@@ -19,6 +19,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.textPlaceholder,
     required this.border,
     required this.chipLabel,
+    required this.pinDotEmpty,
     required this.buttonEnabled,
     required this.buttonEnabledText,
     required this.buttonDisabled,
@@ -56,6 +57,9 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 선택 항목 문구색. Figma가 #000000이라 textPrimary(#242634)와 다르다.
   final Color chipLabel;
+
+  /// PIN 입력 전 빈 점 (Figma 238:1996 Group 22)
+  final Color pinDotEmpty;
 
 
   // 하단 CTA 버튼 — Figma 컴포넌트셋 187:299의 두 variant
@@ -107,6 +111,7 @@ class AppColors extends ThemeExtension<AppColors> {
     textPlaceholder: Color(0xFFDADADA),
     border: Color(0xFFEFEFEF),
     chipLabel: Color(0xFF000000),
+    pinDotEmpty: Color(0xFFCDC8C3),
     buttonEnabled: Color(0xFF242634),
     buttonEnabledText: Color(0xFFFFFFFF),
     buttonDisabled: Color(0xFF818393),
@@ -147,6 +152,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? textPlaceholder,
     Color? border,
     Color? chipLabel,
+    Color? pinDotEmpty,
     Color? buttonEnabled,
     Color? buttonEnabledText,
     Color? buttonDisabled,
@@ -176,6 +182,7 @@ class AppColors extends ThemeExtension<AppColors> {
       textPlaceholder: textPlaceholder ?? this.textPlaceholder,
       border: border ?? this.border,
       chipLabel: chipLabel ?? this.chipLabel,
+      pinDotEmpty: pinDotEmpty ?? this.pinDotEmpty,
       buttonEnabled: buttonEnabled ?? this.buttonEnabled,
       buttonEnabledText: buttonEnabledText ?? this.buttonEnabledText,
       buttonDisabled: buttonDisabled ?? this.buttonDisabled,
@@ -210,6 +217,7 @@ class AppColors extends ThemeExtension<AppColors> {
       textPlaceholder: Color.lerp(textPlaceholder, other.textPlaceholder, t)!,
       border: Color.lerp(border, other.border, t)!,
       chipLabel: Color.lerp(chipLabel, other.chipLabel, t)!,
+      pinDotEmpty: Color.lerp(pinDotEmpty, other.pinDotEmpty, t)!,
       buttonEnabled: Color.lerp(buttonEnabled, other.buttonEnabled, t)!,
       buttonEnabledText: Color.lerp(buttonEnabledText, other.buttonEnabledText, t)!,
       buttonDisabled: Color.lerp(buttonDisabled, other.buttonDisabled, t)!,

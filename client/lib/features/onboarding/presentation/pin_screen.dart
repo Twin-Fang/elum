@@ -36,11 +36,10 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       _current += digit;
       _errorMessage = null;
     });
-
-    if (_current.length == OnboardingProfile.pinLength) {
-      _onComplete();
-    }
   }
+
+  // 4자리를 채워도 자동으로 넘어가지 않는다.
+  // Figma가 모든 PIN 프레임에 CTA를 두고 있고, 자동 전환은 오타를 고칠 틈을 주지 않는다.
 
   void _onBackspace() {
     if (_current.isEmpty) return;
@@ -77,12 +76,21 @@ class _PinScreenState extends ConsumerState<PinScreen> {
 
     return ElumScaffold(
       onBack: () => context.pop(),
+      // Figma 238:1909의 CTA는 "다음"이 아니라 "맞춤 설정하기"다.
+      // 4자리를 채우면 자동으로 다음 단계로 넘어가므로 이 버튼은 확인용이다.
+      bottomButton: ElumButton(
+        label: '맞춤 설정하기',
+        onPressed: _current.length == OnboardingProfile.pinLength
+            ? _onComplete
+            : null,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ElumHeader(
+            // Figma 238:2767 — 재입력 단계의 제목
             title: _isConfirmStep
-                ? '한 번 더\n입력해주세요'
+                ? '암호를 한번 더\n입력해주세요'
                 : '보호자님만 아는\n비밀암호를 만들어주세요',
             description: _errorMessage ?? '보호자모드로 변경할 때 사용하는 암호예요',
           ),
@@ -93,7 +101,6 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           ),
           const Spacer(),
           PinKeypad(onDigit: _onDigit, onBackspace: _onBackspace),
-          SizedBox(height: space.lg),
         ],
       ),
     );
