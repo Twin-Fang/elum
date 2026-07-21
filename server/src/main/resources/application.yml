@@ -29,7 +29,14 @@ chuseok22:
   logging:
     enabled: true
 
+server:
+  forward-headers-strategy: framework
+
 springdoc:
+  title: ELUM API
+  description: 이룸(ELUM) 보호자/아동 행동 카드 서비스 API 문서
+  version: 0.0.1
+
   servers:
     - url: https://api.elum.chuseok22.com
       description: main-server
@@ -40,12 +47,3 @@ springdoc:
   default-produces-media-type: application/json;charset=UTF-8
   swagger-ui:
     path: /docs/swagger
-
-server:
-  forward-headers-strategy: framework
-
-swagger:
-  title: ELUM API
-  description: 이룸(ELUM) 보호자/아동 행동 카드 서비스 API 문서
-  version: 0.0.1
-
