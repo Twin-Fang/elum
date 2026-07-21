@@ -171,9 +171,8 @@ class _TypeChip extends StatelessWidget {
       ),
       child: Text(
         '$label 보호됨',
-        style: context.typo.body.copyWith(
+        style: context.typo.bodySmall.copyWith(
           color: colors.textPrimary,
-          fontSize: 14,
         ),
       ),
     );
@@ -202,9 +201,8 @@ class _TextBlock extends StatelessWidget {
       children: [
         Text(
           label,
-          style: context.typo.body.copyWith(
+          style: context.typo.bodySmall.copyWith(
             color: context.colors.textSecondary,
-            fontSize: 14,
           ),
         ),
         SizedBox(height: space.xs),

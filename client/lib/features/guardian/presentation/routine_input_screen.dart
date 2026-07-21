@@ -126,8 +126,8 @@ class _SuggestionChip extends StatelessWidget {
             Expanded(
               child: Text(
                 text,
-                style: context.typo.body
-                    .copyWith(color: colors.textPrimary, fontSize: 14),
+                style: context.typo.bodySmall
+                    .copyWith(color: colors.textPrimary),
               ),
             ),
           ],

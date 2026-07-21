@@ -19,6 +19,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.sectionTitle,
     required this.tileLabel,
     required this.caption,
+    required this.bodySmall,
   });
 
   static const fontFamily = 'TmoneyRoundWind';
@@ -59,6 +60,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 보조 설명 — 카드 부제·"카드 N장" (12/w400)
   final TextStyle caption;
+
+  /// 본문보다 한 단계 작은 설명 (14/w400).
+  /// DLP 배지·일과 입력 요약처럼 좁은 폭에 들어가는 문구.
+  /// [sectionTitle]과 크기는 같지만 굵기가 달라 별개 토큰이다.
+  final TextStyle bodySmall;
 
   static const standard = AppTypography(
     title: TextStyle(
@@ -133,6 +139,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w400,
       height: 1.2,
     ),
+    bodySmall: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
   );
 
   /// 표준 Material 슬롯에 매핑한다.
@@ -160,6 +172,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? sectionTitle,
     TextStyle? tileLabel,
     TextStyle? caption,
+    TextStyle? bodySmall,
   }) {
     return AppTypography(
       title: title ?? this.title,
@@ -174,6 +187,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       sectionTitle: sectionTitle ?? this.sectionTitle,
       tileLabel: tileLabel ?? this.tileLabel,
       caption: caption ?? this.caption,
+      bodySmall: bodySmall ?? this.bodySmall,
     );
   }
 
@@ -193,6 +207,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       sectionTitle: TextStyle.lerp(sectionTitle, other.sectionTitle, t)!,
       tileLabel: TextStyle.lerp(tileLabel, other.tileLabel, t)!,
       caption: TextStyle.lerp(caption, other.caption, t)!,
+      bodySmall: TextStyle.lerp(bodySmall, other.bodySmall, t)!,
     );
   }
 }
