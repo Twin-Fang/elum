@@ -13,12 +13,21 @@ class ElumButton extends StatelessWidget {
     super.key,
     required this.label,
     this.onPressed,
+    this.backgroundColor,
+    this.labelColor,
   });
 
   final String label;
 
   /// null이면 비활성 상태
   final VoidCallback? onPressed;
+
+  /// 배경색 재정의. 보상 화면처럼 어두운 배경 위에서는 기본색이 묻힌다.
+  /// null이면 활성/비활성 토큰을 그대로 쓴다.
+  final Color? backgroundColor;
+
+  /// 문구색 재정의. [backgroundColor]와 짝으로 쓴다.
+  final Color? labelColor;
 
   @override
   Widget build(BuildContext context) {
@@ -34,16 +43,18 @@ class ElumButton extends StatelessWidget {
         width: double.infinity,
         height: space.buttonH.h,
         decoration: BoxDecoration(
-          color: isEnabled ? colors.buttonEnabled : colors.buttonDisabled,
+          color: backgroundColor ??
+              (isEnabled ? colors.buttonEnabled : colors.buttonDisabled),
           borderRadius: BorderRadius.circular(space.buttonRadius.r),
         ),
         alignment: Alignment.center,
         child: Text(
           label,
           style: context.typo.button.copyWith(
-            color: isEnabled
-                ? colors.buttonEnabledText
-                : colors.buttonDisabledText,
+            color: labelColor ??
+                (isEnabled
+                    ? colors.buttonEnabledText
+                    : colors.buttonDisabledText),
           ),
         ),
       ),

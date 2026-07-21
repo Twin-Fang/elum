@@ -61,6 +61,21 @@ abstract final class AppAssets {
   /// 일과 만들기 흐름에서 뒤로가기 옆에 함께 놓인다.
   static const iconHome = '$_images/icon_home.svg';
 
+  /// 카드 읽어주기 (25×25). Figma `fi-br-volume`.
+  static const iconVolume = '$_images/icon_volume.svg';
+
+  /// 아이 홈의 체크 버튼 (88×88). 체크 전 빈 원.
+  static const childCheckEmpty = '$_images/child_check_empty.svg';
+
+  /// 완료 체크 배지 (40×40). 홈 일과 목록의 완료 표시.
+  static const iconCheckDone = '$_images/icon_check_done.svg';
+
+  /// 보상 화면의 포포 일러스트 (117×104). Figma 334:4433.
+  static const rewardPopo = '$_images/reward_popo.svg';
+
+  /// 아이 홈 우측 상단 캐릭터 배지 (68×68).
+  static const characterBadgeRuru = '$_images/character_badge_ruru.svg';
+
   /// 완료 체크 (10×10). Figma `fi-br-check`.
   /// 로딩 화면의 단계별 완료 표시에 쓴다.
   static const iconCheck = '$_images/icon_check.svg';

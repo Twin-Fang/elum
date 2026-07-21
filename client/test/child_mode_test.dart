@@ -1,0 +1,264 @@
+import 'dart:math';
+
+import 'package:elum/core/router/app_router.dart';
+import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/features/child/application/child_routine_notifier.dart';
+import 'package:elum/features/child/domain/reward_character.dart';
+import 'package:elum/features/child/presentation/child_home_screen.dart';
+import 'package:elum/features/child/presentation/mode_switch_screen.dart';
+import 'package:elum/features/child/presentation/reward_screen.dart';
+import 'package:elum/features/guardian/application/routine_notifier.dart';
+import 'package:elum/features/guardian/domain/card_palette.dart';
+import 'package:elum/shared/models/action_card.dart';
+import 'package:elum/shared/models/routine.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+
+import 'helpers/test_storage.dart';
+
+/// Figma `아이_홈`(309:3548/309:3648) · `아이_보상`(309:4055 등) 정합 테스트.
+void main() {
+  const cards = [
+    ActionCard(
+      id: 'c1',
+      title: '옷을 입어요',
+      description: '학교에 갈 옷을 차례대로 입어요',
+      stepOrder: 1,
+    ),
+    ActionCard(
+      id: 'c2',
+      title: '우산을 챙겨요',
+      description: '현관에서 우산을 챙겨요',
+      stepOrder: 2,
+    ),
+  ];
+
+  Widget wrap(Widget screen, {List<ActionCard> steps = cards}) {
+    final router = GoRouter(
+      initialLocation: Routes.child,
+      routes: [
+        GoRoute(path: Routes.child, builder: (context, state) => screen),
+        GoRoute(
+          path: Routes.childReward,
+          builder: (context, state) => const RewardScreen(),
+        ),
+        GoRoute(
+          path: Routes.modeSwitch,
+          builder: (context, state) => ModeSwitchScreen(
+            target: ModeSwitchTarget.fromName(state.uri.queryParameters['to']),
+          ),
+        ),
+        GoRoute(
+          path: Routes.guardian,
+          builder: (context, state) => const Scaffold(body: Text('보호자 홈')),
+        ),
+      ],
+    );
+
+    return ProviderScope(
+      overrides: [testStorageOverride(onboardingCompleted: true)],
+      child: ScreenUtilInit(
+        designSize: const Size(393, 852),
+        builder: (context, _) => MaterialApp.router(
+          theme: AppTheme.light,
+          routerConfig: router,
+        ),
+      ),
+    );
+  }
+
+  /// 일과를 주입한 뒤 화면을 띄운다
+  Future<ProviderContainer> pumpChild(
+    WidgetTester tester, {
+    List<ActionCard> steps = cards,
+  }) async {
+    await tester.pumpWidget(wrap(const ChildHomeScreen(), steps: steps));
+    await tester.pumpAndSettle();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ChildHomeScreen)),
+    );
+    container.read(routineFlowProvider.notifier).state =
+        RoutineFlowState(routine: Routine(id: 'r1', steps: steps));
+    await tester.pumpAndSettle();
+    return container;
+  }
+
+  group('아이 홈', () {
+    testWidgets('카드 내용을 보여준다', (tester) async {
+      await pumpChild(tester);
+
+      expect(find.text('옷을 입어요'), findsOneWidget);
+      expect(find.text('학교에 갈 옷을 차례대로 입어요'), findsOneWidget);
+    });
+
+    testWidgets('체크 버튼이 아동 최소 터치 타겟을 넘는다', (tester) async {
+      // 아동 모드는 64×64 이상이어야 한다 (CLAUDE.md)
+      await pumpChild(tester);
+
+      expect(ChildHomeScreen.checkButtonSize, greaterThanOrEqualTo(64));
+    });
+
+    testWidgets('일과가 없으면 빈 상태를 보여준다', (tester) async {
+      await tester.pumpWidget(wrap(const ChildHomeScreen()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('오늘의 할 일이 없어요'), findsOneWidget);
+    });
+  });
+
+  group('보상 조건', () {
+    test('처음 체크하면 보상을 준다', () {
+      final container = ProviderContainer(
+        overrides: [testStorageOverride()],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(childRoutineProvider.notifier);
+
+      expect(notifier.toggle('c1'), isTrue);
+    });
+
+    test('해제했다 다시 체크하면 보상을 주지 않는다', () {
+      // 매번 축하하면 보상이 가벼워진다
+      final container = ProviderContainer(
+        overrides: [testStorageOverride()],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(childRoutineProvider.notifier);
+
+      expect(notifier.toggle('c1'), isTrue);
+      expect(notifier.toggle('c1'), isFalse); // 해제
+      expect(notifier.toggle('c1'), isFalse); // 재체크 — 보상 없음
+    });
+
+    test('해제해도 보상 이력은 남는다', () {
+      final container = ProviderContainer(
+        overrides: [testStorageOverride()],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(childRoutineProvider.notifier);
+      notifier
+        ..toggle('c1')
+        ..toggle('c1');
+
+      final state = container.read(childRoutineProvider);
+      expect(state.isCompleted('c1'), isFalse);
+      expect(state.rewarded, contains('c1'));
+    });
+
+    test('카드마다 따로 보상한다', () {
+      final container = ProviderContainer(
+        overrides: [testStorageOverride()],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(childRoutineProvider.notifier);
+
+      expect(notifier.toggle('c1'), isTrue);
+      expect(notifier.toggle('c2'), isTrue);
+    });
+
+    test('새 일과를 시작하면 초기화된다', () {
+      final container = ProviderContainer(
+        overrides: [testStorageOverride()],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(childRoutineProvider.notifier)
+        ..toggle('c1')
+        ..reset();
+
+      expect(container.read(childRoutineProvider).rewarded, isEmpty);
+      // 초기화 후에는 다시 보상을 받을 수 있다
+      expect(notifier.toggle('c1'), isTrue);
+    });
+  });
+
+  group('보상 캐릭터', () {
+    test('세 캐릭터가 모두 나올 수 있다', () {
+      final seen = <RewardCharacter>{};
+      for (var seed = 0; seed < 50; seed++) {
+        seen.add(RewardCharacter.pick(Random(seed)));
+      }
+
+      expect(seen.length, RewardCharacter.values.length);
+    });
+
+    test('캐릭터마다 문구가 다르다', () {
+      final messages =
+          RewardCharacter.values.map((c) => c.message).toSet();
+
+      expect(messages.length, RewardCharacter.values.length);
+    });
+
+    test('문구에 캐릭터 이름이 들어간다', () {
+      expect(RewardCharacter.lumi.message, contains('루미'));
+      expect(RewardCharacter.popo.message, contains('포포'));
+      expect(RewardCharacter.ruru.message, contains('루루'));
+    });
+  });
+
+  group('모드 전환 PIN', () {
+    testWidgets('방향에 따라 문구가 다르다', (tester) async {
+      await tester.pumpWidget(
+        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.child)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('암호를 입력하면 아이 화면으로 전환돼요'), findsOneWidget);
+    });
+
+    testWidgets('보호자 방향 문구도 맞다', (tester) async {
+      await tester.pumpWidget(
+        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.guardian)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('암호를 입력하면 보호자 화면으로 전환돼요'), findsOneWidget);
+    });
+
+    testWidgets('PIN이 틀려도 경고색을 쓰지 않는다', (tester) async {
+      // 아동도 보는 화면이다 (CLAUDE.md)
+      await tester.pumpWidget(
+        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.guardian)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '9999');
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.error), findsNothing);
+      expect(find.byIcon(Icons.warning), findsNothing);
+      for (final t in tester.widgetList<Text>(find.byType(Text))) {
+        expect(t.style?.color, isNot(Colors.red));
+      }
+    });
+
+    test('모르는 방향이면 아이 화면으로 본다', () {
+      expect(ModeSwitchTarget.fromName(null), ModeSwitchTarget.child);
+      expect(ModeSwitchTarget.fromName('nonsense'), ModeSwitchTarget.child);
+      expect(
+        ModeSwitchTarget.fromName('guardian'),
+        ModeSwitchTarget.guardian,
+      );
+    });
+  });
+
+  group('카드 색', () {
+    test('순서마다 다른 색을 준다', () {
+      expect(CardPalette.at(0).fill, isNot(CardPalette.at(1).fill));
+    });
+
+    test('카드가 많아도 범위를 넘지 않는다', () {
+      // AI가 9장을 만든 적이 있다. 범위를 넘으면 화면이 죽는다.
+      expect(() => CardPalette.at(20), returnsNormally);
+      expect(CardPalette.at(CardPalette.length), CardPalette.at(0));
+    });
+  });
+}

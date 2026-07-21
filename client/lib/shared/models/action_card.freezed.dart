@@ -15,7 +15,12 @@ T _$identity<T>(T value) => value;
 mixin _$ActionCard {
 
  String get id;/// 아동에게 보여줄 짧은 문장 (TTS로도 읽힌다). 서버 `description`.
- String get description;/// 수행 순서. 서버 `stepOrder`.
+ String get description;/// 카드 제목 — Figma가 제목과 설명을 나눠 보여준다(`옷을 입어요` /
+/// `학교에 갈 옷을 차례대로 입어요`).
+///
+/// **서버는 아직 주지 않는다.** `RoutineStepResponse`에 제목이 없어
+/// 로컬 카드에서만 채워진다. 비어 있으면 화면이 [description]을 대신 쓴다.
+ String get title;/// 수행 순서. 서버 `stepOrder`.
  int get stepOrder;/// 카드 이미지 경로. 서버 `imagePath`.
  String? get imagePath;/// 수행 완료 여부. 서버 `completed`.
  bool get completed;
@@ -29,16 +34,16 @@ $ActionCardCopyWith<ActionCard> get copyWith => _$ActionCardCopyWithImpl<ActionC
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActionCard&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.stepOrder, stepOrder) || other.stepOrder == stepOrder)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.completed, completed) || other.completed == completed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActionCard&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.title, title) || other.title == title)&&(identical(other.stepOrder, stepOrder) || other.stepOrder == stepOrder)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.completed, completed) || other.completed == completed));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,description,stepOrder,imagePath,completed);
+int get hashCode => Object.hash(runtimeType,id,description,title,stepOrder,imagePath,completed);
 
 @override
 String toString() {
-  return 'ActionCard(id: $id, description: $description, stepOrder: $stepOrder, imagePath: $imagePath, completed: $completed)';
+  return 'ActionCard(id: $id, description: $description, title: $title, stepOrder: $stepOrder, imagePath: $imagePath, completed: $completed)';
 }
 
 
@@ -49,7 +54,7 @@ abstract mixin class $ActionCardCopyWith<$Res>  {
   factory $ActionCardCopyWith(ActionCard value, $Res Function(ActionCard) _then) = _$ActionCardCopyWithImpl;
 @useResult
 $Res call({
- String id, String description, int stepOrder, String? imagePath, bool completed
+ String id, String description, String title, int stepOrder, String? imagePath, bool completed
 });
 
 
@@ -66,10 +71,11 @@ class _$ActionCardCopyWithImpl<$Res>
 
 /// Create a copy of ActionCard
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? stepOrder = null,Object? imagePath = freezed,Object? completed = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = null,Object? title = null,Object? stepOrder = null,Object? imagePath = freezed,Object? completed = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,stepOrder: null == stepOrder ? _self.stepOrder : stepOrder // ignore: cast_nullable_to_non_nullable
 as int,imagePath: freezed == imagePath ? _self.imagePath : imagePath // ignore: cast_nullable_to_non_nullable
 as String?,completed: null == completed ? _self.completed : completed // ignore: cast_nullable_to_non_nullable
@@ -158,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String description,  int stepOrder,  String? imagePath,  bool completed)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String description,  String title,  int stepOrder,  String? imagePath,  bool completed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ActionCard() when $default != null:
-return $default(_that.id,_that.description,_that.stepOrder,_that.imagePath,_that.completed);case _:
+return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.imagePath,_that.completed);case _:
   return orElse();
 
 }
@@ -179,10 +185,10 @@ return $default(_that.id,_that.description,_that.stepOrder,_that.imagePath,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String description,  int stepOrder,  String? imagePath,  bool completed)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String description,  String title,  int stepOrder,  String? imagePath,  bool completed)  $default,) {final _that = this;
 switch (_that) {
 case _ActionCard():
-return $default(_that.id,_that.description,_that.stepOrder,_that.imagePath,_that.completed);case _:
+return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.imagePath,_that.completed);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +205,10 @@ return $default(_that.id,_that.description,_that.stepOrder,_that.imagePath,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String description,  int stepOrder,  String? imagePath,  bool completed)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String description,  String title,  int stepOrder,  String? imagePath,  bool completed)?  $default,) {final _that = this;
 switch (_that) {
 case _ActionCard() when $default != null:
-return $default(_that.id,_that.description,_that.stepOrder,_that.imagePath,_that.completed);case _:
+return $default(_that.id,_that.description,_that.title,_that.stepOrder,_that.imagePath,_that.completed);case _:
   return null;
 
 }
@@ -214,12 +220,18 @@ return $default(_that.id,_that.description,_that.stepOrder,_that.imagePath,_that
 
 
 class _ActionCard extends ActionCard {
-  const _ActionCard({required this.id, required this.description, this.stepOrder = 0, this.imagePath, this.completed = false}): super._();
+  const _ActionCard({required this.id, required this.description, this.title = '', this.stepOrder = 0, this.imagePath, this.completed = false}): super._();
   
 
 @override final  String id;
 /// 아동에게 보여줄 짧은 문장 (TTS로도 읽힌다). 서버 `description`.
 @override final  String description;
+/// 카드 제목 — Figma가 제목과 설명을 나눠 보여준다(`옷을 입어요` /
+/// `학교에 갈 옷을 차례대로 입어요`).
+///
+/// **서버는 아직 주지 않는다.** `RoutineStepResponse`에 제목이 없어
+/// 로컬 카드에서만 채워진다. 비어 있으면 화면이 [description]을 대신 쓴다.
+@override@JsonKey() final  String title;
 /// 수행 순서. 서버 `stepOrder`.
 @override@JsonKey() final  int stepOrder;
 /// 카드 이미지 경로. 서버 `imagePath`.
@@ -237,16 +249,16 @@ _$ActionCardCopyWith<_ActionCard> get copyWith => __$ActionCardCopyWithImpl<_Act
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActionCard&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.stepOrder, stepOrder) || other.stepOrder == stepOrder)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.completed, completed) || other.completed == completed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActionCard&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.title, title) || other.title == title)&&(identical(other.stepOrder, stepOrder) || other.stepOrder == stepOrder)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.completed, completed) || other.completed == completed));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,description,stepOrder,imagePath,completed);
+int get hashCode => Object.hash(runtimeType,id,description,title,stepOrder,imagePath,completed);
 
 @override
 String toString() {
-  return 'ActionCard(id: $id, description: $description, stepOrder: $stepOrder, imagePath: $imagePath, completed: $completed)';
+  return 'ActionCard(id: $id, description: $description, title: $title, stepOrder: $stepOrder, imagePath: $imagePath, completed: $completed)';
 }
 
 
@@ -257,7 +269,7 @@ abstract mixin class _$ActionCardCopyWith<$Res> implements $ActionCardCopyWith<$
   factory _$ActionCardCopyWith(_ActionCard value, $Res Function(_ActionCard) _then) = __$ActionCardCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String description, int stepOrder, String? imagePath, bool completed
+ String id, String description, String title, int stepOrder, String? imagePath, bool completed
 });
 
 
@@ -274,10 +286,11 @@ class __$ActionCardCopyWithImpl<$Res>
 
 /// Create a copy of ActionCard
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? stepOrder = null,Object? imagePath = freezed,Object? completed = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = null,Object? title = null,Object? stepOrder = null,Object? imagePath = freezed,Object? completed = null,}) {
   return _then(_ActionCard(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,stepOrder: null == stepOrder ? _self.stepOrder : stepOrder // ignore: cast_nullable_to_non_nullable
 as int,imagePath: freezed == imagePath ? _self.imagePath : imagePath // ignore: cast_nullable_to_non_nullable
 as String?,completed: null == completed ? _self.completed : completed // ignore: cast_nullable_to_non_nullable

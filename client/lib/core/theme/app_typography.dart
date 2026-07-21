@@ -23,6 +23,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.promptBody,
     required this.chipLabel,
     required this.stageLabel,
+    required this.cardHeadline,
+    required this.cardDescription,
+    required this.reviewTitle,
+    required this.pinTitle,
     required this.bodySmall,
   });
 
@@ -83,6 +87,21 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 로딩 화면 단계 문구 (18/w500)
   final TextStyle stageLabel;
+
+  // --- 행동 카드 (Figma 262:5124 / 309:3548) ---
+  // 아동이 읽는 문구라 크다. TmoneyRoundWind를 쓴다.
+
+  /// 카드 제목·번호 (30/w800)
+  final TextStyle cardHeadline;
+
+  /// 카드 설명 (20/w400, 2줄)
+  final TextStyle cardDescription;
+
+  /// 카드확인 화면 제목 "카드 N개가 생성되었어요" (24/w600 Pretendard)
+  final TextStyle reviewTitle;
+
+  /// PIN 화면 제목 (28/w800). title(28)과 크기는 같지만 줄간격이 다르다.
+  final TextStyle pinTitle;
 
   /// 본문보다 한 단계 작은 설명 (14/w400).
   /// DLP 배지·일과 입력 요약처럼 좁은 폭에 들어가는 문구.
@@ -186,6 +205,30 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.0,
     ),
+    cardHeadline: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 30,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
+    cardDescription: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    ),
+    reviewTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+      height: 1.1,
+    ),
+    pinTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 28,
+      fontWeight: FontWeight.w800,
+      height: 1.2,
+    ),
     bodySmall: TextStyle(
       fontFamily: fontFamily,
       fontSize: 14,
@@ -223,6 +266,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? promptBody,
     TextStyle? chipLabel,
     TextStyle? stageLabel,
+    TextStyle? cardHeadline,
+    TextStyle? cardDescription,
+    TextStyle? reviewTitle,
+    TextStyle? pinTitle,
     TextStyle? bodySmall,
   }) {
     return AppTypography(
@@ -242,6 +289,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptBody: promptBody ?? this.promptBody,
       chipLabel: chipLabel ?? this.chipLabel,
       stageLabel: stageLabel ?? this.stageLabel,
+      cardHeadline: cardHeadline ?? this.cardHeadline,
+      cardDescription: cardDescription ?? this.cardDescription,
+      reviewTitle: reviewTitle ?? this.reviewTitle,
+      pinTitle: pinTitle ?? this.pinTitle,
       bodySmall: bodySmall ?? this.bodySmall,
     );
   }
@@ -266,6 +317,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptBody: TextStyle.lerp(promptBody, other.promptBody, t)!,
       chipLabel: TextStyle.lerp(chipLabel, other.chipLabel, t)!,
       stageLabel: TextStyle.lerp(stageLabel, other.stageLabel, t)!,
+      cardHeadline: TextStyle.lerp(cardHeadline, other.cardHeadline, t)!,
+      cardDescription: TextStyle.lerp(cardDescription, other.cardDescription, t)!,
+      reviewTitle: TextStyle.lerp(reviewTitle, other.reviewTitle, t)!,
+      pinTitle: TextStyle.lerp(pinTitle, other.pinTitle, t)!,
       bodySmall: TextStyle.lerp(bodySmall, other.bodySmall, t)!,
     );
   }

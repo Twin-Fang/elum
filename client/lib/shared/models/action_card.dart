@@ -20,6 +20,13 @@ abstract class ActionCard with _$ActionCard {
     /// 아동에게 보여줄 짧은 문장 (TTS로도 읽힌다). 서버 `description`.
     required String description,
 
+    /// 카드 제목 — Figma가 제목과 설명을 나눠 보여준다(`옷을 입어요` /
+    /// `학교에 갈 옷을 차례대로 입어요`).
+    ///
+    /// **서버는 아직 주지 않는다.** `RoutineStepResponse`에 제목이 없어
+    /// 로컬 카드에서만 채워진다. 비어 있으면 화면이 [description]을 대신 쓴다.
+    @Default('') String title,
+
     /// 수행 순서. 서버 `stepOrder`.
     @Default(0) int stepOrder,
 
@@ -32,12 +39,17 @@ abstract class ActionCard with _$ActionCard {
 
   const ActionCard._();
 
+  /// 화면에 띄울 제목. 서버가 제목을 안 주면 설명을 대신 쓴다.
+  String get displayTitle => title.isNotEmpty ? title : description;
+
   /// 서버 응답 파싱. 필드가 비거나 타입이 달라도 예외를 던지지 않는다 —
   /// 카드 한 장 때문에 데모 전체가 멈추면 안 된다.
   factory ActionCard.fromJson(Map<String, dynamic> json) {
     return ActionCard(
       id: json['id']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
+      // 서버가 아직 주지 않는다. 주기 시작하면 그대로 읽힌다.
+      title: json['title']?.toString() ?? '',
       stepOrder: switch (json['stepOrder']) {
         final int v => v,
         final String v => int.tryParse(v) ?? 0,
@@ -51,6 +63,7 @@ abstract class ActionCard with _$ActionCard {
   Map<String, dynamic> toJson() => {
         'id': id,
         'description': description,
+        'title': title,
         'stepOrder': stepOrder,
         'imagePath': imagePath,
         'completed': completed,

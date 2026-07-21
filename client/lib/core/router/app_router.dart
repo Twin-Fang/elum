@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/guardian/presentation/card_review_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
+import '../../features/child/presentation/child_home_screen.dart';
+import '../../features/child/presentation/mode_switch_screen.dart';
+import '../../features/child/presentation/reward_screen.dart';
 import '../../features/guardian/presentation/routine_loading_screen.dart';
 import '../../features/guardian/presentation/question_screen.dart';
 import '../../features/guardian/presentation/routine_input_screen.dart';
@@ -32,6 +35,12 @@ abstract final class Routes {
   static const routineReview = '/guardian/routine/review';
 
   static const child = '/child';
+
+  /// 아이 보상 (Figma 309:4055 등 3종 랜덤)
+  static const childReward = '/child/reward';
+
+  /// 모드 전환 PIN. `?to=child|guardian`으로 방향을 준다.
+  static const modeSwitch = '/mode-switch';
 }
 
 /// go_router 설정.
@@ -115,7 +124,17 @@ GoRouter createRouter({
       // --- 아동 모드 ---
       GoRoute(
         path: Routes.child,
-        builder: (context, state) => const _Placeholder('아동 모드'),
+        builder: (context, state) => const ChildHomeScreen(),
+      ),
+      GoRoute(
+        path: Routes.childReward,
+        builder: (context, state) => const RewardScreen(),
+      ),
+      GoRoute(
+        path: Routes.modeSwitch,
+        builder: (context, state) => ModeSwitchScreen(
+          target: ModeSwitchTarget.fromName(state.uri.queryParameters['to']),
+        ),
       ),
     ],
     // 잘못된 경로로 들어와도 앱이 죽지 않는다 — 발표 중 치명적이다
