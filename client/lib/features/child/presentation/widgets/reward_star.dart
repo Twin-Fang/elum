@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 
 /// 보상 화면의 빛나는 별.
 ///
-/// Figma는 별 5개를 겹쳐 뒀다 — 큰 별 3겹(blur 20 / glow / inset)과 주변의
-/// 작은 별 2개. 코드로 그리는 이유는 **터지는 애니메이션이 필요해서**다.
-/// 정적 SVG로는 등장 연출을 만들 수 없다.
+/// Figma `Group 46`(269×269) + 주변 작은 별 2개(38 / 30).
 ///
-/// 큰 별은 튕기며 커지고, 작은 별들은 뒤따라 나타난다.
+/// **별은 에셋이다.** 예전에는 `Icon(Icons.star_rounded)`로 그렸는데,
+/// 그것은 Material 기본 글리프라 Figma의 그라데이션 별과 모양이 다르다.
+/// 게다가 위젯 테스트에서는 아이콘 폰트가 없어 **네모로 렌더**됐다
+/// (골든에서 발각 — client/CLAUDE.md §2 "일러스트를 코드로 그리지 않는다").
+///
+/// 애니메이션은 에셋을 `Transform.scale`로 감싸 그대로 유지한다 —
+/// 등장 연출 때문에 코드로 그릴 이유는 없었다.
 class RewardStar extends StatefulWidget {
   const RewardStar({super.key});
 
@@ -69,24 +75,24 @@ class _RewardStarState extends State<RewardStar>
                 scale: t,
                 child: _Star(
                   size: RewardStar.mainSize.w,
-                  color: colors.rewardStar,
                   glow: colors.rewardStarGlow,
                 ),
               ),
-              // 작은 별들은 큰 별이 자리잡은 뒤 나타난다
+              // 작은 별들은 큰 별이 자리잡은 뒤 나타난다.
+              // Figma 실측 — 초록 38(#86FCA3) · 보라 30(#A186FC)
               _Satellite(
                 progress: _controller.value,
                 begin: 0.5,
                 offset: Offset(-88.w, 78.h),
                 size: 38.w,
-                color: colors.rewardStarGreen,
+                asset: AppAssets.starDeco(1),
               ),
               _Satellite(
                 progress: _controller.value,
                 begin: 0.7,
                 offset: Offset(84.w, -40.h),
                 size: 30.w,
-                color: colors.rewardStarPurple,
+                asset: AppAssets.starDeco(7),
               ),
             ],
           );
@@ -96,12 +102,11 @@ class _RewardStarState extends State<RewardStar>
   }
 }
 
-/// 큰 별을 둘러싼 빛까지 함께 그린다.
+/// 큰 별. 그라데이션·글로우가 SVG 안에 들어 있다.
 class _Star extends StatelessWidget {
-  const _Star({required this.size, required this.color, required this.glow});
+  const _Star({required this.size, required this.glow});
 
   final double size;
-  final Color color;
   final Color glow;
 
   @override
@@ -109,24 +114,33 @@ class _Star extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        // Figma boxShadow 0 0 20 rgba(208,255,0,0.3)
-        boxShadow: [
-          BoxShadow(color: glow, blurRadius: 40.w, spreadRadius: 10.w),
-        ],
+        // Figma boxShadow 0 0 20 rgba(208,255,0,0.3) — 별 뒤에서 번지는 빛.
+        //
+        // `BoxShadow`로는 만들 수 없다. 채워진 도형 뒤에 같은 모양을 그대로
+        // 칠하기 때문에 **불투명한 원판**이 깔린다(골든에서 발각).
+        // 가장자리로 갈수록 투명해지는 radial gradient가 실제 글로우다.
+        gradient: RadialGradient(
+          colors: [glow, glow.withValues(alpha: 0)],
+        ),
       ),
-      child: Icon(Icons.star_rounded, size: size, color: color),
+      // 정사각형이라 가로세로 모두 .w
+      child: SvgPicture.asset(
+        AppAssets.starBig,
+        width: size,
+        height: size,
+      ),
     );
   }
 }
 
-/// 큰 별 주변의 작은 별.
+/// 큰 별 주변의 작은 별. 색이 든 SVG를 그대로 쓴다.
 class _Satellite extends StatelessWidget {
   const _Satellite({
     required this.progress,
     required this.begin,
     required this.offset,
     required this.size,
-    required this.color,
+    required this.asset,
   });
 
   /// 전체 진행도 (0~1)
@@ -137,7 +151,9 @@ class _Satellite extends StatelessWidget {
 
   final Offset offset;
   final double size;
-  final Color color;
+
+  /// 별 에셋 경로. 색이 SVG 안에 들어 있어 따로 칠하지 않는다.
+  final String asset;
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +165,7 @@ class _Satellite extends StatelessWidget {
       offset: offset,
       child: Transform.scale(
         scale: scale,
-        child: Icon(Icons.star_rounded, size: size, color: color),
+        child: SvgPicture.asset(asset, width: size, height: size),
       ),
     );
   }

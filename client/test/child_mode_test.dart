@@ -21,6 +21,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/device_viewport.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
@@ -302,6 +303,42 @@ void main() {
       final labels =
           RewardCharacter.values.map((c) => c.buttonLabel).toSet();
       expect(labels.length, RewardCharacter.values.length);
+    });
+  });
+
+  group('보상 별 렌더링', () {
+    // 예전에 `Icon(Icons.star_rounded)`로 그려서 Figma 그라데이션 별과
+    // 모양이 달랐고, 위젯 테스트에서는 아이콘 폰트가 없어 네모로 나왔다.
+    // 도형은 전부 에셋이어야 한다 (client/CLAUDE.md §2).
+
+    // 보상 화면은 852 높이를 꽉 채운다. 기본 뷰포트(800×600)로 돌리면
+    // 화면이 아니라 테스트 환경 때문에 오버플로가 난다.
+    useFigmaViewport();
+
+    testWidgets('큰 별을 SVG로 렌더링한다', (tester) async {
+      await tester.pumpWidget(wrap(const RewardScreen()));
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      expect(svgWithAsset(AppAssets.starBig), findsOneWidget);
+    });
+
+    testWidgets('주변 작은 별도 SVG로 렌더링한다', (tester) async {
+      await tester.pumpWidget(wrap(const RewardScreen()));
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      // Figma 실측 — 초록(#86FCA3) · 보라(#A186FC)
+      expect(svgWithAsset(AppAssets.starDeco(1)), findsOneWidget);
+      expect(svgWithAsset(AppAssets.starDeco(7)), findsOneWidget);
+    });
+
+    testWidgets('별을 아이콘 글리프로 그리지 않는다', (tester) async {
+      await tester.pumpWidget(wrap(const RewardScreen()));
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      final starIcons = find.byWidgetPredicate(
+        (w) => w is Icon && w.icon == Icons.star_rounded,
+      );
+      expect(starIcons, findsNothing);
     });
   });
 

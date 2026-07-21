@@ -478,6 +478,11 @@ class _NavigateView extends StatelessWidget {
     ('온보딩 · 캐릭터', Routes.onboardingCharacter),
     ('온보딩 · PIN', Routes.onboardingPin),
     ('보호자 홈', Routes.guardian),
+    // 아이 모드는 PIN을 거쳐야 들어갈 수 있어 심사·QA 때 확인이 번거롭다.
+    // 여기서는 PIN 없이 바로 띄운다 (이슈 #69 화면 검수용).
+    ('아이 홈 · 일과 목록', Routes.child),
+    ('아이 · 별 모으기', Routes.childStars),
+    ('아이 · 보상', Routes.childReward),
   ];
 
   @override

@@ -20,7 +20,12 @@ import 'widgets/reward_star.dart';
 /// **강한 인터랙션을 허용하는 자리다.** 토스 원칙상 화려한 모션은 브랜드 핵심
 /// 순간에만 쓰는데, 아이가 할 일을 해낸 순간이 바로 그것이다 (docs/motion.md).
 class RewardScreen extends ConsumerStatefulWidget {
-  const RewardScreen({super.key});
+  const RewardScreen({super.key, this.character});
+
+  /// 보여줄 캐릭터. 비우면 **무작위로 뽑는다**(실제 동작).
+  ///
+  /// 테스트에서만 고정한다 — 골든이 실행마다 달라지면 회귀를 못 잡는다.
+  final RewardCharacter? character;
 
   @override
   ConsumerState<RewardScreen> createState() => _RewardScreenState();
@@ -28,7 +33,8 @@ class RewardScreen extends ConsumerStatefulWidget {
 
 class _RewardScreenState extends ConsumerState<RewardScreen> {
   /// 화면이 다시 그려져도 캐릭터가 바뀌지 않게 한 번만 뽑는다.
-  late final RewardCharacter _character = RewardCharacter.pick();
+  late final RewardCharacter _character =
+      widget.character ?? RewardCharacter.pick();
 
   @override
   Widget build(BuildContext context) {
