@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/app_pressable.dart';
 import '../../../shared/models/routine.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../application/routine_notifier.dart';
@@ -145,8 +146,9 @@ class _NewRoutineCard extends StatelessWidget {
     final space = context.space;
     final colors = context.colors;
 
-    return GestureDetector(
+    return AppPressable(
       onTap: onTap,
+      scaleDown: AppPressable.scaleCard,
       child: Container(
         height: 94,
         padding: EdgeInsets.symmetric(horizontal: space.md),

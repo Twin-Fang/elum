@@ -11,6 +11,7 @@
 | 문서 | 내용 |
 | --- | --- |
 | [docs/design-system.md](./docs/design-system.md) | 색·타이포·간격·컴포넌트 토큰 (Figma 추출값) |
+| [docs/motion.md](./docs/motion.md) | **애니메이션 duration·curve·눌림 반응** — 화면에 모션을 넣기 전 |
 | [docs/onboarding-flow.md](./docs/onboarding-flow.md) | 온보딩 12개 프레임 화면별 명세 + **프레임 노드 ID 표** |
 | [docs/architecture.md](./docs/architecture.md) | 폴더 구조, 상태관리, 라우팅, 서버 연동 규칙 |
 | [docs/troubleshooting.md](./docs/troubleshooting.md) | **실제로 겪은 문제와 해결법** — 에러를 만나면 여기부터 |

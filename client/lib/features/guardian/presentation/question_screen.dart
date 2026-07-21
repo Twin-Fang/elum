@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
@@ -95,8 +96,9 @@ class _OptionChip extends StatelessWidget {
     final colors = context.colors;
     final space = context.space;
 
-    return GestureDetector(
+    return AppPressable(
       onTap: onTap,
+      scaleDown: AppPressable.scaleCard,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         margin: EdgeInsets.only(bottom: space.sm),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/theme_context_ext.dart';
+import 'app_pressable.dart';
 
 /// 하단 CTA 버튼. Figma 컴포넌트셋 `일반 버튼`(187:299)에 대응한다.
 ///
@@ -24,24 +25,24 @@ class ElumButton extends StatelessWidget {
     final space = context.space;
     final isEnabled = onPressed != null;
 
-    return SizedBox(
-      width: double.infinity,
-      height: space.buttonH,
-      child: Material(
-        color: isEnabled ? colors.buttonEnabled : colors.buttonDisabled,
-        borderRadius: BorderRadius.circular(space.buttonRadius),
-        child: InkWell(
-          onTap: onPressed,
+    // 눌림 반응은 AppPressable이 담당한다 (docs/motion.md).
+    // ripple 대신 scale로 통일해 앱 전체 터치 피드백을 맞춘다.
+    return AppPressable(
+      onTap: onPressed,
+      child: Container(
+        width: double.infinity,
+        height: space.buttonH,
+        decoration: BoxDecoration(
+          color: isEnabled ? colors.buttonEnabled : colors.buttonDisabled,
           borderRadius: BorderRadius.circular(space.buttonRadius),
-          child: Center(
-            child: Text(
-              label,
-              style: context.typo.button.copyWith(
-                color: isEnabled
-                    ? colors.buttonEnabledText
-                    : colors.buttonDisabledText,
-              ),
-            ),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: context.typo.button.copyWith(
+            color: isEnabled
+                ? colors.buttonEnabledText
+                : colors.buttonDisabledText,
           ),
         ),
       ),

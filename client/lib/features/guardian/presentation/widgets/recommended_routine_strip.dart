@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/app_pressable.dart';
 import '../../domain/recommended_routine.dart';
 
 /// 추천 일과 가로 스크롤.
@@ -64,8 +65,9 @@ class _RoutineTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final space = context.space;
 
-    return GestureDetector(
+    return AppPressable(
       onTap: onTap,
+      scaleDown: AppPressable.scaleCard,
       child: Container(
         width: RecommendedRoutineStrip.tileWidth,
         height: RecommendedRoutineStrip.tileHeight,

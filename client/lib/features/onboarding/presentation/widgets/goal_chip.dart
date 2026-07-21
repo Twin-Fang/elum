@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../domain/support_goal.dart';
 
@@ -39,7 +40,8 @@ class GoalChip extends StatelessWidget {
 
     return AnimatedContainer(
       // 아동도 볼 수 있는 화면이라 전환을 급하게 두지 않는다
-      duration: const Duration(milliseconds: 200),
+      duration: AppMotion.fast,
+      curve: AppMotion.standard,
       height: height,
       padding: const EdgeInsets.symmetric(horizontal: _iconLeft),
       decoration: BoxDecoration(

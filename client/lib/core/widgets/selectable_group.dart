@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_pressable.dart';
+
 /// 선택 "상태"만 관리하는 위젯. 생김새는 전적으로 [itemBuilder]가 책임진다.
 ///
 /// 목표 칩(다중선택, 세로 리스트)과 캐릭터 카드(단일선택, 가로 2열)가
@@ -88,9 +90,10 @@ class _SelectableItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    // 목표 칩·캐릭터 카드는 면적이 넓어 조금만 줄인다 (docs/motion.md)
+    return AppPressable(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
+      scaleDown: AppPressable.scaleCard,
       child: child,
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../domain/character.dart';
 
@@ -35,7 +36,8 @@ class CharacterCard extends StatelessWidget {
     final selection = colors.characterSelected(character);
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: AppMotion.fast,
+      curve: AppMotion.standard,
       height: height,
       decoration: BoxDecoration(
         color: isSelected ? selection.fill : colors.surface,

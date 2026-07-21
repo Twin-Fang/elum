@@ -6,6 +6,7 @@
 | 문서 | 내용 | 언제 읽나 |
 | --- | --- | --- |
 | [design-system.md](./design-system.md) | Figma에서 추출한 색·타이포·간격·컴포넌트 토큰 | UI 코드 쓰기 전 항상 |
+| [motion.md](./motion.md) | 애니메이션 duration·curve·눌림 반응 규칙 (토스 모션 철학) | 화면에 모션을 넣기 전 |
 | [onboarding-flow.md](./onboarding-flow.md) | 온보딩 12개 프레임 화면별 명세 + 플로우 | 온보딩 구현 시 |
 | [architecture.md](./architecture.md) | 폴더 구조, Riverpod 규칙, 라우팅, 서버 연동 | 새 기능 시작 시 |
 | [troubleshooting.md](./troubleshooting.md) | 실제로 겪은 문제·원인·해결·재발 방지 | 에러를 만났을 때 |
