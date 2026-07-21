@@ -68,7 +68,25 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
   ///
   /// repository가 실패를 흡수하므로 여기서 예외를 다루지 않는다.
   /// 서버가 죽어도 로컬 카드로 진행된다 (docs 원칙 6번).
+  ///
+  /// **`POST /api/routines`는 AI 호출이라 한 번이 곧 비용이다.**
+  /// notifier에도 가드가 있지만 여기서 한 번 더 막는다 — 이 화면이 재생성되면
+  /// `initState`가 다시 돌아 요청이 겹쳐 나간 사고가 있었다. (이슈 #41)
   Future<void> _generate() async {
+    final flow = ref.read(routineFlowProvider);
+
+    // 이미 만들어 둔 결과가 있으면 재요청하지 않고 바로 넘어간다.
+    if (flow.routine != null) {
+      debugPrint('[cost] 로딩 화면 재생성 — 이미 만든 카드가 있어 바로 넘어간다');
+      if (mounted) context.pushReplacement(Routes.routineReview);
+      return;
+    }
+    // 다른 인스턴스가 생성 중이면 손대지 않는다. 그쪽이 화면을 넘긴다.
+    if (flow.step == RoutineFlowStep.generating) {
+      debugPrint('[cost] 로딩 화면 재생성 — 이미 생성 중이라 요청하지 않는다');
+      return;
+    }
+
     await ref.read(routineFlowProvider.notifier).generateCards();
     if (mounted) context.pushReplacement(Routes.routineReview);
   }

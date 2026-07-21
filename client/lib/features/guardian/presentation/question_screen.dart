@@ -43,10 +43,20 @@ class QuestionScreen extends ConsumerWidget {
 
     // 질문이 없으면 여기 있을 이유가 없다. 바로 카드 생성으로 보낸다.
     // (도움 목표를 고르지 않으면 서버가 빈 배열을 준다)
+    //
+    // ⚠️ 이 화면은 routineFlowProvider를 watch하므로 생성 중 상태가 바뀔 때마다
+    // 다시 빌드된다. 가드가 없으면 그때마다 로딩 화면을 또 밀어 넣어
+    // 카드 생성 요청이 겹쳐 나간다 — AI 호출이라 한 번이 곧 비용이다. (이슈 #41)
     if (questions.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) context.pushReplacement(Routes.routineMasking);
-      });
+      final alreadyStarted = state.step == RoutineFlowStep.generating ||
+          state.routine != null;
+      if (alreadyStarted) {
+        debugPrint('[cost] 질문 화면 리빌드 — 이미 생성이 시작돼 로딩 화면을 다시 열지 않는다');
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) context.pushReplacement(Routes.routineMasking);
+        });
+      }
       return const RoutineFlowScaffold(child: SizedBox.shrink());
     }
 

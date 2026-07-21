@@ -70,6 +70,34 @@ void main() {
       expect(repo.createCalls, 2);
     });
 
+    /// 질문 화면이 routineFlowProvider를 watch하므로, 생성 중 상태가 바뀔 때마다
+    /// 다시 빌드된다. 가드가 없으면 그때마다 로딩 화면을 또 밀어 넣어 요청이
+    /// 겹쳐 나갔다 — 15번 사고의 실제 경로다.
+    test('생성 중 상태 변화가 반복돼도 요청은 1회다', () async {
+      final repo = _CountingRepo();
+      final container = makeContainer(repo);
+      final notifier = container.read(routineFlowProvider.notifier);
+
+      // 화면이 상태를 구독하는 상황. 실제로는 리빌드마다 로딩 화면이 다시
+      // 생성되며 generateCards()가 불렸다.
+      final seen = <RoutineFlowStep>[];
+      container.listen(
+        routineFlowProvider,
+        (_, next) => seen.add(next.step),
+        fireImmediately: false,
+      );
+
+      final first = notifier.generateCards();
+      // 생성이 도는 동안 리빌드가 여러 번 일어난 상황
+      for (var i = 0; i < 10; i++) {
+        notifier.generateCards();
+      }
+      await first;
+
+      expect(repo.createCalls, 1, reason: '상태가 바뀔 때마다 쏘면 안 된다');
+      expect(seen, isNotEmpty, reason: '상태 변화가 실제로 일어나야 유효한 테스트다');
+    });
+
     test('실패해도 가드가 풀려 재시도할 수 있다', () async {
       final repo = _ThrowingRepo();
       final container = makeContainer(repo);
