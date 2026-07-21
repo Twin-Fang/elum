@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T18:57:22Z",
-    "currentVersion": "1.0.79",
+    "lastUpdated": "2026-07-21T18:59:34Z",
+    "currentVersion": "1.0.80",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 47
+    "totalReleases": 48
   },
   "releases": [
+    {
+      "version": "1.0.80",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 104,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 비밀번호 입력 시 4자리를 다 채우면 자동으로 넘어갑니다\n  * 비밀번호를 다시 확인하는 단계가 더 매끄러워졌습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "비밀번호 입력 시 4자리를 다 채우면 자동으로 넘어갑니다",
+            "비밀번호를 다시 확인하는 단계가 더 매끄러워졌습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.79",
       "project_type": "flutter",
