@@ -10,9 +10,7 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminRoutineService {
 
   private final RoutineRepository routineRepository;
+  private final RoutineImageStorage routineImageStorage;
 
   public List<AdminRoutineResponse> getAll() {
     return routineRepository.findAll().stream()
@@ -52,17 +51,7 @@ public class AdminRoutineService {
       .filter(candidate -> candidate.getId().equals(stepId))
       .findFirst()
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
-    return readImage(step);
-  }
-
-  private AdminRoutineStepImage readImage(RoutineStep step) {
-    Path path = Path.of(step.getImagePath());
-    try {
-      byte[] bytes = Files.readAllBytes(path);
-      String contentType = Files.probeContentType(path);
-      return new AdminRoutineStepImage(bytes, contentType != null ? contentType : "application/octet-stream");
-    } catch (IOException e) {
-      throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND);
-    }
+    RoutineImageStorage.ImageContent content = routineImageStorage.read(step.getImagePath());
+    return new AdminRoutineStepImage(content.bytes(), content.contentType());
   }
 }
