@@ -27,14 +27,29 @@ elum/
 | --- | --- | --- |
 | 1. 설계 | 요구사항·접근법을 정리하고 승인받는다. 결과는 `docs/superpowers/specs/`에 남긴다 | `/brainstorming` |
 | 2. 이슈 작성 | 아래 제목 규칙에 맞춰 이슈를 등록한다 | `/pro-github` |
-| 3. 구현 | 이슈 브랜치에서 작업한다 | |
+| 3. 구현 | `develop`에서 작업한다. **`main`에 직접 커밋하지 않는다** | `/pro-init-worktree` |
 | 4. 검증 | 빌드·테스트·동작 확인. **통과를 확인하기 전에 완료라고 말하지 않는다** | `flutter test` / `./gradlew test` |
 | 5. 커밋 | 이슈 번호를 연결한다 | `/pro-commit` |
 | 6. 푸시 | **사용자가 명시적으로 요청할 때만** | |
-| 7. 배포 | main push만으로는 배포되지 않는다. deploy 브랜치 push가 트리거한다 | `/pro-changelog-deploy` |
+| 7. 배포 | develop → main 릴리스 PR을 올린다 | `/pro-changelog-deploy` |
 
 **설계 단계 생략 기준** — 오타 수정, 상수값 변경처럼 접근법을 고민할 여지가 없는 작업은
 1단계를 건너뛴다. 판단이 서지 않으면 생략하지 않는다.
+
+## 브랜치 전략 · 배포
+
+```
+develop  ← 개발 브랜치 (모든 구현은 여기서)
+  ↓ 릴리스 PR
+main     ← 배포 브랜치 (default) · 버전·릴리스 노트 자동 관리
+```
+
+**배포는 `/pro-changelog-deploy` 하나로 처리한다.**
+
+이 스킬이 develop push → 릴리스 PR 생성 → 릴리스 노트 작성 → automerge까지 진행한다.
+직접 PR을 만들거나 main에 머지하지 않는다.
+
+> ⚠️ **`main`에 직접 커밋·푸시하지 않는다.** main은 배포 트리거이므로 의도치 않은 배포가 발생한다.
 
 ## 이슈 제목 규칙
 
