@@ -233,6 +233,15 @@ jobs:
           printf '%s\n' "$ENV_CONTENT" > ${{ env.ENV_FILE_PATH }}
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
+      # 해커톤 기간 한정 — 개발자 도구 플로팅 버튼을 테스트 빌드에서도 강제로 켠다.
+      # macOS 러너라 sed -i 는 BSD 문법(-i '')을 쓴다.
+      # ⚠️ 정식 출시 전 이 스텝을 삭제한다. (이슈 #13)
+      - name: Force enable dev tools (hackathon)
+        run: |
+          sed -i '' '/^ELUM_SHOW_DEV_TOOLS=/d' ${{ env.ENV_FILE_PATH }}
+          echo 'ELUM_SHOW_DEV_TOOLS=true' >> ${{ env.ENV_FILE_PATH }}
+          grep '^ELUM_SHOW_DEV_TOOLS=' ${{ env.ENV_FILE_PATH }}
+
       - name: Create Secrets.xcconfig file
         env:
           SECRETS_XCCONFIG_CONTENT: ${{ secrets.SECRETS_XCCONFIG }}
@@ -553,6 +562,14 @@ jobs:
             printf '%s\n' "$ENV_CONTENT" > ${{ env.ENV_FILE_PATH }}
             echo "✅ ${{ env.ENV_FILE_PATH }} file created (fallback)"
           fi
+
+      # 해커톤 기간 한정 — 실제 IPA에 들어가는 .env다. 여기서 켜야 앱에 반영된다.
+      # ⚠️ 정식 출시 전 이 스텝을 삭제한다. (이슈 #13)
+      - name: Force enable dev tools (hackathon)
+        run: |
+          sed -i '' '/^ELUM_SHOW_DEV_TOOLS=/d' ${{ env.ENV_FILE_PATH }}
+          echo 'ELUM_SHOW_DEV_TOOLS=true' >> ${{ env.ENV_FILE_PATH }}
+          grep '^ELUM_SHOW_DEV_TOOLS=' ${{ env.ENV_FILE_PATH }}
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2

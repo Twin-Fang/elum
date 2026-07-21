@@ -131,6 +131,16 @@ jobs:
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
+      # 해커톤 기간 한정 — 개발자 도구 플로팅 버튼을 배포 빌드에서도 강제로 켠다.
+      # Secret(ENV_FILE) 값이 무엇이든 여기서 덮어써 테스터가 항상 쓸 수 있게 한다.
+      # macOS 러너라 sed -i 는 BSD 문법(-i '')을 쓴다.
+      # ⚠️ 정식 출시 전 이 스텝을 삭제한다. (이슈 #13)
+      - name: Force enable dev tools (hackathon)
+        run: |
+          sed -i '' '/^ELUM_SHOW_DEV_TOOLS=/d' ${{ env.ENV_FILE_PATH }}
+          echo 'ELUM_SHOW_DEV_TOOLS=true' >> ${{ env.ENV_FILE_PATH }}
+          echo "✅ ELUM_SHOW_DEV_TOOLS=true 강제 적용"
+
       - name: Create Secrets.xcconfig file
         run: |
           mkdir -p ios/Flutter
@@ -301,6 +311,15 @@ jobs:
           EOF
             echo "✅ ${{ env.ENV_FILE_PATH }} file created (fallback)"
           fi
+
+      # 해커톤 기간 한정 — 실제 IPA에 들어가는 .env다. 여기서 켜야 앱에 반영된다.
+      # ⚠️ 정식 출시 전 이 스텝을 삭제한다. (이슈 #13)
+      - name: Force enable dev tools (hackathon)
+        run: |
+          sed -i '' '/^ELUM_SHOW_DEV_TOOLS=/d' ${{ env.ENV_FILE_PATH }}
+          echo 'ELUM_SHOW_DEV_TOOLS=true' >> ${{ env.ENV_FILE_PATH }}
+          echo "✅ ELUM_SHOW_DEV_TOOLS=true 강제 적용"
+          grep '^ELUM_SHOW_DEV_TOOLS=' ${{ env.ENV_FILE_PATH }}
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2

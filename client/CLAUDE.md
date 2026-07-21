@@ -233,6 +233,34 @@ static int get retryCount => _int('ELUM_RETRY_COUNT', 3);
 API 키·인증서처럼 **유출되면 안 되는 값**은 반드시 GitHub Secret으로만 관리하고
 `.env.example`에는 빈 값으로 둔다.
 
+#### 배포 빌드의 `.env`는 로컬 파일이 아니라 GitHub Secret에서 온다 ⚠️
+
+빌드된 앱(Firebase·TestFlight·테스트 APK)의 `.env`는 워크플로우의 `Create .env file`
+스텝이 Secret `ENV_FILE`(없으면 `ENV`)로 만든다. `.env`는 `.gitignore` 대상이라 커밋되지
+않으므로 **로컬 `.env`를 고쳐도 배포 앱은 바뀌지 않는다.**
+
+##### 해커톤 기간 한정 — 개발자 도구 강제 활성화 (이슈 #13)
+
+`ELUM_SHOW_DEV_TOOLS`(플로팅 버튼)는 심사자·테스터가 **릴리스 빌드에서** 써야 하는데,
+Secret 값이 `false`면 배포 앱에서 버튼이 사라진다. Secret은 값을 읽어 확인할 수 없어
+어긋나도 원인을 찾기 어렵다.
+
+그래서 **빌드 워크플로우 4개가 `.env` 생성 직후 이 키를 `true`로 덮어쓴다.**
+Secret 값과 무관하게 배포 앱에서 항상 버튼이 보인다.
+
+| 워크플로우 | 주입 위치 |
+|---|---|
+| `PROJECT-FLUTTER-ANDROID-FIREBASE-CICD.yaml` | prepare-build · build |
+| `PROJECT-FLUTTER-IOS-TESTFLIGHT.yaml` | prepare-build · build |
+| `PROJECT-FLUTTER-ANDROID-TEST-APK.yaml` | build |
+| `PROJECT-FLUTTER-IOS-TEST-TESTFLIGHT.yaml` | prepare-test-build · build |
+
+> `.env` 생성이 **잡마다 따로** 일어난다. 실제 빌드가 도는 잡에 주입하지 않으면 반영되지
+> 않으므로 스텝을 옮기거나 지울 땐 잡 단위로 확인한다. macOS 러너는 `sed -i ''`(BSD 문법)다.
+
+**정식 출시 전** — `Force enable dev tools (hackathon)` 스텝을 모두 삭제하고
+Secret의 `ELUM_SHOW_DEV_TOOLS`를 `false`로 바꾼다.
+
 ### 2. Figma 화면을 구현할 때 — 에셋 우선 원칙 ⚠️ 최우선
 
 > **원본이 있으면 절대 추측하지 않는다. 이 문서에서 가장 중요한 규칙이다.**

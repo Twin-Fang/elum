@@ -341,6 +341,15 @@ jobs:
           printf '%s\n' "$ENV_CONTENT" > ${{ env.ENV_FILE_PATH }}
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
+      # 해커톤 기간 한정 — 개발자 도구 플로팅 버튼을 테스트 빌드에서도 강제로 켠다.
+      # Secret(ENV_FILE) 값이 무엇이든 여기서 덮어쓴다.
+      # ⚠️ 정식 출시 전 이 스텝을 삭제한다. (이슈 #13)
+      - name: Force enable dev tools (hackathon)
+        run: |
+          sed -i '/^ELUM_SHOW_DEV_TOOLS=/d' ${{ env.ENV_FILE_PATH }}
+          echo 'ELUM_SHOW_DEV_TOOLS=true' >> ${{ env.ENV_FILE_PATH }}
+          grep '^ELUM_SHOW_DEV_TOOLS=' ${{ env.ENV_FILE_PATH }}
+
       - name: Setup Release Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
