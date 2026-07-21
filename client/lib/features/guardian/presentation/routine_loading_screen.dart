@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -150,54 +151,76 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     final space = context.space;
     final stages = widget.kind.stages;
 
+    // ⚠️ Figma는 요소를 **절대 좌표**로 둔다(852 높이 기준).
+    //
+    // Column + Spacer로 남는 공간을 배분하면 체크리스트가 화면 바닥에 붙어
+    // 시안과 전혀 달라진다 — 실제로 그렇게 만들었다가 아래로 박혔다.
+    // 좌표를 그대로 옮기고 `.h`로 환산해 기기 높이에 맞춘다.
+    //
+    // 상단바(뒤로가기·홈)를 [RoutineFlowScaffold]가 이미 그리므로,
+    // 그만큼(약 111) 뺀 값이 이 영역 안에서의 y가 된다.
+    const topBarH = 111.0;
+
     return RoutineFlowScaffold(
       // 생성 중에는 되돌릴 수 없다 — 중간에 끊으면 어중간한 상태가 남는다
-      child: Column(
+      child: Stack(
         children: [
-          // Figma(852 높이)는 sparkles를 y=225, 체크리스트를 y=569에 둔다.
-          // 상단을 고정값으로 붙이면 남는 높이가 전부 가운데로 몰려
-          // 제목과 체크리스트 사이가 휑하게 벌어진다. 위:아래를 실측 비율로
-          // 나눠 기기 높이가 달라져도 Figma의 균형을 유지한다.
-          //
-          // 상단 여백 225 - 상단바(약 111) ≒ 114  →  114 : 206 ≒ 5 : 9
-          const Spacer(flex: 5),
-          SvgPicture.asset(AppAssets.iconSparklesLarge, width: 30, height: 36),
-          SizedBox(height: space.lg),
-          Text(
-            widget.kind.title,
-            textAlign: TextAlign.center,
-            style: context.typo.promptTitle.copyWith(color: colors.textPrimary),
-          ),
-          SizedBox(height: space.md),
-          // 진행률 숫자(70 → 80 등)가 단계마다 튀지 않게 세면서 올라간다.
-          // 진행 중임을 알리는 스피너는 [_StageRow]가 이미 보여준다.
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: _percent.toDouble()),
-            duration: AppMotion.slow,
-            curve: AppMotion.decelerate,
-            builder: (context, value, _) => Text(
-              '${value.round()}% 진행 되었어요',
-              style: context.typo.promptBody
-                  .copyWith(color: colors.promptMuted),
+          // 루미는 준비 화면에만 나온다 (Figma 262:4569 `Group 26`, y=383).
+          // 카드 생성 화면(262:4703)에는 없다.
+          if (widget.kind == RoutineLoadingKind.prepare)
+            Positioned(
+              top: (383 - topBarH).h,
+              left: 0,
+              child: const _LumiPeek(),
+            ),
+
+          // sparkles y=225 → 제목 y=285 → 진행률 y=363
+          Positioned(
+            top: (225 - topBarH).h,
+            left: 0,
+            right: 0,
+            child: Column(
+              children: [
+                SvgPicture.asset(
+                  AppAssets.iconSparklesLarge,
+                  width: 30.w,
+                  height: 36.h,
+                ),
+                SizedBox(height: space.lg),
+                Text(
+                  widget.kind.title,
+                  textAlign: TextAlign.center,
+                  style: context.typo.promptTitle
+                      .copyWith(color: colors.textPrimary),
+                ),
+                SizedBox(height: space.md),
+                // 진행률 숫자(70 → 80 등)가 단계마다 튀지 않게 세면서 올라간다.
+                // 진행 중임을 알리는 스피너는 [_StageRow]가 보여준다.
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: _percent.toDouble()),
+                  duration: AppMotion.slow,
+                  curve: AppMotion.decelerate,
+                  builder: (context, value, _) => Text(
+                    '${value.round()}% 진행 되었어요',
+                    style: context.typo.promptBody
+                        .copyWith(color: colors.promptMuted),
+                  ),
+                ),
+              ],
             ),
           ),
-          // 루미는 준비 화면에만 나온다 (Figma 262:4569 `Group 26`).
-          // 카드 생성 화면(262:4703)에는 없으므로 빈 공간으로 남는다.
-          Expanded(
-            flex: 9,
-            child: widget.kind == RoutineLoadingKind.prepare
-                ? const _LumiPeek()
-                : const SizedBox.shrink(),
-          ),
-          // Figma는 스텝을 좌측 정렬한다(x=54 / x=83 고정).
-          // 가운데 정렬하면 줄마다 시작점이 달라 체크리스트로 안 보인다.
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: space.xl + space.lg),
+
+          // 체크리스트 — Figma x=54, y=569. 줄 간격 34(569→603→637).
+          // 좌측 정렬해야 체크 아이콘이 한 줄로 선다.
+          Positioned(
+            top: (569 - topBarH).h,
+            left: 54.w,
+            right: 54.w,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 for (final (index, stage) in stages.indexed) ...[
-                  if (index > 0) SizedBox(height: space.md),
+                  if (index > 0) SizedBox(height: 14.h),
                   _StageRow(
                     stage: stage,
                     // 뒤에 드러난 스텝이 있으면 이 스텝은 끝난 것이다
@@ -208,7 +231,6 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
               ],
             ),
           ),
-          SizedBox(height: space.xl),
         ],
       ),
     );
@@ -236,11 +258,16 @@ class _LumiPeekState extends State<_LumiPeek>
   /// 한 번 나왔다 들어가는 데 걸리는 시간. 쉬는 구간까지 포함한다.
   static const _cycle = Duration(milliseconds: 5200);
 
-  /// Figma 실측 (Group 26: 122×123). SVG 자체는 113×99다.
-  static const _width = 113.0;
-  static const _height = 99.0;
+  /// Figma 실측 — `Group 26`은 122×123이다.
+  /// SVG 자체(113×99)가 아니라 **배치 크기**를 따라야 시안과 같아 보인다.
+  static const _width = 122.0;
+  static const _height = 123.0;
 
-  /// 숨을 때 화면 밖으로 빠지는 거리 — 몸통이 완전히 가려질 만큼
+  /// 다 나왔을 때의 위치. Figma는 x=-48에 두어 **화면 왼쪽 밖으로 걸친다**
+  /// (폭 122의 약 40%가 잘려 몸통 일부만 보인다).
+  static const _restX = -48.0;
+
+  /// 숨을 때는 완전히 가려질 만큼 더 빠진다
   static const _hiddenX = -_width;
 
   @override
@@ -260,10 +287,16 @@ class _LumiPeekState extends State<_LumiPeek>
   /// 시간 비율로 나눈 이유 — 컨트롤러 하나로 전체를 돌리면 중간에 화면이
   /// 사라져도 상태가 어긋나지 않는다.
   double _slideX(double t) {
-    if (t < 0.15) return _lerp(_hiddenX, 0, Curves.easeOutBack.transform(t / 0.15));
-    if (t < 0.65) return 0;
+    if (t < 0.15) {
+      return _lerp(_hiddenX, _restX, Curves.easeOutBack.transform(t / 0.15));
+    }
+    if (t < 0.65) return _restX;
     if (t < 0.80) {
-      return _lerp(0, _hiddenX, Curves.easeInCubic.transform((t - 0.65) / 0.15));
+      return _lerp(
+        _restX,
+        _hiddenX,
+        Curves.easeInCubic.transform((t - 0.65) / 0.15),
+      );
     }
     return _hiddenX;
   }
@@ -281,29 +314,28 @@ class _LumiPeekState extends State<_LumiPeek>
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomLeft,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          final t = _controller.value;
-          return Transform.translate(
-            offset: Offset(_slideX(t), 0),
-            child: Transform.rotate(
-              // 몸 전체를 살짝 기울여 손 흔드는 느낌을 낸다.
-              // SVG가 통짜라 팔만 따로 돌릴 수 없다.
-              angle: _armAngle(t),
-              // 발치를 축으로 삼아야 몸이 붕 뜨지 않는다
-              alignment: Alignment.bottomCenter,
-              child: child,
-            ),
-          );
-        },
-        child: SvgPicture.asset(
-          AppAssets.lumiThinking,
-          width: _width,
-          height: _height,
-        ),
+    // 세로 위치는 부모 [Positioned]가 잡는다. 여기선 가로 이동만 맡는다.
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = _controller.value;
+        return Transform.translate(
+          // Figma 좌표(393 폭 기준)를 기기 폭에 맞춰 환산한다
+          offset: Offset(_slideX(t).w, 0),
+          child: Transform.rotate(
+            // 몸 전체를 살짝 기울여 손 흔드는 느낌을 낸다.
+            // SVG가 통짜라 팔만 따로 돌릴 수 없다.
+            angle: _armAngle(t),
+            // 발치를 축으로 삼아야 몸이 붕 뜨지 않는다
+            alignment: Alignment.bottomCenter,
+            child: child,
+          ),
+        );
+      },
+      child: SvgPicture.asset(
+        AppAssets.lumiThinking,
+        width: _width.w,
+        height: _height.h,
       ),
     );
   }
@@ -346,8 +378,8 @@ class _StageRow extends StatelessWidget {
         child: Row(
           children: [
             SizedBox(
-              width: _dotSize,
-              height: _dotSize,
+              width: _dotSize.w,
+              height: _dotSize.w,
               child: AnimatedSwitcher(
                 duration: AppMotion.normal,
                 child: isDone
@@ -357,7 +389,7 @@ class _StageRow extends StatelessWidget {
                           color: colors.stageDone,
                           shape: BoxShape.circle,
                         ),
-                        padding: const EdgeInsets.all(5),
+                        padding: EdgeInsets.all(5.w),
                         child: SvgPicture.asset(AppAssets.iconCheck),
                       )
                     // 지금 진행 중인 단계는 원이 돌아간다.
@@ -368,9 +400,9 @@ class _StageRow extends StatelessWidget {
                     // 움직임이 있어야 진행 중임이 전달된다.
                     : SizedBox.square(
                         key: const ValueKey('pending'),
-                        dimension: _dotSize,
+                        dimension: _dotSize.w,
                         child: CircularProgressIndicator(
-                          strokeWidth: 3,
+                          strokeWidth: 3.w,
                           // Figma 원의 테두리 색을 그대로 쓴다
                           color: colors.stagePending,
                           backgroundColor: Colors.transparent,
@@ -378,7 +410,8 @@ class _StageRow extends StatelessWidget {
                       ),
               ),
             ),
-            SizedBox(width: context.space.xs),
+            // Figma: 아이콘 우측(x=20) → 문구 좌측(x=28)
+            SizedBox(width: 8.w),
             // 색만 바뀌므로 문구가 갑자기 진해지지 않고 서서히 넘어간다
             Expanded(
               child: AnimatedDefaultTextStyle(
