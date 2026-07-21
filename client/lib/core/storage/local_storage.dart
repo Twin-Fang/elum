@@ -23,6 +23,13 @@ abstract interface class LocalStorage {
 
   Future<void> setPin(String v);
   Future<String?> getPin();
+
+  /// 저장된 온보딩 결과를 전부 지운다. **개발·테스트 전용.**
+  ///
+  /// 일부만 지우면 어중간한 상태가 남아 더 헷갈리므로 5개 값을 모두 비운다.
+  /// 인터페이스에 두는 이유는 InMemoryStorage도 같은 동작을 보장해
+  /// 테스트로 검증할 수 있게 하기 위함이다. (이슈 #13)
+  Future<void> clearAll();
 }
 
 /// SharedPreferences 기반 실제 구현.
@@ -81,6 +88,15 @@ class SharedPrefsStorage implements LocalStorage {
 
   @override
   Future<String?> getPin() async => _prefs.getString(_kPin);
+
+  @override
+  Future<void> clearAll() async {
+    // 앱이 쓰는 키만 지운다. _prefs.clear()는 다른 패키지가 저장한 값까지
+    // 날려 원인 모를 오작동을 만든다.
+    for (final key in [_kNickname, _kGoals, _kCharacter, _kCompleted, _kPin]) {
+      await _prefs.remove(key);
+    }
+  }
 }
 
 /// 메모리 구현. 테스트와 저장소 초기화 실패 시 대체용으로 쓴다.
@@ -123,4 +139,13 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<String?> getPin() async => _pin;
+
+  @override
+  Future<void> clearAll() async {
+    _nickname = null;
+    _goals = const [];
+    _character = null;
+    _pin = null;
+    _completed = false;
+  }
 }

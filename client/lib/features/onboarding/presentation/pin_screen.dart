@@ -24,50 +24,72 @@ class PinScreen extends ConsumerStatefulWidget {
 class _PinScreenState extends ConsumerState<PinScreen> {
   /// 1단계에서 입력한 PIN. null이면 아직 1단계다.
   String? _firstEntry;
-  String _current = '';
   String? _errorMessage;
+
+  /// OS 키패드와 연결되는 실제 입력값.
+  /// 자체 키패드를 두면 iOS·Android 각각의 입력 관습(햅틱·접근성·외부 키보드)을
+  /// 다시 구현해야 한다. 시스템 키패드를 쓰고 화면에는 점만 그린다.
+  final _controller = TextEditingController();
+  final _focusNode = FocusNode();
+
+  String get _current => _controller.text;
 
   bool get _isConfirmStep => _firstEntry != null;
 
-  void _onDigit(String digit) {
-    if (_current.length >= OnboardingProfile.pinLength) return;
+  @override
+  void initState() {
+    super.initState();
+    // 화면에 들어오면 바로 키패드가 올라오게 한다
+    _controller.addListener(_onChanged);
+  }
 
-    setState(() {
-      _current += digit;
-      _errorMessage = null;
-    });
+  @override
+  void dispose() {
+    _controller
+      ..removeListener(_onChanged)
+      ..dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onChanged() {
+    // 입력이 생기면 이전 안내 문구를 지운다
+    if (_errorMessage != null) {
+      setState(() => _errorMessage = null);
+      return;
+    }
+    setState(() {});
   }
 
   // 4자리를 채워도 자동으로 넘어가지 않는다.
   // Figma가 모든 PIN 프레임에 CTA를 두고 있고, 자동 전환은 오타를 고칠 틈을 주지 않는다.
 
-  void _onBackspace() {
-    if (_current.isEmpty) return;
-    setState(() => _current = _current.substring(0, _current.length - 1));
-  }
-
   void _onComplete() {
+    final entered = _current;
+
     if (!_isConfirmStep) {
       // 1단계 완료 → 재입력 받기
-      setState(() {
-        _firstEntry = _current;
-        _current = '';
-      });
+      setState(() => _firstEntry = entered);
+      _clearInput();
       return;
     }
 
-    if (_current != _firstEntry) {
+    if (entered != _firstEntry) {
       // 불일치 — 처음부터 다시. 경고색·에러 아이콘은 쓰지 않는다.
-      setState(() {
-        _firstEntry = null;
-        _current = '';
-        _errorMessage = '암호가 서로 달라요. 다시 만들어볼까요?';
-      });
+      setState(() => _firstEntry = null);
+      _clearInput();
+      setState(() => _errorMessage = '암호가 서로 달라요. 다시 만들어볼까요?');
       return;
     }
 
-    ref.read(onboardingProvider.notifier).setPin(_current);
+    ref.read(onboardingProvider.notifier).setPin(entered);
     context.push(Routes.onboardingDone);
+  }
+
+  /// 입력을 비우고 키패드는 계속 올라와 있게 둔다
+  void _clearInput() {
+    _controller.clear();
+    _focusNode.requestFocus();
   }
 
   @override
@@ -95,12 +117,20 @@ class _PinScreenState extends ConsumerState<PinScreen> {
             description: _errorMessage ?? '보호자모드로 변경할 때 사용하는 암호예요',
           ),
           SizedBox(height: space.xl),
-          PinDots(
-            length: OnboardingProfile.pinLength,
-            filled: _current.length,
+          // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)
+          GestureDetector(
+            onTap: _focusNode.requestFocus,
+            behavior: HitTestBehavior.opaque,
+            child: PinDots(
+              length: OnboardingProfile.pinLength,
+              filled: _current.length,
+            ),
           ),
-          const Spacer(),
-          PinKeypad(onDigit: _onDigit, onBackspace: _onBackspace),
+          PinInputField(
+            controller: _controller,
+            focusNode: _focusNode,
+            maxLength: OnboardingProfile.pinLength,
+          ),
         ],
       ),
     );
