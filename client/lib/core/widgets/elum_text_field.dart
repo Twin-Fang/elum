@@ -15,6 +15,7 @@ import '../theme/theme_context_ext.dart';
 /// - 텍스트 20sp, 상하 여백 각 24 → **수직 중앙**이므로 패딩이 아니라 정렬로 맞춘다
 ///
 /// 왼쪽 아이콘(leadingIconAssetPath)은 있었으나 Figma 개정으로 제거됐다 (이슈 #83).
+/// placeholder는 Figma상 필드 좌측 정렬이다(x=48, 필드는 x=24 시작 → 좌측 패딩 24).
 class ElumTextField extends StatelessWidget {
   const ElumTextField({
     super.key,
@@ -32,10 +33,10 @@ class ElumTextField extends StatelessWidget {
   /// 키보드의 완료(리턴) 키를 눌렀을 때. null이면 키보드만 닫힌다.
   final ValueChanged<String>? onSubmitted;
 
-  /// 정렬을 강제로 지정할 때만 넘긴다. null이면 중앙 정렬(디자인 기본)이다.
+  /// 정렬을 강제로 지정할 때만 넘긴다. null이면 좌측 정렬(디자인 기본)이다.
   final TextAlign? explicitTextAlign;
 
-  TextAlign get resolvedTextAlign => explicitTextAlign ?? TextAlign.center;
+  TextAlign get resolvedTextAlign => explicitTextAlign ?? TextAlign.start;
 
   @override
   Widget build(BuildContext context) {

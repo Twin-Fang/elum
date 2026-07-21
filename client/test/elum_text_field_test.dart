@@ -4,23 +4,24 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// 정렬 판단 규칙을 고정한다.
 ///
-/// 좌측 아이콘은 Figma 개정으로 제거됐다 (이슈 #83). 기본은 중앙 정렬이고,
-/// 좌측 정렬이 필요한 화면(카드 수정 시트 등)만 explicitTextAlign을 넘긴다.
+/// 좌측 아이콘은 Figma 개정으로 제거됐다 (이슈 #83). placeholder는 Figma상
+/// 필드 좌측 정렬이라(2026-07-22 재확인, 이슈 #10 후속) 기본이 좌측 정렬이고,
+/// 예외가 필요한 화면만 explicitTextAlign을 넘긴다.
 void main() {
   group('ElumTextField 정렬 판단', () {
-    test('기본은 중앙 정렬이다', () {
+    test('기본은 좌측 정렬이다', () {
       const field = ElumTextField(hintText: '이름을 입력해주세요');
 
-      expect(field.resolvedTextAlign, TextAlign.center);
+      expect(field.resolvedTextAlign, TextAlign.start);
     });
 
     test('explicitTextAlign을 넘기면 그 값을 쓴다', () {
       const field = ElumTextField(
         hintText: '이름을 입력해주세요',
-        explicitTextAlign: TextAlign.left,
+        explicitTextAlign: TextAlign.center,
       );
 
-      expect(field.resolvedTextAlign, TextAlign.left);
+      expect(field.resolvedTextAlign, TextAlign.center);
     });
   });
 }
