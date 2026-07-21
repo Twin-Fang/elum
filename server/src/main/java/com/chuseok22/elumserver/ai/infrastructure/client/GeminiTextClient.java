@@ -30,7 +30,7 @@ public class GeminiTextClient {
   public GeminiGenerateContentResponse generate(
     String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, String answers
   ) {
-    String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_TEXT_PREFIX)
+    String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX)
       + buildChildProfileSection(nickname, supportGoals, answers);
     return callGenerateContent(systemPrompt, wrapAsData(sanitizedInputText));
   }
@@ -39,7 +39,7 @@ public class GeminiTextClient {
     List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
     String nickname, Set<SupportGoal> supportGoals
   ) {
-    String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_TEXT_PREFIX)
+    String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX)
       + buildChildProfileSection(nickname, supportGoals, null);
     String previousStepsText = previousSteps.stream()
       .map(step -> step.order() + ". " + step.description())
