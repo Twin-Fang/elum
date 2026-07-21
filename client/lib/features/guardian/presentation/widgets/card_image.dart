@@ -52,7 +52,8 @@ class CardImage extends ConsumerWidget {
               child: Image.memory(
                 bytes,
                 key: ValueKey(stepId),
-                fit: BoxFit.contain,
+                // 서버 이미지가 1024×1024라 정사각형 칸을 그대로 채운다
+                fit: BoxFit.cover,
                 // 디코딩 실패도 앱을 죽이면 안 된다
                 errorBuilder: (_, _, _) => const _Fallback(),
               ),

@@ -66,10 +66,16 @@ class ActionCardView extends StatelessWidget {
         ],
       ),
       padding: EdgeInsets.all(space.md),
-      child: Column(
+      // 제목이 두 줄이 되면 카드 높이를 넘길 수 있다. 넘치면 스크롤한다 —
+      // 노란 줄무늬 오버플로 경고가 뜨면 안 된다.
+      child: SingleChildScrollView(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
+          // 이미지는 항상 정사각형이다. Expanded로 두면 남는 공간을 다 먹어
+          // 제목 길이에 따라 카드마다 이미지 크기와 텍스트 시작 높이가 달라진다.
+          AspectRatio(
+            aspectRatio: 1,
             child: _Illustration(
               routineId: routineId,
               stepId: card.id,
@@ -78,14 +84,16 @@ class ActionCardView extends StatelessWidget {
           ),
           SizedBox(height: space.md),
           Row(
+            // 제목이 두 줄이 되면 배지가 가운데로 뜬다. 위로 붙인다.
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _NumberBadge(order: index + 1, color: palette.border),
               SizedBox(width: space.sm),
               Expanded(
                 child: Text(
+                  // 제목을 …로 자르지 않는다. 아동이 무엇을 해야 하는지
+                  // 알려주는 문장이라 잘리면 의미가 사라진다.
                   card.displayTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: context.typo.cardHeadline
                       .copyWith(color: context.colors.textPrimary),
                 ),
@@ -119,8 +127,6 @@ class ActionCardView extends StatelessWidget {
               Expanded(
                 child: Text(
                   card.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                   style: context.typo.cardDescription
                       .copyWith(color: context.colors.textPrimary),
                 ),
@@ -128,6 +134,7 @@ class ActionCardView extends StatelessWidget {
             ],
           ),
         ],
+        ),
       ),
     );
   }
@@ -160,8 +167,8 @@ class _Illustration extends StatelessWidget {
               color: context.colors.surface,
               borderRadius: BorderRadius.circular(space.xs),
             ),
-            child: Padding(
-              padding: EdgeInsets.all(space.md),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(space.xs),
               child: CardImage(routineId: routineId, stepId: stepId),
             ),
           ),
