@@ -4,32 +4,18 @@
 
 ## 릴리스 노트
 
+* **새 기능**
+  * 일과 카드를 체크하면 화면에 색종이가 터지는 축하 효과가 나타납니다
+  * 보상 화면의 별이 자연스럽게 둥둥 떠다니는 연출이 추가되었습니다
+  * 목표 선택 화면의 각 항목마다 어울리는 아이콘이 표시됩니다
+  * 일과 만들기 진행 화면 하단에 보안 안내 배지가 추가되었습니다
+
 * **버그 수정**
-  * Gemini 이미지 응답 로그에서 base64 원본 노출 제거
-  * routine_step title 컬럼 누락에 대한 Flyway 마이그레이션 추가
-
-* **문서**
-  * 관리자 REVISE 프롬프트 테스트 이전 루틴 입력 구현 계획 추가
-  * 관리자 REVISE 프롬프트 테스트 이전 루틴 입력 설계 문서 추가
-
-* **기타**
-  * elum 버전 관리 : chore : v1.0.73 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )
-  * Merge remote-tracking branch 'origin/main' into develop
-  * 시작 화면 구슬 glow 복원 및 idle 부유로 정리 : fix : flutter_svg가 못 그리는 구슬 glow를 splashOrbGlow 토큰 BoxShadow로 재현, 병아리 숨쉬기 제거하고 줄기+구슬만 함께 부유(.w 비례), 접근성 동작 줄이기 존중
-  * Merge pull request from Twin-Fang/develop
-  * Merge branch 'develop' of into develop
-  * elum 버전 관리 : chore : v1.0.71 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )
-  * Figma 정합 검증 불일치 일괄 수정 : feat : 맞춤설정완료 5단계 순차 안내·첫 일과 만들기 CTA, 보상 캐릭터 3종 렌더, 빈 상태 포포 분기, 카드 제목 25px 토큰 분리, 이름 필드 아이콘 제거 외
-  * Merge remote-tracking branch 'origin/main' into develop
-  * elum 버전 관리 : chore : v1.0.70 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )
-  * Merge pull request from Twin-Fang/develop
-  * 시작 화면 등장·idle 연출 및 온보딩 페이지 전환 애니메이션 적용 : feat : AppFadeSlideIn 공통 위젯·slidePage/fadePage 전환 헬퍼 구현, 시작 화면 문구·로고·CTA 순차 등장과 병아리 숨쉬기·별 반짝임 idle 모션(동작 줄이기 존중), 온보딩 전 구간 슬라이드 전환
-  * Merge remote-tracking branch 'origin/develop' into develop
-  * Merge remote-tracking branch 'origin/develop'
-  * elum 버전 관리 : chore : v1.0.68 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )
-  * elum 버전 관리 : chore : v1.0.67 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )
-  * Merge branch 'main' into develop
-  * 온보딩 애니메이션 개선 설계 : docs : 시작 화면 등장·idle 연출과 온보딩 페이지 전환 설계 문서 추가
-  * 카드확인 화면 배경 블러 글로우 제거 : fix : RoutineFlowScaffold에 showAurora 플래그 추가하고 카드확인 화면에서 오로라 배경 비활성화
+  * 카드확인 화면에서 불필요하게 보이던 보안 배지를 정리했습니다
+  * 별 주변 빛나는 효과가 사라졌던 문제를 고쳤습니다
+  * 별 애니메이션이 캐릭터와 겹쳐 보이던 문제를 고쳤습니다
+  * 이름 입력란의 안내 문구 정렬을 맞췄습니다
+  * 홈 화면의 캐릭터 이미지가 온보딩에서 고른 캐릭터와 다르게 보이던 문제를 고쳤습니다
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
