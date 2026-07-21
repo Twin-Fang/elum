@@ -17,6 +17,7 @@ import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineSuggestionCatalog;
+import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
@@ -45,6 +46,7 @@ public class RoutineService {
   private final SensitiveInfoGuardService sensitiveInfoGuardService;
   private final RoutineAiPipeline routineAiPipeline;
   private final RoutineImageStorage routineImageStorage;
+  private final RoutineRequestCooldownGuard routineRequestCooldownGuard;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
@@ -74,6 +76,8 @@ public class RoutineService {
   // 지연 로딩 걱정이 없으므로 안전하다.
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public RoutineResponse create(String memberId, RoutineCreateRequest request) {
+    routineRequestCooldownGuard.guard(memberId);
+
     Member member = memberRepository.findById(memberId)
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -98,6 +102,8 @@ public class RoutineService {
 
   @Transactional
   public RoutineResponse revise(String memberId, String routineId, RoutineReviseRequest request) {
+    routineRequestCooldownGuard.guard(memberId);
+
     Routine routine = getOwnedRoutine(memberId, routineId);
     Member member = routine.getMember();
 
