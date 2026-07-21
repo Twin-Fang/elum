@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -152,7 +154,13 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
       // 생성 중에는 되돌릴 수 없다 — 중간에 끊으면 어중간한 상태가 남는다
       child: Column(
         children: [
-          SizedBox(height: space.xl),
+          // Figma(852 높이)는 sparkles를 y=225, 체크리스트를 y=569에 둔다.
+          // 상단을 고정값으로 붙이면 남는 높이가 전부 가운데로 몰려
+          // 제목과 체크리스트 사이가 휑하게 벌어진다. 위:아래를 실측 비율로
+          // 나눠 기기 높이가 달라져도 Figma의 균형을 유지한다.
+          //
+          // 상단 여백 225 - 상단바(약 111) ≒ 114  →  114 : 206 ≒ 5 : 9
+          const Spacer(flex: 5),
           SvgPicture.asset(AppAssets.iconSparklesLarge, width: 30, height: 36),
           SizedBox(height: space.lg),
           Text(
@@ -161,7 +169,8 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
             style: context.typo.promptTitle.copyWith(color: colors.textPrimary),
           ),
           SizedBox(height: space.md),
-          // 진행률이 튀지 않게 숫자 자체를 부드럽게 잇는다
+          // 진행률 숫자(70 → 80 등)가 단계마다 튀지 않게 세면서 올라간다.
+          // 진행 중임을 알리는 스피너는 [_StageRow]가 이미 보여준다.
           TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: _percent.toDouble()),
             duration: AppMotion.slow,
@@ -172,7 +181,14 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
                   .copyWith(color: colors.promptMuted),
             ),
           ),
-          const Spacer(),
+          // 루미는 준비 화면에만 나온다 (Figma 262:4569 `Group 26`).
+          // 카드 생성 화면(262:4703)에는 없으므로 빈 공간으로 남는다.
+          Expanded(
+            flex: 9,
+            child: widget.kind == RoutineLoadingKind.prepare
+                ? const _LumiPeek()
+                : const SizedBox.shrink(),
+          ),
           // Figma는 스텝을 좌측 정렬한다(x=54 / x=83 고정).
           // 가운데 정렬하면 줄마다 시작점이 달라 체크리스트로 안 보인다.
           Padding(
@@ -194,6 +210,100 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
           ),
           SizedBox(height: space.xl),
         ],
+      ),
+    );
+  }
+}
+
+/// 왼쪽에서 나타나 손을 흔들고 다시 숨는 루미 (Figma 262:4569 `Group 26`).
+///
+/// 기다리는 동안 화면이 정지해 보이지 않게 하는 장치다. 계속 흔들면 시선을
+/// 뺏으므로 **나왔다 → 흔들고 → 들어간 뒤 쉰다**를 반복한다.
+///
+/// Figma는 x=-48에 두어 화면 밖에 걸쳐 몸통 일부만 보인다. 정지 시안이라
+/// 등장·퇴장은 그리지 않았지만, 그 위치가 "옆에서 빼꼼 내민" 상태다.
+class _LumiPeek extends StatefulWidget {
+  const _LumiPeek();
+
+  @override
+  State<_LumiPeek> createState() => _LumiPeekState();
+}
+
+class _LumiPeekState extends State<_LumiPeek>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  /// 한 번 나왔다 들어가는 데 걸리는 시간. 쉬는 구간까지 포함한다.
+  static const _cycle = Duration(milliseconds: 5200);
+
+  /// Figma 실측 (Group 26: 122×123). SVG 자체는 113×99다.
+  static const _width = 113.0;
+  static const _height = 99.0;
+
+  /// 숨을 때 화면 밖으로 빠지는 거리 — 몸통이 완전히 가려질 만큼
+  static const _hiddenX = -_width;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: _cycle)..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// 등장(0~15%) → 흔들기(15~65%) → 퇴장(65~80%) → 쉼(80~100%).
+  ///
+  /// 시간 비율로 나눈 이유 — 컨트롤러 하나로 전체를 돌리면 중간에 화면이
+  /// 사라져도 상태가 어긋나지 않는다.
+  double _slideX(double t) {
+    if (t < 0.15) return _lerp(_hiddenX, 0, Curves.easeOutBack.transform(t / 0.15));
+    if (t < 0.65) return 0;
+    if (t < 0.80) {
+      return _lerp(0, _hiddenX, Curves.easeInCubic.transform((t - 0.65) / 0.15));
+    }
+    return _hiddenX;
+  }
+
+  /// 팔 흔들기 — 다 나온 뒤에만 흔든다. 나오면서 흔들면 어수선하다.
+  double _armAngle(double t) {
+    if (t < 0.18 || t > 0.62) return 0;
+    final progress = (t - 0.18) / (0.62 - 0.18);
+    // 2.5번 왕복. 끝에서 부드럽게 멎도록 진폭을 점점 줄인다.
+    final decay = 1 - progress;
+    return math.sin(progress * math.pi * 5) * 0.22 * decay;
+  }
+
+  static double _lerp(double a, double b, double t) => a + (b - a) * t;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomLeft,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          final t = _controller.value;
+          return Transform.translate(
+            offset: Offset(_slideX(t), 0),
+            child: Transform.rotate(
+              // 몸 전체를 살짝 기울여 손 흔드는 느낌을 낸다.
+              // SVG가 통짜라 팔만 따로 돌릴 수 없다.
+              angle: _armAngle(t),
+              // 발치를 축으로 삼아야 몸이 붕 뜨지 않는다
+              alignment: Alignment.bottomCenter,
+              child: child,
+            ),
+          );
+        },
+        child: SvgPicture.asset(
+          AppAssets.lumiThinking,
+          width: _width,
+          height: _height,
+        ),
       ),
     );
   }
@@ -250,12 +360,20 @@ class _StageRow extends StatelessWidget {
                         padding: const EdgeInsets.all(5),
                         child: SvgPicture.asset(AppAssets.iconCheck),
                       )
-                    : DecoratedBox(
+                    // 지금 진행 중인 단계는 원이 돌아간다.
+                    //
+                    // Figma 262:4736 `Ellipse 22`는 정지된 테두리 원이지만,
+                    // 그대로 두면 완료도 대기도 아닌 상태가 멈춰 보인다.
+                    // 서버 응답이 늦으면 이 단계에 수 초간 머무르므로
+                    // 움직임이 있어야 진행 중임이 전달된다.
+                    : SizedBox.square(
                         key: const ValueKey('pending'),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border:
-                              Border.all(color: colors.stagePending, width: 3),
+                        dimension: _dotSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          // Figma 원의 테두리 색을 그대로 쓴다
+                          color: colors.stagePending,
+                          backgroundColor: Colors.transparent,
                         ),
                       ),
               ),

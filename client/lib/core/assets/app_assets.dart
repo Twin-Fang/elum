@@ -88,6 +88,19 @@ abstract final class AppAssets {
   /// 최근 일과 섹션 제목 앞 시계 (18×18). Figma `fi-br-clock`.
   static const iconClock = '$_images/icon_clock.svg';
 
+  /// 준비 로딩 화면의 루미 캐릭터 (Figma 262:4569 `Group 26`, 122×123).
+  ///
+  /// **`prepare` 화면에만 있다** — 카드 생성 로딩(262:4703)에는 없다.
+  /// 화면 왼쪽 밖(x=-48)에 걸쳐 몸통 일부만 보인다.
+  static const lumiThinking = '$_images/lumi_thinking.svg';
+
+  /// 로딩 체크리스트의 완료 표시 (20×20). Figma 262:4692 `Group 27`.
+  static const stageCheckDone = '$_images/stage_check_done.svg';
+
+  /// 로딩 체크리스트의 미완료 표시 (20×20). Figma 262:4698 `Ellipse 22` —
+  /// 채움 없이 테두리만 있는 원(rgba(36,38,52,0.6) 3px).
+  static const stageCheckPending = '$_images/stage_check_pending.svg';
+
   // --- 시작 화면 (Figma `시작` 238:1808) ---
 
   /// 이룸 로고 (164×60). Cloudsofa_namgim 폰트 대신 이 SVG를 쓴다.

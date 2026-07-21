@@ -67,11 +67,17 @@ void main() {
       await settle(tester);
     });
 
-    testWidgets('마지막 단계가 "추가 질문을 생각하고 있어요"다', (tester) async {
-      // 이 문구가 곧 흐름의 근거다 — 이 화면 다음은 질문 화면이지 카드가 아니다
+    testWidgets('단계 문구가 Figma 262:4569 원문 그대로다', (tester) async {
+      // 흐름상 그럴듯하다는 이유로 문구를 지어내면 화면이 조용히 명세와
+      // 어긋난다 — 실제로 마지막 줄이 "추가 질문을 생각하고 있어요"로
+      // 잘못 들어가 있었다. Figma에 없는 문구다.
       expect(
-        RoutineLoadingKind.prepare.stages.last.label,
-        '추가 질문을 생각하고 있어요',
+        RoutineLoadingKind.prepare.stages.map((s) => s.label).toList(),
+        const [
+          '아이를 알아볼 수 있는 정보는 가려요',
+          '꼭 필요한 내용만 정리해요',
+          '아이가 이해하기 쉬운 말로 바꿔요',
+        ],
       );
     });
 
