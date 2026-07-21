@@ -70,6 +70,14 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(responses);
   }
 
+  // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
+  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @GetMapping("/today")
+  public ResponseEntity<List<RoutineResponse>> getTodayRoutines(Authentication authentication) {
+    List<RoutineResponse> responses = routineService.getTodayRoutines(authentication.getName());
+    return ResponseEntity.ok(responses);
+  }
+
   @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
   @GetMapping("/suggestions")
   public ResponseEntity<List<RoutineSuggestionResponse>> getSuggestions(

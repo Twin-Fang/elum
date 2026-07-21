@@ -23,7 +23,9 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -90,7 +92,7 @@ public class RoutineService {
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
     SensitiveInfoCheckResult checkResult = sensitiveInfoGuardService.check(request.rawInputText());
-    String maskedAnswers = maskAnswers(request.answers());
+    List<String> maskedAnswers = maskAnswers(request.answers());
     RoutineAiPipeline.RoutineGenerationResult generation = routineAiPipeline.generateForCreate(
       checkResult.sanitizedText(), member.getNickname(), member.getSupportGoals(), maskedAnswers,
       member.getCharacter()
@@ -248,6 +250,18 @@ public class RoutineService {
       .toList();
   }
 
+  // 아이 홈 화면 "오늘 할 일" 리스트용. 보호자 승인 전(PENDING_REVIEW) 일과는 제외하고,
+  // scheduledAt이 오늘(KST) 안에 있는 CONFIRMED/COMPLETED 일과만 예정 시각 순으로 반환한다.
+  public List<RoutineResponse> getTodayRoutines(String memberId) {
+    LocalDate today = LocalDate.now();
+    LocalDateTime startOfDay = today.atStartOfDay();
+    LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+    List<Routine> routines = routineRepository.findAllByMemberIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
+      memberId, List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED), startOfDay, endOfDay
+    );
+    return routines.stream().map(RoutineResponse::from).toList();
+  }
+
   // count는 프론트가 요청한 반환 개수다. 1 미만이거나 카탈로그 전체 개수를 초과하면
   // 항상 이 범위 안에서만 뽑을 수 있으므로 잘못된 요청으로 간주해 거부한다.
   public List<RoutineSuggestionResponse> getSuggestions(int count) {
@@ -290,15 +304,28 @@ public class RoutineService {
       .toList();
   }
 
-  // 답변(answers)도 rawInputText와 동일한 로컬 LLM 마스킹 게이트를 거치게 한다.
-  // 마스킹 없이 그대로 Gemini로 보내면 보호자가 답변에 직접 입력한 민감정보가
-  // 새어나갈 수 있다(fable5 최종 검토에서 발견).
-  private String maskAnswers(List<String> answers) {
+  // 답변(answers)도 rawInputText와 동일한 로컬 LLM 마스킹 게이트를 거치게 한다. 항목별로
+  // 개별 마스킹해 배열 구조를 유지해야 Gemini에 additionalAnswers 배열 그대로 전달할 수
+  // 있다(마스킹 전 하나로 합쳐버리면 Gemini 쪽에서 배열 구조를 잃는다, fable5 검토에서
+  // 발견 — 이전에는 answers를 comma로 합친 뒤 한 번에 마스킹해 문자열 하나로 전달했다).
+  // 로컬 LLM 호출을 답변 개수만큼 순차로 하면 fail-open 타임아웃이 그대로 누적되므로,
+  // maskPreviousSteps()와 동일하게 가상 스레드로 병렬 호출해 지연을 1회 타임아웃 수준으로
+  // 묶는다(fable5 검토에서 발견).
+  private List<String> maskAnswers(List<String> answers) {
     if (answers == null || answers.isEmpty()) {
-      return null;
+      return List.of();
     }
-    String joined = String.join(", ", answers);
-    return sensitiveInfoGuardService.check(joined).sanitizedText();
+    ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+    try {
+      List<CompletableFuture<String>> futures = answers.stream()
+        .map(answer -> CompletableFuture.supplyAsync(
+          () -> sensitiveInfoGuardService.check(answer).sanitizedText(), executor
+        ))
+        .toList();
+      return futures.stream().map(CompletableFuture::join).toList();
+    } finally {
+      executor.shutdown();
+    }
   }
 
   // description은 이제 보호자가 PATCH .../steps/{stepId}로 직접 입력한 원문일 수 있으므로

@@ -48,7 +48,8 @@ public class AdminPromptService {
   // - 이미지: prefix + 설명을 그대로 이어붙임(래핑 없음, GeminiImageClient와 동일)
   public String preview(PromptKey key, String content, String sampleInput) {
     return switch (key) {
-      case LOCAL_LLM_SENSITIVE_INFO_CHECK, GEMINI_ROUTINE_TEXT_PREFIX, GEMINI_ROUTINE_QUESTION_PREFIX ->
+      case LOCAL_LLM_SENSITIVE_INFO_CHECK, GEMINI_ROUTINE_CREATE_PREFIX, GEMINI_ROUTINE_REVISE_PREFIX,
+        GEMINI_ROUTINE_QUESTION_PREFIX ->
         "[System]\n" + content + "\n\n[User]\n<text>" + sampleInput + "</text>";
       case GEMINI_ROUTINE_IMAGE_PREFIX -> content + sampleInput;
     };
@@ -60,7 +61,7 @@ public class AdminPromptService {
         SensitiveInfoCheckResult result = sensitiveInfoGuardService.checkForTest(content, sampleInput);
         yield new PromptTestResponse(result, null);
       }
-      case GEMINI_ROUTINE_TEXT_PREFIX -> {
+      case GEMINI_ROUTINE_CREATE_PREFIX, GEMINI_ROUTINE_REVISE_PREFIX -> {
         RoutineStepDraft draft = testGeminiText(content, sampleInput);
         yield new PromptTestResponse(draft, null);
       }

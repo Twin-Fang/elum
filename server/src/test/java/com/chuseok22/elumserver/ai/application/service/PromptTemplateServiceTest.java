@@ -31,12 +31,12 @@ class PromptTemplateServiceTest {
   @DisplayName("getContent는 저장된 프롬프트 내용을 반환한다")
   void getContent_existingKey_returnsContent() {
     PromptTemplate template = new PromptTemplate();
-    template.setPromptKey(PromptKey.GEMINI_ROUTINE_TEXT_PREFIX);
+    template.setPromptKey(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
     template.setContent("텍스트 생성 프롬프트");
-    when(promptTemplateRepository.findByPromptKey(PromptKey.GEMINI_ROUTINE_TEXT_PREFIX))
+    when(promptTemplateRepository.findByPromptKey(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX))
       .thenReturn(Optional.of(template));
 
-    String content = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_TEXT_PREFIX);
+    String content = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
 
     assertThat(content).isEqualTo("텍스트 생성 프롬프트");
   }

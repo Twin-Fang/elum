@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -22,10 +21,12 @@ import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepositor
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
+import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineSuggestionCatalog;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
+import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
@@ -245,7 +246,31 @@ class RoutineServiceTest {
     routineService.create("member-1", new RoutineCreateRequest("내일 병원 가기", null, null));
 
     verify(routineAiPipeline).generateForCreate(
-      eq("내일 병원 가기"), eq("하늘이"), eq(Set.of()), isNull(), eq(CharacterType.LULU)
+      eq("내일 병원 가기"), eq("하늘이"), eq(Set.of()), eq(List.of()), eq(CharacterType.LULU)
+    );
+  }
+
+  @Test
+  @DisplayName("오늘 일과를 조회하면 CONFIRMED/COMPLETED 상태의 오늘 범위 일과만 반환한다")
+  void getTodayRoutines_returnsConfirmedAndCompletedRoutinesForToday() {
+    Member member = new Member();
+    member.setId("member-1");
+    Routine routine = new Routine();
+    routine.setId("routine-1");
+    routine.setTitle("병원 다녀오기");
+    routine.setMember(member);
+    routine.setStatus(RoutineStatus.CONFIRMED);
+    routine.setSteps(List.of());
+    when(routineRepository.findAllByMemberIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
+      eq("member-1"), eq(List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED)), any(), any()
+    )).thenReturn(List.of(routine));
+
+    List<RoutineResponse> result = routineService.getTodayRoutines("member-1");
+
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0).id()).isEqualTo("routine-1");
+    verify(routineRepository).findAllByMemberIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
+      eq("member-1"), eq(List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED)), any(), any()
     );
   }
 }

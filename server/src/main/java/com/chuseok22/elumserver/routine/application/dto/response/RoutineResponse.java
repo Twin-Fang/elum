@@ -32,6 +32,15 @@ public record RoutineResponse(
   @Schema(description = "모든 단계를 완료한 시각(KST), 미완료 시 null")
   LocalDateTime completedAt,
 
+  @Schema(description = "완료한 단계 수", example = "1")
+  Integer completedStepCount,
+
+  @Schema(description = "전체 단계 수", example = "2")
+  Integer totalStepCount,
+
+  @Schema(description = "진행률(%), 단계가 없으면 0", example = "50")
+  Integer progressPercent,
+
   @Schema(description = "단계 목록")
   List<RoutineStepResponse> steps
 ) {
@@ -40,6 +49,11 @@ public record RoutineResponse(
     List<RoutineStepResponse> stepResponses = routine.getSteps().stream()
       .map(RoutineStepResponse::from)
       .toList();
+    int totalStepCount = stepResponses.size();
+    int completedStepCount = (int) stepResponses.stream()
+      .filter(RoutineStepResponse::completed)
+      .count();
+    int progressPercent = totalStepCount == 0 ? 0 : (completedStepCount * 100) / totalStepCount;
     return new RoutineResponse(
       routine.getId(),
       routine.getTitle(),
@@ -49,6 +63,9 @@ public record RoutineResponse(
       routine.getStatus().name(),
       routine.getRevisionFeedback(),
       routine.getCompletedAt(),
+      completedStepCount,
+      totalStepCount,
+      progressPercent,
       stepResponses
     );
   }
