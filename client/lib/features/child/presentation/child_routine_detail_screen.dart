@@ -256,7 +256,11 @@ class _CheckButton extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isChecked ? colors.checkDone : Colors.transparent,
-          border: Border.all(color: colors.checkPending, width: 8.w),
+          // 완료되면 채움만 남긴다 — 회색 테두리가 남으면 덜 끝난 느낌을 준다
+          // (Figma 309:3682)
+          border: isChecked
+              ? null
+              : Border.all(color: colors.checkPending, width: 8.w),
         ),
         child: Icon(
           Icons.check_rounded,

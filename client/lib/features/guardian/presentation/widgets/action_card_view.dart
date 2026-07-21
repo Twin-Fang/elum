@@ -97,7 +97,8 @@ class ActionCardView extends StatelessWidget {
                   // 제목을 …로 자르지 않는다. 아동이 무엇을 해야 하는지
                   // 알려주는 문장이라 잘리면 의미가 사라진다.
                   card.displayTitle,
-                  style: context.typo.cardHeadline
+                  // 제목은 25/w800(style_GKEQ8F) — 순서 배지(cardHeadline 30)와 크기가 다르다
+                  style: context.typo.actionCardTitle
                       .copyWith(color: context.colors.textPrimary),
                 ),
               ),

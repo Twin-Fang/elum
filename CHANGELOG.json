@@ -1,15 +1,104 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T16:15:46Z",
-    "currentVersion": "1.0.68",
+    "lastUpdated": "2026-07-21T16:39:02Z",
+    "currentVersion": "1.0.71",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 38
+    "totalReleases": 40
   },
   "releases": [
+    {
+      "version": "1.0.71",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 88,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 맞춤 설정 완료 화면에서 안내가 단계별로 이어집니다\n  * 설정을 마치면 첫 일과 만들기로 바로 이동할 수 있어요\n  * 아이가 할 일을 해내면 캐릭터가 별을 안고 나타납니다\n  * 시작 화면과 온보딩 전환에 부드러운 등장 효과가 생겼어요\n\n* **개선**\n  * 일과가 없을 때 선택한 캐릭터가 알맞게 표시됩니다\n  * 카드 제목과 화면 곳곳의 글자 크기·굵기를 시안에 맞췄어요\n  * 할 일을 완료하면 체크 표시가 더 깔끔하게 채워집니다\n  * 별 모으기 화면의 별 배치가 정돈됐어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "맞춤 설정 완료 화면에서 안내가 단계별로 이어집니다",
+            "설정을 마치면 첫 일과 만들기로 바로 이동할 수 있어요",
+            "아이가 할 일을 해내면 캐릭터가 별을 안고 나타납니다",
+            "시작 화면과 온보딩 전환에 부드러운 등장 효과가 생겼어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과가 없을 때 선택한 캐릭터가 알맞게 표시됩니다",
+            "카드 제목과 화면 곳곳의 글자 크기·굵기를 시안에 맞췄어요",
+            "할 일을 완료하면 체크 표시가 더 깔끔하게 채워집니다",
+            "별 모으기 화면의 별 배치가 정돈됐어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "1.0.70",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 86,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 루틴 단계에 카드 제목(title) 필드 추가, description은 읽어주기용 문장으로 역할 명확화\n  * 관리자 프롬프트 preview/test가 실제 호출과 동일한 조립 로직을 재사용하도록 통합\n  * 이미지 프롬프트 조립을 GeminiRoutineImagePromptBuilder로 분리\n  * 추가 질문 fallback을 전체 단위에서 목표별 개별 단위로 전환\n  * 추가 질문 Gemini 호출을 JSON으로 전환하고 목표별 questions 배열 크기를 강제\n\n* **버그 수정**\n  * routine_step title 컬럼 누락에 대한 Flyway 마이그레이션 추가\n  * Spring Boot 4 Flyway 자동 설정 누락 수정 및 공통 설정 추가\n  * 최종 리뷰 반영 — fallbackQuestionItem 주석 정정, REVISE 프롬프트 title 필드 반영, 단계 title 스키마에 minLength 추가\n\n* **문서**\n  * 루틴 생성/추가 질문 API 문서를 이미지 재시도·목표별 질문 보장에 맞춰 갱신\n\n* **기타**\n  * Merge pull request from Twin-Fang/develop\n  * Merge remote-tracking branch 'origin/develop' into develop\n  * Merge remote-tracking branch 'origin/develop'\n  * elum 버전 관리 : chore : v1.0.68 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )\n  * elum 버전 관리 : chore : v1.0.67 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )\n  * Merge branch 'main' into develop\n  * 온보딩 애니메이션 개선 설계 : docs : 시작 화면 등장·idle 연출과 온보딩 페이지 전환 설계 문서 추가\n  * 카드확인 화면 배경 블러 글로우 제거 : fix : RoutineFlowScaffold에 showAurora 플래그 추가하고 카드확인 화면에서 오로라 배경 비활성화\n  * Merge pull request from Twin-Fang/develop\n  * Merge branch 'develop' of into develop\n  * elum 버전 관리 : chore : v1.0.65 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )\n  * Merge remote-tracking branch 'origin/main' into develop\n  * 카드 수정 바텀시트 추가 및 카드확인·아이 상세 Figma 정합 : feat : 카드 제목·설명 수정 바텀시트, 삭제 X 우상단 이동, 아이 상세 상단바 일과 제목 표시, 아이 홈 /today 전환()\n  * Merge branch 'develop' of into develop",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "루틴 단계에 카드 제목(title) 필드 추가, description은 읽어주기용 문장으로 역할 명확화",
+            "관리자 프롬프트 preview/test가 실제 호출과 동일한 조립 로직을 재사용하도록 통합",
+            "이미지 프롬프트 조립을 GeminiRoutineImagePromptBuilder로 분리",
+            "추가 질문 fallback을 전체 단위에서 목표별 개별 단위로 전환",
+            "추가 질문 Gemini 호출을 JSON으로 전환하고 목표별 questions 배열 크기를 강제"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "routine_step title 컬럼 누락에 대한 Flyway 마이그레이션 추가",
+            "Spring Boot 4 Flyway 자동 설정 누락 수정 및 공통 설정 추가",
+            "최종 리뷰 반영 — fallbackQuestionItem 주석 정정, REVISE 프롬프트 title 필드 반영, 단계 title 스키마에 minLength 추가"
+          ]
+        },
+        "문서": {
+          "title": "문서",
+          "items": [
+            "루틴 생성/추가 질문 API 문서를 이미지 재시도·목표별 질문 보장에 맞춰 갱신"
+          ]
+        },
+        "기타": {
+          "title": "기타",
+          "items": [
+            "Merge pull request from Twin-Fang/develop",
+            "Merge remote-tracking branch 'origin/develop' into develop",
+            "Merge remote-tracking branch 'origin/develop'",
+            "elum 버전 관리 : chore : v1.0.68 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )",
+            "elum 버전 관리 : chore : v1.0.67 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )",
+            "Merge branch 'main' into develop",
+            "온보딩 애니메이션 개선 설계 : docs : 시작 화면 등장·idle 연출과 온보딩 페이지 전환 설계 문서 추가",
+            "카드확인 화면 배경 블러 글로우 제거 : fix : RoutineFlowScaffold에 showAurora 플래그 추가하고 카드확인 화면에서 오로라 배경 비활성화",
+            "Merge pull request from Twin-Fang/develop",
+            "Merge branch 'develop' of into develop",
+            "elum 버전 관리 : chore : v1.0.65 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )",
+            "Merge remote-tracking branch 'origin/main' into develop",
+            "카드 수정 바텀시트 추가 및 카드확인·아이 상세 Figma 정합 : feat : 카드 제목·설명 수정 바텀시트, 삭제 X 우상단 이동, 아이 상세 상단바 일과 제목 표시, 아이 홈 /today 전환()",
+            "Merge branch 'develop' of into develop"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.68",
       "project_type": "flutter",

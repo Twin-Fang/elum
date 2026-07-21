@@ -33,6 +33,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.starsCount,
     required this.editChipLabel,
     required this.childDetailTitle,
+    required this.promptPlaceholder,
+    required this.promptCaption,
+    required this.actionCardTitle,
   });
 
   static const fontFamily = 'TmoneyRoundWind';
@@ -134,6 +137,20 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 아이 상세 상단바의 일과 제목 (18/w800).
   /// childTileTitle(18/w400)과 굵기가 달라 별개 토큰이다.
   final TextStyle childDetailTitle;
+
+  // --- 일과 입력 (Figma 238:1846, 2026-07-22 덤프) ---
+
+  /// 일과 입력창 플레이스홀더 (16/w400 Pretendard, style_7YRXS7).
+  /// promptBody(16/w500)와 굵기가 달라 별개 토큰이다.
+  final TextStyle promptPlaceholder;
+
+  /// 일과 입력 하단 안내 "아이의 정보를 안전하게 보호해요" (12/w500 Pretendard, style_H3KJNZ).
+  /// caption(12/w400 TmoneyRoundWind)과 폰트·굵기가 달라 별개 토큰이다.
+  final TextStyle promptCaption;
+
+  /// 행동 카드 제목 (25/w800, style_GKEQ8F).
+  /// 순서 배지 숫자용 cardHeadline(30/w800)과 크기가 달라 별개 토큰이다.
+  final TextStyle actionCardTitle;
 
   static const standard = AppTypography(
     title: TextStyle(
@@ -292,6 +309,25 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.0,
     ),
+    promptPlaceholder: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      // Figma는 1em이지만 promptBody(1.1)와 다르면 힌트→입력 전환 때 높이가 튄다
+      height: 1.1,
+    ),
+    promptCaption: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      height: 1.1,
+    ),
+    actionCardTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 25,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
   );
 
   /// 표준 Material 슬롯에 매핑한다.
@@ -333,6 +369,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? starsCount,
     TextStyle? editChipLabel,
     TextStyle? childDetailTitle,
+    TextStyle? promptPlaceholder,
+    TextStyle? promptCaption,
+    TextStyle? actionCardTitle,
   }) {
     return AppTypography(
       title: title ?? this.title,
@@ -361,6 +400,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       starsCount: starsCount ?? this.starsCount,
       editChipLabel: editChipLabel ?? this.editChipLabel,
       childDetailTitle: childDetailTitle ?? this.childDetailTitle,
+      promptPlaceholder: promptPlaceholder ?? this.promptPlaceholder,
+      promptCaption: promptCaption ?? this.promptCaption,
+      actionCardTitle: actionCardTitle ?? this.actionCardTitle,
     );
   }
 
@@ -395,6 +437,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
       editChipLabel: TextStyle.lerp(editChipLabel, other.editChipLabel, t)!,
       childDetailTitle:
           TextStyle.lerp(childDetailTitle, other.childDetailTitle, t)!,
+      promptPlaceholder:
+          TextStyle.lerp(promptPlaceholder, other.promptPlaceholder, t)!,
+      promptCaption: TextStyle.lerp(promptCaption, other.promptCaption, t)!,
+      actionCardTitle:
+          TextStyle.lerp(actionCardTitle, other.actionCardTitle, t)!,
     );
   }
 }

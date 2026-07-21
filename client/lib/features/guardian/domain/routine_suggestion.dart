@@ -75,7 +75,7 @@ class RoutineSuggestion {
       prompt: '아이와 함께 병원에 가야 하는데 무서워하지 않게 준비하고 싶어요',
     ),
     RoutineSuggestion(
-      icon: '🍱',
+      icon: '🌱',
       text: '체험학습 준비',
       prompt: '체험학습 가는 날 아침에 챙길 것들을 순서대로 알려주고 싶어요',
     ),

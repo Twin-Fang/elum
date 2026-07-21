@@ -48,6 +48,12 @@ abstract final class AppMotion {
   /// 동시에 팍 뜨지 않게 `index * staggerDelayMs`로 지연을 준다.
   static const staggerDelayMs = 30;
 
+  /// 장면 연출(시작 화면 등)에서 요소 그룹이 순차 등장하는 간격.
+  ///
+  /// 리스트용 [staggerDelayMs](30ms)와 단위가 다르다 — 그룹 단위 안무는
+  /// 한 덩어리씩 "얹히는" 호흡이 필요해 간격이 더 길다.
+  static const sceneStagger = Duration(milliseconds: 120);
+
   /// 아동 화면 최소 전환 시간.
   ///
   /// 발달장애 아동은 급격한 전환의 인지 부하가 크다. 아동 모드 화면에서는

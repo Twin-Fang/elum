@@ -19,6 +19,7 @@ import '../../features/onboarding/presentation/name_screen.dart';
 import '../../features/onboarding/presentation/pin_screen.dart';
 import '../../features/onboarding/presentation/setup_done_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
+import 'app_transitions.dart';
 
 /// 앱 라우트 경로 상수. 문자열을 화면마다 반복해 적지 않는다.
 abstract final class Routes {
@@ -93,31 +94,37 @@ GoRouter createRouter({
       ),
 
       // --- 온보딩 ---
+      // 단계 진행은 수평 슬라이드 — 즉시 교체는 motion.md 금지 사항이다.
       GoRoute(
         path: Routes.onboardingName,
-        builder: (context, state) => const NameScreen(),
+        pageBuilder: (context, state) => slidePage(state, const NameScreen()),
       ),
       GoRoute(
         path: Routes.onboardingGoals,
-        builder: (context, state) => const GoalsScreen(),
+        pageBuilder: (context, state) => slidePage(state, const GoalsScreen()),
       ),
       GoRoute(
         path: Routes.onboardingCharacter,
-        builder: (context, state) => const CharacterScreen(),
+        pageBuilder: (context, state) =>
+            slidePage(state, const CharacterScreen()),
       ),
       GoRoute(
         path: Routes.onboardingPin,
-        builder: (context, state) => const PinScreen(),
+        pageBuilder: (context, state) => slidePage(state, const PinScreen()),
       ),
       GoRoute(
         path: Routes.onboardingDone,
-        builder: (context, state) => const SetupDoneScreen(),
+        pageBuilder: (context, state) =>
+            slidePage(state, const SetupDoneScreen()),
       ),
 
       // --- 보호자 모드 ---
+      // 온보딩 완료 → 홈은 맥락 전환이라 fade (motion.md "시작 화면 → 홈" 준용).
+      // 다른 경로에서 홈으로 올 때도 fade가 걸리는데, 즉시 교체보다 나으므로 허용.
       GoRoute(
         path: Routes.guardian,
-        builder: (context, state) => const GuardianHomeScreen(),
+        pageBuilder: (context, state) =>
+            fadePage(state, const GuardianHomeScreen()),
       ),
       GoRoute(
         path: Routes.routineInput,

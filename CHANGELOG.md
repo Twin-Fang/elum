@@ -1,7 +1,62 @@
 # Changelog
 
-**현재 버전:** 1.0.68  
-**마지막 업데이트:** 2026-07-21T16:15:46Z  
+**현재 버전:** 1.0.71  
+**마지막 업데이트:** 2026-07-21T16:39:02Z  
+
+---
+
+## [1.0.71] - 2026-07-21
+
+**PR:** #88  
+
+**새 기능**
+- 맞춤 설정 완료 화면에서 안내가 단계별로 이어집니다
+- 설정을 마치면 첫 일과 만들기로 바로 이동할 수 있어요
+- 아이가 할 일을 해내면 캐릭터가 별을 안고 나타납니다
+- 시작 화면과 온보딩 전환에 부드러운 등장 효과가 생겼어요
+
+**개선**
+- 일과가 없을 때 선택한 캐릭터가 알맞게 표시됩니다
+- 카드 제목과 화면 곳곳의 글자 크기·굵기를 시안에 맞췄어요
+- 할 일을 완료하면 체크 표시가 더 깔끔하게 채워집니다
+- 별 모으기 화면의 별 배치가 정돈됐어요
+
+---
+
+## [1.0.70] - 2026-07-21
+
+**PR:** #86  
+
+**새 기능**
+- 루틴 단계에 카드 제목(title) 필드 추가, description은 읽어주기용 문장으로 역할 명확화
+- 관리자 프롬프트 preview/test가 실제 호출과 동일한 조립 로직을 재사용하도록 통합
+- 이미지 프롬프트 조립을 GeminiRoutineImagePromptBuilder로 분리
+- 추가 질문 fallback을 전체 단위에서 목표별 개별 단위로 전환
+- 추가 질문 Gemini 호출을 JSON으로 전환하고 목표별 questions 배열 크기를 강제
+
+**버그 수정**
+- routine_step title 컬럼 누락에 대한 Flyway 마이그레이션 추가
+- Spring Boot 4 Flyway 자동 설정 누락 수정 및 공통 설정 추가
+- 최종 리뷰 반영 — fallbackQuestionItem 주석 정정, REVISE 프롬프트 title 필드 반영, 단계 title 스키마에 minLength 추가
+
+**문서**
+- 루틴 생성/추가 질문 API 문서를 이미지 재시도·목표별 질문 보장에 맞춰 갱신
+
+**기타**
+- Merge pull request from Twin-Fang/develop
+- Merge remote-tracking branch 'origin/develop' into develop
+- Merge remote-tracking branch 'origin/develop'
+- elum 버전 관리 : chore : v1.0.68 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )
+- elum 버전 관리 : chore : v1.0.67 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )
+- Merge branch 'main' into develop
+- 온보딩 애니메이션 개선 설계 : docs : 시작 화면 등장·idle 연출과 온보딩 페이지 전환 설계 문서 추가
+- 카드확인 화면 배경 블러 글로우 제거 : fix : RoutineFlowScaffold에 showAurora 플래그 추가하고 카드확인 화면에서 오로라 배경 비활성화
+- Merge pull request from Twin-Fang/develop
+- Merge branch 'develop' of into develop
+- elum 버전 관리 : chore : v1.0.65 릴리즈 버전 확정 및 릴리즈 문서 업데이트 (PR )
+- Merge remote-tracking branch 'origin/main' into develop
+- 카드 수정 바텀시트 추가 및 카드확인·아이 상세 Figma 정합 : feat : 카드 제목·설명 수정 바텀시트, 삭제 X 우상단 이동, 아이 상세 상단바 일과 제목 표시, 아이 홈 /today 전환()
+- Merge branch 'develop' of into develop
 
 ---
 

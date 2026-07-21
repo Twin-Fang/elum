@@ -1,3 +1,4 @@
+import '../../features/child/domain/reward_character.dart';
 import '../../features/onboarding/domain/character.dart';
 
 /// 에셋 경로 상수.
@@ -25,14 +26,6 @@ abstract final class AppAssets {
   static const setupDoneIcon = '$_images/setup_done_icon.svg';
 
   // --- 입력 필드 아이콘 ---
-
-  /// 아이 이름 입력 필드의 좌측 아이콘 (40×40).
-  /// 노란 원 배경(rgba(255,214,41,0.3))과 어린이 머리(#F3C500)가 SVG 안에 함께 있다.
-  /// Figma `온보딩_이름`(204:991)의 Group 5.
-  ///
-  /// 현재 [goalIcon]과 그림이 같지만 상수를 분리해 둔다. 쓰이는 자리가 다르고
-  /// (목표 칩 vs 이름 입력 필드) 한쪽만 교체될 수 있다.
-  static const inputFieldIconChildName = '$_images/icon_child_head.svg';
 
   /// 캐릭터 일러스트 (약 164×164). 카드 속 주인공으로도 쓰인다.
   static String character(CardCharacter character) => switch (character) {
@@ -76,6 +69,20 @@ abstract final class AppAssets {
 
   /// 보상 화면의 포포 일러스트 (117×104). Figma 334:4433.
   static const rewardPopo = '$_images/reward_popo.svg';
+
+  /// 보상 화면의 루미 일러스트 (124.7×114). Figma 309:4055.
+  static const rewardLumi = '$_images/reward_lumi.svg';
+
+  /// 보상 화면의 루루 일러스트 (122.7×97.6). Figma 343:4434.
+  static const rewardRuru = '$_images/reward_ruru.svg';
+
+  /// 보상 캐릭터 → 일러스트. switch라 새 캐릭터 추가 시 컴파일 에러로 잡힌다.
+  static String rewardCharacter(RewardCharacter character) =>
+      switch (character) {
+        RewardCharacter.lumi => rewardLumi,
+        RewardCharacter.popo => rewardPopo,
+        RewardCharacter.ruru => rewardRuru,
+      };
 
   /// 아이 홈 우측 상단 캐릭터 배지 (68×68). **테두리가 없는 맨 일러스트다.**
   @Deprecated('테두리가 빠져 있다. characterBadgeFramed를 쓴다.')
@@ -155,6 +162,9 @@ abstract final class AppAssets {
 
   /// 아이 홈 빈 상태의 시무룩한 루루 (164×164). Figma 382:3220 `루루_슬픔`.
   static const ruruSad = '$_images/ruru_sad.svg';
+
+  /// 아이 홈 빈 상태의 시무룩한 포포 (164×164). 여우 캐릭터를 골랐을 때 쓴다.
+  static const popoSad = '$_images/popo_sad.svg';
 
   /// 아이_별 화면 가운데 큰 별 (299×299 영역). Figma 364:8282 `Group 46`.
   static const starBig = '$_images/star_big.svg';

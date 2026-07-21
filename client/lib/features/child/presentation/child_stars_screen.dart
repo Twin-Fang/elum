@@ -18,6 +18,10 @@ class ChildStarsScreen extends ConsumerWidget {
 
   /// Figma 실측 — 주변 작은 별들의 (x, y, 크기, 불투명도).
   /// 393×852 기준 절대 좌표를 그대로 옮긴다 (Spacer 배분 금지 규칙).
+  /// Figma 절대 y는 상태바(~52)를 포함한다. SafeArea 안에서는 그만큼 빼야
+  /// 큰 별(182→130)·숫자·문구와 같은 기준으로 정렬된다.
+  static const _statusBarH = 52.0;
+
   static const _decoStars = [
     (x: 54.0, y: 407.0, size: 38.0, opacity: 0.4),
     (x: 321.0, y: 356.0, size: 36.0, opacity: 0.8),
@@ -55,7 +59,7 @@ class ChildStarsScreen extends ConsumerWidget {
               for (final (index, star) in _decoStars.indexed)
                 Positioned(
                   left: star.x.w,
-                  top: star.y.h,
+                  top: (star.y - _statusBarH).h,
                   child: Opacity(
                     opacity: star.opacity,
                     child: SvgPicture.asset(
