@@ -5,10 +5,35 @@ import '../../features/onboarding/domain/character.dart';
 /// 캐릭터 선택 상태의 배경·테두리 색 한 쌍.
 typedef SelectionColors = ({Color fill, Color border});
 
-/// 앱 전역 색상 토큰.
+/// 앱 전역 색상 토큰. **앱의 모든 색은 이 파일 하나에 모인다.**
 ///
 /// 값의 출처는 Figma `이룸` 파일이며, 상세 근거는 docs/design-system.md에 있다.
 /// 위젯에서 `Color(0x...)`를 직접 쓰지 말고 반드시 이 토큰을 경유한다.
+///
+/// ## 같은 색이어도 쓰임이 다르면 토큰을 나눈다 ⚠️
+///
+/// 값이 같다고 하나로 합치지 않는다. **합치면 한쪽만 바꿔야 할 때 못 바꾼다.**
+///
+/// ```dart
+/// catSelectedBorder: Color(0xFF9CADF1),  // 캐릭터 카드 선택 테두리
+/// homeCardTitle:     Color(0xFF9CADF1),  // 홈 카드 제목  ← 값이 같아도 따로
+/// ```
+///
+/// 디자이너가 홈 카드 제목만 바꿔도 캐릭터 선택은 그대로여야 한다.
+/// 중복 상수 몇 줄이 늘어나는 비용보다, 색이 엉뚱한 데까지 번지는 비용이 크다.
+///
+/// **판단 기준** — 두 자리가 "항상 같이 바뀌어야 하는가?"
+/// 예(같은 의미)면 공유하고, 아니면(우연히 같은 값이면) 나눈다.
+///
+/// ## 토큰을 추가할 때 고칠 5곳
+///
+/// 하나라도 빠지면 조용히 어긋난다. `lerp` 누락은 테마 전환 때만 드러난다.
+///
+/// 1. 필드 선언 (용도 주석 + Figma 노드 ID)
+/// 2. 생성자 `required this.x`
+/// 3. [light] 인스턴스 값
+/// 4. [copyWith]
+/// 5. [lerp]
 @immutable
 class AppColors extends ThemeExtension<AppColors> {
   const AppColors({
@@ -40,6 +65,10 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.splashHill,
     required this.splashHillGlow,
     required this.splashTitle,
+    required this.homeCardGradientStart,
+    required this.homeCardGradientEnd,
+    required this.homeCardTitle,
+    required this.homeCardShadow,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -103,6 +132,18 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 시작 화면 강조 문구색
   final Color splashTitle;
 
+  // 보호자 홈 (Figma `보호자_홈` 217:2655)
+  /// "새로운 일과 만들기" 카드 그라데이션 시작색 (134deg)
+  final Color homeCardGradientStart;
+  /// 같은 그라데이션 끝색
+  final Color homeCardGradientEnd;
+  /// 같은 카드의 제목 문구색.
+  /// catSelectedBorder와 값이 같지만(#9CADF1) 쓰임이 달라 분리한다 —
+  /// 캐릭터 선택 테두리가 바뀌어도 홈 카드는 따라가면 안 된다.
+  final Color homeCardTitle;
+  /// 같은 카드의 그림자 (Figma 0px 4px 10px rgba(35,13,96,0.1))
+  final Color homeCardShadow;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -132,6 +173,10 @@ class AppColors extends ThemeExtension<AppColors> {
     splashHill: Color(0xFFFFD629),
     splashHillGlow: Color(0xFFFFF2BB),
     splashTitle: Color(0xFF230D60),
+    homeCardGradientStart: Color(0xFFF9F4FF),
+    homeCardGradientEnd: Color(0xFFE9EEFF),
+    homeCardTitle: Color(0xFF9CADF1),
+    homeCardShadow: Color(0x1A230D60), // rgba(35,13,96,0.1)
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -173,6 +218,10 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? splashHill,
     Color? splashHillGlow,
     Color? splashTitle,
+    Color? homeCardGradientStart,
+    Color? homeCardGradientEnd,
+    Color? homeCardTitle,
+    Color? homeCardShadow,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -203,6 +252,11 @@ class AppColors extends ThemeExtension<AppColors> {
       splashHill: splashHill ?? this.splashHill,
       splashHillGlow: splashHillGlow ?? this.splashHillGlow,
       splashTitle: splashTitle ?? this.splashTitle,
+      homeCardGradientStart:
+          homeCardGradientStart ?? this.homeCardGradientStart,
+      homeCardGradientEnd: homeCardGradientEnd ?? this.homeCardGradientEnd,
+      homeCardTitle: homeCardTitle ?? this.homeCardTitle,
+      homeCardShadow: homeCardShadow ?? this.homeCardShadow,
     );
   }
 
@@ -243,6 +297,12 @@ class AppColors extends ThemeExtension<AppColors> {
       splashHill: Color.lerp(splashHill, other.splashHill, t)!,
       splashHillGlow: Color.lerp(splashHillGlow, other.splashHillGlow, t)!,
       splashTitle: Color.lerp(splashTitle, other.splashTitle, t)!,
+      homeCardGradientStart: Color.lerp(
+          homeCardGradientStart, other.homeCardGradientStart, t)!,
+      homeCardGradientEnd:
+          Color.lerp(homeCardGradientEnd, other.homeCardGradientEnd, t)!,
+      homeCardTitle: Color.lerp(homeCardTitle, other.homeCardTitle, t)!,
+      homeCardShadow: Color.lerp(homeCardShadow, other.homeCardShadow, t)!,
     );
   }
 }

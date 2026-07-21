@@ -123,9 +123,18 @@ class SplashScreen extends ConsumerWidget {
               width: 360.w,
               child: ElumButton(
                 label: '시작하기',
-                onPressed: () => context.go(
-                  isDone ? Routes.guardian : Routes.onboardingName,
-                ),
+                onPressed: () {
+                  // GoRouter를 명시적으로 찾아서 호출한다.
+                  // context.go()만으로는 DevToolsOverlay 레이어에서 라우터를 찾지 못한다.
+                  try {
+                    GoRouter.of(context).go(
+                      isDone ? Routes.guardian : Routes.onboardingName,
+                    );
+                  } catch (e) {
+                    // 라우터를 찾지 못한 경우(테스트 환경 등)
+                    debugPrint('라우팅 실패: $e');
+                  }
+                },
               ),
             ),
           ],

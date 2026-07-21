@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/dev/dev_tools_overlay.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/auth/data/auth_repository.dart';
 import 'features/onboarding/application/onboarding_notifier.dart';
 
 class ElumApp extends ConsumerStatefulWidget {
@@ -21,6 +22,8 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     // 온보딩 미완료 상태로 보호자·아동 화면에 들어오는 것을 막는다
     isOnboardingCompleted: () =>
         ref.read(localStorageProvider).isOnboardingCompleted,
+    // 토큰이 없으면 시작 화면으로 되돌린다 — 회원삭제 후 재진입을 막는다
+    hasToken: () => ref.read(authRepositoryProvider).hasToken,
   );
 
   @override

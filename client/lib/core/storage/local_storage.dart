@@ -24,6 +24,18 @@ abstract interface class LocalStorage {
   Future<void> setPin(String v);
   Future<String?> getPin();
 
+  // --- 인증 ---
+  // Figma에 로그인 화면이 없어 아이 이름을 아이디로 쓴다 (이슈 #19).
+  // 자격증명은 nickname + 고정 비밀번호에서 나오므로 따로 보관하지 않는다.
+  // 원문(rawInputText)은 여전히 저장하지 않는다 (docs 원칙 5번).
+
+  /// 서버 accessToken. 만료(1시간)되면 재발급해 덮어쓴다.
+  String? get accessToken;
+  Future<void> setAccessToken(String v);
+
+  /// 토큰을 지운다. 로그아웃·계정 전환에 쓴다.
+  Future<void> clearAccessToken();
+
   /// 저장된 온보딩 결과를 전부 지운다. **개발·테스트 전용.**
   ///
   /// 일부만 지우면 어중간한 상태가 남아 더 헷갈리므로 5개 값을 모두 비운다.
@@ -43,6 +55,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCharacter = 'cardCharacter';
   static const _kCompleted = 'onboardingCompleted';
   static const _kPin = 'guardianPin';
+  static const _kAccessToken = 'accessToken';
 
   static Future<LocalStorage> create() async {
     return SharedPrefsStorage(await SharedPreferences.getInstance());
@@ -90,10 +103,29 @@ class SharedPrefsStorage implements LocalStorage {
   Future<String?> getPin() async => _prefs.getString(_kPin);
 
   @override
+  String? get accessToken => _prefs.getString(_kAccessToken);
+
+  @override
+  Future<void> setAccessToken(String v) => _prefs.setString(_kAccessToken, v);
+
+  @override
+  Future<void> clearAccessToken() => _prefs.remove(_kAccessToken);
+
+  @override
   Future<void> clearAll() async {
     // 앱이 쓰는 키만 지운다. _prefs.clear()는 다른 패키지가 저장한 값까지
     // 날려 원인 모를 오작동을 만든다.
-    for (final key in [_kNickname, _kGoals, _kCharacter, _kCompleted, _kPin]) {
+    //
+    // 토큰도 함께 지운다 — 이것이 곧 로그아웃이다. 온보딩 값만 지우고 토큰이
+    // 남으면 이전 계정의 일과가 새 이름과 섞여 보인다. (이슈 #13)
+    for (final key in [
+      _kNickname,
+      _kGoals,
+      _kCharacter,
+      _kCompleted,
+      _kPin,
+      _kAccessToken,
+    ]) {
       await _prefs.remove(key);
     }
   }
@@ -109,6 +141,7 @@ class InMemoryStorage implements LocalStorage {
   String? _character;
   String? _pin;
   bool _completed;
+  String? _accessToken;
 
   @override
   String? get nickname => _nickname;
@@ -141,11 +174,21 @@ class InMemoryStorage implements LocalStorage {
   Future<String?> getPin() async => _pin;
 
   @override
+  String? get accessToken => _accessToken;
+
+  @override
+  Future<void> setAccessToken(String v) async => _accessToken = v;
+
+  @override
+  Future<void> clearAccessToken() async => _accessToken = null;
+
+  @override
   Future<void> clearAll() async {
     _nickname = null;
     _goals = const [];
     _character = null;
     _pin = null;
     _completed = false;
+    _accessToken = null;
   }
 }

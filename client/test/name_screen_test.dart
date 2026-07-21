@@ -2,6 +2,7 @@ import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
+import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/onboarding/presentation/name_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +21,8 @@ import 'helpers/test_storage.dart';
 /// 두 프레임은 같은 화면의 상태 전이다. 별도 화면을 만들지 않고
 /// 상태가 올바르게 갈리는지를 여기서 고정한다.
 void main() {
-  Widget buildSubject() {
+  /// 이름 입력 = 로그인이다. 실서버를 타지 않도록 결과를 정해 넣는다. (이슈 #19)
+  Widget buildSubject({AuthOutcome outcome = AuthOutcome.created}) {
     final router = GoRouter(
       initialLocation: Routes.onboardingName,
       routes: [
@@ -32,11 +34,18 @@ void main() {
           path: Routes.onboardingGoals,
           builder: (context, state) => const Scaffold(body: Text('목표 화면')),
         ),
+        GoRoute(
+          path: Routes.guardian,
+          builder: (context, state) => const Scaffold(body: Text('보호자 홈')),
+        ),
       ],
     );
 
     return ProviderScope(
-      overrides: [testStorageOverride()],
+      overrides: [
+        testStorageOverride(),
+        authRepositoryProvider.overrideWithValue(_FakeAuth(outcome)),
+      ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
         builder: (context, child) => MaterialApp.router(
@@ -143,5 +152,51 @@ void main() {
 
       expect(find.text('목표 화면'), findsOneWidget);
     });
+
+    testWidgets('이미 있는 이름이면 보호자 홈으로 바로 간다', (tester) async {
+      // 아이 이름이 곧 아이디다. 기존 계정이면 온보딩을 다시 받지 않는다.
+      await tester.pumpWidget(buildSubject(outcome: AuthOutcome.restored));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '하늘이별');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('다음'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('보호자 홈'), findsOneWidget);
+    });
+
+    testWidgets('로그인에 실패하면 화면에 머물고 에러 코드를 보여준다', (tester) async {
+      await tester.pumpWidget(buildSubject(outcome: AuthOutcome.failed));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '하늘이');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('다음'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('목표 화면'), findsNothing);
+      // 제보를 추적하려면 화면에 식별자가 있어야 한다
+      expect(find.textContaining('E-AUTH'), findsOneWidget);
+    });
   });
+}
+
+/// 네트워크를 타지 않는 인증 대역.
+class _FakeAuth implements AuthRepository {
+  _FakeAuth(this.outcome);
+
+  final AuthOutcome outcome;
+
+  @override
+  Future<AuthOutcome> signInWithName(String childName) async => outcome;
+
+  @override
+  bool get hasToken => outcome != AuthOutcome.failed;
+
+  @override
+  Future<String?> reauthenticate() async => null;
+
+  @override
+  Future<void> deleteAccount() async {}
 }
