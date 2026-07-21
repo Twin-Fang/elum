@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>이룸 관리자 로그인</title>
+</head>
+<body>
+<h1>이룸 관리자 로그인</h1>
+<form th:action="@{/admin/login}" method="post">
+  <div>
+    <label for="username">아이디</label>
+    <input type="text" id="username" name="username" required>
+  </div>
+  <div>
+    <label for="password">비밀번호</label>
+    <input type="password" id="password" name="password" required>
+  </div>
+  <button type="submit">로그인</button>
+</form>
+</body>
+</html>
