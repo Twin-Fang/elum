@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T09:15:03Z",
-    "currentVersion": "1.0.44",
+    "lastUpdated": "2026-07-21T09:32:00Z",
+    "currentVersion": "1.0.45",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 17
+    "totalReleases": 18
   },
   "releases": [
+    {
+      "version": "1.0.45",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 43,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 추천 일과를 고르면 자연스러운 문장이 입력창에 채워집니다\n  * 상황에 더 맞는 추천 일과가 표시됩니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "추천 일과를 고르면 자연스러운 문장이 입력창에 채워집니다",
+            "상황에 더 맞는 추천 일과가 표시됩니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.44",
       "project_type": "flutter",
