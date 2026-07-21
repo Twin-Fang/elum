@@ -132,7 +132,8 @@ class AuthRepository {
     try {
       await _dio.delete<dynamic>('/api/member/me');
     } catch (e) {
-      // 서버에 삭제 API가 아직 없을 수 있다(404). 로컬 정리는 계속한다.
+      // 서버 삭제가 실패해도 로컬 정리는 계속한다. 토큰이 남으면 지워진 계정으로
+      // 계속 401을 맞아 앱이 이상해진다.
       debugPrint('[auth] 서버 회원삭제 실패, 로컬만 정리한다: $e');
     }
     await _storage.clearAll();
