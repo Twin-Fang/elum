@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T21:18:42Z",
-    "currentVersion": "1.0.87",
+    "lastUpdated": "2026-07-21T21:21:49Z",
+    "currentVersion": "1.0.88",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 55
+    "totalReleases": 56
   },
   "releases": [
+    {
+      "version": "1.0.88",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 121,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **기타**\n  * 내부 배포 프로세스 문서를 정리했습니다.",
+      "parsed_changes": {
+        "기타": {
+          "title": "기타",
+          "items": [
+            "내부 배포 프로세스 문서를 정리했습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.87",
       "project_type": "flutter",
