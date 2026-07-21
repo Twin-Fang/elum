@@ -5,8 +5,6 @@ import com.chuseok22.elumserver.ai.core.ChildProfileInput;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionAiInput;
-import com.chuseok22.elumserver.ai.core.RoutineReviseAiInput;
-import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -58,30 +56,6 @@ public class GeminiTextClient {
     return toJson(input);
   }
 
-  public GeminiGenerateContentResponse revise(
-    String previousTitle, List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
-    String nickname, Set<SupportGoal> supportGoals
-  ) {
-    String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_REVISE_PREFIX);
-    String userContent = buildReviseRoutineUserContent(
-      previousTitle, previousSteps, maskedFeedback, nickname, supportGoals
-    );
-    return callGenerateContent(systemPrompt, userContent);
-  }
-
-  public String buildReviseRoutineUserContent(
-    String previousTitle, List<RoutineStepDraft.StepDraft> previousSteps, String feedback,
-    String nickname, Set<SupportGoal> supportGoals
-  ) {
-    RoutineReviseAiInput input = new RoutineReviseAiInput(
-      "REVISE_ROUTINE",
-      new RoutineReviseAiInput.PreviousRoutineInput(previousTitle, previousSteps),
-      feedback,
-      new ChildProfileInput(nickname, supportGoals == null ? Set.of() : supportGoals)
-    );
-    return toJson(input);
-  }
-
   // 도움 목표 기반 추가 질문 생성. supportGoals에 PREPARE_ITEMS/PREPARE_NEW가 없으면
   // 호출하는 쪽(RoutineAiPipeline)에서 아예 이 메서드를 부르지 않는다.
   public GeminiGenerateContentResponse generateQuestion(
@@ -104,15 +78,6 @@ public class GeminiTextClient {
   // 저장 전 미리보기/저장된 값 테스트를 동일한 호출 경로로 지원한다.
   public GeminiGenerateContentResponse generateForTest(String systemPrompt, String sampleInput) {
     String userContent = buildCreateRoutineUserContent(sampleInput, null, Set.of(), List.of());
-    return callGenerateContent(systemPrompt, userContent);
-  }
-
-  // 관리자 테스트 전용: 관리자 화면에서 입력한 이전 제목/단계를 그대로 전달한다.
-  public GeminiGenerateContentResponse reviseForTest(
-    String systemPrompt, String previousTitle, List<RoutineStepDraft.StepDraft> previousSteps,
-    String sampleFeedback
-  ) {
-    String userContent = buildReviseRoutineUserContent(previousTitle, previousSteps, sampleFeedback, null, Set.of());
     return callGenerateContent(systemPrompt, userContent);
   }
 

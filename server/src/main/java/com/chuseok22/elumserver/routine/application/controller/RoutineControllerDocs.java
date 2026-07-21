@@ -3,7 +3,6 @@ package com.chuseok22.elumserver.routine.application.controller;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineReviseRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
@@ -204,40 +203,6 @@ public interface RoutineControllerDocs {
     )
   })
   ResponseEntity<byte[]> getStepImage(Authentication authentication, String routineId, String stepId);
-
-  @Operation(
-    summary = "일과 재생성(피드백)",
-    description = """
-      부모의 자연어 피드백을 받아 기존 단계+피드백을 컨텍스트로 AI 파이프라인을 다시 실행합니다.
-      기존 단계는 전부 교체되며, CONFIRMED 상태였더라도 다시 PENDING_REVIEW로 전환됩니다.
-      """
-  )
-  @SecurityRequirement(name = "bearerAuth")
-  @ApiResponses({
-    @ApiResponse(
-      responseCode = "200",
-      description = "재생성 성공",
-      content = @Content(schema = @Schema(implementation = RoutineResponse.class))
-    ),
-    @ApiResponse(
-      responseCode = "403",
-      description = "본인 소유가 아닌 일과에 접근",
-      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-    ),
-    @ApiResponse(
-      responseCode = "404",
-      description = "존재하지 않는 일과",
-      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-    ),
-    @ApiResponse(
-      responseCode = "502",
-      description = "Gemini 생성 실패 또는 10단계 초과",
-      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-    )
-  })
-  ResponseEntity<RoutineResponse> revise(
-    Authentication authentication, String routineId, RoutineReviseRequest request
-  );
 
   @Operation(
     summary = "일과 승인",

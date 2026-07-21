@@ -20,7 +20,6 @@ import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -298,30 +297,5 @@ class RoutineAiPipelineTest {
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_AI_GENERATION_FAILED));
     verify(geminiImageClient, times(2)).generateImage(any(), any());
-  }
-
-  @Test
-  @DisplayName("루틴 수정 시 설명이 바뀌지 않은 단계는 이미지를 다시 생성하지 않고 기존 경로를 재사용한다")
-  void generateForRevise_unchangedStep_reusesExistingImagePath() {
-    String json = "{\"title\":\"학교에 갈 준비를 해요\",\"steps\":["
-      + "{\"order\":1,\"title\":\"침대에서 일어나요\",\"description\":\"침대에서 일어나요.\"},"
-      + "{\"order\":2,\"title\":\"가방을 챙겨요\",\"description\":\"가방을 챙겨요.\"}]}";
-    when(geminiTextClient.revise(any(), any(), any(), any(), any())).thenReturn(textResponse(json));
-    when(geminiImageClient.generateImage(eq("가방을 챙겨요."), any()))
-      .thenReturn(new GeminiImageClient.GeneratedImage(new byte[]{1, 2, 3}, "png"));
-    when(routineImageStorage.save(any(), eq(2), any())).thenReturn("data/routine-images/batch/2.png");
-
-    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForRevise(
-      "학교에 갈 준비를 해요",
-      List.of(new com.chuseok22.elumserver.ai.core.RoutineStepDraft.StepDraft(1, "침대에서 일어나요", "침대에서 일어나요.")),
-      Map.of(1, "data/routine-images/batch/1.png"),
-      "가방을 챙기는 단계를 추가해 주세요.", "하늘이", Set.of(), null
-    );
-
-    assertThat(result.steps()).hasSize(2);
-    assertThat(result.steps().get(0).imagePath()).isEqualTo("data/routine-images/batch/1.png");
-    assertThat(result.steps().get(1).imagePath()).isEqualTo("data/routine-images/batch/2.png");
-    verify(geminiImageClient, org.mockito.Mockito.never()).generateImage(eq("침대에서 일어나요."), any());
-    verify(geminiImageClient).generateImage(eq("가방을 챙겨요."), any());
   }
 }
