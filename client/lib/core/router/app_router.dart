@@ -34,24 +34,31 @@ abstract final class Routes {
 
 /// go_router 설정.
 ///
-/// **redirect 규칙**: 온보딩을 마치지 않았는데 보호자·아동 화면으로 들어오면
-/// 온보딩 첫 단계로 되돌린다. 딥링크나 중간 진입을 막는다.
+/// **redirect 규칙**: 토큰이 없으면 보호자·아동 화면에 들어갈 수 없다.
+/// 토큰이 인증의 유일한 증거이므로 온보딩 완료 플래그만으로는 부족하다 —
+/// 회원삭제로 토큰이 날아간 상태를 잡지 못한다. (이슈 #19)
+///
+/// 보호 화면에 토큰 없이 접근하면 **시작 화면**으로 되돌린다.
 /// 온보딩 단계 사이의 진행은 각 화면 CTA가 막으므로 여기서 관여하지 않는다.
 ///
-/// [isOnboardingCompleted]를 넘기지 않으면 가드가 비활성화된다(테스트용).
-GoRouter createRouter({bool Function()? isOnboardingCompleted}) {
+/// 콜백을 넘기지 않으면 가드가 비활성화된다(테스트용).
+GoRouter createRouter({
+  bool Function()? isOnboardingCompleted,
+  bool Function()? hasToken,
+}) {
   return GoRouter(
     initialLocation: Routes.splash,
     redirect: (context, state) {
-      // 콜백이 없으면 가드하지 않는다
-      final isDone = isOnboardingCompleted?.call() ?? true;
-      if (isDone) return null;
-
       final path = state.matchedLocation;
-      final needsOnboarding =
+      final isProtected =
           path.startsWith(Routes.guardian) || path.startsWith(Routes.child);
+      if (!isProtected) return null;
 
-      return needsOnboarding ? Routes.onboardingName : null;
+      // 토큰이 없으면 아무것도 조회할 수 없다. 시작 화면부터 다시 시작한다.
+      if (hasToken != null && !hasToken()) return Routes.splash;
+
+      final isDone = isOnboardingCompleted?.call() ?? true;
+      return isDone ? null : Routes.onboardingName;
     },
     routes: [
       GoRoute(

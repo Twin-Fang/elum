@@ -9,6 +9,7 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_text_field.dart';
+import '../../auth/data/auth_repository.dart';
 import '../application/onboarding_notifier.dart';
 
 /// Figma `온보딩_이름` — 아이 호칭을 받는다.
@@ -21,6 +22,12 @@ class NameScreen extends ConsumerStatefulWidget {
 
 class _NameScreenState extends ConsumerState<NameScreen> {
   late final TextEditingController _controller;
+
+  /// 로그인 진행 중. 중복 탭을 막는다.
+  bool _isSubmitting = false;
+
+  /// 실패 안내. 에러 코드를 함께 보여줘 제보를 추적할 수 있게 한다.
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -37,17 +44,51 @@ class _NameScreenState extends ConsumerState<NameScreen> {
     super.dispose();
   }
 
+  /// 이름으로 로그인한다. 아이 이름이 곧 아이디다 (이슈 #19).
+  ///
+  /// 새 이름이면 계정을 만들고 온보딩을 계속하고, 이미 있는 이름이면
+  /// 기존 계정으로 복귀해 보호자 홈으로 바로 보낸다.
+  Future<void> _submit() async {
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
+    final name = ref.read(onboardingProvider).childNickname;
+    final outcome =
+        await ref.read(authRepositoryProvider).signInWithName(name);
+
+    if (!mounted) return;
+
+    switch (outcome) {
+      case AuthOutcome.created:
+        // 새 계정 — 온보딩을 이어서 한다
+        context.push(Routes.onboardingGoals);
+      case AuthOutcome.restored:
+        // 기존 계정 — 이미 설정을 마친 사용자다. 홈으로 바로 보낸다.
+        await ref.read(onboardingProvider.notifier).restoreCompleted(name);
+        if (!mounted) return;
+        context.go(Routes.guardian);
+      case AuthOutcome.failed:
+        setState(() {
+          // 서버가 이름을 4자 이상으로 제한한다. 그 외 실패도 여기로 온다.
+          _errorMessage = '이름으로 시작할 수 없어요. 4자 이상으로 다시 입력해주세요. (E-AUTH)';
+        });
+    }
+
+    if (mounted) setState(() => _isSubmitting = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(onboardingProvider);
+    final canSubmit = profile.canProceedFromName && !_isSubmitting;
 
     return ElumScaffold(
       bottomButton: ElumButton(
-        label: '다음',
+        label: _isSubmitting ? '확인 중...' : '다음',
         // 진행 조건은 모델이 안다 — 화면마다 재구현하지 않는다
-        onPressed: profile.canProceedFromName
-            ? () => context.push(Routes.onboardingGoals)
-            : null,
+        onPressed: canSubmit ? _submit : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -64,6 +105,16 @@ class _NameScreenState extends ConsumerState<NameScreen> {
             leadingIconAssetPath: AppAssets.inputFieldIconChildName,
             onChanged: ref.read(onboardingProvider.notifier).setNickname,
           ),
+          if (_errorMessage != null) ...[
+            SizedBox(height: context.space.md),
+            Text(
+              _errorMessage!,
+              // 아동도 볼 수 있는 화면이라 빨강·경고 아이콘을 쓰지 않는다
+              style: context.typo.body.copyWith(
+                color: context.colors.textSecondary,
+              ),
+            ),
+          ],
         ],
       ),
     );

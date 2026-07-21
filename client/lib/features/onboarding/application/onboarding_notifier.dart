@@ -47,6 +47,22 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
     state = state.copyWith(guardianPin: pin);
   }
 
+  /// 기존 계정으로 복귀했을 때 온보딩을 건너뛴다.
+  ///
+  /// 이미 서버에 계정이 있는 이름이면 설정을 다시 받을 이유가 없다.
+  /// 이름만 저장하고 완료 표시를 남겨 라우터 가드를 통과시킨다. (이슈 #19)
+  Future<void> restoreCompleted(String childName) async {
+    state = state.copyWith(childNickname: childName);
+
+    final storage = ref.read(localStorageProvider);
+    try {
+      await storage.setNickname(childName);
+      await storage.setOnboardingCompleted(true);
+    } catch (e) {
+      debugPrint('[onboarding] 복귀 저장 실패, 진행은 계속: $e');
+    }
+  }
+
   /// 온보딩 완료 — 수집한 4개 값을 로컬에 저장한다.
   /// 저장 실패가 데모를 막으면 안 되므로 예외를 삼키고 진행한다.
   Future<void> complete() async {

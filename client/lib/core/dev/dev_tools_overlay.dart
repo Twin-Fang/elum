@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/auth/data/auth_repository.dart';
 import '../../features/onboarding/application/onboarding_notifier.dart';
 import '../config/app_config.dart';
 import '../router/app_router.dart';
@@ -211,7 +212,7 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
       _DevView.logs => '로그',
       _DevView.status => '현재 상태',
       _DevView.navigate => '화면 이동',
-      _DevView.confirmReset => '온보딩을 초기화할까요?',
+      _DevView.confirmReset => '회원을 삭제할까요?',
     };
 
     return Padding(
@@ -272,9 +273,9 @@ class _DevMenu extends StatelessWidget {
       shrinkWrap: true,
       children: [
         _Tile(
-          icon: Icons.refresh,
-          label: '온보딩 초기화',
-          subtitle: '저장값을 지우고 시작 화면부터 다시',
+          icon: Icons.person_remove_outlined,
+          label: '회원삭제',
+          subtitle: '계정과 저장값을 지우고 처음부터',
           onTap: () => onSelect(_DevView.confirmReset),
         ),
         _Tile(
@@ -301,7 +302,7 @@ class _DevMenu extends StatelessWidget {
 
 }
 
-/// 초기화 확인 — 실수로 눌러 저장값이 날아가지 않도록 한 단계 둔다.
+/// 회원삭제 확인 — 실수로 눌러 계정이 날아가지 않도록 한 단계 둔다.
 ///
 /// `showDialog`를 쓰지 않는다. 이 위젯도 Navigator보다 위에 있어
 /// 다이얼로그를 띄울 수 없다. 시트 안에서 화면만 바꾼다.
@@ -324,7 +325,7 @@ class _ConfirmResetView extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            '저장된 호칭·목표·캐릭터·PIN이\n모두 지워집니다.',
+            '계정과 저장된 호칭·목표·캐릭터·PIN이\n모두 지워집니다.\n같은 이름을 넣어도 새로 시작합니다.',
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -340,14 +341,15 @@ class _ConfirmResetView extends ConsumerWidget {
               Expanded(
                 child: FilledButton(
                   onPressed: () async {
-                    await ref.read(localStorageProvider).clearAll();
+                    // 서버 계정까지 지운다. 서버가 실패해도 로컬은 반드시 지워진다.
+                    await ref.read(authRepositoryProvider).deleteAccount();
                     // 메모리 상태도 비운다 — 저장소만 지우면 화면이 이전 값을 들고 있다
                     ref.invalidate(onboardingProvider);
                     if (!context.mounted) return;
                     onDone();
                     onNavigate(Routes.splash);
                   },
-                  child: const Text('초기화'),
+                  child: const Text('회원삭제'),
                 ),
               ),
             ],
