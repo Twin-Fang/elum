@@ -6,7 +6,6 @@ public record SensitiveInfoCheckResult(
   boolean checked,
   boolean hasSensitiveInfo,
   List<String> categories,
-  String reason,
   String sanitizedText
 ) {
 

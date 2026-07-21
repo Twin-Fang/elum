@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.ai.application.service;
 
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckContent;
+import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckContent.Detection;
 import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.ai.infrastructure.client.LocalLlmChatRequest;
 import com.chuseok22.elumserver.ai.infrastructure.client.LocalLlmChatResponse;
@@ -9,6 +10,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.LocalLlmClient;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
@@ -32,19 +34,17 @@ public class SensitiveInfoGuardService {
 
   public SensitiveInfoCheckResult check(String text) {
     if (!localLlmProperties.enabled()) {
-      return passThrough("local-llm.enabled=false로 설정되어 검증을 생략함", text);
+      return passThrough(text);
     }
 
     String systemPrompt = promptTemplateService.getContent(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
     try {
       SensitiveInfoCheckContent content = callAndParse(systemPrompt, text);
-      return new SensitiveInfoCheckResult(
-        true, content.hasSensitiveInfo(), content.categories(), content.reason(), content.sanitizedText()
-      );
+      return toResult(text, content);
     } catch (Exception e) {
       // 예외 메시지에는 검사 대상 원문 일부가 포함될 수 있으므로 예외 타입만 로그로 남긴다.
       log.warn("로컬 LLM 민감정보 검증 실패, fail-open으로 통과 처리함: {}", e.getClass().getSimpleName());
-      return passThrough("검증 실패로 통과 처리됨", text);
+      return passThrough(text);
     }
   }
 
@@ -54,9 +54,7 @@ public class SensitiveInfoGuardService {
   public SensitiveInfoCheckResult checkForTest(String systemPrompt, String text) {
     try {
       SensitiveInfoCheckContent content = callAndParse(systemPrompt, text);
-      return new SensitiveInfoCheckResult(
-        true, content.hasSensitiveInfo(), content.categories(), content.reason(), content.sanitizedText()
-      );
+      return toResult(text, content);
     } catch (Exception e) {
       log.warn("[관리자 테스트] 로컬 LLM 민감정보 검증 실패: {}", e.getClass().getSimpleName());
       throw new CustomException(ErrorCode.PROMPT_TEST_LOCAL_LLM_FAILED);
@@ -75,36 +73,68 @@ public class SensitiveInfoGuardService {
 
     SensitiveInfoCheckContent content = objectMapper.readValue(response.content(), SensitiveInfoCheckContent.class);
 
-    // hasSensitiveInfo는 Boolean(박싱 타입)으로 선언해 필드 누락 시 Jackson이 false로
-    // 임의 채우지 않고 null로 남도록 했다 — 그래야 스키마 위반을 놓치지 않는다.
-    if (content.categories() == null || content.reason() == null
-      || content.hasSensitiveInfo() == null || content.sanitizedText() == null) {
+    // detections 필드 자체가 없으면(null) 스키마 위반으로 간주한다. 빈 배열([])은
+    // "민감정보 없음"이라는 정상 응답이므로 통과시킨다.
+    if (content.detections() == null) {
       throw new IllegalStateException("로컬 LLM 응답이 JSON Schema를 따르지 않음");
     }
 
     return content;
   }
 
-  private String wrapAsData(String text) {
-    return "<text>" + text + "</text>";
+  // detections를 카테고리 요약과 마스킹된 텍스트로 변환한다. matchedText가 원문에 없으면
+  // (모델이 값을 정규화했거나 실제로 존재하지 않는 값을 만들어낸 경우) 해당 항목만 조용히
+  // 건너뛴다 — 전체 요청을 실패 처리하지 않는다.
+  private SensitiveInfoCheckResult toResult(String originalText, SensitiveInfoCheckContent content) {
+    List<Detection> detections = content.detections();
+
+    List<String> categories = detections.stream()
+      .map(Detection::category)
+      .distinct()
+      .toList();
+
+    String sanitizedText = originalText;
+    for (Detection detection : detections) {
+      if (sanitizedText.contains(detection.matchedText())) {
+        sanitizedText = sanitizedText.replace(detection.matchedText(), "<" + detection.category() + ">");
+      }
+    }
+
+    return new SensitiveInfoCheckResult(true, !detections.isEmpty(), categories, sanitizedText);
+  }
+
+  private String wrapAsData(String text) throws JsonProcessingException {
+    return objectMapper.writeValueAsString(Map.of("text", text));
   }
 
   // fail-open 시 마스킹 없이 원문을 그대로 sanitizedText로 반환한다 — 검증 실패를 이유로
   // 서비스를 막지 않되, 이 경우 마스킹 없이 원문이 그대로 다음 단계(외부 AI)로 전달된다.
-  private SensitiveInfoCheckResult passThrough(String reason, String originalText) {
-    return new SensitiveInfoCheckResult(false, false, List.of(), reason, originalText);
+  private SensitiveInfoCheckResult passThrough(String originalText) {
+    return new SensitiveInfoCheckResult(false, false, List.of(), originalText);
   }
 
   private Map<String, Object> responseFormat() {
     return Map.of(
       "type", "object",
+      "additionalProperties", false,
       "properties", Map.of(
-        "hasSensitiveInfo", Map.of("type", "boolean"),
-        "categories", Map.of("type", "array", "items", Map.of("type", "string")),
-        "reason", Map.of("type", "string"),
-        "sanitizedText", Map.of("type", "string")
+        "detections", Map.of(
+          "type", "array",
+          "items", Map.of(
+            "type", "object",
+            "additionalProperties", false,
+            "properties", Map.of(
+              "category", Map.of(
+                "type", "string",
+                "enum", List.of("이름", "전화번호", "주소", "이메일", "주민등록번호", "계좌번호", "생년월일", "진단명")
+              ),
+              "matchedText", Map.of("type", "string", "minLength", 1)
+            ),
+            "required", List.of("category", "matchedText")
+          )
+        )
       ),
-      "required", List.of("hasSensitiveInfo", "categories", "reason", "sanitizedText")
+      "required", List.of("detections")
     );
   }
 }
