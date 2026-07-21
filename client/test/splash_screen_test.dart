@@ -147,24 +147,27 @@ void main() {
   });
 
   group('idle 모션', () {
-    testWidgets('병아리 숨쉬기·별 반짝임이 반복된다', (tester) async {
+    /// 줄기+구슬 부유 위젯 안의 Transform.translate 세로 offset을 읽는다.
+    double stemOffsetY(WidgetTester tester) {
+      final transform = tester.widget<Transform>(
+        find.descendant(
+          of: find.byKey(const ValueKey('splash-stem-float')),
+          matching: find.byType(Transform),
+        ),
+      );
+      return transform.transform.getTranslation().y;
+    }
+
+    testWidgets('줄기와 구슬이 부유한다', (tester) async {
+      // 병아리 몸은 고정, 줄기+구슬만 아주 살짝 상하로 떠다닌다.
       await tester.pumpWidget(buildSubject());
-      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 200));
 
-      final breath = tester.widget<ScaleTransition>(
-        find.byKey(const ValueKey('splash-chick-breath')),
-      );
-      final twinkle = tester.widget<FadeTransition>(
-        find.byKey(const ValueKey('splash-star-twinkle')),
-      );
-
-      // 시간이 흐르면 값이 움직여야 idle이 살아 있는 것이다
-      final scaleBefore = breath.scale.value;
-      final opacityBefore = twinkle.opacity.value;
+      // 시간이 흐르면 세로 위치가 움직여야 idle이 살아 있는 것이다
+      final before = stemOffsetY(tester);
       await tester.pump(const Duration(milliseconds: 700));
 
-      expect(breath.scale.value, isNot(scaleBefore));
-      expect(twinkle.opacity.value, isNot(opacityBefore));
+      expect(stemOffsetY(tester), isNot(before));
     });
 
     testWidgets('동작 줄이기 설정에서는 idle이 정지한다', (tester) async {

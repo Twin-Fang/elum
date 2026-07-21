@@ -64,6 +64,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.splashBottom,
     required this.splashHill,
     required this.splashHillGlow,
+    required this.splashOrbGlowCore,
+    required this.splashOrbGlowHalo,
     required this.splashTitle,
     required this.homeCardGradientStart,
     required this.homeCardGradientEnd,
@@ -158,6 +160,10 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color splashHill;
   /// 언덕 방사형 그라데이션의 밝은 쪽
   final Color splashHillGlow;
+  /// 새싹 구슬 glow — 안쪽 진한 코어 (Figma effect_WJJJ2E rgba(0,255,208))
+  final Color splashOrbGlowCore;
+  /// 새싹 구슬 glow — 바깥쪽 넓게 번지는 헤일로
+  final Color splashOrbGlowHalo;
   /// 시작 화면 강조 문구색
   final Color splashTitle;
 
@@ -271,6 +277,8 @@ class AppColors extends ThemeExtension<AppColors> {
     splashBottom: Color(0xFFFFFADB),
     splashHill: Color(0xFFFFD629),
     splashHillGlow: Color(0xFFFFF2BB),
+    splashOrbGlowCore: Color(0xE600FFD0),
+    splashOrbGlowHalo: Color(0x9900FFD0),
     splashTitle: Color(0xFF230D60),
     homeCardGradientStart: Color(0xFFF9F4FF),
     homeCardGradientEnd: Color(0xFFE9EEFF),
@@ -345,6 +353,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? splashBottom,
     Color? splashHill,
     Color? splashHillGlow,
+    Color? splashOrbGlowCore,
+    Color? splashOrbGlowHalo,
     Color? splashTitle,
     Color? homeCardGradientStart,
     Color? homeCardGradientEnd,
@@ -408,6 +418,8 @@ class AppColors extends ThemeExtension<AppColors> {
       splashBottom: splashBottom ?? this.splashBottom,
       splashHill: splashHill ?? this.splashHill,
       splashHillGlow: splashHillGlow ?? this.splashHillGlow,
+      splashOrbGlowCore: splashOrbGlowCore ?? this.splashOrbGlowCore,
+      splashOrbGlowHalo: splashOrbGlowHalo ?? this.splashOrbGlowHalo,
       splashTitle: splashTitle ?? this.splashTitle,
       homeCardGradientStart:
           homeCardGradientStart ?? this.homeCardGradientStart,
@@ -482,6 +494,10 @@ class AppColors extends ThemeExtension<AppColors> {
       splashBottom: Color.lerp(splashBottom, other.splashBottom, t)!,
       splashHill: Color.lerp(splashHill, other.splashHill, t)!,
       splashHillGlow: Color.lerp(splashHillGlow, other.splashHillGlow, t)!,
+      splashOrbGlowCore:
+          Color.lerp(splashOrbGlowCore, other.splashOrbGlowCore, t)!,
+      splashOrbGlowHalo:
+          Color.lerp(splashOrbGlowHalo, other.splashOrbGlowHalo, t)!,
       splashTitle: Color.lerp(splashTitle, other.splashTitle, t)!,
       homeCardGradientStart: Color.lerp(
           homeCardGradientStart, other.homeCardGradientStart, t)!,
