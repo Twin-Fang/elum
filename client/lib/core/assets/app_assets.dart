@@ -111,6 +111,9 @@ abstract final class AppAssets {
   /// 최근 일과 섹션 제목 앞 시계 (18×18). Figma `fi-br-clock`.
   static const iconClock = '$_images/icon_clock.svg';
 
+  /// "secured by ELUM AI DLP" 배지의 자물쇠 (16×16). Figma `Component 7`(418:4049).
+  static const iconDlpLock = '$_images/icon_dlp_lock.svg';
+
   /// 준비 로딩 화면의 루미 캐릭터 (Figma 262:4569 `Group 26`, 122×123).
   ///
   /// **`prepare` 화면에만 있다** — 카드 생성 로딩(262:4703)에는 없다.

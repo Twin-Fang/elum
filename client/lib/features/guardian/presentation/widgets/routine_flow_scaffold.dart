@@ -7,6 +7,7 @@ import '../../../../core/assets/app_assets.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/secured_by_dlp_badge.dart';
 import 'aurora_background.dart';
 
 /// 일과 만들기 흐름의 공통 뼈대.
@@ -67,6 +68,10 @@ class RoutineFlowScaffold extends StatelessWidget {
                     ),
                     child: bottomButton,
                   ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 12.h),
+                  child: const Center(child: SecuredByDlpBadge()),
+                ),
               ],
             ),
           ),

@@ -10,6 +10,7 @@ import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_fade_slide_in.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/secured_by_dlp_badge.dart';
 import '../application/onboarding_notifier.dart';
 
 /// Figma `시작` (238:1808) — 서비스 진입 화면.
@@ -271,6 +272,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   },
                 ),
               ),
+            ),
+
+            // 신뢰 배지 (Figma x=107, y=756, 393폭 기준 가로 중앙)
+            Positioned(
+              left: 0,
+              top: 756.h,
+              width: 393.w,
+              child: const Center(child: SecuredByDlpBadge()),
             ),
           ],
         ),

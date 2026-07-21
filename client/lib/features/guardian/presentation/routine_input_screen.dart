@@ -11,6 +11,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/secured_by_dlp_badge.dart';
 import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
 import '../domain/routine_suggestion.dart';
@@ -104,6 +105,8 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
                   ),
                 ),
                 const _PrivacyNote(),
+                SizedBox(height: space.sm),
+                const SecuredByDlpBadge(),
                 SizedBox(height: space.md),
               ],
             ),
