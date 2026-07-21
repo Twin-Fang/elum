@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T18:59:34Z",
-    "currentVersion": "1.0.80",
+    "lastUpdated": "2026-07-21T19:18:53Z",
+    "currentVersion": "1.0.81",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 48
+    "totalReleases": 49
   },
   "releases": [
+    {
+      "version": "1.0.81",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 106,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 일과 카드 이미지 가장자리에 보이던 얇은 배경선을 제거했습니다\n  * 카드 제목이 한 줄일 때 번호와 나란히 정렬되지 않던 문제를 고쳤습니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "일과 카드 이미지 가장자리에 보이던 얇은 배경선을 제거했습니다",
+            "카드 제목이 한 줄일 때 번호와 나란히 정렬되지 않던 문제를 고쳤습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.80",
       "project_type": "flutter",
