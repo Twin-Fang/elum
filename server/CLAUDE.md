@@ -24,6 +24,7 @@
 - `application-*.yml` 수정 금지, `.gitignore` 현재 상태 유지(force add 금지)
 - `application-*.yml` 직접 접근(열람 포함) 절대 금지 — 값이 필요하면 항상 사용자에게 확인
 - DB 직접 접근 절대 금지 — 쿼리 실행, 접속 정보 확인, 스키마 조회 등 일체 금지. 필요한 정보는 항상 사용자에게 확인
+- request DTO(`dto/request` 패키지)에 `jakarta.validation.constraints` 계열 검증 어노테이션(`@NotBlank`, `@NotNull`, `@Size`, `@Pattern` 등)을 추가하지 않는다. 신규 DTO 작성 시에도 적용하지 않는다
 
 ## 상세 규칙
 
