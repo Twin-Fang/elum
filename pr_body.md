@@ -4,12 +4,9 @@
 
 ## 릴리스 노트
 
-* **버그 수정**
-  * 안드로이드에서 앱이 서버에 연결되지 않던 문제 해결
-  * 인터넷이 끊겼을 때 이름을 다시 입력하라고 잘못 안내하던 문제 수정
-
-* **개선**
-  * 연결이 불안정할 때 안내 문구가 더 정확해졌습니다
+* **기타**
+  * Secret 갱신 가이드 추가 : docs : CLIENT_ENV_FILE 갱신 방법과 배포 전 순서 명시
+  * 추가질문 화면 Figma 좌표 정합 : fix : 상단 여백·제목 폭 고정 및 ScreenUtil 적용
+  * 일과 만들기 로딩 화면 Figma 좌표 정합 : fix : 절대 좌표 배치·루미 등장 애니메이션·진행 스피너
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
-

@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T12:17:21Z",
-    "currentVersion": "1.0.59",
+    "lastUpdated": "2026-07-21T12:44:31Z",
+    "currentVersion": "1.0.60",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 30
+    "totalReleases": 31
   },
   "releases": [
+    {
+      "version": "1.0.60",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 60,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **기타**\n  * Secret 갱신 가이드 추가 : docs : CLIENT_ENV_FILE 갱신 방법과 배포 전 순서 명시\n  * 추가질문 화면 Figma 좌표 정합 : fix : 상단 여백·제목 폭 고정 및 ScreenUtil 적용\n  * 일과 만들기 로딩 화면 Figma 좌표 정합 : fix : 절대 좌표 배치·루미 등장 애니메이션·진행 스피너",
+      "parsed_changes": {
+        "기타": {
+          "title": "기타",
+          "items": [
+            "Secret 갱신 가이드 추가 : docs : CLIENT_ENV_FILE 갱신 방법과 배포 전 순서 명시",
+            "추가질문 화면 Figma 좌표 정합 : fix : 상단 여백·제목 폭 고정 및 ScreenUtil 적용",
+            "일과 만들기 로딩 화면 Figma 좌표 정합 : fix : 절대 좌표 배치·루미 등장 애니메이션·진행 스피너"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.59",
       "project_type": "flutter",
