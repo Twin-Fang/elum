@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_config.dart';
@@ -111,19 +112,66 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     state = state.copyWith(answers: next);
   }
 
-  Future<void> generateCards() async {
+  /// 진행 중인 카드 생성. 중복 호출을 막는 유일한 지점이다.
+  ///
+  /// **`POST /api/routines`는 AI 호출이라 한 번이 곧 비용이다.**
+  /// 로딩 화면이 재생성되면(토큰 만료 리다이렉트, 화면 복귀 등) `initState`가
+  /// 다시 돌아 [generateCards]를 또 부른다. 실제로 한 번의 일과 생성에
+  /// 요청이 16번 나간 적이 있다.
+  ///
+  /// 위젯이 아니라 여기서 막는 이유 — 위젯은 몇 번이든 다시 만들어지지만
+  /// provider는 흐름이 끝날 때까지 살아 있다.
+  Future<void>? _generating;
+
+  /// 차단한 중복 호출 수. **0이 아니면 어딘가에서 또 부르고 있다는 신호다.**
+  /// 로그로 남겨야 재발을 눈치챌 수 있다 — 조용히 막기만 하면 원인이 묻힌다.
+  var _blockedCalls = 0;
+
+  Future<void> generateCards() {
+    // 진행 중이거나 이미 끝난 생성이 있으면 그것을 그대로 돌려준다.
+    //
+    // **성공한 뒤에도 가드를 풀지 않는다.** 풀면 로딩 화면이 나중에 다시
+    // 만들어졌을 때 또 쏜다 — 16번 사고가 정확히 이 경로였다.
+    // 새 일과를 만들 때는 홈에서 [reset]을 부르므로 그때 풀린다.
+    final running = _generating;
+    if (running != null) {
+      _blockedCalls++;
+      debugPrint(
+        '[cost] 카드 생성 중복 호출 차단 (누적 $_blockedCalls회) — '
+        '이미 ${state.routine != null ? "생성 완료" : "생성 중"}. 서버 요청 안 보냄',
+      );
+      return running;
+    }
+
+    debugPrint('[cost] 카드 생성 시작 → POST /api/routines (AI 호출, 과금 대상)');
+    return _generating = _createRoutine();
+  }
+
+  Future<void> _createRoutine() async {
     state = state.copyWith(step: RoutineFlowStep.generating);
 
     final repo = ref.read(routineRepositoryProvider);
     final goals = ref.read(onboardingProvider).supportGoals;
 
-    final routine = await repo.createRoutine(
-      rawInputText: state.rawInput,
-      goals: goals,
-      answers: state.answers,
-    );
+    try {
+      final routine = await repo.createRoutine(
+        rawInputText: state.rawInput,
+        goals: goals,
+        answers: state.answers,
+      );
 
-    state = state.copyWith(step: RoutineFlowStep.review, routine: routine);
+      debugPrint(
+        '[cost] 카드 생성 완료 (카드 ${routine.steps.length}장). '
+        '이후 중복 호출은 이 결과를 재사용한다',
+      );
+      state = state.copyWith(step: RoutineFlowStep.review, routine: routine);
+    } catch (e) {
+      // 실패했을 때만 가드를 푼다. 성공과 달리 남길 결과가 없으므로
+      // 붙잡아 두면 사용자가 영영 카드를 못 만든다.
+      debugPrint('[cost] 카드 생성 실패 → 가드 해제, 재시도 가능: $e');
+      _generating = null;
+      rethrow;
+    }
   }
 
   Future<void> updateStep(String stepId, String description) async {
@@ -145,5 +193,13 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     state = state.copyWith(step: RoutineFlowStep.done, routine: confirmed);
   }
 
-  void reset() => state = const RoutineFlowState();
+  void reset() {
+    // 진행 중이던 생성을 놓아준다. 남겨두면 다음 일과 생성이 막힌다.
+    if (_blockedCalls > 0) {
+      debugPrint('[cost] 이번 일과에서 중복 호출 $_blockedCalls회를 막았다');
+    }
+    _generating = null;
+    _blockedCalls = 0;
+    state = const RoutineFlowState();
+  }
 }

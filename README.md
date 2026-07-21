@@ -1,7 +1,7 @@
 # 이룸 (ELUM)
 
 <!-- AUTO-VERSION-SECTION: DO NOT EDIT MANUALLY -->
-## 최신 버전 : v1.0.43 (2026-07-21)
+## 최신 버전 : v1.0.45 (2026-07-21)
 
 > CODEGATE 2026 · AI 스타트업 해커톤 (24시간) · 팀 룸룸(LUMLUM)
 
