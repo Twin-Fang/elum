@@ -4,10 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/dev/dev_log_buffer.dart';
+import 'core/logger/app_logger.dart';
 import 'core/storage/local_storage.dart';
 import 'features/onboarding/application/onboarding_notifier.dart';
 
 Future<void> main() async {
+  AppLogger.appStarted();
+
   WidgetsFlutterBinding.ensureInitialized();
 
   // 환경변수를 먼저 읽는다 — 저장소·네트워크가 설정값에 의존한다.
@@ -19,6 +22,7 @@ Future<void> main() async {
 
   // 저장소는 앱 시작 시 한 번만 초기화하고 provider로 주입한다.
   final storage = await SharedPrefsStorage.create();
+  AppLogger.storageRead('SharedPreferences', 'initialized');
 
   runApp(
     ProviderScope(

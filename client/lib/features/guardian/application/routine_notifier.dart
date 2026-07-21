@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_config.dart';
+import '../../../core/logger/app_logger.dart';
 import '../../../shared/models/routine.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/routine_repository.dart';
@@ -82,11 +83,16 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   @override
   RoutineFlowState build() => const RoutineFlowState();
 
-  void setRawInput(String value) => state = state.copyWith(rawInput: value);
+  void setRawInput(String value) {
+    AppLogger.notifierCall('RoutineFlowNotifier', 'setRawInput', {'input': value});
+    state = state.copyWith(rawInput: value);
+  }
 
   /// DLP 처리. 응답이 빨라도 최소 노출 시간을 지킨다 —
   /// 보안 처리를 체감시키기 위한 연출이다 (docs/07-mvp-scope.md 데모 안전 수칙).
   Future<void> runDlp() async {
+    AppLogger.notifierCall('RoutineFlowNotifier', 'runDlp');
+    AppLogger.notifierStateChange('RoutineFlowNotifier', state.step.name, 'masking');
     state = state.copyWith(step: RoutineFlowStep.masking);
 
     final started = DateTime.now();
@@ -97,6 +103,9 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     final remaining = AppConfig.dlpMinDelay - elapsed;
     if (remaining > Duration.zero) await Future<void>.delayed(remaining);
 
+    AppLogger.notifierStateChange('RoutineFlowNotifier', 'masking', 'maskResult', {
+      'detectedTypes': types.join(', '),
+    });
     state = state.copyWith(
       step: RoutineFlowStep.maskResult,
       maskedInput: masked,
@@ -110,10 +119,16 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   /// 로딩 화면으로 건너뛰고, 카드 생성은 로딩 화면 한 곳에서만 시작한다.
   /// 양쪽에서 생성하면 같은 일과가 두 번 만들어진다.
   Future<void> askQuestion() async {
+    AppLogger.notifierCall('RoutineFlowNotifier', 'askQuestion');
+    AppLogger.notifierStateChange('RoutineFlowNotifier', state.step.name, 'question');
+
     final repo = ref.read(routineRepositoryProvider);
     final question = await repo.generateQuestion(state.rawInput);
 
     state = state.copyWith(step: RoutineFlowStep.question, question: question);
+    AppLogger.notifierStateChange('RoutineFlowNotifier', 'question', 'question', {
+      'questionCount': question.askable.length,
+    });
   }
 
   void toggleAnswer(String answer) {
@@ -209,27 +224,30 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     final goals = ref.read(onboardingProvider).supportGoals;
 
     try {
+      AppLogger.notifierStateChange('RoutineFlowNotifier', state.step.name, 'generating');
       final routine = await repo.createRoutine(
         rawInputText: state.rawInput,
         goals: goals,
         answers: state.answers,
       );
 
-      debugPrint(
-        '[cost] 카드 생성 완료 (카드 ${routine.steps.length}장). '
-        '이후 중복 호출은 이 결과를 재사용한다',
-      );
+      AppLogger.notifierStateChange('RoutineFlowNotifier', 'generating', 'review', {
+        'cardCount': routine.steps.length,
+      });
       state = state.copyWith(step: RoutineFlowStep.review, routine: routine);
     } catch (e) {
-      // 실패했을 때만 가드를 푼다. 성공과 달리 남길 결과가 없으므로
-      // 붙잡아 두면 사용자가 영영 카드를 못 만든다.
-      debugPrint('[cost] 카드 생성 실패 → 가드 해제, 재시도 가능: $e');
+      AppLogger.error('RoutineFlowNotifier', e);
       _generating = null;
       rethrow;
     }
   }
 
   Future<void> updateStep(String stepId, String description) async {
+    AppLogger.notifierCall('RoutineFlowNotifier', 'updateStep', {
+      'stepId': stepId,
+      'description': description,
+    });
+
     final routine = state.routine;
     if (routine == null) return;
 
@@ -240,6 +258,9 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
 
   /// 승인. 이 시점 이후에만 아동 화면에 노출된다 (docs 원칙 3번).
   Future<void> confirm() async {
+    AppLogger.notifierCall('RoutineFlowNotifier', 'confirm');
+    AppLogger.notifierStateChange('RoutineFlowNotifier', state.step.name, 'done');
+
     final routine = state.routine;
     if (routine == null) return;
 
@@ -249,9 +270,11 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   }
 
   void reset() {
-    // 진행 중이던 생성을 놓아준다. 남겨두면 다음 일과 생성이 막힌다.
+    AppLogger.notifierCall('RoutineFlowNotifier', 'reset');
     if (_blockedCalls > 0) {
-      debugPrint('[cost] 이번 일과에서 중복 호출 $_blockedCalls회를 막았다');
+      AppLogger.notifierCall('RoutineFlowNotifier', 'reset', {
+        'blockedCalls': _blockedCalls,
+      });
     }
     _generating = null;
     _blockedCalls = 0;
