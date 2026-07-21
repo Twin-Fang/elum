@@ -14,6 +14,7 @@ class ElumScaffold extends StatelessWidget {
     required this.child,
     this.bottomButton,
     this.onBack,
+    this.horizontalPadding,
   });
 
   final Widget child;
@@ -23,6 +24,12 @@ class ElumScaffold extends StatelessWidget {
 
   /// 뒤로가기. null이면 버튼을 그리지 않는다 (첫 화면).
   final VoidCallback? onBack;
+
+  /// 본문 좌우 여백. 기본은 [AppSpacing.screenH](24).
+  ///
+  /// 온보딩_캐릭터(204:1029)만 카드가 x=16에서 시작해 16을 넘긴다.
+  /// 화면이 직접 Padding을 겹쳐 쓰면 기본 24가 그대로 남아 이중 여백이 된다.
+  final double? horizontalPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +56,9 @@ class ElumScaffold extends StatelessWidget {
               ),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: space.screenH),
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding ?? space.screenH,
+                ),
                 child: child,
               ),
             ),

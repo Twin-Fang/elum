@@ -8,10 +8,10 @@ import '../theme/theme_context_ext.dart';
 ///
 /// 왼쪽 아이콘은 선택이다. 아이콘이 붙으면 텍스트가 좌측 정렬로 바뀐다.
 ///
-/// Figma 204:991 `온보딩_이름` 명세:
-/// - 필드 크기: 344×68
-/// - 내부 패딩: 좌우 16px, 상하 24px (텍스트가 필드 상단에서 24px 아래 위치)
-/// - 아이콘 크기: 40×40 / 왼쪽 여백 14px / 오른쪽 여백 12px
+/// Figma 204:991 `온보딩_이름` 명세 (필드 좌상단 기준 상대좌표):
+/// - 필드 344×68 / radius 20
+/// - 아이콘 40×40, 좌측 여백 14, 아이콘→텍스트 12
+/// - 텍스트 20sp, 상하 여백 각 24 → **수직 중앙**이므로 패딩이 아니라 정렬로 맞춘다
 class ElumTextField extends StatelessWidget {
   const ElumTextField({
     super.key,
@@ -68,7 +68,9 @@ class ElumTextField extends StatelessWidget {
           hintStyle: context.typo.input.copyWith(color: colors.textPlaceholder),
           filled: true,
           fillColor: colors.surface,
-          contentPadding: EdgeInsets.symmetric(horizontal: space.md, vertical: 24),
+          // 세로는 textAlignVertical.center가 맡는다. vertical 패딩을 주면
+          // 콘텐츠 높이 + 패딩이 fieldH(68)를 넘겨 텍스트가 잘린다.
+          contentPadding: EdgeInsets.symmetric(horizontal: space.md),
           prefixIcon: _buildLeadingIcon(),
           // 기본 최소폭 48이 적용되면 Figma 좌표가 밀린다
           prefixIconConstraints: const BoxConstraints(),

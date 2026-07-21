@@ -22,6 +22,13 @@ class CharacterScreen extends ConsumerWidget {
   /// 카드 사이 간격. Figma 카드 x=16/201에 폭이 176이므로 201-(16+176)=9다.
   static const _cardGap = 9.0;
 
+  /// 카드 좌우 여백. 이 화면만 x=16이다 (다른 온보딩 화면은 24).
+  static const _cardMarginH = 16.0;
+
+  /// 제목·설명은 다른 화면과 같은 x=24다. 본문 여백을 16으로 낮췄으므로
+  /// 헤더에만 차액 8을 되돌려준다.
+  static const _headerExtraInset = 8.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(onboardingProvider);
@@ -46,6 +53,8 @@ class CharacterScreen extends ConsumerWidget {
 
     return ElumScaffold(
       onBack: () => context.pop(),
+      // Figma 카드가 x=16에서 시작한다 — 기본 24를 쓰면 카드가 8씩 좁아진다
+      horizontalPadding: _cardMarginH,
       bottomButton: ElumButton(
         label: '다음',
         onPressed: profile.canProceedFromCharacter
@@ -57,9 +66,14 @@ class CharacterScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ElumHeader(
-              title: '${profile.displayName}의 하루를 함께할\n친구를 골라주세요',
-              description: '선택한 친구가 카드 속 주인공이 되어 도와줘요',
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: _headerExtraInset,
+              ),
+              child: ElumHeader(
+                title: '${profile.displayName}의 하루를 함께할\n친구를 골라주세요',
+                description: '선택한 친구가 카드 속 주인공이 되어 도와줘요',
+              ),
             ),
             SizedBox(height: context.space.xl),
             Row(

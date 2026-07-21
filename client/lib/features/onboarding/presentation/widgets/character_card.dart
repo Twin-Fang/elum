@@ -24,6 +24,15 @@ class CharacterCard extends StatelessWidget {
   /// 카드 안 일러스트 152×152 (카드 상단에서 29 내려온 자리)
   static const _illustrationSize = 152.0;
 
+  /// 카드 상단(y=279) → 일러스트 상단(y=308)
+  static const _illustrationTop = 29.0;
+
+  /// 카드 상단(y=279) → 이름 알약 상단(y=451).
+  ///
+  /// 일러스트(308~460)와 겹친다 — Figma가 알약을 일러스트 위에 얹었다.
+  /// 세로로 쌓으면 29+152+16 = 197에 알약 높이까지 더해져 202를 넘긴다.
+  static const _labelTop = 172.0;
+
   final CardCharacter character;
   final bool isSelected;
 
@@ -47,19 +56,27 @@ class CharacterCard extends StatelessWidget {
           width: isSelected ? space.selectedBorderWidth : space.borderWidth,
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      // Figma는 일러스트와 이름을 겹쳐 배치한다(일러스트 y=308~460, 이름 y=451).
+      // Column으로 쌓으면 202를 넘겨 오버플로가 난다.
+      child: Stack(
+        alignment: Alignment.topCenter,
         children: [
-          SvgPicture.asset(
-            AppAssets.character(character),
-            width: _illustrationSize,
-            height: _illustrationSize,
+          Positioned(
+            top: _illustrationTop,
+            child: SvgPicture.asset(
+              AppAssets.character(character),
+              width: _illustrationSize,
+              height: _illustrationSize,
+            ),
           ),
           // Figma는 이 자리(Ellipse 2/3, y=451)를 회색 알약으로 비워뒀다.
           // 이름이 정해져 텍스트로 채운다.
-          Text(
-            character.displayName,
-            style: context.typo.body.copyWith(color: colors.textPrimary),
+          Positioned(
+            top: _labelTop,
+            child: Text(
+              character.displayName,
+              style: context.typo.body.copyWith(color: colors.textPrimary),
+            ),
           ),
         ],
       ),
