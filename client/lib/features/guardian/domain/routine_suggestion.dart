@@ -25,8 +25,11 @@ class RoutineSuggestion {
   /// 타일·칩에 보이는 짧은 라벨. 타일이 86×105로 좁아 명사구다.
   final String text;
 
-  /// 입력창에 채울 자연어 문장 (예: "비 오는 날 우산 챙겨서 학교 가는 준비를
-  /// 하고 싶어요"). **서버가 아직 안 줄 수 있어 기본값이 빈 문자열이다.**
+  /// 입력창에 채울 자연어 문장.
+  ///
+  /// 서버 필드명은 `naturalLanguageExample`이다. 길어서 클라에서는 [prompt]로
+  /// 줄여 부르되, 파싱에서 서버 이름을 읽는다.
+  /// 출처: server/.../dto/response/RoutineSuggestionResponse.java
   ///
   /// [text]를 그대로 입력창에 넣으면 명사구라 보호자가 직접 쓴 문장으로 보이지
   /// 않고, AI에 전달되는 맥락도 얇다. 그래서 표시용과 입력용을 나눈다. (이슈 #39)
@@ -37,7 +40,10 @@ class RoutineSuggestion {
     return RoutineSuggestion(
       icon: json['icon']?.toString() ?? '',
       text: json['text']?.toString() ?? '',
-      prompt: json['prompt']?.toString() ?? '',
+      // 서버 필드명이 naturalLanguageExample이다. 옛 이름도 함께 읽어
+      // 서버가 어느 쪽을 주든 동작하게 둔다.
+      prompt: (json['naturalLanguageExample'] ?? json['prompt'])?.toString() ??
+          '',
     );
   }
 
@@ -55,9 +61,8 @@ class RoutineSuggestion {
   /// **API가 붙어도 지우지 않는다.** 추천이 비면 홈 화면 한 블록이 통째로
   /// 사라져 빈 화면처럼 보인다. 데모는 어떤 실패에서도 진행되어야 한다
   /// (docs 원칙 6번). 문구는 Figma `보호자_홈`(217:2655) 원본이다.
-  // FIXME: 백엔드 #39 대기 — prompt는 서버가 내려줄 값이다.
-  // 지금은 클라이언트가 임시로 들고 있다. 서버가 prompt를 주기 시작하면
-  // 이 문장들은 fallback 전용으로만 남고, 정상 경로에서는 쓰이지 않는다.
+  // 서버가 naturalLanguageExample을 내려주므로(#39 반영됨) 아래 문장들은
+  // 서버가 죽었을 때만 쓰인다.
   static const fallback = [
     RoutineSuggestion(
       icon: '☔️',
