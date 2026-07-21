@@ -4,7 +4,10 @@ import java.util.List;
 
 public record RoutineQuestionDraft(List<QuestionItem> questions) {
 
-  public record QuestionItem(String question, List<String> options) {
+  public record QuestionItem(String question, List<Option> options) {
 
+    public record Option(String emoji, String label) {
+
+    }
   }
 }

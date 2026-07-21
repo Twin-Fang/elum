@@ -192,7 +192,16 @@ public class GeminiTextClient {
               "question", Map.of("type", "string"),
               "options", Map.of(
                 "type", "array",
-                "items", Map.of("type", "string")
+                "minItems", 3,
+                "maxItems", 5,
+                "items", Map.of(
+                  "type", "object",
+                  "properties", Map.of(
+                    "emoji", Map.of("type", "string"),
+                    "label", Map.of("type", "string")
+                  ),
+                  "required", List.of("emoji", "label")
+                )
               )
             ),
             "required", List.of("question", "options")

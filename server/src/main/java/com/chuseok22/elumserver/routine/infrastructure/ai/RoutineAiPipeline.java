@@ -76,7 +76,11 @@ public class RoutineAiPipeline {
       List<RoutineQuestionResult.QuestionResultItem> questions = draft.questions().stream()
         .filter(item -> item.question() != null && !item.question().isBlank()
           && item.options() != null && !item.options().isEmpty())
-        .map(item -> new RoutineQuestionResult.QuestionResultItem(item.question(), item.options()))
+        .map(item -> new RoutineQuestionResult.QuestionResultItem(
+          item.question(), toOptionResults(item.options())
+        ))
+        // label이 모두 비어있어 옵션이 하나도 안 남은 질문은 통째로 제외한다.
+        .filter(item -> !item.options().isEmpty())
         .toList();
       if (questions.isEmpty()) {
         throw new IllegalStateException("Gemini가 유효한 question/options 없이 응답함");
@@ -88,22 +92,46 @@ public class RoutineAiPipeline {
     }
   }
 
-  // 선택한 도움 목표 각각에 대해 개별 질문을 만든다(여러 목표를 하나로 합치지 않음).
+  // label이 없는 옵션은 아동에게 보여줄 수 없는 빈 버튼이 되므로 제외한다. emoji만 없으면
+  // label은 유효하므로 옵션 자체를 버리지 않고 빈 문자열로 완화한다.
+  private List<RoutineQuestionResult.QuestionResultItem.OptionResult> toOptionResults(
+    List<RoutineQuestionDraft.QuestionItem.Option> options
+  ) {
+    return options.stream()
+      .filter(option -> option.label() != null && !option.label().isBlank())
+      .map(option -> new RoutineQuestionResult.QuestionResultItem.OptionResult(
+        option.emoji() == null ? "" : option.emoji(), option.label()
+      ))
+      .toList();
+  }
+
+  // 선택한 도움 목표 각각에 대해 개별 질문을 만든다(여러 목표를 하나로 합치지 않음). "직접 입력"은
+  // 보호자가 자유 텍스트를 입력하도록 유도하는 항목이라 추천 답변 목록에 절대 포함하지 않는다(서비스 정책).
   private RoutineQuestionResult fallbackQuestion(Set<SupportGoal> supportGoals) {
     List<RoutineQuestionResult.QuestionResultItem> questions = new ArrayList<>();
     if (supportGoals.contains(SupportGoal.PREPARE_ITEMS)) {
       questions.add(new RoutineQuestionResult.QuestionResultItem(
         "꼭 챙겨야 하는 준비물이 있나요?",
-        List.of("우산", "우비", "장화", "여벌 양말", "작은 수건")
+        List.of(
+          option("☔", "우산"), option("🧥", "우비"), option("👖", "장화"),
+          option("🧦", "여벌 양말"), option("🧻", "작은 수건")
+        )
       ));
     }
     if (supportGoals.contains(SupportGoal.PREPARE_NEW)) {
       questions.add(new RoutineQuestionResult.QuestionResultItem(
         "평소와 다르게 준비해야 하는 점이 있나요?",
-        List.of("시간 변경", "장소 변경", "동행자 변경", "날씨/환경 변화", "직접 입력")
+        List.of(
+          option("⏰", "시간 변경"), option("📍", "장소 변경"),
+          option("🧑‍🤝‍🧑", "동행자 변경"), option("🌦️", "날씨/환경 변화")
+        )
       ));
     }
     return new RoutineQuestionResult(questions);
+  }
+
+  private RoutineQuestionResult.QuestionResultItem.OptionResult option(String emoji, String label) {
+    return new RoutineQuestionResult.QuestionResultItem.OptionResult(emoji, label);
   }
 
   // Gemini 호출 자체(RestClient의 RestClientResponseException/ResourceAccessException 등)와
@@ -196,8 +224,11 @@ public class RoutineAiPipeline {
 
   public record RoutineQuestionResult(List<QuestionResultItem> questions) {
 
-    public record QuestionResultItem(String question, List<String> options) {
+    public record QuestionResultItem(String question, List<OptionResult> options) {
 
+      public record OptionResult(String emoji, String label) {
+
+      }
     }
   }
 }

@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.routine.infrastructure.ai;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
@@ -50,10 +51,13 @@ class RoutineAiPipelineTest {
   }
 
   @Test
-  @DisplayName("Gemini가 유효한 questions 배열을 반환하면 그대로 변환해서 반환한다")
+  @DisplayName("Gemini가 유효한 questions 배열을 반환하면 emoji/label을 그대로 변환해서 반환한다")
   void generateQuestion_validResponse_returnsMappedQuestions() {
-    String json = "{\"questions\":[{\"question\":\"준비물이 있나요?\",\"options\":[\"우산\",\"우비\"]},"
-      + "{\"question\":\"평소와 다른 점이 있나요?\",\"options\":[\"시간 변경\",\"장소 변경\"]}]}";
+    String json = "{\"questions\":["
+      + "{\"question\":\"준비물이 있나요?\",\"options\":["
+      + "{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"}]},"
+      + "{\"question\":\"평소와 다른 점이 있나요?\",\"options\":["
+      + "{\"emoji\":\"⏰\",\"label\":\"시간 변경\"},{\"emoji\":\"📍\",\"label\":\"장소 변경\"}]}]}";
     when(geminiTextClient.generateQuestion(eq("하늘이"), anySet(), eq("내일 비 오는 날")))
       .thenReturn(textResponse(json));
 
@@ -63,7 +67,47 @@ class RoutineAiPipelineTest {
 
     assertThat(result.questions()).hasSize(2);
     assertThat(result.questions().get(0).question()).isEqualTo("준비물이 있나요?");
-    assertThat(result.questions().get(1).options()).containsExactly("시간 변경", "장소 변경");
+    assertThat(result.questions().get(0).options())
+      .extracting(
+        RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::emoji,
+        RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::label
+      )
+      .containsExactly(tuple("☔", "우산"), tuple("🧥", "우비"));
+    assertThat(result.questions().get(1).options())
+      .extracting(RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::label)
+      .containsExactly("시간 변경", "장소 변경");
+  }
+
+  @Test
+  @DisplayName("옵션에 label이 없으면 그 옵션만 제외하고 나머지는 유지한다")
+  void generateQuestion_optionMissingLabel_dropsOnlyThatOption() {
+    String json = "{\"questions\":[{\"question\":\"준비물이 있나요?\",\"options\":["
+      + "{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"\"}]}]}";
+    when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
+
+    RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
+      "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), "내일 비 오는 날"
+    );
+
+    assertThat(result.questions()).hasSize(1);
+    assertThat(result.questions().get(0).options())
+      .extracting(RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::label)
+      .containsExactly("우산");
+  }
+
+  @Test
+  @DisplayName("모든 옵션의 label이 비어있으면 그 질문 자체를 fallback으로 대체한다")
+  void generateQuestion_allOptionsMissingLabel_fallsBack() {
+    String json = "{\"questions\":[{\"question\":\"준비물이 있나요?\",\"options\":["
+      + "{\"emoji\":\"☔\",\"label\":\"\"},{\"emoji\":\"🧥\",\"label\":\"   \"}]}]}";
+    when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
+
+    RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
+      "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), "내일 비 오는 날"
+    );
+
+    assertThat(result.questions()).hasSize(1);
+    assertThat(result.questions().get(0).question()).isEqualTo("꼭 챙겨야 하는 준비물이 있나요?");
   }
 
   @Test
@@ -77,6 +121,24 @@ class RoutineAiPipelineTest {
     );
 
     assertThat(result.questions()).hasSize(2);
+  }
+
+  @Test
+  @DisplayName("Gemini 호출이 실패하면 대체 답변의 모든 옵션에 emoji가 채워지고 직접 입력 항목은 없다")
+  void generateQuestion_geminiFails_fallbackHasEmojiAndNoManualInputOption() {
+    when(geminiTextClient.generateQuestion(any(), any(), any()))
+      .thenThrow(new RuntimeException("Gemini 호출 실패"));
+
+    RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
+      "하늘이", Set.of(SupportGoal.PREPARE_ITEMS, SupportGoal.PREPARE_NEW), "내일 비 오는 날"
+    );
+
+    List<RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult> allOptions =
+      result.questions().stream().flatMap(item -> item.options().stream()).toList();
+    assertThat(allOptions).allSatisfy(option -> assertThat(option.emoji()).isNotBlank());
+    assertThat(allOptions)
+      .extracting(RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::label)
+      .doesNotContain("직접 입력");
   }
 
   @Test
