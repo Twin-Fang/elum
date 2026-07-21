@@ -63,14 +63,24 @@ abstract final class AppConfig {
   // 값이 없거나 형식이 틀려도 예외를 던지지 않는다.
   // 설정 하나 때문에 앱이 뜨지 않으면 데모가 막힌다.
 
+  /// 환경변수 원본 읽기.
+  ///
+  /// `dotenv.env`는 [load]를 부르기 전에 접근하면 예외를 던진다. 위젯 테스트는
+  /// main을 타지 않아 load가 호출되지 않으므로, 여기서 흡수하지 않으면
+  /// 네트워크 계층을 건드리는 모든 테스트가 죽는다.
+  static String? _raw(String key) {
+    if (!dotenv.isInitialized) return null;
+    return dotenv.env[key];
+  }
+
   static String _string(String key, String fallback) {
-    final value = dotenv.env[key];
+    final value = _raw(key);
     if (value == null || value.isEmpty) return fallback;
     return value;
   }
 
   static int _int(String key, int fallback) {
-    final raw = dotenv.env[key];
+    final raw = _raw(key);
     if (raw == null) return fallback;
     final parsed = int.tryParse(raw);
     if (parsed == null) {
@@ -81,7 +91,7 @@ abstract final class AppConfig {
   }
 
   static bool _bool(String key, bool fallback) {
-    final raw = dotenv.env[key]?.toLowerCase();
+    final raw = _raw(key)?.toLowerCase();
     return switch (raw) {
       'true' || '1' || 'yes' => true,
       'false' || '0' || 'no' => false,

@@ -116,7 +116,7 @@ void main() {
     expect(tester.takeException(), isNull);
 
     expect(find.text('개발자 도구'), findsOneWidget);
-    expect(find.text('온보딩 초기화'), findsOneWidget);
+    expect(find.text('회원삭제'), findsOneWidget);
     expect(find.text('로그 보기'), findsOneWidget);
   });
 
@@ -126,7 +126,7 @@ void main() {
     ('로그 보기', '아직 로그가 없어요'),
     ('현재 상태', '저장값'),
     ('화면 이동', '보호자 홈'),
-    ('온보딩 초기화', '초기화'),
+    ('회원삭제', '회원삭제'),
   ]) {
     testWidgets('$label 화면이 예외 없이 열린다', (tester) async {
       dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
@@ -147,7 +147,7 @@ void main() {
   group('실제 라우터 환경 (MaterialApp.router)', () {
     // 실기기에서 "No GoRouter found in context"로 터진 경로다.
     // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾을 수 없다.
-    testWidgets('온보딩 초기화가 예외 없이 시작 화면으로 보낸다', (tester) async {
+    testWidgets('회원삭제가 예외 없이 시작 화면으로 보낸다', (tester) async {
       dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
 
       await tester.pumpWidget(buildRouterSubject());
@@ -155,9 +155,9 @@ void main() {
 
       await tester.tap(find.byIcon(Icons.bug_report));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('온보딩 초기화'));
+      await tester.tap(find.text('회원삭제'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, '초기화'));
+      await tester.tap(find.widgetWithText(FilledButton, '회원삭제'));
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
@@ -182,7 +182,7 @@ void main() {
     });
   });
 
-  testWidgets('초기화하면 저장값이 비워진다', (tester) async {
+  testWidgets('회원삭제하면 저장값이 비워진다', (tester) async {
     dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
 
     await tester.pumpWidget(buildSubject());
@@ -190,9 +190,9 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.bug_report));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('온보딩 초기화'));
+    await tester.tap(find.text('회원삭제'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, '초기화'));
+    await tester.tap(find.widgetWithText(FilledButton, '회원삭제'));
     await tester.pumpAndSettle();
 
     // 시작 화면으로 보내달라고 요청했는지 확인한다

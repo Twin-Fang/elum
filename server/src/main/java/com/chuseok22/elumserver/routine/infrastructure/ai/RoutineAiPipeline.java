@@ -67,27 +67,40 @@ public class RoutineAiPipeline {
         geminiTextClient.generateQuestion(nickname, supportGoals, sanitizedInputText);
       String json = response.candidates().get(0).content().parts().get(0).text();
       RoutineQuestionDraft draft = objectMapper.readValue(json, RoutineQuestionDraft.class);
-      if (draft.question() == null || draft.question().isBlank()
-        || draft.options() == null || draft.options().isEmpty()) {
-        throw new IllegalStateException("Gemini가 question/options 없이 응답함");
+      if (draft.questions() == null || draft.questions().isEmpty()) {
+        throw new IllegalStateException("Gemini가 questions 없이 응답함");
       }
-      return new RoutineQuestionResult(draft.question(), draft.options());
+      List<RoutineQuestionResult.QuestionResultItem> questions = draft.questions().stream()
+        .filter(item -> item.question() != null && !item.question().isBlank()
+          && item.options() != null && !item.options().isEmpty())
+        .map(item -> new RoutineQuestionResult.QuestionResultItem(item.question(), item.options()))
+        .toList();
+      if (questions.isEmpty()) {
+        throw new IllegalStateException("Gemini가 유효한 question/options 없이 응답함");
+      }
+      return new RoutineQuestionResult(questions);
     } catch (Exception e) {
       log.warn("Gemini 추가 질문 생성 실패, 고정 매핑으로 대체", e);
       return fallbackQuestion(supportGoals);
     }
   }
 
+  // 선택한 도움 목표 각각에 대해 개별 질문을 만든다(여러 목표를 하나로 합치지 않음).
   private RoutineQuestionResult fallbackQuestion(Set<SupportGoal> supportGoals) {
-    List<String> options = List.of("우산", "우비", "장화", "여벌 양말", "작은 수건");
-    boolean hasItems = supportGoals.contains(SupportGoal.PREPARE_ITEMS);
-    boolean hasNew = supportGoals.contains(SupportGoal.PREPARE_NEW);
-    String question = (hasItems && hasNew)
-      ? "평소와 다르게 챙겨야 하는 물건이 있나요?"
-      : hasItems
-        ? "꼭 챙겨야 하는 준비물이 있나요?"
-        : "평소와 달라지는 점이 있나요?";
-    return new RoutineQuestionResult(question, options);
+    List<RoutineQuestionResult.QuestionResultItem> questions = new ArrayList<>();
+    if (supportGoals.contains(SupportGoal.PREPARE_ITEMS)) {
+      questions.add(new RoutineQuestionResult.QuestionResultItem(
+        "꼭 챙겨야 하는 준비물이 있나요?",
+        List.of("우산", "우비", "장화", "여벌 양말", "작은 수건")
+      ));
+    }
+    if (supportGoals.contains(SupportGoal.PREPARE_NEW)) {
+      questions.add(new RoutineQuestionResult.QuestionResultItem(
+        "평소와 다르게 준비해야 하는 점이 있나요?",
+        List.of("시간 변경", "장소 변경", "동행자 변경", "날씨/환경 변화", "직접 입력")
+      ));
+    }
+    return new RoutineQuestionResult(questions);
   }
 
   // Gemini 호출 자체(RestClient의 RestClientResponseException/ResourceAccessException 등)와
@@ -175,7 +188,10 @@ public class RoutineAiPipeline {
 
   }
 
-  public record RoutineQuestionResult(String question, List<String> options) {
+  public record RoutineQuestionResult(List<QuestionResultItem> questions) {
 
+    public record QuestionResultItem(String question, List<String> options) {
+
+    }
   }
 }

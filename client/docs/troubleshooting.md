@@ -41,6 +41,7 @@
 **테스트**
 - [위젯 테스트에서 .w 사용 시 에러](#위젯-테스트에서-w-사용-시-에러)
 - [riverpod 3.x Override 타입 미export](#riverpod-3x-override-타입-미export)
+- [테스트가 실제 위젯 배치를 재현하지 않아 3번 연속 놓침](#테스트가-실제-위젯-배치를-재현하지-않아-3번-연속-놓침)
 
 ---
 
@@ -299,3 +300,48 @@ testStorageOverride({bool onboardingCompleted = false}) {
 ```
 
 **재발 방지**: riverpod 관련 타입을 명시하기 전에 export 여부를 확인한다.
+
+---
+
+## 테스트가 실제 위젯 배치를 재현하지 않아 3번 연속 놓침
+
+**언제**: 2026-07-21 · 이슈 #13
+**증상**: 개발자 도구 오버레이가 테스트는 전부 통과했는데 실기기에서 누를 때마다 터졌다.
+같은 뿌리의 예외가 **세 번 연속** 다른 얼굴로 나왔다.
+
+```
+1차: Navigator operation requested with a context that does not include a Navigator.
+2차: A HeroController can not be shared by multiple Navigators.
+3차: No GoRouter found in context
+```
+
+**원인**: 테스트가 실제 배치를 흉내내지 않았다.
+
+| | 테스트 | 실제 (`app.dart`) |
+| --- | --- | --- |
+| 배치 | `MaterialApp(home: DevToolsOverlay(...))` | `MaterialApp.router(builder: ...)` |
+| Navigator·Overlay·GoRouter 기준 | **안쪽** → 찾아짐 | **바깥쪽** → 못 찾음 |
+
+`MaterialApp`의 `builder`에 놓인 위젯은 Navigator·Overlay·GoRouter보다 **위**에 있다.
+`showModalBottomSheet` · `showDialog` · `Overlay.of` · `context.go` 전부 조상에서
+찾으므로 셋 다 실패한다. 테스트가 `home:`에 넣으면 이 조건이 성립하지 않아 통과해버린다.
+
+**해결**:
+
+1. 조상에 의존하지 않도록 구조 변경 — 패널을 `Stack`에 직접 그리고, 하위 화면 전환은
+   라우팅 대신 내부 상태(enum)로 처리
+2. 화면 이동은 `context.go` 대신 **콜백 주입** — 라우터를 가진 `app.dart`가
+   `onNavigate: _router.go`를 넘긴다
+3. 테스트를 실제 배치대로 고침 — `builder:`에 넣고, 이동이 걸린 기능은
+   `MaterialApp.router` + `GoRouter`로 구성한 별도 헬퍼로 검증
+
+**재발 방지**:
+
+- **위젯 테스트는 그 위젯이 실제로 놓이는 위치와 같은 곳에 배치한다.**
+  `home:`에 넣는 것이 편하지만 `builder:`에 놓일 위젯이면 아무것도 지켜주지 못한다.
+- **고쳤다고 생각하면 수정을 되돌려 테스트가 실패하는지 확인한다.** 이번에도
+  `onNavigate` → `context.go`로 되돌려 `No GoRouter found in context`가 재현되는 것을
+  확인한 뒤에야 통과를 신뢰했다.
+- `tester.takeException()`을 `expect(..., isNull)`로 명시 검증한다. 위젯 테스트는
+  예외를 삼키고 지나갈 수 있다.
+- 관련 테스트: `test/dev_tools_overlay_test.dart`의 `실제 라우터 환경 (MaterialApp.router)` 그룹

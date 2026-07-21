@@ -30,4 +30,20 @@ public class RoutineImageStorage {
       throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
     }
   }
+
+  public ImageContent read(String imagePath) {
+    Path path = Path.of(imagePath);
+    try {
+      byte[] bytes = Files.readAllBytes(path);
+      String contentType = Files.probeContentType(path);
+      return new ImageContent(bytes, contentType != null ? contentType : "application/octet-stream");
+    } catch (IOException e) {
+      log.warn("일과 이미지 조회 실패: path={}", imagePath, e);
+      throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND);
+    }
+  }
+
+  public record ImageContent(byte[] bytes, String contentType) {
+
+  }
 }

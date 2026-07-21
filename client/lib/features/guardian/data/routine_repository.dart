@@ -7,6 +7,7 @@ import '../../../core/network/dio_client.dart';
 import '../../../shared/models/routine.dart';
 import '../../onboarding/domain/support_goal.dart';
 import 'demo_cards.dart';
+import 'member_repository.dart';
 
 /// 일과 저장소.
 ///
@@ -15,6 +16,10 @@ import 'demo_cards.dart';
 abstract interface class RoutineRepository {
   /// AI 추가 질문. 실패하면 "질문 없음"으로 처리해 다음 단계로 넘긴다.
   Future<RoutineQuestion> generateQuestion(String rawInputText);
+
+  /// 내가 만든 일과 목록 — 보호자_홈의 "최근 일과".
+  /// 실패하면 빈 목록을 준다. 화면은 빈 상태 UI를 그린다.
+  Future<List<Routine>> getMyRoutines();
 
   /// 일과 생성 → 카드 5장.
   Future<Routine> createRoutine({
@@ -34,6 +39,26 @@ class RoutineRepositoryImpl implements RoutineRepository {
   RoutineRepositoryImpl({Dio? dio}) : _dio = dio ?? DioClient.create();
 
   final Dio _dio;
+
+  @override
+  Future<List<Routine>> getMyRoutines() async {
+    if (AppConfig.useMock) return const [];
+
+    try {
+      final res = await _dio.get<List<dynamic>>('/api/routines');
+      final body = res.data;
+      if (body == null) return const [];
+
+      return body
+          .whereType<Map<String, dynamic>>()
+          .map(Routine.fromJson)
+          .toList();
+    } catch (e) {
+      // 목록을 못 가져와도 홈 화면은 떠야 한다. 빈 상태 UI가 나간다.
+      debugPrint('[routine] 목록 조회 실패 → 빈 목록으로 처리: $e');
+      return const [];
+    }
+  }
 
   @override
   Future<RoutineQuestion> generateQuestion(String rawInputText) async {
@@ -181,6 +206,18 @@ abstract final class LocalDlp {
   }
 }
 
+/// 일과 저장소. 인증 인터셉터가 붙은 [dioProvider]를 쓴다 —
+/// 직접 `DioClient.create()`를 부르면 토큰이 빠져 401이 그대로 터진다.
 final routineRepositoryProvider = Provider<RoutineRepository>(
-  (ref) => RoutineRepositoryImpl(),
+  (ref) => RoutineRepositoryImpl(dio: ref.watch(dioProvider)),
 );
+
+/// 최근 일과 목록. 보호자_홈이 구독한다.
+final myRoutinesProvider = FutureProvider<List<Routine>>((ref) {
+  return ref.watch(routineRepositoryProvider).getMyRoutines();
+});
+
+/// 회원 정보. 실패하면 null이고 화면은 로컬 온보딩 값으로 fallback한다.
+final memberProvider = FutureProvider<Member?>((ref) {
+  return MemberRepository(dio: ref.watch(dioProvider)).getMyInfo();
+});

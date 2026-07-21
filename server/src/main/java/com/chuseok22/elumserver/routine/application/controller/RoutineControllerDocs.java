@@ -73,9 +73,11 @@ public interface RoutineControllerDocs {
     summary = "AI 추가 질문 생성",
     description = """
       보호자가 선택한 도움 목표(PREPARE_ITEMS/PREPARE_NEW)가 있을 때만 일과 생성 전에 확인할 질문을 만듭니다.
-      두 목표를 모두 선택하지 않았다면 required:false를 반환하며, 이 경우 곧바로 POST /api/routines를 호출하면 됩니다.
-      required:true면 question/options를 사용자에게 보여주고, 선택/직접입력한 값을 POST /api/routines의 answers 필드로 전달하세요.
-      이 API는 아무것도 저장하지 않으며(Stateless), Gemini 호출이 실패해도 고정 질문으로 대체해 항상 200을 반환합니다.
+      선택한 도움 목표마다 하나씩 질문이 생성되므로 questions 배열의 길이는 선택한 목표 수와 같을 수 있습니다.
+      두 목표를 모두 선택하지 않았다면 required:false와 빈 questions를 반환하며, 이 경우 곧바로 POST /api/routines를 호출하면 됩니다.
+      required:true면 questions 각각의 question/options를 사용자에게 순서대로 보여주고, 선택/직접입력한 값을 questions 순서 그대로
+      POST /api/routines의 answers 필드(문자열 배열)로 전달하세요.
+      이 API는 아무것도 저장하지 않으며(Stateless), Gemini 호출이 실패해도 선택한 목표별 고정 질문으로 대체해 항상 200을 반환합니다.
       """
   )
   @SecurityRequirement(name = "bearerAuth")
@@ -137,6 +139,31 @@ public interface RoutineControllerDocs {
     @ApiResponse(responseCode = "200", description = "조회 성공")
   })
   ResponseEntity<List<RoutineResponse>> getMyRoutines(Authentication authentication);
+
+  @Operation(
+    summary = "일과 단계 이미지 조회",
+    description = "본인 소유 일과의 특정 단계에 생성된 이미지를 바이너리로 반환합니다."
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "조회 성공(이미지 바이너리)"),
+    @ApiResponse(
+      responseCode = "403",
+      description = "본인 소유가 아닌 일과에 접근",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "존재하지 않는 일과/단계이거나 이미지 파일을 찾을 수 없음",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"ROUTINE_STEP_IMAGE_NOT_FOUND\",\"errorMessage\":\"이미지를 찾을 수 없습니다.\"}"
+        )
+      )
+    )
+  })
+  ResponseEntity<byte[]> getStepImage(Authentication authentication, String routineId, String stepId);
 
   @Operation(
     summary = "일과 재생성(피드백)",

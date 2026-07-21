@@ -160,13 +160,22 @@ public class GeminiTextClient {
     return Map.of(
       "type", "object",
       "properties", Map.of(
-        "question", Map.of("type", "string"),
-        "options", Map.of(
+        "questions", Map.of(
           "type", "array",
-          "items", Map.of("type", "string")
+          "items", Map.of(
+            "type", "object",
+            "properties", Map.of(
+              "question", Map.of("type", "string"),
+              "options", Map.of(
+                "type", "array",
+                "items", Map.of("type", "string")
+              )
+            ),
+            "required", List.of("question", "options")
+          )
         )
       ),
-      "required", List.of("question", "options")
+      "required", List.of("questions")
     );
   }
 }

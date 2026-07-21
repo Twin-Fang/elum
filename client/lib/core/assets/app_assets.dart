@@ -40,6 +40,26 @@ abstract final class AppAssets {
         CardCharacter.fox => '$_images/character_fox.svg',
       };
 
+  // --- 보호자 홈 (Figma `보호자_홈` 217:2655) ---
+
+  /// 상단 로고 (80×30). 시작 화면 로고(164×60)와 크기가 달라 따로 받았다.
+  static const homeLogo = '$_images/logo_elum_home.svg';
+
+  /// 우상단 캐릭터 배지 (56×56 영역). Figma 217:2670 Mask group.
+  static const homeCharacterBadge = '$_images/home_character_badge.svg';
+
+  /// "새로운 일과 만들기" 카드 속 일러스트 (56×56 영역). Figma 217:2675.
+  static const homeNewRoutineIllust = '$_images/home_new_routine_illust.svg';
+
+  /// 최근 일과 빈 상태 일러스트 (40×40 영역). Figma 217:2695.
+  static const homeEmptyIllust = '$_images/home_empty_illust.svg';
+
+  /// 섹션 제목 앞 반짝임 (15×18). Figma `sparkles`.
+  static const iconSparkles = '$_images/icon_sparkles.svg';
+
+  /// 최근 일과 섹션 제목 앞 시계 (18×18). Figma `fi-br-clock`.
+  static const iconClock = '$_images/icon_clock.svg';
+
   // --- 시작 화면 (Figma `시작` 238:1808) ---
 
   /// 이룸 로고 (164×60). Cloudsofa_namgim 폰트 대신 이 SVG를 쓴다.
