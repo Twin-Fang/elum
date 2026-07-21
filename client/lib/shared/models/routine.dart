@@ -138,7 +138,7 @@ abstract class RoutineQuestion with _$RoutineQuestion {
 abstract class QuestionItem with _$QuestionItem {
   const factory QuestionItem({
     @Default('') String question,
-    @Default(<String>[]) List<String> options,
+    @Default(<QuestionOption>[]) List<QuestionOption> options,
   }) = _QuestionItem;
 
   const QuestionItem._();
@@ -150,9 +150,38 @@ abstract class QuestionItem with _$QuestionItem {
     return QuestionItem(
       question: json['question']?.toString() ?? '',
       options: switch (json['options']) {
-        final List<dynamic> list => list.map((e) => e.toString()).toList(),
-        _ => const <String>[],
+        final List<dynamic> list => list
+            .whereType<Map<String, dynamic>>()
+            .map(QuestionOption.fromJson)
+            .toList(),
+        _ => const <QuestionOption>[],
       },
+    );
+  }
+}
+
+/// 선택지 한 개 — 서버 `RoutineQuestionResponse.QuestionItem.OptionItem`.
+///
+/// 서버는 emoji/label을 분리해서 준다. 이걸 통째로 `.toString()`하면
+/// `{emoji: 🏫, label: 학교...}` 같은 Map 문자열이 그대로 화면에 노출된다
+/// (실제로 발생했던 버그 — 이슈 참고). [label]만 선택값·서버 전송에 쓰고,
+/// [displayLabel]은 화면 표시 전용이다.
+@freezed
+abstract class QuestionOption with _$QuestionOption {
+  const factory QuestionOption({
+    @Default('') String emoji,
+    @Default('') String label,
+  }) = _QuestionOption;
+
+  const QuestionOption._();
+
+  /// Figma는 이모지와 라벨을 한 텍스트로 붙여 보여준다(예: "☂️ 우산").
+  String get displayLabel => emoji.isEmpty ? label : '$emoji $label';
+
+  factory QuestionOption.fromJson(Map<String, dynamic> json) {
+    return QuestionOption(
+      emoji: json['emoji']?.toString() ?? '',
+      label: json['label']?.toString() ?? '',
     );
   }
 }

@@ -203,11 +203,14 @@ class _QuestionBlockState extends State<_QuestionBlock> {
               spacing: 6.w,
               runSpacing: 8.h,
               children: [
+                // 선택·서버 전송 값은 label만 쓴다. 화면 표시는 emoji를 붙인
+                // displayLabel — 이 둘을 섞으면 이모지가 선택값에 끼어
+                // 서버가 모르는 문자열이 answers로 나간다.
                 for (final option in widget.item.options)
                   _OptionChip(
-                    label: option,
-                    isSelected: widget.selected.contains(option),
-                    onTap: () => widget.onToggle(option),
+                    label: option.displayLabel,
+                    isSelected: widget.selected.contains(option.label),
+                    onTap: () => widget.onToggle(option.label),
                   ),
                 // 직접 적은 것은 서버 선택지 뒤에 온다. 지울 수 있는 건 이쪽뿐이다.
                 for (final option in widget.custom)
