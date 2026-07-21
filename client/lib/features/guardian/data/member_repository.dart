@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/network/dio_client.dart';
 
 /// 보호자 회원 정보 — 서버 `MemberResponse`에 대응한다.
 ///
@@ -86,4 +89,24 @@ class MemberRepository {
       debugPrint('[member] 목표 저장 실패, 로컬에는 남아 있다: $e');
     }
   }
+
+  /// 캐릭터 저장. 온보딩 결과를 서버와 맞춘다.
+  ///
+  /// ⚠️ [character]는 서버 `CharacterType` enum 값이어야 한다 (`LULU` / `POPO`).
+  /// `CardCharacter.apiValue`를 그대로 넘긴다. 없는 값을 보내면 서버가 400을 준다.
+  Future<void> updateCharacter(String character) async {
+    try {
+      await _dio.patch<dynamic>(
+        '/api/member/character',
+        data: {'character': character},
+      );
+    } catch (e) {
+      debugPrint('[member] 캐릭터 저장 실패, 로컬에는 남아 있다: $e');
+    }
+  }
 }
+
+/// 회원 정보 저장소. 인증 인터셉터가 붙은 [dioProvider]를 쓴다.
+final memberRepositoryProvider = Provider<MemberRepository>(
+  (ref) => MemberRepository(dio: ref.watch(dioProvider)),
+);

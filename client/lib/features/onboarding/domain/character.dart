@@ -4,14 +4,19 @@
 enum CardCharacter {
   // 순서가 화면 배치다 — 고양이가 왼쪽, 여우가 오른쪽.
   // enum 순서를 바꾸면 화면이 조용히 뒤집히므로 테스트로 고정해 뒀다.
-  cat('고양이', 'CAT', '루루'),
-  fox('여우', 'FOX', '포포');
+  //
+  // apiValue는 서버 CharacterType enum(LULU/POPO)에 맞춘다. 서버는 캐릭터를
+  // '종류'(CAT/FOX)가 아니라 '이름'(루루/포포)으로 저장하므로 프론트가 이를 따른다.
+  // 어긋나면 PATCH /api/member/character가 역직렬화에 실패한다 (이슈 #89).
+  cat('고양이', 'LULU', '루루'),
+  fox('여우', 'POPO', '포포');
 
   const CardCharacter(this.label, this.apiValue, this.displayName);
 
   /// 종류 (접근성 안내·개발자용)
   final String label;
 
+  /// 서버 `CharacterType` enum 값 (`LULU` / `POPO`)
   final String apiValue;
 
   /// 카드에 표시되는 이름.
