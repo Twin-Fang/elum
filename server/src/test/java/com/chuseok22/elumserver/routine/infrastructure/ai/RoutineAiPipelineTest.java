@@ -53,13 +53,15 @@ class RoutineAiPipelineTest {
   }
 
   @Test
-  @DisplayName("Gemini가 유효한 questions 배열을 반환하면 emoji/label을 그대로 변환해서 반환한다")
+  @DisplayName("Gemini가 목표별로 유효한 questions를 반환하면 emoji/label을 그대로 변환해서 반환한다")
   void generateQuestion_validResponse_returnsMappedQuestions() {
     String json = "{\"questions\":["
-      + "{\"question\":\"준비물이 있나요?\",\"options\":["
-      + "{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"}]},"
-      + "{\"question\":\"평소와 다른 점이 있나요?\",\"options\":["
-      + "{\"emoji\":\"⏰\",\"label\":\"시간 변경\"},{\"emoji\":\"📍\",\"label\":\"장소 변경\"}]}]}";
+      + "{\"supportGoal\":\"PREPARE_ITEMS\",\"question\":\"준비물이 있나요?\",\"options\":["
+      + "{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"},"
+      + "{\"emoji\":\"👖\",\"label\":\"장화\"}]},"
+      + "{\"supportGoal\":\"PREPARE_NEW\",\"question\":\"평소와 다른 점이 있나요?\",\"options\":["
+      + "{\"emoji\":\"⏰\",\"label\":\"시간 변경\"},{\"emoji\":\"📍\",\"label\":\"장소 변경\"},"
+      + "{\"emoji\":\"👥\",\"label\":\"동행자 변경\"}]}]}";
     when(geminiTextClient.generateQuestion(eq("하늘이"), anySet(), eq("내일 비 오는 날")))
       .thenReturn(textResponse(json));
 
@@ -74,17 +76,18 @@ class RoutineAiPipelineTest {
         RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::emoji,
         RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::label
       )
-      .containsExactly(tuple("☔", "우산"), tuple("🧥", "우비"));
+      .containsExactly(tuple("☔", "우산"), tuple("🧥", "우비"), tuple("👖", "장화"));
     assertThat(result.questions().get(1).options())
       .extracting(RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::label)
-      .containsExactly("시간 변경", "장소 변경");
+      .containsExactly("시간 변경", "장소 변경", "동행자 변경");
   }
 
   @Test
   @DisplayName("옵션에 label이 없으면 그 옵션만 제외하고 나머지는 유지한다")
   void generateQuestion_optionMissingLabel_dropsOnlyThatOption() {
-    String json = "{\"questions\":[{\"question\":\"준비물이 있나요?\",\"options\":["
-      + "{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"\"}]}]}";
+    String json = "{\"questions\":[{\"supportGoal\":\"PREPARE_ITEMS\",\"question\":\"준비물이 있나요?\","
+      + "\"options\":[{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"},"
+      + "{\"emoji\":\"👖\",\"label\":\"장화\"},{\"emoji\":\"🧦\",\"label\":\"\"}]}]}";
     when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
@@ -94,22 +97,29 @@ class RoutineAiPipelineTest {
     assertThat(result.questions()).hasSize(1);
     assertThat(result.questions().get(0).options())
       .extracting(RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::label)
-      .containsExactly("우산");
+      .containsExactly("우산", "우비", "장화");
   }
 
   @Test
-  @DisplayName("모든 옵션의 label이 비어있으면 그 질문 자체를 fallback으로 대체한다")
-  void generateQuestion_allOptionsMissingLabel_fallsBack() {
-    String json = "{\"questions\":[{\"question\":\"준비물이 있나요?\",\"options\":["
-      + "{\"emoji\":\"☔\",\"label\":\"\"},{\"emoji\":\"🧥\",\"label\":\"   \"}]}]}";
+  @DisplayName("한 목표의 모든 옵션 label이 비어있으면 그 목표만 fallback으로 대체된다")
+  void generateQuestion_oneGoalAllOptionsMissingLabel_fallsBackOnlyThatGoal() {
+    String json = "{\"questions\":["
+      + "{\"supportGoal\":\"PREPARE_ITEMS\",\"question\":\"준비물이 있나요?\",\"options\":["
+      + "{\"emoji\":\"☔\",\"label\":\"\"},{\"emoji\":\"🧥\",\"label\":\"   \"}]},"
+      + "{\"supportGoal\":\"PREPARE_NEW\",\"question\":\"평소와 다른 점이 있나요?\",\"options\":["
+      + "{\"emoji\":\"⏰\",\"label\":\"시간 변경\"},{\"emoji\":\"📍\",\"label\":\"장소 변경\"},"
+      + "{\"emoji\":\"👥\",\"label\":\"동행자 변경\"}]}]}";
     when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
-      "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), "내일 비 오는 날"
+      "하늘이", Set.of(SupportGoal.PREPARE_ITEMS, SupportGoal.PREPARE_NEW), "내일 비 오는 날"
     );
 
-    assertThat(result.questions()).hasSize(1);
-    assertThat(result.questions().get(0).question()).isEqualTo("꼭 챙겨야 하는 준비물이 있나요?");
+    assertThat(result.questions()).hasSize(2);
+    // generateQuestion()이 PREPARE_ITEMS -> PREPARE_NEW 고정 순서로 순회하므로 순서까지 고정된다.
+    assertThat(result.questions())
+      .extracting(RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem::question)
+      .containsExactly("꼭 챙겨야 하는 준비물이 있나요?", "평소와 다른 점이 있나요?");
   }
 
   @Test
@@ -148,6 +158,37 @@ class RoutineAiPipelineTest {
   void generateQuestion_emptyQuestions_fallsBack() {
     when(geminiTextClient.generateQuestion(any(), any(), any()))
       .thenReturn(textResponse("{\"questions\":[]}"));
+
+    RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
+      "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), "내일 비 오는 날"
+    );
+
+    assertThat(result.questions()).hasSize(1);
+    assertThat(result.questions().get(0).question()).isEqualTo("꼭 챙겨야 하는 준비물이 있나요?");
+  }
+
+  @Test
+  @DisplayName("supportGoal이 요청 목표와 다르면 그 항목은 무시하고 해당 목표는 fallback으로 대체된다")
+  void generateQuestion_supportGoalMismatch_ignoresAndFallsBack() {
+    String json = "{\"questions\":["
+      + "{\"supportGoal\":\"PREPARE_NEW\",\"question\":\"준비물이 있나요?\",\"options\":["
+      + "{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"},{\"emoji\":\"👖\",\"label\":\"장화\"}]}]}";
+    when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
+
+    RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
+      "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), "내일 비 오는 날"
+    );
+
+    assertThat(result.questions()).hasSize(1);
+    assertThat(result.questions().get(0).question()).isEqualTo("꼭 챙겨야 하는 준비물이 있나요?");
+  }
+
+  @Test
+  @DisplayName("옵션이 3개 미만이면 그 목표는 무효로 판단해 fallback으로 대체된다")
+  void generateQuestion_fewerThanThreeOptions_fallsBackThatGoal() {
+    String json = "{\"questions\":[{\"supportGoal\":\"PREPARE_ITEMS\",\"question\":\"준비물이 있나요?\","
+      + "\"options\":[{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"}]}]}";
+    when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
       "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), "내일 비 오는 날"

@@ -77,10 +77,34 @@ public class RoutineAiPipeline {
       .collect(Collectors.toMap(RoutineStepDraft.StepDraft::order, step -> previousImagePathsByOrder.get(step.order())));
   }
 
-  // 도움 목표 기반 추가 질문 생성. Gemini 호출/파싱이 실패하면 예외를 던지지 않고
-  // 목표 조합별 고정 매핑으로 대체한다(fail-open) — 다른 생성 메서드와 달리 이 흐름은
-  // 실패해도 사용자에게 에러를 노출하지 않기로 설계에서 결정했다.
+  private static final int MIN_OPTIONS = 3;
+
+  // 도움 목표 기반 추가 질문 생성. 선택된 각 SupportGoal(PREPARE_ITEMS, PREPARE_NEW)마다
+  // Gemini 응답에서 supportGoal이 일치하고 옵션이 3개 이상 남는 질문을 찾아 쓰고, 없으면
+  // 그 목표만 fallbackQuestion(goal)로 대체한다 — 목표 하나가 무효여도 나머지 목표까지
+  // 통째로 fallback 처리되던 이전 동작을 목표 단위로 좁혔다.
   public RoutineQuestionResult generateQuestion(
+    String nickname, Set<SupportGoal> supportGoals, String sanitizedInputText
+  ) {
+    Map<String, RoutineQuestionResult.QuestionResultItem> validQuestionsByGoal = fetchValidQuestionsByGoal(
+      nickname, supportGoals, sanitizedInputText
+    );
+
+    List<RoutineQuestionResult.QuestionResultItem> questions = new ArrayList<>();
+    for (SupportGoal goal : List.of(SupportGoal.PREPARE_ITEMS, SupportGoal.PREPARE_NEW)) {
+      if (!supportGoals.contains(goal)) {
+        continue;
+      }
+      RoutineQuestionResult.QuestionResultItem valid = validQuestionsByGoal.get(goal.name());
+      questions.add(valid != null ? valid : fallbackQuestionItem(goal));
+    }
+    return new RoutineQuestionResult(questions);
+  }
+
+  // Gemini 호출/파싱이 아예 실패하면 빈 맵을 반환해 모든 목표가 fallback을 쓰게 한다
+  // (기존의 "전체 실패 시 전체 fallback"과 동일한 결과가 되지만, 응답이 왔는데 일부
+  // 목표만 무효인 경우와 같은 경로로 처리한다).
+  private Map<String, RoutineQuestionResult.QuestionResultItem> fetchValidQuestionsByGoal(
     String nickname, Set<SupportGoal> supportGoals, String sanitizedInputText
   ) {
     String json = null;
@@ -89,26 +113,31 @@ public class RoutineAiPipeline {
         geminiTextClient.generateQuestion(nickname, supportGoals, sanitizedInputText);
       json = response.candidates().get(0).content().parts().get(0).text();
       RoutineQuestionDraft draft = objectMapper.readValue(json, RoutineQuestionDraft.class);
-      if (draft.questions() == null || draft.questions().isEmpty()) {
-        throw new IllegalStateException("Gemini가 questions 없이 응답함");
+      if (draft.questions() == null) {
+        return Map.of();
       }
-      List<RoutineQuestionResult.QuestionResultItem> questions = draft.questions().stream()
-        .filter(item -> item.question() != null && !item.question().isBlank()
-          && item.options() != null && !item.options().isEmpty())
-        .map(item -> new RoutineQuestionResult.QuestionResultItem(
-          item.question(), toOptionResults(item.options())
-        ))
-        // label이 모두 비어있어 옵션이 하나도 안 남은 질문은 통째로 제외한다.
-        .filter(item -> !item.options().isEmpty())
-        .toList();
-      if (questions.isEmpty()) {
-        throw new IllegalStateException("Gemini가 유효한 question/options 없이 응답함");
-      }
-      return new RoutineQuestionResult(questions);
+      return draft.questions().stream()
+        .filter(this::isValidQuestionItem)
+        .collect(Collectors.toMap(
+          RoutineQuestionDraft.QuestionItem::supportGoal,
+          item -> new RoutineQuestionResult.QuestionResultItem(item.question(), toOptionResults(item.options())),
+          (first, second) -> first // 같은 supportGoal이 중복되면 먼저 나온 것만 채택한다.
+        ));
     } catch (Exception e) {
-      log.warn("Gemini 추가 질문 생성 실패, 고정 매핑으로 대체: response={}", json, e);
-      return fallbackQuestion(supportGoals);
+      log.warn("Gemini 추가 질문 생성 실패, 목표별 고정 매핑으로 대체: response={}", json, e);
+      return Map.of();
     }
+  }
+
+  // supportGoal이 PREPARE_ITEMS/PREPARE_NEW 중 하나이고, question이 비어있지 않고, 라벨이
+  // 있는 옵션이 3개 이상 남아야 유효한 질문으로 인정한다.
+  private boolean isValidQuestionItem(RoutineQuestionDraft.QuestionItem item) {
+    boolean hasKnownGoal = "PREPARE_ITEMS".equals(item.supportGoal()) || "PREPARE_NEW".equals(item.supportGoal());
+    boolean hasQuestion = item.question() != null && !item.question().isBlank();
+    long validOptionCount = item.options() == null ? 0 : item.options().stream()
+      .filter(option -> option.label() != null && !option.label().isBlank())
+      .count();
+    return hasKnownGoal && hasQuestion && validOptionCount >= MIN_OPTIONS;
   }
 
   // label이 없는 옵션은 아동에게 보여줄 수 없는 빈 버튼이 되므로 제외한다. emoji만 없으면
@@ -124,29 +153,25 @@ public class RoutineAiPipeline {
       .toList();
   }
 
-  // 선택한 도움 목표 각각에 대해 개별 질문을 만든다(여러 목표를 하나로 합치지 않음). "직접 입력"은
-  // 보호자가 자유 텍스트를 입력하도록 유도하는 항목이라 추천 답변 목록에 절대 포함하지 않는다(서비스 정책).
-  private RoutineQuestionResult fallbackQuestion(Set<SupportGoal> supportGoals) {
-    List<RoutineQuestionResult.QuestionResultItem> questions = new ArrayList<>();
-    if (supportGoals.contains(SupportGoal.PREPARE_ITEMS)) {
-      questions.add(new RoutineQuestionResult.QuestionResultItem(
+  // 목표 하나에 대한 고정 대체 질문. "직접 입력"은 보호자가 자유 텍스트를 입력하도록
+  // 유도하는 항목이라 추천 답변 목록에 절대 포함하지 않는다(서비스 정책).
+  private RoutineQuestionResult.QuestionResultItem fallbackQuestionItem(SupportGoal goal) {
+    if (goal == SupportGoal.PREPARE_ITEMS) {
+      return new RoutineQuestionResult.QuestionResultItem(
         "꼭 챙겨야 하는 준비물이 있나요?",
         List.of(
           option("☔", "우산"), option("🧥", "우비"), option("👖", "장화"),
           option("🧦", "여벌 양말"), option("🧻", "작은 수건")
         )
-      ));
+      );
     }
-    if (supportGoals.contains(SupportGoal.PREPARE_NEW)) {
-      questions.add(new RoutineQuestionResult.QuestionResultItem(
-        "평소와 다르게 준비해야 하는 점이 있나요?",
-        List.of(
-          option("⏰", "시간 변경"), option("📍", "장소 변경"),
-          option("🧑‍🤝‍🧑", "동행자 변경"), option("🌦️", "날씨/환경 변화")
-        )
-      ));
-    }
-    return new RoutineQuestionResult(questions);
+    return new RoutineQuestionResult.QuestionResultItem(
+      "평소와 다르게 준비해야 하는 점이 있나요?",
+      List.of(
+        option("⏰", "시간 변경"), option("📍", "장소 변경"),
+        option("🧑‍🤝‍🧑", "동행자 변경"), option("🌦️", "날씨/환경 변화")
+      )
+    );
   }
 
   private RoutineQuestionResult.QuestionResultItem.OptionResult option(String emoji, String label) {
