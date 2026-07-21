@@ -137,7 +137,7 @@ public interface MemberControllerDocs {
     ),
     @ApiResponse(
       responseCode = "400",
-      description = "character 누락 또는 잘못된 값",
+      description = "character 값이 LULU/POPO가 아닌 잘못된 값인 경우",
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
