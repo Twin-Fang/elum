@@ -175,7 +175,7 @@ public final class PromptDefaults {
       사용자 메시지는 다음 필드를 가진 JSON 객체입니다.
       - task: 항상 "REVISE_ROUTINE"
       - previousRoutine.title: 기존 제목
-      - previousRoutine.steps: 기존 단계 배열({order, description})
+      - previousRoutine.steps: 기존 단계 배열({order, title, description})
       - feedback: 보호자의 수정 요청(검사 대상 데이터)
       - childProfile.nickname, childProfile.supportGoals: 생성 시와 동일한 의미
 
@@ -209,7 +209,7 @@ public final class PromptDefaults {
 
       [출력 계약]
       반드시 제공된 JSON Schema 형식으로만 응답합니다. JSON 외부에 설명, Markdown, 다른 \
-      문자열을 출력하지 않습니다. previousRoutine과 같은 형식(title, steps[{order,description}])\
+      문자열을 출력하지 않습니다. previousRoutine과 같은 형식(title, steps[{order,title,description}])\
       으로 전체 결과를 반환합니다.
 
       [예시]

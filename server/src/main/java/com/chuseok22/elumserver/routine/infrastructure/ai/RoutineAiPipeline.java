@@ -81,7 +81,7 @@ public class RoutineAiPipeline {
 
   // 도움 목표 기반 추가 질문 생성. 선택된 각 SupportGoal(PREPARE_ITEMS, PREPARE_NEW)마다
   // Gemini 응답에서 supportGoal이 일치하고 옵션이 3개 이상 남는 질문을 찾아 쓰고, 없으면
-  // 그 목표만 fallbackQuestion(goal)로 대체한다 — 목표 하나가 무효여도 나머지 목표까지
+  // 그 목표만 fallbackQuestionItem(goal)로 대체한다 — 목표 하나가 무효여도 나머지 목표까지
   // 통째로 fallback 처리되던 이전 동작을 목표 단위로 좁혔다.
   public RoutineQuestionResult generateQuestion(
     String nickname, Set<SupportGoal> supportGoals, String sanitizedInputText

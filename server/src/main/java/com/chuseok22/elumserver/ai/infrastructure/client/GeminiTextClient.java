@@ -196,6 +196,7 @@ public class GeminiTextClient {
               "order", Map.of("type", "integer"),
               "title", Map.of(
                 "type", "string",
+                "minLength", 1,
                 "description", "카드에 크게 표시할 2~4어절짜리 짧은 라벨. '~해요' 체 (예: '옷을 입어요')"
               ),
               "description", Map.of(
