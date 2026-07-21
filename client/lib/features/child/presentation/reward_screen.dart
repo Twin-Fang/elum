@@ -132,6 +132,11 @@ class _RewardHero extends StatelessWidget {
   /// 바닥 그림자 (Figma `Ellipse 23` — x162 y430, 65×16).
   static const _shadowFrame = (x: 162.0, y: 430.0, w: 65.0, h: 16.0);
 
+  /// 별만 위로 끌어올리는 양. Figma는 별 하단이 캐릭터 머리에 거의 닿아
+  /// 겹쳐 보인다. 별만 이만큼 올려 간격을 확보한다 — 캐릭터는 그대로다
+  /// (이슈 #107). blur 후광까지 감안한 실측값이다.
+  static const _starLift = 28.0;
+
   /// 캐릭터 실측 배치 (Figma 절대좌표).
   /// 포포는 레이아웃 박스(131.06, 321) 122.65×118의 중앙에 실측 117×104가 들어간다.
   ({double x, double y, double w, double h}) get _charFrame =>
@@ -148,10 +153,13 @@ class _RewardHero extends StatelessWidget {
     double sx(double v) => (v - _starOriginX) * _scale;
     double sy(double v) => (v - _starOriginY) * _scale;
 
-    // 그림자 하단이 별 박스보다 아래로 나온 만큼 높이를 늘려
-    // 다음 위젯(문구)과 겹치지 않게 한다
+    // 그림자 하단이 별 박스보다 아래로 나온 만큼 높이를 늘린다.
+    // 여기에 별을 위로 올린 만큼(_starLift)을 더해 위 공간을 확보한다 —
+    // 별은 Stack 최상단(top:0)에 두고, 그림자·캐릭터를 _starLift만큼 내려
+    // 화면상 제자리에 두면 결과적으로 별만 위로 올라간다 (이슈 #107).
     final height =
-        (sy(_shadowFrame.y) + _shadowFrame.h * _scale).clamp(RewardStar.mainSize, double.infinity);
+        (sy(_shadowFrame.y) + _shadowFrame.h * _scale + _starLift)
+            .clamp(RewardStar.mainSize + _starLift, double.infinity);
 
     // 캐릭터가 별 위에 앉은 구도라 세로도 .w로 통일한다 —
     // .h를 섞으면 화면비가 다른 기기에서 캐릭터가 별에서 떨어진다
@@ -161,10 +169,11 @@ class _RewardHero extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // z순서는 Figma 레이어 순서 그대로 — 그림자 → 별 → 캐릭터
+          // z순서는 Figma 레이어 순서 그대로 — 그림자 → 별 → 캐릭터.
+          // 그림자·캐릭터는 별을 올린 만큼(_starLift) 내려 화면상 제자리를 지킨다.
           Positioned(
             left: sx(_shadowFrame.x).w,
-            top: sy(_shadowFrame.y).w,
+            top: (sy(_shadowFrame.y) + _starLift).w,
             child: _FadeSlideIn(
               delay: AppMotion.normal,
               child: ClipOval(
@@ -179,7 +188,7 @@ class _RewardHero extends StatelessWidget {
           const Positioned(top: 0, left: 0, child: RewardStar()),
           Positioned(
             left: sx(char.x).w,
-            top: sy(char.y).w,
+            top: (sy(char.y) + _starLift).w,
             child: _FadeSlideIn(
               delay: AppMotion.normal,
               child: SvgPicture.asset(

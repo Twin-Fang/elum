@@ -163,13 +163,17 @@ GoRouter createRouter({
           return ChildRoutineDetailScreen(routine: routine);
         },
       ),
+      // 어두운 밤하늘 배경이라 옆에서 밀려드는 슬라이드가 부자연스럽다.
+      // fade로 쓱 나타나게 한다 (이슈 #107).
       GoRoute(
         path: Routes.childStars,
-        builder: (context, state) => const ChildStarsScreen(),
+        pageBuilder: (context, state) =>
+            fadePage(state, const ChildStarsScreen()),
       ),
       GoRoute(
         path: Routes.childReward,
-        builder: (context, state) => const RewardScreen(),
+        pageBuilder: (context, state) =>
+            fadePage(state, const RewardScreen()),
       ),
       GoRoute(
         path: Routes.modeSwitch,

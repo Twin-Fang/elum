@@ -87,6 +87,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.rewardBackdropBottom,
     required this.rewardStar,
     required this.rewardStarGlow,
+    required this.rewardStarHalo,
     required this.rewardStarGreen,
     required this.rewardStarPurple,
     required this.starDecoGlowGreen,
@@ -217,6 +218,9 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color rewardStar;
   /// 큰 별 주변 빛 (rgba(208,255,0,0.3))
   final Color rewardStarGlow;
+  /// 큰 별 뒤 넓게 번지는 blur 후광 — 노랑 (#FFDD00). Figma의 blur(20px)
+  /// 노란 별 레이어(node 364:8283 / 334:4282)를 GlowingSvg.haloBlur로 재현.
+  final Color rewardStarHalo;
   /// 작은 별 — 초록
   final Color rewardStarGreen;
   /// 작은 별 — 보라
@@ -308,6 +312,7 @@ class AppColors extends ThemeExtension<AppColors> {
     rewardBackdropBottom: Color(0xFF242634),
     rewardStar: Color(0xFFD0FF00),
     rewardStarGlow: Color(0x4DD0FF00),
+    rewardStarHalo: Color(0xFFFFDD00),
     rewardStarGreen: Color(0xFF86FCA3),
     rewardStarPurple: Color(0xFFA186FC),
     starDecoGlowGreen: Color(0xFF7BFFB0),
@@ -386,6 +391,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? rewardBackdropBottom,
     Color? rewardStar,
     Color? rewardStarGlow,
+    Color? rewardStarHalo,
     Color? rewardStarGreen,
     Color? rewardStarPurple,
     Color? starDecoGlowGreen,
@@ -454,6 +460,7 @@ class AppColors extends ThemeExtension<AppColors> {
       rewardBackdropBottom: rewardBackdropBottom ?? this.rewardBackdropBottom,
       rewardStar: rewardStar ?? this.rewardStar,
       rewardStarGlow: rewardStarGlow ?? this.rewardStarGlow,
+      rewardStarHalo: rewardStarHalo ?? this.rewardStarHalo,
       rewardStarGreen: rewardStarGreen ?? this.rewardStarGreen,
       rewardStarPurple: rewardStarPurple ?? this.rewardStarPurple,
       starDecoGlowGreen: starDecoGlowGreen ?? this.starDecoGlowGreen,
@@ -535,6 +542,7 @@ class AppColors extends ThemeExtension<AppColors> {
       rewardBackdropBottom: Color.lerp(rewardBackdropBottom, other.rewardBackdropBottom, t)!,
       rewardStar: Color.lerp(rewardStar, other.rewardStar, t)!,
       rewardStarGlow: Color.lerp(rewardStarGlow, other.rewardStarGlow, t)!,
+      rewardStarHalo: Color.lerp(rewardStarHalo, other.rewardStarHalo, t)!,
       rewardStarGreen: Color.lerp(rewardStarGreen, other.rewardStarGreen, t)!,
       rewardStarPurple: Color.lerp(rewardStarPurple, other.rewardStarPurple, t)!,
       starDecoGlowGreen:

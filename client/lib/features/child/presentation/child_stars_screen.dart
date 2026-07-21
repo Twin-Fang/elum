@@ -76,6 +76,7 @@ class ChildStarsScreen extends ConsumerWidget {
                   ),
                 ),
               // 큰 별 (Figma x=47, y=182, 299×299)
+              // blur(20px) 노란 후광(node 364:8283)을 haloBlur로 재현 (이슈 #107).
               Positioned(
                 left: 47.w,
                 top: 130.h,
@@ -83,6 +84,8 @@ class ChildStarsScreen extends ConsumerWidget {
                   assetPath: AppAssets.starBig,
                   size: 299.w,
                   glowColor: colors.rewardStarGlow,
+                  haloBlur: 299.w * 0.06,
+                  haloColor: colors.rewardStarHalo,
                 ),
               ),
               // 누적 개수 (Figma y=481, 80/w800, 노랑→흰 그라데이션)

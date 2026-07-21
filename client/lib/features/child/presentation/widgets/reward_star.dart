@@ -142,11 +142,16 @@ class _Star extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Figma boxShadow 0 0 20 rgba(208,255,0,0.3) — 별 뒤에서 번지는 빛.
+    // Figma boxShadow 0 0 20 rgba(208,255,0,0.3) + blur(20px) 노란 후광
+    // (node 364:8283 / 334:4282) — 별 뒤에서 넓게 번지는 빛 (이슈 #107).
     return GlowingSvg(
       assetPath: AppAssets.starBig,
       size: size,
       glowColor: glow,
+      // 별 크기 비례로 흐림을 준다. Figma 20px와 sigma 스케일이 달라
+      // 시뮬레이터 대조로 맞춘 값이다.
+      haloBlur: size * 0.06,
+      haloColor: context.colors.rewardStarHalo,
     );
   }
 }
