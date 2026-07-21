@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T11:05:56Z",
-    "currentVersion": "1.0.53",
+    "lastUpdated": "2026-07-21T11:44:04Z",
+    "currentVersion": "1.0.55",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 26
+    "totalReleases": 27
   },
   "releases": [
+    {
+      "version": "1.0.55",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 54,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **기타**\n  * 추가질문 화면 직접 입력 구현 및 선택지 이모지 반영 : feat : + 직접 입력하기 칩·입력 필드 추가\n  * 일과 만들기 로딩 화면 Figma 정합 및 flow 순서 수정 : fix : 로딩 화면 2종 분리·스텝 최소 노출시간 보장",
+      "parsed_changes": {
+        "기타": {
+          "title": "기타",
+          "items": [
+            "추가질문 화면 직접 입력 구현 및 선택지 이모지 반영 : feat : + 직접 입력하기 칩·입력 필드 추가",
+            "일과 만들기 로딩 화면 Figma 정합 및 flow 순서 수정 : fix : 로딩 화면 2종 분리·스텝 최소 노출시간 보장"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.53",
       "project_type": "flutter",
