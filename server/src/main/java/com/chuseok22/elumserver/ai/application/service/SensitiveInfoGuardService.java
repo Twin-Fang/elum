@@ -34,16 +34,23 @@ public class SensitiveInfoGuardService {
 
   public SensitiveInfoCheckResult check(String text) {
     if (!localLlmProperties.enabled()) {
+      log.info("로컬 LLM 민감정보 검증 비활성화 상태, 원문 그대로 통과: text={}", text);
       return passThrough(text);
     }
 
     String systemPrompt = promptTemplateService.getContent(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
     try {
       SensitiveInfoCheckContent content = callAndParse(systemPrompt, text);
-      return toResult(text, content);
+      SensitiveInfoCheckResult result = toResult(text, content);
+      log.info(
+        "로컬 LLM 민감정보 검증 완료: hasSensitiveInfo={}, categories={}, sanitizedText={}",
+        result.hasSensitiveInfo(), result.categories(), result.sanitizedText()
+      );
+      return result;
     } catch (Exception e) {
-      // 예외 메시지에는 검사 대상 원문 일부가 포함될 수 있으므로 예외 타입만 로그로 남긴다.
-      log.warn("로컬 LLM 민감정보 검증 실패, fail-open으로 통과 처리함: {}", e.getClass().getSimpleName());
+      // 개발 중 원인 추적을 위해 검사 대상 원문과 전체 스택트레이스를 함께 로그로 남긴다
+      // (운영 로그는 개발자만 조회 가능하다는 전제 하에 원문 로깅을 허용하기로 결정됨).
+      log.warn("로컬 LLM 민감정보 검증 실패, fail-open으로 통과 처리함: text={}", text, e);
       return passThrough(text);
     }
   }
@@ -56,7 +63,7 @@ public class SensitiveInfoGuardService {
       SensitiveInfoCheckContent content = callAndParse(systemPrompt, text);
       return toResult(text, content);
     } catch (Exception e) {
-      log.warn("[관리자 테스트] 로컬 LLM 민감정보 검증 실패: {}", e.getClass().getSimpleName());
+      log.warn("[관리자 테스트] 로컬 LLM 민감정보 검증 실패: systemPrompt={}, text={}", systemPrompt, text, e);
       throw new CustomException(ErrorCode.PROMPT_TEST_LOCAL_LLM_FAILED);
     }
   }

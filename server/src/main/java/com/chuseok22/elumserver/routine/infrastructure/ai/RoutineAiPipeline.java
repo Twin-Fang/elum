@@ -64,10 +64,11 @@ public class RoutineAiPipeline {
   public RoutineQuestionResult generateQuestion(
     String nickname, Set<SupportGoal> supportGoals, String sanitizedInputText
   ) {
+    String json = null;
     try {
       GeminiGenerateContentResponse response =
         geminiTextClient.generateQuestion(nickname, supportGoals, sanitizedInputText);
-      String json = response.candidates().get(0).content().parts().get(0).text();
+      json = response.candidates().get(0).content().parts().get(0).text();
       RoutineQuestionDraft draft = objectMapper.readValue(json, RoutineQuestionDraft.class);
       if (draft.questions() == null || draft.questions().isEmpty()) {
         throw new IllegalStateException("Gemini가 questions 없이 응답함");
@@ -82,7 +83,7 @@ public class RoutineAiPipeline {
       }
       return new RoutineQuestionResult(questions);
     } catch (Exception e) {
-      log.warn("Gemini 추가 질문 생성 실패, 고정 매핑으로 대체", e);
+      log.warn("Gemini 추가 질문 생성 실패, 고정 매핑으로 대체: response={}", json, e);
       return fallbackQuestion(supportGoals);
     }
   }
@@ -110,26 +111,27 @@ public class RoutineAiPipeline {
   // 이 메서드 밖으로 그대로 전파돼 GlobalExceptionHandler의 범용 500 처리로 새어나가
   // ROUTINE_AI_GENERATION_FAILED(502)로 변환되지 않는 문제가 있었다(fable5 검토에서 발견).
   private RoutineStepDraft parseDraft(Supplier<GeminiGenerateContentResponse> call) {
+    String json = null;
     try {
       GeminiGenerateContentResponse response = call.get();
-      String json = response.candidates().get(0).content().parts().get(0).text();
+      json = response.candidates().get(0).content().parts().get(0).text();
       RoutineStepDraft draft = objectMapper.readValue(json, RoutineStepDraft.class);
       // title은 Routine.title이 NOT NULL이라, 스키마 위반으로 누락되면 DB 제약 위반(500)이
       // 아니라 여기서 먼저 502로 처리한다(fable5 검토에서 발견).
       if (draft.title() == null || draft.title().isBlank()) {
-        log.warn("Gemini가 title 없이 응답함");
+        log.warn("Gemini가 title 없이 응답함: response={}", json);
         throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
       }
       if (draft.steps() == null || draft.steps().isEmpty() || draft.steps().size() > MAX_STEPS) {
-        log.warn("Gemini가 반환한 단계 수가 허용 범위를 벗어남: {}",
-          draft.steps() == null ? 0 : draft.steps().size());
+        log.warn("Gemini가 반환한 단계 수가 허용 범위를 벗어남: count={}, response={}",
+          draft.steps() == null ? 0 : draft.steps().size(), json);
         throw new CustomException(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED);
       }
       return normalizeOrder(draft);
     } catch (CustomException e) {
       throw e;
     } catch (Exception e) {
-      log.warn("Gemini 텍스트 생성/응답 파싱 실패", e);
+      log.warn("Gemini 텍스트 생성/응답 파싱 실패: response={}", json, e);
       throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
     }
   }

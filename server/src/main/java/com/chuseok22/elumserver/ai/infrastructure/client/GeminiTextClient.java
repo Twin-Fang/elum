@@ -10,10 +10,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class GeminiTextClient {
@@ -114,12 +116,30 @@ public class GeminiTextClient {
       generationConfig(schema)
     );
 
-    return geminiRestClient.post()
-      .uri("/v1beta/models/{model}:generateContent", geminiProperties.textModel())
-      .header("x-goog-api-key", geminiProperties.apiKey())
-      .body(request)
-      .retrieve()
-      .body(GeminiGenerateContentResponse.class);
+    long startedAt = System.currentTimeMillis();
+    log.info(
+      "Gemini 텍스트 생성 호출 시작: model={}, systemPrompt={}, userContent={}",
+      geminiProperties.textModel(), systemPrompt, userContentText
+    );
+    try {
+      GeminiGenerateContentResponse response = geminiRestClient.post()
+        .uri("/v1beta/models/{model}:generateContent", geminiProperties.textModel())
+        .header("x-goog-api-key", geminiProperties.apiKey())
+        .body(request)
+        .retrieve()
+        .body(GeminiGenerateContentResponse.class);
+      log.info(
+        "Gemini 텍스트 생성 호출 완료: model={}, elapsedMs={}, response={}",
+        geminiProperties.textModel(), System.currentTimeMillis() - startedAt, response
+      );
+      return response;
+    } catch (Exception e) {
+      log.warn(
+        "Gemini 텍스트 생성 호출 실패: model={}, elapsedMs={}, systemPrompt={}, userContent={}",
+        geminiProperties.textModel(), System.currentTimeMillis() - startedAt, systemPrompt, userContentText, e
+      );
+      throw e;
+    }
   }
 
   private String wrapAsData(String text) {

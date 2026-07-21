@@ -104,7 +104,7 @@ public class AdminPromptService {
       String base64 = Base64.getEncoder().encodeToString(image.bytes());
       return "data:image/" + image.extension() + ";base64," + base64;
     } catch (Exception e) {
-      log.warn("[관리자 테스트] Gemini 이미지 생성 실패: {}", e.getClass().getSimpleName());
+      log.warn("[관리자 테스트] Gemini 이미지 생성 실패: prefix={}, sampleInput={}", prefix, sampleInput, e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_IMAGE_FAILED);
     }
   }
