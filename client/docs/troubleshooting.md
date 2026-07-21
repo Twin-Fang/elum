@@ -34,6 +34,7 @@
 - [build_runner AOT 컴파일 실패](#build_runner-aot-컴파일-실패)
 - [riverpod_generator / json_serializable 버전 충돌](#riverpod_generator--json_serializable-버전-충돌)
 - [Freezed "No named parameter" 오류](#freezed-no-named-parameter-오류)
+- [배포된 앱에만 개발자 도구 버튼이 안 보임](#배포된-앱에만-개발자-도구-버튼이-안-보임)
 
 **화면 · 상태**
 - [호칭이 비어 조사만 남음](#호칭이-비어-조사만-남음)
@@ -238,6 +239,47 @@ dart run build_runner build --delete-conflicting-outputs
 
 **재발 방지**: **`@freezed` 클래스를 건드렸으면 무조건 build_runner를 돌린다.**
 에러 메시지가 원인을 가리키지 않으므로 반사적으로 실행하는 편이 빠르다.
+
+---
+
+## 배포된 앱에만 개발자 도구 버튼이 안 보임
+
+**언제**: 2026-07-21 · [#13](https://github.com/Twin-Fang/elum/issues/13)
+
+**증상**: 로컬 `.env`에 `ELUM_SHOW_DEV_TOOLS=true`를 넣었는데도 Firebase·TestFlight로
+받은 앱에서 플로팅 버튼이 보이지 않았다. 로컬 실행에서는 정상이라 코드를 계속 의심했다.
+
+**원인**: **배포 빌드의 `.env`는 로컬 파일이 아니라 GitHub Secret에서 만들어진다.**
+`.env`는 `.gitignore` 대상이라 커밋되지도, 빌드 아티팩트로 옮겨지지도 않는다.
+워크플로우의 `Create .env file` 스텝이 Secret `ENV_FILE`(없으면 `ENV`)로 새로 쓰므로,
+로컬 파일을 아무리 고쳐도 배포 앱에는 반영되지 않는다. Secret 값이 `false`였다.
+
+코드(`AppConfig.showDevTools`·`DevToolsOverlay`)에는 문제가 없었다. 이 값만은 의도적으로
+`kDebugMode` 게이트를 걸지 않아 릴리스 빌드에서도 동작하게 되어 있다.
+
+**왜 찾기 어려웠나**: Secret은 **값을 읽어 확인할 수 없다.** 등록 여부만 보이고 내용은
+쓰기 전용이라, 어긋나 있어도 눈으로 대조할 방법이 없다.
+
+**해결**: 빌드 워크플로우 4개(총 7곳)에서 `.env` 생성 직후 이 키를 강제로 덮어쓴다.
+Secret 값과 무관하게 항상 켜진다.
+
+```yaml
+- name: Force enable dev tools (hackathon)
+  run: |
+    sed -i '/^ELUM_SHOW_DEV_TOOLS=/d' .env   # macOS 러너는 sed -i ''
+    echo 'ELUM_SHOW_DEV_TOOLS=true' >> .env
+    grep '^ELUM_SHOW_DEV_TOOLS=' .env        # 주입 실패 시 스텝을 실패시킨다
+```
+
+**재발 방지**
+
+- **`.env` 값이 배포 앱에서 다르게 동작하면 Secret부터 의심한다.** 코드가 아니다.
+- `.env` 생성은 **잡마다 따로** 일어난다. 실제 빌드가 도는 잡에 주입하지 않으면 반영되지
+  않으므로 스텝을 옮기거나 지울 때 잡 단위로 확인한다.
+- 마지막 줄의 `grep`이 검증 장치다. 값이 안 들어가면 exit 1로 스텝이 실패해 조용히
+  넘어가지 않는다. 이 줄을 지우지 않는다.
+- 정식 출시 전 `Force enable dev tools (hackathon)` 스텝을 모두 삭제하고 Secret을
+  `false`로 되돌린다.
 
 ---
 
