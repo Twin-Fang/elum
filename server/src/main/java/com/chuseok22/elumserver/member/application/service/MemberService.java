@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.member.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
@@ -43,6 +44,14 @@ public class MemberService {
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
     member.getSupportGoals().clear();
     member.getSupportGoals().addAll(request.supportGoals());
+    return MemberResponse.from(member);
+  }
+
+  @Transactional
+  public MemberResponse updateCharacter(String memberId, MemberCharacterUpdateRequest request) {
+    Member member = memberRepository.findById(memberId)
+      .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+    member.setCharacter(request.character());
     return MemberResponse.from(member);
   }
 

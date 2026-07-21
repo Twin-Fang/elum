@@ -8,6 +8,9 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
+import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
+import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
@@ -72,6 +75,31 @@ class MemberServiceTest {
     when(memberRepository.findById("missing")).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> memberService.withdraw("missing"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.MEMBER_NOT_FOUND));
+  }
+
+  @Test
+  @DisplayName("캐릭터를 설정하면 회원 정보에 반영된다")
+  void updateCharacter_validRequest_updatesCharacter() {
+    Member member = new Member();
+    member.setId("member-1");
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+
+    MemberResponse response =
+      memberService.updateCharacter("member-1", new MemberCharacterUpdateRequest(CharacterType.LULU));
+
+    assertThat(response.character()).isEqualTo(CharacterType.LULU);
+  }
+
+  @Test
+  @DisplayName("존재하지 않는 회원의 캐릭터를 설정하려 하면 MEMBER_NOT_FOUND를 던진다")
+  void updateCharacter_missingMember_throwsMemberNotFound() {
+    when(memberRepository.findById("missing")).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() ->
+      memberService.updateCharacter("missing", new MemberCharacterUpdateRequest(CharacterType.POPO)))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.MEMBER_NOT_FOUND));

@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.controller;
 
+import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
@@ -45,6 +46,15 @@ public class MemberController implements MemberControllerDocs {
     Authentication authentication, @RequestBody @Valid MemberSupportGoalsUpdateRequest request
   ) {
     MemberResponse response = memberService.updateSupportGoals(authentication.getName(), request);
+    return ResponseEntity.ok(response);
+  }
+
+  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @PatchMapping("/character")
+  public ResponseEntity<MemberResponse> updateCharacter(
+    Authentication authentication, @RequestBody @Valid MemberCharacterUpdateRequest request
+  ) {
+    MemberResponse response = memberService.updateCharacter(authentication.getName(), request);
     return ResponseEntity.ok(response);
   }
 

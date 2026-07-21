@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.member.application.controller;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
+import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
@@ -118,6 +119,35 @@ public interface MemberControllerDocs {
   })
   ResponseEntity<MemberResponse> updateSupportGoals(
     Authentication authentication, MemberSupportGoalsUpdateRequest request
+  );
+
+  @Operation(
+    summary = "캐릭터 설정",
+    description = """
+      보호자가 아이를 위해 선택한 캐릭터(루루/포포)를 저장합니다.
+      저장된 값은 이후 일과 단계별 이미지 생성 시 캐릭터 참조 이미지로 사용됩니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "저장 성공",
+      content = @Content(schema = @Schema(implementation = MemberResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "400",
+      description = "character 누락 또는 잘못된 값",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력값이 올바르지 않습니다.\"}"
+        )
+      )
+    )
+  })
+  ResponseEntity<MemberResponse> updateCharacter(
+    Authentication authentication, MemberCharacterUpdateRequest request
   );
 
   @Operation(

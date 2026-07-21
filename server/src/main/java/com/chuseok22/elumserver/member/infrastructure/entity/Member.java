@@ -36,6 +36,9 @@ public class Member extends BaseEntity {
 
   private String nickname;
 
+  @Enumerated(EnumType.STRING)
+  private CharacterType character;
+
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "member_support_goals", joinColumns = @JoinColumn(name = "member_id"))
   @Enumerated(EnumType.STRING)

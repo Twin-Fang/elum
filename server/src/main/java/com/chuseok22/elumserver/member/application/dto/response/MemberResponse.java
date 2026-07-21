@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.dto.response;
 
+import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,6 +25,9 @@ public record MemberResponse(
   @Schema(description = "선택한 도움 목표(빈 배열이면 미설정)")
   Set<SupportGoal> supportGoals,
 
+  @Schema(description = "선택한 캐릭터, 미설정 시 null", example = "LULU")
+  CharacterType character,
+
   @Schema(description = "회원가입 일시 (KST, ISO-8601 형식)", example = "2026-07-16T10:30:00")
   LocalDateTime createdAt
 ) {
@@ -35,6 +39,7 @@ public record MemberResponse(
       member.getTotalStars(),
       member.getNickname(),
       member.getSupportGoals(),
+      member.getCharacter(),
       member.getCreatedAt()
     );
   }
