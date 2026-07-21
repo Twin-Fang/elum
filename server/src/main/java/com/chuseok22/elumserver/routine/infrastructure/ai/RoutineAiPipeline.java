@@ -199,6 +199,10 @@ public class RoutineAiPipeline {
           draft.steps() == null ? 0 : draft.steps().size(), json);
         throw new CustomException(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED);
       }
+      if (draft.steps().stream().anyMatch(step -> step.title() == null || step.title().isBlank())) {
+        log.warn("Gemini가 일부 단계에 title 없이 응답함: response={}", json);
+        throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
+      }
       return normalizeOrder(draft);
     } catch (CustomException e) {
       throw e;
@@ -213,7 +217,8 @@ public class RoutineAiPipeline {
   private RoutineStepDraft normalizeOrder(RoutineStepDraft draft) {
     List<RoutineStepDraft.StepDraft> normalized = new ArrayList<>();
     for (int i = 0; i < draft.steps().size(); i++) {
-      normalized.add(new RoutineStepDraft.StepDraft(i + 1, draft.steps().get(i).description()));
+      RoutineStepDraft.StepDraft step = draft.steps().get(i);
+      normalized.add(new RoutineStepDraft.StepDraft(i + 1, step.title(), step.description()));
     }
     return new RoutineStepDraft(draft.title(), normalized);
   }
@@ -240,6 +245,7 @@ public class RoutineAiPipeline {
       List<GeneratedStep> steps = stepResults.stream()
         .map(result -> new GeneratedStep(
           result.stepDraft().order(),
+          result.stepDraft().title(),
           result.stepDraft().description(),
           result.reusedImagePath() != null
             ? result.reusedImagePath()
@@ -290,7 +296,7 @@ public class RoutineAiPipeline {
 
   }
 
-  public record GeneratedStep(Integer order, String description, String imagePath) {
+  public record GeneratedStep(Integer order, String title, String description, String imagePath) {
 
   }
 

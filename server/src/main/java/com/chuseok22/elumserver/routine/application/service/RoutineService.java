@@ -302,6 +302,7 @@ public class RoutineService {
         entity.setRoutine(routine);
         entity.setStepOrder(step.order());
         entity.setDescription(step.description());
+        entity.setTitle(step.title());
         entity.setImagePath(step.imagePath());
         return entity;
       })
@@ -343,8 +344,10 @@ public class RoutineService {
     try {
       List<CompletableFuture<RoutineStepDraft.StepDraft>> futures = steps.stream()
         .map(step -> CompletableFuture.supplyAsync(
+          // title은 항상 AI가 생성한 값(RoutineStepUpdateRequest는 description만 수정 가능)이라
+          // description과 달리 보호자 원문이 섞일 수 없으므로 마스킹 없이 그대로 전달한다.
           () -> new RoutineStepDraft.StepDraft(
-            step.getStepOrder(), sensitiveInfoGuardService.check(step.getDescription()).sanitizedText()
+            step.getStepOrder(), step.getTitle(), sensitiveInfoGuardService.check(step.getDescription()).sanitizedText()
           ),
           executor
         ))

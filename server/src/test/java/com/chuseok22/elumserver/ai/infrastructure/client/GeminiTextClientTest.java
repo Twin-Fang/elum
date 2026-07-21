@@ -70,7 +70,7 @@ class GeminiTextClientTest {
   void buildReviseRoutineUserContent_returnsStructuredJson() throws Exception {
     String json = geminiTextClient.buildReviseRoutineUserContent(
       "학교에 갈 준비를 해요",
-      List.of(new com.chuseok22.elumserver.ai.core.RoutineStepDraft.StepDraft(1, "침대에서 일어나요.")),
+      List.of(new com.chuseok22.elumserver.ai.core.RoutineStepDraft.StepDraft(1, "침대에서 일어나요", "침대에서 일어나요.")),
       "가방을 챙기는 단계를 추가해 주세요.", "하늘이", Set.of(SupportGoal.PREPARE_ITEMS)
     );
 

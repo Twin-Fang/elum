@@ -37,6 +37,14 @@ public class RoutineStep extends BaseEntity {
   @Column(nullable = false, columnDefinition = "TEXT")
   private String description;
 
+  // description과 별개로 카드에 표시할 짧은 라벨. NOT NULL로 만들면 기존에 이미 데이터가
+  // 쌓인 routine_step 테이블에 ddl-auto: update가 "ALTER TABLE ... ADD COLUMN title TEXT
+  // NOT NULL"을 시도하다 기존 행에 값이 없어 실패한다. 대신 nullable로 두고, 신규 생성
+  // 경로는 RoutineAiPipeline.parseDraft()에서 blank 여부를 애플리케이션 레벨로 검증한다.
+  // 이 변경 이전에 만들어진 기존 루틴은 title이 null로 남는다.
+  @Column(columnDefinition = "TEXT")
+  private String title;
+
   @Column(nullable = false)
   private String imagePath;
 

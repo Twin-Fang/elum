@@ -202,8 +202,8 @@ class RoutineAiPipelineTest {
   @DisplayName("Gemini가 유효한 title/steps를 반환하면 이미지까지 생성해 결과를 만들고, order는 배열 순서로 재정렬된다")
   void generateForCreate_validResponse_returnsGeneratedStepsInArrayOrder() {
     String json = "{\"title\":\"비 오는 날 학교 가기\",\"steps\":["
-      + "{\"order\":2,\"description\":\"우산을 챙겨요\"},"
-      + "{\"order\":1,\"description\":\"옷을 입어요\"}]}";
+      + "{\"order\":2,\"title\":\"우산을 챙겨요\",\"description\":\"우산을 챙겨요\"},"
+      + "{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
     when(geminiImageClient.generateImage(any(), any()))
       .thenReturn(new GeminiImageClient.GeneratedImage(new byte[]{1, 2, 3}, "png"));
@@ -221,12 +221,14 @@ class RoutineAiPipelineTest {
     assertThat(result.steps().get(1).description()).isEqualTo("옷을 입어요");
     verify(geminiImageClient).generateImage("우산을 챙겨요", CharacterType.LULU);
     verify(geminiImageClient).generateImage("옷을 입어요", CharacterType.LULU);
+    assertThat(result.steps().get(0).title()).isEqualTo("우산을 챙겨요");
+    assertThat(result.steps().get(1).title()).isEqualTo("옷을 입어요");
   }
 
   @Test
   @DisplayName("캐릭터를 선택하지 않은 회원이면 이미지 생성 호출에 캐릭터 없이(null) 전달된다")
   void generateForCreate_noCharacter_passesNullCharacterToImageClient() {
-    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"description\":\"옷을 입어요\"}]}";
+    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
     when(geminiImageClient.generateImage(any(), any()))
       .thenReturn(new GeminiImageClient.GeneratedImage(new byte[]{1, 2, 3}, "png"));
@@ -266,7 +268,7 @@ class RoutineAiPipelineTest {
   @Test
   @DisplayName("이미지 생성이 1차 실패해도 재시도로 성공하면 정상 저장된다")
   void generateForCreate_imageFailsOnce_retriesAndSucceeds() {
-    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"description\":\"옷을 입어요\"}]}";
+    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
     when(geminiImageClient.generateImage(any(), any()))
       .thenThrow(new RuntimeException("일시적 실패"))
@@ -285,7 +287,7 @@ class RoutineAiPipelineTest {
   @Test
   @DisplayName("이미지 생성이 재시도까지 실패하면 ROUTINE_AI_GENERATION_FAILED를 던진다")
   void generateForCreate_imageFailsTwice_throwsGenerationFailed() {
-    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"description\":\"옷을 입어요\"}]}";
+    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
     when(geminiImageClient.generateImage(any(), any())).thenThrow(new RuntimeException("계속 실패"));
 
@@ -302,8 +304,8 @@ class RoutineAiPipelineTest {
   @DisplayName("루틴 수정 시 설명이 바뀌지 않은 단계는 이미지를 다시 생성하지 않고 기존 경로를 재사용한다")
   void generateForRevise_unchangedStep_reusesExistingImagePath() {
     String json = "{\"title\":\"학교에 갈 준비를 해요\",\"steps\":["
-      + "{\"order\":1,\"description\":\"침대에서 일어나요.\"},"
-      + "{\"order\":2,\"description\":\"가방을 챙겨요.\"}]}";
+      + "{\"order\":1,\"title\":\"침대에서 일어나요\",\"description\":\"침대에서 일어나요.\"},"
+      + "{\"order\":2,\"title\":\"가방을 챙겨요\",\"description\":\"가방을 챙겨요.\"}]}";
     when(geminiTextClient.revise(any(), any(), any(), any(), any())).thenReturn(textResponse(json));
     when(geminiImageClient.generateImage(eq("가방을 챙겨요."), any()))
       .thenReturn(new GeminiImageClient.GeneratedImage(new byte[]{1, 2, 3}, "png"));
@@ -311,7 +313,7 @@ class RoutineAiPipelineTest {
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForRevise(
       "학교에 갈 준비를 해요",
-      List.of(new com.chuseok22.elumserver.ai.core.RoutineStepDraft.StepDraft(1, "침대에서 일어나요.")),
+      List.of(new com.chuseok22.elumserver.ai.core.RoutineStepDraft.StepDraft(1, "침대에서 일어나요", "침대에서 일어나요.")),
       Map.of(1, "data/routine-images/batch/1.png"),
       "가방을 챙기는 단계를 추가해 주세요.", "하늘이", Set.of(), null
     );

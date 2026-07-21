@@ -13,7 +13,10 @@ public record RoutineStepResponse(
   @Schema(description = "단계 순서", example = "1")
   Integer stepOrder,
 
-  @Schema(description = "아동 눈높이 설명", example = "옷을 벗어요")
+  @Schema(description = "카드에 표시할 짧은 라벨. 이 변경 이전에 생성된 기존 루틴은 null일 수 있음", example = "옷을 입어요")
+  String title,
+
+  @Schema(description = "아동에게 소리 내어 읽어줄 문장", example = "학교에 입고 갈 옷을 차례대로 입어요")
   String description,
 
   @Schema(description = "생성된 이미지 저장 경로")
@@ -30,6 +33,7 @@ public record RoutineStepResponse(
     return new RoutineStepResponse(
       step.getId(),
       step.getStepOrder(),
+      step.getTitle(),
       step.getDescription(),
       step.getImagePath(),
       step.getCompleted(),

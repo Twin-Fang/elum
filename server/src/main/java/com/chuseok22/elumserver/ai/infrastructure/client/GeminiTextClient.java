@@ -194,9 +194,18 @@ public class GeminiTextClient {
             "type", "object",
             "properties", Map.of(
               "order", Map.of("type", "integer"),
-              "description", Map.of("type", "string")
+              "title", Map.of(
+                "type", "string",
+                "description", "카드에 크게 표시할 2~4어절짜리 짧은 라벨. '~해요' 체 (예: '옷을 입어요')"
+              ),
+              "description", Map.of(
+                "type", "string",
+                "description",
+                "아동에게 소리 내어 읽어줄 문장. title보다 조금 더 자세하게 서술 "
+                  + "(예: '학교에 입고 갈 옷을 차례대로 입어요')"
+              )
             ),
-            "required", List.of("order", "description")
+            "required", List.of("order", "title", "description")
           )
         )
       ),
