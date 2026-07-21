@@ -13,6 +13,7 @@ import '../../features/guardian/domain/routine_stage.dart';
 import '../../features/guardian/presentation/routine_loading_screen.dart';
 import '../../features/guardian/presentation/question_screen.dart';
 import '../../features/guardian/presentation/routine_input_screen.dart';
+import '../../features/onboarding/presentation/card_completion_screen.dart';
 import '../../features/onboarding/presentation/character_screen.dart';
 import '../../features/onboarding/presentation/goals_screen.dart';
 import '../../features/onboarding/presentation/name_screen.dart';
@@ -28,6 +29,7 @@ abstract final class Routes {
   static const onboardingGoals = '/onboarding/goals';
   static const onboardingCharacter = '/onboarding/character';
   static const onboardingPin = '/onboarding/pin';
+  static const cardCompletion = '/onboarding/card-completion';
 
   static const guardian = '/guardian';
   static const routineInput = '/guardian/routine/input';
@@ -109,6 +111,10 @@ GoRouter createRouter({
       GoRoute(
         path: Routes.onboardingPin,
         pageBuilder: (context, state) => slidePage(state, const PinScreen()),
+      ),
+      GoRoute(
+        path: Routes.cardCompletion,
+        builder: (context, state) => const CardCompletionScreen(),
       ),
 
       // --- 보호자 모드 ---
