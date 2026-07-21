@@ -1,15 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T19:18:53Z",
-    "currentVersion": "1.0.81",
+    "lastUpdated": "2026-07-21T19:56:10Z",
+    "currentVersion": "1.0.82",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 49
+    "totalReleases": 50
   },
   "releases": [
+    {
+      "version": "1.0.82",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 109,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 카드를 수정할 때 제목과 설명이 똑같아지던 문제 해결\n\n* **개선**\n  * 아이 보상·별 화면의 빛 효과와 별 위치, 화면 전환이 더 자연스러워졌습니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "카드를 수정할 때 제목과 설명이 똑같아지던 문제 해결"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "아이 보상·별 화면의 빛 효과와 별 위치, 화면 전환이 더 자연스러워졌습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.81",
       "project_type": "flutter",
