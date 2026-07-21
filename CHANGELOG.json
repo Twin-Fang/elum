@@ -1,15 +1,47 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T13:23:49Z",
-    "currentVersion": "1.0.62",
+    "lastUpdated": "2026-07-21T14:11:30Z",
+    "currentVersion": "1.0.63",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 33
+    "totalReleases": 34
   },
   "releases": [
+    {
+      "version": "1.0.63",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 74,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 홈에서 여러 일과를 접고 펼치며 볼 수 있어요\n  * 일과마다 알아보기 쉬운 제목이 표시돼요\n  * 일과별 진행률이 한눈에 보여요\n  * 아이 화면에 모은 별 개수가 표시돼요\n  * 별을 모아보는 화면이 새로 생겼어요\n  * 카드 확인 화면에서 필요 없는 카드를 삭제할 수 있어요\n\n* **개선**\n  * 아이 홈이 일과 목록으로 바뀌어 할 일을 고르기 쉬워졌어요\n  * 보상 화면 문구가 더 자연스러워졌어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "홈에서 여러 일과를 접고 펼치며 볼 수 있어요",
+            "일과마다 알아보기 쉬운 제목이 표시돼요",
+            "일과별 진행률이 한눈에 보여요",
+            "아이 화면에 모은 별 개수가 표시돼요",
+            "별을 모아보는 화면이 새로 생겼어요",
+            "카드 확인 화면에서 필요 없는 카드를 삭제할 수 있어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "아이 홈이 일과 목록으로 바뀌어 할 일을 고르기 쉬워졌어요",
+            "보상 화면 문구가 더 자연스러워졌어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.62",
       "project_type": "flutter",
