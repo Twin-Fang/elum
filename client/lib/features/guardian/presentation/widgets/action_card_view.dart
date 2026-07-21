@@ -23,6 +23,7 @@ class ActionCardView extends StatelessWidget {
     required this.index,
     this.routineId = '',
     this.onEdit,
+    this.onDelete,
     this.onSpeak,
     this.isSpeaking = false,
   });
@@ -38,6 +39,10 @@ class ActionCardView extends StatelessWidget {
 
   /// null이면 수정 버튼을 그리지 않는다 (아이 모드)
   final VoidCallback? onEdit;
+
+  /// 카드 삭제 (Figma 364:8305 좌상단 X). null이면 그리지 않는다 —
+  /// 아이 모드와 마지막 한 장 남은 카드가 해당된다.
+  final VoidCallback? onDelete;
 
   /// 소리로 읽어주기.
   final VoidCallback? onSpeak;
@@ -81,6 +86,7 @@ class ActionCardView extends StatelessWidget {
               routineId: routineId,
               stepId: card.id,
               onEdit: onEdit,
+              onDelete: onDelete,
             ),
           ),
           SizedBox(height: space.md),
@@ -151,11 +157,13 @@ class _Illustration extends StatelessWidget {
     required this.routineId,
     required this.stepId,
     this.onEdit,
+    this.onDelete,
   });
 
   final String routineId;
   final String stepId;
   final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -175,6 +183,12 @@ class _Illustration extends StatelessWidget {
             ),
           ),
         ),
+        if (onDelete != null)
+          Positioned(
+            top: space.sm,
+            left: space.sm,
+            child: _DeleteButton(onTap: onDelete!),
+          ),
         if (onEdit != null)
           Positioned(
             top: space.sm,
@@ -186,7 +200,38 @@ class _Illustration extends StatelessWidget {
   }
 }
 
-/// Figma `수정` 버튼 (padding 10×16, r20)
+/// 카드 삭제 버튼 (Figma 364:8305 좌상단 — 흐린 원 + X).
+class _DeleteButton extends StatelessWidget {
+  const _DeleteButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPressable(
+      onTap: onTap,
+      scaleDown: AppPressable.scaleIcon,
+      child: Container(
+        // 원형 버튼 — 가로세로 모두 .w
+        width: 44.w,
+        height: 44.w,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: context.colors.background,
+        ),
+        child: Icon(
+          Icons.close_rounded,
+          size: 24.w,
+          color: context.colors.textPrimary,
+        ),
+      ),
+    );
+  }
+}
+
+/// Figma `완료` 배지 (364:8305 우상단 — 어두운 알약, 흰 글씨).
+///
+/// 이전 시안의 `수정` 버튼 자리가 `완료`로 바뀌었다.
 class _EditButton extends StatelessWidget {
   const _EditButton({required this.onTap});
 
@@ -199,13 +244,13 @@ class _EditButton extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: context.colors.background,
+          color: context.colors.buttonEnabled,
           borderRadius: BorderRadius.circular(context.space.cardRadius),
         ),
         child: Text(
-          '수정',
+          '완료',
           style: context.typo.chipLabel
-              .copyWith(color: context.colors.chipLabel),
+              .copyWith(color: context.colors.buttonEnabledText),
         ),
       ),
     );

@@ -147,6 +147,12 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
                   isSpeaking: _speakingId == cards[index].id,
                   // 편집 화면이 Figma에 없어 자리만 만든다
                   onEdit: () {},
+                  // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
+                  onDelete: cards.length > 1
+                      ? () => ref
+                          .read(routineFlowProvider.notifier)
+                          .removeStep(cards[index].id)
+                      : null,
                 ),
               ),
             ),

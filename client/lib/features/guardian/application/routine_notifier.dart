@@ -242,6 +242,25 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     }
   }
 
+  /// 카드확인에서 카드를 뺀다 (Figma 364:8305 X 버튼).
+  ///
+  /// 로컬에서만 지우고 서버 반영은 저장(승인) 시점의 목록으로 정리된다.
+  /// **마지막 한 장은 지울 수 없다** — 카드 0장인 일과는 의미가 없다.
+  void removeStep(String stepId) {
+    AppLogger.notifierCall('RoutineFlowNotifier', 'removeStep', {
+      'stepId': stepId,
+    });
+
+    final routine = state.routine;
+    if (routine == null || routine.steps.length <= 1) return;
+
+    state = state.copyWith(
+      routine: routine.copyWith(
+        steps: routine.steps.where((s) => s.id != stepId).toList(),
+      ),
+    );
+  }
+
   Future<void> updateStep(String stepId, String description) async {
     AppLogger.notifierCall('RoutineFlowNotifier', 'updateStep', {
       'stepId': stepId,
