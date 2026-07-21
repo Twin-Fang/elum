@@ -102,17 +102,6 @@ flutter:
         - asset: assets/fonts/Pretendard-SemiBold.ttf
           weight: 600
 
-    # 일과 만들기 흐름 전용. Figma가 이 화면들만 Pretendard로 그렸다.
-    # 온보딩·홈은 TmoneyRoundWind 그대로다 — 섞어 쓰는 게 아니라 화면군이 다르다.
-    - family: Pretendard
-      fonts:
-        - asset: assets/fonts/Pretendard-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Pretendard-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Pretendard-SemiBold.ttf
-          weight: 600
-
   # 에셋 경로는 lib/core/assets/app_assets.dart 에서 상수로 관리한다.
   # 파일을 추가하면 두 곳을 함께 수정한다.
   assets:

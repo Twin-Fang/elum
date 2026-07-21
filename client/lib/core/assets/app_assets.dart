@@ -57,6 +57,11 @@ abstract final class AppAssets {
   /// 섹션 제목 앞 반짝임 (15×18). Figma `sparkles`.
   static const iconSparkles = '$_images/icon_sparkles.svg';
 
+  /// 일과 만들기 화면 상단의 큰 반짝임 (30×36).
+  /// Figma `보호자_새로운 일과 만들기`(238:1643)의 `sparkles`(238:1784).
+  /// [iconSparkles]와 크기·비율이 달라 따로 받았다.
+  static const iconSparklesLarge = '$_images/icon_sparkles_large.svg';
+
   /// 최근 일과 섹션 제목 앞 시계 (18×18). Figma `fi-br-clock`.
   static const iconClock = '$_images/icon_clock.svg';
 

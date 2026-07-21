@@ -19,10 +19,17 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.sectionTitle,
     required this.tileLabel,
     required this.caption,
+    required this.promptTitle,
+    required this.promptBody,
+    required this.chipLabel,
     required this.bodySmall,
   });
 
   static const fontFamily = 'TmoneyRoundWind';
+
+  /// 일과 만들기 흐름 전용 폰트.
+  /// Figma가 이 화면군만 Pretendard로 그렸다 — 섞어 쓰는 게 아니라 화면군이 다르다.
+  static const promptFontFamily = 'Pretendard';
 
   /// 화면 제목 (2줄)
   final TextStyle title;
@@ -60,6 +67,18 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 보조 설명 — 카드 부제·"카드 N장" (12/w400)
   final TextStyle caption;
+
+  // --- 일과 만들기 흐름 (Figma 238:1643 등) ---
+  // 이 화면군만 Pretendard다. 디자이너가 화면군을 나눴다.
+
+  /// 화면 제목 "오늘은 어떤 준비가 필요한가요?" (30/w600, 중앙정렬)
+  final TextStyle promptTitle;
+
+  /// 설명·입력 텍스트 (16)
+  final TextStyle promptBody;
+
+  /// 추천 문구 칩 (14/w500)
+  final TextStyle chipLabel;
 
   /// 본문보다 한 단계 작은 설명 (14/w400).
   /// DLP 배지·일과 입력 요약처럼 좁은 폭에 들어가는 문구.
@@ -139,6 +158,24 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w400,
       height: 1.2,
     ),
+    promptTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 30,
+      fontWeight: FontWeight.w600,
+      height: 1.1,
+    ),
+    promptBody: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.1,
+    ),
+    chipLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
     bodySmall: TextStyle(
       fontFamily: fontFamily,
       fontSize: 14,
@@ -172,6 +209,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? sectionTitle,
     TextStyle? tileLabel,
     TextStyle? caption,
+    TextStyle? promptTitle,
+    TextStyle? promptBody,
+    TextStyle? chipLabel,
     TextStyle? bodySmall,
   }) {
     return AppTypography(
@@ -187,6 +227,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       sectionTitle: sectionTitle ?? this.sectionTitle,
       tileLabel: tileLabel ?? this.tileLabel,
       caption: caption ?? this.caption,
+      promptTitle: promptTitle ?? this.promptTitle,
+      promptBody: promptBody ?? this.promptBody,
+      chipLabel: chipLabel ?? this.chipLabel,
       bodySmall: bodySmall ?? this.bodySmall,
     );
   }
@@ -207,6 +250,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       sectionTitle: TextStyle.lerp(sectionTitle, other.sectionTitle, t)!,
       tileLabel: TextStyle.lerp(tileLabel, other.tileLabel, t)!,
       caption: TextStyle.lerp(caption, other.caption, t)!,
+      promptTitle: TextStyle.lerp(promptTitle, other.promptTitle, t)!,
+      promptBody: TextStyle.lerp(promptBody, other.promptBody, t)!,
+      chipLabel: TextStyle.lerp(chipLabel, other.chipLabel, t)!,
       bodySmall: TextStyle.lerp(bodySmall, other.bodySmall, t)!,
     );
   }

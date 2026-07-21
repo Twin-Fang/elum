@@ -69,6 +69,13 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.homeCardGradientEnd,
     required this.homeCardTitle,
     required this.homeCardShadow,
+    required this.glassSurface,
+    required this.glassChip,
+    required this.promptMuted,
+    required this.glassShadow,
+    required this.auroraMint,
+    required this.auroraViolet,
+    required this.auroraYellow,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -144,6 +151,23 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 같은 카드의 그림자 (Figma 0px 4px 10px rgba(35,13,96,0.1))
   final Color homeCardShadow;
 
+  // 일과 만들기 흐름 (Figma 238:1643) — 움직이는 배경 위의 유리 표면.
+  // 반투명이라 뒤 색이 비쳐야 하므로 alpha를 담은 값이다.
+  /// 입력창 (rgba(255,255,255,0.6))
+  final Color glassSurface;
+  /// 추천 칩 (rgba(255,255,255,0.5))
+  final Color glassChip;
+  /// 흐린 안내 문구 (rgba(36,38,52,0.4))
+  final Color promptMuted;
+  /// 유리 표면 그림자 (rgba(0,0,0,0.05))
+  final Color glassShadow;
+  /// 배경 그라데이션 — 민트
+  final Color auroraMint;
+  /// 배경 그라데이션 — 보라
+  final Color auroraViolet;
+  /// 배경 그라데이션 — 노랑
+  final Color auroraYellow;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -177,6 +201,13 @@ class AppColors extends ThemeExtension<AppColors> {
     homeCardGradientEnd: Color(0xFFE9EEFF),
     homeCardTitle: Color(0xFF9CADF1),
     homeCardShadow: Color(0x1A230D60), // rgba(35,13,96,0.1)
+    glassSurface: Color(0x99FFFFFF), // rgba(255,255,255,0.6)
+    glassChip: Color(0x80FFFFFF), // rgba(255,255,255,0.5)
+    promptMuted: Color(0x66242634), // rgba(36,38,52,0.4)
+    glassShadow: Color(0x0D000000),
+    auroraMint: Color(0xFF7BFFE5),
+    auroraViolet: Color(0xFFD16FFF),
+    auroraYellow: Color(0xFFFCE551),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -222,6 +253,13 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? homeCardGradientEnd,
     Color? homeCardTitle,
     Color? homeCardShadow,
+    Color? glassSurface,
+    Color? glassChip,
+    Color? promptMuted,
+    Color? glassShadow,
+    Color? auroraMint,
+    Color? auroraViolet,
+    Color? auroraYellow,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -257,6 +295,13 @@ class AppColors extends ThemeExtension<AppColors> {
       homeCardGradientEnd: homeCardGradientEnd ?? this.homeCardGradientEnd,
       homeCardTitle: homeCardTitle ?? this.homeCardTitle,
       homeCardShadow: homeCardShadow ?? this.homeCardShadow,
+      glassSurface: glassSurface ?? this.glassSurface,
+      glassChip: glassChip ?? this.glassChip,
+      promptMuted: promptMuted ?? this.promptMuted,
+      glassShadow: glassShadow ?? this.glassShadow,
+      auroraMint: auroraMint ?? this.auroraMint,
+      auroraViolet: auroraViolet ?? this.auroraViolet,
+      auroraYellow: auroraYellow ?? this.auroraYellow,
     );
   }
 
@@ -303,6 +348,13 @@ class AppColors extends ThemeExtension<AppColors> {
           Color.lerp(homeCardGradientEnd, other.homeCardGradientEnd, t)!,
       homeCardTitle: Color.lerp(homeCardTitle, other.homeCardTitle, t)!,
       homeCardShadow: Color.lerp(homeCardShadow, other.homeCardShadow, t)!,
+      glassSurface: Color.lerp(glassSurface, other.glassSurface, t)!,
+      glassChip: Color.lerp(glassChip, other.glassChip, t)!,
+      promptMuted: Color.lerp(promptMuted, other.promptMuted, t)!,
+      glassShadow: Color.lerp(glassShadow, other.glassShadow, t)!,
+      auroraMint: Color.lerp(auroraMint, other.auroraMint, t)!,
+      auroraViolet: Color.lerp(auroraViolet, other.auroraViolet, t)!,
+      auroraYellow: Color.lerp(auroraYellow, other.auroraYellow, t)!,
     );
   }
 }
