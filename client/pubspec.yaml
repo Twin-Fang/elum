@@ -54,6 +54,20 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.15.1
   freezed: ^3.2.3
+  # 앱 아이콘 생성 전용 — build_runner를 쓰지 않는 독립 CLI라 기존 analyzer 충돌과 무관하다.
+  flutter_launcher_icons: ^0.14.4
+
+# 앱 아이콘 설정
+# 원본(assets/icon/app_icon.png) 한 장에서 Android·iOS 전 사이즈를 생성한다.
+# 아이콘을 교체하려면 원본만 바꾸고 아래 명령을 다시 돌린다.
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  # iOS는 투명도를 허용하지 않아 알파 채널을 제거한다. 배경은 로고의 크림색과 맞춘다.
+  remove_alpha_ios: true
+  background_color_ios: "#FDF8DC"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
