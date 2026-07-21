@@ -6,6 +6,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:elum/features/child/application/child_routine_notifier.dart';
 import 'package:elum/features/child/domain/reward_character.dart';
+import 'package:elum/features/onboarding/domain/character.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
 import 'package:elum/features/child/presentation/mode_switch_screen.dart';
@@ -176,6 +177,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('별 화면'), findsOneWidget);
+    });
+
+    testWidgets('캐릭터 배지는 테두리가 있는 에셋을 쓴다', (tester) async {
+      // 테두리 없는 맨 일러스트(characterBadgeRuru)를 쓰면 캐릭터만 덩그러니
+      // 뜬다. Figma 356:5106은 둥근 사각형 테두리까지 포함한다.
+      await pumpChild(tester);
+
+      expect(
+        svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
+        findsOneWidget,
+      );
     });
   });
 
@@ -396,7 +408,7 @@ void main() {
       // 상단 오른쪽 캐릭터 배지가 보호자 모드로 나가는 유일한 입구다
       await tester.tap(
         find.ancestor(
-          of: svgWithAsset(AppAssets.characterBadgeRuru),
+          of: svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
           matching: find.byType(AppPressable),
         ).first,
       );

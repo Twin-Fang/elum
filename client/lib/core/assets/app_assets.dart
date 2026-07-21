@@ -73,8 +73,20 @@ abstract final class AppAssets {
   /// 보상 화면의 포포 일러스트 (117×104). Figma 334:4433.
   static const rewardPopo = '$_images/reward_popo.svg';
 
-  /// 아이 홈 우측 상단 캐릭터 배지 (68×68).
+  /// 아이 홈 우측 상단 캐릭터 배지 (68×68). **테두리가 없는 맨 일러스트다.**
+  @Deprecated('테두리가 빠져 있다. characterBadgeFramed를 쓴다.')
   static const characterBadgeRuru = '$_images/character_badge_ruru.svg';
+
+  /// 아이 홈 우측 상단 캐릭터 배지 (56×56). Figma 356:5106(고양이) · 382:3257(여우).
+  ///
+  /// 둥근 사각형 테두리 + 배경까지 포함한다. 캐릭터마다 **색이 다르다** —
+  /// 고양이는 파랑(#9CADF1 / #CED8FF), 여우는 주황(#EB9B73 / #FFDAC7).
+  /// 테두리 없는 [characterBadgeRuru]를 쓰면 캐릭터만 덩그러니 뜬다.
+  static String characterBadgeFramed(CardCharacter character) =>
+      switch (character) {
+        CardCharacter.cat => '$_images/character_badge_framed_ruru.svg',
+        CardCharacter.fox => '$_images/character_badge_framed_popo.svg',
+      };
 
   /// 완료 체크 (10×10). Figma `fi-br-check`.
   /// 로딩 화면의 단계별 완료 표시에 쓴다.
