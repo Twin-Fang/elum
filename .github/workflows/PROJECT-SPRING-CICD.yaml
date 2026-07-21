@@ -14,7 +14,7 @@ env:
   MAIN_PORT: "8085"
   TEST_PORT: "8085"
   APP_EXPOSE_PORT: "8080"
-  MOUNT_DIR: "/volume/project/elum/server"
+  MOUNT_DIR: "/volume1/project/elum/server"
   SPRING_PROFILE_MAIN: "prod"
   SPRING_PROFILE_TEST: "prod"
 
