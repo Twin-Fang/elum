@@ -1,0 +1,51 @@
+spring:
+  profiles:
+    active: prod
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: false
+        format_sql: true
+        use_sql_comments: true
+  jackson:
+    time-zone: Asia/Seoul
+  servlet:
+    multipart:
+      enabled: true # 파일 업로드 허용
+      max-file-size: 200MB # 업로드 파일 최대 크기
+      max-request-size: 1000MB # 요청 전체 최대 크기
+      file-size-threshold: 10MB
+  mvc:
+    format:
+      date-time: "yyyy-MM-dd'T'HH:mm:ss"
+
+chuseok22:
+  api-change-log:
+    enabled: true
+    entries-to-show: 10
+    date-format: "yyyy-MM-dd"
+  logging:
+    enabled: true
+
+springdoc:
+  servers:
+    - url: https://api.elum.chuseok22.com
+      description: main-server
+    - url: http://localhost:8080
+      description: local-server
+
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  swagger-ui:
+    path: /docs/swagger
+
+server:
+  forward-headers-strategy: framework
+
+swagger:
+  title: ELUM API
+  description: 이룸(ELUM) 보호자/아동 행동 카드 서비스 API 문서
+  version: 0.0.1
+
