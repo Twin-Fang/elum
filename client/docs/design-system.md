@@ -1,7 +1,7 @@
 # 디자인 시스템 — 이룸(ELUM)
 
-> 출처: Figma `이룸` 파일, 섹션 `온보딩` (node `238:3022`)
-> [Figma 링크](https://www.figma.com/design/VSmGuv1iuOpLZmp6QeBHWr/%EC%9D%B4%EB%A3%B8?node-id=238-3022&m=dev)
+> 출처: Figma `이룸` 파일, 최상위 트리 (node `238:1846`)
+> [Figma 링크](https://www.figma.com/design/VSmGuv1iuOpLZmp6QeBHWr/%EC%9D%B4%EB%A3%B8?node-id=238-1846&m=dev)
 >
 > 아래 값은 **Figma에서 직접 추출**한 것이다. 눈대중으로 바꾸지 말고, 디자인이 바뀌면 이 문서를 먼저 고친다.
 

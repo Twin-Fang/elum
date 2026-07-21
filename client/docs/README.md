@@ -14,8 +14,8 @@
 
 ## 디자인 원본
 
-Figma `이룸` 파일 — 섹션 `온보딩` (node `238:3022`)
-<https://www.figma.com/design/VSmGuv1iuOpLZmp6QeBHWr/%EC%9D%B4%EB%A3%B8?node-id=238-3022&m=dev>
+Figma `이룸` 파일 — 최상위 트리 (node `238:1846`)
+<https://www.figma.com/design/VSmGuv1iuOpLZmp6QeBHWr/%EC%9D%B4%EB%A3%B8?node-id=238-1846&m=dev>
 
 ## 문서 갱신 규칙
 

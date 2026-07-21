@@ -22,16 +22,16 @@
 ### Figma — 디자인 원본
 
 ```
-파일    https://www.figma.com/design/VSmGuv1iuOpLZmp6QeBHWr/이룸
-fileKey VSmGuv1iuOpLZmp6QeBHWr
-온보딩   238:3022   ← 섹션 루트. 여기를 덤프하면 프레임 12개가 한 번에 나온다
+파일     https://www.figma.com/design/VSmGuv1iuOpLZmp6QeBHWr/이룸
+fileKey  VSmGuv1iuOpLZmp6QeBHWr
+최상위    238:1846   ← 여기서부터 훑는다. 하위 섹션·프레임이 전부 여기 달려 있다
 ```
 
 화면별 프레임 노드 ID는 [docs/onboarding-flow.md](./docs/onboarding-flow.md#프레임--노드-id)에 있다.
 
 > ⚠️ **디자이너가 Figma를 계속 수정 중이다.** 문서에 적힌 좌표·색은 **덤프한 시점의 값**이다.
 > 화면을 건드리기 전에 **매번 다시 덤프한다.** 문서를 믿고 그대로 쓰지 않는다.
-> 노드 ID도 프레임이 재생성되면 바뀔 수 있으므로, 못 찾으면 섹션 루트(`238:3022`)부터 다시 훑는다.
+> 노드 ID도 프레임이 재생성되면 바뀔 수 있으므로, 못 찾으면 최상위(`238:1846`)부터 다시 훑는다.
 
 **규칙**
 
