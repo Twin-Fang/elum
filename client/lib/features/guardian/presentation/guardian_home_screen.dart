@@ -57,8 +57,10 @@ class GuardianHomeScreen extends ConsumerWidget {
               ),
               SizedBox(height: space.md),
               RecommendedRoutineStrip(
-                onTap: (routine) =>
-                    _startRoutine(context, ref, prefill: routine.prefillText),
+                // 타일 라벨("비 오는 날 등교")이 아니라 자연어 문장을 채운다.
+                // 라벨은 명사구라 보호자가 직접 쓴 문장으로 보이지 않는다. (이슈 #39)
+                onTap: (suggestion) =>
+                    _startRoutine(context, ref, prefill: suggestion.inputText),
               ),
               SizedBox(height: space.xl),
               _SectionTitle(

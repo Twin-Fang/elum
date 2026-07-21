@@ -6,6 +6,7 @@ import '../../../core/config/app_config.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../shared/models/routine.dart';
 import '../../onboarding/domain/support_goal.dart';
+import '../domain/routine_suggestion.dart';
 import 'demo_cards.dart';
 import 'member_repository.dart';
 
@@ -20,6 +21,11 @@ abstract interface class RoutineRepository {
   /// 내가 만든 일과 목록 — 보호자_홈의 "최근 일과".
   /// 실패하면 빈 목록을 준다. 화면은 빈 상태 UI를 그린다.
   Future<List<Routine>> getMyRoutines();
+
+  /// 추천 일과 — 보호자_홈 타일과 일과 만들기 화면의 칩.
+  /// 실패하면 [RoutineSuggestion.fallback]을 준다. 추천이 비면 화면 한 블록이
+  /// 통째로 사라져 빈 화면처럼 보이기 때문이다.
+  Future<List<RoutineSuggestion>> getSuggestions();
 
   /// 일과 생성 → 카드 5장.
   Future<Routine> createRoutine({
@@ -57,6 +63,30 @@ class RoutineRepositoryImpl implements RoutineRepository {
       // 목록을 못 가져와도 홈 화면은 떠야 한다. 빈 상태 UI가 나간다.
       debugPrint('[routine] 목록 조회 실패 → 빈 목록으로 처리: $e');
       return const [];
+    }
+  }
+
+  @override
+  Future<List<RoutineSuggestion>> getSuggestions() async {
+    if (AppConfig.useMock) return RoutineSuggestion.fallback;
+
+    try {
+      final res = await _dio.get<List<dynamic>>('/api/routines/suggestions');
+      final body = res.data;
+
+      final parsed = body
+              ?.whereType<Map<String, dynamic>>()
+              .map(RoutineSuggestion.fromJson)
+              // 문구가 빈 항목은 타일에 아무것도 안 보여 빈칸처럼 된다
+              .where((s) => s.text.isNotEmpty)
+              .toList() ??
+          const <RoutineSuggestion>[];
+
+      // 200이지만 빈 배열인 경우도 fallback으로 흡수한다.
+      return parsed.isEmpty ? RoutineSuggestion.fallback : parsed;
+    } catch (e) {
+      debugPrint('[routine] 추천 조회 실패 → 기본 목록으로 처리: $e');
+      return RoutineSuggestion.fallback;
     }
   }
 
@@ -221,6 +251,15 @@ final routineRepositoryProvider = Provider<RoutineRepository>(
 /// 최근 일과 목록. 보호자_홈이 구독한다.
 final myRoutinesProvider = FutureProvider<List<Routine>>((ref) {
   return ref.watch(routineRepositoryProvider).getMyRoutines();
+});
+
+/// 추천 일과. 보호자_홈 타일과 일과 만들기 화면의 칩이 함께 구독한다.
+///
+/// 서버가 매 호출마다 셔플하므로 두 화면이 각자 부르면 목록이 달라진다.
+/// 같은 provider를 공유해 한 번만 받아 쓴다.
+final routineSuggestionsProvider =
+    FutureProvider<List<RoutineSuggestion>>((ref) {
+  return ref.watch(routineRepositoryProvider).getSuggestions();
 });
 
 /// 회원 정보. 실패하면 null이고 화면은 로컬 온보딩 값으로 fallback한다.

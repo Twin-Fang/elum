@@ -3,6 +3,7 @@ import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
+import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/aurora_background.dart';
@@ -36,7 +37,12 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [testStorageOverride(onboardingCompleted: true)],
+      overrides: [
+        testStorageOverride(onboardingCompleted: true),
+        // 실서버를 타지 않는다. 추천은 서버가 개수를 정하므로 고정 목록을 넣는다.
+        routineSuggestionsProvider
+            .overrideWith((ref) async => RoutineSuggestion.fallback),
+      ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
         builder: (context, _) => MaterialApp.router(
@@ -97,30 +103,32 @@ void main() {
   });
 
   group('추천 문구 칩', () {
-    testWidgets('Figma 5개가 순서대로 보인다', (tester) async {
+    testWidgets('서버가 준 목록이 모두 보인다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pump();
 
-      for (final s in RoutineSuggestion.values) {
+      for (final s in RoutineSuggestion.fallback) {
         expect(find.text(s.label), findsOneWidget);
       }
-      expect(RoutineSuggestion.values.length, 5);
     });
 
-    testWidgets('칩을 누르면 입력창에 문구가 채워진다', (tester) async {
+    testWidgets('칩을 누르면 입력창에 자연어 문장이 채워진다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pump();
 
-      await tester.tap(find.text(RoutineSuggestion.rainyCommute.label));
+      final first = RoutineSuggestion.fallback.first;
+      await tester.tap(find.text(first.label));
       await settle(tester);
 
-      expect(find.text('비 오는 날 등교'), findsWidgets);
+      // 칩 라벨이 아니라 prompt가 들어가야 한다 (이슈 #39)
+      expect(find.text(first.prompt), findsWidgets);
     });
 
-    testWidgets('입력창에는 이모지를 넣지 않는다', (tester) async {
+    test('입력창에는 이모지를 넣지 않는다', () {
       // 이모지는 칩 장식이다. 서버로 보내는 문구에 섞이면 안 된다.
-      expect(RoutineSuggestion.rainyCommute.inputText, '비 오는 날 등교');
-      expect(RoutineSuggestion.afterSchool.inputText, '여름방학 방과후 수업 준비');
+      for (final s in RoutineSuggestion.fallback) {
+        expect(s.inputText, isNot(contains(s.icon)));
+      }
     });
   });
 

@@ -4,7 +4,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/guardian/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
-import 'package:elum/features/guardian/domain/recommended_routine.dart';
+import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/recommended_routine_strip.dart';
 import 'package:elum/shared/models/action_card.dart';
@@ -26,6 +26,7 @@ void main() {
   Widget wrap({
     List<Routine> routines = const [],
     Member? member,
+    List<RoutineSuggestion> suggestions = RoutineSuggestion.fallback,
   }) {
     final router = GoRouter(
       initialLocation: Routes.guardian,
@@ -47,6 +48,7 @@ void main() {
         // 실서버를 타지 않는다
         myRoutinesProvider.overrideWith((ref) async => routines),
         memberProvider.overrideWith((ref) async => member),
+        routineSuggestionsProvider.overrideWith((ref) async => suggestions),
       ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
@@ -117,13 +119,31 @@ void main() {
   });
 
   group('추천 일과', () {
-    testWidgets('Figma 4개가 순서대로 보인다', (tester) async {
+    testWidgets('서버가 준 목록이 순서대로 보인다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      for (final r in RecommendedRoutine.values) {
-        expect(find.text(r.label), findsOneWidget);
+      for (final s in RoutineSuggestion.fallback) {
+        expect(find.text(s.text), findsOneWidget);
       }
+    });
+
+    testWidgets('서버가 4개보다 많이 줘도 전부 렌더링된다', (tester) async {
+      // 개수는 서버가 정한다. 팔레트가 순환하므로 색이 모자라 깨지면 안 된다.
+      const many = [
+        RoutineSuggestion(icon: '1️⃣', text: '하나'),
+        RoutineSuggestion(icon: '2️⃣', text: '둘'),
+        RoutineSuggestion(icon: '3️⃣', text: '셋'),
+        RoutineSuggestion(icon: '4️⃣', text: '넷'),
+        RoutineSuggestion(icon: '5️⃣', text: '다섯'),
+        RoutineSuggestion(icon: '6️⃣', text: '여섯'),
+      ];
+      await tester.pumpWidget(wrap(suggestions: many));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      // 가로 스크롤이라 화면 밖 항목은 빌드되지 않는다. 앞쪽만 확인한다.
+      expect(find.text('하나'), findsOneWidget);
     });
 
     testWidgets('가로로 스와이프된다', (tester) async {
@@ -144,16 +164,27 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text(RecommendedRoutine.rainyCommute.label));
+      await tester.tap(find.text(RoutineSuggestion.fallback.first.text));
       await tester.pumpAndSettle();
 
       expect(find.text('일과 입력'), findsOneWidget);
     });
 
-    testWidgets('이모지는 줄바꿈 없이 한 줄로 채워진다', (tester) async {
-      // 타일 표시용 줄바꿈이 서버로 그대로 나가면 안 된다
-      expect(RecommendedRoutine.rainyCommute.prefillText, '비 오는 날 등교');
-      expect(RecommendedRoutine.rainyCommute.prefillText, isNot(contains('\n')));
+    test('입력창에는 라벨이 아니라 자연어 문장이 들어간다', () {
+      // 타일 라벨은 명사구라 보호자가 직접 쓴 문장으로 보이지 않는다 (이슈 #39)
+      const s = RoutineSuggestion(
+        icon: '☔️',
+        text: '비 오는 날 등교',
+        prompt: '비 오는 날 우산 챙겨서 학교 가는 준비를 하고 싶어요',
+      );
+      expect(s.inputText, s.prompt);
+      expect(s.inputText, isNot(s.text));
+    });
+
+    test('서버가 prompt를 안 주면 라벨로 폴백한다', () {
+      // 서버 #39 배포 전에도 지금과 동일하게 동작해야 한다
+      const s = RoutineSuggestion(icon: '☔️', text: '비 오는 날 등교');
+      expect(s.inputText, '비 오는 날 등교');
     });
   });
 

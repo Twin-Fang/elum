@@ -29,9 +29,11 @@ void main() {
       final offenders = <String>[];
 
       for (final file in screenFiles()) {
-        // 추천 일과 색은 항목에 딸린 데이터다. 백엔드가 추천을 내려주면
-        // 색도 함께 오므로 전역 토큰으로 두지 않는다. (design-system.md)
-        if (file.path.contains('domain/recommended_routine.dart')) continue;
+        // 추천 타일 팔레트는 서버 목록에 인덱스로 배정하는 순환 색이다.
+        // 항목 수가 가변이라 전역 토큰 4쌍으로 고정할 수 없다. (이슈 #36)
+        if (file.path.contains('widgets/recommended_routine_strip.dart')) {
+          continue;
+        }
 
         final lines = file.readAsLinesSync();
         for (final (index, line) in lines.indexed) {

@@ -12,6 +12,7 @@ import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../application/routine_notifier.dart';
+import '../data/routine_repository.dart';
 import '../domain/routine_suggestion.dart';
 import 'widgets/aurora_background.dart';
 
@@ -268,31 +269,39 @@ class _SendButton extends StatelessWidget {
 /// 추천 문구 칩 — Figma 2·2·1 배치.
 ///
 /// `Wrap`으로 두면 글자 길이에 따라 줄이 밀린다. Figma 구조를 그대로 만든다.
-class _SuggestionChips extends StatelessWidget {
+///
+/// 목록은 서버에서 오고 **개수가 고정이 아니다.** 2개씩 채우고 남는 하나는
+/// 마지막 줄에 혼자 둔다(Figma 5개 = 2·2·1). 홀수·짝수 모두 대응된다. (이슈 #36)
+class _SuggestionChips extends ConsumerWidget {
   const _SuggestionChips({required this.onTap});
 
   final ValueChanged<RoutineSuggestion> onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final paired = RoutineSuggestion.paired;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(routineSuggestionsProvider).maybeWhen(
+          data: (list) => list,
+          // 로딩·실패 중에는 칩을 감춘다. 입력창은 그대로 쓸 수 있으므로
+          // 흐름이 막히지 않는다.
+          orElse: () => const <RoutineSuggestion>[],
+        );
+
+    if (items.isEmpty) return const SizedBox.shrink();
 
     return Column(
       children: [
-        for (var row = 0; row < paired.length; row += 2) ...[
+        for (var row = 0; row < items.length; row += 2) ...[
           if (row > 0) SizedBox(height: context.space.xs),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              for (final (index, s) in paired.skip(row).take(2).indexed) ...[
+              for (final (index, s) in items.skip(row).take(2).indexed) ...[
                 if (index > 0) const SizedBox(width: 6),
-                _Chip(suggestion: s, onTap: onTap),
+                Flexible(child: _Chip(suggestion: s, onTap: onTap)),
               ],
             ],
           ),
         ],
-        SizedBox(height: context.space.xs),
-        _Chip(suggestion: RoutineSuggestion.trailing, onTap: onTap),
       ],
     );
   }

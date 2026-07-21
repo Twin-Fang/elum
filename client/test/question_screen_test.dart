@@ -3,6 +3,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
+import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -230,6 +231,10 @@ class _FakeRepo implements RoutineRepository {
 
   @override
   Future<List<Routine>> getMyRoutines() async => const [];
+
+  @override
+  Future<List<RoutineSuggestion>> getSuggestions() async =>
+      RoutineSuggestion.fallback;
 
   @override
   Future<Routine> createRoutine({
