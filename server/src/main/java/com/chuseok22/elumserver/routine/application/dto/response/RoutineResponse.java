@@ -11,7 +11,7 @@ public record RoutineResponse(
   @Schema(description = "일과 ID")
   String id,
 
-  @Schema(description = "AI가 생성한 제목", example = "병원 다녀오기")
+  @Schema(description = "AI가 생성한 제목", example = "병원에 다녀와요")
   String title,
 
   @Schema(description = "일과 원문(마스킹 전)", example = "내일 오후 3시에 병원 가기")

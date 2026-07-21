@@ -158,7 +158,11 @@ public class GeminiTextClient {
     return Map.of(
       "type", "object",
       "properties", Map.of(
-        "title", Map.of("type", "string"),
+        "title", Map.of(
+          "type", "string",
+          "description",
+          "일과 전체를 아우르는 제목. 아이 친화적인 '~해요' 체로 작성 (예: '비오는 날 학교에 가요')"
+        ),
         "steps", Map.of(
           "type", "array",
           "maxItems", 10,
