@@ -10,7 +10,6 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../application/routine_notifier.dart';
-import '../../child/presentation/mode_switch_screen.dart';
 import '../data/routine_repository.dart';
 import 'widgets/recommended_routine_strip.dart';
 import 'widgets/today_routine_section.dart';
@@ -121,11 +120,10 @@ class _Header extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SvgPicture.asset(AppAssets.homeLogo, width: 80.w, height: 30.h),
-              // 아이 화면으로 넘어가는 입구. 암호를 물어본다.
+              // 아이 화면으로 넘어가는 입구. 보호자→아이 방향은 암호 없이 바로 간다.
+              // (아이→보호자 방향만 PIN으로 막는다)
               AppPressable(
-                onTap: () => context.push(
-                  '${Routes.modeSwitch}?to=${ModeSwitchTarget.child.name}',
-                ),
+                onTap: () => context.go(Routes.child),
                 scaleDown: AppPressable.scaleIcon,
                 child: SvgPicture.asset(
                   AppAssets.homeCharacterBadge,

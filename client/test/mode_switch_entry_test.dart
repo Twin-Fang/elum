@@ -18,16 +18,21 @@ import 'helpers/test_storage.dart';
 
 /// 모드 전환 **진입점** 검증 (이슈 #61).
 ///
+/// **PIN은 한 방향만 막는다.**
+///
+/// | 방향 | PIN |
+/// |---|---|
+/// | 보호자 → 아이 | ❌ 필요 없음 — 보호자는 이미 인증된 사용자다 |
+/// | 아이 → 보호자 | ✅ 필요 — 아이가 보호자 화면에 들어가면 안 된다 |
+///
+/// 막아야 할 것은 **아이가 빠져나오는 것**이지 보호자가 들어가는 것이 아니다.
+/// 보호자에게 매번 PIN을 묻는 것은 아이에게 화면을 넘겨줄 때마다 생기는
+/// 불필요한 마찰이다.
+///
 /// **왜 별도 파일인가.** 기존 `child_mode_test.dart`의 PIN 테스트는
 /// `ModeSwitchScreen`을 직접 띄워 검증한다. 그래서 "홈 화면의 버튼이 실제로
-/// PIN 화면을 거치는가"는 아무도 확인하지 않았다 — 진입점이 PIN을 건너뛰도록
-/// 바뀌어도 테스트는 전부 초록불이다.
-///
-/// 실제로 그 일이 일어났다. 보호자 홈의 캐릭터 배지가
-/// `context.go(Routes.child)`로 바뀌어 **PIN 없이 아이 화면으로** 넘어갔는데
-/// 322개 테스트가 모두 통과했다.
-///
-/// 이 파일은 화면이 아니라 **경로**를 고정한다.
+/// 어디로 가는가"는 아무도 확인하지 않았다 — 진입점 경로가 바뀌어도
+/// 테스트는 전부 초록불이다. 이 파일은 화면이 아니라 **경로**를 고정한다.
 void main() {
   useFigmaViewport();
 
@@ -63,9 +68,9 @@ void main() {
     );
   }
 
-  testWidgets('보호자 홈에서 아이 화면으로 갈 때 PIN 화면을 거친다', (tester) async {
-    // 이슈 #61의 "예상 동작" — 양방향 모두 PIN을 요구한다.
-    // 한쪽만 막으면 우회로가 생긴다.
+  testWidgets('보호자 홈에서 아이 화면으로는 PIN 없이 바로 간다', (tester) async {
+    // 보호자는 이미 인증된 사용자다. 아이에게 화면을 넘겨줄 때마다 PIN을
+    // 묻는 것은 불필요한 마찰이다.
     await tester.pumpWidget(wrap(const GuardianHomeScreen()));
     await tester.pumpAndSettle();
 
@@ -79,11 +84,11 @@ void main() {
     await tester.tap(badge);
     await tester.pumpAndSettle();
 
-    // PIN을 건너뛰고 바로 아이 화면에 도달하면 안 된다
     expect(
       find.text('아이 홈'),
-      findsNothing,
-      reason: '보호자 → 아이 전환은 PIN 화면을 거쳐야 한다 (이슈 #61)',
+      findsOneWidget,
+      reason: '보호자 → 아이 전환은 PIN 없이 바로 간다',
     );
+    expect(find.text('PIN 화면'), findsNothing);
   });
 }
