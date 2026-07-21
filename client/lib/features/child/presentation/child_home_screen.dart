@@ -18,6 +18,7 @@ import '../../guardian/data/routine_repository.dart';
 import '../../guardian/presentation/widgets/today_routine_section.dart'
     show routineProgress;
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../onboarding/domain/character.dart';
 import '../application/child_routine_notifier.dart';
 import 'mode_switch_screen.dart';
 
@@ -118,6 +119,10 @@ class _TopBar extends ConsumerWidget {
     final stars = ref
         .watch(memberProvider)
         .maybeWhen(data: (member) => member?.totalStars ?? 0, orElse: () => 0);
+    // 온보딩에서 고른 캐릭터. 배지 테두리 색이 캐릭터마다 다르다.
+    // 아직 안 골랐으면 고양이(루루)로 둔다 — 화면은 떠야 한다.
+    final character =
+        ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(space.screenH, space.md, space.screenH, 0),
@@ -140,7 +145,7 @@ class _TopBar extends ConsumerWidget {
             scaleDown: AppPressable.scaleIcon,
             // 정사각형 배지라 가로세로 모두 .w
             child: SvgPicture.asset(
-              AppAssets.characterBadgeRuru,
+              AppAssets.characterBadgeFramed(character),
               width: 56.w,
               height: 56.w,
             ),
