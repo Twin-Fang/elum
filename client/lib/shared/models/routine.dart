@@ -61,26 +61,59 @@ abstract class Routine with _$Routine {
 ///
 /// 서버는 이 엔드포인트가 **실패해도 항상 200**을 준다.
 /// [isRequired]가 false면 질문 단계를 건너뛰고 바로 카드 생성으로 간다.
+///
+/// ⚠️ 서버가 **질문 여러 개**를 준다. 선택한 도움 목표마다 하나씩 나온다.
+/// 예전에는 단일 질문이었으나 계약이 바뀌었다.
+/// 출처: server/.../dto/response/RoutineQuestionResponse.java
 @freezed
 abstract class RoutineQuestion with _$RoutineQuestion {
   const factory RoutineQuestion({
     /// 서버 필드명은 `required`지만 Dart 예약어와 겹쳐 이름을 바꿨다.
     /// JSON 파싱에서 'required' 키를 읽는다.
     @Default(false) bool isRequired,
-    String? question,
-    @Default(<String>[]) List<String> options,
+    @Default(<QuestionItem>[]) List<QuestionItem> questions,
   }) = _RoutineQuestion;
 
   const RoutineQuestion._();
 
-  /// 질문을 실제로 보여줄 수 있는 상태인가
-  bool get canAsk =>
-      isRequired && (question?.trim().isNotEmpty ?? false);
+  /// 질문을 실제로 보여줄 수 있는 상태인가.
+  /// required가 true여도 질문이 비어 오면 물어볼 것이 없다.
+  bool get canAsk => isRequired && questions.any((q) => q.isValid);
+
+  /// 보여줄 수 있는 질문만 남긴다
+  List<QuestionItem> get askable =>
+      questions.where((q) => q.isValid).toList();
 
   factory RoutineQuestion.fromJson(Map<String, dynamic> json) {
     return RoutineQuestion(
       isRequired: json['required'] == true,
-      question: json['question']?.toString(),
+      questions: switch (json['questions']) {
+        final List<dynamic> list => list
+            .whereType<Map<String, dynamic>>()
+            .map(QuestionItem.fromJson)
+            .toList(),
+        _ => const <QuestionItem>[],
+      },
+    );
+  }
+}
+
+/// 질문 한 개 — 서버 `RoutineQuestionResponse.QuestionItem`.
+@freezed
+abstract class QuestionItem with _$QuestionItem {
+  const factory QuestionItem({
+    @Default('') String question,
+    @Default(<String>[]) List<String> options,
+  }) = _QuestionItem;
+
+  const QuestionItem._();
+
+  /// 화면에 띄울 수 있는 질문인가
+  bool get isValid => question.trim().isNotEmpty;
+
+  factory QuestionItem.fromJson(Map<String, dynamic> json) {
+    return QuestionItem(
+      question: json['question']?.toString() ?? '',
       options: switch (json['options']) {
         final List<dynamic> list => list.map((e) => e.toString()).toList(),
         _ => const <String>[],

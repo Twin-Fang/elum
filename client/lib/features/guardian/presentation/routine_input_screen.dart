@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -46,6 +47,14 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
     super.dispose();
   }
 
+  /// 추가 질문을 받아온 뒤 질문 화면으로 넘긴다.
+  ///
+  /// 질문이 없으면(목표 미설정 등) 질문 화면이 스스로 로딩으로 건너뛴다.
+  Future<void> _askQuestions(BuildContext context) async {
+    unawaited(ref.read(routineFlowProvider.notifier).askQuestion());
+    context.push(Routes.routineQuestion);
+  }
+
   void _fill(RoutineSuggestion suggestion) {
     final text = suggestion.inputText;
     _controller
@@ -85,7 +94,7 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
                           onChanged: ref
                               .read(routineFlowProvider.notifier)
                               .setRawInput,
-                          onSubmit: () => context.push(Routes.routineMasking),
+                          onSubmit: () => _askQuestions(context),
                         ),
                         SizedBox(height: space.lg),
                         _SuggestionChips(onTap: _fill),

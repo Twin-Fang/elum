@@ -22,6 +22,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.promptTitle,
     required this.promptBody,
     required this.chipLabel,
+    required this.stageLabel,
     required this.bodySmall,
   });
 
@@ -79,6 +80,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 추천 문구 칩 (14/w500)
   final TextStyle chipLabel;
+
+  /// 로딩 화면 단계 문구 (18/w500)
+  final TextStyle stageLabel;
 
   /// 본문보다 한 단계 작은 설명 (14/w400).
   /// DLP 배지·일과 입력 요약처럼 좁은 폭에 들어가는 문구.
@@ -176,6 +180,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.0,
     ),
+    stageLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
     bodySmall: TextStyle(
       fontFamily: fontFamily,
       fontSize: 14,
@@ -212,6 +222,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? promptTitle,
     TextStyle? promptBody,
     TextStyle? chipLabel,
+    TextStyle? stageLabel,
     TextStyle? bodySmall,
   }) {
     return AppTypography(
@@ -230,6 +241,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptTitle: promptTitle ?? this.promptTitle,
       promptBody: promptBody ?? this.promptBody,
       chipLabel: chipLabel ?? this.chipLabel,
+      stageLabel: stageLabel ?? this.stageLabel,
       bodySmall: bodySmall ?? this.bodySmall,
     );
   }
@@ -253,6 +265,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptTitle: TextStyle.lerp(promptTitle, other.promptTitle, t)!,
       promptBody: TextStyle.lerp(promptBody, other.promptBody, t)!,
       chipLabel: TextStyle.lerp(chipLabel, other.chipLabel, t)!,
+      stageLabel: TextStyle.lerp(stageLabel, other.stageLabel, t)!,
       bodySmall: TextStyle.lerp(bodySmall, other.bodySmall, t)!,
     );
   }

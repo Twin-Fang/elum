@@ -157,10 +157,16 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
   // --- 로컬 대체 구현 ---
 
+  /// 서버가 실패해도 질문 화면을 보여줄 수 있게 하는 대체 질문.
+  /// 실제 서버는 목표마다 하나씩 여러 개를 준다.
   RoutineQuestion _mockQuestion() => const RoutineQuestion(
         isRequired: true,
-        question: '비 오는 날 평소와 다르게 챙겨야 하는 물건이 있나요?',
-        options: ['우산', '장화', '여벌 양말', '우비'],
+        questions: [
+          QuestionItem(
+            question: '꼭 챙겨야 하는 준비물이 있나요?',
+            options: ['우산', '우비', '장화', '여벌 양말', '작은 수건'],
+          ),
+        ],
       );
 
   /// 서버 없이도 데모가 성립하도록 로컬에서 일과를 구성한다.

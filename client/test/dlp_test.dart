@@ -91,10 +91,15 @@ void main() {
 
   group('RoutineQuestion', () {
     test('서버 required 키를 isRequired로 읽는다', () {
+      // 서버가 질문 여러 개를 배열로 준다 (계약 변경됨)
       final q = RoutineQuestion.fromJson({
         'required': true,
-        'question': '무엇을 챙길까요?',
-        'options': ['우산'],
+        'questions': [
+          {
+            'question': '무엇을 챙길까요?',
+            'options': ['우산'],
+          },
+        ],
       });
       expect(q.isRequired, isTrue);
       expect(q.canAsk, isTrue);

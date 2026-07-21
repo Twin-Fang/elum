@@ -57,6 +57,14 @@ abstract final class AppAssets {
   /// 섹션 제목 앞 반짝임 (15×18). Figma `sparkles`.
   static const iconSparkles = '$_images/icon_sparkles.svg';
 
+  /// 홈으로 돌아가기 (24×24). Figma `fi-br-home`.
+  /// 일과 만들기 흐름에서 뒤로가기 옆에 함께 놓인다.
+  static const iconHome = '$_images/icon_home.svg';
+
+  /// 완료 체크 (10×10). Figma `fi-br-check`.
+  /// 로딩 화면의 단계별 완료 표시에 쓴다.
+  static const iconCheck = '$_images/icon_check.svg';
+
   /// 일과 만들기 화면 상단의 큰 반짝임 (30×36).
   /// Figma `보호자_새로운 일과 만들기`(238:1643)의 `sparkles`(238:1784).
   /// [iconSparkles]와 크기·비율이 달라 따로 받았다.

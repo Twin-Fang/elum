@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/guardian/presentation/card_review_screen.dart';
-import '../../features/guardian/presentation/dlp_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
+import '../../features/guardian/presentation/routine_loading_screen.dart';
 import '../../features/guardian/presentation/question_screen.dart';
 import '../../features/guardian/presentation/routine_input_screen.dart';
 import '../../features/onboarding/presentation/character_screen.dart';
@@ -25,6 +25,8 @@ abstract final class Routes {
 
   static const guardian = '/guardian';
   static const routineInput = '/guardian/routine/input';
+  /// 카드 생성 진행 화면 (Figma 262:4569). 경로 이름은 DLP 시절 것을 유지한다 —
+  /// 마스킹도 이 단계에서 함께 일어나므로 의미가 어긋나지 않는다.
   static const routineMasking = '/guardian/routine/masking';
   static const routineQuestion = '/guardian/routine/question';
   static const routineReview = '/guardian/routine/review';
@@ -99,7 +101,7 @@ GoRouter createRouter({
       ),
       GoRoute(
         path: Routes.routineMasking,
-        builder: (context, state) => const DlpScreen(),
+        builder: (context, state) => const RoutineLoadingScreen(),
       ),
       GoRoute(
         path: Routes.routineQuestion,

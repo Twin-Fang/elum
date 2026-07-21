@@ -29,8 +29,8 @@ void main() {
           builder: (context, state) => const RoutineInputScreen(),
         ),
         GoRoute(
-          path: Routes.routineMasking,
-          builder: (context, state) => const Scaffold(body: Text('마스킹 화면')),
+          path: Routes.routineQuestion,
+          builder: (context, state) => const Scaffold(body: Text('추가질문 화면')),
         ),
       ],
     );
@@ -161,7 +161,7 @@ void main() {
       await tester.tap(sendButton());
       await settle(tester);
 
-      expect(find.text('마스킹 화면'), findsOneWidget);
+      expect(find.text('추가질문 화면'), findsOneWidget);
     });
 
     testWidgets('입력값이 notifier에 반영된다', (tester) async {

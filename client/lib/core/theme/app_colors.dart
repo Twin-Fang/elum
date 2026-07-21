@@ -76,6 +76,9 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.auroraMint,
     required this.auroraViolet,
     required this.auroraYellow,
+    required this.stageDone,
+    required this.stagePending,
+    required this.stagePendingText,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -167,6 +170,12 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color auroraViolet;
   /// 배경 그라데이션 — 노랑
   final Color auroraYellow;
+  /// 로딩 완료 단계 — 채운 원·진한 문구 (rgba(36,38,52,0.8))
+  final Color stageDone;
+  /// 로딩 대기 단계 — 빈 원 테두리 (rgba(36,38,52,0.6))
+  final Color stagePending;
+  /// 로딩 대기 단계 문구 (rgba(36,38,52,0.5))
+  final Color stagePendingText;
 
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
@@ -208,6 +217,9 @@ class AppColors extends ThemeExtension<AppColors> {
     auroraMint: Color(0xFF7BFFE5),
     auroraViolet: Color(0xFFD16FFF),
     auroraYellow: Color(0xFFFCE551),
+    stageDone: Color(0xCC242634),
+    stagePending: Color(0x99242634),
+    stagePendingText: Color(0x80242634),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -260,6 +272,9 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? auroraMint,
     Color? auroraViolet,
     Color? auroraYellow,
+    Color? stageDone,
+    Color? stagePending,
+    Color? stagePendingText,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -302,6 +317,9 @@ class AppColors extends ThemeExtension<AppColors> {
       auroraMint: auroraMint ?? this.auroraMint,
       auroraViolet: auroraViolet ?? this.auroraViolet,
       auroraYellow: auroraYellow ?? this.auroraYellow,
+      stageDone: stageDone ?? this.stageDone,
+      stagePending: stagePending ?? this.stagePending,
+      stagePendingText: stagePendingText ?? this.stagePendingText,
     );
   }
 
@@ -355,6 +373,9 @@ class AppColors extends ThemeExtension<AppColors> {
       auroraMint: Color.lerp(auroraMint, other.auroraMint, t)!,
       auroraViolet: Color.lerp(auroraViolet, other.auroraViolet, t)!,
       auroraYellow: Color.lerp(auroraYellow, other.auroraYellow, t)!,
+      stageDone: Color.lerp(stageDone, other.stageDone, t)!,
+      stagePending: Color.lerp(stagePending, other.stagePending, t)!,
+      stagePendingText: Color.lerp(stagePendingText, other.stagePendingText, t)!,
     );
   }
 }

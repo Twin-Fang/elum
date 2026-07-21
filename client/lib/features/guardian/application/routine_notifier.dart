@@ -93,15 +93,15 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     );
   }
 
-  /// AI 추가 질문을 받아온다. 질문이 없으면 카드 생성으로 바로 넘어간다.
+  /// AI 추가 질문을 받아온다.
+  ///
+  /// **여기서 카드를 생성하지 않는다.** 질문이 없으면 질문 화면이 스스로
+  /// 로딩 화면으로 건너뛰고, 카드 생성은 로딩 화면 한 곳에서만 시작한다.
+  /// 양쪽에서 생성하면 같은 일과가 두 번 만들어진다.
   Future<void> askQuestion() async {
     final repo = ref.read(routineRepositoryProvider);
     final question = await repo.generateQuestion(state.rawInput);
 
-    if (!question.canAsk) {
-      await generateCards();
-      return;
-    }
     state = state.copyWith(step: RoutineFlowStep.question, question: question);
   }
 

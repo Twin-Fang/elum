@@ -304,7 +304,7 @@ mixin _$RoutineQuestion {
 
 /// 서버 필드명은 `required`지만 Dart 예약어와 겹쳐 이름을 바꿨다.
 /// JSON 파싱에서 'required' 키를 읽는다.
- bool get isRequired; String? get question; List<String> get options;
+ bool get isRequired; List<QuestionItem> get questions;
 /// Create a copy of RoutineQuestion
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -315,16 +315,16 @@ $RoutineQuestionCopyWith<RoutineQuestion> get copyWith => _$RoutineQuestionCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoutineQuestion&&(identical(other.isRequired, isRequired) || other.isRequired == isRequired)&&(identical(other.question, question) || other.question == question)&&const DeepCollectionEquality().equals(other.options, options));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoutineQuestion&&(identical(other.isRequired, isRequired) || other.isRequired == isRequired)&&const DeepCollectionEquality().equals(other.questions, questions));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isRequired,question,const DeepCollectionEquality().hash(options));
+int get hashCode => Object.hash(runtimeType,isRequired,const DeepCollectionEquality().hash(questions));
 
 @override
 String toString() {
-  return 'RoutineQuestion(isRequired: $isRequired, question: $question, options: $options)';
+  return 'RoutineQuestion(isRequired: $isRequired, questions: $questions)';
 }
 
 
@@ -335,7 +335,7 @@ abstract mixin class $RoutineQuestionCopyWith<$Res>  {
   factory $RoutineQuestionCopyWith(RoutineQuestion value, $Res Function(RoutineQuestion) _then) = _$RoutineQuestionCopyWithImpl;
 @useResult
 $Res call({
- bool isRequired, String? question, List<String> options
+ bool isRequired, List<QuestionItem> questions
 });
 
 
@@ -352,12 +352,11 @@ class _$RoutineQuestionCopyWithImpl<$Res>
 
 /// Create a copy of RoutineQuestion
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isRequired = null,Object? question = freezed,Object? options = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isRequired = null,Object? questions = null,}) {
   return _then(_self.copyWith(
 isRequired: null == isRequired ? _self.isRequired : isRequired // ignore: cast_nullable_to_non_nullable
-as bool,question: freezed == question ? _self.question : question // ignore: cast_nullable_to_non_nullable
-as String?,options: null == options ? _self.options : options // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as bool,questions: null == questions ? _self.questions : questions // ignore: cast_nullable_to_non_nullable
+as List<QuestionItem>,
   ));
 }
 
@@ -442,10 +441,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isRequired,  String? question,  List<String> options)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isRequired,  List<QuestionItem> questions)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RoutineQuestion() when $default != null:
-return $default(_that.isRequired,_that.question,_that.options);case _:
+return $default(_that.isRequired,_that.questions);case _:
   return orElse();
 
 }
@@ -463,10 +462,10 @@ return $default(_that.isRequired,_that.question,_that.options);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isRequired,  String? question,  List<String> options)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isRequired,  List<QuestionItem> questions)  $default,) {final _that = this;
 switch (_that) {
 case _RoutineQuestion():
-return $default(_that.isRequired,_that.question,_that.options);case _:
+return $default(_that.isRequired,_that.questions);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -483,10 +482,10 @@ return $default(_that.isRequired,_that.question,_that.options);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isRequired,  String? question,  List<String> options)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isRequired,  List<QuestionItem> questions)?  $default,) {final _that = this;
 switch (_that) {
 case _RoutineQuestion() when $default != null:
-return $default(_that.isRequired,_that.question,_that.options);case _:
+return $default(_that.isRequired,_that.questions);case _:
   return null;
 
 }
@@ -498,18 +497,17 @@ return $default(_that.isRequired,_that.question,_that.options);case _:
 
 
 class _RoutineQuestion extends RoutineQuestion {
-  const _RoutineQuestion({this.isRequired = false, this.question, final  List<String> options = const <String>[]}): _options = options,super._();
+  const _RoutineQuestion({this.isRequired = false, final  List<QuestionItem> questions = const <QuestionItem>[]}): _questions = questions,super._();
   
 
 /// 서버 필드명은 `required`지만 Dart 예약어와 겹쳐 이름을 바꿨다.
 /// JSON 파싱에서 'required' 키를 읽는다.
 @override@JsonKey() final  bool isRequired;
-@override final  String? question;
- final  List<String> _options;
-@override@JsonKey() List<String> get options {
-  if (_options is EqualUnmodifiableListView) return _options;
+ final  List<QuestionItem> _questions;
+@override@JsonKey() List<QuestionItem> get questions {
+  if (_questions is EqualUnmodifiableListView) return _questions;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_options);
+  return EqualUnmodifiableListView(_questions);
 }
 
 
@@ -523,16 +521,16 @@ _$RoutineQuestionCopyWith<_RoutineQuestion> get copyWith => __$RoutineQuestionCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RoutineQuestion&&(identical(other.isRequired, isRequired) || other.isRequired == isRequired)&&(identical(other.question, question) || other.question == question)&&const DeepCollectionEquality().equals(other._options, _options));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RoutineQuestion&&(identical(other.isRequired, isRequired) || other.isRequired == isRequired)&&const DeepCollectionEquality().equals(other._questions, _questions));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isRequired,question,const DeepCollectionEquality().hash(_options));
+int get hashCode => Object.hash(runtimeType,isRequired,const DeepCollectionEquality().hash(_questions));
 
 @override
 String toString() {
-  return 'RoutineQuestion(isRequired: $isRequired, question: $question, options: $options)';
+  return 'RoutineQuestion(isRequired: $isRequired, questions: $questions)';
 }
 
 
@@ -543,7 +541,7 @@ abstract mixin class _$RoutineQuestionCopyWith<$Res> implements $RoutineQuestion
   factory _$RoutineQuestionCopyWith(_RoutineQuestion value, $Res Function(_RoutineQuestion) _then) = __$RoutineQuestionCopyWithImpl;
 @override @useResult
 $Res call({
- bool isRequired, String? question, List<String> options
+ bool isRequired, List<QuestionItem> questions
 });
 
 
@@ -560,11 +558,276 @@ class __$RoutineQuestionCopyWithImpl<$Res>
 
 /// Create a copy of RoutineQuestion
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isRequired = null,Object? question = freezed,Object? options = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isRequired = null,Object? questions = null,}) {
   return _then(_RoutineQuestion(
 isRequired: null == isRequired ? _self.isRequired : isRequired // ignore: cast_nullable_to_non_nullable
-as bool,question: freezed == question ? _self.question : question // ignore: cast_nullable_to_non_nullable
-as String?,options: null == options ? _self._options : options // ignore: cast_nullable_to_non_nullable
+as bool,questions: null == questions ? _self._questions : questions // ignore: cast_nullable_to_non_nullable
+as List<QuestionItem>,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$QuestionItem {
+
+ String get question; List<String> get options;
+/// Create a copy of QuestionItem
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$QuestionItemCopyWith<QuestionItem> get copyWith => _$QuestionItemCopyWithImpl<QuestionItem>(this as QuestionItem, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuestionItem&&(identical(other.question, question) || other.question == question)&&const DeepCollectionEquality().equals(other.options, options));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,question,const DeepCollectionEquality().hash(options));
+
+@override
+String toString() {
+  return 'QuestionItem(question: $question, options: $options)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $QuestionItemCopyWith<$Res>  {
+  factory $QuestionItemCopyWith(QuestionItem value, $Res Function(QuestionItem) _then) = _$QuestionItemCopyWithImpl;
+@useResult
+$Res call({
+ String question, List<String> options
+});
+
+
+
+
+}
+/// @nodoc
+class _$QuestionItemCopyWithImpl<$Res>
+    implements $QuestionItemCopyWith<$Res> {
+  _$QuestionItemCopyWithImpl(this._self, this._then);
+
+  final QuestionItem _self;
+  final $Res Function(QuestionItem) _then;
+
+/// Create a copy of QuestionItem
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? question = null,Object? options = null,}) {
+  return _then(_self.copyWith(
+question: null == question ? _self.question : question // ignore: cast_nullable_to_non_nullable
+as String,options: null == options ? _self.options : options // ignore: cast_nullable_to_non_nullable
+as List<String>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [QuestionItem].
+extension QuestionItemPatterns on QuestionItem {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _QuestionItem value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _QuestionItem() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _QuestionItem value)  $default,){
+final _that = this;
+switch (_that) {
+case _QuestionItem():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _QuestionItem value)?  $default,){
+final _that = this;
+switch (_that) {
+case _QuestionItem() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String question,  List<String> options)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _QuestionItem() when $default != null:
+return $default(_that.question,_that.options);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String question,  List<String> options)  $default,) {final _that = this;
+switch (_that) {
+case _QuestionItem():
+return $default(_that.question,_that.options);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String question,  List<String> options)?  $default,) {final _that = this;
+switch (_that) {
+case _QuestionItem() when $default != null:
+return $default(_that.question,_that.options);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _QuestionItem extends QuestionItem {
+  const _QuestionItem({this.question = '', final  List<String> options = const <String>[]}): _options = options,super._();
+  
+
+@override@JsonKey() final  String question;
+ final  List<String> _options;
+@override@JsonKey() List<String> get options {
+  if (_options is EqualUnmodifiableListView) return _options;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_options);
+}
+
+
+/// Create a copy of QuestionItem
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$QuestionItemCopyWith<_QuestionItem> get copyWith => __$QuestionItemCopyWithImpl<_QuestionItem>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuestionItem&&(identical(other.question, question) || other.question == question)&&const DeepCollectionEquality().equals(other._options, _options));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,question,const DeepCollectionEquality().hash(_options));
+
+@override
+String toString() {
+  return 'QuestionItem(question: $question, options: $options)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$QuestionItemCopyWith<$Res> implements $QuestionItemCopyWith<$Res> {
+  factory _$QuestionItemCopyWith(_QuestionItem value, $Res Function(_QuestionItem) _then) = __$QuestionItemCopyWithImpl;
+@override @useResult
+$Res call({
+ String question, List<String> options
+});
+
+
+
+
+}
+/// @nodoc
+class __$QuestionItemCopyWithImpl<$Res>
+    implements _$QuestionItemCopyWith<$Res> {
+  __$QuestionItemCopyWithImpl(this._self, this._then);
+
+  final _QuestionItem _self;
+  final $Res Function(_QuestionItem) _then;
+
+/// Create a copy of QuestionItem
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? question = null,Object? options = null,}) {
+  return _then(_QuestionItem(
+question: null == question ? _self.question : question // ignore: cast_nullable_to_non_nullable
+as String,options: null == options ? _self._options : options // ignore: cast_nullable_to_non_nullable
 as List<String>,
   ));
 }
