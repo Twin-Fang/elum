@@ -1,5 +1,6 @@
 import '../../features/child/domain/reward_character.dart';
 import '../../features/onboarding/domain/character.dart';
+import '../../features/onboarding/domain/support_goal.dart';
 
 /// 에셋 경로 상수.
 ///
@@ -10,12 +11,14 @@ import '../../features/onboarding/domain/character.dart';
 abstract final class AppAssets {
   static const _images = 'assets/images';
 
-  /// 도움 목표 아이콘 (40×40). Figma `온보딩_목표` 프레임의 Group 5~8.
-  ///
-  /// **목표별로 다르지 않다.** 네 그룹 모두 노란 반투명 원 + `fi-br-child-head`
-  /// 조합으로 Figma상 완전히 동일하다. 목표마다 다른 아이콘을 쓰려면
-  /// 디자이너가 Figma를 먼저 바꿔야 한다. (이슈 #11)
-  static const goalIcon = '$_images/goal_icon.svg';
+  /// 도움 목표 아이콘 (40×40). Figma `온보딩_목표`(204:1002)의 Group 62~65,
+  /// 목표별로 서로 다른 아이콘이다 (2026-07-22 갱신, 이슈 #11 후속).
+  static String goalIcon(SupportGoal goal) => switch (goal) {
+        SupportGoal.stepByStep => '$_images/goal_icon_step_by_step.svg',
+        SupportGoal.prepareItems => '$_images/goal_icon_prepare_items.svg',
+        SupportGoal.prepareNew => '$_images/goal_icon_prepare_new.svg',
+        SupportGoal.independent => '$_images/goal_icon_independent.svg',
+      };
 
   /// 뒤로가기 (24×24). Figma `fi-br-angle-left`.
   /// Material 아이콘은 형태가 달라 쓰지 않는다.

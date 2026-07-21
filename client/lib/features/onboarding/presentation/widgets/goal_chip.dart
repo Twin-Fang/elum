@@ -59,7 +59,7 @@ class GoalChip extends StatelessWidget {
         children: [
           // 아이콘 배경 원은 선택 여부와 무관하게 동일하다 (Figma 확인)
           SvgPicture.asset(
-            AppAssets.goalIcon,
+            AppAssets.goalIcon(goal),
             width: _iconSize.w,
             height: _iconSize.w,
           ),

@@ -81,13 +81,15 @@ void main() {
       expect(find.text('여러 개를 선택할 수 있어요'), findsOneWidget);
     });
 
-    testWidgets('아이콘을 SVG 에셋으로 렌더링한다', (tester) async {
+    testWidgets('목표별로 다른 아이콘을 SVG 에셋으로 렌더링한다', (tester) async {
       await tester.pumpWidget(wrap(const GoalsScreen()));
       await tester.pumpAndSettle();
 
       // 도형을 Container로 그리다 일러스트가 사각형이 된 사고가 있었다.
-      // Figma상 4개 목표의 아이콘은 모두 동일하므로 같은 에셋이 4번 나온다.
-      expect(svgWithAsset(AppAssets.goalIcon), findsNWidgets(4));
+      // 2026-07-22 Figma 갱신(이슈 #11 후속) — 4개 목표가 서로 다른 아이콘을 쓴다.
+      for (final goal in SupportGoal.values) {
+        expect(svgWithAsset(AppAssets.goalIcon(goal)), findsOneWidget);
+      }
     });
 
     testWidgets('미선택 상태에서는 CTA가 비활성이다', (tester) async {
