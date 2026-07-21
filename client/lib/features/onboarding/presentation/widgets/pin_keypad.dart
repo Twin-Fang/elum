@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/theme_context_ext.dart';
 
@@ -26,7 +27,7 @@ class PinInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 1,
+      height: 1.h,
       child: Opacity(
         opacity: 0,
         child: TextField(
@@ -71,10 +72,11 @@ class PinDots extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         for (var i = 0; i < length; i++) ...[
-          if (i > 0) const SizedBox(width: _gap),
+          if (i > 0) SizedBox(width: _gap.w),
+          // 점은 원이라 가로세로 모두 .w — .h를 섞으면 타원이 된다
           Container(
-            width: _size,
-            height: _size,
+            width: _size.w,
+            height: _size.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               // 채워진 점은 진하게, 빈 점은 Figma의 회색(#CDC8C3)

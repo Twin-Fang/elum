@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -76,22 +77,31 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: context.space.screenH, top: 12),
+      padding: EdgeInsets.only(left: context.space.screenH, top: 12.h),
       child: Row(
         children: [
           if (onBack != null)
             AppPressable(
               onTap: onBack,
               scaleDown: AppPressable.scaleIcon,
-              child: SvgPicture.asset(AppAssets.iconBack, width: 24, height: 24),
+              // 정사각형 아이콘이라 가로세로 모두 .w
+              child: SvgPicture.asset(
+                AppAssets.iconBack,
+                width: 24.w,
+                height: 24.w,
+              ),
             )
           else
-            const SizedBox(width: 24),
-          const SizedBox(width: 24),
+            SizedBox(width: 24.w),
+          SizedBox(width: 24.w),
           AppPressable(
             onTap: () => context.go(Routes.guardian),
             scaleDown: AppPressable.scaleIcon,
-            child: SvgPicture.asset(AppAssets.iconHome, width: 24, height: 24),
+            child: SvgPicture.asset(
+              AppAssets.iconHome,
+              width: 24.w,
+              height: 24.w,
+            ),
           ),
         ],
       ),

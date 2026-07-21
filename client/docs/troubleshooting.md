@@ -38,6 +38,8 @@
 
 **화면 · 상태**
 - [호칭이 비어 조사만 남음](#호칭이-비어-조사만-남음)
+- [키보드가 올라오면 화면이 깨짐](#키보드가-올라오면-화면이-깨짐)
+- [이름 입력에서 엔터가 줄바꿈이 됨](#이름-입력에서-엔터가-줄바꿈이-됨)
 
 **테스트**
 - [위젯 테스트에서 .w 사용 시 에러](#위젯-테스트에서-w-사용-시-에러)
@@ -322,6 +324,97 @@ unzip -p app-release.apk assets/flutter_assets/.env
 - 화면 문구에 사용자 입력을 넣을 땐 **빈 값일 때를 항상 고려**한다
 - 라우터 redirect로 중간 진입 차단
 - `test/onboarding_profile_test.dart`의 "호칭이 없으면 제목용 대체어를 준다"
+
+---
+
+## 키보드가 올라오면 화면이 깨짐
+
+**언제**: 2026-07-21 · [#13](https://github.com/Twin-Fang/elum/issues/13)
+
+**증상**: 이름 입력 화면에서 키보드가 뜨자 `BOTTOM OVERFLOWED BY 24 PIXELS`
+노란 줄무늬가 나타나고 입력 필드가 찌그러졌다. 에러 메시지가 함께 뜨면 88px까지 커졌다.
+
+**원인**: `ElumScaffold`에 `resizeToAvoidBottomInset` 설정이 없어 기본값 `true`로
+동작했다. 키보드가 뜨면 `Scaffold`가 본문 높이를 키보드만큼 줄이는데, 이 뼈대는
+Figma 좌표를 **고정 높이**로 재현한다 — 헤더·입력필드(68 고정)·CTA·하단 여백(111)이
+모두 압축 여지가 없어 남는 공간을 초과한다.
+
+`RoutineFlowScaffold`와 `routine_input_screen`은 이미 `false`를 명시해 뒀는데
+**`ElumScaffold`만 빠져 있었다.** 이 차이가 위험/안전을 가른 유일한 요인이다.
+
+같은 결함이 `ElumScaffold`를 쓰는 입력 화면 3개에 모두 있었다:
+이름 입력, PIN 설정, 모드 전환. 뒤 두 개는 `autofocus: true`라 **진입하면 키패드가
+항상 뜨므로** 이미 깨지고 있었을 가능성이 높다.
+
+**해결**: `ElumScaffold`에 `resizeToAvoidBottomInset: false` 추가. 한 줄로 3개 화면이
+동시에 해결된다. 함께 빈 곳 탭으로 키보드를 닫는 `GestureDetector`도 넣었다 —
+Flutter가 기본 제공하지 않아 없으면 키보드를 내릴 방법이 완료 키뿐이다.
+
+**왜 테스트가 못 잡았나** — 세 가지가 겹쳤다.
+
+1. **키보드를 재현하지 않았다.** `enterText()`는 텍스트만 넣고 `viewInsets`는 0으로
+   둔다. 테스트 전체에 `viewInsets`가 0건이라 모든 테스트가 "키보드가 영원히
+   안 뜨는 세계"에서 돌았다.
+2. **오버플로는 조용히 실패한다.** Flutter의 overflow는 예외를 던지지 않고 노란
+   줄무늬만 그린다. `takeException()`이 없으면 **터져도 초록불이다.**
+3. **뷰포트가 800×600이었다.** 이름 테스트가 `useFigmaViewport()`를 부르지 않아
+   실기기(393×852)의 세로 압박이 재현되지 않았다.
+
+**재발 방지**
+
+- **`test/flutter_test_config.dart`** — `test/` 루트에 두면 전 테스트에 자동 적용된다.
+  오버플로를 예외로 바꿔 실패시키므로 **앞으로 어느 화면에서 나든 자동으로 걸린다.**
+  이 파일을 지우지 않는다.
+- **`showKeyboard(tester)`** 헬퍼 (`test/helpers/device_viewport.dart`) — 입력이 있는
+  화면은 이걸로 키보드를 올린 뒤 렌더링을 확인한다.
+- 이름·PIN 화면에 키보드 회귀 테스트 추가. 수정을 되돌려 24px·88px 오버플로가 실제로
+  잡히는 것을 확인했다.
+- **입력 화면을 만들면 키보드 상태를 반드시 테스트한다.** 실기기에서만 드러나는 버그다.
+
+---
+
+## 이름 입력에서 엔터가 줄바꿈이 됨
+
+**언제**: 2026-07-21 · [#13](https://github.com/Twin-Fang/elum/issues/13)
+
+**증상**: 아이 이름 입력창에서 리턴키를 누르면 완료가 아니라 **줄바꿈**이 됐다.
+개행이 삽입되는데 필드 높이가 68 고정이라 둘째 줄은 보이지도 않아, 글자가 사라진 것처럼
+보였다. 이름에 `\n`이 섞인 채 서버로 전송됐다.
+
+**원인**: `ElumTextField`가 높이 68을 채우려고 `expands: true`를 쓰는데, 이것이
+`maxLines: null`을 강제한다(Flutter assert). 그러면 Flutter가 이 필드를 **여러 줄
+입력으로 추론**해 `keyboardType`을 `multiline`, `textInputAction`을 `newline`으로 잡는다.
+
+**여러 줄을 받으려던 의도가 전혀 아니었다.** 디자인 제약(68px)이 만든 부작용이다.
+
+**해결**: `maxLines`는 `expands` 때문에 못 건드리므로 나머지 세 축을 명시해 추론을 끊는다.
+
+```dart
+keyboardType: TextInputType.text,        // multiline 추론을 끊는다
+textInputAction: TextInputAction.done,   // 리턴키를 '완료'로
+inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\n'))],
+```
+
+**`keyboardType`과 `textInputAction`을 둘 다 지정해야 한다.** 하나만 주면 나머지가
+여전히 `maxLines: null`을 보고 multiline으로 추론한다. `inputFormatters`는 소프트키보드가
+아닌 경로(붙여넣기·하드웨어 키보드·일부 IME)로 들어오는 개행을 막는 안전망이다.
+
+**한 줄 / 여러 줄 판단** — 전수 조사 결과 실제 버그는 이름 입력 하나였다.
+
+| 입력창 | 성격 | 엔터 | 판정 |
+|---|---|---|---|
+| 아이 이름 | 한 줄 | 완료 | 고침 |
+| 일과 설명 (`routine_input_screen`) | **여러 줄** (`maxLines: 4`) | **줄바꿈** | **손대지 않는다** |
+| 직접 입력 칩 (`question_screen`) | 한 줄 | 제출 | 이미 올바름 |
+| PIN | 한 줄 | — | 숫자패드엔 리턴키가 없다 |
+
+**재발 방지**
+
+- `ElumTextField`는 **한 줄 전용**임을 클래스 주석에 명시했다. 여러 줄이 필요하면
+  이 위젯을 쓰지 말고 별도로 만든다.
+- `expands: true`를 쓰는 곳은 `maxLines: null`이 강제되므로 **입력 성격을 항상 명시**한다.
+- 새 입력창을 만들 땐 "이건 한 줄인가 여러 줄인가"를 먼저 정하고 그에 맞는 3종
+  (`keyboardType`·`textInputAction`·`onSubmitted`)을 지정한다.
 
 ---
 

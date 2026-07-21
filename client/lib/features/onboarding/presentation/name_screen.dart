@@ -55,8 +55,7 @@ class _NameScreenState extends ConsumerState<NameScreen> {
     });
 
     final name = ref.read(onboardingProvider).childNickname;
-    final outcome =
-        await ref.read(authRepositoryProvider).signInWithName(name);
+    final outcome = await ref.read(authRepositoryProvider).signInWithName(name);
 
     if (!mounted) return;
 
@@ -110,6 +109,9 @@ class _NameScreenState extends ConsumerState<NameScreen> {
             hintText: '이름을 입력해주세요',
             leadingIconAssetPath: AppAssets.inputFieldIconChildName,
             onChanged: ref.read(onboardingProvider.notifier).setNickname,
+            // 엔터는 키보드만 닫는다. 진행은 '다음' 버튼으로만 —
+            // 이름 입력이 곧 계정 생성이라 오입력으로 진행되면 되돌리기 번거롭다.
+            onSubmitted: (_) => FocusScope.of(context).unfocus(),
           ),
           if (_errorMessage != null) ...[
             SizedBox(height: context.space.md),

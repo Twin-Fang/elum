@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -122,11 +123,12 @@ class _BackRow extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
-        padding: EdgeInsets.only(left: context.space.screenH, top: 12),
+        padding: EdgeInsets.only(left: context.space.screenH, top: 12.h),
         child: AppPressable(
           onTap: () => context.pop(),
           scaleDown: AppPressable.scaleIcon,
-          child: SvgPicture.asset(AppAssets.iconBack, width: 24, height: 24),
+          // 정사각형 아이콘이라 가로세로 모두 .w — .h를 섞으면 찌그러진다
+          child: SvgPicture.asset(AppAssets.iconBack, width: 24.w, height: 24.w),
         ),
       ),
     );
@@ -143,7 +145,8 @@ class _Headline extends StatelessWidget {
 
     return Column(
       children: [
-        SvgPicture.asset(AppAssets.iconSparklesLarge, width: 30, height: 36),
+        // 30×36 비정사각형이라 가로 .w / 세로 .h
+        SvgPicture.asset(AppAssets.iconSparklesLarge, width: 30.w, height: 36.h),
         SizedBox(height: context.space.lg),
         Text(
           // 줄바꿈 위치는 디자인이 정한 대로다
@@ -191,16 +194,16 @@ class _InputField extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            constraints: const BoxConstraints(minHeight: 52),
-            padding: EdgeInsets.symmetric(horizontal: 18, vertical: space.sm),
+            constraints: BoxConstraints(minHeight: 52.h),
+            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: space.sm),
             decoration: BoxDecoration(
               color: colors.glassSurface,
               borderRadius: BorderRadius.circular(space.cardRadius),
               boxShadow: [
                 BoxShadow(
                   color: colors.glassShadow,
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
+                  blurRadius: 5.w,
+                  offset: Offset(0, 2.h),
                 ),
               ],
             ),
@@ -249,15 +252,16 @@ class _SendButton extends StatelessWidget {
       onTap: onTap,
       scaleDown: AppPressable.scaleIcon,
       child: Container(
-        width: 32,
-        height: 32,
+        // 원형 버튼이라 가로세로 모두 .w
+        width: 32.w,
+        height: 32.w,
         decoration: BoxDecoration(
           color: context.colors.textPrimary,
           shape: BoxShape.circle,
         ),
         child: Icon(
           Icons.arrow_upward_rounded,
-          size: 18,
+          size: 18.w,
           color: context.colors.surface,
         ),
       ),
@@ -295,7 +299,7 @@ class _SuggestionChips extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               for (final (index, s) in items.skip(row).take(2).indexed) ...[
-                if (index > 0) const SizedBox(width: 6),
+                if (index > 0) SizedBox(width: 6.w),
                 Flexible(child: _Chip(suggestion: s, onTap: onTap)),
               ],
             ],
@@ -326,7 +330,7 @@ class _Chip extends StatelessWidget {
             duration: AppMotion.fast,
             curve: AppMotion.standard,
             // Figma padding 10×16
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
             decoration: BoxDecoration(
               color: context.colors.glassChip,
               borderRadius: BorderRadius.circular(space.cardRadius),

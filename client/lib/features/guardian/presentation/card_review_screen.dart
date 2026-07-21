@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -114,7 +115,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
       child: Column(
         children: [
           SizedBox(height: space.md),
-          SvgPicture.asset(AppAssets.iconSparklesLarge, width: 30, height: 36),
+          SvgPicture.asset(
+            AppAssets.iconSparklesLarge,
+            width: 30.w,
+            height: 36.h,
+          ),
           SizedBox(height: space.md),
           Text(
             '카드 ${cards.length}개가 생성되었어요',

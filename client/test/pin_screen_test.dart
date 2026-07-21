@@ -11,6 +11,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
 
 /// Figma `온보딩_비밀번호`(238:1909) / `_입력`(238:1997) / `_재확인`(238:2767) 정합 테스트.
@@ -18,6 +19,9 @@ import 'helpers/test_storage.dart';
 /// PIN 불일치는 아동도 볼 수 있는 화면이라 경고색·에러 아이콘을 쓰지 않는다.
 /// 그 규칙을 테스트로 고정한다.
 void main() {
+  // .w/.h 검증에는 Figma 기준 뷰포트가 필요하다 (기본 800×600이면 스케일이 어긋난다)
+  useFigmaViewport();
+
   bool isCtaEnabled(WidgetTester tester) {
     return tester.widget<ElumButton>(find.byType(ElumButton)).onPressed != null;
   }
@@ -246,6 +250,33 @@ void main() {
   group('OnboardingProfile', () {
     test('PIN은 4자리다', () {
       expect(OnboardingProfile.pinLength, 4);
+    });
+  });
+
+  /// PIN 입력은 autofocus라 **화면에 들어가면 키패드가 항상 뜬다.**
+  /// 즉 키보드가 올라온 상태가 예외가 아니라 기본이다.
+  group('키보드', () {
+    testWidgets('키패드가 올라와도 레이아웃이 깨지지 않는다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      showKeyboard(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PinDots), findsOneWidget);
+    });
+
+    testWidgets('재확인 단계에서도 키패드가 올라와 있어도 깨지지 않는다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      showKeyboard(tester);
+      await tester.enterText(find.byType(TextField), '1234');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElumButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PinDots), findsOneWidget);
     });
   });
 }
