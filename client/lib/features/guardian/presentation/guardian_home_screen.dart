@@ -182,14 +182,15 @@ class _NewRoutineCard extends StatelessWidget {
         height: 94.h,
         padding: EdgeInsets.symmetric(horizontal: space.md),
         decoration: BoxDecoration(
-          // Figma linear-gradient(134deg, #F9F4FF → #E9EEFF)
+          // Figma: linear-gradient(-67deg, #F9F1D7 16.64%, #E9EEFF 83.36%) — 270도 회전
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colors.homeCardGradientStart,
-              colors.homeCardGradientEnd,
+            begin: const Alignment(-0.99, -0.12),
+            end: const Alignment(0.99, 0.12),
+            colors: const [
+              Color(0xFFE9EEFF),
+              Color(0xFFF9F1D7),
             ],
+            stops: const [0.1664, 0.8336],
           ),
           borderRadius: BorderRadius.circular(space.cardRadius),
           border: Border.all(color: colors.border),
@@ -214,10 +215,13 @@ class _NewRoutineCard extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: SvgPicture.asset(
-                    AppAssets.homeNewRoutineChick,
-                    width: 47.w,
-                    height: 51.w,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 1.h),
+                    child: SvgPicture.asset(
+                      AppAssets.homeNewRoutineChick,
+                      width: 47.w,
+                      height: 51.w,
+                    ),
                   ),
                 ),
               ),

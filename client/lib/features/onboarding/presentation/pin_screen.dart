@@ -104,7 +104,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   /// 최종 확정 — 2단계 일치 상태에서 CTA를 눌렀을 때만 호출된다.
   void _onComplete() {
     ref.read(onboardingProvider.notifier).setPin(_current);
-    context.push(Routes.onboardingDone);
+    context.go(Routes.guardian);
   }
 
   /// 입력을 비우고 키패드는 계속 올라와 있게 둔다
