@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../guardian/data/routine_repository.dart';
+import '../../onboarding/application/onboarding_notifier.dart';
 import '../domain/reward_character.dart';
 import 'widgets/reward_star.dart';
 
@@ -32,6 +34,13 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
   Widget build(BuildContext context) {
     final space = context.space;
     final colors = context.colors;
+    // 문구에 아이 이름이 들어간다 (Figma 309:4055 · 343:4434).
+    // 서버 닉네임이 우선이고, 없으면 온보딩에서 받은 이름을 쓴다.
+    final localName = ref.watch(onboardingProvider).displayName;
+    final childName = ref.watch(memberProvider).maybeWhen(
+          data: (member) => member?.nickname ?? localName,
+          orElse: () => localName,
+        );
 
     return Scaffold(
       body: DecoratedBox(
@@ -61,7 +70,7 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
               _FadeSlideIn(
                 delay: AppMotion.slow,
                 child: Text(
-                  _character.message,
+                  _character.messageFor(childName),
                   textAlign: TextAlign.center,
                   style: context.typo.cardDescription
                       .copyWith(color: colors.surface),
@@ -78,7 +87,7 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
                 child: _FadeSlideIn(
                   delay: AppMotion.slow,
                   child: ElumButton(
-                    label: '오예!',
+                    label: _character.buttonLabel,
                     backgroundColor: colors.rewardButton,
                     labelColor: colors.textPrimary,
                     onPressed: () => context.pop(),

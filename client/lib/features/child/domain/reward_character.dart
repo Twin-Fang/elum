@@ -9,24 +9,46 @@ import 'dart:math';
 /// 여기서는 **랜덤으로 뽑는다.** 매번 같은 캐릭터가 나오면 보상이 단조로워진다.
 enum RewardCharacter {
   /// 서비스 AI이자 병아리. 온보딩 선택지에는 없다.
-  lumi('축하해요!', '할 일을 해내서\n루미가 별을 가져왔어요'),
+  lumi(
+    '축하해요!',
+    '할 일을 해내서 루미가\n{name}에게 별을 가져왔어요',
+    '오예!',
+  ),
 
   /// 여우
-  popo('잘했어요!', '할 일을 해내서\n포포가 별을 가져왔네요'),
+  popo(
+    '잘했어요!',
+    '할 일을 해내서\n포포가 별을 가져왔네요',
+    '오예!',
+  ),
 
   /// 고양이
-  ruru('잘했어요!', '할 일을 해내서\n루루가 별을 가져왔네요');
+  ruru(
+    '멋져요!',
+    '{name}가 할 일을 해내서\n루루가 선물을 가져왔다고 해요',
+    '신난다!',
+  );
 
-  const RewardCharacter(this.title, this.message);
+  const RewardCharacter(this.title, this._messageTemplate, this.buttonLabel);
 
   /// 큰 제목 (30/w800)
   final String title;
 
-  /// 두 줄 설명 (20/w400)
+  /// 두 줄 설명 원본. `{name}` 자리에 아이 이름이 들어간다.
+  final String _messageTemplate;
+
+  /// 하단 버튼 문구 (22/w800). 캐릭터마다 다르다 —
+  /// 루미·포포는 `오예!`, 루루는 `신난다!` (Figma 343:4434).
+  final String buttonLabel;
+
+  /// 아이 이름을 넣은 설명 문구.
   ///
-  /// ⚠️ [ruru]의 Figma 문구는 `할 일을 해낸`으로 끊겨 있다. 미완성으로 보고
-  /// [popo]와 같은 형식으로 맞췄다. 디자이너 확인 후 교체한다.
-  final String message;
+  /// 이름이 비면 조사만 남아 어색해지므로 대체어를 쓴다
+  /// (`가 할 일을 해내서` → `우리 아이가 할 일을 해내서`).
+  String messageFor(String childName) {
+    final name = childName.trim().isEmpty ? '우리 아이' : childName.trim();
+    return _messageTemplate.replaceAll('{name}', name);
+  }
 
   /// 무작위로 하나 고른다.
   ///

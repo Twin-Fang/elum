@@ -260,15 +260,38 @@ void main() {
 
     test('캐릭터마다 문구가 다르다', () {
       final messages =
-          RewardCharacter.values.map((c) => c.message).toSet();
+          RewardCharacter.values.map((c) => c.messageFor('하늘이')).toSet();
 
       expect(messages.length, RewardCharacter.values.length);
     });
 
     test('문구에 캐릭터 이름이 들어간다', () {
-      expect(RewardCharacter.lumi.message, contains('루미'));
-      expect(RewardCharacter.popo.message, contains('포포'));
-      expect(RewardCharacter.ruru.message, contains('루루'));
+      expect(RewardCharacter.lumi.messageFor('하늘이'), contains('루미'));
+      expect(RewardCharacter.popo.messageFor('하늘이'), contains('포포'));
+      expect(RewardCharacter.ruru.messageFor('하늘이'), contains('루루'));
+    });
+
+    test('문구에 아이 이름이 들어간다 (Figma 309:4055 · 343:4434)', () {
+      expect(
+        RewardCharacter.lumi.messageFor('하늘이'),
+        '할 일을 해내서 루미가\n하늘이에게 별을 가져왔어요',
+      );
+      expect(
+        RewardCharacter.ruru.messageFor('하늘이'),
+        '하늘이가 할 일을 해내서\n루루가 선물을 가져왔다고 해요',
+      );
+    });
+
+    test('이름이 비어도 조사만 남지 않는다', () {
+      // 온보딩을 건너뛰었거나 서버 닉네임이 없을 때 `가 할 일을 해내서`가 되면 안 된다
+      expect(RewardCharacter.ruru.messageFor(''), contains('우리 아이가'));
+      expect(RewardCharacter.ruru.messageFor('   '), contains('우리 아이가'));
+      expect(RewardCharacter.lumi.messageFor(''), contains('우리 아이에게'));
+    });
+
+    test('버튼 문구가 캐릭터마다 다르다 (Figma 343:4434 신난다!)', () {
+      expect(RewardCharacter.ruru.buttonLabel, '신난다!');
+      expect(RewardCharacter.lumi.buttonLabel, '오예!');
     });
   });
 
