@@ -9,6 +9,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../onboarding/domain/character.dart';
 import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
 import 'widgets/recommended_routine_strip.dart';
@@ -39,6 +40,11 @@ class GuardianHomeScreen extends ConsumerWidget {
 
     final hasRoutines = ref.watch(homeRoutinesProvider).isNotEmpty;
 
+    // 온보딩에서 고른 캐릭터(고양이/여우) — 홈 전역의 마스코트를 이 값으로 맞춘다.
+    // 선택 전(구버전 데이터 등) 폴백은 아이 홈과 동일하게 고양이로 둔다.
+    final character =
+        ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
+
     final todaySection = <Widget>[
       _SectionTitle(iconAsset: AppAssets.iconClock, label: '오늘 일과'),
       SizedBox(height: space.md),
@@ -67,12 +73,13 @@ class GuardianHomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Header(childName: childName),
+              _Header(childName: childName, character: character),
               SizedBox(height: space.lg),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: space.screenH),
                 child: _NewRoutineCard(
                   childName: childName,
+                  character: character,
                   onTap: () => _startRoutine(context, ref),
                 ),
               ),
@@ -100,9 +107,10 @@ class GuardianHomeScreen extends ConsumerWidget {
 
 /// 로고 + 캐릭터 배지 + 인사말 (Figma y=70~223)
 class _Header extends StatelessWidget {
-  const _Header({required this.childName});
+  const _Header({required this.childName, required this.character});
 
   final String childName;
+  final CardCharacter character;
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +134,7 @@ class _Header extends StatelessWidget {
                 onTap: () => context.go(Routes.child),
                 scaleDown: AppPressable.scaleIcon,
                 child: SvgPicture.asset(
-                  AppAssets.homeCharacterBadge,
+                  AppAssets.characterBadgeFramed(character),
                   // 정사각형 배지 — 찌그러지지 않게 가로세로 모두 .w
                   width: 56.w,
                   height: 56.w,
@@ -155,9 +163,14 @@ class _Header extends StatelessWidget {
 ///
 /// Figma에서 하단 CTA를 대신하는 자리다.
 class _NewRoutineCard extends StatelessWidget {
-  const _NewRoutineCard({required this.childName, required this.onTap});
+  const _NewRoutineCard({
+    required this.childName,
+    required this.character,
+    required this.onTap,
+  });
 
   final String childName;
+  final CardCharacter character;
   final VoidCallback onTap;
 
   @override
@@ -194,7 +207,7 @@ class _NewRoutineCard extends StatelessWidget {
         child: Row(
           children: [
             SvgPicture.asset(
-              AppAssets.homeNewRoutineIllust,
+              AppAssets.characterBadgeFramed(character),
               // 정사각형 일러스트 — 가로세로 모두 .w
               width: 56.w,
               height: 56.w,

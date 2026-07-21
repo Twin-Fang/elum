@@ -7,6 +7,7 @@ import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/recommended_routine_strip.dart';
+import 'package:elum/features/onboarding/domain/character.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -101,8 +102,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(svgWithAsset(AppAssets.homeLogo), findsOneWidget);
-      expect(svgWithAsset(AppAssets.homeCharacterBadge), findsOneWidget);
-      expect(svgWithAsset(AppAssets.homeNewRoutineIllust), findsOneWidget);
+      // 캐릭터 배지 — 헤더 · "새로운 일과 만들기" 카드 · (일과 0건이라) 빈 상태까지 세 곳
+      expect(
+        svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
+        findsNWidgets(3),
+      );
       expect(svgWithAsset(AppAssets.iconClock), findsOneWidget);
       // sparkles는 카드와 섹션 제목 두 곳에 쓰인다
       expect(svgWithAsset(AppAssets.iconSparkles), findsWidgets);
@@ -201,7 +205,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('아직 만든 일과가 없어요 😢'), findsOneWidget);
-      expect(svgWithAsset(AppAssets.homeEmptyIllust), findsOneWidget);
+      // 캐릭터 선택 전 기본값은 고양이 (아이 홈과 동일 폴백)
+      expect(
+        svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
+        findsWidgets,
+      );
     });
 
     testWidgets('일과 제목(title)이 접힌 타일로 보인다', (tester) async {

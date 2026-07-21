@@ -11,6 +11,7 @@ import '../../../../core/widgets/routine_progress_ring.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../child/application/child_routine_notifier.dart';
 import '../../../onboarding/application/onboarding_notifier.dart';
+import '../../../onboarding/domain/character.dart';
 import '../../application/routine_notifier.dart';
 import '../../data/routine_repository.dart';
 import '../../domain/card_palette.dart';
@@ -343,13 +344,20 @@ class EmptyRoutines extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
-    final childName = ref.watch(onboardingProvider).displayName;
+    final profile = ref.watch(onboardingProvider);
+    final childName = profile.displayName;
+    // 온보딩에서 고른 캐릭터를 그대로 쓴다 — 홈 전역 마스코트와 통일 (아이 홈과 동일 폴백).
+    final character = profile.cardCharacter ?? CardCharacter.cat;
 
     return _GreyTileShell(
       child: Row(
         children: [
           // 정사각형 일러스트 — 가로세로 모두 .w
-          SvgPicture.asset(AppAssets.homeEmptyIllust, width: 40.w, height: 40.w),
+          SvgPicture.asset(
+            AppAssets.characterBadgeFramed(character),
+            width: 40.w,
+            height: 40.w,
+          ),
           SizedBox(width: space.md),
           Expanded(
             child: Column(

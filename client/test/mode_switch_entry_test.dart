@@ -4,6 +4,7 @@ import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
+import 'package:elum/features/onboarding/domain/character.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -74,11 +75,16 @@ void main() {
     await tester.pumpWidget(wrap(const GuardianHomeScreen()));
     await tester.pumpAndSettle();
 
-    // 우측 상단 캐릭터 배지가 아이 화면 입구다
-    final badge = find.ancestor(
-      of: svgWithAsset(AppAssets.homeCharacterBadge),
-      matching: find.byType(AppPressable),
-    );
+    // 우측 상단 캐릭터 배지가 아이 화면 입구다.
+    // 일과 0건이라 같은 캐릭터 배지가 "새로운 일과 만들기" 카드에도 뜨는데,
+    // 그 카드도 AppPressable이라 배지 기준만으로는 구분되지 않는다.
+    // 화면 최상단(헤더)에 오는 것이 캐릭터 배지이므로 첫 번째로 특정한다.
+    final badge = find
+        .ancestor(
+          of: svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
+          matching: find.byType(AppPressable),
+        )
+        .first;
     expect(badge, findsOneWidget, reason: '아이 화면 입구(캐릭터 배지)가 있어야 한다');
 
     await tester.tap(badge);
