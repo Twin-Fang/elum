@@ -741,6 +741,88 @@ jobs:
             echo "✅ 릴리스 태그 생성: $TAG_NAME"
           fi
 
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+
+      # ─────────────────────────────────────────────
+      # GitHub Release 첨부용 APK 빌드 (Flutter 프로젝트에서만)
+      # 실패해도 태그/배포는 이미 끝난 뒤이므로 워크플로우 전체를 막지 않는다 (#114)
+      # ─────────────────────────────────────────────
+      - name: Flutter 설치 (APK 빌드용)
+        if: contains(needs.detect-and-parse.outputs.project_types, 'flutter')
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.38.9"
+          cache: true
+
+      - name: APK 빌드 (release용)
+        id: build_apk
+        if: contains(needs.detect-and-parse.outputs.project_types, 'flutter')
+        continue-on-error: true
+        working-directory: client
+        run: |
+          chmod +x ../.github/scripts/version_manager.sh
+          VERSION_NAME="${{ needs.update-changelog.outputs.new_version }}"
+          VERSION_CODE=$(../.github/scripts/version_manager.sh get-code)
+
+          printf '%s\n' "${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}" > .env
+
+          mkdir -p android/app/keystore
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > android/app/keystore/key.jks
+          cat > android/key.properties << EOF
+          storeFile=app/keystore/key.jks
+          storePassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.RELEASE_KEY_ALIAS }}
+          keyPassword=${{ secrets.RELEASE_KEY_PASSWORD }}
+          EOF
+          cat << 'EOF' > android/app/google-services.json
+          ${{ secrets.GOOGLE_SERVICES_JSON }}
+          EOF
+
+          flutter pub get
+          flutter build apk \
+            --release \
+            --build-name="$VERSION_NAME" \
+            --build-number="$VERSION_CODE"
+
+          echo "✅ APK 빌드 완료: $VERSION_NAME ($VERSION_CODE)"
+
+      - name: 릴리스 노트 추출
+        id: release_notes
+        continue-on-error: true
+        run: |
+          VERSION="${{ needs.update-changelog.outputs.new_version }}"
+          chmod +x ./.github/scripts/changelog_manager.py
+
+          if [ -f "CHANGELOG.json" ]; then
+            python3 ./.github/scripts/changelog_manager.py export --version "$VERSION" --output release_notes.txt
+          fi
+
+          if [ ! -s release_notes.txt ]; then
+            echo "v$VERSION 업데이트" > release_notes.txt
+          fi
+
+          echo "✅ 릴리스 노트 추출 완료"
+          cat release_notes.txt
+
+      - name: GitHub Release 생성
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets._GITHUB_PAT_TOKEN }}
+        run: |
+          APK_PATH="client/build/app/outputs/flutter-apk/app-release.apk"
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "⚠️ Release $TAG_NAME 이미 존재 — 건너뜀"
+          elif [ -f "$APK_PATH" ]; then
+            gh release create "$TAG_NAME" "$APK_PATH" \
+              --title "$TAG_NAME" --notes-file release_notes.txt
+            echo "✅ GitHub Release 생성 완료 (APK 첨부): $TAG_NAME"
+          else
+            gh release create "$TAG_NAME" \
+              --title "$TAG_NAME" --notes-file release_notes.txt
+            echo "✅ GitHub Release 생성 완료 (APK 없음): $TAG_NAME"
+          fi
+
       - name: 배포 완료 알림
         run: |
           echo "🎉 체인지로그 업데이트 및 배포 트리거 완료!"
@@ -749,4 +831,5 @@ jobs:
           echo "  • 버전: ${{ needs.update-changelog.outputs.new_version }}"
           echo "  • 프로젝트: ${{ needs.detect-and-parse.outputs.project_type }}"
           echo "  • PR: #${{ github.event.pull_request.number }}"
+          echo "  • GitHub Release: $TAG_NAME (https://github.com/${{ github.repository }}/releases/tag/$TAG_NAME)"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
