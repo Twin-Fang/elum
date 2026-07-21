@@ -159,36 +159,37 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'answers': answers,
     });
 
-    if (!AppConfig.useMock) {
-      try {
-        final res = await _dio.post<Map<String, dynamic>>(
-          '/api/routines',
-          data: {
-            'rawInputText': rawInputText,
-            'scheduledAt': DateTime.now()
-                .add(const Duration(days: 1))
-                .toIso8601String()
-                .split('.')
-                .first,
-            'answers': answers,
-          },
-        );
-        final body = res.data;
-        if (body != null) {
-          final routine = Routine.fromJson(body);
-          if (routine.steps.isNotEmpty) {
-            AppLogger.repositorySuccess('RoutineRepository', 'createRoutine', '${routine.steps.length}개 카드 생성됨');
-            return routine;
-          }
-          AppLogger.repositoryError('RoutineRepository', 'createRoutine', '빈 카드 받음 → 로컬 생성으로 전환');
-        }
-      } catch (e) {
-        AppLogger.repositoryError('RoutineRepository', 'createRoutine', e);
-      }
+    // mock 모드에서만 로컬 데모 일과를 쓴다. 실서버 모드는 절대 가짜 일과를 만들지 않는다
+    // — 'local' id로 confirm하면 404가 나고, 아이 모드에 뜨지 않는 유령 일과가 생긴다(데이터 정합성).
+    if (AppConfig.useMock) {
+      final routine = _localRoutine(rawInputText, goals);
+      AppLogger.repositorySuccess('RoutineRepository', 'createRoutine (mock)', '${routine.steps.length}개 카드 mock 생성됨');
+      return routine;
     }
 
-    final routine = _localRoutine(rawInputText, goals);
-    AppLogger.repositorySuccess('RoutineRepository', 'createRoutine (로컬)', '${routine.steps.length}개 카드 로컬 생성됨');
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/routines',
+      data: {
+        'rawInputText': rawInputText,
+        // 서버 getTodayRoutines는 scheduledAt이 '오늘(KST)' 범위인 일과만 아이 홈에 노출한다.
+        // +1일(내일)로 저장하면 승인해도 오늘 목록에서 빠져 아이 모드가 항상 비어 보인다 → now로 저장.
+        'scheduledAt': DateTime.now().toIso8601String().split('.').first,
+        'answers': answers,
+      },
+    );
+    final body = res.data;
+    // 응답이 비었거나 카드가 0장이면 실패로 본다. 로컬로 지어내지 않고 예외를 던져
+    // notifier가 에러 화면(코드+재시도)으로 처리하게 한다. 재시도는 AI를 다시 호출한다.
+    if (body == null) {
+      AppLogger.repositoryError('RoutineRepository', 'createRoutine', '빈 응답');
+      throw StateError('카드 생성 응답이 비었습니다');
+    }
+    final routine = Routine.fromJson(body);
+    if (routine.steps.isEmpty) {
+      AppLogger.repositoryError('RoutineRepository', 'createRoutine', '카드 0장 수신');
+      throw StateError('생성된 카드가 없습니다');
+    }
+    AppLogger.repositorySuccess('RoutineRepository', 'createRoutine', '${routine.steps.length}개 카드 생성됨');
     return routine;
   }
 

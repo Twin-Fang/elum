@@ -98,16 +98,21 @@ void main() {
       expect(seen, isNotEmpty, reason: '상태 변화가 실제로 일어나야 유효한 테스트다');
     });
 
-    test('실패해도 가드가 풀려 재시도할 수 있다', () async {
+    test('실패하면 에러 상태로 전환하고 재시도로 다시 호출한다', () async {
       final repo = _ThrowingRepo();
       final container = makeContainer(repo);
       final notifier = container.read(routineFlowProvider.notifier);
 
-      // repository는 원래 예외를 삼키지만, 그래도 새어 나오는 경우를 막는다
-      await expectLater(notifier.generateCards(), throwsA(isA<Exception>()));
-      await expectLater(notifier.generateCards(), throwsA(isA<Exception>()));
+      // 실패를 삼켜 가짜 일과를 만들지 않는다 — 예외 대신 에러 상태로 드러낸다.
+      await notifier.generateCards();
+      expect(container.read(routineFlowProvider).step, RoutineFlowStep.error);
+      expect(container.read(routineFlowProvider).errorCode, isNotNull);
 
+      // 재시도는 가드를 풀고 AI를 다시 호출한다.
+      await notifier.retryGenerate();
       expect(repo.createCalls, 2, reason: '실패가 재시도를 영구히 막으면 안 된다');
+      expect(container.read(routineFlowProvider).step, RoutineFlowStep.error,
+          reason: '두 번째도 실패했으니 여전히 에러 상태여야 한다');
     });
   });
 }

@@ -16,6 +16,7 @@ enum RoutineFlowStep {
   generating, // 카드 생성 중
   review,     // 카드 검토·승인
   done,       // 승인 완료
+  error,      // 카드 생성 실패 — 재시도 안내 (로컬 가짜 일과를 만들지 않는다)
 }
 
 class RoutineFlowState {
@@ -28,6 +29,7 @@ class RoutineFlowState {
     this.answers = const [],
     this.customOptions = const {},
     this.routine,
+    this.errorCode,
   });
 
   final RoutineFlowStep step;
@@ -47,6 +49,10 @@ class RoutineFlowState {
 
   final Routine? routine;
 
+  /// 카드 생성 실패 시 화면에 노출할 식별자 (예: E-1001). null이면 정상.
+  /// docs 예외처리 규칙 — 사용자에게는 안내 문구, 화면 어딘가엔 추적용 코드.
+  final String? errorCode;
+
   RoutineFlowState copyWith({
     RoutineFlowStep? step,
     String? rawInput,
@@ -56,6 +62,7 @@ class RoutineFlowState {
     List<String>? answers,
     Map<String, List<String>>? customOptions,
     Routine? routine,
+    String? errorCode,
   }) {
     return RoutineFlowState(
       step: step ?? this.step,
@@ -66,6 +73,8 @@ class RoutineFlowState {
       answers: answers ?? this.answers,
       customOptions: customOptions ?? this.customOptions,
       routine: routine ?? this.routine,
+      // errorCode는 null로 되돌릴 수 있어야 한다(재시도 시 초기화) → ?? 쓰지 않는다.
+      errorCode: errorCode,
     );
   }
 }
@@ -218,8 +227,19 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     return _generating = _createRoutine();
   }
 
+  /// 카드 생성 실패 후 다시 시도한다. **로컬 가짜 일과를 만들지 않으므로**,
+  /// 실패하면 오직 이 경로로 AI(`POST /api/routines`)를 다시 호출해야 한다.
+  ///
+  /// 가드([_generating])를 먼저 풀어야 재요청이 나간다 — 안 풀면 이전 실패한
+  /// Future를 그대로 돌려줘 재시도가 무시된다.
+  Future<void> retryGenerate() {
+    _generating = null;
+    return generateCards();
+  }
+
   Future<void> _createRoutine() async {
-    state = state.copyWith(step: RoutineFlowStep.generating);
+    // 재시도로 다시 들어올 수 있으므로 이전 에러 코드를 지운다.
+    state = state.copyWith(step: RoutineFlowStep.generating, errorCode: null);
 
     final repo = ref.read(routineRepositoryProvider);
     final goals = ref.read(onboardingProvider).supportGoals;
@@ -237,9 +257,11 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
       });
       state = state.copyWith(step: RoutineFlowStep.review, routine: routine);
     } catch (e) {
+      // 로컬 폴백을 제거했으므로 실패를 삼키지 않고 에러 상태로 드러낸다.
+      // 화면은 무한 로딩 대신 에러 코드 + 재시도 버튼을 보여준다(docs 예외처리 규칙).
       AppLogger.error('RoutineFlowNotifier', e);
       _generating = null;
-      rethrow;
+      state = state.copyWith(step: RoutineFlowStep.error, errorCode: 'E-1001');
     }
   }
 

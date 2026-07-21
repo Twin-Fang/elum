@@ -10,6 +10,7 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/elum_button.dart';
 import '../application/routine_notifier.dart';
 import '../domain/routine_stage.dart';
 import 'widgets/routine_flow_scaffold.dart';
@@ -88,8 +89,8 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
 
   /// 이 화면이 담당하는 작업을 수행한다.
   ///
-  /// repository가 실패를 흡수하므로 여기서 예외를 다루지 않는다.
-  /// 서버가 죽어도 로컬 카드로 진행된다 (docs 원칙 6번).
+  /// 카드 생성은 더 이상 로컬 폴백으로 흡수되지 않는다. 실패하면 notifier가
+  /// [RoutineFlowStep.error]로 전환하고, 이 화면은 에러 UI(코드+재시도)를 띄운다.
   Future<void> _runWork() async {
     final notifier = ref.read(routineFlowProvider.notifier);
 
@@ -105,6 +106,27 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     }
 
     if (!mounted) return;
+
+    // 생성 실패면 다음 화면으로 넘기지 않는다 — 에러 UI가 이 화면에 그대로 뜬다.
+    if (ref.read(routineFlowProvider).step == RoutineFlowStep.error) return;
+
+    _workDone = true;
+    _tryNavigate();
+  }
+
+  /// 실패 후 재시도 — AI(`POST /api/routines`)를 다시 호출한다.
+  /// 연출(스텝 노출)은 이미 끝났을 수 있으므로 다시 돌려 로딩감을 준다.
+  Future<void> _retry() async {
+    setState(() {
+      _revealed = 0;
+      _stagesDone = false;
+      _workDone = false;
+    });
+    _revealStages();
+    final notifier = ref.read(routineFlowProvider.notifier);
+    await notifier.retryGenerate();
+    if (!mounted) return;
+    if (ref.read(routineFlowProvider).step == RoutineFlowStep.error) return;
     _workDone = true;
     _tryNavigate();
   }
@@ -160,6 +182,16 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     final colors = context.colors;
     final space = context.space;
     final stages = widget.kind.stages;
+
+    // 카드 생성이 실패하면 무한 로딩 대신 에러 UI를 띄운다(docs 예외처리 규칙).
+    // 재시도는 로컬 가짜 일과가 아니라 AI를 다시 호출한다.
+    final flow = ref.watch(routineFlowProvider);
+    if (flow.step == RoutineFlowStep.error) {
+      return RoutineFlowScaffold(
+        onBack: _handleBack,
+        child: _GenerateError(errorCode: flow.errorCode, onRetry: _retry),
+      );
+    }
 
     // ⚠️ Figma는 요소를 **절대 좌표**로 둔다(852 높이 기준).
     //
@@ -464,6 +496,60 @@ class _StageRow extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// 카드 생성 실패 화면.
+///
+/// 로컬 폴백을 없앤 뒤 실패 경로에 놓인다. 무한 로딩 대신 상태를 명확히 보여주고,
+/// **재시도는 로컬 가짜 일과가 아니라 AI를 다시 호출한다.** 화면 어딘가에
+/// 에러 코드를 남겨 제보 시 어디서 터졌는지 추적할 수 있게 한다(docs 예외처리 규칙).
+class _GenerateError extends StatelessWidget {
+  const _GenerateError({required this.errorCode, required this.onRetry});
+
+  final String? errorCode;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final space = context.space;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 32.w),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SvgPicture.asset(
+            AppAssets.lumiThinking,
+            width: 100.w,
+            height: 100.w,
+          ),
+          SizedBox(height: space.lg),
+          Text(
+            '카드를 만들지 못했어요',
+            textAlign: TextAlign.center,
+            style: context.typo.promptTitle.copyWith(color: colors.textPrimary),
+          ),
+          SizedBox(height: space.sm),
+          Text(
+            '잠시 후 다시 시도해 주세요.',
+            textAlign: TextAlign.center,
+            style: context.typo.promptBody.copyWith(color: colors.promptMuted),
+          ),
+          SizedBox(height: space.lg),
+          ElumButton(label: '다시 시도', onPressed: onRetry),
+          if (errorCode != null) ...[
+            SizedBox(height: space.md),
+            // 추적용 식별자 — 사용자에겐 부차적이지만 제보 시 원인 추적의 유일한 단서다
+            Text(
+              errorCode!,
+              style: context.typo.promptBody.copyWith(color: colors.promptMuted),
+            ),
+          ],
+        ],
       ),
     );
   }
