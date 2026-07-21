@@ -4,7 +4,7 @@ import java.util.List;
 
 public record RoutineStepDraft(String title, List<StepDraft> steps) {
 
-  public record StepDraft(Integer order, String description) {
+  public record StepDraft(Integer order, String title, String description) {
 
   }
 }

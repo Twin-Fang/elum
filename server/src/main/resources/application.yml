@@ -20,6 +20,14 @@ spring:
   mvc:
     format:
       date-time: "yyyy-MM-dd'T'HH:mm:ss"
+  flyway:
+    enabled: true
+    # 기존 스키마가 이미 ddl-auto: update로 만들어져 있어 Flyway 마이그레이션 이력이 없으므로,
+    # 첫 실행 시 현재 상태를 베이스라인으로 잡고 그 이후 버전만 적용하게 한다.
+    baseline-on-migrate: true
+    # 기본 baseline 버전은 1인데, 이 값이면 V1 마이그레이션이 "이미 적용된 것"으로 취급돼
+    # 건너뛴다. 0으로 낮춰야 V1이 실제로 실행된다.
+    baseline-version: 0
 
 chuseok22:
   api-change-log:

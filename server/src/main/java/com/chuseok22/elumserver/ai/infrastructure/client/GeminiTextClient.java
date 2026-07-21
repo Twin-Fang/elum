@@ -4,6 +4,8 @@ import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.ChildProfileInput;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
+import com.chuseok22.elumserver.ai.core.RoutineQuestionAiInput;
+import com.chuseok22.elumserver.ai.core.RoutineReviseAiInput;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
@@ -12,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -58,16 +59,27 @@ public class GeminiTextClient {
   }
 
   public GeminiGenerateContentResponse revise(
-    List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
+    String previousTitle, List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
     String nickname, Set<SupportGoal> supportGoals
   ) {
     String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_REVISE_PREFIX);
-    String previousStepsText = previousSteps.stream()
-      .map(step -> step.order() + ". " + step.description())
-      .collect(Collectors.joining("\n"));
-    String userContent = "이전에 생성된 단계:\n" + previousStepsText
-      + "\n\n부모의 수정 요청:\n" + maskedFeedback;
+    String userContent = buildReviseRoutineUserContent(
+      previousTitle, previousSteps, maskedFeedback, nickname, supportGoals
+    );
     return callGenerateContent(systemPrompt, userContent);
+  }
+
+  public String buildReviseRoutineUserContent(
+    String previousTitle, List<RoutineStepDraft.StepDraft> previousSteps, String feedback,
+    String nickname, Set<SupportGoal> supportGoals
+  ) {
+    RoutineReviseAiInput input = new RoutineReviseAiInput(
+      "REVISE_ROUTINE",
+      new RoutineReviseAiInput.PreviousRoutineInput(previousTitle, previousSteps),
+      feedback,
+      new ChildProfileInput(nickname, supportGoals == null ? Set.of() : supportGoals)
+    );
+    return toJson(input);
   }
 
   // 도움 목표 기반 추가 질문 생성. supportGoals에 PREPARE_ITEMS/PREPARE_NEW가 없으면
@@ -75,9 +87,17 @@ public class GeminiTextClient {
   public GeminiGenerateContentResponse generateQuestion(
     String nickname, Set<SupportGoal> supportGoals, String sanitizedInputText
   ) {
-    String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_QUESTION_PREFIX)
-      + buildChildProfileSectionLegacy(nickname, supportGoals, null);
-    return callGenerateContent(systemPrompt, wrapAsDataLegacy(sanitizedInputText), questionResponseSchema());
+    String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_QUESTION_PREFIX);
+    String userContent = buildQuestionUserContent(sanitizedInputText, nickname, supportGoals);
+    return callGenerateContent(systemPrompt, userContent, questionResponseSchemaFor(supportGoals));
+  }
+
+  public String buildQuestionUserContent(String routineText, String nickname, Set<SupportGoal> supportGoals) {
+    RoutineQuestionAiInput input = new RoutineQuestionAiInput(
+      "GENERATE_ROUTINE_QUESTIONS", routineText,
+      new ChildProfileInput(nickname, supportGoals == null ? Set.of() : supportGoals)
+    );
+    return toJson(input);
   }
 
   // 관리자 테스트 전용: DB 조회 없이 전달받은 systemPrompt를 그대로 사용해
@@ -87,42 +107,16 @@ public class GeminiTextClient {
     return callGenerateContent(systemPrompt, userContent);
   }
 
-  // 관리자 테스트 전용(질문 생성 프롬프트): questionResponseSchema를 사용한다는 점만
-  // generateForTest와 다르다.
+  // 관리자 테스트 전용: previousRoutine이 없는 관리자 샘플 입력이라, title은 빈 문자열/
+  // steps는 빈 배열로 두고 sampleInput 전체를 feedback으로만 취급한다.
+  public GeminiGenerateContentResponse reviseForTest(String systemPrompt, String sampleFeedback) {
+    String userContent = buildReviseRoutineUserContent("", List.of(), sampleFeedback, null, Set.of());
+    return callGenerateContent(systemPrompt, userContent);
+  }
+
   public GeminiGenerateContentResponse generateQuestionForTest(String systemPrompt, String sampleInput) {
-    return callGenerateContent(systemPrompt, wrapAsDataLegacy(sampleInput), questionResponseSchema());
-  }
-
-  // TODO(Task 5): revise()를 REVISE_ROUTINE JSON으로 전환하면서 제거 예정. 지금은 컴파일만
-  // 맞추기 위해 임시로 남겨둔 이전 <text> 래핑 로직이다.
-  private String wrapAsDataLegacy(String text) {
-    return "<text>" + text + "</text>";
-  }
-
-  // TODO(Task 7): generateQuestion()을 JSON으로 전환하면서 제거 예정.
-  private String buildChildProfileSectionLegacy(String nickname, Set<SupportGoal> supportGoals, String answers) {
-    boolean hasNickname = nickname != null && !nickname.isBlank();
-    boolean hasGoals = supportGoals != null && !supportGoals.isEmpty();
-    boolean hasAnswers = answers != null && !answers.isBlank();
-    if (!hasNickname && !hasGoals && !hasAnswers) {
-      return "";
-    }
-
-    StringBuilder section = new StringBuilder("\n\n아동 설정:\n");
-    if (hasNickname) {
-      section.append("- 호칭: ").append(nickname).append("\n");
-    }
-    if (hasGoals) {
-      section.append("- 선택한 도움 방식:\n");
-      int order = 1;
-      for (SupportGoal goal : supportGoals) {
-        section.append("  ").append(order++).append(". ").append(goal.getLabel()).append("\n");
-      }
-    }
-    if (hasAnswers) {
-      section.append("\n보호자가 추가로 알려준 정보: ").append(answers).append("\n");
-    }
-    return section.toString();
+    String userContent = buildQuestionUserContent(sampleInput, null, Set.of());
+    return callGenerateContent(systemPrompt, userContent, questionResponseSchemaForTest());
   }
 
   private GeminiGenerateContentResponse callGenerateContent(String systemPrompt, String userContentText) {
@@ -200,9 +194,19 @@ public class GeminiTextClient {
             "type", "object",
             "properties", Map.of(
               "order", Map.of("type", "integer"),
-              "description", Map.of("type", "string")
+              "title", Map.of(
+                "type", "string",
+                "minLength", 1,
+                "description", "카드에 크게 표시할 2~4어절짜리 짧은 라벨. '~해요' 체 (예: '옷을 입어요')"
+              ),
+              "description", Map.of(
+                "type", "string",
+                "description",
+                "아동에게 소리 내어 읽어줄 문장. title보다 조금 더 자세하게 서술 "
+                  + "(예: '학교에 입고 갈 옷을 차례대로 입어요')"
+              )
             ),
-            "required", List.of("order", "description")
+            "required", List.of("order", "title", "description")
           )
         )
       ),
@@ -210,35 +214,56 @@ public class GeminiTextClient {
     );
   }
 
-  private Map<String, Object> questionResponseSchema() {
+  // 선택된 도움 목표 중 질문 생성 대상(PREPARE_ITEMS/PREPARE_NEW)의 개수만큼 questions
+  // 배열 크기를 정확히 강제한다 — 목표 2개를 선택했는데 Gemini가 질문 1개만 반환하는
+  // 것을 스키마 단계에서부터 막기 위함.
+  public Map<String, Object> questionResponseSchemaFor(Set<SupportGoal> supportGoals) {
+    int relevantGoalCount = (int) (supportGoals == null ? 0 : supportGoals.stream()
+      .filter(goal -> goal == SupportGoal.PREPARE_ITEMS || goal == SupportGoal.PREPARE_NEW)
+      .count());
     return Map.of(
       "type", "object",
       "properties", Map.of(
         "questions", Map.of(
-          "type", "array",
-          "items", Map.of(
-            "type", "object",
-            "properties", Map.of(
-              "question", Map.of("type", "string"),
-              "options", Map.of(
-                "type", "array",
-                "minItems", 3,
-                "maxItems", 5,
-                "items", Map.of(
-                  "type", "object",
-                  "properties", Map.of(
-                    "emoji", Map.of("type", "string"),
-                    "label", Map.of("type", "string")
-                  ),
-                  "required", List.of("emoji", "label")
-                )
-              )
-            ),
-            "required", List.of("question", "options")
-          )
+          "type", "array", "minItems", relevantGoalCount, "maxItems", relevantGoalCount,
+          "items", questionItemSchema()
         )
       ),
       "required", List.of("questions")
+    );
+  }
+
+  // 관리자 테스트 전용: 목표 개수를 알 수 없는 임의의 프롬프트 테스트이므로 questions
+  // 배열 크기를 제한하지 않는다.
+  private Map<String, Object> questionResponseSchemaForTest() {
+    return Map.of(
+      "type", "object",
+      "properties", Map.of("questions", Map.of("type", "array", "items", questionItemSchema())),
+      "required", List.of("questions")
+    );
+  }
+
+  private Map<String, Object> questionItemSchema() {
+    return Map.of(
+      "type", "object",
+      "properties", Map.of(
+        "supportGoal", Map.of("type", "string", "enum", List.of("PREPARE_ITEMS", "PREPARE_NEW")),
+        "question", Map.of("type", "string"),
+        "options", Map.of(
+          "type", "array",
+          "minItems", 3,
+          "maxItems", 5,
+          "items", Map.of(
+            "type", "object",
+            "properties", Map.of(
+              "emoji", Map.of("type", "string"),
+              "label", Map.of("type", "string")
+            ),
+            "required", List.of("emoji", "label")
+          )
+        )
+      ),
+      "required", List.of("supportGoal", "question", "options")
     );
   }
 }

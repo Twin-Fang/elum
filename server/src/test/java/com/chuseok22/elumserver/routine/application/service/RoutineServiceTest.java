@@ -237,7 +237,7 @@ class RoutineServiceTest {
       .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "내일 병원 가기"));
     RoutineAiPipeline.RoutineGenerationResult generationResult = new RoutineAiPipeline.RoutineGenerationResult(
       "병원 다녀오기",
-      List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신기", "data/routine-images/batch-1/1.png"))
+      List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발 신기", "data/routine-images/batch-1/1.png"))
     );
     when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU)))
       .thenReturn(generationResult);

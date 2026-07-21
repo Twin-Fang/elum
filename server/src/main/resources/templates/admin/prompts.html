@@ -108,7 +108,8 @@
       try {
         const data = await callPromptApi(key, '/preview', {
           content: getContentFor(key),
-          sampleInput: getSampleInputFor(key)
+          sampleInput: getSampleInputFor(key),
+          character: getCharacterFor(key)
         });
         resultArea.textContent = data.composedPrompt;
       } catch (e) {

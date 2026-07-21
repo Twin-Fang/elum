@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStora
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -20,6 +21,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -46,22 +48,63 @@ public class RoutineAiPipeline {
     RoutineStepDraft draft = parseDraft(
       () -> geminiTextClient.generate(sanitizedInputText, nickname, supportGoals, maskedAnswers)
     );
-    return buildResult(draft, characterType);
+    return buildResult(draft, characterType, Map.of());
   }
 
   public RoutineGenerationResult generateForRevise(
-    List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
+    String previousTitle, List<RoutineStepDraft.StepDraft> previousSteps,
+    Map<Integer, String> previousImagePathsByOrder, String maskedFeedback,
     String nickname, Set<SupportGoal> supportGoals, CharacterType characterType
   ) {
-    RoutineStepDraft draft =
-      parseDraft(() -> geminiTextClient.revise(previousSteps, maskedFeedback, nickname, supportGoals));
-    return buildResult(draft, characterType);
+    RoutineStepDraft draft = parseDraft(() ->
+      geminiTextClient.revise(previousTitle, previousSteps, maskedFeedback, nickname, supportGoals)
+    );
+    return buildResult(draft, characterType, reusableImagePaths(previousSteps, previousImagePathsByOrder, draft));
   }
 
-  // 도움 목표 기반 추가 질문 생성. Gemini 호출/파싱이 실패하면 예외를 던지지 않고
-  // 목표 조합별 고정 매핑으로 대체한다(fail-open) — 다른 생성 메서드와 달리 이 흐름은
-  // 실패해도 사용자에게 에러를 노출하지 않기로 설계에서 결정했다.
+  // 새 단계 설명이 기존 단계(같은 order)와 완전히 같으면 이미지를 다시 생성하지 않고
+  // 기존 경로를 그대로 쓴다 — Gemini 호출과 이미지 생성 비용을 줄이고, 보호자가 요청하지
+  // 않은 단계의 그림이 재생성 때마다 미묘하게 달라지는 것도 막는다.
+  private Map<Integer, String> reusableImagePaths(
+    List<RoutineStepDraft.StepDraft> previousSteps, Map<Integer, String> previousImagePathsByOrder,
+    RoutineStepDraft newDraft
+  ) {
+    Map<Integer, String> previousDescriptionByOrder = previousSteps.stream()
+      .collect(Collectors.toMap(RoutineStepDraft.StepDraft::order, RoutineStepDraft.StepDraft::description));
+    return newDraft.steps().stream()
+      .filter(step -> step.description().equals(previousDescriptionByOrder.get(step.order()))
+        && previousImagePathsByOrder.containsKey(step.order()))
+      .collect(Collectors.toMap(RoutineStepDraft.StepDraft::order, step -> previousImagePathsByOrder.get(step.order())));
+  }
+
+  private static final int MIN_OPTIONS = 3;
+
+  // 도움 목표 기반 추가 질문 생성. 선택된 각 SupportGoal(PREPARE_ITEMS, PREPARE_NEW)마다
+  // Gemini 응답에서 supportGoal이 일치하고 옵션이 3개 이상 남는 질문을 찾아 쓰고, 없으면
+  // 그 목표만 fallbackQuestionItem(goal)로 대체한다 — 목표 하나가 무효여도 나머지 목표까지
+  // 통째로 fallback 처리되던 이전 동작을 목표 단위로 좁혔다.
   public RoutineQuestionResult generateQuestion(
+    String nickname, Set<SupportGoal> supportGoals, String sanitizedInputText
+  ) {
+    Map<String, RoutineQuestionResult.QuestionResultItem> validQuestionsByGoal = fetchValidQuestionsByGoal(
+      nickname, supportGoals, sanitizedInputText
+    );
+
+    List<RoutineQuestionResult.QuestionResultItem> questions = new ArrayList<>();
+    for (SupportGoal goal : List.of(SupportGoal.PREPARE_ITEMS, SupportGoal.PREPARE_NEW)) {
+      if (!supportGoals.contains(goal)) {
+        continue;
+      }
+      RoutineQuestionResult.QuestionResultItem valid = validQuestionsByGoal.get(goal.name());
+      questions.add(valid != null ? valid : fallbackQuestionItem(goal));
+    }
+    return new RoutineQuestionResult(questions);
+  }
+
+  // Gemini 호출/파싱이 아예 실패하면 빈 맵을 반환해 모든 목표가 fallback을 쓰게 한다
+  // (기존의 "전체 실패 시 전체 fallback"과 동일한 결과가 되지만, 응답이 왔는데 일부
+  // 목표만 무효인 경우와 같은 경로로 처리한다).
+  private Map<String, RoutineQuestionResult.QuestionResultItem> fetchValidQuestionsByGoal(
     String nickname, Set<SupportGoal> supportGoals, String sanitizedInputText
   ) {
     String json = null;
@@ -70,26 +113,31 @@ public class RoutineAiPipeline {
         geminiTextClient.generateQuestion(nickname, supportGoals, sanitizedInputText);
       json = response.candidates().get(0).content().parts().get(0).text();
       RoutineQuestionDraft draft = objectMapper.readValue(json, RoutineQuestionDraft.class);
-      if (draft.questions() == null || draft.questions().isEmpty()) {
-        throw new IllegalStateException("Gemini가 questions 없이 응답함");
+      if (draft.questions() == null) {
+        return Map.of();
       }
-      List<RoutineQuestionResult.QuestionResultItem> questions = draft.questions().stream()
-        .filter(item -> item.question() != null && !item.question().isBlank()
-          && item.options() != null && !item.options().isEmpty())
-        .map(item -> new RoutineQuestionResult.QuestionResultItem(
-          item.question(), toOptionResults(item.options())
-        ))
-        // label이 모두 비어있어 옵션이 하나도 안 남은 질문은 통째로 제외한다.
-        .filter(item -> !item.options().isEmpty())
-        .toList();
-      if (questions.isEmpty()) {
-        throw new IllegalStateException("Gemini가 유효한 question/options 없이 응답함");
-      }
-      return new RoutineQuestionResult(questions);
+      return draft.questions().stream()
+        .filter(this::isValidQuestionItem)
+        .collect(Collectors.toMap(
+          RoutineQuestionDraft.QuestionItem::supportGoal,
+          item -> new RoutineQuestionResult.QuestionResultItem(item.question(), toOptionResults(item.options())),
+          (first, second) -> first // 같은 supportGoal이 중복되면 먼저 나온 것만 채택한다.
+        ));
     } catch (Exception e) {
-      log.warn("Gemini 추가 질문 생성 실패, 고정 매핑으로 대체: response={}", json, e);
-      return fallbackQuestion(supportGoals);
+      log.warn("Gemini 추가 질문 생성 실패, 목표별 고정 매핑으로 대체: response={}", json, e);
+      return Map.of();
     }
+  }
+
+  // supportGoal이 PREPARE_ITEMS/PREPARE_NEW 중 하나이고, question이 비어있지 않고, 라벨이
+  // 있는 옵션이 3개 이상 남아야 유효한 질문으로 인정한다.
+  private boolean isValidQuestionItem(RoutineQuestionDraft.QuestionItem item) {
+    boolean hasKnownGoal = "PREPARE_ITEMS".equals(item.supportGoal()) || "PREPARE_NEW".equals(item.supportGoal());
+    boolean hasQuestion = item.question() != null && !item.question().isBlank();
+    long validOptionCount = item.options() == null ? 0 : item.options().stream()
+      .filter(option -> option.label() != null && !option.label().isBlank())
+      .count();
+    return hasKnownGoal && hasQuestion && validOptionCount >= MIN_OPTIONS;
   }
 
   // label이 없는 옵션은 아동에게 보여줄 수 없는 빈 버튼이 되므로 제외한다. emoji만 없으면
@@ -105,29 +153,25 @@ public class RoutineAiPipeline {
       .toList();
   }
 
-  // 선택한 도움 목표 각각에 대해 개별 질문을 만든다(여러 목표를 하나로 합치지 않음). "직접 입력"은
-  // 보호자가 자유 텍스트를 입력하도록 유도하는 항목이라 추천 답변 목록에 절대 포함하지 않는다(서비스 정책).
-  private RoutineQuestionResult fallbackQuestion(Set<SupportGoal> supportGoals) {
-    List<RoutineQuestionResult.QuestionResultItem> questions = new ArrayList<>();
-    if (supportGoals.contains(SupportGoal.PREPARE_ITEMS)) {
-      questions.add(new RoutineQuestionResult.QuestionResultItem(
+  // 목표 하나에 대한 고정 대체 질문. "직접 입력"은 보호자가 자유 텍스트를 입력하도록
+  // 유도하는 항목이라 추천 답변 목록에 절대 포함하지 않는다(서비스 정책).
+  private RoutineQuestionResult.QuestionResultItem fallbackQuestionItem(SupportGoal goal) {
+    if (goal == SupportGoal.PREPARE_ITEMS) {
+      return new RoutineQuestionResult.QuestionResultItem(
         "꼭 챙겨야 하는 준비물이 있나요?",
         List.of(
           option("☔", "우산"), option("🧥", "우비"), option("👖", "장화"),
           option("🧦", "여벌 양말"), option("🧻", "작은 수건")
         )
-      ));
+      );
     }
-    if (supportGoals.contains(SupportGoal.PREPARE_NEW)) {
-      questions.add(new RoutineQuestionResult.QuestionResultItem(
-        "평소와 다르게 준비해야 하는 점이 있나요?",
-        List.of(
-          option("⏰", "시간 변경"), option("📍", "장소 변경"),
-          option("🧑‍🤝‍🧑", "동행자 변경"), option("🌦️", "날씨/환경 변화")
-        )
-      ));
-    }
-    return new RoutineQuestionResult(questions);
+    return new RoutineQuestionResult.QuestionResultItem(
+      "평소와 다르게 준비해야 하는 점이 있나요?",
+      List.of(
+        option("⏰", "시간 변경"), option("📍", "장소 변경"),
+        option("🧑‍🤝‍🧑", "동행자 변경"), option("🌦️", "날씨/환경 변화")
+      )
+    );
   }
 
   private RoutineQuestionResult.QuestionResultItem.OptionResult option(String emoji, String label) {
@@ -155,6 +199,10 @@ public class RoutineAiPipeline {
           draft.steps() == null ? 0 : draft.steps().size(), json);
         throw new CustomException(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED);
       }
+      if (draft.steps().stream().anyMatch(step -> step.title() == null || step.title().isBlank())) {
+        log.warn("Gemini가 일부 단계에 title 없이 응답함: response={}", json);
+        throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
+      }
       return normalizeOrder(draft);
     } catch (CustomException e) {
       throw e;
@@ -169,20 +217,21 @@ public class RoutineAiPipeline {
   private RoutineStepDraft normalizeOrder(RoutineStepDraft draft) {
     List<RoutineStepDraft.StepDraft> normalized = new ArrayList<>();
     for (int i = 0; i < draft.steps().size(); i++) {
-      normalized.add(new RoutineStepDraft.StepDraft(i + 1, draft.steps().get(i).description()));
+      RoutineStepDraft.StepDraft step = draft.steps().get(i);
+      normalized.add(new RoutineStepDraft.StepDraft(i + 1, step.title(), step.description()));
     }
     return new RoutineStepDraft(draft.title(), normalized);
   }
 
-  private RoutineGenerationResult buildResult(RoutineStepDraft draft, CharacterType characterType) {
+  private RoutineGenerationResult buildResult(
+    RoutineStepDraft draft, CharacterType characterType, Map<Integer, String> reusableImagePathsByOrder
+  ) {
     String batchId = UUID.randomUUID().toString();
     ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     try {
-      List<CompletableFuture<StepImage>> futures = draft.steps().stream()
+      List<CompletableFuture<StepResult>> futures = draft.steps().stream()
         .map(stepDraft -> CompletableFuture.supplyAsync(
-          () -> new StepImage(
-            stepDraft, geminiImageClient.generateImage(stepDraft.description(), characterType)
-          ), executor
+          () -> resolveStepResult(stepDraft, characterType, reusableImagePathsByOrder), executor
         ))
         .toList();
 
@@ -191,13 +240,16 @@ public class RoutineAiPipeline {
       // 하기 위함(스펙: "모든 단계가 성공적으로 생성된 뒤에만 저장", fable5 검토에서 발견).
       // futures는 draft.steps() 순서 그대로이고 normalizeOrder가 이미 1..N으로 정렬해뒀으므로
       // 별도 정렬 없이도 steps는 순서대로 나온다.
-      List<StepImage> stepImages = futures.stream().map(CompletableFuture::join).toList();
+      List<StepResult> stepResults = futures.stream().map(CompletableFuture::join).toList();
 
-      List<GeneratedStep> steps = stepImages.stream()
-        .map(stepImage -> new GeneratedStep(
-          stepImage.stepDraft().order(),
-          stepImage.stepDraft().description(),
-          routineImageStorage.save(batchId, stepImage.stepDraft().order(), stepImage.image())
+      List<GeneratedStep> steps = stepResults.stream()
+        .map(result -> new GeneratedStep(
+          result.stepDraft().order(),
+          result.stepDraft().title(),
+          result.stepDraft().description(),
+          result.reusedImagePath() != null
+            ? result.reusedImagePath()
+            : routineImageStorage.save(batchId, result.stepDraft().order(), result.generatedImage())
         ))
         .toList();
 
@@ -210,7 +262,33 @@ public class RoutineAiPipeline {
     }
   }
 
-  private record StepImage(RoutineStepDraft.StepDraft stepDraft, GeminiImageClient.GeneratedImage image) {
+  private StepResult resolveStepResult(
+    RoutineStepDraft.StepDraft stepDraft, CharacterType characterType,
+    Map<Integer, String> reusableImagePathsByOrder
+  ) {
+    String reusablePath = reusableImagePathsByOrder.get(stepDraft.order());
+    if (reusablePath != null) {
+      return new StepResult(stepDraft, null, reusablePath);
+    }
+    return new StepResult(stepDraft, generateImageWithRetry(stepDraft.description(), characterType), null);
+  }
+
+  // 이미지 단계 하나가 일시적으로 실패해도 전체 루틴 생성을 곧바로 포기하지 않도록, 실패한
+  // 단계만 1회 재시도한다(루트 CLAUDE.md 서비스 원칙 6 — "AI 실패 시 fallback 필수" — 반영).
+  // 재시도까지 실패하면 이 메서드가 던지는 예외가 CompletableFuture를 통해 CompletionException으로
+  // 감싸져 buildResult()의 catch에서 잡힌다.
+  private GeminiImageClient.GeneratedImage generateImageWithRetry(String description, CharacterType characterType) {
+    try {
+      return geminiImageClient.generateImage(description, characterType);
+    } catch (Exception e) {
+      log.warn("이미지 생성 1차 실패, 1회 재시도: description={}", description, e);
+      return geminiImageClient.generateImage(description, characterType);
+    }
+  }
+
+  private record StepResult(
+    RoutineStepDraft.StepDraft stepDraft, GeminiImageClient.GeneratedImage generatedImage, String reusedImagePath
+  ) {
 
   }
 
@@ -218,7 +296,7 @@ public class RoutineAiPipeline {
 
   }
 
-  public record GeneratedStep(Integer order, String description, String imagePath) {
+  public record GeneratedStep(Integer order, String title, String description, String imagePath) {
 
   }
 

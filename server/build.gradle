@@ -35,7 +35,10 @@ dependencies {
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
-    implementation 'org.flywaydb:flyway-core'
+    // Spring Boot 4는 spring-boot-autoconfigure를 기술별로 쪼개서, flyway-core만 클래스패스에
+    // 있어도 FlywayAutoConfiguration이 로드되지 않는다(3.x까지의 동작과 다름). 이 starter가
+    // flyway-core를 전이 의존성으로 가져오면서 자동 설정 모듈도 함께 포함한다.
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
     implementation 'org.flywaydb:flyway-database-postgresql'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
