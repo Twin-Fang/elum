@@ -1,4 +1,4 @@
-package com.elum.elum
+package kr.twinfang.elum
 
 import io.flutter.embedding.android.FlutterActivity
 
