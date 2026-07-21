@@ -132,8 +132,9 @@ class _ActionCardViewState extends State<ActionCardView> {
                     ),
                     SizedBox(height: space.md),
                     Row(
-                      // 제목이 두 줄이 되면 배지가 가운데로 뜬다. 위로 붙인다.
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      // center로 두면 한 줄/두 줄 모두 별도 측정 없이 배지·제목이
+                      // Row 높이(둘 중 큰 쪽) 기준으로 세로 중앙 정렬된다 — 이슈 #105
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         _NumberBadge(order: widget.index + 1, color: palette.border),
                         SizedBox(width: space.sm),
