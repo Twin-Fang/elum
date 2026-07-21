@@ -58,6 +58,7 @@ fileKey  VSmGuv1iuOpLZmp6QeBHWr
 ```
 Swagger  https://api.elum.chuseok22.com/v3/api-docs      ← 배포된 계약(OpenAPI JSON)
 내부 로직  <repo>/server/src/main/java/com/chuseok22/elumserver/**
+배포 로그  http://chuseok22.synology.me:8888/containers/elum-back/logs
 ```
 
 **Swagger는 "무엇을 받는가", `server/` 코드는 "왜 그런가"를 본다.**
@@ -71,6 +72,22 @@ Swagger  https://api.elum.chuseok22.com/v3/api-docs      ← 배포된 계약(Op
 | PATCH | `/api/member/nickname` | 호칭 저장 |
 | PATCH | `/api/member/support-goals` | 도움 목표 저장 |
 | GET | `/api/member/me` | 프로필 조회 |
+
+#### API가 실패하면 서버 로그부터 본다 ⚠️
+
+클라이언트에서 4xx·5xx를 받았을 때 **요청 코드를 먼저 의심하지 않는다.**
+요청이 서버까지 갔는지, 어느 계층에서 터졌는지는 배포 로그에 남아 있다.
+
+```bash
+# 최근 로그 확인 (lines는 500 · 1000 · all 만 받는다)
+curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back/logs?lines=500" | tail -50
+
+# 실시간으로 따라가며 재현
+curl -N "http://chuseok22.synology.me:8888/containers/elum-back/logs?lines=all&follow=true"
+```
+
+로그에 요청 자체가 없으면 클라이언트(URL·헤더·토큰) 문제이고,
+요청은 찍혔는데 예외가 났으면 서버 문제다. **이 구분을 먼저 하고 고친다.**
 
 ## 기술 스택 (확정)
 
