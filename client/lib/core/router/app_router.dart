@@ -5,6 +5,11 @@ import '../../features/onboarding/presentation/character_screen.dart';
 import '../../features/onboarding/presentation/goals_screen.dart';
 import '../../features/onboarding/presentation/name_screen.dart';
 import '../../features/onboarding/presentation/pin_screen.dart';
+import '../../features/guardian/presentation/card_review_screen.dart';
+import '../../features/guardian/presentation/dlp_screen.dart';
+import '../../features/guardian/presentation/guardian_home_screen.dart';
+import '../../features/guardian/presentation/question_screen.dart';
+import '../../features/guardian/presentation/routine_input_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
 
 /// 앱 라우트 경로 상수. 문자열을 화면마다 반복해 적지 않는다.
@@ -16,6 +21,10 @@ abstract final class Routes {
   static const onboardingPin = '/onboarding/pin';
   static const onboardingDone = '/onboarding/done';
   static const guardian = '/guardian';
+  static const routineInput = '/guardian/routine/input';
+  static const routineMasking = '/guardian/routine/masking';
+  static const routineQuestion = '/guardian/routine/question';
+  static const routineReview = '/guardian/routine/review';
   static const child = '/child';
 }
 
@@ -54,7 +63,23 @@ GoRouter createRouter() {
       ),
       GoRoute(
         path: Routes.guardian,
-        builder: (context, state) => const _Placeholder('보호자 모드'),
+        builder: (context, state) => const GuardianHomeScreen(),
+      ),
+      GoRoute(
+        path: Routes.routineInput,
+        builder: (context, state) => const RoutineInputScreen(),
+      ),
+      GoRoute(
+        path: Routes.routineMasking,
+        builder: (context, state) => const DlpScreen(),
+      ),
+      GoRoute(
+        path: Routes.routineQuestion,
+        builder: (context, state) => const QuestionScreen(),
+      ),
+      GoRoute(
+        path: Routes.routineReview,
+        builder: (context, state) => const CardReviewScreen(),
       ),
       GoRoute(
         path: Routes.child,

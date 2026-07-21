@@ -72,13 +72,53 @@
 
 - `SupportGoal` → `member/infrastructure/entity/SupportGoal.java`
   (`STEP_BY_STEP` / `PREPARE_ITEMS` / `PREPARE_NEW` / `INDEPENDENT`)
-- `ActionCard` → `routine/infrastructure/entity/RoutineStep.java`
-  (`id` / `description` / `stepOrder` / `imagePath` / `completed`)
+- `ActionCard` → `routine/.../RoutineStepResponse.java`
+  (`id` / `stepOrder` / `description` / `imagePath` / `completed` / `completedAt`)
 
-주요 엔드포인트: `/api/auth`, `/api/member`, `/api/routines`
+#### `/api/routines` 계약 요약
+
+| 메서드 | 경로 | 용도 |
+| --- | --- | --- |
+| POST | `/api/routines/questions` | AI 추가 질문 생성 (**실패해도 항상 200**) |
+| POST | `/api/routines` | 일과 생성 → 카드 생성 |
+| GET | `/api/routines/{id}` | 단건 조회 |
+| PATCH | `/api/routines/{id}/revise` | 피드백으로 재생성 |
+| PATCH | `/api/routines/{id}/confirm` | **보호자 승인** (이후 아동에게 노출) |
+| PATCH | `/api/routines/{id}/steps/{stepId}` | 단계 문장 수정 |
+| PATCH | `.../steps/{stepId}/complete` \| `/cancel` | 아동 수행 체크 |
+
+**`RoutineResponse`의 DLP 관련 필드 — 발표 핵심**
+
+- `rawInputText` — 마스킹 **전** 원문
+- `sanitizedInputText` — 마스킹 **후** (실제 LLM에 전달된 값)
+
+이 두 필드로 "전송 전/후 비교" 화면을 만든다. 서버가 이미 검증용으로 노출해주고 있으므로
+클라이언트에서 마스킹을 흉내내지 않는다.
+
+> ⚠️ `rawInputText`는 **원문이므로 로그에 남기지 않는다.** 서버도 `@LogMonitoring(logResult=false)`로
+> 막아뒀다. 클라이언트 로깅 인터셉터도 body를 찍지 않는다.
 
 > 서버 enum이나 필드명이 바뀌면 **클라이언트 도메인 모델을 먼저 맞추고** 테스트를 돌린다.
 > `test/onboarding_profile_test.dart`에 서버 계약 검증 테스트가 있다.
+
+### 브랜치 전략 (필수)
+
+**구현은 `develop`에서 한다. `main`에 직접 커밋하지 않는다.**
+
+```
+develop  ← 작업을 모으는 브랜치 (여기서 구현)
+  ↓ 릴리스 PR
+main     ← 배포 트리거 (버전·릴리스 노트 자동 관리)
+```
+
+작업 순서: **설계 → 이슈 생성 → (워크트리 생성) → 구현 → 커밋**
+
+- 이슈 생성: `/pro-github`
+- 워크트리: `/pro-init-worktree` — 브랜치명 `YYYYMMDD_#이슈번호_제목`
+- 배포: `/pro-changelog-deploy` (main push만으로는 배포되지 않는다)
+
+> 시간이 급하면 워크트리 없이 `develop`에서 직접 작업해도 된다.
+> 다만 **`main` 직접 커밋은 하지 않는다** — 배포가 자동 트리거된다.
 
 ### 금지
 
