@@ -6,8 +6,12 @@ import '../theme/theme_context_ext.dart';
 
 /// 입력 필드. Figma 기준 344×68 / radius 20 / 흰 배경 + 1px 테두리.
 ///
-/// 왼쪽 아이콘은 선택이다. 아이콘이 붙으면 텍스트가 좌측 정렬로 바뀐다
-/// (Figma `온보딩_이름` 204:991 — placeholder가 아이콘 우측 x=90에서 시작).
+/// 왼쪽 아이콘은 선택이다. 아이콘이 붙으면 텍스트가 좌측 정렬로 바뀐다.
+///
+/// Figma 204:991 `온보딩_이름` 명세:
+/// - 필드 크기: 344×68
+/// - 내부 패딩: 좌우 16px, 상하 24px (텍스트가 필드 상단에서 24px 아래 위치)
+/// - 아이콘 크기: 40×40 / 왼쪽 여백 14px / 오른쪽 여백 12px
 class ElumTextField extends StatelessWidget {
   const ElumTextField({
     super.key,
@@ -64,7 +68,7 @@ class ElumTextField extends StatelessWidget {
           hintStyle: context.typo.input.copyWith(color: colors.textPlaceholder),
           filled: true,
           fillColor: colors.surface,
-          contentPadding: EdgeInsets.symmetric(horizontal: space.md),
+          contentPadding: EdgeInsets.symmetric(horizontal: space.md, vertical: 24),
           prefixIcon: _buildLeadingIcon(),
           // 기본 최소폭 48이 적용되면 Figma 좌표가 밀린다
           prefixIconConstraints: const BoxConstraints(),

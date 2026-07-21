@@ -6,7 +6,13 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// 아이콘은 왼쪽에 붙는데 텍스트만 가운데 뜨는 조합은 디자인상 존재하지 않는다.
 /// 호출부가 정렬을 매번 넘기지 않아도 되도록 위젯이 스스로 판단한다.
+///
+/// Figma 204:991 명세와의 정합성을 검증한다.
+/// - 필드 높이: 68px
+/// - 상하 패딩: 각 24px (Figma: 텍스트 y=600은 배경 y=576에서 24px 아래)
+/// - 좌우 패딩: 각 16px (space.md)
 void main() {
+
   group('ElumTextField 정렬 판단', () {
     test('아이콘이 있으면 좌측 정렬이다', () {
       const field = ElumTextField(
