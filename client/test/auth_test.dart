@@ -243,6 +243,70 @@ void main() {
       );
     });
   });
+
+  /// 회원삭제는 개발자 도구 플로팅 버튼에서 쓰는 기능이다.
+  ///
+  /// 서버 계약: `DELETE /api/member/me` → 204 No Content, body 없음.
+  /// 출처: server/.../member/application/controller/MemberController.java
+  ///
+  /// 경로나 메서드가 어긋나면 조용히 실패한다 — deleteAccount()가 예외를
+  /// 삼키기 때문에 로컬만 지워지고 서버에는 계정이 남는다. 그래서 테스트로 고정한다.
+  group('AuthRepository.deleteAccount — 서버 계약', () {
+    test('DELETE /api/member/me를 호출한다', () async {
+      adapter.stub('/api/member/me', 204, {});
+      storage
+        ..setAccessToken('token')
+        ..setNickname('하늘이별');
+
+      final repo = AuthRepository(dio: dio, storage: storage);
+      await repo.deleteAccount();
+
+      expect(adapter.pathsCalled, contains('/api/member/me'));
+      expect(adapter.lastMethod, 'DELETE');
+    });
+
+    test('삭제 후 토큰과 이름이 모두 지워진다', () async {
+      adapter.stub('/api/member/me', 204, {});
+      storage
+        ..setAccessToken('token')
+        ..setNickname('하늘이별');
+
+      final repo = AuthRepository(dio: dio, storage: storage);
+      await repo.deleteAccount();
+
+      // 토큰만 지우고 이름이 남으면 AuthInterceptor가 재발급을 시도해
+      // 지워진 계정으로 되살아난다. 둘 다 지워져야 한다.
+      expect(storage.accessToken, isNull);
+      expect(storage.nickname, isNull);
+    });
+
+    test('서버가 실패해도 로컬은 반드시 지운다', () async {
+      // 스텁을 등록하지 않으면 어댑터가 404를 준다
+      storage
+        ..setAccessToken('token')
+        ..setNickname('하늘이별');
+
+      final repo = AuthRepository(dio: dio, storage: storage);
+      await repo.deleteAccount();
+
+      // 토큰이 남으면 지워진 계정으로 계속 401을 맞는다
+      expect(storage.accessToken, isNull);
+    });
+
+    test('삭제 후에는 토큰 재발급이 시도되지 않는다', () async {
+      adapter.stub('/api/member/me', 204, {});
+      storage
+        ..setAccessToken('token')
+        ..setNickname('하늘이별');
+
+      final repo = AuthRepository(dio: dio, storage: storage);
+      await repo.deleteAccount();
+
+      // 이름이 지워졌으므로 재발급할 방법이 없다 → 무한 루프가 생기지 않는다
+      expect(await repo.reauthenticate(), isNull);
+      expect(repo.hasToken, isFalse);
+    });
+  });
 }
 
 /// 경로별로 정해둔 응답을 돌려주는 가짜 어댑터.
@@ -252,6 +316,9 @@ class _FakeAdapter implements HttpClientAdapter {
 
   final pathsCalled = <String>[];
   var lastHeaders = <String, dynamic>{};
+
+  /// 마지막 요청의 HTTP 메서드. 경로가 같아도 메서드가 다르면 서버가 405를 준다.
+  var lastMethod = '';
 
   /// 마지막 요청 본문. 어떤 자격증명을 보냈는지 검증한다.
   var lastBody = <String, dynamic>{};
@@ -272,6 +339,7 @@ class _FakeAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     pathsCalled.add(options.path);
+    lastMethod = options.method;
     lastHeaders = Map<String, dynamic>.from(options.headers);
     if (options.data case final Map<String, dynamic> body) {
       lastBody = Map<String, dynamic>.from(body);
