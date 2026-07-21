@@ -23,7 +23,9 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -246,6 +248,18 @@ public class RoutineService {
     return routineRepository.findAllByMemberId(memberId).stream()
       .map(RoutineResponse::from)
       .toList();
+  }
+
+  // 아이 홈 화면 "오늘 할 일" 리스트용. 보호자 승인 전(PENDING_REVIEW) 일과는 제외하고,
+  // scheduledAt이 오늘(KST) 안에 있는 CONFIRMED/COMPLETED 일과만 예정 시각 순으로 반환한다.
+  public List<RoutineResponse> getTodayRoutines(String memberId) {
+    LocalDate today = LocalDate.now();
+    LocalDateTime startOfDay = today.atStartOfDay();
+    LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+    List<Routine> routines = routineRepository.findAllByMemberIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
+      memberId, List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED), startOfDay, endOfDay
+    );
+    return routines.stream().map(RoutineResponse::from).toList();
   }
 
   // count는 프론트가 요청한 반환 개수다. 1 미만이거나 카탈로그 전체 개수를 초과하면
