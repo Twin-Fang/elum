@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
@@ -56,12 +57,12 @@ class ActionCardView extends StatelessWidget {
       decoration: BoxDecoration(
         color: palette.fill,
         borderRadius: BorderRadius.circular(space.cardRadius),
-        border: Border.all(color: palette.border, width: 2),
+        border: Border.all(color: palette.border, width: 2.w),
         boxShadow: [
           BoxShadow(
             color: context.colors.glassShadow,
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+            blurRadius: 5.w,
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -109,9 +110,10 @@ class ActionCardView extends StatelessWidget {
                 scaleDown: AppPressable.scaleIcon,
                 // SVG가 25×25인데 Figma 배치는 24×24다. 크기만 지정하면
                 // 비율이 눌려 아이콘이 찌그러진다 — contain으로 비율을 지킨다.
+                // 정사각형 아이콘이라 가로세로 모두 .w로 맞춘다
                 child: SizedBox(
-                  width: _volumeIconSize,
-                  height: _volumeIconSize,
+                  width: _volumeIconSize.w,
+                  height: _volumeIconSize.w,
                   // 읽는 중에는 흐리게 — 다시 누르면 멈춘다는 신호다
                   child: AnimatedOpacity(
                     duration: AppMotion.fast,
@@ -195,7 +197,7 @@ class _EditButton extends StatelessWidget {
     return AppPressable(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: context.colors.background,
           borderRadius: BorderRadius.circular(context.space.cardRadius),
@@ -219,13 +221,14 @@ class _NumberBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 정사각형 배지라 가로세로 모두 .w
     return Container(
-      width: 40,
-      height: 40,
+      width: 40.w,
+      height: 40.w,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.w),
       ),
       child: Text(
         '$order',

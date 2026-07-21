@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -51,9 +52,10 @@ class _RewardStarState extends State<RewardStar>
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    // 별은 정사각형이라 가로세로 모두 .w
     return SizedBox(
-      width: RewardStar.mainSize,
-      height: RewardStar.mainSize,
+      width: RewardStar.mainSize.w,
+      height: RewardStar.mainSize.w,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, _) {
@@ -66,7 +68,7 @@ class _RewardStarState extends State<RewardStar>
               Transform.scale(
                 scale: t,
                 child: _Star(
-                  size: RewardStar.mainSize,
+                  size: RewardStar.mainSize.w,
                   color: colors.rewardStar,
                   glow: colors.rewardStarGlow,
                 ),
@@ -75,15 +77,15 @@ class _RewardStarState extends State<RewardStar>
               _Satellite(
                 progress: _controller.value,
                 begin: 0.5,
-                offset: const Offset(-88, 78),
-                size: 38,
+                offset: Offset(-88.w, 78.h),
+                size: 38.w,
                 color: colors.rewardStarGreen,
               ),
               _Satellite(
                 progress: _controller.value,
                 begin: 0.7,
-                offset: const Offset(84, -40),
-                size: 30,
+                offset: Offset(84.w, -40.h),
+                size: 30.w,
                 color: colors.rewardStarPurple,
               ),
             ],
@@ -108,7 +110,9 @@ class _Star extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         // Figma boxShadow 0 0 20 rgba(208,255,0,0.3)
-        boxShadow: [BoxShadow(color: glow, blurRadius: 40, spreadRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: glow, blurRadius: 40.w, spreadRadius: 10.w),
+        ],
       ),
       child: Icon(Icons.star_rounded, size: size, color: color),
     );

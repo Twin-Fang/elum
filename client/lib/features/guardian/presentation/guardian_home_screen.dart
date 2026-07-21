@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -113,7 +114,7 @@ class _Header extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SvgPicture.asset(AppAssets.homeLogo, width: 80, height: 30),
+              SvgPicture.asset(AppAssets.homeLogo, width: 80.w, height: 30.h),
               // 아이 화면으로 넘어가는 입구. 암호를 물어본다.
               AppPressable(
                 onTap: () => context.push(
@@ -122,8 +123,9 @@ class _Header extends StatelessWidget {
                 scaleDown: AppPressable.scaleIcon,
                 child: SvgPicture.asset(
                   AppAssets.homeCharacterBadge,
-                  width: 56,
-                  height: 56,
+                  // 정사각형 배지 — 찌그러지지 않게 가로세로 모두 .w
+                  width: 56.w,
+                  height: 56.w,
                 ),
               ),
             ],
@@ -163,7 +165,7 @@ class _NewRoutineCard extends StatelessWidget {
       onTap: onTap,
       scaleDown: AppPressable.scaleCard,
       child: Container(
-        height: 94,
+        height: 94.h,
         padding: EdgeInsets.symmetric(horizontal: space.md),
         decoration: BoxDecoration(
           // Figma linear-gradient(134deg, #F9F4FF → #E9EEFF)
@@ -180,8 +182,8 @@ class _NewRoutineCard extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: colors.homeCardShadow,
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              blurRadius: 10.w,
+              offset: Offset(0, 4.h),
             ),
           ],
         ),
@@ -189,8 +191,9 @@ class _NewRoutineCard extends StatelessWidget {
           children: [
             SvgPicture.asset(
               AppAssets.homeNewRoutineIllust,
-              width: 56,
-              height: 56,
+              // 정사각형 일러스트 — 가로세로 모두 .w
+              width: 56.w,
+              height: 56.w,
             ),
             SizedBox(width: space.md),
             Expanded(
@@ -202,8 +205,8 @@ class _NewRoutineCard extends StatelessWidget {
                     children: [
                       SvgPicture.asset(
                         AppAssets.iconSparkles,
-                        width: 15,
-                        height: 18,
+                        width: 15.w,
+                        height: 18.h,
                       ),
                       SizedBox(width: space.xs),
                       Text(
@@ -246,7 +249,8 @@ class _SectionTitle extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: space.screenH),
       child: Row(
         children: [
-          SvgPicture.asset(iconAsset, width: 18, height: 18),
+          // 정사각형 아이콘 — 가로세로 모두 .w
+          SvgPicture.asset(iconAsset, width: 18.w, height: 18.w),
           SizedBox(width: space.xs),
           Text(
             label,
@@ -279,12 +283,12 @@ class _RecentRoutines extends ConsumerWidget {
 
     return routines.when(
       // 로딩과 빈 상태를 시각적으로 구분한다 — 무한 로딩처럼 보이면 안 된다
-      loading: () => const _RoutineCardShell(
+      loading: () => _RoutineCardShell(
         child: Center(
           child: SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            width: 20.w,
+            height: 20.w,
+            child: CircularProgressIndicator(strokeWidth: 2.w),
           ),
         ),
       ),
@@ -356,12 +360,13 @@ class _CardRow extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: _badgeSize,
-            height: _badgeSize,
+            // 정사각형 배지 — 가로세로 모두 .w
+            width: _badgeSize.w,
+            height: _badgeSize.w,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: palette.border,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.w),
             ),
             child: Text(
               '${index + 1}',
@@ -412,16 +417,18 @@ class _DoneMark extends StatelessWidget {
     return AnimatedContainer(
       duration: AppMotion.fast,
       curve: AppMotion.standard,
-      width: 40,
-      height: 40,
+      // 원형 표시 — 가로세로 모두 .w
+      width: 40.w,
+      height: 40.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: isDone ? colors.checkDone : Colors.transparent,
-        border: isDone ? null : Border.all(color: colors.checkPending, width: 2),
+        border:
+            isDone ? null : Border.all(color: colors.checkPending, width: 2.w),
       ),
       child: Icon(
         Icons.check_rounded,
-        size: 22,
+        size: 22.w,
         color: isDone ? colors.surface : colors.checkPending,
       ),
     );
@@ -440,7 +447,8 @@ class _EmptyRoutines extends ConsumerWidget {
     return _RoutineCardShell(
       child: Row(
         children: [
-          SvgPicture.asset(AppAssets.homeEmptyIllust, width: 40, height: 40),
+          // 정사각형 일러스트 — 가로세로 모두 .w
+          SvgPicture.asset(AppAssets.homeEmptyIllust, width: 40.w, height: 40.w),
           SizedBox(width: space.md),
           Expanded(
             child: Column(
@@ -479,7 +487,7 @@ class _RoutineCardShell extends StatelessWidget {
     final colors = context.colors;
 
     return Container(
-      height: 68,
+      height: 68.h,
       padding: EdgeInsets.symmetric(horizontal: space.md),
       decoration: BoxDecoration(
         color: colors.surface,

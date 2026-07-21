@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -26,6 +27,9 @@ class ChildHomeScreen extends ConsumerStatefulWidget {
 
   /// 체크 버튼 크기. 아동 모드 최소 64×64를 넉넉히 넘긴다.
   static const checkButtonSize = 88.0;
+
+  /// 아동 모드 접근성 하한. 좁은 기기에서 `.w`로 줄어들어도 이 아래로 가지 않는다.
+  static const minTouchTarget = 64.0;
 
   @override
   ConsumerState<ChildHomeScreen> createState() => _ChildHomeScreenState();
@@ -176,17 +180,18 @@ class _TopBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SvgPicture.asset(AppAssets.homeLogo, width: 80, height: 30),
+          SvgPicture.asset(AppAssets.homeLogo, width: 80.w, height: 30.h),
           // 보호자로 돌아가려면 암호가 필요하다
           AppPressable(
             onTap: () => context.push(
               '${Routes.modeSwitch}?to=${ModeSwitchTarget.guardian.name}',
             ),
             scaleDown: AppPressable.scaleIcon,
+            // 정사각형 배지라 가로세로 모두 .w
             child: SvgPicture.asset(
               AppAssets.characterBadgeRuru,
-              width: 56,
-              height: 56,
+              width: 56.w,
+              height: 56.w,
             ),
           ),
         ],
@@ -207,6 +212,8 @@ class _CheckButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final size = ChildHomeScreen.checkButtonSize.w
+        .clamp(ChildHomeScreen.minTouchTarget, double.infinity);
 
     return AppPressable(
       onTap: onTap,
@@ -215,16 +222,18 @@ class _CheckButton extends StatelessWidget {
         // 아동 화면은 300ms 이상으로 둔다 (docs/motion.md)
         duration: AppMotion.normal,
         curve: AppMotion.standard,
-        width: ChildHomeScreen.checkButtonSize,
-        height: ChildHomeScreen.checkButtonSize,
+        // 원형 버튼이라 가로세로 모두 .w. 좁은 기기에서 줄어들어도
+        // 아동 모드 최소 터치 타겟(64) 아래로는 내려가지 않게 막는다.
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: isChecked ? colors.checkDone : Colors.transparent,
-          border: Border.all(color: colors.checkPending, width: 8),
+          border: Border.all(color: colors.checkPending, width: 8.w),
         ),
         child: Icon(
           Icons.check_rounded,
-          size: 44,
+          size: 44.w,
           color: isChecked ? colors.surface : colors.checkPending,
         ),
       ),

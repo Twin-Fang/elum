@@ -315,10 +315,24 @@ Secret의 `ELUM_SHOW_DEV_TOOLS`를 `false`로 바꾼다.
 | 순서 | 할 일 |
 | --- | --- |
 | 1 | `mcp__figma__get_figma_data`로 **해당 노드 덤프 조회** |
-| 2 | 덤프에서 `type: IMAGE-SVG`, `type: COMPONENT`, `type: INSTANCE`를 **전부 목록화** |
-| 3 | 그것들을 `mcp__figma__download_figma_images`로 **먼저 다운로드** |
-| 4 | `AppAssets`에 상수 추가 |
-| 5 | **그 다음에야** 코드를 쓴다 |
+| 2 | `mcp__figma__download_figma_images`로 **프레임 전체를 PNG로 받아 눈으로 본다** |
+| 3 | 덤프에서 `type: IMAGE-SVG`, `type: COMPONENT`, `type: INSTANCE`를 **전부 목록화** |
+| 4 | 그것들을 `download_figma_images`로 **먼저 다운로드** |
+| 5 | `AppAssets`에 상수 추가 |
+| 6 | **그 다음에야** 코드를 쓴다 |
+| 7 | 구현 후 **시뮬레이터 화면과 PNG를 나란히 놓고 비교** |
+
+#### 덤프만 믿지 않는다 — 렌더된 PNG가 기준이다 ⚠️
+
+**JSON 덤프에는 화면에 그려지지 않는 레이어까지 섞여 나온다.**
+
+로딩 화면(262:4569)에서 실제로 겪은 일이다. 덤프에 `아이가 이해하기 쉬운 말로
+바꿔요`(262:4678)가 있길래 "코드가 틀렸다"고 판단해 고쳤는데, PNG를 받아 보니
+화면에는 `추가 질문을 생각하고 있어요`가 나왔다. **멀쩡한 문구를 틀린 값으로
+바꾼 것이다.** 숨겨진 레이어이거나 다른 variant였다.
+
+> 덤프는 **좌표·색·크기**를 읽는 데 쓰고, **무엇이 화면에 보이는가**는 PNG로 확인한다.
+> 둘이 다르면 PNG가 기준이다.
 
 **절대 금지**
 
@@ -345,6 +359,43 @@ Figma 좌표(393×852 기준)를 그대로 쓰되 `.w`/`.h`/`.sp`를 붙인다.
 ```dart
 Positioned(left: 115.w, top: 214.h, child: SvgPicture.asset(AppAssets.logo, width: 164.w))
 ```
+
+**정사각형은 가로세로 모두 `.w`를 쓴다.** 아이콘·원형 배지에 `.w`/`.h`를 섞으면
+기기 화면비가 다를 때 찌그러진다. 원은 원으로 남아야 한다.
+
+```dart
+// ❌ 화면비가 다르면 타원이 된다
+SizedBox(width: 20.w, height: 20.h)
+// ✅
+SizedBox(width: 20.w, height: 20.w)
+```
+
+#### Figma 좌표는 Spacer로 흉내내지 않는다 ⚠️
+
+**Figma는 절대 좌표다. `Column` + `Spacer`로 남는 공간을 배분하면 시안과 달라진다.**
+
+로딩 화면(262:4569)에서 실제로 겪은 일이다. `Spacer(flex:5)` : `Expanded(flex:9)`로
+위아래를 나눴더니 체크리스트가 **화면 바닥에 박혔다.** Figma는 y=569(약 67% 지점)인데,
+Spacer는 "남는 공간을 나눌" 뿐이라 요소가 항상 끝으로 밀린다.
+
+```dart
+// ❌ 체크리스트가 화면 맨 아래로 밀린다
+Column(children: [Spacer(flex: 5), ...상단, Expanded(flex: 9), 체크리스트])
+
+// ✅ Figma y좌표를 그대로 옮긴다 (상단바 높이를 뺀 값)
+Stack(children: [
+  Positioned(top: (569 - topBarH).h, left: 54.w, child: 체크리스트),
+])
+```
+
+| 상황 | 배치 방법 |
+|---|---|
+| 요소 위치가 Figma에 고정돼 있다 | `Stack` + `Positioned` — 좌표를 그대로 옮긴다 |
+| 내용이 늘어나 스크롤이 필요하다 | `SingleChildScrollView` + 상단 여백 `SizedBox((y - topBarH).h)` |
+| 화면 하단 고정 CTA | `Column` 맨 아래 — 이건 Spacer가 맞다 |
+
+**제목·문단은 Figma 폭을 고정한다.** 화면 폭을 다 쓰면 줄바꿈 위치가 시안과 달라진다.
+실제로 `물건이 있나요?`가 `있나 / 요?`로 꺾인 적이 있다 (262:4766은 제목 폭 307).
 
 #### 에셋 파일 추가 절차
 

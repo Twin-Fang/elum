@@ -1,20 +1,31 @@
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/presentation/widgets/aurora_background.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'helpers/device_viewport.dart';
 
 /// 움직이는 배경 테스트.
 ///
 /// 배경이 "실제로 움직이는가"와 "꺼야 할 때 꺼지는가"를 함께 고정한다.
 /// 둘 중 하나만 맞으면 의미가 없다. (docs/motion.md)
 void main() {
+  useFigmaViewport();
+
   Widget wrap({bool reduceMotion = false}) {
     return MaterialApp(
       // 배경색을 AppColors 토큰에서 읽으므로 테마가 필요하다
       theme: AppTheme.light,
       home: MediaQuery(
         data: MediaQueryData(disableAnimations: reduceMotion),
-        child: const Scaffold(body: AuroraBackground()),
+        // 광원 크기가 `.w`를 쓰므로 앱과 같은 환경이 필요하다.
+        // 없으면 LateError로 위젯 빌드 자체가 실패한다.
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          builder: (context, _) =>
+              const Scaffold(body: AuroraBackground()),
+        ),
       ),
     );
   }

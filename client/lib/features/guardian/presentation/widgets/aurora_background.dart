@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/theme/theme_context_ext.dart';
 
@@ -147,12 +148,21 @@ class _AuroraBackgroundState extends State<AuroraBackground>
   }
 
   Widget _blurredCircle(Color color) {
+    // 광원 위치는 [Alignment]가 화면 비율로 잡지만 **크기는 고정값**이라,
+    // 큰 기기에서는 화면 대비 광원이 작아져 배경이 허전해진다.
+    // Figma 260(393 폭 기준)을 `.w`로 환산해 비율을 유지한다.
+    final diameter = 260.w;
+
     return ImageFiltered(
-      // Figma는 blur 100~200px이다. 여기서는 원 크기 대비로 잡는다.
-      imageFilter: ImageFilter.blur(sigmaX: 70, sigmaY: 70),
+      // Figma는 blur 100~200px이다. 여기서는 원 크기 대비(약 27%)로 잡는다.
+      // 원만 키우고 blur를 그대로 두면 가장자리가 선명해져 광원처럼 안 보인다.
+      imageFilter: ImageFilter.blur(
+        sigmaX: diameter * 0.27,
+        sigmaY: diameter * 0.27,
+      ),
       child: Container(
-        width: 260,
-        height: 260,
+        width: diameter,
+        height: diameter,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           // 완전 불투명하면 세 색이 겹칠 때 탁해진다

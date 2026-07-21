@@ -11,6 +11,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
 
 /// Figma `온보딩_비밀번호`(238:1909) / `_입력`(238:1997) / `_재확인`(238:2767) 정합 테스트.
@@ -18,6 +19,9 @@ import 'helpers/test_storage.dart';
 /// PIN 불일치는 아동도 볼 수 있는 화면이라 경고색·에러 아이콘을 쓰지 않는다.
 /// 그 규칙을 테스트로 고정한다.
 void main() {
+  // .w/.h 검증에는 Figma 기준 뷰포트가 필요하다 (기본 800×600이면 스케일이 어긋난다)
+  useFigmaViewport();
+
   bool isCtaEnabled(WidgetTester tester) {
     return tester.widget<ElumButton>(find.byType(ElumButton)).onPressed != null;
   }
