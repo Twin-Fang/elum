@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../logger/app_logger.dart';
 
 /// 로컬 저장소.
 ///
@@ -62,28 +63,56 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
-  String? get nickname => _prefs.getString(_kNickname);
+  String? get nickname {
+    final value = _prefs.getString(_kNickname);
+    AppLogger.storageRead(_kNickname, value);
+    return value;
+  }
 
   @override
-  Future<void> setNickname(String v) => _prefs.setString(_kNickname, v);
+  Future<void> setNickname(String v) {
+    AppLogger.storageWrite(_kNickname, v);
+    return _prefs.setString(_kNickname, v);
+  }
 
   @override
-  List<String> get goals => _prefs.getStringList(_kGoals) ?? const [];
+  List<String> get goals {
+    final value = _prefs.getStringList(_kGoals) ?? const [];
+    AppLogger.storageRead(_kGoals, value);
+    return value;
+  }
 
   @override
-  Future<void> setGoals(List<String> v) => _prefs.setStringList(_kGoals, v);
+  Future<void> setGoals(List<String> v) {
+    AppLogger.storageWrite(_kGoals, v);
+    return _prefs.setStringList(_kGoals, v);
+  }
 
   @override
-  String? get character => _prefs.getString(_kCharacter);
+  String? get character {
+    final value = _prefs.getString(_kCharacter);
+    AppLogger.storageRead(_kCharacter, value);
+    return value;
+  }
 
   @override
-  Future<void> setCharacter(String v) => _prefs.setString(_kCharacter, v);
+  Future<void> setCharacter(String v) {
+    AppLogger.storageWrite(_kCharacter, v);
+    return _prefs.setString(_kCharacter, v);
+  }
 
   @override
-  bool get isOnboardingCompleted => _prefs.getBool(_kCompleted) ?? false;
+  bool get isOnboardingCompleted {
+    final value = _prefs.getBool(_kCompleted) ?? false;
+    AppLogger.storageRead(_kCompleted, value);
+    return value;
+  }
 
   @override
-  Future<void> setOnboardingCompleted(bool v) => _prefs.setBool(_kCompleted, v);
+  Future<void> setOnboardingCompleted(bool v) {
+    AppLogger.storageWrite(_kCompleted, v);
+    return _prefs.setBool(_kCompleted, v);
+  }
 
   // PIN 읽기·쓰기를 메서드로 감싸둔다.
   // flutter_secure_storage로 옮길 때 호출부를 건드리지 않기 위함이다.
@@ -93,23 +122,38 @@ class SharedPrefsStorage implements LocalStorage {
   @override
   Future<void> setPin(String v) async {
     try {
+      AppLogger.storageWrite(_kPin, '***');
       await _prefs.setString(_kPin, v);
     } catch (e) {
-      debugPrint('[storage] PIN 저장 실패: $e');
+      AppLogger.error('storage', e);
     }
   }
 
   @override
-  Future<String?> getPin() async => _prefs.getString(_kPin);
+  Future<String?> getPin() async {
+    final value = _prefs.getString(_kPin);
+    AppLogger.storageRead(_kPin, value != null ? '***' : null);
+    return value;
+  }
 
   @override
-  String? get accessToken => _prefs.getString(_kAccessToken);
+  String? get accessToken {
+    final value = _prefs.getString(_kAccessToken);
+    AppLogger.storageRead(_kAccessToken, value != null ? '***' : null);
+    return value;
+  }
 
   @override
-  Future<void> setAccessToken(String v) => _prefs.setString(_kAccessToken, v);
+  Future<void> setAccessToken(String v) {
+    AppLogger.storageWrite(_kAccessToken, '***');
+    return _prefs.setString(_kAccessToken, v);
+  }
 
   @override
-  Future<void> clearAccessToken() => _prefs.remove(_kAccessToken);
+  Future<void> clearAccessToken() {
+    AppLogger.storageDelete(_kAccessToken);
+    return _prefs.remove(_kAccessToken);
+  }
 
   @override
   Future<void> clearAll() async {

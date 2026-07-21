@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_config.dart';
+import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../shared/models/routine.dart';
 import '../../onboarding/domain/support_goal.dart';
@@ -48,27 +48,39 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
   @override
   Future<List<Routine>> getMyRoutines() async {
-    if (AppConfig.useMock) return const [];
+    AppLogger.repositoryCall('RoutineRepository', 'getMyRoutines');
+
+    if (AppConfig.useMock) {
+      AppLogger.repositorySuccess('RoutineRepository', 'getMyRoutines', '모의 데이터');
+      return const [];
+    }
 
     try {
       final res = await _dio.get<List<dynamic>>('/api/routines');
       final body = res.data;
       if (body == null) return const [];
 
-      return body
+      final routines = body
           .whereType<Map<String, dynamic>>()
           .map(Routine.fromJson)
           .toList();
+
+      AppLogger.repositorySuccess('RoutineRepository', 'getMyRoutines', '${routines.length}개 일과 조회됨');
+      return routines;
     } catch (e) {
-      // 목록을 못 가져와도 홈 화면은 떠야 한다. 빈 상태 UI가 나간다.
-      debugPrint('[routine] 목록 조회 실패 → 빈 목록으로 처리: $e');
+      AppLogger.repositoryError('RoutineRepository', 'getMyRoutines', e);
       return const [];
     }
   }
 
   @override
   Future<List<RoutineSuggestion>> getSuggestions() async {
-    if (AppConfig.useMock) return RoutineSuggestion.fallback;
+    AppLogger.repositoryCall('RoutineRepository', 'getSuggestions');
+
+    if (AppConfig.useMock) {
+      AppLogger.repositorySuccess('RoutineRepository', 'getSuggestions', '모의 데이터 ${RoutineSuggestion.fallback.length}개');
+      return RoutineSuggestion.fallback;
+    }
 
     try {
       final res = await _dio.get<List<dynamic>>('/api/routines/suggestions');
@@ -77,22 +89,28 @@ class RoutineRepositoryImpl implements RoutineRepository {
       final parsed = body
               ?.whereType<Map<String, dynamic>>()
               .map(RoutineSuggestion.fromJson)
-              // 문구가 빈 항목은 타일에 아무것도 안 보여 빈칸처럼 된다
               .where((s) => s.text.isNotEmpty)
               .toList() ??
           const <RoutineSuggestion>[];
 
-      // 200이지만 빈 배열인 경우도 fallback으로 흡수한다.
-      return parsed.isEmpty ? RoutineSuggestion.fallback : parsed;
+      final result = parsed.isEmpty ? RoutineSuggestion.fallback : parsed;
+      AppLogger.repositorySuccess('RoutineRepository', 'getSuggestions', '${result.length}개 추천 조회됨');
+      return result;
     } catch (e) {
-      debugPrint('[routine] 추천 조회 실패 → 기본 목록으로 처리: $e');
+      AppLogger.repositoryError('RoutineRepository', 'getSuggestions', e);
       return RoutineSuggestion.fallback;
     }
   }
 
   @override
   Future<RoutineQuestion> generateQuestion(String rawInputText) async {
-    if (AppConfig.useMock) return _mockQuestion();
+    AppLogger.repositoryCall('RoutineRepository', 'generateQuestion', {'rawInputText': rawInputText});
+
+    if (AppConfig.useMock) {
+      final mock = _mockQuestion();
+      AppLogger.repositorySuccess('RoutineRepository', 'generateQuestion', mock);
+      return mock;
+    }
 
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -100,11 +118,18 @@ class RoutineRepositoryImpl implements RoutineRepository {
         data: {'rawInputText': rawInputText},
       );
       final body = res.data;
-      if (body != null) return RoutineQuestion.fromJson(body);
+      if (body != null) {
+        final question = RoutineQuestion.fromJson(body);
+        AppLogger.repositorySuccess('RoutineRepository', 'generateQuestion', question);
+        return question;
+      }
     } catch (e) {
-      debugPrint('[fallback] 질문 생성 실패 → mock 질문 사용: $e');
+      AppLogger.repositoryError('RoutineRepository', 'generateQuestion', e);
     }
-    return _mockQuestion();
+
+    final mock = _mockQuestion();
+    AppLogger.repositorySuccess('RoutineRepository', 'generateQuestion (fallback)', mock);
+    return mock;
   }
 
   @override
@@ -113,6 +138,12 @@ class RoutineRepositoryImpl implements RoutineRepository {
     required Set<SupportGoal> goals,
     List<String> answers = const [],
   }) async {
+    AppLogger.repositoryCall('RoutineRepository', 'createRoutine', {
+      'rawInputText': rawInputText,
+      'goals': goals.map((g) => g.apiValue).toList(),
+      'answers': answers,
+    });
+
     if (!AppConfig.useMock) {
       try {
         final res = await _dio.post<Map<String, dynamic>>(
@@ -130,32 +161,45 @@ class RoutineRepositoryImpl implements RoutineRepository {
         final body = res.data;
         if (body != null) {
           final routine = Routine.fromJson(body);
-          if (routine.steps.isNotEmpty) return routine;
-          debugPrint('[fallback:1] 서버가 빈 카드 → 로컬 생성으로 전환');
+          if (routine.steps.isNotEmpty) {
+            AppLogger.repositorySuccess('RoutineRepository', 'createRoutine', '${routine.steps.length}개 카드 생성됨');
+            return routine;
+          }
+          AppLogger.repositoryError('RoutineRepository', 'createRoutine', '빈 카드 받음 → 로컬 생성으로 전환');
         }
       } catch (e) {
-        debugPrint('[fallback:1] 일과 생성 실패 → 로컬 생성으로 전환: $e');
+        AppLogger.repositoryError('RoutineRepository', 'createRoutine', e);
       }
     }
 
-    return _localRoutine(rawInputText, goals);
+    final routine = _localRoutine(rawInputText, goals);
+    AppLogger.repositorySuccess('RoutineRepository', 'createRoutine (로컬)', '${routine.steps.length}개 카드 로컬 생성됨');
+    return routine;
   }
 
   @override
   Future<Routine> confirm(Routine routine) async {
+    AppLogger.repositoryCall('RoutineRepository', 'confirm', {'routineId': routine.id});
+
     if (!AppConfig.useMock && routine.id.isNotEmpty) {
       try {
         final res = await _dio.patch<Map<String, dynamic>>(
           '/api/routines/${routine.id}/confirm',
         );
         final body = res.data;
-        if (body != null) return Routine.fromJson(body);
+        if (body != null) {
+          final confirmed = Routine.fromJson(body);
+          AppLogger.repositorySuccess('RoutineRepository', 'confirm', '일과 승인 완료');
+          return confirmed;
+        }
       } catch (e) {
-        debugPrint('[fallback] 승인 API 실패 → 로컬 상태로 처리: $e');
+        AppLogger.repositoryError('RoutineRepository', 'confirm', e);
       }
     }
-    // 서버가 없어도 승인은 성립해야 한다 — 데모가 멈추면 안 된다
-    return routine.copyWith(status: 'CONFIRMED');
+
+    final confirmed = routine.copyWith(status: 'CONFIRMED');
+    AppLogger.repositorySuccess('RoutineRepository', 'confirm (로컬)', '로컬 상태로 일과 승인 처리');
+    return confirmed;
   }
 
   @override
@@ -164,6 +208,12 @@ class RoutineRepositoryImpl implements RoutineRepository {
     String stepId,
     String description,
   ) async {
+    AppLogger.repositoryCall('RoutineRepository', 'updateStep', {
+      'routineId': routine.id,
+      'stepId': stepId,
+      'description': description,
+    });
+
     if (!AppConfig.useMock && routine.id.isNotEmpty) {
       try {
         final res = await _dio.patch<Map<String, dynamic>>(
@@ -171,18 +221,24 @@ class RoutineRepositoryImpl implements RoutineRepository {
           data: {'description': description},
         );
         final body = res.data;
-        if (body != null) return Routine.fromJson(body);
+        if (body != null) {
+          final updated = Routine.fromJson(body);
+          AppLogger.repositorySuccess('RoutineRepository', 'updateStep', '카드 내용 수정 완료');
+          return updated;
+        }
       } catch (e) {
-        debugPrint('[fallback] 카드 수정 API 실패 → 로컬 반영: $e');
+        AppLogger.repositoryError('RoutineRepository', 'updateStep', e);
       }
     }
 
-    return routine.copyWith(
+    final updated = routine.copyWith(
       steps: [
         for (final step in routine.steps)
           if (step.id == stepId) step.copyWith(description: description) else step,
       ],
     );
+    AppLogger.repositorySuccess('RoutineRepository', 'updateStep (로컬)', '로컬에서 카드 내용 수정됨');
+    return updated;
   }
 
   // --- 로컬 대체 구현 ---

@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/onboarding/application/onboarding_notifier.dart';
 import '../config/app_config.dart';
+import '../logger/app_logger.dart';
 import 'auth_interceptor.dart';
 
 /// Dio 인스턴스 생성. 설정값은 전부 [AppConfig]에서 온다 — 하드코딩하지 않는다.
@@ -52,29 +52,45 @@ final dioProvider = Provider<Dio>((ref) {
   return dio;
 });
 
-/// 로깅 인터셉터.
-///
-/// ⚠️ **요청 본문(보호자 입력 원문)은 절대 찍지 않는다.** (docs 원칙 5번)
-/// 원문은 감사 로그에도 남기지 않는 것이 서비스 원칙이므로, 개발 로그도 예외가 아니다.
-/// 경로·상태코드·소요시간만 남긴다.
+/// 로깅 인터셉터. 모든 API 요청/응답을 자동으로 로깅한다.
 class _SafeLogInterceptor extends Interceptor {
+  late final Stopwatch _timer;
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    debugPrint('[api] → ${options.method} ${options.path}');
+    _timer = Stopwatch()..start();
+    AppLogger.networkRequest(
+      method: options.method,
+      endpoint: options.path,
+      params: options.data is Map ? options.data : null,
+      headers: options.headers.cast<String, String>(),
+    );
     handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    debugPrint('[api] ← ${response.statusCode} ${response.requestOptions.path}');
+    _timer.stop();
+    AppLogger.networkSuccess(
+      method: response.requestOptions.method,
+      endpoint: response.requestOptions.path,
+      statusCode: response.statusCode ?? 0,
+      duration: _timer.elapsed,
+      responseData: response.data,
+    );
     handler.next(response);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    debugPrint(
-      '[api] ✗ ${err.response?.statusCode ?? err.type.name} '
-      '${err.requestOptions.path}',
+    _timer.stop();
+    AppLogger.networkError(
+      method: err.requestOptions.method,
+      endpoint: err.requestOptions.path,
+      statusCode: err.response?.statusCode ?? 0,
+      duration: _timer.elapsed,
+      errorData: err.response?.data,
+      errorMessage: err.message,
     );
     handler.next(err);
   }
