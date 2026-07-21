@@ -136,12 +136,17 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
     // 만들어진 카드가 없으면 확인할 것이 없다. 홈으로 돌려보낸다.
     if (cards.isEmpty) {
-      return const RoutineFlowScaffold(child: _EmptyCards());
+      return const RoutineFlowScaffold(
+        showAurora: false,
+        child: _EmptyCards(),
+      );
     }
 
     return RoutineFlowScaffold(
       onBack: () => context.pop(),
       bottomButton: ElumButton(label: '저장하기', onPressed: _save),
+      // Figma 262:5124의 배경은 단색 #F7F2EF뿐이다 — 글로우가 없다 (이슈 #79)
+      showAurora: false,
       child: Column(
         children: [
           SizedBox(height: space.md),

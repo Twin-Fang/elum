@@ -23,6 +23,7 @@ class RoutineFlowScaffold extends StatelessWidget {
     required this.child,
     this.onBack,
     this.bottomButton,
+    this.showAurora = true,
   });
 
   final Widget child;
@@ -32,6 +33,13 @@ class RoutineFlowScaffold extends StatelessWidget {
 
   /// 하단 고정 CTA. 입력·로딩 화면에는 없다.
   final Widget? bottomButton;
+
+  /// 배경 글로우를 그릴지. **Figma에 Gradient가 없는 화면은 false로 끈다.**
+  ///
+  /// 글로우는 입력 화면(238:1643의 Gradient 238:1728)을 재현한 것이라
+  /// 모든 화면에 있는 배경이 아니다. 카드확인(262:5124)은 단색 배경뿐이다.
+  /// 기본값을 true로 둬 이미 맞는 화면들이 영향받지 않게 한다.
+  final bool showAurora;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +51,7 @@ class RoutineFlowScaffold extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          const Positioned.fill(child: AuroraBackground()),
+          if (showAurora) const Positioned.fill(child: AuroraBackground()),
           SafeArea(
             child: Column(
               children: [

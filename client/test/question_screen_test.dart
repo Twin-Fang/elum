@@ -3,6 +3,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
+import 'package:elum/features/guardian/presentation/widgets/aurora_background.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -92,6 +93,14 @@ void main() {
   }
 
   group('추가질문 화면', () {
+    testWidgets('배경 글로우는 그대로 있다 (이슈 #79 회귀 방지)', (tester) async {
+      // 카드확인 화면만 글로우를 껐다. 공통 스캐폴드를 고쳤으므로
+      // 나머지 화면이 함께 꺼지지 않았는지 여기서 잡는다.
+      await pumpWith(tester, twoQuestions);
+
+      expect(find.byType(AuroraBackground), findsOneWidget);
+    });
+
     testWidgets('질문 여러 개를 모두 보여준다', (tester) async {
       // 서버가 도움 목표마다 하나씩 준다. Figma는 하나만 그렸지만 2개 이상 온다.
       await pumpWith(tester, twoQuestions);

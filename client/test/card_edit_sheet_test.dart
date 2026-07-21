@@ -6,6 +6,7 @@ import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
+import 'package:elum/features/guardian/presentation/widgets/aurora_background.dart';
 import 'package:elum/features/guardian/presentation/widgets/card_edit_sheet.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
@@ -187,6 +188,23 @@ void main() {
       expect(svgWithAsset(AppAssets.iconCardDelete), findsWidgets);
       // 이전 시안의 이미지 위 버튼은 사라졌다
       expect(find.text('완료'), findsNothing);
+    });
+
+    testWidgets('배경에 블러 글로우가 없다 (이슈 #79)', (tester) async {
+      // Figma 262:5124의 프레임 배경은 단색 #F7F2EF 하나뿐이다.
+      // 글로우는 입력 화면 시안(238:1728)의 것으로, 공통 스캐폴드를 타고
+      // 여기까지 새어 나왔었다.
+      await pumpReview(tester, _FakeRepo(synced: true));
+
+      expect(find.byType(AuroraBackground), findsNothing);
+    });
+
+    testWidgets('카드가 없어도 글로우가 없다 (이슈 #79)', (tester) async {
+      // 빈 상태도 같은 시안을 따른다 — 여기만 배경이 달라지면 눈에 띈다
+      await tester.pumpWidget(wrap(_FakeRepo(synced: true)));
+      await tester.pump();
+
+      expect(find.byType(AuroraBackground), findsNothing);
     });
 
     testWidgets('칩을 누르면 수정 시트가 뜨고 저장하면 카드가 바뀐다', (tester) async {
