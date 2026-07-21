@@ -1,15 +1,52 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T08:24:54Z",
-    "currentVersion": "1.0.38",
+    "lastUpdated": "2026-07-21T08:27:09Z",
+    "currentVersion": "1.0.39",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 11
+    "totalReleases": 12
   },
   "releases": [
+    {
+      "version": "1.0.39",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 27,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 새로운 일과 만들기 화면이 새 디자인으로 바뀌었습니다\n  * 배경 색이 천천히 흐르는 효과가 적용되었습니다\n  * 자주 쓰는 준비 상황을 눌러 바로 시작할 수 있습니다\n  * 내용을 입력하면 전송 버튼이 나타납니다\n\n* **개선**\n  * 버튼과 카드를 누를 때 자연스럽게 반응합니다\n  * 앱 전체의 화면 전환 속도와 느낌을 통일했습니다\n  * 기기에서 화면 움직임 줄이기를 켜면 배경 애니메이션이 멈춥니다\n\n* **버그 수정**\n  * 아이가 고르는 친구 이름을 루루와 포포로 정리했습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "새로운 일과 만들기 화면이 새 디자인으로 바뀌었습니다",
+            "배경 색이 천천히 흐르는 효과가 적용되었습니다",
+            "자주 쓰는 준비 상황을 눌러 바로 시작할 수 있습니다",
+            "내용을 입력하면 전송 버튼이 나타납니다"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "버튼과 카드를 누를 때 자연스럽게 반응합니다",
+            "앱 전체의 화면 전환 속도와 느낌을 통일했습니다",
+            "기기에서 화면 움직임 줄이기를 켜면 배경 애니메이션이 멈춥니다"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "아이가 고르는 친구 이름을 루루와 포포로 정리했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.38",
       "project_type": "flutter",
