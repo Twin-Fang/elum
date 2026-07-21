@@ -93,6 +93,12 @@ abstract final class AppAssets {
         CardCharacter.fox => '$_images/character_badge_framed_popo.svg',
       };
 
+  /// 보호자 홈 "새로운 일과 만들기" 카드 아이콘 (47×51). Figma 217:2675.
+  ///
+  /// 보호자가 고른 캐릭터(고양이/여우)와 무관하게 **AI 마스코트 "루미" 병아리로 고정**이다.
+  /// (이슈 #110 — 기존엔 [characterBadgeFramed]를 잘못 재사용하고 있었다)
+  static const homeNewRoutineChick = '$_images/home_new_routine_chick.svg';
+
   /// 완료 체크 (10×10). Figma `fi-br-check`.
   /// 로딩 화면의 단계별 완료 표시에 쓴다.
   static const iconCheck = '$_images/icon_check.svg';

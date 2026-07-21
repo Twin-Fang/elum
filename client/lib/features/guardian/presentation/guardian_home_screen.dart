@@ -79,7 +79,6 @@ class GuardianHomeScreen extends ConsumerWidget {
                 padding: EdgeInsets.symmetric(horizontal: space.screenH),
                 child: _NewRoutineCard(
                   childName: childName,
-                  character: character,
                   onTap: () => _startRoutine(context, ref),
                 ),
               ),
@@ -165,12 +164,10 @@ class _Header extends StatelessWidget {
 class _NewRoutineCard extends StatelessWidget {
   const _NewRoutineCard({
     required this.childName,
-    required this.character,
     required this.onTap,
   });
 
   final String childName;
-  final CardCharacter character;
   final VoidCallback onTap;
 
   @override
@@ -206,11 +203,24 @@ class _NewRoutineCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            SvgPicture.asset(
-              AppAssets.characterBadgeFramed(character),
-              // 정사각형 일러스트 — 가로세로 모두 .w
+            // Figma 217:2668+217:2675 — 보호자가 고른 캐릭터(고양이/여우)와
+            // 무관하게 AI 마스코트 "루미" 병아리로 고정된다. (이슈 #110)
+            SizedBox(
               width: 56.w,
               height: 56.w,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.homeCardIconBg,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    AppAssets.homeNewRoutineChick,
+                    width: 47.w,
+                    height: 51.w,
+                  ),
+                ),
+              ),
             ),
             SizedBox(width: space.md),
             Expanded(

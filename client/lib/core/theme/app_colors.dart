@@ -71,6 +71,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.homeCardGradientEnd,
     required this.homeCardTitle,
     required this.homeCardShadow,
+    required this.homeCardIconBg,
     required this.glassSurface,
     required this.glassChip,
     required this.promptMuted,
@@ -181,6 +182,8 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color homeCardTitle;
   /// 같은 카드의 그림자 (Figma 0px 4px 10px rgba(35,13,96,0.1))
   final Color homeCardShadow;
+  /// 같은 카드의 아이콘 원형 배경 (Figma 217:2668, rgba(130,220,223,0.4))
+  final Color homeCardIconBg;
 
   // 일과 만들기 흐름 (Figma 238:1643) — 움직이는 배경 위의 유리 표면.
   // 반투명이라 뒤 색이 비쳐야 하므로 alpha를 담은 값이다.
@@ -296,6 +299,7 @@ class AppColors extends ThemeExtension<AppColors> {
     homeCardGradientEnd: Color(0xFFE9EEFF),
     homeCardTitle: Color(0xFF9CADF1),
     homeCardShadow: Color(0x1A230D60), // rgba(35,13,96,0.1)
+    homeCardIconBg: Color(0x6682DCDF), // rgba(130,220,223,0.4)
     glassSurface: Color(0x99FFFFFF), // rgba(255,255,255,0.6)
     glassChip: Color(0x80FFFFFF), // rgba(255,255,255,0.5)
     promptMuted: Color(0x66242634), // rgba(36,38,52,0.4)
@@ -375,6 +379,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? homeCardGradientEnd,
     Color? homeCardTitle,
     Color? homeCardShadow,
+    Color? homeCardIconBg,
     Color? glassSurface,
     Color? glassChip,
     Color? promptMuted,
@@ -444,6 +449,7 @@ class AppColors extends ThemeExtension<AppColors> {
       homeCardGradientEnd: homeCardGradientEnd ?? this.homeCardGradientEnd,
       homeCardTitle: homeCardTitle ?? this.homeCardTitle,
       homeCardShadow: homeCardShadow ?? this.homeCardShadow,
+      homeCardIconBg: homeCardIconBg ?? this.homeCardIconBg,
       glassSurface: glassSurface ?? this.glassSurface,
       glassChip: glassChip ?? this.glassChip,
       promptMuted: promptMuted ?? this.promptMuted,
@@ -526,6 +532,7 @@ class AppColors extends ThemeExtension<AppColors> {
           Color.lerp(homeCardGradientEnd, other.homeCardGradientEnd, t)!,
       homeCardTitle: Color.lerp(homeCardTitle, other.homeCardTitle, t)!,
       homeCardShadow: Color.lerp(homeCardShadow, other.homeCardShadow, t)!,
+      homeCardIconBg: Color.lerp(homeCardIconBg, other.homeCardIconBg, t)!,
       glassSurface: Color.lerp(glassSurface, other.glassSurface, t)!,
       glassChip: Color.lerp(glassChip, other.glassChip, t)!,
       promptMuted: Color.lerp(promptMuted, other.promptMuted, t)!,
