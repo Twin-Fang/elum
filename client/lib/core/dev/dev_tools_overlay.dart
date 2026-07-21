@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/data/auth_repository.dart';
+import '../../features/guardian/application/routine_notifier.dart';
+import '../../features/guardian/data/routine_repository.dart';
 import '../../features/onboarding/application/onboarding_notifier.dart';
 import '../config/app_config.dart';
 import '../router/app_router.dart';
@@ -343,7 +345,11 @@ class _ConfirmResetView extends ConsumerWidget {
                   onPressed: () async {
                     // 서버 계정까지 지운다. 서버가 실패해도 로컬은 반드시 지워진다.
                     await ref.read(authRepositoryProvider).deleteAccount();
-                    // 메모리 상태도 비운다 — 저장소만 지우면 화면이 이전 값을 들고 있다
+                    // 메모리 상태도 비운다 — 저장소만 지우면 화면이 이전 값을 들고 있다.
+                    // routineFlow(방금 만든 일과)·myRoutines(서버 조회 캐시)를 함께 비우지
+                    // 않으면 재가입 후 홈에 이전 계정 일과가 그대로 노출된다 (이슈 #91).
+                    ref.read(routineFlowProvider.notifier).reset();
+                    ref.invalidate(myRoutinesProvider);
                     ref.invalidate(onboardingProvider);
                     if (!context.mounted) return;
                     onDone();
