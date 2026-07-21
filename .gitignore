@@ -1,5 +1,8 @@
 # IDE Settings
 /.idea
 
+# Issue Mode
+/.issue
+
 # Claude AI Settings
 /.claude/settings.local.json
