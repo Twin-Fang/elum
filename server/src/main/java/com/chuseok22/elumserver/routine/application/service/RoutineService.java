@@ -1,7 +1,6 @@
 package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
-import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -10,7 +9,6 @@ import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineReviseRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
@@ -28,13 +26,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -110,42 +107,6 @@ public class RoutineService {
     routine.setSteps(toStepEntities(routine, generation.steps()));
 
     return RoutineResponse.from(routineRepository.save(routine));
-  }
-
-  @Transactional
-  public RoutineResponse revise(String memberId, String routineId, RoutineReviseRequest request) {
-    routineRequestCooldownGuard.guard(memberId);
-
-    Routine routine = getOwnedRoutine(memberId, routineId);
-    Member member = routine.getMember();
-
-    SensitiveInfoCheckResult checkResult = sensitiveInfoGuardService.check(request.feedback());
-    List<RoutineStepDraft.StepDraft> previousSteps = maskPreviousSteps(routine.getSteps());
-    // imagePath가 null인 단계(이미지 생성 실패로 이미지 없이 저장된 단계)는 재사용 맵에서 뺀다.
-    // Collectors.toMap은 value가 null이면 NPE를 던지고, null 경로는 재사용할 이미지도 없으므로
-    // 재생성 대상으로 넘기는 것이 맞다.
-    Map<Integer, String> previousImagePathsByOrder = routine.getSteps().stream()
-      .filter(step -> step.getImagePath() != null)
-      .collect(Collectors.toMap(RoutineStep::getStepOrder, RoutineStep::getImagePath));
-    RoutineAiPipeline.RoutineGenerationResult generation = routineAiPipeline.generateForRevise(
-      routine.getTitle(), previousSteps, previousImagePathsByOrder, checkResult.sanitizedText(),
-      member.getNickname(), member.getSupportGoals(), member.getCharacter()
-    );
-
-    // orphanRemoval이 정상 동작하려면 컬렉션 참조를 새로 바꾸지 않고(setSteps) 기존
-    // 영속 컬렉션을 clear() 후 addAll()로 채워야 한다.
-    routine.getSteps().clear();
-    routine.getSteps().addAll(toStepEntities(routine, generation.steps()));
-    routine.setTitle(generation.title());
-    routine.setRevisionFeedback(request.feedback());
-    routine.setStatus(RoutineStatus.PENDING_REVIEW);
-    routine.setCompletedAt(null);
-
-    // routine은 이미 영속 상태라 save()는 불필요하지만, flush 없이는 cascade=ALL로
-    // 추가된 신규 RoutineStep들의 UUID가 커밋 전까지 채워지지 않아 응답에 id:null이
-    // 노출된다(수동 검증 중 발견).
-    routineRepository.flush();
-    return RoutineResponse.from(routine);
   }
 
   @Transactional
@@ -233,19 +194,57 @@ public class RoutineService {
   }
 
   @Transactional
-  public RoutineResponse updateStepDescription(
+  public RoutineResponse updateStep(
     String memberId, String routineId, String stepId, RoutineStepUpdateRequest request
   ) {
     Routine routine = getOwnedRoutine(memberId, routineId);
+    if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
+      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
+    }
 
     RoutineStep targetStep = routine.getSteps().stream()
       .filter(step -> step.getId().equals(stepId))
       .findFirst()
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
 
+    targetStep.setTitle(request.title());
     targetStep.setDescription(request.description());
 
     return RoutineResponse.from(routine);
+  }
+
+  @Transactional
+  public RoutineResponse deleteStep(String memberId, String routineId, String stepId) {
+    Routine routine = getOwnedRoutine(memberId, routineId);
+    if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
+      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
+    }
+
+    List<RoutineStep> steps = routine.getSteps();
+    if (steps.size() <= 1) {
+      throw new CustomException(ErrorCode.ROUTINE_STEP_MIN_COUNT);
+    }
+
+    RoutineStep targetStep = steps.stream()
+      .filter(step -> step.getId().equals(stepId))
+      .findFirst()
+      .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
+
+    steps.remove(targetStep);
+    renumberSteps(steps);
+
+    return RoutineResponse.from(routine);
+  }
+
+  // 삭제 후 남은 단계들의 stepOrder를 1..N으로 다시 채운다. PENDING_REVIEW 단계는 완료 이력이
+  // 전혀 없어 재채번이 완료/취소 순서 검증 로직과 충돌하지 않는다.
+  private void renumberSteps(List<RoutineStep> steps) {
+    List<RoutineStep> ordered = steps.stream()
+      .sorted(Comparator.comparingInt(RoutineStep::getStepOrder))
+      .toList();
+    for (int i = 0; i < ordered.size(); i++) {
+      ordered.get(i).setStepOrder(i + 1);
+    }
   }
 
   public RoutineResponse getRoutine(String memberId, String routineId) {
@@ -323,8 +322,8 @@ public class RoutineService {
   // 있다(마스킹 전 하나로 합쳐버리면 Gemini 쪽에서 배열 구조를 잃는다, fable5 검토에서
   // 발견 — 이전에는 answers를 comma로 합친 뒤 한 번에 마스킹해 문자열 하나로 전달했다).
   // 로컬 LLM 호출을 답변 개수만큼 순차로 하면 fail-open 타임아웃이 그대로 누적되므로,
-  // maskPreviousSteps()와 동일하게 가상 스레드로 병렬 호출해 지연을 1회 타임아웃 수준으로
-  // 묶는다(fable5 검토에서 발견).
+  // RoutineAiPipeline의 이미지 생성 병렬화와 동일하게 가상 스레드로 병렬 호출해 지연을 1회
+  // 타임아웃 수준으로 묶는다(fable5 검토에서 발견).
   private List<String> maskAnswers(List<String> answers) {
     if (answers == null || answers.isEmpty()) {
       return List.of();
@@ -334,31 +333,6 @@ public class RoutineService {
       List<CompletableFuture<String>> futures = answers.stream()
         .map(answer -> CompletableFuture.supplyAsync(
           () -> sensitiveInfoGuardService.check(answer).sanitizedText(), executor
-        ))
-        .toList();
-      return futures.stream().map(CompletableFuture::join).toList();
-    } finally {
-      executor.shutdown();
-    }
-  }
-
-  // description은 이제 보호자가 PATCH .../steps/{stepId}로 직접 입력한 원문일 수 있으므로
-  // feedback과 동일하게 마스킹 게이트를 거친 뒤에야 Gemini로 보낸다(fable5 검토에서 발견 —
-  // 이전에는 항상 AI가 생성한 텍스트라 마스킹이 없었다). 단계마다 순차 호출하면 로컬 LLM이
-  // 느리거나 응답이 없을 때(fail-open 타임아웃) 단계 수만큼 지연이 누적되므로,
-  // RoutineAiPipeline의 이미지 생성과 동일하게 가상 스레드로 병렬 호출해 지연을 1회
-  // 타임아웃 수준으로 묶는다(수동 검증 중 발견).
-  private List<RoutineStepDraft.StepDraft> maskPreviousSteps(List<RoutineStep> steps) {
-    ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
-    try {
-      List<CompletableFuture<RoutineStepDraft.StepDraft>> futures = steps.stream()
-        .map(step -> CompletableFuture.supplyAsync(
-          // title은 항상 AI가 생성한 값(RoutineStepUpdateRequest는 description만 수정 가능)이라
-          // description과 달리 보호자 원문이 섞일 수 없으므로 마스킹 없이 그대로 전달한다.
-          () -> new RoutineStepDraft.StepDraft(
-            step.getStepOrder(), step.getTitle(), sensitiveInfoGuardService.check(step.getDescription()).sanitizedText()
-          ),
-          executor
         ))
         .toList();
       return futures.stream().map(CompletableFuture::join).toList();

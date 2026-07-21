@@ -54,8 +54,6 @@ public class AdminPromptService {
         "[System]\n" + content + "\n\n[User]\n" + sensitiveInfoGuardService.buildUserContent(sampleInput);
       case GEMINI_ROUTINE_CREATE_PREFIX -> "[System]\n" + content + "\n\n[User]\n"
         + geminiTextClient.buildCreateRoutineUserContent(sampleInput, null, Set.of(), List.of());
-      case GEMINI_ROUTINE_REVISE_PREFIX -> "[System]\n" + content + "\n\n[User]\n"
-        + geminiTextClient.buildReviseRoutineUserContent("", List.of(), sampleInput, null, Set.of());
       case GEMINI_ROUTINE_QUESTION_PREFIX -> "[System]\n" + content + "\n\n[User]\n"
         + geminiTextClient.buildQuestionUserContent(sampleInput, null, Set.of());
       case GEMINI_ROUTINE_IMAGE_PREFIX -> imagePromptBuilder.build(content, sampleInput, character);
@@ -70,10 +68,6 @@ public class AdminPromptService {
       }
       case GEMINI_ROUTINE_CREATE_PREFIX -> {
         RoutineStepDraft draft = testGeminiText(content, sampleInput);
-        yield new PromptTestResponse(draft, null);
-      }
-      case GEMINI_ROUTINE_REVISE_PREFIX -> {
-        RoutineStepDraft draft = testGeminiRevise(content, sampleInput);
         yield new PromptTestResponse(draft, null);
       }
       case GEMINI_ROUTINE_QUESTION_PREFIX -> {
@@ -94,17 +88,6 @@ public class AdminPromptService {
       return objectMapper.readValue(json, RoutineStepDraft.class);
     } catch (Exception e) {
       log.warn("[관리자 테스트] Gemini 텍스트 생성 실패: systemPrompt={}, sampleInput={}", systemPrompt, sampleInput, e);
-      throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED);
-    }
-  }
-
-  private RoutineStepDraft testGeminiRevise(String systemPrompt, String sampleFeedback) {
-    try {
-      GeminiGenerateContentResponse response = geminiTextClient.reviseForTest(systemPrompt, sampleFeedback);
-      String json = response.candidates().get(0).content().parts().get(0).text();
-      return objectMapper.readValue(json, RoutineStepDraft.class);
-    } catch (Exception e) {
-      log.warn("[관리자 테스트] Gemini 루틴 수정 테스트 실패: systemPrompt={}, sampleInput={}", systemPrompt, sampleFeedback, e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED);
     }
   }

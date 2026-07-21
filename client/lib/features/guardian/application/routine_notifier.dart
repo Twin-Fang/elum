@@ -152,9 +152,10 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
               orElse: () => const QuestionItem(question: '', options: []),
             )
             .options ??
-        const <String>[];
+        const <QuestionOption>[];
     final custom = state.customOptions[question] ?? const <String>[];
-    final isDuplicate = existing.contains(value) || custom.contains(value);
+    final isDuplicate =
+        existing.any((option) => option.label == value) || custom.contains(value);
 
     final nextCustom = Map<String, List<String>>.from(state.customOptions);
     if (!isDuplicate) {

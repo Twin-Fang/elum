@@ -44,7 +44,9 @@ class AdminPromptServiceTest {
     when(geminiTextClient.buildCreateRoutineUserContent("일과 원문", null, java.util.Set.of(), java.util.List.of()))
       .thenReturn("{\"task\":\"CREATE_ROUTINE\"}");
 
-    String result = adminPromptService.preview(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "시스템 프롬프트", "일과 원문", null);
+    String result = adminPromptService.preview(
+      PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "시스템 프롬프트", "일과 원문", null
+    );
 
     assertThat(result).contains("[System]\n시스템 프롬프트");
     assertThat(result).contains("{\"task\":\"CREATE_ROUTINE\"}");

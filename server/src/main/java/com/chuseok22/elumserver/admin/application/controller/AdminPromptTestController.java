@@ -23,7 +23,9 @@ public class AdminPromptTestController {
 
   @PostMapping("/admin/prompts/{key}/preview")
   public PromptPreviewResponse preview(@PathVariable PromptKey key, @RequestBody PromptSampleRequest request) {
-    String composed = adminPromptService.preview(key, request.content(), request.sampleInput(), request.character());
+    String composed = adminPromptService.preview(
+      key, request.content(), request.sampleInput(), request.character()
+    );
     return new PromptPreviewResponse(composed);
   }
 

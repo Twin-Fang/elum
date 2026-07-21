@@ -3,7 +3,6 @@ package com.chuseok22.elumserver.routine.application.controller;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineReviseRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
@@ -22,7 +21,7 @@ import org.springframework.security.core.Authentication;
 
 @Tag(
   name = "Routine",
-  description = "부모 자연어 입력 기반 일과(Routine) 생성/검토/승인/단계 완료/단계 수정/AI 추가 질문 API. 모든 엔드포인트는 accessToken(Bearer) 인증이 필요합니다."
+  description = "부모 자연어 입력 기반 일과(Routine) 생성/검토/승인/단계 완료/단계 수정/단계 삭제/AI 추가 질문 API. 모든 엔드포인트는 accessToken(Bearer) 인증이 필요합니다."
 )
 public interface RoutineControllerDocs {
 
@@ -206,40 +205,6 @@ public interface RoutineControllerDocs {
   ResponseEntity<byte[]> getStepImage(Authentication authentication, String routineId, String stepId);
 
   @Operation(
-    summary = "일과 재생성(피드백)",
-    description = """
-      부모의 자연어 피드백을 받아 기존 단계+피드백을 컨텍스트로 AI 파이프라인을 다시 실행합니다.
-      기존 단계는 전부 교체되며, CONFIRMED 상태였더라도 다시 PENDING_REVIEW로 전환됩니다.
-      """
-  )
-  @SecurityRequirement(name = "bearerAuth")
-  @ApiResponses({
-    @ApiResponse(
-      responseCode = "200",
-      description = "재생성 성공",
-      content = @Content(schema = @Schema(implementation = RoutineResponse.class))
-    ),
-    @ApiResponse(
-      responseCode = "403",
-      description = "본인 소유가 아닌 일과에 접근",
-      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-    ),
-    @ApiResponse(
-      responseCode = "404",
-      description = "존재하지 않는 일과",
-      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-    ),
-    @ApiResponse(
-      responseCode = "502",
-      description = "Gemini 생성 실패 또는 10단계 초과",
-      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-    )
-  })
-  ResponseEntity<RoutineResponse> revise(
-    Authentication authentication, String routineId, RoutineReviseRequest request
-  );
-
-  @Operation(
     summary = "일과 승인",
     description = "PENDING_REVIEW 상태의 일과를 CONFIRMED로 확정합니다. PENDING_REVIEW가 아닌 상태(이미 CONFIRMED이거나 COMPLETED)면 409를 반환합니다."
   )
@@ -368,10 +333,10 @@ public interface RoutineControllerDocs {
   );
 
   @Operation(
-    summary = "일과 단계 설명 수정",
+    summary = "일과 단계 수정",
     description = """
-      보호자가 AI가 생성한 단계 설명 문구를 직접 수정합니다. AI를 다시 호출하지 않고 입력한 텍스트를 그대로 저장합니다.
-      PENDING_REVIEW/CONFIRMED/COMPLETED 등 일과 상태와 무관하게 항상 수정할 수 있으며, 완료(completed) 여부는 변경되지 않습니다.
+      보호자가 AI가 생성한 단계의 title과 description을 직접 수정합니다. AI를 다시 호출하지 않고 입력한 텍스트를 그대로 저장합니다.
+      PENDING_REVIEW 상태의 일과에서만 수정할 수 있습니다. 승인(CONFIRMED) 이후에는 409를 반환합니다.
       """
   )
   @SecurityRequirement(name = "bearerAuth")
@@ -380,16 +345,6 @@ public interface RoutineControllerDocs {
       responseCode = "200",
       description = "수정 성공",
       content = @Content(schema = @Schema(implementation = RoutineResponse.class))
-    ),
-    @ApiResponse(
-      responseCode = "400",
-      description = "description 누락",
-      content = @Content(
-        schema = @Schema(implementation = ErrorResponse.class),
-        examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"description: description은 필수입니다.\"}"
-        )
-      )
     ),
     @ApiResponse(
       responseCode = "403",
@@ -405,9 +360,61 @@ public interface RoutineControllerDocs {
           value = "{\"errorCode\":\"ROUTINE_STEP_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 단계입니다.\"}"
         )
       )
+    ),
+    @ApiResponse(
+      responseCode = "409",
+      description = "PENDING_REVIEW 상태가 아님",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"ROUTINE_INVALID_STATUS\",\"errorMessage\":\"현재 상태에서는 처리할 수 없습니다.\"}"
+        )
+      )
     )
   })
-  ResponseEntity<RoutineResponse> updateStepDescription(
+  ResponseEntity<RoutineResponse> updateStep(
     Authentication authentication, String routineId, String stepId, RoutineStepUpdateRequest request
   );
+
+  @Operation(
+    summary = "일과 단계 삭제",
+    description = """
+      PENDING_REVIEW 상태 일과에서 카드 한 장을 삭제합니다. 삭제 후 남은 카드들의 순서(stepOrder)는 1부터 다시 채번됩니다.
+      카드가 1장만 남은 경우 삭제할 수 없습니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "삭제 성공",
+      content = @Content(schema = @Schema(implementation = RoutineResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "본인 소유가 아닌 일과에 접근",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "존재하지 않는 일과 또는 단계",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"ROUTINE_STEP_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 단계입니다.\"}"
+        )
+      )
+    ),
+    @ApiResponse(
+      responseCode = "409",
+      description = "PENDING_REVIEW 상태가 아니거나, 마지막 남은 한 장을 삭제하려는 경우",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"ROUTINE_STEP_MIN_COUNT\",\"errorMessage\":\"마지막 남은 단계는 삭제할 수 없습니다.\"}"
+        )
+      )
+    )
+  })
+  ResponseEntity<RoutineResponse> deleteStep(Authentication authentication, String routineId, String stepId);
 }

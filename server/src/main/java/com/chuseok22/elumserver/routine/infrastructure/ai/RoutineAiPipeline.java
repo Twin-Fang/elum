@@ -51,32 +51,6 @@ public class RoutineAiPipeline {
     return buildResult(draft, characterType, Map.of());
   }
 
-  public RoutineGenerationResult generateForRevise(
-    String previousTitle, List<RoutineStepDraft.StepDraft> previousSteps,
-    Map<Integer, String> previousImagePathsByOrder, String maskedFeedback,
-    String nickname, Set<SupportGoal> supportGoals, CharacterType characterType
-  ) {
-    RoutineStepDraft draft = parseDraft(() ->
-      geminiTextClient.revise(previousTitle, previousSteps, maskedFeedback, nickname, supportGoals)
-    );
-    return buildResult(draft, characterType, reusableImagePaths(previousSteps, previousImagePathsByOrder, draft));
-  }
-
-  // 새 단계 설명이 기존 단계(같은 order)와 완전히 같으면 이미지를 다시 생성하지 않고
-  // 기존 경로를 그대로 쓴다 — Gemini 호출과 이미지 생성 비용을 줄이고, 보호자가 요청하지
-  // 않은 단계의 그림이 재생성 때마다 미묘하게 달라지는 것도 막는다.
-  private Map<Integer, String> reusableImagePaths(
-    List<RoutineStepDraft.StepDraft> previousSteps, Map<Integer, String> previousImagePathsByOrder,
-    RoutineStepDraft newDraft
-  ) {
-    Map<Integer, String> previousDescriptionByOrder = previousSteps.stream()
-      .collect(Collectors.toMap(RoutineStepDraft.StepDraft::order, RoutineStepDraft.StepDraft::description));
-    return newDraft.steps().stream()
-      .filter(step -> step.description().equals(previousDescriptionByOrder.get(step.order()))
-        && previousImagePathsByOrder.containsKey(step.order()))
-      .collect(Collectors.toMap(RoutineStepDraft.StepDraft::order, step -> previousImagePathsByOrder.get(step.order())));
-  }
-
   private static final int MIN_OPTIONS = 3;
 
   // 도움 목표 기반 추가 질문 생성. 선택된 각 SupportGoal(PREPARE_ITEMS, PREPARE_NEW)마다

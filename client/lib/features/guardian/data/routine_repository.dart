@@ -306,7 +306,13 @@ class RoutineRepositoryImpl implements RoutineRepository {
         questions: [
           QuestionItem(
             question: '꼭 챙겨야 하는 준비물이 있나요?',
-            options: ['☂️ 우산', '🧥 우비', '👢 장화', '🧦 여벌 양말', '🧺 작은 수건'],
+            options: [
+              QuestionOption(emoji: '☂️', label: '우산'),
+              QuestionOption(emoji: '🧥', label: '우비'),
+              QuestionOption(emoji: '👢', label: '장화'),
+              QuestionOption(emoji: '🧦', label: '여벌 양말'),
+              QuestionOption(emoji: '🧺', label: '작은 수건'),
+            ],
           ),
         ],
       );

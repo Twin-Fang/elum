@@ -8,10 +8,9 @@ import org.junit.jupiter.api.Test;
 class PromptDefaultsTest {
 
   @Test
-  @DisplayName("4개 Gemini 프롬프트 키 모두 기본값이 존재하고 비어있지 않다")
+  @DisplayName("3개 Gemini 프롬프트 키 모두 기본값이 존재하고 비어있지 않다")
   void defaults_geminiKeys_allPresentAndNotBlank() {
     assertThat(PromptDefaults.DEFAULTS.get(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX)).isNotBlank();
-    assertThat(PromptDefaults.DEFAULTS.get(PromptKey.GEMINI_ROUTINE_REVISE_PREFIX)).isNotBlank();
     assertThat(PromptDefaults.DEFAULTS.get(PromptKey.GEMINI_ROUTINE_QUESTION_PREFIX)).isNotBlank();
     assertThat(PromptDefaults.DEFAULTS.get(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX)).isNotBlank();
   }
@@ -22,14 +21,6 @@ class PromptDefaultsTest {
     String content = PromptDefaults.DEFAULTS.get(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
 
     assertThat(content).contains("routineText").contains("additionalAnswers").contains("supportGoals");
-  }
-
-  @Test
-  @DisplayName("루틴 수정 프롬프트는 최소 변경 원칙과 previousRoutine 필드를 명시한다")
-  void revisePrompt_mentionsMinimalChangePolicy() {
-    String content = PromptDefaults.DEFAULTS.get(PromptKey.GEMINI_ROUTINE_REVISE_PREFIX);
-
-    assertThat(content).contains("previousRoutine").contains("최소 변경");
   }
 
   @Test

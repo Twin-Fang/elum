@@ -28,11 +28,18 @@ void main() {
     questions: [
       QuestionItem(
         question: '꼭 챙겨야 하는 준비물이 있나요?',
-        options: ['우산', '우비', '장화'],
+        options: [
+          QuestionOption(label: '우산'),
+          QuestionOption(label: '우비'),
+          QuestionOption(label: '장화'),
+        ],
       ),
       QuestionItem(
         question: '평소와 다르게 준비해야 하는 점이 있나요?',
-        options: ['시간 변경', '장소 변경'],
+        options: [
+          QuestionOption(label: '시간 변경'),
+          QuestionOption(label: '장소 변경'),
+        ],
       ),
     ],
   );
@@ -289,7 +296,32 @@ void main() {
 
   group('RoutineQuestion 파싱 (서버 계약)', () {
     test('서버 응답 형태를 그대로 파싱한다', () {
-      // 실측 응답: {"required":true,"questions":[{question, options}]}
+      // 실측 응답: {"required":true,"questions":[{question, options:[{emoji,label}]}]}
+      final parsed = RoutineQuestion.fromJson(const {
+        'required': true,
+        'questions': [
+          {
+            'question': '꼭 챙겨야 하는 준비물이 있나요?',
+            'options': [
+              {'emoji': '☂️', 'label': '우산'},
+              {'emoji': '🧥', 'label': '우비'},
+            ],
+          },
+        ],
+      });
+
+      expect(parsed.isRequired, isTrue);
+      expect(parsed.questions.length, 1);
+      final options = parsed.questions.first.options;
+      expect(options.map((o) => o.label), ['우산', '우비']);
+      expect(options.map((o) => o.displayLabel), ['☂️ 우산', '🧥 우비']);
+      expect(parsed.canAsk, isTrue);
+    });
+
+    test('emoji/label 대신 문자열이 오면 깨지지 않고 빈 옵션으로 처리한다', () {
+      // 과거 버그 재발 방지: options가 객체가 아니라 문자열 배열로 오면
+      // whereType<Map>이 걸러내 빈 리스트가 되어야 한다 — Map.toString()이
+      // 화면에 그대로 노출되던 문제(예: "{emoji: 🏫, label: ...}")를 막는다.
       final parsed = RoutineQuestion.fromJson(const {
         'required': true,
         'questions': [
@@ -300,10 +332,7 @@ void main() {
         ],
       });
 
-      expect(parsed.isRequired, isTrue);
-      expect(parsed.questions.length, 1);
-      expect(parsed.questions.first.options, ['우산', '우비']);
-      expect(parsed.canAsk, isTrue);
+      expect(parsed.questions.first.options, isEmpty);
     });
 
     test('질문이 비면 물어볼 수 없다', () {

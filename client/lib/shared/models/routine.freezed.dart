@@ -591,7 +591,7 @@ as List<QuestionItem>,
 /// @nodoc
 mixin _$QuestionItem {
 
- String get question; List<String> get options;
+ String get question; List<QuestionOption> get options;
 /// Create a copy of QuestionItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -622,7 +622,7 @@ abstract mixin class $QuestionItemCopyWith<$Res>  {
   factory $QuestionItemCopyWith(QuestionItem value, $Res Function(QuestionItem) _then) = _$QuestionItemCopyWithImpl;
 @useResult
 $Res call({
- String question, List<String> options
+ String question, List<QuestionOption> options
 });
 
 
@@ -643,7 +643,7 @@ class _$QuestionItemCopyWithImpl<$Res>
   return _then(_self.copyWith(
 question: null == question ? _self.question : question // ignore: cast_nullable_to_non_nullable
 as String,options: null == options ? _self.options : options // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as List<QuestionOption>,
   ));
 }
 
@@ -728,7 +728,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String question,  List<String> options)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String question,  List<QuestionOption> options)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuestionItem() when $default != null:
 return $default(_that.question,_that.options);case _:
@@ -749,7 +749,7 @@ return $default(_that.question,_that.options);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String question,  List<String> options)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String question,  List<QuestionOption> options)  $default,) {final _that = this;
 switch (_that) {
 case _QuestionItem():
 return $default(_that.question,_that.options);case _:
@@ -769,7 +769,7 @@ return $default(_that.question,_that.options);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String question,  List<String> options)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String question,  List<QuestionOption> options)?  $default,) {final _that = this;
 switch (_that) {
 case _QuestionItem() when $default != null:
 return $default(_that.question,_that.options);case _:
@@ -784,12 +784,12 @@ return $default(_that.question,_that.options);case _:
 
 
 class _QuestionItem extends QuestionItem {
-  const _QuestionItem({this.question = '', final  List<String> options = const <String>[]}): _options = options,super._();
+  const _QuestionItem({this.question = '', final  List<QuestionOption> options = const <QuestionOption>[]}): _options = options,super._();
   
 
 @override@JsonKey() final  String question;
- final  List<String> _options;
-@override@JsonKey() List<String> get options {
+ final  List<QuestionOption> _options;
+@override@JsonKey() List<QuestionOption> get options {
   if (_options is EqualUnmodifiableListView) return _options;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_options);
@@ -826,7 +826,7 @@ abstract mixin class _$QuestionItemCopyWith<$Res> implements $QuestionItemCopyWi
   factory _$QuestionItemCopyWith(_QuestionItem value, $Res Function(_QuestionItem) _then) = __$QuestionItemCopyWithImpl;
 @override @useResult
 $Res call({
- String question, List<String> options
+ String question, List<QuestionOption> options
 });
 
 
@@ -847,7 +847,267 @@ class __$QuestionItemCopyWithImpl<$Res>
   return _then(_QuestionItem(
 question: null == question ? _self.question : question // ignore: cast_nullable_to_non_nullable
 as String,options: null == options ? _self._options : options // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as List<QuestionOption>,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$QuestionOption {
+
+ String get emoji; String get label;
+/// Create a copy of QuestionOption
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$QuestionOptionCopyWith<QuestionOption> get copyWith => _$QuestionOptionCopyWithImpl<QuestionOption>(this as QuestionOption, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuestionOption&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.label, label) || other.label == label));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,emoji,label);
+
+@override
+String toString() {
+  return 'QuestionOption(emoji: $emoji, label: $label)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $QuestionOptionCopyWith<$Res>  {
+  factory $QuestionOptionCopyWith(QuestionOption value, $Res Function(QuestionOption) _then) = _$QuestionOptionCopyWithImpl;
+@useResult
+$Res call({
+ String emoji, String label
+});
+
+
+
+
+}
+/// @nodoc
+class _$QuestionOptionCopyWithImpl<$Res>
+    implements $QuestionOptionCopyWith<$Res> {
+  _$QuestionOptionCopyWithImpl(this._self, this._then);
+
+  final QuestionOption _self;
+  final $Res Function(QuestionOption) _then;
+
+/// Create a copy of QuestionOption
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? emoji = null,Object? label = null,}) {
+  return _then(_self.copyWith(
+emoji: null == emoji ? _self.emoji : emoji // ignore: cast_nullable_to_non_nullable
+as String,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [QuestionOption].
+extension QuestionOptionPatterns on QuestionOption {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _QuestionOption value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _QuestionOption() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _QuestionOption value)  $default,){
+final _that = this;
+switch (_that) {
+case _QuestionOption():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _QuestionOption value)?  $default,){
+final _that = this;
+switch (_that) {
+case _QuestionOption() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String emoji,  String label)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _QuestionOption() when $default != null:
+return $default(_that.emoji,_that.label);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String emoji,  String label)  $default,) {final _that = this;
+switch (_that) {
+case _QuestionOption():
+return $default(_that.emoji,_that.label);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String emoji,  String label)?  $default,) {final _that = this;
+switch (_that) {
+case _QuestionOption() when $default != null:
+return $default(_that.emoji,_that.label);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _QuestionOption extends QuestionOption {
+  const _QuestionOption({this.emoji = '', this.label = ''}): super._();
+  
+
+@override@JsonKey() final  String emoji;
+@override@JsonKey() final  String label;
+
+/// Create a copy of QuestionOption
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$QuestionOptionCopyWith<_QuestionOption> get copyWith => __$QuestionOptionCopyWithImpl<_QuestionOption>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuestionOption&&(identical(other.emoji, emoji) || other.emoji == emoji)&&(identical(other.label, label) || other.label == label));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,emoji,label);
+
+@override
+String toString() {
+  return 'QuestionOption(emoji: $emoji, label: $label)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$QuestionOptionCopyWith<$Res> implements $QuestionOptionCopyWith<$Res> {
+  factory _$QuestionOptionCopyWith(_QuestionOption value, $Res Function(_QuestionOption) _then) = __$QuestionOptionCopyWithImpl;
+@override @useResult
+$Res call({
+ String emoji, String label
+});
+
+
+
+
+}
+/// @nodoc
+class __$QuestionOptionCopyWithImpl<$Res>
+    implements _$QuestionOptionCopyWith<$Res> {
+  __$QuestionOptionCopyWithImpl(this._self, this._then);
+
+  final _QuestionOption _self;
+  final $Res Function(_QuestionOption) _then;
+
+/// Create a copy of QuestionOption
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? emoji = null,Object? label = null,}) {
+  return _then(_QuestionOption(
+emoji: null == emoji ? _self.emoji : emoji // ignore: cast_nullable_to_non_nullable
+as String,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
