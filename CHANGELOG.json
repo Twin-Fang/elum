@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T16:39:02Z",
-    "currentVersion": "1.0.71",
+    "lastUpdated": "2026-07-21T16:54:19Z",
+    "currentVersion": "1.0.73",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 40
+    "totalReleases": 41
   },
   "releases": [
+    {
+      "version": "1.0.73",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 92,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 시작 화면 문구와 로고가 부드럽게 나타나요\n  * 온보딩 화면 전환이 자연스러운 슬라이드로 바뀌었어요\n  * 병아리 새싹 끝 구슬에 반짝이는 빛이 살아났어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "시작 화면 문구와 로고가 부드럽게 나타나요",
+            "온보딩 화면 전환이 자연스러운 슬라이드로 바뀌었어요",
+            "병아리 새싹 끝 구슬에 반짝이는 빛이 살아났어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.71",
       "project_type": "flutter",
