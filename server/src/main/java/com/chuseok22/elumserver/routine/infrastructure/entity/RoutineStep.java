@@ -45,7 +45,9 @@ public class RoutineStep extends BaseEntity {
   @Column(columnDefinition = "TEXT")
   private String title;
 
-  @Column(nullable = false)
+  // AI 이미지 생성이 실패한 단계는 imagePath가 null로 남는다(V3 마이그레이션으로 NOT NULL 제거).
+  // 이미지 하나가 실패해도 일과 전체 생성을 포기하지 않기 위함(루트 CLAUDE.md 서비스 원칙 6).
+  // 조회 시 클라이언트가 null이면 이미지 자리를 비워 렌더링한다.
   private String imagePath;
 
   @Column(nullable = false, columnDefinition = "boolean not null default false")

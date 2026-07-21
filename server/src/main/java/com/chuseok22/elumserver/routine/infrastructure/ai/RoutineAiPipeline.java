@@ -247,9 +247,7 @@ public class RoutineAiPipeline {
           result.stepDraft().order(),
           result.stepDraft().title(),
           result.stepDraft().description(),
-          result.reusedImagePath() != null
-            ? result.reusedImagePath()
-            : routineImageStorage.save(batchId, result.stepDraft().order(), result.generatedImage())
+          resolveImagePath(batchId, result)
         ))
         .toList();
 
@@ -260,6 +258,21 @@ public class RoutineAiPipeline {
     } finally {
       executor.shutdown();
     }
+  }
+
+  // 단계 하나의 최종 imagePath를 결정한다.
+  // - 재사용 경로가 있으면(revise) 그대로 쓴다.
+  // - 새로 생성한 이미지가 있으면 파일로 저장하고 그 경로를 쓴다.
+  // - 이미지 생성이 재시도까지 실패했으면(generatedImage=null) 저장을 건너뛰고 null을 반환한다.
+  //   image_path가 nullable이므로 이미지 없이도 단계·일과가 저장된다(서비스 원칙 6).
+  private String resolveImagePath(String batchId, StepResult result) {
+    if (result.reusedImagePath() != null) {
+      return result.reusedImagePath();
+    }
+    if (result.generatedImage() == null) {
+      return null;
+    }
+    return routineImageStorage.save(batchId, result.stepDraft().order(), result.generatedImage());
   }
 
   private StepResult resolveStepResult(
@@ -275,14 +288,21 @@ public class RoutineAiPipeline {
 
   // 이미지 단계 하나가 일시적으로 실패해도 전체 루틴 생성을 곧바로 포기하지 않도록, 실패한
   // 단계만 1회 재시도한다(루트 CLAUDE.md 서비스 원칙 6 — "AI 실패 시 fallback 필수" — 반영).
-  // 재시도까지 실패하면 이 메서드가 던지는 예외가 CompletableFuture를 통해 CompletionException으로
-  // 감싸져 buildResult()의 catch에서 잡힌다.
+  // 재시도까지 실패하면 예외를 던지지 않고 null을 반환한다 — 이 단계만 이미지 없이(imagePath=null)
+  // 저장하고 나머지 단계와 일과 자체는 살린다. 예외를 던지면 buildResult()에서 일과 전체가
+  // ROUTINE_AI_GENERATION_FAILED로 죽어 서버에 저장조차 되지 않는다(이 버그의 근본 원인).
   private GeminiImageClient.GeneratedImage generateImageWithRetry(String description, CharacterType characterType) {
     try {
       return geminiImageClient.generateImage(description, characterType);
-    } catch (Exception e) {
-      log.warn("이미지 생성 1차 실패, 1회 재시도: description={}", description, e);
-      return geminiImageClient.generateImage(description, characterType);
+    } catch (Exception first) {
+      log.warn("이미지 생성 1차 실패, 1회 재시도: description={}", description, first);
+      try {
+        return geminiImageClient.generateImage(description, characterType);
+      } catch (Exception retry) {
+        // 재시도까지 실패 — 이 단계만 이미지 없이 진행한다. 일과 전체를 포기하지 않는다.
+        log.warn("이미지 생성 재시도까지 실패, 이미지 없이 진행: description={}", description, retry);
+        return null;
+      }
     }
   }
 

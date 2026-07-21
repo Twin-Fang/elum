@@ -121,7 +121,11 @@ public class RoutineService {
 
     SensitiveInfoCheckResult checkResult = sensitiveInfoGuardService.check(request.feedback());
     List<RoutineStepDraft.StepDraft> previousSteps = maskPreviousSteps(routine.getSteps());
+    // imagePath가 null인 단계(이미지 생성 실패로 이미지 없이 저장된 단계)는 재사용 맵에서 뺀다.
+    // Collectors.toMap은 value가 null이면 NPE를 던지고, null 경로는 재사용할 이미지도 없으므로
+    // 재생성 대상으로 넘기는 것이 맞다.
     Map<Integer, String> previousImagePathsByOrder = routine.getSteps().stream()
+      .filter(step -> step.getImagePath() != null)
       .collect(Collectors.toMap(RoutineStep::getStepOrder, RoutineStep::getImagePath));
     RoutineAiPipeline.RoutineGenerationResult generation = routineAiPipeline.generateForRevise(
       routine.getTitle(), previousSteps, previousImagePathsByOrder, checkResult.sanitizedText(),
@@ -283,6 +287,11 @@ public class RoutineService {
       .filter(step -> step.getId().equals(stepId))
       .findFirst()
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
+    // 이미지 생성에 실패해 imagePath가 null인 단계는 이미지가 없다. Path.of(null) NPE 대신
+    // 404로 명확히 응답한다(클라이언트는 이미지 자리를 비워 렌더링).
+    if (targetStep.getImagePath() == null) {
+      throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND);
+    }
     return routineImageStorage.read(targetStep.getImagePath());
   }
 
