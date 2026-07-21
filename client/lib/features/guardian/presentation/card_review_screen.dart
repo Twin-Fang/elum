@@ -175,6 +175,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
               itemBuilder: (context, index) => Padding(
                 padding: EdgeInsets.symmetric(horizontal: space.xs),
                 child: ActionCardView(
+                  key: ValueKey(cards[index].id),
                   card: cards[index],
                   index: index,
                   routineId: routineId,

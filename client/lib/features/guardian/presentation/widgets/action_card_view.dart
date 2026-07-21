@@ -17,7 +17,7 @@ import 'card_image.dart';
 ///
 /// 보호자용에는 삭제 X가 있고, 아이용에는 없다. [onDelete]로 가른다.
 /// 수정 진입점은 카드 밖(`이 카드 수정하기` 칩)으로 나갔다 — 2026-07-22 시안.
-class ActionCardView extends StatelessWidget {
+class ActionCardView extends StatefulWidget {
   const ActionCardView({
     super.key,
     required this.card,
@@ -47,12 +47,49 @@ class ActionCardView extends StatelessWidget {
   /// 지금 이 카드를 읽고 있는가. 아이콘 상태가 바뀐다.
   final bool isSpeaking;
 
+  @override
+  State<ActionCardView> createState() => _ActionCardViewState();
+}
+
+class _ActionCardViewState extends State<ActionCardView> {
   /// Figma 실측 — 카드 안 스피커 아이콘 24×24
   static const _volumeIconSize = 24.0;
 
+  final _scrollController = ScrollController();
+
+  // 설명이 두 줄이 되면 카드 높이를 넘겨 스크롤이 생긴다(§72 참조). 스크롤
+  // 가능한지 사용자가 알 수 있도록 하단에 페이드를 덧그리는데, 그 여부를
+  // 이 값으로 들고 있는다 — 매 프레임 새로 계산하면 카드 수만큼 리스너가
+  // 계속 붙었다 떨어지는 낭비가 생긴다.
+  bool _hasMoreBelow = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_updateFadeVisibility);
+    // 첫 프레임 이후에 실제 콘텐츠 크기가 확정되므로 그때 한 번 계산한다.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateFadeVisibility());
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_updateFadeVisibility);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _updateFadeVisibility() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    final hasMore = position.maxScrollExtent - position.pixels > 1;
+    if (hasMore != _hasMoreBelow) {
+      setState(() => _hasMoreBelow = hasMore);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final palette = CardPalette.at(index);
+    final palette = CardPalette.at(widget.index);
     final space = context.space;
 
     return Container(
@@ -68,77 +105,112 @@ class ActionCardView extends StatelessWidget {
           ),
         ],
       ),
-      padding: EdgeInsets.all(space.md),
-      // 제목이 두 줄이 되면 카드 높이를 넘길 수 있다. 넘치면 스크롤한다 —
-      // 노란 줄무늬 오버플로 경고가 뜨면 안 된다.
-      child: SingleChildScrollView(
-        child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 이미지는 항상 정사각형이다. Expanded로 두면 남는 공간을 다 먹어
-          // 제목 길이에 따라 카드마다 이미지 크기와 텍스트 시작 높이가 달라진다.
-          AspectRatio(
-            aspectRatio: 1,
-            child: _Illustration(
-              routineId: routineId,
-              stepId: card.id,
-              onDelete: onDelete,
-            ),
-          ),
-          SizedBox(height: space.md),
-          Row(
-            // 제목이 두 줄이 되면 배지가 가운데로 뜬다. 위로 붙인다.
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _NumberBadge(order: index + 1, color: palette.border),
-              SizedBox(width: space.sm),
-              Expanded(
-                child: Text(
-                  // 제목을 …로 자르지 않는다. 아동이 무엇을 해야 하는지
-                  // 알려주는 문장이라 잘리면 의미가 사라진다.
-                  card.displayTitle,
-                  // 제목은 25/w800(style_GKEQ8F) — 순서 배지(cardHeadline 30)와 크기가 다르다
-                  style: context.typo.actionCardTitle
-                      .copyWith(color: context.colors.textPrimary),
+      // 페이드가 카드 모서리를 넘지 않게 카드 radius로 함께 잘라낸다.
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(space.cardRadius),
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(space.md),
+              // 제목이 두 줄이 되면 카드 높이를 넘길 수 있다. 넘치면 스크롤한다 —
+              // 노란 줄무늬 오버플로 경고가 뜨면 안 된다.
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 이미지는 4:3 고정이다(서버 Gemini 생성 비율과 통일, 2026-07-22 변경).
+                    // Expanded로 두면 남는 공간을 다 먹어 제목 길이에 따라 카드마다 이미지
+                    // 크기와 텍스트 시작 높이가 달라진다.
+                    AspectRatio(
+                      aspectRatio: 4 / 3,
+                      child: _Illustration(
+                        routineId: widget.routineId,
+                        stepId: widget.card.id,
+                        onDelete: widget.onDelete,
+                      ),
+                    ),
+                    SizedBox(height: space.md),
+                    Row(
+                      // 제목이 두 줄이 되면 배지가 가운데로 뜬다. 위로 붙인다.
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _NumberBadge(order: widget.index + 1, color: palette.border),
+                        SizedBox(width: space.sm),
+                        Expanded(
+                          child: Text(
+                            // 제목을 …로 자르지 않는다. 아동이 무엇을 해야 하는지
+                            // 알려주는 문장이라 잘리면 의미가 사라진다.
+                            widget.card.displayTitle,
+                            // 제목은 25/w800(style_GKEQ8F) — 순서 배지(cardHeadline 30)와 크기가 다르다
+                            style: context.typo.actionCardTitle
+                                .copyWith(color: context.colors.textPrimary),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: space.sm),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppPressable(
+                          onTap: widget.onSpeak,
+                          scaleDown: AppPressable.scaleIcon,
+                          // SVG가 25×25인데 Figma 배치는 24×24다. 크기만 지정하면
+                          // 비율이 눌려 아이콘이 찌그러진다 — contain으로 비율을 지킨다.
+                          // 정사각형 아이콘이라 가로세로 모두 .w로 맞춘다
+                          child: SizedBox(
+                            width: _volumeIconSize.w,
+                            height: _volumeIconSize.w,
+                            // 읽는 중에는 흐리게 — 다시 누르면 멈춘다는 신호다
+                            child: AnimatedOpacity(
+                              duration: AppMotion.fast,
+                              opacity: widget.isSpeaking ? 0.45 : 1,
+                              child: SvgPicture.asset(
+                                AppAssets.iconVolume,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: space.sm),
+                        Expanded(
+                          child: Text(
+                            widget.card.description,
+                            style: context.typo.cardDescription
+                                .copyWith(color: context.colors.textPrimary),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: space.sm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppPressable(
-                onTap: onSpeak,
-                scaleDown: AppPressable.scaleIcon,
-                // SVG가 25×25인데 Figma 배치는 24×24다. 크기만 지정하면
-                // 비율이 눌려 아이콘이 찌그러진다 — contain으로 비율을 지킨다.
-                // 정사각형 아이콘이라 가로세로 모두 .w로 맞춘다
-                child: SizedBox(
-                  width: _volumeIconSize.w,
-                  height: _volumeIconSize.w,
-                  // 읽는 중에는 흐리게 — 다시 누르면 멈춘다는 신호다
-                  child: AnimatedOpacity(
-                    duration: AppMotion.fast,
-                    opacity: isSpeaking ? 0.45 : 1,
-                    child: SvgPicture.asset(
-                      AppAssets.iconVolume,
-                      fit: BoxFit.contain,
+            ),
+            // 설명이 잘려서 스크롤이 필요한 카드에서만 보인다 — 짧은 카드에는
+            // 안 그린다. 스크롤이 다 내려가면(더 볼 내용이 없으면) 사라진다.
+            if (_hasMoreBelow)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: IgnorePointer(
+                  child: Container(
+                    height: space.xl,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          palette.fill.withValues(alpha: 0),
+                          palette.fill,
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-              SizedBox(width: space.sm),
-              Expanded(
-                child: Text(
-                  card.description,
-                  style: context.typo.cardDescription
-                      .copyWith(color: context.colors.textPrimary),
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
         ),
       ),
     );
@@ -239,8 +311,13 @@ class _NumberBadge extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.circular(12.w),
       ),
+      // Text만 Container.alignment로 두면 실제 렌더링 시 글자가 오른쪽으로
+      // 치우쳐 보인다(폰트 line box가 advance width보다 넓게 잡힘) — 이슈 재현
+      // 스크린샷에서 좌우 여백이 약 3배 차이 났다. textAlign.center로 텍스트
+      // 캔버스 자체를 중앙 정렬해 이를 바로잡는다.
       child: Text(
         '$order',
+        textAlign: TextAlign.center,
         style: context.typo.cardHeadline
             .copyWith(color: context.colors.surface),
       ),

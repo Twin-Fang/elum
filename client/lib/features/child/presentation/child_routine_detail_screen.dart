@@ -169,6 +169,7 @@ class _ChildRoutineDetailScreenState
                     vertical: space.md,
                   ),
                   child: ActionCardView(
+                    key: ValueKey(cards[index].id),
                     card: cards[index],
                     index: index,
                     routineId: widget.routine.id,
