@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:fragment="headAssets">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet" type="text/css"/>
+    <style>
+      [data-theme="light"] {
+        --p: 76.9% 0.188 70.08;
+        --pc: 20% 0.04 70;
+      }
+    </style>
+  </th:block>
+</head>
+<body>
+<aside th:fragment="sidebar(active)" class="w-64 min-h-screen bg-base-200 border-r border-base-300 flex flex-col p-4">
+  <div class="text-xl font-bold px-2 py-4">이룸 관리자</div>
+  <ul class="menu w-full flex-1">
+    <li><a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'">대시보드</a></li>
+    <li><a th:href="@{/admin/members}" th:classappend="${active == 'members'} ? 'active'">회원 관리</a></li>
+    <li><a th:href="@{/admin/routines}" th:classappend="${active == 'routines'} ? 'active'">루틴 관리</a></li>
+    <li><a th:href="@{/admin/prompts}" th:classappend="${active == 'prompts'} ? 'active'">프롬프트 관리</a></li>
+  </ul>
+  <form th:action="@{/admin/logout}" method="post" class="px-2">
+    <button type="submit" class="btn btn-ghost btn-sm w-full justify-start">로그아웃</button>
+  </form>
+</aside>
+</body>
+</html>
