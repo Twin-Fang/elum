@@ -1,71 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/theme/theme_context_ext.dart';
 
-/// PIN 입력 키패드. 이 화면에서만 쓰이므로 core로 올리지 않는다.
-class PinKeypad extends StatelessWidget {
-  const PinKeypad({
+/// OS 시스템 숫자 키패드를 띄우는 보이지 않는 입력 필드.
+///
+/// 자체 키패드를 그리지 않는 이유: iOS·Android 각각의 입력 관습(햅틱, 접근성
+/// 낭독, 외부 키보드, 붙여넣기)을 전부 다시 구현해야 한다. 시스템 키패드를 쓰면
+/// OS가 알아서 해준다. 화면에는 [PinDots]로 자릿수만 보여준다.
+///
+/// 필드 자체는 보이지 않게 두되 **크기를 0으로 만들지 않는다.** 0이면 일부
+/// 플랫폼에서 포커스를 받지 못해 키패드가 올라오지 않는다.
+class PinInputField extends StatelessWidget {
+  const PinInputField({
     super.key,
-    required this.onDigit,
-    required this.onBackspace,
+    required this.controller,
+    required this.focusNode,
+    required this.maxLength,
   });
 
-  final ValueChanged<String> onDigit;
-  final VoidCallback onBackspace;
-
-  /// 지우기 키를 나타내는 내부 표식. 화면에는 아이콘으로 그린다.
-  static const _backspaceKey = 'backspace';
-
-  static const _rows = [
-    ['1', '2', '3'],
-    ['4', '5', '6'],
-    ['7', '8', '9'],
-    ['', '0', _backspaceKey],
-  ];
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final int maxLength;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final row in _rows)
-          Row(
-            children: [
-              for (final key in row)
-                Expanded(child: _key(context, key)),
-            ],
-          ),
-      ],
-    );
-  }
-
-  Widget _key(BuildContext context, String key) {
-    if (key.isEmpty) return const SizedBox(height: 64);
-
-    final isBackspace = key == _backspaceKey;
-
     return SizedBox(
-      // 터치 타겟을 넉넉히 둔다
-      height: 64,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: isBackspace ? onBackspace : () => onDigit(key),
-          borderRadius: BorderRadius.circular(context.space.cardRadius),
-          child: Center(
-            // 지우기는 글리프 대신 아이콘을 쓴다. 폰트에 없는 문자면 두부가 나온다.
-            child: isBackspace
-                ? Icon(
-                    Icons.backspace_outlined,
-                    color: context.colors.textPrimary,
-                  )
-                : Text(
-                    key,
-                    style: context.typo.headline.copyWith(
-                      color: context.colors.textPrimary,
-                    ),
-                  ),
-          ),
+      height: 1,
+      child: Opacity(
+        opacity: 0,
+        child: TextField(
+          controller: controller,
+          focusNode: focusNode,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(maxLength),
+          ],
+          // 키패드의 완료 버튼으로 화면을 닫아버리면 입력을 이어갈 수 없다
+          showCursor: false,
+          enableInteractiveSelection: false,
         ),
       ),
     );

@@ -49,12 +49,11 @@ void main() {
     );
   }
 
-  /// 키패드로 PIN을 입력한다
+  /// 시스템 키패드로 PIN을 입력한다.
+  /// 자체 키패드가 아니라 OS 키패드를 쓰므로 숨은 필드에 직접 입력한다.
   Future<void> enterPin(WidgetTester tester, String pin) async {
-    for (final digit in pin.split('')) {
-      await tester.tap(find.widgetWithText(InkWell, digit).first);
-      await tester.pumpAndSettle();
-    }
+    await tester.enterText(find.byType(TextField), pin);
+    await tester.pumpAndSettle();
   }
 
   /// 입력 후 CTA를 눌러 다음 단계로 넘어간다
@@ -107,15 +106,40 @@ void main() {
       expect(filledDots(tester), 2);
     });
 
-    testWidgets('지우기를 누르면 한 자리가 지워진다', (tester) async {
+    testWidgets('지우면 점도 함께 줄어든다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
       await enterPin(tester, '123');
       expect(filledDots(tester), 3);
 
-      await tester.tap(find.byIcon(Icons.backspace_outlined));
+      // 지우기는 OS 키패드가 처리한다. 결과가 점에 반영되는지만 본다.
+      await enterPin(tester, '12');
+      expect(filledDots(tester), 2);
+    });
+
+    testWidgets('OS 시스템 숫자 키패드를 쓴다', (tester) async {
+      await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
+
+      // 자체 키패드를 그리지 않는다 — 각 OS의 입력 관습을 다시 구현하지 않기 위함
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.keyboardType, TextInputType.number);
+    });
+
+    testWidgets('4자리를 넘겨 입력할 수 없다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      await enterPin(tester, '123456');
+      expect(filledDots(tester), OnboardingProfile.pinLength);
+    });
+
+    testWidgets('숫자가 아닌 입력은 무시한다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      await enterPin(tester, 'ab12');
       expect(filledDots(tester), 2);
     });
 
@@ -123,10 +147,11 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
+      // enterText는 전체를 덮어쓴다. 누적 입력이 아니라 최종 상태를 본다.
       await enterPin(tester, '123');
       expect(isCtaEnabled(tester), isFalse);
 
-      await enterPin(tester, '4');
+      await enterPin(tester, '1234');
       expect(isCtaEnabled(tester), isTrue);
     });
 

@@ -136,33 +136,3 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     );
   }
 }
-
-/// Figma `온보딩_비밀번호_완료` — 설정을 저장하고 보호자 홈으로 보낸다.
-class OnboardingDoneScreen extends ConsumerWidget {
-  const OnboardingDoneScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(onboardingProvider);
-
-    return ElumScaffold(
-      bottomButton: ElumButton(
-        label: '맞춤 설정하기',
-        onPressed: () async {
-          await ref.read(onboardingProvider.notifier).complete();
-          if (context.mounted) context.go(Routes.guardian);
-        },
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ElumHeader(
-            title: '${profile.displayName}를 위한\n준비가 끝났어요',
-            // 진단명 없는 개인화 — 발표에서 강조하는 지점
-            description: '선택하신 도움 목표에 맞춰 카드를 만들어드릴게요',
-          ),
-        ],
-      ),
-    );
-  }
-}

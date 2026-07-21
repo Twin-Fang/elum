@@ -10,6 +10,7 @@ import '../../features/onboarding/presentation/character_screen.dart';
 import '../../features/onboarding/presentation/goals_screen.dart';
 import '../../features/onboarding/presentation/name_screen.dart';
 import '../../features/onboarding/presentation/pin_screen.dart';
+import '../../features/onboarding/presentation/setup_done_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
 
 /// 앱 라우트 경로 상수. 문자열을 화면마다 반복해 적지 않는다.
@@ -77,7 +78,7 @@ GoRouter createRouter({bool Function()? isOnboardingCompleted}) {
       ),
       GoRoute(
         path: Routes.onboardingDone,
-        builder: (context, state) => const OnboardingDoneScreen(),
+        builder: (context, state) => const SetupDoneScreen(),
       ),
 
       // --- 보호자 모드 ---

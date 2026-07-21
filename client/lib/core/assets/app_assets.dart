@@ -20,6 +20,10 @@ abstract final class AppAssets {
   /// Material 아이콘은 형태가 달라 쓰지 않는다.
   static const iconBack = '$_images/icon_back.svg';
 
+  /// 맞춤설정완료 전환 화면의 아이콘 (78×78).
+  /// Figma `온보딩_맞춤설정완료`(204:1042)의 Group 5.
+  static const setupDoneIcon = '$_images/setup_done_icon.svg';
+
   // --- 입력 필드 아이콘 ---
 
   /// 아이 이름 입력 필드의 좌측 아이콘 (40×40).
