@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,5 +46,12 @@ public class MemberController implements MemberControllerDocs {
   ) {
     MemberResponse response = memberService.updateSupportGoals(authentication.getName(), request);
     return ResponseEntity.ok(response);
+  }
+
+  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @DeleteMapping("/me")
+  public ResponseEntity<Void> withdraw(Authentication authentication) {
+    memberService.withdraw(authentication.getName());
+    return ResponseEntity.noContent().build();
   }
 }

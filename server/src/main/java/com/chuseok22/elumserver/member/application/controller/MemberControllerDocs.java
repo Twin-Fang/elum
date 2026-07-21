@@ -119,4 +119,48 @@ public interface MemberControllerDocs {
   ResponseEntity<MemberResponse> updateSupportGoals(
     Authentication authentication, MemberSupportGoalsUpdateRequest request
   );
+
+  @Operation(
+    summary = "회원 탈퇴",
+    description = """
+      JWT로 인증된 보호자 본인의 계정을 완전히 삭제합니다(하드 삭제).
+
+      **처리 로직**
+      1. Authorization 헤더의 accessToken에서 회원 ID(subject)를 추출합니다.
+      2. 해당 회원이 작성한 모든 일과(Routine)와 그 하위 단계(RoutineStep)를 함께 삭제합니다.
+      3. 회원 레코드 자체를 삭제합니다. soft-delete가 아니므로 삭제 후에는 복구할 수 없고, 같은 아이디로 즉시 재가입할 수 있습니다.
+      4. 이미 발급된 accessToken은 만료 시각까지는 유효할 수 있습니다(별도 토큰 무효화 없음).
+
+      **사용 방법**
+      - Swagger UI에서 테스트하려면 우측 상단 Authorize 버튼에 로그인 API로 발급받은 accessToken을 입력하세요.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "204",
+      description = "탈퇴 성공(본문 없음)"
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "accessToken이 없거나 유효하지 않은 경우 (형식 오류, 서명 불일치, 만료 포함)",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"INVALID_TOKEN\",\"errorMessage\":\"유효하지 않은 토큰입니다.\"}"
+        )
+      )
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "토큰은 유효하지만 대상 회원을 찾을 수 없는 경우",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"MEMBER_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 회원입니다.\"}"
+        )
+      )
+    )
+  })
+  ResponseEntity<Void> withdraw(Authentication authentication);
 }
