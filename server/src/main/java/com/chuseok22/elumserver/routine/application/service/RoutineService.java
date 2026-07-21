@@ -29,10 +29,12 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -119,9 +121,11 @@ public class RoutineService {
 
     SensitiveInfoCheckResult checkResult = sensitiveInfoGuardService.check(request.feedback());
     List<RoutineStepDraft.StepDraft> previousSteps = maskPreviousSteps(routine.getSteps());
+    Map<Integer, String> previousImagePathsByOrder = routine.getSteps().stream()
+      .collect(Collectors.toMap(RoutineStep::getStepOrder, RoutineStep::getImagePath));
     RoutineAiPipeline.RoutineGenerationResult generation = routineAiPipeline.generateForRevise(
-      routine.getTitle(), previousSteps, checkResult.sanitizedText(), member.getNickname(),
-      member.getSupportGoals(), member.getCharacter()
+      routine.getTitle(), previousSteps, previousImagePathsByOrder, checkResult.sanitizedText(),
+      member.getNickname(), member.getSupportGoals(), member.getCharacter()
     );
 
     // orphanRemoval이 정상 동작하려면 컬렉션 참조를 새로 바꾸지 않고(setSteps) 기존

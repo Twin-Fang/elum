@@ -19,6 +19,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -218,5 +219,63 @@ class RoutineAiPipelineTest {
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED));
+  }
+
+  @Test
+  @DisplayName("이미지 생성이 1차 실패해도 재시도로 성공하면 정상 저장된다")
+  void generateForCreate_imageFailsOnce_retriesAndSucceeds() {
+    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"description\":\"옷을 입어요\"}]}";
+    when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
+    when(geminiImageClient.generateImage(any(), any()))
+      .thenThrow(new RuntimeException("일시적 실패"))
+      .thenReturn(new GeminiImageClient.GeneratedImage(new byte[]{1, 2, 3}, "png"));
+    when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
+
+    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), null
+    );
+
+    assertThat(result.steps()).hasSize(1);
+    assertThat(result.steps().get(0).imagePath()).isEqualTo("data/routine-images/batch/1.png");
+  }
+
+  @Test
+  @DisplayName("이미지 생성이 재시도까지 실패하면 ROUTINE_AI_GENERATION_FAILED를 던진다")
+  void generateForCreate_imageFailsTwice_throwsGenerationFailed() {
+    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"description\":\"옷을 입어요\"}]}";
+    when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
+    when(geminiImageClient.generateImage(any(), any())).thenThrow(new RuntimeException("계속 실패"));
+
+    assertThatThrownBy(() -> routineAiPipeline.generateForCreate(
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), null
+    ))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.ROUTINE_AI_GENERATION_FAILED));
+  }
+
+  @Test
+  @DisplayName("루틴 수정 시 설명이 바뀌지 않은 단계는 이미지를 다시 생성하지 않고 기존 경로를 재사용한다")
+  void generateForRevise_unchangedStep_reusesExistingImagePath() {
+    String json = "{\"title\":\"학교에 갈 준비를 해요\",\"steps\":["
+      + "{\"order\":1,\"description\":\"침대에서 일어나요.\"},"
+      + "{\"order\":2,\"description\":\"가방을 챙겨요.\"}]}";
+    when(geminiTextClient.revise(any(), any(), any(), any(), any())).thenReturn(textResponse(json));
+    when(geminiImageClient.generateImage(eq("가방을 챙겨요."), any()))
+      .thenReturn(new GeminiImageClient.GeneratedImage(new byte[]{1, 2, 3}, "png"));
+    when(routineImageStorage.save(any(), eq(2), any())).thenReturn("data/routine-images/batch/2.png");
+
+    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForRevise(
+      "학교에 갈 준비를 해요",
+      List.of(new com.chuseok22.elumserver.ai.core.RoutineStepDraft.StepDraft(1, "침대에서 일어나요.")),
+      Map.of(1, "data/routine-images/batch/1.png"),
+      "가방을 챙기는 단계를 추가해 주세요.", "하늘이", Set.of(), null
+    );
+
+    assertThat(result.steps()).hasSize(2);
+    assertThat(result.steps().get(0).imagePath()).isEqualTo("data/routine-images/batch/1.png");
+    assertThat(result.steps().get(1).imagePath()).isEqualTo("data/routine-images/batch/2.png");
+    verify(geminiImageClient, org.mockito.Mockito.never()).generateImage(eq("침대에서 일어나요."), any());
+    verify(geminiImageClient).generateImage(eq("가방을 챙겨요."), any());
   }
 }
