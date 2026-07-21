@@ -118,11 +118,7 @@ class _Header extends StatelessWidget {
           Text(
             // Figma 문구. 줄바꿈 위치도 디자인이 정한 대로다.
             '안녕하세요,\n$childName 보호자님 👋🏻',
-            style: context.typo.headline.copyWith(
-              fontSize: 24,
-              height: 1.2,
-              color: colors.textPrimary,
-            ),
+            style: context.typo.greeting.copyWith(color: colors.textPrimary),
           ),
           SizedBox(height: space.sm),
           Text(
@@ -156,18 +152,21 @@ class _NewRoutineCard extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: space.md),
         decoration: BoxDecoration(
           // Figma linear-gradient(134deg, #F9F4FF → #E9EEFF)
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFF9F4FF), Color(0xFFE9EEFF)],
+            colors: [
+              colors.homeCardGradientStart,
+              colors.homeCardGradientEnd,
+            ],
           ),
           borderRadius: BorderRadius.circular(space.cardRadius),
           border: Border.all(color: colors.border),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x1A230D60),
+              color: colors.homeCardShadow,
               blurRadius: 10,
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -194,9 +193,8 @@ class _NewRoutineCard extends StatelessWidget {
                       SizedBox(width: space.xs),
                       Text(
                         '새로운 일과 만들기',
-                        style: context.typo.subtitle.copyWith(
-                          fontSize: 17,
-                          color: const Color(0xFF9CADF1),
+                        style: context.typo.cardTitle.copyWith(
+                          color: colors.homeCardTitle,
                         ),
                       ),
                     ],
@@ -204,9 +202,7 @@ class _NewRoutineCard extends StatelessWidget {
                   SizedBox(height: space.xs),
                   Text(
                     'AI 루미가 $childName에게 맞는 일과와\n행동 카드를 만들어드려요',
-                    style: context.typo.body.copyWith(
-                      fontSize: 12,
-                      height: 1.2,
+                    style: context.typo.caption.copyWith(
                       color: colors.textSecondary,
                     ),
                   ),
@@ -239,9 +235,7 @@ class _SectionTitle extends StatelessWidget {
           SizedBox(width: space.xs),
           Text(
             label,
-            style: context.typo.body.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
+            style: context.typo.sectionTitle.copyWith(
               color: context.colors.textPrimary,
             ),
           ),
@@ -300,16 +294,14 @@ class _EmptyRoutines extends ConsumerWidget {
               children: [
                 Text(
                   '아직 만든 일과가 없어요 😢',
-                  style: context.typo.body.copyWith(
-                    fontSize: 15,
+                  style: context.typo.cardBody.copyWith(
                     color: context.colors.chipLabel,
                   ),
                 ),
                 SizedBox(height: space.xs),
                 Text(
                   '$childName의 첫 행동카드를 만들어보세요',
-                  style: context.typo.body.copyWith(
-                    fontSize: 12,
+                  style: context.typo.caption.copyWith(
                     color: context.colors.textSecondary,
                   ),
                 ),
@@ -349,16 +341,14 @@ class _RoutineList extends StatelessWidget {
                         routine.title.isEmpty ? '이름 없는 일과' : routine.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: context.typo.body.copyWith(
-                          fontSize: 15,
+                        style: context.typo.cardBody.copyWith(
                           color: context.colors.chipLabel,
                         ),
                       ),
                       SizedBox(height: space.xs),
                       Text(
                         '카드 ${routine.steps.length}장',
-                        style: context.typo.body.copyWith(
-                          fontSize: 12,
+                        style: context.typo.caption.copyWith(
                           color: context.colors.textSecondary,
                         ),
                       ),

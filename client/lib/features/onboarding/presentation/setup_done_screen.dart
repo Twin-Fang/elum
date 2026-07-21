@@ -50,7 +50,13 @@ class _SetupDoneScreenState extends ConsumerState<SetupDoneScreen> {
     unawaited(ref.read(onboardingProvider.notifier).complete());
 
     _timer = Timer(SetupDoneScreen.holdDuration, () {
-      if (mounted) context.go(Routes.guardian);
+      if (mounted) {
+        try {
+          GoRouter.of(context).go(Routes.guardian);
+        } catch (e) {
+          debugPrint('라우팅 실패: $e');
+        }
+      }
     });
   }
 

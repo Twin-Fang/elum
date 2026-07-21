@@ -56,6 +56,10 @@ class _RoutineTile extends StatelessWidget {
   /// 이모지를 감싸는 원 (Figma 39×39)
   static const _circleSize = 39.0;
 
+  /// 이모지 글자 크기 (Figma 24). 앱 폰트가 아니라 시스템 이모지라
+  /// AppTypography 토큰이 아닌 여기 상수로 둔다.
+  static const _emojiSize = 24.0;
+
   @override
   Widget build(BuildContext context) {
     final space = context.space;
@@ -82,15 +86,14 @@ class _RoutineTile extends StatelessWidget {
               alignment: Alignment.center,
               // Figma 원본이 텍스트 이모지다(fontFamily: Pretendard).
               // 아이콘 컴포넌트가 아니라 다운로드할 에셋 자체가 없다.
-              child: Text(routine.emoji, style: const TextStyle(fontSize: 24)),
+              // 시스템 이모지 폰트로 렌더링되므로 앱 폰트 토큰을 태우지 않는다.
+              child: Text(routine.emoji, style: const TextStyle(fontSize: _emojiSize)),
             ),
             SizedBox(height: space.xs),
             Text(
               routine.label,
               textAlign: TextAlign.center,
-              style: context.typo.body.copyWith(
-                fontSize: 13,
-                height: 1.2,
+              style: context.typo.tileLabel.copyWith(
                 color: context.colors.chipLabel,
               ),
             ),

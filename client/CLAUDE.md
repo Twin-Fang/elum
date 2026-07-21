@@ -282,6 +282,43 @@ Positioned(left: 115.w, top: 214.h, child: SvgPicture.asset(AppAssets.logo, widt
 > **인스턴스가 아니라 컴포넌트셋이 원본이다.** 인스턴스는 특정 variant 하나만 보여준다.
 > → [버튼 색을 잘못 읽은 사고](./docs/troubleshooting.md#버튼-enable-색을-잘못-읽음)
 
+#### 토큰 파일은 하나다
+
+**모든 색은 `lib/core/theme/app_colors.dart`, 모든 폰트는 `app_typography.dart`.**
+화면이 늘어나도 파일을 나누지 않는다. 찾을 곳이 하나여야 한다.
+
+#### 같은 색이어도 쓰임이 다르면 토큰을 나눈다 ⚠️
+
+HEX가 같다고 합치지 않는다. 합치면 **한쪽만 바꿔야 할 때 못 바꾼다.**
+
+```dart
+catSelectedBorder: Color(0xFF9CADF1),  // 캐릭터 선택 테두리
+homeCardTitle:     Color(0xFF9CADF1),  // 홈 카드 제목 ← 값이 같아도 따로
+```
+
+판단 기준은 **"이 둘은 항상 같이 바뀌어야 하는가?"** 아니라면 나눈다.
+중복 상수 몇 줄보다, 색이 엉뚱한 화면까지 번지는 비용이 크다.
+(실제로 셋을 묶었다가 목표 칩에 여우색이 들어간 적이 있다 — 이슈 #11)
+
+#### 새 크기가 나오면 토큰을 추가한다 — `copyWith(fontSize:)` 금지
+
+```dart
+// ❌ Figma가 17→18로 바뀔 때 grep으로 못 찾는다
+context.typo.subtitle.copyWith(fontSize: 17, color: ...)
+// ✅
+context.typo.cardTitle.copyWith(color: ...)
+```
+
+`copyWith`로 **색만** 주는 건 정상이다.
+
+#### `AppColors`에 필드를 추가하면 5곳을 고친다
+
+선언 / 생성자 / `light` / `copyWith` / `lerp`.
+앞 3개는 컴파일러가 잡지만 **`copyWith`·`lerp` 누락은 안 잡힌다.**
+`lerp`를 빠뜨리면 테마 전환 애니메이션에서만 드러난다.
+
+상세와 전체 토큰표는 [docs/design-system.md](./docs/design-system.md#색상-appcolors).
+
 ### 4. 서버 API가 바뀔 때
 
 | 순서 | 할 일 |

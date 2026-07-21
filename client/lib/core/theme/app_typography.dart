@@ -13,6 +13,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.subtitle,
     required this.input,
     required this.body,
+    required this.greeting,
+    required this.cardTitle,
+    required this.cardBody,
+    required this.sectionTitle,
+    required this.tileLabel,
+    required this.caption,
   });
 
   static const fontFamily = 'TmoneyRoundWind';
@@ -31,6 +37,28 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 설명 문구·선택 항목 텍스트
   final TextStyle body;
+
+  // --- 보호자 홈 (Figma `보호자_홈` 217:2655) ---
+  // title(28)/headline(26)과 크기가 겹치지 않아 별도 토큰으로 둔다.
+  // 화면에서 copyWith(fontSize:)로 덮어쓰면 Figma가 바뀔 때 추적이 불가능하다.
+
+  /// 인사말 "안녕하세요,\n○○ 보호자님" (24/w800, 2줄)
+  final TextStyle greeting;
+
+  /// 카드 제목 "새로운 일과 만들기" (17/w800)
+  final TextStyle cardTitle;
+
+  /// 카드 본문 — 목록 항목 제목·빈 상태 문구 (15/w400)
+  final TextStyle cardBody;
+
+  /// 섹션 제목 "추천 일과"·"최근 일과" (14/w800)
+  final TextStyle sectionTitle;
+
+  /// 추천 타일 라벨 (13/w400, 2줄)
+  final TextStyle tileLabel;
+
+  /// 보조 설명 — 카드 부제·"카드 N장" (12/w400)
+  final TextStyle caption;
 
   static const standard = AppTypography(
     title: TextStyle(
@@ -69,6 +97,42 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w400,
       height: 1.0,
     ),
+    greeting: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 24,
+      fontWeight: FontWeight.w800,
+      height: 1.2,
+    ),
+    cardTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 17,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
+    cardBody: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 15,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    sectionTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
+    tileLabel: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    ),
+    caption: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    ),
   );
 
   /// 표준 Material 슬롯에 매핑한다.
@@ -90,6 +154,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? subtitle,
     TextStyle? input,
     TextStyle? body,
+    TextStyle? greeting,
+    TextStyle? cardTitle,
+    TextStyle? cardBody,
+    TextStyle? sectionTitle,
+    TextStyle? tileLabel,
+    TextStyle? caption,
   }) {
     return AppTypography(
       title: title ?? this.title,
@@ -98,6 +168,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       subtitle: subtitle ?? this.subtitle,
       input: input ?? this.input,
       body: body ?? this.body,
+      greeting: greeting ?? this.greeting,
+      cardTitle: cardTitle ?? this.cardTitle,
+      cardBody: cardBody ?? this.cardBody,
+      sectionTitle: sectionTitle ?? this.sectionTitle,
+      tileLabel: tileLabel ?? this.tileLabel,
+      caption: caption ?? this.caption,
     );
   }
 
@@ -111,6 +187,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       subtitle: TextStyle.lerp(subtitle, other.subtitle, t)!,
       input: TextStyle.lerp(input, other.input, t)!,
       body: TextStyle.lerp(body, other.body, t)!,
+      greeting: TextStyle.lerp(greeting, other.greeting, t)!,
+      cardTitle: TextStyle.lerp(cardTitle, other.cardTitle, t)!,
+      cardBody: TextStyle.lerp(cardBody, other.cardBody, t)!,
+      sectionTitle: TextStyle.lerp(sectionTitle, other.sectionTitle, t)!,
+      tileLabel: TextStyle.lerp(tileLabel, other.tileLabel, t)!,
+      caption: TextStyle.lerp(caption, other.caption, t)!,
     );
   }
 }
