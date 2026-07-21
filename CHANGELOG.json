@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T07:02:13Z",
-    "currentVersion": "1.0.33",
+    "lastUpdated": "2026-07-21T07:17:45Z",
+    "currentVersion": "1.0.34",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 6
+    "totalReleases": 7
   },
   "releases": [
+    {
+      "version": "1.0.34",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 18,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 테스트 도구에서 화면 이동이 되지 않던 문제 해결",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "테스트 도구에서 화면 이동이 되지 않던 문제 해결"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.33",
       "project_type": "flutter",

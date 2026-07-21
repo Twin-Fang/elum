@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../features/onboarding/application/onboarding_notifier.dart';
 import '../config/app_config.dart';
@@ -21,9 +20,15 @@ import 'dev_log_buffer.dart';
 /// `.env`의 `ELUM_SHOW_DEV_TOOLS=false`로 끄거나,
 /// `core/dev/`를 통째로 지우고 `app.dart`의 builder 한 줄을 제거한다.
 class DevToolsOverlay extends StatefulWidget {
-  const DevToolsOverlay({super.key, required this.child});
+  const DevToolsOverlay({super.key, required this.child, required this.onNavigate});
 
   final Widget child;
+
+  /// 화면 이동. `context.go`를 쓰지 않는 이유는 이 위젯이
+  /// `MaterialApp.router`의 `builder`에 놓여 **GoRouter보다 위**라
+  /// `context`로 라우터를 찾지 못하기 때문이다(No GoRouter found in context).
+  /// 라우터를 가진 `app.dart`가 이동 방법을 넘겨준다.
+  final void Function(String route) onNavigate;
 
   @override
   State<DevToolsOverlay> createState() => _DevToolsOverlayState();
@@ -89,6 +94,7 @@ class _DevToolsOverlayState extends State<DevToolsOverlay> {
               Positioned.fill(
                 child: _DevToolsSheet(
                   onClose: () => setState(() => _panelOpen = false),
+                  onNavigate: widget.onNavigate,
                 ),
               ),
           ],
@@ -143,9 +149,10 @@ class _DraggableButton extends StatelessWidget {
 /// `showModalBottomSheet`를 쓰지 않으므로 Navigator가 필요 없다.
 /// 하위 화면 전환도 라우팅 대신 내부 상태로 처리한다.
 class _DevToolsSheet extends StatefulWidget {
-  const _DevToolsSheet({required this.onClose});
+  const _DevToolsSheet({required this.onClose, required this.onNavigate});
 
   final VoidCallback onClose;
+  final void Function(String route) onNavigate;
 
   @override
   State<_DevToolsSheet> createState() => _DevToolsSheetState();
@@ -241,10 +248,14 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
           ),
         _DevView.logs => const _LogViewer(),
         _DevView.status => const _StatusView(),
-        _DevView.navigate => _NavigateView(onClose: widget.onClose),
+        _DevView.navigate => _NavigateView(
+            onClose: widget.onClose,
+            onNavigate: widget.onNavigate,
+          ),
         _DevView.confirmReset => _ConfirmResetView(
             onCancel: () => setState(() => _view = _DevView.menu),
             onDone: widget.onClose,
+            onNavigate: widget.onNavigate,
           ),
       };
 }
@@ -295,10 +306,15 @@ class _DevMenu extends StatelessWidget {
 /// `showDialog`를 쓰지 않는다. 이 위젯도 Navigator보다 위에 있어
 /// 다이얼로그를 띄울 수 없다. 시트 안에서 화면만 바꾼다.
 class _ConfirmResetView extends ConsumerWidget {
-  const _ConfirmResetView({required this.onCancel, required this.onDone});
+  const _ConfirmResetView({
+    required this.onCancel,
+    required this.onDone,
+    required this.onNavigate,
+  });
 
   final VoidCallback onCancel;
   final VoidCallback onDone;
+  final void Function(String route) onNavigate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -329,7 +345,7 @@ class _ConfirmResetView extends ConsumerWidget {
                     ref.invalidate(onboardingProvider);
                     if (!context.mounted) return;
                     onDone();
-                    context.go(Routes.splash);
+                    onNavigate(Routes.splash);
                   },
                   child: const Text('초기화'),
                 ),
@@ -448,9 +464,10 @@ class _StatusView extends ConsumerWidget {
 
 /// 화면 바로 이동.
 class _NavigateView extends StatelessWidget {
-  const _NavigateView({required this.onClose});
+  const _NavigateView({required this.onClose, required this.onNavigate});
 
   final VoidCallback onClose;
+  final void Function(String route) onNavigate;
 
   static const _destinations = <(String, String)>[
     ('시작', Routes.splash),
@@ -472,7 +489,7 @@ class _NavigateView extends StatelessWidget {
             title: Text(label),
             onTap: () {
               onClose();
-              context.go(route);
+              onNavigate(route);
             },
           ),
       ],
