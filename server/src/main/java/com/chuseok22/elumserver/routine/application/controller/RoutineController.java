@@ -140,19 +140,19 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(response);
   }
 
-  // description은 보호자가 직접 입력하는 자유 텍스트라 민감정보가 포함될 수 있고,
+  // title/description은 보호자가 직접 입력하는 자유 텍스트라 민감정보가 포함될 수 있고,
   // RoutineResponse에도 rawInputText(마스킹 전 원문)가 포함되므로 logParameters/logResult를
   // 모두 false로 둔다(fable5 검토에서 발견).
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/{routineId}/steps/{stepId}")
-  public ResponseEntity<RoutineResponse> updateStepDescription(
+  public ResponseEntity<RoutineResponse> updateStep(
     Authentication authentication,
     @PathVariable String routineId,
     @PathVariable String stepId,
     @RequestBody @Valid RoutineStepUpdateRequest request
   ) {
     RoutineResponse response =
-      routineService.updateStepDescription(authentication.getName(), routineId, stepId, request);
+      routineService.updateStep(authentication.getName(), routineId, stepId, request);
     return ResponseEntity.ok(response);
   }
 }

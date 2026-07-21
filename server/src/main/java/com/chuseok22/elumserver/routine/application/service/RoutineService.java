@@ -229,16 +229,20 @@ public class RoutineService {
   }
 
   @Transactional
-  public RoutineResponse updateStepDescription(
+  public RoutineResponse updateStep(
     String memberId, String routineId, String stepId, RoutineStepUpdateRequest request
   ) {
     Routine routine = getOwnedRoutine(memberId, routineId);
+    if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
+      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
+    }
 
     RoutineStep targetStep = routine.getSteps().stream()
       .filter(step -> step.getId().equals(stepId))
       .findFirst()
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
 
+    targetStep.setTitle(request.title());
     targetStep.setDescription(request.description());
 
     return RoutineResponse.from(routine);

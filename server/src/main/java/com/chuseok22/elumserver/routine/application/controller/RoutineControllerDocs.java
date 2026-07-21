@@ -368,10 +368,10 @@ public interface RoutineControllerDocs {
   );
 
   @Operation(
-    summary = "일과 단계 설명 수정",
+    summary = "일과 단계 수정",
     description = """
-      보호자가 AI가 생성한 단계 설명 문구를 직접 수정합니다. AI를 다시 호출하지 않고 입력한 텍스트를 그대로 저장합니다.
-      PENDING_REVIEW/CONFIRMED/COMPLETED 등 일과 상태와 무관하게 항상 수정할 수 있으며, 완료(completed) 여부는 변경되지 않습니다.
+      보호자가 AI가 생성한 단계의 title과 description을 직접 수정합니다. AI를 다시 호출하지 않고 입력한 텍스트를 그대로 저장합니다.
+      PENDING_REVIEW 상태의 일과에서만 수정할 수 있습니다. 승인(CONFIRMED) 이후에는 409를 반환합니다.
       """
   )
   @SecurityRequirement(name = "bearerAuth")
@@ -380,16 +380,6 @@ public interface RoutineControllerDocs {
       responseCode = "200",
       description = "수정 성공",
       content = @Content(schema = @Schema(implementation = RoutineResponse.class))
-    ),
-    @ApiResponse(
-      responseCode = "400",
-      description = "description 누락",
-      content = @Content(
-        schema = @Schema(implementation = ErrorResponse.class),
-        examples = @ExampleObject(
-          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"description: description은 필수입니다.\"}"
-        )
-      )
     ),
     @ApiResponse(
       responseCode = "403",
@@ -405,9 +395,19 @@ public interface RoutineControllerDocs {
           value = "{\"errorCode\":\"ROUTINE_STEP_NOT_FOUND\",\"errorMessage\":\"존재하지 않는 단계입니다.\"}"
         )
       )
+    ),
+    @ApiResponse(
+      responseCode = "409",
+      description = "PENDING_REVIEW 상태가 아님",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"ROUTINE_INVALID_STATUS\",\"errorMessage\":\"현재 상태에서는 처리할 수 없습니다.\"}"
+        )
+      )
     )
   })
-  ResponseEntity<RoutineResponse> updateStepDescription(
+  ResponseEntity<RoutineResponse> updateStep(
     Authentication authentication, String routineId, String stepId, RoutineStepUpdateRequest request
   );
 }
