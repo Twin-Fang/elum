@@ -1,15 +1,38 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T08:18:31Z",
-    "currentVersion": "1.0.37",
+    "lastUpdated": "2026-07-21T08:24:54Z",
+    "currentVersion": "1.0.38",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 10
+    "totalReleases": 11
   },
   "releases": [
+    {
+      "version": "1.0.38",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 26,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 화면 전환과 버튼 반응이 한결 부드러워졌습니다\n  * 이름 입력칸의 글자가 가운데에 바르게 놓입니다\n  * 친구 고르기 화면의 카드가 더 크고 시원하게 보입니다\n  * 카드 속 친구 그림과 이름의 위치를 가지런히 맞췄습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "화면 전환과 버튼 반응이 한결 부드러워졌습니다",
+            "이름 입력칸의 글자가 가운데에 바르게 놓입니다",
+            "친구 고르기 화면의 카드가 더 크고 시원하게 보입니다",
+            "카드 속 친구 그림과 이름의 위치를 가지런히 맞췄습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.37",
       "project_type": "flutter",
