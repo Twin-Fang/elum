@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'core/config/app_config.dart';
+import 'core/dev/dev_log_buffer.dart';
 import 'core/storage/local_storage.dart';
 import 'features/onboarding/application/onboarding_notifier.dart';
 
@@ -11,6 +12,10 @@ Future<void> main() async {
 
   // 환경변수를 먼저 읽는다 — 저장소·네트워크가 설정값에 의존한다.
   await AppConfig.load();
+
+  // 실기기·릴리스 빌드에는 콘솔이 없다. 앱 안에서 로그를 보려면 미리 가로채야
+  // 하므로 초기화 직후에 건다. (이슈 #13)
+  if (AppConfig.showDevTools) DevLogBuffer.install();
 
   // 저장소는 앱 시작 시 한 번만 초기화하고 provider로 주입한다.
   final storage = await SharedPrefsStorage.create();

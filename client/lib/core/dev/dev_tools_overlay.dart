@@ -38,28 +38,33 @@ class _DevToolsOverlayState extends State<DevToolsOverlay> {
   /// 화면 가장자리 최소 여백 — 버튼이 완전히 잘려 못 누르는 상황을 막는다
   static const _edgeMargin = 8.0;
 
+  /// 패널이 열려 있는지.
+  bool _panelOpen = false;
+
   @override
   Widget build(BuildContext context) {
     // 플래그가 꺼져 있으면 아무것도 얹지 않는다.
     // 위젯 트리에 추가되는 것이 없어 런타임 비용이 0이다.
     if (!AppConfig.showDevTools) return widget.child;
 
-    return Stack(
-      children: [
-        widget.child,
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final maxX = constraints.maxWidth - _buttonSize - _edgeMargin;
-            final maxY = constraints.maxHeight - _buttonSize - _edgeMargin;
+    // LayoutBuilder를 Stack 바깥에 둔다 — Positioned는 Stack의 직계 자식이어야 한다.
+    // LayoutBuilder를 사이에 끼우면 ParentData 타입이 어긋나 런타임에 터진다.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxX = constraints.maxWidth - _buttonSize - _edgeMargin;
+        final maxY = constraints.maxHeight - _buttonSize - _edgeMargin;
 
-            // 첫 프레임 기본 위치: 우하단. 하단 CTA 버튼을 가리지 않도록 조금 띄운다.
-            final pos = _position ?? Offset(maxX, maxY - 80);
-            final clamped = Offset(
-              pos.dx.clamp(_edgeMargin, maxX),
-              pos.dy.clamp(_edgeMargin, maxY),
-            );
+        // 첫 프레임 기본 위치: 우하단. 하단 CTA 버튼을 가리지 않도록 조금 띄운다.
+        final pos = _position ?? Offset(maxX, maxY - 80);
+        final clamped = Offset(
+          pos.dx.clamp(_edgeMargin, maxX),
+          pos.dy.clamp(_edgeMargin, maxY),
+        );
 
-            return Positioned(
+        return Stack(
+          children: [
+            widget.child,
+            Positioned(
               left: clamped.dx,
               top: clamped.dy,
               child: _DraggableButton(
@@ -71,26 +76,27 @@ class _DevToolsOverlayState extends State<DevToolsOverlay> {
                     (clamped.dy + delta.dy).clamp(_edgeMargin, maxY),
                   );
                 }),
-                onTap: () => _openPanel(context),
+                onTap: () => setState(() => _panelOpen = true),
               ),
-            );
-          },
-        ),
-      ],
+            ),
+            // 패널도 같은 Stack에 그린다.
+            //
+            // showModalBottomSheet·Overlay를 쓰지 않는 이유: 이 위젯은
+            // MaterialApp의 builder에 놓여 Navigator·Overlay보다 "위"에 있다.
+            // 둘 다 상위에서 찾지 못해 런타임에 터진다.
+            // 직접 그리면 조상에 의존하지 않아 어느 위치에 놓여도 동작한다.
+            if (_panelOpen)
+              Positioned.fill(
+                child: _DevToolsSheet(
+                  onClose: () => setState(() => _panelOpen = false),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
-  void _openPanel(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const _DevToolsPanel(),
-    );
-  }
 }
 
 /// 끌어서 옮길 수 있는 버튼.
@@ -132,105 +138,207 @@ class _DraggableButton extends StatelessWidget {
   }
 }
 
-/// 기능 패널.
-class _DevToolsPanel extends ConsumerWidget {
-  const _DevToolsPanel();
+/// 개발자 도구 시트 — Overlay에 직접 올라간다.
+///
+/// `showModalBottomSheet`를 쓰지 않으므로 Navigator가 필요 없다.
+/// 하위 화면 전환도 라우팅 대신 내부 상태로 처리한다.
+class _DevToolsSheet extends StatefulWidget {
+  const _DevToolsSheet({required this.onClose});
+
+  final VoidCallback onClose;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const _Handle(),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                '개발자 도구',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  State<_DevToolsSheet> createState() => _DevToolsSheetState();
+}
+
+enum _DevView { menu, logs, status, navigate, confirmReset }
+
+class _DevToolsSheetState extends State<_DevToolsSheet> {
+  _DevView _view = _DevView.menu;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Stack(
+        children: [
+          // 시트 밖을 누르면 닫힌다
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: widget.onClose,
+              child: Container(color: Colors.black.withValues(alpha: 0.4)),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              width: double.infinity,
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.85,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const _Handle(),
+                    _header(),
+                    Flexible(child: _body()),
+                  ],
+                ),
               ),
             ),
-            _Tile(
-              icon: Icons.refresh,
-              label: '온보딩 초기화',
-              subtitle: '저장값을 지우고 시작 화면부터 다시',
-              onTap: () => _confirmReset(context, ref),
-            ),
-            _Tile(
-              icon: Icons.article_outlined,
-              label: '로그 보기',
-              subtitle: '최근 ${DevLogBuffer.maxLines}줄',
-              onTap: () {
-                Navigator.pop(context);
-                showModalBottomSheet<void>(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (_) => const _LogViewer(),
-                );
-              },
-            ),
-            _Tile(
-              icon: Icons.info_outline,
-              label: '현재 상태',
-              subtitle: '저장값·설정값 확인',
-              onTap: () {
-                Navigator.pop(context);
-                showModalBottomSheet<void>(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (_) => const _StatusView(),
-                );
-              },
-            ),
-            _Tile(
-              icon: Icons.navigation_outlined,
-              label: '화면 이동',
-              subtitle: '온보딩 단계·보호자 홈',
-              onTap: () {
-                Navigator.pop(context);
-                showModalBottomSheet<void>(
-                  context: context,
-                  builder: (_) => const _NavigateView(),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 실수로 눌러 저장값이 날아가지 않도록 한 번 확인한다.
-  Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('온보딩을 초기화할까요?'),
-        content: const Text('저장된 호칭·목표·캐릭터·PIN이 모두 지워집니다.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('초기화'),
           ),
         ],
       ),
     );
+  }
 
-    if (confirmed != true || !context.mounted) return;
+  Widget _header() {
+    final title = switch (_view) {
+      _DevView.menu => '개발자 도구',
+      _DevView.logs => '로그',
+      _DevView.status => '현재 상태',
+      _DevView.navigate => '화면 이동',
+      _DevView.confirmReset => '온보딩을 초기화할까요?',
+    };
 
-    await ref.read(localStorageProvider).clearAll();
-    // 메모리 상태도 함께 비운다 — 저장소만 지우면 화면이 이전 값을 계속 들고 있다
-    ref.invalidate(onboardingProvider);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+      child: Row(
+        children: [
+          // 하위 화면에서는 메뉴로 돌아가는 버튼을 준다
+          if (_view != _DevView.menu)
+            IconButton(
+              icon: const Icon(Icons.arrow_back, size: 20),
+              onPressed: () => setState(() => _view = _DevView.menu),
+            )
+          else
+            const SizedBox(width: 48),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, size: 20),
+            onPressed: widget.onClose,
+          ),
+        ],
+      ),
+    );
+  }
 
-    if (!context.mounted) return;
-    Navigator.pop(context);
-    context.go(Routes.splash);
+  Widget _body() => switch (_view) {
+        _DevView.menu => _DevMenu(
+            onSelect: (v) => setState(() => _view = v),
+          ),
+        _DevView.logs => const _LogViewer(),
+        _DevView.status => const _StatusView(),
+        _DevView.navigate => _NavigateView(onClose: widget.onClose),
+        _DevView.confirmReset => _ConfirmResetView(
+            onCancel: () => setState(() => _view = _DevView.menu),
+            onDone: widget.onClose,
+          ),
+      };
+}
+
+/// 기능 목록.
+class _DevMenu extends StatelessWidget {
+  const _DevMenu({required this.onSelect});
+
+  final ValueChanged<_DevView> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        _Tile(
+          icon: Icons.refresh,
+          label: '온보딩 초기화',
+          subtitle: '저장값을 지우고 시작 화면부터 다시',
+          onTap: () => onSelect(_DevView.confirmReset),
+        ),
+        _Tile(
+          icon: Icons.article_outlined,
+          label: '로그 보기',
+          subtitle: '최근 ${DevLogBuffer.maxLines}줄',
+          onTap: () => onSelect(_DevView.logs),
+        ),
+        _Tile(
+          icon: Icons.info_outline,
+          label: '현재 상태',
+          subtitle: '저장값·설정값 확인',
+          onTap: () => onSelect(_DevView.status),
+        ),
+        _Tile(
+          icon: Icons.navigation_outlined,
+          label: '화면 이동',
+          subtitle: '온보딩 단계·보호자 홈',
+          onTap: () => onSelect(_DevView.navigate),
+        ),
+      ],
+    );
+  }
+
+}
+
+/// 초기화 확인 — 실수로 눌러 저장값이 날아가지 않도록 한 단계 둔다.
+///
+/// `showDialog`를 쓰지 않는다. 이 위젯도 Navigator보다 위에 있어
+/// 다이얼로그를 띄울 수 없다. 시트 안에서 화면만 바꾼다.
+class _ConfirmResetView extends ConsumerWidget {
+  const _ConfirmResetView({required this.onCancel, required this.onDone});
+
+  final VoidCallback onCancel;
+  final VoidCallback onDone;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '저장된 호칭·목표·캐릭터·PIN이\n모두 지워집니다.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onCancel,
+                  child: const Text('취소'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () async {
+                    await ref.read(localStorageProvider).clearAll();
+                    // 메모리 상태도 비운다 — 저장소만 지우면 화면이 이전 값을 들고 있다
+                    ref.invalidate(onboardingProvider);
+                    if (!context.mounted) return;
+                    onDone();
+                    context.go(Routes.splash);
+                  },
+                  child: const Text('초기화'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -240,66 +348,64 @@ class _LogViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.8,
-      expand: false,
-      builder: (context, scrollController) => Column(
-        children: [
-          const _Handle(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                const Text('로그', style: TextStyle(fontWeight: FontWeight.bold)),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: () async {
-                    await Clipboard.setData(
-                      ClipboardData(text: DevLogBuffer.asText()),
-                    );
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('로그를 복사했어요')),
-                    );
-                  },
-                  icon: const Icon(Icons.copy, size: 18),
-                  label: const Text('복사'),
-                ),
-                TextButton.icon(
-                  onPressed: DevLogBuffer.clear,
-                  icon: const Icon(Icons.delete_outline, size: 18),
-                  label: const Text('비우기'),
-                ),
-              ],
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton.icon(
+                onPressed: () async {
+                  await Clipboard.setData(
+                    ClipboardData(text: DevLogBuffer.asText()),
+                  );
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                    const SnackBar(content: Text('로그를 복사했어요')),
+                  );
+                },
+                icon: const Icon(Icons.copy, size: 18),
+                label: const Text('복사'),
+              ),
+              TextButton.icon(
+                onPressed: DevLogBuffer.clear,
+                icon: const Icon(Icons.delete_outline, size: 18),
+                label: const Text('비우기'),
+              ),
+            ],
           ),
-          const Divider(height: 1),
-          Expanded(
-            // 새 로그가 쌓이면 즉시 갱신한다
-            child: ValueListenableBuilder<int>(
-              valueListenable: DevLogBuffer.revision,
-              builder: (context, _, __) {
-                final lines = DevLogBuffer.lines;
-                if (lines.isEmpty) {
-                  return const Center(child: Text('아직 로그가 없어요'));
-                }
-                return ListView.builder(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(12),
-                  itemCount: lines.length,
-                  itemBuilder: (context, i) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: SelectableText(
-                      lines[i],
-                      style: const TextStyle(fontSize: 11, fontFamily: 'monospace'),
-                    ),
-                  ),
+        ),
+        const Divider(height: 1),
+        Flexible(
+          // 새 로그가 쌓이면 즉시 갱신한다
+          child: ValueListenableBuilder<int>(
+            valueListenable: DevLogBuffer.revision,
+            builder: (context, _, _) {
+              final lines = DevLogBuffer.lines;
+              if (lines.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Text('아직 로그가 없어요'),
                 );
-              },
-            ),
+              }
+              return ListView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.all(12),
+                itemCount: lines.length,
+                itemBuilder: (context, i) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: SelectableText(
+                    lines[i],
+                    style: const TextStyle(fontSize: 11, fontFamily: 'monospace'),
+                  ),
+                ),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -312,43 +418,39 @@ class _StatusView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final storage = ref.read(localStorageProvider);
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      expand: false,
-      builder: (context, scrollController) => ListView(
-        controller: scrollController,
-        padding: const EdgeInsets.all(16),
-        children: [
-          const _Handle(),
-          const SizedBox(height: 12),
-          const Text('저장값', style: TextStyle(fontWeight: FontWeight.bold)),
-          _Row('온보딩 완료', '${storage.isOnboardingCompleted}'),
-          _Row('호칭', storage.nickname ?? '(없음)'),
-          _Row('목표', storage.goals.isEmpty ? '(없음)' : storage.goals.join(', ')),
-          _Row('캐릭터', storage.character ?? '(없음)'),
-          // PIN은 평문 저장 중이라 값을 띄우지 않는다 — 어깨너머 노출 방지
-          FutureBuilder<String?>(
-            future: storage.getPin(),
-            builder: (context, snap) => _Row(
-              'PIN',
-              (snap.data?.isNotEmpty ?? false) ? '설정됨' : '(없음)',
-            ),
+    return ListView(
+      shrinkWrap: true,
+      padding: const EdgeInsets.all(16),
+      children: [
+        const Text('저장값', style: TextStyle(fontWeight: FontWeight.bold)),
+        _Row('온보딩 완료', '${storage.isOnboardingCompleted}'),
+        _Row('호칭', storage.nickname ?? '(없음)'),
+        _Row('목표', storage.goals.isEmpty ? '(없음)' : storage.goals.join(', ')),
+        _Row('캐릭터', storage.character ?? '(없음)'),
+        // PIN은 평문 저장 중이라 값을 띄우지 않는다 — 어깨너머 노출 방지
+        FutureBuilder<String?>(
+          future: storage.getPin(),
+          builder: (context, snap) => _Row(
+            'PIN',
+            (snap.data?.isNotEmpty ?? false) ? '설정됨' : '(없음)',
           ),
-          const SizedBox(height: 16),
-          const Text('설정값', style: TextStyle(fontWeight: FontWeight.bold)),
-          _Row('API', AppConfig.apiBaseUrl),
-          _Row('Mock 사용', '${AppConfig.useMock}'),
-          _Row('네트워크 로그', '${AppConfig.enableNetworkLog}'),
-          _Row('DLP 최소 지연', '${AppConfig.dlpMinDelay.inMilliseconds}ms'),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        const Text('설정값', style: TextStyle(fontWeight: FontWeight.bold)),
+        _Row('API', AppConfig.apiBaseUrl),
+        _Row('Mock 사용', '${AppConfig.useMock}'),
+        _Row('네트워크 로그', '${AppConfig.enableNetworkLog}'),
+        _Row('DLP 최소 지연', '${AppConfig.dlpMinDelay.inMilliseconds}ms'),
+      ],
     );
   }
 }
 
 /// 화면 바로 이동.
 class _NavigateView extends StatelessWidget {
-  const _NavigateView();
+  const _NavigateView({required this.onClose});
+
+  final VoidCallback onClose;
 
   static const _destinations = <(String, String)>[
     ('시작', Routes.splash),
@@ -361,27 +463,23 @@ class _NavigateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const _Handle(),
-          const SizedBox(height: 12),
-          for (final (label, route) in _destinations)
-            ListTile(
-              dense: true,
-              title: Text(label),
-              onTap: () {
-                Navigator.pop(context);
-                context.go(route);
-              },
-            ),
-          const SizedBox(height: 12),
-        ],
-      ),
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        for (final (label, route) in _destinations)
+          ListTile(
+            dense: true,
+            title: Text(label),
+            onTap: () {
+              onClose();
+              context.go(route);
+            },
+          ),
+      ],
     );
   }
 }
+
 
 class _Tile extends StatelessWidget {
   const _Tile({
