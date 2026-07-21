@@ -128,7 +128,7 @@ class RoutineServiceTest {
     member.setSupportGoals(Set.of(SupportGoal.PREPARE_ITEMS));
     when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
     when(sensitiveInfoGuardService.check("내일 비 오는 날 학교 가기"))
-      .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "정상", "내일 비 오는 날 학교 가기"));
+      .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "내일 비 오는 날 학교 가기"));
     RoutineAiPipeline.RoutineQuestionResult pipelineResult = new RoutineAiPipeline.RoutineQuestionResult(
       List.of(new RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem(
         "챙겨야 하는 준비물이 있나요?", List.of("우산", "우비")

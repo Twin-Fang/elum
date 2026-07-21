@@ -16,16 +16,13 @@ public record SensitiveInfoCheckResponse(
   @Schema(description = "탐지된 민감정보 카테고리 목록", example = "[\"이름\", \"전화번호\"]")
   List<String> categories,
 
-  @Schema(description = "판정 사유", example = "이름과 전화번호가 포함되어 있습니다.")
-  String reason,
-
   @Schema(description = "민감정보를 카테고리 태그로 치환한 텍스트(검증 실패 시 원문 그대로)", example = "<이름>한테 <전화번호>로 연락주세요")
   String sanitizedText
 ) {
 
   public static SensitiveInfoCheckResponse from(SensitiveInfoCheckResult result) {
     return new SensitiveInfoCheckResponse(
-      result.checked(), result.hasSensitiveInfo(), result.categories(), result.reason(), result.sanitizedText()
+      result.checked(), result.hasSensitiveInfo(), result.categories(), result.sanitizedText()
     );
   }
 }
