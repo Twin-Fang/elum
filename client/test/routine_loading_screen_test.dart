@@ -232,6 +232,53 @@ void main() {
     });
   });
 
+  group('루미 등장 (이슈 #64)', () {
+    /// 화면에 그려진 루미 SVG의 가로 중심. 좌우 어느 쪽에서 나오는지 판단한다.
+    double lumiCenterX(WidgetTester tester) {
+      final finder = svgWithAsset(AppAssets.lumiThinking);
+      expect(finder, findsOneWidget, reason: '루미가 화면에 없다');
+      return tester.getCenter(finder).dx;
+    }
+
+    testWidgets('두 로딩 화면 모두 루미가 나온다', (tester) async {
+      // 생성 화면(262:4703)에도 `Group 26`(364:8291)이 있다.
+      // 준비 화면에만 그리다 시안과 어긋나 있었다.
+      for (final kind in RoutineLoadingKind.values) {
+        await tester.pumpWidget(wrap(kind));
+        await settle(tester);
+
+        expect(
+          svgWithAsset(AppAssets.lumiThinking),
+          findsOneWidget,
+          reason: '$kind 화면에 루미가 없다',
+        );
+
+        await tester.pump(totalHold(kind));
+        await settle(tester);
+      }
+    });
+
+    testWidgets('준비는 왼쪽, 생성은 오른쪽에서 나온다', (tester) async {
+      // Figma `Group 26` x좌표 — 준비 -48(왼쪽 밖) / 생성 325(오른쪽 밖).
+      // 방향이 반대이므로 화면 중앙을 기준으로 갈린다.
+      await tester.pumpWidget(wrap(RoutineLoadingKind.prepare));
+      await settle(tester);
+      final prepareX = lumiCenterX(tester);
+      await tester.pump(totalHold(RoutineLoadingKind.prepare));
+      await settle(tester);
+
+      await tester.pumpWidget(wrap(RoutineLoadingKind.generate));
+      await settle(tester);
+      final generateX = lumiCenterX(tester);
+      await tester.pump(totalHold(RoutineLoadingKind.generate));
+      await settle(tester);
+
+      const screenCenter = 393 / 2;
+      expect(prepareX, lessThan(screenCenter), reason: '준비 루미가 왼쪽이 아니다');
+      expect(generateX, greaterThan(screenCenter), reason: '생성 루미가 오른쪽이 아니다');
+    });
+  });
+
   group('RoutineStage', () {
     test('진행률이 순서대로 늘어난다', () {
       for (final kind in RoutineLoadingKind.values) {

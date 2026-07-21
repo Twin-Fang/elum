@@ -178,14 +178,15 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
       onBack: _handleBack,
       child: Stack(
         children: [
-          // 루미는 준비 화면에만 나온다 (Figma 262:4569 `Group 26`, y=383).
-          // 카드 생성 화면(262:4703)에는 없다.
-          if (widget.kind == RoutineLoadingKind.prepare)
-            Positioned(
-              top: (383 - topBarH).h,
-              left: 0,
-              child: const _LumiPeek(),
-            ),
+          // 루미는 두 화면 모두 y=383에 있고 **좌우만 반대**다.
+          // 준비(262:4569 `Group 26`)는 x=-48로 왼쪽 밖,
+          // 생성(262:4703 `Group 26`=364:8291)은 x=325로 오른쪽 밖에 걸친다.
+          Positioned(
+            top: (383 - topBarH).h,
+            left: 0,
+            right: 0,
+            child: _LumiPeek(side: widget.kind.lumiSide),
+          ),
 
           // sparkles y=225 → 제목 y=285 → 진행률 y=363
           Positioned(
@@ -250,15 +251,20 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
   }
 }
 
-/// 왼쪽에서 나타나 손을 흔들고 다시 숨는 루미 (Figma 262:4569 `Group 26`).
+/// 화면 옆에서 나타나 손을 흔들고 다시 숨는 루미 (Figma `Group 26`).
 ///
 /// 기다리는 동안 화면이 정지해 보이지 않게 하는 장치다. 계속 흔들면 시선을
 /// 뺏으므로 **나왔다 → 흔들고 → 들어간 뒤 쉰다**를 반복한다.
 ///
-/// Figma는 x=-48에 두어 화면 밖에 걸쳐 몸통 일부만 보인다. 정지 시안이라
-/// 등장·퇴장은 그리지 않았지만, 그 위치가 "옆에서 빼꼼 내민" 상태다.
+/// **좌우 양쪽에 쓰인다.** 준비 화면(262:4569)은 왼쪽 x=-48,
+/// 생성 화면(262:4703)은 오른쪽 x=325다. 정지 시안이라 등장·퇴장은 그리지
+/// 않았지만, 그 위치가 "옆에서 빼꼼 내민" 상태다. 방향만 다르고 연출은 같아
+/// 화면을 둘로 나누지 않고 [side]로 받는다.
 class _LumiPeek extends StatefulWidget {
-  const _LumiPeek();
+  const _LumiPeek({required this.side});
+
+  /// 어느 쪽에서 나오는가
+  final LumiSide side;
 
   @override
   State<_LumiPeek> createState() => _LumiPeekState();
@@ -276,12 +282,20 @@ class _LumiPeekState extends State<_LumiPeek>
   static const _width = 122.0;
   static const _height = 123.0;
 
-  /// 다 나왔을 때의 위치. Figma는 x=-48에 두어 **화면 왼쪽 밖으로 걸친다**
-  /// (폭 122의 약 40%가 잘려 몸통 일부만 보인다).
-  static const _restX = -48.0;
+  /// 화면 밖으로 걸치는 정도. Figma 왼쪽은 x=-48이므로 폭 122의 약 40%가
+  /// 잘려 몸통 일부만 보인다. 오른쪽(x=325, 폭 393)도 393-325=68이 보여
+  /// 잘리는 양이 54로 거의 같다 — 한 값으로 양쪽을 표현한다.
+  static const _peekInset = 48.0;
+
+  /// 다 나왔을 때 화면 안쪽으로 들어온 거리 (부호는 [_direction]이 준다)
+  double get _restX => -_peekInset;
 
   /// 숨을 때는 완전히 가려질 만큼 더 빠진다
-  static const _hiddenX = -_width;
+  double get _hiddenX => -_width;
+
+  /// 오른쪽이면 이동 부호를 뒤집는다. `Align`이 기준 모서리를 잡아주므로
+  /// 여기서는 "바깥으로 얼마나 나가는가"만 다루면 된다.
+  double get _direction => widget.side == LumiSide.left ? 1 : -1;
 
   @override
   void initState() {
@@ -327,28 +341,40 @@ class _LumiPeekState extends State<_LumiPeek>
 
   @override
   Widget build(BuildContext context) {
+    final isLeft = widget.side == LumiSide.left;
+
     // 세로 위치는 부모 [Positioned]가 잡는다. 여기선 가로 이동만 맡는다.
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final t = _controller.value;
-        return Transform.translate(
-          // Figma 좌표(393 폭 기준)를 기기 폭에 맞춰 환산한다
-          offset: Offset(_slideX(t).w, 0),
-          child: Transform.rotate(
-            // 몸 전체를 살짝 기울여 손 흔드는 느낌을 낸다.
-            // SVG가 통짜라 팔만 따로 돌릴 수 없다.
-            angle: _armAngle(t),
-            // 발치를 축으로 삼아야 몸이 붕 뜨지 않는다
-            alignment: Alignment.bottomCenter,
-            child: child,
+    // 부모가 left·right를 모두 0으로 주므로 어느 모서리에 붙일지 정해야 한다.
+    return Align(
+      alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          final t = _controller.value;
+          return Transform.translate(
+            // Figma 좌표(393 폭 기준)를 기기 폭에 맞춰 환산한다.
+            // 오른쪽이면 같은 거리를 반대로 밀어 대칭을 만든다.
+            offset: Offset((_slideX(t) * _direction).w, 0),
+            child: Transform.rotate(
+              // 몸 전체를 살짝 기울여 손 흔드는 느낌을 낸다.
+              // SVG가 통짜라 팔만 따로 돌릴 수 없다.
+              angle: _armAngle(t) * _direction,
+              // 발치를 축으로 삼아야 몸이 붕 뜨지 않는다
+              alignment: Alignment.bottomCenter,
+              child: child,
+            ),
+          );
+        },
+        // 오른쪽 루미는 좌우를 뒤집는다 — Figma 262:4703이 거울상이다.
+        // 뒤집지 않으면 얼굴이 화면 밖을 보게 된다.
+        child: Transform.flip(
+          flipX: !isLeft,
+          child: SvgPicture.asset(
+            AppAssets.lumiThinking,
+            width: _width.w,
+            height: _height.h,
           ),
-        );
-      },
-      child: SvgPicture.asset(
-        AppAssets.lumiThinking,
-        width: _width.w,
-        height: _height.h,
+        ),
       ),
     );
   }

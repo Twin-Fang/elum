@@ -18,6 +18,7 @@ enum RoutineLoadingKind {
   /// 262:4569 — DLP 마스킹 + 추가 질문 준비
   prepare(
     title: '루미가 내용을\n정리하고 있어요',
+    lumiSide: LumiSide.left,
     stages: [
       RoutineStage(label: '아이를 알아볼 수 있는 정보는 가려요', percent: 15, hold: _hold4),
       RoutineStage(label: '꼭 필요한 내용만 정리해요', percent: 40, hold: _hold3),
@@ -28,6 +29,7 @@ enum RoutineLoadingKind {
   /// 262:4703 — 행동카드 생성
   generate(
     title: '루미가 행동카드를\n만들고 있어요',
+    lumiSide: LumiSide.right,
     stages: [
       RoutineStage(label: '오늘의 일과를 읽고 있어요', percent: 70, hold: _hold4),
       RoutineStage(label: '중요한 준비물을 찾고 있어요', percent: 80, hold: _hold3),
@@ -35,14 +37,28 @@ enum RoutineLoadingKind {
     ],
   );
 
-  const RoutineLoadingKind({required this.title, required this.stages});
+  const RoutineLoadingKind({
+    required this.title,
+    required this.stages,
+    required this.lumiSide,
+  });
 
   /// 화면 제목 (Figma 원문 — 줄바꿈 위치까지 그대로)
   final String title;
 
   /// 체크리스트 3줄
   final List<RoutineStage> stages;
+
+  /// 루미가 나오는 방향 (Figma `Group 26` x좌표)
+  final LumiSide lumiSide;
 }
+
+/// 루미가 어느 쪽에서 나오는가.
+///
+/// 두 로딩 프레임이 좌우 대칭이다 — 준비(262:4569)는 x=-48로 왼쪽 밖,
+/// 생성(262:4703)은 x=325로 오른쪽 밖에 걸친다. 연출은 같고 방향만 다르므로
+/// 화면을 둘로 나누지 않고 이 값으로 갈린다.
+enum LumiSide { left, right }
 
 /// 로딩 체크리스트 한 줄.
 ///
