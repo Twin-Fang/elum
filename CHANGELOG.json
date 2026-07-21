@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T18:41:13Z",
-    "currentVersion": "1.0.78",
+    "lastUpdated": "2026-07-21T18:57:22Z",
+    "currentVersion": "1.0.79",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 46
+    "totalReleases": 47
   },
   "releases": [
+    {
+      "version": "1.0.79",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 103,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 일과 만들기 추가질문 화면에서 선택지가 이상한 문자열로 보이던 문제를 해결했습니다\n  * 일과 이미지 생성이 실패해도 일과 저장이 끝까지 진행되도록 개선했습니다\n\n* **개선**\n  * 일과 단계 삭제, 수정 관련 내부 처리를 다듬었습니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "일과 만들기 추가질문 화면에서 선택지가 이상한 문자열로 보이던 문제를 해결했습니다",
+            "일과 이미지 생성이 실패해도 일과 저장이 끝까지 진행되도록 개선했습니다"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과 단계 삭제, 수정 관련 내부 처리를 다듬었습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.78",
       "project_type": "flutter",
