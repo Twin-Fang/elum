@@ -33,6 +33,7 @@ public enum ErrorCode {
   ROUTINE_STEP_ORDER_VIOLATION(HttpStatus.CONFLICT, "이전 단계를 먼저 완료해야 합니다."),
   ROUTINE_STEP_NOT_COMPLETED(HttpStatus.CONFLICT, "완료되지 않은 단계입니다."),
   ROUTINE_STEP_CANCEL_ORDER_VIOLATION(HttpStatus.CONFLICT, "가장 최근에 완료한 단계만 취소할 수 있습니다."),
+  ROUTINE_STEP_MIN_COUNT(HttpStatus.CONFLICT, "마지막 남은 단계는 삭제할 수 없습니다."),
   ROUTINE_STEP_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "이미지를 찾을 수 없습니다."),
   ROUTINE_REQUEST_TOO_FREQUENT(HttpStatus.TOO_MANY_REQUESTS, "너무 잦은 요청입니다. 30초 후 다시 시도해주세요."),
 

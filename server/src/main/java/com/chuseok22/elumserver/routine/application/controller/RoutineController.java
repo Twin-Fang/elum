@@ -16,6 +16,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -153,6 +154,16 @@ public class RoutineController implements RoutineControllerDocs {
   ) {
     RoutineResponse response =
       routineService.updateStep(authentication.getName(), routineId, stepId, request);
+    return ResponseEntity.ok(response);
+  }
+
+  // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
+  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @DeleteMapping("/{routineId}/steps/{stepId}")
+  public ResponseEntity<RoutineResponse> deleteStep(
+    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
+  ) {
+    RoutineResponse response = routineService.deleteStep(authentication.getName(), routineId, stepId);
     return ResponseEntity.ok(response);
   }
 }

@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -246,6 +247,40 @@ public class RoutineService {
     targetStep.setDescription(request.description());
 
     return RoutineResponse.from(routine);
+  }
+
+  @Transactional
+  public RoutineResponse deleteStep(String memberId, String routineId, String stepId) {
+    Routine routine = getOwnedRoutine(memberId, routineId);
+    if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
+      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
+    }
+
+    List<RoutineStep> steps = routine.getSteps();
+    if (steps.size() <= 1) {
+      throw new CustomException(ErrorCode.ROUTINE_STEP_MIN_COUNT);
+    }
+
+    RoutineStep targetStep = steps.stream()
+      .filter(step -> step.getId().equals(stepId))
+      .findFirst()
+      .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
+
+    steps.remove(targetStep);
+    renumberSteps(steps);
+
+    return RoutineResponse.from(routine);
+  }
+
+  // 삭제 후 남은 단계들의 stepOrder를 1..N으로 다시 채운다. PENDING_REVIEW 단계는 완료 이력이
+  // 전혀 없어 재채번이 완료/취소 순서 검증 로직과 충돌하지 않는다.
+  private void renumberSteps(List<RoutineStep> steps) {
+    List<RoutineStep> ordered = steps.stream()
+      .sorted(Comparator.comparingInt(RoutineStep::getStepOrder))
+      .toList();
+    for (int i = 0; i < ordered.size(); i++) {
+      ordered.get(i).setStepOrder(i + 1);
+    }
   }
 
   public RoutineResponse getRoutine(String memberId, String routineId) {
