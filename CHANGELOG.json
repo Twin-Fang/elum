@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T21:21:49Z",
-    "currentVersion": "1.0.88",
+    "lastUpdated": "2026-07-21T21:47:14Z",
+    "currentVersion": "1.0.89",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 56
+    "totalReleases": 57
   },
   "releases": [
+    {
+      "version": "1.0.89",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 123,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 아이 모드에서 오늘 할 일이 비어 보이던 문제 해결\n  * 만든 일과가 아이 화면에 바로 표시됩니다\n\n* **개선**\n  * 일과 만들기 실패 시 다시 시도할 수 있게 안내합니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "아이 모드에서 오늘 할 일이 비어 보이던 문제 해결",
+            "만든 일과가 아이 화면에 바로 표시됩니다"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과 만들기 실패 시 다시 시도할 수 있게 안내합니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.88",
       "project_type": "flutter",
