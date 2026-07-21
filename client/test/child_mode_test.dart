@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:elum/features/child/application/child_routine_notifier.dart';
 import 'package:elum/features/child/domain/reward_character.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
@@ -17,6 +19,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
 /// Figma `아이_홈`(309:3548/309:3648) · `아이_보상`(309:4055 등) 정합 테스트.
@@ -36,7 +39,7 @@ void main() {
     ),
   ];
 
-  Widget wrap(Widget screen, {List<ActionCard> steps = cards}) {
+  Widget wrap(Widget screen, {List<ActionCard> steps = cards, String? pin}) {
     final router = GoRouter(
       initialLocation: Routes.child,
       routes: [
@@ -59,7 +62,7 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [testStorageOverride(onboardingCompleted: true)],
+      overrides: [testStorageOverride(onboardingCompleted: true, pin: pin)],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
         builder: (context, _) => MaterialApp.router(
@@ -74,8 +77,9 @@ void main() {
   Future<ProviderContainer> pumpChild(
     WidgetTester tester, {
     List<ActionCard> steps = cards,
+    String? pin,
   }) async {
-    await tester.pumpWidget(wrap(const ChildHomeScreen(), steps: steps));
+    await tester.pumpWidget(wrap(const ChildHomeScreen(), steps: steps, pin: pin));
     await tester.pumpAndSettle();
 
     final container = ProviderScope.containerOf(
@@ -247,6 +251,67 @@ void main() {
         ModeSwitchTarget.fromName('guardian'),
         ModeSwitchTarget.guardian,
       );
+    });
+  });
+
+  group('아이 → 보호자 PIN 검증 (이슈 #61)', () {
+    testWidgets('아이 홈에서 보호자로 가려면 PIN 화면을 거친다', (tester) async {
+      // 배지를 눌러 곧장 보호자 홈으로 가면 아이가 혼자 빠져나갈 수 있다.
+      await pumpChild(tester, pin: '1234');
+
+      // 상단 오른쪽 캐릭터 배지가 보호자 모드로 나가는 유일한 입구다
+      await tester.tap(
+        find.ancestor(
+          of: svgWithAsset(AppAssets.characterBadgeRuru),
+          matching: find.byType(AppPressable),
+        ).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('암호를 입력하면 보호자 화면으로 전환돼요'), findsOneWidget);
+      expect(find.text('보호자 홈'), findsNothing, reason: 'PIN 없이 보호자 홈에 도달했다');
+    });
+
+    testWidgets('틀린 PIN으로는 보호자 화면에 가지 못한다', (tester) async {
+      await tester.pumpWidget(
+        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.guardian),
+            pin: '1234'),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '9999');
+      await tester.pumpAndSettle();
+
+      expect(find.text('보호자 홈'), findsNothing);
+      // 조용히 비우고 다시 받는다 — 붉은 경고를 띄우지 않는다
+      expect(find.text('암호를 입력하면 보호자 화면으로 전환돼요'), findsOneWidget);
+    });
+
+    testWidgets('맞는 PIN이면 보호자 화면으로 넘어간다', (tester) async {
+      await tester.pumpWidget(
+        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.guardian),
+            pin: '1234'),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '1234');
+      await tester.pumpAndSettle();
+
+      expect(find.text('보호자 홈'), findsOneWidget);
+    });
+
+    testWidgets('보호자 → 아이 방향도 PIN을 요구한다', (tester) async {
+      // 양방향 모두 막는다. 한쪽만 막으면 우회로가 생긴다.
+      await tester.pumpWidget(
+        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.child),
+            pin: '1234'),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '9999');
+      await tester.pumpAndSettle();
+
+      expect(find.text('암호를 입력하면 아이 화면으로 전환돼요'), findsOneWidget);
     });
   });
 
