@@ -34,6 +34,14 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  flutter_riverpod: ^3.3.2
+  riverpod_annotation: ^4.0.3
+  go_router: ^17.3.0
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.12.0
+  dio: ^5.10.0
+  shared_preferences: ^2.5.5
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +64,16 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Figma 디자인 기준 폰트 — 토큰은 docs/design-system.md 참조
+  # Cloudsofa_namgim(로고 64px)은 폰트 파일 미확보 → 이미지 에셋으로 처리
+  fonts:
+    - family: TmoneyRoundWind
+      fonts:
+        - asset: assets/fonts/TmoneyRoundWindRegular.ttf
+          weight: 400
+        - asset: assets/fonts/TmoneyRoundWindExtraBold.ttf
+          weight: 800
 
   # To add assets to your application, add an assets section, like this:
   # assets:
