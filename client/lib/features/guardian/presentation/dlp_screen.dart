@@ -140,8 +140,8 @@ class _MaskResult extends StatelessWidget {
           _TextBlock(
             label: 'AI에게 전달되는 내용',
             text: masked,
-            background: colors.selectedFill,
-            borderColor: colors.selectedBorder,
+            background: colors.highlightFill,
+            borderColor: colors.highlightBorder,
           ),
         ],
       ),
@@ -165,9 +165,9 @@ class _TypeChip extends StatelessWidget {
         vertical: context.space.xs,
       ),
       decoration: BoxDecoration(
-        color: colors.selectedFill,
+        color: colors.highlightFill,
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: colors.selectedBorder),
+        border: Border.all(color: colors.highlightBorder),
       ),
       child: Text(
         '$label 보호됨',

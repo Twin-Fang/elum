@@ -11,9 +11,51 @@
 | 문서 | 내용 |
 | --- | --- |
 | [docs/design-system.md](./docs/design-system.md) | 색·타이포·간격·컴포넌트 토큰 (Figma 추출값) |
-| [docs/onboarding-flow.md](./docs/onboarding-flow.md) | 온보딩 12개 프레임 화면별 명세 |
+| [docs/onboarding-flow.md](./docs/onboarding-flow.md) | 온보딩 12개 프레임 화면별 명세 + **프레임 노드 ID 표** |
 | [docs/architecture.md](./docs/architecture.md) | 폴더 구조, 상태관리, 라우팅, 서버 연동 규칙 |
 | [docs/troubleshooting.md](./docs/troubleshooting.md) | **실제로 겪은 문제와 해결법** — 에러를 만나면 여기부터 |
+
+## 원본이 어디 있는가 ⚠️ 먼저 읽을 것
+
+추측해서 만들지 않는다. 화면도 API도 **원본을 열어보고** 맞춘다.
+
+### Figma — 디자인 원본
+
+```
+파일    https://www.figma.com/design/VSmGuv1iuOpLZmp6QeBHWr/이룸
+fileKey VSmGuv1iuOpLZmp6QeBHWr
+온보딩   238:3022   ← 섹션 루트. 여기를 덤프하면 프레임 12개가 한 번에 나온다
+```
+
+화면별 프레임 노드 ID는 [docs/onboarding-flow.md](./docs/onboarding-flow.md#프레임--노드-id)에 있다.
+
+**규칙**
+
+1. Figma URL(`?node-id=204-1002`)을 받으면 `mcp__figma__get_figma_data`로 **그 노드를 직접 덤프**한다.
+2. 덤프와 `docs/`의 명세가 다르면 **덤프가 기준**이다. 문서를 고친다.
+3. 덤프에 없는 색·간격을 추측해 채우지 않는다. 모르면 **사용자에게 묻는다.**
+4. 에셋(`IMAGE-SVG`/`COMPONENT`/`INSTANCE`)은 코드보다 **먼저** 다운로드한다 (§2 에셋 우선 원칙).
+
+> URL의 `node-id=204-1002`는 MCP 호출 시 `204:1002`로 바꿔 쓴다(하이픈→콜론).
+
+### 서버 — API 원본
+
+```
+Swagger  https://api.elum.chuseok22.com/v3/api-docs      ← 배포된 계약(OpenAPI JSON)
+내부 로직  <repo>/server/src/main/java/com/chuseok22/elumserver/**
+```
+
+**Swagger는 "무엇을 받는가", `server/` 코드는 "왜 그런가"를 본다.**
+필드명·enum 값이 궁금하면 Swagger로 충분하다. 검증 규칙·분기·실패 동작을 알아야 하면
+`server/`의 Controller·DTO·Entity를 직접 연다. 둘이 다르면 **서버 코드가 기준이다.**
+
+온보딩이 쓰는 엔드포인트:
+
+| 메서드 | 경로 | 용도 |
+| --- | --- | --- |
+| PATCH | `/api/member/nickname` | 호칭 저장 |
+| PATCH | `/api/member/support-goals` | 도움 목표 저장 |
+| GET | `/api/member/me` | 프로필 조회 |
 
 ## 기술 스택 (확정)
 

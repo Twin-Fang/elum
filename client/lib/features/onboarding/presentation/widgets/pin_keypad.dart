@@ -84,7 +84,7 @@ class PinDots extends StatelessWidget {
             margin: EdgeInsets.symmetric(horizontal: context.space.xs),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: i < filled ? colors.selectedBorder : colors.border,
+              color: i < filled ? colors.highlightBorder : colors.border,
             ),
           ),
       ],

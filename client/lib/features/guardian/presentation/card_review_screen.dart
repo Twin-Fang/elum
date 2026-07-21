@@ -98,7 +98,7 @@ class _CardTile extends StatelessWidget {
             height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: colors.selectedFill,
+              color: colors.highlightFill,
               shape: BoxShape.circle,
             ),
             child: Text(

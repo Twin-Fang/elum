@@ -19,6 +19,8 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     required this.fieldH,
     required this.fieldRadius,
     required this.cardRadius,
+    required this.borderWidth,
+    required this.selectedBorderWidth,
     required this.headerTop,
   });
 
@@ -43,6 +45,12 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
   /// 선택 카드 radius (목표 칩·캐릭터 카드)
   final double cardRadius;
 
+  /// 기본 테두리 두께
+  final double borderWidth;
+
+  /// 선택 상태 테두리 두께 — 목표 칩·캐릭터 카드 공통 2px
+  final double selectedBorderWidth;
+
   /// 상태바 아래 제목 시작 위치 (y=131)
   final double headerTop;
 
@@ -59,6 +67,8 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     fieldH: 68,
     fieldRadius: 20,
     cardRadius: 20,
+    borderWidth: 1,
+    selectedBorderWidth: 2,
     headerTop: 72,
   );
 
@@ -76,6 +86,8 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     double? fieldH,
     double? fieldRadius,
     double? cardRadius,
+    double? borderWidth,
+    double? selectedBorderWidth,
     double? headerTop,
   }) {
     return AppSpacing(
@@ -91,6 +103,8 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
       fieldH: fieldH ?? this.fieldH,
       fieldRadius: fieldRadius ?? this.fieldRadius,
       cardRadius: cardRadius ?? this.cardRadius,
+      borderWidth: borderWidth ?? this.borderWidth,
+      selectedBorderWidth: selectedBorderWidth ?? this.selectedBorderWidth,
       headerTop: headerTop ?? this.headerTop,
     );
   }
@@ -111,6 +125,9 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
       fieldH: lerpDouble(fieldH, other.fieldH, t),
       fieldRadius: lerpDouble(fieldRadius, other.fieldRadius, t),
       cardRadius: lerpDouble(cardRadius, other.cardRadius, t),
+      borderWidth: lerpDouble(borderWidth, other.borderWidth, t),
+      selectedBorderWidth:
+          lerpDouble(selectedBorderWidth, other.selectedBorderWidth, t),
       headerTop: lerpDouble(headerTop, other.headerTop, t),
     );
   }

@@ -102,18 +102,20 @@ class _OptionChip extends StatelessWidget {
         margin: EdgeInsets.only(bottom: space.sm),
         padding: EdgeInsets.all(space.md),
         decoration: BoxDecoration(
-          color: isSelected ? colors.selectedFill : colors.surface,
+          color: isSelected ? colors.goalSelectedFill : colors.surface,
           borderRadius: BorderRadius.circular(space.cardRadius),
           border: Border.all(
-            color: isSelected ? colors.selectedBorder : colors.border,
-            width: isSelected ? 2 : 1,
+            color: isSelected ? colors.goalSelectedBorder : colors.border,
+            width: isSelected
+                ? space.selectedBorderWidth
+                : space.borderWidth,
           ),
         ),
         child: Row(
           children: [
             Icon(
               isSelected ? Icons.check_circle : Icons.circle_outlined,
-              color: isSelected ? colors.selectedBorder : colors.border,
+              color: isSelected ? colors.goalSelectedBorder : colors.border,
             ),
             SizedBox(width: space.sm),
             Text(

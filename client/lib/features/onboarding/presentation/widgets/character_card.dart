@@ -7,8 +7,9 @@ import '../../domain/character.dart';
 
 /// 캐릭터 선택 카드. Figma 기준 176×202.
 ///
-/// 목표 칩과 선택 색은 같지만 레이아웃이 달라 별도 위젯으로 둔다.
-/// (같은 것은 토큰으로 공유하고, 다른 것은 분리한다)
+/// 선택 색이 **캐릭터마다 다르다** — 여우는 복숭아, 고양이는 파랑.
+/// (Figma 온보딩_캐릭터_여우 204:1121 / 온보딩_캐릭터_고양이 204:1134)
+/// 목표 칩(민트)과도 다르므로 색을 공유하지 않는다.
 class CharacterCard extends StatelessWidget {
   const CharacterCard({
     super.key,
@@ -24,15 +25,18 @@ class CharacterCard extends StatelessWidget {
     final colors = context.colors;
     final space = context.space;
 
+    // 캐릭터별 선택 색 — enum이 늘면 여기서 컴파일 에러가 난다
+    final selection = colors.characterSelected(character);
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       height: 202,
       decoration: BoxDecoration(
-        color: isSelected ? colors.selectedFill : colors.surface,
+        color: isSelected ? selection.fill : colors.surface,
         borderRadius: BorderRadius.circular(space.cardRadius),
         border: Border.all(
-          color: isSelected ? colors.selectedBorder : colors.border,
-          width: isSelected ? 2 : 1,
+          color: isSelected ? selection.border : colors.border,
+          width: isSelected ? space.selectedBorderWidth : space.borderWidth,
         ),
       ),
       child: Center(
