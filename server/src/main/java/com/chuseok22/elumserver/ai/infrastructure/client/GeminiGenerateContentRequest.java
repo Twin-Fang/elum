@@ -22,7 +22,21 @@ public record GeminiGenerateContentRequest(
 
   }
 
-  public record GeminiPart(String text) {
+  // 텍스트 전용 파트는 inlineData를, 캐릭터 참조 이미지 파트는 text를 각각 보내지 않아야 하므로
+  // NON_NULL로 직렬화 시 생략한다.
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  public record GeminiPart(String text, GeminiInlineData inlineData) {
+
+    public GeminiPart(String text) {
+      this(text, null);
+    }
+
+    public static GeminiPart ofInlineData(String mimeType, String data) {
+      return new GeminiPart(null, new GeminiInlineData(mimeType, data));
+    }
+  }
+
+  public record GeminiInlineData(String mimeType, String data) {
 
   }
 }
