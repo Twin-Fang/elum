@@ -27,6 +27,7 @@ public class GeminiImageClient {
   private final GeminiProperties geminiProperties;
   private final PromptTemplateService promptTemplateService;
   private final CharacterReferenceProvider characterReferenceProvider;
+  private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
 
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
     String prefix = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
@@ -48,7 +49,7 @@ public class GeminiImageClient {
       String base64Image = Base64.getEncoder().encodeToString(characterImage);
       parts.add(GeminiGenerateContentRequest.GeminiPart.ofInlineData("image/png", base64Image));
     }
-    String promptText = prefix + stepDescription;
+    String promptText = imagePromptBuilder.build(prefix, stepDescription, characterType);
     parts.add(new GeminiGenerateContentRequest.GeminiPart(promptText));
 
     // responseModalities를 명시하지 않으면 이미지 생성 모델이 간헐적으로 텍스트만
