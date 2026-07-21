@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
@@ -74,9 +75,18 @@ class QuestionScreen extends ConsumerWidget {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: space.lg),
-            SvgPicture.asset(AppAssets.iconSparklesLarge, width: 30, height: 36),
-            SizedBox(height: space.lg),
+            // Figma(262:4766)는 sparkles를 y=225에 둔다. 상단바(약 111)를 뺀
+            // 만큼 띄워야 화면 중간에서 시작한다 — 그냥 쌓으면 전부 위로 몰린다.
+            //
+            // 질문이 2개 이상 오면 스크롤이 필요하므로 Stack 대신 여백을 쓴다.
+            SizedBox(height: (225 - 111).h),
+            SvgPicture.asset(
+              AppAssets.iconSparklesLarge,
+              width: 30.w,
+              height: 36.h,
+            ),
+            // sparkles 하단(261) → 제목(285)
+            SizedBox(height: 24.h),
             for (final (index, item) in questions.indexed) ...[
               if (index > 0) SizedBox(height: space.xl),
               _QuestionBlock(
@@ -164,8 +174,10 @@ class _QuestionBlockState extends State<_QuestionBlock> {
 
     return Column(
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: space.screenH),
+        // Figma는 제목 폭을 307로 고정한다(x=43, 393-43*2=307).
+        // 화면 폭을 다 쓰면 "물건이 있나요?"가 "있나 / 요?"로 어색하게 꺾인다.
+        SizedBox(
+          width: 307.w,
           child: Text(
             widget.item.question,
             textAlign: TextAlign.center,
@@ -173,7 +185,8 @@ class _QuestionBlockState extends State<_QuestionBlock> {
                 .copyWith(color: context.colors.textPrimary),
           ),
         ),
-        SizedBox(height: space.lg),
+        // 제목 하단(384) → 칩(424)
+        SizedBox(height: 40.h),
         // 선택지 길이가 제각각이라 Wrap이 자연스럽다.
         // 입력 화면의 추천 칩과 달리 Figma도 고정 배치가 아니다.
         Padding(
@@ -186,8 +199,9 @@ class _QuestionBlockState extends State<_QuestionBlock> {
             curve: AppMotion.standard,
             child: Wrap(
               alignment: WrapAlignment.center,
-              spacing: 6,
-              runSpacing: 8,
+              // Figma: 칩 사이 6, 줄 사이 8
+              spacing: 6.w,
+              runSpacing: 8.h,
               children: [
                 for (final option in widget.item.options)
                   _OptionChip(
@@ -260,7 +274,7 @@ class _CustomOptionField extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          height: 52,
+          height: 52.h,
           decoration: BoxDecoration(
             color: colors.glassSurface,
             borderRadius: BorderRadius.circular(space.cardRadius),
@@ -346,12 +360,13 @@ class _OptionChip extends StatelessWidget {
           child: AnimatedContainer(
             duration: AppMotion.fast,
             curve: AppMotion.standard,
-            // X가 붙으면 오른쪽 여백을 줄여 X가 그 자리를 대신한다
+            // Figma 실측 padding 10×16.
+            // X가 붙으면 오른쪽 여백을 줄여 X가 그 자리를 대신한다.
             padding: EdgeInsets.only(
-              left: 16,
-              right: onRemove == null ? 16 : 8,
-              top: 10,
-              bottom: 10,
+              left: 16.w,
+              right: (onRemove == null ? 16 : 8).w,
+              top: 10.h,
+              bottom: 10.h,
             ),
             decoration: BoxDecoration(
               color: isSelected ? colors.textPrimary : colors.glassChip,
@@ -365,13 +380,17 @@ class _OptionChip extends StatelessWidget {
                   style: context.typo.chipLabel.copyWith(color: labelColor),
                 ),
                 if (onRemove != null) ...[
-                  const SizedBox(width: 4),
+                  SizedBox(width: 4.w),
                   GestureDetector(
                     key: ValueKey('remove-$label'),
                     onTap: onRemove,
                     // 아이콘만으로는 터치 영역이 좁아 누르기 어렵다
                     behavior: HitTestBehavior.opaque,
-                    child: Icon(Icons.close_rounded, size: 16, color: labelColor),
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: 16.w,
+                      color: labelColor,
+                    ),
                   ),
                 ],
               ],
