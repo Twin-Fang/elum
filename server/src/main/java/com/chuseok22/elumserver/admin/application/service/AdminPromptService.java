@@ -9,6 +9,7 @@ import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiGenerateContentResponse;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.GeminiRoutineImagePromptBuilder;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplate;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -17,6 +18,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,7 @@ public class AdminPromptService {
   private final SensitiveInfoGuardService sensitiveInfoGuardService;
   private final GeminiTextClient geminiTextClient;
   private final GeminiImageClient geminiImageClient;
+  private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
 
   public List<PromptTemplate> getAll() {
     return promptTemplateService.getAll();
@@ -43,15 +46,19 @@ public class AdminPromptService {
     promptTemplateService.update(key, content);
   }
 
-  // 각 클라이언트의 실제 프롬프트 조립 방식을 그대로 재현한다:
-  // - LOCAL_LLM/텍스트/질문 생성: <text> 태그로 래핑
-  // - 이미지: prefix + 설명을 그대로 이어붙임(래핑 없음, GeminiImageClient와 동일)
-  public String preview(PromptKey key, String content, String sampleInput) {
+  // 각 클라이언트의 실제 프롬프트 조립 메서드를 그대로 재사용한다 — preview와 실제 호출이
+  // 항상 같은 결과를 내도록, <text> 태그나 JSON 래핑을 이 메서드가 직접 조립하지 않는다.
+  public String preview(PromptKey key, String content, String sampleInput, CharacterType character) {
     return switch (key) {
-      case LOCAL_LLM_SENSITIVE_INFO_CHECK, GEMINI_ROUTINE_CREATE_PREFIX, GEMINI_ROUTINE_REVISE_PREFIX,
-        GEMINI_ROUTINE_QUESTION_PREFIX ->
-        "[System]\n" + content + "\n\n[User]\n<text>" + sampleInput + "</text>";
-      case GEMINI_ROUTINE_IMAGE_PREFIX -> content + sampleInput;
+      case LOCAL_LLM_SENSITIVE_INFO_CHECK ->
+        "[System]\n" + content + "\n\n[User]\n" + sensitiveInfoGuardService.buildUserContent(sampleInput);
+      case GEMINI_ROUTINE_CREATE_PREFIX -> "[System]\n" + content + "\n\n[User]\n"
+        + geminiTextClient.buildCreateRoutineUserContent(sampleInput, null, Set.of(), List.of());
+      case GEMINI_ROUTINE_REVISE_PREFIX -> "[System]\n" + content + "\n\n[User]\n"
+        + geminiTextClient.buildReviseRoutineUserContent("", List.of(), sampleInput, null, Set.of());
+      case GEMINI_ROUTINE_QUESTION_PREFIX -> "[System]\n" + content + "\n\n[User]\n"
+        + geminiTextClient.buildQuestionUserContent(sampleInput, null, Set.of());
+      case GEMINI_ROUTINE_IMAGE_PREFIX -> imagePromptBuilder.build(content, sampleInput, character);
     };
   }
 
@@ -61,8 +68,12 @@ public class AdminPromptService {
         SensitiveInfoCheckResult result = sensitiveInfoGuardService.checkForTest(content, sampleInput);
         yield new PromptTestResponse(result, null);
       }
-      case GEMINI_ROUTINE_CREATE_PREFIX, GEMINI_ROUTINE_REVISE_PREFIX -> {
+      case GEMINI_ROUTINE_CREATE_PREFIX -> {
         RoutineStepDraft draft = testGeminiText(content, sampleInput);
+        yield new PromptTestResponse(draft, null);
+      }
+      case GEMINI_ROUTINE_REVISE_PREFIX -> {
+        RoutineStepDraft draft = testGeminiRevise(content, sampleInput);
         yield new PromptTestResponse(draft, null);
       }
       case GEMINI_ROUTINE_QUESTION_PREFIX -> {
@@ -83,6 +94,17 @@ public class AdminPromptService {
       return objectMapper.readValue(json, RoutineStepDraft.class);
     } catch (Exception e) {
       log.warn("[관리자 테스트] Gemini 텍스트 생성 실패: systemPrompt={}, sampleInput={}", systemPrompt, sampleInput, e);
+      throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED);
+    }
+  }
+
+  private RoutineStepDraft testGeminiRevise(String systemPrompt, String sampleFeedback) {
+    try {
+      GeminiGenerateContentResponse response = geminiTextClient.reviseForTest(systemPrompt, sampleFeedback);
+      String json = response.candidates().get(0).content().parts().get(0).text();
+      return objectMapper.readValue(json, RoutineStepDraft.class);
+    } catch (Exception e) {
+      log.warn("[관리자 테스트] Gemini 루틴 수정 테스트 실패: systemPrompt={}, sampleInput={}", systemPrompt, sampleFeedback, e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED);
     }
   }

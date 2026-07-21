@@ -114,6 +114,15 @@ public class SensitiveInfoGuardService {
     return objectMapper.writeValueAsString(Map.of("text", text));
   }
 
+  // 관리자 preview 전용: 실제 검증 없이 실제 호출과 동일한 JSON 래핑 결과만 보여준다.
+  public String buildUserContent(String text) {
+    try {
+      return wrapAsData(text);
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException("로컬 LLM 요청 JSON 직렬화 실패", e);
+    }
+  }
+
   // fail-open 시 마스킹 없이 원문을 그대로 sanitizedText로 반환한다 — 검증 실패를 이유로
   // 서비스를 막지 않되, 이 경우 마스킹 없이 원문이 그대로 다음 단계(외부 AI)로 전달된다.
   private SensitiveInfoCheckResult passThrough(String originalText) {
