@@ -16,6 +16,27 @@ enum AuthOutcome {
 
   /// 인증 실패 — 시작 화면에 머문다
   failed,
+
+  /// 서버에 닿지 못했다 (DNS·연결 실패·타임아웃).
+  ///
+  /// [failed]와 나눠둔 이유는 화면이 보여줄 문구가 다르기 때문이다. 네트워크가
+  /// 끊긴 건데 "이름을 4자 이상으로" 안내하면 사용자는 이름만 계속 고치게 된다.
+  offline,
+}
+
+/// 서버에 닿지 못한 실패인가. 응답 코드를 못 받은 경우가 여기에 해당한다.
+bool _isOffline(Object e) {
+  if (e is! DioException) return false;
+  // 응답이 있으면 서버까지는 닿은 것이므로 오프라인이 아니다.
+  if (e.response != null) return false;
+  return switch (e.type) {
+    DioExceptionType.connectionError ||
+    DioExceptionType.connectionTimeout ||
+    DioExceptionType.sendTimeout ||
+    DioExceptionType.receiveTimeout =>
+      true,
+    _ => false,
+  };
 }
 
 /// 아이 이름을 아이디로 쓰는 인증.
@@ -49,17 +70,28 @@ class AuthRepository {
     if (name.isEmpty) return AuthOutcome.failed;
 
     final isNew = await _signUp(name);
+    // 가입 단계에서 이미 서버에 못 닿았다. 로그인도 같은 결과이므로 바로 끝낸다.
+    if (isNew == null) return AuthOutcome.offline;
 
     final token = await _login(name);
-    if (token == null) return AuthOutcome.failed;
+    if (token == null) {
+      return _lastLoginWasOffline ? AuthOutcome.offline : AuthOutcome.failed;
+    }
 
     return isNew ? AuthOutcome.created : AuthOutcome.restored;
   }
 
-  /// 가입을 시도한다. **새로 만들어졌으면 true.**
+  /// 직전 [_login]이 서버에 닿지 못해 실패했는가.
+  ///
+  /// `_login`은 토큰(`String?`)을 반환해야 해서 실패 사유를 함께 돌려줄 자리가
+  /// 없다. 재발급 경로([reauthenticate])와 반환 타입을 공유하므로 플래그로 뺐다.
+  bool _lastLoginWasOffline = false;
+
+  /// 가입을 시도한다. **새로 만들어졌으면 true, 기존 이름이면 false.**
   ///
   /// 409(`DUPLICATE_USERNAME`)는 오류가 아니라 "이미 있는 이름"이라는 정보다.
-  Future<bool> _signUp(String username) async {
+  /// 서버에 닿지 못하면 신규·기존을 판단할 수 없으므로 **null**을 준다.
+  Future<bool?> _signUp(String username) async {
     try {
       await _dio.post<dynamic>(
         '/api/auth/signup',
@@ -71,6 +103,10 @@ class AuthRepository {
         // 기존 사용자다. 정상 경로이므로 로그인으로 넘어간다.
         return false;
       }
+      if (_isOffline(e)) {
+        debugPrint('[auth] 가입 실패 — 서버에 닿지 못했다: ${e.type}');
+        return null;
+      }
       // 이름이 4자 미만이면 서버가 400을 준다. 우회하지 않고 그대로 둔다.
       debugPrint('[auth] 가입 실패 (${e.response?.statusCode}): $e');
       return false;
@@ -81,6 +117,7 @@ class AuthRepository {
   }
 
   Future<String?> _login(String username) async {
+    _lastLoginWasOffline = false;
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/api/auth/login',
@@ -96,7 +133,12 @@ class AuthRepository {
       await _storage.setAccessToken(token);
       return token;
     } catch (e) {
-      debugPrint('[auth] 로그인 실패: $e');
+      _lastLoginWasOffline = _isOffline(e);
+      if (_lastLoginWasOffline) {
+        debugPrint('[auth] 로그인 실패 — 서버에 닿지 못했다');
+      } else {
+        debugPrint('[auth] 로그인 실패: $e');
+      }
       return null;
     }
   }

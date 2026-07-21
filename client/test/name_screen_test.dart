@@ -179,6 +179,20 @@ void main() {
       // 제보를 추적하려면 화면에 식별자가 있어야 한다
       expect(find.textContaining('E-AUTH'), findsOneWidget);
     });
+
+    testWidgets('네트워크가 끊기면 이름이 아니라 연결을 안내한다', (tester) async {
+      // 이름 문제로 안내하면 사용자가 이름만 계속 고치게 된다.
+      await tester.pumpWidget(buildSubject(outcome: AuthOutcome.offline));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '하늘이별');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('다음'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('E-NET'), findsOneWidget);
+      expect(find.textContaining('E-AUTH'), findsNothing);
+    });
   });
 }
 
@@ -192,7 +206,8 @@ class _FakeAuth implements AuthRepository {
   Future<AuthOutcome> signInWithName(String childName) async => outcome;
 
   @override
-  bool get hasToken => outcome != AuthOutcome.failed;
+  bool get hasToken =>
+      outcome != AuthOutcome.failed && outcome != AuthOutcome.offline;
 
   @override
   Future<String?> reauthenticate() async => null;

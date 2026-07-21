@@ -74,6 +74,11 @@ class _NameScreenState extends ConsumerState<NameScreen> {
           // 서버가 이름을 4자 이상으로 제한한다. 그 외 실패도 여기로 온다.
           _errorMessage = '이름으로 시작할 수 없어요. 4자 이상으로 다시 입력해주세요. (E-AUTH)';
         });
+      case AuthOutcome.offline:
+        setState(() {
+          // 이름 문제가 아니다. 이름을 고치라고 안내하면 계속 헛수고를 하게 된다.
+          _errorMessage = '인터넷 연결을 확인하고 다시 눌러주세요. (E-NET)';
+        });
     }
 
     if (mounted) setState(() => _isSubmitting = false);

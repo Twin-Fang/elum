@@ -117,6 +117,50 @@ void main() {
       expect(await repo.signInWithName('하늘이'), AuthOutcome.failed);
     });
 
+    /// 실기기에서 INTERNET 권한이 없어 DNS부터 막혔을 때, 화면이 "이름을 4자
+    /// 이상으로" 안내해 사용자가 이름만 계속 고치는 문제가 있었다.
+    /// 네트워크 실패는 이름 문제와 구분되어야 한다.
+    test('서버에 닿지 못하면 offline으로 구분한다', () async {
+      adapter
+        ..stubConnectionError('/api/auth/signup')
+        ..stubConnectionError('/api/auth/login');
+
+      final repo = AuthRepository(dio: dio, storage: storage);
+
+      expect(await repo.signInWithName('하늘이별'), AuthOutcome.offline);
+    });
+
+    test('가입 단계에서 끊기면 로그인을 시도하지 않는다', () async {
+      // 서버에 못 닿는 게 확실하므로 같은 요청을 한 번 더 보낼 이유가 없다.
+      adapter.stubConnectionError('/api/auth/signup');
+
+      final repo = AuthRepository(dio: dio, storage: storage);
+      await repo.signInWithName('하늘이별');
+
+      expect(adapter.pathsCalled, isNot(contains('/api/auth/login')));
+    });
+
+    test('가입은 됐는데 로그인에서 끊기면 offline이다', () async {
+      adapter
+        ..stub('/api/auth/signup', 201, <String, dynamic>{})
+        ..stubConnectionError('/api/auth/login');
+
+      final repo = AuthRepository(dio: dio, storage: storage);
+
+      expect(await repo.signInWithName('하늘이별'), AuthOutcome.offline);
+    });
+
+    test('서버가 응답한 실패는 offline이 아니다', () async {
+      // 400·500은 서버까지 닿은 것이다. 네트워크 안내를 하면 오히려 혼란스럽다.
+      adapter
+        ..stub('/api/auth/signup', 400, {'errorCode': 'INVALID_INPUT_VALUE'})
+        ..stub('/api/auth/login', 401, <String, dynamic>{});
+
+      final repo = AuthRepository(dio: dio, storage: storage);
+
+      expect(await repo.signInWithName('하늘이'), AuthOutcome.failed);
+    });
+
     test('저장된 이름으로 토큰을 재발급한다', () async {
       await storage.setNickname('하늘이별');
       adapter.stub('/api/auth/login', 200, loginBody('fresh'));
@@ -323,8 +367,16 @@ class _FakeAdapter implements HttpClientAdapter {
   /// 마지막 요청 본문. 어떤 자격증명을 보냈는지 검증한다.
   var lastBody = <String, dynamic>{};
 
+  /// 연결 자체가 실패하는 경로. 응답을 못 받는 상황(DNS·오프라인)을 흉내낸다.
+  final _connectionErrors = <String>{};
+
   void stub(String path, int status, Map<String, dynamic> body) {
     _single[path] = (status, body);
+  }
+
+  /// 서버에 닿지 못하게 만든다. 실기기 오프라인과 같은 DioException이 난다.
+  void stubConnectionError(String path) {
+    _connectionErrors.add(path);
   }
 
   /// 호출 순서대로 다른 응답을 돌려준다 (401 → 200 재시도 검증용)
@@ -343,6 +395,13 @@ class _FakeAdapter implements HttpClientAdapter {
     lastHeaders = Map<String, dynamic>.from(options.headers);
     if (options.data case final Map<String, dynamic> body) {
       lastBody = Map<String, dynamic>.from(body);
+    }
+
+    if (_connectionErrors.contains(options.path)) {
+      throw DioException.connectionError(
+        requestOptions: options,
+        reason: 'Failed host lookup',
+      );
     }
 
     final sequence = _sequences[options.path];
