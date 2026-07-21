@@ -7,6 +7,9 @@ import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoal
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
+import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
   private final MemberRepository memberRepository;
+
+  private final RoutineRepository routineRepository;
 
   public MemberResponse getMyInfo(String memberId) {
     Member member = memberRepository.findById(memberId)
@@ -39,5 +44,16 @@ public class MemberService {
     member.getSupportGoals().clear();
     member.getSupportGoals().addAll(request.supportGoals());
     return MemberResponse.from(member);
+  }
+
+  @Transactional
+  public void withdraw(String memberId) {
+    Member member = memberRepository.findById(memberId)
+      .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+    List<Routine> routines = routineRepository.findAllByMemberId(memberId);
+    routineRepository.deleteAll(routines);
+
+    memberRepository.delete(member);
   }
 }
