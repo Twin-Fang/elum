@@ -28,6 +28,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.reviewTitle,
     required this.pinTitle,
     required this.bodySmall,
+    required this.childTileTitle,
+    required this.ringPercent,
+    required this.starsCount,
   });
 
   static const fontFamily = 'TmoneyRoundWind';
@@ -107,6 +110,18 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// DLP 배지·일과 입력 요약처럼 좁은 폭에 들어가는 문구.
   /// [sectionTitle]과 크기는 같지만 굵기가 달라 별개 토큰이다.
   final TextStyle bodySmall;
+
+  // --- 홈 일과 목록 (Figma 356:4688 / 356:5079 / 364:8219) ---
+
+  /// 아이 홈 일과 타일 제목 (18/w400).
+  final TextStyle childTileTitle;
+
+  /// 진행률 링 중앙 퍼센트 "50%" (12/w800).
+  /// caption(12/w400)과 크기는 같지만 굵기가 다르다.
+  final TextStyle ringPercent;
+
+  /// 아이_별 화면 누적 별 숫자 (80/w800).
+  final TextStyle starsCount;
 
   static const standard = AppTypography(
     title: TextStyle(
@@ -235,6 +250,24 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w400,
       height: 1.0,
     ),
+    childTileTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    ringPercent: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
+    starsCount: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 80,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
   );
 
   /// 표준 Material 슬롯에 매핑한다.
@@ -271,6 +304,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? reviewTitle,
     TextStyle? pinTitle,
     TextStyle? bodySmall,
+    TextStyle? childTileTitle,
+    TextStyle? ringPercent,
+    TextStyle? starsCount,
   }) {
     return AppTypography(
       title: title ?? this.title,
@@ -294,6 +330,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       reviewTitle: reviewTitle ?? this.reviewTitle,
       pinTitle: pinTitle ?? this.pinTitle,
       bodySmall: bodySmall ?? this.bodySmall,
+      childTileTitle: childTileTitle ?? this.childTileTitle,
+      ringPercent: ringPercent ?? this.ringPercent,
+      starsCount: starsCount ?? this.starsCount,
     );
   }
 
@@ -322,6 +361,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       reviewTitle: TextStyle.lerp(reviewTitle, other.reviewTitle, t)!,
       pinTitle: TextStyle.lerp(pinTitle, other.pinTitle, t)!,
       bodySmall: TextStyle.lerp(bodySmall, other.bodySmall, t)!,
+      childTileTitle: TextStyle.lerp(childTileTitle, other.childTileTitle, t)!,
+      ringPercent: TextStyle.lerp(ringPercent, other.ringPercent, t)!,
+      starsCount: TextStyle.lerp(starsCount, other.starsCount, t)!,
     );
   }
 }

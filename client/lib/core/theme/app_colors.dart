@@ -88,6 +88,12 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.rewardStarGreen,
     required this.rewardStarPurple,
     required this.rewardButton,
+    required this.routineTileBg,
+    required this.routineRingTrack,
+    required this.routineRingProgress,
+    required this.childTileDone,
+    required this.starCount,
+    required this.starsNumberStart,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -206,6 +212,21 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 보상 화면 CTA
   final Color rewardButton;
 
+  // 홈 일과 목록 (Figma 356:4688 / 309:3739 / 356:5079)
+  /// 일과 타일·펼침 컨테이너·빈 상태 배경 (#EEE9E6)
+  final Color routineTileBg;
+  /// 진행률 링 트랙. checkPending과 값이 같지만(#C9D6D4) 쓰임이 달라 분리 —
+  /// 아이 체크 버튼 테두리가 바뀌어도 링 트랙은 따라가면 안 된다.
+  final Color routineRingTrack;
+  /// 진행률 링 채움·퍼센트 문구. checkDone(#55CFBA)과 분리, 같은 이유.
+  final Color routineRingProgress;
+  /// 아이 홈 완료된 일과 타일 배경 (#B5EAEC). goalSelectedFill과 값만 같다.
+  final Color childTileDone;
+  /// 별 배지 숫자 (#CB9500)
+  final Color starCount;
+  /// 아이_별 화면 숫자 그라데이션 시작 (#FFDD00 → 흰색)
+  final Color starsNumberStart;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -258,6 +279,12 @@ class AppColors extends ThemeExtension<AppColors> {
     rewardStarGreen: Color(0xFF86FCA3),
     rewardStarPurple: Color(0xFFA186FC),
     rewardButton: Color(0xFF55CFBA),
+    routineTileBg: Color(0xFFEEE9E6),
+    routineRingTrack: Color(0xFFC9D6D4),
+    routineRingProgress: Color(0xFF55CFBA),
+    childTileDone: Color(0xFFB5EAEC),
+    starCount: Color(0xFFCB9500),
+    starsNumberStart: Color(0xFFFFDD00),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -322,6 +349,12 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? rewardStarGreen,
     Color? rewardStarPurple,
     Color? rewardButton,
+    Color? routineTileBg,
+    Color? routineRingTrack,
+    Color? routineRingProgress,
+    Color? childTileDone,
+    Color? starCount,
+    Color? starsNumberStart,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -376,6 +409,12 @@ class AppColors extends ThemeExtension<AppColors> {
       rewardStarGreen: rewardStarGreen ?? this.rewardStarGreen,
       rewardStarPurple: rewardStarPurple ?? this.rewardStarPurple,
       rewardButton: rewardButton ?? this.rewardButton,
+      routineTileBg: routineTileBg ?? this.routineTileBg,
+      routineRingTrack: routineRingTrack ?? this.routineRingTrack,
+      routineRingProgress: routineRingProgress ?? this.routineRingProgress,
+      childTileDone: childTileDone ?? this.childTileDone,
+      starCount: starCount ?? this.starCount,
+      starsNumberStart: starsNumberStart ?? this.starsNumberStart,
     );
   }
 
@@ -441,6 +480,15 @@ class AppColors extends ThemeExtension<AppColors> {
       rewardStarGreen: Color.lerp(rewardStarGreen, other.rewardStarGreen, t)!,
       rewardStarPurple: Color.lerp(rewardStarPurple, other.rewardStarPurple, t)!,
       rewardButton: Color.lerp(rewardButton, other.rewardButton, t)!,
+      routineTileBg: Color.lerp(routineTileBg, other.routineTileBg, t)!,
+      routineRingTrack:
+          Color.lerp(routineRingTrack, other.routineRingTrack, t)!,
+      routineRingProgress:
+          Color.lerp(routineRingProgress, other.routineRingProgress, t)!,
+      childTileDone: Color.lerp(childTileDone, other.childTileDone, t)!,
+      starCount: Color.lerp(starCount, other.starCount, t)!,
+      starsNumberStart:
+          Color.lerp(starsNumberStart, other.starsNumberStart, t)!,
     );
   }
 }

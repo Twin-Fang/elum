@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,181 +9,129 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
-import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../shared/models/action_card.dart';
+import '../../../core/widgets/routine_progress_ring.dart';
+import '../../../shared/models/routine.dart';
 import '../../guardian/application/routine_notifier.dart';
-import '../../guardian/presentation/widgets/action_card_view.dart';
+import '../../guardian/data/routine_repository.dart';
+import '../../guardian/presentation/widgets/today_routine_section.dart'
+    show routineProgress;
+import '../../onboarding/application/onboarding_notifier.dart';
 import '../application/child_routine_notifier.dart';
-import '../data/speech_service.dart';
 import 'mode_switch_screen.dart';
 
-/// Figma `아이_홈`(309:3548 체크 전 / 309:3648 체크 후).
+/// 아이에게 보여줄 일과 목록.
 ///
-/// 두 프레임은 별도 화면이 아니라 **같은 화면의 체크 상태**다.
+/// **승인(CONFIRMED)된 일과만** 노출한다 (docs 원칙 3번).
+/// 방금 만든 일과도 승인 전이면 목록에 없다.
+final childRoutinesProvider = Provider<List<Routine>>((ref) {
+  final current = ref.watch(routineFlowProvider).routine;
+  final fetched =
+      ref.watch(myRoutinesProvider).asData?.value ?? const <Routine>[];
+
+  return [
+    if (current != null && current.isConfirmed && current.steps.isNotEmpty)
+      current,
+    ...fetched.where(
+      (r) => r.id != current?.id && r.isConfirmed && r.steps.isNotEmpty,
+    ),
+  ];
+});
+
+/// Figma `아이_홈_리스트`(356:5079) / `아이_홈_아무것도X`(343:4543).
 ///
-/// 아동이 직접 조작하므로 터치 타겟이 크고(88×88) 전환이 느리다.
-/// 카드를 체크하면 보상 화면이 뜬다 — 단, 같은 카드를 다시 체크할 때는 뜨지 않는다.
-class ChildHomeScreen extends ConsumerStatefulWidget {
+/// 일과 **목록**을 보여주고, 탭하면 카드 상세로 들어간다 (이슈 #69).
+/// 카드 페이저는 [ChildRoutineDetailScreen]으로 내려갔다.
+class ChildHomeScreen extends ConsumerWidget {
   const ChildHomeScreen({super.key});
 
-  /// 체크 버튼 크기. 아동 모드 최소 64×64를 넉넉히 넘긴다.
-  static const checkButtonSize = 88.0;
-
-  /// 아동 모드 접근성 하한. 좁은 기기에서 `.w`로 줄어들어도 이 아래로 가지 않는다.
-  static const minTouchTarget = 64.0;
-
   @override
-  ConsumerState<ChildHomeScreen> createState() => _ChildHomeScreenState();
-}
-
-class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
-  final _controller = PageController(viewportFraction: 0.88);
-
-  /// 지금 읽고 있는 카드 id. null이면 아무것도 안 읽고 있다.
-  String? _speakingId;
-
-  /// dispose에서 `ref`를 읽으면 "unmounted" 오류가 난다.
-  /// 미리 잡아두고 정리할 때 쓴다.
-  SpeechService? _speech;
-
-  @override
-  void initState() {
-    super.initState();
-    // 첫 프레임 뒤에 잡는다. initState에서 읽어도 되지만 일관되게 둔다.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _speech = ref.read(speechServiceProvider);
-    });
-  }
-
-  @override
-  void dispose() {
-    // 화면을 벗어나도 소리가 남으면 다음 화면까지 따라온다
-    _speech?.stop();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다.
-  ///
-  /// 아동이 여러 번 누를 때 소리가 겹치면 알아들을 수 없다.
-  Future<void> _speak(ActionCard card) async {
-    final speech = ref.read(speechServiceProvider);
-
-    if (_speakingId == card.id) {
-      await speech.stop();
-      if (mounted) setState(() => _speakingId = null);
-      return;
-    }
-
-    setState(() => _speakingId = card.id);
-
-    // 제목만 읽으면 무엇을 해야 하는지가 빠지고, 설명만 읽으면 화면의
-    // 큰 제목과 어긋난다. 둘을 이어 붙인다.
-    final ok = await speech.speak('${card.displayTitle}. ${card.description}');
-
-    if (!mounted) return;
-    setState(() => _speakingId = null);
-
-    if (!ok) _showFailure();
-  }
-
-  /// 소리를 낼 수 없을 때. 아동은 못 읽지만 보호자가 제보할 때 필요하다.
-  void _showFailure() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('소리를 재생할 수 없어요 (E-TTS)')),
-    );
-  }
-
-  /// 현재 보고 있는 카드. 체크 버튼이 이 카드를 대상으로 한다.
-  int get _currentIndex =>
-      _controller.hasClients ? (_controller.page ?? 0).round() : 0;
-
-  Future<void> _toggle(String cardId) async {
-    final shouldReward =
-        ref.read(childRoutineProvider.notifier).toggle(cardId);
-
-    if (!shouldReward) return;
-
-    // 체크가 눈에 보인 뒤 보상이 뜨게 한다. 동시에 일어나면 뭘 눌렀는지 모른다.
-    await Future<void>.delayed(AppMotion.normal);
-    if (mounted) context.push(Routes.childReward);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final routine = ref.watch(routineFlowProvider).routine;
-    final cards = routine?.steps ?? const [];
-    final routineId = routine?.id ?? '';
-    final progress = ref.watch(childRoutineProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
+    final routines = ref.watch(childRoutinesProvider);
+    final routinesAsync = ref.watch(myRoutinesProvider);
+    final localName = ref.watch(onboardingProvider).displayName;
+    final childName = ref
+        .watch(memberProvider)
+        .maybeWhen(
+          data: (member) => member?.nickname ?? localName,
+          orElse: () => localName,
+        );
 
     return Scaffold(
       backgroundColor: context.colors.background,
       body: SafeArea(
-        child: Column(
-          children: [
-            const _TopBar(),
-            if (cards.isEmpty)
-              const Expanded(child: _NoRoutine())
-            else ...[
-              Expanded(
-                child: PageView.builder(
-                  controller: _controller,
-                  itemCount: cards.length,
-                  // 카드를 넘기면 체크 버튼 대상도 바뀐다
-                  onPageChanged: (_) => setState(() {}),
-                  itemBuilder: (context, index) => Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: space.xs,
-                      vertical: space.md,
-                    ),
-                    child: ActionCardView(
-                      card: cards[index],
-                      index: index,
-                      routineId: routineId,
-                  onSpeak: () => _speak(cards[index]),
-                  isSpeaking: _speakingId == cards[index].id,
+        child: routines.isEmpty
+            ? Column(
+                children: [
+                  const _TopBar(),
+                  Expanded(
+                    child: _NoRoutine(
+                      childName: childName,
+                      // 조회가 실패했으면 제보 추적용 코드를 함께 보여준다.
+                      // 아동 화면이라 빨강·경고 아이콘은 쓰지 않는다.
+                      errorCode: routinesAsync.hasError ? 'E-CHLIST' : null,
                     ),
                   ),
+                ],
+              )
+            : SingleChildScrollView(
+                padding: EdgeInsets.only(bottom: space.xl),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _TopBar(),
+                    SizedBox(height: space.xl),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: space.screenH),
+                      child: Text(
+                        // Figma 문구 (356:5197) — 이름 뒤 조사는 displayName이
+                        // '하늘이' 꼴이라 '가'로 이어진다.
+                        '오늘 $childName가\n할 일들이야. 힘내보자!',
+                        style: context.typo.greeting.copyWith(
+                          color: context.colors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: space.xl),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: space.md),
+                      child: _RoutineList(routines: routines),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: space.lg),
-              _CheckButton(
-                isChecked: progress.isCompleted(
-                  cards[_currentIndex.clamp(0, cards.length - 1)].id,
-                ),
-                onTap: () => _toggle(
-                  cards[_currentIndex.clamp(0, cards.length - 1)].id,
-                ),
-              ),
-              SizedBox(height: space.xl),
-            ],
-          ],
-        ),
       ),
     );
   }
 }
 
-/// 로고 + 캐릭터 배지 (Figma y=70~113)
-class _TopBar extends StatelessWidget {
+/// 로고 + 별 배지 + 캐릭터 배지 (Figma 356:5079 상단).
+class _TopBar extends ConsumerWidget {
   const _TopBar();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final space = context.space;
+    // 별 개수. 조회 실패해도 0으로 화면은 뜬다 (docs 원칙 6번)
+    final stars = ref
+        .watch(memberProvider)
+        .maybeWhen(data: (member) => member?.totalStars ?? 0, orElse: () => 0);
+
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        context.space.screenH,
-        context.space.md,
-        context.space.screenH,
-        0,
-      ),
+      padding: EdgeInsets.fromLTRB(space.screenH, space.md, space.screenH, 0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           SvgPicture.asset(AppAssets.homeLogo, width: 80.w, height: 30.h),
+          const Spacer(),
+          // 별 배지 — 탭하면 누적 별 화면으로 (Figma 364:8219)
+          AppPressable(
+            onTap: () => context.push(Routes.childStars),
+            scaleDown: AppPressable.scaleIcon,
+            child: _StarBadge(count: stars),
+          ),
+          SizedBox(width: space.md),
           // 보호자로 돌아가려면 암호가 필요하다
           AppPressable(
             onTap: () => context.push(
@@ -200,58 +151,189 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-/// 88×88 체크 버튼.
-///
-/// 체크 전에는 테두리만, 체크 후에는 채워진다.
-class _CheckButton extends StatelessWidget {
-  const _CheckButton({required this.isChecked, required this.onTap});
+/// 별 배지 (Figma 364:8531 — 50×48 SVG 위에 숫자를 겹친다).
+class _StarBadge extends StatelessWidget {
+  const _StarBadge({required this.count});
 
-  final bool isChecked;
-  final VoidCallback onTap;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 50.w,
+      height: 48.w,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SvgPicture.asset(AppAssets.starBadge, width: 50.w, height: 48.w),
+          Padding(
+            // 별 무게중심이 약간 위라 숫자를 살짝 내린다 (Figma y=91-74=17)
+            padding: EdgeInsets.only(top: 4.h),
+            child: Text(
+              '$count',
+              style: context.typo.subtitle.copyWith(
+                color: context.colors.starCount,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 일과 타일 목록 (Figma 361×68, 간격 16).
+class _RoutineList extends ConsumerWidget {
+  const _RoutineList({required this.routines});
+
+  final List<Routine> routines;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final space = context.space;
+    final progress = ref.watch(childRoutineProvider);
+
+    return Column(
+      children: [
+        for (final (index, routine) in routines.indexed) ...[
+          if (index > 0) SizedBox(height: space.md),
+          _RoutineTile(
+            routine: routine,
+            progress: routineProgress(routine, progress.completed),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// 일과 한 줄 (Figma 356:5079).
+///
+/// 미완료는 회색 + 진행률 링, 전부 끝내면 민트 배경 + 채운 체크.
+/// 탭하면 카드 상세로 들어간다.
+class _RoutineTile extends StatelessWidget {
+  const _RoutineTile({required this.routine, required this.progress});
+
+  final Routine routine;
+  final double progress;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final size = ChildHomeScreen.checkButtonSize.w
-        .clamp(ChildHomeScreen.minTouchTarget, double.infinity);
+    final space = context.space;
+    final isDone = progress >= 1.0;
 
     return AppPressable(
-      onTap: onTap,
-      scaleDown: AppPressable.scaleButton,
-      child: AnimatedContainer(
-        // 아동 화면은 300ms 이상으로 둔다 (docs/motion.md)
-        duration: AppMotion.normal,
-        curve: AppMotion.standard,
-        // 원형 버튼이라 가로세로 모두 .w. 좁은 기기에서 줄어들어도
-        // 아동 모드 최소 터치 타겟(64) 아래로는 내려가지 않게 막는다.
-        width: size,
-        height: size,
+      onTap: () => context.push(Routes.childRoutineDetail, extra: routine),
+      scaleDown: AppPressable.scaleCard,
+      child: Container(
+        height: 68.h,
+        // Figma 실측 — 제목 좌 24, 화살표 우 16
+        padding: EdgeInsets.only(left: 24.w, right: 16.w),
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: isChecked ? colors.checkDone : Colors.transparent,
-          border: Border.all(color: colors.checkPending, width: 8.w),
+          color: isDone ? colors.childTileDone : colors.routineTileBg,
+          borderRadius: BorderRadius.circular(space.cardRadius),
         ),
-        child: Icon(
-          Icons.check_rounded,
-          size: 44.w,
-          color: isChecked ? colors.surface : colors.checkPending,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                routine.displayTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.typo.childTileTitle.copyWith(
+                  color: colors.chipLabel,
+                ),
+              ),
+            ),
+            SizedBox(width: space.xs),
+            RoutineProgressRing(progress: progress),
+            SizedBox(width: space.xs),
+            // 아래 방향 원본을 반시계 90° 돌려 `>`로 만든다
+            Transform.rotate(
+              angle: -math.pi / 2,
+              child: SvgPicture.asset(
+                AppAssets.iconAngleSmall,
+                width: 24.w,
+                height: 24.w,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// 보호자가 아직 일과를 만들지 않았다.
+/// 보호자가 아직 일과를 만들지 않았다 (Figma 343:4543).
 class _NoRoutine extends StatelessWidget {
-  const _NoRoutine();
+  const _NoRoutine({required this.childName, this.errorCode});
+
+  final String childName;
+
+  /// 조회 실패 시 제보 추적용 코드. null이면 표시하지 않는다.
+  final String? errorCode;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    // 작은 화면·큰 글꼴에서도 넘치지 않게 스크롤로 감싼다
     return Center(
-      child: Text(
-        '오늘의 할 일이 없어요',
-        style: context.typo.cardHeadline
-            .copyWith(color: context.colors.textSecondary),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '아직 $childName의\n일과가 없어요',
+              textAlign: TextAlign.center,
+              style: context.typo.greeting.copyWith(color: colors.textPrimary),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              '보호자 화면에서 일과를 만들 수 있어요',
+              style: context.typo.body.copyWith(color: colors.textSecondary),
+            ),
+            if (errorCode != null) ...[
+              SizedBox(height: 8.h),
+              Text(
+                '($errorCode)',
+                style: context.typo.caption.copyWith(
+                  color: colors.textSecondary,
+                ),
+              ),
+            ],
+            SizedBox(height: 48.h),
+            // 캐릭터 뒤 은은한 빛 — 단순 원이라 코드로 그린다 (blur 100)
+            SizedBox(
+              width: 200.w,
+              height: 200.w,
+              child: Stack(
+                alignment: Alignment.center,
+                clipBehavior: Clip.none,
+                children: [
+                  ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 40.w, sigmaY: 40.w),
+                    child: Container(
+                      width: 180.w,
+                      height: 180.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colors.catSelectedFill,
+                      ),
+                    ),
+                  ),
+                  // 시무룩한 루루 — 형태가 있는 일러스트는 반드시 에셋 (Figma 382:3220)
+                  SvgPicture.asset(
+                    AppAssets.ruruSad,
+                    width: 164.w,
+                    height: 164.w,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

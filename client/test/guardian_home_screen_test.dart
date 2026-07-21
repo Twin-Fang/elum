@@ -195,7 +195,7 @@ void main() {
     });
   });
 
-  group('오늘 일과', () {
+  group('오늘 일과 (이슈 #69 — 다중 일과 접기/펼치기)', () {
     testWidgets('0건이면 Figma 빈 상태를 보여준다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
@@ -204,24 +204,49 @@ void main() {
       expect(svgWithAsset(AppAssets.homeEmptyIllust), findsOneWidget);
     });
 
-    testWidgets('일과가 있으면 카드를 펼쳐 보여준다', (tester) async {
-      // Figma 309:3739는 일과 이름이 아니라 카드 하나하나를 보여준다
+    testWidgets('일과 제목(title)이 접힌 타일로 보인다', (tester) async {
+      // 백엔드가 준 title을 화면에 쓴다 — 받아만 놓고 버리면 안 된다
+      await tester.pumpWidget(
+        wrap(routines: [
+          routine('비 오는 날 학교 가기', 5),
+          routine('병원 다녀오기', 3),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('비 오는 날 학교 가기'), findsOneWidget);
+      expect(find.text('병원 다녀오기'), findsOneWidget);
+      // 기본은 접힘 (Figma 356:4688) — 카드는 아직 보이지 않는다
+      expect(find.text('카드 1 제목'), findsNothing);
+      expect(find.text('아직 만든 일과가 없어요 😢'), findsNothing);
+    });
+
+    testWidgets('타일을 탭하면 펼쳐져 카드가 보인다', (tester) async {
       await tester.pumpWidget(
         wrap(routines: [routine('비 오는 날 학교 가기', 5)]),
       );
       await tester.pumpAndSettle();
 
+      await tester.tap(find.text('비 오는 날 학교 가기'));
+      await tester.pumpAndSettle();
+
+      // Figma 309:3739 — 카드 하나하나가 펼쳐진다
       expect(find.text('카드 1 제목'), findsOneWidget);
       expect(find.text('카드 1 설명'), findsOneWidget);
       expect(find.text('카드 5 제목'), findsOneWidget);
-      // 목록이 있으면 빈 상태는 사라진다
-      expect(find.text('아직 만든 일과가 없어요 😢'), findsNothing);
+
+      // 다시 탭하면 접힌다
+      await tester.tap(find.text('비 오는 날 학교 가기'));
+      await tester.pumpAndSettle();
+      expect(find.text('카드 1 제목'), findsNothing);
     });
 
-    testWidgets('카드마다 번호를 매긴다', (tester) async {
+    testWidgets('펼치면 카드마다 번호를 매긴다', (tester) async {
       await tester.pumpWidget(
         wrap(routines: [routine('비 오는 날 학교 가기', 3)]),
       );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('비 오는 날 학교 가기'));
       await tester.pumpAndSettle();
 
       for (final n in ['1', '2', '3']) {
@@ -229,8 +254,30 @@ void main() {
       }
     });
 
-    testWidgets('제목이 비어 와도 죽지 않는다', (tester) async {
-      // 서버가 title을 주지 않으므로 description으로 대체된다
+    testWidgets('일과가 있으면 오늘 일과가 추천 일과보다 위에 온다', (tester) async {
+      // Figma 356:4688 — 섹션 순서가 상태에 따라 바뀐다
+      await tester.pumpWidget(
+        wrap(routines: [routine('비 오는 날 학교 가기', 2)]),
+      );
+      await tester.pumpAndSettle();
+
+      final todayY = tester.getTopLeft(find.text('오늘 일과')).dy;
+      final recommendY = tester.getTopLeft(find.text('추천 일과')).dy;
+      expect(todayY, lessThan(recommendY));
+    });
+
+    testWidgets('일과가 없으면 추천 일과가 먼저다', (tester) async {
+      // Figma 217:2655 — 빈 상태는 기존 순서를 유지한다
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      final todayY = tester.getTopLeft(find.text('오늘 일과')).dy;
+      final recommendY = tester.getTopLeft(find.text('추천 일과')).dy;
+      expect(recommendY, lessThan(todayY));
+    });
+
+    testWidgets('title이 비어 와도 대체 제목으로 뜬다', (tester) async {
+      // AI가 title을 못 만들어도 화면이 비지 않는다 (docs 원칙 6번)
       await tester.pumpWidget(
         wrap(
           routines: [
@@ -244,7 +291,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('설명만 있는 카드'), findsWidgets);
+      expect(find.text('오늘의 일과'), findsOneWidget);
     });
   });
 

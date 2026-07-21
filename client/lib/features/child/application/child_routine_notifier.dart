@@ -49,13 +49,16 @@ class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
 
   /// 카드 체크를 토글하고, **보상을 띄워야 하면 true**를 돌려준다.
   ///
+  /// [routineId]는 카드가 속한 일과다 — 홈이 다중 일과가 되면서 flow의
+  /// 일과와 다를 수 있어 호출부가 넘겨준다 (이슈 #69).
+  ///
   /// 보상 조건은 두 가지를 모두 만족할 때다.
   /// 1. 방금 완료로 바뀌었다 (해제가 아니다)
   /// 2. 이 카드로 보상을 받은 적이 없다
   ///
   /// **서버 반영은 기다리지 않는다.** 아동이 누르는 즉시 체크가 보여야 한다.
   /// 네트워크를 기다리면 눌렀는데 반응이 없는 것처럼 느껴진다.
-  bool toggle(String cardId) {
+  bool toggle({required String routineId, required String cardId}) {
     final isNowCompleted = !state.isCompleted(cardId);
 
     final completed = Set<String>.from(state.completed);
@@ -72,16 +75,21 @@ class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
     );
 
     // 별 지급·회수를 뒤에서 처리한다. 실패해도 화면은 이미 바뀐 뒤다.
-    unawaited(_syncToServer(cardId, isCompleted: isNowCompleted));
+    unawaited(
+      _syncToServer(routineId, cardId, isCompleted: isNowCompleted),
+    );
 
     return shouldReward;
   }
 
   /// 별을 서버에 반영한다. 실패는 repository가 흡수한다.
-  Future<void> _syncToServer(String cardId, {required bool isCompleted}) async {
-    final routineId = routine?.id;
+  Future<void> _syncToServer(
+    String routineId,
+    String cardId, {
+    required bool isCompleted,
+  }) async {
     // 로컬 카드는 서버에 없다
-    if (routineId == null || routineId.isEmpty || routineId == 'local') return;
+    if (routineId.isEmpty || routineId == 'local') return;
 
     final repo = ref.read(stepProgressRepositoryProvider);
     if (isCompleted) {

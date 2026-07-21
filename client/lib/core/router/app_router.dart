@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../features/guardian/presentation/card_review_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/child/presentation/child_home_screen.dart';
+import '../../features/child/presentation/child_routine_detail_screen.dart';
+import '../../features/child/presentation/child_stars_screen.dart';
 import '../../features/child/presentation/mode_switch_screen.dart';
 import '../../features/child/presentation/reward_screen.dart';
+import '../../shared/models/routine.dart';
 import '../../features/guardian/domain/routine_stage.dart';
 import '../../features/guardian/presentation/routine_loading_screen.dart';
 import '../../features/guardian/presentation/question_screen.dart';
@@ -41,6 +44,12 @@ abstract final class Routes {
   static const routineReview = '/guardian/routine/review';
 
   static const child = '/child';
+
+  /// 일과 상세 — 카드 페이저 (Figma 309:3548). `extra`로 Routine을 넘긴다.
+  static const childRoutineDetail = '/child/routine';
+
+  /// 누적 별 (Figma 364:8219)
+  static const childStars = '/child/stars';
 
   /// 아이 보상 (Figma 309:4055 등 3종 랜덤)
   static const childReward = '/child/reward';
@@ -137,6 +146,19 @@ GoRouter createRouter({
       GoRoute(
         path: Routes.child,
         builder: (context, state) => const ChildHomeScreen(),
+      ),
+      GoRoute(
+        path: Routes.childRoutineDetail,
+        builder: (context, state) {
+          // extra 없이 들어오면(딥링크 등) 보여줄 일과가 없다 — 홈으로 돌린다.
+          final routine = state.extra;
+          if (routine is! Routine) return const ChildHomeScreen();
+          return ChildRoutineDetailScreen(routine: routine);
+        },
+      ),
+      GoRoute(
+        path: Routes.childStars,
+        builder: (context, state) => const ChildStarsScreen(),
       ),
       GoRoute(
         path: Routes.childReward,

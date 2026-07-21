@@ -39,6 +39,15 @@ abstract class Routine with _$Routine {
   bool get hasMaskedContent =>
       sanitizedInputText.isNotEmpty && rawInputText != sanitizedInputText;
 
+  /// 홈·아이 목록에 보여줄 제목.
+  /// AI가 title을 못 만들어도 화면이 비지 않게 대체어를 준다 (docs 원칙 6번).
+  String get displayTitle =>
+      title.trim().isNotEmpty ? title.trim() : '오늘의 일과';
+
+  /// 모든 카드를 마쳤는가. 아이 홈 타일의 완료 배경 판단에 쓴다.
+  bool get isAllDone =>
+      steps.isNotEmpty && steps.every((s) => s.completed);
+
   factory Routine.fromJson(Map<String, dynamic> json) {
     return Routine(
       id: json['id']?.toString() ?? '',

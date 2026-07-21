@@ -7,9 +7,11 @@ import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:elum/features/child/application/child_routine_notifier.dart';
 import 'package:elum/features/child/domain/reward_character.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
+import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
 import 'package:elum/features/child/presentation/mode_switch_screen.dart';
 import 'package:elum/features/child/presentation/reward_screen.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
+import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/card_palette.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -45,6 +47,16 @@ void main() {
       routes: [
         GoRoute(path: Routes.child, builder: (context, state) => screen),
         GoRoute(
+          path: Routes.childRoutineDetail,
+          builder: (context, state) => ChildRoutineDetailScreen(
+            routine: state.extra! as Routine,
+          ),
+        ),
+        GoRoute(
+          path: Routes.childStars,
+          builder: (context, state) => const Scaffold(body: Text('별 화면')),
+        ),
+        GoRoute(
           path: Routes.childReward,
           builder: (context, state) => const RewardScreen(),
         ),
@@ -62,7 +74,12 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [testStorageOverride(onboardingCompleted: true, pin: pin)],
+      overrides: [
+        testStorageOverride(onboardingCompleted: true, pin: pin),
+        // 실서버를 타지 않는다
+        myRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
+        memberProvider.overrideWith((ref) async => null),
+      ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
         builder: (context, _) => MaterialApp.router(
@@ -73,11 +90,13 @@ void main() {
     );
   }
 
-  /// 일과를 주입한 뒤 화면을 띄운다
+  /// 승인된 일과를 주입한 뒤 화면을 띄운다.
+  /// 아이 홈은 CONFIRMED 일과만 보여준다 (docs 원칙 3번).
   Future<ProviderContainer> pumpChild(
     WidgetTester tester, {
     List<ActionCard> steps = cards,
     String? pin,
+    String status = 'CONFIRMED',
   }) async {
     await tester.pumpWidget(wrap(const ChildHomeScreen(), steps: steps, pin: pin));
     await tester.pumpAndSettle();
@@ -85,32 +104,77 @@ void main() {
     final container = ProviderScope.containerOf(
       tester.element(find.byType(ChildHomeScreen)),
     );
-    container.read(routineFlowProvider.notifier).state =
-        RoutineFlowState(routine: Routine(id: 'r1', steps: steps));
+    container.read(routineFlowProvider.notifier).state = RoutineFlowState(
+      routine: Routine(
+        id: 'r1',
+        title: '비 오는 날 학교에 가요',
+        status: status,
+        steps: steps,
+      ),
+    );
     await tester.pumpAndSettle();
     return container;
   }
 
-  group('아이 홈', () {
-    testWidgets('카드 내용을 보여준다', (tester) async {
+  group('아이 홈 (이슈 #69 — 일과 목록)', () {
+    testWidgets('일과 제목이 목록 타일로 보인다', (tester) async {
       await pumpChild(tester);
+
+      expect(find.text('비 오는 날 학교에 가요'), findsOneWidget);
+      // 카드 내용은 상세로 들어가기 전에는 보이지 않는다
+      expect(find.text('옷을 입어요'), findsNothing);
+    });
+
+    testWidgets('타일을 탭하면 카드 상세로 들어간다', (tester) async {
+      await pumpChild(tester);
+
+      await tester.tap(find.text('비 오는 날 학교에 가요'));
+      await tester.pumpAndSettle();
 
       expect(find.text('옷을 입어요'), findsOneWidget);
       expect(find.text('학교에 갈 옷을 차례대로 입어요'), findsOneWidget);
     });
 
+    testWidgets('승인 전 일과는 목록에 없다', (tester) async {
+      // 보호자 승인 전에는 아동에게 노출하지 않는다 (docs 원칙 3번)
+      await pumpChild(tester, status: 'PENDING_REVIEW');
+
+      expect(find.text('비 오는 날 학교에 가요'), findsNothing);
+      expect(find.textContaining('일과가 없어요'), findsOneWidget);
+    });
+
     testWidgets('체크 버튼이 아동 최소 터치 타겟을 넘는다', (tester) async {
       // 아동 모드는 64×64 이상이어야 한다 (CLAUDE.md)
-      await pumpChild(tester);
-
-      expect(ChildHomeScreen.checkButtonSize, greaterThanOrEqualTo(64));
+      expect(
+        ChildRoutineDetailScreen.checkButtonSize,
+        greaterThanOrEqualTo(64),
+      );
     });
 
     testWidgets('일과가 없으면 빈 상태를 보여준다', (tester) async {
       await tester.pumpWidget(wrap(const ChildHomeScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.text('오늘의 할 일이 없어요'), findsOneWidget);
+      expect(find.textContaining('일과가 없어요'), findsOneWidget);
+      expect(find.text('보호자 화면에서 일과를 만들 수 있어요'), findsOneWidget);
+      // 시무룩한 루루는 코드가 아니라 에셋으로 그린다
+      expect(svgWithAsset(AppAssets.ruruSad), findsOneWidget);
+    });
+
+    testWidgets('별 배지가 보이고 탭하면 별 화면으로 간다', (tester) async {
+      await pumpChild(tester);
+
+      expect(svgWithAsset(AppAssets.starBadge), findsOneWidget);
+
+      await tester.tap(
+        find.ancestor(
+          of: svgWithAsset(AppAssets.starBadge),
+          matching: find.byType(AppPressable),
+        ).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('별 화면'), findsOneWidget);
     });
   });
 
@@ -123,7 +187,7 @@ void main() {
 
       final notifier = container.read(childRoutineProvider.notifier);
 
-      expect(notifier.toggle('c1'), isTrue);
+      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isTrue);
     });
 
     test('해제했다 다시 체크하면 보상을 주지 않는다', () {
@@ -135,9 +199,9 @@ void main() {
 
       final notifier = container.read(childRoutineProvider.notifier);
 
-      expect(notifier.toggle('c1'), isTrue);
-      expect(notifier.toggle('c1'), isFalse); // 해제
-      expect(notifier.toggle('c1'), isFalse); // 재체크 — 보상 없음
+      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isTrue);
+      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isFalse); // 해제
+      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isFalse); // 재체크 — 보상 없음
     });
 
     test('해제해도 보상 이력은 남는다', () {
@@ -148,8 +212,8 @@ void main() {
 
       final notifier = container.read(childRoutineProvider.notifier);
       notifier
-        ..toggle('c1')
-        ..toggle('c1');
+        ..toggle(routineId: 'local', cardId: 'c1')
+        ..toggle(routineId: 'local', cardId: 'c1');
 
       final state = container.read(childRoutineProvider);
       expect(state.isCompleted('c1'), isFalse);
@@ -164,8 +228,8 @@ void main() {
 
       final notifier = container.read(childRoutineProvider.notifier);
 
-      expect(notifier.toggle('c1'), isTrue);
-      expect(notifier.toggle('c2'), isTrue);
+      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isTrue);
+      expect(notifier.toggle(routineId: 'local', cardId: 'c2'), isTrue);
     });
 
     test('새 일과를 시작하면 초기화된다', () {
@@ -175,12 +239,12 @@ void main() {
       addTearDown(container.dispose);
 
       final notifier = container.read(childRoutineProvider.notifier)
-        ..toggle('c1')
+        ..toggle(routineId: 'local', cardId: 'c1')
         ..reset();
 
       expect(container.read(childRoutineProvider).rewarded, isEmpty);
       // 초기화 후에는 다시 보상을 받을 수 있다
-      expect(notifier.toggle('c1'), isTrue);
+      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isTrue);
     });
   });
 

@@ -125,4 +125,25 @@ abstract final class AppAssets {
 
   /// 가운데 장식 (45×25)
   static const splashCenter = '$_images/splash_center.svg';
+
+  // --- 홈 일과 목록 (Figma 356:4688 / 356:5079 / 343:4543 / 364:8219) ---
+
+  /// 일과 접기/펼치기 화살표 (24×24). Figma `fi-br-angle-small-up`(356:4862).
+  /// 원본이 아래 방향이다 — 펼침 상태에서는 180° 돌려 위를 향하게 한다.
+  /// 아이 홈에서는 90° 돌려 `>`로 쓴다.
+  static const iconAngleSmall = '$_images/icon_angle_small_up.svg';
+
+  /// 아이 홈 상단 별 배지 (50×48). Figma 364:8531 `Group 44`.
+  /// 숫자는 SVG에 없다 — 코드에서 겹쳐 그린다.
+  static const starBadge = '$_images/star_badge.svg';
+
+  /// 아이 홈 빈 상태의 시무룩한 루루 (164×164). Figma 382:3220 `루루_슬픔`.
+  static const ruruSad = '$_images/ruru_sad.svg';
+
+  /// 아이_별 화면 가운데 큰 별 (299×299 영역). Figma 364:8282 `Group 46`.
+  static const starBig = '$_images/star_big.svg';
+
+  /// 아이_별 화면 주변 작은 별 7개. Figma 364:8227~8228 `Star 4~10`.
+  /// index는 1부터 — Figma 배치 좌표와 함께 쓴다.
+  static String starDeco(int index) => '$_images/star_deco_$index.svg';
 }
