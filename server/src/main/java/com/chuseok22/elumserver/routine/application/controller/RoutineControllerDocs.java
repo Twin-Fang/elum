@@ -143,13 +143,26 @@ public interface RoutineControllerDocs {
 
   @Operation(
     summary = "추천 일과 목록 조회",
-    description = "하드코딩된 50개 추천 일과 중 무작위 4개(아이콘 + 문구)를 반환합니다. 보호자별 개인화는 하지 않습니다."
+    description = """
+      하드코딩된 50개 추천 일과 중 무작위 count개(아이콘 + 문구 + 자연어 예시)를 반환합니다. 보호자별 개인화는 하지 않습니다.
+      count는 생략하면 4이며, 1 이상 전체 카탈로그 개수(현재 50개) 이하여야 합니다. 범위를 벗어나면 400을 반환합니다.
+      """
   )
   @SecurityRequirement(name = "bearerAuth")
   @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @ApiResponse(responseCode = "200", description = "조회 성공"),
+    @ApiResponse(
+      responseCode = "400",
+      description = "count가 1 미만이거나 전체 카탈로그 개수를 초과",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력값이 올바르지 않습니다.\"}"
+        )
+      )
+    )
   })
-  ResponseEntity<List<RoutineSuggestionResponse>> getSuggestions();
+  ResponseEntity<List<RoutineSuggestionResponse>> getSuggestions(int count);
 
   @Operation(
     summary = "일과 단계 이미지 조회",

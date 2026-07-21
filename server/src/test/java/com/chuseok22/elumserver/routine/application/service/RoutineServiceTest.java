@@ -147,12 +147,44 @@ class RoutineServiceTest {
   }
 
   @Test
-  @DisplayName("추천 일과를 조회하면 카탈로그에서 무작위 4개를 반환한다")
-  void getSuggestions_returnsFourDistinctSuggestionsFromCatalog() {
-    List<RoutineSuggestionResponse> result = routineService.getSuggestions();
+  @DisplayName("추천 일과를 조회하면 카탈로그에서 요청한 개수만큼 무작위로 반환한다")
+  void getSuggestions_validCount_returnsRequestedCountFromCatalog() {
+    List<RoutineSuggestionResponse> result = routineService.getSuggestions(4);
 
     assertThat(result).hasSize(4);
     assertThat(result).isSubsetOf(RoutineSuggestionCatalog.ALL);
     assertThat(result).doesNotHaveDuplicates();
+  }
+
+  @Test
+  @DisplayName("count가 카탈로그 전체 개수와 같으면 전체를 중복 없이 반환한다")
+  void getSuggestions_countEqualsCatalogSize_returnsEntireCatalogWithoutDuplicates() {
+    int catalogSize = RoutineSuggestionCatalog.ALL.size();
+
+    List<RoutineSuggestionResponse> result = routineService.getSuggestions(catalogSize);
+
+    assertThat(result).hasSize(catalogSize);
+    assertThat(result).isSubsetOf(RoutineSuggestionCatalog.ALL);
+    assertThat(result).doesNotHaveDuplicates();
+  }
+
+  @Test
+  @DisplayName("count가 1 미만이면 INVALID_INPUT_VALUE를 던진다")
+  void getSuggestions_countBelowMinimum_throwsInvalidInputValue() {
+    assertThatThrownBy(() -> routineService.getSuggestions(0))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
+  }
+
+  @Test
+  @DisplayName("count가 카탈로그 전체 개수를 초과하면 INVALID_INPUT_VALUE를 던진다")
+  void getSuggestions_countAboveCatalogSize_throwsInvalidInputValue() {
+    int tooMany = RoutineSuggestionCatalog.ALL.size() + 1;
+
+    assertThatThrownBy(() -> routineService.getSuggestions(tooMany))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
   }
 }

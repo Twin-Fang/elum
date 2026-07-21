@@ -46,8 +46,6 @@ public class RoutineService {
   private final RoutineAiPipeline routineAiPipeline;
   private final RoutineImageStorage routineImageStorage;
 
-  private static final int SUGGESTION_COUNT = 4;
-
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
   // 클래스 레벨 readOnly 트랜잭션을 중단시킨다.
@@ -234,10 +232,15 @@ public class RoutineService {
       .toList();
   }
 
-  public List<RoutineSuggestionResponse> getSuggestions() {
+  // count는 프론트가 요청한 반환 개수다. 1 미만이거나 카탈로그 전체 개수를 초과하면
+  // 항상 이 범위 안에서만 뽑을 수 있으므로 잘못된 요청으로 간주해 거부한다.
+  public List<RoutineSuggestionResponse> getSuggestions(int count) {
+    if (count < 1 || count > RoutineSuggestionCatalog.ALL.size()) {
+      throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+    }
     List<RoutineSuggestionResponse> pool = new ArrayList<>(RoutineSuggestionCatalog.ALL);
     Collections.shuffle(pool);
-    return List.copyOf(pool.subList(0, SUGGESTION_COUNT));
+    return List.copyOf(pool.subList(0, count));
   }
 
   public RoutineImageStorage.ImageContent getStepImage(String memberId, String routineId, String stepId) {

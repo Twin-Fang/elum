@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/api/routines")
@@ -69,10 +70,12 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(responses);
   }
 
-  @LogMonitoring(logParameters = false, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
   @GetMapping("/suggestions")
-  public ResponseEntity<List<RoutineSuggestionResponse>> getSuggestions() {
-    List<RoutineSuggestionResponse> responses = routineService.getSuggestions();
+  public ResponseEntity<List<RoutineSuggestionResponse>> getSuggestions(
+    @RequestParam(defaultValue = "4") int count
+  ) {
+    List<RoutineSuggestionResponse> responses = routineService.getSuggestions(count);
     return ResponseEntity.ok(responses);
   }
 

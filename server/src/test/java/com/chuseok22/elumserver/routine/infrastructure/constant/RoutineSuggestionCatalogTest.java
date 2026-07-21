@@ -17,12 +17,13 @@ class RoutineSuggestionCatalogTest {
   }
 
   @Test
-  @DisplayName("추천 일과 카탈로그는 아이콘/문구가 비어있지 않다")
-  void all_entriesHaveIconAndText() {
+  @DisplayName("추천 일과 카탈로그는 아이콘/문구/자연어 예시가 비어있지 않다")
+  void all_entriesHaveIconTextAndExample() {
     assertThat(RoutineSuggestionCatalog.ALL)
       .allSatisfy(suggestion -> {
         assertThat(suggestion.icon()).isNotBlank();
         assertThat(suggestion.text()).isNotBlank();
+        assertThat(suggestion.naturalLanguageExample()).isNotBlank();
       });
   }
 
@@ -34,5 +35,15 @@ class RoutineSuggestionCatalogTest {
       .collect(Collectors.toList());
 
     assertThat(texts).doesNotHaveDuplicates();
+  }
+
+  @Test
+  @DisplayName("추천 일과 카탈로그의 자연어 예시는 서로 중복되지 않는다")
+  void all_naturalLanguageExamplesAreDistinct() {
+    List<String> examples = RoutineSuggestionCatalog.ALL.stream()
+      .map(RoutineSuggestionResponse::naturalLanguageExample)
+      .collect(Collectors.toList());
+
+    assertThat(examples).doesNotHaveDuplicates();
   }
 }

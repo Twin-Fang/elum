@@ -11,6 +11,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 // admin은 Thymeleaf SSR이라 JSON 에러 대신 기본 에러 페이지를 받아야 하므로,
 // 이 어드바이스는 REST API 도메인(ai, auth, member, common, routine)에만 적용되도록 범위를 좁힌다.
@@ -60,6 +61,18 @@ public class GlobalExceptionHandler {
     return ResponseEntity
       .status(errorCode.getStatus())
       .body(new ErrorResponse(errorCode, "요청 본문을 읽을 수 없습니다."));
+  }
+
+  // @RequestParam 타입 파싱 실패(예: count에 숫자가 아닌 값 전달)를 400으로 처리한다.
+  // 처리하지 않으면 하위 Exception.class 핸들러로 흘러가 500이 되어 클라이언트 입력
+  // 오류가 서버 오류로 잘못 보고된다.
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+    log.warn("[MethodArgumentTypeMismatchException] 발생: {}", e.getMessage());
+    ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+    return ResponseEntity
+      .status(errorCode.getStatus())
+      .body(new ErrorResponse(errorCode, errorCode.getMessage()));
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
