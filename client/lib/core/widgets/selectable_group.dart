@@ -16,6 +16,7 @@ class SelectableGroup<T> extends StatelessWidget {
     required this.itemBuilder,
     this.multiSelect = false,
     this.allowDeselect = true,
+    this.gap = 0,
   });
 
   final List<T> items;
@@ -31,6 +32,10 @@ class SelectableGroup<T> extends StatelessWidget {
   /// 단일선택에서 이미 선택된 항목을 다시 눌러 해제할 수 있는지.
   /// 캐릭터처럼 "반드시 하나"인 경우 false로 둔다.
   final bool allowDeselect;
+
+  /// 세로 리스트로 쓸 때 항목 사이 간격.
+  /// 항목 위젯이 margin을 갖게 하면 마지막 항목에도 여백이 남는다.
+  final double gap;
 
   void _toggle(T item) {
     final isSelected = selected.contains(item);
@@ -53,11 +58,14 @@ class SelectableGroup<T> extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final item in items)
+        for (final (index, item) in items.indexed) ...[
+          // 마지막 항목 뒤에는 간격을 두지 않는다
+          if (index > 0) SizedBox(height: gap),
           _SelectableItem(
             onTap: () => _toggle(item),
             child: itemBuilder(context, item, selected.contains(item)),
           ),
+        ],
       ],
     );
   }

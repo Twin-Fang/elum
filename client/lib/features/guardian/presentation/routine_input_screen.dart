@@ -115,9 +115,9 @@ class _SuggestionChip extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(space.sm),
         decoration: BoxDecoration(
-          color: colors.selectedFill,
+          color: colors.highlightFill,
           borderRadius: BorderRadius.circular(space.cardRadius),
-          border: Border.all(color: colors.selectedBorder),
+          border: Border.all(color: colors.highlightBorder),
         ),
         child: Row(
           children: [

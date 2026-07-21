@@ -1,5 +1,4 @@
 import '../../features/onboarding/domain/character.dart';
-import '../../features/onboarding/domain/support_goal.dart';
 
 /// 에셋 경로 상수.
 ///
@@ -11,12 +10,25 @@ abstract final class AppAssets {
   static const _images = 'assets/images';
 
   /// 도움 목표 아이콘 (40×40). Figma `온보딩_목표` 프레임의 Group 5~8.
-  static String goalIcon(SupportGoal goal) => switch (goal) {
-        SupportGoal.stepByStep => '$_images/goal_step_by_step.svg',
-        SupportGoal.prepareItems => '$_images/goal_prepare_items.svg',
-        SupportGoal.prepareNew => '$_images/goal_prepare_new.svg',
-        SupportGoal.independent => '$_images/goal_independent.svg',
-      };
+  ///
+  /// **목표별로 다르지 않다.** 네 그룹 모두 노란 반투명 원 + `fi-br-child-head`
+  /// 조합으로 Figma상 완전히 동일하다. 목표마다 다른 아이콘을 쓰려면
+  /// 디자이너가 Figma를 먼저 바꿔야 한다. (이슈 #11)
+  static const goalIcon = '$_images/goal_icon.svg';
+
+  /// 뒤로가기 (24×24). Figma `fi-br-angle-left`.
+  /// Material 아이콘은 형태가 달라 쓰지 않는다.
+  static const iconBack = '$_images/icon_back.svg';
+
+  // --- 입력 필드 아이콘 ---
+
+  /// 아이 이름 입력 필드의 좌측 아이콘 (40×40).
+  /// 노란 원 배경(rgba(255,214,41,0.3))과 어린이 머리(#F3C500)가 SVG 안에 함께 있다.
+  /// Figma `온보딩_이름`(204:991)의 Group 5.
+  ///
+  /// 현재 [goalIcon]과 그림이 같지만 상수를 분리해 둔다. 쓰이는 자리가 다르고
+  /// (목표 칩 vs 이름 입력 필드) 한쪽만 교체될 수 있다.
+  static const inputFieldIconChildName = '$_images/icon_child_head.svg';
 
   /// 캐릭터 일러스트 (약 164×164). 카드 속 주인공으로도 쓰인다.
   static String character(CardCharacter character) => switch (character) {

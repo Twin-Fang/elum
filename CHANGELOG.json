@@ -1,15 +1,38 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T05:56:03Z",
-    "currentVersion": "1.0.28",
+    "lastUpdated": "2026-07-21T06:28:21Z",
+    "currentVersion": "1.0.29",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 2
+    "totalReleases": 3
   },
   "releases": [
+    {
+      "version": "1.0.29",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 12,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 이름 입력 화면이 디자인대로 새로워졌습니다\n  * 이름 입력칸에 아이 아이콘이 추가됐습니다\n  * 도움 목표 선택 화면의 색상과 여백을 정돈했습니다\n  * 목표를 선택했을 때 표시가 더 또렷해졌습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "이름 입력 화면이 디자인대로 새로워졌습니다",
+            "이름 입력칸에 아이 아이콘이 추가됐습니다",
+            "도움 목표 선택 화면의 색상과 여백을 정돈했습니다",
+            "목표를 선택했을 때 표시가 더 또렷해졌습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.28",
       "project_type": "flutter",

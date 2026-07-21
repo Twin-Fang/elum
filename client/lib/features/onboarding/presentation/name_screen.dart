@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -60,6 +61,7 @@ class _NameScreenState extends ConsumerState<NameScreen> {
           ElumTextField(
             controller: _controller,
             hintText: '이름을 입력해주세요',
+            leadingIconAssetPath: AppAssets.inputFieldIconChildName,
             onChanged: ref.read(onboardingProvider.notifier).setNickname,
           ),
         ],

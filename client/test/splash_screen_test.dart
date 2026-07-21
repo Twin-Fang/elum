@@ -5,10 +5,10 @@ import 'package:elum/features/onboarding/presentation/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
 /// 시작 화면은 Figma `시작`(238:1808)을 따른다.
@@ -66,7 +66,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('이룸'), findsNothing);
-      expect(_svgWithAsset(AppAssets.logo), findsOneWidget);
+      expect(svgWithAsset(AppAssets.logo), findsOneWidget);
     });
 
     testWidgets('병아리 몸통을 직접 그리지 않고 SVG로 렌더링한다', (tester) async {
@@ -75,15 +75,15 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(_svgWithAsset(AppAssets.splashChickBody), findsOneWidget);
+      expect(svgWithAsset(AppAssets.splashChickBody), findsOneWidget);
     });
 
     testWidgets('장식 요소가 모두 배치된다', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(_svgWithAsset(AppAssets.splashHill), findsOneWidget);
-      expect(_svgWithAsset(AppAssets.splashStar), findsOneWidget);
+      expect(svgWithAsset(AppAssets.splashHill), findsOneWidget);
+      expect(svgWithAsset(AppAssets.splashStar), findsOneWidget);
     });
   });
 
@@ -107,14 +107,5 @@ void main() {
 
       expect(find.text('보호자 홈'), findsOneWidget);
     });
-  });
-}
-
-/// 특정 에셋 경로를 쓰는 SvgPicture를 찾는다.
-Finder _svgWithAsset(String assetPath) {
-  return find.byWidgetPredicate((widget) {
-    if (widget is! SvgPicture) return false;
-    final loader = widget.bytesLoader;
-    return loader is SvgAssetLoader && loader.assetName == assetPath;
   });
 }

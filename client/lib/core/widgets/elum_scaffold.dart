@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../assets/app_assets.dart';
 import '../theme/theme_context_ext.dart';
 
 /// 온보딩·보호자 화면의 공통 뼈대.
@@ -35,10 +37,14 @@ class ElumScaffold extends StatelessWidget {
             if (onBack != null)
               Align(
                 alignment: Alignment.centerLeft,
+                // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
                 child: IconButton(
                   onPressed: onBack,
-                  icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-                  color: context.colors.textPrimary,
+                  icon: SvgPicture.asset(
+                    AppAssets.iconBack,
+                    width: 24,
+                    height: 24,
+                  ),
                 ),
               ),
             Expanded(

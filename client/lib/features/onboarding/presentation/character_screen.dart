@@ -19,6 +19,9 @@ import 'widgets/character_card.dart';
 class CharacterScreen extends ConsumerWidget {
   const CharacterScreen({super.key});
 
+  /// 카드 사이 간격. Figma 카드 x=16/201에 폭이 176이므로 201-(16+176)=9다.
+  static const _cardGap = 9.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(onboardingProvider);
@@ -60,11 +63,13 @@ class CharacterScreen extends ConsumerWidget {
             ),
             SizedBox(height: context.space.xl),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 for (final character in CardCharacter.values) ...[
                   Expanded(child: group.buildItem(context, character)),
+                  // Figma 카드 x=16/201, 폭 176 → 사이 간격 9
                   if (character != CardCharacter.values.last)
-                    SizedBox(width: context.space.sm),
+                    SizedBox(width: _cardGap),
                 ],
               ],
             ),
