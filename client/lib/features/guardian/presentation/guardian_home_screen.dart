@@ -182,13 +182,14 @@ class _NewRoutineCard extends StatelessWidget {
         height: 94.h,
         padding: EdgeInsets.symmetric(horizontal: space.md),
         decoration: BoxDecoration(
-          // Figma: linear-gradient(-67deg, #F9F1D7 16.64%, #E9EEFF 83.36%) — 270도 회전
+          // Figma: linear-gradient(-67deg, #F9F1D7 16.64%, #E9EEFF 83.36%)
+          // 노란색 왼쪽 → 보라 오른쪽
           gradient: LinearGradient(
             begin: const Alignment(-0.99, -0.12),
             end: const Alignment(0.99, 0.12),
             colors: const [
-              Color(0xFFE9EEFF),
               Color(0xFFF9F1D7),
+              Color(0xFFE9EEFF),
             ],
             stops: const [0.1664, 0.8336],
           ),
