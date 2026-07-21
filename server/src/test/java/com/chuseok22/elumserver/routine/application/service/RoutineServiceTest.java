@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.routine.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
@@ -131,7 +132,7 @@ class RoutineServiceTest {
   }
 
   @Test
-  @DisplayName("PREPARE_ITEMS를 선택했으면 AI 파이프라인 결과를 질문 목록으로 반환한다")
+  @DisplayName("PREPARE_ITEMS를 선택했으면 AI 파이프라인 결과를 emoji/label 옵션으로 변환해 반환한다")
   void generateQuestion_relevantGoal_returnsQuestions() {
     Member member = new Member();
     member.setId("member-1");
@@ -142,7 +143,11 @@ class RoutineServiceTest {
       .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "내일 비 오는 날 학교 가기"));
     RoutineAiPipeline.RoutineQuestionResult pipelineResult = new RoutineAiPipeline.RoutineQuestionResult(
       List.of(new RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem(
-        "챙겨야 하는 준비물이 있나요?", List.of("우산", "우비")
+        "챙겨야 하는 준비물이 있나요?",
+        List.of(
+          new RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult("☔", "우산"),
+          new RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult("🧥", "우비")
+        )
       ))
     );
     when(routineAiPipeline.generateQuestion(
@@ -155,6 +160,12 @@ class RoutineServiceTest {
     assertThat(response.required()).isTrue();
     assertThat(response.questions()).hasSize(1);
     assertThat(response.questions().get(0).question()).isEqualTo("챙겨야 하는 준비물이 있나요?");
+    assertThat(response.questions().get(0).options())
+      .extracting(
+        RoutineQuestionResponse.QuestionItem.OptionItem::emoji,
+        RoutineQuestionResponse.QuestionItem.OptionItem::label
+      )
+      .containsExactly(tuple("☔", "우산"), tuple("🧥", "우비"));
   }
 
   @Test

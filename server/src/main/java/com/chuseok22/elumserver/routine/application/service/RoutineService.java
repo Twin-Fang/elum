@@ -66,9 +66,17 @@ public class RoutineService {
     RoutineAiPipeline.RoutineQuestionResult result =
       routineAiPipeline.generateQuestion(member.getNickname(), goals, checkResult.sanitizedText());
     List<RoutineQuestionResponse.QuestionItem> questions = result.questions().stream()
-      .map(item -> new RoutineQuestionResponse.QuestionItem(item.question(), item.options()))
+      .map(item -> new RoutineQuestionResponse.QuestionItem(item.question(), toOptionItems(item.options())))
       .toList();
     return new RoutineQuestionResponse(true, questions);
+  }
+
+  private List<RoutineQuestionResponse.QuestionItem.OptionItem> toOptionItems(
+    List<RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult> options
+  ) {
+    return options.stream()
+      .map(option -> new RoutineQuestionResponse.QuestionItem.OptionItem(option.emoji(), option.label()))
+      .toList();
   }
 
   // Gemini 호출(수십 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 클래스 레벨
