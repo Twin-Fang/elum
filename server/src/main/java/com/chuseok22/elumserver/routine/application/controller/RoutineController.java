@@ -6,6 +6,7 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineReviseReq
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
+import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.logging.annotation.LogMonitoring;
@@ -65,6 +66,13 @@ public class RoutineController implements RoutineControllerDocs {
   @GetMapping
   public ResponseEntity<List<RoutineResponse>> getMyRoutines(Authentication authentication) {
     List<RoutineResponse> responses = routineService.getMyRoutines(authentication.getName());
+    return ResponseEntity.ok(responses);
+  }
+
+  @LogMonitoring(logParameters = false, logResult = true, logExecutionTime = true)
+  @GetMapping("/suggestions")
+  public ResponseEntity<List<RoutineSuggestionResponse>> getSuggestions() {
+    List<RoutineSuggestionResponse> responses = routineService.getSuggestions();
     return ResponseEntity.ok(responses);
   }
 

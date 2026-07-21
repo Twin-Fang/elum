@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineReviseReq
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
+import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -139,6 +140,16 @@ public interface RoutineControllerDocs {
     @ApiResponse(responseCode = "200", description = "조회 성공")
   })
   ResponseEntity<List<RoutineResponse>> getMyRoutines(Authentication authentication);
+
+  @Operation(
+    summary = "추천 일과 목록 조회",
+    description = "하드코딩된 50개 추천 일과 중 무작위 4개(아이콘 + 문구)를 반환합니다. 보호자별 개인화는 하지 않습니다."
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+  })
+  ResponseEntity<List<RoutineSuggestionResponse>> getSuggestions();
 
   @Operation(
     summary = "일과 단계 이미지 조회",
