@@ -111,19 +111,46 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     state = state.copyWith(answers: next);
   }
 
-  Future<void> generateCards() async {
+  /// 진행 중인 카드 생성. 중복 호출을 막는 유일한 지점이다.
+  ///
+  /// **`POST /api/routines`는 AI 호출이라 한 번이 곧 비용이다.**
+  /// 로딩 화면이 재생성되면(토큰 만료 리다이렉트, 화면 복귀 등) `initState`가
+  /// 다시 돌아 [generateCards]를 또 부른다. 실제로 한 번의 일과 생성에
+  /// 요청이 16번 나간 적이 있다.
+  ///
+  /// 위젯이 아니라 여기서 막는 이유 — 위젯은 몇 번이든 다시 만들어지지만
+  /// provider는 흐름이 끝날 때까지 살아 있다.
+  Future<void>? _generating;
+
+  Future<void> generateCards() {
+    // 진행 중이거나 이미 끝난 생성이 있으면 그것을 그대로 돌려준다.
+    //
+    // **성공한 뒤에도 가드를 풀지 않는다.** 풀면 로딩 화면이 나중에 다시
+    // 만들어졌을 때 또 쏜다 — 16번 사고가 정확히 이 경로였다.
+    // 새 일과를 만들 때는 홈에서 [reset]을 부르므로 그때 풀린다.
+    return _generating ??= _createRoutine();
+  }
+
+  Future<void> _createRoutine() async {
     state = state.copyWith(step: RoutineFlowStep.generating);
 
     final repo = ref.read(routineRepositoryProvider);
     final goals = ref.read(onboardingProvider).supportGoals;
 
-    final routine = await repo.createRoutine(
-      rawInputText: state.rawInput,
-      goals: goals,
-      answers: state.answers,
-    );
+    try {
+      final routine = await repo.createRoutine(
+        rawInputText: state.rawInput,
+        goals: goals,
+        answers: state.answers,
+      );
 
-    state = state.copyWith(step: RoutineFlowStep.review, routine: routine);
+      state = state.copyWith(step: RoutineFlowStep.review, routine: routine);
+    } catch (e) {
+      // 실패했을 때만 가드를 푼다. 성공과 달리 남길 결과가 없으므로
+      // 붙잡아 두면 사용자가 영영 카드를 못 만든다.
+      _generating = null;
+      rethrow;
+    }
   }
 
   Future<void> updateStep(String stepId, String description) async {
@@ -145,5 +172,9 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     state = state.copyWith(step: RoutineFlowStep.done, routine: confirmed);
   }
 
-  void reset() => state = const RoutineFlowState();
+  void reset() {
+    // 진행 중이던 생성을 놓아준다. 남겨두면 다음 일과 생성이 막힌다.
+    _generating = null;
+    state = const RoutineFlowState();
+  }
 }
