@@ -1,0 +1,5 @@
+# IDE Settings
+/.idea
+
+# Claude AI Settings
+/.claude/settings.local.json
