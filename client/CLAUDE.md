@@ -18,12 +18,19 @@
 
 | 영역 | 선택 | 이유 |
 | --- | --- | --- |
-| 상태관리 | **Riverpod** (`flutter_riverpod` + `riverpod_annotation`) | 서버 미완성 구간을 mock provider로 갈아끼우기 쉬움 |
+| 상태관리 | **Riverpod** (`flutter_riverpod`) | 서버 미완성 구간을 mock provider로 갈아끼우기 쉬움 |
 | 라우팅 | **go_router** | 온보딩 단계별 딥링크·뒤로가기 제어가 명확 |
-| 모델 | **Freezed** + `json_serializable` | 카드/DLP 응답 JSON 파싱 안정성 |
+| 모델 | **Freezed** | 불변 모델 + `copyWith` |
 | HTTP | **dio** | 인터셉터로 실패 시 fallback 체인 처리 |
 | 로컬 저장 | **shared_preferences** | 온보딩 결과(호칭·목표·캐릭터·PIN) 저장 |
-| TTS | **flutter_tts** | 아동 모드 음성 안내 |
+| TTS | **flutter_tts** (예정) | 아동 모드 음성 안내 |
+
+> **의존성 제약 (실제로 부딪힌 것)**
+> - `riverpod_generator` — `flutter_riverpod 3.3.2`와 analyzer 버전이 충돌한다. provider를 손으로 선언한다.
+> - `json_serializable` — 같은 이유로 제외. JSON 파싱은 모델에 직접 쓴다 (필드가 적어 충분하다).
+> - `flutter_secure_storage` — 의존하는 `objective_c`의 build hook이 Dart 3.10에서 `build_runner`의
+>   AOT 컴파일을 깨뜨린다. 현재 PIN은 `shared_preferences`에 저장하며, `LocalStorage`가
+>   메서드로 감싸두어 나중에 교체해도 호출부는 그대로다.
 
 > 해커톤 24시간 기준. 새 패키지를 추가할 땐 **데모 성립 조건**([../docs/07-mvp-scope.md](../docs/07-mvp-scope.md))에 필요한지 먼저 따진다.
 
@@ -50,11 +57,35 @@
 - 애니메이션은 **300ms 이상** — 급격한 전환은 쓰지 않는다
 - 텍스트 최소 20sp, 실패/에러 표현에 빨강·경고 아이콘 사용 금지
 
+### 서버 연동 규칙 (중요)
+
+**API를 붙일 땐 반드시 `server/`의 실제 코드를 읽고 맞춘다.**
+`docs/06-api-spec.md`는 초안이라 실제 구현과 다를 수 있다. **서버 코드가 기준이다.**
+
+| 확인할 것 | 위치 |
+| --- | --- |
+| 엔드포인트 | `server/src/main/java/**/application/controller/*Controller.java` |
+| 요청·응답 필드 | 같은 패키지의 `dto/` |
+| enum 값 | `server/src/main/java/**/infrastructure/entity/*.java` |
+
+이미 맞춰둔 계약:
+
+- `SupportGoal` → `member/infrastructure/entity/SupportGoal.java`
+  (`STEP_BY_STEP` / `PREPARE_ITEMS` / `PREPARE_NEW` / `INDEPENDENT`)
+- `ActionCard` → `routine/infrastructure/entity/RoutineStep.java`
+  (`id` / `description` / `stepOrder` / `imagePath` / `completed`)
+
+주요 엔드포인트: `/api/auth`, `/api/member`, `/api/routines`
+
+> 서버 enum이나 필드명이 바뀌면 **클라이언트 도메인 모델을 먼저 맞추고** 테스트를 돌린다.
+> `test/onboarding_profile_test.dart`에 서버 계약 검증 테스트가 있다.
+
 ### 금지
 
 - `print()` — `debugPrint()` 사용
 - 보호자 입력 원문을 로그에 남기는 것 (루트 docs 원칙 5번)
 - 아동 화면에 **미승인 카드** 렌더링 (원칙 3번)
+- **추측으로 API 필드명 짓기** — 서버 코드를 열어보고 쓴다
 
 ## 폰트
 
