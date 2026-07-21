@@ -60,12 +60,18 @@ void main() {
     );
   }
 
+  /// 카드 [cards]장을 가진 일과. 홈은 일과가 아니라 **그 안의 카드**를 펼친다.
   Routine routine(String title, int cards) => Routine(
         id: title,
         title: title,
         steps: [
           for (var i = 0; i < cards; i++)
-            ActionCard(id: '$title-$i', description: '카드 $i'),
+            ActionCard(
+              id: '$title-$i',
+              title: '카드 ${i + 1} 제목',
+              description: '카드 ${i + 1} 설명',
+              stepOrder: i + 1,
+            ),
         ],
       );
 
@@ -75,7 +81,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('추천 일과'), findsOneWidget);
-      expect(find.text('최근 일과'), findsOneWidget);
+      // Figma 309:3739가 "오늘 일과"다
+      expect(find.text('오늘 일과'), findsOneWidget);
       expect(find.text('새로운 일과 만들기'), findsOneWidget);
       expect(find.text('오늘은 어떤 일과를 준비할까요?'), findsOneWidget);
     });
@@ -188,7 +195,7 @@ void main() {
     });
   });
 
-  group('최근 일과', () {
+  group('오늘 일과', () {
     testWidgets('0건이면 Figma 빈 상태를 보여준다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
@@ -197,24 +204,47 @@ void main() {
       expect(svgWithAsset(AppAssets.homeEmptyIllust), findsOneWidget);
     });
 
-    testWidgets('일과가 있으면 목록으로 보여준다', (tester) async {
+    testWidgets('일과가 있으면 카드를 펼쳐 보여준다', (tester) async {
+      // Figma 309:3739는 일과 이름이 아니라 카드 하나하나를 보여준다
       await tester.pumpWidget(
         wrap(routines: [routine('비 오는 날 학교 가기', 5)]),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('비 오는 날 학교 가기'), findsOneWidget);
-      expect(find.text('카드 5장'), findsOneWidget);
+      expect(find.text('카드 1 제목'), findsOneWidget);
+      expect(find.text('카드 1 설명'), findsOneWidget);
+      expect(find.text('카드 5 제목'), findsOneWidget);
       // 목록이 있으면 빈 상태는 사라진다
       expect(find.text('아직 만든 일과가 없어요 😢'), findsNothing);
     });
 
+    testWidgets('카드마다 번호를 매긴다', (tester) async {
+      await tester.pumpWidget(
+        wrap(routines: [routine('비 오는 날 학교 가기', 3)]),
+      );
+      await tester.pumpAndSettle();
+
+      for (final n in ['1', '2', '3']) {
+        expect(find.text(n), findsOneWidget);
+      }
+    });
+
     testWidgets('제목이 비어 와도 죽지 않는다', (tester) async {
-      await tester.pumpWidget(wrap(routines: [routine('', 2)]));
+      // 서버가 title을 주지 않으므로 description으로 대체된다
+      await tester.pumpWidget(
+        wrap(
+          routines: [
+            const Routine(
+              id: 'r',
+              steps: [ActionCard(id: 'a', description: '설명만 있는 카드')],
+            ),
+          ],
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('이름 없는 일과'), findsOneWidget);
+      expect(find.text('설명만 있는 카드'), findsWidgets);
     });
   });
 

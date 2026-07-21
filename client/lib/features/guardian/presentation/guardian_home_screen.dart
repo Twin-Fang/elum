@@ -7,10 +7,13 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../shared/models/routine.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../application/routine_notifier.dart';
 import '../../child/presentation/mode_switch_screen.dart';
+import '../../../shared/models/action_card.dart';
+import '../../../core/theme/app_motion.dart';
+import '../../child/application/child_routine_notifier.dart';
+import '../domain/card_palette.dart';
 import '../data/routine_repository.dart';
 import 'widgets/recommended_routine_strip.dart';
 
@@ -66,7 +69,7 @@ class GuardianHomeScreen extends ConsumerWidget {
               SizedBox(height: space.xl),
               _SectionTitle(
                 iconAsset: AppAssets.iconClock,
-                label: '최근 일과',
+                label: '오늘 일과',
               ),
               SizedBox(height: space.md),
               Padding(
@@ -257,12 +260,21 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-/// 최근 일과 — 목록 또는 빈 상태.
+/// 오늘 일과 — 방금 만든 일과의 카드 목록 또는 빈 상태.
+///
+/// Figma `보호자_홈_최근일과`(309:3739)는 **일과 목록이 아니라 그 안의 카드**를
+/// 펼쳐 보여준다. 보호자가 아이에게 무엇을 시켰는지 한눈에 확인하는 자리다.
 class _RecentRoutines extends ConsumerWidget {
   const _RecentRoutines();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 방금 만든 일과가 있으면 그것을 먼저 보여준다. 서버 목록을 기다리지 않는다.
+    final current = ref.watch(routineFlowProvider).routine;
+    if (current != null && current.steps.isNotEmpty) {
+      return _CardList(cards: current.steps);
+    }
+
     final routines = ref.watch(myRoutinesProvider);
 
     return routines.when(
@@ -279,8 +291,139 @@ class _RecentRoutines extends ConsumerWidget {
       // 조회 실패도 빈 상태로 흡수한다. repository가 이미 빈 목록을 주지만
       // provider 단계의 예외까지 막아 화면이 붉게 덮이지 않게 한다.
       error: (_, _) => const _EmptyRoutines(),
-      data: (list) =>
-          list.isEmpty ? const _EmptyRoutines() : _RoutineList(routines: list),
+      data: (list) {
+        final cards = list.isEmpty ? const <ActionCard>[] : list.first.steps;
+        return cards.isEmpty
+            ? const _EmptyRoutines()
+            : _CardList(cards: cards);
+      },
+    );
+  }
+}
+
+/// 카드 한 줄씩 (Figma 344×68).
+///
+/// 번호 배지 색이 카드마다 다르다 — 카드확인·아이 홈과 같은 팔레트를 쓴다.
+class _CardList extends ConsumerWidget {
+  const _CardList({required this.cards});
+
+  final List<ActionCard> cards;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final space = context.space;
+    final progress = ref.watch(childRoutineProvider);
+
+    return Column(
+      children: [
+        for (final (index, card) in cards.indexed) ...[
+          if (index > 0) SizedBox(height: space.xs),
+          _CardRow(
+            card: card,
+            index: index,
+            isDone: progress.isCompleted(card.id),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// 카드 한 줄 — 번호 + 제목 + 설명 + 완료 표시.
+class _CardRow extends StatelessWidget {
+  const _CardRow({
+    required this.card,
+    required this.index,
+    required this.isDone,
+  });
+
+  final ActionCard card;
+  final int index;
+
+  /// 아이가 완료했는가. 완료하면 우측에 체크가 채워진다.
+  final bool isDone;
+
+  /// Figma 실측 — 번호 배지 40×40 r12
+  static const _badgeSize = 40.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final space = context.space;
+    final palette = CardPalette.at(index);
+
+    return _RoutineCardShell(
+      child: Row(
+        children: [
+          Container(
+            width: _badgeSize,
+            height: _badgeSize,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: palette.border,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '${index + 1}',
+              style: context.typo.cardHeadline.copyWith(color: colors.surface),
+            ),
+          ),
+          SizedBox(width: space.sm),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  card.displayTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.typo.cardBody.copyWith(color: colors.chipLabel),
+                ),
+                SizedBox(height: space.xs),
+                Text(
+                  card.description,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style:
+                      context.typo.caption.copyWith(color: colors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          // 아이가 끝낸 카드만 채워진 체크가 된다
+          _DoneMark(isDone: isDone),
+        ],
+      ),
+    );
+  }
+}
+
+/// 완료 표시 (40×40). 미완료는 흐린 원, 완료는 채워진 체크.
+class _DoneMark extends StatelessWidget {
+  const _DoneMark({required this.isDone});
+
+  final bool isDone;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return AnimatedContainer(
+      duration: AppMotion.fast,
+      curve: AppMotion.standard,
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isDone ? colors.checkDone : Colors.transparent,
+        border: isDone ? null : Border.all(color: colors.checkPending, width: 2),
+      ),
+      child: Icon(
+        Icons.check_rounded,
+        size: 22,
+        color: isDone ? colors.surface : colors.checkPending,
+      ),
     );
   }
 }
@@ -306,72 +449,20 @@ class _EmptyRoutines extends ConsumerWidget {
               children: [
                 Text(
                   '아직 만든 일과가 없어요 😢',
-                  style: context.typo.cardBody.copyWith(
-                    color: context.colors.chipLabel,
-                  ),
+                  style: context.typo.cardBody
+                      .copyWith(color: context.colors.chipLabel),
                 ),
                 SizedBox(height: space.xs),
                 Text(
                   '$childName의 첫 행동카드를 만들어보세요',
-                  style: context.typo.caption.copyWith(
-                    color: context.colors.textSecondary,
-                  ),
+                  style: context.typo.caption
+                      .copyWith(color: context.colors.textSecondary),
                 ),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 일과 목록. 승인 여부와 무관하게 보호자에게는 모두 보인다.
-class _RoutineList extends StatelessWidget {
-  const _RoutineList({required this.routines});
-
-  final List<Routine> routines;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-
-    return Column(
-      children: [
-        for (final (index, routine) in routines.indexed) ...[
-          if (index > 0) SizedBox(height: space.sm),
-          _RoutineCardShell(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        // 제목이 비어 오는 경우가 있어 대체어를 둔다
-                        routine.title.isEmpty ? '이름 없는 일과' : routine.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.typo.cardBody.copyWith(
-                          color: context.colors.chipLabel,
-                        ),
-                      ),
-                      SizedBox(height: space.xs),
-                      Text(
-                        '카드 ${routine.steps.length}장',
-                        style: context.typo.caption.copyWith(
-                          color: context.colors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
     );
   }
 }
