@@ -30,9 +30,19 @@ public class CharacterReferenceProvider {
     return images.get(characterType);
   }
 
+  // ASSET_PATHS가 아닌 CharacterType.values()를 기준으로 순회해야, 나중에 캐릭터가
+  // 추가되고 ASSET_PATHS 등록을 빠뜨렸을 때 즉시 기동 실패로 드러난다. 반대로 ASSET_PATHS를
+  // 기준으로 순회하면 매핑 누락이 조용히 무시되고, 이미지 생성 시점에야 get()이 null을
+  // 반환해 NPE로 터지게 된다.
   private Map<CharacterType, byte[]> loadImages() {
     Map<CharacterType, byte[]> loaded = new EnumMap<>(CharacterType.class);
-    ASSET_PATHS.forEach((characterType, path) -> loaded.put(characterType, readClasspathResource(path)));
+    for (CharacterType characterType : CharacterType.values()) {
+      String path = ASSET_PATHS.get(characterType);
+      if (path == null) {
+        throw new IllegalStateException("ASSET_PATHS에 캐릭터 참조 이미지 경로가 없습니다: " + characterType);
+      }
+      loaded.put(characterType, readClasspathResource(path));
+    }
     return loaded;
   }
 

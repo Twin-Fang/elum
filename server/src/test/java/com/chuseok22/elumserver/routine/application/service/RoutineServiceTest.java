@@ -2,16 +2,23 @@ package com.chuseok22.elumserver.routine.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
 import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
@@ -19,6 +26,7 @@ import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineSuggestionCatalog;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
+import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.util.List;
@@ -48,6 +56,9 @@ class RoutineServiceTest {
 
   @Mock
   private RoutineAiPipeline routineAiPipeline;
+
+  @Mock
+  private RoutineRequestCooldownGuard routineRequestCooldownGuard;
 
   @InjectMocks
   private RoutineService routineService;
@@ -186,5 +197,44 @@ class RoutineServiceTest {
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
+  }
+
+  @Test
+  @DisplayName("쿨다운 중이면 회원/AI 파이프라인 조회 없이 ROUTINE_REQUEST_TOO_FREQUENT를 던진다")
+  void create_cooldownActive_throwsWithoutTouchingMemberOrPipeline() {
+    doThrow(new CustomException(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT))
+      .when(routineRequestCooldownGuard).guard("member-1");
+
+    assertThatThrownBy(() -> routineService.create("member-1", new RoutineCreateRequest(null, null, null)))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT));
+    verifyNoInteractions(memberRepository, routineAiPipeline);
+  }
+
+  @Test
+  @DisplayName("일과 생성 시 회원이 설정한 캐릭터를 AI 파이프라인 생성 호출에 그대로 전달한다")
+  void create_withMemberCharacter_passesCharacterToPipeline() {
+    Member member = new Member();
+    member.setId("member-1");
+    member.setNickname("하늘이");
+    member.setSupportGoals(Set.of());
+    member.setCharacter(CharacterType.LULU);
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(sensitiveInfoGuardService.check("내일 병원 가기"))
+      .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "내일 병원 가기"));
+    RoutineAiPipeline.RoutineGenerationResult generationResult = new RoutineAiPipeline.RoutineGenerationResult(
+      "병원 다녀오기",
+      List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신기", "data/routine-images/batch-1/1.png"))
+    );
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU)))
+      .thenReturn(generationResult);
+    when(routineRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+    routineService.create("member-1", new RoutineCreateRequest("내일 병원 가기", null, null));
+
+    verify(routineAiPipeline).generateForCreate(
+      eq("내일 병원 가기"), eq("하늘이"), eq(Set.of()), isNull(), eq(CharacterType.LULU)
+    );
   }
 }
