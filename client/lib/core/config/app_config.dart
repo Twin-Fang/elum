@@ -49,6 +49,16 @@ abstract final class AppConfig {
   /// 서버 대신 mock 데이터를 쓸지. 서버 준비 전 개발·데모용.
   static bool get useMock => _bool('ELUM_USE_MOCK', true);
 
+  /// 개발자 도구 오버레이(플로팅 버튼)를 띄울지.
+  ///
+  /// ⚠️ [enableNetworkLog]와 달리 `kDebugMode`를 걸지 않는다. 목적이 다르다 —
+  /// 네트워크 로깅은 운영에서 절대 켜지면 안 되는 값이고, 개발자 도구는
+  /// 심사자·테스터가 **릴리스 빌드로** 확인해야 하는 값이다.
+  /// debug 게이트를 걸면 정작 필요한 사람이 쓰지 못한다.
+  ///
+  /// 정식 출시 전 `.env`와 GitHub Secret에서 false로 바꾼다. (이슈 #13)
+  static bool get showDevTools => _bool('ELUM_SHOW_DEV_TOOLS', false);
+
   // --- 파싱 헬퍼 ---
   // 값이 없거나 형식이 틀려도 예외를 던지지 않는다.
   // 설정 하나 때문에 앱이 뜨지 않으면 데모가 막힌다.

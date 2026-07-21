@@ -39,6 +39,14 @@ void main() {
       expect(AppConfig.dlpMinDelay, const Duration(milliseconds: 1500));
     });
 
+    test('개발자 도구는 기본이 꺼짐이다', () {
+      // .env를 안 만든 사람에게 개발자 도구가 뜨면 안 된다
+      expect(AppConfig.showDevTools, isFalse);
+
+      dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
+      expect(AppConfig.showDevTools, isTrue);
+    });
+
     test('bool은 여러 표기를 받아들인다', () {
       dotenv.loadFromString(envString: 'ELUM_USE_MOCK=false');
       expect(AppConfig.useMock, isFalse);

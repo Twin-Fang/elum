@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'core/dev/dev_tools_overlay.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/onboarding/application/onboarding_notifier.dart';
@@ -34,6 +35,10 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         theme: AppTheme.light,
         routerConfig: _router,
         debugShowCheckedModeBanner: false,
+        // 개발자 도구를 모든 화면 위에 얹는다. 화면별 코드는 건드리지 않는다.
+        // 플래그가 꺼지면 child를 그대로 반환해 비용이 0이다. (이슈 #13)
+        builder: (context, child) =>
+            DevToolsOverlay(child: child ?? const SizedBox.shrink()),
       ),
     );
   }
