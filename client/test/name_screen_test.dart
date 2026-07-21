@@ -10,6 +10,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/device_viewport.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
@@ -21,6 +22,10 @@ import 'helpers/test_storage.dart';
 /// 두 프레임은 같은 화면의 상태 전이다. 별도 화면을 만들지 않고
 /// 상태가 올바르게 갈리는지를 여기서 고정한다.
 void main() {
+  // 실기기와 같은 세로 여유에서 검증한다. 기본 800×600은 세로가 짧아
+  // 키보드가 올라온 상황이 제대로 재현되지 않는다.
+  useFigmaViewport();
+
   /// 이름 입력 = 로그인이다. 실서버를 타지 않도록 결과를 정해 넣는다. (이슈 #19)
   Widget buildSubject({AuthOutcome outcome = AuthOutcome.created}) {
     final router = GoRouter(
@@ -48,10 +53,8 @@ void main() {
       ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
-        builder: (context, child) => MaterialApp.router(
-          theme: AppTheme.light,
-          routerConfig: router,
-        ),
+        builder: (context, child) =>
+            MaterialApp.router(theme: AppTheme.light, routerConfig: router),
       ),
     );
   }
@@ -192,6 +195,42 @@ void main() {
 
       expect(find.textContaining('E-NET'), findsOneWidget);
       expect(find.textContaining('E-AUTH'), findsNothing);
+    });
+  });
+
+  /// 실기기에서 키보드가 올라오자 화면이 노란 줄무늬로 깨졌다.
+  /// 테스트는 키보드를 재현하지 않아 11개가 전부 통과했다.
+  ///
+  /// 오버플로 자체는 `flutter_test_config.dart`가 예외로 바꿔 잡는다.
+  /// 여기서는 그 상황을 만들어 주는 것이 역할이다.
+  group('키보드', () {
+    testWidgets('키보드가 올라와도 레이아웃이 깨지지 않는다', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      showKeyboard(tester);
+      await tester.pumpAndSettle();
+
+      // 화면이 살아있어야 한다 — 오버플로가 나면 여기 오기 전에 실패한다
+      expect(find.byType(ElumButton), findsOneWidget);
+    });
+
+    testWidgets('에러 메시지가 뜬 상태에서 키보드가 올라와도 깨지지 않는다', (tester) async {
+      // 에러 문구는 두 줄이라 콘텐츠가 늘어난다. 실제로 이때 오버플로가 더 커졌다.
+      await tester.pumpWidget(buildSubject(outcome: AuthOutcome.failed));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '서새찬');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElumButton));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('E-AUTH'), findsOneWidget);
+
+      showKeyboard(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ElumButton), findsOneWidget);
     });
   });
 }

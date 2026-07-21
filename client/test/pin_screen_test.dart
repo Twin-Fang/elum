@@ -252,4 +252,31 @@ void main() {
       expect(OnboardingProfile.pinLength, 4);
     });
   });
+
+  /// PIN 입력은 autofocus라 **화면에 들어가면 키패드가 항상 뜬다.**
+  /// 즉 키보드가 올라온 상태가 예외가 아니라 기본이다.
+  group('키보드', () {
+    testWidgets('키패드가 올라와도 레이아웃이 깨지지 않는다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      showKeyboard(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PinDots), findsOneWidget);
+    });
+
+    testWidgets('재확인 단계에서도 키패드가 올라와 있어도 깨지지 않는다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      showKeyboard(tester);
+      await tester.enterText(find.byType(TextField), '1234');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElumButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PinDots), findsOneWidget);
+    });
+  });
 }

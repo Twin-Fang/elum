@@ -72,55 +72,75 @@ class ElumScaffold extends StatelessWidget {
     // CTA 하단 여백 — Figma 버튼 하단(741)에서 프레임 하단(852)까지 111.
     // 여기서 기기 홈인디케이터를 빼야 Figma와 같은 자리에 놓인다.
     final ctaBottom =
-        ((_frameHeight - space.ctaTop - space.buttonH).h - safeBottom)
-            .clamp(0.0, double.infinity);
+        ((_frameHeight - space.ctaTop - space.buttonH).h - safeBottom).clamp(
+          0.0,
+          double.infinity,
+        );
 
     return Scaffold(
       backgroundColor: context.colors.background,
-      // SafeArea를 쓰지 않는다 — Figma y가 화면 최상단 기준이라
-      // 직접 보정해야 한다 (클래스 주석 참조).
-      body: Padding(
-        padding: EdgeInsets.only(top: safeTop, bottom: safeBottom),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (onBack != null) ...[
-              SizedBox(height: fromTop(_backIconY)),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: EdgeInsets.only(left: space.screenH.w),
-                  // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
-                  child: GestureDetector(
-                    onTap: onBack,
-                    child: SvgPicture.asset(
-                      AppAssets.iconBack,
-                      width: _backIconSize.w,
-                      height: _backIconSize.w,
+      // 키보드가 올라와도 본문 높이를 줄이지 않는다.
+      //
+      // 이 뼈대는 Figma 좌표를 고정 높이로 재현한다 — 헤더·입력필드·CTA가 모두
+      // 고정이라 압축할 여지가 없다. 기본값(true)이면 키보드 높이만큼 강제로
+      // 줄어들어 RenderFlex 오버플로가 난다 (이름·PIN 화면에서 실제 발생).
+      // RoutineFlowScaffold도 같은 이유로 false다.
+      resizeToAvoidBottomInset: false,
+      // 빈 곳을 누르면 키보드가 내려간다.
+      //
+      // Flutter는 이 동작을 기본 제공하지 않는다. 없으면 키보드를 내릴 방법이
+      // 완료 키뿐이라 사용자가 갇힌 느낌을 받는다.
+      //
+      // - opaque: 배경처럼 아무것도 없는 영역의 탭도 받는다
+      // - unfocus: 입력 위젯 자신의 탭은 가로채지 않으므로 커서 이동은 그대로 된다
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => FocusScope.of(context).unfocus(),
+        // SafeArea를 쓰지 않는다 — Figma y가 화면 최상단 기준이라
+        // 직접 보정해야 한다 (클래스 주석 참조).
+        child: Padding(
+          padding: EdgeInsets.only(top: safeTop, bottom: safeBottom),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (onBack != null) ...[
+                SizedBox(height: fromTop(_backIconY)),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: space.screenH.w),
+                    // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
+                    child: GestureDetector(
+                      onTap: onBack,
+                      child: SvgPicture.asset(
+                        AppAssets.iconBack,
+                        width: _backIconSize.w,
+                        height: _backIconSize.w,
+                      ),
                     ),
                   ),
                 ),
+              ],
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: (horizontalPadding ?? space.screenH).w,
+                  ),
+                  child: child,
+                ),
               ),
+              if (bottomButton != null)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    space.buttonMarginH.w,
+                    space.md.h,
+                    space.buttonMarginH.w,
+                    ctaBottom,
+                  ),
+                  child: bottomButton,
+                ),
             ],
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: (horizontalPadding ?? space.screenH).w,
-                ),
-                child: child,
-              ),
-            ),
-            if (bottomButton != null)
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  space.buttonMarginH.w,
-                  space.md.h,
-                  space.buttonMarginH.w,
-                  ctaBottom,
-                ),
-                child: bottomButton,
-              ),
-          ],
+          ),
         ),
       ),
     );

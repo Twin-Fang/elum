@@ -21,7 +21,8 @@ void useFigmaViewport({Size size = const Size(393, 852)}) {
   // devicePixelRatio를 1로 두면 논리 픽셀 = 물리 픽셀이라
   // 기대값을 Figma 좌표 그대로 쓸 수 있다.
   setUp(() {
-    final view = TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher
+    final view = TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
         .views
         .first;
     view.devicePixelRatio = 1.0;
@@ -29,10 +30,34 @@ void useFigmaViewport({Size size = const Size(393, 852)}) {
   });
 
   tearDown(() {
-    final view = TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher
+    final view = TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
         .views
         .first;
     view.resetPhysicalSize();
     view.resetDevicePixelRatio();
   });
+}
+
+/// 키보드가 올라온 상태를 만든다.
+///
+/// **`enterText()`로는 이 상황이 재현되지 않는다.** 텍스트 입력 이벤트만 주입할 뿐
+/// 화면 하단이 잠식되는 `viewInsets`는 그대로 0이다. 그래서 모든 테스트가
+/// "키보드가 영원히 안 올라오는 세계"에서 돌았고, 이름·PIN 화면이 실기기에서
+/// 오버플로로 깨지는데도 테스트는 전부 초록불이었다.
+///
+/// 입력이 있는 화면은 이 헬퍼로 키보드를 올린 뒤 렌더링이 깨지지 않는지 확인한다.
+/// 오버플로는 `test/flutter_test_config.dart`가 자동으로 실패시킨다.
+///
+/// ```dart
+/// await tester.pumpWidget(buildSubject());
+/// showKeyboard(tester);
+/// await tester.pumpAndSettle();   // 여기서 오버플로가 나면 테스트가 실패한다
+/// ```
+///
+/// [height]는 논리 픽셀. 기본 336은 iPhone 한글 키보드 높이다.
+void showKeyboard(WidgetTester tester, {double height = 336}) {
+  final view = tester.view;
+  view.viewInsets = FakeViewPadding(bottom: height * view.devicePixelRatio);
+  addTearDown(view.resetViewInsets);
 }
