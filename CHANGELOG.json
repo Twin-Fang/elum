@@ -1,15 +1,133 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T09:40:30Z",
-    "currentVersion": "1.0.46",
+    "lastUpdated": "2026-07-21T10:25:50Z",
+    "currentVersion": "1.0.51",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 19
+    "totalReleases": 24
   },
   "releases": [
+    {
+      "version": "1.0.51",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 50,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 카드에 AI가 그린 그림이 표시됩니다\n\n* **개선**\n  * 그림을 불러오지 못해도 카드가 깨지지 않습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "카드에 AI가 그린 그림이 표시됩니다"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "그림을 불러오지 못해도 카드가 깨지지 않습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "1.0.50",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 49,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 홈에서 오늘의 할 일 카드를 한눈에 볼 수 있습니다\n  * 아이가 끝낸 할 일이 홈에 바로 표시됩니다\n  * 일과를 저장하면 곧바로 홈에 나타납니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "홈에서 오늘의 할 일 카드를 한눈에 볼 수 있습니다",
+            "아이가 끝낸 할 일이 홈에 바로 표시됩니다",
+            "일과를 저장하면 곧바로 홈에 나타납니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "1.0.49",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 47,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 만들어진 카드를 넘겨보며 확인하고 저장할 수 있습니다\n  * 아이 화면에서 할 일을 하나씩 체크할 수 있습니다\n  * 할 일을 해내면 축하 화면과 함께 별을 받습니다\n  * 암호를 입력해 보호자 화면과 아이 화면을 오갈 수 있습니다\n\n* **개선**\n  * 체크한 순간 바로 반응하고 별은 뒤에서 저장됩니다\n  * 이미 축하받은 할 일은 다시 체크해도 축하 화면이 뜨지 않습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "만들어진 카드를 넘겨보며 확인하고 저장할 수 있습니다",
+            "아이 화면에서 할 일을 하나씩 체크할 수 있습니다",
+            "할 일을 해내면 축하 화면과 함께 별을 받습니다",
+            "암호를 입력해 보호자 화면과 아이 화면을 오갈 수 있습니다"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "체크한 순간 바로 반응하고 별은 뒤에서 저장됩니다",
+            "이미 축하받은 할 일은 다시 체크해도 축하 화면이 뜨지 않습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "1.0.48",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 46,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **문서**\n  * 개발 문서를 보완했습니다",
+      "parsed_changes": {
+        "문서": {
+          "title": "문서",
+          "items": [
+            "개발 문서를 보완했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "1.0.47",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 45,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 보호자 입력 속 개인정보를 더 정확하게 감지하도록 개선했습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "보호자 입력 속 개인정보를 더 정확하게 감지하도록 개선했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.46",
       "project_type": "flutter",

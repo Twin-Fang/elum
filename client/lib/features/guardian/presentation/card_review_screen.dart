@@ -1,175 +1,129 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
-import '../../../core/widgets/elum_header.dart';
-import '../../../core/widgets/elum_scaffold.dart';
-import '../../../shared/models/action_card.dart';
 import '../application/routine_notifier.dart';
+import 'widgets/action_card_view.dart';
+import 'widgets/routine_flow_scaffold.dart';
 
-/// 카드 검토·승인.
+/// Figma `보호자_새로운 일과 만들기_카드확인`(262:5124 / 309:2763).
 ///
-/// **승인 전에는 아동 화면에 노출되지 않는다** (docs 원칙 3번).
-/// AI가 만든 결과를 보호자가 확인하는 "출력 승인" 단계다.
-class CardReviewScreen extends ConsumerWidget {
+/// AI가 만든 카드를 보호자가 확인하고 저장한다. **승인 전에는 아동에게
+/// 노출되지 않는다** (docs 원칙 3번).
+///
+/// 카드가 가로로 넘어가고 뒤 카드가 살짝 보인다. 몇 장인지 한눈에 알 수 있게
+/// `viewportFraction`으로 옆 카드를 걸쳐 보여준다.
+class CardReviewScreen extends ConsumerStatefulWidget {
   const CardReviewScreen({super.key});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(routineFlowProvider);
-    final notifier = ref.read(routineFlowProvider.notifier);
-    final routine = state.routine;
+  /// 옆 카드가 걸쳐 보이는 정도. 1.0이면 한 장만 꽉 찬다.
+  static const _viewportFraction = 0.88;
 
-    if (routine == null || state.step == RoutineFlowStep.generating) {
-      return ElumScaffold(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(color: context.colors.brandOrange),
-              SizedBox(height: context.space.lg),
-              Text(
-                '카드를 만들고 있어요',
-                style: context.typo.subtitle
-                    .copyWith(color: context.colors.textPrimary),
-              ),
-            ],
-          ),
-        ),
-      );
+  @override
+  ConsumerState<CardReviewScreen> createState() => _CardReviewScreenState();
+}
+
+class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
+  late final _controller = PageController(
+    viewportFraction: CardReviewScreen._viewportFraction,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    // 승인해야 아동 화면에 나간다
+    await ref.read(routineFlowProvider.notifier).confirm();
+    if (mounted) context.go(Routes.guardian);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final routine = ref.watch(routineFlowProvider).routine;
+    final cards = routine?.steps ?? const [];
+    final routineId = routine?.id ?? '';
+    final space = context.space;
+
+    // 만들어진 카드가 없으면 확인할 것이 없다. 홈으로 돌려보낸다.
+    if (cards.isEmpty) {
+      return const RoutineFlowScaffold(child: _EmptyCards());
     }
 
-    return ElumScaffold(
-      bottomButton: ElumButton(
-        label: '이 카드로 시작하기',
-        onPressed: () async {
-          await notifier.confirm();
-          if (context.mounted) context.go(Routes.child);
-        },
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ElumHeader(
-              title: routine.title.isEmpty ? '카드가 준비됐어요' : routine.title,
-              description: '내용을 확인하고 수정할 수 있어요',
-            ),
-            SizedBox(height: context.space.xl),
-            for (final card in routine.steps)
-              _CardTile(
-                card: card,
-                onEdit: (text) => notifier.updateStep(card.id, text),
+    return RoutineFlowScaffold(
+      onBack: () => context.pop(),
+      bottomButton: ElumButton(label: '저장하기', onPressed: _save),
+      child: Column(
+        children: [
+          SizedBox(height: space.md),
+          SvgPicture.asset(AppAssets.iconSparklesLarge, width: 30, height: 36),
+          SizedBox(height: space.md),
+          Text(
+            '카드 ${cards.length}개가 생성되었어요',
+            style: context.typo.reviewTitle
+                .copyWith(color: context.colors.textPrimary),
+          ),
+          SizedBox(height: space.sm),
+          Text(
+            '내용을 확인하고 카드를 수정하거나 삭제해주세요',
+            style: context.typo.promptBody
+                .copyWith(color: context.colors.promptMuted),
+          ),
+          SizedBox(height: space.lg),
+          Expanded(
+            child: PageView.builder(
+              controller: _controller,
+              itemCount: cards.length,
+              itemBuilder: (context, index) => Padding(
+                padding: EdgeInsets.symmetric(horizontal: space.xs),
+                child: ActionCardView(
+                  card: cards[index],
+                  index: index,
+                  routineId: routineId,
+                  // 편집 화면이 Figma에 없어 자리만 만든다
+                  onEdit: () {},
+                ),
               ),
-          ],
-        ),
+            ),
+          ),
+          SizedBox(height: space.md),
+        ],
       ),
     );
   }
 }
 
-class _CardTile extends StatelessWidget {
-  const _CardTile({required this.card, required this.onEdit});
-
-  final ActionCard card;
-  final ValueChanged<String> onEdit;
+/// 카드가 없을 때. 로딩이 실패해도 여기까지 올 수 있다.
+class _EmptyCards extends StatelessWidget {
+  const _EmptyCards();
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-
-    return Container(
-      margin: EdgeInsets.only(bottom: space.sm),
-      padding: EdgeInsets.all(space.md),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(space.cardRadius),
-        border: Border.all(color: colors.border),
-      ),
-      child: Row(
-        children: [
-          // 순서 배지
-          Container(
-            width: 32,
-            height: 32,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: colors.highlightFill,
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              '${card.stepOrder}',
-              style: context.typo.body.copyWith(color: colors.textPrimary),
-            ),
-          ),
-          SizedBox(width: space.sm),
-          Expanded(
-            child: Text(
-              card.description,
-              style: context.typo.body.copyWith(color: colors.textPrimary),
-            ),
-          ),
-          IconButton(
-            onPressed: () => _showEditSheet(context),
-            icon: Icon(Icons.edit_outlined, color: colors.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditSheet(BuildContext context) {
-    final controller = TextEditingController(text: card.description);
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: context.colors.background,
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.only(
-          left: context.space.lg,
-          right: context.space.lg,
-          top: context.space.lg,
-          bottom: MediaQuery.of(sheetContext).viewInsets.bottom + context.space.lg,
-        ),
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: context.space.screenH),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '카드 내용 수정',
-              style: context.typo.subtitle
+              '만들어진 카드가 없어요',
+              textAlign: TextAlign.center,
+              style: context.typo.promptTitle
                   .copyWith(color: context.colors.textPrimary),
             ),
             SizedBox(height: context.space.md),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              maxLines: 3,
-              style: context.typo.body
-                  .copyWith(color: context.colors.textPrimary),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: context.colors.surface,
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(context.space.fieldRadius),
-                  borderSide: BorderSide(color: context.colors.border),
-                ),
-              ),
-            ),
-            SizedBox(height: context.space.md),
-            ElumButton(
-              label: '수정하기',
-              onPressed: () {
-                final text = controller.text.trim();
-                if (text.isNotEmpty) onEdit(text);
-                Navigator.of(sheetContext).pop();
-              },
+            Text(
+              // 에러 코드를 함께 보여줘야 제보를 추적할 수 있다
+              '다시 만들어 주세요 (E-CARD)',
+              style: context.typo.promptBody
+                  .copyWith(color: context.colors.promptMuted),
             ),
           ],
         ),

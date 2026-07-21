@@ -26,6 +26,27 @@
 - DB 직접 접근 절대 금지 — 쿼리 실행, 접속 정보 확인, 스키마 조회 등 일체 금지. 필요한 정보는 항상 사용자에게 확인
 - request DTO(`dto/request` 패키지)에 `jakarta.validation.constraints` 계열 검증 어노테이션(`@NotBlank`, `@NotNull`, `@Size`, `@Pattern` 등)을 추가하지 않는다. 신규 DTO 작성 시에도 적용하지 않는다
 
+## 배포 서버 로그 확인
+
+배포된 백엔드(`elum-back` 컨테이너)의 로그는 아래로 확인한다.
+
+```bash
+# 전체 로그를 실시간으로 따라간다
+curl -N "http://chuseok22.synology.me:8888/containers/elum-back/logs?lines=all&follow=true"
+
+# 최근 로그만 보고 끝낸다 (follow 없이)
+curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back/logs?lines=500" | tail -50
+```
+
+**`lines`는 `500` · `1000` · `all` · 빈 값만 받는다.** 그 외 숫자를 넣으면
+로그 대신 `잘못된 'lines' 파라미터 요청입니다`가 돌아온다.
+
+`follow=true`는 스트림이라 스스로 끝나지 않는다. 특정 문구가 나올 때까지만 볼 거라면
+`--max-time`으로 상한을 두거나 `grep -m 1`로 끊는다.
+
+> 클라이언트에서 API가 실패할 때(4xx/5xx) **서버 코드를 추측하기 전에 이 로그를 먼저 본다.**
+> 요청이 서버까지 왔는지, 어느 계층에서 터졌는지가 로그에 남는다.
+
 ## 상세 규칙
 
 - `.claude/rules/00-project-overview.md` — 프로젝트 목적/스택/명령어

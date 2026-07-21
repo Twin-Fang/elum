@@ -79,6 +79,15 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.stageDone,
     required this.stagePending,
     required this.stagePendingText,
+    required this.checkDone,
+    required this.checkPending,
+    required this.rewardBackdropTop,
+    required this.rewardBackdropBottom,
+    required this.rewardStar,
+    required this.rewardStarGlow,
+    required this.rewardStarGreen,
+    required this.rewardStarPurple,
+    required this.rewardButton,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -177,6 +186,26 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 로딩 대기 단계 문구 (rgba(36,38,52,0.5))
   final Color stagePendingText;
 
+  // 아이 모드 (Figma 309:3548 / 309:4055)
+  /// 아이 홈 체크 완료 원
+  final Color checkDone;
+  /// 아이 홈 체크 전 테두리 (8px)
+  final Color checkPending;
+  /// 보상 화면 배경 위 (어두워야 별이 빛난다)
+  final Color rewardBackdropTop;
+  /// 보상 화면 배경 아래
+  final Color rewardBackdropBottom;
+  /// 보상 큰 별
+  final Color rewardStar;
+  /// 큰 별 주변 빛 (rgba(208,255,0,0.3))
+  final Color rewardStarGlow;
+  /// 작은 별 — 초록
+  final Color rewardStarGreen;
+  /// 작은 별 — 보라
+  final Color rewardStarPurple;
+  /// 보상 화면 CTA
+  final Color rewardButton;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -220,6 +249,15 @@ class AppColors extends ThemeExtension<AppColors> {
     stageDone: Color(0xCC242634),
     stagePending: Color(0x99242634),
     stagePendingText: Color(0x80242634),
+    checkDone: Color(0xFF55CFBA),
+    checkPending: Color(0xFFC9D6D4),
+    rewardBackdropTop: Color(0xFF0C0D1A),
+    rewardBackdropBottom: Color(0xFF242634),
+    rewardStar: Color(0xFFD0FF00),
+    rewardStarGlow: Color(0x4DD0FF00),
+    rewardStarGreen: Color(0xFF86FCA3),
+    rewardStarPurple: Color(0xFFA186FC),
+    rewardButton: Color(0xFF55CFBA),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -275,6 +313,15 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? stageDone,
     Color? stagePending,
     Color? stagePendingText,
+    Color? checkDone,
+    Color? checkPending,
+    Color? rewardBackdropTop,
+    Color? rewardBackdropBottom,
+    Color? rewardStar,
+    Color? rewardStarGlow,
+    Color? rewardStarGreen,
+    Color? rewardStarPurple,
+    Color? rewardButton,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -320,6 +367,15 @@ class AppColors extends ThemeExtension<AppColors> {
       stageDone: stageDone ?? this.stageDone,
       stagePending: stagePending ?? this.stagePending,
       stagePendingText: stagePendingText ?? this.stagePendingText,
+      checkDone: checkDone ?? this.checkDone,
+      checkPending: checkPending ?? this.checkPending,
+      rewardBackdropTop: rewardBackdropTop ?? this.rewardBackdropTop,
+      rewardBackdropBottom: rewardBackdropBottom ?? this.rewardBackdropBottom,
+      rewardStar: rewardStar ?? this.rewardStar,
+      rewardStarGlow: rewardStarGlow ?? this.rewardStarGlow,
+      rewardStarGreen: rewardStarGreen ?? this.rewardStarGreen,
+      rewardStarPurple: rewardStarPurple ?? this.rewardStarPurple,
+      rewardButton: rewardButton ?? this.rewardButton,
     );
   }
 
@@ -376,6 +432,15 @@ class AppColors extends ThemeExtension<AppColors> {
       stageDone: Color.lerp(stageDone, other.stageDone, t)!,
       stagePending: Color.lerp(stagePending, other.stagePending, t)!,
       stagePendingText: Color.lerp(stagePendingText, other.stagePendingText, t)!,
+      checkDone: Color.lerp(checkDone, other.checkDone, t)!,
+      checkPending: Color.lerp(checkPending, other.checkPending, t)!,
+      rewardBackdropTop: Color.lerp(rewardBackdropTop, other.rewardBackdropTop, t)!,
+      rewardBackdropBottom: Color.lerp(rewardBackdropBottom, other.rewardBackdropBottom, t)!,
+      rewardStar: Color.lerp(rewardStar, other.rewardStar, t)!,
+      rewardStarGlow: Color.lerp(rewardStarGlow, other.rewardStarGlow, t)!,
+      rewardStarGreen: Color.lerp(rewardStarGreen, other.rewardStarGreen, t)!,
+      rewardStarPurple: Color.lerp(rewardStarPurple, other.rewardStarPurple, t)!,
+      rewardButton: Color.lerp(rewardButton, other.rewardButton, t)!,
     );
   }
 }

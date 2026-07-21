@@ -29,9 +29,13 @@ void main() {
       final offenders = <String>[];
 
       for (final file in screenFiles()) {
-        // 추천 타일 팔레트는 서버 목록에 인덱스로 배정하는 순환 색이다.
-        // 항목 수가 가변이라 전역 토큰 4쌍으로 고정할 수 없다. (이슈 #36)
-        if (file.path.contains('widgets/recommended_routine_strip.dart')) {
+        // 인덱스로 배정하는 순환 팔레트는 예외다. 항목 수가 가변이라
+        // 전역 토큰으로 고정할 수 없다. (이슈 #36)
+        //
+        // - 추천 타일: 서버가 주는 추천 개수만큼 순환
+        // - 카드 팔레트: AI가 만드는 카드 장수만큼 순환 (실측 9장까지 나왔다)
+        if (file.path.contains('widgets/recommended_routine_strip.dart') ||
+            file.path.contains('domain/card_palette.dart')) {
           continue;
         }
 
