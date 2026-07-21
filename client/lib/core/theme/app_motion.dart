@@ -28,6 +28,10 @@ abstract final class AppMotion {
   /// 온보딩·특수 진입
   static const emphasis = Duration(milliseconds: 500);
 
+  /// 은은하게 떠다니는(floating) 반복 연출 한 주기.
+  /// 등장 연출과 겹치지 않도록 충분히 느리게 잡는다.
+  static const float = Duration(milliseconds: 2400);
+
   // --- Curve ---
 
   /// 일반 상태 변화

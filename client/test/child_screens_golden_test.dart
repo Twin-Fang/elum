@@ -1,3 +1,4 @@
+import 'package:elum/core/theme/app_motion.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_stars_screen.dart';
@@ -117,8 +118,13 @@ void main() {
   for (final character in RewardCharacter.values) {
     testWidgets('아이 보상 — ${character.name}', (tester) async {
       await tester.pumpWidget(wrap(RewardScreen(character: character)));
-      // 등장 애니메이션이 끝난 뒤를 찍는다
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      // 별의 둥둥 애니메이션이 repeat()로 무한 반복이라 pumpAndSettle은
+      // 영원히 끝나지 않는다. 등장 연출(700ms)이 끝날 시간만큼만 명시적으로
+      // 흘려보내고, float 주기(AppMotion.float)의 정확히 2배 지점 —
+      // 즉 sin 곡선이 0으로 돌아오는 시점 — 에서 프레임을 고정해
+      // 캡처마다 오프셋이 달라지지 않게 한다.
+      await tester.pump();
+      await tester.pump(AppMotion.float * 2);
 
       await expectLater(
         find.byType(RewardScreen),

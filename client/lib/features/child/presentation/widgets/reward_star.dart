@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -31,18 +33,28 @@ class RewardStar extends StatefulWidget {
 }
 
 class _RewardStarState extends State<RewardStar>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: RewardStar.popDuration,
   );
 
+  /// 등장 연출이 끝난 뒤 이어지는 은은한 둥둥 떠다니는 반복 연출.
+  /// 팝업(springOut)과 별개 컨트롤러라 서로 방해하지 않는다.
+  late final AnimationController _floatController = AnimationController(
+    vsync: this,
+    duration: AppMotion.float,
+  )..repeat();
+
+  bool get _reduceMotion => MediaQuery.disableAnimationsOf(context);
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // 동작 줄이기를 켰으면 애니메이션 없이 최종 상태로 둔다
-    if (MediaQuery.disableAnimationsOf(context)) {
+    if (_reduceMotion) {
       _controller.value = 1;
+      _floatController.stop();
     } else if (!_controller.isAnimating && _controller.value == 0) {
       _controller.forward();
     }
@@ -51,6 +63,7 @@ class _RewardStarState extends State<RewardStar>
   @override
   void dispose() {
     _controller.dispose();
+    _floatController.dispose();
     super.dispose();
   }
 
@@ -63,19 +76,24 @@ class _RewardStarState extends State<RewardStar>
       width: RewardStar.mainSize.w,
       height: RewardStar.mainSize.w,
       child: AnimatedBuilder(
-        animation: _controller,
+        animation: Listenable.merge([_controller, _floatController]),
         builder: (context, _) {
           // elasticOut이라 1을 넘겼다가 돌아온다 — 터지는 느낌이 난다
           final t = AppMotion.springOut.transform(_controller.value);
+          // 둥둥 뜨는 정도. 접근성 설정 시 0으로 고정해 흔들림이 없다.
+          final floatT = _reduceMotion ? 0.0 : _floatController.value;
 
           return Stack(
             alignment: Alignment.center,
             children: [
-              Transform.scale(
-                scale: t,
-                child: _Star(
-                  size: RewardStar.mainSize.w,
-                  glow: colors.rewardStarGlow,
+              Transform.translate(
+                offset: _floatOffset(floatT, amplitude: 6.h, phase: 0),
+                child: Transform.scale(
+                  scale: t,
+                  child: _Star(
+                    size: RewardStar.mainSize.w,
+                    glow: colors.rewardStarGlow,
+                  ),
                 ),
               ),
               // 작은 별들은 큰 별이 자리잡은 뒤 나타난다.
@@ -83,14 +101,16 @@ class _RewardStarState extends State<RewardStar>
               _Satellite(
                 progress: _controller.value,
                 begin: 0.5,
-                offset: Offset(-88.w, 78.h),
+                offset: Offset(-88.w, 78.h) +
+                    _floatOffset(floatT, amplitude: 5.h, phase: math.pi / 3),
                 size: 38.w,
                 asset: AppAssets.starDeco(1),
               ),
               _Satellite(
                 progress: _controller.value,
                 begin: 0.7,
-                offset: Offset(84.w, -40.h),
+                offset: Offset(84.w, -40.h) +
+                    _floatOffset(floatT, amplitude: 5.h, phase: math.pi),
                 size: 30.w,
                 asset: AppAssets.starDeco(7),
               ),
@@ -99,6 +119,11 @@ class _RewardStarState extends State<RewardStar>
         },
       ),
     );
+  }
+
+  /// 위아래로 은은히 떠다니는 오프셋. sine 곡선이라 시작·끝이 매끄럽게 이어진다.
+  Offset _floatOffset(double t, {required double amplitude, required double phase}) {
+    return Offset(0, math.sin(t * 2 * math.pi + phase) * amplitude);
   }
 }
 
