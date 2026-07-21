@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T19:56:10Z",
-    "currentVersion": "1.0.82",
+    "lastUpdated": "2026-07-21T20:27:35Z",
+    "currentVersion": "1.0.83",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 50
+    "totalReleases": 51
   },
   "releases": [
+    {
+      "version": "1.0.83",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 111,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 새로운 일과 만들기 카드의 아이콘이 항상 같은 캐릭터로 보이던 문제를 해결했습니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "새로운 일과 만들기 카드의 아이콘이 항상 같은 캐릭터로 보이던 문제를 해결했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.82",
       "project_type": "flutter",

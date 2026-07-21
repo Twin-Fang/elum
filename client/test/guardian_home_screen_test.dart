@@ -102,11 +102,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(svgWithAsset(AppAssets.homeLogo), findsOneWidget);
-      // 캐릭터 배지 — 헤더 · "새로운 일과 만들기" 카드 · (일과 0건이라) 빈 상태까지 세 곳
+      // 캐릭터 배지 — 헤더 · (일과 0건이라) 빈 상태까지 두 곳.
+      // "새로운 일과 만들기" 카드는 캐릭터 선택과 무관하게 루미 병아리로 고정된다 (이슈 #110).
       expect(
         svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
-        findsNWidgets(3),
+        findsNWidgets(2),
       );
+      expect(svgWithAsset(AppAssets.homeNewRoutineChick), findsOneWidget);
       expect(svgWithAsset(AppAssets.iconClock), findsOneWidget);
       // sparkles는 카드와 섹션 제목 두 곳에 쓰인다
       expect(svgWithAsset(AppAssets.iconSparkles), findsWidgets);
