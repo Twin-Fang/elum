@@ -25,6 +25,7 @@ class RoutineFlowScaffold extends StatelessWidget {
     this.onBack,
     this.bottomButton,
     this.showAurora = true,
+    this.showBadge = true,
   });
 
   final Widget child;
@@ -41,6 +42,13 @@ class RoutineFlowScaffold extends StatelessWidget {
   /// 모든 화면에 있는 배경이 아니다. 카드확인(262:5124)은 단색 배경뿐이다.
   /// 기본값을 true로 둬 이미 맞는 화면들이 영향받지 않게 한다.
   final bool showAurora;
+
+  /// 하단 `secured by ELUM AI DLP` 배지를 그릴지.
+  ///
+  /// 배지는 시안상 화면마다 다르다 — 카드확인(262:5124) 덤프엔 배지가 없다.
+  /// `showAurora`와 같은 이유로 기본값을 true로 둬, 배지가 있는 화면들은
+  /// 그대로 두고 없는 화면만 false로 끈다.
+  final bool showBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +76,11 @@ class RoutineFlowScaffold extends StatelessWidget {
                     ),
                     child: bottomButton,
                   ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 12.h),
-                  child: const Center(child: SecuredByDlpBadge()),
-                ),
+                if (showBadge)
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 12.h),
+                    child: const Center(child: SecuredByDlpBadge()),
+                  ),
               ],
             ),
           ),

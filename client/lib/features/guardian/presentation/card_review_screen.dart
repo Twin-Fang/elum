@@ -138,6 +138,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     if (cards.isEmpty) {
       return const RoutineFlowScaffold(
         showAurora: false,
+        // 카드확인 흐름은 시안(262:5124)에 DLP 배지가 없다 — 빈 상태도 맞춘다
+        showBadge: false,
         child: _EmptyCards(),
       );
     }
@@ -147,6 +149,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
       bottomButton: ElumButton(label: '저장하기', onPressed: _save),
       // Figma 262:5124의 배경은 단색 #F7F2EF뿐이다 — 글로우가 없다 (이슈 #79)
       showAurora: false,
+      // 카드확인 시안(262:5124) 덤프엔 `secured by ELUM AI DLP` 배지가 없다
+      showBadge: false,
       child: Column(
         children: [
           SizedBox(height: space.md),
