@@ -46,6 +46,17 @@
             <option value="POPO">포포</option>
           </select>
 
+          <div th:if="${prompt.promptKey.name() == 'GEMINI_ROUTINE_REVISE_PREFIX'}" class="space-y-2">
+            <input type="text" class="previous-title input input-bordered w-full"
+                   th:attr="data-key=${prompt.promptKey}" placeholder="이전 제목"/>
+            <textarea class="previous-step-titles textarea textarea-bordered w-full h-20"
+                      th:attr="data-key=${prompt.promptKey}"
+                      placeholder="이전 단계 제목 (줄바꿈으로 구분)"></textarea>
+            <textarea class="previous-step-descriptions textarea textarea-bordered w-full h-20"
+                      th:attr="data-key=${prompt.promptKey}"
+                      placeholder="이전 단계 설명 (줄바꿈으로 구분, 제목과 같은 순서)"></textarea>
+          </div>
+
           <div class="flex gap-2">
             <button type="button" class="btn btn-outline btn-sm preview-btn"
                     th:attr="data-key=${prompt.promptKey}">미리보기
@@ -80,6 +91,32 @@
     return select && select.value ? select.value : null;
   }
 
+  function getPreviousTitleFor(key) {
+    const el = document.querySelector('.previous-title[data-key="' + key + '"]');
+    return el ? el.value : null;
+  }
+
+  function getPreviousStepsFor(key) {
+    const titleEl = document.querySelector('.previous-step-titles[data-key="' + key + '"]');
+    const descEl = document.querySelector('.previous-step-descriptions[data-key="' + key + '"]');
+    if (!titleEl || !descEl) {
+      return [];
+    }
+    const titles = titleEl.value.split('\n');
+    const descriptions = descEl.value.split('\n');
+    const length = Math.max(titles.length, descriptions.length);
+    const steps = [];
+    for (let i = 0; i < length; i++) {
+      const title = (titles[i] || '').trim();
+      const description = (descriptions[i] || '').trim();
+      if (title === '' && description === '') {
+        continue;
+      }
+      steps.push({title: title, description: description});
+    }
+    return steps;
+  }
+
   function getResultAreaFor(key) {
     return document.querySelector('.result-area[data-key="' + key + '"]');
   }
@@ -109,7 +146,9 @@
         const data = await callPromptApi(key, '/preview', {
           content: getContentFor(key),
           sampleInput: getSampleInputFor(key),
-          character: getCharacterFor(key)
+          character: getCharacterFor(key),
+          previousTitle: getPreviousTitleFor(key),
+          previousSteps: getPreviousStepsFor(key)
         });
         resultArea.textContent = data.composedPrompt;
       } catch (e) {
@@ -127,7 +166,9 @@
         const data = await callPromptApi(key, '/test', {
           content: getContentFor(key),
           sampleInput: getSampleInputFor(key),
-          character: getCharacterFor(key)
+          character: getCharacterFor(key),
+          previousTitle: getPreviousTitleFor(key),
+          previousSteps: getPreviousStepsFor(key)
         });
         if (data.imageDataUri) {
           resultArea.textContent = '';
