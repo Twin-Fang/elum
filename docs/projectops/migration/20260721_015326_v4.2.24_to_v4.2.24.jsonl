@@ -1,0 +1,17 @@
+{"schema":1,"kind":"projectops-migration-trace","from":"4.2.24","to":"4.2.24","started":"2026-07-21T01:53:26Z"}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-COMMON-PROJECTS-SYNC-MANAGER.yaml","detail":{"group":"common"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-COMMON-QA-ISSUE-CREATION-BOT.yaml","detail":{"group":"common"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-COMMON-README-VERSION-UPDATE.yaml","detail":{"group":"common"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-COMMON-RELEASE-CHANGELOG.yaml","detail":{"group":"common"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-COMMON-SUH-ISSUE-HELPER.yaml","detail":{"group":"common"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-COMMON-SYNC-ISSUE-LABELS.yaml","detail":{"group":"common"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-COMMON-VERSION-CONTROL.yaml","detail":{"group":"common"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-COMMON-TEMPLATE-UTIL-VERSION-SYNC.yml","detail":{"group":"common"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-FLUTTER-ANDROID-FIREBASE-CICD.yaml","detail":{"group":"flutter"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-FLUTTER-ANDROID-PLAYSTORE-CICD.yaml","detail":{"group":"flutter"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-FLUTTER-ANDROID-SELFHOSTED-CICD.yaml","detail":{"group":"flutter"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-FLUTTER-ANDROID-TEST-APK.yaml","detail":{"group":"flutter"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-FLUTTER-CI.yaml","detail":{"group":"flutter"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-FLUTTER-IOS-TEST-TESTFLIGHT.yaml","detail":{"group":"flutter"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-FLUTTER-IOS-TESTFLIGHT.yaml","detail":{"group":"flutter"}}
+{"ts":"2026-07-21T01:53:26Z","phase":"copy","action":"skipped-unchanged","target":"PROJECT-FLUTTER-PROJECTOPS-APP-BUILD-TRIGGER.yaml","detail":{"group":"flutter"}}
