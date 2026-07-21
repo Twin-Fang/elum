@@ -1,15 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T08:27:09Z",
-    "currentVersion": "1.0.39",
+    "lastUpdated": "2026-07-21T08:35:09Z",
+    "currentVersion": "1.0.40",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 12
+    "totalReleases": 13
   },
   "releases": [
+    {
+      "version": "1.0.40",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 28,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 홈 화면에서 다양한 활동을 추천받는 기능이 추가됐습니다\n\n* **버그 수정**\n  * iOS 빌드 과정에서 발생하던 오류를 해결했습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "홈 화면에서 다양한 활동을 추천받는 기능이 추가됐습니다"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "iOS 빌드 과정에서 발생하던 오류를 해결했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.39",
       "project_type": "flutter",
