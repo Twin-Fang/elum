@@ -47,7 +47,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cards = ref.watch(routineFlowProvider).routine?.steps ?? const [];
+    final routine = ref.watch(routineFlowProvider).routine;
+    final cards = routine?.steps ?? const [];
+    final routineId = routine?.id ?? '';
     final space = context.space;
 
     // 만들어진 카드가 없으면 확인할 것이 없다. 홈으로 돌려보낸다.
@@ -84,6 +86,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
                 child: ActionCardView(
                   card: cards[index],
                   index: index,
+                  routineId: routineId,
                   // 편집 화면이 Figma에 없어 자리만 만든다
                   onEdit: () {},
                 ),

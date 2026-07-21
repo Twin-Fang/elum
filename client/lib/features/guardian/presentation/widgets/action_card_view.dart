@@ -5,8 +5,8 @@ import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../shared/models/action_card.dart';
-import '../../../onboarding/domain/character.dart';
 import '../../domain/card_palette.dart';
+import 'card_image.dart';
 
 /// 행동 카드 한 장.
 ///
@@ -19,11 +19,15 @@ class ActionCardView extends StatelessWidget {
     super.key,
     required this.card,
     required this.index,
+    this.routineId = '',
     this.onEdit,
     this.onSpeak,
   });
 
   final ActionCard card;
+
+  /// 이미지를 받아오는 데 쓴다. 비면 대체 일러스트를 그린다.
+  final String routineId;
 
   /// 색을 정하는 순서. `stepOrder`가 아니라 목록 인덱스다 —
   /// 서버가 순서를 1부터 주지 않을 수도 있다.
@@ -57,7 +61,13 @@ class ActionCardView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: _Illustration(onEdit: onEdit)),
+          Expanded(
+            child: _Illustration(
+              routineId: routineId,
+              stepId: card.id,
+              onEdit: onEdit,
+            ),
+          ),
           SizedBox(height: space.md),
           Row(
             children: [
@@ -107,11 +117,17 @@ class ActionCardView extends StatelessWidget {
 
 /// 카드 이미지 자리.
 ///
-/// ⚠️ **서버 이미지를 쓸 수 없다.** `imagePath`가 404라(이슈 #20) 대신
-/// 캐릭터 일러스트를 넣는다. 자리를 비우면 카드 비율이 무너진다.
+/// 서버가 만든 그림을 보여주고, 못 받으면 캐릭터 일러스트로 대체한다.
+/// 자리를 비우면 카드 비율이 무너진다.
 class _Illustration extends StatelessWidget {
-  const _Illustration({this.onEdit});
+  const _Illustration({
+    required this.routineId,
+    required this.stepId,
+    this.onEdit,
+  });
 
+  final String routineId;
+  final String stepId;
   final VoidCallback? onEdit;
 
   @override
@@ -128,10 +144,7 @@ class _Illustration extends StatelessWidget {
             ),
             child: Padding(
               padding: EdgeInsets.all(space.md),
-              child: SvgPicture.asset(
-                AppAssets.character(CardCharacter.cat),
-                fit: BoxFit.contain,
-              ),
+              child: CardImage(routineId: routineId, stepId: stepId),
             ),
           ),
         ),

@@ -55,7 +55,9 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cards = ref.watch(routineFlowProvider).routine?.steps ?? const [];
+    final routine = ref.watch(routineFlowProvider).routine;
+    final cards = routine?.steps ?? const [];
+    final routineId = routine?.id ?? '';
     final progress = ref.watch(childRoutineProvider);
     final space = context.space;
 
@@ -79,7 +81,11 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                       horizontal: space.xs,
                       vertical: space.md,
                     ),
-                    child: ActionCardView(card: cards[index], index: index),
+                    child: ActionCardView(
+                      card: cards[index],
+                      index: index,
+                      routineId: routineId,
+                    ),
                   ),
                 ),
               ),
