@@ -1,15 +1,48 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T13:02:40Z",
-    "currentVersion": "1.0.61",
+    "lastUpdated": "2026-07-21T13:23:49Z",
+    "currentVersion": "1.0.62",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 32
+    "totalReleases": 33
   },
   "releases": [
+    {
+      "version": "1.0.62",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 67,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 행동카드를 만드는 동안 루미가 나타나 인사합니다\n\n* **버그 수정**\n  * 일부 화면에서 통신이 계속 실패하던 문제 해결\n  * 준비 화면에서 이전으로 돌아갈 수 없던 문제 해결\n\n* **개선**\n  * 아이 화면과 보호자 화면을 오갈 때 암호 확인이 더 안정적으로 동작합니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "행동카드를 만드는 동안 루미가 나타나 인사합니다"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "일부 화면에서 통신이 계속 실패하던 문제 해결",
+            "준비 화면에서 이전으로 돌아갈 수 없던 문제 해결"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "아이 화면과 보호자 화면을 오갈 때 암호 확인이 더 안정적으로 동작합니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.61",
       "project_type": "flutter",
