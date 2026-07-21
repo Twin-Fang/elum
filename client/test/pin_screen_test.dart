@@ -18,6 +18,9 @@ import 'helpers/test_storage.dart';
 ///
 /// PIN 불일치는 아동도 볼 수 있는 화면이라 경고색·에러 아이콘을 쓰지 않는다.
 /// 그 규칙을 테스트로 고정한다.
+///
+/// 자동 전환(이슈 #101): 1단계 4자리 → 자동으로 재입력 단계. 2단계 4자리 →
+/// 자동 검증(불일치면 1단계 리셋). 저장만 CTA 버튼으로 확정한다.
 void main() {
   // .w/.h 검증에는 Figma 기준 뷰포트가 필요하다 (기본 800×600이면 스케일이 어긋난다)
   useFigmaViewport();
@@ -60,7 +63,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// 입력 후 CTA를 눌러 다음 단계로 넘어간다
+  /// 최종 확정 — 2단계 일치 후 CTA를 눌러 저장·완료한다
   Future<void> submit(WidgetTester tester) async {
     await tester.tap(find.byType(ElumButton));
     await tester.pumpAndSettle();
@@ -135,8 +138,10 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
+      // 6자리를 넣어도 formatter가 4자리로 자른다. 4자리로 인식되면
+      // 자동 전환되어 재입력 단계로 넘어간다 — 그것으로 4자리 제한을 확인한다.
       await enterPin(tester, '123456');
-      expect(filledDots(tester), OnboardingProfile.pinLength);
+      expect(find.textContaining('한번 더'), findsOneWidget);
     });
 
     testWidgets('숫자가 아닌 입력은 무시한다', (tester) async {
@@ -147,24 +152,12 @@ void main() {
       expect(filledDots(tester), 2);
     });
 
-    testWidgets('4자리를 채워야 CTA가 활성된다', (tester) async {
+    testWidgets('1단계는 4자리를 채우면 CTA 없이 자동으로 재입력 단계로 넘어간다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      // enterText는 전체를 덮어쓴다. 누적 입력이 아니라 최종 상태를 본다.
-      await enterPin(tester, '123');
-      expect(isCtaEnabled(tester), isFalse);
-
+      // 4자리 도달 즉시 자동 전환된다 — 버튼을 누르지 않는다
       await enterPin(tester, '1234');
-      expect(isCtaEnabled(tester), isTrue);
-    });
-
-    testWidgets('4자리를 채우면 재입력 단계로 넘어간다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      await enterPin(tester, '1234');
-      await submit(tester);
 
       // Figma 238:2767의 제목
       expect(find.textContaining('한번 더'), findsOneWidget);
@@ -172,31 +165,42 @@ void main() {
       expect(filledDots(tester), 0);
     });
 
-    testWidgets('두 번 같은 값을 넣으면 완료 화면으로 간다', (tester) async {
+    testWidgets('재입력 단계에서 값이 일치하면 CTA가 활성된다 (자동 저장은 하지 않는다)', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      await enterPin(tester, '1234');
-      await submit(tester);
-      await enterPin(tester, '1234');
-      await submit(tester);
+      await enterPin(tester, '1234'); // 자동으로 재입력 단계
+      await enterPin(tester, '1234'); // 일치 — 자동 검증
+
+      // 일치해도 자동으로 넘어가지 않고 CTA만 활성화된다
+      expect(find.text('완료 화면'), findsNothing);
+      expect(isCtaEnabled(tester), isTrue);
+    });
+
+    testWidgets('재입력 일치 후 CTA를 눌러야 완료 화면으로 간다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      await enterPin(tester, '1234'); // 자동 전환
+      await enterPin(tester, '1234'); // 일치 → CTA 활성
+      await submit(tester); // 사용자가 최종 확정
 
       expect(find.text('완료 화면'), findsOneWidget);
     });
 
-    testWidgets('값이 다르면 처음부터 다시 받되 경고색을 쓰지 않는다', (tester) async {
+    testWidgets('재입력 값이 다르면 자동으로 처음부터 다시 받되 경고색을 쓰지 않는다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      await enterPin(tester, '1234');
-      await submit(tester);
-      await enterPin(tester, '9999');
-      await submit(tester);
+      await enterPin(tester, '1234'); // 자동 전환
+      await enterPin(tester, '9999'); // 불일치 — 자동 검증 후 리셋
 
       // 완료로 넘어가지 않는다
       expect(find.text('완료 화면'), findsNothing);
       // 1단계로 되돌아왔다
       expect(filledDots(tester), 0);
+      // 1단계 제목으로 돌아왔다
+      expect(find.textContaining('비밀암호를 만들어주세요'), findsOneWidget);
 
       // 아동 모드 규칙 — 빨강·경고 아이콘 금지
       expect(find.byIcon(Icons.error), findsNothing);
@@ -271,11 +275,11 @@ void main() {
       await tester.pumpAndSettle();
 
       showKeyboard(tester);
+      // 1단계 4자리 → 자동으로 재입력 단계로 전환된다
       await tester.enterText(find.byType(TextField), '1234');
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(ElumButton));
-      await tester.pumpAndSettle();
 
+      expect(find.textContaining('한번 더'), findsOneWidget);
       expect(find.byType(PinDots), findsOneWidget);
     });
   });
