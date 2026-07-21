@@ -187,7 +187,6 @@ void main() {
       await tester.pumpAndSettle();
 
       // Figma는 이 자리(Ellipse 2/3)를 회색 알약으로 비워뒀지만 이름이 정해졌다.
-      // 서비스명 "이룸"에서 따온 이름이다.
       expect(find.text(CardCharacter.cat.displayName), findsOneWidget);
       expect(find.text(CardCharacter.fox.displayName), findsOneWidget);
     });
@@ -198,6 +197,23 @@ void main() {
         CardCharacter.cat.displayName,
         isNot(CardCharacter.fox.displayName),
       );
+    });
+
+    testWidgets('확정된 이름은 고양이 루루 · 여우 포포다', (tester) async {
+      // 기획이 정한 이름이다. 바꾸려면 이 테스트를 먼저 고친다.
+      expect(CardCharacter.cat.displayName, '루루');
+      expect(CardCharacter.fox.displayName, '포포');
+    });
+
+    testWidgets('루루가 왼쪽, 포포가 오른쪽이다', (tester) async {
+      // 배치는 enum 순서를 따른다. 순서를 바꾸면 화면이 조용히 뒤집힌다.
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      final cat = tester.getCenter(find.text(CardCharacter.cat.displayName));
+      final fox = tester.getCenter(find.text(CardCharacter.fox.displayName));
+
+      expect(cat.dx, lessThan(fox.dx));
     });
   });
 }

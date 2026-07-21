@@ -2,8 +2,10 @@
 ///
 /// 카드 이미지 콘텐츠의 일부이며, 서비스 화자(AgentPersona)와는 역할이 다르다.
 enum CardCharacter {
-  cat('고양이', 'CAT', '이루미'),
-  fox('여우', 'FOX', '루미');
+  // 순서가 화면 배치다 — 고양이가 왼쪽, 여우가 오른쪽.
+  // enum 순서를 바꾸면 화면이 조용히 뒤집히므로 테스트로 고정해 뒀다.
+  cat('고양이', 'CAT', '루루'),
+  fox('여우', 'FOX', '포포');
 
   const CardCharacter(this.label, this.apiValue, this.displayName);
 
@@ -12,10 +14,10 @@ enum CardCharacter {
 
   final String apiValue;
 
-  /// 카드에 표시되는 이름. 서비스명 "이룸"에서 따왔다.
+  /// 카드에 표시되는 이름.
   ///
   /// Figma는 이 자리를 회색 알약으로 비워뒀는데(Ellipse 2/3), 이름이 정해져
-  /// 텍스트로 채운다. 아동이 부르는 이름이므로 2~3음절로 짧게 둔다.
+  /// 텍스트로 채운다. 아동이 부르는 이름이므로 2음절로 짧게 둔다.
   final String displayName;
 }
 
