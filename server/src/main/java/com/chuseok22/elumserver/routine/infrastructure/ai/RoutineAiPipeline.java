@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,22 +39,40 @@ public class RoutineAiPipeline {
   private final GeminiImageClient geminiImageClient;
   private final RoutineImageStorage routineImageStorage;
 
+  // 옛 호출부(RoutineService)가 Task 6에서 새 오버로드로 옮겨갈 때까지 남겨두는 임시 위임
+  // 메서드. Task 6 완료 후에는 더 이상 쓰이지 않는다.
   public RoutineGenerationResult generateForCreate(
     String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, String maskedAnswers
+  ) {
+    return generateForCreate(sanitizedInputText, nickname, supportGoals, maskedAnswers, null);
+  }
+
+  public RoutineGenerationResult generateForCreate(
+    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, String maskedAnswers,
+    CharacterType characterType
   ) {
     RoutineStepDraft draft = parseDraft(
       () -> geminiTextClient.generate(sanitizedInputText, nickname, supportGoals, maskedAnswers)
     );
-    return buildResult(draft);
+    return buildResult(draft, characterType);
   }
 
+  // 옛 호출부(RoutineService)가 Task 6에서 새 오버로드로 옮겨갈 때까지 남겨두는 임시 위임
+  // 메서드. Task 6 완료 후에는 더 이상 쓰이지 않는다.
   public RoutineGenerationResult generateForRevise(
     List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
     String nickname, Set<SupportGoal> supportGoals
   ) {
+    return generateForRevise(previousSteps, maskedFeedback, nickname, supportGoals, null);
+  }
+
+  public RoutineGenerationResult generateForRevise(
+    List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
+    String nickname, Set<SupportGoal> supportGoals, CharacterType characterType
+  ) {
     RoutineStepDraft draft =
       parseDraft(() -> geminiTextClient.revise(previousSteps, maskedFeedback, nickname, supportGoals));
-    return buildResult(draft);
+    return buildResult(draft, characterType);
   }
 
   // 도움 목표 기반 추가 질문 생성. Gemini 호출/파싱이 실패하면 예외를 던지지 않고
@@ -142,13 +161,15 @@ public class RoutineAiPipeline {
     return new RoutineStepDraft(draft.title(), normalized);
   }
 
-  private RoutineGenerationResult buildResult(RoutineStepDraft draft) {
+  private RoutineGenerationResult buildResult(RoutineStepDraft draft, CharacterType characterType) {
     String batchId = UUID.randomUUID().toString();
     ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     try {
       List<CompletableFuture<StepImage>> futures = draft.steps().stream()
         .map(stepDraft -> CompletableFuture.supplyAsync(
-          () -> new StepImage(stepDraft, geminiImageClient.generateImage(stepDraft.description())), executor
+          () -> new StepImage(
+            stepDraft, geminiImageClient.generateImage(stepDraft.description(), characterType)
+          ), executor
         ))
         .toList();
 

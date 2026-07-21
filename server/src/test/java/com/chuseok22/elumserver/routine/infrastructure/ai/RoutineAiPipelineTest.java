@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -13,6 +14,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiGenerateContentResponse;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
+import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.util.List;
@@ -98,12 +100,12 @@ class RoutineAiPipelineTest {
       + "{\"order\":2,\"description\":\"우산을 챙겨요\"},"
       + "{\"order\":1,\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
-    when(geminiImageClient.generateImage(any()))
+    when(geminiImageClient.generateImage(any(), any()))
       .thenReturn(new GeminiImageClient.GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
-      "내일 비 오는 날 학교 가기", "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), null
+      "내일 비 오는 날 학교 가기", "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), null, CharacterType.LULU
     );
 
     assertThat(result.title()).isEqualTo("비 오는 날 학교 가기");
@@ -112,6 +114,22 @@ class RoutineAiPipelineTest {
     assertThat(result.steps().get(0).description()).isEqualTo("우산을 챙겨요");
     assertThat(result.steps().get(1).order()).isEqualTo(2);
     assertThat(result.steps().get(1).description()).isEqualTo("옷을 입어요");
+    verify(geminiImageClient).generateImage("우산을 챙겨요", CharacterType.LULU);
+    verify(geminiImageClient).generateImage("옷을 입어요", CharacterType.LULU);
+  }
+
+  @Test
+  @DisplayName("캐릭터를 선택하지 않은 회원이면 이미지 생성 호출에 캐릭터 없이(null) 전달된다")
+  void generateForCreate_noCharacter_passesNullCharacterToImageClient() {
+    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"description\":\"옷을 입어요\"}]}";
+    when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
+    when(geminiImageClient.generateImage(any(), any()))
+      .thenReturn(new GeminiImageClient.GeneratedImage(new byte[]{1, 2, 3}, "png"));
+    when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
+
+    routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null);
+
+    verify(geminiImageClient).generateImage("옷을 입어요", null);
   }
 
   @Test
@@ -120,7 +138,8 @@ class RoutineAiPipelineTest {
     String json = "{\"steps\":[{\"order\":1,\"description\":\"설명\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
 
-    assertThatThrownBy(() -> routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null))
+    assertThatThrownBy(() ->
+      routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_AI_GENERATION_FAILED));
@@ -132,7 +151,8 @@ class RoutineAiPipelineTest {
     String json = "{\"title\":\"제목\",\"steps\":[]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
 
-    assertThatThrownBy(() -> routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null))
+    assertThatThrownBy(() ->
+      routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED));
