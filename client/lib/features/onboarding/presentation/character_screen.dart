@@ -49,24 +49,27 @@ class CharacterScreen extends ConsumerWidget {
             ? () => context.push(Routes.onboardingPin)
             : null,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ElumHeader(
-            title: '${profile.childNickname}의 하루를 함께할\n친구를 골라주세요',
-            description: '선택한 친구가 카드 속 주인공이 되어 도와줘요',
-          ),
-          SizedBox(height: context.space.xl),
-          Row(
-            children: [
-              for (final character in CardCharacter.values) ...[
-                Expanded(child: group.buildItem(context, character)),
-                if (character != CardCharacter.values.last)
-                  SizedBox(width: context.space.sm),
+      // 작은 기기에서 카드(202px)가 잘리지 않게 스크롤을 허용한다
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ElumHeader(
+              title: '${profile.displayName}의 하루를 함께할\n친구를 골라주세요',
+              description: '선택한 친구가 카드 속 주인공이 되어 도와줘요',
+            ),
+            SizedBox(height: context.space.xl),
+            Row(
+              children: [
+                for (final character in CardCharacter.values) ...[
+                  Expanded(child: group.buildItem(context, character)),
+                  if (character != CardCharacter.values.last)
+                    SizedBox(width: context.space.sm),
+                ],
               ],
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

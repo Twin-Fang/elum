@@ -120,7 +120,7 @@ class OnboardingDoneScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ElumHeader(
-            title: '${profile.childNickname}를 위한\n준비가 끝났어요',
+            title: '${profile.displayName}를 위한\n준비가 끝났어요',
             // 진단명 없는 개인화 — 발표에서 강조하는 지점
             description: '선택하신 도움 목표에 맞춰 카드를 만들어드릴게요',
           ),
