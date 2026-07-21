@@ -1,15 +1,47 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T07:54:07Z",
-    "currentVersion": "1.0.36",
+    "lastUpdated": "2026-07-21T08:18:31Z",
+    "currentVersion": "1.0.37",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 9
+    "totalReleases": 10
   },
   "releases": [
+    {
+      "version": "1.0.37",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 25,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 다양한 추천 일과를 받아볼 수 있는 기능이 추가되었습니다\n\n* **버그 수정**\n  * iOS에서 다운로드가 일시적으로 실패하던 문제를 개선했습니다\n\n* **개선**\n  * 회원가입·로그인 시 아이디·비밀번호 글자 수 제한이 없어졌습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "다양한 추천 일과를 받아볼 수 있는 기능이 추가되었습니다"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "iOS에서 다운로드가 일시적으로 실패하던 문제를 개선했습니다"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "회원가입·로그인 시 아이디·비밀번호 글자 수 제한이 없어졌습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.36",
       "project_type": "flutter",
