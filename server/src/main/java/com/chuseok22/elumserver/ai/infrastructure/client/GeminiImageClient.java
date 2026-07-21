@@ -3,6 +3,8 @@ package com.chuseok22.elumserver.ai.infrastructure.client;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
+import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -21,24 +23,45 @@ public class GeminiImageClient {
   private final RestClient geminiRestClient;
   private final GeminiProperties geminiProperties;
   private final PromptTemplateService promptTemplateService;
+  private final CharacterReferenceProvider characterReferenceProvider;
 
+  // 옛 호출부(RoutineAiPipeline)가 Task 5에서 새 오버로드로 옮겨갈 때까지 남겨두는
+  // 임시 위임 메서드. Task 5 완료 후에는 더 이상 쓰이지 않는다.
   public GeneratedImage generateImage(String stepDescription) {
+    return generateImage(stepDescription, null);
+  }
+
+  public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
     String prefix = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
-    return callGenerateImage(prefix, stepDescription);
+    return callGenerateImage(prefix, stepDescription, characterType);
+  }
+
+  // 옛 호출부(AdminPromptService)가 Task 7에서 새 오버로드로 옮겨갈 때까지 남겨두는
+  // 임시 위임 메서드. Task 7 완료 후에는 더 이상 쓰이지 않는다.
+  public GeneratedImage generateImageForTest(String prefix, String sampleInput) {
+    return generateImageForTest(prefix, sampleInput, null);
   }
 
   // 관리자 테스트 전용: DB 조회 없이 전달받은 prefix를 그대로 사용한다.
-  public GeneratedImage generateImageForTest(String prefix, String sampleInput) {
-    return callGenerateImage(prefix, sampleInput);
+  public GeneratedImage generateImageForTest(String prefix, String sampleInput, CharacterType characterType) {
+    return callGenerateImage(prefix, sampleInput, characterType);
   }
 
-  private GeneratedImage callGenerateImage(String prefix, String stepDescription) {
+  // characterType이 있으면 캐릭터 참조 이미지를 텍스트 파트보다 먼저 담아 함께 전송한다
+  // (Gemini 멀티모달 입력 권장 순서). characterType이 null이면(온보딩에서 캐릭터를 아직
+  // 선택하지 않은 회원) 지금까지와 동일하게 텍스트 파트만 전송해 루틴 생성이 끊기지 않게 한다.
+  private GeneratedImage callGenerateImage(String prefix, String stepDescription, CharacterType characterType) {
+    List<GeminiGenerateContentRequest.GeminiPart> parts = new ArrayList<>();
+    if (characterType != null) {
+      byte[] characterImage = characterReferenceProvider.get(characterType);
+      String base64Image = Base64.getEncoder().encodeToString(characterImage);
+      parts.add(GeminiGenerateContentRequest.GeminiPart.ofInlineData("image/png", base64Image));
+    }
+    parts.add(new GeminiGenerateContentRequest.GeminiPart(prefix + stepDescription));
+
     GeminiGenerateContentRequest request = new GeminiGenerateContentRequest(
       null,
-      List.of(new GeminiGenerateContentRequest.GeminiContent(
-        "user",
-        List.of(new GeminiGenerateContentRequest.GeminiPart(prefix + stepDescription))
-      )),
+      List.of(new GeminiGenerateContentRequest.GeminiContent("user", parts)),
       null
     );
 
