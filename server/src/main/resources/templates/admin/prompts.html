@@ -1,57 +1,58 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <title>이룸 관리자 - 프롬프트 관리</title>
   <meta name="_csrf" th:content="${_csrf.token}"/>
   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet" type="text/css"/>
+  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
 </head>
-<body class="min-h-screen bg-base-200 p-8">
-<div class="max-w-4xl mx-auto space-y-6">
-  <div class="flex items-center justify-between">
-    <h1 class="text-2xl font-bold">AI 프롬프트 관리</h1>
-    <a th:href="@{/admin/dashboard}" class="btn btn-ghost btn-sm">대시보드로</a>
-  </div>
+<body class="min-h-screen bg-base-100">
+<div class="flex">
+  <div th:replace="~{admin/fragments/admin-layout :: sidebar('prompts')}"></div>
+  <main class="flex-1 p-8">
+    <div class="max-w-4xl mx-auto space-y-6">
+      <h1 class="text-2xl font-bold">AI 프롬프트 관리</h1>
 
-  <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-  <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+      <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+      <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
-  <div th:each="prompt : ${prompts}" class="card bg-base-100 shadow-md">
-    <div class="card-body space-y-4">
-      <h2 class="card-title" th:text="${prompt.promptKey.label}">프롬프트 제목</h2>
-      <p class="text-sm text-base-content/60">
-        키: <span th:text="${prompt.promptKey}"></span> ·
-        마지막 수정: <span th:text="${prompt.updatedAt}"></span>
-      </p>
+      <div th:each="prompt : ${prompts}" class="card bg-base-100 shadow-md">
+        <div class="card-body space-y-4">
+          <h2 class="card-title" th:text="${prompt.promptKey.label}">프롬프트 제목</h2>
+          <p class="text-sm text-base-content/60">
+            키: <span th:text="${prompt.promptKey}"></span> ·
+            마지막 수정: <span th:text="${prompt.updatedAt}"></span>
+          </p>
 
-      <form th:action="@{/admin/prompts/{key}(key=${prompt.promptKey})}" method="post">
-        <textarea name="content" class="prompt-content textarea textarea-bordered w-full h-40"
-                  th:text="${prompt.content}" th:attr="data-key=${prompt.promptKey}"></textarea>
-        <div class="flex justify-end mt-2">
-          <button type="submit" class="btn btn-primary btn-sm">저장</button>
+          <form th:action="@{/admin/prompts/{key}(key=${prompt.promptKey})}" method="post">
+            <textarea name="content" class="prompt-content textarea textarea-bordered w-full h-40"
+                      th:text="${prompt.content}" th:attr="data-key=${prompt.promptKey}"></textarea>
+            <div class="flex justify-end mt-2">
+              <button type="submit" class="btn btn-primary btn-sm">저장</button>
+            </div>
+          </form>
+
+          <div class="divider">테스트</div>
+
+          <input type="text" class="sample-input input input-bordered w-full"
+                 th:attr="data-key=${prompt.promptKey}" placeholder="샘플 입력값을 입력하세요"/>
+
+          <div class="flex gap-2">
+            <button type="button" class="btn btn-outline btn-sm preview-btn"
+                    th:attr="data-key=${prompt.promptKey}">미리보기
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm test-btn"
+                    th:attr="data-key=${prompt.promptKey}">실제로 테스트하기
+            </button>
+          </div>
+
+          <pre class="result-area bg-base-200 rounded p-3 text-xs whitespace-pre-wrap"
+               th:attr="data-key=${prompt.promptKey}"></pre>
         </div>
-      </form>
-
-      <div class="divider">테스트</div>
-
-      <input type="text" class="sample-input input input-bordered w-full"
-             th:attr="data-key=${prompt.promptKey}" placeholder="샘플 입력값을 입력하세요"/>
-
-      <div class="flex gap-2">
-        <button type="button" class="btn btn-outline btn-sm preview-btn"
-                th:attr="data-key=${prompt.promptKey}">미리보기
-        </button>
-        <button type="button" class="btn btn-secondary btn-sm test-btn"
-                th:attr="data-key=${prompt.promptKey}">실제로 테스트하기
-        </button>
       </div>
-
-      <pre class="result-area bg-base-200 rounded p-3 text-xs whitespace-pre-wrap"
-           th:attr="data-key=${prompt.promptKey}"></pre>
     </div>
-  </div>
+  </main>
 </div>
 
 <script th:inline="javascript">
