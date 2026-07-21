@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -25,13 +26,25 @@ class AuroraBackground extends StatefulWidget {
     Duration(seconds: 22),
   ];
 
-  /// 시작 위치와 끝 위치 (Alignment 기준).
-  /// 화면 밖까지 나가야 가장자리가 비지 않는다.
-  static const _paths = [
-    (Alignment(-0.9, -0.7), Alignment(0.5, 0.2)),
-    (Alignment(0.9, -0.3), Alignment(-0.4, 0.6)),
-    (Alignment(-0.2, 0.8), Alignment(0.7, -0.5)),
+  /// 세 광원이 모여 있을 중심.
+  ///
+  /// 화면 정중앙보다 살짝 위다 — Figma에서 빛이 제목 뒤에 모여 있다.
+  static const _center = Alignment(0, -0.15);
+
+  /// 중심에서 각 광원이 벗어나는 방향.
+  ///
+  /// 세 방향으로 살짝만 벌려 **서로 붙어 있는 덩어리**로 보이게 한다.
+  /// 화면 구석으로 흩어지면 광원 셋이 따로 노는 것처럼 보인다.
+  static const _offsets = [
+    Offset(-0.30, -0.18),
+    Offset(0.30, -0.10),
+    Offset(0.05, 0.28),
   ];
+
+  /// 각 광원이 중심 주위를 도는 반경 (Alignment 단위).
+  ///
+  /// 작게 잡아야 뭉쳐 있는 느낌이 유지된다. 크게 잡으면 다시 흩어진다.
+  static const _wander = 0.14;
 
   @override
   State<AuroraBackground> createState() => _AuroraBackgroundState();
@@ -95,16 +108,35 @@ class _AuroraBackgroundState extends State<AuroraBackground>
             AnimatedBuilder(
               animation: _controllers[i],
               builder: (context, _) {
-                final (from, to) = AuroraBackground._paths[i];
-                final t = Curves.easeInOut.transform(_controllers[i].value);
                 return Align(
-                  alignment: Alignment.lerp(from, to, t)!,
+                  alignment: _alignmentFor(i),
                   child: _blurredCircle(_auroraColors(context)[i]),
                 );
               },
             ),
         ],
       ),
+    );
+  }
+
+  /// 광원 [i]의 현재 위치.
+  ///
+  /// 고정 중심에서 정해진 방향만큼 떨어진 자리를 기준으로, 그 주위를 작은
+  /// 원을 그리며 돈다. 셋이 각자 다른 주기로 돌지만 **중심이 같아 뭉쳐 보인다.**
+  ///
+  /// 이전에는 화면 구석에서 구석으로 이동해 광원이 따로 노는 느낌이었다.
+  Alignment _alignmentFor(int i) {
+    // 컨트롤러가 reverse로 왕복하므로 0~1을 0~2π로 펴서 원운동을 만든다
+    final angle = _controllers[i].value * 2 * math.pi;
+    final base = AuroraBackground._offsets[i];
+
+    return Alignment(
+      AuroraBackground._center.x +
+          base.dx +
+          math.cos(angle) * AuroraBackground._wander,
+      AuroraBackground._center.y +
+          base.dy +
+          math.sin(angle) * AuroraBackground._wander,
     );
   }
 
@@ -117,7 +149,7 @@ class _AuroraBackgroundState extends State<AuroraBackground>
   Widget _blurredCircle(Color color) {
     return ImageFiltered(
       // Figma는 blur 100~200px이다. 여기서는 원 크기 대비로 잡는다.
-      imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
+      imageFilter: ImageFilter.blur(sigmaX: 70, sigmaY: 70),
       child: Container(
         width: 260,
         height: 260,

@@ -12,6 +12,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/device_viewport.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
@@ -20,6 +21,9 @@ import 'helpers/test_storage.dart';
 /// 선택색이 캐릭터마다 다르다는 점을 테스트로 고정한다.
 /// 목표 칩과 색을 공유하던 구조를 이슈 #11에서 걷어냈다.
 void main() {
+  // Figma 실측값을 검증하므로 뷰포트를 실제 기기 크기로 고정한다
+  useFigmaViewport();
+
   bool isCtaEnabled(WidgetTester tester) {
     return tester.widget<ElumButton>(find.byType(ElumButton)).onPressed != null;
   }
@@ -182,38 +186,28 @@ void main() {
       expect(catX, lessThan(foxX));
     });
 
-    testWidgets('카드 안에 캐릭터 이름이 보인다', (tester) async {
+    testWidgets('카드에 이름 텍스트를 넣지 않는다', (tester) async {
+      // Figma가 이 자리(Ellipse 2/3)를 회색 알약으로 비워뒀다.
+      // 원본에 없는 것을 임의로 채우지 않는다.
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      // Figma는 이 자리(Ellipse 2/3)를 회색 알약으로 비워뒀지만 이름이 정해졌다.
-      expect(find.text(CardCharacter.cat.displayName), findsOneWidget);
-      expect(find.text(CardCharacter.fox.displayName), findsOneWidget);
+      expect(find.text(CardCharacter.cat.displayName), findsNothing);
+      expect(find.text(CardCharacter.fox.displayName), findsNothing);
     });
 
-    testWidgets('두 캐릭터의 이름이 서로 다르다', (tester) async {
-      // 같은 이름이면 아이가 두 친구를 구분할 수 없다
+    testWidgets('두 캐릭터의 식별 이름이 서로 다르다', (tester) async {
+      // 화면에 쓰이진 않지만 코드에서 캐릭터를 구분하는 값이다
       expect(
         CardCharacter.cat.displayName,
         isNot(CardCharacter.fox.displayName),
       );
     });
 
-    testWidgets('확정된 이름은 고양이 루루 · 여우 포포다', (tester) async {
-      // 기획이 정한 이름이다. 바꾸려면 이 테스트를 먼저 고친다.
+    testWidgets('확정된 식별 이름은 고양이 루루 · 여우 포포다', (tester) async {
+      // 화면 문구가 아니라 코드에서 캐릭터를 가리키는 이름이다
       expect(CardCharacter.cat.displayName, '루루');
       expect(CardCharacter.fox.displayName, '포포');
-    });
-
-    testWidgets('루루가 왼쪽, 포포가 오른쪽이다', (tester) async {
-      // 배치는 enum 순서를 따른다. 순서를 바꾸면 화면이 조용히 뒤집힌다.
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      final cat = tester.getCenter(find.text(CardCharacter.cat.displayName));
-      final fox = tester.getCenter(find.text(CardCharacter.fox.displayName));
-
-      expect(cat.dx, lessThan(fox.dx));
     });
   });
 }

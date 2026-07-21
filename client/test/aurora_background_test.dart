@@ -58,6 +58,35 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('세 광원이 흩어지지 않고 붙어 있다', (tester) async {
+    // 디자이너 요청 — 구석구석 떠다니면 광원 셋이 따로 노는 것처럼 보인다.
+    await tester.pumpWidget(wrap());
+    await tester.pump();
+
+    for (var elapsed = 0; elapsed < 40; elapsed += 4) {
+      final positions = tester
+          .widgetList<Align>(
+            find.descendant(
+              of: find.byType(AuroraBackground),
+              matching: find.byType(Align),
+            ),
+          )
+          .map((a) => a.alignment as Alignment)
+          .toList();
+
+      // 어느 두 광원도 화면 절반 이상 떨어지지 않는다
+      for (final a in positions) {
+        for (final b in positions) {
+          expect((a.x - b.x).abs(), lessThan(1.0));
+          expect((a.y - b.y).abs(), lessThan(1.0));
+        }
+      }
+      await tester.pump(const Duration(seconds: 4));
+    }
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('원을 세 개 그린다', (tester) async {
     await tester.pumpWidget(wrap(reduceMotion: true));
     await tester.pump();

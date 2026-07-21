@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
@@ -27,12 +28,6 @@ class CharacterCard extends StatelessWidget {
   /// 카드 상단(y=279) → 일러스트 상단(y=308)
   static const _illustrationTop = 29.0;
 
-  /// 카드 상단(y=279) → 이름 알약 상단(y=451).
-  ///
-  /// 일러스트(308~460)와 겹친다 — Figma가 알약을 일러스트 위에 얹었다.
-  /// 세로로 쌓으면 29+152+16 = 197에 알약 높이까지 더해져 202를 넘긴다.
-  static const _labelTop = 172.0;
-
   final CardCharacter character;
   final bool isSelected;
 
@@ -47,35 +42,30 @@ class CharacterCard extends StatelessWidget {
     return AnimatedContainer(
       duration: AppMotion.fast,
       curve: AppMotion.standard,
-      height: height,
+      height: height.h,
       decoration: BoxDecoration(
         color: isSelected ? selection.fill : colors.surface,
-        borderRadius: BorderRadius.circular(space.cardRadius),
+        borderRadius: BorderRadius.circular(space.cardRadius.r),
         border: Border.all(
           color: isSelected ? selection.border : colors.border,
           width: isSelected ? space.selectedBorderWidth : space.borderWidth,
         ),
       ),
-      // Figma는 일러스트와 이름을 겹쳐 배치한다(일러스트 y=308~460, 이름 y=451).
-      // Column으로 쌓으면 202를 넘겨 오버플로가 난다.
+      // Figma는 일러스트만 배치한다(y=308~460).
+      //
+      // ⚠️ 이름 텍스트를 넣지 않는다. Figma가 이 자리(Ellipse 2/3, y=451)를
+      // 회색 알약으로 비워뒀는데, 원본에 없는 것을 임의로 채우면 안 된다.
+      // 캐릭터 이름(루루·포포)은 코드에서 캐릭터를 식별하는 값이지 화면 문구가
+      // 아니다. 디자이너가 이 자리를 채우면 그때 Figma를 보고 넣는다.
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
           Positioned(
-            top: _illustrationTop,
+            top: _illustrationTop.h,
             child: SvgPicture.asset(
               AppAssets.character(character),
-              width: _illustrationSize,
-              height: _illustrationSize,
-            ),
-          ),
-          // Figma는 이 자리(Ellipse 2/3, y=451)를 회색 알약으로 비워뒀다.
-          // 이름이 정해져 텍스트로 채운다.
-          Positioned(
-            top: _labelTop,
-            child: Text(
-              character.displayName,
-              style: context.typo.body.copyWith(color: colors.textPrimary),
+              width: _illustrationSize.w,
+              height: _illustrationSize.w,
             ),
           ),
         ],

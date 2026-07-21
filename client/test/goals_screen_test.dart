@@ -12,6 +12,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/device_viewport.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
@@ -19,6 +20,9 @@ import 'helpers/test_storage.dart';
 ///
 /// 선택 색을 캐릭터색으로 잘못 쓴 전례가 있어(이슈 #11) 색까지 테스트로 고정한다.
 void main() {
+  // Figma 실측값을 검증하므로 뷰포트를 실제 기기 크기로 고정한다
+  useFigmaViewport();
+
   /// CTA가 활성인지 — ElumButton은 onPressed가 null이면 disable variant다
   bool isCtaEnabled(WidgetTester tester) {
     return tester.widget<ElumButton>(find.byType(ElumButton)).onPressed != null;
@@ -143,7 +147,13 @@ void main() {
 
       await tester.tap(find.text('필요한 준비물을 스스로 챙겨요'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('새로운 상황을 미리 준비해요'));
+
+      // 세 번째 칩은 기본 화면 높이에서 접혀 있어 스크롤해야 닿는다.
+      // ensureVisible 없이 tap하면 "No element"로 실패한다.
+      final third = find.text('새로운 상황을 미리 준비해요');
+      await tester.ensureVisible(third);
+      await tester.pumpAndSettle();
+      await tester.tap(third);
       await tester.pumpAndSettle();
       await tester.pump(const Duration(milliseconds: 300));
 
