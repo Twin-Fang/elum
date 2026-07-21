@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -107,7 +106,6 @@ class _NameScreenState extends ConsumerState<NameScreen> {
           ElumTextField(
             controller: _controller,
             hintText: '이름을 입력해주세요',
-            leadingIconAssetPath: AppAssets.inputFieldIconChildName,
             onChanged: ref.read(onboardingProvider.notifier).setNickname,
             // 엔터는 키보드만 닫는다. 진행은 '다음' 버튼으로만 —
             // 이름 입력이 곧 계정 생성이라 오입력으로 진행되면 되돌리기 번거롭다.

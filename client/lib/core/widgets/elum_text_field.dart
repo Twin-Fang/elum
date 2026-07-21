@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/theme_context_ext.dart';
 
 /// 입력 필드. Figma 기준 344×68 / radius 20 / 흰 배경 + 1px 테두리.
-///
-/// 왼쪽 아이콘은 선택이다. 아이콘이 붙으면 텍스트가 좌측 정렬로 바뀐다.
 ///
 /// **한 줄 전용이다.** 높이 68이 Figma 명세로 고정돼 있어 두 번째 줄은 화면에
 /// 보이지도 않는다. 여러 줄 입력이 필요하면 이 위젯을 쓰지 말고 별도로 만든다
@@ -15,8 +12,9 @@ import '../theme/theme_context_ext.dart';
 ///
 /// Figma 204:991 `온보딩_이름` 명세 (필드 좌상단 기준 상대좌표):
 /// - 필드 344×68 / radius 20
-/// - 아이콘 40×40, 좌측 여백 14, 아이콘→텍스트 12
 /// - 텍스트 20sp, 상하 여백 각 24 → **수직 중앙**이므로 패딩이 아니라 정렬로 맞춘다
+///
+/// 왼쪽 아이콘(leadingIconAssetPath)은 있었으나 Figma 개정으로 제거됐다 (이슈 #83).
 class ElumTextField extends StatelessWidget {
   const ElumTextField({
     super.key,
@@ -24,7 +22,6 @@ class ElumTextField extends StatelessWidget {
     this.controller,
     this.onChanged,
     this.onSubmitted,
-    this.leadingIconAssetPath,
     this.explicitTextAlign,
   });
 
@@ -35,29 +32,10 @@ class ElumTextField extends StatelessWidget {
   /// 키보드의 완료(리턴) 키를 눌렀을 때. null이면 키보드만 닫힌다.
   final ValueChanged<String>? onSubmitted;
 
-  /// 필드 왼쪽에 붙는 SVG 아이콘 경로. `AppAssets.inputFieldIcon*`을 넘긴다.
-  /// null이면 아이콘 영역 자체가 생기지 않는다.
-  final String? leadingIconAssetPath;
-
-  /// 정렬을 강제로 지정할 때만 넘긴다.
-  /// 평소에는 null로 두고 [resolvedTextAlign]의 판단에 맡긴다.
+  /// 정렬을 강제로 지정할 때만 넘긴다. null이면 중앙 정렬(디자인 기본)이다.
   final TextAlign? explicitTextAlign;
 
-  /// Figma 아이콘 크기 (40×40) — 좌표에서 역산한 값이라 상수로 고정한다
-  static const _leadingIconSize = 40.0;
-
-  /// 필드 좌측(x=24) → 아이콘 좌측(x=38)
-  static const _leadingIconLeftGap = 14.0;
-
-  /// 아이콘 우측(x=78) → 텍스트 좌측(x=90)
-  static const _leadingIconRightGap = 12.0;
-
-  /// 아이콘이 있으면 좌측, 없으면 중앙 정렬.
-  /// 아이콘은 왼쪽에 붙는데 텍스트만 가운데 뜨는 조합은 디자인상 존재하지 않으므로
-  /// 호출부가 매번 정렬을 넘기게 하지 않는다.
-  TextAlign get resolvedTextAlign =>
-      explicitTextAlign ??
-      (leadingIconAssetPath != null ? TextAlign.left : TextAlign.center);
+  TextAlign get resolvedTextAlign => explicitTextAlign ?? TextAlign.center;
 
   @override
   Widget build(BuildContext context) {
@@ -104,9 +82,6 @@ class ElumTextField extends StatelessWidget {
           // 세로 패딩을 주지 않는다 — expands + textAlignVertical.center가
           // 이미 Figma의 수직 중앙(상하 여백 각 24)을 만든다.
           contentPadding: EdgeInsets.symmetric(horizontal: space.md.w),
-          prefixIcon: _buildLeadingIcon(),
-          // 기본 최소폭 48이 적용되면 Figma 좌표가 밀린다
-          prefixIconConstraints: const BoxConstraints(),
           border: _border(colors.border, space.fieldRadius.r),
           enabledBorder: _border(colors.border, space.fieldRadius.r),
           focusedBorder: _border(
@@ -115,23 +90,6 @@ class ElumTextField extends StatelessWidget {
             width: space.selectedBorderWidth,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget? _buildLeadingIcon() {
-    final assetPath = leadingIconAssetPath;
-    if (assetPath == null) return null;
-
-    return Padding(
-      padding: EdgeInsets.only(
-        left: _leadingIconLeftGap.w,
-        right: _leadingIconRightGap.w,
-      ),
-      child: SvgPicture.asset(
-        assetPath,
-        width: _leadingIconSize.w,
-        height: _leadingIconSize.w,
       ),
     );
   }

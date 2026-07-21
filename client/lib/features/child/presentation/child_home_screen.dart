@@ -60,6 +60,10 @@ class ChildHomeScreen extends ConsumerWidget {
           data: (member) => member?.nickname ?? localName,
           orElse: () => localName,
         );
+    // 온보딩에서 고른 캐릭터. 빈 상태 일러스트가 캐릭터마다 다르다.
+    // 아직 안 골랐으면 고양이(루루)로 둔다 — 화면은 떠야 한다.
+    final character =
+        ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
 
     return Scaffold(
       backgroundColor: context.colors.background,
@@ -71,6 +75,7 @@ class ChildHomeScreen extends ConsumerWidget {
                   Expanded(
                     child: _NoRoutine(
                       childName: childName,
+                      character: character,
                       // 조회가 실패했으면 제보 추적용 코드를 함께 보여준다.
                       // 아동 화면이라 빨강·경고 아이콘은 쓰지 않는다.
                       errorCode: routinesAsync.hasError ? 'E-CHLIST' : null,
@@ -273,9 +278,16 @@ class _RoutineTile extends StatelessWidget {
 
 /// 보호자가 아직 일과를 만들지 않았다 (Figma 343:4543).
 class _NoRoutine extends StatelessWidget {
-  const _NoRoutine({required this.childName, this.errorCode});
+  const _NoRoutine({
+    required this.childName,
+    required this.character,
+    this.errorCode,
+  });
 
   final String childName;
+
+  /// 온보딩에서 고른 캐릭터. 시무룩한 일러스트·글로우 색이 갈린다.
+  final CardCharacter character;
 
   /// 조회 실패 시 제보 추적용 코드. null이면 표시하지 않는다.
   final String? errorCode;
@@ -283,6 +295,11 @@ class _NoRoutine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    // 캐릭터별 일러스트·글로우 — 고양이는 파랑, 여우는 주황 (Figma 343:4543)
+    final (glowColor, sadAsset) = switch (character) {
+      CardCharacter.cat => (colors.catSelectedFill, AppAssets.ruruSad),
+      CardCharacter.fox => (colors.foxSelectedFill, AppAssets.popoSad),
+    };
 
     // 작은 화면·큰 글꼴에서도 넘치지 않게 스크롤로 감싼다
     return Center(
@@ -310,7 +327,8 @@ class _NoRoutine extends StatelessWidget {
               ),
             ],
             SizedBox(height: 48.h),
-            // 캐릭터 뒤 은은한 빛 — 단순 원이라 코드로 그린다 (blur 100)
+            // 캐릭터 뒤 은은한 빛 — 단순 원이라 코드로 그린다
+            // (Figma blur 100 ≈ sigma 50)
             SizedBox(
               width: 200.w,
               height: 200.w,
@@ -319,19 +337,30 @@ class _NoRoutine extends StatelessWidget {
                 clipBehavior: Clip.none,
                 children: [
                   ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 40.w, sigmaY: 40.w),
+                    imageFilter: ImageFilter.blur(sigmaX: 50.w, sigmaY: 50.w),
                     child: Container(
                       width: 180.w,
                       height: 180.w,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: colors.catSelectedFill,
+                        color: glowColor,
                       ),
                     ),
                   ),
-                  // 시무룩한 루루 — 형태가 있는 일러스트는 반드시 에셋 (Figma 382:3220)
+                  // 발밑 그림자 (Figma Ellipse 2 — 64×16). 캐릭터보다 뒤에 깐다
+                  Positioned(
+                    bottom: 10.w,
+                    child: ClipOval(
+                      child: SizedBox(
+                        width: 64.w,
+                        height: 16.w,
+                        child: ColoredBox(color: colors.childEmptyShadow),
+                      ),
+                    ),
+                  ),
+                  // 시무룩한 캐릭터 — 형태가 있는 일러스트는 반드시 에셋
                   SvgPicture.asset(
-                    AppAssets.ruruSad,
+                    sadAsset,
                     width: 164.w,
                     height: 164.w,
                   ),

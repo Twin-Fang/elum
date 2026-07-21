@@ -2,7 +2,6 @@ import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/shared/models/routine.dart';

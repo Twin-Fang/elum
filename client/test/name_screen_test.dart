@@ -1,4 +1,3 @@
-import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
@@ -76,13 +75,12 @@ void main() {
       expect(find.text('이름을 입력해주세요'), findsOneWidget);
     });
 
-    testWidgets('필드 아이콘은 직접 그리지 않고 SVG 에셋으로 렌더링한다', (tester) async {
-      // 노란 원과 아이콘이 SVG 안에 함께 있다.
-      // Container + BoxDecoration으로 흉내내면 형태가 어긋난다.
+    testWidgets('입력 필드에 아이콘이 없다', (tester) async {
+      // Figma 개정으로 필드 좌측 아이콘이 빠졌다 (이슈 #83).
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(svgWithAsset(AppAssets.inputFieldIconChildName), findsOneWidget);
+      expect(svgWithAsset('assets/images/icon_child_head.svg'), findsNothing);
     });
 
     testWidgets('입력 전에는 다음 버튼이 비활성이다', (tester) async {
@@ -118,18 +116,6 @@ void main() {
 
       final field = tester.widget<TextField>(find.byType(TextField));
       expect(field.controller?.text, '하늘이');
-    });
-
-    testWidgets('입력 후에도 필드 아이콘은 그대로 있다', (tester) async {
-      // 204:1174에도 같은 아이콘(Group 4)이 있다.
-      // 상태가 바뀌었다고 아이콘이 사라지면 안 된다.
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), '하늘이');
-      await tester.pumpAndSettle();
-
-      expect(svgWithAsset(AppAssets.inputFieldIconChildName), findsOneWidget);
     });
 
     testWidgets('공백만 입력하면 활성되지 않는다', (tester) async {

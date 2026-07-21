@@ -88,6 +88,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.rewardStarGreen,
     required this.rewardStarPurple,
     required this.rewardButton,
+    required this.rewardGroundShadow,
+    required this.childEmptyShadow,
     required this.routineTileBg,
     required this.routineRingTrack,
     required this.routineRingProgress,
@@ -213,6 +215,11 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color rewardStarPurple;
   /// 보상 화면 CTA
   final Color rewardButton;
+  /// 보상 캐릭터 발밑 그림자 (Figma Ellipse 23 — 어두운 배경용)
+  final Color rewardGroundShadow;
+  /// 아이 홈 빈 상태 캐릭터 발밑 그림자 (Figma Ellipse 2 — 밝은 배경용).
+  /// 보상 화면 그림자와 배경이 달라 항상 따로 바뀐다 — 토큰을 나눈다.
+  final Color childEmptyShadow;
 
   // 홈 일과 목록 (Figma 356:4688 / 309:3739 / 356:5079)
   /// 일과 타일·펼침 컨테이너·빈 상태 배경 (#EEE9E6)
@@ -288,6 +295,8 @@ class AppColors extends ThemeExtension<AppColors> {
     rewardStarGreen: Color(0xFF86FCA3),
     rewardStarPurple: Color(0xFFA186FC),
     rewardButton: Color(0xFF55CFBA),
+    rewardGroundShadow: Color(0xFF121215),
+    childEmptyShadow: Color(0x4D969696),
     routineTileBg: Color(0xFFEEE9E6),
     routineRingTrack: Color(0xFFC9D6D4),
     routineRingProgress: Color(0xFF55CFBA),
@@ -360,6 +369,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? rewardStarGreen,
     Color? rewardStarPurple,
     Color? rewardButton,
+    Color? rewardGroundShadow,
+    Color? childEmptyShadow,
     Color? routineTileBg,
     Color? routineRingTrack,
     Color? routineRingProgress,
@@ -422,6 +433,8 @@ class AppColors extends ThemeExtension<AppColors> {
       rewardStarGreen: rewardStarGreen ?? this.rewardStarGreen,
       rewardStarPurple: rewardStarPurple ?? this.rewardStarPurple,
       rewardButton: rewardButton ?? this.rewardButton,
+      rewardGroundShadow: rewardGroundShadow ?? this.rewardGroundShadow,
+      childEmptyShadow: childEmptyShadow ?? this.childEmptyShadow,
       routineTileBg: routineTileBg ?? this.routineTileBg,
       routineRingTrack: routineRingTrack ?? this.routineRingTrack,
       routineRingProgress: routineRingProgress ?? this.routineRingProgress,
@@ -495,6 +508,10 @@ class AppColors extends ThemeExtension<AppColors> {
       rewardStarGreen: Color.lerp(rewardStarGreen, other.rewardStarGreen, t)!,
       rewardStarPurple: Color.lerp(rewardStarPurple, other.rewardStarPurple, t)!,
       rewardButton: Color.lerp(rewardButton, other.rewardButton, t)!,
+      rewardGroundShadow:
+          Color.lerp(rewardGroundShadow, other.rewardGroundShadow, t)!,
+      childEmptyShadow:
+          Color.lerp(childEmptyShadow, other.childEmptyShadow, t)!,
       routineTileBg: Color.lerp(routineTileBg, other.routineTileBg, t)!,
       routineRingTrack:
           Color.lerp(routineRingTrack, other.routineRingTrack, t)!,

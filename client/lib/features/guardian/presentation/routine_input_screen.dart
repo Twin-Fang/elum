@@ -220,7 +220,8 @@ class _InputField extends StatelessWidget {
                         .copyWith(color: colors.textPrimary),
                     decoration: InputDecoration.collapsed(
                       hintText: '평소 이야기하듯 입력해주세요',
-                      hintStyle: context.typo.promptBody
+                      // 플레이스홀더는 입력 텍스트(promptBody, w500)보다 가늘다 (Figma style_7YRXS7)
+                      hintStyle: context.typo.promptPlaceholder
                           .copyWith(color: colors.promptMuted),
                     ),
                   ),
@@ -355,7 +356,9 @@ class _PrivacyNote extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       '아이의 정보를 안전하게 보호해요',
-      style: context.typo.caption.copyWith(color: context.colors.promptMuted),
+      // 이 화면군은 Pretendard 12/w500이다 (Figma style_H3KJNZ) — caption(TmoneyRound)이 아니다
+      style: context.typo.promptCaption
+          .copyWith(color: context.colors.promptMuted),
     );
   }
 }
