@@ -1,15 +1,38 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T08:36:42Z",
-    "currentVersion": "1.0.41",
+    "lastUpdated": "2026-07-21T08:42:16Z",
+    "currentVersion": "1.0.42",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 14
+    "totalReleases": 15
   },
   "releases": [
+    {
+      "version": "1.0.42",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 32,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 화면 위쪽 여백이 넓어져 글씨가 시원하게 보입니다\n  * 이름 입력칸이 커지고 글자가 가운데에 놓입니다\n  * 아래쪽 버튼이 화면에 알맞은 자리에 놓입니다\n  * 여러 기종에서 화면 비율이 고르게 보이도록 맞췄습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "화면 위쪽 여백이 넓어져 글씨가 시원하게 보입니다",
+            "이름 입력칸이 커지고 글자가 가운데에 놓입니다",
+            "아래쪽 버튼이 화면에 알맞은 자리에 놓입니다",
+            "여러 기종에서 화면 비율이 고르게 보이도록 맞췄습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.41",
       "project_type": "flutter",
