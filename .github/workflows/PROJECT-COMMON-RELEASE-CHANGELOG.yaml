@@ -762,7 +762,8 @@ jobs:
         run: |
           chmod +x ../.github/scripts/version_manager.sh
           VERSION_NAME="${{ needs.update-changelog.outputs.new_version }}"
-          VERSION_CODE=$(../.github/scripts/version_manager.sh get-code)
+          # version_manager는 레포 루트(version.yml 위치) 기준 cwd에서 실행해야 한다
+          VERSION_CODE=$(cd .. && ./.github/scripts/version_manager.sh get-code)
 
           printf '%s\n' "${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}" > .env
 
