@@ -22,6 +22,11 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.brandPeach,
     required this.brandOrange,
     required this.accentYellow,
+    required this.splashTop,
+    required this.splashBottom,
+    required this.splashHill,
+    required this.splashHillGlow,
+    required this.splashTitle,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -53,6 +58,18 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 별 보상
   final Color accentYellow;
 
+  // 시작 화면 (Figma `시작` 238:1808)
+  /// 배경 그라데이션 시작색
+  final Color splashTop;
+  /// 배경 그라데이션 끝색
+  final Color splashBottom;
+  /// 하단 언덕 기본색
+  final Color splashHill;
+  /// 언덕 방사형 그라데이션의 밝은 쪽
+  final Color splashHillGlow;
+  /// 시작 화면 강조 문구색
+  final Color splashTitle;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -69,6 +86,11 @@ class AppColors extends ThemeExtension<AppColors> {
     brandPeach: Color(0xFFFFC9BB),
     brandOrange: Color(0xFFFF8B22),
     accentYellow: Color(0xFFFFD629),
+    splashTop: Color(0xFFFFFFFF),
+    splashBottom: Color(0xFFFFFADB),
+    splashHill: Color(0xFFFFD629),
+    splashHillGlow: Color(0xFFFFF2BB),
+    splashTitle: Color(0xFF230D60),
   );
 
   @override
@@ -88,6 +110,11 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? brandPeach,
     Color? brandOrange,
     Color? accentYellow,
+    Color? splashTop,
+    Color? splashBottom,
+    Color? splashHill,
+    Color? splashHillGlow,
+    Color? splashTitle,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -105,6 +132,11 @@ class AppColors extends ThemeExtension<AppColors> {
       brandPeach: brandPeach ?? this.brandPeach,
       brandOrange: brandOrange ?? this.brandOrange,
       accentYellow: accentYellow ?? this.accentYellow,
+      splashTop: splashTop ?? this.splashTop,
+      splashBottom: splashBottom ?? this.splashBottom,
+      splashHill: splashHill ?? this.splashHill,
+      splashHillGlow: splashHillGlow ?? this.splashHillGlow,
+      splashTitle: splashTitle ?? this.splashTitle,
     );
   }
 
@@ -127,6 +159,11 @@ class AppColors extends ThemeExtension<AppColors> {
       brandPeach: Color.lerp(brandPeach, other.brandPeach, t)!,
       brandOrange: Color.lerp(brandOrange, other.brandOrange, t)!,
       accentYellow: Color.lerp(accentYellow, other.accentYellow, t)!,
+      splashTop: Color.lerp(splashTop, other.splashTop, t)!,
+      splashBottom: Color.lerp(splashBottom, other.splashBottom, t)!,
+      splashHill: Color.lerp(splashHill, other.splashHill, t)!,
+      splashHillGlow: Color.lerp(splashHillGlow, other.splashHillGlow, t)!,
+      splashTitle: Color.lerp(splashTitle, other.splashTitle, t)!,
     );
   }
 }

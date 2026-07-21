@@ -13,7 +13,7 @@ Future<void> main() async {
   await AppConfig.load();
 
   // 저장소는 앱 시작 시 한 번만 초기화하고 provider로 주입한다.
-  final storage = await LocalStorage.create();
+  final storage = await SharedPrefsStorage.create();
 
   runApp(
     ProviderScope(

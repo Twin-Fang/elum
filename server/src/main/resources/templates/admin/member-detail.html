@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>이룸 관리자 - 회원 상세</title>
+  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
+</head>
+<body class="min-h-screen bg-base-100">
+<div class="flex">
+  <div th:replace="~{admin/fragments/admin-layout :: sidebar('members')}"></div>
+  <main class="flex-1 p-8 space-y-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold" th:text="${member.nickname() ?: member.username()}">회원 상세</h1>
+      <a th:href="@{/admin/members}" class="btn btn-ghost btn-sm">목록으로</a>
+    </div>
+
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body grid grid-cols-2 gap-2 text-sm">
+        <div class="text-base-content/60">아이디</div>
+        <div th:text="${member.username()}">username</div>
+        <div class="text-base-content/60">별 개수</div>
+        <div th:text="${member.totalStars()}">0</div>
+        <div class="text-base-content/60">도움 방식</div>
+        <div>
+          <span th:each="goal : ${member.supportGoals()}" class="badge badge-outline mr-1"
+                th:text="${goal.label}">도움방식</span>
+        </div>
+        <div class="text-base-content/60">가입일</div>
+        <div th:text="${#temporals.format(member.createdAt(), 'yyyy-MM-dd HH:mm')}">2026-01-01</div>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-lg font-semibold mb-2">생성한 루틴</h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>제목</th>
+            <th>상태</th>
+            <th>예정일시</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:if="${#lists.isEmpty(member.routines())}">
+            <td colspan="3" class="text-center text-base-content/60">생성한 루틴이 없습니다.</td>
+          </tr>
+          <tr th:each="routine : ${member.routines()}">
+            <td>
+              <a th:href="@{/admin/routines/{id}(id=${routine.id()})}" class="link link-hover"
+                 th:text="${routine.title()}">제목</a>
+            </td>
+            <td>
+              <span th:if="${routine.status().name() == 'PENDING_REVIEW'}" class="badge badge-warning">검토 대기</span>
+              <span th:if="${routine.status().name() == 'CONFIRMED'}" class="badge badge-info">확정</span>
+              <span th:if="${routine.status().name() == 'COMPLETED'}" class="badge badge-success">완료</span>
+            </td>
+            <td th:text="${#temporals.format(routine.scheduledAt(), 'yyyy-MM-dd HH:mm')}">일시</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

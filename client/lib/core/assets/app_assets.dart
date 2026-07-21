@@ -23,4 +23,29 @@ abstract final class AppAssets {
         CardCharacter.cat => '$_images/character_cat.svg',
         CardCharacter.fox => '$_images/character_fox.svg',
       };
+
+  // --- 시작 화면 (Figma `시작` 238:1808) ---
+
+  /// 이룸 로고 (164×60). Cloudsofa_namgim 폰트 대신 이 SVG를 쓴다.
+  static const logo = '$_images/logo_elum.svg';
+
+  /// 병아리 몸통 (393×439). 둥근 형태 + 방사형 그라데이션이 SVG에 포함되어 있다.
+  /// 직접 그리지 않고 이 파일을 그대로 쓴다.
+  static const splashChickBody = '$_images/splash_chick_body.svg';
+
+  /// 몸통 하단 페이드 (393×177)
+  static const splashFade = '$_images/splash_fade.svg';
+
+  /// 새싹 줄기 (113×111)
+  static const splashHill = '$_images/splash_hill.svg';
+
+  /// 반짝이는 별 (36×34 영역)
+  static const splashStar = '$_images/splash_star.svg';
+
+  /// 언덕 위 캐릭터 실루엣 (각 30×32)
+  static const splashCharLeft = '$_images/splash_char_left.svg';
+  static const splashCharRight = '$_images/splash_char_right.svg';
+
+  /// 가운데 장식 (45×25)
+  static const splashCenter = '$_images/splash_center.svg';
 }
