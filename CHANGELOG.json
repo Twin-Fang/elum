@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T10:33:07Z",
-    "currentVersion": "1.0.52",
+    "lastUpdated": "2026-07-21T11:05:56Z",
+    "currentVersion": "1.0.53",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 25
+    "totalReleases": 26
   },
   "releases": [
+    {
+      "version": "1.0.53",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 52,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 카드의 스피커 버튼을 누르면 내용을 소리로 읽어줍니다\n  * 기기에 한국어 음성이 없어도 소리가 재생됩니다\n\n* **버그 수정**\n  * 카드마다 그림 크기가 달라 보이던 문제를 해결했습니다\n  * 긴 제목이 잘려 보이던 문제를 해결했습니다\n  * 스피커 아이콘이 찌그러져 보이던 문제를 해결했습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "카드의 스피커 버튼을 누르면 내용을 소리로 읽어줍니다",
+            "기기에 한국어 음성이 없어도 소리가 재생됩니다"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "카드마다 그림 크기가 달라 보이던 문제를 해결했습니다",
+            "긴 제목이 잘려 보이던 문제를 해결했습니다",
+            "스피커 아이콘이 찌그러져 보이던 문제를 해결했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.52",
       "project_type": "flutter",
