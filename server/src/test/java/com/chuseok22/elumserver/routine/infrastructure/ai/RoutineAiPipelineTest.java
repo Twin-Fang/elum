@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -237,6 +238,7 @@ class RoutineAiPipelineTest {
 
     assertThat(result.steps()).hasSize(1);
     assertThat(result.steps().get(0).imagePath()).isEqualTo("data/routine-images/batch/1.png");
+    verify(geminiImageClient, times(2)).generateImage(any(), any());
   }
 
   @Test
@@ -252,6 +254,7 @@ class RoutineAiPipelineTest {
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_AI_GENERATION_FAILED));
+    verify(geminiImageClient, times(2)).generateImage(any(), any());
   }
 
   @Test
