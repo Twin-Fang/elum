@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'server/**'
 
 env:
   PROJECT_NAME: elum # 프로젝트 명
@@ -20,6 +22,9 @@ jobs:
   build:
     if: ${{ !startsWith(github.event.head_commit.message, 'version(') }} # 특정 커밋 메시지 워크플로 실행 제외
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
 
     steps:
       - name: 코드 체크아웃
@@ -74,15 +79,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfile') }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('server/Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-buildx-
 
       - name: Docker 이미지 빌드 및 푸시
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./Dockerfile
+          context: ./server
+          file: ./server/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.PROJECT_NAME }}${{ env.APP_IMAGE_SUFFIX }}:${{ github.ref_name }}
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.PROJECT_NAME }}${{ env.APP_IMAGE_SUFFIX }}:cache
