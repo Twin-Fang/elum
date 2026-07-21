@@ -264,44 +264,59 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
 }
 
 /// 기능 목록.
-class _DevMenu extends StatelessWidget {
+class _DevMenu extends StatefulWidget {
   const _DevMenu({required this.onSelect});
 
   final ValueChanged<_DevView> onSelect;
 
   @override
+  State<_DevMenu> createState() => _DevMenuState();
+}
+
+class _DevMenuState extends State<_DevMenu> {
+  @override
   Widget build(BuildContext context) {
     return ListView(
       shrinkWrap: true,
       children: [
+        ListTile(
+          leading: const Icon(Icons.speed),
+          title: const Text('온보딩 건너뛰기'),
+          subtitle: const Text('devFlag 토글'),
+          trailing: Switch(
+            value: AppConfig.skipOnboarding,
+            onChanged: (value) {
+              setState(() => AppConfig.skipOnboarding = value);
+            },
+          ),
+        ),
         _Tile(
           icon: Icons.person_remove_outlined,
           label: '회원삭제',
           subtitle: '계정과 저장값을 지우고 처음부터',
-          onTap: () => onSelect(_DevView.confirmReset),
+          onTap: () => widget.onSelect(_DevView.confirmReset),
         ),
         _Tile(
           icon: Icons.article_outlined,
           label: '로그 보기',
           subtitle: '최근 ${DevLogBuffer.maxLines}줄',
-          onTap: () => onSelect(_DevView.logs),
+          onTap: () => widget.onSelect(_DevView.logs),
         ),
         _Tile(
           icon: Icons.info_outline,
           label: '현재 상태',
           subtitle: '저장값·설정값 확인',
-          onTap: () => onSelect(_DevView.status),
+          onTap: () => widget.onSelect(_DevView.status),
         ),
         _Tile(
           icon: Icons.navigation_outlined,
           label: '화면 이동',
           subtitle: '온보딩 단계·보호자 홈',
-          onTap: () => onSelect(_DevView.navigate),
+          onTap: () => widget.onSelect(_DevView.navigate),
         ),
       ],
     );
   }
-
 }
 
 /// 회원삭제 확인 — 실수로 눌러 계정이 날아가지 않도록 한 단계 둔다.
@@ -464,6 +479,7 @@ class _StatusView extends ConsumerWidget {
         _Row('API', AppConfig.apiBaseUrl),
         _Row('Mock 사용', '${AppConfig.useMock}'),
         _Row('네트워크 로그', '${AppConfig.enableNetworkLog}'),
+        _Row('온보딩 건너뛰기', '${AppConfig.skipOnboarding}'),
         _Row('DLP 최소 지연', '${AppConfig.dlpMinDelay.inMilliseconds}ms'),
       ],
     );

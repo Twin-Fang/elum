@@ -73,6 +73,9 @@ abstract final class AppConfig {
   /// 정식 출시 전 `.env`와 GitHub Secret에서 false로 바꾼다. (이슈 #13)
   static bool get showDevTools => _bool('ELUM_SHOW_DEV_TOOLS', false);
 
+  /// 온보딩을 건너뛸지. 개발·시연용. SharedPreferences에서 런타임 토글 가능.
+  static bool skipOnboarding = _bool('ELUM_SKIP_ONBOARDING', false);
+
   // --- 파싱 헬퍼 ---
   // 값이 없거나 형식이 틀려도 예외를 던지지 않는다.
   // 설정 하나 때문에 앱이 뜨지 않으면 데모가 막힌다.

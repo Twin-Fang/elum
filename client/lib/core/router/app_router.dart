@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/config/app_config.dart';
 import '../../features/guardian/presentation/card_review_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/child/presentation/child_home_screen.dart';
@@ -83,6 +84,9 @@ GoRouter createRouter({
 
       // 토큰이 없으면 아무것도 조회할 수 없다. 시작 화면부터 다시 시작한다.
       if (hasToken != null && !hasToken()) return Routes.splash;
+
+      // devFlag: 온보딩 건너뛰기 (시연용)
+      if (AppConfig.skipOnboarding) return null;
 
       final isDone = isOnboardingCompleted?.call() ?? true;
       return isDone ? null : Routes.onboardingName;
