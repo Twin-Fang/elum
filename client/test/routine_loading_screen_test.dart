@@ -203,12 +203,29 @@ void main() {
       await settle(tester);
     });
 
-    testWidgets('뒤로가기가 없다 — 생성 중에는 되돌릴 수 없다', (tester) async {
-      // 중간에 끊으면 어중간한 상태가 남는다
+    testWidgets('뒤로가기를 그린다 (Figma 262:4575 / 262:4709)', (tester) async {
+      // 두 로딩 프레임 모두 x=24, y=87에 `fi-br-angle-left`를 둔다.
+      // 되돌릴 수 없다는 이유로 숨겼다가 시안과 어긋났다 (이슈 #63).
+      for (final kind in RoutineLoadingKind.values) {
+        await tester.pumpWidget(wrap(kind));
+        await settle(tester);
+
+        expect(
+          svgWithAsset(AppAssets.iconBack),
+          findsOneWidget,
+          reason: '$kind 로딩 화면에 뒤로가기가 없다',
+        );
+
+        await tester.pump(totalHold(kind));
+        await settle(tester);
+      }
+    });
+
+    testWidgets('홈도 함께 그린다 (Figma 262:5188 / 262:5190)', (tester) async {
       await tester.pumpWidget(wrap(RoutineLoadingKind.prepare));
       await settle(tester);
 
-      expect(svgWithAsset(AppAssets.iconBack), findsNothing);
+      expect(svgWithAsset(AppAssets.iconHome), findsOneWidget);
 
       await tester.pump(totalHold(RoutineLoadingKind.prepare));
       await settle(tester);

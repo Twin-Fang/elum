@@ -139,6 +139,16 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     });
   }
 
+  /// 뒤로가기 — 기다리다 그만두고 이전 화면으로 돌아간다.
+  ///
+  /// `_navigated`를 먼저 세워, 뒤늦게 도착한 응답이 사용자가 떠난 화면 위로
+  /// 다음 화면을 밀어 올리는 것을 막는다. 작업 자체는 취소하지 않는다 —
+  /// 이미 나간 AI 요청은 되돌릴 수 없고, 결과는 상태에 남아 재진입 시 쓰인다.
+  void _handleBack() {
+    _navigated = true;
+    context.pop();
+  }
+
   /// 지금 보여줄 진행률 — 마지막으로 드러난 스텝의 값.
   int get _percent {
     if (_revealed == 0) return widget.kind.stages.first.percent;
@@ -162,7 +172,10 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     const topBarH = 111.0;
 
     return RoutineFlowScaffold(
-      // 생성 중에는 되돌릴 수 없다 — 중간에 끊으면 어중간한 상태가 남는다
+      // Figma 262:4575 · 262:4709 — 두 로딩 프레임 모두 뒤로가기를 둔다.
+      // 되돌릴 수 없다는 이유로 숨겼다가 시안과 어긋났다 (이슈 #63).
+      // 오래 기다리는 화면이라 빠져나갈 길이 없으면 갇힌 느낌을 준다.
+      onBack: _handleBack,
       child: Stack(
         children: [
           // 루미는 준비 화면에만 나온다 (Figma 262:4569 `Group 26`, y=383).
