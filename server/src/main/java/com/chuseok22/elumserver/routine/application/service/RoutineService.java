@@ -286,6 +286,11 @@ public class RoutineService {
       .filter(step -> step.getId().equals(stepId))
       .findFirst()
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
+    // 이미지 생성에 실패해 imagePath가 null인 단계는 이미지가 없다. Path.of(null) NPE 대신
+    // 404로 명확히 응답한다(클라이언트는 이미지 자리를 비워 렌더링).
+    if (targetStep.getImagePath() == null) {
+      throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND);
+    }
     return routineImageStorage.read(targetStep.getImagePath());
   }
 

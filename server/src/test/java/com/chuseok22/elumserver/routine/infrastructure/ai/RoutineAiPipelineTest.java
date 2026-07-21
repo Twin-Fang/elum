@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -284,18 +285,22 @@ class RoutineAiPipelineTest {
   }
 
   @Test
-  @DisplayName("이미지 생성이 재시도까지 실패하면 ROUTINE_AI_GENERATION_FAILED를 던진다")
-  void generateForCreate_imageFailsTwice_throwsGenerationFailed() {
+  @DisplayName("이미지 생성이 재시도까지 실패해도 일과는 이미지 없이(imagePath=null) 저장된다")
+  void generateForCreate_imageFailsTwice_savesWithoutImage() {
+    // 이미지 하나가 끝까지 실패해도 일과 전체를 포기하지 않는다(서비스 원칙 6). 예외를 던지면
+    // create()가 500으로 죽어 일과가 서버에 저장조차 안 되던 버그의 근본 원인이었다.
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
     when(geminiImageClient.generateImage(any(), any())).thenThrow(new RuntimeException("계속 실패"));
 
-    assertThatThrownBy(() -> routineAiPipeline.generateForCreate(
+    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
       "내일 병원 가기", "하늘이", Set.of(), List.of(), null
-    ))
-      .isInstanceOf(CustomException.class)
-      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
-        .isEqualTo(ErrorCode.ROUTINE_AI_GENERATION_FAILED));
+    );
+
+    assertThat(result.steps()).hasSize(1);
+    assertThat(result.steps().get(0).imagePath()).isNull();
+    // 이미지가 없으므로 저장은 아예 호출되지 않는다.
+    verify(routineImageStorage, never()).save(any(), any(), any());
     verify(geminiImageClient, times(2)).generateImage(any(), any());
   }
 }
