@@ -39,15 +39,14 @@ on:
 # ============================================
 env:
   # 프로젝트 이름
-  APP_ARTIFACT_NAME: "elum"
+  APP_ARTIFACT_NAME: "__APP_ARTIFACT_NAME__"  # @wizard ask:@repo
   # Flutter/Java 버전
   FLUTTER_VERSION: "3.38.9"
-  JAVA_VERSION: "17"
+  JAVA_VERSION: "__JAVA_VERSION__"  # @wizard ask:17
   PROJECT_TYPE: "flutter"
   # Flutter 루트 경로(레포 루트 기준). 단일레포면 ".", 모노레포면 "app" 등.
   # 통합 시점에 integrator의 flutter-root resolver가 project_paths.flutter 값으로 1회 치환.
-  # FLUTTER_ROOT는 Flutter SDK 설치 경로를 가리키는 공식 환경변수라
-  # flutter-action이 런타임에 덮어쓴다. 앱 디렉터리는 APP_ROOT로 분리한다.
+  # FLUTTER_ROOT는 Flutter SDK 경로용 공식 변수라 충돌 — APP_ROOT로 분리
   APP_ROOT: "client"
   # 배포 모드 (store_only | store_prepare | store_submit)
   DEPLOY_MODE: ${{ github.event.inputs.deploy_mode || vars.ANDROID_DEPLOY_MODE || 'store_only' }}
@@ -543,9 +542,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: android-aab
-          # 업로드 경로에 APP_ROOT prefix가 포함되므로 레포 루트에 풀어야 원위치로 복원된다
-          # (APP_ROOT를 다시 붙이면 client/client/build/... 로 이중 중첩)
-          path: .
+          # ⚠️ 업로드 path가 '단일 파일'이면 upload-artifact가 그 파일의 디렉터리를 루트로
+          #    삼아 경로를 평탄화한다(아티팩트 내부 = app-release.aab 하나).
+          #    따라서 레포 루트에 풀면 원래 위치가 복원되지 않으므로,
+          #    빌드 job과 동일한 디렉터리를 명시해 그 자리에 되돌린다.
+          path: ${{ env.APP_ROOT }}/build/app/outputs/bundle/release/
 
       # 릴리즈 노트 다운로드
       - name: Download release notes
