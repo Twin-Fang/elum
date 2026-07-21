@@ -48,6 +48,12 @@ Task 10(`AdminPromptService`)에서 한다. 이 태스크에서는 컴파일이 
 최소 수정(임시로 `GEMINI_ROUTINE_TEXT_PREFIX` 참조를 `GEMINI_ROUTINE_CREATE_PREFIX`로 치환)까지만
 같이 처리한다.
 
+**배포 주의(fable5 검토에서 발견)**: 이 태스크만 단독으로 배포하면 `GEMINI_ROUTINE_REVISE_PREFIX`
+enum 값은 존재하지만 `PromptDefaults`에 기본값이 아직 없어(Task 3에서 추가) 시딩되지 않는
+중간 상태가 된다. `PromptTemplateService.getContent()`가 이 키를 실제로 조회하는 코드는
+Task 5에서야 생기므로 이 중간 상태 자체가 즉시 에러를 내지는 않지만, Task 1~11은 전부
+합쳐서 한 번에 배포해야 하며 그 사이에 develop→main 릴리스가 끼어들지 않도록 한다.
+
 - [ ] **Step 1: PromptKey enum 수정**
 
 `server/src/main/java/com/chuseok22/elumserver/ai/core/PromptKey.java` 전체를 아래로 교체한다.
@@ -136,7 +142,17 @@ Create `server/src/main/resources/db/migration/V1__cleanup_legacy_prompt_key.sql
 -- GEMINI_ROUTINE_TEXT_PREFIX가 GEMINI_ROUTINE_CREATE_PREFIX/GEMINI_ROUTINE_REVISE_PREFIX로
 -- 분리되면서 남는 기존 행을 정리한다. 이 행이 남아있으면 PromptTemplateService.getAll()이
 -- 알 수 없는 enum 문자열을 매핑하지 못해 관리자 프롬프트 페이지가 500으로 깨진다.
-DELETE FROM prompt_template WHERE prompt_key = 'GEMINI_ROUTINE_TEXT_PREFIX';
+--
+-- to_regclass로 테이블 존재 여부를 먼저 확인한다 — Flyway는 기본적으로 Hibernate
+-- ddl-auto보다 먼저 실행되므로, 테이블이 아직 하나도 없는 완전히 새 환경(신규 로컬 DB,
+-- 신규 배포 환경)에서는 이 마이그레이션이 최초 실행될 때 prompt_template 테이블 자체가
+-- 없어 DELETE가 "relation does not exist"로 실패하고 앱 기동이 죽는다(fable5 검토에서 발견).
+DO $$
+BEGIN
+  IF to_regclass('public.prompt_template') IS NOT NULL THEN
+    DELETE FROM prompt_template WHERE prompt_key = 'GEMINI_ROUTINE_TEXT_PREFIX';
+  END IF;
+END $$;
 ```
 
 - [ ] **Step 7: 전체 테스트 실행**
@@ -148,16 +164,22 @@ Expected: `BUILD SUCCESSFUL`, 4개 테스트 모두 PASS
 
 이 스텝은 코드를 건드리지 않는다. 구현자는 사용자에게 다음을 그대로 전달한다.
 
-> `application-dev.yml`과 `application-prod.yml`에 아래 두 값을 추가해주세요(이미 flyway 섹션이
-> 있다면 이 두 키만 병합).
+> `application-dev.yml`과 `application-prod.yml`에 아래 세 값을 추가해주세요(이미 flyway 섹션이
+> 있다면 이 세 키만 병합).
 > ```yaml
 > spring:
 >   flyway:
 >     enabled: true
 >     baseline-on-migrate: true
+>     baseline-version: 0
 > ```
 > `baseline-on-migrate: true`가 없으면 기존 DB 스키마가 이미 있는 상태에서 Flyway가 "마이그레이션
-> 이력 없음"으로 판단해 앱 기동 자체가 실패합니다.
+> 이력 없음"으로 판단해 앱 기동 자체가 실패합니다. **`baseline-version: 0`도 반드시 함께
+> 넣어야 합니다** — 기본 baseline 버전은 1인데, Flyway는 baseline 버전 이하의 마이그레이션을
+> "이미 적용됨"으로 간주해 건너뜁니다. `baseline-version`을 0으로 명시하지 않으면 방금 만든
+> `V1__cleanup_legacy_prompt_key.sql`이 baseline(기본값 1)과 같은 버전이라 실제로는 절대
+> 실행되지 않고, `GEMINI_ROUTINE_TEXT_PREFIX` 잔여 행이 그대로 남아 이번 Flyway 도입의
+> 목적 자체가 무산됩니다(fable5 검토에서 발견).
 
 - [ ] **Step 9: Commit**
 
@@ -686,15 +708,9 @@ Create `server/src/test/java/com/chuseok22/elumserver/ai/infrastructure/client/G
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
-import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -712,12 +728,15 @@ class GeminiTextClientTest {
   private PromptTemplateService promptTemplateService;
   private GeminiTextClient geminiTextClient;
 
+  // build*UserContent()/questionResponseSchemaFor() 계열 메서드는 HTTP 호출도, DB 조회도
+  // 하지 않는 순수 조립 메서드라 promptTemplateService를 실제로 부르지 않는다(fable5
+  // 검토에서 지적 — 이전 초안은 여기서 getContent()를 미리 스텁했지만 어떤 테스트도
+  // 그 스텁을 실제로 쓰지 않는 죽은 stub이었다). 생성자 의존성 채우기용으로만 목을 만든다.
   @BeforeEach
   void setUp() {
     promptTemplateService = mock(PromptTemplateService.class);
-    when(promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX)).thenReturn("시스템 프롬프트");
     RestClient restClient = mock(RestClient.class, invocation -> {
-      throw new IllegalStateException("이 테스트는 HTTP 호출까지 가면 안 된다 — buildCreateRoutineUserContent만 검증한다");
+      throw new IllegalStateException("이 테스트는 HTTP 호출까지 가면 안 된다 — build*UserContent만 검증한다");
     });
     GeminiProperties geminiProperties = new GeminiProperties("key", null, "text-model", "image-model", 1000);
     geminiTextClient = new GeminiTextClient(restClient, geminiProperties, promptTemplateService);
@@ -1067,15 +1086,30 @@ Expected: `BUILD SUCCESSFUL`, 2개 테스트 PASS
   // 개별 마스킹해 배열 구조를 유지해야 Gemini에 additionalAnswers 배열 그대로 전달할 수
   // 있다(마스킹 전 하나로 합쳐버리면 Gemini 쪽에서 배열 구조를 잃는다, fable5 검토에서
   // 발견 — 이전에는 answers를 comma로 합친 뒤 한 번에 마스킹해 문자열 하나로 전달했다).
+  // 로컬 LLM 호출을 답변 개수만큼 순차로 하면 fail-open 타임아웃이 그대로 누적되므로,
+  // maskPreviousSteps()와 동일하게 가상 스레드로 병렬 호출해 지연을 1회 타임아웃 수준으로
+  // 묶는다(fable5 검토에서 발견).
   private List<String> maskAnswers(List<String> answers) {
     if (answers == null || answers.isEmpty()) {
       return List.of();
     }
-    return answers.stream()
-      .map(answer -> sensitiveInfoGuardService.check(answer).sanitizedText())
-      .toList();
+    ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+    try {
+      List<CompletableFuture<String>> futures = answers.stream()
+        .map(answer -> CompletableFuture.supplyAsync(
+          () -> sensitiveInfoGuardService.check(answer).sanitizedText(), executor
+        ))
+        .toList();
+      return futures.stream().map(CompletableFuture::join).toList();
+    } finally {
+      executor.shutdown();
+    }
   }
 ```
+
+`RoutineService.java`는 이미 `maskPreviousSteps()`에서 `java.util.concurrent.CompletableFuture`,
+`java.util.concurrent.ExecutorService`, `java.util.concurrent.Executors`를 import하고 있으므로
+추가 import는 필요 없다.
 
 같은 파일 82-109번째 줄(`create` 메서드) 중 `maskedAnswers` 선언부만 타입을 바꾼다.
 
@@ -1156,8 +1190,6 @@ git commit -m "feat: 루틴 생성 Gemini 호출을 <text> 태그 대신 CREATE_
   @Test
   @DisplayName("buildReviseRoutineUserContent는 previousRoutine.title/steps와 feedback을 JSON으로 담는다")
   void buildReviseRoutineUserContent_returnsStructuredJson() throws Exception {
-    when(promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_REVISE_PREFIX)).thenReturn("시스템 프롬프트");
-
     String json = geminiTextClient.buildReviseRoutineUserContent(
       "학교에 갈 준비를 해요",
       List.of(new com.chuseok22.elumserver.ai.core.RoutineStepDraft.StepDraft(1, "침대에서 일어나요.")),
@@ -2013,7 +2045,9 @@ fallback으로 대체"되는 방향으로 동작이 바뀐다. 아래 절차로 
 고치고, 부분 fallback 테스트를 새로 추가한다.
 
 기존 `generateQuestion_validResponse_returnsMappedQuestions`(54-79번째 줄)를 아래로
-교체한다.
+교체한다. **주의**: `isValidQuestionItem()`이 유효 label 옵션 3개 이상을 요구하므로, 옵션이
+2개뿐이면 이 테스트는 fallback 경로를 타 실패한다(fable5 검토에서 발견) — 각 질문에 옵션을
+3개씩 준다.
 
 ```java
   @Test
@@ -2021,9 +2055,11 @@ fallback으로 대체"되는 방향으로 동작이 바뀐다. 아래 절차로 
   void generateQuestion_validResponse_returnsMappedQuestions() {
     String json = "{\"questions\":["
       + "{\"supportGoal\":\"PREPARE_ITEMS\",\"question\":\"준비물이 있나요?\",\"options\":["
-      + "{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"}]},"
+      + "{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"},"
+      + "{\"emoji\":\"👖\",\"label\":\"장화\"}]},"
       + "{\"supportGoal\":\"PREPARE_NEW\",\"question\":\"평소와 다른 점이 있나요?\",\"options\":["
-      + "{\"emoji\":\"⏰\",\"label\":\"시간 변경\"},{\"emoji\":\"📍\",\"label\":\"장소 변경\"}]}]}";
+      + "{\"emoji\":\"⏰\",\"label\":\"시간 변경\"},{\"emoji\":\"📍\",\"label\":\"장소 변경\"},"
+      + "{\"emoji\":\"👥\",\"label\":\"동행자 변경\"}]}]}";
     when(geminiTextClient.generateQuestion(eq("하늘이"), anySet(), eq("내일 비 오는 날")))
       .thenReturn(textResponse(json));
 
@@ -2038,22 +2074,24 @@ fallback으로 대체"되는 방향으로 동작이 바뀐다. 아래 절차로 
         RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::emoji,
         RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::label
       )
-      .containsExactly(tuple("☔", "우산"), tuple("🧥", "우비"));
+      .containsExactly(tuple("☔", "우산"), tuple("🧥", "우비"), tuple("👖", "장화"));
     assertThat(result.questions().get(1).options())
       .extracting(RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::label)
-      .containsExactly("시간 변경", "장소 변경");
+      .containsExactly("시간 변경", "장소 변경", "동행자 변경");
   }
 ```
 
 기존 `generateQuestion_optionMissingLabel_dropsOnlyThatOption`(81-96번째 줄)을 아래로
-교체한다.
+교체한다. 라벨 있는 옵션이 3개는 남아야 "그 옵션만 제외되고 질문은 유지된다"는 이 테스트의
+의도가 성립하므로, 유효 옵션 3개 + 빈 라벨 1개로 구성한다(fable5 검토에서 발견).
 
 ```java
   @Test
   @DisplayName("옵션에 label이 없으면 그 옵션만 제외하고 나머지는 유지한다")
   void generateQuestion_optionMissingLabel_dropsOnlyThatOption() {
     String json = "{\"questions\":[{\"supportGoal\":\"PREPARE_ITEMS\",\"question\":\"준비물이 있나요?\","
-      + "\"options\":[{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"\"}]}]}";
+      + "\"options\":[{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"},"
+      + "{\"emoji\":\"👖\",\"label\":\"장화\"},{\"emoji\":\"🧦\",\"label\":\"\"}]}]}";
     when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
@@ -2063,12 +2101,15 @@ fallback으로 대체"되는 방향으로 동작이 바뀐다. 아래 절차로 
     assertThat(result.questions()).hasSize(1);
     assertThat(result.questions().get(0).options())
       .extracting(RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::label)
-      .containsExactly("우산");
+      .containsExactly("우산", "우비", "장화");
   }
 ```
 
 기존 `generateQuestion_allOptionsMissingLabel_fallsBack`(98-111번째 줄)을 아래로 교체한다
 (전체 fallback이 아니라 "그 목표만" fallback으로 대체되는 걸 검증하도록 이름과 내용을 바꿈).
+"정상"으로 남아야 하는 `PREPARE_NEW` 질문도 옵션 3개를 채워야 `isValidQuestionItem()`을
+통과해 실제로 Gemini 결과가 쓰인다(옵션 2개면 이 목표까지 fallback으로 밀려 테스트 의도가
+깨진다 — fable5 검토에서 발견).
 
 ```java
   @Test
@@ -2078,7 +2119,8 @@ fallback으로 대체"되는 방향으로 동작이 바뀐다. 아래 절차로 
       + "{\"supportGoal\":\"PREPARE_ITEMS\",\"question\":\"준비물이 있나요?\",\"options\":["
       + "{\"emoji\":\"☔\",\"label\":\"\"},{\"emoji\":\"🧥\",\"label\":\"   \"}]},"
       + "{\"supportGoal\":\"PREPARE_NEW\",\"question\":\"평소와 다른 점이 있나요?\",\"options\":["
-      + "{\"emoji\":\"⏰\",\"label\":\"시간 변경\"},{\"emoji\":\"📍\",\"label\":\"장소 변경\"}]}]}";
+      + "{\"emoji\":\"⏰\",\"label\":\"시간 변경\"},{\"emoji\":\"📍\",\"label\":\"장소 변경\"},"
+      + "{\"emoji\":\"👥\",\"label\":\"동행자 변경\"}]}]}";
     when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
@@ -2086,9 +2128,10 @@ fallback으로 대체"되는 방향으로 동작이 바뀐다. 아래 절차로 
     );
 
     assertThat(result.questions()).hasSize(2);
+    // generateQuestion()이 PREPARE_ITEMS -> PREPARE_NEW 고정 순서로 순회하므로 순서까지 고정된다.
     assertThat(result.questions())
       .extracting(RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem::question)
-      .contains("꼭 챙겨야 하는 준비물이 있나요?", "평소와 다른 점이 있나요?");
+      .containsExactly("꼭 챙겨야 하는 준비물이 있나요?", "평소와 다른 점이 있나요?");
   }
 ```
 
@@ -2451,6 +2494,7 @@ git commit -m "feat: 이미지 프롬프트 조립을 GeminiRoutineImagePromptBu
 - Modify: `server/src/main/java/com/chuseok22/elumserver/ai/application/service/SensitiveInfoGuardService.java`
 - Modify: `server/src/main/java/com/chuseok22/elumserver/admin/application/service/AdminPromptService.java`
 - Modify: `server/src/main/java/com/chuseok22/elumserver/admin/application/controller/AdminPromptTestController.java`
+- Modify: `server/src/main/resources/templates/admin/prompts.html:103-118`
 - Test: `server/src/test/java/com/chuseok22/elumserver/admin/application/service/AdminPromptServiceTest.java`(신설)
 
 **Interfaces:**
@@ -2654,17 +2698,37 @@ import java.util.Set;
 Run: `./gradlew test --tests "*AdminPromptServiceTest*"`
 Expected: `BUILD SUCCESSFUL`, 3개 테스트 PASS
 
-- [ ] **Step 7: 전체 컴파일 확인**
+- [ ] **Step 7: 관리자 프롬프트 화면의 preview 호출에도 character 전달**
+
+`server/src/main/resources/templates/admin/prompts.html`의 preview 버튼 클릭 핸들러
+(103-118번째 줄)를 보면, test 호출(126-130번째 줄)은 `character: getCharacterFor(key)`를
+같이 보내는데 preview 호출(109-112번째 줄)은 `content`/`sampleInput`만 보낸다. 이대로면
+이미지 프롬프트 preview가 항상 `character=null`로만 조립돼, `GeminiRoutineImagePromptBuilder`가
+만드는 `referenceImageProvided:true` 분기를 관리자가 미리보기로 확인할 방법이 없다(fable5
+검토에서 발견 — "preview와 실제 호출이 항상 같은 결과"라는 이번 통합 목적에 어긋남).
+
+109-112번째 줄을 아래로 교체한다.
+
+```javascript
+        const data = await callPromptApi(key, '/preview', {
+          content: getContentFor(key),
+          sampleInput: getSampleInputFor(key),
+          character: getCharacterFor(key)
+        });
+```
+
+- [ ] **Step 8: 전체 컴파일 확인**
 
 Run: `./gradlew compileJava compileTestJava`
 Expected: `BUILD SUCCESSFUL`
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add server/src/main/java/com/chuseok22/elumserver/ai/application/service/SensitiveInfoGuardService.java \
   server/src/main/java/com/chuseok22/elumserver/admin/application/service/AdminPromptService.java \
   server/src/main/java/com/chuseok22/elumserver/admin/application/controller/AdminPromptTestController.java \
+  server/src/main/resources/templates/admin/prompts.html \
   server/src/test/java/com/chuseok22/elumserver/admin/application/service/AdminPromptServiceTest.java
 git commit -m "feat: 관리자 프롬프트 preview/test가 실제 호출과 동일한 조립 로직을 재사용하도록 통합"
 ```
@@ -2674,12 +2738,29 @@ git commit -m "feat: 관리자 프롬프트 preview/test가 실제 호출과 동
 ### Task 11: RoutineControllerDocs 문구 정리 + 최종 빌드 검증
 
 **Files:**
-- Modify: `server/src/main/java/com/chuseok22/elumserver/routine/application/controller/RoutineControllerDocs.java:76-81`
+- Modify: `server/src/main/java/com/chuseok22/elumserver/routine/application/controller/RoutineControllerDocs.java:32-41,76-81`
 
 **Interfaces:**
 - 없음(문서 문자열만 변경, 공개 계약 불변)
 
-- [ ] **Step 1: Swagger 설명 문구 갱신**
+- [ ] **Step 1: 루틴 생성 API 설명의 이미지 실패 문구를 Task 6 재시도 반영해 갱신**
+
+`RoutineControllerDocs.java`의 `create` 메서드 `@Operation(description = """ ... """)` 블록
+(32-41번째 줄) 중 37번째 줄이 Task 6 이전 동작("하나라도 실패하면 전체 요청이 실패합니다")을
+그대로 설명하고 있어 부정확해졌다(fable5 검토에서 발견). 아래 줄을 찾아 교체한다. 기존:
+
+```java
+      3. 단계별로 Gemini 이미지 생성을 병렬 호출합니다. 하나라도 실패하면 전체 요청이 실패합니다.
+```
+
+교체 후:
+
+```java
+      3. 단계별로 Gemini 이미지 생성을 병렬 호출합니다. 한 단계가 일시적으로 실패하면 그
+      단계만 1회 재시도하며, 재시도까지 실패하면 전체 요청이 실패합니다.
+```
+
+- [ ] **Step 2: 추가 질문 API Swagger 설명 문구 갱신**
 
 `RoutineControllerDocs.java`의 `generateQuestion` 메서드 `@Operation(description = """ ... """)`
 블록(76-81번째 줄)을 찾아 교체한다. 기존:
@@ -2705,35 +2786,37 @@ git commit -m "feat: 관리자 프롬프트 preview/test가 실제 호출과 동
       이 API는 아무것도 저장하지 않으며(Stateless), Gemini 호출이 실패해도 선택한 목표별 고정 질문으로 대체해 항상 200을 반환합니다.
 ```
 
-- [ ] **Step 2: 전체 컴파일 확인**
+- [ ] **Step 3: 전체 컴파일 확인**
 
 Run: `./gradlew compileJava`
 Expected: `BUILD SUCCESSFUL`
 
-- [ ] **Step 3: 전체 단위테스트 실행**
+- [ ] **Step 4: 전체 단위테스트 실행**
 
 Run: `./gradlew test`
 Expected: `BUILD SUCCESSFUL`, 실패 0건. 테스트 리포트는 `build/reports/tests/test/index.html`에서
 확인 가능.
 
-- [ ] **Step 4: 전체 빌드(테스트 제외) 확인**
+- [ ] **Step 5: 전체 빌드(테스트 제외) 확인**
 
 Run: `./gradlew build -x test`
 Expected: `BUILD SUCCESSFUL`
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add server/src/main/java/com/chuseok22/elumserver/routine/application/controller/RoutineControllerDocs.java
-git commit -m "docs: 추가 질문 API 문서에 목표별 정확히 1개 질문 보장을 반영"
+git commit -m "docs: 루틴 생성/추가 질문 API 문서를 이미지 재시도·목표별 질문 보장에 맞춰 갱신"
 ```
 
-- [ ] **Step 6: 사용자에게 배포 전 수동 확인 사항 안내(코드 변경 아님)**
+- [ ] **Step 7: 사용자에게 배포 전 수동 확인 사항 안내(코드 변경 아님)**
 
 이 스텝은 코드를 건드리지 않는다. 구현자는 사용자에게 다음을 안내한다.
 
 > 1. `application-dev.yml`/`application-prod.yml`에 Task 1에서 안내한 `spring.flyway.enabled: true`,
->    `spring.flyway.baseline-on-migrate: true`를 추가해주세요.
+>    `spring.flyway.baseline-on-migrate: true`, **`spring.flyway.baseline-version: 0`** 세 값을
+>    모두 추가해주세요. `baseline-version: 0`이 빠지면 `V1__cleanup_legacy_prompt_key.sql`이
+>    baseline과 같은 버전으로 취급돼 실제로는 실행되지 않습니다.
 > 2. 배포 후 관리자 페이지(`/admin/prompts`)에 접속해 `GEMINI_ROUTINE_CREATE_PREFIX`,
 >    `GEMINI_ROUTINE_REVISE_PREFIX` 두 항목이 새 기본 프롬프트로 정상 시딩됐는지, 기존
 >    `GEMINI_ROUTINE_TEXT_PREFIX` 잔여 행 때문에 500이 나지 않는지 확인해주세요.
@@ -2783,6 +2866,26 @@ Flyway 전면 도입, 모델 교체, 메타데이터 확장, 버전 관리, A/B 
   `RoutineAiPipeline`이 정확히 이 메서드명을 사용함을 확인.
 - `GeminiRoutineImagePromptBuilder.build(String, String, CharacterType)`이 Task 9에서
   정의되고, Task 10의 `AdminPromptService.preview()`가 동일한 파라미터 순서로 호출함을 확인.
+
+**4. Fable 5 모델 독립 검토 반영**
+
+계획 초안을 Fable 5로 실제 소스와 줄 단위 대조 검토했고, 아래 문제를 찾아 이 문서에 모두
+반영했다.
+
+- [CRITICAL] `baseline-on-migrate`만으로는 `V1__cleanup_legacy_prompt_key.sql`이 baseline과
+  같은 버전으로 취급돼 실행되지 않음 → `baseline-version: 0` 안내 추가, 빈 스키마에서도
+  안전하도록 `DO $$ ... to_regclass ...` 방어 코드로 교체(Task 1).
+- [HIGH] Task 8의 재작성 테스트 3개가 `MIN_OPTIONS = 3` 요구사항과 모순되는 옵션 2개짜리
+  JSON을 쓰고 있어 자기 구현으로 검증하면 실패함 → 세 테스트 모두 유효 옵션 3개 이상으로
+  수정(Task 8).
+- [MEDIUM] `admin/prompts.html`의 preview 호출이 `character`를 안 보내 이미지 preview가
+  참조 이미지 첨부 여부를 검증 못함 → preview 호출에도 `character` 필드 추가(Task 10).
+- [MEDIUM] 새 `maskAnswers()`가 로컬 LLM을 답변 개수만큼 순차 호출해 지연이 누적됨 →
+  `maskPreviousSteps()`와 동일하게 가상 스레드 병렬 처리로 수정(Task 4).
+- [LOW] `RoutineControllerDocs.java`의 루틴 생성 API 설명이 Task 6 이전 "하나라도 실패하면
+  전체 실패" 문구를 그대로 갖고 있어 부정확함 → 재시도 반영 문구로 수정(Task 11).
+- [LOW] `GeminiTextClientTest`에 실제로 소비되지 않는 죽은 stub과 미사용 import(`any`,
+  `anyString`, `eq`, `verify`)가 있었음 → 제거(Task 4, Task 5).
 
 ## Execution Handoff
 
