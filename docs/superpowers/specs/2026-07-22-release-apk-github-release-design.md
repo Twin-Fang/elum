@@ -1,5 +1,12 @@
 # GitHub Release에 APK 첨부 — 설계
 
+> **검증 노트 (2026-07-22)**: `pull_request_target` 트리거는 워크플로우 코드를 PR head가 아닌
+> PR 오픈 시점의 base(main)에서 로드한다. 이 때문에 워크플로우 파일 자체를 고치는 배포는
+> 그 배포 자체에는 수정 전 코드로 실행되고, 수정 효과는 다음 배포부터 나타난다.
+> v1.0.85(기능 추가), v1.0.87(#118 버그 수정) 모두 이 특성으로 "수정을 반영하는 배포"에서는
+> 검증되지 못했다. 이 커밋은 v1.0.87 수정이 main에 반영된 뒤 다음 배포를 트리거해
+> 실제로 APK가 Release에 첨부되는지 확인하기 위한 것이다.
+
 ## 배경
 
 `PROJECT-COMMON-RELEASE-CHANGELOG.yaml`의 `merge-and-deploy` job은 develop→main 릴리스 PR을 머지한 뒤
