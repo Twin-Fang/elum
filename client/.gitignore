@@ -47,3 +47,6 @@ app.*.map.json
 # 환경변수 — 실제 값은 커밋하지 않는다.
 # 필요한 키 목록은 .env.example 참조, 배포용 값은 GitHub Secret CLIENT_ENV_FILE.
 .env
+
+# 골든 테스트 실패 시 생성되는 diff 이미지 (일시적 산출물)
+test/failures/
