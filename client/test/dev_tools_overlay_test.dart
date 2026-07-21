@@ -1,8 +1,10 @@
 import 'package:elum/core/dev/dev_tools_overlay.dart';
+import 'package:elum/core/router/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import 'helpers/test_storage.dart';
 
@@ -18,13 +20,52 @@ void main() {
   /// 그러면 오버레이가 Navigator "안쪽"이 되어 통과해버린다. 실기기에서는
   /// "context does not include a Navigator"로 터졌다. 배치가 다르면
   /// 테스트가 아무것도 지켜주지 못한다.
+  /// 이동 요청을 기록한다. onNavigate가 실제로 불리는지 확인용.
+  final navigated = <String>[];
+
+  setUp(navigated.clear);
+
   Widget buildSubject() {
     return ProviderScope(
       overrides: [testStorageOverride()],
       child: MaterialApp(
         home: const Scaffold(body: Text('앱 화면')),
-        builder: (context, child) =>
-            DevToolsOverlay(child: child ?? const SizedBox.shrink()),
+        builder: (context, child) => DevToolsOverlay(
+          onNavigate: navigated.add,
+          child: child ?? const SizedBox.shrink(),
+        ),
+      ),
+    );
+  }
+
+  /// **실제 앱과 동일하게 `MaterialApp.router` + GoRouter로 구성한다.**
+  ///
+  /// 앞선 buildSubject는 `MaterialApp`(라우터 아님)이라 라우팅 경로를 밟지 않아
+  /// "No GoRouter found in context" 실패를 놓쳤다. 이동이 걸린 기능은
+  /// 반드시 이쪽으로 검증한다.
+  Widget buildRouterSubject() {
+    final router = GoRouter(
+      initialLocation: Routes.splash,
+      routes: [
+        GoRoute(
+          path: Routes.splash,
+          builder: (context, state) => const Scaffold(body: Text('시작 화면')),
+        ),
+        GoRoute(
+          path: Routes.onboardingName,
+          builder: (context, state) => const Scaffold(body: Text('이름 화면')),
+        ),
+      ],
+    );
+
+    return ProviderScope(
+      overrides: [testStorageOverride()],
+      child: MaterialApp.router(
+        routerConfig: router,
+        builder: (context, child) => DevToolsOverlay(
+          onNavigate: router.go,
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
     );
   }
@@ -102,6 +143,61 @@ void main() {
       expect(find.text(expected), findsWidgets);
     });
   }
+
+  group('실제 라우터 환경 (MaterialApp.router)', () {
+    // 실기기에서 "No GoRouter found in context"로 터진 경로다.
+    // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾을 수 없다.
+    testWidgets('온보딩 초기화가 예외 없이 시작 화면으로 보낸다', (tester) async {
+      dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
+
+      await tester.pumpWidget(buildRouterSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.bug_report));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('온보딩 초기화'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, '초기화'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('시작 화면'), findsOneWidget);
+    });
+
+    testWidgets('화면 이동이 예외 없이 동작한다', (tester) async {
+      dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
+
+      await tester.pumpWidget(buildRouterSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.bug_report));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('화면 이동'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('온보딩 · 이름'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('이름 화면'), findsOneWidget);
+    });
+  });
+
+  testWidgets('초기화하면 저장값이 비워진다', (tester) async {
+    dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
+
+    await tester.pumpWidget(buildSubject());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.bug_report));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('온보딩 초기화'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, '초기화'));
+    await tester.pumpAndSettle();
+
+    // 시작 화면으로 보내달라고 요청했는지 확인한다
+    expect(navigated, contains(Routes.splash));
+  });
 
   testWidgets('드래그하면 버튼 위치가 바뀐다', (tester) async {
     // 하필 버튼이 확인하려는 UI를 가리면 테스터가 치울 수 있어야 한다
