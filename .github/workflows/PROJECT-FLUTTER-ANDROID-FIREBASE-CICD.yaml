@@ -107,11 +107,13 @@ jobs:
       # 해커톤 기간 한정 — 개발자 도구 플로팅 버튼을 배포 빌드에서도 강제로 켠다.
       # Secret(ENV_FILE) 값이 무엇이든 여기서 덮어써 테스터가 항상 쓸 수 있게 한다.
       # ⚠️ 정식 출시 전 이 스텝을 삭제한다. (이슈 #13)
-      - name: Force enable dev tools (hackathon)
+      - name: Force enable dev tools and skip onboarding (hackathon)
         run: |
           sed -i '/^ELUM_SHOW_DEV_TOOLS=/d' .env
+          sed -i '/^ELUM_SKIP_ONBOARDING=/d' .env
           echo 'ELUM_SHOW_DEV_TOOLS=true' >> .env
-          echo "✅ ELUM_SHOW_DEV_TOOLS=true 강제 적용"
+          echo 'ELUM_SKIP_ONBOARDING=true' >> .env
+          echo "✅ Dev tools enabled & onboarding skipped"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -264,11 +266,13 @@ jobs:
 
       # 해커톤 기간 한정 — 실제 APK에 들어가는 .env다. 여기서 켜야 앱에 반영된다.
       # ⚠️ 정식 출시 전 이 스텝을 삭제한다. (이슈 #13)
-      - name: Force enable dev tools (hackathon)
+      - name: Force enable dev tools and skip onboarding (hackathon)
         run: |
           sed -i '/^ELUM_SHOW_DEV_TOOLS=/d' .env
+          sed -i '/^ELUM_SKIP_ONBOARDING=/d' .env
           echo 'ELUM_SHOW_DEV_TOOLS=true' >> .env
-          echo "✅ ELUM_SHOW_DEV_TOOLS=true 강제 적용"
+          echo 'ELUM_SKIP_ONBOARDING=true' >> .env
+          echo "✅ Dev tools enabled & onboarding skipped"
           grep '^ELUM_SHOW_DEV_TOOLS=' .env
 
       # Release Keystore 설정
