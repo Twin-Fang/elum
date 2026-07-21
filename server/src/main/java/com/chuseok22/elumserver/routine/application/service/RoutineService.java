@@ -15,6 +15,7 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdat
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
+import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
@@ -39,6 +40,7 @@ public class RoutineService {
   private final MemberRepository memberRepository;
   private final SensitiveInfoGuardService sensitiveInfoGuardService;
   private final RoutineAiPipeline routineAiPipeline;
+  private final RoutineImageStorage routineImageStorage;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
@@ -221,6 +223,15 @@ public class RoutineService {
     return routineRepository.findAllByMemberId(memberId).stream()
       .map(RoutineResponse::from)
       .toList();
+  }
+
+  public RoutineImageStorage.ImageContent getStepImage(String memberId, String routineId, String stepId) {
+    Routine routine = getOwnedRoutine(memberId, routineId);
+    RoutineStep targetStep = routine.getSteps().stream()
+      .filter(step -> step.getId().equals(stepId))
+      .findFirst()
+      .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
+    return routineImageStorage.read(targetStep.getImagePath());
   }
 
   private Routine getOwnedRoutine(String memberId, String routineId) {

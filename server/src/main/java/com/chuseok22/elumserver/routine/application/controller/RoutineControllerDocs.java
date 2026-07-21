@@ -139,6 +139,31 @@ public interface RoutineControllerDocs {
   ResponseEntity<List<RoutineResponse>> getMyRoutines(Authentication authentication);
 
   @Operation(
+    summary = "일과 단계 이미지 조회",
+    description = "본인 소유 일과의 특정 단계에 생성된 이미지를 바이너리로 반환합니다."
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "조회 성공(이미지 바이너리)"),
+    @ApiResponse(
+      responseCode = "403",
+      description = "본인 소유가 아닌 일과에 접근",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "존재하지 않는 일과/단계이거나 이미지 파일을 찾을 수 없음",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"ROUTINE_STEP_IMAGE_NOT_FOUND\",\"errorMessage\":\"이미지를 찾을 수 없습니다.\"}"
+        )
+      )
+    )
+  })
+  ResponseEntity<byte[]> getStepImage(Authentication authentication, String routineId, String stepId);
+
+  @Operation(
     summary = "일과 재생성(피드백)",
     description = """
       부모의 자연어 피드백을 받아 기존 단계+피드백을 컨텍스트로 AI 파이프라인을 다시 실행합니다.

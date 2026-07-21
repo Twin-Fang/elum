@@ -7,7 +7,9 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdat
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
+import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.logging.annotation.LogMonitoring;
+import org.springframework.http.MediaType;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +66,18 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<List<RoutineResponse>> getMyRoutines(Authentication authentication) {
     List<RoutineResponse> responses = routineService.getMyRoutines(authentication.getName());
     return ResponseEntity.ok(responses);
+  }
+
+  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @GetMapping("/{routineId}/steps/{stepId}/image")
+  public ResponseEntity<byte[]> getStepImage(
+    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
+  ) {
+    RoutineImageStorage.ImageContent content =
+      routineService.getStepImage(authentication.getName(), routineId, stepId);
+    return ResponseEntity.ok()
+      .contentType(MediaType.parseMediaType(content.contentType()))
+      .body(content.bytes());
   }
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
