@@ -57,6 +57,7 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 선택 항목 문구색. Figma가 #000000이라 textPrimary(#242634)와 다르다.
   final Color chipLabel;
 
+
   // 하단 CTA 버튼 — Figma 컴포넌트셋 187:299의 두 variant
   final Color buttonEnabled;
   final Color buttonEnabledText;

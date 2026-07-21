@@ -17,6 +17,12 @@ class CharacterCard extends StatelessWidget {
     required this.isSelected,
   });
 
+  /// Figma 실측 — 카드 176×202
+  static const height = 202.0;
+
+  /// 카드 안 일러스트 152×152 (카드 상단에서 29 내려온 자리)
+  static const _illustrationSize = 152.0;
+
   final CardCharacter character;
   final bool isSelected;
 
@@ -30,7 +36,7 @@ class CharacterCard extends StatelessWidget {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      height: 202,
+      height: height,
       decoration: BoxDecoration(
         color: isSelected ? selection.fill : colors.surface,
         borderRadius: BorderRadius.circular(space.cardRadius),
@@ -39,12 +45,21 @@ class CharacterCard extends StatelessWidget {
           width: isSelected ? space.selectedBorderWidth : space.borderWidth,
         ),
       ),
-      child: Center(
-        child: SvgPicture.asset(
-          AppAssets.character(character),
-          width: 152,
-          height: 152,
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SvgPicture.asset(
+            AppAssets.character(character),
+            width: _illustrationSize,
+            height: _illustrationSize,
+          ),
+          // Figma는 이 자리(Ellipse 2/3, y=451)를 회색 알약으로 비워뒀다.
+          // 이름이 정해져 텍스트로 채운다.
+          Text(
+            character.displayName,
+            style: context.typo.body.copyWith(color: colors.textPrimary),
+          ),
+        ],
       ),
     );
   }
