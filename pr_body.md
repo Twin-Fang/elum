@@ -4,8 +4,6 @@
 
 ## 릴리스 노트
 
-* **버그 수정**
-  * 새로운 일과 만들기 카드의 아이콘이 항상 같은 캐릭터로 보이던 문제를 해결했습니다
-
-<!-- end of auto-generated comment: release notes by coderabbit.ai -->
+* **개선**
+  * 일과 입력 내용을 암호화해 안전하게 전송하도록 보안을 강화했습니다
 

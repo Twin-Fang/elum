@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T20:27:35Z",
-    "currentVersion": "1.0.83",
+    "lastUpdated": "2026-07-21T20:51:46Z",
+    "currentVersion": "1.0.84",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 51
+    "totalReleases": 52
   },
   "releases": [
+    {
+      "version": "1.0.84",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 113,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 일과 입력 내용을 암호화해 안전하게 전송하도록 보안을 강화했습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과 입력 내용을 암호화해 안전하게 전송하도록 보안을 강화했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.83",
       "project_type": "flutter",
