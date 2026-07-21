@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationFilter;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
+import com.chuseok22.elumserver.common.infrastructure.security.AidlpDecryptionFilter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,7 @@ public class SecurityConfig {
   private final UserDetailsService adminUserDetailsService;
   private final JwtProvider jwtProvider;
   private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+  private final AidlpDecryptionFilter aidlpDecryptionFilter;
 
   // Lombok @RequiredArgsConstructor는 필드의 @Qualifier를 생성자 파라미터로 복사하지 않고,
   // UserDetailsService 구현체를 직접 import하면 common -> member/admin 역방향 패키지 의존이
@@ -37,12 +39,14 @@ public class SecurityConfig {
     @Qualifier("memberUserDetailsService") UserDetailsService memberUserDetailsService,
     @Qualifier("adminUserDetailsService") UserDetailsService adminUserDetailsService,
     JwtProvider jwtProvider,
-    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint
+    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+    AidlpDecryptionFilter aidlpDecryptionFilter
   ) {
     this.memberUserDetailsService = memberUserDetailsService;
     this.adminUserDetailsService = adminUserDetailsService;
     this.jwtProvider = jwtProvider;
     this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+    this.aidlpDecryptionFilter = aidlpDecryptionFilter;
   }
 
   @Bean
@@ -110,7 +114,9 @@ public class SecurityConfig {
         .anyRequest().authenticated()
       )
       .exceptionHandling(handling -> handling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-      .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+      .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+      // JWT 인증 이후 실행 — 인증된 요청의 암호화 본문을 복호화해 컨트롤러에 평문 DTO로 넘긴다.
+      .addFilterAfter(aidlpDecryptionFilter, JwtAuthenticationFilter.class);
 
     return http.build();
   }

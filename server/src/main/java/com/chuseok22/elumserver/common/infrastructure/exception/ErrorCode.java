@@ -43,6 +43,13 @@ public enum ErrorCode {
   PROMPT_TEST_GEMINI_TEXT_FAILED(HttpStatus.BAD_GATEWAY, "Gemini 텍스트 테스트 호출에 실패했습니다."),
   PROMPT_TEST_GEMINI_IMAGE_FAILED(HttpStatus.BAD_GATEWAY, "Gemini 이미지 테스트 호출에 실패했습니다."),
 
+  // AI DLP 요청 암호화 (필터 계층 — errorCode 이름이 그대로 클라 식별자가 된다)
+  DLP_TIMESTAMP_INVALID(HttpStatus.BAD_REQUEST, "요청 시각이 유효하지 않습니다."),
+  DLP_NONCE_REPLAY(HttpStatus.BAD_REQUEST, "이미 사용된 요청입니다."),
+  DLP_SIGNATURE_INVALID(HttpStatus.BAD_REQUEST, "요청 서명이 유효하지 않습니다."),
+  DLP_DECRYPT_FAILED(HttpStatus.BAD_REQUEST, "요청 복호화에 실패했습니다."),
+  DLP_ENVELOPE_INVALID(HttpStatus.BAD_REQUEST, "암호화 요청 형식이 올바르지 않습니다."),
+
   ;
 
 
