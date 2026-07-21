@@ -76,7 +76,7 @@ public class GeminiImageClient {
         .body(GeminiGenerateContentResponse.class);
       log.info(
         "Gemini 이미지 생성 호출 완료: model={}, elapsedMs={}, response={}",
-        geminiProperties.imageModel(), System.currentTimeMillis() - startedAt, response
+        geminiProperties.imageModel(), System.currentTimeMillis() - startedAt, describeResponse(response)
       );
       return extractImage(response);
     } catch (Exception e) {
@@ -103,6 +103,26 @@ public class GeminiImageClient {
     byte[] imageBytes = Base64.getDecoder().decode(part.inlineData().data());
     String extension = resolveExtension(part.inlineData().mimeType());
     return new GeneratedImage(imageBytes, extension);
+  }
+
+  // inlineData.data(base64 이미지 원본)를 그대로 로깅하면 로그 한 줄이 이미지 크기만큼
+  // 부풀어 로그 파일 가독성이 크게 떨어지므로, 이미지 존재 여부·MIME 타입·크기만 남긴다.
+  private String describeResponse(GeminiGenerateContentResponse response) {
+    List<GeminiGenerateContentResponse.Part> parts = Optional.ofNullable(response)
+      .map(GeminiGenerateContentResponse::candidates)
+      .filter(candidates -> !candidates.isEmpty())
+      .map(candidates -> candidates.get(0))
+      .map(GeminiGenerateContentResponse.Candidate::content)
+      .map(GeminiGenerateContentResponse.Content::parts)
+      .orElse(List.of());
+
+    return parts.stream()
+      .map(part -> part.inlineData() != null
+        ? "image(mimeType=%s, size=%dB)".formatted(
+            part.inlineData().mimeType(), part.inlineData().data().length())
+        : "text(%s)".formatted(part.text()))
+      .toList()
+      .toString();
   }
 
   private String resolveExtension(String mimeType) {
