@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>이룸 관리자 - 루틴 상세</title>
+  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
+</head>
+<body class="min-h-screen bg-base-100">
+<div class="flex">
+  <div th:replace="~{admin/fragments/admin-layout :: sidebar('routines')}"></div>
+  <main class="flex-1 p-8 space-y-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold" th:text="${routine.title()}">루틴 상세</h1>
+      <a th:href="@{/admin/routines}" class="btn btn-ghost btn-sm">목록으로</a>
+    </div>
+
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body space-y-2 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-base-content/60">보호자</span>
+          <span th:text="${routine.memberNickname() ?: routine.memberUsername()}">보호자</span>
+          <span th:if="${routine.status().name() == 'PENDING_REVIEW'}" class="badge badge-warning">검토 대기</span>
+          <span th:if="${routine.status().name() == 'CONFIRMED'}" class="badge badge-info">확정</span>
+          <span th:if="${routine.status().name() == 'COMPLETED'}" class="badge badge-success">완료</span>
+        </div>
+        <div>
+          <div class="text-base-content/60">원본 입력</div>
+          <p th:text="${routine.rawInputText()}" class="whitespace-pre-wrap">원본 입력</p>
+        </div>
+        <div>
+          <div class="text-base-content/60">정제된 입력</div>
+          <p th:text="${routine.sanitizedInputText()}" class="whitespace-pre-wrap">정제된 입력</p>
+        </div>
+        <div th:if="${routine.revisionFeedback() != null}">
+          <div class="text-base-content/60">수정 피드백</div>
+          <p th:text="${routine.revisionFeedback()}" class="whitespace-pre-wrap">피드백</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-lg font-semibold mb-2">단계 목록</h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>순서</th>
+            <th>설명</th>
+            <th>완료여부</th>
+            <th>이미지</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="step : ${routine.steps()}">
+            <td th:text="${step.stepOrder()}">1</td>
+            <td th:text="${step.description()}">설명</td>
+            <td>
+              <span th:if="${step.completed()}" class="badge badge-success">완료</span>
+              <span th:unless="${step.completed()}" class="badge badge-ghost">미완료</span>
+            </td>
+            <td>
+              <button type="button" class="btn btn-outline btn-xs image-view-btn"
+                      th:attr="data-src=@{/admin/routines/{routineId}/steps/{stepId}/image(routineId=${routine.id()},stepId=${step.id()})}">
+                이미지 보기
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog id="imageModal" class="modal">
+  <div class="modal-box">
+    <img id="imageModalImg" src="" alt="단계 이미지" class="w-full rounded"/>
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn">닫기</button>
+      </form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+<script>
+  document.querySelectorAll('.image-view-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.getElementById('imageModalImg').src = btn.dataset.src;
+      document.getElementById('imageModal').showModal();
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>이룸 관리자 - 회원 관리</title>
+  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
+</head>
+<body class="min-h-screen bg-base-100">
+<div class="flex">
+  <div th:replace="~{admin/fragments/admin-layout :: sidebar('members')}"></div>
+  <main class="flex-1 p-8 space-y-6">
+    <h1 class="text-2xl font-bold">회원 관리</h1>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>닉네임</th>
+          <th>아이디</th>
+          <th>도움 방식</th>
+          <th>별 개수</th>
+          <th>가입일</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(members)}">
+          <td colspan="5" class="text-center text-base-content/60">등록된 회원이 없습니다.</td>
+        </tr>
+        <tr th:each="member : ${members}">
+          <td>
+            <a th:href="@{/admin/members/{id}(id=${member.id()})}" class="link link-hover font-medium"
+               th:text="${member.nickname() ?: member.username()}">닉네임</a>
+          </td>
+          <td th:text="${member.username()}">아이디</td>
+          <td>
+            <span th:each="goal : ${member.supportGoals()}" class="badge badge-outline mr-1"
+                  th:text="${goal.label}">도움방식</span>
+          </td>
+          <td th:text="${member.totalStars()}">0</td>
+          <td th:text="${#temporals.format(member.createdAt(), 'yyyy-MM-dd')}">2026-01-01</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body>
+</html>

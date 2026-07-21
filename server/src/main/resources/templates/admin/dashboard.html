@@ -1,16 +1,37 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      data-theme="light">
 <head>
   <meta charset="UTF-8">
   <title>이룸 관리자 대시보드</title>
+  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
 </head>
-<body>
-<h1>이룸 관리자 대시보드</h1>
-<p>안녕하세요, <span sec:authentication="name">관리자</span>님</p>
-<p><a th:href="@{/admin/prompts}">프롬프트 관리</a></p>
-<form th:action="@{/admin/logout}" method="post">
-  <button type="submit">로그아웃</button>
-</form>
+<body class="min-h-screen bg-base-100">
+<div class="flex">
+  <div th:replace="~{admin/fragments/admin-layout :: sidebar('dashboard')}"></div>
+  <main class="flex-1 p-8 space-y-6">
+    <div>
+      <h1 class="text-2xl font-bold">대시보드</h1>
+      <p class="text-base-content/60">안녕하세요, <span sec:authentication="name">관리자</span>님</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="stat bg-base-200 rounded-box shadow">
+        <div class="stat-title">전체 회원수</div>
+        <div class="stat-value text-primary" th:text="${memberCount}">0</div>
+        <div class="stat-desc">명</div>
+      </div>
+      <div class="stat bg-base-200 rounded-box shadow">
+        <div class="stat-title">전체 루틴수</div>
+        <div class="stat-value text-primary" th:text="${routineStats.total()}">0</div>
+        <div class="stat-desc">
+          검토대기 <span th:text="${routineStats.pendingReview()}">0</span> ·
+          확정 <span th:text="${routineStats.confirmed()}">0</span> ·
+          완료 <span th:text="${routineStats.completed()}">0</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
 </body>
 </html>
