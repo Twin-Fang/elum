@@ -23,12 +23,18 @@ public class AdminPromptTestController {
 
   @PostMapping("/admin/prompts/{key}/preview")
   public PromptPreviewResponse preview(@PathVariable PromptKey key, @RequestBody PromptSampleRequest request) {
-    String composed = adminPromptService.preview(key, request.content(), request.sampleInput(), request.character());
+    String composed = adminPromptService.preview(
+      key, request.content(), request.sampleInput(), request.character(),
+      request.previousTitle(), request.previousSteps()
+    );
     return new PromptPreviewResponse(composed);
   }
 
   @PostMapping("/admin/prompts/{key}/test")
   public PromptTestResponse test(@PathVariable PromptKey key, @RequestBody PromptSampleRequest request) {
-    return adminPromptService.test(key, request.content(), request.sampleInput(), request.character());
+    return adminPromptService.test(
+      key, request.content(), request.sampleInput(), request.character(),
+      request.previousTitle(), request.previousSteps()
+    );
   }
 }

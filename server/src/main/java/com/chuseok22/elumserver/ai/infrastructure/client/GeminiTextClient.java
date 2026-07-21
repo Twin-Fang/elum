@@ -107,10 +107,12 @@ public class GeminiTextClient {
     return callGenerateContent(systemPrompt, userContent);
   }
 
-  // 관리자 테스트 전용: previousRoutine이 없는 관리자 샘플 입력이라, title은 빈 문자열/
-  // steps는 빈 배열로 두고 sampleInput 전체를 feedback으로만 취급한다.
-  public GeminiGenerateContentResponse reviseForTest(String systemPrompt, String sampleFeedback) {
-    String userContent = buildReviseRoutineUserContent("", List.of(), sampleFeedback, null, Set.of());
+  // 관리자 테스트 전용: 관리자 화면에서 입력한 이전 제목/단계를 그대로 전달한다.
+  public GeminiGenerateContentResponse reviseForTest(
+    String systemPrompt, String previousTitle, List<RoutineStepDraft.StepDraft> previousSteps,
+    String sampleFeedback
+  ) {
+    String userContent = buildReviseRoutineUserContent(previousTitle, previousSteps, sampleFeedback, null, Set.of());
     return callGenerateContent(systemPrompt, userContent);
   }
 
