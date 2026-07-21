@@ -29,9 +29,11 @@ void main() {
           path: Routes.routineInput,
           builder: (context, state) => const RoutineInputScreen(),
         ),
+        // 입력 다음은 로딩 화면(262:4569)이다. DLP·질문 생성을 여기서
+        // 기다린 뒤에야 추가질문 화면으로 넘어간다.
         GoRoute(
-          path: Routes.routineQuestion,
-          builder: (context, state) => const Scaffold(body: Text('추가질문 화면')),
+          path: Routes.routineMasking,
+          builder: (context, state) => const Scaffold(body: Text('로딩 화면')),
         ),
       ],
     );
@@ -160,7 +162,7 @@ void main() {
       expect(sendButton(), findsNothing);
     });
 
-    testWidgets('누르면 다음 단계로 간다', (tester) async {
+    testWidgets('누르면 로딩 화면으로 간다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pump();
 
@@ -169,7 +171,7 @@ void main() {
       await tester.tap(sendButton());
       await settle(tester);
 
-      expect(find.text('추가질문 화면'), findsOneWidget);
+      expect(find.text('로딩 화면'), findsOneWidget);
     });
 
     testWidgets('입력값이 notifier에 반영된다', (tester) async {

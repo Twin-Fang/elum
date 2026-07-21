@@ -6,6 +6,7 @@ import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/child/presentation/child_home_screen.dart';
 import '../../features/child/presentation/mode_switch_screen.dart';
 import '../../features/child/presentation/reward_screen.dart';
+import '../../features/guardian/domain/routine_stage.dart';
 import '../../features/guardian/presentation/routine_loading_screen.dart';
 import '../../features/guardian/presentation/question_screen.dart';
 import '../../features/guardian/presentation/routine_input_screen.dart';
@@ -28,10 +29,15 @@ abstract final class Routes {
 
   static const guardian = '/guardian';
   static const routineInput = '/guardian/routine/input';
-  /// 카드 생성 진행 화면 (Figma 262:4569). 경로 이름은 DLP 시절 것을 유지한다 —
-  /// 마스킹도 이 단계에서 함께 일어나므로 의미가 어긋나지 않는다.
+  /// DLP 마스킹 + 추가 질문 준비 로딩 (Figma 262:4569).
+  /// 경로 이름은 DLP 시절 것을 유지한다 — 마스킹이 이 단계에서 일어나므로
+  /// 의미가 어긋나지 않는다.
   static const routineMasking = '/guardian/routine/masking';
   static const routineQuestion = '/guardian/routine/question';
+
+  /// 행동카드 생성 로딩 (Figma 262:4703).
+  /// [routineMasking]과 화면은 같고 문구·진행률·다음 목적지가 다르다.
+  static const routineGenerating = '/guardian/routine/generating';
   static const routineReview = '/guardian/routine/review';
 
   static const child = '/child';
@@ -110,11 +116,17 @@ GoRouter createRouter({
       ),
       GoRoute(
         path: Routes.routineMasking,
-        builder: (context, state) => const RoutineLoadingScreen(),
+        builder: (context, state) =>
+            const RoutineLoadingScreen(kind: RoutineLoadingKind.prepare),
       ),
       GoRoute(
         path: Routes.routineQuestion,
         builder: (context, state) => const QuestionScreen(),
+      ),
+      GoRoute(
+        path: Routes.routineGenerating,
+        builder: (context, state) =>
+            const RoutineLoadingScreen(kind: RoutineLoadingKind.generate),
       ),
       GoRoute(
         path: Routes.routineReview,

@@ -14,13 +14,17 @@ import 'helpers/test_storage.dart';
 
 /// Figma `보호자_새로운 일과 만들기_로딩`(262:4569 / 262:4703) 정합 테스트.
 void main() {
-  Widget wrap() {
+  Widget wrap(RoutineLoadingKind kind) {
     final router = GoRouter(
-      initialLocation: Routes.routineMasking,
+      initialLocation: '/loading',
       routes: [
         GoRoute(
-          path: Routes.routineMasking,
-          builder: (context, state) => const RoutineLoadingScreen(),
+          path: '/loading',
+          builder: (context, state) => RoutineLoadingScreen(kind: kind),
+        ),
+        GoRoute(
+          path: Routes.routineQuestion,
+          builder: (context, state) => const Scaffold(body: Text('추가 질문')),
         ),
         GoRoute(
           path: Routes.routineReview,
@@ -44,104 +48,214 @@ void main() {
   /// 배경이 무한 반복하므로 pumpAndSettle을 쓸 수 없다
   Future<void> settle(WidgetTester tester) async {
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pump(const Duration(milliseconds: 450));
   }
 
-  group('로딩 화면 구성', () {
+  /// 모든 스텝의 노출시간을 합친 값 — 이만큼 지나야 화면이 넘어갈 수 있다
+  Duration totalHold(RoutineLoadingKind kind) => kind.stages
+      .map((s) => s.hold)
+      .fold(Duration.zero, (a, b) => a + b);
+
+  group('prepare 로딩 (262:4569)', () {
     testWidgets('Figma 문구가 보인다', (tester) async {
-      await tester.pumpWidget(wrap());
+      await tester.pumpWidget(wrap(RoutineLoadingKind.prepare));
       await settle(tester);
 
       expect(find.text('루미가 내용을\n정리하고 있어요'), findsOneWidget);
+
+      await tester.pump(totalHold(RoutineLoadingKind.prepare));
+      await settle(tester);
     });
 
-    testWidgets('3단계 체크리스트를 Figma 문구대로 보여준다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await settle(tester);
-
-      for (final stage in RoutineStage.values) {
-        expect(find.text(stage.label), findsOneWidget);
-      }
-      expect(RoutineStage.values.length, 3);
+    testWidgets('마지막 단계가 "추가 질문을 생각하고 있어요"다', (tester) async {
+      // 이 문구가 곧 흐름의 근거다 — 이 화면 다음은 질문 화면이지 카드가 아니다
+      expect(
+        RoutineLoadingKind.prepare.stages.last.label,
+        '추가 질문을 생각하고 있어요',
+      );
     });
 
-    testWidgets('진행률을 보여준다', (tester) async {
-      await tester.pumpWidget(wrap());
+    testWidgets('스텝이 하나씩 드러난다 — 처음엔 첫 줄만 보인다', (tester) async {
+      await tester.pumpWidget(wrap(RoutineLoadingKind.prepare));
       await settle(tester);
 
-      // 첫 단계 진행률
-      expect(find.textContaining('% 진행 되었어요'), findsOneWidget);
+      final stages = RoutineLoadingKind.prepare.stages;
+
+      // 자리는 미리 잡아두므로 위젯 자체는 전부 존재한다.
+      // 실제로 "보이는가"는 투명도로 판단한다.
+      expect(opacityOf(tester, stages[0].label), 1.0);
+      expect(opacityOf(tester, stages[1].label), 0.0);
+      expect(opacityOf(tester, stages[2].label), 0.0);
+
+      await tester.pump(totalHold(RoutineLoadingKind.prepare));
+      await settle(tester);
     });
 
-    testWidgets('sparkles를 SVG 에셋으로 그린다', (tester) async {
-      await tester.pumpWidget(wrap());
+    testWidgets('두 번째 스텝은 첫 스텝의 노출시간이 지난 뒤에 뜬다', (tester) async {
+      await tester.pumpWidget(wrap(RoutineLoadingKind.prepare));
       await settle(tester);
 
-      expect(svgWithAsset(AppAssets.iconSparklesLarge), findsOneWidget);
+      final stages = RoutineLoadingKind.prepare.stages;
+      await tester.pump(stages[0].hold);
+      await settle(tester);
+
+      expect(opacityOf(tester, stages[1].label), 1.0);
+      expect(opacityOf(tester, stages[2].label), 0.0);
+
+      await tester.pump(totalHold(RoutineLoadingKind.prepare));
+      await settle(tester);
     });
 
-    testWidgets('뒤로가기가 없다 — 생성 중에는 되돌릴 수 없다', (tester) async {
-      // 중간에 끊으면 어중간한 상태가 남는다
-      await tester.pumpWidget(wrap());
+    testWidgets('질문 준비가 끝나면 추가 질문 화면으로 넘어간다', (tester) async {
+      await tester.pumpWidget(wrap(RoutineLoadingKind.prepare));
       await settle(tester);
 
-      expect(svgWithAsset(AppAssets.iconBack), findsNothing);
+      await tester.pump(totalHold(RoutineLoadingKind.prepare));
+      await settle(tester);
+
+      expect(find.text('추가 질문'), findsOneWidget);
     });
+  });
 
-    testWidgets('첫 단계 진행률부터 시작한다', (tester) async {
-      // 단계 전진은 타이머가 하지만, mock 환경에서는 카드 생성이 즉시 끝나
-      // 다음 화면으로 넘어가 버린다. 여기서는 시작 상태만 고정한다.
-      await tester.pumpWidget(wrap());
+  group('generate 로딩 (262:4703)', () {
+    testWidgets('Figma 문구가 보인다', (tester) async {
+      await tester.pumpWidget(wrap(RoutineLoadingKind.generate));
       await settle(tester);
 
-      expect(find.text('${RoutineStage.masking.percent}% 진행 되었어요'),
-          findsOneWidget);
+      expect(find.text('루미가 행동카드를\n만들고 있어요'), findsOneWidget);
+
+      await tester.pump(totalHold(RoutineLoadingKind.generate));
+      await settle(tester);
     });
 
     testWidgets('생성이 끝나면 카드 확인 화면으로 넘어간다', (tester) async {
-      await tester.pumpWidget(wrap());
+      await tester.pumpWidget(wrap(RoutineLoadingKind.generate));
       await settle(tester);
-      await tester.pump(const Duration(seconds: 2));
+
+      await tester.pump(totalHold(RoutineLoadingKind.generate));
       await settle(tester);
 
       expect(find.text('카드 확인'), findsOneWidget);
     });
   });
 
+  group('최소 노출시간 보장', () {
+    // 백엔드가 즉시 응답해도 연출을 끝까지 보여준다.
+    // mock 환경에서는 카드 생성이 사실상 즉시 끝나므로,
+    // 이 테스트가 곧 "응답이 빨리 온 경우"다.
+    testWidgets('응답이 즉시 와도 노출시간을 다 채우기 전엔 넘어가지 않는다', (tester) async {
+      await tester.pumpWidget(wrap(RoutineLoadingKind.generate));
+      await settle(tester);
+
+      final stages = RoutineLoadingKind.generate.stages;
+
+      // 첫 두 스텝만 지난 시점 — 아직 마지막 스텝이 남았다
+      await tester.pump(stages[0].hold + stages[1].hold);
+      await settle(tester);
+      expect(
+        find.text('카드 확인'),
+        findsNothing,
+        reason: '노출시간이 남았는데 화면이 넘어갔다',
+      );
+
+      // 마지막 스텝까지 채우면 그제서야 넘어간다
+      await tester.pump(stages[2].hold);
+      await settle(tester);
+      expect(find.text('카드 확인'), findsOneWidget);
+    });
+
+    testWidgets('각 스텝의 노출시간은 4초 / 3초 / 4초다', (tester) async {
+      for (final kind in RoutineLoadingKind.values) {
+        expect(
+          kind.stages.map((s) => s.hold.inSeconds).toList(),
+          [4, 3, 4],
+          reason: '$kind의 스텝 노출시간이 합의값과 다르다',
+        );
+      }
+    });
+  });
+
+  group('화면 구성', () {
+    testWidgets('진행률을 보여준다', (tester) async {
+      await tester.pumpWidget(wrap(RoutineLoadingKind.prepare));
+      await settle(tester);
+
+      expect(find.textContaining('% 진행 되었어요'), findsOneWidget);
+
+      await tester.pump(totalHold(RoutineLoadingKind.prepare));
+      await settle(tester);
+    });
+
+    testWidgets('sparkles를 SVG 에셋으로 그린다', (tester) async {
+      await tester.pumpWidget(wrap(RoutineLoadingKind.prepare));
+      await settle(tester);
+
+      expect(svgWithAsset(AppAssets.iconSparklesLarge), findsOneWidget);
+
+      await tester.pump(totalHold(RoutineLoadingKind.prepare));
+      await settle(tester);
+    });
+
+    testWidgets('뒤로가기가 없다 — 생성 중에는 되돌릴 수 없다', (tester) async {
+      // 중간에 끊으면 어중간한 상태가 남는다
+      await tester.pumpWidget(wrap(RoutineLoadingKind.prepare));
+      await settle(tester);
+
+      expect(svgWithAsset(AppAssets.iconBack), findsNothing);
+
+      await tester.pump(totalHold(RoutineLoadingKind.prepare));
+      await settle(tester);
+    });
+  });
+
   group('RoutineStage', () {
     test('진행률이 순서대로 늘어난다', () {
-      expect(
-        RoutineStage.summarizing.percent,
-        greaterThan(RoutineStage.masking.percent),
-      );
-      expect(
-        RoutineStage.rewriting.percent,
-        greaterThan(RoutineStage.summarizing.percent),
-      );
+      for (final kind in RoutineLoadingKind.values) {
+        final percents = kind.stages.map((s) => s.percent).toList();
+        for (var i = 1; i < percents.length; i++) {
+          expect(percents[i], greaterThan(percents[i - 1]));
+        }
+      }
     });
 
     test('100%를 만들지 않는다', () {
       // 서버가 진행률을 주지 않아 클라이언트가 흉내낸다(이슈 #33).
       // 가짜 100%를 보여주면 다 됐는데 안 넘어간다는 인상을 준다.
-      for (final stage in RoutineStage.values) {
-        expect(stage.percent, lessThan(100));
+      for (final kind in RoutineLoadingKind.values) {
+        for (final stage in kind.stages) {
+          expect(stage.percent, lessThan(100));
+        }
       }
     });
 
-    test('Figma가 보여주는 40%가 두 번째 단계다', () {
-      expect(RoutineStage.summarizing.percent, 40);
+    test('generate가 prepare보다 뒤 진행률을 쓴다', () {
+      // 두 화면이 이어지므로 진행률이 뒤로 가면 안 된다
+      expect(
+        RoutineLoadingKind.generate.stages.first.percent,
+        greaterThan(RoutineLoadingKind.prepare.stages.last.percent),
+      );
     });
 
-    test('앞 단계는 완료로 판정된다', () {
+    test('Figma가 보여주는 값이 들어있다 — prepare 40% / generate 90%', () {
       expect(
-        RoutineStage.masking.isCompletedAt(RoutineStage.summarizing),
-        isTrue,
+        RoutineLoadingKind.prepare.stages.map((s) => s.percent),
+        contains(40),
       );
-      // 현재 단계는 아직 진행 중이다
       expect(
-        RoutineStage.summarizing.isCompletedAt(RoutineStage.summarizing),
-        isFalse,
+        RoutineLoadingKind.generate.stages.map((s) => s.percent),
+        contains(90),
       );
     });
   });
+}
+
+/// [label] 줄의 현재 투명도. 스텝이 실제로 보이는지 판단하는 기준이다.
+double opacityOf(WidgetTester tester, String label) {
+  final opacity = tester.widget<AnimatedOpacity>(
+    find.ancestor(
+      of: find.text(label),
+      matching: find.byType(AnimatedOpacity),
+    ).first,
+  );
+  return opacity.opacity;
 }

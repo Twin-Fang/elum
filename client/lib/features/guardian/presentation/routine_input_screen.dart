@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -48,12 +47,12 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
     super.dispose();
   }
 
-  /// 추가 질문을 받아온 뒤 질문 화면으로 넘긴다.
+  /// 로딩 화면으로 넘긴다 (Figma 262:4569).
   ///
-  /// 질문이 없으면(목표 미설정 등) 질문 화면이 스스로 로딩으로 건너뛴다.
-  Future<void> _askQuestions(BuildContext context) async {
-    unawaited(ref.read(routineFlowProvider.notifier).askQuestion());
-    context.push(Routes.routineQuestion);
+  /// **여기서 DLP·질문 생성을 시작하지 않는다.** 로딩 화면이 직접 부른다 —
+  /// 시작 지점이 둘이면 화면이 재생성될 때 요청이 겹쳐 나간다. (이슈 #41)
+  void _askQuestions(BuildContext context) {
+    context.push(Routes.routineMasking);
   }
 
   void _fill(RoutineSuggestion suggestion) {
