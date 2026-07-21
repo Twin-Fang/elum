@@ -256,7 +256,7 @@ jobs:
       - name: Create .env file
         run: |
           cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
@@ -347,7 +347,7 @@ jobs:
       - name: Create .env file
         run: |
           cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
@@ -505,7 +505,7 @@ jobs:
       - name: Create .env file
         run: |
           cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 

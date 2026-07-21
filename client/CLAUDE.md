@@ -236,14 +236,28 @@ API 키·인증서처럼 **유출되면 안 되는 값**은 반드시 GitHub Sec
 #### 배포 빌드의 `.env`는 로컬 파일이 아니라 GitHub Secret에서 온다 ⚠️
 
 빌드된 앱(Firebase·TestFlight·테스트 APK)의 `.env`는 워크플로우의 `Create .env file`
-스텝이 Secret `ENV_FILE`(없으면 `ENV`)로 만든다. `.env`는 `.gitignore` 대상이라 커밋되지
+스텝이 Secret **`CLIENT_ENV_FILE`** 로 만든다. `.env`는 `.gitignore` 대상이라 커밋되지
 않으므로 **로컬 `.env`를 고쳐도 배포 앱은 바뀌지 않는다.**
+
+> **Secret 이름을 바꾸거나 새 워크플로우를 추가할 땐 이 이름을 반드시 맞춘다.**
+> 이름이 어긋나면 GitHub은 경고 없이 **빈 문자열**을 주고, `AppConfig`가 기본값으로
+> 폴백해 앱이 정상 실행된다 — 즉 **틀린 설정으로 배포돼도 아무 증상이 없다.**
+> 실제로 이 불일치(`ENV_FILE` vs `CLIENT_ENV_FILE`)로 빈 `.env`가 배포된 적이 있다.
+> → [사고 기록](./docs/troubleshooting.md#배포된-앱에만-개발자-도구-버튼이-안-보임)
+
+그래서 실제 빌드 잡에 **`Verify .env has required keys`** 스텝을 두어 `ELUM_API_BASE_URL`이
+없으면 빌드를 실패시킨다. **이 스텝을 지우지 않는다.**
+
+배포 앱의 설정이 의심되면 추측하지 말고 APK를 직접 연다:
+
+```bash
+unzip -p app-release.apk assets/flutter_assets/.env
+```
 
 ##### 해커톤 기간 한정 — 개발자 도구 강제 활성화 (이슈 #13)
 
-`ELUM_SHOW_DEV_TOOLS`(플로팅 버튼)는 심사자·테스터가 **릴리스 빌드에서** 써야 하는데,
-Secret 값이 `false`면 배포 앱에서 버튼이 사라진다. Secret은 값을 읽어 확인할 수 없어
-어긋나도 원인을 찾기 어렵다.
+`ELUM_SHOW_DEV_TOOLS`(플로팅 버튼)는 심사자·테스터가 **릴리스 빌드에서** 써야 하는 값이라
+`kDebugMode` 게이트를 걸지 않았다. Secret이 비거나 `false`면 배포 앱에서 버튼이 사라진다.
 
 그래서 **빌드 워크플로우 4개가 `.env` 생성 직후 이 키를 `true`로 덮어쓴다.**
 Secret 값과 무관하게 배포 앱에서 항상 버튼이 보인다.

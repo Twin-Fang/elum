@@ -127,7 +127,7 @@ jobs:
       - name: Create .env file
         run: |
           cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
           EOF
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
@@ -307,10 +307,20 @@ jobs:
         run: |
           if [ ! -f "${{ env.ENV_FILE_PATH }}" ]; then
             cat << 'EOF' > ${{ env.ENV_FILE_PATH }}
-          ${{ secrets.ENV_FILE || secrets.ENV }}
+          ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
           EOF
             echo "✅ ${{ env.ENV_FILE_PATH }} file created (fallback)"
           fi
+
+      # Secret 이름이 어긋나면 .env가 빈 채로 빌드된다. 앱은 기본값으로 뜨기 때문에
+      # 크래시 없이 조용히 잘못된 설정으로 배포된다 — 실제로 그렇게 배포된 적이 있다.
+      - name: Verify .env has required keys
+        run: |
+          if ! grep -q '^ELUM_API_BASE_URL=' ${{ env.ENV_FILE_PATH }}; then
+            echo "::error::.env에 ELUM_API_BASE_URL이 없다. Secret CLIENT_ENV_FILE이 비었거나 이름이 어긋났는지 확인할 것."
+            exit 1
+          fi
+          echo "✅ .env 필수 키 확인"
 
       # 해커톤 기간 한정 — 실제 IPA에 들어가는 .env다. 여기서 켜야 앱에 반영된다.
       # ⚠️ 정식 출시 전 이 스텝을 삭제한다. (이슈 #13)

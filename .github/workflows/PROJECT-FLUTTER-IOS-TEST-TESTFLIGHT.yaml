@@ -228,7 +228,7 @@ jobs:
 
       - name: Create .env file
         env:
-          ENV_CONTENT: ${{ secrets.ENV_FILE || secrets.ENV }}
+          ENV_CONTENT: ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
         run: |
           printf '%s\n' "$ENV_CONTENT" > ${{ env.ENV_FILE_PATH }}
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
@@ -556,7 +556,7 @@ jobs:
 
       - name: Ensure .env file exists
         env:
-          ENV_CONTENT: ${{ secrets.ENV_FILE || secrets.ENV }}
+          ENV_CONTENT: ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
         run: |
           if [ ! -f "${{ env.ENV_FILE_PATH }}" ]; then
             printf '%s\n' "$ENV_CONTENT" > ${{ env.ENV_FILE_PATH }}

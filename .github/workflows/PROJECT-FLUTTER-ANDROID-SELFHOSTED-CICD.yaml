@@ -76,7 +76,7 @@ jobs:
       # .env 파일 생성
       - name: Create .env file from GitHub Secret
         env:
-          ENV_CONTENT: ${{ secrets.ENV_FILE || secrets.ENV }}
+          ENV_CONTENT: ${{ secrets.CLIENT_ENV_FILE || secrets.ENV_FILE || secrets.ENV }}
         run: |
           printf '%s\n' "$ENV_CONTENT" > .env
           echo ".env file created"
