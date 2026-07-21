@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/glowing_svg.dart';
 import '../../guardian/data/routine_repository.dart';
 
 /// Figma `아이_별`(364:8219) — 지금까지 모은 별을 보여준다.
@@ -22,14 +23,16 @@ class ChildStarsScreen extends ConsumerWidget {
   /// 큰 별(182→130)·숫자·문구와 같은 기준으로 정렬된다.
   static const _statusBarH = 52.0;
 
+  /// glow는 각 star_deco SVG에 내장된 feGaussianBlur 필터 색과 맞춘다.
+  /// 1~6번은 초록, 7번만 보라다 (SVG 자체 색상 추출값, Figma effect 노드와 대조 완료).
   static const _decoStars = [
-    (x: 54.0, y: 407.0, size: 38.0, opacity: 0.4),
-    (x: 321.0, y: 356.0, size: 36.0, opacity: 0.8),
-    (x: 319.0, y: 110.0, size: 43.0, opacity: 0.5),
-    (x: 32.0, y: 196.0, size: 65.0, opacity: 1.0),
-    (x: 216.0, y: 154.0, size: 43.0, opacity: 1.0),
-    (x: 110.0, y: 107.0, size: 30.0, opacity: 0.3),
-    (x: 286.0, y: 232.0, size: 30.0, opacity: 1.0),
+    (x: 54.0, y: 407.0, size: 38.0, opacity: 0.4, glow: _StarGlow.green),
+    (x: 321.0, y: 356.0, size: 36.0, opacity: 0.8, glow: _StarGlow.green),
+    (x: 319.0, y: 110.0, size: 43.0, opacity: 0.5, glow: _StarGlow.green),
+    (x: 32.0, y: 196.0, size: 65.0, opacity: 1.0, glow: _StarGlow.green),
+    (x: 216.0, y: 154.0, size: 43.0, opacity: 1.0, glow: _StarGlow.green),
+    (x: 110.0, y: 107.0, size: 30.0, opacity: 0.3, glow: _StarGlow.green),
+    (x: 286.0, y: 232.0, size: 30.0, opacity: 1.0, glow: _StarGlow.purple),
   ];
 
   @override
@@ -55,17 +58,20 @@ class ChildStarsScreen extends ConsumerWidget {
         child: SafeArea(
           child: Stack(
             children: [
-              // 주변 작은 별 — 그라데이션·글로우가 든 형태라 전부 에셋이다
+              // 주변 작은 별 — 그라데이션은 에셋, 글로우는 GlowingSvg로 재현한다
+              // (flutter_svg가 SVG 내장 feGaussianBlur를 그리지 못한다)
               for (final (index, star) in _decoStars.indexed)
                 Positioned(
                   left: star.x.w,
                   top: (star.y - _statusBarH).h,
                   child: Opacity(
                     opacity: star.opacity,
-                    child: SvgPicture.asset(
-                      AppAssets.starDeco(index + 1),
-                      width: star.size.w,
-                      height: star.size.w,
+                    child: GlowingSvg(
+                      assetPath: AppAssets.starDeco(index + 1),
+                      size: star.size.w,
+                      glowColor: star.glow == _StarGlow.green
+                          ? colors.starDecoGlowGreen
+                          : colors.starDecoGlowPurple,
                     ),
                   ),
                 ),
@@ -73,10 +79,10 @@ class ChildStarsScreen extends ConsumerWidget {
               Positioned(
                 left: 47.w,
                 top: 130.h,
-                child: SvgPicture.asset(
-                  AppAssets.starBig,
-                  width: 299.w,
-                  height: 299.w,
+                child: GlowingSvg(
+                  assetPath: AppAssets.starBig,
+                  size: 299.w,
+                  glowColor: colors.rewardStarGlow,
                 ),
               ),
               // 누적 개수 (Figma y=481, 80/w800, 노랑→흰 그라데이션)
@@ -141,3 +147,6 @@ class ChildStarsScreen extends ConsumerWidget {
     );
   }
 }
+
+/// star_deco SVG가 내장한 feGaussianBlur 필터 색 — 초록 6개, 보라 1개뿐이다.
+enum _StarGlow { green, purple }

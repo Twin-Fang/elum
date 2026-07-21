@@ -2,11 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/glowing_svg.dart';
 
 /// 보상 화면의 빛나는 별.
 ///
@@ -87,7 +87,7 @@ class _RewardStarState extends State<RewardStar>
             alignment: Alignment.center,
             children: [
               Transform.translate(
-                offset: _floatOffset(floatT, amplitude: 6.h, phase: 0),
+                offset: _floatOffset(floatT, amplitude: 14.h, phase: 0),
                 child: Transform.scale(
                   scale: t,
                   child: _Star(
@@ -102,17 +102,19 @@ class _RewardStarState extends State<RewardStar>
                 progress: _controller.value,
                 begin: 0.5,
                 offset: Offset(-88.w, 78.h) +
-                    _floatOffset(floatT, amplitude: 5.h, phase: math.pi / 3),
+                    _floatOffset(floatT, amplitude: 10.h, phase: math.pi / 3),
                 size: 38.w,
                 asset: AppAssets.starDeco(1),
+                glow: colors.starDecoGlowGreen,
               ),
               _Satellite(
                 progress: _controller.value,
                 begin: 0.7,
                 offset: Offset(84.w, -40.h) +
-                    _floatOffset(floatT, amplitude: 5.h, phase: math.pi),
+                    _floatOffset(floatT, amplitude: 10.h, phase: math.pi),
                 size: 30.w,
                 asset: AppAssets.starDeco(7),
+                glow: colors.starDecoGlowPurple,
               ),
             ],
           );
@@ -121,13 +123,17 @@ class _RewardStarState extends State<RewardStar>
     );
   }
 
-  /// 위아래로 은은히 떠다니는 오프셋. sine 곡선이라 시작·끝이 매끄럽게 이어진다.
+  /// 위쪽으로만 은은히 떠오르는 오프셋. sine 곡선이라 시작·끝이 매끄럽게
+  /// 이어지되, 0~-amplitude 구간만 쓴다 — 아래로 내려가면 별 밑에 앉은
+  /// 캐릭터(_RewardHero._charFrame)와 겹치기 때문에 원래 자리보다
+  /// 아래로는 절대 내려가지 않는다.
   Offset _floatOffset(double t, {required double amplitude, required double phase}) {
-    return Offset(0, math.sin(t * 2 * math.pi + phase) * amplitude);
+    final wave = (math.sin(t * 2 * math.pi + phase) - 1) / 2; // 0 ~ -1
+    return Offset(0, wave * amplitude);
   }
 }
 
-/// 큰 별. 그라데이션·글로우가 SVG 안에 들어 있다.
+/// 큰 별. 그라데이션은 SVG 안에, 글로우는 [GlowingSvg]가 재현한다.
 class _Star extends StatelessWidget {
   const _Star({required this.size, required this.glow});
 
@@ -136,29 +142,16 @@ class _Star extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        // Figma boxShadow 0 0 20 rgba(208,255,0,0.3) — 별 뒤에서 번지는 빛.
-        //
-        // `BoxShadow`로는 만들 수 없다. 채워진 도형 뒤에 같은 모양을 그대로
-        // 칠하기 때문에 **불투명한 원판**이 깔린다(골든에서 발각).
-        // 가장자리로 갈수록 투명해지는 radial gradient가 실제 글로우다.
-        gradient: RadialGradient(
-          colors: [glow, glow.withValues(alpha: 0)],
-        ),
-      ),
-      // 정사각형이라 가로세로 모두 .w
-      child: SvgPicture.asset(
-        AppAssets.starBig,
-        width: size,
-        height: size,
-      ),
+    // Figma boxShadow 0 0 20 rgba(208,255,0,0.3) — 별 뒤에서 번지는 빛.
+    return GlowingSvg(
+      assetPath: AppAssets.starBig,
+      size: size,
+      glowColor: glow,
     );
   }
 }
 
-/// 큰 별 주변의 작은 별. 색이 든 SVG를 그대로 쓴다.
+/// 큰 별 주변의 작은 별. 색이 든 SVG + [GlowingSvg]로 재현한 글로우.
 class _Satellite extends StatelessWidget {
   const _Satellite({
     required this.progress,
@@ -166,6 +159,7 @@ class _Satellite extends StatelessWidget {
     required this.offset,
     required this.size,
     required this.asset,
+    required this.glow,
   });
 
   /// 전체 진행도 (0~1)
@@ -180,6 +174,9 @@ class _Satellite extends StatelessWidget {
   /// 별 에셋 경로. 색이 SVG 안에 들어 있어 따로 칠하지 않는다.
   final String asset;
 
+  /// 이 별의 SVG 내장 feGaussianBlur 필터와 같은 색 (flutter_svg 미지원 대체).
+  final Color glow;
+
   @override
   Widget build(BuildContext context) {
     // begin 이전에는 0, 이후 남은 구간에서 0→1
@@ -190,7 +187,7 @@ class _Satellite extends StatelessWidget {
       offset: offset,
       child: Transform.scale(
         scale: scale,
-        child: SvgPicture.asset(asset, width: size, height: size),
+        child: GlowingSvg(assetPath: asset, size: size, glowColor: glow),
       ),
     );
   }

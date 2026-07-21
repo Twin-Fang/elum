@@ -89,6 +89,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.rewardStarGlow,
     required this.rewardStarGreen,
     required this.rewardStarPurple,
+    required this.starDecoGlowGreen,
+    required this.starDecoGlowPurple,
     required this.rewardButton,
     required this.rewardGroundShadow,
     required this.childEmptyShadow,
@@ -219,6 +221,12 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color rewardStarGreen;
   /// 작은 별 — 보라
   final Color rewardStarPurple;
+  /// 작은 별 주변 빛 — 초록 (rgba(123,255,176,1)). star_deco 1~6의 SVG
+  /// 내장 feGaussianBlur 필터 색과 동일 — flutter_svg가 SVG filter를
+  /// 렌더링하지 못해(client/docs/troubleshooting.md) 코드로 재현한다.
+  final Color starDecoGlowGreen;
+  /// 작은 별 주변 빛 — 보라 (rgba(151,120,255,1)). star_deco 7 전용.
+  final Color starDecoGlowPurple;
   /// 보상 화면 CTA
   final Color rewardButton;
   /// 보상 캐릭터 발밑 그림자 (Figma Ellipse 23 — 어두운 배경용)
@@ -302,6 +310,8 @@ class AppColors extends ThemeExtension<AppColors> {
     rewardStarGlow: Color(0x4DD0FF00),
     rewardStarGreen: Color(0xFF86FCA3),
     rewardStarPurple: Color(0xFFA186FC),
+    starDecoGlowGreen: Color(0xFF7BFFB0),
+    starDecoGlowPurple: Color(0xFF9778FF),
     rewardButton: Color(0xFF55CFBA),
     rewardGroundShadow: Color(0xFF121215),
     childEmptyShadow: Color(0x4D969696),
@@ -378,6 +388,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? rewardStarGlow,
     Color? rewardStarGreen,
     Color? rewardStarPurple,
+    Color? starDecoGlowGreen,
+    Color? starDecoGlowPurple,
     Color? rewardButton,
     Color? rewardGroundShadow,
     Color? childEmptyShadow,
@@ -444,6 +456,8 @@ class AppColors extends ThemeExtension<AppColors> {
       rewardStarGlow: rewardStarGlow ?? this.rewardStarGlow,
       rewardStarGreen: rewardStarGreen ?? this.rewardStarGreen,
       rewardStarPurple: rewardStarPurple ?? this.rewardStarPurple,
+      starDecoGlowGreen: starDecoGlowGreen ?? this.starDecoGlowGreen,
+      starDecoGlowPurple: starDecoGlowPurple ?? this.starDecoGlowPurple,
       rewardButton: rewardButton ?? this.rewardButton,
       rewardGroundShadow: rewardGroundShadow ?? this.rewardGroundShadow,
       childEmptyShadow: childEmptyShadow ?? this.childEmptyShadow,
@@ -523,6 +537,10 @@ class AppColors extends ThemeExtension<AppColors> {
       rewardStarGlow: Color.lerp(rewardStarGlow, other.rewardStarGlow, t)!,
       rewardStarGreen: Color.lerp(rewardStarGreen, other.rewardStarGreen, t)!,
       rewardStarPurple: Color.lerp(rewardStarPurple, other.rewardStarPurple, t)!,
+      starDecoGlowGreen:
+          Color.lerp(starDecoGlowGreen, other.starDecoGlowGreen, t)!,
+      starDecoGlowPurple:
+          Color.lerp(starDecoGlowPurple, other.starDecoGlowPurple, t)!,
       rewardButton: Color.lerp(rewardButton, other.rewardButton, t)!,
       rewardGroundShadow:
           Color.lerp(rewardGroundShadow, other.rewardGroundShadow, t)!,
