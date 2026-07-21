@@ -1,15 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T10:17:13Z",
-    "currentVersion": "1.0.50",
+    "lastUpdated": "2026-07-21T10:25:50Z",
+    "currentVersion": "1.0.51",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 23
+    "totalReleases": 24
   },
   "releases": [
+    {
+      "version": "1.0.51",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 50,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 카드에 AI가 그린 그림이 표시됩니다\n\n* **개선**\n  * 그림을 불러오지 못해도 카드가 깨지지 않습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "카드에 AI가 그린 그림이 표시됩니다"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "그림을 불러오지 못해도 카드가 깨지지 않습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.50",
       "project_type": "flutter",
