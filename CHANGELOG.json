@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T21:47:14Z",
-    "currentVersion": "1.0.89",
+    "lastUpdated": "2026-07-21T22:49:45Z",
+    "currentVersion": "1.0.90",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 57
+    "totalReleases": 58
   },
   "releases": [
+    {
+      "version": "1.0.90",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 124,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 보호자 홈 카드 배경색 배치 개선\n  * 초기 설정 완료 후 바로 홈화면으로 이동\n  * 행동 카드 이미지 생성 품질 향상",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "보호자 홈 카드 배경색 배치 개선",
+            "초기 설정 완료 후 바로 홈화면으로 이동",
+            "행동 카드 이미지 생성 품질 향상"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.89",
       "project_type": "flutter",
