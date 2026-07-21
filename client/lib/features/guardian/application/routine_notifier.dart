@@ -261,18 +261,49 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     );
   }
 
-  Future<void> updateStep(String stepId, String description) async {
+  /// 카드 제목·설명 수정 (Figma 262:5124 `이 카드 수정하기`).
+  ///
+  /// 반환값이 false면 서버 반영에 실패해 로컬에만 저장됐다 — 화면이 안내한다.
+  ///
+  /// **title은 서버에 보내지 않는다.** `RoutineStep`에 title 컬럼이 없다
+  /// (2026-07-22 서버 확인, 이슈 #77). 서버 응답에도 title이 없으므로
+  /// 그대로 받으면 다른 카드의 로컬 제목까지 지워진다 — 기존 제목을 되살려 합친다.
+  Future<bool> updateStep({
+    required String stepId,
+    required String title,
+    required String description,
+  }) async {
     AppLogger.notifierCall('RoutineFlowNotifier', 'updateStep', {
       'stepId': stepId,
+      'title': title,
       'description': description,
     });
 
     final routine = state.routine;
-    if (routine == null) return;
+    if (routine == null) return true;
 
     final repo = ref.read(routineRepositoryProvider);
-    final updated = await repo.updateStep(routine, stepId, description);
-    state = state.copyWith(routine: updated);
+    final result = await repo.updateStep(routine, stepId, description);
+
+    // 서버 응답에는 step title이 없다 — 로컬 제목을 복원하고 수정분만 덮는다
+    final localTitles = {
+      for (final step in routine.steps) step.id: step.title,
+    };
+    final merged = result.routine.copyWith(
+      steps: [
+        for (final step in result.routine.steps)
+          step.copyWith(
+            title: step.id == stepId
+                ? title
+                : (step.title.isNotEmpty
+                    ? step.title
+                    : localTitles[step.id] ?? ''),
+          ),
+      ],
+    );
+
+    state = state.copyWith(routine: merged);
+    return result.synced;
   }
 
   /// 승인. 이 시점 이후에만 아동 화면에 노출된다 (docs 원칙 3번).

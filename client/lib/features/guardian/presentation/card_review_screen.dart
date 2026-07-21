@@ -9,9 +9,11 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../shared/models/action_card.dart';
+import '../../../core/widgets/app_pressable.dart';
 import '../../child/data/speech_service.dart';
 import '../application/routine_notifier.dart';
 import 'widgets/action_card_view.dart';
+import 'widgets/card_edit_sheet.dart';
 import 'widgets/routine_flow_scaffold.dart';
 
 /// Figma `보호자_새로운 일과 만들기_카드확인`(262:5124 / 309:2763).
@@ -38,6 +40,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
   /// 지금 읽고 있는 카드 id. null이면 아무것도 안 읽고 있다.
   String? _speakingId;
+
+  /// 지금 보고 있는 카드 인덱스. `이 카드 수정하기`가 이 카드를 대상으로 한다.
+  int _currentIndex = 0;
 
   /// dispose에서 `ref`를 읽으면 "unmounted" 오류가 난다.
   /// 미리 잡아두고 정리할 때 쓴다.
@@ -97,6 +102,31 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     if (mounted) context.go(Routes.guardian);
   }
 
+  /// 지금 보고 있는 카드의 제목·설명을 바텀시트로 수정한다.
+  Future<void> _edit(ActionCard card) async {
+    final edited = await CardEditSheet.show(
+      context,
+      title: card.displayTitle,
+      description: card.description,
+    );
+    // 저장 없이 닫았다 — 아무것도 바꾸지 않는다
+    if (edited == null || !mounted) return;
+
+    final synced = await ref.read(routineFlowProvider.notifier).updateStep(
+          stepId: card.id,
+          title: edited.title,
+          description: edited.description,
+        );
+
+    // 서버 반영 실패 — 로컬에는 반영됐지만 저장하기(승인) 전에 앱을 끄면
+    // 사라진다. 에러 코드가 있어야 제보를 추적할 수 있다.
+    if (!synced && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('수정 내용을 서버에 저장하지 못했어요 (E-STEP)')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final routine = ref.watch(routineFlowProvider).routine;
@@ -126,17 +156,13 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
             style: context.typo.reviewTitle
                 .copyWith(color: context.colors.textPrimary),
           ),
-          SizedBox(height: space.sm),
-          Text(
-            '내용을 확인하고 카드를 수정하거나 삭제해주세요',
-            style: context.typo.promptBody
-                .copyWith(color: context.colors.promptMuted),
-          ),
           SizedBox(height: space.lg),
           Expanded(
             child: PageView.builder(
               controller: _controller,
               itemCount: cards.length,
+              // 카드를 넘기면 수정 칩의 대상도 바뀐다
+              onPageChanged: (index) => setState(() => _currentIndex = index),
               itemBuilder: (context, index) => Padding(
                 padding: EdgeInsets.symmetric(horizontal: space.xs),
                 child: ActionCardView(
@@ -145,8 +171,6 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
                   routineId: routineId,
                   onSpeak: () => _speak(cards[index]),
                   isSpeaking: _speakingId == cards[index].id,
-                  // 편집 화면이 Figma에 없어 자리만 만든다
-                  onEdit: () {},
                   // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
                   onDelete: cards.length > 1
                       ? () => ref
@@ -158,7 +182,41 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
             ),
           ),
           SizedBox(height: space.md),
+          // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
+          _EditChip(
+            onTap: () =>
+                _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),
+          ),
+          SizedBox(height: space.md),
         ],
+      ),
+    );
+  }
+}
+
+/// `이 카드 수정하기` 알약 칩 (Figma 262:5124 — 393:3995, r20, 패딩 10×20).
+class _EditChip extends StatelessWidget {
+  const _EditChip({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final space = context.space;
+
+    return AppPressable(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: context.colors.editChipBg,
+          borderRadius: BorderRadius.circular(space.cardRadius.r),
+        ),
+        child: Text(
+          '이 카드 수정하기',
+          style: context.typo.editChipLabel
+              .copyWith(color: context.colors.editChipLabel),
+        ),
       ),
     );
   }

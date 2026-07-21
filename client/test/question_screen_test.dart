@@ -354,10 +354,13 @@ class _FakeRepo implements RoutineRepository {
   Future<Routine> confirm(Routine routine) async => routine;
 
   @override
-  Future<Routine> updateStep(
+  Future<({Routine routine, bool synced})> updateStep(
     Routine routine,
     String stepId,
     String description,
   ) async =>
-      routine;
+      (routine: routine, synced: true);
+
+  @override
+  Future<List<Routine>> getTodayRoutines() async => const [];
 }

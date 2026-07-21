@@ -94,6 +94,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.childTileDone,
     required this.starCount,
     required this.starsNumberStart,
+    required this.editChipBg,
+    required this.editChipLabel,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -227,6 +229,13 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 아이_별 화면 숫자 그라데이션 시작 (#FFDD00 → 흰색)
   final Color starsNumberStart;
 
+  // 카드확인 (Figma 262:5124, 2026-07-22 덤프)
+  /// `이 카드 수정하기` 칩 배경 (#EEE9E6). routineTileBg와 값만 같다 —
+  /// 일과 타일이 바뀌어도 수정 칩은 따라가면 안 된다.
+  final Color editChipBg;
+  /// 같은 칩의 문구색 (#000000). chipLabel(선택 항목)과 쓰임이 달라 분리한다.
+  final Color editChipLabel;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -285,6 +294,8 @@ class AppColors extends ThemeExtension<AppColors> {
     childTileDone: Color(0xFFB5EAEC),
     starCount: Color(0xFFCB9500),
     starsNumberStart: Color(0xFFFFDD00),
+    editChipBg: Color(0xFFEEE9E6),
+    editChipLabel: Color(0xFF000000),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -355,6 +366,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? childTileDone,
     Color? starCount,
     Color? starsNumberStart,
+    Color? editChipBg,
+    Color? editChipLabel,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -415,6 +428,8 @@ class AppColors extends ThemeExtension<AppColors> {
       childTileDone: childTileDone ?? this.childTileDone,
       starCount: starCount ?? this.starCount,
       starsNumberStart: starsNumberStart ?? this.starsNumberStart,
+      editChipBg: editChipBg ?? this.editChipBg,
+      editChipLabel: editChipLabel ?? this.editChipLabel,
     );
   }
 
@@ -489,6 +504,8 @@ class AppColors extends ThemeExtension<AppColors> {
       starCount: Color.lerp(starCount, other.starCount, t)!,
       starsNumberStart:
           Color.lerp(starsNumberStart, other.starsNumberStart, t)!,
+      editChipBg: Color.lerp(editChipBg, other.editChipBg, t)!,
+      editChipLabel: Color.lerp(editChipLabel, other.editChipLabel, t)!,
     );
   }
 }

@@ -56,6 +56,7 @@ void main() {
       overrides: [
         testStorageOverride(onboardingCompleted: true, pin: '1234'),
         myRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
+        todayRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
         memberProvider.overrideWith((ref) async => null),
       ],
       child: ScreenUtilInit(

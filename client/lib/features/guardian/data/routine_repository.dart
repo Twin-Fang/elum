@@ -22,6 +22,13 @@ abstract interface class RoutineRepository {
   /// 실패하면 빈 목록을 준다. 화면은 빈 상태 UI를 그린다.
   Future<List<Routine>> getMyRoutines();
 
+  /// 오늘 할 일 — 아이 홈 목록 (이슈 #75, `GET /api/routines/today`).
+  ///
+  /// 서버가 오늘(KST) + CONFIRMED/COMPLETED만 진행률과 함께 예정 시각순으로 준다.
+  /// 실패하면 [getMyRoutines]로 폴백한다 — 아이 목록이 비는 것보다
+  /// 클라이언트 필터로라도 보여주는 쪽이 낫다 (docs 원칙 6번).
+  Future<List<Routine>> getTodayRoutines();
+
   /// 추천 일과 — 보호자_홈 타일과 일과 만들기 화면의 칩.
   /// 실패하면 [RoutineSuggestion.fallback]을 준다. 추천이 비면 화면 한 블록이
   /// 통째로 사라져 빈 화면처럼 보이기 때문이다.
@@ -37,8 +44,16 @@ abstract interface class RoutineRepository {
   /// 보호자 승인. 이후에만 아동 화면에 노출된다 (docs 원칙 3번).
   Future<Routine> confirm(Routine routine);
 
-  /// 카드 문장 수정
-  Future<Routine> updateStep(Routine routine, String stepId, String description);
+  /// 카드 문장 수정.
+  ///
+  /// [synced]가 false면 서버 반영에 실패해 **로컬에만** 반영됐다는 뜻이다.
+  /// 화면이 이 값으로 "서버 저장 실패" 안내를 띄운다 — 실패를 조용히 삼키면
+  /// 보호자는 저장된 줄 알고 앱을 끈다.
+  Future<({Routine routine, bool synced})> updateStep(
+    Routine routine,
+    String stepId,
+    String description,
+  );
 }
 
 class RoutineRepositoryImpl implements RoutineRepository {
@@ -203,7 +218,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
   }
 
   @override
-  Future<Routine> updateStep(
+  Future<({Routine routine, bool synced})> updateStep(
     Routine routine,
     String stepId,
     String description,
@@ -213,6 +228,9 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'stepId': stepId,
       'description': description,
     });
+
+    // 서버로 보내려 했는데 실패했는가 — 성공·mock과 구분해야 화면이 안내할 수 있다
+    var serverFailed = false;
 
     if (!AppConfig.useMock && routine.id.isNotEmpty) {
       try {
@@ -224,10 +242,12 @@ class RoutineRepositoryImpl implements RoutineRepository {
         if (body != null) {
           final updated = Routine.fromJson(body);
           AppLogger.repositorySuccess('RoutineRepository', 'updateStep', '카드 내용 수정 완료');
-          return updated;
+          return (routine: updated, synced: true);
         }
+        serverFailed = true;
       } catch (e) {
         AppLogger.repositoryError('RoutineRepository', 'updateStep', e);
+        serverFailed = true;
       }
     }
 
@@ -238,7 +258,39 @@ class RoutineRepositoryImpl implements RoutineRepository {
       ],
     );
     AppLogger.repositorySuccess('RoutineRepository', 'updateStep (로컬)', '로컬에서 카드 내용 수정됨');
-    return updated;
+    return (routine: updated, synced: !serverFailed);
+  }
+
+  @override
+  Future<List<Routine>> getTodayRoutines() async {
+    AppLogger.repositoryCall('RoutineRepository', 'getTodayRoutines');
+
+    if (AppConfig.useMock) {
+      AppLogger.repositorySuccess('RoutineRepository', 'getTodayRoutines', '모의 데이터');
+      return const [];
+    }
+
+    try {
+      final res = await _dio.get<List<dynamic>>('/api/routines/today');
+      final body = res.data;
+      if (body != null) {
+        final routines = body
+            .whereType<Map<String, dynamic>>()
+            .map(Routine.fromJson)
+            .toList();
+        AppLogger.repositorySuccess(
+          'RoutineRepository', 'getTodayRoutines', '${routines.length}개 오늘 일과 조회됨');
+        return routines;
+      }
+    } catch (e) {
+      AppLogger.repositoryError('RoutineRepository', 'getTodayRoutines', e);
+    }
+
+    // 신규 엔드포인트가 죽어도 아이 목록은 떠야 한다 — 전체 조회로 폴백.
+    // 승인 여부 필터는 화면 provider가 한 번 더 거른다 (docs 원칙 3번).
+    AppLogger.repositorySuccess(
+      'RoutineRepository', 'getTodayRoutines (폴백)', '전체 일과 조회로 대체');
+    return getMyRoutines();
   }
 
   // --- 로컬 대체 구현 ---
@@ -311,6 +363,11 @@ final routineRepositoryProvider = Provider<RoutineRepository>(
 /// 최근 일과 목록. 보호자_홈이 구독한다.
 final myRoutinesProvider = FutureProvider<List<Routine>>((ref) {
   return ref.watch(routineRepositoryProvider).getMyRoutines();
+});
+
+/// 오늘 할 일 목록. 아이_홈이 구독한다 (이슈 #75).
+final todayRoutinesProvider = FutureProvider<List<Routine>>((ref) {
+  return ref.watch(routineRepositoryProvider).getTodayRoutines();
 });
 
 /// 추천 일과. 보호자_홈 타일과 일과 만들기 화면의 칩이 함께 구독한다.

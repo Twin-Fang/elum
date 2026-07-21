@@ -31,6 +31,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.childTileTitle,
     required this.ringPercent,
     required this.starsCount,
+    required this.editChipLabel,
+    required this.childDetailTitle,
   });
 
   static const fontFamily = 'TmoneyRoundWind';
@@ -122,6 +124,16 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 아이_별 화면 누적 별 숫자 (80/w800).
   final TextStyle starsCount;
+
+  // --- 카드확인·아이 상세 (Figma 262:5124 / 309:3548, 2026-07-22 덤프) ---
+
+  /// `이 카드 수정하기` 칩 (14/w600 Pretendard).
+  /// chipLabel(14/w500)과 굵기가 달라 별개 토큰이다.
+  final TextStyle editChipLabel;
+
+  /// 아이 상세 상단바의 일과 제목 (18/w800).
+  /// childTileTitle(18/w400)과 굵기가 달라 별개 토큰이다.
+  final TextStyle childDetailTitle;
 
   static const standard = AppTypography(
     title: TextStyle(
@@ -268,6 +280,18 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.0,
     ),
+    editChipLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    childDetailTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
   );
 
   /// 표준 Material 슬롯에 매핑한다.
@@ -307,6 +331,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? childTileTitle,
     TextStyle? ringPercent,
     TextStyle? starsCount,
+    TextStyle? editChipLabel,
+    TextStyle? childDetailTitle,
   }) {
     return AppTypography(
       title: title ?? this.title,
@@ -333,6 +359,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       childTileTitle: childTileTitle ?? this.childTileTitle,
       ringPercent: ringPercent ?? this.ringPercent,
       starsCount: starsCount ?? this.starsCount,
+      editChipLabel: editChipLabel ?? this.editChipLabel,
+      childDetailTitle: childDetailTitle ?? this.childDetailTitle,
     );
   }
 
@@ -364,6 +392,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       childTileTitle: TextStyle.lerp(childTileTitle, other.childTileTitle, t)!,
       ringPercent: TextStyle.lerp(ringPercent, other.ringPercent, t)!,
       starsCount: TextStyle.lerp(starsCount, other.starsCount, t)!,
+      editChipLabel: TextStyle.lerp(editChipLabel, other.editChipLabel, t)!,
+      childDetailTitle:
+          TextStyle.lerp(childDetailTitle, other.childDetailTitle, t)!,
     );
   }
 }
