@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T08:35:09Z",
-    "currentVersion": "1.0.40",
+    "lastUpdated": "2026-07-21T08:36:42Z",
+    "currentVersion": "1.0.41",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 13
+    "totalReleases": 14
   },
   "releases": [
+    {
+      "version": "1.0.41",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 31,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 일과 만들기 화면의 배경 빛이 한데 모여 은은하게 움직입니다\n  * 화면 곳곳의 문구가 기기 크기에 맞게 정확히 표시됩니다\n\n* **버그 수정**\n  * 친구 고르기 화면에서 캐릭터 위에 겹쳐 보이던 글자를 없앴습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과 만들기 화면의 배경 빛이 한데 모여 은은하게 움직입니다",
+            "화면 곳곳의 문구가 기기 크기에 맞게 정확히 표시됩니다"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "친구 고르기 화면에서 캐릭터 위에 겹쳐 보이던 글자를 없앴습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.40",
       "project_type": "flutter",
