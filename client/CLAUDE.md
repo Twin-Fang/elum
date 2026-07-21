@@ -219,7 +219,7 @@ main     ← 배포 트리거 (버전·릴리스 노트 자동 관리)
 | 1 | `.env.example`에 키 + 설명 주석 추가 (**커밋함** — 어떤 키가 필요한지의 유일한 문서) |
 | 2 | `lib/core/config/app_config.dart`에 getter 추가 (**기본값 필수**) |
 | 3 | 로컬 `.env`에도 추가 (**커밋 안 함**) |
-| 4 | 배포용이면 GitHub Secret `CLIENT_ENV_FILE` 갱신 |
+| 4 | 배포용이면 GitHub Secret `CLIENT_ENV_FILE` 갱신 (**배포 전에** — 아래 참조) |
 
 ```dart
 // AppConfig에 추가할 때 — 값이 없거나 형식이 틀려도 앱은 떠야 한다
@@ -238,6 +238,34 @@ API 키·인증서처럼 **유출되면 안 되는 값**은 반드시 GitHub Sec
 빌드된 앱(Firebase·TestFlight·테스트 APK)의 `.env`는 워크플로우의 `Create .env file`
 스텝이 Secret **`CLIENT_ENV_FILE`** 로 만든다. `.env`는 `.gitignore` 대상이라 커밋되지
 않으므로 **로컬 `.env`를 고쳐도 배포 앱은 바뀌지 않는다.**
+
+##### Secret 갱신 방법 — `/pro-github`에 맡긴다
+
+로컬 `.env`를 고쳤으면 Secret도 함께 갱신한다. `gh` CLI는 쓰지 않는다.
+
+```
+/pro-github 로 CLIENT_ENV_FILE secret을 client/.env 내용으로 갱신해줘
+```
+
+Secret은 **쓰기만 되고 읽을 수 없다.** 현재 값이 무엇인지 확인할 방법이 없으므로,
+"이미 맞겠지"라고 넘기지 말고 `.env`를 고쳤으면 무조건 갱신한다.
+
+> ⚠️ **`.env` 내용을 대화·이슈·커밋 메시지에 붙여넣지 않는다.** 파일 경로만 넘기면
+> 스킬이 알아서 읽어 올린다. 값 자체를 텍스트로 남기면 그게 곧 유출이다.
+
+**순서가 중요하다 — 배포보다 Secret이 먼저다.**
+
+```
+1. 로컬 .env 수정
+2. Secret 갱신          ← 여기가 먼저
+3. 커밋 · 푸시 · 배포
+```
+
+`main` push가 빌드 워크플로우를 즉시 트리거하므로, 배포 후에 Secret을 갱신하면
+**그 빌드에는 이전 값이 들어간다.** 앱은 정상 실행되므로 증상도 없다.
+실제로 v1.0.59 배포 때 Secret 갱신이 빌드 시작보다 12초 앞서 겨우 반영됐다.
+
+이미 배포한 뒤에 갱신했다면 워크플로우를 다시 돌린다 (`workflow_dispatch`).
 
 > **Secret 이름을 바꾸거나 새 워크플로우를 추가할 땐 이 이름을 반드시 맞춘다.**
 > 이름이 어긋나면 GitHub은 경고 없이 **빈 문자열**을 주고, `AppConfig`가 기본값으로
