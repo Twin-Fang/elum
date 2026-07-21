@@ -39,14 +39,6 @@ public class RoutineAiPipeline {
   private final GeminiImageClient geminiImageClient;
   private final RoutineImageStorage routineImageStorage;
 
-  // 옛 호출부(RoutineService)가 Task 6에서 새 오버로드로 옮겨갈 때까지 남겨두는 임시 위임
-  // 메서드. Task 6 완료 후에는 더 이상 쓰이지 않는다.
-  public RoutineGenerationResult generateForCreate(
-    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, String maskedAnswers
-  ) {
-    return generateForCreate(sanitizedInputText, nickname, supportGoals, maskedAnswers, null);
-  }
-
   public RoutineGenerationResult generateForCreate(
     String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, String maskedAnswers,
     CharacterType characterType
@@ -55,15 +47,6 @@ public class RoutineAiPipeline {
       () -> geminiTextClient.generate(sanitizedInputText, nickname, supportGoals, maskedAnswers)
     );
     return buildResult(draft, characterType);
-  }
-
-  // 옛 호출부(RoutineService)가 Task 6에서 새 오버로드로 옮겨갈 때까지 남겨두는 임시 위임
-  // 메서드. Task 6 완료 후에는 더 이상 쓰이지 않는다.
-  public RoutineGenerationResult generateForRevise(
-    List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
-    String nickname, Set<SupportGoal> supportGoals
-  ) {
-    return generateForRevise(previousSteps, maskedFeedback, nickname, supportGoals, null);
   }
 
   public RoutineGenerationResult generateForRevise(
