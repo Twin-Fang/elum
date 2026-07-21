@@ -24,18 +24,19 @@ import 'mode_switch_screen.dart';
 
 /// 아이에게 보여줄 일과 목록.
 ///
-/// **승인(CONFIRMED)된 일과만** 노출한다 (docs 원칙 3번).
-/// 방금 만든 일과도 승인 전이면 목록에 없다.
+/// `GET /api/routines/today`(이슈 #75)가 오늘 + CONFIRMED/COMPLETED만 준다.
+/// 폴백(전체 조회)으로 내려올 수도 있으므로 **승인 여부를 한 번 더 거른다**
+/// (docs 원칙 3번). 방금 만든 일과도 승인 전이면 목록에 없다.
 final childRoutinesProvider = Provider<List<Routine>>((ref) {
   final current = ref.watch(routineFlowProvider).routine;
   final fetched =
-      ref.watch(myRoutinesProvider).asData?.value ?? const <Routine>[];
+      ref.watch(todayRoutinesProvider).asData?.value ?? const <Routine>[];
 
   return [
     if (current != null && current.isConfirmed && current.steps.isNotEmpty)
       current,
     ...fetched.where(
-      (r) => r.id != current?.id && r.isConfirmed && r.steps.isNotEmpty,
+      (r) => r.id != current?.id && r.isVisibleToChild && r.steps.isNotEmpty,
     ),
   ];
 });
@@ -51,7 +52,7 @@ class ChildHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
     final routines = ref.watch(childRoutinesProvider);
-    final routinesAsync = ref.watch(myRoutinesProvider);
+    final routinesAsync = ref.watch(todayRoutinesProvider);
     final localName = ref.watch(onboardingProvider).displayName;
     final childName = ref
         .watch(memberProvider)

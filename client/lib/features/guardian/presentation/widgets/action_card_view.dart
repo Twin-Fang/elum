@@ -15,14 +15,14 @@ import 'card_image.dart';
 /// Figma `카드확인`(262:5124)과 `아이_홈`(309:3548)이 같은 카드를 쓴다.
 /// 345×431 / r20 / 2px 테두리, 안에 이미지·번호·제목·설명이 들어간다.
 ///
-/// 보호자용에는 `수정` 버튼이, 아이용에는 없다. [onEdit]으로 가른다.
+/// 보호자용에는 삭제 X가 있고, 아이용에는 없다. [onDelete]로 가른다.
+/// 수정 진입점은 카드 밖(`이 카드 수정하기` 칩)으로 나갔다 — 2026-07-22 시안.
 class ActionCardView extends StatelessWidget {
   const ActionCardView({
     super.key,
     required this.card,
     required this.index,
     this.routineId = '',
-    this.onEdit,
     this.onDelete,
     this.onSpeak,
     this.isSpeaking = false,
@@ -37,10 +37,7 @@ class ActionCardView extends StatelessWidget {
   /// 서버가 순서를 1부터 주지 않을 수도 있다.
   final int index;
 
-  /// null이면 수정 버튼을 그리지 않는다 (아이 모드)
-  final VoidCallback? onEdit;
-
-  /// 카드 삭제 (Figma 364:8305 좌상단 X). null이면 그리지 않는다 —
+  /// 카드 삭제 (Figma 262:5124 이미지 우상단 X). null이면 그리지 않는다 —
   /// 아이 모드와 마지막 한 장 남은 카드가 해당된다.
   final VoidCallback? onDelete;
 
@@ -85,7 +82,6 @@ class ActionCardView extends StatelessWidget {
             child: _Illustration(
               routineId: routineId,
               stepId: card.id,
-              onEdit: onEdit,
               onDelete: onDelete,
             ),
           ),
@@ -156,13 +152,11 @@ class _Illustration extends StatelessWidget {
   const _Illustration({
     required this.routineId,
     required this.stepId,
-    this.onEdit,
     this.onDelete,
   });
 
   final String routineId;
   final String stepId;
-  final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
   @override
@@ -185,72 +179,41 @@ class _Illustration extends StatelessWidget {
         ),
         if (onDelete != null)
           Positioned(
-            top: space.sm,
-            left: space.sm,
+            top: space.xs,
+            right: space.xs,
             child: _DeleteButton(onTap: onDelete!),
-          ),
-        if (onEdit != null)
-          Positioned(
-            top: space.sm,
-            right: space.sm,
-            child: _EditButton(onTap: onEdit!),
           ),
       ],
     );
   }
 }
 
-/// 카드 삭제 버튼 (Figma 364:8305 좌상단 — 흐린 원 + X).
+/// 카드 삭제 버튼 (Figma 262:5124 이미지 우상단 — 흐린 원 + X, 393:4010).
 class _DeleteButton extends StatelessWidget {
   const _DeleteButton({required this.onTap});
 
   final VoidCallback onTap;
+
+  /// Figma 실측 30×30. 그대로 두면 보호자 최소 터치 타겟(44)에 못 미쳐
+  /// 투명 여백으로 넓힌다.
+  static const _visualSize = 30.0;
+  static const _touchSize = 44.0;
 
   @override
   Widget build(BuildContext context) {
     return AppPressable(
       onTap: onTap,
       scaleDown: AppPressable.scaleIcon,
-      child: Container(
-        // 원형 버튼 — 가로세로 모두 .w
-        width: 44.w,
-        height: 44.w,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: context.colors.background,
-        ),
-        child: Icon(
-          Icons.close_rounded,
-          size: 24.w,
-          color: context.colors.textPrimary,
-        ),
-      ),
-    );
-  }
-}
-
-/// Figma `완료` 배지 (364:8305 우상단 — 어두운 알약, 흰 글씨).
-///
-/// 이전 시안의 `수정` 버튼 자리가 `완료`로 바뀌었다.
-class _EditButton extends StatelessWidget {
-  const _EditButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppPressable(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-        decoration: BoxDecoration(
-          color: context.colors.buttonEnabled,
-          borderRadius: BorderRadius.circular(context.space.cardRadius),
-        ),
-        child: Text(
-          '완료',
-          style: context.typo.chipLabel
-              .copyWith(color: context.colors.buttonEnabledText),
+      // 정사각형 버튼 — 가로세로 모두 .w
+      child: SizedBox(
+        width: _touchSize.w,
+        height: _touchSize.w,
+        child: Center(
+          child: SvgPicture.asset(
+            AppAssets.iconCardDelete,
+            width: _visualSize.w,
+            height: _visualSize.w,
+          ),
         ),
       ),
     );

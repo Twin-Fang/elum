@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.64+63
+version: 1.0.65+64
 
 environment:
   sdk: ^3.10.8
@@ -44,6 +44,12 @@ dependencies:
   flutter_screenutil: ^5.9.3
   flutter_tts: ^4.2.5
   audioplayers: ^6.7.1
+
+# path_provider_foundation 2.5+가 끌고 오는 objective_c의 build hook이
+# build_runner AOT 컴파일을 깨뜨린다 (troubleshooting.md "build_runner AOT 컴파일 실패").
+# hook이 없는 2.4.1로 고정한다 — objective_c가 다시 나타나면 여기부터 의심할 것.
+dependency_overrides:
+  path_provider_foundation: 2.4.1
 
 dev_dependencies:
   flutter_test:

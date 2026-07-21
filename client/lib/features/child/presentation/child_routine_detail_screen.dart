@@ -128,7 +128,10 @@ class _ChildRoutineDetailScreenState
       body: SafeArea(
         child: Column(
           children: [
-            _TopBar(onBack: () => context.pop()),
+            _TopBar(
+              onBack: () => context.pop(),
+              title: widget.routine.displayTitle,
+            ),
             Expanded(
               child: PageView.builder(
                 controller: _controller,
@@ -168,11 +171,16 @@ class _ChildRoutineDetailScreenState
   }
 }
 
-/// 뒤로가기 + 캐릭터 배지. 아이가 목록으로 돌아갈 수 있어야 한다.
+/// 뒤로가기 + 일과 제목 (Figma 309:3548 상단, 2026-07-22 시안).
+///
+/// 캐릭터 배지가 빠지고 어떤 일과의 카드인지 제목이 중앙에 뜬다.
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onBack});
+  const _TopBar({required this.onBack, required this.title});
 
   final VoidCallback onBack;
+
+  /// 일과 제목 (`Routine.displayTitle`). 비어도 대체어가 온다.
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +192,6 @@ class _TopBar extends StatelessWidget {
         0,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           AppPressable(
             onTap: onBack,
@@ -202,11 +209,18 @@ class _TopBar extends StatelessWidget {
               ),
             ),
           ),
-          SvgPicture.asset(
-            AppAssets.characterBadgeRuru,
-            width: 56.w,
-            height: 56.w,
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.typo.childDetailTitle
+                  .copyWith(color: context.colors.textPrimary),
+            ),
           ),
+          // 뒤로가기와 같은 폭을 비워 제목이 정확히 가운데 온다
+          SizedBox(width: 64.w),
         ],
       ),
     );

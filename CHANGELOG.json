@@ -1,15 +1,50 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T14:57:05Z",
-    "currentVersion": "1.0.64",
+    "lastUpdated": "2026-07-21T15:43:25Z",
+    "currentVersion": "1.0.65",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 35
+    "totalReleases": 36
   },
   "releases": [
+    {
+      "version": "1.0.65",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-21",
+      "pr_number": 78,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 만들어진 카드의 제목과 설명을 직접 수정할 수 있어요\n  * 수정 화면이 키보드에 가려지지 않고 위로 올라와요\n\n* **개선**\n  * 카드 삭제 버튼이 그림 오른쪽 위로 이동했어요\n  * 아이 화면 상단에 지금 하고 있는 일과 이름이 보여요\n  * 아이 화면에 오늘 할 일만 골라서 보여줘요\n\n* **버그 수정**\n  * 다 끝낸 일과가 아이 목록에서 사라지던 문제를 고쳤어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "만들어진 카드의 제목과 설명을 직접 수정할 수 있어요",
+            "수정 화면이 키보드에 가려지지 않고 위로 올라와요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드 삭제 버튼이 그림 오른쪽 위로 이동했어요",
+            "아이 화면 상단에 지금 하고 있는 일과 이름이 보여요",
+            "아이 화면에 오늘 할 일만 골라서 보여줘요"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "다 끝낸 일과가 아이 목록에서 사라지던 문제를 고쳤어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.64",
       "project_type": "flutter",

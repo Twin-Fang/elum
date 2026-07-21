@@ -64,6 +64,10 @@ abstract final class AppAssets {
   /// 카드 읽어주기 (25×25). Figma `fi-br-volume`.
   static const iconVolume = '$_images/icon_volume.svg';
 
+  /// 카드확인의 카드 삭제 버튼 (30×30 — 흐린 원 + X).
+  /// Figma 393:4010 (262:5124 이미지 우상단, 2026-07-22 덤프).
+  static const iconCardDelete = '$_images/icon_card_delete.svg';
+
   /// 아이 홈의 체크 버튼 (88×88). 체크 전 빈 원.
   static const childCheckEmpty = '$_images/child_check_empty.svg';
 

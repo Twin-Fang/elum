@@ -80,6 +80,7 @@ void main() {
         testStorageOverride(onboardingCompleted: true, pin: pin),
         // 실서버를 타지 않는다
         myRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
+        todayRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
         memberProvider.overrideWith((ref) async => null),
       ],
       child: ScreenUtilInit(

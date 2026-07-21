@@ -24,15 +24,31 @@ abstract class Routine with _$Routine {
     /// 발표의 "전송 전/후 비교" 장면이 이 필드로 성립한다.
     @Default('') String sanitizedInputText,
 
-    /// 상태 (`PENDING_REVIEW` / `CONFIRMED` 등)
+    /// 상태 (`PENDING_REVIEW` / `CONFIRMED` / `COMPLETED` 등)
     @Default('') String status,
     @Default(<ActionCard>[]) List<ActionCard> steps,
+
+    // --- 진행률 (이슈 #75, GET /api/routines/today) ---
+    // 서버가 미리 계산해 내려준다. 옛 엔드포인트 응답에는 없어 0이 기본이다.
+
+    /// 완료한 단계 수. 서버 `completedStepCount`.
+    @Default(0) int completedStepCount,
+
+    /// 전체 단계 수. 서버 `totalStepCount`.
+    @Default(0) int totalStepCount,
+
+    /// 진행률(정수 %). 서버 `progressPercent`.
+    @Default(0) int progressPercent,
   }) = _Routine;
 
   const Routine._();
 
   /// 보호자가 승인했는가. 승인 전에는 아동 화면에 노출하지 않는다 (docs 원칙 3번).
   bool get isConfirmed => status == 'CONFIRMED';
+
+  /// 아동 화면에 보여도 되는가. `/today`가 CONFIRMED와 COMPLETED를 함께 주므로
+  /// isConfirmed만 걸면 다 끝낸 일과가 목록에서 사라진다 (이슈 #75).
+  bool get isVisibleToChild => isConfirmed || status == 'COMPLETED';
 
   /// DLP가 실제로 무언가를 바꿨는가.
   /// 둘이 같으면 탐지된 민감정보가 없다는 뜻이다.
@@ -62,8 +78,18 @@ abstract class Routine with _$Routine {
             .toList(),
         _ => const <ActionCard>[],
       },
+      completedStepCount: _asInt(json['completedStepCount']),
+      totalStepCount: _asInt(json['totalStepCount']),
+      progressPercent: _asInt(json['progressPercent']),
     );
   }
+
+  /// 숫자가 int·String 어느 쪽으로 와도 죽지 않게 읽는다.
+  static int _asInt(Object? value) => switch (value) {
+        final int v => v,
+        final String v => int.tryParse(v) ?? 0,
+        _ => 0,
+      };
 }
 
 /// AI 추가 질문 — 서버 `RoutineQuestionResponse`에 대응.
