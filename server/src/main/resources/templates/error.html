@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>이룸 관리자 - 오류</title>
+  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
+</head>
+<body class="min-h-screen bg-base-200 flex items-center justify-center">
+<div class="card w-96 bg-base-100 shadow-xl">
+  <div class="card-body text-center space-y-4">
+    <h1 class="text-4xl font-bold text-primary" th:text="${status}">404</h1>
+    <p class="text-lg font-semibold" th:text="${error}">Not Found</p>
+    <p class="text-sm text-base-content/60">요청을 처리할 수 없습니다.</p>
+    <a th:href="@{/admin/dashboard}" class="btn btn-primary">대시보드로 이동</a>
+  </div>
+</div>
+</body>
+</html>
