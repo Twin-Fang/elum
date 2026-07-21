@@ -120,8 +120,8 @@ public class RoutineService {
     SensitiveInfoCheckResult checkResult = sensitiveInfoGuardService.check(request.feedback());
     List<RoutineStepDraft.StepDraft> previousSteps = maskPreviousSteps(routine.getSteps());
     RoutineAiPipeline.RoutineGenerationResult generation = routineAiPipeline.generateForRevise(
-      previousSteps, checkResult.sanitizedText(), member.getNickname(), member.getSupportGoals(),
-      member.getCharacter()
+      routine.getTitle(), previousSteps, checkResult.sanitizedText(), member.getNickname(),
+      member.getSupportGoals(), member.getCharacter()
     );
 
     // orphanRemoval이 정상 동작하려면 컬렉션 참조를 새로 바꾸지 않고(setSteps) 기존

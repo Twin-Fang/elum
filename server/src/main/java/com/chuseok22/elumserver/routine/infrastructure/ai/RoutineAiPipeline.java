@@ -50,11 +50,12 @@ public class RoutineAiPipeline {
   }
 
   public RoutineGenerationResult generateForRevise(
-    List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
+    String previousTitle, List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
     String nickname, Set<SupportGoal> supportGoals, CharacterType characterType
   ) {
-    RoutineStepDraft draft =
-      parseDraft(() -> geminiTextClient.revise(previousSteps, maskedFeedback, nickname, supportGoals));
+    RoutineStepDraft draft = parseDraft(() ->
+      geminiTextClient.revise(previousTitle, previousSteps, maskedFeedback, nickname, supportGoals)
+    );
     return buildResult(draft, characterType);
   }
 

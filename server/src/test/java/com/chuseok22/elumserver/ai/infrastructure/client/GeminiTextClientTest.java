@@ -63,4 +63,31 @@ class GeminiTextClientTest {
     assertThat(node.get("additionalAnswers").isArray()).isTrue();
     assertThat(node.get("additionalAnswers")).isEmpty();
   }
+
+  @Test
+  @DisplayName("buildReviseRoutineUserContent는 previousRoutine.title/steps와 feedback을 JSON으로 담는다")
+  void buildReviseRoutineUserContent_returnsStructuredJson() throws Exception {
+    String json = geminiTextClient.buildReviseRoutineUserContent(
+      "학교에 갈 준비를 해요",
+      List.of(new com.chuseok22.elumserver.ai.core.RoutineStepDraft.StepDraft(1, "침대에서 일어나요.")),
+      "가방을 챙기는 단계를 추가해 주세요.", "하늘이", Set.of(SupportGoal.PREPARE_ITEMS)
+    );
+
+    JsonNode node = objectMapper.readTree(json);
+    assertThat(node.get("task").asText()).isEqualTo("REVISE_ROUTINE");
+    assertThat(node.get("previousRoutine").get("title").asText()).isEqualTo("학교에 갈 준비를 해요");
+    assertThat(node.get("previousRoutine").get("steps").get(0).get("description").asText())
+      .isEqualTo("침대에서 일어나요.");
+    assertThat(node.get("feedback").asText()).isEqualTo("가방을 챙기는 단계를 추가해 주세요.");
+  }
+
+  @Test
+  @DisplayName("buildReviseRoutineUserContent 결과에는 <text> 태그가 없다")
+  void buildReviseRoutineUserContent_doesNotContainTextTag() {
+    String json = geminiTextClient.buildReviseRoutineUserContent(
+      "제목", List.of(), "피드백", null, Set.of()
+    );
+
+    assertThat(json).doesNotContain("<text>");
+  }
 }

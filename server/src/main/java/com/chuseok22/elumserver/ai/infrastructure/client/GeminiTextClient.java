@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.ChildProfileInput;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
+import com.chuseok22.elumserver.ai.core.RoutineReviseAiInput;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
@@ -12,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -58,16 +58,27 @@ public class GeminiTextClient {
   }
 
   public GeminiGenerateContentResponse revise(
-    List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
+    String previousTitle, List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
     String nickname, Set<SupportGoal> supportGoals
   ) {
     String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_REVISE_PREFIX);
-    String previousStepsText = previousSteps.stream()
-      .map(step -> step.order() + ". " + step.description())
-      .collect(Collectors.joining("\n"));
-    String userContent = "이전에 생성된 단계:\n" + previousStepsText
-      + "\n\n부모의 수정 요청:\n" + maskedFeedback;
+    String userContent = buildReviseRoutineUserContent(
+      previousTitle, previousSteps, maskedFeedback, nickname, supportGoals
+    );
     return callGenerateContent(systemPrompt, userContent);
+  }
+
+  public String buildReviseRoutineUserContent(
+    String previousTitle, List<RoutineStepDraft.StepDraft> previousSteps, String feedback,
+    String nickname, Set<SupportGoal> supportGoals
+  ) {
+    RoutineReviseAiInput input = new RoutineReviseAiInput(
+      "REVISE_ROUTINE",
+      new RoutineReviseAiInput.PreviousRoutineInput(previousTitle, previousSteps),
+      feedback,
+      new ChildProfileInput(nickname, supportGoals == null ? Set.of() : supportGoals)
+    );
+    return toJson(input);
   }
 
   // 도움 목표 기반 추가 질문 생성. supportGoals에 PREPARE_ITEMS/PREPARE_NEW가 없으면
@@ -84,6 +95,13 @@ public class GeminiTextClient {
   // 저장 전 미리보기/저장된 값 테스트를 동일한 호출 경로로 지원한다.
   public GeminiGenerateContentResponse generateForTest(String systemPrompt, String sampleInput) {
     String userContent = buildCreateRoutineUserContent(sampleInput, null, Set.of(), List.of());
+    return callGenerateContent(systemPrompt, userContent);
+  }
+
+  // 관리자 테스트 전용: previousRoutine이 없는 관리자 샘플 입력이라, title은 빈 문자열/
+  // steps는 빈 배열로 두고 sampleInput 전체를 feedback으로만 취급한다.
+  public GeminiGenerateContentResponse reviseForTest(String systemPrompt, String sampleFeedback) {
+    String userContent = buildReviseRoutineUserContent("", List.of(), sampleFeedback, null, Set.of());
     return callGenerateContent(systemPrompt, userContent);
   }
 
