@@ -142,6 +142,20 @@ public interface RoutineControllerDocs {
   ResponseEntity<List<RoutineResponse>> getMyRoutines(Authentication authentication);
 
   @Operation(
+    summary = "오늘의 일과 목록 조회",
+    description = """
+      아이 홈 화면에 노출할 "오늘 할 일" 목록입니다. scheduledAt이 오늘(KST) 범위에 속하면서
+      상태가 CONFIRMED 또는 COMPLETED인 일과만 예정 시각(scheduledAt) 오름차순으로 반환합니다.
+      보호자 승인 전(PENDING_REVIEW) 일과는 포함되지 않습니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+  })
+  ResponseEntity<List<RoutineResponse>> getTodayRoutines(Authentication authentication);
+
+  @Operation(
     summary = "추천 일과 목록 조회",
     description = """
       하드코딩된 50개 추천 일과 중 무작위 count개(아이콘 + 문구 + 자연어 예시)를 반환합니다. 보호자별 개인화는 하지 않습니다.
