@@ -541,4 +541,20 @@ class AppColors extends ThemeExtension<AppColors> {
       editChipLabel: Color.lerp(editChipLabel, other.editChipLabel, t)!,
     );
   }
+
+  /// 체크 순간 터지는 컨페티(색종이) 팔레트.
+  ///
+  /// Figma 시안(309:3648)에는 컨페티가 그려져 있지 않아 색 원본이 없다.
+  /// 그래서 개별 토큰을 새로 만들지 않고 이미 있는 밝은 브랜드·보상 색을
+  /// 모아 쓴다 — 이 색들이 바뀌면 컨페티도 같이 바뀌는 게 자연스럽다.
+  /// (토큰 분리 기준: "항상 같이 바뀌어야 하는가" → 예)
+  List<Color> get confetti => [
+        checkDone, // 청록 — 체크 원과 같은 색이라 연출이 이어진다
+        accentYellow, // 노랑
+        brandOrange, // 주황
+        brandPeach, // 살구
+        catSelectedBorder, // 파랑
+        rewardStarGreen, // 연두
+        rewardStarPurple, // 보라
+      ];
 }

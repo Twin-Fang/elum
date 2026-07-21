@@ -1,3 +1,4 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -43,6 +44,10 @@ class _ChildRoutineDetailScreenState
     extends ConsumerState<ChildRoutineDetailScreen> {
   final _controller = PageController(viewportFraction: 0.88);
 
+  /// 체크 순간 색종이가 터진다. `play()`가 이 duration만큼 색종이를 뿜는다.
+  /// 아동 화면 최소 전환 시간(300ms) 이상으로 둔다.
+  final _confetti = ConfettiController(duration: AppMotion.normal);
+
   /// 지금 읽고 있는 카드 id. null이면 아무것도 안 읽고 있다.
   String? _speakingId;
 
@@ -63,6 +68,7 @@ class _ChildRoutineDetailScreenState
   void dispose() {
     // 화면을 벗어나도 소리가 남으면 다음 화면까지 따라온다
     _speech?.stop();
+    _confetti.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -102,18 +108,37 @@ class _ChildRoutineDetailScreenState
   int get _currentIndex =>
       _controller.hasClients ? (_controller.page ?? 0).round() : 0;
 
-  Future<void> _toggle(String cardId) async {
+  /// [card]가 지금 체크된 상태인지. 로컬 진행 상태나 서버 값 어느 쪽이든 체크로 본다.
+  bool _isCardChecked(ActionCard card) =>
+      ref.read(childRoutineProvider).isCompleted(card.id) || card.completed;
+
+  Future<void> _toggle(ActionCard card) async {
+    // toggle 전에 현재 상태를 읽어둔다 — 미체크→체크로 "바뀌는" 순간에만
+    // 컨페티를 터뜨리기 위해서다. 체크 해제 때는 터지지 않는다.
+    final wasChecked = _isCardChecked(card);
+
     final shouldReward = ref
         .read(childRoutineProvider.notifier)
-        .toggle(routineId: widget.routine.id, cardId: cardId);
+        .toggle(routineId: widget.routine.id, cardId: card.id);
 
     // 별 개수가 서버에서 바뀌었다 — 홈 별 배지가 다음 조회에서 갱신되게 한다
     ref.invalidate(memberProvider);
 
+    // 미체크→체크로 바뀐 순간마다 컨페티를 터뜨린다(재체크 포함).
+    // 동작 줄이기(Reduce Motion)가 켜져 있으면 색 전환만 남기고 생략한다.
+    final becameChecked = !wasChecked;
+    if (becameChecked && !MediaQuery.disableAnimationsOf(context)) {
+      _confetti.play();
+    }
+
     if (!shouldReward) return;
 
-    // 체크가 눈에 보인 뒤 보상이 뜨게 한다. 동시에 일어나면 뭘 눌렀는지 모른다.
-    await Future<void>.delayed(AppMotion.normal);
+    // 컨페티가 눈에 보인 뒤 보상이 뜨게 한다. 바로 넘어가면 색종이가 안 보인다.
+    // 컨페티가 없는 경우(재체크 아님/동작 줄이기)라도 체크 색 전환은 보여야 하므로
+    // 최소 전환 시간만큼은 기다린다.
+    await Future<void>.delayed(
+      becameChecked ? AppMotion.slow + AppMotion.normal : AppMotion.normal,
+    );
     if (mounted) context.push(Routes.childReward);
   }
 
@@ -154,15 +179,14 @@ class _ChildRoutineDetailScreenState
               ),
             ),
             SizedBox(height: space.lg),
-            _CheckButton(
-              isChecked: progress.isCompleted(
-                    cards[_currentIndex.clamp(0, cards.length - 1)].id,
-                  ) ||
-                  cards[_currentIndex.clamp(0, cards.length - 1)].completed,
-              onTap: () => _toggle(
-                cards[_currentIndex.clamp(0, cards.length - 1)].id,
-              ),
-            ),
+            Builder(builder: (context) {
+              final current = cards[_currentIndex.clamp(0, cards.length - 1)];
+              return _CheckButton(
+                isChecked: progress.isCompleted(current.id) || current.completed,
+                confettiController: _confetti,
+                onTap: () => _toggle(current),
+              );
+            }),
             SizedBox(height: space.xl),
           ],
         ),
@@ -227,13 +251,20 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-/// 88×88 체크 버튼.
+/// 88×88 체크 버튼 + 체크 순간 터지는 컨페티.
 ///
 /// 체크 전에는 테두리만, 체크 후에는 채워진다.
+/// 부모가 [confettiController]로 `play()`를 호출하면 버튼 중심에서 색종이가
+/// 사방으로 터진다 — 발동 조건(미체크→체크·동작 줄이기 존중)은 부모가 판단한다.
 class _CheckButton extends StatelessWidget {
-  const _CheckButton({required this.isChecked, required this.onTap});
+  const _CheckButton({
+    required this.isChecked,
+    required this.confettiController,
+    required this.onTap,
+  });
 
   final bool isChecked;
+  final ConfettiController confettiController;
   final VoidCallback onTap;
 
   @override
@@ -242,32 +273,53 @@ class _CheckButton extends StatelessWidget {
     final size = ChildRoutineDetailScreen.checkButtonSize.w
         .clamp(ChildRoutineDetailScreen.minTouchTarget, double.infinity);
 
-    return AppPressable(
-      onTap: onTap,
-      scaleDown: AppPressable.scaleButton,
-      child: AnimatedContainer(
-        // 아동 화면은 300ms 이상으로 둔다 (docs/motion.md)
-        duration: AppMotion.normal,
-        curve: AppMotion.standard,
-        // 원형 버튼이라 가로세로 모두 .w. 좁은 기기에서 줄어들어도
-        // 아동 모드 최소 터치 타겟(64) 아래로는 내려가지 않게 막는다.
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: isChecked ? colors.checkDone : Colors.transparent,
-          // 완료되면 채움만 남긴다 — 회색 테두리가 남으면 덜 끝난 느낌을 준다
-          // (Figma 309:3682)
-          border: isChecked
-              ? null
-              : Border.all(color: colors.checkPending, width: 8.w),
+    // 색종이가 버튼 중심에서 사방으로 뿜어져 나오도록 겹쳐 놓는다.
+    // ConfettiWidget은 자식(버튼)이 놓인 지점을 방출 원점으로 삼는다.
+    return Stack(
+      alignment: Alignment.center,
+      clipBehavior: Clip.none,
+      children: [
+        ConfettiWidget(
+          confettiController: confettiController,
+          // 한 방향이 아니라 원점에서 사방으로 터지는 '폭죽' 형태
+          blastDirectionality: BlastDirectionality.explosive,
+          // 아동 화면이라 과하지 않게. 짧게 팍 터지고 사라진다.
+          emissionFrequency: 0,
+          numberOfParticles: 18,
+          maxBlastForce: 18,
+          minBlastForce: 8,
+          gravity: 0.25,
+          shouldLoop: false,
+          colors: colors.confetti,
         ),
-        child: Icon(
-          Icons.check_rounded,
-          size: 44.w,
-          color: isChecked ? colors.surface : colors.checkPending,
+        AppPressable(
+          onTap: onTap,
+          scaleDown: AppPressable.scaleButton,
+          child: AnimatedContainer(
+            // 아동 화면은 300ms 이상으로 둔다 (docs/motion.md)
+            duration: AppMotion.normal,
+            curve: AppMotion.standard,
+            // 원형 버튼이라 가로세로 모두 .w. 좁은 기기에서 줄어들어도
+            // 아동 모드 최소 터치 타겟(64) 아래로는 내려가지 않게 막는다.
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isChecked ? colors.checkDone : Colors.transparent,
+              // 완료되면 채움만 남긴다 — 회색 테두리가 남으면 덜 끝난 느낌을 준다
+              // (Figma 309:3682)
+              border: isChecked
+                  ? null
+                  : Border.all(color: colors.checkPending, width: 8.w),
+            ),
+            child: Icon(
+              Icons.check_rounded,
+              size: 44.w,
+              color: isChecked ? colors.surface : colors.checkPending,
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }

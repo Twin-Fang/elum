@@ -44,6 +44,8 @@ dependencies:
   flutter_screenutil: ^5.9.3
   flutter_tts: ^4.2.5
   audioplayers: ^6.7.1
+  # 아동 일과 카드 체크 순간 축하 컨페티(색종이) 연출. 체크 버튼 주위에서 터진다.
+  confetti: ^0.8.0
 
 # path_provider_foundation 2.5+가 끌고 오는 objective_c의 build hook이
 # build_runner AOT 컴파일을 깨뜨린다 (troubleshooting.md "build_runner AOT 컴파일 실패").
