@@ -14,13 +14,17 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineReviseReq
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
+import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
+import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineSuggestionCatalog;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -41,6 +45,8 @@ public class RoutineService {
   private final SensitiveInfoGuardService sensitiveInfoGuardService;
   private final RoutineAiPipeline routineAiPipeline;
   private final RoutineImageStorage routineImageStorage;
+
+  private static final int SUGGESTION_COUNT = 4;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
@@ -226,6 +232,12 @@ public class RoutineService {
     return routineRepository.findAllByMemberId(memberId).stream()
       .map(RoutineResponse::from)
       .toList();
+  }
+
+  public List<RoutineSuggestionResponse> getSuggestions() {
+    List<RoutineSuggestionResponse> pool = new ArrayList<>(RoutineSuggestionCatalog.ALL);
+    Collections.shuffle(pool);
+    return List.copyOf(pool.subList(0, SUGGESTION_COUNT));
   }
 
   public RoutineImageStorage.ImageContent getStepImage(String memberId, String routineId, String stepId) {

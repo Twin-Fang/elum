@@ -14,7 +14,9 @@ import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
+import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
+import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineSuggestionCatalog;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
@@ -142,5 +144,15 @@ class RoutineServiceTest {
     assertThat(response.required()).isTrue();
     assertThat(response.questions()).hasSize(1);
     assertThat(response.questions().get(0).question()).isEqualTo("챙겨야 하는 준비물이 있나요?");
+  }
+
+  @Test
+  @DisplayName("추천 일과를 조회하면 카탈로그에서 무작위 4개를 반환한다")
+  void getSuggestions_returnsFourDistinctSuggestionsFromCatalog() {
+    List<RoutineSuggestionResponse> result = routineService.getSuggestions();
+
+    assertThat(result).hasSize(4);
+    assertThat(result).isSubsetOf(RoutineSuggestionCatalog.ALL);
+    assertThat(result).doesNotHaveDuplicates();
   }
 }
