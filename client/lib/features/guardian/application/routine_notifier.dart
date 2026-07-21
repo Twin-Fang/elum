@@ -25,6 +25,7 @@ class RoutineFlowState {
     this.detectedTypes = const [],
     this.question,
     this.answers = const [],
+    this.customOptions = const {},
     this.routine,
   });
 
@@ -36,6 +37,13 @@ class RoutineFlowState {
   final List<String> detectedTypes;
   final RoutineQuestion? question;
   final List<String> answers;
+
+  /// 보호자가 직접 적어 넣은 선택지. 질문 문구별로 나눠 담는다.
+  ///
+  /// [answers]에만 넣으면 칩 목록(`item.options`)에는 없는데 선택은 된 상태가 돼
+  /// 화면에 보이지 않는다. 어느 질문에 추가했는지도 알아야 그 질문 아래에 그린다.
+  final Map<String, List<String>> customOptions;
+
   final Routine? routine;
 
   RoutineFlowState copyWith({
@@ -45,6 +53,7 @@ class RoutineFlowState {
     List<String>? detectedTypes,
     RoutineQuestion? question,
     List<String>? answers,
+    Map<String, List<String>>? customOptions,
     Routine? routine,
   }) {
     return RoutineFlowState(
@@ -54,6 +63,7 @@ class RoutineFlowState {
       detectedTypes: detectedTypes ?? this.detectedTypes,
       question: question ?? this.question,
       answers: answers ?? this.answers,
+      customOptions: customOptions ?? this.customOptions,
       routine: routine ?? this.routine,
     );
   }
@@ -110,6 +120,51 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     final next = List<String>.from(state.answers);
     next.contains(answer) ? next.remove(answer) : next.add(answer);
     state = state.copyWith(answers: next);
+  }
+
+  /// 보호자가 직접 적은 선택지를 [question]에 추가하고 곧바로 선택한다.
+  ///
+  /// 쓰자마자 또 눌러야 하면 번거로우므로 추가와 선택을 함께 한다.
+  /// 빈 값은 무시하고, 이미 있는 값이면 칩을 새로 만들지 않고 선택만 한다 —
+  /// 같은 이름의 칩이 둘 생기면 어느 쪽이 선택됐는지 알 수 없다.
+  void addCustomOption(String question, String rawValue) {
+    final value = rawValue.trim();
+    if (value.isEmpty) return;
+
+    final existing = state.question?.askable
+            .firstWhere(
+              (item) => item.question == question,
+              orElse: () => const QuestionItem(question: '', options: []),
+            )
+            .options ??
+        const <String>[];
+    final custom = state.customOptions[question] ?? const <String>[];
+    final isDuplicate = existing.contains(value) || custom.contains(value);
+
+    final nextCustom = Map<String, List<String>>.from(state.customOptions);
+    if (!isDuplicate) {
+      nextCustom[question] = [...custom, value];
+    }
+
+    // 중복이어도 선택은 해준다 — 사용자는 그 항목을 원한다는 뜻이다
+    final nextAnswers = List<String>.from(state.answers);
+    if (!nextAnswers.contains(value)) nextAnswers.add(value);
+
+    state = state.copyWith(customOptions: nextCustom, answers: nextAnswers);
+  }
+
+  /// 직접 추가한 선택지를 지운다. 선택도 함께 풀어야 답에 유령이 남지 않는다.
+  void removeCustomOption(String question, String value) {
+    final custom = state.customOptions[question];
+    if (custom == null) return;
+
+    final nextCustom = Map<String, List<String>>.from(state.customOptions)
+      ..[question] = custom.where((o) => o != value).toList();
+
+    state = state.copyWith(
+      customOptions: nextCustom,
+      answers: state.answers.where((a) => a != value).toList(),
+    );
   }
 
   /// 진행 중인 카드 생성. 중복 호출을 막는 유일한 지점이다.

@@ -189,12 +189,16 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
   /// 서버가 실패해도 질문 화면을 보여줄 수 있게 하는 대체 질문.
   /// 실제 서버는 목표마다 하나씩 여러 개를 준다.
+  ///
+  /// 선택지 앞의 이모지는 **서버가 유니코드로 함께 내려준다.** 클라이언트가
+  /// 붙이지 않는다 — 선택지는 AI가 생성해 값이 고정되지 않으므로 매핑이 불가능하다.
+  /// 폴백도 실제 응답과 같은 모양이어야 서버가 죽었을 때만 화면이 달라 보이지 않는다.
   RoutineQuestion _mockQuestion() => const RoutineQuestion(
         isRequired: true,
         questions: [
           QuestionItem(
             question: '꼭 챙겨야 하는 준비물이 있나요?',
-            options: ['우산', '우비', '장화', '여벌 양말', '작은 수건'],
+            options: ['☂️ 우산', '🧥 우비', '👢 장화', '🧦 여벌 양말', '🧺 작은 수건'],
           ),
         ],
       );

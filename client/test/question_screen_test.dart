@@ -44,8 +44,9 @@ void main() {
           path: Routes.routineQuestion,
           builder: (context, state) => const QuestionScreen(),
         ),
+        // 질문 다음은 카드 생성 로딩(262:4703)이다
         GoRoute(
-          path: Routes.routineMasking,
+          path: Routes.routineGenerating,
           builder: (context, state) => const Scaffold(body: Text('로딩 화면')),
         ),
       ],
@@ -169,6 +170,111 @@ void main() {
       await settle(tester);
 
       expect(find.text('로딩 화면'), findsOneWidget);
+    });
+  });
+
+  /// Figma `보호자_새로운 일과 만들기_키보드`(262:3074)의 입력 필드(262:4089).
+  ///
+  /// 선택지에 없는 준비물을 보호자가 직접 적는다. 서버 선택지는 AI가 만든 것이라
+  /// 실제 상황(병원 진료카드 등)을 다 담지 못한다.
+  group('직접 입력하기', () {
+    testWidgets('질문마다 + 직접 입력하기 칩이 있다', (tester) async {
+      await pumpWith(tester, twoQuestions);
+
+      // 질문이 2개면 칩도 2개 — 어느 질문에 추가하는지 구분돼야 한다
+      expect(find.text('+ 직접 입력하기'), findsNWidgets(2));
+    });
+
+    testWidgets('누르면 입력 필드가 열린다', (tester) async {
+      await pumpWith(tester, twoQuestions);
+
+      expect(find.byType(TextField), findsNothing);
+
+      await tester.tap(find.text('+ 직접 입력하기').first);
+      await settle(tester);
+
+      expect(find.byType(TextField), findsOneWidget);
+    });
+
+    testWidgets('입력하고 확정하면 칩으로 추가되고 선택된다', (tester) async {
+      final container = await pumpWith(tester, twoQuestions);
+
+      await tester.tap(find.text('+ 직접 입력하기').first);
+      await settle(tester);
+      await tester.enterText(find.byType(TextField), '진료카드');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await settle(tester);
+
+      // 칩으로 보이고
+      expect(find.text('진료카드'), findsOneWidget);
+      // 바로 선택돼 CTA가 뜬다 — 쓰자마자 또 눌러야 하면 번거롭다
+      expect(container.read(routineFlowProvider).answers, contains('진료카드'));
+      expect(find.text('카드 만들기'), findsOneWidget);
+    });
+
+    testWidgets('빈 값은 추가되지 않는다', (tester) async {
+      final container = await pumpWith(tester, twoQuestions);
+
+      await tester.tap(find.text('+ 직접 입력하기').first);
+      await settle(tester);
+      await tester.enterText(find.byType(TextField), '   ');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await settle(tester);
+
+      expect(container.read(routineFlowProvider).answers, isEmpty);
+    });
+
+    testWidgets('이미 있는 선택지를 적으면 칩을 새로 만들지 않고 그것을 선택한다', (tester) async {
+      final container = await pumpWith(tester, twoQuestions);
+
+      await tester.tap(find.text('+ 직접 입력하기').first);
+      await settle(tester);
+      await tester.enterText(find.byType(TextField), '우산');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await settle(tester);
+
+      // 칩이 두 개가 되면 안 된다
+      expect(find.text('우산'), findsOneWidget);
+      expect(container.read(routineFlowProvider).answers, contains('우산'));
+    });
+
+    testWidgets('추가한 칩은 X로 지운다 — 답에서도 빠진다', (tester) async {
+      final container = await pumpWith(tester, twoQuestions);
+
+      await tester.tap(find.text('+ 직접 입력하기').first);
+      await settle(tester);
+      await tester.enterText(find.byType(TextField), '진료카드');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await settle(tester);
+
+      await tester.tap(find.byKey(const ValueKey('remove-진료카드')));
+      await settle(tester);
+
+      expect(find.text('진료카드'), findsNothing);
+      expect(container.read(routineFlowProvider).answers, isNot(contains('진료카드')));
+    });
+
+    testWidgets('서버 선택지에는 X가 없다 — 지울 수 있는 건 내가 쓴 것뿐', (tester) async {
+      await pumpWith(tester, twoQuestions);
+
+      expect(find.byKey(const ValueKey('remove-우산')), findsNothing);
+    });
+
+    testWidgets('추가한 칩은 다시 눌러 선택을 풀 수 있다', (tester) async {
+      final container = await pumpWith(tester, twoQuestions);
+
+      await tester.tap(find.text('+ 직접 입력하기').first);
+      await settle(tester);
+      await tester.enterText(find.byType(TextField), '진료카드');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await settle(tester);
+
+      await tester.tap(find.text('진료카드'));
+      await settle(tester);
+
+      // 칩은 남아 있고 선택만 풀린다
+      expect(find.text('진료카드'), findsOneWidget);
+      expect(container.read(routineFlowProvider).answers, isEmpty);
     });
   });
 
