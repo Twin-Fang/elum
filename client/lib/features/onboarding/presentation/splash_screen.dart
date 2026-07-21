@@ -249,6 +249,22 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               ),
             ),
 
+            // 하단 페이드 (x=0, y=675, 393×177) — 병아리 몸통 하단과 CTA 버튼
+            // 사이를 투명→크림색(#FFFADB)으로 자연스럽게 이어준다.
+            // Figma Rectangle 13. CTA보다 먼저 그려 버튼 아래 깔린다.
+            Positioned(
+              left: 0,
+              top: 675.h,
+              width: 393.w,
+              height: 177.h,
+              child: SvgPicture.asset(
+                AppAssets.splashFade,
+                width: 393.w,
+                height: 177.h,
+                fit: BoxFit.fill,
+              ),
+            ),
+
             // 하단 CTA (x=16, y=675, 360×66) — 마지막에 등장
             Positioned(
               left: 16.w,
