@@ -7,12 +7,15 @@ import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class GeminiImageClient {
@@ -25,21 +28,9 @@ public class GeminiImageClient {
   private final PromptTemplateService promptTemplateService;
   private final CharacterReferenceProvider characterReferenceProvider;
 
-  // 옛 호출부(RoutineAiPipeline)가 Task 5에서 새 오버로드로 옮겨갈 때까지 남겨두는
-  // 임시 위임 메서드. Task 5 완료 후에는 더 이상 쓰이지 않는다.
-  public GeneratedImage generateImage(String stepDescription) {
-    return generateImage(stepDescription, null);
-  }
-
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
     String prefix = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
     return callGenerateImage(prefix, stepDescription, characterType);
-  }
-
-  // 옛 호출부(AdminPromptService)가 Task 7에서 새 오버로드로 옮겨갈 때까지 남겨두는
-  // 임시 위임 메서드. Task 7 완료 후에는 더 이상 쓰이지 않는다.
-  public GeneratedImage generateImageForTest(String prefix, String sampleInput) {
-    return generateImageForTest(prefix, sampleInput, null);
   }
 
   // 관리자 테스트 전용: DB 조회 없이 전달받은 prefix를 그대로 사용한다.
@@ -57,22 +48,43 @@ public class GeminiImageClient {
       String base64Image = Base64.getEncoder().encodeToString(characterImage);
       parts.add(GeminiGenerateContentRequest.GeminiPart.ofInlineData("image/png", base64Image));
     }
-    parts.add(new GeminiGenerateContentRequest.GeminiPart(prefix + stepDescription));
+    String promptText = prefix + stepDescription;
+    parts.add(new GeminiGenerateContentRequest.GeminiPart(promptText));
 
+    // responseModalities를 명시하지 않으면 이미지 생성 모델이 간헐적으로 텍스트만
+    // 응답하고 이미지 데이터(inlineData)를 아예 포함하지 않는 경우가 있어(운영 로그에서
+    // "Gemini 응답에 이미지 데이터가 없음" 실패로 확인됨), TEXT/IMAGE 모달리티를 모두
+    // 요청해 이미지 출력을 강제한다.
     GeminiGenerateContentRequest request = new GeminiGenerateContentRequest(
       null,
       List.of(new GeminiGenerateContentRequest.GeminiContent("user", parts)),
-      null
+      Map.of("responseModalities", List.of("TEXT", "IMAGE"))
     );
 
-    GeminiGenerateContentResponse response = geminiRestClient.post()
-      .uri("/v1beta/models/{model}:generateContent", geminiProperties.imageModel())
-      .header("x-goog-api-key", geminiProperties.apiKey())
-      .body(request)
-      .retrieve()
-      .body(GeminiGenerateContentResponse.class);
-
-    return extractImage(response);
+    long startedAt = System.currentTimeMillis();
+    log.info(
+      "Gemini 이미지 생성 호출 시작: model={}, apiKey={}, characterType={}, prompt={}",
+      geminiProperties.imageModel(), geminiProperties.apiKey(), characterType, promptText
+    );
+    try {
+      GeminiGenerateContentResponse response = geminiRestClient.post()
+        .uri("/v1beta/models/{model}:generateContent", geminiProperties.imageModel())
+        .header("x-goog-api-key", geminiProperties.apiKey())
+        .body(request)
+        .retrieve()
+        .body(GeminiGenerateContentResponse.class);
+      log.info(
+        "Gemini 이미지 생성 호출 완료: model={}, elapsedMs={}, response={}",
+        geminiProperties.imageModel(), System.currentTimeMillis() - startedAt, response
+      );
+      return extractImage(response);
+    } catch (Exception e) {
+      log.warn(
+        "Gemini 이미지 생성 호출 실패: model={}, elapsedMs={}, characterType={}, prompt={}",
+        geminiProperties.imageModel(), System.currentTimeMillis() - startedAt, characterType, promptText, e
+      );
+      throw e;
+    }
   }
 
   private GeneratedImage extractImage(GeminiGenerateContentResponse response) {

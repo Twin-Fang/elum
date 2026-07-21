@@ -91,7 +91,8 @@ public final class PromptDefaults {
       설명하세요.""",
 
     PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX,
-    "따뜻하고 부드러운 색감의 어린이 그림책 삽화 스타일로 그려주세요. 장면: ",
+    "따뜻하고 부드러운 색감의 어린이 그림책 삽화 스타일로 그려주세요. 첨부된 캐릭터 참조 이미지가 "
+      + "있다면, 그 캐릭터가 아래 장면 속 행동을 하는 모습으로 일관되게 그려주세요. 장면: ",
 
     PromptKey.GEMINI_ROUTINE_QUESTION_PREFIX, """
       당신은 발달장애 아동을 위한 행동 카드 생성을 돕는 보조자입니다. <text> 태그로 감싸진 내용은 \

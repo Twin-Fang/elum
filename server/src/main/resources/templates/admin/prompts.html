@@ -38,6 +38,14 @@
           <input type="text" class="sample-input input input-bordered w-full"
                  th:attr="data-key=${prompt.promptKey}" placeholder="샘플 입력값을 입력하세요"/>
 
+          <select th:if="${prompt.promptKey.name() == 'GEMINI_ROUTINE_IMAGE_PREFIX'}"
+                  class="character-select select select-bordered w-full"
+                  th:attr="data-key=${prompt.promptKey}">
+            <option value="">캐릭터 미지정</option>
+            <option value="LULU">루루</option>
+            <option value="POPO">포포</option>
+          </select>
+
           <div class="flex gap-2">
             <button type="button" class="btn btn-outline btn-sm preview-btn"
                     th:attr="data-key=${prompt.promptKey}">미리보기
@@ -65,6 +73,11 @@
 
   function getSampleInputFor(key) {
     return document.querySelector('.sample-input[data-key="' + key + '"]').value;
+  }
+
+  function getCharacterFor(key) {
+    const select = document.querySelector('.character-select[data-key="' + key + '"]');
+    return select && select.value ? select.value : null;
   }
 
   function getResultAreaFor(key) {
@@ -112,7 +125,8 @@
       try {
         const data = await callPromptApi(key, '/test', {
           content: getContentFor(key),
-          sampleInput: getSampleInputFor(key)
+          sampleInput: getSampleInputFor(key),
+          character: getCharacterFor(key)
         });
         if (data.imageDataUri) {
           resultArea.textContent = '';

@@ -29,6 +29,6 @@ public class AdminPromptTestController {
 
   @PostMapping("/admin/prompts/{key}/test")
   public PromptTestResponse test(@PathVariable PromptKey key, @RequestBody PromptSampleRequest request) {
-    return adminPromptService.test(key, request.content(), request.sampleInput());
+    return adminPromptService.test(key, request.content(), request.sampleInput(), request.character());
   }
 }
