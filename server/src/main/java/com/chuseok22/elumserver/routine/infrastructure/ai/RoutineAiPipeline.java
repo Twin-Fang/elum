@@ -40,7 +40,7 @@ public class RoutineAiPipeline {
   private final RoutineImageStorage routineImageStorage;
 
   public RoutineGenerationResult generateForCreate(
-    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, String maskedAnswers,
+    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> maskedAnswers,
     CharacterType characterType
   ) {
     RoutineStepDraft draft = parseDraft(

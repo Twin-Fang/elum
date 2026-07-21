@@ -1,10 +1,14 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
+import com.chuseok22.elumserver.ai.core.ChildProfileInput;
 import com.chuseok22.elumserver.ai.core.PromptKey;
+import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,25 +31,42 @@ public class GeminiTextClient {
   private final GeminiProperties geminiProperties;
   private final PromptTemplateService promptTemplateService;
 
+  // Spring Boot 4.1은 Jackson 3 기반이라 Jackson 2 ObjectMapper 빈이 자동 구성되지 않으므로
+  // RoutineAiPipeline과 동일하게 직접 생성해서 쓴다.
+  private final ObjectMapper objectMapper = new ObjectMapper();
+
   public GeminiGenerateContentResponse generate(
-    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, String answers
+    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers
   ) {
-    String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX)
-      + buildChildProfileSection(nickname, supportGoals, answers);
-    return callGenerateContent(systemPrompt, wrapAsData(sanitizedInputText));
+    String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
+    String userContent = buildCreateRoutineUserContent(sanitizedInputText, nickname, supportGoals, answers);
+    return callGenerateContent(systemPrompt, userContent);
+  }
+
+  // 실제 호출과 관리자 preview가 같은 조립 결과를 쓰도록 조립 로직만 따로 뗀 메서드.
+  // Gemini를 호출하지 않으므로 AdminPromptService.preview()에서도 그대로 재사용한다.
+  public String buildCreateRoutineUserContent(
+    String routineText, String nickname, Set<SupportGoal> supportGoals, List<String> answers
+  ) {
+    RoutineCreateAiInput input = new RoutineCreateAiInput(
+      "CREATE_ROUTINE",
+      routineText,
+      new ChildProfileInput(nickname, supportGoals == null ? Set.of() : supportGoals),
+      answers == null ? List.of() : answers
+    );
+    return toJson(input);
   }
 
   public GeminiGenerateContentResponse revise(
     List<RoutineStepDraft.StepDraft> previousSteps, String maskedFeedback,
     String nickname, Set<SupportGoal> supportGoals
   ) {
-    String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX)
-      + buildChildProfileSection(nickname, supportGoals, null);
+    String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_REVISE_PREFIX);
     String previousStepsText = previousSteps.stream()
       .map(step -> step.order() + ". " + step.description())
       .collect(Collectors.joining("\n"));
     String userContent = "이전에 생성된 단계:\n" + previousStepsText
-      + "\n\n부모의 수정 요청:\n" + wrapAsData(maskedFeedback);
+      + "\n\n부모의 수정 요청:\n" + maskedFeedback;
     return callGenerateContent(systemPrompt, userContent);
   }
 
@@ -55,26 +76,31 @@ public class GeminiTextClient {
     String nickname, Set<SupportGoal> supportGoals, String sanitizedInputText
   ) {
     String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_QUESTION_PREFIX)
-      + buildChildProfileSection(nickname, supportGoals, null);
-    return callGenerateContent(systemPrompt, wrapAsData(sanitizedInputText), questionResponseSchema());
+      + buildChildProfileSectionLegacy(nickname, supportGoals, null);
+    return callGenerateContent(systemPrompt, wrapAsDataLegacy(sanitizedInputText), questionResponseSchema());
   }
 
   // 관리자 테스트 전용: DB 조회 없이 전달받은 systemPrompt를 그대로 사용해
   // 저장 전 미리보기/저장된 값 테스트를 동일한 호출 경로로 지원한다.
   public GeminiGenerateContentResponse generateForTest(String systemPrompt, String sampleInput) {
-    return callGenerateContent(systemPrompt, wrapAsData(sampleInput));
+    String userContent = buildCreateRoutineUserContent(sampleInput, null, Set.of(), List.of());
+    return callGenerateContent(systemPrompt, userContent);
   }
 
   // 관리자 테스트 전용(질문 생성 프롬프트): questionResponseSchema를 사용한다는 점만
   // generateForTest와 다르다.
   public GeminiGenerateContentResponse generateQuestionForTest(String systemPrompt, String sampleInput) {
-    return callGenerateContent(systemPrompt, wrapAsData(sampleInput), questionResponseSchema());
+    return callGenerateContent(systemPrompt, wrapAsDataLegacy(sampleInput), questionResponseSchema());
   }
 
-  // 닉네임/도움 목표/보호자 답변 중 존재하는 것만 시스템 프롬프트 뒤에 이어붙이는
-  // "아동 설정" 블록을 만든다. 셋 다 없으면(온보딩 미완료) 빈 문자열을 반환해
-  // 프롬프트에 아무 영향도 주지 않는다.
-  private String buildChildProfileSection(String nickname, Set<SupportGoal> supportGoals, String answers) {
+  // TODO(Task 5): revise()를 REVISE_ROUTINE JSON으로 전환하면서 제거 예정. 지금은 컴파일만
+  // 맞추기 위해 임시로 남겨둔 이전 <text> 래핑 로직이다.
+  private String wrapAsDataLegacy(String text) {
+    return "<text>" + text + "</text>";
+  }
+
+  // TODO(Task 7): generateQuestion()을 JSON으로 전환하면서 제거 예정.
+  private String buildChildProfileSectionLegacy(String nickname, Set<SupportGoal> supportGoals, String answers) {
     boolean hasNickname = nickname != null && !nickname.isBlank();
     boolean hasGoals = supportGoals != null && !supportGoals.isEmpty();
     boolean hasAnswers = answers != null && !answers.isBlank();
@@ -142,8 +168,12 @@ public class GeminiTextClient {
     }
   }
 
-  private String wrapAsData(String text) {
-    return "<text>" + text + "</text>";
+  private String toJson(Object input) {
+    try {
+      return objectMapper.writeValueAsString(input);
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException("Gemini 요청 JSON 직렬화 실패", e);
+    }
   }
 
   private Map<String, Object> generationConfig(Map<String, Object> schema) {
