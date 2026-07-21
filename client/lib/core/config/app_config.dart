@@ -43,6 +43,10 @@ abstract final class AppConfig {
   /// ⚠️ 유출되면 안 되는 값이다. `.env.example`에는 빈 값으로 둔다.
   static String get ttsApiKey => _string('ELUM_TTS_API_KEY', '');
 
+  /// AI DLP 요청 암호화 마스터 시크릿. 서버 application-dev.yml의 elum.aidlp.secret와 동일 값.
+  /// 비면 암호화를 건너뛴다(평문 전송 → 서버도 통과, 데모 안전).
+  static String get aidlpSecret => _string('ELUM_AIDLP_SECRET', '');
+
   // --- 데모 연출 ---
 
   /// AI DLP 처리 최소 노출 시간.

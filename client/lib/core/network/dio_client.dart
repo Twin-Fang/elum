@@ -7,6 +7,7 @@ import '../../features/onboarding/application/onboarding_notifier.dart';
 import '../config/app_config.dart';
 import '../logger/app_logger.dart';
 import 'auth_interceptor.dart';
+import 'encryption_interceptor.dart';
 
 /// Dio 인스턴스 생성. 설정값은 전부 [AppConfig]에서 온다 — 하드코딩하지 않는다.
 abstract final class DioClient {
@@ -19,6 +20,9 @@ abstract final class DioClient {
         contentType: 'application/json',
       ),
     );
+
+    // 암호화는 로깅보다 먼저 등록한다 — 봉투로 바뀐 본문만 로그에 남아 원문이 새지 않는다.
+    dio.interceptors.add(EncryptionInterceptor(secret: AppConfig.aidlpSecret));
 
     if (AppConfig.enableNetworkLog) {
       dio.interceptors.add(SafeLogInterceptor());
