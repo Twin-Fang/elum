@@ -2,7 +2,9 @@ package com.chuseok22.elumserver.routine.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
@@ -12,6 +14,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
@@ -19,6 +22,7 @@ import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineSuggestionCatalog;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
+import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.util.List;
@@ -48,6 +52,9 @@ class RoutineServiceTest {
 
   @Mock
   private RoutineAiPipeline routineAiPipeline;
+
+  @Mock
+  private RoutineRequestCooldownGuard routineRequestCooldownGuard;
 
   @InjectMocks
   private RoutineService routineService;
@@ -186,5 +193,18 @@ class RoutineServiceTest {
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
+  }
+
+  @Test
+  @DisplayName("쿨다운 중이면 회원/AI 파이프라인 조회 없이 ROUTINE_REQUEST_TOO_FREQUENT를 던진다")
+  void create_cooldownActive_throwsWithoutTouchingMemberOrPipeline() {
+    doThrow(new CustomException(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT))
+      .when(routineRequestCooldownGuard).guard("member-1");
+
+    assertThatThrownBy(() -> routineService.create("member-1", new RoutineCreateRequest(null, null, null)))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT));
+    verifyNoInteractions(memberRepository, routineAiPipeline);
   }
 }
