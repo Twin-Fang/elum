@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../shared/models/action_card.dart';
@@ -22,6 +23,7 @@ class ActionCardView extends StatelessWidget {
     this.routineId = '',
     this.onEdit,
     this.onSpeak,
+    this.isSpeaking = false,
   });
 
   final ActionCard card;
@@ -36,8 +38,14 @@ class ActionCardView extends StatelessWidget {
   /// null이면 수정 버튼을 그리지 않는다 (아이 모드)
   final VoidCallback? onEdit;
 
-  /// 소리로 읽어주기. 아직 TTS를 붙이지 않아 자리만 있다.
+  /// 소리로 읽어주기.
   final VoidCallback? onSpeak;
+
+  /// 지금 이 카드를 읽고 있는가. 아이콘 상태가 바뀐다.
+  final bool isSpeaking;
+
+  /// Figma 실측 — 카드 안 스피커 아이콘 24×24
+  static const _volumeIconSize = 24.0;
 
   @override
   Widget build(BuildContext context) {
@@ -91,10 +99,20 @@ class ActionCardView extends StatelessWidget {
               AppPressable(
                 onTap: onSpeak,
                 scaleDown: AppPressable.scaleIcon,
-                child: SvgPicture.asset(
-                  AppAssets.iconVolume,
-                  width: 24,
-                  height: 24,
+                // SVG가 25×25인데 Figma 배치는 24×24다. 크기만 지정하면
+                // 비율이 눌려 아이콘이 찌그러진다 — contain으로 비율을 지킨다.
+                child: SizedBox(
+                  width: _volumeIconSize,
+                  height: _volumeIconSize,
+                  // 읽는 중에는 흐리게 — 다시 누르면 멈춘다는 신호다
+                  child: AnimatedOpacity(
+                    duration: AppMotion.fast,
+                    opacity: isSpeaking ? 0.45 : 1,
+                    child: SvgPicture.asset(
+                      AppAssets.iconVolume,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
               ),
               SizedBox(width: space.sm),

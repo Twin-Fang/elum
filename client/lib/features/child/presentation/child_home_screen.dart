@@ -8,9 +8,11 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../shared/models/action_card.dart';
 import '../../guardian/application/routine_notifier.dart';
 import '../../guardian/presentation/widgets/action_card_view.dart';
 import '../application/child_routine_notifier.dart';
+import '../data/speech_service.dart';
 import 'mode_switch_screen.dart';
 
 /// Figma `아이_홈`(309:3548 체크 전 / 309:3648 체크 후).
@@ -32,10 +34,59 @@ class ChildHomeScreen extends ConsumerStatefulWidget {
 class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
   final _controller = PageController(viewportFraction: 0.88);
 
+  /// 지금 읽고 있는 카드 id. null이면 아무것도 안 읽고 있다.
+  String? _speakingId;
+
+  /// dispose에서 `ref`를 읽으면 "unmounted" 오류가 난다.
+  /// 미리 잡아두고 정리할 때 쓴다.
+  SpeechService? _speech;
+
+  @override
+  void initState() {
+    super.initState();
+    // 첫 프레임 뒤에 잡는다. initState에서 읽어도 되지만 일관되게 둔다.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _speech = ref.read(speechServiceProvider);
+    });
+  }
+
   @override
   void dispose() {
+    // 화면을 벗어나도 소리가 남으면 다음 화면까지 따라온다
+    _speech?.stop();
     _controller.dispose();
     super.dispose();
+  }
+
+  /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다.
+  ///
+  /// 아동이 여러 번 누를 때 소리가 겹치면 알아들을 수 없다.
+  Future<void> _speak(ActionCard card) async {
+    final speech = ref.read(speechServiceProvider);
+
+    if (_speakingId == card.id) {
+      await speech.stop();
+      if (mounted) setState(() => _speakingId = null);
+      return;
+    }
+
+    setState(() => _speakingId = card.id);
+
+    // 제목만 읽으면 무엇을 해야 하는지가 빠지고, 설명만 읽으면 화면의
+    // 큰 제목과 어긋난다. 둘을 이어 붙인다.
+    final ok = await speech.speak('${card.displayTitle}. ${card.description}');
+
+    if (!mounted) return;
+    setState(() => _speakingId = null);
+
+    if (!ok) _showFailure();
+  }
+
+  /// 소리를 낼 수 없을 때. 아동은 못 읽지만 보호자가 제보할 때 필요하다.
+  void _showFailure() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('소리를 재생할 수 없어요 (E-TTS)')),
+    );
   }
 
   /// 현재 보고 있는 카드. 체크 버튼이 이 카드를 대상으로 한다.
@@ -85,6 +136,8 @@ class _ChildHomeScreenState extends ConsumerState<ChildHomeScreen> {
                       card: cards[index],
                       index: index,
                       routineId: routineId,
+                  onSpeak: () => _speak(cards[index]),
+                  isSpeaking: _speakingId == cards[index].id,
                     ),
                   ),
                 ),

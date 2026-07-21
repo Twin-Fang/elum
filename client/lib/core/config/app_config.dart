@@ -33,6 +33,16 @@ abstract final class AppConfig {
   static Duration get receiveTimeout =>
       Duration(milliseconds: _int('ELUM_API_RECEIVE_TIMEOUT_MS', 60000));
 
+  // --- TTS (카드 읽어주기) ---
+  // 기기 내장 음성이 우선이고, 실패할 때만 이 서버를 쓴다.
+  // 키가 없으면 서버 폴백만 꺼지고 기기 음성은 그대로 동작한다.
+
+  static String get ttsBaseUrl =>
+      _string('ELUM_TTS_BASE_URL', 'https://ai.suhsaechan.kr/api/flask');
+
+  /// ⚠️ 유출되면 안 되는 값이다. `.env.example`에는 빈 값으로 둔다.
+  static String get ttsApiKey => _string('ELUM_TTS_API_KEY', '');
+
   // --- 데모 연출 ---
 
   /// AI DLP 처리 최소 노출 시간.
