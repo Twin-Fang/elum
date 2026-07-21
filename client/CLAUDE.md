@@ -86,6 +86,104 @@
 - 보호자 입력 원문을 로그에 남기는 것 (루트 docs 원칙 5번)
 - 아동 화면에 **미승인 카드** 렌더링 (원칙 3번)
 - **추측으로 API 필드명 짓기** — 서버 코드를 열어보고 쓴다
+- **URL·타임아웃 등 환경값 하드코딩** — `AppConfig` 경유
+- **에셋 경로 문자열 직접 쓰기** — `AppAssets` 경유
+
+---
+
+## 🔧 관리 포인트 (여기부터가 유지보수의 핵심)
+
+무엇을 고칠 때 **어디를 함께 고쳐야 하는지**를 정리한다.
+한 곳만 고치면 조용히 어긋나는 것들이라, 작업 전에 이 표를 먼저 본다.
+
+### 1. 환경변수를 추가할 때
+
+값이 환경(로컬/운영)에 따라 달라지거나 나중에 조정될 여지가 있으면 **코드에 박지 말고 `.env`로 뺀다.**
+
+| 순서 | 할 일 |
+| --- | --- |
+| 1 | `.env.example`에 키 + 설명 주석 추가 (**커밋함** — 어떤 키가 필요한지의 유일한 문서) |
+| 2 | `lib/core/config/app_config.dart`에 getter 추가 (**기본값 필수**) |
+| 3 | 로컬 `.env`에도 추가 (**커밋 안 함**) |
+| 4 | 배포용이면 GitHub Secret `CLIENT_ENV_FILE` 갱신 |
+
+```dart
+// AppConfig에 추가할 때 — 값이 없거나 형식이 틀려도 앱은 떠야 한다
+static int get retryCount => _int('ELUM_RETRY_COUNT', 3);
+```
+
+> **기본값 없는 환경변수를 만들지 않는다.** `.env`를 안 만든 신규 개발자의 앱이 죽으면
+> 원인을 찾는 데 시간이 갈린다. `AppConfig.load()`는 `.env`가 없어도 경고만 남기고 진행한다.
+
+**민감값 판단 기준**: 서버 주소·타임아웃 같은 건 `.env`로 충분하다.
+API 키·인증서처럼 **유출되면 안 되는 값**은 반드시 GitHub Secret으로만 관리하고
+`.env.example`에는 빈 값으로 둔다.
+
+### 2. 에셋을 추가할 때
+
+| 순서 | 할 일 |
+| --- | --- |
+| 1 | `assets/images/`에 파일 배치 (Figma에서 SVG로 추출) |
+| 2 | `lib/core/assets/app_assets.dart`에 상수/함수 추가 |
+| 3 | `pubspec.yaml`의 `assets:`는 디렉토리 단위라 **보통 수정 불필요** |
+
+> 위젯에 `'assets/images/foo.svg'`를 직접 쓰지 않는다. 오타는 런타임에야 드러난다.
+> enum과 1:1 대응하는 에셋은 `switch`로 매핑해 **새 enum 값 추가 시 컴파일 에러**로 잡히게 한다.
+
+### 3. 디자인 토큰을 바꿀 때
+
+**Figma가 바뀌면 코드보다 `docs/design-system.md`를 먼저 고친다.**
+
+| 순서 | 할 일 |
+| --- | --- |
+| 1 | Figma **컴포넌트셋 원본**에서 값 확인 (인스턴스는 특정 variant만 보여준다) |
+| 2 | `docs/design-system.md` 표 갱신 |
+| 3 | `lib/core/theme/app_colors.dart` 등 토큰 수정 |
+
+> ⚠️ 실제로 겪은 실수: 온보딩 프레임의 버튼 인스턴스가 전부 `disable`로 찍혀 있어
+> enable 색이 없는 줄 알았다. 컴포넌트셋(`187:299`)에는 두 variant가 다 있었다.
+> **인스턴스가 아니라 컴포넌트셋이 원본이다.**
+
+### 4. 서버 API가 바뀔 때
+
+| 순서 | 할 일 |
+| --- | --- |
+| 1 | `server/`의 Controller·Entity·DTO를 **직접 읽는다** |
+| 2 | 클라이언트 도메인 모델(enum `apiValue`, 모델 필드명) 수정 |
+| 3 | `flutter test` — 서버 계약 검증 테스트가 잡아준다 |
+
+> ⚠️ 실제로 겪은 실수: `docs/06-api-spec.md` 초안대로 `SupportGoal`을 만들었는데
+> 서버 실제 enum과 값이 전부 달랐다. **문서가 아니라 서버 코드가 기준이다.**
+
+### 5. 화면을 추가할 때
+
+| 순서 | 할 일 |
+| --- | --- |
+| 1 | `Routes`에 경로 상수 추가 (문자열 직접 쓰지 않음) |
+| 2 | `createRouter()`에 `GoRoute` 등록 |
+| 3 | `features/<기능>/presentation/`에 화면 작성 |
+| 4 | 화면 전용 위젯은 그 아래 `widgets/`에 |
+
+**공통 위젯 승격 기준**: 두 번째 화면이 같은 위젯을 필요로 할 때 `core/widgets/`로 옮긴다.
+화면 하나만 보고 미리 공통화하면 파라미터가 계속 붙어 결국 아무도 못 고치는 위젯이 된다.
+
+### 6. 코드 생성이 필요할 때
+
+Freezed 모델(`@freezed`)을 수정하면 **반드시** 재생성한다. 안 하면 "파라미터가 없다"는
+엉뚱한 컴파일 에러가 난다.
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+### 알아둘 함정 (실제로 부딪힌 것들)
+
+| 증상 | 원인 | 대응 |
+| --- | --- | --- |
+| `Failed to compile build script` | build hook이 있는 패키지(`objective_c` 등)가 `build_runner` AOT를 깨뜨림 | 해당 패키지 제외 또는 대체 |
+| "No named parameter" 인데 코드는 맞음 | Freezed 생성 파일이 낡음 | `build_runner build` 재실행 |
+| `riverpod_generator`/`json_serializable` 추가 실패 | `flutter_riverpod 3.3.2`의 analyzer 제약과 충돌 | provider 수동 선언, JSON 직접 파싱 |
+| 폰트가 안 나옴 | `pubspec.yaml` fonts 선언 누락 | `flutter build bundle` 후 `FontManifest.json` 확인 |
 
 ## 폰트
 
