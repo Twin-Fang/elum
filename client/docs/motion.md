@@ -195,15 +195,19 @@ final reduceMotion = MediaQuery.disableAnimationsOf(context);
 > Timer·debounce 같은 **애니메이션이 아닌 Duration**은 토큰으로 바꾸지 않는다.
 > `SetupDoneScreen.holdDuration`(1600ms)이 그 예다 — 화면 체류 시간이지 모션이 아니다.
 
-## 적용 현황
+## 적용 현황 (2026-07-22 갱신)
 
 | 항목 | 상태 |
 | --- | --- |
-| `AppMotion` 토큰 | 도입 예정 |
-| `AppPressable` | 도입 예정 |
-| `AppFadeSlideIn` | 도입 예정 |
+| `AppMotion` 토큰 | 적용 중 (`sceneStagger` 추가 — 장면 연출용 120ms) |
+| `AppPressable` | 적용 중 |
+| `AppFadeSlideIn` | **구현 완료** (`core/widgets/app_fade_slide_in.dart`) — 시작 화면 적용 |
 | `AppSkeleton` | 도입 예정 |
-| 페이지 전환 규칙 | 미적용 (go_router 기본 전환) |
+| 페이지 전환 규칙 | **온보딩 구간 적용** (`core/router/app_transitions.dart` — slidePage/fadePage). 그 외 구간 미적용 |
+
+> 화면 고유 안무 값(시작 화면 idle 주기 3.4s·2.6s 등)은 다른 화면과 공유되지 않고
+> 배수 회피를 화면 단위로 조율해야 하므로 **AppMotion에 넣지 않고 화면의 private
+> 상수로 둔다.** WHY 주석을 반드시 남긴다.
 
 **새 화면을 만들 때 이 문서를 먼저 본다.** 기존 화면은 손대는 김에 함께 옮긴다 —
 한꺼번에 고치는 작업을 만들지 않기 위해서다.
