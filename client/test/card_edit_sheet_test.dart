@@ -228,6 +228,41 @@ void main() {
       expect(find.text('책과 준비물을 가방에 넣어요'), findsOneWidget);
     });
 
+    testWidgets('title 없는 예전 카드는 제목칸이 비어 열린다 (제목=설명 방지)', (tester) async {
+      // 예전 카드는 title이 없어 displayTitle이 description을 대신 돌려준다.
+      // 그 값을 제목칸 초기값으로 쓰면 사용자가 제목을 안 고쳤을 때
+      // title=description으로 저장돼 제목·설명이 똑같아진다.
+      // 시트는 실제 title로 열려야 하므로, title 없는 카드는 제목칸이 비어야 한다.
+      const titleless = Routine(
+        id: 'r1',
+        status: 'PENDING_REVIEW',
+        steps: [
+          ActionCard(id: 'c1', description: '현관에서 우산을 챙겨요', stepOrder: 1),
+        ],
+      );
+
+      await tester.pumpWidget(wrap(_FakeRepo(synced: true)));
+      final context = tester.element(find.byType(CardReviewScreen));
+      ProviderScope.containerOf(context, listen: false)
+          .read(routineFlowProvider.notifier)
+          .state = const RoutineFlowState(routine: titleless);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      await tester.tap(find.text('이 카드 수정하기'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // 제목칸(첫 필드)이 비어 있어야 한다 — description이 새어들지 않았다
+      final titleField =
+          tester.widget<TextField>(find.byType(TextField).first);
+      expect(titleField.controller?.text, isEmpty,
+          reason: 'title 없는 카드는 제목칸이 비어 열려야 한다');
+      // 저장 버튼은 제목이 비어 비활성 — 제목=설명으로 저장될 수 없다
+      final saveButton = find.text('저장하기').last;
+      expect(saveButton, findsOneWidget);
+    });
+
     testWidgets('제목을 지우면 저장할 수 없다', (tester) async {
       await pumpReview(tester, _FakeRepo(synced: true));
 

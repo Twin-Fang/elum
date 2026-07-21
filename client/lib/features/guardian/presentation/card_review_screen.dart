@@ -106,7 +106,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
   Future<void> _edit(ActionCard card) async {
     final edited = await CardEditSheet.show(
       context,
-      title: card.displayTitle,
+      // displayTitle이 아니라 실제 title을 넘긴다. 예전 카드는 title이 없어
+      // displayTitle이 description을 대신 돌려주는데, 그 값이 제목칸에 채워지면
+      // 사용자가 제목을 안 고쳤을 때 title=description으로 저장돼 제목·설명이
+      // 똑같아진다. title이 비면 제목칸도 비워 사용자가 직접 채우게 한다.
+      title: card.title,
       description: card.description,
     );
     // 저장 없이 닫았다 — 아무것도 바꾸지 않는다
