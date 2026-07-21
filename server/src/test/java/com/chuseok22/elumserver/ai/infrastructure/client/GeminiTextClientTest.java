@@ -9,6 +9,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -89,5 +90,44 @@ class GeminiTextClientTest {
     );
 
     assertThat(json).doesNotContain("<text>");
+  }
+
+  @Test
+  @DisplayName("buildQuestionUserContent는 <text> 태그 없이 task/routineText/childProfile을 담는다")
+  void buildQuestionUserContent_returnsStructuredJson() throws Exception {
+    String json = geminiTextClient.buildQuestionUserContent(
+      "내일 비 오는 날 학교 가기", "하늘이", Set.of(SupportGoal.PREPARE_ITEMS, SupportGoal.PREPARE_NEW)
+    );
+
+    assertThat(json).doesNotContain("<text>");
+    JsonNode node = objectMapper.readTree(json);
+    assertThat(node.get("task").asText()).isEqualTo("GENERATE_ROUTINE_QUESTIONS");
+    assertThat(node.get("routineText").asText()).isEqualTo("내일 비 오는 날 학교 가기");
+  }
+
+  @Test
+  @DisplayName("questionResponseSchema는 선택된 목표 개수만큼 questions 배열 크기를 강제한다")
+  void questionResponseSchema_twoGoals_setsMinMaxItemsToTwo() throws Exception {
+    Map<String, Object> schema = geminiTextClient.questionResponseSchemaFor(
+      Set.of(SupportGoal.PREPARE_ITEMS, SupportGoal.PREPARE_NEW)
+    );
+
+    @SuppressWarnings("unchecked")
+    Map<String, Object> questionsSchema = (Map<String, Object>)
+      ((Map<String, Object>) schema.get("properties")).get("questions");
+    assertThat(questionsSchema.get("minItems")).isEqualTo(2);
+    assertThat(questionsSchema.get("maxItems")).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("questionResponseSchema는 목표 하나만 선택되면 배열 크기를 1로 강제한다")
+  void questionResponseSchema_oneGoal_setsMinMaxItemsToOne() throws Exception {
+    Map<String, Object> schema = geminiTextClient.questionResponseSchemaFor(Set.of(SupportGoal.PREPARE_ITEMS));
+
+    @SuppressWarnings("unchecked")
+    Map<String, Object> questionsSchema = (Map<String, Object>)
+      ((Map<String, Object>) schema.get("properties")).get("questions");
+    assertThat(questionsSchema.get("minItems")).isEqualTo(1);
+    assertThat(questionsSchema.get("maxItems")).isEqualTo(1);
   }
 }
