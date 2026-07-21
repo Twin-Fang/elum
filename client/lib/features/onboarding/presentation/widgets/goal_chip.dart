@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
@@ -42,11 +43,11 @@ class GoalChip extends StatelessWidget {
       // 아동도 볼 수 있는 화면이라 전환을 급하게 두지 않는다
       duration: AppMotion.fast,
       curve: AppMotion.standard,
-      height: height,
-      padding: const EdgeInsets.symmetric(horizontal: _iconLeft),
+      height: height.h,
+      padding: EdgeInsets.symmetric(horizontal: _iconLeft.w),
       decoration: BoxDecoration(
         color: isSelected ? colors.goalSelectedFill : colors.surface,
-        borderRadius: BorderRadius.circular(context.space.cardRadius),
+        borderRadius: BorderRadius.circular(context.space.cardRadius.r),
         border: Border.all(
           color: isSelected ? colors.goalSelectedBorder : colors.border,
           width: isSelected
@@ -59,10 +60,10 @@ class GoalChip extends StatelessWidget {
           // 아이콘 배경 원은 선택 여부와 무관하게 동일하다 (Figma 확인)
           SvgPicture.asset(
             AppAssets.goalIcon,
-            width: _iconSize,
-            height: _iconSize,
+            width: _iconSize.w,
+            height: _iconSize.w,
           ),
-          const SizedBox(width: _iconToText),
+          SizedBox(width: _iconToText.w),
           Expanded(
             child: Text(
               goal.label,

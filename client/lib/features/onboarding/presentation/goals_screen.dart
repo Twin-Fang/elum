@@ -43,9 +43,10 @@ class GoalsScreen extends ConsumerWidget {
               // 앞 화면에서 받은 호칭을 그대로 쓴다
               title: '${profile.displayName}의 어떤 순간을\n도와주고 싶으신가요?',
               description: '여러 개를 선택할 수 있어요',
+              hasBackButton: true,
             ),
-            // 설명(y=211) → 첫 칩(y=279)
-            SizedBox(height: context.space.xl),
+            // Figma 설명 하단(227) → 첫 칩(279)
+            SizedBox(height: context.space.headerToContent),
             SelectableGroup<SupportGoal>(
               items: SupportGoal.values,
               selected: profile.supportGoals,

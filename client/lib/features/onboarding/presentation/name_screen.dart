@@ -98,7 +98,8 @@ class _NameScreenState extends ConsumerState<NameScreen> {
             // 개인정보 최소수집 원칙의 UI 표현 — 삭제하지 않는다
             description: '정확한 실명이 아니어도 괜찮아요',
           ),
-          SizedBox(height: context.space.xl),
+          // Figma 설명 하단(227) → 입력 필드(279)
+          SizedBox(height: context.space.headerToContent),
           ElumTextField(
             controller: _controller,
             hintText: '이름을 입력해주세요',

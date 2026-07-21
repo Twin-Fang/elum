@@ -22,6 +22,8 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     required this.borderWidth,
     required this.selectedBorderWidth,
     required this.headerTop,
+    required this.ctaTop,
+    required this.headerToContent,
   });
 
   final double xs;
@@ -51,8 +53,20 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
   /// 선택 상태 테두리 두께 — 목표 칩·캐릭터 카드 공통 2px
   final double selectedBorderWidth;
 
-  /// 상태바 아래 제목 시작 위치 (y=131)
+  /// 제목 시작 위치. **화면 최상단(y=0) 기준 절대 좌표**다 (Figma y=131).
+  ///
+  /// Figma 프레임(393×852)은 StatusBar(y=0~59)를 포함하므로 이 값은
+  /// 상태바를 뺀 값이 아니다. SafeArea 안에서 그대로 쓰면 상태바 높이만큼
+  /// 위로 밀리므로, [ElumScaffold]가 `131 - safeAreaTop`으로 보정해 쓴다.
   final double headerTop;
+
+  /// 하단 CTA 상단 위치 — 화면 최상단 기준 (Figma y=675).
+  /// Home Indicator(y=831)와 함께 하단 여백을 역산하는 근거다.
+  final double ctaTop;
+
+  /// 헤더 설명 하단(y=227) → 첫 콘텐츠(y=279) 간격.
+  /// [xl](32)과 값이 달라 별도 토큰으로 둔다 — 온보딩 전 화면 공통 52다.
+  final double headerToContent;
 
   static const standard = AppSpacing(
     xs: 8,
@@ -69,7 +83,10 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     cardRadius: 20,
     borderWidth: 1,
     selectedBorderWidth: 2,
-    headerTop: 72,
+    // Figma 실측 — 화면 최상단 기준 절대 y좌표
+    headerTop: 131,
+    ctaTop: 675,
+    headerToContent: 52,
   );
 
   @override
@@ -89,6 +106,8 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     double? borderWidth,
     double? selectedBorderWidth,
     double? headerTop,
+    double? ctaTop,
+    double? headerToContent,
   }) {
     return AppSpacing(
       xs: xs ?? this.xs,
@@ -106,6 +125,8 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
       borderWidth: borderWidth ?? this.borderWidth,
       selectedBorderWidth: selectedBorderWidth ?? this.selectedBorderWidth,
       headerTop: headerTop ?? this.headerTop,
+      ctaTop: ctaTop ?? this.ctaTop,
+      headerToContent: headerToContent ?? this.headerToContent,
     );
   }
 
@@ -129,6 +150,8 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
       selectedBorderWidth:
           lerpDouble(selectedBorderWidth, other.selectedBorderWidth, t),
       headerTop: lerpDouble(headerTop, other.headerTop, t),
+      ctaTop: lerpDouble(ctaTop, other.ctaTop, t),
+      headerToContent: lerpDouble(headerToContent, other.headerToContent, t),
     );
   }
 

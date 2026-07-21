@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
@@ -31,10 +32,10 @@ class ElumButton extends StatelessWidget {
       onTap: onPressed,
       child: Container(
         width: double.infinity,
-        height: space.buttonH,
+        height: space.buttonH.h,
         decoration: BoxDecoration(
           color: isEnabled ? colors.buttonEnabled : colors.buttonDisabled,
-          borderRadius: BorderRadius.circular(space.buttonRadius),
+          borderRadius: BorderRadius.circular(space.buttonRadius.r),
         ),
         alignment: Alignment.center,
         child: Text(

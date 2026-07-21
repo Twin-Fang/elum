@@ -56,29 +56,38 @@ class ElumTextField extends StatelessWidget {
     final space = context.space;
 
     return SizedBox(
-      height: space.fieldH,
+      height: space.fieldH.h,
       child: TextField(
         controller: controller,
         onChanged: onChanged,
         textAlign: resolvedTextAlign,
         textAlignVertical: TextAlignVertical.center,
+        // 부모(SizedBox 68)를 꽉 채운다.
+        //
+        // ⚠️ expands가 없으면 TextField는 **콘텐츠 높이만큼만** 차지한다.
+        // filled 배경도 그만큼만 칠해져 흰 박스가 68이 아니라 46으로 나온다
+        // (실측: y=280~326). vertical 패딩으로 늘리려 하면 콘텐츠+패딩이
+        // 68을 넘겨 반대로 잘린다 — 높이는 부모가, 정렬은 center가 맡는 게 맞다.
+        expands: true,
+        maxLines: null,
+        minLines: null,
         style: context.typo.input.copyWith(color: colors.textPrimary),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: context.typo.input.copyWith(color: colors.textPlaceholder),
           filled: true,
           fillColor: colors.surface,
-          // 세로는 textAlignVertical.center가 맡는다. vertical 패딩을 주면
-          // 콘텐츠 높이 + 패딩이 fieldH(68)를 넘겨 텍스트가 잘린다.
-          contentPadding: EdgeInsets.symmetric(horizontal: space.md),
+          // 세로 패딩을 주지 않는다 — expands + textAlignVertical.center가
+          // 이미 Figma의 수직 중앙(상하 여백 각 24)을 만든다.
+          contentPadding: EdgeInsets.symmetric(horizontal: space.md.w),
           prefixIcon: _buildLeadingIcon(),
           // 기본 최소폭 48이 적용되면 Figma 좌표가 밀린다
           prefixIconConstraints: const BoxConstraints(),
-          border: _border(colors.border, space.fieldRadius),
-          enabledBorder: _border(colors.border, space.fieldRadius),
+          border: _border(colors.border, space.fieldRadius.r),
+          enabledBorder: _border(colors.border, space.fieldRadius.r),
           focusedBorder: _border(
             colors.goalSelectedBorder,
-            space.fieldRadius,
+            space.fieldRadius.r,
             width: space.selectedBorderWidth,
           ),
         ),

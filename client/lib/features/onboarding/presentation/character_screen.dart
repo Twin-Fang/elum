@@ -73,9 +73,11 @@ class CharacterScreen extends ConsumerWidget {
               child: ElumHeader(
                 title: '${profile.displayName}의 하루를 함께할\n친구를 골라주세요',
                 description: '선택한 친구가 카드 속 주인공이 되어 도와줘요',
+                hasBackButton: true,
               ),
             ),
-            SizedBox(height: context.space.xl),
+            // Figma 설명 하단(227) → 카드(279)
+            SizedBox(height: context.space.headerToContent),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
