@@ -65,4 +65,18 @@ void main() {
       expect(SupportGoal.fromApiValue('PREPARE_ITEMS'), SupportGoal.prepareItems);
     });
   });
+
+  group('CardCharacter 서버 계약', () {
+    // 서버 CharacterType(LULU/POPO)과 어긋나면 PATCH /api/member/character가
+    // 역직렬화에 실패해 캐릭터 저장이 조용히 실패한다 (이슈 #89).
+    test('apiValue가 서버 CharacterType enum name과 일치한다', () {
+      expect(CardCharacter.cat.apiValue, 'LULU');
+      expect(CardCharacter.fox.apiValue, 'POPO');
+    });
+
+    // 순서가 화면 배치다 — 고양이가 왼쪽, 여우가 오른쪽. 뒤집히면 화면이 조용히 바뀐다.
+    test('enum 순서가 화면 배치(고양이, 여우)를 유지한다', () {
+      expect(CardCharacter.values, [CardCharacter.cat, CardCharacter.fox]);
+    });
+  });
 }

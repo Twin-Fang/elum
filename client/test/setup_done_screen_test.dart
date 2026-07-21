@@ -33,7 +33,7 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [testStorageOverride()],
+      overrides: [testStorageOverride(), testMemberRepoOverride()],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
         builder: (context, _) => MaterialApp.router(
