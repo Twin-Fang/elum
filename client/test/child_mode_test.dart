@@ -280,6 +280,10 @@ void main() {
         RewardCharacter.ruru.messageFor('하늘이'),
         '하늘이가 할 일을 해내서\n루루가 선물을 가져왔다고 해요',
       );
+      expect(
+        RewardCharacter.popo.messageFor('하늘이'),
+        '포포가 하늘이에게\n축하의 선물로 큰 별을 가져왔어요',
+      );
     });
 
     test('이름이 비어도 조사만 남지 않는다', () {
@@ -289,9 +293,15 @@ void main() {
       expect(RewardCharacter.lumi.messageFor(''), contains('우리 아이에게'));
     });
 
-    test('버튼 문구가 캐릭터마다 다르다 (Figma 343:4434 신난다!)', () {
-      expect(RewardCharacter.ruru.buttonLabel, '신난다!');
-      expect(RewardCharacter.lumi.buttonLabel, '오예!');
+    test('버튼 문구가 캐릭터마다 다르다', () {
+      // 세 프레임의 버튼 문구가 전부 다르다 — 하드코딩하면 안 된다
+      expect(RewardCharacter.lumi.buttonLabel, '오예!'); // 309:4055
+      expect(RewardCharacter.popo.buttonLabel, '좋아요!'); // 334:4320
+      expect(RewardCharacter.ruru.buttonLabel, '신난다!'); // 343:4434
+
+      final labels =
+          RewardCharacter.values.map((c) => c.buttonLabel).toSet();
+      expect(labels.length, RewardCharacter.values.length);
     });
   });
 
