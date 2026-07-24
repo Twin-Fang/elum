@@ -26,6 +26,13 @@ public class AdminPromptController {
     return "admin/prompts";
   }
 
+  @GetMapping("/admin/prompts/{key}/history")
+  public String history(@PathVariable PromptKey key, Model model) {
+    model.addAttribute("prompt", adminPromptService.getTemplate(key));
+    model.addAttribute("histories", adminPromptService.getHistory(key));
+    return "admin/prompt-history";
+  }
+
   @PostMapping("/admin/prompts/{key}")
   public String update(
     @PathVariable PromptKey key,

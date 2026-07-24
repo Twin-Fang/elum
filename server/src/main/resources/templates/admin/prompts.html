@@ -22,7 +22,8 @@
           <h2 class="card-title" th:text="${prompt.promptKey.label}">프롬프트 제목</h2>
           <p class="text-sm text-base-content/60">
             키: <span th:text="${prompt.promptKey}"></span> ·
-            마지막 수정: <span th:text="${prompt.updatedAt}"></span>
+            마지막 수정: <span th:text="${prompt.updatedAt}"></span> ·
+            <a th:href="@{/admin/prompts/{key}/history(key=${prompt.promptKey})}" class="link link-primary">이력 보기</a>
           </p>
 
           <form th:action="@{/admin/prompts/{key}(key=${prompt.promptKey})}" method="post">

@@ -12,6 +12,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiRoutineImagePromptBuilder;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplate;
+import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplateHistory;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -40,6 +41,14 @@ public class AdminPromptService {
 
   public List<PromptTemplate> getAll() {
     return promptTemplateService.getAll();
+  }
+
+  public PromptTemplate getTemplate(PromptKey key) {
+    return promptTemplateService.getTemplate(key);
+  }
+
+  public List<PromptTemplateHistory> getHistory(PromptKey key) {
+    return promptTemplateService.getHistory(key);
   }
 
   public void update(PromptKey key, String content) {
