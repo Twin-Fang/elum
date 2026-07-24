@@ -20,6 +20,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private static final String TOKEN_PREFIX = "Bearer ";
 
   private final JwtProvider jwtProvider;
+  private final TokenAccessValidator tokenAccessValidator;
 
   @Override
   protected void doFilterInternal(
@@ -33,12 +34,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       Claims claims = jwtProvider.parseClaims(token);
       String memberId = claims.getSubject();
 
-      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-        memberId,
-        null,
-        List.of(new SimpleGrantedAuthority("ROLE_MEMBER"))
-      );
-      SecurityContextHolder.getContext().setAuthentication(authentication);
+      // 서명이 유효해도 정지 계정·강제 로그아웃(tokenInvalidBefore 이전 발급) 토큰은
+      // 인증을 세팅하지 않는다 → JwtAuthenticationEntryPoint가 401을 반환한다.
+      if (tokenAccessValidator.isAllowed(memberId, claims.getIssuedAt())) {
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+          memberId,
+          null,
+          List.of(new SimpleGrantedAuthority("ROLE_MEMBER"))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+      }
     }
 
     filterChain.doFilter(request, response);

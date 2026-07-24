@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationFilter;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
+import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.security.AidlpDecryptionFilter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -31,22 +32,26 @@ public class SecurityConfig {
   private final JwtProvider jwtProvider;
   private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
   private final AidlpDecryptionFilter aidlpDecryptionFilter;
+  private final TokenAccessValidator tokenAccessValidator;
 
   // Lombok @RequiredArgsConstructor는 필드의 @Qualifier를 생성자 파라미터로 복사하지 않고,
   // UserDetailsService 구현체를 직접 import하면 common -> member/admin 역방향 패키지 의존이
   // 생기므로, 인터페이스 타입 + 빈 이름 기반 @Qualifier로 명시적 생성자를 작성한다.
+  // TokenAccessValidator도 같은 이유로 인터페이스 타입으로 받는다(구현은 member 도메인).
   public SecurityConfig(
     @Qualifier("memberUserDetailsService") UserDetailsService memberUserDetailsService,
     @Qualifier("adminUserDetailsService") UserDetailsService adminUserDetailsService,
     JwtProvider jwtProvider,
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
-    AidlpDecryptionFilter aidlpDecryptionFilter
+    AidlpDecryptionFilter aidlpDecryptionFilter,
+    TokenAccessValidator tokenAccessValidator
   ) {
     this.memberUserDetailsService = memberUserDetailsService;
     this.adminUserDetailsService = adminUserDetailsService;
     this.jwtProvider = jwtProvider;
     this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
     this.aidlpDecryptionFilter = aidlpDecryptionFilter;
+    this.tokenAccessValidator = tokenAccessValidator;
   }
 
   @Bean
@@ -103,7 +108,7 @@ public class SecurityConfig {
   @Bean
   @Order(2)
   public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
-    JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProvider);
+    JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProvider, tokenAccessValidator);
 
     http
       .securityMatcher(SecurityPaths.API_MATCHER)

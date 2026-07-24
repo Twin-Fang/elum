@@ -9,7 +9,9 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -41,6 +43,8 @@ public class AuthService {
     memberRepository.save(member);
   }
 
+  // 로그인 이력(lastLoginAt·loginCount)을 저장해야 하므로 트랜잭션이 필요하다.
+  @Transactional
   public TokenResponse login(LoginRequest request) {
     try {
       memberAuthenticationManager.authenticate(
@@ -52,6 +56,16 @@ public class AuthService {
 
     Member member = memberRepository.findByUsername(request.username())
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+    // 정지 계정은 비밀번호가 맞아도 로그인 자체를 차단한다.
+    if (member.getStatus() == MemberStatus.SUSPENDED) {
+      throw new CustomException(ErrorCode.MEMBER_SUSPENDED);
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    member.setLastLoginAt(now);
+    member.setLastActivityAt(now);
+    member.setLoginCount(member.getLoginCount() == null ? 1 : member.getLoginCount() + 1);
 
     String accessToken = jwtProvider.createAccessToken(member.getId(), member.getUsername());
     return new TokenResponse(accessToken, "Bearer", jwtProperties.accessExpMillis());
