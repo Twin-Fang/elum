@@ -58,6 +58,11 @@ name: PROJECT-iOS-TestFlight-Deploy
 on:
   push:
     branches: ["main"]
+    # 앱 소스가 바뀔 때만 빌드한다. 서버(server/**)만 변경된 릴리스에서 앱이 재빌드·재배포되는 것을 막는다.
+    # 릴리스 버전 커밋이 매번 client/pubspec.yaml(버전 라인)을 갱신하므로 그 파일만으로는 트리거하지
+    # 않게 제외한다 — 실제 의존성 변경은 client/pubspec.lock도 함께 바뀌어 정상 트리거된다.
+    # client 변경 없이 재빌드가 필요하면 workflow_dispatch로 수동 실행한다.
+    paths: ["client/**", "!client/pubspec.yaml"]
   workflow_dispatch:
     inputs:
       deploy_mode:
