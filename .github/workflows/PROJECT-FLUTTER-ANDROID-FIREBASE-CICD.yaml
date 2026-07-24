@@ -109,16 +109,15 @@ jobs:
           printf '%s\n' "$ENV_CONTENT" > .env
           echo ".env file created"
 
-      # 해커톤 기간 한정 — 개발자 도구 플로팅 버튼을 배포 빌드에서도 강제로 켠다.
-      # Secret(ENV_FILE) 값이 무엇이든 여기서 덮어써 테스터가 항상 쓸 수 있게 한다.
-      # ⚠️ 정식 출시 전 이 스텝을 삭제한다. (이슈 #13)
-      - name: Force enable dev tools and skip onboarding (hackathon)
+      # 배포(prod) 안전장치 — Secret(ENV_FILE)에 devFlag가 true로 들어 있어도
+      # 배포 산출물에는 항상 false가 실리도록 여기서 강제로 덮어쓴다. (이슈 #130)
+      - name: Force disable dev flags (prod safety)
         run: |
           sed -i '/^ELUM_SHOW_DEV_TOOLS=/d' .env
           sed -i '/^ELUM_SKIP_ONBOARDING=/d' .env
-          echo 'ELUM_SHOW_DEV_TOOLS=true' >> .env
-          echo 'ELUM_SKIP_ONBOARDING=true' >> .env
-          echo "✅ Dev tools enabled & onboarding skipped"
+          echo 'ELUM_SHOW_DEV_TOOLS=false' >> .env
+          echo 'ELUM_SKIP_ONBOARDING=false' >> .env
+          echo "✅ Dev flags disabled for prod build"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -269,15 +268,15 @@ jobs:
           fi
           echo "✅ .env 필수 키 확인 ($(wc -l < .env) lines)"
 
-      # 해커톤 기간 한정 — 실제 APK에 들어가는 .env다. 여기서 켜야 앱에 반영된다.
-      # ⚠️ 정식 출시 전 이 스텝을 삭제한다. (이슈 #13)
-      - name: Force enable dev tools and skip onboarding (hackathon)
+      # 배포(prod) 안전장치 — 실제 APK에 들어가는 .env다. Secret에 devFlag가 true로
+      # 들어 있어도 배포 산출물에는 항상 false가 실리도록 강제로 덮어쓴다. (이슈 #130)
+      - name: Force disable dev flags (prod safety)
         run: |
           sed -i '/^ELUM_SHOW_DEV_TOOLS=/d' .env
           sed -i '/^ELUM_SKIP_ONBOARDING=/d' .env
-          echo 'ELUM_SHOW_DEV_TOOLS=true' >> .env
-          echo 'ELUM_SKIP_ONBOARDING=true' >> .env
-          echo "✅ Dev tools enabled & onboarding skipped"
+          echo 'ELUM_SHOW_DEV_TOOLS=false' >> .env
+          echo 'ELUM_SKIP_ONBOARDING=false' >> .env
+          echo "✅ Dev flags disabled for prod build"
           grep '^ELUM_SHOW_DEV_TOOLS=' .env
 
       # Release Keystore 설정

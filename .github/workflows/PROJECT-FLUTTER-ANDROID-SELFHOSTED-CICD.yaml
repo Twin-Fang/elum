@@ -87,6 +87,16 @@ jobs:
           echo ".env file created"
           ls -la
 
+      # 배포(prod) 안전장치 — Secret(ENV_FILE)에 devFlag가 true로 들어 있어도
+      # 배포 산출물에는 항상 false가 실리도록 여기서 강제로 덮어쓴다. (이슈 #130)
+      - name: Force disable dev flags (prod safety)
+        run: |
+          sed -i '/^ELUM_SHOW_DEV_TOOLS=/d' .env
+          sed -i '/^ELUM_SKIP_ONBOARDING=/d' .env
+          echo 'ELUM_SHOW_DEV_TOOLS=false' >> .env
+          echo 'ELUM_SKIP_ONBOARDING=false' >> .env
+          echo "✅ Dev flags disabled for prod build"
+
       # Keystore와 key.properties 설정
       - name: Setup Keystore and key.properties
         run: |
