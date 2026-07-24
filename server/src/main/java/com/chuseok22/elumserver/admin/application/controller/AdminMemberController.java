@@ -1,12 +1,14 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
+import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -16,8 +18,15 @@ public class AdminMemberController {
   private final AdminMemberService adminMemberService;
 
   @GetMapping("/admin/members")
-  public String list(Model model) {
-    model.addAttribute("members", adminMemberService.getAll());
+  public String list(
+    @RequestParam(name = "keyword", required = false) String keyword,
+    @RequestParam(name = "status", required = false) MemberStatus status,
+    @RequestParam(name = "page", defaultValue = "0") int page,
+    Model model
+  ) {
+    model.addAttribute("members", adminMemberService.search(keyword, status, page));
+    model.addAttribute("keyword", keyword == null ? "" : keyword);
+    model.addAttribute("selectedStatus", status);
     return "admin/members";
   }
 

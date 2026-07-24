@@ -9,37 +9,81 @@
 <div class="flex">
   <div th:replace="~{admin/fragments/admin-layout :: sidebar('members')}"></div>
   <main class="flex-1 p-8 space-y-6">
-    <h1 class="text-2xl font-bold">회원 관리</h1>
+    <div>
+      <h1 class="text-2xl font-bold">회원 관리</h1>
+      <p class="text-base-content/60">검색·상태 필터와 회원별 AI 사용량을 확인합니다.</p>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success" th:text="${message}">완료</div>
+
+    <form method="get" th:action="@{/admin/members}" class="flex items-center gap-2 flex-wrap">
+      <input type="text" name="keyword" th:value="${keyword}" placeholder="아이디 또는 닉네임 검색"
+             class="input input-bordered input-sm w-64"/>
+      <select name="status" class="select select-bordered select-sm">
+        <option value="" th:selected="${selectedStatus == null}">전체 상태</option>
+        <option value="ACTIVE" th:selected="${selectedStatus != null && selectedStatus.name() == 'ACTIVE'}">활성</option>
+        <option value="SUSPENDED" th:selected="${selectedStatus != null && selectedStatus.name() == 'SUSPENDED'}">정지</option>
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm">검색</button>
+      <a th:href="@{/admin/members}" class="btn btn-ghost btn-sm">초기화</a>
+      <span class="text-sm text-base-content/60 ml-auto">총 <span th:text="${members.totalElements}">0</span>명</span>
+    </form>
+
     <div class="overflow-x-auto">
-      <table class="table">
+      <table class="table table-sm">
         <thead>
         <tr>
-          <th>닉네임</th>
-          <th>아이디</th>
+          <th>닉네임 / 아이디</th>
+          <th>캐릭터</th>
+          <th>상태</th>
           <th>도움 방식</th>
-          <th>별 개수</th>
+          <th>별</th>
+          <th>루틴</th>
+          <th>AI 호출</th>
+          <th>토큰</th>
+          <th>추정 비용</th>
+          <th>최근 활동</th>
           <th>가입일</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:if="${#lists.isEmpty(members)}">
-          <td colspan="5" class="text-center text-base-content/60">등록된 회원이 없습니다.</td>
+        <tr th:if="${members.isEmpty()}">
+          <td colspan="11" class="text-center text-base-content/60">조건에 맞는 회원이 없습니다.</td>
         </tr>
-        <tr th:each="member : ${members}">
+        <tr th:each="member : ${members.content}">
           <td>
             <a th:href="@{/admin/members/{id}(id=${member.id()})}" class="link link-hover font-medium"
                th:text="${member.nickname() ?: member.username()}">닉네임</a>
+            <div class="text-xs text-base-content/50" th:text="${member.username()}">아이디</div>
           </td>
-          <td th:text="${member.username()}">아이디</td>
+          <td th:text="${member.character() != null ? member.character().label : '-'}">캐릭터</td>
           <td>
-            <span th:each="goal : ${member.supportGoals()}" class="badge badge-outline mr-1"
+            <span th:if="${member.status().name() == 'ACTIVE'}" class="badge badge-success badge-sm">활성</span>
+            <span th:if="${member.status().name() == 'SUSPENDED'}" class="badge badge-error badge-sm">정지</span>
+          </td>
+          <td>
+            <span th:each="goal : ${member.supportGoals()}" class="badge badge-outline badge-sm mr-1"
                   th:text="${goal.label}">도움방식</span>
           </td>
           <td th:text="${member.totalStars()}">0</td>
-          <td th:text="${#temporals.format(member.createdAt(), 'yyyy-MM-dd')}">2026-01-01</td>
+          <td th:text="${member.routineCount()}">0</td>
+          <td th:text="${member.aiCallCount()}">0</td>
+          <td th:text="${#numbers.formatInteger(member.totalTokens(), 1, 'COMMA')}">0</td>
+          <td th:text="'$' + ${#numbers.formatDecimal(member.estimatedCostUsd(), 1, 4)}">$0</td>
+          <td class="text-xs"
+              th:text="${member.lastActivityAt() != null ? #temporals.format(member.lastActivityAt(), 'MM-dd HH:mm') : '-'}">-</td>
+          <td class="text-xs" th:text="${#temporals.format(member.createdAt(), 'yyyy-MM-dd')}">2026-01-01</td>
         </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="flex items-center gap-2" th:if="${members.totalPages > 1}">
+      <a th:if="${members.hasPrevious()}" class="btn btn-sm"
+         th:href="@{/admin/members(page=${members.number - 1}, keyword=${keyword}, status=${selectedStatus != null ? selectedStatus.name() : ''})}">이전</a>
+      <span class="text-sm" th:text="${members.number + 1} + ' / ' + ${members.totalPages}">1 / 1</span>
+      <a th:if="${members.hasNext()}" class="btn btn-sm"
+         th:href="@{/admin/members(page=${members.number + 1}, keyword=${keyword}, status=${selectedStatus != null ? selectedStatus.name() : ''})}">다음</a>
     </div>
   </main>
 </div>

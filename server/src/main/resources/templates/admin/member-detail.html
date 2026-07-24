@@ -9,31 +9,85 @@
 <div class="flex">
   <div th:replace="~{admin/fragments/admin-layout :: sidebar('members')}"></div>
   <main class="flex-1 p-8 space-y-6">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold" th:text="${member.nickname() ?: member.username()}">회원 상세</h1>
-      <a th:href="@{/admin/members}" class="btn btn-ghost btn-sm">목록으로</a>
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-bold" th:text="${member.nickname() ?: member.username()}">회원 상세</h1>
+        <span th:if="${member.status().name() == 'ACTIVE'}" class="badge badge-success">활성</span>
+        <span th:if="${member.status().name() == 'SUSPENDED'}" class="badge badge-error">정지</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <form th:if="${member.status().name() == 'ACTIVE'}"
+              th:action="@{/admin/members/{id}/suspend(id=${member.id()})}" method="post"
+              onsubmit="return confirm('이 계정을 정지할까요? 로그인과 API 사용이 모두 차단됩니다.');">
+          <button type="submit" class="btn btn-error btn-sm">계정 정지</button>
+        </form>
+        <form th:if="${member.status().name() == 'SUSPENDED'}"
+              th:action="@{/admin/members/{id}/unsuspend(id=${member.id()})}" method="post"
+              onsubmit="return confirm('이 계정의 정지를 해제할까요?');">
+          <button type="submit" class="btn btn-success btn-sm">정지 해제</button>
+        </form>
+        <form th:action="@{/admin/members/{id}/force-logout(id=${member.id()})}" method="post"
+              onsubmit="return confirm('강제 로그아웃할까요? 발급된 모든 토큰이 무효화되어 다시 로그인해야 합니다.');">
+          <button type="submit" class="btn btn-warning btn-sm">강제 로그아웃</button>
+        </form>
+        <a th:href="@{/admin/members}" class="btn btn-ghost btn-sm">목록으로</a>
+      </div>
     </div>
 
+    <div th:if="${message}" class="alert alert-success" th:text="${message}">완료</div>
+
     <div class="card bg-base-100 shadow-md">
-      <div class="card-body grid grid-cols-2 gap-2 text-sm">
+      <div class="card-body grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
         <div class="text-base-content/60">아이디</div>
         <div th:text="${member.username()}">username</div>
+        <div class="text-base-content/60">캐릭터</div>
+        <div th:text="${member.character() != null ? member.character().label : '-'}">캐릭터</div>
         <div class="text-base-content/60">별 개수</div>
         <div th:text="${member.totalStars()}">0</div>
-        <div class="text-base-content/60">도움 방식</div>
-        <div>
-          <span th:each="goal : ${member.supportGoals()}" class="badge badge-outline mr-1"
-                th:text="${goal.label}">도움방식</span>
-        </div>
         <div class="text-base-content/60">가입일</div>
         <div th:text="${#temporals.format(member.createdAt(), 'yyyy-MM-dd HH:mm')}">2026-01-01</div>
+        <div class="text-base-content/60">마지막 로그인</div>
+        <div th:text="${member.lastLoginAt() != null ? #temporals.format(member.lastLoginAt(), 'yyyy-MM-dd HH:mm') : '-'}">-</div>
+        <div class="text-base-content/60">마지막 활동</div>
+        <div th:text="${member.lastActivityAt() != null ? #temporals.format(member.lastActivityAt(), 'yyyy-MM-dd HH:mm') : '-'}">-</div>
+        <div class="text-base-content/60">로그인 횟수</div>
+        <div th:text="${member.loginCount() ?: 0}">0</div>
+        <div class="text-base-content/60">도움 방식</div>
+        <div>
+          <span th:each="goal : ${member.supportGoals()}" class="badge badge-outline badge-sm mr-1"
+                th:text="${goal.label}">도움방식</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="stat bg-base-200 rounded-box shadow p-4">
+        <div class="stat-title text-sm">루틴</div>
+        <div class="stat-value text-primary text-2xl" th:text="${#lists.size(member.routines())}">0</div>
+        <div class="stat-desc">
+          대기 <span th:text="${member.routineCountOf('PENDING_REVIEW')}">0</span> ·
+          확정 <span th:text="${member.routineCountOf('CONFIRMED')}">0</span> ·
+          완료 <span th:text="${member.routineCountOf('COMPLETED')}">0</span>
+        </div>
+      </div>
+      <div class="stat bg-base-200 rounded-box shadow p-4">
+        <div class="stat-title text-sm">AI 호출</div>
+        <div class="stat-value text-primary text-2xl" th:text="${member.aiCallCount()}">0</div>
+      </div>
+      <div class="stat bg-base-200 rounded-box shadow p-4">
+        <div class="stat-title text-sm">총 토큰</div>
+        <div class="stat-value text-primary text-2xl" th:text="${#numbers.formatInteger(member.totalTokens(), 1, 'COMMA')}">0</div>
+      </div>
+      <div class="stat bg-base-200 rounded-box shadow p-4">
+        <div class="stat-title text-sm">추정 비용</div>
+        <div class="stat-value text-primary text-2xl" th:text="'$' + ${#numbers.formatDecimal(member.estimatedCostUsd(), 1, 4)}">$0</div>
       </div>
     </div>
 
     <div>
       <h2 class="text-lg font-semibold mb-2">생성한 루틴</h2>
       <div class="overflow-x-auto">
-        <table class="table">
+        <table class="table table-sm">
           <thead>
           <tr>
             <th>제목</th>
@@ -56,6 +110,42 @@
               <span th:if="${routine.status().name() == 'COMPLETED'}" class="badge badge-success">완료</span>
             </td>
             <td th:text="${#temporals.format(routine.scheduledAt(), 'yyyy-MM-dd HH:mm')}">일시</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-lg font-semibold mb-2">최근 AI 호출 (최대 20건)</h2>
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+          <tr>
+            <th>시각</th>
+            <th>유형</th>
+            <th>모델</th>
+            <th>결과</th>
+            <th>지연</th>
+            <th>토큰(입력/출력)</th>
+            <th>추정 비용</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:if="${#lists.isEmpty(member.recentAiCalls())}">
+            <td colspan="7" class="text-center text-base-content/60">AI 호출 기록이 없습니다.</td>
+          </tr>
+          <tr th:each="call : ${member.recentAiCalls()}">
+            <td th:text="${#temporals.format(call.createdAt, 'MM-dd HH:mm:ss')}">시각</td>
+            <td th:text="${call.callType.label}">유형</td>
+            <td class="text-xs" th:text="${call.model}">모델</td>
+            <td>
+              <span th:if="${call.success}" class="badge badge-success badge-sm">성공</span>
+              <span th:unless="${call.success}" class="badge badge-error badge-sm" th:title="${call.errorMessage}">실패</span>
+            </td>
+            <td th:text="${call.latencyMs != null ? call.latencyMs + 'ms' : '-'}">지연</td>
+            <td th:text="${call.totalTokens != null ? (call.promptTokens ?: 0) + ' / ' + (call.outputTokens ?: 0) : '-'}">토큰</td>
+            <td th:text="${call.estimatedCostUsd != null ? '$' + #numbers.formatDecimal(call.estimatedCostUsd, 1, 6) : '-'}">비용</td>
           </tr>
           </tbody>
         </table>

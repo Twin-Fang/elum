@@ -19,7 +19,10 @@
       <div class="stat bg-base-200 rounded-box shadow">
         <div class="stat-title">전체 회원수</div>
         <div class="stat-value text-primary" th:text="${memberCount}">0</div>
-        <div class="stat-desc">명</div>
+        <div class="stat-desc">
+          최근 7일 활성 <span th:text="${activeMemberCount}">0</span> ·
+          정지 <span th:text="${suspendedMemberCount}">0</span>
+        </div>
       </div>
       <div class="stat bg-base-200 rounded-box shadow">
         <div class="stat-title">전체 루틴수</div>
@@ -28,6 +31,21 @@
           검토대기 <span th:text="${routineStats.pendingReview()}">0</span> ·
           확정 <span th:text="${routineStats.confirmed()}">0</span> ·
           완료 <span th:text="${routineStats.completed()}">0</span>
+        </div>
+      </div>
+      <div class="stat bg-base-200 rounded-box shadow">
+        <div class="stat-title">오늘 AI 호출</div>
+        <div class="stat-value text-primary" th:text="${todayAiStats.totalCount}">0</div>
+        <div class="stat-desc">
+          성공 <span th:text="${todayAiStats.successCount}">0</span> ·
+          토큰 <span th:text="${#numbers.formatInteger(todayAiStats.totalTokens, 1, 'COMMA')}">0</span>
+        </div>
+      </div>
+      <div class="stat bg-base-200 rounded-box shadow">
+        <div class="stat-title">오늘 AI 추정 비용</div>
+        <div class="stat-value text-primary" th:text="'$' + ${#numbers.formatDecimal(todayAiStats.totalCostUsd, 1, 4)}">$0</div>
+        <div class="stat-desc">
+          <a th:href="@{/admin/monitoring}" class="link link-hover">AI 모니터링 상세 보기</a>
         </div>
       </div>
     </div>

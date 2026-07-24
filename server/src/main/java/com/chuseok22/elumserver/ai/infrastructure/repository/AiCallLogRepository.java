@@ -44,4 +44,27 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String> {
 
     double getTotalCostUsd();
   }
+
+  // 회원 목록 화면용 회원별 사용량 집계 — 회원 수만큼 쿼리가 나가지 않도록 in + group by 한 번에.
+  @Query("""
+    select l.memberId as memberId,
+           count(l) as callCount,
+           coalesce(sum(l.totalTokens), 0) as totalTokens,
+           coalesce(sum(l.estimatedCostUsd), 0) as totalCostUsd
+    from AiCallLog l
+    where l.memberId in :memberIds
+    group by l.memberId
+    """)
+  List<MemberAiUsage> aggregateUsageByMemberIds(@Param("memberIds") List<String> memberIds);
+
+  interface MemberAiUsage {
+
+    String getMemberId();
+
+    long getCallCount();
+
+    long getTotalTokens();
+
+    double getTotalCostUsd();
+  }
 }
