@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-07-21T23:53:42Z",
-    "currentVersion": "1.0.91",
+    "lastUpdated": "2026-07-24T05:38:10Z",
+    "currentVersion": "1.0.92",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 59
+    "totalReleases": 60
   },
   "releases": [
+    {
+      "version": "1.0.92",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-07-24",
+      "pr_number": 131,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 앱 시작 시 온보딩이 정상적으로 진행됩니다\n  * 화면에 남아 있던 개발자용 버튼이 더 이상 표시되지 않습니다\n  * 서비스 운영 안정성이 개선되었습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "앱 시작 시 온보딩이 정상적으로 진행됩니다",
+            "화면에 남아 있던 개발자용 버튼이 더 이상 표시되지 않습니다",
+            "서비스 운영 안정성이 개선되었습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.91",
       "project_type": "flutter",
