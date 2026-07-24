@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.ai.infrastructure.client;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -35,7 +36,8 @@ class GeminiTextClientTest {
     });
     GeminiProperties geminiProperties = new GeminiProperties("key", null, "text-model", "image-model", 1000);
     geminiTextClient = new GeminiTextClient(
-      restClient, geminiProperties, promptTemplateService, mock(SystemConfigService.class)
+      restClient, geminiProperties, promptTemplateService,
+      mock(SystemConfigService.class), mock(AiCallLogService.class)
     );
   }
 

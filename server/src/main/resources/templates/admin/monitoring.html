@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>이룸 관리자 - AI 모니터링</title>
+  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
+</head>
+<body class="min-h-screen bg-base-100">
+<div class="flex">
+  <div th:replace="~{admin/fragments/admin-layout :: sidebar('monitoring')}"></div>
+  <main class="flex-1 p-8 space-y-6">
+    <div>
+      <h1 class="text-2xl font-bold">AI 모니터링</h1>
+      <p class="text-base-content/60">AI 호출 현황과 토큰 사용량, 추정 비용을 확인합니다.</p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="stat bg-base-200 rounded-box shadow p-4">
+        <div class="stat-title text-sm">오늘 호출수</div>
+        <div class="stat-value text-primary text-2xl" th:text="${todayStats.totalCount}">0</div>
+      </div>
+      <div class="stat bg-base-200 rounded-box shadow p-4">
+        <div class="stat-title text-sm">오늘 성공률</div>
+        <div class="stat-value text-primary text-2xl"
+             th:text="${todayStats.totalCount == 0 ? '-' : #numbers.formatDecimal(todayStats.successCount * 100.0 / todayStats.totalCount, 1, 1) + '%'}">-</div>
+      </div>
+      <div class="stat bg-base-200 rounded-box shadow p-4">
+        <div class="stat-title text-sm">오늘 평균 지연</div>
+        <div class="stat-value text-primary text-2xl"
+             th:text="${#numbers.formatDecimal(todayStats.avgLatencyMs / 1000.0, 1, 1)} + 's'">0s</div>
+      </div>
+      <div class="stat bg-base-200 rounded-box shadow p-4">
+        <div class="stat-title text-sm">오늘 토큰</div>
+        <div class="stat-value text-primary text-2xl" th:text="${#numbers.formatInteger(todayStats.totalTokens, 1, 'COMMA')}">0</div>
+      </div>
+      <div class="stat bg-base-200 rounded-box shadow p-4">
+        <div class="stat-title text-sm">오늘 추정 비용</div>
+        <div class="stat-value text-primary text-2xl"
+             th:text="'$' + ${#numbers.formatDecimal(todayStats.totalCostUsd, 1, 4)}">$0</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="stat bg-base-200 rounded-box shadow p-4">
+        <div class="stat-title text-sm">누적 호출수</div>
+        <div class="stat-value text-2xl" th:text="${#numbers.formatInteger(totalStats.totalCount, 1, 'COMMA')}">0</div>
+        <div class="stat-desc">성공 <span th:text="${totalStats.successCount}">0</span>건</div>
+      </div>
+      <div class="stat bg-base-200 rounded-box shadow p-4">
+        <div class="stat-title text-sm">누적 추정 비용</div>
+        <div class="stat-value text-2xl" th:text="'$' + ${#numbers.formatDecimal(totalStats.totalCostUsd, 1, 4)}">$0</div>
+        <div class="stat-desc">누적 토큰 <span th:text="${#numbers.formatInteger(totalStats.totalTokens, 1, 'COMMA')}">0</span></div>
+      </div>
+    </div>
+
+    <form method="get" th:action="@{/admin/monitoring}" class="flex items-center gap-2">
+      <select name="callType" class="select select-bordered select-sm">
+        <option value="" th:selected="${selectedCallType == null}">전체 유형</option>
+        <option th:each="type : ${callTypes}" th:value="${type.name()}" th:text="${type.label}"
+                th:selected="${selectedCallType == type}">유형</option>
+      </select>
+      <select name="success" class="select select-bordered select-sm">
+        <option value="" th:selected="${selectedSuccess == null}">전체 결과</option>
+        <option value="true" th:selected="${selectedSuccess == true}">성공</option>
+        <option value="false" th:selected="${selectedSuccess == false}">실패</option>
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm">필터</button>
+    </form>
+
+    <div class="overflow-x-auto">
+      <table class="table table-sm">
+        <thead>
+        <tr>
+          <th>시각</th>
+          <th>유형</th>
+          <th>모델</th>
+          <th>회원</th>
+          <th>결과</th>
+          <th>지연</th>
+          <th>토큰(입력/출력)</th>
+          <th>추정 비용</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${calls.isEmpty()}">
+          <td colspan="8" class="text-center text-base-content/60">기록된 AI 호출이 없습니다.</td>
+        </tr>
+        <tr th:each="call : ${calls.content}">
+          <td th:text="${#temporals.format(call.createdAt, 'MM-dd HH:mm:ss')}">시각</td>
+          <td th:text="${call.callType.label}">유형</td>
+          <td class="text-xs" th:text="${call.model}">모델</td>
+          <td>
+            <a th:if="${call.memberId != null}" th:href="@{/admin/members/{id}(id=${call.memberId})}"
+               class="link link-hover text-xs" th:text="${#strings.substring(call.memberId, 0, 8)}">회원</a>
+            <span th:if="${call.memberId == null}" class="text-base-content/40 text-xs">-</span>
+          </td>
+          <td>
+            <span th:if="${call.success}" class="badge badge-success badge-sm">성공</span>
+            <span th:unless="${call.success}" class="badge badge-error badge-sm" th:title="${call.errorMessage}">실패</span>
+          </td>
+          <td th:text="${call.latencyMs != null ? call.latencyMs + 'ms' : '-'}">지연</td>
+          <td th:text="${call.totalTokens != null ? (call.promptTokens ?: 0) + ' / ' + (call.outputTokens ?: 0) : '-'}">토큰</td>
+          <td th:text="${call.estimatedCostUsd != null ? '$' + #numbers.formatDecimal(call.estimatedCostUsd, 1, 6) : '-'}">비용</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex items-center gap-2" th:if="${calls.totalPages > 1}">
+      <a th:if="${calls.hasPrevious()}" class="btn btn-sm"
+         th:href="@{/admin/monitoring(page=${calls.number - 1}, callType=${selectedCallType != null ? selectedCallType.name() : ''}, success=${selectedSuccess})}">이전</a>
+      <span class="text-sm" th:text="${calls.number + 1} + ' / ' + ${calls.totalPages}">1 / 1</span>
+      <a th:if="${calls.hasNext()}" class="btn btn-sm"
+         th:href="@{/admin/monitoring(page=${calls.number + 1}, callType=${selectedCallType != null ? selectedCallType.name() : ''}, success=${selectedSuccess})}">다음</a>
+    </div>
+  </main>
+</div>
+</body>
+</html>

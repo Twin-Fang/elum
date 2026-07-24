@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
+import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
+import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.ChildProfileInput;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
@@ -32,6 +34,7 @@ public class GeminiTextClient {
   private final GeminiProperties geminiProperties;
   private final PromptTemplateService promptTemplateService;
   private final SystemConfigService systemConfigService;
+  private final AiCallLogService aiCallLogService;
 
   // Spring Boot 4.1은 Jackson 3 기반이라 Jackson 2 ObjectMapper 빈이 자동 구성되지 않으므로
   // RoutineAiPipeline과 동일하게 직접 생성해서 쓴다.
@@ -42,7 +45,7 @@ public class GeminiTextClient {
   ) {
     String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
     String userContent = buildCreateRoutineUserContent(sanitizedInputText, nickname, supportGoals, answers);
-    return callGenerateContent(systemPrompt, userContent);
+    return callGenerateContent(systemPrompt, userContent, responseSchema(), AiCallType.GEMINI_TEXT_CREATE);
   }
 
   // 실제 호출과 관리자 preview가 같은 조립 결과를 쓰도록 조립 로직만 따로 뗀 메서드.
@@ -66,7 +69,9 @@ public class GeminiTextClient {
   ) {
     String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_QUESTION_PREFIX);
     String userContent = buildQuestionUserContent(sanitizedInputText, nickname, supportGoals);
-    return callGenerateContent(systemPrompt, userContent, questionResponseSchemaFor(supportGoals));
+    return callGenerateContent(
+      systemPrompt, userContent, questionResponseSchemaFor(supportGoals), AiCallType.GEMINI_TEXT_QUESTION
+    );
   }
 
   public String buildQuestionUserContent(String routineText, String nickname, Set<SupportGoal> supportGoals) {
@@ -81,20 +86,18 @@ public class GeminiTextClient {
   // 저장 전 미리보기/저장된 값 테스트를 동일한 호출 경로로 지원한다.
   public GeminiGenerateContentResponse generateForTest(String systemPrompt, String sampleInput) {
     String userContent = buildCreateRoutineUserContent(sampleInput, null, Set.of(), List.of());
-    return callGenerateContent(systemPrompt, userContent);
+    return callGenerateContent(systemPrompt, userContent, responseSchema(), AiCallType.GEMINI_TEXT_CREATE);
   }
 
   public GeminiGenerateContentResponse generateQuestionForTest(String systemPrompt, String sampleInput) {
     String userContent = buildQuestionUserContent(sampleInput, null, Set.of());
-    return callGenerateContent(systemPrompt, userContent, questionResponseSchemaForTest());
-  }
-
-  private GeminiGenerateContentResponse callGenerateContent(String systemPrompt, String userContentText) {
-    return callGenerateContent(systemPrompt, userContentText, responseSchema());
+    return callGenerateContent(
+      systemPrompt, userContent, questionResponseSchemaForTest(), AiCallType.GEMINI_TEXT_QUESTION
+    );
   }
 
   private GeminiGenerateContentResponse callGenerateContent(
-    String systemPrompt, String userContentText, Map<String, Object> schema
+    String systemPrompt, String userContentText, Map<String, Object> schema, AiCallType callType
   ) {
     GeminiGenerateContentRequest request = new GeminiGenerateContentRequest(
       new GeminiGenerateContentRequest.GeminiSystemInstruction(
@@ -120,16 +123,19 @@ public class GeminiTextClient {
         .body(request)
         .retrieve()
         .body(GeminiGenerateContentResponse.class);
-      log.info(
-        "Gemini 텍스트 생성 호출 완료: model={}, elapsedMs={}, response={}",
-        model, System.currentTimeMillis() - startedAt, response
+      long elapsedMs = System.currentTimeMillis() - startedAt;
+      log.info("Gemini 텍스트 생성 호출 완료: model={}, elapsedMs={}, response={}", model, elapsedMs, response);
+      aiCallLogService.recordSuccess(
+        callType, model, elapsedMs, response == null ? null : response.usageMetadata()
       );
       return response;
     } catch (Exception e) {
+      long elapsedMs = System.currentTimeMillis() - startedAt;
       log.warn(
         "Gemini 텍스트 생성 호출 실패: model={}, elapsedMs={}, systemPrompt={}, userContent={}",
-        model, System.currentTimeMillis() - startedAt, systemPrompt, userContentText, e
+        model, elapsedMs, systemPrompt, userContentText, e
       );
+      aiCallLogService.recordFailure(callType, model, elapsedMs, e.getMessage());
       throw e;
     }
   }

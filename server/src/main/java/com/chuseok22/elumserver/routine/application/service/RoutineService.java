@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
+import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -63,13 +64,20 @@ public class RoutineService {
       return new RoutineQuestionResponse(false, List.of());
     }
 
-    SensitiveInfoCheckResult checkResult = sensitiveInfoGuardService.check(request.rawInputText());
-    RoutineAiPipeline.RoutineQuestionResult result =
-      routineAiPipeline.generateQuestion(member.getNickname(), goals, checkResult.sanitizedText());
-    List<RoutineQuestionResponse.QuestionItem> questions = result.questions().stream()
-      .map(item -> new RoutineQuestionResponse.QuestionItem(item.question(), toOptionItems(item.options())))
-      .toList();
-    return new RoutineQuestionResponse(true, questions);
+    // AI 호출 로그에 요청 회원을 연결한다. finally에서 반드시 비워 스레드 재사용 시
+    // 다른 회원에게 새어 들어가지 않게 한다.
+    AiCallContext.setMemberId(memberId);
+    try {
+      SensitiveInfoCheckResult checkResult = sensitiveInfoGuardService.check(request.rawInputText());
+      RoutineAiPipeline.RoutineQuestionResult result =
+        routineAiPipeline.generateQuestion(member.getNickname(), goals, checkResult.sanitizedText());
+      List<RoutineQuestionResponse.QuestionItem> questions = result.questions().stream()
+        .map(item -> new RoutineQuestionResponse.QuestionItem(item.question(), toOptionItems(item.options())))
+        .toList();
+      return new RoutineQuestionResponse(true, questions);
+    } finally {
+      AiCallContext.clear();
+    }
   }
 
   private List<RoutineQuestionResponse.QuestionItem.OptionItem> toOptionItems(
@@ -90,12 +98,20 @@ public class RoutineService {
     Member member = memberRepository.findById(memberId)
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-    SensitiveInfoCheckResult checkResult = sensitiveInfoGuardService.check(request.rawInputText());
-    List<String> maskedAnswers = maskAnswers(request.answers());
-    RoutineAiPipeline.RoutineGenerationResult generation = routineAiPipeline.generateForCreate(
-      checkResult.sanitizedText(), member.getNickname(), member.getSupportGoals(), maskedAnswers,
-      member.getCharacter()
-    );
+    // AI 호출 로그에 요청 회원을 연결한다 (DLP·텍스트·이미지 병렬 생성까지 전파).
+    SensitiveInfoCheckResult checkResult;
+    RoutineAiPipeline.RoutineGenerationResult generation;
+    AiCallContext.setMemberId(memberId);
+    try {
+      checkResult = sensitiveInfoGuardService.check(request.rawInputText());
+      List<String> maskedAnswers = maskAnswers(request.answers());
+      generation = routineAiPipeline.generateForCreate(
+        checkResult.sanitizedText(), member.getNickname(), member.getSupportGoals(), maskedAnswers,
+        member.getCharacter()
+      );
+    } finally {
+      AiCallContext.clear();
+    }
 
     Routine routine = new Routine();
     routine.setMember(member);

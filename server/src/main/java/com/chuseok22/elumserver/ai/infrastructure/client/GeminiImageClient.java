@@ -1,6 +1,8 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
+import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
+import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -31,6 +33,7 @@ public class GeminiImageClient {
   private final CharacterReferenceProvider characterReferenceProvider;
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
   private final SystemConfigService systemConfigService;
+  private final AiCallLogService aiCallLogService;
 
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
     String prefix = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
@@ -91,12 +94,21 @@ public class GeminiImageClient {
         "Gemini 이미지 생성 호출 완료: model={}, elapsedMs={}, response={}",
         model, System.currentTimeMillis() - startedAt, describeResponse(response)
       );
-      return extractImage(response);
+      // extractImage까지 성공해야 진짜 성공이다 — 응답에 이미지가 없으면 catch로 떨어져
+      // 실패로 기록된다.
+      GeneratedImage image = extractImage(response);
+      aiCallLogService.recordSuccess(
+        AiCallType.GEMINI_IMAGE, model, System.currentTimeMillis() - startedAt,
+        response == null ? null : response.usageMetadata()
+      );
+      return image;
     } catch (Exception e) {
+      long elapsedMs = System.currentTimeMillis() - startedAt;
       log.warn(
         "Gemini 이미지 생성 호출 실패: model={}, elapsedMs={}, characterType={}, prompt={}",
-        model, System.currentTimeMillis() - startedAt, characterType, promptText, e
+        model, elapsedMs, characterType, promptText, e
       );
+      aiCallLogService.recordFailure(AiCallType.GEMINI_IMAGE, model, elapsedMs, e.getMessage());
       throw e;
     }
   }
