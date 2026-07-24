@@ -12,6 +12,8 @@ import com.chuseok22.elumserver.ai.infrastructure.client.LocalLlmClient;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmProperties;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +32,9 @@ class SensitiveInfoGuardServiceTest {
 
   @Mock
   private PromptTemplateService promptTemplateService;
+
+  @Mock
+  private SystemConfigService systemConfigService;
 
   @InjectMocks
   private SensitiveInfoGuardService sensitiveInfoGuardService;
@@ -50,7 +55,7 @@ class SensitiveInfoGuardServiceTest {
   @DisplayName("로컬 LLM이 정상 응답하면 마스킹된 텍스트를 반환한다")
   void check_success_returnsSanitizedText() {
     when(localLlmProperties.enabled()).thenReturn(true);
-    when(localLlmProperties.model()).thenReturn("test-model");
+    when(systemConfigService.getString(ConfigKey.LOCAL_LLM_MODEL)).thenReturn("test-model");
     when(promptTemplateService.getContent(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK)).thenReturn("system prompt");
     String responseJson = "{\"detections\":[{\"category\":\"전화번호\",\"matchedText\":\"010-1234-5678\"}]}";
     when(localLlmClient.chat(any())).thenReturn(new LocalLlmChatResponse(responseJson, "test-model", true));
@@ -67,7 +72,7 @@ class SensitiveInfoGuardServiceTest {
   @DisplayName("여러 카테고리가 탐지되면 categories에 중복 없이 전부 담기고 전부 마스킹된다")
   void check_multipleCategories_masksAllAndListsAllCategories() {
     when(localLlmProperties.enabled()).thenReturn(true);
-    when(localLlmProperties.model()).thenReturn("test-model");
+    when(systemConfigService.getString(ConfigKey.LOCAL_LLM_MODEL)).thenReturn("test-model");
     when(promptTemplateService.getContent(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK)).thenReturn("system prompt");
     String responseJson = "{\"detections\":["
       + "{\"category\":\"이름\",\"matchedText\":\"김하늘\"},"
@@ -86,7 +91,7 @@ class SensitiveInfoGuardServiceTest {
   @DisplayName("같은 값이 문장에 두 번 등장하면 전부 마스킹한다")
   void check_repeatedMatchedText_masksAllOccurrences() {
     when(localLlmProperties.enabled()).thenReturn(true);
-    when(localLlmProperties.model()).thenReturn("test-model");
+    when(systemConfigService.getString(ConfigKey.LOCAL_LLM_MODEL)).thenReturn("test-model");
     when(promptTemplateService.getContent(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK)).thenReturn("system prompt");
     String responseJson = "{\"detections\":["
       + "{\"category\":\"이름\",\"matchedText\":\"김하늘\"},"
@@ -104,7 +109,7 @@ class SensitiveInfoGuardServiceTest {
   @DisplayName("matchedText가 원문에 없으면 그 항목만 건너뛰고 나머지는 정상 마스킹한다")
   void check_matchedTextNotInOriginalText_skipsOnlyThatDetection() {
     when(localLlmProperties.enabled()).thenReturn(true);
-    when(localLlmProperties.model()).thenReturn("test-model");
+    when(systemConfigService.getString(ConfigKey.LOCAL_LLM_MODEL)).thenReturn("test-model");
     when(promptTemplateService.getContent(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK)).thenReturn("system prompt");
     String responseJson = "{\"detections\":["
       + "{\"category\":\"이름\",\"matchedText\":\"이서준\"},"
@@ -124,7 +129,7 @@ class SensitiveInfoGuardServiceTest {
   @DisplayName("detections가 빈 배열이면 민감정보 없음으로 처리한다")
   void check_emptyDetections_returnsNoSensitiveInfo() {
     when(localLlmProperties.enabled()).thenReturn(true);
-    when(localLlmProperties.model()).thenReturn("test-model");
+    when(systemConfigService.getString(ConfigKey.LOCAL_LLM_MODEL)).thenReturn("test-model");
     when(promptTemplateService.getContent(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK)).thenReturn("system prompt");
     String responseJson = "{\"detections\":[]}";
     when(localLlmClient.chat(any())).thenReturn(new LocalLlmChatResponse(responseJson, "test-model", true));
@@ -141,7 +146,7 @@ class SensitiveInfoGuardServiceTest {
   @DisplayName("로컬 LLM 응답에 detections 필드 자체가 없으면 fail-open으로 원문을 통과시킨다")
   void check_missingDetectionsField_failsOpenWithOriginalText() {
     when(localLlmProperties.enabled()).thenReturn(true);
-    when(localLlmProperties.model()).thenReturn("test-model");
+    when(systemConfigService.getString(ConfigKey.LOCAL_LLM_MODEL)).thenReturn("test-model");
     when(promptTemplateService.getContent(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK)).thenReturn("system prompt");
     String invalidJson = "{}";
     when(localLlmClient.chat(any())).thenReturn(new LocalLlmChatResponse(invalidJson, "test-model", true));

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +34,9 @@ class GeminiTextClientTest {
       throw new IllegalStateException("이 테스트는 HTTP 호출까지 가면 안 된다 — build*UserContent만 검증한다");
     });
     GeminiProperties geminiProperties = new GeminiProperties("key", null, "text-model", "image-model", 1000);
-    geminiTextClient = new GeminiTextClient(restClient, geminiProperties, promptTemplateService);
+    geminiTextClient = new GeminiTextClient(
+      restClient, geminiProperties, promptTemplateService, mock(SystemConfigService.class)
+    );
   }
 
   @Test

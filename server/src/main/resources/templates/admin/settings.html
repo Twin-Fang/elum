@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>이룸 관리자 - 시스템 설정</title>
+  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
+</head>
+<body class="min-h-screen bg-base-100">
+<div class="flex">
+  <div th:replace="~{admin/fragments/admin-layout :: sidebar('settings')}"></div>
+  <main class="flex-1 p-8 space-y-6">
+    <div>
+      <h1 class="text-2xl font-bold">시스템 설정</h1>
+      <p class="text-base-content/60">AI 모델과 생성 파라미터를 재배포 없이 변경합니다. 변경 후 최대 30초 안에 모든 서버에 반영됩니다.</p>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success" th:text="${message}">저장되었습니다.</div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">오류</div>
+
+    <div th:each="entry : ${groups}" class="card bg-base-100 shadow-md">
+      <div class="card-body space-y-4">
+        <h2 class="card-title text-lg" th:text="${entry.key.label}">그룹</h2>
+        <div th:each="config : ${entry.value}" class="border-t border-base-200 pt-4 first:border-t-0 first:pt-0">
+          <div class="flex items-start justify-between gap-4 flex-wrap">
+            <div class="min-w-64">
+              <div class="font-medium">
+                <span th:text="${config.label()}">설정명</span>
+                <span th:if="${config.changed()}" class="badge badge-warning badge-sm ml-1">변경됨</span>
+              </div>
+              <div class="text-sm text-base-content/60" th:text="${config.description()}">설명</div>
+              <div class="text-xs text-base-content/40 mt-1">
+                기본값: <span th:text="${config.defaultValue() != '' ? config.defaultValue() : '(없음)'}">기본값</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <form th:action="@{/admin/settings/{key}(key=${config.key()})}" method="post" class="flex items-center gap-2">
+                <!-- SELECT 타입은 허용값 셀렉트박스, 나머지는 텍스트 인풋 -->
+                <select th:if="${config.valueType().name() == 'SELECT'}" name="value" class="select select-bordered select-sm w-40">
+                  <option th:each="allowed : ${config.allowedValues()}" th:value="${allowed}" th:text="${allowed}"
+                          th:selected="${allowed == config.value()}">값</option>
+                </select>
+                <input th:unless="${config.valueType().name() == 'SELECT'}" type="text" name="value"
+                       th:value="${config.value()}" class="input input-bordered input-sm w-64"/>
+                <button type="submit" class="btn btn-primary btn-sm">저장</button>
+              </form>
+              <form th:action="@{/admin/settings/{key}/reset(key=${config.key()})}" method="post"
+                    onsubmit="return confirm('기본값으로 복원할까요?');">
+                <button type="submit" class="btn btn-ghost btn-sm">기본값</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

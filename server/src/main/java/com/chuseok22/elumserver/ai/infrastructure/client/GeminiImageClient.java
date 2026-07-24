@@ -4,6 +4,8 @@ import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -28,6 +30,7 @@ public class GeminiImageClient {
   private final PromptTemplateService promptTemplateService;
   private final CharacterReferenceProvider characterReferenceProvider;
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
+  private final SystemConfigService systemConfigService;
 
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
     String prefix = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
@@ -56,39 +59,43 @@ public class GeminiImageClient {
     // 응답하고 이미지 데이터(inlineData)를 아예 포함하지 않는 경우가 있어(운영 로그에서
     // "Gemini 응답에 이미지 데이터가 없음" 실패로 확인됨), TEXT/IMAGE 모달리티를 모두
     // 요청해 이미지 출력을 강제한다.
-    // imageConfig.aspectRatio를 "4:3"으로 고정한다 — 클라이언트 카드 이미지 영역(Figma
-    // 313×264, 약 1.19:1)이 정사각형이 아니라서, 1:1로 받으면 카드에 넣을 때 크게
-    // 크롭돼야 한다. Gemini가 지원하는 표준 비율 중 4:3이 가장 가깝다.
+    // aspectRatio 기본값은 4:3 — 클라이언트 카드 이미지 영역(Figma 313×264, 약 1.19:1)이
+    // 정사각형이 아니라서 1:1로 받으면 크게 크롭돼야 한다. 관리자가 시스템 설정에서
+    // 다른 비율로 바꿀 수 있다.
     GeminiGenerateContentRequest request = new GeminiGenerateContentRequest(
       null,
       List.of(new GeminiGenerateContentRequest.GeminiContent("user", parts)),
       Map.of(
         "responseModalities", List.of("TEXT", "IMAGE"),
-        "imageConfig", Map.of("aspectRatio", "4:3")
+        "imageConfig", Map.of(
+          "aspectRatio", systemConfigService.getString(ConfigKey.GEMINI_IMAGE_ASPECT_RATIO)
+        )
       )
     );
 
+    // 모델명은 호출 시점마다 시스템 설정에서 읽는다 — 관리자가 바꾸면 재배포 없이 반영된다.
+    String model = systemConfigService.getString(ConfigKey.GEMINI_IMAGE_MODEL);
     long startedAt = System.currentTimeMillis();
     log.info(
       "Gemini 이미지 생성 호출 시작: model={}, apiKey={}, characterType={}, prompt={}",
-      geminiProperties.imageModel(), geminiProperties.apiKey(), characterType, promptText
+      model, geminiProperties.apiKey(), characterType, promptText
     );
     try {
       GeminiGenerateContentResponse response = geminiRestClient.post()
-        .uri("/v1beta/models/{model}:generateContent", geminiProperties.imageModel())
+        .uri("/v1beta/models/{model}:generateContent", model)
         .header("x-goog-api-key", geminiProperties.apiKey())
         .body(request)
         .retrieve()
         .body(GeminiGenerateContentResponse.class);
       log.info(
         "Gemini 이미지 생성 호출 완료: model={}, elapsedMs={}, response={}",
-        geminiProperties.imageModel(), System.currentTimeMillis() - startedAt, describeResponse(response)
+        model, System.currentTimeMillis() - startedAt, describeResponse(response)
       );
       return extractImage(response);
     } catch (Exception e) {
       log.warn(
         "Gemini 이미지 생성 호출 실패: model={}, elapsedMs={}, characterType={}, prompt={}",
-        geminiProperties.imageModel(), System.currentTimeMillis() - startedAt, characterType, promptText, e
+        model, System.currentTimeMillis() - startedAt, characterType, promptText, e
       );
       throw e;
     }

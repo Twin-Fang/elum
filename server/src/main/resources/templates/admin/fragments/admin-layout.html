@@ -21,6 +21,7 @@
     <li><a th:href="@{/admin/routines}" th:classappend="${active == 'routines'} ? 'active'">루틴 관리</a></li>
     <li><a th:href="@{/admin/prompts}" th:classappend="${active == 'prompts'} ? 'active'">프롬프트 관리</a></li>
     <li><a th:href="@{/admin/logs}" th:classappend="${active == 'logs'} ? 'active'">서버 로그</a></li>
+    <li><a th:href="@{/admin/settings}" th:classappend="${active == 'settings'} ? 'active'">시스템 설정</a></li>
   </ul>
   <form th:action="@{/admin/logout}" method="post" class="px-2">
     <button type="submit" class="btn btn-ghost btn-sm w-full justify-start">로그아웃</button>

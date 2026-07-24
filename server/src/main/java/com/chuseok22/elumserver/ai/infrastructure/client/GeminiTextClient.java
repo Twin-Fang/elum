@@ -7,6 +7,8 @@ import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionAiInput;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -29,6 +31,7 @@ public class GeminiTextClient {
   private final RestClient geminiRestClient;
   private final GeminiProperties geminiProperties;
   private final PromptTemplateService promptTemplateService;
+  private final SystemConfigService systemConfigService;
 
   // Spring Boot 4.1은 Jackson 3 기반이라 Jackson 2 ObjectMapper 빈이 자동 구성되지 않으므로
   // RoutineAiPipeline과 동일하게 직접 생성해서 쓴다.
@@ -103,27 +106,29 @@ public class GeminiTextClient {
       generationConfig(schema)
     );
 
+    // 모델명은 호출 시점마다 시스템 설정에서 읽는다 — 관리자가 바꾸면 재배포 없이 반영된다.
+    String model = systemConfigService.getString(ConfigKey.GEMINI_TEXT_MODEL);
     long startedAt = System.currentTimeMillis();
     log.info(
       "Gemini 텍스트 생성 호출 시작: model={}, systemPrompt={}, userContent={}",
-      geminiProperties.textModel(), systemPrompt, userContentText
+      model, systemPrompt, userContentText
     );
     try {
       GeminiGenerateContentResponse response = geminiRestClient.post()
-        .uri("/v1beta/models/{model}:generateContent", geminiProperties.textModel())
+        .uri("/v1beta/models/{model}:generateContent", model)
         .header("x-goog-api-key", geminiProperties.apiKey())
         .body(request)
         .retrieve()
         .body(GeminiGenerateContentResponse.class);
       log.info(
         "Gemini 텍스트 생성 호출 완료: model={}, elapsedMs={}, response={}",
-        geminiProperties.textModel(), System.currentTimeMillis() - startedAt, response
+        model, System.currentTimeMillis() - startedAt, response
       );
       return response;
     } catch (Exception e) {
       log.warn(
         "Gemini 텍스트 생성 호출 실패: model={}, elapsedMs={}, systemPrompt={}, userContent={}",
-        geminiProperties.textModel(), System.currentTimeMillis() - startedAt, systemPrompt, userContentText, e
+        model, System.currentTimeMillis() - startedAt, systemPrompt, userContentText, e
       );
       throw e;
     }
@@ -141,7 +146,7 @@ public class GeminiTextClient {
     return Map.of(
       "responseMimeType", "application/json",
       "responseSchema", schema,
-      "temperature", 0
+      "temperature", systemConfigService.getDouble(ConfigKey.GEMINI_TEXT_TEMPERATURE)
     );
   }
 

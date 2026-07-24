@@ -46,6 +46,9 @@ public enum ErrorCode {
   // ADMIN LOG
   LOG_FILE_READ_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "로그 파일을 읽는 중 오류가 발생했습니다. (E-LOG-001)"),
 
+  // SYSTEM CONFIG
+  SYSTEM_CONFIG_INVALID_VALUE(HttpStatus.BAD_REQUEST, "시스템 설정 값이 올바르지 않습니다."),
+
   // AI DLP 요청 암호화 (필터 계층 — errorCode 이름이 그대로 클라 식별자가 된다)
   DLP_TIMESTAMP_INVALID(HttpStatus.BAD_REQUEST, "요청 시각이 유효하지 않습니다."),
   DLP_NONCE_REPLAY(HttpStatus.BAD_REQUEST, "이미 사용된 요청입니다."),

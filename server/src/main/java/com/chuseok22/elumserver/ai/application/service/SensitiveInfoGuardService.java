@@ -10,6 +10,8 @@ import com.chuseok22.elumserver.ai.infrastructure.client.LocalLlmClient;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmProperties;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -31,6 +33,7 @@ public class SensitiveInfoGuardService {
   private final LocalLlmProperties localLlmProperties;
   private final LocalLlmClient localLlmClient;
   private final PromptTemplateService promptTemplateService;
+  private final SystemConfigService systemConfigService;
 
   public SensitiveInfoCheckResult check(String text) {
     if (!localLlmProperties.enabled()) {
@@ -69,8 +72,9 @@ public class SensitiveInfoGuardService {
   }
 
   private SensitiveInfoCheckContent callAndParse(String systemPrompt, String text) throws Exception {
+    // 모델명은 시스템 설정에서 읽는다 — 관리자가 바꾸면 재배포 없이 반영된다.
     LocalLlmChatRequest request = new LocalLlmChatRequest(
-      localLlmProperties.model(), wrapAsData(text), systemPrompt, 0, responseFormat()
+      systemConfigService.getString(ConfigKey.LOCAL_LLM_MODEL), wrapAsData(text), systemPrompt, 0, responseFormat()
     );
     LocalLlmChatResponse response = localLlmClient.chat(request);
 
