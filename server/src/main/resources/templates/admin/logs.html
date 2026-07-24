@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>이룸 관리자 - 서버 로그</title>
+  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
+</head>
+<body class="min-h-screen bg-base-100">
+<div class="flex">
+  <div th:replace="~{admin/fragments/admin-layout :: sidebar('logs')}"></div>
+  <main class="flex-1 p-8">
+    <div class="max-w-6xl mx-auto space-y-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">서버 로그</h1>
+        <div class="flex items-center gap-2">
+          <span id="status-badge" class="badge badge-ghost">연결 중...</span>
+          <label class="label cursor-pointer gap-2">
+            <span class="label-text text-sm">팔로우</span>
+            <input id="follow-toggle" type="checkbox" class="toggle toggle-primary toggle-sm" checked/>
+          </label>
+          <button id="clear-btn" type="button" class="btn btn-outline btn-sm">지우기</button>
+        </div>
+      </div>
+
+      <p class="text-sm text-base-content/60">
+        <code>logs/elum-server.log</code>를 2초 간격으로 이어 읽습니다. 위로 스크롤하면 자동 스크롤이 멈추고,
+        맨 아래로 내리거나 팔로우를 다시 켜면 재개됩니다.
+      </p>
+
+      <div id="empty-state" class="hidden card bg-base-200">
+        <div class="card-body items-center text-center text-base-content/60">
+          <p class="text-lg">로그 파일이 아직 없습니다</p>
+          <p class="text-sm">서버가 로그를 남기기 시작하면 자동으로 표시됩니다. 계속 확인 중...</p>
+        </div>
+      </div>
+
+      <pre id="log-view"
+           class="bg-neutral text-neutral-content rounded-lg p-4 text-xs leading-5 whitespace-pre-wrap break-all overflow-y-auto"
+           style="height: 70vh"></pre>
+    </div>
+  </main>
+</div>
+
+<script th:inline="javascript">
+  const POLL_INTERVAL_MS = 2000;
+  const MAX_BUFFER_CHARS = 2 * 1024 * 1024; // 화면 버퍼 상한 — 초과분은 앞에서 잘라낸다
+
+  const logView = document.getElementById('log-view');
+  const statusBadge = document.getElementById('status-badge');
+  const followToggle = document.getElementById('follow-toggle');
+  const emptyState = document.getElementById('empty-state');
+
+  let nextOffset = null;
+  let bufferChars = 0;
+  let polling = false;
+
+  function setStatus(text, badgeClass) {
+    statusBadge.textContent = text;
+    statusBadge.className = 'badge ' + badgeClass;
+  }
+
+  function isScrolledToBottom() {
+    return logView.scrollHeight - logView.scrollTop - logView.clientHeight < 10;
+  }
+
+  // 사용자가 위로 스크롤하면 팔로우를 끄고, 바닥까지 내리면 다시 켠다.
+  logView.addEventListener('scroll', function () {
+    followToggle.checked = isScrolledToBottom();
+  });
+
+  document.getElementById('clear-btn').addEventListener('click', function () {
+    logView.replaceChildren();
+    bufferChars = 0;
+  });
+
+  // 텍스트 노드 append — 전체 버퍼 재직렬화 없이 O(증분)로 쌓고, 상한 초과분은 앞 노드부터 버린다.
+  function appendContent(content) {
+    if (!content) return;
+    logView.appendChild(document.createTextNode(content));
+    bufferChars += content.length;
+    while (bufferChars > MAX_BUFFER_CHARS && logView.firstChild) {
+      bufferChars -= logView.firstChild.textContent.length;
+      logView.removeChild(logView.firstChild);
+    }
+    if (followToggle.checked) {
+      logView.scrollTop = logView.scrollHeight;
+    }
+  }
+
+  async function poll() {
+    if (polling) return; // 이전 폴링이 끝나기 전 중복 요청·중복 append 방지
+    polling = true;
+    try {
+      const params = nextOffset === null ? '?lines=200' : '?offset=' + nextOffset;
+      const response = await fetch('/admin/logs/api/tail' + params);
+      // 세션이 만료되면 fetch가 로그인 페이지(302→200 HTML)로 따라간다 — 네트워크 오류와 구분해서 안내한다.
+      if (response.redirected || !(response.headers.get('content-type') || '').includes('application/json')) {
+        setStatus('세션 만료 — 새로고침 후 다시 로그인', 'badge-warning');
+        return;
+      }
+      const data = await response.json();
+      if (!response.ok) {
+        // GlobalExceptionHandler의 ErrorResponse(JSON) — 에러 코드가 메시지에 포함돼 있다.
+        setStatus(data.errorMessage || '오류 — 재시도 중', 'badge-error');
+        return;
+      }
+      if (!data.exists) {
+        emptyState.classList.remove('hidden');
+        setStatus('파일 없음 — 대기 중', 'badge-warning');
+        return;
+      }
+      emptyState.classList.add('hidden');
+      appendContent(data.content);
+      nextOffset = data.nextOffset;
+      setStatus('연결됨', 'badge-success');
+    } catch (e) {
+      setStatus('연결 끊김 — 재시도 중', 'badge-error');
+    } finally {
+      polling = false;
+    }
+  }
+
+  poll();
+  setInterval(poll, POLL_INTERVAL_MS);
+</script>
+</body>
+</html>

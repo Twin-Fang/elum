@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  콘솔 출력(docker logs·외부 로그 엔드포인트)은 그대로 유지하면서, 로그를 파일로도 남긴다.
+  배포 컨테이너는 WORKDIR(/app)에 NAS(/volume1/project/elum/server)가 마운트돼 있어
+  상대경로 logs/ 가 그대로 영구 저장소가 된다. 경로를 바꿔야 하면 -DELUM_LOG_DIR 로 재정의한다.
+-->
+<configuration>
+  <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+  <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+  <property name="LOG_DIR" value="${ELUM_LOG_DIR:-logs}"/>
+
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/elum-server.log</file>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${FILE_LOG_PATTERN}</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/elum-server.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+      <maxFileSize>10MB</maxFileSize>
+      <maxHistory>7</maxHistory>
+      <totalSizeCap>1GB</totalSizeCap>
+    </rollingPolicy>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </root>
+</configuration>
