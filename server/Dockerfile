@@ -15,6 +15,7 @@ ENTRYPOINT ["java", "-jar", "/app.jar"]
 # Spring Boot 서버 포트 노출
 EXPOSE 8080
 
-# Docker Swarm 헬스체크
+# Docker Swarm 헬스체크 — Actuator 의존성이 없어 /actuator/health는 항상 404였다.
+# 서버가 직접 제공하는 /healthz(HealthController)로 검사한다.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=5 \
-CMD curl -f http://localhost:8080/actuator/health || exit 1
+CMD curl -f http://localhost:8080/healthz || exit 1
