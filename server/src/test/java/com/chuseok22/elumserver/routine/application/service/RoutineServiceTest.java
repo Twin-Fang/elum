@@ -273,4 +273,142 @@ class RoutineServiceTest {
       eq("member-1"), eq(List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED)), any(), any()
     );
   }
+
+  // --- 오프라인 퍼스트 일괄 반영 (이슈 #140) ---
+
+  private Routine confirmedRoutine(Member member, int stepCount) {
+    Routine routine = new Routine();
+    routine.setId("routine-1");
+    routine.setMember(member);
+    routine.setStatus(RoutineStatus.CONFIRMED);
+    java.util.List<RoutineStep> steps = new java.util.ArrayList<>();
+    for (int i = 1; i <= stepCount; i++) {
+      RoutineStep step = new RoutineStep();
+      step.setId("step-" + i);
+      step.setStepOrder(i);
+      step.setDescription("단계 " + i);
+      step.setCompleted(false);
+      steps.add(step);
+    }
+    routine.setSteps(steps);
+    return routine;
+  }
+
+  private Member memberWithStars(int stars) {
+    Member member = new Member();
+    member.setId("member-1");
+    member.setTotalStars(stars);
+    return member;
+  }
+
+  @Test
+  @DisplayName("syncProgress: 부분 집합을 보내면 해당 단계만 완료되고 별은 늘어난 수만큼 오른다")
+  void syncProgress_partialSet_marksOnlyThoseAndAddsStars() {
+    Member member = memberWithStars(0);
+    Routine routine = confirmedRoutine(member, 3);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    RoutineResponse response = routineService.syncProgress("member-1", "routine-1", List.of("step-1", "step-2"));
+
+    assertThat(routine.getSteps()).extracting(RoutineStep::getCompleted).containsExactly(true, true, false);
+    assertThat(routine.getSteps().get(0).getCompletedAt()).isNotNull();
+    assertThat(routine.getSteps().get(2).getCompletedAt()).isNull();
+    assertThat(member.getTotalStars()).isEqualTo(2);
+    assertThat(routine.getStatus()).isEqualTo(RoutineStatus.CONFIRMED);
+    assertThat(response.progressPercent()).isEqualTo(66);
+  }
+
+  @Test
+  @DisplayName("syncProgress: 전부 보내면 COMPLETED가 되고 completedAt이 찍힌다")
+  void syncProgress_allSteps_completesRoutine() {
+    Routine routine = confirmedRoutine(memberWithStars(0), 2);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.syncProgress("member-1", "routine-1", List.of("step-1", "step-2"));
+
+    assertThat(routine.getStatus()).isEqualTo(RoutineStatus.COMPLETED);
+    assertThat(routine.getCompletedAt()).isNotNull();
+  }
+
+  @Test
+  @DisplayName("syncProgress: 완료였던 단계를 집합에서 빼면 해제되고 별이 그만큼 내려가며 CONFIRMED로 돌아온다")
+  void syncProgress_removingSteps_uncompletesAndSubtractsStars() {
+    Member member = memberWithStars(3);
+    Routine routine = confirmedRoutine(member, 3);
+    routine.getSteps().forEach(step -> {
+      step.setCompleted(true);
+      step.setCompletedAt(java.time.LocalDateTime.now());
+    });
+    routine.setStatus(RoutineStatus.COMPLETED);
+    routine.setCompletedAt(java.time.LocalDateTime.now());
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.syncProgress("member-1", "routine-1", List.of("step-1"));
+
+    assertThat(routine.getSteps()).extracting(RoutineStep::getCompleted).containsExactly(true, false, false);
+    assertThat(routine.getSteps().get(1).getCompletedAt()).isNull();
+    assertThat(member.getTotalStars()).isEqualTo(1);
+    assertThat(routine.getStatus()).isEqualTo(RoutineStatus.CONFIRMED);
+    assertThat(routine.getCompletedAt()).isNull();
+  }
+
+  @Test
+  @DisplayName("syncProgress: 같은 집합을 두 번 보내도 별이 더 오르지 않는다 (멱등)")
+  void syncProgress_sameSetTwice_isIdempotent() {
+    Member member = memberWithStars(0);
+    Routine routine = confirmedRoutine(member, 2);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.syncProgress("member-1", "routine-1", List.of("step-1"));
+    routineService.syncProgress("member-1", "routine-1", List.of("step-1"));
+
+    assertThat(member.getTotalStars()).isEqualTo(1);
+  }
+
+  @Test
+  @DisplayName("syncProgress: 순서를 건너뛴 집합도 그대로 받아들인다")
+  void syncProgress_outOfOrderSet_isAccepted() {
+    Routine routine = confirmedRoutine(memberWithStars(0), 3);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.syncProgress("member-1", "routine-1", List.of("step-3"));
+
+    assertThat(routine.getSteps()).extracting(RoutineStep::getCompleted).containsExactly(false, false, true);
+  }
+
+  @Test
+  @DisplayName("syncProgress: 별이 0인 상태에서 해제 요청이 와도 음수가 되지 않는다")
+  void syncProgress_neverGoesBelowZeroStars() {
+    Member member = memberWithStars(0);
+    Routine routine = confirmedRoutine(member, 1);
+    routine.getSteps().get(0).setCompleted(true);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.syncProgress("member-1", "routine-1", List.of());
+
+    assertThat(member.getTotalStars()).isZero();
+  }
+
+  @Test
+  @DisplayName("syncProgress: 승인 전 일과면 ROUTINE_INVALID_STATUS를 던진다")
+  void syncProgress_pendingReview_throws() {
+    Routine routine = confirmedRoutine(memberWithStars(0), 1);
+    routine.setStatus(RoutineStatus.PENDING_REVIEW);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    assertThatThrownBy(() -> routineService.syncProgress("member-1", "routine-1", List.of("step-1")))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ROUTINE_INVALID_STATUS));
+  }
+
+  @Test
+  @DisplayName("syncProgress: 이 일과에 없는 단계 id가 섞이면 ROUTINE_STEP_NOT_FOUND를 던진다")
+  void syncProgress_unknownStepId_throws() {
+    Routine routine = confirmedRoutine(memberWithStars(0), 1);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    assertThatThrownBy(() -> routineService.syncProgress("member-1", "routine-1", List.of("step-1", "ghost")))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ROUTINE_STEP_NOT_FOUND));
+  }
 }

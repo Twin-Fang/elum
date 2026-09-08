@@ -28,8 +28,10 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -207,6 +209,62 @@ public class RoutineService {
     }
 
     return RoutineResponse.from(routine);
+  }
+
+  // 오프라인 퍼스트 클라이언트가 "이 일과의 완료 집합은 이것이다"를 통째로 보낸다.
+  // 단계별 complete/cancel과 달리 **순서를 검사하지 않고** 최종 상태로 맞춘다 —
+  // 오프라인 재전송에서 요청 하나가 거부돼 뒤가 연쇄로 무너지는 문제(이슈 #139)를
+  // 구조적으로 없애기 위함. 별은 완료 수의 차이만큼만 움직여 같은 요청을 여러 번
+  // 보내도 결과가 같다(멱등).
+  @Transactional
+  public RoutineResponse syncProgress(String memberId, String routineId, List<String> completedStepIds) {
+    Routine routine = getOwnedRoutine(memberId, routineId);
+    if (routine.getStatus() != RoutineStatus.CONFIRMED && routine.getStatus() != RoutineStatus.COMPLETED) {
+      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
+    }
+
+    List<RoutineStep> steps = routine.getSteps();
+    Set<String> target = new HashSet<>(completedStepIds);
+    Set<String> known = steps.stream().map(RoutineStep::getId).collect(Collectors.toSet());
+    if (!known.containsAll(target)) {
+      throw new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND);
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    int before = countCompleted(steps);
+    for (RoutineStep step : steps) {
+      boolean shouldComplete = target.contains(step.getId());
+      boolean isCompleted = Boolean.TRUE.equals(step.getCompleted());
+      if (shouldComplete && !isCompleted) {
+        step.setCompleted(true);
+        step.setCompletedAt(now);
+      } else if (!shouldComplete && isCompleted) {
+        step.setCompleted(false);
+        step.setCompletedAt(null);
+      }
+      // 이미 완료였고 여전히 완료면 completedAt을 건드리지 않는다 — 처음 완료한 시각이 기록이다.
+    }
+    int after = countCompleted(steps);
+
+    Member member = routine.getMember();
+    member.setTotalStars(Math.max(0, member.getTotalStars() + (after - before)));
+
+    boolean allCompleted = !steps.isEmpty() && after == steps.size();
+    if (allCompleted) {
+      if (routine.getStatus() != RoutineStatus.COMPLETED) {
+        routine.setStatus(RoutineStatus.COMPLETED);
+        routine.setCompletedAt(now);
+      }
+    } else {
+      routine.setStatus(RoutineStatus.CONFIRMED);
+      routine.setCompletedAt(null);
+    }
+
+    return RoutineResponse.from(routine);
+  }
+
+  private int countCompleted(List<RoutineStep> steps) {
+    return (int) steps.stream().filter(step -> Boolean.TRUE.equals(step.getCompleted())).count();
   }
 
   @Transactional
