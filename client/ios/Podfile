@@ -1,5 +1,7 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '13.0'
+# Apple 정책(ITMS-90068): 2027년 봄부터 최소 15.0 이상만 App Store Connect 업로드 가능.
+# 아래 pbxproj·AppFrameworkInfo.plist와 반드시 같은 값으로 맞춘다.
+platform :ios, '15.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
