@@ -6,6 +6,7 @@ import 'core/dev/dev_tools_overlay.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/data/auth_repository.dart';
+import 'features/child/application/sync_triggers.dart';
 import 'features/onboarding/application/onboarding_notifier.dart';
 
 class ElumApp extends ConsumerStatefulWidget {
@@ -40,11 +41,14 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         debugShowCheckedModeBanner: false,
         // 개발자 도구를 모든 화면 위에 얹는다. 화면별 코드는 건드리지 않는다.
         // 플래그가 꺼지면 child를 그대로 반환해 비용이 0이다. (이슈 #13)
-        builder: (context, child) => DevToolsOverlay(
-          // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
-          // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
-          onNavigate: _router.go,
-          child: child ?? const SizedBox.shrink(),
+        builder: (context, child) => SyncTriggers(
+          // 동기화 트리거는 라우터·오버레이와 무관하므로 가장 바깥에 둔다 (이슈 #140)
+          child: DevToolsOverlay(
+            // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
+            // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
+            onNavigate: _router.go,
+            child: child ?? const SizedBox.shrink(),
+          ),
         ),
       ),
     );
