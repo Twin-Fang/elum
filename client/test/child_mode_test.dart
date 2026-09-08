@@ -50,9 +50,8 @@ void main() {
         GoRoute(path: Routes.child, builder: (context, state) => screen),
         GoRoute(
           path: Routes.childRoutineDetail,
-          builder: (context, state) => ChildRoutineDetailScreen(
-            routine: state.extra! as Routine,
-          ),
+          builder: (context, state) =>
+              ChildRoutineDetailScreen(routine: state.extra! as Routine),
         ),
         GoRoute(
           path: Routes.childStars,
@@ -85,10 +84,8 @@ void main() {
       ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
-        builder: (context, _) => MaterialApp.router(
-          theme: AppTheme.light,
-          routerConfig: router,
-        ),
+        builder: (context, _) =>
+            MaterialApp.router(theme: AppTheme.light, routerConfig: router),
       ),
     );
   }
@@ -101,7 +98,9 @@ void main() {
     String? pin,
     String status = 'CONFIRMED',
   }) async {
-    await tester.pumpWidget(wrap(const ChildHomeScreen(), steps: steps, pin: pin));
+    await tester.pumpWidget(
+      wrap(const ChildHomeScreen(), steps: steps, pin: pin),
+    );
     await tester.pumpAndSettle();
 
     final container = ProviderScope.containerOf(
@@ -170,10 +169,12 @@ void main() {
       expect(svgWithAsset(AppAssets.starBadge), findsOneWidget);
 
       await tester.tap(
-        find.ancestor(
-          of: svgWithAsset(AppAssets.starBadge),
-          matching: find.byType(AppPressable),
-        ).first,
+        find
+            .ancestor(
+              of: svgWithAsset(AppAssets.starBadge),
+              matching: find.byType(AppPressable),
+            )
+            .first,
       );
       await tester.pumpAndSettle();
 
@@ -193,41 +194,40 @@ void main() {
   });
 
   group('보상 조건', () {
+    // 서버에 없는 로컬 일과 — 동기화 없이 토글 규칙만 본다.
+    const local = Routine(id: 'local', status: 'CONFIRMED', steps: cards);
+    final c1 = cards[0];
+    final c2 = cards[1];
+
     test('처음 체크하면 보상을 준다', () {
-      final container = ProviderContainer(
-        overrides: [testStorageOverride()],
-      );
+      final container = ProviderContainer(overrides: [testStorageOverride()]);
       addTearDown(container.dispose);
 
       final notifier = container.read(childRoutineProvider.notifier);
 
-      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isTrue);
+      expect(notifier.toggle(routine: local, card: c1), isTrue);
     });
 
     test('해제했다 다시 체크하면 보상을 주지 않는다', () {
       // 매번 축하하면 보상이 가벼워진다
-      final container = ProviderContainer(
-        overrides: [testStorageOverride()],
-      );
+      final container = ProviderContainer(overrides: [testStorageOverride()]);
       addTearDown(container.dispose);
 
       final notifier = container.read(childRoutineProvider.notifier);
 
-      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isTrue);
-      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isFalse); // 해제
-      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isFalse); // 재체크 — 보상 없음
+      expect(notifier.toggle(routine: local, card: c1), isTrue);
+      expect(notifier.toggle(routine: local, card: c1), isFalse); // 해제
+      expect(notifier.toggle(routine: local, card: c1), isFalse); // 재체크 — 보상 없음
     });
 
     test('해제해도 보상 이력은 남는다', () {
-      final container = ProviderContainer(
-        overrides: [testStorageOverride()],
-      );
+      final container = ProviderContainer(overrides: [testStorageOverride()]);
       addTearDown(container.dispose);
 
       final notifier = container.read(childRoutineProvider.notifier);
       notifier
-        ..toggle(routineId: 'local', cardId: 'c1')
-        ..toggle(routineId: 'local', cardId: 'c1');
+        ..toggle(routine: local, card: c1)
+        ..toggle(routine: local, card: c1);
 
       final state = container.read(childRoutineProvider);
       expect(state.isCompleted('c1'), isFalse);
@@ -235,30 +235,26 @@ void main() {
     });
 
     test('카드마다 따로 보상한다', () {
-      final container = ProviderContainer(
-        overrides: [testStorageOverride()],
-      );
+      final container = ProviderContainer(overrides: [testStorageOverride()]);
       addTearDown(container.dispose);
 
       final notifier = container.read(childRoutineProvider.notifier);
 
-      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isTrue);
-      expect(notifier.toggle(routineId: 'local', cardId: 'c2'), isTrue);
+      expect(notifier.toggle(routine: local, card: c1), isTrue);
+      expect(notifier.toggle(routine: local, card: c2), isTrue);
     });
 
     test('새 일과를 시작하면 초기화된다', () {
-      final container = ProviderContainer(
-        overrides: [testStorageOverride()],
-      );
+      final container = ProviderContainer(overrides: [testStorageOverride()]);
       addTearDown(container.dispose);
 
       final notifier = container.read(childRoutineProvider.notifier)
-        ..toggle(routineId: 'local', cardId: 'c1')
+        ..toggle(routine: local, card: c1)
         ..reset();
 
       expect(container.read(childRoutineProvider).rewarded, isEmpty);
       // 초기화 후에는 다시 보상을 받을 수 있다
-      expect(notifier.toggle(routineId: 'local', cardId: 'c1'), isTrue);
+      expect(notifier.toggle(routine: local, card: c1), isTrue);
     });
   });
 
@@ -273,8 +269,9 @@ void main() {
     });
 
     test('캐릭터마다 문구가 다르다', () {
-      final messages =
-          RewardCharacter.values.map((c) => c.messageFor('하늘이')).toSet();
+      final messages = RewardCharacter.values
+          .map((c) => c.messageFor('하늘이'))
+          .toSet();
 
       expect(messages.length, RewardCharacter.values.length);
     });
@@ -313,8 +310,7 @@ void main() {
       expect(RewardCharacter.popo.buttonLabel, '좋아요!'); // 334:4320
       expect(RewardCharacter.ruru.buttonLabel, '신난다!'); // 343:4434
 
-      final labels =
-          RewardCharacter.values.map((c) => c.buttonLabel).toSet();
+      final labels = RewardCharacter.values.map((c) => c.buttonLabel).toSet();
       expect(labels.length, RewardCharacter.values.length);
     });
   });
@@ -398,10 +394,7 @@ void main() {
     test('모르는 방향이면 아이 화면으로 본다', () {
       expect(ModeSwitchTarget.fromName(null), ModeSwitchTarget.child);
       expect(ModeSwitchTarget.fromName('nonsense'), ModeSwitchTarget.child);
-      expect(
-        ModeSwitchTarget.fromName('guardian'),
-        ModeSwitchTarget.guardian,
-      );
+      expect(ModeSwitchTarget.fromName('guardian'), ModeSwitchTarget.guardian);
     });
   });
 
@@ -412,10 +405,14 @@ void main() {
 
       // 상단 오른쪽 캐릭터 배지가 보호자 모드로 나가는 유일한 입구다
       await tester.tap(
-        find.ancestor(
-          of: svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
-          matching: find.byType(AppPressable),
-        ).first,
+        find
+            .ancestor(
+              of: svgWithAsset(
+                AppAssets.characterBadgeFramed(CardCharacter.cat),
+              ),
+              matching: find.byType(AppPressable),
+            )
+            .first,
       );
       await tester.pumpAndSettle();
 
@@ -425,8 +422,10 @@ void main() {
 
     testWidgets('틀린 PIN으로는 보호자 화면에 가지 못한다', (tester) async {
       await tester.pumpWidget(
-        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.guardian),
-            pin: '1234'),
+        wrap(
+          const ModeSwitchScreen(target: ModeSwitchTarget.guardian),
+          pin: '1234',
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -440,8 +439,10 @@ void main() {
 
     testWidgets('맞는 PIN이면 보호자 화면으로 넘어간다', (tester) async {
       await tester.pumpWidget(
-        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.guardian),
-            pin: '1234'),
+        wrap(
+          const ModeSwitchScreen(target: ModeSwitchTarget.guardian),
+          pin: '1234',
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -454,8 +455,10 @@ void main() {
     testWidgets('보호자 → 아이 방향도 PIN을 요구한다', (tester) async {
       // 양방향 모두 막는다. 한쪽만 막으면 우회로가 생긴다.
       await tester.pumpWidget(
-        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.child),
-            pin: '1234'),
+        wrap(
+          const ModeSwitchScreen(target: ModeSwitchTarget.child),
+          pin: '1234',
+        ),
       );
       await tester.pumpAndSettle();
 

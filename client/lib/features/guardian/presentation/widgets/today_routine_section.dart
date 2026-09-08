@@ -26,7 +26,8 @@ import '../../../../shared/models/routine.dart';
 /// steps가 빈 일과는 펼쳐도 보여줄 것이 없어 제외한다.
 final homeRoutinesProvider = Provider<List<Routine>>((ref) {
   final current = ref.watch(routineFlowProvider).routine;
-  final fetched = ref.watch(myRoutinesProvider).asData?.value ?? const <Routine>[];
+  final fetched =
+      ref.watch(myRoutinesProvider).asData?.value ?? const <Routine>[];
 
   return [
     if (current != null && current.steps.isNotEmpty) current,
@@ -36,13 +37,11 @@ final homeRoutinesProvider = Provider<List<Routine>>((ref) {
 
 /// 일과의 진행률(0.0~1.0).
 ///
-/// 서버 `completed`와 아이 모드의 로컬 체크를 합친다 — 서버 반영이 늦어도
-/// 방금 체크한 카드가 진행률에 바로 보여야 한다.
-double routineProgress(Routine routine, Set<String> localCompleted) {
+/// 서버 `completed` 위에 아이 모드의 로컬 표시를 덮는다 — 서버 반영이 늦어도
+/// 방금 체크한 카드가 진행률에 바로 보여야 하고, 로컬에서 푼 카드는 빠져야 한다.
+double routineProgress(Routine routine, ChildRoutineState progress) {
   if (routine.steps.isEmpty) return 0;
-  final done = routine.steps
-      .where((s) => s.completed || localCompleted.contains(s.id))
-      .length;
+  final done = routine.steps.where(progress.isChecked).length;
   return done / routine.steps.length;
 }
 
@@ -92,12 +91,12 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
             child: routine.id == _expandedId
                 ? _ExpandedRoutine(
                     routine: routine,
-                    completed: progress.completed,
+                    progress: progress,
                     onCollapse: () => _toggle(routine.id),
                   )
                 : _CollapsedTile(
                     routine: routine,
-                    progress: routineProgress(routine, progress.completed),
+                    progress: routineProgress(routine, progress),
                     onTap: () => _toggle(routine.id),
                   ),
           ),
@@ -149,7 +148,11 @@ class _CollapsedTile extends StatelessWidget {
             RoutineProgressRing(progress: progress),
             SizedBox(width: space.xs),
             // 원본 SVG가 아래 방향이라 접힘 상태 그대로 쓴다
-            SvgPicture.asset(AppAssets.iconAngleSmall, width: 24.w, height: 24.w),
+            SvgPicture.asset(
+              AppAssets.iconAngleSmall,
+              width: 24.w,
+              height: 24.w,
+            ),
           ],
         ),
       ),
@@ -161,12 +164,14 @@ class _CollapsedTile extends StatelessWidget {
 class _ExpandedRoutine extends ConsumerWidget {
   const _ExpandedRoutine({
     required this.routine,
-    required this.completed,
+    required this.progress,
     required this.onCollapse,
   });
 
   final Routine routine;
-  final Set<String> completed;
+
+  /// 아이 모드의 로컬 표시. 서버 값 위에 덮어 완료 여부를 판단한다.
+  final ChildRoutineState progress;
   final VoidCallback onCollapse;
 
   @override
@@ -196,8 +201,9 @@ class _ExpandedRoutine extends ConsumerWidget {
                       routine.displayTitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style:
-                          context.typo.body.copyWith(color: colors.chipLabel),
+                      style: context.typo.body.copyWith(
+                        color: colors.chipLabel,
+                      ),
                     ),
                   ),
                   // 펼침 상태 — 위 방향 (원본을 180° 돌린다)
@@ -219,7 +225,7 @@ class _ExpandedRoutine extends ConsumerWidget {
             _CardRow(
               card: card,
               index: index,
-              isDone: card.completed || completed.contains(card.id),
+              isDone: progress.isChecked(card),
             ),
           ],
         ],
@@ -285,15 +291,18 @@ class _CardRow extends StatelessWidget {
                   card.displayTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.typo.cardBody.copyWith(color: colors.chipLabel),
+                  style: context.typo.cardBody.copyWith(
+                    color: colors.chipLabel,
+                  ),
                 ),
                 SizedBox(height: space.xs),
                 Text(
                   card.description,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style:
-                      context.typo.caption.copyWith(color: colors.textSecondary),
+                  style: context.typo.caption.copyWith(
+                    color: colors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -325,8 +334,9 @@ class _DoneMark extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: isDone ? colors.checkDone : Colors.transparent,
-        border:
-            isDone ? null : Border.all(color: colors.checkPending, width: 2.w),
+        border: isDone
+            ? null
+            : Border.all(color: colors.checkPending, width: 2.w),
       ),
       child: Icon(
         Icons.check_rounded,
@@ -366,14 +376,16 @@ class EmptyRoutines extends ConsumerWidget {
               children: [
                 Text(
                   '아직 만든 일과가 없어요 😢',
-                  style: context.typo.cardBody
-                      .copyWith(color: context.colors.chipLabel),
+                  style: context.typo.cardBody.copyWith(
+                    color: context.colors.chipLabel,
+                  ),
                 ),
                 SizedBox(height: space.xs),
                 Text(
                   '$childName의 첫 행동카드를 만들어보세요',
-                  style: context.typo.caption
-                      .copyWith(color: context.colors.textSecondary),
+                  style: context.typo.caption.copyWith(
+                    color: context.colors.textSecondary,
+                  ),
                 ),
               ],
             ),

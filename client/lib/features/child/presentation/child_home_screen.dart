@@ -210,7 +210,7 @@ class _RoutineList extends ConsumerWidget {
           if (index > 0) SizedBox(height: space.md),
           _RoutineTile(
             routine: routine,
-            progress: routineProgress(routine, progress.completed),
+            progress: routineProgress(routine, progress),
           ),
         ],
       ],
@@ -359,11 +359,7 @@ class _NoRoutine extends StatelessWidget {
                     ),
                   ),
                   // 시무룩한 캐릭터 — 형태가 있는 일러스트는 반드시 에셋
-                  SvgPicture.asset(
-                    sadAsset,
-                    width: 164.w,
-                    height: 164.w,
-                  ),
+                  SvgPicture.asset(sadAsset, width: 164.w, height: 164.w),
                 ],
               ),
             ),

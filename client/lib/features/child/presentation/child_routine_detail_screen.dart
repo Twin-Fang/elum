@@ -16,6 +16,7 @@ import '../../guardian/data/routine_repository.dart';
 import '../../guardian/presentation/widgets/action_card_view.dart';
 import '../application/child_routine_notifier.dart';
 import '../data/speech_service.dart';
+import 'child_home_screen.dart' show childRoutinesProvider;
 
 /// 일과 상세 — 카드를 넘기며 체크한다 (Figma 309:3548 체크 전 / 309:3648 체크 후).
 ///
@@ -99,18 +100,29 @@ class _ChildRoutineDetailScreenState
 
   /// 소리를 낼 수 없을 때. 아동은 못 읽지만 보호자가 제보할 때 필요하다.
   void _showFailure() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('소리를 재생할 수 없어요 (E-TTS)')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('소리를 재생할 수 없어요 (E-TTS)')));
   }
 
   /// 현재 보고 있는 카드. 체크 버튼이 이 카드를 대상으로 한다.
   int get _currentIndex =>
       _controller.hasClients ? (_controller.page ?? 0).round() : 0;
 
-  /// [card]가 지금 체크된 상태인지. 로컬 진행 상태나 서버 값 어느 쪽이든 체크로 본다.
+  /// 지금 보여줄 일과. 홈이 넘겨준 스냅샷([widget.routine])이 아니라 목록
+  /// provider에서 같은 id를 찾아 쓴다 — 서버 동기화 뒤 목록이 갱신되면 카드의
+  /// `completed`도 최신이어야 로컬 표시를 걷어냈을 때 서버 값이 맞게 보인다.
+  /// 목록에 없으면(로컬 일과 등) 스냅샷으로 둔다.
+  Routine _resolveRoutine(List<Routine> routines) => routines.firstWhere(
+    (r) => r.id == widget.routine.id,
+    orElse: () => widget.routine,
+  );
+
+  Routine get _routine => _resolveRoutine(ref.read(childRoutinesProvider));
+
+  /// [card]가 지금 체크된 상태인지. 로컬 표시가 서버 값보다 우선한다.
   bool _isCardChecked(ActionCard card) =>
-      ref.read(childRoutineProvider).isCompleted(card.id) || card.completed;
+      ref.read(childRoutineProvider).isChecked(card);
 
   Future<void> _toggle(ActionCard card) async {
     // toggle 전에 현재 상태를 읽어둔다 — 미체크→체크로 "바뀌는" 순간에만
@@ -119,7 +131,11 @@ class _ChildRoutineDetailScreenState
 
     final shouldReward = ref
         .read(childRoutineProvider.notifier)
-        .toggle(routineId: widget.routine.id, cardId: card.id);
+        .toggle(routine: _routine, card: card);
+
+    // 순서 규칙(앞 단계 미완료·뒤 단계 완료)에 걸려 아무것도 바뀌지 않았다.
+    // 아동 화면이라 거부를 경고로 알리지 않고 조용히 넘어간다 (CLAUDE.md 아동 모드 규칙).
+    if (_isCardChecked(card) == wasChecked) return;
 
     // 별 개수가 서버에서 바뀌었다 — 홈 별 배지가 다음 조회에서 갱신되게 한다
     ref.invalidate(memberProvider);
@@ -144,8 +160,10 @@ class _ChildRoutineDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    final cards = widget.routine.steps;
+    final routine = _resolveRoutine(ref.watch(childRoutinesProvider));
+    final cards = routine.steps;
     final progress = ref.watch(childRoutineProvider);
+    final notifier = ref.read(childRoutineProvider.notifier);
     final space = context.space;
 
     return Scaffold(
@@ -153,10 +171,7 @@ class _ChildRoutineDetailScreenState
       body: SafeArea(
         child: Column(
           children: [
-            _TopBar(
-              onBack: () => context.pop(),
-              title: widget.routine.displayTitle,
-            ),
+            _TopBar(onBack: () => context.pop(), title: routine.displayTitle),
             Expanded(
               child: PageView.builder(
                 controller: _controller,
@@ -172,7 +187,7 @@ class _ChildRoutineDetailScreenState
                     key: ValueKey(cards[index].id),
                     card: cards[index],
                     index: index,
-                    routineId: widget.routine.id,
+                    routineId: routine.id,
                     onSpeak: () => _speak(cards[index]),
                     isSpeaking: _speakingId == cards[index].id,
                   ),
@@ -180,14 +195,22 @@ class _ChildRoutineDetailScreenState
               ),
             ),
             SizedBox(height: space.lg),
-            Builder(builder: (context) {
-              final current = cards[_currentIndex.clamp(0, cards.length - 1)];
-              return _CheckButton(
-                isChecked: progress.isCompleted(current.id) || current.completed,
-                confettiController: _confetti,
-                onTap: () => _toggle(current),
-              );
-            }),
+            Builder(
+              builder: (context) {
+                final current = cards[_currentIndex.clamp(0, cards.length - 1)];
+                return _CheckButton(
+                  isChecked: progress.isChecked(current),
+                  // 앞 단계가 남았거나 뒤 단계가 이미 체크됐으면 흐리게 — 서버가
+                  // 거부할 요청이라 눌러도 바뀌지 않는다는 걸 색으로만 알린다.
+                  isEnabled: notifier.canToggle(
+                    routine: routine,
+                    card: current,
+                  ),
+                  confettiController: _confetti,
+                  onTap: () => _toggle(current),
+                );
+              },
+            ),
             SizedBox(height: space.xl),
           ],
         ),
@@ -240,8 +263,9 @@ class _TopBar extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.typo.childDetailTitle
-                  .copyWith(color: context.colors.textPrimary),
+              style: context.typo.childDetailTitle.copyWith(
+                color: context.colors.textPrimary,
+              ),
             ),
           ),
           // 뒤로가기와 같은 폭을 비워 제목이 정확히 가운데 온다
@@ -260,67 +284,79 @@ class _TopBar extends StatelessWidget {
 class _CheckButton extends StatelessWidget {
   const _CheckButton({
     required this.isChecked,
+    required this.isEnabled,
     required this.confettiController,
     required this.onTap,
   });
 
   final bool isChecked;
+
+  /// 순서 규칙상 지금 누르면 바뀌는가. 아니면 흐리게 보인다.
+  /// 빨강·경고 아이콘은 쓰지 않는다 — 아동 모드 규칙.
+  final bool isEnabled;
   final ConfettiController confettiController;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final size = ChildRoutineDetailScreen.checkButtonSize.w
-        .clamp(ChildRoutineDetailScreen.minTouchTarget, double.infinity);
+    final size = ChildRoutineDetailScreen.checkButtonSize.w.clamp(
+      ChildRoutineDetailScreen.minTouchTarget,
+      double.infinity,
+    );
 
     // 색종이가 버튼 중심에서 사방으로 뿜어져 나오도록 겹쳐 놓는다.
     // ConfettiWidget은 자식(버튼)이 놓인 지점을 방출 원점으로 삼는다.
-    return Stack(
-      alignment: Alignment.center,
-      clipBehavior: Clip.none,
-      children: [
-        ConfettiWidget(
-          confettiController: confettiController,
-          // 한 방향이 아니라 원점에서 사방으로 터지는 '폭죽' 형태
-          blastDirectionality: BlastDirectionality.explosive,
-          // 아동 화면이라 과하지 않게. 짧게 팍 터지고 사라진다.
-          emissionFrequency: 0,
-          numberOfParticles: 18,
-          maxBlastForce: 18,
-          minBlastForce: 8,
-          gravity: 0.25,
-          shouldLoop: false,
-          colors: colors.confetti,
-        ),
-        AppPressable(
-          onTap: onTap,
-          scaleDown: AppPressable.scaleButton,
-          child: AnimatedContainer(
-            // 아동 화면은 300ms 이상으로 둔다 (docs/motion.md)
-            duration: AppMotion.normal,
-            curve: AppMotion.standard,
-            // 원형 버튼이라 가로세로 모두 .w. 좁은 기기에서 줄어들어도
-            // 아동 모드 최소 터치 타겟(64) 아래로는 내려가지 않게 막는다.
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isChecked ? colors.checkDone : Colors.transparent,
-              // 완료되면 채움만 남긴다 — 회색 테두리가 남으면 덜 끝난 느낌을 준다
-              // (Figma 309:3682)
-              border: isChecked
-                  ? null
-                  : Border.all(color: colors.checkPending, width: 8.w),
-            ),
-            child: Icon(
-              Icons.check_rounded,
-              size: 44.w,
-              color: isChecked ? colors.surface : colors.checkPending,
+    return AnimatedOpacity(
+      duration: AppMotion.normal,
+      curve: AppMotion.standard,
+      opacity: isEnabled ? 1 : 0.4,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          ConfettiWidget(
+            confettiController: confettiController,
+            // 한 방향이 아니라 원점에서 사방으로 터지는 '폭죽' 형태
+            blastDirectionality: BlastDirectionality.explosive,
+            // 아동 화면이라 과하지 않게. 짧게 팍 터지고 사라진다.
+            emissionFrequency: 0,
+            numberOfParticles: 18,
+            maxBlastForce: 18,
+            minBlastForce: 8,
+            gravity: 0.25,
+            shouldLoop: false,
+            colors: colors.confetti,
+          ),
+          AppPressable(
+            onTap: onTap,
+            scaleDown: AppPressable.scaleButton,
+            child: AnimatedContainer(
+              // 아동 화면은 300ms 이상으로 둔다 (docs/motion.md)
+              duration: AppMotion.normal,
+              curve: AppMotion.standard,
+              // 원형 버튼이라 가로세로 모두 .w. 좁은 기기에서 줄어들어도
+              // 아동 모드 최소 터치 타겟(64) 아래로는 내려가지 않게 막는다.
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isChecked ? colors.checkDone : Colors.transparent,
+                // 완료되면 채움만 남긴다 — 회색 테두리가 남으면 덜 끝난 느낌을 준다
+                // (Figma 309:3682)
+                border: isChecked
+                    ? null
+                    : Border.all(color: colors.checkPending, width: 8.w),
+              ),
+              child: Icon(
+                Icons.check_rounded,
+                size: 44.w,
+                color: isChecked ? colors.surface : colors.checkPending,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
