@@ -57,12 +57,24 @@ abstract class Routine with _$Routine {
 
   /// 홈·아이 목록에 보여줄 제목.
   /// AI가 title을 못 만들어도 화면이 비지 않게 대체어를 준다 (docs 원칙 6번).
-  String get displayTitle =>
-      title.trim().isNotEmpty ? title.trim() : '오늘의 일과';
+  String get displayTitle => title.trim().isNotEmpty ? title.trim() : '오늘의 일과';
 
   /// 모든 카드를 마쳤는가. 아이 홈 타일의 완료 배경 판단에 쓴다.
-  bool get isAllDone =>
-      steps.isNotEmpty && steps.every((s) => s.completed);
+  bool get isAllDone => steps.isNotEmpty && steps.every((s) => s.completed);
+
+  /// 오프라인 캐시 저장용 — [fromJson]과 대칭이어야 한다 (이슈 #140).
+  /// 원문(rawInputText)도 포함되므로 **이 결과를 로그에 찍지 않는다** (docs 원칙 5번).
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'rawInputText': rawInputText,
+    'sanitizedInputText': sanitizedInputText,
+    'status': status,
+    'steps': steps.map((s) => s.toJson()).toList(),
+    'completedStepCount': completedStepCount,
+    'totalStepCount': totalStepCount,
+    'progressPercent': progressPercent,
+  };
 
   factory Routine.fromJson(Map<String, dynamic> json) {
     return Routine(
@@ -72,10 +84,11 @@ abstract class Routine with _$Routine {
       sanitizedInputText: json['sanitizedInputText']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       steps: switch (json['steps']) {
-        final List<dynamic> list => list
-            .whereType<Map<String, dynamic>>()
-            .map(ActionCard.fromJson)
-            .toList(),
+        final List<dynamic> list =>
+          list
+              .whereType<Map<String, dynamic>>()
+              .map(ActionCard.fromJson)
+              .toList(),
         _ => const <ActionCard>[],
       },
       completedStepCount: _asInt(json['completedStepCount']),
@@ -86,10 +99,10 @@ abstract class Routine with _$Routine {
 
   /// 숫자가 int·String 어느 쪽으로 와도 죽지 않게 읽는다.
   static int _asInt(Object? value) => switch (value) {
-        final int v => v,
-        final String v => int.tryParse(v) ?? 0,
-        _ => 0,
-      };
+    final int v => v,
+    final String v => int.tryParse(v) ?? 0,
+    _ => 0,
+  };
 }
 
 /// AI 추가 질문 — 서버 `RoutineQuestionResponse`에 대응.
@@ -116,17 +129,17 @@ abstract class RoutineQuestion with _$RoutineQuestion {
   bool get canAsk => isRequired && questions.any((q) => q.isValid);
 
   /// 보여줄 수 있는 질문만 남긴다
-  List<QuestionItem> get askable =>
-      questions.where((q) => q.isValid).toList();
+  List<QuestionItem> get askable => questions.where((q) => q.isValid).toList();
 
   factory RoutineQuestion.fromJson(Map<String, dynamic> json) {
     return RoutineQuestion(
       isRequired: json['required'] == true,
       questions: switch (json['questions']) {
-        final List<dynamic> list => list
-            .whereType<Map<String, dynamic>>()
-            .map(QuestionItem.fromJson)
-            .toList(),
+        final List<dynamic> list =>
+          list
+              .whereType<Map<String, dynamic>>()
+              .map(QuestionItem.fromJson)
+              .toList(),
         _ => const <QuestionItem>[],
       },
     );
@@ -150,10 +163,11 @@ abstract class QuestionItem with _$QuestionItem {
     return QuestionItem(
       question: json['question']?.toString() ?? '',
       options: switch (json['options']) {
-        final List<dynamic> list => list
-            .whereType<Map<String, dynamic>>()
-            .map(QuestionOption.fromJson)
-            .toList(),
+        final List<dynamic> list =>
+          list
+              .whereType<Map<String, dynamic>>()
+              .map(QuestionOption.fromJson)
+              .toList(),
         _ => const <QuestionOption>[],
       },
     );

@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/storage/local_storage.dart';
 import '../../../shared/models/routine.dart';
+import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/support_goal.dart';
 import '../domain/routine_suggestion.dart';
 import 'demo_cards.dart';
@@ -57,16 +61,25 @@ abstract interface class RoutineRepository {
 }
 
 class RoutineRepositoryImpl implements RoutineRepository {
-  RoutineRepositoryImpl({Dio? dio}) : _dio = dio ?? DioClient.create();
+  RoutineRepositoryImpl({Dio? dio, LocalStorage? storage})
+    : _dio = dio ?? DioClient.create(),
+      _storage = storage;
 
   final Dio _dio;
+
+  /// 오늘 일과 캐시용. null이면 캐시 없이 동작한다(기존 테스트 호환).
+  final LocalStorage? _storage;
 
   @override
   Future<List<Routine>> getMyRoutines() async {
     AppLogger.repositoryCall('RoutineRepository', 'getMyRoutines');
 
     if (AppConfig.useMock) {
-      AppLogger.repositorySuccess('RoutineRepository', 'getMyRoutines', '모의 데이터');
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        'getMyRoutines',
+        '모의 데이터',
+      );
       return const [];
     }
 
@@ -80,7 +93,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
           .map(Routine.fromJson)
           .toList();
 
-      AppLogger.repositorySuccess('RoutineRepository', 'getMyRoutines', '${routines.length}개 일과 조회됨');
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        'getMyRoutines',
+        '${routines.length}개 일과 조회됨',
+      );
       return routines;
     } catch (e) {
       AppLogger.repositoryError('RoutineRepository', 'getMyRoutines', e);
@@ -93,7 +110,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
     AppLogger.repositoryCall('RoutineRepository', 'getSuggestions');
 
     if (AppConfig.useMock) {
-      AppLogger.repositorySuccess('RoutineRepository', 'getSuggestions', '모의 데이터 ${RoutineSuggestion.fallback.length}개');
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        'getSuggestions',
+        '모의 데이터 ${RoutineSuggestion.fallback.length}개',
+      );
       return RoutineSuggestion.fallback;
     }
 
@@ -101,7 +122,8 @@ class RoutineRepositoryImpl implements RoutineRepository {
       final res = await _dio.get<List<dynamic>>('/api/routines/suggestions');
       final body = res.data;
 
-      final parsed = body
+      final parsed =
+          body
               ?.whereType<Map<String, dynamic>>()
               .map(RoutineSuggestion.fromJson)
               .where((s) => s.text.isNotEmpty)
@@ -109,7 +131,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
           const <RoutineSuggestion>[];
 
       final result = parsed.isEmpty ? RoutineSuggestion.fallback : parsed;
-      AppLogger.repositorySuccess('RoutineRepository', 'getSuggestions', '${result.length}개 추천 조회됨');
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        'getSuggestions',
+        '${result.length}개 추천 조회됨',
+      );
       return result;
     } catch (e) {
       AppLogger.repositoryError('RoutineRepository', 'getSuggestions', e);
@@ -119,11 +145,17 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
   @override
   Future<RoutineQuestion> generateQuestion(String rawInputText) async {
-    AppLogger.repositoryCall('RoutineRepository', 'generateQuestion', {'rawInputText': rawInputText});
+    AppLogger.repositoryCall('RoutineRepository', 'generateQuestion', {
+      'rawInputText': rawInputText,
+    });
 
     if (AppConfig.useMock) {
       final mock = _mockQuestion();
-      AppLogger.repositorySuccess('RoutineRepository', 'generateQuestion', mock);
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        'generateQuestion',
+        mock,
+      );
       return mock;
     }
 
@@ -135,7 +167,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
       final body = res.data;
       if (body != null) {
         final question = RoutineQuestion.fromJson(body);
-        AppLogger.repositorySuccess('RoutineRepository', 'generateQuestion', question);
+        AppLogger.repositorySuccess(
+          'RoutineRepository',
+          'generateQuestion',
+          question,
+        );
         return question;
       }
     } catch (e) {
@@ -143,7 +179,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
     }
 
     final mock = _mockQuestion();
-    AppLogger.repositorySuccess('RoutineRepository', 'generateQuestion (fallback)', mock);
+    AppLogger.repositorySuccess(
+      'RoutineRepository',
+      'generateQuestion (fallback)',
+      mock,
+    );
     return mock;
   }
 
@@ -163,7 +203,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
     // — 'local' id로 confirm하면 404가 나고, 아이 모드에 뜨지 않는 유령 일과가 생긴다(데이터 정합성).
     if (AppConfig.useMock) {
       final routine = _localRoutine(rawInputText, goals);
-      AppLogger.repositorySuccess('RoutineRepository', 'createRoutine (mock)', '${routine.steps.length}개 카드 mock 생성됨');
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        'createRoutine (mock)',
+        '${routine.steps.length}개 카드 mock 생성됨',
+      );
       return routine;
     }
 
@@ -186,16 +230,26 @@ class RoutineRepositoryImpl implements RoutineRepository {
     }
     final routine = Routine.fromJson(body);
     if (routine.steps.isEmpty) {
-      AppLogger.repositoryError('RoutineRepository', 'createRoutine', '카드 0장 수신');
+      AppLogger.repositoryError(
+        'RoutineRepository',
+        'createRoutine',
+        '카드 0장 수신',
+      );
       throw StateError('생성된 카드가 없습니다');
     }
-    AppLogger.repositorySuccess('RoutineRepository', 'createRoutine', '${routine.steps.length}개 카드 생성됨');
+    AppLogger.repositorySuccess(
+      'RoutineRepository',
+      'createRoutine',
+      '${routine.steps.length}개 카드 생성됨',
+    );
     return routine;
   }
 
   @override
   Future<Routine> confirm(Routine routine) async {
-    AppLogger.repositoryCall('RoutineRepository', 'confirm', {'routineId': routine.id});
+    AppLogger.repositoryCall('RoutineRepository', 'confirm', {
+      'routineId': routine.id,
+    });
 
     if (!AppConfig.useMock && routine.id.isNotEmpty) {
       try {
@@ -205,7 +259,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
         final body = res.data;
         if (body != null) {
           final confirmed = Routine.fromJson(body);
-          AppLogger.repositorySuccess('RoutineRepository', 'confirm', '일과 승인 완료');
+          AppLogger.repositorySuccess(
+            'RoutineRepository',
+            'confirm',
+            '일과 승인 완료',
+          );
           return confirmed;
         }
       } catch (e) {
@@ -214,7 +272,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
     }
 
     final confirmed = routine.copyWith(status: 'CONFIRMED');
-    AppLogger.repositorySuccess('RoutineRepository', 'confirm (로컬)', '로컬 상태로 일과 승인 처리');
+    AppLogger.repositorySuccess(
+      'RoutineRepository',
+      'confirm (로컬)',
+      '로컬 상태로 일과 승인 처리',
+    );
     return confirmed;
   }
 
@@ -242,7 +304,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
         final body = res.data;
         if (body != null) {
           final updated = Routine.fromJson(body);
-          AppLogger.repositorySuccess('RoutineRepository', 'updateStep', '카드 내용 수정 완료');
+          AppLogger.repositorySuccess(
+            'RoutineRepository',
+            'updateStep',
+            '카드 내용 수정 완료',
+          );
           return (routine: updated, synced: true);
         }
         serverFailed = true;
@@ -255,10 +321,17 @@ class RoutineRepositoryImpl implements RoutineRepository {
     final updated = routine.copyWith(
       steps: [
         for (final step in routine.steps)
-          if (step.id == stepId) step.copyWith(description: description) else step,
+          if (step.id == stepId)
+            step.copyWith(description: description)
+          else
+            step,
       ],
     );
-    AppLogger.repositorySuccess('RoutineRepository', 'updateStep (로컬)', '로컬에서 카드 내용 수정됨');
+    AppLogger.repositorySuccess(
+      'RoutineRepository',
+      'updateStep (로컬)',
+      '로컬에서 카드 내용 수정됨',
+    );
     return (routine: updated, synced: !serverFailed);
   }
 
@@ -267,7 +340,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
     AppLogger.repositoryCall('RoutineRepository', 'getTodayRoutines');
 
     if (AppConfig.useMock) {
-      AppLogger.repositorySuccess('RoutineRepository', 'getTodayRoutines', '모의 데이터');
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        'getTodayRoutines',
+        '모의 데이터',
+      );
       return const [];
     }
 
@@ -280,18 +357,54 @@ class RoutineRepositoryImpl implements RoutineRepository {
             .map(Routine.fromJson)
             .toList();
         AppLogger.repositorySuccess(
-          'RoutineRepository', 'getTodayRoutines', '${routines.length}개 오늘 일과 조회됨');
+          'RoutineRepository',
+          'getTodayRoutines',
+          '${routines.length}개 오늘 일과 조회됨',
+        );
+        // 성공한 응답을 캐시해 둔다 — 다음에 오프라인이면 이걸 보여준다 (이슈 #140)
+        await _storage?.setCachedTodayRoutinesJson(
+          jsonEncode(routines.map((r) => r.toJson()).toList()),
+        );
         return routines;
       }
     } catch (e) {
       AppLogger.repositoryError('RoutineRepository', 'getTodayRoutines', e);
     }
 
-    // 신규 엔드포인트가 죽어도 아이 목록은 떠야 한다 — 전체 조회로 폴백.
-    // 승인 여부 필터는 화면 provider가 한 번 더 거른다 (docs 원칙 3번).
+    // 오프라인이거나 서버가 죽었다 — 마지막 성공 응답이 있으면 그걸 쓴다.
+    final cached = _readCachedToday();
+    if (cached != null) {
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        'getTodayRoutines (캐시)',
+        '${cached.length}개 오프라인 캐시 사용',
+      );
+      return cached;
+    }
+
+    // 캐시도 없으면 전체 조회로 폴백. 승인 여부 필터는 화면 provider가 한 번 더 거른다 (docs 원칙 3번).
     AppLogger.repositorySuccess(
-      'RoutineRepository', 'getTodayRoutines (폴백)', '전체 일과 조회로 대체');
+      'RoutineRepository',
+      'getTodayRoutines (폴백)',
+      '전체 일과 조회로 대체',
+    );
     return getMyRoutines();
+  }
+
+  /// 캐시가 깨져 있으면 null — 폴백으로 넘긴다. 캐시 한 건 때문에 화면이 죽으면 안 된다.
+  List<Routine>? _readCachedToday() {
+    final json = _storage?.cachedTodayRoutinesJson;
+    if (json == null) return null;
+    try {
+      final decoded = jsonDecode(json);
+      if (decoded is! List) return null;
+      return decoded
+          .whereType<Map<String, dynamic>>()
+          .map(Routine.fromJson)
+          .toList();
+    } catch (_) {
+      return null;
+    }
   }
 
   // --- 로컬 대체 구현 ---
@@ -303,20 +416,20 @@ class RoutineRepositoryImpl implements RoutineRepository {
   /// 붙이지 않는다 — 선택지는 AI가 생성해 값이 고정되지 않으므로 매핑이 불가능하다.
   /// 폴백도 실제 응답과 같은 모양이어야 서버가 죽었을 때만 화면이 달라 보이지 않는다.
   RoutineQuestion _mockQuestion() => const RoutineQuestion(
-        isRequired: true,
-        questions: [
-          QuestionItem(
-            question: '꼭 챙겨야 하는 준비물이 있나요?',
-            options: [
-              QuestionOption(emoji: '☂️', label: '우산'),
-              QuestionOption(emoji: '🧥', label: '우비'),
-              QuestionOption(emoji: '👢', label: '장화'),
-              QuestionOption(emoji: '🧦', label: '여벌 양말'),
-              QuestionOption(emoji: '🧺', label: '작은 수건'),
-            ],
-          ),
+    isRequired: true,
+    questions: [
+      QuestionItem(
+        question: '꼭 챙겨야 하는 준비물이 있나요?',
+        options: [
+          QuestionOption(emoji: '☂️', label: '우산'),
+          QuestionOption(emoji: '🧥', label: '우비'),
+          QuestionOption(emoji: '👢', label: '장화'),
+          QuestionOption(emoji: '🧦', label: '여벌 양말'),
+          QuestionOption(emoji: '🧺', label: '작은 수건'),
         ],
-      );
+      ),
+    ],
+  );
 
   /// 서버 없이도 데모가 성립하도록 로컬에서 일과를 구성한다.
   /// DLP 마스킹도 여기서 흉내낸다 — 발표에서 전/후 비교를 보여줘야 하기 때문이다.
@@ -364,7 +477,10 @@ abstract final class LocalDlp {
 /// 일과 저장소. 인증 인터셉터가 붙은 [dioProvider]를 쓴다 —
 /// 직접 `DioClient.create()`를 부르면 토큰이 빠져 401이 그대로 터진다.
 final routineRepositoryProvider = Provider<RoutineRepository>(
-  (ref) => RoutineRepositoryImpl(dio: ref.watch(dioProvider)),
+  (ref) => RoutineRepositoryImpl(
+    dio: ref.watch(dioProvider),
+    storage: ref.watch(localStorageProvider),
+  ),
 );
 
 /// 최근 일과 목록. 보호자_홈이 구독한다.
@@ -381,8 +497,9 @@ final todayRoutinesProvider = FutureProvider<List<Routine>>((ref) {
 ///
 /// 서버가 매 호출마다 셔플하므로 두 화면이 각자 부르면 목록이 달라진다.
 /// 같은 provider를 공유해 한 번만 받아 쓴다.
-final routineSuggestionsProvider =
-    FutureProvider<List<RoutineSuggestion>>((ref) {
+final routineSuggestionsProvider = FutureProvider<List<RoutineSuggestion>>((
+  ref,
+) {
   return ref.watch(routineRepositoryProvider).getSuggestions();
 });
 
