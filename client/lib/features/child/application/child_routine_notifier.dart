@@ -1,56 +1,48 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
 import '../../guardian/data/routine_repository.dart';
+import '../data/progress_store.dart';
 import '../data/step_progress_repository.dart';
+import '../domain/routine_progress_record.dart';
 
-/// 아이 모드에서 보는 일과 상태.
+/// 아이 모드에서 보는 일과 진행 상태 (오프라인 퍼스트, 이슈 #140).
 ///
-/// 서버 `completed` 위에 **로컬 표시를 덮어쓰는** 구조다. 아동이 누르는 즉시
-/// 반응해야 하므로 서버 응답을 기다리지 않고 먼저 표시하고, 서버가 거부하면 걷어낸다.
-///
-/// 완료 여부와 **보상을 이미 받았는지**를 따로 기억한다.
-/// 체크를 풀었다가 다시 눌렀을 때 또 축하하면 보상이 가벼워지기 때문이다.
+/// **기기가 진실이다.** [progress]에 기록이 있는 일과는 서버 `completed`를 무시하고
+/// 기록을 보여준다. 기록이 없는 일과만 서버 값을 쓴다. 서버 반영이 안 끝난 일과는
+/// [pending]에 남아 있다가 다음 기회에 다시 전송된다.
 class ChildRoutineState {
-  const ChildRoutineState({
-    this.completed = const {},
-    this.uncompleted = const {},
-    this.rewarded = const {},
-  });
+  const ChildRoutineState({this.progress = const {}, this.pending = const {}});
 
-  /// 로컬에서 완료로 표시한 카드 id.
-  final Set<String> completed;
+  /// routineId → 로컬 진행 기록.
+  final Map<String, RoutineProgressRecord> progress;
 
-  /// 서버에는 완료로 남아 있지만 로컬에서 해제한 카드 id.
-  /// 앱을 다시 열면 로컬 상태 없이 서버 `completed=true`만 있는데, 그걸 풀 때 필요하다.
-  final Set<String> uncompleted;
-
-  /// 보상을 이미 보여준 카드 id. **해제해도 남는다.**
-  final Set<String> rewarded;
+  /// 서버 반영이 아직 안 끝난 routineId.
+  final Set<String> pending;
 
   ChildRoutineState copyWith({
-    Set<String>? completed,
-    Set<String>? uncompleted,
-    Set<String>? rewarded,
+    Map<String, RoutineProgressRecord>? progress,
+    Set<String>? pending,
   }) {
     return ChildRoutineState(
-      completed: completed ?? this.completed,
-      uncompleted: uncompleted ?? this.uncompleted,
-      rewarded: rewarded ?? this.rewarded,
+      progress: progress ?? this.progress,
+      pending: pending ?? this.pending,
     );
   }
 
-  /// 로컬에서 완료로 표시했는가. 서버 값은 보지 않는다 — 화면 판단은 [isChecked]를 쓴다.
-  bool isCompleted(String cardId) => completed.contains(cardId);
-
-  /// 화면에 체크로 보이는가. 로컬 표시가 있으면 그것이, 없으면 서버 값이 기준이다.
-  bool isChecked(ActionCard card) {
-    if (completed.contains(card.id)) return true;
-    if (uncompleted.contains(card.id)) return false;
-    return card.completed;
+  /// 화면에 체크로 보이는가. 로컬 기록이 있으면 그것이, 없으면 서버 값이 기준이다.
+  bool isChecked(String routineId, ActionCard card) {
+    final record = progress[routineId];
+    if (record == null) return card.completed;
+    return record.completed.contains(card.id);
   }
+
+  bool hasRewarded(String routineId, String cardId) =>
+      progress[routineId]?.rewarded.contains(cardId) ?? false;
 }
 
 final childRoutineProvider =
@@ -59,123 +51,141 @@ final childRoutineProvider =
     );
 
 class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
-  /// 서버 동기화 체인. **앞 요청이 끝난 뒤에만 다음을 보낸다.**
-  ///
-  /// 서버가 단계 순서를 검사하므로, 요청이 뒤섞여 도착하면 앞 단계가 아직
-  /// 저장되지 않은 채 뒤 단계가 거부된다. 탭 순서가 곧 서버 도착 순서여야 한다.
+  /// 서버 전송 체인. 한 번에 하나씩, 큐에 넣은 순서대로 보낸다.
   Future<void> _syncChain = Future<void>.value();
+
+  /// 체인에 이미 들어가 대기 중인 routineId. 같은 일과를 연타해도 한 번만 줄 선다 —
+  /// 전송 시점에 최신 집합을 읽으므로 한 번이면 충분하다.
+  final Set<String> _queued = {};
 
   @override
   ChildRoutineState build() => const ChildRoutineState();
 
-  /// 지금 이 카드를 누르면 상태가 바뀌는가 — 체크 버튼 활성 조건.
-  ///
-  /// 서버(`RoutineService`)와 **같은 규칙**을 화면이 먼저 지킨다.
-  /// - 완료: 앞 단계가 전부 체크돼 있어야 한다 (아니면 서버가 409)
-  /// - 해제: 뒤 단계가 하나도 체크돼 있지 않아야 한다 (아니면 서버가 409)
-  ///
-  /// 이걸 안 지키면 화면은 체크됐는데 서버는 거부한 상태가 생기고,
-  /// 앱을 다시 열면 진행률이 되돌아간다 (이슈 #139 — 운영에서 100%→57%).
-  bool canToggle({required Routine routine, required ActionCard card}) {
-    if (state.isChecked(card)) {
-      return !routine.steps.any(
-        (s) => s.stepOrder > card.stepOrder && state.isChecked(s),
-      );
+  ProgressStore get _store => ref.read(progressStoreProvider);
+
+  /// 앱 시작 시 저장된 기록·대기열을 복원하고 곧바로 동기화를 시도한다.
+  Future<void> hydrate() async {
+    final pending = _store.pending;
+    final progress = <String, RoutineProgressRecord>{};
+    for (final id in pending) {
+      final record = _store.load(id);
+      if (record != null) progress[id] = record;
     }
-    return routine.steps
-        .where((s) => s.stepOrder < card.stepOrder)
-        .every(state.isChecked);
+    state = state.copyWith(progress: progress, pending: pending);
+    syncPending();
   }
 
   /// 카드 체크를 토글하고, **보상을 띄워야 하면 true**를 돌려준다.
   ///
-  /// 순서 규칙에 걸리면 아무것도 바꾸지 않고 false다 — 호출부는 전후 상태를
-  /// 비교해 "바뀌었는가"를 판단한다. 아동 화면이라 거부를 경고로 알리지 않는다.
+  /// 순서 제한은 없다 — 서버 일괄 반영 API가 순서를 검사하지 않는다(스펙 확정).
+  /// 즉시 로컬에 반영·저장하고 서버 전송은 뒤에서 따라온다.
   ///
-  /// 보상 조건은 두 가지를 모두 만족할 때다.
-  /// 1. 방금 완료로 바뀌었다 (해제가 아니다)
-  /// 2. 이 카드로 보상을 받은 적이 없다
-  ///
-  /// **서버 반영은 기다리지 않는다.** 아동이 누르는 즉시 체크가 보여야 한다.
+  /// 보상은 "처음 완료로 바뀔 때" 한 번만이다. 해제했다 다시 체크해도 안 준다.
   bool toggle({required Routine routine, required ActionCard card}) {
-    if (!canToggle(routine: routine, card: card)) return false;
+    final current = state.progress[routine.id] ?? _fromServer(routine);
+    final wasChecked = current.completed.contains(card.id);
 
-    final isNowCompleted = !state.isChecked(card);
-    _mark(card, checked: isNowCompleted);
+    final completed = Set<String>.from(current.completed);
+    wasChecked ? completed.remove(card.id) : completed.add(card.id);
 
-    final shouldReward = isNowCompleted && !state.rewarded.contains(card.id);
-    if (shouldReward) {
-      // 보상을 띄우는 순간 이력에 남긴다. 해제해도 지우지 않는다.
-      state = state.copyWith(rewarded: {...state.rewarded, card.id});
-    }
+    final shouldReward = !wasChecked && !current.rewarded.contains(card.id);
+    final record = current.copyWith(
+      completed: completed,
+      rewarded: shouldReward
+          ? {...current.rewarded, card.id}
+          : current.rewarded,
+    );
 
-    _enqueueSync(routine.id, card, isCompleted: isNowCompleted);
+    final isServerRoutine = routine.id.isNotEmpty && routine.id != 'local';
+    state = state.copyWith(
+      progress: {...state.progress, routine.id: record},
+      pending: isServerRoutine ? {...state.pending, routine.id} : state.pending,
+    );
+
+    // 저장은 기다리지 않는다 — 아동이 누르는 즉시 화면이 바뀌어야 한다
+    unawaited(_persist(routine.id, record));
+    if (isServerRoutine) _enqueue(routine.id);
+
     return shouldReward;
   }
 
-  /// 로컬 표시를 바꾼다. 서버 값과 다른 방향으로 갈 때만 override가 남는다.
-  void _mark(ActionCard card, {required bool checked}) {
-    final completed = Set<String>.from(state.completed);
-    final uncompleted = Set<String>.from(state.uncompleted);
-    if (checked) {
-      completed.add(card.id);
-      uncompleted.remove(card.id);
-    } else {
-      completed.remove(card.id);
-      if (card.completed) uncompleted.add(card.id);
+  /// 대기열 전체를 다시 전송한다. 앱 시작·복귀·온라인 전환 시 호출된다.
+  void syncPending() {
+    for (final id in state.pending) {
+      _enqueue(id);
     }
-    state = state.copyWith(completed: completed, uncompleted: uncompleted);
   }
 
-  /// 로컬 표시를 걷어내 서버 값으로 되돌린다.
-  void _unmark(ActionCard card) {
-    state = state.copyWith(
-      completed: Set<String>.from(state.completed)..remove(card.id),
-      uncompleted: Set<String>.from(state.uncompleted)..remove(card.id),
-    );
+  /// 로컬 기록이 없을 때의 출발점 — 서버가 준 완료 상태를 그대로 옮긴다.
+  RoutineProgressRecord _fromServer(Routine routine) => RoutineProgressRecord(
+    completed: routine.steps.where((s) => s.completed).map((s) => s.id).toSet(),
+  );
+
+  Future<void> _persist(String routineId, RoutineProgressRecord record) async {
+    await _store.save(routineId, record);
+    await _store.setPending(state.pending);
   }
 
-  void _enqueueSync(
-    String routineId,
-    ActionCard card, {
-    required bool isCompleted,
-  }) {
-    // 로컬 카드는 서버에 없다
-    if (routineId.isEmpty || routineId == 'local') return;
-
-    _syncChain = _syncChain.then(
-      (_) => _sync(routineId, card, isCompleted: isCompleted),
-    );
+  void _enqueue(String routineId) {
+    if (!_queued.add(routineId)) return;
+    _syncChain = _syncChain.then((_) => _sync(routineId));
   }
 
-  Future<void> _sync(
-    String routineId,
-    ActionCard card, {
-    required bool isCompleted,
-  }) async {
-    final repo = ref.read(stepProgressRepositoryProvider);
-    final accepted = isCompleted
-        ? await repo.complete(routineId: routineId, stepId: card.id)
-        : await repo.cancel(routineId: routineId, stepId: card.id);
+  Future<void> _sync(String routineId) async {
+    _queued.remove(routineId);
+    final record = state.progress[routineId];
+    if (record == null) {
+      await _clearPending(routineId);
+      return;
+    }
 
-    // 응답을 기다리는 동안 provider가 내려갔을 수 있다(화면 종료·테스트 teardown).
-    // 죽은 ref를 건드리면 예외가 나므로 조용히 끝낸다.
+    // 전송한 집합을 기억해 둔다. 응답을 기다리는 동안 또 체크됐으면 그건 아직
+    // 서버에 없는 것이므로 대기열에서 빼지 않는다.
+    final sent = Set<String>.from(record.completed);
+    final outcome = await ref
+        .read(stepProgressRepositoryProvider)
+        .syncProgress(routineId: routineId, completedStepIds: sent);
+
+    // 응답을 기다리는 동안 provider가 내려갔을 수 있다(테스트 teardown 등).
     if (!ref.mounted) return;
 
-    if (!accepted) {
-      // 서버에 남지 않은 표시를 화면에 두면 앱을 다시 열 때 되돌아간다.
-      // 로컬 표시를 걷어내 서버 값(재조회된 completed)이 그대로 보이게 한다.
-      debugPrint(
-        '[star] ${isCompleted ? "완료" : "취소"} 거부됨 — 화면 표시를 서버 값으로 되돌림: ${card.id}',
-      );
-      _unmark(card);
+    switch (outcome) {
+      case SyncOutcome.accepted:
+        final latest = state.progress[routineId]?.completed ?? const <String>{};
+        if (setEquals(latest, sent)) {
+          await _clearPending(routineId);
+        } else {
+          // 전송 중 바뀌었다 — 최신 집합을 다시 보낸다
+          _enqueue(routineId);
+        }
+        _refreshLists();
+      case SyncOutcome.rejected:
+        // 서버가 이 상태를 거부했다(승인 전·삭제 등). 기기 기록을 버리고 서버 값으로 돌아간다.
+        debugPrint('[sync] 서버 거부 — 로컬 기록 폐기: $routineId');
+        final progress = Map<String, RoutineProgressRecord>.from(state.progress)
+          ..remove(routineId);
+        state = state.copyWith(progress: progress);
+        await _store.remove(routineId);
+        await _clearPending(routineId);
+        _refreshLists();
+      case SyncOutcome.unreachable:
+        // 그대로 둔다. 다음 트리거(복귀·온라인 전환·조작)에서 다시 보낸다.
+        debugPrint('[sync] 서버에 닿지 못함 — 대기열 유지: $routineId');
     }
+  }
 
-    // 목록이 서버 진실(진행률·completed)을 다시 읽게 한다 — 성공·실패 모두.
+  Future<void> _clearPending(String routineId) async {
+    if (!state.pending.contains(routineId)) return;
+    state = state.copyWith(pending: {...state.pending}..remove(routineId));
+    await _store.setPending(state.pending);
+  }
+
+  /// 목록이 서버 진실(진행률·별)을 다시 읽게 한다.
+  void _refreshLists() {
     ref.invalidate(todayRoutinesProvider);
     ref.invalidate(myRoutinesProvider);
   }
 
-  /// 새 일과를 시작할 때 초기화한다.
+  /// 새 일과를 시작할 때 화면 상태만 초기화한다. 저장소는 건드리지 않는다.
   void reset() => state = const ChildRoutineState();
 }

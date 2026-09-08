@@ -26,8 +26,9 @@ import '../../../../shared/models/routine.dart';
 /// steps가 빈 일과는 펼쳐도 보여줄 것이 없어 제외한다.
 final homeRoutinesProvider = Provider<List<Routine>>((ref) {
   final current = ref.watch(routineFlowProvider).routine;
-  final fetched =
-      ref.watch(myRoutinesProvider).asData?.value ?? const <Routine>[];
+  // `.value`는 재조회(invalidate) 중에도 직전 값을 준다. `asData`를 쓰면 동기화 뒤
+  // 목록을 다시 읽는 동안 화면이 순간 비어 보인다 (이슈 #140).
+  final fetched = ref.watch(myRoutinesProvider).value ?? const <Routine>[];
 
   return [
     if (current != null && current.steps.isNotEmpty) current,
@@ -37,11 +38,13 @@ final homeRoutinesProvider = Provider<List<Routine>>((ref) {
 
 /// 일과의 진행률(0.0~1.0).
 ///
-/// 서버 `completed` 위에 아이 모드의 로컬 표시를 덮는다 — 서버 반영이 늦어도
+/// 기기 기록이 있으면 그것이 기준이다 — 서버 반영이 늦어도(오프라인 포함)
 /// 방금 체크한 카드가 진행률에 바로 보여야 하고, 로컬에서 푼 카드는 빠져야 한다.
 double routineProgress(Routine routine, ChildRoutineState progress) {
   if (routine.steps.isEmpty) return 0;
-  final done = routine.steps.where(progress.isChecked).length;
+  final done = routine.steps
+      .where((s) => progress.isChecked(routine.id, s))
+      .length;
   return done / routine.steps.length;
 }
 
@@ -225,7 +228,7 @@ class _ExpandedRoutine extends ConsumerWidget {
             _CardRow(
               card: card,
               index: index,
-              isDone: progress.isChecked(card),
+              isDone: progress.isChecked(routine.id, card),
             ),
           ],
         ],

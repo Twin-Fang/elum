@@ -29,8 +29,8 @@ import 'mode_switch_screen.dart';
 /// (docs 원칙 3번). 방금 만든 일과도 승인 전이면 목록에 없다.
 final childRoutinesProvider = Provider<List<Routine>>((ref) {
   final current = ref.watch(routineFlowProvider).routine;
-  final fetched =
-      ref.watch(todayRoutinesProvider).asData?.value ?? const <Routine>[];
+  // `.value`는 재조회 중에도 직전 목록을 유지한다 — 동기화 뒤 깜빡임 방지 (이슈 #140)
+  final fetched = ref.watch(todayRoutinesProvider).value ?? const <Routine>[];
 
   return [
     if (current != null && current.isConfirmed && current.steps.isNotEmpty)

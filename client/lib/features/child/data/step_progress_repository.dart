@@ -5,44 +5,52 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/network/dio_client.dart';
 
-/// 카드 완료·취소를 서버에 반영한다. 별 지급이 여기서 일어난다.
+/// 서버가 완료 집합을 받아들였는가.
 ///
-/// 서버는 완료 시 보호자의 누적 별(`totalStars`)을 1 올리고, 취소 시 1 내린다.
-/// 출처: server/.../RoutineControllerDocs.java
+/// - [accepted]: 반영됨. 대기열에서 빼도 된다.
+/// - [rejected]: 서버가 이 상태를 거부했다(승인 전 일과, 삭제된 단계 등). 로컬 기록을
+///   버리고 서버 값으로 돌아가야 한다.
+/// - [unreachable]: 네트워크·서버 장애. 로컬 기록을 유지하고 다음에 다시 보낸다.
+enum SyncOutcome { accepted, rejected, unreachable }
+
+/// 아동 카드 진행 상태를 서버에 반영한다 (이슈 #140).
 ///
-/// **절대 throw하지 않고 화면을 기다리게 하지도 않는다.** 대신 **성공 여부를 돌려준다.**
-/// 예전엔 실패를 여기서 삼켰는데, 그러면 화면은 체크됐고 서버엔 없는 상태가 생겨
-/// 앱을 다시 열면 진행률이 되돌아갔다 (이슈 #139). 되돌릴지는 호출부(notifier)가 정한다.
+/// 단계별 complete/cancel을 쓰지 않고 **완료 집합을 통째로** `PUT /progress`에 보낸다.
+/// 서버가 순서를 검사하지 않고 멱등으로 맞추므로, 오프라인에서 쌓인 변경을 몇 번을
+/// 보내도 결과가 같다. 출처: server/.../RoutineControllerDocs.java (syncProgress)
+///
+/// **절대 throw하지 않는다.** 결과를 [SyncOutcome]으로 돌려주고 판단은 notifier가 한다.
 class StepProgressRepository {
   StepProgressRepository({Dio? dio}) : _dio = dio ?? DioClient.create();
 
   final Dio _dio;
 
-  /// 완료 처리 — 별 +1. 서버가 받아들였으면 true.
-  ///
-  /// 서버는 **이전 단계가 미완료면 409**를 준다 (`RoutineService.completeStep`).
-  Future<bool> complete({required String routineId, required String stepId}) {
-    return _patch('/api/routines/$routineId/steps/$stepId/complete', '완료');
-  }
-
-  /// 완료 취소 — 별 -1. 서버가 받아들였으면 true.
-  ///
-  /// 서버는 **가장 마지막에 완료한 단계만** 취소를 허용하고, 순서를 어기면 409를 준다.
-  Future<bool> cancel({required String routineId, required String stepId}) {
-    return _patch('/api/routines/$routineId/steps/$stepId/cancel', '취소');
-  }
-
-  Future<bool> _patch(String path, String label) async {
-    // 로컬 카드(mock)는 서버에 없다. 보낼 곳이 없으므로 성공으로 본다.
-    if (AppConfig.useMock) return true;
+  Future<SyncOutcome> syncProgress({
+    required String routineId,
+    required Set<String> completedStepIds,
+  }) async {
+    // 로컬 카드(mock)는 서버에 없다. 보낼 곳이 없으므로 반영된 것으로 본다.
+    if (AppConfig.useMock) return SyncOutcome.accepted;
 
     try {
-      await _dio.patch<dynamic>(path);
-      return true;
+      await _dio.put<dynamic>(
+        '/api/routines/$routineId/progress',
+        data: {'completedStepIds': completedStepIds.toList()},
+      );
+      return SyncOutcome.accepted;
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      // 4xx 중 서버가 "이 상태는 안 된다"고 답한 것만 거부로 본다.
+      // 401은 인터셉터가 토큰을 재발급하므로 여기까지 오면 일시 장애로 취급한다.
+      if (status != null && const {400, 403, 404, 409}.contains(status)) {
+        debugPrint('[sync] 서버가 진행 상태를 거부함 ($status): $routineId');
+        return SyncOutcome.rejected;
+      }
+      debugPrint('[sync] 서버에 닿지 못함, 다음에 재시도: $routineId ($e)');
+      return SyncOutcome.unreachable;
     } catch (e) {
-      // 화면을 막지는 않는다 (docs 원칙 6번). 되돌림은 notifier가 한다.
-      debugPrint('[star] $label 반영 실패: $e');
-      return false;
+      debugPrint('[sync] 예상 못 한 실패, 다음에 재시도: $routineId ($e)');
+      return SyncOutcome.unreachable;
     }
   }
 }

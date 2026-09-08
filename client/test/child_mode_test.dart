@@ -230,8 +230,8 @@ void main() {
         ..toggle(routine: local, card: c1);
 
       final state = container.read(childRoutineProvider);
-      expect(state.isCompleted('c1'), isFalse);
-      expect(state.rewarded, contains('c1'));
+      expect(state.isChecked('local', c1), isFalse);
+      expect(state.hasRewarded('local', 'c1'), isTrue);
     });
 
     test('카드마다 따로 보상한다', () {
@@ -252,7 +252,7 @@ void main() {
         ..toggle(routine: local, card: c1)
         ..reset();
 
-      expect(container.read(childRoutineProvider).rewarded, isEmpty);
+      expect(container.read(childRoutineProvider).progress, isEmpty);
       // 초기화 후에는 다시 보상을 받을 수 있다
       expect(notifier.toggle(routine: local, card: c1), isTrue);
     });
