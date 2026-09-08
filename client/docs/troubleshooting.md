@@ -551,4 +551,4 @@ Set에 7장이 다 들어 있어 100%로 보였다. 로컬 상태는 메모리�
 - **연쇄되는 서버 요청은 `unawaited` 동시 발사 금지.** 순서 의존이 있으면 직렬 체인.
 - 관련 테스트: `test/child_step_sync_test.dart` — 순서 거부 · 서버 거부 되돌림 ·
   직렬 전송 · 서버 완료 카드 재진입을 고정한다
-- 근본 구조 개선(로컬 영속 + 전송 대기열 + 멱등 서버 API)은 이슈 #140에서 다룬다
+- 근본 구조 개선은 이슈 #140에서 완료했다 — 기기 기록(`RoutineProgressRecord`, shared_preferences)이 진실, 완료 집합을 `PUT /api/routines/{id}/progress`로 멱등 반영, 대기열(`progress.pending`)로 오프라인 재전송(`SyncTriggers`: 앱 시작·복귀·온라인 전환). 순서 제한(`canToggle`)은 서버 일괄 API가 순서를 검사하지 않으므로 제거됐다.

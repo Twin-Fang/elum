@@ -159,7 +159,8 @@ curl -N "http://chuseok22.synology.me:8888/containers/elum-back/logs?lines=all&f
 | PATCH | `/api/routines/{id}/revise` | 피드백으로 재생성 |
 | PATCH | `/api/routines/{id}/confirm` | **보호자 승인** (이후 아동에게 노출) |
 | PATCH | `/api/routines/{id}/steps/{stepId}` | 단계 문장 수정 |
-| PATCH | `.../steps/{stepId}/complete` \| `/cancel` | 아동 수행 체크 |
+| PATCH | `.../steps/{stepId}/complete` \| `/cancel` | 아동 수행 체크 (단건, 순서 검사 있음) |
+| PUT | `/api/routines/{id}/progress` | **완료 집합 통째 반영** (오프라인 퍼스트 동기화, 멱등, 순서 검사 없음 — 이슈 #140) |
 
 **`RoutineResponse`의 DLP 관련 필드 — 발표 핵심**
 
