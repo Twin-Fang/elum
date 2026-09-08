@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.routine.application.controller;
 
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
@@ -18,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -126,6 +128,21 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
   ) {
     RoutineResponse response = routineService.cancelStep(authentication.getName(), routineId, stepId);
+    return ResponseEntity.ok(response);
+  }
+
+  // 오프라인 퍼스트 동기화 — 완료 집합을 통째로 받아 멱등 반영한다 (이슈 #140).
+  // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
+  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @PutMapping("/{routineId}/progress")
+  public ResponseEntity<RoutineResponse> syncProgress(
+    Authentication authentication,
+    @PathVariable String routineId,
+    @RequestBody RoutineProgressSyncRequest request
+  ) {
+    RoutineResponse response = routineService.syncProgress(
+      authentication.getName(), routineId, request.completedStepIdsOrEmpty()
+    );
     return ResponseEntity.ok(response);
   }
 
