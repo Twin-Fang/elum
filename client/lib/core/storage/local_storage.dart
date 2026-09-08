@@ -37,6 +37,23 @@ abstract interface class LocalStorage {
   /// 토큰을 지운다. 로그아웃·계정 전환에 쓴다.
   Future<void> clearAccessToken();
 
+  // --- 아동 카드 진행 (오프라인 퍼스트, 이슈 #140) ---
+  // 일과별 완료·보상 기록과 서버 반영 대기열, 오늘 일과 캐시.
+  // JSON 문자열로만 주고받는다 — core가 feature 모델(RoutineProgressRecord)을
+  // 알면 의존 방향이 뒤집힌다. 직렬화는 feature 쪽 ProgressStore가 한다.
+
+  String? getRoutineProgressJson(String routineId);
+  Future<void> setRoutineProgressJson(String routineId, String json);
+  Future<void> removeRoutineProgress(String routineId);
+
+  /// 서버 반영이 아직 안 끝난 일과 id 목록.
+  List<String> get pendingSyncRoutineIds;
+  Future<void> setPendingSyncRoutineIds(List<String> ids);
+
+  /// 마지막으로 성공한 `/api/routines/today` 응답. 오프라인에서 목록을 띄우는 데 쓴다.
+  String? get cachedTodayRoutinesJson;
+  Future<void> setCachedTodayRoutinesJson(String json);
+
   /// 저장된 온보딩 결과를 전부 지운다. **개발·테스트 전용.**
   ///
   /// 일부만 지우면 어중간한 상태가 남아 더 헷갈리므로 5개 값을 모두 비운다.
@@ -57,6 +74,9 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCompleted = 'onboardingCompleted';
   static const _kPin = 'guardianPin';
   static const _kAccessToken = 'accessToken';
+  static const _kProgressPrefix = 'progress.';
+  static const _kPendingSync = 'progress.pending';
+  static const _kCachedToday = 'cache.todayRoutines';
 
   static Future<LocalStorage> create() async {
     return SharedPrefsStorage(await SharedPreferences.getInstance());
@@ -156,6 +176,43 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  String? getRoutineProgressJson(String routineId) =>
+      _prefs.getString('$_kProgressPrefix$routineId');
+
+  @override
+  Future<void> setRoutineProgressJson(String routineId, String json) {
+    // 카드 id 집합뿐이라 로그에 남겨도 원문은 없다
+    AppLogger.storageWrite('$_kProgressPrefix$routineId', json);
+    return _prefs.setString('$_kProgressPrefix$routineId', json);
+  }
+
+  @override
+  Future<void> removeRoutineProgress(String routineId) {
+    AppLogger.storageDelete('$_kProgressPrefix$routineId');
+    return _prefs.remove('$_kProgressPrefix$routineId');
+  }
+
+  @override
+  List<String> get pendingSyncRoutineIds =>
+      _prefs.getStringList(_kPendingSync) ?? const [];
+
+  @override
+  Future<void> setPendingSyncRoutineIds(List<String> ids) {
+    AppLogger.storageWrite(_kPendingSync, ids);
+    return _prefs.setStringList(_kPendingSync, ids);
+  }
+
+  @override
+  String? get cachedTodayRoutinesJson => _prefs.getString(_kCachedToday);
+
+  @override
+  Future<void> setCachedTodayRoutinesJson(String json) {
+    // 서버 응답에는 보호자 원문(rawInputText)이 들어 있다 — 값은 로그에 찍지 않는다 (docs 원칙 5번).
+    AppLogger.storageWrite(_kCachedToday, '${json.length}B');
+    return _prefs.setString(_kCachedToday, json);
+  }
+
+  @override
   Future<void> clearAll() async {
     // 앱이 쓰는 키만 지운다. _prefs.clear()는 다른 패키지가 저장한 값까지
     // 날려 원인 모를 오작동을 만든다.
@@ -172,14 +229,21 @@ class SharedPrefsStorage implements LocalStorage {
     ]) {
       await _prefs.remove(key);
     }
+    // 진행 기록은 일과 id마다 키가 생기므로 접두사로 찾아 지운다.
+    // 계정 전환 후 이전 아이의 체크·대기열·캐시가 남으면 안 된다.
+    for (final key in _prefs.getKeys().where(
+      (k) => k.startsWith(_kProgressPrefix) || k == _kCachedToday,
+    )) {
+      await _prefs.remove(key);
+    }
   }
 }
 
 /// 메모리 구현. 테스트와 저장소 초기화 실패 시 대체용으로 쓴다.
 class InMemoryStorage implements LocalStorage {
   InMemoryStorage({bool onboardingCompleted = false, String? pin})
-      : _completed = onboardingCompleted,
-        _pin = pin;
+    : _completed = onboardingCompleted,
+      _pin = pin;
 
   String? _nickname;
   List<String> _goals = const [];
@@ -187,7 +251,9 @@ class InMemoryStorage implements LocalStorage {
   String? _pin;
   bool _completed;
   String? _accessToken;
-
+  final Map<String, String> _progress = {};
+  List<String> _pendingSync = const [];
+  String? _cachedToday;
 
   @override
   String? get nickname => _nickname;
@@ -229,6 +295,31 @@ class InMemoryStorage implements LocalStorage {
   Future<void> clearAccessToken() async => _accessToken = null;
 
   @override
+  String? getRoutineProgressJson(String routineId) => _progress[routineId];
+
+  @override
+  Future<void> setRoutineProgressJson(String routineId, String json) async =>
+      _progress[routineId] = json;
+
+  @override
+  Future<void> removeRoutineProgress(String routineId) async =>
+      _progress.remove(routineId);
+
+  @override
+  List<String> get pendingSyncRoutineIds => _pendingSync;
+
+  @override
+  Future<void> setPendingSyncRoutineIds(List<String> ids) async =>
+      _pendingSync = ids;
+
+  @override
+  String? get cachedTodayRoutinesJson => _cachedToday;
+
+  @override
+  Future<void> setCachedTodayRoutinesJson(String json) async =>
+      _cachedToday = json;
+
+  @override
   Future<void> clearAll() async {
     _nickname = null;
     _goals = const [];
@@ -236,5 +327,8 @@ class InMemoryStorage implements LocalStorage {
     _pin = null;
     _completed = false;
     _accessToken = null;
+    _progress.clear();
+    _pendingSync = const [];
+    _cachedToday = null;
   }
 }
