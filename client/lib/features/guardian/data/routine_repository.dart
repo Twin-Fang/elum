@@ -39,10 +39,14 @@ abstract interface class RoutineRepository {
   Future<List<RoutineSuggestion>> getSuggestions();
 
   /// 일과 생성 → 카드 5장.
+  ///
+  /// [rewardText]는 보호자가 카드 생성 **전에** 정한 보상이다. 비워둘 수 있다.
   Future<Routine> createRoutine({
     required String rawInputText,
     required Set<SupportGoal> goals,
     List<String> answers,
+    String rewardText,
+    String rewardPresetKey,
   });
 
   /// 보호자 승인. 이후에만 아동 화면에 노출된다 (docs 원칙 3번).
@@ -58,6 +62,35 @@ abstract interface class RoutineRepository {
     String stepId,
     String description,
   );
+
+  // --- 보상(강화물) · 일과 정리 (이슈 #148~150) ---
+
+  /// 보호자가 정한 보상을 저장한다. [rewardText]가 비면 **보상을 지운다**.
+  ///
+  /// 실패하면 로컬 반영만 하고 `synced: false`를 준다 — 보상은 선택 항목이라
+  /// 저장에 실패했다고 일과 만들기를 막지 않는다. 대신 화면이 안내는 띄운다.
+  Future<({Routine routine, bool synced})> updateReward(
+    Routine routine, {
+    required String rewardText,
+    String rewardPresetKey,
+  });
+
+  /// 최근에 정한 보상 — 보상 설정 화면 상단의 재사용 칩.
+  /// 실패하면 **빈 목록**이다. 화면은 섹션을 통째로 숨긴다 (없어도 되는 기능이다).
+  Future<List<RecentReward>> getRecentRewards();
+
+  /// 지난 일과 — 보호자 홈의 접힌 구역. 실패하면 빈 목록.
+  Future<List<Routine>> getPastRoutines();
+
+  /// 임시저장 — 카드는 만들었지만 아직 아이에게 보내지 않은 것. 실패하면 빈 목록.
+  Future<List<Routine>> getDraftRoutines();
+
+  /// 지난 일과 다시 하기. 서버가 오늘 날짜로 복제해 돌려준다.
+  /// 실패하면 **null** — 화면이 토스트로 알리고 목록은 그대로 둔다.
+  Future<Routine?> duplicate(String routineId);
+
+  /// 일과 삭제. 성공 여부를 돌려준다. 실패해도 throw하지 않는다.
+  Future<bool> delete(String routineId);
 }
 
 class RoutineRepositoryImpl implements RoutineRepository {
@@ -192,11 +225,15 @@ class RoutineRepositoryImpl implements RoutineRepository {
     required String rawInputText,
     required Set<SupportGoal> goals,
     List<String> answers = const [],
+    String rewardText = '',
+    String rewardPresetKey = '',
   }) async {
     AppLogger.repositoryCall('RoutineRepository', 'createRoutine', {
       'rawInputText': rawInputText,
       'goals': goals.map((g) => g.apiValue).toList(),
       'answers': answers,
+      // 보상 내용은 보호자가 적은 자유 문구라 로그에 남기지 않는다 (docs 원칙 5번).
+      'hasReward': rewardText.trim().isNotEmpty,
     });
 
     // mock 모드에서만 로컬 데모 일과를 쓴다. 실서버 모드는 절대 가짜 일과를 만들지 않는다
@@ -219,6 +256,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
         // +1일(내일)로 저장하면 승인해도 오늘 목록에서 빠져 아이 모드가 항상 비어 보인다 → now로 저장.
         'scheduledAt': DateTime.now().toIso8601String().split('.').first,
         'answers': answers,
+        // 보상은 선택 항목이다. 비어 있으면 키를 아예 보내지 않는다 —
+        // 빈 문자열을 보내면 서버가 "보상 없음"이 아니라 "빈 보상"으로 저장한다.
+        if (rewardText.trim().isNotEmpty) 'rewardText': rewardText.trim(),
+        if (rewardPresetKey.trim().isNotEmpty)
+          'rewardPresetKey': rewardPresetKey.trim(),
       },
     );
     final body = res.data;
@@ -389,6 +431,172 @@ class RoutineRepositoryImpl implements RoutineRepository {
       '전체 일과 조회로 대체',
     );
     return getMyRoutines();
+  }
+
+  // --- 보상(강화물) · 일과 정리 (이슈 #148~150) ---
+
+  @override
+  Future<({Routine routine, bool synced})> updateReward(
+    Routine routine, {
+    required String rewardText,
+    String rewardPresetKey = '',
+  }) async {
+    final trimmed = rewardText.trim();
+    AppLogger.repositoryCall('RoutineRepository', 'updateReward', {
+      'routineId': routine.id,
+      // 보상 문구 자체는 남기지 않는다 (docs 원칙 5번).
+      'hasReward': trimmed.isNotEmpty,
+      'preset': rewardPresetKey,
+    });
+
+    var serverFailed = false;
+
+    if (!AppConfig.useMock && routine.id.isNotEmpty) {
+      try {
+        final res = await _dio.patch<Map<String, dynamic>>(
+          '/api/routines/${routine.id}/reward',
+          data: {
+            // 빈 문자열을 그대로 보낸다 — 서버가 이걸 "보상 지우기"로 읽는다.
+            'rewardText': trimmed,
+            'rewardPresetKey': rewardPresetKey.trim(),
+          },
+        );
+        final body = res.data;
+        if (body != null) {
+          AppLogger.repositorySuccess(
+            'RoutineRepository',
+            'updateReward',
+            trimmed.isEmpty ? '보상 삭제됨' : '보상 저장됨',
+          );
+          return (routine: Routine.fromJson(body), synced: true);
+        }
+        serverFailed = true;
+      } catch (e) {
+        AppLogger.repositoryError('RoutineRepository', 'updateReward', e);
+        serverFailed = true;
+      }
+    }
+
+    // 서버에 못 보냈어도 화면에는 반영한다. 보호자가 방금 고른 값이 사라지면
+    // 저장이 안 된 건지 잘못 고른 건지 알 수 없다.
+    final updated = routine.copyWith(
+      rewardText: trimmed,
+      rewardPresetKey: rewardPresetKey.trim(),
+    );
+    return (routine: updated, synced: !serverFailed);
+  }
+
+  @override
+  Future<List<RecentReward>> getRecentRewards() async {
+    AppLogger.repositoryCall('RoutineRepository', 'getRecentRewards');
+
+    if (AppConfig.useMock) return const [];
+
+    try {
+      final res = await _dio.get<List<dynamic>>('/api/routines/recent-rewards');
+      final rewards =
+          res.data
+              ?.whereType<Map<String, dynamic>>()
+              .map(RecentReward.fromJson)
+              .where((r) => r.isValid)
+              .toList() ??
+          const <RecentReward>[];
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        'getRecentRewards',
+        '${rewards.length}개 최근 보상',
+      );
+      return rewards;
+    } catch (e) {
+      // 실패해도 보상 설정 자체는 할 수 있어야 한다 — 재사용 칩은 편의 기능이다.
+      AppLogger.repositoryError('RoutineRepository', 'getRecentRewards', e);
+      return const [];
+    }
+  }
+
+  @override
+  Future<List<Routine>> getPastRoutines() => _fetchRoutineList(
+    '/api/routines/past',
+    'getPastRoutines',
+  );
+
+  @override
+  Future<List<Routine>> getDraftRoutines() => _fetchRoutineList(
+    '/api/routines/drafts',
+    'getDraftRoutines',
+  );
+
+  /// 목록 조회 3종이 같은 모양이라 한 곳에 모았다.
+  /// **실패하면 빈 목록이다.** 홈 화면의 한 구역이 비는 것뿐이라 화면은 살아 있다.
+  Future<List<Routine>> _fetchRoutineList(String path, String label) async {
+    AppLogger.repositoryCall('RoutineRepository', label);
+
+    if (AppConfig.useMock) return const [];
+
+    try {
+      final res = await _dio.get<List<dynamic>>(path);
+      final routines =
+          res.data
+              ?.whereType<Map<String, dynamic>>()
+              .map(Routine.fromJson)
+              .toList() ??
+          const <Routine>[];
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        label,
+        '${routines.length}개 조회됨',
+      );
+      return routines;
+    } catch (e) {
+      AppLogger.repositoryError('RoutineRepository', label, e);
+      return const [];
+    }
+  }
+
+  @override
+  Future<Routine?> duplicate(String routineId) async {
+    AppLogger.repositoryCall('RoutineRepository', 'duplicate', {
+      'routineId': routineId,
+    });
+
+    if (AppConfig.useMock || routineId.isEmpty) return null;
+
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/api/routines/$routineId/duplicate',
+      );
+      final body = res.data;
+      if (body == null) return null;
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        'duplicate',
+        '오늘 일과로 복제됨',
+      );
+      return Routine.fromJson(body);
+    } catch (e) {
+      // null을 주면 화면이 토스트로 알리고 목록은 그대로 둔다.
+      AppLogger.repositoryError('RoutineRepository', 'duplicate', e);
+      return null;
+    }
+  }
+
+  @override
+  Future<bool> delete(String routineId) async {
+    AppLogger.repositoryCall('RoutineRepository', 'delete', {
+      'routineId': routineId,
+    });
+
+    if (routineId.isEmpty) return false;
+    if (AppConfig.useMock) return true;
+
+    try {
+      await _dio.delete<void>('/api/routines/$routineId');
+      AppLogger.repositorySuccess('RoutineRepository', 'delete', '일과 삭제됨');
+      return true;
+    } catch (e) {
+      AppLogger.repositoryError('RoutineRepository', 'delete', e);
+      return false;
+    }
   }
 
   /// 캐시가 깨져 있으면 null — 폴백으로 넘긴다. 캐시 한 건 때문에 화면이 죽으면 안 된다.

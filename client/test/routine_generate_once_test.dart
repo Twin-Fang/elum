@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/test_storage.dart';
+import 'helpers/fake_reward_api.dart';
 
 /// `POST /api/routines`는 AI 호출이라 **한 번이 곧 비용**이다.
 ///
@@ -118,7 +119,7 @@ void main() {
 }
 
 /// 호출 횟수를 세는 저장소. 실서버를 타지 않는다.
-class _CountingRepo implements RoutineRepository {
+class _CountingRepo with FakeRewardApi implements RoutineRepository {
   var createCalls = 0;
 
   @override
@@ -126,6 +127,8 @@ class _CountingRepo implements RoutineRepository {
     required String rawInputText,
     required Set<SupportGoal> goals,
     List<String> answers = const [],
+    String rewardText = '',
+    String rewardPresetKey = '',
   }) async {
     createCalls++;
     // 실제 AI 호출처럼 시간이 걸린다 — 그 사이 중복 호출이 들어온다
@@ -166,6 +169,8 @@ class _ThrowingRepo extends _CountingRepo {
     required String rawInputText,
     required Set<SupportGoal> goals,
     List<String> answers = const [],
+    String rewardText = '',
+    String rewardPresetKey = '',
   }) async {
     createCalls++;
     await Future<void>.delayed(const Duration(milliseconds: 10));

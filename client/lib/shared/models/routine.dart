@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'action_card.dart';
+import 'reward_preset.dart';
 
 part 'routine.freezed.dart';
 
@@ -39,6 +40,16 @@ abstract class Routine with _$Routine {
 
     /// 진행률(정수 %). 서버 `progressPercent`.
     @Default(0) int progressPercent,
+
+    // --- 보상(강화물) (이슈 #148, 2026-09-13 서울 ABA연구소 자문) ---
+    // 보호자가 정하는 선택 항목이다. **비어 있으면 아동 화면에 보상 UI를 띄우지 않는다.**
+    // 앱이 보상을 정하지도, 주지도 않는다 — 정하는 것도 주는 것도 보호자다.
+
+    /// 보호자가 정한 보상. 예: "젤리 먹기"
+    @Default('') String rewardText,
+
+    /// 보상 프리셋 키(`SNACK`/`VIDEO`/`PLAY`/`WALK`/`CUSTOM`). 직접 입력이면 `CUSTOM` 또는 빈 값.
+    @Default('') String rewardPresetKey,
   }) = _Routine;
 
   const Routine._();
@@ -62,6 +73,17 @@ abstract class Routine with _$Routine {
   /// 모든 카드를 마쳤는가. 아이 홈 타일의 완료 배경 판단에 쓴다.
   bool get isAllDone => steps.isNotEmpty && steps.every((s) => s.completed);
 
+  /// 보상이 정해져 있는가. **false면 보상 관련 UI를 전부 숨긴다.**
+  /// 보상을 정하지 않은 보호자에게 빈 자리를 보여주면 안 한 일처럼 느껴진다.
+  bool get hasReward => rewardText.trim().isNotEmpty;
+
+  /// 보상 앞에 붙일 그림. 프리셋을 모르면 기본 그림을 준다.
+  String get rewardEmoji => RewardPreset.emojiOf(rewardPresetKey);
+
+  /// 아동 화면 보상 바에 그대로 쓰는 문구. 보상이 없으면 빈 문자열이다.
+  String get rewardDisplay =>
+      hasReward ? '$rewardEmoji ${rewardText.trim()}' : '';
+
   /// 오프라인 캐시 저장용 — [fromJson]과 대칭이어야 한다 (이슈 #140).
   /// 원문(rawInputText)도 포함되므로 **이 결과를 로그에 찍지 않는다** (docs 원칙 5번).
   Map<String, dynamic> toJson() => {
@@ -74,6 +96,8 @@ abstract class Routine with _$Routine {
     'completedStepCount': completedStepCount,
     'totalStepCount': totalStepCount,
     'progressPercent': progressPercent,
+    'rewardText': rewardText,
+    'rewardPresetKey': rewardPresetKey,
   };
 
   factory Routine.fromJson(Map<String, dynamic> json) {
@@ -94,6 +118,9 @@ abstract class Routine with _$Routine {
       completedStepCount: _asInt(json['completedStepCount']),
       totalStepCount: _asInt(json['totalStepCount']),
       progressPercent: _asInt(json['progressPercent']),
+      // 서버는 보상 미설정 시 null을 준다. 빈 문자열로 받아 hasReward가 false가 되게 한다.
+      rewardText: json['rewardText']?.toString() ?? '',
+      rewardPresetKey: json['rewardPresetKey']?.toString() ?? '',
     );
   }
 
@@ -103,6 +130,41 @@ abstract class Routine with _$Routine {
     final String v => int.tryParse(v) ?? 0,
     _ => 0,
   };
+}
+
+/// 최근에 정한 보상 — 서버 `RecentRewardResponse`에 대응.
+///
+/// 보상 설정 화면 상단의 "최근에 정한 보상"에 쓴다. 같은 보상을 다시 고르는 경우가
+/// 대부분이라, 두 번째 일과부터는 탭 한 번으로 끝나게 하는 것이 목적이다.
+///
+/// **첫 일과에서는 빈 목록이 온다.** 그때는 화면에서 섹션 자체를 숨긴다 —
+/// 빈 영역을 남겨두면 로딩에 실패한 것처럼 보인다.
+class RecentReward {
+  const RecentReward({this.rewardText = '', this.rewardPresetKey = ''});
+
+  final String rewardText;
+
+  /// 프리셋 키. 보호자가 직접 적었으면 `CUSTOM`이거나 비어 있다.
+  final String rewardPresetKey;
+
+  /// 칩으로 띄울 수 있는 값인가. 서버가 빈 문자열을 줄 수도 있다.
+  bool get isValid => rewardText.trim().isNotEmpty;
+
+  String get emoji => RewardPreset.emojiOf(rewardPresetKey);
+
+  factory RecentReward.fromJson(Map<String, dynamic> json) => RecentReward(
+    rewardText: json['rewardText']?.toString() ?? '',
+    rewardPresetKey: json['rewardPresetKey']?.toString() ?? '',
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is RecentReward &&
+      other.rewardText == rewardText &&
+      other.rewardPresetKey == rewardPresetKey;
+
+  @override
+  int get hashCode => Object.hash(rewardText, rewardPresetKey);
 }
 
 /// AI 추가 질문 — 서버 `RoutineQuestionResponse`에 대응.

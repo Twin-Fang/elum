@@ -16,6 +16,7 @@ import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 
 import 'helpers/test_storage.dart';
+import 'helpers/fake_reward_api.dart';
 
 /// Figma `보호자_새로운 일과 만들기_추가질문`(262:4766 / 262:4854) 정합 테스트.
 ///
@@ -364,7 +365,7 @@ void main() {
 }
 
 /// 정해진 질문만 돌려주는 저장소. 실서버를 타지 않는다.
-class _FakeRepo implements RoutineRepository {
+class _FakeRepo with FakeRewardApi implements RoutineRepository {
   _FakeRepo(this.question);
 
   final RoutineQuestion question;
@@ -385,6 +386,8 @@ class _FakeRepo implements RoutineRepository {
     required String rawInputText,
     required Set<SupportGoal> goals,
     List<String> answers = const [],
+    String rewardText = '',
+    String rewardPresetKey = '',
   }) async =>
       const Routine(id: 'test');
 

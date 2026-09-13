@@ -18,6 +18,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'helpers/fake_reward_api.dart';
 
 /// 카드 수정 바텀시트 · 카드확인/아이 상세 Figma 정합 (이슈 #77) ·
 /// `/today` 진행률 계약 (이슈 #75).
@@ -323,7 +324,7 @@ void main() {
 ///
 /// updateStep 응답은 실제 서버처럼 **step title 없이** 돌아온다 —
 /// notifier의 제목 복원 로직이 이 조건에서 검증된다.
-class _FakeRepo implements RoutineRepository {
+class _FakeRepo with FakeRewardApi implements RoutineRepository {
   _FakeRepo({required this.synced});
 
   final bool synced;
@@ -355,6 +356,8 @@ class _FakeRepo implements RoutineRepository {
     required String rawInputText,
     required Set<SupportGoal> goals,
     List<String> answers = const [],
+    String rewardText = '',
+    String rewardPresetKey = '',
   }) async =>
       const Routine(id: 'r1');
 
