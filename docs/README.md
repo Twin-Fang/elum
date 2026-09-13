@@ -23,6 +23,11 @@ CODEGATE 2026 AI 스타트업 해커톤 · 팀 룸룸(LUMLUM)
 | [05-ai-dlp-gateway.md](./05-ai-dlp-gateway.md) | AI DLP Gateway 보안 설계 (입력 보호 계층) | AI / 보안 |
 | [06-api-spec.md](./06-api-spec.md) | REST API 러프 명세, JSON 예시, 실패 대비 fallback | FE / BE |
 | [07-mvp-scope.md](./07-mvp-scope.md) | 24시간 구현 범위, 제외 목록, 데모 시나리오 | 전체 |
+| [meetings/](./meetings/) | 외부 자문·사용자 미팅 기록 — 기획이 바뀐 **근거** | 전체 |
+
+> ⚠️ **2026-09-13 서울 ABA연구소 자문 이후, 아래 원칙·정의 중 일부가 바뀌어야 한다.**
+> 타겟 정의(연령 → 기능 수준), 강화(보상) 기능, 가변 단계 수, 수행률 리포트 —
+> 상세는 [meetings/20260913_서울ABA연구소_1차자문](./meetings/20260913_서울ABA연구소_1차자문/) 5장 대조표.
 
 ## 방향이 확실한 원칙 (브레인스토밍에서 합의된 것)
 
