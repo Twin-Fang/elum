@@ -53,6 +53,20 @@ public class Routine extends BaseEntity {
   @Column(columnDefinition = "TEXT")
   private String revisionFeedback;
 
+  /// 보호자가 정한 보상(강화물). 없으면 null — 건너뛰기를 허용한다.
+  ///
+  /// **앱이 보상을 주지 않는다.** 아이에게 보여주고 상기시키는 용도이며,
+  /// 실제로 주는 사람은 보호자다. (2026-09-13 서울 ABA연구소 자문)
+  @Column(length = 100)
+  private String rewardText;
+
+  /// 프리셋에서 고른 경우 그 키(SNACK·VIDEO·PLAY·WALK). 직접 입력이면 null.
+  ///
+  /// 아동 화면에 **그림**을 띄우려면 키가 필요하다 — 자유 텍스트만 받으면
+  /// 글자를 못 읽는 사용자에게 아무 의미가 없다.
+  @Column(length = 30)
+  private String rewardPresetKey;
+
   private LocalDateTime completedAt;
 
   @OneToMany(mappedBy = "routine", cascade = CascadeType.ALL, orphanRemoval = true)

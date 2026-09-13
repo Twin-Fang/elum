@@ -41,6 +41,12 @@ public record RoutineResponse(
   @Schema(description = "진행률(%), 단계가 없으면 0", example = "50")
   Integer progressPercent,
 
+  @Schema(description = "보호자가 정한 보상(강화물). 설정하지 않았으면 null — 아동 화면에서 보상 UI를 띄우지 않는다", example = "젤리 먹기")
+  String rewardText,
+
+  @Schema(description = "보상 프리셋 키. 직접 입력이면 CUSTOM 또는 null", example = "SNACK")
+  String rewardPresetKey,
+
   @Schema(description = "단계 목록")
   List<RoutineStepResponse> steps
 ) {
@@ -66,6 +72,8 @@ public record RoutineResponse(
       completedStepCount,
       totalStepCount,
       progressPercent,
+      routine.getRewardText(),
+      routine.getRewardPresetKey(),
       stepResponses
     );
   }

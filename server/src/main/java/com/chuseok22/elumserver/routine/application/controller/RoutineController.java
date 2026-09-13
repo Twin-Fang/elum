@@ -1,9 +1,11 @@
 package com.chuseok22.elumserver.routine.application.controller;
 
+import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
+import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
@@ -99,6 +101,57 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok()
       .contentType(MediaType.parseMediaType(content.contentType()))
       .body(content.bytes());
+  }
+
+  // 보상 텍스트는 보호자 자유 입력이라 민감정보가 섞일 수 있다 — 파라미터를 로그에 남기지 않는다.
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PatchMapping("/{routineId}/reward")
+  public ResponseEntity<RoutineResponse> updateReward(
+    Authentication authentication, @PathVariable String routineId,
+    @RequestBody @Valid RewardUpdateRequest request
+  ) {
+    RoutineResponse response = routineService.updateReward(authentication.getName(), routineId, request);
+    return ResponseEntity.ok(response);
+  }
+
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @GetMapping("/recent-rewards")
+  public ResponseEntity<List<RecentRewardResponse>> getRecentRewards(Authentication authentication) {
+    List<RecentRewardResponse> response = routineService.getRecentRewards(authentication.getName());
+    return ResponseEntity.ok(response);
+  }
+
+  @LogMonitoring
+  @GetMapping("/past")
+  public ResponseEntity<List<RoutineResponse>> getPastRoutines(Authentication authentication) {
+    List<RoutineResponse> response = routineService.getPastRoutines(authentication.getName());
+    return ResponseEntity.ok(response);
+  }
+
+  @LogMonitoring
+  @GetMapping("/drafts")
+  public ResponseEntity<List<RoutineResponse>> getDraftRoutines(Authentication authentication) {
+    List<RoutineResponse> response = routineService.getDraftRoutines(authentication.getName());
+    return ResponseEntity.ok(response);
+  }
+
+  // AI를 호출하지 않는다. 같은 카드로 오늘 일과를 하나 더 만드는 것뿐이다.
+  @LogMonitoring
+  @PostMapping("/{routineId}/duplicate")
+  public ResponseEntity<RoutineResponse> duplicate(
+    Authentication authentication, @PathVariable String routineId
+  ) {
+    RoutineResponse response = routineService.duplicate(authentication.getName(), routineId);
+    return ResponseEntity.ok(response);
+  }
+
+  @LogMonitoring
+  @DeleteMapping("/{routineId}")
+  public ResponseEntity<Void> delete(
+    Authentication authentication, @PathVariable String routineId
+  ) {
+    routineService.delete(authentication.getName(), routineId);
+    return ResponseEntity.noContent().build();
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.

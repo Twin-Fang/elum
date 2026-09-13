@@ -8,13 +8,16 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
+import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
+import com.chuseok22.elumserver.routine.infrastructure.constant.RewardPreset;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineSuggestionCatalog;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
@@ -29,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,6 +48,17 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RoutineService {
+
+  /// 보상 설정 화면 상단에 띄울 "최근에 정한 보상" 개수.
+  /// 많이 보여줘도 고르는 부담만 늘어난다.
+  private static final int RECENT_REWARD_LIMIT = 3;
+
+  /// 보호자 홈 "지난 일과" 노출 개수. 전부 내려주면 오늘 할 일이 묻힌다.
+  private static final int PAST_ROUTINE_LIMIT = 10;
+
+  /// 보상 텍스트 최대 길이. 아동 화면에 한 줄로 들어가야 하고,
+  /// 길어질수록 글을 읽는 사용자에게도 부담이 된다.
+  private static final int REWARD_TEXT_MAX_LENGTH = 100;
 
   private final RoutineRepository routineRepository;
   private final MemberRepository memberRepository;
@@ -122,6 +137,9 @@ public class RoutineService {
     routine.setTitle(generation.title());
     routine.setScheduledAt(request.scheduledAt());
     routine.setStatus(RoutineStatus.PENDING_REVIEW);
+    // 보상은 선택 항목이다. 보호자가 건너뛰면 null로 남고 아동 화면에서 보상 UI를 띄우지 않는다.
+    routine.setRewardText(trimReward(request.rewardText()));
+    routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
     routine.setSteps(toStepEntities(routine, generation.steps()));
 
     return RoutineResponse.from(routineRepository.save(routine));
@@ -134,7 +152,126 @@ public class RoutineService {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
     routine.setStatus(RoutineStatus.CONFIRMED);
+    // 승인한 날이 곧 그 일과를 하는 날이다.
+    // 날짜 선택 UI를 두지 않는 대신, 미리 만들어 둔 일과를 그날 승인하면 그날 일과가 된다.
+    // (아이 홈은 scheduledAt이 오늘인 CONFIRMED만 조회하므로 이 갱신이 없으면 미리 만든 일과가 뜨지 않는다)
+    routine.setScheduledAt(LocalDate.now().atTime(9, 0));
     return RoutineResponse.from(routine);
+  }
+
+  /// 보상만 수정한다. 일과를 만든 뒤에도 보호자가 바꿀 수 있어야
+  /// "보호자가 관리한다"가 성립한다 (2026-09-13 자문).
+  @Transactional
+  public RoutineResponse updateReward(String memberId, String routineId, RewardUpdateRequest request) {
+    Routine routine = getOwnedRoutine(memberId, routineId);
+    routine.setRewardText(trimReward(request.rewardText()));
+    routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
+    return RoutineResponse.from(routine);
+  }
+
+  /// 최근에 사용한 보상 최대 3개. 보상 설정 화면 상단에 띄워 두 번째 일과부터는
+  /// 탭 한 번으로 끝나게 한다 — 온보딩을 늘리지 않고 입력 부담을 줄이는 방법이다.
+  public List<RecentRewardResponse> getRecentRewards(String memberId) {
+    LinkedHashMap<String, RecentRewardResponse> unique = new LinkedHashMap<>();
+    for (Routine routine : routineRepository
+      .findTop30ByMemberIdAndRewardTextIsNotNullOrderByCreatedAtDesc(memberId)) {
+      String text = routine.getRewardText();
+      if (text == null || text.isBlank()) {
+        continue;
+      }
+      // 같은 보상이 여러 일과에 쓰였으면 가장 최근 것 하나만 남긴다.
+      unique.putIfAbsent(text, new RecentRewardResponse(text, routine.getRewardPresetKey()));
+      if (unique.size() >= RECENT_REWARD_LIMIT) {
+        break;
+      }
+    }
+    return List.copyOf(unique.values());
+  }
+
+  /// 지난 일과를 오늘 일과로 복제한다. **AI를 호출하지 않는다** —
+  /// 매일 같은 준비를 하는 경우 탭 한 번으로 끝나야 재사용 가치가 있다.
+  ///
+  /// 원문(`rawInputText`·`sanitizedInputText`)은 복사하지 않는다. 원문을 계속 들고 다니지 않는다는
+  /// 서비스 원칙에 맞추고, 복제본은 카드만 있으면 수행에 지장이 없다.
+  @Transactional
+  public RoutineResponse duplicate(String memberId, String routineId) {
+    Routine origin = getOwnedRoutine(memberId, routineId);
+
+    Routine copy = new Routine();
+    copy.setMember(origin.getMember());
+    copy.setRawInputText(origin.getTitle());
+    copy.setSanitizedInputText(origin.getTitle());
+    copy.setTitle(origin.getTitle());
+    copy.setScheduledAt(LocalDate.now().atTime(9, 0));
+    // 이미 검토를 거친 카드라 다시 승인받지 않는다. 바로 오늘 할 일이 된다.
+    copy.setStatus(RoutineStatus.CONFIRMED);
+    copy.setRewardText(origin.getRewardText());
+    copy.setRewardPresetKey(origin.getRewardPresetKey());
+
+    List<RoutineStep> copiedSteps = new ArrayList<>();
+    for (RoutineStep step : origin.getSteps()) {
+      RoutineStep copied = new RoutineStep();
+      copied.setRoutine(copy);
+      copied.setStepOrder(step.getStepOrder());
+      copied.setTitle(step.getTitle());
+      copied.setDescription(step.getDescription());
+      // 이미지는 새로 만들지 않고 그대로 쓴다 — 재생성은 비용이고 같은 행동이면 같은 그림이면 된다.
+      copied.setImagePath(step.getImagePath());
+      copied.setCompleted(false);
+      copiedSteps.add(copied);
+    }
+    copy.setSteps(copiedSteps);
+
+    return RoutineResponse.from(routineRepository.save(copy));
+  }
+
+  /// 임시저장(`PENDING_REVIEW`) 일과만 삭제한다.
+  ///
+  /// 승인된 일과는 지우지 않는다 — 수행률 추이의 원본 데이터이고,
+  /// 보호자가 "이 날은 왜 못 했지"를 확인하는 근거다.
+  @Transactional
+  public void delete(String memberId, String routineId) {
+    Routine routine = getOwnedRoutine(memberId, routineId);
+    if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
+      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
+    }
+    routineRepository.delete(routine);
+  }
+
+  /// 보호자 홈 "지난 일과" — 오늘 이전 것만 최신순 10개.
+  /// 전부 내려주면 목록이 계속 쌓여 오늘 할 일이 묻힌다.
+  public List<RoutineResponse> getPastRoutines(String memberId) {
+    return routineRepository
+      .findAllByMemberIdAndScheduledAtBeforeOrderByScheduledAtDesc(
+        memberId, LocalDate.now().atStartOfDay())
+      .stream()
+      .limit(PAST_ROUTINE_LIMIT)
+      .map(RoutineResponse::from)
+      .toList();
+  }
+
+  /// 보호자 홈 "임시저장" — 카드는 만들었지만 아직 아이에게 보내지 않은 일과.
+  public List<RoutineResponse> getDraftRoutines(String memberId) {
+    return routineRepository
+      .findAllByMemberIdAndStatusOrderByCreatedAtDesc(memberId, RoutineStatus.PENDING_REVIEW)
+      .stream()
+      .map(RoutineResponse::from)
+      .toList();
+  }
+
+  /// 보상 텍스트 정리. 공백만 남으면 없는 것으로 본다.
+  /// 길이는 화면에서 막지만 서버도 잘라둔다 — 클라이언트만 믿지 않는다.
+  private String trimReward(String text) {
+    if (text == null) {
+      return null;
+    }
+    String trimmed = text.trim();
+    if (trimmed.isEmpty()) {
+      return null;
+    }
+    return trimmed.length() > REWARD_TEXT_MAX_LENGTH
+      ? trimmed.substring(0, REWARD_TEXT_MAX_LENGTH)
+      : trimmed;
   }
 
   @Transactional

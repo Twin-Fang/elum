@@ -14,7 +14,13 @@ public record RoutineCreateRequest(
   LocalDateTime scheduledAt,
 
   @Schema(description = "POST /api/routines/questions 질문에 대한 답변(선택지+직접입력 통합). 질문 단계를 거치지 않았으면 생략 가능", example = "[\"우산\", \"우비\", \"여벌 양말\"]")
-  List<String> answers
+  List<String> answers,
+
+  @Schema(description = "보호자가 정한 보상(강화물). 선택 항목이라 생략 가능하다", example = "젤리 먹기")
+  String rewardText,
+
+  @Schema(description = "보상 프리셋 키(SNACK/VIDEO/PLAY/WALK/CUSTOM). 직접 입력이면 CUSTOM 또는 생략", example = "SNACK")
+  String rewardPresetKey
 ) {
 
 }

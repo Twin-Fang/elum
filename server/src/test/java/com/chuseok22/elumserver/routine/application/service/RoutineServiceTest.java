@@ -217,7 +217,7 @@ class RoutineServiceTest {
     doThrow(new CustomException(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT))
       .when(routineRequestCooldownGuard).guard("member-1");
 
-    assertThatThrownBy(() -> routineService.create("member-1", new RoutineCreateRequest(null, null, null)))
+    assertThatThrownBy(() -> routineService.create("member-1", new RoutineCreateRequest(null, null, null, null, null)))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT));
@@ -243,7 +243,7 @@ class RoutineServiceTest {
       .thenReturn(generationResult);
     when(routineRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-    routineService.create("member-1", new RoutineCreateRequest("내일 병원 가기", null, null));
+    routineService.create("member-1", new RoutineCreateRequest("내일 병원 가기", null, null, null, null));
 
     verify(routineAiPipeline).generateForCreate(
       eq("내일 병원 가기"), eq("하늘이"), eq(Set.of()), eq(List.of()), eq(CharacterType.LULU)
