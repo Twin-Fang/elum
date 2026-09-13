@@ -5,6 +5,12 @@ import java.util.List;
 
 // 홈 화면 "추천 일과" 카드에 무작위로 노출할 하드코딩 데이터.
 // DB에 저장하지 않는 정적 데이터라 엔티티/리포지토리를 두지 않는다.
+//
+// 항목을 추가할 때 지켜야 할 두 가지 (2026-09-13 서울 ABA연구소 자문):
+//  1) 눈으로 "했다/안 했다"를 확인할 수 있는 행동만 넣는다.
+//     "마음 다스리기", "진정하기" 같은 내면 조절은 카드로 만들 수 없다 —
+//     기분이 나쁘면 폰을 던지지, 속으로 조절하지 않는다.
+//  2) 아동·학교 전제를 두지 않는다. 성인 사용자에게 "학교에 가요"가 뜨면 안 된다.
 public final class RoutineSuggestionCatalog {
 
   public static final List<RoutineSuggestionResponse> ALL = List.of(
@@ -53,11 +59,22 @@ public final class RoutineSuggestionCatalog {
     new RoutineSuggestionResponse("🎁", "선물 주고받기 연습", "아이가 선물을 주고받는 예절을 연습했으면 좋겠어"),
     new RoutineSuggestionResponse("🎇", "불꽃놀이 구경하기", "아이랑 불꽃놀이를 구경하러 갈 건데 아이가 큰 소리를 무서워해"),
     new RoutineSuggestionResponse("🥳", "친구 생일파티 참여", "아이가 친구 생일파티에 처음 초대받았어"),
-    new RoutineSuggestionResponse("😢", "속상할 때 마음 다스리기", "아이가 속상할 때 스스로 마음을 다스리는 법을 알려주고 싶어"),
-    new RoutineSuggestionResponse("🙅", "싫다고 말하는 연습", "아이가 싫을 때 자기 의사를 표현하는 연습을 하고 있어"),
-    new RoutineSuggestionResponse("🤝", "친구와 화해하기", "아이가 친구랑 다퉜는데 화해하는 법을 알려주고 싶어"),
-    new RoutineSuggestionResponse("🔄", "새로운 활동으로 전환하기", "아이가 하던 활동을 멈추고 다음 활동으로 넘어가는 걸 힘들어해"),
-    new RoutineSuggestionResponse("🧘", "진정하는 시간 갖기", "아이가 흥분했을 때 진정하는 시간을 가졌으면 좋겠어")
+    new RoutineSuggestionResponse("🧹", "방 정리하기", "스스로 방을 정리하는 습관을 만들어주고 싶어"),
+    new RoutineSuggestionResponse("🗑️", "쓰레기 버리기", "쓰레기를 정해진 곳에 버리는 걸 알려주고 싶어"),
+    new RoutineSuggestionResponse("🧺", "빨래 개서 정리하기", "빨래를 개서 서랍에 넣는 연습을 하고 있어"),
+    new RoutineSuggestionResponse("🧼", "세수하고 머리 빗기", "아침에 세수하고 머리 빗는 걸 스스로 했으면 좋겠어"),
+    new RoutineSuggestionResponse("🍽️", "먹은 그릇 정리하기", "밥을 먹고 나서 그릇을 치우는 습관을 들이고 싶어"),
+
+    // 성인 사용자(직장·주간활동·자립생활)를 위한 일과.
+    // 2026-09-13 서울 ABA연구소 자문: 추천이 전부 아동·학교 전제라 성인 사용자에게 맞지 않는다는 지적.
+    new RoutineSuggestionResponse("🏢", "출근 준비하기", "아침에 출근 준비를 하는 걸 도와주고 싶어"),
+    new RoutineSuggestionResponse("🚇", "지하철 타고 출근하기", "혼자 지하철을 타고 회사에 가는 연습을 하고 있어"),
+    new RoutineSuggestionResponse("🦺", "일 시작 전 준비하기", "작업을 시작하기 전에 챙겨야 할 것들을 알려주고 싶어"),
+    new RoutineSuggestionResponse("🍱", "회사에서 점심 먹기", "회사 점심시간에 하는 일을 순서대로 알려주고 싶어"),
+    new RoutineSuggestionResponse("🏘️", "주간보호센터 가기", "센터에 가는 준비를 스스로 했으면 좋겠어"),
+    new RoutineSuggestionResponse("🌆", "일 끝나고 집에 오기", "퇴근하고 혼자 집에 오는 연습을 하고 있어"),
+    new RoutineSuggestionResponse("💳", "혼자 물건 사기", "혼자 편의점에서 물건을 사는 연습을 하고 있어"),
+    new RoutineSuggestionResponse("🏦", "은행·관공서 다녀오기", "혼자 은행에 다녀와야 하는 일이 생겼어")
   );
 
   private RoutineSuggestionCatalog() {
