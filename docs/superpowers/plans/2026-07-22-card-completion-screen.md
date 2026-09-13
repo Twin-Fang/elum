@@ -214,7 +214,7 @@ void main() {
 - [ ] **Step 4: 테스트 실행**
 
 ```bash
-cd /Users/suhsaechan/Desktop/Programming/project/elum_codegate2026/client
+cd <repo>/client
 flutter test test/card_completion_screen_test.dart
 ```
 

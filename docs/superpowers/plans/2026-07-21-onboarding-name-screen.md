@@ -355,7 +355,7 @@ explicitTextAlign으로 override 경로는 열어둔다."
 `mcp__figma__download_figma_images` 툴을 아래 인자로 호출한다:
 
 - `fileKey`: `VSmGuv1iuOpLZmp6QeBHWr`
-- `localPath`: `/Users/suhsaechan/Desktop/Programming/project/elum_codegate2026/client/assets/images`
+- `localPath`: `<repo>/client/assets/images`
 - `nodes`: `[{ "nodeId": "204:999", "fileName": "icon_child_head.svg" }]`
 
 204:999(`Group 5`)는 `IMAGE-SVG` 노드라 원 배경과 어린이 머리 아이콘이 한 파일로
