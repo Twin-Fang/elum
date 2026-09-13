@@ -54,6 +54,24 @@ abstract final class AppConfig {
   static Duration get dlpMinDelay =>
       Duration(milliseconds: _int('ELUM_DLP_MIN_DELAY_MS', 1500));
 
+  // --- 빌드 종류 ---
+
+  /// 개발용 빌드인지. **컴파일 타임에 결정되며 `.env`로는 바꿀 수 없다.**
+  ///
+  /// ```bash
+  /// flutter build apk --release                              # 제출·배포용 (기본)
+  /// flutter build apk --release --dart-define=ELUM_BUILD=dev  # 내부 테스트용
+  /// ```
+  ///
+  /// **왜 `.env`가 아니라 dart-define인가** — 개발 플래그를 `.env`로 제어하면
+  /// GitHub Secret에 잘못된 값이 들어가는 순간 mock 데이터로 도는 APK가 배포된다.
+  /// 심사위원이 설치했을 때 가짜 데이터가 나오는 사고를 코드로 막는다. (이슈 #130)
+  static const String _buildFlavor =
+      String.fromEnvironment('ELUM_BUILD', defaultValue: 'prod');
+
+  /// 개발용 빌드에서만 true. 제출용 APK에서는 어떤 설정을 넣어도 false다.
+  static bool get isDevBuild => _buildFlavor == 'dev';
+
   // --- 개발 ---
 
   /// 네트워크 로깅. 릴리스 빌드에서는 값과 무관하게 항상 꺼진다.
@@ -61,20 +79,29 @@ abstract final class AppConfig {
       kDebugMode && _bool('ELUM_ENABLE_NETWORK_LOG', true);
 
   /// 서버 대신 mock 데이터를 쓸지. 서버 준비 전 개발·데모용.
-  static bool get useMock => _bool('ELUM_USE_MOCK', true);
+  ///
+  /// ⚠️ **릴리스 빌드에서는 `.env` 값과 무관하게 꺼진다** (개발용 빌드 제외).
+  /// 기본값이 `true`라서, 설정이 누락되면 mock으로 도는 APK가 나갈 수 있었다.
+  ///
+  /// `kDebugMode`를 함께 허용하는 이유는 **개발과 테스트를 막지 않기 위해서**다.
+  /// 차단해야 하는 것은 "릴리스로 빌드된 제출·배포용 APK"뿐이다.
+  static bool get useMock =>
+      (kDebugMode || isDevBuild) && _bool('ELUM_USE_MOCK', true);
 
   /// 개발자 도구 오버레이(플로팅 버튼)를 띄울지.
   ///
-  /// ⚠️ [enableNetworkLog]와 달리 `kDebugMode`를 걸지 않는다. 목적이 다르다 —
-  /// 네트워크 로깅은 운영에서 절대 켜지면 안 되는 값이고, 개발자 도구는
-  /// 심사자·테스터가 **릴리스 빌드로** 확인해야 하는 값이다.
-  /// debug 게이트를 걸면 정작 필요한 사람이 쓰지 못한다.
-  ///
-  /// 정식 출시 전 `.env`와 GitHub Secret에서 false로 바꾼다. (이슈 #13)
-  static bool get showDevTools => _bool('ELUM_SHOW_DEV_TOOLS', false);
+  /// 심사자·테스터가 **릴리스 빌드로** 확인해야 하는 값이라 `kDebugMode`를 걸지 않는다.
+  /// 대신 **개발용 빌드**에서만 켜지게 한다 — 확인이 필요한 사람에게는
+  /// `ELUM_BUILD=dev`로 만든 APK를 따로 전달한다.
+  static bool get showDevTools =>
+      (kDebugMode || isDevBuild) && _bool('ELUM_SHOW_DEV_TOOLS', false);
 
   /// 온보딩을 건너뛸지. 개발·시연용. SharedPreferences에서 런타임 토글 가능.
-  static bool skipOnboarding = _bool('ELUM_SKIP_ONBOARDING', false);
+  ///
+  /// ⚠️ 제출용 빌드에서는 항상 false다. 온보딩을 건너뛰면 PIN이 설정되지 않아
+  /// 아이가 보호자 모드로 들어갈 수 있다 (이슈 #61).
+  static bool skipOnboarding =
+      (kDebugMode || isDevBuild) && _bool('ELUM_SKIP_ONBOARDING', false);
 
   // --- 파싱 헬퍼 ---
   // 값이 없거나 형식이 틀려도 예외를 던지지 않는다.
