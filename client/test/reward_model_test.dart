@@ -122,7 +122,9 @@ void main() {
       const a = RecentReward(rewardText: '산책', rewardPresetKey: 'WALK');
       const b = RecentReward(rewardText: '산책', rewardPresetKey: 'WALK');
       expect(a, b);
-      expect({a, b}, hasLength(1));
+      // 리터럴 `{a, b}`로 쓰면 분석기가 '같은 원소 두 개'라고 경고한다.
+      // 실제 중복 제거는 목록을 Set으로 바꾸는 경로에서 일어나므로 그대로 검증한다.
+      expect(<RecentReward>[a, b].toSet(), hasLength(1));
     });
   });
 }

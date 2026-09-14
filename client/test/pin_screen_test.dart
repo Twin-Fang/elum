@@ -37,8 +37,10 @@ void main() {
           path: Routes.onboardingPin,
           builder: (context, state) => const PinScreen(),
         ),
+        // PIN 완료 후 실제 목적지는 보호자 홈이다 (pin_screen.dart의 context.go).
+        // 예전에는 SetupDoneScreen을 거쳤으나 제거됐다 (fc9e5a5).
         GoRoute(
-          path: Routes.onboardingDone,
+          path: Routes.guardian,
           builder: (context, state) => const Scaffold(body: Text('완료 화면')),
         ),
       ],

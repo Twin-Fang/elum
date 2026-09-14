@@ -84,7 +84,7 @@ void main() {
         Routes.onboardingGoals,
         Routes.onboardingCharacter,
         Routes.onboardingPin,
-        Routes.onboardingDone,
+        // SetupDoneScreen은 제거됐다 (fc9e5a5) — PIN 완료 후 바로 홈으로 간다.
         Routes.guardian, // 완료 → 보호자 홈 fade
       };
 
