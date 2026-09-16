@@ -1,0 +1,26 @@
+{
+  "templateVersion": "4.6.0",
+  "installedAt": "2026-09-16 01:27:35",
+  "files": {
+    "PROJECT-COMMON-AI-PR-SUMMARY.yaml": {
+      "installed": "sha256:6973c7ec32649d127903d950f53892b6045d59ffaefa1bbd163ca07de6456a50",
+      "rendered": "sha256:6973c7ec32649d127903d950f53892b6045d59ffaefa1bbd163ca07de6456a50"
+    },
+    "PROJECT-COMMON-PROJECTS-SYNC-MANAGER.yaml": {
+      "installed": "sha256:cdbd20a31f2e11283f3e753378fb56f01ffe0405d2a51e51d8ac85fa7c62b5df",
+      "rendered": "sha256:cdbd20a31f2e11283f3e753378fb56f01ffe0405d2a51e51d8ac85fa7c62b5df"
+    },
+    "PROJECT-COMMON-README-VERSION-UPDATE.yaml": {
+      "installed": "sha256:84b3d1c56258c3021484c28b5f4ae10ce56baf1467d9a330a2e8cd732e2b6f8c",
+      "rendered": "sha256:84b3d1c56258c3021484c28b5f4ae10ce56baf1467d9a330a2e8cd732e2b6f8c"
+    },
+    "PROJECT-COMMON-RELEASE-CHANGELOG.yaml": {
+      "installed": "sha256:93c38a2de97bb9042d2a91caab1a1e7dd9f2f3a4eb29328e31bbbebf308869a5",
+      "rendered": "sha256:93c38a2de97bb9042d2a91caab1a1e7dd9f2f3a4eb29328e31bbbebf308869a5"
+    },
+    "PROJECT-COMMON-VERSION-CONTROL.yaml": {
+      "installed": "sha256:8a86d710d26582eed72daa6e7f415abb44a68ea97d3faa63eb047d881758e88c",
+      "rendered": "sha256:8a86d710d26582eed72daa6e7f415abb44a68ea97d3faa63eb047d881758e88c"
+    }
+  }
+}
