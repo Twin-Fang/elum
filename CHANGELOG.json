@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-16T00:34:31Z",
-    "currentVersion": "1.0.98",
+    "lastUpdated": "2026-09-16T01:31:44Z",
+    "currentVersion": "1.0.99",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 66
+    "totalReleases": 67
   },
   "releases": [
+    {
+      "version": "1.0.99",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-16",
+      "pr_number": 157,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **기타**\n  * 배포 자동화 도구를 최신 버전으로 갱신했습니다\n  * 릴리스 시 APK 첨부가 누락되지 않도록 보완했습니다",
+      "parsed_changes": {
+        "기타": {
+          "title": "기타",
+          "items": [
+            "배포 자동화 도구를 최신 버전으로 갱신했습니다",
+            "릴리스 시 APK 첨부가 누락되지 않도록 보완했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.98",
       "project_type": "flutter",
