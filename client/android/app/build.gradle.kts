@@ -78,8 +78,13 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // 릴리스 빌드는 R8로 코드를 축소한다. 소셜 로그인 SDK가 끌고 오는
+            // OkHttp가 선택적 의존성을 참조해 규칙 없이는 빌드가 실패한다.
+            // debug 빌드로는 재현되지 않으므로 여기를 비워두면 배포에서만 터진다.
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
