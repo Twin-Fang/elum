@@ -49,6 +49,10 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.buttonEnabledText,
     required this.buttonDisabled,
     required this.buttonDisabledText,
+    required this.buttonNeutral,
+    required this.buttonNeutralText,
+    required this.danger,
+    required this.dangerText,
     required this.highlightFill,
     required this.highlightBorder,
     required this.goalSelectedFill,
@@ -147,6 +151,17 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color buttonEnabledText;
   final Color buttonDisabled;
   final Color buttonDisabledText;
+
+  // 보조 버튼 — 누를 수 있지만 권하지는 않는 쪽(확인 시트의 '취소' 등).
+  // buttonDisabled를 쓰면 "못 누르는 버튼"으로 읽혀 취소가 막힌 것처럼 보인다 (이슈 #188).
+  final Color buttonNeutral;
+  final Color buttonNeutralText;
+
+  // 되돌릴 수 없는 동작. 흐리게가 아니라 이 색으로 알린다 —
+  // 흐린 색은 위험이 아니라 비활성으로 읽힌다 (이슈 #188).
+  // 13sp 본문에도 쓰이므로 배경(#F7F2EF) 대비 4.5:1을 넘겨야 한다.
+  final Color danger;
+  final Color dangerText;
 
   // 강조 표면 — 보호자 화면의 마스킹 결과·요약 배지 등.
   // Figma 명세가 없는 임시 값이다. 디자인이 확정되면 교체한다.
@@ -336,6 +351,12 @@ class AppColors extends ThemeExtension<AppColors> {
     buttonEnabledText: Color(0xFFFFFFFF),
     buttonDisabled: Color(0xFF818393),
     buttonDisabledText: Color(0x80FFFFFF), // rgba(255,255,255,0.5)
+    buttonNeutral: Color(0xFFEFEDEA),
+    buttonNeutralText: Color(0xFF242634),
+    // 팔레트의 코랄(#EB9B73)과 같은 난색 계열로 낮춰 잡았다. 배경 대비 4.7:1,
+    // 흰 글씨 대비 5.4:1 — 작은 글씨에도 읽히면서 경고로 보인다.
+    danger: Color(0xFFBB3F38),
+    dangerText: Color(0xFFFFFFFF),
     highlightFill: Color(0xFFFFDAC7),
     highlightBorder: Color(0xFFEB9B73),
     goalSelectedFill: Color(0xFFB5EAEC),
@@ -432,6 +453,10 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? buttonEnabledText,
     Color? buttonDisabled,
     Color? buttonDisabledText,
+    Color? buttonNeutral,
+    Color? buttonNeutralText,
+    Color? danger,
+    Color? dangerText,
     Color? highlightFill,
     Color? highlightBorder,
     Color? goalSelectedFill,
@@ -517,6 +542,10 @@ class AppColors extends ThemeExtension<AppColors> {
       buttonEnabledText: buttonEnabledText ?? this.buttonEnabledText,
       buttonDisabled: buttonDisabled ?? this.buttonDisabled,
       buttonDisabledText: buttonDisabledText ?? this.buttonDisabledText,
+      buttonNeutral: buttonNeutral ?? this.buttonNeutral,
+      buttonNeutralText: buttonNeutralText ?? this.buttonNeutralText,
+      danger: danger ?? this.danger,
+      dangerText: dangerText ?? this.dangerText,
       highlightFill: highlightFill ?? this.highlightFill,
       highlightBorder: highlightBorder ?? this.highlightBorder,
       goalSelectedFill: goalSelectedFill ?? this.goalSelectedFill,
@@ -608,6 +637,10 @@ class AppColors extends ThemeExtension<AppColors> {
       buttonEnabledText: Color.lerp(buttonEnabledText, other.buttonEnabledText, t)!,
       buttonDisabled: Color.lerp(buttonDisabled, other.buttonDisabled, t)!,
       buttonDisabledText: Color.lerp(buttonDisabledText, other.buttonDisabledText, t)!,
+      buttonNeutral: Color.lerp(buttonNeutral, other.buttonNeutral, t)!,
+      buttonNeutralText: Color.lerp(buttonNeutralText, other.buttonNeutralText, t)!,
+      danger: Color.lerp(danger, other.danger, t)!,
+      dangerText: Color.lerp(dangerText, other.dangerText, t)!,
       highlightFill: Color.lerp(highlightFill, other.highlightFill, t)!,
       highlightBorder:
           Color.lerp(highlightBorder, other.highlightBorder, t)!,

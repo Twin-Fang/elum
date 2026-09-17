@@ -154,13 +154,15 @@ class _SettingsTile extends StatelessWidget {
             Text(
               label,
               style: context.typo.tileLabel.copyWith(
-                color: destructive ? colors.textSecondary : colors.textPrimary,
+                // 흐리게 하면 "못 누르는 항목"으로 읽힌다. 누를 수 있다는 것과
+                // 위험하다는 것을 동시에 전해야 한다 (이슈 #188).
+                color: destructive ? colors.danger : colors.textPrimary,
               ),
             ),
             Icon(
               Icons.chevron_right_rounded,
               size: space.lg.w,
-              color: colors.textPlaceholder,
+              color: destructive ? colors.danger : colors.textPlaceholder,
             ),
           ],
         ),
@@ -244,7 +246,9 @@ class _ConfirmSheet extends StatelessWidget {
               Expanded(
                 child: _SheetButton(
                   label: '취소',
-                  filled: false,
+                  // 물러나는 쪽은 언제나 누를 수 있어 보여야 한다. 비활성 색을 쓰면
+                  // 취소가 막힌 것처럼 보여 확인 쪽으로 몰린다 (이슈 #188).
+                  kind: _SheetButtonKind.neutral,
                   onTap: () => Navigator.of(context).pop(false),
                 ),
               ),
@@ -252,8 +256,10 @@ class _ConfirmSheet extends StatelessWidget {
               Expanded(
                 child: _SheetButton(
                   label: confirmLabel,
-                  filled: true,
                   // 되돌릴 수 없는 쪽은 기본 버튼색을 쓰지 않는다.
+                  kind: destructive
+                      ? _SheetButtonKind.danger
+                      : _SheetButtonKind.primary,
                   onTap: () => Navigator.of(context).pop(true),
                 ),
               ),
@@ -265,15 +271,30 @@ class _ConfirmSheet extends StatelessWidget {
   }
 }
 
+/// 시트 버튼의 세 가지 역할.
+///
+/// 색을 호출부에서 직접 고르게 하면 화면마다 다른 조합이 생긴다. 역할만 고르면
+/// 위험 표현이 앱 전체에서 같은 모습으로 나온다.
+enum _SheetButtonKind {
+  /// 되돌릴 수 있는 확인 (로그아웃 등).
+  primary,
+
+  /// 물러나기. 눌러도 아무 일이 없으므로 항상 열려 있어 보인다.
+  neutral,
+
+  /// 되돌릴 수 없는 확인.
+  danger,
+}
+
 class _SheetButton extends StatelessWidget {
   const _SheetButton({
     required this.label,
-    required this.filled,
+    required this.kind,
     required this.onTap,
   });
 
   final String label;
-  final bool filled;
+  final _SheetButtonKind kind;
   final VoidCallback onTap;
 
   @override
@@ -287,13 +308,21 @@ class _SheetButton extends StatelessWidget {
         height: space.buttonH.h,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: filled ? colors.buttonEnabled : colors.buttonDisabled,
+          color: switch (kind) {
+            _SheetButtonKind.primary => colors.buttonEnabled,
+            _SheetButtonKind.neutral => colors.buttonNeutral,
+            _SheetButtonKind.danger => colors.danger,
+          },
           borderRadius: BorderRadius.circular(space.buttonRadius.r),
         ),
         child: Text(
           label,
           style: context.typo.button.copyWith(
-            color: filled ? colors.buttonEnabledText : colors.buttonDisabledText,
+            color: switch (kind) {
+              _SheetButtonKind.primary => colors.buttonEnabledText,
+              _SheetButtonKind.neutral => colors.buttonNeutralText,
+              _SheetButtonKind.danger => colors.dangerText,
+            },
           ),
         ),
       ),

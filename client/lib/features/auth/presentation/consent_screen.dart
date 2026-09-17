@@ -43,17 +43,26 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       .where((item) => item.required)
       .every((item) => _checked.contains(item.key));
 
-  bool get _allChecked => _checked.length == consentItems.length;
-
-  void _toggleAll() {
+  /// 일괄 동의는 **필수 항목만** 다룬다 (이슈 #189).
+  ///
+  /// 선택 항목(광고성 정보 수신)은 화면 높이에 따라 접혀서 안 보일 수 있다. 일괄
+  /// 동의가 거기까지 켜면, 사용자는 **무엇에 동의했는지 본 적도 없이** 동의하게 된다.
+  /// 실제로 필수 4개까지만 보이는 화면에서 이 버튼을 누르면 마케팅 동의가 함께 켜졌다.
+  ///
+  /// 선택 항목은 눈으로 보고 직접 누르게 둔다. 한 번 더 누르는 비용보다
+  /// 모르고 동의하는 비용이 크다.
+  void _toggleAllRequired() {
     setState(() {
-      if (_allChecked) {
-        _checked.clear();
+      if (_allRequiredChecked) {
+        _checked.removeAll(_requiredKeys);
       } else {
-        _checked.addAll(consentItems.map((item) => item.key));
+        _checked.addAll(_requiredKeys);
       }
     });
   }
+
+  Iterable<String> get _requiredKeys =>
+      consentItems.where((item) => item.required).map((item) => item.key);
 
   Future<void> _submit() async {
     setState(() {
@@ -114,7 +123,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               ),
               SizedBox(height: space.headerToContent.h),
 
-              _AllAgreeRow(checked: _allChecked, onTap: _toggleAll),
+              _AllAgreeRow(
+                checked: _allRequiredChecked,
+                onTap: _toggleAllRequired,
+              ),
               SizedBox(height: space.sm.h),
 
               for (final item in consentItems) ...[
@@ -197,7 +209,9 @@ class _AllAgreeRow extends StatelessWidget {
             ),
             SizedBox(width: space.sm.w),
             Expanded(
-              child: Text('모두 동의합니다', style: context.typo.subtitle),
+              // "모두"라고만 쓰면 선택 항목까지 켜지는 줄 안다. 무엇을 켜는지 적는다.
+              child: Text('필수 항목에 모두 동의합니다',
+                  style: context.typo.subtitle),
             ),
           ],
         ),

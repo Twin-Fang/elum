@@ -89,6 +89,31 @@
       "text": "네트워크 차단은 'cmd connectivity airplane-mode enable/disable'을 쓴다. 'svc wifi disable'은 껐다 켠 뒤에도 특정 도메인 DNS가 복구되지 않은 적이 있다.",
       "scope": "platform",
       "added": "2026-09-17"
+    },
+    {
+      "text": "화면만 보고 통과시키지 않는다. 앱이 서버로 **무엇을 보냈는지**를 서버 로그에서 대조해야 잡히는 버그가 있다. 동의 화면에서 보이지 않는 선택 항목이 true로 전송된 것을 화면으로는 알 수 없었고 서버 요청 본문에서 드러났다.",
+      "scope": "flutter",
+      "added": "2026-09-17"
+    },
+    {
+      "text": "세로로 긴 목록 화면은 **끝까지 스크롤해서 항목 수를 센다.** 첫 화면에 보이는 것이 전부라고 가정하면, 화면 밖 항목에 상태를 바꾸는 버튼(전체 선택 등)이 있을 때 그 영향을 못 본다.",
+      "scope": "flutter",
+      "added": "2026-09-17"
+    },
+    {
+      "text": "서버 로그는 관리자 화면의 로그 API로 받는다. 폼 로그인이라 CSRF 토큰을 먼저 뽑아야 한다: GET /admin/login 에서 _csrf 추출 → POST /admin/login → GET /admin/logs/api/tail?lines=N. SSH 설정의 포트는 DB 포트라 접속되지 않는다.",
+      "scope": "project",
+      "added": "2026-09-17"
+    },
+    {
+      "text": "탈퇴·삭제를 테스트했으면 **고아 행을 전수 조사한다.** 외래키가 없는 표(refresh_token·ai_call_log)는 DB가 대신 지워 주지 않아 코드에서 빠뜨리면 조용히 남는다. information_schema로 FK 삭제 규칙을 먼저 보면 어디를 의심할지 알 수 있다.",
+      "scope": "project",
+      "added": "2026-09-17"
+    },
+    {
+      "text": "되돌릴 수 없는 동작은 **서버가 실패한 경우**와 **성공한 경우**를 둘 다 밟아야 판정이 선다. 실패만 보면 '머물렀다'가 맞는지 알 수 없고, 성공만 보면 실패를 숨기는지 알 수 없다.",
+      "scope": "flutter",
+      "added": "2026-09-17"
     }
   ],
   "runs": [

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
+import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/data/oauth_sdk.dart';
@@ -115,6 +116,58 @@ void main() {
 
     expect(auth.deleteCalls, 1);
     expect(find.text('로그인 화면'), findsOneWidget);
+  });
+
+  testWidgets('되돌릴 수 없는 항목은 흐린 색이 아니라 위험 색이다 (이슈 #188)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    final colors = AppColors.light;
+    final withdraw = tester.widget<Text>(find.text('회원탈퇴'));
+    final logout = tester.widget<Text>(find.text('로그아웃'));
+
+    expect(withdraw.style?.color, colors.danger,
+        reason: '흐린 보조색을 쓰면 위험이 아니라 비활성으로 읽힌다');
+    expect(withdraw.style?.color, isNot(colors.textSecondary));
+    // 일반 항목까지 물들면 위험 표시가 의미를 잃는다.
+    expect(logout.style?.color, colors.textPrimary);
+  });
+
+  testWidgets('확인 시트에서 취소가 비활성처럼 보이지 않는다 (이슈 #188)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('회원탈퇴'));
+    await tester.pumpAndSettle();
+
+    final colors = AppColors.light;
+    Color? fillBehind(String label) {
+      final box = tester.widget<Container>(
+        find.ancestor(of: find.text(label), matching: find.byType(Container)).first,
+      );
+      return (box.decoration as BoxDecoration?)?.color;
+    }
+
+    // 취소가 비활성 색이면 "지금은 물러날 수 없다"로 읽혀 확인 쪽으로 몰린다.
+    expect(fillBehind('취소'), colors.buttonNeutral);
+    expect(fillBehind('취소'), isNot(colors.buttonDisabled));
+    // 되돌릴 수 없는 쪽은 기본 버튼색이 아니라 위험색이어야 한다.
+    expect(fillBehind('탈퇴하기'), colors.danger);
+    expect(fillBehind('탈퇴하기'), isNot(colors.buttonEnabled));
+  });
+
+  testWidgets('되돌릴 수 있는 확인은 위험색을 쓰지 않는다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('로그아웃'));
+    await tester.pumpAndSettle();
+
+    final box = tester.widget<Container>(
+      find.ancestor(of: find.text('로그아웃').last, matching: find.byType(Container)).first,
+    );
+    // 로그아웃까지 붉게 칠하면 진짜 위험한 것과 구분이 사라진다.
+    expect((box.decoration as BoxDecoration?)?.color, AppColors.light.buttonEnabled);
   });
 
   testWidgets('서버 삭제가 실패하면 탈퇴됐다고 하지 않는다 (이슈 #187)', (tester) async {

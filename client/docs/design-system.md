@@ -89,6 +89,35 @@ homeCardTitle:     Color(0xFF9CADF1),  // 홈 카드 제목  ← 값이 같아�
 > 컴포넌트셋에는 `Property 1=enable` / `=disable` 두 variant가 정의되어 있다.
 > **인스턴스가 아니라 컴포넌트셋(`187:299`)이 원본**이다.
 
+### 되돌릴 수 없는 동작 — 흐리게가 아니라 위험색 ⚠️
+
+**파괴적 항목을 흐린 색으로 표시하지 않는다.** 이 앱에서 흐린 색(`textSecondary`
+`buttonDisabled`)은 **"지금은 쓸 수 없다"**는 뜻이다. 위험을 알리려고 흐리게 쓰면
+사용자는 "누를 수 없는 항목"으로 읽는다. 실제로 설정 화면의 `회원탈퇴`가
+비활성처럼 보였다 (이슈 #188).
+
+| 역할 | 토큰 | 값 | 쓰는 곳 |
+| --- | --- | --- | --- |
+| 되돌릴 수 없음 | `danger` / `dangerText` | `#BB3F38` / `#FFFFFF` | 회원탈퇴 라벨, 탈퇴 확인 버튼 |
+| 물러나기 | `buttonNeutral` / `buttonNeutralText` | `#EFEDEA` / `#242634` | 확인 시트의 `취소` |
+| 되돌릴 수 있음 | `buttonEnabled` / `buttonEnabledText` | `#242634` / `#FFFFFF` | 로그아웃 확인 버튼 |
+
+**확인 시트의 강조는 물러나는 쪽에 둔다.** 파괴 쪽이 기본 버튼색이면 시트 전체가
+"이걸 누르세요"로 읽힌다. 취소에 `buttonDisabled`를 쓰면 **물러날 수 없는 것처럼**
+보여 더 나쁘다 — 취소는 언제나 눌러도 되므로 항상 열려 있어 보여야 한다.
+
+```dart
+// ✅ 역할로 고른다
+kind: destructive ? _SheetButtonKind.danger : _SheetButtonKind.primary,
+
+// ❌ 색을 호출부에서 직접 고르면 화면마다 다른 조합이 생긴다
+color: destructive ? colors.textSecondary : colors.textPrimary,
+```
+
+`danger`는 **13sp 본문에도 쓰이므로** 배경(`#F7F2EF`) 대비 4.5:1을 넘겨야 한다.
+`#BB3F38`은 4.7:1, 흰 글씨 위에서 5.4:1이다. 팔레트의 코랄(`#EB9B73`)과 같은 난색
+계열이라 톤이 튀지 않는다. **더 밝은 빨강으로 바꿀 때 대비를 다시 재고 바꾼다.**
+
 ### 선택 상태 — 용도마다 색이 다르다 ⚠️
 
 미선택은 모두 `#FFFFFF` + `#EFEFEF` 1px로 같지만, **선택색은 셋 다 다르다.**
