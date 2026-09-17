@@ -1,0 +1,221 @@
+{
+  "scanned": "2026-09-17",
+  "flutter_root": "client",
+  "feature_groups": [
+    "auth",
+    "child",
+    "guardian",
+    "onboarding"
+  ],
+  "auth": {
+    "kind": "social",
+    "providers": [
+      "kakao",
+      "naver",
+      "google",
+      "apple"
+    ],
+    "evidence": [
+      "features/auth/data/oauth_sdk.dart"
+    ]
+  },
+  "routes": [
+    {
+      "const": "splash",
+      "path": "/",
+      "group": "root"
+    },
+    {
+      "const": "child",
+      "path": "/child",
+      "group": "child"
+    },
+    {
+      "const": "childReward",
+      "path": "/child/reward",
+      "group": "child"
+    },
+    {
+      "const": "childRoutineDetail",
+      "path": "/child/routine",
+      "group": "child"
+    },
+    {
+      "const": "childStars",
+      "path": "/child/stars",
+      "group": "child"
+    },
+    {
+      "const": "consent",
+      "path": "/consent",
+      "group": "consent"
+    },
+    {
+      "const": "guardian",
+      "path": "/guardian",
+      "group": "guardian"
+    },
+    {
+      "const": "routineGenerating",
+      "path": "/guardian/routine/generating",
+      "group": "guardian"
+    },
+    {
+      "const": "routineInput",
+      "path": "/guardian/routine/input",
+      "group": "guardian"
+    },
+    {
+      "const": "routineMasking",
+      "path": "/guardian/routine/masking",
+      "group": "guardian"
+    },
+    {
+      "const": "routineQuestion",
+      "path": "/guardian/routine/question",
+      "group": "guardian"
+    },
+    {
+      "const": "routineReview",
+      "path": "/guardian/routine/review",
+      "group": "guardian"
+    },
+    {
+      "const": "login",
+      "path": "/login",
+      "group": "login"
+    },
+    {
+      "const": "modeSwitch",
+      "path": "/mode-switch",
+      "group": "mode-switch"
+    },
+    {
+      "const": "cardCompletion",
+      "path": "/onboarding/card-completion",
+      "group": "onboarding"
+    },
+    {
+      "const": "onboardingCharacter",
+      "path": "/onboarding/character",
+      "group": "onboarding"
+    },
+    {
+      "const": "onboardingGoals",
+      "path": "/onboarding/goals",
+      "group": "onboarding"
+    },
+    {
+      "const": "onboardingName",
+      "path": "/onboarding/name",
+      "group": "onboarding"
+    },
+    {
+      "const": "onboardingPin",
+      "path": "/onboarding/pin",
+      "group": "onboarding"
+    }
+  ],
+  "screens": [
+    {
+      "file": "features/auth/presentation/consent_document_screen.dart",
+      "group": "auth",
+      "name": "consent_document"
+    },
+    {
+      "file": "features/auth/presentation/consent_screen.dart",
+      "group": "auth",
+      "name": "consent"
+    },
+    {
+      "file": "features/auth/presentation/login_screen.dart",
+      "group": "auth",
+      "name": "login"
+    },
+    {
+      "file": "features/child/presentation/child_home_screen.dart",
+      "group": "child",
+      "name": "child_home"
+    },
+    {
+      "file": "features/child/presentation/child_routine_detail_screen.dart",
+      "group": "child",
+      "name": "child_routine_detail"
+    },
+    {
+      "file": "features/child/presentation/child_stars_screen.dart",
+      "group": "child",
+      "name": "child_stars"
+    },
+    {
+      "file": "features/child/presentation/mode_switch_screen.dart",
+      "group": "child",
+      "name": "mode_switch"
+    },
+    {
+      "file": "features/child/presentation/reward_screen.dart",
+      "group": "child",
+      "name": "reward"
+    },
+    {
+      "file": "features/guardian/presentation/card_review_screen.dart",
+      "group": "guardian",
+      "name": "card_review"
+    },
+    {
+      "file": "features/guardian/presentation/dlp_screen.dart",
+      "group": "guardian",
+      "name": "dlp"
+    },
+    {
+      "file": "features/guardian/presentation/guardian_home_screen.dart",
+      "group": "guardian",
+      "name": "guardian_home"
+    },
+    {
+      "file": "features/guardian/presentation/question_screen.dart",
+      "group": "guardian",
+      "name": "question"
+    },
+    {
+      "file": "features/guardian/presentation/routine_input_screen.dart",
+      "group": "guardian",
+      "name": "routine_input"
+    },
+    {
+      "file": "features/guardian/presentation/routine_loading_screen.dart",
+      "group": "guardian",
+      "name": "routine_loading"
+    },
+    {
+      "file": "features/onboarding/presentation/card_completion_screen.dart",
+      "group": "onboarding",
+      "name": "card_completion"
+    },
+    {
+      "file": "features/onboarding/presentation/character_screen.dart",
+      "group": "onboarding",
+      "name": "character"
+    },
+    {
+      "file": "features/onboarding/presentation/goals_screen.dart",
+      "group": "onboarding",
+      "name": "goals"
+    },
+    {
+      "file": "features/onboarding/presentation/name_screen.dart",
+      "group": "onboarding",
+      "name": "name"
+    },
+    {
+      "file": "features/onboarding/presentation/pin_screen.dart",
+      "group": "onboarding",
+      "name": "pin"
+    },
+    {
+      "file": "features/onboarding/presentation/splash_screen.dart",
+      "group": "onboarding",
+      "name": "splash"
+    }
+  ]
+}

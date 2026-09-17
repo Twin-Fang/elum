@@ -1,35 +1,8 @@
 {
   "name": "소셜 로그인 첫 가입 — 로그인부터 홈까지",
   "description": "첫 로그인 사용자가 약관 동의와 온보딩을 거쳐 홈에 도달하는 경로. 소셜 계정은 한 번 가입하면 provider 식별자로 붙어 이 경로를 다시 탈 수 없으므로, 밟기 전 reset이 필수다.",
-  "reset": {
-    "device": "pm clear",
-    "server": "./server/tool/reset_test_account.sh --provider KAKAO"
-  },
+  "precondition": "_shared/login-kakao",
   "steps": [
-    {
-      "screen": "시작",
-      "do": "tap '시작하기'",
-      "expect_screen": "로그인 — 카카오·네이버·구글 버튼 3개",
-      "expect_device": ["elum.refreshToken = null", "onboardingCompleted = false"],
-      "expect_server": null,
-      "human": null
-    },
-    {
-      "screen": "로그인",
-      "do": "tap '카카오로 시작하기'",
-      "expect_screen": "카카오 계정 로그인 (CustomTabs)",
-      "expect_device": null,
-      "expect_server": null,
-      "human": "2단계 인증이 뜨면 카카오톡에서 확인 버튼을 눌러달라고 요청한다 (제한 5분)"
-    },
-    {
-      "screen": "카카오 동의",
-      "do": "tap 'Continue'",
-      "expect_screen": "약관 동의 — 필수 4개 + 선택 1개",
-      "expect_device": ["elum.refreshToken 저장됨", "lastLoginProvider = kakao"],
-      "expect_server": "select username, login_count from member m join auth_identity ai on ai.member_id=m.id where ai.provider='KAKAO'",
-      "human": null
-    },
     {
       "screen": "약관 동의",
       "do": "필수 4개만 체크 후 tap '동의하고 시작하기'",
@@ -58,7 +31,12 @@
       "screen": "온보딩 완료",
       "do": "tap '맞춤 설정하기'",
       "expect_screen": "보호자 홈 — 고른 캐릭터와 이름이 보임",
-      "expect_device": ["childNickname", "supportGoals", "cardCharacter", "onboardingCompleted = true"],
+      "expect_device": [
+        "childNickname",
+        "supportGoals",
+        "cardCharacter",
+        "onboardingCompleted = true"
+      ],
       "expect_server": "select p.nickname, p.character from profile p join auth_identity ai on ai.member_id=p.member_id where ai.provider='KAKAO'",
       "human": null
     },
@@ -66,14 +44,28 @@
       "screen": "재시작 회귀",
       "do": "force-stop 후 재실행",
       "expect_screen": "시작 화면을 지나 홈 직행 — 이름·캐릭터 그대로",
-      "expect_device": ["cardCharacter 읽기 발생"],
+      "expect_device": [
+        "cardCharacter 읽기 발생"
+      ],
       "expect_server": null,
       "human": null
     }
   ],
   "conditions": [
-    {"name": "큰 글씨", "apply": "settings put system font_scale 1.3", "revert": "settings put system font_scale 1.0"},
-    {"name": "동작 줄이기", "apply": "settings put global transition_animation_scale 0", "revert": "settings put global transition_animation_scale 1"},
-    {"name": "네트워크 끊김", "apply": "svc wifi disable && svc data disable", "revert": "svc wifi enable && svc data enable"}
+    {
+      "name": "큰 글씨",
+      "apply": "settings put system font_scale 1.3",
+      "revert": "settings put system font_scale 1.0"
+    },
+    {
+      "name": "동작 줄이기",
+      "apply": "settings put global transition_animation_scale 0",
+      "revert": "settings put global transition_animation_scale 1"
+    },
+    {
+      "name": "네트워크 끊김",
+      "apply": "svc wifi disable && svc data disable",
+      "revert": "svc wifi enable && svc data enable"
+    }
   ]
 }
