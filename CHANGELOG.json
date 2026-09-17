@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-17T22:24:12Z",
-    "currentVersion": "1.0.113",
+    "lastUpdated": "2026-09-17T22:33:06Z",
+    "currentVersion": "1.0.114",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 81
+    "totalReleases": 82
   },
   "releases": [
+    {
+      "version": "1.0.114",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-17",
+      "pr_number": 202,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 이룸이 휴대폰을 여러 대 연결할 수 있습니다\n  * 연결한 휴대폰을 하나씩 골라 끊을 수 있습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "이룸이 휴대폰을 여러 대 연결할 수 있습니다",
+            "연결한 휴대폰을 하나씩 골라 끊을 수 있습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.113",
       "project_type": "flutter",
