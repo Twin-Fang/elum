@@ -142,14 +142,13 @@ void main() {
       expect(find.text('이름 화면'), findsOneWidget);
     });
 
-    testWidgets('온보딩을 마쳤으면 보호자 홈으로 간다', (tester) async {
+    testWidgets('온보딩을 마쳤으면 누르지 않아도 보호자 홈으로 간다', (tester) async {
+      // 갈 곳이 하나로 정해진 사용자에게 버튼을 한 번 더 누르게 하지 않는다.
       await tester.pumpWidget(buildSubject(onboardingCompleted: true));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('시작하기'));
-      await tester.pumpAndSettle();
-
       expect(find.text('보호자 홈'), findsOneWidget);
+      expect(find.text('시작하기'), findsNothing);
     });
   });
 

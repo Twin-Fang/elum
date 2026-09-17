@@ -28,6 +28,17 @@ import '../application/onboarding_notifier.dart';
 /// 등장 후에는 머리 위 새싹 줄기와 청록 구슬만 아주 살짝 상하로 부유한다.
 /// 병아리 몸은 고정한다(흔들리면 눈·코까지 우글거려 어색하다). OS "동작
 /// 줄이기"가 켜져 있으면 부유는 시작하지 않는다 (motion.md §접근성).
+/// 시작 화면을 건너뛸지 판단한다.
+///
+/// 이미 로그인했고 온보딩도 끝났다면 갈 곳이 하나로 정해져 있다. 그런데도 버튼을
+/// 한 번 더 누르게 하면, 매일 여는 사용자에게 의미 없는 탭이 계속 쌓인다.
+@visibleForTesting
+bool shouldSkipSplash({
+  required bool hasSession,
+  required bool onboardingCompleted,
+}) =>
+    hasSession && onboardingCompleted;
+
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -49,6 +60,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.initState();
     // 시작은 didChangeDependencies에서 — 동작 줄이기 설정을 먼저 봐야 한다
     _float = AnimationController(vsync: this, duration: _floatPeriod);
+
+    // 갈 곳이 정해진 사용자는 이 화면에 머물 이유가 없다.
+    // build가 아니라 첫 프레임 뒤에 옮긴다 — 빌드 도중 라우팅하면 예외가 난다.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final skip = shouldSkipSplash(
+        hasSession: ref.read(authRepositoryProvider).hasSession,
+        onboardingCompleted: ref.read(localStorageProvider).isOnboardingCompleted,
+      );
+      if (!skip) return;
+      try {
+        GoRouter.of(context).go(Routes.guardian);
+      } catch (e) {
+        // 라우터가 없는 환경(테스트 등)에서는 화면을 그대로 둔다
+        debugPrint('시작 화면 자동 이동 실패: $e');
+      }
+    });
   }
 
   @override
