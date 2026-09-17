@@ -144,10 +144,20 @@ class AuthRepository {
       final res = await _dio.get<Map<String, dynamic>>('/api/member/me');
 
       final consented = res.data?['requiredConsentsCompleted'] == true;
-      if (!consented) return AuthOutcome.consentRequired;
+      if (!consented) {
+        // 동의도 하지 않은 계정이면 확실히 새 계정이다
+        await _storage.clearChildProfile();
+        return AuthOutcome.consentRequired;
+      }
 
       final nickname = res.data?['nickname']?.toString();
-      if (nickname == null || nickname.isEmpty) return AuthOutcome.onboarding;
+      if (nickname == null || nickname.isEmpty) {
+        // 이 계정에는 아직 아이 정보가 없다. 이전 계정의 값이 남아 있으면
+        // 이름 입력칸에 남의 이름이 미리 채워지고, 거기에 입력하면 이어붙는다.
+        // 토큰은 방금 받았으므로 아이 정보만 지운다. (이슈 #177)
+        await _storage.clearChildProfile();
+        return AuthOutcome.onboarding;
+      }
 
       // 재설치한 기존 사용자다. 아이 이름을 로컬에도 되살려 둔다.
       await _storage.setNickname(nickname);

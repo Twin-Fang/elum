@@ -68,6 +68,13 @@ abstract interface class LocalStorage {
   /// 인터페이스에 두는 이유는 InMemoryStorage도 같은 동작을 보장해
   /// 테스트로 검증할 수 있게 하기 위함이다. (이슈 #13)
   Future<void> clearAll();
+
+  /// 아이 정보만 지운다. 토큰은 건드리지 않는다.
+  ///
+  /// 새 계정으로 막 로그인한 직후에 쓴다 — 그 계정에는 아직 아이 정보가 없는데
+  /// 이전 계정의 이름이 남아 있으면 입력칸에 남의 이름이 미리 채워진다 (이슈 #177).
+  /// [clearAll]은 토큰까지 지워 방금 받은 세션이 날아가므로 여기서는 쓸 수 없다.
+  Future<void> clearChildProfile();
 }
 
 /// SharedPreferences 기반 실제 구현.
@@ -235,27 +242,27 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  Future<void> clearChildProfile() async {
+    for (final key in [_kNickname, _kGoals, _kCharacter, _kCompleted, _kPin]) {
+      await _prefs.remove(key);
+    }
+    // 진행 기록·캐시도 이전 아이의 것이다
+    for (final key in _prefs.getKeys().where(
+      (k) => k.startsWith(_kProgressPrefix) || k == _kCachedToday,
+    )) {
+      await _prefs.remove(key);
+    }
+  }
+
+  @override
   Future<void> clearAll() async {
     // 앱이 쓰는 키만 지운다. _prefs.clear()는 다른 패키지가 저장한 값까지
     // 날려 원인 모를 오작동을 만든다.
     //
     // 토큰도 함께 지운다 — 이것이 곧 로그아웃이다. 온보딩 값만 지우고 토큰이
     // 남으면 이전 계정의 일과가 새 이름과 섞여 보인다. (이슈 #13)
-    for (final key in [
-      _kNickname,
-      _kGoals,
-      _kCharacter,
-      _kCompleted,
-      _kPin,
-      _kAccessToken,
-    ]) {
-      await _prefs.remove(key);
-    }
-    // 진행 기록은 일과 id마다 키가 생기므로 접두사로 찾아 지운다.
-    // 계정 전환 후 이전 아이의 체크·대기열·캐시가 남으면 안 된다.
-    for (final key in _prefs.getKeys().where(
-      (k) => k.startsWith(_kProgressPrefix) || k == _kCachedToday,
-    )) {
+    await clearChildProfile();
+    for (final key in [_kAccessToken]) {
       await _prefs.remove(key);
     }
   }
@@ -348,6 +355,17 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setCachedTodayRoutinesJson(String json) async =>
       _cachedToday = json;
+
+  @override
+  Future<void> clearChildProfile() async {
+    _nickname = null;
+    _goals = const [];
+    _character = null;
+    _pin = null;
+    _completed = false;
+    _progress.clear();
+    _cachedToday = null;
+  }
 
   @override
   Future<void> clearAll() async {
