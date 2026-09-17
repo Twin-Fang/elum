@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/config/app_config.dart';
 import '../../features/guardian/presentation/card_review_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
+import '../../features/guardian/presentation/guardian_settings_screen.dart';
 import '../../features/child/presentation/child_home_screen.dart';
 import '../../features/child/presentation/child_routine_detail_screen.dart';
 import '../../features/child/presentation/child_stars_screen.dart';
@@ -42,6 +43,9 @@ abstract final class Routes {
   static const cardCompletion = '/onboarding/card-completion';
 
   static const guardian = '/guardian';
+
+  /// 보호자 설정. 계정 정리(로그아웃·회원탈퇴)가 여기 있다 (#181).
+  static const guardianSettings = '/guardian/settings';
   static const routineInput = '/guardian/routine/input';
   /// DLP 마스킹 + 추가 질문 준비 로딩 (Figma 262:4569).
   /// 경로 이름은 DLP 시절 것을 유지한다 — 마스킹이 이 단계에서 일어나므로
@@ -179,6 +183,11 @@ GoRouter createRouter({
         path: Routes.guardian,
         pageBuilder: (context, state) =>
             fadePage(state, const GuardianHomeScreen()),
+      ),
+      GoRoute(
+        path: Routes.guardianSettings,
+        pageBuilder: (context, state) =>
+            slidePage(state, const GuardianSettingsScreen()),
       ),
       GoRoute(
         path: Routes.routineInput,

@@ -127,17 +127,41 @@ class _Header extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SvgPicture.asset(AppAssets.homeLogo, width: 80.w, height: 30.h),
-              // 아이 화면으로 넘어가는 입구. 보호자→아이 방향은 암호 없이 바로 간다.
-              // (아이→보호자 방향만 PIN으로 막는다)
-              AppPressable(
-                onTap: () => context.go(Routes.child),
-                scaleDown: AppPressable.scaleIcon,
-                child: SvgPicture.asset(
-                  AppAssets.characterBadgeFramed(character),
-                  // 정사각형 배지 — 찌그러지지 않게 가로세로 모두 .w
-                  width: 56.w,
-                  height: 56.w,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // 설정 진입점 (#181). 캐릭터 배지 왼쪽에 둔다 —
+                  // 배지는 아이 화면으로 가는 입구라 자리를 지켜야 한다.
+                  // 전용 아이콘 에셋이 없어 Material 아이콘을 쓴다(앱 내 선례 있음).
+                  AppPressable(
+                    onTap: () => context.go(Routes.guardianSettings),
+                    scaleDown: AppPressable.scaleIcon,
+                    child: Padding(
+                      // 56 배지와 시각 중심을 맞추고 탭 영역도 확보한다.
+                      padding: EdgeInsets.symmetric(
+                        horizontal: space.sm,
+                        vertical: space.md,
+                      ),
+                      child: Icon(
+                        Icons.settings_outlined,
+                        size: 24.w,
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  // 아이 화면으로 넘어가는 입구. 보호자→아이 방향은 암호 없이 바로 간다.
+                  // (아이→보호자 방향만 PIN으로 막는다)
+                  AppPressable(
+                    onTap: () => context.go(Routes.child),
+                    scaleDown: AppPressable.scaleIcon,
+                    child: SvgPicture.asset(
+                      AppAssets.characterBadgeFramed(character),
+                      // 정사각형 배지 — 찌그러지지 않게 가로세로 모두 .w
+                      width: 56.w,
+                      height: 56.w,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

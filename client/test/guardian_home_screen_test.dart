@@ -40,6 +40,10 @@ void main() {
           path: Routes.routineInput,
           builder: (context, state) => const Scaffold(body: Text('일과 입력')),
         ),
+        GoRoute(
+          path: Routes.guardianSettings,
+          builder: (context, state) => const Scaffold(body: Text('설정 화면')),
+        ),
       ],
     );
 
@@ -316,4 +320,19 @@ void main() {
       expect(find.text('일과 입력'), findsOneWidget);
     });
   });
+
+  testWidgets('설정 진입점이 있고 누르면 설정으로 간다 (#181)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    // 로그아웃할 방법이 없어 계정을 바꿀 수 없던 문제라, 진입점 자체가 계약이다.
+    final gear = find.byIcon(Icons.settings_outlined);
+    expect(gear, findsOneWidget);
+
+    await tester.tap(gear);
+    await tester.pumpAndSettle();
+
+    expect(find.text('설정 화면'), findsOneWidget);
+  });
+
 }
