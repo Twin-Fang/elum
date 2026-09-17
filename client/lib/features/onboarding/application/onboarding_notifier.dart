@@ -21,8 +21,24 @@ final onboardingProvider =
 ///
 /// 화면은 이 notifier만 보고, 저장소를 직접 건드리지 않는다.
 class OnboardingNotifier extends Notifier<OnboardingProfile> {
+  /// 앱을 껐다 켜면 이 상태는 비어서 다시 만들어진다. 저장해 둔 값으로 되살리지
+  /// 않으면 홈이 폴백(고양이·"우리 아이")을 그려, 온보딩에서 고른 캐릭터가
+  /// 재시작마다 바뀌는 것처럼 보인다.
+  ///
+  /// PIN은 보안 저장소라 읽기가 비동기다. 여기서 기다리면 첫 프레임이 늦어지고
+  /// 홈은 PIN을 쓰지도 않으므로 비워 둔다 — 필요한 화면이 직접 읽는다.
   @override
-  OnboardingProfile build() => const OnboardingProfile();
+  OnboardingProfile build() {
+    final storage = ref.read(localStorageProvider);
+    return OnboardingProfile(
+      childNickname: storage.nickname ?? '',
+      supportGoals: storage.goals
+          .map(SupportGoal.fromApiValue)
+          .whereType<SupportGoal>()
+          .toSet(),
+      cardCharacter: CardCharacter.fromApiValue(storage.character),
+    );
+  }
 
   void setNickname(String value) {
     state = state.copyWith(childNickname: value);

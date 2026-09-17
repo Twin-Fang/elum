@@ -24,6 +24,16 @@ enum CardCharacter {
   /// Figma는 이 자리를 회색 알약으로 비워뒀는데(Ellipse 2/3), 이름이 정해져
   /// 텍스트로 채운다. 아동이 부르는 이름이므로 2음절로 짧게 둔다.
   final String displayName;
+
+  /// 저장소·서버에 남은 문자열을 되돌린다. 모르는 값이면 null —
+  /// 호출부가 폴백을 정하게 두고 여기서 임의로 고르지 않는다.
+  static CardCharacter? fromApiValue(String? value) {
+    if (value == null) return null;
+    for (final c in CardCharacter.values) {
+      if (c.apiValue == value) return c;
+    }
+    return null;
+  }
 }
 
 /// 서비스 에이전트 — 채팅(카드 생성 대화)에서 사용자에게 말을 거는 존재.
