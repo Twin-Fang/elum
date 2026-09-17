@@ -13,5 +13,8 @@
   * 한 번 로그인하면 로그인 상태가 오래 유지됩니다
   * 계정 정보를 기기의 보안 저장소에 안전하게 보관합니다
 
+* **버그 수정**
+  * 서비스에 접속되지 않던 문제를 해결했습니다
+
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
