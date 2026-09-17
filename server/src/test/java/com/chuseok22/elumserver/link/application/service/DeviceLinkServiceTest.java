@@ -199,10 +199,9 @@ class DeviceLinkServiceTest {
     DeviceLink l = link("A7K3M9", LocalDateTime.now().minusMinutes(1));
     l.setRedeemedAt(LocalDateTime.now().minusMinutes(1));
     l.setLinkedDeviceId("elumi-1");
-    when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
-      .thenReturn(List.of(l));
+    when(deviceLinkRepository.findById("l1")).thenReturn(Optional.of(l));
 
-    service.revoke("m1");
+    service.revoke("m1", "l1");
 
     assertThat(l.getRevokedAt()).isNotNull();
     verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-1"), any());
@@ -218,10 +217,9 @@ class DeviceLinkServiceTest {
     DeviceLink l = link("A7K3M9", LocalDateTime.now().minusMinutes(1));
     l.setRedeemedAt(LocalDateTime.now().minusMinutes(1));
     l.setLinkedDeviceId(null);
-    when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
-      .thenReturn(List.of(l));
+    when(deviceLinkRepository.findById("l1")).thenReturn(Optional.of(l));
 
-    service.revoke("m1");
+    service.revoke("m1", "l1");
 
     verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-l1"), any());
   }
@@ -229,25 +227,81 @@ class DeviceLinkServiceTest {
   @Test
   @DisplayName("연결된 휴대폰이 없으면 끊을 수 없다")
   void revoke_notConnected() {
-    assertThatThrownBy(() -> service.revoke("m1"))
+    assertThatThrownBy(() -> service.revoke("m1", "l1"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.DEVICE_LINK_NOT_CONNECTED));
   }
 
   @Test
-  @DisplayName("상태 — 연결 전 NONE, 발급 후 PENDING, 연결 후 LINKED")
+  @DisplayName("상태 — 연결 전에는 비어 있고, 발급하면 만료 시각이, 연결하면 목록이 찬다")
   void status() throws Exception {
-    assertThat(service.status("m1").state()).isEqualTo(LinkStatusResponse.STATE_NONE);
+    assertThat(service.status("m1").devices()).isEmpty();
+    assertThat(service.status("m1").pendingExpiresAt()).isNull();
 
     DeviceLink pending = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
     when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
       .thenReturn(List.of(pending));
-    assertThat(service.status("m1").state()).isEqualTo(LinkStatusResponse.STATE_PENDING);
+    assertThat(service.status("m1").pendingExpiresAt()).isNotNull();
+    assertThat(service.status("m1").devices()).isEmpty();
 
     pending.setRedeemedAt(LocalDateTime.now());
     LinkStatusResponse linked = service.status("m1");
-    assertThat(linked.state()).isEqualTo(LinkStatusResponse.STATE_LINKED);
-    assertThat(linked.linkedAt()).isNotNull();
+    assertThat(linked.devices()).hasSize(1);
+    assertThat(linked.devices().get(0).linkedAt()).isNotNull();
+    assertThat(linked.pendingExpiresAt()).isNull();
+  }
+
+  @Test
+  @DisplayName("휴대폰은 여러 대 붙을 수 있다 — 새 기기를 붙여도 쓰던 기기가 끊기지 않는다")
+  void status_multipleDevices() throws Exception {
+    DeviceLink first = link("A7K3M9", LocalDateTime.now().minusHours(2));
+    first.setId("l1");
+    first.setRedeemedAt(LocalDateTime.now().minusHours(2));
+    DeviceLink second = link("B8L4N2", LocalDateTime.now().minusMinutes(5));
+    second.setId("l2");
+    second.setRedeemedAt(LocalDateTime.now().minusMinutes(5));
+    when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
+      .thenReturn(List.of(second, first));
+
+    assertThat(service.status("m1").devices())
+      .extracting(d -> d.linkId())
+      .containsExactly("l2", "l1");
+  }
+
+  @Test
+  @DisplayName("한 대를 끊어도 다른 대는 살아 있다")
+  void revoke_onlyTargetedDevice() throws Exception {
+    DeviceLink first = link("A7K3M9", LocalDateTime.now().minusHours(2));
+    first.setId("l1");
+    first.setRedeemedAt(LocalDateTime.now().minusHours(2));
+    first.setLinkedDeviceId("elumi-l1");
+    DeviceLink second = link("B8L4N2", LocalDateTime.now().minusMinutes(5));
+    second.setId("l2");
+    second.setRedeemedAt(LocalDateTime.now().minusMinutes(5));
+    second.setLinkedDeviceId("elumi-l2");
+    when(deviceLinkRepository.findById("l1")).thenReturn(Optional.of(first));
+
+    service.revoke("m1", "l1");
+
+    assertThat(first.getRevokedAt()).isNotNull();
+    assertThat(second.getRevokedAt()).isNull();
+    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-l1"), any());
+  }
+
+  @Test
+  @DisplayName("남의 연결은 끊을 수 없다 — linkId만 알아도 못 끊는다")
+  void revoke_otherMembersLink() throws Exception {
+    DeviceLink other = link("A7K3M9", LocalDateTime.now().minusMinutes(1));
+    other.setMemberId("someone-else");
+    other.setRedeemedAt(LocalDateTime.now().minusMinutes(1));
+    when(deviceLinkRepository.findById("l1")).thenReturn(Optional.of(other));
+
+    assertThatThrownBy(() -> service.revoke("m1", "l1"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.DEVICE_LINK_NOT_CONNECTED));
+
+    assertThat(other.getRevokedAt()).isNull();
   }
 }

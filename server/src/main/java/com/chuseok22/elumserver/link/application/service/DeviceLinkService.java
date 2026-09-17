@@ -9,6 +9,7 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.link.application.dto.response.LinkCodeResponse;
 import com.chuseok22.elumserver.link.application.dto.response.LinkStatusResponse;
+import com.chuseok22.elumserver.link.application.dto.response.LinkedDeviceResponse;
 import com.chuseok22.elumserver.link.core.LinkCode;
 import com.chuseok22.elumserver.link.core.LinkRole;
 import com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink;
@@ -24,7 +25,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HexFormat;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -94,24 +94,30 @@ public class DeviceLinkService {
     return new LinkCodeResponse(code, link.getExpiresAt(), CODE_TTL.toSeconds());
   }
 
-  /** 보호자 설정 화면이 보여줄 상태. */
+  /**
+   * 보호자 설정 화면이 보여줄 상태.
+   *
+   * <p>휴대폰은 <b>여러 대 붙을 수 있다.</b> 태블릿과 휴대폰을 함께 쓰는 경우가 있고,
+   * 한 대만 허용하면 새 기기를 붙이는 순간 쓰던 기기가 조용히 끊긴다.
+   */
   @Transactional(readOnly = true)
   public LinkStatusResponse status(String memberId) {
     LocalDateTime now = LocalDateTime.now();
     List<DeviceLink> alive = deviceLinkRepository
       .findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc(memberId);
 
-    Optional<DeviceLink> linked = alive.stream().filter(DeviceLink::isLinked).findFirst();
-    if (linked.isPresent()) {
-      return new LinkStatusResponse(LinkStatusResponse.STATE_LINKED,
-        linked.get().getRedeemedAt(), null);
-    }
+    List<LinkedDeviceResponse> devices = alive.stream()
+      .filter(DeviceLink::isLinked)
+      .map(l -> new LinkedDeviceResponse(l.getId(), l.getRedeemedAt()))
+      .toList();
 
-    Optional<DeviceLink> pending = alive.stream()
-      .filter(l -> l.isRedeemable(now)).findFirst();
-    return pending
-      .map(l -> new LinkStatusResponse(LinkStatusResponse.STATE_PENDING, null, l.getExpiresAt()))
-      .orElseGet(() -> new LinkStatusResponse(LinkStatusResponse.STATE_NONE, null, null));
+    LocalDateTime pending = alive.stream()
+      .filter(l -> l.isRedeemable(now))
+      .map(DeviceLink::getExpiresAt)
+      .findFirst()
+      .orElse(null);
+
+    return new LinkStatusResponse(devices, pending);
   }
 
   /**
@@ -170,18 +176,20 @@ public class DeviceLinkService {
   }
 
   /**
-   * 보호자가 연결을 끊는다 (§8-5).
+   * 보호자가 연결 하나를 끊는다 (§8-5).
    *
    * <p>이룸이 휴대폰이 손에 없을 때(잃어버림·기기 교체·남의 폰에 잘못 연결) 보호자가
    * 끊을 길이 없으면 그 폰이 계속 일과를 본다.
+   *
+   * <p>여러 대가 붙어 있을 수 있으므로 <b>어느 연결인지 짚어서</b> 끊는다.
+   * 다른 사람의 연결을 끊지 못하도록 memberId도 함께 확인한다.
    */
   @Transactional
-  public void revoke(String memberId) {
+  public void revoke(String memberId, String linkId) {
     LocalDateTime now = LocalDateTime.now();
-    DeviceLink link = deviceLinkRepository
-      .findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc(memberId).stream()
+    DeviceLink link = deviceLinkRepository.findById(linkId)
+      .filter(l -> l.getMemberId().equals(memberId))
       .filter(DeviceLink::isLinked)
-      .findFirst()
       .orElseThrow(() -> new CustomException(ErrorCode.DEVICE_LINK_NOT_CONNECTED));
 
     link.setRevokedAt(now);

@@ -44,9 +44,8 @@ public interface DeviceLinkControllerDocs {
   @Operation(
     summary = "연결 상태 조회 (보호자)",
     description = "설정 화면이 쓰는 값입니다.\n\n"
-      + "- `NONE` — 연결도 발급도 없음 → `이룸이 휴대폰 연결하기`\n"
-      + "- `PENDING` — 암호를 발급했고 아직 아무도 안 씀 (`expiresAt` 참고)\n"
-      + "- `LINKED` — 연결됨 (`linkedAt`으로 `9월 18일부터`를 만든다)",
+      + "- `devices` — 연결된 휴대폰들. **여러 대가 붙을 수 있습니다.** 비어 있으면 `이룸이 휴대폰 연결하기`\n"
+      + "- `pendingExpiresAt` — 암호를 발급했고 아직 아무도 안 쓴 경우의 만료 시각",
     security = @SecurityRequirement(name = "bearerAuth")
   )
   @ApiResponse(responseCode = "200", description = "조회 성공")
@@ -54,7 +53,7 @@ public interface DeviceLinkControllerDocs {
 
   @Operation(
     summary = "연결 끊기 (보호자)",
-    description = "연결된 이룸이 휴대폰을 끊습니다. **그 기기의 세션만** 폐기하므로 "
+    description = "`linkId`가 가리키는 연결 하나를 끊습니다. **그 기기의 세션만** 폐기하므로 "
       + "보호자 로그인은 유지됩니다.\n\n"
       + "이룸이 휴대폰을 잃어버렸거나 기기를 바꿨거나 남의 폰에 잘못 연결했을 때 "
       + "보호자가 끊을 수 있는 유일한 길입니다.",
@@ -65,7 +64,7 @@ public interface DeviceLinkControllerDocs {
     @ApiResponse(responseCode = "404", description = "연결된 휴대폰이 없음",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
-  ResponseEntity<Void> revoke(Authentication authentication);
+  ResponseEntity<Void> revoke(Authentication authentication, String linkId);
 
   @Operation(
     summary = "연결 암호 넣기 (이룸이 휴대폰) — 인증 불필요",

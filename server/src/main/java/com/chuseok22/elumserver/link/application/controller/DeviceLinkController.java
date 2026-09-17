@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,17 +41,17 @@ public class DeviceLinkController implements DeviceLinkControllerDocs {
   }
 
   @Override
-  @GetMapping("/current")
+  @GetMapping
   public ResponseEntity<LinkStatusResponse> status(Authentication authentication) {
     return ResponseEntity.ok(deviceLinkService.status(authentication.getName()));
   }
 
   @Override
   @LogMonitoring(logExecutionTime = true)
-  @DeleteMapping("/current")
-  public ResponseEntity<Void> revoke(Authentication authentication) {
+  @DeleteMapping("/{linkId}")
+  public ResponseEntity<Void> revoke(Authentication authentication, @PathVariable String linkId) {
     requireGuardian(authentication);
-    deviceLinkService.revoke(authentication.getName());
+    deviceLinkService.revoke(authentication.getName(), linkId);
     return ResponseEntity.noContent().build();
   }
 
