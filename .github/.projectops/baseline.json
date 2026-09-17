@@ -1,10 +1,10 @@
 {
-  "templateVersion": "4.6.0",
-  "installedAt": "2026-09-16 01:27:35",
+  "templateVersion": "4.9.1",
+  "installedAt": "2026-09-17 11:48:58",
   "files": {
     "PROJECT-COMMON-AI-PR-SUMMARY.yaml": {
-      "installed": "sha256:6973c7ec32649d127903d950f53892b6045d59ffaefa1bbd163ca07de6456a50",
-      "rendered": "sha256:6973c7ec32649d127903d950f53892b6045d59ffaefa1bbd163ca07de6456a50"
+      "installed": "sha256:8f37b156a5422c1c9178632494c329da30732b30b998650f82994b0d024cfc08",
+      "rendered": "sha256:8f37b156a5422c1c9178632494c329da30732b30b998650f82994b0d024cfc08"
     },
     "PROJECT-COMMON-PROJECTS-SYNC-MANAGER.yaml": {
       "installed": "sha256:cdbd20a31f2e11283f3e753378fb56f01ffe0405d2a51e51d8ac85fa7c62b5df",
@@ -21,6 +21,10 @@
     "PROJECT-COMMON-VERSION-CONTROL.yaml": {
       "installed": "sha256:8a86d710d26582eed72daa6e7f415abb44a68ea97d3faa63eb047d881758e88c",
       "rendered": "sha256:8a86d710d26582eed72daa6e7f415abb44a68ea97d3faa63eb047d881758e88c"
+    },
+    "PROJECT-COMMON-QA-ISSUE-CREATION-BOT.yaml": {
+      "installed": "sha256:2f315e4c0eff9d0debae2be38e9e70d309ae3fd6454e97bb5a95219584fbc935",
+      "rendered": "sha256:2f315e4c0eff9d0debae2be38e9e70d309ae3fd6454e97bb5a95219584fbc935"
     }
   }
 }
