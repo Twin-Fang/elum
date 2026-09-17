@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-17T07:47:05Z",
-    "currentVersion": "1.0.103",
+    "lastUpdated": "2026-09-17T09:48:47Z",
+    "currentVersion": "1.0.104",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 71
+    "totalReleases": 72
   },
   "releases": [
+    {
+      "version": "1.0.104",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-17",
+      "pr_number": 176,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 로그인을 마치신 분은 앱을 켜면 시작 화면을 지나 바로 홈으로 들어갑니다\n  * 아이 이름을 입력한 뒤 키보드의 완료 키만 눌러도 다음 단계로 넘어갑니다\n  * 비밀암호를 다시 입력할 때 틀리면 처음부터 만들지 않고 다시 입력만 하면 됩니다. 틀린 순간 점이 부드럽게 흔들려 알려드립니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "로그인을 마치신 분은 앱을 켜면 시작 화면을 지나 바로 홈으로 들어갑니다",
+            "아이 이름을 입력한 뒤 키보드의 완료 키만 눌러도 다음 단계로 넘어갑니다",
+            "비밀암호를 다시 입력할 때 틀리면 처음부터 만들지 않고 다시 입력만 하면 됩니다. 틀린 순간 점이 부드럽게 흔들려 알려드립니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.103",
       "project_type": "flutter",
