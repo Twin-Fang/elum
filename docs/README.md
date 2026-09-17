@@ -41,6 +41,7 @@
 | [05-ai-dlp-gateway.md](./05-ai-dlp-gateway.md) | AI DLP Gateway 보안 설계 (입력 보호 계층) | AI / 보안 |
 | [06-api-spec.md](./06-api-spec.md) | REST API 러프 명세, JSON 예시, 실패 대비 fallback | FE / BE |
 | [07-mvp-scope.md](./07-mvp-scope.md) | MVP 구현 범위, 제외 목록, 데모 시나리오 | 전체 |
+| [08-design-principles.md](./08-design-principles.md) | **디자인 철학 · 말투 · 화면 규칙 · QA 리뷰 시트** | 디자인 / FE / QA |
 | [meetings/](./meetings/) | 외부 자문·사용자 미팅 기록 — 기획이 바뀐 **근거** | 전체 |
 | [hackathon/](./hackathon/) | 대회 일정·제출물·심사기준·경쟁 분석 | 전체 |
 
