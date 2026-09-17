@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- 서버 통신에 필수. debug/profile 매니페스트에만 있으면 릴리스 빌드에서
          DNS 조회부터 막혀 "Failed host lookup (errno = 7)"로 실패한다. -->
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -31,15 +32,21 @@
         </activity>
         <!-- 카카오 로그인 리다이렉트.
              카카오톡·카카오계정 로그인을 마치면 이 스킴으로 앱이 다시 열린다.
-             스킴 값은 build.gradle.kts가 .env의 네이티브 앱 키로 채운다. -->
+             스킴 값은 build.gradle.kts가 .env의 네이티브 앱 키로 채운다.
+
+             클래스명은 SDK 2.x 기준이다. 1.x의 com.kakao.sdk.flutter.AuthCodeCustomTabsActivity를
+             그대로 두면 안드로이드가 없는 클래스를 띄우려다 ClassNotFoundException으로 앱이 죽는다.
+             카카오톡이 깔린 기기는 앱 간 전환 경로를 타서 멀쩡하고, 카카오계정 웹 로그인에서만
+             터지므로 눈에 잘 띄지 않는다. -->
         <activity
-            android:name="com.kakao.sdk.flutter.AuthCodeCustomTabsActivity"
-            android:exported="true">
+            android:name="com.kakao.sdk.flutter.auth.AuthCodeHandlerActivity"
+            android:exported="true"
+            tools:node="merge">
             <intent-filter android:label="flutter_web_auth">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="${kakaoScheme}" android:host="oauth"/>
+                <data android:scheme="${kakaoScheme}"/>
             </intent-filter>
         </activity>
 
