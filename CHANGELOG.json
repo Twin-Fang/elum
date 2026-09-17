@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-17T22:33:06Z",
-    "currentVersion": "1.0.114",
+    "lastUpdated": "2026-09-17T22:41:32Z",
+    "currentVersion": "1.0.115",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 82
+    "totalReleases": 83
   },
   "releases": [
+    {
+      "version": "1.0.115",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-17",
+      "pr_number": 204,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 이룸이 휴대폰 연결을 끊으면 그 즉시 일과를 볼 수 없습니다\n  * 연결 암호가 틀렸을 때 안내가 제대로 나옵니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "이룸이 휴대폰 연결을 끊으면 그 즉시 일과를 볼 수 없습니다",
+            "연결 암호가 틀렸을 때 안내가 제대로 나옵니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.114",
       "project_type": "flutter",
