@@ -1,0 +1,234 @@
+package com.chuseok22.elumserver.link.application.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.chuseok22.elumserver.auth.application.dto.response.TokenResponse;
+import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
+import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
+import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
+import com.chuseok22.elumserver.link.application.dto.response.LinkCodeResponse;
+import com.chuseok22.elumserver.link.application.dto.response.LinkStatusResponse;
+import com.chuseok22.elumserver.link.core.LinkCode;
+import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink;
+import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
+import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.time.LocalDateTime;
+import java.util.HexFormat;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+/**
+ * 이룸이 휴대폰 연결 (이슈 #200).
+ *
+ * <p>연결 암호는 계정에 붙는 자격증명이다. **실패 경로를 정상 경로만큼 고정한다** —
+ * 만료·재사용·시도 초과가 조용히 통하면 남의 가정 당사자의 일과가 그대로 보인다.
+ */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class DeviceLinkServiceTest {
+
+  @Mock private DeviceLinkRepository deviceLinkRepository;
+  @Mock private MemberRepository memberRepository;
+  @Mock private ProfileRepository profileRepository;
+  @Mock private RefreshTokenRepository refreshTokenRepository;
+  @Mock private RefreshTokenService refreshTokenService;
+  @Mock private JwtProvider jwtProvider;
+  @Mock private JwtProperties jwtProperties;
+
+  @InjectMocks private DeviceLinkService service;
+
+  private Member member;
+
+  @BeforeEach
+  void setUp() {
+    member = new Member();
+    member.setId("m1");
+    member.setUsername("google_1");
+    when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
+    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("m1")).thenReturn(Optional.empty());
+    when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
+      .thenReturn(List.of());
+    when(jwtProperties.accessExpMillis()).thenReturn(86_400_000L);
+    when(jwtProvider.createAccessToken(anyString(), anyString(), any())).thenReturn("elumi-access");
+    when(refreshTokenService.issue(anyString(), anyString())).thenReturn("elumi-refresh");
+  }
+
+  private static String hash(String raw) throws Exception {
+    return HexFormat.of().formatHex(
+      MessageDigest.getInstance("SHA-256").digest(raw.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  private DeviceLink link(String code, LocalDateTime expiresAt) throws Exception {
+    DeviceLink l = new DeviceLink();
+    l.setId("l1");
+    l.setMemberId("m1");
+    l.setCodeHash(hash(code));
+    l.setExpiresAt(expiresAt);
+    return l;
+  }
+
+  @Test
+  @DisplayName("발급하면 우리가 만들 수 있는 모양의 암호와 10분 만료가 나온다")
+  void issue() {
+    LinkCodeResponse res = service.issue("m1");
+
+    assertThat(LinkCode.hasValidShape(res.code())).isTrue();
+    assertThat(res.expiresInSeconds()).isEqualTo(600);
+    assertThat(res.expiresAt()).isAfter(LocalDateTime.now().plusMinutes(9));
+    verify(deviceLinkRepository).save(any(DeviceLink.class));
+  }
+
+  @Test
+  @DisplayName("다시 만들면 이전 미사용 암호는 폐기된다 — 화면에 보이는 것만 통해야 한다")
+  void issue_revokesPreviousUnusedCode() throws Exception {
+    DeviceLink old = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
+    when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
+      .thenReturn(List.of(old));
+
+    service.issue("m1");
+
+    assertThat(old.getRevokedAt()).isNotNull();
+  }
+
+  @Test
+  @DisplayName("이미 연결된 것은 새 암호를 만들어도 끊기지 않는다 — 발급과 끊기는 다른 일이다")
+  void issue_keepsLinked() throws Exception {
+    DeviceLink linked = link("A7K3M9", LocalDateTime.now().minusMinutes(1));
+    linked.setRedeemedAt(LocalDateTime.now().minusMinutes(1));
+    when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
+      .thenReturn(List.of(linked));
+
+    service.issue("m1");
+
+    assertThat(linked.getRevokedAt()).isNull();
+  }
+
+  @Test
+  @DisplayName("소문자로 넣어도 연결된다")
+  void redeem_lowercase() throws Exception {
+    DeviceLink l = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
+    when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
+
+    TokenResponse res = service.redeem("a7k3m9", "elumi-1");
+
+    assertThat(res.accessToken()).isEqualTo("elumi-access");
+    assertThat(l.getRedeemedAt()).isNotNull();
+    assertThat(l.getLinkedDeviceId()).isEqualTo("elumi-1");
+    // 보호자가 아니라 이룸이 역할로 발급돼야 한다.
+    verify(jwtProvider).createAccessToken("m1", "google_1", LinkRole.ELUMI);
+  }
+
+  @Test
+  @DisplayName("만료된 암호는 통하지 않는다")
+  void redeem_expired() throws Exception {
+    DeviceLink l = link("A7K3M9", LocalDateTime.now().minusSeconds(1));
+    when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
+
+    assertThatThrownBy(() -> service.redeem("A7K3M9", "elumi-1"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.DEVICE_LINK_EXPIRED));
+  }
+
+  @Test
+  @DisplayName("한 번 쓴 암호는 다시 통하지 않는다 — 두 기기가 같은 암호로 붙지 못한다")
+  void redeem_alreadyUsed() throws Exception {
+    DeviceLink l = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
+    l.setRedeemedAt(LocalDateTime.now().minusMinutes(1));
+    when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
+
+    assertThatThrownBy(() -> service.redeem("A7K3M9", "elumi-2"))
+      .isInstanceOf(CustomException.class)
+      // 이미 썼다는 사실을 알려주지 않는다 — 존재 여부가 새면 추측의 단서가 된다.
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.DEVICE_LINK_NOT_FOUND));
+  }
+
+  @Test
+  @DisplayName("5회 틀리면 그 암호는 폐기돼 맞는 값도 통하지 않는다")
+  void redeem_tooManyAttempts() throws Exception {
+    DeviceLink l = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
+    l.setFailedAttempts(DeviceLinkService.MAX_FAILED_ATTEMPTS);
+    when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
+
+    assertThatThrownBy(() -> service.redeem("A7K3M9", "elumi-1"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.DEVICE_LINK_TOO_MANY_ATTEMPTS));
+  }
+
+  @Test
+  @DisplayName("모양부터 틀린 값은 저장소를 뒤지지 않는다")
+  void redeem_badShapeDoesNotQuery() {
+    assertThatThrownBy(() -> service.redeem("!!!", "elumi-1"))
+      .isInstanceOf(CustomException.class);
+
+    verify(deviceLinkRepository, never()).findByCodeHash(anyString());
+  }
+
+  @Test
+  @DisplayName("연결을 끊으면 그 기기 세션만 죽고 보호자 세션은 산다")
+  void revoke_killsOnlyLinkedDevice() throws Exception {
+    DeviceLink l = link("A7K3M9", LocalDateTime.now().minusMinutes(1));
+    l.setRedeemedAt(LocalDateTime.now().minusMinutes(1));
+    l.setLinkedDeviceId("elumi-1");
+    when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
+      .thenReturn(List.of(l));
+
+    service.revoke("m1");
+
+    assertThat(l.getRevokedAt()).isNotNull();
+    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-1"), any());
+    // 계정 전체를 끊으면 보호자까지 로그아웃된다.
+    verify(refreshTokenRepository, never()).revokeAllByMemberId(anyString(), any());
+  }
+
+  @Test
+  @DisplayName("연결된 휴대폰이 없으면 끊을 수 없다")
+  void revoke_notConnected() {
+    assertThatThrownBy(() -> service.revoke("m1"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.DEVICE_LINK_NOT_CONNECTED));
+  }
+
+  @Test
+  @DisplayName("상태 — 연결 전 NONE, 발급 후 PENDING, 연결 후 LINKED")
+  void status() throws Exception {
+    assertThat(service.status("m1").state()).isEqualTo(LinkStatusResponse.STATE_NONE);
+
+    DeviceLink pending = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
+    when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
+      .thenReturn(List.of(pending));
+    assertThat(service.status("m1").state()).isEqualTo(LinkStatusResponse.STATE_PENDING);
+
+    pending.setRedeemedAt(LocalDateTime.now());
+    LinkStatusResponse linked = service.status("m1");
+    assertThat(linked.state()).isEqualTo(LinkStatusResponse.STATE_LINKED);
+    assertThat(linked.linkedAt()).isNotNull();
+  }
+}

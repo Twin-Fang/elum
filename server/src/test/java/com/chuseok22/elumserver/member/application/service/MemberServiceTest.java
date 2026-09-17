@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
+import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -51,6 +52,9 @@ class MemberServiceTest {
 
   @Mock
   private AiCallLogRepository aiCallLogRepository;
+
+  @Mock
+  private DeviceLinkRepository deviceLinkRepository;
 
   @InjectMocks
   private MemberService memberService;
@@ -109,6 +113,20 @@ class MemberServiceTest {
     verify(aiCallLogRepository).detachMember("member-3");
     // 행까지 지우면 과거 호출량·비용 집계가 줄어든다 — 지우는 API는 부르지 않는다.
     verify(aiCallLogRepository, never()).deleteAll();
+  }
+
+  @Test
+  @DisplayName("탈퇴 시 이룸이 휴대폰 연결도 함께 지운다 (이슈 #200)")
+  void withdraw_deletesDeviceLinks() {
+    Member member = new Member();
+    member.setId("member-4");
+    when(memberRepository.findById("member-4")).thenReturn(Optional.of(member));
+    when(routineRepository.findAllByProfileMemberId("member-4")).thenReturn(List.of());
+
+    memberService.withdraw("member-4");
+
+    // device_link 도 member를 외래키로 참조하지 않는다. 여기서 안 지우면 남는다.
+    verify(deviceLinkRepository).deleteAllByMemberId("member-4");
   }
 
   @Test

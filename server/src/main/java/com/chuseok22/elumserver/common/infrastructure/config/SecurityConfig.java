@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.security.AidlpDecryptionFilter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
@@ -26,6 +27,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+  private static final String GUARDIAN = "ROLE_GUARDIAN";
+  private static final String ELUMI = "ROLE_ELUMI";
+
 
   private final UserDetailsService memberUserDetailsService;
   private final UserDetailsService adminUserDetailsService;
@@ -116,7 +121,18 @@ public class SecurityConfig {
       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .authorizeHttpRequests(auth -> auth
         .requestMatchers(SecurityPaths.API_AUTH_MATCHER).permitAll()
-        .anyRequest().authenticated()
+        // 이룸이 휴대폰은 아직 토큰이 없는 상태로 이 경로를 부른다.
+        .requestMatchers(HttpMethod.POST, SecurityPaths.API_DEVICE_LINK_REDEEM).permitAll()
+        // ── 이룸이 휴대폰이 할 수 있는 것 (이슈 #200) ──
+        // 두 휴대폰은 같은 계정이라 memberId가 같다. 나누지 않으면 이룸이 휴대폰에서
+        // 일과 삭제·회원 탈퇴가 그대로 된다. **허용할 것만 적고 나머지는 막는다** —
+        // 반대로 하면 엔드포인트가 늘 때마다 막는 걸 잊는다.
+        .requestMatchers(HttpMethod.GET, "/api/routines/**", "/api/member/me").hasAnyAuthority(ELUMI, GUARDIAN)
+        .requestMatchers(HttpMethod.PATCH,
+          "/api/routines/*/steps/*/complete",
+          "/api/routines/*/steps/*/cancel").hasAnyAuthority(ELUMI, GUARDIAN)
+        .requestMatchers(HttpMethod.PUT, "/api/routines/*/progress").hasAnyAuthority(ELUMI, GUARDIAN)
+        .anyRequest().hasAuthority(GUARDIAN)
       )
       .exceptionHandling(handling -> handling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
       .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

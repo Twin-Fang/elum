@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.member.application.service;
 
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
+import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -39,6 +40,8 @@ public class MemberService {
   private final RefreshTokenRepository refreshTokenRepository;
 
   private final AiCallLogRepository aiCallLogRepository;
+
+  private final DeviceLinkRepository deviceLinkRepository;
 
   public MemberResponse getMyInfo(String memberId) {
     return MemberResponse.from(requireMember(memberId), findProfile(memberId));
@@ -113,6 +116,9 @@ public class MemberService {
     // AI 호출 기록은 운영 지표라 행을 남기되 **누가 썼는지는 지운다** (이슈 #191).
     // 여기도 외래키가 없어 빠뜨리면 탈퇴한 회원의 식별자가 그대로 남는다.
     aiCallLogRepository.detachMember(memberId);
+    // 이룸이 휴대폰 연결도 여기서 지운다 (이슈 #200). member를 외래키로 참조하지 않아
+    // DB가 대신 지워 주지 않는다 — refresh_token·ai_call_log와 같은 이유다.
+    deviceLinkRepository.deleteAllByMemberId(memberId);
 
     memberRepository.delete(member);
   }

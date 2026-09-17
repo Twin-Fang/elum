@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.common.infrastructure.jwt;
 
+import com.chuseok22.elumserver.link.core.LinkRole;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -37,10 +38,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       // 서명이 유효해도 정지 계정·강제 로그아웃(tokenInvalidBefore 이전 발급) 토큰은
       // 인증을 세팅하지 않는다 → JwtAuthenticationEntryPoint가 401을 반환한다.
       if (tokenAccessValidator.isAllowed(memberId, claims.getIssuedAt())) {
+        // ROLE_MEMBER는 그대로 둔다 — 기존 설정이 이 권한을 본다.
+        // role 클레임은 "어느 휴대폰인가"를 더한 것이다 (이슈 #200).
+        // 클레임이 없던 시절 토큰은 보호자로 본다. 없다고 막으면 기존 세션이 전부 끊긴다.
+        LinkRole role = LinkRole.fromClaim(claims.get("role"));
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
           memberId,
           null,
-          List.of(new SimpleGrantedAuthority("ROLE_MEMBER"))
+          List.of(new SimpleGrantedAuthority("ROLE_MEMBER"),
+                  new SimpleGrantedAuthority(role.authority()))
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }

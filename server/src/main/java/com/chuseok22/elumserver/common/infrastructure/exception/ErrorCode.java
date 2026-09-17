@@ -69,6 +69,15 @@ public enum ErrorCode {
   // 이미 쓴 토큰이 다시 왔다 = 탈취 가능성. 해당 계정의 세션을 전부 끊는다.
   REFRESH_TOKEN_REUSED(HttpStatus.UNAUTHORIZED, "다시 로그인해 주세요."),
 
+  // 이룸이 휴대폰 연결 (이슈 #200).
+  // 없는 암호와 이미 쓴 암호는 **같은 문구**로 돌려준다 — 구분해 주면 어떤 암호가
+  // 존재했는지가 새어 나가 추측에 단서가 된다.
+  DEVICE_LINK_NOT_FOUND(HttpStatus.NOT_FOUND, "암호가 맞지 않아요."),
+  DEVICE_LINK_EXPIRED(HttpStatus.GONE, "암호가 만료됐어요. 새 암호를 받아주세요."),
+  DEVICE_LINK_TOO_MANY_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, "암호가 만료됐어요. 새 암호를 받아주세요."),
+  DEVICE_LINK_NOT_CONNECTED(HttpStatus.NOT_FOUND, "연결된 이룸이 휴대폰이 없습니다."),
+  DEVICE_LINK_FORBIDDEN_FOR_ELUMI(HttpStatus.FORBIDDEN, "이룸이 휴대폰에서는 할 수 없어요."),
+
   ;
 
 

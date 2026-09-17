@@ -21,6 +21,19 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Stri
     + "where t.memberId = :memberId and t.revokedAt is null")
   int revokeAllByMemberId(@Param("memberId") String memberId, @Param("now") LocalDateTime now);
 
+  /**
+   * 한 기기의 세션만 끊는다 (이슈 #200).
+   *
+   * <p>이룸이 휴대폰 연결을 끊을 때 쓴다. 계정 전체를 끊으면 보호자까지 로그아웃되므로
+   * 기기를 짚어서 끊어야 한다.
+   */
+  @Modifying
+  @Query("update RefreshToken t set t.revokedAt = :now "
+    + "where t.memberId = :memberId and t.deviceId = :deviceId and t.revokedAt is null")
+  int revokeByMemberIdAndDeviceId(@Param("memberId") String memberId,
+                                  @Param("deviceId") String deviceId,
+                                  @Param("now") LocalDateTime now);
+
   /** 회원 탈퇴 시 남은 세션 기록까지 지운다. */
   void deleteAllByMemberId(String memberId);
 
