@@ -232,20 +232,28 @@ class AuthRepository {
     await _storage.clearAll();
   }
 
-  /// 회원삭제 — 서버 계정과 로컬 저장값을 모두 지운다.
+  /// 회원삭제 — 서버 계정과 로컬 저장값을 모두 지운다. 지워졌으면 true.
   ///
   /// 로그아웃과 다르다. 로그아웃 후 같은 계정으로 다시 들어오면 데이터가 그대로지만,
   /// 회원삭제 후에는 같은 소셜 계정으로 로그인해도 **신규 가입**이 된다.
-  Future<void> deleteAccount() async {
+  ///
+  /// **서버가 실패하면 로컬도 건드리지 않고 false를 돌려준다** (이슈 #187).
+  /// 계정이 서버에 그대로 있는데 로컬만 비우면, 사용자는 지워진 줄 알고 떠나고
+  /// 실제로는 아무것도 지워지지 않는다. 되돌릴 수 없다고 안내한 동작은 됐는지
+  /// 안 됐는지를 말해야 한다.
+  ///
+  /// 삭제는 됐는데 응답만 유실된 경우가 남지만, 그때는 다음 요청이 401을 맞고
+  /// 갱신까지 실패해 세션 종료 경로로 빠진다 (이슈 #175). 그쪽에 맡긴다.
+  Future<bool> deleteAccount() async {
     try {
       await _dio.delete<dynamic>('/api/member/me');
     } catch (e) {
-      // 서버 삭제가 실패해도 로컬 정리는 계속한다. 토큰이 남으면 지워진 계정으로
-      // 계속 401을 맞아 앱이 이상해진다.
       AppLogger.error('회원삭제', e);
+      return false;
     }
     await _tokens.clear();
     await _storage.clearAll();
+    return true;
   }
 }
 

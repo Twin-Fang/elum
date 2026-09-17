@@ -37,7 +37,11 @@ class _GuardianSettingsScreenState
       confirmLabel: '로그아웃',
     );
     if (ok != true) return;
-    await _run(() => ref.read(authRepositoryProvider).logout());
+    await _run(() async {
+      await ref.read(authRepositoryProvider).logout();
+      // 로그아웃은 이 기기에서 나가는 것이 본질이라 서버가 실패해도 목적은 달성된다.
+      return true;
+    });
   }
 
   Future<void> _deleteAccount() async {
@@ -53,18 +57,38 @@ class _GuardianSettingsScreenState
     await _run(() => ref.read(authRepositoryProvider).deleteAccount());
   }
 
+  /// 되돌릴 수 없다고 안내한 동작이 실패했을 때.
+  ///
+  /// 화면을 옮기지 않는다 — 계정은 서버에 그대로 있고 토큰도 살아 있으므로
+  /// 이 자리에서 다시 누르면 된다. 코드(E-DEL)를 같이 보여줘야 제보를 받았을 때
+  /// 어디서 멈췄는지 알 수 있다.
+  void _tellFailed() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('계정을 지우지 못했어요. 잠시 후 다시 시도해주세요. (E-DEL)'),
+      ),
+    );
+  }
+
   /// 계정 정리 동작의 공통 뼈대.
   ///
-  /// 저장소 쪽은 서버 요청이 실패해도 로컬을 반드시 비우므로, 여기서 결과를 따져
-  /// 화면을 붙잡아 둘 이유가 없다. 남겨 두면 토큰 없는 상태로 홈에 머물게 된다.
-  Future<void> _run(Future<void> Function() action) async {
+  /// 동작이 **실제로 됐는지**를 받아 분기한다. 됐으면 로컬이 비었으니 이 화면에
+  /// 남을 수 없어 로그인으로 보내고, 안 됐으면 바뀐 것이 없으니 이 자리에 머문
+  /// 채로 알린다 (이슈 #187).
+  Future<void> _run(Future<bool> Function() action) async {
     setState(() => _busy = true);
+    var done = false;
     try {
-      await action();
+      done = await action();
     } finally {
       if (mounted) setState(() => _busy = false);
     }
-    if (mounted) context.go(Routes.login);
+    if (!mounted) return;
+    if (done) {
+      context.go(Routes.login);
+    } else {
+      _tellFailed();
+    }
   }
 
   @override

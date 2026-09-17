@@ -358,7 +358,8 @@ class _ConfirmResetView extends ConsumerWidget {
               Expanded(
                 child: FilledButton(
                   onPressed: () async {
-                    // 서버 계정까지 지운다. 서버가 실패해도 로컬은 반드시 지워진다.
+                    // 서버 계정까지 지운다. 실패하면 로컬도 그대로 남는다 (이슈 #187) —
+                    // 개발 도구라 여기서는 결과를 따지지 않고 로그인으로 보낸다.
                     await ref.read(authRepositoryProvider).deleteAccount();
                     // 메모리 상태도 비운다 — 저장소만 지우면 화면이 이전 값을 들고 있다.
                     // routineFlow(방금 만든 일과)·myRoutines(서버 조회 캐시)를 함께 비우지

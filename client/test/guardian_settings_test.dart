@@ -117,6 +117,47 @@ void main() {
     expect(find.text('로그인 화면'), findsOneWidget);
   });
 
+  testWidgets('서버 삭제가 실패하면 탈퇴됐다고 하지 않는다 (이슈 #187)', (tester) async {
+    auth.deleteSucceeds = false;
+
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('회원탈퇴'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('탈퇴하기'));
+    await tester.pumpAndSettle();
+
+    // 아무것도 지워지지 않았으므로 화면을 옮기지 않는다. 옮기면 사용자는
+    // 탈퇴가 끝난 것과 구분할 수 없다.
+    expect(find.text('로그인 화면'), findsNothing);
+    expect(find.text('설정'), findsOneWidget);
+    // 무엇이 잘못됐는지 코드까지 보여야 제보를 추적할 수 있다.
+    expect(find.textContaining('E-DEL'), findsOneWidget);
+  });
+
+  testWidgets('삭제에 실패해도 다시 시도할 수 있다', (tester) async {
+    auth.deleteSucceeds = false;
+
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('회원탈퇴'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('탈퇴하기'));
+    await tester.pumpAndSettle();
+
+    // 실패 후에도 버튼이 잠겨 있으면 그 자리에서 할 수 있는 일이 없어진다.
+    auth.deleteSucceeds = true;
+    await tester.tap(find.text('회원탈퇴'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('탈퇴하기'));
+    await tester.pumpAndSettle();
+
+    expect(auth.deleteCalls, 2);
+    expect(find.text('로그인 화면'), findsOneWidget);
+  });
+
   testWidgets('회원탈퇴 확인 창에서 취소하면 계정이 남는다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
@@ -144,9 +185,15 @@ class _FakeAuth extends AuthRepository {
   int logoutCalls = 0;
   int deleteCalls = 0;
 
+  /// 서버 삭제가 실패하는 상황을 만들 때 false로 둔다 (이슈 #187).
+  bool deleteSucceeds = true;
+
   @override
   Future<void> logout() async => logoutCalls++;
 
   @override
-  Future<void> deleteAccount() async => deleteCalls++;
+  Future<bool> deleteAccount() async {
+    deleteCalls++;
+    return deleteSucceeds;
+  }
 }
