@@ -74,8 +74,9 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       if (!_isConfirmStep) {
         _advanceToConfirm();
       } else if (_current != _firstEntry) {
-        // 일치 케이스는 자동 전환하지 않는다 — 여기선 불일치만 처리한다
         _resetOnMismatch();
+      } else {
+        _revealConfirmCta();
       }
     }
   }
@@ -88,6 +89,19 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       if (!mounted) return;
       setState(() => _firstEntry = entered);
       _clearInput();
+    });
+  }
+
+  /// 재입력 일치 → 키패드를 내려 CTA를 드러낸다.
+  ///
+  /// 저장은 여기서 하지 않는다(확정할 틈을 남긴다). 다만 키패드를 띄워두면
+  /// 화면 하단의 "맞춤 설정하기"가 그 뒤에 숨어, 4자리를 두 번 다 넣고도
+  /// 다음에 뭘 해야 할지 알 수 없다 — 실기기 테스트에서 실제로 막혔다.
+  /// 점을 누르면 키패드가 다시 올라오므로 되돌릴 길은 남아 있다.
+  void _revealConfirmCta() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _focusNode.unfocus();
     });
   }
 
