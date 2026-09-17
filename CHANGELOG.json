@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-17T23:47:33Z",
-    "currentVersion": "1.1.0",
+    "lastUpdated": "2026-09-17T23:56:16Z",
+    "currentVersion": "1.2.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 84
+    "totalReleases": 85
   },
   "releases": [
+    {
+      "version": "1.2.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-17",
+      "pr_number": 209,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 첫 화면에 병아리가 다시 나옵니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "첫 화면에 병아리가 다시 나옵니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.1.0",
       "project_type": "flutter",
