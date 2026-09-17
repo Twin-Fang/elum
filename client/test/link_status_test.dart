@@ -84,5 +84,14 @@ void _remainingLabelRules() {
   test('정확히 9분이면 9분', () {
     expect(minutesLabel(const Duration(minutes: 9)), 9);
   });
-}
 
+  group('시계 차이 (이슈 #205)', () {
+    test('서버가 준 남은 초를 내 시계에 붙인다 — 서버보다 길게 말하지 않는다', () {
+      final c = IssuedLinkCode.fromNow(code: 'A7K3M9', expiresInSeconds: 600);
+
+      // 600초를 받았으면 화면도 10분이어야 한다. 서버 시계가 앞서 있어도 마찬가지.
+      expect(minutesLabel(c.remaining()), 10);
+      expect(c.isExpired, isFalse);
+    });
+  });
+}

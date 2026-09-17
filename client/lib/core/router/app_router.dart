@@ -104,6 +104,8 @@ String? resolveRedirect(
   required bool hasSession,
   required bool onboardingCompleted,
   required bool skipOnboarding,
+  /// 이룸이(당사자) 휴대폰인가. 여기에는 로그인할 계정이 없다 (이슈 #206).
+  bool isElumiDevice = false,
 }) {
   // 가입 절차도 로그인이 있어야 한다. 계정이 없으면 동의를 기록할 곳도,
   // 아이 정보를 저장할 곳도 없다.
@@ -114,8 +116,11 @@ String? resolveRedirect(
       path.startsWith(Routes.child);
   if (!needsSession) return null;
 
-  // 세션이 없으면 아무것도 조회할 수 없다. 로그인부터 다시 시작한다.
-  if (!hasSession) return Routes.login;
+  // 세션이 없으면 아무것도 조회할 수 없다. 다시 시작할 자리로 보낸다.
+  //
+  // 이룸이 휴대폰은 **로그인이 아니라 연결**로 붙는다. 로그인 화면으로 보내면
+  // 소셜 버튼 세 개만 보이고 이룸이는 누를 것이 없다.
+  if (!hasSession) return isElumiDevice ? Routes.linkEnter : Routes.login;
 
   // 가입 절차 안에서는 단계 이동을 막지 않는다.
   if (isSignUpFlow) return null;
@@ -133,6 +138,7 @@ String? resolveRedirect(
 GoRouter createRouter({
   bool Function()? isOnboardingCompleted,
   bool Function()? hasToken,
+  bool Function()? isElumiDevice,
 }) {
   return GoRouter(
     initialLocation: Routes.splash,
@@ -141,6 +147,7 @@ GoRouter createRouter({
       hasSession: hasToken?.call() ?? true,
       onboardingCompleted: isOnboardingCompleted?.call() ?? true,
       skipOnboarding: AppConfig.skipOnboarding,
+      isElumiDevice: isElumiDevice?.call() ?? false,
     ),
     routes: [
       GoRoute(

@@ -103,4 +103,32 @@ void main() {
       Routes.splash,
     );
   });
+
+  group('이룸이 휴대폰은 로그인이 아니라 연결로 되돌린다 (이슈 #206)', () {
+    String? go(String target, {required bool isElumi}) => resolveRedirect(
+          target,
+          hasSession: false,
+          onboardingCompleted: true,
+          skipOnboarding: false,
+          isElumiDevice: isElumi,
+        );
+
+    test('이룸이 휴대폰 — 연결 암호 넣기로', () {
+      // 로그인 화면에는 소셜 버튼 세 개뿐이라 이룸이는 누를 것이 없다.
+      expect(go(Routes.child, isElumi: true), Routes.linkEnter);
+    });
+
+    test('보호자 휴대폰 — 지금처럼 로그인으로', () {
+      expect(go(Routes.guardian, isElumi: false), Routes.login);
+    });
+
+    test('연결 암호 넣기 화면은 세션이 없어도 막지 않는다', () {
+      // 여기가 이룸이가 다시 붙을 수 있는 유일한 길이다.
+      expect(
+        resolveRedirect(Routes.linkEnter,
+            hasSession: false, onboardingCompleted: false, skipOnboarding: false),
+        isNull,
+      );
+    });
+  });
 }

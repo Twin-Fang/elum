@@ -26,6 +26,8 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         ref.read(localStorageProvider).isOnboardingCompleted,
     // 세션이 없으면 로그인 화면으로 되돌린다 — 로그아웃·회원삭제 후 재진입을 막는다
     hasToken: () => ref.read(authRepositoryProvider).hasSession,
+    // 이룸이 휴대폰은 로그인이 아니라 연결로 붙는다 (이슈 #206)
+    isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
   );
 
   @override
@@ -37,7 +39,10 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     // 남아 있었다 (이슈 #175). 그래서 신호를 듣고 여기서 직접 옮긴다.
     ref.listen<int>(sessionExpiryProvider, (previous, next) {
       if (previous == null || next <= previous) return;
-      _router.go(Routes.login);
+      // 이룸이 휴대폰에는 로그인할 계정이 없다. 로그인 화면으로 보내면
+      // 누를 것이 하나도 없는 막다른 길이 된다 (이슈 #206).
+      final isElumi = ref.read(localStorageProvider).isElumiDevice;
+      _router.go(isElumi ? Routes.linkEnter : Routes.login);
     });
 
     return ScreenUtilInit(

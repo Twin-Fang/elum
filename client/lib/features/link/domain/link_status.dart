@@ -51,6 +51,21 @@ class LinkStatus {
 class IssuedLinkCode {
   const IssuedLinkCode({required this.code, required this.expiresAt});
 
+  /// 서버가 준 "몇 초 뒤"를 **내 시계**에 붙여 만든다 (이슈 #205).
+  ///
+  /// 서버의 `expiresAt`을 그대로 쓰면 두 시계 차이가 그대로 화면에 나온다 —
+  /// 실제로 10분짜리 암호가 `11분 동안 쓸 수 있어요`로 보였다. 서버보다 길게 말하면
+  /// 사용자가 그 말을 믿고 기다리다 만료된다.
+  factory IssuedLinkCode.fromNow({
+    required String code,
+    required int expiresInSeconds,
+  }) {
+    return IssuedLinkCode(
+      code: code,
+      expiresAt: DateTime.now().add(Duration(seconds: expiresInSeconds)),
+    );
+  }
+
   final String code;
   final DateTime expiresAt;
 

@@ -30,6 +30,14 @@ abstract interface class LocalStorage {
   bool get isOnboardingCompleted;
   Future<void> setOnboardingCompleted(bool v);
 
+  /// 이 휴대폰이 이룸이(당사자) 것인가 (이슈 #206).
+  ///
+  /// 연결 암호로 붙은 휴대폰에는 로그인할 계정이 없다. 세션이 끊겼을 때
+  /// 보호자 로그인 화면으로 보내면 누를 것이 하나도 없는 막다른 길이 된다.
+  bool get isElumiDevice;
+
+  Future<void> setElumiDevice(bool v);
+
   Future<void> setPin(String v);
   Future<String?> getPin();
 
@@ -89,6 +97,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCharacter = 'cardCharacter';
   static const _kCompleted = 'onboardingCompleted';
   static const _kPin = 'guardianPin';
+  static const _kElumiDevice = 'isElumiDevice';
   static const _kAccessToken = 'accessToken';
   static const _kProgressPrefix = 'progress.';
   static const _kPendingSync = 'progress.pending';
@@ -242,6 +251,15 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  bool get isElumiDevice => _prefs.getBool(_kElumiDevice) ?? false;
+
+  @override
+  Future<void> setElumiDevice(bool v) async {
+    AppLogger.storageWrite(_kElumiDevice, '$v');
+    await _prefs.setBool(_kElumiDevice, v);
+  }
+
+  @override
   Future<void> clearChildProfile() async {
     for (final key in [_kNickname, _kGoals, _kCharacter, _kCompleted, _kPin]) {
       await _prefs.remove(key);
@@ -262,7 +280,8 @@ class SharedPrefsStorage implements LocalStorage {
     // 토큰도 함께 지운다 — 이것이 곧 로그아웃이다. 온보딩 값만 지우고 토큰이
     // 남으면 이전 계정의 일과가 새 이름과 섞여 보인다. (이슈 #13)
     await clearChildProfile();
-    for (final key in [_kAccessToken]) {
+    // 역할도 지운다 — 이룸이 휴대폰에서의 로그아웃은 곧 연결 끊기다 (§8-5).
+    for (final key in [_kAccessToken, _kElumiDevice]) {
       await _prefs.remove(key);
     }
   }
@@ -273,6 +292,8 @@ class InMemoryStorage implements LocalStorage {
   InMemoryStorage({bool onboardingCompleted = false, String? pin})
     : _completed = onboardingCompleted,
       _pin = pin;
+
+  bool _elumi = false;
 
   String? _nickname;
   List<String> _goals = const [];
@@ -315,6 +336,12 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<void> setOnboardingCompleted(bool v) async => _completed = v;
+
+  @override
+  bool get isElumiDevice => _elumi;
+
+  @override
+  Future<void> setElumiDevice(bool v) async => _elumi = v;
 
   @override
   Future<void> setPin(String v) async => _pin = v;
@@ -375,6 +402,7 @@ class InMemoryStorage implements LocalStorage {
     _pin = null;
     _completed = false;
     _accessToken = null;
+    _elumi = false;
     _progress.clear();
     _pendingSync = const [];
     _cachedToday = null;

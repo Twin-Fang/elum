@@ -51,12 +51,14 @@ class DeviceLinkRepository {
     try {
       final res = await _dio.post<Map<String, dynamic>>('/api/device-links');
       final code = res.data?['code']?.toString();
-      final expires = DateTime.tryParse(res.data?['expiresAt']?.toString() ?? '');
-      if (code == null || code.isEmpty || expires == null) {
-        AppLogger.error('연결 암호 발급', '응답에 code/expiresAt이 없습니다');
+      // 서버의 절대 시각이 아니라 **남은 초**를 쓴다. 두 시계가 어긋나 있으면
+      // 절대 시각을 그대로 믿을 때 남은 시간이 서버보다 길게 나온다 (이슈 #205).
+      final seconds = (res.data?['expiresInSeconds'] as num?)?.toInt();
+      if (code == null || code.isEmpty || seconds == null || seconds <= 0) {
+        AppLogger.error('연결 암호 발급', '응답에 code/expiresInSeconds가 없습니다');
         return null;
       }
-      return IssuedLinkCode(code: code, expiresAt: expires);
+      return IssuedLinkCode.fromNow(code: code, expiresInSeconds: seconds);
     } catch (e) {
       AppLogger.error('연결 암호 발급', e);
       return null;
@@ -100,6 +102,9 @@ class DeviceLinkRepository {
         return RedeemOutcome.failed;
       }
       await _tokens.save(accessToken: access, refreshToken: refresh);
+      // 이 휴대폰이 이룸이 것임을 남긴다. 세션이 끊겼을 때 보호자 로그인 화면이 아니라
+      // 연결 화면으로 되돌리려면 토큰이 사라진 뒤에도 알 수 있어야 한다 (이슈 #206).
+      await _storage.setElumiDevice(true);
       await _pullProfile();
       return RedeemOutcome.linked;
     } on DioException catch (e) {
