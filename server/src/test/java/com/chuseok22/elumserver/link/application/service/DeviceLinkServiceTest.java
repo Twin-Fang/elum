@@ -73,7 +73,7 @@ class DeviceLinkServiceTest {
     when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
       .thenReturn(List.of());
     when(jwtProperties.accessExpMillis()).thenReturn(86_400_000L);
-    when(jwtProvider.createAccessToken(anyString(), anyString(), any())).thenReturn("elumi-access");
+    when(jwtProvider.createAccessToken(anyString(), anyString(), any(), anyString())).thenReturn("elumi-access");
     when(refreshTokenService.issue(anyString(), anyString())).thenReturn("elumi-refresh");
   }
 
@@ -140,7 +140,8 @@ class DeviceLinkServiceTest {
     // 기기 값은 서버가 만든다 — 클라가 안 보내면 끊을 대상이 없어진다.
     assertThat(l.getLinkedDeviceId()).isEqualTo("elumi-l1");
     // 보호자가 아니라 이룸이 역할로 발급돼야 한다.
-    verify(jwtProvider).createAccessToken("m1", "google_1", LinkRole.ELUMI);
+    // 토큰에 어느 연결인지가 들어가야 끊었을 때 즉시 막을 수 있다.
+    verify(jwtProvider).createAccessToken("m1", "google_1", LinkRole.ELUMI, "l1");
     // 리프레시 토큰도 같은 기기 값으로 남아야 끊을 때 짚힌다.
     verify(refreshTokenService).issue("m1", "elumi-l1");
   }

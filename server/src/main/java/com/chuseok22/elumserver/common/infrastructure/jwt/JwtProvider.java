@@ -30,13 +30,29 @@ public class JwtProvider {
    * 둘을 구분할 수 없어, 이룸이 휴대폰에서 일과 삭제·회원 탈퇴가 그대로 된다.
    */
   public String createAccessToken(String memberId, String username, LinkRole role) {
+    return createAccessToken(memberId, username, role, null);
+  }
+
+  /**
+   * 이룸이 휴대폰 토큰에는 <b>어느 연결의 것인지</b>를 함께 담는다 (이슈 #200).
+   *
+   * <p>연결을 끊어도 이미 발급된 액세스 토큰은 만료까지 살아 있다. 이 값이 없으면
+   * 요청마다 "아직 유효한 연결인가"를 물을 수가 없어, 잃어버린 휴대폰이 하루 동안
+   * 계속 일과를 본다.
+   */
+  public String createAccessToken(String memberId, String username, LinkRole role, String linkId) {
     Date now = new Date();
     Date expiry = new Date(now.getTime() + jwtProperties.accessExpMillis());
 
-    return Jwts.builder()
+    var builder = Jwts.builder()
       .subject(memberId)
       .claim("username", username)
-      .claim("role", role.name())
+      .claim("role", role.name());
+    if (linkId != null) {
+      builder = builder.claim("linkId", linkId);
+    }
+
+    return builder
       .issuer(jwtProperties.issuer())
       .issuedAt(now)
       .expiration(expiry)

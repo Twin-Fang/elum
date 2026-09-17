@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationFilter;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
+import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.security.AidlpDecryptionFilter;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,6 +35,8 @@ public class SecurityConfig {
 
   private final UserDetailsService memberUserDetailsService;
   private final UserDetailsService adminUserDetailsService;
+
+  private final LinkAccessValidator linkAccessValidator;
   private final JwtProvider jwtProvider;
   private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
   private final AidlpDecryptionFilter aidlpDecryptionFilter;
@@ -49,13 +52,15 @@ public class SecurityConfig {
     JwtProvider jwtProvider,
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
     AidlpDecryptionFilter aidlpDecryptionFilter,
-    TokenAccessValidator tokenAccessValidator
+    TokenAccessValidator tokenAccessValidator,
+    LinkAccessValidator linkAccessValidator
   ) {
     this.memberUserDetailsService = memberUserDetailsService;
     this.adminUserDetailsService = adminUserDetailsService;
     this.jwtProvider = jwtProvider;
     this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
     this.aidlpDecryptionFilter = aidlpDecryptionFilter;
+    this.linkAccessValidator = linkAccessValidator;
     this.tokenAccessValidator = tokenAccessValidator;
   }
 
@@ -113,7 +118,7 @@ public class SecurityConfig {
   @Bean
   @Order(2)
   public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
-    JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProvider, tokenAccessValidator);
+    JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProvider, tokenAccessValidator, linkAccessValidator);
 
     http
       .securityMatcher(SecurityPaths.API_MATCHER)

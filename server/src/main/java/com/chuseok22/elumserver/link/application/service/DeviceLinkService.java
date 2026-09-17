@@ -168,7 +168,7 @@ public class DeviceLinkService {
     link.setLinkedDeviceId(deviceId);
 
     String accessToken = jwtProvider.createAccessToken(
-      member.getId(), member.getUsername(), LinkRole.ELUMI);
+      member.getId(), member.getUsername(), LinkRole.ELUMI, link.getId());
     String refreshToken = refreshTokenService.issue(member.getId(), deviceId);
 
     log.info("이룸이 휴대폰 연결됨: memberId={}, deviceId={}", member.getId(), deviceId);

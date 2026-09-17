@@ -23,6 +23,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtProvider jwtProvider;
   private final TokenAccessValidator tokenAccessValidator;
 
+  private final LinkAccessValidator linkAccessValidator;
+
   @Override
   protected void doFilterInternal(
     HttpServletRequest request,
@@ -42,6 +44,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // role 클레임은 "어느 휴대폰인가"를 더한 것이다 (이슈 #200).
         // 클레임이 없던 시절 토큰은 보호자로 본다. 없다고 막으면 기존 세션이 전부 끊긴다.
         LinkRole role = LinkRole.fromClaim(claims.get("role"));
+
+        // 이룸이 휴대폰은 연결이 끊기면 그 즉시 막혀야 한다. 리프레시만 폐기하면
+        // 이미 받아 둔 액세스 토큰으로 만료(하루)까지 계속 본다 (이슈 #200).
+        if (role == LinkRole.ELUMI
+          && !linkAccessValidator.isLinkActive(asString(claims.get("linkId")))) {
+          filterChain.doFilter(request, response);
+          return;
+        }
+
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
           memberId,
           null,
@@ -53,6 +64,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     filterChain.doFilter(request, response);
+  }
+
+  private static String asString(Object claim) {
+    return claim == null ? null : claim.toString();
   }
 
   private String resolveToken(HttpServletRequest request) {
