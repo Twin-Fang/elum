@@ -5,9 +5,9 @@ import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
-import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
-import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
@@ -61,7 +61,7 @@ public class RoutineService {
   private static final int REWARD_TEXT_MAX_LENGTH = 100;
 
   private final RoutineRepository routineRepository;
-  private final MemberRepository memberRepository;
+  private final ProfileRepository profileRepository;
   private final SensitiveInfoGuardService sensitiveInfoGuardService;
   private final RoutineAiPipeline routineAiPipeline;
   private final RoutineImageStorage routineImageStorage;
@@ -72,10 +72,9 @@ public class RoutineService {
   // 클래스 레벨 readOnly 트랜잭션을 중단시킨다.
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public RoutineQuestionResponse generateQuestion(String memberId, RoutineQuestionRequest request) {
-    Member member = memberRepository.findById(memberId)
-      .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+    Profile profile = requireProfile(memberId);
 
-    Set<SupportGoal> goals = member.getSupportGoals();
+    Set<SupportGoal> goals = profile.getSupportGoals();
     boolean needsQuestion = goals.contains(SupportGoal.PREPARE_ITEMS) || goals.contains(SupportGoal.PREPARE_NEW);
     if (!needsQuestion) {
       return new RoutineQuestionResponse(false, List.of());
@@ -87,7 +86,7 @@ public class RoutineService {
     try {
       SensitiveInfoCheckResult checkResult = sensitiveInfoGuardService.check(request.rawInputText());
       RoutineAiPipeline.RoutineQuestionResult result =
-        routineAiPipeline.generateQuestion(member.getNickname(), goals, checkResult.sanitizedText());
+        routineAiPipeline.generateQuestion(profile.getNickname(), goals, checkResult.sanitizedText());
       List<RoutineQuestionResponse.QuestionItem> questions = result.questions().stream()
         .map(item -> new RoutineQuestionResponse.QuestionItem(item.question(), toOptionItems(item.options())))
         .toList();
@@ -112,8 +111,7 @@ public class RoutineService {
   public RoutineResponse create(String memberId, RoutineCreateRequest request) {
     routineRequestCooldownGuard.guard(memberId);
 
-    Member member = memberRepository.findById(memberId)
-      .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+    Profile profile = requireProfile(memberId);
 
     // AI 호출 로그에 요청 회원을 연결한다 (DLP·텍스트·이미지 병렬 생성까지 전파).
     SensitiveInfoCheckResult checkResult;
@@ -123,15 +121,15 @@ public class RoutineService {
       checkResult = sensitiveInfoGuardService.check(request.rawInputText());
       List<String> maskedAnswers = maskAnswers(request.answers());
       generation = routineAiPipeline.generateForCreate(
-        checkResult.sanitizedText(), member.getNickname(), member.getSupportGoals(), maskedAnswers,
-        member.getCharacter()
+        checkResult.sanitizedText(), profile.getNickname(), profile.getSupportGoals(), maskedAnswers,
+        profile.getCharacter()
       );
     } finally {
       AiCallContext.clear();
     }
 
     Routine routine = new Routine();
-    routine.setMember(member);
+    routine.setProfile(profile);
     routine.setRawInputText(request.rawInputText());
     routine.setSanitizedInputText(checkResult.sanitizedText());
     routine.setTitle(generation.title());
@@ -174,7 +172,7 @@ public class RoutineService {
   public List<RecentRewardResponse> getRecentRewards(String memberId) {
     LinkedHashMap<String, RecentRewardResponse> unique = new LinkedHashMap<>();
     for (Routine routine : routineRepository
-      .findTop30ByMemberIdAndRewardTextIsNotNullOrderByCreatedAtDesc(memberId)) {
+      .findTop30ByProfileIdAndRewardTextIsNotNullOrderByCreatedAtDesc(requireProfile(memberId).getId())) {
       String text = routine.getRewardText();
       if (text == null || text.isBlank()) {
         continue;
@@ -198,7 +196,7 @@ public class RoutineService {
     Routine origin = getOwnedRoutine(memberId, routineId);
 
     Routine copy = new Routine();
-    copy.setMember(origin.getMember());
+    copy.setProfile(origin.getProfile());
     copy.setRawInputText(origin.getTitle());
     copy.setSanitizedInputText(origin.getTitle());
     copy.setTitle(origin.getTitle());
@@ -242,7 +240,7 @@ public class RoutineService {
   /// 전부 내려주면 목록이 계속 쌓여 오늘 할 일이 묻힌다.
   public List<RoutineResponse> getPastRoutines(String memberId) {
     return routineRepository
-      .findAllByMemberIdAndScheduledAtBeforeOrderByScheduledAtDesc(
+      .findAllByProfileIdAndScheduledAtBeforeOrderByScheduledAtDesc(
         memberId, LocalDate.now().atStartOfDay())
       .stream()
       .limit(PAST_ROUTINE_LIMIT)
@@ -253,7 +251,7 @@ public class RoutineService {
   /// 보호자 홈 "임시저장" — 카드는 만들었지만 아직 아이에게 보내지 않은 일과.
   public List<RoutineResponse> getDraftRoutines(String memberId) {
     return routineRepository
-      .findAllByMemberIdAndStatusOrderByCreatedAtDesc(memberId, RoutineStatus.PENDING_REVIEW)
+      .findAllByProfileIdAndStatusOrderByCreatedAtDesc(requireProfile(memberId).getId(), RoutineStatus.PENDING_REVIEW)
       .stream()
       .map(RoutineResponse::from)
       .toList();
@@ -301,7 +299,7 @@ public class RoutineService {
     LocalDateTime now = LocalDateTime.now();
     targetStep.setCompleted(true);
     targetStep.setCompletedAt(now);
-    routine.getMember().setTotalStars(routine.getMember().getTotalStars() + 1);
+    routine.getProfile().setTotalStars(routine.getProfile().getTotalStars() + 1);
 
     boolean allCompleted = steps.stream().allMatch(step -> Boolean.TRUE.equals(step.getCompleted()));
     if (allCompleted) {
@@ -338,7 +336,7 @@ public class RoutineService {
 
     targetStep.setCompleted(false);
     targetStep.setCompletedAt(null);
-    routine.getMember().setTotalStars(routine.getMember().getTotalStars() - 1);
+    routine.getProfile().setTotalStars(routine.getProfile().getTotalStars() - 1);
 
     if (routine.getStatus() == RoutineStatus.COMPLETED) {
       routine.setStatus(RoutineStatus.CONFIRMED);
@@ -383,8 +381,8 @@ public class RoutineService {
     }
     int after = countCompleted(steps);
 
-    Member member = routine.getMember();
-    member.setTotalStars(Math.max(0, member.getTotalStars() + (after - before)));
+    Profile profile = routine.getProfile();
+    profile.setTotalStars(Math.max(0, profile.getTotalStars() + (after - before)));
 
     boolean allCompleted = !steps.isEmpty() && after == steps.size();
     if (allCompleted) {
@@ -463,7 +461,7 @@ public class RoutineService {
   }
 
   public List<RoutineResponse> getMyRoutines(String memberId) {
-    return routineRepository.findAllByMemberId(memberId).stream()
+    return routineRepository.findAllByProfileId(requireProfile(memberId).getId()).stream()
       .map(RoutineResponse::from)
       .toList();
   }
@@ -474,7 +472,7 @@ public class RoutineService {
     LocalDate today = LocalDate.now();
     LocalDateTime startOfDay = today.atStartOfDay();
     LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
-    List<Routine> routines = routineRepository.findAllByMemberIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
+    List<Routine> routines = routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
       memberId, List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED), startOfDay, endOfDay
     );
     return routines.stream().map(RoutineResponse::from).toList();
@@ -508,7 +506,7 @@ public class RoutineService {
   private Routine getOwnedRoutine(String memberId, String routineId) {
     Routine routine = routineRepository.findById(routineId)
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_NOT_FOUND));
-    if (!routine.getMember().getId().equals(memberId)) {
+    if (!routine.getProfile().getMember().getId().equals(memberId)) {
       throw new CustomException(ErrorCode.ROUTINE_ACCESS_DENIED);
     }
     return routine;
@@ -550,5 +548,16 @@ public class RoutineService {
     } finally {
       executor.shutdown();
     }
+  }
+
+  /**
+   * 계정의 기본 프로필.
+   *
+   * <p>일과는 계정이 아니라 당사자에게 속한다. 기존 API는 계정 토큰만 주므로
+   * 여기서 프로필로 바꿔준다. 계정당 프로필이 하나인 동안 유일하게 결정된다.
+   */
+  private Profile requireProfile(String memberId) {
+    return profileRepository.findFirstByMemberIdOrderByCreatedAtAsc(memberId)
+      .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
   }
 }

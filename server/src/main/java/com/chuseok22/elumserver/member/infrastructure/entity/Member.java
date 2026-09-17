@@ -1,23 +1,27 @@
 package com.chuseok22.elumserver.member.infrastructure.entity;
 
 import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * 로그인하는 계정. 보호자 또는 기관 지도자다.
+ *
+ * <p>당사자 정보(이름·캐릭터·도움 목표·별)는 {@link Profile}로 떼어냈다.
+ * 한 테이블에 섞여 있으면 당사자 기기가 접속하려고 보호자의 아이디·비밀번호를
+ * 써야 하고, 그 기기를 잃어버리면 계정 전체가 열린다.
+ *
+ * <p>이름이 {@code Member}인 것은 기존 API 경로(`/api/member/*`)와 응답 형식을
+ * 유지하기 위해서다. 이미 배포된 앱이 그 계약을 쓰고 있다.
+ */
 @Entity
 @Getter
 @Setter
@@ -31,20 +35,6 @@ public class Member extends BaseEntity {
 
   @Column(nullable = false)
   private String password;
-
-  @Column(nullable = false, columnDefinition = "integer not null default 0")
-  private Integer totalStars = 0;
-
-  private String nickname;
-
-  @Enumerated(EnumType.STRING)
-  private CharacterType character;
-
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "member_support_goals", joinColumns = @JoinColumn(name = "member_id"))
-  @Enumerated(EnumType.STRING)
-  @Column(name = "support_goal", nullable = false)
-  private Set<SupportGoal> supportGoals = new HashSet<>();
 
   // 계정 상태. SUSPENDED면 로그인·API 사용이 모두 차단된다(MemberAccessGuard).
   @Enumerated(EnumType.STRING)

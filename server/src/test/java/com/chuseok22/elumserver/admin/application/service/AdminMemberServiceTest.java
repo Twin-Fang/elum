@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
@@ -14,6 +15,7 @@ import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository.MemberRoutineCount;
 import java.util.List;
@@ -35,10 +37,16 @@ class AdminMemberServiceTest {
   private MemberRepository memberRepository;
 
   @Mock
+  private ProfileRepository profileRepository;
+
+  @Mock
   private RoutineRepository routineRepository;
 
   @Mock
   private AiCallLogRepository aiCallLogRepository;
+
+  @Mock
+  private RefreshTokenService refreshTokenService;
 
   @InjectMocks
   private AdminMemberService adminMemberService;
@@ -139,6 +147,8 @@ class AdminMemberServiceTest {
 
     adminMemberService.suspend("m1");
     assertThat(member.getStatus()).isEqualTo(MemberStatus.SUSPENDED);
+    // 정지만 하고 세션을 두면 리프레시로 계속 접속을 시도한다.
+    verify(refreshTokenService).revokeAll("m1");
 
     adminMemberService.unsuspend("m1");
     assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
@@ -153,6 +163,8 @@ class AdminMemberServiceTest {
     adminMemberService.forceLogout("m1");
 
     assertThat(member.getTokenInvalidBefore()).isNotNull();
+    // 액세스 토큰만 막으면 리프레시로 곧바로 다시 들어온다.
+    verify(refreshTokenService).revokeAll("m1");
   }
 
   @Test
@@ -160,7 +172,7 @@ class AdminMemberServiceTest {
   void getDetail_includesAiUsageAndRecentCalls() {
     Member member = member("m1", "parent1");
     when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByMemberId("m1")).thenReturn(List.of());
+    when(routineRepository.findAllByProfileMemberId("m1")).thenReturn(List.of());
     when(aiCallLogRepository.aggregateUsageByMemberIds(anyList()))
       .thenReturn(List.of(aiUsage("m1", 5, 1000, 0.01)));
     when(aiCallLogRepository.findTop20ByMemberIdOrderByCreatedAtDesc("m1")).thenReturn(List.of());

@@ -47,6 +47,36 @@ abstract final class AppConfig {
   /// 비면 암호화를 건너뛴다(평문 전송 → 서버도 통과, 데모 안전).
   static String get aidlpSecret => _string('ELUM_AIDLP_SECRET', '');
 
+  // --- 소셜 로그인 ---
+  // 콘솔에서 앱을 등록하고 받은 값이다. 받는 절차는
+  // docs/setup/소셜로그인_설정가이드.md 참조.
+  //
+  // ⚠️ 여기 값만으로는 부족하다. 카카오·구글은 로그인 후 앱으로 돌아오는 URL 스킴을
+  // AndroidManifest.xml·Info.plist에도 등록해야 한다. 그 값들은 빌드 타임에 필요해서
+  // .env로 주입할 수 없다.
+
+  /// 카카오 네이티브 앱 키. 앱에 포함되는 공개 값이다(비밀은 Admin 키뿐).
+  static String get kakaoNativeAppKey =>
+      _string('ELUM_KAKAO_NATIVE_APP_KEY', '');
+
+  static String get naverClientId => _string('ELUM_NAVER_CLIENT_ID', '');
+
+  /// 네이버는 모바일 SDK가 시크릿을 요구한다. 앱에 들어갈 수밖에 없는 구조다.
+  static String get naverClientSecret =>
+      _string('ELUM_NAVER_CLIENT_SECRET', '');
+
+  /// 네이버 로그인 동의 화면에 표시되는 서비스 이름.
+  static String get naverClientName => _string('ELUM_NAVER_CLIENT_NAME', '이룸');
+
+  /// 구글 **웹** 클라이언트 ID. 안드로이드 클라이언트 ID가 아니다.
+  /// 안드로이드에서 ID 토큰을 받으려면 serverClientId에 웹 ID를 넘겨야 한다.
+  static String get googleServerClientId =>
+      _string('ELUM_GOOGLE_SERVER_CLIENT_ID', '');
+
+  /// 구글 iOS 클라이언트 ID.
+  static String get googleIosClientId =>
+      _string('ELUM_GOOGLE_IOS_CLIENT_ID', '');
+
   // --- 데모 연출 ---
 
   /// AI DLP 처리 최소 노출 시간.

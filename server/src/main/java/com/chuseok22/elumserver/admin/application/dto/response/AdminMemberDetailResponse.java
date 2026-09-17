@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.ai.infrastructure.entity.AiCallLog;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
@@ -31,7 +32,8 @@ public record AdminMemberDetailResponse(
 ) {
 
   public static AdminMemberDetailResponse of(
-    Member member, List<Routine> routines, MemberAiUsage aiUsage, List<AiCallLog> recentAiCalls
+    Member member, Profile profile, List<Routine> routines, MemberAiUsage aiUsage,
+    List<AiCallLog> recentAiCalls
   ) {
     List<AdminMemberRoutineSummary> routineSummaries = routines.stream()
       .map(AdminMemberRoutineSummary::from)
@@ -39,11 +41,11 @@ public record AdminMemberDetailResponse(
     return new AdminMemberDetailResponse(
       member.getId(),
       member.getUsername(),
-      member.getNickname(),
-      member.getCharacter(),
+      profile == null ? null : profile.getNickname(),
+      profile == null ? null : profile.getCharacter(),
       member.getStatus(),
-      member.getSupportGoals(),
-      member.getTotalStars(),
+      profile == null ? Set.of() : profile.getSupportGoals(),
+      profile == null ? 0 : profile.getTotalStars(),
       member.getCreatedAt(),
       member.getLastLoginAt(),
       member.getLastActivityAt(),

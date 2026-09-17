@@ -4,11 +4,14 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetail
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
+import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
+import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository.MemberRoutineCount;
@@ -33,8 +36,11 @@ public class AdminMemberService {
   private static final int PAGE_SIZE = 20;
 
   private final MemberRepository memberRepository;
+
+  private final ProfileRepository profileRepository;
   private final RoutineRepository routineRepository;
   private final AiCallLogRepository aiCallLogRepository;
+  private final RefreshTokenService refreshTokenService;
 
   // 검색어·상태 필터 조합에 따라 파생/JPQL 쿼리를 선택하고, 페이지에 실린 회원들의
   // 루틴수·AI 사용량을 group by 집계 2번으로 붙인다(회원 수만큼 쿼리 금지).
@@ -50,8 +56,14 @@ public class AdminMemberService {
       : aiCallLogRepository.aggregateUsageByMemberIds(memberIds).stream()
         .collect(Collectors.toMap(MemberAiUsage::getMemberId, Function.identity()));
 
+    // 회원 수만큼 프로필을 따로 조회하지 않는다 — 한 번에 받아 맵으로 쓴다.
+    Map<String, Profile> profiles = memberIds.isEmpty() ? Map.of()
+      : profileRepository.findAllByMemberIdIn(memberIds).stream()
+        .collect(Collectors.toMap(p -> p.getMember().getId(), Function.identity(), (a, b) -> a));
+
     return members.map(member -> AdminMemberResponse.of(
       member,
+      profiles.get(member.getId()),
       routineCounts.getOrDefault(member.getId(), 0L),
       aiUsages.get(member.getId())
     ));
@@ -59,11 +71,13 @@ public class AdminMemberService {
 
   public AdminMemberDetailResponse getDetail(String memberId) {
     Member member = findOrThrow(memberId);
-    List<Routine> routines = routineRepository.findAllByMemberId(memberId);
+    List<Routine> routines = routineRepository.findAllByProfileMemberId(memberId);
+    Profile profile = profileRepository.findFirstByMemberIdOrderByCreatedAtAsc(memberId).orElse(null);
     MemberAiUsage aiUsage = aiCallLogRepository.aggregateUsageByMemberIds(List.of(memberId)).stream()
       .findFirst().orElse(null);
     return AdminMemberDetailResponse.of(
-      member, routines, aiUsage, aiCallLogRepository.findTop20ByMemberIdOrderByCreatedAtDesc(memberId)
+      member, profile, routines, aiUsage,
+      aiCallLogRepository.findTop20ByMemberIdOrderByCreatedAtDesc(memberId)
     );
   }
 
@@ -84,6 +98,8 @@ public class AdminMemberService {
   @Transactional
   public void suspend(String memberId) {
     findOrThrow(memberId).setStatus(MemberStatus.SUSPENDED);
+    // 남은 리프레시 토큰을 끊지 않으면 정지된 계정이 갱신으로 계속 접속을 시도한다.
+    refreshTokenService.revokeAll(memberId);
   }
 
   @Transactional
@@ -95,6 +111,9 @@ public class AdminMemberService {
   @Transactional
   public void forceLogout(String memberId) {
     findOrThrow(memberId).setTokenInvalidBefore(LocalDateTime.now());
+    // 액세스 토큰만 막으면 리프레시로 새 토큰을 받아 그대로 다시 들어온다.
+    // 강제 로그아웃이 성립하려면 세션 자체를 끊어야 한다.
+    refreshTokenService.revokeAll(memberId);
   }
 
   private Page<Member> findMembers(String keyword, MemberStatus status, Pageable pageable) {

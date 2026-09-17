@@ -57,6 +57,16 @@ public enum ErrorCode {
   DLP_DECRYPT_FAILED(HttpStatus.BAD_REQUEST, "요청 복호화에 실패했습니다."),
   DLP_ENVELOPE_INVALID(HttpStatus.BAD_REQUEST, "암호화 요청 형식이 올바르지 않습니다."),
 
+  // --- 소셜 로그인 · 토큰 갱신 ---
+  OAUTH_PROVIDER_UNSUPPORTED(HttpStatus.BAD_REQUEST, "지원하지 않는 로그인 방식입니다."),
+  // 검증 실패 사유(서명·만료·대상 불일치)는 클라이언트에 구분해 알리지 않는다 —
+  // 공격자에게 어디까지 통과했는지 알려주는 셈이 된다.
+  OAUTH_VERIFICATION_FAILED(HttpStatus.UNAUTHORIZED, "소셜 로그인 확인에 실패했습니다."),
+  OAUTH_EMAIL_CONFLICT(HttpStatus.CONFLICT, "이미 다른 방법으로 가입된 이메일입니다."),
+  REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
+  // 이미 쓴 토큰이 다시 왔다 = 탈취 가능성. 해당 계정의 세션을 전부 끊는다.
+  REFRESH_TOKEN_REUSED(HttpStatus.UNAUTHORIZED, "다시 로그인해 주세요."),
+
   ;
 
 

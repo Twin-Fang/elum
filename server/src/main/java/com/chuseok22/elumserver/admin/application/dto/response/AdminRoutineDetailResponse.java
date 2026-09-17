@@ -26,8 +26,8 @@ public record AdminRoutineDetailResponse(
     return new AdminRoutineDetailResponse(
       routine.getId(),
       routine.getTitle(),
-      routine.getMember().getNickname(),
-      routine.getMember().getUsername(),
+      routine.getProfile().getNickname(),
+      routine.getProfile().getMember().getUsername(),
       routine.getStatus(),
       routine.getRawInputText(),
       routine.getSanitizedInputText(),

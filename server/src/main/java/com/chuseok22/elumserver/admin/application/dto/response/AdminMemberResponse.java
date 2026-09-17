@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.admin.application.dto.response;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import java.time.LocalDateTime;
@@ -25,15 +26,17 @@ public record AdminMemberResponse(
   LocalDateTime createdAt
 ) {
 
-  public static AdminMemberResponse of(Member member, long routineCount, MemberAiUsage aiUsage) {
+  public static AdminMemberResponse of(
+    Member member, Profile profile, long routineCount, MemberAiUsage aiUsage
+  ) {
     return new AdminMemberResponse(
       member.getId(),
       member.getUsername(),
-      member.getNickname(),
-      member.getCharacter(),
+      profile == null ? null : profile.getNickname(),
+      profile == null ? null : profile.getCharacter(),
       member.getStatus(),
-      member.getSupportGoals(),
-      member.getTotalStars(),
+      profile == null ? Set.of() : profile.getSupportGoals(),
+      profile == null ? 0 : profile.getTotalStars(),
       routineCount,
       aiUsage == null ? 0 : aiUsage.getCallCount(),
       aiUsage == null ? 0 : aiUsage.getTotalTokens(),

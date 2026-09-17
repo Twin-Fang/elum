@@ -16,8 +16,9 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
-import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
@@ -51,7 +52,7 @@ class RoutineServiceTest {
   private RoutineImageStorage routineImageStorage;
 
   @Mock
-  private MemberRepository memberRepository;
+  private ProfileRepository profileRepository;
 
   @Mock
   private SensitiveInfoGuardService sensitiveInfoGuardService;
@@ -70,8 +71,11 @@ class RoutineServiceTest {
   void getStepImage_ownedRoutine_returnsImageContent() {
     Member member = new Member();
     member.setId("member-1");
+    Profile profile = new Profile();
+    profile.setId("profile-1");
+    profile.setMember(member);
     Routine routine = new Routine();
-    routine.setMember(member);
+    routine.setProfile(profile);
     RoutineStep step = new RoutineStep();
     step.setId("step-1");
     step.setImagePath("data/routine-images/batch-1/1.png");
@@ -91,8 +95,11 @@ class RoutineServiceTest {
   void getStepImage_notOwner_throwsAccessDenied() {
     Member member = new Member();
     member.setId("member-1");
+    Profile profile = new Profile();
+    profile.setId("profile-1");
+    profile.setMember(member);
     Routine routine = new Routine();
-    routine.setMember(member);
+    routine.setProfile(profile);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     assertThatThrownBy(() -> routineService.getStepImage("member-2", "routine-1", "step-1"))
@@ -106,8 +113,11 @@ class RoutineServiceTest {
   void getStepImage_missingStep_throwsStepNotFound() {
     Member member = new Member();
     member.setId("member-1");
+    Profile profile = new Profile();
+    profile.setId("profile-1");
+    profile.setMember(member);
     Routine routine = new Routine();
-    routine.setMember(member);
+    routine.setProfile(profile);
     routine.setSteps(List.of());
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
@@ -122,8 +132,11 @@ class RoutineServiceTest {
   void generateQuestion_noRelevantGoals_returnsNotRequired() {
     Member member = new Member();
     member.setId("member-1");
-    member.setSupportGoals(Set.of(SupportGoal.STEP_BY_STEP));
-    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    Profile profile = new Profile();
+    profile.setId("profile-1");
+    profile.setMember(member);
+    profile.setSupportGoals(Set.of(SupportGoal.STEP_BY_STEP));
+    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1")).thenReturn(Optional.of(profile));
 
     RoutineQuestionResponse response =
       routineService.generateQuestion("member-1", new RoutineQuestionRequest("내일 병원 가기"));
@@ -137,9 +150,12 @@ class RoutineServiceTest {
   void generateQuestion_relevantGoal_returnsQuestions() {
     Member member = new Member();
     member.setId("member-1");
-    member.setNickname("하늘이");
-    member.setSupportGoals(Set.of(SupportGoal.PREPARE_ITEMS));
-    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    Profile profile = new Profile();
+    profile.setId("profile-1");
+    profile.setMember(member);
+    profile.setNickname("하늘이");
+    profile.setSupportGoals(Set.of(SupportGoal.PREPARE_ITEMS));
+    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1")).thenReturn(Optional.of(profile));
     when(sensitiveInfoGuardService.check("내일 비 오는 날 학교 가기"))
       .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "내일 비 오는 날 학교 가기"));
     RoutineAiPipeline.RoutineQuestionResult pipelineResult = new RoutineAiPipeline.RoutineQuestionResult(
@@ -221,7 +237,7 @@ class RoutineServiceTest {
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT));
-    verifyNoInteractions(memberRepository, routineAiPipeline);
+    verifyNoInteractions(profileRepository, routineAiPipeline);
   }
 
   @Test
@@ -229,10 +245,13 @@ class RoutineServiceTest {
   void create_withMemberCharacter_passesCharacterToPipeline() {
     Member member = new Member();
     member.setId("member-1");
-    member.setNickname("하늘이");
-    member.setSupportGoals(Set.of());
-    member.setCharacter(CharacterType.LULU);
-    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    Profile profile = new Profile();
+    profile.setId("profile-1");
+    profile.setMember(member);
+    profile.setNickname("하늘이");
+    profile.setSupportGoals(Set.of());
+    profile.setCharacter(CharacterType.LULU);
+    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1")).thenReturn(Optional.of(profile));
     when(sensitiveInfoGuardService.check("내일 병원 가기"))
       .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "내일 병원 가기"));
     RoutineAiPipeline.RoutineGenerationResult generationResult = new RoutineAiPipeline.RoutineGenerationResult(
@@ -255,13 +274,16 @@ class RoutineServiceTest {
   void getTodayRoutines_returnsConfirmedAndCompletedRoutinesForToday() {
     Member member = new Member();
     member.setId("member-1");
+    Profile profile = new Profile();
+    profile.setId("profile-1");
+    profile.setMember(member);
     Routine routine = new Routine();
     routine.setId("routine-1");
     routine.setTitle("병원 다녀오기");
-    routine.setMember(member);
+    routine.setProfile(profile);
     routine.setStatus(RoutineStatus.CONFIRMED);
     routine.setSteps(List.of());
-    when(routineRepository.findAllByMemberIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
+    when(routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
       eq("member-1"), eq(List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED)), any(), any()
     )).thenReturn(List.of(routine));
 
@@ -269,17 +291,17 @@ class RoutineServiceTest {
 
     assertThat(result).hasSize(1);
     assertThat(result.get(0).id()).isEqualTo("routine-1");
-    verify(routineRepository).findAllByMemberIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
+    verify(routineRepository).findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
       eq("member-1"), eq(List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED)), any(), any()
     );
   }
 
   // --- 오프라인 퍼스트 일괄 반영 (이슈 #140) ---
 
-  private Routine confirmedRoutine(Member member, int stepCount) {
+  private Routine confirmedRoutine(Profile profile, int stepCount) {
     Routine routine = new Routine();
     routine.setId("routine-1");
-    routine.setMember(member);
+    routine.setProfile(profile);
     routine.setStatus(RoutineStatus.CONFIRMED);
     java.util.List<RoutineStep> steps = new java.util.ArrayList<>();
     for (int i = 1; i <= stepCount; i++) {
@@ -294,18 +316,21 @@ class RoutineServiceTest {
     return routine;
   }
 
-  private Member memberWithStars(int stars) {
+  private Profile profileWithStars(int stars) {
     Member member = new Member();
     member.setId("member-1");
-    member.setTotalStars(stars);
-    return member;
+    Profile profile = new Profile();
+    profile.setId("profile-1");
+    profile.setMember(member);
+    profile.setTotalStars(stars);
+    return profile;
   }
 
   @Test
   @DisplayName("syncProgress: 부분 집합을 보내면 해당 단계만 완료되고 별은 늘어난 수만큼 오른다")
   void syncProgress_partialSet_marksOnlyThoseAndAddsStars() {
-    Member member = memberWithStars(0);
-    Routine routine = confirmedRoutine(member, 3);
+    Profile profile = profileWithStars(0);
+    Routine routine = confirmedRoutine(profile, 3);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     RoutineResponse response = routineService.syncProgress("member-1", "routine-1", List.of("step-1", "step-2"));
@@ -313,7 +338,7 @@ class RoutineServiceTest {
     assertThat(routine.getSteps()).extracting(RoutineStep::getCompleted).containsExactly(true, true, false);
     assertThat(routine.getSteps().get(0).getCompletedAt()).isNotNull();
     assertThat(routine.getSteps().get(2).getCompletedAt()).isNull();
-    assertThat(member.getTotalStars()).isEqualTo(2);
+    assertThat(profile.getTotalStars()).isEqualTo(2);
     assertThat(routine.getStatus()).isEqualTo(RoutineStatus.CONFIRMED);
     assertThat(response.progressPercent()).isEqualTo(66);
   }
@@ -321,7 +346,7 @@ class RoutineServiceTest {
   @Test
   @DisplayName("syncProgress: 전부 보내면 COMPLETED가 되고 completedAt이 찍힌다")
   void syncProgress_allSteps_completesRoutine() {
-    Routine routine = confirmedRoutine(memberWithStars(0), 2);
+    Routine routine = confirmedRoutine(profileWithStars(0), 2);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     routineService.syncProgress("member-1", "routine-1", List.of("step-1", "step-2"));
@@ -333,8 +358,8 @@ class RoutineServiceTest {
   @Test
   @DisplayName("syncProgress: 완료였던 단계를 집합에서 빼면 해제되고 별이 그만큼 내려가며 CONFIRMED로 돌아온다")
   void syncProgress_removingSteps_uncompletesAndSubtractsStars() {
-    Member member = memberWithStars(3);
-    Routine routine = confirmedRoutine(member, 3);
+    Profile profile = profileWithStars(3);
+    Routine routine = confirmedRoutine(profile, 3);
     routine.getSteps().forEach(step -> {
       step.setCompleted(true);
       step.setCompletedAt(java.time.LocalDateTime.now());
@@ -347,7 +372,7 @@ class RoutineServiceTest {
 
     assertThat(routine.getSteps()).extracting(RoutineStep::getCompleted).containsExactly(true, false, false);
     assertThat(routine.getSteps().get(1).getCompletedAt()).isNull();
-    assertThat(member.getTotalStars()).isEqualTo(1);
+    assertThat(profile.getTotalStars()).isEqualTo(1);
     assertThat(routine.getStatus()).isEqualTo(RoutineStatus.CONFIRMED);
     assertThat(routine.getCompletedAt()).isNull();
   }
@@ -355,20 +380,20 @@ class RoutineServiceTest {
   @Test
   @DisplayName("syncProgress: 같은 집합을 두 번 보내도 별이 더 오르지 않는다 (멱등)")
   void syncProgress_sameSetTwice_isIdempotent() {
-    Member member = memberWithStars(0);
-    Routine routine = confirmedRoutine(member, 2);
+    Profile profile = profileWithStars(0);
+    Routine routine = confirmedRoutine(profile, 2);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     routineService.syncProgress("member-1", "routine-1", List.of("step-1"));
     routineService.syncProgress("member-1", "routine-1", List.of("step-1"));
 
-    assertThat(member.getTotalStars()).isEqualTo(1);
+    assertThat(profile.getTotalStars()).isEqualTo(1);
   }
 
   @Test
   @DisplayName("syncProgress: 순서를 건너뛴 집합도 그대로 받아들인다")
   void syncProgress_outOfOrderSet_isAccepted() {
-    Routine routine = confirmedRoutine(memberWithStars(0), 3);
+    Routine routine = confirmedRoutine(profileWithStars(0), 3);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     routineService.syncProgress("member-1", "routine-1", List.of("step-3"));
@@ -379,20 +404,20 @@ class RoutineServiceTest {
   @Test
   @DisplayName("syncProgress: 별이 0인 상태에서 해제 요청이 와도 음수가 되지 않는다")
   void syncProgress_neverGoesBelowZeroStars() {
-    Member member = memberWithStars(0);
-    Routine routine = confirmedRoutine(member, 1);
+    Profile profile = profileWithStars(0);
+    Routine routine = confirmedRoutine(profile, 1);
     routine.getSteps().get(0).setCompleted(true);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     routineService.syncProgress("member-1", "routine-1", List.of());
 
-    assertThat(member.getTotalStars()).isZero();
+    assertThat(profile.getTotalStars()).isZero();
   }
 
   @Test
   @DisplayName("syncProgress: 승인 전 일과면 ROUTINE_INVALID_STATUS를 던진다")
   void syncProgress_pendingReview_throws() {
-    Routine routine = confirmedRoutine(memberWithStars(0), 1);
+    Routine routine = confirmedRoutine(profileWithStars(0), 1);
     routine.setStatus(RoutineStatus.PENDING_REVIEW);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
@@ -404,7 +429,7 @@ class RoutineServiceTest {
   @Test
   @DisplayName("syncProgress: 이 일과에 없는 단계 id가 섞이면 ROUTINE_STEP_NOT_FOUND를 던진다")
   void syncProgress_unknownStepId_throws() {
-    Routine routine = confirmedRoutine(memberWithStars(0), 1);
+    Routine routine = confirmedRoutine(profileWithStars(0), 1);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     assertThatThrownBy(() -> routineService.syncProgress("member-1", "routine-1", List.of("step-1", "ghost")))

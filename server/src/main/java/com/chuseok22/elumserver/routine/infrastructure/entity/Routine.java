@@ -1,7 +1,7 @@
 package com.chuseok22.elumserver.routine.infrastructure.entity;
 
 import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
-import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,9 +30,15 @@ public class Routine extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
+  /**
+   * 이 일과를 수행하는 당사자.
+   *
+   * <p>계정이 아니라 프로필에 붙는다. 같은 당사자를 보호자와 기관이 함께 지원할 때
+   * 각자 만든 일과가 한 프로필 아래 모여야 당사자 화면이 하나로 보인다.
+   */
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_id", nullable = false)
-  private Member member;
+  @JoinColumn(name = "profile_id", nullable = false)
+  private Profile profile;
 
   @Column(nullable = false, columnDefinition = "TEXT")
   private String rawInputText;
