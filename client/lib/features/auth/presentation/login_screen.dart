@@ -68,8 +68,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     switch (outcome) {
       case AuthOutcome.consentRequired:
         // 약관 동의 없이는 서비스를 쓸 수 없다. 아이 정보를 받기 전에 먼저 받는다.
+        _forgetPreviousChild();
         context.go(Routes.consent);
       case AuthOutcome.onboarding:
+        _forgetPreviousChild();
         context.go(Routes.onboardingName);
       case AuthOutcome.home:
         // 이미 아이 정보를 채운 계정이다. 온보딩을 건너뛰고 홈으로 보낸다.
@@ -96,6 +98,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
 
     if (mounted) setState(() => _pending = null);
+  }
+
+  /// 이전 계정의 아이 정보를 화면에서도 잊는다.
+  ///
+  /// 저장소는 [AuthRepository]가 이미 비웠지만, provider는 앱이 켜질 때 읽어 둔 값을
+  /// 메모리에 들고 있다. 비우지 않으면 이름 입력칸에 남의 이름이 그대로 남는다 (이슈 #177).
+  void _forgetPreviousChild() {
+    ref.invalidate(onboardingProvider);
   }
 
   @override

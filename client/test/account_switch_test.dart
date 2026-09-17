@@ -1,6 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:elum/core/storage/local_storage.dart';
+import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 
 /// 다른 계정으로 로그인했을 때 이전 아이 정보가 남으면, 이름 입력칸에 남의 이름이
 /// 미리 채워지고 거기에 입력하면 이어붙는다 (이슈 #177).
@@ -47,5 +49,25 @@ void main() {
     final s = InMemoryStorage();
     await s.clearChildProfile();
     expect(s.nickname, isNull);
+  });
+
+  test('저장소를 비워도 provider를 다시 읽지 않으면 화면에 남는다', () async {
+    // 앱이 켜질 때 provider가 값을 메모리에 올린다. 저장소만 비우면 화면은 그대로다 —
+    // 실기기에서 이 상태로 이름 입력칸에 이전 이름이 남아 있었다 (이슈 #177).
+    final storage = await filled();
+    final container = ProviderContainer(
+      overrides: [localStorageProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+
+    expect(container.read(onboardingProvider).childNickname, '민수');
+
+    await storage.clearChildProfile();
+    expect(container.read(onboardingProvider).childNickname, '민수',
+        reason: '저장소만 비우면 메모리에는 남는다 — 이것이 버그였다');
+
+    container.invalidate(onboardingProvider);
+    expect(container.read(onboardingProvider).childNickname, isEmpty,
+        reason: '다시 읽어야 비워진다');
   });
 }
