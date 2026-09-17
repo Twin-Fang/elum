@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-17T12:59:59Z",
-    "currentVersion": "1.0.111",
+    "lastUpdated": "2026-09-17T13:44:44Z",
+    "currentVersion": "1.0.112",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 79
+    "totalReleases": 80
   },
   "releases": [
+    {
+      "version": "1.0.112",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-17",
+      "pr_number": 195,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 설정 화면에서 뒤로가기가 동작하지 않던 문제를 해결했습니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "설정 화면에서 뒤로가기가 동작하지 않던 문제를 해결했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.111",
       "project_type": "flutter",
