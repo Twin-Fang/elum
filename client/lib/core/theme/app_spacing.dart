@@ -24,6 +24,9 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     required this.headerTop,
     required this.ctaTop,
     required this.headerToContent,
+    required this.checkSize,
+    required this.checkRadius,
+    required this.iconSm,
   });
 
   final double xs;
@@ -68,6 +71,18 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
   /// [xl](32)과 값이 달라 별도 토큰으로 둔다 — 온보딩 전 화면 공통 52다.
   final double headerToContent;
 
+  // --- 선택 표시 ---
+
+  /// 체크박스 한 변. 손가락으로 누르는 최소 크기를 확보한다.
+  final double checkSize;
+
+  /// 체크박스 모서리. 값이 xs와 같아도 쓰임이 달라 따로 둔다 —
+  /// 간격을 조정한다고 체크 모양까지 바뀌면 안 된다.
+  final double checkRadius;
+
+  /// 목록 우측 화살표처럼 글에 곁들이는 작은 아이콘.
+  final double iconSm;
+
   static const standard = AppSpacing(
     xs: 8,
     sm: 12,
@@ -87,6 +102,9 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     headerTop: 131,
     ctaTop: 675,
     headerToContent: 52,
+    checkSize: 24,
+    checkRadius: 8,
+    iconSm: 20,
   );
 
   @override
@@ -108,6 +126,9 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
     double? headerTop,
     double? ctaTop,
     double? headerToContent,
+    double? checkSize,
+    double? checkRadius,
+    double? iconSm,
   }) {
     return AppSpacing(
       xs: xs ?? this.xs,
@@ -127,6 +148,9 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
       headerTop: headerTop ?? this.headerTop,
       ctaTop: ctaTop ?? this.ctaTop,
       headerToContent: headerToContent ?? this.headerToContent,
+      checkSize: checkSize ?? this.checkSize,
+      checkRadius: checkRadius ?? this.checkRadius,
+      iconSm: iconSm ?? this.iconSm,
     );
   }
 
@@ -152,6 +176,9 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
       headerTop: lerpDouble(headerTop, other.headerTop, t),
       ctaTop: lerpDouble(ctaTop, other.ctaTop, t),
       headerToContent: lerpDouble(headerToContent, other.headerToContent, t),
+      checkSize: lerpDouble(checkSize, other.checkSize, t),
+      checkRadius: lerpDouble(checkRadius, other.checkRadius, t),
+      iconSm: lerpDouble(iconSm, other.iconSm, t),
     );
   }
 

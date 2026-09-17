@@ -25,23 +25,23 @@ class ConsentDocumentScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 8.h),
+            SizedBox(height: context.space.xs.h),
             Text(
               item.required ? '[필수] ${item.label}' : '[선택] ${item.label}',
               style: context.typo.title,
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: context.space.xs.h),
             Text(
               '버전 $consentVersion',
               style: context.typo.caption.copyWith(color: colors.textSecondary),
             ),
-            SizedBox(height: 20.h),
+            SizedBox(height: context.space.lg.h),
             Text(
               item.body.trim(),
               // 약관은 줄 간격이 촘촘하면 읽기 어렵다. 본문보다 넉넉히 준다.
               style: context.typo.body.copyWith(height: 1.7),
             ),
-            SizedBox(height: 40.h),
+            SizedBox(height: context.space.xl.h),
           ],
         ),
       ),

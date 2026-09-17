@@ -111,6 +111,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginGoogleBg,
     required this.loginGoogleLabel,
     required this.loginGoogleBorder,
+    required this.consentSelectedFill,
+    required this.consentSelectedBorder,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -285,6 +287,13 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color loginGoogleLabel;
   final Color loginGoogleBorder;
 
+  // --- 약관 동의 선택 상태 ---
+  //
+  // 값은 목표 칩 선택색과 같다. 그래도 토큰을 나누는 이유는 이 문서의 핵심 규칙
+  // 때문이다 — 디자이너가 목표 칩 색만 바꿔도 동의 화면은 그대로여야 한다.
+  final Color consentSelectedFill;
+  final Color consentSelectedBorder;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -360,6 +369,8 @@ class AppColors extends ThemeExtension<AppColors> {
     loginGoogleBg: Color(0xFFFFFFFF),
     loginGoogleLabel: Color(0xFF1F1F1F),
     loginGoogleBorder: Color(0xFFDADCE0),
+    consentSelectedFill: Color(0xFFB5EAEC),
+    consentSelectedBorder: Color(0xFF93DBCC),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -447,6 +458,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? loginGoogleBg,
     Color? loginGoogleLabel,
     Color? loginGoogleBorder,
+    Color? consentSelectedFill,
+    Color? consentSelectedBorder,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -524,6 +537,8 @@ class AppColors extends ThemeExtension<AppColors> {
       loginGoogleBg: loginGoogleBg ?? this.loginGoogleBg,
       loginGoogleLabel: loginGoogleLabel ?? this.loginGoogleLabel,
       loginGoogleBorder: loginGoogleBorder ?? this.loginGoogleBorder,
+      consentSelectedFill: consentSelectedFill ?? this.consentSelectedFill,
+      consentSelectedBorder: consentSelectedBorder ?? this.consentSelectedBorder,
     );
   }
 
@@ -621,6 +636,8 @@ class AppColors extends ThemeExtension<AppColors> {
       loginGoogleBg: Color.lerp(loginGoogleBg, other.loginGoogleBg, t)!,
       loginGoogleLabel: Color.lerp(loginGoogleLabel, other.loginGoogleLabel, t)!,
       loginGoogleBorder: Color.lerp(loginGoogleBorder, other.loginGoogleBorder, t)!,
+      consentSelectedFill: Color.lerp(consentSelectedFill, other.consentSelectedFill, t)!,
+      consentSelectedBorder: Color.lerp(consentSelectedBorder, other.consentSelectedBorder, t)!,
     );
   }
 

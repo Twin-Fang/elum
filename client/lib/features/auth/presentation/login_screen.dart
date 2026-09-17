@@ -31,6 +31,10 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  /// 버튼 사이 간격 18 — 온보딩 목표 칩의 리듬(칩 y좌표 차 86 − 높이 68)을 따른다.
+  /// 같은 흐름 안에서 목록 간격이 화면마다 다르면 눈에 띈다.
+  static const _buttonGap = 18.0;
+
   /// 진행 중인 제공자. 중복 탭과 다른 버튼 동시 탭을 막는다.
   OAuthProvider? _pending;
 
@@ -115,7 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             labelColor: context.colors.loginKakaoLabel,
             onPressed: isBusy ? null : () => _signIn(OAuthProvider.kakao),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: _buttonGap.h),
 
           if (_lastProvider == OAuthProvider.naver) const _LastUsedHint(),
           ElumButton(
@@ -124,7 +128,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             labelColor: context.colors.loginNaverLabel,
             onPressed: isBusy ? null : () => _signIn(OAuthProvider.naver),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: _buttonGap.h),
 
           if (_lastProvider == OAuthProvider.google) const _LastUsedHint(),
           // 구글만 테두리가 필요해 따로 그린다. 크기·모서리는 ElumButton과 같은
@@ -141,7 +145,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           // 반대로 iOS에서는 빼면 안 된다 — 다른 소셜 로그인을 제공하는 앱은
           // 애플 로그인도 제공해야 앱스토어 심사를 통과한다.
           if (Platform.isIOS) ...[
-            SizedBox(height: 12.h),
+            SizedBox(height: _buttonGap.h),
             if (_lastProvider == OAuthProvider.apple) const _LastUsedHint(),
             Opacity(
               opacity: isBusy && _pending != OAuthProvider.apple ? 0.5 : 1,
@@ -184,7 +188,7 @@ class _LastUsedHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 6.h),
+      padding: EdgeInsets.only(bottom: context.space.xs.h / 2),
       child: Text(
         '지난번에 이걸로 로그인했어요',
         textAlign: TextAlign.center,
