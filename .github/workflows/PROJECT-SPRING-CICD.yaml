@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - 'server/**'
+  # 설정(Secret)만 바뀐 경우에는 server/ 아래 변경이 없어 배포가 돌지 않는다.
+  # 그럴 때 손으로 한 번 돌려 반영·검증할 수 있게 열어 둔다.
+  workflow_dispatch:
 
 env:
   PROJECT_NAME: elum # 프로젝트 명
