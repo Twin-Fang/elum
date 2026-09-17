@@ -368,7 +368,8 @@ class _ConfirmResetView extends ConsumerWidget {
                     ref.invalidate(onboardingProvider);
                     if (!context.mounted) return;
                     onDone();
-                    onNavigate(Routes.splash);
+                    // 계정이 사라졌으니 로그인부터 다시 한다.
+                    onNavigate(Routes.login);
                   },
                   child: const Text('회원삭제'),
                 ),

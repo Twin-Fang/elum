@@ -29,6 +29,10 @@ public record MemberResponse(
   @Schema(description = "선택한 캐릭터, 미설정 시 null", example = "LULU")
   CharacterType character,
 
+  @Schema(description = "필수 약관에 모두 동의했는지. false면 앱이 동의 화면을 먼저 띄운다. "
+    + "기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.", example = "true")
+  boolean requiredConsentsCompleted,
+
   @Schema(description = "회원가입 일시 (KST, ISO-8601 형식)", example = "2026-07-16T10:30:00")
   LocalDateTime createdAt
 ) {
@@ -50,6 +54,7 @@ public record MemberResponse(
       profile == null ? null : profile.getNickname(),
       profile == null ? Set.of() : profile.getSupportGoals(),
       profile == null ? null : profile.getCharacter(),
+      member.hasRequiredConsents(),
       member.getCreatedAt()
     );
   }

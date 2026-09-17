@@ -1,26 +1,41 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/storage/local_storage.dart';
+import '../../../core/storage/token_store.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import 'oauth_sdk.dart';
 
 /// 로그인 결과. 화면이 다음 목적지를 정하는 데 쓴다.
 enum AuthOutcome {
-  /// 새로 만든 계정 — 온보딩을 계속한다
-  created,
+  /// 약관 동의를 받지 않은 계정 — 동의 화면부터.
+  ///
+  /// 동의 없이는 서비스를 쓸 수 없으므로 아이 정보를 입력받기 전에 먼저 받는다.
+  /// 온보딩을 다 하고 나서 동의를 거부하면 입력한 것이 전부 버려진다.
+  consentRequired,
 
-  /// 이미 있던 이름 — 보호자 홈으로 복귀한다
-  restored,
+  /// 동의는 마쳤고 아이 정보가 없는 계정 — 온보딩을 진행한다
+  onboarding,
 
-  /// 인증 실패 — 시작 화면에 머문다
+  /// 전부 마친 계정 — 보호자 홈으로 바로 간다
+  home,
+
+  /// 사용자가 제공자 화면을 닫았다. **오류가 아니다.**
+  /// 스스로 닫은 것에 에러를 띄우면 뭘 잘못한 줄 안다
+  cancelled,
+
+  /// 같은 이메일이 이미 다른 방법으로 가입돼 있다
+  emailConflict,
+
+  /// 인증 실패 — 화면에 에러 코드와 함께 재시도를 안내한다
   failed,
 
   /// 서버에 닿지 못했다 (DNS·연결 실패·타임아웃).
   ///
-  /// [failed]와 나눠둔 이유는 화면이 보여줄 문구가 다르기 때문이다. 네트워크가
-  /// 끊긴 건데 "이름을 4자 이상으로" 안내하면 사용자는 이름만 계속 고치게 된다.
+  /// [failed]와 나눠둔 이유는 보여줄 문구가 다르기 때문이다. 네트워크가 끊긴 건데
+  /// "다시 로그인해 주세요"라고 하면 사용자는 로그인만 계속 누르게 된다
   offline,
 }
 
@@ -39,153 +54,217 @@ bool _isOffline(Object e) {
   };
 }
 
-/// 아이 이름을 아이디로 쓰는 인증.
+/// 소셜 로그인 기반 인증.
 ///
-/// Figma에 회원가입·로그인 화면이 **없다.** 임의로 만들면 온보딩 흐름이 끊기므로,
-/// 온보딩에서 이미 받는 아이 이름을 그대로 아이디로 쓴다. (이슈 #19)
+/// 제공자 SDK로 받은 토큰을 서버에 넘기면 서버가 확인 후 우리 토큰을 준다.
+/// 제공자 토큰은 여기서 버린다 — 저장하지 않는다.
 ///
-/// **비밀번호는 고정값이다.** 기기 ID를 쓰면 폰을 바꿨을 때 같은 이름으로 로그인할
-/// 수 없다(실측: 같은 이름 + 다른 비밀번호 → 401). 고정값이면 이름만으로 계정이
-/// 결정되므로 기기가 달라도 복귀된다. 해커톤 범위라 이름 충돌은 문제 삼지 않는다.
-///
-/// **절대 throw하지 않는다.** 인증 실패가 데모를 막으면 안 된다 (docs 원칙 6번).
+/// **절대 throw하지 않는다.** 인증 실패가 화면을 깨뜨리면 안 된다 (docs 원칙 6번).
 class AuthRepository {
-  AuthRepository({required Dio dio, required LocalStorage storage})
-      : _dio = dio,
-        _storage = storage;
+  AuthRepository({
+    required Dio dio,
+    required LocalStorage storage,
+    required TokenStore tokens,
+    required OAuthSdk sdk,
+  })  : _dio = dio,
+        _storage = storage,
+        _tokens = tokens,
+        _sdk = sdk;
 
   final Dio _dio;
   final LocalStorage _storage;
+  final TokenStore _tokens;
+  final OAuthSdk _sdk;
 
-  /// 고정 비밀번호.
+  /// 진행 중인 갱신 요청. **동시에 여러 번 갱신하지 않기 위한 장치다.**
   ///
-  /// `0000`은 서버 제약(`@Size(min=8)`)에 걸려 400이다. 실측으로 확인했다.
-  static const fixedPassword = '00000000';
+  /// 홈 화면이 API 3개를 동시에 부르다 다 같이 401을 받으면 각자 갱신을 시도한다.
+  /// 서버는 리프레시 토큰을 한 번 쓰면 폐기하는 회전 방식이라, 두 번째 요청은
+  /// **탈취로 간주돼 계정의 모든 세션이 끊긴다.** 첫 요청만 실제로 보내고
+  /// 나머지는 그 결과를 함께 기다린다.
+  Future<String?>? _refreshInFlight;
 
-  /// 이름으로 로그인한다. 회원가입과 로그인은 항상 짝으로 움직인다.
-  ///
-  /// 서버는 이미 있는 아이디에 409를 준다. 이 신호로 신규·복귀를 구분한다.
-  Future<AuthOutcome> signInWithName(String childName) async {
-    final name = childName.trim();
-    if (name.isEmpty) return AuthOutcome.failed;
+  bool get hasSession => _tokens.hasSession;
 
-    final isNew = await _signUp(name);
-    // 가입 단계에서 이미 서버에 못 닿았다. 로그인도 같은 결과이므로 바로 끝낸다.
-    if (isNew == null) return AuthOutcome.offline;
+  /// 제공자로 로그인한다.
+  Future<AuthOutcome> signInWith(OAuthProvider provider) async {
+    final sdkResult = await _sdk.signIn(provider);
 
-    final token = await _login(name);
-    if (token == null) {
-      return _lastLoginWasOffline ? AuthOutcome.offline : AuthOutcome.failed;
-    }
-
-    return isNew ? AuthOutcome.created : AuthOutcome.restored;
-  }
-
-  /// 직전 [_login]이 서버에 닿지 못해 실패했는가.
-  ///
-  /// `_login`은 토큰(`String?`)을 반환해야 해서 실패 사유를 함께 돌려줄 자리가
-  /// 없다. 재발급 경로([reauthenticate])와 반환 타입을 공유하므로 플래그로 뺐다.
-  bool _lastLoginWasOffline = false;
-
-  /// 가입을 시도한다. **새로 만들어졌으면 true, 기존 이름이면 false.**
-  ///
-  /// 409(`DUPLICATE_USERNAME`)는 오류가 아니라 "이미 있는 이름"이라는 정보다.
-  /// 서버에 닿지 못하면 신규·기존을 판단할 수 없으므로 **null**을 준다.
-  Future<bool?> _signUp(String username) async {
-    try {
-      await _dio.post<dynamic>(
-        '/api/auth/signup',
-        data: {'username': username, 'password': fixedPassword},
-      );
-      return true;
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 409) {
-        // 기존 사용자다. 정상 경로이므로 로그인으로 넘어간다.
-        return false;
-      }
-      if (_isOffline(e)) {
-        debugPrint('[auth] 가입 실패 — 서버에 닿지 못했다: ${e.type}');
-        return null;
-      }
-      // 이름이 4자 미만이면 서버가 400을 준다. 우회하지 않고 그대로 둔다.
-      debugPrint('[auth] 가입 실패 (${e.response?.statusCode}): $e');
-      return false;
-    } catch (e) {
-      debugPrint('[auth] 가입 중 예외: $e');
-      return false;
+    switch (sdkResult) {
+      case OAuthSdkCancelled():
+        return AuthOutcome.cancelled;
+      case OAuthSdkFailure(code: final code):
+        AppLogger.error('소셜 로그인', code);
+        return AuthOutcome.failed;
+      case OAuthSdkSuccess(token: final providerToken):
+        return _exchange(provider, providerToken);
     }
   }
 
-  Future<String?> _login(String username) async {
-    _lastLoginWasOffline = false;
+  /// 제공자 토큰을 우리 토큰으로 바꾼다.
+  Future<AuthOutcome> _exchange(OAuthProvider provider, String providerToken) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
-        '/api/auth/login',
-        data: {'username': username, 'password': fixedPassword},
+        '/api/auth/oauth/${provider.path}',
+        data: {'token': providerToken},
       );
 
-      final token = res.data?['accessToken']?.toString();
-      if (token == null || token.isEmpty) {
-        debugPrint('[auth] 로그인 응답에 토큰이 없다');
+      final access = res.data?['accessToken']?.toString();
+      final refresh = res.data?['refreshToken']?.toString();
+      if (access == null || access.isEmpty || refresh == null || refresh.isEmpty) {
+        AppLogger.error('소셜 로그인', '서버 응답에 토큰이 없다');
+        return AuthOutcome.failed;
+      }
+
+      await _tokens.save(accessToken: access, refreshToken: refresh);
+      // 다음 로그인 화면에서 "지난번에 이걸로 하셨어요"를 보여주기 위해 남긴다.
+      // 다른 수단으로 들어와 빈 계정이 생기는 사고를 막는 장치다.
+      await _storage.setLastLoginProvider(provider.name);
+      return await _resolveDestination();
+    } on DioException catch (e) {
+      if (_isOffline(e)) return AuthOutcome.offline;
+      // 409는 같은 이메일이 다른 제공자로 이미 가입된 경우다.
+      // 서버가 이메일로 계정을 합치지 않기 때문에 사용자에게 안내해야 한다.
+      if (e.response?.statusCode == 409) return AuthOutcome.emailConflict;
+      AppLogger.error('소셜 로그인 교환', e);
+      return AuthOutcome.failed;
+    } catch (e) {
+      AppLogger.error('소셜 로그인 교환', e);
+      return AuthOutcome.failed;
+    }
+  }
+
+  /// 다음에 보여줄 화면을 정한다. 요청 한 번으로 끝내기 위해 회원 정보에
+  /// 동의 완료 여부를 함께 담아 받는다.
+  ///
+  /// 순서는 **동의 → 아이 정보 → 홈**이다. 동의를 마지막에 받으면 아이 정보를
+  /// 다 입력한 뒤 거부했을 때 그 입력이 전부 버려진다.
+  Future<AuthOutcome> _resolveDestination() async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>('/api/member/me');
+
+      final consented = res.data?['requiredConsentsCompleted'] == true;
+      if (!consented) return AuthOutcome.consentRequired;
+
+      final nickname = res.data?['nickname']?.toString();
+      if (nickname == null || nickname.isEmpty) return AuthOutcome.onboarding;
+
+      // 재설치한 기존 사용자다. 아이 이름을 로컬에도 되살려 둔다.
+      await _storage.setNickname(nickname);
+      return AuthOutcome.home;
+    } catch (e) {
+      // 조회가 실패해도 로그인 자체는 끝났다. 동의 화면부터 보내면
+      // 이미 동의한 사용자는 한 번 더 누르게 되지만, 건너뛰어서 동의 없이
+      // 서비스를 쓰게 되는 것보다 낫다.
+      AppLogger.error('회원 정보 조회', e);
+      return AuthOutcome.consentRequired;
+    }
+  }
+
+  /// 리프레시 토큰으로 액세스 토큰을 다시 받는다. [AuthInterceptor]가 401에서 부른다.
+  Future<String?> refreshAccessToken() {
+    return _refreshInFlight ??=
+        _performRefresh().whenComplete(() => _refreshInFlight = null);
+  }
+
+  Future<String?> _performRefresh() async {
+    final refresh = _tokens.refreshToken;
+    if (refresh == null || refresh.isEmpty) return null;
+
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/api/auth/refresh',
+        data: {'refreshToken': refresh},
+      );
+
+      final access = res.data?['accessToken']?.toString();
+      final nextRefresh = res.data?['refreshToken']?.toString();
+      if (access == null || access.isEmpty || nextRefresh == null || nextRefresh.isEmpty) {
         return null;
       }
 
-      await _storage.setAccessToken(token);
-      return token;
-    } catch (e) {
-      _lastLoginWasOffline = _isOffline(e);
-      if (_lastLoginWasOffline) {
-        debugPrint('[auth] 로그인 실패 — 서버에 닿지 못했다');
-      } else {
-        debugPrint('[auth] 로그인 실패: $e');
+      // 회전 방식이라 리프레시 토큰도 매번 새 값으로 바뀐다. 반드시 덮어쓴다.
+      await _tokens.save(accessToken: access, refreshToken: nextRefresh);
+      return access;
+    } on DioException catch (e) {
+      if (_isOffline(e)) {
+        // 네트워크 문제는 세션 문제가 아니다. 토큰을 지우면 안 된다.
+        AppLogger.error('토큰 갱신', '서버에 닿지 못했다');
+        return null;
+      }
+      // 401이면 토큰이 만료·폐기됐거나 재사용으로 감지된 것이다.
+      // 어느 쪽이든 이 세션은 끝났으므로 지우고 다시 로그인시킨다.
+      if (e.response?.statusCode == 401) {
+        AppLogger.error('토큰 갱신', '세션이 만료되었다');
+        await _tokens.clear();
       }
       return null;
-    }
-  }
-
-  /// 저장된 이름으로 토큰을 다시 발급받는다.
-  ///
-  /// 토큰이 1시간 만에 만료되므로 [AuthInterceptor]가 401에서 이걸 부른다.
-  /// 이름이 없으면(온보딩 전) 재발급할 방법이 없다.
-  Future<String?> reauthenticate() async {
-    final name = _storage.nickname;
-    if (name == null || name.isEmpty) {
-      debugPrint('[auth] 저장된 이름이 없어 재발급할 수 없다');
+    } catch (e) {
+      AppLogger.error('토큰 갱신', e);
       return null;
     }
-    return _login(name);
   }
 
-  /// 토큰을 들고 있는가. 라우터 가드가 이 값으로 시작 화면 복귀를 결정한다.
-  bool get hasToken {
-    final token = _storage.accessToken;
-    return token != null && token.isNotEmpty;
+  /// 로그아웃. 서버 세션을 끊고 로컬 토큰을 지운다.
+  ///
+  /// **서버 요청이 실패해도 로컬은 반드시 지운다.** 로컬에 남으면 사용자는
+  /// 로그아웃했다고 생각하는데 앱은 로그인 상태로 동작한다.
+  Future<void> logout() async {
+    final refresh = _tokens.refreshToken;
+    if (refresh != null && refresh.isNotEmpty) {
+      try {
+        await _dio.post<dynamic>('/api/auth/logout', data: {'refreshToken': refresh});
+      } catch (e) {
+        AppLogger.error('로그아웃', e);
+      }
+    }
+    await _tokens.clear();
+    await _storage.clearAll();
   }
 
   /// 회원삭제 — 서버 계정과 로컬 저장값을 모두 지운다.
   ///
-  /// 로그아웃과 다르다. 로그아웃은 로컬만 지워 같은 이름으로 다시 들어가면
-  /// 기존 계정에 복귀하지만, 회원삭제 후에는 같은 이름을 넣어도 **신규 가입**이 된다.
-  ///
-  /// **서버 삭제가 실패해도 로컬은 반드시 지운다.** 로컬에 토큰이 남으면 지워진
-  /// 계정의 토큰으로 계속 401을 맞아 앱이 이상해진다. 개발자 도구에서 쓰는
-  /// 기능이므로 되돌아갈 길을 막지 않는 편이 낫다.
+  /// 로그아웃과 다르다. 로그아웃 후 같은 계정으로 다시 들어오면 데이터가 그대로지만,
+  /// 회원삭제 후에는 같은 소셜 계정으로 로그인해도 **신규 가입**이 된다.
   Future<void> deleteAccount() async {
     try {
       await _dio.delete<dynamic>('/api/member/me');
     } catch (e) {
       // 서버 삭제가 실패해도 로컬 정리는 계속한다. 토큰이 남으면 지워진 계정으로
       // 계속 401을 맞아 앱이 이상해진다.
-      debugPrint('[auth] 서버 회원삭제 실패, 로컬만 정리한다: $e');
+      AppLogger.error('회원삭제', e);
     }
+    await _tokens.clear();
     await _storage.clearAll();
   }
 }
+
+/// 앱 전체에서 하나만 쓴다. 갱신 동시성 제어가 인스턴스 안에 있어서
+/// 매번 새로 만들면 묶는 의미가 없다.
+final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
+
+final oAuthSdkProvider = Provider<OAuthSdk>((ref) => OAuthSdk());
+
+/// 토큰 갱신 전용 인스턴스.
+///
+/// **인터셉터가 붙지 않은 Dio**를 쓴다. 갱신 요청이 401을 받았을 때 인터셉터가
+/// 또 갱신을 부르면 재귀가 된다. 그리고 앱 전체에서 이 인스턴스 하나만 쓰므로
+/// 동시 갱신을 묶는 장치가 실제로 동작한다.
+final tokenRefresherProvider = Provider<AuthRepository>((ref) {
+  return AuthRepository(
+    dio: DioClient.create(),
+    storage: ref.watch(localStorageProvider),
+    tokens: ref.watch(tokenStoreProvider),
+    sdk: ref.watch(oAuthSdkProvider),
+  );
+});
 
 /// 인증 저장소. 인터셉터가 붙은 [dioProvider]를 쓴다.
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(
     dio: ref.watch(dioProvider),
     storage: ref.watch(localStorageProvider),
+    tokens: ref.watch(tokenStoreProvider),
+    sdk: ref.watch(oAuthSdkProvider),
   );
 });

@@ -104,6 +104,13 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.starsNumberStart,
     required this.editChipBg,
     required this.editChipLabel,
+    required this.loginKakaoBg,
+    required this.loginKakaoLabel,
+    required this.loginNaverBg,
+    required this.loginNaverLabel,
+    required this.loginGoogleBg,
+    required this.loginGoogleLabel,
+    required this.loginGoogleBorder,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -264,6 +271,20 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 같은 칩의 문구색 (#000000). chipLabel(선택 항목)과 쓰임이 달라 분리한다.
   final Color editChipLabel;
 
+  // --- 소셜 로그인 버튼 ---
+  //
+  // 각 제공자가 정한 **브랜드 고정값**이다. 디자이너가 바꾸는 값이 아니며,
+  // 임의로 손대면 제공자 검수·스토어 심사에서 지적받는다.
+  // 그래도 토큰으로 두는 이유는 화면에서 Color(0x...)를 직접 쓰지 않기로 한
+  // 규칙(design_token_test)을 예외 없이 지키기 위해서다.
+  final Color loginKakaoBg;
+  final Color loginKakaoLabel;
+  final Color loginNaverBg;
+  final Color loginNaverLabel;
+  final Color loginGoogleBg;
+  final Color loginGoogleLabel;
+  final Color loginGoogleBorder;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -332,6 +353,13 @@ class AppColors extends ThemeExtension<AppColors> {
     starsNumberStart: Color(0xFFFFDD00),
     editChipBg: Color(0xFFEEE9E6),
     editChipLabel: Color(0xFF000000),
+    loginKakaoBg: Color(0xFFFEE500),
+    loginKakaoLabel: Color(0xFF191600),
+    loginNaverBg: Color(0xFF03C75A),
+    loginNaverLabel: Color(0xFFFFFFFF),
+    loginGoogleBg: Color(0xFFFFFFFF),
+    loginGoogleLabel: Color(0xFF1F1F1F),
+    loginGoogleBorder: Color(0xFFDADCE0),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -412,6 +440,13 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? starsNumberStart,
     Color? editChipBg,
     Color? editChipLabel,
+    Color? loginKakaoBg,
+    Color? loginKakaoLabel,
+    Color? loginNaverBg,
+    Color? loginNaverLabel,
+    Color? loginGoogleBg,
+    Color? loginGoogleLabel,
+    Color? loginGoogleBorder,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -482,6 +517,13 @@ class AppColors extends ThemeExtension<AppColors> {
       starsNumberStart: starsNumberStart ?? this.starsNumberStart,
       editChipBg: editChipBg ?? this.editChipBg,
       editChipLabel: editChipLabel ?? this.editChipLabel,
+      loginKakaoBg: loginKakaoBg ?? this.loginKakaoBg,
+      loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
+      loginNaverBg: loginNaverBg ?? this.loginNaverBg,
+      loginNaverLabel: loginNaverLabel ?? this.loginNaverLabel,
+      loginGoogleBg: loginGoogleBg ?? this.loginGoogleBg,
+      loginGoogleLabel: loginGoogleLabel ?? this.loginGoogleLabel,
+      loginGoogleBorder: loginGoogleBorder ?? this.loginGoogleBorder,
     );
   }
 
@@ -572,6 +614,13 @@ class AppColors extends ThemeExtension<AppColors> {
           Color.lerp(starsNumberStart, other.starsNumberStart, t)!,
       editChipBg: Color.lerp(editChipBg, other.editChipBg, t)!,
       editChipLabel: Color.lerp(editChipLabel, other.editChipLabel, t)!,
+      loginKakaoBg: Color.lerp(loginKakaoBg, other.loginKakaoBg, t)!,
+      loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
+      loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,
+      loginNaverLabel: Color.lerp(loginNaverLabel, other.loginNaverLabel, t)!,
+      loginGoogleBg: Color.lerp(loginGoogleBg, other.loginGoogleBg, t)!,
+      loginGoogleLabel: Color.lerp(loginGoogleLabel, other.loginGoogleLabel, t)!,
+      loginGoogleBorder: Color.lerp(loginGoogleBorder, other.loginGoogleBorder, t)!,
     );
   }
 

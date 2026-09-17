@@ -19,12 +19,21 @@ import '../../features/onboarding/presentation/character_screen.dart';
 import '../../features/onboarding/presentation/goals_screen.dart';
 import '../../features/onboarding/presentation/name_screen.dart';
 import '../../features/onboarding/presentation/pin_screen.dart';
+import '../../features/auth/presentation/consent_screen.dart';
+import '../../features/auth/presentation/login_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
 import 'app_transitions.dart';
 
 /// 앱 라우트 경로 상수. 문자열을 화면마다 반복해 적지 않는다.
 abstract final class Routes {
   static const splash = '/';
+
+  /// 온보딩 맨 앞. 계정이 먼저 생기고 그 안에 당사자 프로필을 만든다.
+  static const login = '/login';
+
+  /// 약관 동의. 로그인 직후, 아이 정보를 받기 전에 선다.
+  /// 동의 없이는 서비스를 쓸 수 없다.
+  static const consent = '/consent';
 
   static const onboardingName = '/onboarding/name';
   static const onboardingGoals = '/onboarding/goals';
@@ -78,12 +87,15 @@ GoRouter createRouter({
     initialLocation: Routes.splash,
     redirect: (context, state) {
       final path = state.matchedLocation;
-      final isProtected =
-          path.startsWith(Routes.guardian) || path.startsWith(Routes.child);
+      // 온보딩도 보호 대상이다. 로그인 없이 아이 정보를 입력하면 저장할 계정이 없다.
+      final isProtected = path.startsWith(Routes.guardian) ||
+          path.startsWith(Routes.child) ||
+          path.startsWith(Routes.consent) ||
+          path.startsWith('/onboarding');
       if (!isProtected) return null;
 
-      // 토큰이 없으면 아무것도 조회할 수 없다. 시작 화면부터 다시 시작한다.
-      if (hasToken != null && !hasToken()) return Routes.splash;
+      // 세션이 없으면 아무것도 조회할 수 없다. 로그인부터 다시 시작한다.
+      if (hasToken != null && !hasToken()) return Routes.login;
 
       // devFlag: 온보딩 건너뛰기 (시연용)
       if (AppConfig.skipOnboarding) return null;
@@ -95,6 +107,18 @@ GoRouter createRouter({
       GoRoute(
         path: Routes.splash,
         builder: (context, state) => const SplashScreen(),
+      ),
+
+      // --- 로그인 ---
+      // 온보딩 앞에 서므로 같은 수평 슬라이드를 쓴다.
+      GoRoute(
+        path: Routes.login,
+        pageBuilder: (context, state) => slidePage(state, const LoginScreen()),
+      ),
+
+      GoRoute(
+        path: Routes.consent,
+        pageBuilder: (context, state) => slidePage(state, const ConsentScreen()),
       ),
 
       // --- 온보딩 ---

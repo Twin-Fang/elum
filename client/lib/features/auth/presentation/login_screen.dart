@@ -1,0 +1,232 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
+import '../../../core/router/app_router.dart';
+import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_header.dart';
+import '../../../core/widgets/elum_scaffold.dart';
+import '../../onboarding/application/onboarding_notifier.dart';
+import '../data/auth_repository.dart';
+import '../data/oauth_sdk.dart';
+
+/// 로그인 화면. 온보딩 맨 앞에 선다.
+///
+/// 계정이 먼저 생기고 그 안에 당사자 프로필을 만드는 서버 구조와 순서를 맞췄다.
+/// 재설치한 사용자는 로그인만 하면 아이 정보가 서버에서 되살아난다.
+///
+/// **제공자 버튼은 각 사의 브랜드 규격을 따른다.** 색·문구를 임의로 바꾸면
+/// 스토어 심사나 제공자 검수에서 지적받는다.
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  /// 진행 중인 제공자. 중복 탭과 다른 버튼 동시 탭을 막는다.
+  OAuthProvider? _pending;
+
+  /// 실패 안내. 에러 코드를 함께 보여줘 제보를 추적할 수 있게 한다.
+  String? _errorMessage;
+
+  /// 지난번에 성공한 로그인 수단. 없으면 처음 오는 사용자다.
+  OAuthProvider? _lastProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    final saved = ref.read(localStorageProvider).lastLoginProvider;
+    if (saved != null) {
+      _lastProvider = OAuthProvider.values
+          .where((p) => p.name == saved)
+          .firstOrNull;
+    }
+  }
+
+  Future<void> _signIn(OAuthProvider provider) async {
+    setState(() {
+      _pending = provider;
+      _errorMessage = null;
+    });
+
+    final outcome = await ref.read(authRepositoryProvider).signInWith(provider);
+
+    if (!mounted) return;
+
+    switch (outcome) {
+      case AuthOutcome.consentRequired:
+        // 약관 동의 없이는 서비스를 쓸 수 없다. 아이 정보를 받기 전에 먼저 받는다.
+        context.go(Routes.consent);
+      case AuthOutcome.onboarding:
+        context.go(Routes.onboardingName);
+      case AuthOutcome.home:
+        // 이미 아이 정보를 채운 계정이다. 온보딩을 건너뛰고 홈으로 보낸다.
+        final nickname = ref.read(localStorageProvider).nickname ?? '';
+        await ref.read(onboardingProvider.notifier).restoreCompleted(nickname);
+        if (!mounted) return;
+        context.go(Routes.guardian);
+      case AuthOutcome.cancelled:
+        // 사용자가 스스로 닫았다. 아무것도 띄우지 않는다.
+        break;
+      case AuthOutcome.emailConflict:
+        setState(() {
+          _errorMessage = '이미 다른 방법으로 가입된 계정이에요.\n'
+              '처음 가입할 때 쓰신 방법으로 로그인해주세요. (E-DUP)';
+        });
+      case AuthOutcome.offline:
+        setState(() {
+          _errorMessage = '인터넷 연결을 확인하고 다시 눌러주세요. (E-NET)';
+        });
+      case AuthOutcome.failed:
+        setState(() {
+          _errorMessage = '로그인하지 못했어요. 잠시 후 다시 시도해주세요. (E-AUTH)';
+        });
+    }
+
+    if (mounted) setState(() => _pending = null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isBusy = _pending != null;
+
+    return ElumScaffold(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const ElumHeader(
+            title: '이룸을\n시작해볼까요?',
+            description: '보호자님 계정으로 로그인하면\n아이 정보가 안전하게 보관돼요.',
+          ),
+          SizedBox(height: context.space.headerToContent),
+
+          if (_lastProvider == OAuthProvider.kakao) const _LastUsedHint(),
+          ElumButton(
+            label: _pending == OAuthProvider.kakao ? '연결 중...' : '카카오로 시작하기',
+            backgroundColor: context.colors.loginKakaoBg,
+            labelColor: context.colors.loginKakaoLabel,
+            onPressed: isBusy ? null : () => _signIn(OAuthProvider.kakao),
+          ),
+          SizedBox(height: 12.h),
+
+          if (_lastProvider == OAuthProvider.naver) const _LastUsedHint(),
+          ElumButton(
+            label: _pending == OAuthProvider.naver ? '연결 중...' : '네이버로 시작하기',
+            backgroundColor: context.colors.loginNaverBg,
+            labelColor: context.colors.loginNaverLabel,
+            onPressed: isBusy ? null : () => _signIn(OAuthProvider.naver),
+          ),
+          SizedBox(height: 12.h),
+
+          if (_lastProvider == OAuthProvider.google) const _LastUsedHint(),
+          // 구글만 테두리가 필요해 따로 그린다. 크기·모서리는 ElumButton과 같은
+          // 토큰을 쓴다 — 버튼마다 규격이 다르면 화면이 어수선해진다.
+          _OutlinedProviderButton(
+            label: _pending == OAuthProvider.google ? '연결 중...' : 'Google로 시작하기',
+            onTap: isBusy ? null : () => _signIn(OAuthProvider.google),
+          ),
+
+          // 애플 로그인은 iOS에서만 노출한다.
+          // 안드로이드에서 쓰려면 애플 개발자 콘솔에 Services ID를 따로 만들어야 하는데
+          // 아직 없다. 버튼만 띄우면 눌러도 실패한다.
+          //
+          // 반대로 iOS에서는 빼면 안 된다 — 다른 소셜 로그인을 제공하는 앱은
+          // 애플 로그인도 제공해야 앱스토어 심사를 통과한다.
+          if (Platform.isIOS) ...[
+            SizedBox(height: 12.h),
+            if (_lastProvider == OAuthProvider.apple) const _LastUsedHint(),
+            Opacity(
+              opacity: isBusy && _pending != OAuthProvider.apple ? 0.5 : 1,
+              // 애플 버튼은 규격 위젯을 그대로 쓴다. 색·문구·로고를 직접 그리면
+              // 애플 심사 가이드라인 위반이다. 크기만 앱 버튼에 맞춘다.
+              child: SignInWithAppleButton(
+                text: _pending == OAuthProvider.apple ? '연결 중...' : 'Apple로 시작하기',
+                height: context.space.buttonH.h,
+                borderRadius: BorderRadius.circular(context.space.buttonRadius.r),
+                onPressed: isBusy ? () {} : () => _signIn(OAuthProvider.apple),
+              ),
+            ),
+          ],
+
+          if (_errorMessage != null) ...[
+            SizedBox(height: context.space.md),
+            Text(
+              _errorMessage!,
+              textAlign: TextAlign.center,
+              // 아동도 볼 수 있는 화면이라 빨강·경고 아이콘을 쓰지 않는다
+              style: context.typo.body.copyWith(
+                color: context.colors.textSecondary,
+              ),
+            ),
+          ],
+
+        ],
+      ),
+    );
+  }
+}
+
+/// "지난번에 이걸로" 안내.
+///
+/// 소셜 로그인이 넷이면 무엇을 썼는지 잊는다. 다른 것으로 들어오면 별개 계정이
+/// 생겨 아이 정보가 사라진 것처럼 보인다. 그 사고를 막는 장치다.
+class _LastUsedHint extends StatelessWidget {
+  const _LastUsedHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 6.h),
+      child: Text(
+        '지난번에 이걸로 로그인했어요',
+        textAlign: TextAlign.center,
+        style: context.typo.caption.copyWith(
+          color: context.colors.textSecondary,
+        ),
+      ),
+    );
+  }
+}
+
+/// 테두리가 있는 제공자 버튼. 구글만 흰 배경이라 경계선이 필요하다.
+///
+/// 크기·모서리·타이포는 [ElumButton]과 같은 토큰을 쓴다. 버튼마다 규격이 다르면
+/// 한 화면에 놓였을 때 어긋나 보인다.
+class _OutlinedProviderButton extends StatelessWidget {
+  const _OutlinedProviderButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final space = context.space;
+
+    return AppPressable(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: space.buttonH.h,
+        decoration: BoxDecoration(
+          color: colors.loginGoogleBg,
+          borderRadius: BorderRadius.circular(space.buttonRadius.r),
+          border: Border.all(color: colors.loginGoogleBorder),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: context.typo.button.copyWith(color: colors.loginGoogleLabel),
+        ),
+      ),
+    );
+  }
+}

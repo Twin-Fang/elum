@@ -35,3 +35,6 @@ Runner/GeneratedPluginRegistrant.*
 
 # Fastlane
 Gemfile.lock
+
+# 소셜 로그인 키 (tool/gen_ios_secrets.sh가 .env로 생성)
+Flutter/Secrets.xcconfig

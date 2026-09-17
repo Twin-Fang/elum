@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/data/auth_repository.dart';
-import '../../features/onboarding/application/onboarding_notifier.dart';
 import '../config/app_config.dart';
 import '../logger/app_logger.dart';
 import 'auth_interceptor.dart';
@@ -39,18 +38,15 @@ abstract final class DioClient {
 /// 부르면 인터셉터 없는 인스턴스가 생겨 401이 그대로 터진다.
 final dioProvider = Provider<Dio>((ref) {
   final dio = DioClient.create();
-  final storage = ref.watch(localStorageProvider);
 
   dio.interceptors.add(
     AuthInterceptor(
-      storage: storage,
+      tokens: ref.watch(tokenStoreProvider),
       dio: dio,
-      // AuthRepository가 이 Dio를 다시 참조하면 순환이 생긴다.
-      // 재발급은 인터셉터 없는 별도 인스턴스로 보낸다.
-      reauthenticate: () => AuthRepository(
-        dio: DioClient.create(),
-        storage: storage,
-      ).reauthenticate(),
+      // 갱신은 provider로 받은 **하나의 인스턴스**에 맡긴다.
+      // 여기서 매번 new 하면 동시 갱신을 묶는 장치가 인스턴스마다 따로 생겨
+      // 무력화된다. 같은 리프레시 토큰이 두 번 나가면 세션이 전부 끊긴다.
+      refresh: () => ref.read(tokenRefresherProvider).refreshAccessToken(),
     ),
   );
 

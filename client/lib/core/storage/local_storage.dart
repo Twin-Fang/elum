@@ -13,6 +13,14 @@ abstract interface class LocalStorage {
   String? get nickname;
   Future<void> setNickname(String v);
 
+  /// 마지막으로 성공한 로그인 수단(kakao·naver·google·apple).
+  ///
+  /// 소셜 로그인이 넷이면 사용자는 자기가 뭘 썼는지 잊는다. 다른 것으로 들어오면
+  /// **별개 계정이 생겨** "내 아이 정보가 사라졌다"가 된다. 지난 수단을 표시해
+  /// 그 사고를 막는다. 민감한 값이 아니라 일반 저장소에 둔다.
+  String? get lastLoginProvider;
+  Future<void> setLastLoginProvider(String v);
+
   List<String> get goals;
   Future<void> setGoals(List<String> v);
 
@@ -69,6 +77,7 @@ class SharedPrefsStorage implements LocalStorage {
   final SharedPreferences _prefs;
 
   static const _kNickname = 'childNickname';
+  static const _kLastProvider = 'lastLoginProvider';
   static const _kGoals = 'supportGoals';
   static const _kCharacter = 'cardCharacter';
   static const _kCompleted = 'onboardingCompleted';
@@ -93,6 +102,19 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setNickname(String v) {
     AppLogger.storageWrite(_kNickname, v);
     return _prefs.setString(_kNickname, v);
+  }
+
+  @override
+  String? get lastLoginProvider {
+    final value = _prefs.getString(_kLastProvider);
+    AppLogger.storageRead(_kLastProvider, value);
+    return value;
+  }
+
+  @override
+  Future<void> setLastLoginProvider(String v) {
+    AppLogger.storageWrite(_kLastProvider, v);
+    return _prefs.setString(_kLastProvider, v);
   }
 
   @override
@@ -260,6 +282,14 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<void> setNickname(String v) async => _nickname = v;
+
+  String? _lastLoginProvider;
+
+  @override
+  String? get lastLoginProvider => _lastLoginProvider;
+
+  @override
+  Future<void> setLastLoginProvider(String v) async => _lastLoginProvider = v;
 
   @override
   List<String> get goals => _goals;

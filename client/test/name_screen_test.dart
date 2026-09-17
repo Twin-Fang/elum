@@ -1,7 +1,6 @@
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
-import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/onboarding/presentation/name_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,8 +24,8 @@ void main() {
   // 키보드가 올라온 상황이 제대로 재현되지 않는다.
   useFigmaViewport();
 
-  /// 이름 입력 = 로그인이다. 실서버를 타지 않도록 결과를 정해 넣는다. (이슈 #19)
-  Widget buildSubject({AuthOutcome outcome = AuthOutcome.created}) {
+  /// 로그인은 온보딩 앞으로 나갔다. 이 화면은 입력만 받는다.
+  Widget buildSubject() {
     final router = GoRouter(
       initialLocation: Routes.onboardingName,
       routes: [
@@ -48,7 +47,6 @@ void main() {
     return ProviderScope(
       overrides: [
         testStorageOverride(),
-        authRepositoryProvider.overrideWithValue(_FakeAuth(outcome)),
       ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
@@ -142,46 +140,8 @@ void main() {
       expect(find.text('목표 화면'), findsOneWidget);
     });
 
-    testWidgets('이미 있는 이름이면 보호자 홈으로 바로 간다', (tester) async {
-      // 아이 이름이 곧 아이디다. 기존 계정이면 온보딩을 다시 받지 않는다.
-      await tester.pumpWidget(buildSubject(outcome: AuthOutcome.restored));
-      await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField), '하늘이별');
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('다음'));
-      await tester.pumpAndSettle();
 
-      expect(find.text('보호자 홈'), findsOneWidget);
-    });
-
-    testWidgets('로그인에 실패하면 화면에 머물고 에러 코드를 보여준다', (tester) async {
-      await tester.pumpWidget(buildSubject(outcome: AuthOutcome.failed));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), '하늘이');
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('다음'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('목표 화면'), findsNothing);
-      // 제보를 추적하려면 화면에 식별자가 있어야 한다
-      expect(find.textContaining('E-AUTH'), findsOneWidget);
-    });
-
-    testWidgets('네트워크가 끊기면 이름이 아니라 연결을 안내한다', (tester) async {
-      // 이름 문제로 안내하면 사용자가 이름만 계속 고치게 된다.
-      await tester.pumpWidget(buildSubject(outcome: AuthOutcome.offline));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), '하늘이별');
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('다음'));
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('E-NET'), findsOneWidget);
-      expect(find.textContaining('E-AUTH'), findsNothing);
-    });
   });
 
   /// 실기기에서 키보드가 올라오자 화면이 노란 줄무늬로 깨졌다.
@@ -201,42 +161,5 @@ void main() {
       expect(find.byType(ElumButton), findsOneWidget);
     });
 
-    testWidgets('에러 메시지가 뜬 상태에서 키보드가 올라와도 깨지지 않는다', (tester) async {
-      // 에러 문구는 두 줄이라 콘텐츠가 늘어난다. 실제로 이때 오버플로가 더 커졌다.
-      await tester.pumpWidget(buildSubject(outcome: AuthOutcome.failed));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), '서새찬');
-      await tester.pumpAndSettle();
-      await tester.tap(find.byType(ElumButton));
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('E-AUTH'), findsOneWidget);
-
-      showKeyboard(tester);
-      await tester.pumpAndSettle();
-
-      expect(find.byType(ElumButton), findsOneWidget);
-    });
   });
-}
-
-/// 네트워크를 타지 않는 인증 대역.
-class _FakeAuth implements AuthRepository {
-  _FakeAuth(this.outcome);
-
-  final AuthOutcome outcome;
-
-  @override
-  Future<AuthOutcome> signInWithName(String childName) async => outcome;
-
-  @override
-  bool get hasToken =>
-      outcome != AuthOutcome.failed && outcome != AuthOutcome.offline;
-
-  @override
-  Future<String?> reauthenticate() async => null;
-
-  @override
-  Future<void> deleteAccount() async {}
 }

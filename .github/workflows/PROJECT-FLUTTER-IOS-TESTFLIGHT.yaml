@@ -339,6 +339,16 @@ jobs:
           echo "✅ Dev flags disabled for prod build"
           grep '^ELUM_SHOW_DEV_TOOLS=\|^ELUM_SKIP_ONBOARDING=' ${{ env.ENV_FILE_PATH }}
 
+      # ⚠️ projectops 템플릿 업데이트 시 이 스텝이 사라지지 않도록 주의한다 (#156 참고).
+      # iOS는 URL 스킴·네이버 SDK 설정을 Info.plist에서 읽는데 그 값이 빌드 타임에
+      # 필요하다. Info.plist에 직접 적으면 시크릿이 저장소에 커밋되므로,
+      # .env를 읽어 gitignore된 xcconfig로 만든다. 이 스텝이 빠지면 값이 빈 채로
+      # 빌드돼 카카오·네이버·구글 로그인이 조용히 실패한다.
+      - name: Generate iOS social login secrets
+        run: |
+          bash tool/gen_ios_secrets.sh
+          echo "✅ ios/Flutter/Secrets.xcconfig 생성"
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:

@@ -1,6 +1,8 @@
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
+import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/onboarding/presentation/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,6 +47,11 @@ void main() {
     return ProviderScope(
       overrides: [
         testStorageOverride(onboardingCompleted: onboardingCompleted),
+        // 세션이 없으면 로그인 화면으로 가므로, 온보딩·홈 분기를 보려면
+        // 로그인된 상태를 만들어 둔다.
+        tokenStoreProvider.overrideWithValue(
+          InMemoryTokenStore(accessToken: 'a', refreshToken: 'r'),
+        ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),

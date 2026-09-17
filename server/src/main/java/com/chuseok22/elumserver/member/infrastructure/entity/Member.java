@@ -51,4 +51,49 @@ public class Member extends BaseEntity {
 
   // 이 시각 이전에 발급된 JWT는 거부한다 — 관리자 강제 로그아웃의 구현 수단.
   private LocalDateTime tokenInvalidBefore;
+
+  // --- 약관 동의 ---
+  //
+  // 개인정보보호법은 동의를 **항목별로 나눠서** 받도록 한다. 하나로 뭉쳐 받으면
+  // 동의가 무효가 될 수 있다. 그래서 필드를 따로 둔다.
+  //
+  // 선택 항목(마케팅)을 필수와 섞지 않는 것도 같은 이유다. 선택에 동의하지 않아도
+  // 서비스를 쓸 수 있어야 한다.
+
+  /// 서비스 이용약관 (필수)
+  @Column(nullable = false, columnDefinition = "boolean not null default false")
+  private Boolean termsAgreed = false;
+
+  /// 개인정보 수집·이용 (필수)
+  @Column(nullable = false, columnDefinition = "boolean not null default false")
+  private Boolean privacyAgreed = false;
+
+  /// 개인정보 국외 이전 (필수).
+  /// 일과 카드를 만들 때 마스킹된 텍스트가 Google(미국)로 전달된다.
+  @Column(nullable = false, columnDefinition = "boolean not null default false")
+  private Boolean overseasTransferAgreed = false;
+
+  /// 만 14세 이상이며 아이의 법정대리인임을 확인 (필수).
+  /// 아동 정보를 보호자가 대신 입력하는 구조라 이 확인이 필요하다.
+  @Column(nullable = false, columnDefinition = "boolean not null default false")
+  private Boolean guardianConfirmed = false;
+
+  /// 서비스 소식 수신 (선택). 동의하지 않아도 서비스를 쓸 수 있다.
+  @Column(nullable = false, columnDefinition = "boolean not null default false")
+  private Boolean marketingAgreed = false;
+
+  /// 동의한 시각. **법적 증빙이므로 반드시 남긴다.**
+  /// "언제 동의받았는가"를 답하지 못하면 동의 자체를 입증할 수 없다.
+  private LocalDateTime consentedAt;
+
+  /// 동의한 약관 버전. 약관을 개정하면 이 값이 옛 버전인 사용자에게 재동의를 받는다.
+  private String consentVersion;
+
+  /// 필수 항목을 모두 동의했는가. 하나라도 빠지면 서비스를 쓸 수 없다.
+  public boolean hasRequiredConsents() {
+    return Boolean.TRUE.equals(termsAgreed)
+      && Boolean.TRUE.equals(privacyAgreed)
+      && Boolean.TRUE.equals(overseasTransferAgreed)
+      && Boolean.TRUE.equals(guardianConfirmed);
+  }
 }

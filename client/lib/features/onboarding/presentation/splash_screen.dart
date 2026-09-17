@@ -11,6 +11,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_fade_slide_in.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/secured_by_dlp_badge.dart';
+import '../../auth/data/auth_repository.dart';
 import '../application/onboarding_notifier.dart';
 
 /// Figma `시작` (238:1808) — 서비스 진입 화면.
@@ -98,8 +99,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // 이미 온보딩을 마쳤으면 다시 묻지 않는다
-    final isDone = ref.read(localStorageProvider).isOnboardingCompleted;
+    // 목적지는 세 갈래다.
+    //   세션 없음        → 로그인
+    //   세션 있고 미완료 → 온보딩(아이 정보 입력)
+    //   세션 있고 완료   → 보호자 홈
+    final destination = !ref.read(authRepositoryProvider).hasSession
+        ? Routes.login
+        : ref.read(localStorageProvider).isOnboardingCompleted
+            ? Routes.guardian
+            : Routes.onboardingName;
 
     return Scaffold(
       body: Container(
@@ -278,9 +286,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     // GoRouter를 명시적으로 찾아서 호출한다.
                     // context.go()만으로는 DevToolsOverlay 레이어에서 라우터를 찾지 못한다.
                     try {
-                      GoRouter.of(context).go(
-                        isDone ? Routes.guardian : Routes.onboardingName,
-                      );
+                      GoRouter.of(context).go(destination);
                     } catch (e) {
                       // 라우터를 찾지 못한 경우(테스트 환경 등)
                       debugPrint('라우팅 실패: $e');

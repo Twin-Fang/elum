@@ -2,8 +2,10 @@ package com.chuseok22.elumserver.member.application.controller;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
+import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
+import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -193,4 +195,35 @@ public interface MemberControllerDocs {
     )
   })
   ResponseEntity<Void> withdraw(Authentication authentication);
+
+  @Operation(
+    summary = "약관 동의 상태 조회",
+    description = """
+      현재 계정의 약관 동의 상태를 반환합니다.
+
+      `requiredCompleted`가 false면 앱은 서비스 진입 전에 동의 화면을 띄워야 합니다.
+      """
+  )
+  ResponseEntity<MemberConsentResponse> getConsents(Authentication authentication);
+
+  @Operation(
+    summary = "약관 동의",
+    description = """
+      약관 동의를 기록합니다. 항목을 하나로 뭉치지 않고 **따로** 받습니다.
+
+      **필수 항목** — 하나라도 false면 400을 반환합니다.
+      - `termsAgreed` 서비스 이용약관
+      - `privacyAgreed` 개인정보 수집·이용
+      - `overseasTransferAgreed` 개인정보 국외 이전 (카드 생성 시 Google로 전달)
+      - `guardianConfirmed` 만 14세 이상이며 아이의 법정대리인임을 확인
+
+      **선택 항목**
+      - `marketingAgreed` 서비스 소식 수신. 거부해도 서비스를 이용할 수 있으며,
+        거부 의사도 그대로 저장합니다.
+
+      동의 시각이 함께 기록됩니다. 약관을 개정하면 `consentVersion`으로 재동의 대상을 가립니다.
+      """
+  )
+  ResponseEntity<MemberConsentResponse> agreeConsents(
+    Authentication authentication, MemberConsentRequest request);
 }

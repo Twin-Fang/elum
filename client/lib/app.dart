@@ -23,8 +23,8 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     // 온보딩 미완료 상태로 보호자·아동 화면에 들어오는 것을 막는다
     isOnboardingCompleted: () =>
         ref.read(localStorageProvider).isOnboardingCompleted,
-    // 토큰이 없으면 시작 화면으로 되돌린다 — 회원삭제 후 재진입을 막는다
-    hasToken: () => ref.read(authRepositoryProvider).hasToken,
+    // 세션이 없으면 로그인 화면으로 되돌린다 — 로그아웃·회원삭제 후 재진입을 막는다
+    hasToken: () => ref.read(authRepositoryProvider).hasSession,
   );
 
   @override

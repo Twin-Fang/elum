@@ -2,358 +2,281 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:elum/core/network/auth_interceptor.dart';
 import 'package:elum/core/storage/local_storage.dart';
+import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
+import 'package:elum/features/auth/data/oauth_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// 아이 이름을 아이디로 쓰는 인증 테스트.
+/// 소셜 로그인 인증 테스트.
 ///
-/// Figma에 로그인 화면이 없어 온보딩에서 받는 아이 이름을 아이디로 쓴다.
-/// 비밀번호는 고정값이라 기기가 달라도 같은 이름이면 같은 계정이다.
+/// 제공자 SDK는 대역으로 바꿔 넣는다. 실제 카카오·구글 화면을 띄울 수 없고,
+/// 검증할 것은 **SDK가 준 토큰을 서버 토큰으로 바꾸고 다음 화면을 정하는 부분**이다.
 void main() {
-  /// 요청을 가로채 미리 정한 응답을 돌려주는 어댑터.
-  /// 실 서버를 때리면 테스트가 네트워크에 의존하게 된다.
   late _FakeAdapter adapter;
   late Dio dio;
   late InMemoryStorage storage;
+  late InMemoryTokenStore tokens;
 
   setUp(() {
     adapter = _FakeAdapter();
     dio = Dio(BaseOptions(baseUrl: 'https://test.local'))
       ..httpClientAdapter = adapter;
     storage = InMemoryStorage();
+    tokens = InMemoryTokenStore();
   });
 
-  /// 로그인 성공 응답
-  Map<String, dynamic> loginBody(String token) => {
-        'accessToken': token,
+  AuthRepository buildRepo(OAuthSdkOutcome sdkResult) => AuthRepository(
+        dio: dio,
+        storage: storage,
+        tokens: tokens,
+        sdk: _FakeSdk(sdkResult),
+      );
+
+  Map<String, dynamic> tokenBody(String access, String refresh) => {
+        'accessToken': access,
         'tokenType': 'Bearer',
-        'expiresIn': 3600000,
+        'expiresIn': 86400000,
+        'refreshToken': refresh,
       };
 
-  group('AuthRepository — 아이 이름이 곧 아이디', () {
-    test('새 이름이면 계정을 만들고 온보딩을 계속한다', () async {
+  Map<String, dynamic> memberBody({
+    bool consented = true,
+    String? nickname,
+  }) =>
+      {
+        'id': 'm1',
+        'username': 'kakao_123',
+        'requiredConsentsCompleted': consented,
+        'nickname': nickname,
+      };
+
+  group('소셜 로그인', () {
+    test('토큰을 받아 저장하고, 동의 전이면 동의 화면으로 보낸다', () async {
       adapter
-        ..stub('/api/auth/signup', 201, <String, dynamic>{})
-        ..stub('/api/auth/login', 200, loginBody('token-1'));
+        ..stub('/api/auth/oauth/kakao', 200, tokenBody('access-1', 'refresh-1'))
+        ..stub('/api/member/me', 200, memberBody(consented: false));
 
-      final repo = AuthRepository(dio: dio, storage: storage);
-      final outcome = await repo.signInWithName('하늘이별');
+      final outcome = await buildRepo(const OAuthSdkSuccess('kakao-token'))
+          .signInWith(OAuthProvider.kakao);
 
-      expect(outcome, AuthOutcome.created);
-      expect(storage.accessToken, 'token-1');
+      expect(outcome, AuthOutcome.consentRequired);
+      expect(tokens.accessToken, 'access-1');
+      expect(tokens.refreshToken, 'refresh-1');
     });
 
-    test('이미 있는 이름이면 로그인해 기존 계정으로 복귀한다', () async {
-      // 서버는 중복 아이디에 409를 준다. 오류가 아니라 "기존 사용자" 신호다.
+    test('동의를 마쳤고 아이 정보가 없으면 온보딩으로 보낸다', () async {
       adapter
-        ..stub('/api/auth/signup', 409, {'errorCode': 'DUPLICATE_USERNAME'})
-        ..stub('/api/auth/login', 200, loginBody('token-2'));
+        ..stub('/api/auth/oauth/google', 200, tokenBody('access-1', 'refresh-1'))
+        ..stub('/api/member/me', 200, memberBody(nickname: null));
 
-      final repo = AuthRepository(dio: dio, storage: storage);
-      final outcome = await repo.signInWithName('하늘이별');
+      final outcome = await buildRepo(const OAuthSdkSuccess('id-token'))
+          .signInWith(OAuthProvider.google);
 
-      expect(outcome, AuthOutcome.restored);
-      expect(storage.accessToken, 'token-2');
+      expect(outcome, AuthOutcome.onboarding);
     });
 
-    test('아이디·비밀번호로 이름과 고정값을 보낸다', () async {
+    test('아이 정보까지 있으면 홈으로 보내고 이름을 로컬에 되살린다', () async {
       adapter
-        ..stub('/api/auth/signup', 201, <String, dynamic>{})
-        ..stub('/api/auth/login', 200, loginBody('token-1'));
+        ..stub('/api/auth/oauth/kakao', 200, tokenBody('access-1', 'refresh-1'))
+        ..stub('/api/member/me', 200, memberBody(nickname: '하늘이'));
 
-      final repo = AuthRepository(dio: dio, storage: storage);
-      await repo.signInWithName('하늘이별');
+      final outcome = await buildRepo(const OAuthSdkSuccess('kakao-token'))
+          .signInWith(OAuthProvider.kakao);
 
-      // 기기가 달라도 같은 이름이면 같은 계정이어야 한다
-      expect(adapter.lastBody['username'], '하늘이별');
-      expect(adapter.lastBody['password'], AuthRepository.fixedPassword);
+      expect(outcome, AuthOutcome.home);
+      // 재설치한 사용자도 아이 이름이 화면에 바로 보여야 한다
+      expect(storage.nickname, '하늘이');
     });
 
-    test('고정 비밀번호가 서버 제약(8자 이상)을 지킨다', () {
-      // "0000"은 실측 결과 400이다
-      expect(AuthRepository.fixedPassword.length, greaterThanOrEqualTo(8));
-    });
-
-    test('이름 앞뒤 공백은 제거하고 보낸다', () async {
+    test('성공하면 다음 화면에서 안내할 수 있게 로그인 수단을 남긴다', () async {
       adapter
-        ..stub('/api/auth/signup', 201, <String, dynamic>{})
-        ..stub('/api/auth/login', 200, loginBody('token-1'));
+        ..stub('/api/auth/oauth/naver', 200, tokenBody('access-1', 'refresh-1'))
+        ..stub('/api/member/me', 200, memberBody(nickname: '하늘이'));
 
-      final repo = AuthRepository(dio: dio, storage: storage);
-      await repo.signInWithName('  하늘이별  ');
+      await buildRepo(const OAuthSdkSuccess('naver-token'))
+          .signInWith(OAuthProvider.naver);
 
-      // 공백이 섞이면 같은 이름인데 다른 계정이 된다
-      expect(adapter.lastBody['username'], '하늘이별');
+      expect(storage.lastLoginProvider, 'naver');
     });
 
-    test('이름이 비면 네트워크를 타지 않는다', () async {
-      final repo = AuthRepository(dio: dio, storage: storage);
+    test('사용자가 제공자 화면을 닫으면 서버를 부르지 않는다', () async {
+      final outcome = await buildRepo(const OAuthSdkCancelled())
+          .signInWith(OAuthProvider.kakao);
 
-      expect(await repo.signInWithName('   '), AuthOutcome.failed);
+      expect(outcome, AuthOutcome.cancelled);
       expect(adapter.pathsCalled, isEmpty);
+      expect(tokens.hasSession, isFalse);
     });
 
-    test('로그인이 실패해도 예외를 던지지 않는다', () async {
-      // 데모는 어떤 실패에도 끝까지 진행되어야 한다 (docs 원칙 6번).
-      adapter
-        ..stub('/api/auth/signup', 500, <String, dynamic>{})
-        ..stub('/api/auth/login', 500, <String, dynamic>{});
+    test('같은 이메일이 다른 제공자로 가입돼 있으면 합치지 않고 알린다', () async {
+      // 서버가 이메일로 계정을 병합하지 않기 때문에 409가 온다.
+      adapter.stub('/api/auth/oauth/google', 409, {'errorCode': 'OAUTH_EMAIL_CONFLICT'});
 
-      final repo = AuthRepository(dio: dio, storage: storage);
+      final outcome = await buildRepo(const OAuthSdkSuccess('id-token'))
+          .signInWith(OAuthProvider.google);
 
-      expect(await repo.signInWithName('하늘이별'), AuthOutcome.failed);
+      expect(outcome, AuthOutcome.emailConflict);
+      expect(tokens.hasSession, isFalse);
     });
 
-    test('이름이 4자 미만이면 서버 400을 그대로 실패로 전한다', () async {
-      // 서버가 username을 4~20자로 제한한다. 클라에서 우회하지 않는다.
-      adapter
-        ..stub('/api/auth/signup', 400, {'errorCode': 'INVALID_INPUT_VALUE'})
-        ..stub('/api/auth/login', 401, <String, dynamic>{});
+    test('서버에 닿지 못하면 인증 실패와 구분해 알린다', () async {
+      adapter.stubConnectionError('/api/auth/oauth/kakao');
 
-      final repo = AuthRepository(dio: dio, storage: storage);
+      final outcome = await buildRepo(const OAuthSdkSuccess('kakao-token'))
+          .signInWith(OAuthProvider.kakao);
 
-      expect(await repo.signInWithName('하늘이'), AuthOutcome.failed);
+      // 네트워크 문제인데 "다시 로그인하라"고 하면 사용자는 헛수고를 한다
+      expect(outcome, AuthOutcome.offline);
     });
 
-    /// 실기기에서 INTERNET 권한이 없어 DNS부터 막혔을 때, 화면이 "이름을 4자
-    /// 이상으로" 안내해 사용자가 이름만 계속 고치는 문제가 있었다.
-    /// 네트워크 실패는 이름 문제와 구분되어야 한다.
-    test('서버에 닿지 못하면 offline으로 구분한다', () async {
-      adapter
-        ..stubConnectionError('/api/auth/signup')
-        ..stubConnectionError('/api/auth/login');
+    test('SDK가 실패하면 서버를 부르지 않는다', () async {
+      final outcome = await buildRepo(const OAuthSdkFailure('SDK-KAKAO'))
+          .signInWith(OAuthProvider.kakao);
 
-      final repo = AuthRepository(dio: dio, storage: storage);
-
-      expect(await repo.signInWithName('하늘이별'), AuthOutcome.offline);
-    });
-
-    test('가입 단계에서 끊기면 로그인을 시도하지 않는다', () async {
-      // 서버에 못 닿는 게 확실하므로 같은 요청을 한 번 더 보낼 이유가 없다.
-      adapter.stubConnectionError('/api/auth/signup');
-
-      final repo = AuthRepository(dio: dio, storage: storage);
-      await repo.signInWithName('하늘이별');
-
-      expect(adapter.pathsCalled, isNot(contains('/api/auth/login')));
-    });
-
-    test('가입은 됐는데 로그인에서 끊기면 offline이다', () async {
-      adapter
-        ..stub('/api/auth/signup', 201, <String, dynamic>{})
-        ..stubConnectionError('/api/auth/login');
-
-      final repo = AuthRepository(dio: dio, storage: storage);
-
-      expect(await repo.signInWithName('하늘이별'), AuthOutcome.offline);
-    });
-
-    test('서버가 응답한 실패는 offline이 아니다', () async {
-      // 400·500은 서버까지 닿은 것이다. 네트워크 안내를 하면 오히려 혼란스럽다.
-      adapter
-        ..stub('/api/auth/signup', 400, {'errorCode': 'INVALID_INPUT_VALUE'})
-        ..stub('/api/auth/login', 401, <String, dynamic>{});
-
-      final repo = AuthRepository(dio: dio, storage: storage);
-
-      expect(await repo.signInWithName('하늘이'), AuthOutcome.failed);
-    });
-
-    test('저장된 이름으로 토큰을 재발급한다', () async {
-      await storage.setNickname('하늘이별');
-      adapter.stub('/api/auth/login', 200, loginBody('fresh'));
-
-      final repo = AuthRepository(dio: dio, storage: storage);
-
-      expect(await repo.reauthenticate(), 'fresh');
-      // 재발급은 가입을 다시 시도하지 않는다
-      expect(adapter.pathsCalled, isNot(contains('/api/auth/signup')));
-    });
-
-    test('이름이 없으면 재발급하지 않는다', () async {
-      final repo = AuthRepository(dio: dio, storage: storage);
-
-      expect(await repo.reauthenticate(), isNull);
+      expect(outcome, AuthOutcome.failed);
       expect(adapter.pathsCalled, isEmpty);
-    });
-
-    test('hasToken이 라우팅 판단 기준이 된다', () async {
-      final repo = AuthRepository(dio: dio, storage: storage);
-      expect(repo.hasToken, isFalse);
-
-      await storage.setAccessToken('token-1');
-      expect(repo.hasToken, isTrue);
-
-      // 로그아웃하면 시작 화면으로 돌아가야 한다
-      await storage.clearAll();
-      expect(repo.hasToken, isFalse);
     });
   });
 
-  group('AuthInterceptor — 토큰 만료 대응', () {
-    test('토큰이 있으면 Authorization 헤더를 붙인다', () async {
-      await storage.setAccessToken('token-1');
-      adapter.stub('/api/member/me', 200, {'id': 'm1'});
+  group('토큰 갱신', () {
+    test('갱신하면 리프레시 토큰도 새 값으로 바뀐다 (회전)', () async {
+      tokens = InMemoryTokenStore(accessToken: 'old-a', refreshToken: 'old-r');
+      adapter.stub('/api/auth/refresh', 200, tokenBody('new-a', 'new-r'));
 
-      dio.interceptors.add(
-        AuthInterceptor(
-          storage: storage,
-          dio: dio,
-          reauthenticate: () async => 'token-1',
-        ),
+      final repo = AuthRepository(
+        dio: dio,
+        storage: storage,
+        tokens: tokens,
+        sdk: _FakeSdk(const OAuthSdkCancelled()),
       );
-      await dio.get<dynamic>('/api/member/me');
+      final access = await repo.refreshAccessToken();
 
-      expect(adapter.lastHeaders['Authorization'], 'Bearer token-1');
+      expect(access, 'new-a');
+      // 옛 값을 그대로 두면 다음 갱신에서 재사용으로 감지돼 로그아웃된다
+      expect(tokens.refreshToken, 'new-r');
     });
 
-    test('401이면 재발급 후 원요청을 재시도한다', () async {
-      await storage.setAccessToken('expired');
-      // 첫 호출은 401, 재시도는 200
-      adapter.stubSequence('/api/member/me', [
-        (401, <String, dynamic>{}),
-        (200, {'id': 'm1'}),
+    test('동시에 여러 번 요청해도 서버에는 한 번만 나간다', () async {
+      // 회전 방식이라 같은 리프레시 토큰이 두 번 나가면 서버가 탈취로 보고
+      // 계정의 모든 세션을 끊는다. 홈 화면이 API를 동시에 부를 때 실제로 생긴다.
+      tokens = InMemoryTokenStore(accessToken: 'old-a', refreshToken: 'old-r');
+      adapter.stub('/api/auth/refresh', 200, tokenBody('new-a', 'new-r'));
+
+      final repo = AuthRepository(
+        dio: dio,
+        storage: storage,
+        tokens: tokens,
+        sdk: _FakeSdk(const OAuthSdkCancelled()),
+      );
+
+      final results = await Future.wait([
+        repo.refreshAccessToken(),
+        repo.refreshAccessToken(),
+        repo.refreshAccessToken(),
       ]);
 
-      var reauthCount = 0;
-      dio.interceptors.add(
-        AuthInterceptor(
-          storage: storage,
-          dio: dio,
-          reauthenticate: () async {
-            reauthCount++;
-            await storage.setAccessToken('fresh');
-            return 'fresh';
-          },
-        ),
+      expect(results, ['new-a', 'new-a', 'new-a']);
+      expect(
+        adapter.pathsCalled.where((p) => p == '/api/auth/refresh').length,
+        1,
       );
-
-      final res = await dio.get<dynamic>('/api/member/me');
-
-      expect(res.statusCode, 200);
-      expect(reauthCount, 1);
-      // 재시도는 새 토큰으로 나가야 한다
-      expect(adapter.lastHeaders['Authorization'], 'Bearer fresh');
     });
 
-    test('재시도가 또 401이면 무한 루프 없이 실패한다', () async {
-      await storage.setAccessToken('expired');
-      adapter.stub('/api/member/me', 401, <String, dynamic>{});
+    test('갱신이 401이면 세션이 끝난 것이므로 토큰을 지운다', () async {
+      tokens = InMemoryTokenStore(accessToken: 'old-a', refreshToken: 'old-r');
+      adapter.stub('/api/auth/refresh', 401, {'errorCode': 'REFRESH_TOKEN_REUSED'});
 
-      var reauthCount = 0;
-      dio.interceptors.add(
-        AuthInterceptor(
-          storage: storage,
-          dio: dio,
-          reauthenticate: () async {
-            reauthCount++;
-            await storage.setAccessToken('still-bad');
-            return 'still-bad';
-          },
-        ),
+      final repo = AuthRepository(
+        dio: dio,
+        storage: storage,
+        tokens: tokens,
+        sdk: _FakeSdk(const OAuthSdkCancelled()),
       );
+      final access = await repo.refreshAccessToken();
 
-      await expectLater(
-        dio.get<dynamic>('/api/member/me'),
-        throwsA(isA<DioException>()),
-      );
-      // 재발급은 딱 한 번만 시도한다
-      expect(reauthCount, 1);
+      expect(access, isNull);
+      expect(tokens.hasSession, isFalse);
     });
 
-    test('재발급이 실패하면 원래 401을 그대로 돌려준다', () async {
-      await storage.setAccessToken('expired');
-      adapter.stub('/api/member/me', 401, <String, dynamic>{});
+    test('서버에 닿지 못한 것뿐이면 토큰을 지우지 않는다', () async {
+      // 네트워크 문제로 로그아웃시키면 지하철에서 앱을 열 때마다 튕긴다
+      tokens = InMemoryTokenStore(accessToken: 'old-a', refreshToken: 'old-r');
+      adapter.stubConnectionError('/api/auth/refresh');
 
-      dio.interceptors.add(
-        AuthInterceptor(
-          storage: storage,
-          dio: dio,
-          reauthenticate: () async => null,
-        ),
+      final repo = AuthRepository(
+        dio: dio,
+        storage: storage,
+        tokens: tokens,
+        sdk: _FakeSdk(const OAuthSdkCancelled()),
       );
+      final access = await repo.refreshAccessToken();
 
-      await expectLater(
-        dio.get<dynamic>('/api/member/me'),
-        throwsA(
-          isA<DioException>().having(
-            (e) => e.response?.statusCode,
-            'statusCode',
-            401,
-          ),
-        ),
+      expect(access, isNull);
+      expect(tokens.hasSession, isTrue);
+    });
+
+    test('리프레시 토큰이 없으면 서버를 부르지 않는다', () async {
+      final repo = AuthRepository(
+        dio: dio,
+        storage: storage,
+        tokens: tokens,
+        sdk: _FakeSdk(const OAuthSdkCancelled()),
       );
+      final access = await repo.refreshAccessToken();
+
+      expect(access, isNull);
+      expect(adapter.pathsCalled, isEmpty);
     });
   });
 
-  /// 회원삭제는 개발자 도구 플로팅 버튼에서 쓰는 기능이다.
-  ///
-  /// 서버 계약: `DELETE /api/member/me` → 204 No Content, body 없음.
-  /// 출처: server/.../member/application/controller/MemberController.java
-  ///
-  /// 경로나 메서드가 어긋나면 조용히 실패한다 — deleteAccount()가 예외를
-  /// 삼키기 때문에 로컬만 지워지고 서버에는 계정이 남는다. 그래서 테스트로 고정한다.
-  group('AuthRepository.deleteAccount — 서버 계약', () {
-    test('DELETE /api/member/me를 호출한다', () async {
-      adapter.stub('/api/member/me', 204, {});
-      storage
-        ..setAccessToken('token')
-        ..setNickname('하늘이별');
+  group('로그아웃', () {
+    test('서버 세션을 끊고 로컬을 비운다', () async {
+      tokens = InMemoryTokenStore(accessToken: 'a', refreshToken: 'r');
+      await storage.setNickname('하늘이');
+      adapter.stub('/api/auth/logout', 204, <String, dynamic>{});
 
-      final repo = AuthRepository(dio: dio, storage: storage);
-      await repo.deleteAccount();
+      final repo = AuthRepository(
+        dio: dio,
+        storage: storage,
+        tokens: tokens,
+        sdk: _FakeSdk(const OAuthSdkCancelled()),
+      );
+      await repo.logout();
 
-      expect(adapter.pathsCalled, contains('/api/member/me'));
-      expect(adapter.lastMethod, 'DELETE');
-    });
-
-    test('삭제 후 토큰과 이름이 모두 지워진다', () async {
-      adapter.stub('/api/member/me', 204, {});
-      storage
-        ..setAccessToken('token')
-        ..setNickname('하늘이별');
-
-      final repo = AuthRepository(dio: dio, storage: storage);
-      await repo.deleteAccount();
-
-      // 토큰만 지우고 이름이 남으면 AuthInterceptor가 재발급을 시도해
-      // 지워진 계정으로 되살아난다. 둘 다 지워져야 한다.
-      expect(storage.accessToken, isNull);
+      expect(adapter.pathsCalled, contains('/api/auth/logout'));
+      expect(tokens.hasSession, isFalse);
       expect(storage.nickname, isNull);
     });
 
-    test('서버가 실패해도 로컬은 반드시 지운다', () async {
-      // 스텁을 등록하지 않으면 어댑터가 404를 준다
-      storage
-        ..setAccessToken('token')
-        ..setNickname('하늘이별');
+    test('서버 요청이 실패해도 로컬은 반드시 비운다', () async {
+      // 로컬에 남으면 사용자는 로그아웃했다고 생각하는데 앱은 로그인 상태로 돈다
+      tokens = InMemoryTokenStore(accessToken: 'a', refreshToken: 'r');
+      adapter.stubConnectionError('/api/auth/logout');
 
-      final repo = AuthRepository(dio: dio, storage: storage);
-      await repo.deleteAccount();
+      final repo = AuthRepository(
+        dio: dio,
+        storage: storage,
+        tokens: tokens,
+        sdk: _FakeSdk(const OAuthSdkCancelled()),
+      );
+      await repo.logout();
 
-      // 토큰이 남으면 지워진 계정으로 계속 401을 맞는다
-      expect(storage.accessToken, isNull);
-    });
-
-    test('삭제 후에는 토큰 재발급이 시도되지 않는다', () async {
-      adapter.stub('/api/member/me', 204, {});
-      storage
-        ..setAccessToken('token')
-        ..setNickname('하늘이별');
-
-      final repo = AuthRepository(dio: dio, storage: storage);
-      await repo.deleteAccount();
-
-      // 이름이 지워졌으므로 재발급할 방법이 없다 → 무한 루프가 생기지 않는다
-      expect(await repo.reauthenticate(), isNull);
-      expect(repo.hasToken, isFalse);
+      expect(tokens.hasSession, isFalse);
     });
   });
 }
 
-/// 경로별로 정해둔 응답을 돌려주는 가짜 어댑터.
+/// 제공자 화면을 띄우지 않는 SDK 대역. 정해진 결과를 그대로 돌려준다.
+class _FakeSdk implements OAuthSdk {
+  _FakeSdk(this.result);
+
+  final OAuthSdkOutcome result;
+
+  @override
+  Future<OAuthSdkOutcome> signIn(OAuthProvider provider) async => result;
+}
+
 class _FakeAdapter implements HttpClientAdapter {
   final _single = <String, (int, Map<String, dynamic>)>{};
   final _sequences = <String, List<(int, Map<String, dynamic>)>>{};

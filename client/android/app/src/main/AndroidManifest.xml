@@ -29,6 +29,31 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- 카카오 로그인 리다이렉트.
+             카카오톡·카카오계정 로그인을 마치면 이 스킴으로 앱이 다시 열린다.
+             스킴 값은 build.gradle.kts가 .env의 네이티브 앱 키로 채운다. -->
+        <activity
+            android:name="com.kakao.sdk.flutter.AuthCodeCustomTabsActivity"
+            android:exported="true">
+            <intent-filter android:label="flutter_web_auth">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="${kakaoScheme}" android:host="oauth"/>
+            </intent-filter>
+        </activity>
+
+        <!-- 네이버 로그인 SDK 설정. 값은 build.gradle.kts가 .env에서 리소스로 만든다. -->
+        <meta-data
+            android:name="com.naver.sdk.clientId"
+            android:value="@string/naver_client_id"/>
+        <meta-data
+            android:name="com.naver.sdk.clientSecret"
+            android:value="@string/naver_client_secret"/>
+        <meta-data
+            android:name="com.naver.sdk.clientName"
+            android:value="@string/naver_client_name"/>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -45,5 +70,8 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Android 11부터는 선언하지 않으면 다른 앱의 설치 여부를 알 수 없다.
+             이게 없으면 카카오톡이 깔려 있어도 항상 웹 로그인으로 빠진다. -->
+        <package android:name="com.kakao.talk"/>
     </queries>
 </manifest>

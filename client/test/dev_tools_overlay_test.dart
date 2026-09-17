@@ -1,5 +1,7 @@
 import 'package:elum/core/dev/dev_tools_overlay.dart';
 import 'package:elum/core/router/app_router.dart';
+import 'package:elum/core/storage/token_store.dart';
+import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,7 +29,11 @@ void main() {
 
   Widget buildSubject() {
     return ProviderScope(
-      overrides: [testStorageOverride()],
+      overrides: [
+        testStorageOverride(),
+        // 기기 보안 저장소를 타면 테스트 환경에 플러그인이 없어 멈춘다.
+        tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
+      ],
       child: MaterialApp(
         home: const Scaffold(body: Text('앱 화면')),
         builder: (context, child) => DevToolsOverlay(
@@ -52,6 +58,10 @@ void main() {
           builder: (context, state) => const Scaffold(body: Text('시작 화면')),
         ),
         GoRoute(
+          path: Routes.login,
+          builder: (context, state) => const Scaffold(body: Text('로그인 화면')),
+        ),
+        GoRoute(
           path: Routes.onboardingName,
           builder: (context, state) => const Scaffold(body: Text('이름 화면')),
         ),
@@ -59,7 +69,11 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [testStorageOverride()],
+      overrides: [
+        testStorageOverride(),
+        // 기기 보안 저장소를 타면 테스트 환경에 플러그인이 없어 멈춘다.
+        tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
+      ],
       child: MaterialApp.router(
         routerConfig: router,
         builder: (context, child) => DevToolsOverlay(
@@ -147,7 +161,7 @@ void main() {
   group('실제 라우터 환경 (MaterialApp.router)', () {
     // 실기기에서 "No GoRouter found in context"로 터진 경로다.
     // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾을 수 없다.
-    testWidgets('회원삭제가 예외 없이 시작 화면으로 보낸다', (tester) async {
+    testWidgets('회원삭제가 예외 없이 로그인 화면으로 보낸다', (tester) async {
       dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
 
       await tester.pumpWidget(buildRouterSubject());
@@ -161,7 +175,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('시작 화면'), findsOneWidget);
+      // 계정이 사라졌으니 시작 화면이 아니라 로그인부터다
+      expect(find.text('로그인 화면'), findsOneWidget);
     });
 
     testWidgets('화면 이동이 예외 없이 동작한다', (tester) async {
@@ -195,8 +210,8 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, '회원삭제'));
     await tester.pumpAndSettle();
 
-    // 시작 화면으로 보내달라고 요청했는지 확인한다
-    expect(navigated, contains(Routes.splash));
+    // 계정이 사라졌으니 로그인 화면으로 보내달라고 요청했는지 확인한다
+    expect(navigated, contains(Routes.login));
   });
 
   testWidgets('드래그하면 버튼 위치가 바뀐다', (tester) async {
