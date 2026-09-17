@@ -70,8 +70,15 @@ class _NameScreenState extends ConsumerState<NameScreen> {
             controller: _controller,
             hintText: '이름을 입력해주세요',
             onChanged: ref.read(onboardingProvider.notifier).setNickname,
-            // 엔터는 키보드만 닫는다. 진행은 '다음' 버튼으로만 통일한다.
-            onSubmitted: (_) => FocusScope.of(context).unfocus(),
+            // 완료 키로도 다음 단계로 간다.
+            //
+            // 키보드가 하단 '다음'을 덮고 있어서, 이름을 다 치고도 무엇을 눌러야
+            // 할지 보이지 않는다. 키보드를 내리는 것만으로는 그 사실을 알 수 없다.
+            // 이름이 비어 있으면 진행 조건을 만족하지 않으므로 닫기만 한다.
+            onSubmitted: (_) {
+              FocusScope.of(context).unfocus();
+              if (ref.read(onboardingProvider).canProceedFromName) _submit();
+            },
           ),
         ],
       ),
