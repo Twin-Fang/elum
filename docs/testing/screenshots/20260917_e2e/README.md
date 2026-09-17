@@ -16,3 +16,5 @@ Android 에뮬레이터(Medium_Phone_API_36.1, Google Play 이미지)에서 릴�
 | `08_home_cat_after_restart.png` | 앱 재시작 후 같은 계정 홈 — 고양이로 바뀌어 있다 |
 | `09_consent_escape_clipped.png` | 동의 화면을 **한 번만** 스크롤한 상태 — 아래에 내용이 더 있다는 단서가 없다 |
 | `10_consent_bottom_scrolled.png` | 끝까지 스크롤한 상태 — "다른 계정으로 로그인"이 온전히 보인다 |
+| `11_pin_shake_curve.png` | PIN 불일치 흔들림 — 설계 곡선과 60fps 실측 궤적 |
+| `12_session_expired_looks_normal.png` | 세션이 완전히 끊긴 상태인데 홈이 정상처럼 보인다 |
