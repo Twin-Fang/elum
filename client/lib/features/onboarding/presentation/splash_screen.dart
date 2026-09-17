@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,7 +11,6 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_fade_slide_in.dart';
-import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/secured_by_dlp_badge.dart';
 import '../../auth/data/auth_repository.dart';
 import '../application/onboarding_notifier.dart';
@@ -69,14 +70,40 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         hasSession: ref.read(authRepositoryProvider).hasSession,
         onboardingCompleted: ref.read(localStorageProvider).isOnboardingCompleted,
       );
-      if (!skip) return;
-      try {
-        GoRouter.of(context).go(Routes.guardian);
-      } catch (e) {
-        // 라우터가 없는 환경(테스트 등)에서는 화면을 그대로 둔다
-        debugPrint('시작 화면 자동 이동 실패: $e');
+      if (skip) {
+        _goTo(Routes.guardian);
+        return;
       }
+      // 처음 오는 사람은 연출을 보고 **저절로** 다음 화면으로 넘어간다 (이슈 #207).
+      //
+      // 예전에는 여기에 `시작하기` 버튼이 있었다. 누를 것이 하나뿐인 화면은
+      // 다음에 뭐가 나오는지 말해 주지 않으면서 한 번 더 누르게만 만든다.
+      _advance = Timer(_autoAdvanceAfter, () {
+        if (!mounted) return;
+        _goTo(_destination());
+      });
     });
+  }
+
+  /// 연출이 자리를 잡을 만큼만 기다린다. 더 길면 기다리는 화면이 된다.
+  static const _autoAdvanceAfter = Duration(milliseconds: 1700);
+
+  Timer? _advance;
+
+  String _destination() => !ref.read(authRepositoryProvider).hasSession
+      ? Routes.login
+      : ref.read(localStorageProvider).isOnboardingCompleted
+          ? Routes.guardian
+          : Routes.onboardingName;
+
+  /// context.go()만으로는 DevToolsOverlay 레이어에서 라우터를 찾지 못한다.
+  void _goTo(String route) {
+    try {
+      GoRouter.of(context).go(route);
+    } catch (e) {
+      // 라우터가 없는 환경(테스트 등)에서는 화면을 그대로 둔다
+      debugPrint('시작 화면 이동 실패: $e');
+    }
   }
 
   @override
@@ -97,6 +124,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   void dispose() {
+    _advance?.cancel();
     _float.dispose();
     super.dispose();
   }
@@ -127,16 +155,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // 목적지는 세 갈래다.
-    //   세션 없음        → 로그인
-    //   세션 있고 미완료 → 온보딩(아이 정보 입력)
-    //   세션 있고 완료   → 보호자 홈
-    final destination = !ref.read(authRepositoryProvider).hasSession
-        ? Routes.login
-        : ref.read(localStorageProvider).isOnboardingCompleted
-            ? Routes.guardian
-            : Routes.onboardingName;
-
     return Scaffold(
       body: Container(
         // 배경: 흰색 → 크림 (Figma linear-gradient 180deg, 40% 지점)
@@ -298,29 +316,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 width: 393.w,
                 height: 177.h,
                 fit: BoxFit.fill,
-              ),
-            ),
-
-            // 하단 CTA (x=16, y=675, 360×66) — 마지막에 등장
-            Positioned(
-              left: 16.w,
-              top: 675.h,
-              width: 360.w,
-              child: AppFadeSlideIn(
-                delay: AppMotion.sceneStagger * 2,
-                child: ElumButton(
-                  label: '시작하기',
-                  onPressed: () {
-                    // GoRouter를 명시적으로 찾아서 호출한다.
-                    // context.go()만으로는 DevToolsOverlay 레이어에서 라우터를 찾지 못한다.
-                    try {
-                      GoRouter.of(context).go(destination);
-                    } catch (e) {
-                      // 라우터를 찾지 못한 경우(테스트 환경 등)
-                      debugPrint('라우팅 실패: $e');
-                    }
-                  },
-                ),
               ),
             ),
 

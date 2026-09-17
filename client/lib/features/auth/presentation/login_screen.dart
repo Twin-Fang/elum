@@ -1,16 +1,17 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
-import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/auth_repository.dart';
@@ -115,10 +116,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return ElumScaffold(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        // 제목이 빠지면서 위로 몰렸다. 세로 가운데에 두어 아래가 텅 비지 않게 한다.
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const ElumHeader(
-            title: '이룸을\n시작해볼까요?',
-            description: '보호자님 계정으로 로그인하면\n아이 정보가 안전하게 보관돼요.',
+          // 글자 제목을 두지 않는다 — 로고가 그 자리를 대신한다 (이슈 #207 · 명세 §2-1).
+          // `이룸을 시작해볼까요?`는 로고 바로 밑에서 같은 말을 한 번 더 하는 것이었다.
+          Center(
+            child: SvgPicture.asset(AppAssets.logo, width: 140.w),
+          ),
+          SizedBox(height: context.space.md),
+          Text(
+            '할 일을 카드로 만들어요',
+            textAlign: TextAlign.center,
+            style: context.typo.body.copyWith(color: context.colors.textSecondary),
           ),
           SizedBox(height: context.space.headerToContent),
 

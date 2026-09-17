@@ -81,13 +81,14 @@ void main() {
   group('시작 화면 구성', () {
     useReduceMotion();
 
-    testWidgets('Figma 문구 2줄과 CTA가 보인다', (tester) async {
+    testWidgets('Figma 문구 2줄이 보이고 누를 버튼은 없다 (이슈 #207)', (tester) async {
       await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text('오늘의 하루,'), findsOneWidget);
       expect(find.text('차근차근 함께해요'), findsOneWidget);
-      expect(find.text('시작하기'), findsOneWidget);
+      // `시작하기`는 다음에 뭐가 나오는지 말해 주지 않으면서 한 번 더 누르게만 했다.
+      expect(find.text('시작하기'), findsNothing);
     });
 
     testWidgets('로고는 텍스트가 아니라 SVG 에셋이다', (tester) async {
@@ -119,7 +120,7 @@ void main() {
 
     testWidgets('장면 요소는 첫 프레임부터 완성돼 있다', (tester) async {
       // 병아리·언덕·별이 뒤늦게 fade-in하면 "덜 로드된 느낌"이 난다.
-      // 등장 연출은 문구·로고·CTA에만 건다. (설계 문서 2026-07-22)
+      // 등장 연출은 문구·로고에만 건다. (설계 문서 2026-07-22)
       await tester.pumpWidget(buildSubject());
       // pumpAndSettle 없이 첫 프레임만 그린다
 
@@ -132,11 +133,10 @@ void main() {
   group('시작 화면 이동', () {
     useReduceMotion();
 
-    testWidgets('온보딩 전이면 이름 화면으로 간다', (tester) async {
+    testWidgets('온보딩 전이면 누르지 않아도 이름 화면으로 간다 (이슈 #207)', (tester) async {
       await tester.pumpWidget(buildSubject(onboardingCompleted: false));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('시작하기'));
+      // 연출을 본 뒤 저절로 넘어간다.
+      await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
 
       expect(find.text('이름 화면'), findsOneWidget);
@@ -148,7 +148,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('보호자 홈'), findsOneWidget);
-      expect(find.text('시작하기'), findsNothing);
     });
   });
 
