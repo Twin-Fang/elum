@@ -40,6 +40,7 @@ public class RefreshTokenService {
   private static final int TOKEN_BYTES = 48;
 
   private final RefreshTokenRepository refreshTokenRepository;
+  private final RefreshTokenRevoker refreshTokenRevoker;
   private final JwtProperties jwtProperties;
 
   /**
@@ -69,8 +70,11 @@ public class RefreshTokenService {
     LocalDateTime now = LocalDateTime.now();
 
     // 이미 끊긴 토큰이 다시 왔다 = 복사본이 돌아다닌다. 계정 전체를 끊는다.
+    //
+    // 폐기는 **별도 트랜잭션**에서 해야 한다. 같은 트랜잭션에서 하면 바로 아래
+    // 예외가 롤백을 일으켜 폐기가 되돌아간다 — 감지만 하고 세션은 살아 있게 된다.
     if (current.getRevokedAt() != null) {
-      int revoked = refreshTokenRepository.revokeAllByMemberId(current.getMemberId(), now);
+      int revoked = refreshTokenRevoker.revokeAllInNewTransaction(current.getMemberId(), now);
       log.warn("리프레시 토큰이 재사용되어 계정의 세션을 모두 끊었습니다. memberId={}, 끊은 수={}",
         current.getMemberId(), revoked);
       throw new CustomException(ErrorCode.REFRESH_TOKEN_REUSED);

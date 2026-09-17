@@ -32,6 +32,9 @@ class RefreshTokenServiceTest {
   private RefreshTokenRepository refreshTokenRepository;
 
   @Mock
+  private RefreshTokenRevoker refreshTokenRevoker;
+
+  @Mock
   private JwtProperties jwtProperties;
 
   @InjectMocks
@@ -109,7 +112,9 @@ class RefreshTokenServiceTest {
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.REFRESH_TOKEN_REUSED));
 
-    verify(refreshTokenRepository).revokeAllByMemberId(eq("m1"), any(LocalDateTime.class));
+    // 폐기는 별도 트랜잭션으로 나가야 한다. 같은 트랜잭션이면 아래 예외에 롤백돼
+    // 감지만 하고 세션이 살아남는다.
+    verify(refreshTokenRevoker).revokeAllInNewTransaction(eq("m1"), any(LocalDateTime.class));
     verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
   }
 
@@ -126,7 +131,7 @@ class RefreshTokenServiceTest {
         .isEqualTo(ErrorCode.REFRESH_TOKEN_INVALID));
 
     // 만료는 정상적인 수명 종료다. 탈취로 보고 계정을 끊으면 안 된다.
-    verify(refreshTokenRepository, never()).revokeAllByMemberId(anyString(), any(LocalDateTime.class));
+    verify(refreshTokenRevoker, never()).revokeAllInNewTransaction(anyString(), any(LocalDateTime.class));
   }
 
   @Test

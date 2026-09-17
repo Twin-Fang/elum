@@ -76,6 +76,45 @@ abstract final class Routes {
 /// 회원삭제로 토큰이 날아간 상태를 잡지 못한다. (이슈 #19)
 ///
 /// 보호 화면에 토큰 없이 접근하면 **시작 화면**으로 되돌린다.
+
+/// 경로 가드. **순수 함수로 떼어 두었다** — 라우터를 위젯 트리에 올리지 않고도
+/// 검증할 수 있어야 하기 때문이다.
+///
+/// 실제로 이 판단을 `createRouter` 안에 두었을 때, 가입 절차(약관 동의 → 아이 정보)를
+/// "온보딩 미완료면 이름 화면으로" 규칙에 함께 넣는 사고가 났다. 절차를 밟는 도중에는
+/// 온보딩이 항상 미완료라 **어느 단계로 가든 이름 화면으로 되돌려졌다.**
+/// 동의 화면이 통째로 건너뛰어졌고 이름 입력 후 다음으로도 넘어가지 못했다.
+///
+/// @return 이동시킬 경로. null이면 그대로 둔다.
+@visibleForTesting
+String? resolveRedirect(
+  String path, {
+  required bool hasSession,
+  required bool onboardingCompleted,
+  required bool skipOnboarding,
+}) {
+  // 가입 절차도 로그인이 있어야 한다. 계정이 없으면 동의를 기록할 곳도,
+  // 아이 정보를 저장할 곳도 없다.
+  final isSignUpFlow =
+      path.startsWith(Routes.consent) || path.startsWith('/onboarding');
+  final needsSession = isSignUpFlow ||
+      path.startsWith(Routes.guardian) ||
+      path.startsWith(Routes.child);
+  if (!needsSession) return null;
+
+  // 세션이 없으면 아무것도 조회할 수 없다. 로그인부터 다시 시작한다.
+  if (!hasSession) return Routes.login;
+
+  // 가입 절차 안에서는 단계 이동을 막지 않는다.
+  if (isSignUpFlow) return null;
+
+  // devFlag: 온보딩 건너뛰기 (시연용)
+  if (skipOnboarding) return null;
+
+  // 보호자·아이 화면은 온보딩을 마쳐야 들어갈 수 있다.
+  return onboardingCompleted ? null : Routes.onboardingName;
+}
+
 /// 온보딩 단계 사이의 진행은 각 화면 CTA가 막으므로 여기서 관여하지 않는다.
 ///
 /// 콜백을 넘기지 않으면 가드가 비활성화된다(테스트용).
@@ -85,24 +124,12 @@ GoRouter createRouter({
 }) {
   return GoRouter(
     initialLocation: Routes.splash,
-    redirect: (context, state) {
-      final path = state.matchedLocation;
-      // 온보딩도 보호 대상이다. 로그인 없이 아이 정보를 입력하면 저장할 계정이 없다.
-      final isProtected = path.startsWith(Routes.guardian) ||
-          path.startsWith(Routes.child) ||
-          path.startsWith(Routes.consent) ||
-          path.startsWith('/onboarding');
-      if (!isProtected) return null;
-
-      // 세션이 없으면 아무것도 조회할 수 없다. 로그인부터 다시 시작한다.
-      if (hasToken != null && !hasToken()) return Routes.login;
-
-      // devFlag: 온보딩 건너뛰기 (시연용)
-      if (AppConfig.skipOnboarding) return null;
-
-      final isDone = isOnboardingCompleted?.call() ?? true;
-      return isDone ? null : Routes.onboardingName;
-    },
+    redirect: (context, state) => resolveRedirect(
+      state.matchedLocation,
+      hasSession: hasToken?.call() ?? true,
+      onboardingCompleted: isOnboardingCompleted?.call() ?? true,
+      skipOnboarding: AppConfig.skipOnboarding,
+    ),
     routes: [
       GoRoute(
         path: Routes.splash,
