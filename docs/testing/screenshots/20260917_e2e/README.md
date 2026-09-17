@@ -14,4 +14,5 @@ Android 에뮬레이터(Medium_Phone_API_36.1, Google Play 이미지)에서 릴�
 | `06_pin_cta_revealed.png` | 키패드를 내려야 드러나는 "맞춤 설정하기" |
 | `07_home_fox.png` | 온보딩 직후 홈 — 고른 여우가 보인다 |
 | `08_home_cat_after_restart.png` | 앱 재시작 후 같은 계정 홈 — 고양이로 바뀌어 있다 |
-| `09_consent_escape_clipped.png` | 동의 화면 하단 확대 — "다른 계정으로 로그인"이 CTA에 잘려 있다 |
+| `09_consent_escape_clipped.png` | 동의 화면을 **한 번만** 스크롤한 상태 — 아래에 내용이 더 있다는 단서가 없다 |
+| `10_consent_bottom_scrolled.png` | 끝까지 스크롤한 상태 — "다른 계정으로 로그인"이 온전히 보인다 |
