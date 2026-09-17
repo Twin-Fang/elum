@@ -64,7 +64,10 @@ metadata:
       deploy: "none"
       publish: []
       secret_backup: true
-      semver_auto: false   # 커밋 제목으로 버전 승격 폭 결정 (false면 항상 patch)
+      # 릴리스 구간 커밋 제목으로 승격 폭을 정한다 (이슈 #203).
+      # `type!` → major · `feat` → minor · 그 외 → patch. AI 아님, 결정적.
+      # 통합 당시 기본값이 false여서 기능이 들어간 릴리스도 patch로만 올라갔다.
+      semver_auto: true
       code_review:
         coderabbit: true
       changelog:
