@@ -51,7 +51,12 @@ jobs:
   trigger-builds:
     name: 빌드 워크플로우 트리거
     # @projectops app build / @projectops apk build / @projectops ios build 키워드 감지 (어순 무관)
+    #
+    # SUH-ISSUE-HELPER 안내 댓글은 제외한다. 그 댓글이 기능 설명으로 적어 둔
+    # "@projectops app build" 예시 문구가 아래 조건을 그대로 만족해서, 이슈를
+    # 만들기만 해도 빌드가 발동하고 브랜치가 없어 실패 댓글이 달렸다.
     if: |
+      !contains(github.event.comment.body, '<!-- SUH-ISSUE-HELPER -->') &&
       contains(github.event.comment.body, '@projectops') &&
       (
         (contains(github.event.comment.body, 'build') && contains(github.event.comment.body, 'app')) ||
