@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -36,6 +37,8 @@ public class MemberService {
   private final AuthIdentityRepository authIdentityRepository;
 
   private final RefreshTokenRepository refreshTokenRepository;
+
+  private final AiCallLogRepository aiCallLogRepository;
 
   public MemberResponse getMyInfo(String memberId) {
     return MemberResponse.from(requireMember(memberId), findProfile(memberId));
@@ -107,6 +110,9 @@ public class MemberService {
     // 리프레시 토큰은 member를 외래키로 참조하지 않아 DB가 대신 지워 주지 않는다.
     // 남겨 두면 탈퇴한 계정 ID로 갱신 요청이 계속 들어온다.
     refreshTokenRepository.deleteAllByMemberId(memberId);
+    // AI 호출 기록은 운영 지표라 행을 남기되 **누가 썼는지는 지운다** (이슈 #191).
+    // 여기도 외래키가 없어 빠뜨리면 탈퇴한 회원의 식별자가 그대로 남는다.
+    aiCallLogRepository.detachMember(memberId);
 
     memberRepository.delete(member);
   }

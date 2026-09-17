@@ -3,9 +3,11 @@ package com.chuseok22.elumserver.member.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -47,6 +49,9 @@ class MemberServiceTest {
   @Mock
   private RefreshTokenRepository refreshTokenRepository;
 
+  @Mock
+  private AiCallLogRepository aiCallLogRepository;
+
   @InjectMocks
   private MemberService memberService;
 
@@ -64,11 +69,13 @@ class MemberServiceTest {
     memberService.withdraw("member-1");
 
     InOrder callOrder = inOrder(
-      routineRepository, profileRepository, authIdentityRepository, refreshTokenRepository, memberRepository);
+      routineRepository, profileRepository, authIdentityRepository, refreshTokenRepository,
+      aiCallLogRepository, memberRepository);
     callOrder.verify(routineRepository).deleteAll(routines);
     callOrder.verify(profileRepository).deleteAllByMemberId("member-1");
     callOrder.verify(authIdentityRepository).deleteAllByMemberId("member-1");
     callOrder.verify(refreshTokenRepository).deleteAllByMemberId("member-1");
+    callOrder.verify(aiCallLogRepository).detachMember("member-1");
     callOrder.verify(memberRepository).delete(member);
   }
 
@@ -86,6 +93,22 @@ class MemberServiceTest {
     // 세션 기록은 member를 외래키로 참조하지 않으므로 직접 지워야 남지 않는다.
     verify(refreshTokenRepository).deleteAllByMemberId("member-2");
     verify(memberRepository).delete(member);
+  }
+
+  @Test
+  @DisplayName("탈퇴 시 AI 호출 기록은 남기되 회원 식별자만 떼어낸다")
+  void withdraw_detachesMemberFromAiCallLogs() {
+    Member member = new Member();
+    member.setId("member-3");
+    when(memberRepository.findById("member-3")).thenReturn(Optional.of(member));
+    when(routineRepository.findAllByProfileMemberId("member-3")).thenReturn(List.of());
+
+    memberService.withdraw("member-3");
+
+    // 외래키가 없어 DB가 대신 비워 주지 않는다. 빠뜨리면 탈퇴한 회원의 식별자가 남는다.
+    verify(aiCallLogRepository).detachMember("member-3");
+    // 행까지 지우면 과거 호출량·비용 집계가 줄어든다 — 지우는 API는 부르지 않는다.
+    verify(aiCallLogRepository, never()).deleteAll();
   }
 
   @Test
