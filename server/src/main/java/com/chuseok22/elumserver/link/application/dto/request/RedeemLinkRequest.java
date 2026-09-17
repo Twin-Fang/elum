@@ -9,11 +9,7 @@ public record RedeemLinkRequest(
   @Schema(description = "보호자에게 받은 여섯 글자. 소문자로 보내도 되고 사이 공백이 있어도 된다",
     example = "A7K3M9")
   @NotBlank
-  String code,
-
-  @Schema(description = "이 휴대폰을 구분하는 값. 연결을 끊을 때 이 기기의 토큰만 폐기한다",
-    example = "elumi-phone-1")
-  String deviceId
+  String code
 ) {
 
 }

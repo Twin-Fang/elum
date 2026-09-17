@@ -133,13 +133,16 @@ class DeviceLinkServiceTest {
     DeviceLink l = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
     when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
 
-    TokenResponse res = service.redeem("a7k3m9", "elumi-1");
+    TokenResponse res = service.redeem("a7k3m9");
 
     assertThat(res.accessToken()).isEqualTo("elumi-access");
     assertThat(l.getRedeemedAt()).isNotNull();
-    assertThat(l.getLinkedDeviceId()).isEqualTo("elumi-1");
+    // 기기 값은 서버가 만든다 — 클라가 안 보내면 끊을 대상이 없어진다.
+    assertThat(l.getLinkedDeviceId()).isEqualTo("elumi-l1");
     // 보호자가 아니라 이룸이 역할로 발급돼야 한다.
     verify(jwtProvider).createAccessToken("m1", "google_1", LinkRole.ELUMI);
+    // 리프레시 토큰도 같은 기기 값으로 남아야 끊을 때 짚힌다.
+    verify(refreshTokenService).issue("m1", "elumi-l1");
   }
 
   @Test
@@ -148,7 +151,7 @@ class DeviceLinkServiceTest {
     DeviceLink l = link("A7K3M9", LocalDateTime.now().minusSeconds(1));
     when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
 
-    assertThatThrownBy(() -> service.redeem("A7K3M9", "elumi-1"))
+    assertThatThrownBy(() -> service.redeem("A7K3M9"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.DEVICE_LINK_EXPIRED));
@@ -161,7 +164,7 @@ class DeviceLinkServiceTest {
     l.setRedeemedAt(LocalDateTime.now().minusMinutes(1));
     when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
 
-    assertThatThrownBy(() -> service.redeem("A7K3M9", "elumi-2"))
+    assertThatThrownBy(() -> service.redeem("A7K3M9"))
       .isInstanceOf(CustomException.class)
       // 이미 썼다는 사실을 알려주지 않는다 — 존재 여부가 새면 추측의 단서가 된다.
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
@@ -175,7 +178,7 @@ class DeviceLinkServiceTest {
     l.setFailedAttempts(DeviceLinkService.MAX_FAILED_ATTEMPTS);
     when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
 
-    assertThatThrownBy(() -> service.redeem("A7K3M9", "elumi-1"))
+    assertThatThrownBy(() -> service.redeem("A7K3M9"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.DEVICE_LINK_TOO_MANY_ATTEMPTS));
@@ -184,7 +187,7 @@ class DeviceLinkServiceTest {
   @Test
   @DisplayName("모양부터 틀린 값은 저장소를 뒤지지 않는다")
   void redeem_badShapeDoesNotQuery() {
-    assertThatThrownBy(() -> service.redeem("!!!", "elumi-1"))
+    assertThatThrownBy(() -> service.redeem("!!!"))
       .isInstanceOf(CustomException.class);
 
     verify(deviceLinkRepository, never()).findByCodeHash(anyString());
@@ -205,6 +208,22 @@ class DeviceLinkServiceTest {
     verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-1"), any());
     // 계정 전체를 끊으면 보호자까지 로그아웃된다.
     verify(refreshTokenRepository, never()).revokeAllByMemberId(anyString(), any());
+  }
+
+  @Test
+  @DisplayName("기기 값이 비어 있어도 끊을 대상을 스스로 찾아낸다")
+  void revoke_derivesDeviceIdWhenMissing() throws Exception {
+    // 옛 데이터에 linkedDeviceId 가 비어 있어도 끊기가 무력해지면 안 된다 —
+    // 잃어버린 휴대폰이 계속 일과를 보는 상황이 그대로 남는다.
+    DeviceLink l = link("A7K3M9", LocalDateTime.now().minusMinutes(1));
+    l.setRedeemedAt(LocalDateTime.now().minusMinutes(1));
+    l.setLinkedDeviceId(null);
+    when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
+      .thenReturn(List.of(l));
+
+    service.revoke("m1");
+
+    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-l1"), any());
   }
 
   @Test

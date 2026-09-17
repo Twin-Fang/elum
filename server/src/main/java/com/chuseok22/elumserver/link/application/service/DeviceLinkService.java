@@ -120,8 +120,20 @@ public class DeviceLinkService {
    * <p>실패 사유를 잘게 구분해 주지 않는다 — 없는 암호와 이미 쓴 암호를 구분해 주면
    * 어떤 값이 존재했는지가 새어 나가 추측에 단서가 된다.
    */
+  /**
+   * 연결된 기기를 가리키는 값. <b>서버가 만든다.</b>
+   *
+   * <p>클라이언트가 보내 주길 기대하면 안 된다 — 지금 앱은 로그인할 때도 기기 값을 보내지
+   * 않아 {@code refresh_token.device_id}가 전부 비어 있다. 비어 있으면 연결을 끊어도
+   * 짚을 대상이 없어, <b>잃어버린 휴대폰이 계속 일과를 본다.</b> 끊기가 반드시 동작해야 하는
+   * 기능이므로 서버가 값을 쥔다.
+   */
+  private static String deviceIdOf(String linkId) {
+    return "elumi-" + linkId;
+  }
+
   @Transactional
-  public TokenResponse redeem(String rawCode, String deviceId) {
+  public TokenResponse redeem(String rawCode) {
     String code = LinkCode.normalize(rawCode);
     if (!LinkCode.hasValidShape(code)) {
       // 모양부터 틀리면 저장소를 뒤지지 않는다 — 없는 값으로 시도 횟수를 늘릴 이유가 없다.
@@ -145,6 +157,7 @@ public class DeviceLinkService {
     }
 
     Member member = requireMember(link.getMemberId());
+    String deviceId = deviceIdOf(link.getId());
     link.setRedeemedAt(now);
     link.setLinkedDeviceId(deviceId);
 
@@ -174,10 +187,12 @@ public class DeviceLinkService {
     link.setRevokedAt(now);
 
     // 기기를 짚어서 끊는다. 계정 전체를 끊으면 보호자까지 로그아웃된다.
-    int killed = link.getLinkedDeviceId() == null ? 0
-      : refreshTokenRepository.revokeByMemberIdAndDeviceId(memberId, link.getLinkedDeviceId(), now);
+    // linkedDeviceId 는 연결할 때 서버가 넣으므로 비어 있을 수 없다.
+    String deviceId = link.getLinkedDeviceId() != null
+      ? link.getLinkedDeviceId() : deviceIdOf(link.getId());
+    int killed = refreshTokenRepository.revokeByMemberIdAndDeviceId(memberId, deviceId, now);
     log.info("이룸이 휴대폰 연결 끊음: memberId={}, deviceId={}, 끊은 세션={}",
-      memberId, link.getLinkedDeviceId(), killed);
+      memberId, deviceId, killed);
   }
 
   private void countFailure(DeviceLink link, LocalDateTime now) {
