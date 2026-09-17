@@ -107,6 +107,11 @@ class _GuardianSettingsScreenState
                 context.typo.pinTitle.copyWith(color: context.colors.textPrimary),
           ),
           SizedBox(height: space.xl),
+          // 명세 §8-4는 위에 임시저장·알림도 두지만 아직 없다. 있는 것만 먼저 올린다.
+          _SettingsTile(
+            label: '이룸이 휴대폰 연결하기',
+            onTap: _busy ? null : () => context.push(Routes.linkCode),
+          ),
           _SettingsTile(
             label: '로그아웃',
             onTap: _busy ? null : _logout,

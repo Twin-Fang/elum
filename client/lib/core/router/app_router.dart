@@ -5,6 +5,8 @@ import '../../core/config/app_config.dart';
 import '../../features/guardian/presentation/card_review_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
+import '../../features/link/presentation/link_code_screen.dart';
+import '../../features/link/presentation/link_enter_screen.dart';
 import '../../features/child/presentation/child_home_screen.dart';
 import '../../features/child/presentation/child_routine_detail_screen.dart';
 import '../../features/child/presentation/child_stars_screen.dart';
@@ -57,6 +59,12 @@ abstract final class Routes {
   /// [routineMasking]과 화면은 같고 문구·진행률·다음 목적지가 다르다.
   static const routineGenerating = '/guardian/routine/generating';
   static const routineReview = '/guardian/routine/review';
+
+  /// 연결 암호 만들기 (보호자). 온보딩 직후와 설정에서 들어온다 (이슈 #205).
+  static const linkCode = '/guardian/link';
+
+  /// 연결 암호 넣기 (이룸이 휴대폰). **로그인 전에 서는 화면이다.**
+  static const linkEnter = '/link/enter';
 
   static const child = '/child';
 
@@ -183,6 +191,21 @@ GoRouter createRouter({
         path: Routes.guardian,
         pageBuilder: (context, state) =>
             fadePage(state, const GuardianHomeScreen()),
+      ),
+      GoRoute(
+        path: Routes.linkCode,
+        pageBuilder: (context, state) => slidePage(
+          state,
+          LinkCodeScreen(
+            // 온보딩에서 들어왔을 때만 `나중에 할게요`를 보여준다.
+            fromOnboarding: state.uri.queryParameters['from'] == 'onboarding',
+          ),
+        ),
+      ),
+      GoRoute(
+        path: Routes.linkEnter,
+        pageBuilder: (context, state) =>
+            slidePage(state, const LinkEnterScreen()),
       ),
       GoRoute(
         path: Routes.guardianSettings,
