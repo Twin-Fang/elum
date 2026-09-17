@@ -217,5 +217,18 @@
       "group": "onboarding",
       "name": "splash"
     }
-  ]
+  ],
+  "backend": {
+    "kind": "spring",
+    "db_config": "server/src/main/resources/application-prod.yml",
+    "db_engine": "postgresql",
+    "db_reachable": true,
+    "admin": {
+      "login": "/admin/login",
+      "tail": "/admin/logs/api/tail"
+    },
+    "admin_base_in_config": true,
+    "admin_account_in_config": true
+  },
+  "backend_scanned": "2026-09-17"
 }
