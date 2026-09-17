@@ -187,9 +187,9 @@ class _NewRoutineCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: const Alignment(-0.99, -0.12),
             end: const Alignment(0.99, 0.12),
-            colors: const [
-              Color(0xFFF9F1D7),
-              Color(0xFFE9EEFF),
+            colors: [
+              colors.homeHeroStart,
+              colors.homeHeroEnd,
             ],
             stops: const [0.1664, 0.8336],
           ),

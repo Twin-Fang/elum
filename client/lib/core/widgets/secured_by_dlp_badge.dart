@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../assets/app_assets.dart';
+import '../theme/theme_context_ext.dart';
 
 /// "secured by ELUM AI DLP" 신뢰 배지.
 ///
@@ -11,8 +12,6 @@ import '../assets/app_assets.dart';
 /// 베끼면 한 곳만 여백이 어긋나도 눈에 띈다.
 class SecuredByDlpBadge extends StatelessWidget {
   const SecuredByDlpBadge({super.key});
-
-  static const _textColor = Color(0xFF74757D);
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +26,7 @@ class SecuredByDlpBadge extends StatelessWidget {
             fontFamily: 'Pretendard',
             fontWeight: FontWeight.w600,
             fontSize: 14.sp,
-            color: _textColor,
+            color: context.colors.dlpBadgeText,
           ),
         ),
       ],

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/widgets/secured_by_dlp_badge.dart';
+import '../../../core/theme/theme_context_ext.dart';
 
 /// Figma `보호자_새로운 일과 만들기_완료` (425:4199)
 ///
@@ -33,6 +34,8 @@ class _CardCompletionScreenState extends ConsumerState<CardCompletionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Scaffold(
       body: Container(
         width: 393.w,
@@ -42,8 +45,8 @@ class _CardCompletionScreenState extends ConsumerState<CardCompletionScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF78FFB0), // 초록
-              const Color(0xFF0099FF), // 파란
+              colors.completionBgTop,
+              colors.completionBgBottom,
             ],
           ),
         ),
@@ -66,7 +69,7 @@ class _CardCompletionScreenState extends ConsumerState<CardCompletionScreen> {
                       child: Icon(
                         Icons.star,
                         size: 48.w,
-                        color: const Color(0xFF1a1a1a),
+                        color: colors.completionInk,
                       ),
                     ),
                     SizedBox(height: 48.h),
@@ -78,7 +81,7 @@ class _CardCompletionScreenState extends ConsumerState<CardCompletionScreen> {
                       style: TextStyle(
                         fontSize: 28.sp,
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1a1a1a),
+                        color: colors.completionInk,
                         height: 1.4,
                       ),
                     ),
@@ -90,7 +93,7 @@ class _CardCompletionScreenState extends ConsumerState<CardCompletionScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14.sp,
-                        color: const Color(0xFFA0A0A0),
+                        color: colors.completionSubtle,
                       ),
                     ),
                   ],

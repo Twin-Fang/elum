@@ -113,6 +113,13 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginGoogleBorder,
     required this.consentSelectedFill,
     required this.consentSelectedBorder,
+    required this.dlpBadgeText,
+    required this.homeHeroStart,
+    required this.homeHeroEnd,
+    required this.completionBgTop,
+    required this.completionBgBottom,
+    required this.completionInk,
+    required this.completionSubtle,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -294,6 +301,28 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color consentSelectedFill;
   final Color consentSelectedBorder;
 
+  /// DLP 보안 배지 문구. 본문보다 물러나야 하지만 안내로는 읽혀야 한다
+  /// (Figma Group 57/58).
+  final Color dlpBadgeText;
+
+  /// 보호자 홈 "새로운 일과 만들기" 카드 그라데이션 시작(왼쪽 노랑).
+  final Color homeHeroStart;
+
+  /// 같은 카드 그라데이션 끝(오른쪽 연보라).
+  final Color homeHeroEnd;
+
+  /// 카드 생성 완료 화면 배경 그라데이션 위(연두). Figma 425:4199.
+  final Color completionBgTop;
+
+  /// 같은 배경 그라데이션 아래(파랑).
+  final Color completionBgBottom;
+
+  /// 완료 화면의 글자·아이콘. 밝은 그라데이션 위라 본문색보다 진하다.
+  final Color completionInk;
+
+  /// 완료 화면의 보조 문구(진행도).
+  final Color completionSubtle;
+
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
     surface: Color(0xFFFFFFFF),
@@ -371,6 +400,13 @@ class AppColors extends ThemeExtension<AppColors> {
     loginGoogleBorder: Color(0xFFDADCE0),
     consentSelectedFill: Color(0xFFB5EAEC),
     consentSelectedBorder: Color(0xFF93DBCC),
+    dlpBadgeText: Color(0xFF74757D),
+    homeHeroStart: Color(0xFFF9F1D7),
+    homeHeroEnd: Color(0xFFE9EEFF),
+    completionBgTop: Color(0xFF78FFB0),
+    completionBgBottom: Color(0xFF0099FF),
+    completionInk: Color(0xFF1A1A1A),
+    completionSubtle: Color(0xFFA0A0A0),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -460,6 +496,13 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? loginGoogleBorder,
     Color? consentSelectedFill,
     Color? consentSelectedBorder,
+    Color? dlpBadgeText,
+    Color? homeHeroStart,
+    Color? homeHeroEnd,
+    Color? completionBgTop,
+    Color? completionBgBottom,
+    Color? completionInk,
+    Color? completionSubtle,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -539,6 +582,13 @@ class AppColors extends ThemeExtension<AppColors> {
       loginGoogleBorder: loginGoogleBorder ?? this.loginGoogleBorder,
       consentSelectedFill: consentSelectedFill ?? this.consentSelectedFill,
       consentSelectedBorder: consentSelectedBorder ?? this.consentSelectedBorder,
+      dlpBadgeText: dlpBadgeText ?? this.dlpBadgeText,
+      homeHeroStart: homeHeroStart ?? this.homeHeroStart,
+      homeHeroEnd: homeHeroEnd ?? this.homeHeroEnd,
+      completionBgTop: completionBgTop ?? this.completionBgTop,
+      completionBgBottom: completionBgBottom ?? this.completionBgBottom,
+      completionInk: completionInk ?? this.completionInk,
+      completionSubtle: completionSubtle ?? this.completionSubtle,
     );
   }
 
@@ -638,6 +688,13 @@ class AppColors extends ThemeExtension<AppColors> {
       loginGoogleBorder: Color.lerp(loginGoogleBorder, other.loginGoogleBorder, t)!,
       consentSelectedFill: Color.lerp(consentSelectedFill, other.consentSelectedFill, t)!,
       consentSelectedBorder: Color.lerp(consentSelectedBorder, other.consentSelectedBorder, t)!,
+      dlpBadgeText: Color.lerp(dlpBadgeText, other.dlpBadgeText, t)!,
+      homeHeroStart: Color.lerp(homeHeroStart, other.homeHeroStart, t)!,
+      homeHeroEnd: Color.lerp(homeHeroEnd, other.homeHeroEnd, t)!,
+      completionBgTop: Color.lerp(completionBgTop, other.completionBgTop, t)!,
+      completionBgBottom: Color.lerp(completionBgBottom, other.completionBgBottom, t)!,
+      completionInk: Color.lerp(completionInk, other.completionInk, t)!,
+      completionSubtle: Color.lerp(completionSubtle, other.completionSubtle, t)!,
     );
   }
 

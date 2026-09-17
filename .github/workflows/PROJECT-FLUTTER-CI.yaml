@@ -294,6 +294,17 @@ jobs:
           flutter analyze --no-fatal-infos
           echo "✅ 코드 분석 완료"
 
+      # 단위 테스트 실행
+      #
+      # analyze만으로는 회귀를 못 잡는다. 실제로 색 토큰 규칙을 어긴 코드가
+      # 두 달 넘게 통과했다 — 테스트는 있었지만 CI가 돌리지 않았다.
+      - name: Run Flutter Test
+        id: unit_test
+        run: |
+          echo "🧪 Flutter 단위 테스트 시작..."
+          flutter test
+          echo "✅ 단위 테스트 완료"
+
       # 분석 결과 기록
       - name: 분석 결과 기록
         id: result
@@ -308,7 +319,9 @@ jobs:
             const seconds = Math.floor((elapsed % 60000) / 1000);
             const duration = minutes > 0 ? `${minutes}분 ${seconds}초` : `${seconds}초`;
 
-            const status = '${{ steps.analyze.outcome }}' === 'success' ? 'success' : 'failure';
+            const analyzeOk = '${{ steps.analyze.outcome }}' === 'success';
+            const testOk = '${{ steps.unit_test.outcome }}' === 'success';
+            const status = analyzeOk && testOk ? 'success' : 'failure';
 
             core.setOutput('status', status);
             core.setOutput('duration', duration);
