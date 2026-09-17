@@ -1,15 +1,50 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-17T05:26:07Z",
-    "currentVersion": "1.0.100",
+    "lastUpdated": "2026-09-17T05:39:07Z",
+    "currentVersion": "1.0.101",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 68
+    "totalReleases": 69
   },
   "releases": [
+    {
+      "version": "1.0.101",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-17",
+      "pr_number": 162,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 카카오, 네이버, 구글, 애플 계정으로 로그인할 수 있습니다\n  * 처음 로그인할 때 약관을 항목별로 확인하고 동의할 수 있습니다\n  * 약관 전문을 앱 안에서 바로 읽을 수 있습니다\n\n* **개선**\n  * 한 번 로그인하면 로그인 상태가 오래 유지됩니다\n  * 계정 정보를 기기의 보안 저장소에 안전하게 보관합니다\n\n* **버그 수정**\n  * 서비스에 접속되지 않던 문제를 해결했습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "카카오, 네이버, 구글, 애플 계정으로 로그인할 수 있습니다",
+            "처음 로그인할 때 약관을 항목별로 확인하고 동의할 수 있습니다",
+            "약관 전문을 앱 안에서 바로 읽을 수 있습니다"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "한 번 로그인하면 로그인 상태가 오래 유지됩니다",
+            "계정 정보를 기기의 보안 저장소에 안전하게 보관합니다"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "서비스에 접속되지 않던 문제를 해결했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.100",
       "project_type": "flutter",
