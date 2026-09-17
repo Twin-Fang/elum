@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/app_shake.dart';
 import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:elum/features/child/application/child_routine_notifier.dart';
 import 'package:elum/features/child/domain/reward_character.dart';
@@ -433,8 +434,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('보호자 홈'), findsNothing);
-      // 조용히 비우고 다시 받는다 — 붉은 경고를 띄우지 않는다
-      expect(find.text('암호를 입력하면 보호자 화면으로 전환돼요'), findsOneWidget);
+      // 틀렸다는 사실이 전달돼야 한다 (#180). 종전에는 입력만 조용히 사라져
+      // 틀린 것인지 입력이 안 먹은 것인지 구분할 수 없었다.
+      // 색은 여전히 쓰지 않는다 — 아동도 보는 화면이라 흔들림과 문구로만 알린다.
+      expect(find.text('암호가 달라요. 다시 입력해주세요'), findsOneWidget);
+      expect(find.text('암호를 입력하면 보호자 화면으로 전환돼요'), findsNothing);
+      expect(find.byType(AppShake), findsOneWidget);
     });
 
     testWidgets('맞는 PIN이면 보호자 화면으로 넘어간다', (tester) async {
@@ -465,7 +470,9 @@ void main() {
       await tester.enterText(find.byType(TextField), '9999');
       await tester.pumpAndSettle();
 
-      expect(find.text('암호를 입력하면 아이 화면으로 전환돼요'), findsOneWidget);
+      // 양방향 모두 같은 방식으로 알린다 (#180)
+      expect(find.text('암호가 달라요. 다시 입력해주세요'), findsOneWidget);
+      expect(find.byType(AppShake), findsOneWidget);
     });
   });
 

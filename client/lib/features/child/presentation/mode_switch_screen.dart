@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
@@ -29,6 +30,12 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
 
+  /// 틀린 횟수. [AppShake]의 trigger로 쓴다 — 값이 바뀔 때마다 흔들린다.
+  int _mismatchCount = 0;
+
+  /// 실패 안내. null이면 원래 설명을 보여준다.
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -45,7 +52,12 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   }
 
   void _onChanged() {
-    setState(() {});
+    setState(() {
+      // 다시 누르기 시작하면 실패 안내를 거둔다 — 남겨두면 지금 틀린 것처럼 보인다.
+      if (_errorMessage != null && _controller.text.isNotEmpty) {
+        _errorMessage = null;
+      }
+    });
     if (_controller.text.length == OnboardingProfile.pinLength) _verify();
   }
 
@@ -63,9 +75,24 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       return;
     }
 
-    // 틀렸다 — 조용히 비우고 다시 받는다. 붉은 경고를 띄우지 않는다.
-    _controller.clear();
-    _focusNode.requestFocus();
+    // 틀렸다 — 점을 흔들고 문구로 알린다 (#180).
+    // 종전에는 입력만 조용히 비웠다. 틀린 것인지, 입력이 안 먹은 것인지, 화면이 멈춘
+    // 것인지 구분할 수 없어 같은 암호를 다시 누르게 됐다.
+    //
+    // 색 대신 [AppShake]로 알린다 — 아동도 보는 화면이라 경고색을 쓰지 않는다.
+    // 온보딩 PIN 화면(pin_screen)과 같은 방식이다.
+    //
+    // 비우는 것은 다음 프레임에 한다. 지금은 _onChanged가 도는 중이라
+    // 여기서 clear하면 그 리스너가 곧바로 _errorMessage를 지워버린다.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _controller.clear();
+      _focusNode.requestFocus();
+      setState(() {
+        _errorMessage = '암호가 달라요. 다시 입력해주세요';
+        _mismatchCount++;
+      });
+    });
   }
 
   @override
@@ -86,14 +113,23 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
           ),
           SizedBox(height: space.sm),
           Text(
-            widget.target.description,
+            // 틀렸을 때는 실패 안내로 바뀐다. 색은 그대로 둔다 (#180).
+            _errorMessage ?? widget.target.description,
             style: context.typo.body
                 .copyWith(color: context.colors.textSecondary),
           ),
           SizedBox(height: space.xl * 2),
-          PinDots(
-            length: OnboardingProfile.pinLength,
-            filled: _controller.text.length,
+          // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)
+          GestureDetector(
+            onTap: _focusNode.requestFocus,
+            behavior: HitTestBehavior.opaque,
+            child: AppShake(
+              trigger: _mismatchCount,
+              child: PinDots(
+                length: OnboardingProfile.pinLength,
+                filled: _controller.text.length,
+              ),
+            ),
           ),
           PinInputField(
             controller: _controller,
