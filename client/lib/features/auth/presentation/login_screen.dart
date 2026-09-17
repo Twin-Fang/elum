@@ -12,9 +12,9 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
-import '../../../core/widgets/elum_scaffold.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/auth_repository.dart';
+import 'widgets/elum_chick.dart';
 import '../data/oauth_sdk.dart';
 
 /// 로그인 화면. 온보딩 맨 앞에 선다.
@@ -111,15 +111,45 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    // 시작 화면의 그림을 그대로 이어받는다 (이슈 #207).
+    //
+    // `시작하기`를 없애면서 두 화면이 하나가 됐다. 병아리를 버리면 첫인상이 통째로
+    // 사라지므로, 같은 배경 위에 로그인 버튼을 얹는다. 병아리 아래의 페이드
+    // (`splashFade`)는 원래부터 **버튼과 그림 사이를 잇기 위해** 그려진 것이다.
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [colors.splashTop, colors.splashBottom],
+            stops: const [0, 0.4],
+          ),
+        ),
+        child: Stack(
+          children: [
+            SafeArea(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: context.space.screenH.w),
+                child: _content(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _content(BuildContext context) {
     final isBusy = _pending != null;
 
-    return ElumScaffold(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        // 제목이 빠지면서 위로 몰렸다. 세로 가운데에 두어 아래가 텅 비지 않게 한다.
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // 글자 제목을 두지 않는다 — 로고가 그 자리를 대신한다 (이슈 #207 · 명세 §2-1).
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+          SizedBox(height: context.space.xl * 2),
+          // 글자 제목을 두지 않는다 — 로고가 그 자리를 대신한다 (명세 §2-1).
           // `이룸을 시작해볼까요?`는 로고 바로 밑에서 같은 말을 한 번 더 하는 것이었다.
           Center(
             child: SvgPicture.asset(AppAssets.logo, width: 140.w),
@@ -130,7 +160,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             textAlign: TextAlign.center,
             style: context.typo.body.copyWith(color: context.colors.textSecondary),
           ),
-          SizedBox(height: context.space.headerToContent),
+          // 빈 가운데를 병아리가 채운다. 버튼이 그 아래에 얹힌다.
+          const Spacer(),
+          Center(child: const ElumChick(width: 300)),
+          SizedBox(height: context.space.lg),
 
           if (_lastProvider == OAuthProvider.kakao) const _LastUsedHint(),
           ElumButton(
@@ -192,8 +225,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ],
 
-        ],
-      ),
+        SizedBox(height: context.space.xl),
+      ],
     );
   }
 }

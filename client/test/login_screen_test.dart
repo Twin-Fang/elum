@@ -67,4 +67,15 @@ void main() {
     expect(find.text('네이버로 시작하기'), findsOneWidget);
     expect(find.text('Google로 시작하기'), findsOneWidget);
   });
+
+  testWidgets('병아리가 얼굴까지 함께 나온다 (이슈 #207)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    // 몸통만 옮기면 얼굴 없는 덩어리가 된다 — 실제로 한 번 그랬다.
+    expect(svgWithAsset(AppAssets.splashChickBody), findsOneWidget);
+    expect(svgWithAsset(AppAssets.splashCharLeft), findsOneWidget);
+    expect(svgWithAsset(AppAssets.splashCharRight), findsOneWidget);
+    expect(svgWithAsset(AppAssets.splashCenter), findsOneWidget);
+  });
 }
