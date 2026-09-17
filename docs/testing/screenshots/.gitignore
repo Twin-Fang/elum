@@ -11,3 +11,6 @@
 
 !.gitignore
 !README.md
+
+# 이슈에 근거로 붙인 화면만 예외로 둔다. 붙이기 전에 열어 계정·토큰이 없는지 확인했다.
+!20260917_e2e/27_settings_back_returns_home.png
