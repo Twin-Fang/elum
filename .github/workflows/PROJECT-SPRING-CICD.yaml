@@ -162,6 +162,7 @@ jobs:
             echo $PW | sudo -S docker run -d -p "${PORT}":"${APP_PORT}" --name "${CONTAINER_NAME}" \
               -e TZ=Asia/Seoul \
               -e "SPRING_PROFILES_ACTIVE=${PROFILE}" \
+              -e "ELUM_AIDLP_SECRET=${{ secrets.ELUM_AIDLP_SECRET }}" \
               -v /etc/localtime:/etc/localtime:ro \
               -v "${MOUNT_DIR}":/app \
               "${IMAGE}"
