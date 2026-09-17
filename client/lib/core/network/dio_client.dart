@@ -9,6 +9,7 @@ import 'auth_interceptor.dart';
 // 비활성 상태지만 되살릴 때 바로 쓰도록 남겨둔다 (이슈 #182)
 // ignore: unused_import
 import 'encryption_interceptor.dart';
+import 'session_expiry.dart';
 
 /// Dio 인스턴스 생성. 설정값은 전부 [AppConfig]에서 온다 — 하드코딩하지 않는다.
 abstract final class DioClient {
@@ -67,6 +68,10 @@ final dioProvider = Provider<Dio>((ref) {
       // 여기서 매번 new 하면 동시 갱신을 묶는 장치가 인스턴스마다 따로 생겨
       // 무력화된다. 같은 리프레시 토큰이 두 번 나가면 세션이 전부 끊긴다.
       refresh: () => ref.read(tokenRefresherProvider).refreshAccessToken(),
+      // 갱신까지 실패하면 세션이 끝난 것이다. 화면이 캐시로 계속 그려지지 않도록
+      // 앱 전역에 알린다 — 듣고 있는 쪽이 로그인으로 되돌린다 (이슈 #175).
+      onSessionExpired: () =>
+          ref.read(sessionExpiryProvider.notifier).markExpired(),
     ),
   );
 

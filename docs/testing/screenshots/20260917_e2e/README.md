@@ -18,3 +18,6 @@ Android 에뮬레이터(Medium_Phone_API_36.1, Google Play 이미지)에서 릴�
 | `10_consent_bottom_scrolled.png` | 끝까지 스크롤한 상태 — "다른 계정으로 로그인"이 온전히 보인다 |
 | `11_pin_shake_curve.png` | PIN 불일치 흔들림 — 설계 곡선과 60fps 실측 궤적 |
 | `12_session_expired_looks_normal.png` | 세션이 완전히 끊긴 상태인데 홈이 정상처럼 보인다 |
+| `13_name_carried_over.png` | 다른 계정으로 로그인했는데 이전 아이 이름이 이어붙었다 |
+| `14_name_cleared_after_fix.png` | 수정 후 — 이름 입력칸이 비어 있다 |
+| `15_session_expired_to_login.png` | 수정 후 — 세션이 끊기면 로그인 화면으로 되돌아간다 |

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'core/dev/dev_tools_overlay.dart';
+import 'core/network/session_expiry.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/data/auth_repository.dart';
@@ -29,6 +30,16 @@ class _ElumAppState extends ConsumerState<ElumApp> {
 
   @override
   Widget build(BuildContext context) {
+    // 세션이 끝나면 로그인으로 되돌린다.
+    //
+    // 라우터 가드는 **화면을 옮길 때**만 평가된다. 홈에 머무는 중에 토큰이 만료되면
+    // 가드가 다시 불리지 않아, 서버 요청은 전부 401인데 화면은 캐시로 정상처럼
+    // 남아 있었다 (이슈 #175). 그래서 신호를 듣고 여기서 직접 옮긴다.
+    ref.listen<int>(sessionExpiryProvider, (previous, next) {
+      if (previous == null || next <= previous) return;
+      _router.go(Routes.login);
+    });
+
     return ScreenUtilInit(
       // Figma 프레임 크기(iPhone 16). 이 기준으로 .w/.h/.sp가 계산되므로
       // 화면 코드에서 Figma 좌표를 그대로 쓸 수 있다.

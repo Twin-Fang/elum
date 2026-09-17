@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../logger/app_logger.dart';
 import '../storage/token_store.dart';
@@ -12,9 +13,11 @@ class AuthInterceptor extends Interceptor {
     required TokenStore tokens,
     required Dio dio,
     required Future<String?> Function() refresh,
+    VoidCallback? onSessionExpired,
   })  : _tokens = tokens,
         _dio = dio,
-        _refresh = refresh;
+        _refresh = refresh,
+        _onSessionExpired = onSessionExpired;
 
   final TokenStore _tokens;
   final Dio _dio;
@@ -22,6 +25,13 @@ class AuthInterceptor extends Interceptor {
   /// 갱신 함수. **호출부가 동시 호출을 하나로 묶어야 한다.**
   /// 서버가 회전 방식이라 같은 리프레시 토큰을 두 번 쓰면 세션이 전부 끊긴다.
   final Future<String?> Function() _refresh;
+
+  /// 갱신까지 실패했을 때 알린다. 세션이 끝났다는 뜻이다.
+  ///
+  /// 라우터 가드만으로는 부족하다 — 가드는 **화면을 옮길 때** 평가되므로,
+  /// 이미 홈에 머무는 중이면 다시 불리지 않는다. 그래서 서버 요청이 전부 401로
+  /// 실패하는데도 화면은 정상처럼 남아 있었다 (이슈 #175).
+  final VoidCallback? _onSessionExpired;
 
   /// 재시도한 요청임을 표시하는 키. 무한 루프 방지의 핵심이다.
   static const _retriedKey = 'authRetried';
@@ -54,9 +64,14 @@ class AuthInterceptor extends Interceptor {
 
     final token = await _refresh();
     if (token == null || token.isEmpty) {
-      // 갱신도 실패했다. 원래 401을 그대로 돌려줘 호출부가 판단하게 한다.
-      // 세션이 끝난 경우 토큰은 이미 지워져 있으므로 라우터가 로그인으로 보낸다.
-      AppLogger.error('토큰 갱신', '갱신 실패 → 원요청을 포기한다');
+      // 갱신도 실패했다 — 세션이 끝난 것이다.
+      //
+      // 원래 401은 그대로 돌려줘 호출부가 각자 판단하게 두되, **세션이 끝났다는
+      // 사실은 따로 알린다.** 이것을 알리지 않으면 화면은 캐시로 계속 그려져
+      // 로그인이 풀린 줄 모른 채 쓰게 된다 (이슈 #175).
+      AppLogger.error('토큰 갱신', '갱신 실패 → 세션 종료');
+      await _tokens.clear();
+      _onSessionExpired?.call();
       return handler.next(err);
     }
 
