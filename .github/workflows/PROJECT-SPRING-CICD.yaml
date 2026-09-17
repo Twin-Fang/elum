@@ -159,9 +159,14 @@ jobs:
             fi
 
             echo "새로운 컨테이너 ${CONTAINER_NAME} 실행 중..."
+            # ELUM_AIDLP_SECRET: AI DLP 요청 암호화 시크릿.
+            # Spring이 ELUM_AIDLP_SECRET -> elum.aidlp.secret 으로 자동 매핑한다(별도 yml 설정 불필요).
+            # 클라이언트 .env의 같은 이름 값과 반드시 일치해야 한다 — 다르면 복호화가 실패한다.
+            # APPLICATION_PROD_YML Secret에 elum 블록을 직접 넣었다면 아래 -e 줄은 지워도 된다.
             echo $PW | sudo -S docker run -d -p "${PORT}":"${APP_PORT}" --name "${CONTAINER_NAME}" \
               -e TZ=Asia/Seoul \
               -e "SPRING_PROFILES_ACTIVE=${PROFILE}" \
+              -e "ELUM_AIDLP_SECRET=${{ secrets.ELUM_AIDLP_SECRET }}" \
               -v /etc/localtime:/etc/localtime:ro \
               -v "${MOUNT_DIR}":/app \
               "${IMAGE}"

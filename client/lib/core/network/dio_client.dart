@@ -6,6 +6,8 @@ import '../../features/auth/data/auth_repository.dart';
 import '../config/app_config.dart';
 import '../logger/app_logger.dart';
 import 'auth_interceptor.dart';
+// 비활성 상태지만 되살릴 때 바로 쓰도록 남겨둔다 (이슈 #182)
+// ignore: unused_import
 import 'encryption_interceptor.dart';
 
 /// Dio 인스턴스 생성. 설정값은 전부 [AppConfig]에서 온다 — 하드코딩하지 않는다.
@@ -20,8 +22,26 @@ abstract final class DioClient {
       ),
     );
 
+    // ⚠️ AI DLP 요청 암호화 — 현재 비활성 (이슈 #182).
+    //
+    // 왜 껐나: 클라이언트만 암호화하고 **서버에는 시크릿이 설정되어 있지 않았다.**
+    // 서버 필터는 시크릿이 비면 복호화를 건너뛰고 통과시키므로, 암호문 봉투가
+    // 그대로 역직렬화되어 모든 필드가 null이 됐다. 그 결과 카드 생성이 DB
+    // not-null 제약에 걸려 500으로 죽었고 화면에는 E-1001만 떴다.
+    //
+    // 다시 켜려면 — 코드를 되돌리기 전에 **양쪽 시크릿을 먼저 맞춘다.**
+    //   1) 서버: APPLICATION_PROD_YML Secret에 아래 블록 추가
+    //        elum:
+    //          aidlp:
+    //            secret: <아무 문자열, 클라이언트와 동일해야 함>
+    //   2) 클라이언트: CLIENT_ENV_FILE Secret의 ELUM_AIDLP_SECRET을 같은 값으로
+    //   3) 아래 한 줄의 주석을 푼다
+    //
+    // 값 자체는 아무거나 된다(HKDF-SHA256의 IKM으로 쓰인다). 길이·형식 제약 없이
+    // **양쪽이 완전히 같기만 하면** 된다. 한쪽만 설정하면 이번과 같은 장애가 난다.
+    //
     // 암호화는 로깅보다 먼저 등록한다 — 봉투로 바뀐 본문만 로그에 남아 원문이 새지 않는다.
-    dio.interceptors.add(EncryptionInterceptor(secret: AppConfig.aidlpSecret));
+    // dio.interceptors.add(EncryptionInterceptor(secret: AppConfig.aidlpSecret));
 
     if (AppConfig.enableNetworkLog) {
       dio.interceptors.add(SafeLogInterceptor());

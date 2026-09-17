@@ -56,6 +56,8 @@ public enum ErrorCode {
   DLP_SIGNATURE_INVALID(HttpStatus.BAD_REQUEST, "요청 서명이 유효하지 않습니다."),
   DLP_DECRYPT_FAILED(HttpStatus.BAD_REQUEST, "요청 복호화에 실패했습니다."),
   DLP_ENVELOPE_INVALID(HttpStatus.BAD_REQUEST, "암호화 요청 형식이 올바르지 않습니다."),
+  // 서버 설정 누락이라 클라이언트가 고칠 수 없다. 400으로 뭉뚱그리면 원인이 앱 탓처럼 보인다.
+  DLP_SECRET_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 암호화 시크릿이 설정되지 않았습니다."),
 
   // --- 소셜 로그인 · 토큰 갱신 ---
   OAUTH_PROVIDER_UNSUPPORTED(HttpStatus.BAD_REQUEST, "지원하지 않는 로그인 방식입니다."),

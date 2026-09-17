@@ -48,29 +48,51 @@ public class AidlpDecryptionFilter extends OncePerRequestFilter {
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
-    // 정확 경로 매칭 + POST 만 대상. secret 미설정이면 복호화 자체를 건너뛴다(데모 안전 — 로컬 fallback 유도).
-    boolean isTarget = HttpMethod.POST.matches(request.getMethod())
-      && TARGET_PATHS.contains(request.getRequestURI());
-    return !isTarget || properties.getSecret().isBlank();
+    // 정확 경로 매칭 + POST 만 대상.
+    //
+    // ⚠️ 예전에는 secret이 비면 여기서 통째로 건너뛰었다("데모 안전 — 로컬 fallback 유도").
+    // 그런데 클라이언트는 로컬 폴백을 이미 제거한 상태였다. 그래서 암호문 봉투가 복호화 없이
+    // 컨트롤러까지 흘러가 모든 필드가 null인 DTO가 됐고, 저장 단계의 not-null 제약에 걸려
+    // 500이 났다. 화면에는 E-1001만 떠 원인을 알 수 없었다 (이슈 #182).
+    //
+    // 이제는 대상 경로면 항상 필터를 타고, 봉투 유무·secret 유무를 아래에서 명시적으로 판정한다.
+    return !(HttpMethod.POST.matches(request.getMethod())
+      && TARGET_PATHS.contains(request.getRequestURI()));
   }
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
     throws IOException, ServletException {
 
-    // 1) 봉투 파싱
-    JsonNode root;
+    // 0) 본문을 먼저 통째로 읽어둔다.
+    //    평문 요청이면 그대로 다시 흘려보내야 하는데, getInputStream은 한 번만 읽힌다.
+    byte[] raw = request.getInputStream().readAllBytes();
+
+    // 1) 봉투 파싱 — 암호화된 요청인지 판별한다.
+    JsonNode enc = null;
     try {
-      root = objectMapper.readTree(request.getInputStream());
+      JsonNode root = objectMapper.readTree(raw);
+      enc = root == null ? null : root.get("encrypted");
     } catch (Exception e) {
-      writeError(response, ErrorCode.DLP_ENVELOPE_INVALID);
-      return;
+      // 여기서 형식을 판정하지 않는다. 평문 요청으로 보고 컨트롤러·Spring이 판단하게 둔다.
+      enc = null;
     }
-    JsonNode enc = root == null ? null : root.get("encrypted");
+
+    // 2) 암호화하지 않은 요청은 그대로 통과시킨다.
+    //    클라이언트가 암호화를 끈 빌드와 켠 빌드가 한동안 공존하므로 양쪽을 다 받아야 한다 (#182).
     if (enc == null) {
-      writeError(response, ErrorCode.DLP_ENVELOPE_INVALID);
+      chain.doFilter(new CachedBodyRequest(request, raw), response);
       return;
     }
+
+    // 3) 암호문이 왔는데 서버에 시크릿이 없으면 복호화할 방법이 없다.
+    //    조용히 통과시키면 null 투성이 DTO가 저장까지 내려가 원인 모를 500이 된다 — 그게 #182였다.
+    if (properties.getSecret().isBlank()) {
+      writeError(response, ErrorCode.DLP_SECRET_NOT_CONFIGURED);
+      return;
+    }
+
+    // 4) 봉투 구성요소 확인
     AidlpEnvelope envelope = new AidlpEnvelope(
       text(enc, "ciphertext"), text(enc, "iv"), text(enc, "salt"));
     if (!envelope.isComplete()) {
@@ -78,7 +100,7 @@ public class AidlpDecryptionFilter extends OncePerRequestFilter {
       return;
     }
 
-    // 2) 헤더 추출
+    // 5) 헤더 추출
     String timestamp = request.getHeader("X-Elum-Timestamp");
     String nonce = request.getHeader("X-Elum-Nonce");
     String signature = request.getHeader("X-Elum-Signature");
@@ -87,7 +109,7 @@ public class AidlpDecryptionFilter extends OncePerRequestFilter {
       return;
     }
 
-    // 3) timestamp 허용 오차
+    // 6) timestamp 허용 오차
     long ts;
     try {
       ts = Long.parseLong(timestamp);
@@ -101,19 +123,19 @@ public class AidlpDecryptionFilter extends OncePerRequestFilter {
       return;
     }
 
-    // 4) HMAC 서명 (nonce 소비 전에 검증 — 위조 요청으로 nonce 저장소를 오염시키지 않는다)
+    // 7) HMAC 서명 (nonce 소비 전에 검증 — 위조 요청으로 nonce 저장소를 오염시키지 않는다)
     if (!cryptoService.verifySignature(timestamp, nonce, envelope.ciphertext(), envelope.salt(), signature)) {
       writeError(response, ErrorCode.DLP_SIGNATURE_INVALID);
       return;
     }
 
-    // 5) nonce 재사용
+    // 8) nonce 재사용
     if (!nonceStore.checkAndRemember(nonce, now)) {
       writeError(response, ErrorCode.DLP_NONCE_REPLAY);
       return;
     }
 
-    // 6) 복호화 → 평문 JSON으로 body 교체
+    // 9) 복호화 → 평문 JSON으로 body 교체
     byte[] plain;
     try {
       plain = cryptoService.decrypt(envelope);
