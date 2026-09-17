@@ -33,8 +33,12 @@ public class JwkKeyResolver {
 
   private static final Duration CACHE_TTL = Duration.ofHours(1);
 
+  /// JSON 파싱 전용. **빈으로 등록하지 않는다** — 이 앱에는 ObjectMapper 빈이 없고,
+  /// 새로 등록하면 Spring MVC의 JSON 처리 설정까지 바뀐다. ObjectMapper는 thread-safe라
+  /// 정적 인스턴스로 공유해도 안전하다.
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+
   private final RestClient oauthRestClient;
-  private final ObjectMapper objectMapper;
 
   private final Map<String, CachedKeys> cache = new ConcurrentHashMap<>();
 
@@ -76,7 +80,7 @@ public class JwkKeyResolver {
     }
 
     try {
-      JsonNode keys = objectMapper.readTree(body).path("keys");
+      JsonNode keys = MAPPER.readTree(body).path("keys");
       Map<String, PublicKey> result = new HashMap<>();
       KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 

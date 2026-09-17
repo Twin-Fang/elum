@@ -18,18 +18,29 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
   Page<Member> findByStatus(MemberStatus status, Pageable pageable);
 
-  // nickname이 null인 회원은 like 결과가 null(불일치)로 평가돼 자연스럽게 제외된다.
+  // 아이 별명은 Member가 아니라 Profile에 있다. 계정 하나에 프로필이 여럿이 돼도
+  // 결과가 중복되지 않도록 join 대신 exists를 쓴다.
+  //
+  // 별명이 null인 프로필은 like가 null(불일치)로 평가돼 자연스럽게 제외된다.
   @Query("""
     select m from Member m
     where lower(m.username) like lower(concat('%', :keyword, '%'))
-       or lower(m.nickname) like lower(concat('%', :keyword, '%'))
+       or exists (
+         select 1 from Profile p
+         where p.member = m
+           and lower(p.nickname) like lower(concat('%', :keyword, '%'))
+       )
     """)
   Page<Member> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
   @Query("""
     select m from Member m
     where (lower(m.username) like lower(concat('%', :keyword, '%'))
-       or lower(m.nickname) like lower(concat('%', :keyword, '%')))
+       or exists (
+         select 1 from Profile p
+         where p.member = m
+           and lower(p.nickname) like lower(concat('%', :keyword, '%'))
+       ))
       and m.status = :status
     """)
   Page<Member> searchByKeywordAndStatus(

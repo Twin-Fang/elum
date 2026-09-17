@@ -30,8 +30,12 @@ public class KakaoOAuthVerifier implements OAuthVerifier {
   private static final String TOKEN_INFO_URL = "https://kapi.kakao.com/v1/user/access_token_info";
   private static final String USER_ME_URL = "https://kapi.kakao.com/v2/user/me";
 
+  /// JSON 파싱 전용. **빈으로 등록하지 않는다** — 이 앱에는 ObjectMapper 빈이 없고,
+  /// 새로 등록하면 Spring MVC의 JSON 처리 설정까지 바뀐다. ObjectMapper는 thread-safe라
+  /// 정적 인스턴스로 공유해도 안전하다.
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+
   private final RestClient oauthRestClient;
-  private final ObjectMapper objectMapper;
   private final OAuthProperties oAuthProperties;
 
   @Override
@@ -75,7 +79,7 @@ public class KakaoOAuthVerifier implements OAuthVerifier {
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
         .retrieve()
         .body(String.class);
-      return objectMapper.readTree(body);
+      return MAPPER.readTree(body);
     } catch (Exception e) {
       // 만료·위조·카카오 장애를 구분해 알리지 않는다. 공격자에게 힌트가 된다.
       log.warn("카카오 API 호출에 실패했습니다. url={}", url, e);
