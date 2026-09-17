@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
@@ -25,6 +26,9 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   /// 1단계에서 입력한 PIN. null이면 아직 1단계다.
   String? _firstEntry;
   String? _errorMessage;
+
+  /// 재입력이 틀린 횟수. 값이 바뀔 때마다 점이 한 번 흔들린다.
+  int _mismatchCount = 0;
 
   /// OS 키패드와 연결되는 실제 입력값.
   /// 자체 키패드를 두면 iOS·Android 각각의 입력 관습(햅틱·접근성·외부 키보드)을
@@ -60,8 +64,10 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   }
 
   void _onChanged() {
-    // 입력이 생기면 이전 안내 문구를 지운다
-    if (_errorMessage != null) {
+    // 다시 입력하기 시작하면 이전 안내 문구를 지운다.
+    // _clearInput()이 만드는 빈 값에는 반응하지 않는다 — 방금 띄운 안내가
+    // 곧바로 사라져 무엇이 잘못됐는지 읽을 틈이 없어진다.
+    if (_errorMessage != null && _current.isNotEmpty) {
       setState(() => _errorMessage = null);
     } else {
       setState(() {});
@@ -105,13 +111,21 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     });
   }
 
-  /// 재입력 불일치 → 1단계로 되돌린다. 경고색·에러 아이콘은 쓰지 않는다.
+  /// 재입력 불일치 → 재입력만 비운다. 경고색·에러 아이콘은 쓰지 않는다.
+  ///
+  /// 사용자가 정한 암호(1단계 입력)는 그대로 둔다. 확인 한 번 잘못 눌렀다고
+  /// 암호까지 없애면 네 자리를 두 번 더 쳐야 한다. 처음부터 다시 만들고 싶으면
+  /// 뒤로가기로 돌아갈 수 있다.
+  ///
+  /// 색 대신 [AppShake]로 알린다 — 이 서비스는 실패에 경고색을 쓰지 않는다.
   void _resetOnMismatch() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      setState(() => _firstEntry = null);
       _clearInput();
-      setState(() => _errorMessage = '암호가 서로 달라요. 다시 만들어볼까요?');
+      setState(() {
+        _errorMessage = '암호가 달라요. 다시 입력해주세요';
+        _mismatchCount++;
+      });
     });
   }
 
@@ -158,9 +172,12 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           GestureDetector(
             onTap: _focusNode.requestFocus,
             behavior: HitTestBehavior.opaque,
-            child: PinDots(
-              length: OnboardingProfile.pinLength,
-              filled: _current.length,
+            child: AppShake(
+              trigger: _mismatchCount,
+              child: PinDots(
+                length: OnboardingProfile.pinLength,
+                filled: _current.length,
+              ),
             ),
           ),
           PinInputField(

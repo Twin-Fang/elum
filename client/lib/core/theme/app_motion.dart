@@ -28,6 +28,15 @@ abstract final class AppMotion {
   /// 온보딩·특수 진입
   static const emphasis = Duration(milliseconds: 500);
 
+  /// 입력이 틀렸을 때 좌우로 한 번 흔드는 시간.
+  ///
+  /// 오류를 색이나 아이콘 대신 움직임으로 알린다 — 이 서비스는 경고색을 쓰지
+  /// 않는다. 짧게 끝나야 질책처럼 읽히지 않으므로 [fast]보다 조금 길게만 둔다.
+  static const shake = Duration(milliseconds: 320);
+
+  /// 흔들림의 좌우 진폭(논리 픽셀). 알아차릴 만큼만, 흔들린다는 느낌 이상은 되지 않게.
+  static const shakeAmplitude = 8.0;
+
   /// 은은하게 떠다니는(floating) 반복 연출 한 주기.
   /// 등장 연출과 겹치지 않도록 충분히 느리게 잡는다.
   static const float = Duration(milliseconds: 2400);

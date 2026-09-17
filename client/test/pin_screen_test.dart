@@ -190,19 +190,20 @@ void main() {
       expect(find.text('완료 화면'), findsOneWidget);
     });
 
-    testWidgets('재입력 값이 다르면 자동으로 처음부터 다시 받되 경고색을 쓰지 않는다', (tester) async {
+    testWidgets('재입력이 다르면 재입력만 다시 받고 정한 암호는 살린다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
       await enterPin(tester, '1234'); // 자동 전환
-      await enterPin(tester, '9999'); // 불일치 — 자동 검증 후 리셋
+      await enterPin(tester, '9999'); // 불일치
 
       // 완료로 넘어가지 않는다
       expect(find.text('완료 화면'), findsNothing);
-      // 1단계로 되돌아왔다
+      // 입력칸만 비운다
       expect(filledDots(tester), 0);
-      // 1단계 제목으로 돌아왔다
-      expect(find.textContaining('비밀암호를 만들어주세요'), findsOneWidget);
+      // 확인 단계에 머무른다 — 1단계로 돌아가면 암호를 처음부터 다시 만들어야 한다
+      expect(find.textContaining('한번 더'), findsOneWidget);
+      expect(find.textContaining('비밀암호를 만들어주세요'), findsNothing);
 
       // 아동 모드 규칙 — 빨강·경고 아이콘 금지
       expect(find.byIcon(Icons.error), findsNothing);
@@ -212,6 +213,20 @@ void main() {
       for (final t in texts) {
         expect(t.style?.color, isNot(Colors.red));
       }
+    });
+
+    testWidgets('살아있는 첫 입력으로 다시 맞추면 그대로 완료된다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      await enterPin(tester, '1234');
+      await enterPin(tester, '9999'); // 한 번 틀림
+      await enterPin(tester, '1234'); // 처음 정한 암호로 다시
+
+      await tester.tap(find.text('맞춤 설정하기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('완료 화면'), findsOneWidget);
     });
   });
 
