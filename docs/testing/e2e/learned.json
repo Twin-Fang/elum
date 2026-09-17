@@ -30,19 +30,23 @@
   "pitfalls": [
     {
       "text": "약관 동의 목록은 3~4회 스와이프해야 끝까지 간다. 한 번만 밀고 '잘렸다'고 판단하면 오진한다 — 실제로 없는 버그로 이슈를 올렸다가 취소했다",
-      "added": "2026-09-17"
+      "added": "2026-09-17",
+      "scope": "project"
     },
     {
       "text": "한글 입력 불가. adb input text가 ASCII만 받으므로 이름 입력은 영문으로 대체하고 보고에 적는다",
-      "added": "2026-09-17"
+      "added": "2026-09-17",
+      "scope": "flutter"
     },
     {
       "text": "카카오 로그인은 Chrome CustomTabs로 나간다. 세션이 남아 있으면 2단계 인증이 생략되므로 매번 뜬다고 가정하지 말 것",
-      "added": "2026-09-17"
+      "added": "2026-09-17",
+      "scope": "project"
     },
     {
       "text": "uiautomator dump로는 Flutter 위젯 텍스트를 볼 수 없다. ensureSemantics()를 넣어도 접근성 서비스가 실제로 붙어야 해서 에뮬레이터에서는 안 된다 (2026-09-17 실측)",
-      "added": "2026-09-17"
+      "added": "2026-09-17",
+      "scope": "flutter"
     }
   ],
   "runs": [
