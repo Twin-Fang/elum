@@ -335,4 +335,21 @@ void main() {
     expect(find.text('설정 화면'), findsOneWidget);
   });
 
+  testWidgets('설정에서 뒤로가기로 홈에 돌아온다 (이슈 #194)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text('설정 화면'), findsOneWidget);
+
+    // 기기 뒤로가기. go로 열면 스택이 교체돼 여기서 아무 일도 일어나지 않는다.
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('설정 화면'), findsNothing);
+    expect(find.byIcon(Icons.settings_outlined), findsOneWidget,
+        reason: '홈으로 돌아와야 톱니가 다시 보인다');
+  });
+
 }

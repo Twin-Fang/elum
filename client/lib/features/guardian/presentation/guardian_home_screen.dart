@@ -134,7 +134,9 @@ class _Header extends StatelessWidget {
                   // 배지는 아이 화면으로 가는 입구라 자리를 지켜야 한다.
                   // 전용 아이콘 에셋이 없어 Material 아이콘을 쓴다(앱 내 선례 있음).
                   AppPressable(
-                    onTap: () => context.go(Routes.guardianSettings),
+                    // push로 연다. go는 스택을 교체해 설정 화면의 뒤로가기가
+                    // 돌아갈 곳을 잃는다 — 화살표도 기기 뒤로가기도 먹통이 된다 (이슈 #194).
+                    onTap: () => context.push(Routes.guardianSettings),
                     scaleDown: AppPressable.scaleIcon,
                     child: Padding(
                       // 56 배지와 시각 중심을 맞추고 탭 영역도 확보한다.
