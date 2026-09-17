@@ -1,27 +1,13 @@
-# pro-flutter-e2e — 밟는 과정에서 나오는 부산물은 올리지 않는다.
-# 로그 덤프에는 토큰이, 계정 파일에는 자격증명이 그대로 들어 있다.
+# pro-flutter-e2e — 산출물 폴더
+#
+# 이 폴더에서 나오는 것들에는 테스트 계정·토큰·서버 주소·로그인 화면 캡처가 섞인다.
+# 그래서 **기본은 올리지 않는다.** 팀과 나눠야 할 파일이 생기면 아래에 한 줄씩 적는다.
+#
+#   !flows/auth/social-signup.json
+#
+# 적기 전에 그 파일을 열어 계정·토큰·주소가 없는지 눈으로 본다.
 
-*.log
-*.logcat
-*.xml
-*.mp4
-*.trace
-accounts*
-credentials*
-*secret*
-*.env
-frames/
-raw/
-learned.broken-*.json
+*
 
-# 화면 캡처 원본은 올리지 않는다 — 소셜 로그인 화면에는 계정이 그대로 찍힌다.
-# 문제를 보여주는 것만 골라 번호를 붙여 올린다 (01_*.png 형태).
-screencap*.png
-screen-*.png
-tmp-*.png
-step_*.png
-
-# 아래는 팀이 공유해야 하므로 추적한다
-!learned.json
-!*.json
+!.gitignore
 !README.md
