@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-17T11:44:30Z",
-    "currentVersion": "1.0.108",
+    "lastUpdated": "2026-09-17T12:10:29Z",
+    "currentVersion": "1.0.109",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 76
+    "totalReleases": 77
   },
   "releases": [
+    {
+      "version": "1.0.109",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-17",
+      "pr_number": 186,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 보호자 홈에서 설정으로 들어갈 수 있습니다\n  * 설정에서 로그아웃과 회원탈퇴를 할 수 있습니다\n  * 회원탈퇴 전에 무엇이 사라지는지 알려드립니다\n\n* **버그 수정**\n  * 로그인이 만료되면 로그인 화면으로 자동으로 돌아갑니다\n  * 로그인이 풀렸는데도 화면이 정상처럼 보이던 문제를 해결했습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "보호자 홈에서 설정으로 들어갈 수 있습니다",
+            "설정에서 로그아웃과 회원탈퇴를 할 수 있습니다",
+            "회원탈퇴 전에 무엇이 사라지는지 알려드립니다"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "로그인이 만료되면 로그인 화면으로 자동으로 돌아갑니다",
+            "로그인이 풀렸는데도 화면이 정상처럼 보이던 문제를 해결했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.0.108",
       "project_type": "flutter",
