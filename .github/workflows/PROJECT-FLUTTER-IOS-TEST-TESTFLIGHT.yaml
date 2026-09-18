@@ -251,17 +251,24 @@ jobs:
         id: build_profile
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" test ${{ env.ENV_FILE_PATH }}
 
-      - name: Create Secrets.xcconfig file
-        env:
-          SECRETS_XCCONFIG_CONTENT: ${{ secrets.SECRETS_XCCONFIG }}
+      # ⚠️ projectops 템플릿 업데이트 시 이 스텝이 사라지지 않도록 주의한다 (#156 참고).
+      # iOS는 URL 스킴·네이버 SDK 설정을 Info.plist에서 읽는데 그 값이 빌드 타임에
+      # 필요하다. Info.plist에 직접 적으면 시크릿이 저장소에 커밋되므로,
+      # .env를 읽어 gitignore된 xcconfig로 만든다. 이 스텝이 빠지면 값이 빈 채로
+      # 빌드돼 카카오·네이버·구글 로그인이 조용히 실패한다.
+      #
+      # 템플릿 원형은 `secrets.SECRETS_XCCONFIG`를 읽었지만 그 Secret은 이 레포에 없다.
+      # 없으면 빈 파일을 만들고 넘어가 **아무도 모른 채 스킴이 비었다** (이슈 #243).
+      # 값의 단일 출처는 `.env` 하나로 못박는다.
+      - name: Generate iOS social login secrets
         run: |
-          mkdir -p ios/Flutter
-          if [ -n "$SECRETS_XCCONFIG_CONTENT" ]; then
-            echo "$SECRETS_XCCONFIG_CONTENT" > ios/Flutter/Secrets.xcconfig
-            echo "✅ Secrets.xcconfig created"
-          else
-            echo "// No secrets provided" > ios/Flutter/Secrets.xcconfig
-            echo "ℹ️ Empty Secrets.xcconfig created (no secrets provided)"
+          bash tool/gen_ios_secrets.sh
+          # 키 값은 찍지 않는다. **비었는지만** 길이로 본다 —
+          # 빈 채로 통과한 것을 아무도 모른 게 이 사고의 본질이었다.
+          SCHEME=$(grep '^ELUM_KAKAO_SCHEME=' ios/Flutter/Secrets.xcconfig | cut -d= -f2-)
+          echo "✅ ios/Flutter/Secrets.xcconfig 생성 (카카오 스킴 ${#SCHEME}자)"
+          if [ "$SCHEME" = "kakao" ] || [ -z "$SCHEME" ]; then
+            echo "::warning::카카오 URL 스킴이 비었다. Secret CLIENT_ENV_FILE에 ELUM_KAKAO_NATIVE_APP_KEY가 있는지 확인할 것 (이슈 #243)"
           fi
 
       # 테스트 빌드 버전 설정 (version.yml에서 동적 읽기)
@@ -585,6 +592,20 @@ jobs:
       - name: 빌드 프로파일 적용 (test)
         id: build_profile
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" test ${{ env.ENV_FILE_PATH }}
+
+      # 준비 잡이 만든 것을 아티팩트로 받지만 **여기서 다시 만든다.**
+      # 실제로 빌드에 쓰이는 파일이라 아티팩트 누락 하나로 로그인이 통째로 죽는다.
+      # 배포용 워크플로도 같은 위치에서 같은 스크립트를 부른다 (이슈 #243).
+      - name: Generate iOS social login secrets
+        run: |
+          bash tool/gen_ios_secrets.sh
+          # 키 값은 찍지 않는다. **비었는지만** 길이로 본다 —
+          # 빈 채로 통과한 것을 아무도 모른 게 이 사고의 본질이었다.
+          SCHEME=$(grep '^ELUM_KAKAO_SCHEME=' ios/Flutter/Secrets.xcconfig | cut -d= -f2-)
+          echo "✅ ios/Flutter/Secrets.xcconfig 생성 (카카오 스킴 ${#SCHEME}자)"
+          if [ "$SCHEME" = "kakao" ] || [ -z "$SCHEME" ]; then
+            echo "::warning::카카오 URL 스킴이 비었다. Secret CLIENT_ENV_FILE에 ELUM_KAKAO_NATIVE_APP_KEY가 있는지 확인할 것 (이슈 #243)"
+          fi
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
