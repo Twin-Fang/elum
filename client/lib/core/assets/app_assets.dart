@@ -11,6 +11,15 @@ import '../../features/onboarding/domain/support_goal.dart';
 abstract final class AppAssets {
   static const _images = 'assets/images';
 
+  /// 소셜 로그인 제공자 로고 (22×22). Figma `로그인`(238:1808)에서 받았다.
+  ///
+  /// **각 사의 브랜드 자산이다.** 색·비율을 바꾸면 제공자 검수·스토어 심사에서
+  /// 지적받는다. 파일을 열어 색을 고치지 않는다 (이슈 #230).
+  static const _loginIcons = 'assets/icon/login';
+  static const loginKakao = '$_loginIcons/kakao.svg';
+  static const loginNaver = '$_loginIcons/naver.svg';
+  static const loginApple = '$_loginIcons/apple.svg';
+
   /// 도움 목표 아이콘 (40×40). Figma `온보딩_목표`(204:1002)의 Group 62~65,
   /// 목표별로 서로 다른 아이콘이다 (2026-07-22 갱신, 이슈 #11 후속).
   static String goalIcon(SupportGoal goal) => switch (goal) {

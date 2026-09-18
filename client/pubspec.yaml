@@ -130,6 +130,7 @@ flutter:
   # 파일을 추가하면 두 곳을 함께 수정한다.
   assets:
     - assets/images/
+    - assets/icon/login/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

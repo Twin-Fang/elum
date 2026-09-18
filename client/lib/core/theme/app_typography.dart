@@ -27,6 +27,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.cardDescription,
     required this.reviewTitle,
     required this.pinTitle,
+    required this.loginProvider,
     required this.consentAllAgree,
     required this.consentBadge,
     required this.consentLabel,
@@ -113,6 +114,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// PIN 화면 제목 (28/w800). title(28)과 크기는 같지만 줄간격이 다르다.
   final TextStyle pinTitle;
+
+  /// 소셜 로그인 버튼 문구 (18/w700 Pretendard).
+  ///
+  /// 앱 CTA(`button`, 22/w800 Tmoney)와 다르다 — 제공자 버튼은 카카오·네이버·Apple
+  /// 브랜드 가이드의 리듬을 따르므로 시안 그대로 둔다 (이슈 #230).
+  final TextStyle loginProvider;
 
   /// 약관 화면 전체 동의 버튼 문구 "서비스 이용약관 전체 동의" (20/w600 Pretendard).
   ///
@@ -287,6 +294,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.2,
     ),
+    loginProvider: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w700,
+      height: 1.0,
+    ),
     consentAllAgree: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 20,
@@ -395,6 +408,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? cardDescription,
     TextStyle? reviewTitle,
     TextStyle? pinTitle,
+    TextStyle? loginProvider,
     TextStyle? consentAllAgree,
     TextStyle? consentBadge,
     TextStyle? consentLabel,
@@ -429,6 +443,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       cardDescription: cardDescription ?? this.cardDescription,
       reviewTitle: reviewTitle ?? this.reviewTitle,
       pinTitle: pinTitle ?? this.pinTitle,
+      loginProvider: loginProvider ?? this.loginProvider,
       consentAllAgree: consentAllAgree ?? this.consentAllAgree,
       consentBadge: consentBadge ?? this.consentBadge,
       consentLabel: consentLabel ?? this.consentLabel,
@@ -468,6 +483,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       cardDescription: TextStyle.lerp(cardDescription, other.cardDescription, t)!,
       reviewTitle: TextStyle.lerp(reviewTitle, other.reviewTitle, t)!,
       pinTitle: TextStyle.lerp(pinTitle, other.pinTitle, t)!,
+      loginProvider: TextStyle.lerp(loginProvider, other.loginProvider, t)!,
       consentAllAgree:
           TextStyle.lerp(consentAllAgree, other.consentAllAgree, t)!,
       consentBadge: TextStyle.lerp(consentBadge, other.consentBadge, t)!,

@@ -114,9 +114,9 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginKakaoLabel,
     required this.loginNaverBg,
     required this.loginNaverLabel,
-    required this.loginGoogleBg,
-    required this.loginGoogleLabel,
-    required this.loginGoogleBorder,
+    required this.loginButtonShadow,
+    required this.loginAppleBg,
+    required this.loginAppleLabel,
     required this.consentSelectedFill,
     required this.consentSelectedBorder,
     required this.dlpBadgeText,
@@ -319,9 +319,10 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color loginKakaoLabel;
   final Color loginNaverBg;
   final Color loginNaverLabel;
-  final Color loginGoogleBg;
-  final Color loginGoogleLabel;
-  final Color loginGoogleBorder;
+  /// 제공자 버튼 그림자 (시안 4,4 blur 6 · 검정 5%).
+  final Color loginButtonShadow;
+  final Color loginAppleBg;
+  final Color loginAppleLabel;
 
   // --- 약관 동의 선택 상태 ---
   //
@@ -432,9 +433,9 @@ class AppColors extends ThemeExtension<AppColors> {
     loginKakaoLabel: Color(0xFF191600),
     loginNaverBg: Color(0xFF03C75A),
     loginNaverLabel: Color(0xFFFFFFFF),
-    loginGoogleBg: Color(0xFFFFFFFF),
-    loginGoogleLabel: Color(0xFF1F1F1F),
-    loginGoogleBorder: Color(0xFFDADCE0),
+    loginButtonShadow: Color(0x0D000000),
+    loginAppleBg: Color(0xFF000000),
+    loginAppleLabel: Color(0xFFFFFFFF),
     consentSelectedFill: Color(0xFFB5EAEC),
     consentSelectedBorder: Color(0xFF93DBCC),
     dlpBadgeText: Color(0xFF74757D),
@@ -534,9 +535,9 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? loginKakaoLabel,
     Color? loginNaverBg,
     Color? loginNaverLabel,
-    Color? loginGoogleBg,
-    Color? loginGoogleLabel,
-    Color? loginGoogleBorder,
+    Color? loginButtonShadow,
+    Color? loginAppleBg,
+    Color? loginAppleLabel,
     Color? consentSelectedFill,
     Color? consentSelectedBorder,
     Color? dlpBadgeText,
@@ -626,9 +627,9 @@ class AppColors extends ThemeExtension<AppColors> {
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
       loginNaverLabel: loginNaverLabel ?? this.loginNaverLabel,
-      loginGoogleBg: loginGoogleBg ?? this.loginGoogleBg,
-      loginGoogleLabel: loginGoogleLabel ?? this.loginGoogleLabel,
-      loginGoogleBorder: loginGoogleBorder ?? this.loginGoogleBorder,
+      loginButtonShadow: loginButtonShadow ?? this.loginButtonShadow,
+      loginAppleBg: loginAppleBg ?? this.loginAppleBg,
+      loginAppleLabel: loginAppleLabel ?? this.loginAppleLabel,
       consentSelectedFill: consentSelectedFill ?? this.consentSelectedFill,
       consentSelectedBorder: consentSelectedBorder ?? this.consentSelectedBorder,
       dlpBadgeText: dlpBadgeText ?? this.dlpBadgeText,
@@ -739,9 +740,10 @@ class AppColors extends ThemeExtension<AppColors> {
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,
       loginNaverLabel: Color.lerp(loginNaverLabel, other.loginNaverLabel, t)!,
-      loginGoogleBg: Color.lerp(loginGoogleBg, other.loginGoogleBg, t)!,
-      loginGoogleLabel: Color.lerp(loginGoogleLabel, other.loginGoogleLabel, t)!,
-      loginGoogleBorder: Color.lerp(loginGoogleBorder, other.loginGoogleBorder, t)!,
+      loginButtonShadow:
+          Color.lerp(loginButtonShadow, other.loginButtonShadow, t)!,
+      loginAppleBg: Color.lerp(loginAppleBg, other.loginAppleBg, t)!,
+      loginAppleLabel: Color.lerp(loginAppleLabel, other.loginAppleLabel, t)!,
       consentSelectedFill: Color.lerp(consentSelectedFill, other.consentSelectedFill, t)!,
       consentSelectedBorder: Color.lerp(consentSelectedBorder, other.consentSelectedBorder, t)!,
       dlpBadgeText: Color.lerp(dlpBadgeText, other.dlpBadgeText, t)!,

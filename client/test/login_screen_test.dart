@@ -88,7 +88,24 @@ void main() {
     // 한 번 더 눌러 들어가는 화면이 아니다.
     expect(find.text('카카오로 시작하기'), findsOneWidget);
     expect(find.text('네이버로 시작하기'), findsOneWidget);
-    expect(find.text('Google로 시작하기'), findsOneWidget);
+  });
+
+  testWidgets('구글은 빠졌다 (이슈 #230)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    // 시안에서 제공자가 넷에서 셋으로 줄었다. 버튼이 되살아나면 여기서 잡는다.
+    expect(find.textContaining('Google'), findsNothing);
+  });
+
+  testWidgets('버튼마다 제공자 로고가 붙는다 (이슈 #230)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    // 로고를 코드로 그리다 형태가 어긋난 적이 있다. 에셋을 쓰는지 직접 본다.
+    // 애플은 iOS에서만 뜨므로 여기서는 보지 않는다.
+    expect(svgWithAsset(AppAssets.loginKakao), findsOneWidget);
+    expect(svgWithAsset(AppAssets.loginNaver), findsOneWidget);
   });
 
   testWidgets('시작 화면의 병아리 장면을 그대로 쓴다 (이슈 #207)', (tester) async {
@@ -110,7 +127,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // 그림 위에 겹쳐 얹는 구조라 버튼 묶음이 아래로 새면 마지막 버튼이 잘린다.
-    final lastButton = tester.getRect(find.text('Google로 시작하기'));
+    // 애플은 iOS 전용이라 테스트 환경(호스트 OS)에서 마지막은 네이버다.
+    final lastButton = tester.getRect(find.text('네이버로 시작하기'));
     expect(lastButton.bottom, lessThan(tester.view.physicalSize.height));
   });
 }

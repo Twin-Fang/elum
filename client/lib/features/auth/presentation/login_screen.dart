@@ -3,13 +3,13 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/splash_scene.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/auth_repository.dart';
@@ -34,9 +34,14 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  /// 버튼 사이 간격 18 — 온보딩 목표 칩의 리듬(칩 y좌표 차 86 − 높이 68)을 따른다.
-  /// 같은 흐름 안에서 목록 간격이 화면마다 다르면 눈에 띈다.
-  static const _buttonGap = 18.0;
+  /// 버튼 사이 간격 12 — 시안 실측 (카카오 y=545, 네이버 y=623, 높이 66).
+  static const _buttonGap = 12.0;
+
+  /// 좌우 여백 16 · 하단 85 — 시안 실측 (버튼 x=16 w=360, 마지막 버튼 하단 767).
+  ///
+  /// 다른 화면의 `screenH`(24)와 다르다. 제공자 버튼만 시안이 더 넓게 잡았다.
+  static const _sideInset = 16.0;
+  static const _bottomInset = 85.0;
 
   /// 진행 중인 제공자. 중복 탭과 다른 버튼 동시 탭을 막는다.
   OAuthProvider? _pending;
@@ -121,21 +126,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   /// 제공자 버튼 묶음. 시작 화면의 CTA가 있던 자리(화면 하단)에 얹는다.
   ///
   /// 그림 위에 겹쳐 놓기 때문에 하단 페이드(`splashFade`, y=675~852) 위로 올라온다.
-  /// 버튼이 넷이면 페이드 영역만으로는 모자라 병아리 위까지 올라오는데, 페이드가
-  /// 그 경계를 흐려주므로 읽는 데 지장은 없다.
+  /// 셋으로 줄면서(이슈 #230) 페이드 영역 안에 거의 들어온다.
   Widget _buttons(BuildContext context) {
     final isBusy = _pending != null;
-    final space = context.space;
 
     return Align(
       alignment: Alignment.bottomCenter,
       child: Padding(
-        // 아래 여백 132 = 852(디자인 높이) − 720(버튼 하단).
-        //
-        // 병아리 얼굴(눈 y=573, 부리 y=599)이 버튼 **틈**으로 삐져나오지 않는
-        // 자리다. 더 내리면 눈만 두 개 떠 있는 것처럼 보인다. 버튼 넷이 얼굴
-        // 위를 덮는 구도 자체는 디자이너가 다시 잡기로 했다 (이슈 #207).
-        padding: EdgeInsets.fromLTRB(space.screenH.w, 0, space.screenH.w, 132.h),
+        // 시안 그대로 — 카카오 y=545 · 네이버 y=623 · Apple y=701, 높이 66.
+        // 마지막 버튼 하단이 767이므로 아래 여백은 852 − 767 = 85다.
+        padding: EdgeInsets.fromLTRB(_sideInset.w, 0, _sideInset.w, _bottomInset.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -153,30 +153,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ],
 
             if (_lastProvider == OAuthProvider.kakao) const _LastUsedHint(),
-            ElumButton(
+            _ProviderButton(
               label: _pending == OAuthProvider.kakao ? '연결하고 있어요' : '카카오로 시작하기',
+              iconAsset: AppAssets.loginKakao,
               backgroundColor: context.colors.loginKakaoBg,
               labelColor: context.colors.loginKakaoLabel,
-              onPressed: isBusy ? null : () => _signIn(OAuthProvider.kakao),
+              onTap: isBusy ? null : () => _signIn(OAuthProvider.kakao),
             ),
             SizedBox(height: _buttonGap.h),
 
             if (_lastProvider == OAuthProvider.naver) const _LastUsedHint(),
-            ElumButton(
+            _ProviderButton(
               label: _pending == OAuthProvider.naver ? '연결 중...' : '네이버로 시작하기',
+              iconAsset: AppAssets.loginNaver,
               backgroundColor: context.colors.loginNaverBg,
               labelColor: context.colors.loginNaverLabel,
-              onPressed: isBusy ? null : () => _signIn(OAuthProvider.naver),
+              onTap: isBusy ? null : () => _signIn(OAuthProvider.naver),
             ),
-            SizedBox(height: _buttonGap.h),
 
-            if (_lastProvider == OAuthProvider.google) const _LastUsedHint(),
-            // 구글만 테두리가 필요해 따로 그린다. 크기·모서리는 ElumButton과 같은
-            // 토큰을 쓴다 — 버튼마다 규격이 다르면 화면이 어수선해진다.
-            _OutlinedProviderButton(
-              label: _pending == OAuthProvider.google ? '연결 중...' : 'Google로 시작하기',
-              onTap: isBusy ? null : () => _signIn(OAuthProvider.google),
-            ),
+            // 구글 버튼은 시안에서 빠졌다 (이슈 #230). `OAuthProvider.google`은
+            // **지우지 않았다** — 저장소에 남은 `lastLoginProvider`가 'google'일
+            // 때 파싱이 깨지면 안 되고, 서버 행의 provider 값도 그대로 산다.
 
             // 애플 로그인은 iOS에서만 노출한다.
             // 안드로이드에서 쓰려면 애플 개발자 콘솔에 Services ID를 따로 만들어야 하는데
@@ -187,16 +184,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             if (Platform.isIOS) ...[
               SizedBox(height: _buttonGap.h),
               if (_lastProvider == OAuthProvider.apple) const _LastUsedHint(),
-              Opacity(
-                opacity: isBusy && _pending != OAuthProvider.apple ? 0.5 : 1,
-                // 애플 버튼은 규격 위젯을 그대로 쓴다. 색·문구·로고를 직접 그리면
-                // 애플 심사 가이드라인 위반이다. 크기만 앱 버튼에 맞춘다.
-                child: SignInWithAppleButton(
-                  text: _pending == OAuthProvider.apple ? '연결 중...' : 'Apple로 시작하기',
-                  height: context.space.buttonH.h,
-                  borderRadius: BorderRadius.circular(context.space.buttonRadius.r),
-                  onPressed: isBusy ? () {} : () => _signIn(OAuthProvider.apple),
-                ),
+              // ⚠️ 규격 위젯(`SignInWithAppleButton`)에서 직접 그리기로 바꿨다.
+              // 시안이 세 버튼을 같은 규격(360×66 · r18 · 로고 x=64)으로 그렸고,
+              // 규격 위젯은 그 정렬을 맞출 수 없기 때문이다.
+              //
+              // 애플이 요구하는 것은 지켰다 — **검정 배경 · 흰 사과 심볼 ·
+              // 최소 높이**. 다만 문구 `Apple로 시작하기`는 애플이 승인한 세 가지
+              // (`Apple로 로그인`·`Apple로 계속하기`·`Apple로 가입`)에 없다.
+              // 심사에서 지적받을 수 있어 이슈 #230에 남겼다.
+              _ProviderButton(
+                label: _pending == OAuthProvider.apple ? '연결 중...' : 'Apple로 시작하기',
+                iconAsset: AppAssets.loginApple,
+                backgroundColor: context.colors.loginAppleBg,
+                labelColor: context.colors.loginAppleLabel,
+                onTap: isBusy ? null : () => _signIn(OAuthProvider.apple),
               ),
             ],
           ],
@@ -208,7 +209,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
 /// "지난번에 이걸로" 안내.
 ///
-/// 소셜 로그인이 넷이면 무엇을 썼는지 잊는다. 다른 것으로 들어오면 별개 계정이
+/// 로그인 수단이 여럿이면 무엇을 썼는지 잊는다. 다른 것으로 들어오면 별개 계정이
 /// 생겨 아이 정보가 사라진 것처럼 보인다. 그 사고를 막는 장치다.
 class _LastUsedHint extends StatelessWidget {
   const _LastUsedHint();
@@ -228,19 +229,35 @@ class _LastUsedHint extends StatelessWidget {
   }
 }
 
-/// 테두리가 있는 제공자 버튼. 구글만 흰 배경이라 경계선이 필요하다.
+/// 제공자 버튼 (360×66 · r18). Figma `로그인`(238:1808) 실측.
 ///
-/// 크기·모서리·타이포는 [ElumButton]과 같은 토큰을 쓴다. 버튼마다 규격이 다르면
-/// 한 화면에 놓였을 때 어긋나 보인다.
-class _OutlinedProviderButton extends StatelessWidget {
-  const _OutlinedProviderButton({required this.label, required this.onTap});
+/// **로고는 왼쪽 64에 고정하고 문구는 버튼 가운데에 둔다.** 로고를 문구 바로
+/// 앞에 붙이면 제공자마다 문구 길이가 달라 로고가 들쭉날쭉해진다. 세 개가
+/// 한 줄로 서야 목록으로 읽힌다.
+class _ProviderButton extends StatelessWidget {
+  const _ProviderButton({
+    required this.label,
+    required this.iconAsset,
+    required this.backgroundColor,
+    required this.labelColor,
+    required this.onTap,
+  });
 
   final String label;
+
+  /// 제공자 로고. 색이 SVG 안에 박혀 있어 여기서 덧칠하지 않는다.
+  final String iconAsset;
+
+  final Color backgroundColor;
+  final Color labelColor;
   final VoidCallback? onTap;
+
+  /// 로고 22×22, 왼쪽에서 64 (시안 실측). 세로는 버튼 가운데다.
+  static const _iconSize = 22.0;
+  static const _iconLeft = 64.0;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final space = context.space;
 
     return AppPressable(
@@ -249,14 +266,32 @@ class _OutlinedProviderButton extends StatelessWidget {
         width: double.infinity,
         height: space.buttonH.h,
         decoration: BoxDecoration(
-          color: colors.loginGoogleBg,
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(space.buttonRadius.r),
-          border: Border.all(color: colors.loginGoogleBorder),
+          boxShadow: [
+            BoxShadow(
+              color: context.colors.loginButtonShadow,
+              offset: Offset(4.w, 4.h),
+              blurRadius: 6.r,
+            ),
+          ],
         ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: context.typo.button.copyWith(color: colors.loginGoogleLabel),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Text(
+              label,
+              style: context.typo.loginProvider.copyWith(color: labelColor),
+            ),
+            Positioned(
+              left: _iconLeft.w,
+              child: SvgPicture.asset(
+                iconAsset,
+                width: _iconSize.w,
+                height: _iconSize.w,
+              ),
+            ),
+          ],
         ),
       ),
     );
