@@ -27,7 +27,7 @@
 #   1. flutter build ios --no-codesign (Flutter 빌드)
 #   2. xcodebuild archive (Xcode 아카이브 생성)
 #   3. xcodebuild -exportArchive (IPA 생성, ExportOptions.plist 사용)
-#   4. fastlane upload_testflight (마법사 생성 Fastfile 사용)
+#   4. fastlane deploy (마법사 생성 Fastfile 사용, DEPLOY_MODE=store_only 고정 → TestFlight까지만)
 #
 # ===================================================================
 # 🔑 필수 GitHub Secrets
@@ -907,14 +907,26 @@ jobs:
           export API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
           export IPA_PATH="$IPA_PATH"
           export RELEASE_NOTES="$RELEASE_NOTES"
+          # deploy lane이 번들 ID를 요구한다. 없으면 UI.user_error!로 즉시 멈춘다.
+          export APP_IDENTIFIER="${{ secrets.IOS_BUNDLE_ID || vars.IOS_BUNDLE_ID }}"
+          # 🔴 테스트 빌드는 **TestFlight까지만** 간다. 기본값에 기대지 않고 못을 박는다 —
+          #    Fastfile 기본값이 바뀌면 테스트 빌드가 심사에 제출될 수 있다.
+          export DEPLOY_MODE="store_only"
 
           echo "🔧 Working directory: $(pwd)"
           echo "🔧 IPA_PATH: $IPA_PATH"
           echo "🔧 API_KEY_PATH: $API_KEY_PATH"
+          echo "🔧 DEPLOY_MODE: $DEPLOY_MODE / APP_IDENTIFIER: $APP_IDENTIFIER"
 
-          # Fastlane 실행 (마법사가 생성한 Fastfile 사용)
+          # Fastlane 실행 (마법사가 생성한 Fastfile 사용).
+          #
+          # ⚠️ lane 이름은 `deploy` 하나뿐이다 (이슈 #220).
+          # 전에는 `upload_testflight`를 불렀는데 그런 lane이 없어
+          # `Could not find lane 'ios upload_testflight'`로 매번 죽었다.
+          # 마법사가 까는 Fastfile을 손대는 대신 있는 lane을 쓴다 —
+          # Fastfile을 다시 깔면 손으로 더한 lane은 사라진다.
           cd ios
-          bundle exec fastlane upload_testflight
+          bundle exec fastlane deploy
 
       - name: Notify TestFlight Upload Success
         if: success()
