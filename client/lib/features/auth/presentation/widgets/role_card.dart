@@ -1,75 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/assets/app_assets.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../domain/app_role.dart';
 
-/// 역할 선택 카드 (이슈 #212 · 명세 §4-3).
+/// 역할 선택 카드 (Figma `732:5176`·`732:5258` · 이슈 #229).
 ///
-/// 온보딩 **도움 목표 칩**과 같은 규격(r20 테두리 카드 · 아이콘 40 · 좌여백 14)을
-/// 쓰되, 제목 아래 설명 한 줄이 붙어 높이만 커진다.
+/// ## 아이콘을 두지 않는다
 ///
-/// 선택 상태를 두지 않는다 — **탭하면 바로 넘어가므로** 선택된 카드를 보여줄
-/// 시간이 없다. `다음` 버튼이 없는 화면이라 선택 색을 만들면 쓸 자리가 없다.
+/// 전에는 왼쪽에 그림을 뒀다. 디자인에 없다 — **제목의 색이 그 역할을 한다.**
+/// `보호자`는 민트, `이룸이`는 주황이라 글을 빨리 읽지 못해도 구분된다.
+///
+/// ## 선택 상태가 생겼다
+///
+/// 전에는 탭하면 바로 넘어가 선택을 보여줄 시간이 없었다. 이제 `다음`으로 확정하므로
+/// **고른 카드가 남아 있어야** 무엇을 골랐는지 알 수 있다.
 class RoleCard extends StatelessWidget {
-  const RoleCard({super.key, required this.role, this.onTap});
+  const RoleCard({super.key, required this.role, required this.selected});
 
   final AppRole role;
-  final VoidCallback? onTap;
+  final bool selected;
 
-  /// 목표 칩(68)보다 설명 한 줄만큼 높다.
+  /// Figma 실측 — 344×96 r20
   static const height = 96.0;
 
-  /// 목표 칩과 같은 값 — 한 흐름 안에서 카드 여백이 달라지면 눈에 띈다.
-  static const _iconLeft = 14.0;
-  static const _iconToText = 12.0;
-  static const _iconSize = 40.0;
+  /// 카드 안쪽 여백 (제목·설명 모두 x=24)
+  static const _padding = 24.0;
+
+  /// 제목 하단(44) → 설명(56)
+  static const _titleToDescription = 12.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final space = context.space;
 
-    return Container(
+    return AnimatedContainer(
+      duration: AppMotion.fast,
+      curve: AppMotion.standard,
       height: height.h,
-      padding: EdgeInsets.symmetric(horizontal: _iconLeft.w),
+      padding: EdgeInsets.symmetric(horizontal: _padding.w),
       decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(context.space.cardRadius.r),
-        border: Border.all(color: colors.border, width: context.space.borderWidth),
+        color: selected ? colors.consentSelectedFill : colors.surface,
+        borderRadius: BorderRadius.circular(space.cardRadius.r),
+        border: Border.all(
+          color: selected ? colors.consentSelectedBorder : colors.border,
+          width: selected ? space.selectedBorderWidth : space.borderWidth,
+        ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // TODO(#198 D1 🎨): 역할 선택 전용 그림 2종이 나오면 교체한다.
-          //   지금은 목표 아이콘을 빌려 쓴다 — 도형을 코드로 그리지 않기 위함이다.
-          SvgPicture.asset(
-            switch (role) {
-              AppRole.guardian => AppAssets.roleGuardianMock,
-              AppRole.elumi => AppAssets.roleElumiMock,
-            },
-            width: _iconSize.w,
-            height: _iconSize.w,
-          ),
-          SizedBox(width: _iconToText.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+          // 제목은 두 조각이다 — 앞부분만 색이 다르다.
+          Text.rich(
+            TextSpan(
               children: [
-                Text(
-                  role.label,
-                  style: context.typo.body.copyWith(color: colors.chipLabel),
-                ),
-                SizedBox(height: context.space.xs.h / 2),
-                Text(
-                  role.description,
-                  style: context.typo.caption.copyWith(
-                    color: colors.textSecondary,
+                TextSpan(
+                  text: role.roleWord,
+                  style: TextStyle(
+                    color: switch (role) {
+                      AppRole.guardian => colors.checkDone,
+                      AppRole.elumi => colors.roleElumi,
+                    },
                   ),
                 ),
+                TextSpan(text: role.labelSuffix),
               ],
             ),
+            style: context.typo.subtitle.copyWith(color: colors.chipLabel),
+          ),
+          SizedBox(height: _titleToDescription.h),
+          Text(
+            role.description,
+            style: context.typo.body.copyWith(color: colors.chipLabel),
           ),
         ],
       ),

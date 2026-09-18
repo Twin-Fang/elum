@@ -2,6 +2,7 @@ import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/domain/app_role.dart';
+import 'package:elum/features/auth/presentation/widgets/role_card.dart';
 import 'package:elum/features/auth/presentation/role_select_screen.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:flutter/material.dart';
@@ -82,9 +83,11 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    expect(find.text('서비스를\n누가 사용하나요?'), findsOneWidget);
-    expect(find.text('보호자예요'), findsOneWidget);
-    expect(find.text('이룸이예요'), findsOneWidget);
+    expect(find.text('이 휴대폰은 누가\n사용하나요?'), findsOneWidget);
+    expect(find.text('보호자가 사용해요'), findsOneWidget);
+    expect(find.text('이룸이가 사용해요'), findsOneWidget);
+
+    expect(find.text('보호자모드와 이룸이모드가 나눠져 있어요'), findsOneWidget);
 
     // 처음 보는 이룸이는 암호를 받은 적이 없다. 여기서 말하면 막힌다.
     expect(find.textContaining('암호'), findsNothing);
@@ -102,23 +105,69 @@ void main() {
     expect(find.textContaining('바꿀 수 있'), findsNothing);
   });
 
-  testWidgets('다음 버튼이 없다 — 탭하면 바로 넘어간다', (tester) async {
+  // 전에는 카드를 누르면 바로 넘어갔다. 한 번 고르면 온보딩 경로가 갈리는
+  // 화면이라, 잘못 눌렀을 때 되돌릴 여지를 둔다 (이슈 #229).
+  testWidgets('카드를 눌러도 바로 넘어가지 않는다 — 다음을 눌러야 간다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    expect(find.text('다음'), findsNothing);
+    await tester.tap(find.text('보호자가 사용해요'));
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.text('보호자예요'));
+    // 아직 그대로다
+    expect(find.text('이름 화면'), findsNothing);
+
+    await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
 
     expect(find.text('이름 화면'), findsOneWidget);
+  });
+
+  testWidgets('아무것도 안 고르면 다음이 눌리지 않는다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('이름 화면'), findsNothing);
+    expect(find.text('연결 암호 넣기'), findsNothing);
+  });
+
+  testWidgets('고른 카드가 남아 무엇을 골랐는지 보인다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    RoleCard cardOf(String label) => tester.widget<RoleCard>(
+          find.ancestor(
+            of: find.text(label),
+            matching: find.byType(RoleCard),
+          ),
+        );
+
+    expect(cardOf('보호자가 사용해요').selected, isFalse);
+
+    await tester.tap(find.text('보호자가 사용해요'));
+    await tester.pumpAndSettle();
+
+    expect(cardOf('보호자가 사용해요').selected, isTrue);
+    expect(cardOf('이룸이가 사용해요').selected, isFalse);
+
+    // 다시 고르면 하나만 남는다
+    await tester.tap(find.text('이룸이가 사용해요'));
+    await tester.pumpAndSettle();
+
+    expect(cardOf('보호자가 사용해요').selected, isFalse);
+    expect(cardOf('이룸이가 사용해요').selected, isTrue);
   });
 
   testWidgets('보호자를 고르면 역할이 저장된다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('보호자예요'));
+    await tester.tap(find.text('보호자가 사용해요'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
 
     expect(storage.selectedRole, AppRole.guardian.storageValue);
@@ -128,7 +177,9 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('이룸이예요'));
+    await tester.tap(find.text('이룸이가 사용해요'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
 
     expect(find.text('연결 암호 넣기'), findsOneWidget);
@@ -140,14 +191,16 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('이룸이예요'));
+    await tester.tap(find.text('이룸이가 사용해요'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('뒤로'));
     await tester.pumpAndSettle();
 
     // go로 갈아끼웠다면 스택이 없어 pop이 실패하고 연결 화면에 그대로 남는다
     // (이슈 #194와 같은 함정). push로 얹었기에 돌아올 수 있다.
-    expect(find.text('보호자예요'), findsOneWidget);
+    expect(find.text('보호자가 사용해요'), findsOneWidget);
   });
 
   testWidgets('보호자를 골라도 갇히지 않는다 — 이름 화면에서 되돌아온다 (이슈 #212)',
@@ -157,14 +210,16 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('보호자예요'));
+    await tester.tap(find.text('보호자가 사용해요'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
     expect(find.text('이름 화면'), findsOneWidget);
 
     await tester.tap(find.text('이름에서 뒤로'));
     await tester.pumpAndSettle();
 
-    expect(find.text('이룸이예요'), findsOneWidget);
+    expect(find.text('이룸이가 사용해요'), findsOneWidget);
   });
 
   testWidgets('역할만 골랐을 때는 이룸이 휴대폰으로 표시하지 않는다', (tester) async {
@@ -173,7 +228,9 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('이룸이예요'));
+    await tester.tap(find.text('이룸이가 사용해요'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
 
     expect(storage.isElumiDevice, isFalse);
@@ -184,7 +241,9 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('보호자예요'));
+    await tester.tap(find.text('보호자가 사용해요'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
 
     // 다음에 다시 물으면 될 뿐, 여기서 멈춰 세우지 않는다

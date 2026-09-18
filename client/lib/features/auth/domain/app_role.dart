@@ -27,16 +27,25 @@ enum AppRole {
     return null;
   }
 
-  /// 카드 제목 — 자기가 어느 쪽인지 알아보는 한 마디
-  String get label => switch (this) {
-        AppRole.guardian => '보호자예요',
-        AppRole.elumi => '이룸이예요',
+  /// 카드 제목에서 **색이 다른 앞부분** (Figma 732:5258 · 이슈 #229).
+  ///
+  /// `보호자`는 민트, `이룸이`는 주황. 두 선택지를 색으로 먼저 구분하게 한다 —
+  /// 글을 빨리 읽지 못해도 어느 쪽이 자기인지 보인다.
+  String get roleWord => switch (this) {
+        AppRole.guardian => '보호자',
+        AppRole.elumi => '이룸이',
       };
 
+  /// 카드 제목의 나머지. 앞부분과 이어 붙여 `보호자가 사용해요`가 된다.
+  String get labelSuffix => '가 사용해요';
+
+  /// 카드 제목 전체. 색 구분이 필요 없는 곳(테스트·접근성)에서 쓴다.
+  String get label => '$roleWord$labelSuffix';
+
   /// 카드 설명 — 두 선택지가 **관계로 짝을 이룬다.**
-  /// 한쪽은 만들고, 한쪽은 만들어 준 걸 한다.
+  /// 한쪽은 만들고 관리하며, 한쪽은 그것을 실천한다.
   String get description => switch (this) {
-        AppRole.guardian => '일과를 만들어요',
-        AppRole.elumi => '만들어 준 일과를 해요',
+        AppRole.guardian => '일과를 만들고 관리해요',
+        AppRole.elumi => '일과를 실천해요',
       };
 }

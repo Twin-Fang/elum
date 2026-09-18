@@ -88,6 +88,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.stagePendingText,
     required this.checkDone,
     required this.consentCheckIdle,
+    required this.roleElumi,
     required this.checkPending,
     required this.rewardBackdropTop,
     required this.rewardBackdropBottom,
@@ -249,6 +250,12 @@ class AppColors extends ThemeExtension<AppColors> {
   /// `border`(#EFEFEF)를 쓰면 배경(#F7F2EF)과 거의 같아 **원이 안 보인다.**
   /// 눌러야 하는 자리가 안 보이면 무엇을 해야 하는지 알 수 없다.
   final Color consentCheckIdle;
+
+  /// 역할 선택에서 `이룸이`를 가리키는 색 (Figma 732:5258 실측 #FFAA00 · 이슈 #229).
+  ///
+  /// `보호자`는 포인트색(`checkDone`)을 쓰고 `이룸이`는 주황이다. 두 선택지를
+  /// **색으로 먼저 구분**하게 한다 — 글을 빨리 읽지 못해도 어느 쪽이 자기인지 보인다.
+  final Color roleElumi;
   /// 아이 홈 체크 전 테두리 (8px)
   final Color checkPending;
   /// 보상 화면 배경 위 (어두워야 별이 빛난다)
@@ -399,6 +406,7 @@ class AppColors extends ThemeExtension<AppColors> {
     stagePendingText: Color(0x80242634),
     checkDone: Color(0xFF55CFBA),
     consentCheckIdle: Color(0xFFC9D6D4),
+    roleElumi: Color(0xFFFFAA00),
     checkPending: Color(0xFFC9D6D4),
     rewardBackdropTop: Color(0xFF0C0D1A),
     rewardBackdropBottom: Color(0xFF242634),
@@ -500,6 +508,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? stagePendingText,
     Color? checkDone,
     Color? consentCheckIdle,
+    Color? roleElumi,
     Color? checkPending,
     Color? rewardBackdropTop,
     Color? rewardBackdropBottom,
@@ -591,6 +600,7 @@ class AppColors extends ThemeExtension<AppColors> {
       stagePendingText: stagePendingText ?? this.stagePendingText,
       checkDone: checkDone ?? this.checkDone,
       consentCheckIdle: consentCheckIdle ?? this.consentCheckIdle,
+      roleElumi: roleElumi ?? this.roleElumi,
       checkPending: checkPending ?? this.checkPending,
       rewardBackdropTop: rewardBackdropTop ?? this.rewardBackdropTop,
       rewardBackdropBottom: rewardBackdropBottom ?? this.rewardBackdropBottom,
@@ -696,6 +706,7 @@ class AppColors extends ThemeExtension<AppColors> {
       checkDone: Color.lerp(checkDone, other.checkDone, t)!,
       consentCheckIdle:
           Color.lerp(consentCheckIdle, other.consentCheckIdle, t)!,
+      roleElumi: Color.lerp(roleElumi, other.roleElumi, t)!,
       checkPending: Color.lerp(checkPending, other.checkPending, t)!,
       rewardBackdropTop: Color.lerp(rewardBackdropTop, other.rewardBackdropTop, t)!,
       rewardBackdropBottom: Color.lerp(rewardBackdropBottom, other.rewardBackdropBottom, t)!,
