@@ -1,6 +1,10 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminImageProviderView;
+import com.chuseok22.elumserver.ai.core.ImageProvider;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigView;
 import com.chuseok22.elumserver.systemconfig.core.ConfigGroup;
@@ -22,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminConfigController {
 
   private final SystemConfigService systemConfigService;
+  private final ImageClientRouter imageClientRouter;
 
   @GetMapping("/admin/settings")
   public String settings(Model model) {
@@ -32,6 +37,7 @@ public class AdminConfigController {
       grouped.put(group, views.stream().filter(view -> view.group() == group).toList());
     }
     model.addAttribute("groups", grouped);
+    model.addAttribute("imageProviders", imageProviderViews());
     return "admin/settings";
   }
 
@@ -42,14 +48,51 @@ public class AdminConfigController {
     RedirectAttributes redirectAttributes
   ) {
     try {
+      // 키 없는 제공자로 바꾸면 그 순간부터 카드 생성이 전부 실패한다. 화면 버튼이
+      // 먼저 막지만, 요청을 직접 보내면 뚫리므로 여기서 한 번 더 막는다.
+      rejectUnavailableProvider(key, value);
       systemConfigService.update(key, value);
       redirectAttributes.addFlashAttribute("message", key.getLabel() + " 설정을 저장했습니다.");
     } catch (CustomException e) {
-      redirectAttributes.addFlashAttribute(
-        "errorMessage", key.getLabel() + " 저장 실패: 값이 올바르지 않습니다. (E-CFG-001)"
-      );
+      // 비밀값은 실패 사유가 다르다. "값이 이상하다"로 뭉뚱그리면 관리자가
+      // 서버 설정 문제를 값 문제로 오해해 계속 다시 입력하게 된다.
+      String reason = switch (e.getErrorCode()) {
+        case SECRET_MASTER_KEY_MISSING ->
+          " 저장 실패: 서버에 암호화 키가 없어 비밀값을 저장할 수 없습니다. (E-CFG-002)";
+        case IMAGE_PROVIDER_UNAVAILABLE ->
+          " 저장 실패: 그 제공자의 API 키가 없습니다. 키를 먼저 저장하세요. (E-CFG-003)";
+        default -> " 저장 실패: 값이 올바르지 않습니다. (E-CFG-001)";
+      };
+      redirectAttributes.addFlashAttribute("errorMessage", key.getLabel() + reason);
     }
     return "redirect:/admin/settings";
+  }
+
+  private void rejectUnavailableProvider(ConfigKey key, String value) {
+    if (key != ConfigKey.IMAGE_PROVIDER_SELECTED) {
+      return;
+    }
+    ImageProvider provider;
+    try {
+      provider = ImageProvider.valueOf(value.trim());
+    } catch (IllegalArgumentException e) {
+      throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
+    }
+    boolean usable = imageClientRouter.of(provider)
+      .map(client -> client.available())
+      .orElse(false);
+    if (!usable) {
+      throw new CustomException(ErrorCode.IMAGE_PROVIDER_UNAVAILABLE);
+    }
+  }
+
+  private List<AdminImageProviderView> imageProviderViews() {
+    ImageProvider current = imageClientRouter.selected();
+    return imageClientRouter.all().stream()
+      .map(client -> AdminImageProviderView.of(
+        client, current, systemConfigService.getDouble(client.provider().getPriceKey())))
+      .sorted(java.util.Comparator.comparingDouble(AdminImageProviderView::pricePerImage))
+      .toList();
   }
 
   @PostMapping("/admin/settings/{key}/reset")

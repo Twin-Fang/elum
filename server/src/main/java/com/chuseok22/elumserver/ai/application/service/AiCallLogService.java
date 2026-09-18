@@ -71,6 +71,8 @@ public class AiCallLogService {
   private double estimateCostUsd(AiCallType callType, GeminiGenerateContentResponse.UsageMetadata usage) {
     return switch (callType) {
       case GEMINI_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_GEMINI_IMAGE_PER_IMAGE);
+      case OPENAI_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_OPENAI_IMAGE_PER_IMAGE);
+      case FLUX_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_FLUX_IMAGE_PER_IMAGE);
       case GEMINI_TEXT_CREATE, GEMINI_TEXT_QUESTION -> {
         if (usage == null) {
           yield 0.0;

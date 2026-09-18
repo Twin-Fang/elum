@@ -148,6 +148,12 @@ public class SystemConfigService {
   public void update(ConfigKey key, String rawValue) {
     String value = validate(key, rawValue);
     if (key.getValueType() == ConfigValueType.SECRET) {
+      // 비밀값은 화면에 가려서 보여주므로 폼이 빈 값으로 돌아온다. 그걸 "지우기"로
+      // 받으면 저장 버튼을 누를 때마다 키가 날아간다. 빈 값은 "그대로 두기"다.
+      // 지우려면 기본값 복원을 쓴다.
+      if (value.isEmpty()) {
+        return;
+      }
       value = encryptSecret(value);
     }
     SystemConfig config = systemConfigRepository.findByConfigKey(key)
@@ -163,6 +169,19 @@ public class SystemConfigService {
 
   @Transactional
   public void resetToDefault(ConfigKey key) {
+    // 비밀값의 기본값은 "없음"이다. update는 빈 값을 무시하므로 여기서 직접 비운다.
+    if (key.getValueType() == ConfigValueType.SECRET) {
+      SystemConfig config = systemConfigRepository.findByConfigKey(key)
+        .orElseGet(() -> {
+          SystemConfig created = new SystemConfig();
+          created.setConfigKey(key);
+          return created;
+        });
+      config.setConfigValue("");
+      systemConfigRepository.save(config);
+      forceReload();
+      return;
+    }
     update(key, defaultValueFor(key));
   }
 

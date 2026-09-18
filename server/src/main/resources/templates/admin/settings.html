@@ -17,6 +17,48 @@
     <div th:if="${message}" class="alert alert-success" th:text="${message}">저장되었습니다.</div>
     <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">오류</div>
 
+    <!-- 이미지 제공자 상태 — 단가·키 유무·캐릭터 일관성을 한눈에 본다 (이슈 #246). -->
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body space-y-3">
+        <h2 class="card-title text-lg">이미지 생성 제공자</h2>
+        <p class="text-sm text-base-content/60">
+          카드 삽화가 AI 비용의 대부분을 차지합니다. 싼 제공자로 바꾸면 원가가 크게 내려가지만,
+          캐릭터 일관성을 지키지 못하는 제공자를 고르면 단계마다 다른 캐릭터가 나옵니다.
+        </p>
+
+        <div th:each="provider : ${imageProviders}"
+             class="border border-base-300 rounded-box p-3 flex items-center justify-between gap-3 flex-wrap"
+             th:classappend="${provider.selected()} ? 'border-primary bg-primary/5' : ''">
+          <div>
+            <div class="font-medium">
+              <span th:text="${provider.label()}">제공자</span>
+              <span th:if="${provider.selected()}" class="badge badge-primary badge-sm ml-1">사용 중</span>
+            </div>
+            <div class="text-sm text-base-content/70">
+              <span th:text="'$' + ${#numbers.formatDecimal(provider.pricePerImage(), 1, 4)} + '/장'">$0</span>
+              <span th:if="${provider.available()}" class="text-success">· 키 있음</span>
+              <span th:unless="${provider.available()}" class="text-error">· 키 없음</span>
+              <span th:if="${provider.characterConsistent()}">· 캐릭터 일관성 지원</span>
+              <span th:unless="${provider.characterConsistent()}" class="text-warning">
+                · ⚠ 캐릭터 일관성 미지원
+              </span>
+            </div>
+          </div>
+          <form th:unless="${provider.selected()}"
+                th:action="@{/admin/settings/{key}(key='IMAGE_PROVIDER_SELECTED')}" method="post"
+                onsubmit="return confirm('이 제공자로 바꿀까요? 다음 카드 생성부터 반영됩니다.');">
+            <input type="hidden" name="value" th:value="${provider.name()}"/>
+            <!-- 키가 없는 제공자로 바꾸면 카드 생성이 전부 실패한다. 버튼에서 먼저 막고
+                 서버에서도 한 번 더 막는다. -->
+            <button type="submit" class="btn btn-sm"
+                    th:classappend="${provider.available()} ? 'btn-primary' : 'btn-disabled'"
+                    th:disabled="${!provider.available()}"
+                    th:text="${provider.available()} ? '이것으로 전환' : '키를 먼저 넣으세요'">전환</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <div th:each="entry : ${groups}" class="card bg-base-100 shadow-md">
       <div class="card-body space-y-4">
         <h2 class="card-title text-lg" th:text="${entry.key.label}">그룹</h2>
@@ -25,25 +67,50 @@
             <div class="min-w-64">
               <div class="font-medium">
                 <span th:text="${config.label()}">설정명</span>
-                <span th:if="${config.changed()}" class="badge badge-warning badge-sm ml-1">변경됨</span>
+                <span th:if="${config.changed() and config.valueType().name() != 'SECRET'}"
+                      class="badge badge-warning badge-sm ml-1">변경됨</span>
+                <span th:if="${config.changed() and config.valueType().name() == 'SECRET'}"
+                      class="badge badge-success badge-sm ml-1">저장됨</span>
               </div>
               <div class="text-sm text-base-content/60" th:text="${config.description()}">설명</div>
-              <div class="text-xs text-base-content/40 mt-1">
+              <div class="text-xs text-base-content/40 mt-1"
+                   th:unless="${config.valueType().name() == 'SECRET'}">
                 기본값: <span th:text="${config.defaultValue() != '' ? config.defaultValue() : '(없음)'}">기본값</span>
+              </div>
+              <div class="text-xs text-base-content/40 mt-1"
+                   th:if="${config.valueType().name() == 'SECRET'}">
+                암호화해 저장합니다. 저장한 값은 다시 볼 수 없습니다
               </div>
             </div>
             <div class="flex items-center gap-2">
               <form th:action="@{/admin/settings/{key}(key=${config.key()})}" method="post" class="flex items-center gap-2">
-                <!-- SELECT 타입은 허용값 셀렉트박스, 나머지는 텍스트 인풋 -->
-                <select th:if="${config.valueType().name() == 'SELECT'}" name="value" class="select select-bordered select-sm w-40">
-                  <option th:each="allowed : ${config.allowedValues()}" th:value="${allowed}" th:text="${allowed}"
-                          th:selected="${allowed == config.value()}">값</option>
-                </select>
-                <input th:unless="${config.valueType().name() == 'SELECT'}" type="text" name="value"
-                       th:value="${config.value()}" class="input input-bordered input-sm w-64"/>
+                <!-- 값 타입에 맞는 위젯을 고른다. 비밀값은 절대 화면에 그대로 내보내지 않는다. -->
+                <th:block th:switch="${config.valueType().name()}">
+                  <select th:case="'SELECT'" name="value" class="select select-bordered select-sm w-40">
+                    <option th:each="allowed : ${config.allowedValues()}" th:value="${allowed}" th:text="${allowed}"
+                            th:selected="${allowed == config.value()}">값</option>
+                  </select>
+                  <select th:case="'BOOLEAN'" name="value" class="select select-bordered select-sm w-40">
+                    <option value="true" th:selected="${config.value() == 'true'}">켜짐</option>
+                    <option value="false" th:selected="${config.value() != 'true'}">꺼짐</option>
+                  </select>
+                  <!-- 비어 있으면 "그대로 두기"다. 지우려면 옆의 기본값 버튼을 쓴다. -->
+                  <input th:case="'SECRET'" type="password" name="value" value="" autocomplete="off"
+                         th:placeholder="${config.changed()} ? '저장됨 — 바꾸려면 새 값 입력' : '아직 없음 — 값을 입력하세요'"
+                         class="input input-bordered input-sm w-64"/>
+                  <input th:case="*" type="text" name="value"
+                         th:value="${config.value()}" class="input input-bordered input-sm w-64"/>
+                </th:block>
                 <button type="submit" class="btn btn-primary btn-sm">저장</button>
               </form>
-              <form th:action="@{/admin/settings/{key}/reset(key=${config.key()})}" method="post"
+              <!-- 비밀값은 "기본값으로 복원"이 곧 "지우기"라 버튼 글과 확인 문구가 다르다. -->
+              <form th:if="${config.valueType().name() == 'SECRET'}"
+                    th:action="@{/admin/settings/{key}/reset(key=${config.key()})}" method="post"
+                    onsubmit="return confirm('저장된 값을 지울까요? 이 키를 쓰는 기능이 꺼집니다.');">
+                <button type="submit" class="btn btn-ghost btn-sm">지우기</button>
+              </form>
+              <form th:unless="${config.valueType().name() == 'SECRET'}"
+                    th:action="@{/admin/settings/{key}/reset(key=${config.key()})}" method="post"
                     onsubmit="return confirm('기본값으로 복원할까요?');">
                 <button type="submit" class="btn btn-ghost btn-sm">기본값</button>
               </form>
