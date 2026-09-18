@@ -1,15 +1,43 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-18T12:38:21Z",
-    "currentVersion": "1.11.0",
+    "lastUpdated": "2026-09-18T12:51:30Z",
+    "currentVersion": "1.12.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 102
+    "totalReleases": 103
   },
   "releases": [
+    {
+      "version": "1.12.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-18",
+      "pr_number": 245,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 새 기능\n\n* **새 기능**\n  * 일과를 만들다 나가려 하면 사라진다고 먼저 알려드려요\n\n* **개선**\n  * 보상을 직접 적는 칸이 맨 위로 올라왔어요\n  * 자주 쓰는 보상은 그 아래에서 한 번에 고를 수 있어요\n  * 보상 화면이 배경과 어울리도록 다듬었어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "일과를 만들다 나가려 하면 사라진다고 먼저 알려드려요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "보상을 직접 적는 칸이 맨 위로 올라왔어요",
+            "자주 쓰는 보상은 그 아래에서 한 번에 고를 수 있어요",
+            "보상 화면이 배경과 어울리도록 다듬었어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.11.0",
       "project_type": "flutter",
