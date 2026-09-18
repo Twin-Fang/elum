@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiGenerateContentResponse;
+import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiRoutineImagePromptBuilder;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
@@ -114,7 +115,7 @@ public class AdminPromptService {
 
   private String testGeminiImage(String prefix, String sampleInput, CharacterType characterType) {
     try {
-      GeminiImageClient.GeneratedImage image =
+      GeneratedImage image =
         geminiImageClient.generateImageForTest(prefix, sampleInput, characterType);
       String base64 = Base64.getEncoder().encodeToString(image.bytes());
       return "data:image/" + image.extension() + ";base64," + base64;

@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.infrastructure.ai;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiGenerateContentResponse;
+import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -265,7 +266,7 @@ public class RoutineAiPipeline {
   // 재시도까지 실패하면 예외를 던지지 않고 null을 반환한다 — 이 단계만 이미지 없이(imagePath=null)
   // 저장하고 나머지 단계와 일과 자체는 살린다. 예외를 던지면 buildResult()에서 일과 전체가
   // ROUTINE_AI_GENERATION_FAILED로 죽어 서버에 저장조차 되지 않는다(이 버그의 근본 원인).
-  private GeminiImageClient.GeneratedImage generateImageWithRetry(String description, CharacterType characterType) {
+  private GeneratedImage generateImageWithRetry(String description, CharacterType characterType) {
     try {
       return geminiImageClient.generateImage(description, characterType);
     } catch (Exception first) {
@@ -281,7 +282,7 @@ public class RoutineAiPipeline {
   }
 
   private record StepResult(
-    RoutineStepDraft.StepDraft stepDraft, GeminiImageClient.GeneratedImage generatedImage, String reusedImagePath
+    RoutineStepDraft.StepDraft stepDraft, GeneratedImage generatedImage, String reusedImagePath
   ) {
 
   }

@@ -3,7 +3,7 @@ package com.chuseok22.elumserver.routine.infrastructure.storage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
+import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.RoutineProperties;
@@ -29,7 +29,7 @@ class RoutineImageStorageTest {
   @DisplayName("save로 저장한 이미지를 read로 다시 읽으면 동일한 바이트를 반환한다")
   void saveThenRead_returnsSameBytes() {
     byte[] originalBytes = {1, 2, 3, 4};
-    GeminiImageClient.GeneratedImage image = new GeminiImageClient.GeneratedImage(originalBytes, "png");
+    GeneratedImage image = new GeneratedImage(originalBytes, "png");
 
     String savedPath = routineImageStorage.save("batch-1", 1, image);
     RoutineImageStorage.ImageContent content = routineImageStorage.read(savedPath);

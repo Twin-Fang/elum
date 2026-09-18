@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.ai.infrastructure.client;
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
+import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -159,9 +160,5 @@ public class GeminiImageClient {
       case "image/webp" -> "webp";
       default -> "png";
     };
-  }
-
-  public record GeneratedImage(byte[] bytes, String extension) {
-
   }
 }

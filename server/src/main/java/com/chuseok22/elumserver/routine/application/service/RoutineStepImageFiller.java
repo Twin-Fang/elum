@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
@@ -81,7 +82,7 @@ public class RoutineStepImageFiller {
   /** 그림을 만들어 저장하고 경로를 채운다. 어떤 실패도 밖으로 내지 않는다. */
   void fill(String routineId, String stepId, String description, CharacterType characterType) {
     try {
-      GeminiImageClient.GeneratedImage image =
+      GeneratedImage image =
         geminiImageClient.generateImage(description, characterType);
       if (image == null) {
         log.warn("추가 카드 이미지가 비어 돌아왔다: routineId={}, stepId={}", routineId, stepId);

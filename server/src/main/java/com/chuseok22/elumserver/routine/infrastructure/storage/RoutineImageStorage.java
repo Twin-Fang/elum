@@ -1,6 +1,6 @@
 package com.chuseok22.elumserver.routine.infrastructure.storage;
 
-import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
+import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.RoutineProperties;
@@ -20,7 +20,7 @@ public class RoutineImageStorage {
 
   private final RoutineProperties routineProperties;
 
-  public String save(String batchId, Integer stepOrder, GeminiImageClient.GeneratedImage image) {
+  public String save(String batchId, Integer stepOrder, GeneratedImage image) {
     try {
       Path dir = Path.of(routineProperties.imageStoragePath(), batchId);
       Files.createDirectories(dir);

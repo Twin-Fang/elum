@@ -15,6 +15,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiGenerateContentResponse;
+import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -206,7 +207,7 @@ class RoutineAiPipelineTest {
       + "{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
     when(geminiImageClient.generateImage(any(), any()))
-      .thenReturn(new GeminiImageClient.GeneratedImage(new byte[]{1, 2, 3}, "png"));
+      .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
@@ -231,7 +232,7 @@ class RoutineAiPipelineTest {
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
     when(geminiImageClient.generateImage(any(), any()))
-      .thenReturn(new GeminiImageClient.GeneratedImage(new byte[]{1, 2, 3}, "png"));
+      .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null);
@@ -272,7 +273,7 @@ class RoutineAiPipelineTest {
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
     when(geminiImageClient.generateImage(any(), any()))
       .thenThrow(new RuntimeException("일시적 실패"))
-      .thenReturn(new GeminiImageClient.GeneratedImage(new byte[]{1, 2, 3}, "png"));
+      .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
