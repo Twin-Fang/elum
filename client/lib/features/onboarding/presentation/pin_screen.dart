@@ -101,7 +101,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   /// 재입력 일치 → 키패드를 내려 CTA를 드러낸다.
   ///
   /// 저장은 여기서 하지 않는다(확정할 틈을 남긴다). 다만 키패드를 띄워두면
-  /// 화면 하단의 "맞춤 설정하기"가 그 뒤에 숨어, 4자리를 두 번 다 넣고도
+  /// 화면 하단의 `시작하기`가 그 뒤에 숨어, 4자리를 두 번 다 넣고도
   /// 다음에 뭘 해야 할지 알 수 없다 — 실기기 테스트에서 실제로 막혔다.
   /// 점을 누르면 키패드가 다시 올라오므로 되돌릴 길은 남아 있다.
   void _revealConfirmCta() {
@@ -150,22 +150,27 @@ class _PinScreenState extends ConsumerState<PinScreen> {
 
     return ElumScaffold(
       onBack: () => context.pop(),
-      // Figma 238:1909의 CTA는 "다음"이 아니라 "맞춤 설정하기"다.
-      // 1단계·재입력 전환은 4자리 도달 시 자동으로 일어나므로, 이 버튼은
-      // 재입력이 일치했을 때 저장을 최종 확정하는 용도로만 활성화된다.
-      bottomButton: ElumButton(
-        label: '맞춤 설정하기',
-        onPressed: _canConfirm ? _onComplete : null,
-      ),
+      // 시안(238:2924)에는 **입력 중에 버튼이 아예 없다** (이슈 #231).
+      //
+      // 전에는 비활성 버튼을 깔아 뒀는데, 그러면 네 자리를 넣고도 "이걸 눌러야
+      // 하나" 하고 멈춘다. 눌리지 않는 버튼은 알려주는 게 없다. 두 번 맞춰
+      // 넣으면 그때 나타나므로, **나타나는 것 자체가 다 됐다는 신호**가 된다.
+      bottomButton: _canConfirm
+          ? ElumButton(label: '시작하기', onPressed: _onComplete)
+          : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ElumHeader(
             // Figma 238:2767 — 재입력 단계의 제목
+            // 시안 문구 그대로 쓴다 (238:2767 · 238:2924).
+            // `보호자모드`는 #196에서 `보호자 화면`으로 한 번 바꿨던 말인데,
+            // **시안을 따르기로 합의했다** (이슈 #228 — 기기만 휴대폰으로 바꾸고
+            // 코드·모드는 시안대로). 자세한 근거는 루트 CLAUDE.md 용어 규칙.
             title: _isConfirmStep
-                ? '암호를 한 번 더\n넣어주세요'
+                ? '암호를 한번 더\n입력해주세요'
                 : '보호자님만 아는\n비밀암호를 만들어주세요',
-            description: _errorMessage ?? '보호자 화면으로 바꿀 때 쓰는 암호예요',
+            description: _errorMessage ?? '보호자모드로 변경할 때 사용하는 암호예요',
           ),
           SizedBox(height: space.xl),
           // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)

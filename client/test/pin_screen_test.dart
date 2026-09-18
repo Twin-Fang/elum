@@ -25,9 +25,9 @@ void main() {
   // .w/.h 검증에는 Figma 기준 뷰포트가 필요하다 (기본 800×600이면 스케일이 어긋난다)
   useFigmaViewport();
 
-  bool isCtaEnabled(WidgetTester tester) {
-    return tester.widget<ElumButton>(find.byType(ElumButton)).onPressed != null;
-  }
+  /// CTA가 **화면에 있는가**. 시안은 완료 전에 버튼 자리를 비워 둔다 (이슈 #231).
+  bool hasCta(WidgetTester tester) =>
+      find.byType(ElumButton).evaluate().isNotEmpty;
 
   Widget wrap() {
     final router = GoRouter(
@@ -93,16 +93,17 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('보호자 화면으로 바꿀 때 쓰는 암호예요'), findsOneWidget);
-      // CTA는 "다음"이 아니라 "맞춤 설정하기"다
-      expect(find.text('맞춤 설정하기'), findsOneWidget);
+      expect(find.text('보호자모드로 변경할 때 사용하는 암호예요'), findsOneWidget);
+      // 입력 중에는 CTA가 아예 없다 — 다 맞춰 넣어야 나타난다
+      expect(hasCta(tester), isFalse);
     });
 
-    testWidgets('아무것도 입력하지 않으면 CTA가 비활성이다', (tester) async {
+    testWidgets('아무것도 입력하지 않으면 CTA가 아예 없다 (이슈 #231)', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(isCtaEnabled(tester), isFalse);
+      // 눌리지 않는 버튼을 깔아두면 "이걸 눌러야 하나" 하고 멈춘다.
+      expect(hasCta(tester), isFalse);
     });
 
     testWidgets('점 4개가 자릿수를 보여준다', (tester) async {
@@ -143,7 +144,7 @@ void main() {
       // 6자리를 넣어도 formatter가 4자리로 자른다. 4자리로 인식되면
       // 자동 전환되어 재입력 단계로 넘어간다 — 그것으로 4자리 제한을 확인한다.
       await enterPin(tester, '123456');
-      expect(find.textContaining('한 번 더'), findsOneWidget);
+      expect(find.textContaining('한번 더'), findsOneWidget);
     });
 
     testWidgets('숫자가 아닌 입력은 무시한다', (tester) async {
@@ -162,21 +163,22 @@ void main() {
       await enterPin(tester, '1234');
 
       // Figma 238:2767의 제목
-      expect(find.textContaining('한 번 더'), findsOneWidget);
+      expect(find.textContaining('한번 더'), findsOneWidget);
       // 재입력 단계에서는 점이 비어 있다
       expect(filledDots(tester), 0);
     });
 
-    testWidgets('재입력 단계에서 값이 일치하면 CTA가 활성된다 (자동 저장은 하지 않는다)', (tester) async {
+    testWidgets('재입력 단계에서 값이 일치하면 CTA가 나타난다 (자동 저장은 하지 않는다)', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
       await enterPin(tester, '1234'); // 자동으로 재입력 단계
       await enterPin(tester, '1234'); // 일치 — 자동 검증
 
-      // 일치해도 자동으로 넘어가지 않고 CTA만 활성화된다
+      // 일치해도 자동으로 넘어가지 않는다 — 그때 CTA가 나타난다
       expect(find.text('완료 화면'), findsNothing);
-      expect(isCtaEnabled(tester), isTrue);
+      expect(hasCta(tester), isTrue);
+      expect(find.text('시작하기'), findsOneWidget);
     });
 
     testWidgets('재입력 일치 후 CTA를 눌러야 완료 화면으로 간다', (tester) async {
@@ -202,7 +204,7 @@ void main() {
       // 입력칸만 비운다
       expect(filledDots(tester), 0);
       // 확인 단계에 머무른다 — 1단계로 돌아가면 암호를 처음부터 다시 만들어야 한다
-      expect(find.textContaining('한 번 더'), findsOneWidget);
+      expect(find.textContaining('한번 더'), findsOneWidget);
       expect(find.textContaining('비밀암호를 만들어주세요'), findsNothing);
 
       // 아동 모드 규칙 — 빨강·경고 아이콘 금지
@@ -223,7 +225,7 @@ void main() {
       await enterPin(tester, '9999'); // 한 번 틀림
       await enterPin(tester, '1234'); // 처음 정한 암호로 다시
 
-      await tester.tap(find.text('맞춤 설정하기'));
+      await tester.tap(find.text('시작하기'));
       await tester.pumpAndSettle();
 
       expect(find.text('완료 화면'), findsOneWidget);
@@ -296,7 +298,7 @@ void main() {
       await tester.enterText(find.byType(TextField), '1234');
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('한 번 더'), findsOneWidget);
+      expect(find.textContaining('한번 더'), findsOneWidget);
       expect(find.byType(PinDots), findsOneWidget);
     });
   });
