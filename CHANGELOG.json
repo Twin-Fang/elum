@@ -1,15 +1,43 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-18T06:12:46Z",
-    "currentVersion": "1.4.1",
+    "lastUpdated": "2026-09-18T06:34:26Z",
+    "currentVersion": "1.5.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 93
+    "totalReleases": 94
   },
   "releases": [
+    {
+      "version": "1.5.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-18",
+      "pr_number": 223,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 앱에서 쓰는 말을 전체적으로 다듬었어요\n  * 이름 뒤 조사가 어색하던 문제를 고쳤어요\n  * 안내 문구를 더 짧고 쉽게 바꿨어요\n\n* **버그 수정**\n  * 아이폰 테스트용 앱이 만들어지지 않던 문제를 해결했어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "앱에서 쓰는 말을 전체적으로 다듬었어요",
+            "이름 뒤 조사가 어색하던 문제를 고쳤어요",
+            "안내 문구를 더 짧고 쉽게 바꿨어요"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "아이폰 테스트용 앱이 만들어지지 않던 문제를 해결했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.4.1",
       "project_type": "flutter",
