@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-18T05:59:00Z",
-    "currentVersion": "1.4.0",
+    "lastUpdated": "2026-09-18T06:12:46Z",
+    "currentVersion": "1.4.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 92
+    "totalReleases": 93
   },
   "releases": [
+    {
+      "version": "1.4.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-18",
+      "pr_number": 222,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 테스트용 앱 만들기가 중간에 멈추던 문제를 해결했어요\n  * 안드로이드와 아이폰 테스트용 앱 모두 정상적으로 만들어져요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "테스트용 앱 만들기가 중간에 멈추던 문제를 해결했어요",
+            "안드로이드와 아이폰 테스트용 앱 모두 정상적으로 만들어져요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.4.0",
       "project_type": "flutter",
