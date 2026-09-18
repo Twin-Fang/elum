@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-17T23:56:16Z",
-    "currentVersion": "1.2.0",
+    "lastUpdated": "2026-09-18T00:17:03Z",
+    "currentVersion": "1.2.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 85
+    "totalReleases": 86
   },
   "releases": [
+    {
+      "version": "1.2.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-18",
+      "pr_number": 210,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 로그인 화면이 첫 화면 그림을 그대로 이어받아요\n  * 화면이 바뀔 때 배경이 튀지 않아요\n\n* **기타**\n  * 화면 하단의 보안 표시를 잠시 내렸어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "로그인 화면이 첫 화면 그림을 그대로 이어받아요",
+            "화면이 바뀔 때 배경이 튀지 않아요"
+          ]
+        },
+        "기타": {
+          "title": "기타",
+          "items": [
+            "화면 하단의 보안 표시를 잠시 내렸어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.2.0",
       "project_type": "flutter",
