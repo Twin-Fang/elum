@@ -4,8 +4,9 @@
 
 ## 릴리스 노트
 
-* **개선**
-  * 카드 문구와 그림이 나이에 맞게 만들어져요
+* **버그 수정**
+  * 일과 내용을 비우고 만들면 한참 기다린 뒤 실패하던 문제 해결
+  * 무엇이 잘못됐는지 바로 알려줘요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
