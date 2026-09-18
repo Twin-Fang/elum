@@ -1,15 +1,52 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-18T12:51:30Z",
-    "currentVersion": "1.12.0",
+    "lastUpdated": "2026-09-18T13:31:08Z",
+    "currentVersion": "1.13.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 103
+    "totalReleases": 104
   },
   "releases": [
+    {
+      "version": "1.13.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-18",
+      "pr_number": 249,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 무료·프로 요금제의 바탕을 서버에 넣었습니다\n  * 로그인하는 계정은 모두 무료로 시작합니다\n  * 기존 계정에도 무료 이용 상태를 채웠습니다\n  * 관리자가 프로를 직접 켜고 끌 수 있습니다\n\n* **개선**\n  * 카드 그림 생성 방식을 나중에 바꿀 수 있게 정리했습니다\n\n* **기타**\n  * **이번 업데이트로 앱에서 달라지는 것은 없습니다**\n  * 이용 한도는 모두 열려 있어 지금 막히는 기능이 없습니다\n  * 결제는 아직 연결되지 않았습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "무료·프로 요금제의 바탕을 서버에 넣었습니다",
+            "로그인하는 계정은 모두 무료로 시작합니다",
+            "기존 계정에도 무료 이용 상태를 채웠습니다",
+            "관리자가 프로를 직접 켜고 끌 수 있습니다"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드 그림 생성 방식을 나중에 바꿀 수 있게 정리했습니다"
+          ]
+        },
+        "기타": {
+          "title": "기타",
+          "items": [
+            "**이번 업데이트로 앱에서 달라지는 것은 없습니다**",
+            "이용 한도는 모두 열려 있어 지금 막히는 기능이 없습니다",
+            "결제는 아직 연결되지 않았습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.12.0",
       "project_type": "flutter",
