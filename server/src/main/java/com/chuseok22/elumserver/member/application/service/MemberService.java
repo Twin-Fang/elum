@@ -6,6 +6,7 @@ import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkReposit
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
@@ -42,9 +43,11 @@ public class MemberService {
   private final AiCallLogRepository aiCallLogRepository;
 
   private final DeviceLinkRepository deviceLinkRepository;
+  private final EntitlementService entitlementService;
 
   public MemberResponse getMyInfo(String memberId) {
-    return MemberResponse.from(requireMember(memberId), findProfile(memberId));
+    return MemberResponse.from(requireMember(memberId), findProfile(memberId),
+      entitlementService.snapshot(memberId));
   }
 
   @Transactional
@@ -52,7 +55,7 @@ public class MemberService {
     Member member = requireMember(memberId);
     Profile profile = requireProfile(memberId);
     profile.setNickname(request.nickname());
-    return MemberResponse.from(member, profile);
+    return MemberResponse.from(member, profile, entitlementService.snapshot(memberId));
   }
 
   @Transactional
@@ -61,7 +64,7 @@ public class MemberService {
     Profile profile = requireProfile(memberId);
     profile.getSupportGoals().clear();
     profile.getSupportGoals().addAll(request.supportGoals());
-    return MemberResponse.from(member, profile);
+    return MemberResponse.from(member, profile, entitlementService.snapshot(memberId));
   }
 
   @Transactional
@@ -69,7 +72,7 @@ public class MemberService {
     Member member = requireMember(memberId);
     Profile profile = requireProfile(memberId);
     profile.setCharacter(request.character());
-    return MemberResponse.from(member, profile);
+    return MemberResponse.from(member, profile, entitlementService.snapshot(memberId));
   }
 
   public MemberConsentResponse getConsents(String memberId) {

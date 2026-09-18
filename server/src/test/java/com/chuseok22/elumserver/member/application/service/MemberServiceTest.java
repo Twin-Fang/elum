@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkReposit
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -55,6 +56,9 @@ class MemberServiceTest {
 
   @Mock
   private DeviceLinkRepository deviceLinkRepository;
+
+  @Mock
+  private EntitlementService entitlementService;
 
   @InjectMocks
   private MemberService memberService;

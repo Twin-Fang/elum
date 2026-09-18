@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.dto.response;
 
+import com.chuseok22.elumserver.license.application.service.EntitlementSnapshot;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -34,7 +35,11 @@ public record MemberResponse(
   boolean requiredConsentsCompleted,
 
   @Schema(description = "회원가입 일시 (KST, ISO-8601 형식)", example = "2026-07-16T10:30:00")
-  LocalDateTime createdAt
+  LocalDateTime createdAt,
+
+  @Schema(description = "이 계정이 지금 쓸 수 있는 것들. 화면마다 따로 묻지 않도록 한 번에 내려준다. "
+    + "수치 한도는 -1이면 무제한이다. 기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.")
+  EntitlementSnapshot entitlements
 ) {
 
   /**
@@ -46,7 +51,7 @@ public record MemberResponse(
    * <p>[profile]이 없으면 당사자 항목을 비워 응답한다. 가입 직후 프로필 생성에
    * 실패한 예외적인 상태에서도 화면이 죽지 않게 한다.
    */
-  public static MemberResponse from(Member member, Profile profile) {
+  public static MemberResponse from(Member member, Profile profile, EntitlementSnapshot entitlements) {
     return new MemberResponse(
       member.getId(),
       member.getUsername(),
@@ -55,7 +60,8 @@ public record MemberResponse(
       profile == null ? Set.of() : profile.getSupportGoals(),
       profile == null ? null : profile.getCharacter(),
       member.hasRequiredConsents(),
-      member.getCreatedAt()
+      member.getCreatedAt(),
+      entitlements
     );
   }
 }
