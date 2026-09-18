@@ -156,10 +156,16 @@ GoRouter createRouter({
       ),
 
       // --- 로그인 ---
-      // 온보딩 앞에 서므로 같은 수평 슬라이드를 쓴다.
+      // **fade를 쓴다. 슬라이드를 쓰면 글자가 두 번 보인다** (이슈 #207).
+      //
+      // 시작 화면과 로그인 화면은 같은 그림([SplashScene])을 그린다. 수평
+      // 슬라이드는 나가는 화면과 들어오는 화면을 가로로 어긋나게 겹치므로,
+      // 그림이 같으면 `차근차근 함께해요`·로고·병아리가 통째로 이중으로 찍힌다.
+      // fade는 같은 그림끼리 겹쳐도 차이가 보이지 않아, 버튼만 떠오르는 것처럼
+      // 읽힌다 — `시작하기`를 없애 두 화면을 하나로 만든 의도와 맞는다.
       GoRoute(
         path: Routes.login,
-        pageBuilder: (context, state) => slidePage(state, const LoginScreen()),
+        pageBuilder: (context, state) => fadePage(state, const LoginScreen()),
       ),
 
       GoRoute(
