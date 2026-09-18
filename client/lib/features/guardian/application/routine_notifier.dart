@@ -13,6 +13,7 @@ enum RoutineFlowStep {
   masking,    // DLP 처리 중 (연출)
   maskResult, // 전/후 비교
   question,   // AI 추가 질문
+  reward,     // 보상 정하기 (건너뛸 수 있다)
   generating, // 카드 생성 중
   review,     // 카드 검토·승인
   done,       // 승인 완료
@@ -28,6 +29,8 @@ class RoutineFlowState {
     this.question,
     this.answers = const [],
     this.customOptions = const {},
+    this.rewardText = '',
+    this.rewardPresetKey = '',
     this.routine,
     this.errorCode,
   });
@@ -47,6 +50,15 @@ class RoutineFlowState {
   /// 화면에 보이지 않는다. 어느 질문에 추가했는지도 알아야 그 질문 아래에 그린다.
   final Map<String, List<String>> customOptions;
 
+  /// 보호자가 카드 생성 **전에** 정한 보상 (이슈 #239).
+  ///
+  /// 비어 있으면 건너뛴 것이다 — 이룸이 화면에 보상을 띄우지 않는다.
+  /// **보상은 선택 항목이므로 비었다고 흐름을 막지 않는다.**
+  final String rewardText;
+
+  /// 고른 프리셋 키(`SNACK`·`VIDEO`·`PLAY`·`WALK`). 직접 적었으면 `CUSTOM`.
+  final String rewardPresetKey;
+
   final Routine? routine;
 
   /// 카드 생성 실패 시 화면에 노출할 식별자 (예: E-1001). null이면 정상.
@@ -61,6 +73,8 @@ class RoutineFlowState {
     RoutineQuestion? question,
     List<String>? answers,
     Map<String, List<String>>? customOptions,
+    String? rewardText,
+    String? rewardPresetKey,
     Routine? routine,
     String? errorCode,
   }) {
@@ -72,6 +86,8 @@ class RoutineFlowState {
       question: question ?? this.question,
       answers: answers ?? this.answers,
       customOptions: customOptions ?? this.customOptions,
+      rewardText: rewardText ?? this.rewardText,
+      rewardPresetKey: rewardPresetKey ?? this.rewardPresetKey,
       routine: routine ?? this.routine,
       // errorCode는 null로 되돌릴 수 있어야 한다(재시도 시 초기화) → ?? 쓰지 않는다.
       errorCode: errorCode,
@@ -237,6 +253,44 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     return generateCards();
   }
 
+  /// 보상을 정한다 (이슈 #239).
+  ///
+  /// [text]가 비면 **건너뛴 것**으로 본다 — 프리셋 키도 함께 비운다.
+  /// 키만 남으면 이룸이 화면이 문구 없는 이모지를 띄운다.
+  void setReward(String text, {String presetKey = ''}) {
+    final trimmed = text.trim();
+    state = state.copyWith(
+      rewardText: trimmed,
+      rewardPresetKey: trimmed.isEmpty ? '' : presetKey,
+    );
+  }
+
+  /// 카드를 만든 **뒤에** 보상을 고친다 (검토 화면에서 · 이슈 #239).
+  ///
+  /// 생성 전 [setReward]와 다르다 — 이미 일과가 서버에 있으므로 API를 탄다.
+  /// 저장에 실패해도 로컬에는 반영한다. **보상은 선택 항목이라 실패가 흐름을
+  /// 막지 않는다** — repository가 `synced: false`로 알려 준다.
+  Future<bool> updateRewardOnRoutine(String text, {String presetKey = ''}) async {
+    final routine = state.routine;
+    if (routine == null) return false;
+
+    final trimmed = text.trim();
+    final result = await ref.read(routineRepositoryProvider).updateReward(
+          routine,
+          rewardText: trimmed,
+          rewardPresetKey: trimmed.isEmpty ? '' : presetKey,
+        );
+    state = state.copyWith(
+      routine: result.routine,
+      rewardText: trimmed,
+      rewardPresetKey: trimmed.isEmpty ? '' : presetKey,
+    );
+    return result.synced;
+  }
+
+  /// 보상 없이 넘어간다. 정했던 것을 지운다 — 되돌아와 건너뛰면 그 뜻이다.
+  void skipReward() => setReward('');
+
   Future<void> _createRoutine() async {
     // 재시도로 다시 들어올 수 있으므로 이전 에러 코드를 지운다.
     state = state.copyWith(step: RoutineFlowStep.generating, errorCode: null);
@@ -250,6 +304,9 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
         rawInputText: state.rawInput,
         goals: goals,
         answers: state.answers,
+        // 건너뛰었으면 빈 문자열이다. 서버가 보상 없음으로 저장한다 (이슈 #239).
+        rewardText: state.rewardText,
+        rewardPresetKey: state.rewardPresetKey,
       );
 
       AppLogger.notifierStateChange('RoutineFlowNotifier', 'generating', 'review', {

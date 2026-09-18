@@ -21,7 +21,7 @@ import 'helpers/fake_reward_api.dart';
 /// Figma `보호자_새로운 일과 만들기_추가질문`(262:4766 / 262:4854) 정합 테스트.
 ///
 /// 두 프레임의 차이는 선택 여부다 — 아무것도 고르지 않으면 CTA가 없고,
-/// 하나라도 고르면 `카드 만들기`가 나타난다.
+/// 하나라도 고르면 `다음`이 나타난다. 그 다음은 보상 화면이다 (이슈 #239).
 void main() {
   /// 서버가 주는 다중 질문 (실측 응답 형태)
   const twoQuestions = RoutineQuestion(
@@ -54,6 +54,10 @@ void main() {
           builder: (context, state) => const QuestionScreen(),
         ),
         // 질문 다음은 카드 생성 로딩(262:4703)이다
+        GoRoute(
+          path: Routes.routineReward,
+          builder: (context, state) => const Scaffold(body: Text('보상 화면')),
+        ),
         GoRoute(
           path: Routes.routineGenerating,
           builder: (context, state) => const Scaffold(body: Text('로딩 화면')),
@@ -137,7 +141,7 @@ void main() {
       await tester.tap(find.text('우산'));
       await settle(tester);
 
-      expect(find.text('카드 만들기'), findsOneWidget);
+      expect(find.text('다음'), findsOneWidget);
     });
 
     testWidgets('여러 질문에 걸쳐 답을 고를 수 있다', (tester) async {
@@ -165,18 +169,18 @@ void main() {
       expect(find.byType(ElumButton), findsNothing);
     });
 
-    testWidgets('CTA를 누르면 로딩 화면으로 간다', (tester) async {
+    testWidgets('CTA를 누르면 보상 화면으로 간다 (이슈 #239)', (tester) async {
       await pumpWith(tester, twoQuestions);
 
       await tester.tap(find.text('우산'));
       await settle(tester);
-      await tester.tap(find.text('카드 만들기'));
+      await tester.tap(find.text('다음'));
       await settle(tester);
 
-      expect(find.text('로딩 화면'), findsOneWidget);
+      expect(find.text('보상 화면'), findsOneWidget);
     });
 
-    testWidgets('질문이 없으면 로딩 화면으로 건너뛴다', (tester) async {
+    testWidgets('질문이 없어도 보상은 묻는다 (이슈 #239)', (tester) async {
       // 도움 목표를 고르지 않으면 서버가 빈 배열을 준다(실측 확인).
       // 빈 화면을 보여주면 안 된다.
       await pumpWith(
@@ -186,7 +190,7 @@ void main() {
       // 이동은 첫 프레임이 끝난 뒤 일어난다
       await settle(tester);
 
-      expect(find.text('로딩 화면'), findsOneWidget);
+      expect(find.text('보상 화면'), findsOneWidget);
     });
   });
 
@@ -226,7 +230,7 @@ void main() {
       expect(find.text('진료카드'), findsOneWidget);
       // 바로 선택돼 CTA가 뜬다 — 쓰자마자 또 눌러야 하면 번거롭다
       expect(container.read(routineFlowProvider).answers, contains('진료카드'));
-      expect(find.text('카드 만들기'), findsOneWidget);
+      expect(find.text('다음'), findsOneWidget);
     });
 
     testWidgets('빈 값은 추가되지 않는다', (tester) async {

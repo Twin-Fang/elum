@@ -56,7 +56,8 @@ class QuestionScreen extends ConsumerWidget {
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (context.mounted) {
-            context.pushReplacement(Routes.routineGenerating);
+            // 질문이 없어도 보상은 묻는다 — 보상 화면이 카드 생성 앞에 선다 (#239)
+            context.pushReplacement(Routes.routineReward);
           }
         });
       }
@@ -69,8 +70,10 @@ class QuestionScreen extends ConsumerWidget {
       bottomButton: state.answers.isEmpty
           ? null
           : ElumButton(
-              label: '카드 만들기',
-              onPressed: () => context.push(Routes.routineGenerating),
+              label: '다음',
+              // 카드를 만들기 전에 보상을 먼저 정한다 (#239).
+              // 질문에 답한 맥락이 그대로 이어지는 자리다.
+              onPressed: () => context.push(Routes.routineReward),
             ),
       child: SingleChildScrollView(
         child: Column(

@@ -114,6 +114,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginKakaoLabel,
     required this.loginNaverBg,
     required this.loginNaverLabel,
+    required this.rewardBannerBg,
     required this.linkTimer,
     required this.linkRetryChipBg,
     required this.linkLaterLabel,
@@ -322,6 +323,11 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color loginKakaoLabel;
   final Color loginNaverBg;
   final Color loginNaverLabel;
+  /// 이룸이 화면 보상 배너 배경 (이슈 #239).
+  ///
+  /// 카드보다 물러나야 한다 — 보상이 주인공이 되면 지금 할 일을 가린다.
+  final Color rewardBannerBg;
+
   /// 연결 암호 남은 시간 (#DA5050).
   ///
   /// `danger`(#BB3F38)와 **다른 색이다.** 저쪽은 되돌릴 수 없는 동작을 막는
@@ -448,6 +454,7 @@ class AppColors extends ThemeExtension<AppColors> {
     loginKakaoLabel: Color(0xFF191600),
     loginNaverBg: Color(0xFF03C75A),
     loginNaverLabel: Color(0xFFFFFFFF),
+    rewardBannerBg: Color(0xFFFFF3D6),
     linkTimer: Color(0xFFDA5050),
     linkRetryChipBg: Color(0xFFEEE9E6),
     linkLaterLabel: Color(0xFF74757D),
@@ -553,6 +560,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? loginKakaoLabel,
     Color? loginNaverBg,
     Color? loginNaverLabel,
+    Color? rewardBannerBg,
     Color? linkTimer,
     Color? linkRetryChipBg,
     Color? linkLaterLabel,
@@ -648,6 +656,7 @@ class AppColors extends ThemeExtension<AppColors> {
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
       loginNaverLabel: loginNaverLabel ?? this.loginNaverLabel,
+      rewardBannerBg: rewardBannerBg ?? this.rewardBannerBg,
       linkTimer: linkTimer ?? this.linkTimer,
       linkRetryChipBg: linkRetryChipBg ?? this.linkRetryChipBg,
       linkLaterLabel: linkLaterLabel ?? this.linkLaterLabel,
@@ -764,6 +773,7 @@ class AppColors extends ThemeExtension<AppColors> {
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,
       loginNaverLabel: Color.lerp(loginNaverLabel, other.loginNaverLabel, t)!,
+      rewardBannerBg: Color.lerp(rewardBannerBg, other.rewardBannerBg, t)!,
       linkTimer: Color.lerp(linkTimer, other.linkTimer, t)!,
       linkRetryChipBg:
           Color.lerp(linkRetryChipBg, other.linkRetryChipBg, t)!,

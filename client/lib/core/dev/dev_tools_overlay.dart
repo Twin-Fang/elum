@@ -736,6 +736,7 @@ class _NavigateView extends StatelessWidget {
     ('온보딩 · 목표', Routes.onboardingGoals),
     ('온보딩 · 캐릭터', Routes.onboardingCharacter),
     ('온보딩 · PIN', Routes.onboardingPin),
+    ('일과 · 보상 정하기', Routes.routineReward),
     ('보호자 홈', Routes.guardian),
     // 역할 선택 (이슈 #212). 정식 경로는 로그인 → 약관 → 여기다.
     // 실기기 검수에서 매번 소셜 로그인을 다시 하지 않도록 지름길을 둔다.

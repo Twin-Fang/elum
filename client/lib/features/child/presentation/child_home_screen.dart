@@ -242,7 +242,8 @@ class _RoutineTile extends StatelessWidget {
       onTap: () => context.push(Routes.childRoutineDetail, extra: routine),
       scaleDown: AppPressable.scaleCard,
       child: Container(
-        height: 68.h,
+        // 보상이 있으면 한 줄이 늘어 타일이 높아진다 (이슈 #239).
+        height: (routine.hasReward ? 88 : 68).h,
         // Figma 실측 — 제목 좌 24, 화살표 우 16
         padding: EdgeInsets.only(left: 24.w, right: 16.w),
         decoration: BoxDecoration(
@@ -252,13 +253,32 @@ class _RoutineTile extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: Text(
-                routine.displayTitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.typo.childTileTitle.copyWith(
-                  color: colors.chipLabel,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    routine.displayTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.typo.childTileTitle.copyWith(
+                      color: colors.chipLabel,
+                    ),
+                  ),
+                  // 목록에서부터 "다 하면 뭘 받는지"가 보인다 (이슈 #239).
+                  // 들어가야 알 수 있으면 시작할 이유가 약해진다.
+                  if (routine.hasReward) ...[
+                    SizedBox(height: 4.h),
+                    Text(
+                      '다 하면 ${routine.rewardDisplay}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.typo.caption.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
             SizedBox(width: space.xs),

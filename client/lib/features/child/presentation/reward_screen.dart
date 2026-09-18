@@ -11,6 +11,7 @@ import '../../../core/widgets/elum_button.dart';
 import '../../guardian/data/routine_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../domain/reward_character.dart';
+import 'widgets/reward_banner.dart';
 import 'widgets/reward_star.dart';
 
 /// Figma `아이_보상_루미`(309:4055) / `_포포`(334:4320) / `_루루`(343:4434).
@@ -23,12 +24,18 @@ import 'widgets/reward_star.dart';
 /// **강한 인터랙션을 허용하는 자리다.** 토스 원칙상 화려한 모션은 브랜드 핵심
 /// 순간에만 쓰는데, 아이가 할 일을 해낸 순간이 바로 그것이다 (docs/motion.md).
 class RewardScreen extends ConsumerStatefulWidget {
-  const RewardScreen({super.key, this.character});
+  const RewardScreen({super.key, this.character, this.reward});
 
   /// 보여줄 캐릭터. 비우면 **무작위로 뽑는다**(실제 동작).
   ///
   /// 테스트에서만 고정한다 — 골든이 실행마다 달라지면 회귀를 못 잡는다.
   final RewardCharacter? character;
+
+  /// 보호자가 정한 보상 (이슈 #239). 비면 그리지 않는다 — 건너뛸 수 있다.
+  ///
+  /// 별(⭐) 연출과 **함께** 보여준다. 별은 "해냈다"이고 보상은 "이제 받는다"라
+  /// 서로를 대신하지 못한다.
+  final ({String emoji, String text})? reward;
 
   @override
   ConsumerState<RewardScreen> createState() => _RewardScreenState();
@@ -85,6 +92,20 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
                       .copyWith(color: colors.surface),
                 ),
               ),
+              // 보호자가 정한 보상 — 이제 받을 차례다 (이슈 #239).
+              if (widget.reward != null) ...[
+                SizedBox(height: space.lg),
+                _FadeSlideIn(
+                  delay: AppMotion.slow,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: space.lg),
+                    child: RewardBanner(
+                      emoji: widget.reward!.emoji,
+                      text: widget.reward!.text,
+                    ),
+                  ),
+                ),
+              ],
               const Spacer(),
               Padding(
                 padding: EdgeInsets.fromLTRB(

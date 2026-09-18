@@ -16,6 +16,7 @@ import '../../shared/models/routine.dart';
 import '../../features/guardian/domain/routine_stage.dart';
 import '../../features/guardian/presentation/routine_loading_screen.dart';
 import '../../features/guardian/presentation/question_screen.dart';
+import '../../features/guardian/presentation/reward_setup_screen.dart';
 import '../../features/guardian/presentation/routine_input_screen.dart';
 import '../../features/onboarding/presentation/card_completion_screen.dart';
 import '../../features/onboarding/presentation/character_screen.dart';
@@ -61,6 +62,11 @@ abstract final class Routes {
 
   /// 행동카드 생성 로딩 (Figma 262:4703).
   /// [routineMasking]과 화면은 같고 문구·진행률·다음 목적지가 다르다.
+  /// 보상 정하기 — AI 질문 다음, 카드 생성 **전**이다 (이슈 #239).
+  ///
+  /// 질문에 답하는 맥락이 이어지는 자리다. 카드를 만든 뒤로 미루면 "이미 다
+  /// 끝났는데 왜 또"가 된다. 건너뛸 수 있다.
+  static const routineReward = '/guardian/routine/reward';
   static const routineGenerating = '/guardian/routine/generating';
   static const routineReview = '/guardian/routine/review';
 
@@ -263,6 +269,12 @@ GoRouter createRouter({
         builder: (context, state) => const QuestionScreen(),
       ),
       GoRoute(
+        path: Routes.routineReward,
+        // `extra: true`면 카드 검토에서 고치러 온 것이다 (이슈 #239).
+        builder: (context, state) =>
+            RewardSetupScreen(fromReview: state.extra == true),
+      ),
+      GoRoute(
         path: Routes.routineGenerating,
         builder: (context, state) =>
             const RoutineLoadingScreen(kind: RoutineLoadingKind.generate),
@@ -295,8 +307,16 @@ GoRouter createRouter({
       ),
       GoRoute(
         path: Routes.childReward,
-        pageBuilder: (context, state) =>
-            fadePage(state, const RewardScreen()),
+        // 보상은 `extra`로 온다 (이슈 #239). 개발자 도구로 직접 들어오면 null이라
+        // 별 연출만 돈다 — 그 자체가 보상 없이 끝낸 모습이라 맞다.
+        pageBuilder: (context, state) => fadePage(
+          state,
+          RewardScreen(
+            reward: state.extra is ({String emoji, String text})
+                ? state.extra! as ({String emoji, String text})
+                : null,
+          ),
+        ),
       ),
       GoRoute(
         path: Routes.modeSwitch,

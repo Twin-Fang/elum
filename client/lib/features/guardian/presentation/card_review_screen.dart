@@ -192,6 +192,14 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
             ),
           ),
           SizedBox(height: space.md),
+          // 보상 줄 — 정한 것을 보여주고, 건너뛰었으면 여기서 정할 수 있다 (#239).
+          _RewardRow(
+            reward: routine?.hasReward ?? false
+                ? routine!.rewardDisplay
+                : null,
+            onTap: () => context.push(Routes.routineReward, extra: true),
+          ),
+          SizedBox(height: space.md),
           // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
           _EditChip(
             onTap: () =>
@@ -256,6 +264,60 @@ class _EmptyCards extends StatelessWidget {
               '다시 만들어 주세요 (E-CARD)',
               style: context.typo.promptBody
                   .copyWith(color: context.colors.promptMuted),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 카드 검토의 보상 줄 (이슈 #239).
+///
+/// 보호자가 정한 보상을 여기서 다시 확인하고 고칠 수 있다.
+/// **건너뛴 사람에게는 정하라고 권한다** — 카드를 다 보고 나서야 "무엇을 주지"가
+/// 떠오르는 경우가 있다.
+class _RewardRow extends StatelessWidget {
+  const _RewardRow({required this.reward, required this.onTap});
+
+  /// 정해진 보상 (`🍪 젤리 먹기`). null이면 아직 없다.
+  final String? reward;
+  final VoidCallback onTap;
+
+  static const _padV = 10.0;
+  static const _padH = 16.0;
+  static const _radius = 20.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final has = reward != null;
+
+    return AppPressable(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          vertical: _padV.h,
+          horizontal: _padH.w,
+        ),
+        decoration: BoxDecoration(
+          color: has ? colors.rewardBannerBg : colors.editChipBg,
+          borderRadius: BorderRadius.circular(_radius.r),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              has ? '다 하면 $reward' : '보상 정하기',
+              style: context.typo.chipLabel.copyWith(
+                color: colors.textPrimary,
+              ),
+            ),
+            SizedBox(width: context.space.xs.w),
+            Icon(
+              has ? Icons.edit_outlined : Icons.add,
+              size: context.space.checkSize.w,
+              color: colors.textSecondary,
             ),
           ],
         ),

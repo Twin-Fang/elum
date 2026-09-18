@@ -12,6 +12,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
+import 'widgets/reward_banner.dart';
 import '../../guardian/data/routine_repository.dart';
 import '../../guardian/presentation/widgets/action_card_view.dart';
 import '../application/child_routine_notifier.dart';
@@ -151,7 +152,15 @@ class _ChildRoutineDetailScreenState
     await Future<void>.delayed(
       becameChecked ? AppMotion.slow + AppMotion.normal : AppMotion.normal,
     );
-    if (mounted) context.push(Routes.childReward);
+    if (!mounted) return;
+    // 마지막 카드를 끝냈으니 보상을 함께 보여준다 (이슈 #239).
+    final routine = widget.routine;
+    context.push(
+      Routes.childReward,
+      extra: routine.hasReward
+          ? (emoji: routine.rewardEmoji, text: routine.rewardText)
+          : null,
+    );
   }
 
   @override
@@ -167,6 +176,20 @@ class _ChildRoutineDetailScreenState
         child: Column(
           children: [
             _TopBar(onBack: () => context.pop(), title: routine.displayTitle),
+            // 🔴 하는 동안 보상이 계속 보인다 (이슈 #239 · 2026-09-13 자문 핵심).
+            // 완료 후에만 뜨는 별 연출과 다른 기능이다 — 끝까지 가는 힘이 여기서 나온다.
+            // 보상이 없으면 자리도 없다.
+            if (routine.hasReward) ...[
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  space.screenH,
+                  space.xs,
+                  space.screenH,
+                  0,
+                ),
+                child: RewardBanner.maybe(routine, compact: true),
+              ),
+            ],
             Expanded(
               child: PageView.builder(
                 controller: _controller,
