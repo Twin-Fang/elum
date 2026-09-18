@@ -163,7 +163,7 @@ public class GeminiTextClient {
         "title", Map.of(
           "type", "string",
           "description",
-          "일과 전체를 아우르는 제목. 아이 친화적인 '~해요' 체로 작성 (예: '비오는 날 학교에 가요')"
+          "일과 전체를 아우르는 제목. '~해요' 체로 작성 (예: '비오는 날 학교에 가요')"
         ),
         "steps", Map.of(
           "type", "array",
@@ -180,7 +180,7 @@ public class GeminiTextClient {
               "description", Map.of(
                 "type", "string",
                 "description",
-                "아동에게 소리 내어 읽어줄 문장. title보다 조금 더 자세하게 서술 "
+                "소리 내어 읽어줄 문장. title보다 조금 더 자세하게 서술 "
                   + "(예: '학교에 입고 갈 옷을 차례대로 입어요')"
               )
             ),
