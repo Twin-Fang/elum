@@ -4,7 +4,7 @@ import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiGenerateContentResponse;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
-import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -39,7 +39,7 @@ public class RoutineAiPipeline {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   private final GeminiTextClient geminiTextClient;
-  private final GeminiImageClient geminiImageClient;
+  private final ImageClientRouter imageClientRouter;
   private final RoutineImageStorage routineImageStorage;
 
   public RoutineGenerationResult generateForCreate(
@@ -268,11 +268,11 @@ public class RoutineAiPipeline {
   // ROUTINE_AI_GENERATION_FAILED로 죽어 서버에 저장조차 되지 않는다(이 버그의 근본 원인).
   private GeneratedImage generateImageWithRetry(String description, CharacterType characterType) {
     try {
-      return geminiImageClient.generateImage(description, characterType);
+      return imageClientRouter.current().generateImage(description, characterType);
     } catch (Exception first) {
       log.warn("이미지 생성 1차 실패, 1회 재시도: description={}", description, first);
       try {
-        return geminiImageClient.generateImage(description, characterType);
+        return imageClientRouter.current().generateImage(description, characterType);
       } catch (Exception retry) {
         // 재시도까지 실패 — 이 단계만 이미지 없이 진행한다. 일과 전체를 포기하지 않는다.
         log.warn("이미지 생성 재시도까지 실패, 이미지 없이 진행: description={}", description, retry);

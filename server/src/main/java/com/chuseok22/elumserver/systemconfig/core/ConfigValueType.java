@@ -9,4 +9,6 @@ public enum ConfigValueType {
   SELECT,
   // 켜짐/꺼짐. 저장값은 "true"/"false" 문자열이고 화면은 토글로 그린다.
   BOOLEAN,
+  // 외부 API 키 같은 비밀값. DB에는 암호문으로 들어가고 화면에는 가려서 보여준다.
+  SECRET,
 }

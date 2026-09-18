@@ -53,6 +53,53 @@ public enum ConfigKey {
     ConfigValueType.DECIMAL, List.of(), "0.039"
   ),
 
+  // --- 이미지 생성 제공자 ---
+  //
+  // 카드 삽화가 AI 비용의 99%다. 제공자를 바꿀 수 있어야 원가를 줄일 수 있고,
+  // 그러려면 모델명뿐 아니라 API 키도 화면에서 넣을 수 있어야 한다. 키는 암호화해
+  // 저장한다(SECRET).
+
+  IMAGE_PROVIDER_SELECTED(
+    ConfigGroup.IMAGE_PROVIDER, "사용할 제공자",
+    "카드 삽화를 생성할 제공자. 키가 없는 제공자는 고를 수 없다",
+    ConfigValueType.SELECT, List.of("GEMINI", "OPENAI", "FLUX"), "GEMINI"
+  ),
+  OPENAI_API_KEY(
+    ConfigGroup.IMAGE_PROVIDER, "OpenAI API 키",
+    "암호화해 저장한다. 저장 후에는 다시 볼 수 없고 새 값으로 덮어쓰기만 된다",
+    ConfigValueType.SECRET, List.of(), ""
+  ),
+  OPENAI_IMAGE_MODEL(
+    ConfigGroup.IMAGE_PROVIDER, "OpenAI 이미지 모델",
+    "예: gpt-image-1-mini",
+    ConfigValueType.STRING, List.of(), "gpt-image-1-mini"
+  ),
+  OPENAI_IMAGE_QUALITY(
+    ConfigGroup.IMAGE_PROVIDER, "OpenAI 이미지 품질",
+    "낮출수록 싸다",
+    ConfigValueType.SELECT, List.of("low", "medium", "high"), "low"
+  ),
+  FLUX_API_KEY(
+    ConfigGroup.IMAGE_PROVIDER, "FLUX(fal.ai) API 키",
+    "암호화해 저장한다. 저장 후에는 다시 볼 수 없고 새 값으로 덮어쓰기만 된다",
+    ConfigValueType.SECRET, List.of(), ""
+  ),
+  FLUX_IMAGE_MODEL(
+    ConfigGroup.IMAGE_PROVIDER, "FLUX 모델",
+    "fal.ai 모델 경로. 예: fal-ai/flux/schnell",
+    ConfigValueType.STRING, List.of(), "fal-ai/flux/schnell"
+  ),
+  PRICE_OPENAI_IMAGE_PER_IMAGE(
+    ConfigGroup.PRICING, "OpenAI 이미지 단가 (USD/장)",
+    "OpenAI 이미지 1장 생성 요금. 비용 추정에 사용",
+    ConfigValueType.DECIMAL, List.of(), "0.005"
+  ),
+  PRICE_FLUX_IMAGE_PER_IMAGE(
+    ConfigGroup.PRICING, "FLUX 이미지 단가 (USD/장)",
+    "FLUX 이미지 1장 생성 요금. 비용 추정에 사용",
+    ConfigValueType.DECIMAL, List.of(), "0.006"
+  ),
+
   // --- 플랜 한도 ---
   //
   // 무엇이 Free고 무엇이 Pro인지를 코드가 아니라 여기에 둔다. 가격 정책이 정해졌을 때

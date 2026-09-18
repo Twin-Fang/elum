@@ -1,7 +1,7 @@
 package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
-import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
@@ -49,7 +49,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @RequiredArgsConstructor
 public class RoutineStepImageFiller {
 
-  private final GeminiImageClient geminiImageClient;
+  private final ImageClientRouter imageClientRouter;
   private final RoutineImageStorage routineImageStorage;
   private final RoutineStepRepository routineStepRepository;
 
@@ -83,7 +83,7 @@ public class RoutineStepImageFiller {
   void fill(String routineId, String stepId, String description, CharacterType characterType) {
     try {
       GeneratedImage image =
-        geminiImageClient.generateImage(description, characterType);
+        imageClientRouter.current().generateImage(description, characterType);
       if (image == null) {
         log.warn("추가 카드 이미지가 비어 돌아왔다: routineId={}, stepId={}", routineId, stepId);
         return;

@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmProperties;
+import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.core.ConfigValueType;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfig;
@@ -29,10 +30,14 @@ public class SystemConfigService {
 
   private static final long CACHE_TTL_MILLIS = 30_000;
   private static final int MAX_VALUE_LENGTH = 500;
+  // 암호문이 Base64로 부풀어도 MAX_VALUE_LENGTH 안에 들어오도록 평문을 더 좁게 제한한다.
+  private static final int SECRET_MAX_LENGTH = 300;
+  private static final String SECRET_MASK = "••••••••";
 
   private final SystemConfigRepository systemConfigRepository;
   private final GeminiProperties geminiProperties;
   private final LocalLlmProperties localLlmProperties;
+  private final SecretCipher secretCipher;
 
   private volatile Map<ConfigKey, String> cache = Map.of();
   private volatile long cacheLoadedAtMillis = 0;
@@ -76,6 +81,30 @@ public class SystemConfigService {
     return Boolean.parseBoolean(defaultValueFor(key));
   }
 
+  /**
+   * 비밀값을 풀어서 돌려준다. 저장돼 있지 않거나 풀 수 없으면 빈 문자열.
+   *
+   * <p>빈 문자열을 돌려주는 이유는, 부르는 쪽이 "키가 없다"를 예외가 아니라 상태로
+   * 다루게 하기 위해서다. 키가 없는 제공자는 고를 수 없게 막으면 되지 서버가 죽을 일이
+   * 아니다.
+   */
+  public String getSecret(ConfigKey key) {
+    String stored = storedValue(key);
+    if (stored == null || stored.isBlank()) {
+      return "";
+    }
+    String decrypted = secretCipher.decrypt(stored);
+    if (decrypted == null) {
+      log.warn("비밀값을 풀지 못했습니다. 다시 저장해야 합니다: key={}", key);
+      return "";
+    }
+    return decrypted;
+  }
+
+  public boolean hasSecret(ConfigKey key) {
+    return !getSecret(key).isBlank();
+  }
+
   // 배포 환경(yml)에 바인딩된 모델명이 있으면 그것이 사실상의 기본값이다.
   // enum defaultValue는 yml에도 값이 없을 때의 마지막 폴백.
   public String defaultValueFor(ConfigKey key) {
@@ -97,6 +126,15 @@ public class SystemConfigService {
       .map(key -> {
         String defaultValue = defaultValueFor(key);
         String current = getString(key);
+        if (key.getValueType() == ConfigValueType.SECRET) {
+          // 암호문을 화면에 그대로 내보내지 않는다. 있는지 없는지만 보이면 된다.
+          String stored = storedValue(key);
+          boolean set = stored != null && !stored.isBlank();
+          return new SystemConfigView(
+            key.name(), key.getGroup(), key.getLabel(), key.getDescription(),
+            key.getValueType(), key.getAllowedValues(), set ? SECRET_MASK : "", "", set
+          );
+        }
         return new SystemConfigView(
           key.name(), key.getGroup(), key.getLabel(), key.getDescription(),
           key.getValueType(), key.getAllowedValues(), current, defaultValue,
@@ -109,6 +147,9 @@ public class SystemConfigService {
   @Transactional
   public void update(ConfigKey key, String rawValue) {
     String value = validate(key, rawValue);
+    if (key.getValueType() == ConfigValueType.SECRET) {
+      value = encryptSecret(value);
+    }
     SystemConfig config = systemConfigRepository.findByConfigKey(key)
       .orElseGet(() -> {
         SystemConfig created = new SystemConfig();
@@ -126,6 +167,18 @@ public class SystemConfigService {
   }
 
   private String validate(ConfigKey key, String rawValue) {
+    // 비밀값만 빈 값을 허용한다 — 화면에서 키를 지울 수 있어야 하기 때문이다.
+    // 암호문이 평문보다 길어지므로 평문 길이를 더 좁게 본다.
+    if (key.getValueType() == ConfigValueType.SECRET) {
+      if (rawValue == null) {
+        return "";
+      }
+      String secret = rawValue.trim();
+      if (secret.length() > SECRET_MAX_LENGTH) {
+        throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
+      }
+      return secret;
+    }
     if (rawValue == null || rawValue.isBlank() || rawValue.length() > MAX_VALUE_LENGTH) {
       throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
     }
@@ -145,6 +198,22 @@ public class SystemConfigService {
       throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
     }
     return value;
+  }
+
+  // 빈 값이면 "지우기"이므로 그대로 둔다. 값이 있는데 마스터 키가 없으면 저장을 거부한다 —
+  // 평문으로 남기느니 저장을 실패시키는 편이 낫다.
+  private String encryptSecret(String plain) {
+    if (plain.isEmpty()) {
+      return "";
+    }
+    if (!secretCipher.isAvailable()) {
+      throw new CustomException(ErrorCode.SECRET_MASTER_KEY_MISSING);
+    }
+    String encrypted = secretCipher.encrypt(plain);
+    if (encrypted == null) {
+      throw new CustomException(ErrorCode.SECRET_ENCRYPT_FAILED);
+    }
+    return encrypted;
   }
 
   private String storedValue(ConfigKey key) {

@@ -85,6 +85,15 @@ public enum ErrorCode {
   ROUTINE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "일과를 더 만들려면 기존 일과를 정리해주세요."),
   PROFILE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "이룸이를 더 추가할 수 없어요."),
 
+  // 비밀값(외부 API 키) 저장.
+  SECRET_MASTER_KEY_MISSING(HttpStatus.SERVICE_UNAVAILABLE,
+    "비밀값을 저장할 수 없습니다. 서버에 암호화 키가 설정되지 않았습니다."),
+  SECRET_ENCRYPT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "비밀값을 저장하지 못했습니다."),
+
+  // 이미지 생성 제공자.
+  IMAGE_PROVIDER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "이미지 생성을 사용할 수 없습니다."),
+  IMAGE_PROVIDER_NOT_CONFIGURED(HttpStatus.BAD_REQUEST, "해당 이미지 제공자의 설정이 없습니다."),
+
   ;
 
 

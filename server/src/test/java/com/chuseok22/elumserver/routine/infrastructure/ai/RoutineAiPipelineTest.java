@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -16,13 +17,15 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiGenerateContentResponse;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
-import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +40,10 @@ class RoutineAiPipelineTest {
   private GeminiTextClient geminiTextClient;
 
   @Mock
-  private GeminiImageClient geminiImageClient;
+  private ImageClientRouter imageClientRouter;
+
+  @Mock
+  private ImageGenerationClient imageGenerationClient;
 
   @Mock
   private RoutineImageStorage routineImageStorage;
@@ -51,6 +57,11 @@ class RoutineAiPipelineTest {
         new GeminiGenerateContentResponse.Part(json, null)
       )))
     ));
+  }
+
+  @BeforeEach
+  void setUp() {
+    lenient().when(imageClientRouter.current()).thenReturn(imageGenerationClient);
   }
 
   @Test
@@ -206,7 +217,7 @@ class RoutineAiPipelineTest {
       + "{\"order\":2,\"title\":\"우산을 챙겨요\",\"description\":\"우산을 챙겨요\"},"
       + "{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
-    when(geminiImageClient.generateImage(any(), any()))
+    when(imageGenerationClient.generateImage(any(), any()))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
@@ -220,8 +231,8 @@ class RoutineAiPipelineTest {
     assertThat(result.steps().get(0).description()).isEqualTo("우산을 챙겨요");
     assertThat(result.steps().get(1).order()).isEqualTo(2);
     assertThat(result.steps().get(1).description()).isEqualTo("옷을 입어요");
-    verify(geminiImageClient).generateImage("우산을 챙겨요", CharacterType.LULU);
-    verify(geminiImageClient).generateImage("옷을 입어요", CharacterType.LULU);
+    verify(imageGenerationClient).generateImage("우산을 챙겨요", CharacterType.LULU);
+    verify(imageGenerationClient).generateImage("옷을 입어요", CharacterType.LULU);
     assertThat(result.steps().get(0).title()).isEqualTo("우산을 챙겨요");
     assertThat(result.steps().get(1).title()).isEqualTo("옷을 입어요");
   }
@@ -231,13 +242,13 @@ class RoutineAiPipelineTest {
   void generateForCreate_noCharacter_passesNullCharacterToImageClient() {
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
-    when(geminiImageClient.generateImage(any(), any()))
+    when(imageGenerationClient.generateImage(any(), any()))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null);
 
-    verify(geminiImageClient).generateImage("옷을 입어요", null);
+    verify(imageGenerationClient).generateImage("옷을 입어요", null);
   }
 
   @Test
@@ -271,7 +282,7 @@ class RoutineAiPipelineTest {
   void generateForCreate_imageFailsOnce_retriesAndSucceeds() {
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
-    when(geminiImageClient.generateImage(any(), any()))
+    when(imageGenerationClient.generateImage(any(), any()))
       .thenThrow(new RuntimeException("일시적 실패"))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
@@ -282,7 +293,7 @@ class RoutineAiPipelineTest {
 
     assertThat(result.steps()).hasSize(1);
     assertThat(result.steps().get(0).imagePath()).isEqualTo("data/routine-images/batch/1.png");
-    verify(geminiImageClient, times(2)).generateImage(any(), any());
+    verify(imageGenerationClient, times(2)).generateImage(any(), any());
   }
 
   @Test
@@ -292,7 +303,7 @@ class RoutineAiPipelineTest {
     // create()가 500으로 죽어 일과가 서버에 저장조차 안 되던 버그의 근본 원인이었다.
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
     when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
-    when(geminiImageClient.generateImage(any(), any())).thenThrow(new RuntimeException("계속 실패"));
+    when(imageGenerationClient.generateImage(any(), any())).thenThrow(new RuntimeException("계속 실패"));
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
       "내일 병원 가기", "하늘이", Set.of(), List.of(), null
@@ -302,6 +313,6 @@ class RoutineAiPipelineTest {
     assertThat(result.steps().get(0).imagePath()).isNull();
     // 이미지가 없으므로 저장은 아예 호출되지 않는다.
     verify(routineImageStorage, never()).save(any(), any(), any());
-    verify(geminiImageClient, times(2)).generateImage(any(), any());
+    verify(imageGenerationClient, times(2)).generateImage(any(), any());
   }
 }

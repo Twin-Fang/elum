@@ -11,6 +11,8 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmProperties;
+import com.chuseok22.elumserver.common.infrastructure.properties.SecretProperties;
+import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfig;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigRepository;
@@ -37,7 +39,11 @@ class SystemConfigServiceTest {
     // properties는 record라 목 대신 실제 값으로 만든다 — yml 기반 기본값 우선 규칙 검증에 사용.
     GeminiProperties geminiProperties = new GeminiProperties("key", null, "yml-text-model", "yml-image-model", 1000);
     LocalLlmProperties localLlmProperties = new LocalLlmProperties(true, null, "/chat", "key", "yml-local-model", 1000);
-    systemConfigService = new SystemConfigService(systemConfigRepository, geminiProperties, localLlmProperties);
+    // 비밀값 암호화는 목이 아니라 실물을 쓴다 — 넣은 값이 그대로 돌아오는지가 핵심이라
+    // 목으로 흉내 내면 정작 검증하려던 것을 못 본다.
+    SecretCipher secretCipher = new SecretCipher(new SecretProperties("test-master-key"));
+    systemConfigService = new SystemConfigService(
+      systemConfigRepository, geminiProperties, localLlmProperties, secretCipher);
   }
 
   private SystemConfig config(ConfigKey key, String value) {

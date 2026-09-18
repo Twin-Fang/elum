@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
+import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -23,7 +24,7 @@ import org.springframework.web.client.RestClient;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GeminiImageClient {
+public class GeminiImageClient implements ImageGenerationClient {
 
   // GeminiConfig(Task 1)와 LocalLlmConfig가 각각 RestClient 빈을 하나씩 등록해 타입이
   // 같은 빈이 2개 존재하므로, 파라미터명-빈명 자동 매칭에만 기대지 않고 명시한다.
@@ -36,12 +37,31 @@ public class GeminiImageClient {
   private final SystemConfigService systemConfigService;
   private final AiCallLogService aiCallLogService;
 
+  @Override
+  public ImageProvider provider() {
+    return ImageProvider.GEMINI;
+  }
+
+  /// Gemini 키는 아직 환경설정에 있다. 이미 돌아가는 경로라 건드리지 않았다.
+  @Override
+  public boolean available() {
+    return geminiProperties.apiKey() != null && !geminiProperties.apiKey().isBlank();
+  }
+
+  /// 참조 이미지를 멀티모달 입력 첫 파트로 함께 보내 캐릭터를 유지한다.
+  @Override
+  public boolean supportsCharacterReference() {
+    return true;
+  }
+
+  @Override
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
     String prefix = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
     return callGenerateImage(prefix, stepDescription, characterType);
   }
 
   // 관리자 테스트 전용: DB 조회 없이 전달받은 prefix를 그대로 사용한다.
+  @Override
   public GeneratedImage generateImageForTest(String prefix, String sampleInput, CharacterType characterType) {
     return callGenerateImage(prefix, sampleInput, characterType);
   }

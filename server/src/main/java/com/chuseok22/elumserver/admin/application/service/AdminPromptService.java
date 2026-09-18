@@ -9,7 +9,7 @@ import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiGenerateContentResponse;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
-import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiRoutineImagePromptBuilder;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplate;
@@ -37,7 +37,7 @@ public class AdminPromptService {
   private final PromptTemplateService promptTemplateService;
   private final SensitiveInfoGuardService sensitiveInfoGuardService;
   private final GeminiTextClient geminiTextClient;
-  private final GeminiImageClient geminiImageClient;
+  private final ImageClientRouter imageClientRouter;
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
 
   public List<PromptTemplate> getAll() {
@@ -116,7 +116,7 @@ public class AdminPromptService {
   private String testGeminiImage(String prefix, String sampleInput, CharacterType characterType) {
     try {
       GeneratedImage image =
-        geminiImageClient.generateImageForTest(prefix, sampleInput, characterType);
+        imageClientRouter.current().generateImageForTest(prefix, sampleInput, characterType);
       String base64 = Base64.getEncoder().encodeToString(image.bytes());
       return "data:image/" + image.extension() + ";base64," + base64;
     } catch (Exception e) {
