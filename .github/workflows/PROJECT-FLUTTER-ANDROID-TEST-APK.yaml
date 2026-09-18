@@ -341,14 +341,14 @@ jobs:
           printf '%s\n' "$ENV_CONTENT" > ${{ env.ENV_FILE_PATH }}
           echo "✅ ${{ env.ENV_FILE_PATH }} file created"
 
-      # 해커톤 기간 한정 — 개발자 도구 플로팅 버튼을 테스트 빌드에서도 강제로 켠다.
-      # Secret(ENV_FILE) 값이 무엇이든 여기서 덮어쓴다.
-      # ⚠️ 정식 출시 전 이 스텝을 삭제한다. (이슈 #13)
-      - name: Force enable dev tools (hackathon)
-        run: |
-          sed -i '/^ELUM_SHOW_DEV_TOOLS=/d' ${{ env.ENV_FILE_PATH }}
-          echo 'ELUM_SHOW_DEV_TOOLS=true' >> ${{ env.ENV_FILE_PATH }}
-          grep '^ELUM_SHOW_DEV_TOOLS=' ${{ env.ENV_FILE_PATH }}
+      # 빌드 프로파일 적용 (이슈 #219).
+      # QA·테스트 빌드다. 디버깅 버튼과 네트워크 로그를 켠다.
+      #
+      # 키 목록은 `client/tool/apply_build_profile.sh` **한 곳**에만 있다.
+      # 워크플로 6개에 sed를 흩뿌리면 개발 키가 새로 생길 때 한 군데를 빠뜨리고,
+      # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
+      - name: 빌드 프로파일 적용 (test)
+        run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" test ${{ env.ENV_FILE_PATH }}
 
       - name: Setup Release Keystore
         env:

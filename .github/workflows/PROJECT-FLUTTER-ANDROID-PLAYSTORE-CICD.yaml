@@ -88,15 +88,15 @@ jobs:
           printf '%s\n' "$ENV_CONTENT" > .env
           echo ".env file created"
 
-      # 배포(prod) 안전장치 — Secret(ENV_FILE)에 devFlag가 true로 들어 있어도
-      # 배포 산출물에는 항상 false가 실리도록 여기서 강제로 덮어쓴다. (이슈 #130)
-      - name: Force disable dev flags (prod safety)
-        run: |
-          sed -i '/^ELUM_SHOW_DEV_TOOLS=/d' .env
-          sed -i '/^ELUM_SKIP_ONBOARDING=/d' .env
-          echo 'ELUM_SHOW_DEV_TOOLS=false' >> .env
-          echo 'ELUM_SKIP_ONBOARDING=false' >> .env
-          echo "✅ Dev flags disabled for prod build"
+      # 빌드 프로파일 적용 (이슈 #219).
+      # 사용자에게 나가는 빌드다. 개발 키를 전부 끄고 QA 토큰을 지운다.
+      # 하나라도 켜져 있으면 빌드를 세운다 — 조용히 나가면 사고다.
+      #
+      # 키 목록은 `client/tool/apply_build_profile.sh` **한 곳**에만 있다.
+      # 워크플로 6개에 sed를 흩뿌리면 개발 키가 새로 생길 때 한 군데를 빠뜨리고,
+      # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
+      - name: 빌드 프로파일 적용 (release)
+        run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" release .env
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -236,16 +236,15 @@ jobs:
           printf '%s\n' "$ENV_CONTENT" > .env
           echo "✅ .env 파일 생성됨 (크기: $(wc -c < .env) bytes)"
 
-      # 배포(prod) 안전장치 — 실제 AAB에 들어가는 .env다. Secret에 devFlag가 true로
-      # 들어 있어도 배포 산출물에는 항상 false가 실리도록 강제로 덮어쓴다. (이슈 #130)
-      - name: Force disable dev flags (prod safety)
-        run: |
-          sed -i '/^ELUM_SHOW_DEV_TOOLS=/d' .env
-          sed -i '/^ELUM_SKIP_ONBOARDING=/d' .env
-          echo 'ELUM_SHOW_DEV_TOOLS=false' >> .env
-          echo 'ELUM_SKIP_ONBOARDING=false' >> .env
-          echo "✅ Dev flags disabled for prod build"
-
+      # 빌드 프로파일 적용 (이슈 #219).
+      # 사용자에게 나가는 빌드다. 개발 키를 전부 끄고 QA 토큰을 지운다.
+      # 하나라도 켜져 있으면 빌드를 세운다 — 조용히 나가면 사고다.
+      #
+      # 키 목록은 `client/tool/apply_build_profile.sh` **한 곳**에만 있다.
+      # 워크플로 6개에 sed를 흩뿌리면 개발 키가 새로 생길 때 한 군데를 빠뜨리고,
+      # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
+      - name: 빌드 프로파일 적용 (release)
+        run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" release .env
       # Release Keystore 설정
       - name: Setup Release Keystore
         run: |

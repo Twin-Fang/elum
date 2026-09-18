@@ -283,26 +283,44 @@ Secret은 **쓰기만 되고 읽을 수 없다.** 현재 값이 무엇인지 확
 unzip -p app-release.apk assets/flutter_assets/.env
 ```
 
-##### 해커톤 기간 한정 — 개발자 도구 강제 활성화 (이슈 #13)
+##### 빌드 프로파일 — 테스트 빌드만 개발자 도구를 켠다
 
-`ELUM_SHOW_DEV_TOOLS`(플로팅 버튼)는 심사자·테스터가 **릴리스 빌드에서** 써야 하는 값이라
-`kDebugMode` 게이트를 걸지 않았다. Secret이 비거나 `false`면 배포 앱에서 버튼이 사라진다.
+**한시적 예외가 아니라 상시 정책이다.** 같은 코드라도 어디로 나가느냐에 따라
+개발 키를 다르게 준다.
 
-그래서 **빌드 워크플로우 4개가 `.env` 생성 직후 이 키를 `true`로 덮어쓴다.**
-Secret 값과 무관하게 배포 앱에서 항상 버튼이 보인다.
+| 빌드 | 트리거 | 프로파일 | 개발자 도구 |
+| --- | --- | :-: | :-: |
+| Android 테스트 APK | 이슈·PR 댓글 `@projectops apk build` | `test` | **켬** |
+| iOS 테스트 TestFlight | 댓글 `@projectops ios build` | `test` | **켬** |
+| Android Firebase | `main` push | `release` | 끔 |
+| Android PlayStore | `main` push | `release` | 끔 |
+| Android 자체호스팅 | `main` push | `release` | 끔 |
+| iOS TestFlight (배포) | `main` push | `release` | 끔 |
 
-| 워크플로우 | 주입 위치 |
-|---|---|
-| `PROJECT-FLUTTER-ANDROID-FIREBASE-CICD.yaml` | prepare-build · build |
-| `PROJECT-FLUTTER-IOS-TESTFLIGHT.yaml` | prepare-build · build |
-| `PROJECT-FLUTTER-ANDROID-TEST-APK.yaml` | build |
-| `PROJECT-FLUTTER-IOS-TEST-TESTFLIGHT.yaml` | prepare-test-build · build |
+> 댓글 `@projectops app build`는 Android·iOS를 **둘 다** 돌린다.
+> 뒤에 브랜치명을 붙이면 그 브랜치를 빌드한다 — `@projectops apk build 20260918_#219_...`
 
-> `.env` 생성이 **잡마다 따로** 일어난다. 실제 빌드가 도는 잡에 주입하지 않으면 반영되지
-> 않으므로 스텝을 옮기거나 지울 땐 잡 단위로 확인한다. macOS 러너는 `sed -i ''`(BSD 문법)다.
+**적용은 스크립트 한 곳이 한다.**
 
-**정식 출시 전** — `Force enable dev tools (hackathon)` 스텝을 모두 삭제하고
-Secret의 `ELUM_SHOW_DEV_TOOLS`를 `false`로 바꾼다.
+```bash
+client/tool/apply_build_profile.sh <test|release> <.env 경로>
+```
+
+- `test` — 디버깅 버튼 + 네트워크 로그를 켠다
+- `release` — 개발 키를 전부 끄고 **QA 토큰을 지운 뒤**, 하나라도 켜져 있으면 **빌드를 세운다**
+
+⚠️ **개발 키가 새로 생기면 이 스크립트의 `DEV_KEYS`만 고친다.**
+워크플로 6개에 `sed`를 흩뿌리던 시절에는 한 군데를 빠뜨려도 조용히 지나갔다.
+실제로 `ELUM_ENABLE_NETWORK_LOG`가 그랬다 — 개발자 도구는 켜졌는데 네트워크 로그는
+꺼져 있어 **QA가 백엔드 응답을 못 봤다.**
+
+> `.env` 생성이 **잡마다 따로** 일어난다. 실제 빌드가 도는 잡에서 프로파일을 적용하지
+> 않으면 반영되지 않으므로, 스텝을 옮기거나 지울 땐 잡 단위로 확인한다.
+> 스크립트는 `sed -i`를 쓰지 않는다 — GNU/BSD 문법이 갈려 한쪽에서 조용히 통과한다.
+
+**정식 출시 전** — `ELUM_SHOW_DEV_TOOLS`를 쓰는 코드(`lib/core/dev/` 전체와
+`app.dart`의 오버레이 한 줄)를 통째로 제거한다 (이슈 #13 · #219).
+개발자 도구는 **토큰·PIN을 평문으로 보여주는 통로**다.
 
 ### 2. Figma 화면을 구현할 때 — 에셋 우선 원칙 ⚠️ 최우선
 
