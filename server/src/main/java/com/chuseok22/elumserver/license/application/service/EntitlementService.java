@@ -27,5 +27,16 @@ public interface EntitlementService {
   /// 현재 사용량이 한도 안인가. 무제한이면 언제나 true.
   boolean isWithinLimit(String memberId, Entitlement limit, long current);
 
+  // --- 플랜을 이미 아는 경우 ---
+  //
+  // 위 memberId 버전은 부를 때마다 구독을 다시 조회한다. 한 요청에서 권한을 여러 번
+  // 물어야 하면 조회도 그만큼 늘어난다. 그런 자리에서는 plan을 한 번 구해 아래를 쓴다.
+
+  boolean isAllowed(PlanType plan, Entitlement flag);
+
+  int limitOf(PlanType plan, Entitlement limit);
+
+  boolean isWithinLimit(PlanType plan, Entitlement limit, long current);
+
   EntitlementSnapshot snapshot(String memberId);
 }

@@ -4,7 +4,6 @@ import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
-import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,17 +48,32 @@ public class SystemConfigEntitlementService implements EntitlementService {
 
   @Override
   public boolean isAllowed(String memberId, Entitlement flag) {
-    return systemConfigService.getBoolean(configKey(memberId, flag));
+    return isAllowed(planOf(memberId), flag);
   }
 
   @Override
   public int limitOf(String memberId, Entitlement limit) {
-    return systemConfigService.getInt(configKey(memberId, limit));
+    return limitOf(planOf(memberId), limit);
   }
 
   @Override
   public boolean isWithinLimit(String memberId, Entitlement limit, long current) {
-    int allowed = limitOf(memberId, limit);
+    return isWithinLimit(planOf(memberId), limit, current);
+  }
+
+  @Override
+  public boolean isAllowed(PlanType plan, Entitlement flag) {
+    return systemConfigService.getBoolean(flag.configKeyFor(plan));
+  }
+
+  @Override
+  public int limitOf(PlanType plan, Entitlement limit) {
+    return systemConfigService.getInt(limit.configKeyFor(plan));
+  }
+
+  @Override
+  public boolean isWithinLimit(PlanType plan, Entitlement limit, long current) {
+    int allowed = limitOf(plan, limit);
     if (allowed == Entitlement.UNLIMITED) {
       return true;
     }
@@ -84,9 +98,5 @@ public class SystemConfigEntitlementService implements EntitlementService {
       systemConfigService.getInt(Entitlement.PROFILE_MAX_COUNT.configKeyFor(plan)),
       systemConfigService.getInt(Entitlement.HISTORY_RETENTION_DAYS.configKeyFor(plan))
     );
-  }
-
-  private ConfigKey configKey(String memberId, Entitlement entitlement) {
-    return entitlement.configKeyFor(planOf(memberId));
   }
 }

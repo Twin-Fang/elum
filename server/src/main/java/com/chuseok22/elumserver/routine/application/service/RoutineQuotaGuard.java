@@ -6,6 +6,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.core.Entitlement;
+import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -33,8 +34,11 @@ public class RoutineQuotaGuard {
   private final RoutineRepository routineRepository;
 
   public void guard(String memberId) {
-    guardWeeklyCreate(memberId);
-    guardOwnedCount(memberId);
+    // 플랜을 한 번만 읽어 두 검사가 함께 쓴다. 검사마다 구독을 다시 조회하면
+    // 일과 생성 한 번에 쿼리가 검사 수만큼 늘어난다.
+    PlanType plan = entitlementService.planOf(memberId);
+    guardWeeklyCreate(memberId, plan);
+    guardOwnedCount(memberId, plan);
   }
 
   /**
@@ -44,7 +48,7 @@ public class RoutineQuotaGuard {
    * 때문</b>이다 — 만들고 지우고 다시 만들면 보유 개수는 그대로인데 비용은 그때마다
    * 나간다. 호출 기록은 지워지지 않으므로 실제로 쓴 것을 센다.
    */
-  private void guardWeeklyCreate(String memberId) {
+  private void guardWeeklyCreate(String memberId, PlanType plan) {
     long used;
     try {
       used = aiCallLogRepository
@@ -54,13 +58,13 @@ public class RoutineQuotaGuard {
       log.warn("주간 사용량 집계 실패 — 한도를 보지 않고 통과시킨다: memberId={}", memberId, e);
       return;
     }
-    if (!entitlementService.isWithinLimit(memberId, Entitlement.ROUTINE_CREATE_PER_WEEK, used)) {
+    if (!entitlementService.isWithinLimit(plan, Entitlement.ROUTINE_CREATE_PER_WEEK, used)) {
       log.info("주간 일과 생성 한도 초과: memberId={}, used={}", memberId, used);
       throw new CustomException(ErrorCode.ROUTINE_CREATE_LIMIT_EXCEEDED);
     }
   }
 
-  private void guardOwnedCount(String memberId) {
+  private void guardOwnedCount(String memberId, PlanType plan) {
     long owned;
     try {
       owned = routineRepository.countByProfileMemberId(memberId);
@@ -68,7 +72,7 @@ public class RoutineQuotaGuard {
       log.warn("보유 일과 집계 실패 — 한도를 보지 않고 통과시킨다: memberId={}", memberId, e);
       return;
     }
-    if (!entitlementService.isWithinLimit(memberId, Entitlement.ROUTINE_MAX_COUNT, owned)) {
+    if (!entitlementService.isWithinLimit(plan, Entitlement.ROUTINE_MAX_COUNT, owned)) {
       log.info("보유 일과 개수 한도 초과: memberId={}, owned={}", memberId, owned);
       throw new CustomException(ErrorCode.ROUTINE_COUNT_LIMIT_EXCEEDED);
     }
