@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-18T08:58:08Z",
-    "currentVersion": "1.8.0",
+    "lastUpdated": "2026-09-18T09:10:38Z",
+    "currentVersion": "1.9.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 97
+    "totalReleases": 98
   },
   "releases": [
+    {
+      "version": "1.9.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-18",
+      "pr_number": 234,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 로그인 버튼마다 제공자 로고가 붙었어요\n  * 로그인 수단을 카카오·네이버·Apple 셋으로 정리했어요\n  * 비밀암호를 두 번 다 넣어야 시작하기가 나타나요\n  * 비밀암호 화면 안내 문구를 새로 다듬었어요\n  * 연결 암호에 남은 시간이 초까지 보여요\n  * 연결되면 성공 팝업으로 바로 알려드려요\n  * 연결된 뒤에는 남은 시간과 다시 만들기를 감췄어요\n  * 연결 화면 제목에 이룸이 이름이 들어가요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "로그인 버튼마다 제공자 로고가 붙었어요",
+            "로그인 수단을 카카오·네이버·Apple 셋으로 정리했어요",
+            "비밀암호를 두 번 다 넣어야 시작하기가 나타나요",
+            "비밀암호 화면 안내 문구를 새로 다듬었어요",
+            "연결 암호에 남은 시간이 초까지 보여요",
+            "연결되면 성공 팝업으로 바로 알려드려요",
+            "연결된 뒤에는 남은 시간과 다시 만들기를 감췄어요",
+            "연결 화면 제목에 이룸이 이름이 들어가요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.8.0",
       "project_type": "flutter",
