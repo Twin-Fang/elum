@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-18T13:39:07Z",
-    "currentVersion": "1.14.0",
+    "lastUpdated": "2026-09-18T13:46:24Z",
+    "currentVersion": "1.14.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 105
+    "totalReleases": 106
   },
   "releases": [
+    {
+      "version": "1.14.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-18",
+      "pr_number": 252,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 서버를 늘려도 그림과 보안 장치가 제대로 동작할 준비를 했습니다\n  * 카드 그림을 다른 곳으로 옮길 수 있는 구조로 바꿨습니다\n  * 저장 폴더 밖 파일을 읽으려는 요청을 막습니다\n\n* **기타**\n  * **이번 업데이트로 앱에서 달라지는 것은 없습니다**\n  * 그림과 기록은 지금까지와 같은 자리에 그대로 있습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "서버를 늘려도 그림과 보안 장치가 제대로 동작할 준비를 했습니다",
+            "카드 그림을 다른 곳으로 옮길 수 있는 구조로 바꿨습니다",
+            "저장 폴더 밖 파일을 읽으려는 요청을 막습니다"
+          ]
+        },
+        "기타": {
+          "title": "기타",
+          "items": [
+            "**이번 업데이트로 앱에서 달라지는 것은 없습니다**",
+            "그림과 기록은 지금까지와 같은 자리에 그대로 있습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.14.0",
       "project_type": "flutter",
