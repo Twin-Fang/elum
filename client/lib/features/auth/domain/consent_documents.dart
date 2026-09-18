@@ -62,7 +62,7 @@ const consentItems = <ConsentItem>[
     key: 'guardianConfirmed',
     label: '만 14세 이상이며 아이의 법정대리인입니다',
     required: true,
-    summary: '아이 정보를 대신 입력하는 분임을 확인해요',
+    summary: '이룸이 정보를 대신 적는 분임을 확인해요',
     body: _guardian,
   ),
   ConsentItem(

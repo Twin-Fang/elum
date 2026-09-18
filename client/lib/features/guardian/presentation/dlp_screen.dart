@@ -127,7 +127,7 @@ class _MaskResult extends StatelessWidget {
           ],
 
           _TextBlock(
-            label: '보호자님이 입력한 내용',
+            label: '보호자님이 적은 내용',
             text: raw,
             background: colors.surface,
             borderColor: colors.border,
@@ -138,7 +138,7 @@ class _MaskResult extends StatelessWidget {
           ),
           SizedBox(height: space.sm),
           _TextBlock(
-            label: 'AI에게 전달되는 내용',
+            label: 'AI에게 보내는 내용',
             text: masked,
             background: colors.highlightFill,
             borderColor: colors.highlightBorder,

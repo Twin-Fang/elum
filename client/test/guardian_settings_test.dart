@@ -54,12 +54,12 @@ void main() {
 
   setUp(() => auth = _FakeAuth());
 
-  testWidgets('설정에는 로그아웃과 회원탈퇴가 있다', (tester) async {
+  testWidgets('설정에는 로그아웃과 회원 탈퇴가 있다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
     expect(find.text('로그아웃'), findsOneWidget);
-    expect(find.text('회원탈퇴'), findsOneWidget);
+    expect(find.text('회원 탈퇴'), findsOneWidget);
   });
 
   testWidgets('로그아웃은 확인을 거친다 — 탭만으로는 나가지지 않는다', (tester) async {
@@ -100,11 +100,11 @@ void main() {
     expect(find.text('로그인 화면'), findsOneWidget);
   });
 
-  testWidgets('회원탈퇴는 되돌릴 수 없다고 알린 뒤 실행한다', (tester) async {
+  testWidgets('회원 탈퇴는 되돌릴 수 없다고 알린 뒤 실행한다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('회원탈퇴'));
+    await tester.tap(find.text('회원 탈퇴'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('되돌릴 수 없어요'), findsOneWidget,
@@ -123,7 +123,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final colors = AppColors.light;
-    final withdraw = tester.widget<Text>(find.text('회원탈퇴'));
+    final withdraw = tester.widget<Text>(find.text('회원 탈퇴'));
     final logout = tester.widget<Text>(find.text('로그아웃'));
 
     expect(withdraw.style?.color, colors.danger,
@@ -137,7 +137,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('회원탈퇴'));
+    await tester.tap(find.text('회원 탈퇴'));
     await tester.pumpAndSettle();
 
     final colors = AppColors.light;
@@ -176,7 +176,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('회원탈퇴'));
+    await tester.tap(find.text('회원 탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('탈퇴하기'));
     await tester.pumpAndSettle();
@@ -195,14 +195,14 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('회원탈퇴'));
+    await tester.tap(find.text('회원 탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('탈퇴하기'));
     await tester.pumpAndSettle();
 
     // 실패 후에도 버튼이 잠겨 있으면 그 자리에서 할 수 있는 일이 없어진다.
     auth.deleteSucceeds = true;
-    await tester.tap(find.text('회원탈퇴'));
+    await tester.tap(find.text('회원 탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('탈퇴하기'));
     await tester.pumpAndSettle();
@@ -211,11 +211,11 @@ void main() {
     expect(find.text('로그인 화면'), findsOneWidget);
   });
 
-  testWidgets('회원탈퇴 확인 창에서 취소하면 계정이 남는다', (tester) async {
+  testWidgets('회원 탈퇴 확인 창에서 취소하면 계정이 남는다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('회원탈퇴'));
+    await tester.tap(find.text('회원 탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('취소'));
     await tester.pumpAndSettle();

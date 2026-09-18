@@ -72,7 +72,7 @@ class RoutineSuggestion {
     RoutineSuggestion(
       icon: '🏥',
       text: '병원 방문 준비',
-      prompt: '아이와 함께 병원에 가야 하는데 무서워하지 않게 준비하고 싶어요',
+      prompt: '이룸이와 함께 병원에 가야 하는데 무서워하지 않게 준비하고 싶어요',
     ),
     RoutineSuggestion(
       icon: '🌱',
@@ -82,7 +82,7 @@ class RoutineSuggestion {
     RoutineSuggestion(
       icon: '🚗',
       text: '새로운 장소 방문',
-      prompt: '처음 가보는 장소에 가기 전에 아이가 마음의 준비를 하게 돕고 싶어요',
+      prompt: '처음 가보는 장소에 가기 전에 이룸이가 마음의 준비를 하게 돕고 싶어요',
     ),
   ];
 

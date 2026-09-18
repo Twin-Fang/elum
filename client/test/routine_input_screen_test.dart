@@ -77,7 +77,7 @@ void main() {
 
       expect(find.text('오늘은 어떤 준비가\n필요한가요?'), findsOneWidget);
       expect(find.text('AI 루미가 작은 행동 단계로 나눠드려요'), findsOneWidget);
-      expect(find.text('아이의 정보를 안전하게 보호해요'), findsOneWidget);
+      expect(find.text('이룸이 정보를 안전하게 지켜요'), findsOneWidget);
     });
 
     testWidgets('하단 고정 CTA가 없다', (tester) async {

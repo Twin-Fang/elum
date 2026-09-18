@@ -123,7 +123,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       if (!mounted) return;
       _clearInput();
       setState(() {
-        _errorMessage = '암호가 달라요. 다시 입력해주세요';
+        _errorMessage = '암호가 달라요. 다시 넣어주세요';
         _mismatchCount++;
       });
     });
@@ -163,9 +163,9 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           ElumHeader(
             // Figma 238:2767 — 재입력 단계의 제목
             title: _isConfirmStep
-                ? '암호를 한번 더\n입력해주세요'
+                ? '암호를 한 번 더\n넣어주세요'
                 : '보호자님만 아는\n비밀암호를 만들어주세요',
-            description: _errorMessage ?? '보호자모드로 변경할 때 사용하는 암호예요',
+            description: _errorMessage ?? '보호자 화면으로 바꿀 때 쓰는 암호예요',
           ),
           SizedBox(height: space.xl),
           // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)

@@ -75,7 +75,7 @@ void main() {
       expect(
         RoutineLoadingKind.prepare.stages.map((s) => s.label).toList(),
         const [
-          '아이를 알아볼 수 있는 정보는 가려요',
+          '이룸이를 알아볼 수 있는 정보는 가려요',
           '꼭 필요한 내용만 정리해요',
           '추가 질문을 생각하고 있어요',
         ],
@@ -187,7 +187,7 @@ void main() {
       await tester.pumpWidget(wrap(RoutineLoadingKind.prepare));
       await settle(tester);
 
-      expect(find.textContaining('% 진행 되었어요'), findsOneWidget);
+      expect(find.textContaining('% 진행됐어요'), findsOneWidget);
 
       await tester.pump(totalHold(RoutineLoadingKind.prepare));
       await settle(tester);

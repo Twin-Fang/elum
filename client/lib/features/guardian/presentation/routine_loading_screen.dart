@@ -247,7 +247,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
                   duration: AppMotion.slow,
                   curve: AppMotion.decelerate,
                   builder: (context, value, _) => Text(
-                    '${value.round()}% 진행 되었어요',
+                    '${value.round()}% 진행됐어요',
                     style: context.typo.promptBody
                         .copyWith(color: colors.promptMuted),
                   ),
@@ -535,12 +535,12 @@ class _GenerateError extends StatelessWidget {
           ),
           SizedBox(height: space.sm),
           Text(
-            '잠시 후 다시 시도해 주세요.',
+            '잠시 후 다시 해주세요',
             textAlign: TextAlign.center,
             style: context.typo.promptBody.copyWith(color: colors.promptMuted),
           ),
           SizedBox(height: space.lg),
-          ElumButton(label: '다시 시도', onPressed: onRetry),
+          ElumButton(label: '다시 하기', onPressed: onRetry),
           if (errorCode != null) ...[
             SizedBox(height: space.md),
             // 추적용 식별자 — 사용자에겐 부차적이지만 제보 시 원인 추적의 유일한 단서다

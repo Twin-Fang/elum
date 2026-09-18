@@ -126,7 +126,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     // 사라진다. 에러 코드가 있어야 제보를 추적할 수 있다.
     if (!synced && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('수정 내용을 서버에 저장하지 못했어요 (E-STEP)')),
+        const SnackBar(content: Text('고친 내용을 저장하지 못했어요 (E-STEP)')),
       );
     }
   }
@@ -161,7 +161,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
           ),
           SizedBox(height: space.md),
           Text(
-            '카드 ${cards.length}개가 생성되었어요',
+            '카드 ${cards.length}개를 만들었어요',
             style: context.typo.reviewTitle
                 .copyWith(color: context.colors.textPrimary),
           ),
@@ -223,7 +223,7 @@ class _EditChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(space.cardRadius.r),
         ),
         child: Text(
-          '이 카드 수정하기',
+          '이 카드 고치기',
           style: context.typo.editChipLabel
               .copyWith(color: context.colors.editChipLabel),
         ),

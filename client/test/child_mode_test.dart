@@ -290,7 +290,7 @@ void main() {
       );
       expect(
         RewardCharacter.ruru.messageFor('하늘이'),
-        '하늘이가 할 일을 해내서\n루루가 선물을 가져왔다고 해요',
+        '하늘이가 할 일을 해내서\n루루가 선물을 가져왔어요',
       );
       expect(
         RewardCharacter.popo.messageFor('하늘이'),
@@ -300,9 +300,9 @@ void main() {
 
     test('이름이 비어도 조사만 남지 않는다', () {
       // 온보딩을 건너뛰었거나 서버 닉네임이 없을 때 `가 할 일을 해내서`가 되면 안 된다
-      expect(RewardCharacter.ruru.messageFor(''), contains('우리 아이가'));
-      expect(RewardCharacter.ruru.messageFor('   '), contains('우리 아이가'));
-      expect(RewardCharacter.lumi.messageFor(''), contains('우리 아이에게'));
+      expect(RewardCharacter.ruru.messageFor(''), contains('이룸이가'));
+      expect(RewardCharacter.ruru.messageFor('   '), contains('이룸이가'));
+      expect(RewardCharacter.lumi.messageFor(''), contains('이룸이에게'));
     });
 
     test('버튼 문구가 캐릭터마다 다르다', () {
@@ -363,7 +363,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('암호를 입력하면 아이 화면으로 전환돼요'), findsOneWidget);
+      expect(find.text('암호를 넣으면 이룸이 화면으로 바뀌어요'), findsOneWidget);
     });
 
     testWidgets('보호자 방향 문구도 맞다', (tester) async {
@@ -372,7 +372,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('암호를 입력하면 보호자 화면으로 전환돼요'), findsOneWidget);
+      expect(find.text('암호를 넣으면 보호자 화면으로 바뀌어요'), findsOneWidget);
     });
 
     testWidgets('PIN이 틀려도 경고색을 쓰지 않는다', (tester) async {
@@ -417,7 +417,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('암호를 입력하면 보호자 화면으로 전환돼요'), findsOneWidget);
+      expect(find.text('암호를 넣으면 보호자 화면으로 바뀌어요'), findsOneWidget);
       expect(find.text('보호자 홈'), findsNothing, reason: 'PIN 없이 보호자 홈에 도달했다');
     });
 
@@ -437,8 +437,8 @@ void main() {
       // 틀렸다는 사실이 전달돼야 한다 (#180). 종전에는 입력만 조용히 사라져
       // 틀린 것인지 입력이 안 먹은 것인지 구분할 수 없었다.
       // 색은 여전히 쓰지 않는다 — 아동도 보는 화면이라 흔들림과 문구로만 알린다.
-      expect(find.text('암호가 달라요. 다시 입력해주세요'), findsOneWidget);
-      expect(find.text('암호를 입력하면 보호자 화면으로 전환돼요'), findsNothing);
+      expect(find.text('암호가 달라요. 다시 넣어주세요'), findsOneWidget);
+      expect(find.text('암호를 넣으면 보호자 화면으로 바뀌어요'), findsNothing);
       expect(find.byType(AppShake), findsOneWidget);
     });
 
@@ -471,7 +471,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 양방향 모두 같은 방식으로 알린다 (#180)
-      expect(find.text('암호가 달라요. 다시 입력해주세요'), findsOneWidget);
+      expect(find.text('암호가 달라요. 다시 넣어주세요'), findsOneWidget);
       expect(find.byType(AppShake), findsOneWidget);
     });
   });

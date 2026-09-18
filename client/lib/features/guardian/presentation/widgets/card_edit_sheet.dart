@@ -99,7 +99,7 @@ class _CardEditSheetState extends State<CardEditSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '카드 수정하기',
+                '카드 고치기',
                 style: context.typo.reviewTitle
                     .copyWith(color: colors.textPrimary),
               ),

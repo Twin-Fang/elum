@@ -79,7 +79,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
     if (!saved) {
       setState(() {
         _isSubmitting = false;
-        _errorMessage = '동의를 저장하지 못했어요. 잠시 후 다시 눌러주세요. (E-CONSENT)';
+        _errorMessage = '동의를 저장하지 못했어요. 다시 해주세요 (E-CONSENT)';
       });
       return;
     }
@@ -112,7 +112,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       },
       child: ElumScaffold(
         bottomButton: ElumButton(
-          label: _isSubmitting ? '저장 중...' : '동의하고 시작하기',
+          label: _isSubmitting ? '저장하고 있어요' : '동의하고 시작하기',
           onPressed: _allRequiredChecked && !_isSubmitting ? _submit : null,
         ),
         child: SingleChildScrollView(
@@ -121,7 +121,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
             children: [
               const ElumHeader(
                 title: '시작하기 전에\n확인해주세요',
-                description: '항목을 눌러 내용을 모두 보실 수 있어요',
+                description: '항목을 누르면 전문을 볼 수 있어요',
               ),
               SizedBox(height: space.headerToContent.h),
 
@@ -212,7 +212,7 @@ class _AllAgreeRow extends StatelessWidget {
             SizedBox(width: space.sm.w),
             Expanded(
               // "모두"라고만 쓰면 선택 항목까지 켜지는 줄 안다. 무엇을 켜는지 적는다.
-              child: Text('필수 항목에 모두 동의합니다',
+              child: Text('필수 항목에 모두 동의해요',
                   style: context.typo.subtitle),
             ),
           ],

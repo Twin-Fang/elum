@@ -33,7 +33,7 @@ class _GuardianSettingsScreenState
       context,
       title: '로그아웃할까요?',
       // 겁주지 않는다 — 같은 계정으로 다시 들어오면 일과는 그대로 있다.
-      message: '다시 로그인하면 지금까지 만든 일과를 그대로 볼 수 있어요.',
+      message: '다시 로그인하면 지금까지 만든 일과를 그대로 볼 수 있어요',
       confirmLabel: '로그아웃',
     );
     if (ok != true) return;
@@ -49,7 +49,7 @@ class _GuardianSettingsScreenState
       context,
       title: '정말 탈퇴할까요?',
       // 로그아웃과 결정적으로 다른 지점이라 반드시 말해 준다.
-      message: '만든 일과와 모은 별이 모두 사라져요.\n같은 계정으로 다시 로그인해도 되돌릴 수 없어요.',
+      message: '만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요',
       confirmLabel: '탈퇴하기',
       destructive: true,
     );
@@ -65,7 +65,7 @@ class _GuardianSettingsScreenState
   void _tellFailed() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('계정을 지우지 못했어요. 잠시 후 다시 시도해주세요. (E-DEL)'),
+        content: Text('탈퇴하지 못했어요. 잠시 후 다시 해주세요 (E-DEL)'),
       ),
     );
   }
@@ -117,7 +117,7 @@ class _GuardianSettingsScreenState
             onTap: _busy ? null : _logout,
           ),
           _SettingsTile(
-            label: '회원탈퇴',
+            label: '회원 탈퇴',
             onTap: _busy ? null : _deleteAccount,
             destructive: true,
           ),

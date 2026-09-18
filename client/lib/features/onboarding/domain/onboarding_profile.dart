@@ -28,7 +28,7 @@ abstract class OnboardingProfile with _$OnboardingProfile {
 
   /// 호칭이 없을 때 제목에 쓸 대체어.
   /// 딥링크로 중간 진입하면 호칭이 비어 "의 어떤 순간을..."처럼 조사만 남는다.
-  static const _nicknameFallback = '우리 아이';
+  static const _nicknameFallback = '이룸이';
 
   /// 화면 제목에 넣을 호칭. 비어있으면 자연스러운 대체어를 준다.
   String get displayName =>

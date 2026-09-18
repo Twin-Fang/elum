@@ -68,9 +68,9 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('아이를 어떻게\n불러드릴까요?'), findsOneWidget);
-      expect(find.text('정확한 실명이 아니어도 괜찮아요'), findsOneWidget);
-      expect(find.text('이름을 입력해주세요'), findsOneWidget);
+      expect(find.text('이룸이를 어떻게\n부를까요?'), findsOneWidget);
+      expect(find.text('실명이 아니어도 괜찮아요'), findsOneWidget);
+      expect(find.text('이름을 적어주세요'), findsOneWidget);
     });
 
     testWidgets('입력 필드에 아이콘이 없다', (tester) async {

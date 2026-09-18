@@ -12,6 +12,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/routine_progress_ring.dart';
+import '../../../shared/utils/korean_particle.dart';
 import '../../../shared/models/routine.dart';
 import '../../guardian/application/routine_notifier.dart';
 import '../../guardian/data/routine_repository.dart';
@@ -93,9 +94,12 @@ class ChildHomeScreen extends ConsumerWidget {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: space.screenH),
                       child: Text(
-                        // Figma 문구 (356:5197) — 이름 뒤 조사는 displayName이
-                        // '하늘이' 꼴이라 '가'로 이어진다.
-                        '오늘 $childName가\n할 일들이야. 힘내보자!',
+                        // Figma 문구 (356:5197).
+                        //
+                        // 조사를 '가'로 박아 두었더니 받침 있는 이름에서 **민준가**가
+                        // 나왔다. 이름은 보호자가 직접 적으므로 받침을 보고 고른다.
+                        // 반말(`힘내보자!`)도 지웠다 — 이룸이는 20대 당사자다.
+                        '오늘 $childName${childName.subjectParticle}\n할 일이에요',
                         style: context.typo.greeting.copyWith(
                           color: context.colors.textPrimary,
                         ),

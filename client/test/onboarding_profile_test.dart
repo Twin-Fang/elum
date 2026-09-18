@@ -34,7 +34,7 @@ void main() {
     test('호칭이 없으면 제목용 대체어를 준다', () {
       // 딥링크로 중간 진입하면 "의 어떤 순간을..."처럼 조사만 남는다
       const empty = OnboardingProfile();
-      expect(empty.displayName, '우리 아이');
+      expect(empty.displayName, '이룸이');
 
       const named = OnboardingProfile(childNickname: '하늘이');
       expect(named.displayName, '하늘이');

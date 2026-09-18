@@ -111,7 +111,7 @@ void main() {
     await settle(tester);
 
     // 카드가 실제로 떠 있는지 함께 확인해 오탐(화면이 안 그려져서 통과)을 막는다
-    expect(find.text('카드 2개가 생성되었어요'), findsOneWidget);
+    expect(find.text('카드 2개를 만들었어요'), findsOneWidget);
     expect(find.text(badgeText), findsNothing);
   });
 

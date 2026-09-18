@@ -112,7 +112,7 @@ class ChildStarsScreen extends ConsumerWidget {
                 left: 0,
                 right: 0,
                 child: Text(
-                  '$stars개의 별을 얻었어요\n할 일을 해내고 별을 더 찾아봐요!',
+                  '별 $stars개를 모았어요\n할 일을 하면 더 모을 수 있어요',
                   textAlign: TextAlign.center,
                   style: context.typo.cardDescription
                       .copyWith(color: colors.surface),

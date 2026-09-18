@@ -210,7 +210,7 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('아직 만든 일과가 없어요 😢'), findsOneWidget);
+      expect(find.text('아직 만든 일과가 없어요'), findsOneWidget);
       // 캐릭터 선택 전 기본값은 고양이 (아이 홈과 동일 폴백)
       expect(
         svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
@@ -232,7 +232,7 @@ void main() {
       expect(find.text('병원 다녀오기'), findsOneWidget);
       // 기본은 접힘 (Figma 356:4688) — 카드는 아직 보이지 않는다
       expect(find.text('카드 1 제목'), findsNothing);
-      expect(find.text('아직 만든 일과가 없어요 😢'), findsNothing);
+      expect(find.text('아직 만든 일과가 없어요'), findsNothing);
     });
 
     testWidgets('타일을 탭하면 펼쳐져 카드가 보인다', (tester) async {

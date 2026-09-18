@@ -378,7 +378,7 @@ class EmptyRoutines extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '아직 만든 일과가 없어요 😢',
+                  '아직 만든 일과가 없어요',
                   style: context.typo.cardBody.copyWith(
                     color: context.colors.chipLabel,
                   ),

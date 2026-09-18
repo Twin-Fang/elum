@@ -10,14 +10,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('ElumTextField 정렬 판단', () {
     test('기본은 좌측 정렬이다', () {
-      const field = ElumTextField(hintText: '이름을 입력해주세요');
+      const field = ElumTextField(hintText: '이름을 적어주세요');
 
       expect(field.resolvedTextAlign, TextAlign.start);
     });
 
     test('explicitTextAlign을 넘기면 그 값을 쓴다', () {
       const field = ElumTextField(
-        hintText: '이름을 입력해주세요',
+        hintText: '이름을 적어주세요',
         explicitTextAlign: TextAlign.center,
       );
 

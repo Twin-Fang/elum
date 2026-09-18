@@ -88,15 +88,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       case AuthOutcome.emailConflict:
         setState(() {
           _errorMessage = '이미 다른 방법으로 가입된 계정이에요.\n'
-              '처음 가입할 때 쓰신 방법으로 로그인해주세요. (E-DUP)';
+              '처음 쓰신 방법으로 로그인해주세요 (E-DUP)';
         });
       case AuthOutcome.offline:
         setState(() {
-          _errorMessage = '인터넷 연결을 확인하고 다시 눌러주세요. (E-NET)';
+          _errorMessage = '인터넷 연결을 확인하고 다시 해주세요 (E-NET)';
         });
       case AuthOutcome.failed:
         setState(() {
-          _errorMessage = '로그인하지 못했어요. 잠시 후 다시 시도해주세요. (E-AUTH)';
+          _errorMessage = '로그인하지 못했어요. 잠시 후 다시 해주세요 (E-AUTH)';
         });
     }
 
@@ -154,7 +154,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
             if (_lastProvider == OAuthProvider.kakao) const _LastUsedHint(),
             ElumButton(
-              label: _pending == OAuthProvider.kakao ? '연결 중...' : '카카오로 시작하기',
+              label: _pending == OAuthProvider.kakao ? '연결하고 있어요' : '카카오로 시작하기',
               backgroundColor: context.colors.loginKakaoBg,
               labelColor: context.colors.loginKakaoLabel,
               onPressed: isBusy ? null : () => _signIn(OAuthProvider.kakao),

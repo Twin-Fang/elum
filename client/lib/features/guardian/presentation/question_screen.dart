@@ -222,7 +222,7 @@ class _QuestionBlockState extends State<_QuestionBlock> {
                   ),
                 if (!_isWriting)
                   _OptionChip(
-                    label: '+ 직접 입력하기',
+                    label: '+ 직접 적기',
                     isSelected: false,
                     onTap: _open,
                   ),
@@ -301,7 +301,7 @@ class _CustomOptionField extends StatelessWidget {
                   style: context.typo.chipLabel
                       .copyWith(color: colors.textPrimary),
                   decoration: InputDecoration(
-                    hintText: '직접 입력해 주세요',
+                    hintText: '직접 적어주세요',
                     hintStyle: context.typo.chipLabel
                         .copyWith(color: colors.textPlaceholder),
                     // 글자수 카운터가 52 높이를 밀어낸다

@@ -89,7 +89,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       _controller.clear();
       _focusNode.requestFocus();
       setState(() {
-        _errorMessage = '암호가 달라요. 다시 입력해주세요';
+        _errorMessage = '암호가 달라요. 다시 넣어주세요';
         _mismatchCount++;
       });
     });
@@ -106,7 +106,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
         children: [
           SizedBox(height: space.xl),
           Text(
-            '비밀암호를 입력하세요',
+            '비밀암호를 넣어주세요',
             // 온보딩 PIN 화면과 같은 크기다 (Figma 28/w800)
             style: context.typo.pinTitle
                 .copyWith(color: context.colors.textPrimary),
@@ -144,8 +144,8 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
 
 /// 전환 목적지. 문구와 경로가 함께 붙어 있어야 어긋나지 않는다.
 enum ModeSwitchTarget {
-  child('암호를 입력하면 아이 화면으로 전환돼요', Routes.child),
-  guardian('암호를 입력하면 보호자 화면으로 전환돼요', Routes.guardian);
+  child('암호를 넣으면 이룸이 화면으로 바뀌어요', Routes.child),
+  guardian('암호를 넣으면 보호자 화면으로 바뀌어요', Routes.guardian);
 
   const ModeSwitchTarget(this.description, this.route);
 

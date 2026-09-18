@@ -73,7 +73,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Finder allAgree() => find.textContaining('모두 동의합니다');
+  Finder allAgree() => find.textContaining('모두 동의해요');
 
   /// 칩은 **본문을 누르면 약관 문서가 열리고, 왼쪽 체크만 눌러야 선택**된다.
   /// 라벨을 그대로 누르면 다른 화면으로 넘어가 버린다.

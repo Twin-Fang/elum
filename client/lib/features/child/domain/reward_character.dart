@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import '../../../shared/utils/korean_particle.dart';
+
 /// 보상 화면에 등장하는 캐릭터.
 ///
 /// Figma `아이_보상_루미`(309:4055) / `_포포`(334:4320) / `_루루`(343:4434).
@@ -30,7 +32,7 @@ enum RewardCharacter {
   /// 고양이
   ruru(
     '멋져요!',
-    '{name}가 할 일을 해내서\n루루가 선물을 가져왔다고 해요',
+    '{name}{josa} 할 일을 해내서\n루루가 선물을 가져왔어요',
     '신난다!',
   );
 
@@ -39,20 +41,24 @@ enum RewardCharacter {
   /// 큰 제목 (30/w800)
   final String title;
 
-  /// 두 줄 설명 원본. `{name}` 자리에 아이 이름이 들어간다.
+  /// 두 줄 설명 원본. `{name}`에 이룸이 이름이, `{josa}`에 받침에 맞는 조사가 들어간다.
   final String _messageTemplate;
 
   /// 하단 버튼 문구 (22/w800). 캐릭터마다 다르다 —
   /// 루미·포포는 `오예!`, 루루는 `신난다!` (Figma 343:4434).
   final String buttonLabel;
 
-  /// 아이 이름을 넣은 설명 문구.
+  /// 이룸이 이름을 넣은 설명 문구.
   ///
   /// 이름이 비면 조사만 남아 어색해지므로 대체어를 쓴다
-  /// (`가 할 일을 해내서` → `우리 아이가 할 일을 해내서`).
+  /// (`가 할 일을 해내서` → `이룸이가 할 일을 해내서`).
+  ///
+  /// 조사는 받침에 따라 갈린다 — `민준이` / `루미가`. 하드코딩하면 한쪽이 깨진다.
   String messageFor(String childName) {
-    final name = childName.trim().isEmpty ? '우리 아이' : childName.trim();
-    return _messageTemplate.replaceAll('{name}', name);
+    final name = childName.trim().isEmpty ? '이룸이' : childName.trim();
+    return _messageTemplate
+        .replaceAll('{name}', name)
+        .replaceAll('{josa}', name.subjectParticle);
   }
 
   /// 무작위로 하나 고른다.

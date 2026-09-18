@@ -135,7 +135,7 @@ class DeviceLinkRepository {
       }
       await _storage.setOnboardingCompleted(true);
     } catch (e) {
-      AppLogger.error('연결 후 아이 정보 조회', e);
+      AppLogger.error('연결 후 이룸이 정보 조회', e);
     }
   }
 

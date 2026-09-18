@@ -20,7 +20,7 @@ enum RoutineLoadingKind {
     title: '루미가 내용을\n정리하고 있어요',
     lumiSide: LumiSide.left,
     stages: [
-      RoutineStage(label: '아이를 알아볼 수 있는 정보는 가려요', percent: 15, hold: _hold4),
+      RoutineStage(label: '이룸이를 알아볼 수 있는 정보는 가려요', percent: 15, hold: _hold4),
       RoutineStage(label: '꼭 필요한 내용만 정리해요', percent: 40, hold: _hold3),
       RoutineStage(label: '추가 질문을 생각하고 있어요', percent: 65, hold: _hold4),
     ],

@@ -93,7 +93,7 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('보호자모드로 변경할 때 사용하는 암호예요'), findsOneWidget);
+      expect(find.text('보호자 화면으로 바꿀 때 쓰는 암호예요'), findsOneWidget);
       // CTA는 "다음"이 아니라 "맞춤 설정하기"다
       expect(find.text('맞춤 설정하기'), findsOneWidget);
     });
@@ -143,7 +143,7 @@ void main() {
       // 6자리를 넣어도 formatter가 4자리로 자른다. 4자리로 인식되면
       // 자동 전환되어 재입력 단계로 넘어간다 — 그것으로 4자리 제한을 확인한다.
       await enterPin(tester, '123456');
-      expect(find.textContaining('한번 더'), findsOneWidget);
+      expect(find.textContaining('한 번 더'), findsOneWidget);
     });
 
     testWidgets('숫자가 아닌 입력은 무시한다', (tester) async {
@@ -162,7 +162,7 @@ void main() {
       await enterPin(tester, '1234');
 
       // Figma 238:2767의 제목
-      expect(find.textContaining('한번 더'), findsOneWidget);
+      expect(find.textContaining('한 번 더'), findsOneWidget);
       // 재입력 단계에서는 점이 비어 있다
       expect(filledDots(tester), 0);
     });
@@ -202,7 +202,7 @@ void main() {
       // 입력칸만 비운다
       expect(filledDots(tester), 0);
       // 확인 단계에 머무른다 — 1단계로 돌아가면 암호를 처음부터 다시 만들어야 한다
-      expect(find.textContaining('한번 더'), findsOneWidget);
+      expect(find.textContaining('한 번 더'), findsOneWidget);
       expect(find.textContaining('비밀암호를 만들어주세요'), findsNothing);
 
       // 아동 모드 규칙 — 빨강·경고 아이콘 금지
@@ -296,7 +296,7 @@ void main() {
       await tester.enterText(find.byType(TextField), '1234');
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('한번 더'), findsOneWidget);
+      expect(find.textContaining('한 번 더'), findsOneWidget);
       expect(find.byType(PinDots), findsOneWidget);
     });
   });
