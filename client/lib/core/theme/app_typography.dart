@@ -27,6 +27,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.cardDescription,
     required this.reviewTitle,
     required this.pinTitle,
+    required this.linkCode,
+    required this.linkTimer,
+    required this.linkRetryChip,
+    required this.dialogTitle,
+    required this.dialogAction,
+    required this.linkLater,
     required this.loginProvider,
     required this.consentAllAgree,
     required this.consentBadge,
@@ -114,6 +120,27 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// PIN 화면 제목 (28/w800). title(28)과 크기는 같지만 줄간격이 다르다.
   final TextStyle pinTitle;
+
+  /// 연결 암호 여섯 글자 (40/w800). 이 화면에서 가장 큰 글자다.
+  final TextStyle linkCode;
+
+  /// 연결 암호 남은 시간 `09:59` (16/w500 Pretendard).
+  final TextStyle linkTimer;
+
+  /// `코드 다시 만들기` 칩 (14/w600 Pretendard).
+  ///
+  /// 추천 문구 칩(`chipLabel`, 14/w500)과 **굵기가 다르다.** 합치면 한쪽만
+  /// 못 바꾼다.
+  final TextStyle linkRetryChip;
+
+  /// 팝업 제목 (18/w500 Pretendard).
+  final TextStyle dialogTitle;
+
+  /// 팝업 버튼 문구 (18/w600 Pretendard).
+  final TextStyle dialogAction;
+
+  /// `나중에 할게요` (16/w600 Pretendard).
+  final TextStyle linkLater;
 
   /// 소셜 로그인 버튼 문구 (18/w700 Pretendard).
   ///
@@ -294,6 +321,42 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.2,
     ),
+    linkCode: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 40,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
+    linkTimer: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    linkRetryChip: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    dialogTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    dialogAction: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    linkLater: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
     loginProvider: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 18,
@@ -408,6 +471,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? cardDescription,
     TextStyle? reviewTitle,
     TextStyle? pinTitle,
+    TextStyle? linkCode,
+    TextStyle? linkTimer,
+    TextStyle? linkRetryChip,
+    TextStyle? dialogTitle,
+    TextStyle? dialogAction,
+    TextStyle? linkLater,
     TextStyle? loginProvider,
     TextStyle? consentAllAgree,
     TextStyle? consentBadge,
@@ -443,6 +512,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       cardDescription: cardDescription ?? this.cardDescription,
       reviewTitle: reviewTitle ?? this.reviewTitle,
       pinTitle: pinTitle ?? this.pinTitle,
+      linkCode: linkCode ?? this.linkCode,
+      linkTimer: linkTimer ?? this.linkTimer,
+      linkRetryChip: linkRetryChip ?? this.linkRetryChip,
+      dialogTitle: dialogTitle ?? this.dialogTitle,
+      dialogAction: dialogAction ?? this.dialogAction,
+      linkLater: linkLater ?? this.linkLater,
       loginProvider: loginProvider ?? this.loginProvider,
       consentAllAgree: consentAllAgree ?? this.consentAllAgree,
       consentBadge: consentBadge ?? this.consentBadge,
@@ -483,6 +558,13 @@ class AppTypography extends ThemeExtension<AppTypography> {
       cardDescription: TextStyle.lerp(cardDescription, other.cardDescription, t)!,
       reviewTitle: TextStyle.lerp(reviewTitle, other.reviewTitle, t)!,
       pinTitle: TextStyle.lerp(pinTitle, other.pinTitle, t)!,
+      linkCode: TextStyle.lerp(linkCode, other.linkCode, t)!,
+      linkTimer: TextStyle.lerp(linkTimer, other.linkTimer, t)!,
+      linkRetryChip:
+          TextStyle.lerp(linkRetryChip, other.linkRetryChip, t)!,
+      dialogTitle: TextStyle.lerp(dialogTitle, other.dialogTitle, t)!,
+      dialogAction: TextStyle.lerp(dialogAction, other.dialogAction, t)!,
+      linkLater: TextStyle.lerp(linkLater, other.linkLater, t)!,
       loginProvider: TextStyle.lerp(loginProvider, other.loginProvider, t)!,
       consentAllAgree:
           TextStyle.lerp(consentAllAgree, other.consentAllAgree, t)!,

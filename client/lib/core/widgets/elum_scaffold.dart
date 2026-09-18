@@ -31,6 +31,7 @@ class ElumScaffold extends StatelessWidget {
     super.key,
     required this.child,
     this.bottomButton,
+    this.belowButton,
     this.onBack,
     this.horizontalPadding,
   });
@@ -39,6 +40,12 @@ class ElumScaffold extends StatelessWidget {
 
   /// 하단에 고정되는 CTA. 없으면 영역 자체가 생기지 않는다.
   final Widget? bottomButton;
+
+  /// CTA **아래**에 붙는 보조 동작 (`나중에 할게요` 등). 없으면 자리도 없다.
+  ///
+  /// CTA 안에 함께 넣지 않는 이유 — 이건 버튼이 아니라 빠져나가는 길이다.
+  /// 같은 무게로 두면 무엇이 주 동작인지 흐려진다 (Figma 732:5709).
+  final Widget? belowButton;
 
   /// 뒤로가기. null이면 버튼을 그리지 않는다 (첫 화면).
   final VoidCallback? onBack;
@@ -59,6 +66,12 @@ class ElumScaffold extends StatelessWidget {
   /// 이 111에서 기기 홈인디케이터(safeBottom)를 빼야 Figma와 같은 위치가 된다.
   /// (Home Indicator 상단 y=831 기준으로 계산하면 21만큼 아래로 밀린다.)
   static const _frameHeight = 852.0;
+
+  /// CTA 하단(741) ↔ 보조 동작(765) 간격. 시안 실측.
+  static const _belowGap = 24.0;
+
+  /// 보조 동작 하단(781)에서 프레임 하단(852)까지.
+  static const _belowBottom = 71.0;
 
   @override
   Widget build(BuildContext context) {
@@ -135,9 +148,20 @@ class ElumScaffold extends StatelessWidget {
                     space.buttonMarginH.w,
                     space.md.h,
                     space.buttonMarginH.w,
-                    ctaBottom,
+                    // 아래에 보조 동작이 붙으면 그쪽이 하단 여백을 맡는다.
+                    belowButton == null ? ctaBottom : _belowGap.h,
                   ),
                   child: bottomButton,
+                ),
+              if (belowButton != null)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    space.buttonMarginH.w,
+                    0,
+                    space.buttonMarginH.w,
+                    (_belowBottom.h - safeBottom).clamp(0.0, double.infinity),
+                  ),
+                  child: belowButton,
                 ),
             ],
           ),

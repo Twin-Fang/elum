@@ -315,9 +315,10 @@ class SharedPrefsStorage implements LocalStorage {
 
 /// 메모리 구현. 테스트와 저장소 초기화 실패 시 대체용으로 쓴다.
 class InMemoryStorage implements LocalStorage {
-  InMemoryStorage({bool onboardingCompleted = false, String? pin})
+  InMemoryStorage({bool onboardingCompleted = false, String? pin, String? nickname})
     : _completed = onboardingCompleted,
-      _pin = pin;
+      _pin = pin,
+      _nickname = nickname;
 
   bool _elumi = false;
 

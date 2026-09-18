@@ -1,26 +1,37 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/device_link_repository.dart';
-import '../domain/link_code.dart';
 import '../domain/link_status.dart';
 
-/// 연결 암호 만들기 — **보호자 휴대폰** (이슈 #205 · 명세 §5-1).
+/// 연결 암호 만들기 — **보호자 휴대폰** (이슈 #205 · 디자인 #232).
 ///
 /// 진입은 두 곳이다 — PIN 설정 직후(온보딩), 홈 → 설정.
 /// 온보딩에서 들어온 경우에만 `나중에 할게요`를 보여준다.
 ///
 /// 이 화면의 주인공은 **여섯 글자**다. QR이 빠지면서 화면이 비었으므로 암호를 크게 키운다.
+///
+/// ## 상태 셋 (Figma 732:5334 · 732:5702 · 732:5850)
+///
+/// | | 암호 | 타이머 | 다시 만들기 | CTA |
+/// | --- | --- | --- | --- | --- |
+/// | 대기 | 보임 | `09:59` 빨강 | 있음 | 비활성 |
+/// | 연결 성공 | 보임 | — | — | 팝업이 덮는다 |
+/// | 연결됨 | 보임 | **없음** | **없음** | **활성** |
+///
+/// 연결되면 타이머와 다시 만들기가 사라진다 — **더 기다릴 이유가 없어서다.**
 class LinkCodeScreen extends ConsumerStatefulWidget {
   const LinkCodeScreen({super.key, this.fromOnboarding = false});
 
@@ -35,8 +46,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   bool _loading = true;
   String? _errorMessage;
 
-  /// 남은 시간을 1초마다 다시 그린다. 카운트다운을 숫자로 보여주지는 않는다 —
-  /// 쫓기게 만들지 않으려고 `10분 동안 쓸 수 있어요`로 쓴다 (§5-1).
+  /// 남은 시간을 1초마다 다시 그린다. 시안이 `09:59`를 초까지 보여준다 (#232).
   Timer? _ticker;
 
   /// 연결됐는지 주기적으로 확인한다. 보호자가 이 화면을 보고 있는 동안
@@ -44,6 +54,18 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   Timer? _poller;
 
   bool _linked = false;
+
+  /// 성공 팝업을 두 번 띄우지 않는다. 폴링이 한 박자 늦게 또 돌 수 있다.
+  bool _celebrated = false;
+
+  /// 암호 여섯 글자 사이 간격. 시안은 3-3으로 묶고 가운데를 더 벌린다
+  /// (글자 좌표 0·47·100 | 164·211·258).
+  static const _codeLetterGap = 20.0;
+  static const _codeGroupGap = 40.0;
+
+  /// 암호 묶음(y=299) ↔ 타이머(y=363) ↔ 다시 만들기 칩(y=395)
+  static const _codeToTimer = 24.0;
+  static const _timerToRetry = 16.0;
 
   @override
   void initState() {
@@ -84,7 +106,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   void _startTimers() {
     _ticker?.cancel();
     _poller?.cancel();
-    // 만료 표시를 갱신하려고 1초마다 다시 그린다. 만료되면 멈춘다.
+    // 남은 시간을 초까지 보여주므로 1초마다 다시 그린다. 만료되면 멈춘다.
     _ticker = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) return t.cancel();
       if (_issued?.isExpired ?? true) t.cancel();
@@ -99,20 +121,33 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
         t.cancel();
         _ticker?.cancel();
         setState(() => _linked = true);
+        _celebrate();
       }
     });
   }
 
-  Future<void> _copy() async {
-    final code = _issued?.code;
-    if (code == null) return;
-    await Clipboard.setData(ClipboardData(text: code));
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('복사했어요')));
+  /// 연결 성공 팝업. 화면 밖으로 넘어가지 않고 **이 자리에서** 알린다 (#232).
+  ///
+  /// 팝업을 닫아도 화면에 머문다 — 연결됨 상태를 눈으로 확인하고 `시작하기`를
+  /// 누르는 것이 시안의 흐름이다.
+  Future<void> _celebrate() async {
+    if (_celebrated) return;
+    _celebrated = true;
+    await showElumDialog<void>(
+      context: context,
+      icon: ElumDialogIcon.success,
+      title: '휴대폰 연결에 성공했어요!',
+    );
   }
 
   void _goHome() => context.go(Routes.guardian);
+
+  /// 이룸이 이름. 비어 있으면 `이룸이`로 대신한다 — 온보딩을 건너뛰고 설정에서
+  /// 바로 들어오면 이름이 없을 수 있다. `의`는 받침과 무관해 그냥 붙는다.
+  String get _elumiName {
+    final name = ref.watch(onboardingProvider).childNickname.trim();
+    return name.isEmpty ? '이룸이' : name;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,86 +158,148 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
 
     return ElumScaffold(
       onBack: () => context.pop(),
-      bottomButton: _linked
-          ? ElumButton(label: '완료', onPressed: _goHome)
-          : ElumButton(
-              label: '암호 다시 만들기',
-              onPressed: _loading ? null : _issue,
-              // 만료됐으면 이 버튼이 주 동작이 된다 (§5-1).
-              backgroundColor: expired ? null : colors.buttonNeutral,
-              labelColor: expired ? null : colors.buttonNeutralText,
-            ),
+      // 시안은 연결되기 전에도 버튼을 **보여주되 누를 수 없게** 둔다 (732:5334).
+      // 여기서는 버튼이 다음 할 일을 알려주는 이정표라 자리를 비우지 않는다.
+      bottomButton: ElumButton(
+        label: '시작하기',
+        onPressed: _linked ? _goHome : null,
+      ),
+      // `나중에 할게요`는 CTA 아래에 붙는다 (시안 y=765).
+      belowButton: widget.fromOnboarding && !_linked
+          ? Center(
+              child: AppPressable(
+                onTap: _goHome,
+                child: Padding(
+                  padding: EdgeInsets.all(space.xs.h),
+                  child: Text(
+                    '나중에 할게요',
+                    style: context.typo.linkLater.copyWith(
+                      color: colors.linkLaterLabel,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ElumHeader(
-            title: _linked ? '연결됐어요' : '이룸이 휴대폰에\n이 암호를 넣어주세요',
-            description: _errorMessage,
+            hasBackButton: true,
+            title: '$_elumiName의 휴대폰을\n연결할까요?',
+            description:
+                _errorMessage ?? '$_elumiName의 휴대폰에서 아래 코드를 입력하세요',
           ),
           SizedBox(height: space.xl * 2),
           if (_loading)
             const Center(child: CircularProgressIndicator())
           else if (issued != null) ...[
-            // 화면에서 가장 큰 글자. 3-3으로 묶고 자간을 넓힌다.
-            Text(
-              LinkCode.grouped(issued.code),
-              textAlign: TextAlign.center,
-              style: context.typo.pinTitle.copyWith(
-                color: expired ? colors.textPlaceholder : colors.textPrimary,
-                letterSpacing: 6,
-              ),
+            _CodeText(
+              code: issued.code,
+              dimmed: expired,
+              letterGap: _codeLetterGap,
+              groupGap: _codeGroupGap,
             ),
-            SizedBox(height: space.lg),
-            if (!expired && !_linked)
+            // 연결되면 타이머도 `다시 만들기`도 사라진다 — 더 기다릴 이유가 없다.
+            if (!_linked) ...[
+              SizedBox(height: _codeToTimer.h),
+              Text(
+                _remainingLabel(issued, expired),
+                textAlign: TextAlign.center,
+                style: context.typo.linkTimer.copyWith(color: colors.linkTimer),
+              ),
+              SizedBox(height: _timerToRetry.h),
               Center(
-                child: AppPressable(
-                  onTap: _copy,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: space.lg, vertical: space.sm),
-                    child: Text('암호 복사',
-                        style: context.typo.button
-                            .copyWith(color: colors.textSecondary)),
-                  ),
+                child: _RetryChip(
+                  onTap: _loading ? null : _issue,
                 ),
               ),
-            SizedBox(height: space.xl),
-            Text(
-              _remainingLabel(issued, expired),
-              textAlign: TextAlign.center,
-              style: context.typo.body.copyWith(color: colors.textSecondary),
-            ),
-          ],
-          if (widget.fromOnboarding && !_linked) ...[
-            SizedBox(height: space.lg),
-            Center(
-              child: AppPressable(
-                onTap: _goHome,
-                child: Padding(
-                  padding: EdgeInsets.all(space.sm),
-                  child: Text('나중에 할게요',
-                      style: context.typo.body.copyWith(
-                        color: colors.textSecondary,
-                        decoration: TextDecoration.underline,
-                      )),
-                ),
-              ),
-            ),
+            ],
           ],
         ],
       ),
     );
   }
 
-  /// 남은 시간 문구. 분 단위로만 말한다 — 초를 세어 보여주면 쫓긴다.
+  /// 남은 시간 `MM:SS`. 시안이 초까지 보여준다 (#232 — 전에는 분만 말했다).
   ///
-  /// 올림으로 센다. `inMinutes + 1`로 하면 정확히 10분 남았을 때 **11분**이 나온다 —
-  /// 서버가 준 것보다 길게 말하게 되므로 사용자가 믿고 기다리다 만료된다.
+  /// 올림이 아니라 **내림**이다. 남은 시간을 실제보다 길게 말하면 믿고 기다리다
+  /// 만료된다.
   String _remainingLabel(IssuedLinkCode issued, bool expired) {
-    if (_linked) return '이룸이 휴대폰이 연결됐어요';
     if (expired) return '암호가 만료됐어요';
-    final minutes = (issued.remaining().inSeconds / 60).ceil();
-    if (minutes <= 1) return '1분 남았어요';
-    return '$minutes분 동안 쓸 수 있어요';
+    final total = issued.remaining().inSeconds;
+    final mm = (total ~/ 60).toString().padLeft(2, '0');
+    final ss = (total % 60).toString().padLeft(2, '0');
+    return '$mm:$ss';
+  }
+}
+
+/// 암호 여섯 글자. 3-3으로 묶고 가운데를 더 벌린다 (Figma 732:5710).
+///
+/// `Text` 하나에 `letterSpacing`을 주지 않는 이유 — 마지막 글자 뒤에도 자간이
+/// 붙어 묶음이 왼쪽으로 치우친다. 글자를 낱개로 놓아야 가운데가 맞는다.
+class _CodeText extends StatelessWidget {
+  const _CodeText({
+    required this.code,
+    required this.dimmed,
+    required this.letterGap,
+    required this.groupGap,
+  });
+
+  final String code;
+  final bool dimmed;
+  final double letterGap;
+  final double groupGap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final style = context.typo.linkCode.copyWith(
+      color: dimmed ? colors.textPlaceholder : colors.textPrimary,
+    );
+    final letters = code.split('');
+    final half = letters.length ~/ 2;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (final (i, ch) in letters.indexed) ...[
+          if (i > 0) SizedBox(width: (i == half ? groupGap : letterGap).w),
+          Text(ch, style: style),
+        ],
+      ],
+    );
+  }
+}
+
+/// `코드 다시 만들기` 칩 (Figma 732:5718 — padding 10/20, r20).
+class _RetryChip extends StatelessWidget {
+  const _RetryChip({required this.onTap});
+
+  final VoidCallback? onTap;
+
+  static const _padV = 10.0;
+  static const _padH = 20.0;
+  static const _radius = 20.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return AppPressable(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: _padV.h, horizontal: _padH.w),
+        decoration: BoxDecoration(
+          color: colors.linkRetryChipBg,
+          borderRadius: BorderRadius.circular(_radius.r),
+        ),
+        child: Text(
+          '코드 다시 만들기',
+          style: context.typo.linkRetryChip.copyWith(color: colors.textPrimary),
+        ),
+      ),
+    );
   }
 }

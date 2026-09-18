@@ -114,6 +114,9 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginKakaoLabel,
     required this.loginNaverBg,
     required this.loginNaverLabel,
+    required this.linkTimer,
+    required this.linkRetryChipBg,
+    required this.linkLaterLabel,
     required this.loginButtonShadow,
     required this.loginAppleBg,
     required this.loginAppleLabel,
@@ -319,6 +322,18 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color loginKakaoLabel;
   final Color loginNaverBg;
   final Color loginNaverLabel;
+  /// 연결 암호 남은 시간 (#DA5050).
+  ///
+  /// `danger`(#BB3F38)와 **다른 색이다.** 저쪽은 되돌릴 수 없는 동작을 막는
+  /// 붉은색이고, 이건 "시간이 간다"를 알리는 표시다. 합치면 한쪽만 못 바꾼다.
+  final Color linkTimer;
+
+  /// `코드 다시 만들기` 칩 배경 (#EEE9E6).
+  final Color linkRetryChipBg;
+
+  /// `나중에 할게요` 글자 (#74757D).
+  final Color linkLaterLabel;
+
   /// 제공자 버튼 그림자 (시안 4,4 blur 6 · 검정 5%).
   final Color loginButtonShadow;
   final Color loginAppleBg;
@@ -433,6 +448,9 @@ class AppColors extends ThemeExtension<AppColors> {
     loginKakaoLabel: Color(0xFF191600),
     loginNaverBg: Color(0xFF03C75A),
     loginNaverLabel: Color(0xFFFFFFFF),
+    linkTimer: Color(0xFFDA5050),
+    linkRetryChipBg: Color(0xFFEEE9E6),
+    linkLaterLabel: Color(0xFF74757D),
     loginButtonShadow: Color(0x0D000000),
     loginAppleBg: Color(0xFF000000),
     loginAppleLabel: Color(0xFFFFFFFF),
@@ -535,6 +553,9 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? loginKakaoLabel,
     Color? loginNaverBg,
     Color? loginNaverLabel,
+    Color? linkTimer,
+    Color? linkRetryChipBg,
+    Color? linkLaterLabel,
     Color? loginButtonShadow,
     Color? loginAppleBg,
     Color? loginAppleLabel,
@@ -627,6 +648,9 @@ class AppColors extends ThemeExtension<AppColors> {
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
       loginNaverLabel: loginNaverLabel ?? this.loginNaverLabel,
+      linkTimer: linkTimer ?? this.linkTimer,
+      linkRetryChipBg: linkRetryChipBg ?? this.linkRetryChipBg,
+      linkLaterLabel: linkLaterLabel ?? this.linkLaterLabel,
       loginButtonShadow: loginButtonShadow ?? this.loginButtonShadow,
       loginAppleBg: loginAppleBg ?? this.loginAppleBg,
       loginAppleLabel: loginAppleLabel ?? this.loginAppleLabel,
@@ -740,6 +764,10 @@ class AppColors extends ThemeExtension<AppColors> {
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,
       loginNaverLabel: Color.lerp(loginNaverLabel, other.loginNaverLabel, t)!,
+      linkTimer: Color.lerp(linkTimer, other.linkTimer, t)!,
+      linkRetryChipBg:
+          Color.lerp(linkRetryChipBg, other.linkRetryChipBg, t)!,
+      linkLaterLabel: Color.lerp(linkLaterLabel, other.linkLaterLabel, t)!,
       loginButtonShadow:
           Color.lerp(loginButtonShadow, other.loginButtonShadow, t)!,
       loginAppleBg: Color.lerp(loginAppleBg, other.loginAppleBg, t)!,

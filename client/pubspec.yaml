@@ -131,6 +131,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icon/login/
+    - assets/icon/dialog/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

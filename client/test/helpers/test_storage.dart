@@ -13,9 +13,17 @@ import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 ///
 /// riverpod 3.x가 `Override` 타입을 export하지 않아 반환 타입은 추론에 맡긴다.
 // ignore: strict_top_level_inference
-testStorageOverride({bool onboardingCompleted = false, String? pin}) {
+testStorageOverride({
+  bool onboardingCompleted = false,
+  String? pin,
+  String? nickname,
+}) {
   return localStorageProvider.overrideWithValue(
-    InMemoryStorage(onboardingCompleted: onboardingCompleted, pin: pin),
+    InMemoryStorage(
+      onboardingCompleted: onboardingCompleted,
+      pin: pin,
+      nickname: nickname,
+    ),
   );
 }
 
