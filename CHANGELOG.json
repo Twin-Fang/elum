@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-18T13:51:20Z",
-    "currentVersion": "1.14.3",
+    "lastUpdated": "2026-09-18T14:57:08Z",
+    "currentVersion": "1.14.4",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 108
+    "totalReleases": 109
   },
   "releases": [
+    {
+      "version": "1.14.4",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-18",
+      "pr_number": 255,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 관리자 화면에서 프로 발급이 저장되지 않던 문제를 해결했습니다\n  * 사유를 비우고 발급하면 오류 페이지가 뜨던 문제를 해결했습니다\n  * 회원 상세에서 실패 안내가 보이지 않던 문제를 해결했습니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "관리자 화면에서 프로 발급이 저장되지 않던 문제를 해결했습니다",
+            "사유를 비우고 발급하면 오류 페이지가 뜨던 문제를 해결했습니다",
+            "회원 상세에서 실패 안내가 보이지 않던 문제를 해결했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.14.3",
       "project_type": "flutter",
