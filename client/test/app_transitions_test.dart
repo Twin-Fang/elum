@@ -152,7 +152,7 @@ void main() {
 
       // 전환이 끝나면 로그인 화면 하나만 남는다
       await tester.pump(kPageTransitionDuration);
-      expect(find.text('카카오로 시작하기'), findsOneWidget);
+      expect(find.text('카카오로 계속하기'), findsOneWidget);
       expect(find.text('차근차근 함께해요'), findsOneWidget);
     });
   });

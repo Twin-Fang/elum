@@ -86,8 +86,19 @@ void main() {
     await tester.pumpAndSettle();
 
     // 한 번 더 눌러 들어가는 화면이 아니다.
-    expect(find.text('카카오로 시작하기'), findsOneWidget);
-    expect(find.text('네이버로 시작하기'), findsOneWidget);
+    expect(find.text('카카오로 계속하기'), findsOneWidget);
+    expect(find.text('네이버로 계속하기'), findsOneWidget);
+  });
+
+  testWidgets('애플이 승인한 문구를 쓴다 (이슈 #237)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    // 애플은 `Apple로 로그인`·`Apple로 계속하기`·`Apple로 가입` 셋만 허용한다.
+    // 셋 중 하나에 카카오·네이버도 맞췄다 — 애플만 다르면 버튼이 어긋난다.
+    expect(find.textContaining('로 시작하기'), findsNothing);
+    expect(find.text('카카오로 계속하기'), findsOneWidget);
+    expect(find.text('네이버로 계속하기'), findsOneWidget);
   });
 
   testWidgets('구글은 빠졌다 (이슈 #230)', (tester) async {
@@ -128,7 +139,7 @@ void main() {
 
     // 그림 위에 겹쳐 얹는 구조라 버튼 묶음이 아래로 새면 마지막 버튼이 잘린다.
     // 애플은 iOS 전용이라 테스트 환경(호스트 OS)에서 마지막은 네이버다.
-    final lastButton = tester.getRect(find.text('네이버로 시작하기'));
+    final lastButton = tester.getRect(find.text('네이버로 계속하기'));
     expect(lastButton.bottom, lessThan(tester.view.physicalSize.height));
   });
 }

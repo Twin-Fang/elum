@@ -26,6 +26,10 @@ import '../data/oauth_sdk.dart';
 ///
 /// **제공자 버튼은 각 사의 브랜드 규격을 따른다.** 색·문구를 임의로 바꾸면
 /// 스토어 심사나 제공자 검수에서 지적받는다.
+///
+/// 문구가 `~로 계속하기`인 이유 — 애플이 `Apple로 로그인`·`Apple로 계속하기`·
+/// `Apple로 가입` 셋만 허용한다 (이슈 #237). **셋 중 하나를 골라 카카오·네이버도
+/// 맞췄다.** 애플만 다르게 두면 세 버튼이 어긋나 목록으로 읽히지 않는다.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -154,7 +158,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
             if (_lastProvider == OAuthProvider.kakao) const _LastUsedHint(),
             _ProviderButton(
-              label: _pending == OAuthProvider.kakao ? '연결하고 있어요' : '카카오로 시작하기',
+              label: _pending == OAuthProvider.kakao ? '연결하고 있어요' : '카카오로 계속하기',
               iconAsset: AppAssets.loginKakao,
               backgroundColor: context.colors.loginKakaoBg,
               labelColor: context.colors.loginKakaoLabel,
@@ -164,7 +168,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
             if (_lastProvider == OAuthProvider.naver) const _LastUsedHint(),
             _ProviderButton(
-              label: _pending == OAuthProvider.naver ? '연결 중...' : '네이버로 시작하기',
+              label: _pending == OAuthProvider.naver ? '연결하고 있어요' : '네이버로 계속하기',
               iconAsset: AppAssets.loginNaver,
               backgroundColor: context.colors.loginNaverBg,
               labelColor: context.colors.loginNaverLabel,
@@ -188,12 +192,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // 시안이 세 버튼을 같은 규격(360×66 · r18 · 로고 x=64)으로 그렸고,
               // 규격 위젯은 그 정렬을 맞출 수 없기 때문이다.
               //
-              // 애플이 요구하는 것은 지켰다 — **검정 배경 · 흰 사과 심볼 ·
-              // 최소 높이**. 다만 문구 `Apple로 시작하기`는 애플이 승인한 세 가지
-              // (`Apple로 로그인`·`Apple로 계속하기`·`Apple로 가입`)에 없다.
-              // 심사에서 지적받을 수 있어 이슈 #230에 남겼다.
+              // 애플이 요구하는 것을 전부 지킨다 — **검정 배경 · 흰 사과 심볼 ·
+              // 최소 높이 · 승인 문구**. 문구는 `Apple로 로그인`·`Apple로 계속하기`·
+              // `Apple로 가입` 셋만 허용되므로 **임의로 바꾸지 않는다** (이슈 #237).
               _ProviderButton(
-                label: _pending == OAuthProvider.apple ? '연결 중...' : 'Apple로 시작하기',
+                label: _pending == OAuthProvider.apple ? '연결하고 있어요' : 'Apple로 계속하기',
                 iconAsset: AppAssets.loginApple,
                 backgroundColor: context.colors.loginAppleBg,
                 labelColor: context.colors.loginAppleLabel,
