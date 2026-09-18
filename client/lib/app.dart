@@ -28,6 +28,8 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     hasToken: () => ref.read(authRepositoryProvider).hasSession,
     // 이룸이 휴대폰은 로그인이 아니라 연결로 붙는다 (이슈 #206)
     isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
+    // 역할을 고르기 전에는 보호자·이룸이 어느 쪽 화면도 열지 않는다 (이슈 #212)
+    hasRole: () => ref.read(localStorageProvider).selectedRole != null,
   );
 
   @override

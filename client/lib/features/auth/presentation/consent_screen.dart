@@ -84,8 +84,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       return;
     }
 
-    // 동의를 마쳤으니 아이 정보를 받을 차례다.
-    context.go(Routes.onboardingName);
+    // 동의를 마쳤으니 이제 누가 쓰는 휴대폰인지 묻는다 (이슈 #212).
+    // 보호자인지 이룸이인지에 따라 다음 화면이 갈린다 — 여기서 바로 이름을
+    // 물으면 이룸이 휴대폰이 보호자 온보딩으로 빨려 들어간다.
+    context.go(Routes.roleSelect);
   }
 
   /// 동의하지 않고 나간다. 서비스를 쓸 수 없으므로 로그아웃 상태로 되돌린다.

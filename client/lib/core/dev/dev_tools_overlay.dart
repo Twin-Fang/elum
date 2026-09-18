@@ -502,8 +502,11 @@ class _NavigateView extends StatelessWidget {
     ('온보딩 · 캐릭터', Routes.onboardingCharacter),
     ('온보딩 · PIN', Routes.onboardingPin),
     ('보호자 홈', Routes.guardian),
-    // 연결 암호 두 화면 (이슈 #205). 이룸이 쪽 정식 진입점(역할 선택)은 아직 없어
-    // 여기서만 들어갈 수 있다 — 2대로 붙여 보려면 이 줄이 필요하다.
+    // 역할 선택 (이슈 #212). 정식 경로는 로그인 → 약관 → 여기다.
+    // 실기기 검수에서 매번 소셜 로그인을 다시 하지 않도록 지름길을 둔다.
+    ('역할 선택', Routes.roleSelect),
+    // 연결 암호 두 화면 (이슈 #205). 정식으로는 역할 선택에서 이룸이를 고르면
+    // 열리지만, 두 화면을 따로 확인할 때가 있어 남겨 둔다.
     ('연결 · 암호 만들기(보호자)', Routes.linkCode),
     ('연결 · 암호 넣기(이룸이)', Routes.linkEnter),
     // 아이 모드는 PIN을 거쳐야 들어갈 수 있어 심사·QA 때 확인이 번거롭다.

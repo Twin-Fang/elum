@@ -20,6 +20,13 @@ abstract final class AppAssets {
         SupportGoal.independent => '$_images/goal_icon_independent.svg',
       };
 
+  /// 역할 선택 카드 그림 (40×40) — ⚠️ **임시로 목표 아이콘을 빌려 쓴다.**
+  ///
+  /// 전용 그림 2종은 아직 없다 (#198 D1 🎨 `역할 선택 그림 2`). 도형을 코드로
+  /// 그리지 않기 위한 대타이므로, 에셋이 나오면 **이 두 줄만** 바꾸면 된다.
+  static const roleGuardianMock = '$_images/goal_icon_step_by_step.svg';
+  static const roleElumiMock = '$_images/goal_icon_independent.svg';
+
   /// 뒤로가기 (24×24). Figma `fi-br-angle-left`.
   /// Material 아이콘은 형태가 달라 쓰지 않는다.
   static const iconBack = '$_images/icon_back.svg';

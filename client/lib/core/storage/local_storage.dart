@@ -38,6 +38,20 @@ abstract interface class LocalStorage {
 
   Future<void> setElumiDevice(bool v);
 
+  /// 약관 동의 뒤에 고른 역할 (이슈 #212 · `AppRole.storageValue`).
+  ///
+  /// enum이 아니라 문자열로 주고받는다 — core가 feature의 `AppRole`을 알면
+  /// 의존 방향이 뒤집힌다 (`character`도 같은 이유로 문자열이다).
+  ///
+  /// ⚠️ [isElumiDevice]와 다르다. 역할은 **고른 순간** 정해지고, 이룸이 휴대폰
+  /// 여부는 **연결에 성공한 순간** 정해진다. 둘을 같이 세우면 역할만 고르고
+  /// 연결 전인 사람이 라우터 가드에 붙잡혀 뒤로 갈 수 없게 된다.
+  String? get selectedRole;
+
+  Future<void> setSelectedRole(String v);
+
+  Future<void> clearSelectedRole();
+
   Future<void> setPin(String v);
   Future<String?> getPin();
 
@@ -98,6 +112,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCompleted = 'onboardingCompleted';
   static const _kPin = 'guardianPin';
   static const _kElumiDevice = 'isElumiDevice';
+  static const _kSelectedRole = 'selectedRole';
   static const _kAccessToken = 'accessToken';
   static const _kProgressPrefix = 'progress.';
   static const _kPendingSync = 'progress.pending';
@@ -260,6 +275,16 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  String? get selectedRole => _prefs.getString(_kSelectedRole);
+
+  @override
+  Future<void> setSelectedRole(String v) async =>
+      _prefs.setString(_kSelectedRole, v);
+
+  @override
+  Future<void> clearSelectedRole() async => _prefs.remove(_kSelectedRole);
+
+  @override
   Future<void> clearChildProfile() async {
     for (final key in [_kNickname, _kGoals, _kCharacter, _kCompleted, _kPin]) {
       await _prefs.remove(key);
@@ -281,7 +306,8 @@ class SharedPrefsStorage implements LocalStorage {
     // 남으면 이전 계정의 일과가 새 이름과 섞여 보인다. (이슈 #13)
     await clearChildProfile();
     // 역할도 지운다 — 이룸이 휴대폰에서의 로그아웃은 곧 연결 끊기다 (§8-5).
-    for (final key in [_kAccessToken, _kElumiDevice]) {
+    // 잘못 고른 사람이 로그아웃으로 빠져나올 수 있어야 한다 (이슈 #212).
+    for (final key in [_kAccessToken, _kElumiDevice, _kSelectedRole]) {
       await _prefs.remove(key);
     }
   }
@@ -343,6 +369,17 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setElumiDevice(bool v) async => _elumi = v;
 
+  String? _role;
+
+  @override
+  String? get selectedRole => _role;
+
+  @override
+  Future<void> setSelectedRole(String v) async => _role = v;
+
+  @override
+  Future<void> clearSelectedRole() async => _role = null;
+
   @override
   Future<void> setPin(String v) async => _pin = v;
 
@@ -403,6 +440,7 @@ class InMemoryStorage implements LocalStorage {
     _completed = false;
     _accessToken = null;
     _elumi = false;
+    _role = null;
     _progress.clear();
     _pendingSync = const [];
     _cachedToday = null;

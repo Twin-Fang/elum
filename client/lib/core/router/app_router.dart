@@ -24,6 +24,7 @@ import '../../features/onboarding/presentation/name_screen.dart';
 import '../../features/onboarding/presentation/pin_screen.dart';
 import '../../features/auth/presentation/consent_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/role_select_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
 import 'app_transitions.dart';
 
@@ -37,6 +38,9 @@ abstract final class Routes {
   /// 약관 동의. 로그인 직후, 아이 정보를 받기 전에 선다.
   /// 동의 없이는 서비스를 쓸 수 없다.
   static const consent = '/consent';
+
+  /// 약관 동의 뒤 보호자·이룸이가 갈라지는 지점 (이슈 #212 · 명세 §4-3)
+  static const roleSelect = '/role';
 
   static const onboardingName = '/onboarding/name';
   static const onboardingGoals = '/onboarding/goals';
@@ -106,11 +110,14 @@ String? resolveRedirect(
   required bool skipOnboarding,
   /// 이룸이(당사자) 휴대폰인가. 여기에는 로그인할 계정이 없다 (이슈 #206).
   bool isElumiDevice = false,
+  /// 약관 동의 뒤 역할을 골랐는가 (이슈 #212).
+  bool hasRole = true,
 }) {
   // 가입 절차도 로그인이 있어야 한다. 계정이 없으면 동의를 기록할 곳도,
   // 아이 정보를 저장할 곳도 없다.
-  final isSignUpFlow =
-      path.startsWith(Routes.consent) || path.startsWith('/onboarding');
+  final isSignUpFlow = path.startsWith(Routes.consent) ||
+      path.startsWith(Routes.roleSelect) ||
+      path.startsWith('/onboarding');
   final needsSession = isSignUpFlow ||
       path.startsWith(Routes.guardian) ||
       path.startsWith(Routes.child);
@@ -128,6 +135,16 @@ String? resolveRedirect(
   // devFlag: 온보딩 건너뛰기 (시연용)
   if (skipOnboarding) return null;
 
+  // 역할을 고르지 않았으면 보호자·이룸이 어느 쪽 화면도 열지 않는다 (이슈 #212).
+  // 딥링크나 옛 세션으로 곧장 홈에 들어오면 이룸이 휴대폰이 보호자 온보딩에
+  // 빨려 들어간다.
+  //
+  // 두 경우는 예외다 — 연결에 성공한 휴대폰(역할 확정)과, **역할이 생기기 전에
+  // 온보딩을 마친 기존 보호자**. 이미 답한 것을 다시 묻지 않는다.
+  if (!hasRole && !isElumiDevice && !onboardingCompleted) {
+    return Routes.roleSelect;
+  }
+
   // 보호자·아이 화면은 온보딩을 마쳐야 들어갈 수 있다.
   return onboardingCompleted ? null : Routes.onboardingName;
 }
@@ -139,6 +156,7 @@ GoRouter createRouter({
   bool Function()? isOnboardingCompleted,
   bool Function()? hasToken,
   bool Function()? isElumiDevice,
+  bool Function()? hasRole,
 }) {
   return GoRouter(
     initialLocation: Routes.splash,
@@ -148,6 +166,7 @@ GoRouter createRouter({
       onboardingCompleted: isOnboardingCompleted?.call() ?? true,
       skipOnboarding: AppConfig.skipOnboarding,
       isElumiDevice: isElumiDevice?.call() ?? false,
+      hasRole: hasRole?.call() ?? true,
     ),
     routes: [
       GoRoute(
@@ -171,6 +190,11 @@ GoRouter createRouter({
       GoRoute(
         path: Routes.consent,
         pageBuilder: (context, state) => slidePage(state, const ConsentScreen()),
+      ),
+      GoRoute(
+        path: Routes.roleSelect,
+        pageBuilder: (context, state) =>
+            slidePage(state, const RoleSelectScreen()),
       ),
 
       // --- 온보딩 ---

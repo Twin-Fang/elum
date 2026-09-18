@@ -38,6 +38,10 @@ void main() {
           builder: (context, state) => const Scaffold(body: Text('이름 화면')),
         ),
         GoRoute(
+          path: Routes.roleSelect,
+          builder: (context, state) => const Scaffold(body: Text('역할 선택')),
+        ),
+        GoRoute(
           path: Routes.guardian,
           builder: (context, state) => const Scaffold(body: Text('보호자 홈')),
         ),
@@ -133,13 +137,23 @@ void main() {
   group('시작 화면 이동', () {
     useReduceMotion();
 
-    testWidgets('온보딩 전이면 누르지 않아도 이름 화면으로 간다 (이슈 #207)', (tester) async {
+    testWidgets('역할을 안 골랐으면 누르지 않아도 역할 선택으로 간다 (이슈 #212)', (tester) async {
+      // 이름을 먼저 물으면 이룸이 휴대폰이 보호자 온보딩으로 빨려 들어간다.
       await tester.pumpWidget(buildSubject(onboardingCompleted: false));
       // 연출을 본 뒤 저절로 넘어간다.
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
 
-      expect(find.text('이름 화면'), findsOneWidget);
+      expect(find.text('역할 선택'), findsOneWidget);
+    });
+
+    testWidgets('온보딩을 마쳤으면 역할이 없어도 다시 묻지 않는다 (이슈 #212)', (tester) async {
+      // 역할이 생기기 전에 가입한 보호자다. 이미 답한 것을 또 묻지 않는다.
+      await tester.pumpWidget(buildSubject(onboardingCompleted: true));
+      await tester.pumpAndSettle();
+
+      expect(find.text('역할 선택'), findsNothing);
+      expect(find.text('보호자 홈'), findsOneWidget);
     });
 
     testWidgets('온보딩을 마쳤으면 누르지 않아도 보호자 홈으로 간다', (tester) async {

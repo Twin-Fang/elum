@@ -41,6 +41,10 @@ void main() {
           builder: (context, state) => const Scaffold(body: Text('이름 화면')),
         ),
         GoRoute(
+          path: Routes.roleSelect,
+          builder: (context, state) => const Scaffold(body: Text('역할 선택')),
+        ),
+        GoRoute(
           path: Routes.login,
           builder: (context, state) => const Scaffold(body: Text('로그인 화면')),
         ),
@@ -101,6 +105,8 @@ void main() {
     expect(repo.calls, 1);
   });
 
+  // 약관 다음은 이름이 아니라 **역할 선택**이다 (이슈 #212). 여기서 바로 이름을
+  // 물으면 이룸이 휴대폰이 보호자 온보딩으로 빨려 들어간다.
   testWidgets('일괄 동의만으로 필수가 채워져 그대로 진행된다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
@@ -109,7 +115,7 @@ void main() {
     await tapItem(tester, cta());
 
     // 선택을 빼느라 필수까지 덜 켜지면 화면이 막힌다.
-    expect(find.text('이름 화면'), findsOneWidget);
+    expect(find.text('역할 선택'), findsOneWidget);
   });
 
   testWidgets('선택 항목을 직접 누르면 그때 켜진다', (tester) async {
