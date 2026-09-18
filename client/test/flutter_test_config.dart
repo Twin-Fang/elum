@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:yaml/yaml.dart';
 
 /// 모든 위젯 테스트에 자동 적용되는 전역 설정.
 ///
@@ -15,7 +19,20 @@ import 'package:flutter/foundation.dart';
 /// 전부 통과했다. (트러블슈팅: 키보드가 올라오면 화면이 깨짐)
 ///
 /// 여기서 오버플로를 잡아 실패시키면 어느 화면에서 나든 자동으로 걸린다.
+///
+/// ## 폰트를 전부 실어 준다
+///
+/// 테스트 환경은 폰트를 자동으로 싣지 않는다. 안 실으면 한글이 **전부 네모(□)**로
+/// 그려지고 아이콘도 □가 된다. 골든은 그 상태로 기준이 잡혀 **회귀를 못 잡는다** —
+/// 글자가 바뀌어도 네모 개수만 같으면 통과한다.
+///
+/// 전에는 골든 파일마다 `FontLoader`를 베껴 넣었다. 새 골든을 쓰는 사람이 그걸
+/// 모르면 또 네모가 된다. 여기서 한 번만 실어 **모든 테스트가 같은 조건**이 되게 한다.
+/// (이슈 #226)
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  await _loadAppFonts();
+
   final originalOnError = FlutterError.onError;
 
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -39,3 +56,29 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 
   await testMain();
 }
+
+/// `pubspec.yaml`에 선언된 폰트를 그대로 싣는다.
+///
+/// 목록을 코드에 박지 않는 이유 — 폰트를 추가하고 여기를 안 고치면 그 글자만
+/// 조용히 네모가 된다. pubspec을 읽으면 선언과 테스트가 어긋날 수 없다.
+Future<void> _loadAppFonts() async {
+  final pubspec = loadYaml(await File('pubspec.yaml').readAsString()) as YamlMap;
+  final families = (pubspec['flutter'] as YamlMap?)?['fonts'] as YamlList?;
+
+  for (final family in families ?? const []) {
+    final loader = FontLoader(family['family'] as String);
+    for (final font in family['fonts'] as YamlList) {
+      loader.addFont(_loadAsset(font['asset'] as String));
+    }
+    await loader.load();
+  }
+
+  // 아이콘은 pubspec에 없다 — Flutter SDK가 번들로 싣는다.
+  // 체크·화살표가 전부 □로 나오면 상태를 눈으로 구분할 수 없다.
+  final icons = FontLoader('MaterialIcons')
+    ..addFont(_loadAsset('fonts/MaterialIcons-Regular.otf'));
+  await icons.load();
+}
+
+/// 테스트 바인딩의 rootBundle은 실제 자산을 읽어 준다.
+Future<ByteData> _loadAsset(String path) => rootBundle.load(path);

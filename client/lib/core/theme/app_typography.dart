@@ -27,6 +27,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.cardDescription,
     required this.reviewTitle,
     required this.pinTitle,
+    required this.consentAllAgree,
+    required this.consentBadge,
+    required this.consentLabel,
     required this.bodySmall,
     required this.childTileTitle,
     required this.ringPercent,
@@ -110,6 +113,17 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// PIN 화면 제목 (28/w800). title(28)과 크기는 같지만 줄간격이 다르다.
   final TextStyle pinTitle;
+
+  /// 약관 화면 전체 동의 버튼 문구 "서비스 이용약관 전체 동의" (20/w600 Pretendard).
+  ///
+  /// 이 화면군만 Pretendard다 — 제목·CTA는 Tmoney RoundWind 그대로다 (이슈 #226).
+  final TextStyle consentAllAgree;
+
+  /// 약관 항목 앞 `필수`/`선택` 배지 (16/w600 Pretendard).
+  final TextStyle consentBadge;
+
+  /// 약관 항목 제목 (16/w400 Pretendard).
+  final TextStyle consentLabel;
 
   /// 본문보다 한 단계 작은 설명 (14/w400).
   /// DLP 배지·일과 입력 요약처럼 좁은 폭에 들어가는 문구.
@@ -273,6 +287,24 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.2,
     ),
+    consentAllAgree: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    consentBadge: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    consentLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
     bodySmall: TextStyle(
       fontFamily: fontFamily,
       fontSize: 14,
@@ -363,6 +395,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? cardDescription,
     TextStyle? reviewTitle,
     TextStyle? pinTitle,
+    TextStyle? consentAllAgree,
+    TextStyle? consentBadge,
+    TextStyle? consentLabel,
     TextStyle? bodySmall,
     TextStyle? childTileTitle,
     TextStyle? ringPercent,
@@ -394,6 +429,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       cardDescription: cardDescription ?? this.cardDescription,
       reviewTitle: reviewTitle ?? this.reviewTitle,
       pinTitle: pinTitle ?? this.pinTitle,
+      consentAllAgree: consentAllAgree ?? this.consentAllAgree,
+      consentBadge: consentBadge ?? this.consentBadge,
+      consentLabel: consentLabel ?? this.consentLabel,
       bodySmall: bodySmall ?? this.bodySmall,
       childTileTitle: childTileTitle ?? this.childTileTitle,
       ringPercent: ringPercent ?? this.ringPercent,
@@ -430,6 +468,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
       cardDescription: TextStyle.lerp(cardDescription, other.cardDescription, t)!,
       reviewTitle: TextStyle.lerp(reviewTitle, other.reviewTitle, t)!,
       pinTitle: TextStyle.lerp(pinTitle, other.pinTitle, t)!,
+      consentAllAgree:
+          TextStyle.lerp(consentAllAgree, other.consentAllAgree, t)!,
+      consentBadge: TextStyle.lerp(consentBadge, other.consentBadge, t)!,
+      consentLabel: TextStyle.lerp(consentLabel, other.consentLabel, t)!,
       bodySmall: TextStyle.lerp(bodySmall, other.bodySmall, t)!,
       childTileTitle: TextStyle.lerp(childTileTitle, other.childTileTitle, t)!,
       ringPercent: TextStyle.lerp(ringPercent, other.ringPercent, t)!,

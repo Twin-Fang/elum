@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
@@ -13,13 +12,13 @@ import '../data/auth_repository.dart';
 import '../data/consent_repository.dart';
 import '../domain/consent_documents.dart';
 import 'consent_document_screen.dart';
-import 'widgets/consent_chip.dart';
+import 'widgets/consent_all_agree_button.dart';
+import 'widgets/consent_row.dart';
 
-/// 약관 동의 화면. 로그인 직후, 아이 정보를 받기 전에 선다.
+/// 약관 동의 화면. 로그인 직후, 이룸이 정보를 받기 전에 선다.
 ///
-/// Figma에 이 화면은 없다(신규). 그래서 **온보딩 목표 선택(`204:1002`) 규격을
-/// 그대로 따른다** — 같은 "여러 개 고르기"이고 같은 흐름 안에 있기 때문이다.
-/// 칩 344×68 r20, 간격 18, 제목 y=131, 설명 y=211, 콘텐츠 y=279.
+/// Figma `739:3747`(미동의) · `726:5056`(전체 동의) — 같은 화면의 두 상태다 (이슈 #226).
+/// 전체 동의 버튼 344×68 y=223, 항목 344×50 y=308부터 58 간격, CTA y=675.
 ///
 /// **항목을 하나로 뭉치지 않는다.** 개인정보보호법은 필수와 선택을 나누어 받도록
 /// 하며, 뭉쳐 받은 동의는 무효가 될 수 있다.
@@ -31,8 +30,12 @@ class ConsentScreen extends ConsumerStatefulWidget {
 }
 
 class _ConsentScreenState extends ConsumerState<ConsentScreen> {
-  /// 칩 간격 18 — Figma 칩 y좌표 차(86)에서 칩 높이(68)를 뺀 값 (목표 화면과 동일)
-  static const _chipGap = 18.0;
+  /// 부제 하단(193) → 전체 동의 버튼(223). ElumHeader가 제목·부제를 y=131·177에
+  /// 세우므로 여기서 남은 30만 띄운다. `headerToContent`(52)를 쓰면 22가 밀린다.
+  static const _headerToAllAgree = 30.0;
+
+  /// 전체 동의 버튼 하단(291) → 첫 항목(308)
+  static const _allAgreeToItems = 17.0;
 
   final _checked = <String>{};
 
@@ -112,27 +115,31 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       },
       child: ElumScaffold(
         bottomButton: ElumButton(
-          label: _isSubmitting ? '저장하고 있어요' : '동의하고 시작하기',
+          label: _isSubmitting ? '저장하고 있어요' : '다음',
           onPressed: _allRequiredChecked && !_isSubmitting ? _submit : null,
         ),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const ElumHeader(
-                title: '시작하기 전에\n확인해주세요',
-                description: '항목을 누르면 전문을 볼 수 있어요',
+              ElumHeader(
+                title: '약관에 동의해주세요',
+                // 부제가 상태를 말한다. 왜 `다음`이 꺼져 있는지 여기서만 알 수 있다 —
+                // 고정 문구로 두면 비활성 버튼 앞에서 막힌 사람이 이유를 모른다.
+                description: _allRequiredChecked
+                    ? '항목을 눌러 상세 내용을 볼 수 있어요'
+                    : '서비스 사용을 위해 약관 동의가 필요해요',
               ),
-              SizedBox(height: space.headerToContent.h),
+              SizedBox(height: _headerToAllAgree.h),
 
-              _AllAgreeRow(
+              ConsentAllAgreeButton(
                 checked: _allRequiredChecked,
                 onTap: _toggleAllRequired,
               ),
-              SizedBox(height: space.sm.h),
+              SizedBox(height: _allAgreeToItems.h),
 
               for (final item in consentItems) ...[
-                ConsentChip(
+                ConsentRow(
                   item: item,
                   isChecked: _checked.contains(item.key),
                   onToggle: () => setState(() {
@@ -144,78 +151,22 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: _chipGap.h),
+                SizedBox(height: ConsentRow.gap.h),
               ],
 
+              // 디자인에 에러 자리가 없다. 항목 아래 빈 공간(항목 끝 590 → CTA 675)에
+              // 둔다 — CTA를 밀지 않고, 실패했을 때만 나타난다.
               if (_errorMessage != null) ...[
+                SizedBox(height: space.sm.h),
                 Text(
                   _errorMessage!,
                   style: context.typo.body.copyWith(
                     color: context.colors.textSecondary,
                   ),
                 ),
-                SizedBox(height: space.sm.h),
               ],
-
-              Center(
-                child: AppPressable(
-                  onTap: _leave,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: space.xs.h),
-                    child: Text(
-                      '다른 계정으로 로그인',
-                      style: context.typo.caption.copyWith(
-                        color: context.colors.textSecondary,
-                        decoration: TextDecoration.underline,
-                        decorationColor: context.colors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 전체 동의. 칩이 아니라 한 줄로 둔다 — 항목과 같은 무게로 보이면
-/// 다섯 개 중 하나처럼 읽혀 "전부"라는 뜻이 흐려진다.
-class _AllAgreeRow extends StatelessWidget {
-  const _AllAgreeRow({required this.checked, required this.onTap});
-
-  final bool checked;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-
-    return AppPressable(
-      onTap: onTap,
-      child: Padding(
-        // 칩 내부 좌측 여백과 맞춰 체크가 아래 항목들과 세로로 정렬되게 한다
-        padding: EdgeInsets.symmetric(
-          horizontal: ConsentChip.markLeft.w,
-          vertical: space.sm.h,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              checked ? Icons.check_circle : Icons.check_circle_outline,
-              size: space.checkSize.w,
-              color: checked ? colors.consentSelectedBorder : colors.border,
-            ),
-            SizedBox(width: space.sm.w),
-            Expanded(
-              // "모두"라고만 쓰면 선택 항목까지 켜지는 줄 안다. 무엇을 켜는지 적는다.
-              child: Text('필수 항목에 모두 동의해요',
-                  style: context.typo.subtitle),
-            ),
-          ],
         ),
       ),
     );

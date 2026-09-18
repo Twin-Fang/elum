@@ -729,6 +729,9 @@ class _NavigateView extends StatelessWidget {
 
   static const _destinations = <(String, String)>[
     ('시작', Routes.splash),
+    // 약관 (이슈 #226). 로그인 직후에만 지나가는 화면이라 QA가 다시 보려면
+    // 매번 로그아웃해야 했다. 상태가 둘(미동의·전체동의)이라 확인할 일이 잦다.
+    ('약관 동의', Routes.consent),
     ('온보딩 · 이름', Routes.onboardingName),
     ('온보딩 · 목표', Routes.onboardingGoals),
     ('온보딩 · 캐릭터', Routes.onboardingCharacter),

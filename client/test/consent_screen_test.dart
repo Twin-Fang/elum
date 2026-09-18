@@ -5,7 +5,7 @@ import 'package:elum/features/auth/data/consent_repository.dart';
 import 'package:elum/features/auth/domain/consent_documents.dart';
 import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:elum/features/auth/presentation/consent_screen.dart';
-import 'package:elum/features/auth/presentation/widgets/consent_chip.dart';
+import 'package:elum/features/auth/presentation/widgets/consent_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,9 +24,9 @@ void main() {
 
   late _FakeConsent repo;
 
-  // 칩은 "[선택] " 접두사를 붙여 그린다.
+  // `선택` 배지는 이제 라벨과 분리된 별도 Text다 (이슈 #226) — 라벨만 찾는다.
   final optionalLabel =
-      '[선택] ${consentItems.firstWhere((item) => !item.required).label}';
+      consentItems.firstWhere((item) => !item.required).label;
 
   Widget wrap() {
     final router = GoRouter(
@@ -73,20 +73,20 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Finder allAgree() => find.textContaining('모두 동의해요');
+  Finder allAgree() => find.textContaining('전체 동의');
 
-  /// 칩은 **본문을 누르면 약관 문서가 열리고, 왼쪽 체크만 눌러야 선택**된다.
+  /// 항목은 **본문을 누르면 약관 문서가 열리고, 왼쪽 체크만 눌러야 선택**된다.
   /// 라벨을 그대로 누르면 다른 화면으로 넘어가 버린다.
   Finder chipMark(String label) => find
-      .ancestor(of: find.text(label), matching: find.byType(ConsentChip))
+      .ancestor(of: find.text(label), matching: find.byType(ConsentRow))
       .first;
-  Finder cta() => find.text('동의하고 시작하기');
+  Finder cta() => find.text('다음');
 
   Future<void> tapChipMark(WidgetTester tester, String label) async {
     final chip = chipMark(label);
     await tester.ensureVisible(chip);
     await tester.pumpAndSettle();
-    // 체크는 칩 안 첫 번째 AppPressable — 본문(문서 열기)보다 앞에 있다.
+    // 체크는 줄 안 첫 번째 AppPressable — 본문(문서 열기)보다 앞에 있다.
     await tester.tap(
       find.descendant(of: chip, matching: find.byType(AppPressable)).first,
     );
@@ -141,6 +141,36 @@ void main() {
 
     // 일괄 버튼이 남의 선택까지 되돌리면 방금 고른 것이 말없이 사라진다.
     expect(repo.marketing, isTrue);
+  });
+
+  // 부제가 상태를 말한다 (이슈 #226). 고정 문구로 두면 `다음`이 왜 꺼져 있는지
+  // 알 방법이 없다 — 비활성 버튼 앞에서 막힌 사람에게 유일한 단서다.
+  testWidgets('필수가 덜 찼으면 부제가 동의가 필요하다고 말한다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expect(find.text('서비스 사용을 위해 약관 동의가 필요해요'), findsOneWidget);
+    expect(find.text('항목을 눌러 상세 내용을 볼 수 있어요'), findsNothing);
+  });
+
+  testWidgets('필수를 다 채우면 부제가 상세 보기를 안내한다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tapItem(tester, allAgree());
+
+    expect(find.text('항목을 눌러 상세 내용을 볼 수 있어요'), findsOneWidget);
+    expect(find.text('서비스 사용을 위해 약관 동의가 필요해요'), findsNothing);
+  });
+
+  testWidgets('제목과 CTA가 디자인 문구다 (이슈 #226)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expect(find.text('약관에 동의해주세요'), findsOneWidget);
+    expect(find.text('다음'), findsOneWidget);
+    // 디자인에 없다 — 빼기로 했다
+    expect(find.text('다른 계정으로 로그인'), findsNothing);
   });
 
   testWidgets('필수가 덜 찼으면 진행되지 않는다', (tester) async {

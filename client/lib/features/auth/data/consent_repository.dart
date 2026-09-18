@@ -24,6 +24,9 @@ class ConsentRepository {
           'termsAgreed': true,
           'privacyAgreed': true,
           'overseasTransferAgreed': true,
+          // 나이 확인은 화면에서 별도 항목이지만 (이슈 #226) 서버 필드는
+          // 아직 하나다. 무엇에 동의했는지는 consentVersion이 가른다 —
+          // 문구가 바뀌면 버전을 올려 기록이 어긋나지 않게 한다.
           'guardianConfirmed': true,
           'marketingAgreed': marketingAgreed,
           'consentVersion': consentVersion,

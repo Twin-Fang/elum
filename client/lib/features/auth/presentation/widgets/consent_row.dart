@@ -1,0 +1,156 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/theme/app_motion.dart';
+import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/app_pressable.dart';
+import '../../domain/consent_documents.dart';
+
+/// 약관 항목 한 줄 (Figma `726:5066` 외 · 이슈 #226).
+///
+/// 전에는 칩(`ConsentChip`, 344×68 테두리 박스)이었다. 디자인이 **테두리 없는 한 줄**로
+/// 바뀌었다 — 전체 동의 버튼만 상자를 갖고, 항목은 목록처럼 읽힌다.
+///
+/// **탭 영역이 둘이다.** 왼쪽 체크는 동의 토글, 나머지는 전문 열기.
+/// 한 덩어리로 두면 내용을 보려다 동의가 눌리거나 그 반대가 된다.
+class ConsentRow extends StatelessWidget {
+  const ConsentRow({
+    super.key,
+    required this.item,
+    required this.isChecked,
+    required this.onToggle,
+    required this.onOpen,
+  });
+
+  /// Figma 실측 — 항목 높이 50 고정 (y차 58에서 간격 8을 뺀 값)
+  static const height = 50.0;
+
+  /// 항목 사이 간격 (y차 58 - 높이 50)
+  static const gap = 8.0;
+
+  /// 체크 원 지름
+  static const _checkSize = 20.0;
+
+  /// 줄 왼쪽 → 체크 (x=18)
+  static const _checkLeft = 18.0;
+
+  /// 체크 오른쪽 → 배지 (50 - 18 - 20)
+  static const _checkToBadge = 12.0;
+
+  /// 배지 자리 (제목 x=88 - 배지 x=50). Figma는 글자 폭을 28로 재지만 실제 렌더는
+  /// 그보다 넓어 **`필`/`수`로 줄바꿈된다.** 자리를 38로 잡아 한 줄로 둔다.
+  static const _badgeSlot = 38.0;
+
+  final ConsentItem item;
+  final bool isChecked;
+  final VoidCallback onToggle;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final space = context.space;
+
+    return SizedBox(
+      height: height.h,
+      child: Row(
+        children: [
+          // 체크만 따로 누른다. 탭 영역이 체크 크기(20)면 손가락으로 맞추기 어려워
+          // 줄 높이만큼 세로로 넓힌다.
+          AppPressable(
+            onTap: onToggle,
+            child: SizedBox(
+              width: (_checkLeft + _checkSize + _checkToBadge).w,
+              height: double.infinity,
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: (_checkLeft - _checkToBadge).w,
+                  ),
+                  child: _CheckCircle(checked: isChecked),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: AppPressable(
+              onTap: onOpen,
+              child: SizedBox(
+                height: double.infinity,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: _badgeSlot.w,
+                      child: Text(
+                        item.required ? '필수' : '선택',
+                        maxLines: 1,
+                        softWrap: false,
+                        // 필수는 포인트색으로 눈에 걸리게, 선택은 보조색으로 물러난다
+                        style: context.typo.consentBadge.copyWith(
+                          color: item.required
+                              ? colors.checkDone
+                              : colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        item.label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        // Figma가 #000000이다. textPrimary(#242634)가 아니다.
+                        style: context.typo.consentLabel
+                            .copyWith(color: colors.chipLabel, height: 1.3),
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      size: space.checkSize.w,
+                      color: colors.textSecondary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 원형 체크.
+///
+/// 꺼져 있어도 **체크가 보인다** — 원만 비워 두면 눌러야 할 자리인지 알기 어렵다.
+/// 켜지면 포인트색으로 차고 체크가 흰색이 된다 (Figma 739:3747 ↔ 726:5056).
+class _CheckCircle extends StatelessWidget {
+  const _CheckCircle({required this.checked});
+
+  final bool checked;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return AnimatedContainer(
+      duration: AppMotion.fast,
+      curve: AppMotion.standard,
+      width: ConsentRow._checkSize.w,
+      height: ConsentRow._checkSize.w,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: checked ? colors.checkDone : Colors.transparent,
+        border: Border.all(
+          // border(#EFEFEF)는 배경(#F7F2EF)과 거의 같아 원이 사라진다
+          color: checked ? colors.checkDone : colors.consentCheckIdle,
+          width: context.space.borderWidth,
+        ),
+      ),
+      child: Icon(
+        Icons.check,
+        size: 13.w,
+        color: checked ? colors.surface : colors.consentCheckIdle,
+      ),
+    );
+  }
+}

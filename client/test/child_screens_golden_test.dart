@@ -52,19 +52,6 @@ void main() {
     ),
   ];
 
-  /// 폰트를 안 실어주면 글자가 전부 네모로 렌더된다.
-  /// 골든에서는 그 자체가 회귀 신호를 죽이므로 실제 앱과 같은 폰트를 불러온다.
-  setUpAll(() async {
-    for (final family in ['TmoneyRoundWind']) {
-      final loader = FontLoader(family)
-        ..addFont(
-          rootBundle.load('assets/fonts/TmoneyRoundWindExtraBold.ttf'),
-        )
-        ..addFont(rootBundle.load('assets/fonts/TmoneyRoundWindRegular.ttf'));
-      await loader.load();
-    }
-  });
-
   Widget wrap(Widget screen) {
     return ProviderScope(
       overrides: [testStorageOverride(onboardingCompleted: true)],

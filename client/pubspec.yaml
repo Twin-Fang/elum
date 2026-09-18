@@ -67,6 +67,9 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # 테스트 전역 설정(test/flutter_test_config.dart)이 pubspec의 폰트 선언을
+  # 그대로 읽어 싣는다. 목록을 코드에 박으면 폰트를 추가할 때 어긋난다.
+  yaml: ^3.1.2
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
