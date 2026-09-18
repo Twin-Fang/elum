@@ -49,12 +49,12 @@ class RewardSetupScreen extends ConsumerStatefulWidget {
 }
 
 class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
-  /// 고른 프리셋. null이면 아직 아무것도 안 골랐거나 직접 입력 중이다.
-  RewardPreset? _preset;
+  /// 보상 문구. **이 화면의 주인공이다** — 보호자가 자기 말로 적는다 (#241).
+  final _controller = TextEditingController();
 
-  /// 직접 입력 값. 프리셋을 고르면 비운다.
-  final _customController = TextEditingController();
-  bool _isCustom = false;
+  /// 최근 보상을 다시 골랐을 때 그 프리셋 키를 이어받는다.
+  /// 직접 적었으면 `CUSTOM`이다.
+  String _presetKey = RewardPreset.custom.key;
 
   /// 제목(y=131) 아래 여백 — 다른 일과 화면과 같은 리듬.
   static const _headerTop = 114.0;
@@ -67,57 +67,42 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
     super.initState();
     // 고치러 들어왔으면 지금 값을 채워 둔다 — 빈 화면이면 뭘 정했었는지 알 수 없다.
     final state = ref.read(routineFlowProvider);
-    final existing = state.routine?.rewardText ?? state.rewardText;
+    final existing = (state.routine?.rewardText ?? '').trim().isNotEmpty
+        ? state.routine!.rewardText
+        : state.rewardText;
     if (existing.trim().isEmpty) return;
 
-    final preset = RewardPreset.fromKey(
-      state.routine?.rewardPresetKey.isNotEmpty ?? false
-          ? state.routine!.rewardPresetKey
-          : state.rewardPresetKey,
-    );
-    if (preset != null && preset != RewardPreset.custom) {
-      _preset = preset;
-    } else {
-      _isCustom = true;
-      _customController.text = existing;
-    }
+    _controller.text = existing;
+    final key = (state.routine?.rewardPresetKey ?? '').trim().isNotEmpty
+        ? state.routine!.rewardPresetKey
+        : state.rewardPresetKey;
+    if (key.trim().isNotEmpty) _presetKey = key;
   }
 
   @override
   void dispose() {
-    _customController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   /// 지금 정해진 보상 문구. 비어 있으면 `다음`이 눌리지 않는다.
-  String get _rewardText =>
-      _isCustom ? _customController.text.trim() : (_preset?.label ?? '');
-
-  String get _presetKey =>
-      _isCustom ? RewardPreset.custom.key : (_preset?.key ?? '');
-
-  void _pickPreset(RewardPreset preset) {
-    setState(() {
-      _preset = preset;
-      _isCustom = false;
-      _customController.clear();
-    });
-  }
+  String get _rewardText => _controller.text.trim();
 
   /// 최근에 쓴 것을 그대로 다시 쓴다 — 두 번째 일과부터 탭 한 번이다.
+  ///
+  /// **프리셋 키를 함께 가져온다.** 키가 빠지면 이룸이 화면의 그림이 ⭐로 바뀐다.
   void _pickRecent(RecentReward recent) {
     setState(() {
-      _isCustom = true;
-      _preset = null;
-      _customController.text = recent.rewardText;
+      _controller.text = recent.rewardText;
+      _presetKey = recent.rewardPresetKey.trim().isEmpty
+          ? RewardPreset.custom.key
+          : recent.rewardPresetKey;
     });
   }
 
-  void _openCustom() {
-    setState(() {
-      _isCustom = true;
-      _preset = null;
-    });
+  /// 손으로 고치면 더 이상 그 프리셋이 아니다.
+  void _onTyped(String _) {
+    setState(() => _presetKey = RewardPreset.custom.key);
   }
 
   Future<void> _next() async {
@@ -204,8 +189,19 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
             SizedBox(height: _titleToSubtitle.h),
             Text(
               // 조사를 손으로 붙이면 `민준가`가 된다 — 받침을 봐야 한다 (#196).
-              '$who${who.subjectParticle} 좋아하는 걸 골라주세요',
+              // `고르다`가 아니라 `적다` — 프리셋을 걷어냈다 (#241).
+              '$who${who.subjectParticle} 좋아하는 걸 적어주세요',
               style: context.typo.body.copyWith(color: colors.textSecondary),
+            ),
+
+            // 🔴 입력칸이 주인공이다 (#241). 프리셋에서 고르는 것이 아니라
+            // `젤리 먹기`처럼 그 집에서만 통하는 말을 적는 자리다.
+            SizedBox(height: _sectionGap.h),
+            RewardInputField(
+              controller: _controller,
+              onChanged: (v) {
+                _onTyped(v);
+              },
             ),
 
             // 최근에 쓴 보상 — 없으면 섹션째 사라진다 (빈 영역은 로딩 실패처럼 보인다)
@@ -215,16 +211,16 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
                 if (valid.isEmpty) return const SizedBox.shrink();
                 return _section(
                   context,
-                  '최근에 정한 보상',
+                  '최근 보상',
                   Wrap(
                     spacing: RewardChip.gap.w,
                     runSpacing: RewardChip.gap.h,
                     children: [
                       for (final r in valid)
-                        _RecentChip(
-                          recent: r,
-                          isSelected:
-                              _isCustom && _customController.text == r.rewardText,
+                        RewardChip(
+                          emoji: r.emoji,
+                          label: r.rewardText,
+                          isSelected: _controller.text == r.rewardText,
                           onTap: () => _pickRecent(r),
                         ),
                     ],
@@ -233,37 +229,6 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
               },
               orElse: () => const SizedBox.shrink(),
             ),
-
-            _section(
-              context,
-              '무엇을 줄까요',
-              _presetGrid(),
-            ),
-
-            if (_isCustom) ...[
-              SizedBox(height: _labelToContent.h),
-              TextField(
-                controller: _customController,
-                autofocus: true,
-                maxLength: 30,
-                onChanged: (_) => setState(() {}),
-                style: context.typo.input.copyWith(color: colors.textPrimary),
-                decoration: InputDecoration(
-                  hintText: '예) 젤리 먹기',
-                  counterText: '',
-                  filled: true,
-                  fillColor: colors.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(space.cardRadius.r),
-                    borderSide: BorderSide(color: colors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(space.cardRadius.r),
-                    borderSide: BorderSide(color: colors.border),
-                  ),
-                ),
-              ),
-            ],
 
             SizedBox(height: _sectionGap.h),
             // 자문 문구 그대로다. 보호자가 "큰 것"을 떠올리기 쉬워 먼저 말해 준다.
@@ -291,73 +256,6 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
         SizedBox(height: _labelToContent.h),
         content,
       ],
-    );
-  }
-
-  /// 프리셋 2열 + 직접 입력. 2열인 이유는 넷이 한 화면에 들어와야 하기 때문이다.
-  Widget _presetGrid() {
-    final presets = RewardPreset.selectable;
-    return Column(
-      children: [
-        for (var i = 0; i < presets.length; i += 2) ...[
-          if (i > 0) SizedBox(height: RewardChip.gap.h),
-          Row(
-            children: [
-              Expanded(
-                child: RewardChip(
-                  emoji: presets[i].emoji,
-                  label: presets[i].label,
-                  isSelected: _preset == presets[i],
-                  onTap: () => _pickPreset(presets[i]),
-                ),
-              ),
-              SizedBox(width: RewardChip.gap.w),
-              Expanded(
-                child: i + 1 < presets.length
-                    ? RewardChip(
-                        emoji: presets[i + 1].emoji,
-                        label: presets[i + 1].label,
-                        isSelected: _preset == presets[i + 1],
-                        onTap: () => _pickPreset(presets[i + 1]),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ],
-          ),
-        ],
-        SizedBox(height: RewardChip.gap.h),
-        RewardChip(
-          emoji: RewardPreset.custom.emoji,
-          label: RewardPreset.custom.label,
-          isSelected: _isCustom,
-          onTap: _openCustom,
-        ),
-      ],
-    );
-  }
-}
-
-/// 최근 보상 칩. 프리셋과 달리 **보호자가 전에 적은 문구 그대로** 보여준다.
-class _RecentChip extends StatelessWidget {
-  const _RecentChip({
-    required this.recent,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final RecentReward recent;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return IntrinsicWidth(
-      child: RewardChip(
-        emoji: recent.emoji,
-        label: recent.rewardText,
-        isSelected: isSelected,
-        onTap: onTap,
-      ),
     );
   }
 }

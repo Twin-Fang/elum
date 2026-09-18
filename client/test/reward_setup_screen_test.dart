@@ -5,6 +5,7 @@ import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/reward_setup_screen.dart';
+import 'package:elum/features/guardian/presentation/widgets/reward_chip.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +83,7 @@ void main() {
       await tester.pumpWidget(wrap());
       await settle(tester);
 
-      expect(find.text('하늘이가 좋아하는 걸 골라주세요'), findsOneWidget);
+      expect(find.text('하늘이가 좋아하는 걸 적어주세요'), findsOneWidget);
     });
 
     testWidgets('받침 있는 이름에 조사를 맞춘다 (이슈 #196)', (tester) async {
@@ -113,30 +114,26 @@ void main() {
       await settle(tester);
 
       // 손으로 `가`를 붙이면 `민준가`가 된다
-      expect(find.text('민준이 좋아하는 걸 골라주세요'), findsOneWidget);
+      expect(find.text('민준이 좋아하는 걸 적어주세요'), findsOneWidget);
     });
 
-    testWidgets('프리셋을 고르면 다음이 열린다', (tester) async {
+    testWidgets('입력칸이 처음부터 열려 있다 (이슈 #241)', (tester) async {
       await tester.pumpWidget(wrap());
       await settle(tester);
 
-      await tester.tap(find.text('좋아하는 간식'));
-      await settle(tester);
-
-      expect(ctaEnabled(tester), isTrue);
+      // 프리셋을 걷어냈다 — 보상은 고르는 게 아니라 적는 것이다.
+      expect(find.byType(RewardInputField), findsOneWidget);
+      expect(find.text('좋아하는 간식'), findsNothing);
+      expect(find.text('직접 입력'), findsNothing);
     });
 
-    testWidgets('직접 입력은 글자를 넣어야 열린다', (tester) async {
+    testWidgets('적으면 다음이 열린다', (tester) async {
       await tester.pumpWidget(wrap());
       await settle(tester);
-
-      await tester.tap(find.text('직접 입력'));
-      await settle(tester);
-      // 칸만 열고 비워두면 보상 없이 "정했다"가 된다
-      expect(ctaEnabled(tester), isFalse);
 
       await tester.enterText(find.byType(TextField), '젤리 먹기');
       await settle(tester);
+
       expect(ctaEnabled(tester), isTrue);
     });
   });
@@ -190,7 +187,7 @@ void main() {
       );
       await settle(tester);
 
-      await tester.tap(find.text('산책'));
+      await tester.enterText(find.byType(TextField), '산책');
       await settle(tester);
       await tester.tap(find.text('건너뛰기'));
       await settle(tester);
@@ -207,7 +204,7 @@ void main() {
       await settle(tester);
 
       // 빈 영역을 남기면 로딩에 실패한 것처럼 보인다
-      expect(find.text('최근에 정한 보상'), findsNothing);
+      expect(find.text('최근 보상'), findsNothing);
     });
 
     testWidgets('있으면 최대 3개까지 보여주고 탭 한 번으로 고른다', (tester) async {
@@ -221,13 +218,18 @@ void main() {
       await tester.pumpWidget(wrap());
       await settle(tester);
 
-      expect(find.text('최근에 정한 보상'), findsOneWidget);
+      expect(find.text('최근 보상'), findsOneWidget);
       expect(find.text('젤리 먹기'), findsOneWidget);
       expect(find.text('넷째는 안 보인다'), findsNothing);
 
       await tester.tap(find.text('젤리 먹기'));
       await settle(tester);
       expect(ctaEnabled(tester), isTrue);
+      // 고른 문구가 입력칸에 들어간다 — 거기서 바로 고칠 수 있어야 한다
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller?.text,
+        '젤리 먹기',
+      );
     });
 
     testWidgets('빈 문구가 섞여 와도 칩으로 만들지 않는다', (tester) async {
@@ -238,7 +240,7 @@ void main() {
       await tester.pumpWidget(wrap());
       await settle(tester);
 
-      expect(find.text('최근에 정한 보상'), findsNothing);
+      expect(find.text('최근 보상'), findsNothing);
     });
 
     testWidgets('조회가 실패해도 화면이 뜬다', (tester) async {
@@ -249,7 +251,7 @@ void main() {
 
       // 보상은 없어도 되는 기능이다 — 조회 실패가 화면을 막지 않는다
       expect(find.textContaining('무엇을 할 수 있나요'), findsOneWidget);
-      expect(find.text('최근에 정한 보상'), findsNothing);
+      expect(find.text('최근 보상'), findsNothing);
     });
   });
 

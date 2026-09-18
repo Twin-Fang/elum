@@ -114,6 +114,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginKakaoLabel,
     required this.loginNaverBg,
     required this.loginNaverLabel,
+    required this.glassFill,
+    required this.glassBorder,
     required this.rewardBannerBg,
     required this.linkTimer,
     required this.linkRetryChipBg,
@@ -323,6 +325,15 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color loginKakaoLabel;
   final Color loginNaverBg;
   final Color loginNaverLabel;
+  /// 반투명 유리 면 — 배경 그라데이션 위에 얹는 입력칸·카드 (이슈 #239).
+  ///
+  /// 불투명한 흰 상자를 올리면 뒤 배경이 잘려 화면이 두 조각으로 보인다.
+  /// 반투명으로 두면 색이 비쳐 한 장면으로 이어진다.
+  final Color glassFill;
+
+  /// 유리 면의 테두리. 면보다 밝아야 가장자리가 잡힌다.
+  final Color glassBorder;
+
   /// 이룸이 화면 보상 배너 배경 (이슈 #239).
   ///
   /// 카드보다 물러나야 한다 — 보상이 주인공이 되면 지금 할 일을 가린다.
@@ -454,6 +465,8 @@ class AppColors extends ThemeExtension<AppColors> {
     loginKakaoLabel: Color(0xFF191600),
     loginNaverBg: Color(0xFF03C75A),
     loginNaverLabel: Color(0xFFFFFFFF),
+    glassFill: Color(0x8CFFFFFF),
+    glassBorder: Color(0xB3FFFFFF),
     rewardBannerBg: Color(0xFFFFF3D6),
     linkTimer: Color(0xFFDA5050),
     linkRetryChipBg: Color(0xFFEEE9E6),
@@ -560,6 +573,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? loginKakaoLabel,
     Color? loginNaverBg,
     Color? loginNaverLabel,
+    Color? glassFill,
+    Color? glassBorder,
     Color? rewardBannerBg,
     Color? linkTimer,
     Color? linkRetryChipBg,
@@ -656,6 +671,8 @@ class AppColors extends ThemeExtension<AppColors> {
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
       loginNaverLabel: loginNaverLabel ?? this.loginNaverLabel,
+      glassFill: glassFill ?? this.glassFill,
+      glassBorder: glassBorder ?? this.glassBorder,
       rewardBannerBg: rewardBannerBg ?? this.rewardBannerBg,
       linkTimer: linkTimer ?? this.linkTimer,
       linkRetryChipBg: linkRetryChipBg ?? this.linkRetryChipBg,
@@ -773,6 +790,8 @@ class AppColors extends ThemeExtension<AppColors> {
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,
       loginNaverLabel: Color.lerp(loginNaverLabel, other.loginNaverLabel, t)!,
+      glassFill: Color.lerp(glassFill, other.glassFill, t)!,
+      glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
       rewardBannerBg: Color.lerp(rewardBannerBg, other.rewardBannerBg, t)!,
       linkTimer: Color.lerp(linkTimer, other.linkTimer, t)!,
       linkRetryChipBg:
