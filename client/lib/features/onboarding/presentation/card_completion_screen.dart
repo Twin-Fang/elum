@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
-import '../../../core/widgets/secured_by_dlp_badge.dart';
 import '../../../core/theme/theme_context_ext.dart';
 
 /// Figma `보호자_새로운 일과 만들기_완료` (425:4199)
@@ -98,16 +97,6 @@ class _CardCompletionScreenState extends ConsumerState<CardCompletionScreen> {
                     ),
                   ],
                 ),
-              ),
-            ),
-
-            // DLP 배지 (하단)
-            Positioned(
-              bottom: 32.h,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: const SecuredByDlpBadge(),
               ),
             ),
           ],

@@ -6,7 +6,6 @@ import '../assets/app_assets.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_fade_slide_in.dart';
-import 'secured_by_dlp_badge.dart';
 
 /// 시작 화면의 그림 한 벌 (Figma `시작` 238:1808).
 ///
@@ -264,14 +263,6 @@ class _SplashSceneState extends State<SplashScene>
               height: 177.h,
               fit: BoxFit.fill,
             ),
-          ),
-
-          // 신뢰 배지 (Figma x=107, y=756, 393폭 기준 가로 중앙)
-          Positioned(
-            left: 0,
-            top: 756.h,
-            width: 393.w,
-            child: const Center(child: SecuredByDlpBadge()),
           ),
 
           // 화면별로 얹는 것 — 로그인 버튼 등. 항상 맨 위에 그린다.

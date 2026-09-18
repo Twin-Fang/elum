@@ -105,13 +105,12 @@ void main() {
     expect(svgWithAsset(AppAssets.splashFade), findsOneWidget);
   });
 
-  testWidgets('버튼이 신뢰 배지를 가리지 않는다', (tester) async {
+  testWidgets('버튼이 화면 밖으로 밀려나지 않는다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    // 그림 위에 겹쳐 얹는 구조라 버튼이 아래로 밀리면 배지를 덮는다.
+    // 그림 위에 겹쳐 얹는 구조라 버튼 묶음이 아래로 새면 마지막 버튼이 잘린다.
     final lastButton = tester.getRect(find.text('Google로 시작하기'));
-    final badge = tester.getRect(find.textContaining('DLP'));
-    expect(lastButton.bottom, lessThan(badge.top));
+    expect(lastButton.bottom, lessThan(tester.view.physicalSize.height));
   });
 }

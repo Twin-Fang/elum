@@ -132,9 +132,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Padding(
         // 아래 여백 132 = 852(디자인 높이) − 720(버튼 하단).
         //
-        // 아래로는 y=756의 신뢰 배지, 위로는 y=573의 언덕 위 실루엣이 경계다.
-        // 112(배지 바로 위)로 두면 실루엣 머리가 카카오·네이버 버튼 **틈**으로
-        // 삐져나와 눈처럼 보인다. 20 올려 실루엣이 버튼 뒤로 완전히 들어가게 했다.
+        // 병아리 얼굴(눈 y=573, 부리 y=599)이 버튼 **틈**으로 삐져나오지 않는
+        // 자리다. 더 내리면 눈만 두 개 떠 있는 것처럼 보인다. 버튼 넷이 얼굴
+        // 위를 덮는 구도 자체는 디자이너가 다시 잡기로 했다 (이슈 #207).
         padding: EdgeInsets.fromLTRB(space.screenH.w, 0, space.screenH.w, 132.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,

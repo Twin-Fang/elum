@@ -15,11 +15,11 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/test_storage.dart';
 
-/// 카드확인 화면에서만 `secured by ELUM AI DLP` 배지를 숨긴다 (이슈 #79 후속).
+/// `secured by ELUM AI DLP` 배지는 **어느 화면에도 나오지 않는다**.
 ///
-/// Figma `보호자_새로운 일과 만들기_카드확인`(262:5124) 덤프엔 배지가 없다.
-/// 반면 로딩 화면(262:4703)엔 배지가 그대로 있다 — 화면마다 시안이 다르다.
-/// [RoutineFlowScaffold.showBadge] 플래그로 카드확인만 끄고 나머지는 유지한다.
+/// 원래는 카드확인(262:5124)만 시안에 배지가 없어 그 화면만 껐었다(이슈 #79 후속).
+/// 지금은 DLP를 비활성화해 둔 상태라, 보호받고 있다고 적어 두면 사실이 아니게 된다.
+/// 화면 전체에서 걷어냈고 이 테스트가 되살아나는 것을 막는다.
 void main() {
   const badgeText = 'secured by ELUM AI DLP';
 
@@ -106,11 +106,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 450));
   }
 
-  testWidgets('카드확인 화면엔 DLP 배지가 없다 (262:5124)', (tester) async {
+  testWidgets('카드확인 화면엔 DLP 배지가 없다', (tester) async {
     await tester.pumpWidget(wrapReview(tester, cards));
     await settle(tester);
 
-    // 시안에 배지가 없다 — 카드가 실제로 떠 있는지 함께 확인해 오탐을 막는다
+    // 카드가 실제로 떠 있는지 함께 확인해 오탐(화면이 안 그려져서 통과)을 막는다
     expect(find.text('카드 2개가 생성되었어요'), findsOneWidget);
     expect(find.text(badgeText), findsNothing);
   });
@@ -122,13 +122,14 @@ void main() {
     expect(find.text(badgeText), findsNothing);
   });
 
-  testWidgets('로딩 화면엔 배지가 그대로 남아 있다 (262:4703)', (tester) async {
-    // 배지를 카드확인에서만 껐는지 확인하는 대조군 — 공통 위젯을 통째로
-    // 지운 게 아니어야 한다.
+  testWidgets('로딩 화면에도 배지가 없다', (tester) async {
+    // 예전엔 이 화면만 배지를 남겼다. DLP를 끈 지금은 여기도 없어야 한다.
     await tester.pumpWidget(wrapLoading());
     await settle(tester);
 
-    expect(find.text(badgeText), findsOneWidget);
+    // 화면이 실제로 떠 있는지 먼저 본다 — 안 떠도 findsNothing은 통과한다
+    expect(find.byType(RoutineLoadingScreen), findsOneWidget);
+    expect(find.text(badgeText), findsNothing);
 
     // 로딩이 끝나 화면이 넘어가며 pending 타이머가 남지 않게 마저 흘려보낸다
     final total = RoutineLoadingKind.generate.stages

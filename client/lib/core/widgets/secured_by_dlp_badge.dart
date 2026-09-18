@@ -10,6 +10,10 @@ import '../theme/theme_context_ext.dart';
 /// Figma Group 57/58(`418:4049` 등)에 화면 7개 전부 동일한 자리에 반복해서
 /// 그려져 있다 — 일과 만들기 흐름 전체와 시작 화면 하단. 화면마다 좌표를
 /// 베끼면 한 곳만 여백이 어긋나도 눈에 띈다.
+///
+/// ⚠️ **지금은 어느 화면에서도 쓰지 않는다.** DLP를 비활성화해 둔 상태라
+/// 보호받고 있다고 말하면 사실이 아니게 된다. 다시 켜면 이 위젯을 그대로
+/// 되살린다 — 그래서 지우지 않고 남겨 둔다.
 class SecuredByDlpBadge extends StatelessWidget {
   const SecuredByDlpBadge({super.key});
 
