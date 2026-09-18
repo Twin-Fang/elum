@@ -225,7 +225,7 @@ public class RoutineAiPipeline {
         ))
         .toList();
 
-      return new RoutineGenerationResult(draft.title(), steps);
+      return new RoutineGenerationResult(draft.title(), steps, batchId);
     } catch (CompletionException e) {
       log.warn("단계별 이미지 생성 실패", e);
       throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
@@ -286,7 +286,12 @@ public class RoutineAiPipeline {
 
   }
 
-  public record RoutineGenerationResult(String title, List<GeneratedStep> steps) {
+  /**
+   * @param batchId 이번 생성에서 만든 이미지가 들어간 폴더. 저장이 실패하면 서비스가
+   *                이 폴더를 지워 고아 파일을 남기지 않는다 (이슈 #215).
+   *                재사용 이미지(revise)는 다른 batchId에 있으므로 함께 지워지지 않는다.
+   */
+  public record RoutineGenerationResult(String title, List<GeneratedStep> steps, String batchId) {
 
   }
 

@@ -32,6 +32,7 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -256,7 +258,8 @@ class RoutineServiceTest {
       .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "내일 병원 가기"));
     RoutineAiPipeline.RoutineGenerationResult generationResult = new RoutineAiPipeline.RoutineGenerationResult(
       "병원 다녀오기",
-      List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발 신기", "data/routine-images/batch-1/1.png"))
+      List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발 신기", "data/routine-images/batch-1/1.png")),
+      "batch-1"
     );
     when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU)))
       .thenReturn(generationResult);
@@ -267,6 +270,70 @@ class RoutineServiceTest {
     verify(routineAiPipeline).generateForCreate(
       eq("내일 병원 가기"), eq("하늘이"), eq(Set.of()), eq(List.of()), eq(CharacterType.LULU)
     );
+  }
+
+  /**
+   * 이슈 #215 — scheduledAt을 빼고 보내도 서버가 채운다.
+   *
+   * <p>DB는 NOT NULL인데 Swagger에는 필수 표시가 없었다. 빠뜨린 호출 하나가
+   * AI를 다 태운 뒤 DB 제약에서 터졌다.
+   */
+  @Test
+  @DisplayName("scheduledAt이 없으면 서버가 지금 시각으로 채운다 (이슈 #215)")
+  void create_nullScheduledAt_serverFillsNow() {
+    Profile profile = profileWithNickname("하늘이");
+    stubCreatePipeline(profile);
+    ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
+    when(routineRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+
+    LocalDateTime before = LocalDateTime.now();
+    routineService.create("member-1", new RoutineCreateRequest("내일 병원 가기", null, null, null, null));
+
+    assertThat(saved.getValue().getScheduledAt())
+      .as("null로 저장하면 DB 제약에서 터진다")
+      .isNotNull()
+      .isAfterOrEqualTo(before);
+  }
+
+  /**
+   * 이슈 #215 — 저장이 실패하면 방금 만든 이미지를 지운다.
+   *
+   * <p>이미지는 엔티티 저장 <b>전에</b> 디스크에 쓰인다. 저장이 실패하면 아무도
+   * 참조하지 않는 파일이 남아 디스크가 계속 불어난다.
+   */
+  @Test
+  @DisplayName("저장이 실패하면 생성한 이미지를 정리한다 (이슈 #215)")
+  void create_saveFails_cleansUpGeneratedImages() {
+    Profile profile = profileWithNickname("하늘이");
+    stubCreatePipeline(profile);
+    when(routineRepository.save(any())).thenThrow(new RuntimeException("DB 제약 위반"));
+
+    assertThatThrownBy(() ->
+      routineService.create("member-1", new RoutineCreateRequest("내일 병원 가기", null, null, null, null)))
+      .isInstanceOf(RuntimeException.class);
+
+    verify(routineImageStorage).deleteBatch("batch-1");
+  }
+
+  private Profile profileWithNickname(String nickname) {
+    Profile profile = new Profile();
+    profile.setNickname(nickname);
+    profile.setCharacter(CharacterType.LULU);
+    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1"))
+      .thenReturn(Optional.of(profile));
+    return profile;
+  }
+
+  private void stubCreatePipeline(Profile profile) {
+    when(sensitiveInfoGuardService.check("내일 병원 가기"))
+      .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "내일 병원 가기"));
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU)))
+      .thenReturn(new RoutineAiPipeline.RoutineGenerationResult(
+        "병원 다녀오기",
+        List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발 신기",
+          "data/routine-images/batch-1/1.png")),
+        "batch-1"
+      ));
   }
 
   @Test

@@ -133,14 +133,26 @@ public class RoutineService {
     routine.setRawInputText(request.rawInputText());
     routine.setSanitizedInputText(checkResult.sanitizedText());
     routine.setTitle(generation.title());
-    routine.setScheduledAt(request.scheduledAt());
+    // scheduledAt은 비워서 보낼 수 있다. DB는 NOT NULL이므로 **서버가 채운다** —
+    // 클라이언트도 지금 시각을 그대로 넣고 있었다(오늘 목록에 떠야 하므로). 값을 요구하면
+    // 빠뜨린 호출 하나가 AI를 다 태운 뒤 DB에서 터진다 (이슈 #215).
+    routine.setScheduledAt(
+      request.scheduledAt() != null ? request.scheduledAt() : LocalDateTime.now()
+    );
     routine.setStatus(RoutineStatus.PENDING_REVIEW);
-    // 보상은 선택 항목이다. 보호자가 건너뛰면 null로 남고 아동 화면에서 보상 UI를 띄우지 않는다.
+    // 보상은 선택 항목이다. 보호자가 건너뛰면 null로 남고 이룸이 화면에서 보상 UI를 띄우지 않는다.
     routine.setRewardText(trimReward(request.rewardText()));
     routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
     routine.setSteps(toStepEntities(routine, generation.steps()));
 
-    return RoutineResponse.from(routineRepository.save(routine));
+    // 이미지는 여기 오기 전에 이미 디스크에 쓰였다. 저장이 실패하면 아무도 참조하지 않는
+    // 파일이 남으므로 방금 만든 것만 되돌린다 (이슈 #215).
+    try {
+      return RoutineResponse.from(routineRepository.save(routine));
+    } catch (RuntimeException e) {
+      routineImageStorage.deleteBatch(generation.batchId());
+      throw e;
+    }
   }
 
   @Transactional
