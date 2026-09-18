@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-18T14:57:08Z",
-    "currentVersion": "1.14.4",
+    "lastUpdated": "2026-09-18T16:49:22Z",
+    "currentVersion": "1.14.5",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 109
+    "totalReleases": 110
   },
   "releases": [
+    {
+      "version": "1.14.5",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-18",
+      "pr_number": 256,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 회원 탈퇴가 되지 않던 문제를 해결했습니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "회원 탈퇴가 되지 않던 문제를 해결했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.14.4",
       "project_type": "flutter",
