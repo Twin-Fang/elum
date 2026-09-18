@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-18T00:24:23Z",
-    "currentVersion": "1.2.2",
+    "lastUpdated": "2026-09-18T01:44:43Z",
+    "currentVersion": "1.3.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 87
+    "totalReleases": 88
   },
   "releases": [
+    {
+      "version": "1.3.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-18",
+      "pr_number": 213,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 처음 시작할 때 보호자인지 이룸이인지 고를 수 있어요\n  * 이룸이 휴대폰도 앱에서 바로 연결할 수 있어요\n\n* **개선**\n  * 카드 문구와 그림이 나이에 맞게 만들어져요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "처음 시작할 때 보호자인지 이룸이인지 고를 수 있어요",
+            "이룸이 휴대폰도 앱에서 바로 연결할 수 있어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드 문구와 그림이 나이에 맞게 만들어져요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.2.2",
       "project_type": "flutter",
