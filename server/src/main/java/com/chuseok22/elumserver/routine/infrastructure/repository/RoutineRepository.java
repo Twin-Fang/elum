@@ -31,6 +31,9 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
   /** 계정 아래 모든 프로필의 일과. 회원 탈퇴 시 정리용. */
   List<Routine> findAllByProfileMemberId(String memberId);
 
+  /// 계정이 지금 가지고 있는 일과 수. 보유 개수 한도에 쓴다.
+  long countByProfileMemberId(String memberId);
+
   long countByStatus(RoutineStatus status);
 
   List<Routine> findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(

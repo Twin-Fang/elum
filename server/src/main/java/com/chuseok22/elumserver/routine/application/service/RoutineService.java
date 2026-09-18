@@ -79,6 +79,7 @@ public class RoutineService {
   private final RoutineAiPipeline routineAiPipeline;
   private final RoutineImageStorage routineImageStorage;
   private final RoutineRequestCooldownGuard routineRequestCooldownGuard;
+  private final RoutineQuotaGuard routineQuotaGuard;
   private final RoutineStepImageFiller routineStepImageFiller;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
@@ -124,6 +125,8 @@ public class RoutineService {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public RoutineResponse create(String memberId, RoutineCreateRequest request) {
     routineRequestCooldownGuard.guard(memberId);
+    // 쿨다운이 몰아치기를 막고, 여기서 이번 주에 얼마나 썼는지를 본다.
+    routineQuotaGuard.guard(memberId);
 
     Profile profile = requireProfile(memberId);
 

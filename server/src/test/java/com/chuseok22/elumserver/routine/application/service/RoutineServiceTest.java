@@ -65,6 +65,9 @@ class RoutineServiceTest {
   @Mock
   private RoutineRequestCooldownGuard routineRequestCooldownGuard;
 
+  @Mock
+  private RoutineQuotaGuard routineQuotaGuard;
+
   @InjectMocks
   private RoutineService routineService;
 
