@@ -248,6 +248,7 @@ jobs:
       # 워크플로 6개에 sed를 흩뿌리면 개발 키가 새로 생길 때 한 군데를 빠뜨리고,
       # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
       - name: 빌드 프로파일 적용 (test)
+        id: build_profile
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" test ${{ env.ENV_FILE_PATH }}
 
       - name: Create Secrets.xcconfig file
@@ -582,6 +583,7 @@ jobs:
       # 워크플로 6개에 sed를 흩뿌리면 개발 키가 새로 생길 때 한 군데를 빠뜨리고,
       # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
       - name: 빌드 프로파일 적용 (test)
+        id: build_profile
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" test ${{ env.ENV_FILE_PATH }}
 
       - name: Set up Flutter
@@ -649,7 +651,10 @@ jobs:
           # xcode-select만으로는 서브프로세스에 전파되지 않아 명시적으로 지정
           DEVELOPER_DIR: /Applications/Xcode_${{ env.XCODE_VERSION }}.app/Contents/Developer
         run: |
+          # 빌드 플래그는 프로파일이 정한다 (이슈 #220).
+          # 여기에 직접 적지 않아야 .env와 dart-define이 따로 놀지 않는다.
           flutter build ios --release --no-codesign \
+            ${{ steps.build_profile.outputs.build_flags }} \
             --build-name="${{ needs.prepare-test-build.outputs.version }}" \
             --build-number="${{ needs.prepare-test-build.outputs.build_number }}"
 

@@ -122,6 +122,7 @@ jobs:
       # 워크플로 6개에 sed를 흩뿌리면 개발 키가 새로 생길 때 한 군데를 빠뜨리고,
       # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
       - name: 빌드 프로파일 적용 (release)
+        id: build_profile
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" release .env
 
       - name: Set up Flutter
@@ -281,6 +282,7 @@ jobs:
       # 워크플로 6개에 sed를 흩뿌리면 개발 키가 새로 생길 때 한 군데를 빠뜨리고,
       # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
       - name: 빌드 프로파일 적용 (release)
+        id: build_profile
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" release .env
       # Release Keystore 설정
       - name: Setup Release Keystore
@@ -419,10 +421,13 @@ jobs:
           echo "📋 명령어: flutter build apk --release --build-name=$VERSION_NAME --build-number=$VERSION_CODE --verbose"
           echo "⏱️ 빌드 시작 시간: $(date '+%Y-%m-%d %H:%M:%S')"
 
+          # 빌드 플래그는 프로파일이 정한다 (이슈 #220). release 프로파일은 비어 있다 —
+          # 여기에 직접 적지 않아야 .env와 dart-define이 따로 놀지 않는다.
           flutter build apk \
             --release \
             --build-name="$VERSION_NAME" \
             --build-number="$VERSION_CODE" \
+            ${{ steps.build_profile.outputs.build_flags }} \
             --verbose
 
           BUILD_EXIT_CODE=$?

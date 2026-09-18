@@ -89,18 +89,30 @@ abstract final class AppConfig {
   /// 개발용 빌드인지. **컴파일 타임에 결정되며 `.env`로는 바꿀 수 없다.**
   ///
   /// ```bash
-  /// flutter build apk --release                              # 제출·배포용 (기본)
-  /// flutter build apk --release --dart-define=ELUM_BUILD=dev  # 내부 테스트용
+  /// flutter build apk --release                                       # 제출·배포용 (기본)
+  /// flutter build apk --release --dart-define=APP_FLAVOR=dev  # 내부 테스트용
   /// ```
   ///
   /// **왜 `.env`가 아니라 dart-define인가** — 개발 플래그를 `.env`로 제어하면
   /// GitHub Secret에 잘못된 값이 들어가는 순간 mock 데이터로 도는 APK가 배포된다.
   /// 심사위원이 설치했을 때 가짜 데이터가 나오는 사고를 코드로 막는다. (이슈 #130)
-  static const String _buildFlavor =
-      String.fromEnvironment('ELUM_BUILD', defaultValue: 'prod');
+  ///
+  /// **왜 `APP_FLAVOR`인가** — 앱 이름이 안 들어가는 중립적인 이름이라 CI 템플릿이
+  /// 앱을 몰라도 된다. 전에는 `ELUM_BUILD`를 썼는데 레포마다 이름이 달랐다 (이슈 #220).
+  ///
+  /// Flutter 표준인 `FLUTTER_APP_FLAVOR`(SDK의 `appFlavor`)를 쓰려 했으나
+  /// **CLI가 예약어로 막는다** — `--flavor`로만 설정되고, 그건 Gradle productFlavors와
+  /// Xcode scheme을 갖춰야 한다.
+  ///
+  /// ```
+  /// FLUTTER_APP_FLAVOR is used by the framework and cannot be set using --dart-define
+  /// ```
+  ///
+  /// 나중에 `--flavor`를 갖추게 되면 이 getter만 `appFlavor == 'dev'`로 바꾸면 된다.
+  static const String _flavor = String.fromEnvironment('APP_FLAVOR');
 
   /// 개발용 빌드에서만 true. 제출용 APK에서는 어떤 설정을 넣어도 false다.
-  static bool get isDevBuild => _buildFlavor == 'dev';
+  static bool get isDevBuild => _flavor == 'dev';
 
   // --- 개발 ---
 
@@ -108,7 +120,7 @@ abstract final class AppConfig {
   ///
   /// **개발자 도구를 켰으면 함께 켜진다** (이슈 #219). 디버깅 도구를 열어 두고도
   /// 백엔드가 무슨 값을 보냈는지 못 보면 도구를 쓸 이유가 없다. QA가 받는
-  /// `ELUM_BUILD=dev` APK는 릴리스 빌드라, `kDebugMode`만 보면 늘 꺼져 있었다.
+  /// 개발용 APK는 릴리스 빌드라, `kDebugMode`만 보면 늘 꺼져 있었다.
   static bool get enableNetworkLog =>
       (kDebugMode || showDevTools) && _bool('ELUM_ENABLE_NETWORK_LOG', true);
 
@@ -126,7 +138,11 @@ abstract final class AppConfig {
   ///
   /// 심사자·테스터가 **릴리스 빌드로** 확인해야 하는 값이라 `kDebugMode`를 걸지 않는다.
   /// 대신 **개발용 빌드**에서만 켜지게 한다 — 확인이 필요한 사람에게는
-  /// `ELUM_BUILD=dev`로 만든 APK를 따로 전달한다.
+  /// 플레이버를 `dev`로 넘겨 만든 APK를 따로 전달한다.
+  ///
+  /// 🔴 **게이트가 둘이다.** `.env`의 이 값만 켜도 보이지 않는다 —
+  /// 플레이버(`--dart-define=APP_FLAVOR=dev`)를 함께 넘겨야 한다.
+  /// `client/tool/apply_build_profile.sh`가 두 층을 한 번에 맞춰 준다 (이슈 #220).
   static bool get showDevTools =>
       (kDebugMode || isDevBuild) && _bool('ELUM_SHOW_DEV_TOOLS', false);
 

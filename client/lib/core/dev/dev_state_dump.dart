@@ -66,7 +66,7 @@ abstract final class DevStateDump {
             : kProfileMode
                 ? 'profile'
                 : 'debug',
-        'ELUM_BUILD': AppConfig.isDevBuild ? 'dev' : 'prod',
+        '플레이버': AppConfig.isDevBuild ? 'dev' : '(없음)',
         '뽑은 시각': DateTime.now().toIso8601String(),
       };
 
