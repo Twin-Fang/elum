@@ -85,6 +85,37 @@ void main() {
       expect(find.text('하늘이가 좋아하는 걸 골라주세요'), findsOneWidget);
     });
 
+    testWidgets('받침 있는 이름에 조사를 맞춘다 (이슈 #196)', (tester) async {
+      final router = GoRouter(
+        initialLocation: Routes.routineReward,
+        routes: [
+          GoRoute(
+            path: Routes.routineReward,
+            builder: (context, state) => const RewardSetupScreen(),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            routineRepositoryProvider.overrideWithValue(repo),
+            testStorageOverride(nickname: '민준'),
+          ],
+          child: ScreenUtilInit(
+            designSize: const Size(393, 852),
+            builder: (context, child) => MaterialApp.router(
+              theme: AppTheme.light,
+              routerConfig: router,
+            ),
+          ),
+        ),
+      );
+      await settle(tester);
+
+      // 손으로 `가`를 붙이면 `민준가`가 된다
+      expect(find.text('민준이 좋아하는 걸 골라주세요'), findsOneWidget);
+    });
+
     testWidgets('프리셋을 고르면 다음이 열린다', (tester) async {
       await tester.pumpWidget(wrap());
       await settle(tester);

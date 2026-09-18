@@ -8,6 +8,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../shared/models/reward_preset.dart';
+import '../../../shared/utils/korean_particle.dart';
 import '../../../shared/models/routine.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../application/routine_notifier.dart';
@@ -202,7 +203,8 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
             ),
             SizedBox(height: _titleToSubtitle.h),
             Text(
-              '$who가 좋아하는 걸 골라주세요',
+              // 조사를 손으로 붙이면 `민준가`가 된다 — 받침을 봐야 한다 (#196).
+              '$who${who.subjectParticle} 좋아하는 걸 골라주세요',
               style: context.typo.body.copyWith(color: colors.textSecondary),
             ),
 
