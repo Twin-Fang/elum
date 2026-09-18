@@ -16,8 +16,29 @@ import 'helpers/test_storage.dart';
 ///
 /// 첫 화면에서 **바로** 로그인할 수 있어야 한다. 제목은 로고가 대신한다 —
 /// 로고 바로 밑에서 같은 말을 한 번 더 하지 않는다.
+///
+/// ## 시작 화면과 같은 그림을 쓴다
+///
+/// `시작하기`를 없애면서 두 화면이 하나가 됐다. 로그인 화면은 시작 화면의
+/// 장면(`SplashScene`)을 그대로 깔고 그 위에 제공자 버튼만 얹는다. 배경이
+/// 통째로 바뀌면 다른 앱으로 튄 것처럼 보이기 때문이다.
+///
+/// 그 장면은 새싹·구슬이 무한 반복으로 부유하므로 `pumpAndSettle()`이 끝나지
+/// 않는다. 화면이 OS "동작 줄이기"를 존중해 idle을 멈추므로 그 설정을 켜고 돌린다.
 void main() {
   useFigmaViewport();
+
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized()
+            .platformDispatcher
+            .accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+  });
+  tearDown(() {
+    TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
+        .clearAccessibilityFeaturesTestValue();
+  });
 
   Widget wrap() {
     final router = GoRouter(
@@ -51,11 +72,13 @@ void main() {
     expect(find.textContaining('시작해볼까요'), findsNothing);
   });
 
-  testWidgets('무엇을 하는 앱인지 한 줄로 말한다', (tester) async {
+  testWidgets('시작 화면의 문구를 그대로 이어받는다 (이슈 #207)', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    expect(find.text('할 일을 카드로 만들어요'), findsOneWidget);
+    // 시작 화면에서 넘어오자마자 문구가 바뀌면 화면이 갈아끼워진 것처럼 보인다.
+    expect(find.text('오늘의 하루,'), findsOneWidget);
+    expect(find.text('차근차근 함께해요'), findsOneWidget);
   });
 
   testWidgets('로그인 수단이 첫 화면에 모두 있다', (tester) async {
@@ -68,14 +91,27 @@ void main() {
     expect(find.text('Google로 시작하기'), findsOneWidget);
   });
 
-  testWidgets('병아리가 얼굴까지 함께 나온다 (이슈 #207)', (tester) async {
+  testWidgets('시작 화면의 병아리 장면을 그대로 쓴다 (이슈 #207)', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    // 몸통만 옮기면 얼굴 없는 덩어리가 된다 — 실제로 한 번 그랬다.
+    // 병아리를 따로 조립했다가 얼굴 없는 덩어리가 된 적이 있다.
+    // 이제는 시작 화면과 **같은 위젯**을 쓰므로 구성 요소가 전부 따라온다.
     expect(svgWithAsset(AppAssets.splashChickBody), findsOneWidget);
     expect(svgWithAsset(AppAssets.splashCharLeft), findsOneWidget);
     expect(svgWithAsset(AppAssets.splashCharRight), findsOneWidget);
     expect(svgWithAsset(AppAssets.splashCenter), findsOneWidget);
+    expect(svgWithAsset(AppAssets.splashHill), findsOneWidget);
+    expect(svgWithAsset(AppAssets.splashFade), findsOneWidget);
+  });
+
+  testWidgets('버튼이 신뢰 배지를 가리지 않는다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    // 그림 위에 겹쳐 얹는 구조라 버튼이 아래로 밀리면 배지를 덮는다.
+    final lastButton = tester.getRect(find.text('Google로 시작하기'));
+    final badge = tester.getRect(find.textContaining('DLP'));
+    expect(lastButton.bottom, lessThan(badge.top));
   });
 }

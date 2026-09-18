@@ -145,11 +145,13 @@ abstract final class AppAssets {
   /// 반짝이는 별 (36×34 영역)
   static const splashStar = '$_images/splash_star.svg';
 
-  /// 언덕 위 캐릭터 실루엣 (각 30×32)
+  /// 병아리 **눈** (각 30×32). 파일명이 `char`라 실루엣처럼 읽히지만 실제로 렌더하면
+  /// 몸통 위 y=573 자리의 두 눈이다. 몸통(`splashChickBody`)에는 얼굴이 없어서
+  /// 이 셋을 빼면 노란 덩어리만 남는다.
   static const splashCharLeft = '$_images/splash_char_left.svg';
   static const splashCharRight = '$_images/splash_char_right.svg';
 
-  /// 가운데 장식 (45×25)
+  /// 병아리 **부리** (45×25). 눈 바로 아래 y=599.
   static const splashCenter = '$_images/splash_center.svg';
 
   // --- 홈 일과 목록 (Figma 356:4688 / 356:5079 / 343:4543 / 364:8219) ---
