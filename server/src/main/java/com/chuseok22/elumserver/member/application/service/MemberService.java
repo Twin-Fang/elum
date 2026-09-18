@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepos
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
+import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
@@ -43,6 +44,7 @@ public class MemberService {
   private final AiCallLogRepository aiCallLogRepository;
 
   private final DeviceLinkRepository deviceLinkRepository;
+  private final SubscriptionRepository subscriptionRepository;
   private final EntitlementService entitlementService;
 
   public MemberResponse getMyInfo(String memberId) {
@@ -122,6 +124,11 @@ public class MemberService {
     // 이룸이 휴대폰 연결도 여기서 지운다 (이슈 #200). member를 외래키로 참조하지 않아
     // DB가 대신 지워 주지 않는다 — refresh_token·ai_call_log와 같은 이유다.
     deviceLinkRepository.deleteAllByMemberId(memberId);
+    // 구독은 member를 외래키로 참조한다. 남겨 두면 계정 삭제가 제약에 걸려 탈퇴가
+    // 통째로 실패한다 — 실제로 그렇게 배포됐다.
+    subscriptionRepository.deleteByMemberId(memberId);
+    // 구독은 member를 외래키로 참조한다. 남겨 두면 계정 삭제가 제약에 걸려 탈퇴가
+    // 통째로 실패한다 — 실제로 그렇게 배포됐다.
 
     memberRepository.delete(member);
   }
