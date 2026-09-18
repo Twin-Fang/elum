@@ -352,14 +352,19 @@ jobs:
 
           echo "commit_hash=$COMMIT_SHORT" >> $GITHUB_OUTPUT
 
-          cat << EOF | sed -E 's/^ {10}//' > final_release_notes.txt
-          테스트 빌드 #$BUILD_NUMBER
-
-          브랜치: $BRANCH_NAME
-          커밋: $COMMIT_SHORT
-          날짜: $BUILD_DATE
-
-          EOF
+          # heredoc을 쓰지 않는다 (이슈 #220).
+          #
+          # `<< EOF`의 종료자는 **반드시 컬럼 0**이어야 한다. if 블록 안에서 들여쓰면
+          # 셸이 종료자를 못 찾고 스크립트 끝까지 읽어 `syntax error: unexpected end of file`로 죽는다.
+          # 이 경로는 **이슈에서 트리거할 때만** 타므로(이슈 번호가 있을 때) 오래 드러나지 않았다.
+          {
+            echo "테스트 빌드 #$BUILD_NUMBER"
+            echo ""
+            echo "브랜치: $BRANCH_NAME"
+            echo "커밋: $COMMIT_SHORT"
+            echo "날짜: $BUILD_DATE"
+            echo ""
+          } > final_release_notes.txt
 
           # 이슈 정보가 있으면 추가
           if [ -n "${{ steps.issue_info.outputs.issue_number }}" ]; then
@@ -367,19 +372,18 @@ jobs:
             ISSUE_TITLE="${{ steps.issue_info.outputs.issue_title }}"
             ISSUE_URL="${{ steps.issue_info.outputs.issue_url }}"
 
-            cat << EOF | sed -E 's/^ {12}//' >> final_release_notes.txt
-            관련 이슈:
-            - #$ISSUE_NUMBER: $ISSUE_TITLE
-            - URL: $ISSUE_URL
-
-            EOF
+            {
+              echo "관련 이슈:"
+              echo "- #$ISSUE_NUMBER: $ISSUE_TITLE"
+              echo "- URL: $ISSUE_URL"
+              echo ""
+            } >> final_release_notes.txt
           fi
 
           echo "📋 생성된 릴리즈 노트:"
           echo "----------------------------------------"
           cat final_release_notes.txt
           echo "----------------------------------------"
-
       - name: Upload release notes
         uses: actions/upload-artifact@v4
         with:
