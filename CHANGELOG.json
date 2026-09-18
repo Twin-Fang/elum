@@ -1,15 +1,40 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-18T10:09:33Z",
-    "currentVersion": "1.9.2",
+    "lastUpdated": "2026-09-18T11:19:09Z",
+    "currentVersion": "1.10.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 100
+    "totalReleases": 101
   },
   "releases": [
+    {
+      "version": "1.10.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-18",
+      "pr_number": 240,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 일과를 만들 때 보상을 정할 수 있어요\n  * 자주 쓰는 보상은 한 번만 눌러 다시 고를 수 있어요\n  * 보상은 건너뛰어도 괜찮아요\n  * 이룸이 화면에서 다 하면 무엇을 받는지 계속 보여요\n  * 일과를 마치면 받을 보상을 함께 보여드려요\n  * 카드를 확인하면서 보상을 고치거나 새로 정할 수 있어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "일과를 만들 때 보상을 정할 수 있어요",
+            "자주 쓰는 보상은 한 번만 눌러 다시 고를 수 있어요",
+            "보상은 건너뛰어도 괜찮아요",
+            "이룸이 화면에서 다 하면 무엇을 받는지 계속 보여요",
+            "일과를 마치면 받을 보상을 함께 보여드려요",
+            "카드를 확인하면서 보상을 고치거나 새로 정할 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.9.2",
       "project_type": "flutter",
