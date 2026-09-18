@@ -298,11 +298,16 @@ jobs:
       #
       # analyze만으로는 회귀를 못 잡는다. 실제로 색 토큰 규칙을 어긴 코드가
       # 두 달 넘게 통과했다 — 테스트는 있었지만 CI가 돌리지 않았다.
+      # 골든(픽셀 비교)은 제외한다 — 이슈 #218.
+      # macOS에서 만든 골든을 Linux 러너가 통과하지 못한다. blur·그라데이션
+      # 래스터가 환경마다 달라 6건이 늘 실패했고(18%·13%·7%×3·1.2%), 그 탓에
+      # CI가 최근 30회 연속 빨간불이었다. **늘 빨간 CI는 아무도 보지 않아
+      # 진짜 회귀까지 묻힌다.** 골든은 로컬에서 그대로 돌아 회귀를 잡는다.
       - name: Run Flutter Test
         id: unit_test
         run: |
-          echo "🧪 Flutter 단위 테스트 시작..."
-          flutter test
+          echo "🧪 Flutter 단위 테스트 시작... (골든 제외)"
+          flutter test --exclude-tags golden
           echo "✅ 단위 테스트 완료"
 
       # 분석 결과 기록

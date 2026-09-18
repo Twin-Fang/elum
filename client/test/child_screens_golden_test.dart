@@ -1,3 +1,11 @@
+@Tags(['golden'])
+library;
+
+// 이 파일은 **CI에서 돌지 않는다** (`--exclude-tags golden`).
+// 골든은 픽셀 비교라 macOS에서 만든 기준을 Linux CI가 통과하지 못한다 —
+// blur·그라데이션 래스터가 환경마다 다르다. 코드 회귀가 아니다.
+// 로컬에서는 그대로 돌아 회귀를 잡는다. 근거: 이슈 #218
+
 import 'package:elum/core/theme/app_motion.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';

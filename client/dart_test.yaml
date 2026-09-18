@@ -1,0 +1,13 @@
+# 테스트 태그 선언. 선언하지 않으면 `--exclude-tags`가 "알 수 없는 태그" 경고를 낸다.
+tags:
+  golden:
+    # 골든은 **렌더 결과 픽셀을 비교**한다. 같은 코드라도 OS·GPU가 다르면 결과가 다르다.
+    #
+    # macOS에서 만든 골든을 Linux CI에서 비교하면 blur·그라데이션이 미세하게 달라
+    # 6건이 늘 실패했다 (child_home_empty 18%, child_stars 13%, 보상 3종 7%).
+    # 코드 문제가 아니라 환경 문제라 CI에서는 제외한다 — 늘 빨간 CI는 아무도 안 본다.
+    #
+    # 로컬에서는 그대로 돈다. 회귀 방지 값은 유지된다:
+    #   flutter test                      # 골든 포함
+    #   flutter test --exclude-tags golden  # CI와 같은 조건
+    skip: false
