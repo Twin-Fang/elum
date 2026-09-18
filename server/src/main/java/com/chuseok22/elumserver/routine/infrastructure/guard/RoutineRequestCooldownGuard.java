@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.store.SharedStateStore;
 import java.time.Duration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,6 +24,10 @@ public class RoutineRequestCooldownGuard {
   private final SharedStateStore sharedStateStore;
   private final Duration cooldown;
 
+  // 생성자가 둘이면 스프링이 어느 것으로 만들지 알 수 없다. 예전에는 인자 없는
+  // 생성자가 있어 그것이 쓰였지만 지금은 둘 다 인자를 받으므로 명시해야 한다.
+  // 이것을 빠뜨리면 서버가 아예 뜨지 않는다.
+  @Autowired
   public RoutineRequestCooldownGuard(SharedStateStore sharedStateStore) {
     this(sharedStateStore, DEFAULT_COOLDOWN);
   }
