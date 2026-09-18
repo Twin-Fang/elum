@@ -28,12 +28,13 @@ public record AdminMemberDetailResponse(
   long totalTokens,
   double estimatedCostUsd,
   List<AdminMemberRoutineSummary> routines,
-  List<AiCallLog> recentAiCalls
+  List<AiCallLog> recentAiCalls,
+  AdminSubscriptionSummary subscription
 ) {
 
   public static AdminMemberDetailResponse of(
     Member member, Profile profile, List<Routine> routines, MemberAiUsage aiUsage,
-    List<AiCallLog> recentAiCalls
+    List<AiCallLog> recentAiCalls, AdminSubscriptionSummary subscription
   ) {
     List<AdminMemberRoutineSummary> routineSummaries = routines.stream()
       .map(AdminMemberRoutineSummary::from)
@@ -54,7 +55,8 @@ public record AdminMemberDetailResponse(
       aiUsage == null ? 0 : aiUsage.getTotalTokens(),
       aiUsage == null ? 0 : aiUsage.getTotalCostUsd(),
       routineSummaries,
-      recentAiCalls
+      recentAiCalls,
+      subscription
     );
   }
 

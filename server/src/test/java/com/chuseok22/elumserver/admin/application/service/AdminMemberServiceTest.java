@@ -12,6 +12,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetail
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
+import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
@@ -47,6 +48,9 @@ class AdminMemberServiceTest {
 
   @Mock
   private RefreshTokenService refreshTokenService;
+
+  @Mock
+  private SubscriptionService subscriptionService;
 
   @InjectMocks
   private AdminMemberService adminMemberService;

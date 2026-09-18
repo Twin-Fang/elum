@@ -36,6 +36,67 @@
 
     <div th:if="${message}" class="alert alert-success" th:text="${message}">완료</div>
 
+    <!-- 요금제 — 결제가 붙기 전까지 Pro를 켜는 유일한 경로다 (이슈 #158). -->
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body space-y-4">
+        <h2 class="card-title text-lg">
+          요금제
+          <span class="badge badge-sm"
+                th:classappend="${member.subscription().plan().name() == 'PRO'} ? 'badge-primary' : 'badge-ghost'"
+                th:text="${member.subscription().plan().label}">FREE</span>
+          <span th:if="${member.subscription().expired()}" class="badge badge-warning badge-sm">
+            기간 지남 — 지금은 Free로 동작
+          </span>
+        </h2>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+          <div class="text-base-content/60">상태</div>
+          <div th:text="${member.subscription().status().label}">이용 중</div>
+          <div class="text-base-content/60">발급 경로</div>
+          <div th:text="${member.subscription().source().label}">가입 기본</div>
+          <div class="text-base-content/60">시작</div>
+          <div th:text="${member.subscription().startedAt() != null
+                          ? #temporals.format(member.subscription().startedAt(), 'yyyy-MM-dd HH:mm') : '-'}">-</div>
+          <div class="text-base-content/60">만료</div>
+          <div th:text="${member.subscription().expiresAt() != null
+                          ? #temporals.format(member.subscription().expiresAt(), 'yyyy-MM-dd HH:mm') : '무기한'}">무기한</div>
+          <div class="text-base-content/60">사유</div>
+          <div class="col-span-3" th:text="${member.subscription().memo() ?: '-'}">-</div>
+        </div>
+
+        <div class="border-t border-base-200 pt-4">
+          <form th:action="@{/admin/members/{id}/grant-pro(id=${member.id()})}" method="post"
+                class="flex flex-wrap items-end gap-2">
+            <label class="form-control">
+              <span class="label-text text-xs">기간(일) — 비우면 무기한</span>
+              <input type="number" name="days" min="1" placeholder="30"
+                     class="input input-bordered input-sm w-32"/>
+            </label>
+            <label class="form-control flex-1 min-w-64">
+              <!-- 사유를 필수로 받는다. 나중에 "이 계정은 왜 Pro지"에 답해야 한다. -->
+              <span class="label-text text-xs">사유 (필수)</span>
+              <input type="text" name="memo" required maxlength="500"
+                     placeholder="예: 베타 테스터, 시연용 계정"
+                     class="input input-bordered input-sm w-full"/>
+            </label>
+            <button type="submit" class="btn btn-primary btn-sm">Pro 발급</button>
+          </form>
+
+          <form th:if="${member.subscription().plan().name() == 'PRO'}"
+                th:action="@{/admin/members/{id}/revoke-pro(id=${member.id()})}" method="post"
+                class="mt-2"
+                onsubmit="return confirm('Pro를 회수할까요? 이 계정은 Free로 돌아갑니다.');">
+            <button type="submit" class="btn btn-ghost btn-sm">Pro 회수</button>
+          </form>
+        </div>
+
+        <p class="text-xs text-base-content/50">
+          결제는 아직 붙어 있지 않습니다. 앱 스토어 심사 전이라 인앱결제를 쓸 수 없어,
+          지금은 이 화면이 Pro를 켜는 유일한 방법입니다.
+        </p>
+      </div>
+    </div>
+
     <div class="card bg-base-100 shadow-md">
       <div class="card-body grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
         <div class="text-base-content/60">아이디</div>

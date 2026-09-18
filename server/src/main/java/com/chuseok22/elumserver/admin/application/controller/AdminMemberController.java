@@ -50,6 +50,32 @@ public class AdminMemberController {
     return "redirect:/admin/members/" + id;
   }
 
+  /**
+   * Pro 발급. 사유를 반드시 받는다 — 나중에 "이 계정은 왜 Pro지"에 답해야 한다.
+   *
+   * <p>기간을 비우면 무기한이다. 심사 전이라 인앱결제를 붙일 수 없어, 지금은 이 화면이
+   * Pro를 켜는 유일한 방법이다.
+   */
+  @PostMapping("/admin/members/{id}/grant-pro")
+  public String grantPro(
+    @PathVariable String id,
+    @RequestParam(name = "days", required = false) Integer days,
+    @RequestParam(name = "memo") String memo,
+    RedirectAttributes redirectAttributes
+  ) {
+    adminMemberService.grantPro(id, days, memo);
+    redirectAttributes.addFlashAttribute("message",
+      days == null || days <= 0 ? "Pro를 무기한으로 발급했습니다." : "Pro를 " + days + "일간 발급했습니다.");
+    return "redirect:/admin/members/" + id;
+  }
+
+  @PostMapping("/admin/members/{id}/revoke-pro")
+  public String revokePro(@PathVariable String id, RedirectAttributes redirectAttributes) {
+    adminMemberService.revokePro(id);
+    redirectAttributes.addFlashAttribute("message", "Pro를 회수했습니다. 이 계정은 Free로 돌아갑니다.");
+    return "redirect:/admin/members/" + id;
+  }
+
   @PostMapping("/admin/members/{id}/force-logout")
   public String forceLogout(@PathVariable String id, RedirectAttributes redirectAttributes) {
     adminMemberService.forceLogout(id);

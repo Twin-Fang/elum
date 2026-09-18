@@ -1,12 +1,14 @@
 package com.chuseok22.elumserver.admin.application.service;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionSummary;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
 import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -41,6 +43,7 @@ public class AdminMemberService {
   private final RoutineRepository routineRepository;
   private final AiCallLogRepository aiCallLogRepository;
   private final RefreshTokenService refreshTokenService;
+  private final SubscriptionService subscriptionService;
 
   // 검색어·상태 필터 조합에 따라 파생/JPQL 쿼리를 선택하고, 페이지에 실린 회원들의
   // 루틴수·AI 사용량을 group by 집계 2번으로 붙인다(회원 수만큼 쿼리 금지).
@@ -77,8 +80,25 @@ public class AdminMemberService {
       .findFirst().orElse(null);
     return AdminMemberDetailResponse.of(
       member, profile, routines, aiUsage,
-      aiCallLogRepository.findTop20ByMemberIdOrderByCreatedAtDesc(memberId)
+      aiCallLogRepository.findTop20ByMemberIdOrderByCreatedAtDesc(memberId),
+      subscriptionService.find(memberId)
+        .map(AdminSubscriptionSummary::from)
+        .orElseGet(AdminSubscriptionSummary::none)
     );
+  }
+
+  /**
+   * Pro를 켠다. 결제가 아직 없으므로 지금은 이 경로가 유일하게 Pro를 만드는 방법이다.
+   *
+   * @param days null이면 무기한
+   */
+  public void grantPro(String memberId, Integer days, String memo) {
+    LocalDateTime expiresAt = (days == null || days <= 0) ? null : LocalDateTime.now().plusDays(days);
+    subscriptionService.grantPro(memberId, expiresAt, memo);
+  }
+
+  public void revokePro(String memberId) {
+    subscriptionService.revokePro(memberId, "관리자 회수");
   }
 
   public long count() {
