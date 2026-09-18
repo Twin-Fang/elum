@@ -12,6 +12,8 @@ public enum ConfigGroup {
   GEMINI_IMAGE("Gemini 이미지"),
   LOCAL_LLM("로컬 LLM"),
   PRICING("AI 요금 단가"),
+  PLAN_FREE("Free 플랜 한도"),
+  PLAN_PRO("Pro 플랜 한도"),
   ;
 
   private final String label;

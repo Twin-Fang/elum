@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
+import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -34,6 +35,7 @@ public class AuthService {
   private final JwtProvider jwtProvider;
   private final JwtProperties jwtProperties;
   private final RefreshTokenService refreshTokenService;
+  private final SubscriptionService subscriptionService;
 
   @Transactional
   public void signUp(SignUpRequest request) {
@@ -52,6 +54,10 @@ public class AuthService {
     profile.setMember(member);
     profile.setCharacter(CharacterType.LULU);
     profileRepository.save(profile);
+
+    // 로그인하는 사람은 일단 Free다. 행이 없어도 Free로 보긴 하지만, 만들어 두면
+    // 관리자 화면에서 모든 계정의 구독이 같은 모양으로 보이고 시작 시점도 남는다.
+    subscriptionService.createFreeIfAbsent(member);
   }
 
   // 로그인 이력(lastLoginAt·loginCount)을 저장해야 하므로 트랜잭션이 필요하다.

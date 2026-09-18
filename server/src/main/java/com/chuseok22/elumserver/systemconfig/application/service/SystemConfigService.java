@@ -62,6 +62,20 @@ public class SystemConfigService {
     }
   }
 
+  // parseBoolean은 "true"가 아닌 값을 조용히 false로 만든다. 값이 손상됐을 때
+  // (수동 DB 조작 등) 권한이 슬그머니 꺼지는 대신 기본값으로 돌아가게 한다.
+  public boolean getBoolean(ConfigKey key) {
+    String value = getString(key).trim();
+    if ("true".equalsIgnoreCase(value)) {
+      return true;
+    }
+    if ("false".equalsIgnoreCase(value)) {
+      return false;
+    }
+    log.warn("시스템 설정 불리언 파싱 실패, 기본값 사용: key={}, value={}", key, value);
+    return Boolean.parseBoolean(defaultValueFor(key));
+  }
+
   // 배포 환경(yml)에 바인딩된 모델명이 있으면 그것이 사실상의 기본값이다.
   // enum defaultValue는 yml에도 값이 없을 때의 마지막 폴백.
   public String defaultValueFor(ConfigKey key) {
@@ -122,6 +136,9 @@ public class SystemConfigService {
       } else if (key.getValueType() == ConfigValueType.DECIMAL) {
         Double.parseDouble(value);
       } else if (key.getValueType() == ConfigValueType.SELECT && !key.getAllowedValues().contains(value)) {
+        throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
+      } else if (key.getValueType() == ConfigValueType.BOOLEAN
+        && !"true".equalsIgnoreCase(value) && !"false".equalsIgnoreCase(value)) {
         throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
       }
     } catch (NumberFormatException e) {

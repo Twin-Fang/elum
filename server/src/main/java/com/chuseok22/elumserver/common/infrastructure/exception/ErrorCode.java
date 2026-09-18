@@ -79,6 +79,12 @@ public enum ErrorCode {
   DEVICE_LINK_NOT_CONNECTED(HttpStatus.NOT_FOUND, "연결된 이룸이 휴대폰이 없습니다."),
   DEVICE_LINK_FORBIDDEN_FOR_ELUMI(HttpStatus.FORBIDDEN, "이룸이 휴대폰에서는 할 수 없어요."),
 
+  // 요금제 한도.
+  // 문구는 해요체·능동형으로 쓰고 "아이"라는 말을 쓰지 않는다 (docs 용어 규칙).
+  ROUTINE_CREATE_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "이번 주에 만들 수 있는 일과를 다 썼어요."),
+  ROUTINE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "일과를 더 만들려면 기존 일과를 정리해주세요."),
+  PROFILE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "이룸이를 더 추가할 수 없어요."),
+
   ;
 
 

@@ -18,6 +18,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
+import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -45,6 +46,9 @@ class OAuthLoginServiceTest {
 
   @Mock
   private ProfileRepository profileRepository;
+
+  @Mock
+  private SubscriptionService subscriptionService;
 
   @Mock
   private PasswordEncoder passwordEncoder;
@@ -75,7 +79,7 @@ class OAuthLoginServiceTest {
       OAuthProvider.KAKAO, new OAuthUser("kakao-9999", "parent@kakao.com", true));
     oAuthLoginService = new OAuthLoginService(
       List.of(kakao), authIdentityRepository, memberRepository, profileRepository,
-      passwordEncoder, jwtProvider, jwtProperties, refreshTokenService);
+      subscriptionService, passwordEncoder, jwtProvider, jwtProperties, refreshTokenService);
   }
 
   private Member existingMember(MemberStatus status) {

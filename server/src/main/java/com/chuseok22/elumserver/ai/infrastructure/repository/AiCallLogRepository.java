@@ -22,6 +22,21 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String> {
   List<AiCallLog> findTop20ByMemberIdOrderByCreatedAtDesc(String memberId);
 
   /**
+   * 특정 기간에 이 회원이 낸 호출 건수. 요금제 한도 계산에 쓴다.
+   *
+   * <p>일과 표를 세지 않는 이유는 <b>지우면 행이 사라져 우회되기 때문</b>이다. 만들고
+   * 지우고 다시 만들면 보유 개수는 그대로인데 AI 비용은 그때마다 나간다. 이 표는
+   * 지워지지 않으므로 실제로 쓴 것을 센다.
+   *
+   * <p>성공한 호출만 센다 — 실패는 결과물이 없으므로 한도를 깎지 않는다.
+   *
+   * <p>{@code idx_ai_call_log_member_created}(member_id, created_at)를 그대로 탄다.
+   */
+  long countByMemberIdAndCallTypeAndSuccessIsTrueAndCreatedAtGreaterThanEqual(
+    String memberId, AiCallType callType, LocalDateTime from
+  );
+
+  /**
    * 탈퇴한 회원의 식별자만 떼어낸다. 행 자체는 남긴다.
    *
    * <p>이 표는 운영 지표(호출량·비용)를 보기 위한 것이라 행을 지우면 과거 집계가 줄어든다.

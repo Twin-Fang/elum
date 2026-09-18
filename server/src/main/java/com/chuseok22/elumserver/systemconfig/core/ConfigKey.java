@@ -52,7 +52,80 @@ public enum ConfigKey {
     "Gemini 이미지 1장 생성 요금. AI 호출 비용 추정에 사용",
     ConfigValueType.DECIMAL, List.of(), "0.039"
   ),
+
+  // --- 플랜 한도 ---
+  //
+  // 무엇이 Free고 무엇이 Pro인지를 코드가 아니라 여기에 둔다. 가격 정책이 정해졌을 때
+  // 배포 없이 관리자 화면에서 숫자만 바꾸기 위해서다.
+  //
+  // 수치 한도의 초기값은 전부 -1(무제한)이다. 구조만 넣고 지금 동작을 지금과 똑같게
+  // 유지한다 — 실측 원가가 나오기 전에 숫자를 박으면 두 번 일한다.
+
+  // ⚠️ 기본값이 아직 true다. 끄면 Free 카드에 그림이 사라지는데, 대체할 픽토그램이
+  // 아직 없기 때문이다. 픽토그램이 붙으면 false로 내린다.
+  FREE_AI_IMAGE_GENERATION(
+    ConfigGroup.PLAN_FREE, "AI 맞춤 삽화",
+    "Free에서 AI가 그린 맞춤 삽화를 쓸 수 있는지. 끄면 픽토그램을 쓴다 (픽토그램 적용 전까지는 켜 둔다)",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  FREE_ADS_REMOVED(
+    ConfigGroup.PLAN_FREE, "광고 제거",
+    "Free에서 광고를 숨길지. 꺼두면 광고가 보인다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  FREE_ROUTINE_CREATE_PER_WEEK(
+    ConfigGroup.PLAN_FREE, "주당 일과 생성 횟수",
+    "Free가 한 주(월요일 시작)에 만들 수 있는 일과 수. -1이면 무제한",
+    ConfigValueType.INTEGER, List.of(), "-1"
+  ),
+  FREE_ROUTINE_MAX_COUNT(
+    ConfigGroup.PLAN_FREE, "보유 일과 개수",
+    "Free가 동시에 가질 수 있는 일과 수. -1이면 무제한",
+    ConfigValueType.INTEGER, List.of(), "-1"
+  ),
+  FREE_PROFILE_MAX_COUNT(
+    ConfigGroup.PLAN_FREE, "이룸이 명수",
+    "Free 계정 하나에 둘 수 있는 이룸이 수. -1이면 무제한",
+    ConfigValueType.INTEGER, List.of(), "-1"
+  ),
+  FREE_HISTORY_RETENTION_DAYS(
+    ConfigGroup.PLAN_FREE, "기록 보관 일수",
+    "Free가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
+    ConfigValueType.INTEGER, List.of(), "-1"
+  ),
+
+  PRO_AI_IMAGE_GENERATION(
+    ConfigGroup.PLAN_PRO, "AI 맞춤 삽화",
+    "Pro에서 AI가 그린 맞춤 삽화를 쓸 수 있는지",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_ADS_REMOVED(
+    ConfigGroup.PLAN_PRO, "광고 제거",
+    "Pro에서 광고를 숨길지",
+    ConfigValueType.BOOLEAN, List.of(), "true"
+  ),
+  PRO_ROUTINE_CREATE_PER_WEEK(
+    ConfigGroup.PLAN_PRO, "주당 일과 생성 횟수",
+    "Pro가 한 주에 만들 수 있는 일과 수. -1이면 무제한",
+    ConfigValueType.INTEGER, List.of(), "-1"
+  ),
+  PRO_ROUTINE_MAX_COUNT(
+    ConfigGroup.PLAN_PRO, "보유 일과 개수",
+    "Pro가 동시에 가질 수 있는 일과 수. -1이면 무제한",
+    ConfigValueType.INTEGER, List.of(), "-1"
+  ),
+  PRO_PROFILE_MAX_COUNT(
+    ConfigGroup.PLAN_PRO, "이룸이 명수",
+    "Pro 계정 하나에 둘 수 있는 이룸이 수. -1이면 무제한",
+    ConfigValueType.INTEGER, List.of(), "-1"
+  ),
+  PRO_HISTORY_RETENTION_DAYS(
+    ConfigGroup.PLAN_PRO, "기록 보관 일수",
+    "Pro가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
+    ConfigValueType.INTEGER, List.of(), "-1"
+  ),
   ;
+
 
   private final ConfigGroup group;
   private final String label;

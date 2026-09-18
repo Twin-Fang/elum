@@ -7,4 +7,6 @@ public enum ConfigValueType {
   INTEGER,
   DECIMAL,
   SELECT,
+  // 켜짐/꺼짐. 저장값은 "true"/"false" 문자열이고 화면은 토글로 그린다.
+  BOOLEAN,
 }

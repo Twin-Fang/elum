@@ -10,6 +10,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
+import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -45,6 +46,7 @@ public class OAuthLoginService {
   private final AuthIdentityRepository authIdentityRepository;
   private final MemberRepository memberRepository;
   private final ProfileRepository profileRepository;
+  private final SubscriptionService subscriptionService;
   private final PasswordEncoder passwordEncoder;
   private final JwtProvider jwtProvider;
   private final JwtProperties jwtProperties;
@@ -55,6 +57,7 @@ public class OAuthLoginService {
     AuthIdentityRepository authIdentityRepository,
     MemberRepository memberRepository,
     ProfileRepository profileRepository,
+    SubscriptionService subscriptionService,
     PasswordEncoder passwordEncoder,
     JwtProvider jwtProvider,
     JwtProperties jwtProperties,
@@ -64,6 +67,7 @@ public class OAuthLoginService {
     this.authIdentityRepository = authIdentityRepository;
     this.memberRepository = memberRepository;
     this.profileRepository = profileRepository;
+    this.subscriptionService = subscriptionService;
     this.passwordEncoder = passwordEncoder;
     this.jwtProvider = jwtProvider;
     this.jwtProperties = jwtProperties;
@@ -143,6 +147,9 @@ public class OAuthLoginService {
     profile.setMember(member);
     profile.setCharacter(CharacterType.LULU);
     profileRepository.save(profile);
+
+    // 소셜로 들어온 계정도 똑같이 Free로 시작한다.
+    subscriptionService.createFreeIfAbsent(member);
 
     return member;
   }
