@@ -5,12 +5,14 @@ import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
@@ -40,10 +42,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -60,12 +64,22 @@ public class RoutineService {
   /// 길어질수록 글을 읽는 사용자에게도 부담이 된다.
   private static final int REWARD_TEXT_MAX_LENGTH = 100;
 
+  /// 한 일과에 담을 수 있는 카드 수 상한 (이슈 #199).
+  ///
+  /// AI 생성 경로가 이미 같은 값으로 막혀 있다(`RoutineAiPipeline.MAX_STEPS`, 프롬프트도
+  /// "1개 이상 10개 이하"). 같은 값으로 맞춰야 **기존 일과 중 상한을 넘는 것이 없다** —
+  /// 더 낮게 잡으면 AI가 만든 일과가 처음부터 상한 초과 상태가 된다.
+  ///
+  /// 카드 1장을 추가할 때마다 AI 이미지가 1회 생성되므로, 상한이 곧 비용의 천장이다.
+  private static final int STEP_MAX_COUNT = 10;
+
   private final RoutineRepository routineRepository;
   private final ProfileRepository profileRepository;
   private final SensitiveInfoGuardService sensitiveInfoGuardService;
   private final RoutineAiPipeline routineAiPipeline;
   private final RoutineImageStorage routineImageStorage;
   private final RoutineRequestCooldownGuard routineRequestCooldownGuard;
+  private final RoutineStepImageFiller routineStepImageFiller;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
@@ -419,27 +433,71 @@ public class RoutineService {
     String memberId, String routineId, String stepId, RoutineStepUpdateRequest request
   ) {
     Routine routine = getOwnedRoutine(memberId, routineId);
-    if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
-      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
-    }
+    requireEditableRoutine(routine);
 
-    RoutineStep targetStep = routine.getSteps().stream()
+    List<RoutineStep> steps = routine.getSteps();
+    RoutineStep targetStep = steps.stream()
       .filter(step -> step.getId().equals(stepId))
       .findFirst()
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
 
-    targetStep.setTitle(request.title());
-    targetStep.setDescription(request.description());
+    // 보낸 필드만 반영한다. 예전에는 넘어온 값을 그대로 덮어써서, 순서만 보내면
+    // 제목·설명이 null로 지워졌다.
+    if (request.title() != null) {
+      targetStep.setTitle(request.title());
+    }
+    if (request.description() != null) {
+      targetStep.setDescription(request.description());
+    }
+    if (request.stepOrder() != null) {
+      moveStep(steps, targetStep, request.stepOrder());
+    }
 
     return RoutineResponse.from(routine);
+  }
+
+  /**
+   * 카드를 원하는 자리로 옮기고 나머지를 1..N으로 다시 채운다 (이슈 #199).
+   *
+   * <p>화면은 화살표로 한 칸씩 민다. 클라가 낙관적으로 먼저 반영하고 실패하면 되돌리므로,
+   * 서버는 <b>항상 연속된 값</b>으로 정규화해 응답한다 — 값이 겹치거나 비면 다음 이동에서
+   * 순서가 튄다.
+   *
+   * <p>범위를 벗어난 값은 막지 않고 끝으로 붙인다. 화살표를 끝에서 한 번 더 눌렀을 때
+   * 400을 던지면 화면이 되돌아가야 하는데, 사용자가 보기엔 아무 일도 아니다.
+   */
+  private void moveStep(List<RoutineStep> steps, RoutineStep target, int desiredOrder) {
+    List<RoutineStep> ordered = new ArrayList<>(steps);
+    ordered.sort(Comparator.comparingInt(RoutineStep::getStepOrder));
+    ordered.remove(target);
+
+    int index = Math.clamp(desiredOrder - 1, 0, ordered.size());
+    ordered.add(index, target);
+
+    for (int i = 0; i < ordered.size(); i++) {
+      ordered.get(i).setStepOrder(i + 1);
+    }
+  }
+
+  /**
+   * 카드를 고칠 수 있는 상태인지 본다 (이슈 #199).
+   *
+   * <p>예전에는 {@code PENDING_REVIEW}만 허용했다. 전문가 자문의 필수 요구가
+   * <i>"생성된 카드를 수정·순서 변경·삭제할 수 있어야 한다. 쉽게."</i> 라서,
+   * <b>이룸이에게 보낸 뒤에도</b> 고칠 수 있어야 한다.
+   *
+   * <p>지금은 모든 상태를 허용하므로 막는 경우가 없다. 그래도 메서드를 두는 이유는
+   * 다시 조일 자리를 한 곳으로 모아 두기 위함이다 — 호출부 네 곳에 흩어지면
+   * 한 군데만 고쳐져 어긋난다.
+   */
+  private void requireEditableRoutine(Routine routine) {
+    // 현재는 PENDING_REVIEW · CONFIRMED · COMPLETED 모두 허용한다.
   }
 
   @Transactional
   public RoutineResponse deleteStep(String memberId, String routineId, String stepId) {
     Routine routine = getOwnedRoutine(memberId, routineId);
-    if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
-      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
-    }
+    requireEditableRoutine(routine);
 
     List<RoutineStep> steps = routine.getSteps();
     if (steps.size() <= 1) {
@@ -451,10 +509,88 @@ public class RoutineService {
       .findFirst()
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
 
+    // 이미 별을 받은 카드를 지우면 그 별도 함께 거둔다 (이슈 #199).
+    // 별은 "완료한 카드 수"를 따라간다 — completeStep(+1) · cancelStep(-1) ·
+    // syncProgress(증감분)가 모두 그 규칙이다. 카드가 사라졌는데 별만 남으면
+    // 이룸이 화면의 별 개수가 무엇을 센 것인지 설명할 수 없게 된다.
+    if (Boolean.TRUE.equals(targetStep.getCompleted())) {
+      Profile profile = routine.getProfile();
+      profile.setTotalStars(Math.max(0, profile.getTotalStars() - 1));
+    }
+
     steps.remove(targetStep);
     renumberSteps(steps);
+    refreshCompletionStatus(routine);
 
     return RoutineResponse.from(routine);
+  }
+
+  /**
+   * 보호자가 카드를 한 장 직접 추가한다 (이슈 #199).
+   *
+   * <p><b>그림을 기다리지 않는다.</b> 이미지 생성은 몇 초 걸리는데 응답을 그때까지
+   * 붙잡으면 화면이 멈춘다. 카드를 먼저 만들어 응답하고, 그림은 커밋 뒤에 채운다.
+   * 클라는 {@code imagePath}가 빌 동안 "그림 만드는 중"을 띄운다 (#198 §9).
+   *
+   * <p><b>그림이 실패해도 카드 추가는 성공한다.</b> {@code imagePath}를 {@code null}로
+   * 두고 끝낸다 — 클라가 기본 그림으로 채운다 (서비스 원칙 6).
+   */
+  @Transactional
+  public RoutineResponse addStep(
+    String memberId, String routineId, RoutineStepCreateRequest request
+  ) {
+    Routine routine = getOwnedRoutine(memberId, routineId);
+    requireEditableRoutine(routine);
+
+    List<RoutineStep> steps = routine.getSteps();
+    if (steps.size() >= STEP_MAX_COUNT) {
+      throw new CustomException(ErrorCode.ROUTINE_STEP_MAX_COUNT);
+    }
+
+    RoutineStep step = new RoutineStep();
+    step.setRoutine(routine);
+    step.setTitle(request.title().trim());
+    step.setDescription(request.descriptionOrEmpty());
+    // 맨 뒤에 붙인다. 뒤이어 renumberSteps가 1..N으로 정규화하므로
+    // 기존 값이 비어 있거나 겹쳐 있어도 결과는 연속값이 된다.
+    step.setStepOrder(steps.size() + 1);
+    step.setCompleted(false);
+    steps.add(step);
+    renumberSteps(steps);
+
+    // 카드가 늘면 "전부 완료" 상태가 깨진다 — COMPLETED였다면 CONFIRMED로 되돌린다.
+    refreshCompletionStatus(routine);
+
+    // 커밋된 뒤에 그림을 만든다. 트랜잭션 안에서 돌리면 Gemini 호출(수 초) 동안
+    // DB 커넥션을 붙잡고, 롤백되면 방금 쓴 이미지 파일이 고아로 남는다.
+    routineStepImageFiller.scheduleAfterCommit(
+      routineId, step.getId(), step.getDescription(), routine.getProfile().getCharacter());
+
+    return RoutineResponse.from(routine);
+  }
+
+  /**
+   * 카드가 늘거나 줄었을 때 일과의 완료 상태를 다시 계산한다 (이슈 #199).
+   *
+   * <p>{@code syncProgress}가 쓰는 규칙과 같다 — 전부 완료면 COMPLETED, 아니면 CONFIRMED.
+   * 검토 중(PENDING_REVIEW)인 일과는 아직 이룸이에게 가지 않았으므로 건드리지 않는다.
+   */
+  private void refreshCompletionStatus(Routine routine) {
+    if (routine.getStatus() == RoutineStatus.PENDING_REVIEW) {
+      return;
+    }
+    List<RoutineStep> steps = routine.getSteps();
+    boolean allCompleted =
+      !steps.isEmpty() && steps.stream().allMatch(s -> Boolean.TRUE.equals(s.getCompleted()));
+    if (allCompleted) {
+      if (routine.getStatus() != RoutineStatus.COMPLETED) {
+        routine.setStatus(RoutineStatus.COMPLETED);
+        routine.setCompletedAt(LocalDateTime.now());
+      }
+    } else {
+      routine.setStatus(RoutineStatus.CONFIRMED);
+      routine.setCompletedAt(null);
+    }
   }
 
   // 삭제 후 남은 단계들의 stepOrder를 1..N으로 다시 채운다. PENDING_REVIEW 단계는 완료 이력이

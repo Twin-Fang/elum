@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequ
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
@@ -196,6 +197,21 @@ public class RoutineController implements RoutineControllerDocs {
     RoutineResponse response = routineService.syncProgress(
       authentication.getName(), routineId, request.completedStepIdsOrEmpty()
     );
+    return ResponseEntity.ok(response);
+  }
+
+  // 보호자가 카드를 한 장 직접 추가한다 (이슈 #199).
+  // title/description이 자유 텍스트라 민감정보가 섞일 수 있고, RoutineResponse에도
+  // rawInputText(마스킹 전 원문)가 들어가므로 파라미터·결과 모두 로그에서 뺀다.
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PostMapping("/{routineId}/steps")
+  public ResponseEntity<RoutineResponse> addStep(
+    Authentication authentication,
+    @PathVariable String routineId,
+    @RequestBody @Valid RoutineStepCreateRequest request
+  ) {
+    RoutineResponse response =
+      routineService.addStep(authentication.getName(), routineId, request);
     return ResponseEntity.ok(response);
   }
 
