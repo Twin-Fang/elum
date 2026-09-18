@@ -46,26 +46,28 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       .where((item) => item.required)
       .every((item) => _checked.contains(item.key));
 
-  /// 일괄 동의는 **필수 항목만** 다룬다 (이슈 #189).
+  /// 모두 켜져 있는가. 버튼이 `전체 동의`이므로 **선택 항목까지** 본다.
+  bool get _allChecked =>
+      consentItems.every((item) => _checked.contains(item.key));
+
+  /// 일괄 동의는 **이름 그대로 전부** 켠다 (이슈 #235).
   ///
-  /// 선택 항목(광고성 정보 수신)은 화면 높이에 따라 접혀서 안 보일 수 있다. 일괄
-  /// 동의가 거기까지 켜면, 사용자는 **무엇에 동의했는지 본 적도 없이** 동의하게 된다.
-  /// 실제로 필수 4개까지만 보이는 화면에서 이 버튼을 누르면 마케팅 동의가 함께 켜졌다.
+  /// 전에는 필수만 켰다 (이슈 #189). 화면 아래로 밀린 선택 항목까지 켜면
+  /// "본 적 없는 것에 동의하게 된다"는 이유였는데, **해법이 틀렸다.**
+  /// `전체 동의`라고 써 놓고 일부만 켜면 사용자는 다 켜진 줄 알고 넘어간다.
+  /// 이름과 동작이 어긋나는 쪽이 모르고 동의하는 것보다 나쁘다.
   ///
-  /// 선택 항목은 눈으로 보고 직접 누르게 둔다. 한 번 더 누르는 비용보다
-  /// 모르고 동의하는 비용이 크다.
-  void _toggleAllRequired() {
+  /// #189가 걱정한 것은 실은 **켜진 것을 볼 수 없던 것**이다. 항목마다 체크가
+  /// 보이고 스크롤하면 확인할 수 있으며, 선택 항목만 따로 끌 수도 있다.
+  void _toggleAll() {
     setState(() {
-      if (_allRequiredChecked) {
-        _checked.removeAll(_requiredKeys);
+      if (_allChecked) {
+        _checked.clear();
       } else {
-        _checked.addAll(_requiredKeys);
+        _checked.addAll(consentItems.map((item) => item.key));
       }
     });
   }
-
-  Iterable<String> get _requiredKeys =>
-      consentItems.where((item) => item.required).map((item) => item.key);
 
   Future<void> _submit() async {
     setState(() {
@@ -133,8 +135,8 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               SizedBox(height: _headerToAllAgree.h),
 
               ConsentAllAgreeButton(
-                checked: _allRequiredChecked,
-                onTap: _toggleAllRequired,
+                checked: _allChecked,
+                onTap: _toggleAll,
               ),
               SizedBox(height: _allAgreeToItems.h),
 

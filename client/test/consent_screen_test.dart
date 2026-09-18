@@ -93,14 +93,40 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('일괄 동의는 선택 항목을 켜지 않는다 (이슈 #189)', (tester) async {
+  testWidgets('일괄 동의는 선택 항목까지 켠다 (이슈 #235)', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
     await tapItem(tester, allAgree());
     await tapItem(tester, cta());
 
-    // 화면 밖에 있을 수 있는 항목이 함께 켜지면 "모르고 동의"가 된다.
+    // 버튼이 `전체 동의`다. 필수만 켜면 다 켜진 줄 알고 넘어간다.
+    // (한때 필수만 켰다 — 이슈 #189. 이름과 동작이 어긋나 되돌렸다.)
+    expect(repo.marketing, isTrue);
+    expect(repo.calls, 1);
+  });
+
+  testWidgets('일괄 동의를 다시 누르면 전부 꺼진다 (이슈 #235)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tapItem(tester, allAgree()); // 전부 켬
+    await tapItem(tester, allAgree()); // 전부 끔
+    await tapItem(tester, cta());
+
+    // 필수가 꺼졌으므로 진행되지 않는다
+    expect(repo.calls, 0);
+  });
+
+  testWidgets('선택만 따로 끌 수 있다 (이슈 #235)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tapItem(tester, allAgree());
+    await tapChipMark(tester, optionalLabel); // 선택만 끈다
+    await tapItem(tester, cta());
+
+    // 전체 동의로 켜졌어도 개별로 되돌릴 수 있어야 한다.
     expect(repo.marketing, isFalse);
     expect(repo.calls, 1);
   });
@@ -118,28 +144,15 @@ void main() {
     expect(find.text('역할 선택'), findsOneWidget);
   });
 
-  testWidgets('선택 항목을 직접 누르면 그때 켜진다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    await tapItem(tester, allAgree());
-    await tapChipMark(tester, optionalLabel);
-    await tapItem(tester, cta());
-
-    expect(repo.marketing, isTrue);
-  });
-
-  testWidgets('일괄 동의를 껐다 켜도 직접 고른 선택은 남는다', (tester) async {
+  testWidgets('선택 항목만 눌러도 켜진다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
     await tapChipMark(tester, optionalLabel);
+    // 필수가 덜 찼으므로 전체 동의로 마저 채운다
     await tapItem(tester, allAgree());
-    await tapItem(tester, allAgree()); // 껐다
-    await tapItem(tester, allAgree()); // 다시 켠다
     await tapItem(tester, cta());
 
-    // 일괄 버튼이 남의 선택까지 되돌리면 방금 고른 것이 말없이 사라진다.
     expect(repo.marketing, isTrue);
   });
 

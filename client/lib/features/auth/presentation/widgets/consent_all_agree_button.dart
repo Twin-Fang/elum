@@ -10,8 +10,8 @@ import '../../../../core/widgets/app_pressable.dart';
 /// **항목과 같은 무게로 두지 않는다.** 다섯 개 중 하나처럼 읽히면 "전부"라는 뜻이
 /// 흐려진다. 그래서 항목(50)보다 높고(68), 눌리면 통째로 색이 찬다.
 ///
-/// 누르면 **필수 항목만** 켜진다 (이슈 #189). 선택 항목은 화면 아래로 밀려 보이지
-/// 않을 수 있어, 여기서 함께 켜면 본 적 없는 것에 동의하게 된다.
+/// 누르면 **선택 항목까지 전부** 켜진다 (이슈 #235). 한때 필수만 켰는데,
+/// `전체 동의`라고 써 놓고 일부만 켜면 다 켜진 줄 알고 넘어간다.
 class ConsentAllAgreeButton extends StatelessWidget {
   const ConsentAllAgreeButton({
     super.key,

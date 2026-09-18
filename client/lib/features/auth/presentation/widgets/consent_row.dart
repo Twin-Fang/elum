@@ -11,8 +11,12 @@ import '../../domain/consent_documents.dart';
 /// 전에는 칩(`ConsentChip`, 344×68 테두리 박스)이었다. 디자인이 **테두리 없는 한 줄**로
 /// 바뀌었다 — 전체 동의 버튼만 상자를 갖고, 항목은 목록처럼 읽힌다.
 ///
-/// **탭 영역이 둘이다.** 왼쪽 체크는 동의 토글, 나머지는 전문 열기.
-/// 한 덩어리로 두면 내용을 보려다 동의가 눌리거나 그 반대가 된다.
+/// **탭 영역이 둘이다.** 왼쪽(체크 + `필수`/`선택` 배지)은 동의 토글,
+/// 제목부터 오른쪽은 전문 열기. 한 덩어리로 두면 내용을 보려다 동의가 눌린다.
+///
+/// 🔴 배지까지 토글에 넣은 이유 (이슈 #235) — 체크만 누르게 두니 **탭 영역이
+/// 50밖에 안 돼 손가락으로 맞추기 어려웠다.** 배지는 누를 것이 없는 라벨이라
+/// 여기 붙이면 영역이 88로 넓어지면서 잃는 것이 없다.
 class ConsentRow extends StatelessWidget {
   const ConsentRow({
     super.key,
@@ -55,20 +59,32 @@ class ConsentRow extends StatelessWidget {
       height: height.h,
       child: Row(
         children: [
-          // 체크만 따로 누른다. 탭 영역이 체크 크기(20)면 손가락으로 맞추기 어려워
-          // 줄 높이만큼 세로로 넓힌다.
+          // 체크 + 배지를 한 덩어리로 누른다 (88×50). 체크(20)만 받으면 좁다.
           AppPressable(
             onTap: onToggle,
             child: SizedBox(
-              width: (_checkLeft + _checkSize + _checkToBadge).w,
+              width: (_checkLeft + _checkSize + _checkToBadge + _badgeSlot).w,
               height: double.infinity,
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: (_checkLeft - _checkToBadge).w,
+              child: Row(
+                children: [
+                  SizedBox(width: _checkLeft.w),
+                  _CheckCircle(checked: isChecked),
+                  SizedBox(width: _checkToBadge.w),
+                  SizedBox(
+                    width: _badgeSlot.w,
+                    child: Text(
+                      item.required ? '필수' : '선택',
+                      maxLines: 1,
+                      softWrap: false,
+                      // 필수는 포인트색으로 눈에 걸리게, 선택은 보조색으로 물러난다
+                      style: context.typo.consentBadge.copyWith(
+                        color: item.required
+                            ? colors.checkDone
+                            : colors.textSecondary,
+                      ),
+                    ),
                   ),
-                  child: _CheckCircle(checked: isChecked),
-                ),
+                ],
               ),
             ),
           ),
@@ -79,20 +95,6 @@ class ConsentRow extends StatelessWidget {
                 height: double.infinity,
                 child: Row(
                   children: [
-                    SizedBox(
-                      width: _badgeSlot.w,
-                      child: Text(
-                        item.required ? '필수' : '선택',
-                        maxLines: 1,
-                        softWrap: false,
-                        // 필수는 포인트색으로 눈에 걸리게, 선택은 보조색으로 물러난다
-                        style: context.typo.consentBadge.copyWith(
-                          color: item.required
-                              ? colors.checkDone
-                              : colors.textSecondary,
-                        ),
-                      ),
-                    ),
                     Expanded(
                       child: Text(
                         item.label,

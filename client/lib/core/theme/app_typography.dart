@@ -27,6 +27,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.cardDescription,
     required this.reviewTitle,
     required this.pinTitle,
+    required this.docSection,
+    required this.docBody,
     required this.linkCode,
     required this.linkTimer,
     required this.linkRetryChip,
@@ -120,6 +122,14 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// PIN 화면 제목 (28/w800). title(28)과 크기는 같지만 줄간격이 다르다.
   final TextStyle pinTitle;
+
+  /// 약관 전문의 섹션 제목 `0. 누가 입력하고…` (16/w700 Pretendard).
+  ///
+  /// 긴 글이라 제목용 둥근 폰트(Tmoney)를 쓰지 않는다 — 글자가 뭉쳐 읽기 어렵다.
+  final TextStyle docSection;
+
+  /// 약관 전문 본문 (14/w400 Pretendard). 화면 본문(`body`, 16 Tmoney)보다 작다.
+  final TextStyle docBody;
 
   /// 연결 암호 여섯 글자 (40/w800). 이 화면에서 가장 큰 글자다.
   final TextStyle linkCode;
@@ -321,6 +331,18 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.2,
     ),
+    docSection: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+      height: 1.4,
+    ),
+    docBody: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.6,
+    ),
     linkCode: TextStyle(
       fontFamily: fontFamily,
       fontSize: 40,
@@ -471,6 +493,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? cardDescription,
     TextStyle? reviewTitle,
     TextStyle? pinTitle,
+    TextStyle? docSection,
+    TextStyle? docBody,
     TextStyle? linkCode,
     TextStyle? linkTimer,
     TextStyle? linkRetryChip,
@@ -512,6 +536,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       cardDescription: cardDescription ?? this.cardDescription,
       reviewTitle: reviewTitle ?? this.reviewTitle,
       pinTitle: pinTitle ?? this.pinTitle,
+      docSection: docSection ?? this.docSection,
+      docBody: docBody ?? this.docBody,
       linkCode: linkCode ?? this.linkCode,
       linkTimer: linkTimer ?? this.linkTimer,
       linkRetryChip: linkRetryChip ?? this.linkRetryChip,
@@ -558,6 +584,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       cardDescription: TextStyle.lerp(cardDescription, other.cardDescription, t)!,
       reviewTitle: TextStyle.lerp(reviewTitle, other.reviewTitle, t)!,
       pinTitle: TextStyle.lerp(pinTitle, other.pinTitle, t)!,
+      docSection: TextStyle.lerp(docSection, other.docSection, t)!,
+      docBody: TextStyle.lerp(docBody, other.docBody, t)!,
       linkCode: TextStyle.lerp(linkCode, other.linkCode, t)!,
       linkTimer: TextStyle.lerp(linkTimer, other.linkTimer, t)!,
       linkRetryChip:
