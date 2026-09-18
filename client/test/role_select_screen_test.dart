@@ -33,7 +33,19 @@ void main() {
         ),
         GoRoute(
           path: Routes.onboardingName,
-          builder: (context, state) => const Scaffold(body: Text('이름 화면')),
+          // 실제 NameScreen도 canPop이면 뒤로가기를 그린다. 대역도 같게 둔다.
+          builder: (context, state) => Scaffold(
+            body: Column(
+              children: [
+                const Text('이름 화면'),
+                if (context.canPop())
+                  TextButton(
+                    onPressed: () => context.pop(),
+                    child: const Text('이름에서 뒤로'),
+                  ),
+              ],
+            ),
+          ),
         ),
         GoRoute(
           path: Routes.linkEnter,
@@ -79,11 +91,15 @@ void main() {
     expect(find.textContaining('코드'), findsNothing);
   });
 
-  testWidgets('되돌릴 수 있다는 것을 고르기 전에 말한다', (tester) async {
+  testWidgets('지킬 수 없는 약속을 하지 않는다 (이슈 #212)', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    expect(find.text('나중에 바꿀 수 있어요'), findsOneWidget);
+    // 명세에는 `나중에 바꿀 수 있어요`가 있지만 **바꿀 자리가 없다.**
+    // 설정에 역할 바꾸기가 없고 연결이 끝나면 로그아웃 말고는 길이 없다.
+    // 안심은 문구가 아니라 뒤로가기로 준다.
+    expect(find.textContaining('나중에'), findsNothing);
+    expect(find.textContaining('바꿀 수 있'), findsNothing);
   });
 
   testWidgets('다음 버튼이 없다 — 탭하면 바로 넘어간다', (tester) async {
@@ -132,6 +148,23 @@ void main() {
     // go로 갈아끼웠다면 스택이 없어 pop이 실패하고 연결 화면에 그대로 남는다
     // (이슈 #194와 같은 함정). push로 얹었기에 돌아올 수 있다.
     expect(find.text('보호자예요'), findsOneWidget);
+  });
+
+  testWidgets('보호자를 골라도 갇히지 않는다 — 이름 화면에서 되돌아온다 (이슈 #212)',
+      (tester) async {
+    // 이룸이 쪽만 push로 두고 보호자는 go로 뒀더니, 잘못 누른 사람이 이름 화면에
+    // 갇혔다. 두 갈래는 **대칭**이어야 한다.
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('보호자예요'));
+    await tester.pumpAndSettle();
+    expect(find.text('이름 화면'), findsOneWidget);
+
+    await tester.tap(find.text('이름에서 뒤로'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('이룸이예요'), findsOneWidget);
   });
 
   testWidgets('역할만 골랐을 때는 이룸이 휴대폰으로 표시하지 않는다', (tester) async {

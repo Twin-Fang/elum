@@ -50,7 +50,13 @@ class _NameScreenState extends ConsumerState<NameScreen> {
     final profile = ref.watch(onboardingProvider);
     final canSubmit = profile.canProceedFromName;
 
+    // 역할 선택에서 push로 들어오면 돌아갈 수 있어야 한다 (이슈 #212).
+    // 다만 스플래시·가드처럼 go로 갈아끼워 들어오는 길도 있어, 그때는 pop할 것이
+    // 없다. canPop으로 갈라 **없는 버튼을 눌러 아무 일도 안 나는 상황**을 막는다.
+    final canGoBack = context.canPop();
+
     return ElumScaffold(
+      onBack: canGoBack ? () => context.pop() : null,
       bottomButton: ElumButton(
         label: '다음',
         // 진행 조건은 모델이 안다 — 화면마다 재구현하지 않는다
@@ -59,10 +65,11 @@ class _NameScreenState extends ConsumerState<NameScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const ElumHeader(
+          ElumHeader(
             title: '아이를 어떻게\n불러드릴까요?',
             // 개인정보 최소수집 원칙의 UI 표현 — 삭제하지 않는다
             description: '정확한 실명이 아니어도 괜찮아요',
+            hasBackButton: canGoBack,
           ),
           // Figma 설명 하단(227) → 입력 필드(279)
           SizedBox(height: context.space.headerToContent),

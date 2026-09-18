@@ -43,10 +43,11 @@ class RoleSelectScreen extends ConsumerWidget {
     if (!context.mounted) return;
 
     switch (role) {
+      // 양쪽 다 push다. 잘못 고른 사람이 **어느 쪽으로 갔든** 뒤로 돌아와야 한다.
+      // go로 갈아끼우면 스택이 없어 pop이 실패한다 (이슈 #194와 같은 함정).
       case AppRole.guardian:
-        context.go(Routes.onboardingName);
+        context.push(Routes.onboardingName);
       case AppRole.elumi:
-        // push — 연결 암호 넣기에서 뒤로 누르면 이 화면으로 돌아와야 한다
         context.push(Routes.linkEnter);
     }
   }
@@ -59,11 +60,11 @@ class RoleSelectScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const ElumHeader(
-              title: '서비스를\n누가 사용하나요?',
-              // 되돌릴 수 있다는 것을 **고르기 전에** 말한다
-              description: '나중에 바꿀 수 있어요',
-            ),
+            // 설명을 두지 않는다. 명세에는 `나중에 바꿀 수 있어요`가 있지만
+            // **지킬 수 없는 약속이다** — 설정에 역할 바꾸기가 없고, 연결이 끝나면
+            // 로그아웃 말고는 되돌릴 길이 없다. 안심은 문구가 아니라 **뒤로가기**로
+            // 준다. 양쪽 다 push로 띄워 다음 화면에서 돌아올 수 있다.
+            const ElumHeader(title: '서비스를\n누가 사용하나요?'),
             SizedBox(height: context.space.headerToContent),
             for (final role in AppRole.values) ...[
               AppPressable(
