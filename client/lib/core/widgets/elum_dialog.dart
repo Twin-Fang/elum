@@ -10,7 +10,12 @@ import 'app_pressable.dart';
 ///
 /// 지금은 성공 하나뿐이다. 경고·물음이 생기면 여기에 값을 더하고
 /// [_iconAsset]에 에셋을 한 줄 추가한다 — 화면 코드는 건드리지 않는다.
-enum ElumDialogIcon { success }
+enum ElumDialogIcon {
+  success,
+
+  /// 주의 — **붉지 않다.** 아동도 보는 화면이라 빨간 경고를 쓰지 않는다 (#242).
+  warning,
+}
 
 /// 버튼의 무게. 색만 바꾼다 — 크기·모서리는 어느 쪽이든 같다.
 enum ElumDialogTone {
@@ -22,6 +27,12 @@ enum ElumDialogTone {
 
   /// 되돌릴 수 없는 동작. 붉은 배경 + 흰 글자.
   danger,
+
+  /// 지금 나가면 **잃는다**. 노란 배경 + 흰 글자 (#242).
+  ///
+  /// `danger`와 나누는 기준 — 계정이나 저장된 것이 사라지면 `danger`,
+  /// 만들던 중인 것만 사라지면 `warn`이다.
+  warn,
 }
 
 /// 팝업 버튼 하나.
@@ -111,6 +122,7 @@ class ElumDialogCard<T> extends StatelessWidget {
 
   static String _iconAsset(ElumDialogIcon icon) => switch (icon) {
         ElumDialogIcon.success => AppAssets.dialogCheck,
+        ElumDialogIcon.warning => AppAssets.dialogWarn,
       };
 
   @override
@@ -193,6 +205,7 @@ class ElumDialogCard<T> extends StatelessWidget {
       ElumDialogTone.primary => (colors.checkDone, colors.surface),
       ElumDialogTone.neutral => (colors.buttonNeutral, colors.buttonNeutralText),
       ElumDialogTone.danger => (colors.danger, colors.dangerText),
+      ElumDialogTone.warn => (colors.warn, colors.warnText),
     };
 
     return AppPressable(

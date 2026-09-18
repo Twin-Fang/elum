@@ -114,6 +114,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginKakaoLabel,
     required this.loginNaverBg,
     required this.loginNaverLabel,
+    required this.warn,
+    required this.warnText,
     required this.glassFill,
     required this.glassBorder,
     required this.rewardBannerBg,
@@ -325,6 +327,14 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color loginKakaoLabel;
   final Color loginNaverBg;
   final Color loginNaverLabel;
+  /// 주의 톤 (#F5A524) — `danger`와 다르다 (이슈 #242).
+  ///
+  /// `danger`(#BB3F38)는 **되돌릴 수 없는 파괴**(회원탈퇴)에 쓴다.
+  /// 이건 "지금 나가면 만들던 게 사라진다" 정도다. 아동도 보는 화면이라
+  /// 붉은 경고를 함부로 쓰지 않는다.
+  final Color warn;
+  final Color warnText;
+
   /// 반투명 유리 면 — 배경 그라데이션 위에 얹는 입력칸·카드 (이슈 #239).
   ///
   /// 불투명한 흰 상자를 올리면 뒤 배경이 잘려 화면이 두 조각으로 보인다.
@@ -465,6 +475,8 @@ class AppColors extends ThemeExtension<AppColors> {
     loginKakaoLabel: Color(0xFF191600),
     loginNaverBg: Color(0xFF03C75A),
     loginNaverLabel: Color(0xFFFFFFFF),
+    warn: Color(0xFFF5A524),
+    warnText: Color(0xFFFFFFFF),
     glassFill: Color(0x8CFFFFFF),
     glassBorder: Color(0xB3FFFFFF),
     rewardBannerBg: Color(0xFFFFF3D6),
@@ -573,6 +585,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? loginKakaoLabel,
     Color? loginNaverBg,
     Color? loginNaverLabel,
+    Color? warn,
+    Color? warnText,
     Color? glassFill,
     Color? glassBorder,
     Color? rewardBannerBg,
@@ -671,6 +685,8 @@ class AppColors extends ThemeExtension<AppColors> {
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
       loginNaverLabel: loginNaverLabel ?? this.loginNaverLabel,
+      warn: warn ?? this.warn,
+      warnText: warnText ?? this.warnText,
       glassFill: glassFill ?? this.glassFill,
       glassBorder: glassBorder ?? this.glassBorder,
       rewardBannerBg: rewardBannerBg ?? this.rewardBannerBg,
@@ -790,6 +806,8 @@ class AppColors extends ThemeExtension<AppColors> {
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,
       loginNaverLabel: Color.lerp(loginNaverLabel, other.loginNaverLabel, t)!,
+      warn: Color.lerp(warn, other.warn, t)!,
+      warnText: Color.lerp(warnText, other.warnText, t)!,
       glassFill: Color.lerp(glassFill, other.glassFill, t)!,
       glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
       rewardBannerBg: Color.lerp(rewardBannerBg, other.rewardBannerBg, t)!,

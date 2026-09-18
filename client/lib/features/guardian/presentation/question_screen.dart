@@ -65,6 +65,7 @@ class QuestionScreen extends ConsumerWidget {
     }
 
     return RoutineFlowScaffold(
+      confirmExit: true,
       onBack: () => context.pop(),
       // 답을 하나라도 골랐을 때만 CTA가 나타난다 (Figma 262:4854)
       bottomButton: state.answers.isEmpty

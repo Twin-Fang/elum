@@ -147,6 +147,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     }
 
     return RoutineFlowScaffold(
+      // AI가 30초 걸려 만든 카드다. 저장 전에 나가면 통째로 날아간다 (#242).
+      confirmExit: true,
       onBack: () => context.pop(),
       bottomButton: ElumButton(label: '저장하기', onPressed: _save),
       // Figma 262:5124의 배경은 단색 #F7F2EF뿐이다 — 글로우가 없다 (이슈 #79)

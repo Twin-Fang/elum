@@ -150,6 +150,8 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
     final recents = ref.watch(recentRewardsProvider);
 
     return RoutineFlowScaffold(
+      // 여기서 나가면 앞서 만든 답까지 사라진다 (#242).
+      confirmExit: !widget.fromReview,
       onBack: () => context.pop(),
       bottomButton: Column(
         mainAxisSize: MainAxisSize.min,

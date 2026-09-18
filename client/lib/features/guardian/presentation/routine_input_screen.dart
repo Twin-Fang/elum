@@ -9,7 +9,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
@@ -71,6 +73,20 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
     final canSubmit = rawInput.trim().isNotEmpty;
     final space = context.space;
 
+    return PopScope(
+      // 쓴 글이 있으면 시스템 뒤로가기도 잡는다 (#242).
+      canPop: !canSubmit,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        if (await confirmLeaveRoutineFlow(context) && context.mounted) {
+          context.pop();
+        }
+      },
+      child: _scaffold(context, canSubmit, space),
+    );
+  }
+
+  Widget _scaffold(BuildContext context, bool canSubmit, AppSpacing space) {
     return Scaffold(
       backgroundColor: context.colors.background,
       // 키보드가 올라와도 배경이 밀려 찌그러지지 않게 한다
@@ -81,7 +97,7 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
           SafeArea(
             child: Column(
               children: [
-                const _BackRow(),
+                _BackRow(confirmExit: canSubmit),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -116,7 +132,10 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
 
 /// 뒤로가기 (Figma x=24, y=87)
 class _BackRow extends StatelessWidget {
-  const _BackRow();
+  const _BackRow({required this.confirmExit});
+
+  /// 쓴 글이 있으면 나가기 전에 묻는다 (#242).
+  final bool confirmExit;
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +144,12 @@ class _BackRow extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.only(left: context.space.screenH, top: 12.h),
         child: AppPressable(
-          onTap: () => context.pop(),
+          onTap: () async {
+            if (!confirmExit) return context.pop();
+            if (await confirmLeaveRoutineFlow(context) && context.mounted) {
+              context.pop();
+            }
+          },
           scaleDown: AppPressable.scaleIcon,
           // 정사각형 아이콘이라 가로세로 모두 .w — .h를 섞으면 찌그러진다
           child: SvgPicture.asset(AppAssets.iconBack, width: 24.w, height: 24.w),

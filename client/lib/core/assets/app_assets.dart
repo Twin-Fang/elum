@@ -24,6 +24,12 @@ abstract final class AppAssets {
   /// 원과 체크가 한 파일에 있어 크기만 바꿔 쓰면 된다.
   static const dialogCheck = 'assets/icon/dialog/check_round.svg';
 
+  /// 공통 팝업의 경고 아이콘 (40×40 원 + 흰 느낌표). 이슈 #242.
+  ///
+  /// **빨강이 아니라 노랑이다.** 아동도 볼 수 있는 화면이라 붉은 경고를 쓰지
+  /// 않는다 (client/CLAUDE.md). `danger`(되돌릴 수 없음)와 그래서 색이 다르다.
+  static const dialogWarn = 'assets/icon/dialog/warn_round.svg';
+
   /// 도움 목표 아이콘 (40×40). Figma `온보딩_목표`(204:1002)의 Group 62~65,
   /// 목표별로 서로 다른 아이콘이다 (2026-07-22 갱신, 이슈 #11 후속).
   static String goalIcon(SupportGoal goal) => switch (goal) {
