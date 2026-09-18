@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +12,9 @@ import '../../features/onboarding/application/onboarding_notifier.dart';
 import '../config/app_config.dart';
 import '../router/app_router.dart';
 import 'dev_log_buffer.dart';
+import 'dev_log_file.dart';
+import 'dev_state_dump.dart';
+import 'dev_tools_visibility.dart';
 
 /// 개발자 도구 오버레이 — 드래그 가능한 플로팅 버튼 + 기능 패널.
 ///
@@ -54,6 +60,17 @@ class _DevToolsOverlayState extends State<DevToolsOverlay> {
     // 플래그가 꺼져 있으면 아무것도 얹지 않는다.
     // 위젯 트리에 추가되는 것이 없어 런타임 비용이 0이다.
     if (!AppConfig.showDevTools) return widget.child;
+
+    // 숨기기를 누르면 이번 실행 동안 버튼이 사라진다.
+    // 되살리려면 작업관리자에서 앱을 완전히 종료했다 켠다 (이슈 #219).
+    return ValueListenableBuilder<bool>(
+      valueListenable: DevToolsVisibility.hidden,
+      builder: (context, hidden, _) =>
+          hidden ? widget.child : _buildOverlay(context),
+    );
+  }
+
+  Widget _buildOverlay(BuildContext context) {
 
     // LayoutBuilder를 Stack 바깥에 둔다 — Positioned는 Stack의 직계 자식이어야 한다.
     // LayoutBuilder를 사이에 끼우면 ParentData 타입이 어긋나 런타임에 터진다.
@@ -161,7 +178,7 @@ class _DevToolsSheet extends StatefulWidget {
   State<_DevToolsSheet> createState() => _DevToolsSheetState();
 }
 
-enum _DevView { menu, logs, status, navigate, confirmReset }
+enum _DevView { menu, logs, status, navigate, confirmReset, confirmLogout, dump }
 
 class _DevToolsSheetState extends State<_DevToolsSheet> {
   _DevView _view = _DevView.menu;
@@ -215,6 +232,8 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
       _DevView.status => '현재 상태',
       _DevView.navigate => '화면 이동',
       _DevView.confirmReset => '회원을 삭제할까요?',
+      _DevView.confirmLogout => '로그아웃할까요?',
+      _DevView.dump => '상태 덤프',
     };
 
     return Padding(
@@ -260,6 +279,12 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
             onDone: widget.onClose,
             onNavigate: widget.onNavigate,
           ),
+        _DevView.confirmLogout => _ConfirmLogoutView(
+            onCancel: () => setState(() => _view = _DevView.menu),
+            onDone: widget.onClose,
+            onNavigate: widget.onNavigate,
+          ),
+        _DevView.dump => const _DumpView(),
       };
 }
 
@@ -313,6 +338,34 @@ class _DevMenuState extends State<_DevMenu> {
           label: '화면 이동',
           subtitle: '온보딩 단계·보호자 홈',
           onTap: () => widget.onSelect(_DevView.navigate),
+        ),
+        const Divider(height: 1),
+        _Tile(
+          icon: Icons.logout,
+          label: '로그아웃',
+          subtitle: '계정은 남기고 세션만 끊는다',
+          onTap: () => widget.onSelect(_DevView.confirmLogout),
+        ),
+        const Divider(height: 1),
+        // 로그 용량은 실시간으로 바뀐다 — 얼마나 찼는지 여기서 바로 보인다
+        ValueListenableBuilder<int>(
+          valueListenable: DevLogFile.sizeBytes,
+          builder: (context, bytes, _) => _Tile(
+            icon: Icons.download_outlined,
+            label: '상태 덤프 내보내기',
+            subtitle: '저장값·세션·설정·로그를 파일 하나로 '
+                '(${DevStateDump.formatBytes(bytes)} / 2.00 MB)',
+            onTap: () => widget.onSelect(_DevView.dump),
+          ),
+        ),
+        _Tile(
+          icon: Icons.visibility_off_outlined,
+          label: '디버깅 버튼 숨기기',
+          subtitle: '앱을 완전히 종료했다 켜면 다시 보인다',
+          onTap: () {
+            DevToolsVisibility.hide();
+            widget.onSelect(_DevView.menu);
+          },
         ),
       ],
     );
@@ -379,6 +432,185 @@ class _ConfirmResetView extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 로그아웃 확인 — 계정은 남기고 세션만 끊는다 (이슈 #219).
+///
+/// 회원삭제는 되돌릴 수 없어 테스트 중 계정을 계속 새로 만들어야 했다.
+/// 로그인 흐름만 다시 밟고 싶을 때 쓴다.
+class _ConfirmLogoutView extends ConsumerWidget {
+  const _ConfirmLogoutView({
+    required this.onCancel,
+    required this.onDone,
+    required this.onNavigate,
+  });
+
+  final VoidCallback onCancel;
+  final VoidCallback onDone;
+  final void Function(String route) onNavigate;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '계정은 그대로 남습니다.\n세션만 끊고 로그인 화면으로 갑니다.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(onPressed: onCancel, child: const Text('취소')),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () async {
+                    await ref.read(authRepositoryProvider).logout();
+                    // 메모리에 남은 이전 계정 값도 비운다 (회원삭제와 같은 이유, 이슈 #91)
+                    ref.read(routineFlowProvider.notifier).reset();
+                    ref.invalidate(myRoutinesProvider);
+                    ref.invalidate(onboardingProvider);
+                    if (!context.mounted) return;
+                    onDone();
+                    onNavigate(Routes.login);
+                  },
+                  child: const Text('로그아웃'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 상태 덤프 — 내부 값을 전부 모아 보여주고, 복사·파일 내보내기를 준다 (이슈 #219).
+///
+/// QA가 문제를 만난 자리에서 그대로 넘길 수 있게 하는 것이 목적이다.
+/// 화면 캡처만으로는 어떤 값이 들어 있었는지 알 수 없다.
+class _DumpView extends StatefulWidget {
+  const _DumpView();
+
+  @override
+  State<_DumpView> createState() => _DumpViewState();
+}
+
+class _DumpViewState extends State<_DumpView> {
+  String? _summary;
+  String? _message;
+  bool _busy = false;
+
+  /// ⚠️ `initState`가 아니라 여기서 읽는다.
+  ///
+  /// 덤프는 `MediaQuery`(화면 크기·글꼴 배율·다크모드)를 본다. `initState`에서
+  /// 상속 위젯을 읽으면 Flutter가 막는다 — 실제로 첫 구현에서
+  /// `[기기] (수집 실패: dependOnInheritedWidgetOfExactType<MediaQuery>() was
+  /// called before initState() completed)`가 찍혔다.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_summary == null) _load();
+  }
+
+  Future<void> _load() async {
+    // 요약만 먼저 보여준다. 로그 전체(최대 2MB)를 화면에 그리면 느리다.
+    final text = await DevStateDump.summary(context);
+    if (mounted) setState(() => _summary = text);
+  }
+
+  /// 로그까지 붙인 전체를 만든다. 복사·내보내기가 공유한다.
+  Future<String> _full() => DevStateDump.full(mounted ? context : null);
+
+  Future<void> _copy() async {
+    setState(() => _busy = true);
+    try {
+      await Clipboard.setData(ClipboardData(text: await _full()));
+      _say('클립보드에 복사했습니다');
+    } catch (e) {
+      _say('복사하지 못했습니다: $e');
+    }
+  }
+
+  Future<void> _export() async {
+    setState(() => _busy = true);
+    try {
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/${DevStateDump.fileName()}');
+      await file.writeAsString(await _full());
+      // 공유 시트를 띄운다. 사용자가 취소해도 예외가 아니라 그냥 닫힌다.
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], text: 'elum 디버그 덤프'),
+      );
+      _say('내보냈습니다: ${file.path.split('/').last}');
+    } catch (e) {
+      _say('내보내지 못했습니다: $e');
+    }
+  }
+
+  void _say(String m) {
+    if (mounted) setState(() {
+      _busy = false;
+      _message = m;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_summary == null) {
+      return const Padding(
+        padding: EdgeInsets.all(32),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _busy ? null : _copy,
+                  icon: const Icon(Icons.copy, size: 18),
+                  label: const Text('복사'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: _busy ? null : _export,
+                  icon: const Icon(Icons.ios_share, size: 18),
+                  label: const Text('내보내기'),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (_message != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Text(_message!, style: const TextStyle(fontSize: 12)),
+          ),
+        const SizedBox(height: 8),
+        Flexible(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: SelectableText(
+              _summary!,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

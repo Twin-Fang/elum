@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'dev_log_file.dart';
+
 /// 앱 내 로그 뷰어용 링버퍼.
 ///
 /// 실기기·릴리스 빌드에는 `flutter run` 콘솔이 없어 로그를 볼 방법이 없다.
@@ -11,9 +13,11 @@ import 'package:flutter/foundation.dart';
 ///
 /// 정식 출시 전 제거 대상. (이슈 #13)
 abstract final class DevLogBuffer {
-  /// 메모리를 무한정 먹지 않도록 상한을 둔다.
-  /// 데모 중 원인 파악에는 최근 로그면 충분하다.
-  static const maxLines = 200;
+  /// 메모리 상한. 실시간 보기용이라 화면에서 훑을 만큼만 둔다.
+  ///
+  /// 200줄은 일과 하나 만드는 동안 다 밀려났다 — 응답 본문까지 펼치면 더 빨리 찬다.
+  /// 오래된 것은 [DevLogFile]이 2MB까지 붙들고 있으므로 여기서 밀려도 잃지 않는다.
+  static const maxLines = 2000;
 
   static final List<String> _lines = <String>[];
 
@@ -42,6 +46,8 @@ abstract final class DevLogBuffer {
 
   static void _add(String message) {
     _lines.add(message);
+    // 파일에도 남긴다 — 앱이 죽으면 메모리는 사라진다 (이슈 #219)
+    DevLogFile.append(message);
     // 상한을 넘으면 오래된 줄부터 버린다
     if (_lines.length > maxLines) {
       _lines.removeRange(0, _lines.length - maxLines);

@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
+
+import '../config/app_config.dart';
 
 /// 애플리케이션 전체에서 사용하는 로거.
 /// 타임스탐프, 카테고리, 구조화된 데이터를 자동으로 포함한다.
@@ -37,14 +41,47 @@ abstract final class AppLogger {
   }
 
   /// 값을 문자열로 변환 (깊은 객체도 표시)
+  /// 값 하나가 로그를 통째로 삼키지 않도록 둔 상한.
+  /// 카드 5장 + 이미지 경로가 들어가는 일과 응답이 대략 2~3천자라 넉넉히 잡았다.
+  static const _maxExpandedLength = 8000;
+
+  /// 펼쳐서 찍을지. 개발자 도구를 켠 빌드에서만 전체를 남긴다 (이슈 #219).
+  ///
+  /// 예전에는 컬렉션을 `{5 entries}`로만 줄여서, **백엔드가 무슨 값을 보냈는지
+  /// 로그만 봐서는 알 수 없었다.** 그 탓에 실패 원인을 매번 서버 로그에서 찾았다.
+  static bool get _expand => kDebugMode || AppConfig.showDevTools;
+
   static String _formatValue(dynamic value) {
     if (value == null) return 'null';
-    if (value is String) return value.length > 100 ? '${value.substring(0, 100)}...' : value;
     if (value is num || value is bool) return value.toString();
-    if (value is List) return '[${value.length} items]';
-    if (value is Map) return '{${value.length} entries}';
-    return value.runtimeType.toString();
+
+    if (!_expand) {
+      // 개발자 도구가 꺼진 빌드 — 예전처럼 크기만 남긴다
+      if (value is String) {
+        return value.length > 100 ? '${value.substring(0, 100)}...' : value;
+      }
+      if (value is List) return '[${value.length} items]';
+      if (value is Map) return '{${value.length} entries}';
+      return value.runtimeType.toString();
+    }
+
+    if (value is String) return _cap(value);
+
+    // Map·List는 JSON으로 펼친다. 직렬화할 수 없는 값이 섞이면 toString으로 떨어뜨려
+    // **로그 한 줄 때문에 예외가 나지 않게** 한다.
+    if (value is Map || value is List) {
+      try {
+        return _cap(jsonEncode(value, toEncodable: (o) => o.toString()));
+      } catch (_) {
+        return _cap(value.toString());
+      }
+    }
+    return _cap(value.toString());
   }
+
+  static String _cap(String s) => s.length > _maxExpandedLength
+      ? '${s.substring(0, _maxExpandedLength)}… (${s.length}자 중 앞부분)'
+      : s;
 
   // ========== 네트워크 로깅 ==========
 

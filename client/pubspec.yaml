@@ -39,6 +39,10 @@ dependencies:
   freezed_annotation: ^3.1.0
   dio: ^5.10.0
   shared_preferences: ^2.5.5
+
+  # 개발자 도구 — 로그 파일 저장·공유 (이슈 #219). 정식 출시 전 제거 대상.
+  path_provider: ^2.1.5
+  share_plus: ^13.3.0
   flutter_svg: ^2.3.0
   flutter_dotenv: ^6.0.1
   flutter_screenutil: ^5.9.3

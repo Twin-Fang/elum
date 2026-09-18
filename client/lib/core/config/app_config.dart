@@ -104,9 +104,13 @@ abstract final class AppConfig {
 
   // --- 개발 ---
 
-  /// 네트워크 로깅. 릴리스 빌드에서는 값과 무관하게 항상 꺼진다.
+  /// 네트워크 로깅.
+  ///
+  /// **개발자 도구를 켰으면 함께 켜진다** (이슈 #219). 디버깅 도구를 열어 두고도
+  /// 백엔드가 무슨 값을 보냈는지 못 보면 도구를 쓸 이유가 없다. QA가 받는
+  /// `ELUM_BUILD=dev` APK는 릴리스 빌드라, `kDebugMode`만 보면 늘 꺼져 있었다.
   static bool get enableNetworkLog =>
-      kDebugMode && _bool('ELUM_ENABLE_NETWORK_LOG', true);
+      (kDebugMode || showDevTools) && _bool('ELUM_ENABLE_NETWORK_LOG', true);
 
   /// 서버 대신 mock 데이터를 쓸지. 서버 준비 전 개발·데모용.
   ///

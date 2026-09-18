@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/dev/dev_log_buffer.dart';
+import 'core/dev/dev_log_file.dart';
 import 'core/logger/app_logger.dart';
 import 'core/storage/local_storage.dart';
 import 'core/storage/token_store.dart';
@@ -21,7 +22,13 @@ Future<void> main() async {
 
   // 실기기·릴리스 빌드에는 콘솔이 없다. 앱 안에서 로그를 보려면 미리 가로채야
   // 하므로 초기화 직후에 건다. (이슈 #13)
-  if (AppConfig.showDevTools) DevLogBuffer.install();
+  // 개발자 도구를 켠 빌드에서만 로그를 붙잡는다.
+  // 파일(2MB 상한)에도 남겨 앱이 죽어도 직전 로그가 남는다 (이슈 #219).
+  // 파일 열기가 실패해도 앱 시작을 막지 않는다 — 로그는 보조 수단이다.
+  if (AppConfig.showDevTools) {
+    await DevLogFile.init();
+    DevLogBuffer.install();
+  }
 
   // 저장소는 앱 시작 시 한 번만 초기화하고 provider로 주입한다.
   final storage = await SharedPrefsStorage.create();
