@@ -92,11 +92,16 @@ public class AdminMemberService {
    *
    * @param days null이면 무기한
    */
+  // 이 클래스는 기본이 읽기 전용이다. 붙이지 않으면 읽기 전용 트랜잭션에 참여해
+  // 저장이 flush되지 않고 조용히 사라진다 — 로그도 화면도 성공으로 보이는데 아무 일도
+  // 일어나지 않는다. 실제로 그렇게 배포됐다.
+  @Transactional
   public void grantPro(String memberId, Integer days, String memo) {
     LocalDateTime expiresAt = (days == null || days <= 0) ? null : LocalDateTime.now().plusDays(days);
     subscriptionService.grantPro(memberId, expiresAt, memo);
   }
 
+  @Transactional
   public void revokePro(String memberId) {
     subscriptionService.revokePro(memberId, "관리자 회수");
   }

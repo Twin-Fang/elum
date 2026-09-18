@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -63,7 +64,15 @@ public class AdminMemberController {
     @RequestParam(name = "memo") String memo,
     RedirectAttributes redirectAttributes
   ) {
-    adminMemberService.grantPro(id, days, memo);
+    // 화면 컨트롤러라 예외를 그대로 올리면 500 페이지가 뜬다. 무엇이 잘못됐는지
+    // 화면에서 알려줘야 관리자가 다시 시도할 수 있다.
+    try {
+      adminMemberService.grantPro(id, days, memo);
+    } catch (CustomException e) {
+      redirectAttributes.addFlashAttribute("errorMessage",
+        "Pro 발급 실패: 사유를 입력해주세요. (E-ADM-001)");
+      return "redirect:/admin/members/" + id;
+    }
     redirectAttributes.addFlashAttribute("message",
       days == null || days <= 0 ? "Pro를 무기한으로 발급했습니다." : "Pro를 " + days + "일간 발급했습니다.");
     return "redirect:/admin/members/" + id;

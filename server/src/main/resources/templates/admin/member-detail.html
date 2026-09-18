@@ -35,6 +35,8 @@
     </div>
 
     <div th:if="${message}" class="alert alert-success" th:text="${message}">완료</div>
+    <!-- 성공만 알리고 실패를 안 알리면, 관리자는 눌렀는데 아무 일도 안 일어난 것처럼 보인다. -->
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">오류</div>
 
     <!-- 요금제 — 결제가 붙기 전까지 Pro를 켜는 유일한 경로다 (이슈 #158). -->
     <div class="card bg-base-100 shadow-md">
