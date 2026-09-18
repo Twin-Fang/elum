@@ -32,6 +32,16 @@ Future<void> main() async {
   final tokens = SecureTokenStore();
   await tokens.load();
 
+  // QA 세션 주입 (디버그 빌드 전용). 로그인 뒤 화면을 실기기로 밟기 위한 통로다.
+  // 이미 세션이 있으면 건드리지 않는다 — 실제 로그인을 덮어쓰면 안 된다.
+  if (!tokens.hasSession && AppConfig.devRefreshToken.isNotEmpty) {
+    await tokens.save(
+      accessToken: AppConfig.devAccessToken,
+      refreshToken: AppConfig.devRefreshToken,
+    );
+    debugPrint('[QA] .env의 토큰으로 세션을 주입했습니다 (디버그 빌드 전용)');
+  }
+
   // 카카오 SDK는 초기화 전에 로그인을 부르면 예외가 난다.
   // 실패해도 다른 제공자는 동작해야 하므로 앱 시작을 막지 않는다.
   await OAuthSdk.initialize();

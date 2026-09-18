@@ -133,6 +133,21 @@ abstract final class AppConfig {
   static bool skipOnboarding =
       (kDebugMode || isDevBuild) && _bool('ELUM_SKIP_ONBOARDING', false);
 
+  /// QA 세션 주입 — **디버그 빌드에서만** 동작한다.
+  ///
+  /// 로그인 뒤에 있는 화면(역할 선택·온보딩·보호자 홈)을 실기기로 확인하려면
+  /// 소셜 로그인을 통과해야 하는데, 계정 입력은 사람 손을 탄다. 그래서 검수할 때
+  /// 서버에서 받은 토큰을 `.env`에 넣어 세션이 있는 상태로 앱을 띄운다.
+  ///
+  /// ⚠️ **`isDevBuild`를 쓰지 않고 `kDebugMode`만 본다.** 개발용 APK는 심사자에게
+  /// 전달되지만 디버그 빌드는 배포되지 않는다. 남의 토큰으로 앱이 열리는 길은
+  /// 배포물에 절대 있으면 안 된다.
+  static String get devRefreshToken =>
+      kDebugMode ? _string('ELUM_DEV_REFRESH_TOKEN', '') : '';
+
+  static String get devAccessToken =>
+      kDebugMode ? _string('ELUM_DEV_ACCESS_TOKEN', '') : '';
+
   // --- 파싱 헬퍼 ---
   // 값이 없거나 형식이 틀려도 예외를 던지지 않는다.
   // 설정 하나 때문에 앱이 뜨지 않으면 데모가 막힌다.
