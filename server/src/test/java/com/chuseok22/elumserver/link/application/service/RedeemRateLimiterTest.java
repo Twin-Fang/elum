@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.link.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.chuseok22.elumserver.common.infrastructure.store.InMemorySharedStateStore;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ class RedeemRateLimiterTest {
   @Test
   @DisplayName("분당 10회까지 통과하고 11번째부터 막는다")
   void limitsPerCaller() {
-    RedeemRateLimiter limiter = new RedeemRateLimiter();
+    RedeemRateLimiter limiter = new RedeemRateLimiter(new InMemorySharedStateStore());
 
     long passed = IntStream.range(0, 20)
       .filter(i -> limiter.tryAcquire("1.2.3.4"))
@@ -29,7 +30,7 @@ class RedeemRateLimiterTest {
   @Test
   @DisplayName("호출자가 다르면 서로 영향을 주지 않는다 — 한 사람이 남을 막지 못한다")
   void isolatesCallers() {
-    RedeemRateLimiter limiter = new RedeemRateLimiter();
+    RedeemRateLimiter limiter = new RedeemRateLimiter(new InMemorySharedStateStore());
 
     IntStream.range(0, 15).forEach(i -> limiter.tryAcquire("1.2.3.4"));
 

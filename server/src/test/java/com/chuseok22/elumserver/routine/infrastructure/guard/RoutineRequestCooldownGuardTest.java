@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.chuseok22.elumserver.common.infrastructure.store.InMemorySharedStateStore;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import java.time.Duration;
@@ -15,7 +16,7 @@ class RoutineRequestCooldownGuardTest {
   @Test
   @DisplayName("같은 회원이 쿨다운 시간 내에 재요청하면 ROUTINE_REQUEST_TOO_FREQUENT를 던진다")
   void guard_sameMemberWithinCooldown_throwsTooFrequent() {
-    RoutineRequestCooldownGuard guard = new RoutineRequestCooldownGuard(Duration.ofSeconds(30));
+    RoutineRequestCooldownGuard guard = new RoutineRequestCooldownGuard(new InMemorySharedStateStore(), Duration.ofSeconds(30));
 
     guard.guard("member-1");
 
@@ -28,7 +29,7 @@ class RoutineRequestCooldownGuardTest {
   @Test
   @DisplayName("다른 회원의 요청은 서로의 쿨다운에 영향을 받지 않는다")
   void guard_differentMembers_doNotBlockEachOther() {
-    RoutineRequestCooldownGuard guard = new RoutineRequestCooldownGuard(Duration.ofSeconds(30));
+    RoutineRequestCooldownGuard guard = new RoutineRequestCooldownGuard(new InMemorySharedStateStore(), Duration.ofSeconds(30));
 
     guard.guard("member-1");
 
@@ -38,7 +39,7 @@ class RoutineRequestCooldownGuardTest {
   @Test
   @DisplayName("쿨다운 시간이 지나면 같은 회원도 다시 요청할 수 있다")
   void guard_afterCooldownExpires_allowsSameMemberAgain() throws InterruptedException {
-    RoutineRequestCooldownGuard guard = new RoutineRequestCooldownGuard(Duration.ofMillis(20));
+    RoutineRequestCooldownGuard guard = new RoutineRequestCooldownGuard(new InMemorySharedStateStore(), Duration.ofMillis(20));
 
     guard.guard("member-1");
     Thread.sleep(30);

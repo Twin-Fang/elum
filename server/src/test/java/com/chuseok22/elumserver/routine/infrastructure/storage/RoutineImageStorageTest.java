@@ -22,7 +22,7 @@ class RoutineImageStorageTest {
 
   @BeforeEach
   void setUp() {
-    routineImageStorage = new RoutineImageStorage(new RoutineProperties(tempDir.toString()));
+    routineImageStorage = new LocalFileRoutineImageStorage(new RoutineProperties(tempDir.toString()));
   }
 
   @Test
@@ -31,10 +31,49 @@ class RoutineImageStorageTest {
     byte[] originalBytes = {1, 2, 3, 4};
     GeneratedImage image = new GeneratedImage(originalBytes, "png");
 
-    String savedPath = routineImageStorage.save("batch-1", 1, image);
-    RoutineImageStorage.ImageContent content = routineImageStorage.read(savedPath);
+    String savedKey = routineImageStorage.save("batch-1", 1, image);
+    RoutineImageStorage.ImageContent content = routineImageStorage.read(savedKey);
 
     assertThat(content.bytes()).isEqualTo(originalBytes);
+  }
+
+  @Test
+  @DisplayName("저장 결과는 경로가 아니라 열쇠다 — 저장 위치가 바뀌어도 이 값은 그대로 쓴다")
+  void save_returnsKeyNotPath() {
+    String key = routineImageStorage.save("batch-1", 2, new GeneratedImage(new byte[]{9}, "webp"));
+
+    assertThat(key).isEqualTo("batch-1/2.webp");
+    assertThat(key).doesNotContain(tempDir.toString());
+  }
+
+  @Test
+  @DisplayName("열쇠로 바꾸기 전에 저장된 경로도 계속 읽힌다 — 마이그레이션이 늦어도 그림이 안 깨진다")
+  void read_legacyAbsolutePath_stillWorks() {
+    byte[] bytes = {5, 6, 7};
+    String key = routineImageStorage.save("batch-2", 1, new GeneratedImage(bytes, "png"));
+    String legacyPath = tempDir.resolve(key).toString();
+
+    assertThat(routineImageStorage.read(legacyPath).bytes()).isEqualTo(bytes);
+  }
+
+  @Test
+  @DisplayName("저장 폴더 밖을 가리키는 열쇠는 읽지 않는다")
+  void read_pathTraversal_rejected() {
+    assertThatThrownBy(() -> routineImageStorage.read("../../etc/passwd"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND));
+  }
+
+  @Test
+  @DisplayName("한 번에 만든 그림을 통째로 지운다")
+  void deleteBatch_removesAll() {
+    String key = routineImageStorage.save("batch-3", 1, new GeneratedImage(new byte[]{1}, "png"));
+
+    routineImageStorage.deleteBatch("batch-3");
+
+    assertThatThrownBy(() -> routineImageStorage.read(key))
+      .isInstanceOf(CustomException.class);
   }
 
   @Test
