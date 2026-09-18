@@ -55,6 +55,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'repository_dispatch' && github.event.client_payload.branch_name || github.ref }}
   cancel-in-progress: true
 
+# 레포 기본 워크플로 권한이 `read`라 명시하지 않으면 GITHUB_TOKEN이 읽기 전용이다.
+# 이 빌드는 진행 상황·결과를 이슈/PR 댓글로 알리므로 쓰기가 필요하다.
+# 없으면 `Resource not accessible by integration`으로 댓글 스텝에서 죽는다 (이슈 #220).
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 on:
   workflow_dispatch:
   repository_dispatch:
