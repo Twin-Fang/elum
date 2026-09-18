@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,9 +20,17 @@ import org.springframework.stereotype.Component;
  * <p><b>서버가 한 대일 때만 온전히 동작한다.</b> 여러 대가 되면 A가 저장한 그림을 B가
  * 읽지 못해 조회의 상당수가 "이미지를 찾을 수 없습니다"로 떨어진다. 그때는 공유
  * 저장소 구현체로 바꾼다.
+ *
+ * <p><b>구현체는 설정으로 고른다.</b> {@code elum.store.routine-image} 값이 없거나
+ * {@code local}이면 이것이 쓰인다. 다른 구현체를 추가해도 등록되는 것은 하나뿐이라
+ * 충돌하지 않는다.
+ *
+ * <p>다만 <b>구현체를 바꾸는 것만으로는 부족하다</b> — 이미 디스크에 있는 그림을 새
+ * 저장소로 옮기는 일이 남는다. DB 값은 열쇠라 그대로 쓸 수 있으니 파일만 옮기면 된다.
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "elum.store.routine-image", havingValue = "local", matchIfMissing = true)
 @RequiredArgsConstructor
 public class LocalFileRoutineImageStorage implements RoutineImageStorage {
 
