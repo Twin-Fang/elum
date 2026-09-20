@@ -202,6 +202,19 @@ abstract final class AppAssets {
   /// `지난 일과` 섹션 제목 아이콘 (18×18). Figma `fi-br-time-forward`(931:3867).
   static const iconTimePast = '$_images/icon_time_past.svg';
 
+  /// `오늘 일과` 섹션 제목 아이콘 (18×18). Figma `오늘일과`(931:3880).
+  ///
+  /// **[iconClock]과 다른 파일이다.** 저쪽은 파랑(#9CADF1), 이쪽은 섹션
+  /// 라벨과 같은 회색(#74757D)이다. 모양이 같아 재사용했다가 색이 어긋난 채
+  /// 배포됐다 — 시안과 픽셀로 맞대보고서야 드러났다 (이슈 #258).
+  static const iconTodayRoutine = '$_images/icon_today_routine.svg';
+
+  /// 홈 우상단 설정 톱니 (24×24). Figma `설정`(781:5992).
+  ///
+  /// **Material 아이콘으로 대신하지 않는다.** 시안의 톱니는 날이 8개고
+  /// 가운데 구멍이 크다 — Material `settings_outlined`와 모양이 다르다.
+  static const iconSettings = '$_images/icon_settings.svg';
+
   /// 아이 홈 상단 별 배지 (50×48). Figma 364:8531 `Group 44`.
   /// 숫자는 SVG에 없다 — 코드에서 겹쳐 그린다.
   static const starBadge = '$_images/star_badge.svg';

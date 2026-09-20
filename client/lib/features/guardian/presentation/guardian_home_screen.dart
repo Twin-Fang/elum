@@ -78,7 +78,7 @@ class GuardianHomeScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const RoutineSectionTitle(
-                      iconAsset: AppAssets.iconClock,
+                      iconAsset: AppAssets.iconTodayRoutine,
                       label: '오늘 일과',
                     ),
                     SizedBox(height: _titleToList.h),
@@ -166,16 +166,16 @@ class _Header extends StatelessWidget {
                   ),
                   SizedBox(width: _badgeToSettings.w),
                   // 설정 진입점 (#181). 개편 시안에서 배지 오른쪽으로 옮겨졌다.
-                  // 전용 아이콘 에셋이 없어 Material 아이콘을 쓴다(앱 내 선례 있음).
                   AppPressable(
                     // push로 연다. go는 스택을 교체해 설정 화면의 뒤로가기가
                     // 돌아갈 곳을 잃는다 — 화살표도 기기 뒤로가기도 먹통이 된다 (이슈 #194).
                     onTap: () => context.push(Routes.guardianSettings),
                     scaleDown: AppPressable.scaleIcon,
-                    child: Icon(
-                      Icons.settings_outlined,
-                      size: _settings.w,
-                      color: colors.textPrimary,
+                    child: SvgPicture.asset(
+                      AppAssets.iconSettings,
+                      // 정사각형 아이콘 — 가로세로 모두 .w
+                      width: _settings.w,
+                      height: _settings.w,
                     ),
                   ),
                 ],

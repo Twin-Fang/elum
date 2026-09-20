@@ -160,7 +160,7 @@ void main() {
         svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
         findsOneWidget,
       );
-      expect(svgWithAsset(AppAssets.iconClock), findsOneWidget);
+      expect(svgWithAsset(AppAssets.iconTodayRoutine), findsOneWidget);
       expect(svgWithAsset(AppAssets.iconTimePast), findsOneWidget);
       // 만들기 버튼의 반짝임
       expect(svgWithAsset(AppAssets.iconSparkles), findsOneWidget);
@@ -413,7 +413,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // 로그아웃할 방법이 없어 계정을 바꿀 수 없던 문제라, 진입점 자체가 계약이다.
-    final gear = find.byIcon(Icons.settings_outlined);
+    // 시안 톱니는 Material 아이콘과 모양이 달라 SVG 에셋으로 그린다.
+    final gear = svgWithAsset(AppAssets.iconSettings);
     expect(gear, findsOneWidget);
 
     await tester.tap(gear);
@@ -426,7 +427,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.tap(svgWithAsset(AppAssets.iconSettings));
     await tester.pumpAndSettle();
     expect(find.text('설정 화면'), findsOneWidget);
 
@@ -435,7 +436,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('설정 화면'), findsNothing);
-    expect(find.byIcon(Icons.settings_outlined), findsOneWidget,
+    expect(svgWithAsset(AppAssets.iconSettings), findsOneWidget,
         reason: '홈으로 돌아와야 톱니가 다시 보인다');
   });
 

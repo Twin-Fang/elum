@@ -341,12 +341,12 @@ class EmptyRoutines extends StatelessWidget {
         children: [
           Text(
             '아직 만든 일과가 없어요',
-            style: typo.routineTileTitle.copyWith(color: colors.chipLabel),
+            style: typo.routineEmptyTitle.copyWith(color: colors.routineTileLabel),
           ),
           SizedBox(height: _emptyLineGap.h),
           Text(
             '오늘의 첫 행동카드를 만들어보세요',
-            style: typo.routineTileMeta.copyWith(color: colors.routineTileLabel),
+            style: typo.routineTileMeta.copyWith(color: colors.routineEmptyHint),
           ),
         ],
       ),
@@ -368,7 +368,7 @@ class _EmptyPastLabel extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: Text(
         '지난 일과가 없어요',
-        style: context.typo.routineTileTitle
+        style: context.typo.routineEmptyPast
             .copyWith(color: context.colors.routineTileLabel),
       ),
     );

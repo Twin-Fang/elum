@@ -47,6 +47,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.routineTileReward,
     required this.routineSectionLabel,
     required this.routineCreateLabel,
+    required this.routineEmptyTitle,
+    required this.routineEmptyPast,
     required this.starsCount,
     required this.editChipLabel,
     required this.childDetailTitle,
@@ -207,6 +209,13 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// `새로운 일과 만들기` 버튼 문구 (Pretendard 500/17).
   final TextStyle routineCreateLabel;
+
+  /// 빈 상태 첫 줄 (Pretendard 500/16). 일과 카드 제목(600)보다 얇다 —
+  /// 진짜 일과가 아니라 자리를 지키는 문구다.
+  final TextStyle routineEmptyTitle;
+
+  /// `지난 일과가 없어요` (Pretendard 500/15). 오늘 쪽(16)보다 1 작다 — 시안 그대로다.
+  final TextStyle routineEmptyPast;
 
   /// 아이_별 화면 누적 별 숫자 (80/w800).
   final TextStyle starsCount;
@@ -476,6 +485,18 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.0,
     ),
+    routineEmptyTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    routineEmptyPast: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 15,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
     starsCount: TextStyle(
       fontFamily: fontFamily,
       fontSize: 80,
@@ -568,6 +589,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? routineTileReward,
     TextStyle? routineSectionLabel,
     TextStyle? routineCreateLabel,
+    TextStyle? routineEmptyTitle,
+    TextStyle? routineEmptyPast,
     TextStyle? starsCount,
     TextStyle? editChipLabel,
     TextStyle? childDetailTitle,
@@ -616,6 +639,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineTileReward: routineTileReward ?? this.routineTileReward,
       routineSectionLabel: routineSectionLabel ?? this.routineSectionLabel,
       routineCreateLabel: routineCreateLabel ?? this.routineCreateLabel,
+      routineEmptyTitle: routineEmptyTitle ?? this.routineEmptyTitle,
+      routineEmptyPast: routineEmptyPast ?? this.routineEmptyPast,
       starsCount: starsCount ?? this.starsCount,
       editChipLabel: editChipLabel ?? this.editChipLabel,
       childDetailTitle: childDetailTitle ?? this.childDetailTitle,
@@ -671,6 +696,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineTileReward: TextStyle.lerp(routineTileReward, other.routineTileReward, t)!,
       routineSectionLabel: TextStyle.lerp(routineSectionLabel, other.routineSectionLabel, t)!,
       routineCreateLabel: TextStyle.lerp(routineCreateLabel, other.routineCreateLabel, t)!,
+      routineEmptyTitle: TextStyle.lerp(routineEmptyTitle, other.routineEmptyTitle, t)!,
+      routineEmptyPast: TextStyle.lerp(routineEmptyPast, other.routineEmptyPast, t)!,
       starsCount: TextStyle.lerp(starsCount, other.starsCount, t)!,
       editChipLabel: TextStyle.lerp(editChipLabel, other.editChipLabel, t)!,
       childDetailTitle:

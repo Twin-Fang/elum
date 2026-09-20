@@ -114,6 +114,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.routineCreateStart,
     required this.routineCreateEnd,
     required this.routineCreateGlow,
+    required this.routineEmptyHint,
     required this.childTileDone,
     required this.starCount,
     required this.starsNumberStart,
@@ -334,6 +335,9 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color routineCreateEnd;
   /// 같은 버튼 바깥으로 번지는 빛 (#CCBCF6). 그림자가 아니라 발광이라 흐림이 크고 색이 진하다.
   final Color routineCreateGlow;
+  /// 빈 상태 둘째 줄 (#AEB0B7). 제목(routineTileLabel #74757D)보다 한 단계 더 옅다 —
+  /// 할 일이 없다는 자리라 두 줄이 같은 무게로 읽히면 안 된다.
+  final Color routineEmptyHint;
   /// 아이 홈 완료된 일과 타일 배경 (#B5EAEC). goalSelectedFill과 값만 같다.
   final Color childTileDone;
   /// 별 배지 숫자 (#CB9500)
@@ -506,6 +510,7 @@ class AppColors extends ThemeExtension<AppColors> {
     routineCreateStart: Color(0xFFA2B1EB),
     routineCreateEnd: Color(0xFF9C7DE9),
     routineCreateGlow: Color(0xFFCCBCF6),
+    routineEmptyHint: Color(0xFFAEB0B7),
     childTileDone: Color(0xFFB5EAEC),
     starCount: Color(0xFFCB9500),
     starsNumberStart: Color(0xFFFFDD00),
@@ -625,6 +630,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? routineCreateStart,
     Color? routineCreateEnd,
     Color? routineCreateGlow,
+    Color? routineEmptyHint,
     Color? childTileDone,
     Color? starCount,
     Color? starsNumberStart,
@@ -734,6 +740,7 @@ class AppColors extends ThemeExtension<AppColors> {
       routineCreateStart: routineCreateStart ?? this.routineCreateStart,
       routineCreateEnd: routineCreateEnd ?? this.routineCreateEnd,
       routineCreateGlow: routineCreateGlow ?? this.routineCreateGlow,
+      routineEmptyHint: routineEmptyHint ?? this.routineEmptyHint,
       childTileDone: childTileDone ?? this.childTileDone,
       starCount: starCount ?? this.starCount,
       starsNumberStart: starsNumberStart ?? this.starsNumberStart,
@@ -863,6 +870,7 @@ class AppColors extends ThemeExtension<AppColors> {
       routineCreateStart: Color.lerp(routineCreateStart, other.routineCreateStart, t)!,
       routineCreateEnd: Color.lerp(routineCreateEnd, other.routineCreateEnd, t)!,
       routineCreateGlow: Color.lerp(routineCreateGlow, other.routineCreateGlow, t)!,
+      routineEmptyHint: Color.lerp(routineEmptyHint, other.routineEmptyHint, t)!,
       childTileDone: Color.lerp(childTileDone, other.childTileDone, t)!,
       starCount: Color.lerp(starCount, other.starCount, t)!,
       starsNumberStart:
