@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_pressable.dart';
-import '../../../../core/widgets/routine_progress_ring.dart';
-import '../../../../shared/models/action_card.dart';
+import '../../../../core/widgets/elum_dialog.dart';
 import '../../../child/application/child_routine_notifier.dart';
-import '../../../onboarding/application/onboarding_notifier.dart';
-import '../../../onboarding/domain/character.dart';
 import '../../application/routine_notifier.dart';
 import '../../data/routine_repository.dart';
-import '../../domain/card_palette.dart';
 import '../../../../shared/models/routine.dart';
+import 'routine_summary_tile.dart';
+import 'routine_swipe_actions.dart';
 
 // (참고) 제목 fallback은 Routine.displayTitle이 처리한다.
 
@@ -23,7 +22,7 @@ import '../../../../shared/models/routine.dart';
 ///
 /// 방금 만든 일과를 먼저 둔다. 서버 목록 갱신을 기다리면 승인 직후 홈에
 /// 아무것도 없는 것처럼 보인다 (docs 원칙 6번 — 데모는 끊기지 않는다).
-/// steps가 빈 일과는 펼쳐도 보여줄 것이 없어 제외한다.
+/// steps가 빈 일과는 보여줄 것이 없어 제외한다.
 final homeRoutinesProvider = Provider<List<Routine>>((ref) {
   final current = ref.watch(routineFlowProvider).routine;
   // `.value`는 재조회(invalidate) 중에도 직전 값을 준다. `asData`를 쓰면 동기화 뒤
@@ -48,10 +47,18 @@ double routineProgress(Routine routine, ChildRoutineState progress) {
   return done / routine.steps.length;
 }
 
-/// 보호자 홈 "오늘 일과" 섹션 (Figma 356:4688 접힘 / 309:3739 펼침 / 217:2655 빈).
+/// 카드 사이 간격 (Figma 931:4013 — gap 8)
+const _tileGap = 8.0;
+
+/// 보호자 홈 `오늘 일과` (Figma 931:3896 / 931:4179 / 931:4879 · 이슈 #258).
 ///
-/// 일과 여러 개를 접힌 타일로 나열하고, 탭하면 그 일과만 펼쳐 카드 목록을
-/// 보여준다. **한 번에 하나만 펼친다** — 여러 개가 열리면 화면이 끝없이 길어진다.
+/// 개편으로 세 가지가 한꺼번에 들어왔다.
+///
+/// - **밀면 삭제·수정이 나온다.** 목록에 버튼을 상시 세우지 않으려는 선택이다 —
+///   일과가 늘어나면 버튼이 제목보다 넓어진다.
+/// - **손잡이로 순서를 바꾼다.** 예정 시각순 고정이던 것을 보호자가 정한다.
+/// - **펼치기가 없다.** 카드 목록은 수정 화면에서 본다. 여러 개가 펼쳐지면
+///   화면이 끝없이 길어지고, 줄 높이가 달라져 순서를 바꿀 때 자리가 튄다.
 class TodayRoutineSection extends ConsumerStatefulWidget {
   const TodayRoutineSection({super.key});
 
@@ -61,17 +68,113 @@ class TodayRoutineSection extends ConsumerStatefulWidget {
 }
 
 class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
-  /// 펼쳐진 일과 id. null이면 전부 접힘 (Figma 기본 상태 356:4688).
-  String? _expandedId;
+  /// 지금 밀려서 열려 있는 일과. **한 번에 하나만 연다** —
+  /// 둘이 열리면 어느 버튼이 누구 것인지 알 수 없다.
+  String? _openId;
 
-  void _toggle(String id) {
-    setState(() => _expandedId = _expandedId == id ? null : id);
+  /// 들려서 자리를 옮기는 중인 일과.
+  String? _draggingId;
+
+  /// 보호자가 방금 정한 순서(일과 id). 서버 목록이 아직 옛 순서로 오는 동안
+  /// 화면이 되돌아가지 않게 덮어쓴다. 새 순서가 도착하면 자연히 같은 값이 되어
+  /// 아무 일도 하지 않으므로 따로 치우지 않아도 된다.
+  List<String>? _order;
+
+  /// 들어 올릴 때 커지는 정도. 더 키우면 옆 카드를 덮어 어디로 가는지 안 보인다.
+  static const _liftScale = 0.03;
+
+  /// 화면에 보이는 순서를 [_order]에 맞춘다.
+  ///
+  /// 그 사이에 생긴 일과는 뒤에 붙이고, 사라진 것은 그냥 빠진다 —
+  /// 저장해 둔 순서가 낡아도 목록이 깨지지 않아야 한다.
+  List<Routine> _applyOrder(List<Routine> routines) {
+    final ids = _order;
+    if (ids == null) return routines;
+
+    final remaining = {for (final r in routines) r.id: r};
+    final ordered = <Routine>[];
+    for (final id in ids) {
+      final found = remaining.remove(id);
+      if (found != null) ordered.add(found);
+    }
+    ordered.addAll(remaining.values);
+    return ordered;
+  }
+
+  Future<void> _reorder(List<Routine> routines, int oldIndex, int newIndex) async {
+    // ReorderableListView는 "빼내기 전" 기준으로 목적지를 준다.
+    final to = newIndex > oldIndex ? newIndex - 1 : newIndex;
+    if (to == oldIndex) return;
+
+    final next = [...routines];
+    next.insert(to, next.removeAt(oldIndex));
+    final ids = [for (final r in next) r.id];
+    setState(() => _order = ids);
+
+    final ok = await ref.read(routineRepositoryProvider).reorder(ids);
+    if (!mounted) return;
+    if (!ok) {
+      // 서버가 받지 못했으면 화면만 바뀐 채로 두지 않는다 —
+      // 다음에 열면 옛 순서로 돌아와 보호자가 바꾼 적 없다고 여긴다.
+      setState(() => _order = null);
+      _toast('순서를 저장하지 못했어요 (E-ORDER)');
+      return;
+    }
+    ref.invalidate(myRoutinesProvider);
+  }
+
+  Future<void> _delete(Routine routine) async {
+    final confirmed = await showElumDialog<bool>(
+      context: context,
+      title: '일과를 삭제하실건가요?',
+      icon: ElumDialogIcon.trash,
+      actions: const [
+        ElumDialogAction(
+          label: '취소',
+          value: false,
+          tone: ElumDialogTone.neutral,
+        ),
+        ElumDialogAction(
+          label: '삭제',
+          value: true,
+          tone: ElumDialogTone.danger,
+        ),
+      ],
+    );
+    if (confirmed != true || !mounted) return;
+
+    final ok = await ref.read(routineRepositoryProvider).delete(routine.id);
+    if (!mounted) return;
+    if (!ok) {
+      _toast('일과를 삭제하지 못했어요 (E-DEL)');
+      return;
+    }
+    // 방금 만든 일과를 지웠다면 흐름에 남은 것도 함께 치운다 —
+    // 안 치우면 서버에 없는 일과가 홈 맨 위에 그대로 남는다.
+    if (ref.read(routineFlowProvider).routine?.id == routine.id) {
+      ref.read(routineFlowProvider.notifier).reset();
+    }
+    setState(() => _openId = null);
+    ref.invalidate(myRoutinesProvider);
+    ref.invalidate(pastRoutinesProvider);
+  }
+
+  /// 이미 만든 일과를 검토 화면에 올린다. 거기서 카드 문구와 보상을 고친다.
+  void _edit(Routine routine) {
+    setState(() => _openId = null);
+    ref.read(routineFlowProvider.notifier).loadExisting(routine);
+    context.push(Routes.routineReview);
+  }
+
+  void _toast(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final routines = ref.watch(homeRoutinesProvider);
-    final space = context.space;
+    final routines = _applyOrder(ref.watch(homeRoutinesProvider));
 
     if (routines.isEmpty) {
       final async = ref.watch(myRoutinesProvider);
@@ -82,318 +185,191 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
 
     final progress = ref.watch(childRoutineProvider);
 
+    return ReorderableListView.builder(
+      shrinkWrap: true,
+      // 바깥 화면이 이미 스크롤한다. 여기까지 스크롤하면 둘이 맞물려 튄다.
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      // 손잡이를 쥐었을 때만 들린다. 기본값은 어디를 잡아도 들려서
+      // 밀어서 지우기와 부딪힌다.
+      buildDefaultDragHandles: false,
+      itemCount: routines.length,
+      onReorderStart: (index) {
+        HapticFeedback.mediumImpact();
+        setState(() {
+          _draggingId = routines[index].id;
+          // 들고 있는 카드가 밀려 있으면 버튼만 제자리에 남는다.
+          _openId = null;
+        });
+      },
+      onReorderEnd: (_) => setState(() => _draggingId = null),
+      onReorder: (oldIndex, newIndex) => _reorder(routines, oldIndex, newIndex),
+      proxyDecorator: (child, index, animation) => AnimatedBuilder(
+        animation: animation,
+        builder: (context, inner) {
+          final lift = Curves.easeOut.transform(animation.value);
+          return Transform.scale(
+            scale: 1 + _liftScale * lift,
+            child: Material(type: MaterialType.transparency, child: inner),
+          );
+        },
+        child: child,
+      ),
+      itemBuilder: (context, index) {
+        final routine = routines[index];
+        return Padding(
+          key: ValueKey(routine.id),
+          padding: EdgeInsets.only(
+            bottom: index == routines.length - 1 ? 0 : _tileGap.h,
+          ),
+          child: RoutineSwipeActions(
+            isOpen: _openId == routine.id,
+            onOpenChanged: (open) =>
+                setState(() => _openId = open ? routine.id : null),
+            onDelete: () => _delete(routine),
+            onEdit: () => _edit(routine),
+            child: RoutineSummaryTile(
+              routine: routine,
+              progress: routineProgress(routine, progress),
+              highlighted:
+                  _openId == routine.id || _draggingId == routine.id,
+              dragHandle: ReorderableDragStartListener(
+                index: index,
+                child: const RoutineDragHandle(),
+              ),
+              // 밀려 있을 때 탭하면 닫기만 한다 — 열어놓고 실수로 누르는 자리다.
+              onTap: () => _openId == routine.id
+                  ? setState(() => _openId = null)
+                  : _edit(routine),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// 보호자 홈 `지난 일과` (Figma 931:3896 — 지난일과_1).
+///
+/// 오늘 목록과 달리 **밀리지도 않고 순서도 바꾸지 않는다.** 지나간 것을
+/// 고칠 일이 없고, 순서는 날짜가 정한다.
+///
+/// 다 끝낸 일과에만 `일과 다시하기`가 붙는다 — 그대로 한 번 더 시킬 값어치가
+/// 있다는 뜻이고, 하다 만 것을 복제하면 같은 일과가 둘이 되어 헷갈린다.
+class PastRoutineSection extends ConsumerStatefulWidget {
+  const PastRoutineSection({super.key});
+
+  @override
+  ConsumerState<PastRoutineSection> createState() => _PastRoutineSectionState();
+}
+
+class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
+  /// 다시 만드는 중인 일과. 두 번 눌러 둘이 생기는 것을 막는다.
+  String? _rerunning;
+
+  Future<void> _rerun(Routine routine) async {
+    if (_rerunning != null) return;
+    setState(() => _rerunning = routine.id);
+
+    final copy = await ref.read(routineRepositoryProvider).duplicate(routine.id);
+    if (!mounted) return;
+    setState(() => _rerunning = null);
+
+    if (copy == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('일과를 다시 만들지 못했어요 (E-DUP)')),
+      );
+      return;
+    }
+    ref.invalidate(myRoutinesProvider);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${copy.displayTitle}을(를) 오늘 일과에 담았어요')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final async = ref.watch(pastRoutinesProvider);
+    final routines = async.value ?? const <Routine>[];
+
+    if (routines.isEmpty) {
+      return async.isLoading
+          ? const _LoadingTile()
+          : const _GreyTileShell(child: _EmptyPastLabel());
+    }
+
     return Column(
       children: [
         for (final (index, routine) in routines.indexed) ...[
-          if (index > 0) SizedBox(height: space.md),
-          // 펼침/접힘 전환이 뚝 끊기지 않게 크기를 애니메이션한다
-          AnimatedSize(
-            duration: AppMotion.normal,
-            curve: AppMotion.standard,
-            alignment: Alignment.topCenter,
-            child: routine.id == _expandedId
-                ? _ExpandedRoutine(
-                    routine: routine,
-                    progress: progress,
-                    onCollapse: () => _toggle(routine.id),
-                  )
-                : _CollapsedTile(
-                    routine: routine,
-                    progress: routineProgress(routine, progress),
-                    onTap: () => _toggle(routine.id),
-                  ),
-          ),
+          if (index > 0) SizedBox(height: _tileGap.h),
+          Builder(builder: (context) {
+            // 시안은 다 끝낸 일과에만 날짜와 다시하기를 붙인다(931:4072 vs 931:4160).
+            // 하다 만 것은 복제할 값어치가 없고, 링이 몇 %인지가 더 중요한 정보다.
+            final done = routine.progressPercent >= 100;
+            return RoutineSummaryTile(
+              routine: routine,
+              // 지난 일과는 서버가 셈해 둔 값이 기준이다. 기기 기록은 오늘 것만 있다.
+              progress: routine.progressPercent / 100,
+              showDate: done,
+              onRerun: done ? () => _rerun(routine) : null,
+              highlighted: _rerunning == routine.id,
+            );
+          }),
         ],
       ],
     );
   }
 }
 
-/// 접힌 일과 타일 (Figma 356:4688 — 361×68, r20, #EEE9E6).
-class _CollapsedTile extends StatelessWidget {
-  const _CollapsedTile({
-    required this.routine,
-    required this.progress,
-    required this.onTap,
-  });
-
-  final Routine routine;
-  final double progress;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-
-    return AppPressable(
-      onTap: onTap,
-      scaleDown: AppPressable.scaleCard,
-      child: Container(
-        height: 68.h,
-        // Figma 실측 — 제목 좌 24, 화살표 우 16
-        padding: EdgeInsets.only(left: 24.w, right: 16.w),
-        decoration: BoxDecoration(
-          color: colors.routineTileBg,
-          borderRadius: BorderRadius.circular(space.cardRadius),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                routine.displayTitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.typo.body.copyWith(color: colors.chipLabel),
-              ),
-            ),
-            SizedBox(width: space.xs),
-            RoutineProgressRing(progress: progress),
-            SizedBox(width: space.xs),
-            // 원본 SVG가 아래 방향이라 접힘 상태 그대로 쓴다
-            SvgPicture.asset(
-              AppAssets.iconAngleSmall,
-              width: 24.w,
-              height: 24.w,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// 펼쳐진 일과 (Figma 309:3739 Group 47 — 361 폭, r28, #EEE9E6 컨테이너).
-class _ExpandedRoutine extends ConsumerWidget {
-  const _ExpandedRoutine({
-    required this.routine,
-    required this.progress,
-    required this.onCollapse,
-  });
-
-  final Routine routine;
-
-  /// 아이 모드의 로컬 표시. 서버 값 위에 덮어 완료 여부를 판단한다.
-  final ChildRoutineState progress;
-  final VoidCallback onCollapse;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colors = context.colors;
-    final space = context.space;
-
-    return Container(
-      // Figma 실측 — 컨테이너 안쪽 여백 8, 카드 목록이 그 안에 들어간다
-      padding: EdgeInsets.fromLTRB(8.w, 0, 8.w, 8.w),
-      decoration: BoxDecoration(
-        color: colors.routineTileBg,
-        borderRadius: BorderRadius.circular(28.w),
-      ),
-      child: Column(
-        children: [
-          // 제목 헤더 — 탭하면 접힌다
-          AppPressable(
-            onTap: onCollapse,
-            child: Padding(
-              // Figma 실측 — 제목 y=26, 좌 16(컨테이너 8 + 16 = 24)
-              padding: EdgeInsets.fromLTRB(16.w, 22.h, 0, 12.h),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      routine.displayTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.typo.body.copyWith(
-                        color: colors.chipLabel,
-                      ),
-                    ),
-                  ),
-                  // 펼침 상태 — 위 방향 (원본을 180° 돌린다)
-                  Transform.rotate(
-                    angle: 3.14159,
-                    child: SvgPicture.asset(
-                      AppAssets.iconAngleSmall,
-                      width: 24.w,
-                      height: 24.w,
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                ],
-              ),
-            ),
-          ),
-          for (final (index, card) in routine.steps.indexed) ...[
-            if (index > 0) SizedBox(height: space.xs),
-            _CardRow(
-              card: card,
-              index: index,
-              isDone: progress.isChecked(routine.id, card),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// 카드 한 줄 — 번호 + 제목 + 설명 + 완료 표시 (Figma 344×68, 흰 배경).
-class _CardRow extends StatelessWidget {
-  const _CardRow({
-    required this.card,
-    required this.index,
-    required this.isDone,
-  });
-
-  final ActionCard card;
-  final int index;
-
-  /// 아이가 완료했는가. 완료하면 우측에 체크가 채워진다.
-  final bool isDone;
-
-  /// Figma 실측 — 번호 배지 40×40 r12
-  static const _badgeSize = 40.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-    final palette = CardPalette.at(index);
-
-    return Container(
-      height: 68.h,
-      padding: EdgeInsets.symmetric(horizontal: space.md),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(space.cardRadius),
-        border: Border.all(color: colors.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            // 정사각형 배지 — 가로세로 모두 .w
-            width: _badgeSize.w,
-            height: _badgeSize.w,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: palette.border,
-              borderRadius: BorderRadius.circular(12.w),
-            ),
-            child: Text(
-              '${index + 1}',
-              style: context.typo.cardHeadline.copyWith(color: colors.surface),
-            ),
-          ),
-          SizedBox(width: space.sm),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  card.displayTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.typo.cardBody.copyWith(
-                    color: colors.chipLabel,
-                  ),
-                ),
-                SizedBox(height: space.xs),
-                Text(
-                  card.description,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.typo.caption.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // 아이가 끝낸 카드만 채워진 체크가 된다
-          _DoneMark(isDone: isDone),
-        ],
-      ),
-    );
-  }
-}
-
-/// 완료 표시 (40×40). 미완료는 흐린 원, 완료는 채워진 체크.
-class _DoneMark extends StatelessWidget {
-  const _DoneMark({required this.isDone});
-
-  final bool isDone;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return AnimatedContainer(
-      duration: AppMotion.fast,
-      curve: AppMotion.standard,
-      // 원형 표시 — 가로세로 모두 .w
-      width: 40.w,
-      height: 40.w,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isDone ? colors.checkDone : Colors.transparent,
-        border: isDone
-            ? null
-            : Border.all(color: colors.checkPending, width: 2.w),
-      ),
-      child: Icon(
-        Icons.check_rounded,
-        size: 22.w,
-        color: isDone ? colors.surface : colors.checkPending,
-      ),
-    );
-  }
-}
-
-/// Figma 빈 상태 (217:2655 — 344×68, #EEE9E6) — `아직 만든 일과가 없어요 😢`
-class EmptyRoutines extends ConsumerWidget {
+/// Figma 빈 상태 (217:2655 — 361×68, #EEE9E6) — `아직 만든 일과가 없어요`
+///
+/// 개편 시안에서 **캐릭터 배지가 빠졌다.** 일과 카드와 같은 상자에 같은 자리에서
+/// 글이 시작해야 "여기가 일과가 들어올 자리"로 읽힌다 — 그림이 붙으면 다른
+/// 종류의 알림처럼 보인다.
+class EmptyRoutines extends StatelessWidget {
   const EmptyRoutines({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final space = context.space;
-    final profile = ref.watch(onboardingProvider);
-    final childName = profile.displayName;
-    // 온보딩에서 고른 캐릭터를 그대로 쓴다 — 홈 전역 마스코트와 통일 (아이 홈과 동일 폴백).
-    final character = profile.cardCharacter ?? CardCharacter.cat;
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typo = context.typo;
 
     return _GreyTileShell(
-      child: Row(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 정사각형 일러스트 — 가로세로 모두 .w
-          SvgPicture.asset(
-            AppAssets.characterBadgeFramed(character),
-            width: 40.w,
-            height: 40.w,
+          Text(
+            '아직 만든 일과가 없어요',
+            style: typo.routineTileTitle.copyWith(color: colors.chipLabel),
           ),
-          SizedBox(width: space.md),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '아직 만든 일과가 없어요',
-                  style: context.typo.cardBody.copyWith(
-                    color: context.colors.chipLabel,
-                  ),
-                ),
-                SizedBox(height: space.xs),
-                Text(
-                  '$childName의 첫 행동카드를 만들어보세요',
-                  style: context.typo.caption.copyWith(
-                    color: context.colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+          SizedBox(height: _emptyLineGap.h),
+          Text(
+            '오늘의 첫 행동카드를 만들어보세요',
+            style: typo.routineTileMeta.copyWith(color: colors.routineTileLabel),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 빈 상태 두 줄 사이 (일과 카드의 제목↔보상 간격과 같다)
+const _emptyLineGap = 8.0;
+
+/// 지난 일과가 0건일 때. 오늘 빈 상태와 달리 **권하지 않는다** —
+/// 지난 일과는 시간이 지나면 저절로 쌓이는 것이라 할 일이 없다.
+class _EmptyPastLabel extends StatelessWidget {
+  const _EmptyPastLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        '지난 일과가 없어요',
+        style: context.typo.routineTileTitle
+            .copyWith(color: context.colors.routineTileLabel),
       ),
     );
   }
@@ -417,7 +393,7 @@ class _LoadingTile extends StatelessWidget {
   }
 }
 
-/// 빈 상태·로딩의 회색 껍데기 (Figma 217:2691 — 344×68, r20, #EEE9E6).
+/// 빈 상태·로딩의 회색 껍데기 (Figma 931:3906 — 361×68, r20, #EEE9E6).
 class _GreyTileShell extends StatelessWidget {
   const _GreyTileShell({required this.child});
 
@@ -427,9 +403,11 @@ class _GreyTileShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final space = context.space;
 
-    return Container(
+    return AnimatedContainer(
+      duration: AppMotion.fast,
+      curve: AppMotion.standard,
       height: 68.h,
-      padding: EdgeInsets.symmetric(horizontal: space.md),
+      padding: EdgeInsets.symmetric(horizontal: RoutineSummaryTile.padLeft.w),
       decoration: BoxDecoration(
         color: context.colors.routineTileBg,
         borderRadius: BorderRadius.circular(space.cardRadius),

@@ -12,18 +12,30 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/character.dart';
 import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
-import 'widgets/recommended_routine_strip.dart';
+import 'widgets/create_routine_button.dart';
+import 'widgets/routine_summary_tile.dart';
 import 'widgets/today_routine_section.dart';
 
-/// Figma `보호자_홈`(217:2655 빈 / 356:4688 접힘 / 309:3739 펼침).
+/// Figma `보호자_홈`(931:3896 기본 / 931:4179 밀림 / 931:4879 삭제 확인 · 이슈 #258).
 ///
-/// **하단 고정 CTA가 없다.** Figma에서 "일과 만들기" 버튼이 본문의
-/// `새로운 일과 만들기` 카드로 올라왔다. (이슈 #19)
+/// 개편으로 홈이 **오늘 일과 · 지난 일과 두 칸**으로 정리됐다.
 ///
-/// **섹션 순서가 상태에 따라 다르다** (이슈 #69) —
-/// 일과가 있으면 `오늘 일과`가 `추천 일과`보다 위로 온다.
+/// - `추천 일과`가 빠졌다. 자리를 많이 쓰는 데 비해 눌리지 않았고, 그 자리에
+///   지난 일과가 들어와 "전에 하던 것을 또 한다"는 실제 쓰임을 받는다.
+/// - `새로운 일과 만들기`가 설명 붙은 카드에서 알약 버튼으로 줄었다.
+/// - 섹션 순서가 상태에 따라 바뀌지 않는다. 오늘이 늘 먼저다 — 목록이 비었다고
+///   자리가 뒤바뀌면 다음에 열었을 때 어디를 봐야 할지 다시 찾게 된다.
 class GuardianHomeScreen extends ConsumerWidget {
   const GuardianHomeScreen({super.key});
+
+  /// Figma 실측 — 카드·버튼은 화면 끝에서 16, 글은 24
+  static const _listInset = 16.0;
+
+  /// 머리말 묶음 ↔ 만들기 버튼 32 · 버튼 ↔ 일과 40 · 섹션 사이 32 · 제목 ↔ 카드 8
+  static const _toCreateButton = 32.0;
+  static const _toSections = 40.0;
+  static const _betweenSections = 32.0;
+  static const _titleToList = 8.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -38,32 +50,10 @@ class GuardianHomeScreen extends ConsumerWidget {
           orElse: () => localName,
         );
 
-    final hasRoutines = ref.watch(homeRoutinesProvider).isNotEmpty;
-
     // 온보딩에서 고른 캐릭터(고양이/여우) — 홈 전역의 마스코트를 이 값으로 맞춘다.
-    // 선택 전(구버전 데이터 등) 폴백은 아이 홈과 동일하게 고양이로 둔다.
+    // 선택 전(구버전 데이터 등) 폴백은 이룸이 홈과 동일하게 고양이로 둔다.
     final character =
         ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
-
-    final todaySection = <Widget>[
-      _SectionTitle(iconAsset: AppAssets.iconClock, label: '오늘 일과'),
-      SizedBox(height: space.md),
-      Padding(
-        padding: EdgeInsets.symmetric(horizontal: space.screenH),
-        child: const TodayRoutineSection(),
-      ),
-    ];
-
-    final recommendSection = <Widget>[
-      _SectionTitle(iconAsset: AppAssets.iconSparkles, label: '추천 일과'),
-      SizedBox(height: space.md),
-      RecommendedRoutineStrip(
-        // 타일 라벨("비 오는 날 등교")이 아니라 자연어 문장을 채운다.
-        // 라벨은 명사구라 보호자가 직접 쓴 문장으로 보이지 않는다. (이슈 #39)
-        onTap: (suggestion) =>
-            _startRoutine(context, ref, prefill: suggestion.inputText),
-      ),
-    ];
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -74,20 +64,35 @@ class GuardianHomeScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _Header(childName: childName, character: character),
-              SizedBox(height: space.lg),
+              SizedBox(height: _toCreateButton.h),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: space.screenH),
-                child: _NewRoutineCard(
-                  childName: childName,
+                padding: EdgeInsets.symmetric(horizontal: _listInset.w),
+                child: CreateRoutineButton(
                   onTap: () => _startRoutine(context, ref),
                 ),
               ),
-              SizedBox(height: space.xl),
-              // Figma 정합 — 일과가 있으면 오늘 일과가 먼저다 (356:4688).
-              // 없으면 추천이 먼저다 (217:2655).
-              ...hasRoutines
-                  ? [...todaySection, SizedBox(height: space.xl), ...recommendSection]
-                  : [...recommendSection, SizedBox(height: space.xl), ...todaySection],
+              SizedBox(height: _toSections.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: _listInset.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const RoutineSectionTitle(
+                      iconAsset: AppAssets.iconClock,
+                      label: '오늘 일과',
+                    ),
+                    SizedBox(height: _titleToList.h),
+                    const TodayRoutineSection(),
+                    SizedBox(height: _betweenSections.h),
+                    const RoutineSectionTitle(
+                      iconAsset: AppAssets.iconTimePast,
+                      label: '지난 일과',
+                    ),
+                    SizedBox(height: _titleToList.h),
+                    const PastRoutineSection(),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -96,20 +101,33 @@ class GuardianHomeScreen extends ConsumerWidget {
   }
 
   /// 일과 만들기 시작. 이전 입력이 남아 있으면 안 되므로 항상 초기화한다.
-  void _startRoutine(BuildContext context, WidgetRef ref, {String? prefill}) {
-    final notifier = ref.read(routineFlowProvider.notifier)..reset();
-    // 추천 타일에서 왔으면 문구를 미리 채운다. 보호자가 손댈 수 있다.
-    if (prefill != null) notifier.setRawInput(prefill);
+  void _startRoutine(BuildContext context, WidgetRef ref) {
+    ref.read(routineFlowProvider.notifier).reset();
     context.push(Routes.routineInput);
   }
 }
 
-/// 로고 + 캐릭터 배지 + 인사말 (Figma y=70~223)
+/// 로고 + 캐릭터 배지 + 설정 + 인사말 (Figma y=70~223).
+///
+/// 셋이 y=98을 가운데로 나란히 선다. 크기가 제각각(30 · 56 · 24)이라
+/// 위를 맞추면 어긋나 보인다.
 class _Header extends StatelessWidget {
   const _Header({required this.childName, required this.character});
 
   final String childName;
   final CardCharacter character;
+
+  /// Figma 실측 — 안전영역(59) 기준 상단 여백
+  static const _top = 11.0;
+  static const _logoW = 80.0;
+  static const _logoH = 30.0;
+  static const _badge = 56.0;
+  static const _settings = 24.0;
+
+  /// 배지 ↔ 설정 16 · 머리 줄 ↔ 인사말 11 · 인사말 ↔ 부제 12
+  static const _badgeToSettings = 16.0;
+  static const _rowToGreeting = 11.0;
+  static const _greetingToSubtitle = 12.0;
 
   @override
   Widget build(BuildContext context) {
@@ -121,200 +139,59 @@ class _Header extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: space.md),
+          SizedBox(height: _top.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SvgPicture.asset(AppAssets.homeLogo, width: 80.w, height: 30.h),
+              SvgPicture.asset(
+                AppAssets.homeLogo,
+                width: _logoW.w,
+                height: _logoH.h,
+              ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // 설정 진입점 (#181). 캐릭터 배지 왼쪽에 둔다 —
-                  // 배지는 아이 화면으로 가는 입구라 자리를 지켜야 한다.
-                  // 전용 아이콘 에셋이 없어 Material 아이콘을 쓴다(앱 내 선례 있음).
-                  AppPressable(
-                    // push로 연다. go는 스택을 교체해 설정 화면의 뒤로가기가
-                    // 돌아갈 곳을 잃는다 — 화살표도 기기 뒤로가기도 먹통이 된다 (이슈 #194).
-                    onTap: () => context.push(Routes.guardianSettings),
-                    scaleDown: AppPressable.scaleIcon,
-                    child: Padding(
-                      // 56 배지와 시각 중심을 맞추고 탭 영역도 확보한다.
-                      padding: EdgeInsets.symmetric(
-                        horizontal: space.sm,
-                        vertical: space.md,
-                      ),
-                      child: Icon(
-                        Icons.settings_outlined,
-                        size: 24.w,
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  // 아이 화면으로 넘어가는 입구. 보호자→아이 방향은 암호 없이 바로 간다.
-                  // (아이→보호자 방향만 PIN으로 막는다)
+                  // 이룸이 화면으로 넘어가는 입구. 보호자→이룸이 방향은 암호 없이 바로 간다.
+                  // (이룸이→보호자 방향만 PIN으로 막는다)
                   AppPressable(
                     onTap: () => context.go(Routes.child),
                     scaleDown: AppPressable.scaleIcon,
                     child: SvgPicture.asset(
                       AppAssets.characterBadgeFramed(character),
                       // 정사각형 배지 — 찌그러지지 않게 가로세로 모두 .w
-                      width: 56.w,
-                      height: 56.w,
+                      width: _badge.w,
+                      height: _badge.w,
+                    ),
+                  ),
+                  SizedBox(width: _badgeToSettings.w),
+                  // 설정 진입점 (#181). 개편 시안에서 배지 오른쪽으로 옮겨졌다.
+                  // 전용 아이콘 에셋이 없어 Material 아이콘을 쓴다(앱 내 선례 있음).
+                  AppPressable(
+                    // push로 연다. go는 스택을 교체해 설정 화면의 뒤로가기가
+                    // 돌아갈 곳을 잃는다 — 화살표도 기기 뒤로가기도 먹통이 된다 (이슈 #194).
+                    onTap: () => context.push(Routes.guardianSettings),
+                    scaleDown: AppPressable.scaleIcon,
+                    child: Icon(
+                      Icons.settings_outlined,
+                      size: _settings.w,
+                      color: colors.textPrimary,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          SizedBox(height: space.lg),
+          SizedBox(height: _rowToGreeting.h),
           Text(
             // Figma 문구. 줄바꿈 위치도 디자인이 정한 대로다.
             '안녕하세요,\n$childName 보호자님 👋🏻',
             style: context.typo.greeting.copyWith(color: colors.textPrimary),
           ),
-          SizedBox(height: space.sm),
+          SizedBox(height: _greetingToSubtitle.h),
           Text(
             '오늘은 어떤 일과를 준비할까요?',
-            style: context.typo.body.copyWith(color: colors.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// "새로운 일과 만들기" 카드 (344×94, 그라데이션 + 그림자).
-///
-/// Figma에서 하단 CTA를 대신하는 자리다.
-class _NewRoutineCard extends StatelessWidget {
-  const _NewRoutineCard({
-    required this.childName,
-    required this.onTap,
-  });
-
-  final String childName;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-    final colors = context.colors;
-
-    return AppPressable(
-      onTap: onTap,
-      scaleDown: AppPressable.scaleCard,
-      child: Container(
-        height: 94.h,
-        padding: EdgeInsets.symmetric(horizontal: space.md),
-        decoration: BoxDecoration(
-          // Figma: linear-gradient(-67deg, #F9F1D7 16.64%, #E9EEFF 83.36%)
-          // 노란색 왼쪽 → 보라 오른쪽
-          gradient: LinearGradient(
-            begin: const Alignment(-0.99, -0.12),
-            end: const Alignment(0.99, 0.12),
-            colors: [
-              colors.homeHeroStart,
-              colors.homeHeroEnd,
-            ],
-            stops: const [0.1664, 0.8336],
-          ),
-          borderRadius: BorderRadius.circular(space.cardRadius),
-          border: Border.all(color: colors.border),
-          boxShadow: [
-            BoxShadow(
-              color: colors.homeCardShadow,
-              blurRadius: 10.w,
-              offset: Offset(0, 4.h),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Figma 217:2668+217:2675 — 보호자가 고른 캐릭터(고양이/여우)와
-            // 무관하게 AI 마스코트 "루미" 병아리로 고정된다. (이슈 #110)
-            SizedBox(
-              width: 56.w,
-              height: 56.w,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colors.homeCardIconBg,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 1.h),
-                    child: SvgPicture.asset(
-                      AppAssets.homeNewRoutineChick,
-                      width: 47.w,
-                      height: 51.w,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: space.md),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      SvgPicture.asset(
-                        AppAssets.iconSparkles,
-                        width: 15.w,
-                        height: 18.h,
-                      ),
-                      SizedBox(width: space.xs),
-                      Text(
-                        '새로운 일과 만들기',
-                        style: context.typo.cardTitle.copyWith(
-                          color: colors.homeCardTitle,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: space.xs),
-                  Text(
-                    'AI 루미가 $childName에게 맞는 일과와\n행동 카드를 만들어드려요',
-                    style: context.typo.caption.copyWith(
-                      color: colors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// 섹션 제목 — 아이콘 + 문구 (Figma 14/w800).
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.iconAsset, required this.label});
-
-  final String iconAsset;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: space.screenH),
-      child: Row(
-        children: [
-          // 정사각형 아이콘 — 가로세로 모두 .w
-          SvgPicture.asset(iconAsset, width: 18.w, height: 18.w),
-          SizedBox(width: space.xs),
-          Text(
-            label,
-            style: context.typo.sectionTitle.copyWith(
-              color: context.colors.textPrimary,
-            ),
+            style: context.typo.body.copyWith(color: colors.routineTileLabel),
           ),
         ],
       ),

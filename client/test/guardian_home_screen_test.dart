@@ -6,8 +6,10 @@ import 'package:elum/features/guardian/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
-import 'package:elum/features/guardian/presentation/widgets/recommended_routine_strip.dart';
+import 'package:elum/features/guardian/presentation/widgets/routine_summary_tile.dart';
+import 'package:elum/features/guardian/presentation/widgets/routine_swipe_actions.dart';
 import 'package:elum/features/onboarding/domain/character.dart';
+import 'package:elum/features/onboarding/domain/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -16,19 +18,28 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/device_viewport.dart';
+import 'helpers/fake_reward_api.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
-/// Figma `보호자_홈`(217:2655) 정합 테스트.
+/// Figma `보호자_홈` 개편(931:3896 기본 / 931:4179 밀림 / 931:4879 삭제) 정합 테스트.
 ///
-/// 디자이너가 만든 3개 시안 중 `217:2655`를 채택했다. 추천 일과가 가로 스크롤인
-/// 시안이며, 하단 고정 CTA가 본문 카드로 올라온 것이 이전 구현과 가장 큰 차이다.
+/// 개편으로 홈이 **오늘 일과 · 지난 일과 두 칸**이 됐다. 추천 일과가 빠졌고,
+/// 접기/펼치기 대신 밀어서 삭제·수정 · 손잡이로 순서 바꾸기가 들어왔다.
 void main() {
+  // Figma 실측값(68 · 105 · 40)을 그대로 검증하려면 뷰포트가 기기와 같아야 한다.
+  useFigmaViewport();
+
+  late _FakeRoutineRepo repo;
+
   Widget wrap({
     List<Routine> routines = const [],
+    List<Routine> past = const [],
     Member? member,
-    List<RoutineSuggestion> suggestions = RoutineSuggestion.fallback,
   }) {
+    repo = _FakeRoutineRepo(routines: routines, past: past);
+
     final router = GoRouter(
       initialLocation: Routes.guardian,
       routes: [
@@ -41,6 +52,10 @@ void main() {
           builder: (context, state) => const Scaffold(body: Text('일과 입력')),
         ),
         GoRoute(
+          path: Routes.routineReview,
+          builder: (context, state) => const Scaffold(body: Text('카드 검토')),
+        ),
+        GoRoute(
           path: Routes.guardianSettings,
           builder: (context, state) => const Scaffold(body: Text('설정 화면')),
         ),
@@ -50,10 +65,9 @@ void main() {
     return ProviderScope(
       overrides: [
         testStorageOverride(onboardingCompleted: true),
-        // 실서버를 타지 않는다
-        myRoutinesProvider.overrideWith((ref) async => routines),
+        // 실서버를 타지 않는다. 목록 조회도 삭제·순서도 이 fake가 받는다.
+        routineRepositoryProvider.overrideWithValue(repo),
         memberProvider.overrideWith((ref) async => member),
-        routineSuggestionsProvider.overrideWith((ref) async => suggestions),
       ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
@@ -65,10 +79,20 @@ void main() {
     );
   }
 
-  /// 카드 [cards]장을 가진 일과. 홈은 일과가 아니라 **그 안의 카드**를 펼친다.
-  Routine routine(String title, int cards) => Routine(
+  /// 카드 [cards]장을 가진 일과.
+  Routine routine(
+    String title,
+    int cards, {
+    String reward = '',
+    int percent = 0,
+    DateTime? at,
+  }) =>
+      Routine(
         id: title,
         title: title,
+        rewardText: reward,
+        progressPercent: percent,
+        scheduledAt: at,
         steps: [
           for (var i = 0; i < cards; i++)
             ActionCard(
@@ -80,21 +104,46 @@ void main() {
         ],
       );
 
+  /// [title] 카드 뒤에 깔린 동작 버튼의 아이콘.
+  Finder actionIn(String title, String asset) => find.descendant(
+        of: find.ancestor(
+          of: find.text(title),
+          matching: find.byType(RoutineSwipeActions),
+        ),
+        matching: svgWithAsset(asset),
+      );
+
+  /// 얼마나 드러났는가(0~1).
+  ///
+  /// 버튼은 **늘 카드 뒤에 있다** — 카드가 비켜나며 그림이 살아날 뿐이라
+  /// `findsNothing`으로는 닫힘을 확인할 수 없다.
+  double revealOf(WidgetTester tester, Finder icon) {
+    final opacity = find.ancestor(of: icon, matching: find.byType(Opacity));
+    return tester.widget<Opacity>(opacity.first).opacity;
+  }
+
   group('보호자_홈 구성', () {
     testWidgets('Figma 섹션 문구가 보인다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('추천 일과'), findsOneWidget);
-      // Figma 309:3739가 "오늘 일과"다
       expect(find.text('오늘 일과'), findsOneWidget);
+      expect(find.text('지난 일과'), findsOneWidget);
       expect(find.text('새로운 일과 만들기'), findsOneWidget);
       expect(find.text('오늘은 어떤 일과를 준비할까요?'), findsOneWidget);
     });
 
+    testWidgets('추천 일과가 더는 없다', (tester) async {
+      // 자리를 많이 쓰는 데 비해 눌리지 않아 지난 일과에 자리를 내줬다.
+      // 되살리려면 디자인부터 다시 정해야 하므로 여기서 막는다.
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('추천 일과'), findsNothing);
+    });
+
     testWidgets('하단 고정 CTA가 없다', (tester) async {
-      // Figma에서 "일과 만들기" 버튼이 본문 카드로 올라왔다.
-      // 다시 하단 버튼을 추가하면 이 테스트가 막는다.
+      // 만들기 버튼이 본문 알약으로 올라와 있다. 하단 버튼을 다시 붙이면 막는다.
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
@@ -106,16 +155,15 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(svgWithAsset(AppAssets.homeLogo), findsOneWidget);
-      // 캐릭터 배지 — 헤더 · (일과 0건이라) 빈 상태까지 두 곳.
-      // "새로운 일과 만들기" 카드는 캐릭터 선택과 무관하게 루미 병아리로 고정된다 (이슈 #110).
+      // 캐릭터 배지는 헤더 하나뿐이다 — 개편 시안에서 빈 상태의 배지가 빠졌다
       expect(
         svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
-        findsNWidgets(2),
+        findsOneWidget,
       );
-      expect(svgWithAsset(AppAssets.homeNewRoutineChick), findsOneWidget);
       expect(svgWithAsset(AppAssets.iconClock), findsOneWidget);
-      // sparkles는 카드와 섹션 제목 두 곳에 쓰인다
-      expect(svgWithAsset(AppAssets.iconSparkles), findsWidgets);
+      expect(svgWithAsset(AppAssets.iconTimePast), findsOneWidget);
+      // 만들기 버튼의 반짝임
+      expect(svgWithAsset(AppAssets.iconSparkles), findsOneWidget);
     });
 
     testWidgets('서버 호칭이 있으면 인사말에 쓴다', (tester) async {
@@ -131,186 +179,225 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('추천 일과'), findsOneWidget);
+      expect(find.text('오늘 일과'), findsOneWidget);
     });
   });
 
-  group('추천 일과', () {
-    testWidgets('서버가 준 목록이 순서대로 보인다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      for (final s in RoutineSuggestion.fallback) {
-        expect(find.text(s.text), findsOneWidget);
-      }
-    });
-
-    testWidgets('서버가 4개보다 많이 줘도 전부 렌더링된다', (tester) async {
-      // 개수는 서버가 정한다. 팔레트가 순환하므로 색이 모자라 깨지면 안 된다.
-      const many = [
-        RoutineSuggestion(icon: '1️⃣', text: '하나'),
-        RoutineSuggestion(icon: '2️⃣', text: '둘'),
-        RoutineSuggestion(icon: '3️⃣', text: '셋'),
-        RoutineSuggestion(icon: '4️⃣', text: '넷'),
-        RoutineSuggestion(icon: '5️⃣', text: '다섯'),
-        RoutineSuggestion(icon: '6️⃣', text: '여섯'),
-      ];
-      await tester.pumpWidget(wrap(suggestions: many));
-      await tester.pumpAndSettle();
-
-      expect(tester.takeException(), isNull);
-      // 가로 스크롤이라 화면 밖 항목은 빌드되지 않는다. 앞쪽만 확인한다.
-      expect(find.text('하나'), findsOneWidget);
-    });
-
-    testWidgets('가로로 스와이프된다', (tester) async {
-      // Figma에서 4번째 타일이 콘텐츠 영역을 넘어간다 — 스와이프 어포던스다
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      final list = tester.widget<ListView>(
-        find.descendant(
-          of: find.byType(RecommendedRoutineStrip),
-          matching: find.byType(ListView),
-        ),
-      );
-      expect(list.scrollDirection, Axis.horizontal);
-    });
-
-    testWidgets('타일을 누르면 문구가 채워진 채 입력 화면으로 간다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text(RoutineSuggestion.fallback.first.text));
-      await tester.pumpAndSettle();
-
-      expect(find.text('일과 입력'), findsOneWidget);
-    });
-
-    test('입력창에는 라벨이 아니라 자연어 문장이 들어간다', () {
-      // 타일 라벨은 명사구라 보호자가 직접 쓴 문장으로 보이지 않는다 (이슈 #39)
-      const s = RoutineSuggestion(
-        icon: '☔️',
-        text: '비 오는 날 등교',
-        prompt: '비 오는 날 우산 챙겨서 학교 가는 준비를 하고 싶어요',
-      );
-      expect(s.inputText, s.prompt);
-      expect(s.inputText, isNot(s.text));
-    });
-
-    test('서버가 prompt를 안 주면 라벨로 폴백한다', () {
-      // 서버 #39 배포 전에도 지금과 동일하게 동작해야 한다
-      const s = RoutineSuggestion(icon: '☔️', text: '비 오는 날 등교');
-      expect(s.inputText, '비 오는 날 등교');
-    });
-  });
-
-  group('오늘 일과 (이슈 #69 — 다중 일과 접기/펼치기)', () {
+  group('오늘 일과', () {
     testWidgets('0건이면 Figma 빈 상태를 보여준다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
       expect(find.text('아직 만든 일과가 없어요'), findsOneWidget);
-      // 캐릭터 선택 전 기본값은 고양이 (아이 홈과 동일 폴백)
-      expect(
-        svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
-        findsWidgets,
-      );
+      expect(find.text('지난 일과가 없어요'), findsOneWidget);
     });
 
-    testWidgets('일과 제목(title)이 접힌 타일로 보인다', (tester) async {
-      // 백엔드가 준 title을 화면에 쓴다 — 받아만 놓고 버리면 안 된다
+    testWidgets('제목과 보상이 한 줄 요약으로 보인다', (tester) async {
       await tester.pumpWidget(
         wrap(routines: [
-          routine('비 오는 날 학교 가기', 5),
-          routine('병원 다녀오기', 3),
+          routine('스스로 옷을 입어요', 5, reward: '유튜브 시청 20분'),
+          routine('밥 먹기 전에 손을 씻어요', 3),
         ]),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('비 오는 날 학교 가기'), findsOneWidget);
-      expect(find.text('병원 다녀오기'), findsOneWidget);
-      // 기본은 접힘 (Figma 356:4688) — 카드는 아직 보이지 않는다
-      expect(find.text('카드 1 제목'), findsNothing);
-      expect(find.text('아직 만든 일과가 없어요'), findsNothing);
-    });
-
-    testWidgets('타일을 탭하면 펼쳐져 카드가 보인다', (tester) async {
-      await tester.pumpWidget(
-        wrap(routines: [routine('비 오는 날 학교 가기', 5)]),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('비 오는 날 학교 가기'));
-      await tester.pumpAndSettle();
-
-      // Figma 309:3739 — 카드 하나하나가 펼쳐진다
-      expect(find.text('카드 1 제목'), findsOneWidget);
-      expect(find.text('카드 1 설명'), findsOneWidget);
-      expect(find.text('카드 5 제목'), findsOneWidget);
-
-      // 다시 탭하면 접힌다
-      await tester.tap(find.text('비 오는 날 학교 가기'));
-      await tester.pumpAndSettle();
+      expect(find.text('스스로 옷을 입어요'), findsOneWidget);
+      expect(find.text('밥 먹기 전에 손을 씻어요'), findsOneWidget);
+      expect(find.text('완료 시'), findsOneWidget);
+      expect(find.text('유튜브 시청 20분'), findsOneWidget);
+      // 펼치기가 없어졌다 — 카드 목록은 수정 화면에서 본다
       expect(find.text('카드 1 제목'), findsNothing);
     });
 
-    testWidgets('펼치면 카드마다 번호를 매긴다', (tester) async {
-      await tester.pumpWidget(
-        wrap(routines: [routine('비 오는 날 학교 가기', 3)]),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('비 오는 날 학교 가기'));
+    testWidgets('보상이 없으면 `완료 시` 줄 자체가 없다', (tester) async {
+      // 안 정한 자리를 비워두면 하다 만 것처럼 보인다
+      await tester.pumpWidget(wrap(routines: [routine('손 씻기', 2)]));
       await tester.pumpAndSettle();
 
-      for (final n in ['1', '2', '3']) {
-        expect(find.text(n), findsOneWidget);
-      }
+      expect(find.text('완료 시'), findsNothing);
     });
 
-    testWidgets('일과가 있으면 오늘 일과가 추천 일과보다 위에 온다', (tester) async {
-      // Figma 356:4688 — 섹션 순서가 상태에 따라 바뀐다
-      await tester.pumpWidget(
-        wrap(routines: [routine('비 오는 날 학교 가기', 2)]),
-      );
+    testWidgets('탭하면 수정 화면으로 간다', (tester) async {
+      await tester.pumpWidget(wrap(routines: [routine('손 씻기', 2)]));
       await tester.pumpAndSettle();
 
-      final todayY = tester.getTopLeft(find.text('오늘 일과')).dy;
-      final recommendY = tester.getTopLeft(find.text('추천 일과')).dy;
-      expect(todayY, lessThan(recommendY));
-    });
-
-    testWidgets('일과가 없으면 추천 일과가 먼저다', (tester) async {
-      // Figma 217:2655 — 빈 상태는 기존 순서를 유지한다
-      await tester.pumpWidget(wrap());
+      await tester.tap(find.text('손 씻기'));
       await tester.pumpAndSettle();
 
-      final todayY = tester.getTopLeft(find.text('오늘 일과')).dy;
-      final recommendY = tester.getTopLeft(find.text('추천 일과')).dy;
-      expect(recommendY, lessThan(todayY));
+      expect(find.text('카드 검토'), findsOneWidget);
     });
 
     testWidgets('title이 비어 와도 대체 제목으로 뜬다', (tester) async {
       // AI가 title을 못 만들어도 화면이 비지 않는다 (docs 원칙 6번)
       await tester.pumpWidget(
-        wrap(
-          routines: [
-            const Routine(
-              id: 'r',
-              steps: [ActionCard(id: 'a', description: '설명만 있는 카드')],
-            ),
-          ],
-        ),
+        wrap(routines: [
+          const Routine(
+            id: 'r',
+            steps: [ActionCard(id: 'a', description: '설명만 있는 카드')],
+          ),
+        ]),
       );
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
       expect(find.text('오늘의 일과'), findsOneWidget);
     });
+
+    testWidgets('일과마다 순서 바꾸기 손잡이가 하나씩 있다', (tester) async {
+      await tester.pumpWidget(
+        wrap(routines: [routine('하나', 1), routine('둘', 1)]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RoutineDragHandle), findsNWidgets(2));
+    });
+
+    testWidgets('지난 일과에는 손잡이가 없다', (tester) async {
+      // 지나간 것의 순서는 날짜가 정한다
+      await tester.pumpWidget(wrap(past: [routine('어제 한 일', 1)]));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RoutineDragHandle), findsNothing);
+    });
+  });
+
+  group('밀어서 삭제·수정 (Figma 931:4179)', () {
+    testWidgets('밀면 삭제·수정 버튼이 드러난다', (tester) async {
+      await tester.pumpWidget(wrap(routines: [routine('손 씻기', 2)]));
+      await tester.pumpAndSettle();
+
+      expect(revealOf(tester, actionIn('손 씻기', AppAssets.iconTrash)), 0);
+
+      await tester.drag(find.text('손 씻기'), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+
+      expect(revealOf(tester, actionIn('손 씻기', AppAssets.iconTrash)), 1);
+      expect(revealOf(tester, actionIn('손 씻기', AppAssets.iconPencil)), 1);
+    });
+
+    testWidgets('삭제를 누르면 확인부터 묻는다', (tester) async {
+      await tester.pumpWidget(wrap(routines: [routine('손 씻기', 2)]));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.text('손 씻기'), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      await tester.tap(svgWithAsset(AppAssets.iconTrash));
+      await tester.pumpAndSettle();
+
+      expect(find.text('일과를 삭제하실건가요?'), findsOneWidget);
+
+      // 취소하면 아무 일도 일어나지 않는다 — 되돌릴 수 없는 동작이다
+      await tester.tap(find.text('취소'));
+      await tester.pumpAndSettle();
+
+      expect(repo.deleted, isEmpty);
+      expect(find.text('손 씻기'), findsOneWidget);
+    });
+
+    testWidgets('확인하면 서버에 삭제를 보낸다', (tester) async {
+      await tester.pumpWidget(wrap(routines: [routine('손 씻기', 2)]));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.text('손 씻기'), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      await tester.tap(svgWithAsset(AppAssets.iconTrash));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('삭제'));
+      await tester.pumpAndSettle();
+
+      expect(repo.deleted, ['손 씻기']);
+    });
+
+    testWidgets('수정을 누르면 그 일과가 검토 화면으로 올라간다', (tester) async {
+      await tester.pumpWidget(wrap(routines: [routine('손 씻기', 2)]));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.text('손 씻기'), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      await tester.tap(svgWithAsset(AppAssets.iconPencil));
+      await tester.pumpAndSettle();
+
+      expect(find.text('카드 검토'), findsOneWidget);
+    });
+
+    testWidgets('한 번에 하나만 열린다', (tester) async {
+      await tester.pumpWidget(
+        wrap(routines: [routine('하나', 1), routine('둘', 1)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.text('하나'), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      expect(revealOf(tester, actionIn('하나', AppAssets.iconTrash)), 1);
+
+      await tester.drag(find.text('둘'), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+
+      // 둘이 동시에 열리면 어느 버튼이 누구 것인지 알 수 없다
+      expect(revealOf(tester, actionIn('둘', AppAssets.iconTrash)), 1);
+      expect(revealOf(tester, actionIn('하나', AppAssets.iconTrash)), 0);
+    });
+
+    testWidgets('지난 일과는 밀리지 않는다', (tester) async {
+      await tester.pumpWidget(wrap(past: [routine('어제 한 일', 1)]));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.text('어제 한 일'), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+
+      expect(svgWithAsset(AppAssets.iconTrash), findsNothing);
+    });
+  });
+
+  group('지난 일과 (Figma 931:3896)', () {
+    testWidgets('언제 한 일과인지 날짜가 보인다', (tester) async {
+      await tester.pumpWidget(
+        wrap(past: [
+          routine('학교에 갈 준비를 해요', 3, percent: 100, at: DateTime(2026, 9, 20)),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('2026년 9월 20일'), findsOneWidget);
+    });
+
+    testWidgets('날짜가 안 오면 그 줄만 빠지고 화면은 뜬다', (tester) async {
+      await tester.pumpWidget(
+        wrap(past: [routine('학교 가기', 3, percent: 100)]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('학교 가기'), findsOneWidget);
+    });
+
+    testWidgets('다 끝낸 일과만 다시 만들 수 있다', (tester) async {
+      await tester.pumpWidget(
+        wrap(past: [
+          routine('끝낸 일과', 2, percent: 100),
+          routine('하다 만 일과', 2, percent: 50),
+        ]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('일과 다시하기'), findsOneWidget);
+    });
+
+    testWidgets('다시하기를 누르면 복제를 요청한다', (tester) async {
+      await tester.pumpWidget(
+        wrap(past: [routine('끝낸 일과', 2, percent: 100)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('일과 다시하기'));
+      await tester.pumpAndSettle();
+
+      expect(repo.duplicated, ['끝낸 일과']);
+    });
   });
 
   group('새로운 일과 만들기', () {
-    testWidgets('카드를 누르면 입력 화면으로 간다', (tester) async {
+    testWidgets('누르면 입력 화면으로 간다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
@@ -352,4 +439,87 @@ void main() {
         reason: '홈으로 돌아와야 톱니가 다시 보인다');
   });
 
+  group('추천 문구 폴백 (서버 #39 배포 전 호환)', () {
+    test('입력창에는 라벨이 아니라 자연어 문장이 들어간다', () {
+      const s = RoutineSuggestion(
+        icon: '☔️',
+        text: '비 오는 날 등교',
+        prompt: '비 오는 날 우산 챙겨서 학교 가는 준비를 하고 싶어요',
+      );
+      expect(s.inputText, s.prompt);
+      expect(s.inputText, isNot(s.text));
+    });
+
+    test('서버가 prompt를 안 주면 라벨로 폴백한다', () {
+      const s = RoutineSuggestion(icon: '☔️', text: '비 오는 날 등교');
+      expect(s.inputText, '비 오는 날 등교');
+    });
+  });
+}
+
+/// 홈이 부르는 것만 받는 저장소. 삭제·순서·복제는 **보냈는지**를 기록한다.
+class _FakeRoutineRepo with FakeRewardApi implements RoutineRepository {
+  _FakeRoutineRepo({required this.routines, required this.past});
+
+  final List<Routine> routines;
+  final List<Routine> past;
+
+  final deleted = <String>[];
+  final duplicated = <String>[];
+  final reordered = <List<String>>[];
+
+  @override
+  Future<List<Routine>> getMyRoutines() async => routines;
+
+  @override
+  Future<List<Routine>> getTodayRoutines() async => routines;
+
+  @override
+  Future<List<Routine>> getPastRoutines() async => past;
+
+  @override
+  Future<bool> delete(String routineId) async {
+    deleted.add(routineId);
+    return true;
+  }
+
+  @override
+  Future<Routine?> duplicate(String routineId) async {
+    duplicated.add(routineId);
+    return routines.isEmpty ? past.first : routines.first;
+  }
+
+  @override
+  Future<bool> reorder(List<String> routineIds) async {
+    reordered.add(routineIds);
+    return true;
+  }
+
+  @override
+  Future<List<RoutineSuggestion>> getSuggestions() async => const [];
+
+  @override
+  Future<RoutineQuestion> generateQuestion(String rawInputText) async =>
+      const RoutineQuestion();
+
+  @override
+  Future<Routine> createRoutine({
+    required String rawInputText,
+    required Set<SupportGoal> goals,
+    List<String> answers = const [],
+    String rewardText = '',
+    String rewardPresetKey = '',
+  }) async =>
+      const Routine(id: 'new');
+
+  @override
+  Future<Routine> confirm(Routine routine) async => routine;
+
+  @override
+  Future<({Routine routine, bool synced})> updateStep(
+    Routine routine,
+    String stepId,
+    String description,
+  ) async =>
+      (routine: routine, synced: true);
 }

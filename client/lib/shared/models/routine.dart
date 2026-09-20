@@ -41,6 +41,13 @@ abstract class Routine with _$Routine {
     /// 진행률(정수 %). 서버 `progressPercent`.
     @Default(0) int progressPercent,
 
+    /// 일과를 수행하는 날/시각. 서버 `scheduledAt` (이슈 #258).
+    ///
+    /// **`지난 일과`에서만 화면에 나온다.** 오늘 일과는 전부 오늘이라 날짜를
+    /// 적을 이유가 없고, 지난 목록은 언제 것인지가 없으면 같은 제목이 여러 번
+    /// 반복돼 구분되지 않는다.
+    DateTime? scheduledAt,
+
     // --- 보상(강화물) (이슈 #148, 2026-09-13 서울 ABA연구소 자문) ---
     // 보호자가 정하는 선택 항목이다. **비어 있으면 아동 화면에 보상 UI를 띄우지 않는다.**
     // 앱이 보상을 정하지도, 주지도 않는다 — 정하는 것도 주는 것도 보호자다.
@@ -84,6 +91,14 @@ abstract class Routine with _$Routine {
   String get rewardDisplay =>
       hasReward ? '$rewardEmoji ${rewardText.trim()}' : '';
 
+  /// `지난 일과` 카드에 적는 날짜 (`2026년 9월 20일`). 값이 없으면 빈 문자열이라
+  /// 화면에서 그 줄 자체가 사라진다 — `날짜 없음` 같은 문구를 보여주지 않는다.
+  String get scheduledDateLabel {
+    final at = scheduledAt;
+    if (at == null) return '';
+    return '${at.year}년 ${at.month}월 ${at.day}일';
+  }
+
   /// 오프라인 캐시 저장용 — [fromJson]과 대칭이어야 한다 (이슈 #140).
   /// 원문(rawInputText)도 포함되므로 **이 결과를 로그에 찍지 않는다** (docs 원칙 5번).
   Map<String, dynamic> toJson() => {
@@ -96,6 +111,7 @@ abstract class Routine with _$Routine {
     'completedStepCount': completedStepCount,
     'totalStepCount': totalStepCount,
     'progressPercent': progressPercent,
+    'scheduledAt': scheduledAt?.toIso8601String(),
     'rewardText': rewardText,
     'rewardPresetKey': rewardPresetKey,
   };
@@ -118,6 +134,8 @@ abstract class Routine with _$Routine {
       completedStepCount: _asInt(json['completedStepCount']),
       totalStepCount: _asInt(json['totalStepCount']),
       progressPercent: _asInt(json['progressPercent']),
+      // 형식이 어긋나도 null로 떨어뜨린다 — 날짜 한 줄 때문에 목록이 죽으면 안 된다.
+      scheduledAt: DateTime.tryParse(json['scheduledAt']?.toString() ?? ''),
       // 서버는 보상 미설정 시 null을 준다. 빈 문자열로 받아 hasReward가 false가 되게 한다.
       rewardText: json['rewardText']?.toString() ?? '',
       rewardPresetKey: json['rewardPresetKey']?.toString() ?? '',

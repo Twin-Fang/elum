@@ -399,6 +399,23 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     state = state.copyWith(step: RoutineFlowStep.done, routine: confirmed);
   }
 
+  /// 이미 만든 일과를 검토 화면에 올린다 (이슈 #258 — 홈에서 `수정`).
+  ///
+  /// 만들기 흐름을 거치지 않고 중간 화면부터 여는 유일한 입구라, 앞 단계에서
+  /// 남은 값(원문·질문·답)을 함께 비운다. 남겨두면 이 일과와 상관없는 이전
+  /// 입력이 검토 화면에 섞여 보인다.
+  void loadExisting(Routine routine) {
+    AppLogger.notifierCall('RoutineFlowNotifier', 'loadExisting', {
+      'routineId': routine.id,
+    });
+    state = RoutineFlowState(
+      step: RoutineFlowStep.review,
+      routine: routine,
+      rewardText: routine.rewardText,
+      rewardPresetKey: routine.rewardPresetKey,
+    );
+  }
+
   void reset() {
     AppLogger.notifierCall('RoutineFlowNotifier', 'reset');
     if (_blockedCalls > 0) {

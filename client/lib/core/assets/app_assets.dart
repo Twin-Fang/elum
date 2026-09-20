@@ -30,6 +30,12 @@ abstract final class AppAssets {
   /// 않는다 (client/CLAUDE.md). `danger`(되돌릴 수 없음)와 그래서 색이 다르다.
   static const dialogWarn = 'assets/icon/dialog/warn_round.svg';
 
+  /// 공통 팝업의 삭제 아이콘 (40×40 붉은 원 + 흰 휴지통). Figma 931:4877.
+  ///
+  /// **여기만 붉다.** 경고(dialogWarn)는 노랑이지만 삭제는 되돌릴 수 없어
+  /// 색으로 먼저 멈춰 세운다. 보호자 화면에만 쓴다.
+  static const dialogTrash = 'assets/icon/dialog/trash_round.svg';
+
   /// 도움 목표 아이콘 (40×40). Figma `온보딩_목표`(204:1002)의 Group 62~65,
   /// 목표별로 서로 다른 아이콘이다 (2026-07-22 갱신, 이슈 #11 후속).
   static String goalIcon(SupportGoal goal) => switch (goal) {
@@ -186,6 +192,15 @@ abstract final class AppAssets {
   /// 원본이 아래 방향이다 — 펼침 상태에서는 180° 돌려 위를 향하게 한다.
   /// 아이 홈에서는 90° 돌려 `>`로 쓴다.
   static const iconAngleSmall = '$_images/icon_angle_small_up.svg';
+
+  /// 일과를 밀었을 때 나오는 삭제 아이콘 (24×24, 흰색). Figma `fi-br-trash`(384:3479).
+  static const iconTrash = '$_images/icon_trash.svg';
+
+  /// 같은 자리의 수정 아이콘 (24×24, 흰색). Figma `fi-br-pencil`(931:4364).
+  static const iconPencil = '$_images/icon_pencil.svg';
+
+  /// `지난 일과` 섹션 제목 아이콘 (18×18). Figma `fi-br-time-forward`(931:3867).
+  static const iconTimePast = '$_images/icon_time_past.svg';
 
   /// 아이 홈 상단 별 배지 (50×48). Figma 364:8531 `Group 44`.
   /// 숫자는 SVG에 없다 — 코드에서 겹쳐 그린다.

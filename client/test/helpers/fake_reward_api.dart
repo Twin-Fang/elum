@@ -35,4 +35,7 @@ mixin FakeRewardApi implements RoutineRepository {
 
   @override
   Future<bool> delete(String routineId) async => true;
+
+  @override
+  Future<bool> reorder(List<String> routineIds) async => true;
 }

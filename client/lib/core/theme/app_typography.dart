@@ -42,6 +42,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.bodySmall,
     required this.childTileTitle,
     required this.ringPercent,
+    required this.routineTileTitle,
+    required this.routineTileMeta,
+    required this.routineTileReward,
+    required this.routineSectionLabel,
+    required this.routineCreateLabel,
     required this.starsCount,
     required this.editChipLabel,
     required this.childDetailTitle,
@@ -182,6 +187,26 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 진행률 링 중앙 퍼센트 "50%" (12/w800).
   /// caption(12/w400)과 크기는 같지만 굵기가 다르다.
   final TextStyle ringPercent;
+
+  /// 일과 카드 제목 (Pretendard 600/16).
+  /// cardTitle(Tmoney 800/17)과 다르다 — 목록에서 여러 줄이 겹치므로
+  /// 둥근 폰트보다 좁고 또렷한 쪽이 읽힌다.
+  final TextStyle routineTileTitle;
+
+  /// 일과 카드의 `완료 시` 라벨과 날짜 (Pretendard 400/13).
+  final TextStyle routineTileMeta;
+
+  /// 일과 카드의 보상 문구 (Pretendard 500/13). 라벨과 같은 줄에 서므로
+  /// 크기는 같고 굵기로만 값임을 드러낸다.
+  final TextStyle routineTileReward;
+
+  /// `오늘 일과` · `지난 일과` 섹션 제목 (Pretendard 600/14).
+  /// sectionTitle(Tmoney 800/14)을 쓰지 않는다 — 개편 시안에서 섹션 제목이
+  /// 본문 폰트로 바뀌고 색도 옅어졌다.
+  final TextStyle routineSectionLabel;
+
+  /// `새로운 일과 만들기` 버튼 문구 (Pretendard 500/17).
+  final TextStyle routineCreateLabel;
 
   /// 아이_별 화면 누적 별 숫자 (80/w800).
   final TextStyle starsCount;
@@ -421,6 +446,36 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.0,
     ),
+    routineTileTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    routineTileMeta: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    routineTileReward: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    routineSectionLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    routineCreateLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 17,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
     starsCount: TextStyle(
       fontFamily: fontFamily,
       fontSize: 80,
@@ -508,6 +563,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? bodySmall,
     TextStyle? childTileTitle,
     TextStyle? ringPercent,
+    TextStyle? routineTileTitle,
+    TextStyle? routineTileMeta,
+    TextStyle? routineTileReward,
+    TextStyle? routineSectionLabel,
+    TextStyle? routineCreateLabel,
     TextStyle? starsCount,
     TextStyle? editChipLabel,
     TextStyle? childDetailTitle,
@@ -551,6 +611,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
       bodySmall: bodySmall ?? this.bodySmall,
       childTileTitle: childTileTitle ?? this.childTileTitle,
       ringPercent: ringPercent ?? this.ringPercent,
+      routineTileTitle: routineTileTitle ?? this.routineTileTitle,
+      routineTileMeta: routineTileMeta ?? this.routineTileMeta,
+      routineTileReward: routineTileReward ?? this.routineTileReward,
+      routineSectionLabel: routineSectionLabel ?? this.routineSectionLabel,
+      routineCreateLabel: routineCreateLabel ?? this.routineCreateLabel,
       starsCount: starsCount ?? this.starsCount,
       editChipLabel: editChipLabel ?? this.editChipLabel,
       childDetailTitle: childDetailTitle ?? this.childDetailTitle,
@@ -601,6 +666,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
       bodySmall: TextStyle.lerp(bodySmall, other.bodySmall, t)!,
       childTileTitle: TextStyle.lerp(childTileTitle, other.childTileTitle, t)!,
       ringPercent: TextStyle.lerp(ringPercent, other.ringPercent, t)!,
+      routineTileTitle: TextStyle.lerp(routineTileTitle, other.routineTileTitle, t)!,
+      routineTileMeta: TextStyle.lerp(routineTileMeta, other.routineTileMeta, t)!,
+      routineTileReward: TextStyle.lerp(routineTileReward, other.routineTileReward, t)!,
+      routineSectionLabel: TextStyle.lerp(routineSectionLabel, other.routineSectionLabel, t)!,
+      routineCreateLabel: TextStyle.lerp(routineCreateLabel, other.routineCreateLabel, t)!,
       starsCount: TextStyle.lerp(starsCount, other.starsCount, t)!,
       editChipLabel: TextStyle.lerp(editChipLabel, other.editChipLabel, t)!,
       childDetailTitle:

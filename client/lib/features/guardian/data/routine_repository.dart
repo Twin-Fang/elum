@@ -91,6 +91,12 @@ abstract interface class RoutineRepository {
 
   /// 일과 삭제. 성공 여부를 돌려준다. 실패해도 throw하지 않는다.
   Future<bool> delete(String routineId);
+
+  /// 홈 목록의 순서를 통째로 저장한다.
+  ///
+  /// 화면에 보이는 **전체**를 차례대로 보낸다. 일부만 보내는 방식이 아니다 —
+  /// 부분 갱신은 두 곳에서 동시에 순서를 바꿀 때 뒤엉킨다.
+  Future<bool> reorder(List<String> routineIds);
 }
 
 class RoutineRepositoryImpl implements RoutineRepository {
@@ -581,6 +587,29 @@ class RoutineRepositoryImpl implements RoutineRepository {
   }
 
   @override
+  Future<bool> reorder(List<String> routineIds) async {
+    AppLogger.repositoryCall('RoutineRepository', 'reorder', {
+      'count': routineIds.length,
+    });
+
+    if (routineIds.isEmpty) return true;
+    if (AppConfig.useMock) return true;
+
+    try {
+      await _dio.patch<void>(
+        '/api/routines/order',
+        data: {'routineIds': routineIds},
+      );
+      AppLogger.repositorySuccess('RoutineRepository', 'reorder', '순서 저장됨');
+      return true;
+    } catch (e) {
+      // 실패를 삼키지 않는다 — 부르는 쪽이 목록을 되돌려야 한다.
+      AppLogger.repositoryError('RoutineRepository', 'reorder', e);
+      return false;
+    }
+  }
+
+  @override
   Future<bool> delete(String routineId) async {
     AppLogger.repositoryCall('RoutineRepository', 'delete', {
       'routineId': routineId,
@@ -699,6 +728,14 @@ final myRoutinesProvider = FutureProvider<List<Routine>>((ref) {
 /// 오늘 할 일 목록. 아이_홈이 구독한다 (이슈 #75).
 final todayRoutinesProvider = FutureProvider<List<Routine>>((ref) {
   return ref.watch(routineRepositoryProvider).getTodayRoutines();
+});
+
+/// 지난 일과 목록. 보호자_홈 아래쪽 구역이 구독한다 (이슈 #258).
+///
+/// 오늘 목록과 따로 받는다 — 지난 일과는 자주 바뀌지 않아 오늘 목록이 갱신될 때마다
+/// 함께 부를 이유가 없다.
+final pastRoutinesProvider = FutureProvider<List<Routine>>((ref) {
+  return ref.watch(routineRepositoryProvider).getPastRoutines();
 });
 
 /// 추천 일과. 보호자_홈 타일과 일과 만들기 화면의 칩이 함께 구독한다.

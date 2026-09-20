@@ -15,6 +15,12 @@ enum ElumDialogIcon {
 
   /// 주의 — **붉지 않다.** 아동도 보는 화면이라 빨간 경고를 쓰지 않는다 (#242).
   warning,
+
+  /// 삭제 — 붉은 원에 휴지통. **보호자 화면에만 쓴다** (#258).
+  ///
+  /// `warning`과 나누는 기준 — 만들던 것이 사라지면 warning, 이미 저장된
+  /// 것이 사라지면 trash다.
+  trash,
 }
 
 /// 버튼의 무게. 색만 바꾼다 — 크기·모서리는 어느 쪽이든 같다.
@@ -123,6 +129,7 @@ class ElumDialogCard<T> extends StatelessWidget {
   static String _iconAsset(ElumDialogIcon icon) => switch (icon) {
         ElumDialogIcon.success => AppAssets.dialogCheck,
         ElumDialogIcon.warning => AppAssets.dialogWarn,
+        ElumDialogIcon.trash => AppAssets.dialogTrash,
       };
 
   @override

@@ -105,6 +105,15 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.routineTileBg,
     required this.routineRingTrack,
     required this.routineRingProgress,
+    required this.routineTileSwiped,
+    required this.routineSwipeDelete,
+    required this.routineSwipeEdit,
+    required this.routineTileLabel,
+    required this.routineTileReward,
+    required this.routineDragHandle,
+    required this.routineCreateStart,
+    required this.routineCreateEnd,
+    required this.routineCreateGlow,
     required this.childTileDone,
     required this.starCount,
     required this.starsNumberStart,
@@ -303,6 +312,28 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color routineRingTrack;
   /// 진행률 링 채움·퍼센트 문구. checkDone(#55CFBA)과 분리, 같은 이유.
   final Color routineRingProgress;
+  /// 밀어서 열린 / 순서 바꾸는 중인 일과 카드 배경 (#D7D3D1).
+  /// 기본 배경(routineTileBg)보다 한 단계 어둡다 — 지금 손대고 있는 카드가 어느 것인지
+  /// 색으로 드러나야 옆의 버튼이 누구 것인지 헷갈리지 않는다.
+  final Color routineTileSwiped;
+  /// 밀었을 때 나오는 삭제 버튼 배경 (#DA5050). linkTimer와 값만 같다 —
+  /// 남은 시간 색이 바뀌어도 삭제 버튼이 따라가면 안 된다.
+  final Color routineSwipeDelete;
+  /// 밀었을 때 나오는 수정 버튼 배경 (#F8C905).
+  final Color routineSwipeEdit;
+  /// 일과 카드의 `완료 시` 라벨과 섹션 제목 (#74757D).
+  final Color routineTileLabel;
+  /// 보상 문구 rgba(0,0,0,0.7). 제목보다 옅고 라벨보다 진하다 —
+  /// 셋이 한 줄에 서므로 무게가 겹치면 어느 것이 값인지 읽히지 않는다.
+  final Color routineTileReward;
+  /// 순서 바꾸기 손잡이 (#CACACA).
+  final Color routineDragHandle;
+  /// `새로운 일과 만들기` 버튼 방사형 그라데이션 가운데 (#A2B1EB).
+  final Color routineCreateStart;
+  /// 같은 버튼 방사형 그라데이션 바깥 (#9C7DE9).
+  final Color routineCreateEnd;
+  /// 같은 버튼 바깥으로 번지는 빛 (#CCBCF6). 그림자가 아니라 발광이라 흐림이 크고 색이 진하다.
+  final Color routineCreateGlow;
   /// 아이 홈 완료된 일과 타일 배경 (#B5EAEC). goalSelectedFill과 값만 같다.
   final Color childTileDone;
   /// 별 배지 숫자 (#CB9500)
@@ -466,6 +497,15 @@ class AppColors extends ThemeExtension<AppColors> {
     routineTileBg: Color(0xFFEEE9E6),
     routineRingTrack: Color(0xFFC9D6D4),
     routineRingProgress: Color(0xFF55CFBA),
+    routineTileSwiped: Color(0xFFD7D3D1),
+    routineSwipeDelete: Color(0xFFDA5050),
+    routineSwipeEdit: Color(0xFFF8C905),
+    routineTileLabel: Color(0xFF74757D),
+    routineTileReward: Color(0xB3000000),
+    routineDragHandle: Color(0xFFCACACA),
+    routineCreateStart: Color(0xFFA2B1EB),
+    routineCreateEnd: Color(0xFF9C7DE9),
+    routineCreateGlow: Color(0xFFCCBCF6),
     childTileDone: Color(0xFFB5EAEC),
     starCount: Color(0xFFCB9500),
     starsNumberStart: Color(0xFFFFDD00),
@@ -576,6 +616,15 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? routineTileBg,
     Color? routineRingTrack,
     Color? routineRingProgress,
+    Color? routineTileSwiped,
+    Color? routineSwipeDelete,
+    Color? routineSwipeEdit,
+    Color? routineTileLabel,
+    Color? routineTileReward,
+    Color? routineDragHandle,
+    Color? routineCreateStart,
+    Color? routineCreateEnd,
+    Color? routineCreateGlow,
     Color? childTileDone,
     Color? starCount,
     Color? starsNumberStart,
@@ -676,6 +725,15 @@ class AppColors extends ThemeExtension<AppColors> {
       routineTileBg: routineTileBg ?? this.routineTileBg,
       routineRingTrack: routineRingTrack ?? this.routineRingTrack,
       routineRingProgress: routineRingProgress ?? this.routineRingProgress,
+      routineTileSwiped: routineTileSwiped ?? this.routineTileSwiped,
+      routineSwipeDelete: routineSwipeDelete ?? this.routineSwipeDelete,
+      routineSwipeEdit: routineSwipeEdit ?? this.routineSwipeEdit,
+      routineTileLabel: routineTileLabel ?? this.routineTileLabel,
+      routineTileReward: routineTileReward ?? this.routineTileReward,
+      routineDragHandle: routineDragHandle ?? this.routineDragHandle,
+      routineCreateStart: routineCreateStart ?? this.routineCreateStart,
+      routineCreateEnd: routineCreateEnd ?? this.routineCreateEnd,
+      routineCreateGlow: routineCreateGlow ?? this.routineCreateGlow,
       childTileDone: childTileDone ?? this.childTileDone,
       starCount: starCount ?? this.starCount,
       starsNumberStart: starsNumberStart ?? this.starsNumberStart,
@@ -796,6 +854,15 @@ class AppColors extends ThemeExtension<AppColors> {
           Color.lerp(routineRingTrack, other.routineRingTrack, t)!,
       routineRingProgress:
           Color.lerp(routineRingProgress, other.routineRingProgress, t)!,
+      routineTileSwiped: Color.lerp(routineTileSwiped, other.routineTileSwiped, t)!,
+      routineSwipeDelete: Color.lerp(routineSwipeDelete, other.routineSwipeDelete, t)!,
+      routineSwipeEdit: Color.lerp(routineSwipeEdit, other.routineSwipeEdit, t)!,
+      routineTileLabel: Color.lerp(routineTileLabel, other.routineTileLabel, t)!,
+      routineTileReward: Color.lerp(routineTileReward, other.routineTileReward, t)!,
+      routineDragHandle: Color.lerp(routineDragHandle, other.routineDragHandle, t)!,
+      routineCreateStart: Color.lerp(routineCreateStart, other.routineCreateStart, t)!,
+      routineCreateEnd: Color.lerp(routineCreateEnd, other.routineCreateEnd, t)!,
+      routineCreateGlow: Color.lerp(routineCreateGlow, other.routineCreateGlow, t)!,
       childTileDone: Color.lerp(childTileDone, other.childTileDone, t)!,
       starCount: Color.lerp(starCount, other.starCount, t)!,
       starsNumberStart:
