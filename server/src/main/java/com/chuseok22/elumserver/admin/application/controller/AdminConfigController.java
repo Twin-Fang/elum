@@ -1,8 +1,11 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminImageProviderView;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminTextProviderView;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
+import com.chuseok22.elumserver.ai.core.TextProvider;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
+import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -27,6 +30,7 @@ public class AdminConfigController {
 
   private final SystemConfigService systemConfigService;
   private final ImageClientRouter imageClientRouter;
+  private final TextClientRouter textClientRouter;
 
   @GetMapping("/admin/settings")
   public String settings(Model model) {
@@ -38,6 +42,7 @@ public class AdminConfigController {
     }
     model.addAttribute("groups", grouped);
     model.addAttribute("imageProviders", imageProviderViews());
+    model.addAttribute("textProviders", textProviderViews());
     return "admin/settings";
   }
 
@@ -59,7 +64,7 @@ public class AdminConfigController {
       String reason = switch (e.getErrorCode()) {
         case SECRET_MASTER_KEY_MISSING ->
           " 저장 실패: 서버에 암호화 키가 없어 비밀값을 저장할 수 없습니다. (E-CFG-002)";
-        case IMAGE_PROVIDER_UNAVAILABLE ->
+        case IMAGE_PROVIDER_UNAVAILABLE, TEXT_PROVIDER_UNAVAILABLE ->
           " 저장 실패: 그 제공자의 API 키가 없습니다. 키를 먼저 저장하세요. (E-CFG-003)";
         default -> " 저장 실패: 값이 올바르지 않습니다. (E-CFG-001)";
       };
@@ -69,9 +74,16 @@ public class AdminConfigController {
   }
 
   private void rejectUnavailableProvider(ConfigKey key, String value) {
-    if (key != ConfigKey.IMAGE_PROVIDER_SELECTED) {
-      return;
+    switch (key) {
+      case IMAGE_PROVIDER_SELECTED -> rejectUnavailableImageProvider(value);
+      case TEXT_PROVIDER_SELECTED -> rejectUnavailableTextProvider(value);
+      default -> {
+        // 제공자 선택이 아닌 설정은 검사할 것이 없다.
+      }
     }
+  }
+
+  private void rejectUnavailableImageProvider(String value) {
     ImageProvider provider;
     try {
       provider = ImageProvider.valueOf(value.trim());
@@ -84,6 +96,34 @@ public class AdminConfigController {
     if (!usable) {
       throw new CustomException(ErrorCode.IMAGE_PROVIDER_UNAVAILABLE);
     }
+  }
+
+  private void rejectUnavailableTextProvider(String value) {
+    TextProvider provider;
+    try {
+      provider = TextProvider.valueOf(value.trim());
+    } catch (IllegalArgumentException e) {
+      throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
+    }
+    boolean usable = textClientRouter.of(provider)
+      .map(client -> client.available())
+      .orElse(false);
+    if (!usable) {
+      throw new CustomException(ErrorCode.TEXT_PROVIDER_UNAVAILABLE);
+    }
+  }
+
+  // 단가가 둘이라 이미지처럼 한 값으로 정렬할 수 없다. 선언 순서를 그대로 보여준다.
+  private List<AdminTextProviderView> textProviderViews() {
+    TextProvider current = textClientRouter.selected();
+    return textClientRouter.all().stream()
+      .map(client -> AdminTextProviderView.of(
+        client, current,
+        systemConfigService.getDouble(client.provider().getInputPriceKey()),
+        systemConfigService.getDouble(client.provider().getOutputPriceKey())
+      ))
+      .sorted(java.util.Comparator.comparing(AdminTextProviderView::name))
+      .toList();
   }
 
   private List<AdminImageProviderView> imageProviderViews() {

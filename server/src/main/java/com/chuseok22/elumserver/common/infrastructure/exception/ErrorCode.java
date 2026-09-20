@@ -94,6 +94,9 @@ public enum ErrorCode {
   IMAGE_PROVIDER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "이미지 생성을 사용할 수 없습니다."),
   IMAGE_PROVIDER_NOT_CONFIGURED(HttpStatus.BAD_REQUEST, "해당 이미지 제공자의 설정이 없습니다."),
 
+  // 텍스트 생성 제공자.
+  TEXT_PROVIDER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "텍스트 생성을 사용할 수 없습니다."),
+
   ;
 
 

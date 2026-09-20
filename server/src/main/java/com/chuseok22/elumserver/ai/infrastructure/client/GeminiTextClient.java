@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.ai.core.ChildProfileInput;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionAiInput;
+import com.chuseok22.elumserver.ai.core.TextProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -25,7 +26,7 @@ import org.springframework.web.client.RestClient;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GeminiTextClient {
+public class GeminiTextClient implements TextGenerationClient {
 
   // GeminiConfig(Task 1)와 LocalLlmConfig가 각각 RestClient 빈을 하나씩 등록해 타입이
   // 같은 빈이 2개 존재하므로, 파라미터명-빈명 자동 매칭에만 기대지 않고 명시한다.
@@ -39,6 +40,63 @@ public class GeminiTextClient {
   // Spring Boot 4.1은 Jackson 3 기반이라 Jackson 2 ObjectMapper 빈이 자동 구성되지 않으므로
   // RoutineAiPipeline과 동일하게 직접 생성해서 쓴다.
   private final ObjectMapper objectMapper = new ObjectMapper();
+
+  @Override
+  public TextProvider provider() {
+    return TextProvider.GEMINI;
+  }
+
+  /// Gemini 키는 아직 배포 환경(yml)에 있다. 이미 돌아가는 경로라 건드리지 않았다.
+  @Override
+  public boolean available() {
+    return geminiProperties.apiKey() != null && !geminiProperties.apiKey().isBlank();
+  }
+
+  @Override
+  public String generateRoutineJson(
+    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers
+  ) {
+    return firstText(generate(sanitizedInputText, nickname, supportGoals, answers));
+  }
+
+  @Override
+  public String generateQuestionJson(
+    String nickname, Set<SupportGoal> supportGoals, String sanitizedInputText
+  ) {
+    return firstText(generateQuestion(nickname, supportGoals, sanitizedInputText));
+  }
+
+  @Override
+  public String generateRoutineJsonForTest(String systemPrompt, String sampleInput) {
+    return firstText(generateForTest(systemPrompt, sampleInput));
+  }
+
+  @Override
+  public String generateQuestionJsonForTest(String systemPrompt, String sampleInput) {
+    return firstText(generateQuestionForTest(systemPrompt, sampleInput));
+  }
+
+  /**
+   * 응답에서 JSON 본문 한 덩어리를 꺼낸다.
+   *
+   * <p>예전에는 호출부마다 {@code candidates.get(0)...parts.get(0)}을 직접 훑었다.
+   * 응답이 비어 오면 그 자리에서 인덱스 예외가 나 무엇이 없었는지 알 수 없었으므로,
+   * 한 곳으로 모으면서 단계마다 무엇이 비었는지 말하게 했다.
+   */
+  private String firstText(GeminiGenerateContentResponse response) {
+    if (response == null || response.candidates() == null || response.candidates().isEmpty()) {
+      throw new IllegalStateException("Gemini 응답에 candidates가 없음");
+    }
+    GeminiGenerateContentResponse.Content content = response.candidates().get(0).content();
+    if (content == null || content.parts() == null || content.parts().isEmpty()) {
+      throw new IllegalStateException("Gemini 응답에 본문이 없음");
+    }
+    String text = content.parts().get(0).text();
+    if (text == null || text.isBlank()) {
+      throw new IllegalStateException("Gemini 응답 본문이 비어 있음");
+    }
+    return text;
+  }
 
   public GeminiGenerateContentResponse generate(
     String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers
@@ -156,7 +214,7 @@ public class GeminiTextClient {
     );
   }
 
-  private Map<String, Object> responseSchema() {
+  public Map<String, Object> responseSchema() {
     return Map.of(
       "type", "object",
       "properties", Map.of(
@@ -213,7 +271,7 @@ public class GeminiTextClient {
 
   // 관리자 테스트 전용: 목표 개수를 알 수 없는 임의의 프롬프트 테스트이므로 questions
   // 배열 크기를 제한하지 않는다.
-  private Map<String, Object> questionResponseSchemaForTest() {
+  public Map<String, Object> questionResponseSchemaForTest() {
     return Map.of(
       "type", "object",
       "properties", Map.of("questions", Map.of("type", "array", "items", questionItemSchema())),

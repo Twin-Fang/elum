@@ -89,10 +89,37 @@ public enum ConfigKey {
     "fal.ai 모델 경로. 예: fal-ai/flux/schnell",
     ConfigValueType.STRING, List.of(), "fal-ai/flux/schnell"
   ),
+  // --- 텍스트 생성 제공자 ---
+  //
+  // 이미지와 같은 이유로 제공자를 화면에서 고른다. 다만 무게가 다르다 — OpenAI가
+  // 텍스트 모델에만 무료 토큰을 주는데 영구 보장이 아니라, 끊기는 날 즉시 되돌릴
+  // 수단이 필요하다. API 키는 이미지와 같은 OPENAI_API_KEY를 함께 쓴다.
+  TEXT_PROVIDER_SELECTED(
+    ConfigGroup.TEXT_PROVIDER, "사용할 제공자",
+    "일과·추가 질문 텍스트를 생성할 제공자. 키가 없는 제공자는 고를 수 없다",
+    ConfigValueType.SELECT, List.of("GEMINI", "OPENAI"), "GEMINI"
+  ),
+  OPENAI_TEXT_MODEL(
+    ConfigGroup.TEXT_PROVIDER, "OpenAI 텍스트 모델",
+    "예: gpt-4.1-mini. nano급은 한국어 문장이 깨져 권장하지 않는다",
+    ConfigValueType.STRING, List.of(), "gpt-4.1-mini"
+  ),
   PRICE_OPENAI_IMAGE_PER_IMAGE(
     ConfigGroup.PRICING, "OpenAI 이미지 단가 (USD/장)",
     "OpenAI 이미지 1장 생성 요금. 비용 추정에 사용",
     ConfigValueType.DECIMAL, List.of(), "0.005"
+  ),
+  // 아래 두 값은 OpenAI 공식 단가표를 확인하지 못해 추정치로 둔다.
+  // Usage 화면의 실제 청구액과 대조해 보정한다.
+  PRICE_OPENAI_TEXT_INPUT_PER_1M(
+    ConfigGroup.PRICING, "OpenAI 텍스트 입력 단가 (USD/1M 토큰)",
+    "OpenAI 텍스트 입력 토큰 100만 개당 요금. 비용 추정에 사용",
+    ConfigValueType.DECIMAL, List.of(), "0.40"
+  ),
+  PRICE_OPENAI_TEXT_OUTPUT_PER_1M(
+    ConfigGroup.PRICING, "OpenAI 텍스트 출력 단가 (USD/1M 토큰)",
+    "OpenAI 텍스트 출력 토큰 100만 개당 요금. 비용 추정에 사용",
+    ConfigValueType.DECIMAL, List.of(), "1.60"
   ),
   PRICE_FLUX_IMAGE_PER_IMAGE(
     ConfigGroup.PRICING, "FLUX 이미지 단가 (USD/장)",

@@ -2,10 +2,9 @@ package com.chuseok22.elumserver.routine.infrastructure.ai;
 
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
-import com.chuseok22.elumserver.ai.infrastructure.client.GeminiGenerateContentResponse;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
-import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -38,7 +37,7 @@ public class RoutineAiPipeline {
   // SensitiveInfoGuardService와 동일하게 직접 생성해서 쓴다.
   private final ObjectMapper objectMapper = new ObjectMapper();
 
-  private final GeminiTextClient geminiTextClient;
+  private final TextClientRouter textClientRouter;
   private final ImageClientRouter imageClientRouter;
   private final RoutineImageStorage routineImageStorage;
 
@@ -47,7 +46,8 @@ public class RoutineAiPipeline {
     CharacterType characterType
   ) {
     RoutineStepDraft draft = parseDraft(
-      () -> geminiTextClient.generate(sanitizedInputText, nickname, supportGoals, maskedAnswers)
+      () -> textClientRouter.current()
+        .generateRoutineJson(sanitizedInputText, nickname, supportGoals, maskedAnswers)
     );
     return buildResult(draft, characterType, Map.of());
   }
@@ -84,9 +84,8 @@ public class RoutineAiPipeline {
   ) {
     String json = null;
     try {
-      GeminiGenerateContentResponse response =
-        geminiTextClient.generateQuestion(nickname, supportGoals, sanitizedInputText);
-      json = response.candidates().get(0).content().parts().get(0).text();
+      json = textClientRouter.current()
+        .generateQuestionJson(nickname, supportGoals, sanitizedInputText);
       RoutineQuestionDraft draft = objectMapper.readValue(json, RoutineQuestionDraft.class);
       if (draft.questions() == null) {
         return Map.of();
@@ -99,7 +98,7 @@ public class RoutineAiPipeline {
           (first, second) -> first // 같은 supportGoal이 중복되면 먼저 나온 것만 채택한다.
         ));
     } catch (Exception e) {
-      log.warn("Gemini 추가 질문 생성 실패, 목표별 고정 매핑으로 대체: response={}", json, e);
+      log.warn("AI 추가 질문 생성 실패, 목표별 고정 매핑으로 대체: response={}", json, e);
       return Map.of();
     }
   }
@@ -153,29 +152,28 @@ public class RoutineAiPipeline {
     return new RoutineQuestionResult.QuestionResultItem.OptionResult(emoji, label);
   }
 
-  // Gemini 호출 자체(RestClient의 RestClientResponseException/ResourceAccessException 등)와
+  // AI 호출 자체(RestClient의 RestClientResponseException/ResourceAccessException 등)와
   // 응답 파싱을 하나의 try 블록에서 함께 처리한다. 호출과 파싱을 분리해두면 호출 실패가
   // 이 메서드 밖으로 그대로 전파돼 GlobalExceptionHandler의 범용 500 처리로 새어나가
   // ROUTINE_AI_GENERATION_FAILED(502)로 변환되지 않는 문제가 있었다(fable5 검토에서 발견).
-  private RoutineStepDraft parseDraft(Supplier<GeminiGenerateContentResponse> call) {
+  private RoutineStepDraft parseDraft(Supplier<String> call) {
     String json = null;
     try {
-      GeminiGenerateContentResponse response = call.get();
-      json = response.candidates().get(0).content().parts().get(0).text();
+      json = call.get();
       RoutineStepDraft draft = objectMapper.readValue(json, RoutineStepDraft.class);
       // title은 Routine.title이 NOT NULL이라, 스키마 위반으로 누락되면 DB 제약 위반(500)이
       // 아니라 여기서 먼저 502로 처리한다(fable5 검토에서 발견).
       if (draft.title() == null || draft.title().isBlank()) {
-        log.warn("Gemini가 title 없이 응답함: response={}", json);
+        log.warn("AI가 title 없이 응답함: response={}", json);
         throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
       }
       if (draft.steps() == null || draft.steps().isEmpty() || draft.steps().size() > MAX_STEPS) {
-        log.warn("Gemini가 반환한 단계 수가 허용 범위를 벗어남: count={}, response={}",
+        log.warn("AI가 반환한 단계 수가 허용 범위를 벗어남: count={}, response={}",
           draft.steps() == null ? 0 : draft.steps().size(), json);
         throw new CustomException(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED);
       }
       if (draft.steps().stream().anyMatch(step -> step.title() == null || step.title().isBlank())) {
-        log.warn("Gemini가 일부 단계에 title 없이 응답함: response={}", json);
+        log.warn("AI가 일부 단계에 title 없이 응답함: response={}", json);
         throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
       }
       return normalizeOrder(draft);

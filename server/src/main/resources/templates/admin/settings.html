@@ -59,6 +59,48 @@
       </div>
     </div>
 
+    <!-- 텍스트 제공자 상태 — 이미지 카드와 같은 모양으로 둔다 (이슈 #261).
+         다른 점은 단가가 둘이라는 것뿐이다. 텍스트는 장당이 아니라 입력·출력 토큰으로
+         셈하므로 "장당 얼마"처럼 한 줄로 비교되지 않는다. -->
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body space-y-3">
+        <h2 class="card-title text-lg">텍스트 생성 제공자</h2>
+        <p class="text-sm text-base-content/60">
+          일과 제목·단계와 추가 질문을 만드는 모델입니다. 카드에 적히는 문장은 이룸이가 소리 내어
+          듣는 말이라, 싼 모델로 바꿀 때는 문장이 어색해지지 않는지 먼저 확인하세요.
+        </p>
+
+        <div th:each="provider : ${textProviders}"
+             class="border border-base-300 rounded-box p-3 flex items-center justify-between gap-3 flex-wrap"
+             th:classappend="${provider.selected()} ? 'border-primary bg-primary/5' : ''">
+          <div>
+            <div class="font-medium">
+              <span th:text="${provider.label()}">제공자</span>
+              <span th:if="${provider.selected()}" class="badge badge-primary badge-sm ml-1">사용 중</span>
+            </div>
+            <div class="text-sm text-base-content/70">
+              <span th:text="'입력 $' + ${#numbers.formatDecimal(provider.inputPricePer1M(), 1, 2)}
+                    + ' · 출력 $' + ${#numbers.formatDecimal(provider.outputPricePer1M(), 1, 2)}
+                    + ' /1M 토큰'">$0</span>
+              <span th:if="${provider.available()}" class="text-success">· 키 있음</span>
+              <span th:unless="${provider.available()}" class="text-error">· 키 없음</span>
+            </div>
+          </div>
+          <form th:unless="${provider.selected()}"
+                th:action="@{/admin/settings/{key}(key='TEXT_PROVIDER_SELECTED')}" method="post"
+                onsubmit="return confirm('이 제공자로 바꿀까요? 다음 일과 생성부터 반영됩니다.');">
+            <input type="hidden" name="value" th:value="${provider.name()}"/>
+            <!-- 키가 없는 제공자로 바꾸면 일과 생성이 전부 실패한다. 버튼에서 먼저 막고
+                 서버에서도 한 번 더 막는다. -->
+            <button type="submit" class="btn btn-sm"
+                    th:classappend="${provider.available()} ? 'btn-primary' : 'btn-disabled'"
+                    th:disabled="${!provider.available()}"
+                    th:text="${provider.available()} ? '이것으로 전환' : '키를 먼저 넣으세요'">전환</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <div th:each="entry : ${groups}" class="card bg-base-100 shadow-md">
       <div class="card-body space-y-4">
         <h2 class="card-title text-lg" th:text="${entry.key.label}">그룹</h2>

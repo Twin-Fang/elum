@@ -73,6 +73,11 @@ public class AiCallLogService {
       case GEMINI_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_GEMINI_IMAGE_PER_IMAGE);
       case OPENAI_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_OPENAI_IMAGE_PER_IMAGE);
       case FLUX_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_FLUX_IMAGE_PER_IMAGE);
+      case OPENAI_TEXT_CREATE, OPENAI_TEXT_QUESTION -> textCostUsd(
+        usage,
+        ConfigKey.PRICE_OPENAI_TEXT_INPUT_PER_1M,
+        ConfigKey.PRICE_OPENAI_TEXT_OUTPUT_PER_1M
+      );
       case GEMINI_TEXT_CREATE, GEMINI_TEXT_QUESTION -> {
         if (usage == null) {
           yield 0.0;
@@ -86,6 +91,19 @@ public class AiCallLogService {
       }
       case LOCAL_LLM_DLP -> 0.0;
     };
+  }
+
+  // 입력·출력 토큰 종량 계산. 단가 키만 제공자별로 갈린다.
+  private double textCostUsd(
+    GeminiGenerateContentResponse.UsageMetadata usage, ConfigKey inputPriceKey, ConfigKey outputPriceKey
+  ) {
+    if (usage == null) {
+      return 0.0;
+    }
+    double promptTokens = usage.promptTokenCount() == null ? 0 : usage.promptTokenCount();
+    double outputTokens = usage.candidatesTokenCount() == null ? 0 : usage.candidatesTokenCount();
+    return promptTokens / TOKENS_PER_MILLION * systemConfigService.getDouble(inputPriceKey)
+      + outputTokens / TOKENS_PER_MILLION * systemConfigService.getDouble(outputPriceKey);
   }
 
   private String truncate(String message) {

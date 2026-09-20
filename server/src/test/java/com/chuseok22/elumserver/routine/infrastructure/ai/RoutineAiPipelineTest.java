@@ -15,11 +15,11 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 
-import com.chuseok22.elumserver.ai.infrastructure.client.GeminiGenerateContentResponse;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
-import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
+import com.chuseok22.elumserver.ai.infrastructure.client.TextGenerationClient;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
@@ -37,7 +37,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class RoutineAiPipelineTest {
 
   @Mock
-  private GeminiTextClient geminiTextClient;
+  private TextClientRouter textClientRouter;
+
+  @Mock
+  private TextGenerationClient textGenerationClient;
 
   @Mock
   private ImageClientRouter imageClientRouter;
@@ -51,17 +54,11 @@ class RoutineAiPipelineTest {
   @InjectMocks
   private RoutineAiPipeline routineAiPipeline;
 
-  private GeminiGenerateContentResponse textResponse(String json) {
-    return new GeminiGenerateContentResponse(List.of(
-      new GeminiGenerateContentResponse.Candidate(new GeminiGenerateContentResponse.Content(List.of(
-        new GeminiGenerateContentResponse.Part(json, null)
-      )))
-    ));
-  }
 
   @BeforeEach
   void setUp() {
     lenient().when(imageClientRouter.current()).thenReturn(imageGenerationClient);
+    lenient().when(textClientRouter.current()).thenReturn(textGenerationClient);
   }
 
   @Test
@@ -74,8 +71,8 @@ class RoutineAiPipelineTest {
       + "{\"supportGoal\":\"PREPARE_NEW\",\"question\":\"평소와 다른 점이 있나요?\",\"options\":["
       + "{\"emoji\":\"⏰\",\"label\":\"시간 변경\"},{\"emoji\":\"📍\",\"label\":\"장소 변경\"},"
       + "{\"emoji\":\"👥\",\"label\":\"동행자 변경\"}]}]}";
-    when(geminiTextClient.generateQuestion(eq("하늘이"), anySet(), eq("내일 비 오는 날")))
-      .thenReturn(textResponse(json));
+    when(textGenerationClient.generateQuestionJson(eq("하늘이"), anySet(), eq("내일 비 오는 날")))
+      .thenReturn(json);
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
       "하늘이", Set.of(SupportGoal.PREPARE_ITEMS, SupportGoal.PREPARE_NEW), "내일 비 오는 날"
@@ -100,7 +97,7 @@ class RoutineAiPipelineTest {
     String json = "{\"questions\":[{\"supportGoal\":\"PREPARE_ITEMS\",\"question\":\"준비물이 있나요?\","
       + "\"options\":[{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"},"
       + "{\"emoji\":\"👖\",\"label\":\"장화\"},{\"emoji\":\"🧦\",\"label\":\"\"}]}]}";
-    when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
+    when(textGenerationClient.generateQuestionJson(any(), any(), any())).thenReturn(json);
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
       "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), "내일 비 오는 날"
@@ -121,7 +118,7 @@ class RoutineAiPipelineTest {
       + "{\"supportGoal\":\"PREPARE_NEW\",\"question\":\"평소와 다른 점이 있나요?\",\"options\":["
       + "{\"emoji\":\"⏰\",\"label\":\"시간 변경\"},{\"emoji\":\"📍\",\"label\":\"장소 변경\"},"
       + "{\"emoji\":\"👥\",\"label\":\"동행자 변경\"}]}]}";
-    when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
+    when(textGenerationClient.generateQuestionJson(any(), any(), any())).thenReturn(json);
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
       "하늘이", Set.of(SupportGoal.PREPARE_ITEMS, SupportGoal.PREPARE_NEW), "내일 비 오는 날"
@@ -137,7 +134,7 @@ class RoutineAiPipelineTest {
   @Test
   @DisplayName("Gemini 호출이 실패하면 선택한 도움 목표별 고정 질문으로 대체한다")
   void generateQuestion_geminiFails_fallsBackToGoalMappedQuestions() {
-    when(geminiTextClient.generateQuestion(any(), any(), any()))
+    when(textGenerationClient.generateQuestionJson(any(), any(), any()))
       .thenThrow(new RuntimeException("Gemini 호출 실패"));
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
@@ -150,7 +147,7 @@ class RoutineAiPipelineTest {
   @Test
   @DisplayName("Gemini 호출이 실패하면 대체 답변의 모든 옵션에 emoji가 채워지고 직접 입력 항목은 없다")
   void generateQuestion_geminiFails_fallbackHasEmojiAndNoManualInputOption() {
-    when(geminiTextClient.generateQuestion(any(), any(), any()))
+    when(textGenerationClient.generateQuestionJson(any(), any(), any()))
       .thenThrow(new RuntimeException("Gemini 호출 실패"));
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
@@ -168,8 +165,8 @@ class RoutineAiPipelineTest {
   @Test
   @DisplayName("Gemini 응답에 questions가 없으면 fallback으로 대체한다")
   void generateQuestion_emptyQuestions_fallsBack() {
-    when(geminiTextClient.generateQuestion(any(), any(), any()))
-      .thenReturn(textResponse("{\"questions\":[]}"));
+    when(textGenerationClient.generateQuestionJson(any(), any(), any()))
+      .thenReturn("{\"questions\":[]}");
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
       "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), "내일 비 오는 날"
@@ -185,7 +182,7 @@ class RoutineAiPipelineTest {
     String json = "{\"questions\":["
       + "{\"supportGoal\":\"PREPARE_NEW\",\"question\":\"준비물이 있나요?\",\"options\":["
       + "{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"},{\"emoji\":\"👖\",\"label\":\"장화\"}]}]}";
-    when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
+    when(textGenerationClient.generateQuestionJson(any(), any(), any())).thenReturn(json);
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
       "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), "내일 비 오는 날"
@@ -200,7 +197,7 @@ class RoutineAiPipelineTest {
   void generateQuestion_fewerThanThreeOptions_fallsBackThatGoal() {
     String json = "{\"questions\":[{\"supportGoal\":\"PREPARE_ITEMS\",\"question\":\"준비물이 있나요?\","
       + "\"options\":[{\"emoji\":\"☔\",\"label\":\"우산\"},{\"emoji\":\"🧥\",\"label\":\"우비\"}]}]}";
-    when(geminiTextClient.generateQuestion(any(), any(), any())).thenReturn(textResponse(json));
+    when(textGenerationClient.generateQuestionJson(any(), any(), any())).thenReturn(json);
 
     RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
       "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), "내일 비 오는 날"
@@ -216,7 +213,7 @@ class RoutineAiPipelineTest {
     String json = "{\"title\":\"비 오는 날 학교 가기\",\"steps\":["
       + "{\"order\":2,\"title\":\"우산을 챙겨요\",\"description\":\"우산을 챙겨요\"},"
       + "{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
-    when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
     when(imageGenerationClient.generateImage(any(), any()))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
@@ -241,7 +238,7 @@ class RoutineAiPipelineTest {
   @DisplayName("캐릭터를 선택하지 않은 회원이면 이미지 생성 호출에 캐릭터 없이(null) 전달된다")
   void generateForCreate_noCharacter_passesNullCharacterToImageClient() {
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
-    when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
     when(imageGenerationClient.generateImage(any(), any()))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
@@ -255,7 +252,7 @@ class RoutineAiPipelineTest {
   @DisplayName("Gemini가 title 없이 응답하면 ROUTINE_AI_GENERATION_FAILED를 던진다")
   void generateForCreate_missingTitle_throwsGenerationFailed() {
     String json = "{\"steps\":[{\"order\":1,\"description\":\"설명\"}]}";
-    when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
 
     assertThatThrownBy(() ->
       routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null))
@@ -268,7 +265,7 @@ class RoutineAiPipelineTest {
   @DisplayName("Gemini가 빈 steps를 반환하면 ROUTINE_STEP_LIMIT_EXCEEDED를 던진다")
   void generateForCreate_emptySteps_throwsStepLimitExceeded() {
     String json = "{\"title\":\"제목\",\"steps\":[]}";
-    when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
 
     assertThatThrownBy(() ->
       routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null))
@@ -281,7 +278,7 @@ class RoutineAiPipelineTest {
   @DisplayName("이미지 생성이 1차 실패해도 재시도로 성공하면 정상 저장된다")
   void generateForCreate_imageFailsOnce_retriesAndSucceeds() {
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
-    when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
     when(imageGenerationClient.generateImage(any(), any()))
       .thenThrow(new RuntimeException("일시적 실패"))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
@@ -302,7 +299,7 @@ class RoutineAiPipelineTest {
     // 이미지 하나가 끝까지 실패해도 일과 전체를 포기하지 않는다(서비스 원칙 6). 예외를 던지면
     // create()가 500으로 죽어 일과가 서버에 저장조차 안 되던 버그의 근본 원인이었다.
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
-    when(geminiTextClient.generate(any(), any(), any(), any())).thenReturn(textResponse(json));
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
     when(imageGenerationClient.generateImage(any(), any())).thenThrow(new RuntimeException("계속 실패"));
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(

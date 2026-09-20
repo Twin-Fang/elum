@@ -11,6 +11,8 @@ public enum AiCallType {
   GEMINI_TEXT_CREATE("Gemini 루틴 생성"),
   GEMINI_TEXT_QUESTION("Gemini 추가 질문"),
   GEMINI_IMAGE("Gemini 이미지"),
+  OPENAI_TEXT_CREATE("OpenAI 루틴 생성"),
+  OPENAI_TEXT_QUESTION("OpenAI 추가 질문"),
   OPENAI_IMAGE("OpenAI 이미지"),
   FLUX_IMAGE("FLUX 이미지"),
   LOCAL_LLM_DLP("로컬 LLM 민감정보 검사"),

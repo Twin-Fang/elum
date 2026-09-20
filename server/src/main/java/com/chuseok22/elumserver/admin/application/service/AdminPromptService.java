@@ -7,11 +7,11 @@ import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
-import com.chuseok22.elumserver.ai.infrastructure.client.GeminiGenerateContentResponse;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiRoutineImagePromptBuilder;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplate;
 import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplateHistory;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -37,6 +37,7 @@ public class AdminPromptService {
   private final PromptTemplateService promptTemplateService;
   private final SensitiveInfoGuardService sensitiveInfoGuardService;
   private final GeminiTextClient geminiTextClient;
+  private final TextClientRouter textClientRouter;
   private final ImageClientRouter imageClientRouter;
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
 
@@ -93,22 +94,20 @@ public class AdminPromptService {
 
   private RoutineStepDraft testGeminiText(String systemPrompt, String sampleInput) {
     try {
-      GeminiGenerateContentResponse response = geminiTextClient.generateForTest(systemPrompt, sampleInput);
-      String json = response.candidates().get(0).content().parts().get(0).text();
+      String json = textClientRouter.current().generateRoutineJsonForTest(systemPrompt, sampleInput);
       return objectMapper.readValue(json, RoutineStepDraft.class);
     } catch (Exception e) {
-      log.warn("[관리자 테스트] Gemini 텍스트 생성 실패: systemPrompt={}, sampleInput={}", systemPrompt, sampleInput, e);
+      log.warn("[관리자 테스트] 텍스트 생성 실패: systemPrompt={}, sampleInput={}", systemPrompt, sampleInput, e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED);
     }
   }
 
   private RoutineQuestionDraft testGeminiQuestion(String systemPrompt, String sampleInput) {
     try {
-      GeminiGenerateContentResponse response = geminiTextClient.generateQuestionForTest(systemPrompt, sampleInput);
-      String json = response.candidates().get(0).content().parts().get(0).text();
+      String json = textClientRouter.current().generateQuestionJsonForTest(systemPrompt, sampleInput);
       return objectMapper.readValue(json, RoutineQuestionDraft.class);
     } catch (Exception e) {
-      log.warn("[관리자 테스트] Gemini 질문 생성 실패: systemPrompt={}, sampleInput={}", systemPrompt, sampleInput, e);
+      log.warn("[관리자 테스트] 질문 생성 실패: systemPrompt={}, sampleInput={}", systemPrompt, sampleInput, e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED);
     }
   }
@@ -120,7 +119,7 @@ public class AdminPromptService {
       String base64 = Base64.getEncoder().encodeToString(image.bytes());
       return "data:image/" + image.extension() + ";base64," + base64;
     } catch (Exception e) {
-      log.warn("[관리자 테스트] Gemini 이미지 생성 실패: prefix={}, sampleInput={}", prefix, sampleInput, e);
+      log.warn("[관리자 테스트] 이미지 생성 실패: prefix={}, sampleInput={}", prefix, sampleInput, e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_IMAGE_FAILED);
     }
   }
