@@ -73,6 +73,19 @@ public class Routine extends BaseEntity {
   @Column(length = 30)
   private String rewardPresetKey;
 
+  /**
+   * 홈 목록에서 보이는 순서. 작을수록 위다.
+   *
+   * <p>예정 시각으로만 줄 세우면 보호자가 순서를 바꿀 수 없다. 그렇다고 예정 시각을
+   * 바꿔 순서를 표현하면 "몇 시에 하는 일과인가"라는 뜻이 망가진다. 그래서 보이는
+   * 순서를 따로 둔다.
+   *
+   * <p>같은 값이면 예정 시각으로 갈린다 — 순서를 한 번도 바꾸지 않은 계정도 지금과
+   * 똑같은 차례로 보인다.
+   */
+  @Column(nullable = false, columnDefinition = "integer not null default 0")
+  private Integer displayOrder = 0;
+
   private LocalDateTime completedAt;
 
   @OneToMany(mappedBy = "routine", cascade = CascadeType.ALL, orphanRemoval = true)

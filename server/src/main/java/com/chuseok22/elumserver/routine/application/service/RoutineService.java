@@ -31,11 +31,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.concurrent.CompletableFuture;
@@ -157,6 +159,9 @@ public class RoutineService {
       request.scheduledAt() != null ? request.scheduledAt() : LocalDateTime.now()
     );
     routine.setStatus(RoutineStatus.PENDING_REVIEW);
+    // 새로 만든 일과는 목록 맨 뒤에 붙는다. 보호자가 순서를 바꾼 뒤에도 새 일과가
+    // 중간에 끼어들지 않게 한다.
+    routine.setDisplayOrder(routineRepository.maxDisplayOrder(profile.getId()) + 1);
     // 보상은 선택 항목이다. 보호자가 건너뛰면 null로 남고 이룸이 화면에서 보상 UI를 띄우지 않는다.
     routine.setRewardText(trimReward(request.rewardText()));
     routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
@@ -623,8 +628,12 @@ public class RoutineService {
     LocalDate today = LocalDate.now();
     LocalDateTime startOfDay = today.atStartOfDay();
     LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
-    List<Routine> routines = routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
-      memberId, List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED), startOfDay, endOfDay
+    // 프로필을 계정에서 떼어낸 뒤로 profileId와 memberId가 다른 값이 됐는데, 여기만
+    // memberId를 그대로 넘기고 있었다. 그 상태로는 어떤 일과도 걸리지 않는다.
+    // 보이는 순서 → 예정 시각 차례로 줄 세운다.
+    List<Routine> routines = routineRepository.findTodayOrdered(
+      requireProfile(memberId).getId(),
+      List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED), startOfDay, endOfDay
     );
     return routines.stream().map(RoutineResponse::from).toList();
   }
@@ -652,6 +661,45 @@ public class RoutineService {
       throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND);
     }
     return routineImageStorage.read(targetStep.getImagePath());
+  }
+
+  /**
+   * 홈 목록의 순서를 통째로 다시 매긴다.
+   *
+   * <p>보낸 차례대로 1부터 번호를 붙인다. 일부만 보내 부분 갱신하는 방식이 아니라
+   * <b>화면에 보이는 전체를 그대로 보낸다</b> — 부분 갱신은 두 사람이 동시에 순서를
+   * 바꿀 때 뒤엉킨다.
+   *
+   * <p>하나라도 남의 것이거나 없는 것이 섞이면 <b>아무것도 바꾸지 않고</b> 거부한다.
+   * 절반만 반영되면 화면과 서버의 순서가 어긋나 더 나쁘다.
+   */
+  @Transactional
+  public void reorder(String memberId, List<String> routineIds) {
+    if (routineIds == null || routineIds.isEmpty()) {
+      return;
+    }
+    // 같은 값이 두 번 오면 번호가 겹쳐 순서가 뒤엉킨다.
+    if (new HashSet<>(routineIds).size() != routineIds.size()) {
+      throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+    }
+
+    Profile profile = requireProfile(memberId);
+    List<Routine> routines = routineRepository.findAllById(routineIds);
+    if (routines.size() != routineIds.size()) {
+      throw new CustomException(ErrorCode.ROUTINE_NOT_FOUND);
+    }
+
+    Map<String, Routine> byId = new HashMap<>();
+    for (Routine routine : routines) {
+      if (!routine.getProfile().getId().equals(profile.getId())) {
+        throw new CustomException(ErrorCode.ROUTINE_ACCESS_DENIED);
+      }
+      byId.put(routine.getId(), routine);
+    }
+
+    for (int i = 0; i < routineIds.size(); i++) {
+      byId.get(routineIds.get(i)).setDisplayOrder(i + 1);
+    }
   }
 
   private Routine getOwnedRoutine(String memberId, String routineId) {

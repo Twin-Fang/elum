@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.routine.application.controller;
 
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
@@ -113,6 +114,16 @@ public class RoutineController implements RoutineControllerDocs {
   ) {
     RoutineResponse response = routineService.updateReward(authentication.getName(), routineId, request);
     return ResponseEntity.ok(response);
+  }
+
+  // 화면에 보이는 순서를 그대로 받는다. 부분 갱신이 아니라 전체 교체다.
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PatchMapping("/order")
+  public ResponseEntity<Void> reorder(
+    Authentication authentication, @RequestBody RoutineReorderRequest request
+  ) {
+    routineService.reorder(authentication.getName(), request.routineIds());
+    return ResponseEntity.noContent().build();
   }
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)

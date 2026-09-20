@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -353,16 +354,20 @@ class RoutineServiceTest {
     routine.setProfile(profile);
     routine.setStatus(RoutineStatus.CONFIRMED);
     routine.setSteps(List.of());
-    when(routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
-      eq("member-1"), eq(List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED)), any(), any()
+    // 프로필로 조회해야 한다. 예전에는 memberId를 그대로 넘겨 아무것도 걸리지 않았는데,
+    // 이 테스트가 그 값을 기대하고 있어 버그가 통과로 남아 있었다.
+    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1"))
+      .thenReturn(Optional.of(profile));
+    when(routineRepository.findTodayOrdered(
+      eq("profile-1"), eq(List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED)), any(), any()
     )).thenReturn(List.of(routine));
 
     List<RoutineResponse> result = routineService.getTodayRoutines("member-1");
 
     assertThat(result).hasSize(1);
     assertThat(result.get(0).id()).isEqualTo("routine-1");
-    verify(routineRepository).findAllByProfileIdAndStatusInAndScheduledAtBetweenOrderByScheduledAtAsc(
-      eq("member-1"), eq(List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED)), any(), any()
+    verify(routineRepository).findTodayOrdered(
+      eq("profile-1"), eq(List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED)), any(), any()
     );
   }
 
@@ -505,5 +510,97 @@ class RoutineServiceTest {
     assertThatThrownBy(() -> routineService.syncProgress("member-1", "routine-1", List.of("step-1", "ghost")))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ROUTINE_STEP_NOT_FOUND));
+  }
+
+  // --- 순서 바꾸기 (이슈 #258) ---
+
+  private Routine ownedRoutine(String id, Profile profile) {
+    Routine routine = new Routine();
+    routine.setId(id);
+    routine.setProfile(profile);
+    routine.setDisplayOrder(0);
+    return routine;
+  }
+
+  private Profile profileOf(String profileId, String memberId) {
+    Member member = new Member();
+    member.setId(memberId);
+    Profile profile = new Profile();
+    profile.setId(profileId);
+    profile.setMember(member);
+    return profile;
+  }
+
+  @Test
+  @DisplayName("보낸 차례대로 1부터 번호가 붙는다")
+  void reorder_assignsSequentialOrder() {
+    Profile profile = profileOf("profile-1", "member-1");
+    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1"))
+      .thenReturn(Optional.of(profile));
+    Routine a = ownedRoutine("r-a", profile);
+    Routine b = ownedRoutine("r-b", profile);
+    Routine c = ownedRoutine("r-c", profile);
+    when(routineRepository.findAllById(List.of("r-c", "r-a", "r-b")))
+      .thenReturn(List.of(a, b, c));
+
+    routineService.reorder("member-1", List.of("r-c", "r-a", "r-b"));
+
+    assertThat(c.getDisplayOrder()).isEqualTo(1);
+    assertThat(a.getDisplayOrder()).isEqualTo(2);
+    assertThat(b.getDisplayOrder()).isEqualTo(3);
+  }
+
+  @Test
+  @DisplayName("남의 일과가 섞이면 아무것도 바꾸지 않는다")
+  void reorder_foreignRoutine_changesNothing() {
+    Profile mine = profileOf("profile-1", "member-1");
+    Profile others = profileOf("profile-2", "member-2");
+    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1"))
+      .thenReturn(Optional.of(mine));
+    Routine a = ownedRoutine("r-a", mine);
+    Routine stranger = ownedRoutine("r-x", others);
+    when(routineRepository.findAllById(List.of("r-a", "r-x")))
+      .thenReturn(List.of(a, stranger));
+
+    assertThatThrownBy(() -> routineService.reorder("member-1", List.of("r-a", "r-x")))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.ROUTINE_ACCESS_DENIED));
+
+    assertThat(a.getDisplayOrder()).isZero();
+    assertThat(stranger.getDisplayOrder()).isZero();
+  }
+
+  @Test
+  @DisplayName("없는 일과가 섞이면 거부한다 — 절반만 반영되면 화면과 서버가 어긋난다")
+  void reorder_missingRoutine_rejected() {
+    Profile profile = profileOf("profile-1", "member-1");
+    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1"))
+      .thenReturn(Optional.of(profile));
+    when(routineRepository.findAllById(List.of("r-a", "없는것")))
+      .thenReturn(List.of(ownedRoutine("r-a", profile)));
+
+    assertThatThrownBy(() -> routineService.reorder("member-1", List.of("r-a", "없는것")))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.ROUTINE_NOT_FOUND));
+  }
+
+  @Test
+  @DisplayName("같은 일과가 두 번 오면 거부한다 — 번호가 겹쳐 순서가 뒤엉킨다")
+  void reorder_duplicateIds_rejected() {
+    assertThatThrownBy(() -> routineService.reorder("member-1", List.of("r-a", "r-a")))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
+  }
+
+  @Test
+  @DisplayName("빈 목록은 조회조차 하지 않는다")
+  void reorder_emptyList_noop() {
+    routineService.reorder("member-1", List.of());
+    routineService.reorder("member-1", null);
+
+    verify(routineRepository, never()).findAllById(any());
   }
 }

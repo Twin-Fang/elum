@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.routine.application.controller;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
@@ -231,6 +232,25 @@ public interface RoutineControllerDocs {
     )
   })
   ResponseEntity<RoutineResponse> confirm(Authentication authentication, String routineId);
+
+  @Operation(
+    summary = "일과 순서 변경",
+    description = """
+      홈 목록에 보이는 일과 순서를 바꿉니다.
+
+      **화면에 보이는 전체를 차례대로 보냅니다.** 일부만 보내 부분 갱신하는 방식이 아닙니다 —
+      부분 갱신은 두 곳에서 동시에 순서를 바꿀 때 뒤엉킵니다.
+
+      - 보낸 차례대로 1부터 번호가 붙습니다. 앞에 있을수록 위입니다.
+      - 하나라도 남의 일과이거나 없는 일과가 섞이면 **아무것도 바꾸지 않고** 거부합니다.
+        절반만 반영되면 화면과 서버의 순서가 어긋나 더 나쁩니다.
+      - 같은 ID가 두 번 오면 거부합니다.
+      - 빈 목록은 아무 일도 하지 않고 성공으로 답합니다.
+      """
+  )
+  ResponseEntity<Void> reorder(
+    Authentication authentication, RoutineReorderRequest request
+  );
 
   @Operation(
     summary = "보상(강화물) 수정",

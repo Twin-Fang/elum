@@ -5,6 +5,8 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface RoutineRepository extends JpaRepository<Routine, String> {
 
@@ -33,6 +35,30 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   /// 계정이 지금 가지고 있는 일과 수. 보유 개수 한도에 쓴다.
   long countByProfileMemberId(String memberId);
+
+  /**
+   * 홈 목록용 조회. 보이는 순서 → 예정 시각 차례로 줄 세운다.
+   *
+   * <p>순서를 한 번도 바꾸지 않았으면 전부 같은 값이라 예정 시각 순이 된다 — 지금
+   * 동작과 같다.
+   */
+  @Query("""
+    select r from Routine r
+    where r.profile.id = :profileId
+      and r.status in :statuses
+      and r.scheduledAt between :from and :to
+    order by r.displayOrder asc, r.scheduledAt asc
+    """)
+  List<Routine> findTodayOrdered(
+    @Param("profileId") String profileId,
+    @Param("statuses") List<RoutineStatus> statuses,
+    @Param("from") LocalDateTime from,
+    @Param("to") LocalDateTime to
+  );
+
+  /// 순서를 새로 매길 때 기준이 되는 값. 새 일과는 이 뒤에 붙는다.
+  @Query("select coalesce(max(r.displayOrder), 0) from Routine r where r.profile.id = :profileId")
+  int maxDisplayOrder(@Param("profileId") String profileId);
 
   long countByStatus(RoutineStatus status);
 
