@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-20T07:09:40Z",
-    "currentVersion": "1.15.1",
+    "lastUpdated": "2026-09-20T07:40:15Z",
+    "currentVersion": "1.16.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 112
+    "totalReleases": 113
   },
   "releases": [
+    {
+      "version": "1.16.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-20",
+      "pr_number": 262,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 일과와 질문을 만드는 AI를 바꿔 쓸 수 있게 했습니다\n  * AI를 바꿔도 만들어지는 카드의 형태는 그대로 유지됩니다\n  * 일과 만들기 응답이 더 빨라졌습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과와 질문을 만드는 AI를 바꿔 쓸 수 있게 했습니다",
+            "AI를 바꿔도 만들어지는 카드의 형태는 그대로 유지됩니다",
+            "일과 만들기 응답이 더 빨라졌습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.15.1",
       "project_type": "flutter",
