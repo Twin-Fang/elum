@@ -1,15 +1,38 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-20T01:54:51Z",
-    "currentVersion": "1.15.0",
+    "lastUpdated": "2026-09-20T07:09:40Z",
+    "currentVersion": "1.15.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 111
+    "totalReleases": 112
   },
   "releases": [
+    {
+      "version": "1.15.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-20",
+      "pr_number": 260,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * `새로운 일과 만들기` 버튼이 안쪽까지 빛나게 다듬어졌습니다\n  * 홈 우측 상단 설정 아이콘이 또렷해졌습니다\n  * `오늘 일과` 아이콘 색을 제목과 맞췄습니다\n  * 일과가 없을 때 보이는 안내 문구가 읽기 편해졌습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "`새로운 일과 만들기` 버튼이 안쪽까지 빛나게 다듬어졌습니다",
+            "홈 우측 상단 설정 아이콘이 또렷해졌습니다",
+            "`오늘 일과` 아이콘 색을 제목과 맞췄습니다",
+            "일과가 없을 때 보이는 안내 문구가 읽기 편해졌습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.15.0",
       "project_type": "flutter",
