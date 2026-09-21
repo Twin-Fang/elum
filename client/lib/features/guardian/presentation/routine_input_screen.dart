@@ -78,9 +78,11 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
       canPop: !canSubmit,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        if (await confirmLeaveRoutineFlow(context) && context.mounted) {
-          context.pop();
+        if (!await confirmLeaveRoutineFlow(context) || !context.mounted) {
+          return;
         }
+        dismissKeyboard();
+        context.pop();
       },
       child: _scaffold(context, canSubmit, space),
     );
@@ -145,10 +147,15 @@ class _BackRow extends StatelessWidget {
         padding: EdgeInsets.only(left: context.space.screenH, top: 12.h),
         child: AppPressable(
           onTap: () async {
-            if (!confirmExit) return context.pop();
-            if (await confirmLeaveRoutineFlow(context) && context.mounted) {
-              context.pop();
+            if (!confirmExit) {
+              dismissKeyboard();
+              return context.pop();
             }
+            if (!await confirmLeaveRoutineFlow(context) || !context.mounted) {
+              return;
+            }
+            dismissKeyboard();
+            context.pop();
           },
           scaleDown: AppPressable.scaleIcon,
           // 정사각형 아이콘이라 가로세로 모두 .w — .h를 섞으면 찌그러진다

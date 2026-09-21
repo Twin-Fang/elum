@@ -71,7 +71,9 @@ class RoutineFlowScaffold extends StatelessWidget {
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final ok = await _mayLeave(context);
-        if (ok && context.mounted) context.pop();
+        if (!ok || !context.mounted) return;
+        dismissKeyboard();
+        context.pop();
       },
       child: _scaffold(context, space),
     );
@@ -92,7 +94,9 @@ class RoutineFlowScaffold extends StatelessWidget {
                   onBack: onBack == null
                       ? null
                       : () async {
-                          if (await _mayLeave(context)) onBack!();
+                          if (!await _mayLeave(context)) return;
+                          dismissKeyboard();
+                          onBack!();
                         },
                   onHome: () async {
                     final ok = await _mayLeave(context);
@@ -167,6 +171,17 @@ class _TopBar extends StatelessWidget {
 ///
 /// 이 스캐폴드를 쓰지 않는 화면(일과 입력)도 같은 문구·같은 무게를 써야 하므로
 /// 함수로 뺐다. 화면마다 따로 쓰면 문구가 어긋난다.
+/// 화면을 닫기 직전에 키보드를 내린다 (이슈 #301).
+///
+/// **iOS는 입력칸이 포커스를 쥔 채 라우트가 닫히면 키보드를 그대로 둔다.** 홈으로
+/// 돌아왔는데 키보드가 화면 아래를 덮고 있어 빈 곳을 한 번 눌러야 사라진다.
+/// 안드로이드는 대개 알아서 내려 주므로 iOS에서만 드러난다.
+///
+/// 나가는 길마다 흩뿌리지 않고 이 함수를 거치게 한다 — 길이 하나 더 생겨도
+/// 빠뜨리지 않는다. `dispose`에 넣는 것으로는 늦다. 그때는 라우트가 이미 닫힌
+/// 뒤라 iOS가 키보드를 남긴 채 화면만 바꾼다.
+void dismissKeyboard() => FocusManager.instance.primaryFocus?.unfocus();
+
 Future<bool> confirmLeaveRoutineFlow(BuildContext context) async {
   final leave = await showElumDialog<bool>(
     context: context,

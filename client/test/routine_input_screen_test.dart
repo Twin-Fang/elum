@@ -1,5 +1,6 @@
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
+import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
@@ -101,6 +102,74 @@ void main() {
       await tester.pump();
 
       expect(svgWithAsset(AppAssets.iconBack), findsOneWidget);
+    });
+
+    testWidgets('뒤로가기로 나가면 입력칸이 포커스를 놓는다 (#301)', (tester) async {
+      // 뒤로 갈 곳이 있어야 pop 이 성립한다 — 이 화면만 띄우면 스택이 비어 있다.
+      final router = GoRouter(
+        initialLocation: '/home',
+        routes: [
+          GoRoute(
+            path: '/home',
+            builder: (context, state) => Scaffold(
+              body: Center(
+                child: TextButton(
+                  onPressed: () => context.push(Routes.routineInput),
+                  child: const Text('열기'),
+                ),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: Routes.routineInput,
+            builder: (context, state) => const RoutineInputScreen(),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            testStorageOverride(onboardingCompleted: true),
+            routineSuggestionsProvider.overrideWith(
+              (ref) async => RoutineSuggestion.fallback,
+            ),
+          ],
+          child: ScreenUtilInit(
+            designSize: const Size(393, 852),
+            builder: (context, _) =>
+                MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('열기'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      expect(
+        tester.widget<EditableText>(find.byType(EditableText)).focusNode.hasFocus,
+        isTrue,
+        reason: '먼저 키보드가 올라온 상태를 만든다',
+      );
+
+      await tester.tap(
+        find
+            .ancestor(
+              of: svgWithAsset(AppAssets.iconBack),
+              matching: find.byType(AppPressable),
+            )
+            .first,
+      );
+      // 배경 오로라가 계속 돌아 pumpAndSettle 이 끝나지 않는다. 시간을 직접 민다.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // iOS 는 입력칸이 포커스를 쥔 채 라우트가 닫히면 키보드를 내리지 않는다.
+      // 홈으로 돌아왔는데 키보드가 화면 아래를 덮고 있던 것이 이 때문이다.
+      expect(find.byType(RoutineInputScreen), findsNothing, reason: '화면은 닫혔다');
+      expect(find.byType(EditableText), findsNothing, reason: '입력칸도 함께 사라진다');
     });
   });
 
