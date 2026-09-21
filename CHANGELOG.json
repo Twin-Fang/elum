@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-20T07:40:15Z",
-    "currentVersion": "1.16.0",
+    "lastUpdated": "2026-09-21T01:54:16Z",
+    "currentVersion": "1.17.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 113
+    "totalReleases": 114
   },
   "releases": [
+    {
+      "version": "1.17.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 265,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 입력한 내용과 다른 일과가 만들어지던 문제를 해결했습니다\n  * 보상을 정해도 저장되지 않던 문제를 해결했습니다\n  * 저장에 실패해도 저장된 것처럼 보이던 문제를 해결했습니다\n\n* **개선**\n  * 불러오지 못했을 때 이유를 알려주고 다시 시도할 수 있습니다\n  * 설정이 서버에 저장되지 않으면 알려드립니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "입력한 내용과 다른 일과가 만들어지던 문제를 해결했습니다",
+            "보상을 정해도 저장되지 않던 문제를 해결했습니다",
+            "저장에 실패해도 저장된 것처럼 보이던 문제를 해결했습니다"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "불러오지 못했을 때 이유를 알려주고 다시 시도할 수 있습니다",
+            "설정이 서버에 저장되지 않으면 알려드립니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.16.0",
       "project_type": "flutter",
