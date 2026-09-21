@@ -4,11 +4,8 @@
 
 ## 릴리스 노트
 
-* **버그 수정**
-  * 여우 캐릭터 배지가 테두리 밖으로 삐져나오던 문제를 해결했어요
-
 * **개선**
-  * 설정 화면을 정리했어요
+  * 일과를 열었을 때 화면이 항상 같은 높이로 떠요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
