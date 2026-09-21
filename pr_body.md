@@ -5,7 +5,9 @@
 ## 릴리스 노트
 
 * **개선**
-  * 일과 순서를 바꿀 때 번호가 자리를 지켜요
+  * 뒤로가기 버튼을 누르기 쉬워졌어요
+  * 뒤로가기 아이콘 색을 다듬었어요
+  * 일과 만들기 입력칸의 글자가 가운데에 놓여요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
