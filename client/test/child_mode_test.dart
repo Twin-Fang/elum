@@ -327,22 +327,23 @@ void main() {
 
     // 별은 등장 후 둥둥 떠다니는 float 애니메이션이 무한 반복이라
     // pumpAndSettle이 끝나지 않는다. 등장 연출이 끝날 만큼만 pump한다.
-    testWidgets('큰 별을 SVG로 렌더링한다', (tester) async {
+    // **별은 PNG다.** 후광·그림자·안쪽 하이라이트가 전부 SVG `filter`인데
+    // flutter_svg가 그것을 버려서, SVG로 두면 후광용 반투명 별이 흐려지지 않고
+    // 그대로 깔려 별 둘레에 탁한 띠가 생긴다 (#297).
+    testWidgets('큰 별을 에셋으로 렌더링한다', (tester) async {
       await tester.pumpWidget(wrap(const RewardScreen()));
       await tester.pump(const Duration(seconds: 1));
 
-      // 큰 별 뒤 blur 후광 레이어가 별 SVG를 한 겹 더 그린다(이슈 #107).
-      // 최소 한 개 이상 렌더되면 별이 에셋으로 그려진 것이다.
-      expect(svgWithAsset(AppAssets.starBig), findsWidgets);
+      expect(imageWithAsset(AppAssets.starBig), findsWidgets);
     });
 
-    testWidgets('주변 작은 별도 SVG로 렌더링한다', (tester) async {
+    testWidgets('주변 작은 별도 에셋으로 렌더링한다', (tester) async {
       await tester.pumpWidget(wrap(const RewardScreen()));
       await tester.pump(const Duration(seconds: 1));
 
       // Figma 실측 — 초록(#86FCA3) · 보라(#A186FC)
-      expect(svgWithAsset(AppAssets.starDeco(1)), findsOneWidget);
-      expect(svgWithAsset(AppAssets.starDeco(7)), findsOneWidget);
+      expect(imageWithAsset(AppAssets.starDeco(1)), findsOneWidget);
+      expect(imageWithAsset(AppAssets.starDeco(7)), findsOneWidget);
     });
 
     testWidgets('별을 아이콘 글리프로 그리지 않는다', (tester) async {

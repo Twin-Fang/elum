@@ -21,6 +21,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/precache_images.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/test_storage.dart';
 
@@ -104,6 +105,8 @@ void main() {
   testWidgets('아이 별 모으기 (364:8219)', (tester) async {
     await tester.pumpWidget(wrap(const ChildStarsScreen()));
     await tester.pumpAndSettle();
+    // 별은 PNG라 로딩을 기다려야 그려진다 (안 기다리면 빈 밤하늘이 굳는다)
+    await precacheAllImages(tester);
 
     await expectLater(
       find.byType(ChildStarsScreen),
@@ -122,6 +125,7 @@ void main() {
       // 즉 sin 곡선이 0으로 돌아오는 시점 — 에서 프레임을 고정해
       // 캡처마다 오프셋이 달라지지 않게 한다.
       await tester.pump();
+      await precacheAllImages(tester);
       await tester.pump(AppMotion.float * 2);
 
       await expectLater(

@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
+import 'helpers/precache_images.dart';
 
 /// 보상이 보이는 자리들 (이슈 #239).
 ///
@@ -119,6 +120,8 @@ void main() {
       ),
     ));
     await tester.pump();
+    // 별은 PNG라 로딩을 기다려야 그려진다
+    await precacheAllImages(tester);
     await tester.pump(const Duration(milliseconds: 800));
 
     await expectLater(

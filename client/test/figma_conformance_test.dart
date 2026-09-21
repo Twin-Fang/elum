@@ -7,6 +7,7 @@ import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
+import 'package:elum/features/child/presentation/child_stars_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
@@ -18,6 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_reward_api.dart';
+import 'helpers/precache_images.dart';
 import 'helpers/test_storage.dart';
 
 /// **시안 대조용** 렌더. 회귀 확인이 목적인 `*_golden_test.dart`와 다르다.
@@ -130,6 +132,30 @@ void main() {
               child: child!,
             ),
             home: const ChildHomeScreen(),
+          ),
+        ),
+      );
+
+  /// 별 모으기 화면 대조용. 시안(364:8219)은 별 15개를 그린다.
+  ///
+  /// 일과 목록이 필요 없는 화면이라 저장소를 끼우지 않는다 — 별 개수만 본다.
+  Widget wrapStars({int stars = 15}) => ProviderScope(
+        overrides: [
+          testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+          memberProvider.overrideWith(
+            (ref) async => Member(nickname: '하늘이', totalStars: stars),
+          ),
+        ],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp(
+            theme: AppTheme.light,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            home: const ChildStarsScreen(),
           ),
         ),
       );
@@ -270,6 +296,23 @@ void main() {
     await expectLater(
       find.byType(RoutineInputScreen),
       matchesGoldenFile('figma/input_238-1643.png'),
+    );
+  });
+
+  // 이룸이가 모은 별을 보러 들어오는 화면이다. 큰 별의 후광과 작은 별 일곱의
+  // 자리를 그림으로 맞대본 적이 한 번도 없다 (#297).
+  //
+  // 이 화면은 코드가 상태바를 52로 잡고 Figma y좌표에서 빼는데, 실제 기기는
+  // 59다. 그 7 차이가 화면 전체를 밀어 올렸는지 여기서 드러난다.
+  testWidgets('별 모으기 (Figma 364:8219)', (tester) async {
+    await tester.pumpWidget(wrapStars());
+    await tester.pumpAndSettle();
+    // 별은 PNG라 로딩이 끝나야 그려진다. 안 기다리면 빈 밤하늘이 정답이 된다.
+    await precacheAllImages(tester);
+
+    await expectLater(
+      find.byType(ChildStarsScreen),
+      matchesGoldenFile('figma/stars_364-8219.png'),
     );
   });
 }

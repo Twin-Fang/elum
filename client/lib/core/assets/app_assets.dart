@@ -228,10 +228,23 @@ abstract final class AppAssets {
   /// 아이 홈 빈 상태의 시무룩한 포포 (164×164). 여우 캐릭터를 골랐을 때 쓴다.
   static const popoSad = '$_images/popo_sad.svg';
 
-  /// 아이_별 화면 가운데 큰 별 (299×299 영역). Figma 364:8282 `Group 46`.
-  static const starBig = '$_images/star_big.svg';
+  /// 아이_별 화면 가운데 큰 별. Figma 364:8282 `Group 46` · 실제 264×255.
+  ///
+  /// **PNG인 이유** ⚠️ — 이 별은 세 겹(후광·그림자·안쪽 하이라이트)으로 되어 있고
+  /// 세 겹이 전부 SVG `filter`다. **flutter_svg는 filter를 통째로 버린다**
+  /// (`unhandled element <filter/>`). 그러면 맨 뒤의 후광용 반투명 별이 흐려지지
+  /// 않고 그대로 깔려, 별 둘레에 탁한 올리브색 띠가 생긴다 — 시안의 흰빛 도는
+  /// 얇은 테두리와 전혀 다르게 보인다. 필터가 구워진 PNG를 쓴다 (#297).
+  ///
+  /// Figma가 알려주는 배치 크기(299×299)는 **필터까지 포함한 상자**라 실제
+  /// 그림보다 크다. 에셋을 늘리지 말고 원본 크기 그대로 놓는다.
+  static const starBig = '$_images/star_big.png';
 
   /// 아이_별 화면 주변 작은 별 7개. Figma 364:8227~8228 `Star 4~10`.
   /// index는 1부터 — Figma 배치 좌표와 함께 쓴다.
-  static String starDeco(int index) => '$_images/star_deco_$index.svg';
+  ///
+  /// 큰 별과 같은 이유로 PNG다. **투명도가 이미 구워져 있다** — 시안이 0.3으로
+  /// 둔 별은 알파가 76으로 나온다. 위에 `Opacity`를 한 번 더 씌우면 두 번
+  /// 곱해져 시안보다 옅어진다.
+  static String starDeco(int index) => '$_images/star_deco_$index.png';
 }

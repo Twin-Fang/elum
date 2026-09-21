@@ -6,7 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/glowing_svg.dart';
 
 /// 보상 화면의 빛나는 별.
 ///
@@ -26,7 +25,12 @@ class RewardStar extends StatefulWidget {
   static const popDuration = Duration(milliseconds: 700);
 
   /// Figma 실측 — 큰 별 209
-  static const mainSize = 209.0;
+  /// 큰 별이 차지하는 폭. **후광까지 담긴 에셋 전체 기준이다.**
+  ///
+  /// 시안(309:4055)이 알려주는 209는 후광을 뺀 별 본체 크기다. 에셋에는 후광이
+  /// 함께 들어 있어 그 값을 그대로 주면 별이 시안보다 10% 작아진다. 시안 그림에서
+  /// 잰 본체 폭(177.5)에 에셋의 본체 비율을 맞춰 나온 값이다 (#297).
+  static const mainSize = 230.9;
 
   @override
   State<RewardStar> createState() => _RewardStarState();
@@ -97,22 +101,26 @@ class _RewardStarState extends State<RewardStar>
                 ),
               ),
               // 작은 별들은 큰 별이 자리잡은 뒤 나타난다.
-              // Figma 실측 — 초록 38(#86FCA3) · 보라 30(#A186FC)
+              //
+              // 자리는 시안 노드 좌표(초록 76.7,308.9 · 보라 256.8,172.7)를 큰 별
+              // 본체 중심(196.2, 245.5)에서 뺀 값이다. 에셋 전체 중심이 본체 중심보다
+              // 5.7 아래라 그만큼 올려 준다 — 후광이 위아래로 고르게 붙지 않아서다.
+              // 크기도 노드 값이 아니라 **에셋 크기**를 쓴다 (그림자 여백 포함).
               _Satellite(
                 progress: _controller.value,
                 begin: 0.5,
-                offset: Offset(-88.w, 78.h) +
+                offset: Offset(-100.5.w, 76.8.h) +
                     _floatOffset(floatT, amplitude: 10.h, phase: math.pi / 3),
-                size: 38.w,
+                size: 48.7.w,
                 asset: AppAssets.starDeco(1),
                 glow: colors.starDecoGlowGreen,
               ),
               _Satellite(
                 progress: _controller.value,
                 begin: 0.7,
-                offset: Offset(84.w, -40.h) +
+                offset: Offset(75.8.w, -63.3.h) +
                     _floatOffset(floatT, amplitude: 10.h, phase: math.pi),
-                size: 30.w,
+                size: 38.7.w,
                 asset: AppAssets.starDeco(7),
                 glow: colors.starDecoGlowPurple,
               ),
@@ -133,7 +141,7 @@ class _RewardStarState extends State<RewardStar>
   }
 }
 
-/// 큰 별. 그라데이션은 SVG 안에, 글로우는 [GlowingSvg]가 재현한다.
+/// 큰 별. 후광·그림자·안쪽 하이라이트가 모두 에셋(PNG)에 구워져 있다.
 class _Star extends StatelessWidget {
   const _Star({required this.size, required this.glow});
 
@@ -142,21 +150,13 @@ class _Star extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Figma boxShadow 0 0 20 rgba(208,255,0,0.3) + blur(20px) 노란 후광
-    // (node 364:8283 / 334:4282) — 별 뒤에서 넓게 번지는 빛 (이슈 #107).
-    return GlowingSvg(
-      assetPath: AppAssets.starBig,
-      size: size,
-      glowColor: glow,
-      // 별 크기 비례로 흐림을 준다. Figma 20px와 sigma 스케일이 달라
-      // 시뮬레이터 대조로 맞춘 값이다.
-      haloBlur: size * 0.06,
-      haloColor: context.colors.rewardStarHalo,
-    );
+    // **높이를 주지 않는다** — 에셋이 264×255라 정사각형으로 묶으면 남는 쪽에
+    // 여백이 생겨 별이 가운데로 밀린다 (#297).
+    return Image.asset(AppAssets.starBig, width: size);
   }
 }
 
-/// 큰 별 주변의 작은 별. 색이 든 SVG + [GlowingSvg]로 재현한 글로우.
+/// 큰 별 주변의 작은 별. 투명도까지 에셋에 구워져 있어 덧씌우지 않는다.
 class _Satellite extends StatelessWidget {
   const _Satellite({
     required this.progress,
@@ -192,7 +192,7 @@ class _Satellite extends StatelessWidget {
       offset: offset,
       child: Transform.scale(
         scale: scale,
-        child: GlowingSvg(assetPath: asset, size: size, glowColor: glow),
+        child: Image.asset(asset, width: size),
       ),
     );
   }
