@@ -253,4 +253,12 @@ abstract final class AppAssets {
   /// 둔 별은 알파가 76으로 나온다. 위에 `Opacity`를 한 번 더 씌우면 두 번
   /// 곱해져 시안보다 옅어진다.
   static String starDeco(int index) => '$_images/star_deco_$index.png';
+
+  /// 보상 화면 큰 별 옆에 뜨는 작은 별 둘 (Figma `334:4293` 초록 · `334:4294` 보라).
+  ///
+  /// **별 모으기 화면의 `starDeco`와 다른 노드다.** 그쪽 초록별은 40%만 불투명해
+  /// 어두운 보상 배경에 올리면 시커멓게 죽는다. 실제로 그걸 돌려 쓰고 있었다 (#297).
+  /// 후광(`boxShadow 0 0 10px`)이 구워진 PNG라 렌더러가 버리지 않는다.
+  static const rewardStarGreen = '$_images/reward_star_green.png';
+  static const rewardStarPurple = '$_images/reward_star_purple.png';
 }

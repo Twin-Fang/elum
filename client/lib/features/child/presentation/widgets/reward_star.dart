@@ -112,7 +112,7 @@ class _RewardStarState extends State<RewardStar>
                 offset: Offset(-100.5.w, 76.8.h) +
                     _floatOffset(floatT, amplitude: 10.h, phase: math.pi / 3),
                 size: 48.7.w,
-                asset: AppAssets.starDeco(1),
+                asset: AppAssets.rewardStarGreen,
                 glow: colors.starDecoGlowGreen,
               ),
               _Satellite(
@@ -121,7 +121,7 @@ class _RewardStarState extends State<RewardStar>
                 offset: Offset(75.8.w, -63.3.h) +
                     _floatOffset(floatT, amplitude: 10.h, phase: math.pi),
                 size: 38.7.w,
-                asset: AppAssets.starDeco(7),
+                asset: AppAssets.rewardStarPurple,
                 glow: colors.starDecoGlowPurple,
               ),
             ],

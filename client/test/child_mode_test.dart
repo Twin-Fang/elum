@@ -341,9 +341,11 @@ void main() {
       await tester.pumpWidget(wrap(const RewardScreen()));
       await tester.pump(const Duration(seconds: 1));
 
-      // Figma 실측 — 초록(#86FCA3) · 보라(#A186FC)
-      expect(imageWithAsset(AppAssets.starDeco(1)), findsOneWidget);
-      expect(imageWithAsset(AppAssets.starDeco(7)), findsOneWidget);
+      // Figma 실측 — 초록(`334:4293`) · 보라(`334:4294`).
+      // **별 모으기 화면의 `starDeco`가 아니다** — 그쪽 초록별은 40%만
+      // 불투명해 어두운 보상 배경에서 시커멓게 죽는다 (#297).
+      expect(imageWithAsset(AppAssets.rewardStarGreen), findsOneWidget);
+      expect(imageWithAsset(AppAssets.rewardStarPurple), findsOneWidget);
     });
 
     testWidgets('별을 아이콘 글리프로 그리지 않는다', (tester) async {

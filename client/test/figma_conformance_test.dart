@@ -318,8 +318,9 @@ void main() {
     );
   }
 
-  /// 보상 화면 대조용 (시안 309:4055 `아이_보상_루미`).
-  Widget wrapReward() => ProviderScope(
+  /// 보상 화면 대조용 (시안 `309:4055` 루미 · `334:4320` 포포 · `343:4434` 루루).
+  Widget wrapReward({RewardCharacter character = RewardCharacter.lumi}) =>
+      ProviderScope(
     overrides: [
       testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
       memberProvider.overrideWith(
@@ -336,7 +337,7 @@ void main() {
           data: MediaQuery.of(context).copyWith(padding: deviceInsets),
           child: child!,
         ),
-        home: const RewardScreen(character: RewardCharacter.lumi),
+        home: RewardScreen(character: character),
       ),
     ),
   );
@@ -860,6 +861,32 @@ void main() {
     await expectLater(
       find.byType(RewardScreen),
       matchesGoldenFile('figma/reward_lumi_309-4055.png'),
+    );
+  });
+
+  // 보상 — 포포 · 루루 (#297). 캐릭터만 바뀌는 같은 화면이지만 **그림과 문구가
+  // 다르다** — 루미만 올려 두면 나머지 둘이 어긋나도 드러나지 않는다.
+  testWidgets('보상 — 포포 (Figma 334:4320)', (tester) async {
+    await tester.pumpWidget(wrapReward(character: RewardCharacter.popo));
+    await tester.pump();
+    await precacheAllImages(tester);
+    await tester.pump(AppMotion.float * 2);
+
+    await expectLater(
+      find.byType(RewardScreen),
+      matchesGoldenFile('figma/reward_popo_334-4320.png'),
+    );
+  });
+
+  testWidgets('보상 — 루루 (Figma 343:4434)', (tester) async {
+    await tester.pumpWidget(wrapReward(character: RewardCharacter.ruru));
+    await tester.pump();
+    await precacheAllImages(tester);
+    await tester.pump(AppMotion.float * 2);
+
+    await expectLater(
+      find.byType(RewardScreen),
+      matchesGoldenFile('figma/reward_ruru_343-4434.png'),
     );
   });
 

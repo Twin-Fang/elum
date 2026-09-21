@@ -173,8 +173,16 @@ class _RewardHero extends StatelessWidget {
   static const _scale = RewardStar.mainSize / _figmaStarSize;
 
   /// Figma 절대좌표(393×852)에서의 별 박스 원점.
-  static const _starOriginX = 62.0;
   static const _starOriginY = 125.0;
+
+  /// 별 그림(PNG) 상자가 **화면에서 차지하는 자리** — 시안 프레임 좌표로 잰 값.
+  ///
+  /// PNG는 Figma 별 상자(269)와 안쪽 여백이 달라, 상자 크기로 뽑은 `_scale`이
+  /// 별에는 맞아도 캐릭터·그림자에는 맞지 않는다. 실제로 포포가 117이어야 할
+  /// 것이 100으로 줄고 아홉 오른쪽·여덟 아래에 놓여 있었다 (#297).
+  /// 그래서 캐릭터와 그림자는 **시안 절대좌표에서 이 원점만 빼서** 놓는다.
+  static double get _heroLeftInFrame => (393 - RewardStar.mainSize) / 2;
+  static const _heroTopInFrame = 133.75;
 
   /// 바닥 그림자 (Figma `Ellipse 23` — x162 y430, 65×16).
   static const _shadowFrame = (x: 162.0, y: 430.0, w: 65.0, h: 16.0);
@@ -196,8 +204,8 @@ class _RewardHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final char = _charFrame;
-    // Figma 절대좌표 → 별 박스 상대좌표 → 코드 별 크기로 비례 환산
-    double sx(double v) => (v - _starOriginX) * _scale;
+    // Figma 절대좌표 → 별 박스 상대좌표 → 코드 별 크기로 비례 환산.
+    // 높이를 잡는 데만 쓴다 — 자리는 `_heroLeftInFrame`/`_heroTopInFrame`으로 잡는다.
     double sy(double v) => (v - _starOriginY) * _scale;
 
     // 그림자 하단이 별 박스보다 아래로 나온 만큼 높이를 늘린다.
@@ -218,14 +226,14 @@ class _RewardHero extends StatelessWidget {
           // z순서는 Figma 레이어 순서 그대로 — 그림자 → 별 → 캐릭터.
           // 그림자·캐릭터는 별을 올린 만큼(_starLift) 내려 화면상 제자리를 지킨다.
           Positioned(
-            left: sx(_shadowFrame.x).w,
-            top: (sy(_shadowFrame.y) + _starLift).w,
+            left: (_shadowFrame.x - _heroLeftInFrame).w,
+            top: (_shadowFrame.y - _heroTopInFrame).w,
             child: _FadeSlideIn(
               delay: AppMotion.normal,
               child: ClipOval(
                 child: SizedBox(
-                  width: (_shadowFrame.w * _scale).w,
-                  height: (_shadowFrame.h * _scale).w,
+                  width: _shadowFrame.w.w,
+                  height: _shadowFrame.h.w,
                   child: ColoredBox(color: context.colors.rewardGroundShadow),
                 ),
               ),
@@ -233,14 +241,17 @@ class _RewardHero extends StatelessWidget {
           ),
           const Positioned(top: 0, left: 0, child: RewardStar()),
           Positioned(
-            left: sx(char.x).w,
-            top: (sy(char.y) + _starLift).w,
+            left: (char.x - _heroLeftInFrame).w,
+            top: (char.y - _heroTopInFrame).w,
             child: _FadeSlideIn(
               delay: AppMotion.normal,
               child: SvgPicture.asset(
                 AppAssets.rewardCharacter(character),
-                width: (char.w * _scale).w,
-                height: (char.h * _scale).w,
+                // **비례 환산을 걸지 않는다.** 별 그림(PNG)은 Figma 별 상자와
+                // 안쪽 여백이 달라 `_scale`이 별에는 맞아도 캐릭터에는 안 맞는다.
+                // 걸어 두니 포포가 117이어야 할 것이 100으로 줄어 있었다 (#297).
+                width: char.w.w,
+                height: char.h.w,
               ),
             ),
           ),
