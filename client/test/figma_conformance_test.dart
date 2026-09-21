@@ -1175,6 +1175,49 @@ void main() {
       matchesGoldenFile('figma/char_ruru_204-1134.png'),
     );
   });
+
+  // 역할 선택 — 고른 뒤 (#297).
+  //
+  // ⚠️ **시안 두 프레임의 제목이 서로 다르다.** 고르기 전(`732:5176`)은
+  // `이 휴대폰은 누가`(폭 204)인데 고른 뒤(`732:5258`)는 `이 휴대폰 누가`(폭 177)다.
+  // 앱은 앞쪽을 따르고 있어 이 화면에서는 제목 한 줄이 붉게 남는다.
+  // **디자이너에게 물어야 할 것이라 임의로 바꾸지 않는다.**
+  testWidgets('역할 선택 — 고른 뒤 (Figma 732:5258)', (tester) async {
+    await pumpOnboarding(
+      tester,
+      Routes.roleSelect,
+      () => const RoleSelectScreen(),
+      nickname: null,
+    );
+
+    await tester.tap(find.text('일과를 만들고 관리해요'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(RoleSelectScreen),
+      matchesGoldenFile('figma/role_selected_732-5258.png'),
+    );
+  });
+
+  // 비밀번호 — 두 번째 단계 (#297). 시안 `238:2924`.
+  //
+  // 네 자리를 두 번 맞춰 넣으면 키패드가 내려가고 `시작하기`가 나타난다.
+  // **나타나는 것 자체가 다 됐다는 신호**라 이 상태가 시안에 따로 그려져 있다.
+  testWidgets('비밀번호 — 다시 넣은 뒤 (Figma 238:2924)', (tester) async {
+    await pumpOnboarding(tester, Routes.onboardingPin, () => const PinScreen());
+
+    // 1단계 — 네 자리를 넣으면 재입력 단계로 자동 전환된다
+    await tester.enterText(find.byType(EditableText), '1234');
+    await tester.pumpAndSettle();
+    // 2단계 — 같은 값을 넣으면 CTA 가 나타난다
+    await tester.enterText(find.byType(EditableText), '1234');
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(PinScreen),
+      matchesGoldenFile('figma/pinconfirm_238-2924.png'),
+    );
+  });
 }
 
 /// 연결 암호 대역. 시안(`732:5334`)이 그린 `5NJ280`과 `09:59`를 그대로 준다 —
