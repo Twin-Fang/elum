@@ -66,6 +66,45 @@ void main() {
         ],
       );
 
+
+  /// 시트 대조용. 시안(956:4084)이 그린 네 단계를 그대로 담는다.
+  /// 내용이 다르면 diff 가 통째로 붉어져 정작 봐야 할 어긋남이 묻힌다.
+  Routine sheetRoutine() => Routine(
+        id: 's1',
+        title: '스스로 옷을 입어요',
+        status: 'CONFIRMED',
+        rewardText: '유튜브 시청 20분',
+        progressPercent: 50,
+        steps: const [
+          ActionCard(
+            id: 's-c1',
+            stepOrder: 1,
+            title: '옷을 골라요',
+            description: '밖에 나갈 때 입을 옷을 꺼내요',
+            completed: true,
+          ),
+          ActionCard(
+            id: 's-c2',
+            stepOrder: 2,
+            title: '바지를 입어요',
+            description: '양쪽 다리를 넣고 바지를 올려 입어요',
+            completed: true,
+          ),
+          ActionCard(
+            id: 's-c3',
+            stepOrder: 3,
+            title: '윗옷을 입어요',
+            description: '머리와 팔을 넣어 윗옷을 입어요',
+          ),
+          ActionCard(
+            id: 's-c4',
+            stepOrder: 4,
+            title: '양말을 신어요',
+            description: '양쪽 발에 양말을 신어요',
+          ),
+        ],
+      );
+
   Widget wrap({
     required List<Routine> routines,
     required List<Routine> past,
@@ -128,6 +167,22 @@ void main() {
     await expectLater(
       find.byType(GuardianHomeScreen),
       matchesGoldenFile('figma/home_217-2655.png'),
+    );
+  });
+
+  // 오늘 일과를 눌렀을 때 뜨는 시트다. **여기가 가장 많이 어긋나 있던 화면이라**
+  // 대조에 올린다 (#295 에서 글꼴·크기·체크·보상 줄까지 여섯 군데가 나왔다).
+  // 시트는 홈 위에 덮이므로 화면 전체를 찍는다.
+  testWidgets('일과 시트 (Figma 956:4084)', (tester) async {
+    await tester.pumpWidget(wrap(routines: [sheetRoutine()], past: const []));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('스스로 옷을 입어요'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/sheet_956-4084.png'),
     );
   });
 }
