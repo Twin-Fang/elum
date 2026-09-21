@@ -4,8 +4,8 @@
 
 ## 릴리스 노트
 
-* **버그 수정**
-  * 일과 만들기 화면에서 나가면 키보드가 함께 사라져요
+* **개선**
+  * 일과 순서를 바꿀 때 번호가 자리를 지켜요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
