@@ -114,7 +114,7 @@ abstract final class AppLogger {
       'endpoint': endpoint,
       'statusCode': statusCode,
       'duration': '${duration.inMilliseconds}ms',
-      if (responseData != null) 'response': responseData,
+      'response': ?responseData,
     };
     _log(_tagNetwork, '✅ 응답 성공', data);
   }
@@ -133,8 +133,8 @@ abstract final class AppLogger {
       'endpoint': endpoint,
       'statusCode': statusCode,
       'duration': '${duration.inMilliseconds}ms',
-      if (errorMessage != null) 'message': errorMessage,
-      if (errorData != null) 'error': errorData,
+      'message': ?errorMessage,
+      'error': ?errorData,
     };
     _log(_tagNetwork, '❌ 응답 실패', data);
   }
@@ -164,7 +164,7 @@ abstract final class AppLogger {
     final data = {
       'repository': repositoryName,
       'method': methodName,
-      if (result != null) 'result': result,
+      'result': ?result,
     };
     _log(_tagRepository, '완료', data);
   }

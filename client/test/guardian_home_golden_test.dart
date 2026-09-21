@@ -1,7 +1,6 @@
 @Tags(['golden'])
 library;
 
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/member_repository.dart';

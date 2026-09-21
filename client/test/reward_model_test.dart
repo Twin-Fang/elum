@@ -135,6 +135,7 @@ void main() {
       expect(a, b);
       // 리터럴 `{a, b}`로 쓰면 분석기가 '같은 원소 두 개'라고 경고한다.
       // 실제 중복 제거는 목록을 Set으로 바꾸는 경로에서 일어나므로 그대로 검증한다.
+      // ignore: prefer_collection_literals
       expect(<RecentReward>[a, b].toSet(), hasLength(1));
     });
   });

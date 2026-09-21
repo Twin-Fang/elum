@@ -511,9 +511,12 @@ class _DumpViewState extends State<_DumpView> {
   /// ⚠️ `initState`가 아니라 여기서 읽는다.
   ///
   /// 덤프는 `MediaQuery`(화면 크기·글꼴 배율·다크모드)를 본다. `initState`에서
-  /// 상속 위젯을 읽으면 Flutter가 막는다 — 실제로 첫 구현에서
-  /// `[기기] (수집 실패: dependOnInheritedWidgetOfExactType<MediaQuery>() was
-  /// called before initState() completed)`가 찍혔다.
+  /// 상속 위젯을 읽으면 Flutter가 막는다 — 실제로 첫 구현에서 이것이 찍혔다.
+  ///
+  /// ```text
+  /// [기기] (수집 실패: dependOnInheritedWidgetOfExactType<MediaQuery>() was
+  /// called before initState() completed)
+  /// ```
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -556,7 +559,8 @@ class _DumpViewState extends State<_DumpView> {
   }
 
   void _say(String m) {
-    if (mounted) setState(() {
+    if (!mounted) return;
+    setState(() {
       _busy = false;
       _message = m;
     });

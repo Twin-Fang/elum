@@ -118,7 +118,7 @@ abstract final class AppAssets {
   ///
   /// 둥근 사각형 테두리 + 배경까지 포함한다. 캐릭터마다 **색이 다르다** —
   /// 고양이는 파랑(#9CADF1 / #CED8FF), 여우는 주황(#EB9B73 / #FFDAC7).
-  /// 테두리 없는 [characterBadgeRuru]를 쓰면 캐릭터만 덩그러니 뜬다.
+  /// 테두리 없는 `characterBadgeRuru`를 쓰면 캐릭터만 덩그러니 뜬다.
   static String characterBadgeFramed(CardCharacter character) =>
       switch (character) {
         CardCharacter.cat => '$_images/character_badge_framed_ruru.svg',
