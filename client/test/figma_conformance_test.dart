@@ -9,6 +9,7 @@ import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
+import 'package:elum/features/onboarding/presentation/card_completion_screen.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -536,6 +537,54 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('figma/past_sheet_980-4777.png'),
     );
+  });
+
+  // 일과 만들기 완료 (#297). 1.5초 뒤 홈으로 스스로 넘어가므로 그 전에 찍는다.
+  testWidgets('일과 만들기 완료 (Figma 425:4199)', (tester) async {
+    // 1.5초 뒤 스스로 홈으로 넘어가므로 갈 곳을 만들어 준다 — 없으면
+    // 타이머가 남아 테스트가 실패한다.
+    final router = GoRouter(
+      initialLocation: '/done',
+      routes: [
+        GoRoute(
+          path: '/done',
+          builder: (context, state) => const CardCompletionScreen(),
+        ),
+        GoRoute(
+          path: Routes.guardian,
+          builder: (context, state) => const Scaffold(body: Text('홈')),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [testStorageOverride(onboardingCompleted: true)],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp.router(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            routerConfig: router,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await expectLater(
+      find.byType(CardCompletionScreen),
+      matchesGoldenFile('figma/complete_425-4199.png'),
+    );
+
+    // 남은 타이머를 흘려보낸다 (오로라는 계속 도므로 settle 은 쓰지 않는다)
+    await tester.pump(const Duration(seconds: 2));
   });
 
   // 카드확인 (#297). **이 화면만 오로라를 껐다** — 배경이 정지라 대조가 정확하다.
