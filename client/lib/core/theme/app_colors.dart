@@ -90,6 +90,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.checkIdleBorder,
     required this.rewardBadgeTop,
     required this.rewardBadgeBottom,
+    required this.rewardEmptyLabel,
     required this.consentCheckIdle,
     required this.roleElumi,
     required this.checkPending,
@@ -300,6 +301,12 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 따라가면 안 된다.
   final Color rewardBadgeTop;
   final Color rewardBadgeBottom;
+
+  /// 보상을 아직 정하지 않았을 때의 안내 글자 (Figma `980:5183` — #AEB0B7).
+  ///
+  /// `textSecondary`보다 흐리다. 채워진 내용이 아니라 **비어 있음**을 말하는
+  /// 자리라서, 정해진 보상과 같은 굵기로 보이면 안 된다.
+  final Color rewardEmptyLabel;
 
   /// 약관 항목의 아직 안 누른 체크 (Figma 739:3747 실측 #C9D6D4 · 이슈 #226).
   ///
@@ -561,6 +568,7 @@ class AppColors extends ThemeExtension<AppColors> {
     checkIdleBorder: Color(0xFFC9D6D4),
     rewardBadgeTop: Color(0xFF0C0D1A),
     rewardBadgeBottom: Color(0xFF242634),
+    rewardEmptyLabel: Color(0xFFAEB0B7),
     consentCheckIdle: Color(0xFFC9D6D4),
     roleElumi: Color(0xFFFFAA00),
     checkPending: Color(0xFFC9D6D4),
@@ -688,6 +696,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? checkIdleBorder,
     Color? rewardBadgeTop,
     Color? rewardBadgeBottom,
+    Color? rewardEmptyLabel,
     Color? consentCheckIdle,
     Color? roleElumi,
     Color? checkPending,
@@ -805,6 +814,7 @@ class AppColors extends ThemeExtension<AppColors> {
       checkIdleBorder: checkIdleBorder ?? this.checkIdleBorder,
       rewardBadgeTop: rewardBadgeTop ?? this.rewardBadgeTop,
       rewardBadgeBottom: rewardBadgeBottom ?? this.rewardBadgeBottom,
+      rewardEmptyLabel: rewardEmptyLabel ?? this.rewardEmptyLabel,
       consentCheckIdle: consentCheckIdle ?? this.consentCheckIdle,
       roleElumi: roleElumi ?? this.roleElumi,
       checkPending: checkPending ?? this.checkPending,
@@ -975,6 +985,7 @@ class AppColors extends ThemeExtension<AppColors> {
       checkIdleBorder: Color.lerp(checkIdleBorder, other.checkIdleBorder, t)!,
       rewardBadgeTop: Color.lerp(rewardBadgeTop, other.rewardBadgeTop, t)!,
       rewardBadgeBottom: Color.lerp(rewardBadgeBottom, other.rewardBadgeBottom, t)!,
+      rewardEmptyLabel: Color.lerp(rewardEmptyLabel, other.rewardEmptyLabel, t)!,
       consentCheckIdle: Color.lerp(
         consentCheckIdle,
         other.consentCheckIdle,

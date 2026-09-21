@@ -445,10 +445,12 @@ class _CompletionMark extends StatelessWidget {
   }
 }
 
-/// 보상 줄. **없으면 아무것도 그리지 않는다.**
+/// 보상 줄. **정하지 않았어도 그린다** (#308).
 ///
-/// 빈 칸을 두면 "보상이 없다"가 아니라 "덜 만들어졌다"로 보인다. 보상을 여기서
-/// 정하게 하는 안도 검토했으나 그 부분 디자인이 아직 나오지 않아 미뤘다 (#266).
+/// 전에는 없으면 줄째 숨겼다 — 빈 칸이 "덜 만들어졌다"로 보인다고 봤기 때문이다.
+/// 시안(980:5174)은 그 걱정을 다르게 푼다. 빈 칸을 두는 대신 **없다고 말하고**
+/// 별을 흐리게 해 채울 수 있는 자리임을 보여준다. 줄째 없애면 보상을 넣을 수
+/// 있다는 것조차 보이지 않는다.
 ///
 /// **뱃지 + 카드로 둔다** (#295). 전에는 별 뱃지를 빼고 `다 하면 ○○`이라는 말로
 /// 대신했다 (#275) — 별이 이룸이가 일과를 끝냈을 때의 연출과 뜻이 겹친다고 봤다.
@@ -462,10 +464,12 @@ class _RewardRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!routine.hasReward) return const SizedBox.shrink();
-
     final colors = context.colors;
     final typo = context.typo;
+    // 보상을 아직 정하지 않았어도 줄은 그린다 (#308). 줄째 없애면 보상을 넣을 수
+    // 있다는 것조차 보이지 않는다. 시안(980:5174)은 대신 별을 흐리게 하고
+    // "없어요"라고 말해 준다 — 빈 칸이 아니라 말로 알린다.
+    final hasReward = routine.hasReward;
 
     return Padding(
       padding: EdgeInsets.only(top: 8.h),
@@ -485,10 +489,14 @@ class _RewardRow extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(16.r),
             ),
-            child: SvgPicture.asset(
-              AppAssets.rewardBadgeStar,
-              width: 25.w,
-              height: 24.w,
+            // 정하지 않았으면 별을 흐리게 — 채울 수 있는 자리임을 보여준다.
+            child: Opacity(
+              opacity: hasReward ? 1 : 0.5,
+              child: SvgPicture.asset(
+                AppAssets.rewardBadgeStar,
+                width: 25.w,
+                height: 24.w,
+              ),
             ),
           ),
           SizedBox(width: 4.w),
@@ -502,10 +510,12 @@ class _RewardRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Text(
-                routine.rewardText.trim(),
+                hasReward ? routine.rewardText.trim() : '일과 완료 후 보상이 없어요',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: typo.sheetStepTitle.copyWith(color: colors.textPrimary),
+                style: typo.sheetStepTitle.copyWith(
+                  color: hasReward ? colors.textPrimary : colors.rewardEmptyLabel,
+                ),
               ),
             ),
           ),

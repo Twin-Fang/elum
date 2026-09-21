@@ -85,7 +85,7 @@ void main() {
     expect(find.text('⭐'), findsNothing, reason: '별은 이모지가 아니라 에셋이다');
   });
 
-  testWidgets('보상이 없으면 그 줄을 그리지 않는다 — 빈 칸은 덜 만들어진 것처럼 보인다', (tester) async {
+  testWidgets('보상을 정하지 않았으면 없다고 말해 준다 (#308)', (tester) async {
     await tester.pumpWidget(
       wrap(
         _FakeRepo(),
@@ -94,7 +94,15 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('⭐'), findsNothing);
+    // 전에는 줄째 숨겼다. 그러면 보상을 넣을 수 있다는 것조차 보이지 않는다.
+    // 시안(980:5174)은 빈 칸 대신 말로 알리고 별을 흐리게 한다.
+    expect(find.text('일과 완료 후 보상이 없어요'), findsOneWidget);
+    expect(find.text('⭐'), findsNothing, reason: '별은 이모지가 아니라 에셋이다');
+
+    final dimmed = tester
+        .widgetList<Opacity>(find.byType(Opacity))
+        .where((o) => o.opacity == 0.5);
+    expect(dimmed, isNotEmpty, reason: '채울 수 있는 자리라 별이 흐리다');
   });
 
   testWidgets('편집하기를 누르면 true를 돌려준다 — 화면 이동은 부르는 쪽이 한다', (tester) async {
