@@ -66,16 +66,17 @@ class _NameScreenState extends ConsumerState<NameScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ElumHeader(
-            title: '이룸이를 어떻게\n부를까요?',
+            // 시안(204:996) 문구 그대로. `부를까요`로 줄여 두었던 것을 되돌린다.
+            title: '이룸이를 어떻게\n불러드릴까요?',
             // 개인정보 최소수집 원칙의 UI 표현 — 삭제하지 않는다
-            description: '실명이 아니어도 괜찮아요',
+            description: '정확한 실명이 아니어도 괜찮아요',
             hasBackButton: canGoBack,
           ),
           // Figma 설명 하단(227) → 입력 필드(279)
           SizedBox(height: context.space.headerToContent),
           ElumTextField(
             controller: _controller,
-            hintText: '이름을 적어주세요',
+            hintText: '이름을 입력해주세요',
             onChanged: ref.read(onboardingProvider.notifier).setNickname,
             // 완료 키로도 다음 단계로 간다.
             //

@@ -10,7 +10,9 @@ import 'package:elum/core/router/app_router.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
 import 'package:elum/features/auth/presentation/login_screen.dart';
+import 'package:elum/features/auth/presentation/role_select_screen.dart';
 import 'package:elum/features/onboarding/presentation/card_completion_screen.dart';
+import 'package:elum/features/onboarding/presentation/name_screen.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -537,6 +539,84 @@ void main() {
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('figma/past_sheet_980-4777.png'),
+    );
+  });
+
+  // 역할 선택 (#297).
+  testWidgets('역할 선택 (Figma 732:5176)', (tester) async {
+    final router = GoRouter(
+      initialLocation: Routes.roleSelect,
+      routes: [
+        GoRoute(
+          path: Routes.roleSelect,
+          builder: (context, state) => const RoleSelectScreen(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [testStorageOverride()],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp.router(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            routerConfig: router,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await expectLater(
+      find.byType(RoleSelectScreen),
+      matchesGoldenFile('figma/role_732-5176.png'),
+    );
+  });
+
+  // 이름 (#297). 온보딩 두 번째 화면이다.
+  testWidgets('이름 (Figma 204:991)', (tester) async {
+    final router = GoRouter(
+      initialLocation: Routes.onboardingName,
+      routes: [
+        GoRoute(
+          path: Routes.onboardingName,
+          builder: (context, state) => const NameScreen(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [testStorageOverride()],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp.router(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            routerConfig: router,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await expectLater(
+      find.byType(NameScreen),
+      matchesGoldenFile('figma/name_204-991.png'),
     );
   });
 
