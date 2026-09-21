@@ -31,7 +31,7 @@ import org.springframework.util.StreamUtils;
 public class ConsentDocumentInitializer implements ApplicationRunner {
 
   /** 앱 번들이 들고 있는 버전과 같다. 첫 시딩에만 쓴다. */
-  private static final String INITIAL_VERSION = "2026-09-18";
+  private static final String INITIAL_VERSION = "2026-09-21";
 
   private final ConsentDocumentRepository consentDocumentRepository;
 
