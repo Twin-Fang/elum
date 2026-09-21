@@ -40,6 +40,9 @@ dependencies:
   dio: ^5.10.0
   shared_preferences: ^2.5.5
 
+  # 현재 앱 버전을 읽는다 — 강제 업데이트 판단에 필요하다 (이슈 #279)
+  package_info_plus: ^10.2.1
+
   # 개발자 도구 — 로그 파일 저장·공유 (이슈 #219). 정식 출시 전 제거 대상.
   path_provider: ^2.1.5
   share_plus: ^13.3.0

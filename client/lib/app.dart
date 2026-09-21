@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'core/app_status/app_status_gate.dart';
 import 'core/dev/dev_tools_overlay.dart';
 import 'core/network/session_expiry.dart';
 import 'core/router/app_router.dart';
@@ -61,11 +62,15 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         // 플래그가 꺼지면 child를 그대로 반환해 비용이 0이다. (이슈 #13)
         builder: (context, child) => SyncTriggers(
           // 동기화 트리거는 라우터·오버레이와 무관하므로 가장 바깥에 둔다 (이슈 #140)
-          child: DevToolsOverlay(
+          child: AppStatusGate(
+            // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다 (이슈 #279).
+            // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
+            child: DevToolsOverlay(
             // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
             // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
             onNavigate: _router.go,
-            child: child ?? const SizedBox.shrink(),
+              child: child ?? const SizedBox.shrink(),
+            ),
           ),
         ),
       ),
