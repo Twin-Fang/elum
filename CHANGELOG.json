@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T11:47:04Z",
-    "currentVersion": "1.24.0",
+    "lastUpdated": "2026-09-21T12:41:44Z",
+    "currentVersion": "1.24.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 125
+    "totalReleases": 126
   },
   "releases": [
+    {
+      "version": "1.24.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 292,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 개인정보처리방침에 위탁·국외 이전 안내를 넣었어요\n  * 개인정보 보호책임자와 시행일을 안내해요\n  * 약관 문구를 실제 동작과 맞게 다듬었어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "개인정보처리방침에 위탁·국외 이전 안내를 넣었어요",
+            "개인정보 보호책임자와 시행일을 안내해요",
+            "약관 문구를 실제 동작과 맞게 다듬었어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.24.0",
       "project_type": "flutter",
