@@ -206,10 +206,17 @@ void main() {
   );
 
   /// 이룸이 홈 대조용. 보호자 홈과 쓰는 provider 가 다르다.
-  Widget wrapChild({required List<Routine> routines, int stars = 0}) =>
-      ProviderScope(
+  Widget wrapChild({
+    required List<Routine> routines,
+    int stars = 0,
+    CardCharacter character = CardCharacter.cat,
+  }) => ProviderScope(
         overrides: [
-          testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+          testStorageOverride(
+            onboardingCompleted: true,
+            nickname: '하늘이',
+            character: character.apiValue,
+          ),
           routineRepositoryProvider.overrideWithValue(
             _StubRepo(routines: routines, past: const []),
           ),
@@ -1467,6 +1474,43 @@ void main() {
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('figma/linkcode_732-5702.png'),
+    );
+  });
+
+  // 로딩 — 카드 만드는 중 (#297). 시안 `262:4703`.
+  // 병아리가 **오른쪽**에 서고 문구 셋이 다르다 — 같은 뼈대의 다른 화면이다.
+  testWidgets('로딩 — 카드 만드는 중 (Figma 262:4703)', (tester) async {
+    await tester.pumpWidget(wrapLoading(RoutineLoadingKind.generate));
+    await tester.pump();
+    await precacheAllImages(tester);
+    for (var i = 0; i < 70; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    await expectLater(
+      find.byType(RoutineLoadingScreen),
+      matchesGoldenFile('figma/loading_262-4703.png'),
+    );
+
+    // 남은 타이머(응답 대기·마감)를 흘려보낸다. **`pumpAndSettle`은 못 쓴다** —
+    // 응답이 오면 카드확인으로 넘어가고 거기서 끝나지 않는 움직임이 이어진다.
+    for (var i = 0; i < 30; i++) {
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+  });
+
+  // 이룸이 홈 — 빈 상태, 포포를 고른 경우 (#297). 시안 `364:8537`.
+  // 고른 친구에 따라 **시무룩한 그림과 배지가 바뀐다** — 루루만 보고 있었다.
+  testWidgets('이룸이 홈 — 빈 상태 · 포포 (Figma 364:8537)', (tester) async {
+    await tester.pumpWidget(
+      wrapChild(routines: const [], stars: 0, character: CardCharacter.fox),
+    );
+    await tester.pumpAndSettle();
+    await precacheAllImages(tester);
+
+    await expectLater(
+      find.byType(ChildHomeScreen),
+      matchesGoldenFile('figma/childhome_empty_364-8537.png'),
     );
   });
 }

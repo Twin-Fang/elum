@@ -92,7 +92,8 @@ class ChildHomeScreen extends ConsumerWidget {
                     const _TopBar(),
                     // 시안(356:5197)은 인사말이 y150 에서 시작한다. 토큰(32)을
                     // 쓰면 화면 전체가 13 내려가 타일까지 따라 밀린다 (#297).
-                    SizedBox(height: 19.h),
+                    // 상단 줄을 시안 자리(74)로 6 올렸으므로 여기서 되돌려 준다.
+                    SizedBox(height: 25.h),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: space.screenH),
                       child: Text(
@@ -124,6 +125,9 @@ class ChildHomeScreen extends ConsumerWidget {
 class _TopBar extends ConsumerWidget {
   const _TopBar();
 
+  /// 안전영역 아래 여백 — 시안 상단 줄이 y=74다 (59 + 15, 로고 안 여백 5를 뺀 값).
+  static const _topBarTop = 10.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
@@ -137,7 +141,9 @@ class _TopBar extends ConsumerWidget {
         ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(space.screenH, space.md, space.screenH, 0),
+      // 안전영역(59) 아래 10 → 상단 줄이 시안 y=74에 선다.
+      // `space.md`(16)를 쓰고 있어 이룸이 홈 **세 화면 모두** 6 내려가 있었다 (#297).
+      padding: EdgeInsets.fromLTRB(space.screenH, _topBarTop, space.screenH, 0),
       child: Row(
         children: [
           SvgPicture.asset(AppAssets.homeLogo, width: 80.w, height: 30.h),
@@ -319,7 +325,8 @@ class _NoRoutine extends StatelessWidget {
   final String? errorCode;
 
   /// 상단 줄 아래부터 제목까지 — 시안(343:4543)은 제목이 234 에서 시작한다.
-  static double get _emptyTop => 100.h;
+  /// 상단 줄 아래 → 시무룩한 그림. 상단을 6 올린 만큼 여기서 되돌린다.
+  static double get _emptyTop => 106.h;
 
   @override
   Widget build(BuildContext context) {
@@ -359,7 +366,8 @@ class _NoRoutine extends StatelessWidget {
                 ),
               ),
             ],
-            SizedBox(height: 48.h),
+            // 설명 → 시무룩한 그림. 48을 쓰면 그림이 15 내려간다 (#297).
+            SizedBox(height: 33.h),
             // 캐릭터 뒤 은은한 빛 — 단순 원이라 코드로 그린다
             // (Figma blur 100 ≈ sigma 50)
             SizedBox(

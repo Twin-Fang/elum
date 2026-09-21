@@ -17,12 +17,14 @@ testStorageOverride({
   bool onboardingCompleted = false,
   String? pin,
   String? nickname,
+  String? character,
 }) {
   return localStorageProvider.overrideWithValue(
     InMemoryStorage(
       onboardingCompleted: onboardingCompleted,
       pin: pin,
       nickname: nickname,
+      character: character,
     ),
   );
 }
