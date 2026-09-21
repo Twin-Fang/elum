@@ -73,12 +73,13 @@ void main() {
     expect(routines.first.steps.first.completed, isTrue);
   });
 
-  test('캐시가 없으면 기존 폴백(빈 목록)으로 간다', () async {
+  test('캐시도 없으면 실패를 드러낸다 (이슈 #264)', () async {
+    // 오프라인 캐시는 그대로 둔다 — 비행기 모드에서도 오늘 할 일은 보여야 한다.
+    // 다만 캐시마저 없으면 보여줄 것이 없으므로 빈 목록으로 뭉개지 않는다.
+    // 빈 목록은 "오늘 할 일이 없다"는 뜻이라 실패와 구분되지 않는다.
     adapter.fail = true;
 
-    final routines = await repo.getTodayRoutines();
-
-    expect(routines, isEmpty);
+    expect(() => repo.getTodayRoutines(), throwsA(anything));
   });
 
   test('Routine.toJson은 fromJson과 왕복한다', () {

@@ -124,11 +124,20 @@ void main() {
     });
   });
 
-  group('목록 조회가 실패할 때', () {
-    test('빈 목록을 준다 — 홈이 죽지 않는다', () async {
+  group('목록 조회가 실패할 때 (이슈 #264)', () {
+    test('빈 목록으로 뭉개지 않고 예외를 던진다', () async {
+      // 예전에는 빈 목록을 돌려줬다. 그러면 "아직 만든 일과가 없어요"와
+      // "불러오지 못했어요"가 같은 화면이 되어, 보호자는 무엇이 잘못됐는지
+      // 알 수 없고 우리도 제보를 받아 추적할 수 없다.
       adapter.stub(502, {'errorCode': 'INTERNAL_ERROR'});
 
-      expect(await repo.getMyRoutines(), isEmpty);
+      expect(() => repo.getMyRoutines(), throwsA(anything));
+    });
+
+    test('추천도 내장 데이터로 대신하지 않는다', () async {
+      adapter.stub(502, {'errorCode': 'INTERNAL_ERROR'});
+
+      expect(() => repo.getSuggestions(), throwsA(anything));
     });
   });
 }

@@ -8,6 +8,7 @@ import '../../../../core/assets/app_assets.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../child/application/child_routine_notifier.dart';
 import '../../application/routine_notifier.dart';
@@ -101,7 +102,11 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     return ordered;
   }
 
-  Future<void> _reorder(List<Routine> routines, int oldIndex, int newIndex) async {
+  Future<void> _reorder(
+    List<Routine> routines,
+    int oldIndex,
+    int newIndex,
+  ) async {
     // ReorderableListView는 "빼내기 전" 기준으로 목적지를 준다.
     final to = newIndex > oldIndex ? newIndex - 1 : newIndex;
     if (to == oldIndex) return;
@@ -134,11 +139,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
           value: false,
           tone: ElumDialogTone.neutral,
         ),
-        ElumDialogAction(
-          label: '삭제',
-          value: true,
-          tone: ElumDialogTone.danger,
-        ),
+        ElumDialogAction(label: '삭제', value: true, tone: ElumDialogTone.danger),
       ],
     );
     if (confirmed != true || !mounted) return;
@@ -167,9 +168,9 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
   }
 
   void _toast(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -178,8 +179,17 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
 
     if (routines.isEmpty) {
       final async = ref.watch(myRoutinesProvider);
-      // 로딩과 빈 상태를 구분한다 — 무한 로딩처럼 보이면 안 된다.
-      // 조회 실패도 빈 상태로 흡수해 화면이 붉게 덮이지 않게 한다.
+      // 로딩·빈 상태·실패를 셋으로 나눈다. 예전에는 실패까지 빈 상태로 흡수해
+      // "아직 만든 일과가 없어요"를 띄웠는데, 그러면 보호자는 자기가 만든
+      // 일과가 사라진 줄 안다.
+      if (async.hasError) {
+        return ElumErrorView(
+          message: '일과를 불러오지 못했어요',
+          errorCode: 'E-HOME',
+          onRetry: () => ref.invalidate(myRoutinesProvider),
+          compact: true,
+        );
+      }
       return async.isLoading ? const _LoadingTile() : const EmptyRoutines();
     }
 
@@ -231,8 +241,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
             child: RoutineSummaryTile(
               routine: routine,
               progress: routineProgress(routine, progress),
-              highlighted:
-                  _openId == routine.id || _draggingId == routine.id,
+              highlighted: _openId == routine.id || _draggingId == routine.id,
               dragHandle: ReorderableDragStartListener(
                 index: index,
                 child: const RoutineDragHandle(),
@@ -271,14 +280,16 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
     if (_rerunning != null) return;
     setState(() => _rerunning = routine.id);
 
-    final copy = await ref.read(routineRepositoryProvider).duplicate(routine.id);
+    final copy = await ref
+        .read(routineRepositoryProvider)
+        .duplicate(routine.id);
     if (!mounted) return;
     setState(() => _rerunning = null);
 
     if (copy == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('일과를 다시 만들지 못했어요 (E-DUP)')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('일과를 다시 만들지 못했어요 (E-DUP)')));
       return;
     }
     ref.invalidate(myRoutinesProvider);
@@ -293,6 +304,16 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
     final routines = async.value ?? const <Routine>[];
 
     if (routines.isEmpty) {
+      if (async.hasError) {
+        return _GreyTileShell(
+          child: ElumErrorView(
+            message: '지난 일과를 불러오지 못했어요',
+            errorCode: 'E-PAST',
+            onRetry: () => ref.invalidate(pastRoutinesProvider),
+            compact: true,
+          ),
+        );
+      }
       return async.isLoading
           ? const _LoadingTile()
           : const _GreyTileShell(child: _EmptyPastLabel());
@@ -302,19 +323,21 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
       children: [
         for (final (index, routine) in routines.indexed) ...[
           if (index > 0) SizedBox(height: _tileGap.h),
-          Builder(builder: (context) {
-            // 시안은 다 끝낸 일과에만 날짜와 다시하기를 붙인다(931:4072 vs 931:4160).
-            // 하다 만 것은 복제할 값어치가 없고, 링이 몇 %인지가 더 중요한 정보다.
-            final done = routine.progressPercent >= 100;
-            return RoutineSummaryTile(
-              routine: routine,
-              // 지난 일과는 서버가 셈해 둔 값이 기준이다. 기기 기록은 오늘 것만 있다.
-              progress: routine.progressPercent / 100,
-              showDate: done,
-              onRerun: done ? () => _rerun(routine) : null,
-              highlighted: _rerunning == routine.id,
-            );
-          }),
+          Builder(
+            builder: (context) {
+              // 시안은 다 끝낸 일과에만 날짜와 다시하기를 붙인다(931:4072 vs 931:4160).
+              // 하다 만 것은 복제할 값어치가 없고, 링이 몇 %인지가 더 중요한 정보다.
+              final done = routine.progressPercent >= 100;
+              return RoutineSummaryTile(
+                routine: routine,
+                // 지난 일과는 서버가 셈해 둔 값이 기준이다. 기기 기록은 오늘 것만 있다.
+                progress: routine.progressPercent / 100,
+                showDate: done,
+                onRerun: done ? () => _rerun(routine) : null,
+                highlighted: _rerunning == routine.id,
+              );
+            },
+          ),
         ],
       ],
     );
@@ -341,12 +364,16 @@ class EmptyRoutines extends StatelessWidget {
         children: [
           Text(
             '아직 만든 일과가 없어요',
-            style: typo.routineEmptyTitle.copyWith(color: colors.routineTileLabel),
+            style: typo.routineEmptyTitle.copyWith(
+              color: colors.routineTileLabel,
+            ),
           ),
           SizedBox(height: _emptyLineGap.h),
           Text(
             '오늘의 첫 행동카드를 만들어보세요',
-            style: typo.routineTileMeta.copyWith(color: colors.routineEmptyHint),
+            style: typo.routineTileMeta.copyWith(
+              color: colors.routineEmptyHint,
+            ),
           ),
         ],
       ),
@@ -368,8 +395,9 @@ class _EmptyPastLabel extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: Text(
         '지난 일과가 없어요',
-        style: context.typo.routineEmptyPast
-            .copyWith(color: context.colors.routineTileLabel),
+        style: context.typo.routineEmptyPast.copyWith(
+          color: context.colors.routineTileLabel,
+        ),
       ),
     );
   }

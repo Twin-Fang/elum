@@ -128,8 +128,10 @@ class RoutineRepositoryImpl implements RoutineRepository {
       );
       return routines;
     } catch (e) {
+      // 빈 목록으로 뭉개지 않는다 — "아직 만든 게 없다"와 "불러오지 못했다"가
+      // 같은 화면이 되면 보호자도 우리도 무엇이 잘못됐는지 알 수 없다.
       AppLogger.repositoryError('RoutineRepository', 'getMyRoutines', e);
-      return const [];
+      rethrow;
     }
   }
 
@@ -157,8 +159,10 @@ class RoutineRepositoryImpl implements RoutineRepository {
       );
       return result;
     } catch (e) {
+      // 내장 추천으로 대신하지 않는다. 추천이 안 뜨는 것보다
+      // 왜 안 뜨는지 모르는 것이 나쁘다.
       AppLogger.repositoryError('RoutineRepository', 'getSuggestions', e);
-      return RoutineSuggestion.fallback;
+      rethrow;
     }
   }
 
@@ -493,7 +497,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
       return routines;
     } catch (e) {
       AppLogger.repositoryError('RoutineRepository', label, e);
-      return const [];
+      rethrow;
     }
   }
 

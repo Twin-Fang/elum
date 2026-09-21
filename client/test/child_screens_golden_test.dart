@@ -22,6 +22,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/fake_dio.dart';
 import 'helpers/test_storage.dart';
 
 /// 아이 모드 화면 골든 (이슈 #69).
@@ -54,13 +55,16 @@ void main() {
 
   Widget wrap(Widget screen) {
     return ProviderScope(
-      overrides: [testStorageOverride(onboardingCompleted: true)],
+      overrides: [
+        // 빈 상태 골든은 "서버가 0건을 줬을 때"를 그린다. mock을 걷어낸 뒤(#263)
+        // 응답을 주지 않으면 조회가 실패해 에러 화면이 그려진다 — 빈 상태와 다르다.
+        fakeDioOverride(const {'GET /api/routines/today': <dynamic>[]}),
+        testStorageOverride(onboardingCompleted: true),
+      ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
-        builder: (context, _) => MaterialApp(
-          theme: AppTheme.light,
-          home: screen,
-        ),
+        builder: (context, _) =>
+            MaterialApp(theme: AppTheme.light, home: screen),
       ),
     );
   }

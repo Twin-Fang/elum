@@ -52,8 +52,27 @@ class RecommendedRoutineStrip extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final suggestions = ref.watch(routineSuggestionsProvider);
 
-    // repository가 실패를 흡수해 fallback을 주므로 error 분기는 사실상 오지
-    // 않는다. 그래도 provider 단계의 예외까지 막아 화면이 붉게 덮이지 않게 한다.
+    // 실패하면 왜 비었는지 알려준다. 예전에는 repository가 내장 추천으로
+    // 대신해 실패가 드러나지 않았다(#264).
+    if (suggestions.hasError) {
+      // 자리가 105 높이뿐이라 전체 실패 화면(ElumErrorView)은 넘친다.
+      // 추천은 입력을 돕는 곁가지이므로 한 줄로 알리고 다시 시도만 준다.
+      return SizedBox(
+        height: tileHeight,
+        child: Center(
+          child: TextButton(
+            onPressed: () => ref.invalidate(routineSuggestionsProvider),
+            child: Text(
+              '추천을 불러오지 못했어요 · 다시 시도 (E-SUGGEST)',
+              style: context.typo.promptBody.copyWith(
+                color: context.colors.promptMuted,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final items = suggestions.maybeWhen(
       data: (list) => list,
       orElse: () => const <RoutineSuggestion>[],
