@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T14:01:50Z",
-    "currentVersion": "1.25.3",
+    "lastUpdated": "2026-09-21T14:25:57Z",
+    "currentVersion": "1.25.4",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 130
+    "totalReleases": 131
   },
   "releases": [
+    {
+      "version": "1.25.4",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 307,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 뒤로가기 버튼을 누르기 쉬워졌어요\n  * 뒤로가기 아이콘 색을 다듬었어요\n  * 일과 만들기 입력칸의 글자가 가운데에 놓여요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "뒤로가기 버튼을 누르기 쉬워졌어요",
+            "뒤로가기 아이콘 색을 다듬었어요",
+            "일과 만들기 입력칸의 글자가 가운데에 놓여요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.25.3",
       "project_type": "flutter",
