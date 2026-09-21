@@ -1,15 +1,43 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T15:08:22Z",
-    "currentVersion": "1.25.8",
+    "lastUpdated": "2026-09-21T15:50:34Z",
+    "currentVersion": "1.25.9",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 135
+    "totalReleases": 136
   },
   "releases": [
+    {
+      "version": "1.25.9",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 320,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 지난 일과를 눌러도 아무 일이 없던 문제를 고쳤어요\n  * 일과 화면의 글자와 칸이 조금씩 어긋나 보이던 것을 바로잡았어요\n  * 굵은 글자가 얇게 보이던 문제를 고쳤어요\n\n* **개선**\n  * 지난 일과를 열면 그날 결과를 그대로 보여주고, 다시 하기로 오늘에 담을 수 있어요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "지난 일과를 눌러도 아무 일이 없던 문제를 고쳤어요",
+            "일과 화면의 글자와 칸이 조금씩 어긋나 보이던 것을 바로잡았어요",
+            "굵은 글자가 얇게 보이던 문제를 고쳤어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "지난 일과를 열면 그날 결과를 그대로 보여주고, 다시 하기로 오늘에 담을 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.25.8",
       "project_type": "flutter",
