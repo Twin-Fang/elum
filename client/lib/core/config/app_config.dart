@@ -86,6 +86,14 @@ abstract final class AppConfig {
   static Duration get dlpMinDelay =>
       Duration(milliseconds: _int('ELUM_DLP_MIN_DELAY_MS', 1500));
 
+  /// 로딩 화면이 결과를 기다리는 최대 시간 (#276).
+  ///
+  /// 이만큼 지나도 응답이 없으면 기다리기를 그만두고 에러 코드와 재시도를
+  /// 보여준다. `receiveTimeout`(60초)보다 짧게 둔 것은, 네트워크가 끝까지
+  /// 버티는 동안 사용자를 1분 내내 붙잡아 두지 않기 위해서다.
+  static Duration get loadingMaxWait =>
+      Duration(milliseconds: _int('ELUM_LOADING_MAX_WAIT_MS', 45000));
+
   // --- 빌드 종류 ---
 
   /// 개발용 빌드인지. **컴파일 타임에 결정되며 `.env`로는 바꿀 수 없다.**

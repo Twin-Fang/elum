@@ -322,6 +322,17 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     }
   }
 
+  /// 로딩 화면이 정한 시간 안에 결과가 오지 않았다 (#276).
+  ///
+  /// 요청 자체를 취소하지는 않는다 — 이미 나간 AI 요청은 되돌릴 수 없다.
+  /// 다만 사용자를 더 붙잡지 않고 에러 코드와 재시도를 보여준다.
+  /// 이미 에러거나 결과가 도착했으면 아무것도 하지 않는다.
+  void failOnTimeout() {
+    if (state.step == RoutineFlowStep.error) return;
+    AppLogger.notifierStateChange('RoutineFlowNotifier', state.step.name, 'error');
+    state = state.copyWith(step: RoutineFlowStep.error, errorCode: 'E-1002');
+  }
+
   /// 카드확인에서 카드를 뺀다 (Figma 364:8305 X 버튼).
   ///
   /// 로컬에서만 지우고 서버 반영은 저장(승인) 시점의 목록으로 정리된다.

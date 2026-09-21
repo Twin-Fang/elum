@@ -14,8 +14,13 @@ import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
 /// Figma `보호자_새로운 일과 만들기_로딩`(262:4569 / 262:4703) 정합 테스트.
+
+/// 연출(2+1.5+2=5.5초)보다 느린 응답. "결과를 기다리는 동안"을 만들되,
+/// 테스트가 끝까지 흘려보낼 수 있을 만큼만 늦춘다.
+const _slowResponse = Duration(seconds: 8);
+
 void main() {
-  Widget wrap(RoutineLoadingKind kind) {
+  Widget wrap(RoutineLoadingKind kind, {Duration responseDelay = Duration.zero}) {
     final router = GoRouter(
       initialLocation: '/loading',
       routes: [
@@ -38,7 +43,7 @@ void main() {
       overrides: [
         // mock을 걷어낸 뒤(#263) 이 화면은 실제로 서버를 부른다. 무엇이 온다고
         // 가정하는지 테스트 안에 드러내 둔다.
-        fakeDioOverride(const {
+        fakeDioOverride(delay: responseDelay, const {
           'POST /api/routines/questions': {'questions': []},
           'POST /api/routines': {
             'id': 'r1',
@@ -68,6 +73,16 @@ void main() {
   /// 모든 스텝의 노출시간을 합친 값 — 이만큼 지나야 화면이 넘어갈 수 있다
   Duration totalHold(RoutineLoadingKind kind) =>
       kind.stages.map((s) => s.hold).fold(Duration.zero, (a, b) => a + b);
+
+  /// 남은 연출과 응답을 끝까지 흘려보낸다.
+  ///
+  /// 대기를 잘게 쪼개 확인하도록 바뀌어(#276) 화면이 살아 있는 동안 타이머가
+  /// 계속 생긴다. 검증만 하고 테스트를 끝내면 `A Timer is still pending`으로
+  /// 터지므로, 화면이 넘어가 dispose될 때까지 돌려 준다.
+  Future<void> drain(WidgetTester tester) async {
+    await tester.pump(_slowResponse + const Duration(seconds: 1));
+    await settle(tester);
+  }
 
   group('prepare 로딩 (262:4569)', () {
     testWidgets('Figma 문구가 보인다', (tester) async {
@@ -107,8 +122,12 @@ void main() {
       await settle(tester);
     });
 
-    testWidgets('두 번째 스텝은 첫 스텝의 노출시간이 지난 뒤에 뜬다', (tester) async {
-      await tester.pumpWidget(wrap(RoutineLoadingKind.prepare));
+    testWidgets('응답이 늦으면 두 번째 스텝은 첫 스텝의 노출시간이 지난 뒤에 뜬다', (tester) async {
+      // 응답을 늦춰야 연출이 제 리듬으로 돈다. 즉시 응답하면 남은 줄을
+      // 훑고 지나가므로(#276) 이 리듬 자체를 볼 수 없다.
+      await tester.pumpWidget(
+        wrap(RoutineLoadingKind.prepare, responseDelay: _slowResponse),
+      );
       await settle(tester);
 
       final stages = RoutineLoadingKind.prepare.stages;
@@ -118,8 +137,7 @@ void main() {
       expect(opacityOf(tester, stages[1].label), 1.0);
       expect(opacityOf(tester, stages[2].label), 0.0);
 
-      await tester.pump(totalHold(RoutineLoadingKind.prepare));
-      await settle(tester);
+      await drain(tester);
     });
 
     testWidgets('질문 준비가 끝나면 추가 질문 화면으로 넘어간다', (tester) async {
@@ -155,33 +173,59 @@ void main() {
     });
   });
 
-  group('최소 노출시간 보장', () {
-    // 백엔드가 즉시 응답해도 연출을 끝까지 보여준다.
-    // mock 환경에서는 카드 생성이 사실상 즉시 끝나므로,
-    // 이 테스트가 곧 "응답이 빨리 온 경우"다.
-    testWidgets('응답이 즉시 와도 노출시간을 다 채우기 전엔 넘어가지 않는다', (tester) async {
+  group('노출시간', () {
+    testWidgets('응답이 빨리 오면 연출을 끝까지 채우지 않고 넘어간다 (#276)', (tester) async {
       await tester.pumpWidget(wrap(RoutineLoadingKind.generate));
       await settle(tester);
 
-      final stages = RoutineLoadingKind.generate.stages;
-
-      // 첫 두 스텝만 지난 시점 — 아직 마지막 스텝이 남았다
-      await tester.pump(stages[0].hold + stages[1].hold);
-      await settle(tester);
-      expect(find.text('카드 확인'), findsNothing, reason: '노출시간이 남았는데 화면이 넘어갔다');
-
-      // 마지막 스텝까지 채우면 그제서야 넘어간다
-      await tester.pump(stages[2].hold);
+      // 세 줄을 짧게 훑는 시간이면 충분하다. 예전에는 4+3+4=11초를 다 채워야
+      // 넘어갔고, 화면이 둘이라 일과 하나에 22초가 들었다.
+      await tester.pump(const Duration(seconds: 2));
       await settle(tester);
       expect(find.text('카드 확인'), findsOneWidget);
     });
 
-    testWidgets('각 스텝의 노출시간은 4초 / 3초 / 4초다', (tester) async {
+    testWidgets('아무리 빨라도 한 줄은 보여준다 — 무엇을 했는지 읽을 틈은 준다 (#276)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(wrap(RoutineLoadingKind.generate));
+      await settle(tester);
+
+      // 개인정보를 가린다는 사실은 보호자가 봐야 의미가 있다.
+      // 한 프레임에 세 줄이 스쳐 지나가면 보여준 것이 아니다.
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.text('카드 확인'), findsNothing);
+
+      await drain(tester);
+    });
+
+    testWidgets('응답이 늦으면 정해진 리듬을 지킨다 (#276)', (tester) async {
+      await tester.pumpWidget(
+        wrap(RoutineLoadingKind.generate, responseDelay: _slowResponse),
+      );
+      await settle(tester);
+
+      final stages = RoutineLoadingKind.generate.stages;
+      await tester.pump(stages[0].hold + stages[1].hold);
+      await settle(tester);
+      expect(find.text('카드 확인'), findsNothing, reason: '결과가 없는데 화면이 넘어갔다');
+
+      // 단계를 다 소진해도 결과가 없으면 기다린다 — 가짜로 넘기지 않는다
+      await tester.pump(stages[2].hold);
+      await settle(tester);
+      expect(find.text('카드 확인'), findsNothing);
+
+      await drain(tester);
+    });
+
+    testWidgets('스텝 노출시간은 2초 / 1.5초 / 2초다 (#276)', (tester) async {
+      // Gemini 시절의 4/3/4는 AI가 느려 어차피 기다리던 때의 값이다.
+      // OpenAI로 옮겨 응답이 빨라지자 연출이 오히려 붙잡는 쪽이 됐다.
       for (final kind in RoutineLoadingKind.values) {
         expect(
-          kind.stages.map((s) => s.hold.inSeconds).toList(),
-          [4, 3, 4],
-          reason: '$kind의 스텝 노출시간이 합의값과 다르다',
+          kind.stages.map((s) => s.hold.inMilliseconds).toList(),
+          [2000, 1500, 2000],
+          reason: '$kind의 스텝 노출시간이 다르다',
         );
       }
     });

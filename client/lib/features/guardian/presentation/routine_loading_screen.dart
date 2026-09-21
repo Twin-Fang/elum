@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -62,13 +64,38 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
   /// 양쪽에서 각각 넘겨 화면이 두 번 쌓이는 것을 막는다.
   var _navigated = false;
 
+  /// 결과를 기다리는 상한 (#276). 무한 로딩을 두지 않는다.
+  Timer? _deadline;
+
+  /// 결과가 온 뒤에도 한 줄을 보여주는 최소 시간.
+  ///
+  /// 0으로 두면 세 줄이 한 프레임에 스쳐 지나가 무엇을 했는지 읽을 수 없다.
+  /// 개인정보를 가린다는 사실은 보호자가 **봐야** 의미가 있다.
+  static const _minVisible = Duration(milliseconds: 300);
+
+  /// 대기를 쪼개는 간격. 통째로 기다리면 도중에 결과가 와도 깨어나지 못한다.
+  static const _tick = Duration(milliseconds: 100);
+
   @override
   void initState() {
     super.initState();
     _revealStages();
+    _deadline = Timer(AppConfig.loadingMaxWait, _onTimeout);
     // initState에서 provider를 건드리면 "빌드 중 수정" 오류가 난다.
     // 첫 프레임이 끝난 뒤로 미룬다.
     WidgetsBinding.instance.addPostFrameCallback((_) => _runWork());
+  }
+
+  @override
+  void dispose() {
+    _deadline?.cancel();
+    super.dispose();
+  }
+
+  /// 상한을 넘겼다 — 기다리기를 그만두고 에러 코드와 재시도를 보여준다.
+  void _onTimeout() {
+    if (!mounted || _navigated || _workDone) return;
+    ref.read(routineFlowProvider.notifier).failOnTimeout();
   }
 
   /// 스텝을 하나씩 드러낸다. 각자 정해진 [RoutineStage.hold]만큼 머문다.
@@ -79,12 +106,29 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     for (final stage in widget.kind.stages) {
       if (!mounted) return;
       setState(() => _revealed++);
-      await Future<void>.delayed(stage.hold);
+      await _hold(stage.hold);
     }
     if (!mounted) return;
 
     _stagesDone = true;
     _tryNavigate();
+  }
+
+  /// 한 줄이 머무는 시간. **결과가 이미 왔으면 남은 시간을 채우지 않는다** (#276).
+  ///
+  /// 예전에는 `await delayed(4초)`를 통째로 걸어, 서버가 1초 만에 답해도 3초를
+  /// 더 기다렸다. 화면 하나가 11초였으니 일과 하나에 22초가 들었다. 이미지 모델을
+  /// OpenAI로 옮겨 응답이 빨라졌는데(#261) 연출이 그만큼 붙잡고 있었다.
+  ///
+  /// 그렇다고 0으로 만들지는 않는다 — [_minVisible]만큼은 보여준다.
+  Future<void> _hold(Duration full) async {
+    var waited = Duration.zero;
+    while (waited < full) {
+      if (!mounted) return;
+      if (_workDone && waited >= _minVisible) return;
+      await Future<void>.delayed(_tick);
+      waited += _tick;
+    }
   }
 
   /// 이 화면이 담당하는 작업을 수행한다.
@@ -117,6 +161,8 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
   /// 실패 후 재시도 — AI(`POST /api/routines`)를 다시 호출한다.
   /// 연출(스텝 노출)은 이미 끝났을 수 있으므로 다시 돌려 로딩감을 준다.
   Future<void> _retry() async {
+    _deadline?.cancel();
+    _deadline = Timer(AppConfig.loadingMaxWait, _onTimeout);
     setState(() {
       _revealed = 0;
       _stagesDone = false;
@@ -239,7 +285,8 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
                   style: context.typo.promptTitle
                       .copyWith(color: colors.textPrimary),
                 ),
-                SizedBox(height: space.md),
+                // 시안 간격은 12다 (제목 바닥 351 → 진행률 363).
+                SizedBox(height: space.sm),
                 // 진행률 숫자(70 → 80 등)가 단계마다 튀지 않게 세면서 올라간다.
                 // 진행 중임을 알리는 스피너는 [_StageRow]가 보여준다.
                 TweenAnimationBuilder<double>(

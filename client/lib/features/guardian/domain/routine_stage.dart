@@ -20,9 +20,9 @@ enum RoutineLoadingKind {
     title: '루미가 내용을\n정리하고 있어요',
     lumiSide: LumiSide.left,
     stages: [
-      RoutineStage(label: '이룸이를 알아볼 수 있는 정보는 가려요', percent: 15, hold: _hold4),
-      RoutineStage(label: '꼭 필요한 내용만 정리해요', percent: 40, hold: _hold3),
-      RoutineStage(label: '추가 질문을 생각하고 있어요', percent: 65, hold: _hold4),
+      RoutineStage(label: '이룸이를 알아볼 수 있는 정보는 가려요', percent: 15, hold: _holdLong),
+      RoutineStage(label: '꼭 필요한 내용만 정리해요', percent: 40, hold: _holdShort),
+      RoutineStage(label: '추가 질문을 생각하고 있어요', percent: 65, hold: _holdLong),
     ],
   ),
 
@@ -31,9 +31,9 @@ enum RoutineLoadingKind {
     title: '루미가 행동카드를\n만들고 있어요',
     lumiSide: LumiSide.right,
     stages: [
-      RoutineStage(label: '오늘의 일과를 읽고 있어요', percent: 70, hold: _hold4),
-      RoutineStage(label: '중요한 준비물을 찾고 있어요', percent: 80, hold: _hold3),
-      RoutineStage(label: '순서를 정리하고 있어요', percent: 90, hold: _hold4),
+      RoutineStage(label: '오늘의 일과를 읽고 있어요', percent: 70, hold: _holdLong),
+      RoutineStage(label: '중요한 준비물을 찾고 있어요', percent: 80, hold: _holdShort),
+      RoutineStage(label: '순서를 정리하고 있어요', percent: 90, hold: _holdLong),
     ],
   );
 
@@ -69,12 +69,21 @@ enum LumiSide { left, right }
 /// 그래서 **100%를 만들지 않는다.** 실제 완료는 서버 응답이 결정하며, 마지막
 /// 단계에 도달해도 응답 전까지는 대기 상태로 둔다. 가짜 100%를 보여주면
 /// 다 됐는데 안 넘어간다는 인상을 준다.
-/// 스텝별 최소 노출시간. 디자이너·기획 합의값(4초 / 3초 / 4초)이다.
+/// 스텝별 노출시간.
+///
+/// 처음에는 4초 / 3초 / 4초였다(디자이너·기획 합의값). 그때는 Gemini라 AI가
+/// 느려서 어차피 기다려야 했고, 연출이 그 시간을 덮어 주는 쪽이었다. 이미지·문장
+/// 모델을 OpenAI로 옮겨 응답이 빨라지자(#261) 관계가 뒤집혀, **연출이 사용자를
+/// 붙잡는 쪽**이 됐다 — 화면 하나가 11초, 일과 하나에 22초였다. 절반으로 줄인다.
+/// 세 줄을 읽기에는 이만큼이면 된다 (#276).
 ///
 /// 상수로 빼둔 이유 — 두 로딩 화면이 같은 리듬을 써야 한다. 한쪽만 고치면
 /// 흐름이 어긋나는데, 화면을 나란히 보지 않으면 눈치채기 어렵다.
-const _hold4 = Duration(seconds: 4);
-const _hold3 = Duration(seconds: 3);
+///
+/// **값이 아니라 쓰임으로 이름 짓는다.** `_hold4`처럼 값을 이름에 박으면
+/// 다음에 시간을 바꿀 때 이름까지 틀린 말이 된다.
+const _holdLong = Duration(seconds: 2);
+const _holdShort = Duration(milliseconds: 1500);
 
 class RoutineStage {
   const RoutineStage({
@@ -93,11 +102,14 @@ class RoutineStage {
   /// 뒤 화면의 진행률이 앞 화면보다 커야 흐름이 뒤로 가지 않는다.
   final int percent;
 
-  /// 이 단계를 **반드시 보여줄** 시간.
+  /// 이 단계가 머무는 시간.
   ///
-  /// 서버 응답이 먼저 와도 이 시간이 지나기 전엔 다음 화면으로 넘기지 않는다.
-  /// 로딩이 순식간에 스쳐 지나가면 "무엇을 하고 있는지"를 보여주려던 목적이
-  /// 사라진다 — 특히 개인정보를 가린다는 사실은 보호자가 봐야 의미가 있다.
+  /// **결과가 아직이면** 이만큼 보여준다. 로딩이 순식간에 스쳐 지나가면
+  /// "무엇을 하고 있는지"를 보여주려던 목적이 사라진다 — 특히 개인정보를
+  /// 가린다는 사실은 보호자가 봐야 의미가 있다.
+  ///
+  /// **결과가 이미 왔으면 이 시간을 채우지 않는다** (#276). 다 끝난 일을
+  /// 붙잡아 둘 이유가 없다. 대신 한 줄도 못 보고 지나가지 않을 만큼만 머문다.
   ///
   /// 반대로 응답이 **늦으면** 마지막 단계에서 기다린다. 단계를 다 소진했다고
   /// 화면을 넘기지 않는다 — 아직 결과가 없기 때문이다.

@@ -18,9 +18,15 @@ import 'package:elum/core/network/dio_client.dart';
 /// 돌려준다. 등록하지 않은 경로는 404를 준다 — 조용히 200을 주면 테스트가
 /// 가짜 성공 위에서 돌게 된다.
 class FakeAdapter implements HttpClientAdapter {
-  FakeAdapter(this.routes);
+  FakeAdapter(this.routes, {this.delay = Duration.zero});
 
   final Map<String, Object?> routes;
+
+  /// 응답을 이만큼 늦춘다. 기본은 즉시다.
+  ///
+  /// 로딩 연출처럼 **응답이 늦을 때의 동작**을 봐야 하는 화면에 쓴다.
+  /// 즉시 응답하면 "결과를 기다리는 동안"의 흐름을 아예 지나쳐 버린다.
+  final Duration delay;
 
   /// 실제로 나간 요청. "무엇을 불렀는가"를 검증할 때 쓴다.
   final List<String> calls = [];
@@ -33,6 +39,8 @@ class FakeAdapter implements HttpClientAdapter {
   ) async {
     final key = '${options.method} ${options.path}';
     calls.add(key);
+
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
 
     final body = routes[key];
     if (body == null) {
@@ -63,9 +71,9 @@ class FakeAdapter implements HttpClientAdapter {
 /// riverpod 3.x가 `Override` 타입을 export하지 않아 반환 타입은 추론에 맡긴다
 /// (`test_storage.dart`와 같은 사정).
 // ignore: strict_top_level_inference
-fakeDioOverride(Map<String, Object?> routes) {
+fakeDioOverride(Map<String, Object?> routes, {Duration delay = Duration.zero}) {
   final dio = Dio(BaseOptions(baseUrl: 'https://test.local'))
-    ..httpClientAdapter = FakeAdapter(routes);
+    ..httpClientAdapter = FakeAdapter(routes, delay: delay);
   return dioProvider.overrideWithValue(dio);
 }
 
