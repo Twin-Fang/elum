@@ -272,10 +272,15 @@ public class RoutineService {
 
   /// 보호자 홈 "지난 일과" — 오늘 이전 것만 최신순 10개.
   /// 전부 내려주면 목록이 계속 쌓여 오늘 할 일이 묻힌다.
+  ///
+  /// 프로필을 계정에서 떼어낸 뒤로 profileId와 memberId는 서로 다른 값이다.
+  /// 여기에 memberId를 그대로 넘기고 있어서 **어떤 일과도 걸리지 않았다** —
+  /// 모든 보호자에게 지난 일과가 빈 칸으로 보였다. 같은 실수를 오늘 일과에서
+  /// 한 번 고쳤는데(getTodayRoutines) 이곳이 함께 고쳐지지 않았다.
   public List<RoutineResponse> getPastRoutines(String memberId) {
     return routineRepository
       .findAllByProfileIdAndScheduledAtBeforeOrderByScheduledAtDesc(
-        memberId, LocalDate.now().atStartOfDay())
+        requireProfile(memberId).getId(), LocalDate.now().atStartOfDay())
       .stream()
       .limit(PAST_ROUTINE_LIMIT)
       .map(RoutineResponse::from)
