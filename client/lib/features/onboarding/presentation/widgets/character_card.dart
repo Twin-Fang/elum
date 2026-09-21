@@ -28,6 +28,15 @@ class CharacterCard extends StatelessWidget {
   /// 카드 상단(y=279) → 일러스트 상단(y=308)
   static const _illustrationTop = 29.0;
 
+  /// 발밑 그림자 (Figma `204:1037` 그림자 — 카드 기준 x=53, y=172, 64×16).
+  /// 없으면 캐릭터가 허공에 뜬다 — 실제로 빠져 있었다 (#297).
+  static const _shadowWidth = 64.0;
+  static const _shadowHeight = 16.0;
+  static const _shadowTop = 172.0;
+
+  /// 카드 하단(481) → 이름(493). 이름은 **카드 밖**에 있다.
+  static const nameGap = 12.0;
+
   final CardCharacter character;
   final bool isSelected;
 
@@ -51,15 +60,26 @@ class CharacterCard extends StatelessWidget {
           width: isSelected ? space.selectedBorderWidth : space.borderWidth,
         ),
       ),
-      // Figma는 일러스트만 배치한다(y=308~460).
+      // 그림자를 **일러스트보다 먼저** 깐다 — 발 뒤에 깔려야 한다.
       //
-      // ⚠️ 이름 텍스트를 넣지 않는다. Figma가 이 자리(Ellipse 2/3, y=451)를
-      // 회색 알약으로 비워뒀는데, 원본에 없는 것을 임의로 채우면 안 된다.
-      // 캐릭터 이름(루루·포포)은 코드에서 캐릭터를 식별하는 값이지 화면 문구가
-      // 아니다. 디자이너가 이 자리를 채우면 그때 Figma를 보고 넣는다.
+      // 이름(루루·포포)은 이 카드 밖, 카드 아래 12 자리에 놓인다
+      // (Figma `732:5320` / `732:5319`). 카드 안에 넣으면 높이가 202를 넘는다.
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
+          Positioned(
+            top: _shadowTop.h,
+            child: Container(
+              width: _shadowWidth.w,
+              height: _shadowHeight.h,
+              decoration: BoxDecoration(
+                color: colors.characterCardShadow,
+                borderRadius: BorderRadius.all(
+                  Radius.elliptical(_shadowWidth.w / 2, _shadowHeight.h / 2),
+                ),
+              ),
+            ),
+          ),
           Positioned(
             top: _illustrationTop.h,
             child: SvgPicture.asset(

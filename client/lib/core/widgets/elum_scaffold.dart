@@ -56,12 +56,19 @@ class ElumScaffold extends StatelessWidget {
   /// 화면이 직접 Padding을 겹쳐 쓰면 기본 24가 그대로 남아 이중 여백이 된다.
   final double? horizontalPadding;
 
-  /// Figma 뒤로가기 아이콘 좌표 (x=24, y=75, 24×24)
-  static const _backIconY = 75.0;
+  /// Figma 뒤로가기 컴포넌트(`976:4549`) — **40×40 상자가 x=16, y=79** 에 놓인다.
+  ///
+  /// 상자 안에서 24×24 아이콘이 가운데에 오므로 획은 (24, 87)에서 시작한다.
+  /// 전에는 24×24 아이콘을 (24, 75)에 두고 누름 영역만 40으로 덮었는데,
+  /// 그러면 **획이 12 위로 뜬다** — 온보딩 다섯 화면에서 똑같이 어긋나 있었다
+  /// (#297). 상자를 시안대로 두고 아이콘을 가운데 놓으면 둘 다 맞는다.
+  static const _backBoxLeft = 16.0;
+  static const _backBoxY = 79.0;
+  static const _backBoxSize = 40.0;
   static const _backIconSize = 24.0;
 
-  /// 누름 영역. 시안 `976:4549` 가 40×40 이다.
-  static const _backTapSize = 40.0;
+  /// 뒤로가기 상자 하단 — [ElumHeader]가 제목 y를 여기서 이어 계산한다.
+  static const backBoxBottom = _backBoxY + _backBoxSize;
 
   /// Figma 프레임 전체 높이. CTA 하단 여백을 화면 하단 기준으로 역산한다.
   ///
@@ -120,36 +127,25 @@ class ElumScaffold extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (onBack != null) ...[
-                SizedBox(height: fromTop(_backIconY)),
+                SizedBox(height: fromTop(_backBoxY)),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: EdgeInsets.only(left: space.screenH.w),
+                    padding: EdgeInsets.only(left: _backBoxLeft.w),
                     // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
-                    // 시안(`976:4549`)은 40×40 누름 영역 안에 아이콘을 가운데 둔다.
-                    // 그림만 그려 두면 24×24 위만 눌린다 (#306).
-                    // 자리는 아이콘 크기 그대로 두고 **그 위로** 40×40 누름
-                    // 영역을 덮는다 (#306). 자리째 키우면 상단바가 높아져 화면
-                    // 전체가 아래로 밀린다 — 누르기 편하자고 레이아웃을 흔들 수 없다.
-                    child: SizedBox(
-                      width: _backIconSize.w,
-                      height: _backIconSize.w,
-                      child: OverflowBox(
-                        maxWidth: _backTapSize.w,
-                        maxHeight: _backTapSize.w,
-                        child: GestureDetector(
-                          onTap: onBack,
-                          behavior: HitTestBehavior.opaque,
-                          child: SizedBox(
-                            width: _backTapSize.w,
-                            height: _backTapSize.w,
-                            child: Center(
-                              child: SvgPicture.asset(
-                                AppAssets.iconBack,
-                                width: _backIconSize.w,
-                                height: _backIconSize.w,
-                              ),
-                            ),
+                    // 상자 자체가 40×40이라 누름 영역과 자리가 한 값으로 맞는다
+                    // — 따로 덮을 필요가 없다 (#306의 OverflowBox를 걷어냈다).
+                    child: GestureDetector(
+                      onTap: onBack,
+                      behavior: HitTestBehavior.opaque,
+                      child: SizedBox(
+                        width: _backBoxSize.w,
+                        height: _backBoxSize.w,
+                        child: Center(
+                          child: SvgPicture.asset(
+                            AppAssets.iconBack,
+                            width: _backIconSize.w,
+                            height: _backIconSize.w,
                           ),
                         ),
                       ),
@@ -162,7 +158,12 @@ class ElumScaffold extends StatelessWidget {
                   padding: EdgeInsets.symmetric(
                     horizontal: (horizontalPadding ?? space.screenH).w,
                   ),
-                  child: child,
+                  // 뼈대가 위에서 얼마를 썼는지 본문에 알린다 — 헤더가 제목
+                  // y를 이어서 계산한다.
+                  child: ElumScaffoldTopScope(
+                    consumedTop: onBack != null ? backBoxBottom : 0,
+                    child: child,
+                  ),
                 ),
               ),
               if (bottomButton != null)
@@ -192,4 +193,30 @@ class ElumScaffold extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 뼈대가 **상단에서 이미 써 버린 높이**를 본문에 알린다.
+///
+/// [ElumHeader]가 제목 y(131)를 계산하려면 이 값이 필요하다. 예전에는 화면이
+/// `hasBackButton: true`를 손으로 넘겼는데, **빠뜨려도 아무 표시가 없었다** —
+/// 비밀번호·연결암호 화면이 그렇게 제목이 40씩 내려가 있었고 아무도 몰랐다
+/// (#297). 뼈대가 직접 알려주면 빠뜨릴 수가 없다.
+class ElumScaffoldTopScope extends InheritedWidget {
+  const ElumScaffoldTopScope({
+    super.key,
+    required this.consumedTop,
+    required super.child,
+  });
+
+  /// 화면 최상단부터 본문이 시작하는 자리까지의 Figma y.
+  final double consumedTop;
+
+  /// 뼈대 밖에서 쓰이면 null — 그때는 헤더가 직접 넘겨받은 값을 쓴다.
+  static double? maybeOf(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<ElumScaffoldTopScope>()
+      ?.consumedTop;
+
+  @override
+  bool updateShouldNotify(ElumScaffoldTopScope oldWidget) =>
+      oldWidget.consumedTop != consumedTop;
 }

@@ -112,6 +112,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.rewardButton,
     required this.rewardGroundShadow,
     required this.childEmptyShadow,
+    required this.characterCardShadow,
     required this.routineTileBg,
     required this.routineRingTrack,
     required this.routineRingProgress,
@@ -393,6 +394,11 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 보상 화면 그림자와 배경이 달라 항상 따로 바뀐다 — 토큰을 나눈다.
   final Color childEmptyShadow;
 
+  /// 온보딩 캐릭터 카드 안 발밑 그림자 (Figma `204:1037` 그림자 — 흰 카드 위).
+  /// [childEmptyShadow]와 값은 같지만 바탕이 다르다(흰 카드 vs 베이지 화면) —
+  /// 한쪽만 조정될 수 있으므로 묶지 않는다.
+  final Color characterCardShadow;
+
   // 홈 일과 목록 (Figma 356:4688 / 309:3739 / 356:5079)
   /// 일과 타일·펼침 컨테이너·빈 상태 배경 (#EEE9E6)
   final Color routineTileBg;
@@ -622,6 +628,7 @@ class AppColors extends ThemeExtension<AppColors> {
     rewardButton: Color(0xFF55CFBA),
     rewardGroundShadow: Color(0xFF121215),
     childEmptyShadow: Color(0x4D969696),
+    characterCardShadow: Color(0x4D969696),
     routineTileBg: Color(0xFFEEE9E6),
     routineRingTrack: Color(0xFFC9D6D4),
     routineRingProgress: Color(0xFF55CFBA),
@@ -756,6 +763,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? rewardButton,
     Color? rewardGroundShadow,
     Color? childEmptyShadow,
+    Color? characterCardShadow,
     Color? routineTileBg,
     Color? routineRingTrack,
     Color? routineRingProgress,
@@ -880,6 +888,7 @@ class AppColors extends ThemeExtension<AppColors> {
       rewardButton: rewardButton ?? this.rewardButton,
       rewardGroundShadow: rewardGroundShadow ?? this.rewardGroundShadow,
       childEmptyShadow: childEmptyShadow ?? this.childEmptyShadow,
+      characterCardShadow: characterCardShadow ?? this.characterCardShadow,
       routineTileBg: routineTileBg ?? this.routineTileBg,
       routineRingTrack: routineRingTrack ?? this.routineRingTrack,
       routineRingProgress: routineRingProgress ?? this.routineRingProgress,
@@ -1099,6 +1108,11 @@ class AppColors extends ThemeExtension<AppColors> {
       childEmptyShadow: Color.lerp(
         childEmptyShadow,
         other.childEmptyShadow,
+        t,
+      )!,
+      characterCardShadow: Color.lerp(
+        characterCardShadow,
+        other.characterCardShadow,
         t,
       )!,
       routineTileBg: Color.lerp(routineTileBg, other.routineTileBg, t)!,

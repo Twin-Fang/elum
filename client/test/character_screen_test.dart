@@ -186,18 +186,30 @@ void main() {
       expect(catX, lessThan(foxX));
     });
 
-    testWidgets('카드에 이름 텍스트를 넣지 않는다', (tester) async {
-      // Figma가 이 자리(Ellipse 2/3)를 회색 알약으로 비워뒀다.
-      // 원본에 없는 것을 임의로 채우지 않는다.
+    testWidgets('카드 아래에 이름이 보인다', (tester) async {
+      // 한때 이 자리가 회색 알약으로 비어 있어 넣지 않았는데,
+      // 2026-09-22 시안(`732:5320` 루루 / `732:5319` 포포)에는 텍스트가 있다.
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text(CardCharacter.cat.displayName), findsNothing);
-      expect(find.text(CardCharacter.fox.displayName), findsNothing);
+      expect(find.text(CardCharacter.cat.displayName), findsOneWidget);
+      expect(find.text(CardCharacter.fox.displayName), findsOneWidget);
+    });
+
+    testWidgets('이름은 카드 밖, 카드 아래에 놓인다', (tester) async {
+      // 카드 안에 넣으면 카드 높이가 시안(202)을 넘는다
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      final cardBottom = tester.getBottomLeft(cardOf(CardCharacter.cat)).dy;
+      final nameTop = tester
+          .getTopLeft(find.text(CardCharacter.cat.displayName))
+          .dy;
+      expect(nameTop, greaterThanOrEqualTo(cardBottom));
     });
 
     testWidgets('두 캐릭터의 식별 이름이 서로 다르다', (tester) async {
-      // 화면에 쓰이진 않지만 코드에서 캐릭터를 구분하는 값이다
+      // 화면에도 나가고 코드에서 캐릭터를 구분하는 데도 쓰인다
       expect(
         CardCharacter.cat.displayName,
         isNot(CardCharacter.fox.displayName),
@@ -205,7 +217,7 @@ void main() {
     });
 
     testWidgets('확정된 식별 이름은 고양이 루루 · 여우 포포다', (tester) async {
-      // 화면 문구가 아니라 코드에서 캐릭터를 가리키는 이름이다
+      // 카드 아래에 그대로 나가는 문구다
       expect(CardCharacter.cat.displayName, '루루');
       expect(CardCharacter.fox.displayName, '포포');
     });

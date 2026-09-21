@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
-import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -153,10 +153,12 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     _focusNode.requestFocus();
   }
 
+  /// 설명 하단(227) → 점(299). 시안 `238:1996` 실측.
+  /// 전에는 `space.xl`(32)을 썼는데 그러면 점이 40 위로 뜬다 (#297).
+  static const _descriptionToDots = 72.0;
+
   @override
   Widget build(BuildContext context) {
-    final space = context.space;
-
     return ElumScaffold(
       onBack: () => context.pop(),
       // 시안(238:2924)에는 **입력 중에 버튼이 아예 없다** (이슈 #231).
@@ -181,7 +183,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                 : '보호자님만 아는\n비밀암호를 만들어주세요',
             description: _errorMessage ?? '보호자모드로 변경할 때 사용하는 암호예요',
           ),
-          SizedBox(height: space.xl),
+          SizedBox(height: _descriptionToDots.h),
           // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)
           GestureDetector(
             onTap: _focusNode.requestFocus,

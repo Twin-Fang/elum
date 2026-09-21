@@ -13,6 +13,9 @@ import 'package:elum/features/auth/presentation/login_screen.dart';
 import 'package:elum/features/auth/presentation/role_select_screen.dart';
 import 'package:elum/features/onboarding/presentation/card_completion_screen.dart';
 import 'package:elum/features/onboarding/presentation/name_screen.dart';
+import 'package:elum/features/onboarding/presentation/goals_screen.dart';
+import 'package:elum/features/onboarding/presentation/character_screen.dart';
+import 'package:elum/features/onboarding/presentation/pin_screen.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -409,6 +412,58 @@ void main() {
         ),
       );
 
+  /// 온보딩 화면 하나를 시안과 같은 조건으로 세운다.
+  ///
+  /// **화면을 밀어 넣는다(push).** 뒤로가기는 `context.canPop()`으로 갈리므로
+  /// 라우터에 화면 하나만 두면 시안에 있는 뒤로가기가 앱에서는 안 그려진다 —
+  /// 시험이 만든 차이지 앱의 결함이 아니다. 실제 흐름처럼 앞 화면을 깔고
+  /// 그 위로 올려야 시안과 같은 조건이 된다 (#297).
+  ///
+  /// 셋 다 앞 화면에서 받은 호칭을 제목에 넣으므로 저장소에 `하늘이`를
+  /// 미리 넣어 둔다. 시안도 그 이름으로 그려져 있다 — 다르면 제목 줄이
+  /// 통째로 어긋난 것으로 나온다.
+  Future<void> pumpOnboarding(
+    WidgetTester tester,
+    String path,
+    Widget Function() build, {
+    String? nickname = '하늘이',
+  }) async {
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(path: '/', builder: (context, state) => const SizedBox.shrink()),
+        GoRoute(path: path, builder: (context, state) => build()),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          testStorageOverride(nickname: nickname),
+          testMemberRepoOverride(),
+        ],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp.router(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            routerConfig: router,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    router.push(path);
+    await tester.pump();
+    // 화면 전환 애니메이션이 끝나야 자리가 고정된다
+    await tester.pump(const Duration(milliseconds: 600));
+  }
+
   testWidgets('보호자 홈 — 일과 있음 (Figma 931:3896)', (tester) async {
     await tester.pumpWidget(
       wrap(
@@ -544,36 +599,12 @@ void main() {
 
   // 역할 선택 (#297).
   testWidgets('역할 선택 (Figma 732:5176)', (tester) async {
-    final router = GoRouter(
-      initialLocation: Routes.roleSelect,
-      routes: [
-        GoRoute(
-          path: Routes.roleSelect,
-          builder: (context, state) => const RoleSelectScreen(),
-        ),
-      ],
+    await pumpOnboarding(
+      tester,
+      Routes.roleSelect,
+      () => const RoleSelectScreen(),
+      nickname: null,
     );
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [testStorageOverride()],
-        child: ScreenUtilInit(
-          designSize: const Size(393, 852),
-          useInheritedMediaQuery: true,
-          builder: (context, _) => MaterialApp.router(
-            theme: AppTheme.light,
-            debugShowCheckedModeBanner: false,
-            builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
-              child: child!,
-            ),
-            routerConfig: router,
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
 
     await expectLater(
       find.byType(RoleSelectScreen),
@@ -583,36 +614,12 @@ void main() {
 
   // 이름 (#297). 온보딩 두 번째 화면이다.
   testWidgets('이름 (Figma 204:991)', (tester) async {
-    final router = GoRouter(
-      initialLocation: Routes.onboardingName,
-      routes: [
-        GoRoute(
-          path: Routes.onboardingName,
-          builder: (context, state) => const NameScreen(),
-        ),
-      ],
+    await pumpOnboarding(
+      tester,
+      Routes.onboardingName,
+      () => const NameScreen(),
+      nickname: null,
     );
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [testStorageOverride()],
-        child: ScreenUtilInit(
-          designSize: const Size(393, 852),
-          useInheritedMediaQuery: true,
-          builder: (context, _) => MaterialApp.router(
-            theme: AppTheme.light,
-            debugShowCheckedModeBanner: false,
-            builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
-              child: child!,
-            ),
-            routerConfig: router,
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
 
     await expectLater(
       find.byType(NameScreen),
@@ -853,6 +860,48 @@ void main() {
     await expectLater(
       find.byType(ElumDialogCard<bool>),
       matchesGoldenFile('figma/dialog_delete_931-4879.png'),
+    );
+  });
+
+
+  // 목표 (#297). 온보딩 셋째 화면이다.
+  testWidgets('목표 (Figma 204:1002)', (tester) async {
+    await pumpOnboarding(tester, Routes.onboardingGoals, () => const GoalsScreen());
+    await precacheAllImages(tester);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await expectLater(
+      find.byType(GoalsScreen),
+      matchesGoldenFile('figma/goals_204-1002.png'),
+    );
+  });
+
+  // 캐릭터 (#297). 카드 안이 그림이라 로딩을 기다린다.
+  testWidgets('캐릭터 (Figma 204:1029)', (tester) async {
+    await pumpOnboarding(
+      tester,
+      Routes.onboardingCharacter,
+      () => const CharacterScreen(),
+    );
+    await precacheAllImages(tester);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await expectLater(
+      find.byType(CharacterScreen),
+      matchesGoldenFile('figma/character_204-1029.png'),
+    );
+  });
+
+  // 비밀번호 (#297). **시안 아래 절반은 iOS 시스템 키패드**다 — 앱이 그리는
+  // 것이 아니라 OS 가 올려 준다. 시험 환경에는 키패드가 없으므로 그 구간은
+  // 대조에서 빼고 본다 (`--mask-bottom 300`).
+  testWidgets('비밀번호 (Figma 238:1909)', (tester) async {
+    await pumpOnboarding(tester, Routes.onboardingPin, () => const PinScreen());
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await expectLater(
+      find.byType(PinScreen),
+      matchesGoldenFile('figma/pin_238-1909.png'),
     );
   });
 }

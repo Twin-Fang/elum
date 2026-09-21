@@ -17,8 +17,12 @@ import 'package:flutter_test/flutter_test.dart';
 ///   ...
 /// }
 /// ```
+/// 골든은 **논리 크기 그대로(393×852)** 캡처된다 — `matchesGoldenFile`이
+/// devicePixelRatio를 보지 않기 때문이다. 그러니 시안과 맞댈 때는
+/// **Figma export도 1배로 받는다.** 2배 export에 1배 렌더를 늘려서 대면
+/// 획이 굵어져 글자가 통째로 붉어지고, 정작 봐야 할 어긋남이 묻힌다 (#297).
 void useFigmaViewport({Size size = const Size(393, 852)}) {
-  // devicePixelRatio를 1로 두면 논리 픽셀 = 물리 픽셀이라
+  // devicePixelRatio가 1이면 논리 픽셀 = 물리 픽셀이라
   // 기대값을 Figma 좌표 그대로 쓸 수 있다.
   setUp(() {
     final view = TestWidgetsFlutterBinding.ensureInitialized()

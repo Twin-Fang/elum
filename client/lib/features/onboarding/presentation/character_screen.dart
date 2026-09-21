@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
@@ -84,6 +85,27 @@ class CharacterScreen extends ConsumerWidget {
                 for (final character in CardCharacter.values) ...[
                   Expanded(child: group.buildItem(context, character)),
                   // Figma 카드 x=16/201, 폭 176 → 사이 간격 9
+                  if (character != CardCharacter.values.last)
+                    SizedBox(width: _cardGap),
+                ],
+              ],
+            ),
+            // 카드 하단(481) → 이름(493)
+            SizedBox(height: CharacterCard.nameGap.h),
+            // 이름은 **카드 밖**에 있다 (Figma `732:5320` 루루 / `732:5319` 포포).
+            // 각 이름이 카드 가운데에 오도록 같은 Row 구조를 그대로 겹친다.
+            Row(
+              children: [
+                for (final character in CardCharacter.values) ...[
+                  Expanded(
+                    child: Text(
+                      character.displayName,
+                      textAlign: TextAlign.center,
+                      style: context.typo.subtitle.copyWith(
+                        color: context.colors.textSecondary,
+                      ),
+                    ),
+                  ),
                   if (character != CardCharacter.values.last)
                     SizedBox(width: _cardGap),
                 ],
