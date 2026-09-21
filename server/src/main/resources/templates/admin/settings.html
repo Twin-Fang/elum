@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
-<head>
-  <meta charset="UTF-8">
-  <title>이룸 관리자 - 시스템 설정</title>
-  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
-</head>
-<body class="min-h-screen bg-base-100">
-<div class="flex">
-  <div th:replace="~{admin/fragments/admin-layout :: sidebar('settings')}"></div>
-  <main class="flex-1 p-8 space-y-6">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<th:block th:replace="~{admin/fragments/admin-layout :: page('시스템 설정', 'settings', ~{:: content})}"></th:block>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
     <div>
       <h1 class="text-2xl font-bold">시스템 설정</h1>
       <p class="text-base-content/60">AI 모델과 생성 파라미터를 재배포 없이 변경합니다. 변경 후 최대 30초 안에 모든 서버에 반영됩니다.</p>
@@ -162,6 +158,5 @@
       </div>
     </div>
   </main>
-</div>
 </body>
 </html>

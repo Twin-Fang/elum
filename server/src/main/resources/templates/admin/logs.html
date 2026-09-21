@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
-<head>
-  <meta charset="UTF-8">
-  <title>이룸 관리자 - 서버 로그</title>
-  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
-</head>
-<body class="min-h-screen bg-base-100">
-<div class="flex">
-  <div th:replace="~{admin/fragments/admin-layout :: sidebar('logs')}"></div>
-  <main class="flex-1 p-8">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<th:block th:replace="~{admin/fragments/admin-layout :: page('서버 로그', 'logs', ~{:: content})}"></th:block>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8">
     <div class="max-w-6xl mx-auto space-y-4">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">서버 로그</h1>
@@ -38,7 +34,7 @@
            class="bg-neutral text-neutral-content rounded-lg p-4 text-xs leading-5 whitespace-pre-wrap break-all overflow-y-auto"
            style="height: 70vh"></pre>
     </div>
-  </main>
+  
 </div>
 
 <script th:inline="javascript">
@@ -123,5 +119,6 @@
   poll();
   setInterval(poll, POLL_INTERVAL_MS);
 </script>
+</main>
 </body>
 </html>

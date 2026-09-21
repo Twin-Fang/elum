@@ -1,16 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
-<head>
-  <meta charset="UTF-8">
-  <title>이룸 관리자 - 프롬프트 관리</title>
-  <meta name="_csrf" th:content="${_csrf.token}"/>
-  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
-</head>
-<body class="min-h-screen bg-base-100">
-<div class="flex">
-  <div th:replace="~{admin/fragments/admin-layout :: sidebar('prompts')}"></div>
-  <main class="flex-1 p-8">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<th:block th:replace="~{admin/fragments/admin-layout :: page('프롬프트 관리', 'prompts', ~{:: content})}"></th:block>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8">
     <div class="max-w-4xl mx-auto space-y-6">
       <h1 class="text-2xl font-bold">AI 프롬프트 관리</h1>
 
@@ -61,7 +55,7 @@
         </div>
       </div>
     </div>
-  </main>
+  
 </div>
 
 <script th:inline="javascript">
@@ -145,5 +139,6 @@
     });
   });
 </script>
+</main>
 </body>
 </html>

@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
-<head>
-  <meta charset="UTF-8">
-  <title>이룸 관리자 - 루틴 상세</title>
-  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
-</head>
-<body class="min-h-screen bg-base-100">
-<div class="flex">
-  <div th:replace="~{admin/fragments/admin-layout :: sidebar('routines')}"></div>
-  <main class="flex-1 p-8 space-y-6">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<th:block th:replace="~{admin/fragments/admin-layout :: page('루틴 상세', 'routines', ~{:: content})}"></th:block>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold" th:text="${routine.title()}">루틴 상세</h1>
       <a th:href="@{/admin/routines}" class="btn btn-ghost btn-sm">목록으로</a>
@@ -69,7 +65,7 @@
         </table>
       </div>
     </div>
-  </main>
+  
 </div>
 
 <dialog id="imageModal" class="modal">
@@ -94,5 +90,6 @@
     });
   });
 </script>
+</main>
 </body>
 </html>

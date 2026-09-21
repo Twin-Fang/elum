@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  화면마다 새로 짜던 조각들을 모아 둔다 (이슈 #248).
+
+  특히 `emptyState`가 공통이어야 하는 이유 — 저장소 예외처리 규칙이
+  "목록이 0건: 로딩과 구분되는 빈 상태 화면을 별도로 만든다"고 정해 뒀는데,
+  화면마다 따로 짜면 0건일 때 모습이 제각각이 된다.
+-->
+<body>
+
+<div th:fragment="pageHeader(title, desc)">
+  <h1 class="text-2xl font-bold" th:text="${title}">제목</h1>
+  <p class="text-base-content/60" th:text="${desc}" th:if="${desc != null and !desc.isEmpty()}">설명</p>
+</div>
+
+<!-- 목록이 0건일 때. 로딩과 구분되는 화면이어야 한다. -->
+<div th:fragment="emptyState(message)"
+     class="flex flex-col items-center justify-center gap-2 rounded-box border border-dashed border-base-300 py-12 text-base-content/50">
+  <span class="text-3xl">📭</span>
+  <span th:text="${message}">아직 아무것도 없어요</span>
+</div>
+
+<div th:fragment="statCard(title, value, desc)" class="stat rounded-box bg-base-200 shadow">
+  <div class="stat-title" th:text="${title}">제목</div>
+  <div class="stat-value text-primary" th:text="${value}">0</div>
+  <div class="stat-desc" th:text="${desc}" th:if="${desc != null and !desc.isEmpty()}">설명</div>
+</div>
+
+</body>
+</html>

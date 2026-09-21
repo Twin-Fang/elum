@@ -1,20 +1,69 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <th:block th:fragment="headAssets">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet" type="text/css"/>
-    <style>
-      [data-theme="light"] {
-        --p: 76.9% 0.188 70.08;
-        --pc: 20% 0.04 70;
-      }
-    </style>
-  </th:block>
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--
+  관리자 화면의 골격. **페이지는 본문만 쓴다** (이슈 #248).
+
+  예전에는 문서 선언부터 body 여는 태그까지를 12개 파일이 똑같이 반복했다.
+  레이아웃을 한 번 바꾸려면 12곳을 고쳐야 했고, 그래서 모바일·다크모드를
+  넣지 못했다. 이제 골격이 여기 한 곳에 있다.
+
+  쓰는 쪽:
+    <th:block th:replace="~{admin/fragments/admin-layout :: page('대시보드', 'dashboard', ~{:: content})}"></th:block>
+    <main th:fragment="content" class="p-4 lg:p-8 space-y-6"> ... </main>
+-->
 <body>
-<aside th:fragment="sidebar(active)" class="w-64 min-h-screen bg-base-200 border-r border-base-300 flex flex-col p-4">
-  <div class="text-xl font-bold px-2 py-4">이룸 관리자</div>
+
+<th:block th:fragment="page(title, active, content)">
+  <!DOCTYPE html>
+  <html lang="ko" xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="'이룸 관리자 · ' + ${title}">이룸 관리자</title>
+    <!-- CDN이 아니라 동봉한 파일이다. 개발용 CDN 빌드는 브라우저에서 컴파일해
+         프로덕션 경고가 뜨고, 스타일 적용 전 화면이 한 번 깜빡인다. -->
+    <link rel="stylesheet" th:href="@{/admin/vendor/admin.css}"/>
+    <!-- 화면이 그려지기 전에 테마를 정해야 밝은 화면이 번쩍이지 않는다. -->
+    <script th:src="@{/admin/js/theme.js}"></script>
+  </head>
+  <body class="min-h-screen bg-base-100">
+  <div class="drawer lg:drawer-open">
+    <input id="admin-drawer" type="checkbox" class="drawer-toggle"/>
+
+    <div class="drawer-content flex flex-col min-h-screen">
+      <div th:replace="~{admin/fragments/admin-layout :: topbar(${title})}"></div>
+      <div th:replace="${content}"></div>
+    </div>
+
+    <div class="drawer-side z-20">
+      <label for="admin-drawer" aria-label="메뉴 닫기" class="drawer-overlay"></label>
+      <div th:replace="~{admin/fragments/admin-layout :: sidebar(${active})}"></div>
+    </div>
+  </div>
+  </body>
+  </html>
+</th:block>
+
+<!-- 좁은 화면에서만 보이는 상단바. 햄버거가 없으면 사이드바를 열 수 없다. -->
+<header th:fragment="topbar(title)"
+        class="lg:hidden sticky top-0 z-10 flex items-center gap-2 border-b border-base-300 bg-base-100 px-3 py-2">
+  <label for="admin-drawer" class="btn btn-ghost btn-sm" aria-label="메뉴 열기">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+    </svg>
+  </label>
+  <span class="font-bold" th:text="${title}">관리자</span>
+  <div class="ml-auto" th:replace="~{admin/fragments/admin-layout :: themeToggle}"></div>
+</header>
+
+<aside th:fragment="sidebar(active)"
+       class="flex min-h-screen w-64 flex-col border-r border-base-300 bg-base-200 p-4">
+  <div class="flex items-center gap-2 px-2 py-4">
+    <span class="text-xl font-bold">이룸 관리자</span>
+    <div class="ml-auto hidden lg:block" th:replace="~{admin/fragments/admin-layout :: themeToggle}"></div>
+  </div>
   <ul class="menu w-full flex-1">
     <li><a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'">대시보드</a></li>
     <li><a th:href="@{/admin/members}" th:classappend="${active == 'members'} ? 'active'">회원 관리</a></li>
@@ -28,5 +77,12 @@
     <button type="submit" class="btn btn-ghost btn-sm w-full justify-start">로그아웃</button>
   </form>
 </aside>
+
+<!-- 테마 토글. 실제 전환은 theme.js가 한다. -->
+<button th:fragment="themeToggle" type="button" id="theme-toggle"
+        class="btn btn-ghost btn-sm btn-circle" aria-label="밝게/어둡게 전환">
+  <span id="theme-icon">🌙</span>
+</button>
+
 </body>
 </html>

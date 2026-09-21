@@ -1,22 +1,39 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!--
+  사이드바가 없는 유일한 화면이라 골격(page)을 쓰지 않는다.
+  로그인 전에는 메뉴를 보여줄 이유가 없다.
+-->
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>이룸 관리자 로그인</title>
-  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
+  <link rel="stylesheet" th:href="@{/admin/vendor/admin.css}"/>
+  <script th:src="@{/admin/js/theme.js}"></script>
 </head>
-<body class="min-h-screen bg-base-200 flex items-center justify-center">
-<div class="card w-96 bg-base-100 shadow-xl">
+<body class="flex min-h-screen items-center justify-center bg-base-200 p-4">
+<div class="card w-full max-w-sm bg-base-100 shadow-xl">
   <div class="card-body">
-    <h1 class="text-2xl font-bold text-center mb-4">이룸 관리자 로그인</h1>
+    <h1 class="mb-4 text-center text-2xl font-bold">이룸 관리자 로그인</h1>
+
+    <!-- 틀렸다는 말을 해 준다. 예전에는 실패해도 빈 화면만 다시 떴다. -->
+    <div th:if="${param.error}" class="alert alert-error py-2 text-sm">
+      <span>아이디 또는 비밀번호가 맞지 않아요</span>
+    </div>
+    <div th:if="${param.logout}" class="alert py-2 text-sm">
+      <span>로그아웃했어요</span>
+    </div>
+
     <form th:action="@{/admin/login}" method="post" class="space-y-4">
       <div class="form-control">
         <label class="label" for="username"><span class="label-text">아이디</span></label>
-        <input type="text" id="username" name="username" class="input input-bordered w-full" required>
+        <input type="text" id="username" name="username" class="input input-bordered w-full"
+               autocomplete="username" required>
       </div>
       <div class="form-control">
         <label class="label" for="password"><span class="label-text">비밀번호</span></label>
-        <input type="password" id="password" name="password" class="input input-bordered w-full" required>
+        <input type="password" id="password" name="password" class="input input-bordered w-full"
+               autocomplete="current-password" required>
       </div>
       <button type="submit" class="btn btn-primary w-full">로그인</button>
     </form>
