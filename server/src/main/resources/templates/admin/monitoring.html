@@ -86,8 +86,10 @@
           <td th:text="${call.callType.label}">유형</td>
           <td class="text-xs" th:text="${call.model}">모델</td>
           <td>
+            <!-- substring은 ID가 8자보다 짧으면 예외를 던져 화면이 통째로 죽는다.
+                 abbreviate는 짧으면 자르지 않고 그대로 둔다. -->
             <a th:if="${call.memberId != null}" th:href="@{/admin/members/{id}(id=${call.memberId})}"
-               class="link link-hover text-xs" th:text="${#strings.substring(call.memberId, 0, 8)}">회원</a>
+               class="link link-hover text-xs" th:text="${#strings.abbreviate(call.memberId, 10)}">회원</a>
             <span th:if="${call.memberId == null}" class="text-base-content/40 text-xs">-</span>
           </td>
           <td>

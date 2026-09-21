@@ -39,6 +39,24 @@ cat > "$WORK/input.css" <<'CSS'
   --p: 76.9% 0.188 70.08;
   --pc: 20% 0.04 70;
 }
+
+/* 좁은 칸에서 배지 글자가 세로로 쪼개진다. 한국어 두 글자짜리 상태값
+   (활성·정지·성공·실패)이 "활/성"으로 갈라져 읽히지 않았다. */
+.badge {
+  white-space: nowrap;
+}
+
+/* 표는 좁은 화면에서 가로로 스크롤한다 (모든 표가 이미 overflow-x-auto 안에 있다).
+   억지로 칸에 욱여넣게 두면 숫자까지 세로로 쪼개진다 — 별 개수 14가 "1/4"로 갈라졌다.
+   긴 이메일은 줄바꿈을 허용하되, 숫자·배지처럼 쪼개지면 뜻이 달라지는 값은 붙여 둔다. */
+.table td,
+.table th {
+  white-space: nowrap;
+}
+.table td.wrap-anywhere {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 CSS
 
 cat > "$WORK/tailwind.config.js" <<CONFIG

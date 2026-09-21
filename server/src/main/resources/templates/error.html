@@ -1,16 +1,24 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!--
+  오류 화면. **골격(page)을 쓰지 않는다** — 골격이 깨져서 여기로 온 경우에도
+  이 화면만큼은 떠야 하기 때문이다. 실제로 골격을 바꾸면서 이 파일이 옛 프래그먼트를
+  참조한 채 남아, 오류 페이지 자체가 터져 진짜 원인이 가려진 적이 있다 (이슈 #248).
+-->
 <head>
-  <meta charset="UTF-8">
-  <title>이룸 관리자 - 오류</title>
-  <th:block th:replace="~{admin/fragments/admin-layout :: headAssets}"></th:block>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>이룸 관리자 · 오류</title>
+  <link rel="stylesheet" th:href="@{/admin/vendor/admin.css}"/>
 </head>
-<body class="min-h-screen bg-base-200 flex items-center justify-center">
-<div class="card w-96 bg-base-100 shadow-xl">
-  <div class="card-body text-center space-y-4">
+<body class="flex min-h-screen items-center justify-center bg-base-200 p-4">
+<div class="card w-full max-w-sm bg-base-100 shadow-xl">
+  <div class="card-body space-y-4 text-center">
     <h1 class="text-4xl font-bold text-primary" th:text="${status}">404</h1>
     <p class="text-lg font-semibold" th:text="${error}">Not Found</p>
     <p class="text-sm text-base-content/60">요청을 처리할 수 없습니다.</p>
+    <!-- 어디서 터졌는지 추적할 수 있게 경로를 함께 보여준다. -->
+    <p class="break-all text-xs text-base-content/40" th:if="${path}" th:text="${path}">/admin/...</p>
     <a th:href="@{/admin/dashboard}" class="btn btn-primary">대시보드로 이동</a>
   </div>
 </div>
