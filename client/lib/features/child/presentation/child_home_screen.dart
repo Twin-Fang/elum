@@ -90,7 +90,9 @@ class ChildHomeScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const _TopBar(),
-                    SizedBox(height: space.xl),
+                    // 시안(356:5197)은 인사말이 y150 에서 시작한다. 토큰(32)을
+                    // 쓰면 화면 전체가 13 내려가 타일까지 따라 밀린다 (#297).
+                    SizedBox(height: 19.h),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: space.screenH),
                       child: Text(
