@@ -115,20 +115,26 @@ class _SplashSceneState extends State<SplashScene>
           // 둥근 path와 방사형 그라데이션이 SVG 안에 있다.
           // 직접 그리면 사각형이 되므로 반드시 에셋을 쓴다.
           // 병아리는 고정한다 — 몸이 흔들리면 눈·코까지 우글거려 어색하다.
+          // **크기를 둘 다 준다.** 폭만 주고 `fitWidth`로 두면 상자 높이가
+          // 그림 픽셀 높이로 잡혀 세로가 0.77배로 눌린다 — 몸이 33 짧아 보였다 (#297).
           Positioned(
             left: 0,
             top: 413.h,
             width: 393.w,
-            child: SvgPicture.asset(
+            height: 439.h,
+            child: Image.asset(
               AppAssets.splashChickBody,
               width: 393.w,
-              fit: BoxFit.fitWidth,
+              height: 439.h,
+              fit: BoxFit.fill,
             ),
           ),
 
-          // 새싹 줄기 (x=184, y=308, 113×111) — 끝의 구슬과 함께 부유한다.
+          // 새싹 줄기 (x=87, y=308, 113×111) — 끝의 구슬과 함께 부유한다.
+          // **x가 184가 아니다.** 시안(`726:4742`)은 87이고, 184로 두면 줄기가
+          // 화면 오른쪽으로 거울상처럼 뒤집혀 보인다 (#297).
           Positioned(
-            left: 184.w,
+            left: 87.w,
             top: 308.h,
             child: _floating(
               key: const ValueKey('splash-stem-float'),
@@ -137,52 +143,21 @@ class _SplashSceneState extends State<SplashScene>
             ),
           ),
 
-          // 청록 구슬 (x=281, y=340, 36×34) — 새싹 줄기 끝.
+          // 청록 구슬 (본체 x=67, y=340, 36×34) — 새싹 줄기 끝.
           //
-          // glow는 코드로 그린다. 구슬 SVG 안에 Figma가 넣어둔 feGaussianBlur
-          // 필터가 있지만 flutter_svg 2.3.0이 SVG <filter>를 렌더하지 못해
-          // (테스트 로그 `unhandled element <filter/>`) glow가 통째로 사라진다.
-          // 원 도형은 규칙대로 SVG를 그대로 쓰고, glow만 BoxShadow로 재현한다.
-          // Figma effect_WJJJ2E: 0 offset · blur 30 · rgba(0,255,208).
+          // **그림 하나로 그린다.** 둘레 빛이 SVG `<filter>`라 렌더러가 버려
+          // 전에는 원만 남고 빛을 BoxShadow로 흉내 내고 있었다. 게다가 상자(96×94)에
+          // 본체 크기(36)를 줘서 **구슬이 13으로 쪼그라들어 있었다** (#297).
+          // 빛이 구워진 PNG를 상자 크기 그대로 놓는다 — 본체가 (30,30)에 있으므로
+          // 상자는 (67-30, 340-30)에 온다.
           Positioned(
-            left: 281.w,
-            top: 340.h,
+            left: 37.w,
+            top: 310.h,
             child: RepaintBoundary(
               // 구슬은 줄기 끝에 달렸으니 줄기와 같은 위상으로 함께 뜬다
               child: _floating(
                 phase: 0,
-                child: Stack(
-                  alignment: Alignment.center,
-                  clipBehavior: Clip.none,
-                  children: [
-                    // glow — 구슬 원 뒤에 깐다. 원본은 구슬 지름의 두어 배로
-                    // 진하고 넓게 퍼진다. 안쪽(진하게)·바깥쪽(넓게) 두 겹으로
-                    // 쌓아 그 느낌을 낸다. Figma effect_WJJJ2E 계열 색(rgba
-                    // 0,255,208)을 쓴다. blur·spread는 화면 크기에 비례([.w]).
-                    Container(
-                      width: 20.w,
-                      height: 20.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          // 안쪽 — 구슬에 밀착된 진한 코어
-                          BoxShadow(
-                            color: colors.splashOrbGlowCore,
-                            blurRadius: 18.w,
-                            spreadRadius: 4.w,
-                          ),
-                          // 바깥쪽 — 넓게 번지는 옅은 헤일로
-                          BoxShadow(
-                            color: colors.splashOrbGlowHalo,
-                            blurRadius: 34.w,
-                            spreadRadius: 10.w,
-                          ),
-                        ],
-                      ),
-                    ),
-                    SvgPicture.asset(AppAssets.splashStar, width: 36.w),
-                  ],
-                ),
+                child: Image.asset(AppAssets.splashOrb, width: 96.w),
               ),
             ),
           ),
@@ -249,21 +224,9 @@ class _SplashSceneState extends State<SplashScene>
             ),
           ),
 
-          // 하단 페이드 (x=0, y=675, 393×177) — 병아리 몸통 하단과 그 위에 얹는
-          // 버튼 사이를 투명→크림색(#FFFADB)으로 자연스럽게 이어준다.
-          // Figma Rectangle 13. overlay보다 먼저 그려 버튼 아래 깔린다.
-          Positioned(
-            left: 0,
-            top: 675.h,
-            width: 393.w,
-            height: 177.h,
-            child: SvgPicture.asset(
-              AppAssets.splashFade,
-              width: 393.w,
-              height: 177.h,
-              fit: BoxFit.fill,
-            ),
-          ),
+          // **하단 페이드를 두지 않는다.** 전에는 버튼 아래를 크림색으로 덮어
+          // 부드럽게 이었는데, 시안(`238:1808`) 덤프에는 그런 사각형이 없다.
+          // 덮어 두니 병아리 아래쪽 민트가 크림빛으로 지워져 몸이 짧아 보였다 (#297).
 
           // 화면별로 얹는 것 — 로그인 버튼 등. 항상 맨 위에 그린다.
           if (widget.overlay != null) Positioned.fill(child: widget.overlay!),

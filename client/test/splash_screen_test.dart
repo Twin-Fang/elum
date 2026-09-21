@@ -111,7 +111,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(svgWithAsset(AppAssets.splashChickBody), findsOneWidget);
+      expect(imageWithAsset(AppAssets.splashChickBody), findsOneWidget);
     });
 
     testWidgets('장식 요소가 모두 배치된다', (tester) async {
@@ -119,7 +119,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(svgWithAsset(AppAssets.splashHill), findsOneWidget);
-      expect(svgWithAsset(AppAssets.splashStar), findsOneWidget);
+      expect(imageWithAsset(AppAssets.splashOrb), findsOneWidget);
     });
 
     testWidgets('장면 요소는 첫 프레임부터 완성돼 있다', (tester) async {
@@ -128,9 +128,9 @@ void main() {
       await tester.pumpWidget(buildSubject());
       // pumpAndSettle 없이 첫 프레임만 그린다
 
-      expect(svgWithAsset(AppAssets.splashChickBody), findsOneWidget);
+      expect(imageWithAsset(AppAssets.splashChickBody), findsOneWidget);
       expect(svgWithAsset(AppAssets.splashHill), findsOneWidget);
-      expect(svgWithAsset(AppAssets.splashStar), findsOneWidget);
+      expect(imageWithAsset(AppAssets.splashOrb), findsOneWidget);
     });
   });
 
@@ -201,7 +201,7 @@ void main() {
       // 반복 중이면 여기서 타임아웃으로 실패한다.
       await tester.pumpAndSettle();
 
-      expect(svgWithAsset(AppAssets.splashChickBody), findsOneWidget);
+      expect(imageWithAsset(AppAssets.splashChickBody), findsOneWidget);
     });
   });
 }

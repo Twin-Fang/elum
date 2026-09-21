@@ -652,10 +652,12 @@ void main() {
     );
   });
 
-  // 로그인 (#297). **애플 버튼은 iOS 에서만 뜬다**(`Platform.isIOS`) — 시안은
-  // 아이폰 화면이라 셋인데 시험 환경(macOS)에서는 둘이다. 그 한 줄은 차이로
-  // 남는 것이 맞다.
+  // 로그인 (#297). 애플 버튼을 켜고 찍는다 — 시안이 셋을 그렸고, 시험 환경
+  // (macOS)에서는 기본으로 둘만 떠서 버튼 자리가 통째로 어긋난다.
   testWidgets('로그인 (Figma 238:1808)', (tester) async {
+    LoginScreen.debugForceAppleButton = true;
+    addTearDown(() => LoginScreen.debugForceAppleButton = false);
+
     final router = GoRouter(
       initialLocation: Routes.login,
       routes: [
@@ -687,6 +689,9 @@ void main() {
     // 병아리 둘레의 빛이 끝나지 않는다 — settle 대신 시간을 밀어 고정한다.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
+    // 구슬은 PNG라 로딩이 끝나야 그려진다
+    await precacheAllImages(tester);
+    await tester.pump(const Duration(milliseconds: 200));
 
     await expectLater(
       find.byType(LoginScreen),

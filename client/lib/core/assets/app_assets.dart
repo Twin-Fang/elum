@@ -180,7 +180,12 @@ abstract final class AppAssets {
 
   /// 병아리 몸통 (393×439). 둥근 형태 + 방사형 그라데이션이 SVG에 포함되어 있다.
   /// 직접 그리지 않고 이 파일을 그대로 쓴다.
-  static const splashChickBody = '$_images/splash_chick_body.svg';
+  /// 병아리 몸통 (Figma `726:4743` — 393×439).
+  ///
+  /// **PNG다.** 방사형 그라데이션에 `gradientTransform` 행렬이 걸려 있어
+  /// 렌더러가 그대로 그리지 못한다 — 아래쪽 민트가 훨씬 옅게 나와 몸이
+  /// 33 짧아 보였다 (#297). 필터를 버리는 것과 같은 부류다.
+  static const splashChickBody = '$_images/splash_chick_body.png';
 
   /// 몸통 하단 페이드 (393×177)
   static const splashFade = '$_images/splash_fade.svg';
@@ -189,6 +194,14 @@ abstract final class AppAssets {
   static const splashHill = '$_images/splash_hill.svg';
 
   /// 반짝이는 별 (36×34 영역)
+  /// 새싹 줄기 끝 청록 구슬 (Figma `726:4744` — 본체 36×34 + 둘레 빛 blur 30).
+  ///
+  /// **PNG다.** 빛이 SVG `<filter>`라 렌더러가 통째로 버린다. 상자는 96×94이고
+  /// 본체가 그 안 (30, 30)에 있다 — 본체를 시안 자리(67, 340)에 두려면
+  /// 상자를 (37, 310)에 놓는다 (#297).
+  static const splashOrb = '$_images/splash_orb.png';
+
+  @Deprecated('빛이 빠진다. splashOrb(PNG)를 쓴다.')
   static const splashStar = '$_images/splash_star.svg';
 
   /// 병아리 **눈** (각 30×32). 파일명이 `char`라 실루엣처럼 읽히지만 실제로 렌더하면

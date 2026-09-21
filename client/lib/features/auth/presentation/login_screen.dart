@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -27,11 +28,22 @@ import '../data/oauth_sdk.dart';
 /// **제공자 버튼은 각 사의 브랜드 규격을 따른다.** 색·문구를 임의로 바꾸면
 /// 스토어 심사나 제공자 검수에서 지적받는다.
 ///
-/// 문구가 `~로 계속하기`인 이유 — 애플이 `Apple로 로그인`·`Apple로 계속하기`·
+/// 문구가 `~로 로그인`인 이유 — 애플이 `Apple로 로그인`·`Apple로 계속하기`·
 /// `Apple로 가입` 셋만 허용한다 (이슈 #237). **셋 중 하나를 골라 카카오·네이버도
-/// 맞췄다.** 애플만 다르게 두면 세 버튼이 어긋나 목록으로 읽히지 않는다.
+/// 맞춘다.** 애플만 다르게 두면 세 버튼이 어긋나 목록으로 읽히지 않는다.
+///
+/// 한때 `계속하기`를 골랐는데 **시안(`726:4924`·`726:4925`·`726:4926`)이 고른 것은
+/// `로그인`이다.** 셋 다 애플이 허용하는 말이라 시안을 따른다 (#297).
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
+
+  /// 애플 버튼을 강제로 켠다 — **시안 대조 전용**.
+  ///
+  /// 애플 로그인은 iOS에서만 뜨는데 위젯 시험은 macOS에서 돈다. 그대로 두면
+  /// 버튼이 둘만 그려져 셋을 그린 시안과 자리가 통째로 어긋나, 정작 봐야 할
+  /// 것이 묻힌다 (#297). 실제 화면 동작은 바꾸지 않는다.
+  @visibleForTesting
+  static bool debugForceAppleButton = false;
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -158,7 +170,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
             if (_lastProvider == OAuthProvider.kakao) const _LastUsedHint(),
             _ProviderButton(
-              label: _pending == OAuthProvider.kakao ? '연결하고 있어요' : '카카오로 계속하기',
+              label: _pending == OAuthProvider.kakao ? '연결하고 있어요' : '카카오로 로그인',
               iconAsset: AppAssets.loginKakao,
               backgroundColor: context.colors.loginKakaoBg,
               labelColor: context.colors.loginKakaoLabel,
@@ -168,7 +180,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
             if (_lastProvider == OAuthProvider.naver) const _LastUsedHint(),
             _ProviderButton(
-              label: _pending == OAuthProvider.naver ? '연결하고 있어요' : '네이버로 계속하기',
+              label: _pending == OAuthProvider.naver ? '연결하고 있어요' : '네이버로 로그인',
               iconAsset: AppAssets.loginNaver,
               backgroundColor: context.colors.loginNaverBg,
               labelColor: context.colors.loginNaverLabel,
@@ -185,7 +197,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             //
             // 반대로 iOS에서는 빼면 안 된다 — 다른 소셜 로그인을 제공하는 앱은
             // 애플 로그인도 제공해야 앱스토어 심사를 통과한다.
-            if (Platform.isIOS) ...[
+            if (Platform.isIOS || LoginScreen.debugForceAppleButton) ...[
               SizedBox(height: _buttonGap.h),
               if (_lastProvider == OAuthProvider.apple) const _LastUsedHint(),
               // ⚠️ 규격 위젯(`SignInWithAppleButton`)에서 직접 그리기로 바꿨다.
@@ -196,7 +208,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // 최소 높이 · 승인 문구**. 문구는 `Apple로 로그인`·`Apple로 계속하기`·
               // `Apple로 가입` 셋만 허용되므로 **임의로 바꾸지 않는다** (이슈 #237).
               _ProviderButton(
-                label: _pending == OAuthProvider.apple ? '연결하고 있어요' : 'Apple로 계속하기',
+                label: _pending == OAuthProvider.apple ? '연결하고 있어요' : 'Apple로 로그인',
                 iconAsset: AppAssets.loginApple,
                 backgroundColor: context.colors.loginAppleBg,
                 labelColor: context.colors.loginAppleLabel,
