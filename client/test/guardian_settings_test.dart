@@ -75,7 +75,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('약관 및 개인정보처리방침'), findsOneWidget);
-    expect(find.text('문의하기'), findsOneWidget);
+    // 문의하기는 뺐다 (#312). 스토어 페이지의 지원 주소가 그 몫을 한다.
+    expect(find.text('문의하기'), findsNothing);
   });
 
   testWidgets('약관 줄을 누르면 문서 목록이 열린다', (tester) async {
@@ -102,18 +103,6 @@ void main() {
     expect(find.text('[필수] 개인정보 수집·이용'), findsOneWidget);
   });
 
-  testWidgets('문의하기는 문의 주소를 보여준다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('문의하기'));
-    await tester.pumpAndSettle();
-
-    // 주소를 화면에 보여주지 않고 메일 앱만 띄우면, 메일 앱이 없는 휴대폰에서는
-    // 아무 일도 일어나지 않는다. 주소 자체가 보여야 한다.
-    expect(find.textContaining('@'), findsOneWidget);
-    expect(find.text('주소 복사'), findsOneWidget);
-  });
 
   testWidgets('로그아웃은 확인을 거친다 — 탭만으로는 나가지지 않는다', (tester) async {
     await tester.pumpWidget(wrap());

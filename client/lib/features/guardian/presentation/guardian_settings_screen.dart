@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/app_status/app_status_repository.dart';
-import '../../../core/config/app_config.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -60,27 +58,6 @@ class _GuardianSettingsScreenState
     );
     if (ok != true) return;
     await _run(() => ref.read(authRepositoryProvider).deleteAccount());
-  }
-
-  /// 문의 주소를 보여주고 복사하게 한다 (이슈 #289).
-  ///
-  /// **외부 브라우저나 메일 앱으로 보내지 않는다.** 그러려면 의존성을 하나 더
-  /// 들여야 하고, 메일 앱이 없는 휴대폰에서는 아무 일도 일어나지 않아 사용자가
-  /// 눌렀는데 멈춘 것처럼 보인다. 주소를 보여주고 복사해 주는 편이 확실하다.
-  Future<void> _contact() async {
-    final email = AppConfig.supportEmail;
-    final ok = await _ConfirmSheet.show(
-      context,
-      title: '문의하기',
-      message: '$email\n평일 기준 2~3일 안에 답장드려요',
-      confirmLabel: '주소 복사',
-    );
-    if (ok != true) return;
-    await Clipboard.setData(ClipboardData(text: email));
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('문의 주소를 복사했어요')),
-    );
   }
 
   /// 되돌릴 수 없다고 안내한 동작이 실패했을 때.
@@ -149,10 +126,6 @@ class _GuardianSettingsScreenState
                         builder: (_) => const ConsentDocumentListScreen(),
                       ),
                     ),
-          ),
-          SettingsTile(
-            label: '문의하기',
-            onTap: _busy ? null : _contact,
           ),
           SettingsTile(
             label: '로그아웃',
