@@ -4,8 +4,8 @@
 
 ## 릴리스 노트
 
-* **버그 수정**
-  * 카드 확인 화면의 글자와 카드가 아래로 치우쳐 보이던 것을 바로잡았어요
+* **개선**
+  * 일과 만들기를 마쳤을 때 보이는 화면을 다듬었어요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
