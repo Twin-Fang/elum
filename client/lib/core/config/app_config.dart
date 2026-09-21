@@ -72,6 +72,14 @@ abstract final class AppConfig {
   /// 비면 암호화를 건너뛴다(평문 전송 → 서버도 통과, 데모 안전).
   static String get aidlpSecret => _string('ELUM_AIDLP_SECRET', '');
 
+  /// 문의를 받는 주소. 설정 화면의 `문의하기`가 보여준다 (이슈 #289).
+  ///
+  /// 게시된 도움말 페이지·개인정보처리방침의 보호책임자 주소와 **같은 값이어야 한다.**
+  /// 두 곳에 다른 주소를 두면 사용자가 어디로 보내야 하는지 헷갈리고,
+  /// 한쪽만 고쳤을 때 조용히 어긋난다.
+  static String get supportEmail =>
+      _string('ELUM_SUPPORT_EMAIL', 'chan4760@gmail.com');
+
   // --- 소셜 로그인 ---
   // 콘솔에서 앱을 등록하고 받은 값이다. 받는 절차는
   // docs/setup/소셜로그인_설정가이드.md 참조.

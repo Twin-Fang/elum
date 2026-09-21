@@ -5,14 +5,18 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:label="elum"
+        android:label="이룸"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- screenOrientation: 세로 고정 (이슈 #289). 가로 레이아웃은 검증한 적이 없다.
+             Android 16부터 큰 화면(sw600dp 이상)에서는 이 값이 무시되지만,
+             이룸은 휴대폰만 대상이라 실사용 기기에서는 그대로 적용된다. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
+            android:screenOrientation="portrait"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"

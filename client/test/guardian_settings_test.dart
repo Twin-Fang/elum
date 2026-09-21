@@ -5,7 +5,9 @@ import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
+import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/data/oauth_sdk.dart';
+import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/guardian/presentation/guardian_settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,7 +43,11 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [authRepositoryProvider.overrideWithValue(auth)],
+      overrides: [
+        authRepositoryProvider.overrideWithValue(auth),
+        // 약관 목록은 서버·캐시를 타므로 테스트에서는 앱 번들 기본값으로 고정한다.
+        consentBundleProvider.overrideWith((ref) async => ConsentBundle.bundled),
+      ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
         builder: (context, child) => MaterialApp.router(
@@ -60,6 +66,53 @@ void main() {
 
     expect(find.text('로그아웃'), findsOneWidget);
     expect(find.text('회원 탈퇴'), findsOneWidget);
+  });
+
+  // 가입한 뒤에 약관을 다시 볼 곳이 없으면 Apple 심사에서 지적받는다(5.1.1(i)).
+  // 줄이 사라져도 화면은 멀쩡히 뜨므로 눈으로는 알아채기 어렵다 (이슈 #289).
+  testWidgets('설정에서 약관과 문의로 들어갈 수 있다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expect(find.text('약관 및 개인정보처리방침'), findsOneWidget);
+    expect(find.text('문의하기'), findsOneWidget);
+  });
+
+  testWidgets('약관 줄을 누르면 문서 목록이 열린다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('약관 및 개인정보처리방침'));
+    await tester.pumpAndSettle();
+
+    // 동의 화면이 쓰는 묶음을 그대로 보여준다 — 여기만 따로 만들면 조용히 어긋난다.
+    expect(find.text('개인정보 수집·이용'), findsOneWidget);
+    expect(find.text('개인정보 국외 이전'), findsOneWidget);
+  });
+
+  testWidgets('문서를 고르면 전문이 열린다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('약관 및 개인정보처리방침'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('개인정보 수집·이용'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('[필수] 개인정보 수집·이용'), findsOneWidget);
+  });
+
+  testWidgets('문의하기는 문의 주소를 보여준다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('문의하기'));
+    await tester.pumpAndSettle();
+
+    // 주소를 화면에 보여주지 않고 메일 앱만 띄우면, 메일 앱이 없는 휴대폰에서는
+    // 아무 일도 일어나지 않는다. 주소 자체가 보여야 한다.
+    expect(find.textContaining('@'), findsOneWidget);
+    expect(find.text('주소 복사'), findsOneWidget);
   });
 
   testWidgets('로그아웃은 확인을 거친다 — 탭만으로는 나가지지 않는다', (tester) async {

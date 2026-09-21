@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/app_status/app_status_repository.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/settings_tile.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../auth/presentation/consent_document_list_screen.dart';
 
 /// 보호자 설정 화면 (이슈 #181).
 ///
@@ -55,6 +60,27 @@ class _GuardianSettingsScreenState
     );
     if (ok != true) return;
     await _run(() => ref.read(authRepositoryProvider).deleteAccount());
+  }
+
+  /// 문의 주소를 보여주고 복사하게 한다 (이슈 #289).
+  ///
+  /// **외부 브라우저나 메일 앱으로 보내지 않는다.** 그러려면 의존성을 하나 더
+  /// 들여야 하고, 메일 앱이 없는 휴대폰에서는 아무 일도 일어나지 않아 사용자가
+  /// 눌렀는데 멈춘 것처럼 보인다. 주소를 보여주고 복사해 주는 편이 확실하다.
+  Future<void> _contact() async {
+    final email = AppConfig.supportEmail;
+    final ok = await _ConfirmSheet.show(
+      context,
+      title: '문의하기',
+      message: '$email\n평일 기준 2~3일 안에 답장드려요',
+      confirmLabel: '주소 복사',
+    );
+    if (ok != true) return;
+    await Clipboard.setData(ClipboardData(text: email));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('문의 주소를 복사했어요')),
+    );
   }
 
   /// 되돌릴 수 없다고 안내한 동작이 실패했을 때.
@@ -108,69 +134,66 @@ class _GuardianSettingsScreenState
           ),
           SizedBox(height: space.xl),
           // 명세 §8-4는 위에 임시저장·알림도 두지만 아직 없다. 있는 것만 먼저 올린다.
-          _SettingsTile(
+          SettingsTile(
             label: '이룸이 휴대폰 연결하기',
             onTap: _busy ? null : () => context.push(Routes.linkCode),
           ),
-          _SettingsTile(
+          // 계정을 정리하는 항목(로그아웃·탈퇴) 위에 둔다. 읽을거리와 되돌릴 수 없는
+          // 동작이 섞이면 실수로 누르기 쉽다.
+          SettingsTile(
+            label: '약관 및 개인정보처리방침',
+            onTap: _busy
+                ? null
+                : () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ConsentDocumentListScreen(),
+                      ),
+                    ),
+          ),
+          SettingsTile(
+            label: '문의하기',
+            onTap: _busy ? null : _contact,
+          ),
+          SettingsTile(
             label: '로그아웃',
             onTap: _busy ? null : _logout,
           ),
-          _SettingsTile(
+          SettingsTile(
             label: '회원 탈퇴',
             onTap: _busy ? null : _deleteAccount,
             destructive: true,
           ),
+          // 게시된 도움말 페이지가 "앱 버전 — 설정 화면 맨 아래"라고 안내한다.
+          // 제보를 받았을 때 어느 빌드인지 알아야 재현할 수 있다 (이슈 #289).
+          const Spacer(),
+          const _VersionLine(),
+          SizedBox(height: space.lg),
         ],
       ),
     );
   }
 }
 
-/// 설정 목록의 한 줄. 항목이 늘어도 이 위젯만 반복하면 된다.
-class _SettingsTile extends StatelessWidget {
-  const _SettingsTile({
-    required this.label,
-    required this.onTap,
-    this.destructive = false,
-  });
-
-  final String label;
-  final VoidCallback? onTap;
-
-  /// 되돌릴 수 없는 항목. 색으로 구분해 실수로 누르는 것을 줄인다.
-  final bool destructive;
+/// 설정 맨 아래 버전 줄. 읽지 못하면 아무것도 그리지 않는다.
+///
+/// 버전을 못 읽는 것(플러그인 미등록·테스트 환경)은 사용자가 할 수 있는 일이
+/// 없으므로 오류로 보여줄 이유가 없다. 그 자리는 그냥 비워 둔다.
+class _VersionLine extends ConsumerWidget {
+  const _VersionLine();
 
   @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-    final colors = context.colors;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final version = ref.watch(appVersionProvider).maybeWhen(
+          data: (value) => value,
+          orElse: () => '',
+        );
+    if (version.isEmpty) return const SizedBox.shrink();
 
-    return AppPressable(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: space.lg),
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: colors.border)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: context.typo.tileLabel.copyWith(
-                // 흐리게 하면 "못 누르는 항목"으로 읽힌다. 누를 수 있다는 것과
-                // 위험하다는 것을 동시에 전해야 한다 (이슈 #188).
-                color: destructive ? colors.danger : colors.textPrimary,
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: space.lg.w,
-              color: destructive ? colors.danger : colors.textPlaceholder,
-            ),
-          ],
-        ),
+    return Text(
+      '버전 $version',
+      textAlign: TextAlign.center,
+      style: context.typo.caption.copyWith(
+        color: context.colors.textPlaceholder,
       ),
     );
   }

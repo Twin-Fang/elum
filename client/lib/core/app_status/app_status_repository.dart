@@ -45,6 +45,14 @@ final appStatusRepositoryProvider = Provider<AppStatusRepository>(
   (ref) => AppStatusRepository(ref.watch(dioProvider)),
 );
 
+/// 지금 앱 버전만 필요할 때 (설정 화면 맨 아래 — 이슈 #289).
+///
+/// [appStatusProvider] 를 쓰지 않는 이유 — 그쪽은 서버에 앱 상태를 물으러 간다.
+/// 버전 한 줄을 보여주려고 네트워크를 타면 서버가 느릴 때 설정 화면이 같이 느려진다.
+final appVersionProvider = FutureProvider<String>(
+  (ref) => AppStatusRepository.currentVersion(),
+);
+
 /// 앱이 뜰 때 한 번, 그리고 [appStatusRecheckProvider] 가 올라갈 때마다 다시 묻는다.
 /// 화면을 옮길 때마다 묻지는 않는다.
 final appStatusProvider = FutureProvider<({AppStatus status, String version})>(
