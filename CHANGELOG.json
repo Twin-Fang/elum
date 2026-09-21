@@ -1,15 +1,43 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T09:35:48Z",
-    "currentVersion": "1.22.0",
+    "lastUpdated": "2026-09-21T10:39:03Z",
+    "currentVersion": "1.23.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 122
+    "totalReleases": 123
   },
   "releases": [
+    {
+      "version": "1.23.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 284,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 약관·개인정보처리방침을 관리자 화면에서 고칠 수 있어요\n  * 약관을 누가 언제 왜 고쳤는지 이력이 남아요\n\n* **개선**\n  * 인터넷이 없어도 약관을 읽고 가입할 수 있어요\n  * 동의한 약관의 버전이 정확하게 기록돼요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "약관·개인정보처리방침을 관리자 화면에서 고칠 수 있어요",
+            "약관을 누가 언제 왜 고쳤는지 이력이 남아요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "인터넷이 없어도 약관을 읽고 가입할 수 있어요",
+            "동의한 약관의 버전이 정확하게 기록돼요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.22.0",
       "project_type": "flutter",
