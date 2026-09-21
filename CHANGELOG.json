@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T13:51:30Z",
-    "currentVersion": "1.25.0",
+    "lastUpdated": "2026-09-21T13:53:13Z",
+    "currentVersion": "1.25.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 127
+    "totalReleases": 128
   },
   "releases": [
+    {
+      "version": "1.25.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 300,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 지난 일과가 보이지 않던 문제를 해결했어요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "지난 일과가 보이지 않던 문제를 해결했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.25.0",
       "project_type": "flutter",
