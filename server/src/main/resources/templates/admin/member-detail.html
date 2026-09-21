@@ -155,9 +155,8 @@
           </tr>
           </thead>
           <tbody>
-          <tr th:if="${#lists.isEmpty(member.routines())}">
-            <td colspan="3" class="text-center text-base-content/60">생성한 루틴이 없습니다.</td>
-          </tr>
+          <tr th:if="${#lists.isEmpty(member.routines())}"
+              th:replace="~{admin/fragments/admin-ui :: emptyRow(3, '아직 만든 일과가 없어요')}"></tr>
           <tr th:each="routine : ${member.routines()}">
             <td>
               <a th:href="@{/admin/routines/{id}(id=${routine.id()})}" class="link link-hover"
@@ -191,9 +190,8 @@
           </tr>
           </thead>
           <tbody>
-          <tr th:if="${#lists.isEmpty(member.recentAiCalls())}">
-            <td colspan="7" class="text-center text-base-content/60">AI 호출 기록이 없습니다.</td>
-          </tr>
+          <tr th:if="${#lists.isEmpty(member.recentAiCalls())}"
+              th:replace="~{admin/fragments/admin-ui :: emptyRow(7, '아직 AI 호출 기록이 없어요')}"></tr>
           <tr th:each="call : ${member.recentAiCalls()}">
             <td th:text="${#temporals.format(call.createdAt, 'MM-dd HH:mm:ss')}">시각</td>
             <td th:text="${call.callType.label}">유형</td>

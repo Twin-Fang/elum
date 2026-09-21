@@ -43,9 +43,8 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:if="${members.isEmpty()}">
-          <td colspan="11" class="text-center text-base-content/60">조건에 맞는 회원이 없습니다.</td>
-        </tr>
+        <tr th:if="${members.isEmpty()}"
+            th:replace="~{admin/fragments/admin-ui :: emptyRow(11, '조건에 맞는 회원이 없어요')}"></tr>
         <tr th:each="member : ${members.content}">
           <td>
             <a th:href="@{/admin/members/{id}(id=${member.id()})}" class="link link-hover font-medium"

@@ -14,7 +14,15 @@
   <p class="text-base-content/60" th:text="${desc}" th:if="${desc != null and !desc.isEmpty()}">설명</p>
 </div>
 
-<!-- 목록이 0건일 때. 로딩과 구분되는 화면이어야 한다. -->
+<!-- 표 **안**에서 쓰는 빈 줄. 표 구조를 지켜야 하므로 카드가 아니라 td다.
+     colspan을 틀리면 칸이 어긋나므로 쓰는 쪽이 칸 수를 넘긴다. -->
+<tr th:fragment="emptyRow(colspan, message)">
+  <td th:attr="colspan=${colspan}" class="py-8 text-center text-base-content/50">
+    <span class="mr-1">📭</span><span th:text="${message}">아직 아무것도 없어요</span>
+  </td>
+</tr>
+
+<!-- 표 **밖**에서 쓰는 빈 화면. 로딩과 구분되는 화면이어야 한다. -->
 <div th:fragment="emptyState(message)"
      class="flex flex-col items-center justify-center gap-2 rounded-box border border-dashed border-base-300 py-12 text-base-content/50">
   <span class="text-3xl">📭</span>

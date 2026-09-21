@@ -18,9 +18,8 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:if="${#lists.isEmpty(routines)}">
-          <td colspan="5" class="text-center text-base-content/60">생성된 루틴이 없습니다.</td>
-        </tr>
+        <tr th:if="${#lists.isEmpty(routines)}"
+            th:replace="~{admin/fragments/admin-ui :: emptyRow(5, '아직 만들어진 일과가 없어요')}"></tr>
         <tr th:each="routine : ${routines}">
           <td>
             <a th:href="@{/admin/routines/{id}(id=${routine.id()})}" class="link link-hover font-medium"

@@ -78,9 +78,8 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:if="${calls.isEmpty()}">
-          <td colspan="8" class="text-center text-base-content/60">기록된 AI 호출이 없습니다.</td>
-        </tr>
+        <tr th:if="${calls.isEmpty()}"
+            th:replace="~{admin/fragments/admin-ui :: emptyRow(8, '조건에 맞는 AI 호출이 없어요')}"></tr>
         <tr th:each="call : ${calls.content}">
           <td th:text="${#temporals.format(call.createdAt, 'MM-dd HH:mm:ss')}">시각</td>
           <td th:text="${call.callType.label}">유형</td>
