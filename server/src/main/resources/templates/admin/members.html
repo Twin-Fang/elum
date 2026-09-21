@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{admin/fragments/admin-layout :: page('회원 관리', 'members', ~{:: content})}">
 <body>
-<th:block th:replace="~{admin/fragments/admin-layout :: page('회원 관리', 'members', ~{:: content})}"></th:block>
 
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
     <div>

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{admin/fragments/admin-layout :: page('루틴 관리', 'routines', ~{:: content})}">
 <body>
-<th:block th:replace="~{admin/fragments/admin-layout :: page('루틴 관리', 'routines', ~{:: content})}"></th:block>
 
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
     <h1 class="text-2xl font-bold">루틴 관리</h1>

@@ -78,10 +78,13 @@
   </form>
 </aside>
 
-<!-- 테마 토글. 실제 전환은 theme.js가 한다. -->
-<button th:fragment="themeToggle" type="button" id="theme-toggle"
+<!-- 테마 토글. 실제 전환은 theme.js가 한다.
+     **id를 쓰지 않는다** — 이 조각은 상단바와 사이드바 양쪽에 놓여 한 문서에
+     두 번 나온다. id를 달면 중복이 되고, 스크립트가 첫 번째만 찾아
+     넓은 화면에서는 숨겨진 쪽을 붙잡아 아무 일도 일어나지 않는다. -->
+<button th:fragment="themeToggle" type="button" data-theme-toggle
         class="btn btn-ghost btn-sm btn-circle" aria-label="밝게/어둡게 전환">
-  <span id="theme-icon">🌙</span>
+  <span data-theme-icon>🌙</span>
 </button>
 
 </body>

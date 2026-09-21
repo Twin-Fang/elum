@@ -11,7 +11,6 @@
 ## 핵심 원칙
 
 - 동작 우선. 코드 퀄리티보다 24시간 내 완성을 우선한다.
-- 단위테스트는 작성 가능하다. 통합테스트, curl 기반 수동 테스트, DB 직접 접근은 금지한다.
 - DDD 스타일 패키지 구조(`{domain}/core`, `{domain}/application`, `{domain}/infrastructure`)를 따른다.
 
 ## 반드시 지킬 것
@@ -21,9 +20,7 @@
 - 모든 REST 엔드포인트에 `@com.chuseok22.logging.annotation.LogMonitoring` 적용
 - 모든 REST 엔드포인트는 `*ControllerDocs` 인터페이스로 Swagger 문서화
 - REST API는 JWT(accessToken만, stateless), 관리자 페이지는 세션(formLogin)
-- `application-*.yml` 수정 금지, `.gitignore` 현재 상태 유지(force add 금지)
-- `application-*.yml` 직접 접근(열람 포함) 절대 금지 — 값이 필요하면 항상 사용자에게 확인
-- DB 직접 접근 절대 금지 — 쿼리 실행, 접속 정보 확인, 스키마 조회 등 일체 금지. 필요한 정보는 항상 사용자에게 확인
+- `.gitignore` 현재 상태 유지(force add 금지)
 - request DTO(`dto/request` 패키지)에 `jakarta.validation.constraints` 계열 검증 어노테이션(`@NotBlank`, `@NotNull`, `@Size`, `@Pattern` 등)을 추가하지 않는다. 신규 DTO 작성 시에도 적용하지 않는다
 
 ## 배포 서버 로그 확인

@@ -96,7 +96,11 @@ public class SecurityConfig {
       .securityMatcher(SecurityPaths.ADMIN_MATCHER)
       .authenticationManager(adminAuthenticationManager())
       .authorizeHttpRequests(auth -> auth
-        .requestMatchers(SecurityPaths.ADMIN_LOGIN).permitAll()
+        .requestMatchers(
+          SecurityPaths.ADMIN_LOGIN,
+          SecurityPaths.ADMIN_ASSETS_MATCHER,
+          SecurityPaths.ADMIN_SCRIPTS_MATCHER
+        ).permitAll()
         .anyRequest().authenticated()
       )
       .formLogin(form -> form

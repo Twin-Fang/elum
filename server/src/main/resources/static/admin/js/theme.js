@@ -38,8 +38,11 @@
 
   function apply(theme) {
     document.documentElement.setAttribute('data-theme', theme);
-    var icon = document.getElementById('theme-icon');
-    if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    // 토글은 상단바·사이드바 두 곳에 있다. 둘 다 바꿔야 한쪽이 어긋나지 않는다.
+    var icons = document.querySelectorAll('[data-theme-icon]');
+    for (var i = 0; i < icons.length; i++) {
+      icons[i].textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
   }
 
   // 저장값이 없으면 시스템 설정을 따른다.
@@ -48,7 +51,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     apply(read() || systemTheme()); // 아이콘은 DOM이 생긴 뒤에야 맞출 수 있다
     document.addEventListener('click', function (event) {
-      var button = event.target.closest && event.target.closest('#theme-toggle');
+      var button = event.target.closest && event.target.closest('[data-theme-toggle]');
       if (!button) return;
       var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       apply(next);
