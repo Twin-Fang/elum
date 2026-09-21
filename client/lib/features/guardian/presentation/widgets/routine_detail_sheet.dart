@@ -311,18 +311,30 @@ class _StepRowState extends State<_StepRow>
           scale: 1 + _liftScale * t,
           child: Row(
             children: [
-              Container(
-                width: 40.w,
-                height: 68.h,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: palette[widget.index % palette.length],
-                  borderRadius: BorderRadius.circular(16.r),
-                  boxShadow: shadow,
-                ),
-                child: Text(
-                  '${widget.index + 1}',
-                  style: typo.stepBadgeNumber.copyWith(color: colors.surface),
+              // 끌고 있는 동안에는 뱃지를 감춘다 (이슈 #296).
+              //
+              // **번호는 카드의 이름표가 아니라 몇 번째 자리인가를 뜻한다.** 뱃지가
+              // 카드를 따라다니면 내려놓는 순간 번호가 한꺼번에 다시 매겨져,
+              // 무엇을 어디로 옮겼는지 눈으로 좇기 어렵다. 카드만 떠오르게 두면
+              // 왼쪽 줄은 1·2·3·4 그대로 서 있고 내용만 자리를 바꾼다.
+              //
+              // 자리는 남겨 둔다. 통째로 들어내면 떠오른 카드의 폭이 달라져
+              // 놓을 자리를 가늠하기 어려워진다.
+              Opacity(
+                opacity: widget.dragging ? 0 : 1,
+                child: Container(
+                  width: 40.w,
+                  height: 68.h,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: palette[widget.index % palette.length],
+                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: shadow,
+                  ),
+                  child: Text(
+                    '${widget.index + 1}',
+                    style: typo.stepBadgeNumber.copyWith(color: colors.surface),
+                  ),
                 ),
               ),
               SizedBox(width: 4.w),

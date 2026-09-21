@@ -158,6 +158,28 @@ void main() {
     expect(find.textContaining('E-STEP-ORDER'), findsOneWidget);
   });
 
+  testWidgets('순서를 바꿔도 번호는 자리를 지킨다 (#296)', (tester) async {
+    final repo = _FakeRepo();
+    await tester.pumpWidget(wrap(repo));
+    await tester.pump();
+
+    expect(find.text('옷을 골라요'), findsOneWidget);
+    for (final n in ['1', '2', '3']) {
+      expect(find.text(n), findsOneWidget);
+    }
+
+    await _grabAndDrag(tester, const Offset(0, 160));
+
+    // **번호는 카드의 이름표가 아니라 몇 번째 자리인가를 뜻한다.** 옮긴 뒤에도
+    // 왼쪽 줄은 1·2·3 그대로 서 있고 카드 내용만 자리를 바꾼다. 뱃지가 카드를
+    // 따라다니면 내려놓는 순간 번호가 한꺼번에 다시 매겨져 헷갈린다.
+    for (final n in ['1', '2', '3']) {
+      expect(find.text(n), findsOneWidget, reason: '번호 $n 이 한 자리에 그대로 있다');
+    }
+    // 서버에는 바뀐 순서가 간다 — 화면만 그대로인 것이 아니다.
+    expect(repo.lastStepIds, hasLength(3));
+  });
+
   testWidgets('길게 누르고 있으면 줄이 떠오른다 — 움직이기 전에 잡혔음을 보여준다 (#274)', (
     tester,
   ) async {
