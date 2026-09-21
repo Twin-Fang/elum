@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T15:50:34Z",
-    "currentVersion": "1.25.9",
+    "lastUpdated": "2026-09-21T16:01:22Z",
+    "currentVersion": "1.25.10",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 136
+    "totalReleases": 137
   },
   "releases": [
+    {
+      "version": "1.25.10",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 321,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 일과 목록의 진행률 고리가 밀려 보이던 문제를 고쳤어요\n  * 체크 표시 모양이 달라 보이던 문제를 고쳤어요\n  * 보상 화면의 별과 글자가 아래로 치우쳐 보이던 것을 바로잡았어요\n\n* **개선**\n  * 지난 일과 줄이 오늘 일과와 같은 모양으로 정돈됐어요\n  * 일과 순서는 일과를 눌러 열리는 화면에서 바꿔요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "일과 목록의 진행률 고리가 밀려 보이던 문제를 고쳤어요",
+            "체크 표시 모양이 달라 보이던 문제를 고쳤어요",
+            "보상 화면의 별과 글자가 아래로 치우쳐 보이던 것을 바로잡았어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "지난 일과 줄이 오늘 일과와 같은 모양으로 정돈됐어요",
+            "일과 순서는 일과를 눌러 열리는 화면에서 바꿔요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.25.9",
       "project_type": "flutter",
