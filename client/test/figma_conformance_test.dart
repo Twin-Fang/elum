@@ -9,6 +9,7 @@ import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
+import 'package:elum/features/auth/presentation/login_screen.dart';
 import 'package:elum/features/onboarding/presentation/card_completion_screen.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
@@ -536,6 +537,48 @@ void main() {
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('figma/past_sheet_980-4777.png'),
+    );
+  });
+
+  // 로그인 (#297). **애플 버튼은 iOS 에서만 뜬다**(`Platform.isIOS`) — 시안은
+  // 아이폰 화면이라 셋인데 시험 환경(macOS)에서는 둘이다. 그 한 줄은 차이로
+  // 남는 것이 맞다.
+  testWidgets('로그인 (Figma 238:1808)', (tester) async {
+    final router = GoRouter(
+      initialLocation: Routes.login,
+      routes: [
+        GoRoute(
+          path: Routes.login,
+          builder: (context, state) => const LoginScreen(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [testStorageOverride()],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp.router(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            routerConfig: router,
+          ),
+        ),
+      ),
+    );
+    // 병아리 둘레의 빛이 끝나지 않는다 — settle 대신 시간을 밀어 고정한다.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    await expectLater(
+      find.byType(LoginScreen),
+      matchesGoldenFile('figma/login_238-1808.png'),
     );
   });
 
