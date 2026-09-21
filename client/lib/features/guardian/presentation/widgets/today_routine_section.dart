@@ -9,6 +9,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_error_view.dart';
+import 'routine_detail_sheet.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../child/application/child_routine_notifier.dart';
 import '../../application/routine_notifier.dart';
@@ -167,6 +168,19 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     context.push(Routes.routineReview);
   }
 
+  /// 일과를 눌렀을 때 — 먼저 시트로 보여주고, `편집하기`를 눌렀을 때만 편집 화면으로
+  /// 보낸다 (이슈 #266).
+  ///
+  /// **편집 화면으로 갈 때는 시트를 먼저 닫는다.** 시트를 띄운 채 화면을 밀면 편집에서
+  /// 뒤로 나올 때 시트를 한 번 더 지나야 한다. 편집 화면이 같은 일과를 보여주므로
+  /// 맥락은 끊기지 않는다.
+  Future<void> _openSheet(Routine routine) async {
+    setState(() => _openId = null);
+    final wantsEdit = await RoutineDetailSheet.show(context, routine);
+    if (wantsEdit != true || !mounted) return;
+    _edit(routine);
+  }
+
   void _toast(String message) {
     ScaffoldMessenger.of(
       context,
@@ -249,7 +263,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
               // 밀려 있을 때 탭하면 닫기만 한다 — 열어놓고 실수로 누르는 자리다.
               onTap: () => _openId == routine.id
                   ? setState(() => _openId = null)
-                  : _edit(routine),
+                  : _openSheet(routine),
             ),
           ),
         );

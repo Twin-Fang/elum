@@ -4,6 +4,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/guardian/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
+import 'package:elum/features/guardian/presentation/widgets/routine_detail_sheet.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/routine_summary_tile.dart';
@@ -71,10 +72,8 @@ void main() {
       ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
-        builder: (context, _) => MaterialApp.router(
-          theme: AppTheme.light,
-          routerConfig: router,
-        ),
+        builder: (context, _) =>
+            MaterialApp.router(theme: AppTheme.light, routerConfig: router),
       ),
     );
   }
@@ -86,32 +85,31 @@ void main() {
     String reward = '',
     int percent = 0,
     DateTime? at,
-  }) =>
-      Routine(
-        id: title,
-        title: title,
-        rewardText: reward,
-        progressPercent: percent,
-        scheduledAt: at,
-        steps: [
-          for (var i = 0; i < cards; i++)
-            ActionCard(
-              id: '$title-$i',
-              title: '카드 ${i + 1} 제목',
-              description: '카드 ${i + 1} 설명',
-              stepOrder: i + 1,
-            ),
-        ],
-      );
+  }) => Routine(
+    id: title,
+    title: title,
+    rewardText: reward,
+    progressPercent: percent,
+    scheduledAt: at,
+    steps: [
+      for (var i = 0; i < cards; i++)
+        ActionCard(
+          id: '$title-$i',
+          title: '카드 ${i + 1} 제목',
+          description: '카드 ${i + 1} 설명',
+          stepOrder: i + 1,
+        ),
+    ],
+  );
 
   /// [title] 카드 뒤에 깔린 동작 버튼의 아이콘.
   Finder actionIn(String title, String asset) => find.descendant(
-        of: find.ancestor(
-          of: find.text(title),
-          matching: find.byType(RoutineSwipeActions),
-        ),
-        matching: svgWithAsset(asset),
-      );
+    of: find.ancestor(
+      of: find.text(title),
+      matching: find.byType(RoutineSwipeActions),
+    ),
+    matching: svgWithAsset(asset),
+  );
 
   /// 얼마나 드러났는가(0~1).
   ///
@@ -194,10 +192,12 @@ void main() {
 
     testWidgets('제목과 보상이 한 줄 요약으로 보인다', (tester) async {
       await tester.pumpWidget(
-        wrap(routines: [
-          routine('스스로 옷을 입어요', 5, reward: '유튜브 시청 20분'),
-          routine('밥 먹기 전에 손을 씻어요', 3),
-        ]),
+        wrap(
+          routines: [
+            routine('스스로 옷을 입어요', 5, reward: '유튜브 시청 20분'),
+            routine('밥 먹기 전에 손을 씻어요', 3),
+          ],
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -217,25 +217,44 @@ void main() {
       expect(find.text('완료 시'), findsNothing);
     });
 
-    testWidgets('탭하면 수정 화면으로 간다', (tester) async {
+    testWidgets('탭하면 먼저 시트로 보여준다 (이슈 #266)', (tester) async {
+      // 예전에는 곧바로 편집 화면으로 넘어갔다. 보호자가 훨씬 자주 하는 일은
+      // "오늘 어디까지 했나"를 보는 것이라, 확인은 시트에서 가볍게 한다.
       await tester.pumpWidget(wrap(routines: [routine('손 씻기', 2)]));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('손 씻기'));
       await tester.pumpAndSettle();
 
+      expect(find.byType(RoutineDetailSheet), findsOneWidget);
+      expect(find.text('카드 검토'), findsNothing, reason: '아직 편집 화면이 아니다');
+    });
+
+    testWidgets('시트의 편집하기를 눌러야 수정 화면으로 간다 (이슈 #266)', (tester) async {
+      await tester.pumpWidget(wrap(routines: [routine('손 씻기', 2)]));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('손 씻기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('편집하기'));
+      await tester.pumpAndSettle();
+
       expect(find.text('카드 검토'), findsOneWidget);
+      // 시트를 닫고 가야 뒤로가기 한 번에 홈으로 나온다.
+      expect(find.byType(RoutineDetailSheet), findsNothing);
     });
 
     testWidgets('title이 비어 와도 대체 제목으로 뜬다', (tester) async {
       // AI가 title을 못 만들어도 화면이 비지 않는다 (docs 원칙 6번)
       await tester.pumpWidget(
-        wrap(routines: [
-          const Routine(
-            id: 'r',
-            steps: [ActionCard(id: 'a', description: '설명만 있는 카드')],
-          ),
-        ]),
+        wrap(
+          routines: [
+            const Routine(
+              id: 'r',
+              steps: [ActionCard(id: 'a', description: '설명만 있는 카드')],
+            ),
+          ],
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -352,9 +371,11 @@ void main() {
   group('지난 일과 (Figma 931:3896)', () {
     testWidgets('언제 한 일과인지 날짜가 보인다', (tester) async {
       await tester.pumpWidget(
-        wrap(past: [
-          routine('학교에 갈 준비를 해요', 3, percent: 100, at: DateTime(2026, 9, 20)),
-        ]),
+        wrap(
+          past: [
+            routine('학교에 갈 준비를 해요', 3, percent: 100, at: DateTime(2026, 9, 20)),
+          ],
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -362,9 +383,7 @@ void main() {
     });
 
     testWidgets('날짜가 안 오면 그 줄만 빠지고 화면은 뜬다', (tester) async {
-      await tester.pumpWidget(
-        wrap(past: [routine('학교 가기', 3, percent: 100)]),
-      );
+      await tester.pumpWidget(wrap(past: [routine('학교 가기', 3, percent: 100)]));
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
@@ -373,10 +392,12 @@ void main() {
 
     testWidgets('다 끝낸 일과만 다시 만들 수 있다', (tester) async {
       await tester.pumpWidget(
-        wrap(past: [
-          routine('끝낸 일과', 2, percent: 100),
-          routine('하다 만 일과', 2, percent: 50),
-        ]),
+        wrap(
+          past: [
+            routine('끝낸 일과', 2, percent: 100),
+            routine('하다 만 일과', 2, percent: 50),
+          ],
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -384,9 +405,7 @@ void main() {
     });
 
     testWidgets('다시하기를 누르면 복제를 요청한다', (tester) async {
-      await tester.pumpWidget(
-        wrap(past: [routine('끝낸 일과', 2, percent: 100)]),
-      );
+      await tester.pumpWidget(wrap(past: [routine('끝낸 일과', 2, percent: 100)]));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('일과 다시하기'));
@@ -436,8 +455,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('설정 화면'), findsNothing);
-    expect(svgWithAsset(AppAssets.iconSettings), findsOneWidget,
-        reason: '홈으로 돌아와야 톱니가 다시 보인다');
+    expect(
+      svgWithAsset(AppAssets.iconSettings),
+      findsOneWidget,
+      reason: '홈으로 돌아와야 톱니가 다시 보인다',
+    );
   });
 
   group('추천 문구 폴백 (서버 #39 배포 전 호환)', () {
@@ -510,8 +532,7 @@ class _FakeRoutineRepo with FakeRewardApi implements RoutineRepository {
     List<String> answers = const [],
     String rewardText = '',
     String rewardPresetKey = '',
-  }) async =>
-      const Routine(id: 'new');
+  }) async => const Routine(id: 'new');
 
   @override
   Future<Routine> confirm(Routine routine) async => routine;
@@ -521,6 +542,5 @@ class _FakeRoutineRepo with FakeRewardApi implements RoutineRepository {
     Routine routine,
     String stepId,
     String description,
-  ) async =>
-      (routine: routine, synced: true);
+  ) async => (routine: routine, synced: true);
 }

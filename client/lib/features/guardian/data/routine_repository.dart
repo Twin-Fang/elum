@@ -95,6 +95,12 @@ abstract interface class RoutineRepository {
   /// 화면에 보이는 **전체**를 차례대로 보낸다. 일부만 보내는 방식이 아니다 —
   /// 부분 갱신은 두 곳에서 동시에 순서를 바꿀 때 뒤엉킨다.
   Future<bool> reorder(List<String> routineIds);
+
+  /// 일과 안의 행동 단계 순서를 바꾼다.
+  ///
+  /// 일과 순서([reorder])와 같은 방식이다 — **화면에 보이는 단계 전체를 차례대로**
+  /// 보낸다. 실패하면 false를 주고, 부르는 쪽이 화면을 되돌린다.
+  Future<bool> reorderSteps(String routineId, List<String> stepIds);
 }
 
 class RoutineRepositoryImpl implements RoutineRepository {
@@ -546,6 +552,33 @@ class RoutineRepositoryImpl implements RoutineRepository {
     } catch (e) {
       // 실패를 삼키지 않는다 — 부르는 쪽이 목록을 되돌려야 한다.
       AppLogger.repositoryError('RoutineRepository', 'reorder', e);
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> reorderSteps(String routineId, List<String> stepIds) async {
+    AppLogger.repositoryCall('RoutineRepository', 'reorderSteps', {
+      'routineId': routineId,
+      'count': stepIds.length,
+    });
+
+    if (routineId.isEmpty || stepIds.isEmpty) return true;
+
+    try {
+      await _dio.patch<void>(
+        '/api/routines/$routineId/steps/order',
+        data: {'stepIds': stepIds},
+      );
+      AppLogger.repositorySuccess(
+        'RoutineRepository',
+        'reorderSteps',
+        '단계 순서 저장됨',
+      );
+      return true;
+    } catch (e) {
+      // 일과 순서와 같다 — 실패를 삼키지 않고 부르는 쪽이 화면을 되돌린다.
+      AppLogger.repositoryError('RoutineRepository', 'reorderSteps', e);
       return false;
     }
   }

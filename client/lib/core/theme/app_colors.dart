@@ -144,6 +144,10 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.completionBgBottom,
     required this.completionInk,
     required this.completionSubtle,
+    required this.stepBadge1,
+    required this.stepBadge2,
+    required this.stepBadge3,
+    required this.stepBadge4,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -164,7 +168,6 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// PIN 입력 전 빈 점 (Figma 238:1996 Group 22)
   final Color pinDotEmpty;
-
 
   // 하단 CTA 버튼 — Figma 컴포넌트셋 187:299의 두 variant
   final Color buttonEnabled;
@@ -209,30 +212,40 @@ class AppColors extends ThemeExtension<AppColors> {
   // 시작 화면 (Figma `시작` 238:1808)
   /// 배경 그라데이션 시작색
   final Color splashTop;
+
   /// 배경 그라데이션 끝색
   final Color splashBottom;
+
   /// 하단 언덕 기본색
   final Color splashHill;
+
   /// 언덕 방사형 그라데이션의 밝은 쪽
   final Color splashHillGlow;
+
   /// 새싹 구슬 glow — 안쪽 진한 코어 (Figma effect_WJJJ2E rgba(0,255,208))
   final Color splashOrbGlowCore;
+
   /// 새싹 구슬 glow — 바깥쪽 넓게 번지는 헤일로
   final Color splashOrbGlowHalo;
+
   /// 시작 화면 강조 문구색
   final Color splashTitle;
 
   // 보호자 홈 (Figma `보호자_홈` 217:2655)
   /// "새로운 일과 만들기" 카드 그라데이션 시작색 (134deg)
   final Color homeCardGradientStart;
+
   /// 같은 그라데이션 끝색
   final Color homeCardGradientEnd;
+
   /// 같은 카드의 제목 문구색.
   /// catSelectedBorder와 값이 같지만(#9CADF1) 쓰임이 달라 분리한다 —
   /// 캐릭터 선택 테두리가 바뀌어도 홈 카드는 따라가면 안 된다.
   final Color homeCardTitle;
+
   /// 같은 카드의 그림자 (Figma 0px 4px 10px rgba(35,13,96,0.1))
   final Color homeCardShadow;
+
   /// 같은 카드의 아이콘 원형 배경 (Figma 217:2668, rgba(130,220,223,0.4))
   final Color homeCardIconBg;
 
@@ -240,22 +253,31 @@ class AppColors extends ThemeExtension<AppColors> {
   // 반투명이라 뒤 색이 비쳐야 하므로 alpha를 담은 값이다.
   /// 입력창 (rgba(255,255,255,0.6))
   final Color glassSurface;
+
   /// 추천 칩 (rgba(255,255,255,0.5))
   final Color glassChip;
+
   /// 흐린 안내 문구 (rgba(36,38,52,0.4))
   final Color promptMuted;
+
   /// 유리 표면 그림자 (rgba(0,0,0,0.05))
   final Color glassShadow;
+
   /// 배경 그라데이션 — 민트
   final Color auroraMint;
+
   /// 배경 그라데이션 — 보라
   final Color auroraViolet;
+
   /// 배경 그라데이션 — 노랑
   final Color auroraYellow;
+
   /// 로딩 완료 단계 — 채운 원·진한 문구 (rgba(36,38,52,0.8))
   final Color stageDone;
+
   /// 로딩 대기 단계 — 빈 원 테두리 (rgba(36,38,52,0.6))
   final Color stagePending;
+
   /// 로딩 대기 단계 문구 (rgba(36,38,52,0.5))
   final Color stagePendingText;
 
@@ -274,33 +296,46 @@ class AppColors extends ThemeExtension<AppColors> {
   /// `보호자`는 포인트색(`checkDone`)을 쓰고 `이룸이`는 주황이다. 두 선택지를
   /// **색으로 먼저 구분**하게 한다 — 글을 빨리 읽지 못해도 어느 쪽이 자기인지 보인다.
   final Color roleElumi;
+
   /// 아이 홈 체크 전 테두리 (8px)
   final Color checkPending;
+
   /// 보상 화면 배경 위 (어두워야 별이 빛난다)
   final Color rewardBackdropTop;
+
   /// 보상 화면 배경 아래
   final Color rewardBackdropBottom;
+
   /// 보상 큰 별
   final Color rewardStar;
+
   /// 큰 별 주변 빛 (rgba(208,255,0,0.3))
   final Color rewardStarGlow;
+
   /// 큰 별 뒤 넓게 번지는 blur 후광 — 노랑 (#FFDD00). Figma의 blur(20px)
   /// 노란 별 레이어(node 364:8283 / 334:4282)를 GlowingSvg.haloBlur로 재현.
   final Color rewardStarHalo;
+
   /// 작은 별 — 초록
   final Color rewardStarGreen;
+
   /// 작은 별 — 보라
   final Color rewardStarPurple;
+
   /// 작은 별 주변 빛 — 초록 (rgba(123,255,176,1)). star_deco 1~6의 SVG
   /// 내장 feGaussianBlur 필터 색과 동일 — flutter_svg가 SVG filter를
   /// 렌더링하지 못해(client/docs/troubleshooting.md) 코드로 재현한다.
   final Color starDecoGlowGreen;
+
   /// 작은 별 주변 빛 — 보라 (rgba(151,120,255,1)). star_deco 7 전용.
   final Color starDecoGlowPurple;
+
   /// 보상 화면 CTA
   final Color rewardButton;
+
   /// 보상 캐릭터 발밑 그림자 (Figma Ellipse 23 — 어두운 배경용)
   final Color rewardGroundShadow;
+
   /// 아이 홈 빈 상태 캐릭터 발밑 그림자 (Figma Ellipse 2 — 밝은 배경용).
   /// 보상 화면 그림자와 배경이 달라 항상 따로 바뀐다 — 토큰을 나눈다.
   final Color childEmptyShadow;
@@ -308,40 +343,55 @@ class AppColors extends ThemeExtension<AppColors> {
   // 홈 일과 목록 (Figma 356:4688 / 309:3739 / 356:5079)
   /// 일과 타일·펼침 컨테이너·빈 상태 배경 (#EEE9E6)
   final Color routineTileBg;
+
   /// 진행률 링 트랙. checkPending과 값이 같지만(#C9D6D4) 쓰임이 달라 분리 —
   /// 아이 체크 버튼 테두리가 바뀌어도 링 트랙은 따라가면 안 된다.
   final Color routineRingTrack;
+
   /// 진행률 링 채움·퍼센트 문구. checkDone(#55CFBA)과 분리, 같은 이유.
   final Color routineRingProgress;
+
   /// 밀어서 열린 / 순서 바꾸는 중인 일과 카드 배경 (#D7D3D1).
   /// 기본 배경(routineTileBg)보다 한 단계 어둡다 — 지금 손대고 있는 카드가 어느 것인지
   /// 색으로 드러나야 옆의 버튼이 누구 것인지 헷갈리지 않는다.
   final Color routineTileSwiped;
+
   /// 밀었을 때 나오는 삭제 버튼 배경 (#DA5050). linkTimer와 값만 같다 —
   /// 남은 시간 색이 바뀌어도 삭제 버튼이 따라가면 안 된다.
   final Color routineSwipeDelete;
+
   /// 밀었을 때 나오는 수정 버튼 배경 (#F8C905).
   final Color routineSwipeEdit;
+
   /// 일과 카드의 `완료 시` 라벨과 섹션 제목 (#74757D).
   final Color routineTileLabel;
+
   /// 보상 문구 rgba(0,0,0,0.7). 제목보다 옅고 라벨보다 진하다 —
   /// 셋이 한 줄에 서므로 무게가 겹치면 어느 것이 값인지 읽히지 않는다.
   final Color routineTileReward;
+
   /// 순서 바꾸기 손잡이 (#CACACA).
   final Color routineDragHandle;
+
   /// `새로운 일과 만들기` 버튼 방사형 그라데이션 가운데 (#A2B1EB).
   final Color routineCreateStart;
+
   /// 같은 버튼 방사형 그라데이션 바깥 (#9C7DE9).
   final Color routineCreateEnd;
+
   /// 같은 버튼 바깥으로 번지는 빛 (#CCBCF6). 그림자가 아니라 발광이라 흐림이 크고 색이 진하다.
   final Color routineCreateGlow;
+
   /// 빈 상태 둘째 줄 (#AEB0B7). 제목(routineTileLabel #74757D)보다 한 단계 더 옅다 —
   /// 할 일이 없다는 자리라 두 줄이 같은 무게로 읽히면 안 된다.
   final Color routineEmptyHint;
+
   /// 아이 홈 완료된 일과 타일 배경 (#B5EAEC). goalSelectedFill과 값만 같다.
   final Color childTileDone;
+
   /// 별 배지 숫자 (#CB9500)
   final Color starCount;
+
   /// 아이_별 화면 숫자 그라데이션 시작 (#FFDD00 → 흰색)
   final Color starsNumberStart;
 
@@ -349,6 +399,7 @@ class AppColors extends ThemeExtension<AppColors> {
   /// `이 카드 수정하기` 칩 배경 (#EEE9E6). routineTileBg와 값만 같다 —
   /// 일과 타일이 바뀌어도 수정 칩은 따라가면 안 된다.
   final Color editChipBg;
+
   /// 같은 칩의 문구색 (#000000). chipLabel(선택 항목)과 쓰임이 달라 분리한다.
   final Color editChipLabel;
 
@@ -362,6 +413,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color loginKakaoLabel;
   final Color loginNaverBg;
   final Color loginNaverLabel;
+
   /// 주의 톤 (#F5A524) — `danger`와 다르다 (이슈 #242).
   ///
   /// `danger`(#BB3F38)는 **되돌릴 수 없는 파괴**(회원탈퇴)에 쓴다.
@@ -429,6 +481,13 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 완료 화면의 보조 문구(진행도).
   final Color completionSubtle;
+
+  /// 시트의 행동 단계 번호 뱃지. 네 색을 차례로 쓰고 다섯 번째부터 다시 처음으로
+  /// 돌아간다 (Figma 956:4084). 단계가 몇 개든 색이 비지 않아야 한다.
+  final Color stepBadge1;
+  final Color stepBadge2;
+  final Color stepBadge3;
+  final Color stepBadge4;
 
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
@@ -540,6 +599,10 @@ class AppColors extends ThemeExtension<AppColors> {
     completionBgBottom: Color(0xFF0099FF),
     completionInk: Color(0xFF1A1A1A),
     completionSubtle: Color(0xFFA0A0A0),
+    stepBadge1: Color(0xFFAEE4D9),
+    stepBadge2: Color(0xFFB7C2EC),
+    stepBadge3: Color(0xFFF4BDA2),
+    stepBadge4: Color(0xFFECE0AE),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -660,6 +723,10 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? completionBgBottom,
     Color? completionInk,
     Color? completionSubtle,
+    Color? stepBadge1,
+    Color? stepBadge2,
+    Color? stepBadge3,
+    Color? stepBadge4,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -762,7 +829,8 @@ class AppColors extends ThemeExtension<AppColors> {
       loginAppleBg: loginAppleBg ?? this.loginAppleBg,
       loginAppleLabel: loginAppleLabel ?? this.loginAppleLabel,
       consentSelectedFill: consentSelectedFill ?? this.consentSelectedFill,
-      consentSelectedBorder: consentSelectedBorder ?? this.consentSelectedBorder,
+      consentSelectedBorder:
+          consentSelectedBorder ?? this.consentSelectedBorder,
       dlpBadgeText: dlpBadgeText ?? this.dlpBadgeText,
       homeHeroStart: homeHeroStart ?? this.homeHeroStart,
       homeHeroEnd: homeHeroEnd ?? this.homeHeroEnd,
@@ -770,6 +838,10 @@ class AppColors extends ThemeExtension<AppColors> {
       completionBgBottom: completionBgBottom ?? this.completionBgBottom,
       completionInk: completionInk ?? this.completionInk,
       completionSubtle: completionSubtle ?? this.completionSubtle,
+      stepBadge1: stepBadge1 ?? this.stepBadge1,
+      stepBadge2: stepBadge2 ?? this.stepBadge2,
+      stepBadge3: stepBadge3 ?? this.stepBadge3,
+      stepBadge4: stepBadge4 ?? this.stepBadge4,
     );
   }
 
@@ -786,26 +858,49 @@ class AppColors extends ThemeExtension<AppColors> {
       chipLabel: Color.lerp(chipLabel, other.chipLabel, t)!,
       pinDotEmpty: Color.lerp(pinDotEmpty, other.pinDotEmpty, t)!,
       buttonEnabled: Color.lerp(buttonEnabled, other.buttonEnabled, t)!,
-      buttonEnabledText: Color.lerp(buttonEnabledText, other.buttonEnabledText, t)!,
+      buttonEnabledText: Color.lerp(
+        buttonEnabledText,
+        other.buttonEnabledText,
+        t,
+      )!,
       buttonDisabled: Color.lerp(buttonDisabled, other.buttonDisabled, t)!,
-      buttonDisabledText: Color.lerp(buttonDisabledText, other.buttonDisabledText, t)!,
+      buttonDisabledText: Color.lerp(
+        buttonDisabledText,
+        other.buttonDisabledText,
+        t,
+      )!,
       buttonNeutral: Color.lerp(buttonNeutral, other.buttonNeutral, t)!,
-      buttonNeutralText: Color.lerp(buttonNeutralText, other.buttonNeutralText, t)!,
+      buttonNeutralText: Color.lerp(
+        buttonNeutralText,
+        other.buttonNeutralText,
+        t,
+      )!,
       danger: Color.lerp(danger, other.danger, t)!,
       dangerText: Color.lerp(dangerText, other.dangerText, t)!,
       highlightFill: Color.lerp(highlightFill, other.highlightFill, t)!,
-      highlightBorder:
-          Color.lerp(highlightBorder, other.highlightBorder, t)!,
-      goalSelectedFill:
-          Color.lerp(goalSelectedFill, other.goalSelectedFill, t)!,
-      goalSelectedBorder:
-          Color.lerp(goalSelectedBorder, other.goalSelectedBorder, t)!,
+      highlightBorder: Color.lerp(highlightBorder, other.highlightBorder, t)!,
+      goalSelectedFill: Color.lerp(
+        goalSelectedFill,
+        other.goalSelectedFill,
+        t,
+      )!,
+      goalSelectedBorder: Color.lerp(
+        goalSelectedBorder,
+        other.goalSelectedBorder,
+        t,
+      )!,
       foxSelectedFill: Color.lerp(foxSelectedFill, other.foxSelectedFill, t)!,
-      foxSelectedBorder:
-          Color.lerp(foxSelectedBorder, other.foxSelectedBorder, t)!,
+      foxSelectedBorder: Color.lerp(
+        foxSelectedBorder,
+        other.foxSelectedBorder,
+        t,
+      )!,
       catSelectedFill: Color.lerp(catSelectedFill, other.catSelectedFill, t)!,
-      catSelectedBorder:
-          Color.lerp(catSelectedBorder, other.catSelectedBorder, t)!,
+      catSelectedBorder: Color.lerp(
+        catSelectedBorder,
+        other.catSelectedBorder,
+        t,
+      )!,
       brandPeach: Color.lerp(brandPeach, other.brandPeach, t)!,
       brandOrange: Color.lerp(brandOrange, other.brandOrange, t)!,
       accentYellow: Color.lerp(accentYellow, other.accentYellow, t)!,
@@ -813,15 +908,27 @@ class AppColors extends ThemeExtension<AppColors> {
       splashBottom: Color.lerp(splashBottom, other.splashBottom, t)!,
       splashHill: Color.lerp(splashHill, other.splashHill, t)!,
       splashHillGlow: Color.lerp(splashHillGlow, other.splashHillGlow, t)!,
-      splashOrbGlowCore:
-          Color.lerp(splashOrbGlowCore, other.splashOrbGlowCore, t)!,
-      splashOrbGlowHalo:
-          Color.lerp(splashOrbGlowHalo, other.splashOrbGlowHalo, t)!,
+      splashOrbGlowCore: Color.lerp(
+        splashOrbGlowCore,
+        other.splashOrbGlowCore,
+        t,
+      )!,
+      splashOrbGlowHalo: Color.lerp(
+        splashOrbGlowHalo,
+        other.splashOrbGlowHalo,
+        t,
+      )!,
       splashTitle: Color.lerp(splashTitle, other.splashTitle, t)!,
       homeCardGradientStart: Color.lerp(
-          homeCardGradientStart, other.homeCardGradientStart, t)!,
-      homeCardGradientEnd:
-          Color.lerp(homeCardGradientEnd, other.homeCardGradientEnd, t)!,
+        homeCardGradientStart,
+        other.homeCardGradientStart,
+        t,
+      )!,
+      homeCardGradientEnd: Color.lerp(
+        homeCardGradientEnd,
+        other.homeCardGradientEnd,
+        t,
+      )!,
       homeCardTitle: Color.lerp(homeCardTitle, other.homeCardTitle, t)!,
       homeCardShadow: Color.lerp(homeCardShadow, other.homeCardShadow, t)!,
       homeCardIconBg: Color.lerp(homeCardIconBg, other.homeCardIconBg, t)!,
@@ -834,47 +941,127 @@ class AppColors extends ThemeExtension<AppColors> {
       auroraYellow: Color.lerp(auroraYellow, other.auroraYellow, t)!,
       stageDone: Color.lerp(stageDone, other.stageDone, t)!,
       stagePending: Color.lerp(stagePending, other.stagePending, t)!,
-      stagePendingText: Color.lerp(stagePendingText, other.stagePendingText, t)!,
+      stagePendingText: Color.lerp(
+        stagePendingText,
+        other.stagePendingText,
+        t,
+      )!,
       checkDone: Color.lerp(checkDone, other.checkDone, t)!,
-      consentCheckIdle:
-          Color.lerp(consentCheckIdle, other.consentCheckIdle, t)!,
+      consentCheckIdle: Color.lerp(
+        consentCheckIdle,
+        other.consentCheckIdle,
+        t,
+      )!,
       roleElumi: Color.lerp(roleElumi, other.roleElumi, t)!,
       checkPending: Color.lerp(checkPending, other.checkPending, t)!,
-      rewardBackdropTop: Color.lerp(rewardBackdropTop, other.rewardBackdropTop, t)!,
-      rewardBackdropBottom: Color.lerp(rewardBackdropBottom, other.rewardBackdropBottom, t)!,
+      rewardBackdropTop: Color.lerp(
+        rewardBackdropTop,
+        other.rewardBackdropTop,
+        t,
+      )!,
+      rewardBackdropBottom: Color.lerp(
+        rewardBackdropBottom,
+        other.rewardBackdropBottom,
+        t,
+      )!,
       rewardStar: Color.lerp(rewardStar, other.rewardStar, t)!,
       rewardStarGlow: Color.lerp(rewardStarGlow, other.rewardStarGlow, t)!,
       rewardStarHalo: Color.lerp(rewardStarHalo, other.rewardStarHalo, t)!,
       rewardStarGreen: Color.lerp(rewardStarGreen, other.rewardStarGreen, t)!,
-      rewardStarPurple: Color.lerp(rewardStarPurple, other.rewardStarPurple, t)!,
-      starDecoGlowGreen:
-          Color.lerp(starDecoGlowGreen, other.starDecoGlowGreen, t)!,
-      starDecoGlowPurple:
-          Color.lerp(starDecoGlowPurple, other.starDecoGlowPurple, t)!,
+      rewardStarPurple: Color.lerp(
+        rewardStarPurple,
+        other.rewardStarPurple,
+        t,
+      )!,
+      starDecoGlowGreen: Color.lerp(
+        starDecoGlowGreen,
+        other.starDecoGlowGreen,
+        t,
+      )!,
+      starDecoGlowPurple: Color.lerp(
+        starDecoGlowPurple,
+        other.starDecoGlowPurple,
+        t,
+      )!,
       rewardButton: Color.lerp(rewardButton, other.rewardButton, t)!,
-      rewardGroundShadow:
-          Color.lerp(rewardGroundShadow, other.rewardGroundShadow, t)!,
-      childEmptyShadow:
-          Color.lerp(childEmptyShadow, other.childEmptyShadow, t)!,
+      rewardGroundShadow: Color.lerp(
+        rewardGroundShadow,
+        other.rewardGroundShadow,
+        t,
+      )!,
+      childEmptyShadow: Color.lerp(
+        childEmptyShadow,
+        other.childEmptyShadow,
+        t,
+      )!,
       routineTileBg: Color.lerp(routineTileBg, other.routineTileBg, t)!,
-      routineRingTrack:
-          Color.lerp(routineRingTrack, other.routineRingTrack, t)!,
-      routineRingProgress:
-          Color.lerp(routineRingProgress, other.routineRingProgress, t)!,
-      routineTileSwiped: Color.lerp(routineTileSwiped, other.routineTileSwiped, t)!,
-      routineSwipeDelete: Color.lerp(routineSwipeDelete, other.routineSwipeDelete, t)!,
-      routineSwipeEdit: Color.lerp(routineSwipeEdit, other.routineSwipeEdit, t)!,
-      routineTileLabel: Color.lerp(routineTileLabel, other.routineTileLabel, t)!,
-      routineTileReward: Color.lerp(routineTileReward, other.routineTileReward, t)!,
-      routineDragHandle: Color.lerp(routineDragHandle, other.routineDragHandle, t)!,
-      routineCreateStart: Color.lerp(routineCreateStart, other.routineCreateStart, t)!,
-      routineCreateEnd: Color.lerp(routineCreateEnd, other.routineCreateEnd, t)!,
-      routineCreateGlow: Color.lerp(routineCreateGlow, other.routineCreateGlow, t)!,
-      routineEmptyHint: Color.lerp(routineEmptyHint, other.routineEmptyHint, t)!,
+      routineRingTrack: Color.lerp(
+        routineRingTrack,
+        other.routineRingTrack,
+        t,
+      )!,
+      routineRingProgress: Color.lerp(
+        routineRingProgress,
+        other.routineRingProgress,
+        t,
+      )!,
+      routineTileSwiped: Color.lerp(
+        routineTileSwiped,
+        other.routineTileSwiped,
+        t,
+      )!,
+      routineSwipeDelete: Color.lerp(
+        routineSwipeDelete,
+        other.routineSwipeDelete,
+        t,
+      )!,
+      routineSwipeEdit: Color.lerp(
+        routineSwipeEdit,
+        other.routineSwipeEdit,
+        t,
+      )!,
+      routineTileLabel: Color.lerp(
+        routineTileLabel,
+        other.routineTileLabel,
+        t,
+      )!,
+      routineTileReward: Color.lerp(
+        routineTileReward,
+        other.routineTileReward,
+        t,
+      )!,
+      routineDragHandle: Color.lerp(
+        routineDragHandle,
+        other.routineDragHandle,
+        t,
+      )!,
+      routineCreateStart: Color.lerp(
+        routineCreateStart,
+        other.routineCreateStart,
+        t,
+      )!,
+      routineCreateEnd: Color.lerp(
+        routineCreateEnd,
+        other.routineCreateEnd,
+        t,
+      )!,
+      routineCreateGlow: Color.lerp(
+        routineCreateGlow,
+        other.routineCreateGlow,
+        t,
+      )!,
+      routineEmptyHint: Color.lerp(
+        routineEmptyHint,
+        other.routineEmptyHint,
+        t,
+      )!,
       childTileDone: Color.lerp(childTileDone, other.childTileDone, t)!,
       starCount: Color.lerp(starCount, other.starCount, t)!,
-      starsNumberStart:
-          Color.lerp(starsNumberStart, other.starsNumberStart, t)!,
+      starsNumberStart: Color.lerp(
+        starsNumberStart,
+        other.starsNumberStart,
+        t,
+      )!,
       editChipBg: Color.lerp(editChipBg, other.editChipBg, t)!,
       editChipLabel: Color.lerp(editChipLabel, other.editChipLabel, t)!,
       loginKakaoBg: Color.lerp(loginKakaoBg, other.loginKakaoBg, t)!,
@@ -887,22 +1074,44 @@ class AppColors extends ThemeExtension<AppColors> {
       glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
       rewardBannerBg: Color.lerp(rewardBannerBg, other.rewardBannerBg, t)!,
       linkTimer: Color.lerp(linkTimer, other.linkTimer, t)!,
-      linkRetryChipBg:
-          Color.lerp(linkRetryChipBg, other.linkRetryChipBg, t)!,
+      linkRetryChipBg: Color.lerp(linkRetryChipBg, other.linkRetryChipBg, t)!,
       linkLaterLabel: Color.lerp(linkLaterLabel, other.linkLaterLabel, t)!,
-      loginButtonShadow:
-          Color.lerp(loginButtonShadow, other.loginButtonShadow, t)!,
+      loginButtonShadow: Color.lerp(
+        loginButtonShadow,
+        other.loginButtonShadow,
+        t,
+      )!,
       loginAppleBg: Color.lerp(loginAppleBg, other.loginAppleBg, t)!,
       loginAppleLabel: Color.lerp(loginAppleLabel, other.loginAppleLabel, t)!,
-      consentSelectedFill: Color.lerp(consentSelectedFill, other.consentSelectedFill, t)!,
-      consentSelectedBorder: Color.lerp(consentSelectedBorder, other.consentSelectedBorder, t)!,
+      consentSelectedFill: Color.lerp(
+        consentSelectedFill,
+        other.consentSelectedFill,
+        t,
+      )!,
+      consentSelectedBorder: Color.lerp(
+        consentSelectedBorder,
+        other.consentSelectedBorder,
+        t,
+      )!,
       dlpBadgeText: Color.lerp(dlpBadgeText, other.dlpBadgeText, t)!,
       homeHeroStart: Color.lerp(homeHeroStart, other.homeHeroStart, t)!,
       homeHeroEnd: Color.lerp(homeHeroEnd, other.homeHeroEnd, t)!,
       completionBgTop: Color.lerp(completionBgTop, other.completionBgTop, t)!,
-      completionBgBottom: Color.lerp(completionBgBottom, other.completionBgBottom, t)!,
+      completionBgBottom: Color.lerp(
+        completionBgBottom,
+        other.completionBgBottom,
+        t,
+      )!,
       completionInk: Color.lerp(completionInk, other.completionInk, t)!,
-      completionSubtle: Color.lerp(completionSubtle, other.completionSubtle, t)!,
+      completionSubtle: Color.lerp(
+        completionSubtle,
+        other.completionSubtle,
+        t,
+      )!,
+      stepBadge1: Color.lerp(stepBadge1, other.stepBadge1, t)!,
+      stepBadge2: Color.lerp(stepBadge2, other.stepBadge2, t)!,
+      stepBadge3: Color.lerp(stepBadge3, other.stepBadge3, t)!,
+      stepBadge4: Color.lerp(stepBadge4, other.stepBadge4, t)!,
     );
   }
 
@@ -913,12 +1122,12 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 모아 쓴다 — 이 색들이 바뀌면 컨페티도 같이 바뀌는 게 자연스럽다.
   /// (토큰 분리 기준: "항상 같이 바뀌어야 하는가" → 예)
   List<Color> get confetti => [
-        checkDone, // 청록 — 체크 원과 같은 색이라 연출이 이어진다
-        accentYellow, // 노랑
-        brandOrange, // 주황
-        brandPeach, // 살구
-        catSelectedBorder, // 파랑
-        rewardStarGreen, // 연두
-        rewardStarPurple, // 보라
-      ];
+    checkDone, // 청록 — 체크 원과 같은 색이라 연출이 이어진다
+    accentYellow, // 노랑
+    brandOrange, // 주황
+    brandPeach, // 살구
+    catSelectedBorder, // 파랑
+    rewardStarGreen, // 연두
+    rewardStarPurple, // 보라
+  ];
 }

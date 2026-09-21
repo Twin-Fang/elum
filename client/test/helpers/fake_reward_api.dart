@@ -38,4 +38,8 @@ mixin FakeRewardApi implements RoutineRepository {
 
   @override
   Future<bool> reorder(List<String> routineIds) async => true;
+
+  @override
+  Future<bool> reorderSteps(String routineId, List<String> stepIds) async =>
+      true;
 }
