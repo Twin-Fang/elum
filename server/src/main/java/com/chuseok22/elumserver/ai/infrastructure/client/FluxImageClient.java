@@ -73,7 +73,7 @@ public class FluxImageClient implements ImageGenerationClient {
   }
 
   private GeneratedImage call(String prefix, String stepDescription, CharacterType characterType) {
-    String prompt = imagePromptBuilder.build(prefix, stepDescription, characterType);
+    String prompt = imagePromptBuilder.build(prefix, stepDescription, characterType, false);
     String model = systemConfigService.getString(ConfigKey.FLUX_IMAGE_MODEL);
     String apiKey = systemConfigService.getSecret(ConfigKey.FLUX_API_KEY);
 

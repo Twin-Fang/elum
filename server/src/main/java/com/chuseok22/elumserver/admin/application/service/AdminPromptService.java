@@ -67,7 +67,12 @@ public class AdminPromptService {
         + geminiTextClient.buildCreateRoutineUserContent(sampleInput, null, Set.of(), List.of());
       case GEMINI_ROUTINE_QUESTION_PREFIX -> "[System]\n" + content + "\n\n[User]\n"
         + geminiTextClient.buildQuestionUserContent(sampleInput, null, Set.of());
-      case GEMINI_ROUTINE_IMAGE_PREFIX -> imagePromptBuilder.build(content, sampleInput, character);
+      // 미리보기도 지금 고른 제공자 기준으로 만든다 — 참조 이미지를 보내는지에 따라
+      // 실제 프롬프트가 달라지는데, 여기서 다르게 보이면 미리보기를 믿을 수 없다 (#269).
+      case GEMINI_ROUTINE_IMAGE_PREFIX -> imagePromptBuilder.build(
+        content, sampleInput, character,
+        character != null && imageClientRouter.current().supportsCharacterReference()
+      );
     };
   }
 

@@ -16,11 +16,23 @@ public class GeminiRoutineImagePromptBuilder {
   // GeminiTextClient와 동일하게 직접 생성해서 쓴다.
   private final ObjectMapper objectMapper = new ObjectMapper();
 
-  public String build(String prefix, String stepDescription, CharacterType characterType) {
+  /**
+   * @param referenceImageProvided 참조 이미지를 함께 보내는가. <b>사실대로 적는다</b> —
+   *                               보내지 않으면서 보낸다고 하면 모델이 그림을 믿고
+   *                               생김새를 덜 신경 쓴다 (이슈 #269)
+   */
+  public String build(
+    String prefix, String stepDescription, CharacterType characterType,
+    boolean referenceImageProvided
+  ) {
     GeminiImageAiInput input = new GeminiImageAiInput(
       "CREATE_ROUTINE_CARD_IMAGE",
       new GeminiImageAiInput.Scene(stepDescription),
-      characterType == null ? null : new GeminiImageAiInput.Character(characterType, true)
+      characterType == null
+        ? null
+        : new GeminiImageAiInput.Character(
+          characterType, characterType.getAppearance(), referenceImageProvided
+        )
     );
     return prefix + "\n\n장면 정보:\n" + toJson(input);
   }

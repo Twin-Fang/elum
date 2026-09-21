@@ -75,7 +75,7 @@ public class OpenAiImageClient implements ImageGenerationClient {
   private GeneratedImage call(String prefix, String stepDescription, CharacterType characterType) {
     // 프롬프트는 Gemini와 같은 것을 쓴다. 제공자를 바꿨다고 그림의 결이 달라지면
     // 비교가 성립하지 않는다.
-    String prompt = imagePromptBuilder.build(prefix, stepDescription, characterType);
+    String prompt = imagePromptBuilder.build(prefix, stepDescription, characterType, false);
     String model = systemConfigService.getString(ConfigKey.OPENAI_IMAGE_MODEL);
     String quality = systemConfigService.getString(ConfigKey.OPENAI_IMAGE_QUALITY);
     String apiKey = systemConfigService.getSecret(ConfigKey.OPENAI_API_KEY);

@@ -8,6 +8,8 @@ import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiRoutineImagePromptBuilder;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import org.junit.jupiter.api.DisplayName;
@@ -35,6 +37,12 @@ class AdminPromptServiceTest {
   @Mock
   private GeminiRoutineImagePromptBuilder imagePromptBuilder;
 
+  @Mock
+  private ImageClientRouter imageClientRouter;
+
+  @Mock
+  private ImageGenerationClient imageGenerationClient;
+
   @InjectMocks
   private AdminPromptService adminPromptService;
 
@@ -56,7 +64,11 @@ class AdminPromptServiceTest {
   @Test
   @DisplayName("GEMINI_ROUTINE_IMAGE_PREFIX preview는 GeminiRoutineImagePromptBuilder를 그대로 사용한다")
   void preview_imagePrefix_delegatesToImagePromptBuilder() {
-    when(imagePromptBuilder.build("이미지 프롬프트", "옷을 입어요", CharacterType.LULU))
+    // preview도 지금 고른 제공자 기준으로 만든다 (#269) — 참조 이미지를 보내는지에 따라
+    // 프롬프트가 달라지므로, 미리보기가 실제와 같으려면 같은 판단을 거쳐야 한다.
+    when(imageClientRouter.current()).thenReturn(imageGenerationClient);
+    when(imageGenerationClient.supportsCharacterReference()).thenReturn(true);
+    when(imagePromptBuilder.build("이미지 프롬프트", "옷을 입어요", CharacterType.LULU, true))
       .thenReturn("이미지 프롬프트\n\n장면 정보:\n{...}");
 
     String result = adminPromptService.preview(

@@ -76,7 +76,7 @@ public class GeminiImageClient implements ImageGenerationClient {
       String base64Image = Base64.getEncoder().encodeToString(characterImage);
       parts.add(GeminiGenerateContentRequest.GeminiPart.ofInlineData("image/png", base64Image));
     }
-    String promptText = imagePromptBuilder.build(prefix, stepDescription, characterType);
+    String promptText = imagePromptBuilder.build(prefix, stepDescription, characterType, characterType != null);
     parts.add(new GeminiGenerateContentRequest.GeminiPart(promptText));
 
     // responseModalities를 명시하지 않으면 이미지 생성 모델이 간헐적으로 텍스트만
