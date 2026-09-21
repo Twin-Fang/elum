@@ -3,6 +3,7 @@ import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/widgets/routine_detail_sheet.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -73,13 +74,14 @@ void main() {
     expect(find.text('3'), findsOneWidget);
   });
 
-  testWidgets('보상 본문은 글자만 — 별은 왼쪽 뱃지에만 있다 (#275)', (tester) async {
+  testWidgets('보상은 다 하면 무엇을 받는지로 보여준다 — 별을 쓰지 않는다 (#275)', (tester) async {
     await tester.pumpWidget(wrap(_FakeRepo()));
     await tester.pump();
 
-    // 본문에도 그림을 붙이면 한 줄에 별이 두 번 나온다. 시안도 글자만 그린다.
     expect(find.text('유튜브 시청 20분'), findsOneWidget);
-    expect(find.text('⭐'), findsOneWidget);
+    expect(find.text('다 하면'), findsOneWidget);
+    // 별은 이룸이가 일과를 끝냈을 때의 연출이라 여기서 쓰면 뜻이 겹친다
+    expect(find.text('⭐'), findsNothing);
   });
 
   testWidgets('보상이 없으면 그 줄을 그리지 않는다 — 빈 칸은 덜 만들어진 것처럼 보인다', (tester) async {
@@ -135,12 +137,7 @@ void main() {
     await tester.pumpWidget(wrap(repo));
     await tester.pump();
 
-    // 첫 줄 손잡이를 아래로 끈다. ReorderableDragStartListener라 길게 누를 필요가 없다.
-    await tester.drag(
-      find.byIcon(Icons.drag_handle).first,
-      const Offset(0, 160),
-    );
-    await tester.pumpAndSettle();
+    await _grabAndDrag(tester, const Offset(0, 160));
 
     // 부분이 아니라 보이는 전체를 보낸다 — 부분 갱신은 두 곳에서 동시에 바꿀 때 뒤엉킨다.
     expect(repo.lastStepIds, isNotNull);
@@ -154,15 +151,75 @@ void main() {
     await tester.pumpWidget(wrap(repo));
     await tester.pump();
 
+    await _grabAndDrag(tester, const Offset(0, 160));
+
+    expect(find.textContaining('순서를 저장하지 못했어요'), findsOneWidget);
+    expect(find.textContaining('E-STEP-ORDER'), findsOneWidget);
+  });
+
+  testWidgets('길게 누르고 있으면 줄이 떠오른다 — 움직이기 전에 잡혔음을 보여준다 (#274)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(_FakeRepo()));
+    await tester.pump();
+
+    bool anyLifted() => tester
+        .widgetList<Container>(find.byType(Container))
+        .any(
+          (c) =>
+              ((c.decoration as BoxDecoration?)?.boxShadow ?? []).isNotEmpty,
+        );
+
+    expect(anyLifted(), isFalse, reason: '손대기 전에는 떠오른 줄이 없다');
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byIcon(Icons.drag_handle).first),
+    );
+    // 첫 프레임은 Ticker가 시작점을 잡느라 경과가 0이다. 그 다음부터 흐른다.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    // 손가락을 아직 움직이지 않았는데도 떠올라 있어야 한다.
+    // 예전에는 움직여야 그림자가 나타나 누르는 내내 아무 일도 없어 보였다.
+    expect(anyLifted(), isTrue);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('스치듯 끌면 순서가 바뀌지 않는다 — 스크롤하다 놀라면 안 된다 (#274)', (
+    tester,
+  ) async {
+    final repo = _FakeRepo();
+    await tester.pumpWidget(wrap(repo));
+    await tester.pump();
+
+    // 길게 누르지 않고 곧바로 끈다. 목록을 아래로 쓸어내리려던 손짓이다.
     await tester.drag(
       find.byIcon(Icons.drag_handle).first,
       const Offset(0, 160),
     );
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('순서를 저장하지 못했어요'), findsOneWidget);
-    expect(find.textContaining('E-STEP-ORDER'), findsOneWidget);
+    // 잡지 않았으므로 아무 일도 일어나지 않는다 — 서버로도 보내지 않는다
+    expect(repo.lastStepIds, isNull);
   });
+
+}
+
+/// 손잡이를 **길게 눌러 잡은 뒤** 끈다.
+///
+/// 스치는 것만으로는 잡히지 않게 바뀌었으므로(#274) 임계 시간만큼 누르고 있어야
+/// 한다. `tester.drag`은 곧바로 움직여서 이제 아무 일도 일어나지 않는다.
+Future<void> _grabAndDrag(WidgetTester tester, Offset offset) async {
+  final gesture = await tester.startGesture(
+    tester.getCenter(find.byIcon(Icons.drag_handle).first),
+  );
+  await tester.pump(kLongPressTimeout + const Duration(milliseconds: 20));
+  await gesture.moveBy(offset);
+  await tester.pump();
+  await gesture.up();
+  await tester.pumpAndSettle();
 }
 
 class _FakeRepo with FakeRewardApi implements RoutineRepository {

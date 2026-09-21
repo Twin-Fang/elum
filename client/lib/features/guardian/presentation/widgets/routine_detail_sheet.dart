@@ -1,7 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../../shared/models/routine.dart';
@@ -45,6 +48,11 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
   /// 시안 기준 시트 높이는 614/852 ≈ 0.72다. 단계가 적으면 그만큼만 쓰고,
   /// 많으면 여기까지만 커진 뒤 목록이 스크롤된다.
   static const _maxHeightRatio = 0.72;
+
+  /// 지금 끌고 있는 줄. 끌기가 시작되면 그 줄은 목록에서 빠지고 시트 위에 뜬
+  /// 사본으로 다시 그려지는데, 들린 상태를 넘겨주지 않으면 잡았다 놓는 사이에
+  /// 그림자가 한 번 꺼졌다 켜진다 (#274).
+  int? _draggingIndex;
 
   Future<void> _reorder(int oldIndex, int newIndex) async {
     // ReorderableListView는 아래로 옮길 때 제거 전 위치를 준다.
@@ -97,22 +105,24 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               buildDefaultDragHandles: false,
               // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
-              // 들린 카드를 제자리에서 살짝 띄우기만 한다.
-              proxyDecorator: (child, index, animation) => Material(
-                color: Colors.transparent,
-                elevation: 6,
-                borderRadius: BorderRadius.circular(16.r),
-                child: child,
-              ),
+              // 들어올림은 줄이 직접 그리므로 여기서는 자리만 잡아 준다 (#274).
+              proxyDecorator: (child, index, animation) =>
+                  Material(color: Colors.transparent, child: child),
               itemCount: _steps.length,
               onReorder: _reorder,
+              onReorderStart: (index) => setState(() => _draggingIndex = index),
+              onReorderEnd: (_) => setState(() => _draggingIndex = null),
               footer: _RewardRow(routine: widget.routine),
               itemBuilder: (context, index) {
                 final step = _steps[index];
                 return Padding(
                   key: ValueKey(step.id),
                   padding: EdgeInsets.only(bottom: 8.h),
-                  child: _StepRow(step: step, index: index),
+                  child: _StepRow(
+                    step: step,
+                    index: index,
+                    dragging: _draggingIndex == index,
+                  ),
                 );
               },
             ),
@@ -190,11 +200,89 @@ class _Header extends StatelessWidget {
 }
 
 /// 단계 한 줄 — 번호 뱃지 + 제목·설명 + 완료 표시 + 순서 손잡이.
-class _StepRow extends StatelessWidget {
-  const _StepRow({required this.step, required this.index});
+///
+/// **손잡이는 길게 눌러야 잡힌다** (#274). 닿는 즉시 끌리게 두면 목록을 스크롤하려던
+/// 손가락이 손잡이를 스치는 것만으로 순서가 바뀐다. 고칠 생각이 없었는데 일과가
+/// 바뀌고 서버로 전송까지 된다.
+///
+/// 누르고 있는 동안 줄이 **점점 떠오른다.** 예전에는 움직여야 그림자가 나타나서
+/// 누르는 내내 아무 일도 없다가 갑자기 뜨는 것처럼 보였다. 다 떠오른 순간이 곧
+/// 잡힌 순간이므로 진동으로 함께 알리고, 도중에 손을 떼면 제자리로 내려앉는다.
+class _StepRow extends StatefulWidget {
+  const _StepRow({
+    required this.step,
+    required this.index,
+    this.dragging = false,
+  });
 
   final ActionCard step;
   final int index;
+
+  /// 지금 끌려가는 중인가. 끌기가 시작되면 이 줄은 시트 위의 사본으로 다시
+  /// 그려지므로, 들린 상태로 시작하지 않으면 그림자가 한 번 깜빡인다.
+  final bool dragging;
+
+  @override
+  State<_StepRow> createState() => _StepRowState();
+}
+
+class _StepRowState extends State<_StepRow>
+    with SingleTickerProviderStateMixin {
+  /// 누르고 있는 정도(0~1).
+  ///
+  /// 길이를 [kLongPressTimeout]에 맞춘다. 이 값이 실제로 잡히는 시점과 어긋나면
+  /// 다 떠오른 뒤에도 안 잡히거나, 덜 떠오른 채로 잡혀 버린다.
+  late final AnimationController _lift = AnimationController(
+    vsync: this,
+    duration: kLongPressTimeout,
+    reverseDuration: AppMotion.fast,
+    value: widget.dragging ? 1 : 0,
+  )..addStatusListener(_onLiftStatus);
+
+  /// 진동을 한 번만 울리기 위한 표시.
+  bool _announced = false;
+
+  /// 다 들렸을 때 커지는 비율. 그림자가 주된 신호이고 크기는 거들 뿐이라 작게 준다.
+  static const _liftScale = 0.03;
+
+  void _onLiftStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed && !_announced) {
+      _announced = true;
+      HapticFeedback.mediumImpact();
+    } else if (status == AnimationStatus.dismissed) {
+      _announced = false;
+    }
+  }
+
+  @override
+  void didUpdateWidget(_StepRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.dragging == oldWidget.dragging) return;
+    if (widget.dragging) {
+      _lift.value = 1;
+    } else {
+      // 놓는 순간 되돌린다 — 손을 뗀 것과 같은 모습으로 내려앉는다.
+      _lift.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _lift.dispose();
+    super.dispose();
+  }
+
+  /// 들린 높이에 맞춘 그림자. 눌리지 않았으면 아예 그리지 않는다.
+  List<BoxShadow> _shadow(double t) {
+    if (t == 0) return const [];
+    return [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.16 * t),
+        blurRadius: 18 * t,
+        offset: Offset(0, 6 * t),
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -209,76 +297,101 @@ class _StepRow extends StatelessWidget {
       colors.stepBadge4,
     ];
 
-    return Row(
-      children: [
-        Container(
-          width: 40.w,
-          height: 68.h,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: palette[index % palette.length],
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          child: Text(
-            '${index + 1}',
-            style: typo.stepBadgeNumber.copyWith(color: colors.surface),
-          ),
-        ),
-        SizedBox(width: 4.w),
-        Expanded(
-          child: Container(
-            height: 68.h,
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            decoration: BoxDecoration(
-              color: colors.editChipBg,
-              borderRadius: BorderRadius.circular(16.r),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return AnimatedBuilder(
+      animation: _lift,
+      builder: (context, _) {
+        final t = _lift.value;
+        // 뱃지와 카드에 따로 그림자를 준다. 줄 전체를 한 덩어리로 감싸면
+        // 둘 사이 틈까지 사각형으로 덮인다.
+        final shadow = _shadow(t);
+
+        return Transform.scale(
+          scale: 1 + _liftScale * t,
+          child: Row(
+            children: [
+              Container(
+                width: 40.w,
+                height: 68.h,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: palette[widget.index % palette.length],
+                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: shadow,
+                ),
+                child: Text(
+                  '${widget.index + 1}',
+                  style: typo.stepBadgeNumber.copyWith(color: colors.surface),
+                ),
+              ),
+              SizedBox(width: 4.w),
+              Expanded(
+                child: Container(
+                  height: 68.h,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  decoration: BoxDecoration(
+                    color: colors.editChipBg,
+                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: shadow,
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        step.displayTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: typo.cardTitle.copyWith(
-                          color: colors.textPrimary,
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.step.displayTitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: typo.cardTitle.copyWith(
+                                color: colors.textPrimary,
+                              ),
+                            ),
+                            if (widget.step.description.isNotEmpty) ...[
+                              SizedBox(height: 2.h),
+                              Text(
+                                widget.step.description,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: typo.cardBody.copyWith(
+                                  color: colors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      if (step.description.isNotEmpty) ...[
-                        SizedBox(height: 2.h),
-                        Text(
-                          step.description,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: typo.cardBody.copyWith(
-                            color: colors.textSecondary,
+                      // 이룸이가 해낸 결과를 보여줄 뿐 여기서 체크하지 않는다.
+                      // 보호자가 대신 체크하면 "이룸이가 해냈다"는 기록이 아니게 된다.
+                      _CompletionMark(completed: widget.step.completed),
+                      SizedBox(width: 8.w),
+                      // 누르는 동안의 들어올림은 여기서 시작한다. 끌기 자체는
+                      // Delayed 쪽이 맡으므로 둘의 임계가 같아야 한다.
+                      Listener(
+                        // 아이콘 글리프에만 의존하면 빈틈이 생긴다. 손잡이는
+                        // 24px이라 그러잖아도 좁으므로 영역 전체로 받는다.
+                        behavior: HitTestBehavior.opaque,
+                        onPointerDown: (_) => _lift.forward(),
+                        onPointerUp: (_) => _lift.reverse(),
+                        onPointerCancel: (_) => _lift.reverse(),
+                        child: ReorderableDelayedDragStartListener(
+                          index: widget.index,
+                          child: Icon(
+                            Icons.drag_handle,
+                            size: 24.w,
+                            color: colors.textPlaceholder,
                           ),
                         ),
-                      ],
+                      ),
                     ],
                   ),
                 ),
-                // 이룸이가 해낸 결과를 보여줄 뿐 여기서 체크하지 않는다.
-                // 보호자가 대신 체크하면 "이룸이가 해냈다"는 기록이 아니게 된다.
-                _CompletionMark(completed: step.completed),
-                SizedBox(width: 8.w),
-                ReorderableDragStartListener(
-                  index: index,
-                  child: Icon(
-                    Icons.drag_handle,
-                    size: 24.w,
-                    color: colors.textPlaceholder,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
@@ -313,6 +426,11 @@ class _CompletionMark extends StatelessWidget {
 ///
 /// 빈 칸을 두면 "보상이 없다"가 아니라 "덜 만들어졌다"로 보인다. 보상을 여기서
 /// 정하게 하는 안도 검토했으나 그 부분 디자인이 아직 나오지 않아 미뤘다 (#266).
+///
+/// **별 뱃지를 두지 않는다** (#275). 단계 번호 자리에 별을 넣어 봤지만, 별은
+/// 이룸이가 일과를 끝냈을 때의 연출이라 뜻이 겹쳤다. 대신 앱이 다른 화면에서
+/// 이미 쓰는 `다 하면 ○○`을 그대로 쓴다 — 보상 줄임을 말로 알리는 쪽이
+/// 새 그림을 만드는 것보다 헷갈리지 않는다.
 class _RewardRow extends StatelessWidget {
   const _RewardRow({required this.routine});
 
@@ -327,39 +445,32 @@ class _RewardRow extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(top: 8.h),
-      child: Row(
-        children: [
-          Container(
-            width: 40.w,
-            height: 68.h,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: colors.textPrimary,
-              borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        height: 68.h,
+        // 단계와 달리 왼쪽 뱃지가 없으므로 줄 전체를 쓴다. 폭이 다른 것 자체가
+        // "이건 단계가 아니다"를 말해 준다.
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        decoration: BoxDecoration(
+          color: colors.editChipBg,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Row(
+          children: [
+            Text(
+              '다 하면',
+              style: typo.cardBody.copyWith(color: colors.textSecondary),
             ),
-            child: Text('⭐', style: TextStyle(fontSize: 24.sp)),
-          ),
-          SizedBox(width: 4.w),
-          Expanded(
-            child: Container(
-              height: 68.h,
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              alignment: Alignment.centerLeft,
-              decoration: BoxDecoration(
-                color: colors.editChipBg,
-                borderRadius: BorderRadius.circular(16.r),
-              ),
+            SizedBox(width: 8.w),
+            Expanded(
               child: Text(
-                // 왼쪽 별 뱃지가 이미 "보상 줄"임을 말해준다. 여기에 또 그림을
-                // 넣으면 한 줄에 별이 두 번 나온다 — 시안도 글자만 그린다 (#275).
                 routine.rewardText.trim(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: typo.cardTitle.copyWith(color: colors.textPrimary),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
