@@ -1,15 +1,47 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T17:53:01Z",
-    "currentVersion": "1.25.17",
+    "lastUpdated": "2026-09-21T18:43:17Z",
+    "currentVersion": "1.26.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 144
+    "totalReleases": 145
   },
   "releases": [
+    {
+      "version": "1.26.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 330,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 로그인 화면의 새싹이 반대쪽에 그려지던 문제 해결\n  * 로그인 화면의 구슬이 작게 나오고 빛이 빠지던 문제 해결\n  * 로그인 화면의 병아리가 짧게 눌려 보이던 문제 해결\n  * 카드 화면에서 카드 아래가 크게 비어 보이던 문제 해결\n  * 일과를 적을 때 추천 문구 한 줄이 빠져 있던 문제 해결\n\n* **개선**\n  * 로그인 버튼 문구를 `카카오로 로그인`처럼 다듬었습니다\n  * 카드 그림이 조금 더 크게 보입니다\n  * 일과를 적는 칸을 누르면 안내 문구가 비켜납니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "로그인 화면의 새싹이 반대쪽에 그려지던 문제 해결",
+            "로그인 화면의 구슬이 작게 나오고 빛이 빠지던 문제 해결",
+            "로그인 화면의 병아리가 짧게 눌려 보이던 문제 해결",
+            "카드 화면에서 카드 아래가 크게 비어 보이던 문제 해결",
+            "일과를 적을 때 추천 문구 한 줄이 빠져 있던 문제 해결"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "로그인 버튼 문구를 `카카오로 로그인`처럼 다듬었습니다",
+            "카드 그림이 조금 더 크게 보입니다",
+            "일과를 적는 칸을 누르면 안내 문구가 비켜납니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.25.17",
       "project_type": "flutter",

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.chuseok22'
-version = '1.25.17'
+version = '1.26.0'
 description = 'elum-server'
 
 java {
