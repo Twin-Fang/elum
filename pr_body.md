@@ -5,7 +5,7 @@
 ## 릴리스 노트
 
 * **버그 수정**
-  * 일과 만들기 화면들의 위쪽 여백이 좁아 보이던 문제를 고쳤어요
+  * 카드 확인 화면의 글자와 카드가 아래로 치우쳐 보이던 것을 바로잡았어요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
