@@ -48,14 +48,8 @@ void main() {
     });
 
     test('bool은 여러 표기를 받아들인다', () {
-      dotenv.loadFromString(envString: 'ELUM_USE_MOCK=false');
-      expect(AppConfig.useMock, isFalse);
 
-      dotenv.loadFromString(envString: 'ELUM_USE_MOCK=0');
-      expect(AppConfig.useMock, isFalse);
 
-      dotenv.loadFromString(envString: 'ELUM_USE_MOCK=yes');
-      expect(AppConfig.useMock, isTrue);
     });
   });
 }

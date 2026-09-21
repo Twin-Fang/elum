@@ -711,7 +711,6 @@ class _StatusView extends ConsumerWidget {
         const SizedBox(height: 16),
         const Text('설정값', style: TextStyle(fontWeight: FontWeight.bold)),
         _Row('API', AppConfig.apiBaseUrl),
-        _Row('Mock 사용', '${AppConfig.useMock}'),
         _Row('네트워크 로그', '${AppConfig.enableNetworkLog}'),
         _Row('온보딩 건너뛰기', '${AppConfig.skipOnboarding}'),
         _Row('DLP 최소 지연', '${AppConfig.dlpMinDelay.inMilliseconds}ms'),

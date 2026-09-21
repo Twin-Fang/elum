@@ -98,7 +98,6 @@ abstract final class DevStateDump {
         '개발자 도구': '${AppConfig.showDevTools}',
         '온보딩 건너뛰기': '${AppConfig.skipOnboarding}',
         '네트워크 로그': '${AppConfig.enableNetworkLog}',
-        'mock 사용': '${AppConfig.useMock}',
       };
 
   /// SharedPreferences에 실제로 들어 있는 **모든 키**를 읽는다.

@@ -18,6 +18,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
 
 /// 카드 수정 바텀시트 · 카드확인/아이 상세 Figma 정합 (이슈 #77) ·
@@ -87,6 +88,7 @@ void main() {
     ProviderContainer containerWith(_FakeRepo repo) {
       final container = ProviderContainer(
         overrides: [
+          offlineDioOverride(),
           testStorageOverride(onboardingCompleted: true),
           routineRepositoryProvider.overrideWithValue(repo),
         ],
@@ -155,15 +157,14 @@ void main() {
 
       return ProviderScope(
         overrides: [
+          offlineDioOverride(),
           testStorageOverride(onboardingCompleted: true),
           routineRepositoryProvider.overrideWithValue(repo),
         ],
         child: ScreenUtilInit(
           designSize: const Size(393, 852),
-          builder: (context, _) => MaterialApp.router(
-            theme: AppTheme.light,
-            routerConfig: router,
-          ),
+          builder: (context, _) =>
+              MaterialApp.router(theme: AppTheme.light, routerConfig: router),
         ),
       );
     }
@@ -173,9 +174,12 @@ void main() {
     Future<void> pumpReview(WidgetTester tester, _FakeRepo repo) async {
       await tester.pumpWidget(wrap(repo));
       final context = tester.element(find.byType(CardReviewScreen));
-      ProviderScope.containerOf(context, listen: false)
-          .read(routineFlowProvider.notifier)
-          .state = const RoutineFlowState(routine: routine);
+      ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(routineFlowProvider.notifier).state = const RoutineFlowState(
+        routine: routine,
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
     }
@@ -244,9 +248,12 @@ void main() {
 
       await tester.pumpWidget(wrap(_FakeRepo(synced: true)));
       final context = tester.element(find.byType(CardReviewScreen));
-      ProviderScope.containerOf(context, listen: false)
-          .read(routineFlowProvider.notifier)
-          .state = const RoutineFlowState(routine: titleless);
+      ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(routineFlowProvider.notifier).state = const RoutineFlowState(
+        routine: titleless,
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -255,10 +262,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
 
       // 제목칸(첫 필드)이 비어 있어야 한다 — description이 새어들지 않았다
-      final titleField =
-          tester.widget<TextField>(find.byType(TextField).first);
-      expect(titleField.controller?.text, isEmpty,
-          reason: 'title 없는 카드는 제목칸이 비어 열려야 한다');
+      final titleField = tester.widget<TextField>(find.byType(TextField).first);
+      expect(
+        titleField.controller?.text,
+        isEmpty,
+        reason: 'title 없는 카드는 제목칸이 비어 열려야 한다',
+      );
       // 저장 버튼은 제목이 비어 비활성 — 제목=설명으로 저장될 수 없다
       final saveButton = find.text('저장하기').last;
       expect(saveButton, findsOneWidget);
@@ -277,8 +286,11 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(find.text('카드 고치기'), findsOneWidget,
-          reason: '빈 제목으로는 저장되지 않고 시트가 남는다');
+      expect(
+        find.text('카드 고치기'),
+        findsOneWidget,
+        reason: '빈 제목으로는 저장되지 않고 시트가 남는다',
+      );
     });
 
     testWidgets('서버 반영 실패 시 에러 코드를 보여준다', (tester) async {
@@ -298,7 +310,10 @@ void main() {
   group('아이 일과 상세 상단바 (Figma 309:3548, 2026-07-22 시안)', () {
     Widget wrapDetail() {
       return ProviderScope(
-        overrides: [testStorageOverride(onboardingCompleted: true)],
+        overrides: [
+          offlineDioOverride(),
+          testStorageOverride(onboardingCompleted: true),
+        ],
         child: ScreenUtilInit(
           designSize: const Size(393, 852),
           builder: (context, _) => MaterialApp(
@@ -316,6 +331,10 @@ void main() {
       expect(find.text('비 오는 날 학교에 가요'), findsOneWidget);
       // ignore: deprecated_member_use_from_same_package
       expect(svgWithAsset(AppAssets.characterBadgeRuru), findsNothing);
+
+      // 진행 동기화가 500ms 디바운스 타이머를 건다. 흘려보내지 않고 화면을
+      // 내리면 "Timer is still pending"으로 테스트가 깨진다.
+      await tester.pump(const Duration(milliseconds: 600));
     });
   });
 }
@@ -358,8 +377,7 @@ class _FakeRepo with FakeRewardApi implements RoutineRepository {
     List<String> answers = const [],
     String rewardText = '',
     String rewardPresetKey = '',
-  }) async =>
-      const Routine(id: 'r1');
+  }) async => const Routine(id: 'r1');
 
   @override
   Future<RoutineQuestion> generateQuestion(String rawInputText) async =>

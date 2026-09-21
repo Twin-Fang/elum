@@ -17,8 +17,10 @@ abstract final class AppConfig {
     try {
       await dotenv.load(fileName: '.env');
     } catch (e) {
-      debugPrint('[config] .env 없음 → 기본값으로 동작한다. '
-          '.env.example을 복사해 .env를 만들 것. ($e)');
+      debugPrint(
+        '[config] .env 없음 → 기본값으로 동작한다. '
+        '.env.example을 복사해 .env를 만들 것. ($e)',
+      );
     }
   }
 
@@ -123,16 +125,6 @@ abstract final class AppConfig {
   /// 개발용 APK는 릴리스 빌드라, `kDebugMode`만 보면 늘 꺼져 있었다.
   static bool get enableNetworkLog =>
       (kDebugMode || showDevTools) && _bool('ELUM_ENABLE_NETWORK_LOG', true);
-
-  /// 서버 대신 mock 데이터를 쓸지. 서버 준비 전 개발·데모용.
-  ///
-  /// ⚠️ **릴리스 빌드에서는 `.env` 값과 무관하게 꺼진다** (개발용 빌드 제외).
-  /// 기본값이 `true`라서, 설정이 누락되면 mock으로 도는 APK가 나갈 수 있었다.
-  ///
-  /// `kDebugMode`를 함께 허용하는 이유는 **개발과 테스트를 막지 않기 위해서**다.
-  /// 차단해야 하는 것은 "릴리스로 빌드된 제출·배포용 APK"뿐이다.
-  static bool get useMock =>
-      (kDebugMode || isDevBuild) && _bool('ELUM_USE_MOCK', true);
 
   /// 개발자 도구 오버레이(플로팅 버튼)를 띄울지.
   ///

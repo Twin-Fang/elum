@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/storage/local_storage.dart';
@@ -11,7 +10,6 @@ import '../../../shared/models/routine.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/support_goal.dart';
 import '../domain/routine_suggestion.dart';
-import 'demo_cards.dart';
 import 'member_repository.dart';
 
 /// 일과 저장소.
@@ -113,15 +111,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
   Future<List<Routine>> getMyRoutines() async {
     AppLogger.repositoryCall('RoutineRepository', 'getMyRoutines');
 
-    if (AppConfig.useMock) {
-      AppLogger.repositorySuccess(
-        'RoutineRepository',
-        'getMyRoutines',
-        '모의 데이터',
-      );
-      return const [];
-    }
-
     try {
       final res = await _dio.get<List<dynamic>>('/api/routines');
       final body = res.data;
@@ -147,15 +136,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
   @override
   Future<List<RoutineSuggestion>> getSuggestions() async {
     AppLogger.repositoryCall('RoutineRepository', 'getSuggestions');
-
-    if (AppConfig.useMock) {
-      AppLogger.repositorySuccess(
-        'RoutineRepository',
-        'getSuggestions',
-        '모의 데이터 ${RoutineSuggestion.fallback.length}개',
-      );
-      return RoutineSuggestion.fallback;
-    }
 
     try {
       final res = await _dio.get<List<dynamic>>('/api/routines/suggestions');
@@ -188,16 +168,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'rawInputText': rawInputText,
     });
 
-    if (AppConfig.useMock) {
-      final mock = _mockQuestion();
-      AppLogger.repositorySuccess(
-        'RoutineRepository',
-        'generateQuestion',
-        mock,
-      );
-      return mock;
-    }
-
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/api/routines/questions',
@@ -217,7 +187,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
       AppLogger.repositoryError('RoutineRepository', 'generateQuestion', e);
     }
 
-    final mock = _mockQuestion();
+    final mock = _fallbackQuestion();
     AppLogger.repositorySuccess(
       'RoutineRepository',
       'generateQuestion (fallback)',
@@ -241,18 +211,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
       // 보상 내용은 보호자가 적은 자유 문구라 로그에 남기지 않는다 (docs 원칙 5번).
       'hasReward': rewardText.trim().isNotEmpty,
     });
-
-    // mock 모드에서만 로컬 데모 일과를 쓴다. 실서버 모드는 절대 가짜 일과를 만들지 않는다
-    // — 'local' id로 confirm하면 404가 나고, 아이 모드에 뜨지 않는 유령 일과가 생긴다(데이터 정합성).
-    if (AppConfig.useMock) {
-      final routine = _localRoutine(rawInputText, goals);
-      AppLogger.repositorySuccess(
-        'RoutineRepository',
-        'createRoutine (mock)',
-        '${routine.steps.length}개 카드 mock 생성됨',
-      );
-      return routine;
-    }
 
     final res = await _dio.post<Map<String, dynamic>>(
       '/api/routines',
@@ -299,7 +257,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'routineId': routine.id,
     });
 
-    if (!AppConfig.useMock && routine.id.isNotEmpty) {
+    if (routine.id.isNotEmpty) {
       try {
         final res = await _dio.patch<Map<String, dynamic>>(
           '/api/routines/${routine.id}/confirm',
@@ -343,7 +301,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
     // 서버로 보내려 했는데 실패했는가 — 성공·mock과 구분해야 화면이 안내할 수 있다
     var serverFailed = false;
 
-    if (!AppConfig.useMock && routine.id.isNotEmpty) {
+    if (routine.id.isNotEmpty) {
       try {
         final res = await _dio.patch<Map<String, dynamic>>(
           '/api/routines/${routine.id}/steps/$stepId',
@@ -386,15 +344,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
   @override
   Future<List<Routine>> getTodayRoutines() async {
     AppLogger.repositoryCall('RoutineRepository', 'getTodayRoutines');
-
-    if (AppConfig.useMock) {
-      AppLogger.repositorySuccess(
-        'RoutineRepository',
-        'getTodayRoutines',
-        '모의 데이터',
-      );
-      return const [];
-    }
 
     try {
       final res = await _dio.get<List<dynamic>>('/api/routines/today');
@@ -457,7 +406,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
     var serverFailed = false;
 
-    if (!AppConfig.useMock && routine.id.isNotEmpty) {
+    if (routine.id.isNotEmpty) {
       try {
         final res = await _dio.patch<Map<String, dynamic>>(
           '/api/routines/${routine.id}/reward',
@@ -496,8 +445,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
   Future<List<RecentReward>> getRecentRewards() async {
     AppLogger.repositoryCall('RoutineRepository', 'getRecentRewards');
 
-    if (AppConfig.useMock) return const [];
-
     try {
       final res = await _dio.get<List<dynamic>>('/api/routines/recent-rewards');
       final rewards =
@@ -521,23 +468,17 @@ class RoutineRepositoryImpl implements RoutineRepository {
   }
 
   @override
-  Future<List<Routine>> getPastRoutines() => _fetchRoutineList(
-    '/api/routines/past',
-    'getPastRoutines',
-  );
+  Future<List<Routine>> getPastRoutines() =>
+      _fetchRoutineList('/api/routines/past', 'getPastRoutines');
 
   @override
-  Future<List<Routine>> getDraftRoutines() => _fetchRoutineList(
-    '/api/routines/drafts',
-    'getDraftRoutines',
-  );
+  Future<List<Routine>> getDraftRoutines() =>
+      _fetchRoutineList('/api/routines/drafts', 'getDraftRoutines');
 
   /// 목록 조회 3종이 같은 모양이라 한 곳에 모았다.
   /// **실패하면 빈 목록이다.** 홈 화면의 한 구역이 비는 것뿐이라 화면은 살아 있다.
   Future<List<Routine>> _fetchRoutineList(String path, String label) async {
     AppLogger.repositoryCall('RoutineRepository', label);
-
-    if (AppConfig.useMock) return const [];
 
     try {
       final res = await _dio.get<List<dynamic>>(path);
@@ -565,7 +506,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'routineId': routineId,
     });
 
-    if (AppConfig.useMock || routineId.isEmpty) return null;
+    if (routineId.isEmpty) return null;
 
     try {
       final res = await _dio.post<Map<String, dynamic>>(
@@ -593,7 +534,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
     });
 
     if (routineIds.isEmpty) return true;
-    if (AppConfig.useMock) return true;
 
     try {
       await _dio.patch<void>(
@@ -616,7 +556,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
     });
 
     if (routineId.isEmpty) return false;
-    if (AppConfig.useMock) return true;
 
     try {
       await _dio.delete<void>('/api/routines/$routineId');
@@ -652,7 +591,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
   /// 선택지 앞의 이모지는 **서버가 유니코드로 함께 내려준다.** 클라이언트가
   /// 붙이지 않는다 — 선택지는 AI가 생성해 값이 고정되지 않으므로 매핑이 불가능하다.
   /// 폴백도 실제 응답과 같은 모양이어야 서버가 죽었을 때만 화면이 달라 보이지 않는다.
-  RoutineQuestion _mockQuestion() => const RoutineQuestion(
+  RoutineQuestion _fallbackQuestion() => const RoutineQuestion(
     isRequired: true,
     questions: [
       QuestionItem(
@@ -670,16 +609,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
   /// 서버 없이도 데모가 성립하도록 로컬에서 일과를 구성한다.
   /// DLP 마스킹도 여기서 흉내낸다 — 발표에서 전/후 비교를 보여줘야 하기 때문이다.
-  Routine _localRoutine(String rawInputText, Set<SupportGoal> goals) {
-    return Routine(
-      id: 'local',
-      title: '비 오는 날 학교 가기',
-      rawInputText: rawInputText,
-      sanitizedInputText: LocalDlp.mask(rawInputText),
-      status: 'PENDING_REVIEW',
-      steps: DemoCards.forGoals(goals),
-    );
-  }
 }
 
 /// 서버가 없을 때 쓰는 로컬 마스킹.

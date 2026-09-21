@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
-import '../../../../core/config/app_config.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../onboarding/domain/character.dart';
 import '../../data/card_image_repository.dart';
@@ -17,11 +16,7 @@ import '../../data/card_image_repository.dart';
 /// 실패하면 캐릭터 일러스트로 대체한다. 자리를 비우면 카드 비율이 무너지고,
 /// 아동에게 깨진 이미지 아이콘을 보여줄 수는 없다.
 class CardImage extends ConsumerWidget {
-  const CardImage({
-    super.key,
-    required this.routineId,
-    required this.stepId,
-  });
+  const CardImage({super.key, required this.routineId, required this.stepId});
 
   final String routineId;
   final String stepId;
@@ -33,11 +28,9 @@ class CardImage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 로컬 카드(mock)는 서버에 이미지가 없다. 요청 자체를 하지 않는다.
-    final canFetch = !AppConfig.useMock &&
-        routineId.isNotEmpty &&
-        routineId != 'local' &&
-        stepId.isNotEmpty;
+    // 아직 서버에 저장되지 않은 카드는 이미지도 없다. 요청 자체를 하지 않는다.
+    final canFetch =
+        routineId.isNotEmpty && routineId != 'local' && stepId.isNotEmpty;
 
     if (!canFetch) return const _Fallback();
 

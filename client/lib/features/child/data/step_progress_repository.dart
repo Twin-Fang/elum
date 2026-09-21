@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/config/app_config.dart';
 import '../../../core/network/dio_client.dart';
 
 /// 서버가 완료 집합을 받아들였는가.
@@ -30,7 +29,6 @@ class StepProgressRepository {
     required Set<String> completedStepIds,
   }) async {
     // 로컬 카드(mock)는 서버에 없다. 보낼 곳이 없으므로 반영된 것으로 본다.
-    if (AppConfig.useMock) return SyncOutcome.accepted;
 
     try {
       await _dio.put<dynamic>(

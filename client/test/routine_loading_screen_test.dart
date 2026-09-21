@@ -9,6 +9,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/fake_dio.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
@@ -34,13 +35,26 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [testStorageOverride(onboardingCompleted: true)],
+      overrides: [
+        // mock을 걷어낸 뒤(#263) 이 화면은 실제로 서버를 부른다. 무엇이 온다고
+        // 가정하는지 테스트 안에 드러내 둔다.
+        fakeDioOverride(const {
+          'POST /api/routines/questions': {'questions': []},
+          'POST /api/routines': {
+            'id': 'r1',
+            'title': '테스트 일과',
+            'status': 'PENDING_REVIEW',
+            'steps': [
+              {'id': 'c1', 'stepOrder': 1, 'description': '첫 단계'},
+            ],
+          },
+        }),
+        testStorageOverride(onboardingCompleted: true),
+      ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
-        builder: (context, _) => MaterialApp.router(
-          theme: AppTheme.light,
-          routerConfig: router,
-        ),
+        builder: (context, _) =>
+            MaterialApp.router(theme: AppTheme.light, routerConfig: router),
       ),
     );
   }
@@ -52,9 +66,8 @@ void main() {
   }
 
   /// 모든 스텝의 노출시간을 합친 값 — 이만큼 지나야 화면이 넘어갈 수 있다
-  Duration totalHold(RoutineLoadingKind kind) => kind.stages
-      .map((s) => s.hold)
-      .fold(Duration.zero, (a, b) => a + b);
+  Duration totalHold(RoutineLoadingKind kind) =>
+      kind.stages.map((s) => s.hold).fold(Duration.zero, (a, b) => a + b);
 
   group('prepare 로딩 (262:4569)', () {
     testWidgets('Figma 문구가 보인다', (tester) async {
@@ -74,11 +87,7 @@ void main() {
       // 기준은 **렌더된 PNG**다.
       expect(
         RoutineLoadingKind.prepare.stages.map((s) => s.label).toList(),
-        const [
-          '이룸이를 알아볼 수 있는 정보는 가려요',
-          '꼭 필요한 내용만 정리해요',
-          '추가 질문을 생각하고 있어요',
-        ],
+        const ['이룸이를 알아볼 수 있는 정보는 가려요', '꼭 필요한 내용만 정리해요', '추가 질문을 생각하고 있어요'],
       );
     });
 
@@ -159,11 +168,7 @@ void main() {
       // 첫 두 스텝만 지난 시점 — 아직 마지막 스텝이 남았다
       await tester.pump(stages[0].hold + stages[1].hold);
       await settle(tester);
-      expect(
-        find.text('카드 확인'),
-        findsNothing,
-        reason: '노출시간이 남았는데 화면이 넘어갔다',
-      );
+      expect(find.text('카드 확인'), findsNothing, reason: '노출시간이 남았는데 화면이 넘어갔다');
 
       // 마지막 스텝까지 채우면 그제서야 넘어간다
       await tester.pump(stages[2].hold);
@@ -323,10 +328,9 @@ void main() {
 /// [label] 줄의 현재 투명도. 스텝이 실제로 보이는지 판단하는 기준이다.
 double opacityOf(WidgetTester tester, String label) {
   final opacity = tester.widget<AnimatedOpacity>(
-    find.ancestor(
-      of: find.text(label),
-      matching: find.byType(AnimatedOpacity),
-    ).first,
+    find
+        .ancestor(of: find.text(label), matching: find.byType(AnimatedOpacity))
+        .first,
   );
   return opacity.opacity;
 }

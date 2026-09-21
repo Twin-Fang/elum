@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,16 +13,11 @@ import 'package:flutter_test/flutter_test.dart';
 /// 유령 일과가 됐다(데이터 정합성 문제). 이제 실패하면 예외를 던지고,
 /// notifier가 에러 상태로 전환해 **AI 재호출(재시도)** 로만 복구한다.
 ///
-/// 이 테스트는 `useMock=false`인 실제 경로를 검증한다 — mock을 켜면 서버를 아예
-/// 타지 않아 실패 경로를 확인할 수 없다.
 void main() {
   late _FakeAdapter adapter;
   late RoutineRepositoryImpl repo;
 
   setUp(() {
-    // 실제 서버 경로를 검증한다. mock이 켜지면 요청 자체를 하지 않아
-    // fallback이 도는지 확인할 수 없다.
-    dotenv.loadFromString(envString: 'ELUM_USE_MOCK=false');
 
     adapter = _FakeAdapter();
     final dio = Dio(BaseOptions(baseUrl: 'https://test.local'))
