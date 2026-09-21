@@ -440,6 +440,17 @@ class _CheckButton extends StatelessWidget {
               border: isChecked
                   ? null
                   : Border.all(color: colors.checkPending, width: 8.w),
+              // 채워진 뒤에만 그림자가 붙는다 (시안 `309:3682` — 0 2 5 · 5%).
+              // 카드가 쓰는 것과 같은 그림자다.
+              boxShadow: isChecked
+                  ? [
+                      BoxShadow(
+                        color: colors.glassShadow,
+                        blurRadius: 5.w,
+                        offset: Offset(0, 2.h),
+                      ),
+                    ]
+                  : null,
             ),
             // **`Icons.check_rounded`가 아니다.** 그건 획이 가늘어 시안과 나란히
             // 놓으면 진한 픽셀이 607 대 212로 벌어진다. 시안(`993:4331`)은

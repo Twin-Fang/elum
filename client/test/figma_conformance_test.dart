@@ -1274,7 +1274,7 @@ void main() {
   ///
   /// **카드 안 그림은 AI 가 만든다** — 시험에는 없으므로 대체 일러스트가 뜬다.
   /// 그 사각형은 차이로 남는 것이 맞다. 볼 것은 상단바·카드 틀·문구·체크 단추다.
-  Widget wrapCardDetail() => ProviderScope(
+  Widget wrapCardDetail({bool completed = false}) => ProviderScope(
     overrides: [
       offlineDioOverride(),
       testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
@@ -1297,7 +1297,7 @@ void main() {
           routes: [
             GoRoute(
               path: Routes.childRoutineDetail,
-              builder: (context, state) => const ChildRoutineDetailScreen(
+              builder: (context, state) => ChildRoutineDetailScreen(
                 routine: Routine(
                   id: 'd1',
                   title: '비 오는 날 학교에 가요',
@@ -1308,6 +1308,7 @@ void main() {
                       stepOrder: 1,
                       title: '옷을 입어요',
                       description: '학교에 입고 갈 옷을 차례대로 입어요',
+                      completed: completed,
                     ),
                   ],
                 ),
@@ -1335,9 +1336,20 @@ void main() {
     );
   });
 
-  // 체크한 뒤(`309:3648`)는 **대조에 올리지 않는다.** 체크하면 색종이가 터지는데
-  // 조각 자리가 매번 무작위라 돌릴 때마다 0.1%씩 흔들려 골든이 스스로 깨진다.
-  // 체크 단추 색은 `child_screens_golden_test.dart`가 회귀로 잡는다.
+  // 체크한 뒤(`309:3648`)도 올린다. **누르지 않고 체크된 채로 그린다** —
+  // 누르면 색종이가 터지고 조각 자리가 매번 무작위라 골든이 스스로 깨진다.
+  // `completed`가 참인 카드는 기록 없이도 체크로 보이므로(`isChecked`) 그 길을 쓴다.
+  testWidgets('이룸이 카드 — 체크한 뒤 (Figma 309:3648)', (tester) async {
+    await tester.pumpWidget(wrapCardDetail(completed: true));
+    await tester.pump();
+    await precacheAllImages(tester);
+    await tester.pump(const Duration(milliseconds: 600));
+
+    await expectLater(
+      find.byType(ChildRoutineDetailScreen),
+      matchesGoldenFile('figma/childhome_309-3648.png'),
+    );
+  });
 
   /// 로딩 화면. 시안 `262:4569`(정리 중) · `262:4703`(카드 만드는 중).
   ///
