@@ -91,14 +91,26 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
   /// 소리를 낼 수 없을 때. 아동은 못 읽지만 보호자가 제보할 때 필요하다.
   void _showFailure() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('소리를 재생할 수 없어요 (E-TTS)')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('소리를 재생할 수 없어요 (E-TTS)')));
   }
 
   Future<void> _save() async {
-    // 승인해야 아동 화면에 나간다
-    await ref.read(routineFlowProvider.notifier).confirm();
+    // 저장해야 이룸이 화면에 나간다.
+    try {
+      await ref.read(routineFlowProvider.notifier).confirm();
+    } catch (e) {
+      // **실패하면 홈으로 보내지 않는다.** 홈으로 가면 저장된 것처럼 보이는데,
+      // 정작 이룸이 휴대폰에는 아무것도 뜨지 않는다. 그때 보호자가 의심할 곳은
+      // 앱이 아니라 이룸이다.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('일과를 저장하지 못했어요. 다시 해주세요 (E-CONFIRM)')),
+        );
+      }
+      return;
+    }
     if (mounted) context.go(Routes.guardian);
   }
 
@@ -116,7 +128,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     // 저장 없이 닫았다 — 아무것도 바꾸지 않는다
     if (edited == null || !mounted) return;
 
-    final synced = await ref.read(routineFlowProvider.notifier).updateStep(
+    final synced = await ref
+        .read(routineFlowProvider.notifier)
+        .updateStep(
           stepId: card.id,
           title: edited.title,
           description: edited.description,
@@ -140,10 +154,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
     // 만들어진 카드가 없으면 확인할 것이 없다. 홈으로 돌려보낸다.
     if (cards.isEmpty) {
-      return const RoutineFlowScaffold(
-        showAurora: false,
-        child: _EmptyCards(),
-      );
+      return const RoutineFlowScaffold(showAurora: false, child: _EmptyCards());
     }
 
     return RoutineFlowScaffold(
@@ -164,8 +175,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
           SizedBox(height: space.md),
           Text(
             '카드 ${cards.length}개를 만들었어요',
-            style: context.typo.reviewTitle
-                .copyWith(color: context.colors.textPrimary),
+            style: context.typo.reviewTitle.copyWith(
+              color: context.colors.textPrimary,
+            ),
           ),
           SizedBox(height: space.lg),
           Expanded(
@@ -186,8 +198,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
                   // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
                   onDelete: cards.length > 1
                       ? () => ref
-                          .read(routineFlowProvider.notifier)
-                          .removeStep(cards[index].id)
+                            .read(routineFlowProvider.notifier)
+                            .removeStep(cards[index].id)
                       : null,
                 ),
               ),
@@ -196,16 +208,13 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
           SizedBox(height: space.md),
           // 보상 줄 — 정한 것을 보여주고, 건너뛰었으면 여기서 정할 수 있다 (#239).
           _RewardRow(
-            reward: routine?.hasReward ?? false
-                ? routine!.rewardDisplay
-                : null,
+            reward: routine?.hasReward ?? false ? routine!.rewardDisplay : null,
             onTap: () => context.push(Routes.routineReward, extra: true),
           ),
           SizedBox(height: space.md),
           // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
           _EditChip(
-            onTap: () =>
-                _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),
+            onTap: () => _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),
           ),
           SizedBox(height: space.md),
         ],
@@ -234,8 +243,9 @@ class _EditChip extends StatelessWidget {
         ),
         child: Text(
           '이 카드 고치기',
-          style: context.typo.editChipLabel
-              .copyWith(color: context.colors.editChipLabel),
+          style: context.typo.editChipLabel.copyWith(
+            color: context.colors.editChipLabel,
+          ),
         ),
       ),
     );
@@ -257,15 +267,17 @@ class _EmptyCards extends StatelessWidget {
             Text(
               '만들어진 카드가 없어요',
               textAlign: TextAlign.center,
-              style: context.typo.promptTitle
-                  .copyWith(color: context.colors.textPrimary),
+              style: context.typo.promptTitle.copyWith(
+                color: context.colors.textPrimary,
+              ),
             ),
             SizedBox(height: context.space.md),
             Text(
               // 에러 코드를 함께 보여줘야 제보를 추적할 수 있다
               '다시 만들어 주세요 (E-CARD)',
-              style: context.typo.promptBody
-                  .copyWith(color: context.colors.promptMuted),
+              style: context.typo.promptBody.copyWith(
+                color: context.colors.promptMuted,
+              ),
             ),
           ],
         ),
@@ -298,10 +310,7 @@ class _RewardRow extends StatelessWidget {
     return AppPressable(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: _padV.h,
-          horizontal: _padH.w,
-        ),
+        padding: EdgeInsets.symmetric(vertical: _padV.h, horizontal: _padH.w),
         decoration: BoxDecoration(
           color: has ? colors.rewardBannerBg : colors.editChipBg,
           borderRadius: BorderRadius.circular(_radius.r),
@@ -311,9 +320,7 @@ class _RewardRow extends StatelessWidget {
           children: [
             Text(
               has ? '다 하면 $reward' : '보상 정하기',
-              style: context.typo.chipLabel.copyWith(
-                color: colors.textPrimary,
-              ),
+              style: context.typo.chipLabel.copyWith(color: colors.textPrimary),
             ),
             SizedBox(width: context.space.xs.w),
             Icon(

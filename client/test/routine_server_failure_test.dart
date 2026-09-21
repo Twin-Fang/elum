@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/routine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 서버 실패 시 클라이언트가 **로컬 가짜 일과를 만들지 않는지** 고정한다.
@@ -18,7 +19,6 @@ void main() {
   late RoutineRepositoryImpl repo;
 
   setUp(() {
-
     adapter = _FakeAdapter();
     final dio = Dio(BaseOptions(baseUrl: 'https://test.local'))
       ..httpClientAdapter = adapter;
@@ -89,6 +89,38 @@ void main() {
 
       expect(question.canAsk, isTrue);
       expect(question.askable, isNotEmpty);
+    });
+  });
+
+  group('승인이 실패할 때 (이슈 #264)', () {
+    test('로컬 승인으로 덮지 않고 예외를 던진다', () async {
+      // 예전에는 실패해도 로컬에서 status를 CONFIRMED로 바꿔 돌려줬다.
+      // 그러면 보호자 화면은 승인됐는데 서버엔 반영이 없어, 이룸이 휴대폰에는
+      // 아무것도 뜨지 않는다. 그때 보호자가 의심할 곳은 앱이 아니라 이룸이다.
+      adapter.stub(502, {'errorCode': 'INTERNAL_ERROR'});
+
+      expect(
+        () => repo.confirm(const Routine(id: 'r1', status: 'PENDING_REVIEW')),
+        throwsA(anything),
+      );
+    });
+
+    test('서버에 없는 일과는 승인을 시도하지 않는다', () async {
+      // id가 비면 /api/routines//confirm 이 되어 엉뚱한 404가 난다.
+      expect(
+        () => repo.confirm(const Routine(id: '', status: 'PENDING_REVIEW')),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('성공하면 서버가 준 상태를 그대로 쓴다', () async {
+      adapter.stub(200, {'id': 'r1', 'title': '아침 준비', 'status': 'CONFIRMED'});
+
+      final confirmed = await repo.confirm(
+        const Routine(id: 'r1', status: 'PENDING_REVIEW'),
+      );
+
+      expect(confirmed.status, 'CONFIRMED');
     });
   });
 

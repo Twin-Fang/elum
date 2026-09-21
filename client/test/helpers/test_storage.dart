@@ -42,11 +42,11 @@ class _NoopMemberRepository extends MemberRepository {
   _NoopMemberRepository() : super(dio: Dio());
 
   @override
-  Future<void> updateNickname(String nickname) async {}
+  Future<bool> updateNickname(String nickname) async => true;
 
   @override
-  Future<void> updateSupportGoals(List<String> goals) async {}
+  Future<bool> updateSupportGoals(List<String> goals) async => true;
 
   @override
-  Future<void> updateCharacter(String character) async {}
+  Future<bool> updateCharacter(String character) async => true;
 }

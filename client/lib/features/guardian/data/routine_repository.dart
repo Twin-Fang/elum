@@ -257,32 +257,29 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'routineId': routine.id,
     });
 
-    if (routine.id.isNotEmpty) {
-      try {
-        final res = await _dio.patch<Map<String, dynamic>>(
-          '/api/routines/${routine.id}/confirm',
-        );
-        final body = res.data;
-        if (body != null) {
-          final confirmed = Routine.fromJson(body);
-          AppLogger.repositorySuccess(
-            'RoutineRepository',
-            'confirm',
-            '일과 승인 완료',
-          );
-          return confirmed;
-        }
-      } catch (e) {
-        AppLogger.repositoryError('RoutineRepository', 'confirm', e);
-      }
+    // 승인은 **서버에 반영돼야 뜻이 있다.** 이룸이 화면에 카드를 노출할지를
+    // 정하는 동작이라(docs 원칙 3번), 로컬만 CONFIRMED로 바꿔 두면 보호자는
+    // 승인했다고 믿는데 이룸이 휴대폰에는 아무것도 뜨지 않는다.
+    // 그때 보호자가 의심할 곳은 앱이 아니라 이룸이다.
+    if (routine.id.isEmpty) {
+      AppLogger.repositoryError(
+        'RoutineRepository',
+        'confirm',
+        '서버에 저장되지 않은 일과는 승인할 수 없다',
+      );
+      throw StateError('승인할 일과가 서버에 없습니다');
     }
 
-    final confirmed = routine.copyWith(status: 'CONFIRMED');
-    AppLogger.repositorySuccess(
-      'RoutineRepository',
-      'confirm (로컬)',
-      '로컬 상태로 일과 승인 처리',
+    final res = await _dio.patch<Map<String, dynamic>>(
+      '/api/routines/${routine.id}/confirm',
     );
+    final body = res.data;
+    if (body == null) {
+      throw StateError('승인 응답이 비어 있습니다');
+    }
+
+    final confirmed = Routine.fromJson(body);
+    AppLogger.repositorySuccess('RoutineRepository', 'confirm', '일과 승인 완료');
     return confirmed;
   }
 
