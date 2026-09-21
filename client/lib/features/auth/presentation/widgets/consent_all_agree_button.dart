@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -25,6 +27,15 @@ class ConsentAllAgreeButton extends StatelessWidget {
   /// 체크(16)와 문구 사이 (75 - 51 - 16)
   static const _checkToLabel = 8.0;
 
+  /// 상자 왼쪽 → 체크 (Figma x=51). **가운데 정렬이 아니다** — 가운데로 두면
+  /// 글자 폭이 시안과 조금만 달라도 통째로 밀린다. 실제로 6이 밀려 있었다 (#297).
+  static const _checkLeft = 51.0;
+
+  /// 체크 상자와 그 안 획 (Figma `726:4843` Union 13.09×9.75)
+  static const _checkBox = 16.0;
+  static const _checkMarkW = 13.09;
+  static const _checkMarkH = 9.75;
+
   final bool checked;
   final VoidCallback onTap;
 
@@ -48,12 +59,24 @@ class ConsentAllAgreeButton extends StatelessWidget {
           border: Border.all(color: point, width: space.selectedBorderWidth),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.check,
-              size: space.md.w,
-              color: checked ? colors.surface : point,
+            // 테두리가 안쪽 자리를 그만큼 먹는다 — 빼 주지 않으면 2가 밀린다
+            SizedBox(width: (_checkLeft - space.selectedBorderWidth).w),
+            // Material 체크는 획 끝이 달라 시안과 다르게 보인다 — 같은 에셋을 쓴다
+            SizedBox(
+              width: _checkBox.w,
+              height: _checkBox.w,
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.iconCheckMark,
+                  width: _checkMarkW.w,
+                  height: _checkMarkH.w,
+                  colorFilter: ColorFilter.mode(
+                    checked ? colors.surface : point,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
             ),
             SizedBox(width: _checkToLabel.w),
             Text(

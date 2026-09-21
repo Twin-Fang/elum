@@ -1,6 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -45,6 +49,13 @@ class ConsentRow extends StatelessWidget {
   /// 그보다 넓어 **`필`/`수`로 줄바꿈된다.** 자리를 38로 잡아 한 줄로 둔다.
   static const _badgeSlot = 38.0;
 
+  /// 화살표 상자 (24×24) 오른쪽 여백. Figma 상자 x=303, 줄 폭 344 → 344-303-24=17.
+  /// 끝에 붙여 두면 19가 밖으로 나간다 (#297).
+  static const _arrowRight = 17.0;
+
+  /// 화살표 상자 크기. 안쪽 획은 8×16으로 그려진다.
+  static const _arrowSize = 24.0;
+
   final ConsentItem item;
   final bool isChecked;
   final VoidCallback onToggle;
@@ -53,7 +64,6 @@ class ConsentRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final space = context.space;
 
     return SizedBox(
       height: height.h,
@@ -105,11 +115,22 @@ class ConsentRow extends StatelessWidget {
                             .copyWith(color: colors.chipLabel, height: 1.3),
                       ),
                     ),
-                    Icon(
-                      Icons.chevron_right,
-                      size: space.checkSize.w,
-                      color: colors.textSecondary,
+                    // Material 아이콘은 형태가 다르다 — 시안과 같은 SVG를 쓴다
+                    // (`fi-br-angle-small-up` 356:4862). 원본이 아래를 보므로
+                    // 반시계 90°를 돌려 `>`로 만든다.
+                    Transform.rotate(
+                      angle: -math.pi / 2,
+                      child: SvgPicture.asset(
+                        AppAssets.iconAngleSmall,
+                        width: _arrowSize.w,
+                        height: _arrowSize.w,
+                        colorFilter: ColorFilter.mode(
+                          colors.textSecondary,
+                          BlendMode.srcIn,
+                        ),
+                      ),
                     ),
+                    SizedBox(width: _arrowRight.w),
                   ],
                 ),
               ),
@@ -148,10 +169,18 @@ class _CheckCircle extends StatelessWidget {
           width: context.space.borderWidth,
         ),
       ),
-      child: Icon(
-        Icons.check,
-        size: 13.w,
-        color: checked ? colors.surface : colors.consentCheckIdle,
+      // Material 체크는 획 끝이 달라 시안과 다르게 보인다 — 같은 에셋을 쓴다.
+      // Figma 원(20) 안 10.91×8.13 (`726:4867` Union).
+      child: Center(
+        child: SvgPicture.asset(
+          AppAssets.iconCheckMark,
+          width: 10.91.w,
+          height: 8.13.w,
+          colorFilter: ColorFilter.mode(
+            checked ? colors.surface : colors.consentCheckIdle,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
     );
   }

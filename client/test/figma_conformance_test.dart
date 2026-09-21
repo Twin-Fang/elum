@@ -11,6 +11,11 @@ import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
 import 'package:elum/features/auth/presentation/login_screen.dart';
 import 'package:elum/features/auth/presentation/role_select_screen.dart';
+import 'package:elum/features/auth/presentation/consent_screen.dart';
+import 'package:elum/features/auth/data/consent_repository.dart';
+import 'package:elum/features/auth/domain/consent_bundle.dart';
+import 'package:elum/features/auth/data/consent_document_repository.dart';
+import 'package:dio/dio.dart';
 import 'package:elum/features/onboarding/presentation/card_completion_screen.dart';
 import 'package:elum/features/onboarding/presentation/name_screen.dart';
 import 'package:elum/features/onboarding/presentation/goals_screen.dart';
@@ -904,6 +909,59 @@ void main() {
       matchesGoldenFile('figma/pin_238-1909.png'),
     );
   });
+
+  // 약관 동의 (#297). 시안 `726:5056`은 **전부 켜진** 상태다 — 같은 화면의
+  // 두 상태 중 하나이므로 켠 상태로 맞춰 세운다.
+  //
+  // 문구는 서버에서 온다. 시험에서는 앱에 담긴 기본값을 꽂아 네트워크를 타지
+  // 않게 한다. 나이 확인 문구는 **일부러 시안과 다르다** — 시안의
+  // `만 14세 이상이며 아이의 법정대리인입니다`는 성인 이룸이에게 사실이
+  // 아니라 #226에서 한 줄로 줄였다. 그 줄은 붉게 떠도 그대로 둔다.
+  testWidgets('약관 동의 (Figma 726:5056)', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          testStorageOverride(),
+          consentRepositoryProvider.overrideWithValue(_SilentConsent()),
+          consentBundleProvider.overrideWith((ref) async => ConsentBundle.bundled),
+        ],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            home: const ConsentScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // 시안은 전체 동의가 눌린 상태다
+    await tester.tap(find.textContaining('전체 동의'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(ConsentScreen),
+      matchesGoldenFile('figma/consent_726-5056.png'),
+    );
+  });
+}
+
+/// 서버에 나가지 않는 대역. 대조는 그림만 본다.
+class _SilentConsent extends ConsentRepository {
+  _SilentConsent() : super(dio: Dio());
+
+  @override
+  Future<bool> agree({
+    required Set<String> agreedKeys,
+    required String version,
+  }) async => true;
 }
 
 /// TTS 는 플랫폼 채널을 타므로 아무 것도 하지 않는 것으로 바꿔 끼운다.
