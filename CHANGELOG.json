@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T02:57:19Z",
-    "currentVersion": "1.18.2",
+    "lastUpdated": "2026-09-21T03:09:07Z",
+    "currentVersion": "1.19.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 117
+    "totalReleases": 118
   },
   "releases": [
+    {
+      "version": "1.19.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 272,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 일과를 누르면 행동 단계를 한눈에 볼 수 있습니다\n  * 단계 순서를 끌어서 바꿀 수 있습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "일과를 누르면 행동 단계를 한눈에 볼 수 있습니다",
+            "단계 순서를 끌어서 바꿀 수 있습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.18.2",
       "project_type": "flutter",
