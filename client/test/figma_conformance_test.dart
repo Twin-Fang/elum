@@ -6,6 +6,10 @@ import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/features/guardian/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
+import 'package:elum/core/router/app_router.dart';
+import 'package:elum/features/guardian/application/routine_notifier.dart';
+import 'package:elum/features/guardian/presentation/question_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_stars_screen.dart';
@@ -240,6 +244,59 @@ void main() {
       ),
     ),
   );
+
+  /// 추가질문 대조용. 시안(262:4766)이 그린 질문과 선택지 그대로.
+  ///
+  /// 이모지는 시험 환경에 글꼴이 없어 □ 로 나온다 — 자리만 본다.
+  const designQuestion = RoutineQuestion(
+    isRequired: true,
+    questions: [
+      QuestionItem(
+        question: '하늘이가 비 오는 날\n평소와 다르게 챙겨야 하는\n물건이 있나요?',
+        options: [
+          QuestionOption(emoji: '☂️', label: '우산'),
+          QuestionOption(emoji: '🧥', label: '우비'),
+          QuestionOption(emoji: '👢', label: '장화'),
+          QuestionOption(emoji: '🧦', label: '여벌 양말'),
+          QuestionOption(emoji: '🧺', label: '작은 수건'),
+        ],
+      ),
+    ],
+  );
+
+  Widget wrapQuestion() {
+    final router = GoRouter(
+      initialLocation: Routes.routineQuestion,
+      routes: [
+        GoRoute(
+          path: Routes.routineQuestion,
+          builder: (context, state) => const QuestionScreen(),
+        ),
+      ],
+    );
+    return ProviderScope(
+      overrides: [
+        testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+        routineRepositoryProvider.overrideWithValue(
+          _QuestionRepo(designQuestion),
+        ),
+      ],
+      child: ScreenUtilInit(
+        designSize: const Size(393, 852),
+        useInheritedMediaQuery: true,
+        builder: (context, _) => MaterialApp.router(
+          theme: AppTheme.light,
+          debugShowCheckedModeBanner: false,
+          // 다른 대조와 같은 안전영역을 준다 — 빼먹으면 화면이 59 위로 뜬다.
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+            child: child!,
+          ),
+          routerConfig: router,
+        ),
+      ),
+    );
+  }
 
   /// 보상 화면 대조용 (시안 309:4055 `아이_보상_루미`).
   Widget wrapReward() => ProviderScope(
@@ -479,6 +536,26 @@ void main() {
     );
   });
 
+  // 추가질문 (#297). 오로라가 깔린 화면이라 배경은 어긋난 채로 읽는다 —
+  // 질문과 선택지 **자리**가 맞는지가 여기서 볼 것이다.
+  testWidgets('추가질문 (Figma 262:4766)', (tester) async {
+    await tester.pumpWidget(wrapQuestion());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(QuestionScreen)),
+    );
+    await container.read(routineFlowProvider.notifier).askQuestion();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    await expectLater(
+      find.byType(QuestionScreen),
+      matchesGoldenFile('figma/question_262-4766.png'),
+    );
+  });
+
   // 이룸이 홈 빈 상태 (#297). 일과가 하나도 없을 때 무엇을 보여주는지는
   // 시안에 따로 그려져 있다 — 빈 화면이 아니라 시무룩한 캐릭터와 안내다.
   testWidgets('이룸이 홈 — 빈 상태 (Figma 343:4543)', (tester) async {
@@ -517,6 +594,20 @@ void main() {
       matchesGoldenFile('figma/dialog_delete_931-4879.png'),
     );
   });
+}
+
+/// 추가질문만 돌려준다.
+class _QuestionRepo with FakeRewardApi implements RoutineRepository {
+  _QuestionRepo(this.question);
+
+  final RoutineQuestion question;
+
+  @override
+  Future<RoutineQuestion> generateQuestion(String rawInputText) async =>
+      question;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// 목록만 돌려준다. 대조용이라 쓰기는 일어나지 않는다.

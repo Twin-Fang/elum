@@ -135,7 +135,9 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: context.space.screenH, top: 12.h),
+      // 시안(262:4766)은 상단 아이콘이 y=87 에서 시작한다. 안전영역(59) 안에서
+      // 28 이다 — 12 로 두면 화면 전체가 16 위로 뜬다 (#297).
+      padding: EdgeInsets.only(left: context.space.screenH, top: 28.h),
       child: Row(
         children: [
           if (onBack != null)
