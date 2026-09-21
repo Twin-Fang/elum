@@ -67,6 +67,8 @@ class QuestionScreen extends ConsumerWidget {
     return RoutineFlowScaffold(
       confirmExit: true,
       onBack: () => context.pop(),
+      // 시안(`262:4854`)은 CTA를 y=675에 둔다 — 약관·목표와 같은 자리다 (#297).
+      pinCtaToFigmaY: true,
       // 답을 하나라도 골랐을 때만 CTA가 나타난다 (Figma 262:4854)
       bottomButton: state.answers.isEmpty
           ? null

@@ -25,6 +25,7 @@ class RoutineFlowScaffold extends StatelessWidget {
     required this.child,
     this.onBack,
     this.bottomButton,
+    this.pinCtaToFigmaY = false,
     this.showAurora = true,
     this.confirmExit = false,
   });
@@ -36,6 +37,13 @@ class RoutineFlowScaffold extends StatelessWidget {
 
   /// 하단 고정 CTA. 입력·로딩 화면에는 없다.
   final Widget? bottomButton;
+
+  /// CTA를 **시안 자리(y=675)에 고정**할지.
+  ///
+  /// 기본은 화면 바닥에 붙인다 — 카드확인처럼 내용이 길어 CTA가 아래로 내려오는
+  /// 화면이 그렇다. 추가질문(`262:4854`)은 시안이 `y=675`로, 약관·목표와 같은
+  /// 앱 표준 자리다. 바닥에 붙여 두어 **66 아래**에 있었다 (#297).
+  final bool pinCtaToFigmaY;
 
   /// 배경 글로우를 그릴지. **Figma에 Gradient가 없는 화면은 false로 끈다.**
   ///
@@ -110,7 +118,14 @@ class RoutineFlowScaffold extends StatelessWidget {
                       space.buttonMarginH,
                       space.md,
                       space.buttonMarginH,
-                      space.lg,
+                      // 시안 자리에 고정할 때는 `ElumScaffold`와 같은 식으로
+                      // 역산한다 — 프레임 하단(852)에서 CTA 하단(741)까지 111을
+                      // 두되 기기 홈인디케이터만큼은 뺀다.
+                      pinCtaToFigmaY
+                          ? ((852 - space.ctaTop - space.buttonH).h -
+                                    MediaQuery.paddingOf(context).bottom)
+                                .clamp(0.0, double.infinity)
+                          : space.lg,
                     ),
                     child: bottomButton,
                   ),
