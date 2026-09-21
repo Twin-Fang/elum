@@ -702,6 +702,50 @@ public class RoutineService {
     }
   }
 
+  /**
+   * 일과 안의 행동 단계 순서를 바꾼다.
+   *
+   * <p>{@link #reorder}(일과 순서)와 같은 방식이다 — <b>화면에 보이는 전체를 그대로
+   * 받아 통째로 다시 매긴다.</b> 부분 갱신은 두 곳에서 동시에 바꿀 때 뒤엉킨다.
+   *
+   * <p><b>하나라도 어긋나면 아무것도 바꾸지 않는다.</b> 절반만 반영되면 화면과 서버가
+   * 어긋나 더 나쁘다 — 보호자는 자기가 바꾼 순서를 봤는데 이룸이 휴대폰에는 다른
+   * 차례로 뜬다.
+   */
+  @Transactional
+  public void reorderSteps(String memberId, String routineId, List<String> stepIds) {
+    if (stepIds == null || stepIds.isEmpty()) {
+      return;
+    }
+    // 같은 값이 두 번 오면 번호가 겹쳐 순서가 뒤엉킨다.
+    if (new HashSet<>(stepIds).size() != stepIds.size()) {
+      throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+    }
+
+    Routine routine = getOwnedRoutine(memberId, routineId);
+    List<RoutineStep> steps = routine.getSteps();
+
+    // 일부만 보내면 빠진 단계의 차례가 어디인지 알 수 없다. 전체가 와야 한다.
+    if (steps.size() != stepIds.size()) {
+      throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+    }
+
+    Map<String, RoutineStep> byId = new HashMap<>();
+    for (RoutineStep step : steps) {
+      byId.put(step.getId(), step);
+    }
+    // 남의 일과 단계나 없는 단계가 섞이면 멈춘다.
+    for (String stepId : stepIds) {
+      if (!byId.containsKey(stepId)) {
+        throw new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND);
+      }
+    }
+
+    for (int i = 0; i < stepIds.size(); i++) {
+      byId.get(stepIds.get(i)).setStepOrder(i + 1);
+    }
+  }
+
   private Routine getOwnedRoutine(String memberId, String routineId) {
     Routine routine = routineRepository.findById(routineId)
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_NOT_FOUND));

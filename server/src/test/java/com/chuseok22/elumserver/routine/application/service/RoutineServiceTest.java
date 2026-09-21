@@ -514,6 +514,107 @@ class RoutineServiceTest {
 
   // --- 순서 바꾸기 (이슈 #258) ---
 
+  // --- 행동 단계 순서 변경 (이슈 #267) ---
+
+  private RoutineStep stepOf(String id, int order) {
+    RoutineStep step = new RoutineStep();
+    step.setId(id);
+    step.setStepOrder(order);
+    return step;
+  }
+
+  private Routine routineWithSteps(String id, Profile profile, RoutineStep... steps) {
+    Routine routine = ownedRoutine(id, profile);
+    routine.getSteps().addAll(List.of(steps));
+    return routine;
+  }
+
+  @Test
+  @DisplayName("보낸 차례대로 1부터 번호가 붙는다")
+  void reorderSteps_assignsSequentialOrder() {
+    Profile profile = profileOf("profile-1", "member-1");
+    RoutineStep a = stepOf("s-a", 1);
+    RoutineStep b = stepOf("s-b", 2);
+    RoutineStep c = stepOf("s-c", 3);
+    Routine routine = routineWithSteps("r-1", profile, a, b, c);
+    when(routineRepository.findById("r-1")).thenReturn(Optional.of(routine));
+
+    routineService.reorderSteps("member-1", "r-1", List.of("s-c", "s-a", "s-b"));
+
+    assertThat(c.getStepOrder()).isEqualTo(1);
+    assertThat(a.getStepOrder()).isEqualTo(2);
+    assertThat(b.getStepOrder()).isEqualTo(3);
+  }
+
+  @Test
+  @DisplayName("일부만 보내면 거부한다 — 빠진 단계의 차례를 알 수 없다")
+  void reorderSteps_partialList_rejected() {
+    Profile profile = profileOf("profile-1", "member-1");
+    RoutineStep a = stepOf("s-a", 1);
+    RoutineStep b = stepOf("s-b", 2);
+    Routine routine = routineWithSteps("r-1", profile, a, b);
+    when(routineRepository.findById("r-1")).thenReturn(Optional.of(routine));
+
+    assertThatThrownBy(() -> routineService.reorderSteps("member-1", "r-1", List.of("s-b")))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
+
+    // 아무것도 바뀌지 않아야 한다 — 절반만 반영되면 화면과 서버가 어긋난다.
+    assertThat(a.getStepOrder()).isEqualTo(1);
+    assertThat(b.getStepOrder()).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("없는 단계가 섞이면 아무것도 바꾸지 않는다")
+  void reorderSteps_unknownStep_changesNothing() {
+    Profile profile = profileOf("profile-1", "member-1");
+    RoutineStep a = stepOf("s-a", 1);
+    RoutineStep b = stepOf("s-b", 2);
+    Routine routine = routineWithSteps("r-1", profile, a, b);
+    when(routineRepository.findById("r-1")).thenReturn(Optional.of(routine));
+
+    assertThatThrownBy(
+      () -> routineService.reorderSteps("member-1", "r-1", List.of("s-a", "없는것")))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.ROUTINE_STEP_NOT_FOUND));
+
+    assertThat(a.getStepOrder()).isEqualTo(1);
+    assertThat(b.getStepOrder()).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("같은 단계가 두 번 오면 거부한다 — 번호가 겹쳐 순서가 뒤엉킨다")
+  void reorderSteps_duplicateId_rejected() {
+    assertThatThrownBy(
+      () -> routineService.reorderSteps("member-1", "r-1", List.of("s-a", "s-a")))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
+  }
+
+  @Test
+  @DisplayName("남의 일과는 건드릴 수 없다")
+  void reorderSteps_foreignRoutine_rejected() {
+    Profile others = profileOf("profile-2", "member-2");
+    Routine routine = routineWithSteps("r-1", others, stepOf("s-a", 1));
+    when(routineRepository.findById("r-1")).thenReturn(Optional.of(routine));
+
+    assertThatThrownBy(() -> routineService.reorderSteps("member-1", "r-1", List.of("s-a")))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.ROUTINE_ACCESS_DENIED));
+  }
+
+  @Test
+  @DisplayName("빈 목록은 아무 일도 하지 않는다")
+  void reorderSteps_emptyList_noop() {
+    routineService.reorderSteps("member-1", "r-1", List.of());
+    // 조회조차 하지 않는다
+    verify(routineRepository, never()).findById("r-1");
+  }
+
   private Routine ownedRoutine(String id, Profile profile) {
     Routine routine = new Routine();
     routine.setId(id);

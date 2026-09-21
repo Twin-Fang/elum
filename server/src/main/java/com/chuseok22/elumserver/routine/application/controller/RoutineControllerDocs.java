@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.controller;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
@@ -250,6 +251,26 @@ public interface RoutineControllerDocs {
   )
   ResponseEntity<Void> reorder(
     Authentication authentication, RoutineReorderRequest request
+  );
+
+  @Operation(
+    summary = "행동 단계 순서 변경",
+    description = """
+      일과 안의 행동 단계 순서를 바꿉니다.
+
+      **일과 순서 변경(`PATCH /api/routines/order`)과 같은 방식입니다.**
+      화면에 보이는 단계 전체를 차례대로 보냅니다.
+
+      - 보낸 차례대로 1부터 번호가 붙습니다. 앞에 있을수록 먼저 하는 단계입니다.
+      - **일부만 보내면 거부합니다.** 빠진 단계의 차례를 알 수 없기 때문입니다.
+      - 없는 단계나 다른 일과의 단계가 섞이면 **아무것도 바꾸지 않고** 거부합니다.
+        절반만 반영되면 보호자가 본 순서와 이룸이 화면의 순서가 어긋나 더 나쁩니다.
+      - 같은 ID가 두 번 오면 거부합니다.
+      - 빈 목록은 아무 일도 하지 않고 성공으로 답합니다.
+      """
+  )
+  ResponseEntity<Void> reorderSteps(
+    Authentication authentication, String routineId, RoutineStepReorderRequest request
   );
 
   @Operation(

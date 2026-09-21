@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.routine.application.controller;
 
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
@@ -123,6 +124,17 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication, @RequestBody RoutineReorderRequest request
   ) {
     routineService.reorder(authentication.getName(), request.routineIds());
+    return ResponseEntity.noContent().build();
+  }
+
+  // 일과 순서(/order)와 같은 방식이다. 화면에 보이는 단계 전체를 그대로 받는다.
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PatchMapping("/{routineId}/steps/order")
+  public ResponseEntity<Void> reorderSteps(
+    Authentication authentication, @PathVariable String routineId,
+    @RequestBody RoutineStepReorderRequest request
+  ) {
+    routineService.reorderSteps(authentication.getName(), routineId, request.stepIds());
     return ResponseEntity.noContent().build();
   }
 
