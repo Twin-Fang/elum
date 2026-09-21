@@ -162,6 +162,10 @@
                   <input th:case="'SECRET'" type="password" name="value" value="" autocomplete="off"
                          th:placeholder="${config.changed()} ? '저장됨 — 바꾸려면 새 값 입력' : '아직 없음 — 값을 입력하세요'"
                          class="input input-bordered input-sm w-full sm:w-64"/>
+                  <!-- 숫자는 숫자 칸으로. 범위가 있는 키는 브라우저가 먼저 막는다(서버도 다시 막는다). -->
+                  <input th:case="'INTEGER'" type="number" name="value" step="1"
+                         th:value="${config.value()}" th:attr="min=${config.minValue()},max=${config.maxValue()}"
+                         class="input input-bordered input-sm w-full sm:w-64"/>
                   <input th:case="*" type="text" name="value"
                          th:value="${config.value()}" class="input input-bordered input-sm w-full sm:w-64"/>
                 </th:block>

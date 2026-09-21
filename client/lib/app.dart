@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'core/app_status/app_status_gate.dart';
+import 'core/app_status/app_status_repository.dart';
+import 'core/config/client_tuning.dart';
 import 'core/dev/dev_tools_overlay.dart';
+import 'core/network/dio_client.dart';
 import 'core/network/session_expiry.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -40,6 +43,18 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     // 라우터 가드는 **화면을 옮길 때**만 평가된다. 홈에 머무는 중에 토큰이 만료되면
     // 가드가 다시 불리지 않아, 서버 요청은 전부 401인데 화면은 캐시로 정상처럼
     // 남아 있었다 (이슈 #175). 그래서 신호를 듣고 여기서 직접 옮긴다.
+    // 서버가 준 대기·연출 시간값을 받자마자 적용하고 다음 실행을 위해 저장한다.
+    // 관리자 화면에서 고친 값이 앱을 다시 올리지 않아도 반영된다.
+    ref.listen(appStatusProvider, (previous, next) {
+      final tuning = next.value?.status.tuning;
+      if (tuning == null) return;
+      applyServerTuning(
+        tuning,
+        dio: ref.read(dioProvider),
+        storage: ref.read(localStorageProvider),
+      );
+    });
+
     ref.listen<int>(sessionExpiryProvider, (previous, next) {
       if (previous == null || next <= previous) return;
       // 이룸이 휴대폰에는 로그인할 계정이 없다. 로그인 화면으로 보내면

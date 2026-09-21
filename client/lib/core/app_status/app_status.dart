@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import '../config/client_tuning.dart';
+
 /// 앱이 시작할 때 서버에 묻는 것 (이슈 #279).
 ///
 /// 점검 중인지, 이 버전으로 계속 써도 되는지를 담는다.
@@ -9,6 +11,7 @@ class AppStatus {
     this.maintenanceMessage = '',
     this.minVersion = '',
     this.latestVersion = '',
+    this.tuning,
   });
 
   final bool maintenance;
@@ -19,6 +22,9 @@ class AppStatus {
 
   /// 이 버전 미만이면 업데이트를 권한다. 건너뛸 수 있다.
   final String latestVersion;
+
+  /// 서버가 준 대기·연출 시간값. 옛 서버라 없으면 null 이고, 그때는 지금 값을 그대로 쓴다.
+  final ClientTuning? tuning;
 
   /// 서버가 못 오거나 형식이 다를 때 쓰는 값.
   ///
@@ -40,6 +46,7 @@ class AppStatus {
       latestVersion: version is Map
           ? (version['latestVersion'] as String?)?.trim() ?? ''
           : '',
+      tuning: ClientTuning.tryParse(json['client']),
     );
   }
 

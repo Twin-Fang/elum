@@ -169,4 +169,43 @@ class SystemConfigServiceTest {
       .filter(view -> view.key().equals(ConfigKey.GEMINI_IMAGE_ASPECT_RATIO.name())).findFirst().orElseThrow();
     assertThat(aspectRatio.changed()).isFalse();
   }
+
+  @Test
+  @DisplayName("범위가 있는 시간값은 범위를 벗어나면 거절한다 — 0 은 앱이 끝없이 기다리게 만든다")
+  void update_integerOutOfRange_rejected() {
+    for (String bad : List.of("0", "-1", "999", "15001", "abc")) {
+      assertThatThrownBy(() -> systemConfigService.update(ConfigKey.APP_CONSENT_FETCH_TIMEOUT_MS, bad))
+        .as("값 %s", bad)
+        .isInstanceOf(CustomException.class)
+        .extracting("errorCode").isEqualTo(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
+    }
+    verify(systemConfigRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("범위 안의 시간값은 저장한다 — 경계값 포함")
+  void update_integerInRange_saved() {
+    when(systemConfigRepository.findByConfigKey(ConfigKey.APP_CONSENT_FETCH_TIMEOUT_MS)).thenReturn(Optional.empty());
+    systemConfigService.update(ConfigKey.APP_CONSENT_FETCH_TIMEOUT_MS, "1000");
+    systemConfigService.update(ConfigKey.APP_CONSENT_FETCH_TIMEOUT_MS, "15000");
+    verify(systemConfigRepository, org.mockito.Mockito.times(2)).save(any());
+  }
+
+  @Test
+  @DisplayName("범위가 없는 정수는 예전처럼 받는다 — 플랜 한도의 -1(무제한)")
+  void update_integerWithoutRange_keepsOldBehavior() {
+    when(systemConfigRepository.findByConfigKey(ConfigKey.FREE_ROUTINE_MAX_COUNT)).thenReturn(Optional.empty());
+    systemConfigService.update(ConfigKey.FREE_ROUTINE_MAX_COUNT, "-1");
+    verify(systemConfigRepository).save(any());
+  }
+
+  @Test
+  @DisplayName("앱 시간값의 기본값은 앱 코드 기본값과 같다 — 서버를 못 봐도 같은 값으로 돈다")
+  void appTuningDefaults_matchClient() {
+    assertThat(ConfigKey.APP_CONNECT_TIMEOUT_MS.getDefaultValue()).isEqualTo("10000");
+    assertThat(ConfigKey.APP_RECEIVE_TIMEOUT_MS.getDefaultValue()).isEqualTo("60000");
+    assertThat(ConfigKey.APP_LOADING_MAX_WAIT_MS.getDefaultValue()).isEqualTo("45000");
+    assertThat(ConfigKey.APP_CONSENT_FETCH_TIMEOUT_MS.getDefaultValue()).isEqualTo("3000");
+    assertThat(ConfigKey.APP_DLP_MIN_DELAY_MS.getDefaultValue()).isEqualTo("1500");
+  }
 }

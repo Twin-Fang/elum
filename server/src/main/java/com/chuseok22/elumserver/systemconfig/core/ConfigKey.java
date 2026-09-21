@@ -1,7 +1,6 @@
 package com.chuseok22.elumserver.systemconfig.core;
 
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 // 동적으로 수정 가능한 시스템 설정의 전체 목록. 새 설정이 필요하면 여기에 키를 추가하면
@@ -9,7 +8,6 @@ import lombok.Getter;
 // 모델명 3종의 defaultValue는 코드 기본값이며, 배포 환경(yml)에 값이 있으면
 // SystemConfigService.defaultValueFor()가 그 값을 우선한다.
 @Getter
-@AllArgsConstructor
 public enum ConfigKey {
 
   GEMINI_TEXT_MODEL(
@@ -250,6 +248,34 @@ public enum ConfigKey {
     "이 버전보다 낮으면 업데이트를 권한다. 건너뛸 수 있다",
     ConfigValueType.STRING, List.of(), ""
   ),
+  // ── 앱이 서버에서 받아 쓰는 시간값 (앱 .env 에서 옮겨 왔다) ──
+  // 앱은 시작할 때 /api/app/status 로 받아 저장해 두고, 못 받으면 코드 기본값을 쓴다.
+  // 0 이나 음수는 "끝없이 기다리기"가 되므로 범위를 둔다. 단위는 모두 밀리초다.
+  APP_CONNECT_TIMEOUT_MS(
+    ConfigGroup.APP_TUNING, "서버 연결 대기",
+    "앱이 서버에 연결을 맺기까지 기다리는 시간(ms). 넘기면 연결 실패로 본다. 1000~60000",
+    ConfigValueType.INTEGER, List.of(), "10000", 1_000, 60_000
+  ),
+  APP_RECEIVE_TIMEOUT_MS(
+    ConfigGroup.APP_TUNING, "서버 응답 대기",
+    "연결 뒤 응답을 기다리는 시간(ms). 카드 생성이 오래 걸리므로 넉넉히 둔다. 5000~180000",
+    ConfigValueType.INTEGER, List.of(), "60000", 5_000, 180_000
+  ),
+  APP_LOADING_MAX_WAIT_MS(
+    ConfigGroup.APP_TUNING, "카드 만들기 최대 대기",
+    "로딩 화면이 결과를 기다리는 최대 시간(ms). 넘기면 오류 코드와 다시 하기를 보여준다. 서버 응답 대기보다 짧게 둔다. 10000~180000",
+    ConfigValueType.INTEGER, List.of(), "45000", 10_000, 180_000
+  ),
+  APP_CONSENT_FETCH_TIMEOUT_MS(
+    ConfigGroup.APP_TUNING, "약관 불러오기 대기",
+    "동의 화면이 약관을 기다리는 최대 시간(ms). 넘기면 앱에 담긴 약관을 보여준다. 로그인 직후라 짧게 둔다. 1000~15000",
+    ConfigValueType.INTEGER, List.of(), "3000", 1_000, 15_000
+  ),
+  APP_DLP_MIN_DELAY_MS(
+    ConfigGroup.APP_TUNING, "민감정보 검사 최소 연출",
+    "검사 결과가 빨리 와도 이만큼은 검사 화면을 보여준다(ms). 0이면 연출하지 않는다. 0~10000",
+    ConfigValueType.INTEGER, List.of(), "1500", 0, 10_000
+  ),
   ;
 
 
@@ -259,4 +285,29 @@ public enum ConfigKey {
   private final ConfigValueType valueType;
   private final List<String> allowedValues;
   private final String defaultValue;
+  /** INTEGER 의 허용 범위. 없으면(null) 범위를 보지 않는다 — 플랜 한도의 -1(무제한)처럼. */
+  private final Integer minValue;
+  private final Integer maxValue;
+
+  ConfigKey(
+    ConfigGroup group, String label, String description,
+    ConfigValueType valueType, List<String> allowedValues, String defaultValue
+  ) {
+    this(group, label, description, valueType, allowedValues, defaultValue, null, null);
+  }
+
+  ConfigKey(
+    ConfigGroup group, String label, String description,
+    ConfigValueType valueType, List<String> allowedValues, String defaultValue,
+    Integer minValue, Integer maxValue
+  ) {
+    this.group = group;
+    this.label = label;
+    this.description = description;
+    this.valueType = valueType;
+    this.allowedValues = allowedValues;
+    this.defaultValue = defaultValue;
+    this.minValue = minValue;
+    this.maxValue = maxValue;
+  }
 }

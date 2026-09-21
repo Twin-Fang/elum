@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'core/config/app_config.dart';
+import 'core/config/client_tuning.dart';
 import 'core/dev/dev_log_buffer.dart';
 import 'core/dev/dev_log_file.dart';
 import 'core/logger/app_logger.dart';
@@ -33,6 +34,13 @@ Future<void> main() async {
   // 저장소는 앱 시작 시 한 번만 초기화하고 provider로 주입한다.
   final storage = await SharedPrefsStorage.create();
   AppLogger.storageRead('SharedPreferences', 'initialized');
+
+  // 지난번 서버에서 받은 시간값으로 시작한다. 서버에 닿기 전 첫 요청(Dio 생성)부터
+  // 이 값을 쓴다. 한 번도 받은 적 없으면 코드 기본값 그대로다.
+  final cachedTuning = ClientTuning.tryParseJson(storage.cachedClientTuningJson);
+  if (cachedTuning != null) {
+    AppConfig.applyTuning(cachedTuning, source: TuningSource.cached);
+  }
 
   // 토큰은 보안 저장소에 있어 읽기가 비동기다. 첫 화면이 세션 유무를 바로
   // 판단할 수 있도록 여기서 미리 읽어 메모리에 올린다.

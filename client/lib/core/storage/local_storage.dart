@@ -92,6 +92,12 @@ abstract interface class LocalStorage {
   String? get cachedConsentJson;
   Future<void> setCachedConsentJson(String json);
 
+  /// 마지막으로 서버에서 받은 대기·연출 시간값 (`ClientTuning`).
+  ///
+  /// 앱이 뜰 때 서버에 닿기 전 첫 요청부터 이 값으로 돈다. 없으면 코드 기본값이다.
+  String? get cachedClientTuningJson;
+  Future<void> setCachedClientTuningJson(String json);
+
   /// 저장된 온보딩 결과를 전부 지운다. **개발·테스트 전용.**
   ///
   /// 일부만 지우면 어중간한 상태가 남아 더 헷갈리므로 5개 값을 모두 비운다.
@@ -126,6 +132,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kPendingSync = 'progress.pending';
   static const _kCachedToday = 'cache.todayRoutines';
   static const _kCachedConsent = 'cache.consentDocuments';
+  static const _kCachedTuning = 'cache.clientTuning';
 
   static Future<LocalStorage> create() async {
     return SharedPrefsStorage(await SharedPreferences.getInstance());
@@ -272,6 +279,15 @@ class SharedPrefsStorage implements LocalStorage {
     // 서버 응답에는 보호자 원문(rawInputText)이 들어 있다 — 값은 로그에 찍지 않는다 (docs 원칙 5번).
     AppLogger.storageWrite(_kCachedToday, '${json.length}B');
     return _prefs.setString(_kCachedToday, json);
+  }
+
+  @override
+  String? get cachedClientTuningJson => _prefs.getString(_kCachedTuning);
+
+  @override
+  Future<void> setCachedClientTuningJson(String json) {
+    AppLogger.storageWrite(_kCachedTuning, json);
+    return _prefs.setString(_kCachedTuning, json);
   }
 
   @override
@@ -440,6 +456,14 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setCachedTodayRoutinesJson(String json) async =>
       _cachedToday = json;
+
+  String? _cachedTuning;
+
+  @override
+  String? get cachedClientTuningJson => _cachedTuning;
+
+  @override
+  Future<void> setCachedClientTuningJson(String json) async => _cachedTuning = json;
 
   @override
   String? get cachedConsentJson => _cachedConsent;

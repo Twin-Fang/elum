@@ -91,10 +91,13 @@ abstract final class DevStateDump {
 
   static Map<String, String> _config() => {
         'API 주소': AppConfig.apiBaseUrl,
+        '시간값 출처': AppConfig.tuningSource.name,
         '연결 타임아웃': '${AppConfig.connectTimeout.inMilliseconds}ms',
         '수신 타임아웃': '${AppConfig.receiveTimeout.inMilliseconds}ms',
         'TTS 주소': AppConfig.ttsBaseUrl,
         'DLP 최소 연출': '${AppConfig.dlpMinDelay.inMilliseconds}ms',
+        '약관 대기': '${AppConfig.consentFetchTimeout.inMilliseconds}ms',
+        '카드 최대 대기': '${AppConfig.loadingMaxWait.inMilliseconds}ms',
         '개발자 도구': '${AppConfig.showDevTools}',
         '온보딩 건너뛰기': '${AppConfig.skipOnboarding}',
         '네트워크 로그': '${AppConfig.enableNetworkLog}',

@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.common.application.controller;
 
 import com.chuseok22.elumserver.common.application.dto.response.AppStatusResponse;
+import com.chuseok22.elumserver.common.application.dto.response.AppStatusResponse.ClientTuning;
 import com.chuseok22.elumserver.common.application.dto.response.AppStatusResponse.VersionRequirement;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
@@ -36,6 +37,13 @@ public class AppStatusController implements AppStatusControllerDocs {
       new VersionRequirement(
         systemConfigService.getString(ConfigKey.MIN_APP_VERSION_ANDROID),
         systemConfigService.getString(ConfigKey.LATEST_APP_VERSION_ANDROID)
+      ),
+      new ClientTuning(
+        systemConfigService.getInt(ConfigKey.APP_CONNECT_TIMEOUT_MS),
+        systemConfigService.getInt(ConfigKey.APP_RECEIVE_TIMEOUT_MS),
+        systemConfigService.getInt(ConfigKey.APP_LOADING_MAX_WAIT_MS),
+        systemConfigService.getInt(ConfigKey.APP_CONSENT_FETCH_TIMEOUT_MS),
+        systemConfigService.getInt(ConfigKey.APP_DLP_MIN_DELAY_MS)
       )
     ));
   }

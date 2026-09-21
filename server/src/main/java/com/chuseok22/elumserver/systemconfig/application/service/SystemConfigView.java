@@ -14,7 +14,10 @@ public record SystemConfigView(
   List<String> allowedValues,
   String value,
   String defaultValue,
-  boolean changed
+  boolean changed,
+  // INTEGER 허용 범위. 화면 입력칸이 먼저 막고, 서버가 다시 막는다.
+  Integer minValue,
+  Integer maxValue
 ) {
 
 }

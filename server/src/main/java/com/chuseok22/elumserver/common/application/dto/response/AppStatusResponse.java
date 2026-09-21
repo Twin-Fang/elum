@@ -19,8 +19,27 @@ public record AppStatusResponse(
   VersionRequirement ios,
 
   @Schema(description = "Android 버전 요구")
-  VersionRequirement android
+  VersionRequirement android,
+
+  @Schema(description = "앱이 쓰는 대기·연출 시간값. 관리자 화면에서 고친다")
+  ClientTuning client
 ) {
+
+  /**
+   * 앱의 대기·연출 시간값 (밀리초).
+   *
+   * <p>전에는 앱의 {@code .env} 에 있어 바꾸려면 앱을 다시 빌드해야 했다. 이제 서버가 주고,
+   * 앱은 받은 값을 저장해 두었다가 다음 실행에도 쓴다. 못 받으면 앱 코드의 기본값을 쓴다.
+   */
+  @Schema(description = "앱 대기·연출 시간값 (ms)")
+  public record ClientTuning(
+    @Schema(description = "서버 연결 대기", example = "10000") int connectTimeoutMs,
+    @Schema(description = "서버 응답 대기", example = "60000") int receiveTimeoutMs,
+    @Schema(description = "카드 만들기 최대 대기", example = "45000") int loadingMaxWaitMs,
+    @Schema(description = "약관 불러오기 대기", example = "3000") int consentFetchTimeoutMs,
+    @Schema(description = "민감정보 검사 최소 연출", example = "1500") int dlpMinDelayMs
+  ) {}
+
 
   /**
    * 버전 조건. 비어 있으면 그 조건은 없는 것이다.

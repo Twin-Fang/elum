@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'client_tuning.dart';
+
 /// 환경변수 접근 단일 창구.
 ///
 /// 위젯이나 repository가 `dotenv.env['...']`를 직접 읽지 않는다.
@@ -29,14 +31,32 @@ abstract final class AppConfig {
   static String get apiBaseUrl =>
       _string('ELUM_API_BASE_URL', 'https://api.elum.chuseok22.com');
 
-  static Duration get connectTimeout =>
-      Duration(milliseconds: _int('ELUM_API_CONNECT_TIMEOUT_MS', 10000));
+  // --- 대기·연출 시간값 ---
+  // `.env` 에서 읽지 않는다. 서버가 주고 관리자 화면에서 고친다 ([ClientTuning]).
+  // 코드에는 기본값만 있다. 서버 주소처럼 서버에 닿기 전에 필요한 값만 `.env` 에 남는다.
 
-  static Duration get receiveTimeout =>
-      Duration(milliseconds: _int('ELUM_API_RECEIVE_TIMEOUT_MS', 60000));
+  static ClientTuning _tuning = ClientTuning.defaults;
+  static TuningSource _tuningSource = TuningSource.defaults;
+
+  /// 지금 쓰는 시간값이 어디서 왔나 (개발자 도구 표시용).
+  static TuningSource get tuningSource => _tuningSource;
+
+  /// 시간값을 바꾼다. main 에서 저장해 둔 값으로 한 번, 서버에서 받으면 또 한 번 부른다.
+  static void applyTuning(ClientTuning tuning, {required TuningSource source}) {
+    _tuning = tuning;
+    _tuningSource = source;
+  }
+
+  /// 테스트가 끝나면 기본값으로 되돌린다. 정적 값이라 테스트끼리 새어 나간다.
+  @visibleForTesting
+  static void resetTuning() => applyTuning(ClientTuning.defaults, source: TuningSource.defaults);
+
+  static Duration get connectTimeout => _tuning.connectTimeout;
+
+  static Duration get receiveTimeout => _tuning.receiveTimeout;
 
   /// 동의 화면이 약관을 기다리는 상한 (#278). 넘기면 캐시·앱 기본값으로 떨어진다.
-  static Duration get consentFetchTimeout => const Duration(milliseconds: 3000);
+  static Duration get consentFetchTimeout => _tuning.consentFetchTimeout;
 
   // --- TTS (카드 읽어주기) ---
   // 기기 내장 음성이 우선이고, 실패할 때만 이 서버를 쓴다.
@@ -84,18 +104,16 @@ abstract final class AppConfig {
 
   // --- 데모 연출 ---
 
-  /// AI DLP 처리 최소 노출 시간.
+  /// AI DLP 처리 최소 노출 시간. 서버가 준다 ([ClientTuning]).
   /// 응답이 빨라도 보안 처리를 체감시키기 위해 유지한다.
-  static Duration get dlpMinDelay =>
-      Duration(milliseconds: _int('ELUM_DLP_MIN_DELAY_MS', 1500));
+  static Duration get dlpMinDelay => _tuning.dlpMinDelay;
 
-  /// 로딩 화면이 결과를 기다리는 최대 시간 (#276).
+  /// 로딩 화면이 결과를 기다리는 최대 시간 (#276). 서버가 준다 ([ClientTuning]).
   ///
   /// 이만큼 지나도 응답이 없으면 기다리기를 그만두고 에러 코드와 재시도를
   /// 보여준다. `receiveTimeout`(60초)보다 짧게 둔 것은, 네트워크가 끝까지
   /// 버티는 동안 사용자를 1분 내내 붙잡아 두지 않기 위해서다.
-  static Duration get loadingMaxWait =>
-      Duration(milliseconds: _int('ELUM_LOADING_MAX_WAIT_MS', 45000));
+  static Duration get loadingMaxWait => _tuning.loadingMaxWait;
 
   // --- 빌드 종류 ---
 
@@ -189,17 +207,6 @@ abstract final class AppConfig {
     final value = _raw(key);
     if (value == null || value.isEmpty) return fallback;
     return value;
-  }
-
-  static int _int(String key, int fallback) {
-    final raw = _raw(key);
-    if (raw == null) return fallback;
-    final parsed = int.tryParse(raw);
-    if (parsed == null) {
-      debugPrint('[config] $key 값이 숫자가 아니다("$raw") → 기본값 $fallback 사용');
-      return fallback;
-    }
-    return parsed;
   }
 
   static bool _bool(String key, bool fallback) {

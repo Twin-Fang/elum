@@ -45,7 +45,11 @@ public interface AppStatusControllerDocs {
           "maintenance": false,
           "maintenanceMessage": "잠시 점검하고 있어요. 조금 뒤에 다시 열어주세요",
           "ios": { "minVersion": "1.2.0", "latestVersion": "1.21.0" },
-          "android": { "minVersion": "1.2.0", "latestVersion": "1.21.0" }
+          "android": { "minVersion": "1.2.0", "latestVersion": "1.21.0" },
+          "client": {
+            "connectTimeoutMs": 10000, "receiveTimeoutMs": 60000, "loadingMaxWaitMs": 45000,
+            "consentFetchTimeoutMs": 3000, "dlpMinDelayMs": 1500
+          }
         }
         """))
   ))

@@ -132,13 +132,14 @@ public class SystemConfigService {
           boolean set = stored != null && !stored.isBlank();
           return new SystemConfigView(
             key.name(), key.getGroup(), key.getLabel(), key.getDescription(),
-            key.getValueType(), key.getAllowedValues(), set ? SECRET_MASK : "", "", set
+            key.getValueType(), key.getAllowedValues(), set ? SECRET_MASK : "", "", set,
+            key.getMinValue(), key.getMaxValue()
           );
         }
         return new SystemConfigView(
           key.name(), key.getGroup(), key.getLabel(), key.getDescription(),
           key.getValueType(), key.getAllowedValues(), current, defaultValue,
-          !current.equals(defaultValue)
+          !current.equals(defaultValue), key.getMinValue(), key.getMaxValue()
         );
       })
       .toList();
@@ -204,7 +205,12 @@ public class SystemConfigService {
     String value = rawValue.trim();
     try {
       if (key.getValueType() == ConfigValueType.INTEGER) {
-        Integer.parseInt(value);
+        int number = Integer.parseInt(value);
+        // 시간값에 0 이나 음수가 들어가면 앱의 요청이 끝없이 기다리게 된다. 범위가 있는 키만 본다.
+        if ((key.getMinValue() != null && number < key.getMinValue())
+          || (key.getMaxValue() != null && number > key.getMaxValue())) {
+          throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
+        }
       } else if (key.getValueType() == ConfigValueType.DECIMAL) {
         Double.parseDouble(value);
       } else if (key.getValueType() == ConfigValueType.SELECT && !key.getAllowedValues().contains(value)) {
