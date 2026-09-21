@@ -368,8 +368,12 @@ class _StepRowState extends State<_StepRow>
                                 widget.step.description,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
+                                // 시안의 `sub_color`(#74757D). 일과 타일 설명과 같은
+                                // 값이라 토큰을 함께 쓴다 — 디자이너가 한 변수로
+                                // 두었으므로 한쪽만 바뀌어서는 안 된다.
+                                // `textSecondary`(#898B98)는 다른 자리의 색이다.
                                 style: typo.sheetStepBody.copyWith(
-                                  color: colors.textSecondary,
+                                  color: colors.routineTileLabel,
                                 ),
                               ),
                             ],
