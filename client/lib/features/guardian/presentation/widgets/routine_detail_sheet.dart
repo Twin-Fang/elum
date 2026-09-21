@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
@@ -191,7 +193,7 @@ class _Header extends StatelessWidget {
           SizedBox(height: 20.h),
           Text(
             title,
-            style: context.typo.reviewTitle.copyWith(color: colors.textPrimary),
+            style: context.typo.sheetTitle.copyWith(color: colors.textPrimary),
           ),
         ],
       ),
@@ -327,10 +329,10 @@ class _StepRowState extends State<_StepRow>
               Expanded(
                 child: Container(
                   height: 68.h,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  padding: EdgeInsets.symmetric(horizontal: 18.w),
                   decoration: BoxDecoration(
                     color: colors.editChipBg,
-                    borderRadius: BorderRadius.circular(16.r),
+                    borderRadius: BorderRadius.circular(20.r),
                     boxShadow: shadow,
                   ),
                   child: Row(
@@ -344,7 +346,7 @@ class _StepRowState extends State<_StepRow>
                               widget.step.displayTitle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: typo.cardTitle.copyWith(
+                              style: typo.sheetStepTitle.copyWith(
                                 color: colors.textPrimary,
                               ),
                             ),
@@ -354,7 +356,7 @@ class _StepRowState extends State<_StepRow>
                                 widget.step.description,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: typo.cardBody.copyWith(
+                                style: typo.sheetStepBody.copyWith(
                                   color: colors.textSecondary,
                                 ),
                               ),
@@ -405,18 +407,23 @@ class _CompletionMark extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    // 시안(`채크_라운드` 726:4881)은 두 상태를 이렇게 나눈다.
+    // 미완료도 투명이 아니라 배경색으로 칠하고 테두리를 따로 둔다 — 투명하게 두면
+    // 카드 위에서 동그라미가 사라져 "누를 곳"으로 읽히지 않는다.
     return Container(
-      width: 36.w,
-      height: 36.w,
+      width: 40.w,
+      height: 40.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: completed ? colors.checkDone : Colors.transparent,
-        border: completed ? null : Border.all(color: colors.border, width: 2.w),
+        color: completed ? colors.checkDone : colors.background,
+        border: completed
+            ? null
+            : Border.all(color: colors.checkIdleBorder, width: 2.w),
       ),
       child: Icon(
         Icons.check,
-        size: 20.w,
-        color: completed ? colors.surface : colors.border,
+        size: 22.w,
+        color: completed ? colors.surface : colors.checkIdleBorder,
       ),
     );
   }
@@ -427,10 +434,11 @@ class _CompletionMark extends StatelessWidget {
 /// 빈 칸을 두면 "보상이 없다"가 아니라 "덜 만들어졌다"로 보인다. 보상을 여기서
 /// 정하게 하는 안도 검토했으나 그 부분 디자인이 아직 나오지 않아 미뤘다 (#266).
 ///
-/// **별 뱃지를 두지 않는다** (#275). 단계 번호 자리에 별을 넣어 봤지만, 별은
-/// 이룸이가 일과를 끝냈을 때의 연출이라 뜻이 겹쳤다. 대신 앱이 다른 화면에서
-/// 이미 쓰는 `다 하면 ○○`을 그대로 쓴다 — 보상 줄임을 말로 알리는 쪽이
-/// 새 그림을 만드는 것보다 헷갈리지 않는다.
+/// **뱃지 + 카드로 둔다** (#295). 전에는 별 뱃지를 빼고 `다 하면 ○○`이라는 말로
+/// 대신했다 (#275) — 별이 이룸이가 일과를 끝냈을 때의 연출과 뜻이 겹친다고 봤다.
+/// 그 뒤에 나온 시안(956:4084)이 검은 뱃지에 별을 넣어 단계와 같은 짜임으로
+/// 그렸고, 시안이 나중 판단이라 그쪽을 따른다. 뱃지 색과 별이 이미 "이건 단계가
+/// 아니다"를 말해 주므로 `다 하면`이라는 말은 뺀다.
 class _RewardRow extends StatelessWidget {
   const _RewardRow({required this.routine});
 
@@ -445,32 +453,47 @@ class _RewardRow extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(top: 8.h),
-      child: Container(
-        height: 68.h,
-        // 단계와 달리 왼쪽 뱃지가 없으므로 줄 전체를 쓴다. 폭이 다른 것 자체가
-        // "이건 단계가 아니다"를 말해 준다.
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
-        decoration: BoxDecoration(
-          color: colors.editChipBg,
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        child: Row(
-          children: [
-            Text(
-              '다 하면',
-              style: typo.cardBody.copyWith(color: colors.textSecondary),
+      child: Row(
+        children: [
+          // 단계 번호 자리에 검은 뱃지를 둔다. 폭이 같아 줄이 나란히 서고,
+          // 색과 별로 "이건 단계가 아니라 보상"이 읽힌다 (Figma 963:4423).
+          Container(
+            width: 40.w,
+            height: 68.h,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [colors.rewardBadgeTop, colors.rewardBadgeBottom],
+              ),
+              borderRadius: BorderRadius.circular(16.r),
             ),
-            SizedBox(width: 8.w),
-            Expanded(
+            child: SvgPicture.asset(
+              AppAssets.rewardBadgeStar,
+              width: 25.w,
+              height: 24.w,
+            ),
+          ),
+          SizedBox(width: 4.w),
+          Expanded(
+            child: Container(
+              height: 68.h,
+              alignment: Alignment.centerLeft,
+              padding: EdgeInsets.symmetric(horizontal: 18.w),
+              decoration: BoxDecoration(
+                color: colors.editChipBg,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
               child: Text(
                 routine.rewardText.trim(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: typo.cardTitle.copyWith(color: colors.textPrimary),
+                style: typo.sheetStepTitle.copyWith(color: colors.textPrimary),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

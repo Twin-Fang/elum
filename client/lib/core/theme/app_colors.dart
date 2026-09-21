@@ -87,6 +87,9 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.stagePending,
     required this.stagePendingText,
     required this.checkDone,
+    required this.checkIdleBorder,
+    required this.rewardBadgeTop,
+    required this.rewardBadgeBottom,
     required this.consentCheckIdle,
     required this.roleElumi,
     required this.checkPending,
@@ -284,6 +287,19 @@ class AppColors extends ThemeExtension<AppColors> {
   // 아이 모드 (Figma 309:3548 / 309:4055)
   /// 아이 홈 체크 완료 원
   final Color checkDone;
+
+  /// 아직 체크하지 않은 동그라미의 테두리 (Figma `채크_라운드` Default — #C9D6D4).
+  ///
+  /// 공통 `border`(#EFEFEF)를 쓰지 않는다. 시안이 이 동그라미에만 청록기가 도는
+  /// 테두리를 줬고, 공통 테두리로 칠하면 카드 경계와 구분되지 않는다.
+  final Color checkIdleBorder;
+
+  /// 일과 시트 보상 뱃지의 그라데이션 (Figma `963:4424` — 180deg #0C0D1A → #242634).
+  ///
+  /// 아래쪽 값이 `textPrimary`와 같지만 나눠 둔다. 글자색이 바뀐다고 뱃지까지
+  /// 따라가면 안 된다.
+  final Color rewardBadgeTop;
+  final Color rewardBadgeBottom;
 
   /// 약관 항목의 아직 안 누른 체크 (Figma 739:3747 실측 #C9D6D4 · 이슈 #226).
   ///
@@ -542,6 +558,9 @@ class AppColors extends ThemeExtension<AppColors> {
     stagePending: Color(0x99242634),
     stagePendingText: Color(0x80242634),
     checkDone: Color(0xFF55CFBA),
+    checkIdleBorder: Color(0xFFC9D6D4),
+    rewardBadgeTop: Color(0xFF0C0D1A),
+    rewardBadgeBottom: Color(0xFF242634),
     consentCheckIdle: Color(0xFFC9D6D4),
     roleElumi: Color(0xFFFFAA00),
     checkPending: Color(0xFFC9D6D4),
@@ -666,6 +685,9 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? stagePending,
     Color? stagePendingText,
     Color? checkDone,
+    Color? checkIdleBorder,
+    Color? rewardBadgeTop,
+    Color? rewardBadgeBottom,
     Color? consentCheckIdle,
     Color? roleElumi,
     Color? checkPending,
@@ -780,6 +802,9 @@ class AppColors extends ThemeExtension<AppColors> {
       stagePending: stagePending ?? this.stagePending,
       stagePendingText: stagePendingText ?? this.stagePendingText,
       checkDone: checkDone ?? this.checkDone,
+      checkIdleBorder: checkIdleBorder ?? this.checkIdleBorder,
+      rewardBadgeTop: rewardBadgeTop ?? this.rewardBadgeTop,
+      rewardBadgeBottom: rewardBadgeBottom ?? this.rewardBadgeBottom,
       consentCheckIdle: consentCheckIdle ?? this.consentCheckIdle,
       roleElumi: roleElumi ?? this.roleElumi,
       checkPending: checkPending ?? this.checkPending,
@@ -947,6 +972,9 @@ class AppColors extends ThemeExtension<AppColors> {
         t,
       )!,
       checkDone: Color.lerp(checkDone, other.checkDone, t)!,
+      checkIdleBorder: Color.lerp(checkIdleBorder, other.checkIdleBorder, t)!,
+      rewardBadgeTop: Color.lerp(rewardBadgeTop, other.rewardBadgeTop, t)!,
+      rewardBadgeBottom: Color.lerp(rewardBadgeBottom, other.rewardBadgeBottom, t)!,
       consentCheckIdle: Color.lerp(
         consentCheckIdle,
         other.consentCheckIdle,

@@ -74,14 +74,15 @@ void main() {
     expect(find.text('3'), findsOneWidget);
   });
 
-  testWidgets('보상은 다 하면 무엇을 받는지로 보여준다 — 별을 쓰지 않는다 (#275)', (tester) async {
+  testWidgets('보상은 뱃지 + 카드로 보여준다 — 시안 짜임을 따른다 (#295)', (tester) async {
     await tester.pumpWidget(wrap(_FakeRepo()));
     await tester.pump();
 
     expect(find.text('유튜브 시청 20분'), findsOneWidget);
-    expect(find.text('다 하면'), findsOneWidget);
-    // 별은 이룸이가 일과를 끝냈을 때의 연출이라 여기서 쓰면 뜻이 겹친다
-    expect(find.text('⭐'), findsNothing);
+    // 시안(963:4422)은 단계와 같은 짜임으로 두고 뱃지만 다르게 한다.
+    // 전에는 `다 하면`이라는 말로 대신했는데(#275) 시안이 뒤에 나와 그쪽을 따른다.
+    expect(find.text('다 하면'), findsNothing);
+    expect(find.text('⭐'), findsNothing, reason: '별은 이모지가 아니라 에셋이다');
   });
 
   testWidgets('보상이 없으면 그 줄을 그리지 않는다 — 빈 칸은 덜 만들어진 것처럼 보인다', (tester) async {

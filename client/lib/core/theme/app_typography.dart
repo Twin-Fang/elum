@@ -51,6 +51,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.routineEmptyPast,
     required this.starsCount,
     required this.stepBadgeNumber,
+    required this.sheetTitle,
+    required this.sheetStepTitle,
+    required this.sheetStepBody,
     required this.editChipLabel,
     required this.childDetailTitle,
     required this.promptPlaceholder,
@@ -226,6 +229,21 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// **[starsCount](80)를 빌려 쓰지 않는다.** 이름이 비슷해 한 번 그렇게 썼다가
   /// 40×68 뱃지 안에서 숫자가 잘렸다. 쓰임이 다르면 크기도 다르다.
   final TextStyle stepBadgeNumber;
+
+  /// 일과 시트 제목 (Figma 956:4084 `타이틀` — Pretendard 20).
+  ///
+  /// `reviewTitle`(24)을 쓰지 않는다 — 그건 다른 화면도 함께 쓰므로 여기서 크기를
+  /// 바꾸면 손대지 않은 화면까지 딸려 바뀐다. 시안이 이 화면군만 Pretendard로
+  /// 그렸기에 글꼴도 다르다.
+  final TextStyle sheetTitle;
+
+  /// 일과 시트의 단계 제목 (Figma `963:4236` — Pretendard 16/600).
+  /// `cardTitle`(Tmoney 17/800)과 다르다.
+  final TextStyle sheetStepTitle;
+
+  /// 일과 시트의 단계 설명 (Figma `963:4237` — Pretendard 13/400).
+  /// `cardBody`(15)와 다르다.
+  final TextStyle sheetStepBody;
 
   // --- 카드확인·아이 상세 (Figma 262:5124 / 309:3548, 2026-07-22 덤프) ---
 
@@ -516,6 +534,24 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.0,
     ),
+    sheetTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      height: 1,
+    ),
+    sheetStepTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1,
+    ),
+    sheetStepBody: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1,
+    ),
     editChipLabel: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 14,
@@ -606,6 +642,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? routineEmptyPast,
     TextStyle? starsCount,
     TextStyle? stepBadgeNumber,
+    TextStyle? sheetTitle,
+    TextStyle? sheetStepTitle,
+    TextStyle? sheetStepBody,
     TextStyle? editChipLabel,
     TextStyle? childDetailTitle,
     TextStyle? promptPlaceholder,
@@ -657,6 +696,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineEmptyPast: routineEmptyPast ?? this.routineEmptyPast,
       starsCount: starsCount ?? this.starsCount,
       stepBadgeNumber: stepBadgeNumber ?? this.stepBadgeNumber,
+      sheetTitle: sheetTitle ?? this.sheetTitle,
+      sheetStepTitle: sheetStepTitle ?? this.sheetStepTitle,
+      sheetStepBody: sheetStepBody ?? this.sheetStepBody,
       editChipLabel: editChipLabel ?? this.editChipLabel,
       childDetailTitle: childDetailTitle ?? this.childDetailTitle,
       promptPlaceholder: promptPlaceholder ?? this.promptPlaceholder,
@@ -715,6 +757,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineEmptyPast: TextStyle.lerp(routineEmptyPast, other.routineEmptyPast, t)!,
       starsCount: TextStyle.lerp(starsCount, other.starsCount, t)!,
       stepBadgeNumber: TextStyle.lerp(stepBadgeNumber, other.stepBadgeNumber, t)!,
+      sheetTitle: TextStyle.lerp(sheetTitle, other.sheetTitle, t)!,
+      sheetStepTitle: TextStyle.lerp(sheetStepTitle, other.sheetStepTitle, t)!,
+      sheetStepBody: TextStyle.lerp(sheetStepBody, other.sheetStepBody, t)!,
       editChipLabel: TextStyle.lerp(editChipLabel, other.editChipLabel, t)!,
       childDetailTitle:
           TextStyle.lerp(childDetailTitle, other.childDetailTitle, t)!,

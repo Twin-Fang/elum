@@ -219,6 +219,9 @@ abstract final class AppAssets {
   /// 숫자는 SVG에 없다 — 코드에서 겹쳐 그린다.
   static const starBadge = '$_images/star_badge.svg';
 
+  /// 일과 시트 보상 뱃지 안의 별 (Figma 963:4442, 25×24).
+  static const rewardBadgeStar = '$_images/reward_badge_star.svg';
+
   /// 아이 홈 빈 상태의 시무룩한 루루 (164×164). Figma 382:3220 `루루_슬픔`.
   static const ruruSad = '$_images/ruru_sad.svg';
 
