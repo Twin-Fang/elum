@@ -123,13 +123,26 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    // 병아리를 따로 조립했다가 얼굴 없는 덩어리가 된 적이 있다.
+    // 병아리를 따로 조립했다가 형태가 어긋난 적이 있다.
     // 이제는 시작 화면과 **같은 위젯**을 쓰므로 구성 요소가 전부 따라온다.
     expect(imageWithAsset(AppAssets.splashChickBody), findsOneWidget);
-    expect(svgWithAsset(AppAssets.splashCharLeft), findsOneWidget);
-    expect(svgWithAsset(AppAssets.splashCharRight), findsOneWidget);
-    expect(svgWithAsset(AppAssets.splashCenter), findsOneWidget);
     expect(svgWithAsset(AppAssets.splashHill), findsOneWidget);
+    expect(imageWithAsset(AppAssets.splashOrb), findsOneWidget);
+  });
+
+  testWidgets('병아리에 얼굴을 얹지 않는다 (이슈 #297)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    // 시안 `726:4942` 안에는 벡터가 셋뿐이다 — 줄기·몸통·구슬. 눈도 부리도 없다.
+    // 7월 시안에서 받아 둔 얼굴을 계속 얹고 있었고, 부리가 카카오 버튼 아래로
+    // 13 삐져나와 **버튼 사이에 주황 조각**으로 보였다. 되살아나면 여기서 잡는다.
+    // ignore: deprecated_member_use_from_same_package
+    expect(svgWithAsset(AppAssets.splashCharLeft), findsNothing);
+    // ignore: deprecated_member_use_from_same_package
+    expect(svgWithAsset(AppAssets.splashCharRight), findsNothing);
+    // ignore: deprecated_member_use_from_same_package
+    expect(svgWithAsset(AppAssets.splashCenter), findsNothing);
   });
 
   testWidgets('버튼이 화면 밖으로 밀려나지 않는다', (tester) async {

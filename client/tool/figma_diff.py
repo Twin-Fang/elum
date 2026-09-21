@@ -67,6 +67,115 @@ def clusters(mask, min_area):
     return [b for b in boxes if (b[2] - b[0] + 1) * (b[3] - b[1] + 1) >= min_area]
 
 
+def _components(mask, min_area):
+    """다른 픽셀을 **진짜 연결 덩어리**로 묶는다 (4-이웃).
+
+    [clusters]는 행 단위로 겹치면 합쳐서 사람이 읽기 좋은 상자를 만든다. 대신 한 행에
+    글자와 그림이 같이 있으면 둘이 한 상자가 된다. 색 덩어리인지 글자 뭉개짐인지
+    가리려면 그 둘이 갈라져 있어야 해서 따로 센다.
+
+    행마다 연속 구간(run)을 찾아 위 행과 겹치는 것끼리 union-find 로 잇는다.
+    마스크 픽셀만 훑으므로 화면 하나에 수십 ms면 끝난다.
+    """
+    h, w = mask.shape
+    parent = {}
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[rb] = ra
+
+    prev_runs = []
+    runs = []          # (label, y, x0, x1)
+    for y in range(h):
+        xs = np.nonzero(mask[y])[0]
+        if len(xs) == 0:
+            prev_runs = []
+            continue
+        cur = []
+        start = xs[0]
+        for i in range(1, len(xs) + 1):
+            if i == len(xs) or xs[i] != xs[i - 1] + 1:
+                x0, x1 = int(start), int(xs[i - 1])
+                label = len(runs)
+                parent[label] = label
+                for plabel, px0, px1 in prev_runs:
+                    if px0 <= x1 and x0 <= px1:      # 위 행과 가로가 겹친다
+                        union(plabel, label)
+                runs.append((label, y, x0, x1))
+                cur.append((label, x0, x1))
+                if i < len(xs):
+                    start = xs[i]
+        prev_runs = cur
+
+    agg = {}
+    for label, y, x0, x1 in runs:
+        root = find(label)
+        a = agg.get(root)
+        n = x1 - x0 + 1
+        if a is None:
+            agg[root] = [x0, y, x1, y, n]
+        else:
+            a[0] = min(a[0], x0); a[2] = max(a[2], x1)
+            a[3] = y; a[4] += n
+    return [v for v in agg.values() if v[4] >= min_area]
+
+
+def _edge_density(img, thr):
+    """가로로 이웃과 크게 다른 픽셀의 비율. 글자가 있으면 높고, 색면이면 0에 가깝다."""
+    if img.shape[1] < 2:
+        return 0.0
+    d = np.abs(img[:, 1:].astype(np.int16) - img[:, :-1]).max(axis=2)
+    return float((d > thr).mean())
+
+
+def _report_solids(design, render, mask, thr, min_area):
+    """**한쪽에만 있는 덩어리**를 찾아낸다.
+
+    글자 뭉개짐은 양쪽 다 글자가 있어서 가장자리가 촘촘하다. 반대로 한쪽에만 있는
+    그림 조각은 양쪽 다 매끈한데 색만 다르다 — 그 차이로 가른다.
+
+    **채움률도 본다.** 그림이 1px만 밀려도 실루엣을 따라 색이 확 바뀌어 위 조건을
+    통과한다. 그런 것은 가는 곡선이라 상자 안이 거의 비어 있고(10% 안팎),
+    한쪽에만 있는 조각은 상자를 꽉 채운다. 부리는 0.69, 1px 밀린 포포는 0.09였다.
+
+    로그인 화면이 1.66%까지 내려간 뒤에도 병아리 부리가 카카오 버튼 아래로 13
+    삐져나와 있었다. 수치로는 이미 "글자만 남은" 화면이라 열어보지 않았다 (#297).
+    """
+    found = _components(mask, min_area)
+    hits = []
+    for x0, y0, x1, y1, area in found:
+        dcrop = design[y0:y1 + 1, x0:x1 + 1]
+        rcrop = render[y0:y1 + 1, x0:x1 + 1]
+        de, re_ = _edge_density(dcrop, thr), _edge_density(rcrop, thr)
+        sub = mask[y0:y1 + 1, x0:x1 + 1]
+        dmean = dcrop[sub].mean(axis=0)
+        rmean = rcrop[sub].mean(axis=0)
+        gap = float(np.abs(dmean - rmean).max())
+        fill = area / float((x1 - x0 + 1) * (y1 - y0 + 1))
+        if de < 0.10 and re_ < 0.10 and gap > 40 and fill >= 0.30:
+            hits.append((area, x0, y0, x1, y1, dmean, rmean, gap, fill))
+
+    if not hits:
+        print('한쪽에만 있는 덩어리: 없음')
+        return
+    hits.sort(reverse=True)
+    print(f'⚠️ 한쪽에만 있는 덩어리 {len(hits)}개 — 글자가 아니라 **색면**이 다르다')
+    print(f'{"y범위":>12}  {"x범위":>12}  {"넓이":>7}  {"시안색":>15}  {"앱색":>15}  '
+          f'색차  채움률')
+    for area, x0, y0, x1, y1, dmean, rmean, gap, fill in hits:
+        d_ = ','.join(f'{int(v):3}' for v in dmean)
+        r_ = ','.join(f'{int(v):3}' for v in rmean)
+        print(f'{y0:5}~{y1:<6}  {x0:5}~{x1:<6}  {area:7}  {d_:>15}  {r_:>15}  '
+              f'{gap:4.0f}  {fill:.2f}')
+
+
 def _ink_rows(img, thr, top, bottom):
     """가로로 글자가 있는 구간을 y범위 목록으로 돌려준다."""
     dark = img.sum(axis=2) < thr
@@ -141,6 +250,8 @@ def main():
     # 그럴 때 **글줄 y좌표**를 양쪽에서 뽑아 맞대면 자리는 정확히 볼 수 있다.
     ap.add_argument('--rows', action='store_true',
                     help='글줄 y좌표를 양쪽에서 뽑아 맞대본다 (배경이 움직이는 화면용)')
+    ap.add_argument('--solids', action='store_true',
+                    help='한쪽에만 있는 색 덩어리를 찾는다 (글자 뭉개짐과 구분)')
     ap.add_argument('--row-threshold', type=int, default=470,
                     help='--rows 에서 "글자"로 볼 밝기 합 (기본 470)')
     args = ap.parse_args()
@@ -182,6 +293,10 @@ def main():
             hot = region[region > args.threshold]
             print(f'{y0:5}~{y1:<6}  {x0:5}~{x1:<6}  '
                   f'{x1 - x0 + 1:4}x{y1 - y0 + 1:<5}  {hot.mean():.0f}')
+
+    if args.solids:
+        print()
+        _report_solids(design, render, mask, args.threshold, args.min_area)
 
     if args.rows:
         print()

@@ -204,13 +204,18 @@ abstract final class AppAssets {
   @Deprecated('빛이 빠진다. splashOrb(PNG)를 쓴다.')
   static const splashStar = '$_images/splash_star.svg';
 
-  /// 병아리 **눈** (각 30×32). 파일명이 `char`라 실루엣처럼 읽히지만 실제로 렌더하면
-  /// 몸통 위 y=573 자리의 두 눈이다. 몸통(`splashChickBody`)에는 얼굴이 없어서
-  /// 이 셋을 빼면 노란 덩어리만 남는다.
+  /// 병아리 **눈** (각 30×32) — 지금 시안에는 없다.
+  ///
+  /// 시안 `726:4942`(background_graphic) 안에는 벡터가 셋뿐이다 — 줄기·몸통·구슬.
+  /// 얼굴은 2026-07-21 옛 시안에서 받아 둔 것이고, 그 뒤 시안에서 빠졌다.
+  /// 로그인 화면에서 부리가 카카오 버튼 아래로 13 삐져나와 드러났다 (#297).
+  @Deprecated('지금 시안에 없는 얼굴이다. 되살리려면 시안에 먼저 그려야 한다.')
   static const splashCharLeft = '$_images/splash_char_left.svg';
+  @Deprecated('지금 시안에 없는 얼굴이다. 되살리려면 시안에 먼저 그려야 한다.')
   static const splashCharRight = '$_images/splash_char_right.svg';
 
-  /// 병아리 **부리** (45×25). 눈 바로 아래 y=599.
+  /// 병아리 **부리** (45×25) — 지금 시안에는 없다. [splashCharLeft] 참조.
+  @Deprecated('지금 시안에 없는 얼굴이다. 되살리려면 시안에 먼저 그려야 한다.')
   static const splashCenter = '$_images/splash_center.svg';
 
   // --- 홈 일과 목록 (Figma 356:4688 / 356:5079 / 343:4543 / 364:8219) ---

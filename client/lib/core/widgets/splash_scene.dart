@@ -18,13 +18,13 @@ import 'app_fade_slide_in.dart';
 ///
 /// ## 연출 (설계: docs/superpowers/specs/2026-07-22-onboarding-animation-design.md)
 ///
-/// 장면(병아리·덤불·별·실루엣·배경)은 **첫 프레임부터 완성돼 있다** —
+/// 장면(병아리·줄기·구슬·배경)은 **첫 프레임부터 완성돼 있다** —
 /// 뒤늦게 뜨면 덜 로드된 느낌이 난다. 그 위에 문구 → 로고만
 /// [AppMotion.sceneStagger] 간격으로 차분하게 등장한다.
 ///
 /// 등장 후에는 머리 위 새싹 줄기와 청록 구슬만 아주 살짝 상하로 부유한다.
-/// 병아리 몸은 고정한다(흔들리면 눈·코까지 우글거려 어색하다). OS "동작
-/// 줄이기"가 켜져 있으면 부유는 시작하지 않는다 (motion.md §접근성).
+/// 병아리 몸은 고정한다 — 화면의 절반을 차지해 조금만 움직여도 눈에 걸린다.
+/// OS "동작 줄이기"가 켜져 있으면 부유는 시작하지 않는다 (motion.md §접근성).
 class SplashScene extends StatefulWidget {
   const SplashScene({super.key, this.overlay});
 
@@ -113,8 +113,7 @@ class _SplashSceneState extends State<SplashScene>
         children: [
           // 병아리 몸통 — Figma y=413, 393×439.
           // 둥근 path와 방사형 그라데이션이 SVG 안에 있다.
-          // 직접 그리면 사각형이 되므로 반드시 에셋을 쓴다.
-          // 병아리는 고정한다 — 몸이 흔들리면 눈·코까지 우글거려 어색하다.
+          // 직접 그리면 사각형이 되므로 반드시 에셋을 쓴다. 고정한다.
           // **크기를 둘 다 준다.** 폭만 주고 `fitWidth`로 두면 상자 높이가
           // 그림 픽셀 높이로 잡혀 세로가 0.77배로 눌린다 — 몸이 33 짧아 보였다 (#297).
           Positioned(
@@ -162,25 +161,12 @@ class _SplashSceneState extends State<SplashScene>
             ),
           ),
 
-          // 병아리 얼굴 — 눈 둘(각 30×32, y=573)과 부리(45×25, y=599). 고정.
+          // **병아리 얼굴을 그리지 않는다.** 눈 둘(y=573)과 부리(y=599)를 얹고
+          // 있었는데 지금 시안(`726:4942`) 안에는 벡터가 셋뿐이다 — 줄기·몸통·구슬.
+          // 얼굴은 2026-07-21 옛 시안에서 받아 둔 잔재였다.
           //
-          // 에셋 이름이 `char`/`center`라 장식처럼 보이지만 몸통에는 얼굴이 없어서
-          // 이 셋이 곧 표정이다. 위에 무언가를 얹을 때 이 영역을 가리지 않는지 본다.
-          Positioned(
-            left: 124.w,
-            top: 573.h,
-            child: SvgPicture.asset(AppAssets.splashCharLeft, width: 30.w),
-          ),
-          Positioned(
-            left: 239.w,
-            top: 573.h,
-            child: SvgPicture.asset(AppAssets.splashCharRight, width: 30.w),
-          ),
-          Positioned(
-            left: 174.w,
-            top: 599.h,
-            child: SvgPicture.asset(AppAssets.splashCenter, width: 45.w),
-          ),
+          // 로그인 화면에서 드러났다. 카카오 버튼이 545~611을 덮는데 부리가 624까지
+          // 내려와 **버튼과 버튼 사이로 주황 조각이 13 삐져나와 있었다** (#297).
 
           // 문구 (x=141 y=140 / x=92 y=168) — 가로 중앙 정렬, 함께 등장
           Positioned(
