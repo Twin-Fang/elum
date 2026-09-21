@@ -98,6 +98,9 @@ public enum ErrorCode {
   // 텍스트 생성 제공자.
   TEXT_PROVIDER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "텍스트 생성을 사용할 수 없습니다."),
 
+  // 점검 모드 (이슈 #279). 점검 중에는 앱 상태 확인·약관 읽기·토큰 갱신을 뺀 API를 막는다.
+  MAINTENANCE_MODE(HttpStatus.SERVICE_UNAVAILABLE, "잠시 점검하고 있어요. 조금 뒤에 다시 열어주세요"),
+
   // 약관 문서 (이슈 #278).
   CONSENT_DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "약관 문서를 찾을 수 없습니다."),
   CONSENT_REASON_REQUIRED(HttpStatus.BAD_REQUEST, "수정 사유를 적어주세요."),

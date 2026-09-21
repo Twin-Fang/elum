@@ -17,6 +17,13 @@ public final class SecurityPaths {
   public static final String ADMIN_SCRIPTS_MATCHER = "/admin/js/**";
   public static final String API_MATCHER = "/api/**";
   public static final String API_AUTH_MATCHER = "/api/auth/**";
+  /**
+   * 토큰 갱신. <b>점검 중에도 연다</b> (이슈 #279).
+   *
+   * <p>갱신이 503을 받으면 앱은 세션이 끝난 것으로 처리할 수 있다. 점검 한 번에 모든 사용자가
+   * 로그아웃되지 않게 이 경로만은 막지 않는다.
+   */
+  public static final String API_AUTH_REFRESH = "/api/auth/refresh";
   /** 이룸이 휴대폰이 연결 암호를 넣는 곳. 로그인 전에 부르므로 인증이 없다 (이슈 #200). */
   public static final String API_DEVICE_LINK_REDEEM = "/api/device-links/redeem";
   /**

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/data/auth_repository.dart';
+import '../app_status/app_status_recheck.dart';
 import '../config/app_config.dart';
 import '../logger/app_logger.dart';
 import 'auth_interceptor.dart';
@@ -72,6 +73,14 @@ final dioProvider = Provider<Dio>((ref) {
       // 앱 전역에 알린다 — 듣고 있는 쪽이 로그인으로 되돌린다 (이슈 #175).
       onSessionExpired: () =>
           ref.read(sessionExpiryProvider.notifier).markExpired(),
+    ),
+  );
+
+  // 서버가 점검 중이라 막으면 앱 상태를 다시 묻는다. 이미 앱을 열어 둔 사람도
+  // 다음 요청에서 곧바로 점검 화면으로 넘어간다 (이슈 #279 QA).
+  dio.interceptors.add(
+    MaintenanceInterceptor(
+      onMaintenance: () => ref.read(appStatusRecheckProvider.notifier).request(),
     ),
   );
 

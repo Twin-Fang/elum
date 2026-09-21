@@ -3,6 +3,8 @@ package com.chuseok22.elumserver.common.infrastructure.config;
 import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationFilter;
+import com.chuseok22.elumserver.common.infrastructure.security.MaintenanceModeFilter;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.jwt.TokenAccessValidator;
@@ -41,6 +43,7 @@ public class SecurityConfig {
   private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
   private final AidlpDecryptionFilter aidlpDecryptionFilter;
   private final TokenAccessValidator tokenAccessValidator;
+  private final SystemConfigService systemConfigService;
 
   // Lombok @RequiredArgsConstructor는 필드의 @Qualifier를 생성자 파라미터로 복사하지 않고,
   // UserDetailsService 구현체를 직접 import하면 common -> member/admin 역방향 패키지 의존이
@@ -53,7 +56,8 @@ public class SecurityConfig {
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
     AidlpDecryptionFilter aidlpDecryptionFilter,
     TokenAccessValidator tokenAccessValidator,
-    LinkAccessValidator linkAccessValidator
+    LinkAccessValidator linkAccessValidator,
+    SystemConfigService systemConfigService
   ) {
     this.memberUserDetailsService = memberUserDetailsService;
     this.adminUserDetailsService = adminUserDetailsService;
@@ -62,6 +66,7 @@ public class SecurityConfig {
     this.aidlpDecryptionFilter = aidlpDecryptionFilter;
     this.linkAccessValidator = linkAccessValidator;
     this.tokenAccessValidator = tokenAccessValidator;
+    this.systemConfigService = systemConfigService;
   }
 
   @Bean
@@ -123,6 +128,9 @@ public class SecurityConfig {
   @Order(2)
   public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
     JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProvider, tokenAccessValidator, linkAccessValidator);
+    // 빈으로 두지 않는다 — @Component 로 두면 Spring Boot 가 서블릿 필터로 한 번 더 등록해
+    // 관리자 경로까지 타게 된다. API 체인에만 건다.
+    MaintenanceModeFilter maintenanceModeFilter = new MaintenanceModeFilter(systemConfigService);
 
     http
       .securityMatcher(SecurityPaths.API_MATCHER)
@@ -147,6 +155,8 @@ public class SecurityConfig {
       )
       .exceptionHandling(handling -> handling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
       .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+      // 점검 중이면 인증보다 먼저 503 — 만료 토큰이 401을 받고 갱신에 나서지 않게 한다 (이슈 #279).
+      .addFilterBefore(maintenanceModeFilter, JwtAuthenticationFilter.class)
       // JWT 인증 이후 실행 — 인증된 요청의 암호화 본문을 복호화해 컨트롤러에 평문 DTO로 넘긴다.
       .addFilterAfter(aidlpDecryptionFilter, JwtAuthenticationFilter.class);
 

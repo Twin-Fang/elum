@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/theme_context_ext.dart';
+import 'app_status_recheck.dart';
 import 'app_status_repository.dart';
 
 /// 앱이 시작할 때 서버 상태를 확인하고, 필요하면 화면을 대신 그린다 (이슈 #279).
@@ -10,16 +11,47 @@ import 'app_status_repository.dart';
 /// **확인하지 못하면 그냥 통과시킨다.** 서버를 못 봤다는 이유로 앱을 세우면
 /// 정작 서버가 죽었을 때 아무도 앱을 열지 못한다. 기다리는 동안도 마찬가지다 —
 /// 로딩 화면을 끼워 넣으면 매번 시작이 느려진다.
-class AppStatusGate extends ConsumerWidget {
+///
+/// **앱이 다시 앞으로 올라오면 다시 묻는다.** 전에는 시작할 때 한 번뿐이라, 점검을
+/// 켜기 전에 앱을 연 사람은 다시 켤 때까지 점검 사실을 몰랐다 (#279 QA).
+class AppStatusGate extends ConsumerStatefulWidget {
   const AppStatusGate({super.key, required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppStatusGate> createState() => _AppStatusGateState();
+}
+
+class _AppStatusGateState extends ConsumerState<AppStatusGate>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(appStatusRecheckProvider.notifier).request();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final async = ref.watch(appStatusProvider);
 
     return async.maybeWhen(
+      // 다시 묻는 동안에는 **직전 화면을 그대로 둔다.** 그러지 않으면 점검 화면에서
+      // 앱 화면이 잠깐 튀어나와 요청을 보내고, 그 요청이 또 503을 받아 되묻기를 반복한다.
+      skipLoadingOnReload: true,
       data: (result) {
         final status = result.status;
         if (status.maintenance) {
@@ -44,10 +76,10 @@ class AppStatusGate extends ConsumerWidget {
             onAction: () => ref.invalidate(appStatusProvider),
           );
         }
-        return child;
+        return widget.child;
       },
-      // 기다리는 중·실패 — 어느 쪽이든 앱을 막지 않는다
-      orElse: () => child,
+      // 처음 기다리는 중·실패 — 어느 쪽이든 앱을 막지 않는다
+      orElse: () => widget.child,
     );
   }
 }

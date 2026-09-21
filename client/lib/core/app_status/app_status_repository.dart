@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../network/dio_client.dart';
 import 'app_status.dart';
+import 'app_status_recheck.dart';
 
 /// 앱 상태를 서버에 묻는다 (이슈 #279).
 ///
@@ -44,9 +45,11 @@ final appStatusRepositoryProvider = Provider<AppStatusRepository>(
   (ref) => AppStatusRepository(ref.watch(dioProvider)),
 );
 
-/// 앱이 뜬 뒤 한 번 확인한다. 화면을 옮길 때마다 다시 묻지 않는다.
+/// 앱이 뜰 때 한 번, 그리고 [appStatusRecheckProvider] 가 올라갈 때마다 다시 묻는다.
+/// 화면을 옮길 때마다 묻지는 않는다.
 final appStatusProvider = FutureProvider<({AppStatus status, String version})>(
   (ref) async {
+    ref.watch(appStatusRecheckProvider);
     final repo = ref.watch(appStatusRepositoryProvider);
     final results = await Future.wait([
       repo.fetch(),

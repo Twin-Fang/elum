@@ -221,7 +221,7 @@ public enum ConfigKey {
   //    "앱이 동작하지 않는다"(App Store 2.1)로 돌려보낸다.
   MAINTENANCE_MODE(
     ConfigGroup.APP_CONTROL, "점검 모드",
-    "켜면 앱이 점검 안내 화면을 띄운다. 심사 기간에는 켜지 않는다",
+    "켜면 서버가 API를 막고(503) 앱은 점검 안내 화면을 띄운다. 상태 확인·약관 읽기·토큰 갱신·관리자 화면은 열어 둔다. 심사 기간에는 켜지 않는다",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
   MAINTENANCE_MESSAGE(
