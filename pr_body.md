@@ -4,8 +4,11 @@
 
 ## 릴리스 노트
 
+* **버그 수정**
+  * 여우 캐릭터 배지가 테두리 밖으로 삐져나오던 문제를 해결했어요
+
 * **개선**
-  * 보상을 정하지 않은 일과도 그 자리를 보여줘요
+  * 설정 화면을 정리했어요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
