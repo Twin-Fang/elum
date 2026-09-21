@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T16:06:38Z",
-    "currentVersion": "1.25.11",
+    "lastUpdated": "2026-09-21T16:12:28Z",
+    "currentVersion": "1.25.12",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 138
+    "totalReleases": 139
   },
   "releases": [
+    {
+      "version": "1.25.12",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 323,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 일과 만들기 화면들의 위쪽 여백이 좁아 보이던 문제를 고쳤어요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "일과 만들기 화면들의 위쪽 여백이 좁아 보이던 문제를 고쳤어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.25.11",
       "project_type": "flutter",
