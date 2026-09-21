@@ -1569,6 +1569,27 @@ void main() {
       matchesGoldenFile('figma/input_typed_262-4106.png'),
     );
   });
+
+  // 일과 만들기 — 입력칸을 누른 뒤 (#297). 시안 `262:3074`.
+  //
+  // **안내 문구가 사라지고 커서만 남는다** — 여기서 볼 것은 그것이다.
+  // 시안은 키보드가 올라와 **위 내용이 16 눌린 상태**로 그려져 있는데, 앱은
+  // `resizeToAvoidBottomInset: false`라 고정이다(그래야 고정 높이 뼈대가 안 터진다).
+  // 그 16은 붉게 남는 것이 맞다. 입력칸 자리(447)는 양쪽이 같다.
+  testWidgets('일과 만들기 — 입력칸을 누른 뒤 (Figma 262:3074)', (tester) async {
+    await tester.pumpWidget(wrapInput());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    await expectLater(
+      find.byType(RoutineInputScreen),
+      matchesGoldenFile('figma/input_keyboard_262-3074.png'),
+    );
+  });
 }
 
 /// 연결 암호 대역. 시안(`732:5334`)이 그린 `5NJ280`과 `09:59`를 그대로 준다 —
