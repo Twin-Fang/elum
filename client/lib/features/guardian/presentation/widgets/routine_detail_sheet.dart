@@ -47,9 +47,14 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
 class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
   late List<ActionCard> _steps = List.of(widget.routine.steps);
 
-  /// 시안 기준 시트 높이는 614/852 ≈ 0.72다. 단계가 적으면 그만큼만 쓰고,
-  /// 많으면 여기까지만 커진 뒤 목록이 스크롤된다.
-  static const _maxHeightRatio = 0.72;
+  /// 시트 높이. 시안(956:4084) 기준 614/852 ≈ 0.72다.
+  ///
+  /// **내용과 무관하게 이 높이를 지킨다** (#316). 전에는 최대치로만 두어 단계가
+  /// 적으면 시트가 오그라들었는데, 그러면 **열 때마다 시트 윗변이 달라져**
+  /// 보호자가 매번 다른 화면을 본다. 윗변이 밀리면 안의 모든 줄이 함께 밀린다.
+  ///
+  /// 단계가 많으면 지금처럼 목록이 안에서 스크롤된다.
+  static const _heightRatio = 0.72;
 
   /// 지금 끌고 있는 줄. 끌기가 시작되면 그 줄은 목록에서 빠지고 시트 위에 뜬
   /// 사본으로 다시 그려지는데, 들린 상태를 넘겨주지 않으면 잡았다 놓는 사이에
@@ -86,16 +91,15 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
     final colors = context.colors;
     final space = context.space;
     final typo = context.typo;
-    final maxHeight = MediaQuery.sizeOf(context).height * _maxHeightRatio;
+    final height = MediaQuery.sizeOf(context).height * _heightRatio;
 
     return Container(
-      constraints: BoxConstraints(maxHeight: maxHeight),
+      height: height,
       decoration: BoxDecoration(
         color: colors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           // --- 고정: 핸들바 + 제목 (덤프의 `스크롤 시 fix 영역`) ---
           _Header(title: widget.routine.title),
