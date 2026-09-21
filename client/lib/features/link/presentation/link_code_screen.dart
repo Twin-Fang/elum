@@ -32,6 +32,7 @@ import '../domain/link_status.dart';
 /// | 연결됨 | 보임 | **없음** | **없음** | **활성** |
 ///
 /// 연결되면 타이머와 다시 만들기가 사라진다 — **더 기다릴 이유가 없어서다.**
+/// `나중에 할게요`는 세 상태 모두에 남는다 (시안 `732:5850`).
 class LinkCodeScreen extends ConsumerStatefulWidget {
   const LinkCodeScreen({super.key, this.fromOnboarding = false});
 
@@ -64,6 +65,15 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   static const _codeGroupGap = 40.0;
 
   /// 암호 묶음(y=299) ↔ 타이머(y=363) ↔ 다시 만들기 칩(y=395)
+  /// 설명 하단(227) → 코드 상단(299). 시안 `732:5656` 실측.
+  /// `space.xl * 2`(64)를 쓰고 있었는데 그러면 코드 블록이 통째로 8 뜬다 (#297).
+  static const _descriptionToCode = 72.0;
+
+  /// `나중에 할게요` 글자 높이 (시안 `732:5607` 16).
+  /// 누르기 편하라고 8씩 덧댄 여백이 **자리까지 늘려** CTA를 16 밀어 올렸다.
+  /// 여백은 누름 영역으로만 두고 자리는 글자 높이 그대로 잡는다 (#297).
+  static const _laterHeight = 16.0;
+
   static const _codeToTimer = 24.0;
   static const _timerToRetry = 16.0;
 
@@ -165,17 +175,27 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
         onPressed: _linked ? _goHome : null,
       ),
       // `나중에 할게요`는 CTA 아래에 붙는다 (시안 y=765).
-      belowButton: widget.fromOnboarding && !_linked
+      //
+      // **연결된 뒤에도 남는다** — 시안 `732:5850`이 그렇게 그려져 있다.
+      // 전에는 연결되면 숨겼는데, 누르면 `시작하기`와 같은 곳으로 가므로
+      // 숨겨서 얻는 것이 없고 화면만 시안과 달라졌다 (#297).
+      belowButton: widget.fromOnboarding
           ? Center(
-              child: AppPressable(
-                onTap: _goHome,
-                child: Padding(
-                  padding: EdgeInsets.all(space.xs.h),
-                  child: Text(
-                    '나중에 할게요',
-                    style: context.typo.linkLater.copyWith(
-                      color: colors.linkLaterLabel,
-                      decoration: TextDecoration.underline,
+              child: SizedBox(
+                height: _laterHeight.h,
+                child: OverflowBox(
+                  maxHeight: (_laterHeight + space.xs * 2).h,
+                  child: AppPressable(
+                    onTap: _goHome,
+                    child: Padding(
+                      padding: EdgeInsets.all(space.xs.h),
+                      child: Text(
+                        '나중에 할게요',
+                        style: context.typo.linkLater.copyWith(
+                          color: colors.linkLaterLabel,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -191,7 +211,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
             description:
                 _errorMessage ?? '$_elumiName의 휴대폰에서 아래 코드를 입력하세요',
           ),
-          SizedBox(height: space.xl * 2),
+          SizedBox(height: _descriptionToCode.h),
           if (_loading)
             const Center(child: CircularProgressIndicator())
           else if (issued != null) ...[

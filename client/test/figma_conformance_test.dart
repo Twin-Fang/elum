@@ -16,6 +16,11 @@ import 'package:elum/features/auth/data/consent_repository.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:dio/dio.dart';
+import 'package:elum/core/storage/local_storage.dart';
+import 'package:elum/core/storage/token_store.dart';
+import 'package:elum/features/link/data/device_link_repository.dart';
+import 'package:elum/features/link/domain/link_status.dart';
+import 'package:elum/features/link/presentation/link_code_screen.dart';
 import 'package:elum/features/onboarding/presentation/card_completion_screen.dart';
 import 'package:elum/features/onboarding/presentation/name_screen.dart';
 import 'package:elum/features/onboarding/presentation/goals_screen.dart';
@@ -951,6 +956,106 @@ void main() {
       matchesGoldenFile('figma/consent_726-5056.png'),
     );
   });
+
+  /// 연결 암호 화면을 세운다. **1초 타이머가 계속 돌아** `pumpAndSettle`을
+  /// 쓸 수 없다 — 필요한 만큼만 `pump()`한다.
+  Future<_FakeLink> pumpLinkCode(WidgetTester tester) async {
+    final repo = _FakeLink();
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(path: '/', builder: (context, state) => const SizedBox.shrink()),
+        GoRoute(
+          path: Routes.linkCode,
+          builder: (context, state) =>
+              const LinkCodeScreen(fromOnboarding: true),
+        ),
+        GoRoute(
+          path: Routes.guardian,
+          builder: (context, state) => const SizedBox.shrink(),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          deviceLinkRepositoryProvider.overrideWithValue(repo),
+          testStorageOverride(nickname: '하늘이'),
+        ],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp.router(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            routerConfig: router,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    // 뒤로가기가 `canPop()` 으로 갈린다 — 실제 흐름처럼 밀어 넣어야 시안과 같다
+    router.push(Routes.linkCode);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    return repo;
+  }
+
+  // 코드연결 — 대기 (#297). 시안 `732:5334`.
+  testWidgets('코드연결 — 대기 (Figma 732:5334)', (tester) async {
+    await pumpLinkCode(tester);
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await expectLater(
+      find.byType(LinkCodeScreen),
+      matchesGoldenFile('figma/linkcode_732-5334.png'),
+    );
+  });
+
+  // 코드연결 — 연결됨 (#297). 시안 `732:5850`. 타이머와 다시 만들기가 사라지고
+  // 시작하기가 켜진다.
+  testWidgets('코드연결 — 연결됨 (Figma 732:5850)', (tester) async {
+    final repo = await pumpLinkCode(tester);
+    await tester.pump(const Duration(milliseconds: 100));
+
+    repo.linked = true;
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump();
+    await tester.tap(find.text('확인'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await expectLater(
+      find.byType(LinkCodeScreen),
+      matchesGoldenFile('figma/linkcode_732-5850.png'),
+    );
+  });
+}
+
+/// 연결 암호 대역. 시안(`732:5334`)이 그린 `5NJ280`과 `09:59`를 그대로 준다 —
+/// 다른 값이면 글자가 통째로 어긋난 것으로 나온다.
+class _FakeLink extends DeviceLinkRepository {
+  _FakeLink()
+    : super(dio: Dio(), tokens: InMemoryTokenStore(), storage: InMemoryStorage());
+
+  bool linked = false;
+
+  /// 600으로 둔다 — 화면을 세우는 데 1초가 채 안 걸리므로 내림하면 `09:59`가
+  /// 남아 시안과 같은 글자가 된다. 599면 `09:58`이 되어 두 자리가 붉어진다.
+  @override
+  Future<IssuedLinkCode?> issue() async =>
+      IssuedLinkCode.fromNow(code: '5NJ280', expiresInSeconds: 600);
+
+  @override
+  Future<LinkStatus> status() async => LinkStatus(
+    devices: linked
+        ? [LinkedDevice(linkId: 'l1', linkedAt: DateTime(2026, 9, 18))]
+        : const [],
+  );
 }
 
 /// 서버에 나가지 않는 대역. 대조는 그림만 본다.
