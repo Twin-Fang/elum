@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T02:44:08Z",
-    "currentVersion": "1.18.1",
+    "lastUpdated": "2026-09-21T02:57:19Z",
+    "currentVersion": "1.18.2",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 116
+    "totalReleases": 117
   },
   "releases": [
+    {
+      "version": "1.18.2",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 271,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 고른 캐릭터가 카드 그림에 나오지 않던 문제를 해결했습니다\n  * 그림의 색이 채워지지 않던 문제를 해결했습니다\n  * 단계마다 그림이 제각각이던 문제를 개선했습니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "고른 캐릭터가 카드 그림에 나오지 않던 문제를 해결했습니다",
+            "그림의 색이 채워지지 않던 문제를 해결했습니다",
+            "단계마다 그림이 제각각이던 문제를 개선했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.18.1",
       "project_type": "flutter",
