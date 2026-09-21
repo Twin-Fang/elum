@@ -284,7 +284,7 @@ void main() {
   group('루미 등장 (이슈 #64)', () {
     /// 화면에 그려진 루미 SVG의 가로 중심. 좌우 어느 쪽에서 나오는지 판단한다.
     double lumiCenterX(WidgetTester tester) {
-      final finder = svgWithAsset(AppAssets.lumiThinking);
+      final finder = imageWithAsset(AppAssets.lumiThinking);
       expect(finder, findsOneWidget, reason: '루미가 화면에 없다');
       return tester.getCenter(finder).dx;
     }
@@ -297,7 +297,7 @@ void main() {
         await settle(tester);
 
         expect(
-          svgWithAsset(AppAssets.lumiThinking),
+          imageWithAsset(AppAssets.lumiThinking),
           findsOneWidget,
           reason: '$kind 화면에 루미가 없다',
         );

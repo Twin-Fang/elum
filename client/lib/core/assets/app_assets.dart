@@ -160,11 +160,15 @@ abstract final class AppAssets {
   /// "secured by ELUM AI DLP" 배지의 자물쇠 (16×16). Figma `Component 7`(418:4049).
   static const iconDlpLock = '$_images/icon_dlp_lock.svg';
 
-  /// 준비 로딩 화면의 루미 캐릭터 (Figma 262:4569 `Group 26`, 122×123).
+  /// 준비 로딩 화면의 루미 캐릭터 (Figma `262:4675` `Group 26`).
   ///
   /// **`prepare` 화면에만 있다** — 카드 생성 로딩(262:4703)에는 없다.
   /// 화면 왼쪽 밖(x=-48)에 걸쳐 몸통 일부만 보인다.
-  static const lumiThinking = '$_images/lumi_thinking.svg';
+  ///
+  /// **PNG다.** 더듬이 끝 민트 구슬의 빛이 SVG `<filter>`라 렌더러가 통째로
+  /// 버려 납작한 점만 남았고, 몸통 방사형 그라데이션 셋에도 `gradientTransform`
+  /// 행렬이 걸려 빛 자리가 어긋났다. 병아리 몸통·구슬과 같은 부류다 (#297).
+  static const lumiThinking = '$_images/lumi_thinking.png';
 
   /// 로딩 체크리스트의 완료 표시 (20×20). Figma 262:4692 `Group 27`.
   static const stageCheckDone = '$_images/stage_check_done.svg';

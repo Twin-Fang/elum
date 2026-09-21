@@ -197,8 +197,57 @@ def _ink_rows(img, thr, top, bottom):
     return runs
 
 
-def _report_rows(design, render, thr, top, bottom, scale):
-    """양쪽 글줄을 순서대로 맞대 **몇 px 어긋났는지** 찍는다.
+def _match_rows(d, r, scale, tol):
+    """글줄을 **겹치는 것끼리** 짝짓는다 (순서는 지킨다).
+
+    순서대로 1:1로 맞대면 한 줄만 어긋나도 그 뒤가 통째로 밀려 "백 몇 px 어긋남"
+    같은 헛것이 줄줄이 나온다. 실제로 보호자 홈에서 글줄 둘이 붙어 하나로 세어진
+    것뿐인데 14 대 12로 보고돼 요소가 빠진 줄 알았다 (#297).
+
+    그래서 정렬 문제로 푼다. 짝을 최대한 많이 맺되, 같은 수면 어긋남 합이 작은
+    쪽을 고른다. [tol](논리 px)보다 멀면 아예 짝으로 보지 않는다.
+    """
+    n, m = len(d), len(r)
+    INF = float('inf')
+    # dp[i][j] = (못 맺은 줄 수, 어긋남 합) — 사전식으로 작은 것이 낫다
+    dp = [[(INF, INF)] * (m + 1) for _ in range(n + 1)]
+    back = [[None] * (m + 1) for _ in range(n + 1)]
+    dp[0][0] = (0, 0)
+    for i in range(n + 1):
+        for j in range(m + 1):
+            cur = dp[i][j]
+            if cur[0] == INF:
+                continue
+            if i < n:                                   # 시안 줄을 못 맺고 넘긴다
+                cand = (cur[0] + 1, cur[1])
+                if cand < dp[i + 1][j]:
+                    dp[i + 1][j], back[i + 1][j] = cand, (i, j, 'd')
+            if j < m:                                   # 앱 줄을 못 맺고 넘긴다
+                cand = (cur[0] + 1, cur[1])
+                if cand < dp[i][j + 1]:
+                    dp[i][j + 1], back[i][j + 1] = cand, (i, j, 'r')
+            if i < n and j < m:
+                off = abs((r[j][0] - d[i][0]) / scale)
+                if off <= tol:
+                    cand = (cur[0], cur[1] + off)
+                    if cand < dp[i + 1][j + 1]:
+                        dp[i + 1][j + 1], back[i + 1][j + 1] = cand, (i, j, 'm')
+    pairs, i, j = [], n, m
+    while (i, j) != (0, 0):
+        pi, pj, how = back[i][j]
+        if how == 'm':
+            pairs.append((d[pi], r[pj]))
+        elif how == 'd':
+            pairs.append((d[pi], None))
+        else:
+            pairs.append((None, r[pj]))
+        i, j = pi, pj
+    pairs.reverse()
+    return pairs
+
+
+def _report_rows(design, render, thr, top, bottom, scale, tol=40):
+    """양쪽 글줄을 맞대 **몇 px 어긋났는지** 찍는다.
 
     배경이 움직이는 화면(오로라·로딩)에서는 `diff%`가 배경에 먹혀 쓸모가 없다.
     그럴 때도 **글자가 어느 높이에 있는지**는 이렇게 숫자로 볼 수 있다 —
@@ -206,23 +255,25 @@ def _report_rows(design, render, thr, top, bottom, scale):
     """
     d = _ink_rows(design, thr, top, bottom)
     r = _ink_rows(render, thr, top, bottom)
-    print(f'글줄 (밝기합 {thr} 미만을 글자로 본다 · 논리 px)')
+    pairs = _match_rows(d, r, scale, tol)
+    print(f'글줄 (밝기합 {thr} 미만을 글자로 본다 · 논리 px · {tol} 넘게 떨어지면 짝으로 안 본다)')
     print(f'{"#":>3}  {"시안":>12}  {"앱":>12}  어긋남')
-    for i in range(max(len(d), len(r))):
-        dv = d[i] if i < len(d) else None
-        rv = r[i] if i < len(r) else None
-        def fmt(v):
-            return f'{round(v[0]/scale)}~{round(v[1]/scale)}' if v else '—'
-        gap = ''
+
+    def fmt(v):
+        return f'{round(v[0] / scale)}~{round(v[1] / scale)}' if v else '—'
+
+    lonely = 0
+    for i, (dv, rv) in enumerate(pairs):
         if dv and rv:
             off = round((rv[0] - dv[0]) / scale)
             gap = '맞음' if abs(off) <= 1 else f'{off:+d}'
         else:
-            gap = '한쪽에만 있다'
+            gap = '앱에만 있다' if rv else '시안에만 있다'
+            lonely += 1
         print(f'{i + 1:>3}  {fmt(dv):>12}  {fmt(rv):>12}  {gap}')
-    if len(d) != len(r):
-        print(f'\n⚠️ 줄 개수가 다르다 — 시안 {len(d)}, 앱 {len(r)}. '
-              f'글자가 한 줄 더 꺾였거나 요소가 빠졌다.')
+    if lonely:
+        print(f'\n⚠️ 짝이 없는 글줄 {lonely}개. 글자가 한 줄 더 꺾였거나 '
+              f'요소가 빠졌거나, 붙어 있어 한 줄로 세어진 것이다.')
 
 
 def main():
@@ -252,6 +303,8 @@ def main():
                     help='글줄 y좌표를 양쪽에서 뽑아 맞대본다 (배경이 움직이는 화면용)')
     ap.add_argument('--solids', action='store_true',
                     help='한쪽에만 있는 색 덩어리를 찾는다 (글자 뭉개짐과 구분)')
+    ap.add_argument('--row-tolerance', type=int, default=40,
+                    help='--rows 에서 짝으로 볼 최대 어긋남 (기본 40)')
     ap.add_argument('--row-threshold', type=int, default=470,
                     help='--rows 에서 "글자"로 볼 밝기 합 (기본 470)')
     args = ap.parse_args()
@@ -300,7 +353,8 @@ def main():
 
     if args.rows:
         print()
-        _report_rows(design, render, args.row_threshold, top, bottom, scale)
+        _report_rows(design, render, args.row_threshold, top, bottom, scale,
+                      args.row_tolerance)
 
     if args.out:
         # 원본을 흐리게 깔고 다른 자리만 붉게 칠한다 — 어디가 틀렸는지 바로 보인다.

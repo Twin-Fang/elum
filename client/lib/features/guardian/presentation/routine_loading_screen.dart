@@ -256,11 +256,12 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
       onBack: _handleBack,
       child: Stack(
         children: [
-          // 루미는 두 화면 모두 y=383에 있고 **좌우만 반대**다.
-          // 준비(262:4569 `Group 26`)는 x=-48로 왼쪽 밖,
-          // 생성(262:4703 `Group 26`=364:8291)은 x=325로 오른쪽 밖에 걸친다.
+          // 루미는 두 화면 모두 y=398에 있고 **좌우만 반대**다.
+          // 준비(262:4569)는 왼쪽 밖으로 31, 생성(262:4703)은 오른쪽 밖으로 37
+          // 걸친다. **덤프 좌표(y=383)가 아니라** 시안 export에 겹쳐 맞춘 값이다 —
+          // 그룹 상자에 그려지지 않는 여백이 붙어 있다 (#297).
           Positioned(
-            top: (383 - topBarH).h,
+            top: (398 - topBarH).h,
             left: 0,
             right: 0,
             child: _LumiPeek(side: widget.kind.lumiSide),
@@ -360,18 +361,22 @@ class _LumiPeekState extends State<_LumiPeek>
   /// 한 번 나왔다 들어가는 데 걸리는 시간. 쉬는 구간까지 포함한다.
   static const _cycle = Duration(milliseconds: 5200);
 
-  /// Figma 실측 — `Group 26`은 122×123이다.
-  /// SVG 자체(113×99)가 아니라 **배치 크기**를 따라야 시안과 같아 보인다.
-  static const _width = 122.0;
-  static const _height = 123.0;
+  /// 그림이 **화면에서 차지하는 자리** — 에셋 크기 그대로다.
+  ///
+  /// **덤프의 그룹 크기(122×123)를 쓰면 안 된다.** `Group 26` 상자에는 그려지지
+  /// 않는 여백이 붙어 있어, 그 크기로 늘리면 몸이 시안보다 아홉 넓고 자리도
+  /// 어긋난다. 시안 export 위에 에셋을 겹쳐 맞춰 잰 값이다 (#297).
+  static const _width = 113.0;
+  static const _height = 99.0;
 
-  /// 화면 밖으로 걸치는 정도. Figma 왼쪽은 x=-48이므로 폭 122의 약 40%가
-  /// 잘려 몸통 일부만 보인다. 오른쪽(x=325, 폭 393)도 393-325=68이 보여
-  /// 잘리는 양이 54로 거의 같다 — 한 값으로 양쪽을 표현한다.
-  static const _peekInset = 48.0;
+  /// 화면 밖으로 걸치는 정도 — **좌우가 다르다.**
+  /// 시안에서 왼쪽 루미는 x=-31이고, 오른쪽은 오른끝이 430이라 37이 잘린다.
+  static const _peekInsetLeft = 31.0;
+  static const _peekInsetRight = 37.0;
 
   /// 다 나왔을 때 화면 안쪽으로 들어온 거리 (부호는 [_direction]이 준다)
-  double get _restX => -_peekInset;
+  double get _restX =>
+      -(widget.side == LumiSide.left ? _peekInsetLeft : _peekInsetRight);
 
   /// 숨을 때는 완전히 가려질 만큼 더 빠진다
   double get _hiddenX => -_width;
@@ -452,10 +457,12 @@ class _LumiPeekState extends State<_LumiPeek>
         // 뒤집지 않으면 얼굴이 화면 밖을 보게 된다.
         child: Transform.flip(
           flipX: !isLeft,
-          child: SvgPicture.asset(
+          // **PNG다.** 더듬이 빛이 `<filter>`라 SVG로 두면 통째로 사라진다 (#297).
+          child: Image.asset(
             AppAssets.lumiThinking,
             width: _width.w,
             height: _height.h,
+            fit: BoxFit.contain,
           ),
         ),
       ),
@@ -573,10 +580,11 @@ class _GenerateError extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset(
+          Image.asset(
             AppAssets.lumiThinking,
             width: 100.w,
             height: 100.w,
+            fit: BoxFit.contain,
           ),
           SizedBox(height: space.lg),
           Text(

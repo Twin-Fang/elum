@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../assets/app_assets.dart';
 import '../theme/theme_context_ext.dart';
@@ -89,7 +88,12 @@ class ElumErrorView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset(AppAssets.lumiThinking, width: 100.w, height: 100.w),
+          Image.asset(
+            AppAssets.lumiThinking,
+            width: 100.w,
+            height: 100.w,
+            fit: BoxFit.contain,
+          ),
           SizedBox(height: space.lg),
           Text(
             message,

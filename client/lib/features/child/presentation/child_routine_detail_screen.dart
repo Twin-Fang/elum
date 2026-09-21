@@ -324,7 +324,10 @@ class _TopBar extends StatelessWidget {
         context.space.screenH,
         0,
       ),
+      // **위에서부터 쌓는다.** 가운데 정렬로 두면 제목이 64 상자의 한가운데로
+      // 가 시안보다 8 내려간다 (#297).
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppPressable(
             onTap: onBack,
@@ -333,23 +336,36 @@ class _TopBar extends StatelessWidget {
             child: SizedBox(
               width: 64.w,
               height: 64.w,
-              child: Center(
-                child: SvgPicture.asset(
-                  AppAssets.iconBack,
-                  width: 28.w,
-                  height: 28.w,
+              // **누를 자리와 그림 자리를 따로 둔다.** 64 상자 한가운데에
+              // 그리면 시안(`356:5169` — 24×24 @ 24,87)보다 12 오른쪽·6 아래로
+              // 밀리고 크기도 28이라 넷 크다 (#297). 상자 왼위 모서리에 붙이고
+              // 위로만 12 띄우면 그림이 시안 자리에 온다 — 좌우 여백
+              // (`screenH` 24)이 이미 시안 x와 같다. 누를 자리는 64 그대로다.
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(top: 12.h),
+                  child: SvgPicture.asset(
+                    AppAssets.iconBack,
+                    width: 24.w,
+                    height: 24.w,
+                  ),
                 ),
               ),
             ),
           ),
           Expanded(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.typo.childDetailTitle.copyWith(
-                color: context.colors.textPrimary,
+            // 시안 제목은 y=90 — 상단바 시작(75)에서 15 아래다.
+            child: Padding(
+              padding: EdgeInsets.only(top: 15.h),
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.typo.childDetailTitle.copyWith(
+                  color: context.colors.textPrimary,
+                ),
               ),
             ),
           ),
