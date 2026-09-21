@@ -1513,6 +1513,35 @@ void main() {
       matchesGoldenFile('figma/childhome_empty_364-8537.png'),
     );
   });
+
+  // 일과 시트 — 보상을 아직 안 정했을 때 (#297). 시안 `980:5174`.
+  //
+  // **줄을 없애지 않는다** (#308). 줄째 빼면 보상을 넣을 수 있다는 것조차
+  // 보이지 않는다. 시안은 대신 별을 흐리게 하고 "없어요"라고 말해 준다.
+  testWidgets('일과 시트 — 보상 없음 (Figma 980:5174)', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        routines: [
+          Routine(
+            id: 'nr',
+            title: '스스로 옷을 입어요',
+            status: 'CONFIRMED',
+            steps: sheetRoutine().steps,
+          ),
+        ],
+        past: const [],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('스스로 옷을 입어요'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/sheet_noreward_980-5174.png'),
+    );
+  });
 }
 
 /// 연결 암호 대역. 시안(`732:5334`)이 그린 `5NJ280`과 `09:59`를 그대로 준다 —

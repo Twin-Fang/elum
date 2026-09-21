@@ -97,14 +97,16 @@ void main() {
     await tester.pump();
 
     // 전에는 줄째 숨겼다. 그러면 보상을 넣을 수 있다는 것조차 보이지 않는다.
-    // 시안(980:5174)은 빈 칸 대신 말로 알리고 별을 흐리게 한다.
+    // 시안(980:5174)은 빈 칸 대신 **말로** 알린다.
     expect(find.text('일과 완료 후 보상이 없어요'), findsOneWidget);
     expect(find.text('⭐'), findsNothing, reason: '별은 이모지가 아니라 에셋이다');
 
+    // **별은 흐리게 하지 않는다.** 한때 흐리게 했는데 시안을 잘못 읽은 것이었다
+    // — `980:5174`의 별은 보상이 없을 때도 선명하다 (#297).
     final dimmed = tester
         .widgetList<Opacity>(find.byType(Opacity))
         .where((o) => o.opacity == 0.5);
-    expect(dimmed, isNotEmpty, reason: '채울 수 있는 자리라 별이 흐리다');
+    expect(dimmed, isEmpty, reason: '시안의 별은 보상이 없어도 선명하다');
   });
 
   testWidgets('편집하기를 누르면 edit을 돌려준다 — 화면 이동은 부르는 쪽이 한다', (tester) async {

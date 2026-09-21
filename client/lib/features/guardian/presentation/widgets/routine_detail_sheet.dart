@@ -542,8 +542,8 @@ class _RewardRow extends StatelessWidget {
     final colors = context.colors;
     final typo = context.typo;
     // 보상을 아직 정하지 않았어도 줄은 그린다 (#308). 줄째 없애면 보상을 넣을 수
-    // 있다는 것조차 보이지 않는다. 시안(980:5174)은 대신 별을 흐리게 하고
-    // "없어요"라고 말해 준다 — 빈 칸이 아니라 말로 알린다.
+    // 있다는 것조차 보이지 않는다. 시안(980:5174)은 **글자로** 알린다 —
+    // 빈 칸이 아니라 "없어요"라고 말해 준다.
     final hasReward = routine.hasReward;
 
     // **위 여백을 주지 않는다.** 단계 줄마다 아래 8 이 붙어 있어 여기서 또 주면
@@ -567,13 +567,13 @@ class _RewardRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(16.r),
             ),
             // 정하지 않았으면 별을 흐리게 — 채울 수 있는 자리임을 보여준다.
-            child: Opacity(
-              opacity: hasReward ? 1 : 0.5,
-              child: SvgPicture.asset(
-                AppAssets.rewardBadgeStar,
-                width: 25.w,
-                height: 24.w,
-              ),
+            // **별은 흐리게 하지 않는다.** 시안(`980:5174`)의 별은 보상이 없을
+            // 때도 선명하다 — 흐리게 한 건 시안을 잘못 읽은 것이었다 (#297).
+            // 비었다는 것은 **글자가** 말해 준다.
+            child: SvgPicture.asset(
+              AppAssets.rewardBadgeStar,
+              width: 25.w,
+              height: 24.w,
             ),
           ),
           SizedBox(width: 4.w),
