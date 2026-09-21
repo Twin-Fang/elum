@@ -1,15 +1,46 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T05:13:20Z",
-    "currentVersion": "1.20.0",
+    "lastUpdated": "2026-09-21T07:32:31Z",
+    "currentVersion": "1.21.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 120
+    "totalReleases": 121
   },
   "releases": [
+    {
+      "version": "1.21.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 282,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 관리자 화면을 휴대폰에서도 볼 수 있습니다\n  * 관리자 화면에 어두운 테마가 생겼습니다\n  * 설정을 검색하고 분류별로 골라 볼 수 있습니다\n  * 설정을 저장해도 보던 자리를 잃지 않습니다\n\n* **버그 수정**\n  * 없는 페이지에 들어갔을 때 안내가 정확해졌습니다\n  * 목록이 길어져도 화면이 느려지지 않습니다\n  * 글자가 좁은 칸에서 세로로 쪼개지던 문제를 고쳤습니다",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "관리자 화면을 휴대폰에서도 볼 수 있습니다",
+            "관리자 화면에 어두운 테마가 생겼습니다",
+            "설정을 검색하고 분류별로 골라 볼 수 있습니다",
+            "설정을 저장해도 보던 자리를 잃지 않습니다"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "없는 페이지에 들어갔을 때 안내가 정확해졌습니다",
+            "목록이 길어져도 화면이 느려지지 않습니다",
+            "글자가 좁은 칸에서 세로로 쪼개지던 문제를 고쳤습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.20.0",
       "project_type": "flutter",
