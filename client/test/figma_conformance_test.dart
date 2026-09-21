@@ -35,6 +35,7 @@ import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_stars_screen.dart';
 import 'package:elum/features/child/presentation/mode_switch_screen.dart';
+import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
 import 'package:elum/core/theme/app_motion.dart';
 import 'package:elum/features/child/domain/reward_character.dart';
 import 'package:elum/features/child/presentation/reward_screen.dart';
@@ -48,6 +49,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/precache_images.dart';
 import 'helpers/test_storage.dart';
@@ -1218,6 +1220,108 @@ void main() {
       matchesGoldenFile('figma/pinconfirm_238-2924.png'),
     );
   });
+
+  // 보호자 홈 — 일과를 민 상태 (#297). 시안 `931:4179`.
+  //
+  // 담긴 일과는 `931:3896`과 **같다** — 시안이 같은 화면의 두 상태로 그렸다.
+  // 두 번째 오늘 일과를 왼쪽으로 밀면 삭제·수정이 드러난다.
+  testWidgets('보호자 홈 — 일과를 민 뒤 (Figma 931:4179)', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        routines: [
+          routine('r1', '스스로 옷을 입어요', reward: '유튜브 시청 20분', percent: 50),
+          routine('r2', '밥 먹기 전에 손을 씻어요', reward: '마이구미 5개 먹기', percent: 100),
+        ],
+        past: [
+          routine(
+            'p1',
+            '학교에 갈 준비를 해요',
+            reward: '좋아하는 노래 들으며 학교 가기',
+            percent: 100,
+          ),
+          routine('p2', '밥 먹기 전에 손을 씻어요', reward: '거실에서 저녁 먹기', percent: 50),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.drag(find.text('마이구미 5개 먹기'), const Offset(-200, 0));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(GuardianHomeScreen),
+      matchesGoldenFile('figma/routine_menu_931-4179.png'),
+    );
+  });
+
+  /// 이룸이가 카드를 보는 화면. 시안 `309:3548`(안 체크) · `309:3648`(체크).
+  ///
+  /// **카드 안 그림은 AI 가 만든다** — 시험에는 없으므로 대체 일러스트가 뜬다.
+  /// 그 사각형은 차이로 남는 것이 맞다. 볼 것은 상단바·카드 틀·문구·체크 단추다.
+  Widget wrapCardDetail() => ProviderScope(
+    overrides: [
+      offlineDioOverride(),
+      testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+      // 읽어 주기는 오디오 채널을 타 시험에서 터진다 — 아무것도 안 하는 대역으로
+      speechServiceProvider.overrideWithValue(_SilentSpeech()),
+    ],
+    child: ScreenUtilInit(
+      designSize: const Size(393, 852),
+      useInheritedMediaQuery: true,
+      builder: (context, _) => MaterialApp.router(
+        theme: AppTheme.light,
+        debugShowCheckedModeBanner: false,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+          child: child!,
+        ),
+        // 마지막 단계를 체크하면 보상 화면으로 넘어간다 — 길이 없으면 터진다
+        routerConfig: GoRouter(
+          initialLocation: Routes.childRoutineDetail,
+          routes: [
+            GoRoute(
+              path: Routes.childRoutineDetail,
+              builder: (context, state) => const ChildRoutineDetailScreen(
+                routine: Routine(
+                  id: 'd1',
+                  title: '비 오는 날 학교에 가요',
+                  status: 'CONFIRMED',
+                  steps: [
+                    ActionCard(
+                      id: 'd-c1',
+                      stepOrder: 1,
+                      title: '옷을 입어요',
+                      description: '학교에 입고 갈 옷을 차례대로 입어요',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            GoRoute(
+              path: Routes.childReward,
+              builder: (context, state) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  testWidgets('이룸이 카드 — 안 체크 (Figma 309:3548)', (tester) async {
+    await tester.pumpWidget(wrapCardDetail());
+    await tester.pump();
+    await precacheAllImages(tester);
+    await tester.pump(const Duration(milliseconds: 600));
+
+    await expectLater(
+      find.byType(ChildRoutineDetailScreen),
+      matchesGoldenFile('figma/childhome_309-3548.png'),
+    );
+  });
+
+  // 체크한 뒤(`309:3648`)는 **대조에 올리지 않는다.** 체크하면 색종이가 터지는데
+  // 조각 자리가 매번 무작위라 돌릴 때마다 0.1%씩 흔들려 골든이 스스로 깨진다.
+  // 체크 단추 색은 `child_screens_golden_test.dart`가 회귀로 잡는다.
 }
 
 /// 연결 암호 대역. 시안(`732:5334`)이 그린 `5NJ280`과 `09:59`를 그대로 준다 —
