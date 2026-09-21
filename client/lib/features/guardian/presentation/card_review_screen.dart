@@ -176,6 +176,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
           ),
           SizedBox(height: space.md),
           Text(
+            // 시안은 `카드 5개가 생성되었어요`인데 **피동형이라 쓸 수 없다**
+            // (루트 CLAUDE.md 말투 규칙). 능동으로 바꿔 둔다.
             '카드 ${cards.length}개를 만들었어요',
             style: context.typo.reviewTitle.copyWith(
               color: context.colors.textPrimary,
@@ -246,7 +248,8 @@ class _EditChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(space.cardRadius.r),
         ),
         child: Text(
-          '이 카드 고치기',
+          // 시안 `262:5124` 문구 그대로 — `고치기`로 줄여 두었었다 (#297)
+          '이 카드 수정하기',
           style: context.typo.editChipLabel.copyWith(
             color: context.colors.editChipLabel,
           ),

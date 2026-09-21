@@ -187,7 +187,7 @@ void main() {
     testWidgets('수정 칩이 있고 삭제 X는 에셋으로 그린다', (tester) async {
       await pumpReview(tester, _FakeRepo(synced: true));
 
-      expect(find.text('이 카드 고치기'), findsOneWidget);
+      expect(find.text('이 카드 수정하기'), findsOneWidget);
       // 흐린 원 + X는 코드로 그리지 않는다 — Figma 393:4010 에셋
       expect(svgWithAsset(AppAssets.iconCardDelete), findsWidgets);
       // 이전 시안의 이미지 위 버튼은 사라졌다
@@ -214,7 +214,7 @@ void main() {
     testWidgets('칩을 누르면 수정 시트가 뜨고 저장하면 카드가 바뀐다', (tester) async {
       await pumpReview(tester, _FakeRepo(synced: true));
 
-      await tester.tap(find.text('이 카드 고치기'));
+      await tester.tap(find.text('이 카드 수정하기'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
@@ -257,7 +257,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      await tester.tap(find.text('이 카드 고치기'));
+      await tester.tap(find.text('이 카드 수정하기'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
@@ -276,7 +276,7 @@ void main() {
     testWidgets('제목을 지우면 저장할 수 없다', (tester) async {
       await pumpReview(tester, _FakeRepo(synced: true));
 
-      await tester.tap(find.text('이 카드 고치기'));
+      await tester.tap(find.text('이 카드 수정하기'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
@@ -296,7 +296,7 @@ void main() {
     testWidgets('서버 반영 실패 시 에러 코드를 보여준다', (tester) async {
       await pumpReview(tester, _FakeRepo(synced: false));
 
-      await tester.tap(find.text('이 카드 고치기'));
+      await tester.tap(find.text('이 카드 수정하기'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       await tester.tap(find.text('저장하기').last);

@@ -203,14 +203,15 @@ class _RoutineInputLayout {
   /// 뒤로가기 왼쪽 — 시안 16.
   static double get backLeft => 16.w;
 
-  /// 뒤로가기 줄(20 + 40) 아래부터 반짝임(225)까지.
+  /// 뒤로가기 줄(20 + 40) 아래부터 반짝임(225)까지 — 시안 계산 그대로 106.
   ///
-  /// 시안 계산으로는 106 인데 99 다. 반짝임 SVG 가 시안(30 높이)보다 작게(23)
-  /// 그려져 그만큼 위로 붙는다 — 그림이 아니라 **그려진 결과**에 맞춘 값이다.
-  static double get topToSparkles => 99.h;
+  /// 한때 99였다. "반짝임 SVG가 시안보다 7 작게 그려진다"는 이유였는데
+  /// **다시 재 보니 양쪽 다 36으로 같았다** — 근거가 사라진 보정이라 걷어냈다.
+  /// 그 7 때문에 반짝임이 통째로 위에 떠 있었다 (#297).
+  static double get topToSparkles => 106.h;
 
-  /// 반짝임 → 제목. 시안 간격은 24지만 반짝임 SVG가 7 작게 그려져 그만큼 더 준다.
-  static double get sparklesToTitle => 31.h;
+  /// 반짝임 → 제목 — 시안 간격 24.
+  static double get sparklesToTitle => 24.h;
 
   /// 부제 끝(381) → 입력칸(429).
   static double get bodyToInput => 48.h;
