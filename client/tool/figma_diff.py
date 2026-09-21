@@ -67,6 +67,55 @@ def clusters(mask, min_area):
     return [b for b in boxes if (b[2] - b[0] + 1) * (b[3] - b[1] + 1) >= min_area]
 
 
+def _ink_rows(img, thr, top, bottom):
+    """가로로 글자가 있는 구간을 y범위 목록으로 돌려준다."""
+    dark = img.sum(axis=2) < thr
+    if top:
+        dark[:top] = False
+    if bottom:
+        dark[-bottom:] = False
+    counts = dark.sum(axis=1)
+    runs, start = [], None
+    for y, v in enumerate(counts):
+        if v > 0 and start is None:
+            start = y
+        elif v == 0 and start is not None:
+            if y - start > 2:
+                runs.append((start, y))
+            start = None
+    if start is not None:
+        runs.append((start, len(counts)))
+    return runs
+
+
+def _report_rows(design, render, thr, top, bottom, scale):
+    """양쪽 글줄을 순서대로 맞대 **몇 px 어긋났는지** 찍는다.
+
+    배경이 움직이는 화면(오로라·로딩)에서는 `diff%`가 배경에 먹혀 쓸모가 없다.
+    그럴 때도 **글자가 어느 높이에 있는지**는 이렇게 숫자로 볼 수 있다 —
+    실제로 추가질문에서 제목이 넷째 줄까지 꺾여 있던 것을 이 방법으로 찾았다.
+    """
+    d = _ink_rows(design, thr, top, bottom)
+    r = _ink_rows(render, thr, top, bottom)
+    print(f'글줄 (밝기합 {thr} 미만을 글자로 본다 · 논리 px)')
+    print(f'{"#":>3}  {"시안":>12}  {"앱":>12}  어긋남')
+    for i in range(max(len(d), len(r))):
+        dv = d[i] if i < len(d) else None
+        rv = r[i] if i < len(r) else None
+        def fmt(v):
+            return f'{round(v[0]/scale)}~{round(v[1]/scale)}' if v else '—'
+        gap = ''
+        if dv and rv:
+            off = round((rv[0] - dv[0]) / scale)
+            gap = '맞음' if abs(off) <= 1 else f'{off:+d}'
+        else:
+            gap = '한쪽에만 있다'
+        print(f'{i + 1:>3}  {fmt(dv):>12}  {fmt(rv):>12}  {gap}')
+    if len(d) != len(r):
+        print(f'\n⚠️ 줄 개수가 다르다 — 시안 {len(d)}, 앱 {len(r)}. '
+              f'글자가 한 줄 더 꺾였거나 요소가 빠졌다.')
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--render', required=True, help='앱이 그린 PNG')
@@ -88,6 +137,12 @@ def main():
                     help='시안 프레임의 논리 높이 (기본 852)')
     ap.add_argument('--min-area', type=int, default=200,
                     help='이 넓이 미만 덩어리는 보고하지 않는다')
+    # 오로라처럼 배경이 통째로 움직이는 화면은 diff%가 배경에 먹힌다.
+    # 그럴 때 **글줄 y좌표**를 양쪽에서 뽑아 맞대면 자리는 정확히 볼 수 있다.
+    ap.add_argument('--rows', action='store_true',
+                    help='글줄 y좌표를 양쪽에서 뽑아 맞대본다 (배경이 움직이는 화면용)')
+    ap.add_argument('--row-threshold', type=int, default=470,
+                    help='--rows 에서 "글자"로 볼 밝기 합 (기본 470)')
     args = ap.parse_args()
 
     design = load_rgb(args.design)
@@ -127,6 +182,10 @@ def main():
             hot = region[region > args.threshold]
             print(f'{y0:5}~{y1:<6}  {x0:5}~{x1:<6}  '
                   f'{x1 - x0 + 1:4}x{y1 - y0 + 1:<5}  {hot.mean():.0f}')
+
+    if args.rows:
+        print()
+        _report_rows(design, render, args.row_threshold, top, bottom, scale)
 
     if args.out:
         # 원본을 흐리게 깔고 다른 자리만 붉게 칠한다 — 어디가 틀렸는지 바로 보인다.

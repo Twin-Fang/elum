@@ -197,8 +197,8 @@ fileKey  VSmGuv1iuOpLZmp6QeBHWr
 ## 대조하는 법
 
 ```bash
-# 1. export를 새로 받는다 (받아 둔 것을 그냥 쓰지 않는다)
-#    mcp__figma__download_figma_images → docs/figma/<주제>/
+# 1. export를 새로 받는다 (받아 둔 것을 그냥 쓰지 않는다). **1배로 받는다**
+#    mcp__figma__download_figma_images (pngScale: 1) → docs/figma/<주제>/x1/
 
 # 2. 앱 화면을 렌더한다
 flutter test test/figma_conformance_test.dart --update-goldens
@@ -206,9 +206,24 @@ flutter test test/figma_conformance_test.dart --update-goldens
 # 3. 픽셀로 맞대본다
 python3 tool/figma_diff.py \
   --render test/figma/stars_364-8219.png \
-  --design ../docs/figma/stars/child_stars_364-8219.png \
+  --design ../docs/figma/i297-onboarding/x1/stars_364-8219.png \
   --out /tmp/diff.png
+
+# 4. 배경이 움직이는 화면(오로라·로딩)은 `--rows`로 **글줄 자리**를 맞댄다
+python3 tool/figma_diff.py --render ... --design ... --rows
 ```
+
+### 배경이 움직이면 `--rows`로 본다 ⚠️
+
+오로라가 깔린 화면은 `diff%`가 배경에 먹혀 쓸모가 없다. `--rows`는 양쪽에서
+**글줄 y좌표를 뽑아 순서대로 맞대고 몇 px 어긋났는지** 찍는다. 줄 개수가 다르면
+경고한다 — 글자가 한 줄 더 꺾였거나 요소가 빠졌다는 뜻이다.
+
+추가질문에서 제목이 넷째 줄까지 꺾여 있던 것을 39% 뒤에서 이렇게 찾았다.
+
+> 임계(`--row-threshold`, 기본 470)에 걸친 글자는 한쪽에서만 잡힐 수 있다.
+> 갑자기 `한쪽에만 있다`가 나오면 **색을 재서** 진짜 차이인지 먼저 본다 —
+> 입력칸 안내 문구가 476 대 466으로 갈려 허상이 나온 적이 있다.
 
 **대조에 새 화면을 올릴 때** — 시안이 그린 내용을 **그대로** 채운다. 이름·문구·개수가
 다르면 차이 그림이 통째로 붉어져 정작 봐야 할 어긋남이 묻힌다.
