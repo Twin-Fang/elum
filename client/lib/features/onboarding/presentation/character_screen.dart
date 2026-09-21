@@ -94,6 +94,10 @@ class CharacterScreen extends ConsumerWidget {
             SizedBox(height: CharacterCard.nameGap.h),
             // 이름은 **카드 밖**에 있다 (Figma `732:5320` 루루 / `732:5319` 포포).
             // 각 이름이 카드 가운데에 오도록 같은 Row 구조를 그대로 겹친다.
+            //
+            // **고른 쪽 이름은 그 캐릭터의 선택색이 된다** — 포포 `#EB9B73`,
+            // 루루 `#9CADF1` (Figma `204:1121` · `204:1134`). 둘 다 회색으로
+            // 두면 무엇을 골랐는지 카드 테두리로만 알 수 있다 (#297).
             Row(
               children: [
                 for (final character in CardCharacter.values) ...[
@@ -102,7 +106,9 @@ class CharacterScreen extends ConsumerWidget {
                       character.displayName,
                       textAlign: TextAlign.center,
                       style: context.typo.subtitle.copyWith(
-                        color: context.colors.textSecondary,
+                        color: selected.contains(character)
+                            ? context.colors.characterSelected(character).border
+                            : context.colors.textSecondary,
                       ),
                     ),
                   ),

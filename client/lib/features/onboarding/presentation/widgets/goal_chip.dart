@@ -57,9 +57,10 @@ class GoalChip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 아이콘 배경 원은 선택 여부와 무관하게 동일하다 (Figma 확인)
+          // 고르면 배경 원 색도 바뀐다 (`#EEE9E6` → `#93DBCC`).
+          // 원이 그림 안에 있어 덧칠이 안 되므로 그림 자체를 갈아 끼운다.
           SvgPicture.asset(
-            AppAssets.goalIcon(goal),
+            AppAssets.goalIcon(goal, selected: isSelected),
             width: _iconSize.w,
             height: _iconSize.w,
           ),

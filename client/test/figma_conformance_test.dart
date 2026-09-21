@@ -25,6 +25,8 @@ import 'package:elum/features/onboarding/presentation/card_completion_screen.dar
 import 'package:elum/features/onboarding/presentation/name_screen.dart';
 import 'package:elum/features/onboarding/presentation/goals_screen.dart';
 import 'package:elum/features/onboarding/presentation/character_screen.dart';
+import 'package:elum/features/onboarding/presentation/widgets/character_card.dart';
+import 'package:elum/features/onboarding/domain/character.dart';
 import 'package:elum/features/onboarding/presentation/pin_screen.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
@@ -1106,6 +1108,71 @@ void main() {
     await expectLater(
       find.byType(ModeSwitchScreen),
       matchesGoldenFile('figma/modeswitch_309-2837.png'),
+    );
+  });
+
+  // ── 고른 뒤 모습 (#297) ──────────────────────────────────────────────
+  // 시안은 같은 화면을 **고르기 전/후**로 나눠 그린다. 고른 뒤만 아는 것이
+  // 선택색·테두리 굵기·CTA 활성색이라, 전만 올려 두면 그 넷을 아무도 안 본다.
+  // 실제로 목표 칩에 여우색이 들어간 적이 있다 (이슈 #11).
+
+  testWidgets('목표 — 고른 뒤 (Figma 204:1147)', (tester) async {
+    await pumpOnboarding(tester, Routes.onboardingGoals, () => const GoalsScreen());
+    await precacheAllImages(tester);
+
+    // 시안은 위 둘이 켜져 있다
+    await tester.tap(find.text('해야 할 일을 순서대로 이해해요'));
+    // 칩이 색을 바꾸는 동안에는 다음 탭이 먹지 않는다 — 끝까지 기다린다
+    // (이 화면은 끝나지 않는 움직임이 없어 settle 을 써도 된다)
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('필요한 준비물을 스스로 챙겨요'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(GoalsScreen),
+      matchesGoldenFile('figma/goal_selected_204-1147.png'),
+    );
+  });
+
+  testWidgets('캐릭터 — 포포를 고른 뒤 (Figma 204:1121)', (tester) async {
+    await pumpOnboarding(
+      tester,
+      Routes.onboardingCharacter,
+      () => const CharacterScreen(),
+    );
+    await precacheAllImages(tester);
+
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) => w is CharacterCard && w.character == CardCharacter.fox,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(CharacterScreen),
+      matchesGoldenFile('figma/char_popo_204-1121.png'),
+    );
+  });
+
+  testWidgets('캐릭터 — 루루를 고른 뒤 (Figma 204:1134)', (tester) async {
+    await pumpOnboarding(
+      tester,
+      Routes.onboardingCharacter,
+      () => const CharacterScreen(),
+    );
+    await precacheAllImages(tester);
+
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) => w is CharacterCard && w.character == CardCharacter.cat,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(CharacterScreen),
+      matchesGoldenFile('figma/char_ruru_204-1134.png'),
     );
   });
 }
