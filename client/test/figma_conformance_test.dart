@@ -30,6 +30,8 @@ import 'package:elum/features/onboarding/domain/character.dart';
 import 'package:elum/features/onboarding/presentation/pin_screen.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
+import 'package:elum/features/guardian/presentation/routine_loading_screen.dart';
+import 'package:elum/features/guardian/domain/routine_stage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
@@ -1322,6 +1324,71 @@ void main() {
   // 체크한 뒤(`309:3648`)는 **대조에 올리지 않는다.** 체크하면 색종이가 터지는데
   // 조각 자리가 매번 무작위라 돌릴 때마다 0.1%씩 흔들려 골든이 스스로 깨진다.
   // 체크 단추 색은 `child_screens_golden_test.dart`가 회귀로 잡는다.
+
+  /// 로딩 화면. 시안 `262:4569`(정리 중) · `262:4703`(카드 만드는 중).
+  ///
+  /// 서버 응답을 **일부러 늦춰** 마지막 단계에 머문 상태를 만든다 — 시안이
+  /// 그린 것이 그 순간이다. 오로라 배경은 계속 흐르므로 수치가 크게 남는데,
+  /// **볼 것은 글자와 체크 줄의 자리**다.
+  Widget wrapLoading(RoutineLoadingKind kind) => ProviderScope(
+    overrides: [
+      fakeDioOverride(delay: const Duration(seconds: 8), const {
+        'POST /api/routines/questions': {'questions': []},
+        'POST /api/routines': {'id': 'r1'},
+      }),
+      testStorageOverride(onboardingCompleted: true),
+    ],
+    child: ScreenUtilInit(
+      designSize: const Size(393, 852),
+      useInheritedMediaQuery: true,
+      builder: (context, _) => MaterialApp.router(
+        theme: AppTheme.light,
+        debugShowCheckedModeBanner: false,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+          child: child!,
+        ),
+        routerConfig: GoRouter(
+          initialLocation: '/loading',
+          routes: [
+            GoRoute(
+              path: '/loading',
+              builder: (context, state) => RoutineLoadingScreen(kind: kind),
+            ),
+            GoRoute(
+              path: Routes.routineQuestion,
+              builder: (context, state) => const SizedBox.shrink(),
+            ),
+            GoRoute(
+              path: Routes.routineReview,
+              builder: (context, state) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  testWidgets('로딩 — 내용 정리 중 (Figma 262:4569)', (tester) async {
+    await tester.pumpWidget(wrapLoading(RoutineLoadingKind.prepare));
+    await tester.pump();
+    await precacheAllImages(tester);
+    // 세 줄이 다 드러날 만큼(2+1.5+2초) 흘려보낸다.
+    // **한 번에 6초를 주면 안 된다** — 단계는 100ms 틱을 세며 드러나는데
+    // 한 프레임만 그리면 틱이 한 번만 돌아 첫 줄에서 멈춘다.
+    for (var i = 0; i < 70; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    await expectLater(
+      find.byType(RoutineLoadingScreen),
+      matchesGoldenFile('figma/loading_262-4569.png'),
+    );
+
+    // 찍은 뒤에는 남은 타이머(응답 대기·마감)를 흘려보낸다 — 안 그러면
+    // 위젯이 사라진 뒤에도 타이머가 남아 시험이 실패한다.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+  });
 }
 
 /// 연결 암호 대역. 시안(`732:5334`)이 그린 `5NJ280`과 `09:59`를 그대로 준다 —

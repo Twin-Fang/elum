@@ -305,10 +305,14 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
 
           // 체크리스트 — Figma x=54, y=569. 줄 간격 34(569→603→637).
           // 좌측 정렬해야 체크 아이콘이 한 줄로 선다.
+          //
+          // **오른쪽은 54로 묶지 않는다.** 시안 첫 줄이 x=353까지 가는데(폭 299)
+          // 양쪽 54면 285밖에 안 남아 `…가려 / 요`로 꺾이고, 그 아래 두 줄까지
+          // 통째로 밀린다 (#297). 화면 밖으로 나가지 않을 만큼만 남긴다.
           Positioned(
             top: (569 - topBarH).h,
             left: 54.w,
-            right: 54.w,
+            right: space.screenH.w,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

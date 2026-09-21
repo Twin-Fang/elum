@@ -169,7 +169,8 @@ class _TopBar extends StatelessWidget {
             )
           else
             SizedBox(width: 24.w),
-          SizedBox(width: 24.w),
+          // 뒤로가기 자리(24~48) → 집 상자(시안 x=74). 24를 띄우면 2가 모자란다 (#297).
+          SizedBox(width: 26.w),
           AppPressable(
             onTap: onHome,
             scaleDown: AppPressable.scaleIcon,
