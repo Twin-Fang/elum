@@ -37,6 +37,9 @@ class ChildRoutineDetailScreen extends ConsumerStatefulWidget {
   /// 아동 모드 접근성 하한. 좁은 기기에서 `.w`로 줄어들어도 이 아래로 가지 않는다.
   static const minTouchTarget = 64.0;
 
+  /// 체크 버튼. 화면에 누를 것이 여럿이라 테스트가 타입만으로는 갈라내지 못한다.
+  static const checkButtonKey = ValueKey('child.routine.check');
+
   @override
   ConsumerState<ChildRoutineDetailScreen> createState() =>
       _ChildRoutineDetailScreenState();
@@ -153,13 +156,50 @@ class _ChildRoutineDetailScreenState
       becameChecked ? AppMotion.slow + AppMotion.normal : AppMotion.normal,
     );
     if (!mounted) return;
-    // 마지막 카드를 끝냈으니 보상을 함께 보여준다 (이슈 #239).
+    // 카드를 하나 끝낼 때마다 별을 보여준다. 보호자가 정한 보상도 함께 뜬다 (이슈 #239).
+    // 같은 카드를 다시 체크할 때는 뜨지 않는다 — 위 `shouldReward`가 걸러 준다.
     final routine = widget.routine;
-    context.push(
+    await context.push(
       Routes.childReward,
       extra: routine.hasReward
           ? (emoji: routine.rewardEmoji, text: routine.rewardText)
           : null,
+    );
+    if (!mounted) return;
+    _advanceToNextUnchecked();
+  }
+
+  /// 별 화면을 닫은 뒤 **아직 안 한 카드 중 가장 앞**으로 넘어간다 (이슈 #293).
+  ///
+  /// 전에는 별 화면을 닫으면 방금 끝낸 카드가 그대로 남아, 다음 카드를 보려면
+  /// 화면을 옆으로 밀어야 했다. 미는 동작은 누르기보다 어렵고, 끝낸 카드가 계속
+  /// 떠 있으면 **지금 할 일이 무엇인지** 흐려진다.
+  ///
+  /// **"다음"을 순서가 아니라 남은 일로 정의한다.** 중간을 건너뛰고 뒤를 체크했을 때
+  /// 그저 앞으로만 가면 빠뜨린 카드가 영영 남는다. 남은 것이 없으면 움직이지 않는다 —
+  /// 일과를 다 끝냈을 때 보여줄 화면은 시안이 나온 뒤 따로 만든다.
+  ///
+  /// 체크 해제와 재체크 때는 이 함수까지 오지 않는다. 별 화면이 뜨지 않기 때문인데,
+  /// 연출 없이 화면만 바뀌면 이룸이가 무엇이 일어났는지 알 수 없다.
+  void _advanceToNextUnchecked() {
+    if (!_controller.hasClients) return;
+    final routine = _routine;
+    final progress = ref.read(childRoutineProvider);
+    final next = routine.steps.indexWhere(
+      (card) => !progress.isChecked(routine.id, card),
+    );
+    if (next < 0 || next == _currentIndex) return;
+
+    // 갑자기 바뀌면 무엇이 일어났는지 모른다. 아동 화면은 300ms 이상으로 둔다.
+    // 동작 줄이기가 켜져 있으면 애니메이션만 생략하고 이동은 그대로 한다.
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.jumpToPage(next);
+      return;
+    }
+    _controller.animateToPage(
+      next,
+      duration: AppMotion.normal,
+      curve: AppMotion.standard,
     );
   }
 
@@ -332,6 +372,7 @@ class _CheckButton extends StatelessWidget {
           colors: colors.confetti,
         ),
         AppPressable(
+          key: ChildRoutineDetailScreen.checkButtonKey,
           onTap: onTap,
           scaleDown: AppPressable.scaleButton,
           child: AnimatedContainer(
