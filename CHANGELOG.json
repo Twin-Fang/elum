@@ -1,15 +1,50 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T07:32:31Z",
-    "currentVersion": "1.21.0",
+    "lastUpdated": "2026-09-21T09:35:48Z",
+    "currentVersion": "1.22.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 121
+    "totalReleases": 122
   },
   "releases": [
+    {
+      "version": "1.22.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 283,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 점검 중이거나 업데이트가 필요하면 앱이 알려줍니다\n\n* **개선**\n  * 관리자 화면의 설정을 검색하고 분류별로 볼 수 있습니다\n  * 관리자 화면을 휴대폰에서도 볼 수 있고 어두운 테마를 쓸 수 있습니다\n  * 목록이 비어 있을 때의 안내가 한 모양으로 통일됐습니다\n\n* **버그 수정**\n  * 없는 페이지에 들어갔을 때 안내가 정확해졌습니다\n  * 목록이 길어져도 화면이 느려지지 않습니다",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "점검 중이거나 업데이트가 필요하면 앱이 알려줍니다"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "관리자 화면의 설정을 검색하고 분류별로 볼 수 있습니다",
+            "관리자 화면을 휴대폰에서도 볼 수 있고 어두운 테마를 쓸 수 있습니다",
+            "목록이 비어 있을 때의 안내가 한 모양으로 통일됐습니다"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "없는 페이지에 들어갔을 때 안내가 정확해졌습니다",
+            "목록이 길어져도 화면이 느려지지 않습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.21.0",
       "project_type": "flutter",
