@@ -13,6 +13,27 @@
     <div th:if="${message}" class="alert alert-success" th:text="${message}">저장되었습니다.</div>
     <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">오류</div>
 
+    <!-- 설정이 서른 개가 넘어 평면 목록에서는 찾기가 고통스럽다 (이슈 #248).
+         검색과 그룹 탭은 서버를 거치지 않고 화면에서 거른다 — 왕복할 이유가 없다. -->
+    <div class="sticky top-12 z-10 space-y-2 bg-base-100 py-2 lg:top-14">
+      <div class="flex flex-wrap items-center gap-2">
+        <input type="search" data-settings-search placeholder="설정 이름·설명으로 찾기"
+               class="input input-bordered input-sm w-full sm:w-72"/>
+        <label class="label cursor-pointer gap-2">
+          <input type="checkbox" data-changed-only class="checkbox checkbox-sm"/>
+          <span class="label-text">바꾼 것만</span>
+        </label>
+        <span class="ml-auto text-sm text-base-content/50" data-settings-count></span>
+      </div>
+      <div class="flex flex-wrap gap-1">
+        <button type="button" data-group-tab="" class="btn btn-xs btn-primary">전체</button>
+        <button type="button" th:each="entry : ${groups}" th:data-group-tab="${entry.key.name()}"
+                th:text="${entry.key.label}" class="btn btn-xs btn-ghost">그룹</button>
+      </div>
+      <!-- 저장 결과를 여기 띄운다. 페이지를 다시 그리지 않으므로 스크롤이 그대로다. -->
+      <div data-settings-toast class="alert hidden py-2 text-sm"></div>
+    </div>
+
     <!-- 이미지 제공자 상태 — 단가·키 유무·캐릭터 일관성을 한눈에 본다 (이슈 #246). -->
     <div class="card bg-base-100 shadow-md">
       <div class="card-body space-y-3">
@@ -97,10 +118,14 @@
       </div>
     </div>
 
-    <div th:each="entry : ${groups}" class="card bg-base-100 shadow-md">
+    <div th:each="entry : ${groups}" class="card bg-base-100 shadow-md"
+         th:data-group-card="${entry.key.name()}">
       <div class="card-body space-y-4">
         <h2 class="card-title text-lg" th:text="${entry.key.label}">그룹</h2>
-        <div th:each="config : ${entry.value}" class="border-t border-base-200 pt-4 first:border-t-0 first:pt-0">
+        <div th:each="config : ${entry.value}" class="border-t border-base-200 pt-4 first:border-t-0 first:pt-0"
+             data-config-row
+             th:data-changed="${config.changed()}"
+             th:data-search="${#strings.toLowerCase(config.label() + ' ' + config.key() + ' ' + config.description())}">
           <div class="flex items-start justify-between gap-4 flex-wrap">
             <div class="min-w-64">
               <div class="font-medium">
@@ -120,24 +145,25 @@
                 암호화해 저장합니다. 저장한 값은 다시 볼 수 없습니다
               </div>
             </div>
-            <div class="flex items-center gap-2">
-              <form th:action="@{/admin/settings/{key}(key=${config.key()})}" method="post" class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <form th:action="@{/admin/settings/{key}(key=${config.key()})}" method="post"
+                    data-async-save class="flex flex-wrap items-center gap-2">
                 <!-- 값 타입에 맞는 위젯을 고른다. 비밀값은 절대 화면에 그대로 내보내지 않는다. -->
                 <th:block th:switch="${config.valueType().name()}">
-                  <select th:case="'SELECT'" name="value" class="select select-bordered select-sm w-40">
+                  <select th:case="'SELECT'" name="value" class="select select-bordered select-sm w-full sm:w-40">
                     <option th:each="allowed : ${config.allowedValues()}" th:value="${allowed}" th:text="${allowed}"
                             th:selected="${allowed == config.value()}">값</option>
                   </select>
-                  <select th:case="'BOOLEAN'" name="value" class="select select-bordered select-sm w-40">
+                  <select th:case="'BOOLEAN'" name="value" class="select select-bordered select-sm w-full sm:w-40">
                     <option value="true" th:selected="${config.value() == 'true'}">켜짐</option>
                     <option value="false" th:selected="${config.value() != 'true'}">꺼짐</option>
                   </select>
                   <!-- 비어 있으면 "그대로 두기"다. 지우려면 옆의 기본값 버튼을 쓴다. -->
                   <input th:case="'SECRET'" type="password" name="value" value="" autocomplete="off"
                          th:placeholder="${config.changed()} ? '저장됨 — 바꾸려면 새 값 입력' : '아직 없음 — 값을 입력하세요'"
-                         class="input input-bordered input-sm w-64"/>
+                         class="input input-bordered input-sm w-full sm:w-64"/>
                   <input th:case="*" type="text" name="value"
-                         th:value="${config.value()}" class="input input-bordered input-sm w-64"/>
+                         th:value="${config.value()}" class="input input-bordered input-sm w-full sm:w-64"/>
                 </th:block>
                 <button type="submit" class="btn btn-primary btn-sm">저장</button>
               </form>
@@ -157,6 +183,7 @@
         </div>
       </div>
     </div>
+  <script th:src="@{/admin/js/settings.js}"></script>
   </main>
 </body>
 </html>

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -46,6 +47,31 @@ public class AdminConfigController {
     return "admin/settings";
   }
 
+  /**
+   * 리로드 없이 저장한다 (이슈 #248).
+   *
+   * <p>설정이 서른 개가 넘어 화면이 길다. 하나 고칠 때마다 페이지가 다시 그려지면
+   * <b>스크롤이 맨 위로 튀어</b> 고치던 자리를 다시 찾아 내려가야 한다.
+   *
+   * <p>같은 경로를 쓰되 {@code X-Requested-With: fetch} 가 붙었을 때만 JSON을 준다.
+   * 스크립트가 막힌 환경에서는 평범한 폼 제출로 떨어져 예전처럼 동작한다 —
+   * 저장 자체가 안 되는 것보다 낫다.
+   */
+  @PostMapping(value = "/admin/settings/{key}", headers = "X-Requested-With=fetch")
+  @ResponseBody
+  public Map<String, Object> updateAsync(
+    @PathVariable ConfigKey key,
+    @RequestParam("value") String value
+  ) {
+    try {
+      rejectUnavailableProvider(key, value);
+      systemConfigService.update(key, value);
+      return Map.of("ok", true, "message", key.getLabel() + " 설정을 저장했습니다.");
+    } catch (CustomException e) {
+      return Map.of("ok", false, "message", key.getLabel() + failureReason(e));
+    }
+  }
+
   @PostMapping("/admin/settings/{key}")
   public String update(
     @PathVariable ConfigKey key,
@@ -59,18 +85,23 @@ public class AdminConfigController {
       systemConfigService.update(key, value);
       redirectAttributes.addFlashAttribute("message", key.getLabel() + " 설정을 저장했습니다.");
     } catch (CustomException e) {
-      // 비밀값은 실패 사유가 다르다. "값이 이상하다"로 뭉뚱그리면 관리자가
-      // 서버 설정 문제를 값 문제로 오해해 계속 다시 입력하게 된다.
-      String reason = switch (e.getErrorCode()) {
-        case SECRET_MASTER_KEY_MISSING ->
-          " 저장 실패: 서버에 암호화 키가 없어 비밀값을 저장할 수 없습니다. (E-CFG-002)";
-        case IMAGE_PROVIDER_UNAVAILABLE, TEXT_PROVIDER_UNAVAILABLE ->
-          " 저장 실패: 그 제공자의 API 키가 없습니다. 키를 먼저 저장하세요. (E-CFG-003)";
-        default -> " 저장 실패: 값이 올바르지 않습니다. (E-CFG-001)";
-      };
-      redirectAttributes.addFlashAttribute("errorMessage", key.getLabel() + reason);
+      redirectAttributes.addFlashAttribute("errorMessage", key.getLabel() + failureReason(e));
     }
     return "redirect:/admin/settings";
+  }
+
+  /**
+   * 저장 실패 사유. 비밀값은 실패 이유가 다르다 — "값이 이상하다"로 뭉뚱그리면
+   * 관리자가 서버 설정 문제를 값 문제로 오해해 계속 다시 입력하게 된다.
+   */
+  private String failureReason(CustomException e) {
+    return switch (e.getErrorCode()) {
+      case SECRET_MASTER_KEY_MISSING ->
+        " 저장 실패: 서버에 암호화 키가 없어 비밀값을 저장할 수 없습니다. (E-CFG-002)";
+      case IMAGE_PROVIDER_UNAVAILABLE, TEXT_PROVIDER_UNAVAILABLE ->
+        " 저장 실패: 그 제공자의 API 키가 없습니다. 키를 먼저 저장하세요. (E-CFG-003)";
+      default -> " 저장 실패: 값이 올바르지 않습니다. (E-CFG-001)";
+    };
   }
 
   private void rejectUnavailableProvider(ConfigKey key, String value) {
