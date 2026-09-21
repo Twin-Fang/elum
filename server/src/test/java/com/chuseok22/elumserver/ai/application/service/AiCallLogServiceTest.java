@@ -117,4 +117,41 @@ class AiCallLogServiceTest {
     assertThatCode(() -> aiCallLogService.recordSuccess(AiCallType.LOCAL_LLM_DLP, "exaone", 100, null))
       .doesNotThrowAnyException();
   }
+  @Test
+  @DisplayName("OpenAI 이미지도 토큰이 남는다 — 예전에는 usage를 버려 '-'로 찍혔다")
+  void recordSuccess_openAiImage_keepsTokens() {
+    // 토큰 단가를 안 넣으면 장당 고정값으로 셈하되, 토큰 자체는 기록한다.
+    when(systemConfigService.getDouble(ConfigKey.PRICE_OPENAI_IMAGE_INPUT_PER_1M)).thenReturn(0.0);
+    when(systemConfigService.getDouble(ConfigKey.PRICE_OPENAI_IMAGE_OUTPUT_PER_1M)).thenReturn(0.0);
+    when(systemConfigService.getDouble(ConfigKey.PRICE_OPENAI_IMAGE_PER_IMAGE)).thenReturn(0.005);
+
+    aiCallLogService.recordSuccess(
+      AiCallType.OPENAI_IMAGE, "gpt-image-1-mini", 9000, new UsageMetadata(29, 272, 301)
+    );
+
+    ArgumentCaptor<AiCallLog> captor = ArgumentCaptor.forClass(AiCallLog.class);
+    verify(aiCallLogRepository).save(captor.capture());
+    AiCallLog saved = captor.getValue();
+    assertThat(saved.getPromptTokens()).isEqualTo(29);
+    assertThat(saved.getOutputTokens()).isEqualTo(272);
+    assertThat(saved.getEstimatedCostUsd()).isEqualTo(0.005);
+  }
+
+  @Test
+  @DisplayName("이미지 토큰 단가를 넣으면 실제 사용량으로 셈한다 — 품질을 바꾸면 비용도 따라간다")
+  void recordSuccess_openAiImage_tokenBasedWhenPriced() {
+    when(systemConfigService.getDouble(ConfigKey.PRICE_OPENAI_IMAGE_INPUT_PER_1M)).thenReturn(2.0);
+    when(systemConfigService.getDouble(ConfigKey.PRICE_OPENAI_IMAGE_OUTPUT_PER_1M)).thenReturn(18.4);
+
+    aiCallLogService.recordSuccess(
+      AiCallType.OPENAI_IMAGE, "gpt-image-1-mini", 9000,
+      new UsageMetadata(1_000_000, 1_000_000, 2_000_000)
+    );
+
+    ArgumentCaptor<AiCallLog> captor = ArgumentCaptor.forClass(AiCallLog.class);
+    verify(aiCallLogRepository).save(captor.capture());
+    // 1M 입력 × $2.0 + 1M 출력 × $18.4 = $20.4
+    assertThat(captor.getValue().getEstimatedCostUsd()).isEqualTo(20.4);
+  }
+
 }

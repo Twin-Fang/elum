@@ -96,6 +96,14 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
               shrinkWrap: true,
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               buildDefaultDragHandles: false,
+              // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
+              // 들린 카드를 제자리에서 살짝 띄우기만 한다.
+              proxyDecorator: (child, index, animation) => Material(
+                color: Colors.transparent,
+                elevation: 6,
+                borderRadius: BorderRadius.circular(16.r),
+                child: child,
+              ),
               itemCount: _steps.length,
               onReorder: _reorder,
               footer: _RewardRow(routine: widget.routine),
@@ -152,7 +160,10 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Padding(
+    return Container(
+      // 배경이 없으면 스크롤되는 목록이 제목 뒤로 비친다 (덤프의 `스크롤 시 fix 영역`에도
+      // background 사각형이 따로 있다).
+      color: colors.background,
       padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,7 +221,7 @@ class _StepRow extends StatelessWidget {
           ),
           child: Text(
             '${index + 1}',
-            style: typo.starsCount.copyWith(color: colors.surface),
+            style: typo.stepBadgeNumber.copyWith(color: colors.surface),
           ),
         ),
         SizedBox(width: 4.w),
@@ -326,7 +337,7 @@ class _RewardRow extends StatelessWidget {
               color: colors.textPrimary,
               borderRadius: BorderRadius.circular(16.r),
             ),
-            child: Text('⭐', style: typo.starsCount),
+            child: Text('⭐', style: TextStyle(fontSize: 24.sp)),
           ),
           SizedBox(width: 4.w),
           Expanded(

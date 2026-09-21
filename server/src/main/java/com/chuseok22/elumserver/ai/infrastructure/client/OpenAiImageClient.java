@@ -104,7 +104,8 @@ public class OpenAiImageClient implements ImageGenerationClient {
 
       GeneratedImage image = extractImage(response);
       aiCallLogService.recordSuccess(
-        AiCallType.OPENAI_IMAGE, model, System.currentTimeMillis() - startedAt, null);
+        AiCallType.OPENAI_IMAGE, model, System.currentTimeMillis() - startedAt,
+        toUsageMetadata(response));
       log.info("OpenAI 이미지 생성 호출 완료: model={}, elapsedMs={}",
         model, System.currentTimeMillis() - startedAt);
       return image;
@@ -114,6 +115,19 @@ public class OpenAiImageClient implements ImageGenerationClient {
       aiCallLogService.recordFailure(AiCallType.OPENAI_IMAGE, model, elapsedMs, e.getMessage());
       throw e;
     }
+  }
+
+  // 토큰 수를 Gemini 형식으로 옮겨 담아 기존 로그·비용 계산 경로를 그대로 탄다.
+  private GeminiGenerateContentResponse.UsageMetadata toUsageMetadata(
+    OpenAiImageResponse response
+  ) {
+    if (response == null || response.usage() == null) {
+      return null;
+    }
+    OpenAiImageResponse.OpenAiImageUsage usage = response.usage();
+    return new GeminiGenerateContentResponse.UsageMetadata(
+      usage.inputTokens(), usage.outputTokens(), usage.totalTokens()
+    );
   }
 
   // GPT 이미지 모델은 언제나 base64로 돌려준다(response_format 파라미터를 받지 않는다).
@@ -137,10 +151,22 @@ public class OpenAiImageClient implements ImageGenerationClient {
   }
 
   /// 응답에서 쓰는 것만 담는다. 모르는 필드는 무시된다.
-  record OpenAiImageResponse(List<OpenAiImageData> data) {
+  ///
+  /// <p><b>usage를 함께 받는다.</b> 예전에는 이것을 버리고 장당 고정 단가만 기록했다.
+  /// 그러면 품질을 바꿔 출력 토큰이 네 배가 되어도(low 272 → medium 1056) 비용은
+  /// 그대로 찍혀, 관리자 화면의 숫자가 실제 청구액과 멀어진다 (이슈 #269 후속).
+  record OpenAiImageResponse(List<OpenAiImageData> data, OpenAiImageUsage usage) {
 
     record OpenAiImageData(
       @com.fasterxml.jackson.annotation.JsonProperty("b64_json") String b64Json
+    ) {
+
+    }
+
+    record OpenAiImageUsage(
+      @com.fasterxml.jackson.annotation.JsonProperty("input_tokens") Integer inputTokens,
+      @com.fasterxml.jackson.annotation.JsonProperty("output_tokens") Integer outputTokens,
+      @com.fasterxml.jackson.annotation.JsonProperty("total_tokens") Integer totalTokens
     ) {
 
     }

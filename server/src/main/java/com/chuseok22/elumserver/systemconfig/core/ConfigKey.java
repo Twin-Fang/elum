@@ -121,6 +121,22 @@ public enum ConfigKey {
     "OpenAI 텍스트 출력 토큰 100만 개당 요금. 비용 추정에 사용",
     ConfigValueType.DECIMAL, List.of(), "1.60"
   ),
+  // 이미지도 토큰으로 과금된다. 장당 고정값만 두면 품질을 바꿔 출력 토큰이
+  // 네 배가 되어도(low 272 → medium 1056) 기록된 비용은 그대로라 실제와 멀어진다.
+  // 아래 두 값이 0이면 장당 고정값(PRICE_OPENAI_IMAGE_PER_IMAGE)으로 되돌아간다.
+  //
+  // 기본값은 실측 역산이다 — low 품질 1장이 출력 272토큰이고 장당 $0.005이므로
+  // 100만 토큰당 약 $18.4. 공식 단가표를 확인하면 그 값으로 바꾼다.
+  PRICE_OPENAI_IMAGE_INPUT_PER_1M(
+    ConfigGroup.PRICING, "OpenAI 이미지 입력 단가 (USD/1M 토큰)",
+    "프롬프트 텍스트 토큰 요금. 0이면 장당 고정 단가를 쓴다",
+    ConfigValueType.DECIMAL, List.of(), "0"
+  ),
+  PRICE_OPENAI_IMAGE_OUTPUT_PER_1M(
+    ConfigGroup.PRICING, "OpenAI 이미지 출력 단가 (USD/1M 토큰)",
+    "생성 이미지 토큰 요금. 0이면 장당 고정 단가를 쓴다",
+    ConfigValueType.DECIMAL, List.of(), "0"
+  ),
   PRICE_FLUX_IMAGE_PER_IMAGE(
     ConfigGroup.PRICING, "FLUX 이미지 단가 (USD/장)",
     "FLUX 이미지 1장 생성 요금. 비용 추정에 사용",

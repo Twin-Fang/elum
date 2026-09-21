@@ -71,7 +71,9 @@ public class AiCallLogService {
   private double estimateCostUsd(AiCallType callType, GeminiGenerateContentResponse.UsageMetadata usage) {
     return switch (callType) {
       case GEMINI_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_GEMINI_IMAGE_PER_IMAGE);
-      case OPENAI_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_OPENAI_IMAGE_PER_IMAGE);
+      // 토큰 단가가 설정돼 있으면 실제 사용량으로 셈한다. 품질을 바꾸면 출력 토큰이
+      // 달라지는데 장당 고정값은 그것을 따라가지 못한다.
+      case OPENAI_IMAGE -> openAiImageCostUsd(usage);
       case FLUX_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_FLUX_IMAGE_PER_IMAGE);
       case OPENAI_TEXT_CREATE, OPENAI_TEXT_QUESTION -> textCostUsd(
         usage,
@@ -91,6 +93,25 @@ public class AiCallLogService {
       }
       case LOCAL_LLM_DLP -> 0.0;
     };
+  }
+
+  /**
+   * OpenAI 이미지 비용.
+   *
+   * <p>토큰 단가가 설정돼 있으면 실제 사용량으로, 아니면 장당 고정값으로 셈한다.
+   * 공식 단가표를 확인하기 전까지는 고정값이 기본이지만, <b>토큰은 항상 기록되므로</b>
+   * 나중에 실제 청구액과 대조해 단가를 채워 넣을 수 있다.
+   */
+  private double openAiImageCostUsd(GeminiGenerateContentResponse.UsageMetadata usage) {
+    double inputPer1M = systemConfigService.getDouble(ConfigKey.PRICE_OPENAI_IMAGE_INPUT_PER_1M);
+    double outputPer1M = systemConfigService.getDouble(ConfigKey.PRICE_OPENAI_IMAGE_OUTPUT_PER_1M);
+    if (usage == null || (inputPer1M == 0 && outputPer1M == 0)) {
+      return systemConfigService.getDouble(ConfigKey.PRICE_OPENAI_IMAGE_PER_IMAGE);
+    }
+    double promptTokens = usage.promptTokenCount() == null ? 0 : usage.promptTokenCount();
+    double outputTokens = usage.candidatesTokenCount() == null ? 0 : usage.candidatesTokenCount();
+    return promptTokens / TOKENS_PER_MILLION * inputPer1M
+      + outputTokens / TOKENS_PER_MILLION * outputPer1M;
   }
 
   // 입력·출력 토큰 종량 계산. 단가 키만 제공자별로 갈린다.

@@ -50,6 +50,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.routineEmptyTitle,
     required this.routineEmptyPast,
     required this.starsCount,
+    required this.stepBadgeNumber,
     required this.editChipLabel,
     required this.childDetailTitle,
     required this.promptPlaceholder,
@@ -219,6 +220,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 아이_별 화면 누적 별 숫자 (80/w800).
   final TextStyle starsCount;
+
+  /// 일과 시트의 단계 번호 뱃지 (30/w800, Figma 956:4084 `style_H23PME`).
+  ///
+  /// **[starsCount](80)를 빌려 쓰지 않는다.** 이름이 비슷해 한 번 그렇게 썼다가
+  /// 40×68 뱃지 안에서 숫자가 잘렸다. 쓰임이 다르면 크기도 다르다.
+  final TextStyle stepBadgeNumber;
 
   // --- 카드확인·아이 상세 (Figma 262:5124 / 309:3548, 2026-07-22 덤프) ---
 
@@ -503,6 +510,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.0,
     ),
+    stepBadgeNumber: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 30,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
     editChipLabel: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 14,
@@ -592,6 +605,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? routineEmptyTitle,
     TextStyle? routineEmptyPast,
     TextStyle? starsCount,
+    TextStyle? stepBadgeNumber,
     TextStyle? editChipLabel,
     TextStyle? childDetailTitle,
     TextStyle? promptPlaceholder,
@@ -642,6 +656,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineEmptyTitle: routineEmptyTitle ?? this.routineEmptyTitle,
       routineEmptyPast: routineEmptyPast ?? this.routineEmptyPast,
       starsCount: starsCount ?? this.starsCount,
+      stepBadgeNumber: stepBadgeNumber ?? this.stepBadgeNumber,
       editChipLabel: editChipLabel ?? this.editChipLabel,
       childDetailTitle: childDetailTitle ?? this.childDetailTitle,
       promptPlaceholder: promptPlaceholder ?? this.promptPlaceholder,
@@ -699,6 +714,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineEmptyTitle: TextStyle.lerp(routineEmptyTitle, other.routineEmptyTitle, t)!,
       routineEmptyPast: TextStyle.lerp(routineEmptyPast, other.routineEmptyPast, t)!,
       starsCount: TextStyle.lerp(starsCount, other.starsCount, t)!,
+      stepBadgeNumber: TextStyle.lerp(stepBadgeNumber, other.stepBadgeNumber, t)!,
       editChipLabel: TextStyle.lerp(editChipLabel, other.editChipLabel, t)!,
       childDetailTitle:
           TextStyle.lerp(childDetailTitle, other.childDetailTitle, t)!,
