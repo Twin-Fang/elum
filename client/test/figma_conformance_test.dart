@@ -8,6 +8,8 @@ import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
+import 'package:elum/features/guardian/presentation/card_review_screen.dart';
+import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
@@ -536,6 +538,93 @@ void main() {
     );
   });
 
+  // 카드확인 (#297). **이 화면만 오로라를 껐다** — 배경이 정지라 대조가 정확하다.
+  testWidgets('카드확인 (Figma 262:5124)', (tester) async {
+    final container = ProviderContainer(
+      overrides: [
+        testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+        speechServiceProvider.overrideWithValue(_SilentSpeech()),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    // 시안(262:5124)은 카드 다섯 장을 그리고 첫 장을 보여 준다.
+    container.read(routineFlowProvider.notifier).state = RoutineFlowState(
+      routine: const Routine(
+        id: 'r1',
+        title: '학교에 가요',
+        steps: [
+          ActionCard(
+            id: 'c1',
+            stepOrder: 1,
+            title: '옷을 입어요',
+            description: '학교에 입고 갈 옷을 차례대로 입어요',
+          ),
+          ActionCard(
+            id: 'c2',
+            stepOrder: 2,
+            title: '가방을 챙겨요',
+            description: '설명',
+          ),
+          ActionCard(
+            id: 'c3',
+            stepOrder: 3,
+            title: '신발을 신어요',
+            description: '설명',
+          ),
+          ActionCard(
+            id: 'c4',
+            stepOrder: 4,
+            title: '문을 열어요',
+            description: '설명',
+          ),
+          ActionCard(
+            id: 'c5',
+            stepOrder: 5,
+            title: '길을 걸어요',
+            description: '설명',
+          ),
+        ],
+      ),
+    );
+
+    final router = GoRouter(
+      initialLocation: Routes.routineReview,
+      routes: [
+        GoRoute(
+          path: Routes.routineReview,
+          builder: (context, state) => const CardReviewScreen(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp.router(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            routerConfig: router,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await expectLater(
+      find.byType(CardReviewScreen),
+      matchesGoldenFile('figma/card_review_262-5124.png'),
+    );
+  });
+
   // 추가질문 (#297). 오로라가 깔린 화면이라 배경은 어긋난 채로 읽는다 —
   // 질문과 선택지 **자리**가 맞는지가 여기서 볼 것이다.
   testWidgets('추가질문 (Figma 262:4766)', (tester) async {
@@ -594,6 +683,12 @@ void main() {
       matchesGoldenFile('figma/dialog_delete_931-4879.png'),
     );
   });
+}
+
+/// TTS 는 플랫폼 채널을 타므로 아무 것도 하지 않는 것으로 바꿔 끼운다.
+class _SilentSpeech implements SpeechService {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => Future<void>.value();
 }
 
 /// 추가질문만 돌려준다.

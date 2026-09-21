@@ -166,7 +166,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
       showAurora: false,
       child: Column(
         children: [
-          SizedBox(height: space.md),
+          // 시안(262:5124)은 상단 아이콘이 110 에서 끝나고 반짝임이 117 에서
+          // 시작한다 — 사이가 7 이다. 토큰(16)을 쓰면 12 내려간다 (#297).
+          SizedBox(height: 4.h),
           SvgPicture.asset(
             AppAssets.iconSparklesLarge,
             width: 30.w,
@@ -179,7 +181,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
               color: context.colors.textPrimary,
             ),
           ),
-          SizedBox(height: space.lg),
+          // 시안은 제목이 190 에서 끝나고 카드가 바로 이어진다 — 토큰(24)을
+          // 쓰면 카드가 17 내려간다 (#297).
+          SizedBox(height: 7.h),
           Expanded(
             child: PageView.builder(
               controller: _controller,
