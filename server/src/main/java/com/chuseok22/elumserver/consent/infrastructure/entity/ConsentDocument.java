@@ -35,8 +35,10 @@ public class ConsentDocument extends BaseEntity {
   /**
    * 이 문서의 버전. 날짜 문자열({@code 2026-09-18})을 쓴다.
    *
-   * <p><b>관리자가 올릴지 말지를 고른다.</b> 오타를 고칠 때마다 올리면 사용자가
-   * 재동의 화면을 반복해서 보게 된다.
+   * <p><b>관리자가 올릴지 말지를 고른다.</b> 오타를 고칠 때마다 올리면 회원마다
+   * 어떤 문구에 동의했는지 가리기 어려워진다.
+   *
+   * <p>⚠️ 올려도 기존 회원에게 다시 묻지는 않는다. 재동의 판정은 아직 없다.
    */
   @Column(nullable = false)
   private String version;

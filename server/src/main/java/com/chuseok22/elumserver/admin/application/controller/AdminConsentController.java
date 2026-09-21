@@ -66,8 +66,9 @@ public class AdminConsentController {
   }
 
   /**
-   * @param bumpVersion 체크했을 때만 버전을 올린다. <b>오타 수정까지 버전을 올리면</b>
-   *                    사용자가 재동의 화면을 반복해서 보게 된다.
+   * @param bumpVersion 체크했을 때만 버전을 올린다. 올리면 이후 동의부터 새 버전으로
+   *                    기록된다. <b>기존 회원에게 다시 묻지는 않는다</b> — 재동의 판정은
+   *                    아직 없다({@code Member#hasRequiredConsents} 는 버전을 보지 않는다).
    */
   @PostMapping("/admin/consents/{key}")
   public String update(
