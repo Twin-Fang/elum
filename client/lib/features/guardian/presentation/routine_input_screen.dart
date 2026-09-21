@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -284,7 +285,11 @@ class _InputField extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             constraints: BoxConstraints(minHeight: 52.h),
-            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: space.sm),
+            // 위아래도 18이다 (시안 `238:1723`). `space.sm`(12)을 쓰고 있어
+            // 글자가 7 위에 붙어 있었다 (#297).
+            // 글자 쪽은 18, 보내기 단추 쪽은 9다 — 시안 원이 오른쪽에서
+            // 9 안쪽에 선다 (`262:4106`). 양쪽 18로 두면 단추가 9 안으로 들어간다.
+            padding: EdgeInsets.fromLTRB(18.w, 18.h, 9.w, 18.h),
             decoration: BoxDecoration(
               color: colors.glassSurface,
               borderRadius: BorderRadius.circular(space.cardRadius),
@@ -297,9 +302,10 @@ class _InputField extends StatelessWidget {
               ],
             ),
             child: Row(
-              // 가운데 맞춤이다. 아래 맞춤으로 두면 한 줄일 때 글자가 박스 바닥에
-              // 붙는다 — 시안은 위아래 여백을 18씩 같게 뒀다 (238:1723).
-              crossAxisAlignment: CrossAxisAlignment.center,
+              // **아래 맞춤이다.** 시안(`262:4106`)은 글자가 위에서부터 쌓이고
+              // 보내기 단추가 아래에 붙는다. 가운데로 두면 두 줄일 때 단추가
+              // 11 올라간다 (#297). 한 줄일 때는 둘 다 같은 높이라 차이가 없다.
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
                   child: TextField(
@@ -350,14 +356,26 @@ class _SendButton extends StatelessWidget {
         // 원형 버튼이라 가로세로 모두 .w
         width: 32.w,
         height: 32.w,
+        // **흰 원에 짙은 꺾쇠다** (Figma `262:4106`). 검은 원에 흰 위쪽 화살표로
+        // 그리고 있었는데 색이 반대였고 모양도 달랐다 (#297).
         decoration: BoxDecoration(
-          color: context.colors.textPrimary,
+          color: context.colors.surface,
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          Icons.arrow_upward_rounded,
-          size: 18.w,
-          color: context.colors.surface,
+        // 아래를 보는 원본을 반시계 90° 돌려 `>`로 만든다 — 약관 줄과 같은 에셋.
+        child: Center(
+          child: Transform.rotate(
+            angle: -math.pi / 2,
+            child: SvgPicture.asset(
+              AppAssets.iconAngleSmall,
+              width: 24.w,
+              height: 24.w,
+              colorFilter: ColorFilter.mode(
+                context.colors.textPrimary,
+                BlendMode.srcIn,
+              ),
+            ),
+          ),
         ),
       ),
     );

@@ -1542,6 +1542,28 @@ void main() {
       matchesGoldenFile('figma/sheet_noreward_980-5174.png'),
     );
   });
+
+  // 일과 만들기 — 입력한 뒤 (#297). 시안 `262:4106`.
+  //
+  // 글자가 들어가면 **추천 칩이 사라지고 보내기 화살표가 켜진다.**
+  // 시안 아래 절반은 OS 키보드라 대조에서 뺀다 (`--mask-bottom 180`).
+  testWidgets('일과 만들기 — 입력한 뒤 (Figma 262:4106)', (tester) async {
+    await tester.pumpWidget(wrapInput());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    await tester.enterText(
+      find.byType(EditableText),
+      '내일 비가 오는데 하늘이가 한별초등학교에 갈 준비를 해야 해',
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    await expectLater(
+      find.byType(RoutineInputScreen),
+      matchesGoldenFile('figma/input_typed_262-4106.png'),
+    );
+  });
 }
 
 /// 연결 암호 대역. 시안(`732:5334`)이 그린 `5NJ280`과 `09:59`를 그대로 준다 —
