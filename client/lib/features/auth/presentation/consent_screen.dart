@@ -79,7 +79,8 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
     });
 
     final saved = await ref.read(consentRepositoryProvider).agree(
-          marketingAgreed: _checked.contains('marketingAgreed'),
+          // 켠 것만 동의로 보낸다. 고정값을 보내면 켜지 않은 항목이 동의로 남는다 (#278 QA).
+          agreedKeys: Set.of(_checked),
           // **화면에 보여준 것**의 버전이다. 캐시나 기본값을 보여줬다면 그 버전으로
           // 남아야 한다 — 보지 않은 문서에 동의한 것으로 기록하면 안 된다.
           version: bundle.version,

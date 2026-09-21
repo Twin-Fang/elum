@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:elum/core/config/app_config.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
@@ -208,6 +209,24 @@ void main() {
         contains('2026-10-01'),
         reason: '갱신 결과가 캐시에 담겨 다음 실행에 쓰인다',
       );
+    });
+  });
+
+  group('기다리는 상한', () {
+    test('연결 단계에도 상한을 건다 — 전역값(10초)을 따르지 않는다', () async {
+      RequestOptions? seen;
+      final dio = Dio()
+        ..interceptors.add(InterceptorsWrapper(onRequest: (o, h) {
+          seen = o;
+          h.reject(DioException(requestOptions: o, error: '끊는다'));
+        }))
+        ..options.connectTimeout = const Duration(seconds: 10);
+
+      await ConsentDocumentRepository(dio: dio, storage: InMemoryStorage()).load();
+
+      // 실측으로 드러났다: 응답·전송에만 걸어 두어 연결에서 10,034ms 를 기다렸다 (#278 QA).
+      expect(seen?.connectTimeout, AppConfig.consentFetchTimeout);
+      expect(seen?.receiveTimeout, AppConfig.consentFetchTimeout);
     });
   });
 

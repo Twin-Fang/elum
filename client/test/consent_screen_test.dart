@@ -227,11 +227,11 @@ class _FakeConsent extends ConsentRepository {
 
   @override
   Future<bool> agree({
-    required bool marketingAgreed,
+    required Set<String> agreedKeys,
     required String version,
   }) async {
     calls++;
-    marketing = marketingAgreed;
+    marketing = agreedKeys.contains('marketingAgreed');
     this.version = version;
     return true;
   }

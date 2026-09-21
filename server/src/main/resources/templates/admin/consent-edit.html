@@ -13,7 +13,8 @@
        class="btn btn-ghost btn-sm ml-auto">이력 보기</a>
   </div>
 
-  <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+  <!-- 검증에 걸리면 이 화면을 입력값 그대로 다시 그린다. 리다이렉트하면 고치던 전문이 사라진다. -->
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}"></div>
 
   <form th:action="@{/admin/consents/{key}(key=${document.consentKey})}" method="post" class="space-y-6">
     <div class="card bg-base-100 shadow-md">
@@ -21,33 +22,33 @@
         <div class="grid gap-4 md:grid-cols-2">
           <label class="form-control">
             <div class="label"><span class="label-text">항목 이름</span></div>
-            <input type="text" name="label" class="input input-bordered"
-                   th:value="${document.label}" required/>
+            <input type="text" name="label" class="input input-bordered" maxlength="255"
+                   th:value="${form.label}" required/>
             <div class="label"><span class="label-text-alt">동의 화면 목록에 보이는 줄입니다</span></div>
           </label>
           <label class="form-control">
             <div class="label"><span class="label-text">한 줄 요약</span></div>
-            <input type="text" name="summary" class="input input-bordered"
-                   th:value="${document.summary}" required/>
+            <input type="text" name="summary" class="input input-bordered" maxlength="255"
+                   th:value="${form.summary}" required/>
             <div class="label"><span class="label-text-alt">항목 이름 아래에 작게 붙습니다</span></div>
           </label>
         </div>
 
-        <label class="label cursor-pointer justify-start gap-3">
-          <input type="checkbox" name="required" value="true" class="checkbox checkbox-primary"
-                 th:checked="${document.required}"/>
-          <span class="label-text">
-            필수 항목입니다
-            <span class="block text-xs text-base-content/60">
-              끄면 동의하지 않아도 가입할 수 있습니다. 법령이 요구하는 항목을 끄지 마세요
-            </span>
-          </span>
-        </label>
+        <!-- 필수 여부는 법이 정한다. 관리자가 바꿀 수 있게 두었더니, 끄는 순간 사용자가 켜지 않은
+             항목이 동의한 것으로 기록됐다 (#278 QA). 보여주기만 한다. -->
+        <div class="flex items-start gap-3">
+          <span th:if="${document.consentKey.required}" class="badge badge-primary whitespace-nowrap">필수</span>
+          <span th:unless="${document.consentKey.required}" class="badge badge-ghost whitespace-nowrap">선택</span>
+          <span class="text-xs text-base-content/60"
+                th:text="${document.consentKey.required}
+                  ? '법이 요구하는 항목이라 선택으로 바꿀 수 없습니다'
+                  : '광고성 정보 수신은 법상 선택이어야 해서 필수로 바꿀 수 없습니다'">설명</span>
+        </div>
 
         <label class="form-control">
           <div class="label"><span class="label-text">전문</span></div>
           <textarea name="body" class="textarea textarea-bordered h-96 text-sm leading-relaxed"
-                    th:text="${document.body}" required></textarea>
+                    th:text="${form.body}" required></textarea>
         </label>
       </div>
     </div>
@@ -58,7 +59,7 @@
 
         <label class="form-control">
           <div class="label"><span class="label-text">수정 사유 <span class="text-error">*</span></span></div>
-          <input type="text" name="reason" class="input input-bordered"
+          <input type="text" name="reason" class="input input-bordered" th:value="${form.reason}"
                  placeholder="예: 문의 이메일 주소 변경 / 개인정보 보유 기간 문구 정정" required/>
           <div class="label">
             <span class="label-text-alt">
@@ -71,7 +72,7 @@
 
         <label class="label cursor-pointer justify-start gap-3">
           <input type="checkbox" name="bumpVersion" value="true" class="checkbox checkbox-warning"
-                 id="bump-version"/>
+                 id="bump-version" th:checked="${form.bumpVersion}"/>
           <span class="label-text">
             버전을 올립니다
             <span class="block text-xs text-base-content/60">
@@ -84,8 +85,14 @@
         <label class="form-control max-w-xs">
           <div class="label"><span class="label-text">새 버전</span></div>
           <input type="text" name="newVersion" class="input input-bordered font-mono"
-                 th:value="${today}" id="new-version" disabled/>
-          <div class="label"><span class="label-text-alt">날짜 형식을 씁니다</span></div>
+                 th:value="${form.newVersion}" id="new-version" placeholder="2026-09-21"
+                 th:disabled="${!form.bumpVersion}"/>
+          <div class="label">
+            <span class="label-text-alt">
+              날짜로 적습니다. 지금 버전(<span class="font-mono" th:text="${document.version}">-</span>)보다
+              늦어야 합니다
+            </span>
+          </div>
         </label>
       </div>
     </div>
@@ -111,6 +118,5 @@
     })();
   </script>
 </main>
-
 </body>
 </html>

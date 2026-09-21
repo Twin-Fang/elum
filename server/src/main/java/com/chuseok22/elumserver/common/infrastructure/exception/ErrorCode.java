@@ -99,6 +99,12 @@ public enum ErrorCode {
 
   // 약관 문서 (이슈 #278).
   CONSENT_DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "약관 문서를 찾을 수 없습니다."),
+  CONSENT_REASON_REQUIRED(HttpStatus.BAD_REQUEST, "수정 사유를 적어주세요."),
+  CONSENT_FIELD_BLANK(HttpStatus.BAD_REQUEST, "항목 이름·요약·전문은 비워둘 수 없습니다."),
+  CONSENT_FIELD_TOO_LONG(HttpStatus.BAD_REQUEST, "항목 이름이나 요약이 너무 깁니다."),
+  CONSENT_VERSION_REQUIRED(HttpStatus.BAD_REQUEST, "새 버전을 적어주세요."),
+  CONSENT_VERSION_INVALID(HttpStatus.BAD_REQUEST, "버전은 2026-09-21 같은 날짜로 적어주세요."),
+  CONSENT_VERSION_NOT_NEWER(HttpStatus.BAD_REQUEST, "새 버전은 지금 버전보다 늦은 날짜여야 합니다."),
 
   ;
 

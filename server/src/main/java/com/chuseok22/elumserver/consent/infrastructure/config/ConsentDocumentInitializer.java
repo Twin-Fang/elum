@@ -39,7 +39,9 @@ public class ConsentDocumentInitializer implements ApplicationRunner {
   @Transactional
   public void run(ApplicationArguments args) {
     for (ConsentKey key : ConsentKey.values()) {
-      if (consentDocumentRepository.existsByConsentKey(key)) {
+      var existing = consentDocumentRepository.findByConsentKey(key);
+      if (existing.isPresent()) {
+        syncRequired(existing.get());
         continue;
       }
       String body = readDefaultBody(key);
@@ -55,10 +57,23 @@ public class ConsentDocumentInitializer implements ApplicationRunner {
       document.setLabel(key.getLabel());
       document.setSummary(key.getSummary());
       document.setBody(body);
-      document.setRequired(key.isRequiredByDefault());
+      document.setRequired(key.isRequired());
       document.setPublishedAt(LocalDateTime.now());
       consentDocumentRepository.save(document);
       log.info("약관 문서를 생성했습니다. key={} version={}", key, INITIAL_VERSION);
+    }
+  }
+
+  /**
+   * 필수 여부만은 코드를 따른다. 본문은 관리자가 고친 것을 존중하지만, 필수 여부는 법이 정한
+   * 값이라 DB에 다른 값이 남아 있으면 그게 사고다 (예전 화면에서 끈 흔적).
+   */
+  private void syncRequired(ConsentDocument document) {
+    boolean lawful = document.getConsentKey().isRequired();
+    if (document.isRequired() != lawful) {
+      log.warn("약관 필수 여부가 법이 정한 값과 달라 바로잡습니다. key={} {} -> {}",
+        document.getConsentKey(), document.isRequired(), lawful);
+      document.setRequired(lawful);
     }
   }
 

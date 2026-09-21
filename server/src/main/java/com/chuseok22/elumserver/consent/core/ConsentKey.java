@@ -11,8 +11,14 @@ import lombok.RequiredArgsConstructor;
  * enum 이름을 그대로 쓰지 않는 이유는 그렇게 하면 필드명을 바꿀 때 앱이 조용히
  * 깨지기 때문이다 — 양쪽을 잇는 이름은 한 곳에 적어 둔다.
  *
- * <p>{@code required} 는 <b>기본값일 뿐</b>이다. 실제 필수 여부는 DB 문서가 들고 있고
- * 관리자가 바꿀 수 있다. 여기 값은 문서를 처음 만들 때만 쓴다.
+ * <p><b>필수 여부는 법이 정한다. 관리자가 바꿀 수 없다.</b> 이용약관·개인정보 수집·국외 이전·
+ * 나이 확인은 빠지면 서비스를 제공할 수 없고, 소식 받기는 반대로 <b>필수로 받으면 위법</b>이다
+ * (정보통신망법 — 광고성 정보 수신 동의를 서비스 이용 조건으로 걸 수 없다).
+ *
+ * <p>전에는 관리자 화면에서 필수를 끌 수 있었다. 그런데 앱은 네 항목을 고정으로 {@code true}
+ * 로 보내고 서버는 네 항목을 {@code @AssertTrue} 로 강제해서, 끄는 순간 <b>사용자가 켜지
+ * 않은 항목이 동의한 것으로 기록</b>됐다 (#278 QA). 세 곳이 서로 다른 규칙을 믿지 않도록
+ * 규칙을 이 한 곳에 둔다.
  */
 @Getter
 @RequiredArgsConstructor
@@ -37,7 +43,8 @@ public enum ConsentKey {
   /** 앱과 주고받는 필드명. 앱의 {@code ConsentItem.key} 와 같다. */
   private final String field;
   private final String label;
-  private final boolean requiredByDefault;
+  /** 법이 정한 필수 여부. DB 값보다 우선한다. */
+  private final boolean required;
   private final String summary;
   /** 문서를 처음 만들 때 읽어 올 기본 본문의 classpath 경로. */
   private final String defaultBodyResource;

@@ -29,7 +29,8 @@ public record ConsentDocumentResponse(
     return new ConsentDocumentResponse(
       document.getConsentKey().getField(),
       document.getLabel(),
-      document.isRequired(),
+      // 필수 여부는 법이 정한 값을 그대로 낸다. DB 컬럼과 어긋나도 이쪽이 맞다.
+      document.getConsentKey().isRequired(),
       document.getSummary(),
       document.getBody(),
       document.getVersion()

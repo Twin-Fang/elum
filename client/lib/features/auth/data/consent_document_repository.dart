@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/storage/local_storage.dart';
@@ -32,12 +33,18 @@ class ConsentDocumentRepository {
   final Dio _dio;
   final LocalStorage _storage;
 
-  /// 서버를 기다리는 상한.
+  /// 서버를 기다리는 상한. [AppConfig.consentFetchTimeout] 을 따른다.
   ///
   /// 동의 화면은 로그인 직후에 선다. 여기서 오래 붙들면 **로그인이 실패한 것처럼**
   /// 보인다. 짧게 끊고 캐시로 넘어가는 편이 낫다 — 캐시가 조금 낡는 것보다
   /// 화면이 멈춘 것이 나쁘다.
-  static const _timeout = Duration(seconds: 3);
+  ///
+  /// ⚠️ **연결 단계에도 준다.** 전에는 응답·전송에만 걸어 연결은 전역값(10초)을
+  /// 따랐고, 응답 없는 망에서 실제로 10초를 기다렸다 (#278 QA 실측 10,034ms).
+  static Options get _options {
+    final limit = AppConfig.consentFetchTimeout;
+    return Options(connectTimeout: limit, receiveTimeout: limit, sendTimeout: limit);
+  }
 
   /// 화면에 띄울 약관을 고른다.
   ///
@@ -61,7 +68,7 @@ class ConsentDocumentRepository {
       final response = await _dio.get<Map<String, dynamic>>(
         '/api/consents/documents',
         // 인증 없이 열린 경로다. 토큰이 있으면 붙지만 서버가 보지 않는다.
-        options: Options(receiveTimeout: _timeout, sendTimeout: _timeout),
+        options: _options,
       );
       final bundle = ConsentBundle.tryParse(
         response.data,

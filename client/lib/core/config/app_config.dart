@@ -35,6 +35,9 @@ abstract final class AppConfig {
   static Duration get receiveTimeout =>
       Duration(milliseconds: _int('ELUM_API_RECEIVE_TIMEOUT_MS', 60000));
 
+  /// 동의 화면이 약관을 기다리는 상한 (#278). 넘기면 캐시·앱 기본값으로 떨어진다.
+  static Duration get consentFetchTimeout => const Duration(milliseconds: 3000);
+
   // --- TTS (카드 읽어주기) ---
   // 기기 내장 음성이 우선이고, 실패할 때만 이 서버를 쓴다.
   // 키가 없으면 서버 폴백만 꺼지고 기기 음성은 그대로 동작한다.
