@@ -5,6 +5,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
+import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
@@ -133,6 +134,32 @@ void main() {
         ),
       );
 
+
+  /// 일과 만들기 입력 대조용.
+  ///
+  /// **배경 오로라를 멈춘다.** 무한 반복이라 켜 두면 찍을 때마다 그림이 달라져
+  /// 대조가 성립하지 않는다. 시안은 정지된 한 장이다.
+  Widget wrapInput() => ProviderScope(
+        overrides: [
+          testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+          routineSuggestionsProvider
+              .overrideWith((ref) async => RoutineSuggestion.fallback),
+        ],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp(
+            theme: AppTheme.light,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(padding: deviceInsets, disableAnimations: true),
+              child: child!,
+            ),
+            home: const RoutineInputScreen(),
+          ),
+        ),
+      );
+
   Widget wrap({
     required List<Routine> routines,
     required List<Routine> past,
@@ -230,6 +257,19 @@ void main() {
     await expectLater(
       find.byType(ChildHomeScreen),
       matchesGoldenFile('figma/child_home_356-5079.png'),
+    );
+  });
+
+  // 오늘 고친 화면이다 (#305 — 시안에 없는 문구를 빼고 입력칸을 가운데로).
+  // 고친 것이 시안에 맞는지 그림으로 확인한다.
+  testWidgets('일과 만들기 입력 (Figma 238:1643)', (tester) async {
+    await tester.pumpWidget(wrapInput());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    await expectLater(
+      find.byType(RoutineInputScreen),
+      matchesGoldenFile('figma/input_238-1643.png'),
     );
   });
 }
