@@ -1,15 +1,46 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T18:43:17Z",
-    "currentVersion": "1.26.0",
+    "lastUpdated": "2026-09-21T19:15:20Z",
+    "currentVersion": "1.26.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 145
+    "totalReleases": 146
   },
   "releases": [
+    {
+      "version": "1.26.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 331,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 로그인 화면 버튼 사이에 주황 조각이 비치던 문제 해결\n  * 일과 시트의 순서 바꾸기 손잡이가 흐리게 보이던 문제 해결\n  * 이룸이 카드 화면에서 체크 동그라미가 아래로 내려가 있던 문제 해결\n  * 이룸이 카드 화면의 뒤로가기와 제목 위치가 밀려 있던 문제 해결\n  * 일과를 만드는 동안 루미 머리 위 구슬의 빛이 빠지던 문제 해결\n\n* **개선**\n  * 체크 표시가 더 또렷해졌습니다\n  * 일과를 만드는 동안 나오는 루미의 크기가 알맞아졌습니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "로그인 화면 버튼 사이에 주황 조각이 비치던 문제 해결",
+            "일과 시트의 순서 바꾸기 손잡이가 흐리게 보이던 문제 해결",
+            "이룸이 카드 화면에서 체크 동그라미가 아래로 내려가 있던 문제 해결",
+            "이룸이 카드 화면의 뒤로가기와 제목 위치가 밀려 있던 문제 해결",
+            "일과를 만드는 동안 루미 머리 위 구슬의 빛이 빠지던 문제 해결"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "체크 표시가 더 또렷해졌습니다",
+            "일과를 만드는 동안 나오는 루미의 크기가 알맞아졌습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.26.0",
       "project_type": "flutter",
