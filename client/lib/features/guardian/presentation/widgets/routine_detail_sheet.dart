@@ -455,11 +455,13 @@ class _StepRowState extends State<_StepRow>
                           onPointerCancel: (_) => _lift.reverse(),
                           child: ReorderableDelayedDragStartListener(
                             index: widget.index,
-                            child: Icon(
-                              Icons.drag_handle,
-                              // 시안(963:4240 순서변경)은 18×18 이다
-                              size: 18.w,
-                              color: colors.textPlaceholder,
+                            child: SvgPicture.asset(
+                              // **`Icons.drag_handle`이 아니다.** 그건 줄이 둘인데
+                              // 시안(`963:4240` 순서변경)은 셋이고 색도 `#CACACA`로
+                              // 더 진하다. 색은 에셋에 들어 있으니 덧칠하지 않는다.
+                              AppAssets.sheetReorderHandle,
+                              width: 18.w,
+                              height: 18.w,
                             ),
                           ),
                         ),

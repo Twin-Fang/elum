@@ -1,6 +1,7 @@
 @Tags(['golden'])
 library;
 
+import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/features/guardian/data/member_repository.dart';
@@ -55,6 +56,7 @@ import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/precache_images.dart';
 import 'helpers/test_storage.dart';
+import 'helpers/svg_finder.dart';
 
 /// **시안 대조용** 렌더. 회귀 확인이 목적인 `*_golden_test.dart`와 다르다.
 ///
@@ -614,7 +616,7 @@ void main() {
       findsOneWidget,
       reason: '지난 일과 시트가 떠야 하고 버튼은 다시하기여야 한다',
     );
-    expect(find.byIcon(Icons.drag_handle), findsNothing);
+    expect(svgWithAsset(AppAssets.sheetReorderHandle), findsNothing);
 
     await expectLater(
       find.byType(MaterialApp),

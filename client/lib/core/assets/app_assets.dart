@@ -218,6 +218,12 @@ abstract final class AppAssets {
   @Deprecated('지금 시안에 없는 얼굴이다. 되살리려면 시안에 먼저 그려야 한다.')
   static const splashCenter = '$_images/splash_center.svg';
 
+  /// 일과 시트 행의 **순서 바꾸기 손잡이** (Figma `963:4240` 순서변경 — 18×18).
+  ///
+  /// `Icons.drag_handle`을 쓰고 있었는데 그건 **줄이 둘**이다. 시안은 셋이고
+  /// 색도 `#CACACA`로 더 진하다. 나란히 놓고 보기 전에는 안 드러났다 (#297).
+  static const sheetReorderHandle = '$_images/sheet_reorder_handle.svg';
+
   // --- 홈 일과 목록 (Figma 356:4688 / 356:5079 / 343:4543 / 364:8219) ---
 
   /// 일과 접기/펼치기 화살표 (24×24). Figma `fi-br-angle-small-up`(356:4862).

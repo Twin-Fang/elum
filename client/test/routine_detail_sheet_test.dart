@@ -1,3 +1,4 @@
+import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/widgets/routine_detail_sheet.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
+import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
 /// 오늘 일과 시트 (Figma 956:4084, 이슈 #266).
@@ -163,7 +165,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.byIcon(Icons.drag_handle),
+        svgWithAsset(AppAssets.sheetReorderHandle),
         findsNothing,
         reason: '지나간 일과는 자리를 바꿔도 의미가 없다',
       );
@@ -173,7 +175,7 @@ void main() {
       await tester.pumpWidget(wrap(_FakeRepo()));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.drag_handle), findsWidgets);
+      expect(svgWithAsset(AppAssets.sheetReorderHandle), findsWidgets);
     });
 
     testWidgets('다시하기를 누르면 rerun을 돌려준다', (tester) async {
@@ -280,7 +282,7 @@ void main() {
     expect(anyLifted(), isFalse, reason: '손대기 전에는 떠오른 줄이 없다');
 
     final gesture = await tester.startGesture(
-      tester.getCenter(find.byIcon(Icons.drag_handle).first),
+      tester.getCenter(svgWithAsset(AppAssets.sheetReorderHandle).first),
     );
     // 첫 프레임은 Ticker가 시작점을 잡느라 경과가 0이다. 그 다음부터 흐른다.
     await tester.pump();
@@ -303,7 +305,7 @@ void main() {
 
     // 길게 누르지 않고 곧바로 끈다. 목록을 아래로 쓸어내리려던 손짓이다.
     await tester.drag(
-      find.byIcon(Icons.drag_handle).first,
+      svgWithAsset(AppAssets.sheetReorderHandle).first,
       const Offset(0, 160),
     );
     await tester.pumpAndSettle();
@@ -320,7 +322,7 @@ void main() {
 /// 한다. `tester.drag`은 곧바로 움직여서 이제 아무 일도 일어나지 않는다.
 Future<void> _grabAndDrag(WidgetTester tester, Offset offset) async {
   final gesture = await tester.startGesture(
-    tester.getCenter(find.byIcon(Icons.drag_handle).first),
+    tester.getCenter(svgWithAsset(AppAssets.sheetReorderHandle).first),
   );
   await tester.pump(kLongPressTimeout + const Duration(milliseconds: 20));
   await gesture.moveBy(offset);
