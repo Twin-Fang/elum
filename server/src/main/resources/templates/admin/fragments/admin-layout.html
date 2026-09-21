@@ -26,10 +26,10 @@
          프로덕션 경고가 뜨고, 스타일 적용 전 화면이 한 번 깜빡인다. -->
     <link rel="stylesheet" th:href="@{/admin/vendor/admin.css}"/>
     <!-- 화면이 그려지기 전에 테마를 정해야 밝은 화면이 번쩍이지 않는다. -->
-    <script th:src="@{/admin/js/theme.js}"></script>
+    <script th:src="@{/admin/js/admin-ui.js}"></script>
   </head>
   <body class="min-h-screen bg-base-100">
-  <div class="drawer lg:drawer-open">
+  <div class="drawer lg:drawer-open" data-drawer>
     <input id="admin-drawer" type="checkbox" class="drawer-toggle"/>
 
     <div class="drawer-content flex flex-col min-h-screen">
@@ -48,13 +48,23 @@
 
 <!-- 좁은 화면에서만 보이는 상단바. 햄버거가 없으면 사이드바를 열 수 없다. -->
 <header th:fragment="topbar(title)"
-        class="lg:hidden sticky top-0 z-10 flex items-center gap-2 border-b border-base-300 bg-base-100 px-3 py-2">
-  <label for="admin-drawer" class="btn btn-ghost btn-sm" aria-label="메뉴 열기">
+        class="sticky top-0 z-10 flex items-center gap-2 border-b border-base-300 bg-base-100 px-3 py-2">
+  <!-- 좁은 화면에서는 서랍을 여닫고, 넓은 화면에서는 사이드바를 접는다.
+       표가 넓은 화면(모니터링은 칸이 여덟이다)에서 사이드바 256px가 아쉬워서인데,
+       메뉴를 한 번 고르고 나면 계속 볼 이유도 없다. -->
+  <label for="admin-drawer" class="btn btn-ghost btn-sm lg:hidden" aria-label="메뉴 열기">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
     </svg>
   </label>
-  <span class="font-bold" th:text="${title}">관리자</span>
+  <button type="button" data-sidebar-toggle class="btn btn-ghost btn-sm hidden lg:inline-flex"
+          aria-label="사이드바 접기/펼치기">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+    </svg>
+  </button>
+  <!-- 본문에도 제목이 있어 넓은 화면에서는 겹친다. 좁을 때만 보여준다. -->
+  <span class="font-bold lg:hidden" th:text="${title}">관리자</span>
   <div class="ml-auto" th:replace="~{admin/fragments/admin-layout :: themeToggle}"></div>
 </header>
 
@@ -62,7 +72,6 @@
        class="flex min-h-screen w-64 flex-col border-r border-base-300 bg-base-200 p-4">
   <div class="flex items-center gap-2 px-2 py-4">
     <span class="text-xl font-bold">이룸 관리자</span>
-    <div class="ml-auto hidden lg:block" th:replace="~{admin/fragments/admin-layout :: themeToggle}"></div>
   </div>
   <ul class="menu w-full flex-1">
     <li><a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'">대시보드</a></li>
