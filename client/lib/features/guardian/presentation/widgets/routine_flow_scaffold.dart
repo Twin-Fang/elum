@@ -143,10 +143,26 @@ class _TopBar extends StatelessWidget {
               onTap: onBack,
               scaleDown: AppPressable.scaleIcon,
               // 정사각형 아이콘이라 가로세로 모두 .w
-              child: SvgPicture.asset(
-                AppAssets.iconBack,
+              // 자리는 아이콘 크기 그대로 두고 **그 위로** 40×40 누름 영역을 덮는다 (#306).
+              // 자리째 키우면 상단바가 높아져 화면 전체가 아래로 밀린다.
+              child: SizedBox(
                 width: 24.w,
                 height: 24.w,
+                child: OverflowBox(
+                  maxWidth: 40.w,
+                  maxHeight: 40.w,
+                  child: SizedBox(
+                    width: 40.w,
+                    height: 40.w,
+                    child: Center(
+                      child: SvgPicture.asset(
+                        AppAssets.iconBack,
+                        width: 24.w,
+                        height: 24.w,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             )
           else
@@ -155,10 +171,26 @@ class _TopBar extends StatelessWidget {
           AppPressable(
             onTap: onHome,
             scaleDown: AppPressable.scaleIcon,
-            child: SvgPicture.asset(
-              AppAssets.iconHome,
+            // 자리는 아이콘 크기 그대로 두고 **그 위로** 40×40 누름 영역을 덮는다 (#306).
+            // 자리째 키우면 상단바가 높아져 화면 전체가 아래로 밀린다.
+            child: SizedBox(
               width: 24.w,
               height: 24.w,
+              child: OverflowBox(
+                maxWidth: 40.w,
+                maxHeight: 40.w,
+                child: SizedBox(
+                  width: 40.w,
+                  height: 40.w,
+                  child: Center(
+                    child: SvgPicture.asset(
+                      AppAssets.iconHome,
+                      width: 24.w,
+                      height: 24.w,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],

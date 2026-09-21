@@ -76,9 +76,14 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pump();
 
+      // 시안(238:1643)이 담은 글자는 셋뿐이다 — 제목·부제·플레이스홀더.
       expect(find.text('오늘은 어떤 준비가\n필요한가요?'), findsOneWidget);
       expect(find.text('AI 루미가 작은 행동 단계로 나눠드려요'), findsOneWidget);
-      expect(find.text('이룸이 정보를 안전하게 지켜요'), findsOneWidget);
+      expect(find.text('평소 이야기하듯 적어주세요'), findsOneWidget);
+
+      // 시안에서 빠진 문구다 (#305). 예전 시안에는 있었고 테스트가 그 상태를
+      // 붙잡고 있었다 — 시안이 바뀌면 여기도 함께 바뀌어야 한다.
+      expect(find.text('이룸이 정보를 안전하게 지켜요'), findsNothing);
     });
 
     testWidgets('하단 고정 CTA가 없다', (tester) async {

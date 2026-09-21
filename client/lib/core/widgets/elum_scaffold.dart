@@ -60,6 +60,9 @@ class ElumScaffold extends StatelessWidget {
   static const _backIconY = 75.0;
   static const _backIconSize = 24.0;
 
+  /// 누름 영역. 시안 `976:4549` 가 40×40 이다.
+  static const _backTapSize = 40.0;
+
   /// Figma 프레임 전체 높이. CTA 하단 여백을 화면 하단 기준으로 역산한다.
   ///
   /// CTA는 y=675, h=66 → 하단 741. 프레임 하단 852까지 111이 남는다.
@@ -123,12 +126,32 @@ class ElumScaffold extends StatelessWidget {
                   child: Padding(
                     padding: EdgeInsets.only(left: space.screenH.w),
                     // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
-                    child: GestureDetector(
-                      onTap: onBack,
-                      child: SvgPicture.asset(
-                        AppAssets.iconBack,
-                        width: _backIconSize.w,
-                        height: _backIconSize.w,
+                    // 시안(`976:4549`)은 40×40 누름 영역 안에 아이콘을 가운데 둔다.
+                    // 그림만 그려 두면 24×24 위만 눌린다 (#306).
+                    // 자리는 아이콘 크기 그대로 두고 **그 위로** 40×40 누름
+                    // 영역을 덮는다 (#306). 자리째 키우면 상단바가 높아져 화면
+                    // 전체가 아래로 밀린다 — 누르기 편하자고 레이아웃을 흔들 수 없다.
+                    child: SizedBox(
+                      width: _backIconSize.w,
+                      height: _backIconSize.w,
+                      child: OverflowBox(
+                        maxWidth: _backTapSize.w,
+                        maxHeight: _backTapSize.w,
+                        child: GestureDetector(
+                          onTap: onBack,
+                          behavior: HitTestBehavior.opaque,
+                          child: SizedBox(
+                            width: _backTapSize.w,
+                            height: _backTapSize.w,
+                            child: Center(
+                              child: SvgPicture.asset(
+                                AppAssets.iconBack,
+                                width: _backIconSize.w,
+                                height: _backIconSize.w,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),

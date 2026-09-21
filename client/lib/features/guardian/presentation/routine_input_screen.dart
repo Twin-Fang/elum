@@ -121,7 +121,6 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
                     ),
                   ),
                 ),
-                const _PrivacyNote(),
                 SizedBox(height: space.md),
               ],
             ),
@@ -159,7 +158,27 @@ class _BackRow extends StatelessWidget {
           },
           scaleDown: AppPressable.scaleIcon,
           // 정사각형 아이콘이라 가로세로 모두 .w — .h를 섞으면 찌그러진다
-          child: SvgPicture.asset(AppAssets.iconBack, width: 24.w, height: 24.w),
+          // 자리는 아이콘 크기 그대로 두고 **그 위로** 40×40 누름 영역을 덮는다 (#306).
+          // 자리째 키우면 상단바가 높아져 화면 전체가 아래로 밀린다.
+          child: SizedBox(
+            width: 24.w,
+            height: 24.w,
+            child: OverflowBox(
+              maxWidth: 40.w,
+              maxHeight: 40.w,
+              child: SizedBox(
+                width: 40.w,
+                height: 40.w,
+                child: Center(
+                  child: SvgPicture.asset(
+                    AppAssets.iconBack,
+                    width: 24.w,
+                    height: 24.w,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -239,7 +258,9 @@ class _InputField extends StatelessWidget {
               ],
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              // 가운데 맞춤이다. 아래 맞춤으로 두면 한 줄일 때 글자가 박스 바닥에
+              // 붙는다 — 시안은 위아래 여백을 18씩 같게 뒀다 (238:1723).
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: TextField(
@@ -379,17 +400,3 @@ class _Chip extends StatelessWidget {
   }
 }
 
-/// 하단 안내 (Figma y=794)
-class _PrivacyNote extends StatelessWidget {
-  const _PrivacyNote();
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      '이룸이 정보를 안전하게 지켜요',
-      // 이 화면군은 Pretendard 12/w500이다 (Figma style_H3KJNZ) — caption(TmoneyRound)이 아니다
-      style: context.typo.promptCaption
-          .copyWith(color: context.colors.promptMuted),
-    );
-  }
-}
