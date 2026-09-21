@@ -83,6 +83,10 @@ Future<T?> showElumDialog<T>({
     barrierDismissible: barrierDismissible,
     // 시안의 dim — 검정 50%.
     barrierColor: Colors.black.withValues(alpha: 0.5),
+    // **화면 전체 가운데에 둔다.** 기본값(true)은 안전영역 안에서 가운데를
+    // 잡아, 위 59·아래 21이 다른 만큼 팝업이 19 아래로 내려간다 (#297).
+    // 시안(`732:5702`·`931:4879`)은 프레임 정중앙이다.
+    useSafeArea: false,
     builder: (context) => ElumDialogCard<T>(
       title: title,
       message: message,

@@ -1422,6 +1422,53 @@ void main() {
       matchesGoldenFile('figma/question_262-4854.png'),
     );
   });
+
+  // 비밀번호 — 한 자리 넣은 뒤 (#297). 시안 `238:1997`.
+  // 채운 점과 빈 점이 한 화면에 함께 보이는 유일한 상태다.
+  testWidgets('비밀번호 — 한 자리 (Figma 238:1997)', (tester) async {
+    await pumpOnboarding(tester, Routes.onboardingPin, () => const PinScreen());
+
+    await tester.enterText(find.byType(EditableText), '1');
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(PinScreen),
+      matchesGoldenFile('figma/pin_typed_238-1997.png'),
+    );
+  });
+
+  // 비밀번호 확인 — 한 자리 (#297). 시안 `238:2767`.
+  testWidgets('비밀번호 확인 — 한 자리 (Figma 238:2767)', (tester) async {
+    await pumpOnboarding(tester, Routes.onboardingPin, () => const PinScreen());
+
+    // 네 자리를 넣으면 재입력 단계로 자동 전환된다
+    await tester.enterText(find.byType(EditableText), '1234');
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(EditableText), '1');
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(PinScreen),
+      matchesGoldenFile('figma/pinconfirm_238-2767.png'),
+    );
+  });
+
+  // 코드연결 — 성공 팝업 (#297). 시안 `732:5702`.
+  // **팝업은 화면 위에 뜨므로 앱 전체를 찍는다.**
+  testWidgets('코드연결 — 성공 팝업 (Figma 732:5702)', (tester) async {
+    final repo = await pumpLinkCode(tester);
+    await tester.pump(const Duration(milliseconds: 100));
+
+    repo.linked = true;
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/linkcode_732-5702.png'),
+    );
+  });
 }
 
 /// 연결 암호 대역. 시안(`732:5334`)이 그린 `5NJ280`과 `09:59`를 그대로 준다 —
