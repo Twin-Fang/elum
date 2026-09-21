@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T14:41:29Z",
-    "currentVersion": "1.25.7",
+    "lastUpdated": "2026-09-21T15:08:22Z",
+    "currentVersion": "1.25.8",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 134
+    "totalReleases": 135
   },
   "releases": [
+    {
+      "version": "1.25.8",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 319,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 별 둘레에 탁한 띠가 보이던 문제를 고쳤어요\n  * 별 화면의 글자와 그림이 조금씩 밀려 보이던 문제를 고쳤어요\n  * 일과를 지울 때 뜨는 확인 창의 버튼 색을 바로잡았어요\n\n* **개선**\n  * 별이 더 또렷하고 환하게 보여요\n  * 별 화면의 안내 문구를 다듬었어요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "별 둘레에 탁한 띠가 보이던 문제를 고쳤어요",
+            "별 화면의 글자와 그림이 조금씩 밀려 보이던 문제를 고쳤어요",
+            "일과를 지울 때 뜨는 확인 창의 버튼 색을 바로잡았어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "별이 더 또렷하고 환하게 보여요",
+            "별 화면의 안내 문구를 다듬었어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.25.7",
       "project_type": "flutter",
