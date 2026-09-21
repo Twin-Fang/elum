@@ -22,21 +22,45 @@ import '../../data/routine_repository.dart';
 /// **시트에서 할 수 있는 고치기는 순서 하나뿐이다.** 문구·그림·보상은 전부
 /// `편집하기`로 보낸다. 여기서 이것저것 고칠 수 있게 하면 시트와 편집 화면의
 /// 경계가 사라져 둘 다 어중간해진다.
+/// 시트를 닫으며 부르는 쪽에 알리는 것.
+///
+/// 시트는 **화면을 직접 밀지 않는다.** 시트가 뜬 채로 그 위에 화면이 얹히면
+/// 뒤로가기를 두 번 눌러야 홈으로 나온다.
+enum RoutineSheetAction {
+  /// 오늘 일과 — 검토 화면으로 보낸다.
+  edit,
+
+  /// 지난 일과 — 오늘 날짜로 복제한다.
+  rerun,
+}
+
 class RoutineDetailSheet extends ConsumerStatefulWidget {
-  const RoutineDetailSheet({super.key, required this.routine});
+  const RoutineDetailSheet({
+    super.key,
+    required this.routine,
+    this.isPast = false,
+  });
 
   final Routine routine;
 
-  /// 시트를 띄운다. `편집하기`를 누르면 true가 돌아온다.
+  /// 지난 일과인가 (시안 `980:4777`).
   ///
-  /// 편집 화면으로는 **부르는 쪽이 보낸다.** 시트가 직접 화면을 밀면 시트가 뜬 채로
-  /// 그 위에 화면이 얹혀, 뒤로가기를 두 번 눌러야 홈으로 나온다.
-  static Future<bool?> show(BuildContext context, Routine routine) {
-    return showModalBottomSheet<bool>(
+  /// **지나간 것은 고치지 않는다.** 고쳐 봐야 어제 일과가 바뀔 뿐 오늘 할 일이
+  /// 생기지 않는다. 그래서 시안은 버튼을 `일과 다시하기`로 두고 순서 바꾸는
+  /// 손잡이도 그리지 않는다 — 그날의 결과를 그대로 보여 주는 화면이다.
+  final bool isPast;
+
+  /// 시트를 띄운다. 눌린 버튼이 [RoutineSheetAction]으로 돌아온다.
+  static Future<RoutineSheetAction?> show(
+    BuildContext context,
+    Routine routine, {
+    bool isPast = false,
+  }) {
+    return showModalBottomSheet<RoutineSheetAction>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => RoutineDetailSheet(routine: routine),
+      builder: (_) => RoutineDetailSheet(routine: routine, isPast: isPast),
     );
   }
 
@@ -105,17 +129,24 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
           _Header(title: widget.routine.title),
 
           // --- 스크롤: 단계 + 보상 ---
-          Flexible(
+          //
+          // **`Flexible`이 아니라 `Expanded`다.** Flexible 은 목록이 내용만큼만
+          // 차지하게 두어, 단계가 적으면 남는 자리가 그대로 남고 **버튼이 그만큼
+          // 위로 딸려 올라간다.** 시트 높이는 고정인데 버튼만 떠 있어 시안보다
+          // 28 위에 있었다.
+          Expanded(
             child: ReorderableListView.builder(
               shrinkWrap: true,
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              // 시안(956:4084) 헤더가 68 에서 끝나고 첫 단계가 76 에서 시작한다.
+              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
               buildDefaultDragHandles: false,
               // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
               // 들어올림은 줄이 직접 그리므로 여기서는 자리만 잡아 준다 (#274).
               proxyDecorator: (child, index, animation) =>
                   Material(color: Colors.transparent, child: child),
               itemCount: _steps.length,
-              onReorder: _reorder,
+              // 지난 일과는 자리를 바꿔도 의미가 없으므로 받기만 하고 버린다.
+              onReorder: widget.isPast ? (_, _) {} : _reorder,
               onReorderStart: (index) => setState(() => _draggingIndex = index),
               onReorderEnd: (_) => setState(() => _draggingIndex = null),
               footer: _RewardRow(routine: widget.routine),
@@ -128,19 +159,24 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                     step: step,
                     index: index,
                     dragging: _draggingIndex == index,
+                    // 손잡이를 아예 그리지 않는다 (시안 980:4777)
+                    reorderable: !widget.isPast,
                   ),
                 );
               },
             ),
           ),
 
-          // --- 고정: 편집하기 (목록이 길어져도 밀려나지 않는다) ---
+          // --- 고정: 편집하기 · 다시하기 (목록이 길어져도 밀려나지 않는다) ---
           Padding(
             padding: EdgeInsets.fromLTRB(
               16.w,
               space.md,
               16.w,
-              MediaQuery.paddingOf(context).bottom + space.md,
+              // 시안(963:4448) 버튼은 y492~558 이고 시트가 614 이라 **아래가 56**이다.
+              // 안전영역을 더하지 않는다 — 시트가 이미 화면 바닥까지 내려와 있고
+              // 시안의 56 안에 홈 인디케이터 자리가 들어 있다.
+              56.h,
             ),
             child: SizedBox(
               width: double.infinity,
@@ -152,10 +188,14 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                     borderRadius: BorderRadius.circular(18.r),
                   ),
                 ),
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () => Navigator.of(context).pop(
+                  widget.isPast
+                      ? RoutineSheetAction.rerun
+                      : RoutineSheetAction.edit,
+                ),
                 child: Text(
-                  '편집하기',
-                  style: typo.button.copyWith(color: colors.surface),
+                  widget.isPast ? '일과 다시하기' : '편집하기',
+                  style: typo.sheetActionLabel.copyWith(color: colors.surface),
                 ),
               ),
             ),
@@ -180,7 +220,9 @@ class _Header extends StatelessWidget {
       // 배경이 없으면 스크롤되는 목록이 제목 뒤로 비친다 (덤프의 `스크롤 시 fix 영역`에도
       // background 사각형이 따로 있다).
       color: colors.background,
-      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 16.h),
+      // 시안(980:5146) 헤더는 68 높이다 — 손잡이 16 · 제목 40~60 · 아래 8.
+      // 아래를 16 으로 두면 헤더가 76 이 되어 목록 전체가 8 씩 밀린다.
+      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 8.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -189,7 +231,7 @@ class _Header extends StatelessWidget {
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: colors.border,
+                color: colors.sheetHandle,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -197,7 +239,9 @@ class _Header extends StatelessWidget {
           SizedBox(height: 20.h),
           Text(
             title,
-            style: context.typo.sheetTitle.copyWith(color: colors.textPrimary),
+            style: context.typo.sheetTitle.copyWith(
+              color: colors.sheetTitleText,
+            ),
           ),
         ],
       ),
@@ -219,6 +263,7 @@ class _StepRow extends StatefulWidget {
     required this.step,
     required this.index,
     this.dragging = false,
+    this.reorderable = true,
   });
 
   final ActionCard step;
@@ -227,6 +272,9 @@ class _StepRow extends StatefulWidget {
   /// 지금 끌려가는 중인가. 끌기가 시작되면 이 줄은 시트 위의 사본으로 다시
   /// 그려지므로, 들린 상태로 시작하지 않으면 그림자가 한 번 깜빡인다.
   final bool dragging;
+
+  /// 순서 바꾸는 손잡이를 그릴지. 지난 일과는 그리지 않는다 (시안 980:4777).
+  final bool reorderable;
 
   @override
   State<_StepRow> createState() => _StepRowState();
@@ -362,12 +410,15 @@ class _StepRowState extends State<_StepRow>
                               widget.step.displayTitle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              // 시안(963:4236)은 순검정이다. 앱 본문색(#242634)이
+                              // 아니다 — 시트 제목과 같은 토큰을 쓴다.
                               style: typo.sheetStepTitle.copyWith(
-                                color: colors.textPrimary,
+                                color: colors.sheetTitleText,
                               ),
                             ),
                             if (widget.step.description.isNotEmpty) ...[
-                              SizedBox(height: 2.h),
+                              // 시안 제목 y15(16 높이) · 설명 y39 → 사이 8
+                              SizedBox(height: 8.h),
                               Text(
                                 widget.step.description,
                                 maxLines: 1,
@@ -384,28 +435,35 @@ class _StepRowState extends State<_StepRow>
                           ],
                         ),
                       ),
+                      // 시안(963:4239)은 글 오른쪽 끝(227)과 체크(231) 사이가 4다.
+                      SizedBox(width: 4.w),
                       // 이룸이가 해낸 결과를 보여줄 뿐 여기서 체크하지 않는다.
                       // 보호자가 대신 체크하면 "이룸이가 해냈다"는 기록이 아니게 된다.
                       _CompletionMark(completed: widget.step.completed),
-                      SizedBox(width: 8.w),
-                      // 누르는 동안의 들어올림은 여기서 시작한다. 끌기 자체는
-                      // Delayed 쪽이 맡으므로 둘의 임계가 같아야 한다.
-                      Listener(
-                        // 아이콘 글리프에만 의존하면 빈틈이 생긴다. 손잡이는
-                        // 24px이라 그러잖아도 좁으므로 영역 전체로 받는다.
-                        behavior: HitTestBehavior.opaque,
-                        onPointerDown: (_) => _lift.forward(),
-                        onPointerUp: (_) => _lift.reverse(),
-                        onPointerCancel: (_) => _lift.reverse(),
-                        child: ReorderableDelayedDragStartListener(
-                          index: widget.index,
-                          child: Icon(
-                            Icons.drag_handle,
-                            size: 24.w,
-                            color: colors.textPlaceholder,
+                      // 손잡이가 없으면 그 자리의 여백도 없다 (시안 980:4777)
+                      if (widget.reorderable) ...[
+                        // 시안 체크 끝(271) → 손잡이(281) 사이 10
+                        SizedBox(width: 10.w),
+                        // 누르는 동안의 들어올림은 여기서 시작한다. 끌기 자체는
+                        // Delayed 쪽이 맡으므로 둘의 임계가 같아야 한다.
+                        Listener(
+                          // 아이콘 글리프에만 의존하면 빈틈이 생긴다. 손잡이는
+                          // 18px이라 그러잖아도 좁으므로 영역 전체로 받는다.
+                          behavior: HitTestBehavior.opaque,
+                          onPointerDown: (_) => _lift.forward(),
+                          onPointerUp: (_) => _lift.reverse(),
+                          onPointerCancel: (_) => _lift.reverse(),
+                          child: ReorderableDelayedDragStartListener(
+                            index: widget.index,
+                            child: Icon(
+                              Icons.drag_handle,
+                              // 시안(963:4240 순서변경)은 18×18 이다
+                              size: 18.w,
+                              color: colors.textPlaceholder,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -475,8 +533,10 @@ class _RewardRow extends StatelessWidget {
     // "없어요"라고 말해 준다 — 빈 칸이 아니라 말로 알린다.
     final hasReward = routine.hasReward;
 
+    // **위 여백을 주지 않는다.** 단계 줄마다 아래 8 이 붙어 있어 여기서 또 주면
+    // 마지막 단계와 보상 사이만 16 이 된다 (시안은 8).
     return Padding(
-      padding: EdgeInsets.only(top: 8.h),
+      padding: EdgeInsets.zero,
       child: Row(
         children: [
           // 단계 번호 자리에 검은 뱃지를 둔다. 폭이 같아 줄이 나란히 서고,
@@ -518,7 +578,9 @@ class _RewardRow extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: typo.sheetStepTitle.copyWith(
-                  color: hasReward ? colors.textPrimary : colors.rewardEmptyLabel,
+                  color: hasReward
+                      ? colors.textPrimary
+                      : colors.rewardEmptyLabel,
                 ),
               ),
             ),

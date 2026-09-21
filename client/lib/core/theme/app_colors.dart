@@ -51,6 +51,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.buttonDisabledText,
     required this.buttonNeutral,
     required this.buttonNeutralText,
+    required this.sheetHandle,
+    required this.sheetTitleText,
     required this.dialogTitleText,
     required this.dialogNeutral,
     required this.dialogNeutralText,
@@ -191,6 +193,16 @@ class AppColors extends ThemeExtension<AppColors> {
   // 팝업 전용. `buttonNeutral`·`danger`와 값이 달라서가 아니라 **쓰임이 달라서**
   // 나눈다 — 저 둘은 설정의 되돌릴 수 없는 항목, 연결 암호 오류, 설정 시트 버튼도
   // 함께 쓴다. 팝업을 시안에 맞추려고 저 토큰을 건드리면 그 셋까지 같이 바뀐다.
+  /// 바텀시트 맨 위 손잡이 (시안 980:4893 · stroke #CACACA · 40×4).
+  ///
+  /// **`border`(#EFEFEF)를 쓰면 안 된다.** 시트 배경이 #F7F2EF 라 거의 같은 색이
+  /// 되어 손잡이가 통째로 안 보인다. 실제로 그렇게 두어 "상단이 시안과 다르다"는
+  /// 지적을 받았다.
+  final Color sheetHandle;
+
+  /// 시트 제목. 앱 본문색이 아니라 시안(980:4892) 그대로 순검정이다.
+  final Color sheetTitleText;
+
   /// 팝업 제목. 앱 본문색(#242634)이 아니라 시안 그대로 순검정이다.
   final Color dialogTitleText;
 
@@ -545,6 +557,9 @@ class AppColors extends ThemeExtension<AppColors> {
     buttonDisabledText: Color(0x80FFFFFF), // rgba(255,255,255,0.5)
     buttonNeutral: Color(0xFFEFEDEA),
     buttonNeutralText: Color(0xFF242634),
+    // Figma 980:5146 `Frame 34` (시트 상단) 실측
+    sheetHandle: Color(0xFFCACACA),
+    sheetTitleText: Color(0xFF000000),
     // Figma 931:4878 `팝업` 컴포넌트셋 (variant 삭제) 실측
     dialogTitleText: Color(0xFF000000),
     dialogNeutral: Color(0xFFD7D3D1),
@@ -680,6 +695,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? buttonDisabledText,
     Color? buttonNeutral,
     Color? buttonNeutralText,
+    Color? sheetHandle,
+    Color? sheetTitleText,
     Color? dialogTitleText,
     Color? dialogNeutral,
     Color? dialogNeutralText,
@@ -801,6 +818,8 @@ class AppColors extends ThemeExtension<AppColors> {
       buttonDisabledText: buttonDisabledText ?? this.buttonDisabledText,
       buttonNeutral: buttonNeutral ?? this.buttonNeutral,
       buttonNeutralText: buttonNeutralText ?? this.buttonNeutralText,
+      sheetHandle: sheetHandle ?? this.sheetHandle,
+      sheetTitleText: sheetTitleText ?? this.sheetTitleText,
       dialogTitleText: dialogTitleText ?? this.dialogTitleText,
       dialogNeutral: dialogNeutral ?? this.dialogNeutral,
       dialogNeutralText: dialogNeutralText ?? this.dialogNeutralText,
@@ -941,9 +960,15 @@ class AppColors extends ThemeExtension<AppColors> {
         other.buttonNeutralText,
         t,
       )!,
+      sheetHandle: Color.lerp(sheetHandle, other.sheetHandle, t)!,
+      sheetTitleText: Color.lerp(sheetTitleText, other.sheetTitleText, t)!,
       dialogTitleText: Color.lerp(dialogTitleText, other.dialogTitleText, t)!,
       dialogNeutral: Color.lerp(dialogNeutral, other.dialogNeutral, t)!,
-      dialogNeutralText: Color.lerp(dialogNeutralText, other.dialogNeutralText, t)!,
+      dialogNeutralText: Color.lerp(
+        dialogNeutralText,
+        other.dialogNeutralText,
+        t,
+      )!,
       dialogDanger: Color.lerp(dialogDanger, other.dialogDanger, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
       dangerText: Color.lerp(dangerText, other.dangerText, t)!,
@@ -1019,8 +1044,16 @@ class AppColors extends ThemeExtension<AppColors> {
       checkDone: Color.lerp(checkDone, other.checkDone, t)!,
       checkIdleBorder: Color.lerp(checkIdleBorder, other.checkIdleBorder, t)!,
       rewardBadgeTop: Color.lerp(rewardBadgeTop, other.rewardBadgeTop, t)!,
-      rewardBadgeBottom: Color.lerp(rewardBadgeBottom, other.rewardBadgeBottom, t)!,
-      rewardEmptyLabel: Color.lerp(rewardEmptyLabel, other.rewardEmptyLabel, t)!,
+      rewardBadgeBottom: Color.lerp(
+        rewardBadgeBottom,
+        other.rewardBadgeBottom,
+        t,
+      )!,
+      rewardEmptyLabel: Color.lerp(
+        rewardEmptyLabel,
+        other.rewardEmptyLabel,
+        t,
+      )!,
       consentCheckIdle: Color.lerp(
         consentCheckIdle,
         other.consentCheckIdle,

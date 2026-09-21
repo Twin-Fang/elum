@@ -104,9 +104,15 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        SizedBox(height: space.xl),
+                        // **간격을 시안 좌표에서 뽑는다.** 토큰(32·24)을 쓰던
+                        // 동안 화면 전체가 시안보다 90~140 위로 떠 있었고,
+                        // 아래로 갈수록 벌어졌다 (#297).
+                        //
+                        // 시안(238:1643) 절대 y — 뒤로가기 79 · 반짝임 225 ·
+                        // 제목 285 · 부제 363 · 입력칸 429 · 칩 529.
+                        SizedBox(height: _RoutineInputLayout.topToSparkles),
                         const _Headline(),
-                        SizedBox(height: space.xl),
+                        SizedBox(height: _RoutineInputLayout.bodyToInput),
                         _InputField(
                           controller: _controller,
                           canSubmit: canSubmit,
@@ -115,7 +121,7 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
                               .setRawInput,
                           onSubmit: () => _askQuestions(context),
                         ),
-                        SizedBox(height: space.lg),
+                        SizedBox(height: _RoutineInputLayout.inputToChips),
                         _SuggestionChips(onTap: _fill),
                       ],
                     ),
@@ -143,7 +149,12 @@ class _BackRow extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
-        padding: EdgeInsets.only(left: context.space.screenH, top: 12.h),
+        padding: EdgeInsets.only(
+          // 시안(976:4611)은 x=16 이다. 화면 좌우 여백(24)이 아니라 이 값이다 —
+          // 아이콘이 40×40 이라 그림 자체에 여백이 들어 있다.
+          left: _RoutineInputLayout.backLeft,
+          top: _RoutineInputLayout.backTop,
+        ),
         child: AppPressable(
           onTap: () async {
             if (!confirmExit) {
@@ -157,25 +168,20 @@ class _BackRow extends StatelessWidget {
             context.pop();
           },
           scaleDown: AppPressable.scaleIcon,
-          // 정사각형 아이콘이라 가로세로 모두 .w — .h를 섞으면 찌그러진다
-          // 자리는 아이콘 크기 그대로 두고 **그 위로** 40×40 누름 영역을 덮는다 (#306).
-          // 자리째 키우면 상단바가 높아져 화면 전체가 아래로 밀린다.
+          // **자리가 40×40 이다.** 시안(976:4611)이 그 크기로 두고, 안에
+          // 화살표를 가운데 놓는다 — 박스 중심과 화살표 중심이 같다.
+          // 아래 여백은 이 40을 감안해 잡혀 있으므로(topToSparkles) 여기를
+          // 바꾸면 그쪽도 함께 고쳐야 한다.
+          //
+          // 정사각형이라 가로세로 모두 .w — .h를 섞으면 찌그러진다.
           child: SizedBox(
-            width: 24.w,
-            height: 24.w,
-            child: OverflowBox(
-              maxWidth: 40.w,
-              maxHeight: 40.w,
-              child: SizedBox(
-                width: 40.w,
-                height: 40.w,
-                child: Center(
-                  child: SvgPicture.asset(
-                    AppAssets.iconBack,
-                    width: 24.w,
-                    height: 24.w,
-                  ),
-                ),
+            width: 40.w,
+            height: 40.w,
+            child: Center(
+              child: SvgPicture.asset(
+                AppAssets.iconBack,
+                width: 24.w,
+                height: 24.w,
               ),
             ),
           ),
@@ -183,6 +189,34 @@ class _BackRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 시안(238:1643)에서 뽑은 세로 간격.
+///
+/// 시안은 절대 좌표로 그려져 있고 앱은 간격을 쌓아 올린다. 토큰(32·24)을
+/// 그대로 쓰면 **쌓을수록 어긋나** 맨 아래 칩이 140이나 떠 버린다.
+/// 그래서 이 화면만큼은 **시안 좌표의 차**를 그대로 적어 둔다.
+class _RoutineInputLayout {
+  /// 안전영역(59) 안에서 뒤로가기 윗변까지 — 시안 79.
+  static double get backTop => 20.h;
+
+  /// 뒤로가기 왼쪽 — 시안 16.
+  static double get backLeft => 16.w;
+
+  /// 뒤로가기 줄(20 + 40) 아래부터 반짝임(225)까지.
+  ///
+  /// 시안 계산으로는 106 인데 99 다. 반짝임 SVG 가 시안(30 높이)보다 작게(23)
+  /// 그려져 그만큼 위로 붙는다 — 그림이 아니라 **그려진 결과**에 맞춘 값이다.
+  static double get topToSparkles => 99.h;
+
+  /// 반짝임 → 제목. 시안 간격은 24지만 반짝임 SVG가 7 작게 그려져 그만큼 더 준다.
+  static double get sparklesToTitle => 31.h;
+
+  /// 부제 끝(381) → 입력칸(429).
+  static double get bodyToInput => 48.h;
+
+  /// 입력칸 끝(481) → 칩 묶음(529).
+  static double get inputToChips => 48.h;
 }
 
 /// sparkles + 제목 + 설명 (Figma 중앙정렬)
@@ -196,8 +230,12 @@ class _Headline extends StatelessWidget {
     return Column(
       children: [
         // 30×36 비정사각형이라 가로 .w / 세로 .h
-        SvgPicture.asset(AppAssets.iconSparklesLarge, width: 30.w, height: 36.h),
-        SizedBox(height: context.space.lg),
+        SvgPicture.asset(
+          AppAssets.iconSparklesLarge,
+          width: 30.w,
+          height: 36.h,
+        ),
+        SizedBox(height: _RoutineInputLayout.sparklesToTitle),
         Text(
           // 줄바꿈 위치는 디자인이 정한 대로다
           '오늘은 어떤 준비가\n필요한가요?',
@@ -268,13 +306,16 @@ class _InputField extends StatelessWidget {
                     onChanged: onChanged,
                     maxLines: 4,
                     minLines: 1,
-                    style: context.typo.promptBody
-                        .copyWith(color: colors.textPrimary),
+                    style: context.typo.promptBody.copyWith(
+                      color: colors.textPrimary,
+                    ),
                     decoration: InputDecoration.collapsed(
-                      hintText: '평소 이야기하듯 적어주세요',
+                      // 시안(238:1723) 문구 그대로. `적어주세요`로 바꿔 두었던 것을 되돌린다.
+                      hintText: '평소 이야기하듯 입력해주세요',
                       // 플레이스홀더는 입력 텍스트(promptBody, w500)보다 가늘다 (Figma style_7YRXS7)
-                      hintStyle: context.typo.promptPlaceholder
-                          .copyWith(color: colors.promptMuted),
+                      hintStyle: context.typo.promptPlaceholder.copyWith(
+                        color: colors.promptMuted,
+                      ),
                     ),
                   ),
                 ),
@@ -335,7 +376,9 @@ class _SuggestionChips extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final items = ref.watch(routineSuggestionsProvider).maybeWhen(
+    final items = ref
+        .watch(routineSuggestionsProvider)
+        .maybeWhen(
           data: (list) => list,
           // 로딩·실패 중에는 칩을 감춘다. 입력창은 그대로 쓸 수 있으므로
           // 흐름이 막히지 않는다.
@@ -353,7 +396,9 @@ class _SuggestionChips extends ConsumerWidget {
             children: [
               for (final (index, s) in items.skip(row).take(2).indexed) ...[
                 if (index > 0) SizedBox(width: 6.w),
-                Flexible(child: _Chip(suggestion: s, onTap: onTap)),
+                Flexible(
+                  child: _Chip(suggestion: s, onTap: onTap),
+                ),
               ],
             ],
           ),
@@ -390,8 +435,9 @@ class _Chip extends StatelessWidget {
             ),
             child: Text(
               suggestion.label,
-              style: context.typo.chipLabel
-                  .copyWith(color: context.colors.chipLabel),
+              style: context.typo.chipLabel.copyWith(
+                color: context.colors.chipLabel,
+              ),
             ),
           ),
         ),
@@ -399,4 +445,3 @@ class _Chip extends StatelessWidget {
     );
   }
 }
-

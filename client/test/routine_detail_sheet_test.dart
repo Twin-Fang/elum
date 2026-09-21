@@ -45,7 +45,7 @@ void main() {
     rewardText: '유튜브 시청 20분',
   );
 
-  Widget wrap(_FakeRepo repo, {Routine value = routine}) {
+  Widget wrap(_FakeRepo repo, {Routine value = routine, bool isPast = false}) {
     return ProviderScope(
       overrides: [
         offlineDioOverride(),
@@ -56,7 +56,9 @@ void main() {
         designSize: const Size(393, 852),
         builder: (context, _) => MaterialApp(
           theme: AppTheme.light,
-          home: Scaffold(body: RoutineDetailSheet(routine: value)),
+          home: Scaffold(
+            body: RoutineDetailSheet(routine: value, isPast: isPast),
+          ),
         ),
       ),
     );
@@ -105,8 +107,8 @@ void main() {
     expect(dimmed, isNotEmpty, reason: '채울 수 있는 자리라 별이 흐리다');
   });
 
-  testWidgets('편집하기를 누르면 true를 돌려준다 — 화면 이동은 부르는 쪽이 한다', (tester) async {
-    bool? result;
+  testWidgets('편집하기를 누르면 edit을 돌려준다 — 화면 이동은 부르는 쪽이 한다', (tester) async {
+    RoutineSheetAction? result;
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -138,7 +140,79 @@ void main() {
     await tester.tap(find.text('편집하기'));
     await tester.pumpAndSettle();
 
-    expect(result, isTrue);
+    expect(result, RoutineSheetAction.edit);
+  });
+
+  // --- 지난 일과 (시안 980:4777 · #310) ---
+  //
+  // **지나간 것은 고치지 않는다.** 고쳐 봐야 어제 일과가 바뀔 뿐 오늘 할 일이
+  // 생기지 않는다. 그래서 시안은 버튼을 바꾸고 순서 손잡이를 지웠다.
+  group('지난 일과 시트', () {
+    testWidgets('버튼이 일과 다시하기다', (tester) async {
+      await tester.pumpWidget(wrap(_FakeRepo(), isPast: true));
+      await tester.pumpAndSettle();
+
+      expect(find.text('일과 다시하기'), findsOneWidget);
+      expect(find.text('편집하기'), findsNothing);
+    });
+
+    testWidgets('순서를 바꾸는 손잡이가 없다', (tester) async {
+      await tester.pumpWidget(wrap(_FakeRepo(), isPast: true));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byIcon(Icons.drag_handle),
+        findsNothing,
+        reason: '지나간 일과는 자리를 바꿔도 의미가 없다',
+      );
+    });
+
+    testWidgets('오늘 일과에는 손잡이가 그대로 있다', (tester) async {
+      await tester.pumpWidget(wrap(_FakeRepo()));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.drag_handle), findsWidgets);
+    });
+
+    testWidgets('다시하기를 누르면 rerun을 돌려준다', (tester) async {
+      RoutineSheetAction? result;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            offlineDioOverride(),
+            testStorageOverride(onboardingCompleted: true),
+            routineRepositoryProvider.overrideWithValue(_FakeRepo()),
+          ],
+          child: ScreenUtilInit(
+            designSize: const Size(393, 852),
+            builder: (context, _) => MaterialApp(
+              theme: AppTheme.light,
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) => ElevatedButton(
+                    onPressed: () async {
+                      result = await RoutineDetailSheet.show(
+                        context,
+                        routine,
+                        isPast: true,
+                      );
+                    },
+                    child: const Text('열기'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('열기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('일과 다시하기'));
+      await tester.pumpAndSettle();
+
+      expect(result, RoutineSheetAction.rerun);
+    });
   });
 
   testWidgets('손잡이를 끌면 전체 순서를 서버로 보낸다 (#266)', (tester) async {

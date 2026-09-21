@@ -54,6 +54,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.sheetTitle,
     required this.sheetStepTitle,
     required this.sheetStepBody,
+    required this.sheetActionLabel,
     required this.editChipLabel,
     required this.childDetailTitle,
     required this.promptPlaceholder,
@@ -244,6 +245,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 일과 시트의 단계 설명 (Figma `963:4237` — Pretendard 13/400).
   /// `cardBody`(15)와 다르다.
   final TextStyle sheetStepBody;
+  final TextStyle sheetActionLabel;
 
   // --- 카드확인·아이 상세 (Figma 262:5124 / 309:3548, 2026-07-22 덤프) ---
 
@@ -537,7 +539,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     sheetTitle: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 20,
-      fontWeight: FontWeight.w600,
+      // 시안(980:4892)은 700 이다. 600 으로 두면 제목이 눈에 띄게 얇다.
+      fontWeight: FontWeight.w700,
       height: 1,
     ),
     sheetStepTitle: TextStyle(
@@ -550,6 +553,17 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontFamily: promptFontFamily,
       fontSize: 13,
       fontWeight: FontWeight.w400,
+      height: 1,
+    ),
+    /// 시트 아래 큰 버튼 글자 (시안 963:4448 `편집하기`).
+    ///
+    /// **`button`(TmoneyRoundWind)과 다르다.** 같은 버튼 컴포넌트를 쓰는데도
+    /// 시안이 시트에서만 Pretendard 로 덮어썼다. 공용 토큰을 고치면 보상 화면
+    /// 같은 다른 버튼까지 바뀌므로 시트 전용으로 둔다.
+    sheetActionLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 22,
+      fontWeight: FontWeight.w800,
       height: 1,
     ),
     editChipLabel: TextStyle(
@@ -645,6 +659,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? sheetTitle,
     TextStyle? sheetStepTitle,
     TextStyle? sheetStepBody,
+    TextStyle? sheetActionLabel,
     TextStyle? editChipLabel,
     TextStyle? childDetailTitle,
     TextStyle? promptPlaceholder,
@@ -699,6 +714,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       sheetTitle: sheetTitle ?? this.sheetTitle,
       sheetStepTitle: sheetStepTitle ?? this.sheetStepTitle,
       sheetStepBody: sheetStepBody ?? this.sheetStepBody,
+      sheetActionLabel: sheetActionLabel ?? this.sheetActionLabel,
       editChipLabel: editChipLabel ?? this.editChipLabel,
       childDetailTitle: childDetailTitle ?? this.childDetailTitle,
       promptPlaceholder: promptPlaceholder ?? this.promptPlaceholder,
@@ -760,6 +776,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
       sheetTitle: TextStyle.lerp(sheetTitle, other.sheetTitle, t)!,
       sheetStepTitle: TextStyle.lerp(sheetStepTitle, other.sheetStepTitle, t)!,
       sheetStepBody: TextStyle.lerp(sheetStepBody, other.sheetStepBody, t)!,
+      sheetActionLabel: TextStyle.lerp(
+        sheetActionLabel,
+        other.sheetActionLabel,
+        t,
+      )!,
       editChipLabel: TextStyle.lerp(editChipLabel, other.editChipLabel, t)!,
       childDetailTitle:
           TextStyle.lerp(childDetailTitle, other.childDetailTitle, t)!,

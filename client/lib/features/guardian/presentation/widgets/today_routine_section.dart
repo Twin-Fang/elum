@@ -175,8 +175,8 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
   /// 맥락은 끊기지 않는다.
   Future<void> _openSheet(Routine routine) async {
     setState(() => _openId = null);
-    final wantsEdit = await RoutineDetailSheet.show(context, routine);
-    if (wantsEdit != true || !mounted) return;
+    final action = await RoutineDetailSheet.show(context, routine);
+    if (action != RoutineSheetAction.edit || !mounted) return;
     _edit(routine);
   }
 
@@ -289,6 +289,20 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
   /// 다시 만드는 중인 일과. 두 번 눌러 둘이 생기는 것을 막는다.
   String? _rerunning;
 
+  /// 지난 일과 시트를 띄우고, `일과 다시하기`를 누르면 오늘로 복제한다.
+  ///
+  /// 복제는 타일의 다시하기와 **같은 길을 쓴다** — 두 자리에서 각각 만들면
+  /// 한쪽만 고쳐져 어긋난다.
+  Future<void> _openPastSheet(Routine routine) async {
+    final action = await RoutineDetailSheet.show(
+      context,
+      routine,
+      isPast: true,
+    );
+    if (action != RoutineSheetAction.rerun || !mounted) return;
+    await _rerun(routine);
+  }
+
   Future<void> _rerun(Routine routine) async {
     if (_rerunning != null) return;
     setState(() => _rerunning = routine.id);
@@ -347,6 +361,10 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
                 progress: routine.progressPercent / 100,
                 showDate: done,
                 onRerun: done ? () => _rerun(routine) : null,
+                // 시안(980:4777)에는 지난 일과를 눌러 여는 시트가 있는데 화면이
+                // 없었다. #299 로 목록 자체가 안 보이던 동안 아무도 열어 보지
+                // 못해 빠진 것이 드러나지 않았다 (#310).
+                onTap: () => _openPastSheet(routine),
                 highlighted: _rerunning == routine.id,
               );
             },

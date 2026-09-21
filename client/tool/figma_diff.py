@@ -74,10 +74,18 @@ def main():
     ap.add_argument('--out', help='차이를 칠한 PNG를 저장할 경로')
     ap.add_argument('--threshold', type=int, default=24,
                     help='채널당 이 값을 넘어야 "다르다"로 본다 (기본 24)')
-    ap.add_argument('--mask-top', type=int, default=0,
-                    help='위에서 이만큼을 비교에서 뺀다 (상태바)')
-    ap.add_argument('--mask-bottom', type=int, default=0,
-                    help='아래에서 이만큼을 뺀다 (홈 인디케이터)')
+    # **기본값이 0이면 안 된다.** 앱은 시계·배터리·홈 인디케이터를 그리지 않는데
+    # 시안에는 그려져 있어, 가리지 않으면 그 띠가 통째로 "다름"으로 잡힌다.
+    # 인자를 깜빡한 채 돌려서 모든 수치가 부풀어 있었다 — 기본값을 실측으로 둔다.
+    #
+    # 단위는 **논리 픽셀(852 높이 기준)**이다. 시안 export 는 2x·3x 로 나오므로
+    # 아래에서 비교 크기에 맞춰 환산한다. 겹치는 화면이 없으면 0으로 끌 수 있다.
+    ap.add_argument('--mask-top', type=int, default=59,
+                    help='위에서 이만큼(논리px)을 비교에서 뺀다 — 상태바 (기본 59)')
+    ap.add_argument('--mask-bottom', type=int, default=21,
+                    help='아래에서 이만큼(논리px)을 뺀다 — 홈 인디케이터 (기본 21)')
+    ap.add_argument('--design-height', type=int, default=852,
+                    help='시안 프레임의 논리 높이 (기본 852)')
     ap.add_argument('--min-area', type=int, default=200,
                     help='이 넓이 미만 덩어리는 보고하지 않는다')
     args = ap.parse_args()
@@ -86,17 +94,24 @@ def main():
     render = load_rgb(args.render, size=(design.shape[1], design.shape[0]))
 
     delta = np.abs(design - render).max(axis=2)
-    if args.mask_top:
-        delta[:args.mask_top] = 0
-    if args.mask_bottom:
-        delta[-args.mask_bottom:] = 0
+
+    # 논리 px -> 실제 비교 px. 시안이 2x면 59 가 118 이 된다.
+    scale = design.shape[0] / max(args.design_height, 1)
+    top = int(round(args.mask_top * scale))
+    bottom = int(round(args.mask_bottom * scale))
+    if top:
+        delta[:top] = 0
+    if bottom:
+        delta[-bottom:] = 0
 
     mask = delta > args.threshold
-    compared = delta.size - (args.mask_top + args.mask_bottom) * delta.shape[1]
+    compared = delta.size - (top + bottom) * delta.shape[1]
     pct = 100.0 * mask.sum() / max(compared, 1)
 
     print(f'비교 크기   {design.shape[1]}x{design.shape[0]}')
     print(f'임계        채널차 {args.threshold} 초과')
+    if top or bottom:
+        print(f'가린 띠     위 {top}px · 아래 {bottom}px (앱이 그리지 않는 자리)')
     print(f'다른 픽셀   {mask.sum():,} / {compared:,}  ({pct:.2f}%)')
     print(f'최대 채널차 {int(delta.max())}')
     print()
