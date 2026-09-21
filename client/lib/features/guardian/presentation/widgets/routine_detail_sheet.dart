@@ -350,7 +350,9 @@ class _RewardRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16.r),
               ),
               child: Text(
-                routine.rewardDisplay,
+                // 왼쪽 별 뱃지가 이미 "보상 줄"임을 말해준다. 여기에 또 그림을
+                // 넣으면 한 줄에 별이 두 번 나온다 — 시안도 글자만 그린다 (#275).
+                routine.rewardText.trim(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: typo.cardTitle.copyWith(color: colors.textPrimary),

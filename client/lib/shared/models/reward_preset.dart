@@ -14,7 +14,8 @@ enum RewardPreset {
   walk('WALK', '산책', '🚶'),
 
   /// 프리셋에 없는 것을 보호자가 직접 적은 경우.
-  custom('CUSTOM', '직접 입력', '⭐');
+  /// **대표 그림이 없다** — 보호자가 적지 않은 별을 앱이 지어내면 안 된다 (#275).
+  custom('CUSTOM', '직접 입력', '');
 
   const RewardPreset(this.key, this.label, this.emoji);
 
@@ -25,6 +26,7 @@ enum RewardPreset {
   final String label;
 
   /// 아동 화면용. 프리셋 그림이 준비되기 전까지 이모지로 대신한다.
+  /// **[custom]은 비어 있다** — 직접 적은 말에 어울리는 그림은 앱이 알 수 없다.
   final String emoji;
 
   /// 보호자가 고를 수 있는 프리셋 — [custom]은 별도 버튼이라 목록에서 뺀다.
@@ -44,7 +46,10 @@ enum RewardPreset {
     return null;
   }
 
-  /// 보상 텍스트 앞에 붙일 그림.
-  /// 프리셋을 모르면 [custom]의 것을 쓴다 — 아무것도 없는 것보다 낫다.
-  static String emojiOf(String? key) => fromKey(key)?.emoji ?? custom.emoji;
+  /// 보상 텍스트 앞에 붙일 그림. **모르는 키는 빈 문자열이다** (#275).
+  ///
+  /// 예전에는 모르는 키를 ⭐로 메웠다. 그런데 별은 이룸이가 일과를 끝냈을 때 나오는
+  /// 연출이라 뜻이 겹쳤고, ⭐가 `유튜브 시청 20분`을 뜻하지도 않아 그림 구실을
+  /// 못 했다. **모르면 비워 두고 글자만 보여준다.**
+  static String emojiOf(String? key) => fromKey(key)?.emoji ?? '';
 }

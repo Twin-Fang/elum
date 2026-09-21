@@ -83,10 +83,21 @@ void main() {
       expect(routine.rewardDisplay, '${RewardPreset.snack.emoji} 젤리 먹기');
     });
 
-    test('직접 입력이라 프리셋이 없어도 문구는 나온다', () {
+    test('직접 입력한 보상은 글자만 보여준다 — 별을 지어 붙이지 않는다 (#275)', () {
       const routine = Routine(id: 'r1', rewardText: '할머니 집 가기');
       expect(routine.hasReward, isTrue);
-      expect(routine.rewardDisplay, contains('할머니 집 가기'));
+      // contains로 두면 앞에 ⭐가 붙어도 통과한다. 실제로 그래서 못 잡았다.
+      expect(routine.rewardDisplay, '할머니 집 가기');
+    });
+
+    test('프리셋 키가 CUSTOM이어도 마찬가지다 (#275)', () {
+      // 보호자가 손으로 적으면 키가 CUSTOM이 된다 — 여기가 별이 새던 길목이다.
+      const routine = Routine(
+        id: 'r1',
+        rewardText: '유튜브 시청 20분',
+        rewardPresetKey: 'CUSTOM',
+      );
+      expect(routine.rewardDisplay, '유튜브 시청 20분');
     });
 
     test('오프라인 캐시에 보상이 함께 저장되고 그대로 돌아온다', () {

@@ -73,11 +73,13 @@ void main() {
     expect(find.text('3'), findsOneWidget);
   });
 
-  testWidgets('보상이 있으면 보여준다', (tester) async {
+  testWidgets('보상 본문은 글자만 — 별은 왼쪽 뱃지에만 있다 (#275)', (tester) async {
     await tester.pumpWidget(wrap(_FakeRepo()));
     await tester.pump();
 
-    expect(find.textContaining('유튜브 시청 20분'), findsOneWidget);
+    // 본문에도 그림을 붙이면 한 줄에 별이 두 번 나온다. 시안도 글자만 그린다.
+    expect(find.text('유튜브 시청 20분'), findsOneWidget);
+    expect(find.text('⭐'), findsOneWidget);
   });
 
   testWidgets('보상이 없으면 그 줄을 그리지 않는다 — 빈 칸은 덜 만들어진 것처럼 보인다', (tester) async {

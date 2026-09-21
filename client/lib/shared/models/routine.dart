@@ -88,8 +88,15 @@ abstract class Routine with _$Routine {
   String get rewardEmoji => RewardPreset.emojiOf(rewardPresetKey);
 
   /// 아동 화면 보상 바에 그대로 쓰는 문구. 보상이 없으면 빈 문자열이다.
-  String get rewardDisplay =>
-      hasReward ? '$rewardEmoji ${rewardText.trim()}' : '';
+  ///
+  /// **그림이 없으면 글자만 준다** (#275). 빈 그림을 그대로 이어붙이면 문구 앞에
+  /// 공백 한 칸이 남아 줄이 밀린다.
+  String get rewardDisplay {
+    if (!hasReward) return '';
+    final text = rewardText.trim();
+    final emoji = rewardEmoji;
+    return emoji.isEmpty ? text : '$emoji $text';
+  }
 
   /// `지난 일과` 카드에 적는 날짜 (`2026년 9월 20일`). 값이 없으면 빈 문자열이라
   /// 화면에서 그 줄 자체가 사라진다 — `날짜 없음` 같은 문구를 보여주지 않는다.

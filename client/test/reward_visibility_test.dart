@@ -60,7 +60,9 @@ void main() {
       expect(find.byType(RewardBanner), findsNothing);
     });
 
-    testWidgets('모르는 프리셋 키가 와도 그림이 나온다', (tester) async {
+    testWidgets('모르는 프리셋 키가 와도 글자는 나온다 — 그림은 지어내지 않는다 (#275)', (
+      tester,
+    ) async {
       const routine = Routine(
         id: 'r1',
         rewardText: '새로 생긴 보상',
@@ -72,7 +74,8 @@ void main() {
 
       // 서버에 프리셋이 늘었는데 앱이 아직 모를 때 화면이 죽으면 안 된다
       expect(find.text('새로 생긴 보상'), findsOneWidget);
-      expect(find.text('⭐'), findsOneWidget);
+      // 모르는 것을 별로 메우지 않는다 — 별은 일과를 끝냈을 때의 연출이라 뜻이 겹친다
+      expect(find.text('⭐'), findsNothing);
     });
 
     testWidgets('수행 중에는 작게 — 카드를 가리지 않는다', (tester) async {

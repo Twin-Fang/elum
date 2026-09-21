@@ -76,13 +76,17 @@ class RewardBanner extends StatelessWidget {
                 .copyWith(color: colors.textSecondary),
           ),
           SizedBox(width: _gap.w),
-          Text(
-            emoji,
-            style: TextStyle(
-              fontSize: (compact ? _emojiSmall : _emojiLarge).sp,
+          // 직접 적은 보상에는 그림이 없다. 빈 글자를 그대로 두면 옆 여백만 남아
+          // 문구가 가운데에서 밀려 보인다 (#275).
+          if (emoji.isNotEmpty) ...[
+            Text(
+              emoji,
+              style: TextStyle(
+                fontSize: (compact ? _emojiSmall : _emojiLarge).sp,
+              ),
             ),
-          ),
-          SizedBox(width: (_gap / 2).w),
+            SizedBox(width: (_gap / 2).w),
+          ],
           Flexible(
             child: Text(
               text,
