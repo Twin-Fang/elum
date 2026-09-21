@@ -479,6 +479,19 @@ void main() {
     );
   });
 
+  // 이룸이 홈 빈 상태 (#297). 일과가 하나도 없을 때 무엇을 보여주는지는
+  // 시안에 따로 그려져 있다 — 빈 화면이 아니라 시무룩한 캐릭터와 안내다.
+  testWidgets('이룸이 홈 — 빈 상태 (Figma 343:4543)', (tester) async {
+    await tester.pumpWidget(wrapChild(routines: const [], stars: 0));
+    await tester.pumpAndSettle();
+    await precacheAllImages(tester);
+
+    await expectLater(
+      find.byType(ChildHomeScreen),
+      matchesGoldenFile('figma/child_home_empty_343-4543.png'),
+    );
+  });
+
   // 보상 화면 (#297). 별이 둥둥 떠다녀 pumpAndSettle 이 끝나지 않으므로
   // 등장 연출(700ms) 뒤 float 주기의 두 배 지점 — sin 이 0 으로 돌아오는 자리 —
   // 에서 프레임을 고정한다. 그래야 캡처마다 별 높이가 달라지지 않는다.

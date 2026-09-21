@@ -318,6 +318,9 @@ class _NoRoutine extends StatelessWidget {
   /// 조회 실패 시 제보 추적용 코드. null이면 표시하지 않는다.
   final String? errorCode;
 
+  /// 상단 줄 아래부터 제목까지 — 시안(343:4543)은 제목이 234 에서 시작한다.
+  static double get _emptyTop => 100.h;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -327,12 +330,16 @@ class _NoRoutine extends StatelessWidget {
       CardCharacter.fox => (colors.foxSelectedFill, AppAssets.popoSad),
     };
 
-    // 작은 화면·큰 글꼴에서도 넘치지 않게 스크롤로 감싼다
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(
+    // 작은 화면·큰 글꼴에서도 넘치지 않게 스크롤로 감싼다.
+    //
+    // **`Center`가 아니다.** 세로 가운데에 두면 화면 높이에 따라 글자가 오르내려
+    // 시안과 어긋난다 — 실제로 81 아래에 있었다. 시안(343:4543)은 제목이 234 에서
+    // 시작하므로 위 여백을 고정한다 (#297).
+    return SingleChildScrollView(
+      child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            SizedBox(height: _emptyTop),
             Text(
               '아직 $childName의\n일과가 없어요',
               textAlign: TextAlign.center,
@@ -390,7 +397,6 @@ class _NoRoutine extends StatelessWidget {
               ),
             ),
           ],
-        ),
       ),
     );
   }
