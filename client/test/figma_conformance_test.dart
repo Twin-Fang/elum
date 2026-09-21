@@ -32,6 +32,7 @@ import 'package:go_router/go_router.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_stars_screen.dart';
+import 'package:elum/features/child/presentation/mode_switch_screen.dart';
 import 'package:elum/core/theme/app_motion.dart';
 import 'package:elum/features/child/domain/reward_character.dart';
 import 'package:elum/features/child/presentation/reward_screen.dart';
@@ -1032,6 +1033,52 @@ void main() {
     await expectLater(
       find.byType(LinkCodeScreen),
       matchesGoldenFile('figma/linkcode_732-5850.png'),
+    );
+  });
+
+  // 화면 전환 (#297). 시안 `309:2837` — 이룸이 화면에서 보호자 화면으로 넘어갈 때
+  // PIN을 받는다. **아래 절반은 iOS 시스템 키패드**라 앱이 그리지 않는다
+  // (`--mask-bottom 300`).
+  testWidgets('화면 전환 (Figma 309:2837)', (tester) async {
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(path: '/', builder: (context, state) => const SizedBox.shrink()),
+        GoRoute(
+          path: Routes.modeSwitch,
+          builder: (context, state) => const ModeSwitchScreen(
+            target: ModeSwitchTarget.guardian,
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [testStorageOverride(pin: '1234')],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp.router(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            routerConfig: router,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    router.push(Routes.modeSwitch);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    await expectLater(
+      find.byType(ModeSwitchScreen),
+      matchesGoldenFile('figma/modeswitch_309-2837.png'),
     );
   });
 }

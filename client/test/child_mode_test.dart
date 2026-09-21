@@ -364,7 +364,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('암호를 넣으면 이룸이 화면으로 바뀌어요'), findsOneWidget);
+      expect(find.text('암호를 입력하면 이룸이 화면으로 바뀌어요'), findsOneWidget);
     });
 
     testWidgets('보호자 방향 문구도 맞다', (tester) async {
@@ -373,7 +373,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('암호를 넣으면 보호자 화면으로 바뀌어요'), findsOneWidget);
+      expect(find.text('암호를 입력하면 보호자 화면으로 바뀌어요'), findsOneWidget);
     });
 
     testWidgets('PIN이 틀려도 경고색을 쓰지 않는다', (tester) async {
@@ -418,7 +418,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('암호를 넣으면 보호자 화면으로 바뀌어요'), findsOneWidget);
+      expect(find.text('암호를 입력하면 보호자 화면으로 바뀌어요'), findsOneWidget);
       expect(find.text('보호자 홈'), findsNothing, reason: 'PIN 없이 보호자 홈에 도달했다');
     });
 
@@ -439,7 +439,7 @@ void main() {
       // 틀린 것인지 입력이 안 먹은 것인지 구분할 수 없었다.
       // 색은 여전히 쓰지 않는다 — 아동도 보는 화면이라 흔들림과 문구로만 알린다.
       expect(find.text('암호가 달라요. 다시 넣어주세요'), findsOneWidget);
-      expect(find.text('암호를 넣으면 보호자 화면으로 바뀌어요'), findsNothing);
+      expect(find.text('암호를 입력하면 보호자 화면으로 바뀌어요'), findsNothing);
       expect(find.byType(AppShake), findsOneWidget);
     });
 

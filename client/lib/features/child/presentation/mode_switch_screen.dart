@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
-import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_shake.dart';
+import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
@@ -95,30 +96,29 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
     });
   }
 
+  /// 설명 하단(193) → 점(299). 시안 `309:2837` 실측.
+  ///
+  /// **점은 비밀번호 화면과 같은 y=299에 있다.** 다만 이 화면은 제목이 한 줄이라
+  /// 설명이 위(177)에 서고, 그래서 남는 간격이 106으로 더 크다. 거기 72를 쓰면
+  /// 점이 34 떠 오른다.
+  static const _descriptionToDots = 106.0;
+
   @override
   Widget build(BuildContext context) {
-    final space = context.space;
-
     return ElumScaffold(
       onBack: () => context.pop(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: space.xl),
-          Text(
-            '비밀암호를 넣어주세요',
-            // 온보딩 PIN 화면과 같은 크기다 (Figma 28/w800)
-            style: context.typo.pinTitle
-                .copyWith(color: context.colors.textPrimary),
-          ),
-          SizedBox(height: space.sm),
-          Text(
+          // 제목·설명을 손으로 쌓지 않는다 — 뼈대가 쓰는 간격과 어긋난다.
+          // 실제로 `space.xl`(32)을 쓰다 제목이 20 내려가 있었다 (#297).
+          ElumHeader(
+            // 시안 `309:2837` 문구 그대로
+            title: '비밀암호를 입력하세요',
             // 틀렸을 때는 실패 안내로 바뀐다. 색은 그대로 둔다 (#180).
-            _errorMessage ?? widget.target.description,
-            style: context.typo.body
-                .copyWith(color: context.colors.textSecondary),
+            description: _errorMessage ?? widget.target.description,
           ),
-          SizedBox(height: space.xl * 2),
+          SizedBox(height: _descriptionToDots.h),
           // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)
           GestureDetector(
             onTap: _focusNode.requestFocus,
@@ -144,8 +144,11 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
 
 /// 전환 목적지. 문구와 경로가 함께 붙어 있어야 어긋나지 않는다.
 enum ModeSwitchTarget {
-  child('암호를 넣으면 이룸이 화면으로 바뀌어요', Routes.child),
-  guardian('암호를 넣으면 보호자 화면으로 바뀌어요', Routes.guardian);
+  // 시안(`309:2837`)은 `암호를 입력하면 보호자 화면으로 전환돼요`다.
+  // `입력하면`은 시안을 따르고, 끝은 **능동형**으로 둔다 — 피동형(`전환돼요`)은
+  // 루트 CLAUDE.md 말투 규칙이 금지한다.
+  child('암호를 입력하면 이룸이 화면으로 바뀌어요', Routes.child),
+  guardian('암호를 입력하면 보호자 화면으로 바뀌어요', Routes.guardian);
 
   const ModeSwitchTarget(this.description, this.route);
 
