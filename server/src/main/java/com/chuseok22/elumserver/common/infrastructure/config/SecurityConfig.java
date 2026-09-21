@@ -132,6 +132,7 @@ public class SecurityConfig {
         .requestMatchers(SecurityPaths.API_AUTH_MATCHER).permitAll()
         // 이룸이 휴대폰은 아직 토큰이 없는 상태로 이 경로를 부른다.
         .requestMatchers(HttpMethod.POST, SecurityPaths.API_DEVICE_LINK_REDEEM).permitAll()
+        .requestMatchers(HttpMethod.GET, SecurityPaths.API_APP_STATUS).permitAll()
         // ── 이룸이 휴대폰이 할 수 있는 것 (이슈 #200) ──
         // 두 휴대폰은 같은 계정이라 memberId가 같다. 나누지 않으면 이룸이 휴대폰에서
         // 일과 삭제·회원 탈퇴가 그대로 된다. **허용할 것만 적고 나머지는 막는다** —

@@ -16,6 +16,7 @@ public enum ConfigGroup {
   PRICING("AI 요금 단가"),
   PLAN_FREE("Free 플랜 한도"),
   PLAN_PRO("Pro 플랜 한도"),
+  APP_CONTROL("앱 점검·버전"),
   ;
 
   private final String label;

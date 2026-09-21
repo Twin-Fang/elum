@@ -214,6 +214,42 @@ public enum ConfigKey {
     "Pro가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
+
+  // 앱을 세우거나 업데이트를 요구하는 값들 (이슈 #279).
+  //
+  // ⚠️ 심사 기간에는 점검 모드를 켜지 않는다. 리뷰어가 점검 화면만 보고
+  //    "앱이 동작하지 않는다"(App Store 2.1)로 돌려보낸다.
+  MAINTENANCE_MODE(
+    ConfigGroup.APP_CONTROL, "점검 모드",
+    "켜면 앱이 점검 안내 화면을 띄운다. 심사 기간에는 켜지 않는다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  MAINTENANCE_MESSAGE(
+    ConfigGroup.APP_CONTROL, "점검 안내 문구",
+    "점검 화면에 보여줄 말. 언제 끝나는지를 적어 준다",
+    ConfigValueType.STRING, List.of(), "잠시 점검하고 있어요. 조금 뒤에 다시 열어주세요"
+  ),
+  // 버전 비교는 semver다. 1.10.0이 1.9.0보다 높다.
+  MIN_APP_VERSION_IOS(
+    ConfigGroup.APP_CONTROL, "iOS 최소 버전",
+    "이 버전보다 낮으면 업데이트해야 쓸 수 있다. 비우면 막지 않는다",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  MIN_APP_VERSION_ANDROID(
+    ConfigGroup.APP_CONTROL, "Android 최소 버전",
+    "이 버전보다 낮으면 업데이트해야 쓸 수 있다. 비우면 막지 않는다",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  LATEST_APP_VERSION_IOS(
+    ConfigGroup.APP_CONTROL, "iOS 최신 버전",
+    "이 버전보다 낮으면 업데이트를 권한다. 건너뛸 수 있다",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  LATEST_APP_VERSION_ANDROID(
+    ConfigGroup.APP_CONTROL, "Android 최신 버전",
+    "이 버전보다 낮으면 업데이트를 권한다. 건너뛸 수 있다",
+    ConfigValueType.STRING, List.of(), ""
+  ),
   ;
 
 

@@ -19,6 +19,13 @@ public final class SecurityPaths {
   public static final String API_AUTH_MATCHER = "/api/auth/**";
   /** 이룸이 휴대폰이 연결 암호를 넣는 곳. 로그인 전에 부르므로 인증이 없다 (이슈 #200). */
   public static final String API_DEVICE_LINK_REDEEM = "/api/device-links/redeem";
+  /**
+   * 앱이 시작하며 서버 상태를 묻는 곳 (이슈 #279).
+   *
+   * <p>인증이 없다. 로그인 전에도, <b>점검 중에도</b> 부를 수 있어야 한다 —
+   * 여기까지 막으면 앱이 점검 사실을 받을 방법이 없어 무한 로딩으로 보인다.
+   */
+  public static final String API_APP_STATUS = "/api/app/status";
   public static final String DOCS_SWAGGER = "/docs/swagger";
   public static final String DOCS_SWAGGER_UI_MATCHER = "/docs/swagger-ui/**";
   public static final String DOCS_API_DOCS_MATCHER = "/v3/api-docs/**";
