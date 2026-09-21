@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
@@ -17,8 +18,13 @@ public class AdminRoutineController {
   private final AdminRoutineService adminRoutineService;
 
   @GetMapping("/admin/routines")
-  public String list(Model model) {
-    model.addAttribute("routines", adminRoutineService.getAll());
+  public String list(
+    @RequestParam(name = "keyword", required = false) String keyword,
+    @RequestParam(name = "page", defaultValue = "0") int page,
+    Model model
+  ) {
+    model.addAttribute("routines", adminRoutineService.search(keyword, page));
+    model.addAttribute("keyword", keyword);
     return "admin/routines";
   }
 

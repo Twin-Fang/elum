@@ -4,6 +4,8 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +13,19 @@ import org.springframework.data.repository.query.Param;
 public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   List<Routine> findAllByProfileId(String profileId);
+
+  /**
+   * 관리자 목록 검색 (이슈 #248). 제목과 이룸이 호칭으로 찾는다.
+   *
+   * <p><b>원문({@code rawInputText})은 찾지 않는다.</b> 보호자가 적은 말 그대로라
+   * 관리자가 그것으로 검색할 수 있으면 원문을 들여다보는 통로가 된다 (서비스 원칙 5번).
+   */
+  @Query("""
+    select r from Routine r
+    where lower(r.title) like lower(concat('%', :keyword, '%'))
+       or lower(r.profile.nickname) like lower(concat('%', :keyword, '%'))
+    """)
+  Page<Routine> searchForAdmin(@Param("keyword") String keyword, Pageable pageable);
 
   // 회원 목록 화면용 회원별 루틴 개수 집계 — N+1을 피하기 위해 in + group by 한 번에.
   @org.springframework.data.jpa.repository.Query("""
