@@ -178,10 +178,14 @@ class _QuestionBlockState extends State<_QuestionBlock> {
 
     return Column(
       children: [
-        // Figma는 제목 폭을 307로 고정한다(x=43, 393-43*2=307).
-        // 화면 폭을 다 쓰면 "물건이 있나요?"가 "있나 / 요?"로 어색하게 꺾인다.
+        // Figma 제목 상자는 307(x=43)이지만 **그 값을 그대로 쓰면 꺾인다.**
+        // 시안에서 가장 긴 줄이 305인데 앱 글자 렌더가 그보다 조금 넓어,
+        // 307로 묶으면 `…챙겨야 하 / 는`으로 넷째 줄이 생긴다 (#297).
+        //
+        // 줄바꿈 위치는 문구의 `\n`이 이미 정한다 — 폭은 **그 줄이 안 꺾일
+        // 만큼**만 있으면 된다. 좌우 24를 남겨 345로 둔다.
         SizedBox(
-          width: 307.w,
+          width: 345.w,
           child: Text(
             widget.item.question,
             textAlign: TextAlign.center,
@@ -226,7 +230,8 @@ class _QuestionBlockState extends State<_QuestionBlock> {
                   ),
                 if (!_isWriting)
                   _OptionChip(
-                    label: '+ 직접 적기',
+                    // 시안 `262:4854` 문구 그대로 — `직접 적기`로 줄여 두었었다 (#297)
+                    label: '+ 직접 입력하기',
                     isSelected: false,
                     onTap: _open,
                   ),

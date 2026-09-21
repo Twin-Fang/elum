@@ -1389,6 +1389,39 @@ void main() {
     // 위젯이 사라진 뒤에도 타이머가 남아 시험이 실패한다.
     await tester.pumpAndSettle(const Duration(seconds: 1));
   });
+
+  // 추가질문 — 고른 뒤 (#297). 시안 `262:4854`.
+  //
+  // 고른 칩은 **검게 차고 글자가 희어진다**. 그리고 `카드 만들기`가 나타난다 —
+  // 고르기 전에는 없던 버튼이라 나타나는 것 자체가 다음 할 일을 알린다.
+  testWidgets('추가질문 — 고른 뒤 (Figma 262:4854)', (tester) async {
+    await tester.pumpWidget(wrapQuestion());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(QuestionScreen)),
+    );
+    await container.read(routineFlowProvider.notifier).askQuestion();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    // 시안이 고른 둘. 칩이 색을 바꾸는 동안에는 다음 탭이 먹지 않으므로
+    // 사이를 충분히 띄운다. **`pumpAndSettle`은 못 쓴다** — 오로라가 끝나지 않는다.
+    await tester.tap(find.textContaining('우비'));
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+    await tester.tap(find.textContaining('여벌 양말'));
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+
+    await expectLater(
+      find.byType(QuestionScreen),
+      matchesGoldenFile('figma/question_262-4854.png'),
+    );
+  });
 }
 
 /// 연결 암호 대역. 시안(`732:5334`)이 그린 `5NJ280`과 `09:59`를 그대로 준다 —

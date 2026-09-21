@@ -198,12 +198,12 @@ void main() {
   ///
   /// 선택지에 없는 준비물을 보호자가 직접 적는다. 서버 선택지는 AI가 만든 것이라
   /// 실제 상황(병원 진료카드 등)을 다 담지 못한다.
-  group('직접 적기', () {
-    testWidgets('질문마다 + 직접 적기 칩이 있다', (tester) async {
+  group('직접 입력하기', () {
+    testWidgets('질문마다 + 직접 입력하기 칩이 있다', (tester) async {
       await pumpWith(tester, twoQuestions);
 
       // 질문이 2개면 칩도 2개 — 어느 질문에 추가하는지 구분돼야 한다
-      expect(find.text('+ 직접 적기'), findsNWidgets(2));
+      expect(find.text('+ 직접 입력하기'), findsNWidgets(2));
     });
 
     testWidgets('누르면 입력 필드가 열린다', (tester) async {
@@ -211,7 +211,7 @@ void main() {
 
       expect(find.byType(TextField), findsNothing);
 
-      await tester.tap(find.text('+ 직접 적기').first);
+      await tester.tap(find.text('+ 직접 입력하기').first);
       await settle(tester);
 
       expect(find.byType(TextField), findsOneWidget);
@@ -220,7 +220,7 @@ void main() {
     testWidgets('입력하고 확정하면 칩으로 추가되고 선택된다', (tester) async {
       final container = await pumpWith(tester, twoQuestions);
 
-      await tester.tap(find.text('+ 직접 적기').first);
+      await tester.tap(find.text('+ 직접 입력하기').first);
       await settle(tester);
       await tester.enterText(find.byType(TextField), '진료카드');
       await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -236,7 +236,7 @@ void main() {
     testWidgets('빈 값은 추가되지 않는다', (tester) async {
       final container = await pumpWith(tester, twoQuestions);
 
-      await tester.tap(find.text('+ 직접 적기').first);
+      await tester.tap(find.text('+ 직접 입력하기').first);
       await settle(tester);
       await tester.enterText(find.byType(TextField), '   ');
       await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -248,7 +248,7 @@ void main() {
     testWidgets('이미 있는 선택지를 적으면 칩을 새로 만들지 않고 그것을 선택한다', (tester) async {
       final container = await pumpWith(tester, twoQuestions);
 
-      await tester.tap(find.text('+ 직접 적기').first);
+      await tester.tap(find.text('+ 직접 입력하기').first);
       await settle(tester);
       await tester.enterText(find.byType(TextField), '우산');
       await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -262,7 +262,7 @@ void main() {
     testWidgets('추가한 칩은 X로 지운다 — 답에서도 빠진다', (tester) async {
       final container = await pumpWith(tester, twoQuestions);
 
-      await tester.tap(find.text('+ 직접 적기').first);
+      await tester.tap(find.text('+ 직접 입력하기').first);
       await settle(tester);
       await tester.enterText(find.byType(TextField), '진료카드');
       await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -284,7 +284,7 @@ void main() {
     testWidgets('추가한 칩은 다시 눌러 선택을 풀 수 있다', (tester) async {
       final container = await pumpWith(tester, twoQuestions);
 
-      await tester.tap(find.text('+ 직접 적기').first);
+      await tester.tap(find.text('+ 직접 입력하기').first);
       await settle(tester);
       await tester.enterText(find.byType(TextField), '진료카드');
       await tester.testTextInput.receiveAction(TextInputAction.done);
