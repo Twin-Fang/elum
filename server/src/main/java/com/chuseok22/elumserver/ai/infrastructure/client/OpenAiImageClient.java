@@ -92,6 +92,11 @@ public class OpenAiImageClient implements ImageGenerationClient {
           "prompt", prompt,
           "quality", quality,
           "size", IMAGE_SIZE,
+          // **배경을 반드시 불투명으로 받는다.** 기본값(auto)에서는 모델이 투명 배경을
+          // 골라 버리는데, 그때 배경만 비는 것이 아니라 **캐릭터 몸통 안쪽까지 투명하게
+          // 나온다.** 윤곽선만 남아 색이 빠진 그림이 되어, 카드에 얹으면 선화처럼 보인다
+          // (이슈 #269에서 실측으로 확인).
+          "background", "opaque",
           "n", 1
         ))
         .retrieve()
