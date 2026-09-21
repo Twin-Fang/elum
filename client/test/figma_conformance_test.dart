@@ -5,6 +5,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
+import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
@@ -105,6 +106,33 @@ void main() {
         ],
       );
 
+
+  /// 이룸이 홈 대조용. 보호자 홈과 쓰는 provider 가 다르다.
+  Widget wrapChild({required List<Routine> routines, int stars = 0}) =>
+      ProviderScope(
+        overrides: [
+          testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+          routineRepositoryProvider
+              .overrideWithValue(_StubRepo(routines: routines, past: const [])),
+          todayRoutinesProvider.overrideWith((ref) async => routines),
+          memberProvider.overrideWith(
+            (ref) async => Member(nickname: '하늘이', totalStars: stars),
+          ),
+        ],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp(
+            theme: AppTheme.light,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            home: const ChildHomeScreen(),
+          ),
+        ),
+      );
+
   Widget wrap({
     required List<Routine> routines,
     required List<Routine> past,
@@ -183,6 +211,25 @@ void main() {
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('figma/sheet_956-4084.png'),
+    );
+  });
+
+  // 이룸이가 직접 쓰는 화면이라 올려 둔다. 값으로 대조했을 때는 열두 값이
+  // 모두 맞았지만(#297), 픽셀로 맞대본 적은 없었다.
+  testWidgets('이룸이 홈 (Figma 356:5079)', (tester) async {
+    await tester.pumpWidget(wrapChild(
+      // 시안이 그린 내용 그대로. 다르면 차이 그림이 통째로 붉어진다.
+      routines: [
+        routine('c1', '비 오는 날 학교에 가요', percent: 50),
+        routine('c2', '학원 준비물을 챙겨요', percent: 100),
+      ],
+      stars: 15,
+    ));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(ChildHomeScreen),
+      matchesGoldenFile('figma/child_home_356-5079.png'),
     );
   });
 }
