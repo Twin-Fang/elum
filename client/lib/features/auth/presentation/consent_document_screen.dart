@@ -54,7 +54,7 @@ class ConsentDocumentScreen extends StatelessWidget {
             ),
             SizedBox(height: space.xs.h),
             Text(
-              '버전 $consentVersion',
+              '버전 ${item.version}',
               style: context.typo.caption.copyWith(color: colors.textSecondary),
             ),
             SizedBox(height: space.md.h),

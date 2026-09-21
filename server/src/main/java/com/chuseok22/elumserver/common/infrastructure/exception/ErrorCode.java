@@ -97,6 +97,9 @@ public enum ErrorCode {
   // 텍스트 생성 제공자.
   TEXT_PROVIDER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "텍스트 생성을 사용할 수 없습니다."),
 
+  // 약관 문서 (이슈 #278).
+  CONSENT_DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "약관 문서를 찾을 수 없습니다."),
+
   ;
 
 

@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/data/consent_repository.dart';
+import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/auth/domain/consent_documents.dart';
 import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:elum/features/auth/presentation/consent_screen.dart';
@@ -52,7 +54,12 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [consentRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        consentRepositoryProvider.overrideWithValue(repo),
+        // 약관은 서버에서 온다 (이슈 #278). 여기서는 네트워크를 타지 않도록
+        // 앱 번들 기본값을 그대로 꽂는다.
+        consentBundleProvider.overrideWith((ref) async => ConsentBundle.bundled),
+      ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
         builder: (context, child) => MaterialApp.router(
@@ -186,6 +193,18 @@ void main() {
     expect(find.text('다른 계정으로 로그인'), findsNothing);
   });
 
+  // 서버본을 못 받아 기본값을 보여줬다면 **그 버전**으로 기록돼야 한다 (이슈 #278).
+  // 서버 최신 버전을 적으면 사용자가 보지 않은 문서에 동의한 것으로 남는다.
+  testWidgets('화면에 보여준 약관의 버전을 보낸다 (이슈 #278)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tapItem(tester, allAgree());
+    await tapItem(tester, cta());
+
+    expect(repo.version, ConsentBundle.bundled.version);
+  });
+
   testWidgets('필수가 덜 찼으면 진행되지 않는다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
@@ -204,11 +223,16 @@ class _FakeConsent extends ConsentRepository {
 
   int calls = 0;
   bool? marketing;
+  String? version;
 
   @override
-  Future<bool> agree({required bool marketingAgreed}) async {
+  Future<bool> agree({
+    required bool marketingAgreed,
+    required String version,
+  }) async {
     calls++;
     marketing = marketingAgreed;
+    this.version = version;
     return true;
   }
 }

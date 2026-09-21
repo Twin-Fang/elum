@@ -1,14 +1,28 @@
-/// 약관 전문. **웹으로 보내지 않고 앱 안에서 보여준다.**
+/// 약관 전문의 **앱 번들 기본값**. 서버를 못 봤을 때 쓰는 최후의 폴백이다 (이슈 #278).
 ///
-/// 외부 링크로 넘기면 로그인 흐름이 끊기고, 네트워크가 없으면 읽을 수도 없다.
-/// 동의는 "읽을 수 있는 상태에서 받아야" 성립하므로 본문을 앱에 담는다.
+/// **웹으로 보내지 않고 앱 안에서 보여준다.** 외부 링크로 넘기면 로그인 흐름이
+/// 끊기고, 네트워크가 없으면 읽을 수도 없다. 동의는 "읽을 수 있는 상태에서 받아야"
+/// 성립하므로 본문을 앱에 담는다.
 ///
-/// 게시된 개인정보처리방침(twin-fang.github.io/elum/privacy.html)과 **내용이
-/// 같아야 한다.** 한쪽만 고치면 심사에서 불일치로 지적받는다.
+/// ## 지금 이 값이 원본은 아니다
+///
+/// 원본은 서버에 있고 관리자 화면에서 고친다. 앱은
+/// `ConsentDocumentRepository`가 서버본 → 캐시 → 이 기본값 순으로 골라 준다.
+/// **여기를 고쳐도 앱을 새로 올리기 전까지는 아무에게도 보이지 않는다** —
+/// 문구를 바꿀 일이 있으면 관리자 화면에서 한다.
+///
+/// 이 파일을 남겨 둔 이유는 하나다. **첫 실행에 네트워크가 없으면 읽을 것이
+/// 아무것도 없어 가입이 막힌다.** 그 상황에서만 쓰인다.
+///
+/// 서버의 `resources/consent/*.txt`는 이 파일에서 기계로 떠낸 것이고,
+/// 게시된 개인정보처리방침(twin-fang.github.io/elum/privacy.html)과도
+/// **내용이 같아야 한다.** 한쪽만 고치면 심사에서 불일치로 지적받는다.
 library;
 
-/// 동의받은 약관의 버전. 내용을 고치면 이 값을 올린다.
-/// 서버가 이 값으로 재동의 대상을 가린다.
+/// 번들 기본값의 버전.
+///
+/// **서버본을 보여줬다면 이 값을 보내지 않는다.** 화면에 실제로 보여준 문서의
+/// 버전을 보내야 한다 — 사용자가 보지 않은 문서에 동의한 것으로 기록하면 안 된다.
 const consentVersion = '2026-09-18';
 
 /// 동의 항목 하나.
@@ -19,7 +33,34 @@ class ConsentItem {
     required this.required,
     required this.summary,
     required this.body,
+    this.version = consentVersion,
   });
+
+  /// 서버가 준 한 항목을 읽는다. 형식이 어긋나면 null이라 캐시·기본값으로 떨어진다.
+  static ConsentItem? tryParse(Object? raw) {
+    if (raw is! Map) return null;
+    final key = raw['key'];
+    final body = raw['body'];
+    if (key is! String || key.isEmpty) return null;
+    if (body is! String || body.trim().isEmpty) return null;
+    return ConsentItem(
+      key: key,
+      label: raw['label'] is String ? raw['label'] as String : key,
+      required: raw['required'] == true,
+      summary: raw['summary'] is String ? raw['summary'] as String : '',
+      body: body,
+      version: raw['version'] is String ? raw['version'] as String : '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'key': key,
+    'label': label,
+    'required': required,
+    'summary': summary,
+    'body': body,
+    'version': version,
+  };
 
   /// 서버 요청 필드명과 같다.
   final String key;
@@ -34,6 +75,9 @@ class ConsentItem {
 
   /// 전문.
   final String body;
+
+  /// 이 문서의 버전. 동의를 기록할 때 **실제로 보여준 것**을 보내야 한다.
+  final String version;
 }
 
 const consentItems = <ConsentItem>[

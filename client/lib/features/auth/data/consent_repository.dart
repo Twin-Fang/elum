@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
-import '../domain/consent_documents.dart';
 
 /// 약관 동의를 서버에 기록한다.
 ///
@@ -13,8 +12,17 @@ class ConsentRepository {
 
   final Dio _dio;
 
+  /// [version] 은 **화면에 실제로 보여준 약관의 버전**이다 (이슈 #278).
+  ///
+  /// 서버 최신본을 못 받아 캐시나 앱 기본값을 보여줬다면 그쪽 버전으로 기록해야
+  /// 한다. 서버 최신 버전을 적어 버리면 **사용자가 보지 않은 문서에 동의한 것으로**
+  /// 남는다.
+  ///
   /// @return 저장 성공 여부. 실패해도 예외를 던지지 않는다.
-  Future<bool> agree({required bool marketingAgreed}) async {
+  Future<bool> agree({
+    required bool marketingAgreed,
+    required String version,
+  }) async {
     try {
       await _dio.post<Map<String, dynamic>>(
         '/api/member/consents',
@@ -29,7 +37,7 @@ class ConsentRepository {
           // 문구가 바뀌면 버전을 올려 기록이 어긋나지 않게 한다.
           'guardianConfirmed': true,
           'marketingAgreed': marketingAgreed,
-          'consentVersion': consentVersion,
+          'consentVersion': version,
         },
       );
       return true;

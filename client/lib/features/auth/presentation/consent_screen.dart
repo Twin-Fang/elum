@@ -9,8 +9,9 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../data/auth_repository.dart';
+import '../data/consent_document_repository.dart';
 import '../data/consent_repository.dart';
-import '../domain/consent_documents.dart';
+import '../domain/consent_bundle.dart';
 import 'consent_document_screen.dart';
 import 'widgets/consent_all_agree_button.dart';
 import 'widgets/consent_row.dart';
@@ -22,6 +23,9 @@ import 'widgets/consent_row.dart';
 ///
 /// **항목을 하나로 뭉치지 않는다.** 개인정보보호법은 필수와 선택을 나누어 받도록
 /// 하며, 뭉쳐 받은 동의는 무효가 될 수 있다.
+///
+/// 문구는 서버에서 온다 (이슈 #278). 서버를 못 보면 캐시, 그것도 없으면 앱에 담긴
+/// 기본값으로 떨어지므로 **이 화면이 비는 경우는 없다.**
 class ConsentScreen extends ConsumerStatefulWidget {
   const ConsentScreen({super.key});
 
@@ -42,13 +46,12 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   bool _isSubmitting = false;
   String? _errorMessage;
 
-  bool get _allRequiredChecked => consentItems
-      .where((item) => item.required)
-      .every((item) => _checked.contains(item.key));
+  bool _allRequiredChecked(ConsentBundle bundle) =>
+      bundle.requiredItems.every((item) => _checked.contains(item.key));
 
   /// 모두 켜져 있는가. 버튼이 `전체 동의`이므로 **선택 항목까지** 본다.
-  bool get _allChecked =>
-      consentItems.every((item) => _checked.contains(item.key));
+  bool _allChecked(ConsentBundle bundle) =>
+      bundle.items.every((item) => _checked.contains(item.key));
 
   /// 일괄 동의는 **이름 그대로 전부** 켠다 (이슈 #235).
   ///
@@ -59,17 +62,17 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   ///
   /// #189가 걱정한 것은 실은 **켜진 것을 볼 수 없던 것**이다. 항목마다 체크가
   /// 보이고 스크롤하면 확인할 수 있으며, 선택 항목만 따로 끌 수도 있다.
-  void _toggleAll() {
+  void _toggleAll(ConsentBundle bundle) {
     setState(() {
-      if (_allChecked) {
+      if (_allChecked(bundle)) {
         _checked.clear();
       } else {
-        _checked.addAll(consentItems.map((item) => item.key));
+        _checked.addAll(bundle.items.map((item) => item.key));
       }
     });
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit(ConsentBundle bundle) async {
     setState(() {
       _isSubmitting = true;
       _errorMessage = null;
@@ -77,6 +80,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
 
     final saved = await ref.read(consentRepositoryProvider).agree(
           marketingAgreed: _checked.contains('marketingAgreed'),
+          // **화면에 보여준 것**의 버전이다. 캐시나 기본값을 보여줬다면 그 버전으로
+          // 남아야 한다 — 보지 않은 문서에 동의한 것으로 기록하면 안 된다.
+          version: bundle.version,
         );
 
     if (!mounted) return;
@@ -107,7 +113,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final space = context.space;
+    final bundle = ref.watch(consentBundleProvider);
 
     return PopScope(
       // 뒤로가기로 빠져나가면 동의 없이 화면이 열린다. 나가려면 로그아웃이어야 한다.
@@ -115,60 +121,95 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _leave();
       },
-      child: ElumScaffold(
-        bottomButton: ElumButton(
-          label: _isSubmitting ? '저장하고 있어요' : '다음',
-          onPressed: _allRequiredChecked && !_isSubmitting ? _submit : null,
+      // 읽어 오는 동안에도 **헤더는 그대로 선다.** 흰 화면을 띄우면 로그인이
+      // 실패한 것처럼 보인다. 이 대기는 첫 실행에만 있고 3초를 넘지 않는다.
+      //
+      // `orElse`로 묶은 이유 — 이 provider는 실패하지 않는다. 서버·캐시가 모두
+      // 없으면 앱 번들 기본값이 온다. 그래도 error를 대비해 두는 것은,
+      // 예상 못 한 예외로 **가입이 통째로 막히는 것을 막기 위해서**다.
+      child: bundle.maybeWhen(
+        data: _content,
+        orElse: () => bundle.hasError ? _content(ConsentBundle.bundled) : _waiting(),
+      ),
+    );
+  }
+
+  /// 약관을 읽어 오는 동안. 골격은 같고 누를 것만 비활성이다.
+  Widget _waiting() {
+    return ElumScaffold(
+      bottomButton: const ElumButton(label: '다음', onPressed: null),
+      child: const SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ElumHeader(
+              title: '약관에 동의해주세요',
+              description: '약관을 불러오고 있어요',
+            ),
+          ],
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ElumHeader(
-                title: '약관에 동의해주세요',
-                // 부제가 상태를 말한다. 왜 `다음`이 꺼져 있는지 여기서만 알 수 있다 —
-                // 고정 문구로 두면 비활성 버튼 앞에서 막힌 사람이 이유를 모른다.
-                description: _allRequiredChecked
-                    ? '항목을 눌러 상세 내용을 볼 수 있어요'
-                    : '서비스 사용을 위해 약관 동의가 필요해요',
-              ),
-              SizedBox(height: _headerToAllAgree.h),
+      ),
+    );
+  }
 
-              ConsentAllAgreeButton(
-                checked: _allChecked,
-                onTap: _toggleAll,
-              ),
-              SizedBox(height: _allAgreeToItems.h),
+  Widget _content(ConsentBundle bundle) {
+    final space = context.space;
+    final allRequired = _allRequiredChecked(bundle);
 
-              for (final item in consentItems) ...[
-                ConsentRow(
-                  item: item,
-                  isChecked: _checked.contains(item.key),
-                  onToggle: () => setState(() {
-                    if (!_checked.remove(item.key)) _checked.add(item.key);
-                  }),
-                  onOpen: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => ConsentDocumentScreen(item: item),
-                    ),
+    return ElumScaffold(
+      bottomButton: ElumButton(
+        label: _isSubmitting ? '저장하고 있어요' : '다음',
+        onPressed:
+            allRequired && !_isSubmitting ? () => _submit(bundle) : null,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ElumHeader(
+              title: '약관에 동의해주세요',
+              // 부제가 상태를 말한다. 왜 `다음`이 꺼져 있는지 여기서만 알 수 있다 —
+              // 고정 문구로 두면 비활성 버튼 앞에서 막힌 사람이 이유를 모른다.
+              description: allRequired
+                  ? '항목을 눌러 상세 내용을 볼 수 있어요'
+                  : '서비스 사용을 위해 약관 동의가 필요해요',
+            ),
+            SizedBox(height: _headerToAllAgree.h),
+
+            ConsentAllAgreeButton(
+              checked: _allChecked(bundle),
+              onTap: () => _toggleAll(bundle),
+            ),
+            SizedBox(height: _allAgreeToItems.h),
+
+            for (final item in bundle.items) ...[
+              ConsentRow(
+                item: item,
+                isChecked: _checked.contains(item.key),
+                onToggle: () => setState(() {
+                  if (!_checked.remove(item.key)) _checked.add(item.key);
+                }),
+                onOpen: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => ConsentDocumentScreen(item: item),
                   ),
                 ),
-                SizedBox(height: ConsentRow.gap.h),
-              ],
-
-              // 디자인에 에러 자리가 없다. 항목 아래 빈 공간(항목 끝 590 → CTA 675)에
-              // 둔다 — CTA를 밀지 않고, 실패했을 때만 나타난다.
-              if (_errorMessage != null) ...[
-                SizedBox(height: space.sm.h),
-                Text(
-                  _errorMessage!,
-                  style: context.typo.body.copyWith(
-                    color: context.colors.textSecondary,
-                  ),
-                ),
-              ],
+              ),
+              SizedBox(height: ConsentRow.gap.h),
             ],
-          ),
+
+            // 디자인에 에러 자리가 없다. 항목 아래 빈 공간(항목 끝 590 → CTA 675)에
+            // 둔다 — CTA를 밀지 않고, 실패했을 때만 나타난다.
+            if (_errorMessage != null) ...[
+              SizedBox(height: space.sm.h),
+              Text(
+                _errorMessage!,
+                style: context.typo.body.copyWith(
+                  color: context.colors.textSecondary,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

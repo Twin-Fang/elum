@@ -26,6 +26,12 @@ public final class SecurityPaths {
    * 여기까지 막으면 앱이 점검 사실을 받을 방법이 없어 무한 로딩으로 보인다.
    */
   public static final String API_APP_STATUS = "/api/app/status";
+  /**
+   * 약관 전문을 주는 곳 (이슈 #278).
+   *
+   * <p>인증이 없다. <b>가입하기 전에 읽는 문서</b>라 로그인을 요구할 수 없다.
+   */
+  public static final String API_CONSENT_DOCUMENTS = "/api/consents/documents";
   public static final String DOCS_SWAGGER = "/docs/swagger";
   public static final String DOCS_SWAGGER_UI_MATCHER = "/docs/swagger-ui/**";
   public static final String DOCS_API_DOCS_MATCHER = "/v3/api-docs/**";

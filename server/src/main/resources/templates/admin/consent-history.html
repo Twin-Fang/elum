@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{admin/fragments/admin-layout :: page('약관 변경 이력', 'consents', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div class="flex flex-wrap items-center gap-2">
+    <a th:href="@{/admin/consents}" class="btn btn-ghost btn-sm">← 목록</a>
+    <h1 class="text-2xl font-bold">
+      <span th:text="${document.label}">항목</span> 변경 이력
+    </h1>
+    <a th:href="@{/admin/consents/{key}(key=${document.consentKey})}"
+       class="btn btn-primary btn-sm ml-auto">고치기</a>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title text-base">
+        지금 적용 중
+        <span class="badge badge-primary font-mono" th:text="${document.version}">버전</span>
+      </h2>
+      <p class="text-sm text-base-content/60" th:text="${document.summary}">요약</p>
+      <pre class="mt-2 max-h-64 overflow-auto rounded bg-base-200 p-3 text-sm leading-relaxed whitespace-pre-wrap font-sans"
+           th:text="${document.body}">본문</pre>
+    </div>
+  </div>
+
+  <div>
+    <h2 class="mb-2 text-lg font-semibold">지난 내용</h2>
+    <p class="mb-4 text-sm text-base-content/60">
+      고치기 <b>직전</b>의 내용이 새것부터 쌓입니다. 분쟁이 생겼을 때
+      "그 사람이 동의한 시점의 문구"를 여기서 찾습니다.
+    </p>
+
+    <!-- th:replace 가 th:if 보다 먼저 실행된다. 한 태그에 두면 조건이 무시되고
+         이력이 있어도 "아직 고친 적이 없어요"가 함께 그려진다. -->
+    <th:block th:if="${histories.isEmpty()}">
+      <div th:replace="~{admin/fragments/admin-ui :: emptyState('아직 고친 적이 없어요')}"></div>
+    </th:block>
+
+    <div class="space-y-3">
+      <details th:each="h : ${histories}" class="collapse collapse-arrow bg-base-200">
+        <summary class="collapse-title">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="badge badge-outline font-mono" th:text="${h.version}">버전</span>
+            <span class="text-sm font-semibold" th:text="${h.label}">이름</span>
+            <span th:if="${h.required}" class="badge badge-sm">필수</span>
+            <span th:unless="${h.required}" class="badge badge-ghost badge-sm">선택</span>
+            <span class="ml-auto text-xs text-base-content/60 whitespace-nowrap"
+                  th:text="${#temporals.format(h.createdAt, 'yyyy-MM-dd HH:mm')}">시각</span>
+          </div>
+          <div class="mt-1 text-xs text-base-content/70">
+            <span th:text="${h.changedBy}">누가</span> ·
+            <span th:text="${h.reason}">왜</span>
+          </div>
+        </summary>
+        <div class="collapse-content">
+          <p class="mb-2 text-xs text-base-content/60" th:text="${h.summary}">요약</p>
+          <pre class="max-h-96 overflow-auto rounded bg-base-100 p-3 text-sm leading-relaxed whitespace-pre-wrap font-sans"
+               th:text="${h.body}">본문</pre>
+        </div>
+      </details>
+    </div>
+  </div>
+</main>
+</body>
+</html>

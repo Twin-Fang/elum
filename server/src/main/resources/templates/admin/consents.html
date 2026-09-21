@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{admin/fragments/admin-layout :: page('약관 관리', 'consents', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div th:replace="~{admin/fragments/admin-ui :: pageHeader('약관 관리',
+       '앱 동의 화면에 나가는 문구입니다. 여기서 고치면 앱을 새로 올리지 않아도 반영됩니다.')}"></div>
+
+  <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+  <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+  <div class="card bg-base-200">
+    <div class="card-body space-y-1 text-sm">
+      <p>
+        회원 동의 기록에 남는 <b>묶음 버전</b>은
+        <code class="font-mono" th:text="${bundleVersion}">-</code> 입니다.
+        필수 항목 중 가장 최근 버전이며, 선택 항목은 세지 않습니다.
+      </p>
+      <p class="text-base-content/60">
+        앱은 받은 내용을 저장해 두고 평소엔 그것을 읽습니다.
+        서버를 못 봐도 앱에 담긴 기본값으로 화면이 뜨므로 가입이 막히지 않습니다.
+      </p>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-sm">
+      <thead>
+      <tr>
+        <th>항목</th>
+        <th>구분</th>
+        <th>버전</th>
+        <th>이 버전 적용일</th>
+        <th>마지막 수정</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- th:replace 가 th:if 보다 먼저 실행된다. 한 태그에 두면 조건이 무시되고
+           데이터가 있어도 빈 줄이 함께 그려진다. 조건을 바깥으로 뺀다. -->
+      <th:block th:if="${documents.isEmpty()}">
+        <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(6, '약관 문서가 없어요. 서버를 다시 시작하면 기본값으로 채워집니다')}"></tr>
+      </th:block>
+      <tr th:each="doc : ${documents}">
+        <td>
+          <div class="font-semibold whitespace-nowrap" th:text="${doc.label}">항목</div>
+          <div class="text-xs text-base-content/60" th:text="${doc.summary}">요약</div>
+        </td>
+        <td>
+          <span th:if="${doc.required}" class="badge badge-primary badge-sm whitespace-nowrap">필수</span>
+          <span th:unless="${doc.required}" class="badge badge-ghost badge-sm whitespace-nowrap">선택</span>
+        </td>
+        <td class="font-mono whitespace-nowrap" th:text="${doc.version}">버전</td>
+        <td class="whitespace-nowrap text-xs"
+            th:text="${#temporals.format(doc.publishedAt, 'yyyy-MM-dd HH:mm')}">적용일</td>
+        <td class="whitespace-nowrap text-xs"
+            th:text="${doc.updatedAt != null ? #temporals.format(doc.updatedAt, 'yyyy-MM-dd HH:mm') : '-'}">수정</td>
+        <td class="whitespace-nowrap">
+          <a th:href="@{/admin/consents/{key}(key=${doc.consentKey})}" class="btn btn-primary btn-xs">고치기</a>
+          <a th:href="@{/admin/consents/{key}/history(key=${doc.consentKey})}" class="btn btn-ghost btn-xs">이력</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card bg-base-200">
+    <div class="card-body text-sm space-y-2">
+      <h2 class="card-title text-base">고치기 전에 알아둘 것</h2>
+      <ul class="list-disc space-y-1 pl-5 text-base-content/80">
+        <li>
+          <b>버전을 올리면 기존 회원이 다시 동의해야 합니다.</b>
+          오타를 고칠 때는 올리지 마세요.
+        </li>
+        <li>
+          게시된 개인정보처리방침(<code class="font-mono">twin-fang.github.io/elum/privacy.html</code>)과
+          <b>내용이 같아야 합니다.</b> 한쪽만 고치면 심사에서 불일치로 지적받습니다.
+        </li>
+        <li>수정 사유는 반드시 남습니다. 약관은 법적 문서라 변경 근거가 곧 증빙입니다.</li>
+      </ul>
+    </div>
+  </div>
+</main>
+</body>
+</html>

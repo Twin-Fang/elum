@@ -84,6 +84,14 @@ abstract interface class LocalStorage {
   String? get cachedTodayRoutinesJson;
   Future<void> setCachedTodayRoutinesJson(String json);
 
+  /// 마지막으로 서버에서 받은 약관 전문 (이슈 #278).
+  ///
+  /// 약관은 서버가 원본을 들고 있지만 **서버를 못 봐도 읽을 수 있어야 한다** —
+  /// 읽을 수 없는 상태에서 받은 동의는 고지로 성립하지 않는다. 그래서 받은 것을
+  /// 여기 담아 두고, 이것도 없으면 앱에 박힌 기본값으로 떨어진다.
+  String? get cachedConsentJson;
+  Future<void> setCachedConsentJson(String json);
+
   /// 저장된 온보딩 결과를 전부 지운다. **개발·테스트 전용.**
   ///
   /// 일부만 지우면 어중간한 상태가 남아 더 헷갈리므로 5개 값을 모두 비운다.
@@ -117,6 +125,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kProgressPrefix = 'progress.';
   static const _kPendingSync = 'progress.pending';
   static const _kCachedToday = 'cache.todayRoutines';
+  static const _kCachedConsent = 'cache.consentDocuments';
 
   static Future<LocalStorage> create() async {
     return SharedPrefsStorage(await SharedPreferences.getInstance());
@@ -266,6 +275,16 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  String? get cachedConsentJson => _prefs.getString(_kCachedConsent);
+
+  @override
+  Future<void> setCachedConsentJson(String json) {
+    // 약관 전문은 길다. 크기만 남긴다.
+    AppLogger.storageWrite(_kCachedConsent, '${json.length}B');
+    return _prefs.setString(_kCachedConsent, json);
+  }
+
+  @override
   bool get isElumiDevice => _prefs.getBool(_kElumiDevice) ?? false;
 
   @override
@@ -331,6 +350,7 @@ class InMemoryStorage implements LocalStorage {
   final Map<String, String> _progress = {};
   List<String> _pendingSync = const [];
   String? _cachedToday;
+  String? _cachedConsent;
 
   @override
   String? get nickname => _nickname;
@@ -420,6 +440,12 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setCachedTodayRoutinesJson(String json) async =>
       _cachedToday = json;
+
+  @override
+  String? get cachedConsentJson => _cachedConsent;
+
+  @override
+  Future<void> setCachedConsentJson(String json) async => _cachedConsent = json;
 
   @override
   Future<void> clearChildProfile() async {
