@@ -135,6 +135,12 @@ abstract final class AppAssets {
   /// 로딩 화면의 단계별 완료 표시에 쓴다.
   static const iconCheck = '$_images/icon_check.svg';
 
+  /// 동그란 체크 안의 **체크 표시만** (Figma `채크_라운드` 726:4866).
+  ///
+  /// `Icons.check` 글리프를 쓰면 안 된다 — 시안의 체크는 가로로 긴 벡터라
+  /// 정사각 글리프와 모양이 다르다. 20 기준으로 10.91×8.13 이다.
+  static const iconCheckMark = '$_images/icon_check_mark.svg';
+
   /// 일과 만들기 화면 상단의 큰 반짝임 (30×36).
   /// Figma `보호자_새로운 일과 만들기`(238:1643)의 `sparkles`(238:1784).
   /// [iconSparkles]와 크기·비율이 달라 따로 받았다.

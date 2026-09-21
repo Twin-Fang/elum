@@ -53,7 +53,9 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
     // 문구에 아이 이름이 들어간다 (Figma 309:4055 · 343:4434).
     // 서버 닉네임이 우선이고, 없으면 온보딩에서 받은 이름을 쓴다.
     final localName = ref.watch(onboardingProvider).displayName;
-    final childName = ref.watch(memberProvider).maybeWhen(
+    final childName = ref
+        .watch(memberProvider)
+        .maybeWhen(
           data: (member) => member?.nickname ?? localName,
           orElse: () => localName,
         );
@@ -71,25 +73,30 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              const Spacer(),
+              // **`Spacer`가 아니다.** 남는 공간을 나누면 화면 높이에 따라 별이
+              // 오르내려 시안과 어긋난다. 실제로 별이 44, 글자가 26 아래에
+              // 있었다. 시안(309:4055) 좌표에서 뽑은 값을 그대로 둔다 (#297).
+              SizedBox(height: _RewardLayout.topToStar),
               _RewardHero(character: _character),
-              SizedBox(height: space.xl),
+              SizedBox(height: _RewardLayout.starToTitle),
               _FadeSlideIn(
                 delay: AppMotion.normal,
                 child: Text(
                   _character.title,
-                  style: context.typo.cardHeadline
-                      .copyWith(color: colors.surface),
+                  style: context.typo.cardHeadline.copyWith(
+                    color: colors.surface,
+                  ),
                 ),
               ),
-              SizedBox(height: space.md),
+              SizedBox(height: _RewardLayout.titleToBody),
               _FadeSlideIn(
                 delay: AppMotion.slow,
                 child: Text(
                   _character.messageFor(childName),
                   textAlign: TextAlign.center,
-                  style: context.typo.cardDescription
-                      .copyWith(color: colors.surface),
+                  style: context.typo.cardDescription.copyWith(
+                    color: colors.surface,
+                  ),
                 ),
               ),
               // 보호자가 정한 보상 — 이제 받을 차례다 (이슈 #239).
@@ -112,7 +119,7 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
                   space.buttonMarginH,
                   0,
                   space.buttonMarginH,
-                  space.lg,
+                  _RewardLayout.buttonBottom,
                 ),
                 child: _FadeSlideIn(
                   delay: AppMotion.slow,
@@ -137,6 +144,25 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
 /// Figma에서 큰 별(Group 46)은 (62,125) 269×269인데 코드의 별은 209라,
 /// 캐릭터·그림자의 Figma 절대좌표를 별 박스 기준 상대좌표로 옮긴 뒤
 /// 같은 비율로 줄여 별 하단 중앙에 정확히 겹치게 한다.
+/// 시안(309:4055)에서 뽑은 세로 값.
+///
+/// 이 화면은 위아래를 `Spacer`로 나눠 두었는데, 그러면 남는 공간이 화면마다
+/// 달라 **별과 글자가 함께 오르내린다.** 시안은 절대 좌표로 그려져 있으므로
+/// 위를 고정하고 아래만 남는 자리를 쓰게 한다.
+class _RewardLayout {
+  /// 안전영역 아래부터 별 에셋 윗변까지 — 시안 140.
+  static double get topToStar => 81.4.h;
+
+  /// 별 묶음 → `축하해요!` — 시안 494.
+  static double get starToTitle => 50.h;
+
+  /// 제목 → 문구 — 시안 542.
+  static double get titleToBody => 18.h;
+
+  /// 버튼 아래 — 시안 버튼이 675~741 이고 안전영역 안에서 90 이 남는다.
+  static double get buttonBottom => 90.h;
+}
+
 class _RewardHero extends StatelessWidget {
   const _RewardHero({required this.character});
 
@@ -178,9 +204,8 @@ class _RewardHero extends StatelessWidget {
     // 여기에 별을 위로 올린 만큼(_starLift)을 더해 위 공간을 확보한다 —
     // 별은 Stack 최상단(top:0)에 두고, 그림자·캐릭터를 _starLift만큼 내려
     // 화면상 제자리에 두면 결과적으로 별만 위로 올라간다 (이슈 #107).
-    final height =
-        (sy(_shadowFrame.y) + _shadowFrame.h * _scale + _starLift)
-            .clamp(RewardStar.mainSize + _starLift, double.infinity);
+    final height = (sy(_shadowFrame.y) + _shadowFrame.h * _scale + _starLift)
+        .clamp(RewardStar.mainSize + _starLift, double.infinity);
 
     // 캐릭터가 별 위에 앉은 구도라 세로도 .w로 통일한다 —
     // .h를 섞으면 화면비가 다른 기기에서 캐릭터가 별에서 떨어진다
@@ -244,14 +269,19 @@ class _FadeSlideIn extends StatelessWidget {
       duration: AppMotion.slow,
       curve: Interval(
         // 전체 구간 중 delay만큼 지난 뒤부터 움직인다
-        (delay.inMilliseconds / (AppMotion.slow.inMilliseconds * 2))
-            .clamp(0.0, 0.9),
+        (delay.inMilliseconds / (AppMotion.slow.inMilliseconds * 2)).clamp(
+          0.0,
+          0.9,
+        ),
         1,
         curve: AppMotion.entry,
       ),
       builder: (context, t, child) => Opacity(
         opacity: t,
-        child: Transform.translate(offset: Offset(0, (1 - t) * 16), child: child),
+        child: Transform.translate(
+          offset: Offset(0, (1 - t) * 16),
+          child: child,
+        ),
       ),
       child: child,
     );

@@ -262,13 +262,16 @@ void main() {
       expect(find.text('오늘의 일과'), findsOneWidget);
     });
 
-    testWidgets('일과마다 순서 바꾸기 손잡이가 하나씩 있다', (tester) async {
+    // 시안(931:3896)에서 손잡이가 빠졌다. 홈에서는 줄을 밀어 편집·삭제하고,
+    // 순서는 줄을 눌러 여는 시트에서 바꾼다. 손잡이를 그리면 그만큼 링이
+    // 왼쪽으로 밀려 시안과 어긋난다 (#297).
+    testWidgets('줄에 순서 바꾸기 손잡이를 그리지 않는다', (tester) async {
       await tester.pumpWidget(
         wrap(routines: [routine('하나', 1), routine('둘', 1)]),
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(RoutineDragHandle), findsNWidgets(2));
+      expect(find.byType(RoutineDragHandle), findsNothing);
     });
 
     testWidgets('지난 일과에는 손잡이가 없다', (tester) async {
@@ -369,7 +372,8 @@ void main() {
   });
 
   group('지난 일과 (Figma 931:3896)', () {
-    testWidgets('언제 한 일과인지 날짜가 보인다', (tester) async {
+    // 시안(931:3896)에서 날짜 줄이 빠졌다 — 지난 일과도 오늘과 같은 68 짜리 줄이다.
+    testWidgets('줄에 날짜를 붙이지 않는다', (tester) async {
       await tester.pumpWidget(
         wrap(
           past: [
@@ -379,7 +383,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('2026년 9월 20일'), findsOneWidget);
+      expect(find.text('2026년 9월 20일'), findsNothing);
     });
 
     testWidgets('날짜가 안 오면 그 줄만 빠지고 화면은 뜬다', (tester) async {
@@ -390,7 +394,10 @@ void main() {
       expect(find.text('학교 가기'), findsOneWidget);
     });
 
-    testWidgets('다 끝낸 일과만 다시 만들 수 있다', (tester) async {
+    // 시안(931:3896)에서 줄에 붙던 날짜와 `일과 다시하기`가 빠졌다.
+    // 지난 일과도 오늘 일과와 같은 68 짜리 줄이고, 다시하기는 줄을 눌러
+    // 여는 시트 안으로 들어갔다 (#310).
+    testWidgets('줄에는 다시하기가 붙지 않는다', (tester) async {
       await tester.pumpWidget(
         wrap(
           past: [
@@ -401,13 +408,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('일과 다시하기'), findsOneWidget);
+      expect(find.text('일과 다시하기'), findsNothing);
     });
 
-    testWidgets('다시하기를 누르면 복제를 요청한다', (tester) async {
+    testWidgets('줄을 눌러 연 시트에서 다시하기를 누르면 복제를 요청한다', (tester) async {
       await tester.pumpWidget(wrap(past: [routine('끝낸 일과', 2, percent: 100)]));
       await tester.pumpAndSettle();
 
+      await tester.tap(find.text('끝낸 일과'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('일과 다시하기'));
       await tester.pumpAndSettle();
 

@@ -245,24 +245,30 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
           padding: EdgeInsets.only(
             bottom: index == routines.length - 1 ? 0 : _tileGap.h,
           ),
-          child: RoutineSwipeActions(
-            isOpen: _openId == routine.id,
-            onOpenChanged: (open) =>
-                setState(() => _openId = open ? routine.id : null),
-            onDelete: () => _delete(routine),
-            onEdit: () => _edit(routine),
-            child: RoutineSummaryTile(
-              routine: routine,
-              progress: routineProgress(routine, progress),
-              highlighted: _openId == routine.id || _draggingId == routine.id,
-              dragHandle: ReorderableDragStartListener(
-                index: index,
-                child: const RoutineDragHandle(),
+          child: ReorderableDelayedDragStartListener(
+            index: index,
+            child: RoutineSwipeActions(
+              isOpen: _openId == routine.id,
+              onOpenChanged: (open) =>
+                  setState(() => _openId = open ? routine.id : null),
+              onDelete: () => _delete(routine),
+              onEdit: () => _edit(routine),
+              child: RoutineSummaryTile(
+                routine: routine,
+                progress: routineProgress(routine, progress),
+                highlighted: _openId == routine.id || _draggingId == routine.id,
+                // **손잡이를 그리지 않는다.** 시안(931:3896)에서 빠졌다 — 홈에서는
+                // 줄을 밀어 편집·삭제하고, 순서는 줄을 눌러 여는 시트에서 바꾼다.
+                // 손잡이가 있으면 링이 그만큼 왼쪽으로 밀려 시안과 어긋난다.
+                //
+                // 길게 눌러 끄는 길은 남겨 둔다 — 목록이 `ReorderableListView` 라
+                // 아래 `ReorderableDelayedDragStartListener` 가 그 역할을 한다.
+                dragHandle: null,
+                // 밀려 있을 때 탭하면 닫기만 한다 — 열어놓고 실수로 누르는 자리다.
+                onTap: () => _openId == routine.id
+                    ? setState(() => _openId = null)
+                    : _openSheet(routine),
               ),
-              // 밀려 있을 때 탭하면 닫기만 한다 — 열어놓고 실수로 누르는 자리다.
-              onTap: () => _openId == routine.id
-                  ? setState(() => _openId = null)
-                  : _openSheet(routine),
             ),
           ),
         );
@@ -352,15 +358,13 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
           if (index > 0) SizedBox(height: _tileGap.h),
           Builder(
             builder: (context) {
-              // 시안은 다 끝낸 일과에만 날짜와 다시하기를 붙인다(931:4072 vs 931:4160).
-              // 하다 만 것은 복제할 값어치가 없고, 링이 몇 %인지가 더 중요한 정보다.
-              final done = routine.progressPercent >= 100;
+              // **날짜와 다시하기를 붙이지 않는다.** 시안(931:3896)에서 둘 다
+              // 빠졌다 — 지난 일과도 오늘 일과와 같은 68 짜리 줄이다.
+              // 다시하기는 줄을 눌러 여는 시트 안에 있다 (#310).
               return RoutineSummaryTile(
                 routine: routine,
                 // 지난 일과는 서버가 셈해 둔 값이 기준이다. 기기 기록은 오늘 것만 있다.
                 progress: routine.progressPercent / 100,
-                showDate: done,
-                onRerun: done ? () => _rerun(routine) : null,
                 // 시안(980:4777)에는 지난 일과를 눌러 여는 시트가 있는데 화면이
                 // 없었다. #299 로 목록 자체가 안 보이던 동안 아무도 열어 보지
                 // 못해 빠진 것이 드러나지 않았다 (#310).

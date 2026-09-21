@@ -481,6 +481,12 @@ class _CompletionMark extends StatelessWidget {
 
   final bool completed;
 
+  /// 시안(956:4084 `채크_라운드`) — 원 40 · 안의 체크 21.82×16.26.
+  /// 원본 컴포넌트가 20 기준 10.91×8.13 이라 그 비율 그대로다.
+  static const _size = 40.0;
+  static const _markW = 21.82;
+  static const _markH = 16.26;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -489,8 +495,9 @@ class _CompletionMark extends StatelessWidget {
     // 미완료도 투명이 아니라 배경색으로 칠하고 테두리를 따로 둔다 — 투명하게 두면
     // 카드 위에서 동그라미가 사라져 "누를 곳"으로 읽히지 않는다.
     return Container(
-      width: 40.w,
-      height: 40.w,
+      width: _size.w,
+      height: _size.w,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: completed ? colors.checkDone : colors.background,
@@ -498,10 +505,16 @@ class _CompletionMark extends StatelessWidget {
             ? null
             : Border.all(color: colors.checkIdleBorder, width: 2.w),
       ),
-      child: Icon(
-        Icons.check,
-        size: 22.w,
-        color: completed ? colors.surface : colors.checkIdleBorder,
+      // **글리프가 아니라 에셋이다.** `Icons.check` 는 정사각형이라 시안의
+      // 가로로 긴 체크와 모양이 다르다 (client/CLAUDE.md §2).
+      child: SvgPicture.asset(
+        AppAssets.iconCheckMark,
+        width: _markW.w,
+        height: _markH.w,
+        colorFilter: ColorFilter.mode(
+          completed ? colors.surface : colors.checkIdleBorder,
+          BlendMode.srcIn,
+        ),
       ),
     );
   }

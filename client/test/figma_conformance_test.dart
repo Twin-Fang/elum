@@ -9,6 +9,9 @@ import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_stars_screen.dart';
+import 'package:elum/core/theme/app_motion.dart';
+import 'package:elum/features/child/domain/reward_character.dart';
+import 'package:elum/features/child/presentation/reward_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
@@ -238,6 +241,29 @@ void main() {
     ),
   );
 
+  /// 보상 화면 대조용 (시안 309:4055 `아이_보상_루미`).
+  Widget wrapReward() => ProviderScope(
+    overrides: [
+      testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+      memberProvider.overrideWith(
+        (ref) async => Member(nickname: '하늘이', totalStars: 15),
+      ),
+    ],
+    child: ScreenUtilInit(
+      designSize: const Size(393, 852),
+      useInheritedMediaQuery: true,
+      builder: (context, _) => MaterialApp(
+        theme: AppTheme.light,
+        debugShowCheckedModeBanner: false,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+          child: child!,
+        ),
+        home: const RewardScreen(character: RewardCharacter.lumi),
+      ),
+    ),
+  );
+
   /// 별 모으기 화면 대조용. 시안(364:8219)은 별 15개를 그린다.
   ///
   /// 일과 목록이 필요 없는 화면이라 저장소를 끼우지 않는다 — 별 개수만 본다.
@@ -329,22 +355,16 @@ void main() {
         ],
         // 시안(931:3896)에 그려진 내용 그대로. 내용이 다르면 diff가 통째로
         // 붉어져 **정작 봐야 할 어긋남이 묻힌다.**
+        // 시안(931:3896)이 그린 그대로. 지난 일과도 68 짜리 줄이고
+        // 날짜·다시하기는 없다.
         past: [
           routine(
             'p1',
             '학교에 갈 준비를 해요',
             reward: '좋아하는 노래 들으며 학교 가기',
             percent: 100,
-            at: DateTime(2026, 9, 20),
           ),
-          // 시안의 두 번째 카드는 날짜 없이 `일과 다시하기`만 있다.
-          routine(
-            'p2',
-            '학교에 갈 준비를 해요',
-            reward: '좋아하는 노래 들으며 학교 가기',
-            percent: 100,
-          ),
-          routine('p3', '밥 먹기 전에 손을 씻어요', reward: '거실에서 저녁 먹기', percent: 50),
+          routine('p2', '밥 먹기 전에 손을 씻어요', reward: '거실에서 저녁 먹기', percent: 50),
         ],
       ),
     );
@@ -456,6 +476,21 @@ void main() {
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('figma/past_sheet_980-4777.png'),
+    );
+  });
+
+  // 보상 화면 (#297). 별이 둥둥 떠다녀 pumpAndSettle 이 끝나지 않으므로
+  // 등장 연출(700ms) 뒤 float 주기의 두 배 지점 — sin 이 0 으로 돌아오는 자리 —
+  // 에서 프레임을 고정한다. 그래야 캡처마다 별 높이가 달라지지 않는다.
+  testWidgets('보상 — 루미 (Figma 309:4055)', (tester) async {
+    await tester.pumpWidget(wrapReward());
+    await tester.pump();
+    await precacheAllImages(tester);
+    await tester.pump(AppMotion.float * 2);
+
+    await expectLater(
+      find.byType(RewardScreen),
+      matchesGoldenFile('figma/reward_lumi_309-4055.png'),
     );
   });
 
