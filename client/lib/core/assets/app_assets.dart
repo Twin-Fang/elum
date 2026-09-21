@@ -218,6 +218,12 @@ abstract final class AppAssets {
   @Deprecated('지금 시안에 없는 얼굴이다. 되살리려면 시안에 먼저 그려야 한다.')
   static const splashCenter = '$_images/splash_center.svg';
 
+  /// 이룸이 카드의 **체크 표시** (Figma `993:4331` — 48×35.76).
+  ///
+  /// `Icons.check_rounded`를 쓰고 있었는데 획이 훨씬 가늘다. 시안과 나란히 놓고
+  /// 진한 픽셀을 세면 607 대 212였다. 색은 상태에 따라 바뀌므로 덧칠한다 (#297).
+  static const childCheckMark = '$_images/child_check_mark.svg';
+
   /// 일과 시트 행의 **순서 바꾸기 손잡이** (Figma `963:4240` 순서변경 — 18×18).
   ///
   /// `Icons.drag_handle`을 쓰고 있었는데 그건 **줄이 둘**이다. 시안은 셋이고

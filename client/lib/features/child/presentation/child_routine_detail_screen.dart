@@ -38,6 +38,15 @@ class ChildRoutineDetailScreen extends ConsumerStatefulWidget {
   /// 아동 모드 접근성 하한. 좁은 기기에서 `.w`로 줄어들어도 이 아래로 가지 않는다.
   static const minTouchTarget = 64.0;
 
+  /// 상단바 아래에서 카드 윗변까지 (시안 `309:3548` — 카드 y=180).
+  static const _cardTopGap = 41.0;
+
+  /// 카드 자리 높이 (시안 345×431). 카드가 이보다 짧아도 이 자리는 유지한다.
+  static const _cardBoxHeight = 431.0;
+
+  /// 카드 자리 아래(611)에서 체크 버튼(675)까지.
+  static const _cardToCheck = 64.0;
+
   /// 체크 버튼. 화면에 누를 것이 여럿이라 테스트가 타입만으로는 갈라내지 못한다.
   static const checkButtonKey = ValueKey('child.routine.check');
 
@@ -231,27 +240,30 @@ class _ChildRoutineDetailScreenState
                 child: RewardBanner.maybe(routine, compact: true),
               ),
             ],
-            Expanded(
-              child: PageView.builder(
-                controller: _controller,
-                itemCount: cards.length,
-                // 카드를 넘기면 체크 버튼 대상도 바뀐다
-                onPageChanged: (_) => setState(() {}),
-                // **카드를 늘리지 않는다.** `Expanded` 안에 그대로 두면 남는 높이를
-                // 다 먹어 시안보다 85 길어지고 아래가 통째로 빈다 (#297).
-                // `Center`로 감싸면 내용만큼만 잡고, 내용이 넘치면 카드 안에 이미
-                // 있는 스크롤(`ActionCardView`)이 받는다.
-                itemBuilder: (context, index) => Padding(
+            // 상단바 아래(139)에서 시안 카드 윗변(y=180)까지 41.
+            // 토큰(16)을 쓰면 카드가 25 올라간다.
+            SizedBox(height: ChildRoutineDetailScreen._cardTopGap.h),
+            // **카드 자리를 시안 높이로 못 박는다.**
+            //
+            // `Expanded`로 남는 높이를 카드에 다 주면 그 아래 체크 버튼이 화면
+            // 바닥까지 밀려 **시안보다 36 내려간다** (#297). 시안은 카드도 버튼도
+            // 자리가 고정이다 — 카드 y=180 (345×431), 버튼 y=675 (88×88).
+            //
+            // `Flexible`로 감싸 두면 화면이 짧을 때 이 상자가 먼저 줄어들어
+            // 버튼이 잘려 나가지 않는다.
+            Flexible(
+              child: SizedBox(
+                height: ChildRoutineDetailScreen._cardBoxHeight.h,
+                child: PageView.builder(
+                  controller: _controller,
+                  itemCount: cards.length,
+                  // 카드를 넘기면 체크 버튼 대상도 바뀐다
+                  onPageChanged: (_) => setState(() {}),
                   // **좌우 여백을 주지 않는다.** `viewportFraction`(0.88)이 이미
                   // 항목을 345.8 폭으로 잘라 시안 카드(345 @ x=24)와 같다.
-                  // 여기서 또 8을 주고 있어 카드가 16 좁았다 (#297).
-                  // 위 41 — 상단바 아래(139)에서 시안 카드(y=180)까지.
-                  // 토큰(16)을 쓰면 카드가 25 올라간다.
-                  padding: EdgeInsets.only(top: 41.h, bottom: space.md),
-                  // **위에서부터 쌓는다.** 가운데로 두면 카드가 41 내려간다 —
-                  // 시안은 카드가 y=180에 고정이다 (#297). 늘리지도 않는다:
-                  // `Expanded` 안에서 stretch 하면 아래가 통째로 빈다.
-                  child: Column(
+                  //
+                  // **위에서부터 쌓는다.** 가운데로 두면 카드가 내려간다.
+                  itemBuilder: (context, index) => Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -273,7 +285,8 @@ class _ChildRoutineDetailScreenState
                 ),
               ),
             ),
-            SizedBox(height: space.lg),
+            // 시안 카드 아래(611) → 체크 버튼(675) 사이 64
+            SizedBox(height: ChildRoutineDetailScreen._cardToCheck.h),
             Builder(
               builder: (context) {
                 final current = cards[_currentIndex.clamp(0, cards.length - 1)];
@@ -284,7 +297,6 @@ class _ChildRoutineDetailScreenState
                 );
               },
             ),
-            SizedBox(height: space.xl),
           ],
         ),
       ),
@@ -413,10 +425,19 @@ class _CheckButton extends StatelessWidget {
                   ? null
                   : Border.all(color: colors.checkPending, width: 8.w),
             ),
-            child: Icon(
-              Icons.check_rounded,
-              size: 44.w,
-              color: isChecked ? colors.surface : colors.checkPending,
+            // **`Icons.check_rounded`가 아니다.** 그건 획이 가늘어 시안과 나란히
+            // 놓으면 진한 픽셀이 607 대 212로 벌어진다. 시안(`993:4331`)은
+            // 48×35.76이고 88 상자 한가운데에 온다 (#297).
+            child: Center(
+              child: SvgPicture.asset(
+                AppAssets.childCheckMark,
+                width: 48.w,
+                height: 35.76.w,
+                colorFilter: ColorFilter.mode(
+                  isChecked ? colors.surface : colors.checkPending,
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
           ),
         ),
