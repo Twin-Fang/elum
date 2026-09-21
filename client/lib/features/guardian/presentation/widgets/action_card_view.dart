@@ -53,6 +53,9 @@ class ActionCardView extends StatefulWidget {
 
 class _ActionCardViewState extends State<ActionCardView> {
   /// Figma 실측 — 카드 안 스피커 아이콘 24×24
+  /// 제목 → 설명 (시안 `309:3548` 실측)
+  static const _titleToBody = 17.0;
+
   static const _volumeIconSize = 24.0;
 
   final _scrollController = ScrollController();
@@ -119,11 +122,15 @@ class _ActionCardViewState extends State<ActionCardView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 이미지는 4:3 고정이다(서버 Gemini 생성 비율과 통일, 2026-07-22 변경).
+                    // 그림칸은 **313:264**이다 — 시안(`309:3548`) 실측.
+                    // 4:3으로 두고 있었는데 그러면 칸이 32 낮아지고 카드 전체가
+                    // 시안보다 46 짧아진다 (#297). 그림은 `BoxFit.contain`이라
+                    // 칸 비율이 바뀌어도 잘리지 않는다.
+                    //
                     // Expanded로 두면 남는 공간을 다 먹어 제목 길이에 따라 카드마다 이미지
                     // 크기와 텍스트 시작 높이가 달라진다.
                     AspectRatio(
-                      aspectRatio: 4 / 3,
+                      aspectRatio: 313 / 264,
                       child: _Illustration(
                         routineId: widget.routineId,
                         stepId: widget.card.id,
@@ -150,7 +157,9 @@ class _ActionCardViewState extends State<ActionCardView> {
                         ),
                       ],
                     ),
-                    SizedBox(height: space.sm),
+                    // 제목 아래 17 — 시안 제목 끝(509) → 설명(535). 토큰(12)을
+                    // 쓰면 설명이 5 올라간다 (#297).
+                    SizedBox(height: _titleToBody),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

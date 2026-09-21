@@ -34,6 +34,7 @@ class ChildRoutineDetailScreen extends ConsumerStatefulWidget {
   /// 체크 버튼 크기. 아동 모드 최소 64×64를 넉넉히 넘긴다.
   static const checkButtonSize = 88.0;
 
+
   /// 아동 모드 접근성 하한. 좁은 기기에서 `.w`로 줄어들어도 이 아래로 가지 않는다.
   static const minTouchTarget = 64.0;
 
@@ -236,18 +237,38 @@ class _ChildRoutineDetailScreenState
                 itemCount: cards.length,
                 // 카드를 넘기면 체크 버튼 대상도 바뀐다
                 onPageChanged: (_) => setState(() {}),
+                // **카드를 늘리지 않는다.** `Expanded` 안에 그대로 두면 남는 높이를
+                // 다 먹어 시안보다 85 길어지고 아래가 통째로 빈다 (#297).
+                // `Center`로 감싸면 내용만큼만 잡고, 내용이 넘치면 카드 안에 이미
+                // 있는 스크롤(`ActionCardView`)이 받는다.
                 itemBuilder: (context, index) => Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: space.xs,
-                    vertical: space.md,
-                  ),
-                  child: ActionCardView(
-                    key: ValueKey(cards[index].id),
-                    card: cards[index],
-                    index: index,
-                    routineId: routine.id,
-                    onSpeak: () => _speak(cards[index]),
-                    isSpeaking: _speakingId == cards[index].id,
+                  // **좌우 여백을 주지 않는다.** `viewportFraction`(0.88)이 이미
+                  // 항목을 345.8 폭으로 잘라 시안 카드(345 @ x=24)와 같다.
+                  // 여기서 또 8을 주고 있어 카드가 16 좁았다 (#297).
+                  // 위 41 — 상단바 아래(139)에서 시안 카드(y=180)까지.
+                  // 토큰(16)을 쓰면 카드가 25 올라간다.
+                  padding: EdgeInsets.only(top: 41.h, bottom: space.md),
+                  // **위에서부터 쌓는다.** 가운데로 두면 카드가 41 내려간다 —
+                  // 시안은 카드가 y=180에 고정이다 (#297). 늘리지도 않는다:
+                  // `Expanded` 안에서 stretch 하면 아래가 통째로 빈다.
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // **`Flexible`이다.** 그냥 두면 내용이 길 때 카드가
+                      // 무한히 커져 오버플로한다(실제로 590 넘쳤다). 남는
+                      // 높이를 상한으로 주면, 넘치는 카드는 안쪽 스크롤이 받는다.
+                      Flexible(
+                        child: ActionCardView(
+                          key: ValueKey(cards[index].id),
+                          card: cards[index],
+                          index: index,
+                          routineId: routine.id,
+                          onSpeak: () => _speak(cards[index]),
+                          isSpeaking: _speakingId == cards[index].id,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

@@ -37,14 +37,15 @@ void main() {
         description: description,
       );
 
-  testWidgets('이미지는 항상 4:3 비율이다', (tester) async {
+  testWidgets('이미지 칸은 항상 313:264 비율이다', (tester) async {
     // 카드마다 비율이 다르면 넘길 때 그림이 들쭉날쭉해 보인다.
-    // 서버 Gemini 생성 비율(4:3, 2026-07-22 변경)과 통일한다.
+    // 시안(`309:3548`)이 그린 칸이 313×264다 — 4:3으로 두면 칸이 32 낮아지고
+    // 카드 전체가 시안보다 46 짧아진다 (#297). 그림은 `contain`이라 안 잘린다.
     await tester.pumpWidget(wrap(card('옷을 입어요', '학교에 갈 옷을 입어요')));
     await tester.pump();
 
     final size = tester.getSize(find.byType(AspectRatio));
-    expect(size.width / size.height, closeTo(4 / 3, 0.01));
+    expect(size.width / size.height, closeTo(313 / 264, 0.01));
   });
 
   testWidgets('제목이 길어도 이미지 크기가 같다', (tester) async {
