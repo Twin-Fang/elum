@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-21T10:39:03Z",
-    "currentVersion": "1.23.0",
+    "lastUpdated": "2026-09-21T11:13:45Z",
+    "currentVersion": "1.23.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 123
+    "totalReleases": 124
   },
   "releases": [
+    {
+      "version": "1.23.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-21",
+      "pr_number": 285,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 켜지 않은 약관 항목이 동의로 기록될 수 있던 문제 해결\n  * 점검 중에도 앱을 열어 둔 채 계속 쓸 수 있던 문제 해결\n  * 인터넷이 불안정할 때 약관 화면이 오래 멈춰 있던 문제 해결\n\n* **개선**\n  * 앱으로 다시 돌아오면 점검 여부를 다시 확인해요\n  * 관리자 화면에서 잘못 입력한 약관을 저장 전에 알려줘요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "켜지 않은 약관 항목이 동의로 기록될 수 있던 문제 해결",
+            "점검 중에도 앱을 열어 둔 채 계속 쓸 수 있던 문제 해결",
+            "인터넷이 불안정할 때 약관 화면이 오래 멈춰 있던 문제 해결"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "앱으로 다시 돌아오면 점검 여부를 다시 확인해요",
+            "관리자 화면에서 잘못 입력한 약관을 저장 전에 알려줘요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.23.0",
       "project_type": "flutter",
