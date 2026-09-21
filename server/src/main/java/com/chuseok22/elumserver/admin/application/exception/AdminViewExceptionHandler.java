@@ -13,6 +13,8 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -55,6 +57,24 @@ public class AdminViewExceptionHandler {
     model.addAttribute("status", code.getStatus().value());
     model.addAttribute("error", code.getMessage());
     // 어디서 났는지 알아야 제보를 받았을 때 추적할 수 있다.
+    model.addAttribute("path", request.getRequestURI());
+    return "error";
+  }
+
+  /**
+   * 주소의 키가 enum 에 없을 때 ({@code /admin/consents/NOPE}).
+   *
+   * <p>전에는 여기로 오지 않아 Spring 기본 처리로 400 {@code Bad Request}(영문)가 떴다.
+   * 같은 "없는 대상"인데 회원은 404 한국어, 약관·프롬프트는 400 영문으로 갈렸다 (#278 QA).
+   */
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public String handleUnknownKey(
+    MethodArgumentTypeMismatchException e, Model model, HttpServletRequest request, HttpServletResponse response
+  ) {
+    response.setStatus(HttpStatus.NOT_FOUND.value());
+    log.info("[관리자 화면] 없는 키 — {} {}", request.getMethod(), request.getRequestURI());
+    model.addAttribute("status", HttpStatus.NOT_FOUND.value());
+    model.addAttribute("error", "없는 항목입니다. 주소를 확인해주세요.");
     model.addAttribute("path", request.getRequestURI());
     return "error";
   }

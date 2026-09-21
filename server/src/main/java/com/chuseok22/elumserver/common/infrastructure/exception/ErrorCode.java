@@ -41,6 +41,7 @@ public enum ErrorCode {
 
   // PROMPT
   PROMPT_TEMPLATE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "프롬프트 설정을 찾을 수 없습니다."),
+  PROMPT_TEMPLATE_BLANK(HttpStatus.BAD_REQUEST, "프롬프트 내용을 입력해주세요."),
   PROMPT_TEST_LOCAL_LLM_FAILED(HttpStatus.BAD_GATEWAY, "로컬 LLM 테스트 호출에 실패했습니다."),
   PROMPT_TEST_GEMINI_TEXT_FAILED(HttpStatus.BAD_GATEWAY, "Gemini 텍스트 테스트 호출에 실패했습니다."),
   PROMPT_TEST_GEMINI_IMAGE_FAILED(HttpStatus.BAD_GATEWAY, "Gemini 이미지 테스트 호출에 실패했습니다."),

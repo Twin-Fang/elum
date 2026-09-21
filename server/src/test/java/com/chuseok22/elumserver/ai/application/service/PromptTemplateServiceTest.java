@@ -111,6 +111,22 @@ class PromptTemplateServiceTest {
   }
 
   @Test
+  @DisplayName("update는 공백만 있는 프롬프트를 거절하고 기존 내용을 지킨다 (#278 QA)")
+  void update_blankContent_rejected() {
+    PromptTemplate template = new PromptTemplate();
+    template.setPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
+    template.setContent("당신은 개인정보 DLP 엔티티 탐지 엔진입니다.");
+
+    // 공백 검사가 저장소를 읽기 전에 끝나므로 조회는 일어나지 않는다.
+    assertThatThrownBy(() -> promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "   "))
+      .isInstanceOf(CustomException.class)
+      .extracting("errorCode")
+      .isEqualTo(ErrorCode.PROMPT_TEMPLATE_BLANK);
+    assertThat(template.getContent()).startsWith("당신은");
+    verify(promptTemplateHistoryRepository, never()).save(any());
+  }
+
+  @Test
   @DisplayName("getHistory는 키의 이력을 최신순으로 반환한다")
   void getHistory_returnsHistories() {
     PromptTemplateHistory history = new PromptTemplateHistory();
