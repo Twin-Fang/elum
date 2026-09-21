@@ -51,6 +51,10 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.buttonDisabledText,
     required this.buttonNeutral,
     required this.buttonNeutralText,
+    required this.dialogTitleText,
+    required this.dialogNeutral,
+    required this.dialogNeutralText,
+    required this.dialogDanger,
     required this.danger,
     required this.dangerText,
     required this.highlightFill,
@@ -183,6 +187,20 @@ class AppColors extends ThemeExtension<AppColors> {
   // buttonDisabled를 쓰면 "못 누르는 버튼"으로 읽혀 취소가 막힌 것처럼 보인다 (이슈 #188).
   final Color buttonNeutral;
   final Color buttonNeutralText;
+
+  // 팝업 전용. `buttonNeutral`·`danger`와 값이 달라서가 아니라 **쓰임이 달라서**
+  // 나눈다 — 저 둘은 설정의 되돌릴 수 없는 항목, 연결 암호 오류, 설정 시트 버튼도
+  // 함께 쓴다. 팝업을 시안에 맞추려고 저 토큰을 건드리면 그 셋까지 같이 바뀐다.
+  /// 팝업 제목. 앱 본문색(#242634)이 아니라 시안 그대로 순검정이다.
+  final Color dialogTitleText;
+
+  /// 팝업의 보조 버튼(취소). 진회색 바탕에 **흰 글자**다.
+  final Color dialogNeutral;
+  final Color dialogNeutralText;
+
+  /// 팝업의 되돌릴 수 없는 버튼(삭제). 타일을 밀었을 때 나오는 삭제 버튼과 같은 빨강 —
+  /// 같은 "삭제"인데 빨강이 두 가지면 같은 뜻으로 읽히지 않는다.
+  final Color dialogDanger;
 
   // 되돌릴 수 없는 동작. 흐리게가 아니라 이 색으로 알린다 —
   // 흐린 색은 위험이 아니라 비활성으로 읽힌다 (이슈 #188).
@@ -527,6 +545,11 @@ class AppColors extends ThemeExtension<AppColors> {
     buttonDisabledText: Color(0x80FFFFFF), // rgba(255,255,255,0.5)
     buttonNeutral: Color(0xFFEFEDEA),
     buttonNeutralText: Color(0xFF242634),
+    // Figma 931:4878 `팝업` 컴포넌트셋 (variant 삭제) 실측
+    dialogTitleText: Color(0xFF000000),
+    dialogNeutral: Color(0xFFD7D3D1),
+    dialogNeutralText: Color(0xFFFFFFFF),
+    dialogDanger: Color(0xFFDA5050),
     // 팔레트의 코랄(#EB9B73)과 같은 난색 계열로 낮춰 잡았다. 배경 대비 4.7:1,
     // 흰 글씨 대비 5.4:1 — 작은 글씨에도 읽히면서 경고로 보인다.
     danger: Color(0xFFBB3F38),
@@ -657,6 +680,10 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? buttonDisabledText,
     Color? buttonNeutral,
     Color? buttonNeutralText,
+    Color? dialogTitleText,
+    Color? dialogNeutral,
+    Color? dialogNeutralText,
+    Color? dialogDanger,
     Color? danger,
     Color? dangerText,
     Color? highlightFill,
@@ -774,6 +801,10 @@ class AppColors extends ThemeExtension<AppColors> {
       buttonDisabledText: buttonDisabledText ?? this.buttonDisabledText,
       buttonNeutral: buttonNeutral ?? this.buttonNeutral,
       buttonNeutralText: buttonNeutralText ?? this.buttonNeutralText,
+      dialogTitleText: dialogTitleText ?? this.dialogTitleText,
+      dialogNeutral: dialogNeutral ?? this.dialogNeutral,
+      dialogNeutralText: dialogNeutralText ?? this.dialogNeutralText,
+      dialogDanger: dialogDanger ?? this.dialogDanger,
       danger: danger ?? this.danger,
       dangerText: dangerText ?? this.dangerText,
       highlightFill: highlightFill ?? this.highlightFill,
@@ -910,6 +941,10 @@ class AppColors extends ThemeExtension<AppColors> {
         other.buttonNeutralText,
         t,
       )!,
+      dialogTitleText: Color.lerp(dialogTitleText, other.dialogTitleText, t)!,
+      dialogNeutral: Color.lerp(dialogNeutral, other.dialogNeutral, t)!,
+      dialogNeutralText: Color.lerp(dialogNeutralText, other.dialogNeutralText, t)!,
+      dialogDanger: Color.lerp(dialogDanger, other.dialogDanger, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
       dangerText: Color.lerp(dangerText, other.dangerText, t)!,
       highlightFill: Color.lerp(highlightFill, other.highlightFill, t)!,

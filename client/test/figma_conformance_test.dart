@@ -2,6 +2,7 @@
 library;
 
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/features/guardian/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
@@ -132,6 +133,41 @@ void main() {
               child: child!,
             ),
             home: const ChildHomeScreen(),
+          ),
+        ),
+      );
+
+  /// 삭제 확인 팝업 대조용 (931:4879 안의 팝업 `931:5018`).
+  ///
+  /// 뒤에 깔린 홈 화면까지 재현하려면 타일을 민 상태를 만들어야 해서, **카드만**
+  /// 세워 맞댄다. 카드는 흰 바탕이라 뒤가 무엇이든 결과가 달라지지 않는다.
+  Widget wrapDeleteDialog() => ProviderScope(
+        overrides: [testStorageOverride(onboardingCompleted: true)],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp(
+            theme: AppTheme.light,
+            home: const Scaffold(
+              body: Center(
+                child: ElumDialogCard<bool>(
+                  title: '일과를 삭제하실건가요?',
+                  icon: ElumDialogIcon.trash,
+                  actions: [
+                    ElumDialogAction(
+                      label: '취소',
+                      value: false,
+                      tone: ElumDialogTone.neutral,
+                    ),
+                    ElumDialogAction(
+                      label: '삭제',
+                      value: true,
+                      tone: ElumDialogTone.danger,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       );
@@ -313,6 +349,17 @@ void main() {
     await expectLater(
       find.byType(ChildStarsScreen),
       matchesGoldenFile('figma/stars_364-8219.png'),
+    );
+  });
+
+  // 일과를 지울 때 뜨는 확인 팝업 (#318). 버튼 색과 사이 간격이 시안과 달랐다.
+  testWidgets('일과 삭제 팝업 (Figma 931:4879)', (tester) async {
+    await tester.pumpWidget(wrapDeleteDialog());
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(ElumDialogCard<bool>),
+      matchesGoldenFile('figma/dialog_delete_931-4879.png'),
     );
   });
 }

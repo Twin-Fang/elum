@@ -121,10 +121,13 @@ class ElumDialogCard<T> extends StatelessWidget {
   static const _iconToTitle = 20.0;
   static const _bodyToActions = 32.0;
 
-  /// 버튼 높이 54 · 모서리 8 · 두 개일 때 사이 8
+  /// 버튼 높이 54 · 모서리 8 · 두 개일 때 사이 4
+  ///
+  /// **사이는 4다(8이 아니다).** 카드 안쪽 폭이 294라 `145 + 4 + 145`로 딱
+  /// 떨어진다. 8로 두면 버튼이 143이 되어 시안보다 2씩 좁아진다 (#318).
   static const _actionHeight = 54.0;
   static const _actionRadius = 8.0;
-  static const _actionGap = 8.0;
+  static const _actionGap = 4.0;
 
   static String _iconAsset(ElumDialogIcon icon) => switch (icon) {
         ElumDialogIcon.success => AppAssets.dialogCheck,
@@ -177,8 +180,9 @@ class ElumDialogCard<T> extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
+              // 앱 본문색이 아니라 시안 그대로 순검정이다 (#318)
               style: context.typo.dialogTitle
-                  .copyWith(color: colors.textPrimary),
+                  .copyWith(color: colors.dialogTitleText),
             ),
             if (message != null) ...[
               SizedBox(height: context.space.sm),
@@ -208,10 +212,12 @@ class ElumDialogCard<T> extends StatelessWidget {
 
   Widget _button(BuildContext context, ElumDialogAction<T> action) {
     final colors = context.colors;
+    // 팝업 전용 토큰을 쓴다. `buttonNeutral`·`danger`는 설정 화면과 연결 암호도
+    // 함께 쓰므로, 팝업을 시안에 맞추려고 그것을 건드리면 그쪽까지 바뀐다 (#318).
     final (bg, fg) = switch (action.tone) {
       ElumDialogTone.primary => (colors.checkDone, colors.surface),
-      ElumDialogTone.neutral => (colors.buttonNeutral, colors.buttonNeutralText),
-      ElumDialogTone.danger => (colors.danger, colors.dangerText),
+      ElumDialogTone.neutral => (colors.dialogNeutral, colors.dialogNeutralText),
+      ElumDialogTone.danger => (colors.dialogDanger, colors.dangerText),
       ElumDialogTone.warn => (colors.warn, colors.warnText),
     };
 
