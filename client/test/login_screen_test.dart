@@ -224,9 +224,13 @@ void main() {
   });
 
   /// 지난번에 카카오로 로그인한 상태를 만든다 — 그래야 안내 문구가 뜬다.
-  Future<Widget> wrapWithLastProvider() async {
+  Future<Widget> wrapWithLastProvider({
+    OAuthProvider? provider = OAuthProvider.kakao,
+  }) async {
     final storage = InMemoryStorage();
-    await storage.setLastLoginProvider(OAuthProvider.kakao.name);
+    if (provider != null) {
+      await storage.setLastLoginProvider(provider.name);
+    }
     final router = GoRouter(
       initialLocation: Routes.login,
       routes: [
@@ -249,49 +253,66 @@ void main() {
     );
   }
 
-  group('지난번 로그인 안내는 그림 위에서도 읽힌다 (이슈 #337)', () {
-    // 안드로이드는 얼굴을 그리므로(#297) 이 문구가 **부리와 정확히 겹친다** —
-    // 부리 y614~638, 문구 y623~633. 회색 글자가 주황 부리에 묻혀 `이걸로` 가
-    // 읽히지 않았다. 글자 뒤에 옅은 알약을 깔아 어느 그림 위에서도 읽히게 한다.
-    testWidgets('문구 뒤에 배경이 깔린다', (tester) async {
+  group('최근 로그인 표시는 시안값을 따른다 (이슈 #346)', () {
+    // 시안 `로그인_iOS`(238:1808) — 알약 91×28 · r20, 배경 #FFFADC 투명도 50%.
+    // 버튼 우측에서 16 · 버튼 위로 10 겹친다.
+    //
+    // 겹쳐 놓는 것이 핵심이다. 이전 구현은 버튼 위에 한 줄을 깔아, 최근 로그인이
+    // 있을 때만 버튼 묶음이 통째로 밀렸다 — 누르려던 자리가 움직인다.
+    testWidgets('문구는 `최근 로그인` 이다', (tester) async {
       await tester.pumpWidget(await wrapWithLastProvider());
       await tester.pumpAndSettle();
 
-      final hint = find.text('지난번에 이걸로 로그인했어요');
-      expect(hint, findsOneWidget);
+      expect(find.text('최근 로그인'), findsOneWidget);
+    });
 
-      final box = tester.widget<Container>(
-        find
-            .ancestor(of: hint, matching: find.byType(Container))
-            .first,
-      );
-      final decoration = box.decoration as BoxDecoration?;
-      expect(
-        decoration?.color,
-        isNotNull,
-        reason: '배경이 없으면 그림 위에서 글자가 묻힌다',
-      );
+    testWidgets('알약은 91x28 이고 반투명이다', (tester) async {
+      await tester.pumpWidget(await wrapWithLastProvider());
+      await tester.pumpAndSettle();
+
+      final pill = find
+          .ancestor(of: find.text('최근 로그인'), matching: find.byType(Container))
+          .first;
+
+      final size = tester.getSize(pill);
+      expect(size.width, closeTo(91, 1));
+      expect(size.height, closeTo(28, 1));
+
+      final decoration = tester.widget<Container>(pill).decoration as BoxDecoration?;
+      expect(decoration?.color, isNotNull, reason: '배경이 없으면 그림 위에서 글자가 묻힌다');
       expect(
         decoration?.color?.a,
         lessThan(1.0),
-        reason: '반투명이어야 덧댄 것처럼 보이지 않는다',
+        reason: '반투명이라야 아래 버튼 색이 비쳐 제공자마다 달라 보인다',
       );
     });
 
-    testWidgets('알약이 글자만큼만 넓다 — 버튼 폭으로 늘어나지 않는다', (tester) async {
+    testWidgets('버튼 위로 겹쳐 레이아웃을 밀지 않는다', (tester) async {
+      // 최근 로그인이 없을 때와 있을 때 첫 버튼의 y가 같아야 한다.
+      await tester.pumpWidget(await wrapWithLastProvider(provider: null));
+      await tester.pumpAndSettle();
+      final withoutBadge = tester.getTopLeft(find.text('카카오로 로그인')).dy;
+
+      await tester.pumpWidget(await wrapWithLastProvider());
+      await tester.pumpAndSettle();
+      final withBadge = tester.getTopLeft(find.text('카카오로 로그인')).dy;
+
+      expect(withBadge, closeTo(withoutBadge, 0.5));
+    });
+
+    testWidgets('알약은 해당 제공자 버튼에만 붙는다', (tester) async {
       await tester.pumpWidget(await wrapWithLastProvider());
       await tester.pumpAndSettle();
 
-      final pill = tester.getSize(
-        find
-            .ancestor(
-              of: find.text('지난번에 이걸로 로그인했어요'),
-              matching: find.byType(Container),
-            )
-            .first,
+      final badge = tester.getTopLeft(find.text('최근 로그인'));
+      final kakao = tester.getTopLeft(find.text('카카오로 로그인'));
+      final naver = tester.getTopLeft(find.text('네이버로 로그인'));
+
+      expect(
+        (badge.dy - kakao.dy).abs(),
+        lessThan((badge.dy - naver.dy).abs()),
+        reason: '카카오로 마지막에 들어왔으면 알약도 카카오 버튼에 붙어야 한다',
       );
-      final button = tester.getSize(find.text('카카오로 로그인'));
-      expect(pill.width, lessThan(button.width * 3));
     });
   });
 

@@ -59,6 +59,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.childDetailTitle,
     required this.promptPlaceholder,
     required this.promptCaption,
+    required this.lastLoginBadge,
     required this.actionCardTitle,
   });
 
@@ -266,6 +267,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 일과 입력 하단 안내 "아이의 정보를 안전하게 보호해요" (12/w500 Pretendard, style_H3KJNZ).
   /// caption(12/w400 TmoneyRoundWind)과 폰트·굵기가 달라 별개 토큰이다.
   final TextStyle promptCaption;
+
+  /// 로그인 버튼의 `최근 로그인` 알약 (12/w500 Pretendard, Figma `238:1808`).
+  /// promptCaption과 값은 같지만 쓰임이 달라 따로 둔다 — 한쪽을 고칠 때
+  /// 다른 쪽이 딸려 바뀌면 안 된다.
+  final TextStyle lastLoginBadge;
 
   /// 행동 카드 제목 (25/w800, style_GKEQ8F).
   /// 순서 배지 숫자용 cardHeadline(30/w800)과 크기가 달라 별개 토큰이다.
@@ -591,6 +597,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.1,
     ),
+    lastLoginBadge: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
     actionCardTitle: TextStyle(
       fontFamily: fontFamily,
       fontSize: 25,
@@ -664,6 +676,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? childDetailTitle,
     TextStyle? promptPlaceholder,
     TextStyle? promptCaption,
+    TextStyle? lastLoginBadge,
     TextStyle? actionCardTitle,
   }) {
     return AppTypography(
@@ -719,6 +732,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       childDetailTitle: childDetailTitle ?? this.childDetailTitle,
       promptPlaceholder: promptPlaceholder ?? this.promptPlaceholder,
       promptCaption: promptCaption ?? this.promptCaption,
+      lastLoginBadge: lastLoginBadge ?? this.lastLoginBadge,
       actionCardTitle: actionCardTitle ?? this.actionCardTitle,
     );
   }
@@ -787,6 +801,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptPlaceholder:
           TextStyle.lerp(promptPlaceholder, other.promptPlaceholder, t)!,
       promptCaption: TextStyle.lerp(promptCaption, other.promptCaption, t)!,
+      lastLoginBadge: TextStyle.lerp(lastLoginBadge, other.lastLoginBadge, t)!,
       actionCardTitle:
           TextStyle.lerp(actionCardTitle, other.actionCardTitle, t)!,
     );

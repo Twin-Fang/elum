@@ -10,6 +10,7 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/login_scene.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/auth_repository.dart';
@@ -66,7 +67,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   OAuthProvider? _pending;
 
   /// 실패 안내. 에러 코드를 함께 보여줘 제보를 추적할 수 있게 한다.
-  String? _errorMessage;
 
   /// 지난번에 성공한 로그인 수단. 없으면 처음 오는 사용자다.
   OAuthProvider? _lastProvider;
@@ -83,10 +83,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _signIn(OAuthProvider provider) async {
-    setState(() {
-      _pending = provider;
-      _errorMessage = null;
-    });
+    setState(() => _pending = provider);
 
     final outcome = await ref.read(authRepositoryProvider).signInWith(provider);
 
@@ -110,21 +107,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // 사용자가 스스로 닫았다. 아무것도 띄우지 않는다.
         break;
       case AuthOutcome.emailConflict:
-        setState(() {
-          _errorMessage = '이미 다른 방법으로 가입된 계정이에요.\n'
-              '처음 쓰신 방법으로 로그인해주세요 (E-DUP)';
-        });
+        await _alert('이미 가입된 계정이에요', '처음 쓰신 방법으로 로그인해주세요 (E-DUP)');
       case AuthOutcome.offline:
-        setState(() {
-          _errorMessage = '인터넷 연결을 확인하고 다시 해주세요 (E-NET)';
-        });
+        await _alert('인터넷 연결을 확인해주세요', '연결한 뒤 다시 해주세요 (E-NET)');
       case AuthOutcome.failed:
-        setState(() {
-          _errorMessage = '로그인하지 못했어요. 잠시 후 다시 해주세요 (E-AUTH)';
-        });
+        await _alert('로그인하지 못했어요', '잠시 후 다시 해주세요 (E-AUTH)');
     }
 
     if (mounted) setState(() => _pending = null);
+  }
+
+  /// 실패를 팝업으로 알린다.
+  ///
+  /// **버튼 위 글자로 두지 않는다.** 배경이 그림이라 대비가 약해 눌린 버튼에
+  /// 가려지고, 글자가 생기면서 버튼 묶음이 위로 밀려 누르려던 자리가 움직인다.
+  /// 팝업은 앱 공통 [showElumDialog]를 그대로 쓴다 — 화면마다 새로 그리지
+  /// 않는다는 결정(#232)을 따른다 (#346).
+  ///
+  /// **에러 코드는 그대로 노출한다.** 사용자에게는 뜻이 없지만, 제보를 받았을 때
+  /// 어디서 터졌는지 가릴 유일한 단서다.
+  Future<void> _alert(String title, String message) {
+    return showElumDialog<void>(
+      context: context,
+      title: title,
+      message: message,
+      // 아동도 보는 화면이라 붉은 경고를 쓰지 않는다.
+      icon: ElumDialogIcon.warning,
+    );
   }
 
   /// 이전 계정의 아이 정보를 화면에서도 잊는다.
@@ -168,35 +177,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_errorMessage != null) ...[
-              Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-                // 아동도 볼 수 있는 화면이라 빨강·경고 아이콘을 쓰지 않는다
-                style: context.typo.body.copyWith(
-                  color: context.colors.textSecondary,
-                ),
-              ),
-              SizedBox(height: context.space.md),
-            ],
-
-            if (_lastProvider == OAuthProvider.kakao) const _LastUsedHint(),
-            _ProviderButton(
+            _LastUsedSlot(
+              show: _lastProvider == OAuthProvider.kakao,
+              child: _ProviderButton(
               label: _pending == OAuthProvider.kakao ? '연결하고 있어요' : '카카오로 로그인',
               iconAsset: AppAssets.loginKakao,
               backgroundColor: context.colors.loginKakaoBg,
               labelColor: context.colors.loginKakaoLabel,
-              onTap: isBusy ? null : () => _signIn(OAuthProvider.kakao),
+                onTap: isBusy ? null : () => _signIn(OAuthProvider.kakao),
+              ),
             ),
             SizedBox(height: _buttonGap.h),
 
-            if (_lastProvider == OAuthProvider.naver) const _LastUsedHint(),
-            _ProviderButton(
+            _LastUsedSlot(
+              show: _lastProvider == OAuthProvider.naver,
+              child: _ProviderButton(
               label: _pending == OAuthProvider.naver ? '연결하고 있어요' : '네이버로 로그인',
               iconAsset: AppAssets.loginNaver,
               backgroundColor: context.colors.loginNaverBg,
               labelColor: context.colors.loginNaverLabel,
-              onTap: isBusy ? null : () => _signIn(OAuthProvider.naver),
+                onTap: isBusy ? null : () => _signIn(OAuthProvider.naver),
+              ),
             ),
 
             // 구글 버튼은 시안에서 빠졌다 (이슈 #230). `OAuthProvider.google`은
@@ -211,7 +212,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             // 애플 로그인도 제공해야 앱스토어 심사를 통과한다.
             if (_showApple) ...[
               SizedBox(height: _buttonGap.h),
-              if (_lastProvider == OAuthProvider.apple) const _LastUsedHint(),
+
               // ⚠️ 규격 위젯(`SignInWithAppleButton`)에서 직접 그리기로 바꿨다.
               // 시안이 세 버튼을 같은 규격(360×66 · r18 · 로고 x=64)으로 그렸고,
               // 규격 위젯은 그 정렬을 맞출 수 없기 때문이다.
@@ -219,12 +220,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // 애플이 요구하는 것을 전부 지킨다 — **검정 배경 · 흰 사과 심볼 ·
               // 최소 높이 · 승인 문구**. 문구는 `Apple로 로그인`·`Apple로 계속하기`·
               // `Apple로 가입` 셋만 허용되므로 **임의로 바꾸지 않는다** (이슈 #237).
-              _ProviderButton(
-                label: _pending == OAuthProvider.apple ? '연결하고 있어요' : 'Apple로 로그인',
-                iconAsset: AppAssets.loginApple,
-                backgroundColor: context.colors.loginAppleBg,
-                labelColor: context.colors.loginAppleLabel,
-                onTap: isBusy ? null : () => _signIn(OAuthProvider.apple),
+              _LastUsedSlot(
+                show: _lastProvider == OAuthProvider.apple,
+                child: _ProviderButton(
+                  label: _pending == OAuthProvider.apple ? '연결하고 있어요' : 'Apple로 로그인',
+                  iconAsset: AppAssets.loginApple,
+                  backgroundColor: context.colors.loginAppleBg,
+                  labelColor: context.colors.loginAppleLabel,
+                  onTap: isBusy ? null : () => _signIn(OAuthProvider.apple),
+                ),
               ),
             ],
           ],
@@ -246,37 +250,61 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 /// (이슈 #337). iOS 도 노란 몸통 위라 대비가 좋지 않아 **양쪽 다** 깐다.
 ///
 /// 반투명이라 뒤 그림이 비쳐 덧댄 것처럼 보이지 않는다.
-class _LastUsedHint extends StatelessWidget {
-  const _LastUsedHint();
+/// 제공자 버튼 위에 `최근 로그인` 알약을 얹는 자리.
+///
+/// Figma `로그인_iOS`(238:1808) 실측 — 알약 **91×28 · r20**, 버튼 **우측에서 16**,
+/// 버튼 상단에서 **위로 10** 겹친다. 배경은 `#FFFADC` 투명도 50%이라 아래 버튼
+/// 색이 비쳐, 세 제공자에서 각각 다른 색으로 보인다.
+///
+/// **줄을 따로 차지하지 않는다.** 이전 구현은 버튼 위에 한 줄을 깔아, 최근 로그인이
+/// 있을 때만 버튼 묶음이 통째로 밀렸다 — 누르려던 자리가 움직인다. 버튼 간격이
+/// 12라 위로 10 겹쳐도 레이아웃은 그대로다 (#346).
+///
+/// [show]가 거짓이면 버튼만 그대로 내보낸다 — `Stack`을 세우지 않는다.
+class _LastUsedSlot extends StatelessWidget {
+  const _LastUsedSlot({required this.show, required this.child});
 
-  /// 알약이 글자를 감싸는 여백. 시안에 없는 요소라 최소로 둔다.
-  static const _padH = 10.0;
-  static const _padV = 3.0;
+  final bool show;
+  final Widget child;
+
+  /// 시안 실측 — 알약 91×28 · r20.
+  static const _pillWidth = 91.0;
+  static const _pillHeight = 28.0;
+  static const _pillRadius = 20.0;
+
+  /// 버튼 우측에서 16 · 버튼 위로 10.
+  static const _right = 16.0;
+  static const _top = 10.0;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: context.space.xs.h / 2),
-      // 알약이 글자만큼만 넓어야 한다 — 그냥 두면 버튼 폭까지 늘어난다.
-      child: Center(
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: _padH.w,
-            vertical: _padV.h,
-          ),
-          decoration: BoxDecoration(
-            color: context.colors.surface.withValues(alpha: 0.72),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Text(
-            '지난번에 이걸로 로그인했어요',
-            textAlign: TextAlign.center,
-            style: context.typo.caption.copyWith(
-              color: context.colors.textSecondary,
+    if (!show) return child;
+
+    return Stack(
+      // 알약이 버튼 위로 삐져나온다. 자르면 시안과 달라진다.
+      clipBehavior: Clip.none,
+      children: [
+        child,
+        Positioned(
+          right: _right.w,
+          top: -_top.h,
+          child: Container(
+            width: _pillWidth.w,
+            height: _pillHeight.h,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: context.colors.loginLastUsedBg,
+              borderRadius: BorderRadius.circular(_pillRadius.r),
+            ),
+            child: Text(
+              '최근 로그인',
+              style: context.typo.lastLoginBadge.copyWith(
+                color: context.colors.textPrimary,
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

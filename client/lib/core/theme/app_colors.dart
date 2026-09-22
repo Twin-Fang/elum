@@ -146,6 +146,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.linkLaterLabel,
     required this.loginButtonShadow,
     required this.loginAppleBg,
+    required this.loginLastUsedBg,
     required this.loginAppleLabel,
     required this.consentSelectedFill,
     required this.consentSelectedBorder,
@@ -519,6 +520,12 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color loginAppleBg;
   final Color loginAppleLabel;
 
+  /// `최근 로그인` 알약 배경 (Figma `238:1808` — #FFFADC 투명도 50%).
+  ///
+  /// 버튼 위에 겹쳐 놓기 때문에 반투명이다. 불투명하게 두면 버튼 색이 비치지
+  /// 않아 세 제공자에서 모두 같은 크림색 알약으로 보인다.
+  final Color loginLastUsedBg;
+
   // --- 약관 동의 선택 상태 ---
   //
   // 값은 목표 칩 선택색과 같다. 그래도 토큰을 나누는 이유는 이 문서의 핵심 규칙
@@ -670,6 +677,7 @@ class AppColors extends ThemeExtension<AppColors> {
     loginButtonShadow: Color(0x0D000000),
     loginAppleBg: Color(0xFF000000),
     loginAppleLabel: Color(0xFFFFFFFF),
+    loginLastUsedBg: Color(0x80FFFADC),
     consentSelectedFill: Color(0xFFB5EAEC),
     consentSelectedBorder: Color(0xFF93DBCC),
     dlpBadgeText: Color(0xFF74757D),
@@ -791,6 +799,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? starsNumberStart,
     Color? editChipBg,
     Color? editChipLabel,
+    Color? loginLastUsedBg,
     Color? loginKakaoBg,
     Color? loginKakaoLabel,
     Color? loginNaverBg,
@@ -917,6 +926,7 @@ class AppColors extends ThemeExtension<AppColors> {
       starsNumberStart: starsNumberStart ?? this.starsNumberStart,
       editChipBg: editChipBg ?? this.editChipBg,
       editChipLabel: editChipLabel ?? this.editChipLabel,
+      loginLastUsedBg: loginLastUsedBg ?? this.loginLastUsedBg,
       loginKakaoBg: loginKakaoBg ?? this.loginKakaoBg,
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
@@ -1196,6 +1206,7 @@ class AppColors extends ThemeExtension<AppColors> {
       )!,
       editChipBg: Color.lerp(editChipBg, other.editChipBg, t)!,
       editChipLabel: Color.lerp(editChipLabel, other.editChipLabel, t)!,
+      loginLastUsedBg: Color.lerp(loginLastUsedBg, other.loginLastUsedBg, t)!,
       loginKakaoBg: Color.lerp(loginKakaoBg, other.loginKakaoBg, t)!,
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,
