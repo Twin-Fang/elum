@@ -8,6 +8,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:elum/core/network/app_failure.dart';
+import 'package:elum/core/widgets/elum_error_view.dart';
+
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
 
@@ -67,6 +70,7 @@ Future<void> _pump(WidgetTester tester, Object error) async {
 
 void main() {
   useFigmaViewport();
+  _overflowGuard();
 
   testWidgets('서버가 이유를 알려주면 그 문구가 화면에 그대로 뜬다', (tester) async {
     await _pump(
@@ -101,9 +105,56 @@ void main() {
       ),
     );
 
-    // 문구는 화면 것을 쓰되 **코드로 원인이 갈린다** — 제보를 받으면
-    // 서버가 막은 것인지 인터넷이 끊긴 것인지 바로 안다.
+    // 무엇이 안 됐는지는 화면이, **무엇을 하면 되는지는 앱이** 말한다.
+    // 실기기 QA 에서 코드만 E-NET-OFFLINE 이고 문구는 인터넷 이야기를 하지
+    // 않아 사용자가 끊긴 채로 계속 다시 시도를 누르고 있었다 (#352).
     expect(find.text('임시저장을 불러오지 못했어요'), findsOneWidget);
+    expect(find.text('인터넷 연결을 확인해주세요'), findsOneWidget);
+    expect(find.textContaining('E-NET-OFFLINE'), findsOneWidget);
+  });
+}
+
+
+/// 줄인 실패 화면이 **고정 높이 칸 안에** 들어가는가 (#352 QA).
+///
+/// 홈의 지난 일과는 일과 한 줄과 같은 68 짜리 회색 칸에 실패를 담는다. 거기에
+/// 안내 한 줄을 더했더니 **실기기에서 11px 넘쳤다** — 위젯 테스트는 자리가
+/// 넉넉한 화면만 보고 있어서 못 잡았다. 넘침은 `flutter_test_config.dart` 가
+/// 자동으로 실패시키므로, 그 칸 크기 그대로 세워 보는 것으로 충분하다.
+void _overflowGuard() {
+  testWidgets('세 줄짜리 실패가 회색 칸 안에 들어간다', (tester) async {
+    await tester.pumpWidget(
+      ScreenUtilInit(
+        designSize: const Size(393, 852),
+        useInheritedMediaQuery: true,
+        builder: (context, _) => MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                // `_GreyTileShell` 이 실패를 담을 때 쓰는 높이.
+                height: 96,
+                width: 361,
+                child: ElumErrorView.failure(
+                  DioException(
+                    requestOptions: RequestOptions(path: '/x'),
+                    type: DioExceptionType.connectionError,
+                  ),
+                  fallback: '지난 일과를 불러오지 못했어요',
+                  fallbackCode: 'E-PAST',
+                  onRetry: () {},
+                  compact: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('지난 일과를 불러오지 못했어요'), findsOneWidget);
+    expect(find.text('인터넷 연결을 확인해주세요'), findsOneWidget);
     expect(find.textContaining('E-NET-OFFLINE'), findsOneWidget);
   });
 }

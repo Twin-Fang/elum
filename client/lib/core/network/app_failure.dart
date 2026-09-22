@@ -94,6 +94,26 @@ class AppFailure {
   /// 앱이 다시 쓰면 서버에서 고쳐도 앱은 옛 문구를 보여준다.
   String messageOr(String fallback) => serverMessage ?? fallback;
 
+  /// 다음에 무엇을 하면 되는지. **네트워크 쪽 사정은 서버가 말해 줄 수 없다.**
+  ///
+  /// 실기기에서 비행기 모드로 밟아 보니 화면이 이렇게 말하고 있었다.
+  ///
+  /// ```
+  /// 일과를 불러오지 못했어요
+  /// 다시 시도 (E-NET-OFFLINE)
+  /// ```
+  ///
+  /// 코드는 **개발자에게** 네트워크라고 말하는데 **사용자에게는** 아무 말도 안 한다.
+  /// 인터넷을 확인하라는 말이 없으니 끊긴 채로 계속 다시 시도를 누른다.
+  /// 세어 보니 인터넷을 언급하는 화면이 로그인·암호넣기 **둘뿐**이었다 — 화면마다
+  /// 따로 쓰게 두면 나머지는 영영 안 쓴다. 그래서 여기서 한 번만 말한다 (#352).
+  String? get hint => switch (fault) {
+    NetworkFault.offline => '인터넷 연결을 확인해주세요',
+    NetworkFault.timeout => '연결이 느려요. 잠시 후 다시 해주세요',
+    NetworkFault.badCertificate => '안전하지 않은 연결이에요. 다른 망에서 해주세요',
+    _ => null,
+  };
+
   /// 추적용 식별자. 사용자에게는 뜻이 없지만, 제보를 받았을 때 어디서 터졌는지
   /// 가릴 유일한 단서다 (docs 예외처리 규칙).
   ///
@@ -119,9 +139,16 @@ class AppFailure {
     return fallbackCode;
   }
 
-  /// 팝업 본문 한 줄 — `문구 (식별자)`.
-  String describe(String fallback, String fallbackCode) =>
-      '${messageOr(fallback)} (${badgeOr(fallbackCode)})';
+  /// 한 줄로 말한다 — `무엇이 안 됐는지 · 무엇을 하면 되는지 (식별자)`.
+  ///
+  /// 서버가 이유를 말해 줬으면 그것으로 충분하다. 말이 없고 네트워크 사정을
+  /// 아는 경우에만 [hint] 를 덧붙인다 — 무엇이 안 됐는지(화면 몫)와 무엇을 하면
+  /// 되는지(여기 몫)가 둘 다 있어야 사용자가 다음 수를 안다.
+  String describe(String fallback, String fallbackCode) {
+    final body = serverMessage ??
+        (hint == null ? fallback : '$fallback · $hint');
+    return '$body (${badgeOr(fallbackCode)})';
+  }
 
   /// **무엇이 던져져도 받는다.** 이 함수가 앱의 단일 판정 지점이다.
   ///
@@ -169,15 +196,23 @@ class AppFailure {
           cause: e,
         );
       case DioExceptionType.unknown:
-        // dio 는 원인을 모를 때 원래 예외를 `error` 에 넣어 준다.
-        // 기기가 비행기 모드면 여기로 `SocketException` 이 온다.
-        if (e.error is SocketException) {
+        // **응답이 없으면 서버에 닿지 못한 것이다.**
+        //
+        // 원래는 `e.error is SocketException` 으로만 갈랐는데, 실기기에서
+        // 요청이 나가는 도중에 비행기 모드를 켜면 dio 가 `error` 를 비운 채
+        // `DioException [unknown]: null` 을 준다 (2026-09-23 실측). 그러면
+        // 연결 실패가 `앱 오류` 로 떨어져 "다시 해주세요" 로 안내하게 된다 —
+        // 오프라인인 사용자는 될 때까지 계속 누른다 (#341 이 지적한 그 상황).
+        //
+        // 타입이 아니라 **응답 유무**로 가른다. 응답을 못 받았다는 사실이
+        // 원인을 모르는 것보다 확실하다.
+        if (e.response == null) {
           return AppFailure(fault: NetworkFault.offline, cause: e);
         }
-        // 응답이 있는데 unknown 인 경우도 있다 — 본문은 읽어 둔다.
+        // 응답이 있는데 unknown 이면 앱 쪽 문제다 — 본문은 읽어 둔다.
         return AppFailure(
           fault: NetworkFault.app,
-          server: e.response == null ? null : e.serverError,
+          server: e.serverError,
           cause: e,
         );
     }

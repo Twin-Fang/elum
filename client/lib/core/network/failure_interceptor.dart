@@ -31,8 +31,13 @@ class FailureInterceptor extends Interceptor {
 
     // 앱이 스스로 끊은 요청은 실패가 아니다 — 로그를 남기면 진짜 실패가 묻힌다.
     if (!failure.isSilent) {
+      // **없는 코드를 지어내지 않는다.** 전에는 `badgeOr('E-HTTP')` 를 썼는데,
+      // 인터셉터는 화면 코드를 모르므로 아무것도 모를 때 `E-HTTP` 가 찍혔다.
+      // 그 문자열은 코드베이스 어디에도 없어 제보를 받아도 찾을 수 없다 (#352).
       AppLogger.error('네트워크', failure, err.stackTrace, {
-        'code': failure.badgeOr('E-HTTP'),
+        'fault': failure.fault.name,
+        if (failure.server != null && !failure.server!.isUnknownCode)
+          'code': failure.server!.code.wire,
         'path': err.requestOptions.path,
         'status': err.response?.statusCode,
         // 서버가 준 문구는 사용자용이라 로그에 남겨도 안전하다.

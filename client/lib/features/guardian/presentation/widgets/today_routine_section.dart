@@ -344,6 +344,8 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
     if (routines.isEmpty) {
       if (async.hasError) {
         return _GreyTileShell(
+          // 세 줄(문구·안내·다시 시도)이 들어간다.
+          height: _errorShellHeight,
           child: ElumErrorView.failure(
             async.error,
             fallback: '지난 일과를 불러오지 못했어요',
@@ -463,10 +465,20 @@ class _LoadingTile extends StatelessWidget {
 }
 
 /// 빈 상태·로딩의 회색 껍데기 (Figma 931:3906 — 361×68, r20, #EEE9E6).
+/// 실패를 담을 때의 회색 칸 높이. 한 줄(68)로는 세 줄이 안 들어간다.
+const double _errorShellHeight = 96;
+
 class _GreyTileShell extends StatelessWidget {
-  const _GreyTileShell({required this.child});
+  const _GreyTileShell({required this.child, this.height});
 
   final Widget child;
+
+  /// 기본은 일과 한 줄과 같은 68.
+  ///
+  /// **실패를 담을 때는 늘린다.** 실패는 무엇이 안 됐는지·무엇을 하면 되는지·
+  /// 추적 코드까지 세 줄이라 한 줄 높이에 들어가지 않는다 — 실기기에서
+  /// 11px 넘쳤다 (#352 QA). 늘어나는 것은 실패했을 때뿐이라 평소 리듬은 그대로다.
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -475,7 +487,7 @@ class _GreyTileShell extends StatelessWidget {
     return AnimatedContainer(
       duration: AppMotion.fast,
       curve: AppMotion.standard,
-      height: 68.h,
+      height: (height ?? 68).h,
       padding: EdgeInsets.symmetric(horizontal: RoutineSummaryTile.padLeft.w),
       decoration: BoxDecoration(
         color: context.colors.routineTileBg,

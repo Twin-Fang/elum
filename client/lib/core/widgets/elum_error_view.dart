@@ -71,7 +71,9 @@ class ElumErrorView extends StatelessWidget {
     return ElumErrorView(
       key: key,
       message: failure.messageOr(fallback),
-      description: description,
+      // 두 줄을 쓸 수 있는 화면이므로 **무엇이 안 됐는지**와 **무엇을 하면
+      // 되는지**를 나눠 보여준다. 연결이 끊긴 것을 안내하는 자리다 (#352).
+      description: description ?? failure.hint,
       errorCode: failure.badgeOr(fallbackCode),
       onRetry: onRetry,
       compact: compact,
@@ -97,6 +99,20 @@ class ElumErrorView extends StatelessWidget {
               textAlign: TextAlign.center,
               style: typo.promptBody.copyWith(color: colors.textPrimary),
             ),
+            // **다음에 무엇을 하면 되는지는 줄인 자리에서도 남긴다.**
+            // 전에는 compact 가 이 줄을 통째로 버렸는데, 정작 연결이 끊겼을 때
+            // 안내가 필요한 홈 두 구역·임시저장이 전부 compact 다. 코드만
+            // `E-NET-OFFLINE` 이고 문구는 인터넷 이야기를 안 해서 사용자가
+            // 끊긴 채로 계속 다시 시도를 눌렀다 (#352 실기기 QA).
+            //
+            // 넘치지 않는다 — 줄인 이유는 100 짜리 일러스트와 여백이었지
+            // 이 한 줄이 아니었다.
+            if (description != null)
+              Text(
+                description!,
+                textAlign: TextAlign.center,
+                style: typo.promptBody.copyWith(color: colors.promptMuted),
+              ),
             if (onRetry != null)
               TextButton(
                 onPressed: onRetry,

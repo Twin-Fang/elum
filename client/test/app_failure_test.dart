@@ -126,9 +126,54 @@ void main() {
       );
     });
 
+    test('원인을 못 밝힌 실패도 응답이 없으면 연결 실패다 (실기기 회귀)', () {
+      // 요청이 나가는 도중에 비행기 모드를 켜면 dio 가 `error` 를 비운 채
+      // `DioException [unknown]: null` 을 준다. 타입만 보고 가르던 시절에는
+      // 이것이 `앱 오류` 로 떨어져 오프라인인데 "다시 해주세요" 로 안내했다 (#352).
+      final f = AppFailure.of(_typed(DioExceptionType.unknown));
+      expect(f.badgeOr('E-X'), 'E-NET-OFFLINE');
+    });
+
+    test('응답이 있는데 unknown 이면 앱 쪽 문제로 둔다', () {
+      final err = _res({'errorMessage': '뭔가 이상해요'}, status: 200);
+      final f = AppFailure.of(DioException(
+        requestOptions: err.requestOptions,
+        type: DioExceptionType.unknown,
+        response: err.response,
+      ));
+      expect(f.messageOr('기본'), '뭔가 이상해요');
+    });
+
     test('앱이 끊은 요청은 알리지 않는다 — 사용자가 한 적 없는 실패다', () {
       final f = AppFailure.of(_typed(DioExceptionType.cancel));
       expect(f.isSilent, isTrue);
+    });
+  });
+
+  group('네트워크 사정은 우리가 안내한다 (#352)', () {
+    test('오프라인이면 무엇을 하면 되는지 말한다', () {
+      final f = AppFailure.of(_typed(DioExceptionType.connectionError));
+      expect(f.hint, '인터넷 연결을 확인해주세요');
+      // 무엇이 안 됐는지(화면 몫)와 무엇을 하면 되는지(여기 몫)가 둘 다 나온다.
+      expect(
+        f.describe('일과를 불러오지 못했어요', 'E-HOME'),
+        '일과를 불러오지 못했어요 · 인터넷 연결을 확인해주세요 (E-NET-OFFLINE)',
+      );
+    });
+
+    test('서버가 이유를 말했으면 덧붙이지 않는다 — 두 번 말하지 않는다', () {
+      final f = AppFailure.of(_res({
+        'errorCode': 'MEMBER_SUSPENDED',
+        'errorMessage': '정지된 계정이에요',
+      }, status: 403));
+      expect(f.hint, isNull);
+      expect(f.describe('기본', 'E-X'), '정지된 계정이에요 (MEMBER_SUSPENDED)');
+    });
+
+    test('서버가 응답한 실패에는 네트워크 안내를 붙이지 않는다', () {
+      final f = AppFailure.of(_res(null, status: 500));
+      expect(f.hint, isNull);
+      expect(f.describe('저장하지 못했어요', 'E-X'), '저장하지 못했어요 (E-X/500)');
     });
   });
 
