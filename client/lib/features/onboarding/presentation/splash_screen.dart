@@ -157,6 +157,13 @@ class _SplashCanvas extends StatelessWidget {
   static const _logoTop = 396.0;
   static const _logoWidth = 164.0;
 
+  /// 로고를 읽어 주는 이름.
+  ///
+  /// 이 화면에는 **글자가 하나도 없다.** 이름을 안 주면 화면 낭독기에 아무것도
+  /// 읽히지 않아 "빈 화면"으로 들린다. 실기기 E2E 도 이 이름으로 이 화면이
+  /// 떴는지 안다 — 없으면 앱이 뜨기 전에 셔터가 내려가 홈 화면이 찍힌다 (#338).
+  static const _logoLabel = '이룸';
+
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
@@ -166,7 +173,11 @@ class _SplashCanvas extends StatelessWidget {
           Positioned(
             left: _logoLeft.w,
             top: _logoTop.h,
-            child: SvgPicture.asset(AppAssets.logo, width: _logoWidth.w),
+            child: SvgPicture.asset(
+              AppAssets.logo,
+              width: _logoWidth.w,
+              semanticsLabel: _logoLabel,
+            ),
           ),
         ],
       ),

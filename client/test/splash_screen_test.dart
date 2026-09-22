@@ -120,6 +120,16 @@ void main() {
       );
     });
 
+    testWidgets('로고에 읽을 수 있는 이름이 있다 (이슈 #338)', (tester) async {
+      // 이 화면에는 글자가 하나도 없다. 이름이 없으면 화면 낭독기에 아무것도
+      // 읽히지 않아 빈 화면으로 들린다. 실기기 E2E 도 이 이름으로 이 화면이
+      // 떴는지 안다 — 없으면 앱이 뜨기 전에 셔터가 내려가 홈 화면이 찍힌다.
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.bySemanticsLabel('이룸'), findsOneWidget);
+    });
+
     testWidgets('연출이 끝나기를 기다리지 않아도 로고가 이미 떠 있다', (tester) async {
       // 1.7초 뒤 사라지는 화면이다. 페이드를 걸면 다 뜨기 전에 넘어간다.
       await tester.pumpWidget(buildSubject());
