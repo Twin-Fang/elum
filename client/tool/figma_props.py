@@ -407,29 +407,55 @@ def check_fill(box, render, visible, findings):
     return want
 
 
+CORNER_NAMES = {'tl': '좌상', 'tr': '우상', 'br': '우하', 'bl': '좌하'}
+
+# 꼭짓점에서 대각선으로 d 들어간 점이 반지름 r 인 원호 **바깥**일 조건은
+# (r-d)²+(r-d)² > r², 즉 d < r(1 - 1/√2) ≈ r × 0.2929.
+# 뒤집으면 면이 시작되는 d 에서 반지름을 되짚을 수 있다: r ≈ d / 0.2929.
+DIAG = 1 - 2 ** -0.5
+
+
+def estimate_radius(box, render, face, behind, corner, visible, limit):
+    """꼭짓점에서 **대각선으로 들어가며 면이 시작되는 자리**로 반지름을 되짚는다.
+
+    한 점만 찍어 "면이냐 아니냐"로 가르면 상자가 3px 만 밀려도 거짓말한다 —
+    이룸이 홈의 번호 배지(40×40, r=12)가 그랬다. 배지가 3 올라가 있을 뿐인데
+    시안 꼭짓점 자리가 배지 안쪽이라 `모서리 각짐`으로 올라왔다.
+
+    **재서 값으로 말하면** 그 문제가 없다. 위 배지는 약 10 으로 재져 12 와
+    가깝고, 진짜 각진 시트는 약 3 으로 재져 20 과 확연히 다르다.
+    """
+    x, y, w, h = box['x'], box['y'], box['w'], box['h']
+    sign = {'tl': (1, 1), 'tr': (-1, 1), 'br': (-1, -1), 'bl': (1, -1)}[corner]
+    base = {'tl': (x, y), 'tr': (x + w, y),
+            'br': (x + w, y + h), 'bl': (x, y + h)}[corner]
+
+    run = 0
+    for step in range(1, int(limit) + 1):
+        pt = (base[0] + sign[0] * step, base[1] + sign[1] * step)
+        if not visible(pt, box['order']):
+            return None
+        got = render.at(*pt)
+        if got is None:
+            return None
+        if nearer(got, face, behind) == 'face':
+            run += 1
+            # 안티에일리어싱 한 줄에 속지 않도록 두 칸이 이어질 때만 인정한다.
+            if run >= 2:
+                return (step - 1) / DIAG
+        else:
+            run = 0
+    return None
+
+
 def check_corners(box, render, face, visible, findings):
-    """**이번 사고를 잡는 검사.** 둥글어야 할 자리가 채워져 있는가.
+    """**이번 사고를 잡는 검사.** 둥글어야 할 곳이 각졌나 — 재서 값으로 말한다.
 
-    ## 탐침을 어디에 둘 것인가 — 이 계산을 틀리면 도구가 조용히 거짓말한다
-
-    반지름 r 의 모서리는 꼭짓점에서 (r, r) 떨어진 곳을 중심으로 한 원호다.
-    꼭짓점에서 대각선으로 d 들어간 점 (d, d) 가 **원호 바깥**일 조건은
-
-        (r-d)² + (r-d)² > r²   →   d < r(1 - 1/√2) ≈ r × 0.293
-
-    처음 시제품은 `r × 0.3` 을 썼다. **0.293 을 아슬아슬하게 넘는 값이라
-    탐침이 곡선 안쪽에 들어간다** — 둥근 렌더를 각졌다고 보고했다.
-    그래서 0.10·0.16·0.22 세 자리를 찍어 가운데값을 쓴다. r=20 에서 곡선
-    바깥으로 2px 이상 떨어져 안티에일리어싱에도 흔들리지 않는다.
-
-    면과 배경이 비슷하면 아예 묻지 않는다 — 픽셀로 구분할 수 없는 것을
+    면과 배경이 비슷하면 아예 묻지 않는다. 픽셀로 구분할 수 없는 것을
     "이상 없음"이라고 말하면 도구를 믿을 수 없게 된다.
     """
     if face is None:
         return
-    names = {'tl': '좌상', 'tr': '우상', 'br': '우하', 'bl': '좌하'}
-    x, y, w, h = box['x'], box['y'], box['w'], box['h']
-
     for corner, r in zip(('tl', 'tr', 'br', 'bl'), box['radii']):
         # r 이 작으면 안티에일리어싱이 곡선보다 굵어 판정할 수 없다.
         if r < 6:
@@ -438,24 +464,16 @@ def check_corners(box, render, face, visible, findings):
         if behind is None or dist(face, behind) < DISTINCT:
             continue
 
-        probes = []
-        for frac in (0.10, 0.16, 0.22):
-            d = max(1.0, r * frac)
-            probes.append({
-                'tl': (x + d, y + d),
-                'tr': (x + w - d, y + d),
-                'br': (x + w - d, y + h - d),
-                'bl': (x + d, y + h - d),
-            }[corner])
-        probes = [p for p in probes if visible(p, box['order'])]
-        got = render.median(probes) if probes else None
+        got = estimate_radius(box, render, face, behind, corner, visible,
+                              limit=r * DIAG * 2 + 3)
         if got is None:
             continue
-
-        if nearer(got, face, behind) == 'face':
+        # 절반 아래로 내려가면 곡선이 아니라 각이다. 3px 미만 차이는 묻지 않는다.
+        if got < r * 0.55 and r - got >= 3:
             findings.append(finding(
                 ERROR, '모서리 각짐', box,
-                f"{names[corner]} r={round(r)} → 렌더가 면 색으로 차 있다",
+                f"{CORNER_NAMES[corner]} r={round(r)} 이어야 하는데 "
+                f"렌더는 약 {round(got)} 이다",
             ))
 
 
@@ -466,7 +484,7 @@ def check_square_corners(box, render, face, visible, findings):
     """
     if face is None:
         return
-    names = {'tl': '좌상', 'tr': '우상', 'br': '우하', 'bl': '좌하'}
+    names = CORNER_NAMES
     x, y, w, h = box['x'], box['y'], box['w'], box['h']
     if min(w, h) < 24:
         return
