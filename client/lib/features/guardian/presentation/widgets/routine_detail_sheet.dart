@@ -119,6 +119,11 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
 
     return Container(
       height: height,
+      // **자식까지 둥근 모양으로 자른다.** `decoration`의 라운드는 배경만 둥글게
+      // 칠할 뿐 자식을 자르지 않는다. 바로 아래 헤더가 배경색을 전체 폭에 깔기
+      // 때문에, 자르지 않으면 그 사각형이 둥근 모서리를 덮어 상단이 각져 보인다.
+      // 시안(`980:4891`)은 헤더 배경 자체에 `[20,20,0,0]`을 준다 (#345).
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: colors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
