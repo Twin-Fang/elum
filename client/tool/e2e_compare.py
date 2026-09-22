@@ -28,6 +28,22 @@ GAP = 14
 FONT = ImageFont.truetype('/System/Library/Fonts/AppleSDGothicNeo.ttc', 24)
 
 
+def design_path(spec, platform):
+    """이 플랫폼이 따를 시안. 시안이 하나뿐이면 둘 다 그것을 본다.
+
+    로그인은 시안이 **플랫폼별로 따로 나왔다** (#338). 한 장만 보면
+    안드로이드는 늘 어긋난 것으로 나와 진짜 결함이 묻힌다.
+    """
+    fig = spec.get('figma')
+    if not fig:
+        return None
+    if isinstance(fig, dict):
+        fig = fig.get(platform)
+        if not fig:
+            return None
+    return os.path.normpath(os.path.join(ROOT, fig))
+
+
 def tile(label, path):
     """한 칸. 파일이 없으면 자리만 비워 두고 그 사실을 적는다."""
     head = 38
@@ -56,15 +72,22 @@ def main():
         print(f'e2e/flows.json 에 {flow} 가 없다', file=sys.stderr)
         return 2
     spec = meta[flow]
-    figma = os.path.normpath(os.path.join(ROOT, spec['figma'])) if spec.get('figma') else None
+    ios_design = design_path(spec, 'ios')
+    aos_design = design_path(spec, 'android')
 
-    tiles = [
-        tile(f"시안 {spec.get('node', '')}".strip(), figma),
+    # 시안이 플랫폼별로 갈린 화면은 **두 장을 다 보여준다.** 한 장만 걸면
+    # 나머지 한쪽은 늘 어긋나 보여 진짜 결함이 묻힌다 (#338).
+    if ios_design == aos_design:
+        tiles = [tile(f"시안 {spec.get('node', '')}".strip(), ios_design)]
+    else:
+        tiles = [tile('시안 iOS', ios_design), tile('시안 AOS', aos_design)]
+    tiles += [
         tile('iOS', os.path.join(ROOT, 'e2e', 'shots', 'ios', f'{flow}.png')),
         tile('Android', os.path.join(ROOT, 'e2e', 'shots', 'android', f'{flow}.png')),
     ]
     h = max(t.height for t in tiles)
-    sheet = Image.new('RGB', (TILE_W * 3 + GAP * 2, h + 40), (255, 255, 255))
+    n = len(tiles)
+    sheet = Image.new('RGB', (TILE_W * n + GAP * (n - 1), h + 40), (255, 255, 255))
     ImageDraw.Draw(sheet).text((8, 8), spec.get('title', flow), font=FONT, fill=(0, 0, 0))
     for i, t in enumerate(tiles):
         sheet.paste(t, (i * (TILE_W + GAP), 40))

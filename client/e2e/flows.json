@@ -3,5 +3,20 @@
     "title": "보호자 홈 (일과 있음)",
     "figma": "../docs/figma/home-redesign/home_931-3896.png",
     "node": "931:3896"
+  },
+  "login": {
+    "title": "로그인 (iOS 3 버튼 · 안드 2 버튼)",
+    "figma": {
+      "ios": "../docs/figma/i297-new/x1/login_ios_238-1808.png",
+      "android": "../docs/figma/i297-new/x1/login_aos_1022-4333.png"
+    },
+    "node": "238:1808 (iOS) · 1022:4333 (AOS)",
+    "note": "시안이 플랫폼별로 다르다 — 병아리가 서로 반대쪽을 본다 (#338). 기기를 로그아웃해 둔 뒤 돌린다."
+  },
+  "splash": {
+    "title": "스플래시 (로고 한 장)",
+    "figma": "../docs/figma/i297-new/x1/splash_1022-4415.png",
+    "node": "1022:4415",
+    "note": "1.7초 뒤 스스로 넘어간다 — 앱을 띄우자마자 찍는다."
   }
 }

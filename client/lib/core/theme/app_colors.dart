@@ -70,6 +70,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.brandPeach,
     required this.brandOrange,
     required this.accentYellow,
+    required this.splashPlain,
     required this.splashTop,
     required this.splashBottom,
     required this.splashHill,
@@ -244,8 +245,14 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 별 보상
   final Color accentYellow;
 
-  // 시작 화면 (Figma `시작` 238:1808)
-  /// 배경 그라데이션 시작색
+  // 시작·로그인 화면
+  /// 시작 화면의 **단색** 배경 (Figma `스플래시` 1022:4415).
+  ///
+  /// 값이 [splashBottom]과 같지만 따로 둔다 — 시작 화면은 단색 한 장이고
+  /// 로그인 화면은 그라데이션이라, 한쪽만 바뀔 수 있다.
+  final Color splashPlain;
+
+  /// 로그인 화면 배경 그라데이션 시작색 (Figma `로그인_iOS` 238:1808)
   final Color splashTop;
 
   /// 배경 그라데이션 끝색
@@ -586,6 +593,7 @@ class AppColors extends ThemeExtension<AppColors> {
     brandPeach: Color(0xFFFFC9BB),
     brandOrange: Color(0xFFFF8B22),
     accentYellow: Color(0xFFFFD629),
+    splashPlain: Color(0xFFFFFADB),
     splashTop: Color(0xFFFFFFFF),
     splashBottom: Color(0xFFFFFADB),
     splashHill: Color(0xFFFFD629),
@@ -721,6 +729,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? brandPeach,
     Color? brandOrange,
     Color? accentYellow,
+    Color? splashPlain,
     Color? splashTop,
     Color? splashBottom,
     Color? splashHill,
@@ -845,6 +854,7 @@ class AppColors extends ThemeExtension<AppColors> {
       brandPeach: brandPeach ?? this.brandPeach,
       brandOrange: brandOrange ?? this.brandOrange,
       accentYellow: accentYellow ?? this.accentYellow,
+      splashPlain: splashPlain ?? this.splashPlain,
       splashTop: splashTop ?? this.splashTop,
       splashBottom: splashBottom ?? this.splashBottom,
       splashHill: splashHill ?? this.splashHill,
@@ -1008,6 +1018,7 @@ class AppColors extends ThemeExtension<AppColors> {
       brandPeach: Color.lerp(brandPeach, other.brandPeach, t)!,
       brandOrange: Color.lerp(brandOrange, other.brandOrange, t)!,
       accentYellow: Color.lerp(accentYellow, other.accentYellow, t)!,
+      splashPlain: Color.lerp(splashPlain, other.splashPlain, t)!,
       splashTop: Color.lerp(splashTop, other.splashTop, t)!,
       splashBottom: Color.lerp(splashBottom, other.splashBottom, t)!,
       splashHill: Color.lerp(splashHill, other.splashHill, t)!,

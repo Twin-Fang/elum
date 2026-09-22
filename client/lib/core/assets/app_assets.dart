@@ -191,11 +191,23 @@ abstract final class AppAssets {
   /// 33 짧아 보였다 (#297). 필터를 버리는 것과 같은 부류다.
   static const splashChickBody = '$_images/splash_chick_body.png';
 
+  /// 병아리 몸통 — **안드로이드 시안 전용** (Figma `1022:4386` — 393×481.5).
+  ///
+  /// iOS 것(439)보다 **43 크다.** 같은 그림을 늘려 쓰면 방사형 그라데이션이
+  /// 세로로 늘어나 민트가 아래로 밀린다 — 그래서 따로 받았다 (#338).
+  static const splashChickBodyAos = '$_images/splash_chick_body_aos.png';
+
   /// 몸통 하단 페이드 (393×177)
   static const splashFade = '$_images/splash_fade.svg';
 
-  /// 새싹 줄기 (113×111)
+  /// 새싹 줄기 (113×111) — iOS 시안(`726:4742`). 구슬이 **왼쪽** 끝에 달린다.
   static const splashHill = '$_images/splash_hill.svg';
+
+  /// 새싹 줄기 — **안드로이드 시안 전용** (Figma `1022:4385` — 113×111).
+  ///
+  /// [splashHill]의 **거울상이다.** 병아리가 앞을 보는 배치라 줄기가 반대로
+  /// 휘고 구슬이 오른쪽 끝에 달린다. 좌우 반전으로는 만들 수 없어 따로 받았다 (#338).
+  static const splashHillAos = '$_images/splash_hill_aos.svg';
 
   /// 반짝이는 별 (36×34 영역)
   /// 새싹 줄기 끝 청록 구슬 (Figma `726:4744` — 본체 36×34 + 둘레 빛 blur 30).
@@ -208,18 +220,18 @@ abstract final class AppAssets {
   @Deprecated('빛이 빠진다. splashOrb(PNG)를 쓴다.')
   static const splashStar = '$_images/splash_star.svg';
 
-  /// 병아리 **눈** (각 30×32, y=573).
+  /// 병아리 **눈** (각 30×32) — **안드로이드 시안에만 있다.**
   ///
-  /// 시안 `726:4942`(background_graphic)에는 벡터가 셋뿐이다 — 줄기·몸통·구슬.
-  /// 병아리가 **뒤를 돌아본** 모습이라 얼굴이 없고 새싹도 반대쪽으로 갔다.
-  /// 그 시안은 버튼이 셋인 iOS 기준이다.
+  /// iOS 시안(`726:4942`)에는 벡터가 셋뿐이다 — 줄기·몸통·구슬. 병아리가
+  /// **뒤를 돌아본** 모습이라 얼굴이 없고 새싹도 반대쪽으로 갔다.
+  /// 안드로이드 시안(`1022:4333`)은 앞을 보고 얼굴이 있다.
   ///
-  /// **안드로이드는 애플 버튼이 없어 자리가 남아 얼굴을 살린다.**
-  /// 그리는 조건은 `SplashScene.showFace`가 정한다 (#297).
+  /// 파일은 두 시안이 **똑같다**(md5 일치). 자리만 다르다 — 안드로이드는 `y=530`
+  /// 이고 옛 시안은 573이었다. 그리는 조건과 자리는 `LoginSceneLayout`이 정한다 (#338).
   static const splashCharLeft = '$_images/splash_char_left.svg';
   static const splashCharRight = '$_images/splash_char_right.svg';
 
-  /// 병아리 **부리** (45×25). 눈 바로 아래 y=599. [splashCharLeft] 참조.
+  /// 병아리 **부리** (45×25). 눈 바로 아래. [splashCharLeft] 참조.
   static const splashCenter = '$_images/splash_center.svg';
 
   /// 이룸이 카드의 **체크 표시** (Figma `993:4331` — 48×35.76).

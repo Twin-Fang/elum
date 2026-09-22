@@ -2,18 +2,23 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../auth/domain/app_role.dart';
-import '../../../core/widgets/splash_scene.dart';
+import '../../../core/theme/theme_context_ext.dart';
 import '../../auth/data/auth_repository.dart';
 import '../application/onboarding_notifier.dart';
 
-/// Figma `시작` (238:1808) — 서비스 진입 화면.
+/// Figma `스플래시` (1022:4415) — 서비스 진입 화면.
 ///
-/// 그림은 [SplashScene]이 그린다. 로그인 화면이 같은 그림을 쓰기 때문에
-/// 한 벌로 묶어 뒀다 (이슈 #207). 이 화면은 **언제 어디로 넘길지**만 맡는다.
+/// 그림은 [_SplashCanvas]가 그린다. 이 화면은 **언제 어디로 넘길지**만 맡는다.
+///
+/// **로그인 화면과 그림을 나눠 가진다** (이슈 #338). 한때 둘이 같은 장면을
+/// 공유했는데(#207), 새 시안에서 시작 화면이 로고 한 장으로 줄면서 갈라졌다.
 ///
 /// 시작 화면을 건너뛸지 판단한다.
 ///
@@ -134,8 +139,37 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    // 얼굴은 애플 버튼이 없는 기기에서만 그린다 — 로그인 화면과 기준을 맞춘다 (#297).
-    body: SplashScene(showFace: SplashScene.faceShowsOnThisPlatform),
-  );
+  Widget build(BuildContext context) => const Scaffold(body: _SplashCanvas());
+}
+
+/// Figma `스플래시`(1022:4415) — **단색 배경 위에 로고 하나뿐이다.**
+///
+/// 병아리도 `오늘의 하루,`도 없다. 그 그림은 로그인 화면(`238:1808`·`1022:4333`)
+/// 것이고, 시작 화면은 1.7초 뒤 사라지므로 읽을 것을 얹지 않는다 (이슈 #338).
+///
+/// **등장 연출을 걸지 않는다.** 머무는 시간이 짧아 페이드를 넣으면 로고가 다 뜨기도
+/// 전에 화면이 넘어간다.
+class _SplashCanvas extends StatelessWidget {
+  const _SplashCanvas();
+
+  /// 로고 자리 — 시안 실측 (115, 396) 164×60.
+  static const _logoLeft = 115.0;
+  static const _logoTop = 396.0;
+  static const _logoWidth = 164.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: context.colors.splashPlain,
+      child: Stack(
+        children: [
+          Positioned(
+            left: _logoLeft.w,
+            top: _logoTop.h,
+            child: SvgPicture.asset(AppAssets.logo, width: _logoWidth.w),
+          ),
+        ],
+      ),
+    );
+  }
 }

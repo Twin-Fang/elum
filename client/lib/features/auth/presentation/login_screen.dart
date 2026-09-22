@@ -10,7 +10,7 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/splash_scene.dart';
+import '../../../core/widgets/login_scene.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/auth_repository.dart';
 import '../data/oauth_sdk.dart';
@@ -20,9 +20,9 @@ import '../data/oauth_sdk.dart';
 /// 계정이 먼저 생기고 그 안에 당사자 프로필을 만드는 서버 구조와 순서를 맞췄다.
 /// 재설치한 사용자는 로그인만 하면 아이 정보가 서버에서 되살아난다.
 ///
-/// **화면 그림은 시작 화면과 같은 [SplashScene]을 그대로 쓴다** (이슈 #207).
-/// `시작하기` 버튼이 있던 자리에 제공자 버튼을 얹는다. 시작 화면에서 넘어오자마자
-/// 배경이 통째로 바뀌면 다른 앱으로 튄 것처럼 보인다.
+/// **화면 그림은 [LoginScene]이 그리고, 배치는 플랫폼마다 다르다** (이슈 #338).
+/// 시안이 `로그인_iOS`(238:1808)와 `로그인_AOS`(1022:4333) 둘로 나와, 병아리가
+/// 서로 반대쪽을 보고 새싹도 화면 반대편에 있다.
 ///
 /// **제공자 버튼은 각 사의 브랜드 규격을 따른다.** 색·문구를 임의로 바꾸면
 /// 스토어 심사나 제공자 검수에서 지적받는다.
@@ -36,13 +36,17 @@ import '../data/oauth_sdk.dart';
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
-  /// 애플 버튼을 강제로 켠다 — **시안 대조 전용**.
+  /// 이 기기가 iOS인 척한다 — **시안 대조 전용**.
   ///
   /// 애플 로그인은 iOS에서만 뜨는데 위젯 시험은 macOS에서 돈다. 그대로 두면
   /// 버튼이 둘만 그려져 셋을 그린 시안과 자리가 통째로 어긋나, 정작 봐야 할
   /// 것이 묻힌다 (#297). 실제 화면 동작은 바꾸지 않는다.
+  ///
+  /// **버튼 유무와 장면 배치를 한 값이 함께 정한다.** 둘을 따로 열어 두면
+  /// 시안에 없는 조합(얼굴 + 버튼 셋)을 시험이 만들어 낸다 — 그 조합이 바로
+  /// 부리가 버튼 사이로 삐져나오던 화면이다 (#338).
   @visibleForTesting
-  static bool debugForceAppleButton = false;
+  static bool? debugPretendIos;
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -131,16 +135,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.invalidate(onboardingProvider);
   }
 
+  /// 이 기기가 iOS인가 — **애플 버튼과 장면 배치가 같이 갈린다.**
+  bool get _isIos => LoginScreen.debugPretendIos ?? Platform.isIOS;
+
   /// 애플 버튼을 그리는가 — iOS 에서만 뜬다 (심사 요건).
-  ///
-  /// 이 값이 **병아리 얼굴 유무까지 정한다.** 버튼이 셋이면 부리가 버튼 사이로
-  /// 삐져나오므로 얼굴을 빼고, 둘뿐인 안드로이드는 살린다 (#297).
-  bool get _showApple => Platform.isIOS || LoginScreen.debugForceAppleButton;
+  bool get _showApple => _isIos;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SplashScene(showFace: !_showApple, overlay: _buttons(context)),
+      body: LoginScene(
+        layout: _isIos ? LoginSceneLayout.ios : LoginSceneLayout.android,
+        overlay: _buttons(context),
+      ),
     );
   }
 
@@ -231,18 +238,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 ///
 /// 로그인 수단이 여럿이면 무엇을 썼는지 잊는다. 다른 것으로 들어오면 별개 계정이
 /// 생겨 아이 정보가 사라진 것처럼 보인다. 그 사고를 막는 장치다.
+/// `지난번에 이걸로 로그인했어요` — 마지막으로 쓴 제공자 위에 붙는다.
+///
+/// **글자 뒤에 옅은 알약을 깐다.** 이 문구는 병아리 그림 위에 얹히는데 회색
+/// 글자라 그냥 두면 묻힌다. 안드로이드에서는 얼굴을 그리므로(#297) 부리와
+/// 정확히 겹쳐 `이걸로` 가 읽히지 않았다 — 부리 y614~638, 문구 y623~633
+/// (이슈 #337). iOS 도 노란 몸통 위라 대비가 좋지 않아 **양쪽 다** 깐다.
+///
+/// 반투명이라 뒤 그림이 비쳐 덧댄 것처럼 보이지 않는다.
 class _LastUsedHint extends StatelessWidget {
   const _LastUsedHint();
+
+  /// 알약이 글자를 감싸는 여백. 시안에 없는 요소라 최소로 둔다.
+  static const _padH = 10.0;
+  static const _padV = 3.0;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: context.space.xs.h / 2),
-      child: Text(
-        '지난번에 이걸로 로그인했어요',
-        textAlign: TextAlign.center,
-        style: context.typo.caption.copyWith(
-          color: context.colors.textSecondary,
+      // 알약이 글자만큼만 넓어야 한다 — 그냥 두면 버튼 폭까지 늘어난다.
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: _padH.w,
+            vertical: _padV.h,
+          ),
+          decoration: BoxDecoration(
+            color: context.colors.surface.withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            '지난번에 이걸로 로그인했어요',
+            textAlign: TextAlign.center,
+            style: context.typo.caption.copyWith(
+              color: context.colors.textSecondary,
+            ),
+          ),
         ),
       ),
     );

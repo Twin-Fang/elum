@@ -1,6 +1,7 @@
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/token_store.dart';
+import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/onboarding/presentation/splash_screen.dart';
@@ -13,17 +14,15 @@ import 'package:go_router/go_router.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
-/// 시작 화면은 Figma `시작`(238:1808)을 따른다.
+/// 시작 화면은 Figma `스플래시`(1022:4415)를 따른다.
 ///
-/// 이 테스트가 존재하는 이유: 화면 요소를 직접 그리려다 형태가 틀리는 사고를
-/// 막기 위함이다. 병아리 몸통은 둥근 SVG인데 사각형으로 그려진 적이 있다.
+/// **시안에 있는 것은 단색 배경과 로고 하나뿐이다.** 병아리·문구는 로그인 화면
+/// 것이다 (이슈 #338). 한때 두 화면이 같은 장면을 공유했는데(#207) 새 시안에서
+/// 갈라졌다.
 ///
-/// ## 반복 idle 모션과 pumpAndSettle ⚠️
-///
-/// 시작 화면은 병아리 숨쉬기·별 반짝임 idle 모션을 무한 반복한다.
-/// 그대로 `pumpAndSettle()`을 부르면 애니메이션이 끝나지 않아 타임아웃이 난다.
-/// 화면은 OS "동작 줄이기"를 존중해 idle을 정지하므로, 구성·이동 테스트는
-/// 그 설정을 켠 상태로 돌린다. idle 자체는 별도 그룹에서 고정 pump로 검증한다.
+/// 이 테스트가 존재하는 이유 — **에셋은 시안에서 빠져도 앱에서 저절로 사라지지
+/// 않는다.** 실제로 두 달 전 시안의 병아리 얼굴이 그렇게 남아 화면에 삐져나와
+/// 있었다 (#297). 그래서 "없어야 하는 것이 없는지"를 함께 고정한다.
 void main() {
   Widget buildSubject({bool onboardingCompleted = false}) {
     final router = GoRouter(
@@ -85,52 +84,48 @@ void main() {
   group('시작 화면 구성', () {
     useReduceMotion();
 
-    testWidgets('Figma 문구 2줄이 보이고 누를 버튼은 없다 (이슈 #207)', (tester) async {
+    testWidgets('시안대로 로고 하나만 그린다 (이슈 #338)', (tester) async {
       await tester.pumpWidget(buildSubject());
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
 
-      expect(find.text('오늘의 하루,'), findsOneWidget);
-      expect(find.text('차근차근 함께해요'), findsOneWidget);
-      // `시작하기`는 다음에 뭐가 나오는지 말해 주지 않으면서 한 번 더 누르게만 했다.
+      expect(svgWithAsset(AppAssets.logo), findsOneWidget);
+      // Cloudsofa_namgim 폰트를 못 구해 텍스트로 대체했던 적이 있다
+      expect(find.text('이룸'), findsNothing);
+    });
+
+    testWidgets('로그인 화면 그림이 되살아나지 않는다 (이슈 #338)', (tester) async {
+      // 되돌림 감시 — 시안에서 빠진 에셋이 앱에 남아 있던 사고가 있었다 (#297).
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(imageWithAsset(AppAssets.splashChickBody), findsNothing);
+      expect(svgWithAsset(AppAssets.splashHill), findsNothing);
+      expect(imageWithAsset(AppAssets.splashOrb), findsNothing);
+      expect(find.text('오늘의 하루,'), findsNothing);
+      expect(find.text('차근차근 함께해요'), findsNothing);
+      // `시작하기`는 다음에 뭐가 나오는지 말해 주지 않으면서 한 번 더 누르게만 했다
       expect(find.text('시작하기'), findsNothing);
     });
 
-    testWidgets('로고는 텍스트가 아니라 SVG 에셋이다', (tester) async {
-      // Cloudsofa_namgim 폰트를 못 구해 텍스트로 대체했던 적이 있다.
-      // 실제로는 로고 SVG가 따로 있다.
+    testWidgets('배경은 시안의 단색이다 (이슈 #338)', (tester) async {
+      // 그라데이션(로그인 화면 것)을 잘못 얹으면 위쪽이 하얗게 뜬다
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('이룸'), findsNothing);
-      expect(svgWithAsset(AppAssets.logo), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is ColoredBox && w.color == AppColors.light.splashPlain,
+        ),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('병아리 몸통을 직접 그리지 않고 SVG로 렌더링한다', (tester) async {
-      // 둥근 형태와 방사형 그라데이션이 SVG 안에 있다.
-      // Container + RadialGradient로 흉내내면 사각형이 된다.
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(imageWithAsset(AppAssets.splashChickBody), findsOneWidget);
-    });
-
-    testWidgets('장식 요소가 모두 배치된다', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(svgWithAsset(AppAssets.splashHill), findsOneWidget);
-      expect(imageWithAsset(AppAssets.splashOrb), findsOneWidget);
-    });
-
-    testWidgets('장면 요소는 첫 프레임부터 완성돼 있다', (tester) async {
-      // 병아리·언덕·별이 뒤늦게 fade-in하면 "덜 로드된 느낌"이 난다.
-      // 등장 연출은 문구·로고에만 건다. (설계 문서 2026-07-22)
+    testWidgets('연출이 끝나기를 기다리지 않아도 로고가 이미 떠 있다', (tester) async {
+      // 1.7초 뒤 사라지는 화면이다. 페이드를 걸면 다 뜨기 전에 넘어간다.
       await tester.pumpWidget(buildSubject());
       // pumpAndSettle 없이 첫 프레임만 그린다
 
-      expect(imageWithAsset(AppAssets.splashChickBody), findsOneWidget);
-      expect(svgWithAsset(AppAssets.splashHill), findsOneWidget);
-      expect(imageWithAsset(AppAssets.splashOrb), findsOneWidget);
+      expect(svgWithAsset(AppAssets.logo), findsOneWidget);
     });
   });
 
@@ -165,43 +160,6 @@ void main() {
     });
   });
 
-  group('idle 모션', () {
-    /// 줄기+구슬 부유 위젯 안의 Transform.translate 세로 offset을 읽는다.
-    double stemOffsetY(WidgetTester tester) {
-      final transform = tester.widget<Transform>(
-        find.descendant(
-          of: find.byKey(const ValueKey('splash-stem-float')),
-          matching: find.byType(Transform),
-        ),
-      );
-      return transform.transform.getTranslation().y;
-    }
-
-    testWidgets('줄기와 구슬이 부유한다', (tester) async {
-      // 병아리 몸은 고정, 줄기+구슬만 아주 살짝 상하로 떠다닌다.
-      await tester.pumpWidget(buildSubject());
-      await tester.pump(const Duration(milliseconds: 200));
-
-      // 시간이 흐르면 세로 위치가 움직여야 idle이 살아 있는 것이다
-      final before = stemOffsetY(tester);
-      await tester.pump(const Duration(milliseconds: 700));
-
-      expect(stemOffsetY(tester), isNot(before));
-    });
-
-    testWidgets('동작 줄이기 설정에서는 idle이 정지한다', (tester) async {
-      // 움직임에 민감한 사용자 보호 (motion.md §접근성)
-      tester.platformDispatcher.accessibilityFeaturesTestValue =
-          const FakeAccessibilityFeatures(disableAnimations: true);
-      addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
-
-      await tester.pumpWidget(buildSubject());
-
-      // idle이 정지 상태여야 등장 연출만 끝나고 안정된다.
-      // 반복 중이면 여기서 타임아웃으로 실패한다.
-      await tester.pumpAndSettle();
-
-      expect(imageWithAsset(AppAssets.splashChickBody), findsOneWidget);
-    });
-  });
+  // idle 부유 모션 시험은 **로그인 화면으로 옮겼다** (이슈 #338).
+  // 새싹 줄기와 구슬이 그쪽에만 있다 — `login_screen_test.dart` 참고.
 }

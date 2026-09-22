@@ -22,6 +22,7 @@ import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
 import 'package:elum/features/link/presentation/link_code_screen.dart';
+import 'package:elum/features/onboarding/presentation/splash_screen.dart';
 import 'package:elum/features/onboarding/presentation/card_completion_screen.dart';
 import 'package:elum/features/onboarding/presentation/name_screen.dart';
 import 'package:elum/features/onboarding/presentation/goals_screen.dart';
@@ -657,8 +658,8 @@ void main() {
   // 로그인 (#297). 애플 버튼을 켜고 찍는다 — 시안이 셋을 그렸고, 시험 환경
   // (macOS)에서는 기본으로 둘만 떠서 버튼 자리가 통째로 어긋난다.
   testWidgets('로그인 (Figma 238:1808)', (tester) async {
-    LoginScreen.debugForceAppleButton = true;
-    addTearDown(() => LoginScreen.debugForceAppleButton = false);
+    LoginScreen.debugPretendIos = true;
+    addTearDown(() => LoginScreen.debugPretendIos = null);
 
     final router = GoRouter(
       initialLocation: Routes.login,
@@ -699,6 +700,104 @@ void main() {
       find.byType(LoginScreen),
       matchesGoldenFile('figma/login_238-1808.png'),
     );
+  });
+
+  // 로그인_AOS (#338). 안드로이드 시안은 병아리가 앞을 보고 버튼이 둘이다.
+  // **이 프레임을 안 올리면 안드로이드 화면은 아무도 재지 않는다** — 실제로
+  // iOS 배치를 그대로 쓰고 있던 것이 그래서 안 드러났다.
+  testWidgets('로그인_AOS (Figma 1022:4333)', (tester) async {
+    LoginScreen.debugPretendIos = false;
+    addTearDown(() => LoginScreen.debugPretendIos = null);
+
+    final router = GoRouter(
+      initialLocation: Routes.login,
+      routes: [
+        GoRoute(
+          path: Routes.login,
+          builder: (context, state) => const LoginScreen(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [testStorageOverride()],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp.router(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            routerConfig: router,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await precacheAllImages(tester);
+    await tester.pump(const Duration(milliseconds: 200));
+
+    await expectLater(
+      find.byType(LoginScreen),
+      matchesGoldenFile('figma/login_aos_1022-4333.png'),
+    );
+  });
+
+  // 스플래시 (#338). 시안에 있는 것은 단색 배경과 로고뿐이다.
+  testWidgets('스플래시 (Figma 1022:4415)', (tester) async {
+    final router = GoRouter(
+      initialLocation: Routes.splash,
+      routes: [
+        GoRoute(
+          path: Routes.splash,
+          builder: (context, state) => const SplashScreen(),
+        ),
+        // 1.7초 뒤 스스로 넘어간다 — 갈 곳이 없으면 타이머가 남아 실패한다.
+        GoRoute(
+          path: Routes.login,
+          builder: (context, state) => const SizedBox.shrink(),
+        ),
+        GoRoute(
+          path: Routes.roleSelect,
+          builder: (context, state) => const SizedBox.shrink(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [testStorageOverride()],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp.router(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            routerConfig: router,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    await expectLater(
+      find.byType(SplashScreen),
+      matchesGoldenFile('figma/splash_1022-4415.png'),
+    );
+
+    // 화면이 스스로 넘어가는 타이머를 소진시킨다
+    await tester.pump(const Duration(milliseconds: 1200));
+    await tester.pumpAndSettle();
   });
 
   // 일과 만들기 완료 (#297). 1.5초 뒤 홈으로 스스로 넘어가므로 그 전에 찍는다.

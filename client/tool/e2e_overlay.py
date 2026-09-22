@@ -49,6 +49,22 @@ SEARCH = 60             # 세로 이동을 찾는 범위 (논리 px)
 FONT = ImageFont.truetype('/System/Library/Fonts/AppleSDGothicNeo.ttc', 22)
 
 
+def design_path(spec, platform):
+    """이 플랫폼이 따를 시안. 시안이 하나뿐이면 둘 다 그것을 본다.
+
+    로그인은 시안이 **플랫폼별로 따로 나왔다** (#338). iOS 시안 위에
+    안드로이드를 겹치면 병아리가 서로 반대쪽을 봐 화면 절반이 붉어진다.
+    """
+    fig = spec.get('figma')
+    if not fig:
+        return None
+    if isinstance(fig, dict):
+        fig = fig.get(platform)
+        if not fig:
+            return None
+    return os.path.normpath(os.path.join(ROOT, fig))
+
+
 def load(path):
     """논리 크기(393×852)로 맞춰 읽는다. 기기마다 해상도가 다르다."""
     im = Image.open(path).convert('RGB')
@@ -75,7 +91,10 @@ def best_shift(design, shot, mask_top, mask_bottom):
 
 def overlay(flow, platform, spec):
     shot_path = os.path.join(ROOT, 'e2e', 'shots', platform, f'{flow}.png')
-    figma_path = os.path.normpath(os.path.join(ROOT, spec['figma']))
+    figma_path = design_path(spec, platform)
+    if not figma_path:
+        print(f'{flow}: {platform} 시안이 flows.json 에 없다', file=sys.stderr)
+        return
     if not os.path.exists(shot_path):
         print(f'  {platform}: 캡처 없음 — bash tool/e2e_shot.sh {flow} 먼저')
         return
