@@ -1,13 +1,21 @@
 @Tags(['golden'])
 library;
 
+import 'package:dio/dio.dart';
+import 'package:elum/core/storage/local_storage.dart';
+import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/auth/presentation/consent_document_list_screen.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/draft_routines_screen.dart';
+import 'package:elum/features/auth/domain/consent_documents.dart';
+import 'package:elum/features/auth/presentation/consent_document_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_settings_screen.dart';
+import 'package:elum/features/link/data/device_link_repository.dart';
+import 'package:elum/features/link/domain/link_status.dart';
+import 'package:elum/features/link/presentation/link_code_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -94,4 +102,45 @@ void main() {
       matchesGoldenFile('figma/settings_terms_1027-4683.png'),
     );
   });
+
+  testWidgets('설정 — 이룸이 휴대폰 연결 (Figma 1027:4617)', (tester) async {
+    // 설정에서 들어온 화면이다 — `fromOnboarding: false`.
+    // 온보딩 시안(`732:5334`)과 머리·하단이 다르므로 둘을 같은 골든으로 묶으면
+    // 한쪽이 어긋나도 드러나지 않는다.
+    await _pump(
+      tester,
+      const LinkCodeScreen(),
+      extra: [deviceLinkRepositoryProvider.overrideWithValue(_FakeLink())],
+    );
+    await expectLater(
+      find.byType(LinkCodeScreen),
+      matchesGoldenFile('figma/settings_link_1027-4617.png'),
+    );
+  });
+
+  testWidgets('설정 — 약관 상세 (Figma 1027:4831)', (tester) async {
+    final overseas = consentItems.firstWhere((e) => e.key == 'overseasTransferAgreed');
+    await _pump(tester, ConsentDocumentScreen(item: overseas));
+    await expectLater(
+      find.byType(ConsentDocumentScreen),
+      matchesGoldenFile('figma/settings_terms_detail_1027-4831.png'),
+    );
+  });
+}
+
+/// 암호를 고정한다. 진짜 저장소를 쓰면 매번 다른 여섯 글자가 나와 골든이 흔들린다.
+class _FakeLink extends DeviceLinkRepository {
+  _FakeLink()
+      : super(
+          dio: Dio(),
+          tokens: InMemoryTokenStore(),
+          storage: InMemoryStorage(),
+        );
+
+  @override
+  Future<IssuedLinkCode?> issue() async =>
+      IssuedLinkCode.fromNow(code: '5NJ280', expiresInSeconds: 599);
+
+  @override
+  Future<LinkStatus> status() async => const LinkStatus(devices: []);
 }

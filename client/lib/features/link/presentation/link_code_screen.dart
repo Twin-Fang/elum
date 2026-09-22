@@ -18,8 +18,18 @@ import '../domain/link_status.dart';
 
 /// 연결 암호 만들기 — **보호자 휴대폰** (이슈 #205 · 디자인 #232).
 ///
-/// 진입은 두 곳이다 — PIN 설정 직후(온보딩), 홈 → 설정.
-/// 온보딩에서 들어온 경우에만 `나중에 할게요`를 보여준다.
+/// 진입은 두 곳이고 **시안이 서로 다르다.**
+///
+/// | | 온보딩 (`732:5334`) | 설정 (`1027:4617`) |
+/// | --- | --- | --- |
+/// | 네비게이션 제목 | 없음 | `이룸이 휴대폰 연결` |
+/// | 뒤로가기 y | 79 | **67** |
+/// | 제목 y | 131 | **147** |
+/// | 시작하기 | 있음 | **없음** |
+/// | 나중에 할게요 | 있음 | 없음 |
+///
+/// 설정에서는 이미 앱 안이라 `시작하기`가 갈 곳이 없다 — 연결하면 팝업으로
+/// 알리고 뒤로가기로 돌아간다. 시안도 그렇게 그려져 있다 (#349).
 ///
 /// 이 화면의 주인공은 **여섯 글자**다. QR이 빠지면서 화면이 비었으므로 암호를 크게 키운다.
 ///
@@ -76,6 +86,11 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
 
   static const _codeToTimer = 24.0;
   static const _timerToRetry = 16.0;
+
+  /// 설정 진입 시안(`1027:4617`)의 뒤로가기 y와 제목 y.
+  /// 설정 묶음은 전부 67/147 이다 — 온보딩 계열(79/131)과 12·16씩 다르다.
+  static const _settingsBackTop = 67.0;
+  static const _settingsTitleY = 147.0;
 
   @override
   void initState() {
@@ -165,15 +180,22 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     final colors = context.colors;
     final issued = _issued;
     final expired = issued?.isExpired ?? false;
+    // 설정에서 들어온 화면은 머리와 하단이 통째로 다르다 (클래스 주석의 표).
+    final fromSettings = !widget.fromOnboarding;
 
     return ElumScaffold(
       onBack: () => context.pop(),
-      // 시안은 연결되기 전에도 버튼을 **보여주되 누를 수 없게** 둔다 (732:5334).
-      // 여기서는 버튼이 다음 할 일을 알려주는 이정표라 자리를 비우지 않는다.
-      bottomButton: ElumButton(
-        label: '시작하기',
-        onPressed: _linked ? _goHome : null,
-      ),
+      title: fromSettings ? '이룸이 휴대폰 연결' : null,
+      backTop: fromSettings ? _settingsBackTop : null,
+      // 온보딩 시안은 연결되기 전에도 버튼을 **보여주되 누를 수 없게** 둔다
+      // (732:5334) — 다음 할 일을 알려주는 이정표라 자리를 비우지 않는다.
+      // 설정 시안(`1027:4617`)에는 버튼 자체가 없다.
+      bottomButton: fromSettings
+          ? null
+          : ElumButton(
+              label: '시작하기',
+              onPressed: _linked ? _goHome : null,
+            ),
       // `나중에 할게요`는 CTA 아래에 붙는다 (시안 y=765).
       //
       // **연결된 뒤에도 남는다** — 시안 `732:5850`이 그렇게 그려져 있다.
@@ -207,6 +229,9 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
         children: [
           ElumHeader(
             hasBackButton: true,
+            // 설정 시안은 제목이 147에서 시작한다 — 뒤로가기 줄에 제목이 함께
+            // 서면서 머리가 107에서 끝나기 때문이다.
+            titleY: fromSettings ? _settingsTitleY : null,
             title: '$_elumiName의 휴대폰을\n연결할까요?',
             description:
                 _errorMessage ?? '$_elumiName의 휴대폰에서 아래 코드를 입력하세요',

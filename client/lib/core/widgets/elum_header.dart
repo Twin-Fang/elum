@@ -20,6 +20,7 @@ class ElumHeader extends StatelessWidget {
     required this.title,
     this.description,
     this.hasBackButton = false,
+    this.titleY,
   });
 
   /// 2줄로 줄바꿈된 제목. 줄바꿈 위치는 디자인이 정한 대로 전달한다.
@@ -34,6 +35,13 @@ class ElumHeader extends StatelessWidget {
   /// (예전엔 화면마다 손으로 넘겼는데 비밀번호·연결암호가 빠뜨려 제목이
   /// 40씩 내려가 있었다 — #297)
   final bool hasBackButton;
+
+  /// 제목 y를 시안대로 덮어쓴다. 기본은 온보딩 계열의 131.
+  ///
+  /// **설정에서 들어오는 화면은 머리가 다르다.** 뒤로가기 줄에 네비게이션 제목이
+  /// 함께 서고(뒤로가기 y=67 → 하단 107) 본문은 147에서 시작한다
+  /// (`1027:4617` 이룸이휴대폰연결). 기본값 131을 그대로 쓰면 제목이 16 뜬다.
+  final double? titleY;
 
   /// Figma 제목 y좌표 (화면 최상단 기준)
   static const _titleY = 131.0;
@@ -55,9 +63,10 @@ class ElumHeader extends StatelessWidget {
 
     // 뒤로가기가 있으면 뼈대가 119까지 소비했다 → 남은 간격은 131-119=12.
     // 없으면 화면 최상단부터이므로 SafeArea를 뺀 만큼 띄운다.
+    final y = titleY ?? _titleY;
     final topGap = consumedTop > 0
-        ? (_titleY - consumedTop).h
-        : (_titleY.h - safeTop).clamp(0.0, _titleY.h);
+        ? (y - consumedTop).h
+        : (y.h - safeTop).clamp(0.0, y.h);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -421,17 +421,19 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.2,
     ),
+    // 약관 전문. 시안(`1027:4831`)이 본문을 **12/w400 · 줄높이 120%** 로 잡는다.
+    // 섹션은 시안에 따로 없어 본문과 같은 폭만큼만 내렸다 (16→14).
     docSection: TextStyle(
       fontFamily: promptFontFamily,
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: FontWeight.w700,
-      height: 1.4,
+      height: 1.2,
     ),
     docBody: TextStyle(
       fontFamily: promptFontFamily,
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: FontWeight.w400,
-      height: 1.6,
+      height: 1.2,
     ),
     linkCode: TextStyle(
       fontFamily: fontFamily,

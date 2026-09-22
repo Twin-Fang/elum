@@ -153,11 +153,21 @@ class ElumScaffold extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         height: _backBoxSize.w,
-                        child: Center(
-                          child: Text(
-                            title!,
-                            style: context.typo.navTitle.copyWith(
-                              color: context.colors.textPrimary,
+                        child: Padding(
+                          // 좌우 같은 값이라 가운데는 그대로다. 뒤로가기(16~56)를
+                          // 침범하지 않게 폭만 좁힌다 — 약관 상세처럼 문서 이름이
+                          // 그대로 제목이 되는 화면은 길이를 앱이 정하지 못한다.
+                          padding: EdgeInsets.symmetric(horizontal: 64.w),
+                          child: Center(
+                            child: Text(
+                              title!,
+                              maxLines: 1,
+                              // 넘치면 40 높이를 뚫고 두 줄이 된다. 자르고 만다 —
+                              // 제목 때문에 화면이 깨지지는 않게 한다.
+                              overflow: TextOverflow.ellipsis,
+                              style: context.typo.navTitle.copyWith(
+                                color: context.colors.textPrimary,
+                              ),
                             ),
                           ),
                         ),

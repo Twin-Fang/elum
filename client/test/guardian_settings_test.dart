@@ -8,6 +8,7 @@ import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/data/oauth_sdk.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
+import 'package:elum/features/auth/presentation/consent_document_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -101,7 +102,10 @@ void main() {
     await tester.tap(find.text('개인정보 수집·이용'));
     await tester.pumpAndSettle();
 
-    expect(find.text('[필수] 개인정보 수집·이용'), findsOneWidget);
+    expect(find.byType(ConsentDocumentScreen), findsOneWidget);
+    // 시안(`1027:4831`)은 문서 이름을 **뒤로가기 줄**에 올린다. 본문 위에 큰
+    // 글씨로 다시 쓰지 않으므로 `[필수] …` 제목은 더 이상 없다 (#349).
+    expect(find.text('[필수] 개인정보 수집·이용'), findsNothing);
   });
 
 
