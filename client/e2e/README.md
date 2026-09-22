@@ -1,0 +1,40 @@
+# 실기기 E2E — 시안 · iOS · 안드로이드를 나란히 본다
+
+골든 대조(`test/figma_conformance_test.dart`)는 **위젯을 그려 픽셀만** 맞댄다.
+글꼴 대체·이모지 폭·상태바 높이·안전영역처럼 **기기에서만 드러나는 것**은 못 잡는다.
+여기는 그걸 본다.
+
+## 쓰는 법
+
+```bash
+bash tool/e2e_shot.sh guardian_home         # 두 기기에서 찍는다
+python3 tool/e2e_compare.py guardian_home   # 시안과 나란히 붙인다
+# → e2e/shots/compare/guardian_home.png
+```
+
+한쪽만 돌리려면 `bash tool/e2e_shot.sh guardian_home ios`.
+
+## 화면을 하나 더 올리려면
+
+1. `e2e/flows/<이름>.yaml` 에 플로우를 쓴다. 끝에 `takeScreenshot: <이름>` 을 둔다.
+2. `e2e/flows.json` 에 제목·시안 경로·노드 번호를 적는다.
+3. 위 두 명령을 돌린다.
+
+## 지켜야 할 것
+
+**`clearState` 를 쓰지 않는다.** 세션이 날아가면 소셜 로그인부터 다시 해야 하는데
+그건 자동화할 수 없다. 한 번 로그인해 둔 기기를 계속 쓴다.
+
+**`extendedWaitUntil` 로 화면이 다 뜬 것을 확인하고 찍는다.** 덜 뜬 화면을 찍으면
+돌릴 때마다 다른 그림이 나와 비교가 무의미해진다.
+
+**세 벌은 크기가 다르다.** iPhone 16 Pro 1206×2622 · 에뮬레이터 1080×2400 ·
+시안 export 393×852. 가로를 맞춰 줄일 뿐 **픽셀을 맞대지 않는다** — 사람이 눈으로
+견주는 그림이다. 수치가 필요하면 `tool/figma_diff.py` 를 쓴다.
+
+## 알아둘 것
+
+- `takeScreenshot` 은 실행한 자리가 아니라 `~/.maestro/tests/…/takeScreenshot/` 에
+  떨어지고 **14일 뒤 지워진다.** 러너가 레포 안으로 옮겨 온다.
+- 기기를 고정하지 않으면 Maestro 가 시뮬레이터·에뮬레이터 중 아무거나 잡는다.
+  러너가 `--udid` 를 항상 박는다.

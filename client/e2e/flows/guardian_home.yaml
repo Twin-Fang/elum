@@ -1,0 +1,15 @@
+# 보호자 홈 — 앱을 켜면 바로 나오는 화면.
+#
+# 시안: docs/figma/home-redesign/home_931-3896.png (931:3896 보호자_홈_일과O)
+#
+# **clearState 를 쓰지 않는다.** 세션이 날아가면 로그인부터 다시 해야 하는데
+# 소셜 로그인은 자동화할 수 없다. 대신 `extendedWaitUntil` 로 화면이 다 뜬 것을
+# 확인하고 찍는다 — 덜 뜬 화면을 찍으면 매번 다른 그림이 나온다.
+appId: kr.twinfang.elum
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "새로운 일과 만들기"
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: guardian_home
