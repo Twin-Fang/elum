@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
+import '../../../core/network/server_error.dart';
 import '../../../shared/models/routine.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/routine_repository.dart';
@@ -33,6 +35,7 @@ class RoutineFlowState {
     this.rewardPresetKey = '',
     this.routine,
     this.errorCode,
+    this.errorMessage,
   });
 
   final RoutineFlowStep step;
@@ -65,6 +68,13 @@ class RoutineFlowState {
   /// docs 예외처리 규칙 — 사용자에게는 안내 문구, 화면 어딘가엔 추적용 코드.
   final String? errorCode;
 
+  /// 서버가 보낸 사용자용 문구. 있으면 화면이 이것을 그대로 띄운다.
+  ///
+  /// 주간 한도에 걸린 것과 AI 가 실패한 것은 **사용자가 할 일이 다르다.**
+  /// 둘 다 "잠시 후 다시 해주세요"로 뭉개면 한도에 걸린 사람은 될 때까지
+  /// 다시 누른다 (#347).
+  final String? errorMessage;
+
   RoutineFlowState copyWith({
     RoutineFlowStep? step,
     String? rawInput,
@@ -77,6 +87,7 @@ class RoutineFlowState {
     String? rewardPresetKey,
     Routine? routine,
     String? errorCode,
+    String? errorMessage,
   }) {
     return RoutineFlowState(
       step: step ?? this.step,
@@ -91,6 +102,7 @@ class RoutineFlowState {
       routine: routine ?? this.routine,
       // errorCode는 null로 되돌릴 수 있어야 한다(재시도 시 초기화) → ?? 쓰지 않는다.
       errorCode: errorCode,
+      errorMessage: errorMessage,
     );
   }
 }
@@ -318,7 +330,15 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
       // 화면은 무한 로딩 대신 에러 코드 + 재시도 버튼을 보여준다(docs 예외처리 규칙).
       AppLogger.error('RoutineFlowNotifier', e);
       _generating = null;
-      state = state.copyWith(step: RoutineFlowStep.error, errorCode: 'E-1001');
+
+      // **서버가 이유를 알려줬으면 그것을 그대로 쓴다.** 주간 한도·일과 개수 한도는
+      // 재시도로 풀리지 않는데, 뭉뚱그리면 사용자는 계속 다시 누른다 (#347).
+      final err = e is DioException ? e.serverError : null;
+      state = state.copyWith(
+        step: RoutineFlowStep.error,
+        errorCode: err == null || err.isUnknownCode ? 'E-1001' : err.badge,
+        errorMessage: err?.message,
+      );
     }
   }
 

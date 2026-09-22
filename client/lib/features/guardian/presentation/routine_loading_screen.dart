@@ -235,7 +235,11 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     if (flow.step == RoutineFlowStep.error) {
       return RoutineFlowScaffold(
         onBack: _handleBack,
-        child: _GenerateError(errorCode: flow.errorCode, onRetry: _retry),
+        child: _GenerateError(
+          errorCode: flow.errorCode,
+          errorMessage: flow.errorMessage,
+          onRetry: _retry,
+        ),
       );
     }
 
@@ -565,9 +569,17 @@ class _StageRow extends StatelessWidget {
 /// **재시도는 로컬 가짜 일과가 아니라 AI를 다시 호출한다.** 화면 어딘가에
 /// 에러 코드를 남겨 제보 시 어디서 터졌는지 추적할 수 있게 한다(docs 예외처리 규칙).
 class _GenerateError extends StatelessWidget {
-  const _GenerateError({required this.errorCode, required this.onRetry});
+  const _GenerateError({
+    required this.errorCode,
+    required this.errorMessage,
+    required this.onRetry,
+  });
 
   final String? errorCode;
+
+  /// 서버가 보낸 문구. 있으면 이것을 그대로 띄운다 — 앱이 다시 쓰면 서버에서
+  /// 고쳐도 앱은 옛 문구를 보여준다 (#347).
+  final String? errorMessage;
   final Future<void> Function() onRetry;
 
   @override
@@ -594,7 +606,10 @@ class _GenerateError extends StatelessWidget {
           ),
           SizedBox(height: space.sm),
           Text(
-            '잠시 후 다시 해주세요',
+            // 주간 한도처럼 재시도로 풀리지 않는 실패는 서버가 정확히 알려준다.
+            errorMessage?.trim().isNotEmpty == true
+                ? errorMessage!.trim()
+                : '잠시 후 다시 해주세요',
             textAlign: TextAlign.center,
             style: context.typo.promptBody.copyWith(color: colors.promptMuted),
           ),

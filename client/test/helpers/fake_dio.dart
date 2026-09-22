@@ -43,6 +43,24 @@ class FakeAdapter implements HttpClientAdapter {
     if (delay > Duration.zero) await Future<void>.delayed(delay);
 
     final body = routes[key];
+
+    // 서버가 실패를 돌려주는 경우. 성공 본문만 흉내 낼 수 있으면 한도 초과나
+    // 계정 정지처럼 **서버가 이유를 알려주는 실패 경로**를 테스트할 수 없다 (#347).
+    if (body is FakeHttpError) {
+      throw DioException(
+        requestOptions: options,
+        response: Response<dynamic>(
+          requestOptions: options,
+          statusCode: body.status,
+          data: {
+            if (body.errorCode != null) 'errorCode': body.errorCode,
+            if (body.errorMessage != null) 'errorMessage': body.errorMessage,
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      );
+    }
+
     if (body == null) {
       // 등록하지 않은 경로는 실패로 둔다. 테스트가 기대하지 않은 호출을
       // 성공으로 받으면 그 호출이 일어났다는 사실 자체가 묻힌다.
@@ -83,3 +101,22 @@ fakeDioOverride(Map<String, Object?> routes, {Duration delay = Duration.zero}) {
 /// 화면이 몰래 서버를 부르고 있었다면 그것이 드러난다.
 // ignore: strict_top_level_inference
 offlineDioOverride() => fakeDioOverride(const {});
+
+/// 서버가 돌려주는 실패 한 건. [fakeDioOverride]의 값 자리에 넣는다.
+///
+/// ```dart
+/// fakeDioOverride(const {
+///   'POST /api/routines': FakeHttpError(
+///     403,
+///     errorCode: 'ROUTINE_CREATE_LIMIT_EXCEEDED',
+///     errorMessage: '이번 주에 만들 수 있는 일과를 다 썼어요.',
+///   ),
+/// })
+/// ```
+class FakeHttpError {
+  const FakeHttpError(this.status, {this.errorCode, this.errorMessage});
+
+  final int status;
+  final String? errorCode;
+  final String? errorMessage;
+}
