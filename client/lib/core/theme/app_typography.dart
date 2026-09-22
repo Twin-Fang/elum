@@ -61,6 +61,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.promptCaption,
     required this.lastLoginBadge,
     required this.settingsTileLabel,
+    required this.navTitle,
+    required this.contactSheetTitle,
+    required this.contactSheetEmail,
     required this.actionCardTitle,
   });
 
@@ -279,6 +282,19 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// `tileLabel`(13/w400 TmoneyRoundWind)과 크기·폰트가 모두 다르다.
   /// 회원탈퇴만 같은 크기에 w500 을 쓴다 — 굵기는 쓰는 쪽에서 얹는다.
   final TextStyle settingsTileLabel;
+
+  /// 뒤로가기와 같은 줄에 서는 가운데 제목 (18/w600 Pretendard, Figma `1022:4467`).
+  ///
+  /// 본문 맨 위 큰 제목(`pinTitle` 28/w800 Tmoney)과 **크기·폰트·굵기가 모두 다르다.**
+  /// 한쪽을 다른 쪽으로 쓰면 화면 성격이 바뀐다 — 네비게이션 제목과 페이지 제목이다.
+  final TextStyle navTitle;
+
+  /// 문의하기 시트 제목 (20/w700 Pretendard, Figma `1045:5005`).
+  final TextStyle contactSheetTitle;
+
+  /// 문의하기 시트의 메일 주소 (20/w400 Pretendard).
+  /// 제목과 크기가 같지만 굵기가 달라 별개 토큰이다.
+  final TextStyle contactSheetEmail;
 
   /// 행동 카드 제목 (25/w800, style_GKEQ8F).
   /// 순서 배지 숫자용 cardHeadline(30/w800)과 크기가 달라 별개 토큰이다.
@@ -604,6 +620,24 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.1,
     ),
+    contactSheetTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+      height: 1.0,
+    ),
+    contactSheetEmail: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    navTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
     settingsTileLabel: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 16,
@@ -691,6 +725,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? promptCaption,
     TextStyle? lastLoginBadge,
     TextStyle? settingsTileLabel,
+    TextStyle? navTitle,
+    TextStyle? contactSheetTitle,
+    TextStyle? contactSheetEmail,
     TextStyle? actionCardTitle,
   }) {
     return AppTypography(
@@ -748,6 +785,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptCaption: promptCaption ?? this.promptCaption,
       lastLoginBadge: lastLoginBadge ?? this.lastLoginBadge,
       settingsTileLabel: settingsTileLabel ?? this.settingsTileLabel,
+      navTitle: navTitle ?? this.navTitle,
+      contactSheetTitle: contactSheetTitle ?? this.contactSheetTitle,
+      contactSheetEmail: contactSheetEmail ?? this.contactSheetEmail,
       actionCardTitle: actionCardTitle ?? this.actionCardTitle,
     );
   }
@@ -819,6 +859,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
       lastLoginBadge: TextStyle.lerp(lastLoginBadge, other.lastLoginBadge, t)!,
       settingsTileLabel:
           TextStyle.lerp(settingsTileLabel, other.settingsTileLabel, t)!,
+      navTitle: TextStyle.lerp(navTitle, other.navTitle, t)!,
+      contactSheetTitle:
+          TextStyle.lerp(contactSheetTitle, other.contactSheetTitle, t)!,
+      contactSheetEmail:
+          TextStyle.lerp(contactSheetEmail, other.contactSheetEmail, t)!,
       actionCardTitle:
           TextStyle.lerp(actionCardTitle, other.actionCardTitle, t)!,
     );

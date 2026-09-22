@@ -33,6 +33,8 @@ class ElumScaffold extends StatelessWidget {
     this.bottomButton,
     this.belowButton,
     this.onBack,
+    this.title,
+    this.backTop,
     this.horizontalPadding,
   });
 
@@ -49,6 +51,20 @@ class ElumScaffold extends StatelessWidget {
 
   /// 뒤로가기. null이면 버튼을 그리지 않는다 (첫 화면).
   final VoidCallback? onBack;
+
+  /// 뒤로가기와 **같은 줄**에 놓이는 가운데 제목 (설정·약관·임시저장).
+  ///
+  /// 본문 맨 위에 큰 글씨로 두는 [ElumHeader]와 다르다. 시안(`1022:4467`)은
+  /// 뒤로가기 상자(중심 y=87)와 제목(중심 y=87)이 한 줄에 선다. 본문 쪽에
+  /// 제목을 두면 뒤로가기 **아래**로 내려가 시안과 한 줄이 어긋난다 (#349).
+  final String? title;
+
+  /// 뒤로가기 상자의 Figma y. 기본은 79(온보딩 계열).
+  ///
+  /// 설정 묶음 시안(`1022:4467` 등)은 **67**이다. 기본값을 그대로 쓰면 머리가
+  /// 12 내려가 제목과 뒤로가기가 통째로 밀린다 — 줄 위치는 맞는데 머리만
+  /// 어긋나 눈으로는 "대충 비슷해" 보인다 (#349).
+  final double? backTop;
 
   /// 본문 좌우 여백. 기본은 [AppSpacing.screenH](24).
   ///
@@ -127,10 +143,26 @@ class ElumScaffold extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (onBack != null) ...[
-                SizedBox(height: fromTop(_backBoxY)),
-                Align(
+                SizedBox(height: fromTop(backTop ?? _backBoxY)),
+                // 제목은 뒤로가기 **위에 겹쳐** 가운데에 둔다. Row 로 나란히 두면
+                // 제목이 뒤로가기 폭만큼 오른쪽으로 밀려 화면 중앙에서 벗어난다.
+                Stack(
                   alignment: Alignment.centerLeft,
-                  child: Padding(
+                  children: [
+                    if (title != null)
+                      SizedBox(
+                        width: double.infinity,
+                        height: _backBoxSize.w,
+                        child: Center(
+                          child: Text(
+                            title!,
+                            style: context.typo.navTitle.copyWith(
+                              color: context.colors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    Padding(
                     padding: EdgeInsets.only(left: _backBoxLeft.w),
                     // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
                     // 상자 자체가 40×40이라 누름 영역과 자리가 한 값으로 맞는다
@@ -150,7 +182,8 @@ class ElumScaffold extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
+                    ),
+                  ],
                 ),
               ],
               Expanded(
@@ -161,7 +194,9 @@ class ElumScaffold extends StatelessWidget {
                   // 뼈대가 위에서 얼마를 썼는지 본문에 알린다 — 헤더가 제목
                   // y를 이어서 계산한다.
                   child: ElumScaffoldTopScope(
-                    consumedTop: onBack != null ? backBoxBottom : 0,
+                    consumedTop: onBack != null
+                        ? (backTop ?? _backBoxY) + _backBoxSize
+                        : 0,
                     child: child,
                   ),
                 ),

@@ -65,6 +65,10 @@ class ConsentBundle {
 
   /// 필수 항목만. 동의 완료 판정에 쓴다.
   Iterable<ConsentItem> get requiredItems => items.where((item) => item.required);
+
+  /// 빼도 되는 항목. 약관 목록이 필수와 나눠 보여준다 (#349).
+  Iterable<ConsentItem> get optionalItems =>
+      items.where((item) => !item.required);
 }
 
 /// 지금 화면에 띄운 약관이 어디서 온 것인가.

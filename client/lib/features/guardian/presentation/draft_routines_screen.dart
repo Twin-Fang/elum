@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
@@ -30,17 +31,14 @@ class DraftRoutinesScreen extends ConsumerWidget {
 
     return ElumScaffold(
       onBack: () => context.pop(),
+      // 시안(`1045:4910`)도 같은 네비게이션 제목이다.
+      title: '임시저장',
+      backTop: 67,
+      horizontalPadding: 16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: space.xl),
-          Text(
-            '임시저장',
-            style: context.typo.pinTitle.copyWith(
-              color: context.colors.textPrimary,
-            ),
-          ),
-          SizedBox(height: space.xl),
+          SizedBox(height: 40.h),
           Expanded(
             child: drafts.when(
               // 로딩과 0건을 **구분한다.** 같은 화면으로 두면 느린 연결에서

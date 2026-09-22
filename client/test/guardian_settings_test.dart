@@ -75,8 +75,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('약관 및 개인정보처리방침'), findsOneWidget);
-    // 문의하기는 뺐다 (#312). 스토어 페이지의 지원 주소가 그 몫을 한다.
-    expect(find.text('문의하기'), findsNothing);
+    // 문의하기는 #312 에서 뺐다가 **새 시안(`1022:4467`)에 다시 그려져 되살렸다** (#349).
+    // 스토어 지원 주소로 갈음된다고 봤지만, 디자인이 앱 안에도 두기로 정했다.
+    expect(find.text('문의하기'), findsOneWidget);
   });
 
   testWidgets('약관 줄을 누르면 문서 목록이 열린다', (tester) async {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/theme_context_ext.dart';
@@ -6,6 +7,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../data/consent_document_repository.dart';
 import '../domain/consent_bundle.dart';
+import '../domain/consent_documents.dart';
 import 'consent_document_screen.dart';
 
 /// 가입한 뒤에도 약관과 개인정보처리방침을 다시 읽는 화면 (이슈 #289).
@@ -25,6 +27,11 @@ class ConsentDocumentListScreen extends ConsumerWidget {
 
     return ElumScaffold(
       onBack: () => Navigator.of(context).pop(),
+      // 시안(`1027:4683`)은 제목이 뒤로가기와 같은 줄에 선다 (#349).
+      title: '약관 및 개인정보처리방침',
+      // 줄이 x=16 에서 시작한다.
+      backTop: 67,
+      horizontalPadding: 16,
       // 읽어 오는 동안에도 제목은 그대로 선다. 흰 화면을 띄우면 멈춘 것처럼 보인다.
       //
       // 이 provider는 실패하지 않는다 — 서버·캐시가 모두 없으면 앱 번들 기본값이
@@ -46,14 +53,8 @@ class ConsentDocumentListScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: space.xl),
-          Text(
-            '약관 및 개인정보처리방침',
-            style: context.typo.pinTitle.copyWith(
-              color: context.colors.textPrimary,
-            ),
-          ),
-          SizedBox(height: space.xl),
+          // 시안 `필수항목` 글자가 y=147 이다. 뒤로가기 상자 하단(119)에서 28.
+          SizedBox(height: 40.h),
           if (bundle == null)
             // 캐시가 없는 첫 실행에서만 잠깐 보인다. 상한은 약관 대기 시간과 같다.
             Padding(
@@ -66,18 +67,53 @@ class ConsentDocumentListScreen extends ConsumerWidget {
                 ),
               ),
             )
-          else
-            for (final item in bundle.items)
-              SettingsTile(
-                label: item.label,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => ConsentDocumentScreen(item: item),
-                  ),
-                ),
-              ),
+          else ...[
+            // **필수와 선택을 나눠 보여준다.** 시안이 그렇게 그렸고, 무엇을 빼도
+            // 되는지는 묶어 두면 알 수 없다.
+            _GroupLabel('필수항목'),
+            for (final item in bundle.requiredItems) _tile(context, item),
+            if (bundle.optionalItems.isNotEmpty) ...[
+              // 시안 — 마지막 필수 줄 하단(410)에서 `선택항목`(450)까지 40.
+              SizedBox(height: 40.h),
+              _GroupLabel('선택항목'),
+              for (final item in bundle.optionalItems) _tile(context, item),
+            ],
+          ],
           SizedBox(height: space.xl),
         ],
+      ),
+    );
+  }
+
+  Widget _tile(BuildContext context, ConsentItem item) => SettingsTile(
+    label: item.label,
+    onTap: () => Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ConsentDocumentScreen(item: item),
+      ),
+    ),
+  );
+}
+
+/// `필수항목` · `선택항목` 묶음 이름 (16/w600 Pretendard, Figma `1027:4683`).
+///
+/// 줄 라벨(16/w400)과 크기는 같고 굵기만 다르다 — 시안 그대로다.
+class _GroupLabel extends StatelessWidget {
+  const _GroupLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      // 줄 안쪽 여백과 같은 16. 글자 왼쪽이 줄 라벨과 한 선에 선다 (x=32).
+      padding: EdgeInsets.only(left: 16.w, bottom: 6.h),
+      child: Text(
+        text,
+        style: context.typo.settingsTileLabel.copyWith(
+          color: context.colors.textPrimary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
