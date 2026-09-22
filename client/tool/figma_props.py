@@ -98,15 +98,43 @@ def read_token() -> str | None:
     return None
 
 
+def fetch_nodes(node_ids: list[str], token: str) -> dict:
+    """여러 노드를 **한 번에** 받는다.
+
+    한 장씩 받으면 화면 50개에서 50번을 부르게 되고 Figma 가 429(Too Many Requests)로
+    끊는다 — 실제로 묶음 실행 첫판이 그렇게 절반 넘게 비었다. API 는 `ids=` 에
+    쉼표로 여러 개를 받으므로 나눠 담아 부른다.
+    """
+    import time
+
+    out: dict[str, dict] = {}
+    CHUNK = 12
+    for i in range(0, len(node_ids), CHUNK):
+        chunk = node_ids[i:i + CHUNK]
+        url = (f'https://api.figma.com/v1/files/{FILE_KEY}'
+               f"/nodes?ids={','.join(chunk)}")
+        req = urllib.request.Request(url, headers={'X-Figma-Token': token})
+        for attempt in range(4):
+            try:
+                with urllib.request.urlopen(req, timeout=60) as resp:
+                    data = json.load(resp)
+                break
+            except urllib.error.HTTPError as err:
+                if err.code != 429 or attempt == 3:
+                    raise
+                # 물러섰다 다시 묻는다. 서두르면 더 오래 걸린다.
+                time.sleep(2 ** attempt)
+        for nid, node in (data.get('nodes') or {}).items():
+            if node and node.get('document'):
+                out[nid] = node['document']
+    return out
+
+
 def fetch_node(node_id: str, token: str) -> dict:
-    url = f'https://api.figma.com/v1/files/{FILE_KEY}/nodes?ids={node_id}'
-    req = urllib.request.Request(url, headers={'X-Figma-Token': token})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        data = json.load(resp)
-    nodes = data.get('nodes') or {}
-    if node_id not in nodes:
+    got = fetch_nodes([node_id], token)
+    if node_id not in got:
         raise SystemExit(f'노드를 찾지 못했다: {node_id}')
-    return nodes[node_id]['document']
+    return got[node_id]
 
 
 def solid_fill(node: dict):
@@ -145,6 +173,11 @@ def radii_of(node: dict) -> list[float]:
 # 쏟아졌다. 오탐이 42건이면 아무도 안 읽는다 — 그게 이 이슈의 출발점이었다.
 FACE_TYPES = {'RECTANGLE', 'FRAME', 'COMPONENT', 'INSTANCE'}
 
+# **기기 껍데기**는 시안에만 있다. 위젯 테스트 렌더는 상태바도 키보드도 그리지 않는다
+# (키보드는 `viewInsets` 로 자리만 비운다). 이름으로 통째로 건너뛴다 — 안 그러면
+# 입력 화면마다 자판 30여 개가 "면 색 다름"으로 올라와 진짜 결함을 덮는다.
+CHROME_NAMES = ('keyboard', '키보드', 'statusbar', 'status bar', 'home indicator')
+
 
 def collect_boxes(root: dict, origin: tuple[float, float]):
     """검사할 '면'과, 그 위에 덮이는 '가림막'을 함께 모은다.
@@ -167,6 +200,17 @@ def collect_boxes(root: dict, origin: tuple[float, float]):
     def walk(node: dict, hidden: bool):
         nonlocal order
         hidden = hidden or node.get('visible') is False
+        name = (node.get('name') or '').lower()
+        if any(k in name for k in CHROME_NAMES):
+            # **가림막으로는 남긴다.** 시안에서 자판이 덮고 있는 것은 애초에
+            # 맞댈 수 없다 — PIN 화면 CTA 가 그렇다(시안에서 자판 뒤에 있다).
+            # 대신 자판 자체를 검사하지는 않는다. 렌더는 자판을 그리지 않고
+            # `viewInsets` 로 자리만 비우기 때문이다.
+            bb2 = node.get('absoluteBoundingBox')
+            if bb2 and not hidden:
+                occluders.append((order, bb2['x'] - ox, bb2['y'] - oy,
+                                  bb2['width'], bb2['height']))
+            return
         bb = node.get('absoluteBoundingBox')
         order += 1
         mine = order
@@ -514,63 +558,85 @@ def check_shadows(box, render, face, visible, findings):
                 ))
 
 
-def check_edges(box, render, face, findings):
-    """면의 실제 경계가 시안 좌표와 맞는가.
+def check_placement(box, render, face, visible, findings, siblings=()):
+    """상자가 **시안이 말한 자리에** 있나. True / False / None(판정 불가).
 
-    여러 줄을 훑어 **과반이 같은 값을 말할 때만** 보고한다. 한 줄만 보면
-    자식이 덮은 자리에 걸려 엉뚱한 값이 나온다.
+    ## 왜 모서리보다 이걸 먼저 묻나
+
+    상자가 통째로 밀려 있으면 모서리 탐침이 거짓말한다. 카드확인 화면에서 실제로
+    그랬다 — 카드가 시안보다 위에 있어서, 시안이 말한 좌상 꼭짓점 자리가 **이미
+    카드 안쪽**이라 "모서리 각짐"으로 잡혔다. 각지지 않았는데도.
+
+    그래서 네 변마다 **안쪽 2px 과 바깥쪽 3px** 을 찍어 경계가 그 선을 지나가는지
+    먼저 본다. 지나가지 않으면 모서리는 묻지 않고 자리가 다르다고만 말한다.
     """
     if face is None:
-        return
-    # 반투명 면은 가장자리 색이 뒤에 따라 달라져 이 방식으로 못 잰다.
-    if box['alpha'] < 0.99:
-        return
+        return None
     x, y, w, h = box['x'], box['y'], box['w'], box['h']
-    if min(w, h) < 24:
-        return
+    if min(w, h) < 20:
+        return None
     behind = _outside(box, render)
     if behind is None or dist(face, behind) < DISTINCT:
-        return
+        return None
 
-    def scan(fixed_vals, horizontal, forward):
-        """가장자리에서 안쪽으로 들어가며 면 색이 시작되는 자리를 찾는다."""
-        found = []
-        span = w if horizontal else h
-        for v in fixed_vals:
-            hit = None
-            for step in range(0, int(span * 0.4)):
-                d = step if forward else -step
-                px = (x + d) if horizontal else v
-                py = v if horizontal else (y + d)
-                if not forward:
-                    px = (x + w + d) if horizontal else v
-                    py = v if horizontal else (y + h + d)
-                got = render.at(px, py)
-                if got is not None and dist(got, face) <= SAME:
-                    hit = d if forward else -d
-                    break
-            if hit is not None:
-                found.append(hit)
-        if len(found) < 2:
-            return None
-        return int(np.median(found))
+    # 안쪽 선은 면을 갉아먹으므로 그 두께만큼 더 들어가서 찍는다.
+    inset = 2 + box['stroke']
+    off = 3
+    bad = []
+    tested = 0
 
-    rows = [y + h * f for f in (0.35, 0.5, 0.65)]
-    cols = [x + w * f for f in (0.35, 0.5, 0.65)]
-    # 안쪽 선(`strokeAlign: INSIDE`)이 있으면 면이 그 두께만큼 안에서 시작한다.
-    # 실제로 홈 배지(2px 선)가 `오른쪽 3 안쪽`으로 잡혀 오탐이 났다.
-    tol = 2 + box['stroke']
-    for label, delta in (
-        ('왼쪽', scan(rows, True, True)),
-        ('오른쪽', scan(rows, True, False)),
-        ('위', scan(cols, False, True)),
-        ('아래', scan(cols, False, False)),
-    ):
-        if delta is not None and abs(delta) > tol:
-            findings.append(finding(
-                WARN, '경계 어긋남', box,
-                f"{label} 가장자리가 {abs(delta)} {'안쪽' if delta > 0 else '바깥'}에 있다",
-            ))
+    sides = {
+        '위': [((x + w * f, y + inset), (x + w * f, y - off)) for f in (0.35, 0.5, 0.65)],
+        '아래': [((x + w * f, y + h - inset), (x + w * f, y + h + off)) for f in (0.35, 0.5, 0.65)],
+        '왼쪽': [((x + inset, y + h * f), (x - off, y + h * f)) for f in (0.35, 0.5, 0.65)],
+        '오른쪽': [((x + w - inset, y + h * f), (x + w + off, y + h * f)) for f in (0.35, 0.5, 0.65)],
+    }
+
+    def abutted(point):
+        """시안에서 이 자리에 **같은 색 면이 맞닿아** 있나.
+
+        시트 헤더 배경 아래에는 같은 색 시트 몸통이 이어진다. 그 경계는 그림으로
+        드러나지 않으므로 "바깥이 배경이어야 한다"를 적용하면 멀쩡한 것이 걸린다.
+        """
+        px, py = point
+        for other in siblings:
+            if other is box:
+                continue
+            if (other['x'] <= px <= other['x'] + other['w']
+                    and other['y'] <= py <= other['y'] + other['h']
+                    and dist(other['fill'], box['fill']) < DISTINCT):
+                return True
+        return False
+
+    for label, probes in sides.items():
+        votes = []
+        for inner, outer in probes:
+            if not visible(inner, box['order']):
+                continue
+            ci, co = render.at(*inner), render.at(*outer)
+            if ci is None or co is None:
+                continue
+            reaches = nearer(ci, face, behind) == 'face'
+            # 바깥이 면 색이면 상자가 시안보다 더 뻗어 있다는 뜻이다 —
+            # 다만 같은 색 면이 맞닿아 있으면 그렇게 보이는 것이 정상이다.
+            spills = (nearer(co, face, behind) == 'face') and not abutted(outer)
+            votes.append(reaches and not spills)
+        if not votes:
+            continue
+        tested += 1
+        # 과반이 아니라고 하면 그 변이 시안 선 위에 없다.
+        if sum(votes) * 2 <= len(votes):
+            bad.append(label)
+
+    if tested == 0:
+        return None
+    if bad:
+        findings.append(finding(
+            WARN, '자리 어긋남', box,
+            f"{'·'.join(bad)} 가장자리가 시안 선 위에 없다",
+        ))
+        return False
+    return True
 
 
 def inspect(boxes, render, occluders=(), skip_top=0.0, skip_bottom=0.0) -> list[dict]:
@@ -588,10 +654,12 @@ def inspect(boxes, render, occluders=(), skip_top=0.0, skip_bottom=0.0) -> list[
         if skip_bottom and box['y'] >= render.h - skip_bottom:
             continue
         face = check_fill(box, render, visible, findings)
-        check_corners(box, render, face, visible, findings)
-        check_square_corners(box, render, face, visible, findings)
+        # 자리부터 본다 — 밀려 있으면 모서리 탐침이 거짓말한다.
+        placed = check_placement(box, render, face, visible, findings, boxes)
+        if placed is not False:
+            check_corners(box, render, face, visible, findings)
+            check_square_corners(box, render, face, visible, findings)
         check_shadows(box, render, face, visible, findings)
-        check_edges(box, render, face, findings)
     return findings
 
 
@@ -793,18 +861,23 @@ def run_dir(args) -> int:
     if not token:
         return report_missing_token()
 
-    worst = OK
+    pairs = []
     for png in sorted(pathlib.Path(args.dir).glob('*.png')):
         m = re.search(r'_(\d+)-(\d+)$', png.stem)
         if not m:
             print(f'· 건너뜀  {png.name} — 파일명에 노드 id 가 없다')
             continue
-        node_id = f'{m.group(1)}:{m.group(2)}'
+        pairs.append((png, f'{m.group(1)}:{m.group(2)}'))
+
+    # 같은 노드를 여러 상태가 함께 쓰므로 중복을 지워 한 번에 받는다.
+    docs = fetch_nodes(sorted({nid for _, nid in pairs}), token)
+
+    worst = OK
+    for png, node_id in pairs:
         print(f'\n=== {png.name}  ({node_id})')
-        try:
-            doc = fetch_node(node_id, token)
-        except Exception as err:  # 한 화면이 실패해도 나머지는 계속 본다
-            print(f'  받지 못했다: {err}')
+        doc = docs.get(node_id)
+        if doc is None:
+            print('  받지 못했다 — 노드가 지워졌거나 이름이 바뀌었다')
             worst = max(worst, WARN)
             continue
         bb = doc.get('absoluteBoundingBox') or {}
