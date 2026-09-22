@@ -688,6 +688,19 @@ final myRoutinesProvider = FutureProvider<List<Routine>>((ref) {
   return ref.watch(routineRepositoryProvider).getMyRoutines();
 });
 
+/// 임시저장 — 만들다 만 일과 (이슈 #349).
+///
+/// 서버의 `PENDING_REVIEW` 가 곧 임시저장이다. 카드까지 만들어졌지만 보호자가
+/// 아직 확인하지 않은 상태다. **`승인 대기`라 부르지 않는다** — 만들다 만 것이지
+/// 심사가 아니다 (용어 규칙).
+///
+/// 전용 API 를 따로 두지 않고 내 일과 목록에서 걸러 쓴다. 목록이 길어지면
+/// 서버에 상태 필터를 다는 편이 낫지만, 지금은 한 보호자의 일과가 많지 않다.
+final draftRoutinesProvider = FutureProvider<List<Routine>>((ref) async {
+  final all = await ref.watch(myRoutinesProvider.future);
+  return all.where((r) => r.status == 'PENDING_REVIEW').toList();
+});
+
 /// 오늘 할 일 목록. 아이_홈이 구독한다 (이슈 #75).
 final todayRoutinesProvider = FutureProvider<List<Routine>>((ref) {
   return ref.watch(routineRepositoryProvider).getTodayRoutines();

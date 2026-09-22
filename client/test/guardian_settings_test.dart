@@ -65,7 +65,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('로그아웃'), findsOneWidget);
-    expect(find.text('회원 탈퇴'), findsOneWidget);
+    expect(find.text('회원탈퇴'), findsOneWidget);
   });
 
   // 가입한 뒤에 약관을 다시 볼 곳이 없으면 Apple 심사에서 지적받는다(5.1.1(i)).
@@ -146,7 +146,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('회원 탈퇴'));
+    await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('되돌릴 수 없어요'), findsOneWidget,
@@ -165,11 +165,15 @@ void main() {
     await tester.pumpAndSettle();
 
     final colors = AppColors.light;
-    final withdraw = tester.widget<Text>(find.text('회원 탈퇴'));
+    final withdraw = tester.widget<Text>(find.text('회원탈퇴'));
     final logout = tester.widget<Text>(find.text('로그아웃'));
 
-    expect(withdraw.style?.color, colors.danger,
+    // 시안(`1022:4467`)은 이 글자에 #DA5050 을 쓴다. 팝업 버튼의 danger(#BB3F38)와
+    // 값이 다르다 — 넓은 면을 채우는 색과 글자 하나에 쓰는 색이 같을 이유가 없다 (#349).
+    expect(withdraw.style?.color, colors.settingsDestructive,
         reason: '흐린 보조색을 쓰면 위험이 아니라 비활성으로 읽힌다');
+    // 시안은 이 줄만 굵다.
+    expect(withdraw.style?.fontWeight, FontWeight.w500);
     expect(withdraw.style?.color, isNot(colors.textSecondary));
     // 일반 항목까지 물들면 위험 표시가 의미를 잃는다.
     expect(logout.style?.color, colors.textPrimary);
@@ -179,7 +183,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('회원 탈퇴'));
+    await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
 
     final colors = AppColors.light;
@@ -218,7 +222,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('회원 탈퇴'));
+    await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('탈퇴하기'));
     await tester.pumpAndSettle();
@@ -237,14 +241,14 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('회원 탈퇴'));
+    await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('탈퇴하기'));
     await tester.pumpAndSettle();
 
     // 실패 후에도 버튼이 잠겨 있으면 그 자리에서 할 수 있는 일이 없어진다.
     auth.deleteSucceeds = true;
-    await tester.tap(find.text('회원 탈퇴'));
+    await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('탈퇴하기'));
     await tester.pumpAndSettle();
@@ -257,7 +261,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('회원 탈퇴'));
+    await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('취소'));
     await tester.pumpAndSettle();

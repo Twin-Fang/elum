@@ -23,37 +23,45 @@ class SettingsTile extends StatelessWidget {
   /// 되돌릴 수 없는 항목. 색으로 구분해 실수로 누르는 것을 줄인다.
   final bool destructive;
 
+  /// 시안(`1022:4467`) 실측 — 줄 높이 60, 좌우 안쪽 여백 16.
+  static const _height = 60.0;
+  static const _padH = 16.0;
+
   @override
   Widget build(BuildContext context) {
-    final space = context.space;
     final colors = context.colors;
 
     return AppPressable(
       onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: space.lg),
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: colors.border)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: context.typo.tileLabel.copyWith(
-                  // 흐리게 하면 "못 누르는 항목"으로 읽힌다. 누를 수 있다는 것과
-                  // 위험하다는 것을 동시에 전해야 한다 (이슈 #188).
-                  color: destructive ? colors.danger : colors.textPrimary,
+      child: SizedBox(
+        height: _height.h,
+        // **구분선을 긋지 않는다.** 시안은 줄 사이가 배경 그대로다 — 렌더의
+        // 경계 픽셀을 재 보면 배경색이 끊기지 않고 이어진다 (#349).
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: _padH.w),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: context.typo.settingsTileLabel.copyWith(
+                    // 흐리게 하면 "못 누르는 항목"으로 읽힌다. 누를 수 있다는 것과
+                    // 위험하다는 것을 동시에 전해야 한다 (이슈 #188).
+                    color: destructive
+                        ? colors.settingsDestructive
+                        : colors.textPrimary,
+                    // 시안은 회원탈퇴만 굵다.
+                    fontWeight: destructive ? FontWeight.w500 : null,
+                  ),
                 ),
               ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: space.lg.w,
-              color: destructive ? colors.danger : colors.textPlaceholder,
-            ),
-          ],
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20.w,
+                color: colors.settingsChevron,
+              ),
+            ],
+          ),
         ),
       ),
     );

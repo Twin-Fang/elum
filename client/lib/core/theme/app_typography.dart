@@ -60,6 +60,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.promptPlaceholder,
     required this.promptCaption,
     required this.lastLoginBadge,
+    required this.settingsTileLabel,
     required this.actionCardTitle,
   });
 
@@ -272,6 +273,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// promptCaption과 값은 같지만 쓰임이 달라 따로 둔다 — 한쪽을 고칠 때
   /// 다른 쪽이 딸려 바뀌면 안 된다.
   final TextStyle lastLoginBadge;
+
+  /// 설정 목록 한 줄의 라벨 (16/w400 Pretendard, Figma `1022:4467`).
+  ///
+  /// `tileLabel`(13/w400 TmoneyRoundWind)과 크기·폰트가 모두 다르다.
+  /// 회원탈퇴만 같은 크기에 w500 을 쓴다 — 굵기는 쓰는 쪽에서 얹는다.
+  final TextStyle settingsTileLabel;
 
   /// 행동 카드 제목 (25/w800, style_GKEQ8F).
   /// 순서 배지 숫자용 cardHeadline(30/w800)과 크기가 달라 별개 토큰이다.
@@ -597,6 +604,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.1,
     ),
+    settingsTileLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
     lastLoginBadge: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 12,
@@ -677,6 +690,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? promptPlaceholder,
     TextStyle? promptCaption,
     TextStyle? lastLoginBadge,
+    TextStyle? settingsTileLabel,
     TextStyle? actionCardTitle,
   }) {
     return AppTypography(
@@ -733,6 +747,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptPlaceholder: promptPlaceholder ?? this.promptPlaceholder,
       promptCaption: promptCaption ?? this.promptCaption,
       lastLoginBadge: lastLoginBadge ?? this.lastLoginBadge,
+      settingsTileLabel: settingsTileLabel ?? this.settingsTileLabel,
       actionCardTitle: actionCardTitle ?? this.actionCardTitle,
     );
   }
@@ -802,6 +817,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
           TextStyle.lerp(promptPlaceholder, other.promptPlaceholder, t)!,
       promptCaption: TextStyle.lerp(promptCaption, other.promptCaption, t)!,
       lastLoginBadge: TextStyle.lerp(lastLoginBadge, other.lastLoginBadge, t)!,
+      settingsTileLabel:
+          TextStyle.lerp(settingsTileLabel, other.settingsTileLabel, t)!,
       actionCardTitle:
           TextStyle.lerp(actionCardTitle, other.actionCardTitle, t)!,
     );

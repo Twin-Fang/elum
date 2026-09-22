@@ -110,13 +110,19 @@ class _GuardianSettingsScreenState
                 context.typo.pinTitle.copyWith(color: context.colors.textPrimary),
           ),
           SizedBox(height: space.xl),
-          // 명세 §8-4는 위에 임시저장·알림도 두지만 아직 없다. 있는 것만 먼저 올린다.
           SettingsTile(
             label: '이룸이 휴대폰 연결하기',
             onTap: _busy ? null : () => context.push(Routes.linkCode),
           ),
           // 계정을 정리하는 항목(로그아웃·탈퇴) 위에 둔다. 읽을거리와 되돌릴 수 없는
           // 동작이 섞이면 실수로 누르기 쉽다.
+          SettingsTile(
+
+            label: '임시저장',
+
+            onTap: _busy ? null : () => context.push(Routes.guardianDrafts),
+
+          ),
           SettingsTile(
             label: '약관 및 개인정보처리방침',
             onTap: _busy
@@ -132,7 +138,7 @@ class _GuardianSettingsScreenState
             onTap: _busy ? null : _logout,
           ),
           SettingsTile(
-            label: '회원 탈퇴',
+            label: '회원탈퇴',
             onTap: _busy ? null : _deleteAccount,
             destructive: true,
           ),

@@ -147,6 +147,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginButtonShadow,
     required this.loginAppleBg,
     required this.loginLastUsedBg,
+    required this.settingsDestructive,
+    required this.settingsChevron,
     required this.loginAppleLabel,
     required this.consentSelectedFill,
     required this.consentSelectedBorder,
@@ -526,6 +528,16 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 않아 세 제공자에서 모두 같은 크림색 알약으로 보인다.
   final Color loginLastUsedBg;
 
+  /// 설정의 `회원탈퇴` 글자 (Figma `1022:4467` — #DA5050).
+  ///
+  /// `danger`(#BB3F38)와 **값이 다르다.** danger 는 팝업 버튼처럼 넓은 면을 채울 때
+  /// 쓰는 짙은 붉은색이고, 이건 글자 하나에 쓰는 밝은 쪽이다. 같은 값으로 합치면
+  /// 목록에서 혼자 너무 어둡게 보인다.
+  final Color settingsDestructive;
+
+  /// 설정 목록의 오른쪽 화살표 (실측 #CDCDCD).
+  final Color settingsChevron;
+
   // --- 약관 동의 선택 상태 ---
   //
   // 값은 목표 칩 선택색과 같다. 그래도 토큰을 나누는 이유는 이 문서의 핵심 규칙
@@ -678,6 +690,8 @@ class AppColors extends ThemeExtension<AppColors> {
     loginAppleBg: Color(0xFF000000),
     loginAppleLabel: Color(0xFFFFFFFF),
     loginLastUsedBg: Color(0x80FFFADC),
+    settingsDestructive: Color(0xFFDA5050),
+    settingsChevron: Color(0xFFCDCDCD),
     consentSelectedFill: Color(0xFFB5EAEC),
     consentSelectedBorder: Color(0xFF93DBCC),
     dlpBadgeText: Color(0xFF74757D),
@@ -800,6 +814,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? editChipBg,
     Color? editChipLabel,
     Color? loginLastUsedBg,
+    Color? settingsDestructive,
+    Color? settingsChevron,
     Color? loginKakaoBg,
     Color? loginKakaoLabel,
     Color? loginNaverBg,
@@ -927,6 +943,8 @@ class AppColors extends ThemeExtension<AppColors> {
       editChipBg: editChipBg ?? this.editChipBg,
       editChipLabel: editChipLabel ?? this.editChipLabel,
       loginLastUsedBg: loginLastUsedBg ?? this.loginLastUsedBg,
+      settingsDestructive: settingsDestructive ?? this.settingsDestructive,
+      settingsChevron: settingsChevron ?? this.settingsChevron,
       loginKakaoBg: loginKakaoBg ?? this.loginKakaoBg,
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
@@ -1207,6 +1225,9 @@ class AppColors extends ThemeExtension<AppColors> {
       editChipBg: Color.lerp(editChipBg, other.editChipBg, t)!,
       editChipLabel: Color.lerp(editChipLabel, other.editChipLabel, t)!,
       loginLastUsedBg: Color.lerp(loginLastUsedBg, other.loginLastUsedBg, t)!,
+      settingsDestructive:
+          Color.lerp(settingsDestructive, other.settingsDestructive, t)!,
+      settingsChevron: Color.lerp(settingsChevron, other.settingsChevron, t)!,
       loginKakaoBg: Color.lerp(loginKakaoBg, other.loginKakaoBg, t)!,
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,

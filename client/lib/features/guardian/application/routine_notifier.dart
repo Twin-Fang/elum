@@ -342,6 +342,18 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     }
   }
 
+  /// 임시저장에서 이어서 만들기 (#349).
+  ///
+  /// 목록이 이미 [Routine]을 들고 있으므로 다시 받아오지 않는다. 카드확인 화면은
+  /// 이 상태만 있으면 그대로 선다.
+  ///
+  /// **이전 흐름을 지우고 시작한다.** 만들다 만 다른 입력이 남아 있으면 이어서
+  /// 만든 일과에 그 값이 섞인다.
+  void resumeDraft(Routine routine) {
+    AppLogger.notifierStateChange('RoutineFlowNotifier', state.step.name, 'review');
+    state = RoutineFlowState(step: RoutineFlowStep.review, routine: routine);
+  }
+
   /// 로딩 화면이 정한 시간 안에 결과가 오지 않았다 (#276).
   ///
   /// 요청 자체를 취소하지는 않는다 — 이미 나간 AI 요청은 되돌릴 수 없다.
