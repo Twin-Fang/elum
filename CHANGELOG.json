@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-22T08:50:32Z",
-    "currentVersion": "1.30.0",
+    "lastUpdated": "2026-09-22T09:12:48Z",
+    "currentVersion": "1.31.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 152
+    "totalReleases": 153
   },
   "releases": [
+    {
+      "version": "1.31.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-22",
+      "pr_number": 350,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 설정에 임시저장이 생겼어요. 만들다 만 일과를 이어서 만들 수 있어요\n\n* **개선**\n  * 설정 화면을 새 디자인으로 다듬었어요\n  * 일과를 만들지 못했을 때 그 이유를 더 정확히 알려드려요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "설정에 임시저장이 생겼어요. 만들다 만 일과를 이어서 만들 수 있어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "설정 화면을 새 디자인으로 다듬었어요",
+            "일과를 만들지 못했을 때 그 이유를 더 정확히 알려드려요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.30.0",
       "project_type": "flutter",
