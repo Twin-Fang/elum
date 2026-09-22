@@ -617,6 +617,9 @@ jobs:
       - name: Upload to Play Store Internal Testing
         env:
           DEPLOY_MODE: ${{ env.DEPLOY_MODE }}
+          # 비공개 테스트(Alpha) 자동 승급. 프로덕션 액세스 조건(테스터 12명·14일)이 도는 동안은
+          # 켜 둔다 (#333). 끄려면 저장소 변수 PROMOTE_TO_CLOSED_TESTING 을 false 로 둔다.
+          PROMOTE_TO_CLOSED_TESTING: ${{ vars.PROMOTE_TO_CLOSED_TESTING || 'true' }}
         run: |
           echo "=========================================="
           echo "🚀 Play Store 배포 시작"
