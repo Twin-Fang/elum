@@ -1,3 +1,4 @@
+import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
@@ -510,21 +511,21 @@ class _FakeRoutineRepo with FakeRewardApi implements RoutineRepository {
   Future<List<Routine>> getPastRoutines() async => past;
 
   @override
-  Future<bool> delete(String routineId) async {
+  Future<AppFailure?> delete(String routineId) async {
     deleted.add(routineId);
-    return true;
+    return null;
   }
 
   @override
-  Future<Routine?> duplicate(String routineId) async {
+  Future<Attempt<Routine>> duplicate(String routineId) async {
     duplicated.add(routineId);
-    return routines.isEmpty ? past.first : routines.first;
+    return Attempt.ok(routines.isEmpty ? past.first : routines.first);
   }
 
   @override
-  Future<bool> reorder(List<String> routineIds) async {
+  Future<AppFailure?> reorder(List<String> routineIds) async {
     reordered.add(routineIds);
-    return true;
+    return null;
   }
 
   @override
@@ -547,9 +548,9 @@ class _FakeRoutineRepo with FakeRewardApi implements RoutineRepository {
   Future<Routine> confirm(Routine routine) async => routine;
 
   @override
-  Future<({Routine routine, bool synced})> updateStep(
+  Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
     String stepId,
     String description,
-  ) async => (routine: routine, synced: true);
+  ) async => (routine: routine, failure: null);
 }

@@ -1,10 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/app_failure.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
-import '../../../core/network/server_error.dart';
 import '../../../shared/models/routine.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/routine_repository.dart';
@@ -281,10 +280,12 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   ///
   /// 생성 전 [setReward]와 다르다 — 이미 일과가 서버에 있으므로 API를 탄다.
   /// 저장에 실패해도 로컬에는 반영한다. **보상은 선택 항목이라 실패가 흐름을
-  /// 막지 않는다** — repository가 `synced: false`로 알려 준다.
-  Future<bool> updateRewardOnRoutine(String text, {String presetKey = ''}) async {
+  /// 막지 않는다** — 실패 이유를 돌려주고 화면이 스낵바로 알린다.
+  ///
+  /// null 이면 성공이다.
+  Future<AppFailure?> updateRewardOnRoutine(String text, {String presetKey = ''}) async {
     final routine = state.routine;
-    if (routine == null) return false;
+    if (routine == null) return const AppFailure(fault: NetworkFault.app);
 
     final trimmed = text.trim();
     final result = await ref.read(routineRepositoryProvider).updateReward(
@@ -297,7 +298,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
       rewardText: trimmed,
       rewardPresetKey: trimmed.isEmpty ? '' : presetKey,
     );
-    return result.synced;
+    return result.failure;
   }
 
   /// 보상 없이 넘어간다. 정했던 것을 지운다 — 되돌아와 건너뛰면 그 뜻이다.
@@ -333,11 +334,13 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
 
       // **서버가 이유를 알려줬으면 그것을 그대로 쓴다.** 주간 한도·일과 개수 한도는
       // 재시도로 풀리지 않는데, 뭉뚱그리면 사용자는 계속 다시 누른다 (#347).
-      final err = e is DioException ? e.serverError : null;
+      // 판정은 전역 [AppFailure] 하나가 한다 — 여기서 본문을 다시 파싱하지 않고,
+      // 연결 실패·타임아웃도 같은 통로로 들어온다 (#352).
+      final failure = AppFailure.of(e);
       state = state.copyWith(
         step: RoutineFlowStep.error,
-        errorCode: err == null || err.isUnknownCode ? 'E-1001' : err.badge,
-        errorMessage: err?.message,
+        errorCode: failure.badgeOr('E-1001'),
+        errorMessage: failure.serverMessage,
       );
     }
   }
@@ -386,12 +389,13 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
 
   /// 카드 제목·설명 수정 (Figma 262:5124 `이 카드 수정하기`).
   ///
-  /// 반환값이 false면 서버 반영에 실패해 로컬에만 저장됐다 — 화면이 안내한다.
+  /// 돌려주는 값이 null 이 아니면 서버 반영에 실패해 로컬에만 저장됐다 —
+  /// 그 안에 서버가 알려준 이유가 들어 있고, 화면이 그대로 안내한다 (#352).
   ///
   /// **title은 서버에 보내지 않는다.** `RoutineStep`에 title 컬럼이 없다
   /// (2026-07-22 서버 확인, 이슈 #77). 서버 응답에도 title이 없으므로
   /// 그대로 받으면 다른 카드의 로컬 제목까지 지워진다 — 기존 제목을 되살려 합친다.
-  Future<bool> updateStep({
+  Future<AppFailure?> updateStep({
     required String stepId,
     required String title,
     required String description,
@@ -403,7 +407,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     });
 
     final routine = state.routine;
-    if (routine == null) return true;
+    if (routine == null) return null;
 
     final repo = ref.read(routineRepositoryProvider);
     final result = await repo.updateStep(routine, stepId, description);
@@ -426,7 +430,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     );
 
     state = state.copyWith(routine: merged);
-    return result.synced;
+    return result.failure;
   }
 
   /// 승인. 이 시점 이후에만 아동 화면에 노출된다 (docs 원칙 3번).

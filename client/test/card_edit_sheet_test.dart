@@ -1,3 +1,4 @@
+import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
@@ -103,12 +104,12 @@ void main() {
     test('제목과 설명이 함께 바뀐다', () async {
       final container = containerWith(_FakeRepo(synced: true));
 
-      final synced = await container
+      final failure = await container
           .read(routineFlowProvider.notifier)
           .updateStep(stepId: 'c1', title: '새 제목', description: '새 설명');
 
       final steps = container.read(routineFlowProvider).routine!.steps;
-      expect(synced, isTrue);
+      expect(failure, isNull, reason: '성공이면 실패 이유가 없다');
       expect(steps.first.title, '새 제목');
       expect(steps.first.description, '새 설명');
     });
@@ -126,15 +127,17 @@ void main() {
       expect(steps[1].title, '우산을 챙겨요', reason: '수정 안 한 카드의 제목은 유지');
     });
 
-    test('서버 반영 실패 시 로컬은 반영되고 false를 돌려준다', () async {
+    test('서버 반영 실패 시 로컬은 반영되고 실패 이유를 돌려준다', () async {
       final container = containerWith(_FakeRepo(synced: false));
 
-      final synced = await container
+      final failure = await container
           .read(routineFlowProvider.notifier)
           .updateStep(stepId: 'c1', title: '새 제목', description: '새 설명');
 
       final steps = container.read(routineFlowProvider).routine!.steps;
-      expect(synced, isFalse);
+      // **이유가 화면까지 올라온다.** 전에는 `false` 한 글자로 납작해져
+      // 서버가 알려준 문구가 저장소 안에서 사라졌다 (#352).
+      expect(failure, isNotNull);
       expect(steps.first.description, '새 설명', reason: '실패해도 화면은 유지');
     });
   });
@@ -349,7 +352,7 @@ class _FakeRepo with FakeRewardApi implements RoutineRepository {
   final bool synced;
 
   @override
-  Future<({Routine routine, bool synced})> updateStep(
+  Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
     String stepId,
     String description,
@@ -364,7 +367,7 @@ class _FakeRepo with FakeRewardApi implements RoutineRepository {
           ),
       ],
     );
-    return (routine: updated, synced: synced);
+    return (routine: updated, failure: synced ? null : const AppFailure(fault: NetworkFault.app));
   }
 
   @override

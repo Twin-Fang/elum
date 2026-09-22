@@ -65,6 +65,9 @@ void main() {
 
     expect(find.text('카드를 만들지 못했어요'), findsOneWidget);
     expect(find.text('잠시 후 다시 해주세요'), findsOneWidget);
-    expect(find.text('E-1001'), findsOneWidget);
+    // **화면 코드는 그대로 남는다.** 서버 코드를 못 받으면 상태 코드를 뒤에
+    // 붙이므로(`E-1001/404`) 정확히 같은 문자열은 아니다 — 제보를 받은 사람이
+    // 코드베이스에서 찾을 `E-1001` 이 남아 있는지만 본다 (#352).
+    expect(find.textContaining('E-1001'), findsOneWidget);
   });
 }

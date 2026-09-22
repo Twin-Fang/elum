@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -95,18 +96,21 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
       _steps.insert(to, moved);
     });
 
-    final ok = await ref.read(routineRepositoryProvider).reorderSteps(
+    final failure = await ref.read(routineRepositoryProvider).reorderSteps(
       widget.routine.id,
       [for (final s in _steps) s.id],
     );
 
-    if (ok || !mounted) return;
+    if (failure == null || !mounted) return;
 
     // 서버가 받지 못했으면 화면을 되돌린다. 화면만 바뀐 채 두면 다음에 열었을 때
     // 바꾼 적 없는 것처럼 보인다.
     setState(() => _steps = before);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('순서를 저장하지 못했어요 (E-STEP-ORDER)')),
+    showFailureSnack(
+      context,
+      failure,
+      fallback: '순서를 저장하지 못했어요',
+      fallbackCode: 'E-STEP-ORDER',
     );
   }
 

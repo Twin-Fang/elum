@@ -76,11 +76,15 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
 
     setState(() => _sending = true);
     _focusNode.unfocus();
-    final outcome = await ref.read(deviceLinkRepositoryProvider).redeem(code);
+    final result = await ref.read(deviceLinkRepositoryProvider).redeem(code);
     if (!mounted) return;
     setState(() => _sending = false);
 
-    switch (outcome) {
+    // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다 (#352).
+    String say(String fallback, String code) =>
+        result.failure?.describe(fallback, code) ?? '$fallback ($code)';
+
+    switch (result.outcome) {
       case RedeemOutcome.linked:
         context.go(Routes.child);
       case RedeemOutcome.notFound:
@@ -88,11 +92,11 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
       case RedeemOutcome.expired:
         _fail('암호가 만료됐어요. 새 암호를 받아주세요');
       case RedeemOutcome.tooManyAttempts:
-        _fail('잠시 후 다시 해주세요 (E-LINK-429)');
+        _fail(say('잠시 후 다시 해주세요', 'E-LINK-429'));
       case RedeemOutcome.offline:
-        _fail('연결하지 못했어요. 인터넷을 확인해주세요 (E-NET)');
+        _fail(say('연결하지 못했어요. 인터넷을 확인해주세요', 'E-NET'));
       case RedeemOutcome.failed:
-        _fail('연결하지 못했어요. 다시 해주세요 (E-LINK)');
+        _fail(say('연결하지 못했어요. 다시 해주세요', 'E-LINK'));
     }
   }
 

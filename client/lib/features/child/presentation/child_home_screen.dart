@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/network/app_failure.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -79,7 +80,12 @@ class ChildHomeScreen extends ConsumerWidget {
                       character: character,
                       // 조회가 실패했으면 제보 추적용 코드를 함께 보여준다.
                       // 아동 화면이라 빨강·경고 아이콘은 쓰지 않는다.
-                      errorCode: routinesAsync.hasError ? 'E-CHLIST' : null,
+                      // 코드는 실제로 무엇이 터졌는지를 쓴다 — 연결이 끊긴 것과
+                      // 서버가 막은 것이 같은 코드로 보이면 제보를 못 가린다 (#352).
+                      errorCode: routinesAsync.hasError
+                          ? AppFailure.of(routinesAsync.error)
+                              .badgeOr('E-CHLIST')
+                          : null,
                     ),
                   ),
                 ],

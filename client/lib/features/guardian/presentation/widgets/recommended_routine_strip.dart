@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/network/app_failure.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../data/routine_repository.dart';
@@ -63,7 +64,9 @@ class RecommendedRoutineStrip extends ConsumerWidget {
           child: TextButton(
             onPressed: () => ref.invalidate(routineSuggestionsProvider),
             child: Text(
-              '추천을 불러오지 못했어요 · 다시 시도 (E-SUGGEST)',
+              // 서버가 이유를 알려줬으면 그 문구를 쓴다 (#352).
+              AppFailure.of(suggestions.error)
+                  .describe('추천을 불러오지 못했어요 · 다시 시도', 'E-SUGGEST'),
               style: context.typo.promptBody.copyWith(
                 color: context.colors.promptMuted,
               ),

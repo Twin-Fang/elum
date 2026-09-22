@@ -44,9 +44,11 @@ class DraftRoutinesScreen extends ConsumerWidget {
               // 로딩과 0건을 **구분한다.** 같은 화면으로 두면 느린 연결에서
               // "없다"고 잘못 읽는다 (docs 예외처리 규칙).
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => ElumErrorView(
-                message: '임시저장을 불러오지 못했어요',
-                errorCode: 'E-DRAFT',
+              // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다 (#352).
+              error: (e, _) => ElumErrorView.failure(
+                e,
+                fallback: '임시저장을 불러오지 못했어요',
+                fallbackCode: 'E-DRAFT',
                 onRetry: () => ref.invalidate(myRoutinesProvider),
                 // 제목 아래 남는 자리에 들어간다. 큰 쪽은 일러스트까지 세워
                 // 이 자리에서 넘친다.

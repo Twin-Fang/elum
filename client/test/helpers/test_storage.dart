@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/guardian/data/member_repository.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
@@ -44,11 +45,11 @@ class _NoopMemberRepository extends MemberRepository {
   _NoopMemberRepository() : super(dio: Dio());
 
   @override
-  Future<bool> updateNickname(String nickname) async => true;
+  Future<AppFailure?> updateNickname(String nickname) async => null;
 
   @override
-  Future<bool> updateSupportGoals(List<String> goals) async => true;
+  Future<AppFailure?> updateSupportGoals(List<String> goals) async => null;
 
   @override
-  Future<bool> updateCharacter(String character) async => true;
+  Future<AppFailure?> updateCharacter(String character) async => null;
 }

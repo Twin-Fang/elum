@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/show_failure.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -105,8 +106,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
       // 정작 이룸이 휴대폰에는 아무것도 뜨지 않는다. 그때 보호자가 의심할 곳은
       // 앱이 아니라 이룸이다.
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('일과를 저장하지 못했어요. 다시 해주세요 (E-CONFIRM)')),
+        showFailureSnack(
+          context,
+          e,
+          fallback: '일과를 저장하지 못했어요. 다시 해주세요',
+          fallbackCode: 'E-CONFIRM',
         );
       }
       return;
@@ -128,7 +132,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     // 저장 없이 닫았다 — 아무것도 바꾸지 않는다
     if (edited == null || !mounted) return;
 
-    final synced = await ref
+    final failure = await ref
         .read(routineFlowProvider.notifier)
         .updateStep(
           stepId: card.id,
@@ -138,9 +142,12 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
     // 서버 반영 실패 — 로컬에는 반영됐지만 저장하기(승인) 전에 앱을 끄면
     // 사라진다. 에러 코드가 있어야 제보를 추적할 수 있다.
-    if (!synced && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('고친 내용을 저장하지 못했어요 (E-STEP)')),
+    if (failure != null && mounted) {
+      showFailureSnack(
+        context,
+        failure,
+        fallback: '고친 내용을 저장하지 못했어요',
+        fallbackCode: 'E-STEP',
       );
     }
   }

@@ -137,8 +137,8 @@ class _FakeLink extends DeviceLinkRepository {
   RedeemOutcome outcome = RedeemOutcome.linked;
 
   @override
-  Future<RedeemOutcome> redeem(String code) async {
+  Future<RedeemResult> redeem(String code) async {
     sent.add(code);
-    return outcome;
+    return RedeemResult(outcome);
   }
 }

@@ -1,6 +1,7 @@
 @Tags(['golden'])
 library;
 
+import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
@@ -1769,8 +1770,9 @@ class _FakeLink extends DeviceLinkRepository {
   /// 600으로 둔다 — 화면을 세우는 데 1초가 채 안 걸리므로 내림하면 `09:59`가
   /// 남아 시안과 같은 글자가 된다. 599면 `09:58`이 되어 두 자리가 붉어진다.
   @override
-  Future<IssuedLinkCode?> issue() async =>
-      IssuedLinkCode.fromNow(code: '5NJ280', expiresInSeconds: 600);
+  Future<Attempt<IssuedLinkCode>> issue() async => Attempt.ok(
+    IssuedLinkCode.fromNow(code: '5NJ280', expiresInSeconds: 600),
+  );
 
   @override
   Future<LinkStatus> status() async => LinkStatus(
@@ -1785,10 +1787,10 @@ class _SilentConsent extends ConsentRepository {
   _SilentConsent() : super(dio: Dio());
 
   @override
-  Future<bool> agree({
+  Future<AppFailure?> agree({
     required Set<String> agreedKeys,
     required String version,
-  }) async => true;
+  }) async => null;
 }
 
 /// TTS 는 플랫폼 채널을 타므로 아무 것도 하지 않는 것으로 바꿔 끼운다.
@@ -1847,9 +1849,9 @@ class _StubRepo with FakeRewardApi implements RoutineRepository {
   Future<Routine> confirm(Routine routine) async => routine;
 
   @override
-  Future<({Routine routine, bool synced})> updateStep(
+  Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
     String stepId,
     String description,
-  ) async => (routine: routine, synced: true);
+  ) async => (routine: routine, failure: null);
 }

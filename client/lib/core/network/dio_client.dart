@@ -7,6 +7,7 @@ import '../app_status/app_status_recheck.dart';
 import '../config/app_config.dart';
 import '../logger/app_logger.dart';
 import 'auth_interceptor.dart';
+import 'failure_interceptor.dart';
 // 비활성 상태지만 되살릴 때 바로 쓰도록 남겨둔다 (이슈 #182)
 // ignore: unused_import
 import 'encryption_interceptor.dart';
@@ -83,6 +84,10 @@ final dioProvider = Provider<Dio>((ref) {
       onMaintenance: () => ref.read(appStatusRecheckProvider.notifier).request(),
     ),
   );
+
+  // **맨 뒤에 붙인다.** 앞의 인증 인터셉터가 토큰을 갱신해 요청을 되살리면
+  // 그건 실패가 아니다 — 먼저 붙이면 되살아날 401 까지 실패로 남는다 (#352).
+  dio.interceptors.add(const FailureInterceptor());
 
   return dio;
 });

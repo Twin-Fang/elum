@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/show_failure.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -109,15 +110,19 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
     final notifier = ref.read(routineFlowProvider.notifier);
 
     if (widget.fromReview) {
-      final synced = await notifier.updateRewardOnRoutine(
+      final failure = await notifier.updateRewardOnRoutine(
         _rewardText,
         presetKey: _presetKey,
       );
       if (!mounted) return;
       // 저장에 실패해도 화면은 되돌아간다 — 로컬에는 반영됐다. 다만 말은 해 준다.
-      if (!synced) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('보상을 저장하지 못했어요 (E-REWARD)')),
+      // **서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다** (#352).
+      if (failure != null) {
+        showFailureSnack(
+          context,
+          failure,
+          fallback: '보상을 저장하지 못했어요',
+          fallbackCode: 'E-REWARD',
         );
       }
       context.pop();

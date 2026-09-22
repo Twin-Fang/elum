@@ -1,3 +1,4 @@
+import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
@@ -338,9 +339,9 @@ class _FakeRepo with FakeRewardApi implements RoutineRepository {
   List<String>? lastStepIds;
 
   @override
-  Future<bool> reorderSteps(String routineId, List<String> stepIds) async {
+  Future<AppFailure?> reorderSteps(String routineId, List<String> stepIds) async {
     lastStepIds = stepIds;
-    return reorderSucceeds;
+    return reorderSucceeds ? null : const AppFailure(fault: NetworkFault.app);
   }
 
   @override

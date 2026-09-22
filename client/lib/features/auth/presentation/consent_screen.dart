@@ -78,7 +78,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       _errorMessage = null;
     });
 
-    final saved = await ref.read(consentRepositoryProvider).agree(
+    final failure = await ref.read(consentRepositoryProvider).agree(
           // 켠 것만 동의로 보낸다. 고정값을 보내면 켜지 않은 항목이 동의로 남는다 (#278 QA).
           agreedKeys: Set.of(_checked),
           // **화면에 보여준 것**의 버전이다. 캐시나 기본값을 보여줬다면 그 버전으로
@@ -88,10 +88,11 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
 
     if (!mounted) return;
 
-    if (!saved) {
+    if (failure != null) {
       setState(() {
         _isSubmitting = false;
-        _errorMessage = '동의를 저장하지 못했어요. 다시 해주세요 (E-CONSENT)';
+        // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다 (#352).
+        _errorMessage = failure.describe('동의를 저장하지 못했어요. 다시 해주세요', 'E-CONSENT');
       });
       return;
     }

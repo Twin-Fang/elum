@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
 
 /// 보호자 회원 정보 — 서버 `MemberResponse`에 대응한다.
@@ -63,18 +64,18 @@ class MemberRepository {
   }
 
   /// 아이 호칭 저장. 온보딩 결과를 서버와 맞춘다.
-  Future<bool> updateNickname(String nickname) async {
+  Future<AppFailure?> updateNickname(String nickname) async {
     try {
       await _dio.patch<dynamic>(
         '/api/member/nickname',
         data: {'nickname': nickname},
       );
-      return true;
+      return null;
     } catch (e) {
       // 로컬에는 남아 있지만 서버에는 없다 — 재설치하면 사라진다.
       // 부르는 쪽이 알아야 사용자에게 알릴 수 있다.
       debugPrint('[member] 호칭 저장 실패, 로컬에는 남아 있다: $e');
-      return false;
+      return AppFailure.of(e);
     }
   }
 
@@ -83,16 +84,16 @@ class MemberRepository {
   /// ⚠️ [goals]는 서버 enum 값이어야 한다
   /// (`STEP_BY_STEP` / `PREPARE_ITEMS` / `PREPARE_NEW` / `INDEPENDENT`).
   /// 없는 값을 보내면 서버가 400을 준다.
-  Future<bool> updateSupportGoals(List<String> goals) async {
+  Future<AppFailure?> updateSupportGoals(List<String> goals) async {
     try {
       await _dio.patch<dynamic>(
         '/api/member/support-goals',
         data: {'supportGoals': goals},
       );
-      return true;
+      return null;
     } catch (e) {
       debugPrint('[member] 목표 저장 실패, 로컬에는 남아 있다: $e');
-      return false;
+      return AppFailure.of(e);
     }
   }
 
@@ -100,16 +101,16 @@ class MemberRepository {
   ///
   /// ⚠️ [character]는 서버 `CharacterType` enum 값이어야 한다 (`LULU` / `POPO`).
   /// `CardCharacter.apiValue`를 그대로 넘긴다. 없는 값을 보내면 서버가 400을 준다.
-  Future<bool> updateCharacter(String character) async {
+  Future<AppFailure?> updateCharacter(String character) async {
     try {
       await _dio.patch<dynamic>(
         '/api/member/character',
         data: {'character': character},
       );
-      return true;
+      return null;
     } catch (e) {
       debugPrint('[member] 캐릭터 저장 실패, 로컬에는 남아 있다: $e');
-      return false;
+      return AppFailure.of(e);
     }
   }
 }

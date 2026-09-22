@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/app_failure.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
 
@@ -32,8 +33,9 @@ class ConsentRepository {
   /// [version] 은 **화면에 실제로 보여준 약관의 버전**이다. 서버 최신본을 못 받아
   /// 캐시나 앱 기본값을 보여줬다면 그쪽 버전으로 기록해야 한다.
   ///
-  /// @return 저장 성공 여부. 실패해도 예외를 던지지 않는다.
-  Future<bool> agree({
+  /// null 이면 성공. 실패해도 예외를 던지지 않고 **이유를 담아** 돌려준다 —
+  /// `false` 한 글자로 납작하게 만들면 서버가 알려준 문구가 사라진다 (#352).
+  Future<AppFailure?> agree({
     required Set<String> agreedKeys,
     required String version,
   }) async {
@@ -45,10 +47,10 @@ class ConsentRepository {
           'consentVersion': version,
         },
       );
-      return true;
+      return null;
     } catch (e) {
       AppLogger.error('약관 동의 저장', e);
-      return false;
+      return AppFailure.of(e);
     }
   }
 }

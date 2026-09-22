@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/show_failure.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -132,16 +133,18 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   /// 최종 확정 — 2단계 일치 상태에서 CTA를 눌렀을 때만 호출된다.
   void _onComplete() async {
     ref.read(onboardingProvider.notifier).setPin(_current);
-    final saved = await ref.read(onboardingProvider.notifier).complete();
+    final failure = await ref.read(onboardingProvider.notifier).complete();
     if (!mounted) return;
 
     // 로컬에는 저장돼 있어 앱은 그대로 쓸 수 있다. 다만 서버에 못 남겼다는 것을
     // 알려야 "재설치했더니 설정이 사라졌다"를 나중에 겪지 않는다.
-    if (!saved) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('설정을 서버에 저장하지 못했어요. 설정 화면에서 다시 확인해주세요 (E-PROFILE)'),
-        ),
+    // **서버가 왜 거절했는지 말해줬으면 그 문구를 그대로 쓴다** (#352).
+    if (failure != null) {
+      showFailureSnack(
+        context,
+        failure,
+        fallback: '설정을 서버에 저장하지 못했어요. 설정 화면에서 다시 확인해주세요',
+        fallbackCode: 'E-PROFILE',
       );
     }
     context.go(Routes.guardian);

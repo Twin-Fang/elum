@@ -110,19 +110,21 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
       _loading = true;
       _errorMessage = null;
     });
-    final issued = await ref.read(deviceLinkRepositoryProvider).issue();
+    final attempt = await ref.read(deviceLinkRepositoryProvider).issue();
     if (!mounted) return;
 
-    if (issued == null) {
+    if (!attempt.isOk) {
       setState(() {
         _loading = false;
-        _errorMessage = '암호를 만들지 못했어요. 다시 해주세요 (E-LINK-NEW)';
+        // **서버가 이유를 알려줬으면 그 문구를 그대로 쓴다** (#352).
+        _errorMessage = attempt.failure!
+            .describe('암호를 만들지 못했어요. 다시 해주세요', 'E-LINK-NEW');
       });
       return;
     }
 
     setState(() {
-      _issued = issued;
+      _issued = attempt.value;
       _loading = false;
     });
     _startTimers();

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
@@ -296,8 +297,8 @@ class _FakeAuth extends AuthRepository {
   Future<void> logout() async => logoutCalls++;
 
   @override
-  Future<bool> deleteAccount() async {
+  Future<AppFailure?> deleteAccount() async {
     deleteCalls++;
-    return deleteSucceeds;
+    return deleteSucceeds ? null : const AppFailure(fault: NetworkFault.app);
   }
 }

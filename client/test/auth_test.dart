@@ -57,10 +57,10 @@ void main() {
         ..stub('/api/auth/oauth/kakao', 200, tokenBody('access-1', 'refresh-1'))
         ..stub('/api/member/me', 200, memberBody(consented: false));
 
-      final outcome = await buildRepo(const OAuthSdkSuccess('kakao-token'))
+      final result = await buildRepo(const OAuthSdkSuccess('kakao-token'))
           .signInWith(OAuthProvider.kakao);
 
-      expect(outcome, AuthOutcome.consentRequired);
+      expect(result.outcome, AuthOutcome.consentRequired);
       expect(tokens.accessToken, 'access-1');
       expect(tokens.refreshToken, 'refresh-1');
     });
@@ -70,10 +70,10 @@ void main() {
         ..stub('/api/auth/oauth/google', 200, tokenBody('access-1', 'refresh-1'))
         ..stub('/api/member/me', 200, memberBody(nickname: null));
 
-      final outcome = await buildRepo(const OAuthSdkSuccess('id-token'))
+      final result = await buildRepo(const OAuthSdkSuccess('id-token'))
           .signInWith(OAuthProvider.google);
 
-      expect(outcome, AuthOutcome.onboarding);
+      expect(result.outcome, AuthOutcome.onboarding);
     });
 
     test('아이 정보까지 있으면 홈으로 보내고 이름을 로컬에 되살린다', () async {
@@ -81,10 +81,10 @@ void main() {
         ..stub('/api/auth/oauth/kakao', 200, tokenBody('access-1', 'refresh-1'))
         ..stub('/api/member/me', 200, memberBody(nickname: '하늘이'));
 
-      final outcome = await buildRepo(const OAuthSdkSuccess('kakao-token'))
+      final result = await buildRepo(const OAuthSdkSuccess('kakao-token'))
           .signInWith(OAuthProvider.kakao);
 
-      expect(outcome, AuthOutcome.home);
+      expect(result.outcome, AuthOutcome.home);
       // 재설치한 사용자도 아이 이름이 화면에 바로 보여야 한다
       expect(storage.nickname, '하늘이');
     });
@@ -101,10 +101,10 @@ void main() {
     });
 
     test('사용자가 제공자 화면을 닫으면 서버를 부르지 않는다', () async {
-      final outcome = await buildRepo(const OAuthSdkCancelled())
+      final result = await buildRepo(const OAuthSdkCancelled())
           .signInWith(OAuthProvider.kakao);
 
-      expect(outcome, AuthOutcome.cancelled);
+      expect(result.outcome, AuthOutcome.cancelled);
       expect(adapter.pathsCalled, isEmpty);
       expect(tokens.hasSession, isFalse);
     });
@@ -113,30 +113,58 @@ void main() {
       // 서버가 이메일로 계정을 병합하지 않기 때문에 409가 온다.
       adapter.stub('/api/auth/oauth/google', 409, {'errorCode': 'OAUTH_EMAIL_CONFLICT'});
 
-      final outcome = await buildRepo(const OAuthSdkSuccess('id-token'))
+      final result = await buildRepo(const OAuthSdkSuccess('id-token'))
           .signInWith(OAuthProvider.google);
 
-      expect(outcome, AuthOutcome.emailConflict);
+      expect(result.outcome, AuthOutcome.emailConflict);
       expect(tokens.hasSession, isFalse);
     });
 
     test('서버에 닿지 못하면 인증 실패와 구분해 알린다', () async {
       adapter.stubConnectionError('/api/auth/oauth/kakao');
 
-      final outcome = await buildRepo(const OAuthSdkSuccess('kakao-token'))
+      final result = await buildRepo(const OAuthSdkSuccess('kakao-token'))
           .signInWith(OAuthProvider.kakao);
 
       // 네트워크 문제인데 "다시 로그인하라"고 하면 사용자는 헛수고를 한다
-      expect(outcome, AuthOutcome.offline);
+      expect(result.outcome, AuthOutcome.offline);
+    });
+
+    test('서버가 이유를 알려주면 그 문구가 결과에 실려 온다 (#352)', () async {
+      // 정지된 계정에 "잠시 후 다시 해주세요"라고 안내하면 사용자는 될 때까지
+      // 다시 누른다. 서버가 준 문구가 앱 문구를 이겨야 한다.
+      adapter.stub('/api/auth/oauth/kakao', 403, {
+        'errorCode': 'MEMBER_SUSPENDED',
+        'errorMessage': '정지된 계정이에요',
+      });
+
+      final result = await buildRepo(const OAuthSdkSuccess('kakao-token'))
+          .signInWith(OAuthProvider.kakao);
+
+      expect(result.outcome, AuthOutcome.failedApi);
+      expect(result.failure, isNotNull);
+      expect(result.failure!.messageOr('잠시 후 다시 해주세요'), '정지된 계정이에요');
+      expect(result.failure!.badgeOr('E-AUTH-API'), 'MEMBER_SUSPENDED');
+    });
+
+    test('서버가 문구를 주지 않으면 화면 기본 문구가 나선다', () async {
+      adapter.stub('/api/auth/oauth/kakao', 500, {});
+
+      final result = await buildRepo(const OAuthSdkSuccess('kakao-token'))
+          .signInWith(OAuthProvider.kakao);
+
+      expect(result.failure!.messageOr('잠시 후 다시 해주세요'), '잠시 후 다시 해주세요');
+      // 코드를 몰라도 추적할 단서는 남는다.
+      expect(result.failure!.badgeOr('E-AUTH-API'), 'E-AUTH-API/500');
     });
 
     test('SDK가 실패하면 서버를 부르지 않는다', () async {
-      final outcome = await buildRepo(const OAuthSdkFailure('SDK-KAKAO'))
+      final result = await buildRepo(const OAuthSdkFailure('SDK-KAKAO'))
           .signInWith(OAuthProvider.kakao);
 
       // 갈래를 나눠 둔 이유는 제보 추적이다. 뭉뚱그린 `failed`가 아니라
       // `failedSdk`여야 화면에 `E-AUTH-SDK`가 붙는다 (#346).
-      expect(outcome, AuthOutcome.failedSdk);
+      expect(result.outcome, AuthOutcome.failedSdk);
       expect(adapter.pathsCalled, isEmpty);
     });
   });

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
@@ -226,13 +227,13 @@ class _FakeConsent extends ConsentRepository {
   String? version;
 
   @override
-  Future<bool> agree({
+  Future<AppFailure?> agree({
     required Set<String> agreedKeys,
     required String version,
   }) async {
     calls++;
     marketing = agreedKeys.contains('marketingAgreed');
     this.version = version;
-    return true;
+    return null;
   }
 }

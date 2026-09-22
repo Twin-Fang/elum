@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/network/app_failure.dart';
+import '../../../core/widgets/show_failure.dart';
 import '../../../core/app_status/app_status_repository.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/router/app_router.dart';
@@ -46,7 +48,7 @@ class _GuardianSettingsScreenState
     await _run(() async {
       await ref.read(authRepositoryProvider).logout();
       // 로그아웃은 이 기기에서 나가는 것이 본질이라 서버가 실패해도 목적은 달성된다.
-      return true;
+      return null;
     });
   }
 
@@ -85,11 +87,13 @@ class _GuardianSettingsScreenState
   /// 화면을 옮기지 않는다 — 계정은 서버에 그대로 있고 토큰도 살아 있으므로
   /// 이 자리에서 다시 누르면 된다. 코드(E-DEL)를 같이 보여줘야 제보를 받았을 때
   /// 어디서 멈췄는지 알 수 있다.
-  void _tellFailed() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('탈퇴하지 못했어요. 잠시 후 다시 해주세요 (E-DEL)'),
-      ),
+  void _tellFailed(AppFailure? failure) {
+    // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다 (#352).
+    showFailureSnack(
+      context,
+      failure,
+      fallback: '탈퇴하지 못했어요. 잠시 후 다시 해주세요',
+      fallbackCode: 'E-DEL',
     );
   }
 
@@ -98,19 +102,19 @@ class _GuardianSettingsScreenState
   /// 동작이 **실제로 됐는지**를 받아 분기한다. 됐으면 로컬이 비었으니 이 화면에
   /// 남을 수 없어 로그인으로 보내고, 안 됐으면 바뀐 것이 없으니 이 자리에 머문
   /// 채로 알린다 (이슈 #187).
-  Future<void> _run(Future<bool> Function() action) async {
+  Future<void> _run(Future<AppFailure?> Function() action) async {
     setState(() => _busy = true);
-    var done = false;
+    AppFailure? failure;
     try {
-      done = await action();
+      failure = await action();
     } finally {
       if (mounted) setState(() => _busy = false);
     }
     if (!mounted) return;
-    if (done) {
+    if (failure == null) {
       context.go(Routes.login);
     } else {
-      _tellFailed();
+      _tellFailed(failure);
     }
   }
 

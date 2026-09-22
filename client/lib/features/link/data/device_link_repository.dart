@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/app_failure.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/storage/local_storage.dart';
@@ -33,6 +34,19 @@ enum RedeemOutcome {
   failed,
 }
 
+/// 암호 넣기 한 번의 결과 — 갈래와 **그 실패가 무엇이었는지**를 함께 돌려준다.
+///
+/// 갈래만으로는 서버가 알려준 문구를 화면에 전할 수 없다. 이유가 저장소 안에서
+/// 사라지면 화면은 자기가 지어낸 말밖에 못 한다 (#352).
+class RedeemResult {
+  const RedeemResult(this.outcome, {this.failure});
+
+  final RedeemOutcome outcome;
+
+  /// 실패했을 때 서버·네트워크가 알려준 것. 성공이면 null.
+  final AppFailure? failure;
+}
+
 class DeviceLinkRepository {
   DeviceLinkRepository({
     required Dio dio,
@@ -46,8 +60,10 @@ class DeviceLinkRepository {
   final TokenStore _tokens;
   final LocalStorage _storage;
 
-  /// 새 연결 암호를 만든다. 실패하면 null — 화면이 에러 코드와 함께 알린다.
-  Future<IssuedLinkCode?> issue() async {
+  /// 새 연결 암호를 만든다.
+  ///
+  /// 실패하면 **이유까지 담아** 돌려준다 — 화면이 서버 문구를 그대로 띄운다 (#352).
+  Future<Attempt<IssuedLinkCode>> issue() async {
     try {
       final res = await _dio.post<Map<String, dynamic>>('/api/device-links');
       final code = res.data?['code']?.toString();
@@ -56,12 +72,14 @@ class DeviceLinkRepository {
       final seconds = (res.data?['expiresInSeconds'] as num?)?.toInt();
       if (code == null || code.isEmpty || seconds == null || seconds <= 0) {
         AppLogger.error('연결 암호 발급', '응답에 code/expiresInSeconds가 없습니다');
-        return null;
+        return const Attempt.failed(AppFailure(fault: NetworkFault.app));
       }
-      return IssuedLinkCode.fromNow(code: code, expiresInSeconds: seconds);
+      return Attempt.ok(
+        IssuedLinkCode.fromNow(code: code, expiresInSeconds: seconds),
+      );
     } catch (e) {
       AppLogger.error('연결 암호 발급', e);
-      return null;
+      return Attempt.failed(AppFailure.of(e));
     }
   }
 
@@ -89,7 +107,7 @@ class DeviceLinkRepository {
   }
 
   /// 이룸이 휴대폰이 암호를 넣는다. **로그인 전이라 토큰 없이 부른다.**
-  Future<RedeemOutcome> redeem(String code) async {
+  Future<RedeemResult> redeem(String code) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/api/device-links/redeem',
@@ -99,19 +117,19 @@ class DeviceLinkRepository {
       final refresh = res.data?['refreshToken']?.toString();
       if (access == null || access.isEmpty || refresh == null || refresh.isEmpty) {
         AppLogger.error('연결', '응답에 토큰이 없습니다');
-        return RedeemOutcome.failed;
+        return const RedeemResult(RedeemOutcome.failed);
       }
       await _tokens.save(accessToken: access, refreshToken: refresh);
       // 이 휴대폰이 이룸이 것임을 남긴다. 세션이 끊겼을 때 보호자 로그인 화면이 아니라
       // 연결 화면으로 되돌리려면 토큰이 사라진 뒤에도 알 수 있어야 한다 (이슈 #206).
       await _storage.setElumiDevice(true);
       await _pullProfile();
-      return RedeemOutcome.linked;
+      return const RedeemResult(RedeemOutcome.linked);
     } on DioException catch (e) {
-      return _classify(e);
+      return RedeemResult(_classify(e), failure: AppFailure.of(e));
     } catch (e) {
       AppLogger.error('연결', e);
-      return RedeemOutcome.failed;
+      return RedeemResult(RedeemOutcome.failed, failure: AppFailure.of(e));
     }
   }
 

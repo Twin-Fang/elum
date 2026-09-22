@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/app_failure.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/storage/local_storage.dart';
@@ -52,10 +53,11 @@ abstract interface class RoutineRepository {
 
   /// 카드 문장 수정.
   ///
-  /// [synced]가 false면 서버 반영에 실패해 **로컬에만** 반영됐다는 뜻이다.
+  /// [failure]가 null이 아니면 서버 반영에 실패해 **로컬에만** 반영됐다는 뜻이다.
+  /// 그 안에 서버가 알려준 이유가 들어 있다 — 화면이 그대로 띄운다 (#352).
   /// 화면이 이 값으로 "서버 저장 실패" 안내를 띄운다 — 실패를 조용히 삼키면
   /// 보호자는 저장된 줄 알고 앱을 끈다.
-  Future<({Routine routine, bool synced})> updateStep(
+  Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
     String stepId,
     String description,
@@ -65,9 +67,9 @@ abstract interface class RoutineRepository {
 
   /// 보호자가 정한 보상을 저장한다. [rewardText]가 비면 **보상을 지운다**.
   ///
-  /// 실패하면 로컬 반영만 하고 `synced: false`를 준다 — 보상은 선택 항목이라
+  /// 실패하면 로컬 반영만 하고 실패 이유를 함께 준다 — 보상은 선택 항목이라
   /// 저장에 실패했다고 일과 만들기를 막지 않는다. 대신 화면이 안내는 띄운다.
-  Future<({Routine routine, bool synced})> updateReward(
+  Future<({Routine routine, AppFailure? failure})> updateReward(
     Routine routine, {
     required String rewardText,
     String rewardPresetKey,
@@ -85,22 +87,26 @@ abstract interface class RoutineRepository {
 
   /// 지난 일과 다시 하기. 서버가 오늘 날짜로 복제해 돌려준다.
   /// 실패하면 **null** — 화면이 토스트로 알리고 목록은 그대로 둔다.
-  Future<Routine?> duplicate(String routineId);
+  /// 성공하면 복제된 일과, 실패하면 **이유**가 담겨 온다 (#352).
+  Future<Attempt<Routine>> duplicate(String routineId);
 
   /// 일과 삭제. 성공 여부를 돌려준다. 실패해도 throw하지 않는다.
-  Future<bool> delete(String routineId);
+  /// null 이면 성공. 실패하면 서버가 알려준 이유가 담겨 온다 (#352).
+  Future<AppFailure?> delete(String routineId);
 
   /// 홈 목록의 순서를 통째로 저장한다.
   ///
   /// 화면에 보이는 **전체**를 차례대로 보낸다. 일부만 보내는 방식이 아니다 —
   /// 부분 갱신은 두 곳에서 동시에 순서를 바꿀 때 뒤엉킨다.
-  Future<bool> reorder(List<String> routineIds);
+  /// null 이면 성공. 실패하면 서버가 알려준 이유가 담겨 온다 (#352).
+  Future<AppFailure?> reorder(List<String> routineIds);
 
   /// 일과 안의 행동 단계 순서를 바꾼다.
   ///
   /// 일과 순서([reorder])와 같은 방식이다 — **화면에 보이는 단계 전체를 차례대로**
   /// 보낸다. 실패하면 false를 주고, 부르는 쪽이 화면을 되돌린다.
-  Future<bool> reorderSteps(String routineId, List<String> stepIds);
+  /// null 이면 성공. 실패하면 서버가 알려준 이유가 담겨 온다 (#352).
+  Future<AppFailure?> reorderSteps(String routineId, List<String> stepIds);
 }
 
 class RoutineRepositoryImpl implements RoutineRepository {
@@ -294,7 +300,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
   }
 
   @override
-  Future<({Routine routine, bool synced})> updateStep(
+  Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
     String stepId,
     String description,
@@ -305,8 +311,9 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'description': description,
     });
 
-    // 서버로 보내려 했는데 실패했는가 — 성공·mock과 구분해야 화면이 안내할 수 있다
-    var serverFailed = false;
+    // 서버로 보내려 했는데 왜 실패했는가 — **이유까지 들고 나간다.**
+    // `false` 로 납작하게 만들면 서버가 알려준 문구가 여기서 사라진다 (#352).
+    AppFailure? failure;
 
     if (routine.id.isNotEmpty) {
       try {
@@ -322,12 +329,12 @@ class RoutineRepositoryImpl implements RoutineRepository {
             'updateStep',
             '카드 내용 수정 완료',
           );
-          return (routine: updated, synced: true);
+          return (routine: updated, failure: null);
         }
-        serverFailed = true;
+        failure = const AppFailure(fault: NetworkFault.app);
       } catch (e) {
         AppLogger.repositoryError('RoutineRepository', 'updateStep', e);
-        serverFailed = true;
+        failure = AppFailure.of(e);
       }
     }
 
@@ -345,7 +352,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'updateStep (로컬)',
       '로컬에서 카드 내용 수정됨',
     );
-    return (routine: updated, synced: !serverFailed);
+    return (routine: updated, failure: failure);
   }
 
   @override
@@ -398,7 +405,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
   // --- 보상(강화물) · 일과 정리 (이슈 #148~150) ---
 
   @override
-  Future<({Routine routine, bool synced})> updateReward(
+  Future<({Routine routine, AppFailure? failure})> updateReward(
     Routine routine, {
     required String rewardText,
     String rewardPresetKey = '',
@@ -411,7 +418,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'preset': rewardPresetKey,
     });
 
-    var serverFailed = false;
+    AppFailure? failure;
 
     if (routine.id.isNotEmpty) {
       try {
@@ -430,12 +437,12 @@ class RoutineRepositoryImpl implements RoutineRepository {
             'updateReward',
             trimmed.isEmpty ? '보상 삭제됨' : '보상 저장됨',
           );
-          return (routine: Routine.fromJson(body), synced: true);
+          return (routine: Routine.fromJson(body), failure: null);
         }
-        serverFailed = true;
+        failure = const AppFailure(fault: NetworkFault.app);
       } catch (e) {
         AppLogger.repositoryError('RoutineRepository', 'updateReward', e);
-        serverFailed = true;
+        failure = AppFailure.of(e);
       }
     }
 
@@ -445,7 +452,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
       rewardText: trimmed,
       rewardPresetKey: rewardPresetKey.trim(),
     );
-    return (routine: updated, synced: !serverFailed);
+    return (routine: updated, failure: failure);
   }
 
   @override
@@ -508,39 +515,43 @@ class RoutineRepositoryImpl implements RoutineRepository {
   }
 
   @override
-  Future<Routine?> duplicate(String routineId) async {
+  Future<Attempt<Routine>> duplicate(String routineId) async {
     AppLogger.repositoryCall('RoutineRepository', 'duplicate', {
       'routineId': routineId,
     });
 
-    if (routineId.isEmpty) return null;
+    if (routineId.isEmpty) {
+      return const Attempt.failed(AppFailure(fault: NetworkFault.app));
+    }
 
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/api/routines/$routineId/duplicate',
       );
       final body = res.data;
-      if (body == null) return null;
+      if (body == null) {
+        return const Attempt.failed(AppFailure(fault: NetworkFault.app));
+      }
       AppLogger.repositorySuccess(
         'RoutineRepository',
         'duplicate',
         '오늘 일과로 복제됨',
       );
-      return Routine.fromJson(body);
+      return Attempt.ok(Routine.fromJson(body));
     } catch (e) {
-      // null을 주면 화면이 토스트로 알리고 목록은 그대로 둔다.
+      // 화면이 토스트로 알리고 목록은 그대로 둔다.
       AppLogger.repositoryError('RoutineRepository', 'duplicate', e);
-      return null;
+      return Attempt.failed(AppFailure.of(e));
     }
   }
 
   @override
-  Future<bool> reorder(List<String> routineIds) async {
+  Future<AppFailure?> reorder(List<String> routineIds) async {
     AppLogger.repositoryCall('RoutineRepository', 'reorder', {
       'count': routineIds.length,
     });
 
-    if (routineIds.isEmpty) return true;
+    if (routineIds.isEmpty) return null;
 
     try {
       await _dio.patch<void>(
@@ -548,22 +559,22 @@ class RoutineRepositoryImpl implements RoutineRepository {
         data: {'routineIds': routineIds},
       );
       AppLogger.repositorySuccess('RoutineRepository', 'reorder', '순서 저장됨');
-      return true;
+      return null;
     } catch (e) {
       // 실패를 삼키지 않는다 — 부르는 쪽이 목록을 되돌려야 한다.
       AppLogger.repositoryError('RoutineRepository', 'reorder', e);
-      return false;
+      return AppFailure.of(e);
     }
   }
 
   @override
-  Future<bool> reorderSteps(String routineId, List<String> stepIds) async {
+  Future<AppFailure?> reorderSteps(String routineId, List<String> stepIds) async {
     AppLogger.repositoryCall('RoutineRepository', 'reorderSteps', {
       'routineId': routineId,
       'count': stepIds.length,
     });
 
-    if (routineId.isEmpty || stepIds.isEmpty) return true;
+    if (routineId.isEmpty || stepIds.isEmpty) return null;
 
     try {
       await _dio.patch<void>(
@@ -575,29 +586,31 @@ class RoutineRepositoryImpl implements RoutineRepository {
         'reorderSteps',
         '단계 순서 저장됨',
       );
-      return true;
+      return null;
     } catch (e) {
       // 일과 순서와 같다 — 실패를 삼키지 않고 부르는 쪽이 화면을 되돌린다.
       AppLogger.repositoryError('RoutineRepository', 'reorderSteps', e);
-      return false;
+      return AppFailure.of(e);
     }
   }
 
   @override
-  Future<bool> delete(String routineId) async {
+  Future<AppFailure?> delete(String routineId) async {
     AppLogger.repositoryCall('RoutineRepository', 'delete', {
       'routineId': routineId,
     });
 
-    if (routineId.isEmpty) return false;
+    if (routineId.isEmpty) {
+      return const AppFailure(fault: NetworkFault.app);
+    }
 
     try {
       await _dio.delete<void>('/api/routines/$routineId');
       AppLogger.repositorySuccess('RoutineRepository', 'delete', '일과 삭제됨');
-      return true;
+      return null;
     } catch (e) {
       AppLogger.repositoryError('RoutineRepository', 'delete', e);
-      return false;
+      return AppFailure.of(e);
     }
   }
 

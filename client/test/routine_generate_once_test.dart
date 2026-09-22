@@ -1,3 +1,4 @@
+import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
@@ -151,12 +152,12 @@ class _CountingRepo with FakeRewardApi implements RoutineRepository {
   Future<Routine> confirm(Routine routine) async => routine;
 
   @override
-  Future<({Routine routine, bool synced})> updateStep(
+  Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
     String stepId,
     String description,
   ) async =>
-      (routine: routine, synced: true);
+      (routine: routine, failure: null);
 
   @override
   Future<List<Routine>> getTodayRoutines() async => const [];

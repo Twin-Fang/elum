@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
-import '../../../core/network/server_error.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
+import '../../../core/network/app_failure.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import 'oauth_sdk.dart';
 
@@ -58,20 +58,27 @@ enum AuthOutcome {
   offline,
 }
 
-/// 서버에 닿지 못한 실패인가. 응답 코드를 못 받은 경우가 여기에 해당한다.
-bool _isOffline(Object e) {
-  if (e is! DioException) return false;
-  // 응답이 있으면 서버까지는 닿은 것이므로 오프라인이 아니다.
-  if (e.response != null) return false;
-  return switch (e.type) {
-    DioExceptionType.connectionError ||
-    DioExceptionType.connectionTimeout ||
-    DioExceptionType.sendTimeout ||
-    DioExceptionType.receiveTimeout =>
-      true,
-    _ => false,
-  };
+/// 로그인 한 번의 결과 — 갈래와 **그 실패가 무엇이었는지**를 함께 돌려준다.
+///
+/// 전에는 실패를 저장소의 `lastServerError` 필드에 담아 두고 화면이 나중에
+/// 꺼내 봤다. **실패는 그 호출의 결과지 저장소의 상태가 아니다** — 요청이 겹치면
+/// 엉뚱한 실패를 보여줄 수 있었다 (#352).
+class AuthResult {
+  const AuthResult(this.outcome, {this.failure});
+
+  final AuthOutcome outcome;
+
+  /// 실패했을 때 서버·네트워크가 알려준 것. 성공이면 null.
+  ///
+  /// 화면은 이것을 [AppFailure.messageOr] 에 넘겨 **서버 문구를 그대로** 띄운다.
+  final AppFailure? failure;
 }
+
+/// 서버에 닿지 못한 실패인가. 응답 자체를 못 받은 경우가 여기에 해당한다.
+bool _isOffline(AppFailure f) =>
+    f.fault == NetworkFault.offline ||
+    f.fault == NetworkFault.timeout ||
+    f.fault == NetworkFault.badCertificate;
 
 /// 소셜 로그인 기반 인증.
 ///
@@ -106,31 +113,25 @@ class AuthRepository {
   bool get hasSession => _tokens.hasSession;
 
   /// 제공자로 로그인한다.
-  /// 마지막 로그인 실패에서 서버가 보낸 것.
   ///
-  /// [AuthOutcome]은 갈래만 말하고 문구는 말하지 않는다. 화면이 서버 문구를
-  /// 그대로 띄우려면 그 문구가 필요해서 여기에 남긴다. 성공하면 비운다 —
-  /// 지난 실패의 문구가 다음 실패에 딸려 나오면 안 된다 (#347).
-  ServerError? lastServerError;
-
-  Future<AuthOutcome> signInWith(OAuthProvider provider) async {
-    lastServerError = null;
-
+  /// 실패는 **결과에 담아 돌려준다.** 저장소 필드에 남겨 화면이 꺼내 보게 하면
+  /// 요청이 겹칠 때 엉뚱한 실패가 딸려 나온다 (#352).
+  Future<AuthResult> signInWith(OAuthProvider provider) async {
     final sdkResult = await _sdk.signIn(provider);
 
     switch (sdkResult) {
       case OAuthSdkCancelled():
-        return AuthOutcome.cancelled;
+        return const AuthResult(AuthOutcome.cancelled);
       case OAuthSdkFailure(code: final code):
         AppLogger.error('소셜 로그인', code);
-        return AuthOutcome.failedSdk;
+        return const AuthResult(AuthOutcome.failedSdk);
       case OAuthSdkSuccess(token: final providerToken):
         return _exchange(provider, providerToken);
     }
   }
 
   /// 제공자 토큰을 우리 토큰으로 바꾼다.
-  Future<AuthOutcome> _exchange(OAuthProvider provider, String providerToken) async {
+  Future<AuthResult> _exchange(OAuthProvider provider, String providerToken) async {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/api/auth/oauth/${provider.path}',
@@ -141,37 +142,35 @@ class AuthRepository {
       final refresh = res.data?['refreshToken']?.toString();
       if (access == null || access.isEmpty || refresh == null || refresh.isEmpty) {
         AppLogger.error('소셜 로그인', '서버 응답에 토큰이 없다');
-        return AuthOutcome.failedToken;
+        return const AuthResult(AuthOutcome.failedToken);
       }
 
       await _tokens.save(accessToken: access, refreshToken: refresh);
       // 다음 로그인 화면에서 "지난번에 이걸로 하셨어요"를 보여주기 위해 남긴다.
       // 다른 수단으로 들어와 빈 계정이 생기는 사고를 막는 장치다.
       await _storage.setLastLoginProvider(provider.name);
-      return await _resolveDestination();
+      return AuthResult(await _resolveDestination());
     } on DioException catch (e) {
-      if (_isOffline(e)) return AuthOutcome.offline;
+      // 판정은 전역 인터셉터가 이미 해 뒀다. 여기서 본문을 다시 파싱하지 않는다.
+      final failure = AppFailure.of(e);
+      if (_isOffline(failure)) {
+        return AuthResult(AuthOutcome.offline, failure: failure);
+      }
 
       // **서버가 무엇이 잘못됐는지 이미 알려줬다.** 상태 코드만 보고 뭉개면
       // 정지된 계정에게 "잠시 후 다시 해주세요"라고 안내하게 된다 — 사용자는
       // 될 때까지 다시 누른다 (#347).
-      final err = e.serverError;
-      lastServerError = err;
-      if (err.isUnknownCode) {
-        // 앱이 따라가야 할 코드가 늘었다는 신호다. 조용히 넘기지 않는다.
-        AppLogger.error('소셜 로그인 교환 — 모르는 코드', '$err');
-      }
       // 같은 이메일이 다른 제공자로 이미 가입된 경우. 서버가 이메일로 계정을
       // 합치지 않기 때문에 사용자에게 안내해야 한다.
-      if (err.code == ServerErrorCode.oauthEmailConflict ||
+      if (failure.server?.code == ServerErrorCode.oauthEmailConflict ||
           e.response?.statusCode == 409) {
-        return AuthOutcome.emailConflict;
+        return AuthResult(AuthOutcome.emailConflict, failure: failure);
       }
       AppLogger.error('소셜 로그인 교환', e);
-      return AuthOutcome.failedApi;
+      return AuthResult(AuthOutcome.failedApi, failure: failure);
     } catch (e) {
       AppLogger.error('소셜 로그인 교환', e);
-      return AuthOutcome.failed;
+      return AuthResult(AuthOutcome.failed, failure: AppFailure.of(e));
     }
   }
 
@@ -238,7 +237,7 @@ class AuthRepository {
       await _tokens.save(accessToken: access, refreshToken: nextRefresh);
       return access;
     } on DioException catch (e) {
-      if (_isOffline(e)) {
+      if (_isOffline(AppFailure.of(e))) {
         // 네트워크 문제는 세션 문제가 아니다. 토큰을 지우면 안 된다.
         AppLogger.error('토큰 갱신', '서버에 닿지 못했다');
         return null;
@@ -285,16 +284,17 @@ class AuthRepository {
   ///
   /// 삭제는 됐는데 응답만 유실된 경우가 남지만, 그때는 다음 요청이 401을 맞고
   /// 갱신까지 실패해 세션 종료 경로로 빠진다 (이슈 #175). 그쪽에 맡긴다.
-  Future<bool> deleteAccount() async {
+  /// null 이면 지워졌다. 실패하면 **서버가 알려준 이유**가 담겨 온다 (#352).
+  Future<AppFailure?> deleteAccount() async {
     try {
       await _dio.delete<dynamic>('/api/member/me');
     } catch (e) {
       AppLogger.error('회원삭제', e);
-      return false;
+      return AppFailure.of(e);
     }
     await _tokens.clear();
     await _storage.clearAll();
-    return true;
+    return null;
   }
 }
 

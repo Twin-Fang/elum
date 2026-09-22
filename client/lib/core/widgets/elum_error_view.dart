@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../assets/app_assets.dart';
+import '../network/app_failure.dart';
 import '../theme/theme_context_ext.dart';
 import 'elum_button.dart';
 
@@ -44,6 +45,38 @@ class ElumErrorView extends StatelessWidget {
   /// 홈처럼 여러 구역이 있는 화면에서 한 구역이 실패했다고 화면 전체를 덮으면,
   /// 멀쩡한 나머지까지 쓸 수 없게 된다. 그래서 실패한 자리에만 작게 놓는다.
   final bool compact;
+
+  /// 잡은 예외에서 바로 만든다 — **문구·코드 판정을 [AppFailure] 에 맡긴다.**
+  ///
+  /// `message` 를 손으로 적으면 서버가 이유를 알려줘도 앱 문구가 덮어쓴다.
+  /// 실제로 그래서 `MEMBER_SUSPENDED`("정지된 계정이에요")가 화면에는
+  /// "잠시 후 다시 해주세요"로 나왔다 (#352).
+  ///
+  /// ```dart
+  /// error: (e, _) => ElumErrorView.failure(e,
+  ///     fallback: '임시저장을 불러오지 못했어요',
+  ///     fallbackCode: 'E-DRAFT',
+  ///     onRetry: ...),
+  /// ```
+  factory ElumErrorView.failure(
+    Object? error, {
+    Key? key,
+    required String fallback,
+    required String fallbackCode,
+    String? description,
+    VoidCallback? onRetry,
+    bool compact = false,
+  }) {
+    final failure = AppFailure.of(error);
+    return ElumErrorView(
+      key: key,
+      message: failure.messageOr(fallback),
+      description: description,
+      errorCode: failure.badgeOr(fallbackCode),
+      onRetry: onRetry,
+      compact: compact,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,3 +1,4 @@
+import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/routine.dart';
 
@@ -9,7 +10,7 @@ import 'package:elum/shared/models/routine.dart';
 /// 여기 것을 덮어써서 쓴다.
 mixin FakeRewardApi implements RoutineRepository {
   @override
-  Future<({Routine routine, bool synced})> updateReward(
+  Future<({Routine routine, AppFailure? failure})> updateReward(
     Routine routine, {
     required String rewardText,
     String rewardPresetKey = '',
@@ -18,7 +19,7 @@ mixin FakeRewardApi implements RoutineRepository {
       rewardText: rewardText,
       rewardPresetKey: rewardPresetKey,
     ),
-    synced: true,
+    failure: null,
   );
 
   @override
@@ -31,15 +32,16 @@ mixin FakeRewardApi implements RoutineRepository {
   Future<List<Routine>> getDraftRoutines() async => const [];
 
   @override
-  Future<Routine?> duplicate(String routineId) async => null;
+  Future<Attempt<Routine>> duplicate(String routineId) async =>
+      const Attempt.failed(AppFailure(fault: NetworkFault.app));
 
   @override
-  Future<bool> delete(String routineId) async => true;
+  Future<AppFailure?> delete(String routineId) async => null;
 
   @override
-  Future<bool> reorder(List<String> routineIds) async => true;
+  Future<AppFailure?> reorder(List<String> routineIds) async => null;
 
   @override
-  Future<bool> reorderSteps(String routineId, List<String> stepIds) async =>
-      true;
+  Future<AppFailure?> reorderSteps(String routineId, List<String> stepIds) async =>
+      null;
 }

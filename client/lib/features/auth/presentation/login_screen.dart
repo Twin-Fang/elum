@@ -10,8 +10,8 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/network/server_error.dart';
 import '../../../core/widgets/elum_dialog.dart';
+import '../../../core/widgets/show_failure.dart';
 import '../../../core/widgets/login_scene.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/auth_repository.dart';
@@ -87,11 +87,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _pending = provider);
 
     final repo = ref.read(authRepositoryProvider);
-    final outcome = await repo.signInWith(provider);
+    final result = await repo.signInWith(provider);
 
     if (!mounted) return;
 
-    switch (outcome) {
+    switch (result.outcome) {
       case AuthOutcome.consentRequired:
         // 약관 동의 없이는 서비스를 쓸 수 없다. 아이 정보를 받기 전에 먼저 받는다.
         _forgetPreviousChild();
@@ -110,31 +110,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         break;
       // **서버 문구를 그대로 띄우는 것이 기본이다.** 서버 문구는 이미 사용자용으로
       // 쓰여 있고, 앱이 다시 쓰면 서버에서 고쳐도 앱은 옛 문구를 보여준다 (#347).
-      // 서버가 아무 문구도 주지 않았을 때만 앱 문구가 나선다.
+      // 아래 기본 문구는 서버가 아무 말도 주지 않았을 때만 나선다 (#352).
       case AuthOutcome.emailConflict:
-        await _alertFromServer(
-          repo.lastServerError,
+        await _alert(
+          result,
           title: '이미 가입된 계정이에요',
           fallback: '처음 쓰신 방법으로 로그인해주세요',
           fallbackCode: 'E-DUP',
         );
       case AuthOutcome.offline:
-        await _alert('인터넷 연결을 확인해주세요', '연결한 뒤 다시 해주세요 (E-NET)');
+        await _alert(
+          result,
+          title: '인터넷 연결을 확인해주세요',
+          fallback: '연결한 뒤 다시 해주세요',
+          fallbackCode: 'E-NET',
+        );
       // 사용자에게는 넷 다 같은 말이다. **코드만 다르다** — 제보를 받았을 때
       // 어디서 터졌는지 가릴 유일한 단서다 (#346).
       case AuthOutcome.failedSdk:
-        await _alert('로그인하지 못했어요', '잠시 후 다시 해주세요 (E-AUTH-SDK)');
+        await _alert(
+          result,
+          title: '로그인하지 못했어요',
+          fallback: '잠시 후 다시 해주세요',
+          fallbackCode: 'E-AUTH-SDK',
+        );
       case AuthOutcome.failedToken:
-        await _alert('로그인하지 못했어요', '잠시 후 다시 해주세요 (E-AUTH-TOKEN)');
+        await _alert(
+          result,
+          title: '로그인하지 못했어요',
+          fallback: '잠시 후 다시 해주세요',
+          fallbackCode: 'E-AUTH-TOKEN',
+        );
       case AuthOutcome.failedApi:
-        await _alertFromServer(
-          repo.lastServerError,
+        await _alert(
+          result,
           title: '로그인하지 못했어요',
           fallback: '잠시 후 다시 해주세요',
           fallbackCode: 'E-AUTH-API',
         );
       case AuthOutcome.failed:
-        await _alert('로그인하지 못했어요', '잠시 후 다시 해주세요 (E-AUTH)');
+        await _alert(
+          result,
+          title: '로그인하지 못했어요',
+          fallback: '잠시 후 다시 해주세요',
+          fallbackCode: 'E-AUTH',
+        );
     }
 
     if (mounted) setState(() => _pending = null);
@@ -149,28 +169,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   ///
   /// **에러 코드는 그대로 노출한다.** 사용자에게는 뜻이 없지만, 제보를 받았을 때
   /// 어디서 터졌는지 가릴 유일한 단서다.
-  /// 서버가 보낸 문구로 알린다. 없으면 앱 문구로 물러선다.
+  /// 실패를 팝업으로 알린다 — **앱 공통 통로 하나만 쓴다** (#352).
   ///
-  /// **식별자는 어느 쪽이든 붙는다** — 서버 코드가 있으면 그것을, 없으면
-  /// 앱 코드를 붙인다. 제보를 받았을 때 추적할 유일한 단서다.
-  Future<void> _alertFromServer(
-    ServerError? error, {
+  /// 문구도 식별자도 [showFailure] 가 정한다. 서버가 이유를 줬으면 그 문구가
+  /// [fallback] 을 이기고, 아무것도 없을 때만 [fallbackCode] 가 붙는다.
+  Future<void> _alert(
+    AuthResult result, {
     required String title,
     required String fallback,
     required String fallbackCode,
   }) {
-    final body = error?.messageOr(fallback) ?? fallback;
-    final badge = error?.badge ?? fallbackCode;
-    return _alert(title, '$body ($badge)');
-  }
-
-  Future<void> _alert(String title, String message) {
-    return showElumDialog<void>(
-      context: context,
+    return showFailure(
+      context,
+      result.failure,
       title: title,
-      message: message,
-      // 아동도 보는 화면이라 붉은 경고를 쓰지 않는다.
-      icon: ElumDialogIcon.warning,
+      fallback: fallback,
+      fallbackCode: fallbackCode,
     );
   }
 

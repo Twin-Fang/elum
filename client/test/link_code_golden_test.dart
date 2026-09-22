@@ -2,6 +2,7 @@
 library;
 
 import 'package:dio/dio.dart';
+import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
@@ -119,9 +120,8 @@ class _FakeLink extends DeviceLinkRepository {
   bool linked = false;
 
   @override
-  Future<IssuedLinkCode?> issue() async => IssuedLinkCode.fromNow(
-        code: '5NJ280',
-        expiresInSeconds: 599,
+  Future<Attempt<IssuedLinkCode>> issue() async => Attempt.ok(
+        IssuedLinkCode.fromNow(code: '5NJ280', expiresInSeconds: 599),
       );
 
   @override

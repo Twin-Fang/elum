@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/app_failure.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../guardian/data/member_repository.dart';
 import '../domain/character.dart';
@@ -90,8 +91,9 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
   /// 대신 **서버 저장이 온전했는지를 돌려준다** — 부르는 쪽이 알려야
   /// 보호자가 "설정이 저장된 줄 알았는데 재설치하니 사라졌다"를 겪지 않는다.
   ///
-  /// @return 서버 저장이 모두 성공했으면 true
-  Future<bool> complete() async {
+  /// null 이면 셋 다 저장됐다. 하나라도 실패하면 **처음 실패한 이유**를 돌려준다 —
+  /// 서버가 왜 거절했는지(잘못된 값·정지된 계정 등)를 화면이 그대로 띄운다 (#352).
+  Future<AppFailure?> complete() async {
     final storage = ref.read(localStorageProvider);
     try {
       await storage.setNickname(state.childNickname);
@@ -111,14 +113,14 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
     // 서버 연동 — nickname·goals·character를 계정에 남긴다. 하나가 실패해도
     // 나머지는 시도한다 — 셋 중 둘이라도 남는 편이 낫다.
     final member = ref.read(memberRepositoryProvider);
-    var allSaved = await member.updateNickname(state.childNickname);
-    allSaved &= await member.updateSupportGoals(
+    var failure = await member.updateNickname(state.childNickname);
+    failure ??= await member.updateSupportGoals(
       state.supportGoals.map((g) => g.apiValue).toList(),
     );
     final character = state.cardCharacter;
     if (character != null) {
-      allSaved &= await member.updateCharacter(character.apiValue);
+      failure ??= await member.updateCharacter(character.apiValue);
     }
-    return allSaved;
+    return failure;
   }
 }

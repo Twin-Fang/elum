@@ -1,3 +1,4 @@
+import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
@@ -399,12 +400,12 @@ class _FakeRepo with FakeRewardApi implements RoutineRepository {
   Future<Routine> confirm(Routine routine) async => routine;
 
   @override
-  Future<({Routine routine, bool synced})> updateStep(
+  Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
     String stepId,
     String description,
   ) async =>
-      (routine: routine, synced: true);
+      (routine: routine, failure: null);
 
   @override
   Future<List<Routine>> getTodayRoutines() async => const [];

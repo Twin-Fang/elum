@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -116,13 +117,13 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     final ids = [for (final r in next) r.id];
     setState(() => _order = ids);
 
-    final ok = await ref.read(routineRepositoryProvider).reorder(ids);
+    final failure = await ref.read(routineRepositoryProvider).reorder(ids);
     if (!mounted) return;
-    if (!ok) {
+    if (failure != null) {
       // 서버가 받지 못했으면 화면만 바뀐 채로 두지 않는다 —
       // 다음에 열면 옛 순서로 돌아와 보호자가 바꾼 적 없다고 여긴다.
       setState(() => _order = null);
-      _toast('순서를 저장하지 못했어요 (E-ORDER)');
+      _toast(failure.describe('순서를 저장하지 못했어요', 'E-ORDER'));
       return;
     }
     ref.invalidate(myRoutinesProvider);
@@ -144,10 +145,10 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     );
     if (confirmed != true || !mounted) return;
 
-    final ok = await ref.read(routineRepositoryProvider).delete(routine.id);
+    final failure = await ref.read(routineRepositoryProvider).delete(routine.id);
     if (!mounted) return;
-    if (!ok) {
-      _toast('일과를 삭제하지 못했어요 (E-DEL)');
+    if (failure != null) {
+      _toast(failure.describe('일과를 삭제하지 못했어요', 'E-DEL'));
       return;
     }
     // 방금 만든 일과를 지웠다면 흐름에 남은 것도 함께 치운다 —
@@ -196,9 +197,10 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
       // "아직 만든 일과가 없어요"를 띄웠는데, 그러면 보호자는 자기가 만든
       // 일과가 사라진 줄 안다.
       if (async.hasError) {
-        return ElumErrorView(
-          message: '일과를 불러오지 못했어요',
-          errorCode: 'E-HOME',
+        return ElumErrorView.failure(
+          async.error,
+          fallback: '일과를 불러오지 못했어요',
+          fallbackCode: 'E-HOME',
           onRetry: () => ref.invalidate(myRoutinesProvider),
           compact: true,
         );
@@ -319,15 +321,18 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
     if (!mounted) return;
     setState(() => _rerunning = null);
 
-    if (copy == null) {
-      ScaffoldMessenger.of(
+    if (!copy.isOk) {
+      showFailureSnack(
         context,
-      ).showSnackBar(const SnackBar(content: Text('일과를 다시 만들지 못했어요 (E-DUP)')));
+        copy.failure,
+        fallback: '일과를 다시 만들지 못했어요',
+        fallbackCode: 'E-DUP',
+      );
       return;
     }
     ref.invalidate(myRoutinesProvider);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${copy.displayTitle}을(를) 오늘 일과에 담았어요')),
+      SnackBar(content: Text('${copy.value!.displayTitle}을(를) 오늘 일과에 담았어요')),
     );
   }
 
@@ -339,9 +344,10 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
     if (routines.isEmpty) {
       if (async.hasError) {
         return _GreyTileShell(
-          child: ElumErrorView(
-            message: '지난 일과를 불러오지 못했어요',
-            errorCode: 'E-PAST',
+          child: ElumErrorView.failure(
+            async.error,
+            fallback: '지난 일과를 불러오지 못했어요',
+            fallbackCode: 'E-PAST',
             onRetry: () => ref.invalidate(pastRoutinesProvider),
             compact: true,
           ),
