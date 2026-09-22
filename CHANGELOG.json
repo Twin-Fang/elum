@@ -1,15 +1,52 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-22T09:12:48Z",
-    "currentVersion": "1.31.0",
+    "lastUpdated": "2026-09-22T14:32:12Z",
+    "currentVersion": "1.32.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 153
+    "totalReleases": 154
   },
   "releases": [
+    {
+      "version": "1.32.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-22",
+      "pr_number": 351,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 설정에서 만들다 만 일과를 이어서 만들 수 있어요\n\n* **개선**\n  * 설정과 약관 화면을 새 디자인에 맞췄어요\n  * 약관을 열면 문서 이름이 화면 위에 보여요\n  * 약관 목록을 필수·선택으로 나눠 보여줘요\n  * 설정에 문의하기를 다시 넣었어요\n  * 이룸이 휴대폰 연결 화면을 설정에 맞게 정리했어요\n\n* **기타**\n  * 화면이 디자인과 어긋나면 자동으로 잡아내도록 했어요\n  * 공개 안내 페이지가 앱 방침과 어긋나면 알리도록 했어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "설정에서 만들다 만 일과를 이어서 만들 수 있어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "설정과 약관 화면을 새 디자인에 맞췄어요",
+            "약관을 열면 문서 이름이 화면 위에 보여요",
+            "약관 목록을 필수·선택으로 나눠 보여줘요",
+            "설정에 문의하기를 다시 넣었어요",
+            "이룸이 휴대폰 연결 화면을 설정에 맞게 정리했어요"
+          ]
+        },
+        "기타": {
+          "title": "기타",
+          "items": [
+            "화면이 디자인과 어긋나면 자동으로 잡아내도록 했어요",
+            "공개 안내 페이지가 앱 방침과 어긋나면 알리도록 했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.31.0",
       "project_type": "flutter",
