@@ -134,7 +134,9 @@ void main() {
       final outcome = await buildRepo(const OAuthSdkFailure('SDK-KAKAO'))
           .signInWith(OAuthProvider.kakao);
 
-      expect(outcome, AuthOutcome.failed);
+      // 갈래를 나눠 둔 이유는 제보 추적이다. 뭉뚱그린 `failed`가 아니라
+      // `failedSdk`여야 화면에 `E-AUTH-SDK`가 붙는다 (#346).
+      expect(outcome, AuthOutcome.failedSdk);
       expect(adapter.pathsCalled, isEmpty);
     });
   });

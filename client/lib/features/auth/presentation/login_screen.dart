@@ -110,6 +110,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         await _alert('이미 가입된 계정이에요', '처음 쓰신 방법으로 로그인해주세요 (E-DUP)');
       case AuthOutcome.offline:
         await _alert('인터넷 연결을 확인해주세요', '연결한 뒤 다시 해주세요 (E-NET)');
+      // 사용자에게는 넷 다 같은 말이다. **코드만 다르다** — 제보를 받았을 때
+      // 어디서 터졌는지 가릴 유일한 단서다 (#346).
+      case AuthOutcome.failedSdk:
+        await _alert('로그인하지 못했어요', '잠시 후 다시 해주세요 (E-AUTH-SDK)');
+      case AuthOutcome.failedToken:
+        await _alert('로그인하지 못했어요', '잠시 후 다시 해주세요 (E-AUTH-TOKEN)');
+      case AuthOutcome.failedApi:
+        await _alert('로그인하지 못했어요', '잠시 후 다시 해주세요 (E-AUTH-API)');
       case AuthOutcome.failed:
         await _alert('로그인하지 못했어요', '잠시 후 다시 해주세요 (E-AUTH)');
     }

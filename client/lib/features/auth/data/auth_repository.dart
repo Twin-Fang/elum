@@ -29,7 +29,24 @@ enum AuthOutcome {
   /// 같은 이메일이 이미 다른 방법으로 가입돼 있다
   emailConflict,
 
-  /// 인증 실패 — 화면에 에러 코드와 함께 재시도를 안내한다
+  /// 인증 실패 — 화면에 에러 코드와 함께 재시도를 안내한다.
+  ///
+  /// **갈래를 나눠 둔 이유는 제보를 받았을 때 어디서 터졌는지 가리기 위해서다.**
+  /// 사용자에게는 넷 다 "로그인하지 못했어요"로 같지만, 붙는 코드가 달라
+  /// 스크린샷 한 장으로 원인을 좁힐 수 있다. 특히 [failedSdk]는 스토어로 받은
+  /// 빌드에서만 나기 쉽다 — Play 가 앱을 다시 서명하므로 앱 서명 키의
+  /// SHA-1·키해시를 제공자에 등록하지 않으면 그 빌드에서만 깨진다 (#286 4단계).
+  ///
+  /// 소셜 SDK 자체가 실패했다 (`E-AUTH-SDK`).
+  failedSdk,
+
+  /// 서버가 응답은 줬는데 토큰이 비어 있다 (`E-AUTH-TOKEN`).
+  failedToken,
+
+  /// 토큰 교환 API 가 오프라인도 409 도 아닌 오류를 냈다 (`E-AUTH-API`).
+  failedApi,
+
+  /// 위 어느 것도 아닌 예외 (`E-AUTH`).
   failed,
 
   /// 서버에 닿지 못했다 (DNS·연결 실패·타임아웃).
@@ -95,7 +112,7 @@ class AuthRepository {
         return AuthOutcome.cancelled;
       case OAuthSdkFailure(code: final code):
         AppLogger.error('소셜 로그인', code);
-        return AuthOutcome.failed;
+        return AuthOutcome.failedSdk;
       case OAuthSdkSuccess(token: final providerToken):
         return _exchange(provider, providerToken);
     }
@@ -113,7 +130,7 @@ class AuthRepository {
       final refresh = res.data?['refreshToken']?.toString();
       if (access == null || access.isEmpty || refresh == null || refresh.isEmpty) {
         AppLogger.error('소셜 로그인', '서버 응답에 토큰이 없다');
-        return AuthOutcome.failed;
+        return AuthOutcome.failedToken;
       }
 
       await _tokens.save(accessToken: access, refreshToken: refresh);
@@ -127,7 +144,7 @@ class AuthRepository {
       // 서버가 이메일로 계정을 합치지 않기 때문에 사용자에게 안내해야 한다.
       if (e.response?.statusCode == 409) return AuthOutcome.emailConflict;
       AppLogger.error('소셜 로그인 교환', e);
-      return AuthOutcome.failed;
+      return AuthOutcome.failedApi;
     } catch (e) {
       AppLogger.error('소셜 로그인 교환', e);
       return AuthOutcome.failed;

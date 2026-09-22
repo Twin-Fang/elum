@@ -18,6 +18,7 @@ import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:elum/core/storage/local_storage.dart';
+import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
@@ -699,6 +700,58 @@ void main() {
     await expectLater(
       find.byType(LoginScreen),
       matchesGoldenFile('figma/login_238-1808.png'),
+    );
+  });
+
+  // 로그인 — 최근 로그인 알약이 붙은 모습 (#346).
+  //
+  // **시안은 세 버튼 모두에 알약을 그렸지만 실제로는 하나만 뜬다.** 시안의 그것은
+  // 변형을 한 프레임에 모아 보여 준 것이다. 그래서 이 렌더는 시안과 픽셀로 맞대는
+  // 대조용이 아니라, 알약이 시안 값(91×28 · 우측 16 · 위로 10)에서 벗어나면
+  // 드러나게 하는 회귀용이다. 알약이 없는 `login_238-1808.png` 가 배치 대조를 맡는다.
+  testWidgets('로그인 — 최근 로그인 (Figma 238:1808 변형)', (tester) async {
+    LoginScreen.debugPretendIos = true;
+    addTearDown(() => LoginScreen.debugPretendIos = null);
+
+    final storage = InMemoryStorage();
+    await storage.setLastLoginProvider('kakao');
+
+    final router = GoRouter(
+      initialLocation: Routes.login,
+      routes: [
+        GoRoute(
+          path: Routes.login,
+          builder: (context, state) => const LoginScreen(),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [localStorageProvider.overrideWithValue(storage)],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp.router(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            routerConfig: router,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await precacheAllImages(tester);
+    await tester.pump(const Duration(milliseconds: 200));
+
+    await expectLater(
+      find.byType(LoginScreen),
+      matchesGoldenFile('figma/login_lastused_238-1808.png'),
     );
   });
 
