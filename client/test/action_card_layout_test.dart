@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'helpers/device_viewport.dart';
+
 /// 카드 레이아웃 회귀 방지.
 ///
 /// 실기기에서 세 가지가 어긋났다.
@@ -13,6 +15,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// 2. 텍스트 시작 높이가 달랐다 (이미지 높이가 달라 아래가 밀렸다)
 /// 3. 긴 제목이 `…`으로 잘렸다 (`천천히 학교로 ...`)
 void main() {
+  // **뷰포트를 기기 크기로 고정한다.** 기본 800×600이면 `.w`가 2배로 잡혀
+  // 40 짜리 배지가 81 로 측정된다 — 멀쩡한 코드를 결함으로 오판한다 (#335).
+  useFigmaViewport();
+
   Widget wrap(ActionCard card) {
     return ProviderScope(
       child: ScreenUtilInit(
@@ -106,5 +112,87 @@ void main() {
     await tester.pump();
 
     expect(find.text('설명만 있는 카드'), findsWidgets);
+  });
+
+  group('설명이 카드 밖으로 밀려 잘리지 않는다 (이슈 #335)', () {
+    /// 카드 자리에 넣었을 때 **숨는 높이**. 0 이면 다 보인다.
+    Future<double> hidden(
+      WidgetTester tester, {
+      required String description,
+      required double height,
+      required double width,
+    }) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: ScreenUtilInit(
+            designSize: const Size(393, 852),
+            useInheritedMediaQuery: true,
+            builder: (context, _) => MaterialApp(
+              theme: AppTheme.light,
+              home: Scaffold(
+                body: Align(
+                  alignment: Alignment.topLeft,
+                  child: SizedBox(
+                    width: width,
+                    height: height,
+                    child: ActionCardView(
+                      card: card('옷을 갈아입어요', description),
+                      index: 0,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return tester
+          .state<ScrollableState>(find.byType(Scrollable).first)
+          .position
+          .maxScrollExtent;
+    }
+
+    // 실기기에서 AI 가 만든 문구들이다. 시험 고정 문구는 짧아 두 줄에
+    // 들어맞아서, 골든으로는 이 결함이 잡히지 않았다.
+    const real = [
+      '학교에 입고 갈 옷으로 차례대로 갈아입어요.',
+      '학교에 가져갈 가방을 손으로 챙겨요. 빠뜨린 것이 없는지 살펴요.',
+    ];
+
+    testWidgets('이룸이 카드 상세 (431) — 두 줄은 다 보인다', (tester) async {
+      expect(
+        await hidden(tester, description: real.first, height: 431, width: 345.8),
+        0,
+      );
+    });
+
+    testWidgets('세 줄은 시안 자리에서도 넘친다 — 알고 남겨 둔 한계', (tester) async {
+      // 시안(`309:3548`)은 설명을 두 줄로 그렸다. 세 줄짜리 문구가 오면
+      // **어느 화면에서도** 카드 안에 다 안 들어간다. 카드 자리를 늘리거나
+      // 문구 길이를 제한해야 하는 문제라 여기서 고치지 않는다 (#335).
+      expect(
+        await hidden(tester, description: real.last, height: 431, width: 345.8),
+        greaterThan(0),
+      );
+    });
+
+    testWidgets('카드확인 — 아래 간격을 줄여 얻은 414 자리에 두 줄이 들어간다', (tester) async {
+      // 보상 줄(#239)이 붙으면서 카드가 390으로 짧아져 16.7 이 숨었다.
+      // 아래 간격 셋을 md(16) → xs(8) 로 줄여 24 를 카드에 돌려줬다.
+      expect(
+        await hidden(tester, description: real.first, height: 414, width: 332),
+        0,
+        reason: '두 줄 설명은 카드 안에 다 들어가야 한다',
+      );
+    });
+
+    testWidgets('고치기 전 자리(390)였다면 잘린다 — 되돌림 감시', (tester) async {
+      expect(
+        await hidden(tester, description: real.first, height: 390, width: 332),
+        greaterThan(0),
+        reason: '이 값이 0 이 되면 자리가 넉넉해진 것이니 간격을 되돌려도 된다',
+      );
+    });
   });
 }

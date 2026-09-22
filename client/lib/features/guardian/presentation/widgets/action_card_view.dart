@@ -28,6 +28,12 @@ class ActionCardView extends StatefulWidget {
     this.isSpeaking = false,
   });
 
+  /// 시안 그림칸 비율 (`309:3548` — 313×264).
+  ///
+  /// 카드 자리가 시안 높이(431)면 이 비율로 설명 **두 줄까지** 넘침 없이
+  /// 들어간다. 세 줄은 시안 자리 자체가 모자라 어느 화면에서도 넘친다 (#335).
+  static const designIllustrationAspect = 313 / 264;
+
   final ActionCard card;
 
   /// 이미지를 받아오는 데 쓴다. 비면 대체 일러스트를 그린다.
@@ -130,7 +136,7 @@ class _ActionCardViewState extends State<ActionCardView> {
                     // Expanded로 두면 남는 공간을 다 먹어 제목 길이에 따라 카드마다 이미지
                     // 크기와 텍스트 시작 높이가 달라진다.
                     AspectRatio(
-                      aspectRatio: 313 / 264,
+                      aspectRatio: ActionCardView.designIllustrationAspect,
                       child: _Illustration(
                         routineId: widget.routineId,
                         stepId: widget.card.id,

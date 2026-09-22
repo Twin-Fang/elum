@@ -211,18 +211,21 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
               ),
             ),
           ),
-          SizedBox(height: space.md),
+          // **아래 간격을 md(16)가 아니라 xs(8)로 둔다.** 보상 줄(#239)이
+          // 들어오면서 카드가 시안보다 41 짧아졌다. 셋을 줄여 24를 카드에
+          // 돌려준다 — 그만큼 설명이 잘리는 양이 준다 (이슈 #335).
+          SizedBox(height: space.xs),
           // 보상 줄 — 정한 것을 보여주고, 건너뛰었으면 여기서 정할 수 있다 (#239).
           _RewardRow(
             reward: routine?.hasReward ?? false ? routine!.rewardDisplay : null,
             onTap: () => context.push(Routes.routineReward, extra: true),
           ),
-          SizedBox(height: space.md),
+          SizedBox(height: space.xs),
           // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
           _EditChip(
             onTap: () => _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),
           ),
-          SizedBox(height: space.md),
+          SizedBox(height: space.xs),
         ],
       ),
     );
