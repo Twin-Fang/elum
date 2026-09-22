@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/network/server_error.dart';
+import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
@@ -104,7 +106,16 @@ class AuthRepository {
   bool get hasSession => _tokens.hasSession;
 
   /// 제공자로 로그인한다.
+  /// 마지막 로그인 실패에서 서버가 보낸 것.
+  ///
+  /// [AuthOutcome]은 갈래만 말하고 문구는 말하지 않는다. 화면이 서버 문구를
+  /// 그대로 띄우려면 그 문구가 필요해서 여기에 남긴다. 성공하면 비운다 —
+  /// 지난 실패의 문구가 다음 실패에 딸려 나오면 안 된다 (#347).
+  ServerError? lastServerError;
+
   Future<AuthOutcome> signInWith(OAuthProvider provider) async {
+    lastServerError = null;
+
     final sdkResult = await _sdk.signIn(provider);
 
     switch (sdkResult) {
@@ -140,9 +151,22 @@ class AuthRepository {
       return await _resolveDestination();
     } on DioException catch (e) {
       if (_isOffline(e)) return AuthOutcome.offline;
-      // 409는 같은 이메일이 다른 제공자로 이미 가입된 경우다.
-      // 서버가 이메일로 계정을 합치지 않기 때문에 사용자에게 안내해야 한다.
-      if (e.response?.statusCode == 409) return AuthOutcome.emailConflict;
+
+      // **서버가 무엇이 잘못됐는지 이미 알려줬다.** 상태 코드만 보고 뭉개면
+      // 정지된 계정에게 "잠시 후 다시 해주세요"라고 안내하게 된다 — 사용자는
+      // 될 때까지 다시 누른다 (#347).
+      final err = e.serverError;
+      lastServerError = err;
+      if (err.isUnknownCode) {
+        // 앱이 따라가야 할 코드가 늘었다는 신호다. 조용히 넘기지 않는다.
+        AppLogger.error('소셜 로그인 교환 — 모르는 코드', '$err');
+      }
+      // 같은 이메일이 다른 제공자로 이미 가입된 경우. 서버가 이메일로 계정을
+      // 합치지 않기 때문에 사용자에게 안내해야 한다.
+      if (err.code == ServerErrorCode.oauthEmailConflict ||
+          e.response?.statusCode == 409) {
+        return AuthOutcome.emailConflict;
+      }
       AppLogger.error('소셜 로그인 교환', e);
       return AuthOutcome.failedApi;
     } catch (e) {

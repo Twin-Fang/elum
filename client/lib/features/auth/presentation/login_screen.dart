@@ -10,6 +10,7 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/network/server_error.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/login_scene.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
@@ -85,7 +86,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _signIn(OAuthProvider provider) async {
     setState(() => _pending = provider);
 
-    final outcome = await ref.read(authRepositoryProvider).signInWith(provider);
+    final repo = ref.read(authRepositoryProvider);
+    final outcome = await repo.signInWith(provider);
 
     if (!mounted) return;
 
@@ -106,8 +108,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       case AuthOutcome.cancelled:
         // 사용자가 스스로 닫았다. 아무것도 띄우지 않는다.
         break;
+      // **서버 문구를 그대로 띄우는 것이 기본이다.** 서버 문구는 이미 사용자용으로
+      // 쓰여 있고, 앱이 다시 쓰면 서버에서 고쳐도 앱은 옛 문구를 보여준다 (#347).
+      // 서버가 아무 문구도 주지 않았을 때만 앱 문구가 나선다.
       case AuthOutcome.emailConflict:
-        await _alert('이미 가입된 계정이에요', '처음 쓰신 방법으로 로그인해주세요 (E-DUP)');
+        await _alertFromServer(
+          repo.lastServerError,
+          title: '이미 가입된 계정이에요',
+          fallback: '처음 쓰신 방법으로 로그인해주세요',
+          fallbackCode: 'E-DUP',
+        );
       case AuthOutcome.offline:
         await _alert('인터넷 연결을 확인해주세요', '연결한 뒤 다시 해주세요 (E-NET)');
       // 사용자에게는 넷 다 같은 말이다. **코드만 다르다** — 제보를 받았을 때
@@ -117,7 +127,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       case AuthOutcome.failedToken:
         await _alert('로그인하지 못했어요', '잠시 후 다시 해주세요 (E-AUTH-TOKEN)');
       case AuthOutcome.failedApi:
-        await _alert('로그인하지 못했어요', '잠시 후 다시 해주세요 (E-AUTH-API)');
+        await _alertFromServer(
+          repo.lastServerError,
+          title: '로그인하지 못했어요',
+          fallback: '잠시 후 다시 해주세요',
+          fallbackCode: 'E-AUTH-API',
+        );
       case AuthOutcome.failed:
         await _alert('로그인하지 못했어요', '잠시 후 다시 해주세요 (E-AUTH)');
     }
@@ -134,6 +149,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   ///
   /// **에러 코드는 그대로 노출한다.** 사용자에게는 뜻이 없지만, 제보를 받았을 때
   /// 어디서 터졌는지 가릴 유일한 단서다.
+  /// 서버가 보낸 문구로 알린다. 없으면 앱 문구로 물러선다.
+  ///
+  /// **식별자는 어느 쪽이든 붙는다** — 서버 코드가 있으면 그것을, 없으면
+  /// 앱 코드를 붙인다. 제보를 받았을 때 추적할 유일한 단서다.
+  Future<void> _alertFromServer(
+    ServerError? error, {
+    required String title,
+    required String fallback,
+    required String fallbackCode,
+  }) {
+    final body = error?.messageOr(fallback) ?? fallback;
+    final badge = error?.badge ?? fallbackCode;
+    return _alert(title, '$body ($badge)');
+  }
+
   Future<void> _alert(String title, String message) {
     return showElumDialog<void>(
       context: context,
