@@ -134,5 +134,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => const Scaffold(body: SplashScene());
+  Widget build(BuildContext context) => Scaffold(
+    // 얼굴은 애플 버튼이 없는 기기에서만 그린다 — 로그인 화면과 기준을 맞춘다 (#297).
+    body: SplashScene(showFace: SplashScene.faceShowsOnThisPlatform),
+  );
 }

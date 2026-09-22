@@ -131,10 +131,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.invalidate(onboardingProvider);
   }
 
+  /// 애플 버튼을 그리는가 — iOS 에서만 뜬다 (심사 요건).
+  ///
+  /// 이 값이 **병아리 얼굴 유무까지 정한다.** 버튼이 셋이면 부리가 버튼 사이로
+  /// 삐져나오므로 얼굴을 빼고, 둘뿐인 안드로이드는 살린다 (#297).
+  bool get _showApple => Platform.isIOS || LoginScreen.debugForceAppleButton;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SplashScene(overlay: _buttons(context)),
+      body: SplashScene(showFace: !_showApple, overlay: _buttons(context)),
     );
   }
 
@@ -196,7 +202,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             //
             // 반대로 iOS에서는 빼면 안 된다 — 다른 소셜 로그인을 제공하는 앱은
             // 애플 로그인도 제공해야 앱스토어 심사를 통과한다.
-            if (Platform.isIOS || LoginScreen.debugForceAppleButton) ...[
+            if (_showApple) ...[
               SizedBox(height: _buttonGap.h),
               if (_lastProvider == OAuthProvider.apple) const _LastUsedHint(),
               // ⚠️ 규격 위젯(`SignInWithAppleButton`)에서 직접 그리기로 바꿨다.

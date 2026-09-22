@@ -130,19 +130,33 @@ void main() {
     expect(imageWithAsset(AppAssets.splashOrb), findsOneWidget);
   });
 
-  testWidgets('병아리에 얼굴을 얹지 않는다 (이슈 #297)', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
+  group('병아리 얼굴은 애플 버튼 유무를 따른다 (이슈 #297)', () {
+    // 시안(`238:1808`)은 병아리가 **뒤를 돌아본** 모습이라 얼굴이 없고 새싹도
+    // 반대쪽으로 갔다. 그 시안은 버튼이 셋인 iOS 기준이다.
+    //
+    // **안드로이드는 애플 버튼이 없어 버튼이 둘뿐이고, 그만큼 자리가 남아
+    // 얼굴을 살린다.** 시안 프레임이 아직 없는 규칙이라 시험으로 못 박는다.
+    tearDown(() => LoginScreen.debugForceAppleButton = false);
 
-    // 시안 `726:4942` 안에는 벡터가 셋뿐이다 — 줄기·몸통·구슬. 눈도 부리도 없다.
-    // 7월 시안에서 받아 둔 얼굴을 계속 얹고 있었고, 부리가 카카오 버튼 아래로
-    // 13 삐져나와 **버튼 사이에 주황 조각**으로 보였다. 되살아나면 여기서 잡는다.
-    // ignore: deprecated_member_use_from_same_package
-    expect(svgWithAsset(AppAssets.splashCharLeft), findsNothing);
-    // ignore: deprecated_member_use_from_same_package
-    expect(svgWithAsset(AppAssets.splashCharRight), findsNothing);
-    // ignore: deprecated_member_use_from_same_package
-    expect(svgWithAsset(AppAssets.splashCenter), findsNothing);
+    testWidgets('애플 버튼이 있으면 얼굴을 빼서 부리가 버튼 사이로 안 나온다', (tester) async {
+      LoginScreen.debugForceAppleButton = true;
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      expect(svgWithAsset(AppAssets.splashCharLeft), findsNothing);
+      expect(svgWithAsset(AppAssets.splashCharRight), findsNothing);
+      expect(svgWithAsset(AppAssets.splashCenter), findsNothing);
+    });
+
+    testWidgets('애플 버튼이 없으면(안드로이드) 얼굴을 살린다', (tester) async {
+      LoginScreen.debugForceAppleButton = false;
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      expect(svgWithAsset(AppAssets.splashCharLeft), findsOneWidget);
+      expect(svgWithAsset(AppAssets.splashCharRight), findsOneWidget);
+      expect(svgWithAsset(AppAssets.splashCenter), findsOneWidget);
+    });
   });
 
   testWidgets('버튼이 화면 밖으로 밀려나지 않는다', (tester) async {

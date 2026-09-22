@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -26,10 +28,27 @@ import 'app_fade_slide_in.dart';
 /// 병아리 몸은 고정한다 — 화면의 절반을 차지해 조금만 움직여도 눈에 걸린다.
 /// OS "동작 줄이기"가 켜져 있으면 부유는 시작하지 않는다 (motion.md §접근성).
 class SplashScene extends StatefulWidget {
-  const SplashScene({super.key, this.overlay});
+  const SplashScene({super.key, this.overlay, this.showFace = true});
 
   /// 그림 위에 얹을 것. 로그인 화면은 여기에 제공자 버튼을 넣는다.
   final Widget? overlay;
+
+  /// 병아리 **얼굴**(눈 둘 + 부리)을 그릴지.
+  ///
+  /// 시안(`238:1808`)은 병아리가 **뒤를 돌아본** 모습이라 얼굴이 없고 머리 위
+  /// 새싹도 반대쪽으로 갔다. 그 시안은 버튼이 셋인 iOS 기준이다.
+  ///
+  /// **안드로이드는 애플 버튼이 없어 버튼이 둘뿐이고, 그만큼 자리가 남아
+  /// 얼굴을 살린다.** 그래서 이 값은 호출하는 쪽이 정한다 — 애플 버튼을
+  /// 그리는 화면은 `false`를 준다 (#297).
+  final bool showFace;
+
+  /// 이 기기에서 얼굴을 그리는가 — **애플 버튼이 없는 쪽에서만 그린다.**
+  ///
+  /// 시작 화면은 버튼이 없어 얼굴이 가려질 일이 없지만, iOS 에서 시작 →
+  /// 로그인으로 넘어갈 때 얼굴이 깜빡 사라지면 어색하다. 두 화면이 같은
+  /// 그림을 쓰므로(#207) 기준을 하나로 맞춘다.
+  static bool get faceShowsOnThisPlatform => !Platform.isIOS;
 
   @override
   State<SplashScene> createState() => _SplashSceneState();
@@ -161,12 +180,28 @@ class _SplashSceneState extends State<SplashScene>
             ),
           ),
 
-          // **병아리 얼굴을 그리지 않는다.** 눈 둘(y=573)과 부리(y=599)를 얹고
-          // 있었는데 지금 시안(`726:4942`) 안에는 벡터가 셋뿐이다 — 줄기·몸통·구슬.
-          // 얼굴은 2026-07-21 옛 시안에서 받아 둔 잔재였다.
+          // 병아리 얼굴 — 눈 둘(각 30×32, y=573)과 부리(45×25, y=599). 고정.
           //
-          // 로그인 화면에서 드러났다. 카카오 버튼이 545~611을 덮는데 부리가 624까지
-          // 내려와 **버튼과 버튼 사이로 주황 조각이 13 삐져나와 있었다** (#297).
+          // **애플 버튼이 뜨는 화면에서는 그리지 않는다** ([showFace]).
+          // 버튼이 셋이면 카카오 버튼이 545~611을 덮는데 부리가 624까지 내려와
+          // **버튼과 버튼 사이로 주황 조각이 13 삐져나온다** (#297).
+          if (widget.showFace) ...[
+            Positioned(
+              left: 124.w,
+              top: 573.h,
+              child: SvgPicture.asset(AppAssets.splashCharLeft, width: 30.w),
+            ),
+            Positioned(
+              left: 239.w,
+              top: 573.h,
+              child: SvgPicture.asset(AppAssets.splashCharRight, width: 30.w),
+            ),
+            Positioned(
+              left: 174.w,
+              top: 599.h,
+              child: SvgPicture.asset(AppAssets.splashCenter, width: 45.w),
+            ),
+          ],
 
           // 문구 (x=141 y=140 / x=92 y=168) — 가로 중앙 정렬, 함께 등장
           Positioned(
