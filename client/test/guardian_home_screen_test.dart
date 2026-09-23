@@ -38,9 +38,10 @@ void main() {
   Widget wrap({
     List<Routine> routines = const [],
     List<Routine> past = const [],
+    List<Routine>? today,
     Member? member,
   }) {
-    repo = _FakeRoutineRepo(routines: routines, past: past);
+    repo = _FakeRoutineRepo(routines: routines, past: past, today: today);
 
     final router = GoRouter(
       initialLocation: Routes.guardian,
@@ -120,6 +121,42 @@ void main() {
     final opacity = find.ancestor(of: icon, matching: find.byType(Opacity));
     return tester.widget<Opacity>(opacity.first).opacity;
   }
+
+  group('오늘 일과는 오늘 것만 보여준다 (이슈 #353)', () {
+    testWidgets('전체 목록이 아니라 오늘 목록을 본다', (tester) async {
+      // 서버는 `/today` 로 **오늘 것만** 준다 — 어제 것도, 아직 이룸이에게
+      // 보내지 않은 것(`PENDING_REVIEW`)도 빼고. 홈이 전체 목록을 보고 있어서
+      // 그 둘이 오늘 할 일에 섞여 있었고, 실기기에서 같은 일과가 오늘과 지난에
+      // 동시에 떴다 (#353).
+      await tester.pumpWidget(wrap(
+        routines: [routine('오늘 할 일', 2), routine('어제 것', 2), routine('승인 전', 2)],
+        today: [routine('오늘 할 일', 2)],
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('오늘 할 일'), findsOneWidget);
+      expect(find.text('어제 것'), findsNothing,
+          reason: '날짜가 지난 일과가 오늘 할 일에 남으면 초기화가 안 된 것이다');
+      expect(find.text('승인 전'), findsNothing,
+          reason: '이룸이 화면에 없는 것이 보호자 오늘 할 일에 있으면 둘이 어긋난다');
+    });
+
+    testWidgets('이룸이 홈과 같은 목록을 본다', (tester) async {
+      // 보호자가 "오늘 할 일"로 믿는 것과 이룸이 화면에 뜨는 것이 같아야 한다.
+      // 둘 다 `todayRoutinesProvider` 를 본다.
+      await tester.pumpWidget(wrap(
+        routines: [routine('가', 2), routine('나', 2)],
+        today: [routine('가', 2)],
+      ));
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(GuardianHomeScreen)),
+      );
+      final today = await container.read(todayRoutinesProvider.future);
+      expect(today.map((r) => r.title), ['가']);
+    });
+  });
 
   group('보호자_홈 구성', () {
     testWidgets('Figma 섹션 문구가 보인다', (tester) async {
@@ -492,10 +529,13 @@ void main() {
 
 /// 홈이 부르는 것만 받는 저장소. 삭제·순서·복제는 **보냈는지**를 기록한다.
 class _FakeRoutineRepo with FakeRewardApi implements RoutineRepository {
-  _FakeRoutineRepo({required this.routines, required this.past});
+  _FakeRoutineRepo({required this.routines, required this.past, this.today});
 
   final List<Routine> routines;
   final List<Routine> past;
+
+  /// `/api/routines/today` 가 주는 것. null 이면 전체와 같다고 본다.
+  final List<Routine>? today;
 
   final deleted = <String>[];
   final duplicated = <String>[];
@@ -505,7 +545,10 @@ class _FakeRoutineRepo with FakeRewardApi implements RoutineRepository {
   Future<List<Routine>> getMyRoutines() async => routines;
 
   @override
-  Future<List<Routine>> getTodayRoutines() async => routines;
+  // **전체 목록과 따로 준다.** 서버가 `/today` 와 `/api/routines` 를 다르게
+  // 주는데 fake 가 같은 값을 주면, 홈이 어느 쪽을 보는지 테스트가 구분하지
+  // 못한다 — 실제로 그래서 #353 이 테스트를 통과한 채 배포됐다.
+  Future<List<Routine>> getTodayRoutines() async => today ?? routines;
 
   @override
   Future<List<Routine>> getPastRoutines() async => past;

@@ -418,7 +418,7 @@ class _ConfirmResetView extends ConsumerWidget {
                     // routineFlow(방금 만든 일과)·myRoutines(서버 조회 캐시)를 함께 비우지
                     // 않으면 재가입 후 홈에 이전 계정 일과가 그대로 노출된다 (이슈 #91).
                     ref.read(routineFlowProvider.notifier).reset();
-                    ref.invalidate(myRoutinesProvider);
+                    ref.refreshRoutines();
                     ref.invalidate(onboardingProvider);
                     if (!context.mounted) return;
                     onDone();
@@ -475,7 +475,7 @@ class _ConfirmLogoutView extends ConsumerWidget {
                     await ref.read(authRepositoryProvider).logout();
                     // 메모리에 남은 이전 계정 값도 비운다 (회원삭제와 같은 이유, 이슈 #91)
                     ref.read(routineFlowProvider.notifier).reset();
-                    ref.invalidate(myRoutinesProvider);
+                    ref.refreshRoutines();
                     ref.invalidate(onboardingProvider);
                     if (!context.mounted) return;
                     onDone();

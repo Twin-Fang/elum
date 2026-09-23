@@ -182,8 +182,7 @@ class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
 
   /// 목록이 서버 진실(진행률·별)을 다시 읽게 한다.
   void _refreshLists() {
-    ref.invalidate(todayRoutinesProvider);
-    ref.invalidate(myRoutinesProvider);
+    ref.refreshRoutines();
   }
 
   /// 새 일과를 시작할 때 화면 상태만 초기화한다. 저장소는 건드리지 않는다.

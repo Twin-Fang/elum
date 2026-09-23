@@ -29,7 +29,10 @@ final homeRoutinesProvider = Provider<List<Routine>>((ref) {
   final current = ref.watch(routineFlowProvider).routine;
   // `.value`는 재조회(invalidate) 중에도 직전 값을 준다. `asData`를 쓰면 동기화 뒤
   // 목록을 다시 읽는 동안 화면이 순간 비어 보인다 (이슈 #140).
-  final fetched = ref.watch(myRoutinesProvider).value ?? const <Routine>[];
+  // **오늘 것만 본다.** 전체 목록(`myRoutinesProvider`)을 보고 있어서 어제 것도,
+  // 아직 이룸이에게 보내지 않은 것도 오늘 할 일로 보였다. 이룸이 홈과 같은
+  // 목록을 봐야 보호자가 믿는 것과 이룸이 화면이 같아진다 (#353).
+  final fetched = ref.watch(todayRoutinesProvider).value ?? const <Routine>[];
 
   return [
     if (current != null && current.steps.isNotEmpty) current,
@@ -126,7 +129,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
       _toast(failure.describe('순서를 저장하지 못했어요', 'E-ORDER'));
       return;
     }
-    ref.invalidate(myRoutinesProvider);
+    ref.refreshRoutines();
   }
 
   Future<void> _delete(Routine routine) async {
@@ -157,7 +160,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
       ref.read(routineFlowProvider.notifier).reset();
     }
     setState(() => _openId = null);
-    ref.invalidate(myRoutinesProvider);
+    ref.refreshRoutines();
     ref.invalidate(pastRoutinesProvider);
   }
 
@@ -192,7 +195,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     final routines = _applyOrder(ref.watch(homeRoutinesProvider));
 
     if (routines.isEmpty) {
-      final async = ref.watch(myRoutinesProvider);
+      final async = ref.watch(todayRoutinesProvider);
       // 로딩·빈 상태·실패를 셋으로 나눈다. 예전에는 실패까지 빈 상태로 흡수해
       // "아직 만든 일과가 없어요"를 띄웠는데, 그러면 보호자는 자기가 만든
       // 일과가 사라진 줄 안다.
@@ -201,7 +204,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
           async.error,
           fallback: '일과를 불러오지 못했어요',
           fallbackCode: 'E-HOME',
-          onRetry: () => ref.invalidate(myRoutinesProvider),
+          onRetry: ref.refreshRoutines,
           compact: true,
         );
       }
@@ -330,7 +333,7 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
       );
       return;
     }
-    ref.invalidate(myRoutinesProvider);
+    ref.refreshRoutines();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${copy.value!.displayTitle}을(를) 오늘 일과에 담았어요')),
     );
