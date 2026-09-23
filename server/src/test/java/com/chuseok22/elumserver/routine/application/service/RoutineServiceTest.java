@@ -69,6 +69,9 @@ class RoutineServiceTest {
   @Mock
   private RoutineQuotaGuard routineQuotaGuard;
 
+  @Mock
+  private AiDailyBudgetGuard aiDailyBudgetGuard;
+
   @InjectMocks
   private RoutineService routineService;
 
@@ -266,6 +269,21 @@ class RoutineServiceTest {
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT));
     verifyNoInteractions(profileRepository, routineAiPipeline);
+  }
+
+  @Test
+  @DisplayName("서비스 전체 하루 비용 상한에 닿으면 AI 를 부르기 전에 거절한다 (#368)")
+  void create_dailyBudgetReached_rejectsBeforeCallingAi() {
+    doThrow(new CustomException(ErrorCode.AI_DAILY_BUDGET_EXCEEDED))
+      .when(aiDailyBudgetGuard).guard();
+
+    assertThatThrownBy(() -> routineService.create(
+      "member-1", new RoutineCreateRequest("내일 병원 가기", null, null, null, null)))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.AI_DAILY_BUDGET_EXCEEDED));
+    // 민감정보 검사(로컬 LLM)도 AI 호출이다. 거절할 거면 아무것도 부르지 않는다.
+    verifyNoInteractions(sensitiveInfoGuardService, routineAiPipeline);
   }
 
   @Test

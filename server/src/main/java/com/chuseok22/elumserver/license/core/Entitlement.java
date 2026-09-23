@@ -26,6 +26,10 @@ public enum Entitlement {
     Kind.FLAG, "광고 제거",
     ConfigKey.FREE_ADS_REMOVED, ConfigKey.PRO_ADS_REMOVED
   ),
+  ROUTINE_CREATE_PER_DAY(
+    Kind.LIMIT, "하루 일과 생성",
+    ConfigKey.FREE_ROUTINE_CREATE_PER_DAY, ConfigKey.PRO_ROUTINE_CREATE_PER_DAY
+  ),
   ROUTINE_CREATE_PER_WEEK(
     Kind.LIMIT, "주당 일과 생성",
     ConfigKey.FREE_ROUTINE_CREATE_PER_WEEK, ConfigKey.PRO_ROUTINE_CREATE_PER_WEEK

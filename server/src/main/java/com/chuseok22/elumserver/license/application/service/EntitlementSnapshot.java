@@ -11,6 +11,7 @@ public record EntitlementSnapshot(
   PlanType plan,
   boolean aiImageGeneration,
   boolean adsRemoved,
+  int routineCreatePerDay,
   int routineCreatePerWeek,
   int routineMaxCount,
   int profileMaxCount,

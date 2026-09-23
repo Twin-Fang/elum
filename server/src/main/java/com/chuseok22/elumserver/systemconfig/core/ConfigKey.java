@@ -161,6 +161,13 @@ public enum ConfigKey {
     "Free에서 광고를 숨길지. 꺼두면 광고가 보인다",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
+  // 하루 한도와 주간 한도는 둘 다 걸 수 있고, 먼저 닿는 쪽이 막는다 (#368).
+  // 기간을 고르는 설정을 따로 두지 않는다 — 한쪽을 -1 로 두면 "하루만" / "주만" 이 된다.
+  FREE_ROUTINE_CREATE_PER_DAY(
+    ConfigGroup.PLAN_FREE, "하루 일과 생성 횟수",
+    "Free가 하루(한국 시각 0시 시작)에 만들 수 있는 일과 수. 주당 횟수와 함께 걸면 먼저 닿는 쪽이 막는다. -1이면 무제한",
+    ConfigValueType.INTEGER, List.of(), "-1"
+  ),
   FREE_ROUTINE_CREATE_PER_WEEK(
     ConfigGroup.PLAN_FREE, "주당 일과 생성 횟수",
     "Free가 한 주(월요일 시작)에 만들 수 있는 일과 수. -1이면 무제한",
@@ -192,6 +199,11 @@ public enum ConfigKey {
     "Pro에서 광고를 숨길지",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
+  PRO_ROUTINE_CREATE_PER_DAY(
+    ConfigGroup.PLAN_PRO, "하루 일과 생성 횟수",
+    "Pro가 하루(한국 시각 0시 시작)에 만들 수 있는 일과 수. 주당 횟수와 함께 걸면 먼저 닿는 쪽이 막는다. -1이면 무제한",
+    ConfigValueType.INTEGER, List.of(), "-1"
+  ),
   PRO_ROUTINE_CREATE_PER_WEEK(
     ConfigGroup.PLAN_PRO, "주당 일과 생성 횟수",
     "Pro가 한 주에 만들 수 있는 일과 수. -1이면 무제한",
@@ -211,6 +223,17 @@ public enum ConfigKey {
     ConfigGroup.PLAN_PRO, "기록 보관 일수",
     "Pro가 지난 기록을 볼 수 있는 기간. -1이면 무제한",
     ConfigValueType.INTEGER, List.of(), "-1"
+  ),
+
+  // 서비스 전체 하루 AI 비용 상한 (#368).
+  //
+  // 계정별 한도는 계정을 여러 개 만드는 악용과 회원 없이 남는 호출(관리자 시험 등)을
+  // 못 본다. 이 값은 누가 썼든 오늘 전체 합계를 본다. 기본값 -1 은 꺼짐이라 배포만으로는
+  // 동작이 바뀌지 않는다.
+  AI_DAILY_BUDGET_USD(
+    ConfigGroup.AI_BUDGET, "하루 AI 비용 상한 (USD)",
+    "서비스 전체가 하루(한국 시각 0시 시작)에 AI에 쓸 추정 비용의 상한. 닿으면 새 일과 만들기를 멈추고, 카드 추가는 그림 없이 한다. 호출 기록의 추정치라 실제 청구와 다를 수 있다. -1이면 끄고, 0이면 새 일과 만들기와 추가 카드 그림을 바로 멈춘다",
+    ConfigValueType.DECIMAL, List.of(), "-1"
   ),
 
   // 앱을 세우거나 업데이트를 요구하는 값들 (이슈 #279).

@@ -16,6 +16,7 @@ public enum ConfigGroup {
   PRICING("AI 요금 단가"),
   PLAN_FREE("Free 플랜 한도"),
   PLAN_PRO("Pro 플랜 한도"),
+  AI_BUDGET("AI 비용 상한"),
   APP_CONTROL("앱 점검·버전"),
   // 앱이 서버에서 받아 쓰는 시간값. 전에는 앱의 .env 에 있어 바꾸려면 다시 빌드해야 했다.
   APP_TUNING("앱 대기·연출 시간"),

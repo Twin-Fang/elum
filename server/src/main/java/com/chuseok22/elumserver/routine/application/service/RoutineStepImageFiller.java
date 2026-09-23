@@ -1,9 +1,11 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
+import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThrottle;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.util.concurrent.ExecutorService;
@@ -36,6 +38,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *   <li><b>실패해도 삼킨다</b> — 카드 추가는 이미 성공했고 받아 줄 응답이 없다.
  *       {@code imagePath}를 {@code null}로 두면 클라가 기본 그림으로 채운다
  *       (서비스 원칙 6 — 어떤 실패에서도 끝까지 진행된다).</li>
+ *   <li><b>비용 장치에 걸리면 그림만 건너뛴다</b> — 하루 비용 상한과 회원별 그림 횟수 (#368).
+ *       카드 추가를 거절하지 않는다. 막으면 보호자가 일과를 못 고친다.</li>
  * </ul>
  *
  * <h2>카드당 한 번만 부른다</h2>
@@ -52,6 +56,8 @@ public class RoutineStepImageFiller {
   private final ImageClientRouter imageClientRouter;
   private final RoutineImageStorage routineImageStorage;
   private final RoutineStepRepository routineStepRepository;
+  private final AiDailyBudgetGuard aiDailyBudgetGuard;
+  private final RoutineStepImageThrottle routineStepImageThrottle;
 
   /// 가상 스레드라 몇 초짜리 HTTP 대기에 OS 스레드를 묶어 두지 않는다.
   private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
@@ -63,7 +69,7 @@ public class RoutineStepImageFiller {
    * 빈 프롬프트로 부르면 돈만 쓰고 엉뚱한 그림이 나온다.
    */
   public void scheduleAfterCommit(
-    String routineId, String stepId, String description, CharacterType characterType
+    String memberId, String routineId, String stepId, String description, CharacterType characterType
   ) {
     if (description == null || description.isBlank()) {
       return;
@@ -74,14 +80,39 @@ public class RoutineStepImageFiller {
     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
       @Override
       public void afterCommit() {
-        executor.execute(() -> fill(routineId, stepId, description, characterType));
+        executor.execute(() -> fill(memberId, routineId, stepId, description, characterType));
       }
     });
   }
 
-  /** 그림을 만들어 저장하고 경로를 채운다. 어떤 실패도 밖으로 내지 않는다. */
-  void fill(String routineId, String stepId, String description, CharacterType characterType) {
+  /**
+   * 그림을 만들어 저장하고 경로를 채운다. 어떤 실패도 밖으로 내지 않는다.
+   *
+   * <p>돈을 쓰기 직전에 두 관문을 본다 (#368). 걸리면 그림만 건너뛰고 카드는 그대로 둔다 —
+   * 클라가 기본 그림으로 채운다. 그림이 실패했을 때와 같은 결과다.
+   * <ol>
+   *   <li>서비스 전체 하루 비용 상한</li>
+   *   <li>회원별 추가 그림 횟수 — 추가·삭제를 되풀이해도 끝이 있게</li>
+   * </ol>
+   * 상한을 먼저 본다. 상한 때문에 건너뛴 그림이 회원의 횟수를 깎으면 안 된다.
+   */
+  void fill(
+    String memberId, String routineId, String stepId, String description, CharacterType characterType
+  ) {
+    // 이 스레드는 요청 스레드가 아니라 회원 맥락이 없다(addStep 은 세우지 않는다). 여기서 세워야
+    // 그림 호출 기록에 회원이 남는다 — 전에는 회원 없이 남아 계정별로는 볼 수 없었다 (#368).
+    AiCallContext.setMemberId(memberId);
     try {
+      if (aiDailyBudgetGuard.isReached()) {
+        log.warn("AI 하루 비용 상한 — 추가 카드 그림을 건너뛰고 기본 그림으로 둔다: routineId={}, stepId={}",
+          routineId, stepId);
+        return;
+      }
+      if (!routineStepImageThrottle.tryAcquire(memberId)) {
+        log.warn("추가 카드 그림이 너무 잦다 — 이번 그림은 건너뛴다: memberId={}, routineId={}, stepId={}",
+          memberId, routineId, stepId);
+        return;
+      }
       GeneratedImage image =
         imageClientRouter.current().generateImage(description, characterType);
       if (image == null) {
@@ -97,6 +128,8 @@ public class RoutineStepImageFiller {
     } catch (Exception e) {
       log.warn("추가 카드 이미지 실패 — 기본 그림으로 둔다: routineId={}, stepId={}",
         routineId, stepId, e);
+    } finally {
+      AiCallContext.clear();
     }
   }
 

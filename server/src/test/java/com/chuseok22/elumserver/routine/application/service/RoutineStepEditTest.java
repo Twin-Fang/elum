@@ -85,9 +85,10 @@ class RoutineStepEditTest {
     routineService.addStep("member-1", "routine-1",
       new RoutineStepCreateRequest("우산을 챙겨요", "현관에서 우산을 챙겨요."));
 
-    // 그 일과의 캐릭터를 그대로 넘겨야 기존 카드들과 그림체가 맞는다
+    // 그 일과의 캐릭터를 그대로 넘겨야 기존 카드들과 그림체가 맞는다.
+    // 요청 회원도 넘겨야 그림 호출 기록에 회원이 남고 회원별 그림 횟수를 셀 수 있다 (#368).
     verify(routineStepImageFiller).scheduleAfterCommit(
-      eq("routine-1"), any(), eq("현관에서 우산을 챙겨요."), eq(CharacterType.LULU));
+      eq("member-1"), eq("routine-1"), any(), eq("현관에서 우산을 챙겨요."), eq(CharacterType.LULU));
   }
 
   @Test
@@ -141,7 +142,7 @@ class RoutineStepEditTest {
 
     assertThat(routine.getSteps().get(1).getDescription()).isEmpty();
     // 예약 자체는 부르되, 빈 설명이면 Filler가 내부에서 걸러 낸다
-    verify(routineStepImageFiller).scheduleAfterCommit(any(), any(), eq(""), any());
+    verify(routineStepImageFiller).scheduleAfterCommit(any(), any(), any(), eq(""), any());
   }
 
   // ── 순서 변경 ────────────────────────────────────────────────────
@@ -265,7 +266,7 @@ class RoutineStepEditTest {
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_ACCESS_DENIED);
 
-    verify(routineStepImageFiller, never()).scheduleAfterCommit(any(), any(), any(), any());
+    verify(routineStepImageFiller, never()).scheduleAfterCommit(any(), any(), any(), any(), any());
   }
 
   // ── 헬퍼 ────────────────────────────────────────────────────────

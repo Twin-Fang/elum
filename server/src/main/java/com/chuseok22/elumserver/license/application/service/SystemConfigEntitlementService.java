@@ -93,6 +93,7 @@ public class SystemConfigEntitlementService implements EntitlementService {
       plan,
       systemConfigService.getBoolean(Entitlement.AI_IMAGE_GENERATION.configKeyFor(plan)),
       systemConfigService.getBoolean(Entitlement.ADS_REMOVED.configKeyFor(plan)),
+      systemConfigService.getInt(Entitlement.ROUTINE_CREATE_PER_DAY.configKeyFor(plan)),
       systemConfigService.getInt(Entitlement.ROUTINE_CREATE_PER_WEEK.configKeyFor(plan)),
       systemConfigService.getInt(Entitlement.ROUTINE_MAX_COUNT.configKeyFor(plan)),
       systemConfigService.getInt(Entitlement.PROFILE_MAX_COUNT.configKeyFor(plan)),

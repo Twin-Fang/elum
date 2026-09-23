@@ -143,7 +143,41 @@ class SystemConfigEntitlementServiceTest {
       MEMBER_ID, Entitlement.ROUTINE_CREATE_PER_WEEK, 100)).isTrue();
   }
 
+  @Test
+  @DisplayName("하루 한도는 플랜별 하루 설정 키를 읽는다 — 주간 키와 섞이지 않는다 (#368)")
+  void dailyLimit_readsDailyKeyOfPlan() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    when(systemConfigService.getInt(ConfigKey.FREE_ROUTINE_CREATE_PER_DAY)).thenReturn(5);
+    lenient().when(systemConfigService.getInt(ConfigKey.FREE_ROUTINE_CREATE_PER_WEEK)).thenReturn(1);
+
+    assertThat(entitlementService.isWithinLimit(
+      MEMBER_ID, Entitlement.ROUTINE_CREATE_PER_DAY, 3)).isTrue();
+  }
+
+  @Test
+  @DisplayName("Pro 의 하루 한도는 Pro 하루 키를 읽는다")
+  void dailyLimit_proReadsProKey() {
+    when(systemConfigService.getInt(ConfigKey.PRO_ROUTINE_CREATE_PER_DAY)).thenReturn(2);
+
+    assertThat(entitlementService.isWithinLimit(
+      PlanType.PRO, Entitlement.ROUTINE_CREATE_PER_DAY, 2)).isFalse();
+  }
+
   // --- 스냅샷 ---
+
+  @Test
+  @DisplayName("스냅샷에 하루 한도가 실린다")
+  void snapshot_includesDailyLimit() {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.empty());
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(3);
+    when(systemConfigService.getInt(ConfigKey.FREE_ROUTINE_CREATE_PER_DAY)).thenReturn(2);
+
+    EntitlementSnapshot snapshot = entitlementService.snapshot(MEMBER_ID);
+
+    assertThat(snapshot.routineCreatePerDay()).isEqualTo(2);
+    assertThat(snapshot.routineCreatePerWeek()).isEqualTo(3);
+  }
 
   @Test
   @DisplayName("스냅샷은 현재 플랜의 값으로 채워진다")

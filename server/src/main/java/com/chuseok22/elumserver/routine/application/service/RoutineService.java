@@ -72,7 +72,9 @@ public class RoutineService {
   /// "1개 이상 10개 이하"). 같은 값으로 맞춰야 **기존 일과 중 상한을 넘는 것이 없다** —
   /// 더 낮게 잡으면 AI가 만든 일과가 처음부터 상한 초과 상태가 된다.
   ///
-  /// 카드 1장을 추가할 때마다 AI 이미지가 1회 생성되므로, 상한이 곧 비용의 천장이다.
+  /// 카드 1장을 추가할 때마다 AI 이미지가 1회 생성된다. 다만 이 상한은 비용의 천장이
+  /// 아니다 — 지우면 자리가 다시 나서 추가·삭제를 되풀이할 수 있다. 그림 횟수는
+  /// {@link RoutineStepImageFiller}가 따로 묶는다 (#368).
   private static final int STEP_MAX_COUNT = 10;
 
   private final RoutineRepository routineRepository;
@@ -82,6 +84,7 @@ public class RoutineService {
   private final RoutineImageStorage routineImageStorage;
   private final RoutineRequestCooldownGuard routineRequestCooldownGuard;
   private final RoutineQuotaGuard routineQuotaGuard;
+  private final AiDailyBudgetGuard aiDailyBudgetGuard;
   private final RoutineStepImageFiller routineStepImageFiller;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
@@ -127,8 +130,11 @@ public class RoutineService {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public RoutineResponse create(String memberId, RoutineCreateRequest request) {
     routineRequestCooldownGuard.guard(memberId);
-    // 쿨다운이 몰아치기를 막고, 여기서 이번 주에 얼마나 썼는지를 본다.
+    // 쿨다운이 몰아치기를 막고, 여기서 오늘·이번 주에 얼마나 썼는지를 본다.
     routineQuotaGuard.guard(memberId);
+    // 계정과 무관하게 서비스 전체가 오늘 쓴 비용을 본다 (#368). 셋 다 AI 를 부르기 전이라
+    // 거절해도 비용이 0 이다.
+    aiDailyBudgetGuard.guard();
 
     Profile profile = requireProfile(memberId);
 
@@ -547,6 +553,9 @@ public class RoutineService {
    *
    * <p><b>그림이 실패해도 카드 추가는 성공한다.</b> {@code imagePath}를 {@code null}로
    * 두고 끝낸다 — 클라가 기본 그림으로 채운다 (서비스 원칙 6).
+   *
+   * <p>하루 비용 상한이나 회원별 그림 횟수에 걸려도 같다 — 카드는 추가하고 그림만
+   * 건너뛴다 (#368). 그래서 여기에는 일과 만들기의 쿨다운·한도를 걸지 않는다.
    */
   @Transactional
   public RoutineResponse addStep(
@@ -577,7 +586,7 @@ public class RoutineService {
     // 커밋된 뒤에 그림을 만든다. 트랜잭션 안에서 돌리면 Gemini 호출(수 초) 동안
     // DB 커넥션을 붙잡고, 롤백되면 방금 쓴 이미지 파일이 고아로 남는다.
     routineStepImageFiller.scheduleAfterCommit(
-      routineId, step.getId(), step.getDescription(), routine.getProfile().getCharacter());
+      memberId, routineId, step.getId(), step.getDescription(), routine.getProfile().getCharacter());
 
     return RoutineResponse.from(routine);
   }

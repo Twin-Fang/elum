@@ -83,8 +83,15 @@ public enum ErrorCode {
   // 요금제 한도.
   // 문구는 해요체·능동형으로 쓰고 "아이"라는 말을 쓰지 않는다 (docs 용어 규칙).
   ROUTINE_CREATE_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "이번 주에 만들 수 있는 일과를 다 썼어요."),
+  // 하루 한도 (#368). 주간과 코드를 나눈다 — 제보를 받았을 때 어느 한도인지 가려야 하고,
+  // "내일 다시" 는 하루 한도에서만 맞는 말이다.
+  ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "오늘 만들 수 있는 일과를 다 썼어요. 내일 다시 만들어 주세요."),
   ROUTINE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "일과를 더 만들려면 기존 일과를 정리해주세요."),
   PROFILE_COUNT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "이룸이를 더 추가할 수 없어요."),
+
+  // 서비스 전체 하루 AI 비용 상한 (#368). 계정 한도와 다른 코드로 둔다 — 이 사람이 많이
+  // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.
+  AI_DAILY_BUDGET_EXCEEDED(HttpStatus.SERVICE_UNAVAILABLE, "오늘은 카드를 더 만들 수 없어요. 내일 다시 만들어 주세요."),
 
   // 비밀값(외부 API 키) 저장.
   SECRET_MASTER_KEY_MISSING(HttpStatus.SERVICE_UNAVAILABLE,
