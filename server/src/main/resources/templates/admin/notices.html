@@ -6,7 +6,7 @@
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div th:replace="~{admin/fragments/admin-ui :: pageHeader('공지 관리',
-         '보호자 홈에 앱을 켜고 처음 들어올 때 뜨는 팝업이에요. 여러 개면 한 팝업에서 옆으로 넘겨 봐요.')}"></div>
+         '보호자 홈에 앱을 켜고 처음 들어올 때 뜨는 팝업이에요. 여러 개면 하나를 닫을 때마다 다음 공지가 이어서 떠요.')}"></div>
     <a th:href="@{/admin/notices/new}" class="btn btn-primary btn-sm">새 공지</a>
   </div>
 
@@ -85,10 +85,10 @@
           <h2 class="card-title text-base">올리기 전에 알아둘 것</h2>
           <ul class="list-disc space-y-1 pl-5 text-base-content/80">
             <li><b>보호자 홈에서만</b> 떠요. 이룸이 화면과 일과 만들기 중에는 뜨지 않아요.</li>
-            <li>앱을 켜고 홈에 처음 들어올 때 <b>한 번</b> 떠요. 게시 중인 공지는 우선순위가 큰 것부터 <b>최대 5장</b>이 한 팝업에 들어가요.</li>
+            <li>앱을 켜고 홈에 처음 들어올 때 <b>한 번</b> 떠요. 게시 중인 공지는 우선순위가 큰 것부터 <b>최대 5개</b>가 차례로 떠요.</li>
             <li>
               보호자가 <b th:text="${hideDays == 7} ? '일주일간 보지 않기' : ${hideDays} + '일간 보지 않기'">일주일간 보지 않기</b>를
-              체크하고 닫으면 그 팝업의 공지가 전부 숨겨져요. 일수는 시스템 설정의 "보지 않기 일수"에서 바꿔요.
+              체크하고 닫으면 <b>그 공지만</b> 숨겨져요. 일수는 시스템 설정의 "보지 않기 일수"에서 바꿔요.
             </li>
             <li>숨긴 보호자에게 다시 알려야 할 만큼 바뀌었으면 고칠 때 <b>다시 보이게</b>를 켜요. 오타만 고칠 때는 끈 채 저장해요.</li>
             <li>끄거나 지우면 다음에 앱을 켜는 보호자부터 안 보여요(늦어도 1분).</li>
@@ -100,7 +100,7 @@
     <aside class="card bg-base-200 np-aside">
       <div class="card-body space-y-3">
         <h2 class="card-title text-base">전체 미리보기</h2>
-        <p class="text-xs text-base-content/60">지금 게시 중인 공지를 앱이 받는 순서대로 넘겨 봐요.</p>
+        <p class="text-xs text-base-content/60">지금 게시 중인 공지를 앱에 뜨는 순서대로 하나씩 봐요.</p>
         <div class="flex gap-1" role="group" aria-label="미리볼 플랫폼">
           <button type="button" class="btn btn-xs btn-primary" data-preview-platform="IOS">iOS</button>
           <button type="button" class="btn btn-xs btn-ghost" data-preview-platform="ANDROID">Android</button>
