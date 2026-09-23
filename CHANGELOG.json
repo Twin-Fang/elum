@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-23T08:54:35Z",
-    "currentVersion": "1.33.4",
+    "lastUpdated": "2026-09-23T16:21:30Z",
+    "currentVersion": "1.34.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 159
+    "totalReleases": 160
   },
   "releases": [
+    {
+      "version": "1.34.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-23",
+      "pr_number": 391,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 공지 팝업이 앱의 다른 안내창과 같은 모양으로 바뀌었어요\n  * 공지가 여러 개면 하나씩 차례로 보여줘요\n  * 공지 글이 낱말 단위로 줄바꿈돼 읽기 편해졌어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "공지 팝업이 앱의 다른 안내창과 같은 모양으로 바뀌었어요",
+            "공지가 여러 개면 하나씩 차례로 보여줘요",
+            "공지 글이 낱말 단위로 줄바꿈돼 읽기 편해졌어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.33.4",
       "project_type": "flutter",
