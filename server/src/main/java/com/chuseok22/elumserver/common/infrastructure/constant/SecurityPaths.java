@@ -48,6 +48,14 @@ public final class SecurityPaths {
    */
   public static final String API_APP_NOTICES = "/api/app/notices";
   public static final String API_APP_NOTICE_IMAGE = "/api/app/notices/*/image";
+  /**
+   * 해커톤 때 수동 검증용으로 연 경로 (이슈 #382). <b>API 체인에서 누구도 부를 수 없게 막는다.</b>
+   *
+   * <p>API 체인의 마지막 규칙이 보호자 권한이라, 따로 막지 않으면 가입만 하면 누구나 로컬 LLM 을
+   * 돌리고 보낸 원문을 로그에 남길 수 있었다. API 체인에는 관리자 역할이 없으므로 "관리자만"이
+   * 아니라 전부 막는다. 관리자 프롬프트 시험 화면은 서비스를 직접 불러 이 경로를 쓰지 않는다.
+   */
+  public static final String API_INTERNAL_MATCHER = "/api/internal/**";
   public static final String DOCS_SWAGGER = "/docs/swagger";
   public static final String DOCS_SWAGGER_UI_MATCHER = "/docs/swagger-ui/**";
   public static final String DOCS_API_DOCS_MATCHER = "/v3/api-docs/**";
