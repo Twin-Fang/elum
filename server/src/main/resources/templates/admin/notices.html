@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('공지 관리', 'notices', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div th:replace="~{admin/fragments/admin-ui :: pageHeader('공지 관리',
+         '보호자 홈에 앱을 켜고 처음 들어올 때 뜨는 팝업이에요. 여러 개면 한 팝업에서 옆으로 넘겨 봐요.')}"></div>
+    <a th:href="@{/admin/notices/new}" class="btn btn-primary btn-sm">새 공지</a>
+  </div>
+
+  <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+
+  <!-- 넓은 화면에서는 표 옆에 전체 미리보기를 둔다. 좁으면 아래로 내려간다. -->
+  <div class="np-page">
+    <section class="space-y-3">
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+          <tr>
+            <th>상태</th>
+            <th>제목</th>
+            <th>기간 (한국 시각)</th>
+            <th>대상 · 순서</th>
+            <th>마지막 수정</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          <!-- th:replace 가 th:if 보다 먼저 실행된다. 조건을 바깥으로 뺀다 (consents.html 과 같은 이유). -->
+          <th:block th:if="${rows.isEmpty()}">
+            <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(6, '아직 올린 공지가 없어요. 새 공지를 만들어 보세요')}"></tr>
+          </th:block>
+          <tr th:each="row : ${rows}" th:with="n=${row.notice}, live=${row.status.name() == 'LIVE'}">
+            <td>
+              <span class="badge badge-sm"
+                    th:classappend="${live} ? 'badge-success' : (${row.status.name() == 'SCHEDULED'} ? 'badge-info' : 'badge-ghost')"
+                    th:text="${row.status.label}">게시 중</span>
+            </td>
+            <td class="wrap-anywhere" style="min-width:11rem">
+              <!-- 표기(**)를 그대로 보인다. 강조가 어디 걸렸는지 관리자가 바로 알 수 있게. -->
+              <div class="font-semibold" th:text="${n.title}">제목</div>
+              <div class="text-xs text-base-content/60">
+                <span th:text="'판 ' + ${n.revision}">판 1</span>
+                <span th:if="${n.imageKey != null}"> · 이미지</span>
+                <span th:if="${n.buttonLabel != null}" th:text="' · 버튼 ' + ${n.buttonLabel}"> · 버튼</span>
+              </div>
+            </td>
+            <td class="text-xs">
+              <div th:text="${#temporals.format(n.startsAt, 'yyyy-MM-dd HH:mm')}">시작</div>
+              <div class="text-base-content/60"
+                   th:text="${n.endsAt != null} ? '~ ' + ${#temporals.format(n.endsAt, 'yyyy-MM-dd HH:mm')} : '~ 끌 때까지'">~ 종료</div>
+            </td>
+            <!-- 칸을 줄이려고 플랫폼과 우선순위를 한 칸에 둔다. 넓은 화면에서도 오른쪽 버튼이 잘렸다. -->
+            <td class="text-xs">
+              <div th:text="${n.platform.label}">전체</div>
+              <div class="text-base-content/60" th:text="'우선순위 ' + ${n.priority}">우선순위 0</div>
+            </td>
+            <td class="text-xs">
+              <div th:text="${n.updatedAt != null ? #temporals.format(n.updatedAt, 'MM-dd HH:mm') : '-'}">수정</div>
+              <div class="text-base-content/60" th:text="${n.updatedBy}">관리자</div>
+            </td>
+            <td>
+              <div class="flex items-center gap-1">
+                <a th:href="@{/admin/notices/{id}(id=${n.id})}" class="btn btn-primary btn-xs">고치기</a>
+                <form th:action="@{/admin/notices/{id}/enabled(id=${n.id})}" method="post">
+                  <input type="hidden" name="enabled" th:value="${!n.enabled}"/>
+                  <button type="submit" class="btn btn-ghost btn-xs" th:text="${n.enabled} ? '끄기' : '켜기'">끄기</button>
+                </form>
+                <!-- 게시 중이면 한 번 더 묻는다 (notice-preview.js). 지우면 이미지 파일도 함께 지운다. -->
+                <form th:action="@{/admin/notices/{id}/delete(id=${n.id})}" method="post"
+                      data-notice-delete th:data-live="${live}" th:data-title="${n.title}">
+                  <button type="submit" class="btn btn-ghost btn-xs text-error">지우기</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card bg-base-200">
+        <div class="card-body text-sm space-y-2">
+          <h2 class="card-title text-base">올리기 전에 알아둘 것</h2>
+          <ul class="list-disc space-y-1 pl-5 text-base-content/80">
+            <li><b>보호자 홈에서만</b> 떠요. 이룸이 화면과 일과 만들기 중에는 뜨지 않아요.</li>
+            <li>앱을 켜고 홈에 처음 들어올 때 <b>한 번</b> 떠요. 게시 중인 공지는 우선순위가 큰 것부터 <b>최대 5장</b>이 한 팝업에 들어가요.</li>
+            <li>
+              보호자가 <b th:text="${hideDays == 7} ? '일주일간 보지 않기' : ${hideDays} + '일간 보지 않기'">일주일간 보지 않기</b>를
+              체크하고 닫으면 그 팝업의 공지가 전부 숨겨져요. 일수는 시스템 설정의 "보지 않기 일수"에서 바꿔요.
+            </li>
+            <li>숨긴 보호자에게 다시 알려야 할 만큼 바뀌었으면 고칠 때 <b>다시 보이게</b>를 켜요. 오타만 고칠 때는 끈 채 저장해요.</li>
+            <li>끄거나 지우면 다음에 앱을 켜는 보호자부터 안 보여요(늦어도 1분).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <aside class="card bg-base-200 np-aside">
+      <div class="card-body space-y-3">
+        <h2 class="card-title text-base">전체 미리보기</h2>
+        <p class="text-xs text-base-content/60">지금 게시 중인 공지를 앱이 받는 순서대로 넘겨 봐요.</p>
+        <div class="flex gap-1" role="group" aria-label="미리볼 플랫폼">
+          <button type="button" class="btn btn-xs btn-primary" data-preview-platform="IOS">iOS</button>
+          <button type="button" class="btn btn-xs btn-ghost" data-preview-platform="ANDROID">Android</button>
+        </div>
+        <div id="notice-preview-list" data-notice-preview-list></div>
+        <p class="text-xs text-base-content/60" data-preview-note></p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 레이아웃이 떠 가는 것은 이 <main> 하나뿐이다. 스크립트도 안에 둔다 (consent-edit.html 과 같은 이유). -->
+  <script th:inline="javascript">
+    window.NOTICE_PREVIEW_DATA = /*[[${previewJson}]]*/ '{"hideDays":7,"notices":[]}';
+  </script>
+  <script th:src="@{/admin/js/notice-preview.js}"></script>
+</main>
+</body>
+</html>

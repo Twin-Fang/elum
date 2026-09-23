@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.admin.application.controller.AdminConsentControl
 import com.chuseok22.elumserver.admin.application.controller.AdminLogController;
 import com.chuseok22.elumserver.admin.application.controller.AdminMemberController;
 import com.chuseok22.elumserver.admin.application.controller.AdminMonitoringController;
+import com.chuseok22.elumserver.admin.application.controller.AdminNoticeController;
 import com.chuseok22.elumserver.admin.application.controller.AdminPromptController;
 import com.chuseok22.elumserver.admin.application.controller.AdminRoutineController;
 import com.chuseok22.elumserver.admin.application.controller.AdminViewController;
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
   AdminLogController.class,
   AdminMemberController.class,
   AdminMonitoringController.class,
+  AdminNoticeController.class,
   AdminPromptController.class,
   AdminRoutineController.class,
   AdminViewController.class,

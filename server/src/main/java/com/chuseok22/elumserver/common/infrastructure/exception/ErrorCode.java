@@ -117,6 +117,25 @@ public enum ErrorCode {
   CONSENT_VERSION_INVALID(HttpStatus.BAD_REQUEST, "버전은 2026-09-21 같은 날짜로 적어주세요."),
   CONSENT_VERSION_NOT_NEWER(HttpStatus.BAD_REQUEST, "새 버전은 지금 버전보다 늦은 날짜여야 합니다."),
 
+  // 앱 공지 (이슈 #370). 저장 검증은 전부 400 이다 — 관리자가 고치면 되는 입력이라
+  // 500 으로 두면 서버 장애와 섞인다 (#257 의 교훈). 관리자 화면은 E-NTC 코드를 함께 보여준다.
+  NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "공지를 찾을 수 없어요."),
+  NOTICE_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "공지 이미지를 찾을 수 없어요."),
+  NOTICE_TITLE_BLANK(HttpStatus.BAD_REQUEST, "제목을 적어주세요."),
+  NOTICE_TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "제목이 너무 길어요."),
+  NOTICE_TITLE_EMPHASIS_UNPAIRED(HttpStatus.BAD_REQUEST, "제목의 강조 표기 ** 짝이 맞지 않아요."),
+  NOTICE_BODY_BLANK(HttpStatus.BAD_REQUEST, "본문을 적어주세요."),
+  NOTICE_BODY_TOO_LONG(HttpStatus.BAD_REQUEST, "본문이 너무 길어요."),
+  NOTICE_BUTTON_INCOMPLETE(HttpStatus.BAD_REQUEST, "버튼은 문구와 링크를 함께 적어주세요."),
+  NOTICE_BUTTON_LABEL_TOO_LONG(HttpStatus.BAD_REQUEST, "버튼 문구가 너무 길어요."),
+  NOTICE_BUTTON_URL_INVALID(HttpStatus.BAD_REQUEST, "버튼 링크는 https:// 로 시작하는 주소여야 해요."),
+  NOTICE_PERIOD_INVALID(HttpStatus.BAD_REQUEST, "게시 기간이 올바르지 않아요."),
+  NOTICE_PRIORITY_INVALID(HttpStatus.BAD_REQUEST, "우선순위는 숫자로 적어주세요."),
+  NOTICE_PLATFORM_INVALID(HttpStatus.BAD_REQUEST, "플랫폼은 ALL, IOS, ANDROID 중 하나예요."),
+  NOTICE_IMAGE_INVALID_TYPE(HttpStatus.BAD_REQUEST, "이미지는 png, jpg, webp 만 올릴 수 있어요."),
+  NOTICE_IMAGE_TOO_LARGE(HttpStatus.BAD_REQUEST, "이미지는 2MB 까지 올릴 수 있어요."),
+  NOTICE_IMAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "공지 이미지를 저장하지 못했어요."),
+
   ;
 
 

@@ -80,6 +80,14 @@ class MaintenanceModeFilterTest {
     assertThat(run("POST", path).getStatus()).isEqualTo(503);
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {"/api/app/notices", "/api/app/notices/abc/image"})
+  @DisplayName("점검 중에는 공지도 막는다 — 앱이 점검 화면만 띄우므로 공지가 나갈 자리가 없다 (#370 N19)")
+  void maintenance_blocksNotices(String path) throws Exception {
+    maintenance(true);
+    assertThat(run("GET", path).getStatus()).isEqualTo(503);
+  }
+
   @Test
   @DisplayName("점검이 아니면 그대로 통과시킨다")
   void normal_passes() throws Exception {

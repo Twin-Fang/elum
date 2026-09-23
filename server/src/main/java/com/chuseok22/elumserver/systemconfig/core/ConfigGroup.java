@@ -20,6 +20,8 @@ public enum ConfigGroup {
   APP_CONTROL("앱 점검·버전"),
   // 앱이 서버에서 받아 쓰는 시간값. 전에는 앱의 .env 에 있어 바꾸려면 다시 빌드해야 했다.
   APP_TUNING("앱 대기·연출 시간"),
+  // 보호자 홈 공지 팝업 (이슈 #370). 공지 내용은 "공지 관리" 화면에서, 팝업 전체에 걸리는 값만 여기에 둔다.
+  NOTICE("앱 공지"),
   ;
 
   private final String label;

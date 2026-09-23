@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page(${notice == null} ? '새 공지' : '공지 고치기', 'notices', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div class="flex flex-wrap items-center gap-2">
+    <a th:href="@{/admin/notices}" class="btn btn-ghost btn-sm">← 목록</a>
+    <h1 class="text-2xl font-bold" th:text="${notice == null} ? '새 공지' : '공지 고치기'">공지</h1>
+    <th:block th:if="${notice != null}">
+      <span class="badge"
+            th:classappend="${status.name() == 'LIVE'} ? 'badge-success' : (${status.name() == 'SCHEDULED'} ? 'badge-info' : 'badge-ghost')"
+            th:text="${status.label}">게시 중</span>
+      <span class="badge badge-outline font-mono" th:text="'판 ' + ${notice.revision}">판 1</span>
+    </th:block>
+  </div>
+
+  <!-- 검증에 걸리면 이 화면을 입력값 그대로 다시 그린다. 리다이렉트하면 쓰던 본문이 사라진다. -->
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}"></div>
+
+  <div class="np-page">
+    <form id="notice-form" class="space-y-6" method="post" enctype="multipart/form-data"
+          th:action="${notice == null} ? @{/admin/notices} : @{/admin/notices/{id}(id=${notice.id})}">
+      <div class="card bg-base-100 shadow-md">
+        <div class="card-body space-y-4">
+          <h2 class="card-title text-base">무엇을 알릴까요</h2>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text">제목 <span class="text-error">*</span></span>
+              <span class="label-text-alt font-mono" data-count-for="notice-title">0/40</span>
+            </div>
+            <input id="notice-title" type="text" name="title" class="input input-bordered" maxlength="40"
+                   th:value="${form.title}" required/>
+            <div class="label">
+              <span class="label-text-alt">
+                강조할 글자를 <code class="font-mono">**이렇게**</code> 감싸면 앱에서 브랜드 색으로 보여요. ** 표기도 글자 수에 들어가요
+              </span>
+            </div>
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text">본문 <span class="text-error">*</span></span>
+              <span class="label-text-alt font-mono" data-count-for="notice-body">0/1000</span>
+            </div>
+            <textarea id="notice-body" name="body" class="textarea textarea-bordered h-40 text-sm leading-relaxed"
+                      maxlength="1000" th:text="${form.body}" required></textarea>
+            <div class="label">
+              <span class="label-text-alt">줄바꿈은 그대로 보여요. 길면 앱에서 본문만 스크롤돼요</span>
+            </div>
+          </label>
+
+          <!-- 문구 도움 (N20). 경고만 하고 저장은 막지 않는다 — 법적 문구가 필요할 때가 있다. -->
+          <div class="rounded-box bg-base-200 p-3 text-sm space-y-1">
+            <p class="text-base-content/80">
+              해요체로 써요. <span class="text-base-content/60">예: 저장되었습니다 → 저장했어요 · 사라집니다 → 이어서 만들 수 있어요</span>
+            </p>
+            <ul id="notice-wording" class="list-disc space-y-1 pl-5" aria-live="polite"></ul>
+          </div>
+
+          <div class="divider my-0"></div>
+
+          <div class="space-y-2">
+            <div class="label-text">이미지 (선택)</div>
+            <th:block th:if="${notice != null and notice.imageKey != null}">
+              <div class="flex items-center gap-3">
+                <img th:src="@{/admin/notices/{id}/image(id=${notice.id})}" alt="지금 올라가 있는 이미지"
+                     class="rounded-box border border-base-300" style="height:64px"/>
+                <label class="label cursor-pointer justify-start gap-2">
+                  <input id="notice-remove-image" type="checkbox" name="removeImage" value="true" class="checkbox checkbox-sm"
+                         th:checked="${form.isRemoveImage()}"/>
+                  <span class="label-text">이미지 지우기</span>
+                </label>
+              </div>
+            </th:block>
+            <input id="notice-image" type="file" name="image" accept="image/png,image/jpeg,image/webp"
+                   class="block w-full text-sm"/>
+            <p class="text-xs text-base-content/60">
+              권장 16:10 (1280×800). png, jpg, webp · 2MB 까지. 비율이 다르면 가장자리가 잘려 보여요.
+              새로 고르면 지금 이미지를 바꿔요.
+            </p>
+            <p id="notice-image-note" class="text-xs font-semibold" aria-live="polite"></p>
+          </div>
+
+          <div class="divider my-0"></div>
+
+          <div class="grid gap-4 md:grid-cols-2">
+            <label class="form-control">
+              <div class="label">
+                <span class="label-text">버튼 문구 (선택)</span>
+                <span class="label-text-alt font-mono" data-count-for="notice-button-label">0/20</span>
+              </div>
+              <input id="notice-button-label" type="text" name="buttonLabel" class="input input-bordered" maxlength="20"
+                     th:value="${form.buttonLabel}" placeholder="자세히 보기"/>
+            </label>
+            <label class="form-control">
+              <div class="label"><span class="label-text">버튼 링크 (선택)</span></div>
+              <input id="notice-button-url" type="text" name="buttonUrl" class="input input-bordered font-mono text-sm"
+                     maxlength="500" th:value="${form.buttonUrl}" placeholder="https://"/>
+            </label>
+          </div>
+          <p class="text-xs text-base-content/60">문구와 링크를 함께 적거나 둘 다 비워요. 링크는 https:// 만 받아요. 누르면 휴대폰 브라우저가 열려요.</p>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-md">
+        <div class="card-body space-y-4">
+          <h2 class="card-title text-base">언제, 누구에게</h2>
+          <div class="grid gap-4 md:grid-cols-2">
+            <label class="form-control">
+              <div class="label"><span class="label-text">시작 (한국 시각) <span class="text-error">*</span></span></div>
+              <input id="notice-starts-at" type="datetime-local" name="startsAt" class="input input-bordered"
+                     th:value="${form.startsAt}" required/>
+            </label>
+            <label class="form-control">
+              <div class="label"><span class="label-text">종료 (한국 시각)</span></div>
+              <input id="notice-ends-at" type="datetime-local" name="endsAt" class="input input-bordered"
+                     th:value="${form.endsAt}"/>
+              <div class="label"><span class="label-text-alt">비우면 끌 때까지 나가요. 종료 시각이 되면 바로 빠져요</span></div>
+            </label>
+            <label class="form-control">
+              <div class="label"><span class="label-text">플랫폼</span></div>
+              <select id="notice-platform" name="platform" class="select select-bordered">
+                <option value="ALL" th:selected="${form.platform == 'ALL'}">전체</option>
+                <option value="IOS" th:selected="${form.platform == 'IOS'}">iOS</option>
+                <option value="ANDROID" th:selected="${form.platform == 'ANDROID'}">Android</option>
+              </select>
+            </label>
+            <label class="form-control">
+              <div class="label"><span class="label-text">우선순위</span></div>
+              <input id="notice-priority" type="number" name="priority" class="input input-bordered font-mono"
+                     th:value="${form.priority}" step="1"/>
+              <div class="label"><span class="label-text-alt">클수록 먼저 보여요. 같으면 시작이 늦은 것이 먼저예요</span></div>
+            </label>
+          </div>
+
+          <label class="label cursor-pointer justify-start gap-3">
+            <input id="notice-enabled" type="checkbox" name="enabled" value="true" class="toggle toggle-primary"
+                   th:checked="${form.isEnabled()}"/>
+            <span class="label-text">
+              켜기
+              <span class="block text-xs text-base-content/60">켜야 게시 기간에 앱에 나가요. 처음에는 꺼 두고 미리보기로 확인한 뒤 켜요</span>
+            </span>
+          </label>
+
+          <!-- "다시 보이게"는 이미 나간 공지를 고칠 때만 뜻이 있다. -->
+          <label th:if="${notice != null}" class="label cursor-pointer justify-start gap-3 rounded-box bg-base-200 p-3">
+            <input type="checkbox" name="bumpRevision" value="true" class="checkbox checkbox-warning"
+                   th:checked="${form.isBumpRevision()}"/>
+            <span class="label-text">
+              다시 보이게
+              <span class="block text-xs text-base-content/60">
+                켜고 저장하면 보지 않기로 숨긴 보호자에게도 다시 떠요. 오타만 고칠 때는 끈 채로 저장해요
+              </span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <a th:href="@{/admin/notices}" class="btn btn-ghost">취소</a>
+        <button type="submit" class="btn btn-primary">저장</button>
+      </div>
+    </form>
+
+    <aside class="card bg-base-200 np-aside">
+      <div class="card-body space-y-3">
+        <h2 class="card-title text-base">미리보기</h2>
+        <p class="text-xs text-base-content/60">입력하는 대로 바뀌어요. 앱 팝업과 같은 치수예요.</p>
+        <div class="flex flex-wrap gap-1" role="group" aria-label="미리보기 범위">
+          <button type="button" class="btn btn-xs btn-primary" data-preview-mode="single">이 공지만</button>
+          <button type="button" class="btn btn-xs btn-ghost" data-preview-mode="all">게시 중인 공지와 함께</button>
+        </div>
+        <div class="flex gap-1" role="group" aria-label="미리볼 플랫폼">
+          <button type="button" class="btn btn-xs btn-primary" data-preview-platform="IOS">iOS</button>
+          <button type="button" class="btn btn-xs btn-ghost" data-preview-platform="ANDROID">Android</button>
+        </div>
+        <div id="notice-preview"
+             th:data-existing-image="${notice != null and notice.imageKey != null} ? @{/admin/notices/{id}/image(id=${notice.id})} : ''"></div>
+        <p class="text-xs text-base-content/60" data-preview-note></p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 지우기는 저장 폼 밖에 둔다. 폼 안에 폼을 넣으면 브라우저가 안쪽 폼을 버린다. -->
+  <form th:if="${notice != null}" th:action="@{/admin/notices/{id}/delete(id=${notice.id})}" method="post"
+        class="flex justify-end" data-notice-delete th:data-live="${status.name() == 'LIVE'}" th:data-title="${notice.title}">
+    <button type="submit" class="btn btn-outline btn-error btn-sm">이 공지 지우기</button>
+  </form>
+
+  <script th:inline="javascript">
+    window.NOTICE_PREVIEW_DATA = /*[[${previewJson}]]*/ '{"hideDays":7,"notices":[]}';
+  </script>
+  <script th:src="@{/admin/js/notice-preview.js}"></script>
+</main>
+</body>
+</html>

@@ -142,6 +142,8 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.POST, SecurityPaths.API_DEVICE_LINK_REDEEM).permitAll()
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_APP_STATUS).permitAll()
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_CONSENT_DOCUMENTS).permitAll()
+        // 공지 팝업 — 읽기 전용, 인증 없음 (이슈 #370)
+        .requestMatchers(HttpMethod.GET, SecurityPaths.API_APP_NOTICES, SecurityPaths.API_APP_NOTICE_IMAGE).permitAll()
         // ── 이룸이 휴대폰이 할 수 있는 것 (이슈 #200) ──
         // 두 휴대폰은 같은 계정이라 memberId가 같다. 나누지 않으면 이룸이 휴대폰에서
         // 일과 삭제·회원 탈퇴가 그대로 된다. **허용할 것만 적고 나머지는 막는다** —

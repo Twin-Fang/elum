@@ -39,6 +39,15 @@ public final class SecurityPaths {
    * <p>인증이 없다. <b>가입하기 전에 읽는 문서</b>라 로그인을 요구할 수 없다.
    */
   public static final String API_CONSENT_DOCUMENTS = "/api/consents/documents";
+  /**
+   * 보호자 홈 공지 팝업 목록과 이미지 (이슈 #370).
+   *
+   * <p>인증이 없다. 읽기 전용이고, 토큰이 만료된 순간에도 팝업 하나 때문에 갱신이 돌면 안 된다.
+   * <b>점검 중에는 막는다</b>({@code MaintenanceModeFilter} 의 열린 경로에 넣지 않았다) —
+   * 점검 중이면 앱이 점검 화면만 띄우므로 공지가 나갈 자리가 없다.
+   */
+  public static final String API_APP_NOTICES = "/api/app/notices";
+  public static final String API_APP_NOTICE_IMAGE = "/api/app/notices/*/image";
   public static final String DOCS_SWAGGER = "/docs/swagger";
   public static final String DOCS_SWAGGER_UI_MATCHER = "/docs/swagger-ui/**";
   public static final String DOCS_API_DOCS_MATCHER = "/v3/api-docs/**";
