@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.auth.infrastructure.entity.RefreshToken;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -36,6 +37,9 @@ class RefreshTokenServiceTest {
 
   @Mock
   private JwtProperties jwtProperties;
+
+  @Mock
+  private LinkAccessValidator linkAccessValidator;
 
   @InjectMocks
   private RefreshTokenService refreshTokenService;
@@ -63,6 +67,13 @@ class RefreshTokenServiceTest {
     token.setTokenHash("hash-old");
     token.setDeviceId("device-1");
     token.setExpiresAt(LocalDateTime.now().plusDays(30));
+    return token;
+  }
+
+  /** 연결 암호로 붙은 이룸이 휴대폰의 토큰. 기기 값은 연결할 때 서버가 만든다. */
+  private RefreshToken elumiToken() {
+    RefreshToken token = livingToken();
+    token.setDeviceId("elumi-l1");
     return token;
   }
 
@@ -158,5 +169,87 @@ class RefreshTokenServiceTest {
     verify(refreshTokenRepository).save(org.mockito.ArgumentMatchers.argThat(saved ->
       "device-1".equals(saved.getDeviceId())
     ));
+  }
+
+  @Test
+  @DisplayName("이룸이 휴대폰 세션을 갱신하면 어느 연결인지 돌려준다 — 새 액세스 토큰의 역할이 이 값으로 정해진다")
+  void rotate_elumiToken_returnsLinkId() {
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(elumiToken()));
+    when(linkAccessValidator.isLinkActive("l1")).thenReturn(true);
+    when(jwtProperties.refreshExpMillis()).thenReturn(15552000000L);
+    stubSave();
+
+    RefreshTokenService.RotationResult result = refreshTokenService.rotate("raw-elumi", null);
+
+    assertThat(result.memberId()).isEqualTo("m1");
+    assertThat(result.linkId()).isEqualTo("l1");
+  }
+
+  @Test
+  @DisplayName("이룸이 휴대폰 기기 값은 헤더로 바뀌지 않는다 — elumi- 가 떨어지면 다음 갱신부터 보호자 토큰이 나온다")
+  void rotate_elumiToken_ignoresDeviceHeader() {
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(elumiToken()));
+    when(linkAccessValidator.isLinkActive("l1")).thenReturn(true);
+    when(jwtProperties.refreshExpMillis()).thenReturn(15552000000L);
+    stubSave();
+
+    RefreshTokenService.RotationResult result = refreshTokenService.rotate("raw-elumi", "attacker-device");
+
+    assertThat(result.linkId()).isEqualTo("l1");
+    // 기기 값이 그대로여야 보호자가 연결을 끊을 때 이 세션도 짚힌다.
+    verify(refreshTokenRepository).save(org.mockito.ArgumentMatchers.argThat(saved ->
+      "elumi-l1".equals(saved.getDeviceId())
+    ));
+  }
+
+  @Test
+  @DisplayName("연결이 끊긴 이룸이 휴대폰은 갱신이 거절되고 그 기기 세션이 끊긴다")
+  void rotate_elumiTokenOfRevokedLink_revokesDeviceAndRejects() {
+    RefreshToken token = elumiToken();
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
+    when(linkAccessValidator.isLinkActive("l1")).thenReturn(false);
+
+    assertThatThrownBy(() -> refreshTokenService.rotate("raw-elumi", null))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.REFRESH_TOKEN_INVALID));
+
+    // 예외에 롤백되지 않도록 별도 트랜잭션으로 끊는다. 기기만 짚는다 — 계정 전체면 보호자까지 로그아웃된다.
+    verify(refreshTokenRevoker).revokeDeviceInNewTransaction(eq("m1"), eq("elumi-l1"), any(LocalDateTime.class));
+    verify(refreshTokenRevoker, never()).revokeAllInNewTransaction(anyString(), any(LocalDateTime.class));
+    verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
+  }
+
+  @Test
+  @DisplayName("보호자가 끊은 휴대폰이 갱신하러 와도 재사용으로 잡혀 보호자 세션까지 끊기지 않는다")
+  void rotate_revokedElumiTokenOfRevokedLink_keepsGuardianSessions() {
+    // 연결을 끊을 때 그 기기의 리프레시 토큰도 함께 폐기된다.
+    RefreshToken token = elumiToken();
+    token.setRevokedAt(LocalDateTime.now().minusMinutes(5));
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
+    when(linkAccessValidator.isLinkActive("l1")).thenReturn(false);
+
+    assertThatThrownBy(() -> refreshTokenService.rotate("raw-elumi", null))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.REFRESH_TOKEN_INVALID));
+
+    verify(refreshTokenRevoker, never()).revokeAllInNewTransaction(anyString(), any(LocalDateTime.class));
+  }
+
+  @Test
+  @DisplayName("보호자 세션은 헤더 기기 값을 이어 받고 연결을 묻지 않는다")
+  void rotate_guardianToken_followsHeaderWithoutLinkCheck() {
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(livingToken()));
+    when(jwtProperties.refreshExpMillis()).thenReturn(15552000000L);
+    stubSave();
+
+    RefreshTokenService.RotationResult result = refreshTokenService.rotate("raw-old", "device-2");
+
+    assertThat(result.linkId()).isNull();
+    verify(refreshTokenRepository).save(org.mockito.ArgumentMatchers.argThat(saved ->
+      "device-2".equals(saved.getDeviceId())
+    ));
+    verify(linkAccessValidator, never()).isLinkActive(any());
   }
 }

@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
+import com.chuseok22.elumserver.link.core.LinkRole;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -111,7 +112,12 @@ public class AuthService {
 
     member.setLastActivityAt(LocalDateTime.now());
 
-    String accessToken = jwtProvider.createAccessToken(member.getId(), member.getUsername());
+    // 이룸이 휴대폰 세션이면 역할과 연결을 그대로 이어 준다 (이슈 #359).
+    // 역할 없는 발급은 보호자 토큰이라, 그대로 쓰면 갱신 한 번에 이룸이 휴대폰이 보호자 권한을 얻고
+    // linkId 도 빠져 연결을 끊어도 막히지 않는다.
+    String accessToken = rotation.linkId() != null
+      ? jwtProvider.createAccessToken(member.getId(), member.getUsername(), LinkRole.ELUMI, rotation.linkId())
+      : jwtProvider.createAccessToken(member.getId(), member.getUsername());
     return new TokenResponse(accessToken, "Bearer", jwtProperties.accessExpMillis(), rotation.refreshToken());
   }
 

@@ -30,4 +30,15 @@ public class RefreshTokenRevoker {
   public int revokeAllInNewTransaction(String memberId, LocalDateTime now) {
     return refreshTokenRepository.revokeAllByMemberId(memberId, now);
   }
+
+  /**
+   * 한 기기의 세션만 새 트랜잭션에서 끊는다 (이슈 #359).
+   *
+   * <p>끊긴 연결의 이룸이 휴대폰이 갱신하러 왔을 때 쓴다. 계정 전체를 끊으면 보호자까지
+   * 로그아웃된다.
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public int revokeDeviceInNewTransaction(String memberId, String deviceId, LocalDateTime now) {
+    return refreshTokenRepository.revokeByMemberIdAndDeviceId(memberId, deviceId, now);
+  }
 }

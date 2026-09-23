@@ -4,7 +4,9 @@ import com.chuseok22.elumserver.auth.infrastructure.entity.RefreshToken;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
+import com.chuseok22.elumserver.link.core.ElumiDeviceId;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -42,6 +44,7 @@ public class RefreshTokenService {
   private final RefreshTokenRepository refreshTokenRepository;
   private final RefreshTokenRevoker refreshTokenRevoker;
   private final JwtProperties jwtProperties;
+  private final LinkAccessValidator linkAccessValidator;
 
   /**
    * 새 리프레시 토큰을 발급한다.
@@ -69,6 +72,21 @@ public class RefreshTokenService {
 
     LocalDateTime now = LocalDateTime.now();
 
+    // 이룸이 휴대폰 세션인지는 요청 헤더가 아니라 저장된 기기 값으로 가린다 (이슈 #359).
+    String linkId = ElumiDeviceId.linkIdOf(current.getDeviceId());
+
+    // 연결이 끊긴 이룸이 휴대폰이면 그 기기 세션만 끊고 거절한다.
+    // 재사용 감지보다 먼저 본다 — 보호자가 연결을 끊으면 그 기기 토큰은 이미 폐기돼 있어,
+    // 뒤에 두면 끊긴 휴대폰의 갱신 한 번이 재사용으로 잡혀 보호자 세션까지 전부 끊긴다.
+    // 폐기는 별도 트랜잭션이다. 같은 트랜잭션이면 아래 예외에 롤백된다.
+    if (linkId != null && !linkAccessValidator.isLinkActive(linkId)) {
+      int revoked = refreshTokenRevoker.revokeDeviceInNewTransaction(
+        current.getMemberId(), current.getDeviceId(), now);
+      log.info("끊긴 연결의 이룸이 휴대폰 갱신을 거절했습니다. memberId={}, deviceId={}, 끊은 세션={}",
+        current.getMemberId(), current.getDeviceId(), revoked);
+      throw new CustomException(ErrorCode.REFRESH_TOKEN_INVALID);
+    }
+
     // 이미 끊긴 토큰이 다시 왔다 = 복사본이 돌아다닌다. 계정 전체를 끊는다.
     //
     // 폐기는 **별도 트랜잭션**에서 해야 한다. 같은 트랜잭션에서 하면 바로 아래
@@ -85,14 +103,17 @@ public class RefreshTokenService {
     }
 
     // 기기 정보는 이번 갱신 값으로 이어 준다. 앱 재설치로 기기 ID가 바뀌어도 세션은 유지된다.
-    String nextDeviceId = deviceId != null && !deviceId.isBlank() ? deviceId : current.getDeviceId();
+    // 단 이룸이 휴대폰 값은 헤더로 바꾸지 못한다 — elumi- 가 떨어지면 다음 갱신부터 보호자
+    // 토큰이 나오고, 보호자가 연결을 끊어도 이 세션이 짚히지 않는다 (이슈 #359).
+    boolean followHeader = linkId == null && deviceId != null && !deviceId.isBlank();
+    String nextDeviceId = followHeader ? deviceId : current.getDeviceId();
     IssuedToken next = save(current.getMemberId(), nextDeviceId, current.getId());
 
     current.setRevokedAt(now);
     current.setLastUsedAt(now);
     current.setReplacedById(next.entity().getId());
 
-    return new RotationResult(current.getMemberId(), next.rawToken());
+    return new RotationResult(current.getMemberId(), next.rawToken(), linkId);
   }
 
   /** 로그아웃. 넘어온 토큰이 속한 계정의 세션을 전부 끊는다. */
@@ -138,7 +159,11 @@ public class RefreshTokenService {
     }
   }
 
-  public record RotationResult(String memberId, String refreshToken) {
+  /**
+   * @param linkId 이룸이 휴대폰 세션이면 그 연결 ID, 보호자 세션이면 null.
+   *               새 액세스 토큰의 역할을 이 값으로 정한다.
+   */
+  public record RotationResult(String memberId, String refreshToken, String linkId) {
 
   }
 
