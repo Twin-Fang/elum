@@ -23,7 +23,7 @@ library;
 ///
 /// **서버본을 보여줬다면 이 값을 보내지 않는다.** 화면에 실제로 보여준 문서의
 /// 버전을 보내야 한다 — 사용자가 보지 않은 문서에 동의한 것으로 기록하면 안 된다.
-const consentVersion = '2026-09-21';
+const consentVersion = '2026-09-23';
 
 /// 동의 항목 하나.
 class ConsentItem {
@@ -248,6 +248,7 @@ const _privacy = '''
 일과 카드를 만들 때 아래 업체에 처리를 맡깁니다.
 - Google LLC — 카드 문장 생성, 카드 그림 생성
 - OpenAI, L.L.C. — 카드 문장 생성, 카드 그림 생성
+- Features & Labels Inc.(fal) — 카드 그림 생성
 
 맡기는 정보는 민감정보를 가린 상황 설명, 이룸이를 부르는 이름(별명),
 선택한 도움 목표입니다. 보호자가 쓴 문장은 그대로 나가지 않습니다.
@@ -258,6 +259,7 @@ const _privacy = '''
 위 업체는 미국에 있어 개인정보가 국외로 이전됩니다.
 - 이전받는 자   Google LLC (policies.google.com/privacy)
                OpenAI, L.L.C. (openai.com/policies/privacy-policy)
+               Features & Labels Inc. (fal.ai/legal/privacy-policy)
 - 이전되는 국가  미국
 - 이전 일시·방법 카드를 만들 때마다 HTTPS로 암호화해 전송합니다
 - 이전 항목     민감정보를 가린 상황 설명, 이룸이를 부르는 이름(별명),
@@ -282,7 +284,9 @@ const _privacy = '''
 - 경찰청 사이버수사국 ecrm.police.go.kr / 182
 
 11. 시행일
-이 방침은 2026년 9월 21일부터 적용됩니다.
+이 방침은 2026년 9월 30일부터 적용됩니다.
+(국외 이전 업체에 Features & Labels Inc.를 더한 변경으로, 2026년 9월 23일에
+미리 알립니다.)
 ''';
 
 const _overseas = '''
@@ -290,6 +294,7 @@ const _overseas = '''
 
 전달받는 자   Google LLC (policies.google.com/privacy)
              OpenAI, L.L.C. (openai.com/policies/privacy-policy)
+             Features & Labels Inc. (fal.ai/legal/privacy-policy)
 이전되는 국가  미국
 이전 일시     카드를 만들 때마다 (네트워크를 통해 전송)
 이전 방법     HTTPS 암호화 전송

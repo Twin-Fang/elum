@@ -2,6 +2,7 @@
 
 전달받는 자   Google LLC (policies.google.com/privacy)
              OpenAI, L.L.C. (openai.com/policies/privacy-policy)
+             Features & Labels Inc. (fal.ai/legal/privacy-policy)
 이전되는 국가  미국
 이전 일시     카드를 만들 때마다 (네트워크를 통해 전송)
 이전 방법     HTTPS 암호화 전송
