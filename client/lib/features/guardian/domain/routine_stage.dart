@@ -15,12 +15,17 @@
 /// 레이어(262:4678 `아이가 이해하기 쉬운 말로 바꿔요` 등)까지 섞여 나온다.
 /// 덤프만 보고 고치면 멀쩡한 문구를 틀린 값으로 바꾸게 된다.
 enum RoutineLoadingKind {
-  /// 262:4569 — DLP 마스킹 + 추가 질문 준비
+  /// 262:4569 — 추가 질문 준비
+  ///
+  /// 첫 줄은 시안(`이룸이를 알아볼 수 있는 정보는 가려요`)과 다르다. AI DLP 를 꺼서(#377)
+  /// 입력이 가공 없이 AI 로 가므로 사실이 아닌 개인정보 안내가 됐다. 2026-09-23 사용자 승인으로
+  /// 바꿨고 디자이너에게 시안 반영을 요청했다(#383). 뒤 화면 첫 줄 `…읽고 있어요` 와 동사가
+  /// 겹치지 않게 `살펴보고` 로 골랐다.
   prepare(
     title: '루미가 내용을\n정리하고 있어요',
     lumiSide: LumiSide.left,
     stages: [
-      RoutineStage(label: '이룸이를 알아볼 수 있는 정보는 가려요', percent: 15, hold: _holdLong),
+      RoutineStage(label: '적어 주신 상황을 살펴보고 있어요', percent: 15, hold: _holdLong),
       RoutineStage(label: '꼭 필요한 내용만 정리해요', percent: 40, hold: _holdShort),
       RoutineStage(label: '추가 질문을 생각하고 있어요', percent: 65, hold: _holdLong),
     ],
