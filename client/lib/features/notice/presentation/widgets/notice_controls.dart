@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 
-/// 누르는 곳은 모두 44×44 이상 (명세 3-2). 그림은 작아도 손가락 자리는 줄이지 않는다.
+/// 누르는 곳은 모두 44×44 이상 (docs/08 §7-2). 그림은 작아도 손가락 자리는 줄이지 않는다.
 const double noticeTapTarget = 44;
 
-/// 오른쪽 위 `☐ 일주일간 보지 않기` (명세 2-1).
+/// 본문 아래 `◯✓ 일주일간 보지 않기` (시안 1090:4919).
 ///
-/// **네모와 글자 전체가 누름 영역이다.** 50대 보호자에게 18짜리 네모만 누르게 하면
-/// 몇 번씩 빗나간다. 화면 낭독기에는 체크 상태까지 읽힌다.
+/// **동그라미와 글자 전체가 누름 영역이다.** 16짜리 동그라미만 누르게 하면 50대
+/// 보호자가 몇 번씩 빗나간다. 누름 영역은 위아래로 44 까지 넓히되, 보이는 줄은
+/// 16 이라 둘레 간격은 부르는 쪽이 그만큼 줄여 시안 자리를 지킨다.
+/// 화면 낭독기에는 체크 상태까지 읽힌다.
 class NoticeHideToggle extends StatelessWidget {
   const NoticeHideToggle({
     super.key,
@@ -25,11 +28,12 @@ class NoticeHideToggle extends StatelessWidget {
   final bool checked;
   final ValueChanged<bool> onChanged;
 
-  static const _box = 18.0;
-  static const _boxRadius = 4.0;
-  static const _boxToLabel = 6.0;
-  static const _pillPadH = 10.0;
-  static const _pillPadV = 7.0;
+  /// 시안 — 동그라미 16 · 글자와 사이 6.
+  static const checkSize = 16.0;
+  static const _checkToLabel = 6.0;
+
+  /// 좌우로도 손가락 자리를 조금 준다. 글자 끝을 누르다 빗나가지 않게.
+  static const _padH = 8.0;
 
   @override
   Widget build(BuildContext context) {
@@ -47,52 +51,25 @@ class NoticeHideToggle extends StatelessWidget {
         child: ExcludeSemantics(
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: noticeTapTarget),
-            child: Center(
-              widthFactor: 1,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: _pillPadH,
-                  vertical: _pillPadV,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.noticeHidePillBg,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AnimatedContainer(
-                      duration: AppMotion.fast,
-                      width: _box,
-                      height: _box,
-                      decoration: BoxDecoration(
-                        color: checked ? colors.checkDone : colors.surface,
-                        borderRadius: BorderRadius.circular(_boxRadius),
-                        border: Border.all(
-                          color: checked
-                              ? colors.checkDone
-                              : colors.textSecondary,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      // Material 체크는 획 끝이 달라 앱의 다른 체크와 다르게 보인다
-                      child: checked
-                          ? SvgPicture.asset(AppAssets.iconCheckMark, width: 11)
-                          : null,
-                    ),
-                    const SizedBox(width: _boxToLabel),
-                    Flexible(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.typo.noticeHideLabel.copyWith(
-                          color: colors.textPrimary,
-                        ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: _padH),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  NoticeRoundCheck(checked: checked),
+                  const SizedBox(width: _checkToLabel),
+                  Flexible(
+                    // 글꼴을 키우면 두 줄로 꺾는다 — 말줄임으로 자르면 무엇을 체크하는지
+                    // 읽을 수 없다. 꺾을 때도 어절에서 꺾는다 ("일주일간 보지 / 않기").
+                    child: Text(
+                      keepWords(label),
+                      textAlign: TextAlign.center,
+                      style: context.typo.noticeHideLabel.copyWith(
+                        color: colors.noticeHideLabel,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -102,124 +79,52 @@ class NoticeHideToggle extends StatelessWidget {
   }
 }
 
-/// 오른쪽 위 ✕. 그림이 밝든 어둡든 보이게 반투명 원 위에 흰 ✕ 를 얹는다.
-class NoticeCloseButton extends StatelessWidget {
-  const NoticeCloseButton({super.key, required this.onTap});
-
-  final VoidCallback onTap;
-
-  static const _circle = 28.0;
-  static const _icon = 18.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return AppPressable(
-      onTap: onTap,
-      scaleDown: AppPressable.scaleIcon,
-      semanticLabel: '공지 닫기',
-      child: SizedBox.square(
-        dimension: noticeTapTarget,
-        child: Center(
-          child: Container(
-            width: _circle,
-            height: _circle,
-            decoration: BoxDecoration(
-              color: colors.noticeCloseBg,
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.close_rounded,
-              size: _icon,
-              color: colors.surface,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 맨 아래 `←  ● ○ ○  →` (명세 2-1).
+/// 동그란 체크 16 (시안 1090:4920 · 원본 컴포넌트 `채크_라운드` 726:4881).
 ///
-/// 50대 보호자가 옆으로 미는 것을 모를 수 있어 화살표를 둔다. 첫 장에서 ←, 끝 장에서
-/// → 는 숨긴다 — 눌러도 아무 일이 없는 버튼은 고장으로 읽힌다. 숨겨도 자리는 남겨
-/// 점이 가운데에서 흔들리지 않게 한다.
-class NoticePageNav extends StatelessWidget {
-  const NoticePageNav({
-    super.key,
-    required this.dotsKey,
-    required this.index,
-    required this.count,
-    required this.onPrev,
-    required this.onNext,
-  });
+/// 꺼져 있을 때 — 흰 원에 연한 청록 테두리와 체크 (`Default`, 시안 공지에 그려진 모양).
+/// 켜졌을 때 — 포인트색으로 차고 체크가 흰색 (`enable`). 공지 시안은 꺼진 모양만
+/// 그렸으므로 켜진 모양은 같은 컴포넌트 세트의 `enable` 을 따른다 — 약관 동의·일과
+/// 완료의 동그란 체크와 같은 뜻이라 새로 만들지 않는다.
+class NoticeRoundCheck extends StatelessWidget {
+  const NoticeRoundCheck({super.key, required this.checked});
 
-  final Key dotsKey;
-  final int index;
-  final int count;
-  final VoidCallback onPrev;
-  final VoidCallback onNext;
+  final bool checked;
 
-  static const _dot = 8.0;
-  static const _dotGap = 6.0;
-  static const _arrow = 22.0;
+  static const _size = NoticeHideToggle.checkSize;
+
+  /// 원본(20)의 테두리·체크 비율을 16 에 그대로 옮긴다 — 테두리 1.45, 체크 8.73×6.5.
+  static const _ring = _size / 11;
+  static const _markW = _size * 10.91 / 20;
+  static const _markH = _size * 8.13 / 20;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final hasPrev = index > 0;
-    final hasNext = index < count - 1;
-
-    Widget arrow(IconData icon, String label, VoidCallback onTap) =>
-        AppPressable(
-          onTap: onTap,
-          scaleDown: AppPressable.scaleIcon,
-          semanticLabel: label,
-          child: SizedBox.square(
-            dimension: noticeTapTarget,
-            child: Icon(icon, size: _arrow, color: colors.textSecondary),
-          ),
-        );
-
-    const empty = SizedBox.square(dimension: noticeTapTarget);
-
-    return Row(
-      children: [
-        hasPrev ? arrow(Icons.arrow_back, '이전 공지', onPrev) : empty,
-        Expanded(
-          child: Center(
-            // 점은 글자 없이 위치를 말한다. 화면 낭독기에는 "2/4" 로 읽힌다.
-            child: Semantics(
-              key: dotsKey,
-              label: '${index + 1}/$count',
-              child: ExcludeSemantics(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (var i = 0; i < count; i++) ...[
-                      if (i > 0) const SizedBox(width: _dotGap),
-                      AnimatedContainer(
-                        duration: AppMotion.fast,
-                        width: _dot,
-                        height: _dot,
-                        decoration: BoxDecoration(
-                          color: i == index
-                              ? colors.checkDone
-                              : colors.noticeDotIdle,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
+    return AnimatedContainer(
+      duration: AppMotion.fast,
+      curve: AppMotion.standard,
+      width: _size,
+      height: _size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: checked ? colors.checkDone : colors.surface,
+        border: Border.all(
+          color: checked ? colors.checkDone : colors.checkIdleBorder,
+          width: _ring,
         ),
-        hasNext ? arrow(Icons.arrow_forward, '다음 공지', onNext) : empty,
-      ],
+      ),
+      // **글리프가 아니라 에셋이다.** `Icons.check` 는 정사각형이라 시안의 가로로 긴
+      // 체크와 모양이 다르다 (client/CLAUDE.md §2).
+      child: SvgPicture.asset(
+        AppAssets.iconCheckMark,
+        width: _markW,
+        height: _markH,
+        colorFilter: ColorFilter.mode(
+          checked ? colors.surface : colors.checkIdleBorder,
+          BlendMode.srcIn,
+        ),
+      ),
     );
   }
 }

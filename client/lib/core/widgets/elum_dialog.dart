@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -117,34 +119,17 @@ class ElumDialogCard<T> extends StatelessWidget {
   final ElumDialogIcon? icon;
   final List<ElumDialogAction<T>> actions;
 
-  /// 시안 실측 — 카드 322 폭, 좌우 36 여백 (393 − 36×2 = 321).
-  static const _cardWidth = 322.0;
-  static const _cardRadius = 20.0;
-
-  /// 카드 안쪽 여백 `24 14 14` — 위가 넓은 것은 아이콘이 숨 쉴 자리다.
-  static const _padTop = 24.0;
-  static const _padSide = 14.0;
-  static const _padBottom = 14.0;
-
   /// 아이콘 40 · 아이콘↔제목 20 · 제목 묶음↔버튼 32
   static const _iconSize = 40.0;
   static const _iconToTitle = 20.0;
   static const _bodyToActions = 32.0;
 
-  /// 버튼 높이 54 · 모서리 8 · 두 개일 때 사이 4
-  ///
-  /// **사이는 4다(8이 아니다).** 카드 안쪽 폭이 294라 `145 + 4 + 145`로 딱
-  /// 떨어진다. 8로 두면 버튼이 143이 되어 시안보다 2씩 좁아진다 (#318).
-  static const _actionHeight = 54.0;
-  static const _actionRadius = 8.0;
-  static const _actionGap = 4.0;
-
   static String _iconAsset(ElumDialogIcon icon) => switch (icon) {
-        ElumDialogIcon.success => AppAssets.dialogCheck,
-        ElumDialogIcon.warning => AppAssets.dialogWarn,
-        ElumDialogIcon.trash => AppAssets.dialogTrash,
-        ElumDialogIcon.alert => AppAssets.dialogAlert,
-      };
+    ElumDialogIcon.success => AppAssets.dialogCheck,
+    ElumDialogIcon.warning => AppAssets.dialogWarn,
+    ElumDialogIcon.trash => AppAssets.dialogTrash,
+    ElumDialogIcon.alert => AppAssets.dialogAlert,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -158,25 +143,7 @@ class ElumDialogCard<T> extends StatelessWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       insetPadding: EdgeInsets.zero,
-      child: Container(
-        width: _cardWidth.w,
-        padding: EdgeInsets.fromLTRB(
-          _padSide.w,
-          _padTop.h,
-          _padSide.w,
-          _padBottom.h,
-        ),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(_cardRadius.r),
-          boxShadow: [
-            BoxShadow(
-              color: colors.loginButtonShadow,
-              offset: Offset(4.w, 4.h),
-              blurRadius: 6.r,
-            ),
-          ],
-        ),
+      child: ElumDialogSurface(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -192,8 +159,9 @@ class ElumDialogCard<T> extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               // 앱 본문색이 아니라 시안 그대로 순검정이다 (#318)
-              style: context.typo.dialogTitle
-                  .copyWith(color: colors.dialogTitleText),
+              style: context.typo.dialogTitle.copyWith(
+                color: colors.dialogTitleText,
+              ),
             ),
             if (message != null) ...[
               SizedBox(height: context.space.sm),
@@ -204,46 +172,182 @@ class ElumDialogCard<T> extends StatelessWidget {
               ),
             ],
             SizedBox(height: _bodyToActions.h),
-            _actions(context, resolved),
+            ElumDialogButtonRow(
+              children: [
+                for (final action in resolved)
+                  ElumDialogButton(
+                    label: action.label,
+                    tone: action.tone,
+                    onTap: () => Navigator.of(context).pop(action.value),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
+}
 
-  /// 버튼 줄. 하나면 꽉 채우고, 둘이면 반씩 나눈다.
-  Widget _actions(BuildContext context, List<ElumDialogAction<T>> items) {
-    final buttons = <Widget>[];
-    for (final (i, action) in items.indexed) {
-      if (i > 0) buttons.add(SizedBox(width: _actionGap.w));
-      buttons.add(Expanded(child: _button(context, action)));
-    }
-    return Row(children: buttons);
+/// 팝업 카드 면 — 폭·안쪽 여백·모서리·그림자 (시안 `팝업` 931:4878 공통).
+///
+/// [ElumDialogCard] 와 공지 팝업(#390, 같은 컴포넌트 세트의 `방침` 변형)이 함께 쓴다.
+/// 팝업마다 카드를 따로 그리면 모서리·그림자가 조금씩 어긋난다 — 공지가 한때
+/// 웹 공지 모양으로 따로 그려져 앱의 다른 팝업과 달라 보였다 (#390).
+class ElumDialogSurface extends StatelessWidget {
+  const ElumDialogSurface({
+    super.key,
+    required this.child,
+    this.padTop = defaultPadTop,
+    this.padSides = true,
+  });
+
+  final Widget child;
+
+  /// 좌우 여백을 카드가 줄지. 공지처럼 **안에서 스크롤되는 글**이 있으면 false 로 두고
+  /// 자식이 직접 [padSide] 를 준다 — 그래야 스크롤 막대가 글 위가 아니라 여백에 선다.
+  final bool padSides;
+
+  /// 위 여백. 기본 24 는 아이콘·제목이 숨 쉴 자리다. 공지의 그림처럼 **면을 채우는
+  /// 것**이 맨 위에 오면 옆·아래와 같은 [padSide] 로 줄인다.
+  final double padTop;
+
+  /// 시안 실측 — 카드 322 폭, 좌우 36 여백 (393 − 36×2 = 321).
+  static const cardWidth = 322.0;
+  static const radius = 20.0;
+
+  /// 카드 안쪽 여백 `24 14 14` — 위가 넓은 것은 아이콘이 숨 쉴 자리다.
+  static const defaultPadTop = 24.0;
+  static const padSide = 14.0;
+  static const padBottom = 14.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      width: cardWidth.w,
+      padding: EdgeInsets.fromLTRB(
+        padSides ? padSide.w : 0,
+        padTop.h,
+        padSides ? padSide.w : 0,
+        padBottom.h,
+      ),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(radius.r),
+        boxShadow: [
+          BoxShadow(
+            color: colors.loginButtonShadow,
+            offset: Offset(4.w, 4.h),
+            blurRadius: 6.r,
+          ),
+        ],
+      ),
+      child: child,
+    );
   }
+}
 
-  Widget _button(BuildContext context, ElumDialogAction<T> action) {
+/// 버튼 줄. 하나면 꽉 채우고, 둘이면 반씩 나눈다.
+///
+/// **두 버튼 높이를 맞춘다.** 한쪽 문구만 두 줄로 꺾이면(공지의 긴 버튼 문구) 그쪽만
+/// 키가 커져 줄이 들쭉날쭉해진다. 한 줄일 때는 둘 다 최소 높이라 모양이 같다.
+class ElumDialogButtonRow extends StatelessWidget {
+  const ElumDialogButtonRow({super.key, required this.children});
+
+  final List<Widget> children;
+
+  /// 두 개일 때 사이 4.
+  ///
+  /// **사이는 4다(8이 아니다).** 카드 안쪽 폭이 294라 `145 + 4 + 145`로 딱
+  /// 떨어진다. 8로 두면 버튼이 143이 되어 시안보다 2씩 좁아진다 (#318).
+  static const gap = 4.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final row = <Widget>[];
+    for (final (i, child) in children.indexed) {
+      if (i > 0) row.add(SizedBox(width: gap.w));
+      row.add(Expanded(child: child));
+    }
+    return IntrinsicHeight(
+      child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: row),
+    );
+  }
+}
+
+/// 팝업 버튼 하나 — 높이 54 · 모서리 8 · 18/w600 (시안 `팝업` 931:4878 공통).
+class ElumDialogButton extends StatelessWidget {
+  const ElumDialogButton({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.tone = ElumDialogTone.primary,
+    this.semanticsLabel,
+    this.centerLines = false,
+  });
+
+  /// 보이는 문구. 공지처럼 어절 단위로 끊으려면 표시를 넣은 문구를 주고
+  /// [semanticsLabel] 에 원문을 준다.
+  final String label;
+  final VoidCallback? onTap;
+  final ElumDialogTone tone;
+  final String? semanticsLabel;
+
+  /// 문구가 두 줄로 꺾일 수 있는 버튼(공지의 관리자 문구). 줄마다 가운데로 맞춘다.
+  final bool centerLines;
+
+  static const height = 54.0;
+  static const radius = 8.0;
+
+  /// 문구가 두 줄로 꺾일 때 가장자리에 붙지 않게 둔다. 한 줄 문구는 가운데라 영향이 없다.
+  static const _padH = 8.0;
+  static const _padV = 8.0;
+
+  /// 손가락 자리 최소 44 (docs/08 §7-2). 높이는 `.h` 로 줄어드는데, 세로가 짧은
+  /// 휴대폰(640)에서는 54 가 41 이 된다. 852 기준 화면에서는 54 그대로라 시안과 같다.
+  static const _minTap = 44.0;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     // 팝업 전용 토큰을 쓴다. `buttonNeutral`·`danger`는 설정 화면과 연결 암호도
     // 함께 쓰므로, 팝업을 시안에 맞추려고 그것을 건드리면 그쪽까지 바뀐다 (#318).
-    final (bg, fg) = switch (action.tone) {
+    final (bg, fg) = switch (tone) {
       ElumDialogTone.primary => (colors.checkDone, colors.surface),
-      ElumDialogTone.neutral => (colors.dialogNeutral, colors.dialogNeutralText),
+      ElumDialogTone.neutral => (
+        colors.dialogNeutral,
+        colors.dialogNeutralText,
+      ),
       ElumDialogTone.danger => (colors.dialogDanger, colors.dangerText),
       ElumDialogTone.warn => (colors.warn, colors.warnText),
     };
 
-    return AppPressable(
-      onTap: () => Navigator.of(context).pop(action.value),
-      child: Container(
-        height: _actionHeight.h,
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(_actionRadius.r),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          action.label,
-          style: context.typo.dialogAction.copyWith(color: fg),
+    // 버튼마다 제 접근성 노드를 세운다. 안 세우면 누르는 동작이 위쪽 노드로 합쳐져
+    // 버튼의 영역이 제목·본문까지 덮는다 — 공지 `방침 보기`가 그랬다 (#385 C).
+    return Semantics(
+      container: true,
+      button: true,
+      child: AppPressable(
+        onTap: onTap,
+        // Container 로 둔다 — 설정 화면 테스트가 버튼 문구 뒤의 면 색을 Container 로 찾는다.
+        child: Container(
+          constraints: BoxConstraints(minHeight: math.max(height.h, _minTap)),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(radius.r),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: _padH.w, vertical: _padV),
+          child: Center(
+            child: Text(
+              label,
+              semanticsLabel: semanticsLabel,
+              // 한 줄 문구에 가운데 정렬을 걸면 글자가 0.1px 쯤 밀려 기존 팝업 골든이
+              // 전부 깨진다. 꺾일 수 있는 문구에만 건다.
+              textAlign: centerLines ? TextAlign.center : null,
+              style: context.typo.dialogAction.copyWith(color: fg),
+            ),
+          ),
         ),
       ),
     );

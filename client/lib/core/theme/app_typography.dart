@@ -67,7 +67,6 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.actionCardTitle,
     required this.noticeTitle,
     required this.noticeBody,
-    required this.noticeAction,
     required this.noticeHideLabel,
   });
 
@@ -304,23 +303,22 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 순서 배지 숫자용 cardHeadline(30/w800)과 크기가 달라 별개 토큰이다.
   final TextStyle actionCardTitle;
 
-  // --- 공지 팝업 (이슈 #371 · 명세 2-1) ---
-  // 시안이 없는 팝업이라 명세 치수를 따른다. 공통 팝업(`dialogTitle`)과 같은
-  // Pretendard 로 두어 한 앱 안의 팝업끼리 글꼴이 어긋나지 않게 한다.
-  // 관리자 미리보기(#370)가 같은 치수로 그리므로 여기를 바꾸면 그쪽도 바꾼다.
+  // --- 공지 팝업 (이슈 #390 · 시안 `팝업` 1090:4922 `방침`) ---
+  // 공통 팝업의 변형이다. 버튼 문구는 공통 팝업 `dialogAction` 을 그대로 쓴다.
+  // 관리자 미리보기(`notice-preview.js` 맨 위 `APP`)가 같은 값으로 그리므로
+  // 여기를 바꾸면 그쪽도 바꾼다 — 어긋나면 미리보기와 앱의 줄바꿈이 달라진다 (#385 A).
+  //
+  // **자간 0 을 적어 둔다.** 안 적으면 테마 기본 글자(Material 3 bodyMedium)의 자간 0.25 를
+  // 물려받아 글이 시안보다 3% 넓어지고, 미리보기(자간 0)와 다른 자리에서 꺾인다 (#390 실측).
 
-  /// 공지 제목 (18/w700 Pretendard). 두세 줄이 될 수 있어 줄 간격을 둔다.
-  /// `dialogTitle`(18/w500)과 크기가 같지만 굵기가 달라 별개 토큰이다.
+  /// 공지 제목 (18/w500 Pretendard · 줄 19.8). `dialogTitle` 과 크기·굵기가 같지만
+  /// 줄 간격이 다르다 — 공지 제목은 두 줄이 기본이라 시안이 110% 로 벌렸다.
   final TextStyle noticeTitle;
 
-  /// 공지 본문 (14/w400 Pretendard). 긴 글을 읽는 자리라 줄 간격 1.5.
+  /// 공지 본문 (16/w400 Pretendard · 줄 19.2).
   final TextStyle noticeBody;
 
-  /// 공지 링크 버튼 (16/w600 Pretendard). 팝업 버튼(`dialogAction` 18)보다 작다 —
-  /// 참고 화면처럼 폭을 꽉 채우지 않는 가운데 버튼이다.
-  final TextStyle noticeAction;
-
-  /// `일주일간 보지 않기` (14/w500 Pretendard). 설명 최소 14 (docs/08 §7-2).
+  /// `일주일간 보지 않기` (14/w400 Pretendard). 설명 최소 14 (docs/08 §7-2).
   final TextStyle noticeHideLabel;
 
   static const standard = AppTypography(
@@ -684,26 +682,23 @@ class AppTypography extends ThemeExtension<AppTypography> {
     noticeTitle: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 18,
-      fontWeight: FontWeight.w700,
-      height: 1.4,
+      fontWeight: FontWeight.w500,
+      height: 1.1,
+      letterSpacing: 0,
     ),
     noticeBody: TextStyle(
       fontFamily: promptFontFamily,
-      fontSize: 14,
-      fontWeight: FontWeight.w400,
-      height: 1.5,
-    ),
-    noticeAction: TextStyle(
-      fontFamily: promptFontFamily,
       fontSize: 16,
-      fontWeight: FontWeight.w600,
-      height: 1.0,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+      letterSpacing: 0,
     ),
     noticeHideLabel: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 14,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w400,
       height: 1.0,
+      letterSpacing: 0,
     ),
   );
 
@@ -780,7 +775,6 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? actionCardTitle,
     TextStyle? noticeTitle,
     TextStyle? noticeBody,
-    TextStyle? noticeAction,
     TextStyle? noticeHideLabel,
   }) {
     return AppTypography(
@@ -844,7 +838,6 @@ class AppTypography extends ThemeExtension<AppTypography> {
       actionCardTitle: actionCardTitle ?? this.actionCardTitle,
       noticeTitle: noticeTitle ?? this.noticeTitle,
       noticeBody: noticeBody ?? this.noticeBody,
-      noticeAction: noticeAction ?? this.noticeAction,
       noticeHideLabel: noticeHideLabel ?? this.noticeHideLabel,
     );
   }
@@ -925,7 +918,6 @@ class AppTypography extends ThemeExtension<AppTypography> {
           TextStyle.lerp(actionCardTitle, other.actionCardTitle, t)!,
       noticeTitle: TextStyle.lerp(noticeTitle, other.noticeTitle, t)!,
       noticeBody: TextStyle.lerp(noticeBody, other.noticeBody, t)!,
-      noticeAction: TextStyle.lerp(noticeAction, other.noticeAction, t)!,
       noticeHideLabel:
           TextStyle.lerp(noticeHideLabel, other.noticeHideLabel, t)!,
     );

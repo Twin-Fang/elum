@@ -164,9 +164,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.stepBadge3,
     required this.stepBadge4,
     required this.noticeImagePlaceholder,
-    required this.noticeHidePillBg,
-    required this.noticeCloseBg,
-    required this.noticeDotIdle,
+    required this.noticeHideLabel,
   });
 
   /// 화면 배경 (따뜻한 아이보리)
@@ -578,24 +576,19 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color stepBadge3;
   final Color stepBadge4;
 
-  // --- 공지 팝업 (이슈 #371 · 명세 2-1) ---
-  // 시안이 없는 팝업이다. 강조·체크·현재 점·링크 버튼은 앱 포인트색(`checkDone`)을
-  // 그대로 쓰고 — 공통 팝업 주 버튼·약관 체크와 같은 뜻이라 따로 두지 않는다 —
-  // 기존 토큰에 맞는 뜻이 없는 넷만 여기 둔다.
+  // --- 공지 팝업 (이슈 #390 · 시안 `팝업` 1090:4922 `방침`) ---
+  // 공통 팝업 컴포넌트의 변형이라 카드·버튼·제목·체크는 공통 팝업 토큰
+  // (`surface`·`dialogNeutral`·`checkDone`·`dialogTitleText`·`checkIdleBorder`)을 그대로 쓴다.
+  // 공통 팝업에 없는 자리 둘만 여기 둔다.
 
-  /// 그림이 없는 슬라이드의 그림 자리 (N28). 다른 장에 그림이 있으면 카드 높이가
-  /// 튀지 않게 자리를 비워 두는데, 흰 카드 위 빈칸으로 보이지 않게 앱 배경색으로 채운다.
+  /// 그림을 받는 동안의 그림 자리. 흰 카드 위 빈칸으로 보이지 않게 앱 배경색으로 채운다.
+  /// **시안 밖이다** — 그림 있는 공지 변형은 디자이너 시안 전이라 임시로 둔다 (#390).
   /// `background`와 값만 같다 — 화면 배경이 바뀌어도 이 자리까지 따라갈 이유는 없다.
   final Color noticeImagePlaceholder;
 
-  /// 그림 위 `☐ 일주일간 보지 않기` 알약 배경 (흰 80%). 어떤 그림 위에서도 글자가 읽히게.
-  final Color noticeHidePillBg;
-
-  /// 그림 위 ✕ 원 (본문색 60%). 밝은 그림·어두운 그림 모두에서 보이게 반투명으로 둔다.
-  final Color noticeCloseBg;
-
-  /// 지금 장이 아닌 점. 흰 카드 위에서 보일 만큼만 짙다.
-  final Color noticeDotIdle;
+  /// `일주일간 보지 않기` 글자 (시안 1090:4918 — #74757D).
+  /// 제목·본문(순검정)보다 한 단계 흐리다. 누를 수 있지만 주 동작은 아니다.
+  final Color noticeHideLabel;
 
   static const light = AppColors(
     background: Color(0xFFF7F2EF),
@@ -729,9 +722,7 @@ class AppColors extends ThemeExtension<AppColors> {
     stepBadge3: Color(0xFFF4BDA2),
     stepBadge4: Color(0xFFECE0AE),
     noticeImagePlaceholder: Color(0xFFF7F2EF),
-    noticeHidePillBg: Color(0xCCFFFFFF), // rgba(255,255,255,0.8)
-    noticeCloseBg: Color(0x99242634), // rgba(36,38,52,0.6)
-    noticeDotIdle: Color(0xFFD7D3D1),
+    noticeHideLabel: Color(0xFF74757D),
   );
 
   /// 캐릭터별 선택 색. enum과 1:1이므로 switch로 매핑한다.
@@ -872,9 +863,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? stepBadge3,
     Color? stepBadge4,
     Color? noticeImagePlaceholder,
-    Color? noticeHidePillBg,
-    Color? noticeCloseBg,
-    Color? noticeDotIdle,
+    Color? noticeHideLabel,
   }) {
     return AppColors(
       background: background ?? this.background,
@@ -1006,9 +995,7 @@ class AppColors extends ThemeExtension<AppColors> {
       stepBadge3: stepBadge3 ?? this.stepBadge3,
       stepBadge4: stepBadge4 ?? this.stepBadge4,
       noticeImagePlaceholder: noticeImagePlaceholder ?? this.noticeImagePlaceholder,
-      noticeHidePillBg: noticeHidePillBg ?? this.noticeHidePillBg,
-      noticeCloseBg: noticeCloseBg ?? this.noticeCloseBg,
-      noticeDotIdle: noticeDotIdle ?? this.noticeDotIdle,
+      noticeHideLabel: noticeHideLabel ?? this.noticeHideLabel,
     );
   }
 
@@ -1312,9 +1299,7 @@ class AppColors extends ThemeExtension<AppColors> {
       stepBadge3: Color.lerp(stepBadge3, other.stepBadge3, t)!,
       stepBadge4: Color.lerp(stepBadge4, other.stepBadge4, t)!,
       noticeImagePlaceholder: Color.lerp(noticeImagePlaceholder, other.noticeImagePlaceholder, t)!,
-      noticeHidePillBg: Color.lerp(noticeHidePillBg, other.noticeHidePillBg, t)!,
-      noticeCloseBg: Color.lerp(noticeCloseBg, other.noticeCloseBg, t)!,
-      noticeDotIdle: Color.lerp(noticeDotIdle, other.noticeDotIdle, t)!,
+      noticeHideLabel: Color.lerp(noticeHideLabel, other.noticeHideLabel, t)!,
     );
   }
 

@@ -44,31 +44,26 @@ class NoticeHideStore {
     }
   }
 
-  /// [notices] 전부를 [days] 동안 숨긴다.
+  /// [notice] 하나를 [days] 동안 숨긴다.
   ///
-  /// 팝업 하나에 체크박스가 하나라서, 체크하고 닫으면 **넘겨 보지 않은 슬라이드까지**
-  /// 함께 숨긴다(N27). 체크박스는 공지 한 장이 아니라 이 팝업에 대한 것이다.
+  /// **공지마다 따로 숨긴다** (#390). 공지가 여러 개면 하나씩 차례로 뜨고, 각 팝업에
+  /// 제 `보지 않기`가 있다. 둘째에서만 체크했으면 둘째만 숨는다.
   ///
   /// 저장이 실패해도 올리지 않는다 — 다음 실행에 한 번 더 뜰 뿐이고, 그것 때문에
   /// 홈이 멈추면 안 된다. 로그는 남긴다.
-  Future<void> hideAll(
-    Iterable<AppNotice> notices, {
+  Future<void> hide(
+    AppNotice notice, {
     required int days,
     required DateTime now,
   }) async {
     final until = now.add(Duration(days: days)).millisecondsSinceEpoch;
-    for (final notice in notices) {
-      try {
-        await _storage.setNoticeHiddenJson(
-          notice.id,
-          jsonEncode({_kRevision: notice.revision, _kUntil: until}),
-        );
-      } catch (e, st) {
-        AppLogger.error('notice', e, st, {
-          'step': 'saveHidden',
-          'id': notice.id,
-        });
-      }
+    try {
+      await _storage.setNoticeHiddenJson(
+        notice.id,
+        jsonEncode({_kRevision: notice.revision, _kUntil: until}),
+      );
+    } catch (e, st) {
+      AppLogger.error('notice', e, st, {'step': 'saveHidden', 'id': notice.id});
     }
   }
 }

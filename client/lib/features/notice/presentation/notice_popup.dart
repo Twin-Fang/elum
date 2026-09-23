@@ -1,11 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/logger/app_logger.dart';
-import '../../../core/theme/app_motion.dart';
+import '../../../core/text/keep_words.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/elum_dialog.dart';
 import '../domain/app_notice.dart';
 import 'show_notice_popup.dart';
 import 'widgets/notice_controls.dart';
@@ -15,224 +16,189 @@ import 'widgets/notice_slide.dart';
 export 'show_notice_popup.dart';
 export 'widgets/notice_slide.dart' show NoticeImageResolver;
 
-/// 공지 팝업 본체 (명세 2-1). 골든·테스트에서 직접 세울 수 있게 공개한다.
+/// 공지 팝업 — 공지 **한 건** (이슈 #390 · 시안 `팝업` 931:4878 의 `방침` 변형 1090:4922).
+///
+/// 앱의 다른 팝업(로그아웃·회원탈퇴·일과 삭제)과 **같은 컴포넌트**다. 카드·버튼은
+/// [ElumDialogSurface]·[ElumDialogButton] 을 그대로 쓴다. #371 은 참고로 받은 웹 공지
+/// 모달(위 그림, 오른쪽 위 ✕, 위쪽 체크박스, 슬라이드)을 따라 그려 앱 안에서 혼자 달랐다.
 ///
 /// ```
-/// ┌──────────────────────────────┐  카드: 화면 폭 90%(최대 360), 모서리 20
-/// │         ☐ 일주일간 보지 않기 ✕ │  그림 위에 얹는다
-/// │         [ 그림 16:10 ]        │  그림이 한 장도 없으면 자리가 없다
-/// │  제목 **강조**  /  본문        │  길면 이 자리만 스크롤 (화면의 45%)
-/// │         [ 버튼 ]              │
-/// │   ←      ● ○ ○      →        │  한 장이면 숨긴다
-/// └──────────────────────────────┘
+/// ┌────────────────────────────┐  카드 322 · 모서리 20 · 여백 24 14 14
+/// │  [ 그림 16:10 ]             │  ← 시안 밖(임시). 그림 있는 공지만. 못 받으면 자리째 없다
+/// │     개인정보처리방침이        │  제목 18/500 · **강조** 민트
+/// │     9월 30일에 바뀌어요       │
+/// │  카드 그림을 만드는 업체가 …  │  본문 16/400 — 길면 글 자리만 스크롤
+/// │      ◯✓ 일주일간 보지 않기     │  공지마다 따로
+/// │ [   닫기   ][  방침 보기  ]  │  링크 없으면 [      닫기      ] 하나
+/// └────────────────────────────┘
 /// ```
+///
+/// 여러 공지는 이 팝업을 **차례로** 띄운다 — 한 팝업 안에서 넘기지 않는다
+/// ([GuardianNoticeLauncher]).
 class NoticePopupCard extends StatefulWidget {
   const NoticePopupCard({
     super.key,
-    required this.feed,
+    required this.notice,
+    required this.hideDays,
     required this.hideChecked,
     required this.onClose,
+    required this.onLinkOpened,
     required this.openLink,
     required this.imageFor,
   });
 
-  final NoticeFeed feed;
+  final AppNotice notice;
 
-  /// "보지 않기" 체크 상태. 팝업을 띄운 쪽이 닫힌 뒤에 읽는다.
+  /// `보지 않기` 일수. 7 이면 "일주일간", 아니면 "N일간".
+  final int hideDays;
+
+  /// "보지 않기" 체크 상태. 팝업을 띄운 쪽이 닫힌 뒤에 읽는다 — 바깥을 눌러 닫혀도
+  /// 값이 남게 팝업 밖에 둔다.
   final ValueNotifier<bool> hideChecked;
+
+  /// `닫기` 를 눌렀다.
   final VoidCallback onClose;
+
+  /// 링크를 열었다. 공통 팝업처럼 버튼을 누르면 팝업이 닫힌다.
+  final VoidCallback onLinkOpened;
   final NoticeLinkOpener openLink;
   final NoticeImageResolver imageFor;
 
   static const cardKey = ValueKey('notice-card');
-  static const pagesKey = ValueKey('notice-pages');
-  static const dotsKey = ValueKey('notice-dots');
+  static const closeKey = ValueKey('notice-close');
+
+  /// 링크를 열지 못했을 때 보이는 에러 코드 — 제보를 받았을 때 링크 열기에서 터졌다는 것을 가린다.
+  static const linkFailureCode = 'E-NOTICE-LINK';
 
   @override
   State<NoticePopupCard> createState() => _NoticePopupCardState();
 }
 
 class _NoticePopupCardState extends State<NoticePopupCard> {
-  static const _widthRatio = 0.9;
-  static const _maxWidth = 360.0;
-  static const _radius = 20.0;
+  /// 카드 최대 높이 — 화면의 75%. 긴 공지도 화면을 꽉 채우지 않아 뒤에 홈이 보이고,
+  /// 그 안에서 글 자리만 스크롤된다(N4). 누를 것(보지 않기·버튼)은 스크롤 밖이라 늘 보인다.
+  static const _maxHeightRatio = 0.75;
 
-  /// 카드 위아래로 화면 끝에서 떨어질 거리. 긴 공지도 화면을 꽉 채우지 않는다.
+  /// 화면 끝(안전영역)과 카드 사이 최소 거리.
   static const _screenMargin = 24.0;
 
-  /// 글 자리 최대 높이 — 화면의 45% (N4).
-  static const _textMaxRatio = 0.45;
+  /// 시안 — 본문↔보지 않기 24 · 보지 않기↔버튼 14. 보지 않기의 누름 영역(44)이 보이는
+  /// 줄(16)보다 위아래로 14 씩 넓으므로 그만큼 뺀다. 그래야 보이는 간격이 시안과 같다.
+  static const _bodyToHide = 24.0;
+  static const _hideToActions = 14.0;
+  static const _hideReach = (noticeTapTarget - NoticeHideToggle.checkSize) / 2;
 
-  /// 오른쪽 위 조작부만 글자 확대를 2.0배에서 멈춘다. 2.0(안드로이드 최대)까지는
-  /// 360 화면에서도 `일주일간 보지 않기`가 ✕ 와 한 줄에 들어간다 — 테스트로 고정했다.
-  /// iOS 손쉬운 사용의 더 큰 글자(3배 안팎)에서는 "일주일간 보…"로 잘려 무엇을
-  /// 체크하는지 읽을 수 없어 여기서 멈춘다. 제목·본문은 끝까지 키운다.
+  /// 누를 것만 글자 확대를 2배에서 멈춘다. 그 이상이면 버튼 문구가 한 글자씩 꺾여
+  /// 버튼이 카드를 밀어낸다. 제목·본문은 끝까지 키운다 — 스크롤되니까.
   static const _controlsMaxScale = 2.0;
-  static const _controlsInset = 4.0;
-  static const _navBottom = 4.0;
 
-  final _pages = PageController();
-  int _index = 0;
-  bool _precached = false;
-  final Set<String> _failedImages = {};
-  String? _linkFailedId;
+  final _scroll = ScrollController();
+  bool _imageFailed = false;
+  bool _linkFailed = false;
   bool _opening = false;
 
-  List<AppNotice> get _notices => widget.feed.notices;
-
-  /// 그림 자리는 카드 단위다 — 불러올 수 있는 그림이 한 장이라도 있으면 모든 장에 둔다.
-  bool get _hasImageArea =>
-      _notices.any((n) => n.imageUrl != null && !_failedImages.contains(n.id));
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // 넘기기 전에 모든 장의 그림을 미리 받는다. 넘겨 보기 전에 실패를 알아야
-    // 전부 실패했을 때 그림 자리를 처음부터 걷어낼 수 있다(N3).
-    if (_precached) return;
-    _precached = true;
-    for (final notice in _notices) {
-      final url = notice.imageUrl;
-      if (url == null) continue;
-      precacheImage(
-        widget.imageFor(url),
-        context,
-        onError: (e, _) => _markImageFailed(notice.id, e),
-      );
-    }
-  }
+  AppNotice get _notice => widget.notice;
 
   @override
   void dispose() {
-    _pages.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
-  void _markImageFailed(String noticeId, Object error) {
-    if (_failedImages.contains(noticeId)) return;
-    AppLogger.error('notice', error, null, {'step': 'image', 'id': noticeId});
-    // 그림의 errorBuilder 는 그리는 중에 불린다 — 그 자리에서 setState 하면 안 된다
+  void _onImageError(Object error) {
+    if (_imageFailed) return;
+    AppLogger.error('notice', error, null, {'step': 'image', 'id': _notice.id});
+    // errorBuilder 는 그리는 중에 불린다 — 그 자리에서 setState 하면 안 된다
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) setState(() => _failedImages.add(noticeId));
+      if (mounted) setState(() => _imageFailed = true);
     });
   }
 
-  void _onPageChanged(int index) {
-    setState(() => _index = index);
-    // 점은 눈으로 보는 것이라 낭독기 사용자에게는 위치를 말로 알린다
-    SemanticsService.sendAnnouncement(
-      View.of(context),
-      '${index + 1}/${_notices.length}',
-      Directionality.of(context),
-    );
-  }
-
-  void _go(int delta) {
-    final target = (_index + delta).clamp(0, _notices.length - 1);
-    // 동작 줄이기를 켰으면 미끄러지지 않고 바로 바꾼다
-    if (MediaQuery.disableAnimationsOf(context)) {
-      _pages.jumpToPage(target);
-    } else {
-      _pages.animateToPage(
-        target,
-        duration: AppMotion.normal,
-        curve: AppMotion.standard,
-      );
-    }
-  }
-
-  Future<void> _open(AppNotice notice) async {
-    final button = notice.button;
+  Future<void> _open() async {
+    final button = _notice.button;
     // 빨리 두 번 눌러도 브라우저는 한 번만 연다
     if (button == null || _opening) return;
     _opening = true;
     final opened = await widget.openLink(button.url);
     _opening = false;
     if (!mounted) return;
-    if (!opened) {
-      AppLogger.error('notice', 'link not opened', null, {
-        'id': notice.id,
-        'code': NoticeSlide.linkFailureCode,
-      });
+    if (opened) {
+      widget.onLinkOpened();
+      return;
     }
-    setState(() => _linkFailedId = opened ? null : notice.id);
+    // 못 열었으면 닫지 않는다 — 닫히면 보호자는 무엇이 안 됐는지 모른다
+    AppLogger.error('notice', 'link not opened', null, {
+      'id': _notice.id,
+      'code': NoticePopupCard.linkFailureCode,
+    });
+    setState(() => _linkFailed = true);
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final media = MediaQuery.of(context);
-    // ScreenUtil(.w)을 쓰지 않는다. 명세가 화면 비율로 정한 카드이고, .w 를 쓰면
-    // 360 폭 휴대폰에서 44 누름 영역이 40 으로 줄어든다.
-    final width = math.min(media.size.width * _widthRatio, _maxWidth);
-    final maxHeight =
-        media.size.height - media.padding.vertical - _screenMargin * 2;
-    final textMax = media.size.height * _textMaxRatio;
-    final hasImageArea = _hasImageArea;
-
-    Widget slide(AppNotice notice, {required bool measuring}) => NoticeSlide(
-      notice: notice,
-      showImageArea: hasImageArea,
-      imageFailed: _failedImages.contains(notice.id),
-      textMaxHeight: textMax,
-      imageFor: widget.imageFor,
-      onImageError: _markImageFailed,
-      onOpenLink: () => _open(notice),
-      linkFailed: _linkFailedId == notice.id,
-      measuring: measuring,
+    final maxHeight = math.min(
+      media.size.height * _maxHeightRatio,
+      media.size.height - media.padding.vertical - _screenMargin * 2,
     );
+    final showImage = _notice.imageUrl != null && !_imageFailed;
+    final side = ElumDialogSurface.padSide.w;
+    final button = _notice.button;
 
     final controls = MediaQuery.withClampedTextScaling(
       maxScaleFactor: _controlsMaxScale,
-      child: ValueListenableBuilder<bool>(
-        valueListenable: widget.hideChecked,
-        builder: (context, checked, _) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: math.max(0, _bodyToHide.h - _hideReach)),
+          ValueListenableBuilder<bool>(
+            valueListenable: widget.hideChecked,
+            builder: (context, checked, _) => Center(
               child: NoticeHideToggle(
-                label: noticeHideLabel(widget.feed.hideDays),
+                label: noticeHideLabel(widget.hideDays),
                 checked: checked,
                 onChanged: (v) => widget.hideChecked.value = v,
               ),
             ),
-            NoticeCloseButton(onTap: widget.onClose),
-          ],
-        ),
-      ),
-    );
-
-    final pages = Stack(
-      children: [
-        // PageView 는 스스로 높이를 정하지 못한다. 모든 장을 보이지 않게 한 벌 더 그려
-        // **가장 긴 장**에 카드 높이를 맞춘다 — 넘길 때마다 카드가 들썩이지 않는다.
-        ExcludeSemantics(
-          child: IgnorePointer(
-            child: Opacity(
-              opacity: 0,
-              child: Stack(
-                children: [for (final n in _notices) slide(n, measuring: true)],
+          ),
+          SizedBox(height: math.max(0, _hideToActions.h - _hideReach)),
+          if (_linkFailed)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                '링크를 열지 못했어요 (${NoticePopupCard.linkFailureCode})',
+                textAlign: TextAlign.center,
+                style: context.typo.noticeHideLabel.copyWith(
+                  color: colors.noticeHideLabel,
+                ),
               ),
             ),
+          // 링크가 없으면 `닫기` 하나를 꽉 채운다 — 공통 팝업 info·로그인 실패 변형처럼
+          // 혼자 선 버튼은 주 동작 색이다. 회색 버튼이 혼자 서면 눌리지 않는 버튼으로 읽힌다.
+          ElumDialogButtonRow(
+            children: [
+              ElumDialogButton(
+                key: NoticePopupCard.closeKey,
+                label: '닫기',
+                tone: button == null
+                    ? ElumDialogTone.primary
+                    : ElumDialogTone.neutral,
+                onTap: widget.onClose,
+              ),
+              if (button != null)
+                ElumDialogButton(
+                  key: ValueKey('notice-link-${_notice.id}'),
+                  // 관리자가 쓴 문구라 길 수 있다(최대 20자). 말줄임 없이 어절에서 꺾는다 (R2)
+                  label: keepWords(button.label),
+                  semanticsLabel: button.label,
+                  centerLines: true,
+                  onTap: _open,
+                ),
+            ],
           ),
-        ),
-        Positioned.fill(
-          child: PageView.builder(
-            key: NoticePopupCard.pagesKey,
-            controller: _pages,
-            itemCount: _notices.length,
-            onPageChanged: _onPageChanged,
-            itemBuilder: (context, i) => slide(_notices[i], measuring: false),
-          ),
-        ),
-        if (hasImageArea)
-          Positioned(
-            top: _controlsInset,
-            right: _controlsInset,
-            left: _controlsInset,
-            child: Align(alignment: Alignment.topRight, child: controls),
-          ),
-      ],
+        ],
+      ),
     );
 
     return Dialog(
@@ -241,41 +207,42 @@ class _NoticePopupCardState extends State<NoticePopupCard> {
       insetPadding: EdgeInsets.zero,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxHeight: maxHeight),
-        child: Container(
+        child: ElumDialogSurface(
           key: NoticePopupCard.cardKey,
-          width: width,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(_radius),
-          ),
+          // 그림이 맨 위면 옆·아래와 같은 14 — 버튼 줄이 아래 가장자리에서 14 인 것과 같게
+          padTop: showImage
+              ? ElumDialogSurface.padSide
+              : ElumDialogSurface.defaultPadTop,
+          // 좌우 14 는 안에서 준다 — 긴 공지의 스크롤 막대가 글자를 덮지 않고 여백에 서게.
+          padSides: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 그림이 없으면 조작부가 얹힐 자리가 없어 제 줄을 갖는다
-              if (!hasImageArea)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    _controlsInset,
-                    _controlsInset,
-                    _controlsInset,
-                    0,
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: controls,
+              // 제목까지 글 자리에 넣는다. 글꼴 2.0 · 360 폭에서 40자 제목이 여러 줄이 되면
+              // 제목을 고정한 채로는 버튼이 카드 밖으로 밀린다(#371 에서 겪었다). 짧으면
+              // 스크롤이 생기지 않아 본문만 스크롤되는 것과 똑같이 보인다.
+              Flexible(
+                child: Scrollbar(
+                  controller: _scroll,
+                  // 50대 보호자는 밀면 더 있다는 것을 모를 수 있다. 넘칠 때만 막대가 보인다.
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    key: ValueKey('notice-scroll-${_notice.id}'),
+                    controller: _scroll,
+                    padding: EdgeInsets.symmetric(horizontal: side),
+                    child: NoticeContent(
+                      notice: _notice,
+                      showImage: showImage,
+                      imageFor: widget.imageFor,
+                      onImageError: _onImageError,
+                    ),
                   ),
                 ),
-              Flexible(child: pages),
-              if (_notices.length > 1)
-                NoticePageNav(
-                  dotsKey: NoticePopupCard.dotsKey,
-                  index: _index,
-                  count: _notices.length,
-                  onPrev: () => _go(-1),
-                  onNext: () => _go(1),
-                ),
-              const SizedBox(height: _navBottom),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: side),
+                child: controls,
+              ),
             ],
           ),
         ),

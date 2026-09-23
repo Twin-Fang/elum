@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// 공지 팝업의 슬라이드 한 장 (이슈 #371 · 서버 #370 `AppNoticeResponse`).
+/// 공지 한 건 (이슈 #371 · #390 · 서버 #370 `AppNoticeResponse`). 팝업 하나에 하나씩 뜬다.
 @immutable
 class AppNotice {
   const AppNotice({
@@ -36,7 +36,7 @@ class NoticeButton {
   final Uri url;
 }
 
-/// 한 번에 띄울 공지 묶음.
+/// 이번 실행에 차례로 띄울 공지 묶음.
 @immutable
 class NoticeFeed {
   const NoticeFeed({required this.hideDays, required this.notices});
@@ -44,12 +44,13 @@ class NoticeFeed {
   /// "보지 않기"로 숨길 일수. 서버 설정 `NOTICE_HIDE_DAYS`(1~30).
   final int hideDays;
 
-  /// 슬라이드 순서대로. 서버가 우선순위 순으로 준다.
+  /// 띄울 순서대로. 서버가 우선순위 순으로 준다.
   final List<AppNotice> notices;
 
   static const defaultHideDays = 7;
 
-  /// 서버가 최대 5개를 주지만 앱도 한 번 더 자른다 — 팝업 한 장에 점이 끝없이 늘면 안 된다.
+  /// 서버가 최대 5개를 주지만 앱도 한 번 더 자른다 — 홈에 들어오자마자 팝업이
+  /// 끝없이 이어지면 홈을 쓸 수 없다.
   static const maxNotices = 5;
 
   static const empty = NoticeFeed(hideDays: defaultHideDays, notices: []);
@@ -71,7 +72,7 @@ class NoticeFeed {
     if (raw is List) {
       for (final entry in raw) {
         final notice = _readNotice(entry, baseUrl);
-        // 같은 id 가 두 번 오면 슬라이드 열쇠가 겹친다. 앞의 것(우선순위 높은 쪽)만 쓴다.
+        // 같은 id 가 두 번 오면 숨김 열쇠가 겹친다. 앞의 것(우선순위 높은 쪽)만 쓴다.
         if (notice == null || !seen.add(notice.id)) continue;
         notices.add(notice);
         if (notices.length == maxNotices) break;
@@ -189,6 +190,6 @@ List<NoticeTitlePart> parseNoticeTitle(String title) {
   ];
 }
 
-/// 체크박스 문구. 일수는 관리자 설정 하나라 팝업 전체에 한 번만 말한다.
+/// `보지 않기` 문구. 일수는 관리자 설정 하나(`NOTICE_HIDE_DAYS`)라 모든 공지가 같다.
 String noticeHideLabel(int days) =>
     days == NoticeFeed.defaultHideDays ? '일주일간 보지 않기' : '$days일간 보지 않기';

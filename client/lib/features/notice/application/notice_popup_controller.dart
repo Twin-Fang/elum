@@ -5,6 +5,7 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/notice_hide_store.dart';
 import '../data/notice_repository.dart';
 import '../domain/app_notice.dart';
+import 'notice_log.dart';
 
 /// 이번 실행에서 공지를 이미 물었는가.
 ///
@@ -18,7 +19,7 @@ class NoticeSession {
 
 final noticeSessionProvider = Provider<NoticeSession>((ref) => NoticeSession());
 
-/// 무엇을 띄울지 정한다 (이슈 #371 · 명세 3-2).
+/// 무엇을 띄울지 정한다 (이슈 #371 · #390).
 class NoticePopupController {
   NoticePopupController({
     required NoticeRepository repository,
@@ -40,7 +41,7 @@ class NoticePopupController {
   final DateTime Function() _now;
   final NoticePlatform Function() _platform;
 
-  /// 이번 실행에서 처음이면 공지를 받아 **숨기지 않은 것만** 돌려준다.
+  /// 이번 실행에서 처음이면 공지를 받아 **숨기지 않은 것만** 서버 순서대로 돌려준다.
   /// 띄울 것이 없으면 null.
   ///
   /// 표시를 **묻기 전에** 해 둔다. 응답을 기다리는 사이 홈을 다시 그리거나,
@@ -51,21 +52,35 @@ class NoticePopupController {
 
     // 보호자 홈에서만 뜬다(N10). 라우터가 이룸이 휴대폰을 보호자 홈으로 보내지는
     // 않지만, 길이 하나 새로 생겨도 이룸이 화면에 공지가 뜨지 않게 여기서 한 번 더 막는다.
-    if (_storage.isElumiDevice) return null;
+    if (_storage.isElumiDevice) {
+      NoticeLog.event('skip', {'why': 'elumiDevice'});
+      return null;
+    }
 
     final feed = await _repository.fetch(_platform());
+    // 못 받았을 때(N1)는 저장소가 이미 에러 로그를 남겼다. 여기서는 받은 것을 적는다 —
+    // 0 이면 "서버가 안 줬다", 숫자가 있는데 안 떴으면 아래 숨김을 본다.
+    NoticeLog.event('fetched', {
+      'count': feed.notices.length,
+      'notices': NoticeLog.refs(feed.notices),
+    });
+
     final now = _now();
-    final visible = [
-      for (final notice in feed.notices)
-        if (!_hideStore.isHidden(notice, now)) notice,
-    ];
+    final visible = <AppNotice>[];
+    for (final notice in feed.notices) {
+      if (_hideStore.isHidden(notice, now)) {
+        NoticeLog.event('skipHidden', {'notice': NoticeLog.ref(notice)});
+      } else {
+        visible.add(notice);
+      }
+    }
     if (visible.isEmpty) return null;
     return NoticeFeed(hideDays: feed.hideDays, notices: visible);
   }
 
-  /// 팝업에 있던 공지를 **전부** 숨긴다(N27). 체크박스는 팝업 하나에 하나다.
-  Future<void> hide(NoticeFeed shown) =>
-      _hideStore.hideAll(shown.notices, days: shown.hideDays, now: _now());
+  /// [notice] 하나를 [days] 동안 숨긴다 — `보지 않기`는 공지마다 따로다 (#390).
+  Future<void> hide(AppNotice notice, int days) =>
+      _hideStore.hide(notice, days: days, now: _now());
 }
 
 final noticePopupControllerProvider = Provider<NoticePopupController>(

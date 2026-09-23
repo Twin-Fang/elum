@@ -29,7 +29,7 @@ void main() {
   });
 
   test('숨기면 기한 안에서는 안 보인다', () async {
-    await store.hideAll([notice('a')], days: 7, now: now);
+    await store.hide(notice('a'), days: 7, now: now);
 
     expect(store.isHidden(notice('a'), now), isTrue);
     expect(
@@ -39,7 +39,7 @@ void main() {
   });
 
   test('기한이 지나면 다시 보인다', () async {
-    await store.hideAll([notice('a')], days: 7, now: now);
+    await store.hide(notice('a'), days: 7, now: now);
 
     expect(
       store.isHidden(notice('a'), now.add(const Duration(days: 7))),
@@ -48,7 +48,7 @@ void main() {
   });
 
   test('일수는 서버 설정을 따른다', () async {
-    await store.hideAll([notice('a')], days: 3, now: now);
+    await store.hide(notice('a'), days: 3, now: now);
 
     expect(
       store.isHidden(notice('a'), now.add(const Duration(days: 2))),
@@ -61,13 +61,13 @@ void main() {
   });
 
   test('N7 숨긴 뒤 관리자가 "다시 보이게"로 고치면(판이 오르면) 다시 뜬다', () async {
-    await store.hideAll([notice('a', revision: 1)], days: 7, now: now);
+    await store.hide(notice('a', revision: 1), days: 7, now: now);
 
     expect(store.isHidden(notice('a', revision: 2), now), isFalse);
   });
 
   test('N8 숨긴 뒤 오타만 고치면(판이 그대로면) 안 뜬다', () async {
-    await store.hideAll([notice('a', revision: 4)], days: 7, now: now);
+    await store.hide(notice('a', revision: 4), days: 7, now: now);
 
     // 제목·본문이 바뀌어도 판이 같으면 같은 공지다
     final fixed = AppNotice(
@@ -80,7 +80,7 @@ void main() {
   });
 
   test('다른 공지는 건드리지 않는다', () async {
-    await store.hideAll([notice('a')], days: 7, now: now);
+    await store.hide(notice('a'), days: 7, now: now);
 
     expect(store.isHidden(notice('b'), now), isFalse);
   });
@@ -102,15 +102,12 @@ void main() {
 
   test('저장이 실패해도 예외를 올리지 않는다 — 다음 실행에 한 번 더 뜰 뿐이다', () async {
     final failing = NoticeHideStore(_FailingStorage());
-    await expectLater(
-      failing.hideAll([notice('a')], days: 7, now: now),
-      completes,
-    );
+    await expectLater(failing.hide(notice('a'), days: 7, now: now), completes);
   });
 
   group('로그아웃해도 남는다 — 공지 숨김은 계정이 아니라 휴대폰 기준', () {
     test('InMemoryStorage', () async {
-      await store.hideAll([notice('a')], days: 7, now: now);
+      await store.hide(notice('a'), days: 7, now: now);
 
       await storage.clearAll();
       await storage.clearChildProfile();
@@ -124,7 +121,7 @@ void main() {
       final real = SharedPrefsStorage(prefs);
       final realStore = NoticeHideStore(real);
 
-      await realStore.hideAll([notice('abc', revision: 2)], days: 7, now: now);
+      await realStore.hide(notice('abc', revision: 2), days: 7, now: now);
       final saved = prefs.getString('notice.hidden.abc');
       expect(saved, isNotNull);
       expect(jsonDecode(saved!), {

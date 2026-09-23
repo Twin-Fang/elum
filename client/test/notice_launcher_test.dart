@@ -21,6 +21,7 @@ import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 
 /// 보호자 홈에서만, 앱 실행 중 처음 한 번 (이슈 #371 · 명세 2장 · 3-2).
+/// 여러 개면 **차례로**, `보지 않기` 는 공지마다 (이슈 #390).
 void main() {
   useFigmaViewport();
 
@@ -93,7 +94,9 @@ void main() {
       );
 
       expect(find.byKey(NoticePopupCard.cardKey), findsOneWidget);
-      expect(find.text('공지 a'), findsWidgets);
+      // 한 번에 하나 — 첫째만 떠 있다
+      expect(find.byKey(const ValueKey('notice-title-a')), findsOneWidget);
+      expect(find.byKey(const ValueKey('notice-title-b')), findsNothing);
       // 팝업 뒤에 홈이 이미 그려져 있다 — 공지가 홈을 막지 않는다
       expect(
         find.text('오늘은 어떤 일과를 준비할까요?', skipOffstage: false),
@@ -145,9 +148,10 @@ void main() {
             testStorage(InMemoryStorage(onboardingCompleted: true)),
             noticeRepositoryProvider.overrideWithValue(repo),
           ],
-          child: MaterialApp.router(
-            theme: AppTheme.light,
-            routerConfig: router,
+          child: ScreenUtilInit(
+            designSize: const Size(393, 852),
+            builder: (context, _) =>
+                MaterialApp.router(theme: AppTheme.light, routerConfig: router),
           ),
         ),
       );
@@ -162,7 +166,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(NoticePopupCard.cardKey), findsOneWidget);
 
-      await tester.tap(find.bySemanticsLabel('공지 닫기'));
+      await tester.tap(find.byKey(NoticePopupCard.closeKey));
       await tester.pumpAndSettle();
 
       // push 뒤 pop — 홈이 그대로 남아 있던 경우
@@ -203,6 +207,32 @@ void main() {
       expect(find.byKey(NoticePopupCard.cardKey), findsNothing);
       expect(repo.calls, 1);
     });
+
+    testWidgets('앞 공지가 닫히는 사이 홈이 앞에서 사라지면 다음 공지를 그 위에 띄우지 않는다', (tester) async {
+      repo.reply = NoticeFeed(
+        hideDays: 7,
+        notices: [_notice('a'), _notice('b')],
+      );
+      final router = await pumpFlow(tester);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('notice-title-a')), findsOneWidget);
+
+      // 닫자마자(닫히는 모습이 끝나기 전) 다른 화면으로 넘어간 경우
+      await tester.tap(find.byKey(NoticePopupCard.closeKey));
+      await tester.pump();
+      router.push(Routes.routineInput);
+      await tester.pumpAndSettle();
+
+      expect(find.text('일과 입력'), findsOneWidget);
+      expect(find.byKey(NoticePopupCard.cardKey), findsNothing);
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(NoticePopupCard.cardKey),
+        findsNothing,
+        reason: '이번 실행 몫은 끝났다',
+      );
+    });
   });
 
   group('숨김은 다음 실행까지 이어진다', () {
@@ -220,14 +250,23 @@ void main() {
             testStorage(storage),
             noticeRepositoryProvider.overrideWithValue(repo),
           ],
-          child: MaterialApp(
-            theme: AppTheme.light,
-            home: const GuardianNoticeLauncher(
-              child: Scaffold(body: Center(child: Text('보호자 홈'))),
+          child: ScreenUtilInit(
+            designSize: const Size(393, 852),
+            builder: (context, _) => MaterialApp(
+              theme: AppTheme.light,
+              home: const GuardianNoticeLauncher(
+                child: Scaffold(body: Center(child: Text('보호자 홈'))),
+              ),
             ),
           ),
         ),
       );
+      await tester.pumpAndSettle();
+    }
+
+    Finder titleOf(String id) => find.byKey(ValueKey('notice-title-$id'));
+    Future<void> close(WidgetTester tester) async {
+      await tester.tap(find.byKey(NoticePopupCard.closeKey));
       await tester.pumpAndSettle();
     }
 
@@ -236,56 +275,123 @@ void main() {
       final feed = NoticeFeed(hideDays: 7, notices: [_notice('a')]);
 
       await launch(tester, storage, feed);
-      await tester.tap(find.bySemanticsLabel('공지 닫기'));
+      await tester.tap(find.byKey(NoticePopupCard.closeKey));
       await tester.pumpAndSettle();
 
       await launch(tester, storage, feed);
       expect(find.byKey(NoticePopupCard.cardKey), findsOneWidget);
     });
 
-    testWidgets('N27 체크하고 닫으면 넘겨 보지 않은 장까지 다음 실행에 안 뜬다 — N7 판이 오르면 다시 뜬다', (
+    testWidgets('R3 셋 중 둘째에서만 보지 않기 — 셋째가 이어 뜨고, 다음 실행에는 둘째만 빠진다', (
       tester,
     ) async {
       final storage = InMemoryStorage(onboardingCompleted: true);
-
-      await launch(
-        tester,
-        storage,
-        NoticeFeed(
-          hideDays: 7,
-          notices: [_notice('a'), _notice('b'), _notice('c')],
-        ),
+      final feed = NoticeFeed(
+        hideDays: 7,
+        notices: [_notice('a'), _notice('b'), _notice('c')],
       );
-      // 첫 장만 보고 체크한 뒤 닫는다
+
+      await launch(tester, storage, feed);
+      expect(titleOf('a'), findsOneWidget);
+      await close(tester);
+
+      // 닫으면 다음이 이어서 뜬다
+      expect(titleOf('b'), findsOneWidget);
+      expect(
+        find.byKey(NoticePopupCard.cardKey),
+        findsOneWidget,
+        reason: '한 번에 하나',
+      );
       await tester.tap(find.bySemanticsLabel('일주일간 보지 않기'));
-      await tester.tap(find.bySemanticsLabel('공지 닫기'));
-      await tester.pumpAndSettle();
+      await close(tester);
+
+      expect(titleOf('c'), findsOneWidget);
+      // 앞 팝업의 체크가 넘어오지 않는다 — 공지마다 따로다
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('일주일간 보지 않기')),
+        containsSemantics(isChecked: false),
+      );
+      await close(tester);
+      expect(find.byKey(NoticePopupCard.cardKey), findsNothing);
+      expect(find.text('보호자 홈'), findsOneWidget);
+
+      // 다음 실행 — 둘째만 숨었다
+      await launch(tester, storage, feed);
+      expect(titleOf('a'), findsOneWidget);
+      await close(tester);
+      expect(titleOf('c'), findsOneWidget);
+      await close(tester);
+      expect(find.byKey(NoticePopupCard.cardKey), findsNothing);
+    });
+
+    testWidgets('N7 숨긴 공지도 판이 오르면 다시 뜬다', (tester) async {
+      final storage = InMemoryStorage(onboardingCompleted: true);
+      await launch(
+        tester,
+        storage,
+        NoticeFeed(hideDays: 7, notices: [_notice('b')]),
+      );
+      await tester.tap(find.bySemanticsLabel('일주일간 보지 않기'));
+      await close(tester);
 
       await launch(
         tester,
         storage,
-        NoticeFeed(
-          hideDays: 7,
-          notices: [_notice('a'), _notice('b'), _notice('c')],
-        ),
+        NoticeFeed(hideDays: 7, notices: [_notice('b')]),
       );
       expect(find.byKey(NoticePopupCard.cardKey), findsNothing);
 
       await launch(
         tester,
         storage,
-        NoticeFeed(
-          hideDays: 7,
-          notices: [_notice('a'), _notice('b', revision: 2), _notice('c')],
-        ),
+        NoticeFeed(hideDays: 7, notices: [_notice('b', revision: 2)]),
       );
-      expect(find.byKey(NoticePopupCard.cardKey), findsOneWidget);
-      expect(find.text('공지 b'), findsWidgets);
-      expect(
-        find.byKey(NoticePopupCard.dotsKey),
-        findsNothing,
-        reason: 'b 한 장만 뜬다',
+      expect(titleOf('b'), findsOneWidget);
+    });
+
+    testWidgets('바깥을 눌러 닫아도 다음이 이어 뜬다', (tester) async {
+      final storage = InMemoryStorage(onboardingCompleted: true);
+      await launch(
+        tester,
+        storage,
+        NoticeFeed(hideDays: 7, notices: [_notice('a'), _notice('b')]),
       );
+      await tester.tapAt(const Offset(4, 4));
+      await tester.pumpAndSettle();
+      expect(titleOf('b'), findsOneWidget);
+    });
+
+    testWidgets('#385 D 띄움·닫은 방법·숨김을 원문 없이 남긴다', (tester) async {
+      final lines = <String>[];
+      final original = debugPrint;
+      debugPrint = (message, {wrapWidth}) => lines.add(message ?? '');
+      // 테스트 본문이 끝나기 전에 되돌려야 한다 — 바인딩이 본문 직후에 검사한다
+      try {
+        final storage = InMemoryStorage(onboardingCompleted: true);
+        await launch(
+          tester,
+          storage,
+          NoticeFeed(
+            hideDays: 7,
+            notices: [_notice('a'), _notice('b', revision: 4)],
+          ),
+        );
+        await close(tester);
+        await tester.tap(find.bySemanticsLabel('일주일간 보지 않기'));
+        await tester.tapAt(const Offset(4, 4));
+        await tester.pumpAndSettle();
+      } finally {
+        debugPrint = original;
+      }
+
+      final log = lines.join('\n');
+      expect(log, contains('event: show'));
+      expect(log, contains('notice: a@1 | order: 1/2'));
+      expect(log, contains('notice: a@1 | how: close | hide: false'));
+      expect(log, contains('notice: b@4 | order: 2/2'));
+      expect(log, contains('notice: b@4 | how: outside | hide: true'));
+      expect(log, isNot(contains('본문이에요')));
+      expect(log, isNot(contains('공지 a')));
     });
   });
 }

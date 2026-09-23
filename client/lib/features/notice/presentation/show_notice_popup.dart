@@ -19,41 +19,79 @@ Future<bool> openNoticeLink(Uri url) async {
   try {
     return await launchUrl(url, mode: LaunchMode.externalApplication);
   } catch (e, st) {
-    AppLogger.error('notice', e, st, {'step': 'openLink', 'url': '$url'});
+    // 주소 전체를 남기지 않는다 — 공지 로그에는 원문을 두지 않는다 (#385 D)
+    AppLogger.error('notice', e, st, {'step': 'openLink', 'host': url.host});
     return false;
   }
 }
 
 ImageProvider _networkImage(String url) => NetworkImage(url);
 
-/// 공지 팝업을 띄우고, 닫힌 뒤 **"보지 않기"를 체크했는지** 돌려준다.
+/// 공지 팝업이 어떻게 닫혔나 — 로그에 남긴다 (#385 D).
+enum NoticeCloseHow {
+  /// `닫기` 버튼
+  close,
+
+  /// 링크 버튼 — 브라우저를 열고 닫힌다
+  link,
+
+  /// 바깥(어두운 배경) 또는 안드로이드 뒤로가기. 둘은 같은 길로 닫혀 가릴 수 없다.
+  outside,
+}
+
+/// 공지 팝업이 닫힌 뒤 돌려받는 것.
+@immutable
+class NoticePopupResult {
+  const NoticePopupResult({required this.how, required this.hide});
+
+  final NoticeCloseHow how;
+
+  /// `보지 않기` 를 체크한 채 닫았나. **어떻게 닫았든** 체크돼 있으면 숨긴다.
+  final bool hide;
+}
+
+/// 배경 막을 읽어 줄 이름 (#385 C). 앱에 한국어 지역화가 없어 기본값이 영어 `Dismiss`
+/// 로 읽혔다. 이번에는 공지 팝업에서만 이름을 준다 — 앱 전체 지역화는 따로 다룬다.
+const noticeBarrierLabel = '공지 닫기';
+
+/// 공지 한 건을 띄우고, **닫히는 모습이 끝난 뒤에** 결과를 돌려준다.
 ///
-/// ✕·바깥(어두운 배경)·안드로이드 뒤로가기 — 어떻게 닫든 같다(명세 2장 "닫기").
-/// 체크 상태를 팝업 밖에 두는 이유가 이것이다. 바깥을 눌러 닫히면 팝업은 값을
-/// 돌려주지 못하고 사라진다.
-Future<bool> showNoticePopup(
+/// 끝날 때까지 기다리는 이유 — 다음 공지가 바로 이어서 뜬다(#390). 앞 팝업이 사라지는
+/// 중에 다음 팝업을 올리면 어두운 막이 두 겹으로 겹쳐 한순간 더 어두워진다.
+Future<NoticePopupResult> showNoticePopup(
   BuildContext context,
-  NoticeFeed feed, {
+  AppNotice notice, {
+  required int hideDays,
   NoticeLinkOpener openLink = openNoticeLink,
   NoticeImageResolver imageFor = _networkImage,
 }) async {
   // dispose 하지 않는다. 닫히는 애니메이션 동안에도 카드가 이 값을 읽는다 —
   // 결과가 먼저 돌아오므로 여기서 버리면 사라지는 카드가 버려진 값을 만진다.
   final hide = ValueNotifier(false);
-  await showDialog<void>(
+  final navigator = Navigator.of(context);
+  final route = DialogRoute<NoticeCloseHow>(
     context: context,
     barrierDismissible: true,
+    barrierLabel: noticeBarrierLabel,
     // 공통 팝업과 같은 dim — 검정 50%
     barrierColor: Colors.black.withValues(alpha: 0.5),
-    // 카드가 안전영역 안에 머무는 것은 카드가 스스로 계산한다
+    // 공통 팝업처럼 화면 전체 가운데에 둔다 (#297). 안전영역은 카드가 스스로 피한다.
     useSafeArea: false,
+    themes: InheritedTheme.capture(from: context, to: navigator.context),
     builder: (dialogContext) => NoticePopupCard(
-      feed: feed,
+      notice: notice,
+      hideDays: hideDays,
       hideChecked: hide,
-      onClose: () => Navigator.of(dialogContext).pop(),
+      onClose: () => Navigator.of(dialogContext).pop(NoticeCloseHow.close),
+      onLinkOpened: () => Navigator.of(dialogContext).pop(NoticeCloseHow.link),
       openLink: openLink,
       imageFor: imageFor,
     ),
   );
-  return hide.value;
+  final how = await navigator.push(route);
+  await route.completed;
+  return NoticePopupResult(
+    how: how ?? NoticeCloseHow.outside,
+    hide: hide.value,
+  );
 }
