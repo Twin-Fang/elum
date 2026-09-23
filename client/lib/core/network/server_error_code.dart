@@ -115,6 +115,24 @@ enum ServerErrorCode {
   consentVersionInvalid('CONSENT_VERSION_INVALID'),
   consentVersionNotNewer('CONSENT_VERSION_NOT_NEWER'),
 
+  // 앱 공지 (이슈 #370). 관리자 화면 저장 검증과 공지 조회에서 난다.
+  noticeNotFound('NOTICE_NOT_FOUND'),
+  noticeImageNotFound('NOTICE_IMAGE_NOT_FOUND'),
+  noticeTitleBlank('NOTICE_TITLE_BLANK'),
+  noticeTitleTooLong('NOTICE_TITLE_TOO_LONG'),
+  noticeTitleEmphasisUnpaired('NOTICE_TITLE_EMPHASIS_UNPAIRED'),
+  noticeBodyBlank('NOTICE_BODY_BLANK'),
+  noticeBodyTooLong('NOTICE_BODY_TOO_LONG'),
+  noticeButtonIncomplete('NOTICE_BUTTON_INCOMPLETE'),
+  noticeButtonLabelTooLong('NOTICE_BUTTON_LABEL_TOO_LONG'),
+  noticeButtonUrlInvalid('NOTICE_BUTTON_URL_INVALID'),
+  noticePeriodInvalid('NOTICE_PERIOD_INVALID'),
+  noticePriorityInvalid('NOTICE_PRIORITY_INVALID'),
+  noticePlatformInvalid('NOTICE_PLATFORM_INVALID'),
+  noticeImageInvalidType('NOTICE_IMAGE_INVALID_TYPE'),
+  noticeImageTooLarge('NOTICE_IMAGE_TOO_LARGE'),
+  noticeImageSaveFailed('NOTICE_IMAGE_SAVE_FAILED'),
+
   /// 앱이 모르는 코드. **서버가 새 코드를 먼저 배포하는 일은 반드시 생긴다.**
   /// 그때도 `errorMessage`는 맞으므로 문구는 그대로 보여줄 수 있다.
   unknown('');
