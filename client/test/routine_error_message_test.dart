@@ -60,6 +60,17 @@ void main() {
     expect(find.text('ROUTINE_CREATE_LIMIT_EXCEEDED'), findsOneWidget);
   });
 
+  testWidgets('인터넷이 끊겼으면 인터넷을 확인하라고 말한다 (#387 D4 · #352)', (tester) async {
+    // 오프라인은 서버가 이유를 말해 줄 수 없다. `잠시 후 다시 해주세요` 만 띄우면
+    // 끊긴 채로 계속 다시 하기를 누른다 — 무엇을 하면 되는지를 말한다.
+    await _pump(tester, const FakeOffline());
+
+    expect(find.text('카드를 만들지 못했어요'), findsOneWidget);
+    expect(find.text('인터넷 연결을 확인해주세요'), findsOneWidget);
+    expect(find.text('잠시 후 다시 해주세요'), findsNothing);
+    expect(find.text('E-NET-OFFLINE'), findsOneWidget);
+  });
+
   testWidgets('서버가 이유를 안 주면 앱 문구로 물러선다', (tester) async {
     await _pump(tester, null);
 

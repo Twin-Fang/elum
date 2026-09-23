@@ -279,10 +279,15 @@ public class RoutineService {
   /// 여기에 memberId를 그대로 넘기고 있어서 **어떤 일과도 걸리지 않았다** —
   /// 모든 보호자에게 지난 일과가 빈 칸으로 보였다. 같은 실수를 오늘 일과에서
   /// 한 번 고쳤는데(getTodayRoutines) 이곳이 함께 고쳐지지 않았다.
+  ///
+  /// 보낸 일과(CONFIRMED·COMPLETED)만 준다 — 오늘 일과와 같은 기준이다 (#353).
+  /// 상태를 거르지 않으면 오늘 만들다 둔 임시저장이 내일 지난 일과에 뜬다 (#387).
   public List<RoutineResponse> getPastRoutines(String memberId) {
     return routineRepository
-      .findAllByProfileIdAndScheduledAtBeforeOrderByScheduledAtDesc(
-        requireProfile(memberId).getId(), LocalDate.now().atStartOfDay())
+      .findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
+        requireProfile(memberId).getId(),
+        List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED),
+        LocalDate.now().atStartOfDay())
       .stream()
       .limit(PAST_ROUTINE_LIMIT)
       .map(RoutineResponse::from)

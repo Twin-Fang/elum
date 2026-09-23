@@ -178,7 +178,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
       leave: routine?.status == 'PENDING_REVIEW'
           ? RoutineLeave.draft
           : RoutineLeave.edit,
-      onBack: () => context.pop(),
+      // 뒤로도 흐름을 떠난다 — 홈과 같이 묻고, 나가면 흐름을 연 화면(홈·임시저장)으로
+      // 간다. 카드를 만든 뒤 흐름 안으로 되돌아가면 앞 화면들이 `남지 않아요` 라고
+      // 사실과 다르게 말하고, 거기서 바꾼 보상·답은 다시 만들지 않아 버려진다 (#387 D1).
+      backLeavesFlow: true,
+      onBack: () => leaveRoutineFlow(context),
       bottomButton: ElumButton(label: '저장하기', onPressed: _save),
       aurora: CardReviewScreen.aurora,
       child: Column(

@@ -213,7 +213,7 @@ void main() {
       await drain(tester);
     });
 
-    // 뒤로는 흐름 안 한 칸이라 묻지 않는다 — `exit_confirm_test`의 askOnBack 이 본다.
+    // 뒤로는 흐름 안 한 칸이라 묻지 않는다 — `exit_confirm_test`의 backLeavesFlow 가 본다.
 
     testWidgets('만들지 못했으면 남은 것이 없다 — 그만둘까요 (T5)', (tester) async {
       await tester.pumpWidget(

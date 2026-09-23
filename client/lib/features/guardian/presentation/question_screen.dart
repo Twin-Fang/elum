@@ -95,6 +95,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
 
     return RoutineFlowScaffold(
       aurora: QuestionScreen.aurora,
+      // 홈으로 나갈 때만 묻는다. 뒤로는 보상으로 한 칸이라 고른 답이 남는다 (#387 D3).
       leave: RoutineLeave.discard,
       onBack: () => context.pop(),
       // 시안(`262:4854`)은 CTA를 y=675에 둔다 — 약관·목표와 같은 자리다 (#297).

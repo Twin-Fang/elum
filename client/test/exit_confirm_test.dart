@@ -24,34 +24,31 @@ import 'helpers/test_storage.dart';
 void main() {
   useFigmaViewport();
 
-  Widget wrap({RoutineLeave? leave, bool askOnBack = true}) {
+  /// [backLeavesFlow] 면 카드 확인처럼 뒤로가 흐름을 통째로 닫는다(앱과 같은 콜백).
+  Widget wrap({
+    RoutineLeave? leave,
+    bool backLeavesFlow = false,
+    String initial = '/flow',
+  }) {
+    Widget flow(BuildContext context) => RoutineFlowScaffold(
+      leave: leave,
+      backLeavesFlow: backLeavesFlow,
+      onBack: backLeavesFlow
+          ? () => leaveRoutineFlow(context)
+          : () => context.pop(),
+      child: const SizedBox.shrink(),
+    );
     final router = GoRouter(
-      initialLocation: '/flow',
+      initialLocation: initial,
       routes: [
         GoRoute(
           path: '/before',
           builder: (context, state) => const Scaffold(body: Text('앞 화면')),
           routes: [
-            GoRoute(
-              path: 'flow',
-              builder: (context, state) => RoutineFlowScaffold(
-                leave: leave,
-                askOnBack: askOnBack,
-                onBack: () => context.pop(),
-                child: const SizedBox.shrink(),
-              ),
-            ),
+            GoRoute(path: 'flow', builder: (context, state) => flow(context)),
           ],
         ),
-        GoRoute(
-          path: '/flow',
-          builder: (context, state) => RoutineFlowScaffold(
-            leave: leave,
-            askOnBack: askOnBack,
-            onBack: () => context.pop(),
-            child: const SizedBox.shrink(),
-          ),
-        ),
+        GoRoute(path: '/flow', builder: (context, state) => flow(context)),
         GoRoute(
           path: Routes.guardian,
           builder: (context, state) => const Scaffold(body: Text('보호자 홈')),
@@ -197,9 +194,7 @@ void main() {
   });
 
   testWidgets('로딩처럼 뒤로가 흐름 안 한 칸이면 뒤로는 묻지 않는다 — 홈만 묻는다', (tester) async {
-    await tester.pumpWidget(
-      wrap(leave: RoutineLeave.draftWhenReady, askOnBack: false),
-    );
+    await tester.pumpWidget(wrap(leave: RoutineLeave.draftWhenReady));
     await settle(tester);
 
     // 홈은 흐름을 떠난다 — 묻는다
@@ -213,6 +208,69 @@ void main() {
     await tester.binding.handlePopRoute();
     await settle(tester);
     expect(find.byType(ElumDialogCard<bool>), findsNothing);
+  });
+
+  group('뒤로가 흐름을 떠나면 (카드 확인 · #387 D1)', () {
+    testWidgets('뒤로 → 묻고 → 나가기면 흐름을 연 화면으로 간다', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          leave: RoutineLeave.draft,
+          backLeavesFlow: true,
+          initial: '/before/flow',
+        ),
+      );
+      await settle(tester);
+
+      await tester.tap(find.bySemanticsLabel('뒤로 가기'));
+      await settle(tester);
+      expect(find.text('임시저장에 두고 나갈까요?'), findsOneWidget);
+      await tester.tap(find.text('나가기'));
+      await settle(tester);
+
+      // 닫히는 전환이 끝날 때까지 민다
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text('앞 화면'), findsOneWidget);
+      expect(find.byType(RoutineFlowScaffold), findsNothing);
+    });
+
+    testWidgets('기기 뒤로도 같은 확인을 거친다', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          leave: RoutineLeave.draft,
+          backLeavesFlow: true,
+          initial: '/before/flow',
+        ),
+      );
+      await settle(tester);
+
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(find.text('임시저장에 두고 나갈까요?'), findsOneWidget);
+      // 계속 만들기면 그대로 남는다
+      await tester.tap(find.text('계속 만들기'));
+      await settle(tester);
+      expect(find.byType(RoutineFlowScaffold), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      await tester.tap(find.text('나가기'));
+      await settle(tester);
+      expect(find.text('앞 화면'), findsOneWidget);
+    });
+
+    testWidgets('아래에 아무것도 없으면 보호자 홈으로 간다', (tester) async {
+      await tester.pumpWidget(
+        wrap(leave: RoutineLeave.draft, backLeavesFlow: true),
+      );
+      await settle(tester);
+
+      await tester.tap(find.bySemanticsLabel('뒤로 가기'));
+      await settle(tester);
+      await tester.tap(find.text('나가기'));
+      await settle(tester);
+
+      expect(find.text('보호자 홈'), findsOneWidget);
+    });
   });
 
   test('warn과 danger는 다른 색이다 (이슈 #242)', () {

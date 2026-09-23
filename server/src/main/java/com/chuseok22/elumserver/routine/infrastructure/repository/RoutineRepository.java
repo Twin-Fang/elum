@@ -83,8 +83,9 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   // 보호자 홈 "지난 일과" — 오늘 이전에 예정됐던 것만 최신순.
   // 지우지 않고 접어두는 이유는 수행률 추이(P1)의 원본 데이터이기 때문이다.
-  List<Routine> findAllByProfileIdAndScheduledAtBeforeOrderByScheduledAtDesc(
-    String profileId, LocalDateTime before
+  // 상태로도 거른다 — 임시저장(PENDING_REVIEW)은 이룸이에게 보낸 적이 없어 "지난" 일과가 아니다.
+  List<Routine> findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
+    String profileId, List<RoutineStatus> statuses, LocalDateTime before
   );
 
   // 보호자 홈 "임시저장" — 카드는 만들었지만 아직 아이에게 보내지 않은 일과.

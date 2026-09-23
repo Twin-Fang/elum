@@ -133,6 +133,10 @@ class RoutineServiceTest {
         .isEqualTo(ErrorCode.ROUTINE_STEP_NOT_FOUND));
   }
 
+  /// 지난 일과는 보낸 일과(CONFIRMED·COMPLETED)만 — 오늘 일과가 쓰는 두 상태와 같다.
+  private static final List<RoutineStatus> SENT =
+    List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED);
+
   @Test
   @DisplayName("지난 일과는 회원 ID가 아니라 프로필 ID로 찾는다 — 잘못 넘기면 한 건도 걸리지 않는다")
   void getPastRoutines_queriesByProfileId() {
@@ -142,17 +146,42 @@ class RoutineServiceTest {
     profile.setId("profile-1");
     profile.setMember(member);
     when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1")).thenReturn(Optional.of(profile));
-    when(routineRepository.findAllByProfileIdAndScheduledAtBeforeOrderByScheduledAtDesc(
-      eq("profile-1"), any(LocalDateTime.class))).thenReturn(List.of());
+    when(routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
+      eq("profile-1"), any(), any(LocalDateTime.class))).thenReturn(List.of());
 
     routineService.getPastRoutines("member-1");
 
     // 프로필을 계정에서 떼어낸 뒤 두 값이 달라졌다. 회원 ID를 넘기면 쿼리는 성공하지만
     // 언제나 0건이라, 모든 보호자에게 지난 일과가 빈 칸으로 보인다.
-    verify(routineRepository).findAllByProfileIdAndScheduledAtBeforeOrderByScheduledAtDesc(
-      eq("profile-1"), any(LocalDateTime.class));
-    verify(routineRepository, never()).findAllByProfileIdAndScheduledAtBeforeOrderByScheduledAtDesc(
-      eq("member-1"), any(LocalDateTime.class));
+    verify(routineRepository).findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
+      eq("profile-1"), any(), any(LocalDateTime.class));
+    verify(routineRepository, never()).findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
+      eq("member-1"), any(), any(LocalDateTime.class));
+  }
+
+  @Test
+  @DisplayName("지난 일과에 임시저장(PENDING_REVIEW)은 없다 — 이룸이에게 보낸 일과만 지난 일과다")
+  void getPastRoutines_excludesPendingReview() {
+    Member member = new Member();
+    member.setId("member-1");
+    Profile profile = new Profile();
+    profile.setId("profile-1");
+    profile.setMember(member);
+    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1")).thenReturn(Optional.of(profile));
+    when(routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
+      eq("profile-1"), any(), any(LocalDateTime.class))).thenReturn(List.of());
+
+    routineService.getPastRoutines("member-1");
+
+    // 오늘 만들다 둔 임시저장은 scheduledAt 이 오늘이라 내일이면 "오늘 이전" 에 걸린다.
+    // 상태로 거르지 않으면 보내지도 않은 일과가 지난 일과에 뜬다 (#387). 오늘 일과가
+    // CONFIRMED·COMPLETED 만 쓰는 것과 같은 기준이다 (#353).
+    ArgumentCaptor<List<RoutineStatus>> statuses = ArgumentCaptor.forClass(List.class);
+    verify(routineRepository).findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
+      eq("profile-1"), statuses.capture(), any(LocalDateTime.class));
+    assertThat(statuses.getValue())
+      .containsExactlyInAnyOrderElementsOf(SENT)
+      .doesNotContain(RoutineStatus.PENDING_REVIEW);
   }
 
   @Test

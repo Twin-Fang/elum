@@ -35,6 +35,7 @@ class RoutineFlowState {
     this.routine,
     this.errorCode,
     this.errorMessage,
+    this.errorHint,
   });
 
   final RoutineFlowStep step;
@@ -74,6 +75,11 @@ class RoutineFlowState {
   /// 다시 누른다 (#347).
   final String? errorMessage;
 
+  /// 무엇을 하면 되는지 — 네트워크 사정이라 서버가 말해 줄 수 없을 때만 있다
+  /// ([AppFailure.hint]). 오프라인인데 `잠시 후 다시 해주세요` 만 띄우면 끊긴 채로
+  /// 다시 하기만 누른다 (#352 규칙 · #387 D4).
+  final String? errorHint;
+
   RoutineFlowState copyWith({
     RoutineFlowStep? step,
     String? rawInput,
@@ -87,6 +93,7 @@ class RoutineFlowState {
     Routine? routine,
     String? errorCode,
     String? errorMessage,
+    String? errorHint,
   }) {
     return RoutineFlowState(
       step: step ?? this.step,
@@ -102,6 +109,7 @@ class RoutineFlowState {
       // errorCode는 null로 되돌릴 수 있어야 한다(재시도 시 초기화) → ?? 쓰지 않는다.
       errorCode: errorCode,
       errorMessage: errorMessage,
+      errorHint: errorHint,
     );
   }
 }
@@ -345,6 +353,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
         step: RoutineFlowStep.error,
         errorCode: failure.badgeOr('E-1001'),
         errorMessage: failure.serverMessage,
+        errorHint: failure.hint,
       );
     }
   }

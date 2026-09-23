@@ -61,6 +61,13 @@ class FakeAdapter implements HttpClientAdapter {
       );
     }
 
+    // 서버에 닿지 못했다. 실기기에서 요청 중 비행기 모드를 켜면 dio 가 이 모양을
+    // 준다 — 유형은 unknown, `error` 도 응답도 비어 있다 (#352 실측). SocketException
+    // 을 넣어 만들면 실기기에서 안 나오는 친절한 모양만 검증하게 된다.
+    if (body is FakeOffline) {
+      throw DioException(requestOptions: options);
+    }
+
     if (body == null) {
       // 등록하지 않은 경로는 실패로 둔다. 테스트가 기대하지 않은 호출을
       // 성공으로 받으면 그 호출이 일어났다는 사실 자체가 묻힌다.
@@ -119,4 +126,9 @@ class FakeHttpError {
   final int status;
   final String? errorCode;
   final String? errorMessage;
+}
+
+/// 서버에 닿지 못한 요청 (비행기 모드). [fakeDioOverride]의 값 자리에 넣는다.
+class FakeOffline {
+  const FakeOffline();
 }

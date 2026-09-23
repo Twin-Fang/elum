@@ -440,22 +440,19 @@ void main() {
   });
 
   group('흐름 안에서 빠져나가기', () {
-    testWidgets('시스템 뒤로가기도 흐름 안에서 확인을 묻는다 (E3)', (tester) async {
+    testWidgets('시스템 뒤로가기는 흐름째 닫지 않고 안에서 한 칸 돌아간다 (E3)', (tester) async {
       final router = await pumpFlow(tester);
       router.push(Routes.routineReward);
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
-      // 안드로이드 뒤로 단추. 흐름이 ShellRoute 로 한 겹 들어가도 안쪽 화면의
-      // 확인이 먼저 받아야 한다 — 흐름째 닫히면 만들던 일과가 말없이 사라진다.
+      // 안드로이드 뒤로 단추. 흐름이 ShellRoute 로 한 겹 들어가도 안쪽 화면이
+      // 먼저 받아야 한다 — 흐름째 닫히면 만들던 일과가 말없이 사라진다.
+      // 보상의 뒤로는 입력으로 한 칸이라 묻지 않는다 — 적은 것이 남는다 (#387 D3).
       await tester.binding.handlePopRoute();
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(find.text('일과 만들기를 그만둘까요?'), findsOneWidget);
-
-      await tester.tap(find.text('나가기'));
-      await tester.pump();
       await tester.pump(AppMotion.ambient + const Duration(milliseconds: 100));
+      expect(find.text('일과 만들기를 그만둘까요?'), findsNothing);
 
       expect(find.byType(RoutineInputScreen), findsOneWidget);
       expect(find.byType(RewardSetupScreen), findsNothing);

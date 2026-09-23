@@ -33,7 +33,7 @@ class RoutineFlowScaffold extends ConsumerWidget {
     this.pinCtaToFigmaY = false,
     this.aurora = AuroraTone.input,
     this.leave,
-    this.askOnBack = true,
+    this.backLeavesFlow = false,
     this.belowButton,
   });
 
@@ -91,9 +91,18 @@ class RoutineFlowScaffold extends ConsumerWidget {
   /// 가장 성가시다.
   final RoutineLeave? leave;
 
-  /// 뒤로가기도 묻는가. 로딩처럼 뒤로가 **흐름 안에서 한 칸 돌아가는 것**이면
-  /// false — 떠나는 것은 홈뿐이라 홈만 묻는다.
-  final bool askOnBack;
+  /// 뒤로가 **흐름을 떠나는가** (#387 D1 · D3).
+  ///
+  /// false(기본)면 뒤로는 흐름 안에서 한 칸 돌아가는 것이다 — 적은 것이 그대로
+  /// 남으므로 **묻지 않는다.** 보상·추가 질문·로딩이 그렇다. 떠나는 것은 홈뿐이라
+  /// 홈만 [leave] 를 묻는다.
+  ///
+  /// true 면 뒤로도 떠나는 것이다 — 홈과 똑같이 묻고, 나가면 [onBack] 이 흐름을
+  /// 통째로 닫는다([leaveRoutineFlow]). 카드 확인이 그렇다. 거기서 한 칸 돌아가면
+  /// 이미 임시저장에 있는 일과를 두고 추가 질문 화면이 `남지 않아요` 라고 겁을 주고,
+  /// 되돌아가 바꾼 보상·답은 생성 막음에 걸려 조용히 버려진다(E2E 2차 D1·D2).
+  /// 기기 뒤로·스와이프도 화살표와 같은 길을 간다.
+  final bool backLeavesFlow;
 
   /// 나가도 되는지 묻는다. 물어보지 않기로 했으면 그대로 통과시킨다.
   ///
@@ -110,7 +119,7 @@ class RoutineFlowScaffold extends ConsumerWidget {
     required bool back,
   }) async {
     final kind = leave;
-    if (kind == null || (back && !askOnBack)) return true;
+    if (kind == null || (back && !backLeavesFlow)) return true;
     final container = ProviderScope.containerOf(context, listen: false);
     final ok = await confirmLeaveRoutineFlow(context, kind);
     if (ok && kind != RoutineLeave.discard) {
@@ -126,14 +135,16 @@ class RoutineFlowScaffold extends ConsumerWidget {
     final space = context.space;
 
     return PopScope(
-      // 시스템 뒤로가기(제스처·버튼)를 여기서 잡는다.
-      canPop: leave == null || !askOnBack,
+      // 시스템 뒤로가기(제스처·버튼)를 여기서 잡는다. 한 칸 돌아가는 뒤로는 그냥
+      // 보내고, 흐름을 떠나는 뒤로만 붙잡아 화살표와 같은 길([onBack])로 보낸다.
+      canPop: !backLeavesFlow,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final ok = await _mayLeave(context, ref, back: true);
         if (!ok || !context.mounted) return;
         dismissKeyboard();
-        context.pop();
+        final back = onBack;
+        back == null ? leaveRoutineFlow(context) : back();
       },
       child: _scaffold(context, ref, space),
     );
@@ -308,6 +319,24 @@ class _TopBar extends StatelessWidget {
 /// 빠뜨리지 않는다. `dispose`에 넣는 것으로는 늦다. 그때는 라우트가 이미 닫힌
 /// 뒤라 iOS가 키보드를 남긴 채 화면만 바꾼다.
 void dismissKeyboard() => FocusManager.instance.primaryFocus?.unfocus();
+
+/// 일과 만들기 흐름을 **통째로** 닫고 흐름에 들어오기 전 화면으로 돌아간다 (#387 D1).
+///
+/// 흐름은 한 장의 ShellRoute 로 루트 네비게이터에 얹혀 있다 — 그 한 장을 내리면 안의
+/// 화면(입력·보상·추가 질문·카드 확인)이 함께 내려간다. 그래서 돌아가는 곳은
+/// 흐름을 연 화면이다: 홈에서 만들었으면 홈, 임시저장에서 이어서 만들었으면 임시저장.
+/// `context.pop()` 은 흐름 안 한 칸만 돌아간다.
+///
+/// 아래에 아무것도 없으면(흐름으로 곧장 들어온 경우) 보호자 홈으로 간다.
+void leaveRoutineFlow(BuildContext context) {
+  dismissKeyboard();
+  final root = Navigator.of(context, rootNavigator: true);
+  if (root.canPop()) {
+    root.pop();
+  } else {
+    context.go(Routes.guardian);
+  }
+}
 
 Future<bool> confirmLeaveRoutineFlow(
   BuildContext context, [

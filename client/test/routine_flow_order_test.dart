@@ -4,7 +4,10 @@ import 'package:elum/core/theme/app_motion.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
+import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
+import 'package:elum/features/guardian/presentation/draft_routines_screen.dart';
+import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
 import 'package:elum/features/guardian/presentation/reward_setup_screen.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
@@ -21,6 +24,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/aurora_probe.dart';
 import 'helpers/device_viewport.dart';
+import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
 
@@ -45,9 +49,16 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
   }
 
-  Future<GoRouter> pumpFlow(WidgetTester tester, {bool withQuestion = true}) async {
-    repo = _Repo(withQuestion: withQuestion);
-    final router = createRouter()..go(Routes.routineInput);
+  /// [below] 를 주면 그 화면 위에 흐름을 **push** 한다 — 앱에서 홈·임시저장이
+  /// 흐름을 여는 모양 그대로다. 흐름을 닫으면 어디로 돌아가는지 볼 때 쓴다.
+  Future<GoRouter> pumpFlow(
+    WidgetTester tester, {
+    bool withQuestion = true,
+    String? below,
+    List<Routine> drafts = const [],
+  }) async {
+    repo = _Repo(withQuestion: withQuestion)..drafts = drafts;
+    final router = createRouter()..go(below ?? Routes.routineInput);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -56,6 +67,9 @@ void main() {
             nickname: '하늘이',
           ),
           routineRepositoryProvider.overrideWithValue(repo),
+          // 흐름 아래에 진짜 홈을 깔 때 — 이룸이 정보·공지가 실서버를 타지 않게 한다.
+          memberProvider.overrideWith((ref) async => null),
+          fakeDioOverride(const {}),
           routineSuggestionsProvider.overrideWith(
             (ref) async => RoutineSuggestion.fallback,
           ),
@@ -70,6 +84,10 @@ void main() {
       ),
     );
     await settle(tester);
+    if (below != null) {
+      router.push(Routes.routineInput);
+      await settle(tester);
+    }
     return router;
   }
 
@@ -178,12 +196,11 @@ void main() {
     expect(find.byType(QuestionScreen), findsOneWidget);
 
     // 추가 질문에서 뒤로 — 준비 로딩은 질문 화면으로 교체됐으니 보상으로 돌아간다.
+    // **묻지 않는다** — 한 칸 돌아가는 것이라 적은 것이 그대로 남는다 (#387 D3).
     await tester.tap(find.bySemanticsLabel('뒤로 가기'));
-    await settle(tester);
-    expect(find.text('일과 만들기를 그만둘까요?'), findsOneWidget);
-    await tester.tap(find.text('나가기'));
     await tester.pump();
     await tester.pump(AppMotion.ambient + const Duration(milliseconds: 100));
+    expect(find.byType(ElumDialogCard<bool>), findsNothing);
 
     expect(find.byType(RewardSetupScreen), findsOneWidget);
     expect(find.byType(QuestionScreen), findsNothing);
@@ -203,14 +220,158 @@ void main() {
     await tester.pump(AppMotion.ambient + const Duration(milliseconds: 100));
     expect(find.byType(RewardSetupScreen), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('뒤로 가기'));
-    await settle(tester);
-    await tester.tap(find.text('나가기'));
     await tester.pump();
     await tester.pump(AppMotion.ambient + const Duration(milliseconds: 100));
+    expect(find.byType(ElumDialogCard<bool>), findsNothing);
 
     expect(find.byType(RoutineInputScreen), findsOneWidget);
     expect(find.text('내일 비 오는 날 등교'), findsOneWidget);
     expectBackdrop(tester, AuroraTone.input);
+  });
+
+  group('뒤로는 한 칸 · 떠날 때만 묻는다 (#387 D3)', () {
+    testWidgets('보상 — 기기 뒤로는 묻지 않고 입력으로, 홈은 그만둘까요', (tester) async {
+      await pumpFlow(tester);
+      await typeInputAndSend(tester);
+      expect(find.byType(RewardSetupScreen), findsOneWidget);
+
+      // 홈은 흐름을 떠난다 — 카드 만들기 전이라 적은 것이 남지 않는다고 묻는다.
+      await tester.tap(find.bySemanticsLabel('홈으로 가기'));
+      await settle(tester);
+      expect(find.text('일과 만들기를 그만둘까요?'), findsOneWidget);
+      await tester.tap(find.text('계속 만들기'));
+      await settle(tester);
+
+      // 기기 뒤로(스와이프도 같은 길)는 한 칸 — 묻지 않는다.
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      await tester.pump(AppMotion.ambient + const Duration(milliseconds: 100));
+      expect(find.byType(ElumDialogCard<bool>), findsNothing);
+      expect(find.byType(RoutineInputScreen), findsOneWidget);
+      expect(find.text('내일 비 오는 날 등교'), findsOneWidget);
+    });
+
+    testWidgets('추가 질문 — 기기 뒤로는 묻지 않고 보상으로', (tester) async {
+      await pumpFlow(tester);
+      await typeInputAndSend(tester);
+      await tester.tap(find.text('나중에 할게요'));
+      await tester.pump();
+      await runLoading(tester);
+      expect(find.byType(QuestionScreen), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      await tester.pump(AppMotion.ambient + const Duration(milliseconds: 100));
+      expect(find.byType(ElumDialogCard<bool>), findsNothing);
+      expect(find.byType(RewardSetupScreen), findsOneWidget);
+    });
+
+    testWidgets('입력 — 흐름 첫 화면이라 기기 뒤로가 곧 떠나는 것이다. 묻는다', (tester) async {
+      await pumpFlow(tester, below: Routes.guardianDrafts);
+      await tester.enterText(find.byType(TextField), '내일 비 오는 날 등교');
+      await settle(tester);
+
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      expect(find.text('일과 만들기를 그만둘까요?'), findsOneWidget);
+      expect(find.text('지금 나가면 적은 내용은 남지 않아요'), findsOneWidget);
+    });
+  });
+
+  group('카드 확인의 뒤로는 흐름을 떠난다 (#387 D1)', () {
+    /// 홈에서 새로 만들어 카드 확인까지 간다 — 앱과 같은 모양(홈 위에 흐름 push).
+    Future<GoRouter> reachReview(WidgetTester tester) async {
+      final router = await pumpFlow(tester, below: Routes.guardian);
+      await typeInputAndSend(tester);
+      await tester.tap(find.text('나중에 할게요'));
+      await tester.pump();
+      await runLoading(tester);
+      await tester.tap(find.text('우산'));
+      await settle(tester);
+      await tester.tap(find.text('카드 만들기'));
+      await tester.pump();
+      await runLoading(tester);
+      expect(find.byType(CardReviewScreen), findsOneWidget);
+      return router;
+    }
+
+    /// 흐름 화면이 하나도 남지 않고 들어오기 전 화면([at])에 섰는가.
+    void expectOutOfFlow(WidgetTester tester, GoRouter router, String at) {
+      expect(router.state.uri.path, at);
+      expect(
+        find.byType(at == Routes.guardian ? GuardianHomeScreen : DraftRoutinesScreen),
+        findsOneWidget,
+      );
+      // 흐름 아래 가려져 쉬던 화면이 다시 보이는 순간 목록을 다시 그리다 터지지 않는다(#387).
+      expect(tester.takeException(), isNull);
+      for (final t in [
+        CardReviewScreen,
+        QuestionScreen,
+        RewardSetupScreen,
+        RoutineInputScreen,
+        RoutineLoadingScreen,
+      ]) {
+        expect(find.byType(t, skipOffstage: false), findsNothing, reason: '$t 가 남았다');
+      }
+    }
+
+    Future<void> leave(WidgetTester tester) async {
+      await settle(tester);
+      // 임시저장에 남는다는 말 — 카드를 만든 뒤라 사실이다.
+      expect(find.text('임시저장에 두고 나갈까요?'), findsOneWidget);
+      await tester.tap(find.text('나가기'));
+      await tester.pump();
+      await tester.pump(AppMotion.ambient + const Duration(milliseconds: 100));
+    }
+
+    testWidgets('화살표 → 나가기면 추가 질문이 아니라 흐름 밖으로', (tester) async {
+      final router = await reachReview(tester);
+      await tester.tap(find.bySemanticsLabel('뒤로 가기'));
+      await leave(tester);
+      expectOutOfFlow(tester, router, Routes.guardian);
+      // 흐름 안으로 돌아가 `그만둘까요`(사라진다) 를 다시 볼 일이 없다.
+      expect(find.text('일과 만들기를 그만둘까요?'), findsNothing);
+      // AI 를 다시 부르지 않았다.
+      expect(repo.createCalls, 1);
+    });
+
+    testWidgets('기기 뒤로 → 나가기도 흐름 밖으로', (tester) async {
+      final router = await reachReview(tester);
+      await tester.binding.handlePopRoute();
+      await leave(tester);
+      expectOutOfFlow(tester, router, Routes.guardian);
+    });
+
+    testWidgets('계속 만들기면 카드 확인에 남는다', (tester) async {
+      await reachReview(tester);
+      await tester.binding.handlePopRoute();
+      await settle(tester);
+      await tester.tap(find.text('계속 만들기'));
+      await settle(tester);
+      expect(find.byType(CardReviewScreen), findsOneWidget);
+    });
+
+    testWidgets('임시저장에서 이어서 만들다 뒤로 → 임시저장 목록으로 (T7)', (tester) async {
+      final router = await pumpFlow(
+        tester,
+        drafts: const [
+          Routine(
+            id: 'd1',
+            title: '비 오는 날 등교',
+            status: 'PENDING_REVIEW',
+            steps: [ActionCard(id: 'c1', stepOrder: 1, description: '우산을 챙겨요')],
+          ),
+        ],
+      )..go(Routes.guardianDrafts);
+      await settle(tester);
+      await tester.tap(find.text('비 오는 날 등교'));
+      await settle(tester);
+      expect(find.byType(CardReviewScreen), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await leave(tester);
+      expectOutOfFlow(tester, router, Routes.guardianDrafts);
+    });
   });
 
   testWidgets('입력의 보내기를 빠르게 두 번 눌러도 보상 화면은 한 장이다', (tester) async {
@@ -278,8 +439,17 @@ class _Repo with FakeRewardApi implements RoutineRepository {
     );
   }
 
+  /// 임시저장 화면이 보여줄 목록.
+  List<Routine> drafts = const [];
+
   @override
-  Future<List<Routine>> getMyRoutines() async => const [];
+  Future<List<Routine>> getMyRoutines() async => drafts;
+
+  @override
+  Future<List<Routine>> getTodayRoutines() async => const [];
+
+  @override
+  Future<List<Routine>> getPastRoutines() async => const [];
 
   @override
   Future<List<RoutineSuggestion>> getSuggestions() async =>

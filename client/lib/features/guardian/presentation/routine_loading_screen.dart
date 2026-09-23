@@ -260,10 +260,10 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
         onBack: _handleBack,
         // 만들지 못했으니 서버에 남은 것이 없다 (T5). 뒤로는 흐름 안 한 칸이라 묻지 않는다.
         leave: RoutineLeave.discard,
-        askOnBack: false,
         child: _GenerateError(
           errorCode: flow.errorCode,
           errorMessage: flow.errorMessage,
+          errorHint: flow.errorHint,
           onRetry: _retry,
         ),
       );
@@ -288,7 +288,6 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
         RoutineLoadingKind.prepare => RoutineLeave.discard,
         RoutineLoadingKind.generate => RoutineLeave.draftWhenReady,
       },
-      askOnBack: false,
       // Figma 262:4575 · 262:4709 — 두 로딩 프레임 모두 뒤로가기를 둔다.
       // 되돌릴 수 없다는 이유로 숨겼다가 시안과 어긋났다 (이슈 #63).
       // 오래 기다리는 화면이라 빠져나갈 길이 없으면 갇힌 느낌을 준다.
@@ -607,6 +606,7 @@ class _GenerateError extends StatelessWidget {
   const _GenerateError({
     required this.errorCode,
     required this.errorMessage,
+    required this.errorHint,
     required this.onRetry,
   });
 
@@ -615,6 +615,9 @@ class _GenerateError extends StatelessWidget {
   /// 서버가 보낸 문구. 있으면 이것을 그대로 띄운다 — 앱이 다시 쓰면 서버에서
   /// 고쳐도 앱은 옛 문구를 보여준다 (#347).
   final String? errorMessage;
+
+  /// 네트워크 사정일 때 무엇을 하면 되는지 (`인터넷 연결을 확인해주세요`).
+  final String? errorHint;
   final Future<void> Function() onRetry;
 
   @override
@@ -641,10 +644,12 @@ class _GenerateError extends StatelessWidget {
           ),
           SizedBox(height: space.sm),
           Text(
+            // 제목이 무엇이 안 됐는지, 이 줄이 무엇을 하면 되는지를 말한다 (#352).
             // 주간 한도처럼 재시도로 풀리지 않는 실패는 서버가 정확히 알려준다.
+            // 서버에 닿지도 못했으면 서버 문구가 없다 — 인터넷을 확인하라고 한다.
             errorMessage?.trim().isNotEmpty == true
                 ? errorMessage!.trim()
-                : '잠시 후 다시 해주세요',
+                : errorHint ?? '잠시 후 다시 해주세요',
             textAlign: TextAlign.center,
             style: context.typo.promptBody.copyWith(color: colors.promptMuted),
           ),
