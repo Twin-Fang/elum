@@ -38,7 +38,7 @@
 | [02-architecture.md](./02-architecture.md) | 시스템 구성, 기술 스택, 저장소 구조 | BE / AI / 인프라 |
 | [03-screens.md](./03-screens.md) | 전체 화면 플로우 + 페이지별 러프 명세 | FE |
 | [04-ai-card-generation.md](./04-ai-card-generation.md) | 도움 목표 기반 개인화, 프롬프트 방향, 카드 데이터 형식 | AI / BE |
-| [05-ai-dlp-gateway.md](./05-ai-dlp-gateway.md) | AI DLP Gateway 보안 설계 (입력 보호 계층) | AI / 보안 |
+| [05-ai-dlp-gateway.md](./05-ai-dlp-gateway.md) | AI DLP Gateway 보안 설계 (해커톤 POC — 2026-09-23 사용 중단, #377) | AI / 보안 |
 | [06-api-spec.md](./06-api-spec.md) | REST API 러프 명세, JSON 예시, 실패 대비 fallback | FE / BE |
 | [07-mvp-scope.md](./07-mvp-scope.md) | MVP 구현 범위, 제외 목록, 데모 시나리오 | 전체 |
 | [08-design-principles.md](./08-design-principles.md) | **디자인 철학 · 말투 · 화면 규칙 · QA 리뷰 시트** | 디자인 / FE / QA |
@@ -54,7 +54,7 @@
 세부 구현은 러프하지만, 아래 방향성은 서비스의 정체성이므로 유지한다.
 
 1. **진단명·장애 유형을 수집하지 않는다.** 개인화는 보호자가 선택한 `supportGoals`(도움 목표)로만 한다. — "최소한의 정보로 개인화"
-2. **보호자 입력 원문을 LLM에 그대로 보내지 않는다.** AI DLP Gateway에서 마스킹·일반화 후 최소 정보만 전달한다. (로컬 LLM이라도 동일 적용 — 최소 정보 원칙)
+2. **AI에는 필요한 정보만 보낸다.** AI DLP Gateway(로컬 LLM 마스킹)는 해커톤 POC였고 2026-09-23부터 쓰지 않는다(#377). 보호자 입력은 가공 없이 전달되므로 개인정보를 적지 말라고 안내한다.
 3. **AI 생성 결과는 보호자 승인 후에만 아동 화면에 노출한다.** (입력 보호 + 출력 승인의 이중 안전 구조)
 4. **한 카드에는 하나의 행동만 담는다.**
 5. **원문을 감사 로그에 저장하지 않는다.** 탐지 유형·건수만 저장한다.
