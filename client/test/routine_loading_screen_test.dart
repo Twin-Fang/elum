@@ -37,6 +37,7 @@ void main() {
     RoutineLoadingKind kind, {
     Duration responseDelay = Duration.zero,
     Map<String, Object?> questions = oneQuestion,
+    Object? createResult,
   }) {
     final router = GoRouter(
       initialLocation: '/loading',
@@ -66,7 +67,7 @@ void main() {
         // 가정하는지 테스트 안에 드러내 둔다.
         fakeDioOverride(delay: responseDelay, {
           'POST /api/routines/questions': questions,
-          'POST /api/routines': const {
+          'POST /api/routines': createResult ?? const {
             'id': 'r1',
             'title': '테스트 일과',
             'status': 'PENDING_REVIEW',
@@ -189,6 +190,48 @@ void main() {
 
       expect(find.text('추가 질문'), findsNothing);
       expect(find.text('카드 생성 로딩'), findsOneWidget);
+    });
+  });
+
+  group('로딩에서 나가기 (#387 T4·T5)', () {
+    testWidgets('카드 만드는 중 홈 — 다 만들어지면 임시저장에 남는다고 말한다 (T4)', (tester) async {
+      await tester.pumpWidget(
+        wrap(RoutineLoadingKind.generate, responseDelay: _slowResponse),
+      );
+      await settle(tester);
+
+      await tester.tap(find.bySemanticsLabel('홈으로 가기'));
+      await settle(tester);
+
+      // 나가도 생성 요청은 서버에서 끝까지 가서 임시저장으로 남는다 — 경고가 아니다.
+      expect(find.text('임시저장에 두고 나갈까요?'), findsOneWidget);
+      expect(
+        find.text('카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('계속 만들기'));
+      await drain(tester);
+    });
+
+    // 뒤로는 흐름 안 한 칸이라 묻지 않는다 — `exit_confirm_test`의 askOnBack 이 본다.
+
+    testWidgets('만들지 못했으면 남은 것이 없다 — 그만둘까요 (T5)', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          RoutineLoadingKind.generate,
+          createResult: const FakeHttpError(500),
+        ),
+      );
+      await settle(tester);
+      await tester.pump(const Duration(seconds: 6));
+      await settle(tester);
+      expect(find.text('카드를 만들지 못했어요'), findsOneWidget);
+
+      await tester.tap(find.bySemanticsLabel('홈으로 가기'));
+      await settle(tester);
+
+      expect(find.text('일과 만들기를 그만둘까요?'), findsOneWidget);
+      expect(find.text('지금 나가면 적은 내용은 남지 않아요'), findsOneWidget);
     });
   });
 

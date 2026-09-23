@@ -95,7 +95,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
 
     return RoutineFlowScaffold(
       aurora: QuestionScreen.aurora,
-      confirmExit: true,
+      leave: RoutineLeave.discard,
       onBack: () => context.pop(),
       // 시안(`262:4854`)은 CTA를 y=675에 둔다 — 약관·목표와 같은 자리다 (#297).
       pinCtaToFigmaY: true,

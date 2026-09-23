@@ -775,6 +775,15 @@ extension RoutineListRefresh on WidgetRef {
   }
 }
 
+/// 화면을 떠난 뒤(위젯이 사라진 뒤)에 부를 때 쓰는 같은 것 — 컨테이너를 붙잡아 둔다.
+extension RoutineListRefreshContainer on ProviderContainer {
+  void refreshRoutines() {
+    invalidate(todayRoutinesProvider);
+    invalidate(pastRoutinesProvider);
+    invalidate(myRoutinesProvider);
+  }
+}
+
 /// notifier 쪽에서 쓰는 같은 것.
 extension RoutineListRefreshRef on Ref {
   void refreshRoutines() {

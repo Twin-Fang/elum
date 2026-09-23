@@ -191,7 +191,8 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
     return RoutineFlowScaffold(
       aurora: RewardSetupScreen.aurora,
       // 여기서 나가면 앞서 만든 답까지 사라진다 (#242).
-      confirmExit: !widget.fromReview,
+      // 카드 만들기 전이라 나가면 적은 것이 남지 않는다. 고치러 온 길은 잃을 것이 없다.
+      leave: widget.fromReview ? null : RoutineLeave.discard,
       onBack: () => context.pop(),
       // 시안은 CTA를 y=675에 둔다 — 약관·목표·추가질문과 같은 자리다.
       pinCtaToFigmaY: true,

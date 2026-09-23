@@ -326,6 +326,10 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
         'cardCount': routine.steps.length,
       });
       state = state.copyWith(step: RoutineFlowStep.review, routine: routine);
+      // 이 순간 서버에 임시저장(`PENDING_REVIEW`)으로 남았다. 목록을 다시 받지 않으면
+      // 앱을 다시 켜기 전까지 임시저장 화면에 안 보인다 (#387) — 전체 목록이
+      // keepAlive 라 한 번 받은 것을 계속 준다.
+      ref.refreshRoutines();
     } catch (e) {
       // 로컬 폴백을 제거했으므로 실패를 삼키지 않고 에러 상태로 드러낸다.
       // 화면은 무한 로딩 대신 에러 코드 + 재시도 버튼을 보여준다(docs 예외처리 규칙).

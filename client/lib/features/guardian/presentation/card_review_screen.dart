@@ -173,8 +173,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     }
 
     return RoutineFlowScaffold(
-      // AI가 30초 걸려 만든 카드다. 저장 전에 나가면 통째로 날아간다 (#242).
-      confirmExit: true,
+      // 카드를 만든 순간 서버에 임시저장으로 남는다 — 나가도 날아가지 않는다 (#387).
+      // 홈에서 편집하러 온 이미 저장한 일과는 뺀 카드만 저장하기를 기다린다.
+      leave: routine?.status == 'PENDING_REVIEW'
+          ? RoutineLeave.draft
+          : RoutineLeave.edit,
       onBack: () => context.pop(),
       bottomButton: ElumButton(label: '저장하기', onPressed: _save),
       aurora: CardReviewScreen.aurora,

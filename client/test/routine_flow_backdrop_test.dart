@@ -451,7 +451,7 @@ void main() {
       await tester.binding.handlePopRoute();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
-      expect(find.text('만들던 일과가 사라져요'), findsOneWidget);
+      expect(find.text('일과 만들기를 그만둘까요?'), findsOneWidget);
 
       await tester.tap(find.text('나가기'));
       await tester.pump();
@@ -491,7 +491,7 @@ void main() {
       await tester.tap(find.bySemanticsLabel('뒤로 가기'));
       await tester.pump();
       await tester.pump(AppMotion.ambient + const Duration(milliseconds: 100));
-      expect(find.text('만들던 일과가 사라져요'), findsNothing);
+      expect(find.text('일과 만들기를 그만둘까요?'), findsNothing);
       for (final c in auroraColors(tester)) {
         expect(c.a, 0);
       }

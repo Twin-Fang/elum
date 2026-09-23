@@ -258,6 +258,9 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
       return RoutineFlowScaffold(
         aurora: RoutineLoadingScreen.auroraOf(widget.kind),
         onBack: _handleBack,
+        // 만들지 못했으니 서버에 남은 것이 없다 (T5). 뒤로는 흐름 안 한 칸이라 묻지 않는다.
+        leave: RoutineLeave.discard,
+        askOnBack: false,
         child: _GenerateError(
           errorCode: flow.errorCode,
           errorMessage: flow.errorMessage,
@@ -278,6 +281,14 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
 
     return RoutineFlowScaffold(
       aurora: RoutineLoadingScreen.auroraOf(widget.kind),
+      // 홈으로 떠날 때만 묻는다 — 뒤로는 기다리기를 그만두고 흐름 안 한 칸 돌아가는
+      // 것이라 잃을 것이 없다. 생성 중에 떠나면 요청은 서버에서 끝까지 가서
+      // 임시저장으로 남는다 (T4 · #387). 준비 중이면 아직 아무것도 없다.
+      leave: switch (widget.kind) {
+        RoutineLoadingKind.prepare => RoutineLeave.discard,
+        RoutineLoadingKind.generate => RoutineLeave.draftWhenReady,
+      },
+      askOnBack: false,
       // Figma 262:4575 · 262:4709 — 두 로딩 프레임 모두 뒤로가기를 둔다.
       // 되돌릴 수 없다는 이유로 숨겼다가 시안과 어긋났다 (이슈 #63).
       // 오래 기다리는 화면이라 빠져나갈 길이 없으면 갇힌 느낌을 준다.

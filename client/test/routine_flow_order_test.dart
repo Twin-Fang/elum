@@ -180,7 +180,7 @@ void main() {
     // 추가 질문에서 뒤로 — 준비 로딩은 질문 화면으로 교체됐으니 보상으로 돌아간다.
     await tester.tap(find.bySemanticsLabel('뒤로 가기'));
     await settle(tester);
-    expect(find.text('만들던 일과가 사라져요'), findsOneWidget);
+    expect(find.text('일과 만들기를 그만둘까요?'), findsOneWidget);
     await tester.tap(find.text('나가기'));
     await tester.pump();
     await tester.pump(AppMotion.ambient + const Duration(milliseconds: 100));

@@ -297,7 +297,7 @@ GoRouter createRouter({
       //
       // 흐름 바깥에서 들어올 때는 흐름 전체가 한 장으로 미끄러져 들어온다.
       // **iOS 뒤로 밀기가 흐름을 통째로 닫지 않게** 전환 페이지로 둔다 — 플랫폼
-      // 기본 페이지면 안쪽 화면의 `만들던 일과가 사라져요` 확인을 건너뛴다.
+      // 기본 페이지면 안쪽 화면의 나가기 확인(#242 · #387)을 건너뛴다.
       ShellRoute(
         pageBuilder: (context, state, child) => slidePage(
           state,

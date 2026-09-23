@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +11,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_scaffold.dart';
+import '../../data/routine_repository.dart';
 import 'aurora_background.dart';
 import 'routine_flow_backdrop.dart';
 
@@ -22,7 +24,7 @@ import 'routine_flow_backdrop.dart';
 ///
 /// Figma는 뒤로가기(x=24)와 홈(x=72)을 나란히 둔다. 홈은 흐름을 중간에
 /// 빠져나가는 길이다 — 일과 만들기는 단계가 길어 되돌아갈 방법이 필요하다.
-class RoutineFlowScaffold extends StatelessWidget {
+class RoutineFlowScaffold extends ConsumerWidget {
   const RoutineFlowScaffold({
     super.key,
     required this.child,
@@ -30,7 +32,8 @@ class RoutineFlowScaffold extends StatelessWidget {
     this.bottomButton,
     this.pinCtaToFigmaY = false,
     this.aurora = AuroraTone.input,
-    this.confirmExit = false,
+    this.leave,
+    this.askOnBack = true,
     this.belowButton,
   });
 
@@ -73,42 +76,70 @@ class RoutineFlowScaffold extends StatelessWidget {
   /// 보조 동작 하단(781)에서 프레임 하단(852)까지.
   static const _belowBottom = 71.0;
 
-  /// 나가기 전에 물어볼지 (이슈 #242).
+  /// 여기서 흐름을 떠나면 무엇이 남는가 — 나가기 전에 그것을 말하고 묻는다
+  /// (이슈 #242 · #387). null 이면 잃을 것이 없어 묻지 않는다.
   ///
   /// **일과를 만들다 중간에 나가면 되돌릴 수 없다.** 입력한 문장도, AI가 만든
-  /// 카드도 사라지는데 카드 생성은 30초 넘게 걸린다 — 잘못 눌러 날리면 그 시간을
-  /// 다시 쓴다.
+  /// 카드도 남지 않는데 카드 생성은 30초 넘게 걸린다 — 잘못 눌러 날리면 그 시간을
+  /// 다시 쓴다. 다만 카드를 만든 뒤에는 서버에 임시저장으로 **남는다** — 그때
+  /// `사라져요`라고 하면 사실이 아니다. 그래서 시점마다 [RoutineLeave]가 다르다.
   ///
   /// 뒤로가기·홈·**시스템 뒤로가기(제스처)** 를 모두 잡는다. 화면 안의 버튼만
   /// 막으면 제스처로 그냥 빠져나간다.
   ///
-  /// 잃을 것이 없는 화면에서는 false로 둔다 — 물어볼 것이 없는데 묻는 팝업이
+  /// 잃을 것이 없는 화면에서는 null 로 둔다 — 물어볼 것이 없는데 묻는 팝업이
   /// 가장 성가시다.
-  final bool confirmExit;
+  final RoutineLeave? leave;
+
+  /// 뒤로가기도 묻는가. 로딩처럼 뒤로가 **흐름 안에서 한 칸 돌아가는 것**이면
+  /// false — 떠나는 것은 홈뿐이라 홈만 묻는다.
+  final bool askOnBack;
 
   /// 나가도 되는지 묻는다. 물어보지 않기로 했으면 그대로 통과시킨다.
-  Future<bool> _mayLeave(BuildContext context) async =>
-      confirmExit ? confirmLeaveRoutineFlow(context) : true;
+  ///
+  /// 임시저장에 남기고 나가면 목록을 다시 받는다 — 카드 확인에서 문장을 고쳤을 수
+  /// 있고, 안 받으면 임시저장 화면이 옛 목록을 보여준다 (#387).
+  ///
+  /// **나간 다음 프레임에 받는다.** 지금은 돌아갈 화면(임시저장·홈)이 이 화면 아래에
+  /// 가려져 구독을 쉬고 있다. 쉬는 동안 목록을 무효화하면, 그 화면이 다시 보이는
+  /// 순간 파생 목록이 빌드 도중에 다시 그리라고 요청해 디버그에서
+  /// `markNeedsBuild() called during build` 가 난다 (실제로 났다).
+  Future<bool> _mayLeave(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool back,
+  }) async {
+    final kind = leave;
+    if (kind == null || (back && !askOnBack)) return true;
+    final container = ProviderScope.containerOf(context, listen: false);
+    final ok = await confirmLeaveRoutineFlow(context, kind);
+    if (ok && kind != RoutineLeave.discard) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => container.refreshRoutines(),
+      );
+    }
+    return ok;
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
 
     return PopScope(
       // 시스템 뒤로가기(제스처·버튼)를 여기서 잡는다.
-      canPop: !confirmExit,
+      canPop: leave == null || !askOnBack,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        final ok = await _mayLeave(context);
+        final ok = await _mayLeave(context, ref, back: true);
         if (!ok || !context.mounted) return;
         dismissKeyboard();
         context.pop();
       },
-      child: _scaffold(context, space),
+      child: _scaffold(context, ref, space),
     );
   }
 
-  Widget _scaffold(BuildContext context, AppSpacing space) {
+  Widget _scaffold(BuildContext context, WidgetRef ref, AppSpacing space) {
     // 흐름 배경 위라면 바탕을 칠하지 않는다 — 배경이 비쳐야 색이 번지는 게 보인다.
     final onBackdrop = RoutineFlowBackdrop.isPresent(context);
 
@@ -129,12 +160,14 @@ class RoutineFlowScaffold extends StatelessWidget {
                   onBack: onBack == null
                       ? null
                       : () async {
-                          if (!await _mayLeave(context)) return;
+                          if (!await _mayLeave(context, ref, back: true)) {
+                            return;
+                          }
                           dismissKeyboard();
                           onBack!();
                         },
                   onHome: () async {
-                    final ok = await _mayLeave(context);
+                    final ok = await _mayLeave(context, ref, back: false);
                     if (ok && context.mounted) context.go(Routes.guardian);
                   },
                 ),
@@ -276,14 +309,22 @@ class _TopBar extends StatelessWidget {
 /// 뒤라 iOS가 키보드를 남긴 채 화면만 바꾼다.
 void dismissKeyboard() => FocusManager.instance.primaryFocus?.unfocus();
 
-Future<bool> confirmLeaveRoutineFlow(BuildContext context) async {
+Future<bool> confirmLeaveRoutineFlow(
+  BuildContext context, [
+  RoutineLeave kind = RoutineLeave.discard,
+]) async {
+  final (title, message) = RoutineLeave.copyOf(kind);
+  // 정말 잃을 때만 경고한다. 임시저장에 남는 나가기는 되돌릴 수 있는 동작이라
+  // 경고 아이콘·노란 버튼을 쓰지 않는다 — 괜히 겁을 주면 저장된 것도 못 믿는다 (#387).
+  final loses = kind == RoutineLeave.discard;
   final leave = await showElumDialog<bool>(
     context: context,
-    icon: ElumDialogIcon.warning,
-    title: '만들던 일과가 사라져요',
-    actions: const [
+    icon: loses ? ElumDialogIcon.warning : null,
+    title: title,
+    message: message,
+    actions: [
       // 되돌아가는 쪽을 먼저 둔다 — 실수로 누르는 일이 잦다.
-      ElumDialogAction(
+      const ElumDialogAction(
         label: '계속 만들기',
         value: false,
         tone: ElumDialogTone.neutral,
@@ -291,12 +332,44 @@ Future<bool> confirmLeaveRoutineFlow(BuildContext context) async {
       ElumDialogAction(
         label: '나가기',
         value: true,
-        tone: ElumDialogTone.warn,
+        tone: loses ? ElumDialogTone.warn : ElumDialogTone.primary,
       ),
     ],
   );
   // 바깥을 눌러 닫으면 null이다 — 나가지 않는 쪽이 안전하다.
   return leave == true;
+}
+
+/// 흐름을 떠날 때 무엇이 남는가 (#387). 나가기 팝업의 말이 여기서 갈린다.
+enum RoutineLeave {
+  /// 카드 만들기 전 (입력·보상·추가 질문·준비 로딩·생성 실패) — 서버에 아무것도 없다.
+  discard,
+
+  /// 카드 만드는 중 (생성 로딩) — 나가도 생성은 서버에서 끝까지 가고, 다 되면
+  /// 임시저장(`PENDING_REVIEW`)으로 남는다. 실패하면 남지 않으므로 "다 만들어지면".
+  draftWhenReady,
+
+  /// 카드 만든 뒤 (카드 확인) — 이미 임시저장에 있다.
+  draft,
+
+  /// 이미 저장한 일과를 고치는 중 (홈에서 편집으로 들어온 카드 확인). 문장·보상은
+  /// 고칠 때마다 바로 저장되고, 카드 빼기만 `저장하기`를 눌러야 반영된다.
+  edit;
+
+  /// 제목과 설명. 해요체·능동·긍정형 (CLAUDE.md 말투 규칙 — `사라져요` 대신 무엇이
+  /// 남는지·어디서 이어서 하는지를 말한다).
+  ///
+  /// 설명 줄바꿈은 손으로 둔다 — 팝업 폭(322)에서 저절로 꺾이면 `요` 한 글자만
+  /// 다음 줄로 떨어진다(실제로 그랬다).
+  static (String, String) copyOf(RoutineLeave kind) => switch (kind) {
+    discard => ('일과 만들기를 그만둘까요?', '지금 나가면 적은 내용은 남지 않아요'),
+    draftWhenReady => (
+      '임시저장에 두고 나갈까요?',
+      '카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요',
+    ),
+    draft => ('임시저장에 두고 나갈까요?', '설정의 임시저장에서\n이어서 만들 수 있어요'),
+    edit => ('저장하지 않고 나갈까요?', '뺀 카드는 저장하기를 눌러야 빠져요'),
+  };
 }
 
 /// 다음 화면으로 **한 번만** 넘긴다 — 빠르게 두 번 눌러도 화면이 두 장 쌓이지 않는다.

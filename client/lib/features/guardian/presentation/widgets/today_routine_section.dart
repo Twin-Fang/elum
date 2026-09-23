@@ -20,11 +20,16 @@ import 'routine_swipe_actions.dart';
 
 // (참고) 제목 fallback은 Routine.displayTitle이 처리한다.
 
-/// 홈에 보여줄 일과 목록 — 방금 만든 일과 + 서버 목록을 병합한다.
+/// 홈에 보여줄 일과 목록 — 방금 저장한 일과 + 서버 목록을 병합한다.
 ///
-/// 방금 만든 일과를 먼저 둔다. 서버 목록 갱신을 기다리면 승인 직후 홈에
+/// 방금 저장한 일과를 먼저 둔다. 서버 목록 갱신을 기다리면 승인 직후 홈에
 /// 아무것도 없는 것처럼 보인다 (docs 원칙 6번 — 데모는 끊기지 않는다).
 /// steps가 빈 일과는 보여줄 것이 없어 제외한다.
+///
+/// **흐름에 남은 일과가 임시저장(`PENDING_REVIEW`)이면 붙이지 않는다** (#387 결함 C).
+/// 카드 확인에서 `나가기`로 끝내면 흐름에 그 일과가 남는데, 상태를 안 보고 붙여서
+/// 아직 이룸이에게 보내지 않은 것이 오늘 일과 맨 앞에 떴다 — 앱을 다시 켜야
+/// 사라졌다. 오늘 일과는 저장(승인)한 것만이다 (#353).
 final homeRoutinesProvider = Provider<List<Routine>>((ref) {
   final current = ref.watch(routineFlowProvider).routine;
   // `.value`는 재조회(invalidate) 중에도 직전 값을 준다. `asData`를 쓰면 동기화 뒤
@@ -35,7 +40,10 @@ final homeRoutinesProvider = Provider<List<Routine>>((ref) {
   final fetched = ref.watch(todayRoutinesProvider).value ?? const <Routine>[];
 
   return [
-    if (current != null && current.steps.isNotEmpty) current,
+    if (current != null &&
+        current.steps.isNotEmpty &&
+        current.status != 'PENDING_REVIEW')
+      current,
     ...fetched.where((r) => r.id != current?.id && r.steps.isNotEmpty),
   ];
 });

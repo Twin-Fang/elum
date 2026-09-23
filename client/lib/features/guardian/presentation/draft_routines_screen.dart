@@ -21,11 +21,35 @@ import '../data/routine_repository.dart';
 ///
 /// 서버의 `PENDING_REVIEW`가 곧 임시저장이다. **`승인 대기`라 부르지 않는다** —
 /// 만들다 만 것이지 심사가 아니다 (용어 규칙).
-class DraftRoutinesScreen extends ConsumerWidget {
+class DraftRoutinesScreen extends ConsumerStatefulWidget {
   const DraftRoutinesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DraftRoutinesScreen> createState() =>
+      _DraftRoutinesScreenState();
+}
+
+class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // **들어올 때마다 새로 받는다** (#387). 전체 목록은 keepAlive 라 한 번 받은 것을
+    // 계속 준다 — 다른 휴대폰에서 만들다 둔 것, 로딩 중에 나가 뒤늦게 생긴 것이
+    // 안 보인다. 받는 동안에는 직전 목록을 그대로 보여주므로 깜빡이지 않는다.
+    //
+    // 서버 전용 `GET /api/routines/drafts` 는 쓰지 않는다. 목록이 하나 더 생기면
+    // 셋(오늘·지난·전체)과 함께 무효화해야 하는 넷째가 되고, 한쪽만 갱신되는
+    // 일(#353)이 다시 생긴다. 전체 목록을 걸러도 한 보호자의 일과는 많지 않다.
+    //
+    // 첫 프레임 뒤로 미룬다 — initState 는 빌드 중이라 여기서 무효화하면 이미
+    // 목록을 보고 있는 위 화면까지 빌드 도중에 다시 그리라는 요청이 된다.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.invalidate(myRoutinesProvider);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final drafts = ref.watch(draftRoutinesProvider);
     final space = context.space;
 
