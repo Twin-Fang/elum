@@ -2,12 +2,16 @@ package com.chuseok22.elumserver.member.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
+import com.chuseok22.elumserver.auth.infrastructure.entity.AuthIdentity;
+import com.chuseok22.elumserver.auth.infrastructure.oauth.OAuthProvider;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
@@ -19,11 +23,13 @@ import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUp
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +39,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
@@ -67,11 +74,53 @@ class MemberServiceTest {
   @InjectMocks
   private MemberService memberService;
 
-  @Test
-  @DisplayName("탈퇴 시 연관 일과를 먼저 삭제한 뒤 회원을 삭제한다")
-  void withdraw_withRoutines_deletesRoutinesThenMember() {
+  private Member activeMember(String id) {
     Member member = new Member();
-    member.setId("member-1");
+    member.setId(id);
+    member.setUsername("kakao_" + id);
+    member.setStatus(MemberStatus.ACTIVE);
+    member.setLastLoginAt(LocalDateTime.now().minusHours(1));
+    member.setLastActivityAt(LocalDateTime.now().minusMinutes(5));
+    member.setTermsAgreed(true);
+    member.setConsentedAt(LocalDateTime.now().minusDays(30));
+    return member;
+  }
+
+  private AuthIdentity kakaoIdentity(String memberId) {
+    AuthIdentity identity = new AuthIdentity();
+    identity.setMemberId(memberId);
+    identity.setProvider(OAuthProvider.KAKAO);
+    identity.setProviderUserId("kakao-9999");
+    identity.setEmail("parent@kakao.com");
+    identity.setEmailVerified(true);
+    return identity;
+  }
+
+  @Test
+  @DisplayName("탈퇴하면 계정 행을 지우지 않고 WITHDRAWN 과 탈퇴 시각을 남긴다 (#372)")
+  void withdraw_keepsMemberRowAsWithdrawn() {
+    Member member = activeMember("member-1");
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(routineRepository.findAllByProfileMemberId("member-1")).thenReturn(List.of());
+
+    LocalDateTime before = LocalDateTime.now();
+    memberService.withdraw("member-1");
+
+    assertThat(member.getStatus()).isEqualTo(MemberStatus.WITHDRAWN);
+    assertThat(member.getWithdrawnAt()).isAfterOrEqualTo(before);
+    // 재가입을 알아볼 기준이라 행은 남긴다. 지우면 같은 소셜 계정이 새 계정으로 들어온다.
+    verify(memberRepository, never()).delete(any(Member.class));
+    // 동의 값은 남긴다 — 무엇에 동의했었는지의 증빙이다. 되살릴 때 비운다.
+    assertThat(member.getTermsAgreed()).isTrue();
+    // 재가입 판별에 필요 없는 활동 기록은 비운다 (최소 보관).
+    assertThat(member.getLastLoginAt()).isNull();
+    assertThat(member.getLastActivityAt()).isNull();
+  }
+
+  @Test
+  @DisplayName("탈퇴하면 이룸이 정보·일과·세션·이룸이 휴대폰 연결·구독은 즉시 지운다 (최소 보관)")
+  void withdraw_deletesEverythingNotNeededForRejoin() {
+    Member member = activeMember("member-1");
     Routine routine = new Routine();
     routine.setId("routine-1");
     List<Routine> routines = List.of(routine);
@@ -80,60 +129,102 @@ class MemberServiceTest {
 
     memberService.withdraw("member-1");
 
-    InOrder callOrder = inOrder(
-      routineRepository, profileRepository, authIdentityRepository, refreshTokenRepository,
-      aiCallLogRepository, memberRepository);
+    // 일과 → 프로필 순이어야 외래키에 걸리지 않는다.
+    InOrder callOrder = inOrder(routineRepository, profileRepository);
     callOrder.verify(routineRepository).deleteAll(routines);
     callOrder.verify(profileRepository).deleteAllByMemberId("member-1");
-    callOrder.verify(authIdentityRepository).deleteAllByMemberId("member-1");
-    callOrder.verify(refreshTokenRepository).deleteAllByMemberId("member-1");
-    callOrder.verify(aiCallLogRepository).detachMember("member-1");
-    callOrder.verify(memberRepository).delete(member);
+    verify(refreshTokenRepository).deleteAllByMemberId("member-1");
+    verify(deviceLinkRepository).deleteAllByMemberId("member-1");
+    verify(subscriptionRepository).deleteByMemberId("member-1");
   }
 
   @Test
-  @DisplayName("연관 일과가 없는 회원도 정상적으로 탈퇴된다")
-  void withdraw_noRoutines_deletesMemberOnly() {
-    Member member = new Member();
-    member.setId("member-2");
-    when(memberRepository.findById("member-2")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByProfileMemberId("member-2")).thenReturn(List.of());
-
-    memberService.withdraw("member-2");
-
-    verify(routineRepository).deleteAll(List.of());
-    // 세션 기록은 member를 외래키로 참조하지 않으므로 직접 지워야 남지 않는다.
-    verify(refreshTokenRepository).deleteAllByMemberId("member-2");
-    verify(memberRepository).delete(member);
-  }
-
-  @Test
-  @DisplayName("탈퇴 시 AI 호출 기록은 남기되 회원 식별자만 떼어낸다")
-  void withdraw_detachesMemberFromAiCallLogs() {
-    Member member = new Member();
-    member.setId("member-3");
+  @DisplayName("S1 탈퇴해도 AI 호출 기록의 회원 식별자를 떼지 않는다 — 재가입하면 한도가 이어진다")
+  void withdraw_keepsAiCallLogOwner() {
+    Member member = activeMember("member-3");
     when(memberRepository.findById("member-3")).thenReturn(Optional.of(member));
     when(routineRepository.findAllByProfileMemberId("member-3")).thenReturn(List.of());
 
     memberService.withdraw("member-3");
 
-    // 외래키가 없어 DB가 대신 비워 주지 않는다. 빠뜨리면 탈퇴한 회원의 식별자가 남는다.
-    verify(aiCallLogRepository).detachMember("member-3");
-    // 행까지 지우면 과거 호출량·비용 집계가 줄어든다 — 지우는 API는 부르지 않는다.
+    // 떼는 순간 하루·주간 한도가 세는 기록이 누구 것도 아니게 되어, 재가입한 계정의 사용량이 0 이 된다.
+    verify(aiCallLogRepository, never()).detachMember(any());
     verify(aiCallLogRepository, never()).deleteAll();
   }
 
   @Test
-  @DisplayName("탈퇴 시 이룸이 휴대폰 연결도 함께 지운다 (이슈 #200)")
+  @DisplayName("S3 탈퇴하면 소셜 신원은 남기되 이메일을 비운다 — 다른 제공자로 새로 가입할 때 충돌로 막히지 않는다")
+  void withdraw_keepsIdentityButClearsEmail() {
+    Member member = activeMember("member-5");
+    AuthIdentity identity = kakaoIdentity("member-5");
+    when(memberRepository.findById("member-5")).thenReturn(Optional.of(member));
+    when(routineRepository.findAllByProfileMemberId("member-5")).thenReturn(List.of());
+    when(authIdentityRepository.findAllByMemberId("member-5")).thenReturn(List.of(identity));
+
+    memberService.withdraw("member-5");
+
+    // 제공자 + 제공자 회원번호는 남아야 같은 소셜 계정이 다시 왔을 때 알아본다.
+    verify(authIdentityRepository, never()).deleteAllByMemberId(any());
+    assertThat(identity.getProvider()).isEqualTo(OAuthProvider.KAKAO);
+    assertThat(identity.getProviderUserId()).isEqualTo("kakao-9999");
+    // 이메일은 재가입 판별에 쓰지 않는다. 남겨 두면 네이버로 같은 이메일 가입이 이메일 충돌로 막힌다.
+    assertThat(identity.getEmail()).isNull();
+    assertThat(identity.isEmailVerified()).isFalse();
+  }
+
+  @Test
+  @DisplayName("S4 탈퇴하면 그 전에 발급된 액세스 토큰을 막고 세션을 지운다")
+  void withdraw_invalidatesIssuedTokens() {
+    Member member = activeMember("member-6");
+    when(memberRepository.findById("member-6")).thenReturn(Optional.of(member));
+    when(routineRepository.findAllByProfileMemberId("member-6")).thenReturn(List.of());
+
+    LocalDateTime before = LocalDateTime.now();
+    memberService.withdraw("member-6");
+
+    // 리프레시만 지우면 받아 둔 액세스 토큰으로 만료(하루)까지 계속 들어온다.
+    assertThat(member.getTokenInvalidBefore()).isAfterOrEqualTo(before);
+    verify(refreshTokenRepository).deleteAllByMemberId("member-6");
+  }
+
+  @Test
+  @DisplayName("S5 탈퇴 도중 실패하면 예외를 그대로 올리고 계정 상태를 바꾸지 않는다")
+  void withdraw_failureMidway_propagatesAndLeavesStatus() {
+    Member member = activeMember("member-7");
+    when(memberRepository.findById("member-7")).thenReturn(Optional.of(member));
+    when(routineRepository.findAllByProfileMemberId("member-7")).thenReturn(List.of());
+    doThrow(new IllegalStateException("구독 삭제 실패"))
+      .when(subscriptionRepository).deleteByMemberId("member-7");
+
+    // 예외를 삼키면 트랜잭션이 커밋돼 반쯤 지워진 계정이 남는다. 올라가야 전부 롤백되고
+    // 앱이 에러 코드와 함께 머문다 (#187).
+    assertThatThrownBy(() -> memberService.withdraw("member-7"))
+      .isInstanceOf(IllegalStateException.class);
+    assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
+    assertThat(member.getWithdrawnAt()).isNull();
+  }
+
+  @Test
+  @DisplayName("S5 탈퇴는 쓰기 트랜잭션 하나로 묶여 있어 도중에 실패하면 전부 되돌린다")
+  void withdraw_runsInOneWriteTransaction() throws NoSuchMethodException {
+    Transactional transactional = MemberService.class.getMethod("withdraw", String.class)
+      .getAnnotation(Transactional.class);
+
+    // 클래스 기본값이 읽기 전용이다. 메서드에 따로 없으면 지우기가 flush 되지 않는다.
+    assertThat(transactional).isNotNull();
+    assertThat(transactional.readOnly()).isFalse();
+  }
+
+  @Test
+  @DisplayName("S8 탈퇴하면 이룸이 휴대폰 연결을 지운다 — 되살아나도 새 연결 암호가 있어야 붙는다")
   void withdraw_deletesDeviceLinks() {
-    Member member = new Member();
-    member.setId("member-4");
+    Member member = activeMember("member-4");
     when(memberRepository.findById("member-4")).thenReturn(Optional.of(member));
     when(routineRepository.findAllByProfileMemberId("member-4")).thenReturn(List.of());
 
     memberService.withdraw("member-4");
 
-    // device_link 도 member를 외래키로 참조하지 않는다. 여기서 안 지우면 남는다.
+    // device_link 는 member를 외래키로 참조하지 않는다. 여기서 안 지우면 남는다.
     verify(deviceLinkRepository).deleteAllByMemberId("member-4");
   }
 
@@ -146,6 +237,24 @@ class MemberServiceTest {
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.MEMBER_NOT_FOUND));
+  }
+
+  @Test
+  @DisplayName("이미 탈퇴한 계정은 없는 회원으로 본다 — 다시 탈퇴하거나 정보를 볼 수 없다")
+  void withdrawnMember_isTreatedAsNotFound() {
+    Member member = activeMember("member-8");
+    member.setStatus(MemberStatus.WITHDRAWN);
+    when(memberRepository.findById("member-8")).thenReturn(Optional.of(member));
+
+    assertThatThrownBy(() -> memberService.withdraw("member-8"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.MEMBER_NOT_FOUND));
+    assertThatThrownBy(() -> memberService.getConsents("member-8"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.MEMBER_NOT_FOUND));
+    verify(routineRepository, never()).deleteAll(any());
   }
 
   @Test

@@ -23,11 +23,15 @@ public record AdminMemberResponse(
   long totalTokens,
   double estimatedCostUsd,
   LocalDateTime lastActivityAt,
-  LocalDateTime createdAt
+  LocalDateTime createdAt,
+  LocalDateTime withdrawnAt,
+  LocalDateTime retentionExpiresAt
 ) {
 
+  /// @param retentionExpiresAt 탈퇴 계정의 보관 만료 예정일. 탈퇴하지 않았으면 null (#372)
   public static AdminMemberResponse of(
-    Member member, Profile profile, long routineCount, MemberAiUsage aiUsage
+    Member member, Profile profile, long routineCount, MemberAiUsage aiUsage,
+    LocalDateTime retentionExpiresAt
   ) {
     return new AdminMemberResponse(
       member.getId(),
@@ -42,7 +46,9 @@ public record AdminMemberResponse(
       aiUsage == null ? 0 : aiUsage.getTotalTokens(),
       aiUsage == null ? 0 : aiUsage.getTotalCostUsd(),
       member.getLastActivityAt(),
-      member.getCreatedAt()
+      member.getCreatedAt(),
+      member.getWithdrawnAt(),
+      retentionExpiresAt
     );
   }
 }

@@ -10,6 +10,7 @@
         <h1 class="text-2xl font-bold" th:text="${member.nickname() ?: member.username()}">회원 상세</h1>
         <span th:if="${member.status().name() == 'ACTIVE'}" class="badge badge-success">활성</span>
         <span th:if="${member.status().name() == 'SUSPENDED'}" class="badge badge-error">정지</span>
+        <span th:if="${member.status().name() == 'WITHDRAWN'}" class="badge badge-ghost">탈퇴</span>
       </div>
       <div class="flex items-center gap-2">
         <form th:if="${member.status().name() == 'ACTIVE'}"
@@ -22,7 +23,9 @@
               onsubmit="return confirm('이 계정의 정지를 해제할까요?');">
           <button type="submit" class="btn btn-success btn-sm">정지 해제</button>
         </form>
-        <form th:action="@{/admin/members/{id}/force-logout(id=${member.id()})}" method="post"
+        <!-- 탈퇴 계정은 이미 모든 토큰이 막혀 있고, 서버도 이 동작을 받지 않는다 (MEMBER_WITHDRAWN). -->
+        <form th:if="${member.status().name() != 'WITHDRAWN'}"
+              th:action="@{/admin/members/{id}/force-logout(id=${member.id()})}" method="post"
               onsubmit="return confirm('강제 로그아웃할까요? 발급된 모든 토큰이 무효화되어 다시 로그인해야 합니다.');">
           <button type="submit" class="btn btn-warning btn-sm">강제 로그아웃</button>
         </form>
@@ -34,8 +37,33 @@
     <!-- 성공만 알리고 실패를 안 알리면, 관리자는 눌렀는데 아무 일도 안 일어난 것처럼 보인다. -->
     <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">오류</div>
 
-    <!-- 요금제 — 결제가 붙기 전까지 Pro를 켜는 유일한 경로다 (이슈 #158). -->
-    <div class="card bg-base-100 shadow-md">
+    <!-- 탈퇴 계정 (이슈 #372). 재가입을 알아볼 최소한만 보관 기간 동안 남아 있다. -->
+    <div th:if="${member.status().name() == 'WITHDRAWN'}" class="card bg-base-100 shadow-md border border-base-300">
+      <div class="card-body space-y-3">
+        <h2 class="card-title text-lg">탈퇴한 계정</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+          <div class="text-base-content/60">탈퇴일</div>
+          <div th:text="${member.withdrawnAt() != null ? #temporals.format(member.withdrawnAt(), 'yyyy-MM-dd HH:mm') : '-'}">-</div>
+          <div class="text-base-content/60">보관 만료 예정일</div>
+          <div th:text="${member.retentionExpiresAt() != null ? #temporals.format(member.retentionExpiresAt(), 'yyyy-MM-dd HH:mm') : '다음 정리 때'}">-</div>
+        </div>
+        <p class="text-sm text-base-content/70">
+          이룸이 정보와 일과는 탈퇴할 때 지웠어요. 지금은 소셜 로그인 식별값과 AI 이용 기록만 남아 있어요.
+          보관 만료 예정일이 지나면 자동으로 완전히 지워요. 그 전에 같은 소셜 계정으로 다시 가입하면
+          이 계정이 빈 상태로 되살아나고 AI 사용량이 이어져요.
+        </p>
+        <!-- 정보주체가 삭제를 요구했을 때 누른다 (S9). 되돌릴 수 없으므로 확인 창을 거친다. -->
+        <form th:if="${member.status().name() == 'WITHDRAWN'}"
+              th:action="@{/admin/members/{id}/purge(id=${member.id()})}" method="post"
+              onsubmit="return confirm('이 탈퇴 계정을 지금 완전히 지울까요?\n\n되돌릴 수 없어요. 남아 있는 소셜 로그인 식별값을 지우고 AI 이용 기록에서 회원을 떼요. 같은 소셜 계정으로 다시 가입하면 새 계정이 되고 AI 사용량도 0부터 시작해요.');">
+          <button type="submit" class="btn btn-error btn-sm">지금 완전히 지우기</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 요금제 — 결제가 붙기 전까지 Pro를 켜는 유일한 경로다 (이슈 #158).
+         탈퇴 계정에는 보이지 않는다 — 구독은 탈퇴할 때 지웠고 서버도 발급을 받지 않는다. -->
+    <div th:if="${member.status().name() != 'WITHDRAWN'}" class="card bg-base-100 shadow-md">
       <div class="card-body space-y-4">
         <h2 class="card-title text-lg">
           요금제

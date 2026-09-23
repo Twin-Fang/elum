@@ -9,6 +9,7 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -37,6 +38,7 @@ public class AuthService {
   private final JwtProperties jwtProperties;
   private final RefreshTokenService refreshTokenService;
   private final SubscriptionService subscriptionService;
+  private final WithdrawnMemberService withdrawnMemberService;
 
   @Transactional
   public void signUp(SignUpRequest request) {
@@ -75,6 +77,16 @@ public class AuthService {
     Member member = memberRepository.findByUsername(request.username())
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
+    // 탈퇴 계정 (이슈 #372). 비밀번호가 맞았을 때만 여기까지 온다.
+    // 보관 중이면 새 계정 대신 이전 계정을 빈 상태로 되살린다 — 사용량이 이어진다 (S1).
+    // 보관 기간이 지났으면 없는 계정으로 본다 — 곧 스케줄러가 지운다 (S2).
+    if (member.getStatus() == MemberStatus.WITHDRAWN) {
+      if (withdrawnMemberService.isRetentionExpired(member)) {
+        throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
+      }
+      withdrawnMemberService.revive(member);
+    }
+
     // 정지 계정은 비밀번호가 맞아도 로그인 자체를 차단한다.
     if (member.getStatus() == MemberStatus.SUSPENDED) {
       throw new CustomException(ErrorCode.MEMBER_SUSPENDED);
@@ -108,6 +120,13 @@ public class AuthService {
     if (member.getStatus() == MemberStatus.SUSPENDED) {
       refreshTokenService.revokeAll(member.getId());
       throw new CustomException(ErrorCode.MEMBER_SUSPENDED);
+    }
+
+    // 탈퇴한 계정은 갱신으로 살아나지 않는다 (S4). 되살리기는 로그인만 한다.
+    // 세션은 탈퇴 때 지웠으므로 보통은 위 회전에서 이미 거절된다. 남은 것이 있어도 여기서 매번 거절하고,
+    // 거절 예외에 회전도 함께 롤백되므로 새 토큰은 나가지 않는다.
+    if (member.getStatus() == MemberStatus.WITHDRAWN) {
+      throw new CustomException(ErrorCode.REFRESH_TOKEN_INVALID);
     }
 
     member.setLastActivityAt(LocalDateTime.now());

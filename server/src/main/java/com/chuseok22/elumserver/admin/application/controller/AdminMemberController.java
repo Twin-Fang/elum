@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.admin.application.controller;
 import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -83,6 +84,19 @@ public class AdminMemberController {
     adminMemberService.revokePro(id);
     redirectAttributes.addFlashAttribute("message", "Pro를 회수했습니다. 이 계정은 Free로 돌아갑니다.");
     return "redirect:/admin/members/" + id;
+  }
+
+  /**
+   * 탈퇴 계정을 보관 기간을 기다리지 않고 바로 완전히 지운다 (이슈 #372 S9 — 정보주체 삭제 요구).
+   *
+   * <p>지운 뒤에는 상세 화면이 없으므로 탈퇴 목록으로 돌아간다.
+   */
+  @PostMapping("/admin/members/{id}/purge")
+  public String purge(@PathVariable String id, Principal principal, RedirectAttributes redirectAttributes) {
+    adminMemberService.purgeNow(id, principal == null ? null : principal.getName());
+    redirectAttributes.addFlashAttribute("message",
+      "탈퇴 계정을 완전히 지웠어요. 남아 있던 계정 식별값을 지우고 AI 이용 기록에서 회원을 뗐어요.");
+    return "redirect:/admin/members?status=WITHDRAWN";
   }
 
   @PostMapping("/admin/members/{id}/force-logout")

@@ -19,6 +19,8 @@
         <option value="" th:selected="${selectedStatus == null}">전체 상태</option>
         <option value="ACTIVE" th:selected="${selectedStatus != null && selectedStatus.name() == 'ACTIVE'}">활성</option>
         <option value="SUSPENDED" th:selected="${selectedStatus != null && selectedStatus.name() == 'SUSPENDED'}">정지</option>
+        <!-- 탈퇴 계정은 "전체 상태"에서 빠진다. 보관 중인 탈퇴 계정은 이 필터로만 본다 (이슈 #372). -->
+        <option value="WITHDRAWN" th:selected="${selectedStatus != null && selectedStatus.name() == 'WITHDRAWN'}">탈퇴</option>
       </select>
       <button type="submit" class="btn btn-primary btn-sm">검색</button>
       <a th:href="@{/admin/members}" class="btn btn-ghost btn-sm">초기화</a>
@@ -58,6 +60,10 @@
           <td>
             <span th:if="${member.status().name() == 'ACTIVE'}" class="badge badge-success badge-sm">활성</span>
             <span th:if="${member.status().name() == 'SUSPENDED'}" class="badge badge-error badge-sm">정지</span>
+            <span th:if="${member.status().name() == 'WITHDRAWN'}" class="badge badge-ghost badge-sm">탈퇴</span>
+            <!-- 이 날이 지나면 스케줄러가 완전히 지운다. -->
+            <div th:if="${member.retentionExpiresAt() != null}" class="text-xs text-base-content/50 whitespace-nowrap"
+                 th:text="'만료 ' + ${#temporals.format(member.retentionExpiresAt(), 'yyyy-MM-dd')}">만료 2027-09-23</div>
           </td>
           <td>
             <span th:each="goal : ${member.supportGoals()}" class="badge badge-outline badge-sm mr-1"

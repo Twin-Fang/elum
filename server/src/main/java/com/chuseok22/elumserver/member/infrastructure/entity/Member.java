@@ -52,6 +52,9 @@ public class Member extends BaseEntity {
   // 이 시각 이전에 발급된 JWT는 거부한다 — 관리자 강제 로그아웃의 구현 수단.
   private LocalDateTime tokenInvalidBefore;
 
+  // 탈퇴한 시각 (이슈 #372). 보관 만료일의 기준이다. 탈퇴하지 않았으면 비어 있다.
+  private LocalDateTime withdrawnAt;
+
   // --- 약관 동의 ---
   //
   // 개인정보보호법은 동의를 **항목별로 나눠서** 받도록 한다. 하나로 뭉쳐 받으면
@@ -88,6 +91,18 @@ public class Member extends BaseEntity {
 
   /// 동의한 약관 버전. 약관을 개정하면 이 값이 옛 버전인 사용자에게 재동의를 받는다.
   private String consentVersion;
+
+  /// 동의를 받기 전 상태로 돌린다. 탈퇴 계정을 되살릴 때 동의를 다시 받기 위해 쓴다 (이슈 #372).
+  /// 옛 동의 시각을 남기면 새로 동의받지 않았는데도 동의한 것처럼 보인다.
+  public void clearConsents() {
+    termsAgreed = false;
+    privacyAgreed = false;
+    overseasTransferAgreed = false;
+    guardianConfirmed = false;
+    marketingAgreed = false;
+    consentedAt = null;
+    consentVersion = null;
+  }
 
   /// 필수 항목을 모두 동의했는가. 하나라도 빠지면 서비스를 쓸 수 없다.
   public boolean hasRequiredConsents() {

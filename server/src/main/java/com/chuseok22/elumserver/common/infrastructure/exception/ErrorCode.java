@@ -17,6 +17,9 @@ public enum ErrorCode {
   DUPLICATE_USERNAME(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
   MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
   MEMBER_SUSPENDED(HttpStatus.FORBIDDEN, "정지된 계정입니다. 관리자에게 문의해주세요."),
+  // 탈퇴 계정 (이슈 #372). 둘 다 관리자 화면에서만 난다 — 앱은 탈퇴한 계정으로 들어올 수 없다.
+  MEMBER_WITHDRAWN(HttpStatus.CONFLICT, "탈퇴한 계정이에요. 정지·로그아웃·요금제를 바꿀 수 없어요."),
+  MEMBER_NOT_WITHDRAWN(HttpStatus.CONFLICT, "탈퇴한 계정만 바로 지울 수 있어요."),
 
   // AUTH
   INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),

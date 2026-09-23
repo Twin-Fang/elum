@@ -14,6 +14,8 @@ public enum ConfigGroup {
   IMAGE_PROVIDER("이미지 생성 제공자"),
   TEXT_PROVIDER("텍스트 생성 제공자"),
   PRICING("AI 요금 단가"),
+  // 탈퇴 계정 보관 (이슈 #372).
+  MEMBER("회원"),
   PLAN_FREE("Free 플랜 한도"),
   PLAN_PRO("Pro 플랜 한도"),
   AI_BUDGET("AI 비용 상한"),

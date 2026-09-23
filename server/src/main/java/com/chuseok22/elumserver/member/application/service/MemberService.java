@@ -1,6 +1,5 @@
 package com.chuseok22.elumserver.member.application.service;
 
-import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
@@ -15,6 +14,7 @@ import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoal
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
@@ -40,8 +40,6 @@ public class MemberService {
   private final AuthIdentityRepository authIdentityRepository;
 
   private final RefreshTokenRepository refreshTokenRepository;
-
-  private final AiCallLogRepository aiCallLogRepository;
 
   private final DeviceLinkRepository deviceLinkRepository;
   private final SubscriptionRepository subscriptionRepository;
@@ -106,35 +104,57 @@ public class MemberService {
     return MemberConsentResponse.from(member);
   }
 
+  /**
+   * 탈퇴. 계정을 지우지 않고 WITHDRAWN 으로 남긴다 (이슈 #372).
+   *
+   * <p>완전히 지우면 같은 소셜 계정으로 다시 가입해 무료 사용량을 0 부터 새로 받을 수 있다.
+   * 그래서 재가입을 알아볼 최소한만 보관 기간 동안 남기고, 나머지는 지금처럼 즉시 지운다.
+   * 보관 기간이 지나면 남긴 것도 지운다({@link WithdrawnMemberService#purge}).
+   *
+   * <p>한 트랜잭션이라 도중에 실패하면 전부 되돌린다 (S5). 상태는 맨 마지막에 바꾼다.
+   */
   @Transactional
   public void withdraw(String memberId) {
     Member member = requireMember(memberId);
 
-    // 일과 → 프로필 → 소셜 신원 → 세션 → 계정 순으로 지운다. 참조가 남으면 외래키가 걸린다.
+    // ── 지운다 ──
+    // 이룸이 정보·일과·단계. 발달장애 당사자에 대한 서술이라 오래 둘수록 위험하고, 악용 방지에는 필요 없다.
+    // 일과 → 프로필 순으로 지운다. 참조가 남으면 외래키가 걸린다.
     List<Routine> routines = routineRepository.findAllByProfileMemberId(memberId);
     routineRepository.deleteAll(routines);
     profileRepository.deleteAllByMemberId(memberId);
-    authIdentityRepository.deleteAllByMemberId(memberId);
-    // 리프레시 토큰은 member를 외래키로 참조하지 않아 DB가 대신 지워 주지 않는다.
-    // 남겨 두면 탈퇴한 계정 ID로 갱신 요청이 계속 들어온다.
+    // 세션. member를 외래키로 참조하지 않아 DB가 대신 지워 주지 않는다.
     refreshTokenRepository.deleteAllByMemberId(memberId);
-    // AI 호출 기록은 운영 지표라 행을 남기되 **누가 썼는지는 지운다** (이슈 #191).
-    // 여기도 외래키가 없어 빠뜨리면 탈퇴한 회원의 식별자가 그대로 남는다.
-    aiCallLogRepository.detachMember(memberId);
-    // 이룸이 휴대폰 연결도 여기서 지운다 (이슈 #200). member를 외래키로 참조하지 않아
-    // DB가 대신 지워 주지 않는다 — refresh_token·ai_call_log와 같은 이유다.
+    // 이룸이 휴대폰 연결 (이슈 #200). 되살아나도 예전 휴대폰은 새 연결 암호로만 붙는다 (S8).
     deviceLinkRepository.deleteAllByMemberId(memberId);
-    // 구독은 member를 외래키로 참조한다. 남겨 두면 계정 삭제가 제약에 걸려 탈퇴가
-    // 통째로 실패한다 — 실제로 그렇게 배포됐다.
+    // 구독. 되살릴 때 가입처럼 Free 로 새로 만든다.
     subscriptionRepository.deleteByMemberId(memberId);
-    // 구독은 member를 외래키로 참조한다. 남겨 두면 계정 삭제가 제약에 걸려 탈퇴가
-    // 통째로 실패한다 — 실제로 그렇게 배포됐다.
 
-    memberRepository.delete(member);
+    // ── 남긴다 (보관 기간 동안) ──
+    // 소셜 신원: 같은 소셜 계정이 다시 오면 이 행으로 이전 계정을 찾는다. 이메일은 비운다 —
+    // 재가입 판별에 쓰지 않고, 남겨 두면 다른 제공자로 새로 가입할 때 이메일 충돌로 막힌다 (S3).
+    authIdentityRepository.findAllByMemberId(memberId).forEach(identity -> {
+      identity.setEmail(null);
+      identity.setEmailVerified(false);
+    });
+    // AI 호출 기록: 회원 식별자를 그대로 둔다. 떼면 재가입한 계정의 하루·주간 사용량이 0 이 된다.
+    // 식별자는 보관 기간이 지나 완전히 지울 때 뗀다.
+
+    // 계정 행: 상태만 바꾼다. 맨 마지막에 둔다 — 앞에서 실패하면 상태가 바뀌지 않은 채 되돌아간다.
+    LocalDateTime now = LocalDateTime.now();
+    member.setStatus(MemberStatus.WITHDRAWN);
+    member.setWithdrawnAt(now);
+    // 이미 발급된 액세스 토큰도 즉시 막는다 (S4). 되살아나도 이 값은 그대로라 탈퇴 전 토큰은 계속 막힌다.
+    member.setTokenInvalidBefore(now);
+    // 재가입 판별에 필요 없는 활동 기록은 비운다 (최소 보관).
+    member.setLastLoginAt(null);
+    member.setLastActivityAt(null);
   }
 
+  /** 탈퇴한 계정은 없는 회원으로 본다 — 탈퇴 전 행을 지우던 때와 같은 응답이다. */
   private Member requireMember(String memberId) {
     return memberRepository.findById(memberId)
+      .filter(member -> member.getStatus() != MemberStatus.WITHDRAWN)
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
   }
 

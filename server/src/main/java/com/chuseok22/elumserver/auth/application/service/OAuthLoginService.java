@@ -11,6 +11,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
+import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -51,6 +52,7 @@ public class OAuthLoginService {
   private final JwtProvider jwtProvider;
   private final JwtProperties jwtProperties;
   private final RefreshTokenService refreshTokenService;
+  private final WithdrawnMemberService withdrawnMemberService;
 
   public OAuthLoginService(
     List<OAuthVerifier> oAuthVerifiers,
@@ -61,7 +63,8 @@ public class OAuthLoginService {
     PasswordEncoder passwordEncoder,
     JwtProvider jwtProvider,
     JwtProperties jwtProperties,
-    RefreshTokenService refreshTokenService
+    RefreshTokenService refreshTokenService,
+    WithdrawnMemberService withdrawnMemberService
   ) {
     oAuthVerifiers.forEach(verifier -> this.verifiers.put(verifier.provider(), verifier));
     this.authIdentityRepository = authIdentityRepository;
@@ -72,6 +75,7 @@ public class OAuthLoginService {
     this.jwtProvider = jwtProvider;
     this.jwtProperties = jwtProperties;
     this.refreshTokenService = refreshTokenService;
+    this.withdrawnMemberService = withdrawnMemberService;
   }
 
   @Transactional
@@ -86,7 +90,8 @@ public class OAuthLoginService {
 
     Member member = authIdentityRepository
       .findByProviderAndProviderUserId(provider, oAuthUser.providerUserId())
-      .map(identity -> loadMember(identity.getMemberId()))
+      // 보관 기간이 지나 지운 탈퇴 계정이면 null 이 돌아와 map 이 비고, 새로 가입한다 (S2).
+      .map(identity -> resumeWithdrawn(identity, loadMember(identity.getMemberId()), oAuthUser))
       .orElseGet(() -> register(provider, oAuthUser));
 
     if (member.getStatus() == MemberStatus.SUSPENDED) {
@@ -114,6 +119,46 @@ public class OAuthLoginService {
   private Member loadMember(String memberId) {
     return memberRepository.findById(memberId)
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+  }
+
+  /**
+   * 탈퇴 계정이면 보관 기간에 따라 되살리거나 지운다 (이슈 #372). 탈퇴 계정이 아니면 그대로 돌려준다.
+   *
+   * @return 로그인할 계정. 보관 기간이 지나 지웠으면 null — 호출부가 새로 가입시킨다
+   */
+  private Member resumeWithdrawn(AuthIdentity identity, Member member, OAuthUser oAuthUser) {
+    if (member.getStatus() != MemberStatus.WITHDRAWN) {
+      return member;
+    }
+    if (withdrawnMemberService.isRetentionExpired(member)) {
+      // S2 — 약속한 보관 기간을 넘겨 잇지 않는다. 스케줄러가 아직 못 지웠어도 여기서 지우고 새로 가입시킨다.
+      withdrawnMemberService.purge(member.getId());
+      return null;
+    }
+    // S1 — 새 계정 대신 이전 계정을 빈 상태로 되살린다. 회원 ID 가 같아 하루·주간 한도가 이어진다.
+    withdrawnMemberService.revive(member);
+    restoreEmail(identity, oAuthUser);
+    return member;
+  }
+
+  /**
+   * 탈퇴 때 비운 이메일을 가입 때처럼 다시 적는다. 새 가입의 이메일 충돌 안내가 이 값을 본다.
+   *
+   * <p>보관 기간에 같은 이메일로 다른 계정이 생겼으면(S3 — 다른 제공자로 가입) 적지 않는다.
+   * 한 이메일이 두 계정을 가리키면 충돌 안내가 어느 계정인지 모른다.
+   */
+  private void restoreEmail(AuthIdentity identity, OAuthUser oAuthUser) {
+    // 충돌 안내는 검증된 이메일만 본다 — 검증 안 된 이메일은 가입 때처럼 그대로 적는다.
+    boolean takenByOther = oAuthUser.hasTrustedEmail()
+      && authIdentityRepository.findFirstByEmailAndEmailVerifiedTrue(oAuthUser.email())
+      .filter(existing -> !identity.getMemberId().equals(existing.getMemberId()))
+      .isPresent();
+    if (takenByOther) {
+      log.info("되살린 계정의 이메일이 다른 계정에서 쓰이고 있어 비워 둡니다. memberId={}", identity.getMemberId());
+      return;
+    }
+    identity.setEmail(oAuthUser.email());
+    identity.setEmailVerified(oAuthUser.emailVerified());
   }
 
   private Member register(OAuthProvider provider, OAuthUser oAuthUser) {

@@ -29,12 +29,16 @@ public record AdminMemberDetailResponse(
   double estimatedCostUsd,
   List<AdminMemberRoutineSummary> routines,
   List<AiCallLog> recentAiCalls,
-  AdminSubscriptionSummary subscription
+  AdminSubscriptionSummary subscription,
+  LocalDateTime withdrawnAt,
+  LocalDateTime retentionExpiresAt
 ) {
 
+  /// @param retentionExpiresAt 탈퇴 계정의 보관 만료 예정일. 탈퇴하지 않았으면 null (#372)
   public static AdminMemberDetailResponse of(
     Member member, Profile profile, List<Routine> routines, MemberAiUsage aiUsage,
-    List<AiCallLog> recentAiCalls, AdminSubscriptionSummary subscription
+    List<AiCallLog> recentAiCalls, AdminSubscriptionSummary subscription,
+    LocalDateTime retentionExpiresAt
   ) {
     List<AdminMemberRoutineSummary> routineSummaries = routines.stream()
       .map(AdminMemberRoutineSummary::from)
@@ -56,7 +60,9 @@ public record AdminMemberDetailResponse(
       aiUsage == null ? 0 : aiUsage.getTotalCostUsd(),
       routineSummaries,
       recentAiCalls,
-      subscription
+      subscription,
+      member.getWithdrawnAt(),
+      retentionExpiresAt
     );
   }
 

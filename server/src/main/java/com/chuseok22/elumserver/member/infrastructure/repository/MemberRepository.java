@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.member.infrastructure.repository;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,6 +49,44 @@ public interface MemberRepository extends JpaRepository<Member, String> {
   );
 
   long countByStatus(MemberStatus status);
+
+  // --- 탈퇴 계정 (이슈 #372) ---
+  // 탈퇴해도 행이 남으므로, 탈퇴 전처럼 "회원"을 세고 보여주려면 WITHDRAWN 을 빼야 한다.
+
+  Page<Member> findByStatusNot(MemberStatus status, Pageable pageable);
+
+  @Query("""
+    select m from Member m
+    where (lower(m.username) like lower(concat('%', :keyword, '%'))
+       or exists (
+         select 1 from Profile p
+         where p.member = m
+           and lower(p.nickname) like lower(concat('%', :keyword, '%'))
+       ))
+      and m.status <> :status
+    """)
+  Page<Member> searchByKeywordAndStatusNot(
+    @Param("keyword") String keyword, @Param("status") MemberStatus status, Pageable pageable
+  );
+
+  long countByStatusNot(MemberStatus status);
+
+  long countByLastActivityAtAfterAndStatusNot(LocalDateTime after, MemberStatus status);
+
+  /**
+   * 보관 기간이 지난 탈퇴 계정. 완전 삭제 스케줄러가 쓴다.
+   *
+   * <p>탈퇴 시각이 비어 있는 탈퇴 계정도 고른다 — 언제 탈퇴했는지 모르면 보관 기간 안이라고
+   * 말할 수 없다.
+   */
+  @Query("""
+    select m.id from Member m
+    where m.status = :status
+      and (m.withdrawnAt is null or m.withdrawnAt <= :threshold)
+    """)
+  List<String> findWithdrawnIdsUntil(
+    @Param("status") MemberStatus status, @Param("threshold") LocalDateTime threshold
+  );
 
   // 최근 활동 회원수(대시보드) — lastActivityAt 기준.
   long countByLastActivityAtAfter(LocalDateTime after);

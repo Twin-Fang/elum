@@ -16,6 +16,9 @@ enum ServerErrorCode {
   duplicateUsername('DUPLICATE_USERNAME'),
   memberNotFound('MEMBER_NOT_FOUND'),
   memberSuspended('MEMBER_SUSPENDED'),
+  // 탈퇴 계정 (#372). 관리자 화면에서만 난다 — 앱은 탈퇴한 계정으로 들어올 수 없다.
+  memberWithdrawn('MEMBER_WITHDRAWN'),
+  memberNotWithdrawn('MEMBER_NOT_WITHDRAWN'),
 
   // AUTH
   invalidCredentials('INVALID_CREDENTIALS'),

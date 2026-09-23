@@ -81,6 +81,33 @@ class MemberAccessGuardTest {
   }
 
   @Test
+  @DisplayName("S4 탈퇴한 계정의 토큰은 서명이 유효해도 거부된다 — 401")
+  void isAllowed_withdrawnMember_returnsFalse() {
+    Member member = activeMember();
+    member.setStatus(MemberStatus.WITHDRAWN);
+    // 발급 시각 기준만으로는 못 막는 경우 — 탈퇴 뒤에 어떤 경로로든 새로 발급된 토큰도 막는다.
+    member.setTokenInvalidBefore(LocalDateTime.now().minusHours(1));
+    when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
+
+    assertThat(memberAccessGuard.isAllowed("m1", dateOf(LocalDateTime.now()))).isFalse();
+    // 탈퇴한 계정을 활동 중으로 세지 않는다.
+    assertThat(member.getLastActivityAt()).isNull();
+  }
+
+  @Test
+  @DisplayName("S4·S8 되살아난 계정이라도 탈퇴 전에 발급된 토큰(예전 이룸이 휴대폰 포함)은 계속 거부된다")
+  void isAllowed_revivedMember_oldTokenStillRejected() {
+    LocalDateTime withdrawnAt = LocalDateTime.now().minusDays(10);
+    Member revived = activeMember();
+    revived.setTokenInvalidBefore(withdrawnAt);
+    when(memberRepository.findById("m1")).thenReturn(Optional.of(revived));
+
+    assertThat(memberAccessGuard.isAllowed("m1", dateOf(withdrawnAt.minusDays(1)))).isFalse();
+    // 되살아난 뒤 새로 로그인해 받은 토큰은 통과한다.
+    assertThat(memberAccessGuard.isAllowed("m1", dateOf(LocalDateTime.now()))).isTrue();
+  }
+
+  @Test
   @DisplayName("존재하지 않는 회원은 거부된다")
   void isAllowed_missingMember_returnsFalse() {
     when(memberRepository.findById("ghost")).thenReturn(Optional.empty());

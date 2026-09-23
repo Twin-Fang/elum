@@ -13,10 +13,12 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import io.jsonwebtoken.Claims;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,6 +50,9 @@ class AuthServiceTest {
   @Mock
   private RefreshTokenService refreshTokenService;
 
+  @Mock
+  private WithdrawnMemberService withdrawnMemberService;
+
   @InjectMocks
   private AuthService authService;
 
@@ -57,7 +62,7 @@ class AuthServiceTest {
 
   private AuthService serviceWithRealJwt() {
     return new AuthService(memberRepository, null, passwordEncoder, memberAuthenticationManager,
-      realJwt, jwtProperties, refreshTokenService, null);
+      realJwt, jwtProperties, refreshTokenService, null, withdrawnMemberService);
   }
 
   private Member member(MemberStatus status) {
@@ -175,5 +180,63 @@ class AuthServiceTest {
     authService.logout("some-refresh");
 
     verify(refreshTokenService).revokeByToken("some-refresh");
+  }
+  @Test
+  @DisplayName("S1 보관 중인 탈퇴 계정에 아이디·비밀번호로 로그인하면 새 계정 없이 이전 계정을 되살린다")
+  void login_withdrawnWithinRetention_revives() {
+    Member member = member(MemberStatus.WITHDRAWN);
+    member.setWithdrawnAt(LocalDateTime.now().minusDays(10));
+    when(memberRepository.findByUsername("parent1")).thenReturn(Optional.of(member));
+    when(withdrawnMemberService.isRetentionExpired(member)).thenReturn(false);
+    when(jwtProvider.createAccessToken("m1", "parent1")).thenReturn("access-token");
+    when(jwtProperties.accessExpMillis()).thenReturn(86400000L);
+    when(refreshTokenService.issue("m1", "device-1")).thenReturn("refresh-token");
+
+    TokenResponse response = authService.login(new LoginRequest("parent1", "pw"), "device-1");
+
+    // 비밀번호 확인(authenticate)을 통과한 뒤에만 되살린다 — 아이디만 알아서는 되살릴 수 없다.
+    verify(memberAuthenticationManager).authenticate(org.mockito.ArgumentMatchers.any());
+    verify(withdrawnMemberService).revive(member);
+    // 같은 회원 ID 로 토큰이 나가야 AI 사용 기록과 한도가 이어진다.
+    assertThat(response.accessToken()).isEqualTo("access-token");
+  }
+
+  @Test
+  @DisplayName("S2 보관 기간이 지난 탈퇴 계정은 아이디로 로그인할 수 없다 — 없는 계정으로 본다")
+  void login_withdrawnPastRetention_rejected() {
+    Member member = member(MemberStatus.WITHDRAWN);
+    member.setWithdrawnAt(LocalDateTime.now().minusDays(400));
+    when(memberRepository.findByUsername("parent1")).thenReturn(Optional.of(member));
+    when(withdrawnMemberService.isRetentionExpired(member)).thenReturn(true);
+
+    assertThatThrownBy(() -> authService.login(new LoginRequest("parent1", "pw"), "device-1"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.INVALID_CREDENTIALS));
+
+    // 기간이 지난 것을 되살리면 약속한 보관 기간을 넘겨 기록을 잇게 된다. 곧 스케줄러가 지운다.
+    verify(withdrawnMemberService, never()).revive(org.mockito.ArgumentMatchers.any());
+    verify(refreshTokenService, never()).issue(org.mockito.ArgumentMatchers.anyString(),
+      org.mockito.ArgumentMatchers.anyString());
+  }
+
+  @Test
+  @DisplayName("S4 탈퇴한 계정은 남은 리프레시 토큰으로 갱신할 수 없다 — 401")
+  void refresh_withdrawnMember_rejected() {
+    when(refreshTokenService.rotate("old-refresh", null))
+      .thenReturn(new RefreshTokenService.RotationResult("m1", "new-refresh", null));
+    Member member = member(MemberStatus.WITHDRAWN);
+    when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
+
+    assertThatThrownBy(() -> authService.refresh("old-refresh", null))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.REFRESH_TOKEN_INVALID));
+
+    // 갱신은 되살리기 경로가 아니다 — 되살리려면 소셜·아이디 로그인을 다시 거쳐야 한다.
+    verify(withdrawnMemberService, never()).revive(org.mockito.ArgumentMatchers.any());
+    assertThat(member.getStatus()).isEqualTo(MemberStatus.WITHDRAWN);
+    verify(jwtProvider, never()).createAccessToken(org.mockito.ArgumentMatchers.anyString(),
+      org.mockito.ArgumentMatchers.anyString());
   }
 }
