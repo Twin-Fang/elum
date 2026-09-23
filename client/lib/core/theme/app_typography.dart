@@ -65,6 +65,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.contactSheetTitle,
     required this.contactSheetEmail,
     required this.actionCardTitle,
+    required this.noticeTitle,
+    required this.noticeBody,
+    required this.noticeAction,
+    required this.noticeHideLabel,
   });
 
   static const fontFamily = 'TmoneyRoundWind';
@@ -299,6 +303,25 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 행동 카드 제목 (25/w800, style_GKEQ8F).
   /// 순서 배지 숫자용 cardHeadline(30/w800)과 크기가 달라 별개 토큰이다.
   final TextStyle actionCardTitle;
+
+  // --- 공지 팝업 (이슈 #371 · 명세 2-1) ---
+  // 시안이 없는 팝업이라 명세 치수를 따른다. 공통 팝업(`dialogTitle`)과 같은
+  // Pretendard 로 두어 한 앱 안의 팝업끼리 글꼴이 어긋나지 않게 한다.
+  // 관리자 미리보기(#370)가 같은 치수로 그리므로 여기를 바꾸면 그쪽도 바꾼다.
+
+  /// 공지 제목 (18/w700 Pretendard). 두세 줄이 될 수 있어 줄 간격을 둔다.
+  /// `dialogTitle`(18/w500)과 크기가 같지만 굵기가 달라 별개 토큰이다.
+  final TextStyle noticeTitle;
+
+  /// 공지 본문 (14/w400 Pretendard). 긴 글을 읽는 자리라 줄 간격 1.5.
+  final TextStyle noticeBody;
+
+  /// 공지 링크 버튼 (16/w600 Pretendard). 팝업 버튼(`dialogAction` 18)보다 작다 —
+  /// 참고 화면처럼 폭을 꽉 채우지 않는 가운데 버튼이다.
+  final TextStyle noticeAction;
+
+  /// `일주일간 보지 않기` (14/w500 Pretendard). 설명 최소 14 (docs/08 §7-2).
+  final TextStyle noticeHideLabel;
 
   static const standard = AppTypography(
     title: TextStyle(
@@ -658,6 +681,30 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.0,
     ),
+    noticeTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w700,
+      height: 1.4,
+    ),
+    noticeBody: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.5,
+    ),
+    noticeAction: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    noticeHideLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
   );
 
   /// 표준 Material 슬롯에 매핑한다.
@@ -731,6 +778,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? contactSheetTitle,
     TextStyle? contactSheetEmail,
     TextStyle? actionCardTitle,
+    TextStyle? noticeTitle,
+    TextStyle? noticeBody,
+    TextStyle? noticeAction,
+    TextStyle? noticeHideLabel,
   }) {
     return AppTypography(
       title: title ?? this.title,
@@ -791,6 +842,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
       contactSheetTitle: contactSheetTitle ?? this.contactSheetTitle,
       contactSheetEmail: contactSheetEmail ?? this.contactSheetEmail,
       actionCardTitle: actionCardTitle ?? this.actionCardTitle,
+      noticeTitle: noticeTitle ?? this.noticeTitle,
+      noticeBody: noticeBody ?? this.noticeBody,
+      noticeAction: noticeAction ?? this.noticeAction,
+      noticeHideLabel: noticeHideLabel ?? this.noticeHideLabel,
     );
   }
 
@@ -868,6 +923,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
           TextStyle.lerp(contactSheetEmail, other.contactSheetEmail, t)!,
       actionCardTitle:
           TextStyle.lerp(actionCardTitle, other.actionCardTitle, t)!,
+      noticeTitle: TextStyle.lerp(noticeTitle, other.noticeTitle, t)!,
+      noticeBody: TextStyle.lerp(noticeBody, other.noticeBody, t)!,
+      noticeAction: TextStyle.lerp(noticeAction, other.noticeAction, t)!,
+      noticeHideLabel:
+          TextStyle.lerp(noticeHideLabel, other.noticeHideLabel, t)!,
     );
   }
 }

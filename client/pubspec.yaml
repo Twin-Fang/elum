@@ -60,6 +60,9 @@ dependencies:
   google_sign_in: ^7.2.0
   sign_in_with_apple: ^7.0.1
   flutter_secure_storage: ^11.2.0
+  # 공지 팝업의 링크 버튼을 외부 브라우저로 연다 (이슈 #371). 앱에 링크를 여는 길이
+  # 이것뿐이다 — #279 에서 스토어 링크가 생길 때 들이기로 미뤄 둔 그 의존성이다.
+  url_launcher: ^6.3.2
 
 # path_provider_foundation 2.5+가 끌고 오는 objective_c의 build hook이
 # build_runner AOT 컴파일을 깨뜨린다 (troubleshooting.md "build_runner AOT 컴파일 실패").

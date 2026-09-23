@@ -98,6 +98,17 @@ abstract interface class LocalStorage {
   String? get cachedClientTuningJson;
   Future<void> setCachedClientTuningJson(String json);
 
+  // --- 공지 "보지 않기" 기록 (이슈 #371) ---
+  // 공지마다 `{revision, until}` JSON 한 줄. 판단은 feature 쪽 NoticeHideStore 가 한다 —
+  // 진행 기록과 같은 이유로 core 는 문자열만 주고받는다.
+  //
+  // ⚠️ [clearAll]·[clearChildProfile] 이 **지우지 않는다.** 숨김은 계정이 아니라
+  // 이 휴대폰에서 이미 본 공지에 대한 것이다. 로그아웃했다 들어왔다고 방금 숨긴
+  // 공지가 다시 뜨면 보지 않기를 누른 뜻이 사라진다.
+
+  String? getNoticeHiddenJson(String noticeId);
+  Future<void> setNoticeHiddenJson(String noticeId, String json);
+
   /// 저장된 온보딩 결과를 전부 지운다. **개발·테스트 전용.**
   ///
   /// 일부만 지우면 어중간한 상태가 남아 더 헷갈리므로 5개 값을 모두 비운다.
@@ -133,6 +144,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedToday = 'cache.todayRoutines';
   static const _kCachedConsent = 'cache.consentDocuments';
   static const _kCachedTuning = 'cache.clientTuning';
+  static const _kNoticeHiddenPrefix = 'notice.hidden.';
 
   static Future<LocalStorage> create() async {
     return SharedPrefsStorage(await SharedPreferences.getInstance());
@@ -298,6 +310,17 @@ class SharedPrefsStorage implements LocalStorage {
     // 약관 전문은 길다. 크기만 남긴다.
     AppLogger.storageWrite(_kCachedConsent, '${json.length}B');
     return _prefs.setString(_kCachedConsent, json);
+  }
+
+  @override
+  String? getNoticeHiddenJson(String noticeId) =>
+      _prefs.getString('$_kNoticeHiddenPrefix$noticeId');
+
+  @override
+  Future<void> setNoticeHiddenJson(String noticeId, String json) {
+    // 판과 기한 숫자뿐이라 값을 남겨도 된다
+    AppLogger.storageWrite('$_kNoticeHiddenPrefix$noticeId', json);
+    return _prefs.setString('$_kNoticeHiddenPrefix$noticeId', json);
   }
 
   @override
@@ -475,6 +498,15 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<void> setCachedConsentJson(String json) async => _cachedConsent = json;
+
+  final Map<String, String> _noticeHidden = {};
+
+  @override
+  String? getNoticeHiddenJson(String noticeId) => _noticeHidden[noticeId];
+
+  @override
+  Future<void> setNoticeHiddenJson(String noticeId, String json) async =>
+      _noticeHidden[noticeId] = json;
 
   @override
   Future<void> clearChildProfile() async {

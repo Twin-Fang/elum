@@ -28,6 +28,7 @@ import '../../features/auth/presentation/consent_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/role_select_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
+import '../../features/notice/presentation/guardian_notice_launcher.dart';
 import 'app_transitions.dart';
 
 /// 앱 라우트 경로 상수. 문자열을 화면마다 반복해 적지 않는다.
@@ -236,8 +237,12 @@ GoRouter createRouter({
       // 다른 경로에서 홈으로 올 때도 fade가 걸리는데, 즉시 교체보다 나으므로 허용.
       GoRoute(
         path: Routes.guardian,
-        pageBuilder: (context, state) =>
-            fadePage(state, const GuardianHomeScreen()),
+        // 공지 팝업은 **이 자리에서만** 뜬다 (이슈 #371). 이룸이 화면·일과 만들기에는
+        // 감싸지 않는다 — 이룸이 화면은 한 화면에 행동 하나다 (#281 과 같은 판단).
+        pageBuilder: (context, state) => fadePage(
+          state,
+          const GuardianNoticeLauncher(child: GuardianHomeScreen()),
+        ),
       ),
       GoRoute(
         path: Routes.linkCode,
