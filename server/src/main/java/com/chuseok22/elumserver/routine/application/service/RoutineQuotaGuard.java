@@ -47,13 +47,16 @@ public class RoutineQuotaGuard {
    * <p>일과 표가 아니라 AI 호출 기록을 센다. <b>일과를 지우면 행이 사라져 우회되기
    * 때문</b>이다 — 만들고 지우고 다시 만들면 보유 개수는 그대로인데 비용은 그때마다
    * 나간다. 호출 기록은 지워지지 않으므로 실제로 쓴 것을 센다.
+   *
+   * <p><b>제공자를 가리지 않고 센다.</b> 텍스트 제공자는 관리자 화면에서 바뀐다. 한 제공자
+   * 유형만 세면 바꾸는 순간 사용량이 0 이 되어 한도가 풀린다 (#367).
    */
   private void guardWeeklyCreate(String memberId, PlanType plan) {
     long used;
     try {
       used = aiCallLogRepository
-        .countByMemberIdAndCallTypeAndSuccessIsTrueAndCreatedAtGreaterThanEqual(
-          memberId, AiCallType.GEMINI_TEXT_CREATE, weekStart());
+        .countByMemberIdAndCallTypeInAndSuccessIsTrueAndCreatedAtGreaterThanEqual(
+          memberId, AiCallType.routineCreateTypes(), weekStart());
     } catch (Exception e) {
       log.warn("주간 사용량 집계 실패 — 한도를 보지 않고 통과시킨다: memberId={}", memberId, e);
       return;

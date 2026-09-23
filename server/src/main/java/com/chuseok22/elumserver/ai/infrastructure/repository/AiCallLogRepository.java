@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.ai.infrastructure.repository;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.infrastructure.entity.AiCallLog;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,10 +31,13 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String> {
    *
    * <p>성공한 호출만 센다 — 실패는 결과물이 없으므로 한도를 깎지 않는다.
    *
+   * <p>유형을 목록으로 받는다. 같은 일을 하는 호출이 제공자마다 다른 유형으로 남기 때문이다 —
+   * 하나만 받으면 제공자를 바꾸는 순간 사용량이 끊긴다 (#367).
+   *
    * <p>{@code idx_ai_call_log_member_created}(member_id, created_at)를 그대로 탄다.
    */
-  long countByMemberIdAndCallTypeAndSuccessIsTrueAndCreatedAtGreaterThanEqual(
-    String memberId, AiCallType callType, LocalDateTime from
+  long countByMemberIdAndCallTypeInAndSuccessIsTrueAndCreatedAtGreaterThanEqual(
+    String memberId, Collection<AiCallType> callTypes, LocalDateTime from
   );
 
   /**
