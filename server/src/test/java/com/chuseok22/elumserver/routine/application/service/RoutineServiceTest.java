@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
-import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -56,9 +55,6 @@ class RoutineServiceTest {
 
   @Mock
   private ProfileRepository profileRepository;
-
-  @Mock
-  private SensitiveInfoGuardService sensitiveInfoGuardService;
 
   @Mock
   private RoutineAiPipeline routineAiPipeline;
@@ -187,8 +183,6 @@ class RoutineServiceTest {
     profile.setNickname("하늘이");
     profile.setSupportGoals(Set.of(SupportGoal.PREPARE_ITEMS));
     when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1")).thenReturn(Optional.of(profile));
-    when(sensitiveInfoGuardService.check("내일 비 오는 날 학교 가기"))
-      .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "내일 비 오는 날 학교 가기"));
     RoutineAiPipeline.RoutineQuestionResult pipelineResult = new RoutineAiPipeline.RoutineQuestionResult(
       List.of(new RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem(
         "챙겨야 하는 준비물이 있나요?",
@@ -283,7 +277,7 @@ class RoutineServiceTest {
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.AI_DAILY_BUDGET_EXCEEDED));
     // 민감정보 검사(로컬 LLM)도 AI 호출이다. 거절할 거면 아무것도 부르지 않는다.
-    verifyNoInteractions(sensitiveInfoGuardService, routineAiPipeline);
+    verifyNoInteractions(routineAiPipeline);
   }
 
   @Test
@@ -298,8 +292,6 @@ class RoutineServiceTest {
     profile.setSupportGoals(Set.of());
     profile.setCharacter(CharacterType.LULU);
     when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1")).thenReturn(Optional.of(profile));
-    when(sensitiveInfoGuardService.check("내일 병원 가기"))
-      .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "내일 병원 가기"));
     RoutineAiPipeline.RoutineGenerationResult generationResult = new RoutineAiPipeline.RoutineGenerationResult(
       "병원 다녀오기",
       List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발 신기", "data/routine-images/batch-1/1.png")),
@@ -314,6 +306,61 @@ class RoutineServiceTest {
     verify(routineAiPipeline).generateForCreate(
       eq("내일 병원 가기"), eq("하늘이"), eq(Set.of()), eq(List.of()), eq(CharacterType.LULU)
     );
+  }
+
+  /**
+   * 이슈 #377 — AI DLP(로컬 LLM 마스킹)는 해커톤 POC 라 쓰지 않는다.
+   *
+   * <p>예전에는 입력 글과 답변 하나하나를 로컬 LLM 에 보내 가린 뒤 넘겼다. 이제는 가공하지
+   * 않고 그대로 넘긴다 — 로컬 LLM 이 fail-open 이라 보장도 아니었고 호출마다 수 초가 걸렸다.
+   * 가린 흔적(`<전화번호>`)이 생기지 않는지까지 본다.
+   */
+  @Test
+  @DisplayName("일과 만들기는 입력 글과 답변을 가공하지 않고 그대로 AI 에 넘긴다 (이슈 #377)")
+  void create_passesRawInputAndAnswersAsIs() {
+    Profile profile = profileWithNickname("하늘이");
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU)))
+      .thenReturn(new RoutineAiPipeline.RoutineGenerationResult(
+        "병원 다녀오기",
+        List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발 신기",
+          "data/routine-images/batch-1/1.png")),
+        "batch-1"
+      ));
+    ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
+    when(routineRepository.save(saved.capture())).thenAnswer(invocation -> invocation.getArgument(0));
+
+    routineService.create("member-1", new RoutineCreateRequest(
+      "내일 병원 가기 010-1234-5678", null, List.of("우산", "엄마 010-9999-8888"), null, null));
+
+    verify(routineAiPipeline).generateForCreate(
+      eq("내일 병원 가기 010-1234-5678"), eq("하늘이"), any(),
+      eq(List.of("우산", "엄마 010-9999-8888")), eq(CharacterType.LULU)
+    );
+    // 가공하지 않으므로 저장되는 두 칸이 같다. 컬럼 정리는 별도.
+    assertThat(saved.getValue().getSanitizedInputText()).isEqualTo("내일 병원 가기 010-1234-5678");
+  }
+
+  @Test
+  @DisplayName("추가 질문도 입력 글을 그대로 AI 에 넘긴다 (이슈 #377)")
+  void generateQuestion_passesRawInputAsIs() {
+    Profile profile = profileWithNickname("하늘이");
+    profile.setSupportGoals(Set.of(SupportGoal.PREPARE_ITEMS));
+    when(routineAiPipeline.generateQuestion(any(), any(), any()))
+      .thenReturn(new RoutineAiPipeline.RoutineQuestionResult(List.of()));
+
+    routineService.generateQuestion("member-1", new RoutineQuestionRequest("학교 가기 010-1234-5678"));
+
+    verify(routineAiPipeline).generateQuestion(
+      eq("하늘이"), eq(Set.of(SupportGoal.PREPARE_ITEMS)), eq("학교 가기 010-1234-5678"));
+  }
+
+  @Test
+  @DisplayName("일과 서비스는 로컬 LLM 민감정보 검사에 의존하지 않는다 (이슈 #377)")
+  void routineService_doesNotDependOnLocalLlmGuard() {
+    // 필드로 다시 들어오면 누군가 호출을 되살린 것이다 — 약관은 가린다고 적지 않는다.
+    assertThat(java.util.Arrays.stream(RoutineService.class.getDeclaredFields())
+      .map(java.lang.reflect.Field::getType))
+      .doesNotContain((Class) SensitiveInfoGuardService.class);
   }
 
   /**
@@ -369,8 +416,6 @@ class RoutineServiceTest {
   }
 
   private void stubCreatePipeline(Profile profile) {
-    when(sensitiveInfoGuardService.check("내일 병원 가기"))
-      .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "내일 병원 가기"));
     when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU)))
       .thenReturn(new RoutineAiPipeline.RoutineGenerationResult(
         "병원 다녀오기",

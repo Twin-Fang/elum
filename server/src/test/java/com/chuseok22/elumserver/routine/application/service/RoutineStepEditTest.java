@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -47,7 +46,6 @@ class RoutineStepEditTest {
   @Mock private RoutineRepository routineRepository;
   @Mock private RoutineImageStorage routineImageStorage;
   @Mock private ProfileRepository profileRepository;
-  @Mock private SensitiveInfoGuardService sensitiveInfoGuardService;
   @Mock private RoutineAiPipeline routineAiPipeline;
   @Mock private RoutineRequestCooldownGuard routineRequestCooldownGuard;
   @Mock private RoutineStepImageFiller routineStepImageFiller;

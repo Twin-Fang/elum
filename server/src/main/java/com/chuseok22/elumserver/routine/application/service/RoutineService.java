@@ -1,8 +1,6 @@
 package com.chuseok22.elumserver.routine.application.service;
 
-import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
-import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -40,9 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -79,7 +74,6 @@ public class RoutineService {
 
   private final RoutineRepository routineRepository;
   private final ProfileRepository profileRepository;
-  private final SensitiveInfoGuardService sensitiveInfoGuardService;
   private final RoutineAiPipeline routineAiPipeline;
   private final RoutineImageStorage routineImageStorage;
   private final RoutineRequestCooldownGuard routineRequestCooldownGuard;
@@ -104,9 +98,9 @@ public class RoutineService {
     // 다른 회원에게 새어 들어가지 않게 한다.
     AiCallContext.setMemberId(memberId);
     try {
-      SensitiveInfoCheckResult checkResult = sensitiveInfoGuardService.check(request.rawInputText());
+      // 입력 글을 가공하지 않고 넘긴다 — AI DLP(로컬 LLM 마스킹)는 해커톤 POC 라 쓰지 않는다 (#377).
       RoutineAiPipeline.RoutineQuestionResult result =
-        routineAiPipeline.generateQuestion(profile.getNickname(), goals, checkResult.sanitizedText());
+        routineAiPipeline.generateQuestion(profile.getNickname(), goals, request.rawInputText());
       List<RoutineQuestionResponse.QuestionItem> questions = result.questions().stream()
         .map(item -> new RoutineQuestionResponse.QuestionItem(item.question(), toOptionItems(item.options())))
         .toList();
@@ -138,15 +132,15 @@ public class RoutineService {
 
     Profile profile = requireProfile(memberId);
 
-    // AI 호출 로그에 요청 회원을 연결한다 (DLP·텍스트·이미지 병렬 생성까지 전파).
-    SensitiveInfoCheckResult checkResult;
+    // AI 호출 로그에 요청 회원을 연결한다 (텍스트·이미지 병렬 생성까지 전파).
+    // 입력 글과 답변은 가공하지 않고 넘긴다. 예전의 AI DLP(로컬 LLM 마스킹)는 해커톤 POC 였고
+    // 실패하면 원문을 그대로 넘기는 fail-open 이라 보장도 아니면서 호출마다 수 초가 걸렸다 (#377).
+    List<String> answers = request.answers() == null ? List.of() : request.answers();
     RoutineAiPipeline.RoutineGenerationResult generation;
     AiCallContext.setMemberId(memberId);
     try {
-      checkResult = sensitiveInfoGuardService.check(request.rawInputText());
-      List<String> maskedAnswers = maskAnswers(request.answers());
       generation = routineAiPipeline.generateForCreate(
-        checkResult.sanitizedText(), profile.getNickname(), profile.getSupportGoals(), maskedAnswers,
+        request.rawInputText(), profile.getNickname(), profile.getSupportGoals(), answers,
         profile.getCharacter()
       );
     } finally {
@@ -156,7 +150,8 @@ public class RoutineService {
     Routine routine = new Routine();
     routine.setProfile(profile);
     routine.setRawInputText(request.rawInputText());
-    routine.setSanitizedInputText(checkResult.sanitizedText());
+    // 가공하지 않으므로 원문과 같다. 컬럼을 없애는 것은 마이그레이션이 필요해 따로 한다 (#377).
+    routine.setSanitizedInputText(request.rawInputText());
     routine.setTitle(generation.title());
     // scheduledAt은 비워서 보낼 수 있다. DB는 NOT NULL이므로 **서버가 채운다** —
     // 클라이언트도 지금 시각을 그대로 넣고 있었다(오늘 목록에 떠야 하므로). 값을 요구하면
@@ -781,30 +776,6 @@ public class RoutineService {
         return entity;
       })
       .toList();
-  }
-
-  // 답변(answers)도 rawInputText와 동일한 로컬 LLM 마스킹 게이트를 거치게 한다. 항목별로
-  // 개별 마스킹해 배열 구조를 유지해야 Gemini에 additionalAnswers 배열 그대로 전달할 수
-  // 있다(마스킹 전 하나로 합쳐버리면 Gemini 쪽에서 배열 구조를 잃는다, fable5 검토에서
-  // 발견 — 이전에는 answers를 comma로 합친 뒤 한 번에 마스킹해 문자열 하나로 전달했다).
-  // 로컬 LLM 호출을 답변 개수만큼 순차로 하면 fail-open 타임아웃이 그대로 누적되므로,
-  // RoutineAiPipeline의 이미지 생성 병렬화와 동일하게 가상 스레드로 병렬 호출해 지연을 1회
-  // 타임아웃 수준으로 묶는다(fable5 검토에서 발견).
-  private List<String> maskAnswers(List<String> answers) {
-    if (answers == null || answers.isEmpty()) {
-      return List.of();
-    }
-    ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
-    try {
-      List<CompletableFuture<String>> futures = answers.stream()
-        .map(answer -> CompletableFuture.supplyAsync(
-          () -> sensitiveInfoGuardService.check(answer).sanitizedText(), executor
-        ))
-        .toList();
-      return futures.stream().map(CompletableFuture::join).toList();
-    } finally {
-      executor.shutdown();
-    }
   }
 
   /**
