@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/semantics_audit.dart';
 import 'helpers/test_storage.dart';
 
 /// Figma `온보딩_비밀번호`(238:1909) / `_입력`(238:1997) / `_재확인`(238:2767) 정합 테스트.
@@ -300,6 +301,18 @@ void main() {
 
       expect(find.textContaining('한번 더'), findsOneWidget);
       expect(find.byType(PinDots), findsOneWidget);
+    });
+  });
+
+  group('누를 수 있는 것에 읽을 이름이 있다 (#339)', () {
+    testWidgets('암호 점 자리와 뒤로가기가 읽힌다', (tester) async {
+      // 실제 입력칸은 투명이라 화면 낭독기에 드러나지 않는다. 키보드를 여는
+      // 길은 이 점 자리뿐이다.
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      expectLabeledButton(tester, '암호 넣기');
+      expect(unnamedTapTargets(tester), isEmpty);
     });
   });
 }

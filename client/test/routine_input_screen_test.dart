@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/svg_finder.dart';
+import 'helpers/semantics_audit.dart';
 import 'helpers/test_storage.dart';
 
 /// Figma `보호자_새로운 일과 만들기`(238:1643) 정합 테스트.
@@ -308,6 +309,22 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AuroraBackground), findsOneWidget);
+    });
+  });
+
+  group('누를 수 있는 것에 읽을 이름이 있다 (#339)', () {
+    testWidgets('뒤로가기와 보내기 화살표가 읽힌다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pump();
+
+      expectLabeledButton(tester, '뒤로 가기');
+
+      // 보내기는 입력이 있을 때만 나타난다
+      await tester.enterText(find.byType(TextField), '내일 병원 가기');
+      await settle(tester);
+
+      expectLabeledButton(tester, '보내기');
+      expect(unnamedTapTargets(tester), isEmpty);
     });
   });
 }

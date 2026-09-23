@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/semantics_audit.dart';
 
 /// 연결 암호 넣기 화면 (이슈 #205 · 명세 §5-2).
 ///
@@ -63,6 +64,23 @@ void main() {
     // 이룸이 혼자 보고도 다음 행동을 알 수 있어야 한다.
     expect(find.textContaining('보호자 휴대폰에서'), findsOneWidget);
     expect(find.textContaining('설정 → 이룸이 휴대폰 연결하기'), findsOneWidget);
+  });
+
+  testWidgets('여섯 칸 자리가 연결 암호 넣기로 읽히고 넣은 글자를 알린다 (#339)', (tester) async {
+    // 실제 입력칸은 투명이라 화면 낭독기에 드러나지 않는다. 칸에 보이는 글자는
+    // 값으로 함께 읽혀야 무엇을 넣었는지 들을 수 있다.
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expectLabeledButton(tester, '연결 암호 넣기');
+    expect(unnamedTapTargets(tester), isEmpty);
+
+    await type(tester, 'a7k');
+
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('연결 암호 넣기')),
+      containsSemantics(value: 'A7K'),
+    );
   });
 
   testWidgets('여섯 자를 채우면 확인 버튼 없이 바로 보낸다', (tester) async {

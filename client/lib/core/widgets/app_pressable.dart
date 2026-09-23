@@ -20,6 +20,7 @@ class AppPressable extends StatefulWidget {
     this.onLongPress,
     this.scaleDown = scaleButton,
     this.behavior = HitTestBehavior.opaque,
+    this.semanticLabel,
   });
 
   final Widget child;
@@ -34,6 +35,14 @@ class AppPressable extends StatefulWidget {
   final double scaleDown;
 
   final HitTestBehavior behavior;
+
+  /// 화면 낭독기가 읽을 이름. **그림만 있는 버튼에 준다** (#339).
+  ///
+  /// 주면 이 이름이 버튼의 전부가 된다 — 안의 그림·글자는 읽지 않는다.
+  /// 별 배지처럼 안의 글자(`10`)만으로는 뜻이 안 통하는 자리도 이것으로 덮는다.
+  /// 글자가 이미 뜻을 다 말하는 버튼(CTA 등)에는 주지 않는다. 안 주면 지금처럼
+  /// 안의 글자가 이름이 된다.
+  final String? semanticLabel;
 
   /// 버튼 (CTA·FAB 등 전형적인 버튼)
   static const scaleButton = 0.97;
@@ -87,7 +96,8 @@ class _AppPressableState extends State<AppPressable>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final label = widget.semanticLabel;
+    final pressable = GestureDetector(
       behavior: widget.behavior,
       onTapDown: _onTapDown,
       onTapUp: (_) => _releaseWithSpring(),
@@ -98,12 +108,24 @@ class _AppPressableState extends State<AppPressable>
       child: AnimatedBuilder(
         animation: _controller,
         // child를 밖에서 만들어 스케일이 바뀔 때마다 다시 빌드하지 않는다
-        child: widget.child,
+        child: label == null ? widget.child : ExcludeSemantics(child: widget.child),
         builder: (context, child) => Transform.scale(
           scale: _controller.value,
           child: child,
         ),
       ),
+    );
+    if (label == null) return pressable;
+
+    // 이름을 제스처 **바깥**에서 감싼다. 안쪽(그림)에 붙이면 이름 노드와 누르는
+    // 노드가 갈라져, 실기기에서 이름 없는 버튼과 누를 수 없는 그림이 따로 잡힌다.
+    // container 로 제 노드를 세워 아래 GestureDetector 의 탭 동작을 여기로 모은다.
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: _isEnabled,
+      label: label,
+      child: pressable,
     );
   }
 }

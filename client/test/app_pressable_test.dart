@@ -3,6 +3,8 @@ import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'helpers/semantics_audit.dart';
+
 /// 눌림 반응 위젯 테스트.
 ///
 /// 토스 방식 — **누를 때는 즉각 줄고, 뗄 때만 물리적으로 복귀한다.**
@@ -21,6 +23,77 @@ void main() {
   }
 
   Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: Center(child: child)));
+
+  // 그림만 있는 버튼은 이름을 주지 않으면 화면 낭독기에 "버튼"으로만 읽힌다 (#339).
+  group('AppPressable — 읽을 이름', () {
+    testWidgets('이름을 주면 누르는 노드에 그 이름이 붙는다', (tester) async {
+      await tester.pumpWidget(
+        wrap(AppPressable(
+          onTap: () {},
+          semanticLabel: '설정',
+          child: const SizedBox(width: 40, height: 40),
+        )),
+      );
+
+      expectLabeledButton(tester, '설정');
+      expect(unnamedTapTargets(tester), isEmpty);
+    });
+
+    testWidgets('이름이 안의 글자를 덮는다 — 두 번 읽히지 않는다', (tester) async {
+      // 별 배지처럼 안의 글자(숫자)만으로는 뜻이 안 통하는 자리를 위한 것이다
+      await tester.pumpWidget(
+        wrap(AppPressable(
+          onTap: () {},
+          semanticLabel: '별 10개 모았어요',
+          child: const Text('10'),
+        )),
+      );
+
+      expectLabeledButton(tester, '별 10개 모았어요');
+      expect(find.bySemanticsLabel('10'), findsNothing);
+    });
+
+    testWidgets('이름으로 눌러도 onTap 이 불린다', (tester) async {
+      // 화면 낭독기는 좌표가 아니라 노드의 탭 동작을 부른다
+      var tapped = 0;
+      await tester.pumpWidget(
+        wrap(AppPressable(
+          onTap: () => tapped++,
+          semanticLabel: '설정',
+          child: const SizedBox(width: 40, height: 40),
+        )),
+      );
+
+      tester.semantics.tap(find.semantics.byLabel('설정'));
+      await tester.pumpAndSettle();
+
+      expect(tapped, 1);
+    });
+
+    testWidgets('이름을 주지 않으면 안의 글자가 그대로 이름이다', (tester) async {
+      // 글자가 이미 뜻을 다 말하는 버튼(CTA 등)은 지금처럼 둔다
+      await tester.pumpWidget(
+        wrap(AppPressable(onTap: () {}, child: const Text('다음'))),
+      );
+
+      expect(find.bySemanticsLabel('다음'), findsOneWidget);
+    });
+
+    testWidgets('비활성이면 누를 수 없다고 알린다', (tester) async {
+      await tester.pumpWidget(
+        wrap(const AppPressable(
+          onTap: null,
+          semanticLabel: '보내기',
+          child: SizedBox(width: 40, height: 40),
+        )),
+      );
+
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('보내기')),
+        containsSemantics(isButton: true, hasEnabledState: true, isEnabled: false),
+      );
+    });
+  });
 
   group('AppPressable — 눌림 반응', () {
     testWidgets('누르면 즉시 줄어든다', (tester) async {

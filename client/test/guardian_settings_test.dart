@@ -18,6 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/semantics_audit.dart';
 
 /// 보호자 설정 화면 (이슈 #181).
 ///
@@ -68,6 +69,16 @@ void main() {
 
     expect(find.text('로그아웃'), findsOneWidget);
     expect(find.text('회원탈퇴'), findsOneWidget);
+  });
+
+  // 공통 뒤로가기(`ElumScaffold`)라 이 자리가 비면 앱 거의 모든 화면이 함께
+  // 빈다. 실기기에서 설정의 화살표가 이름 없이 잡혔다 (#339).
+  testWidgets('뒤로가기가 뒤로 가기라고 읽히고 이름 없는 누름 자리가 없다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expectLabeledButton(tester, '뒤로 가기');
+    expect(unnamedTapTargets(tester), isEmpty);
   });
 
   // 가입한 뒤에 약관을 다시 볼 곳이 없으면 Apple 심사에서 지적받는다(5.1.1(i)).

@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/test_storage.dart';
+import 'helpers/semantics_audit.dart';
 
 /// 오버레이는 개발용이므로 **꺼졌을 때 흔적이 남지 않는 것**이 가장 중요하다.
 /// 플래그를 끄고 배포했는데 버튼이 보이면 사용자에게 그대로 노출된다. (이슈 #13)
@@ -245,5 +246,25 @@ void main() {
     expect(rect.left, greaterThanOrEqualTo(0));
     expect(rect.top, greaterThanOrEqualTo(0));
     expect(find.byIcon(Icons.bug_report), findsOneWidget);
+  });
+
+  // 테스트 빌드에서는 이 버튼이 **모든 화면**에 떠 있다. 이름이 없으면 실기기
+  // 접근성 검사에서 화면마다 이름 없는 버튼이 하나씩 잡힌다 (#339).
+  testWidgets('떠 있는 버튼과 패널의 아이콘 버튼에 이름이 있다', (tester) async {
+    dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
+
+    await tester.pumpWidget(buildSubject());
+    await tester.pumpAndSettle();
+
+    expectLabeledButton(tester, '개발자 도구 열기');
+    expect(unnamedTapTargets(tester), isEmpty);
+
+    await tester.tap(find.byIcon(Icons.bug_report));
+    await tester.pumpAndSettle();
+
+    // tooltip 으로 이름을 주면 이 패널에서는 Overlay 가 없어 터진다
+    expect(tester.takeException(), isNull);
+    expectLabeledButton(tester, '닫기');
+    expect(unnamedTapTargets(tester), isEmpty);
   });
 }

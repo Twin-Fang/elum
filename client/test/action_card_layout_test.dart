@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/semantics_audit.dart';
 
 /// 카드 레이아웃 회귀 방지.
 ///
@@ -193,6 +194,48 @@ void main() {
         greaterThan(0),
         reason: '이 값이 0 이 되면 자리가 넉넉해진 것이니 간격을 되돌려도 된다',
       );
+    });
+  });
+
+  group('누를 수 있는 것에 읽을 이름이 있다 (#339)', () {
+    Widget withActions({bool isSpeaking = false}) => ProviderScope(
+      child: ScreenUtilInit(
+        designSize: const Size(393, 852),
+        builder: (context, _) => MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: SizedBox(
+              width: 345,
+              height: 431,
+              child: ActionCardView(
+                card: card('옷을 입어요', '학교에 갈 옷을 입어요'),
+                index: 0,
+                onSpeak: () {},
+                onDelete: () {},
+                isSpeaking: isSpeaking,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    testWidgets('스피커와 X가 무엇을 하는지 읽힌다', (tester) async {
+      await tester.pumpWidget(withActions());
+      await tester.pump();
+
+      expectLabeledButton(tester, '소리로 듣기');
+      expectLabeledButton(tester, '이 카드 지우기');
+      expect(unnamedTapTargets(tester), isEmpty);
+    });
+
+    testWidgets('읽는 중에는 스피커가 멈추기라고 읽힌다', (tester) async {
+      // 읽는 중에 다시 누르면 멈춘다. 흐려지는 것만으로는 화면 낭독기에 안 닿는다.
+      await tester.pumpWidget(withActions(isSpeaking: true));
+      await tester.pump();
+
+      expectLabeledButton(tester, '읽기 멈추기');
+      expect(find.bySemanticsLabel('소리로 듣기'), findsNothing);
     });
   });
 }

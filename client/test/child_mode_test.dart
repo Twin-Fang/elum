@@ -10,9 +10,11 @@ import 'package:elum/features/child/domain/reward_character.dart';
 import 'package:elum/features/onboarding/domain/character.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
+import 'package:elum/features/child/presentation/child_stars_screen.dart';
 import 'package:elum/features/child/presentation/mode_switch_screen.dart';
 import 'package:elum/features/child/presentation/reward_screen.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
+import 'package:elum/features/guardian/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/card_palette.dart';
 import 'package:elum/shared/models/action_card.dart';
@@ -24,6 +26,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/semantics_audit.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
@@ -44,7 +47,12 @@ void main() {
     ),
   ];
 
-  Widget wrap(Widget screen, {List<ActionCard> steps = cards, String? pin}) {
+  Widget wrap(
+    Widget screen, {
+    List<ActionCard> steps = cards,
+    String? pin,
+    Member? member,
+  }) {
     final router = GoRouter(
       initialLocation: Routes.child,
       routes: [
@@ -81,7 +89,7 @@ void main() {
         // 실서버를 타지 않는다
         myRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
         todayRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
-        memberProvider.overrideWith((ref) async => null),
+        memberProvider.overrideWith((ref) async => member),
       ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
@@ -98,9 +106,10 @@ void main() {
     List<ActionCard> steps = cards,
     String? pin,
     String status = 'CONFIRMED',
+    Member? member,
   }) async {
     await tester.pumpWidget(
-      wrap(const ChildHomeScreen(), steps: steps, pin: pin),
+      wrap(const ChildHomeScreen(), steps: steps, pin: pin, member: member),
     );
     await tester.pumpAndSettle();
 
@@ -476,6 +485,97 @@ void main() {
       // 양방향 모두 같은 방식으로 알린다 (#180)
       expect(find.text('암호가 달라요. 다시 넣어주세요'), findsOneWidget);
       expect(find.byType(AppShake), findsOneWidget);
+    });
+  });
+
+  group('누를 수 있는 것에 읽을 이름이 있다 (#339)', () {
+    // 별 화면은 852 높이를 꽉 채운다 — 기본 뷰포트면 테스트 환경 탓에 넘친다
+    useFigmaViewport();
+
+    testWidgets('별 배지는 숫자만이 아니라 무엇의 개수인지 읽힌다', (tester) async {
+      // 배지 안 글자는 `10` 하나뿐이다. 그대로 두면 화면 낭독기가 "10, 버튼"만
+      // 읽어 무엇이 10인지 알 수 없었다.
+      await pumpChild(tester, member: const Member(totalStars: 10));
+
+      expectLabeledButton(tester, '별 10개 모았어요');
+      expect(find.bySemanticsLabel('10'), findsNothing,
+          reason: '숫자만 따로 한 번 더 읽히면 안 된다');
+    });
+
+    testWidgets('캐릭터 배지는 보호자 화면으로 가는 입구라고 읽힌다', (tester) async {
+      await pumpChild(tester);
+
+      expectLabeledButton(tester, '보호자 화면으로 가기');
+    });
+
+    testWidgets('이룸이 홈에 이름 없는 누름 자리가 없다', (tester) async {
+      await pumpChild(tester, member: const Member(totalStars: 3));
+
+      expect(unnamedTapTargets(tester), isEmpty);
+    });
+
+    testWidgets('일과 상세의 뒤로가기·듣기·다 했어요가 읽힌다', (tester) async {
+      await pumpChild(tester);
+      await tester.tap(find.text('비 오는 날 학교에 가요'));
+      await tester.pumpAndSettle();
+
+      expectLabeledButton(tester, '뒤로 가기');
+      expectLabeledButton(tester, '다 했어요');
+      // 스피커는 카드마다 하나씩 있다 — 옆 카드도 미리 그려 두므로 둘이다
+      final speak = find.bySemanticsLabel('소리로 듣기');
+      expect(speak, findsWidgets);
+      expect(
+        tester.getSemantics(speak.first),
+        containsSemantics(isButton: true, hasTapAction: true),
+      );
+      expect(unnamedTapTargets(tester), isEmpty);
+    });
+
+    testWidgets('다 했어요 버튼은 눌렀는지도 함께 알린다', (tester) async {
+      // 누를 때마다 켜고 끄는 버튼이다. 이름만 있으면 이미 했는지 알 수 없다.
+      await pumpChild(tester);
+      await tester.tap(find.text('비 오는 날 학교에 가요'));
+      await tester.pumpAndSettle();
+
+      final check = find.bySemanticsLabel('다 했어요');
+      expect(
+        tester.getSemantics(check),
+        containsSemantics(hasCheckedState: true, isChecked: false),
+      );
+
+      await tester.tap(find.byKey(ChildRoutineDetailScreen.checkButtonKey));
+      // 한 프레임만 — 조금 뒤 별 화면이 올라와 이 화면을 덮는다
+      await tester.pump();
+
+      expect(
+        tester.getSemantics(check),
+        containsSemantics(hasCheckedState: true, isChecked: true),
+      );
+
+      // 별 화면으로 넘어가는 대기 타이머를 흘려보낸다. 별 화면은 계속 움직여
+      // pumpAndSettle 이 끝나지 않는다 (child_card_advance_test 와 같은 방식).
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
+    });
+
+    testWidgets('별 화면의 뒤로가기가 읽힌다', (tester) async {
+      await tester.pumpWidget(wrap(const ChildStarsScreen()));
+      await tester.pumpAndSettle();
+
+      expectLabeledButton(tester, '뒤로 가기');
+      expect(unnamedTapTargets(tester), isEmpty);
+    });
+
+    testWidgets('암호 점을 누르는 자리가 암호 넣기라고 읽힌다', (tester) async {
+      // 실제 입력칸은 투명이라 화면 낭독기에 드러나지 않는다. 키보드를 여는
+      // 길은 이 점 자리 하나뿐이다.
+      await tester.pumpWidget(
+        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.guardian)),
+      );
+      await tester.pumpAndSettle();
+
+      expectLabeledButton(tester, '암호 넣기');
+      expect(unnamedTapTargets(tester), isEmpty);
     });
   });
 

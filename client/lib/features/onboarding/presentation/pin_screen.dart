@@ -188,14 +188,21 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           ),
           SizedBox(height: _descriptionToDots.h),
           // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)
-          GestureDetector(
-            onTap: _focusNode.requestFocus,
-            behavior: HitTestBehavior.opaque,
-            child: AppShake(
-              trigger: _mismatchCount,
-              child: PinDots(
-                length: OnboardingProfile.pinLength,
-                filled: _current.length,
+          // 실제 입력칸은 투명(Opacity 0)이라 화면 낭독기에서 빠진다. 키보드를 여는
+          // 길은 이 점 자리뿐이라 이름을 준다 (#339). 넣은 숫자는 암호라 읽지 않는다.
+          Semantics(
+            container: true,
+            button: true,
+            label: '암호 넣기',
+            child: GestureDetector(
+              onTap: _focusNode.requestFocus,
+              behavior: HitTestBehavior.opaque,
+              child: AppShake(
+                trigger: _mismatchCount,
+                child: PinDots(
+                  length: OnboardingProfile.pinLength,
+                  filled: _current.length,
+                ),
               ),
             ),
           ),

@@ -19,6 +19,7 @@ class SelectableGroup<T> extends StatelessWidget {
     this.multiSelect = false,
     this.allowDeselect = true,
     this.gap = 0,
+    this.semanticLabelOf,
   });
 
   final List<T> items;
@@ -38,6 +39,13 @@ class SelectableGroup<T> extends StatelessWidget {
   /// 세로 리스트로 쓸 때 항목 사이 간격.
   /// 항목 위젯이 margin을 갖게 하면 마지막 항목에도 여백이 남는다.
   final double gap;
+
+  /// 항목을 화면 낭독기가 읽는 이름 (#339). **그림뿐인 항목에만 준다.**
+  ///
+  /// 캐릭터 카드는 안에 그림뿐이고 이름(루루·포포)이 카드 밖에 있어, 누르는
+  /// 카드 자체에는 이름이 없었다. 주면 고른 상태(selected)도 함께 알린다.
+  /// 목표 칩처럼 안에 글자가 있으면 주지 않는다 — 그 글자가 이미 이름이다.
+  final String Function(T item)? semanticLabelOf;
 
   void _toggle(T item) {
     final isSelected = selected.contains(item);
@@ -65,6 +73,8 @@ class SelectableGroup<T> extends StatelessWidget {
           if (index > 0) SizedBox(height: gap),
           _SelectableItem(
             onTap: () => _toggle(item),
+            label: semanticLabelOf?.call(item),
+            isSelected: selected.contains(item),
             child: itemBuilder(context, item, selected.contains(item)),
           ),
         ],
@@ -77,24 +87,46 @@ class SelectableGroup<T> extends StatelessWidget {
   Widget buildItem(BuildContext context, T item) {
     return _SelectableItem(
       onTap: () => _toggle(item),
+      label: semanticLabelOf?.call(item),
+      isSelected: selected.contains(item),
       child: itemBuilder(context, item, selected.contains(item)),
     );
   }
 }
 
 class _SelectableItem extends StatelessWidget {
-  const _SelectableItem({required this.onTap, required this.child});
+  const _SelectableItem({
+    required this.onTap,
+    required this.child,
+    required this.isSelected,
+    this.label,
+  });
 
   final VoidCallback onTap;
   final Widget child;
+  final bool isSelected;
+
+  /// null 이면 안의 글자가 그대로 이름이 된다 (지금까지와 같다).
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
     // 목표 칩·캐릭터 카드는 면적이 넓어 조금만 줄인다 (docs/motion.md)
-    return AppPressable(
+    final pressable = AppPressable(
       onTap: onTap,
       scaleDown: AppPressable.scaleCard,
-      child: child,
+      child: label == null ? child : ExcludeSemantics(child: child),
+    );
+    if (label == null) return pressable;
+
+    // 고른 상태는 AppPressable 의 이름 자리로 담을 수 없어 여기서 감싼다.
+    // 제스처 바깥에 두어야 이름과 누름 동작이 한 노드에 모인다.
+    return Semantics(
+      container: true,
+      button: true,
+      selected: isSelected,
+      label: label,
+      child: pressable,
     );
   }
 }

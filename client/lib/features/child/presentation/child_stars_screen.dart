@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_scaffold.dart';
 import '../../guardian/data/routine_repository.dart';
 
 /// Figma `아이_별`(364:8219) — 지금까지 모은 별을 보여준다.
@@ -134,6 +135,7 @@ class ChildStarsScreen extends ConsumerWidget {
                   child: AppPressable(
                     onTap: () => context.pop(),
                     scaleDown: AppPressable.scaleIcon,
+                    semanticLabel: ElumScaffold.backLabel,
                     child: SizedBox(
                       width: _backTouch.w,
                       height: _backTouch.w,

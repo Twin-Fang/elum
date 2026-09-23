@@ -160,6 +160,9 @@ class _Header extends StatelessWidget {
                   AppPressable(
                     onTap: () => context.go(Routes.child),
                     scaleDown: AppPressable.scaleIcon,
+                    // 이룸이 화면으로 가는 유일한 입구다. 그림뿐이라 이름을 주지
+                    // 않으면 화면 낭독기로는 이 길을 찾을 수 없다 (#339).
+                    semanticLabel: '이룸이 화면으로 가기',
                     child: _CharacterBadge(character: character),
                   ),
                   SizedBox(width: _badgeToSettings.w),
@@ -169,6 +172,7 @@ class _Header extends StatelessWidget {
                     // 돌아갈 곳을 잃는다 — 화살표도 기기 뒤로가기도 먹통이 된다 (이슈 #194).
                     onTap: () => context.push(Routes.guardianSettings),
                     scaleDown: AppPressable.scaleIcon,
+                    semanticLabel: '설정',
                     child: SvgPicture.asset(
                       AppAssets.iconSettings,
                       // 정사각형 아이콘 — 가로세로 모두 .w

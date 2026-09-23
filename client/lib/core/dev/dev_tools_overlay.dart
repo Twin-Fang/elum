@@ -141,24 +141,31 @@ class _DraggableButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      onPanUpdate: (details) => onDrag(details.delta),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.55),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    // 테스트 빌드에서는 모든 화면에 떠 있다. 이름이 없으면 실기기 접근성
+    // 검사에서 화면마다 이름 없는 버튼이 하나씩 잡힌다 (#339).
+    return Semantics(
+      container: true,
+      button: true,
+      label: '개발자 도구 열기',
+      child: GestureDetector(
+        onTap: onTap,
+        onPanUpdate: (details) => onDrag(details.delta),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.55),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const Icon(Icons.bug_report, color: Colors.white, size: 24),
         ),
-        child: const Icon(Icons.bug_report, color: Colors.white, size: 24),
       ),
     );
   }
@@ -191,9 +198,14 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
         children: [
           // 시트 밖을 누르면 닫힌다
           Positioned.fill(
-            child: GestureDetector(
-              onTap: widget.onClose,
-              child: Container(color: Colors.black.withValues(alpha: 0.4)),
+            child: Semantics(
+              container: true,
+              button: true,
+              label: '개발자 도구 닫기',
+              child: GestureDetector(
+                onTap: widget.onClose,
+                child: Container(color: Colors.black.withValues(alpha: 0.4)),
+              ),
             ),
           ),
           Align(
@@ -243,7 +255,13 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
           // 하위 화면에서는 메뉴로 돌아가는 버튼을 준다
           if (_view != _DevView.menu)
             IconButton(
-              icon: const Icon(Icons.arrow_back, size: 20),
+              // 아이콘만 있는 버튼이라 이름을 준다 (#339). tooltip 은 쓰지 않는다 —
+              // 이 패널은 Navigator 바깥에 떠서 Tooltip 이 찾을 Overlay 가 없다.
+              icon: const Icon(
+                Icons.arrow_back,
+                size: 20,
+                semanticLabel: '메뉴로 돌아가기',
+              ),
               onPressed: () => setState(() => _view = _DevView.menu),
             )
           else
@@ -256,7 +274,7 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, size: 20),
+            icon: const Icon(Icons.close, size: 20, semanticLabel: '닫기'),
             onPressed: widget.onClose,
           ),
         ],
@@ -304,15 +322,18 @@ class _DevMenuState extends State<_DevMenu> {
     return ListView(
       shrinkWrap: true,
       children: [
-        ListTile(
-          leading: const Icon(Icons.speed),
-          title: const Text('온보딩 건너뛰기'),
-          subtitle: const Text('devFlag 토글'),
-          trailing: Switch(
-            value: AppConfig.skipOnboarding,
-            onChanged: (value) {
-              setState(() => AppConfig.skipOnboarding = value);
-            },
+        // 스위치가 제목과 따로 떨어져 이름 없이 읽히지 않게 한 노드로 묶는다 (#339)
+        MergeSemantics(
+          child: ListTile(
+            leading: const Icon(Icons.speed),
+            title: const Text('온보딩 건너뛰기'),
+            subtitle: const Text('devFlag 토글'),
+            trailing: Switch(
+              value: AppConfig.skipOnboarding,
+              onChanged: (value) {
+                setState(() => AppConfig.skipOnboarding = value);
+              },
+            ),
           ),
         ),
         _Tile(

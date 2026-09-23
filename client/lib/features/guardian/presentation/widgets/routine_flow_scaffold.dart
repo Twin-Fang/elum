@@ -9,6 +9,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/elum_scaffold.dart';
 import 'aurora_background.dart';
 
 /// 일과 만들기 흐름의 공통 뼈대.
@@ -159,6 +160,8 @@ class _TopBar extends StatelessWidget {
             AppPressable(
               onTap: onBack,
               scaleDown: AppPressable.scaleIcon,
+              // 일과 만들기 흐름 화면 전부가 이 상단바를 쓴다 — 여기가 비면 다 빈다 (#339)
+              semanticLabel: ElumScaffold.backLabel,
               // 정사각형 아이콘이라 가로세로 모두 .w
               // 자리는 아이콘 크기 그대로 두고 **그 위로** 40×40 누름 영역을 덮는다 (#306).
               // 자리째 키우면 상단바가 높아져 화면 전체가 아래로 밀린다.
@@ -189,6 +192,7 @@ class _TopBar extends StatelessWidget {
           AppPressable(
             onTap: onHome,
             scaleDown: AppPressable.scaleIcon,
+            semanticLabel: '홈으로 가기',
             // 자리는 아이콘 크기 그대로 두고 **그 위로** 40×40 누름 영역을 덮는다 (#306).
             // 자리째 키우면 상단바가 높아져 화면 전체가 아래로 밀린다.
             child: SizedBox(

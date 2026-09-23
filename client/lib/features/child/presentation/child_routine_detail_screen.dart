@@ -10,6 +10,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_scaffold.dart';
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
 import 'widgets/reward_banner.dart';
@@ -332,6 +333,7 @@ class _TopBar extends StatelessWidget {
           AppPressable(
             onTap: onBack,
             scaleDown: AppPressable.scaleIcon,
+            semanticLabel: ElumScaffold.backLabel,
             // 아동 모드 터치 타겟을 넉넉히 잡는다
             child: SizedBox(
               width: 64.w,
@@ -420,49 +422,59 @@ class _CheckButton extends StatelessWidget {
           shouldLoop: false,
           colors: colors.confetti,
         ),
-        AppPressable(
-          key: ChildRoutineDetailScreen.checkButtonKey,
-          onTap: onTap,
-          scaleDown: AppPressable.scaleButton,
-          child: AnimatedContainer(
-            // 아동 화면은 300ms 이상으로 둔다 (docs/motion.md)
-            duration: AppMotion.normal,
-            curve: AppMotion.standard,
-            // 원형 버튼이라 가로세로 모두 .w. 좁은 기기에서 줄어들어도
-            // 아동 모드 최소 터치 타겟(64) 아래로는 내려가지 않게 막는다.
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isChecked ? colors.checkDone : Colors.transparent,
-              // 완료되면 채움만 남긴다 — 회색 테두리가 남으면 덜 끝난 느낌을 준다
-              // (Figma 309:3682)
-              border: isChecked
-                  ? null
-                  : Border.all(color: colors.checkPending, width: 8.w),
-              // 채워진 뒤에만 그림자가 붙는다 (시안 `309:3682` — 0 2 5 · 5%).
-              // 카드가 쓰는 것과 같은 그림자다.
-              boxShadow: isChecked
-                  ? [
-                      BoxShadow(
-                        color: colors.glassShadow,
-                        blurRadius: 5.w,
-                        offset: Offset(0, 2.h),
-                      ),
-                    ]
-                  : null,
-            ),
-            // **`Icons.check_rounded`가 아니다.** 그건 획이 가늘어 시안과 나란히
-            // 놓으면 진한 픽셀이 607 대 212로 벌어진다. 시안(`993:4331`)은
-            // 48×35.76이고 88 상자 한가운데에 온다 (#297).
-            child: Center(
-              child: SvgPicture.asset(
-                AppAssets.childCheckMark,
-                width: 48.w,
-                height: 35.76.w,
-                colorFilter: ColorFilter.mode(
-                  isChecked ? colors.surface : colors.checkPending,
-                  BlendMode.srcIn,
+        // 그림(체크 표시)뿐인 버튼이라 이름을 준다 (#339). 누를 때마다 켜고 끄므로
+        // 이름만으로는 이미 했는지 모른다 — 켜짐 상태(checked)도 함께 알린다.
+        // AppPressable 의 이름 자리는 상태를 못 담아 여기서 직접 감싼다.
+        Semantics(
+          container: true,
+          button: true,
+          checked: isChecked,
+          label: '다 했어요',
+          child: AppPressable(
+            key: ChildRoutineDetailScreen.checkButtonKey,
+            onTap: onTap,
+            scaleDown: AppPressable.scaleButton,
+            child: AnimatedContainer(
+              // 아동 화면은 300ms 이상으로 둔다 (docs/motion.md)
+              duration: AppMotion.normal,
+              curve: AppMotion.standard,
+              // 원형 버튼이라 가로세로 모두 .w. 좁은 기기에서 줄어들어도
+              // 아동 모드 최소 터치 타겟(64) 아래로는 내려가지 않게 막는다.
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isChecked ? colors.checkDone : Colors.transparent,
+                // 완료되면 채움만 남긴다 — 회색 테두리가 남으면 덜 끝난 느낌을 준다
+                // (Figma 309:3682)
+                border: isChecked
+                    ? null
+                    : Border.all(color: colors.checkPending, width: 8.w),
+                // 채워진 뒤에만 그림자가 붙는다 (시안 `309:3682` — 0 2 5 · 5%).
+                // 카드가 쓰는 것과 같은 그림자다.
+                boxShadow: isChecked
+                    ? [
+                        BoxShadow(
+                          color: colors.glassShadow,
+                          blurRadius: 5.w,
+                          offset: Offset(0, 2.h),
+                        ),
+                      ]
+                    : null,
+              ),
+              // **`Icons.check_rounded`가 아니다.** 그건 획이 가늘어 시안과 나란히
+              // 놓으면 진한 픽셀이 607 대 212로 벌어진다. 시안(`993:4331`)은
+              // 48×35.76이고 88 상자 한가운데에 온다 (#297).
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.childCheckMark,
+                  width: 48.w,
+                  height: 35.76.w,
+                  colorFilter: ColorFilter.mode(
+                    isChecked ? colors.surface : colors.checkPending,
+                    BlendMode.srcIn,
+                  ),
+                  excludeFromSemantics: true,
                 ),
               ),
             ),

@@ -86,6 +86,12 @@ class ElumScaffold extends StatelessWidget {
   /// 뒤로가기 상자 하단 — [ElumHeader]가 제목 y를 여기서 이어 계산한다.
   static const backBoxBottom = _backBoxY + _backBoxSize;
 
+  /// 뒤로가기 화살표를 화면 낭독기가 읽는 이름 (#339).
+  ///
+  /// 이 뼈대를 쓰지 않는 화면(흐름·이룸이·별 화면)의 화살표도 이 값을 쓴다.
+  /// 화면마다 따로 쓰면 같은 버튼이 곳곳에서 다르게 읽힌다.
+  static const backLabel = '뒤로 가기';
+
   /// Figma 프레임 전체 높이. CTA 하단 여백을 화면 하단 기준으로 역산한다.
   ///
   /// CTA는 y=675, h=66 → 하단 741. 프레임 하단 852까지 111이 남는다.
@@ -135,6 +141,11 @@ class ElumScaffold extends StatelessWidget {
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => FocusScope.of(context).unfocus(),
+        // 화면 낭독기에는 드러내지 않는다 (#339). 드러내면 본문 전체가 하나의
+        // "누를 수 있는 것"이 되어, 흩어진 글자(설정 제목·버전)가 그 이름으로
+        // 뭉쳐 읽히고 글자가 없는 화면에서는 이름 없는 버튼으로 잡힌다.
+        // 키보드를 내리는 건 눈으로 보는 사용자를 위한 편의라 탭은 그대로 둔다.
+        excludeFromSemantics: true,
         // SafeArea를 쓰지 않는다 — Figma y가 화면 최상단 기준이라
         // 직접 보정해야 한다 (클래스 주석 참조).
         child: Padding(
@@ -177,17 +188,26 @@ class ElumScaffold extends StatelessWidget {
                     // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
                     // 상자 자체가 40×40이라 누름 영역과 자리가 한 값으로 맞는다
                     // — 따로 덮을 필요가 없다 (#306의 OverflowBox를 걷어냈다).
-                    child: GestureDetector(
-                      onTap: onBack,
-                      behavior: HitTestBehavior.opaque,
-                      child: SizedBox(
-                        width: _backBoxSize.w,
-                        height: _backBoxSize.w,
-                        child: Center(
-                          child: SvgPicture.asset(
-                            AppAssets.iconBack,
-                            width: _backIconSize.w,
-                            height: _backIconSize.w,
+                    //
+                    // 앱 거의 모든 화면의 뒤로가기라 이름이 비면 전부 함께 빈다
+                    // (#339). 이름은 제스처 바깥에 두어야 누르는 노드에 붙는다.
+                    child: Semantics(
+                      container: true,
+                      button: true,
+                      label: backLabel,
+                      child: GestureDetector(
+                        onTap: onBack,
+                        behavior: HitTestBehavior.opaque,
+                        child: SizedBox(
+                          width: _backBoxSize.w,
+                          height: _backBoxSize.w,
+                          child: Center(
+                            child: SvgPicture.asset(
+                              AppAssets.iconBack,
+                              width: _backIconSize.w,
+                              height: _backIconSize.w,
+                              excludeFromSemantics: true,
+                            ),
                           ),
                         ),
                       ),

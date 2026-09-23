@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/semantics_audit.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
@@ -220,6 +221,33 @@ void main() {
       // 카드 아래에 그대로 나가는 문구다
       expect(CardCharacter.cat.displayName, '루루');
       expect(CardCharacter.fox.displayName, '포포');
+    });
+  });
+
+  group('누를 수 있는 것에 읽을 이름이 있다 (#339)', () {
+    testWidgets('캐릭터 카드가 이름으로 읽히고 고른 쪽을 알린다', (tester) async {
+      // 카드 안에는 그림뿐이고 이름은 카드 **밖** 아래 줄에 있다. 누르는
+      // 카드에 이름이 없으면 "버튼, 버튼, 포포, 루루"로 읽혀 무엇을 고르는지
+      // 알 수 없었다.
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      // 한 곳에서만 읽혀야 한다 — 카드 밖 이름 줄이 한 번 더 읽히면 안 된다
+      expectLabeledButton(tester, '루루');
+      expectLabeledButton(tester, '포포');
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('루루')),
+        containsSemantics(isSelected: false),
+      );
+
+      await tester.tap(find.bySemanticsLabel('루루'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('루루')),
+        containsSemantics(isSelected: true),
+      );
+      expect(unnamedTapTargets(tester), isEmpty);
     });
   });
 }

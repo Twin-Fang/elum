@@ -16,6 +16,7 @@ import 'package:go_router/go_router.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 
+import 'helpers/semantics_audit.dart';
 import 'helpers/test_storage.dart';
 import 'helpers/fake_reward_api.dart';
 
@@ -297,6 +298,33 @@ void main() {
       // 칩은 남아 있고 선택만 풀린다
       expect(find.text('진료카드'), findsOneWidget);
       expect(container.read(routineFlowProvider).answers, isEmpty);
+    });
+  });
+
+  group('누를 수 있는 것에 읽을 이름이 있다 (#339)', () {
+    testWidgets('흐름 화면 위의 뒤로가기와 홈이 읽힌다', (tester) async {
+      // 일과 만들기 흐름 화면이 모두 같은 상단바(`RoutineFlowScaffold`)를 쓴다.
+      await pumpWith(tester, twoQuestions);
+
+      expectLabeledButton(tester, '뒤로 가기');
+      expectLabeledButton(tester, '홈으로 가기');
+      expect(unnamedTapTargets(tester), isEmpty);
+    });
+
+    testWidgets('직접 입력 칸의 X와 내가 쓴 칩의 X가 무엇을 하는지 읽힌다', (tester) async {
+      await pumpWith(tester, twoQuestions);
+
+      await tester.tap(find.text('+ 직접 입력하기').first);
+      await settle(tester);
+      expectLabeledButton(tester, '직접 입력 닫기');
+
+      await tester.enterText(find.byType(TextField), '진료카드');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await settle(tester);
+
+      // 칩 이름과 지우기가 한데 섞이면 "진료카드"를 누르는지 지우는지 모른다
+      expectLabeledButton(tester, '진료카드 지우기');
+      expect(unnamedTapTargets(tester), isEmpty);
     });
   });
 

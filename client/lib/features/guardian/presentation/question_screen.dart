@@ -326,6 +326,7 @@ class _CustomOptionField extends StatelessWidget {
               AppPressable(
                 onTap: onCancel,
                 scaleDown: AppPressable.scaleIcon,
+                semanticLabel: '직접 입력 닫기',
                 child: Padding(
                   padding: EdgeInsets.only(right: space.md),
                   child: Icon(Icons.close_rounded,
@@ -395,15 +396,22 @@ class _OptionChip extends StatelessWidget {
                 ),
                 if (onRemove != null) ...[
                   SizedBox(width: 4.w),
-                  GestureDetector(
-                    key: ValueKey('remove-$label'),
-                    onTap: onRemove,
-                    // 아이콘만으로는 터치 영역이 좁아 누르기 어렵다
-                    behavior: HitTestBehavior.opaque,
-                    child: Icon(
-                      Icons.close_rounded,
-                      size: 16.w,
-                      color: labelColor,
+                  // 칩 안의 X 는 칩과 따로 읽혀야 한다. 이름이 없으면 칩 이름만
+                  // 들려 누르면 고르는지 지우는지 알 수 없다 (#339).
+                  Semantics(
+                    container: true,
+                    button: true,
+                    label: '$label 지우기',
+                    child: GestureDetector(
+                      key: ValueKey('remove-$label'),
+                      onTap: onRemove,
+                      // 아이콘만으로는 터치 영역이 좁아 누르기 어렵다
+                      behavior: HitTestBehavior.opaque,
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 16.w,
+                        color: labelColor,
+                      ),
                     ),
                   ),
                 ],

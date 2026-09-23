@@ -14,6 +14,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_scaffold.dart';
 import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
 import '../domain/routine_suggestion.dart';
@@ -169,6 +170,7 @@ class _BackRow extends StatelessWidget {
             context.pop();
           },
           scaleDown: AppPressable.scaleIcon,
+          semanticLabel: ElumScaffold.backLabel,
           // **자리가 40×40 이다.** 시안(976:4611)이 그 크기로 두고, 안에
           // 화살표를 가운데 놓는다 — 박스 중심과 화살표 중심이 같다.
           // 아래 여백은 이 40을 감안해 잡혀 있으므로(topToSparkles) 여기를
@@ -378,6 +380,8 @@ class _SendButton extends StatelessWidget {
       key: RoutineInputScreen.sendButtonKey,
       onTap: onTap,
       scaleDown: AppPressable.scaleIcon,
+      // 입력창 안 화살표뿐이라 무엇을 하는 버튼인지 이름으로 알린다 (#339)
+      semanticLabel: '보내기',
       child: Container(
         // 원형 버튼이라 가로세로 모두 .w
         width: 32.w,

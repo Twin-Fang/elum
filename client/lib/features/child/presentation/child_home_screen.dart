@@ -158,6 +158,9 @@ class _TopBar extends ConsumerWidget {
           AppPressable(
             onTap: () => context.push(Routes.childStars),
             scaleDown: AppPressable.scaleIcon,
+            // 배지 안 글자는 숫자뿐이라 그대로 두면 "10"만 읽힌다. 무엇이 10인지
+            // 붙여 읽힌다 — 이름이 안의 숫자를 덮으므로 두 번 읽히지 않는다 (#339).
+            semanticLabel: '별 $stars개 모았어요',
             child: _StarBadge(count: stars),
           ),
           SizedBox(width: space.md),
@@ -167,6 +170,7 @@ class _TopBar extends ConsumerWidget {
               '${Routes.modeSwitch}?to=${ModeSwitchTarget.guardian.name}',
             ),
             scaleDown: AppPressable.scaleIcon,
+            semanticLabel: '보호자 화면으로 가기',
             // 정사각형 배지라 가로세로 모두 .w
             child: SvgPicture.asset(
               AppAssets.characterBadgeFramed(character),

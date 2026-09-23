@@ -149,12 +149,24 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
             ),
           ),
           SizedBox(height: space.xl),
-          GestureDetector(
-            onTap: _focusNode.requestFocus,
-            behavior: HitTestBehavior.opaque,
-            child: AppShake(
-              trigger: _failCount,
-              child: CodeBoxes(value: _typed, hasError: _errorMessage != null),
+          // 실제 입력칸은 투명이라 화면 낭독기에서 빠진다. 키보드를 여는 길은 이
+          // 여섯 칸뿐이라 이름을 주고, 칸에 보이는 글자는 값으로 함께 읽힌다 (#339).
+          Semantics(
+            container: true,
+            button: true,
+            label: '연결 암호 넣기',
+            value: _typed,
+            child: GestureDetector(
+              onTap: _focusNode.requestFocus,
+              behavior: HitTestBehavior.opaque,
+              child: AppShake(
+                trigger: _failCount,
+                // 칸마다 글자를 따로 읽으면 한 글자씩 끊겨 들린다 — 위 값 하나로
+                // 읽힌다. 바깥에서 빼면 누름 동작까지 함께 빠져 안쪽에서 뺀다.
+                child: ExcludeSemantics(
+                  child: CodeBoxes(value: _typed, hasError: _errorMessage != null),
+                ),
+              ),
             ),
           ),
           if (_sending) ...[

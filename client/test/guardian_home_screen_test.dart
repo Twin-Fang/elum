@@ -22,6 +22,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_reward_api.dart';
+import 'helpers/semantics_audit.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 
@@ -523,6 +524,36 @@ void main() {
     test('서버가 prompt를 안 주면 라벨로 폴백한다', () {
       const s = RoutineSuggestion(icon: '☔️', text: '비 오는 날 등교');
       expect(s.inputText, '비 오는 날 등교');
+    });
+  });
+
+  group('누를 수 있는 것에 읽을 이름이 있다 (#339)', () {
+    testWidgets('캐릭터 배지는 이룸이 화면으로 가는 입구라고 읽힌다', (tester) async {
+      // 이룸이 화면으로 가는 **유일한 입구**다. 이름이 없으면 화면 낭독기로는
+      // 무엇을 누르는지 알 수 없어 이룸이 화면에 갈 방법이 사라진다.
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      expectLabeledButton(tester, '이룸이 화면으로 가기');
+    });
+
+    testWidgets('톱니는 설정이라고 읽힌다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      expectLabeledButton(tester, '설정');
+    });
+
+    testWidgets('일과가 있어도 이름 없는 누름 자리가 없다', (tester) async {
+      // 실기기 판정(clickable 인데 이름 없음)과 같은 기준으로 화면 전체를 훑는다.
+      await tester.pumpWidget(wrap(
+        routines: [routine('오늘 할 일', 2)],
+        today: [routine('오늘 할 일', 2)],
+        past: [routine('어제 한 일', 1)],
+      ));
+      await tester.pumpAndSettle();
+
+      expect(unnamedTapTargets(tester), isEmpty);
     });
   });
 }
