@@ -17,6 +17,8 @@ import 'card_image.dart';
 ///
 /// 보호자용에는 삭제 X가 있고, 아이용에는 없다. [onDelete]로 가른다.
 /// 수정 진입점은 카드 밖(`이 카드 수정하기` 칩)으로 나갔다 — 2026-07-22 시안.
+///
+/// 카드 안 배치는 [layout]으로 가른다 — 두 시안이 여백·그림칸 비율부터 달라졌다.
 class ActionCardView extends StatefulWidget {
   const ActionCardView({
     super.key,
@@ -26,6 +28,7 @@ class ActionCardView extends StatefulWidget {
     this.onDelete,
     this.onSpeak,
     this.isSpeaking = false,
+    this.layout = ActionCardLayout.review,
   });
 
   /// 시안 그림칸 비율 (`309:3548` — 313×264).
@@ -53,15 +56,27 @@ class ActionCardView extends StatefulWidget {
   /// 지금 이 카드를 읽고 있는가. 아이콘 상태가 바뀐다.
   final bool isSpeaking;
 
+  /// 카드 안 배치. 이룸이 일과 상세만 [ActionCardLayout.childDetail]을 쓴다.
+  final ActionCardLayout layout;
+
   @override
   State<ActionCardView> createState() => _ActionCardViewState();
 }
 
 class _ActionCardViewState extends State<ActionCardView> {
-  /// Figma 실측 — 카드 안 스피커 아이콘 24×24
-  /// 제목 → 설명 (시안 `309:3548` 실측)
+  /// 배지 줄 아래 → 설명. 카드확인은 예전 값(17)을 그대로 쓴다.
   static const _titleToBody = 17.0;
 
+  /// 이룸이 상세 — 배지 줄 아래 → 설명 (시안 `309:3548` 배지 끝 517 → 설명 535).
+  static const _childTitleToBody = 18.0;
+
+  /// 이룸이 상세 — 그림칸 아래 → 배지 (시안 `309:3548` 그림칸 끝 460 → 배지 477).
+  static const _childIllustrationToTitle = 17.0;
+
+  /// 카드 테두리 두께 (시안 `Rectangle 30` — 2, 안쪽 선).
+  static const _borderWidth = 2.0;
+
+  /// Figma 실측 — 카드 안 스피커 아이콘 24×24
   static const _volumeIconSize = 24.0;
 
   final _scrollController = ScrollController();
@@ -77,7 +92,9 @@ class _ActionCardViewState extends State<ActionCardView> {
     super.initState();
     _scrollController.addListener(_updateFadeVisibility);
     // 첫 프레임 이후에 실제 콘텐츠 크기가 확정되므로 그때 한 번 계산한다.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _updateFadeVisibility());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _updateFadeVisibility(),
+    );
   }
 
   @override
@@ -100,12 +117,33 @@ class _ActionCardViewState extends State<ActionCardView> {
   Widget build(BuildContext context) {
     final palette = CardPalette.at(widget.index);
     final space = context.space;
+    final childLayout = widget.layout == ActionCardLayout.childDetail;
+    final speaker = AppPressable(
+      onTap: widget.onSpeak,
+      scaleDown: AppPressable.scaleIcon,
+      // 읽는 중에 다시 누르면 멈춘다. 흐려지는 것만으로는
+      // 화면 낭독기에 닿지 않아 이름도 함께 바꾼다 (#339).
+      semanticLabel: widget.isSpeaking ? '읽기 멈추기' : '소리로 듣기',
+      // SVG가 25×25인데 Figma 배치는 24×24다. 크기만 지정하면
+      // 비율이 눌려 아이콘이 찌그러진다 — contain으로 비율을 지킨다.
+      // 정사각형 아이콘이라 가로세로 모두 .w로 맞춘다
+      child: SizedBox(
+        width: _volumeIconSize.w,
+        height: _volumeIconSize.w,
+        // 읽는 중에는 흐리게 — 다시 누르면 멈춘다는 신호다
+        child: AnimatedOpacity(
+          duration: AppMotion.fast,
+          opacity: widget.isSpeaking ? 0.45 : 1,
+          child: SvgPicture.asset(AppAssets.iconVolume, fit: BoxFit.contain),
+        ),
+      ),
+    );
 
     return Container(
       decoration: BoxDecoration(
         color: palette.fill,
         borderRadius: BorderRadius.circular(space.cardRadius),
-        border: Border.all(color: palette.border, width: 2.w),
+        border: Border.all(color: palette.border, width: _borderWidth.w),
         boxShadow: [
           BoxShadow(
             color: context.colors.glassShadow,
@@ -120,7 +158,13 @@ class _ActionCardViewState extends State<ActionCardView> {
         child: Stack(
           children: [
             Padding(
-              padding: EdgeInsets.all(space.md),
+              // 이룸이 상세는 **테두리를 빼고 준다.** Container 는 테두리 두께만큼
+              // 안쪽을 이미 띄운다. md(16)를 그대로 주면 그림칸이 바깥에서 18
+              // 들어가 시안(16, 안쪽 선이라 테두리 포함)보다 2 안쪽에 4 좁게
+              // 그려진다 (#394).
+              padding: EdgeInsets.all(
+                childLayout ? space.md - _borderWidth.w : space.md,
+              ),
               // 제목이 두 줄이 되면 카드 높이를 넘길 수 있다. 넘치면 스크롤한다 —
               // 노란 줄무늬 오버플로 경고가 뜨면 안 된다.
               child: SingleChildScrollView(
@@ -143,62 +187,64 @@ class _ActionCardViewState extends State<ActionCardView> {
                         onDelete: widget.onDelete,
                       ),
                     ),
-                    SizedBox(height: space.md),
+                    SizedBox(
+                      height: childLayout
+                          ? _childIllustrationToTitle
+                          : space.md,
+                    ),
                     Row(
                       // center로 두면 한 줄/두 줄 모두 별도 측정 없이 배지·제목이
                       // Row 높이(둘 중 큰 쪽) 기준으로 세로 중앙 정렬된다 — 이슈 #105
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        _NumberBadge(order: widget.index + 1, color: palette.border),
-                        SizedBox(width: space.sm),
+                        _NumberBadge(
+                          order: widget.index + 1,
+                          color: palette.border,
+                        ),
+                        // 이룸이 상세는 배지 → 제목 8 (시안 배지 끝 80 → 제목 88).
+                        SizedBox(width: childLayout ? space.xs : space.sm),
                         Expanded(
                           child: Text(
                             // 제목을 …로 자르지 않는다. 아동이 무엇을 해야 하는지
                             // 알려주는 문장이라 잘리면 의미가 사라진다.
                             widget.card.displayTitle,
                             // 제목은 25/w800(style_GKEQ8F) — 순서 배지(cardHeadline 30)와 크기가 다르다
-                            style: context.typo.actionCardTitle
-                                .copyWith(color: context.colors.textPrimary),
+                            style: context.typo.actionCardTitle.copyWith(
+                              color: context.colors.textPrimary,
+                            ),
                           ),
                         ),
                       ],
                     ),
                     // 제목 아래 17 — 시안 제목 끝(509) → 설명(535). 토큰(12)을
                     // 쓰면 설명이 5 올라간다 (#297).
-                    SizedBox(height: _titleToBody),
+                    SizedBox(
+                      height: childLayout ? _childTitleToBody : _titleToBody,
+                    ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AppPressable(
-                          onTap: widget.onSpeak,
-                          scaleDown: AppPressable.scaleIcon,
-                          // 읽는 중에 다시 누르면 멈춘다. 흐려지는 것만으로는
-                          // 화면 낭독기에 닿지 않아 이름도 함께 바꾼다 (#339).
-                          semanticLabel:
-                              widget.isSpeaking ? '읽기 멈추기' : '소리로 듣기',
-                          // SVG가 25×25인데 Figma 배치는 24×24다. 크기만 지정하면
-                          // 비율이 눌려 아이콘이 찌그러진다 — contain으로 비율을 지킨다.
-                          // 정사각형 아이콘이라 가로세로 모두 .w로 맞춘다
-                          child: SizedBox(
-                            width: _volumeIconSize.w,
-                            height: _volumeIconSize.w,
-                            // 읽는 중에는 흐리게 — 다시 누르면 멈춘다는 신호다
-                            child: AnimatedOpacity(
-                              duration: AppMotion.fast,
-                              opacity: widget.isSpeaking ? 0.45 : 1,
-                              child: SvgPicture.asset(
-                                AppAssets.iconVolume,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: space.sm),
+                        // **이룸이 상세는 스피커를 배지 칸 한가운데에 둔다.** 시안은
+                        // 스피커를 배지(40) 아래 가운데(x=48)에, 설명을 제목과 같은
+                        // x(88)에 그린다. 카드 왼끝에 붙이면 스피커가 6 왼쪽, 설명이
+                        // 10 왼쪽으로 가 제목과 줄이 안 맞는다 (#394).
+                        //
+                        // 카드확인은 예전 자리 그대로다 — 앱 카드가 시안(333)보다
+                        // 좁아 설명 칸을 8 줄이면 `차례대\n로`처럼 낱말 중간에서 꺾인다.
+                        if (childLayout)
+                          SizedBox(
+                            width: _NumberBadge.size.w,
+                            child: Center(child: speaker),
+                          )
+                        else
+                          speaker,
+                        SizedBox(width: childLayout ? space.xs : space.sm),
                         Expanded(
                           child: Text(
                             widget.card.description,
-                            style: context.typo.cardDescription
-                                .copyWith(color: context.colors.textPrimary),
+                            style: context.typo.cardDescription.copyWith(
+                              color: context.colors.textPrimary,
+                            ),
                           ),
                         ),
                       ],
@@ -318,6 +364,9 @@ class _DeleteButton extends StatelessWidget {
 class _NumberBadge extends StatelessWidget {
   const _NumberBadge({required this.order, required this.color});
 
+  /// 배지 한 변. 아래 줄의 스피커 칸도 이 폭을 쓴다.
+  static const size = 40.0;
+
   final int order;
   final Color color;
 
@@ -325,8 +374,8 @@ class _NumberBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     // 정사각형 배지라 가로세로 모두 .w
     return Container(
-      width: 40.w,
-      height: 40.w,
+      width: size.w,
+      height: size.w,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: color,
@@ -339,9 +388,20 @@ class _NumberBadge extends StatelessWidget {
       child: Text(
         '$order',
         textAlign: TextAlign.center,
-        style: context.typo.cardHeadline
-            .copyWith(color: context.colors.surface),
+        style: context.typo.cardHeadline.copyWith(
+          color: context.colors.surface,
+        ),
       ),
     );
   }
+}
+
+/// 카드 안 배치. 두 화면의 시안이 따로 움직여 값이 다르다.
+enum ActionCardLayout {
+  /// 보호자 카드확인 (`262:5124`). 여백 16(테두리 밖)·배지 → 제목 12·스피커는 왼끝.
+  review,
+
+  /// 이룸이 일과 상세 (`309:3548`). 테두리 포함 여백 16·그림칸 → 배지 17·
+  /// 배지 → 제목 8·스피커는 배지 칸 가운데·설명은 제목과 같은 x·배지 → 설명 18 (#394).
+  childDetail,
 }

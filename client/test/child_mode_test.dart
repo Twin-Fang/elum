@@ -521,9 +521,10 @@ void main() {
 
       expectLabeledButton(tester, '뒤로 가기');
       expectLabeledButton(tester, '다 했어요');
-      // 스피커는 카드마다 하나씩 있다 — 옆 카드도 미리 그려 두므로 둘이다
+      // 스피커는 카드마다 하나씩 있지만 **가운데 카드 것만 읽힌다** — 옆 카드는
+      // 가장자리에 걸쳐 보이기만 하고 화면 낭독기에서 빠진다 (#394).
+      expect(find.semantics.byLabel('소리로 듣기'), findsOne);
       final speak = find.bySemanticsLabel('소리로 듣기');
-      expect(speak, findsWidgets);
       expect(
         tester.getSemantics(speak.first),
         containsSemantics(isButton: true, hasTapAction: true),

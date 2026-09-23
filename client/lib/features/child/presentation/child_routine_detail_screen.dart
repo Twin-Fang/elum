@@ -15,7 +15,7 @@ import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
 import 'widgets/reward_banner.dart';
 import '../../guardian/data/routine_repository.dart';
-import '../../guardian/presentation/widgets/action_card_view.dart';
+import 'widgets/child_card_pager.dart';
 import '../application/child_routine_notifier.dart';
 import '../data/speech_service.dart';
 import 'child_home_screen.dart' show childRoutinesProvider;
@@ -34,7 +34,6 @@ class ChildRoutineDetailScreen extends ConsumerStatefulWidget {
 
   /// 체크 버튼 크기. 아동 모드 최소 64×64를 넉넉히 넘긴다.
   static const checkButtonSize = 88.0;
-
 
   /// 아동 모드 접근성 하한. 좁은 기기에서 `.w`로 줄어들어도 이 아래로 가지 않는다.
   static const minTouchTarget = 64.0;
@@ -58,7 +57,10 @@ class ChildRoutineDetailScreen extends ConsumerStatefulWidget {
 
 class _ChildRoutineDetailScreenState
     extends ConsumerState<ChildRoutineDetailScreen> {
-  final _controller = PageController(viewportFraction: 0.88);
+  /// 옆 카드가 가장자리에 걸치도록 한 장 폭(카드 + 간격)만큼 자른다 (#394).
+  final _controller = PageController(
+    viewportFraction: ChildCardPager.viewportFraction,
+  );
 
   /// 체크 순간 색종이가 터진다. `play()`가 이 duration만큼 색종이를 뿜는다.
   /// 아동 화면 최소 전환 시간(300ms) 이상으로 둔다.
@@ -200,15 +202,20 @@ class _ChildRoutineDetailScreenState
       (card) => !progress.isChecked(routine.id, card),
     );
     if (next < 0 || next == _currentIndex) return;
+    _goToPage(next);
+  }
 
+  /// [index] 카드로 넘어간다. 별 화면 뒤 다음 카드로, 옆 카드를 눌렀을 때 쓴다.
+  void _goToPage(int index) {
+    if (!_controller.hasClients) return;
     // 갑자기 바뀌면 무엇이 일어났는지 모른다. 아동 화면은 300ms 이상으로 둔다.
     // 동작 줄이기가 켜져 있으면 애니메이션만 생략하고 이동은 그대로 한다.
     if (MediaQuery.disableAnimationsOf(context)) {
-      _controller.jumpToPage(next);
+      _controller.jumpToPage(index);
       return;
     }
     _controller.animateToPage(
-      next,
+      index,
       duration: AppMotion.normal,
       curve: AppMotion.standard,
     );
@@ -255,34 +262,21 @@ class _ChildRoutineDetailScreenState
             Flexible(
               child: SizedBox(
                 height: ChildRoutineDetailScreen._cardBoxHeight.h,
-                child: PageView.builder(
+                // 가운데 카드는 시안 자리(345 @ x=24) 그대로, 옆 카드는 가장자리에
+                // 16 걸친다 (#394 — 승인된 시안 이탈). 카드는 이 자리 높이를
+                // 채운다 — 내용 높이로 두면 시안(431)보다 13 짧아진다.
+                child: ChildCardPager(
                   controller: _controller,
-                  itemCount: cards.length,
+                  cards: cards,
+                  routineId: routine.id,
+                  currentIndex: cards.isEmpty
+                      ? 0
+                      : _currentIndex.clamp(0, cards.length - 1),
+                  speakingId: _speakingId,
+                  onSpeak: _speak,
                   // 카드를 넘기면 체크 버튼 대상도 바뀐다
                   onPageChanged: (_) => setState(() {}),
-                  // **좌우 여백을 주지 않는다.** `viewportFraction`(0.88)이 이미
-                  // 항목을 345.8 폭으로 잘라 시안 카드(345 @ x=24)와 같다.
-                  //
-                  // **위에서부터 쌓는다.** 가운데로 두면 카드가 내려간다.
-                  itemBuilder: (context, index) => Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // **`Flexible`이다.** 그냥 두면 내용이 길 때 카드가
-                      // 무한히 커져 오버플로한다(실제로 590 넘쳤다). 남는
-                      // 높이를 상한으로 주면, 넘치는 카드는 안쪽 스크롤이 받는다.
-                      Flexible(
-                        child: ActionCardView(
-                          key: ValueKey(cards[index].id),
-                          card: cards[index],
-                          index: index,
-                          routineId: routine.id,
-                          onSpeak: () => _speak(cards[index]),
-                          isSpeaking: _speakingId == cards[index].id,
-                        ),
-                      ),
-                    ],
-                  ),
+                  onSideTap: _goToPage,
                 ),
               ),
             ),

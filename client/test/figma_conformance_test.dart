@@ -1464,6 +1464,15 @@ void main() {
                       description: '학교에 입고 갈 옷을 차례대로 입어요',
                       completed: completed,
                     ),
+                    // 시안은 첫 카드만 그리지만 일과는 여러 장이다. 뒤 카드를
+                    // 두어야 **오른쪽에 걸친 옆 카드**(#394 — 승인된 시안 이탈)가
+                    // 대조에 드러난다. 한 장만 두면 그 차이를 아무도 못 본다.
+                    const ActionCard(
+                      id: 'd-c2',
+                      stepOrder: 2,
+                      title: '우산을 챙겨요',
+                      description: '현관에서 우산을 챙겨요',
+                    ),
                   ],
                 ),
               ),

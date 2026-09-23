@@ -38,11 +38,8 @@ void main() {
     );
   }
 
-  ActionCard card(String title, String description) => ActionCard(
-        id: 'c1',
-        title: title,
-        description: description,
-      );
+  ActionCard card(String title, String description) =>
+      ActionCard(id: 'c1', title: title, description: description);
 
   testWidgets('이미지 칸은 항상 313:264 비율이다', (tester) async {
     // 카드마다 비율이 다르면 넘길 때 그림이 들쭉날쭉해 보인다.
@@ -122,6 +119,7 @@ void main() {
       required String description,
       required double height,
       required double width,
+      ActionCardLayout layout = ActionCardLayout.review,
     }) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -139,6 +137,7 @@ void main() {
                     child: ActionCardView(
                       card: card('옷을 갈아입어요', description),
                       index: 0,
+                      layout: layout,
                     ),
                   ),
                 ),
@@ -163,7 +162,13 @@ void main() {
 
     testWidgets('이룸이 카드 상세 (431) — 두 줄은 다 보인다', (tester) async {
       expect(
-        await hidden(tester, description: real.first, height: 431, width: 345.8),
+        await hidden(
+          tester,
+          description: real.first,
+          height: 431,
+          width: 345,
+          layout: ActionCardLayout.childDetail,
+        ),
         0,
       );
     });
@@ -173,7 +178,13 @@ void main() {
       // **어느 화면에서도** 카드 안에 다 안 들어간다. 카드 자리를 늘리거나
       // 문구 길이를 제한해야 하는 문제라 여기서 고치지 않는다 (#335).
       expect(
-        await hidden(tester, description: real.last, height: 431, width: 345.8),
+        await hidden(
+          tester,
+          description: real.last,
+          height: 431,
+          width: 345,
+          layout: ActionCardLayout.childDetail,
+        ),
         greaterThan(0),
       );
     });
