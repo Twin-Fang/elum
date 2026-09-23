@@ -79,4 +79,15 @@ class RoutineSuggestionCatalogTest {
 
     assertThat(examples).doesNotHaveDuplicates();
   }
+
+  @Test
+  @DisplayName("추천 일과 예시 문장은 이룸이를 아이라고 부르지 않는다 (이슈 #388)")
+  void all_doNotCallElumiAChild() {
+    // 칩을 누르면 문장이 입력칸에 그대로 들어간다. 20대 당사자도 쓰므로 연령을 암시하는
+    // '아이'를 쓰지 않는다(용어 규칙). 아이스크림·아이콘처럼 다른 낱말 속 글자는 잡지 않는다.
+    java.util.regex.Pattern child = java.util.regex.Pattern.compile("(^|[^가-힣])아이($|[가랑를는에의도와 ])");
+    assertThat(RoutineSuggestionCatalog.ALL)
+      .allSatisfy(s -> assertThat(child.matcher(s.naturalLanguageExample()).find())
+        .as("%s — %s", s.text(), s.naturalLanguageExample()).isFalse());
+  }
 }
