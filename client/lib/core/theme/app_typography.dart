@@ -35,6 +35,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.dialogTitle,
     required this.dialogAction,
     required this.linkLater,
+    required this.helpLink,
     required this.loginProvider,
     required this.consentAllAgree,
     required this.consentBadge,
@@ -171,6 +172,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// `나중에 할게요` (16/w600 Pretendard).
   final TextStyle linkLater;
+
+  /// 도움말 줄 — `보상이 왜 필요한가요?` (14/w400 Pretendard · 시안 `1082:4768`).
+  final TextStyle helpLink;
 
   /// 소셜 로그인 버튼 문구 (18/w700 Pretendard).
   ///
@@ -492,6 +496,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w600,
       height: 1.0,
     ),
+    helpLink: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
     loginProvider: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 18,
@@ -743,6 +753,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? dialogTitle,
     TextStyle? dialogAction,
     TextStyle? linkLater,
+    TextStyle? helpLink,
     TextStyle? loginProvider,
     TextStyle? consentAllAgree,
     TextStyle? consentBadge,
@@ -806,6 +817,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       dialogTitle: dialogTitle ?? this.dialogTitle,
       dialogAction: dialogAction ?? this.dialogAction,
       linkLater: linkLater ?? this.linkLater,
+      helpLink: helpLink ?? this.helpLink,
       loginProvider: loginProvider ?? this.loginProvider,
       consentAllAgree: consentAllAgree ?? this.consentAllAgree,
       consentBadge: consentBadge ?? this.consentBadge,
@@ -875,6 +887,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       dialogTitle: TextStyle.lerp(dialogTitle, other.dialogTitle, t)!,
       dialogAction: TextStyle.lerp(dialogAction, other.dialogAction, t)!,
       linkLater: TextStyle.lerp(linkLater, other.linkLater, t)!,
+      helpLink: TextStyle.lerp(helpLink, other.helpLink, t)!,
       loginProvider: TextStyle.lerp(loginProvider, other.loginProvider, t)!,
       consentAllAgree:
           TextStyle.lerp(consentAllAgree, other.consentAllAgree, t)!,

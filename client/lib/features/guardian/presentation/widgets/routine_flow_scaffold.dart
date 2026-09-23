@@ -11,12 +11,14 @@ import '../../../../core/widgets/elum_dialog.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_scaffold.dart';
 import 'aurora_background.dart';
+import 'routine_flow_backdrop.dart';
 
 /// 일과 만들기 흐름의 공통 뼈대.
 ///
-/// 네 화면(입력·로딩·추가질문·카드확인)이 같은 배경과 상단 버튼을 공유한다.
-/// 화면마다 반복하면 배경이 조금씩 어긋나고, 무엇보다 [AuroraBackground]가
-/// 화면 전환마다 재생성되어 애니메이션이 튄다.
+/// 흐름 화면(로딩·추가질문·보상·카드확인)이 같은 상단 버튼을 공유한다.
+/// 배경은 흐름이 **한 장**([RoutineFlowBackdrop])을 함께 쓰고, 여기서는 그 위에
+/// 투명하게 선다 (#380). 화면마다 [AuroraBackground]를 그리면 전환마다 새로
+/// 만들어져 움직임이 튀고, 색이 다른 화면이 경계선째 밀려 들어온다.
 ///
 /// Figma는 뒤로가기(x=24)와 홈(x=72)을 나란히 둔다. 홈은 흐름을 중간에
 /// 빠져나가는 길이다 — 일과 만들기는 단계가 길어 되돌아갈 방법이 필요하다.
@@ -27,8 +29,9 @@ class RoutineFlowScaffold extends StatelessWidget {
     this.onBack,
     this.bottomButton,
     this.pinCtaToFigmaY = false,
-    this.showAurora = true,
+    this.aurora = AuroraTone.prepare,
     this.confirmExit = false,
+    this.belowButton,
   });
 
   final Widget child;
@@ -46,12 +49,29 @@ class RoutineFlowScaffold extends StatelessWidget {
   /// 앱 표준 자리다. 바닥에 붙여 두어 **66 아래**에 있었다 (#297).
   final bool pinCtaToFigmaY;
 
-  /// 배경 글로우를 그릴지. **Figma에 Gradient가 없는 화면은 false로 끈다.**
+  /// 배경 글로우의 색. **Figma에 Gradient가 없는 화면은 [AuroraTone.none]으로 끈다.**
   ///
   /// 글로우는 입력 화면(238:1643의 Gradient 238:1728)을 재현한 것이라
-  /// 모든 화면에 있는 배경이 아니다. 카드확인(262:5124)은 단색 배경뿐이다.
-  /// 기본값을 true로 둬 이미 맞는 화면들이 영향받지 않게 한다.
-  final bool showAurora;
+  /// 모든 화면에 있는 배경이 아니다. 카드확인(262:5124)은 단색 배경뿐이고,
+  /// 보상 설정(1082:4709)은 분홍이다 (#380).
+  ///
+  /// ⚠️ 흐름 배경([RoutineFlowBackdrop]) 위에서는 이 값으로 그리지 않는다 —
+  /// 라우터가 위치로 색을 정한다(`routineFlowToneOf`). 여기 값은 흐름 밖에서
+  /// 단독으로 열렸을 때(테스트·대조 렌더) 쓴다. 두 값이 같은지는
+  /// `routine_flow_backdrop_test`가 본다.
+  final AuroraTone aurora;
+
+  /// CTA **아래**에 붙는 빠져나가는 길 (`나중에 할게요`). [ElumScaffold]와 같은 자리다.
+  ///
+  /// [pinCtaToFigmaY]와 함께 쓰면 CTA는 시안 자리(y=675)에 그대로 서고, 이 줄이
+  /// 그 아래 24(y=765)에 붙는다.
+  final Widget? belowButton;
+
+  /// CTA 하단(741) ↔ 보조 동작(765) 간격. 시안 실측 (`ElumScaffold`와 같다).
+  static const _belowGap = 24.0;
+
+  /// 보조 동작 하단(781)에서 프레임 하단(852)까지.
+  static const _belowBottom = 71.0;
 
   /// 나가기 전에 물어볼지 (이슈 #242).
   ///
@@ -89,13 +109,19 @@ class RoutineFlowScaffold extends StatelessWidget {
   }
 
   Widget _scaffold(BuildContext context, AppSpacing space) {
+    // 흐름 배경 위라면 바탕을 칠하지 않는다 — 배경이 비쳐야 색이 번지는 게 보인다.
+    final onBackdrop = RoutineFlowBackdrop.isPresent(context);
+
     return Scaffold(
-      backgroundColor: context.colors.background,
+      backgroundColor: onBackdrop
+          ? Colors.transparent
+          : context.colors.background,
       // 키보드가 올라와도 배경이 밀려 찌그러지지 않게 한다
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          if (showAurora) const Positioned.fill(child: AuroraBackground()),
+          if (!onBackdrop && aurora != AuroraTone.none)
+            Positioned.fill(child: AuroraBackground(tone: aurora)),
           SafeArea(
             child: Column(
               children: [
@@ -121,14 +147,28 @@ class RoutineFlowScaffold extends StatelessWidget {
                       space.buttonMarginH,
                       // 시안 자리에 고정할 때는 `ElumScaffold`와 같은 식으로
                       // 역산한다 — 프레임 하단(852)에서 CTA 하단(741)까지 111을
-                      // 두되 기기 홈인디케이터만큼은 뺀다.
+                      // 두되 기기 홈인디케이터만큼은 뺀다. 아래에 보조 동작이
+                      // 붙으면 그 줄(781)부터 잰다.
                       pinCtaToFigmaY
-                          ? ((852 - space.ctaTop - space.buttonH).h -
+                          ? ((belowButton == null
+                                            ? 852 - space.ctaTop - space.buttonH
+                                            : _belowBottom)
+                                        .h -
                                     MediaQuery.paddingOf(context).bottom)
                                 .clamp(0.0, double.infinity)
                           : space.lg,
                     ),
-                    child: bottomButton,
+                    child: belowButton == null
+                        ? bottomButton
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              bottomButton!,
+                              SizedBox(height: _belowGap.h),
+                              belowButton!,
+                            ],
+                          ),
                   ),
               ],
             ),

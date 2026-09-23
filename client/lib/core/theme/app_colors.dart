@@ -90,6 +90,9 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.auroraMint,
     required this.auroraViolet,
     required this.auroraYellow,
+    required this.auroraRewardViolet,
+    required this.auroraRewardPink,
+    required this.auroraRewardRose,
     required this.stageDone,
     required this.stagePending,
     required this.stagePendingText,
@@ -318,6 +321,19 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 배경 그라데이션 — 노랑
   final Color auroraYellow;
+
+  // 보상 설정(Figma 1082:4709) 배경 — 입력 화면과 **같은 두 원을 색만 바꿔** 그렸다.
+  // 세 값은 위 민트·보라·노랑과 같은 자리(Eclipse 시작 · Eclipse 끝 · Planet 시작)다.
+  // 자리가 같아야 두 화면 사이에서 색만 번지고 모양은 그대로 남는다.
+
+  /// 보상 배경 — 보라 (Eclipse 시작 #A97BFF)
+  final Color auroraRewardViolet;
+
+  /// 보상 배경 — 분홍 (Eclipse 끝 #FF6FB9)
+  final Color auroraRewardPink;
+
+  /// 보상 배경 — 장미 (Planet 시작 #FB8BD4)
+  final Color auroraRewardRose;
 
   /// 로딩 완료 단계 — 채운 원·진한 문구 (rgba(36,38,52,0.8))
   final Color stageDone;
@@ -648,6 +664,9 @@ class AppColors extends ThemeExtension<AppColors> {
     auroraMint: Color(0xFF7BFFE5),
     auroraViolet: Color(0xFFD16FFF),
     auroraYellow: Color(0xFFFCE551),
+    auroraRewardViolet: Color(0xFFA97BFF),
+    auroraRewardPink: Color(0xFFFF6FB9),
+    auroraRewardRose: Color(0xFFFB8BD4),
     stageDone: Color(0xCC242634),
     stagePending: Color(0x99242634),
     stagePendingText: Color(0x80242634),
@@ -789,6 +808,9 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? auroraMint,
     Color? auroraViolet,
     Color? auroraYellow,
+    Color? auroraRewardViolet,
+    Color? auroraRewardPink,
+    Color? auroraRewardRose,
     Color? stageDone,
     Color? stagePending,
     Color? stagePendingText,
@@ -920,6 +942,9 @@ class AppColors extends ThemeExtension<AppColors> {
       auroraMint: auroraMint ?? this.auroraMint,
       auroraViolet: auroraViolet ?? this.auroraViolet,
       auroraYellow: auroraYellow ?? this.auroraYellow,
+      auroraRewardViolet: auroraRewardViolet ?? this.auroraRewardViolet,
+      auroraRewardPink: auroraRewardPink ?? this.auroraRewardPink,
+      auroraRewardRose: auroraRewardRose ?? this.auroraRewardRose,
       stageDone: stageDone ?? this.stageDone,
       stagePending: stagePending ?? this.stagePending,
       stagePendingText: stagePendingText ?? this.stagePendingText,
@@ -1104,6 +1129,13 @@ class AppColors extends ThemeExtension<AppColors> {
       auroraMint: Color.lerp(auroraMint, other.auroraMint, t)!,
       auroraViolet: Color.lerp(auroraViolet, other.auroraViolet, t)!,
       auroraYellow: Color.lerp(auroraYellow, other.auroraYellow, t)!,
+      auroraRewardViolet: Color.lerp(
+        auroraRewardViolet,
+        other.auroraRewardViolet,
+        t,
+      )!,
+      auroraRewardPink: Color.lerp(auroraRewardPink, other.auroraRewardPink, t)!,
+      auroraRewardRose: Color.lerp(auroraRewardRose, other.auroraRewardRose, t)!,
       stageDone: Color.lerp(stageDone, other.stageDone, t)!,
       stagePending: Color.lerp(stagePending, other.stagePending, t)!,
       stagePendingText: Color.lerp(

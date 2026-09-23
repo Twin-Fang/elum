@@ -19,6 +19,7 @@ import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
 import '../domain/routine_suggestion.dart';
 import 'widgets/aurora_background.dart';
+import 'widgets/routine_flow_backdrop.dart';
 
 /// Figma `보호자_새로운 일과 만들기`(238:1643) — 자연어로 일과를 받는다.
 ///
@@ -91,13 +92,18 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
   }
 
   Widget _scaffold(BuildContext context, bool canSubmit, AppSpacing space) {
+    // 흐름 배경(#380) 위라면 바탕도 오로라도 그리지 않는다 — 흐름이 하나를 함께 쓴다.
+    final onBackdrop = RoutineFlowBackdrop.isPresent(context);
+
     return Scaffold(
-      backgroundColor: context.colors.background,
+      backgroundColor: onBackdrop
+          ? Colors.transparent
+          : context.colors.background,
       // 키보드가 올라와도 배경이 밀려 찌그러지지 않게 한다
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          const Positioned.fill(child: AuroraBackground()),
+          if (!onBackdrop) const Positioned.fill(child: AuroraBackground()),
           SafeArea(
             child: Column(
               children: [

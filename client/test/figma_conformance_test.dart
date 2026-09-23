@@ -34,6 +34,7 @@ import 'package:elum/features/onboarding/domain/character.dart';
 import 'package:elum/features/onboarding/presentation/pin_screen.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
+import 'package:elum/features/guardian/presentation/reward_setup_screen.dart';
 import 'package:elum/features/guardian/presentation/routine_loading_screen.dart';
 import 'package:elum/features/guardian/domain/routine_stage.dart';
 import 'package:go_router/go_router.dart';
@@ -1757,6 +1758,93 @@ void main() {
       matchesGoldenFile('figma/input_keyboard_262-3074.png'),
     );
   });
+
+  /// 보상 설정 대조용. 시안(`1082:4709`)이 그린 칩 넷을 그대로 준다.
+  ///
+  /// 칩은 **최근에 쓴 보상**이다 — 프리셋은 #241 에서 걷어냈다. 시안이 넷을
+  /// 그리므로 넷을 준다. 내용이 다르면 diff 가 통째로 붉어진다.
+  Widget wrapRewardSetup() {
+    final router = GoRouter(
+      initialLocation: Routes.routineReward,
+      routes: [
+        GoRoute(
+          path: Routes.routineReward,
+          builder: (context, state) => const RewardSetupScreen(),
+        ),
+      ],
+    );
+    return ProviderScope(
+      overrides: [
+        testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+        routineRepositoryProvider.overrideWithValue(_RewardRepo()),
+      ],
+      child: ScreenUtilInit(
+        designSize: const Size(393, 852),
+        useInheritedMediaQuery: true,
+        builder: (context, _) => MaterialApp.router(
+          theme: AppTheme.light,
+          debugShowCheckedModeBanner: false,
+          // 배경 오로라를 멈춘다 — 시안은 정지된 한 장이다.
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(padding: deviceInsets, disableAnimations: true),
+            child: child!,
+          ),
+          routerConfig: router,
+        ),
+      ),
+    );
+  }
+
+  // 보상 설정 — 비어 있음 (#380). 시안 `1082:4709`.
+  //
+  // 배경 오로라가 **분홍**이다. 입력(238:1643)과 같은 자리·같은 크기의 두 원을
+  // 색만 바꿔 그렸다.
+  testWidgets('보상 설정 — 비어 있음 (Figma 1082:4709)', (tester) async {
+    await tester.pumpWidget(wrapRewardSetup());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    await expectLater(
+      find.byType(RewardSetupScreen),
+      matchesGoldenFile('figma/reward_setup_1082-4709.png'),
+    );
+  });
+
+  // 보상 설정 — 적은 뒤 (#380). 시안 `1082:4801`.
+  //
+  // 입력칸이 차고 `다음`이 검게 켜진다. 칩은 **고른 표시가 없다** — 시안에서
+  // 두 프레임의 칩 자리가 픽셀까지 같다.
+  testWidgets('보상 설정 — 적은 뒤 (Figma 1082:4801)', (tester) async {
+    await tester.pumpWidget(wrapRewardSetup());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    await tester.tap(find.text('젤리 4개 먹기'));
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+
+    await expectLater(
+      find.byType(RewardSetupScreen),
+      matchesGoldenFile('figma/reward_setup_filled_1082-4801.png'),
+    );
+  });
+}
+
+/// 보상 설정 대조용 — 시안이 그린 최근 보상 넷.
+class _RewardRepo with FakeRewardApi implements RoutineRepository {
+  @override
+  Future<List<RecentReward>> getRecentRewards() async => const [
+    RecentReward(rewardText: '인형놀이 20분', rewardPresetKey: 'CUSTOM'),
+    RecentReward(rewardText: '젤리 4개 먹기', rewardPresetKey: 'CUSTOM'),
+    RecentReward(rewardText: '20분 산책하기', rewardPresetKey: 'CUSTOM'),
+    RecentReward(rewardText: '거실에서 저녁먹기', rewardPresetKey: 'CUSTOM'),
+  ];
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// 연결 암호 대역. 시안(`732:5334`)이 그린 `5NJ280`과 `09:59`를 그대로 준다 —

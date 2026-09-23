@@ -15,6 +15,7 @@ import '../../child/data/speech_service.dart';
 import '../application/routine_notifier.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
+import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 
 /// Figma `보호자_새로운 일과 만들기_카드확인`(262:5124 / 309:2763).
@@ -26,6 +27,10 @@ import 'widgets/routine_flow_scaffold.dart';
 /// `viewportFraction`으로 옆 카드를 걸쳐 보여준다.
 class CardReviewScreen extends ConsumerStatefulWidget {
   const CardReviewScreen({super.key});
+
+  /// Figma 262:5124의 배경은 단색 #F7F2EF뿐이다 — 글로우가 없다 (이슈 #79).
+  /// 흐름 배경(#380)이 이 값을 보고 오로라를 가라앉힌다.
+  static const aurora = AuroraTone.none;
 
   /// 옆 카드가 걸쳐 보이는 정도. 1.0이면 한 장만 꽉 찬다.
   static const _viewportFraction = 0.88;
@@ -161,7 +166,10 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
     // 만들어진 카드가 없으면 확인할 것이 없다. 홈으로 돌려보낸다.
     if (cards.isEmpty) {
-      return const RoutineFlowScaffold(showAurora: false, child: _EmptyCards());
+      return const RoutineFlowScaffold(
+        aurora: CardReviewScreen.aurora,
+        child: _EmptyCards(),
+      );
     }
 
     return RoutineFlowScaffold(
@@ -169,8 +177,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
       confirmExit: true,
       onBack: () => context.pop(),
       bottomButton: ElumButton(label: '저장하기', onPressed: _save),
-      // Figma 262:5124의 배경은 단색 #F7F2EF뿐이다 — 글로우가 없다 (이슈 #79)
-      showAurora: false,
+      aurora: CardReviewScreen.aurora,
       child: Column(
         children: [
           // 시안(262:5124)은 상단 아이콘이 110 에서 끝나고 반짝임이 117 에서

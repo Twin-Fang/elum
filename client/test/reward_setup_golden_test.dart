@@ -19,7 +19,7 @@ import 'helpers/device_viewport.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
 
-/// 보상 정하기 화면 8-1 (이슈 #239).
+/// 보상 설정 화면 8-1 (이슈 #239 · 시안 1082:4709 #380).
 ///
 /// 배경(aurora)이 무한 반복해 `pumpAndSettle`을 쓸 수 없다 — `pump()`로 돌린다.
 void main() {
@@ -63,7 +63,7 @@ void main() {
     );
   });
 
-  testWidgets('두 번째부터 — 최근 보상이 위에 선다', (tester) async {
+  testWidgets('두 번째부터 — 최근 보상이 입력칸 아래 칩으로 선다', (tester) async {
     final repo = _FakeRepo()
       ..recents = const [
         RecentReward(rewardText: '젤리 먹기', rewardPresetKey: 'SNACK'),

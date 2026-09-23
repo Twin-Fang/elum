@@ -160,6 +160,11 @@ abstract final class AppAssets {
   /// [iconSparkles]와 크기·비율이 달라 따로 받았다.
   static const iconSparklesLarge = '$_images/icon_sparkles_large.svg';
 
+  /// 보상 설정의 `보상이 왜 필요한가요?` 앞 물음표 원 (14×14, #74757D).
+  /// Figma `1082:4792` — 시안은 SF Symbol `questionmark.circle` 글자라
+  /// 안드로이드에 없다. 윤곽선으로 뽑아 받았다.
+  static const iconQuestionCircle = '$_images/icon_question_circle.svg';
+
   /// 최근 일과 섹션 제목 앞 시계 (18×18). Figma `fi-br-clock`.
   static const iconClock = '$_images/icon_clock.svg';
 
