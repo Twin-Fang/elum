@@ -10,6 +10,7 @@ import 'package:elum/features/guardian/presentation/widgets/reward_chip.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,7 +41,7 @@ void main() {
               RewardSetupScreen(fromReview: state.extra == true),
         ),
         GoRoute(
-          path: Routes.routineGenerating,
+          path: Routes.routineMasking,
           builder: (context, state) => const Scaffold(body: Text('로딩 화면')),
         ),
       ],
@@ -143,15 +144,19 @@ void main() {
       await tester.tap(find.text('보상이 왜 필요한가요?'));
       await settle(tester);
 
-      expect(
-        find.textContaining('한 달 뒤 선물보다 오늘 받을 수 있는 것이 더 효과적이에요'),
-        findsOneWidget,
-      );
+      // 디자인이 없어 개발에서 정한 문구다 (#380 결정 3). 이유 · 어떤 것 · 안 해도
+      // 된다는 것 세 줄 — 전문 용어 없이, 당사자는 `이룸이`로 부른다.
+      expect(find.text(RewardSetupScreen.whyMessage), findsOneWidget);
+      expect(RewardSetupScreen.whyMessage.split('\n'), hasLength(3));
+      for (final banned in ['강화', '아이', '아동', '행동중재']) {
+        expect(RewardSetupScreen.whyMessage, isNot(contains(banned)));
+      }
+      expect(RewardSetupScreen.whyMessage, contains('이룸이'));
     });
   });
 
   group('나중에 할게요 — 보상은 선택이다', () {
-    testWidgets('누르면 보상 없이 카드 생성으로 간다 (E2)', (tester) async {
+    testWidgets('누르면 보상 없이 질문 준비 로딩으로 간다 (E2 · #380 결정 1)', (tester) async {
       await tester.pumpWidget(wrap());
       await settle(tester);
 
@@ -176,7 +181,7 @@ void main() {
             ),
           ),
           GoRoute(
-            path: Routes.routineGenerating,
+            path: Routes.routineMasking,
             builder: (context, state) => const Scaffold(body: Text('로딩 화면')),
           ),
         ],
@@ -210,8 +215,88 @@ void main() {
     });
   });
 
+  group('카드 검토에서 고치러 왔을 때 (#380 실기기 B)', () {
+    // 실기기에서 검토 → 보상 고치기 → `나중에 할게요`가 확인 없이 기존 보상을 지웠다
+    // (DB '젤리 2개' → 빈 값). 나중에 하겠다는 말은 "지금 안 고친다"지 "없앤다"가 아니다.
+    Future<ProviderContainer> pumpFromReview(WidgetTester tester) async {
+      final router = GoRouter(
+        initialLocation: Routes.routineReview,
+        routes: [
+          GoRoute(
+            path: Routes.routineReview,
+            builder: (context, state) => const Scaffold(body: Text('카드 검토')),
+          ),
+          GoRoute(
+            path: Routes.routineReward,
+            builder: (context, state) =>
+                RewardSetupScreen(fromReview: state.extra == true),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            routineRepositoryProvider.overrideWithValue(repo),
+            testStorageOverride(nickname: '하늘이'),
+          ],
+          child: ScreenUtilInit(
+            designSize: const Size(393, 852),
+            builder: (context, child) =>
+                MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+          ),
+        ),
+      );
+      await settle(tester);
+      final container = ProviderScope.containerOf(
+        tester.element(find.text('카드 검토')),
+      );
+      container.read(routineFlowProvider.notifier).loadExisting(
+        const Routine(
+          id: 'r1',
+          status: 'PENDING_REVIEW',
+          rewardText: '젤리 2개',
+          rewardPresetKey: 'SNACK',
+        ),
+      );
+      router.push(Routes.routineReward, extra: true);
+      await settle(tester);
+      await tester.pump(const Duration(milliseconds: 500));
+      return container;
+    }
+
+    testWidgets('나중에 할게요는 정해 둔 보상을 지우지 않고 돌아간다', (tester) async {
+      final container = await pumpFromReview(tester);
+      // 고치러 왔으니 지금 값이 채워져 있다
+      expect(find.text('젤리 2개'), findsOneWidget);
+
+      await tester.tap(find.text('나중에 할게요'));
+      await settle(tester);
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('카드 검토'), findsOneWidget);
+      expect(repo.rewardUpdates, 0, reason: '서버의 보상을 건드렸다');
+      final flow = container.read(routineFlowProvider);
+      expect(flow.routine?.rewardText, '젤리 2개');
+      expect(flow.routine?.rewardPresetKey, 'SNACK');
+    });
+
+    testWidgets('다음은 고친 보상을 저장하고 돌아간다', (tester) async {
+      final container = await pumpFromReview(tester);
+      await tester.enterText(find.byType(TextField), '공원 가기');
+      await settle(tester);
+
+      await tester.tap(find.text('다음'));
+      await settle(tester);
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('카드 검토'), findsOneWidget);
+      expect(repo.rewardUpdates, 1);
+      expect(container.read(routineFlowProvider).routine?.rewardText, '공원 가기');
+    });
+  });
+
   group('빠르게 두 번 누르기 (E8)', () {
-    // 카드 생성 로딩이 두 번 쌓이면 AI 호출이 두 번 나간다 — 한 번이 곧 비용이다.
+    // 질문 준비 로딩이 두 번 쌓이면 AI 호출이 두 번 나간다 — 한 번이 곧 비용이다.
     late GoRouter router;
 
     Future<_PushCounter> pumpCounting(WidgetTester tester) async {
@@ -225,7 +310,7 @@ void main() {
             builder: (context, state) => const RewardSetupScreen(),
           ),
           GoRoute(
-            path: Routes.routineGenerating,
+            path: Routes.routineMasking,
             builder: (context, state) => const Scaffold(body: Text('로딩 화면')),
           ),
         ],
@@ -250,7 +335,7 @@ void main() {
       return counter;
     }
 
-    testWidgets('다음을 두 번 눌러도 카드 생성은 한 번만 열린다', (tester) async {
+    testWidgets('다음을 두 번 눌러도 로딩은 한 번만 열린다', (tester) async {
       final counter = await pumpCounting(tester);
       await tester.enterText(find.byType(TextField), '젤리 먹기');
       await settle(tester);
@@ -367,6 +452,68 @@ void main() {
     });
   });
 
+  group('큰 글꼴에서 글자가 잘리지 않는다 (#380 실기기 A)', () {
+    // 실기기 1.3 에서 `나중에 할게요` 아래가 잘렸다(2.0 에서 절반). 자리를 16 으로
+    // 못 박은 상자 안에서 글자만 커져, 넘친 것이 아니라 **잘려** 경고도 안 났다.
+    // 그래서 넘침 검사로는 못 잡는다 — 그려진 높이가 글자 높이만큼 되는지 잰다.
+    for (final scale in const [1.0, 1.3, 2.0]) {
+      testWidgets('글꼴 $scale — 나중에 할게요 · 도움말이 온전히 그려진다', (tester) async {
+        final router = GoRouter(
+          initialLocation: Routes.routineReward,
+          routes: [
+            GoRoute(
+              path: Routes.routineReward,
+              builder: (context, state) => const RewardSetupScreen(),
+            ),
+          ],
+        );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              routineRepositoryProvider.overrideWithValue(repo),
+              testStorageOverride(nickname: '하늘이'),
+            ],
+            child: ScreenUtilInit(
+              designSize: const Size(393, 852),
+              builder: (context, child) => MaterialApp.router(
+                theme: AppTheme.light,
+                routerConfig: router,
+                builder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: TextScaler.linear(scale)),
+                  child: child!,
+                ),
+              ),
+            ),
+          ),
+        );
+        await settle(tester);
+
+        for (final label in const ['나중에 할게요', '보상이 왜 필요한가요?']) {
+          final paragraph = tester.renderObject<RenderParagraph>(find.text(label));
+          final needed = paragraph.getMaxIntrinsicHeight(paragraph.size.width);
+          expect(
+            paragraph.size.height,
+            greaterThanOrEqualTo(needed - 0.5),
+            reason: '$label — 글자 높이 $needed 인데 ${paragraph.size.height} 만 그려진다',
+          );
+          // 잘라 주는 조상이 글자보다 작으면 글자 크기는 맞아도 가려진다.
+          final rect = tester.getRect(find.text(label));
+          for (final clip in tester.renderObjectList<RenderBox>(
+            find.ancestor(of: find.text(label), matching: find.byType(ClipRect)),
+          )) {
+            final box = clip.localToGlobal(Offset.zero) & clip.size;
+            expect(box.top, lessThanOrEqualTo(rect.top + 0.5), reason: label);
+            expect(box.bottom, greaterThanOrEqualTo(rect.bottom - 0.5), reason: label);
+          }
+          // 화면 밖으로 밀려나지도 않는다.
+          expect(rect.bottom, lessThanOrEqualTo(852));
+        }
+      });
+    }
+  });
+
   group('글꼴 2.0 (E6)', () {
     // 넘침은 flutter_test_config 가 실패로 만든다 — 뜨기만 하면 통과다.
     testWidgets('최근 보상 넷에 적은 뒤에도 넘치지 않는다', (tester) async {
@@ -430,6 +577,23 @@ class _PushCounter extends NavigatorObserver {
 class _FakeRepo with FakeRewardApi implements RoutineRepository {
   List<RecentReward> recents = const [];
   bool recentsThrows = false;
+
+  /// 서버에 보상 고치기를 보낸 횟수 — 고치러 와서 그냥 돌아가면 0 이어야 한다.
+  var rewardUpdates = 0;
+
+  @override
+  Future<({Routine routine, AppFailure? failure})> updateReward(
+    Routine routine, {
+    required String rewardText,
+    String rewardPresetKey = '',
+  }) {
+    rewardUpdates++;
+    return super.updateReward(
+      routine,
+      rewardText: rewardText,
+      rewardPresetKey: rewardPresetKey,
+    );
+  }
 
   @override
   Future<List<RecentReward>> getRecentRewards() async {

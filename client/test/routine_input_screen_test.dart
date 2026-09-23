@@ -11,6 +11,7 @@ import 'package:elum/features/guardian/presentation/widgets/aurora_background.da
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -31,8 +32,12 @@ void main() {
           path: Routes.routineInput,
           builder: (context, state) => const RoutineInputScreen(),
         ),
-        // 입력 다음은 로딩 화면(262:4569)이다. DLP·질문 생성을 여기서
-        // 기다린 뒤에야 추가질문 화면으로 넘어간다.
+        // 입력 다음은 보상 설정(1082:4709)이다 — Figma 섹션 1049:4654 순서
+        // (#380 결정 1). 질문 준비 로딩은 보상 다음이다.
+        GoRoute(
+          path: Routes.routineReward,
+          builder: (context, state) => const Scaffold(body: Text('보상 화면')),
+        ),
         GoRoute(
           path: Routes.routineMasking,
           builder: (context, state) => const Scaffold(body: Text('로딩 화면')),
@@ -86,6 +91,31 @@ void main() {
       // 시안에서 빠진 문구다 (#305). 예전 시안에는 있었고 테스트가 그 상태를
       // 붙잡고 있었다 — 시안이 바뀌면 여기도 함께 바뀌어야 한다.
       expect(find.text('이룸이 정보를 안전하게 지켜요'), findsNothing);
+    });
+
+    testWidgets('시안 자리에 선다 — 제목 245 · 입력칸 389 (2026-09-23 · #380 결정 5)', (
+      tester,
+    ) async {
+      // 시안이 뒤로가기만 두고 아래 전부를 40 올렸다 (제목 285 → 245).
+      // 기기와 같게 — 393×852, 상태바 59 · 홈 인디케이터 21.
+      tester.view
+        ..physicalSize = const Size(393, 852)
+        ..devicePixelRatio = 1
+        ..padding = const FakeViewPadding(top: 59, bottom: 21);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(wrap());
+      await settle(tester);
+
+      final title = tester.getTopLeft(find.text('오늘은 어떤 준비가\n필요한가요?'));
+      final body = tester.getTopLeft(find.text('AI 루미가 작은 행동 단계로 나눠드려요'));
+      final hint = tester.getTopLeft(find.text('평소 이야기하듯 입력해주세요'));
+      final sparkles = tester.getTopLeft(find.byType(SvgPicture).at(1));
+      expect(sparkles.dy, closeTo(185, 1.5));
+      expect(title.dy, closeTo(245, 1.5));
+      expect(body.dy, closeTo(323, 1.5));
+      // 안내 문구는 입력칸(389) 안 18 아래 — 시안 238:1723 y=407.
+      expect(hint.dy, closeTo(407, 1.5));
     });
 
     testWidgets('하단 고정 CTA가 없다', (tester) async {
@@ -238,7 +268,7 @@ void main() {
       expect(sendButton(), findsNothing);
     });
 
-    testWidgets('누르면 로딩 화면으로 간다', (tester) async {
+    testWidgets('누르면 보상 설정으로 간다 — 로딩은 그 다음이다 (#380 결정 1)', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pump();
 
@@ -247,7 +277,8 @@ void main() {
       await tester.tap(sendButton());
       await settle(tester);
 
-      expect(find.text('로딩 화면'), findsOneWidget);
+      expect(find.text('보상 화면'), findsOneWidget);
+      expect(find.text('로딩 화면'), findsNothing);
     });
 
     testWidgets('입력값이 notifier에 반영된다', (tester) async {

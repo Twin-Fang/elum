@@ -28,9 +28,9 @@ final recentRewardsProvider = FutureProvider.autoDispose<List<RecentReward>>(
 
 /// 보상 설정 — Figma `보호자_보상설정` `1082:4709`(비어 있음) · `1082:4801`(적은 뒤).
 ///
-/// 흐름 자리는 **AI 추가 질문 다음, 카드 생성 전**이다 (#239 · `docs/03-screens.md`
-/// 8-1). 새 시안 섹션(`1049:4654`)은 입력 바로 다음에 놓여 있지만 프로토타입
-/// 연결이 없어 순서는 바꾸지 않았다 — #380 확인 필요 1.
+/// 흐름 자리는 **일과 입력 바로 다음**, 질문 준비 로딩 앞이다 (Figma 섹션
+/// `1049:4654` · #380 결정 1 · `docs/03-screens.md` 8-1). 처음엔(#239) 추가 질문
+/// 다음이었다 — 시안 배치를 따라 옮겼다.
 ///
 /// ## 왜 이 화면이 필요한가
 ///
@@ -52,6 +52,12 @@ class RewardSetupScreen extends ConsumerStatefulWidget {
   /// 이 화면의 배경 색 — 분홍 (시안 `1082:4710` Gradient).
   static const aurora = AuroraTone.reward;
 
+  /// `보상이 왜 필요한가요?` 팝업 본문 (#380 결정 3 · 개발 문구 — 디자인이 나오면 교체).
+  static const whyMessage =
+      '일과를 마친 뒤 기다리는 것이 있으면 이룸이가 끝까지 해낼 힘이 생겨요.\n'
+      '한 달 뒤 선물보다 오늘 바로 줄 수 있는 작은 것이 더 잘 통해요.\n'
+      '정하지 않아도 일과는 만들 수 있어요.';
+
   /// 카드 검토 화면에서 뒤늦게 고치러 들어왔는가 (이슈 #239).
   ///
   /// true면 카드를 만들지 않고 **서버에 보상만 고친 뒤 되돌아간다.**
@@ -62,7 +68,8 @@ class RewardSetupScreen extends ConsumerStatefulWidget {
   ConsumerState<RewardSetupScreen> createState() => _RewardSetupScreenState();
 }
 
-class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
+class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
+    with LeaveOnceMixin {
   /// 보상 문구. **이 화면의 주인공이다** — 보호자가 자기 말로 적는다 (#241).
   final _controller = TextEditingController();
 
@@ -70,16 +77,7 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
   /// 직접 적었으면 `CUSTOM`이다.
   String _presetKey = RewardPreset.custom.key;
 
-  /// 다음 화면으로 넘기는 중인가 (E8).
-  ///
-  /// 두 번 누르면 카드 생성 로딩이 두 장 쌓이고 **AI 호출이 두 번 나간다.**
-  /// 넘어간 화면이 닫혀 이 화면이 다시 맨 위가 되면 풀린다.
-  bool _leaving = false;
-
-  /// 직전에 이 화면이 맨 위였는가 — 맨 위로 **돌아온 순간**을 잡는다.
-  bool _wasCurrent = true;
-
-  /// 시안이 그린 칩은 넷이다 (2·2). 서버는 지금 셋까지 준다 — #380 확인 필요 2.
+  /// 시안이 그린 칩은 넷이다 (2·2). 서버도 넷까지 준다 (#380 결정 2).
   static const _maxChips = 4;
 
   @override
@@ -97,17 +95,6 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
         ? state.routine!.rewardPresetKey
         : state.rewardPresetKey;
     if (key.trim().isNotEmpty) _presetKey = key;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // `push`가 돌려주는 Future로 풀지 않는다. 로딩이 검토 화면으로 **교체**되면
-    // (pushReplacement) 그 Future는 끝나지 않아, 검토에서 돌아왔을 때 버튼이
-    // 죽어 있다. 이 화면이 다시 맨 위가 된 사실로 푼다.
-    final isCurrent = ModalRoute.isCurrentOf(context) ?? true;
-    if (isCurrent && !_wasCurrent) _leaving = false;
-    _wasCurrent = isCurrent;
   }
 
   @override
@@ -136,15 +123,8 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
     setState(() => _presetKey = RewardPreset.custom.key);
   }
 
-  /// 한 번만 넘긴다. 넘어간 화면이 닫혀 돌아오면 다시 누를 수 있다
-  /// ([didChangeDependencies]).
-  Future<void> _leaveOnce(Future<void> Function() go) async {
-    if (_leaving) return;
-    _leaving = true;
-    await go();
-  }
-
-  Future<void> _next() => _leaveOnce(() async {
+  /// 두 번 누르면 질문 준비 로딩이 두 장 쌓이고 **AI 호출이 두 번 나간다** (E8).
+  Future<void> _next() => leaveOnce(() async {
     final notifier = ref.read(routineFlowProvider.notifier);
     dismissKeyboard();
 
@@ -169,34 +149,38 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen> {
     }
 
     notifier.setReward(_rewardText, presetKey: _presetKey);
-    // 기다리지 않는다 — 풀어 주는 것은 이 화면이 다시 맨 위가 될 때다.
-    unawaited(context.push(Routes.routineGenerating));
+    // 다음은 질문 준비 로딩이다 (#380 결정 1). 기다리지 않는다 — 풀어 주는 것은
+    // 이 화면이 다시 맨 위가 될 때다 ([LeaveOnceMixin]).
+    unawaited(context.push(Routes.routineMasking));
   });
 
-  Future<void> _later() => _leaveOnce(() async {
+  Future<void> _later() => leaveOnce(() async {
     final notifier = ref.read(routineFlowProvider.notifier);
     dismissKeyboard();
 
+    // 카드 검토에서 고치러 왔으면 **정해 둔 보상을 그대로 두고** 돌아간다
+    // (#380 실기기 B). 전에는 빈 값으로 저장해 확인도 없이 '젤리 2개'가 지워졌다.
+    // "나중에"는 지금 안 고친다는 뜻이지 없앤다는 뜻이 아니다.
     if (widget.fromReview) {
-      await notifier.updateRewardOnRoutine('');
-      if (mounted) context.pop();
+      context.pop();
       return;
     }
 
     notifier.skipReward();
-    unawaited(context.push(Routes.routineGenerating));
+    unawaited(context.push(Routes.routineMasking));
   });
 
   /// `보상이 왜 필요한가요?` (E14).
   ///
-  /// ⚠️ 시안에 누른 뒤 화면이 없다 — #380 확인 필요 3. 자문(#239)에서 온 문구로
-  /// 공통 팝업을 띄워 둔다. 도움말처럼 생긴 줄이 눌러도 아무 일 없으면 고장으로 읽힌다.
+  /// 시안에 누른 뒤 화면이 없어 **개발에서 정한 문구**다 (#380 결정 3 — 디자인이
+  /// 나오면 교체). 보호자에게 한 가지만 말한다 — 왜 정해 두면 좋은가. 줄마다
+  /// 이유 · 어떤 것이 좋은가 · 안 정해도 된다(되돌릴 수 있다고 먼저 말한다,
+  /// `08-design-principles.md` ④). 자문(#239)의 "한 달 뒤 선물보다 오늘 받을 수
+  /// 있는 것"을 살렸다.
   Future<void> _explain() => showElumDialog<void>(
     context: context,
     title: '보상이 왜 필요한가요?',
-    message:
-        '끝나면 무엇을 받는지 알면 일과를 끝까지 해낼 힘이 생겨요.\n'
-        '한 달 뒤 선물보다 오늘 받을 수 있는 것이 더 효과적이에요.',
+    message: RewardSetupScreen.whyMessage,
     barrierDismissible: true,
   );
 
@@ -421,36 +405,36 @@ class _HelpLink extends StatelessWidget {
 
 /// `나중에 할게요` — CTA 아래 빠져나가는 길 (시안 `1082:4764`, y=765).
 ///
-/// 자리는 글자 높이(16) 그대로 두고 누름 영역만 위아래로 넓힌다. 자리째 키우면
-/// CTA가 위로 밀린다 (연결 암호 화면과 같은 방식).
+/// **높이를 못 박지 않는다.** 전에는 자리를 글자 높이(16)로 고정하고 그 위로
+/// OverflowBox 를 덮어 누름 영역만 넓혔는데, 글꼴을 키우면 글자가 16 상자에
+/// 갇혀 **아래가 잘렸다**(1.3 에서 일부, 2.0 에서 절반 — #380 실기기 A). 넘친 것이
+/// 아니라 잘린 것이라 경고도 안 났다. 게다가 그 OverflowBox 는 부모 상자(16) 밖을
+/// 눌러도 받지 못해 넓힌 누름 영역도 실제로는 없었다.
+///
+/// 이제 글자 높이가 곧 자리다 — 글꼴 1.0 에서는 16 그대로라 시안 자리(765)가 같고,
+/// 커지면 자리도 함께 커진다. 누름 영역은 **옆으로만** 넓힌다 (세로를 넓히면 자리가
+/// 바뀐다).
 class _LaterLink extends StatelessWidget {
   const _LaterLink({required this.onTap});
 
   final VoidCallback onTap;
-
-  static const _height = 16.0;
 
   @override
   Widget build(BuildContext context) {
     final space = context.space;
     final colors = context.colors;
 
-    return SizedBox(
-      height: _height.h,
-      child: OverflowBox(
-        maxHeight: (_height + space.xs * 2).h,
-        child: AppPressable(
-          onTap: onTap,
-          child: Padding(
-            padding: EdgeInsets.all(space.xs.h),
-            child: Text(
-              '나중에 할게요',
-              style: context.typo.linkLater.copyWith(
-                color: colors.linkLaterLabel,
-                decoration: TextDecoration.underline,
-                decorationColor: colors.linkLaterLabel,
-              ),
-            ),
+    return AppPressable(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: space.md.w),
+        child: Text(
+          '나중에 할게요',
+          textAlign: TextAlign.center,
+          style: context.typo.linkLater.copyWith(
+            color: colors.linkLaterLabel,
+            decoration: TextDecoration.underline,
+            decorationColor: colors.linkLaterLabel,
           ),
         ),
       ),

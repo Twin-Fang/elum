@@ -69,10 +69,11 @@ abstract final class Routes {
 
   /// 행동카드 생성 로딩 (Figma 262:4703).
   /// [routineMasking]과 화면은 같고 문구·진행률·다음 목적지가 다르다.
-  /// 보상 정하기 — AI 질문 다음, 카드 생성 **전**이다 (이슈 #239).
+  /// 보상 정하기 — 일과 입력 **바로 다음**이다 (Figma 섹션 `1049:4654` · #380 결정 1).
   ///
-  /// 질문에 답하는 맥락이 이어지는 자리다. 카드를 만든 뒤로 미루면 "이미 다
-  /// 끝났는데 왜 또"가 된다. 건너뛸 수 있다.
+  /// 처음(#239)에는 AI 질문 다음이었다. 시안이 입력 → 보상 → 로딩 → 추가질문으로
+  /// 놓아 옮겼다. 카드를 만든 뒤로 미루면 "이미 다 끝났는데 왜 또"가 되는 것은
+  /// 그대로라 카드 생성 **전**이다. 건너뛸 수 있다.
   static const routineReward = '/guardian/routine/reward';
   static const routineGenerating = '/guardian/routine/generating';
   static const routineReview = '/guardian/routine/review';
@@ -168,9 +169,17 @@ String? resolveRedirect(
 /// 하면 한 프레임 늦어 넘어가는 첫 프레임에 앞 색이 남는다. 색 자체는 화면이
 /// 선언한 값을 그대로 가져온다 — 두 곳에 따로 적으면 어긋난다.
 AuroraTone routineFlowToneOf(String path) => switch (path) {
+  Routes.routineInput => RoutineInputScreen.aurora,
   Routes.routineReward => RewardSetupScreen.aurora,
+  Routes.routineMasking => RoutineLoadingScreen.auroraOf(
+    RoutineLoadingKind.prepare,
+  ),
+  Routes.routineQuestion => QuestionScreen.aurora,
+  Routes.routineGenerating => RoutineLoadingScreen.auroraOf(
+    RoutineLoadingKind.generate,
+  ),
   Routes.routineReview => CardReviewScreen.aurora,
-  _ => AuroraTone.prepare,
+  _ => RoutineInputScreen.aurora,
 };
 
 /// 온보딩 단계 사이의 진행은 각 화면 CTA가 막으므로 여기서 관여하지 않는다.

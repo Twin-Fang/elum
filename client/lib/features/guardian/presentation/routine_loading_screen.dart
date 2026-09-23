@@ -15,6 +15,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../application/routine_notifier.dart';
 import '../domain/routine_stage.dart';
+import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 
 /// Figma `보호자_새로운 일과 만들기_로딩`.
@@ -22,8 +23,10 @@ import 'widgets/routine_flow_scaffold.dart';
 /// 프레임이 둘이고 흐름의 서로 다른 자리에 놓인다 — [RoutineLoadingKind] 참조.
 ///
 /// ```
-/// 입력 → prepare(262:4569) → 추가질문 → generate(262:4703) → 카드확인
+/// 입력 → 보상 → prepare(262:4569) → 추가질문 → generate(262:4703) → 카드확인
 /// ```
+///
+/// 보상이 입력 바로 다음이다 (Figma 섹션 `1049:4654` · #380 결정 1).
 ///
 /// 단순 스피너 대신 3단계를 하나씩 체크해 **무엇을 하고 있는지** 보여준다.
 /// 특히 개인정보를 가린다는 사실은 보호자가 봐야 의미가 있다.
@@ -41,6 +44,15 @@ class RoutineLoadingScreen extends ConsumerStatefulWidget {
 
   /// 어느 로딩 화면인가 — 문구·진행률·다음 목적지가 여기서 갈린다
   final RoutineLoadingKind kind;
+
+  /// 로딩 화면의 배경 색 — 시안이 둘을 다르게 칠했다 (#380 결정 4).
+  ///
+  /// 준비(262:4569)는 옅은 연보라, 생성(262:4703)은 연두·산호다. 같은 뼈대라도
+  /// 색이 달라야 "지금 두 번째 기다림"이라는 것이 보인다.
+  static AuroraTone auroraOf(RoutineLoadingKind kind) => switch (kind) {
+    RoutineLoadingKind.prepare => AuroraTone.preparing,
+    RoutineLoadingKind.generate => AuroraTone.generating,
+  };
 
   @override
   ConsumerState<RoutineLoadingScreen> createState() =>
@@ -202,10 +214,20 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     _navigated = true;
 
     context.pushReplacement(switch (widget.kind) {
-      RoutineLoadingKind.prepare => Routes.routineQuestion,
+      RoutineLoadingKind.prepare => _hasQuestions
+          ? Routes.routineQuestion
+          // 물을 것이 없으면 질문 화면을 거치지 않고 바로 카드를 만든다.
+          // 보상은 이미 앞에서 정했다 (#380). 질문 화면을 한 프레임 띄웠다
+          // 넘기면 배경이 파랑 쪽으로 번지다 되돌아와 색이 한 번 출렁인다.
+          : Routes.routineGenerating,
       RoutineLoadingKind.generate => Routes.routineReview,
     });
   }
+
+  /// 받아 온 질문 중 보호자에게 물을 것이 있는가.
+  /// 도움 목표에 준비물(PREPARE_*)이 없으면 서버가 빈 배열을 준다.
+  bool get _hasQuestions =>
+      ref.read(routineFlowProvider).question?.askable.isNotEmpty ?? false;
 
   /// 뒤로가기 — 기다리다 그만두고 이전 화면으로 돌아간다.
   ///
@@ -234,6 +256,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     final flow = ref.watch(routineFlowProvider);
     if (flow.step == RoutineFlowStep.error) {
       return RoutineFlowScaffold(
+        aurora: RoutineLoadingScreen.auroraOf(widget.kind),
         onBack: _handleBack,
         child: _GenerateError(
           errorCode: flow.errorCode,
@@ -254,6 +277,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     const topBarH = 111.0;
 
     return RoutineFlowScaffold(
+      aurora: RoutineLoadingScreen.auroraOf(widget.kind),
       // Figma 262:4575 · 262:4709 — 두 로딩 프레임 모두 뒤로가기를 둔다.
       // 되돌릴 수 없다는 이유로 숨겼다가 시안과 어긋났다 (이슈 #63).
       // 오래 기다리는 화면이라 빠져나갈 길이 없으면 갇힌 느낌을 준다.

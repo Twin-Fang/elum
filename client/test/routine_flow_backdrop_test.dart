@@ -4,7 +4,10 @@ import 'package:elum/core/theme/app_motion.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
+import 'package:elum/features/guardian/domain/routine_stage.dart';
+import 'package:elum/features/guardian/presentation/question_screen.dart';
 import 'package:elum/features/guardian/presentation/reward_setup_screen.dart';
+import 'package:elum/features/guardian/presentation/routine_loading_screen.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/aurora_background.dart';
 import 'package:elum/features/guardian/presentation/widgets/routine_flow_backdrop.dart';
@@ -15,6 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/aurora_probe.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
 
@@ -29,7 +33,7 @@ void main() {
   useFigmaViewport();
 
   final light = AppColors.light;
-  final prepare = AuroraPalette.of(light, AuroraTone.prepare);
+  final inputTone = AuroraPalette.of(light, AuroraTone.input);
   final reward = AuroraPalette.of(light, AuroraTone.reward);
 
   /// 앱과 **같은 라우터**로 띄운다. 흐름을 감싸는 자리가 빠지면 여기서 잡힌다.
@@ -68,14 +72,9 @@ void main() {
     return router;
   }
 
-  /// 지금 화면에 깔린 오로라 원들의 색. 흐름에 배경이 하나뿐이어야 한다.
-  List<Color> auroraColors(WidgetTester tester) {
-    final circles = find.byKey(AuroraBackground.circleKey, skipOffstage: false);
-    return [
-      for (final e in circles.evaluate())
-        ((e.widget as Container).decoration! as BoxDecoration).color!,
-    ];
-  }
+  /// 지금 화면에 깔린 오로라의 세 색 — Eclipse 시작 · Eclipse 끝 · Planet 시작.
+  /// 흐름에 배경이 하나뿐이어야 하므로 원도 한 벌만 있어야 한다.
+  List<Color> auroraColors(WidgetTester tester) => readAuroraColors(tester);
 
   /// 두 색 사이 값인가 — 채널마다 [a]와 [b] 사이에 있고 둘 다와 다르다.
   bool strictlyBetween(Color c, Color a, Color b) {
@@ -130,10 +129,133 @@ void main() {
     });
   });
 
+  group('흐름 순서대로 — 화면마다 색이 툭 바뀌지 않는다 (#380 결정 4)', () {
+    /// 흐름 순서 (Figma 섹션 1049:4654). 로딩·추가질문도 이제 자기 색이 있다.
+    const order = [
+      AuroraTone.input,
+      AuroraTone.reward,
+      AuroraTone.preparing,
+      AuroraTone.question,
+      AuroraTone.generating,
+      AuroraTone.none,
+    ];
+
+    /// 배경 한 장만 띄우고 색만 바꾼다 — 화면·라우터 없이 전환 자체를 잰다.
+    Future<void Function(AuroraTone)> pumpBackground(
+      WidgetTester tester,
+      AuroraTone start, {
+      bool reduceMotion = false,
+    }) async {
+      late StateSetter setTone;
+      var tone = start;
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(393, 852),
+          builder: (context, _) => MaterialApp(
+            theme: AppTheme.light,
+            home: MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(disableAnimations: reduceMotion),
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  setTone = setState;
+                  return AuroraBackground(tone: tone);
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(AppMotion.ambient);
+      return (next) => setTone(() => tone = next);
+    }
+
+    for (var i = 0; i + 1 < order.length; i++) {
+      final from = order[i];
+      final to = order[i + 1];
+
+      testWidgets('${from.name} → ${to.name} 가운데는 두 색 사이, 끝은 정확히 다음 색', (
+        tester,
+      ) async {
+        final a = AuroraPalette.of(light, from);
+        final b = AuroraPalette.of(light, to);
+        final go = await pumpBackground(tester, from);
+        expect(readAuroraColors(tester), a.visibleColors);
+
+        go(to);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 16));
+        // 첫 프레임 — 아직 앞 색에 가깝다. easeInOut 이라 시작이 느리다.
+        final first = readAuroraColors(tester);
+        for (var c = 0; c < 3; c++) {
+          expect(distance(first[c], a.visibleColors[c]), lessThan(0.02));
+        }
+
+        await tester.pump(AppMotion.ambient ~/ 2 - const Duration(milliseconds: 16));
+        final mid = readAuroraColors(tester);
+        for (var c = 0; c < 3; c++) {
+          if (a.visibleColors[c] == b.visibleColors[c]) continue;
+          if (to == AuroraTone.none) {
+            // 가라앉을 때는 세기만 — 반쯤 투명해졌을 뿐 색은 그대로다.
+            expect(mid[c].a, inExclusiveRange(0, a.visibleColors[c].a));
+          } else {
+            expect(
+              strictlyBetween(mid[c], a.visibleColors[c], b.visibleColors[c]),
+              isTrue,
+              reason: '원 $c 이 가운데에서 ${mid[c]} — 두 색 사이가 아니다',
+            );
+          }
+        }
+
+        await tester.pump(AppMotion.ambient);
+        expect(readAuroraColors(tester), b.visibleColors);
+      });
+    }
+
+    testWidgets('보상 → 준비 로딩은 두 원이 40 내려간다 — 그것도 번지는 동안 조금씩', (
+      tester,
+    ) async {
+      final go = await pumpBackground(tester, AuroraTone.reward);
+      expect(readAuroraShift(tester), 0);
+
+      go(AuroraTone.preparing);
+      await tester.pump();
+      await tester.pump(AppMotion.ambient ~/ 2);
+      // 한가운데 — 204 와 244 사이 어딘가. 한 프레임에 40 을 뛰지 않는다.
+      expect(readAuroraShift(tester), inExclusiveRange(5, 35));
+
+      await tester.pump(AppMotion.ambient);
+      expect(readAuroraShift(tester), closeTo(40, 1e-6));
+
+      // 흐름을 거슬러 돌아가면 다시 올라간다.
+      go(AuroraTone.reward);
+      await tester.pump();
+      await tester.pump(AppMotion.ambient + const Duration(milliseconds: 16));
+      expect(readAuroraShift(tester), closeTo(0, 1e-6));
+    });
+
+    testWidgets('동작 줄이기면 색도 자리도 즉시 다음 화면 것이다', (tester) async {
+      final go = await pumpBackground(
+        tester,
+        AuroraTone.reward,
+        reduceMotion: true,
+      );
+      go(AuroraTone.question);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+
+      expect(
+        readAuroraColors(tester),
+        AuroraPalette.of(light, AuroraTone.question).visibleColors,
+      );
+      expect(readAuroraShift(tester), closeTo(40, 1e-6));
+    });
+  });
+
   group('색이 번진다', () {
     testWidgets('보상으로 가면 전환 중간에는 두 색 사이 값이다', (tester) async {
       final router = await pumpFlow(tester);
-      expect(auroraColors(tester), prepare.visibleColors);
+      expect(auroraColors(tester), inputTone.visibleColors);
 
       router.push(Routes.routineReward);
       await tester.pump();
@@ -142,7 +264,7 @@ void main() {
       final first = auroraColors(tester);
       for (var i = 0; i < 3; i++) {
         expect(
-          distance(first[i], prepare.visibleColors[i]),
+          distance(first[i], inputTone.visibleColors[i]),
           lessThan(0.02),
           reason: '원 $i 이 첫 프레임에 이미 크게 바뀌었다',
         );
@@ -155,7 +277,7 @@ void main() {
         expect(
           strictlyBetween(
             mid[i],
-            prepare.visibleColors[i],
+            inputTone.visibleColors[i],
             reward.visibleColors[i],
           ),
           isTrue,
@@ -184,14 +306,14 @@ void main() {
           strictlyBetween(
             mid[i],
             reward.visibleColors[i],
-            prepare.visibleColors[i],
+            inputTone.visibleColors[i],
           ),
           isTrue,
         );
       }
 
       await tester.pump(AppMotion.ambient);
-      expect(auroraColors(tester), prepare.visibleColors);
+      expect(auroraColors(tester), inputTone.visibleColors);
     });
 
     testWidgets('번지는 도중에 되돌아가도 색이 튀지 않는다 (E9)', (tester) async {
@@ -212,7 +334,7 @@ void main() {
       }
 
       await tester.pump(AppMotion.ambient + const Duration(milliseconds: 100));
-      expect(auroraColors(tester), prepare.visibleColors);
+      expect(auroraColors(tester), inputTone.visibleColors);
     });
 
     testWidgets('동작 줄이기를 켜면 배경이 즉시 바뀐다 (E7)', (tester) async {
@@ -233,12 +355,12 @@ void main() {
       // 가라앉는 동안 색은 민트 그대로, 투명도만 줄어든다 — 검게 탁해지지 않는다.
       final mid = auroraColors(tester);
       for (var i = 0; i < 3; i++) {
-        expect(mid[i].a, lessThan(prepare.visibleColors[i].a));
+        expect(mid[i].a, lessThan(inputTone.visibleColors[i].a));
         expect(mid[i].a, greaterThan(0));
         expect(
           distance(
             mid[i].withValues(alpha: 1),
-            prepare.visibleColors[i].withValues(alpha: 1),
+            inputTone.visibleColors[i].withValues(alpha: 1),
           ),
           lessThan(0.01),
         );
@@ -337,7 +459,7 @@ void main() {
 
       expect(find.byType(RoutineInputScreen), findsOneWidget);
       expect(find.byType(RewardSetupScreen), findsNothing);
-      expect(auroraColors(tester), prepare.visibleColors);
+      expect(auroraColors(tester), inputTone.visibleColors);
     });
 
     testWidgets('카드 검토에서 고치러 오면 분홍이 떠오르고 돌아가면 가라앉는다 (E5)', (tester) async {
@@ -377,12 +499,64 @@ void main() {
   });
 
   test('라우트마다 배경색 — 화면이 선언한 색과 같다', () {
-    expect(routineFlowToneOf(Routes.routineInput), AuroraTone.prepare);
-    expect(routineFlowToneOf(Routes.routineMasking), AuroraTone.prepare);
-    expect(routineFlowToneOf(Routes.routineQuestion), AuroraTone.prepare);
+    expect(routineFlowToneOf(Routes.routineInput), RoutineInputScreen.aurora);
     expect(routineFlowToneOf(Routes.routineReward), RewardSetupScreen.aurora);
-    expect(routineFlowToneOf(Routes.routineGenerating), AuroraTone.prepare);
+    expect(
+      routineFlowToneOf(Routes.routineMasking),
+      RoutineLoadingScreen.auroraOf(RoutineLoadingKind.prepare),
+    );
+    expect(routineFlowToneOf(Routes.routineQuestion), QuestionScreen.aurora);
+    expect(
+      routineFlowToneOf(Routes.routineGenerating),
+      RoutineLoadingScreen.auroraOf(RoutineLoadingKind.generate),
+    );
     expect(routineFlowToneOf(Routes.routineReview), AuroraTone.none);
+
+    // 화면마다 시안이 다른 색을 칠했다 (#380 결정 4) — 둘이 같으면 어딘가 빠졌다.
+    expect(RoutineInputScreen.aurora, AuroraTone.input);
+    expect(RoutineLoadingScreen.auroraOf(RoutineLoadingKind.prepare),
+        AuroraTone.preparing);
+    expect(QuestionScreen.aurora, AuroraTone.question);
+    expect(RoutineLoadingScreen.auroraOf(RoutineLoadingKind.generate),
+        AuroraTone.generating);
+  });
+
+  test('색·자리는 시안 값 그대로다 (2026-09-23 덤프)', () {
+    // Eclipse 시작 · Eclipse 끝 · Planet 시작 — 시안 `Gradient` 그룹의 두 원.
+    const figma = {
+      AuroraTone.input: [0xFF7BFFE5, 0xFFD16FFF, 0xFFFCE551], // 238:1728
+      AuroraTone.reward: [0xFFA97BFF, 0xFFFF6FB9, 0xFFFB8BD4], // 1082:4710
+      AuroraTone.preparing: [0xFFCED8FF, 0xFFCED8FF, 0xFFCB51FC], // 262:4570
+      AuroraTone.question: [0xFFA7AAFF, 0xFF6FC5FF, 0xFF5651FC], // 262:4767
+      AuroraTone.generating: [0xFF7BFFB0, 0xFFFF6F93, 0xFFFCF351], // 262:4704
+    };
+    for (final MapEntry(key: tone, value: hex) in figma.entries) {
+      expect(
+        AuroraPalette.of(light, tone).colors,
+        [for (final h in hex) Color(h)],
+        reason: '$tone',
+      );
+    }
+
+    // 작은 원 아래 끝의 투명색 — 그라데이션이 이 색을 지나므로 투명이어도 보인다.
+    // 보상만 진분홍(#FF3CA1)이다. 하늘로 두면 분홍 원 가운데가 연보라로 샌다.
+    for (final tone in figma.keys) {
+      expect(
+        AuroraPalette.of(light, tone).planetEnd,
+        tone == AuroraTone.reward
+            ? const Color(0x00FF3CA1)
+            : const Color(0x003CFFFF),
+        reason: '$tone',
+      );
+    }
+
+    // 그룹 윗변 — 입력·보상은 204, 로딩·추가질문은 40 아래 244 다.
+    // 입력 화면이 40 올라가면서(#380 결정 5) 두 원도 함께 올라갔다.
+    expect(AuroraPalette.of(light, AuroraTone.input).top, 204);
+    expect(AuroraPalette.of(light, AuroraTone.reward).top, 204);
+    expect(AuroraPalette.of(light, AuroraTone.preparing).top, 244);
+    expect(AuroraPalette.of(light, AuroraTone.question).top, 244);
+    expect(AuroraPalette.of(light, AuroraTone.generating).top, 244);
   });
 
   test('오로라 색 보간 — 없음과 섞일 때는 색이 아니라 세기만 바뀐다', () {
@@ -394,8 +568,8 @@ void main() {
       expect(half.visibleColors[i].a,
           closeTo(reward.visibleColors[i].a / 2, 0.01));
     }
-    expect(AuroraPalette.lerp(prepare, reward, 0), prepare);
-    expect(AuroraPalette.lerp(prepare, reward, 1), reward);
+    expect(AuroraPalette.lerp(inputTone, reward, 0), inputTone);
+    expect(AuroraPalette.lerp(inputTone, reward, 1), reward);
   });
 }
 

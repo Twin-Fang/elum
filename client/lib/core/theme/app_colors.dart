@@ -93,6 +93,16 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.auroraRewardViolet,
     required this.auroraRewardPink,
     required this.auroraRewardRose,
+    required this.auroraPreparingHaze,
+    required this.auroraPreparingOrchid,
+    required this.auroraQuestionPeri,
+    required this.auroraQuestionSky,
+    required this.auroraQuestionIndigo,
+    required this.auroraGeneratingMint,
+    required this.auroraGeneratingCoral,
+    required this.auroraGeneratingLemon,
+    required this.auroraPlanetFade,
+    required this.auroraRewardFade,
     required this.stageDone,
     required this.stagePending,
     required this.stagePendingText,
@@ -334,6 +344,40 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 보상 배경 — 장미 (Planet 시작 #FB8BD4)
   final Color auroraRewardRose;
+
+  // 로딩·추가질문(Figma 262:4569 · 262:4766 · 262:4703) 배경 — 입력·보상과 같은 두 원을
+  // 색만 바꿔 그렸다 (2026-09-23 덤프 · #380). 자리는 위 셋과 같다
+  // (Eclipse 시작 · Eclipse 끝 · Planet 시작).
+
+  /// 준비 로딩 배경 — 안개 (Eclipse 단색 #CED8FF — 시작·끝이 같다)
+  final Color auroraPreparingHaze;
+
+  /// 준비 로딩 배경 — 난초 (Planet 시작 #CB51FC)
+  final Color auroraPreparingOrchid;
+
+  /// 추가질문 배경 — 연보라 (Eclipse 시작 #A7AAFF)
+  final Color auroraQuestionPeri;
+
+  /// 추가질문 배경 — 하늘 (Eclipse 끝 #6FC5FF)
+  final Color auroraQuestionSky;
+
+  /// 추가질문 배경 — 남보라 (Planet 시작 #5651FC)
+  final Color auroraQuestionIndigo;
+
+  /// 생성 로딩 배경 — 연두 (Eclipse 시작 #7BFFB0)
+  final Color auroraGeneratingMint;
+
+  /// 생성 로딩 배경 — 산호 (Eclipse 끝 #FF6F93)
+  final Color auroraGeneratingCoral;
+
+  /// 생성 로딩 배경 — 레몬 (Planet 시작 #FCF351)
+  final Color auroraGeneratingLemon;
+
+  /// Planet 원 아래 끝 — 투명 하늘 (#3CFFFF 0%). 보상만 빼고 모두 이 값이다
+  final Color auroraPlanetFade;
+
+  /// 보상 배경 Planet 아래 끝 — 투명 진분홍 (#FF3CA1 0%). 보상만 하늘이 아니다
+  final Color auroraRewardFade;
 
   /// 로딩 완료 단계 — 채운 원·진한 문구 (rgba(36,38,52,0.8))
   final Color stageDone;
@@ -667,6 +711,16 @@ class AppColors extends ThemeExtension<AppColors> {
     auroraRewardViolet: Color(0xFFA97BFF),
     auroraRewardPink: Color(0xFFFF6FB9),
     auroraRewardRose: Color(0xFFFB8BD4),
+    auroraPreparingHaze: Color(0xFFCED8FF),
+    auroraPreparingOrchid: Color(0xFFCB51FC),
+    auroraQuestionPeri: Color(0xFFA7AAFF),
+    auroraQuestionSky: Color(0xFF6FC5FF),
+    auroraQuestionIndigo: Color(0xFF5651FC),
+    auroraGeneratingMint: Color(0xFF7BFFB0),
+    auroraGeneratingCoral: Color(0xFFFF6F93),
+    auroraGeneratingLemon: Color(0xFFFCF351),
+    auroraPlanetFade: Color(0x003CFFFF),
+    auroraRewardFade: Color(0x00FF3CA1),
     stageDone: Color(0xCC242634),
     stagePending: Color(0x99242634),
     stagePendingText: Color(0x80242634),
@@ -811,6 +865,16 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? auroraRewardViolet,
     Color? auroraRewardPink,
     Color? auroraRewardRose,
+    Color? auroraPreparingHaze,
+    Color? auroraPreparingOrchid,
+    Color? auroraQuestionPeri,
+    Color? auroraQuestionSky,
+    Color? auroraQuestionIndigo,
+    Color? auroraGeneratingMint,
+    Color? auroraGeneratingCoral,
+    Color? auroraGeneratingLemon,
+    Color? auroraPlanetFade,
+    Color? auroraRewardFade,
     Color? stageDone,
     Color? stagePending,
     Color? stagePendingText,
@@ -945,6 +1009,16 @@ class AppColors extends ThemeExtension<AppColors> {
       auroraRewardViolet: auroraRewardViolet ?? this.auroraRewardViolet,
       auroraRewardPink: auroraRewardPink ?? this.auroraRewardPink,
       auroraRewardRose: auroraRewardRose ?? this.auroraRewardRose,
+      auroraPreparingHaze: auroraPreparingHaze ?? this.auroraPreparingHaze,
+      auroraPreparingOrchid: auroraPreparingOrchid ?? this.auroraPreparingOrchid,
+      auroraQuestionPeri: auroraQuestionPeri ?? this.auroraQuestionPeri,
+      auroraQuestionSky: auroraQuestionSky ?? this.auroraQuestionSky,
+      auroraQuestionIndigo: auroraQuestionIndigo ?? this.auroraQuestionIndigo,
+      auroraGeneratingMint: auroraGeneratingMint ?? this.auroraGeneratingMint,
+      auroraGeneratingCoral: auroraGeneratingCoral ?? this.auroraGeneratingCoral,
+      auroraGeneratingLemon: auroraGeneratingLemon ?? this.auroraGeneratingLemon,
+      auroraPlanetFade: auroraPlanetFade ?? this.auroraPlanetFade,
+      auroraRewardFade: auroraRewardFade ?? this.auroraRewardFade,
       stageDone: stageDone ?? this.stageDone,
       stagePending: stagePending ?? this.stagePending,
       stagePendingText: stagePendingText ?? this.stagePendingText,
@@ -1136,6 +1210,16 @@ class AppColors extends ThemeExtension<AppColors> {
       )!,
       auroraRewardPink: Color.lerp(auroraRewardPink, other.auroraRewardPink, t)!,
       auroraRewardRose: Color.lerp(auroraRewardRose, other.auroraRewardRose, t)!,
+      auroraPreparingHaze: Color.lerp(auroraPreparingHaze, other.auroraPreparingHaze, t)!,
+      auroraPreparingOrchid: Color.lerp(auroraPreparingOrchid, other.auroraPreparingOrchid, t)!,
+      auroraQuestionPeri: Color.lerp(auroraQuestionPeri, other.auroraQuestionPeri, t)!,
+      auroraQuestionSky: Color.lerp(auroraQuestionSky, other.auroraQuestionSky, t)!,
+      auroraQuestionIndigo: Color.lerp(auroraQuestionIndigo, other.auroraQuestionIndigo, t)!,
+      auroraGeneratingMint: Color.lerp(auroraGeneratingMint, other.auroraGeneratingMint, t)!,
+      auroraGeneratingCoral: Color.lerp(auroraGeneratingCoral, other.auroraGeneratingCoral, t)!,
+      auroraGeneratingLemon: Color.lerp(auroraGeneratingLemon, other.auroraGeneratingLemon, t)!,
+      auroraPlanetFade: Color.lerp(auroraPlanetFade, other.auroraPlanetFade, t)!,
+      auroraRewardFade: Color.lerp(auroraRewardFade, other.auroraRewardFade, t)!,
       stageDone: Color.lerp(stageDone, other.stageDone, t)!,
       stagePending: Color.lerp(stagePending, other.stagePending, t)!,
       stagePendingText: Color.lerp(

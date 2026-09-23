@@ -13,74 +13,140 @@ import '../../../../core/theme/theme_context_ext.dart';
 ///
 /// 시안은 화면마다 **같은 두 원(`Gradient` 그룹)을 복제해 색만 바꿔** 그렸다.
 /// 그래서 색은 화면이 정하고, 모양·움직임은 흐름 전체가 하나를 쓴다.
+/// 값은 2026-09-23 덤프 기준이다 (섹션 `1049:4654`).
 enum AuroraTone {
-  /// 입력(238:1643)·로딩·추가질문 — 민트·보라·노랑.
-  ///
-  /// 시안의 로딩(262:4569)·추가질문(262:4766)은 색이 또 다르지만 앱은 지금까지
-  /// 입력 색을 같이 써 왔다. 이번 범위가 아니다 (#380 확인 필요 4).
-  prepare,
+  /// 입력(238:1643) — 민트·보라·노랑.
+  input,
 
   /// 보상 설정(1082:4709) — 분홍.
   reward,
+
+  /// 준비 로딩(262:4569) — 옅은 연보라에 난초색.
+  preparing,
+
+  /// 추가질문(262:4766) — 파랑.
+  question,
+
+  /// 생성 로딩(262:4703) — 연두·산호·레몬.
+  generating,
 
   /// 오로라 없음 — 카드확인(262:5124)은 단색 배경이다.
   none,
 }
 
-/// 오로라 세 원의 색과 세기.
+/// 오로라 두 원의 색·세기·자리.
 ///
 /// **색과 세기를 따로 보간한다.** `none`을 투명 검정으로 두고 색째 섞으면
 /// 가라앉는 도중 원이 잿빛으로 탁해진다. 세기만 줄이면 색은 그대로 옅어진다.
 @immutable
 class AuroraPalette {
-  const AuroraPalette(this.colors, {this.strength = 1});
+  const AuroraPalette(
+    this.colors, {
+    required this.planetEnd,
+    this.strength = 1,
+    this.eclipseEndAlpha = 0.46,
+    this.top = inputTop,
+  });
 
-  /// 세 원의 색 (알파 없는 원색). 순서는 Eclipse 시작 · Eclipse 끝 · Planet 시작.
+  /// 세 색 (알파 없는 원색). 순서는 Eclipse 시작 · Eclipse 끝 · Planet 시작.
   final List<Color> colors;
+
+  /// 작은 원(Planet) 아래 끝 — 투명한 색. **투명이어도 색이 보인다**: 그라데이션이
+  /// 두 색 사이를 지나며 이 색을 섞는다(노랑 → 투명 하늘 = 가운데가 연두).
+  /// 보상만 진분홍이고 나머지는 하늘이다. 하늘로 두면 분홍이 가운데서 연보라로 샌다.
+  final Color planetEnd;
 
   /// 0이면 보이지 않는다, 1이면 시안 세기.
   final double strength;
 
-  /// 완전 불투명하면 세 색이 겹칠 때 탁해진다 — 원마다 이만큼만 칠한다.
-  static const _alpha = 0.55;
+  /// 큰 원(Eclipse) 아래 끝의 불투명도. 시안은 46% 로 흐려지는데, 준비 로딩만
+  /// 단색으로 칠해 끝까지 100% 다.
+  final double eclipseEndAlpha;
+
+  /// 두 원 묶음(시안 `Gradient` 그룹)의 윗변 y — 852 높이 기준.
+  final double top;
+
+  /// 입력·보상의 그룹 윗변. 입력 화면이 40 올라가며(#380 결정 5) 함께 올라갔다.
+  static const inputTop = 204.0;
+
+  /// 로딩·추가질문의 그룹 윗변 — 제목이 285 에 있는 화면들이다.
+  static const loadingTop = 244.0;
 
   static AuroraPalette of(AppColors colors, AuroraTone tone) => switch (tone) {
-    AuroraTone.prepare => AuroraPalette([
+    AuroraTone.input => AuroraPalette([
       colors.auroraMint,
       colors.auroraViolet,
       colors.auroraYellow,
-    ]),
+    ], planetEnd: colors.auroraPlanetFade),
     AuroraTone.reward => AuroraPalette([
       colors.auroraRewardViolet,
       colors.auroraRewardPink,
       colors.auroraRewardRose,
-    ]),
-    // 색은 아무거나 둔다 — 세기가 0이면 보간할 때 상대편 색을 쓴다.
-    AuroraTone.none => AuroraPalette([
-      colors.auroraMint,
-      colors.auroraViolet,
-      colors.auroraYellow,
-    ], strength: 0),
+    ], planetEnd: colors.auroraRewardFade),
+    AuroraTone.preparing => AuroraPalette(
+      [
+        colors.auroraPreparingHaze,
+        colors.auroraPreparingHaze,
+        colors.auroraPreparingOrchid,
+      ],
+      planetEnd: colors.auroraPlanetFade,
+      // 시안 Eclipse 가 그라데이션이 아니라 단색이다 (262:4571)
+      eclipseEndAlpha: 1,
+      top: loadingTop,
+    ),
+    AuroraTone.question => AuroraPalette(
+      [
+        colors.auroraQuestionPeri,
+        colors.auroraQuestionSky,
+        colors.auroraQuestionIndigo,
+      ],
+      planetEnd: colors.auroraPlanetFade,
+      top: loadingTop,
+    ),
+    AuroraTone.generating => AuroraPalette(
+      [
+        colors.auroraGeneratingMint,
+        colors.auroraGeneratingCoral,
+        colors.auroraGeneratingLemon,
+      ],
+      planetEnd: colors.auroraPlanetFade,
+      top: loadingTop,
+    ),
+    // 색·자리는 아무거나 둔다 — 세기가 0이면 보간할 때 상대편 값을 쓴다.
+    AuroraTone.none => AuroraPalette(
+      [colors.auroraMint, colors.auroraViolet, colors.auroraYellow],
+      planetEnd: colors.auroraPlanetFade,
+      strength: 0,
+    ),
   };
 
-  /// 실제로 칠하는 색 (알파 포함).
+  /// 실제로 칠하는 색 (알파 포함) — Eclipse 시작 · Eclipse 끝 · Planet 시작.
   List<Color> get visibleColors => [
-    for (final c in colors) c.withValues(alpha: _alpha * strength),
+    colors[0].withValues(alpha: strength),
+    colors[1].withValues(alpha: eclipseEndAlpha * strength),
+    colors[2].withValues(alpha: strength),
   ];
 
   /// 두 팔레트 사이.
   ///
-  /// 한쪽 세기가 0이면 그쪽 색은 뜻이 없다 — **상대편 색을 빌려** 세기만
+  /// 한쪽 세기가 0이면 그쪽 색·자리는 뜻이 없다 — **상대편 값을 빌려** 세기만
   /// 옮긴다. 분홍이 가라앉을 때 분홍 그대로 옅어지고, 떠오를 때도 처음부터
-  /// 분홍이다.
+  /// 분홍이다. 자리도 그 자리에서 떠오른다.
   static AuroraPalette lerp(AuroraPalette a, AuroraPalette b, double t) {
     if (t <= 0) return a;
     if (t >= 1) return b;
-    final from = a.strength == 0 ? b.colors : a.colors;
-    final to = b.strength == 0 ? a.colors : b.colors;
+    final from = a.strength == 0 ? b : a;
+    final to = b.strength == 0 ? a : b;
+    double mix(double x, double y) => x + (y - x) * t;
     return AuroraPalette(
-      [for (var i = 0; i < from.length; i++) Color.lerp(from[i], to[i], t)!],
-      strength: a.strength + (b.strength - a.strength) * t,
+      [
+        for (var i = 0; i < from.colors.length; i++)
+          Color.lerp(from.colors[i], to.colors[i], t)!,
+      ],
+      planetEnd: Color.lerp(from.planetEnd, to.planetEnd, t)!,
+      strength: mix(a.strength, b.strength),
+      eclipseEndAlpha: mix(from.eclipseEndAlpha, to.eclipseEndAlpha),
+      top: mix(from.top, to.top),
     );
   }
 
@@ -88,10 +154,14 @@ class AuroraPalette {
   bool operator ==(Object other) =>
       other is AuroraPalette &&
       other.strength == strength &&
+      other.eclipseEndAlpha == eclipseEndAlpha &&
+      other.top == top &&
+      other.planetEnd == planetEnd &&
       listEquals(other.colors, colors);
 
   @override
-  int get hashCode => Object.hash(strength, Object.hashAll(colors));
+  int get hashCode =>
+      Object.hash(strength, eclipseEndAlpha, top, planetEnd, Object.hashAll(colors));
 }
 
 class _AuroraPaletteTween extends Tween<AuroraPalette> {
@@ -103,51 +173,40 @@ class _AuroraPaletteTween extends Tween<AuroraPalette> {
 
 /// 천천히 흐르는 컬러 블러 배경.
 ///
-/// Figma `보호자_새로운 일과 만들기`(238:1643)의 `Gradient`(238:1728)를 재현한다.
-/// 원본은 blur 200px·100px 원이 겹친 정적 SVG지만, 화면에서는 **아주 천천히
-/// 움직여야** 한다. 그래서 에셋이 아니라 코드로 그린다.
+/// 시안 `Gradient` 그룹(입력 238:1728 등)을 그대로 옮긴다 — **큰 원(Eclipse)과
+/// 작은 원(Planet) 둘**이고, 각자 위에서 아래로 흐려지는 선형 그라데이션에
+/// 레이어 블러(200 · 100)가 걸려 있다. 시안은 정지된 한 장이지만 화면에서는
+/// **아주 천천히 떠다녀야** 한다. 그래서 에셋이 아니라 코드로 그린다.
 ///
 /// 위에 얹는 칩·입력창이 `backdropFilter`를 쓰므로, 배경이 움직이면 유리 너머
 /// 색이 저절로 흐른다. 그쪽은 따로 애니메이션하지 않는다.
 class AuroraBackground extends StatefulWidget {
-  const AuroraBackground({super.key, this.tone = AuroraTone.prepare});
+  const AuroraBackground({super.key, this.tone = AuroraTone.input});
 
-  /// 깔 색. **바뀌면 그 자리에서 번진다** — 원은 멈추지 않고 색만 옮겨 간다.
+  /// 깔 색. **바뀌면 그 자리에서 번진다** — 원은 멈추지 않고 색·자리만 옮겨 간다.
   final AuroraTone tone;
 
-  /// 원 하나하나 (테스트가 전환 중간의 색을 재려고 찾는다).
+  /// 두 원 (테스트가 전환 중간의 색을 재려고 찾는다).
   @visibleForTesting
-  static const circleKey = ValueKey('auroraCircle');
+  static const eclipseKey = ValueKey('auroraEclipse');
+  @visibleForTesting
+  static const planetKey = ValueKey('auroraPlanet');
+
+  /// 두 원 묶음 — 그룹 윗변이 입력 자리(204)에서 얼마나 내려왔는지 잰다.
+  @visibleForTesting
+  static const groupKey = ValueKey('auroraGroup');
 
   /// 각 원의 왕복 주기.
   ///
   /// **서로 나누어떨어지지 않게 잡는다.** 20·40초처럼 배수 관계면 40초마다
-  /// 셋이 정확히 같은 자리로 돌아와 패턴이 눈에 보인다. (docs/motion.md)
-  static const _periods = [
-    Duration(seconds: 28),
-    Duration(seconds: 34),
-    Duration(seconds: 22),
-  ];
+  /// 둘이 정확히 같은 자리로 돌아와 패턴이 눈에 보인다. (docs/motion.md)
+  static const _periods = [Duration(seconds: 28), Duration(seconds: 34)];
 
-  /// 세 광원이 모여 있을 중심.
+  /// 원이 제자리 주위를 도는 반경 (393 폭 기준).
   ///
-  /// 화면 정중앙보다 살짝 위다 — Figma에서 빛이 제목 뒤에 모여 있다.
-  static const _center = Alignment(0, -0.15);
-
-  /// 중심에서 각 광원이 벗어나는 방향.
-  ///
-  /// 세 방향으로 살짝만 벌려 **서로 붙어 있는 덩어리**로 보이게 한다.
-  /// 화면 구석으로 흩어지면 광원 셋이 따로 노는 것처럼 보인다.
-  static const _offsets = [
-    Offset(-0.30, -0.18),
-    Offset(0.30, -0.10),
-    Offset(0.05, 0.28),
-  ];
-
-  /// 각 광원이 중심 주위를 도는 반경 (Alignment 단위).
-  ///
-  /// 작게 잡아야 뭉쳐 있는 느낌이 유지된다. 크게 잡으면 다시 흩어진다.
-  static const _wander = 0.14;
+  /// 시안 자리에서 크게 벗어나면 화면마다 원 배치가 달라 보인다. 살아 있는
+  /// 느낌만 줄 만큼 작게 둔다.
+  static const _wander = 14.0;
 
   @override
   State<AuroraBackground> createState() => _AuroraBackgroundState();
@@ -186,7 +245,7 @@ class _AuroraBackgroundState extends State<AuroraBackground>
       } else {
         controller
           ..stop()
-          // 정지 위치가 제각각이면 화면이 어색하다. 시작점으로 되돌린다.
+          // 정지 위치가 제각각이면 화면이 어색하다. 시작점(= 시안 자리)으로 되돌린다.
           ..value = 0;
       }
     }
@@ -220,66 +279,106 @@ class _AuroraBackgroundState extends State<AuroraBackground>
         curve: AppMotion.standard,
         builder: (context, palette, _) {
           final colors = palette.visibleColors;
-          return Stack(
-            children: [
-              for (var i = 0; i < _controllers.length; i++)
-                AnimatedBuilder(
-                  animation: _controllers[i],
-                  builder: (context, _) {
-                    return Align(
-                      alignment: _alignmentFor(i),
-                      child: _blurredCircle(colors[i]),
-                    );
-                  },
+          // 입력·보상(204)과 로딩·추가질문(244)은 두 원 자리가 40 다르다.
+          // 색과 같은 곡선으로 옮겨 가 두 원이 툭 떨어지지 않는다.
+          return Transform.translate(
+            key: AuroraBackground.groupKey,
+            offset: Offset(0, (palette.top - AuroraPalette.inputTop).h),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _blob(
+                  controller: _controllers[0],
+                  key: AuroraBackground.eclipseKey,
+                  spec: _Blob.eclipse,
+                  colors: [colors[0], colors[1]],
                 ),
-            ],
+                _blob(
+                  controller: _controllers[1],
+                  key: AuroraBackground.planetKey,
+                  spec: _Blob.planet,
+                  colors: [colors[2], palette.planetEnd],
+                ),
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  /// 광원 [i]의 현재 위치.
-  ///
-  /// 고정 중심에서 정해진 방향만큼 떨어진 자리를 기준으로, 그 주위를 작은
-  /// 원을 그리며 돈다. 셋이 각자 다른 주기로 돌지만 **중심이 같아 뭉쳐 보인다.**
-  ///
-  /// 이전에는 화면 구석에서 구석으로 이동해 광원이 따로 노는 느낌이었다.
-  Alignment _alignmentFor(int i) {
-    // 컨트롤러가 reverse로 왕복하므로 0~1을 0~2π로 펴서 원운동을 만든다
-    final angle = _controllers[i].value * 2 * math.pi;
-    final base = AuroraBackground._offsets[i];
+  /// 원 하나. 시안 자리를 중심으로 작은 원을 그리며 돈다.
+  Widget _blob({
+    required AnimationController controller,
+    required Key key,
+    required _Blob spec,
+    required List<Color> colors,
+  }) {
+    // 원이라 가로세로 모두 .w — .h를 섞으면 기기 비율에 따라 타원이 된다.
+    final diameter = spec.diameter.w;
 
-    return Alignment(
-      AuroraBackground._center.x +
-          base.dx +
-          math.cos(angle) * AuroraBackground._wander,
-      AuroraBackground._center.y +
-          base.dy +
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) {
+        // 컨트롤러가 reverse로 왕복하므로 0~1을 0~2π로 펴서 원운동을 만든다.
+        // 0 에서 시작하면 제자리다 — 동작 줄이기면 여기서 멈춘다.
+        final angle = controller.value * 2 * math.pi;
+        final drift = Offset(
           math.sin(angle) * AuroraBackground._wander,
+          (1 - math.cos(angle)) * AuroraBackground._wander,
+        );
+        return Positioned(
+          left: (spec.left + drift.dx).w,
+          top: (spec.top + drift.dy).h,
+          child: child!,
+        );
+      },
+      child: ImageFiltered(
+        // 시안 레이어 블러 반경의 절반이 가우스 표준편차다 (Figma 블러 200 =
+        // CSS blur(100px)). `decal` 이라 원 바깥을 투명으로 보고 번진다 —
+        // 가장자리 색을 늘여 붙이면 상자 모양 띠가 생긴다.
+        imageFilter: ImageFilter.blur(
+          sigmaX: (spec.blur / 2).w,
+          sigmaY: (spec.blur / 2).w,
+          tileMode: TileMode.decal,
+        ),
+        child: Container(
+          key: key,
+          width: diameter,
+          height: diameter,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            // 시안 그라데이션 손잡이가 위(0.5, 0)→아래(0.5, 1)다.
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: colors,
+            ),
+          ),
+        ),
+      ),
     );
   }
+}
 
-  Widget _blurredCircle(Color color) {
-    // 광원 위치는 [Alignment]가 화면 비율로 잡지만 **크기는 고정값**이라,
-    // 큰 기기에서는 화면 대비 광원이 작아져 배경이 허전해진다.
-    // Figma 260(393 폭 기준)을 `.w`로 환산해 비율을 유지한다.
-    final diameter = 260.w;
+/// 시안 `Gradient` 그룹 안 두 원의 자리 — 그룹 윗변이 204 인 입력 화면 기준.
+/// 다른 화면은 그룹째 내려간다([AuroraPalette.top]).
+enum _Blob {
+  /// `Eclipse` (238:1729) — 356.7 원, (11.2, 225.3), 블러 200.
+  eclipse(left: 11.2, top: 225.3, diameter: 356.7, blur: 200),
 
-    return ImageFiltered(
-      // Figma는 blur 100~200px이다. 여기서는 원 크기 대비(약 27%)로 잡는다.
-      // 원만 키우고 blur를 그대로 두면 가장자리가 선명해져 광원처럼 안 보인다.
-      imageFilter: ImageFilter.blur(
-        sigmaX: diameter * 0.27,
-        sigmaY: diameter * 0.27,
-      ),
-      child: Container(
-        key: AuroraBackground.circleKey,
-        width: diameter,
-        height: diameter,
-        // 알파는 팔레트가 이미 담았다 (AuroraPalette.visibleColors).
-        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-      ),
-    );
-  }
+  /// `Planet` (238:1730) — 261 원, (120.4, 204), 블러 100.
+  planet(left: 120.4, top: 204, diameter: 261, blur: 100);
+
+  const _Blob({
+    required this.left,
+    required this.top,
+    required this.diameter,
+    required this.blur,
+  });
+
+  final double left;
+  final double top;
+  final double diameter;
+  final double blur;
 }

@@ -20,7 +20,24 @@ import 'helpers/test_storage.dart';
 const _slowResponse = Duration(seconds: 8);
 
 void main() {
-  Widget wrap(RoutineLoadingKind kind, {Duration responseDelay = Duration.zero}) {
+  /// 보호자에게 물을 것이 하나 있는 응답 (실측 형태).
+  const oneQuestion = {
+    'required': true,
+    'questions': [
+      {
+        'question': '꼭 챙겨야 하는 준비물이 있나요?',
+        'options': [
+          {'emoji': '☂️', 'label': '우산'},
+        ],
+      },
+    ],
+  };
+
+  Widget wrap(
+    RoutineLoadingKind kind, {
+    Duration responseDelay = Duration.zero,
+    Map<String, Object?> questions = oneQuestion,
+  }) {
     final router = GoRouter(
       initialLocation: '/loading',
       routes: [
@@ -33,6 +50,10 @@ void main() {
           builder: (context, state) => const Scaffold(body: Text('추가 질문')),
         ),
         GoRoute(
+          path: Routes.routineGenerating,
+          builder: (context, state) => const Scaffold(body: Text('카드 생성 로딩')),
+        ),
+        GoRoute(
           path: Routes.routineReview,
           builder: (context, state) => const Scaffold(body: Text('카드 확인')),
         ),
@@ -43,9 +64,9 @@ void main() {
       overrides: [
         // mock을 걷어낸 뒤(#263) 이 화면은 실제로 서버를 부른다. 무엇이 온다고
         // 가정하는지 테스트 안에 드러내 둔다.
-        fakeDioOverride(delay: responseDelay, const {
-          'POST /api/routines/questions': {'questions': []},
-          'POST /api/routines': {
+        fakeDioOverride(delay: responseDelay, {
+          'POST /api/routines/questions': questions,
+          'POST /api/routines': const {
             'id': 'r1',
             'title': '테스트 일과',
             'status': 'PENDING_REVIEW',
@@ -150,6 +171,24 @@ void main() {
       await settle(tester);
 
       expect(find.text('추가 질문'), findsOneWidget);
+    });
+
+    testWidgets('물을 것이 없으면 질문 화면을 건너 곧장 카드 생성 로딩으로 간다 (#380)', (
+      tester,
+    ) async {
+      // 도움 목표에 준비물(PREPARE_*)이 없으면 서버가 빈 배열을 준다. 보상은 이미
+      // 앞에서 정했으니 질문 화면을 한 프레임 띄웠다 넘길 이유가 없다 — 띄우면
+      // 배경이 파랑 쪽으로 번지다 되돌아온다.
+      await tester.pumpWidget(
+        wrap(RoutineLoadingKind.prepare, questions: const {'questions': []}),
+      );
+      await settle(tester);
+
+      await tester.pump(totalHold(RoutineLoadingKind.prepare));
+      await settle(tester);
+
+      expect(find.text('추가 질문'), findsNothing);
+      expect(find.text('카드 생성 로딩'), findsOneWidget);
     });
   });
 

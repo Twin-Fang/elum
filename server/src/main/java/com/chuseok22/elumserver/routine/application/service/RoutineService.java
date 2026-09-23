@@ -50,9 +50,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class RoutineService {
 
-  /// 보상 설정 화면 상단에 띄울 "최근에 정한 보상" 개수.
-  /// 많이 보여줘도 고르는 부담만 늘어난다.
-  private static final int RECENT_REWARD_LIMIT = 3;
+  /// 보상 설정 화면 입력칸 아래에 띄울 "최근에 정한 보상" 개수.
+  /// 시안(1082:4801)이 칩을 2·2 넷으로 그린다 — 셋이면 둘째 줄이 한 칸만 차 2·1 로 선다 (#380).
+  /// 그 이상은 고르는 부담만 늘어난다.
+  private static final int RECENT_REWARD_LIMIT = 4;
 
   /// 보호자 홈 "지난 일과" 노출 개수. 전부 내려주면 오늘 할 일이 묻힌다.
   private static final int PAST_ROUTINE_LIMIT = 10;
@@ -202,7 +203,7 @@ public class RoutineService {
     return RoutineResponse.from(routine);
   }
 
-  /// 최근에 사용한 보상 최대 3개. 보상 설정 화면 상단에 띄워 두 번째 일과부터는
+  /// 최근에 사용한 보상 최대 4개. 보상 설정 화면 입력칸 아래에 띄워 두 번째 일과부터는
   /// 탭 한 번으로 끝나게 한다 — 온보딩을 늘리지 않고 입력 부담을 줄이는 방법이다.
   public List<RecentRewardResponse> getRecentRewards(String memberId) {
     LinkedHashMap<String, RecentRewardResponse> unique = new LinkedHashMap<>();

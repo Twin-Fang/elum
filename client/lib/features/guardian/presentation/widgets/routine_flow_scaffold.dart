@@ -29,7 +29,7 @@ class RoutineFlowScaffold extends StatelessWidget {
     this.onBack,
     this.bottomButton,
     this.pinCtaToFigmaY = false,
-    this.aurora = AuroraTone.prepare,
+    this.aurora = AuroraTone.input,
     this.confirmExit = false,
     this.belowButton,
   });
@@ -297,4 +297,34 @@ Future<bool> confirmLeaveRoutineFlow(BuildContext context) async {
   );
   // 바깥을 눌러 닫으면 null이다 — 나가지 않는 쪽이 안전하다.
   return leave == true;
+}
+
+/// 다음 화면으로 **한 번만** 넘긴다 — 빠르게 두 번 눌러도 화면이 두 장 쌓이지 않는다.
+///
+/// 일과 만들기에서 다음 화면은 대개 AI 를 부르는 로딩이다(질문 준비·카드 생성).
+/// 두 장 쌓이면 요청이 두 번 나가거나 검토 화면이 두 번 열린다 — 한 번이 곧 비용이다.
+///
+/// 풀어 주는 때는 `push` 가 돌려주는 Future 가 아니라 **이 화면이 다시 맨 위가 된
+/// 순간**이다. 로딩이 다음 화면으로 교체(pushReplacement)되면 그 Future 는 끝나지
+/// 않아, 돌아왔을 때 버튼이 죽어 있다 (#380).
+mixin LeaveOnceMixin<T extends StatefulWidget> on State<T> {
+  bool _leaving = false;
+
+  /// 직전에 이 화면이 맨 위였는가 — 맨 위로 **돌아온 순간**을 잡는다.
+  bool _wasCurrent = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final isCurrent = ModalRoute.isCurrentOf(context) ?? true;
+    if (isCurrent && !_wasCurrent) _leaving = false;
+    _wasCurrent = isCurrent;
+  }
+
+  /// [go]를 한 번만 부른다. 넘어간 화면이 닫혀 돌아오면 다시 부를 수 있다.
+  Future<void> leaveOnce(Future<void> Function() go) async {
+    if (_leaving) return;
+    _leaving = true;
+    await go();
+  }
 }

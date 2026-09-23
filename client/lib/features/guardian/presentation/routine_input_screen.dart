@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -28,6 +29,9 @@ import 'widgets/routine_flow_backdrop.dart';
 class RoutineInputScreen extends ConsumerStatefulWidget {
   const RoutineInputScreen({super.key});
 
+  /// 이 화면의 배경 색 — 민트·보라·노랑 (시안 `238:1728`).
+  static const aurora = AuroraTone.input;
+
   /// 전송 버튼. 입력이 있을 때만 존재하므로 테스트가 키로 찾는다.
   static const sendButtonKey = Key('routineInputSend');
 
@@ -35,7 +39,8 @@ class RoutineInputScreen extends ConsumerStatefulWidget {
   ConsumerState<RoutineInputScreen> createState() => _RoutineInputScreenState();
 }
 
-class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
+class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
+    with LeaveOnceMixin {
   late final TextEditingController _controller;
 
   @override
@@ -53,13 +58,15 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
     super.dispose();
   }
 
-  /// 로딩 화면으로 넘긴다 (Figma 262:4569).
+  /// 보상 설정으로 넘긴다 (Figma 1082:4709 · #380 결정 1 — 입력 바로 다음).
   ///
-  /// **여기서 DLP·질문 생성을 시작하지 않는다.** 로딩 화면이 직접 부른다 —
-  /// 시작 지점이 둘이면 화면이 재생성될 때 요청이 겹쳐 나간다. (이슈 #41)
-  void _askQuestions(BuildContext context) {
-    context.push(Routes.routineMasking);
-  }
+  /// **여기서 DLP·질문 생성을 시작하지 않는다.** 보상 다음의 로딩 화면이 직접
+  /// 부른다 — 시작 지점이 둘이면 화면이 재생성될 때 요청이 겹쳐 나간다. (이슈 #41)
+  /// 두 번 눌러도 보상 화면이 두 장 쌓이지 않게 한 번만 넘긴다.
+  Future<void> _next() => leaveOnce(() async {
+    dismissKeyboard();
+    unawaited(context.push(Routes.routineReward));
+  });
 
   void _fill(RoutineSuggestion suggestion) {
     final text = suggestion.inputText;
@@ -103,7 +110,10 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          if (!onBackdrop) const Positioned.fill(child: AuroraBackground()),
+          if (!onBackdrop)
+            const Positioned.fill(
+              child: AuroraBackground(tone: RoutineInputScreen.aurora),
+            ),
           SafeArea(
             child: Column(
               children: [
@@ -116,8 +126,8 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
                         // 동안 화면 전체가 시안보다 90~140 위로 떠 있었고,
                         // 아래로 갈수록 벌어졌다 (#297).
                         //
-                        // 시안(238:1643) 절대 y — 뒤로가기 79 · 반짝임 225 ·
-                        // 제목 285 · 부제 363 · 입력칸 429 · 칩 529.
+                        // 시안(238:1643, 2026-09-23 덤프) 절대 y — 뒤로가기 79 ·
+                        // 반짝임 185 · 제목 245 · 부제 323 · 입력칸 389 · 칩 489.
                         SizedBox(height: _RoutineInputLayout.topToSparkles),
                         const _Headline(),
                         SizedBox(height: _RoutineInputLayout.bodyToInput),
@@ -127,7 +137,7 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen> {
                           onChanged: ref
                               .read(routineFlowProvider.notifier)
                               .setRawInput,
-                          onSubmit: () => _askQuestions(context),
+                          onSubmit: _next,
                         ),
                         SizedBox(height: _RoutineInputLayout.inputToChips),
                         _SuggestionChips(onTap: _fill),
@@ -212,20 +222,24 @@ class _RoutineInputLayout {
   /// 뒤로가기 왼쪽 — 시안 16.
   static double get backLeft => 16.w;
 
-  /// 뒤로가기 줄(20 + 40) 아래부터 반짝임(225)까지 — 시안 계산 그대로 106.
+  /// 뒤로가기 줄(20 + 40) 아래부터 반짝임(185)까지 — 시안 계산 그대로 66.
+  ///
+  /// 2026-09-23 시안이 뒤로가기만 두고 **아래 전부를 40 올렸다**(반짝임 225 → 185).
+  /// 보상 설정(1082:4709)과 같은 높이가 됐다 — 두 화면 사이에서 제목이 제자리에
+  /// 선다 (#380 결정 5). 두 원(오로라)도 같이 올라갔다(`AuroraPalette.inputTop`).
   ///
   /// 한때 99였다. "반짝임 SVG가 시안보다 7 작게 그려진다"는 이유였는데
   /// **다시 재 보니 양쪽 다 36으로 같았다** — 근거가 사라진 보정이라 걷어냈다.
   /// 그 7 때문에 반짝임이 통째로 위에 떠 있었다 (#297).
-  static double get topToSparkles => 106.h;
+  static double get topToSparkles => 66.h;
 
   /// 반짝임 → 제목 — 시안 간격 24.
   static double get sparklesToTitle => 24.h;
 
-  /// 부제 끝(381) → 입력칸(429).
+  /// 부제 끝(341) → 입력칸(389).
   static double get bodyToInput => 48.h;
 
-  /// 입력칸 끝(481) → 칩 묶음(529).
+  /// 입력칸 끝(441) → 칩 묶음(489).
   static double get inputToChips => 48.h;
 }
 

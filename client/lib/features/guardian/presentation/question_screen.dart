@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
+import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 
 /// Figma `보호자_새로운 일과 만들기_추가질문`(262:4766 / 262:4854).
@@ -26,11 +28,29 @@ import 'widgets/routine_flow_scaffold.dart';
 ///
 /// 두 프레임의 차이는 선택 여부다. 아무것도 고르지 않으면 CTA가 없고(262:4766),
 /// 하나라도 고르면 `카드 만들기`가 나타난다(262:4854).
-class QuestionScreen extends ConsumerWidget {
+///
+/// 흐름 자리는 보상 **다음**, 카드 생성 앞이다 (#380 결정 1). 그래서 CTA 가 곧
+/// 카드 생성(AI)을 부른다 — 두 번 누르기를 막는다([LeaveOnceMixin]).
+class QuestionScreen extends ConsumerStatefulWidget {
   const QuestionScreen({super.key});
 
+  /// 이 화면의 배경 색 — 파랑 (시안 `262:4767`).
+  static const aurora = AuroraTone.question;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<QuestionScreen> createState() => _QuestionScreenState();
+}
+
+class _QuestionScreenState extends ConsumerState<QuestionScreen>
+    with LeaveOnceMixin {
+  /// 카드 생성 로딩으로. **기다리지 않는다** — 로딩이 검토로 교체되면 Future 가
+  /// 끝나지 않는다. 풀어 주는 것은 이 화면이 다시 맨 위가 될 때다.
+  Future<void> _makeCards() => leaveOnce(() async {
+    unawaited(context.push(Routes.routineGenerating));
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(routineFlowProvider);
     final notifier = ref.read(routineFlowProvider.notifier);
     final questions = state.question?.askable ?? const <QuestionItem>[];
@@ -39,11 +59,17 @@ class QuestionScreen extends ConsumerWidget {
     // 앞의 로딩 화면(262:4569)이 질문을 받아온 뒤에야 여기로 넘어온다.
     // 그래도 null이면 이례적인 상황이므로 빈 화면 대신 대기 표시를 둔다.
     if (state.question == null) {
-      return const RoutineFlowScaffold(child: _Waiting());
+      return const RoutineFlowScaffold(
+        aurora: QuestionScreen.aurora,
+        child: _Waiting(),
+      );
     }
 
     // 질문이 없으면 여기 있을 이유가 없다. 바로 카드 생성으로 보낸다.
     // (도움 목표를 고르지 않으면 서버가 빈 배열을 준다)
+    //
+    // 앞의 로딩이 이미 질문이 없으면 이 화면을 건너뛴다. 여기는 그래도 들어온
+    // 경우(화면 이동 도구 등)의 안전망이다.
     //
     // ⚠️ 이 화면은 routineFlowProvider를 watch하므로 생성 중 상태가 바뀔 때마다
     // 다시 빌드된다. 가드가 없으면 그때마다 로딩 화면을 또 밀어 넣어
@@ -56,15 +82,19 @@ class QuestionScreen extends ConsumerWidget {
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (context.mounted) {
-            // 질문이 없어도 보상은 묻는다 — 보상 화면이 카드 생성 앞에 선다 (#239)
-            context.pushReplacement(Routes.routineReward);
+            // 보상은 이미 앞에서 정했다 (#380 결정 1) — 곧장 카드를 만든다.
+            context.pushReplacement(Routes.routineGenerating);
           }
         });
       }
-      return const RoutineFlowScaffold(child: SizedBox.shrink());
+      return const RoutineFlowScaffold(
+        aurora: QuestionScreen.aurora,
+        child: SizedBox.shrink(),
+      );
     }
 
     return RoutineFlowScaffold(
+      aurora: QuestionScreen.aurora,
       confirmExit: true,
       onBack: () => context.pop(),
       // 시안(`262:4854`)은 CTA를 y=675에 둔다 — 약관·목표와 같은 자리다 (#297).
@@ -73,10 +103,10 @@ class QuestionScreen extends ConsumerWidget {
       bottomButton: state.answers.isEmpty
           ? null
           : ElumButton(
-              label: '다음',
-              // 카드를 만들기 전에 보상을 먼저 정한다 (#239).
-              // 질문에 답한 맥락이 그대로 이어지는 자리다.
-              onPressed: () => context.push(Routes.routineReward),
+              // 시안(262:4854) 그대로다. 보상이 앞으로 옮겨 오면서(#380) 이 버튼이
+              // 여는 것이 정말로 카드 생성이 됐다 — 규칙(바로 다음 화면 이름)과도 맞는다.
+              label: '카드 만들기',
+              onPressed: _makeCards,
             ),
       child: SingleChildScrollView(
         child: Column(

@@ -21,6 +21,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
+import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
@@ -788,5 +789,39 @@ class RoutineServiceTest {
     routineService.reorder("member-1", null);
 
     verify(routineRepository, never()).findAllById(any());
+  }
+  @Test
+  @DisplayName("최근 보상은 겹치지 않는 것으로 넷까지 준다 — 보상 설정 시안(1082:4801)이 칩 넷을 2·2로 그린다")
+  void getRecentRewards_returnsUpToFourDistinctNewestFirst() {
+    Member member = new Member();
+    member.setId("member-1");
+    Profile profile = new Profile();
+    profile.setId("profile-1");
+    profile.setMember(member);
+    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1")).thenReturn(Optional.of(profile));
+    // 최신순. 같은 보상이 두 번, 빈 보상이 한 번 섞여 있다 — 둘 다 칸을 차지하면 안 된다.
+    List<Routine> newestFirst = List.of(
+      routineWithReward("인형놀이 20분"),
+      routineWithReward("젤리 4개 먹기"),
+      routineWithReward("인형놀이 20분"),
+      routineWithReward("  "),
+      routineWithReward("20분 산책하기"),
+      routineWithReward("거실에서 저녁먹기"),
+      routineWithReward("유튜브 10분 보기")
+    );
+    when(routineRepository.findTop30ByProfileIdAndRewardTextIsNotNullOrderByCreatedAtDesc("profile-1"))
+      .thenReturn(newestFirst);
+
+    List<RecentRewardResponse> result = routineService.getRecentRewards("member-1");
+
+    // 넷째까지 온다. 셋에서 끊으면 시안의 둘째 줄이 한 칸만 차서 2·1 로 선다 (#380).
+    assertThat(result).extracting(RecentRewardResponse::rewardText)
+      .containsExactly("인형놀이 20분", "젤리 4개 먹기", "20분 산책하기", "거실에서 저녁먹기");
+  }
+
+  private static Routine routineWithReward(String rewardText) {
+    Routine routine = new Routine();
+    routine.setRewardText(rewardText);
+    return routine;
   }
 }
