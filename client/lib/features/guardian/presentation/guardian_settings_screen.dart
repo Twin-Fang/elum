@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -8,10 +7,8 @@ import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/app_status/app_status_repository.dart';
-import '../../../core/config/app_config.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../auth/data/auth_repository.dart';
@@ -59,23 +56,6 @@ class _GuardianSettingsScreenState
       // 로그아웃은 이 기기에서 나가는 것이 본질이라 서버가 실패해도 목적은 달성된다.
       return null;
     });
-  }
-
-  /// 문의 주소를 보여주고 복사하게 한다 (Figma `설정_문의하기` 1045:5005).
-  ///
-  /// **메일 앱을 바로 열지 않는다.** 메일 계정이 없는 기기에서는 아무 일도 일어나지
-  /// 않아 사용자는 눌렸는지조차 모른다. 주소를 눈에 보이게 두고 복사하게 하면
-  /// 어떤 기기에서도 다음 행동이 있다.
-  ///
-  /// 이 줄은 한 번 지웠다가(`c535ca7` — 스토어 지원 주소로 갈음된다고 봤다)
-  /// 새 시안에 다시 그려져 되살렸다.
-  Future<void> _contact() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => const _ContactSheet(),
-    );
   }
 
   Future<void> _deleteAccount() async {
@@ -174,13 +154,14 @@ class _GuardianSettingsScreenState
                       ),
                     ),
           ),
-          SettingsTile(
-
-            label: '문의하기',
-
-            onTap: _busy ? null : _contact,
-
-          ),
+          // `문의하기`는 **일부러 뺐다** (#312, 2026-09-23 결정).
+          // 시안(`1022:4467`)에는 이 자리(약관과 로그아웃 사이)에 그려져 있지만
+          // App Store 심사 기간에는 두지 않는다 — 애플이 요구하는 것은 스토어
+          // 페이지의 지원 주소이고, 앱 안 문의하기는 필수가 아니다.
+          // **시안 대조에서 '빠졌다'고 되살리지 않는다** (#349 에서 한 번 그랬다).
+          // 심사나 운영에서 문제가 되면 되살린다 — 누르면 뜨던 시트(`1045:5005`)는
+          // `ce1271d` 에 있고, 주소(`AppConfig.supportEmail`)와 글자 토큰
+          // (`contactSheetTitle`·`contactSheetEmail`)은 그대로 남겨 두었다.
           SettingsTile(
             label: '로그아웃',
             onTap: _busy ? null : _logout,
@@ -221,110 +202,6 @@ class _VersionLine extends ConsumerWidget {
       textAlign: TextAlign.center,
       style: context.typo.caption.copyWith(
         color: context.colors.textPlaceholder,
-      ),
-    );
-  }
-}
-
-/// 되돌릴 수 없는 동작을 한 번 확인받는 시트.
-///
-/// 카드 수정 시트와 같은 바텀시트 방식을 쓴다 — 확인 창만 다른 형태로 뜨면
-/// 앱 안에서 두 가지 문법을 배우게 된다.
-class _ContactSheet extends StatelessWidget {
-  const _ContactSheet();
-
-  static const _height = 375.0;
-  static const _radius = 20.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final email = AppConfig.supportEmail;
-
-    return Container(
-      height: _height.h,
-      // 자식이 배경을 깔아 둥근 모서리를 덮지 않게 자른다 (#345에서 겪은 것).
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: colors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(_radius.r)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 손잡이 — 시안 y=492, 시트 상단(476)에서 16.
-          SizedBox(height: 16.h),
-          Center(
-            child: Container(
-              width: 40.w,
-              height: 4.h,
-              decoration: BoxDecoration(
-                color: colors.sheetHandle,
-                borderRadius: BorderRadius.circular(2.r),
-              ),
-            ),
-          ),
-          // 제목 y=516 → 손잡이(496)에서 20.
-          SizedBox(height: 20.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Text(
-              '문의하기',
-              style: context.typo.contactSheetTitle.copyWith(
-                color: colors.textPrimary,
-              ),
-            ),
-          ),
-          // 안내 y=560 → 제목 하단(536)에서 24.
-          SizedBox(height: 24.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Text(
-              '평일 기준 2~3일 안에 답장드려요',
-              style: context.typo.settingsTileLabel.copyWith(
-                color: colors.textPrimary,
-              ),
-            ),
-          ),
-          // 주소 칸 y=600 → 안내 하단(576)에서 24.
-          SizedBox(height: 24.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: Container(
-              height: 68.h,
-              alignment: Alignment.centerLeft,
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              decoration: BoxDecoration(
-                color: colors.editChipBg,
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Text(
-                email,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.typo.contactSheetEmail.copyWith(
-                  color: colors.textPrimary,
-                ),
-              ),
-            ),
-          ),
-          const Spacer(),
-          // 버튼 y=730, 하단 796 → 시트 하단(851)까지 55.
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 55.h),
-            child: ElumButton(
-              label: '메일 복사하기',
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: email));
-                if (!context.mounted) return;
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('문의 주소를 복사했어요')),
-                );
-              },
-            ),
-          ),
-        ],
       ),
     );
   }

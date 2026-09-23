@@ -71,6 +71,16 @@ void main() {
   // 없으면 800×600 으로 찍혀 시안과 맞댈 수 없다.
   useFigmaViewport();
 
+  // **알려진 차이 — 문의하기 줄 (#312).** 시안에는 약관과 로그아웃 사이에
+  // `문의하기`가 있지만 App Store 심사 기간이라 일부러 뺐다. 골든은 뺀 상태로
+  // 다시 찍었다. 시안(1배 export)과 `figma_diff.py --rows` 로 맞대면 이렇게 나온다.
+  //
+  //   시안 y=349 줄(문의하기)부터 아래 줄이 한 칸(60)씩 올라간다
+  //   → 349·409 줄은 글자가 달라 붉게 뜨고, 469 줄(회원탈퇴)은 "시안에만 있다"
+  //
+  // 이 셋은 **의도된 차이라 그대로 둔다.** 그 위(제목 ~ 약관 줄)가 어긋나면
+  // 그건 진짜 결함이다. 문의하기를 되살리면 이 주석과 골든을 함께 바꾼다
+  // (`guardian_settings_test.dart` 의 "일부러 뺐다" 테스트도 같이 깨진다).
   testWidgets('설정 (Figma 1022:4467)', (tester) async {
     await _pump(tester, const GuardianSettingsScreen());
     await expectLater(

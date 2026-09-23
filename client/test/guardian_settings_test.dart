@@ -83,14 +83,40 @@ void main() {
 
   // 가입한 뒤에 약관을 다시 볼 곳이 없으면 Apple 심사에서 지적받는다(5.1.1(i)).
   // 줄이 사라져도 화면은 멀쩡히 뜨므로 눈으로는 알아채기 어렵다 (이슈 #289).
-  testWidgets('설정에서 약관과 문의로 들어갈 수 있다', (tester) async {
+  testWidgets('설정에서 약관으로 들어갈 수 있다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
     expect(find.text('약관 및 개인정보처리방침'), findsOneWidget);
-    // 문의하기는 #312 에서 뺐다가 **새 시안(`1022:4467`)에 다시 그려져 되살렸다** (#349).
-    // 스토어 지원 주소로 갈음된다고 봤지만, 디자인이 앱 안에도 두기로 정했다.
-    expect(find.text('문의하기'), findsOneWidget);
+  });
+
+  // 문의하기는 **시안(`1022:4467`)과 일부러 다르게** 뺐다 (#312, 2026-09-23 결정).
+  //
+  // #312 에서 뺐다가 #349 에서 "시안에 다시 그려져 있다"며 되살렸고, App Store
+  // 심사 기간이라 다시 뺐다. 애플이 요구하는 것은 스토어 페이지의 지원 주소이고
+  // 앱 안 문의하기는 필수가 아니다. 시안 대조만 보고 또 되살리지 않도록 여기서
+  // 막는다 — 되살릴 때는 이 테스트를 함께 바꾼다.
+  testWidgets('문의하기는 심사 기간에 일부러 뺐다 — 남은 줄은 빈칸 없이 이어진다',
+      (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expect(find.text('문의하기'), findsNothing);
+
+    // 줄만 지우고 자리를 남기면 약관과 로그아웃 사이에 빈 줄이 생긴다.
+    // 나머지는 시안 순서 그대로, 줄 높이(60)만큼씩 붙어 있어야 한다.
+    const order = [
+      '이룸이 휴대폰 연결하기',
+      '임시저장',
+      '약관 및 개인정보처리방침',
+      '로그아웃',
+      '회원탈퇴',
+    ];
+    final ys = [for (final label in order) tester.getTopLeft(find.text(label)).dy];
+    for (var i = 1; i < ys.length; i++) {
+      expect(ys[i] - ys[i - 1], closeTo(60, 0.5),
+          reason: '${order[i]} 줄이 바로 앞 줄(${order[i - 1]})에 붙어야 한다');
+    }
   });
 
   testWidgets('약관 줄을 누르면 문서 목록이 열린다', (tester) async {
