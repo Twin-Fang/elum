@@ -6,6 +6,7 @@ import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/auth/presentation/consent_document_list_screen.dart';
@@ -127,6 +128,47 @@ void main() {
       matchesGoldenFile('figma/settings_terms_detail_1027-4831.png'),
     );
   });
+
+  // 로그아웃·회원탈퇴 팝업 (Figma `팝업` 1045:5194 `로그아웃/회원탈퇴`).
+  //
+  // 전에는 바텀시트로 따로 그려 두고 있었다 — 같은 확인을 앱이 두 모양으로
+  // 했다 (#353).
+  for (final (name, title, message, icon, tone) in [
+    ('logout', '로그아웃 하실건가요?', null, ElumDialogIcon.warning,
+        ElumDialogTone.primary),
+    (
+      'withdraw',
+      '회원탈퇴 하실건가요?',
+      '만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요',
+      ElumDialogIcon.alert,
+      ElumDialogTone.danger,
+    ),
+  ]) {
+    testWidgets('설정 — $name 팝업 (Figma 1045:5194)', (tester) async {
+      await _pump(
+        tester,
+        Builder(
+          builder: (context) => ElumDialogCard<bool>(
+            title: title,
+            message: message,
+            icon: icon,
+            actions: [
+              const ElumDialogAction(
+                label: '취소',
+                value: false,
+                tone: ElumDialogTone.neutral,
+              ),
+              ElumDialogAction(label: '확인', value: true, tone: tone),
+            ],
+          ),
+        ),
+      );
+      await expectLater(
+        find.byType(ElumDialogCard<bool>),
+        matchesGoldenFile('figma/popup_${name}_1045-5194.png'),
+      );
+    });
+  }
 }
 
 /// 암호를 고정한다. 진짜 저장소를 쓰면 매번 다른 여섯 글자가 나와 골든이 흔들린다.

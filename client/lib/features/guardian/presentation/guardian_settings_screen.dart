@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/app_status/app_status_repository.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/settings_tile.dart';
@@ -37,12 +37,21 @@ class _GuardianSettingsScreenState
   bool _busy = false;
 
   Future<void> _logout() async {
-    final ok = await _ConfirmSheet.show(
-      context,
-      title: '로그아웃할까요?',
-      // 겁주지 않는다 — 같은 계정으로 다시 들어오면 일과는 그대로 있다.
-      message: '다시 로그인하면 지금까지 만든 일과를 그대로 볼 수 있어요',
-      confirmLabel: '로그아웃',
+    // 시안(`팝업` 1045:5194 `로그아웃/회원탈퇴`)은 **가운데 팝업**이다.
+    // 바텀시트로 따로 그려 두고 있었는데, 그러면 같은 확인을 앱이 두 가지
+    // 모양으로 하게 된다 — 일과 삭제는 팝업, 로그아웃은 시트였다 (#353).
+    final ok = await showElumDialog<bool>(
+      context: context,
+      // **한 단계 낮춰 쓴다.** 시안은 로그아웃과 회원탈퇴를 한 변형으로 묶어
+      // 둘 다 붉게 칠하지만, 로그아웃은 다시 들어오면 그대로다. 둘을 같은
+      // 빨강으로 두면 진짜 되돌릴 수 없는 쪽과 구분이 사라진다 (#188 의 판단을
+      // 유지한다). 색과 아이콘만 낮추고 **모양은 시안 팝업 그대로다** (#353).
+      icon: ElumDialogIcon.warning,
+      title: '로그아웃 하실건가요?',
+      actions: const [
+        ElumDialogAction(label: '취소', value: false, tone: ElumDialogTone.neutral),
+        ElumDialogAction(label: '확인', value: true, tone: ElumDialogTone.primary),
+      ],
     );
     if (ok != true) return;
     await _run(() async {
@@ -70,13 +79,20 @@ class _GuardianSettingsScreenState
   }
 
   Future<void> _deleteAccount() async {
-    final ok = await _ConfirmSheet.show(
-      context,
-      title: '정말 탈퇴할까요?',
-      // 로그아웃과 결정적으로 다른 지점이라 반드시 말해 준다.
+    final ok = await showElumDialog<bool>(
+      context: context,
+      icon: ElumDialogIcon.alert,
+      title: '회원탈퇴 하실건가요?',
+      // **설명 한 줄은 시안에 없지만 남긴다.** 시안은 로그아웃과 회원탈퇴를 한
+      // 변형으로 묶어 제목만 두는데, 둘은 결정적으로 다르다 — 로그아웃은
+      // 다시 들어오면 그대로지만 탈퇴는 되돌아오지 않는다. 되돌릴 수 없다는
+      // 고지를 빼면 사용자가 잃는 것이 크다 (docs 예외처리 규칙 · #187).
+      // 팝업 컴포넌트는 두 줄 제목을 이미 담는다(`로그인실패` 변형이 그렇다).
       message: '만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요',
-      confirmLabel: '탈퇴하기',
-      destructive: true,
+      actions: const [
+        ElumDialogAction(label: '취소', value: false, tone: ElumDialogTone.neutral),
+        ElumDialogAction(label: '확인', value: true, tone: ElumDialogTone.danger),
+      ],
     );
     if (ok != true) return;
     await _run(() => ref.read(authRepositoryProvider).deleteAccount());
@@ -214,165 +230,6 @@ class _VersionLine extends ConsumerWidget {
 ///
 /// 카드 수정 시트와 같은 바텀시트 방식을 쓴다 — 확인 창만 다른 형태로 뜨면
 /// 앱 안에서 두 가지 문법을 배우게 된다.
-class _ConfirmSheet extends StatelessWidget {
-  const _ConfirmSheet({
-    required this.title,
-    required this.message,
-    required this.confirmLabel,
-    required this.destructive,
-  });
-
-  final String title;
-  final String message;
-  final String confirmLabel;
-  final bool destructive;
-
-  static Future<bool?> show(
-    BuildContext context, {
-    required String title,
-    required String message,
-    required String confirmLabel,
-    bool destructive = false,
-  }) {
-    return showModalBottomSheet<bool>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _ConfirmSheet(
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        destructive: destructive,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-    final colors = context.colors;
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(
-        space.screenH,
-        space.xl,
-        space.screenH,
-        // 홈 인디케이터에 버튼이 걸리지 않게 기기 여백을 더한다.
-        space.xl + MediaQuery.of(context).padding.bottom,
-      ),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(space.cardRadius.r),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            title,
-            style: context.typo.sectionTitle.copyWith(color: colors.textPrimary),
-          ),
-          SizedBox(height: space.sm),
-          Text(
-            message,
-            style: context.typo.body.copyWith(color: colors.textSecondary),
-          ),
-          SizedBox(height: space.xl),
-          Row(
-            children: [
-              Expanded(
-                child: _SheetButton(
-                  label: '취소',
-                  // 물러나는 쪽은 언제나 누를 수 있어 보여야 한다. 비활성 색을 쓰면
-                  // 취소가 막힌 것처럼 보여 확인 쪽으로 몰린다 (이슈 #188).
-                  kind: _SheetButtonKind.neutral,
-                  onTap: () => Navigator.of(context).pop(false),
-                ),
-              ),
-              SizedBox(width: space.sm),
-              Expanded(
-                child: _SheetButton(
-                  label: confirmLabel,
-                  // 되돌릴 수 없는 쪽은 기본 버튼색을 쓰지 않는다.
-                  kind: destructive
-                      ? _SheetButtonKind.danger
-                      : _SheetButtonKind.primary,
-                  onTap: () => Navigator.of(context).pop(true),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 시트 버튼의 세 가지 역할.
-///
-/// 색을 호출부에서 직접 고르게 하면 화면마다 다른 조합이 생긴다. 역할만 고르면
-/// 위험 표현이 앱 전체에서 같은 모습으로 나온다.
-enum _SheetButtonKind {
-  /// 되돌릴 수 있는 확인 (로그아웃 등).
-  primary,
-
-  /// 물러나기. 눌러도 아무 일이 없으므로 항상 열려 있어 보인다.
-  neutral,
-
-  /// 되돌릴 수 없는 확인.
-  danger,
-}
-
-class _SheetButton extends StatelessWidget {
-  const _SheetButton({
-    required this.label,
-    required this.kind,
-    required this.onTap,
-  });
-
-  final String label;
-  final _SheetButtonKind kind;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-    final colors = context.colors;
-
-    return AppPressable(
-      onTap: onTap,
-      child: Container(
-        height: space.buttonH.h,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: switch (kind) {
-            _SheetButtonKind.primary => colors.buttonEnabled,
-            _SheetButtonKind.neutral => colors.buttonNeutral,
-            _SheetButtonKind.danger => colors.danger,
-          },
-          borderRadius: BorderRadius.circular(space.buttonRadius.r),
-        ),
-        child: Text(
-          label,
-          style: context.typo.button.copyWith(
-            color: switch (kind) {
-              _SheetButtonKind.primary => colors.buttonEnabledText,
-              _SheetButtonKind.neutral => colors.buttonNeutralText,
-              _SheetButtonKind.danger => colors.dangerText,
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 문의하기 바텀시트 (Figma `1045:5005` 실측).
-///
-/// 시트 375 · 상단 라운드 20 · 손잡이 40×4 · 제목 20/w700 · 안내 16/w400 ·
-/// 주소 칸 361×68 r20 에 20/w400 · 버튼 360×66 r18.
 class _ContactSheet extends StatelessWidget {
   const _ContactSheet();
 

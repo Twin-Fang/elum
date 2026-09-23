@@ -21,6 +21,12 @@ enum ElumDialogIcon {
   /// `warning`과 나누는 기준 — 만들던 것이 사라지면 warning, 이미 저장된
   /// 것이 사라지면 trash다.
   trash,
+
+  /// 되돌릴 수 없는 것을 묻는다 — 붉은 원에 느낌표 (`팝업` 변형 `로그아웃/회원탈퇴`).
+  ///
+  /// `trash`와 나누는 기준 — 지우는 대상이 눈에 보이는 하나면 trash(일과 삭제),
+  /// 계정처럼 통째로 끝나는 것이면 alert다.
+  alert,
 }
 
 /// 버튼의 무게. 색만 바꾼다 — 크기·모서리는 어느 쪽이든 같다.
@@ -137,6 +143,7 @@ class ElumDialogCard<T> extends StatelessWidget {
         ElumDialogIcon.success => AppAssets.dialogCheck,
         ElumDialogIcon.warning => AppAssets.dialogWarn,
         ElumDialogIcon.trash => AppAssets.dialogTrash,
+        ElumDialogIcon.alert => AppAssets.dialogAlert,
       };
 
   @override

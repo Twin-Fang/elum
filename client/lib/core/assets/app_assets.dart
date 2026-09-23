@@ -36,6 +36,12 @@ abstract final class AppAssets {
   /// 색으로 먼저 멈춰 세운다. 보호자 화면에만 쓴다.
   static const dialogTrash = 'assets/icon/dialog/trash_round.svg';
 
+  /// 되돌릴 수 없는 것을 묻는 팝업 — 붉은 원에 느낌표 (Figma `팝업` 1045:5212).
+  ///
+  /// 로그아웃·회원탈퇴·로그인 실패가 같은 아이콘을 쓴다. **보호자 화면 전용이다** —
+  /// 이룸이도 보는 화면에는 붉은 경고를 쓰지 않는다.
+  static const dialogAlert = 'assets/icon/dialog/alert_round.svg';
+
   /// 도움 목표 아이콘 (40×40). Figma `온보딩_목표`(204:1002)의 Group 62~65,
   /// 목표별로 서로 다른 아이콘이다 (2026-07-22 갱신, 이슈 #11 후속).
   /// 목표 칩 아이콘 (40×40).

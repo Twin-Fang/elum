@@ -117,7 +117,7 @@ void main() {
     await tester.tap(find.text('로그아웃'));
     await tester.pumpAndSettle();
 
-    expect(find.text('로그아웃할까요?'), findsOneWidget);
+    expect(find.text('로그아웃 하실건가요?'), findsOneWidget);
     expect(auth.logoutCalls, 0, reason: '확인 전에는 아무 일도 일어나면 안 된다');
   });
 
@@ -140,8 +140,8 @@ void main() {
 
     await tester.tap(find.text('로그아웃'));
     await tester.pumpAndSettle();
-    // 시트의 확인 버튼. 목록의 '로그아웃'과 글자가 같으므로 마지막 것을 집는다.
-    await tester.tap(find.text('로그아웃').last);
+    // 시안(`팝업` 1045:5194)의 확인 버튼 이름은 `확인`이다.
+    await tester.tap(find.text('확인'));
     await tester.pumpAndSettle();
 
     expect(auth.logoutCalls, 1);
@@ -159,7 +159,7 @@ void main() {
         reason: '로그아웃과 같은 문구면 사용자가 둘을 구분할 수 없다');
     expect(auth.deleteCalls, 0);
 
-    await tester.tap(find.text('탈퇴하기'));
+    await tester.tap(find.text('확인'));
     await tester.pumpAndSettle();
 
     expect(auth.deleteCalls, 1);
@@ -185,7 +185,7 @@ void main() {
     expect(logout.style?.color, colors.textPrimary);
   });
 
-  testWidgets('확인 시트에서 취소가 비활성처럼 보이지 않는다 (이슈 #188)', (tester) async {
+  testWidgets('확인 팝업에서 취소가 비활성처럼 보이지 않는다 (이슈 #188)', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
@@ -201,25 +201,32 @@ void main() {
     }
 
     // 취소가 비활성 색이면 "지금은 물러날 수 없다"로 읽혀 확인 쪽으로 몰린다.
-    expect(fillBehind('취소'), colors.buttonNeutral);
+    expect(fillBehind('취소'), colors.dialogNeutral);
     expect(fillBehind('취소'), isNot(colors.buttonDisabled));
     // 되돌릴 수 없는 쪽은 기본 버튼색이 아니라 위험색이어야 한다.
-    expect(fillBehind('탈퇴하기'), colors.danger);
-    expect(fillBehind('탈퇴하기'), isNot(colors.buttonEnabled));
+    expect(fillBehind('확인'), colors.dialogDanger);
+    expect(fillBehind('확인'), isNot(colors.buttonEnabled));
   });
 
-  testWidgets('되돌릴 수 있는 확인은 위험색을 쓰지 않는다', (tester) async {
+  testWidgets('로그아웃은 같은 팝업을 쓰되 한 단계 낮은 색이다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('로그아웃'));
     await tester.pumpAndSettle();
 
+    // 시안(`팝업` 1045:5194)은 로그아웃과 회원탈퇴를 한 변형으로 묶어 둘 다
+    // 붉게 칠한다. **모양은 그대로 따르되 색만 낮춘다** — 로그아웃은 다시
+    // 들어오면 그대로라, 둘을 같은 빨강으로 두면 진짜 되돌릴 수 없는 쪽과
+    // 구분이 사라진다 (#188 의 판단을 유지, #353 에서 확인받음).
     final box = tester.widget<Container>(
-      find.ancestor(of: find.text('로그아웃').last, matching: find.byType(Container)).first,
+      find.ancestor(of: find.text('확인'), matching: find.byType(Container)).first,
     );
-    // 로그아웃까지 붉게 칠하면 진짜 위험한 것과 구분이 사라진다.
-    expect((box.decoration as BoxDecoration?)?.color, AppColors.light.buttonEnabled);
+    expect((box.decoration as BoxDecoration?)?.color, AppColors.light.checkDone);
+    expect((box.decoration as BoxDecoration?)?.color,
+        isNot(AppColors.light.dialogDanger));
+    expect(find.textContaining('되돌릴 수 없어요'), findsNothing,
+        reason: '로그아웃은 되돌아올 수 있다 — 탈퇴와 같은 말을 하면 안 된다');
   });
 
   testWidgets('서버 삭제가 실패하면 탈퇴됐다고 하지 않는다 (이슈 #187)', (tester) async {
@@ -230,7 +237,7 @@ void main() {
 
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('탈퇴하기'));
+    await tester.tap(find.text('확인'));
     await tester.pumpAndSettle();
 
     // 아무것도 지워지지 않았으므로 화면을 옮기지 않는다. 옮기면 사용자는
@@ -249,14 +256,14 @@ void main() {
 
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('탈퇴하기'));
+    await tester.tap(find.text('확인'));
     await tester.pumpAndSettle();
 
     // 실패 후에도 버튼이 잠겨 있으면 그 자리에서 할 수 있는 일이 없어진다.
     auth.deleteSucceeds = true;
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('탈퇴하기'));
+    await tester.tap(find.text('확인'));
     await tester.pumpAndSettle();
 
     expect(auth.deleteCalls, 2);
