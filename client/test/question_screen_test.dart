@@ -17,6 +17,7 @@ import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 
 import 'helpers/semantics_audit.dart';
+import 'helpers/line_breaks.dart';
 import 'helpers/test_storage.dart';
 import 'helpers/fake_reward_api.dart';
 
@@ -25,6 +26,11 @@ import 'helpers/fake_reward_api.dart';
 /// 두 프레임의 차이는 선택 여부다 — 아무것도 고르지 않으면 CTA가 없고,
 /// 하나라도 고르면 `카드 만들기`가 나타난다. 그 다음은 카드 생성 로딩이다 —
 /// 보상은 입력 바로 다음으로 옮겨 갔다 (#380 결정 1).
+/// 질문 제목. 낱말 단위 줄바꿈 표시가 섞여 [find.text] 로는 못 찾는다 (#393 S5).
+Finder questionText(String q) => find.byWidgetPredicate(
+  (w) => w is Text && (w.data == q || w.semanticsLabel == q),
+);
+
 void main() {
   /// 서버가 주는 다중 질문 (실측 응답 형태)
   const twoQuestions = RoutineQuestion(
@@ -108,6 +114,34 @@ void main() {
     return container;
   }
 
+  // #393 S5 — AI 가 주는 질문은 `\n` 없이 오므로 제목 폭에서 엔진이 꺾는다.
+  // 360 폭에서 `…준비물이 있나 / 요?`로 `요?`만 다음 줄에 떨어졌다. 공지 팝업(#390)의
+  // 낱말 단위 줄바꿈을 질문 제목에만 건다(앱 전체 규칙은 그대로).
+  group('질문 제목 줄바꿈 (#393 S5)', () {
+    for (final width in const [360.0, 393.0]) {
+      testWidgets('폭 $width — 띄어쓰기에서만 줄을 바꾼다', (tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = Size(width, 800);
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await pumpWith(tester, twoQuestions);
+
+        for (final q in const [
+          '꼭 챙겨야 하는 준비물이 있나요?',
+          '평소와 다르게 준비해야 하는 점이 있나요?',
+        ]) {
+          expectBreaksOnlyAtSpaces(tester, questionText(q));
+        }
+        // 낭독기는 끊지 말라는 표시 없이 원문을 읽는다
+        expect(
+          tester.widget<Text>(questionText('꼭 챙겨야 하는 준비물이 있나요?')).semanticsLabel,
+          '꼭 챙겨야 하는 준비물이 있나요?',
+        );
+      });
+    }
+  });
+
   group('추가질문 화면', () {
     testWidgets('배경 글로우는 그대로 있다 (이슈 #79 회귀 방지)', (tester) async {
       // 카드확인 화면만 글로우를 껐다. 공통 스캐폴드를 고쳤으므로
@@ -121,8 +155,8 @@ void main() {
       // 서버가 도움 목표마다 하나씩 준다. Figma는 하나만 그렸지만 2개 이상 온다.
       await pumpWith(tester, twoQuestions);
 
-      expect(find.text('꼭 챙겨야 하는 준비물이 있나요?'), findsOneWidget);
-      expect(find.text('평소와 다르게 준비해야 하는 점이 있나요?'), findsOneWidget);
+      expect(questionText('꼭 챙겨야 하는 준비물이 있나요?'), findsOneWidget);
+      expect(questionText('평소와 다르게 준비해야 하는 점이 있나요?'), findsOneWidget);
     });
 
     testWidgets('선택지를 모두 보여준다', (tester) async {

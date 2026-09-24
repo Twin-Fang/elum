@@ -114,6 +114,15 @@ class AppFailure {
     _ => null,
   };
 
+  /// 서버에 **닿지 못했다** — 오프라인·타임아웃·인증서. 사용자가 할 일이 있는 실패다
+  /// ([hint] 가 있다). 서버가 응답한 실패와 달리 다음 요청도 같은 이유로 실패한다.
+  bool get isUnreachable => switch (fault) {
+    NetworkFault.offline ||
+    NetworkFault.timeout ||
+    NetworkFault.badCertificate => true,
+    NetworkFault.cancelled || NetworkFault.none || NetworkFault.app => false,
+  };
+
   /// 추적용 식별자. 사용자에게는 뜻이 없지만, 제보를 받았을 때 어디서 터졌는지
   /// 가릴 유일한 단서다 (docs 예외처리 규칙).
   ///

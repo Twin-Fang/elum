@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/widgets/app_pressable.dart';
@@ -24,7 +26,7 @@ import 'helpers/test_storage.dart';
 /// 기존 화면과 완전히 다른 디자인이라 통째로 다시 만들었다.
 /// 하단 CTA가 사라지고 입력창 안 화살표가 그 자리를 대신한다.
 void main() {
-  Widget wrap({bool reduceMotion = false}) {
+  Widget wrap({bool reduceMotion = false, double textScale = 1}) {
     final router = GoRouter(
       initialLocation: Routes.routineInput,
       routes: [
@@ -58,8 +60,10 @@ void main() {
           theme: AppTheme.light,
           routerConfig: router,
           builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context)
-                .copyWith(disableAnimations: reduceMotion),
+            data: MediaQuery.of(context).copyWith(
+              disableAnimations: reduceMotion,
+              textScaler: TextScaler.linear(textScale),
+            ),
             child: child ?? const SizedBox.shrink(),
           ),
         ),
@@ -231,6 +235,41 @@ void main() {
       // 칩 라벨이 아니라 prompt가 들어가야 한다 (이슈 #39)
       expect(find.text(first.prompt), findsWidgets);
     });
+
+    // #393 S3 — 글꼴 2.0 에서 두 칩이 한 줄을 다 차지해 화면 끝에 붙었다. 칩 묶음에
+    // 본문과 같은 좌우 여백(24)을 둔다. 글꼴 1.0 에서는 칩이 좁아 자리가 그대로다.
+    for (final (width, scale) in const [(393.0, 2.0), (360.0, 2.0), (393.0, 1.0)]) {
+      testWidgets('폭 $width · 글꼴 $scale — 칩이 좌우 여백 24 안에 든다', (tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = Size(width, 852);
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(wrap(textScale: scale));
+        await tester.pump();
+
+        final margin = 24 * width / 393; // 24.w
+        final lineWidth = width - margin * 2;
+        for (final s in RoutineSuggestion.fallback) {
+          final finder = find
+              .ancestor(of: find.text(s.label), matching: find.byType(AnimatedContainer))
+              .first;
+          final chip = tester.getRect(finder);
+          expect(chip.left, greaterThanOrEqualTo(margin - 0.5), reason: s.label);
+          expect(chip.right, lessThanOrEqualTo(width - margin + 0.5), reason: s.label);
+          // 여백을 두느라 칩이 옆 칩에 눌려 좁아지면 `병원 방 / 문 준비`처럼 꺾인다.
+          // 칩은 제 글자 폭만큼 넓거나, 그게 안 되면 한 줄을 다 쓴다 — 눌리지 않는다.
+          final natural = tester
+              .renderObject<RenderBox>(finder)
+              .getMaxIntrinsicWidth(double.infinity);
+          expect(
+            chip.width,
+            greaterThanOrEqualTo(math.min(natural, lineWidth) - 0.5),
+            reason: '${s.label} — 제 폭 $natural 인데 ${chip.width} 로 눌렸다',
+          );
+        }
+      });
+    }
 
     test('입력창에는 이모지를 넣지 않는다', () {
       // 이모지는 칩 장식이다. 서버로 보내는 문구에 섞이면 안 된다.

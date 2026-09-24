@@ -9,6 +9,7 @@ import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
 import 'package:elum/features/link/presentation/link_code_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,7 +29,7 @@ void main() {
 
   setUp(() => repo = _FakeLink());
 
-  Widget wrap({String nickname = ''}) {
+  Widget wrap({String nickname = '', double textScale = 1}) {
     final router = GoRouter(
       initialLocation: Routes.linkCode,
       routes: [
@@ -54,6 +55,11 @@ void main() {
         builder: (context, child) => MaterialApp.router(
           theme: AppTheme.light,
           routerConfig: router,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: TextScaler.linear(textScale)),
+            child: child!,
+          ),
         ),
       ),
     );
@@ -159,6 +165,44 @@ void main() {
       expect(find.text('코드 다시 만들기'), findsNothing);
       expect(find.textContaining(RegExp(r'^\d{2}:\d{2}$')), findsNothing);
       expect(ctaEnabled(tester), isTrue);
+    });
+  });
+
+  // #393 S6 — 보상 화면(#380 실기기 A)과 같은 구조였다. 자리를 글자 높이 16 으로
+  // 못 박고 OverflowBox 로 덮어, 글꼴을 키우면 글자가 16 상자에 갇혀 아래가 잘린다.
+  // 넘친 것이 아니라 잘린 것이라 넘침 검사로는 못 잡는다 — 그려진 높이를 잰다.
+  group('큰 글꼴에서 나중에 할게요가 잘리지 않는다 (#393 S6)', () {
+    for (final scale in const [1.0, 1.3, 2.0]) {
+      testWidgets('글꼴 $scale', (tester) async {
+        await tester.pumpWidget(wrap(textScale: scale));
+        await settleIssue(tester);
+
+        final label = find.text('나중에 할게요');
+        final paragraph = tester.renderObject<RenderParagraph>(label);
+        final needed = paragraph.getMaxIntrinsicHeight(paragraph.size.width);
+        expect(
+          paragraph.size.height,
+          greaterThanOrEqualTo(needed - 0.5),
+          reason: '글자 높이 $needed 인데 ${paragraph.size.height} 만 그려진다',
+        );
+        // 글자 위를 덮는 조상 상자가 글자보다 작으면 누름·그리기가 거기서 끊긴다.
+        final rect = tester.getRect(label);
+        final holder = tester.getRect(
+          find.ancestor(of: label, matching: find.byType(Center)).first,
+        );
+        expect(holder.top, lessThanOrEqualTo(rect.top + 0.5));
+        expect(holder.bottom, greaterThanOrEqualTo(rect.bottom - 0.5));
+        expect(rect.bottom, lessThanOrEqualTo(852));
+      });
+    }
+
+    testWidgets('글꼴 1.0 에서는 시안 자리 그대로다 — 시작하기와 사이가 변하지 않는다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await settleIssue(tester);
+
+      // 시안 732:5334 — 나중에 할게요 y=765, 높이 16
+      final rect = tester.getRect(find.text('나중에 할게요'));
+      expect(rect.height, moreOrLessEquals(16, epsilon: 1));
     });
   });
 }

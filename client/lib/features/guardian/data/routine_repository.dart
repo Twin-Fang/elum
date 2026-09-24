@@ -18,7 +18,13 @@ import 'member_repository.dart';
 /// **절대 throw하지 않는다.** 데모는 어떤 실패에도 끝까지 진행되어야 한다 (docs 원칙 6번).
 /// 화면은 에러 분기를 쓸 일이 없고, 따라서 빠뜨릴 수도 없다.
 abstract interface class RoutineRepository {
-  /// AI 추가 질문. 실패하면 "질문 없음"으로 처리해 다음 단계로 넘긴다.
+  /// AI 추가 질문.
+  ///
+  /// - 서버가 응답은 했는데 실패면 **질문 없음**을 준다 — 카드 만들기로 넘어간다.
+  /// - 서버에 **닿지 못했으면** [AppFailure] 를 던진다. 다음 단계(카드 만들기)도
+  ///   어차피 실패하므로 흐름이 연결 안내와 다시 하기를 띄운다 (#393 S1 · #352).
+  ///
+  /// 어느 쪽이든 **입력과 무관한 대체 질문은 만들지 않는다** (#393 S1).
   Future<RoutineQuestion> generateQuestion(String rawInputText);
 
   /// 내가 만든 일과 목록 — 보호자_홈의 "최근 일과".
@@ -211,15 +217,20 @@ class RoutineRepositoryImpl implements RoutineRepository {
       }
     } catch (e) {
       AppLogger.repositoryError('RoutineRepository', 'generateQuestion', e);
+      // 서버에 닿지 못했다 — 흐름이 연결 안내를 띄우게 넘긴다 (#393 S1).
+      final failure = AppFailure.of(e);
+      if (failure.isUnreachable) throw failure;
     }
 
-    final mock = _fallbackQuestion();
+    // 응답은 받았는데 실패했다(5xx·빈 본문 등). 예전에는 여기서 `비 오는 날
+    // 준비물` 대체 질문을 줬는데, 수영장 가기를 적어도 우산을 물었다 (#393 S1).
+    // 질문은 선택 단계라 없이 넘어가도 카드는 만들어진다.
     AppLogger.repositorySuccess(
       'RoutineRepository',
-      'generateQuestion (fallback)',
-      mock,
+      'generateQuestion (질문 없이 넘어감)',
+      const RoutineQuestion(),
     );
-    return mock;
+    return const RoutineQuestion();
   }
 
   @override
@@ -664,28 +675,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
   }
 
   // --- 로컬 대체 구현 ---
-
-  /// 서버가 실패해도 질문 화면을 보여줄 수 있게 하는 대체 질문.
-  /// 실제 서버는 목표마다 하나씩 여러 개를 준다.
-  ///
-  /// 선택지 앞의 이모지는 **서버가 유니코드로 함께 내려준다.** 클라이언트가
-  /// 붙이지 않는다 — 선택지는 AI가 생성해 값이 고정되지 않으므로 매핑이 불가능하다.
-  /// 폴백도 실제 응답과 같은 모양이어야 서버가 죽었을 때만 화면이 달라 보이지 않는다.
-  RoutineQuestion _fallbackQuestion() => const RoutineQuestion(
-    isRequired: true,
-    questions: [
-      QuestionItem(
-        question: '꼭 챙겨야 하는 준비물이 있나요?',
-        options: [
-          QuestionOption(emoji: '☂️', label: '우산'),
-          QuestionOption(emoji: '🧥', label: '우비'),
-          QuestionOption(emoji: '👢', label: '장화'),
-          QuestionOption(emoji: '🧦', label: '여벌 양말'),
-          QuestionOption(emoji: '🧺', label: '작은 수건'),
-        ],
-      ),
-    ],
-  );
 
   /// 서버 없이도 데모가 성립하도록 로컬에서 일과를 구성한다.
   /// DLP 마스킹도 여기서 흉내낸다 — 발표에서 전/후 비교를 보여줘야 하기 때문이다.

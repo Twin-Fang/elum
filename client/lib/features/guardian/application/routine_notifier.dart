@@ -29,6 +29,7 @@ class RoutineFlowState {
     this.maskedInput = '',
     this.detectedTypes = const [],
     this.question,
+    this.questionInput = '',
     this.answers = const [],
     this.customOptions = const {},
     this.rewardText = '',
@@ -46,6 +47,13 @@ class RoutineFlowState {
   /// 탐지된 민감정보 **유형**만. 원문은 담지 않는다.
   final List<String> detectedTypes;
   final RoutineQuestion? question;
+
+  /// [question] 을 받아 올 때 보낸 입력. [answers] 는 이 입력에 딸린다 (#393 S2).
+  ///
+  /// 보상으로 되돌아갔다 오면 준비 로딩이 다시 묻는다. 입력이 그대로면 같은 질문을
+  /// 다시 쓰고 답도 남기고, 바뀌었으면 새로 받고 답을 비운다 — 안 그러면 수영장
+  /// 질문 옆에 우산이 골라진 채 남는다.
+  final String questionInput;
   final List<String> answers;
 
   /// 보호자가 직접 적어 넣은 선택지. 질문 문구별로 나눠 담는다.
@@ -87,6 +95,7 @@ class RoutineFlowState {
     String? maskedInput,
     List<String>? detectedTypes,
     RoutineQuestion? question,
+    String? questionInput,
     List<String>? answers,
     Map<String, List<String>>? customOptions,
     String? rewardText,
@@ -102,6 +111,7 @@ class RoutineFlowState {
       maskedInput: maskedInput ?? this.maskedInput,
       detectedTypes: detectedTypes ?? this.detectedTypes,
       question: question ?? this.question,
+      questionInput: questionInput ?? this.questionInput,
       answers: answers ?? this.answers,
       customOptions: customOptions ?? this.customOptions,
       rewardText: rewardText ?? this.rewardText,
@@ -167,13 +177,57 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     AppLogger.notifierCall('RoutineFlowNotifier', 'askQuestion');
     AppLogger.notifierStateChange('RoutineFlowNotifier', state.step.name, 'question');
 
-    final repo = ref.read(routineRepositoryProvider);
-    final question = await repo.generateQuestion(state.rawInput);
+    // 같은 입력으로 이미 받은 질문이 있으면 그것을 다시 쓴다 (#393 S2). 보상으로
+    // 되돌아갔다 오면 여기가 또 불린다 — 다시 부르면 AI 비용이 한 번 더 들고, 질문이
+    // 달라져 전에 고른 답이 엉뚱한 질문 옆에 남는다. 서버 질문은 입력만 보고 만든다.
+    final cached = state.question;
+    if (cached != null && state.questionInput == state.rawInput) {
+      state = state.copyWith(step: RoutineFlowStep.question);
+      return;
+    }
 
-    state = state.copyWith(step: RoutineFlowStep.question, question: question);
+    final repo = ref.read(routineRepositoryProvider);
+    final RoutineQuestion question;
+    try {
+      question = await repo.generateQuestion(state.rawInput);
+    } catch (e) {
+      // 서버에 닿지 못했다 (#393 S1). 입력과 무관한 질문을 띄우지 않고 연결 안내와
+      // 다시 하기를 띄운다 — 다음 단계(카드 만들기)도 같은 이유로 실패한다 (#352).
+      final failure = AppFailure.of(e);
+      AppLogger.notifierStateChange('RoutineFlowNotifier', 'question', 'error', {
+        'fault': failure.fault.name,
+      });
+      state = state.copyWith(
+        step: RoutineFlowStep.error,
+        errorCode: failure.badgeOr('E-1003'),
+        errorMessage: failure.serverMessage,
+        errorHint: failure.hint,
+      );
+      return;
+    }
+
+    // 새 질문이다 — 옛 질문에 고른 답과 직접 적은 선택지를 비운다 (#393 S2).
+    state = RoutineFlowState(
+      step: RoutineFlowStep.question,
+      rawInput: state.rawInput,
+      maskedInput: state.maskedInput,
+      detectedTypes: state.detectedTypes,
+      question: question,
+      questionInput: state.rawInput,
+      rewardText: state.rewardText,
+      rewardPresetKey: state.rewardPresetKey,
+      routine: state.routine,
+    );
     AppLogger.notifierStateChange('RoutineFlowNotifier', 'question', 'question', {
       'questionCount': question.askable.length,
     });
+  }
+
+  /// 질문 받기가 실패한 뒤 다시 한다 (#393 S1). 카드를 만들지 않는다 —
+  /// 준비 로딩의 `다시 하기`가 카드 생성 재시도로 이어지면 질문을 건너뛴다.
+  Future<void> retryQuestion() {
+    state = state.copyWith(step: RoutineFlowStep.maskResult);
+    return askQuestion();
   }
 
   void toggleAnswer(String answer) {

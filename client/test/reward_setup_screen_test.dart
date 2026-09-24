@@ -17,6 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/line_breaks.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
 
@@ -24,6 +25,14 @@ import 'helpers/test_storage.dart';
 ///
 /// **보상은 선택 항목이다.** 건너뛰어도 흐름이 끝까지 가야 한다 — 필수로 만들면
 /// 일과 만들기가 한 단계 더 무거워진다.
+/// 도움말 본문. 낱말 단위 줄바꿈 표시가 섞여 [find.text] 로는 못 찾는다 (#393 S4).
+Finder whyMessageText() => find.byWidgetPredicate(
+  (w) =>
+      w is Text &&
+      (w.data == RewardSetupScreen.whyMessage ||
+          w.semanticsLabel == RewardSetupScreen.whyMessage),
+);
+
 void main() {
   useFigmaViewport();
 
@@ -146,7 +155,7 @@ void main() {
 
       // 디자인이 없어 개발에서 정한 문구다 (#380 결정 3). 이유 · 어떤 것 · 안 해도
       // 된다는 것 세 줄 — 전문 용어 없이, 당사자는 `이룸이`로 부른다.
-      expect(find.text(RewardSetupScreen.whyMessage), findsOneWidget);
+      expect(whyMessageText(), findsOneWidget);
       expect(RewardSetupScreen.whyMessage.split('\n'), hasLength(3));
       for (final banned in ['강화', '아이', '아동', '행동중재']) {
         expect(RewardSetupScreen.whyMessage, isNot(contains(banned)));
@@ -154,6 +163,26 @@ void main() {
       expect(RewardSetupScreen.whyMessage, contains('이룸이'));
     });
   });
+
+  // #393 S4 — 360 폭 기본 글꼴에서 `이룸이 / 가`처럼 낱말 가운데서 줄이 바뀌었다.
+  // 공지 팝업(#390)의 낱말 단위 줄바꿈을 이 팝업에만 건다(앱 전체 규칙은 그대로).
+  for (final width in const [360.0, 393.0]) {
+    testWidgets('도움말 팝업이 폭 $width 에서 띄어쓰기에서만 줄을 바꾼다 (#393 S4)', (tester) async {
+      tester.view.physicalSize = Size(width, 800);
+      await tester.pumpWidget(wrap());
+      await settle(tester);
+
+      await tester.tap(find.text('보상이 왜 필요한가요?'));
+      await settle(tester);
+
+      expectBreaksOnlyAtSpaces(tester, whyMessageText());
+      // 화면 낭독기는 끊지 말라는 표시 없이 원문을 읽는다
+      expect(
+        tester.widget<Text>(whyMessageText()).semanticsLabel,
+        RewardSetupScreen.whyMessage,
+      );
+    });
+  }
 
   group('나중에 할게요 — 보상은 선택이다', () {
     testWidgets('누르면 보상 없이 질문 준비 로딩으로 간다 (E2 · #380 결정 1)', (tester) async {

@@ -82,13 +82,16 @@ void main() {
   });
 
   group('질문 생성이 실패할 때', () {
-    test('대체 질문을 준다 — 화면이 비지 않는다', () async {
+    // 예전에는 `비 오는 날 준비물` 대체 질문을 줬다. 입력과 무관해 수영장 가기를
+    // 적어도 우산을 물었다 (#393 S1). 질문은 선택 단계라 없이 넘어간다.
+    // 서버에 닿지 못한 경우는 `routine_question_flow_test.dart` 가 본다.
+    test('질문 없이 넘어간다 — 입력과 무관한 대체 질문을 만들지 않는다', () async {
       adapter.stub(502, {'errorCode': 'ROUTINE_AI_GENERATION_FAILED'});
 
       final question = await repo.generateQuestion('비 오는 날 등교');
 
-      expect(question.canAsk, isTrue);
-      expect(question.askable, isNotEmpty);
+      expect(question.canAsk, isFalse);
+      expect(question.askable, isEmpty);
     });
   });
 

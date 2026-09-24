@@ -23,6 +23,7 @@ void main() {
     String? message,
     ElumDialogIcon? icon,
     List<ElumDialogAction<T>> actions = const [],
+    bool barrierDismissible = false,
   }) async {
     T? result;
     late BuildContext ctx;
@@ -49,11 +50,34 @@ void main() {
       message: message,
       icon: icon,
       actions: actions,
+      barrierDismissible: barrierDismissible,
     ).then((v) => result = v);
     await tester.pumpAndSettle();
 
     return result;
   }
+
+  // #393 S7 — 앱에 한국어 지역화가 없어 배경 막이 영어 `Dismiss` 로 읽혔다.
+  // 공지 팝업만 `공지 닫기`로 고쳐 두었다(#385 C). 공통 팝업도 한국어로 읽는다.
+  testWidgets('바깥을 눌러 닫는 팝업의 배경 막은 팝업 닫기로 읽힌다 (#393 S7)', (tester) async {
+    final handle = tester.ensureSemantics();
+    await open<void>(tester, title: '보상이 왜 필요한가요?', barrierDismissible: true);
+
+    expect(find.bySemanticsLabel('Dismiss'), findsNothing);
+    expect(find.bySemanticsLabel(elumDialogBarrierLabel), findsOneWidget);
+    expect(elumDialogBarrierLabel, '팝업 닫기');
+    handle.dispose();
+  });
+
+  testWidgets('바깥을 눌러도 안 닫히는 팝업은 배경 막을 읽지 않는다 (#393 S7)', (tester) async {
+    final handle = tester.ensureSemantics();
+    await open<void>(tester, title: '로그아웃할까요?');
+
+    // 눌러도 아무 일이 없는 자리를 `닫기`로 읽으면 낭독기 사용자가 헛누른다.
+    expect(find.bySemanticsLabel('Dismiss'), findsNothing);
+    expect(find.bySemanticsLabel(elumDialogBarrierLabel), findsNothing);
+    handle.dispose();
+  });
 
   testWidgets('버튼을 주지 않으면 확인 하나가 선다', (tester) async {
     await open<void>(tester, title: '휴대폰 연결에 성공했어요!');

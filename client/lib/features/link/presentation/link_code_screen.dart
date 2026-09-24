@@ -79,11 +79,6 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   /// `space.xl * 2`(64)를 쓰고 있었는데 그러면 코드 블록이 통째로 8 뜬다 (#297).
   static const _descriptionToCode = 72.0;
 
-  /// `나중에 할게요` 글자 높이 (시안 `732:5607` 16).
-  /// 누르기 편하라고 8씩 덧댄 여백이 **자리까지 늘려** CTA를 16 밀어 올렸다.
-  /// 여백은 누름 영역으로만 두고 자리는 글자 높이 그대로 잡는다 (#297).
-  static const _laterHeight = 16.0;
-
   static const _codeToTimer = 24.0;
   static const _timerToRetry = 16.0;
 
@@ -203,68 +198,75 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
       // **연결된 뒤에도 남는다** — 시안 `732:5850`이 그렇게 그려져 있다.
       // 전에는 연결되면 숨겼는데, 누르면 `시작하기`와 같은 곳으로 가므로
       // 숨겨서 얻는 것이 없고 화면만 시안과 달라졌다 (#297).
+      //
+      // **높이를 못 박지 않는다** (#393 S6 · 보상 화면 #380 실기기 A 와 같은 원인).
+      // 전에는 자리를 글자 높이 16 으로 고정하고 OverflowBox 로 누름 영역만 넓혔다.
+      // 글꼴을 키우면 글자가 16 상자에 갇혀 아래가 잘렸고, 넘친 것이 아니라 잘린
+      // 것이라 경고도 안 났다. 이제 글자 높이가 곧 자리다 — 글꼴 1.0 에서는 16 그대로라
+      // 시안 자리(765)와 같다(#297 에서 맞춘 CTA 자리도 그대로). 누름 영역은 옆으로만
+      // 넓힌다 — 위아래로 넓히면 자리가 늘어 CTA 를 밀어 올린다.
       belowButton: widget.fromOnboarding
           ? Center(
-              child: SizedBox(
-                height: _laterHeight.h,
-                child: OverflowBox(
-                  maxHeight: (_laterHeight + space.xs * 2).h,
-                  child: AppPressable(
-                    onTap: _goHome,
-                    child: Padding(
-                      padding: EdgeInsets.all(space.xs.h),
-                      child: Text(
-                        '나중에 할게요',
-                        style: context.typo.linkLater.copyWith(
-                          color: colors.linkLaterLabel,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
+              child: AppPressable(
+                onTap: _goHome,
+                child: Padding(
+                  // 옆 여백은 전과 같은 8 — 바꾸면 글자가 반 픽셀 옮겨 골든이 흔들린다.
+                  padding: EdgeInsets.symmetric(horizontal: space.xs.h),
+                  child: Text(
+                    '나중에 할게요',
+                    style: context.typo.linkLater.copyWith(
+                      color: colors.linkLaterLabel,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
               ),
             )
           : null,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ElumHeader(
-            hasBackButton: true,
-            // 설정 시안은 제목이 147에서 시작한다 — 뒤로가기 줄에 제목이 함께
-            // 서면서 머리가 107에서 끝나기 때문이다.
-            titleY: fromSettings ? _settingsTitleY : null,
-            title: '$_elumiName의 휴대폰을\n연결할까요?',
-            description:
-                _errorMessage ?? '$_elumiName의 휴대폰에서 아래 코드를 입력하세요',
-          ),
-          SizedBox(height: _descriptionToCode.h),
-          if (_loading)
-            const Center(child: CircularProgressIndicator())
-          else if (issued != null) ...[
-            _CodeText(
-              code: issued.code,
-              dimmed: expired,
-              letterGap: _codeLetterGap,
-              groupGap: _codeGroupGap,
+      // 글꼴을 키우면(2.0) 제목 두 줄·설명·암호·타이머·칩이 한 화면을 넘는다.
+      // 고정 높이 칸에 두면 아래가 넘쳐 잘리므로 스크롤로 끝까지 볼 수 있게 한다
+      // (#393 S6 에서 함께 드러남). 글꼴 1.0 에서는 다 들어와 움직이지 않는다.
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ElumHeader(
+              hasBackButton: true,
+              // 설정 시안은 제목이 147에서 시작한다 — 뒤로가기 줄에 제목이 함께
+              // 서면서 머리가 107에서 끝나기 때문이다.
+              titleY: fromSettings ? _settingsTitleY : null,
+              title: '$_elumiName의 휴대폰을\n연결할까요?',
+              description:
+                  _errorMessage ?? '$_elumiName의 휴대폰에서 아래 코드를 입력하세요',
             ),
-            // 연결되면 타이머도 `다시 만들기`도 사라진다 — 더 기다릴 이유가 없다.
-            if (!_linked) ...[
-              SizedBox(height: _codeToTimer.h),
-              Text(
-                _remainingLabel(issued, expired),
-                textAlign: TextAlign.center,
-                style: context.typo.linkTimer.copyWith(color: colors.linkTimer),
+            SizedBox(height: _descriptionToCode.h),
+            if (_loading)
+              const Center(child: CircularProgressIndicator())
+            else if (issued != null) ...[
+              _CodeText(
+                code: issued.code,
+                dimmed: expired,
+                letterGap: _codeLetterGap,
+                groupGap: _codeGroupGap,
               ),
-              SizedBox(height: _timerToRetry.h),
-              Center(
-                child: _RetryChip(
-                  onTap: _loading ? null : _issue,
+              // 연결되면 타이머도 `다시 만들기`도 사라진다 — 더 기다릴 이유가 없다.
+              if (!_linked) ...[
+                SizedBox(height: _codeToTimer.h),
+                Text(
+                  _remainingLabel(issued, expired),
+                  textAlign: TextAlign.center,
+                  style: context.typo.linkTimer.copyWith(color: colors.linkTimer),
                 ),
-              ),
+                SizedBox(height: _timerToRetry.h),
+                Center(
+                  child: _RetryChip(
+                    onTap: _loading ? null : _issue,
+                  ),
+                ),
+              ],
             ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -308,14 +310,19 @@ class _CodeText extends StatelessWidget {
     final letters = code.split('');
     final half = letters.length ~/ 2;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (final (i, ch) in letters.indexed) ...[
-          if (i > 0) SizedBox(width: (i == half ? groupGap : letterGap).w),
-          Text(ch, style: style),
+    // 글꼴 2.0 이면 여섯 글자가 화면 폭을 100 넘는다. 폭에 맞춰 줄이기만 한다 —
+    // 들어갈 때(글꼴 1.0)는 그대로라 시안 크기가 바뀌지 않는다 (#393 S6).
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final (i, ch) in letters.indexed) ...[
+            if (i > 0) SizedBox(width: (i == half ? groupGap : letterGap).w),
+            Text(ch, style: style),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

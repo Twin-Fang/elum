@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/text/keep_words.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
@@ -219,8 +220,11 @@ class _QuestionBlockState extends State<_QuestionBlock> {
         // 만큼**만 있으면 된다. 좌우 24를 남겨 345로 둔다.
         SizedBox(
           width: 345.w,
+          // AI 가 주는 질문은 `\n` 없이 온다. 엔진이 글자 단위로 꺾어 `있나 / 요?`가
+          // 됐다 — 띄어쓰기에서만 꺾는다 (#393 S5). 낭독기에는 원문을 준다.
           child: Text(
-            widget.item.question,
+            keepWords(widget.item.question),
+            semanticsLabel: widget.item.question,
             textAlign: TextAlign.center,
             style: context.typo.promptTitle
                 .copyWith(color: context.colors.textPrimary),

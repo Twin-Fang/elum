@@ -182,6 +182,8 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
     title: '보상이 왜 필요한가요?',
     message: RewardSetupScreen.whyMessage,
     barrierDismissible: true,
+    // 360 폭에서 `이룸이 / 가`처럼 낱말 가운데서 꺾였다 (#393 S4)
+    keepWordsInMessage: true,
   );
 
   @override

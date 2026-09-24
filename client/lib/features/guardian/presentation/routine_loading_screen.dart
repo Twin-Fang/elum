@@ -170,7 +170,10 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     _tryNavigate();
   }
 
-  /// 실패 후 재시도 — AI(`POST /api/routines`)를 다시 호출한다.
+  /// 실패 후 재시도 — 이 화면이 맡은 일을 다시 한다.
+  ///
+  /// 준비 로딩은 **질문을 다시 받는다** (#393 S1). 카드 생성 재시도로 이으면 질문을
+  /// 건너뛰고 카드를 만든다. 생성 로딩은 AI(`POST /api/routines`)를 다시 호출한다.
   /// 연출(스텝 노출)은 이미 끝났을 수 있으므로 다시 돌려 로딩감을 준다.
   Future<void> _retry() async {
     _deadline?.cancel();
@@ -182,7 +185,12 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     });
     _revealStages();
     final notifier = ref.read(routineFlowProvider.notifier);
-    await notifier.retryGenerate();
+    switch (widget.kind) {
+      case RoutineLoadingKind.prepare:
+        await notifier.retryQuestion();
+      case RoutineLoadingKind.generate:
+        await notifier.retryGenerate();
+    }
     if (!mounted) return;
     if (ref.read(routineFlowProvider).step == RoutineFlowStep.error) return;
     _workDone = true;
@@ -261,6 +269,11 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
         // 만들지 못했으니 서버에 남은 것이 없다 (T5). 뒤로는 흐름 안 한 칸이라 묻지 않는다.
         leave: RoutineLeave.discard,
         child: _GenerateError(
+          // 준비 로딩은 질문을 받다 실패한 것이다 — 카드는 아직 시작도 안 했다 (#393 S1).
+          title: switch (widget.kind) {
+            RoutineLoadingKind.prepare => '질문을 준비하지 못했어요',
+            RoutineLoadingKind.generate => '카드를 만들지 못했어요',
+          },
           errorCode: flow.errorCode,
           errorMessage: flow.errorMessage,
           errorHint: flow.errorHint,
@@ -604,11 +617,15 @@ class _StageRow extends StatelessWidget {
 /// 에러 코드를 남겨 제보 시 어디서 터졌는지 추적할 수 있게 한다(docs 예외처리 규칙).
 class _GenerateError extends StatelessWidget {
   const _GenerateError({
+    required this.title,
     required this.errorCode,
     required this.errorMessage,
     required this.errorHint,
     required this.onRetry,
   });
+
+  /// 무엇이 안 됐는지.
+  final String title;
 
   final String? errorCode;
 
@@ -638,7 +655,7 @@ class _GenerateError extends StatelessWidget {
           ),
           SizedBox(height: space.lg),
           Text(
-            '카드를 만들지 못했어요',
+            title,
             textAlign: TextAlign.center,
             style: context.typo.promptTitle.copyWith(color: colors.textPrimary),
           ),

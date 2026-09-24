@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../assets/app_assets.dart';
+import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
 
@@ -78,6 +79,10 @@ class ElumDialogAction<T> {
 ///
 /// 돌아오는 값은 눌린 버튼의 [ElumDialogAction.value]다. 바깥을 눌러 닫으면
 /// null이므로, **null을 "취소"로 다루는 쪽이 안전하다.**
+///
+/// [keepWordsInMessage] 를 켜면 설명을 **띄어쓰기에서만** 줄바꿈한다([keepWords]).
+/// 기본은 꺼 둔다 — 다른 팝업은 시안 대조가 글자 단위 줄에 맞춰져 있어, 앱 전체
+/// 규칙으로 바꾸면 골든이 함께 흔들린다 (#393 S4 — 보상 도움말에만 켠다).
 Future<T?> showElumDialog<T>({
   required BuildContext context,
   required String title,
@@ -85,10 +90,14 @@ Future<T?> showElumDialog<T>({
   ElumDialogIcon? icon,
   List<ElumDialogAction<T>> actions = const [],
   bool barrierDismissible = false,
+  bool keepWordsInMessage = false,
 }) {
   return showDialog<T>(
     context: context,
     barrierDismissible: barrierDismissible,
+    // 배경 막을 읽어 줄 이름 (#393 S7). 앱에 한국어 지역화가 없어 기본값이 영어
+    // `Dismiss` 로 읽혔다 — 공지 팝업은 #385 C 에서 `공지 닫기` 로 먼저 고쳤다.
+    barrierLabel: elumDialogBarrierLabel,
     // 시안의 dim — 검정 50%.
     barrierColor: Colors.black.withValues(alpha: 0.5),
     // **화면 전체 가운데에 둔다.** 기본값(true)은 안전영역 안에서 가운데를
@@ -100,9 +109,13 @@ Future<T?> showElumDialog<T>({
       message: message,
       icon: icon,
       actions: actions,
+      keepWordsInMessage: keepWordsInMessage,
     ),
   );
 }
+
+/// 공통 팝업 배경 막의 이름 (#393 S7). 막을 눌러 닫을 수 있을 때만 읽힌다.
+const elumDialogBarrierLabel = '팝업 닫기';
 
 /// 팝업 본체. [showElumDialog]가 쓰지만, 골든·테스트에서 직접 세울 수 있게 공개한다.
 class ElumDialogCard<T> extends StatelessWidget {
@@ -112,12 +125,16 @@ class ElumDialogCard<T> extends StatelessWidget {
     this.message,
     this.icon,
     this.actions = const [],
+    this.keepWordsInMessage = false,
   });
 
   final String title;
   final String? message;
   final ElumDialogIcon? icon;
   final List<ElumDialogAction<T>> actions;
+
+  /// 설명을 낱말 단위로 줄바꿈한다 — [showElumDialog] 참조.
+  final bool keepWordsInMessage;
 
   /// 아이콘 40 · 아이콘↔제목 20 · 제목 묶음↔버튼 32
   static const _iconSize = 40.0;
@@ -166,7 +183,9 @@ class ElumDialogCard<T> extends StatelessWidget {
             if (message != null) ...[
               SizedBox(height: context.space.sm),
               Text(
-                message!,
+                keepWordsInMessage ? keepWords(message!) : message!,
+                // 끊지 말라는 표시가 낭독기에 섞이지 않게 원문을 준다
+                semanticsLabel: keepWordsInMessage ? message : null,
                 textAlign: TextAlign.center,
                 style: context.typo.body.copyWith(color: colors.textSecondary),
               ),

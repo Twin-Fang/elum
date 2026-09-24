@@ -456,23 +456,30 @@ class _SuggestionChips extends ConsumerWidget {
 
     if (items.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      children: [
-        for (var row = 0; row < items.length; row += 2) ...[
-          if (row > 0) SizedBox(height: context.space.xs),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (final (index, s) in items.skip(row).take(2).indexed) ...[
-                if (index > 0) SizedBox(width: 6.w),
-                Flexible(
-                  child: _Chip(suggestion: s, onTap: onTap),
-                ),
+    // 본문과 같은 좌우 여백 24 (#393 S3). 글꼴 2.0 에서 두 칩이 한 줄을 다 차지해
+    // 화면 끝에 붙었다. 글꼴 1.0 에서는 칩이 좁아 가운데 그대로라 시안 자리와 같다.
+    //
+    // 두 칩씩 묶는 것은 그대로 두되 **둘이 한 줄에 안 들어가면 한 줄에 하나씩** 둔다
+    // (Wrap). 한 줄에 억지로 둘을 두면 칩이 좁아져 `병원 방 / 문 준비`처럼 낱말
+    // 가운데서 꺾였다. 들어가면 Row 때와 같은 자리다.
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: context.space.screenH.w),
+      child: Column(
+        children: [
+          for (var row = 0; row < items.length; row += 2) ...[
+            if (row > 0) SizedBox(height: context.space.xs),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 6.w,
+              runSpacing: context.space.xs,
+              children: [
+                for (final s in items.skip(row).take(2))
+                  _Chip(suggestion: s, onTap: onTap),
               ],
-            ],
-          ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
