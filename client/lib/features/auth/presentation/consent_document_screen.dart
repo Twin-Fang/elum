@@ -51,11 +51,21 @@ class ConsentDocumentScreen extends StatelessWidget {
   /// 불릿 점과 글 사이
   static const _bulletGap = 8.0;
 
+  /// 표 행의 이름 칸과 값 칸 사이 (#376). 불릿 점 간격보다 넓어야 이름과 값이
+  /// 한 문장으로 읽히지 않는다.
+  static const _rowGap = 12.0;
+
+  /// 이름 칸이 본문 폭의 이만큼을 넘으면 값을 이름 아래로 내린다 (#376 L4).
+  /// 393 · 글꼴 1.3 에서 가장 긴 이름(`이전되는 국가`)이 약 1/3 이라 나란히 두고,
+  /// 360 · 글꼴 2.0 에서는 절반을 넘어 값 칸이 한두 글자씩 꺾이므로 쌓는다.
+  static const _stackRatio = 0.4;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final space = context.space;
     final blocks = parseConsentBody(item.body);
+    final labelWidth = _labelWidth(context, blocks);
 
     return ElumScaffold(
       onBack: () => Navigator.of(context).pop(),
@@ -69,7 +79,12 @@ class ConsentDocumentScreen extends StatelessWidget {
             // 머리 하단(67+40=107) → 본문 첫 줄(147). 설정 묶음 공통 40.
             SizedBox(height: _headToBody.h),
             for (final (i, block) in blocks.indexed)
-              _block(context, block, i == 0 ? null : blocks[i - 1].kind),
+              _block(
+                context,
+                block,
+                i == 0 ? null : blocks[i - 1].kind,
+                labelWidth,
+              ),
             // 버전은 시안에 없지만 **지운 것이 아니라 끝으로 옮겼다.**
             // 제보를 받았을 때 어느 판을 읽고 동의했는지 맞춰 볼 수 있어야 한다.
             // 첫 화면 밖이라 시안과 맞대는 자리에는 걸리지 않는다.
@@ -95,13 +110,51 @@ class ConsentDocumentScreen extends StatelessWidget {
       ConsentBlockKind.section => _sectionTop,
       ConsentBlockKind.subsection => _subsectionTop,
       // 불릿끼리는 붙고, 다른 덩이 뒤에 처음 오는 불릿만 한 줄 띄운다 (시안 실측).
-      ConsentBlockKind.bullet =>
-        prev == ConsentBlockKind.bullet ? 0.0 : _blockGap,
+      // 표 행도 원문에서 줄마다 이어 적은 목록이라 불릿과 같이 붙인다 (#376) —
+      // 개인정보처리방침 9조는 불릿과 표 행이 섞여 한 목록을 이룬다.
+      ConsentBlockKind.bullet ||
+      ConsentBlockKind.row => _isList(prev) ? 0.0 : _blockGap,
       ConsentBlockKind.paragraph => _blockGap,
     };
   }
 
-  Widget _block(BuildContext context, ConsentBlock block, ConsentBlockKind? prev) {
+  static bool _isList(ConsentBlockKind kind) =>
+      kind == ConsentBlockKind.bullet || kind == ConsentBlockKind.row;
+
+  /// 표 행 이름 칸의 폭 — 문서 안 이름 중 가장 긴 것에 맞춘다.
+  ///
+  /// 원문은 이름 뒤를 공백으로 채워 **값의 시작선을 맞춘다.** 행마다 이름 폭만큼만
+  /// 두면 값이 들쭉날쭉해 표로 안 읽힌다. 글꼴 배율을 넣어 재야 큰 글꼴에서도 맞다.
+  static double _labelWidth(BuildContext context, List<ConsentBlock> blocks) {
+    final style = _labelStyle(context);
+    final scaler = MediaQuery.textScalerOf(context);
+    var widest = 0.0;
+    for (final b in blocks) {
+      final label = b.label;
+      if (label == null) continue;
+      final painter = TextPainter(
+        text: TextSpan(text: label, style: style),
+        textDirection: TextDirection.ltr,
+        textScaler: scaler,
+        maxLines: 1,
+      )..layout();
+      if (painter.width > widest) widest = painter.width;
+      painter.dispose();
+    }
+    return widest;
+  }
+
+  static TextStyle _labelStyle(BuildContext context) => context.typo.docBody.copyWith(
+        color: context.colors.textPrimary,
+        fontWeight: FontWeight.w700,
+      );
+
+  Widget _block(
+    BuildContext context,
+    ConsentBlock block,
+    ConsentBlockKind? prev,
+    double labelWidth,
+  ) {
     final colors = context.colors;
     final typo = context.typo;
 
@@ -138,11 +191,56 @@ class ConsentDocumentScreen extends StatelessWidget {
           block.text,
           style: typo.docBody.copyWith(color: colors.textPrimary),
         ),
+      ConsentBlockKind.row => _row(context, block, labelWidth),
     };
 
     return Padding(
       padding: EdgeInsets.only(top: _gapAbove(prev, block.kind).h),
       child: body,
+    );
+  }
+
+  /// 표 행 — 이름 칸과 값 칸을 나란히 둔다 (#376).
+  ///
+  /// 이름이 본문 폭의 [_stackRatio] 를 넘으면(360 폭 · 글꼴 2.0) 값 칸이 좁아져
+  /// 한두 글자씩 꺾이므로 **이름 아래로 값을 내린다** (L4). 어느 쪽이든 자르지 않는다.
+  Widget _row(BuildContext context, ConsentBlock block, double labelWidth) {
+    final colors = context.colors;
+    final typo = context.typo;
+    final label = Text(block.label ?? '', style: _labelStyle(context));
+    final value = Text(
+      block.text,
+      style: typo.docBody.copyWith(color: colors.textPrimary),
+    );
+
+    final cells = LayoutBuilder(
+      builder: (context, constraints) {
+        final column = labelWidth + _rowGap.w;
+        if (column > constraints.maxWidth * _stackRatio) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [label, value],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(width: column, child: label),
+            Expanded(child: value),
+          ],
+        );
+      },
+    );
+
+    if (!block.bulleted) return cells;
+    // 불릿 안의 표 행은 점을 남긴다 — 9조처럼 불릿과 섞인 목록에서 줄이 맞는다.
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('·', style: typo.docBody.copyWith(color: colors.textSecondary)),
+        SizedBox(width: _bulletGap.w),
+        Expanded(child: cells),
+      ],
     );
   }
 }
