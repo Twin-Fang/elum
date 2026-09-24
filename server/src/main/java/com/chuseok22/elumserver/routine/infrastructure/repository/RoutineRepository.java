@@ -7,8 +7,10 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface RoutineRepository extends JpaRepository<Routine, String> {
 
@@ -97,4 +99,18 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
   // 두 번째 일과부터는 탭 한 번으로 끝나게 한다.
   // 중복 제거·개수 제한은 서비스에서 처리한다 (JPQL distinct는 정렬 컬럼까지 묶여 의도대로 동작하지 않는다).
   List<Routine> findTop30ByProfileIdAndRewardTextIsNotNullOrderByCreatedAtDesc(String profileId);
+
+  /**
+   * 만든 사람이 비어 있는 일과를 그 프로필의 대표 보호자로 채운다 — V25 의 채우기와 같은 문장이다.
+   *
+   * <p>새 코드는 항상 채우므로 비어 있으면 옛 서버가 만든 것이다 (E38).
+   */
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true, value = """
+    update routine r
+    set created_by = (select p.member_id from profile p where p.id = r.profile_id)
+    where r.created_by is null
+    """)
+  int backfillCreatorFromProfileOwner();
 }
