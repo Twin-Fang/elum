@@ -79,6 +79,9 @@ class RoutineServiceTest {
   private ProfileAccessGuard profileAccessGuard;
 
   @Mock
+  private RoutineCreationWriter routineCreationWriter;
+
+  @Mock
   private RoutineAiPipeline routineAiPipeline;
 
   @Mock
@@ -349,7 +352,7 @@ class RoutineServiceTest {
     );
     when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU), any()))
       .thenReturn(generationResult);
-    when(routineRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    when(routineCreationWriter.save(any(), any(), any())).thenAnswer(invocation -> invocation.getArgument(2));
 
     routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null));
 
@@ -377,7 +380,7 @@ class RoutineServiceTest {
         "batch-1"
       ));
     ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
-    when(routineRepository.save(saved.capture())).thenAnswer(invocation -> invocation.getArgument(0));
+    when(routineCreationWriter.save(any(), any(), saved.capture())).thenAnswer(invocation -> invocation.getArgument(2));
 
     routineService.create(GUARDIAN, new RoutineCreateRequest(
       "내일 병원 가기 010-1234-5678", null, List.of("우산", "엄마 010-9999-8888"), null, null));
@@ -425,7 +428,7 @@ class RoutineServiceTest {
     Profile profile = profileWithNickname("하늘이");
     stubCreatePipeline(profile);
     ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
-    when(routineRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+    when(routineCreationWriter.save(any(), any(), saved.capture())).thenAnswer(i -> i.getArgument(2));
 
     LocalDateTime before = LocalDateTime.now();
     routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null));
@@ -447,7 +450,7 @@ class RoutineServiceTest {
   void create_saveFails_cleansUpGeneratedImages() {
     Profile profile = profileWithNickname("하늘이");
     stubCreatePipeline(profile);
-    when(routineRepository.save(any())).thenThrow(new RuntimeException("DB 제약 위반"));
+    when(routineCreationWriter.save(any(), any(), any())).thenThrow(new RuntimeException("DB 제약 위반"));
 
     assertThatThrownBy(() ->
       routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null)))
@@ -1008,16 +1011,30 @@ class RoutineServiceTest {
   }
 
   @Test
-  @DisplayName("새로 만든 일과에는 만든 사람이 늘 채워진다 — 비어 있으면 아무도 고치지 못한다")
+  @DisplayName("새로 만든 일과는 요청자를 만든 사람으로, 고른 이룸이에 저장한다 — 저장기가 채운다")
   void create_recordsCallerAsCreator() {
     Profile profile = profileWithNickname("하늘이");
+    profile.setId("profile-1");
     stubCreatePipeline(profile);
-    ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
-    when(routineRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+    when(routineCreationWriter.save(any(), any(), any())).thenAnswer(i -> i.getArgument(2));
 
     routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null));
 
-    assertThat(saved.getValue().getCreatedBy()).isEqualTo("member-1");
+    verify(routineCreationWriter).save(eq("member-1"), eq("profile-1"), any(Routine.class));
+  }
+
+  @Test
+  @DisplayName("E17 만드는 사이 나가 저장이 거절되면 방금 만든 그림을 지운다")
+  void e17_guardianLeftWhileGenerating_discardsImages() {
+    Profile profile = profileWithNickname("하늘이");
+    stubCreatePipeline(profile);
+    when(routineCreationWriter.save(any(), any(), any()))
+      .thenThrow(new CustomException(ErrorCode.PROFILE_ACCESS_DENIED));
+
+    assertThatThrownBy(() ->
+      routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null)))
+      .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PROFILE_ACCESS_DENIED);
+    verify(routineImageStorage).deleteBatch("batch-1");
   }
 
   @Test

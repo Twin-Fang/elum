@@ -87,6 +87,7 @@ public class RoutineService {
   private final AiDailyBudgetGuard aiDailyBudgetGuard;
   private final RoutineStepImageFiller routineStepImageFiller;
   private final ProfileAccessGuard profileAccessGuard;
+  private final RoutineCreationWriter routineCreationWriter;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
@@ -154,10 +155,8 @@ public class RoutineService {
       AiCallContext.clear();
     }
 
+    // 이룸이·만든 사람·순서 번호는 저장기가 이룸이 행을 잠근 뒤 채운다 (E17).
     Routine routine = new Routine();
-    routine.setProfile(profile);
-    // 만든 사람만 승인·수정·삭제한다 (명세 4-2). 새 코드는 늘 채운다 — 비면 아무도 고치지 못한다.
-    routine.setCreatedBy(caller.memberId());
     routine.setRawInputText(request.rawInputText());
     // 가공하지 않으므로 원문과 같다. 컬럼을 없애는 것은 마이그레이션이 필요해 따로 한다 (#377).
     routine.setSanitizedInputText(request.rawInputText());
@@ -169,18 +168,15 @@ public class RoutineService {
       request.scheduledAt() != null ? request.scheduledAt() : LocalDateTime.now()
     );
     routine.setStatus(RoutineStatus.PENDING_REVIEW);
-    // 새로 만든 일과는 목록 맨 뒤에 붙는다. 보호자가 순서를 바꾼 뒤에도 새 일과가
-    // 중간에 끼어들지 않게 한다.
-    routine.setDisplayOrder(routineRepository.maxDisplayOrder(profile.getId()) + 1);
     // 보상은 선택 항목이다. 보호자가 건너뛰면 null로 남고 이룸이 화면에서 보상 UI를 띄우지 않는다.
     routine.setRewardText(trimReward(request.rewardText()));
     routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
     routine.setSteps(toStepEntities(routine, generation.steps()));
 
-    // 이미지는 여기 오기 전에 이미 디스크에 쓰였다. 저장이 실패하면 아무도 참조하지 않는
-    // 파일이 남으므로 방금 만든 것만 되돌린다 (이슈 #215).
+    // 이미지는 여기 오기 전에 이미 디스크에 쓰였다. 저장이 실패하면 — 그사이 이 보호자가 나가 거절된
+    // 경우(E17)를 포함해 — 아무도 참조하지 않는 파일이 남으므로 방금 만든 것만 되돌린다 (이슈 #215).
     try {
-      return RoutineResponse.from(routineRepository.save(routine));
+      return RoutineResponse.from(routineCreationWriter.save(caller.memberId(), profile.getId(), routine));
     } catch (RuntimeException e) {
       routineImageStorage.deleteBatch(generation.batchId());
       throw e;
