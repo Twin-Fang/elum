@@ -114,7 +114,7 @@ env:
   # 값이 있으면 CHANGELOG 대신 이 문구를 매번 그대로 넣는다 (심사자·사용자에게 변경 내용을 자세히 알리지 않을 때).
   # 빈 문자열("")로 두면 덮어쓰지 않고 해당 버전의 CHANGELOG 항목을 넣는다.
   # TestFlight 'What to Test'는 이 값과 상관없이 항상 CHANGELOG를 쓴다.
-  APPSTORE_WHATS_NEW_OVERRIDE: "이번 버전에서 버그를 고치고 성능을 개선했어요."
+  STORE_WHATS_NEW_OVERRIDE: "이번 버전에서 버그를 고치고 성능을 개선했어요."
 
 jobs:
   prepare-build:

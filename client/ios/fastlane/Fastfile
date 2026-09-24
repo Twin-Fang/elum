@@ -51,14 +51,14 @@ platform :ios do
     if prepare_appstore
       app_ver = ENV["APP_VERSION"]
       # App Store '새로운 기능(What's New)'은 기본으로 CHANGELOG(RELEASE_NOTES)를 쓴다.
-      # APPSTORE_WHATS_NEW_OVERRIDE(워크플로 env)에 값이 있으면 CHANGELOG 대신 그 문구로 덮어쓴다.
+      # STORE_WHATS_NEW_OVERRIDE(워크플로 env)에 값이 있으면 CHANGELOG 대신 그 문구로 덮어쓴다.
       # 직전 출시 이후 여러 버전이 한꺼번에 나가 CHANGELOG 한 항목이 실제 변경과 어긋나거나,
       # 변경 내용을 자세히 알리고 싶지 않을 때 쓴다. TestFlight What to Test는 위 pilot이 항상 CHANGELOG를 쓴다.
       default_notes = "버그를 수정하고 안정성을 개선했습니다."
-      override_notes = (ENV["APPSTORE_WHATS_NEW_OVERRIDE"] || "").strip
+      override_notes = (ENV["STORE_WHATS_NEW_OVERRIDE"] || "").strip
       release_notes = override_notes.empty? ? (ENV["RELEASE_NOTES"] || "").strip : override_notes
       release_notes = default_notes if release_notes.empty?
-      UI.message("📝 whatsNew 출처: #{override_notes.empty? ? 'CHANGELOG' : 'APPSTORE_WHATS_NEW_OVERRIDE 덮어쓰기'}")
+      UI.message("📝 whatsNew 출처: #{override_notes.empty? ? 'CHANGELOG' : 'STORE_WHATS_NEW_OVERRIDE 덮어쓰기'}")
 
       # whatsNew 메타를 절대경로로 생성 (상대경로는 fastlane CWD와 어긋나 공란 → 제출 거부).
       # release_notes.txt만 만들고 다른 메타는 안 만듦 → ASC 기존 메타(설명/키워드 등) 보존.

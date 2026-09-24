@@ -64,7 +64,7 @@ env:
   # 값이 있으면 CHANGELOG 대신 이 문구를 매번 그대로 넣는다 (사용자·심사에 변경 내용을 자세히 알리지 않을 때).
   # 빈 문자열("")로 두면 덮어쓰지 않고 해당 버전의 CHANGELOG 항목을 넣는다.
   # 출시 노트는 내부 테스트에 올릴 때 한 번 정해지고 비공개 테스트·프로덕션 승급 때 그대로 따라가므로 모든 트랙에 같이 적용된다.
-  PLAYSTORE_WHATS_NEW_OVERRIDE: "이번 버전에서 버그를 고치고 성능을 개선했어요."
+  STORE_WHATS_NEW_OVERRIDE: "이번 버전에서 버그를 고치고 성능을 개선했어요."
 
 jobs:
   prepare-build:
@@ -702,10 +702,10 @@ jobs:
           CHANGELOG_DIR="android/fastlane/metadata/android/ko-KR/changelogs"
           mkdir -p "$CHANGELOG_DIR"
 
-          if [ -n "$(printf '%s' "$PLAYSTORE_WHATS_NEW_OVERRIDE" | tr -d '[:space:]')" ]; then
+          if [ -n "$(printf '%s' "$STORE_WHATS_NEW_OVERRIDE" | tr -d '[:space:]')" ]; then
             # 덮어쓰기 문구가 있으면 CHANGELOG 대신 쓴다 (공백만 있는 값은 없는 것으로 본다)
-            printf '%s\n' "$PLAYSTORE_WHATS_NEW_OVERRIDE" > "$CHANGELOG_DIR/${VERSION_CODE}.txt"
-            echo "✅ Changelog 준비 완료 — PLAYSTORE_WHATS_NEW_OVERRIDE 덮어쓰기 (버전 코드: $VERSION_CODE)"
+            printf '%s\n' "$STORE_WHATS_NEW_OVERRIDE" > "$CHANGELOG_DIR/${VERSION_CODE}.txt"
+            echo "✅ Changelog 준비 완료 — STORE_WHATS_NEW_OVERRIDE 덮어쓰기 (버전 코드: $VERSION_CODE)"
           elif [ -f "$GITHUB_WORKSPACE/final_release_notes.txt" ]; then
             # Google Play release notes 한도(500 글자)에 맞춰 절단 (마진 두어 480자)
             # final_release_notes.txt·truncate 스크립트는 레포 루트 기준 — working-directory가 APP_ROOT이므로 절대경로 사용
