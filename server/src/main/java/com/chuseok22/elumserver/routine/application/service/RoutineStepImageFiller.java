@@ -4,7 +4,6 @@ import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
-import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThrottle;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
@@ -13,7 +12,6 @@ import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -28,6 +26,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * {@code RoutineService} 안에 두면 같은 빈 안에서 자기 메서드를 부르게 되어
  * <b>{@code @Transactional}이 프록시를 타지 않는다.</b> 커밋 뒤 다른 스레드에서 도는 코드라
  * 트랜잭션이 하나도 열리지 않고, 엔티티를 고쳐도 아무것도 저장되지 않는다.
+ *
+ * <p>이 클래스 안에서도 자기 메서드의 {@code @Transactional} 에 기대지 않는다 — 경로 저장은 리포지토리의
+ * 한 줄 UPDATE 가 자기 트랜잭션으로 한다. 예전의 {@code persistImagePath} 는 {@code fill} 이 자기 호출로
+ * 불러 트랜잭션이 열리지 않았고, 분리된 엔티티를 고쳐 경로가 저장되지 않았다.
  *
  * <h2>지키는 세 가지</h2>
  *
@@ -106,6 +108,12 @@ public class RoutineStepImageFiller {
     // 그림 호출 기록에 회원이 남는다 — 전에는 회원 없이 남아 계정별로는 볼 수 없었다 (#368).
     AiCallContext.setMemberId(memberId);
     try {
+      // 그새 카드(또는 일과·이룸이)가 지워졌으면 그림을 만들지 않는다 — 한 장 한 장이 돈이다 (다중 보호자 E18).
+      // 비용 관문보다 먼저 본다. 없는 카드 때문에 회원의 그림 횟수가 깎이면 안 된다.
+      if (!routineStepRepository.existsById(stepId)) {
+        log.warn("그림을 채울 카드가 없어 그만둔다: routineId={}, stepId={}", routineId, stepId);
+        return;
+      }
       if (aiDailyBudgetGuard.isReached()) {
         log.warn("AI 하루 비용 상한 — 추가 카드 그림을 건너뛰고 기본 그림으로 둔다: routineId={}, stepId={}",
           routineId, stepId);
@@ -127,7 +135,13 @@ public class RoutineStepImageFiller {
       // 일과 생성 때의 batchId에 섞으면 그 배치를 되돌릴 때(deleteBatch)
       // 나중에 추가한 그림까지 함께 지워진다.
       String imagePath = routineImageStorage.save(stepId, 1, image);
-      persistImagePath(stepId, imagePath);
+      if (routineStepRepository.updateImagePath(stepId, imagePath) == 0) {
+        // 그림을 만드는 사이 지워졌다 (E18 — 나가기·일과 삭제·카드 삭제). 아무도 가리키지 않는 파일을
+        // 남기지 않는다. 다시 시도하지 않는다.
+        log.warn("그림을 만드는 사이 카드가 지워져 그림을 버린다: routineId={}, stepId={}", routineId, stepId);
+        routineImageStorage.deleteBatch(stepId);
+        return;
+      }
       log.info("추가 카드 이미지 완료: routineId={}, stepId={}", routineId, stepId);
     } catch (Exception e) {
       log.warn("추가 카드 이미지 실패 — 기본 그림으로 둔다: routineId={}, stepId={}",
@@ -135,16 +149,5 @@ public class RoutineStepImageFiller {
     } finally {
       AiCallContext.clear();
     }
-  }
-
-  /**
-   * 이미지 경로만 따로 커밋한다.
-   *
-   * <p>원래 트랜잭션은 이미 끝났으므로 새로 연다. 카드가 그새 지워졌으면 아무 일도 하지
-   * 않는다 — 보호자가 추가하자마자 지울 수 있다.
-   */
-  @Transactional
-  public void persistImagePath(String stepId, String imagePath) {
-    routineStepRepository.findById(stepId).ifPresent(step -> step.setImagePath(imagePath));
   }
 }

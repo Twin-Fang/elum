@@ -6,6 +6,7 @@ import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -21,11 +22,9 @@ import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
 import com.chuseok22.elumserver.common.infrastructure.store.InMemorySharedStateStore;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
-import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThrottle;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -61,7 +60,6 @@ class RoutineStepImageFillerTest {
   @Mock private AiDailyBudgetGuard aiDailyBudgetGuard;
 
   private RoutineStepImageFiller filler;
-  private final RoutineStep step = new RoutineStep();
 
   @BeforeEach
   void setUp() {
@@ -76,7 +74,8 @@ class RoutineStepImageFillerTest {
     lenient().when(imageClientRouter.current()).thenReturn(imageClient);
     lenient().when(imageClient.generateImage(anyString(), any())).thenReturn(IMAGE);
     lenient().when(routineImageStorage.save(anyString(), anyInt(), any())).thenReturn("images/step-1/1.png");
-    lenient().when(routineStepRepository.findById(anyString())).thenReturn(Optional.of(step));
+    lenient().when(routineStepRepository.existsById(anyString())).thenReturn(true);
+    lenient().when(routineStepRepository.updateImagePath(anyString(), anyString())).thenReturn(1);
     AiCallContext.clear();
   }
 
@@ -96,7 +95,7 @@ class RoutineStepImageFillerTest {
 
     fill("member-1");
 
-    assertThat(step.getImagePath()).isEqualTo("images/step-1/1.png");
+    verify(routineStepRepository).updateImagePath("step-1", "images/step-1/1.png");
   }
 
   @Test
@@ -107,7 +106,7 @@ class RoutineStepImageFillerTest {
     fill("member-1");
 
     verify(imageClient, never()).generateImage(anyString(), any());
-    assertThat(step.getImagePath()).isNull();
+    verify(routineStepRepository, never()).updateImagePath(anyString(), anyString());
   }
 
   @Test
@@ -202,6 +201,46 @@ class RoutineStepImageFillerTest {
 
     verify(fluxImageClient).generate(
       "The character picks up an umbrella at the front door.", CharacterType.LULU, FluxSeed.of(SEED_KEY));
-    assertThat(step.getImagePath()).isEqualTo("images/step-1/1.png");
+    verify(routineStepRepository).updateImagePath("step-1", "images/step-1/1.png");
+  }
+
+  @Test
+  @DisplayName("E18 그림을 만들기 전에 카드가 지워졌으면 그림을 만들지 않고 횟수도 깎지 않는다 — 한 장 한 장이 돈이다")
+  void e18_stepGoneBeforeGeneration_skipsAi() {
+    when(routineStepRepository.existsById("step-1")).thenReturn(false);
+
+    for (int i = 0; i < 10; i++) {
+      fill("member-1");
+    }
+    when(routineStepRepository.existsById("step-1")).thenReturn(true);
+    when(aiDailyBudgetGuard.isReached()).thenReturn(false);
+    fill("member-1");
+
+    // 지워진 카드 열 번은 부르지도, 회원의 그림 횟수를 깎지도 않았다
+    verify(imageClient, times(1)).generateImage(anyString(), any());
+  }
+
+  @Test
+  @DisplayName("E18 그림을 만드는 사이 카드가 지워졌으면 그 그림을 지우고 조용히 끝낸다 — 다시 시도하지 않는다")
+  void e18_stepGoneDuringGeneration_discardsImageQuietly() {
+    when(aiDailyBudgetGuard.isReached()).thenReturn(false);
+    when(routineStepRepository.updateImagePath("step-1", "images/step-1/1.png")).thenReturn(0);
+
+    assertThatCode(() -> fill("member-1")).doesNotThrowAnyException();
+
+    verify(routineImageStorage).deleteBatch("step-1");
+    verify(imageClient, times(1)).generateImage(anyString(), any());
+  }
+
+  @Test
+  @DisplayName("그림 경로는 한 줄 UPDATE 로 저장된다 — 트랜잭션 밖에서 엔티티를 고치면 아무것도 저장되지 않는다")
+  void fill_persistsImagePathWithSingleUpdate() {
+    when(aiDailyBudgetGuard.isReached()).thenReturn(false);
+
+    fill("member-1");
+
+    verify(routineStepRepository).updateImagePath("step-1", "images/step-1/1.png");
+    verify(routineStepRepository, never()).findById(anyString());
+    verify(routineImageStorage, never()).deleteBatch(anyString());
   }
 }
