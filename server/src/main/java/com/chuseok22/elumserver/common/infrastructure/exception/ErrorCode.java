@@ -83,6 +83,15 @@ public enum ErrorCode {
   DEVICE_LINK_NOT_CONNECTED(HttpStatus.NOT_FOUND, "연결된 이룸이 휴대폰이 없습니다."),
   DEVICE_LINK_FORBIDDEN_FOR_ELUMI(HttpStatus.FORBIDDEN, "이룸이 휴대폰에서는 할 수 없어요."),
 
+  // 이룸이 · 함께 돌보는 보호자 (다중 보호자 1단계).
+  // 연결되지 않은 이룸이와 없는 이룸이를 같은 404로 뭉치지 않는다 — 앱이 403이면 머물고, 404면 이룸이 등록으로 보낸다(E29).
+  PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "등록된 이룸이가 없어요."),
+  PROFILE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "이 이룸이의 정보를 볼 수 없어요."),
+  // 일과는 연결된 보호자가 모두 보지만 승인·수정·삭제는 만든 사람만 한다 (명세 4-2).
+  ROUTINE_NOT_CREATOR(HttpStatus.FORBIDDEN, "일과를 만든 사람만 바꿀 수 있어요."),
+  // 두 사람(두 기기)이 동시에 순서를 바꿔 보낸 목록이 옛 목록이 됐다 (E24).
+  ROUTINE_ORDER_CONFLICT(HttpStatus.CONFLICT, "그사이 일과가 바뀌었어요. 목록을 다시 불러와 주세요."),
+
   // 요금제 한도.
   // 문구는 해요체·능동형으로 쓰고 "아이"라는 말을 쓰지 않는다 (docs 용어 규칙).
   ROUTINE_CREATE_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "이번 주에 만들 수 있는 일과를 다 썼어요."),

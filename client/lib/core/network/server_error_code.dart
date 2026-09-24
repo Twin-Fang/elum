@@ -82,6 +82,15 @@ enum ServerErrorCode {
   deviceLinkNotConnected('DEVICE_LINK_NOT_CONNECTED'),
   deviceLinkForbiddenForElumi('DEVICE_LINK_FORBIDDEN_FOR_ELUMI'),
 
+  // 이룸이 · 함께 돌보는 보호자 (다중 보호자 1단계).
+  // 연결되지 않은 이룸이와 없는 이룸이를 같은 404로 뭉치지 않는다 — 앱이 403이면 머물고, 404면 이룸이 등록으로 보낸다(E29).
+  profileNotFound('PROFILE_NOT_FOUND'),
+  profileAccessDenied('PROFILE_ACCESS_DENIED'),
+  // 일과는 연결된 보호자가 모두 보지만 승인·수정·삭제는 만든 사람만 한다 (명세 4-2).
+  routineNotCreator('ROUTINE_NOT_CREATOR'),
+  // 두 사람(두 기기)이 동시에 순서를 바꿔 보낸 목록이 옛 목록이 됐다 (E24).
+  routineOrderConflict('ROUTINE_ORDER_CONFLICT'),
+
   // 요금제 한도.
   // 문구는 해요체·능동형으로 쓰고 "아이"라는 말을 쓰지 않는다 (docs 용어 규칙).
   routineCreateLimitExceeded('ROUTINE_CREATE_LIMIT_EXCEEDED'),
