@@ -95,8 +95,12 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
           );
         }
         if (status.requiresUpdate(result.version)) {
-          // 보낼 스토어를 모르면(iOS 앱 ID 미정) 예전처럼 다시 확인 버튼을 둔다.
-          final storeUrl = AppConfig.storeUrl(defaultTargetPlatform);
+          // 서버가 준 주소 → 앱에 넣어 둔 주소 순서다 (#416).
+          // 둘 다 없으면 예전처럼 다시 확인 버튼을 둔다.
+          final storeUrl = AppConfig.storeUrl(
+            defaultTargetPlatform,
+            serverUrl: status.storeUrl,
+          );
           return _FullNotice(
             emoji: '✨',
             title: '새 이룸이 나왔어요',

@@ -310,6 +310,21 @@ public enum ConfigKey {
     "이 버전보다 낮으면 업데이트를 권한다. 건너뛸 수 있다",
     ConfigValueType.STRING, List.of(), ""
   ),
+  // 강제 업데이트 화면이 보내는 곳 (#416). 그 화면은 옛 버전 앱에서 뜨므로, 앱에 박힌 주소는
+  // 앱을 다시 내지 않으면 못 고친다. 비워 두면 앱에 넣어 둔 주소를 쓴다(기본값으로 되돌리기).
+  // 공식 스토어 주소만 받는다 — StoreUrlPolicy.
+  IOS_STORE_URL(
+    ConfigGroup.APP_CONTROL, "iOS 스토어 주소",
+    "강제 업데이트 화면의 업데이트하러 가기 버튼이 여는 주소. https://apps.apple.com/... 또는 "
+      + "itms-apps://apps.apple.com/... 만 받는다. 비우면 앱에 넣어 둔 주소를 쓴다",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  ANDROID_STORE_URL(
+    ConfigGroup.APP_CONTROL, "Android 스토어 주소",
+    "강제 업데이트 화면의 업데이트하러 가기 버튼이 여는 주소. https://play.google.com/store/apps/details?id=... 또는 "
+      + "market://details?id=... 만 받는다. 비우면 앱에 넣어 둔 주소를 쓴다",
+    ConfigValueType.STRING, List.of(), ""
+  ),
   // ── 앱이 서버에서 받아 쓰는 시간값 (앱 .env 에서 옮겨 왔다) ──
   // 앱은 시작할 때 /api/app/status 로 받아 저장해 두고, 못 받으면 코드 기본값을 쓴다.
   // 0 이나 음수는 "끝없이 기다리기"가 되므로 범위를 둔다. 단위는 모두 밀리초다.

@@ -11,6 +11,7 @@ class AppStatus {
     this.maintenanceMessage = '',
     this.minVersion = '',
     this.latestVersion = '',
+    this.storeUrl = '',
     this.tuning,
   });
 
@@ -22,6 +23,10 @@ class AppStatus {
 
   /// 이 버전 미만이면 업데이트를 권한다. 건너뛸 수 있다.
   final String latestVersion;
+
+  /// 강제 업데이트 화면이 열 스토어 주소 (#416). 비어 있으면 앱에 넣어 둔 주소를 쓴다.
+  /// 스토어 주소인지는 여기서 보지 않는다 — 여는 쪽([AppConfig.storeUrl])이 거른다.
+  final String storeUrl;
 
   /// 서버가 준 대기·연출 시간값. 옛 서버라 없으면 null 이고, 그때는 지금 값을 그대로 쓴다.
   final ClientTuning? tuning;
@@ -45,6 +50,10 @@ class AppStatus {
           : '',
       latestVersion: version is Map
           ? (version['latestVersion'] as String?)?.trim() ?? ''
+          : '',
+      // 문자열이 아니면(형식이 다름) 빈 값으로 둔다 — 캐스팅 예외로 앱이 멈추면 안 된다
+      storeUrl: version is Map && version['storeUrl'] is String
+          ? (version['storeUrl'] as String).trim()
           : '',
       tuning: ClientTuning.tryParse(json['client']),
     );

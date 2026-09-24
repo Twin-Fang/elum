@@ -212,4 +212,62 @@ class SystemConfigServiceTest {
     assertThat(ConfigKey.APP_CONSENT_FETCH_TIMEOUT_MS.getDefaultValue()).isEqualTo("3000");
     assertThat(ConfigKey.APP_DLP_MIN_DELAY_MS.getDefaultValue()).isEqualTo("1500");
   }
+
+  // ── 스토어 주소 (#416) ──
+  // 강제 업데이트 화면이 이 주소로 사용자를 보낸다. 엉뚱한 주소가 저장되면 막힌 사용자가
+  // 다른 곳으로 가므로, 플랫폼에 맞는 공식 스토어 주소만 받는다.
+
+  @Test
+  @DisplayName("iOS 스토어 주소는 App Store 주소를 받는다")
+  void update_iosStoreUrl_appStore_saves() {
+    when(systemConfigRepository.findByConfigKey(ConfigKey.IOS_STORE_URL)).thenReturn(Optional.empty());
+
+    systemConfigService.update(ConfigKey.IOS_STORE_URL, " https://apps.apple.com/kr/app/id6792970508 ");
+    systemConfigService.update(ConfigKey.IOS_STORE_URL, "itms-apps://apps.apple.com/app/id6792970508");
+
+    verify(systemConfigRepository, org.mockito.Mockito.times(2)).save(any());
+  }
+
+  @Test
+  @DisplayName("Android 스토어 주소는 Play 스토어 주소를 받는다")
+  void update_androidStoreUrl_playStore_saves() {
+    when(systemConfigRepository.findByConfigKey(ConfigKey.ANDROID_STORE_URL)).thenReturn(Optional.empty());
+
+    systemConfigService.update(ConfigKey.ANDROID_STORE_URL,
+      "https://play.google.com/store/apps/details?id=kr.twinfang.elum");
+    systemConfigService.update(ConfigKey.ANDROID_STORE_URL, "market://details?id=kr.twinfang.elum");
+
+    verify(systemConfigRepository, org.mockito.Mockito.times(2)).save(any());
+  }
+
+  @Test
+  @DisplayName("스토어 주소가 아니거나 플랫폼이 다르면 거부한다")
+  void update_storeUrl_notStore_throws() {
+    List<String> iosRejected = List.of(
+      "http://apps.apple.com/app/id6792970508",        // https 가 아니다
+      "https://apps.apple.com.evil.com/app/id1",        // 호스트를 흉내 냈다
+      "https://example.com/elum",
+      "https://play.google.com/store/apps/details?id=kr.twinfang.elum", // 다른 플랫폼
+      "apps.apple.com/app/id6792970508",                 // 스킴이 없다
+      "javascript:alert(1)"
+    );
+    for (String value : iosRejected) {
+      assertThatThrownBy(() -> systemConfigService.update(ConfigKey.IOS_STORE_URL, value))
+        .as(value)
+        .isInstanceOf(CustomException.class)
+        .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+          .isEqualTo(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE));
+    }
+    assertThatThrownBy(() -> systemConfigService.update(ConfigKey.ANDROID_STORE_URL,
+      "https://apps.apple.com/kr/app/id6792970508"))
+      .isInstanceOf(CustomException.class);
+    verify(systemConfigRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("스토어 주소 기본값은 비어 있다 — 비면 앱에 넣어 둔 주소를 쓴다")
+  void storeUrl_defaultIsEmpty() {
+    assertThat(ConfigKey.IOS_STORE_URL.getDefaultValue()).isEmpty();
+    assertThat(ConfigKey.ANDROID_STORE_URL.getDefaultValue()).isEmpty();
+  }
 }

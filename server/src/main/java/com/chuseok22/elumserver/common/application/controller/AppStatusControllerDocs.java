@@ -33,6 +33,8 @@ public interface AppStatusControllerDocs {
       - `maintenance`가 true면 점검 안내만 보여줍니다
       - 현재 버전 < `minVersion` 이면 업데이트해야 계속할 수 있습니다
       - 현재 버전 < `latestVersion` 이면 업데이트를 권하되 건너뛸 수 있습니다
+      - 업데이트 화면의 버튼은 `storeUrl`을 엽니다. 비어 있거나 스토어 주소가 아니면
+        앱에 넣어 둔 주소를 씁니다 (#416)
       - **이 요청이 실패하면 그냥 진행합니다** — 서버를 못 봤다는 이유로 앱을 막으면
         서버가 죽었을 때 아무도 앱을 열지 못합니다
       """
@@ -44,8 +46,9 @@ public interface AppStatusControllerDocs {
         {
           "maintenance": false,
           "maintenanceMessage": "잠시 점검하고 있어요. 조금 뒤에 다시 열어주세요",
-          "ios": { "minVersion": "1.2.0", "latestVersion": "1.21.0" },
-          "android": { "minVersion": "1.2.0", "latestVersion": "1.21.0" },
+          "ios": { "minVersion": "1.2.0", "latestVersion": "1.21.0",
+                   "storeUrl": "itms-apps://apps.apple.com/app/id6792970508" },
+          "android": { "minVersion": "1.2.0", "latestVersion": "1.21.0", "storeUrl": "" },
           "client": {
             "connectTimeoutMs": 10000, "receiveTimeoutMs": 60000, "loadingMaxWaitMs": 45000,
             "consentFetchTimeoutMs": 3000, "dlpMinDelayMs": 1500

@@ -32,11 +32,13 @@ public class AppStatusController implements AppStatusControllerDocs {
       systemConfigService.getString(ConfigKey.MAINTENANCE_MESSAGE),
       new VersionRequirement(
         systemConfigService.getString(ConfigKey.MIN_APP_VERSION_IOS),
-        systemConfigService.getString(ConfigKey.LATEST_APP_VERSION_IOS)
+        systemConfigService.getString(ConfigKey.LATEST_APP_VERSION_IOS),
+        systemConfigService.getString(ConfigKey.IOS_STORE_URL)
       ),
       new VersionRequirement(
         systemConfigService.getString(ConfigKey.MIN_APP_VERSION_ANDROID),
-        systemConfigService.getString(ConfigKey.LATEST_APP_VERSION_ANDROID)
+        systemConfigService.getString(ConfigKey.LATEST_APP_VERSION_ANDROID),
+        systemConfigService.getString(ConfigKey.ANDROID_STORE_URL)
       ),
       new ClientTuning(
         systemConfigService.getInt(ConfigKey.APP_CONNECT_TIMEOUT_MS),

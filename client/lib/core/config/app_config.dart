@@ -95,7 +95,39 @@ abstract final class AppConfig {
   static const iosAppStoreId = '6792970508';
 
   /// 플랫폼별 스토어 상세 주소. 보낼 곳을 모르면 null 이다.
-  static Uri? storeUrl(TargetPlatform platform) => switch (platform) {
+  ///
+  /// [serverUrl] 이 그 플랫폼의 공식 스토어 주소면 그것을 먼저 쓴다 (#416).
+  /// 강제 업데이트 화면은 옛 버전 앱에서 뜨므로, 서버에서 바꿀 수 있어야 이미 깔린 앱도
+  /// 보낼 곳을 고칠 수 있다. 비었거나 스토어 주소가 아니면 앱에 넣어 둔 주소로 돌아간다 —
+  /// 서버 설정이 잘못돼도 막힌 사용자를 엉뚱한 곳으로 보내지 않는다.
+  static Uri? storeUrl(TargetPlatform platform, {String serverUrl = ''}) {
+    final fromServer = _allowedStoreUrl(platform, serverUrl);
+    if (fromServer != null) return fromServer;
+    return _builtInStoreUrl(platform);
+  }
+
+  /// 서버 값이 그 플랫폼의 공식 스토어 주소면 Uri, 아니면 null.
+  /// 서버 `StoreUrlPolicy` 와 같은 규칙이다 — 서버가 저장할 때 한 번, 앱이 열 때 한 번 거른다.
+  static Uri? _allowedStoreUrl(TargetPlatform platform, String raw) {
+    final value = raw.trim();
+    if (value.isEmpty) return null;
+    final uri = Uri.tryParse(value);
+    if (uri == null) return null;
+    final scheme = uri.scheme.toLowerCase();
+    // 호스트는 정확히 같아야 한다 — endsWith 로 보면 apps.apple.com.evil.com 이 통과한다
+    final host = uri.host.toLowerCase();
+    final allowed = switch (platform) {
+      TargetPlatform.iOS =>
+        (scheme == 'https' || scheme == 'itms-apps') && host == 'apps.apple.com',
+      // market://details?id=... 는 호스트 자리에 details 가 온다
+      TargetPlatform.android => (scheme == 'https' && host == 'play.google.com') ||
+          (scheme == 'market' && host == 'details'),
+      _ => false,
+    };
+    return allowed ? uri : null;
+  }
+
+  static Uri? _builtInStoreUrl(TargetPlatform platform) => switch (platform) {
         TargetPlatform.android => Uri.https(
             'play.google.com',
             '/store/apps/details',

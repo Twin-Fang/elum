@@ -53,6 +53,10 @@ public record AppStatusResponse(
     String minVersion,
 
     @Schema(description = "이 버전 미만이면 업데이트를 권한다. 건너뛸 수 있다", example = "1.21.0")
-    String latestVersion
+    String latestVersion,
+
+    @Schema(description = "강제 업데이트 화면이 여는 스토어 주소. 비면 앱에 넣어 둔 주소를 쓴다 (#416)",
+      example = "itms-apps://apps.apple.com/app/id6792970508")
+    String storeUrl
   ) {}
 }

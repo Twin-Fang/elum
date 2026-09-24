@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmPropert
 import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.core.ConfigValueType;
+import com.chuseok22.elumserver.systemconfig.core.StoreUrlPolicy;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfig;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfigHistory;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigHistoryRepository;
@@ -301,6 +302,9 @@ public class SystemConfigService {
         throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
       } else if (key.getValueType() == ConfigValueType.BOOLEAN
         && !"true".equalsIgnoreCase(value) && !"false".equalsIgnoreCase(value)) {
+        throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
+      } else if (StoreUrlPolicy.appliesTo(key) && !StoreUrlPolicy.isAllowed(key, value)) {
+        // 막힌 사용자를 엉뚱한 곳으로 보내지 않도록 공식 스토어 주소만 받는다 (#416)
         throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
       }
     } catch (NumberFormatException e) {
