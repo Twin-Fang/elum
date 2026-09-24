@@ -1,19 +1,22 @@
 package com.chuseok22.elumserver.routine.application.controller;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
+import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreateRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -74,7 +77,11 @@ public interface RoutineControllerDocs {
       )
     )
   })
-  ResponseEntity<RoutineResponse> create(Authentication authentication, RoutineCreateRequest request);
+  ResponseEntity<RoutineResponse> create(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
+    RoutineCreateRequest request
+  );
 
   @Operation(
     summary = "AI 추가 질문 생성",
@@ -107,7 +114,9 @@ public interface RoutineControllerDocs {
     )
   })
   ResponseEntity<RoutineQuestionResponse> generateQuestion(
-    Authentication authentication, RoutineQuestionRequest request
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
+    RoutineQuestionRequest request
   );
 
   @Operation(summary = "일과 단건 조회", description = "본인 소유의 일과를 steps 포함해 조회합니다.")
@@ -146,7 +155,10 @@ public interface RoutineControllerDocs {
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "조회 성공")
   })
-  ResponseEntity<List<RoutineResponse>> getMyRoutines(Authentication authentication);
+  ResponseEntity<List<RoutineResponse>> getMyRoutines(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId
+  );
 
   @Operation(
     summary = "오늘의 일과 목록 조회",
@@ -160,7 +172,10 @@ public interface RoutineControllerDocs {
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "조회 성공")
   })
-  ResponseEntity<List<RoutineResponse>> getTodayRoutines(Authentication authentication);
+  ResponseEntity<List<RoutineResponse>> getTodayRoutines(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId
+  );
 
   @Operation(
     summary = "추천 일과 목록 조회",
@@ -247,10 +262,13 @@ public interface RoutineControllerDocs {
         절반만 반영되면 화면과 서버의 순서가 어긋나 더 나쁩니다.
       - 같은 ID가 두 번 오면 거부합니다.
       - 빈 목록은 아무 일도 하지 않고 성공으로 답합니다.
+      - 그사이 일과가 늘거나 줄었으면 409(ROUTINE_ORDER_CONFLICT) — 목록을 다시 받아 보냅니다.
       """
   )
   ResponseEntity<Void> reorder(
-    Authentication authentication, RoutineReorderRequest request
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
+    RoutineReorderRequest request
   );
 
   @Operation(
@@ -299,7 +317,10 @@ public interface RoutineControllerDocs {
       보상을 한 번도 설정하지 않았으면 빈 배열이 내려갑니다. 이때 화면에서는 **섹션 자체를 숨깁니다.**
       """
   )
-  ResponseEntity<List<RecentRewardResponse>> getRecentRewards(Authentication authentication);
+  ResponseEntity<List<RecentRewardResponse>> getRecentRewards(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId
+  );
 
   @Operation(
     summary = "지난 일과 목록 조회",
@@ -313,7 +334,10 @@ public interface RoutineControllerDocs {
       보이지 않게 접어둘 뿐 지우지 않습니다.
       """
   )
-  ResponseEntity<List<RoutineResponse>> getPastRoutines(Authentication authentication);
+  ResponseEntity<List<RoutineResponse>> getPastRoutines(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId
+  );
 
   @Operation(
     summary = "임시저장 일과 목록 조회",
@@ -324,7 +348,10 @@ public interface RoutineControllerDocs {
       보호자 홈에서는 `[임시저장]` 배지로 표시하고, 탭하면 카드 검토 화면으로 이어집니다.
       """
   )
-  ResponseEntity<List<RoutineResponse>> getDraftRoutines(Authentication authentication);
+  ResponseEntity<List<RoutineResponse>> getDraftRoutines(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId
+  );
 
   @Operation(
     summary = "일과 복제 (다시 하기)",

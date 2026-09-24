@@ -14,20 +14,20 @@ import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository
 import com.chuseok22.elumserver.auth.infrastructure.entity.AuthIdentity;
 import com.chuseok22.elumserver.auth.infrastructure.oauth.OAuthProvider;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
-import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
+import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +47,7 @@ class MemberServiceTest {
   private MemberRepository memberRepository;
 
   @Mock
-  private ProfileRepository profileRepository;
+  private ProfileAccessGuard profileAccessGuard;
 
   @Mock
   private GuardianshipService guardianshipService;
@@ -134,7 +134,6 @@ class MemberServiceTest {
     // 이룸이·일과는 나가기 규칙이 정리한다 — 내가 만든 일과, 내가 붙인 휴대폰, 관계. 혼자 돌보던 이룸이는
     // 지우고 함께 돌보는 이룸이는 남은 보호자에게 남긴다. 계정의 "모든 프로필"을 지우지 않는다.
     verify(guardianshipService).leaveAll("member-1");
-    verify(profileRepository, never()).deleteAllByMemberId(any());
     verify(refreshTokenRepository).deleteAllByMemberId("member-1");
     verify(deviceLinkRepository).deleteAllByMemberId("member-1");
     verify(subscriptionRepository).deleteByMemberId("member-1");
@@ -296,11 +295,10 @@ class MemberServiceTest {
     Profile profile = new Profile();
     profile.setMember(member);
     when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
-    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("member-1"))
-      .thenReturn(Optional.of(profile));
+    when(profileAccessGuard.profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE)).thenReturn(profile);
 
     MemberResponse response =
-      memberService.updateCharacter("member-1", new MemberCharacterUpdateRequest(CharacterType.LULU));
+      memberService.updateCharacter(Caller.guardian("member-1"), new MemberCharacterUpdateRequest(CharacterType.LULU));
 
     assertThat(response.character()).isEqualTo(CharacterType.LULU);
   }
@@ -311,9 +309,37 @@ class MemberServiceTest {
     when(memberRepository.findById("missing")).thenReturn(Optional.empty());
 
     assertThatThrownBy(() ->
-      memberService.updateCharacter("missing", new MemberCharacterUpdateRequest(CharacterType.POPO)))
+      memberService.updateCharacter(Caller.guardian("missing"), new MemberCharacterUpdateRequest(CharacterType.POPO)))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.MEMBER_NOT_FOUND));
+  }
+
+  @Test
+  @DisplayName("E29 연결된 이룸이가 없으면 내 정보의 당사자 칸을 비워 준다 — 화면이 죽지 않는다")
+  void e29_getMyInfo_noProfiles_returnsEmptyProfileFields() {
+    Member member = activeMember("member-1");
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of());
+
+    MemberResponse response = memberService.getMyInfo(Caller.guardian("member-1"));
+
+    assertThat(response.nickname()).isNull();
+    assertThat(response.totalStars()).isZero();
+  }
+
+  @Test
+  @DisplayName("E27 헤더로 짚은 이룸이는 판단자가 보기 권한을 확인한 뒤 돌려준다")
+  void e27_getMyInfo_withHeader_asksViewPermission() {
+    Member member = activeMember("member-1");
+    Profile p2 = new Profile();
+    p2.setId("p2");
+    p2.setNickname("바다");
+    Caller caller = Caller.guardian("member-1", "p2");
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(profileAccessGuard.profilesOf(caller)).thenReturn(List.of(new Profile(), p2));
+    when(profileAccessGuard.profileFor(caller, ProfileAction.VIEW)).thenReturn(p2);
+
+    assertThat(memberService.getMyInfo(caller).nickname()).isEqualTo("바다");
   }
 }

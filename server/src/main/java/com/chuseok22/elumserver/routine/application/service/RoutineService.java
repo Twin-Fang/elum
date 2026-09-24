@@ -1,9 +1,12 @@
 package com.chuseok22.elumserver.routine.application.service;
 
-import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
+import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.member.application.service.Caller;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
@@ -20,19 +23,19 @@ import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggesti
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RewardPreset;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineSuggestionCatalog;
-import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
-import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
+import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -82,13 +85,14 @@ public class RoutineService {
   private final RoutineQuotaGuard routineQuotaGuard;
   private final AiDailyBudgetGuard aiDailyBudgetGuard;
   private final RoutineStepImageFiller routineStepImageFiller;
+  private final ProfileAccessGuard profileAccessGuard;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
   // 클래스 레벨 readOnly 트랜잭션을 중단시킨다.
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public RoutineQuestionResponse generateQuestion(String memberId, RoutineQuestionRequest request) {
-    Profile profile = requireProfile(memberId);
+  public RoutineQuestionResponse generateQuestion(Caller caller, RoutineQuestionRequest request) {
+    Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
 
     Set<SupportGoal> goals = profile.getSupportGoals();
     boolean needsQuestion = goals.contains(SupportGoal.PREPARE_ITEMS) || goals.contains(SupportGoal.PREPARE_NEW);
@@ -98,7 +102,7 @@ public class RoutineService {
 
     // AI 호출 로그에 요청 회원을 연결한다. finally에서 반드시 비워 스레드 재사용 시
     // 다른 회원에게 새어 들어가지 않게 한다.
-    AiCallContext.setMemberId(memberId);
+    AiCallContext.setMemberId(caller.memberId());
     try {
       // 입력 글을 가공하지 않고 넘긴다 — AI DLP(로컬 LLM 마스킹)는 해커톤 POC 라 쓰지 않는다 (#377).
       RoutineAiPipeline.RoutineQuestionResult result =
@@ -124,22 +128,22 @@ public class RoutineService {
   // readOnly 트랜잭션을 이 메서드에서만 명시적으로 중단시킨다. routine은 신규 엔티티라
   // 지연 로딩 걱정이 없으므로 안전하다.
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public RoutineResponse create(String memberId, RoutineCreateRequest request) {
-    routineRequestCooldownGuard.guard(memberId);
+  public RoutineResponse create(Caller caller, RoutineCreateRequest request) {
+    routineRequestCooldownGuard.guard(caller.memberId());
     // 쿨다운이 몰아치기를 막고, 여기서 오늘·이번 주에 얼마나 썼는지를 본다.
-    routineQuotaGuard.guard(memberId);
+    routineQuotaGuard.guard(caller.memberId());
     // 계정과 무관하게 서비스 전체가 오늘 쓴 비용을 본다 (#368). 셋 다 AI 를 부르기 전이라
     // 거절해도 비용이 0 이다.
     aiDailyBudgetGuard.guard();
 
-    Profile profile = requireProfile(memberId);
+    Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
 
     // AI 호출 로그에 요청 회원을 연결한다 (텍스트·이미지 병렬 생성까지 전파).
     // 입력 글과 답변은 가공하지 않고 넘긴다. 예전의 AI DLP(로컬 LLM 마스킹)는 해커톤 POC 였고
     // 실패하면 원문을 그대로 넘기는 fail-open 이라 보장도 아니면서 호출마다 수 초가 걸렸다 (#377).
     List<String> answers = request.answers() == null ? List.of() : request.answers();
     RoutineAiPipeline.RoutineGenerationResult generation;
-    AiCallContext.setMemberId(memberId);
+    AiCallContext.setMemberId(caller.memberId());
     try {
       generation = routineAiPipeline.generateForCreate(
         request.rawInputText(), profile.getNickname(), profile.getSupportGoals(), answers,
@@ -181,8 +185,8 @@ public class RoutineService {
   }
 
   @Transactional
-  public RoutineResponse confirm(String memberId, String routineId) {
-    Routine routine = getOwnedRoutine(memberId, routineId);
+  public RoutineResponse confirm(Caller caller, String routineId) {
+    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
     if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
@@ -197,8 +201,8 @@ public class RoutineService {
   /// 보상만 수정한다. 일과를 만든 뒤에도 보호자가 바꿀 수 있어야
   /// "보호자가 관리한다"가 성립한다 (2026-09-13 자문).
   @Transactional
-  public RoutineResponse updateReward(String memberId, String routineId, RewardUpdateRequest request) {
-    Routine routine = getOwnedRoutine(memberId, routineId);
+  public RoutineResponse updateReward(Caller caller, String routineId, RewardUpdateRequest request) {
+    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
     routine.setRewardText(trimReward(request.rewardText()));
     routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
     return RoutineResponse.from(routine);
@@ -206,10 +210,10 @@ public class RoutineService {
 
   /// 최근에 사용한 보상 최대 4개. 보상 설정 화면 입력칸 아래에 띄워 두 번째 일과부터는
   /// 탭 한 번으로 끝나게 한다 — 온보딩을 늘리지 않고 입력 부담을 줄이는 방법이다.
-  public List<RecentRewardResponse> getRecentRewards(String memberId) {
+  public List<RecentRewardResponse> getRecentRewards(Caller caller) {
     LinkedHashMap<String, RecentRewardResponse> unique = new LinkedHashMap<>();
     for (Routine routine : routineRepository
-      .findTop30ByProfileIdAndRewardTextIsNotNullOrderByCreatedAtDesc(requireProfile(memberId).getId())) {
+      .findTop30ByProfileIdAndRewardTextIsNotNullOrderByCreatedAtDesc(profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId())) {
       String text = routine.getRewardText();
       if (text == null || text.isBlank()) {
         continue;
@@ -229,8 +233,8 @@ public class RoutineService {
   /// 원문(`rawInputText`·`sanitizedInputText`)은 복사하지 않는다. 원문을 계속 들고 다니지 않는다는
   /// 서비스 원칙에 맞추고, 복제본은 카드만 있으면 수행에 지장이 없다.
   @Transactional
-  public RoutineResponse duplicate(String memberId, String routineId) {
-    Routine origin = getOwnedRoutine(memberId, routineId);
+  public RoutineResponse duplicate(Caller caller, String routineId) {
+    Routine origin = getOwnedRoutine(caller.memberId(), routineId);
 
     Routine copy = new Routine();
     copy.setProfile(origin.getProfile());
@@ -265,8 +269,8 @@ public class RoutineService {
   /// 승인된 일과는 지우지 않는다 — 수행률 추이의 원본 데이터이고,
   /// 보호자가 "이 날은 왜 못 했지"를 확인하는 근거다.
   @Transactional
-  public void delete(String memberId, String routineId) {
-    Routine routine = getOwnedRoutine(memberId, routineId);
+  public void delete(Caller caller, String routineId) {
+    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
     if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
@@ -283,10 +287,10 @@ public class RoutineService {
   ///
   /// 보낸 일과(CONFIRMED·COMPLETED)만 준다 — 오늘 일과와 같은 기준이다 (#353).
   /// 상태를 거르지 않으면 오늘 만들다 둔 임시저장이 내일 지난 일과에 뜬다 (#387).
-  public List<RoutineResponse> getPastRoutines(String memberId) {
+  public List<RoutineResponse> getPastRoutines(Caller caller) {
     return routineRepository
       .findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
-        requireProfile(memberId).getId(),
+        profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId(),
         List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED),
         LocalDate.now().atStartOfDay())
       .stream()
@@ -296,9 +300,9 @@ public class RoutineService {
   }
 
   /// 보호자 홈 "임시저장" — 카드는 만들었지만 아직 아이에게 보내지 않은 일과.
-  public List<RoutineResponse> getDraftRoutines(String memberId) {
+  public List<RoutineResponse> getDraftRoutines(Caller caller) {
     return routineRepository
-      .findAllByProfileIdAndStatusOrderByCreatedAtDesc(requireProfile(memberId).getId(), RoutineStatus.PENDING_REVIEW)
+      .findAllByProfileIdAndStatusOrderByCreatedAtDesc(profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId(), RoutineStatus.PENDING_REVIEW)
       .stream()
       .map(RoutineResponse::from)
       .toList();
@@ -320,8 +324,8 @@ public class RoutineService {
   }
 
   @Transactional
-  public RoutineResponse completeStep(String memberId, String routineId, String stepId) {
-    Routine routine = getOwnedRoutine(memberId, routineId);
+  public RoutineResponse completeStep(Caller caller, String routineId, String stepId) {
+    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
     if (routine.getStatus() != RoutineStatus.CONFIRMED) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
@@ -358,8 +362,8 @@ public class RoutineService {
   }
 
   @Transactional
-  public RoutineResponse cancelStep(String memberId, String routineId, String stepId) {
-    Routine routine = getOwnedRoutine(memberId, routineId);
+  public RoutineResponse cancelStep(Caller caller, String routineId, String stepId) {
+    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
     if (routine.getStatus() != RoutineStatus.CONFIRMED && routine.getStatus() != RoutineStatus.COMPLETED) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
@@ -399,8 +403,8 @@ public class RoutineService {
   // 구조적으로 없애기 위함. 별은 완료 수의 차이만큼만 움직여 같은 요청을 여러 번
   // 보내도 결과가 같다(멱등).
   @Transactional
-  public RoutineResponse syncProgress(String memberId, String routineId, List<String> completedStepIds) {
-    Routine routine = getOwnedRoutine(memberId, routineId);
+  public RoutineResponse syncProgress(Caller caller, String routineId, List<String> completedStepIds) {
+    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
     if (routine.getStatus() != RoutineStatus.CONFIRMED && routine.getStatus() != RoutineStatus.COMPLETED) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
@@ -451,9 +455,9 @@ public class RoutineService {
 
   @Transactional
   public RoutineResponse updateStep(
-    String memberId, String routineId, String stepId, RoutineStepUpdateRequest request
+    Caller caller, String routineId, String stepId, RoutineStepUpdateRequest request
   ) {
-    Routine routine = getOwnedRoutine(memberId, routineId);
+    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
     requireEditableRoutine(routine);
 
     List<RoutineStep> steps = routine.getSteps();
@@ -516,8 +520,8 @@ public class RoutineService {
   }
 
   @Transactional
-  public RoutineResponse deleteStep(String memberId, String routineId, String stepId) {
-    Routine routine = getOwnedRoutine(memberId, routineId);
+  public RoutineResponse deleteStep(Caller caller, String routineId, String stepId) {
+    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
     requireEditableRoutine(routine);
 
     List<RoutineStep> steps = routine.getSteps();
@@ -561,9 +565,9 @@ public class RoutineService {
    */
   @Transactional
   public RoutineResponse addStep(
-    String memberId, String routineId, RoutineStepCreateRequest request
+    Caller caller, String routineId, RoutineStepCreateRequest request
   ) {
-    Routine routine = getOwnedRoutine(memberId, routineId);
+    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
     requireEditableRoutine(routine);
 
     List<RoutineStep> steps = routine.getSteps();
@@ -588,7 +592,7 @@ public class RoutineService {
     // 커밋된 뒤에 그림을 만든다. 트랜잭션 안에서 돌리면 Gemini 호출(수 초) 동안
     // DB 커넥션을 붙잡고, 롤백되면 방금 쓴 이미지 파일이 고아로 남는다.
     routineStepImageFiller.scheduleAfterCommit(
-      memberId, routineId, step.getId(), step.getDescription(), routine.getProfile().getCharacter(),
+      caller.memberId(), routineId, step.getId(), step.getDescription(), routine.getProfile().getCharacter(),
       FluxSeed.routineKey(routine.getProfile().getId(), routine.getTitle()));
 
     return RoutineResponse.from(routine);
@@ -629,19 +633,19 @@ public class RoutineService {
     }
   }
 
-  public RoutineResponse getRoutine(String memberId, String routineId) {
-    return RoutineResponse.from(getOwnedRoutine(memberId, routineId));
+  public RoutineResponse getRoutine(Caller caller, String routineId) {
+    return RoutineResponse.from(getOwnedRoutine(caller.memberId(), routineId));
   }
 
-  public List<RoutineResponse> getMyRoutines(String memberId) {
-    return routineRepository.findAllByProfileId(requireProfile(memberId).getId()).stream()
+  public List<RoutineResponse> getMyRoutines(Caller caller) {
+    return routineRepository.findAllByProfileId(profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId()).stream()
       .map(RoutineResponse::from)
       .toList();
   }
 
   // 아이 홈 화면 "오늘 할 일" 리스트용. 보호자 승인 전(PENDING_REVIEW) 일과는 제외하고,
   // scheduledAt이 오늘(KST) 안에 있는 CONFIRMED/COMPLETED 일과만 예정 시각 순으로 반환한다.
-  public List<RoutineResponse> getTodayRoutines(String memberId) {
+  public List<RoutineResponse> getTodayRoutines(Caller caller) {
     LocalDate today = LocalDate.now();
     LocalDateTime startOfDay = today.atStartOfDay();
     LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
@@ -649,7 +653,7 @@ public class RoutineService {
     // memberId를 그대로 넘기고 있었다. 그 상태로는 어떤 일과도 걸리지 않는다.
     // 보이는 순서 → 예정 시각 차례로 줄 세운다.
     List<Routine> routines = routineRepository.findTodayOrdered(
-      requireProfile(memberId).getId(),
+      profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId(),
       List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED), startOfDay, endOfDay
     );
     return routines.stream().map(RoutineResponse::from).toList();
@@ -666,8 +670,8 @@ public class RoutineService {
     return List.copyOf(pool.subList(0, count));
   }
 
-  public RoutineImageStorage.ImageContent getStepImage(String memberId, String routineId, String stepId) {
-    Routine routine = getOwnedRoutine(memberId, routineId);
+  public RoutineImageStorage.ImageContent getStepImage(Caller caller, String routineId, String stepId) {
+    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
     RoutineStep targetStep = routine.getSteps().stream()
       .filter(step -> step.getId().equals(stepId))
       .findFirst()
@@ -691,7 +695,7 @@ public class RoutineService {
    * 절반만 반영되면 화면과 서버의 순서가 어긋나 더 나쁘다.
    */
   @Transactional
-  public void reorder(String memberId, List<String> routineIds) {
+  public void reorder(Caller caller, List<String> routineIds) {
     if (routineIds == null || routineIds.isEmpty()) {
       return;
     }
@@ -700,7 +704,7 @@ public class RoutineService {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
     }
 
-    Profile profile = requireProfile(memberId);
+    Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     List<Routine> routines = routineRepository.findAllById(routineIds);
     if (routines.size() != routineIds.size()) {
       throw new CustomException(ErrorCode.ROUTINE_NOT_FOUND);
@@ -730,7 +734,7 @@ public class RoutineService {
    * 차례로 뜬다.
    */
   @Transactional
-  public void reorderSteps(String memberId, String routineId, List<String> stepIds) {
+  public void reorderSteps(Caller caller, String routineId, List<String> stepIds) {
     if (stepIds == null || stepIds.isEmpty()) {
       return;
     }
@@ -739,7 +743,7 @@ public class RoutineService {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
     }
 
-    Routine routine = getOwnedRoutine(memberId, routineId);
+    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
     List<RoutineStep> steps = routine.getSteps();
 
     // 일부만 보내면 빠진 단계의 차례가 어디인지 알 수 없다. 전체가 와야 한다.
@@ -784,16 +788,5 @@ public class RoutineService {
         return entity;
       })
       .toList();
-  }
-
-  /**
-   * 계정의 기본 프로필.
-   *
-   * <p>일과는 계정이 아니라 당사자에게 속한다. 기존 API는 계정 토큰만 주므로
-   * 여기서 프로필로 바꿔준다. 계정당 프로필이 하나인 동안 유일하게 결정된다.
-   */
-  private Profile requireProfile(String memberId) {
-    return profileRepository.findFirstByMemberIdOrderByCreatedAtAsc(memberId)
-      .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
   }
 }

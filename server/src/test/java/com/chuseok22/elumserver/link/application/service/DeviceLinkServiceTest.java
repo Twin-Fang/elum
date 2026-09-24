@@ -22,9 +22,12 @@ import com.chuseok22.elumserver.link.core.LinkCode;
 import com.chuseok22.elumserver.link.core.LinkRole;
 import com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
+import com.chuseok22.elumserver.member.application.service.Caller;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
@@ -51,9 +54,11 @@ import org.mockito.quality.Strictness;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class DeviceLinkServiceTest {
 
+  private static final Caller GUARDIAN = Caller.guardian("m1");
+
   @Mock private DeviceLinkRepository deviceLinkRepository;
   @Mock private MemberRepository memberRepository;
-  @Mock private ProfileRepository profileRepository;
+  @Mock private ProfileAccessGuard profileAccessGuard;
   @Mock private RefreshTokenRepository refreshTokenRepository;
   @Mock private RefreshTokenService refreshTokenService;
   @Mock private JwtProvider jwtProvider;
@@ -69,7 +74,9 @@ class DeviceLinkServiceTest {
     member.setId("m1");
     member.setUsername("google_1");
     when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
-    when(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc("m1")).thenReturn(Optional.empty());
+    Profile profile = new Profile();
+    profile.setId("p1");
+    when(profileAccessGuard.profileFor(GUARDIAN, ProfileAction.MANAGE)).thenReturn(profile);
     when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
       .thenReturn(List.of());
     when(jwtProperties.accessExpMillis()).thenReturn(86_400_000L);
@@ -94,7 +101,7 @@ class DeviceLinkServiceTest {
   @Test
   @DisplayName("발급하면 우리가 만들 수 있는 모양의 암호와 10분 만료가 나온다")
   void issue() {
-    LinkCodeResponse res = service.issue("m1");
+    LinkCodeResponse res = service.issue(GUARDIAN);
 
     assertThat(LinkCode.hasValidShape(res.code())).isTrue();
     assertThat(res.expiresInSeconds()).isEqualTo(600);
@@ -109,7 +116,7 @@ class DeviceLinkServiceTest {
     when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
       .thenReturn(List.of(old));
 
-    service.issue("m1");
+    service.issue(GUARDIAN);
 
     assertThat(old.getRevokedAt()).isNotNull();
   }
@@ -122,7 +129,7 @@ class DeviceLinkServiceTest {
     when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
       .thenReturn(List.of(linked));
 
-    service.issue("m1");
+    service.issue(GUARDIAN);
 
     assertThat(linked.getRevokedAt()).isNull();
   }
@@ -304,5 +311,13 @@ class DeviceLinkServiceTest {
         .isEqualTo(ErrorCode.DEVICE_LINK_NOT_CONNECTED));
 
     assertThat(other.getRevokedAt()).isNull();
+  }
+
+  @Test
+  @DisplayName("E39 연결 암호는 판단자가 고른 이룸이에 묶인다 — 그 휴대폰은 이 이룸이만 본다")
+  void e39_issue_bindsLinkToResolvedProfile() {
+    service.issue(GUARDIAN);
+
+    verify(deviceLinkRepository).save(org.mockito.ArgumentMatchers.argThat(link -> "p1".equals(link.getProfileId())));
   }
 }

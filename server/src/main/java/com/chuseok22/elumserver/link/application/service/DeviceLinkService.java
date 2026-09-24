@@ -15,10 +15,11 @@ import com.chuseok22.elumserver.link.core.LinkCode;
 import com.chuseok22.elumserver.link.core.LinkRole;
 import com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
+import com.chuseok22.elumserver.member.application.service.Caller;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
-import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -56,7 +57,7 @@ public class DeviceLinkService {
 
   private final DeviceLinkRepository deviceLinkRepository;
   private final MemberRepository memberRepository;
-  private final ProfileRepository profileRepository;
+  private final ProfileAccessGuard profileAccessGuard;
   private final RefreshTokenRepository refreshTokenRepository;
   private final RefreshTokenService refreshTokenService;
   private final JwtProvider jwtProvider;
@@ -70,8 +71,12 @@ public class DeviceLinkService {
    * 이미 연결된 것은 건드리지 않는다 — 새 암호를 만드는 것과 기존 연결을 끊는 것은 다른 일이다.
    */
   @Transactional
-  public LinkCodeResponse issue(String memberId) {
+  public LinkCodeResponse issue(Caller caller) {
+    String memberId = caller.memberId();
     Member member = requireMember(memberId);
+    // 이 휴대폰이 볼 이룸이 — 보호자가 짚은(헤더) 또는 가장 먼저 연결된 이룸이. 연결 안 된 이룸이면 403.
+    // 이 값이 곧 이룸이 휴대폰의 이룸이다 (명세 4-5). 보호자의 "첫 이룸이"로 뒤에서 다시 찾지 않는다.
+    String profileId = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE).getId();
     LocalDateTime now = LocalDateTime.now();
 
     for (DeviceLink alive : deviceLinkRepository
@@ -84,8 +89,7 @@ public class DeviceLinkService {
     String code = LinkCode.generate();
     DeviceLink link = new DeviceLink();
     link.setMemberId(member.getId());
-    link.setProfileId(profileRepository.findFirstByMemberIdOrderByCreatedAtAsc(memberId)
-      .map(Profile::getId).orElse(null));
+    link.setProfileId(profileId);
     link.setCodeHash(hash(code));
     link.setExpiresAt(now.plus(CODE_TTL));
     deviceLinkRepository.save(link);

@@ -1,12 +1,13 @@
 package com.chuseok22.elumserver.routine.application.controller;
 
+import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreateRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
@@ -15,19 +16,20 @@ import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggesti
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.logging.annotation.LogMonitoring;
-import org.springframework.http.MediaType;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,9 +45,11 @@ public class RoutineController implements RoutineControllerDocs {
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PostMapping
   public ResponseEntity<RoutineResponse> create(
-    Authentication authentication, @RequestBody @Valid RoutineCreateRequest request
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
+    @RequestBody @Valid RoutineCreateRequest request
   ) {
-    RoutineResponse response = routineService.create(authentication.getName(), request);
+    RoutineResponse response = routineService.create(Caller.from(authentication, profileId), request);
     return ResponseEntity.ok(response);
   }
 
@@ -54,9 +58,12 @@ public class RoutineController implements RoutineControllerDocs {
   @LogMonitoring(logParameters = false, logResult = true, logExecutionTime = true)
   @PostMapping("/questions")
   public ResponseEntity<RoutineQuestionResponse> generateQuestion(
-    Authentication authentication, @RequestBody @Valid RoutineQuestionRequest request
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
+    @RequestBody @Valid RoutineQuestionRequest request
   ) {
-    RoutineQuestionResponse response = routineService.generateQuestion(authentication.getName(), request);
+    RoutineQuestionResponse response =
+      routineService.generateQuestion(Caller.from(authentication, profileId), request);
     return ResponseEntity.ok(response);
   }
 
@@ -66,22 +73,28 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<RoutineResponse> getRoutine(
     Authentication authentication, @PathVariable String routineId
   ) {
-    RoutineResponse response = routineService.getRoutine(authentication.getName(), routineId);
+    RoutineResponse response = routineService.getRoutine(Caller.from(authentication), routineId);
     return ResponseEntity.ok(response);
   }
 
   @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
   @GetMapping
-  public ResponseEntity<List<RoutineResponse>> getMyRoutines(Authentication authentication) {
-    List<RoutineResponse> responses = routineService.getMyRoutines(authentication.getName());
+  public ResponseEntity<List<RoutineResponse>> getMyRoutines(
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
+  ) {
+    List<RoutineResponse> responses = routineService.getMyRoutines(Caller.from(authentication, profileId));
     return ResponseEntity.ok(responses);
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
   @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
   @GetMapping("/today")
-  public ResponseEntity<List<RoutineResponse>> getTodayRoutines(Authentication authentication) {
-    List<RoutineResponse> responses = routineService.getTodayRoutines(authentication.getName());
+  public ResponseEntity<List<RoutineResponse>> getTodayRoutines(
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
+  ) {
+    List<RoutineResponse> responses = routineService.getTodayRoutines(Caller.from(authentication, profileId));
     return ResponseEntity.ok(responses);
   }
 
@@ -100,7 +113,7 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
   ) {
     RoutineImageStorage.ImageContent content =
-      routineService.getStepImage(authentication.getName(), routineId, stepId);
+      routineService.getStepImage(Caller.from(authentication), routineId, stepId);
     return ResponseEntity.ok()
       .contentType(MediaType.parseMediaType(content.contentType()))
       .body(content.bytes());
@@ -113,7 +126,7 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication, @PathVariable String routineId,
     @RequestBody @Valid RewardUpdateRequest request
   ) {
-    RoutineResponse response = routineService.updateReward(authentication.getName(), routineId, request);
+    RoutineResponse response = routineService.updateReward(Caller.from(authentication), routineId, request);
     return ResponseEntity.ok(response);
   }
 
@@ -121,9 +134,11 @@ public class RoutineController implements RoutineControllerDocs {
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/order")
   public ResponseEntity<Void> reorder(
-    Authentication authentication, @RequestBody RoutineReorderRequest request
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
+    @RequestBody RoutineReorderRequest request
   ) {
-    routineService.reorder(authentication.getName(), request.routineIds());
+    routineService.reorder(Caller.from(authentication, profileId), request.routineIds());
     return ResponseEntity.noContent().build();
   }
 
@@ -134,28 +149,37 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication, @PathVariable String routineId,
     @RequestBody RoutineStepReorderRequest request
   ) {
-    routineService.reorderSteps(authentication.getName(), routineId, request.stepIds());
+    routineService.reorderSteps(Caller.from(authentication), routineId, request.stepIds());
     return ResponseEntity.noContent().build();
   }
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/recent-rewards")
-  public ResponseEntity<List<RecentRewardResponse>> getRecentRewards(Authentication authentication) {
-    List<RecentRewardResponse> response = routineService.getRecentRewards(authentication.getName());
+  public ResponseEntity<List<RecentRewardResponse>> getRecentRewards(
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
+  ) {
+    List<RecentRewardResponse> response = routineService.getRecentRewards(Caller.from(authentication, profileId));
     return ResponseEntity.ok(response);
   }
 
   @LogMonitoring
   @GetMapping("/past")
-  public ResponseEntity<List<RoutineResponse>> getPastRoutines(Authentication authentication) {
-    List<RoutineResponse> response = routineService.getPastRoutines(authentication.getName());
+  public ResponseEntity<List<RoutineResponse>> getPastRoutines(
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
+  ) {
+    List<RoutineResponse> response = routineService.getPastRoutines(Caller.from(authentication, profileId));
     return ResponseEntity.ok(response);
   }
 
   @LogMonitoring
   @GetMapping("/drafts")
-  public ResponseEntity<List<RoutineResponse>> getDraftRoutines(Authentication authentication) {
-    List<RoutineResponse> response = routineService.getDraftRoutines(authentication.getName());
+  public ResponseEntity<List<RoutineResponse>> getDraftRoutines(
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
+  ) {
+    List<RoutineResponse> response = routineService.getDraftRoutines(Caller.from(authentication, profileId));
     return ResponseEntity.ok(response);
   }
 
@@ -165,7 +189,7 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<RoutineResponse> duplicate(
     Authentication authentication, @PathVariable String routineId
   ) {
-    RoutineResponse response = routineService.duplicate(authentication.getName(), routineId);
+    RoutineResponse response = routineService.duplicate(Caller.from(authentication), routineId);
     return ResponseEntity.ok(response);
   }
 
@@ -174,7 +198,7 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<Void> delete(
     Authentication authentication, @PathVariable String routineId
   ) {
-    routineService.delete(authentication.getName(), routineId);
+    routineService.delete(Caller.from(authentication), routineId);
     return ResponseEntity.noContent().build();
   }
 
@@ -184,7 +208,7 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<RoutineResponse> confirm(
     Authentication authentication, @PathVariable String routineId
   ) {
-    RoutineResponse response = routineService.confirm(authentication.getName(), routineId);
+    RoutineResponse response = routineService.confirm(Caller.from(authentication), routineId);
     return ResponseEntity.ok(response);
   }
 
@@ -194,7 +218,7 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<RoutineResponse> completeStep(
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
   ) {
-    RoutineResponse response = routineService.completeStep(authentication.getName(), routineId, stepId);
+    RoutineResponse response = routineService.completeStep(Caller.from(authentication), routineId, stepId);
     return ResponseEntity.ok(response);
   }
 
@@ -204,7 +228,7 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<RoutineResponse> cancelStep(
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
   ) {
-    RoutineResponse response = routineService.cancelStep(authentication.getName(), routineId, stepId);
+    RoutineResponse response = routineService.cancelStep(Caller.from(authentication), routineId, stepId);
     return ResponseEntity.ok(response);
   }
 
@@ -218,7 +242,7 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestBody RoutineProgressSyncRequest request
   ) {
     RoutineResponse response = routineService.syncProgress(
-      authentication.getName(), routineId, request.completedStepIdsOrEmpty()
+      Caller.from(authentication), routineId, request.completedStepIdsOrEmpty()
     );
     return ResponseEntity.ok(response);
   }
@@ -234,7 +258,7 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestBody @Valid RoutineStepCreateRequest request
   ) {
     RoutineResponse response =
-      routineService.addStep(authentication.getName(), routineId, request);
+      routineService.addStep(Caller.from(authentication), routineId, request);
     return ResponseEntity.ok(response);
   }
 
@@ -250,7 +274,7 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestBody @Valid RoutineStepUpdateRequest request
   ) {
     RoutineResponse response =
-      routineService.updateStep(authentication.getName(), routineId, stepId, request);
+      routineService.updateStep(Caller.from(authentication), routineId, stepId, request);
     return ResponseEntity.ok(response);
   }
 
@@ -260,7 +284,7 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<RoutineResponse> deleteStep(
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
   ) {
-    RoutineResponse response = routineService.deleteStep(authentication.getName(), routineId, stepId);
+    RoutineResponse response = routineService.deleteStep(Caller.from(authentication), routineId, stepId);
     return ResponseEntity.ok(response);
   }
 }

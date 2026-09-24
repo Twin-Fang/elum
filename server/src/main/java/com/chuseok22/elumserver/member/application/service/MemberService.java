@@ -1,24 +1,25 @@
 package com.chuseok22.elumserver.member.application.service;
 
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
-import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
+import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class MemberService {
 
   private final MemberRepository memberRepository;
 
-  private final ProfileRepository profileRepository;
+  private final ProfileAccessGuard profileAccessGuard;
 
   private final GuardianshipService guardianshipService;
 
@@ -42,34 +43,44 @@ public class MemberService {
   private final SubscriptionRepository subscriptionRepository;
   private final EntitlementService entitlementService;
 
-  public MemberResponse getMyInfo(String memberId) {
-    return MemberResponse.from(requireMember(memberId), findProfile(memberId),
-      entitlementService.snapshot(memberId));
+  /**
+   * 내 정보. 헤더로 이룸이를 짚었으면 그 이룸이(연결 안 됐으면 403), 아니면 가장 먼저 연결된 이룸이.
+   *
+   * <p>연결된 이룸이가 없으면(E29) 당사자 칸을 비워 응답한다 — 화면이 죽지 않고 앱이 온보딩으로 보낸다.
+   */
+  public MemberResponse getMyInfo(Caller caller) {
+    Member member = requireMember(caller.memberId());
+    List<Profile> profiles = profileAccessGuard.profilesOf(caller);
+    Profile current = caller.profileId() != null
+      ? profileAccessGuard.profileFor(caller, ProfileAction.VIEW)
+      : profiles.stream().findFirst().orElse(null);
+    return MemberResponse.from(member, current, entitlementService.snapshot(caller.memberId()));
   }
 
+  // 이룸이 정보는 연결된 보호자 누구나 고친다. 마지막에 바꾼 값이 남는다 (명세 2장 · E23).
   @Transactional
-  public MemberResponse updateNickname(String memberId, MemberNicknameUpdateRequest request) {
-    Member member = requireMember(memberId);
-    Profile profile = requireProfile(memberId);
+  public MemberResponse updateNickname(Caller caller, MemberNicknameUpdateRequest request) {
+    Member member = requireMember(caller.memberId());
+    Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     profile.setNickname(request.nickname());
-    return MemberResponse.from(member, profile, entitlementService.snapshot(memberId));
+    return MemberResponse.from(member, profile, entitlementService.snapshot(caller.memberId()));
   }
 
   @Transactional
-  public MemberResponse updateSupportGoals(String memberId, MemberSupportGoalsUpdateRequest request) {
-    Member member = requireMember(memberId);
-    Profile profile = requireProfile(memberId);
+  public MemberResponse updateSupportGoals(Caller caller, MemberSupportGoalsUpdateRequest request) {
+    Member member = requireMember(caller.memberId());
+    Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     profile.getSupportGoals().clear();
     profile.getSupportGoals().addAll(request.supportGoals());
-    return MemberResponse.from(member, profile, entitlementService.snapshot(memberId));
+    return MemberResponse.from(member, profile, entitlementService.snapshot(caller.memberId()));
   }
 
   @Transactional
-  public MemberResponse updateCharacter(String memberId, MemberCharacterUpdateRequest request) {
-    Member member = requireMember(memberId);
-    Profile profile = requireProfile(memberId);
+  public MemberResponse updateCharacter(Caller caller, MemberCharacterUpdateRequest request) {
+    Member member = requireMember(caller.memberId());
+    Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     profile.setCharacter(request.character());
-    return MemberResponse.from(member, profile, entitlementService.snapshot(memberId));
+    return MemberResponse.from(member, profile, entitlementService.snapshot(caller.memberId()));
   }
 
   public MemberConsentResponse getConsents(String memberId) {
@@ -157,19 +168,5 @@ public class MemberService {
     return memberRepository.findById(memberId)
       .filter(member -> member.getStatus() != MemberStatus.WITHDRAWN)
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-  }
-
-  /**
-   * 계정의 기본 프로필. 계정당 하나인 동안 기존 API가 당사자를 찾는 통로다.
-   * 프로필이 여럿이 되면 호출부가 어느 프로필인지 명시하게 바꾼다.
-   */
-  private Profile requireProfile(String memberId) {
-    return profileRepository.findFirstByMemberIdOrderByCreatedAtAsc(memberId)
-      .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-  }
-
-  /** 조회 전용 — 프로필이 없어도 화면이 죽지 않게 null을 허용한다. */
-  private Profile findProfile(String memberId) {
-    return profileRepository.findFirstByMemberIdOrderByCreatedAtAsc(memberId).orElse(null);
   }
 }

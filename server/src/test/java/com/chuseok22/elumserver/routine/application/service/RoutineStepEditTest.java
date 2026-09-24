@@ -1,6 +1,5 @@
 package com.chuseok22.elumserver.routine.application.service;
 
-import com.chuseok22.elumserver.ai.core.FluxSeed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.any;
@@ -10,8 +9,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -44,6 +45,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class RoutineStepEditTest {
 
+  private static final Caller GUARDIAN = Caller.guardian("member-1");
+
   @Mock private RoutineRepository routineRepository;
   @Mock private RoutineImageStorage routineImageStorage;
   @Mock private ProfileRepository profileRepository;
@@ -61,7 +64,7 @@ class RoutineStepEditTest {
     Routine routine = routine(RoutineStatus.PENDING_REVIEW, 3, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.addStep("member-1", "routine-1",
+    routineService.addStep(GUARDIAN, "routine-1",
       new RoutineStepCreateRequest("우산을 챙겨요", "현관에서 우산을 챙겨요."));
 
     assertThat(routine.getSteps()).hasSize(4);
@@ -81,7 +84,7 @@ class RoutineStepEditTest {
     routine.getProfile().setCharacter(CharacterType.LULU);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.addStep("member-1", "routine-1",
+    routineService.addStep(GUARDIAN, "routine-1",
       new RoutineStepCreateRequest("우산을 챙겨요", "현관에서 우산을 챙겨요."));
 
     // 그 일과의 캐릭터를 그대로 넘겨야 기존 카드들과 그림체가 맞는다.
@@ -98,7 +101,7 @@ class RoutineStepEditTest {
     Routine routine = routine(RoutineStatus.PENDING_REVIEW, 10, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    assertThatThrownBy(() -> routineService.addStep("member-1", "routine-1",
+    assertThatThrownBy(() -> routineService.addStep(GUARDIAN, "routine-1",
       new RoutineStepCreateRequest("열한 번째", "안 된다")))
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_STEP_MAX_COUNT);
@@ -113,7 +116,7 @@ class RoutineStepEditTest {
     Routine routine = routine(RoutineStatus.CONFIRMED, 2, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.addStep("member-1", "routine-1",
+    routineService.addStep(GUARDIAN, "routine-1",
       new RoutineStepCreateRequest("하나 더", "설명"));
 
     assertThat(routine.getSteps()).hasSize(3);
@@ -125,7 +128,7 @@ class RoutineStepEditTest {
     Routine routine = routine(RoutineStatus.COMPLETED, 2, true);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.addStep("member-1", "routine-1",
+    routineService.addStep(GUARDIAN, "routine-1",
       new RoutineStepCreateRequest("하나 더", "설명"));
 
     assertThat(routine.getStatus()).isEqualTo(RoutineStatus.CONFIRMED);
@@ -138,7 +141,7 @@ class RoutineStepEditTest {
     Routine routine = routine(RoutineStatus.PENDING_REVIEW, 1, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.addStep("member-1", "routine-1",
+    routineService.addStep(GUARDIAN, "routine-1",
       new RoutineStepCreateRequest("제목만", null));
 
     assertThat(routine.getSteps().get(1).getDescription()).isEmpty();
@@ -154,7 +157,7 @@ class RoutineStepEditTest {
     Routine routine = routine(RoutineStatus.PENDING_REVIEW, 3, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.updateStep("member-1", "routine-1", "step-3",
+    routineService.updateStep(GUARDIAN, "routine-1", "step-3",
       new RoutineStepUpdateRequest(null, null, 1));
 
     RoutineStep moved = routine.getSteps().stream()
@@ -171,7 +174,7 @@ class RoutineStepEditTest {
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     // 4번째를 2번 자리로
-    routineService.updateStep("member-1", "routine-1", "step-4",
+    routineService.updateStep(GUARDIAN, "routine-1", "step-4",
       new RoutineStepUpdateRequest(null, null, 2));
 
     assertThat(sortedIds(routine)).containsExactly("step-1", "step-4", "step-2", "step-3");
@@ -185,7 +188,7 @@ class RoutineStepEditTest {
     Routine routine = routine(RoutineStatus.PENDING_REVIEW, 3, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.updateStep("member-1", "routine-1", "step-1",
+    routineService.updateStep(GUARDIAN, "routine-1", "step-1",
       new RoutineStepUpdateRequest(null, null, 99));
 
     assertThat(sortedIds(routine)).containsExactly("step-2", "step-3", "step-1");
@@ -197,7 +200,7 @@ class RoutineStepEditTest {
     Routine routine = routine(RoutineStatus.CONFIRMED, 3, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.updateStep("member-1", "routine-1", "step-3",
+    routineService.updateStep(GUARDIAN, "routine-1", "step-3",
       new RoutineStepUpdateRequest(null, null, 1));
 
     assertThat(sortedIds(routine)).containsExactly("step-3", "step-1", "step-2");
@@ -213,7 +216,7 @@ class RoutineStepEditTest {
     routine.getProfile().setTotalStars(1);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.deleteStep("member-1", "routine-1", "step-1");
+    routineService.deleteStep(GUARDIAN, "routine-1", "step-1");
 
     assertThat(routine.getProfile().getTotalStars()).isZero();
     assertThat(routine.getSteps()).hasSize(2);
@@ -227,7 +230,7 @@ class RoutineStepEditTest {
     routine.getProfile().setTotalStars(1);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.deleteStep("member-1", "routine-1", "step-3");
+    routineService.deleteStep(GUARDIAN, "routine-1", "step-3");
 
     assertThat(routine.getProfile().getTotalStars()).isEqualTo(1);
   }
@@ -239,7 +242,7 @@ class RoutineStepEditTest {
     routine.getSteps().get(0).setCompleted(true);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.deleteStep("member-1", "routine-1", "step-2");
+    routineService.deleteStep(GUARDIAN, "routine-1", "step-2");
 
     assertThat(routine.getStatus()).isEqualTo(RoutineStatus.COMPLETED);
     assertThat(routine.getCompletedAt()).isNotNull();
@@ -251,7 +254,7 @@ class RoutineStepEditTest {
     Routine routine = routine(RoutineStatus.CONFIRMED, 1, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    assertThatThrownBy(() -> routineService.deleteStep("member-1", "routine-1", "step-1"))
+    assertThatThrownBy(() -> routineService.deleteStep(GUARDIAN, "routine-1", "step-1"))
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_STEP_MIN_COUNT);
   }
@@ -262,7 +265,7 @@ class RoutineStepEditTest {
     Routine routine = routine(RoutineStatus.PENDING_REVIEW, 1, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    assertThatThrownBy(() -> routineService.addStep("other-member", "routine-1",
+    assertThatThrownBy(() -> routineService.addStep(Caller.guardian("other-member"), "routine-1",
       new RoutineStepCreateRequest("제목", "설명")))
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_ACCESS_DENIED);

@@ -7,7 +7,10 @@ import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpd
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
+import com.chuseok22.elumserver.member.application.service.Caller;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -68,7 +71,10 @@ public interface MemberControllerDocs {
       )
     )
   })
-  ResponseEntity<MemberResponse> getMyInfo(Authentication authentication);
+  ResponseEntity<MemberResponse> getMyInfo(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId
+  );
 
   @Operation(
     summary = "아이 호칭 설정",
@@ -92,7 +98,11 @@ public interface MemberControllerDocs {
       )
     )
   })
-  ResponseEntity<MemberResponse> updateNickname(Authentication authentication, MemberNicknameUpdateRequest request);
+  ResponseEntity<MemberResponse> updateNickname(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
+    MemberNicknameUpdateRequest request
+  );
 
   @Operation(
     summary = "도움 목표 설정",
@@ -120,7 +130,9 @@ public interface MemberControllerDocs {
     )
   })
   ResponseEntity<MemberResponse> updateSupportGoals(
-    Authentication authentication, MemberSupportGoalsUpdateRequest request
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
+    MemberSupportGoalsUpdateRequest request
   );
 
   @Operation(
@@ -149,7 +161,9 @@ public interface MemberControllerDocs {
     )
   })
   ResponseEntity<MemberResponse> updateCharacter(
-    Authentication authentication, MemberCharacterUpdateRequest request
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
+    MemberCharacterUpdateRequest request
   );
 
   @Operation(

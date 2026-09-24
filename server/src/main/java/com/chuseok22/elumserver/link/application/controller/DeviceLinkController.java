@@ -9,6 +9,7 @@ import com.chuseok22.elumserver.link.application.dto.response.LinkStatusResponse
 import com.chuseok22.elumserver.link.application.service.DeviceLinkService;
 import com.chuseok22.elumserver.link.application.service.RedeemRateLimiter;
 import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.logging.annotation.LogMonitoring;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,9 +37,12 @@ public class DeviceLinkController implements DeviceLinkControllerDocs {
   @Override
   @LogMonitoring(logResult = true, logExecutionTime = true)
   @PostMapping
-  public ResponseEntity<LinkCodeResponse> issue(Authentication authentication) {
+  public ResponseEntity<LinkCodeResponse> issue(
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
+  ) {
     requireGuardian(authentication);
-    return ResponseEntity.ok(deviceLinkService.issue(authentication.getName()));
+    return ResponseEntity.ok(deviceLinkService.issue(Caller.from(authentication, profileId)));
   }
 
   @Override

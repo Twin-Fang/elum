@@ -5,7 +5,10 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.link.application.dto.request.RedeemLinkRequest;
 import com.chuseok22.elumserver.link.application.dto.response.LinkCodeResponse;
 import com.chuseok22.elumserver.link.application.dto.response.LinkStatusResponse;
+import com.chuseok22.elumserver.member.application.service.Caller;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,7 +42,10 @@ public interface DeviceLinkControllerDocs {
     @ApiResponse(responseCode = "403", description = "이룸이 휴대폰에서는 발급할 수 없음",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
-  ResponseEntity<LinkCodeResponse> issue(Authentication authentication);
+  ResponseEntity<LinkCodeResponse> issue(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId
+  );
 
   @Operation(
     summary = "연결 상태 조회 (보호자)",
