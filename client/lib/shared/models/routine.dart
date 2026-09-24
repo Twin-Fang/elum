@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'action_card.dart';
+import 'credit_usage.dart';
 import 'reward_preset.dart';
 
 part 'routine.freezed.dart';
@@ -57,6 +58,10 @@ abstract class Routine with _$Routine {
 
     /// 보상 프리셋 키(`SNACK`/`VIDEO`/`PLAY`/`WALK`/`CUSTOM`). 직접 입력이면 `CUSTOM` 또는 빈 값.
     @Default('') String rewardPresetKey,
+
+    /// 이번 생성이 쓴 크레딧 (#407). **생성 응답에만 있다** — 캐시([toJson])에
+    /// 넣지 않는다. 다시 읽은 일과에 옛 사용량이 붙어 있으면 거짓말이 된다.
+    CreditUsage? creditUsage,
   }) = _Routine;
 
   const Routine._();
@@ -146,6 +151,8 @@ abstract class Routine with _$Routine {
       // 서버는 보상 미설정 시 null을 준다. 빈 문자열로 받아 hasReward가 false가 되게 한다.
       rewardText: json['rewardText']?.toString() ?? '',
       rewardPresetKey: json['rewardPresetKey']?.toString() ?? '',
+      // 크레딧이 꺼져 있거나 모양이 다르면 null — 사용량 줄을 그리지 않는다.
+      creditUsage: CreditUsage.tryParse(json['credit']),
     );
   }
 

@@ -10,6 +10,8 @@ import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/auth/presentation/consent_document_list_screen.dart';
+import 'package:elum/features/credit/data/credit_repository.dart';
+import 'package:elum/features/credit/domain/credit_summary.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/draft_routines_screen.dart';
 import 'package:elum/features/auth/domain/consent_documents.dart';
@@ -24,6 +26,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/credit_fixtures.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/precache_images.dart';
 import 'helpers/test_storage.dart';
@@ -81,8 +84,20 @@ void main() {
   // 이 셋은 **의도된 차이라 그대로 둔다.** 그 위(제목 ~ 약관 줄)가 어긋나면
   // 그건 진짜 결함이다. 문의하기를 되살리면 이 주석과 골든을 함께 바꾼다
   // (`guardian_settings_test.dart` 의 "일부러 뺐다" 테스트도 같이 깨진다).
+  //
+  // **알려진 차이 — AI 크레딧 카드 (#407).** 시안(1022:4467)에 없는 카드가 제목과
+  // 첫 줄 사이에 들어와 아래 줄이 전부 카드 높이만큼 내려간다. 카드는 이슈 시안
+  // (정상 잔액 72 / 100)으로 찍는다 — 조회 실패·로딩 상태로 찍으면 기준이 흔들린다.
   testWidgets('설정 (Figma 1022:4467)', (tester) async {
-    await _pump(tester, const GuardianSettingsScreen());
+    await _pump(
+      tester,
+      const GuardianSettingsScreen(),
+      extra: [
+        creditSummaryProvider.overrideWith(
+          (ref) async => CreditSummary.fromJson(creditJson()),
+        ),
+      ],
+    );
     await expectLater(
       find.byType(GuardianSettingsScreen),
       matchesGoldenFile('figma/settings_1022-4467.png'),

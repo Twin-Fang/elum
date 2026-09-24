@@ -8,6 +8,8 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_dialog.dart';
+import '../../credit/application/credit_start_gate.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/character.dart';
 import '../application/routine_notifier.dart';
@@ -67,9 +69,7 @@ class GuardianHomeScreen extends ConsumerWidget {
               SizedBox(height: _toCreateButton.h),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: _listInset.w),
-                child: CreateRoutineButton(
-                  onTap: () => _startRoutine(context, ref),
-                ),
+                child: const _StartRoutineButton(),
               ),
               SizedBox(height: _toSections.h),
               Padding(
@@ -99,11 +99,55 @@ class GuardianHomeScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// `새로운 일과 만들기` + 시작 전 크레딧 확인.
+///
+/// 확인을 기다리는 동안 한 번 더 누르면 입력 화면이 두 번 쌓였다. 확인 중에는
+/// 누름을 무시한다. 확인은 [creditStartCheckTimeout] 안에 끝나 오래 막히지 않는다.
+class _StartRoutineButton extends ConsumerStatefulWidget {
+  const _StartRoutineButton();
+
+  @override
+  ConsumerState<_StartRoutineButton> createState() =>
+      _StartRoutineButtonState();
+}
+
+class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton> {
+  /// 크레딧을 확인하는 중인가. 화면을 다시 그릴 일이 없어 setState 없이 둔다.
+  var _starting = false;
+
+  @override
+  Widget build(BuildContext context) =>
+      CreateRoutineButton(onTap: _startRoutine);
 
   /// 일과 만들기 시작. 이전 입력이 남아 있으면 안 되므로 항상 초기화한다.
-  void _startRoutine(BuildContext context, WidgetRef ref) {
-    ref.read(routineFlowProvider.notifier).reset();
-    context.push(Routes.routineInput);
+  ///
+  /// 이번 주 크레딧을 다 썼으면 들어가지 않고 알린다 (#407) — 입력·질문·보상까지
+  /// 다 적은 뒤 마지막에 막히면 적은 것이 헛수고가 된다.
+  Future<void> _startRoutine() async {
+    if (_starting) return;
+    _starting = true;
+    try {
+      final blocked = await creditBlocksRoutineStart(ref);
+      if (!mounted) return;
+      if (blocked != null) {
+        await showElumDialog<void>(
+          context: context,
+          icon: ElumDialogIcon.warning,
+          title: '이번 주 크레딧을 모두 사용했어요',
+          message: '${blocked.resetLabel}부터 다시 만들 수 있어요',
+          actions: const [ElumDialogAction(label: '확인')],
+        );
+        return;
+      }
+      ref.read(routineFlowProvider.notifier).reset();
+      // push 가 끝나기를 기다리지 않는다 — 흐름이 `go` 로 홈에 돌아오면 그 Future 가
+      // 끝나지 않을 수 있고, 그러면 버튼이 영영 눌리지 않는다.
+      context.push(Routes.routineInput);
+    } finally {
+      _starting = false;
+    }
   }
 }
 

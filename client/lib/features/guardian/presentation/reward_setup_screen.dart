@@ -19,6 +19,7 @@ import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/reward_chip.dart';
+import 'widgets/credit_low_notice.dart';
 import 'widgets/routine_flow_scaffold.dart';
 
 /// 최근 보상. 실패하면 빈 목록이라 화면이 칩 자리를 비운다.
@@ -199,27 +200,30 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
       onBack: () => context.pop(),
       // 시안은 CTA를 y=675에 둔다 — 약관·목표·추가질문과 같은 자리다.
       pinCtaToFigmaY: true,
-      bottomButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // ⚠️ 시안은 이 줄을 **가운데가 아니라 x=116**에 둔다 (묶음 116~258,
-          // 중심 187 — 화면 중심 196.5보다 9.5 왼쪽). 다른 줄은 모두 가운데라
-          // 실수로 보이지만 시안대로 둔다 — #380 확인 필요 6.
-          Padding(
-            padding: EdgeInsets.only(left: _RewardLayout.helpLeft),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: _HelpLink(onTap: _explain),
+      // 크레딧이 적으면 버튼 묶음 위에 알린다 (#407). 도움말은 버튼 곁에 남긴다.
+      bottomButton: CreditLowNotice(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ⚠️ 시안은 이 줄을 **가운데가 아니라 x=116**에 둔다 (묶음 116~258,
+            // 중심 187 — 화면 중심 196.5보다 9.5 왼쪽). 다른 줄은 모두 가운데라
+            // 실수로 보이지만 시안대로 둔다 — #380 확인 필요 6.
+            Padding(
+              padding: EdgeInsets.only(left: _RewardLayout.helpLeft),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: _HelpLink(onTap: _explain),
+              ),
             ),
-          ),
-          // 도움말 하단(659) → CTA(675)
-          SizedBox(height: _RewardLayout.helpToCta),
-          ElumButton(
-            label: '다음',
-            onPressed: _rewardText.isEmpty ? null : _next,
-          ),
-        ],
+            // 도움말 하단(659) → CTA(675)
+            SizedBox(height: _RewardLayout.helpToCta),
+            ElumButton(
+              label: '다음',
+              onPressed: _rewardText.isEmpty ? null : _next,
+            ),
+          ],
+        ),
       ),
       // 건너뛰기를 버튼으로 두지 않는다 — 같은 무게면 무엇이 주 동작인지 흐려진다.
       belowButton: Center(child: _LaterLink(onTap: _later)),

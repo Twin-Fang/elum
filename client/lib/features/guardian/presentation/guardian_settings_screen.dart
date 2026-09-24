@@ -8,11 +8,13 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/app_status/app_status_repository.dart';
 import '../../../core/router/app_router.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
+import 'widgets/ai_credit_card.dart';
 
 /// 보호자 설정 화면 (이슈 #181).
 ///
@@ -126,58 +128,67 @@ class _GuardianSettingsScreenState
       // 줄이 x=16 에서 시작한다. 뼈대 기본 여백(24)이면 8 만큼 안쪽으로 밀린다.
       backTop: 67,
       horizontalPadding: 16,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 시안 첫 줄은 y=147 이다. 뒤로가기 상자 하단(119)에서 28 떨어져 있다.
-          SizedBox(height: 40.h),
-          SettingsTile(
-            label: '이룸이 휴대폰 연결하기',
-            onTap: _busy ? null : () => context.push(Routes.linkCode),
+      // 크레딧 카드(#407)가 들어와 글꼴을 키우면 한 화면을 넘는다 — 스크롤로 끝까지
+      // 볼 수 있게 하되, 짧을 때는 버전 줄이 지금처럼 맨 아래에 붙게 최소 높이를 준다.
+      child: LayoutBuilder(
+        builder: (context, box) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: box.maxHeight),
+            child: IntrinsicHeight(child: _list(space)),
           ),
-          // 계정을 정리하는 항목(로그아웃·탈퇴) 위에 둔다. 읽을거리와 되돌릴 수 없는
-          // 동작이 섞이면 실수로 누르기 쉽다.
-          SettingsTile(
-
-            label: '임시저장',
-
-            onTap: _busy ? null : () => context.push(Routes.guardianDrafts),
-
-          ),
-          SettingsTile(
-            label: '약관 및 개인정보처리방침',
-            onTap: _busy
-                ? null
-                : () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const ConsentDocumentListScreen(),
-                      ),
-                    ),
-          ),
-          // `문의하기`는 **일부러 뺐다** (#312, 2026-09-23 결정).
-          // 시안(`1022:4467`)에는 이 자리(약관과 로그아웃 사이)에 그려져 있지만
-          // App Store 심사 기간에는 두지 않는다 — 애플이 요구하는 것은 스토어
-          // 페이지의 지원 주소이고, 앱 안 문의하기는 필수가 아니다.
-          // **시안 대조에서 '빠졌다'고 되살리지 않는다** (#349 에서 한 번 그랬다).
-          // 심사나 운영에서 문제가 되면 되살린다 — 누르면 뜨던 시트(`1045:5005`)는
-          // `ce1271d` 에 있고, 주소(`AppConfig.supportEmail`)와 글자 토큰
-          // (`contactSheetTitle`·`contactSheetEmail`)은 그대로 남겨 두었다.
-          SettingsTile(
-            label: '로그아웃',
-            onTap: _busy ? null : _logout,
-          ),
-          SettingsTile(
-            label: '회원탈퇴',
-            onTap: _busy ? null : _deleteAccount,
-            destructive: true,
-          ),
-          // 게시된 도움말 페이지가 "앱 버전 — 설정 화면 맨 아래"라고 안내한다.
-          // 제보를 받았을 때 어느 빌드인지 알아야 재현할 수 있다 (이슈 #289).
-          const Spacer(),
-          const _VersionLine(),
-          SizedBox(height: space.lg),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _list(AppSpacing space) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // 시안 첫 줄은 y=147 이다. 뒤로가기 상자 하단(119)에서 28 떨어져 있다.
+        SizedBox(height: 40.h),
+        // 이번 주 AI 생성 (#407). 제목 아래·첫 줄 위 — 꺼져 있으면 자리도 없다.
+        const AiCreditCard(),
+        SettingsTile(
+          label: '이룸이 휴대폰 연결하기',
+          onTap: _busy ? null : () => context.push(Routes.linkCode),
+        ),
+        // 계정을 정리하는 항목(로그아웃·탈퇴) 위에 둔다. 읽을거리와 되돌릴 수 없는
+        // 동작이 섞이면 실수로 누르기 쉽다.
+        SettingsTile(
+          label: '임시저장',
+          onTap: _busy ? null : () => context.push(Routes.guardianDrafts),
+        ),
+        SettingsTile(
+          label: '약관 및 개인정보처리방침',
+          onTap: _busy
+              ? null
+              : () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ConsentDocumentListScreen(),
+                  ),
+                ),
+        ),
+        // `문의하기`는 **일부러 뺐다** (#312, 2026-09-23 결정).
+        // 시안(`1022:4467`)에는 이 자리(약관과 로그아웃 사이)에 그려져 있지만
+        // App Store 심사 기간에는 두지 않는다 — 애플이 요구하는 것은 스토어
+        // 페이지의 지원 주소이고, 앱 안 문의하기는 필수가 아니다.
+        // **시안 대조에서 '빠졌다'고 되살리지 않는다** (#349 에서 한 번 그랬다).
+        // 심사나 운영에서 문제가 되면 되살린다 — 누르면 뜨던 시트(`1045:5005`)는
+        // `ce1271d` 에 있고, 주소(`AppConfig.supportEmail`)와 글자 토큰
+        // (`contactSheetTitle`·`contactSheetEmail`)은 그대로 남겨 두었다.
+        SettingsTile(label: '로그아웃', onTap: _busy ? null : _logout),
+        SettingsTile(
+          label: '회원탈퇴',
+          onTap: _busy ? null : _deleteAccount,
+          destructive: true,
+        ),
+        // 게시된 도움말 페이지가 "앱 버전 — 설정 화면 맨 아래"라고 안내한다.
+        // 제보를 받았을 때 어느 빌드인지 알아야 재현할 수 있다 (이슈 #289).
+        const Spacer(),
+        const _VersionLine(),
+        SizedBox(height: space.lg),
+      ],
     );
   }
 }
@@ -191,10 +202,9 @@ class _VersionLine extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final version = ref.watch(appVersionProvider).maybeWhen(
-          data: (value) => value,
-          orElse: () => '',
-        );
+    final version = ref
+        .watch(appVersionProvider)
+        .maybeWhen(data: (value) => value, orElse: () => '');
     if (version.isEmpty) return const SizedBox.shrink();
 
     return Text(

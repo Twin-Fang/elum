@@ -15,6 +15,7 @@ import '../../child/data/speech_service.dart';
 import '../application/routine_notifier.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
+import 'widgets/credit_usage_line.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 
@@ -212,6 +213,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
               color: context.colors.textPrimary,
             ),
           ),
+          // 이번 생성이 쓴 크레딧 (#407). 없으면 크기 0 이라 배치가 그대로다.
+          const CreditUsageLine(),
           // 시안은 제목이 190 에서 끝나고 카드가 바로 이어진다 — 토큰(24)을
           // 쓰면 카드가 17 내려간다 (#297).
           SizedBox(height: 7.h),

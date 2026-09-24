@@ -13,6 +13,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../credit/domain/credit_summary.dart';
 import '../application/routine_notifier.dart';
 import '../domain/routine_stage.dart';
 import 'widgets/aurora_background.dart';
@@ -277,7 +278,10 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
           errorCode: flow.errorCode,
           errorMessage: flow.errorMessage,
           errorHint: flow.errorHint,
-          onRetry: _retry,
+          // 크레딧 부족·진행 중·동결은 다시 해도 같다 — 다시 하기 대신 홈으로 (#407).
+          // 떠나기 전에 묻지 않는다. 만든 것이 없어 잃을 것도 없다.
+          onRetry: isCreditBlockingCode(flow.errorCode) ? null : _retry,
+          onHome: () => context.go(Routes.guardian),
         ),
       );
     }
@@ -622,6 +626,7 @@ class _GenerateError extends StatelessWidget {
     required this.errorMessage,
     required this.errorHint,
     required this.onRetry,
+    required this.onHome,
   });
 
   /// 무엇이 안 됐는지.
@@ -635,7 +640,10 @@ class _GenerateError extends StatelessWidget {
 
   /// 네트워크 사정일 때 무엇을 하면 되는지 (`인터넷 연결을 확인해주세요`).
   final String? errorHint;
-  final Future<void> Function() onRetry;
+
+  /// null 이면 다시 해도 풀리지 않는 실패다 — [onHome] 버튼을 대신 둔다.
+  final Future<void> Function()? onRetry;
+  final VoidCallback onHome;
 
   @override
   Widget build(BuildContext context) {
@@ -671,7 +679,10 @@ class _GenerateError extends StatelessWidget {
             style: context.typo.promptBody.copyWith(color: colors.promptMuted),
           ),
           SizedBox(height: space.lg),
-          ElumButton(label: '다시 하기', onPressed: onRetry),
+          if (onRetry case final retry?)
+            ElumButton(label: '다시 하기', onPressed: retry)
+          else
+            ElumButton(label: '홈으로', onPressed: onHome),
           if (errorCode != null) ...[
             SizedBox(height: space.md),
             // 추적용 식별자 — 사용자에겐 부차적이지만 제보 시 원인 추적의 유일한 단서다

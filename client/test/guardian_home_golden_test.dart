@@ -273,6 +273,7 @@ class _GoldenRepo with FakeRewardApi implements RoutineRepository {
     List<String> answers = const [],
     String rewardText = '',
     String rewardPresetKey = '',
+    String idempotencyKey = '',
   }) async =>
       const Routine(id: 'new');
 

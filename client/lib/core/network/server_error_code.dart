@@ -104,6 +104,12 @@ enum ServerErrorCode {
   // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.
   aiDailyBudgetExceeded('AI_DAILY_BUDGET_EXCEEDED'),
 
+  // 주간 AI 크레딧 (#407). 부족·진행 중·동결은 다시 해도 같으니 "홈으로", 장부 오류만 다시 시도한다.
+  aiCreditInsufficient('AI_CREDIT_INSUFFICIENT'),
+  aiCreditJobInProgress('AI_CREDIT_JOB_IN_PROGRESS'),
+  aiCreditAccountFrozen('AI_CREDIT_ACCOUNT_FROZEN'),
+  aiCreditUnavailable('AI_CREDIT_UNAVAILABLE'),
+
   // 비밀값(외부 API 키) 저장.
   secretMasterKeyMissing('SECRET_MASTER_KEY_MISSING'),
   secretEncryptFailed('SECRET_ENCRYPT_FAILED'),

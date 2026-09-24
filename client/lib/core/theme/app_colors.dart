@@ -162,6 +162,12 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginLastUsedBg,
     required this.settingsDestructive,
     required this.settingsChevron,
+    required this.creditCardBg,
+    required this.creditBarTrack,
+    required this.creditBarFill,
+    required this.creditDivider,
+    required this.creditAccentText,
+    required this.creditNoticeBg,
     required this.loginAppleLabel,
     required this.consentSelectedFill,
     required this.consentSelectedBorder,
@@ -600,6 +606,26 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 설정 목록의 오른쪽 화살표 (실측 #CDCDCD).
   final Color settingsChevron;
 
+  // --- AI 크레딧 (#407) ---
+
+  /// AI 크레딧 카드 면 (#407 이슈 시안 — 흰 카드).
+  final Color creditCardBg;
+
+  /// 크레딧 막대의 빈 쪽.
+  final Color creditBarTrack;
+
+  /// 크레딧 막대의 남은 쪽 — 이슈 강조색 #FF8B22.
+  final Color creditBarFill;
+
+  /// 크레딧 카드 안 구분선. 막대 빈 쪽과 값이 같지만 쓰임이 달라 나눈다.
+  final Color creditDivider;
+
+  /// 크레딧 강조 글자(`+ 추가 N`·직전 안내). #FF8B22 는 흰 바탕 글자로 대비가 모자라 짙게 둔다.
+  final Color creditAccentText;
+
+  /// 생성 직전 크레딧 안내 띠의 면.
+  final Color creditNoticeBg;
+
   // --- 약관 동의 선택 상태 ---
   //
   // 값은 목표 칩 선택색과 같다. 그래도 토큰을 나누는 이유는 이 문서의 핵심 규칙
@@ -781,6 +807,12 @@ class AppColors extends ThemeExtension<AppColors> {
     loginLastUsedBg: Color(0x80FFFADC),
     settingsDestructive: Color(0xFFDA5050),
     settingsChevron: Color(0xFFCDCDCD),
+    creditCardBg: Color(0xFFFFFFFF),
+    creditBarTrack: Color(0xFFEFEFEF),
+    creditBarFill: Color(0xFFFF8B22),
+    creditDivider: Color(0xFFEFEFEF),
+    creditAccentText: Color(0xFFB85A0B),
+    creditNoticeBg: Color(0xFFFFF0E2),
     consentSelectedFill: Color(0xFFB5EAEC),
     consentSelectedBorder: Color(0xFF93DBCC),
     dlpBadgeText: Color(0xFF74757D),
@@ -920,6 +952,12 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? loginLastUsedBg,
     Color? settingsDestructive,
     Color? settingsChevron,
+    Color? creditCardBg,
+    Color? creditBarTrack,
+    Color? creditBarFill,
+    Color? creditDivider,
+    Color? creditAccentText,
+    Color? creditNoticeBg,
     Color? loginKakaoBg,
     Color? loginKakaoLabel,
     Color? loginNaverBg,
@@ -1064,6 +1102,12 @@ class AppColors extends ThemeExtension<AppColors> {
       loginLastUsedBg: loginLastUsedBg ?? this.loginLastUsedBg,
       settingsDestructive: settingsDestructive ?? this.settingsDestructive,
       settingsChevron: settingsChevron ?? this.settingsChevron,
+      creditCardBg: creditCardBg ?? this.creditCardBg,
+      creditBarTrack: creditBarTrack ?? this.creditBarTrack,
+      creditBarFill: creditBarFill ?? this.creditBarFill,
+      creditDivider: creditDivider ?? this.creditDivider,
+      creditAccentText: creditAccentText ?? this.creditAccentText,
+      creditNoticeBg: creditNoticeBg ?? this.creditNoticeBg,
       loginKakaoBg: loginKakaoBg ?? this.loginKakaoBg,
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
@@ -1366,6 +1410,12 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsDestructive:
           Color.lerp(settingsDestructive, other.settingsDestructive, t)!,
       settingsChevron: Color.lerp(settingsChevron, other.settingsChevron, t)!,
+      creditCardBg: Color.lerp(creditCardBg, other.creditCardBg, t)!,
+      creditBarTrack: Color.lerp(creditBarTrack, other.creditBarTrack, t)!,
+      creditBarFill: Color.lerp(creditBarFill, other.creditBarFill, t)!,
+      creditDivider: Color.lerp(creditDivider, other.creditDivider, t)!,
+      creditAccentText: Color.lerp(creditAccentText, other.creditAccentText, t)!,
+      creditNoticeBg: Color.lerp(creditNoticeBg, other.creditNoticeBg, t)!,
       loginKakaoBg: Color.lerp(loginKakaoBg, other.loginKakaoBg, t)!,
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,

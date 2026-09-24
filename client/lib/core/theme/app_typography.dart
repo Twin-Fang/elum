@@ -62,6 +62,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.promptCaption,
     required this.lastLoginBadge,
     required this.settingsTileLabel,
+    required this.creditTitle,
+    required this.creditNumber,
+    required this.creditBody,
+    required this.creditCaption,
     required this.navTitle,
     required this.contactSheetTitle,
     required this.contactSheetEmail,
@@ -289,6 +293,18 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// `tileLabel`(13/w400 TmoneyRoundWind)과 크기·폰트가 모두 다르다.
   /// 회원탈퇴만 같은 크기에 w500 을 쓴다 — 굵기는 쓰는 쪽에서 얹는다.
   final TextStyle settingsTileLabel;
+
+  /// AI 크레딧 카드 제목 `이번 주 AI 생성` (17/w700 Pretendard, #407 시안).
+  final TextStyle creditTitle;
+
+  /// AI 크레딧 남은 숫자 (32/w800 Pretendard). 시안은 37 이지만 설정 목록 폭(361)에 맞춰 줄였다.
+  final TextStyle creditNumber;
+
+  /// AI 크레딧 본문 (14/w400 Pretendard). 줄이 꺾일 수 있어 줄 높이를 준다.
+  final TextStyle creditBody;
+
+  /// AI 크레딧 작은 안내 (12/w400 Pretendard).
+  final TextStyle creditCaption;
 
   /// 뒤로가기와 같은 줄에 서는 가운데 제목 (18/w600 Pretendard, Figma `1022:4467`).
   ///
@@ -671,6 +687,30 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w600,
       height: 1.0,
     ),
+    creditTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 17,
+      fontWeight: FontWeight.w700,
+      height: 1.2,
+    ),
+    creditNumber: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 32,
+      fontWeight: FontWeight.w800,
+      height: 1.1,
+    ),
+    creditBody: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+    ),
+    creditCaption: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+    ),
     settingsTileLabel: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 16,
@@ -780,6 +820,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? promptCaption,
     TextStyle? lastLoginBadge,
     TextStyle? settingsTileLabel,
+    TextStyle? creditTitle,
+    TextStyle? creditNumber,
+    TextStyle? creditBody,
+    TextStyle? creditCaption,
     TextStyle? navTitle,
     TextStyle? contactSheetTitle,
     TextStyle? contactSheetEmail,
@@ -844,6 +888,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptCaption: promptCaption ?? this.promptCaption,
       lastLoginBadge: lastLoginBadge ?? this.lastLoginBadge,
       settingsTileLabel: settingsTileLabel ?? this.settingsTileLabel,
+      creditTitle: creditTitle ?? this.creditTitle,
+      creditNumber: creditNumber ?? this.creditNumber,
+      creditBody: creditBody ?? this.creditBody,
+      creditCaption: creditCaption ?? this.creditCaption,
       navTitle: navTitle ?? this.navTitle,
       contactSheetTitle: contactSheetTitle ?? this.contactSheetTitle,
       contactSheetEmail: contactSheetEmail ?? this.contactSheetEmail,
@@ -922,6 +970,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
       lastLoginBadge: TextStyle.lerp(lastLoginBadge, other.lastLoginBadge, t)!,
       settingsTileLabel:
           TextStyle.lerp(settingsTileLabel, other.settingsTileLabel, t)!,
+      creditTitle: TextStyle.lerp(creditTitle, other.creditTitle, t)!,
+      creditNumber: TextStyle.lerp(creditNumber, other.creditNumber, t)!,
+      creditBody: TextStyle.lerp(creditBody, other.creditBody, t)!,
+      creditCaption: TextStyle.lerp(creditCaption, other.creditCaption, t)!,
       navTitle: TextStyle.lerp(navTitle, other.navTitle, t)!,
       contactSheetTitle:
           TextStyle.lerp(contactSheetTitle, other.contactSheetTitle, t)!,

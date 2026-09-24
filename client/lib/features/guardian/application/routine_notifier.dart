@@ -2,10 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
+import '../../../core/network/idempotency_key.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
+import '../../../shared/models/credit_usage.dart';
 import '../../../shared/models/routine.dart';
+import '../../credit/data/credit_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/routine_repository.dart';
 
@@ -38,6 +41,8 @@ class RoutineFlowState {
     this.errorCode,
     this.errorMessage,
     this.errorHint,
+    this.idempotencyKey,
+    this.creditUsage,
   });
 
   final RoutineFlowStep step;
@@ -89,6 +94,13 @@ class RoutineFlowState {
   /// 다시 하기만 누른다 (#352 규칙 · #387 D4).
   final String? errorHint;
 
+  /// 카드 생성 요청의 멱등 키 (#407). 같은 요청의 재시도는 이 키를 다시 쓴다.
+  final String? idempotencyKey;
+
+  /// 이번 생성이 쓴 크레딧. 카드 확인 머리 아래 한 줄로 보인다. 크레딧이 꺼져 있거나
+  /// 이미 만든 일과를 연 경우 null 이다.
+  final CreditUsage? creditUsage;
+
   RoutineFlowState copyWith({
     RoutineFlowStep? step,
     String? rawInput,
@@ -104,6 +116,8 @@ class RoutineFlowState {
     String? errorCode,
     String? errorMessage,
     String? errorHint,
+    String? idempotencyKey,
+    CreditUsage? creditUsage,
   }) {
     return RoutineFlowState(
       step: step ?? this.step,
@@ -121,6 +135,8 @@ class RoutineFlowState {
       errorCode: errorCode,
       errorMessage: errorMessage,
       errorHint: errorHint,
+      idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+      creditUsage: creditUsage ?? this.creditUsage,
     );
   }
 }
@@ -307,6 +323,12 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   /// 없는 카드를 또 지우러 가면 안 된다.
   final _removedStepIds = <String>{};
 
+  /// [RoutineFlowState.idempotencyKey]를 발급할 때의 요청 내용.
+  ///
+  /// 내용이 같으면 재시도라 같은 키, 다르면(되돌아가 입력·답·보상을 고쳤다) 새 요청이라
+  /// 새 키다. 고친 요청에 옛 키를 실으면 서버는 옛 요청으로 보고 옛 일과를 준다.
+  String? _keyIssuedFor;
+
   Future<void> generateCards() {
     // 진행 중이거나 이미 끝난 생성이 있으면 그것을 그대로 돌려준다.
     //
@@ -379,7 +401,11 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
 
   Future<void> _createRoutine() async {
     // 재시도로 다시 들어올 수 있으므로 이전 에러 코드를 지운다.
-    state = state.copyWith(step: RoutineFlowStep.generating, errorCode: null);
+    state = state.copyWith(
+      step: RoutineFlowStep.generating,
+      errorCode: null,
+      idempotencyKey: _keyForThisRequest(),
+    );
 
     final repo = ref.read(routineRepositoryProvider);
     final goals = ref.read(onboardingProvider).supportGoals;
@@ -393,12 +419,19 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
         // 건너뛰었으면 빈 문자열이다. 서버가 보상 없음으로 저장한다 (이슈 #239).
         rewardText: state.rewardText,
         rewardPresetKey: state.rewardPresetKey,
+        idempotencyKey: state.idempotencyKey ?? '',
       );
 
       AppLogger.notifierStateChange('RoutineFlowNotifier', 'generating', 'review', {
         'cardCount': routine.steps.length,
       });
-      state = state.copyWith(step: RoutineFlowStep.review, routine: routine);
+      state = state.copyWith(
+        step: RoutineFlowStep.review,
+        routine: routine,
+        creditUsage: routine.creditUsage,
+      );
+      // 잔액이 바뀌었다 — 설정 카드·직전 안내가 옛 숫자를 보이지 않게 한다.
+      ref.invalidate(creditSummaryProvider);
       // 이 순간 서버에 임시저장(`PENDING_REVIEW`)으로 남았다. 목록을 다시 받지 않으면
       // 앱을 다시 켜기 전까지 임시저장 화면에 안 보인다 (#387) — 전체 목록이
       // keepAlive 라 한 번 받은 것을 계속 준다.
@@ -420,7 +453,23 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
         errorMessage: failure.serverMessage,
         errorHint: failure.hint,
       );
+      // 실패해도 예약이 풀렸거나(반환) 부족이 드러났다 — 다음에 볼 숫자를 새로 받는다.
+      ref.invalidate(creditSummaryProvider);
     }
+  }
+
+  /// 이번 요청의 멱등 키. 같은 요청이면 전에 발급한 키를, 아니면 새 키를 준다.
+  String _keyForThisRequest() {
+    final fingerprint = [
+      state.rawInput,
+      ...state.answers,
+      state.rewardText,
+      state.rewardPresetKey,
+    ].join('\u0000');
+    final existing = state.idempotencyKey;
+    if (existing != null && _keyIssuedFor == fingerprint) return existing;
+    _keyIssuedFor = fingerprint;
+    return newIdempotencyKey();
   }
 
   /// 임시저장에서 이어서 만들기 (#349).
@@ -605,6 +654,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     _generating = null;
     _blockedCalls = 0;
     _removedStepIds.clear();
+    _keyIssuedFor = null;
     state = const RoutineFlowState();
   }
 }

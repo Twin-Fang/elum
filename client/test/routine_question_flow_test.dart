@@ -91,6 +91,41 @@ void main() {
     });
   });
 
+  // 크레딧이 막으면 질문 없이 넘겨도 카드 만들기에서 똑같이 막힌다 (#407).
+  // 질문을 건너뛰고 생성 로딩까지 끌고 가지 않고 질문 단계에서 멈춘다.
+  group('저장소 — 크레딧이 막으면 질문 단계에서 멈춘다 (#407)', () {
+    for (final (status, code) in [
+      (403, 'AI_CREDIT_INSUFFICIENT'),
+      (403, 'AI_CREDIT_ACCOUNT_FROZEN'),
+      (409, 'AI_CREDIT_JOB_IN_PROGRESS'),
+    ]) {
+      test('$code 는 질문 없이 넘기지 않고 실패를 던진다', () async {
+        final repo = RoutineRepositoryImpl(
+          dio: _dio(FakeHttpError(status, errorCode: code)).dio,
+        );
+
+        await expectLater(
+          repo.generateQuestion('수영장 가기'),
+          throwsA(
+            isA<AppFailure>().having((f) => f.badgeOr('E-1003'), 'badge', code),
+          ),
+        );
+      });
+    }
+
+    test('장부 오류(UNAVAILABLE)는 잠시 뒤 풀린다 — 지금처럼 질문 없이 넘어간다', () async {
+      final repo = RoutineRepositoryImpl(
+        dio: _dio(
+          const FakeHttpError(503, errorCode: 'AI_CREDIT_UNAVAILABLE'),
+        ).dio,
+      );
+
+      final question = await repo.generateQuestion('수영장 가기');
+
+      expect(question.askable, isEmpty);
+    });
+  });
+
   group('흐름 — 답은 그 질문을 만든 입력에 딸린다 (S2)', () {
     late ProviderContainer container;
     late ({Dio dio, FakeAdapter adapter, Map<String, Object?> routes}) net;

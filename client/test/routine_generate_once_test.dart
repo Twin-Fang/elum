@@ -130,6 +130,7 @@ class _CountingRepo with FakeRewardApi implements RoutineRepository {
     List<String> answers = const [],
     String rewardText = '',
     String rewardPresetKey = '',
+    String idempotencyKey = '',
   }) async {
     createCalls++;
     // 실제 AI 호출처럼 시간이 걸린다 — 그 사이 중복 호출이 들어온다
@@ -176,6 +177,7 @@ class _ThrowingRepo extends _CountingRepo {
     List<String> answers = const [],
     String rewardText = '',
     String rewardPresetKey = '',
+    String idempotencyKey = '',
   }) async {
     createCalls++;
     await Future<void>.delayed(const Duration(milliseconds: 10));

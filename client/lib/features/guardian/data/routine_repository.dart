@@ -8,6 +8,7 @@ import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../shared/models/routine.dart';
+import '../../credit/domain/credit_summary.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/support_goal.dart';
 import '../domain/routine_suggestion.dart';
@@ -46,12 +47,17 @@ abstract interface class RoutineRepository {
   /// 일과 생성 → 카드 5장.
   ///
   /// [rewardText]는 보호자가 카드 생성 **전에** 정한 보상이다. 비워둘 수 있다.
+  ///
+  /// [idempotencyKey]는 `Idempotency-Key` 헤더로 간다 (#407). 같은 키로 다시 오면
+  /// 서버가 AI 를 다시 부르지 않고 저장된 일과를 준다 — 재시도가 크레딧을 두 번
+  /// 쓰지 않는다. 비우면 헤더를 보내지 않고 서버가 만든다(구버전 호환과 같은 길).
   Future<Routine> createRoutine({
     required String rawInputText,
     required Set<SupportGoal> goals,
     List<String> answers,
     String rewardText,
     String rewardPresetKey,
+    String idempotencyKey,
   });
 
   /// 보호자 승인. 이후에만 아동 화면에 노출된다 (docs 원칙 3번).
@@ -220,6 +226,9 @@ class RoutineRepositoryImpl implements RoutineRepository {
       // 서버에 닿지 못했다 — 흐름이 연결 안내를 띄우게 넘긴다 (#393 S1).
       final failure = AppFailure.of(e);
       if (failure.isUnreachable) throw failure;
+      // 크레딧이 막았다 (#407). 질문 없이 넘기면 카드 만들기에서 같은 이유로 또
+      // 막힌다 — 질문 단계에서 멈추고 `홈으로` 오류 화면을 띄우게 넘긴다.
+      if (isCreditBlockingCode(failure.badgeOr(''))) throw failure;
     }
 
     // 응답은 받았는데 실패했다(5xx·빈 본문 등). 예전에는 여기서 `비 오는 날
@@ -240,6 +249,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
     List<String> answers = const [],
     String rewardText = '',
     String rewardPresetKey = '',
+    String idempotencyKey = '',
   }) async {
     AppLogger.repositoryCall('RoutineRepository', 'createRoutine', {
       'rawInputText': rawInputText,
@@ -263,6 +273,9 @@ class RoutineRepositoryImpl implements RoutineRepository {
         if (rewardPresetKey.trim().isNotEmpty)
           'rewardPresetKey': rewardPresetKey.trim(),
       },
+      options: idempotencyKey.isEmpty
+          ? null
+          : Options(headers: {'Idempotency-Key': idempotencyKey}),
     );
     final body = res.data;
     // 응답이 비었거나 카드가 0장이면 실패로 본다. 로컬로 지어내지 않고 예외를 던져

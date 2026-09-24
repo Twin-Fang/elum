@@ -17,6 +17,7 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
 import 'widgets/aurora_background.dart';
+import 'widgets/credit_low_notice.dart';
 import 'widgets/routine_flow_scaffold.dart';
 
 /// Figma `보호자_새로운 일과 만들기_추가질문`(262:4766 / 262:4854).
@@ -104,11 +105,14 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
       // 답을 하나라도 골랐을 때만 CTA가 나타난다 (Figma 262:4854)
       bottomButton: state.answers.isEmpty
           ? null
-          : ElumButton(
-              // 시안(262:4854) 그대로다. 보상이 앞으로 옮겨 오면서(#380) 이 버튼이
-              // 여는 것이 정말로 카드 생성이 됐다 — 규칙(바로 다음 화면 이름)과도 맞는다.
-              label: '카드 만들기',
-              onPressed: _makeCards,
+          // 크레딧이 적으면 누르기 전에 알린다 (#407). 아니면 버튼 그대로다.
+          : CreditLowNotice(
+              child: ElumButton(
+                // 시안(262:4854) 그대로다. 보상이 앞으로 옮겨 오면서(#380) 이 버튼이
+                // 여는 것이 정말로 카드 생성이 됐다 — 규칙(바로 다음 화면 이름)과도 맞는다.
+                label: '카드 만들기',
+                onPressed: _makeCards,
+              ),
             ),
       child: SingleChildScrollView(
         child: Column(

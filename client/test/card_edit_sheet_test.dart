@@ -384,6 +384,7 @@ class _FakeRepo with FakeRewardApi implements RoutineRepository {
     List<String> answers = const [],
     String rewardText = '',
     String rewardPresetKey = '',
+    String idempotencyKey = '',
   }) async => const Routine(id: 'r1');
 
   @override
