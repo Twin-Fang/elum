@@ -4,6 +4,11 @@ import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
+import com.chuseok22.elumserver.credit.application.service.CreditReservation;
+import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
+import com.chuseok22.elumserver.credit.application.service.CreditSettlement;
+import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
@@ -29,6 +34,7 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,7 +47,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +86,11 @@ public class RoutineService {
   /// {@link RoutineStepImageFiller}가 따로 묶는다 (#368).
   private static final int STEP_MAX_COUNT = 10;
 
+  /// 멱등 키 최대 길이 — ai_credit_job.request_key 가 varchar(255) 다. 넘으면 저장에서 터지기 전에 400.
+  private static final int IDEMPOTENCY_KEY_MAX_LENGTH = 255;
+  /// 반환 사유 최대 길이 — ai_credit_job.fail_reason 이 varchar(500) 다.
+  private static final int RELEASE_REASON_MAX_LENGTH = 200;
+
   private final RoutineRepository routineRepository;
   private final ProfileRepository profileRepository;
   private final RoutineAiPipeline routineAiPipeline;
@@ -88,6 +101,9 @@ public class RoutineService {
   private final RoutineStepImageFiller routineStepImageFiller;
   private final ProfileAccessGuard profileAccessGuard;
   private final RoutineCreationWriter routineCreationWriter;
+  private final RoutineStepRepository routineStepRepository;
+  private final CreditReservationService creditReservationService;
+  private final CreditQueryService creditQueryService;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
@@ -95,6 +111,10 @@ public class RoutineService {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public RoutineQuestionResponse generateQuestion(Caller caller, RoutineQuestionRequest request) {
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
+    // 질문은 차감이 없지만 곧 일과 생성으로 이어진다. 잔액이 모자라면 여기서 막는다(스펙 §3) — 아래 AI 실패
+    // 대체(fail-open)와 달리 이 거절은 403 으로 그대로 나간다. 목표와 무관하게 본다: 질문을 건너뛰는 목표여도
+    // 다음 단계인 카드 만들기에서 같은 이유로 막힌다.
+    creditQueryService.requireCanStartRoutine(caller.memberId());
 
     Set<SupportGoal> goals = profile.getSupportGoals();
     boolean needsQuestion = goals.contains(SupportGoal.PREPARE_ITEMS) || goals.contains(SupportGoal.PREPARE_NEW);
@@ -129,10 +149,26 @@ public class RoutineService {
   // Gemini 호출(수십 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 클래스 레벨
   // readOnly 트랜잭션을 이 메서드에서만 명시적으로 중단시킨다. routine은 신규 엔티티라
   // 지연 로딩 걱정이 없으므로 안전하다.
+  //
+  // 크레딧 (#407): 프로필 확인 뒤 예약 → AI → 저장 트랜잭션에서 정산, 실패하면 반환.
+  // 비용 상한까지 모든 거절을 예약 앞에 둔다 — 거절될 요청이 예약·원장을 남기지 않게.
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public RoutineResponse create(Caller caller, RoutineCreateRequest request) {
+  public RoutineResponse create(Caller caller, RoutineCreateRequest request, String idempotencyKey) {
+    String requestKey = requestKeyOf(idempotencyKey);
+    // 같은 키가 이미 끝났으면 쿨다운·한도·예산보다 먼저 돌려준다. 응답을 놓친 재전송은 새 생성이 아니다 —
+    // 한도를 막 채운 요청이나 30초 안의 재전송이 막히면 이미 청구된 일과를 받을 길이 없다.
+    // 키가 없으면(구버전 앱) 서버가 방금 만든 키라 찾을 것이 없다.
+    if (idempotencyKey != null && !idempotencyKey.isBlank()) {
+      Optional<String> settledRoutineId = creditReservationService.findSettledRoutineId(caller.memberId(), requestKey);
+      if (settledRoutineId.isPresent()) {
+        log.info("같은 멱등 키의 일과를 돌려준다(한도 검사 전, AI 재호출 없음): memberId={}, routineId={}",
+          caller.memberId(), settledRoutineId.get());
+        return routineCreationWriter.loadSaved(caller, settledRoutineId.get());
+      }
+    }
+
     routineRequestCooldownGuard.guard(caller.memberId());
-    // 쿨다운이 몰아치기를 막고, 여기서 오늘·이번 주에 얼마나 썼는지를 본다.
+    // 쿨다운이 몰아치기를 막고, 여기서 오늘·이번 주에 얼마나 썼는지를 본다(크레딧이 켜져 있으면 보유 수만).
     routineQuotaGuard.guard(caller.memberId());
     // 계정과 무관하게 서비스 전체가 오늘 쓴 비용을 본다 (#368). 셋 다 AI 를 부르기 전이라
     // 거절해도 비용이 0 이다.
@@ -140,17 +176,35 @@ public class RoutineService {
 
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
 
+    // 같은 키로 다시 오면(앱의 "다시 하기"·응답 유실 재전송) 이미 끝난 일과를 돌려주고 AI 를 다시 부르지 않는다.
+    // 키가 없으면(구버전 앱) 요청마다 새 키 — 멱등은 없지만 크레딧은 똑같이 센다.
+    CreditReservation reservation = creditReservationService.reserve(
+      caller.memberId(), CreditJobKind.ROUTINE_CREATE, requestKey, true);
+    if (reservation.outcome() == CreditReservation.Outcome.ALREADY_SETTLED) {
+      // 선조회와 예약 사이에 같은 키가 끝난 경우다(동시 재전송).
+      log.info("같은 멱등 키의 일과를 돌려준다(AI 재호출 없음): memberId={}, routineId={}",
+        caller.memberId(), reservation.routineId());
+      return routineCreationWriter.loadSaved(caller, reservation.routineId());
+    }
+    String creditJobId = reservation.isReserved() ? reservation.jobId() : null;
+
     // AI 호출 로그에 요청 회원을 연결한다 (텍스트·이미지 병렬 생성까지 전파).
     // 입력 글과 답변은 가공하지 않고 넘긴다. 예전의 AI DLP(로컬 LLM 마스킹)는 해커톤 POC 였고
     // 실패하면 원문을 그대로 넘기는 fail-open 이라 보장도 아니면서 호출마다 수 초가 걸렸다 (#377).
     List<String> answers = request.answers() == null ? List.of() : request.answers();
     RoutineAiPipeline.RoutineGenerationResult generation;
     AiCallContext.setMemberId(caller.memberId());
+    // 호출 기록에 작업 id 를 달아 작업 하나의 실제 USD 를 대조한다. 그림 가상 스레드에도 전파된다.
+    AiCallContext.setCreditJobId(creditJobId);
     try {
       generation = routineAiPipeline.generateForCreate(
         request.rawInputText(), profile.getNickname(), profile.getSupportGoals(), answers,
         profile.getCharacter(), profile.getId()
       );
+    } catch (RuntimeException e) {
+      // 만들지 못했으면 청구하지 않는다 — 예약을 돌려준다.
+      releaseCredit(creditJobId, "AI 생성 실패", e);
+      throw e;
     } finally {
       AiCallContext.clear();
     }
@@ -173,14 +227,52 @@ public class RoutineService {
     routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
     routine.setSteps(toStepEntities(routine, generation.steps()));
 
+    // 청구할 그림 수 = 카드에 실제로 붙은 그림. 실패해 비어 있는 카드는 세지 않는다.
+    int imageCount = (int) routine.getSteps().stream().filter(step -> step.getImagePath() != null).count();
+
     // 이미지는 여기 오기 전에 이미 디스크에 쓰였다. 저장이 실패하면 — 그사이 이 보호자가 나가 거절된
     // 경우(E17)를 포함해 — 아무도 참조하지 않는 파일이 남으므로 방금 만든 것만 되돌린다 (이슈 #215).
+    // 정산은 저장과 같은 트랜잭션이라 함께 되돌아간다. 예약은 따로 돌려준다.
+    RoutineCreationWriter.SavedRoutine saved;
     try {
-      return RoutineResponse.from(routineCreationWriter.save(caller.memberId(), profile.getId(), routine));
+      saved = routineCreationWriter.save(caller.memberId(), profile.getId(), routine, creditJobId, imageCount);
     } catch (RuntimeException e) {
       routineImageStorage.deleteBatch(generation.batchId());
+      releaseCredit(creditJobId, "일과 저장 실패", e);
       throw e;
     }
+    RoutineResponse response = RoutineResponse.from(saved.routine());
+    CreditSettlement settlement = saved.settlement();
+    if (settlement == null) {
+      return response;
+    }
+    return response.withCredit(new RoutineResponse.CreditUsage(
+      saved.routine().getSteps().size(), imageCount, settlement.charged(), settlement.balanceAfter()));
+  }
+
+  /// 앱이 보낸 멱등 키. 없으면(구버전 앱) 서버가 만든다.
+  private static String requestKeyOf(String idempotencyKey) {
+    if (idempotencyKey == null || idempotencyKey.isBlank()) {
+      return UUID.randomUUID().toString();
+    }
+    String key = idempotencyKey.trim();
+    if (key.length() > IDEMPOTENCY_KEY_MAX_LENGTH) {
+      throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+    }
+    return key;
+  }
+
+  /// 예약을 돌려준다. 크레딧이 꺼져 예약이 없으면 할 일이 없다. release 는 던지지 않는다 — 원래 실패를 가리지 않게.
+  private void releaseCredit(String creditJobId, String what, RuntimeException cause) {
+    if (creditJobId == null) {
+      return;
+    }
+    String detail = cause instanceof CustomException custom
+      ? custom.getErrorCode().name()
+      : cause.getClass().getSimpleName();
+    String reason = what + ": " + detail;
+    creditReservationService.release(creditJobId,
+      reason.length() > RELEASE_REASON_MAX_LENGTH ? reason.substring(0, RELEASE_REASON_MAX_LENGTH) : reason);
   }
 
   @Transactional
@@ -566,6 +658,12 @@ public class RoutineService {
    *
    * <p>하루 비용 상한이나 회원별 그림 횟수에 걸려도 같다 — 카드는 추가하고 그림만
    * 건너뛴다 (#368). 그래서 여기에는 일과 만들기의 쿨다운·한도를 걸지 않는다.
+   *
+   * <p><b>그림은 {@code generateImage=true} 일 때만 만든다 (#407).</b> 크레딧이 켜져 있으면 이 트랜잭션 안에서
+   * 그림 1장을 예약한다(초과 허용 없음). 모자라거나 계정이 멈춰 있으면 카드는 저장하고 그림만 건너뛰며 응답에
+   * 까닭을 싣는다. 예약 거절은 예약 트랜잭션이 정상으로 끝난 뒤 던져지므로 이 트랜잭션은 롤백 전용이 되지 않는다.
+   * 장부 오류(AI_CREDIT_UNAVAILABLE)는 카드까지 실패시킨다 — 그 경우 예약 안에서 난 예외가 이 트랜잭션을
+   * 이미 롤백 전용으로 만들어 카드만 저장할 수 없고, 장부 오류는 막는다(fail-closed).
    */
   @Transactional
   public RoutineResponse addStep(
@@ -593,11 +691,35 @@ public class RoutineService {
     // 카드가 늘면 "전부 완료" 상태가 깨진다 — COMPLETED였다면 CONFIRMED로 되돌린다.
     refreshCompletionStatus(routine);
 
+    // 지금 저장해 id 를 받는다. 목록에만 넣으면 커밋 때에야 id 가 매겨져, 그림 예약·정산에 넘길 카드 id 가
+    // 비어 있다 — 예전에는 그래서 그림 채우기가 "카드 없음"으로 끝났다.
+    routineStepRepository.save(step);
+
+    if (!request.wantsImage() || step.getDescription().isBlank()) {
+      return RoutineResponse.from(routine);
+    }
+
+    String creditJobId;
+    try {
+      // 카드 추가는 멱등 키가 없다 — 요청마다 새 작업이다.
+      CreditReservation reservation = creditReservationService.reserve(
+        caller.memberId(), CreditJobKind.CARD_IMAGE, "card-image:" + UUID.randomUUID(), false);
+      creditJobId = reservation.isReserved() ? reservation.jobId() : null;
+    } catch (CustomException e) {
+      if (e.getErrorCode() == ErrorCode.AI_CREDIT_INSUFFICIENT
+        || e.getErrorCode() == ErrorCode.AI_CREDIT_ACCOUNT_FROZEN) {
+        log.info("크레딧 거절 — 카드만 저장하고 그림은 건너뛴다: memberId={}, routineId={}, reason={}",
+          caller.memberId(), routineId, e.getErrorCode());
+        return RoutineResponse.from(routine).withImageSkippedReason(e.getErrorCode().name());
+      }
+      throw e;
+    }
+
     // 커밋된 뒤에 그림을 만든다. 트랜잭션 안에서 돌리면 Gemini 호출(수 초) 동안
-    // DB 커넥션을 붙잡고, 롤백되면 방금 쓴 이미지 파일이 고아로 남는다.
+    // DB 커넥션을 붙잡고, 롤백되면 방금 쓴 이미지 파일이 고아로 남는다. 롤백되면 예약도 함께 사라진다.
     routineStepImageFiller.scheduleAfterCommit(
       caller.memberId(), routineId, step.getId(), step.getDescription(), routine.getProfile().getCharacter(),
-      FluxSeed.routineKey(routine.getProfile().getId(), routine.getTitle()));
+      FluxSeed.routineKey(routine.getProfile().getId(), routine.getTitle()), creditJobId);
 
     return RoutineResponse.from(routine);
   }

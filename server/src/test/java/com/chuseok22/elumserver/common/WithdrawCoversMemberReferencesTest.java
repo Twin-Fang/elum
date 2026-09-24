@@ -47,7 +47,8 @@ class WithdrawCoversMemberReferencesTest {
   /// 탈퇴해도 보관 기간 동안 남기는 표와 그 이유. 여기에 없는 표는 탈퇴할 때 지운다 (최소 보관).
   private static final Map<String, String> RETAINED_ON_WITHDRAW = Map.of(
     "AuthIdentity", "같은 소셜 계정이 다시 오면 이 행으로 이전 계정을 찾는다 — 이메일은 비운다",
-    "AiCallLog", "하루·주간 한도를 잇는다 — 식별자를 떼면 재가입한 계정의 사용량이 0 이 된다"
+    "AiCallLog", "하루·주간 한도를 잇는다 — 식별자를 떼면 재가입한 계정의 사용량이 0 이 된다",
+    "AiCreditAccount", "재가입해도 주간 사용량을 이어 붙이려고 보관한다 — purge 에서 member 참조만 뗀다 (#407)"
   );
 
   @Test

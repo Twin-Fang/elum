@@ -105,6 +105,14 @@ public enum ErrorCode {
   // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.
   AI_DAILY_BUDGET_EXCEEDED(HttpStatus.SERVICE_UNAVAILABLE, "오늘은 카드를 더 만들 수 없어요. 내일 다시 만들어 주세요."),
 
+  // 주간 AI 크레딧 (#407). 부족·진행 중·동결·장부 오류를 코드로 나눈다 — 앱이 크레딧 오류면
+  // "다시 하기" 대신 "홈으로"를 보여주고, 장부 오류(UNAVAILABLE)만 다시 시도할 수 있다.
+  AI_CREDIT_INSUFFICIENT(HttpStatus.FORBIDDEN, "이번 주 크레딧을 모두 사용했어요. 월요일 0시에 다시 채워져요."),
+  AI_CREDIT_JOB_IN_PROGRESS(HttpStatus.CONFLICT, "이미 만들고 있어요. 잠시 뒤에 확인해주세요."),
+  AI_CREDIT_ACCOUNT_FROZEN(HttpStatus.FORBIDDEN, "지금은 AI 만들기를 쓸 수 없어요."),
+  // 장부를 못 읽으면 막는다(fail-closed) — 열어 두면 비용이 장부 밖으로 샌다.
+  AI_CREDIT_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "잠시 뒤에 다시 시도해주세요."),
+
   // 비밀값(외부 API 키) 저장.
   SECRET_MASTER_KEY_MISSING(HttpStatus.SERVICE_UNAVAILABLE,
     "비밀값을 저장할 수 없습니다. 서버에 암호화 키가 설정되지 않았습니다."),

@@ -88,6 +88,23 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     @Param("status") MemberStatus status, @Param("threshold") LocalDateTime threshold
   );
 
+  /**
+   * 관리자 크레딧 회원 검색 — 회원 id 그대로 · 아이디 · 이룸이 호칭 일부로 찾는다 (#407).
+   *
+   * <p>크레딧 표는 계정 단위라 회원 목록처럼 Member 를 페이지로 받지 않는다. 맞는 id 만 받아 계정 쪽에서 거른다.
+   */
+  @Query("""
+    select m.id from Member m
+    where m.id = :keyword
+       or lower(m.username) like lower(concat('%', :keyword, '%'))
+       or exists (
+         select 1 from ProfileGuardian g
+         where g.member = m
+           and lower(g.profile.nickname) like lower(concat('%', :keyword, '%'))
+       )
+    """)
+  List<String> findIdsByKeyword(@Param("keyword") String keyword);
+
   // 최근 활동 회원수(대시보드) — lastActivityAt 기준.
   long countByLastActivityAtAfter(LocalDateTime after);
 }

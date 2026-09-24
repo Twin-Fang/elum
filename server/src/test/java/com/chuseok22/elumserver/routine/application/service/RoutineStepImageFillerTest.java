@@ -21,6 +21,7 @@ import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
 import com.chuseok22.elumserver.common.infrastructure.store.InMemorySharedStateStore;
+import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThrottle;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
@@ -58,6 +59,7 @@ class RoutineStepImageFillerTest {
   @Mock private RoutineImageStorage routineImageStorage;
   @Mock private RoutineStepRepository routineStepRepository;
   @Mock private AiDailyBudgetGuard aiDailyBudgetGuard;
+  @Mock private CreditReservationService creditReservationService;
 
   private RoutineStepImageFiller filler;
 
@@ -69,7 +71,8 @@ class RoutineStepImageFillerTest {
     filler = new RoutineStepImageFiller(
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
       routineImageStorage, routineStepRepository, aiDailyBudgetGuard,
-      new RoutineStepImageThrottle(new InMemorySharedStateStore())
+      new RoutineStepImageThrottle(new InMemorySharedStateStore()),
+      creditReservationService
     );
     lenient().when(imageClientRouter.current()).thenReturn(imageClient);
     lenient().when(imageClient.generateImage(anyString(), any())).thenReturn(IMAGE);
@@ -85,7 +88,7 @@ class RoutineStepImageFillerTest {
   }
 
   private void fill(String memberId) {
-    filler.fill(memberId, "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, SEED_KEY);
+    filler.fill(memberId, "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, SEED_KEY, null);
   }
 
   @Test
@@ -166,7 +169,7 @@ class RoutineStepImageFillerTest {
     TransactionSynchronizationManager.initSynchronization();
     try {
       filler.scheduleAfterCommit(
-        "member-1", "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, SEED_KEY);
+        "member-1", "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, SEED_KEY, null);
       TransactionSynchronizationManager.getSynchronizations()
         .forEach(TransactionSynchronization::afterCommit);
     } finally {

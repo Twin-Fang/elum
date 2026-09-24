@@ -21,8 +21,19 @@ public record RoutineStepCreateRequest(
   // 설명은 이룸이 화면에서 TTS로 그대로 읽힌다. 너무 길면 듣다 지친다.
   @Size(max = 300, message = "카드 설명은 300자를 넘을 수 없습니다.")
   @Schema(description = "카드 설명 (이룸이 화면에서 소리로 읽어 준다)", example = "현관에서 우산을 챙겨요.")
-  String description
+  String description,
+
+  // 그림은 돈이라 명시적으로 고를 때만 만든다 (#407). 빼면 false — 예전처럼 자동으로 그리지 않는다.
+  @Schema(description = "AI 그림을 만들지 여부(기본 false). true 면 크레딧 1(그림 단가)을 쓰고, 모자라면 카드만 저장하고 "
+    + "응답 imageSkippedReason 에 AI_CREDIT_INSUFFICIENT 를 담는다. 설명이 비어 있으면 그리지 않는다",
+    example = "false", nullable = true)
+  Boolean generateImage
 ) {
+
+  /** 그림을 요청했는가. 빠지면 false. */
+  public boolean wantsImage() {
+    return Boolean.TRUE.equals(generateImage);
+  }
 
   /** 설명을 비워 보내도 화면이 깨지지 않게 빈 문자열로 맞춘다. */
   public String descriptionOrEmpty() {

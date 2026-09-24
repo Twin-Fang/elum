@@ -64,6 +64,23 @@ class AiCallLogServiceTest {
   }
 
   @Test
+  @DisplayName("크레딧 작업 id 가 맥락에 있으면 호출 기록에 단다 — 없으면 비운다 (#407)")
+  void record_creditJobIdFromContext() {
+    AiCallContext.setMemberId("member-1");
+    AiCallContext.setCreditJobId("job-1");
+
+    aiCallLogService.recordFailure(AiCallType.GEMINI_TEXT_CREATE, "gemini", 10, "timeout");
+    AiCallContext.clear();
+    aiCallLogService.recordFailure(AiCallType.GEMINI_TEXT_CREATE, "gemini", 10, "timeout");
+
+    ArgumentCaptor<AiCallLog> captor = ArgumentCaptor.forClass(AiCallLog.class);
+    verify(aiCallLogRepository, org.mockito.Mockito.times(2)).save(captor.capture());
+    assertThat(captor.getAllValues()).extracting(AiCallLog::getCreditJobId).containsExactly("job-1", null);
+    // clear 는 회원과 작업을 함께 비운다 — 스레드 재사용으로 다음 요청에 새지 않게.
+    assertThat(AiCallContext.currentCreditJobId()).isNull();
+  }
+
+  @Test
   @DisplayName("이미지 성공 기록은 장당 고정 단가로 비용을 계산한다")
   void recordSuccess_imageCall_usesPerImagePrice() {
     when(systemConfigService.getDouble(ConfigKey.PRICE_GEMINI_IMAGE_PER_IMAGE)).thenReturn(0.039);

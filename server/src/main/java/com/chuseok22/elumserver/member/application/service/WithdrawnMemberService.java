@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepos
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditAccountRepository;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
@@ -25,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p>탈퇴({@link MemberService#withdraw})는 계정을 지우지 않고 WITHDRAWN 으로 남긴다. 완전히 지우면
  * 같은 소셜 계정으로 다시 가입해 무료 사용량을 0 부터 새로 받을 수 있어서다. 남기는 것은 재가입을
- * 알아볼 최소한 — 계정 행, 소셜 신원(이메일은 비움), AI 호출 기록의 회원 식별자뿐이다.
+ * 알아볼 최소한 — 계정 행, 소셜 신원(이메일은 비움), AI 호출 기록의 회원 식별자, AI 크레딧 계정(#407)뿐이다.
  *
  * <pre>
  *   탈퇴 ──▶ WITHDRAWN (보관) ──┬── 보관 기간 안에 같은 소셜 계정으로 로그인 ──▶ {@link #revive} (빈 상태, 한도 이어짐)
@@ -49,6 +50,7 @@ public class WithdrawnMemberService {
   private final SubscriptionService subscriptionService;
   private final SystemConfigService systemConfigService;
   private final GuardianshipService guardianshipService;
+  private final AiCreditAccountRepository aiCreditAccountRepository;
 
   /** 탈퇴 뒤 남겨 두는 일수. 관리자 설정값이다 (기본 365 — 개인정보처리방침 4조의 1년과 같다). */
   public int retentionDays() {
@@ -132,6 +134,9 @@ public class WithdrawnMemberService {
     // 보관하던 것. 소셜 신원은 지우고, AI 호출 기록은 운영 지표라 행을 남기되 누가 썼는지를 뗀다 (#191).
     authIdentityRepository.deleteAllByMemberId(memberId);
     aiCallLogRepository.detachMember(memberId);
+    // 크레딧 계정도 행·원장은 남기고 회원만 뗀다 (#407). 같은 소셜 신원으로 돌아오면 identity_key 로 다시 붙어
+    // 이번 주 사용량이 이어진다 — 지우면 탈퇴·재가입으로 주간 지급을 새로 받는다.
+    aiCreditAccountRepository.detachMember(memberId);
 
     memberRepository.delete(member);
     // 지우기를 바로 DB 에 보낸다. 로그인 경로(S2)는 같은 트랜잭션에서 같은 아이디로 새 계정을 만드는데,

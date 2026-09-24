@@ -11,11 +11,16 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
+import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.RoutineAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
+import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,8 +42,13 @@ class RoutineCreationWriterTest {
   @Mock
   private RoutineRepository routineRepository;
 
+  @Mock
+  private CreditReservationService creditReservationService;
+
   @InjectMocks
   private RoutineCreationWriter writer;
+
+  private static final Caller GUARDIAN_A = Caller.guardian("A");
 
   private Profile profile() {
     Profile profile = new Profile();
@@ -52,7 +62,7 @@ class RoutineCreationWriterTest {
     when(profileRepository.findByIdForUpdate("p1")).thenReturn(Optional.of(profile()));
     doThrow(new CustomException(ErrorCode.PROFILE_ACCESS_DENIED)).when(profileAccessGuard).requireGuardianOf("A", "p1");
 
-    assertThatThrownBy(() -> writer.save("A", "p1", new Routine()))
+    assertThatThrownBy(() -> writer.save("A", "p1", new Routine(), null, 0).routine())
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PROFILE_ACCESS_DENIED);
     verify(routineRepository, never()).save(any());
@@ -66,7 +76,7 @@ class RoutineCreationWriterTest {
     when(routineRepository.maxDisplayOrder("p1")).thenReturn(4);
     when(routineRepository.save(any(Routine.class))).thenAnswer(i -> i.getArgument(0));
 
-    Routine saved = writer.save("A", "p1", new Routine());
+    Routine saved = writer.save("A", "p1", new Routine(), null, 0).routine();
 
     InOrder order = inOrder(profileRepository, profileAccessGuard, routineRepository);
     order.verify(profileRepository).findByIdForUpdate("p1");
@@ -83,7 +93,41 @@ class RoutineCreationWriterTest {
   void profileRemovedDuringGeneration_notFound() {
     when(profileRepository.findByIdForUpdate("p1")).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> writer.save("A", "p1", new Routine()))
+    assertThatThrownBy(() -> writer.save("A", "p1", new Routine(), null, 0).routine())
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PROFILE_NOT_FOUND);
+  }
+
+  // --- 멱등 재요청의 저장된 일과 ---
+
+  private Routine savedRoutine() {
+    Routine routine = new Routine();
+    routine.setId("r1");
+    routine.setTitle("병원 다녀오기");
+    routine.setProfile(profile());
+    routine.setCreatedBy("A");
+    routine.setStatus(RoutineStatus.PENDING_REVIEW);
+    routine.setSteps(List.of());
+    return routine;
+  }
+
+  @Test
+  @DisplayName("같은 키로 다시 와도 그 사이 이룸이에서 나간 보호자에게는 저장된 일과를 주지 않는다")
+  void loadSaved_guardianLeft_denied() {
+    when(routineRepository.findById("r1")).thenReturn(Optional.of(savedRoutine()));
+    doThrow(new CustomException(ErrorCode.ROUTINE_ACCESS_DENIED))
+      .when(profileAccessGuard).checkRoutine(GUARDIAN_A, "p1", "A", RoutineAction.VIEW);
+
+    assertThatThrownBy(() -> writer.loadSaved(GUARDIAN_A, "r1"))
+      .isInstanceOf(CustomException.class)
+      .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_ACCESS_DENIED);
+  }
+
+  @Test
+  @DisplayName("아직 연결된 보호자에게는 저장된 일과를 돌려준다 — 보기 권한으로 확인한다")
+  void loadSaved_stillGuardian_returnsRoutine() {
+    when(routineRepository.findById("r1")).thenReturn(Optional.of(savedRoutine()));
+
+    assertThat(writer.loadSaved(GUARDIAN_A, "r1").id()).isEqualTo("r1");
+    verify(profileAccessGuard).checkRoutine(GUARDIAN_A, "p1", "A", RoutineAction.VIEW);
   }
 }

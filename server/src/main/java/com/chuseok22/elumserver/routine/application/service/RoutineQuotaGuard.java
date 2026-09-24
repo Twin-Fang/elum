@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.credit.application.service.CreditPolicyService;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
@@ -34,6 +35,8 @@ public class RoutineQuotaGuard {
   private final EntitlementService entitlementService;
   private final AiCallLogRepository aiCallLogRepository;
   private final RoutineRepository routineRepository;
+  /// 크레딧이 켜져 있으면 하루·주간 횟수 대신 크레딧이 사용량을 묶는다 (#407).
+  private final CreditPolicyService creditPolicyService;
   /// 하루·주 경계를 정하는 시계. 테스트가 요일을 고정할 수 있게 밖에서 받는다.
   private final Clock clock;
 
@@ -41,18 +44,19 @@ public class RoutineQuotaGuard {
   @Autowired
   public RoutineQuotaGuard(
     EntitlementService entitlementService, AiCallLogRepository aiCallLogRepository,
-    RoutineRepository routineRepository
+    RoutineRepository routineRepository, CreditPolicyService creditPolicyService
   ) {
-    this(entitlementService, aiCallLogRepository, routineRepository, Clock.systemDefaultZone());
+    this(entitlementService, aiCallLogRepository, routineRepository, creditPolicyService, Clock.systemDefaultZone());
   }
 
   RoutineQuotaGuard(
     EntitlementService entitlementService, AiCallLogRepository aiCallLogRepository,
-    RoutineRepository routineRepository, Clock clock
+    RoutineRepository routineRepository, CreditPolicyService creditPolicyService, Clock clock
   ) {
     this.entitlementService = entitlementService;
     this.aiCallLogRepository = aiCallLogRepository;
     this.routineRepository = routineRepository;
+    this.creditPolicyService = creditPolicyService;
     this.clock = clock;
   }
 
@@ -60,13 +64,30 @@ public class RoutineQuotaGuard {
     // 플랜을 한 번만 읽어 모든 검사가 함께 쓴다. 검사마다 구독을 다시 조회하면
     // 일과 생성 한 번에 쿼리가 검사 수만큼 늘어난다.
     PlanType plan = entitlementService.planOf(memberId);
-    // 주간을 먼저 본다. 주간이 다 찼는데 하루 한도로 거절하면 "내일 다시" 라고 안내하게
-    // 되는데, 내일도 막힌다.
-    guardCreateCount(memberId, plan, Entitlement.ROUTINE_CREATE_PER_WEEK, weekStart(),
-      ErrorCode.ROUTINE_CREATE_LIMIT_EXCEEDED);
-    guardCreateCount(memberId, plan, Entitlement.ROUTINE_CREATE_PER_DAY, dayStart(),
-      ErrorCode.ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED);
+    // 크레딧이 켜져 있으면 하루·주간 횟수는 보지 않는다 — 크레딧 예약이 대신 막는다(스펙 §1).
+    // 보유 일과 최대 수는 저장 공간 한도라 크레딧과 무관하게 남긴다.
+    if (!creditEnabled()) {
+      // 주간을 먼저 본다. 주간이 다 찼는데 하루 한도로 거절하면 "내일 다시" 라고 안내하게
+      // 되는데, 내일도 막힌다.
+      guardCreateCount(memberId, plan, Entitlement.ROUTINE_CREATE_PER_WEEK, weekStart(),
+        ErrorCode.ROUTINE_CREATE_LIMIT_EXCEEDED);
+      guardCreateCount(memberId, plan, Entitlement.ROUTINE_CREATE_PER_DAY, dayStart(),
+        ErrorCode.ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED);
+    }
     guardOwnedCount(memberId, plan);
+  }
+
+  /**
+   * 크레딧 정책이 켜져 있는가. 정책을 못 읽으면 꺼진 것으로 보고 횟수 한도를 건다 —
+   * 한도 없이 열어 두는 쪽보다 낫고, 어차피 뒤이은 크레딧 예약이 장부 오류로 막는다.
+   */
+  private boolean creditEnabled() {
+    try {
+      return creditPolicyService.current().isEnabled();
+    } catch (Exception e) {
+      log.warn("크레딧 정책 조회 실패 — 기존 횟수 한도를 건다", e);
+      return false;
+    }
   }
 
   /**

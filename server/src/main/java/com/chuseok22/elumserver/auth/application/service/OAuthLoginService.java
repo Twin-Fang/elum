@@ -10,6 +10,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
+import com.chuseok22.elumserver.credit.application.service.CreditAccountService;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.member.application.service.GuardianshipService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
@@ -25,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * 소셜 로그인. 카카오·네이버·구글·애플을 한 입구로 처리한다.
@@ -51,6 +54,7 @@ public class OAuthLoginService {
   private final JwtProperties jwtProperties;
   private final RefreshTokenService refreshTokenService;
   private final WithdrawnMemberService withdrawnMemberService;
+  private final CreditAccountService creditAccountService;
 
   public OAuthLoginService(
     List<OAuthVerifier> oAuthVerifiers,
@@ -62,7 +66,8 @@ public class OAuthLoginService {
     JwtProvider jwtProvider,
     JwtProperties jwtProperties,
     RefreshTokenService refreshTokenService,
-    WithdrawnMemberService withdrawnMemberService
+    WithdrawnMemberService withdrawnMemberService,
+    CreditAccountService creditAccountService
   ) {
     oAuthVerifiers.forEach(verifier -> this.verifiers.put(verifier.provider(), verifier));
     this.authIdentityRepository = authIdentityRepository;
@@ -74,6 +79,7 @@ public class OAuthLoginService {
     this.jwtProperties = jwtProperties;
     this.refreshTokenService = refreshTokenService;
     this.withdrawnMemberService = withdrawnMemberService;
+    this.creditAccountService = creditAccountService;
   }
 
   @Transactional
@@ -185,6 +191,9 @@ public class OAuthLoginService {
     identity.setEmailVerified(oAuthUser.emailVerified());
     authIdentityRepository.save(identity);
 
+    // 크레딧 계정을 소셜 신원으로 잇는다 (#407) — 완전 삭제 뒤 같은 소셜 계정으로 다시 오면 떼어 둔 장부를 되붙인다.
+    linkCreditAccount(member.getId(), provider, oAuthUser.providerUserId());
+
     // 가입 즉시 당사자 프로필을 관계와 함께 만든다. 이후 조회가 "프로필 없음"을 분기하지 않아도 된다.
     guardianshipService.createOwnProfile(member);
 
@@ -192,5 +201,33 @@ public class OAuthLoginService {
     subscriptionService.createFreeIfAbsent(member);
 
     return member;
+  }
+
+  /**
+   * 가입이 커밋된 뒤 크레딧 계정을 신원 키로 잇는다.
+   *
+   * <p>커밋 뒤에 하는 까닭: 보관 기간이 지난 탈퇴 계정을 이 로그인 트랜잭션에서 지우고(purge — 장부의 회원을 뗀다)
+   * 바로 새로 가입하면, 뗀 것이 아직 커밋 전이라 다른 트랜잭션인 연결이 그 장부를 못 본다. 가입이 롤백되면 연결도
+   * 하지 않는다. <b>실패해도 로그인은 막지 않는다</b> — 계정은 첫 크레딧 요청에서도 만들어진다(그때는 이어 붙이지 못해
+   * 새 주간 지급을 받는다 — error 로그로 남겨 관리자가 볼 수 있게 한다).
+   */
+  private void linkCreditAccount(String memberId, OAuthProvider provider, String providerUserId) {
+    Runnable link = () -> {
+      try {
+        creditAccountService.linkIdentity(memberId, CreditAccountService.identityKey(provider.name(), providerUserId));
+      } catch (RuntimeException e) {
+        log.error("크레딧 계정 신원 연결 실패 — 로그인은 계속한다: memberId={}, provider={}", memberId, provider, e);
+      }
+    };
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+        @Override
+        public void afterCommit() {
+          link.run();
+        }
+      });
+      return;
+    }
+    link.run();
   }
 }

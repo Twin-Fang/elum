@@ -17,6 +17,7 @@ import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepos
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditAccountRepository;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
@@ -67,6 +68,9 @@ class WithdrawnMemberServiceTest {
 
   @Mock
   private SystemConfigService systemConfigService;
+
+  @Mock
+  private AiCreditAccountRepository aiCreditAccountRepository;
 
   @InjectMocks
   private WithdrawnMemberService withdrawnMemberService;
@@ -219,6 +223,9 @@ class WithdrawnMemberServiceTest {
     // AI 기록 행은 운영 지표라 남기고, 누가 썼는지만 뗀다 (#191).
     verify(aiCallLogRepository).detachMember("m1");
     verify(aiCallLogRepository, never()).deleteAll();
+    // 크레딧 계정도 행은 남기고 회원만 뗀다 — 재가입하면 신원으로 다시 붙어 주간 사용량이 이어진다 (#407).
+    verify(aiCreditAccountRepository).detachMember("m1");
+    verify(aiCreditAccountRepository, never()).deleteAll();
     // 탈퇴 때 지웠어야 할 것도 한 번 더 지운다 — 남아 있으면 계정 행이 외래키에 걸린다.
     // 이룸이는 나가기 규칙으로 — 함께 돌보는 이룸이는 남은 보호자에게 남긴다 (다중 보호자 4-3).
     InOrder leaveFirst = inOrder(guardianshipService, memberRepository);

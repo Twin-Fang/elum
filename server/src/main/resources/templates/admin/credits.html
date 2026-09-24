@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{admin/fragments/admin-layout :: page('AI 크레딧', 'credits', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold">AI 크레딧</h1>
+    <p class="text-base-content/60">주간 AI 크레딧 지급·사용과 실제 AI 비용을 한 주 단위로 봅니다.</p>
+  </div>
+
+  <nav th:replace="~{admin/fragments/credit-nav :: nav('overview')}"></nav>
+
+  <!-- 주 선택. 미래 주는 없으니 이번 주에서는 "다음"을 숨긴다. -->
+  <div class="flex flex-wrap items-center gap-2">
+    <a class="btn btn-sm" th:href="@{/admin/credits(week=${overview.prevKey()})}">← 지난 주</a>
+    <span class="font-semibold" th:text="${overview.period().key()}">2026-W39</span>
+    <span class="text-sm text-base-content/60"
+          th:text="${#temporals.format(overview.period().start(), 'MM-dd')} + ' ~ ' + ${#temporals.format(overview.period().end().minusDays(1), 'MM-dd')}">09-21 ~ 09-27</span>
+    <span th:if="${overview.current()}" class="badge badge-primary badge-sm">이번 주</span>
+    <a th:if="${overview.nextKey() != null}" class="btn btn-sm" th:href="@{/admin/credits(week=${overview.nextKey()})}">다음 주 →</a>
+    <a th:unless="${overview.current()}" class="btn btn-ghost btn-sm" th:href="@{/admin/credits}">이번 주로</a>
+  </div>
+
+  <!-- 경고 — 하나라도 있으면 맨 위에 둔다. 조용히 묻히면 장부 문제를 늦게 안다. -->
+  <div th:if="${overview.hasWarning()}" class="space-y-2">
+    <div th:if="${!overview.policy().enabled}" class="alert alert-warning">
+      <span>크레딧 정책이 꺼져 있어요. 지금은 기존 일과 생성 횟수 한도로 동작합니다.
+        <a class="link" th:href="@{/admin/credits/policy}">정책 보기</a></span>
+    </div>
+    <div th:if="${overview.budgetReached()}" class="alert alert-error">
+      <span>오늘 AI 비용 상한에 닿았어요. 새 AI 생성이 멈춰 있습니다.
+        <a class="link" th:href="@{/admin/settings}">시스템 설정</a></span>
+    </div>
+    <div th:if="${overview.stuckCount() > 0}" class="alert alert-warning">
+      <span>
+        멈춘 예약 <b th:text="${overview.stuckCount()}">0</b>건 — 예약 유지 시간(<span th:text="${overview.policy().reservationTtlMinutes}">15</span>분)이
+        지났는데 아직 예약 중이에요. 다음 조회 때 자동으로 풀리지만, 바로 풀려면 작업에서 수동 반환하세요.
+        <a class="link" th:href="@{/admin/credits/jobs(status='RESERVED')}">예약 중 작업 보기</a>
+      </span>
+    </div>
+    <div th:if="${overview.mismatchCount() > 0}" class="alert alert-warning">
+      <span>
+        대조 불일치 <b th:text="${overview.mismatchCount()}">0</b>건 — 크레딧을 청구했는데 연결된 AI 호출 기록이 없어요.
+        <a class="link"
+           th:href="@{/admin/credits/jobs(mismatch=true, from=${#temporals.format(overview.period().start(), 'yyyy-MM-dd')}, to=${#temporals.format(overview.period().end().minusDays(1), 'yyyy-MM-dd')})}">불일치 작업 보기</a>
+      </span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="stat bg-base-200 rounded-box shadow p-4">
+      <div class="stat-title text-sm">지급받은 회원</div>
+      <div class="stat-value text-primary text-2xl" th:text="${overview.activeAccounts()}">0</div>
+      <div class="stat-desc">그 주 주간 지급이 있는 계정</div>
+    </div>
+    <div class="stat bg-base-200 rounded-box shadow p-4">
+      <div class="stat-title text-sm">지급</div>
+      <div class="stat-value text-primary text-2xl" th:text="${#numbers.formatInteger(overview.granted(), 1, 'COMMA')}">0</div>
+      <div class="stat-desc">보너스 <span th:text="${overview.bonusGranted()}">0</span> 별도</div>
+    </div>
+    <div class="stat bg-base-200 rounded-box shadow p-4">
+      <div class="stat-title text-sm">사용</div>
+      <div class="stat-value text-primary text-2xl" th:text="${#numbers.formatInteger(overview.used(), 1, 'COMMA')}">0</div>
+      <div class="stat-desc">실제 차감 합</div>
+    </div>
+    <div class="stat bg-base-200 rounded-box shadow p-4">
+      <div class="stat-title text-sm">남음</div>
+      <div class="stat-value text-primary text-2xl" th:text="${#numbers.formatInteger(overview.remaining(), 1, 'COMMA')}">0</div>
+      <div class="stat-desc" th:text="${overview.current()} ? '지금 사용 가능량 합' : '주간 지급이 주 말에 남긴 양'">지금 사용 가능량 합</div>
+    </div>
+    <div class="stat bg-base-200 rounded-box shadow p-4">
+      <div class="stat-title text-sm">예약 중</div>
+      <div class="stat-value text-2xl" th:text="${overview.reserved()}">0</div>
+      <div class="stat-desc" th:text="${overview.current()} ? '진행 중 작업이 잡아 둔 양' : '지난 주는 보지 않음'">진행 중</div>
+    </div>
+    <div class="stat bg-base-200 rounded-box shadow p-4">
+      <div class="stat-title text-sm">초과</div>
+      <div class="stat-value text-2xl" th:text="${overview.overageJobs()} + '건'">0건</div>
+      <div class="stat-desc"><span th:text="${overview.overageCredits()}">0</span> 크레딧 — 잔액이 모자라 차감 못 한 몫</div>
+    </div>
+    <div class="stat bg-base-200 rounded-box shadow p-4">
+      <div class="stat-title text-sm">반환·만료 작업</div>
+      <div class="stat-value text-2xl" th:text="${overview.releasedJobs()}">0</div>
+      <div class="stat-desc">실패로 돌려준 예약</div>
+    </div>
+    <div class="stat bg-base-200 rounded-box shadow p-4">
+      <div class="stat-title text-sm">소진 회원</div>
+      <div class="stat-value text-2xl" th:text="${overview.exhaustedAccounts()}">0</div>
+      <div class="stat-desc">
+        <a class="link link-hover" th:href="@{/admin/credits/members(week=${overview.period().key()}, exhausted=true)}">남음 0 인 계정 보기</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body space-y-3">
+        <h2 class="card-title text-lg">실제 AI 비용</h2>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div class="text-base-content/60">그 주 추정 USD</div>
+          <div class="font-mono" th:text="'$' + ${#numbers.formatDecimal(overview.totalUsd(), 1, 4)}">$0</div>
+          <div class="text-base-content/60">크레딧당 평균 원가</div>
+          <!-- 사용이 0 이면 나눌 수 없다. 0 으로 보이면 "공짜"로 오해한다. -->
+          <div class="font-mono"
+               th:text="${overview.costPerCredit() != null} ? '$' + ${#numbers.formatDecimal(overview.costPerCredit(), 1, 4)} : '—'">—</div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="table table-sm">
+            <thead>
+            <tr><th>모델</th><th class="text-right">호출</th><th class="text-right">USD</th></tr>
+            </thead>
+            <tbody>
+            <th:block th:if="${overview.modelCosts().isEmpty()}">
+              <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(3, '그 주 AI 호출이 없어요')}"></tr>
+            </th:block>
+            <tr th:each="cost : ${overview.modelCosts()}">
+              <td class="text-xs" th:text="${cost.model()}">모델</td>
+              <td class="text-right" th:text="${cost.calls()}">0</td>
+              <td class="text-right font-mono" th:text="'$' + ${#numbers.formatDecimal(cost.usd(), 1, 4)}">$0</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-xs text-base-content/50">질문·재시도·관리자 시험처럼 크레딧을 쓰지 않는 호출도 포함한 그 주 전체예요.</p>
+      </div>
+    </div>
+
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body space-y-3">
+        <h2 class="card-title text-lg">작업 종류별 평균</h2>
+        <div class="overflow-x-auto">
+          <table class="table table-sm">
+            <thead>
+            <tr><th>종류</th><th class="text-right">작업</th><th class="text-right">평균 호출</th><th class="text-right">평균 USD</th></tr>
+            </thead>
+            <tbody>
+            <th:block th:if="${overview.kindCosts().isEmpty()}">
+              <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(4, '그 주 정산한 작업이 없어요')}"></tr>
+            </th:block>
+            <tr th:each="cost : ${overview.kindCosts()}">
+              <td th:text="${cost.kind().name()}">ROUTINE_CREATE</td>
+              <td class="text-right" th:text="${cost.jobs()}">0</td>
+              <td class="text-right" th:text="${#numbers.formatDecimal(cost.avgCalls(), 1, 1)}">0</td>
+              <td class="text-right font-mono" th:text="'$' + ${#numbers.formatDecimal(cost.avgUsd(), 1, 4)}">$0</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-xs text-base-content/50">그 주에 정산한 작업과 거기에 연결된 AI 호출(credit_job_id)로 셉니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-sm text-base-content/60">
+    지금 정책 v<span th:text="${overview.policy().version}">1</span> ·
+    <span th:text="${overview.policy().enabled} ? '켜짐' : '꺼짐'">켜짐</span> ·
+    <a class="link link-hover" th:href="@{/admin/credits/policy}">정책 화면</a>
+  </div>
+</main>
+</body>
+</html>

@@ -29,6 +29,8 @@
               onsubmit="return confirm('강제 로그아웃할까요? 발급된 모든 토큰이 무효화되어 다시 로그인해야 합니다.');">
           <button type="submit" class="btn btn-warning btn-sm">강제 로그아웃</button>
         </form>
+        <!-- 이 회원의 주간 AI 크레딧 잔액·조정·작업 기록 (#407). -->
+        <a th:href="@{/admin/credits/members/{id}(id=${member.id()})}" class="btn btn-outline btn-sm">AI 크레딧</a>
         <a th:href="@{/admin/members}" class="btn btn-ghost btn-sm">목록으로</a>
       </div>
     </div>

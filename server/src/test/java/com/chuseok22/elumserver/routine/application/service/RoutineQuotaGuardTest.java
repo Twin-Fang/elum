@@ -16,6 +16,8 @@ import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.credit.application.service.CreditPolicyService;
+import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPolicy;
 import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.core.Entitlement;
 import com.chuseok22.elumserver.license.core.PlanType;
@@ -56,6 +58,9 @@ class RoutineQuotaGuardTest {
   @Mock
   private RoutineRepository routineRepository;
 
+  @Mock
+  private CreditPolicyService creditPolicyService;
+
   private RoutineQuotaGuard guard;
 
   /// 성공한 호출 기록 한 줄. 가짜 기록 표가 유형과 시각으로 거른다.
@@ -67,8 +72,10 @@ class RoutineQuotaGuardTest {
   @BeforeEach
   void setUp() {
     guard = new RoutineQuotaGuard(
-      entitlementService, aiCallLogRepository, routineRepository, WEDNESDAY_AFTERNOON
+      entitlementService, aiCallLogRepository, routineRepository, creditPolicyService, WEDNESDAY_AFTERNOON
     );
+    // 기존 한도 검사는 크레딧이 꺼졌을 때의 동작이다 — 기본은 꺼짐으로 두고 켜짐은 따로 본다 (#407).
+    lenient().when(creditPolicyService.current()).thenReturn(AiCreditPolicy.disabledDefault());
     // 기록 표를 흉내 낸다. 가드가 넘긴 유형 목록에 들고 넘긴 시각 이후인 행만 센다 —
     // 실제 쿼리(call_type in (...) and created_at >= :from)와 같은 규칙이다.
     // 예전 목은 GEMINI_TEXT_CREATE 하나로 고정돼 있어서 가드가 무엇을 넘기든 같은 숫자를
@@ -265,5 +272,43 @@ class RoutineQuotaGuardTest {
   void periodStarts() {
     assertThat(guard.weekStart()).isEqualTo(LocalDateTime.of(2026, 9, 21, 0, 0));
     assertThat(guard.dayStart()).isEqualTo(LocalDateTime.of(2026, 9, 23, 0, 0));
+  }
+
+  // --- 크레딧 켜짐 (#407) ---
+
+  private void creditEnabled() {
+    AiCreditPolicy policy = AiCreditPolicy.disabledDefault();
+    policy.setEnabled(true);
+    when(creditPolicyService.current()).thenReturn(policy);
+  }
+
+  @Test
+  @DisplayName("크레딧이 켜져 있으면 하루·주간 횟수 한도를 넘어도 통과한다 — 크레딧이 대신 묶는다 (#407)")
+  void creditEnabled_skipsDailyAndWeeklyLimits() {
+    creditEnabled();
+    logged(10, AiCallType.GEMINI_TEXT_CREATE, TODAY);
+    limits(2, 5);
+
+    assertThatCode(() -> guard.guard(MEMBER_ID)).doesNotThrowAnyException();
+  }
+
+  @Test
+  @DisplayName("크레딧이 켜져 있어도 보유 일과 최대 수는 본다 (#407)")
+  void creditEnabled_keepsOwnedCountLimit() {
+    creditEnabled();
+    limit(Entitlement.ROUTINE_MAX_COUNT, 3);
+    when(routineRepository.countByCreatedBy(MEMBER_ID)).thenReturn(3L);
+
+    assertRejectedWith(() -> guard.guard(MEMBER_ID), ErrorCode.ROUTINE_COUNT_LIMIT_EXCEEDED);
+  }
+
+  @Test
+  @DisplayName("크레딧 정책을 못 읽으면 기존 횟수 한도로 막는다 — 한도 없이 열어 두지 않는다 (#407)")
+  void creditPolicyUnreadable_fallsBackToCountLimits() {
+    when(creditPolicyService.current()).thenThrow(new IllegalStateException("db down"));
+    logged(5, AiCallType.GEMINI_TEXT_CREATE, TODAY);
+    limits(3, 10);
+
+    assertRejectedWith(() -> guard.guard(MEMBER_ID), ErrorCode.ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED);
   }
 }

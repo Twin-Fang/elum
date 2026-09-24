@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{admin/fragments/admin-layout :: page('AI 크레딧 · 정책', 'credits', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold">AI 크레딧 · 정책</h1>
+    <p class="text-base-content/60">주간 지급량·단가를 새 버전으로 발행합니다. 옛 버전은 고치지 않고 이력으로 남습니다.</p>
+  </div>
+
+  <nav th:replace="~{admin/fragments/credit-nav :: nav('policy')}"></nav>
+
+  <div th:if="${message}" class="alert alert-success" th:text="${message}">완료</div>
+  <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">오류</div>
+
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body space-y-3">
+      <h2 class="card-title text-lg">
+        지금 정책 v<span th:text="${current.version}">1</span>
+        <span class="badge badge-sm" th:classappend="${current.enabled} ? 'badge-success' : 'badge-error'"
+              th:text="${current.enabled} ? '켜짐' : '꺼짐'">켜짐</span>
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+        <div class="text-base-content/60">주간 지급 (Free / Pro)</div>
+        <div th:text="${currentValues.freeGrant()} + ' / ' + ${currentValues.proGrant()}">100 / 100</div>
+        <div class="text-base-content/60">단가 (글 / 그림 / 다시 그리기)</div>
+        <div th:text="${currentValues.costRoutineText()} + ' / ' + ${currentValues.costCardImage()} + ' / ' + ${currentValues.costImageRegenerate()}">1 / 1 / 1</div>
+        <div class="text-base-content/60">예약 유지 시간</div>
+        <div th:text="${current.reservationTtlMinutes} + '분'">15분</div>
+        <div class="text-base-content/60">시작</div>
+        <div th:text="${current.version > 0 ? #temporals.format(current.effectiveFrom, 'yyyy-MM-dd HH:mm') : '-'}">-</div>
+        <div class="text-base-content/60">발행</div>
+        <div th:text="${current.createdBy ?: '-'}">-</div>
+        <div class="text-base-content/60">사유</div>
+        <div th:text="${current.reason ?: '-'}">-</div>
+      </div>
+      <p th:if="${current.version == 0}" class="text-sm text-base-content/60">
+        발행된 정책이 없어 꺼진 기본값으로 동작하고 있어요.
+      </p>
+    </div>
+  </div>
+
+  <!-- 미리보기 결과. 확인 버튼이 같은 값을 다시 보내 발행한다. -->
+  <div th:if="${preview != null}" class="card bg-base-100 shadow-md border border-base-300">
+    <div class="card-body space-y-3">
+      <h2 class="card-title text-lg">영향 미리보기</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+        <div class="text-base-content/60">대상 계정</div>
+        <div th:text="${preview.targetAccounts()} + '개 (Free ' + ${preview.freeAccounts()} + ' · Pro ' + ${preview.proAccounts()} + ')'">0개</div>
+        <div class="text-base-content/60">주간 지급 총량</div>
+        <div th:text="${preview.weeklyTotalBefore()} + ' → ' + ${preview.weeklyTotalAfter()} + ' (' + (${preview.weeklyTotalChange() >= 0} ? '+' : '') + ${preview.weeklyTotalChange()} + ')'">0 → 0</div>
+        <div class="text-base-content/60">주당 소진 계정(추정)</div>
+        <div th:text="${#numbers.formatDecimal(preview.exhaustedBefore(), 1, 1)} + ' → ' + ${#numbers.formatDecimal(preview.exhaustedAfter(), 1, 1)}">0 → 0</div>
+        <div class="text-base-content/60">크레딧당 원가(지난 4주)</div>
+        <div th:text="${preview.usdPerCredit() != null} ? '$' + ${#numbers.formatDecimal(preview.usdPerCredit(), 1, 4)} : '— (지난 4주 사용 없음)'">—</div>
+        <div class="text-base-content/60">예상 주간 USD</div>
+        <div th:text="${preview.estimatedWeeklyUsdAfter() != null} ? '$' + ${#numbers.formatDecimal(preview.estimatedWeeklyUsdBefore(), 1, 2)} + ' → $' + ${#numbers.formatDecimal(preview.estimatedWeeklyUsdAfter(), 1, 2)} : '—'">—</div>
+        <div class="text-base-content/60">적용 시점</div>
+        <div th:text="${preview.immediate()} ? '즉시 — 이번 주 지급 ' + ${preview.immediateAccounts()} + '개 계정을 ' + (${preview.immediateDelta() >= 0} ? '+' : '') + ${preview.immediateDelta()} + ' 만큼 맞춤(줄이면 남은 양까지만), 이번 주에 처음 받는 회원도 새 지급량' : '다음 주부터 — 이번 주 지급은 그대로(이번 주에 처음 받는 회원도 이전 지급량)'">다음 주부터</div>
+      </div>
+      <p class="text-xs text-base-content/50">
+        소진·USD 추정은 지난 4주 계정별 주 수요(실제 차감 + 초과)를 새 지급량에 대 본 값이에요. 단가 변경은 수요에 반영하지 않아요.
+      </p>
+
+      <div th:if="${preview.disabling()}" class="alert alert-error">
+        <span>
+          크레딧을 끄면 기존 Free 일과 생성 횟수 한도가 다시 적용돼요 —
+          하루 <b th:text="${preview.freeRoutinePerDay() < 0 ? '무제한' : preview.freeRoutinePerDay() + '개'}">무제한</b>,
+          주당 <b th:text="${preview.freeRoutinePerWeek() < 0 ? '무제한' : preview.freeRoutinePerWeek() + '개'}">무제한</b>
+          (FREE_ROUTINE_CREATE_PER_DAY / PER_WEEK). 값은 시스템 설정에서 바꿉니다.
+        </span>
+      </div>
+
+      <!-- 끄기는 한 번 더 묻는다. 문구는 data 속성으로 넘긴다 — Thymeleaf 가 이벤트 속성에 식 결과를 넣는 것을 막는다. -->
+      <form th:action="@{/admin/credits/policy}" method="post" class="flex flex-wrap gap-2"
+            th:data-confirm="${preview.disabling()} ? '크레딧을 끌까요? 기존 횟수 한도로 돌아가요.' : '이 정책을 발행할까요?'"
+            onsubmit="return confirm(this.dataset.confirm);">
+        <input type="hidden" name="freeGrant" th:value="${form.freeGrant()}"/>
+        <input type="hidden" name="proGrant" th:value="${form.proGrant()}"/>
+        <input type="hidden" name="costRoutineText" th:value="${form.costRoutineText()}"/>
+        <input type="hidden" name="costCardImage" th:value="${form.costCardImage()}"/>
+        <input type="hidden" name="costImageRegenerate" th:value="${form.costImageRegenerate()}"/>
+        <input type="hidden" name="ttlMinutes" th:value="${form.ttlMinutes()}"/>
+        <input type="hidden" name="enabled" th:value="${form.isEnabled()}"/>
+        <input type="hidden" name="grantApply" th:value="${form.grantApply()}"/>
+        <input type="hidden" name="reason" th:value="${form.reason()}"/>
+        <button type="submit" class="btn btn-sm" th:classappend="${preview.disabling()} ? 'btn-error' : 'btn-primary'"
+                th:text="${preview.disabling()} ? '끄고 발행' : '이대로 발행'">이대로 발행</button>
+        <a th:href="@{/admin/credits/policy}" class="btn btn-ghost btn-sm">취소</a>
+      </form>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body space-y-4">
+      <h2 class="card-title text-lg">새 버전 발행</h2>
+      <form th:action="@{/admin/credits/policy/preview}" method="post" class="space-y-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <label class="form-control">
+            <span class="label-text text-xs">Free 주간 지급</span>
+            <input type="number" name="freeGrant" min="0" required th:value="${form.freeGrant()}" class="input input-bordered input-sm"/>
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">Pro 주간 지급</span>
+            <input type="number" name="proGrant" min="0" required th:value="${form.proGrant()}" class="input input-bordered input-sm"/>
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">일과 글 단가 (ROUTINE_TEXT)</span>
+            <input type="number" name="costRoutineText" min="0" required th:value="${form.costRoutineText()}" class="input input-bordered input-sm"/>
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">카드 그림 단가 (CARD_IMAGE)</span>
+            <input type="number" name="costCardImage" min="0" required th:value="${form.costCardImage()}" class="input input-bordered input-sm"/>
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">다시 그리기 단가 (IMAGE_REGENERATE)</span>
+            <input type="number" name="costImageRegenerate" min="0" required th:value="${form.costImageRegenerate()}" class="input input-bordered input-sm"/>
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">예약 유지 시간(분)</span>
+            <input type="number" name="ttlMinutes" min="1" required th:value="${form.ttlMinutes()}" class="input input-bordered input-sm"/>
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">적용 시점</span>
+            <select name="grantApply" class="select select-bordered select-sm">
+              <option value="NEXT_PERIOD" th:selected="${form.grantApply() == null or form.grantApply() == 'NEXT_PERIOD'}">다음 주부터</option>
+              <option value="IMMEDIATE" th:selected="${form.grantApply() == 'IMMEDIATE'}">즉시 (이번 주 지급도 맞춤)</option>
+            </select>
+          </label>
+          <label class="label cursor-pointer justify-start gap-2">
+            <input type="checkbox" name="enabled" value="true" class="toggle toggle-primary" th:checked="${form.isEnabled()}"/>
+            <span class="label-text">크레딧 켜기</span>
+          </label>
+        </div>
+        <label class="form-control">
+          <span class="label-text text-xs">사유 (필수)</span>
+          <input type="text" name="reason" required maxlength="200" th:value="${form.reason()}"
+                 placeholder="예: 비공개 테스트 사용량을 보고 주간 지급을 150 으로 올림" class="input input-bordered input-sm w-full"/>
+        </label>
+        <button type="submit" class="btn btn-sm">영향 미리보기</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body space-y-3">
+      <h2 class="card-title text-lg">버전 이력</h2>
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+          <tr><th>버전</th><th>상태</th><th>시작</th><th>주간 지급</th><th>단가</th><th>TTL</th><th>적용</th><th>발행</th><th>사유</th></tr>
+          </thead>
+          <tbody>
+          <th:block th:if="${history.isEmpty()}">
+            <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(9, '발행한 정책이 없어요')}"></tr>
+          </th:block>
+          <tr th:each="policy : ${history}">
+            <td th:text="'v' + ${policy.version}">v1</td>
+            <td>
+              <span class="badge badge-sm" th:classappend="${policy.enabled} ? 'badge-success' : 'badge-error'"
+                    th:text="${policy.enabled} ? '켜짐' : '꺼짐'">켜짐</span>
+            </td>
+            <td class="text-xs whitespace-nowrap" th:text="${#temporals.format(policy.effectiveFrom, 'yyyy-MM-dd HH:mm')}">-</td>
+            <td class="text-xs font-mono" th:text="${policy.weeklyGrantJson}">{}</td>
+            <td class="text-xs font-mono" th:text="${policy.actionCostsJson}">{}</td>
+            <td th:text="${policy.reservationTtlMinutes} + '분'">15분</td>
+            <td class="text-xs" th:text="${policy.grantApply}">NEXT_PERIOD</td>
+            <td class="text-xs" th:text="${policy.createdBy ?: '-'}">-</td>
+            <td class="text-xs" th:text="${policy.reason ?: '-'}">-</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

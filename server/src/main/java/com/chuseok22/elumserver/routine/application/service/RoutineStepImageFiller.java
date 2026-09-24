@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.service;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
+import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThrottle;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
@@ -60,6 +61,7 @@ public class RoutineStepImageFiller {
   private final RoutineStepRepository routineStepRepository;
   private final AiDailyBudgetGuard aiDailyBudgetGuard;
   private final RoutineStepImageThrottle routineStepImageThrottle;
+  private final CreditReservationService creditReservationService;
 
   /// 가상 스레드라 몇 초짜리 HTTP 대기에 OS 스레드를 묶어 두지 않는다.
   private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
@@ -70,21 +72,32 @@ public class RoutineStepImageFiller {
    * <p>트랜잭션 밖에서 불리거나 설명이 비어 있으면 아무 일도 하지 않는다 —
    * 빈 프롬프트로 부르면 돈만 쓰고 엉뚱한 그림이 나온다.
    */
-  /// @param seedKey {@code FluxSeed.routineKey} — 일과를 만들 때와 같은 seed 로 그려 같은 캐릭터가 나온다 (#373)
+  /// @param seedKey     {@code FluxSeed.routineKey} — 일과를 만들 때와 같은 seed 로 그려 같은 캐릭터가 나온다 (#373)
+  /// @param creditJobId 이 그림에 잡아 둔 크레딧 작업(#407). 크레딧이 꺼져 있으면 null. 그림을 붙이면 정산,
+  ///                    못 붙이면 반환한다 — 어느 쪽으로든 반드시 끝낸다
   public void scheduleAfterCommit(
     String memberId, String routineId, String stepId, String description, CharacterType characterType,
-    String seedKey
+    String seedKey, String creditJobId
   ) {
     if (description == null || description.isBlank()) {
+      releaseCredit(creditJobId, "설명이 비어 그림을 만들지 않음");
       return;
     }
     if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+      // 트랜잭션 밖이면 예약도 같은 트랜잭션에 없었다(합류할 곳이 없어 따로 커밋됐다). 그림을 못 만드니 돌려준다.
+      releaseCredit(creditJobId, "트랜잭션 밖 — 그림 예약을 걸 수 없음");
       return;
     }
     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
       @Override
       public void afterCommit() {
-        executor.execute(() -> fill(memberId, routineId, stepId, description, characterType, seedKey));
+        try {
+          executor.execute(() -> fill(memberId, routineId, stepId, description, characterType, seedKey, creditJobId));
+        } catch (RuntimeException e) {
+          // 실행기가 거절하면(종료 중) 그림은 없다. 예약만 돌려준다.
+          log.warn("추가 카드 그림 작업을 시작하지 못했다: routineId={}, stepId={}", routineId, stepId, e);
+          releaseCredit(creditJobId, "그림 작업 시작 실패");
+        }
       }
     });
   }
@@ -102,26 +115,32 @@ public class RoutineStepImageFiller {
    */
   void fill(
     String memberId, String routineId, String stepId, String description, CharacterType characterType,
-    String seedKey
+    String seedKey, String creditJobId
   ) {
     // 이 스레드는 요청 스레드가 아니라 회원 맥락이 없다(addStep 은 세우지 않는다). 여기서 세워야
     // 그림 호출 기록에 회원이 남는다 — 전에는 회원 없이 남아 계정별로는 볼 수 없었다 (#368).
     AiCallContext.setMemberId(memberId);
+    AiCallContext.setCreditJobId(creditJobId);
+    // 그림을 붙이고 정산했으면 null. 그 밖의 모든 출구(건너뜀·실패·예외)는 finally 에서 이 까닭으로 반환한다.
+    String releaseReason = "그림 생성 중단";
     try {
       // 그새 카드(또는 일과·이룸이)가 지워졌으면 그림을 만들지 않는다 — 한 장 한 장이 돈이다 (다중 보호자 E18).
       // 비용 관문보다 먼저 본다. 없는 카드 때문에 회원의 그림 횟수가 깎이면 안 된다.
       if (!routineStepRepository.existsById(stepId)) {
         log.warn("그림을 채울 카드가 없어 그만둔다: routineId={}, stepId={}", routineId, stepId);
+        releaseReason = "카드가 지워짐";
         return;
       }
       if (aiDailyBudgetGuard.isReached()) {
         log.warn("AI 하루 비용 상한 — 추가 카드 그림을 건너뛰고 기본 그림으로 둔다: routineId={}, stepId={}",
           routineId, stepId);
+        releaseReason = "하루 비용 상한";
         return;
       }
       if (!routineStepImageThrottle.tryAcquire(memberId)) {
         log.warn("추가 카드 그림이 너무 잦다 — 이번 그림은 건너뛴다: memberId={}, routineId={}, stepId={}",
           memberId, routineId, stepId);
+        releaseReason = "추가 그림 횟수 제한";
         return;
       }
       // 직접 추가한 카드엔 영어 장면이 없다 — FLUX 면 CardImageGenerator 가 번역한다 (#373).
@@ -129,6 +148,7 @@ public class RoutineStepImageFiller {
         new CardImageGenerator.CardImageRequest(description, null, characterType, seedKey));
       if (image == null) {
         log.warn("추가 카드 이미지가 비어 돌아왔다: routineId={}, stepId={}", routineId, stepId);
+        releaseReason = "그림 생성 결과 없음";
         return;
       }
       // 추가 카드는 stepId를 batchId로 써서 자기 폴더에 담는다.
@@ -140,14 +160,32 @@ public class RoutineStepImageFiller {
         // 남기지 않는다. 다시 시도하지 않는다.
         log.warn("그림을 만드는 사이 카드가 지워져 그림을 버린다: routineId={}, stepId={}", routineId, stepId);
         routineImageStorage.deleteBatch(stepId);
+        releaseReason = "그림을 만드는 사이 카드가 지워짐";
         return;
       }
       log.info("추가 카드 이미지 완료: routineId={}, stepId={}", routineId, stepId);
+      // 카드에 실제로 붙었으니 청구한다. 정산은 자기 트랜잭션에서 한다(이 스레드엔 트랜잭션이 없다).
+      if (creditJobId != null) {
+        creditReservationService.settle(creditJobId, 0, 1, routineId, stepId);
+      }
+      releaseReason = null;
     } catch (Exception e) {
       log.warn("추가 카드 이미지 실패 — 기본 그림으로 둔다: routineId={}, stepId={}",
         routineId, stepId, e);
+      // 그림을 붙인 뒤 정산만 실패했을 수도 있다 — 그래도 반환한다. 그림 1장이 무료가 될 뿐 빚은 남기지 않는다.
+      releaseReason = "그림 생성·정산 실패: " + e.getClass().getSimpleName();
     } finally {
       AiCallContext.clear();
+      if (releaseReason != null) {
+        releaseCredit(creditJobId, releaseReason);
+      }
+    }
+  }
+
+  /// 예약을 돌려준다. 크레딧이 꺼져 예약이 없으면 할 일이 없다. release 는 던지지 않는다.
+  private void releaseCredit(String creditJobId, String reason) {
+    if (creditJobId != null) {
+      creditReservationService.release(creditJobId, reason);
     }
   }
 }

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{admin/fragments/admin-layout :: page('AI 크레딧 · 회원별', 'credits', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold">AI 크레딧 · 회원별</h1>
+    <p class="text-base-content/60">한 주 동안 계정별 지급·사용·남음과 초과를 봅니다.</p>
+  </div>
+
+  <nav th:replace="~{admin/fragments/credit-nav :: nav('members')}"></nav>
+
+  <form method="get" th:action="@{/admin/credits/members}" class="flex flex-wrap items-center gap-2">
+    <input type="text" name="week" th:value="${period.key()}" placeholder="2026-W39"
+           class="input input-bordered input-sm w-32" aria-label="주(ISO 주)"/>
+    <input type="text" name="keyword" th:value="${keyword}" placeholder="닉네임 · 아이디 · 회원 id"
+           class="input input-bordered input-sm w-64"/>
+    <select name="sort" class="select select-bordered select-sm" aria-label="정렬">
+      <option value="USED_DESC" th:selected="${sort == 'USED_DESC'}">사용 많은 순</option>
+      <option value="OVERAGE_DESC" th:selected="${sort == 'OVERAGE_DESC'}">초과 많은 순</option>
+      <option value="REMAINING_ASC" th:selected="${sort == 'REMAINING_ASC'}">남음 적은 순</option>
+    </select>
+    <label class="label cursor-pointer gap-1">
+      <input type="checkbox" name="exhausted" value="true" class="checkbox checkbox-sm" th:checked="${filter.exhaustedOnly()}"/>
+      <span class="label-text">소진</span>
+    </label>
+    <label class="label cursor-pointer gap-1">
+      <input type="checkbox" name="overage" value="true" class="checkbox checkbox-sm" th:checked="${filter.overageOnly()}"/>
+      <span class="label-text">초과</span>
+    </label>
+    <label class="label cursor-pointer gap-1">
+      <input type="checkbox" name="frozen" value="true" class="checkbox checkbox-sm" th:checked="${filter.frozenOnly()}"/>
+      <span class="label-text">동결</span>
+    </label>
+    <button type="submit" class="btn btn-primary btn-sm">보기</button>
+    <a th:href="@{/admin/credits/members}" class="btn btn-ghost btn-sm">초기화</a>
+    <span class="text-sm text-base-content/60 ml-auto">
+      <span th:text="${period.key()}">2026-W39</span> · 총 <span th:text="${rows.totalElements}">0</span>개 계정
+    </span>
+  </form>
+
+  <div class="overflow-x-auto">
+    <table class="table table-sm">
+      <thead>
+      <tr>
+        <th>회원</th>
+        <th>플랜</th>
+        <th class="text-right">지급</th>
+        <th class="text-right">보너스</th>
+        <th class="text-right">사용</th>
+        <th class="text-right">예약</th>
+        <th class="text-right">남음</th>
+        <th class="text-right">초과</th>
+        <th>마지막 사용</th>
+        <th>상태</th>
+      </tr>
+      </thead>
+      <tbody>
+      <th:block th:if="${rows.isEmpty()}">
+        <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(10, '조건에 맞는 계정이 없어요')}"></tr>
+      </th:block>
+      <tr th:each="row : ${rows.content}">
+        <td>
+          <a th:if="${row.memberId() != null}" th:href="@{/admin/credits/members/{id}(id=${row.memberId()})}"
+             class="link link-hover font-medium" th:text="${row.nickname() ?: (row.username() ?: row.memberId())}">닉네임</a>
+          <!-- 완전 삭제된 회원의 계정은 회원이 없다. 행·원장은 재가입을 위해 남는다. -->
+          <span th:if="${row.memberId() == null}" class="text-base-content/50">떼어진 계정</span>
+          <div class="text-xs text-base-content/50" th:text="${row.username() ?: row.accountId()}">아이디</div>
+        </td>
+        <td th:text="${row.plan() != null ? row.plan().label : '-'}">무료</td>
+        <td class="text-right" th:text="${row.weeklyGrant() != null ? row.weeklyGrant() : '-'}">100</td>
+        <td class="text-right" th:text="${row.bonus()}">0</td>
+        <td class="text-right" th:text="${row.used()}">0</td>
+        <td class="text-right" th:text="${row.reserved()}">0</td>
+        <td class="text-right font-semibold" th:classappend="${row.exhausted()} ? 'text-error'" th:text="${row.remaining()}">0</td>
+        <td class="text-right" th:classappend="${row.overage() > 0} ? 'text-warning'"
+            th:text="${row.overage() > 0 ? row.overage() + ' (' + row.overageJobs() + '건)' : '0'}">0</td>
+        <td class="text-xs whitespace-nowrap"
+            th:text="${row.lastUsedAt() != null ? #temporals.format(row.lastUsedAt(), 'MM-dd HH:mm') : '-'}">-</td>
+        <td>
+          <span th:if="${row.frozen()}" class="badge badge-error badge-sm">동결</span>
+          <span th:if="${!row.frozen() and row.exhausted()}" class="badge badge-warning badge-sm">소진</span>
+          <span th:if="${!row.frozen() and !row.exhausted()}" class="badge badge-ghost badge-sm">정상</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex items-center gap-2" th:if="${rows.totalPages > 1}">
+    <a th:if="${rows.hasPrevious()}" class="btn btn-sm"
+       th:href="@{/admin/credits/members(page=${rows.number - 1}, week=${period.key()}, keyword=${keyword}, sort=${sort}, exhausted=${filter.exhaustedOnly()}, overage=${filter.overageOnly()}, frozen=${filter.frozenOnly()})}">이전</a>
+    <span class="text-sm" th:text="${rows.number + 1} + ' / ' + ${rows.totalPages}">1 / 1</span>
+    <a th:if="${rows.hasNext()}" class="btn btn-sm"
+       th:href="@{/admin/credits/members(page=${rows.number + 1}, week=${period.key()}, keyword=${keyword}, sort=${sort}, exhausted=${filter.exhaustedOnly()}, overage=${filter.overageOnly()}, frozen=${filter.frozenOnly()})}">다음</a>
+  </div>
+</main>
+</body>
+</html>

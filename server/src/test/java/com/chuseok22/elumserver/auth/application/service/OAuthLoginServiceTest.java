@@ -21,6 +21,8 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
+import com.chuseok22.elumserver.credit.application.service.CreditAccountService;
+import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditAccountRepository;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
@@ -97,6 +99,12 @@ class OAuthLoginServiceTest {
   @Mock
   private SystemConfigService systemConfigService;
 
+  @Mock
+  private AiCreditAccountRepository aiCreditAccountRepository;
+
+  @Mock
+  private CreditAccountService creditAccountService;
+
   private OAuthLoginService oAuthLoginService;
 
   /** 제공자 호출 없이 정해진 신원을 돌려주는 검증기. 실제 검증은 각 Verifier의 책임이다. */
@@ -120,11 +128,11 @@ class OAuthLoginServiceTest {
       profileRepository, profileGuardianRepository, routineRepository, deviceLinkRepository, refreshTokenRepository);
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
       memberRepository, authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
-      subscriptionService, systemConfigService, guardianshipService);
+      subscriptionService, systemConfigService, guardianshipService, aiCreditAccountRepository);
     oAuthLoginService = new OAuthLoginService(
       List.of(kakao, naver), authIdentityRepository, memberRepository, guardianshipService,
       subscriptionService, passwordEncoder, jwtProvider, jwtProperties, refreshTokenService,
-      withdrawnMemberService);
+      withdrawnMemberService, creditAccountService);
   }
 
   private Member existingMember(MemberStatus status) {
@@ -215,6 +223,42 @@ class OAuthLoginServiceTest {
     // 관계 한 줄도 함께 — 새 서버는 관계 표로 이룸이를 찾는다 (다중 보호자 #360).
     verify(profileGuardianRepository).save(org.mockito.ArgumentMatchers.argThat(guardian ->
       "new-m".equals(guardian.getMember().getId())));
+  }
+
+  private void stubNewSignup() {
+    when(authIdentityRepository.findByProviderAndProviderUserId(OAuthProvider.KAKAO, "kakao-9999"))
+      .thenReturn(Optional.empty());
+    when(authIdentityRepository.findFirstByEmailAndEmailVerifiedTrue("parent@kakao.com"))
+      .thenReturn(Optional.empty());
+    when(passwordEncoder.encode(anyString())).thenReturn("encoded");
+    when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> {
+      Member saved = invocation.getArgument(0);
+      saved.setId("new-m");
+      return saved;
+    });
+    stubTokenIssue("new-m", "kakao_kakao-9999");
+  }
+
+  @Test
+  @DisplayName("#407 새로 가입하면 크레딧 계정을 소셜 신원 키로 잇는다 — 재가입이면 떼어 둔 장부가 되붙는다")
+  void login_newIdentity_linksCreditAccountByIdentityKey() {
+    stubNewSignup();
+
+    oAuthLoginService.login("kakao", "provider-token", "device-1");
+
+    verify(creditAccountService).linkIdentity("new-m", CreditAccountService.identityKey("KAKAO", "kakao-9999"));
+  }
+
+  @Test
+  @DisplayName("#407 크레딧 계정 연결이 실패해도 로그인은 된다")
+  void login_creditLinkFails_loginStillSucceeds() {
+    stubNewSignup();
+    org.mockito.Mockito.doThrow(new RuntimeException("db down"))
+      .when(creditAccountService).linkIdentity(anyString(), anyString());
+
+    TokenResponse response = oAuthLoginService.login("kakao", "provider-token", "device-1");
+
+    assertThat(response.accessToken()).isEqualTo("access-token");
   }
 
   @Test

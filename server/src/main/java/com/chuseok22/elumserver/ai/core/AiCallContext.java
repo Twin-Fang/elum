@@ -11,6 +11,8 @@ package com.chuseok22.elumserver.ai.core;
 public final class AiCallContext {
 
   private static final InheritableThreadLocal<String> MEMBER_ID = new InheritableThreadLocal<>();
+  /// 크레딧 작업 id (#407). 작업 하나에 딸린 호출의 실제 USD 를 모아 대조하려고 호출 기록에 단다.
+  private static final InheritableThreadLocal<String> CREDIT_JOB_ID = new InheritableThreadLocal<>();
 
   private AiCallContext() {
   }
@@ -23,9 +25,18 @@ public final class AiCallContext {
     return MEMBER_ID.get();
   }
 
+  public static void setCreditJobId(String creditJobId) {
+    CREDIT_JOB_ID.set(creditJobId);
+  }
+
+  public static String currentCreditJobId() {
+    return CREDIT_JOB_ID.get();
+  }
+
   // 요청 스레드는 풀에서 재사용되므로 진입점의 finally에서 반드시 비워야
-  // 다음 요청에 이전 회원이 새어 들어가지 않는다.
+  // 다음 요청에 이전 회원·작업이 새어 들어가지 않는다. 둘을 함께 비운다.
   public static void clear() {
     MEMBER_ID.remove();
+    CREDIT_JOB_ID.remove();
   }
 }

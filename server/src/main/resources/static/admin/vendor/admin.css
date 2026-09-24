@@ -33,3 +33,7 @@
 .checkbox-primary{--chkbg:var(--fallback-p,oklch(var(--p)/1));--chkfg:var(--fallback-pc,oklch(var(--pc)/1));border-color:var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));--tw-border-opacity:0.2}
 .checkbox-warning{--chkbg:var(--fallback-wa,oklch(var(--wa)/1));--chkfg:var(--fallback-wac,oklch(var(--wac)/1));border-color:var(--fallback-wa,oklch(var(--wa)/var(--tw-border-opacity)));--tw-border-opacity:0.2}
 .label-text-alt{font-size:.75rem;line-height:1rem;--tw-text-opacity:1;color:var(--fallback-bc,oklch(var(--bc)/var(--tw-text-opacity)))}
+
+/* AI 크레딧 화면 (이슈 #407) — 경고 띠와 숫자 칸 오른쪽 정렬 */
+.alert-warning{border-color:var(--fallback-wa,oklch(var(--wa)/.2));--tw-text-opacity:1;color:var(--fallback-wac,oklch(var(--wac)/var(--tw-text-opacity)));--alert-bg:var(--fallback-wa,oklch(var(--wa)/1));--alert-bg-mix:var(--fallback-b1,oklch(var(--b1)/1))}
+.text-right{text-align:right}

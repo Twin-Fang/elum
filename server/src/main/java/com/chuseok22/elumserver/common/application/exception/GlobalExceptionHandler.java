@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 // admin은 Thymeleaf SSR이라 JSON 에러 대신 기본 에러 페이지를 받아야 하므로,
-// 이 어드바이스는 REST API 도메인(ai, auth, member, common, consent, link, notice, routine)에만 적용되도록 범위를 좁힌다.
+// 이 어드바이스는 REST API 도메인(ai, auth, member, common, consent, credit, link, notice, routine)에만 적용되도록 범위를 좁힌다.
 // ⚠️ **새 도메인 패키지를 만들면 여기에 반드시 더한다.** 빠뜨리면 CustomException이 잡히지 않아
 // 404여야 할 응답이 500으로 나간다 — 컴파일도 테스트도 통과하므로 실제로 호출해 봐야 드러난다
 // (이슈 #200에서 link 패키지가 그렇게 빠져 있었다). 빠뜨림은 ExceptionHandlerCoverageTest 가 잡는다 —
@@ -31,6 +31,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
     "com.chuseok22.elumserver.member",
     "com.chuseok22.elumserver.common",
     "com.chuseok22.elumserver.consent",
+    "com.chuseok22.elumserver.credit",
     "com.chuseok22.elumserver.link",
     "com.chuseok22.elumserver.notice",
     "com.chuseok22.elumserver.routine"

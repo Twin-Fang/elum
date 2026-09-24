@@ -72,6 +72,23 @@
       toast.classList.add(ok ? 'alert-success' : 'alert-error');
     }
 
+    // 변경 사유(선택, #407) — 위 입력칸의 값을 설정 폼마다 실어 보낸다. 비동기 저장보다 먼저 붙여야
+    // FormData 에 함께 담긴다. 비동기가 아닌 폼(복원·제공자 전환)도 같은 방식으로 싣는다.
+    var reasonInput = document.querySelector('[data-settings-reason]');
+    document.querySelectorAll('form[action*="/admin/settings/"]').forEach(function (form) {
+      form.addEventListener('submit', function () {
+        if (!reasonInput) return;
+        var hidden = form.querySelector('input[name=reason]');
+        if (!hidden) {
+          hidden = document.createElement('input');
+          hidden.type = 'hidden';
+          hidden.name = 'reason';
+          form.appendChild(hidden);
+        }
+        hidden.value = reasonInput.value || '';
+      });
+    });
+
     document.querySelectorAll('form[data-async-save]').forEach(function (form) {
       form.addEventListener('submit', function (event) {
         event.preventDefault();

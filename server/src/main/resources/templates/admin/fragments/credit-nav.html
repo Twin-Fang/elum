@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  AI 크레딧 화면들의 윗줄 메뉴 (이슈 #407). 사이드 메뉴는 "AI 크레딧" 하나라 화면 사이는 여기서 오간다.
+  daisyUI tabs 는 동봉 CSS 에 없어 버튼으로 그린다.
+-->
+<body>
+
+<nav th:fragment="nav(tab)" class="flex flex-wrap gap-2" aria-label="AI 크레딧 화면">
+  <a th:href="@{/admin/credits}" class="btn btn-sm"
+     th:classappend="${tab == 'overview'} ? 'btn-primary' : 'btn-ghost'">개요</a>
+  <a th:href="@{/admin/credits/members}" class="btn btn-sm"
+     th:classappend="${tab == 'members'} ? 'btn-primary' : 'btn-ghost'">회원별</a>
+  <a th:href="@{/admin/credits/jobs}" class="btn btn-sm"
+     th:classappend="${tab == 'jobs'} ? 'btn-primary' : 'btn-ghost'">작업 탐색</a>
+  <a th:href="@{/admin/credits/policy}" class="btn btn-sm"
+     th:classappend="${tab == 'policy'} ? 'btn-primary' : 'btn-ghost'">정책</a>
+</nav>
+
+</body>
+</html>

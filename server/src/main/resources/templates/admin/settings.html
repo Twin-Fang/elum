@@ -25,6 +25,9 @@
         </label>
         <span class="ml-auto text-sm text-base-content/50" data-settings-count></span>
       </div>
+      <!-- 변경 사유(선택, #407). 저장·복원·전환 때 함께 보내 아래 변경 이력에 남는다. -->
+      <input type="text" data-settings-reason maxlength="500" placeholder="변경 사유 (선택) — 이력에 남아요"
+             class="input input-bordered input-sm w-full sm:w-96"/>
       <div class="flex flex-wrap gap-1">
         <button type="button" data-group-tab="" class="btn btn-xs btn-primary">전체</button>
         <button type="button" th:each="entry : ${groups}" th:data-group-tab="${entry.key.name()}"
@@ -184,6 +187,40 @@
               </form>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+    <!-- 설정 변경 이력 (#407) — 누가 언제 무엇을 무엇으로 바꿨는지. 비밀값은 값 대신 •••• 로만 남는다. -->
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body space-y-3">
+        <h2 class="card-title text-lg">최근 변경 이력</h2>
+        <p class="text-sm text-base-content/60">최근 20건입니다. 크레딧 정책을 켜고 끈 기록도 여기에 남습니다.</p>
+        <p th:if="${#lists.isEmpty(history)}" class="text-sm text-base-content/50">아직 바꾼 기록이 없습니다.</p>
+        <div th:unless="${#lists.isEmpty(history)}" class="overflow-x-auto">
+          <table class="table table-sm">
+            <thead>
+            <tr>
+              <th>시각</th>
+              <th>설정</th>
+              <th>이전 → 새 값</th>
+              <th>변경자</th>
+              <th>사유</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="h : ${history}">
+              <td class="whitespace-nowrap" th:text="${h.createdAt != null ? #temporals.format(h.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">시각</td>
+              <td class="font-mono text-xs" th:text="${h.configKey}">KEY</td>
+              <td class="break-all">
+                <span th:text="${h.oldValue != null and h.oldValue != '' ? h.oldValue : '(없음)'}">이전</span>
+                →
+                <span class="font-medium" th:text="${h.newValue != null and h.newValue != '' ? h.newValue : '(없음)'}">새 값</span>
+              </td>
+              <td th:text="${h.changedBy}">admin</td>
+              <td class="text-base-content/70" th:text="${h.reason != null ? h.reason : '-'}">사유</td>
+            </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

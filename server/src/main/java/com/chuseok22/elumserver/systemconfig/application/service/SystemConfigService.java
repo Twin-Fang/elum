@@ -8,10 +8,13 @@ import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.core.ConfigValueType;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfig;
+import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfigHistory;
+import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigHistoryRepository;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigRepository;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,11 +36,17 @@ public class SystemConfigService {
   // 암호문이 Base64로 부풀어도 MAX_VALUE_LENGTH 안에 들어오도록 평문을 더 좁게 제한한다.
   private static final int SECRET_MAX_LENGTH = 300;
   private static final String SECRET_MASK = "••••••••";
+  /// 이력에 남기는 비밀값 표시. 평문도 암호문도 남기지 않는다 — 바뀌었다는 사실만 보인다.
+  static final String HISTORY_SECRET_MASK = "••••";
+  /// 사람이 아니라 코드가 바꿀 때의 변경자.
+  static final String SYSTEM_ACTOR = "system";
+  private static final int HISTORY_REASON_MAX_LENGTH = 500;
 
   private final SystemConfigRepository systemConfigRepository;
   private final GeminiProperties geminiProperties;
   private final LocalLlmProperties localLlmProperties;
   private final SecretCipher secretCipher;
+  private final SystemConfigHistoryRepository systemConfigHistoryRepository;
 
   private volatile Map<ConfigKey, String> cache = Map.of();
   private volatile long cacheLoadedAtMillis = 0;
@@ -145,45 +154,120 @@ public class SystemConfigService {
       .toList();
   }
 
+  /// 코드가 바꿀 때. 이력의 변경자는 system 이다.
   @Transactional
   public void update(ConfigKey key, String rawValue) {
+    update(key, rawValue, SYSTEM_ACTOR, null);
+  }
+
+  /**
+   * 설정을 바꾸고 이력을 남긴다 (#407). 값이 그대로면 이력을 남기지 않는다.
+   *
+   * @param actor  바꾼 관리자 로그인 아이디. 비면 system
+   * @param reason 사유(선택)
+   */
+  @Transactional
+  public void update(ConfigKey key, String rawValue, String actor, String reason) {
     String value = validate(key, rawValue);
-    if (key.getValueType() == ConfigValueType.SECRET) {
+    boolean secret = key.getValueType() == ConfigValueType.SECRET;
+    if (secret) {
       // 비밀값은 화면에 가려서 보여주므로 폼이 빈 값으로 돌아온다. 그걸 "지우기"로
       // 받으면 저장 버튼을 누를 때마다 키가 날아간다. 빈 값은 "그대로 두기"다.
       // 지우려면 기본값 복원을 쓴다.
       if (value.isEmpty()) {
         return;
       }
-      value = encryptSecret(value);
     }
-    SystemConfig config = systemConfigRepository.findByConfigKey(key)
-      .orElseGet(() -> {
-        SystemConfig created = new SystemConfig();
-        created.setConfigKey(key);
-        return created;
-      });
-    config.setConfigValue(value);
+    SystemConfig config = findOrNew(key);
+    // 비교는 사람이 보는 값으로 한다 — 저장값이 없으면 기본값이 지금 값이다. 비밀값은 풀어서 비교한다.
+    String before = secret ? currentSecret(config) : effectiveValue(key, config);
+    config.setConfigValue(secret ? encryptSecret(value) : value);
+    // 저장은 예전처럼 늘 한다(기본값과 같은 값도 행으로 고정된다). 이력만 실제로 바뀐 것을 남긴다.
     systemConfigRepository.save(config);
+    if (!Objects.equals(before, value)) {
+      recordHistory(key, secret, before, value, actor, reason);
+    }
     forceReload();
   }
 
   @Transactional
   public void resetToDefault(ConfigKey key) {
+    resetToDefault(key, SYSTEM_ACTOR, null);
+  }
+
+  @Transactional
+  public void resetToDefault(ConfigKey key, String actor, String reason) {
     // 비밀값의 기본값은 "없음"이다. update는 빈 값을 무시하므로 여기서 직접 비운다.
     if (key.getValueType() == ConfigValueType.SECRET) {
-      SystemConfig config = systemConfigRepository.findByConfigKey(key)
-        .orElseGet(() -> {
-          SystemConfig created = new SystemConfig();
-          created.setConfigKey(key);
-          return created;
-        });
+      SystemConfig config = findOrNew(key);
+      String before = currentSecret(config);
       config.setConfigValue("");
       systemConfigRepository.save(config);
+      if (!before.isEmpty()) {
+        recordHistory(key, true, before, "", actor, reason);
+      }
       forceReload();
       return;
     }
-    update(key, defaultValueFor(key));
+    update(key, defaultValueFor(key), actor, reason);
+  }
+
+  /// 설정 화면 아래 최근 변경 이력(최신 20건).
+  @Transactional(readOnly = true)
+  public List<SystemConfigHistory> recentHistory() {
+    return systemConfigHistoryRepository.findTop20ByOrderByCreatedAtDesc();
+  }
+
+  private SystemConfig findOrNew(ConfigKey key) {
+    return systemConfigRepository.findByConfigKey(key)
+      .orElseGet(() -> {
+        SystemConfig created = new SystemConfig();
+        created.setConfigKey(key);
+        return created;
+      });
+  }
+
+  /// 저장값이 비었으면 기본값이 지금 값이다(getString 과 같은 규칙).
+  private String effectiveValue(ConfigKey key, SystemConfig config) {
+    String stored = config.getConfigValue();
+    return (stored == null || stored.isBlank()) ? defaultValueFor(key) : stored;
+  }
+
+  /// 저장된 비밀값의 평문. 없거나 풀 수 없으면 빈 문자열 — 풀 수 없으면 다른 값으로 보고 새로 저장한다.
+  private String currentSecret(SystemConfig config) {
+    String stored = config.getConfigValue();
+    if (stored == null || stored.isBlank()) {
+      return "";
+    }
+    String decrypted = secretCipher.decrypt(stored);
+    return decrypted == null ? "" : decrypted;
+  }
+
+  /**
+   * 이력 한 줄. 비밀값은 값 대신 있음(••••)/없음(빈 값)만 적는다 — 이력 표가 새면 키가 새는 일이 없게.
+   */
+  private void recordHistory(
+    ConfigKey key, boolean secret, String before, String after, String actor, String reason
+  ) {
+    SystemConfigHistory history = new SystemConfigHistory();
+    history.setConfigKey(key.name());
+    history.setOldValue(secret ? maskSecret(before) : before);
+    history.setNewValue(secret ? maskSecret(after) : after);
+    history.setChangedBy(actor == null || actor.isBlank() ? SYSTEM_ACTOR : actor);
+    history.setReason(trimReason(reason));
+    systemConfigHistoryRepository.save(history);
+  }
+
+  private static String maskSecret(String plain) {
+    return plain == null || plain.isEmpty() ? "" : HISTORY_SECRET_MASK;
+  }
+
+  private static String trimReason(String reason) {
+    if (reason == null || reason.isBlank()) {
+      return null;
+    }
+    String trimmed = reason.trim();
+    return trimmed.length() > HISTORY_REASON_MAX_LENGTH ? trimmed.substring(0, HISTORY_REASON_MAX_LENGTH) : trimmed;
   }
 
   private String validate(ConfigKey key, String rawValue) {

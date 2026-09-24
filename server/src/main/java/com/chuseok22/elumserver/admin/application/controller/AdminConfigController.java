@@ -12,6 +12,7 @@ import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigSer
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigView;
 import com.chuseok22.elumserver.systemconfig.core.ConfigGroup;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
+import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,8 @@ public class AdminConfigController {
     model.addAttribute("groups", grouped);
     model.addAttribute("imageProviders", imageProviderViews());
     model.addAttribute("textProviders", textProviderViews());
+    // 누가 언제 무엇을 바꿨는지 (#407) — 크레딧을 끄고 켠 기록도 여기 보인다.
+    model.addAttribute("history", systemConfigService.recentHistory());
     return "admin/settings";
   }
 
@@ -61,11 +64,13 @@ public class AdminConfigController {
   @ResponseBody
   public Map<String, Object> updateAsync(
     @PathVariable ConfigKey key,
-    @RequestParam("value") String value
+    @RequestParam("value") String value,
+    @RequestParam(value = "reason", required = false) String reason,
+    Principal principal
   ) {
     try {
       rejectUnavailableProvider(key, value);
-      systemConfigService.update(key, value);
+      systemConfigService.update(key, value, actorOf(principal), reason);
       return Map.of("ok", true, "message", key.getLabel() + " 설정을 저장했습니다.");
     } catch (CustomException e) {
       return Map.of("ok", false, "message", key.getLabel() + failureReason(e));
@@ -76,13 +81,15 @@ public class AdminConfigController {
   public String update(
     @PathVariable ConfigKey key,
     @RequestParam("value") String value,
+    @RequestParam(value = "reason", required = false) String reason,
+    Principal principal,
     RedirectAttributes redirectAttributes
   ) {
     try {
       // 키 없는 제공자로 바꾸면 그 순간부터 카드 생성이 전부 실패한다. 화면 버튼이
       // 먼저 막지만, 요청을 직접 보내면 뚫리므로 여기서 한 번 더 막는다.
       rejectUnavailableProvider(key, value);
-      systemConfigService.update(key, value);
+      systemConfigService.update(key, value, actorOf(principal), reason);
       redirectAttributes.addFlashAttribute("message", key.getLabel() + " 설정을 저장했습니다.");
     } catch (CustomException e) {
       redirectAttributes.addFlashAttribute("errorMessage", key.getLabel() + failureReason(e));
@@ -167,9 +174,19 @@ public class AdminConfigController {
   }
 
   @PostMapping("/admin/settings/{key}/reset")
-  public String reset(@PathVariable ConfigKey key, RedirectAttributes redirectAttributes) {
-    systemConfigService.resetToDefault(key);
+  public String reset(
+    @PathVariable ConfigKey key,
+    @RequestParam(value = "reason", required = false) String reason,
+    Principal principal,
+    RedirectAttributes redirectAttributes
+  ) {
+    systemConfigService.resetToDefault(key, actorOf(principal), reason);
     redirectAttributes.addFlashAttribute("message", key.getLabel() + " 설정을 기본값으로 복원했습니다.");
     return "redirect:/admin/settings";
+  }
+
+  /// 이력의 변경자 — 로그인한 관리자 아이디. 세션이 없으면(테스트 등) 서비스가 system 으로 적는다.
+  private static String actorOf(Principal principal) {
+    return principal == null ? null : principal.getName();
   }
 }

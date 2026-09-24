@@ -3,11 +3,13 @@ package com.chuseok22.elumserver.routine.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -18,6 +20,9 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
+import com.chuseok22.elumserver.credit.application.service.CreditReservation;
+import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
@@ -43,6 +48,7 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,6 +56,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -93,8 +100,24 @@ class RoutineServiceTest {
   @Mock
   private AiDailyBudgetGuard aiDailyBudgetGuard;
 
+  @Mock
+  private CreditReservationService creditReservationService;
+
+  @Mock
+  private CreditQueryService creditQueryService;
+
+  @Mock
+  private RoutineStepRepository routineStepRepository;
+
   @InjectMocks
   private RoutineService routineService;
+
+  @BeforeEach
+  void creditDisabledByDefault() {
+    // 크레딧이 꺼져 있을 때의 기존 동작을 본다. 켜짐은 RoutineServiceCreditTest 가 본다 (#407).
+    lenient().when(creditReservationService.reserve(anyString(), any(), anyString(), anyBoolean()))
+      .thenReturn(CreditReservation.disabled());
+  }
 
   @Test
   @DisplayName("본인 소유 일과의 단계 이미지를 조회하면 저장된 이미지 내용을 반환한다")
@@ -311,7 +334,7 @@ class RoutineServiceTest {
     doThrow(new CustomException(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT))
       .when(routineRequestCooldownGuard).guard("member-1");
 
-    assertThatThrownBy(() -> routineService.create(GUARDIAN, new RoutineCreateRequest(null, null, null, null, null)))
+    assertThatThrownBy(() -> routineService.create(GUARDIAN, new RoutineCreateRequest(null, null, null, null, null), null))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT));
@@ -325,7 +348,7 @@ class RoutineServiceTest {
       .when(aiDailyBudgetGuard).guard();
 
     assertThatThrownBy(() -> routineService.create(
-      GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null)))
+      GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.AI_DAILY_BUDGET_EXCEEDED));
@@ -352,9 +375,9 @@ class RoutineServiceTest {
     );
     when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU), any()))
       .thenReturn(generationResult);
-    when(routineCreationWriter.save(any(), any(), any())).thenAnswer(invocation -> invocation.getArgument(2));
+    when(routineCreationWriter.save(any(), any(), any(), any(), anyInt())).thenAnswer(invocation -> new RoutineCreationWriter.SavedRoutine(invocation.getArgument(2), null));
 
-    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null));
+    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
 
     verify(routineAiPipeline).generateForCreate(
       eq("내일 병원 가기"), eq("하늘이"), eq(Set.of()), eq(List.of()), eq(CharacterType.LULU), any()
@@ -380,10 +403,10 @@ class RoutineServiceTest {
         "batch-1"
       ));
     ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
-    when(routineCreationWriter.save(any(), any(), saved.capture())).thenAnswer(invocation -> invocation.getArgument(2));
+    when(routineCreationWriter.save(any(), any(), saved.capture(), any(), anyInt())).thenAnswer(invocation -> new RoutineCreationWriter.SavedRoutine(invocation.getArgument(2), null));
 
     routineService.create(GUARDIAN, new RoutineCreateRequest(
-      "내일 병원 가기 010-1234-5678", null, List.of("우산", "엄마 010-9999-8888"), null, null));
+      "내일 병원 가기 010-1234-5678", null, List.of("우산", "엄마 010-9999-8888"), null, null), null);
 
     verify(routineAiPipeline).generateForCreate(
       eq("내일 병원 가기 010-1234-5678"), eq("하늘이"), any(),
@@ -428,10 +451,10 @@ class RoutineServiceTest {
     Profile profile = profileWithNickname("하늘이");
     stubCreatePipeline(profile);
     ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
-    when(routineCreationWriter.save(any(), any(), saved.capture())).thenAnswer(i -> i.getArgument(2));
+    when(routineCreationWriter.save(any(), any(), saved.capture(), any(), anyInt())).thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), null));
 
     LocalDateTime before = LocalDateTime.now();
-    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null));
+    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
 
     assertThat(saved.getValue().getScheduledAt())
       .as("null로 저장하면 DB 제약에서 터진다")
@@ -450,10 +473,10 @@ class RoutineServiceTest {
   void create_saveFails_cleansUpGeneratedImages() {
     Profile profile = profileWithNickname("하늘이");
     stubCreatePipeline(profile);
-    when(routineCreationWriter.save(any(), any(), any())).thenThrow(new RuntimeException("DB 제약 위반"));
+    when(routineCreationWriter.save(any(), any(), any(), any(), anyInt())).thenThrow(new RuntimeException("DB 제약 위반"));
 
     assertThatThrownBy(() ->
-      routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null)))
+      routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null))
       .isInstanceOf(RuntimeException.class);
 
     verify(routineImageStorage).deleteBatch("batch-1");
@@ -924,7 +947,7 @@ class RoutineServiceTest {
         (Consumer<RoutineService>) s -> s.generateQuestion(GUARDIAN, new RoutineQuestionRequest("내일 병원 가기"))),
       Arguments.of("reorder", ProfileAction.MANAGE, (Consumer<RoutineService>) s -> s.reorder(GUARDIAN, List.of("r-a"))),
       Arguments.of("create", ProfileAction.MANAGE,
-        (Consumer<RoutineService>) s -> s.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null)))
+        (Consumer<RoutineService>) s -> s.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null))
     );
   }
 
@@ -952,7 +975,7 @@ class RoutineServiceTest {
         (Consumer<RoutineService>) s -> s.updateStep(GUARDIAN, "routine-1", "step-1", new RoutineStepUpdateRequest("제목", null, null))),
       Arguments.of("deleteStep", RoutineAction.EDIT, (Consumer<RoutineService>) s -> s.deleteStep(GUARDIAN, "routine-1", "step-1")),
       Arguments.of("addStep", RoutineAction.EDIT,
-        (Consumer<RoutineService>) s -> s.addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("제목", "설명"))),
+        (Consumer<RoutineService>) s -> s.addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("제목", "설명", null))),
       Arguments.of("reorderSteps", RoutineAction.EDIT,
         (Consumer<RoutineService>) s -> s.reorderSteps(GUARDIAN, "routine-1", List.of("step-2", "step-1"))),
       Arguments.of("completeStep", RoutineAction.PROGRESS, (Consumer<RoutineService>) s -> s.completeStep(GUARDIAN, "routine-1", "step-1")),
@@ -1016,11 +1039,11 @@ class RoutineServiceTest {
     Profile profile = profileWithNickname("하늘이");
     profile.setId("profile-1");
     stubCreatePipeline(profile);
-    when(routineCreationWriter.save(any(), any(), any())).thenAnswer(i -> i.getArgument(2));
+    when(routineCreationWriter.save(any(), any(), any(), any(), anyInt())).thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), null));
 
-    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null));
+    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
 
-    verify(routineCreationWriter).save(eq("member-1"), eq("profile-1"), any(Routine.class));
+    verify(routineCreationWriter).save(eq("member-1"), eq("profile-1"), any(Routine.class), any(), anyInt());
   }
 
   @Test
@@ -1028,11 +1051,11 @@ class RoutineServiceTest {
   void e17_guardianLeftWhileGenerating_discardsImages() {
     Profile profile = profileWithNickname("하늘이");
     stubCreatePipeline(profile);
-    when(routineCreationWriter.save(any(), any(), any()))
+    when(routineCreationWriter.save(any(), any(), any(), any(), anyInt()))
       .thenThrow(new CustomException(ErrorCode.PROFILE_ACCESS_DENIED));
 
     assertThatThrownBy(() ->
-      routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null)))
+      routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PROFILE_ACCESS_DENIED);
     verify(routineImageStorage).deleteBatch("batch-1");
   }

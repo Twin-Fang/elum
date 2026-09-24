@@ -15,6 +15,9 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.credit.application.service.CreditReservation;
+import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
+import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.RoutineAction;
@@ -30,6 +33,7 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +63,8 @@ class RoutineStepEditTest {
   @Mock private RoutineRequestCooldownGuard routineRequestCooldownGuard;
   @Mock private RoutineStepImageFiller routineStepImageFiller;
   @Mock private ProfileAccessGuard profileAccessGuard;
+  @Mock private RoutineStepRepository routineStepRepository;
+  @Mock private CreditReservationService creditReservationService;
 
   @InjectMocks private RoutineService routineService;
 
@@ -71,7 +77,7 @@ class RoutineStepEditTest {
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     routineService.addStep(GUARDIAN, "routine-1",
-      new RoutineStepCreateRequest("우산을 챙겨요", "현관에서 우산을 챙겨요."));
+      new RoutineStepCreateRequest("우산을 챙겨요", "현관에서 우산을 챙겨요.", null));
 
     assertThat(routine.getSteps()).hasSize(4);
     assertThat(routine.getSteps()).extracting(RoutineStep::getStepOrder)
@@ -90,15 +96,18 @@ class RoutineStepEditTest {
     routine.getProfile().setCharacter(CharacterType.LULU);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
+    when(creditReservationService.reserve(eq("member-1"), eq(CreditJobKind.CARD_IMAGE), anyString(), eq(false)))
+      .thenReturn(CreditReservation.disabled());
+
     routineService.addStep(GUARDIAN, "routine-1",
-      new RoutineStepCreateRequest("우산을 챙겨요", "현관에서 우산을 챙겨요."));
+      new RoutineStepCreateRequest("우산을 챙겨요", "현관에서 우산을 챙겨요.", true));
 
     // 그 일과의 캐릭터를 그대로 넘겨야 기존 카드들과 그림체가 맞는다.
     // 요청 회원도 넘겨야 그림 호출 기록에 회원이 남고 회원별 그림 횟수를 셀 수 있다 (#368).
     // FLUX seed 열쇠도 넘긴다 — 일과 만들 때와 같은 공식이라 추가 카드도 같은 캐릭터로 그린다 (#373).
     verify(routineStepImageFiller).scheduleAfterCommit(
       eq("member-1"), eq("routine-1"), any(), eq("현관에서 우산을 챙겨요."), eq(CharacterType.LULU),
-      eq(FluxSeed.routineKey(routine.getProfile().getId(), routine.getTitle())));
+      eq(FluxSeed.routineKey(routine.getProfile().getId(), routine.getTitle())), eq(null));
   }
 
   @Test
@@ -108,7 +117,7 @@ class RoutineStepEditTest {
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     assertThatThrownBy(() -> routineService.addStep(GUARDIAN, "routine-1",
-      new RoutineStepCreateRequest("열한 번째", "안 된다")))
+      new RoutineStepCreateRequest("열한 번째", "안 된다", true)))
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_STEP_MAX_COUNT);
 
@@ -123,7 +132,7 @@ class RoutineStepEditTest {
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     routineService.addStep(GUARDIAN, "routine-1",
-      new RoutineStepCreateRequest("하나 더", "설명"));
+      new RoutineStepCreateRequest("하나 더", "설명", null));
 
     assertThat(routine.getSteps()).hasSize(3);
   }
@@ -135,24 +144,23 @@ class RoutineStepEditTest {
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     routineService.addStep(GUARDIAN, "routine-1",
-      new RoutineStepCreateRequest("하나 더", "설명"));
+      new RoutineStepCreateRequest("하나 더", "설명", null));
 
     assertThat(routine.getStatus()).isEqualTo(RoutineStatus.CONFIRMED);
     assertThat(routine.getCompletedAt()).isNull();
   }
 
   @Test
-  @DisplayName("설명이 비면 그림을 부르지 않는다 — 빈 프롬프트는 돈만 쓴다")
+  @DisplayName("설명이 비면 그림을 요청해도 부르지 않는다 — 빈 프롬프트는 돈만 쓴다. 크레딧도 잡지 않는다 (#407)")
   void addStep_blankDescription_skipsImage() {
     Routine routine = routine(RoutineStatus.PENDING_REVIEW, 1, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
     routineService.addStep(GUARDIAN, "routine-1",
-      new RoutineStepCreateRequest("제목만", null));
+      new RoutineStepCreateRequest("제목만", null, true));
 
     assertThat(routine.getSteps().get(1).getDescription()).isEmpty();
-    // 예약 자체는 부르되, 빈 설명이면 Filler가 내부에서 걸러 낸다
-    verify(routineStepImageFiller).scheduleAfterCommit(any(), any(), any(), eq(""), any(), any());
+    verifyNoInteractions(routineStepImageFiller, creditReservationService);
   }
 
   // ── 순서 변경 ────────────────────────────────────────────────────
@@ -274,11 +282,11 @@ class RoutineStepEditTest {
       .checkRoutine(Caller.guardian("other-member"), "profile-1", "member-1", RoutineAction.EDIT);
 
     assertThatThrownBy(() -> routineService.addStep(Caller.guardian("other-member"), "routine-1",
-      new RoutineStepCreateRequest("제목", "설명")))
+      new RoutineStepCreateRequest("제목", "설명", true)))
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_NOT_CREATOR);
 
-    verify(routineStepImageFiller, never()).scheduleAfterCommit(any(), any(), any(), any(), any(), any());
+    verifyNoInteractions(routineStepImageFiller, creditReservationService);
   }
 
   // ── 헬퍼 ────────────────────────────────────────────────────────

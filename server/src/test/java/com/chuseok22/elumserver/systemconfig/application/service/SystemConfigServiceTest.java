@@ -15,6 +15,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.SecretPropertie
 import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfig;
+import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigHistoryRepository;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigRepository;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,9 @@ class SystemConfigServiceTest {
   @Mock
   private SystemConfigRepository systemConfigRepository;
 
+  @Mock
+  private SystemConfigHistoryRepository systemConfigHistoryRepository;
+
   private SystemConfigService systemConfigService;
 
   @BeforeEach
@@ -43,7 +47,7 @@ class SystemConfigServiceTest {
     // 목으로 흉내 내면 정작 검증하려던 것을 못 본다.
     SecretCipher secretCipher = new SecretCipher(new SecretProperties("test-master-key"));
     systemConfigService = new SystemConfigService(
-      systemConfigRepository, geminiProperties, localLlmProperties, secretCipher);
+      systemConfigRepository, geminiProperties, localLlmProperties, secretCipher, systemConfigHistoryRepository);
   }
 
   private SystemConfig config(ConfigKey key, String value) {

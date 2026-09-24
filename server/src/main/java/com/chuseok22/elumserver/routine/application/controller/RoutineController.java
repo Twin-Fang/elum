@@ -47,14 +47,17 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<RoutineResponse> create(
     Authentication authentication,
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
+    // 크레딧 멱등 키(#407). 구버전 앱은 보내지 않는다 — 서비스가 새로 만든다.
+    @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
     @RequestBody @Valid RoutineCreateRequest request
   ) {
-    RoutineResponse response = routineService.create(Caller.from(authentication, profileId), request);
+    RoutineResponse response =
+      routineService.create(Caller.from(authentication, profileId), request, idempotencyKey);
     return ResponseEntity.ok(response);
   }
 
   // rawInputText에 민감정보 원문이 포함될 수 있으므로 logParameters를 false로 둔다.
-  // 이 엔드포인트는 실패해도 항상 200을 반환한다(RoutineService.generateQuestion 참고).
+  // AI 가 실패해도 200을 반환한다(RoutineService.generateQuestion 참고). 크레딧 부족만 403 이다 (#407).
   @LogMonitoring(logParameters = false, logResult = true, logExecutionTime = true)
   @PostMapping("/questions")
   public ResponseEntity<RoutineQuestionResponse> generateQuestion(

@@ -49,6 +49,8 @@ public class AiCallLogService {
     try {
       AiCallLog callLog = new AiCallLog();
       callLog.setMemberId(AiCallContext.currentMemberId());
+      // 크레딧 작업에 딸린 호출이면 작업 id 를 단다 — 관리자가 작업 하나의 실제 USD 를 대조한다 (#407).
+      callLog.setCreditJobId(AiCallContext.currentCreditJobId());
       callLog.setCallType(callType);
       callLog.setModel(model);
       callLog.setSuccess(success);
