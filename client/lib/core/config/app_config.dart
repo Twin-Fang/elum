@@ -80,6 +80,33 @@ abstract final class AppConfig {
   static String get supportEmail =>
       _string('ELUM_SUPPORT_EMAIL', 'chan4760@gmail.com');
 
+  // --- 스토어 (강제 업데이트 화면이 보낸다 — #279) ---
+  // `.env` 에 두지 않는다. 환경마다 달라지는 값이 아니라 앱 자체의 식별자라서,
+  // Secret 을 빠뜨려 빈 값이 배포돼도 증상이 없는 길을 만들 이유가 없다.
+
+  /// Play 스토어 패키지명. `android/app/build.gradle.kts` 의 `applicationId` 와 같아야 한다.
+  static const androidPackageId = 'kr.twinfang.elum';
+
+  /// App Store Connect 의 Apple ID(숫자). **아직 모른다** — 레포·이슈 어디에도 없다.
+  ///
+  /// 비어 있으면 iOS 강제 업데이트 화면은 스토어 버튼을 숨긴다. 검색 주소로 대신
+  /// 보내지 않는다 — 같은 이름의 다른 앱으로 보낼 수 있다.
+  /// 콘솔 `앱 정보 > 일반 정보 > Apple ID` 값을 넣으면 버튼이 켜진다.
+  static const iosAppStoreId = '';
+
+  /// 플랫폼별 스토어 상세 주소. 보낼 곳을 모르면 null 이다.
+  static Uri? storeUrl(TargetPlatform platform) => switch (platform) {
+        TargetPlatform.android => Uri.https(
+            'play.google.com',
+            '/store/apps/details',
+            {'id': androidPackageId},
+          ),
+        // itms-apps 는 브라우저를 거치지 않고 App Store 앱을 바로 연다
+        TargetPlatform.iOS when iosAppStoreId.isNotEmpty =>
+          Uri.parse('itms-apps://apps.apple.com/app/id$iosAppStoreId'),
+        _ => null,
+      };
+
   // --- 소셜 로그인 ---
   // 콘솔에서 앱을 등록하고 받은 값이다. 받는 절차는
   // docs/setup/소셜로그인_설정가이드.md 참조.
