@@ -10,6 +10,10 @@
 #   store_prepare (= appstore_prepare)       : TestFlight + ASC 버전 생성·빌드 선택·What's New 채움(제출 직전)
 #   store_submit  (= appstore_submit)        : 위 전부 + 심사 자동 제출(submit_for_review)
 #
+# 문구 두 가지는 레포에서 관리한다 (App Store Connect 화면에서 고치면 다음 제출 때 덮인다):
+#   '새로운 기능(What's New)' : 워크플로 env STORE_WHATS_NEW_OVERRIDE (비우면 CHANGELOG)
+#   심사 메모(Notes)           : ios/fastlane/review_notes.txt (없으면 ASC 기존값 유지)
+#
 # ⚠️ 신규 앱은 최초 1회 App Store Connect에서 수동 제출이 필요합니다.
 #   그 이후 업데이트부터 store_submit으로 완전 자동 제출됩니다.
 # ============================================================
@@ -50,10 +54,8 @@ platform :ios do
     # 2) App Store 버전 준비 (+ store_submit이면 심사 자동 제출)
     if prepare_appstore
       app_ver = ENV["APP_VERSION"]
-      # App Store '새로운 기능(What's New)'은 기본으로 CHANGELOG(RELEASE_NOTES)를 쓴다.
-      # STORE_WHATS_NEW_OVERRIDE(워크플로 env)에 값이 있으면 CHANGELOG 대신 그 문구로 덮어쓴다.
-      # 직전 출시 이후 여러 버전이 한꺼번에 나가 CHANGELOG 한 항목이 실제 변경과 어긋나거나,
-      # 변경 내용을 자세히 알리고 싶지 않을 때 쓴다. TestFlight What to Test는 위 pilot이 항상 CHANGELOG를 쓴다.
+      # '새로운 기능(What's New)' 문구: STORE_WHATS_NEW_OVERRIDE 가 있으면 그것, 없으면 CHANGELOG(RELEASE_NOTES).
+      # 왜 덮어쓰나는 워크플로 env 주석 참고. TestFlight What to Test 는 위 pilot 이 항상 CHANGELOG 를 쓴다.
       default_notes = "버그를 수정하고 안정성을 개선했습니다."
       override_notes = (ENV["STORE_WHATS_NEW_OVERRIDE"] || "").strip
       release_notes = override_notes.empty? ? (ENV["RELEASE_NOTES"] || "").strip : override_notes
@@ -74,10 +76,10 @@ platform :ios do
       end
       UI.message("📝 whatsNew 메타 작성: #{release_notes}")
 
-      # 심사 메모(Notes)는 레포의 review_notes.txt 를 원본으로 삼는다.
-      # 예전엔 거절 소명서 승계를 막으려 매번 공란으로 덮었는데, 이 앱은 공용 계정 없이
-      # "Apple로 계속하기" 안내를 Notes에만 두므로 공란이면 심사자가 로그인 방법을 모른다.
-      # 파일이 없으면 notes.txt 를 만들지 않아 ASC 기존값을 그대로 둔다. 연락처 등 다른 심사정보도 보존.
+      # 심사 메모(Notes)는 ios/fastlane/review_notes.txt 를 원본으로 삼아 매번 그 내용을 넣는다.
+      # 이 앱은 심사용 공용 계정이 없어 'Sign-in required'를 일부러 끄고, "Apple로 계속하기"로 로그인하라는
+      # 안내를 Notes 에만 둔다. 그 안내가 어긋나면 로그인 문제로 거절되므로 코드와 함께 관리한다.
+      # 파일이 없거나 비어 있으면 notes.txt 를 만들지 않아 ASC 기존값을 그대로 둔다. 연락처 등 다른 심사정보는 건드리지 않는다.
       notes_src = File.join(workspace, ENV["APP_ROOT"] || ".", "ios", "fastlane", "review_notes.txt")
       review_dir = File.join(metadata_path, "review_information")
       FileUtils.mkdir_p(review_dir)

@@ -103,17 +103,27 @@ env:
   SKIP_WAITING_FOR_BUILD_PROCESSING: "false"
 
   # ============================================
-  # 📝 배포 모드 (store_only | store_prepare | store_submit)
+  # 📝 배포 모드 — main 배포 시 App Store 어디까지 올릴지
   # ============================================
+  #   store_only    : TestFlight 업로드까지만 (기본)
+  #   store_prepare : + App Store Connect 버전 생성·빌드 연결·문구 입력 (제출 버튼은 사람이 누른다)
+  #   store_submit  : + 심사 자동 제출, 승인되면 자동 출시
+  # 값은 레포 변수 IOS_DEPLOY_MODE 에서 읽는다 (Settings → Secrets and variables → Actions → Variables).
+  # 코드가 아니라 레포 변수에 두는 이유: 급할 때 배포 없이 자동 제출을 바로 끌 수 있어야 한다 (값을 store_only 로).
+  # 수동 실행(workflow_dispatch)에서 고른 값이 있으면 그것이 우선한다.
   DEPLOY_MODE: ${{ github.event.inputs.deploy_mode || vars.IOS_DEPLOY_MODE || 'store_only' }}
 
   # ============================================
-  # 📝 App Store 'What's New' 문구 덮어쓰기
+  # 📝 스토어 '새로운 기능(What's New)' 문구 덮어쓰기
   # ============================================
-  # store_prepare / store_submit 때 App Store '새로운 기능(What's New)' 칸에 들어갈 문구.
-  # 값이 있으면 CHANGELOG 대신 이 문구를 매번 그대로 넣는다 (심사자·사용자에게 변경 내용을 자세히 알리지 않을 때).
-  # 빈 문자열("")로 두면 덮어쓰지 않고 해당 버전의 CHANGELOG 항목을 넣는다.
-  # TestFlight 'What to Test'는 이 값과 상관없이 항상 CHANGELOG를 쓴다.
+  # store_prepare / store_submit 때 App Store 의 '이 버전의 새로운 기능' 칸에 들어갈 문구다.
+  #   값이 있으면 → 버전과 상관없이 매번 이 문구를 그대로 넣는다.
+  #   ""(빈 문자열)이면 → 덮어쓰지 않고 CHANGELOG.json 의 해당 버전 항목을 넣는다.
+  # 이 칸은 사용자뿐 아니라 App Review 심사자도 본다. 변경 내용을 자세히 적으면 심사자가 그 기능을 골라 확인하므로,
+  # 필요 이상 알리고 싶지 않으면 한 줄 고정 문구를 쓴다. 또 App Store 는 직전 '출시' 이후 여러 버전이 한꺼번에 나가서
+  # CHANGELOG 한 버전 항목만으로는 실제 변경과 어긋나기 쉽다.
+  # 이 값은 TestFlight 'What to Test'(내부 테스터용)에는 영향이 없다 — 거기는 항상 CHANGELOG 를 쓴다.
+  # Android(PROJECT-FLUTTER-ANDROID-PLAYSTORE-CICD.yaml)에도 같은 이름의 설정이 있다. 두 곳을 함께 바꾼다.
   STORE_WHATS_NEW_OVERRIDE: "이번 버전에서 버그를 고치고 성능을 개선했어요."
 
 jobs:

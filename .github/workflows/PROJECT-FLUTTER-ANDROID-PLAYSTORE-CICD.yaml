@@ -58,12 +58,19 @@ env:
   # 통합 시점에 integrator의 flutter-root resolver가 project_paths.flutter 값으로 1회 치환.
   # FLUTTER_ROOT는 Flutter SDK 경로용 공식 변수라 충돌 — APP_ROOT로 분리
   APP_ROOT: "client"
-  # 배포 모드 (store_only | store_prepare | store_submit)
+  # 배포 모드 — main 배포 시 Play 어디까지 올릴지
+  #   store_only    : 내부 테스트 업로드 + 비공개 테스트(Alpha) 승급까지 (기본)
+  #   store_prepare : + 프로덕션에 draft 로 올림 (Play Console 에서 '출시 시작'은 사람이 누른다)
+  #   store_submit  : + 프로덕션 심사 자동 등록
+  # 값은 레포 변수 ANDROID_DEPLOY_MODE 에서 읽는다. 프로덕션 액세스가 없는 동안은 비워 둔다(store_only) —
+  # 프로덕션 단계가 매번 실패한다.
   DEPLOY_MODE: ${{ github.event.inputs.deploy_mode || vars.ANDROID_DEPLOY_MODE || 'store_only' }}
-  # Play '출시 노트(What's new)' 문구 덮어쓰기.
-  # 값이 있으면 CHANGELOG 대신 이 문구를 매번 그대로 넣는다 (사용자·심사에 변경 내용을 자세히 알리지 않을 때).
-  # 빈 문자열("")로 두면 덮어쓰지 않고 해당 버전의 CHANGELOG 항목을 넣는다.
-  # 출시 노트는 내부 테스트에 올릴 때 한 번 정해지고 비공개 테스트·프로덕션 승급 때 그대로 따라가므로 모든 트랙에 같이 적용된다.
+  # 스토어 '새로운 기능(What's new)' 문구 덮어쓰기 — Play Console 의 '출시 노트' 칸.
+  #   값이 있으면 → 버전과 상관없이 매번 이 문구를 그대로 넣는다.
+  #   ""(빈 문자열)이면 → 덮어쓰지 않고 CHANGELOG.json 의 해당 버전 항목을 넣는다.
+  # 출시 노트는 내부 테스트에 올릴 때 한 번 정해지고 비공개 테스트·프로덕션으로 승급할 때 그대로 따라간다.
+  # 그래서 이 값은 모든 트랙(내부·비공개·프로덕션)에 같이 적용된다.
+  # iOS(PROJECT-FLUTTER-IOS-TESTFLIGHT.yaml)에도 같은 이름의 설정이 있다. 두 곳을 함께 바꾼다.
   STORE_WHATS_NEW_OVERRIDE: "이번 버전에서 버그를 고치고 성능을 개선했어요."
 
 jobs:
