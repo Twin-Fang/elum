@@ -103,24 +103,25 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
   }
 
   Future<void> _save() async {
-    // 저장해야 이룸이 화면에 나간다.
-    try {
-      await ref.read(routineFlowProvider.notifier).confirm();
-    } catch (e) {
-      // **실패하면 홈으로 보내지 않는다.** 홈으로 가면 저장된 것처럼 보이는데,
-      // 정작 이룸이 휴대폰에는 아무것도 뜨지 않는다. 그때 보호자가 의심할 곳은
-      // 앱이 아니라 이룸이다.
-      if (mounted) {
-        showFailureSnack(
-          context,
-          e,
-          fallback: '일과를 저장하지 못했어요. 다시 해주세요',
-          fallbackCode: 'E-CONFIRM',
-        );
-      }
+    // 저장해야 이룸이 화면에 나간다. 뺀 카드를 서버에서 지우고, 만들기 흐름에서
+    // 온 일과만 승인한다 — 이미 저장한 일과에 승인을 부르면 서버가 거절한다 (#405).
+    final failure = await ref.read(routineFlowProvider.notifier).save();
+
+    if (!mounted) return;
+
+    // **실패하면 홈으로 보내지 않는다.** 홈으로 가면 저장된 것처럼 보이는데,
+    // 정작 이룸이 휴대폰에는 아무것도 뜨지 않는다. 그때 보호자가 의심할 곳은
+    // 앱이 아니라 이룸이다.
+    if (failure != null) {
+      showFailureSnack(
+        context,
+        failure,
+        fallback: '일과를 저장하지 못했어요. 다시 해주세요',
+        fallbackCode: 'E-CONFIRM',
+      );
       return;
     }
-    if (mounted) context.go(Routes.guardian);
+    context.go(Routes.guardian);
   }
 
   /// 지금 보고 있는 카드의 제목·설명을 바텀시트로 수정한다.

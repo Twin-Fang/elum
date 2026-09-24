@@ -626,6 +626,10 @@ class _FakeRepo with FakeRewardApi implements RoutineRepository {
   Future<Routine> confirm(Routine routine) async => routine;
 
   @override
+  Future<AppFailure?> deleteStep(String routineId, String stepId) async =>
+      null;
+
+  @override
   Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
     String stepId,

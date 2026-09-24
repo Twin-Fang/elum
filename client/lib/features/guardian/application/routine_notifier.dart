@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
+import '../../../core/network/server_error_code.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../shared/models/routine.dart';
@@ -242,6 +243,16 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   /// 로그로 남겨야 재발을 눈치챌 수 있다 — 조용히 막기만 하면 원인이 묻힌다.
   var _blockedCalls = 0;
 
+  /// 화면에서 뺐지만 서버에는 아직 남아 있는 카드 (이슈 #405).
+  ///
+  /// [save]가 이것을 서버에 반영한다. **화면이 아니라 여기에 둔다** — 카드확인
+  /// 화면은 저장 도중에도 다시 만들어질 수 있고, 목록에서 이미 사라진 카드는
+  /// 화면에서 되찾을 방법이 없다.
+  ///
+  /// 지우는 데 성공한 것은 그때그때 뺀다. 하나가 실패해 다시 눌렀을 때 이미
+  /// 없는 카드를 또 지우러 가면 안 된다.
+  final _removedStepIds = <String>{};
+
   Future<void> generateCards() {
     // 진행 중이거나 이미 끝난 생성이 있으면 그것을 그대로 돌려준다.
     //
@@ -392,6 +403,11 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
 
     final routine = state.routine;
     if (routine == null || routine.steps.length <= 1) return;
+    if (!routine.steps.any((s) => s.id == stepId)) return;
+
+    // 저장하기가 이 목록을 보고 서버에서 뺀다 (#405). 화면에서만 지우고 끝내면
+    // 나가기 팝업의 "저장하기를 눌러야 빠져요" 가 지켜지지 않는다.
+    _removedStepIds.add(stepId);
 
     state = state.copyWith(
       routine: routine.copyWith(
@@ -446,17 +462,64 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     return result.failure;
   }
 
-  /// 승인. 이 시점 이후에만 아동 화면에 노출된다 (docs 원칙 3번).
-  Future<void> confirm() async {
-    AppLogger.notifierCall('RoutineFlowNotifier', 'confirm');
-    AppLogger.notifierStateChange('RoutineFlowNotifier', state.step.name, 'done');
+  /// 카드확인의 `저장하기` (이슈 #405).
+  ///
+  /// 하는 일이 **일과의 상태에 따라 다르다.**
+  ///
+  /// | 어디서 왔나 | 상태 | 하는 일 |
+  /// |---|---|---|
+  /// | 만들기 흐름 | `PENDING_REVIEW` | 뺀 카드를 지우고 **승인**한다 |
+  /// | 홈에서 편집 | 그 밖(`CONFIRMED`·`COMPLETED`) | 뺀 카드만 지운다 |
+  ///
+  /// 전에는 어느 쪽이든 승인 API 를 불렀다. 서버는 임시저장만 승인할 수 있어서
+  /// 이미 저장한 일과를 편집하면 `ROUTINE_INVALID_STATUS` 로 거절했다.
+  ///
+  /// **지우기가 먼저다.** 승인하는 순간 이룸이 화면에 카드가 나가므로(docs 원칙
+  /// 3번), 순서가 바뀌면 뺀 카드가 잠깐이라도 이룸이에게 보인다.
+  ///
+  /// null 이면 성공. 실패하면 이유가 담겨 오고 **화면은 그대로 둔다** — 홈으로
+  /// 보내면 저장된 것처럼 보이는데 이룸이 휴대폰에는 옛 카드가 그대로다.
+  Future<AppFailure?> save() async {
+    AppLogger.notifierCall('RoutineFlowNotifier', 'save', {
+      'removed': _removedStepIds.length,
+    });
 
     final routine = state.routine;
-    if (routine == null) return;
+    if (routine == null) return null;
 
     final repo = ref.read(routineRepositoryProvider);
-    final confirmed = await repo.confirm(routine);
-    state = state.copyWith(step: RoutineFlowStep.done, routine: confirmed);
+
+    // 뺀 카드를 서버에서 지운다. 하나라도 실패하면 승인하지 않는다 —
+    // 뺀 카드가 남은 채로 이룸이에게 가면 보호자가 지운 것이 되살아난 셈이다.
+    for (final stepId in _removedStepIds.toList()) {
+      final failure = await repo.deleteStep(routine.id, stepId);
+
+      // 이미 없는 카드는 빠진 것으로 본다 — 다른 휴대폰에서 먼저 지웠을 때다.
+      // 결과가 같으므로 실패로 다루면 보호자가 영영 저장할 수 없다.
+      final gone = failure?.server?.code == ServerErrorCode.routineStepNotFound;
+      if (failure == null || gone) {
+        _removedStepIds.remove(stepId);
+        continue;
+      }
+      return failure;
+    }
+
+    // 이미 저장한 일과는 여기서 끝이다. 승인 API 는 임시저장만 받는다.
+    if (routine.status != 'PENDING_REVIEW') {
+      ref.refreshRoutines();
+      return null;
+    }
+
+    AppLogger.notifierStateChange('RoutineFlowNotifier', state.step.name, 'done');
+    try {
+      final confirmed = await repo.confirm(routine);
+      state = state.copyWith(step: RoutineFlowStep.done, routine: confirmed);
+    } catch (e) {
+      AppLogger.error('RoutineFlowNotifier', e);
+      return AppFailure.of(e);
+    }
+    ref.refreshRoutines();
+    return null;
   }
 
   /// 이미 만든 일과를 검토 화면에 올린다 (이슈 #258 — 홈에서 `수정`).
@@ -468,6 +531,8 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     AppLogger.notifierCall('RoutineFlowNotifier', 'loadExisting', {
       'routineId': routine.id,
     });
+    // 앞서 다른 일과에서 뺀 카드가 남아 있으면 엉뚱한 카드를 지우러 간다 (#405).
+    _removedStepIds.clear();
     state = RoutineFlowState(
       step: RoutineFlowStep.review,
       routine: routine,
@@ -485,6 +550,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     }
     _generating = null;
     _blockedCalls = 0;
+    _removedStepIds.clear();
     state = const RoutineFlowState();
   }
 }

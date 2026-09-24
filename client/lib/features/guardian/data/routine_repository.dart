@@ -51,6 +51,16 @@ abstract interface class RoutineRepository {
   /// 보호자 승인. 이후에만 아동 화면에 노출된다 (docs 원칙 3번).
   Future<Routine> confirm(Routine routine);
 
+  /// 카드 한 장을 일과에서 뺀다 (이슈 #405).
+  ///
+  /// 카드확인의 X 는 화면에서만 지우고, **저장하기가 이것으로 서버에 반영한다** —
+  /// 나가기 팝업이 "뺀 카드는 저장하기를 눌러야 빠져요"라고 약속하는 그 동작이다.
+  /// 승인([confirm])은 본문 없이 상태만 바꾸므로 여기를 거치지 않으면 뺀 카드가
+  /// 서버에 그대로 남는다.
+  ///
+  /// null 이면 성공. 실패하면 서버가 알려준 이유가 담겨 온다 (#352).
+  Future<AppFailure?> deleteStep(String routineId, String stepId);
+
   /// 카드 문장 수정.
   ///
   /// [failure]가 null이 아니면 서버 반영에 실패해 **로컬에만** 반영됐다는 뜻이다.
@@ -590,6 +600,29 @@ class RoutineRepositoryImpl implements RoutineRepository {
     } catch (e) {
       // 일과 순서와 같다 — 실패를 삼키지 않고 부르는 쪽이 화면을 되돌린다.
       AppLogger.repositoryError('RoutineRepository', 'reorderSteps', e);
+      return AppFailure.of(e);
+    }
+  }
+
+  @override
+  Future<AppFailure?> deleteStep(String routineId, String stepId) async {
+    AppLogger.repositoryCall('RoutineRepository', 'deleteStep', {
+      'routineId': routineId,
+      'stepId': stepId,
+    });
+
+    if (routineId.isEmpty || stepId.isEmpty) {
+      return const AppFailure(fault: NetworkFault.app);
+    }
+
+    try {
+      // 응답으로 일과 전체가 오지만 쓰지 않는다 — 서버 응답에는 카드 제목이 없어
+      // (RoutineStep 에 title 컬럼이 없다, #77) 그대로 받으면 로컬 제목이 지워진다.
+      await _dio.delete<void>('/api/routines/$routineId/steps/$stepId');
+      AppLogger.repositorySuccess('RoutineRepository', 'deleteStep', '카드 빠짐');
+      return null;
+    } catch (e) {
+      AppLogger.repositoryError('RoutineRepository', 'deleteStep', e);
       return AppFailure.of(e);
     }
   }
