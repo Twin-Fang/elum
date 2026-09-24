@@ -107,6 +107,15 @@ env:
   # ============================================
   DEPLOY_MODE: ${{ github.event.inputs.deploy_mode || vars.IOS_DEPLOY_MODE || 'store_only' }}
 
+  # ============================================
+  # 📝 App Store 'What's New' 문구 덮어쓰기
+  # ============================================
+  # store_prepare / store_submit 때 App Store '새로운 기능(What's New)' 칸에 들어갈 문구.
+  # 값이 있으면 CHANGELOG 대신 이 문구를 매번 그대로 넣는다 (심사자·사용자에게 변경 내용을 자세히 알리지 않을 때).
+  # 빈 문자열("")로 두면 덮어쓰지 않고 해당 버전의 CHANGELOG 항목을 넣는다.
+  # TestFlight 'What to Test'는 이 값과 상관없이 항상 CHANGELOG를 쓴다.
+  APPSTORE_WHATS_NEW_OVERRIDE: "이번 버전에서 버그를 고치고 성능을 개선했어요."
+
 jobs:
   prepare-build:
     name: 환경 설정 및 준비
@@ -511,8 +520,6 @@ jobs:
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           SKIP_WAITING_FOR_BUILD_PROCESSING: ${{ env.SKIP_WAITING_FOR_BUILD_PROCESSING }}
           APP_ROOT: ${{ env.APP_ROOT }}   # 아래 스크립트가 셸 변수로 참조한다
-          # App Store '새로운 기능' 임시 덮어쓰기. 비어 있으면 Fastfile이 CHANGELOG를 쓴다 (#414)
-          APPSTORE_RELEASE_NOTES: ${{ vars.IOS_APPSTORE_RELEASE_NOTES }}
         run: |
           # IPA 절대경로 탐색
           IPA_PATH=$(find "$GITHUB_WORKSPACE/${APP_ROOT}/ios/build/ipa" -name "*.ipa" | head -1)
