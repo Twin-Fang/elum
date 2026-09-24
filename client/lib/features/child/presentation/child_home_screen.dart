@@ -12,6 +12,7 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/character_badge.dart';
 import '../../../core/widgets/routine_progress_ring.dart';
 import '../../../shared/utils/korean_particle.dart';
 import '../../../shared/models/routine.dart';
@@ -171,12 +172,8 @@ class _TopBar extends ConsumerWidget {
             ),
             scaleDown: AppPressable.scaleIcon,
             semanticLabel: '보호자 화면으로 가기',
-            // 정사각형 배지라 가로세로 모두 .w
-            child: SvgPicture.asset(
-              AppAssets.characterBadgeFramed(character),
-              width: 56.w,
-              height: 56.w,
-            ),
+            // 여우 배지 자르기(#311)가 보호자 홈과 같아야 해 공용 위젯을 쓴다
+            child: CharacterBadge(character: character),
           ),
         ],
       ),

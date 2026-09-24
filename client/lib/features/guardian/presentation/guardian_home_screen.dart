@@ -8,6 +8,7 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/character_badge.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../credit/application/credit_start_gate.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
@@ -165,10 +166,6 @@ class _Header extends StatelessWidget {
   static const _top = 11.0;
   static const _logoW = 80.0;
   static const _logoH = 30.0;
-  static const _badge = 56.0;
-
-  /// 배지 모서리. 시안 356:5106 · 382:3257 이 16 이다.
-  static const _badgeRadius = 16.0;
   static const _settings = 24.0;
 
   /// 배지 ↔ 설정 16 · 머리 줄 ↔ 인사말 11 · 인사말 ↔ 부제 12
@@ -207,7 +204,7 @@ class _Header extends StatelessWidget {
                     // 이룸이 화면으로 가는 유일한 입구다. 그림뿐이라 이름을 주지
                     // 않으면 화면 낭독기로는 이 길을 찾을 수 없다 (#339).
                     semanticLabel: '이룸이 화면으로 가기',
-                    child: _CharacterBadge(character: character),
+                    child: CharacterBadge(character: character),
                   ),
                   SizedBox(width: _badgeToSettings.w),
                   // 설정 진입점 (#181). 개편 시안에서 배지 오른쪽으로 옮겨졌다.
@@ -241,38 +238,6 @@ class _Header extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 오른쪽 위 캐릭터 배지.
-///
-/// **여우만 경계 밖을 잘라낸다** (#311). 여우 에셋은 시안에서 마스크가 셋 겹쳐
-/// 나오는데 `flutter_svg` 가 그것을 온전히 그리지 못해 캐릭터가 둥근 사각형
-/// 밖으로 삐져나온다. 시안에서 다시 받아도 마스크는 그대로 셋이라 에셋 교체로는
-/// 풀리지 않는다.
-///
-/// **고양이에는 씌우지 않는다.** 멀쩡한 것을 잘라내면 모서리가 미세하게 깎여
-/// 시안 대조 테스트가 어긋난다 — 실제로 그렇게 나왔다.
-class _CharacterBadge extends StatelessWidget {
-  const _CharacterBadge({required this.character});
-
-  final CardCharacter character;
-
-  @override
-  Widget build(BuildContext context) {
-    final badge = SvgPicture.asset(
-      AppAssets.characterBadgeFramed(character),
-      // 정사각형 배지 — 찌그러지지 않게 가로세로 모두 .w
-      width: _Header._badge.w,
-      height: _Header._badge.w,
-    );
-    if (character != CardCharacter.fox) return badge;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(
-        _Header._badgeRadius.r,
-      ),
-      child: badge,
     );
   }
 }
