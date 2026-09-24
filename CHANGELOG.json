@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-24T02:35:32Z",
-    "currentVersion": "1.37.0",
+    "lastUpdated": "2026-09-24T02:49:51Z",
+    "currentVersion": "1.38.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 163
+    "totalReleases": 164
   },
   "releases": [
+    {
+      "version": "1.38.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-24",
+      "pr_number": 398,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * AI 사용 비용을 더 정확히 기록하고 줄일 준비를 했어요\n  * 카드 그림을 만드는 방식을 하나 더 쓸 수 있게 준비했어요\n  * 서비스 보안을 강화했어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "AI 사용 비용을 더 정확히 기록하고 줄일 준비를 했어요",
+            "카드 그림을 만드는 방식을 하나 더 쓸 수 있게 준비했어요",
+            "서비스 보안을 강화했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.37.0",
       "project_type": "flutter",
