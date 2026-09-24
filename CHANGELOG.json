@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-24T12:16:09Z",
-    "currentVersion": "1.41.1",
+    "lastUpdated": "2026-09-24T15:14:51Z",
+    "currentVersion": "1.41.2",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 171
+    "totalReleases": 172
   },
   "releases": [
+    {
+      "version": "1.41.2",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-24",
+      "pr_number": 410,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 설정의 AI 크레딧 카드가 더 간결해졌어요\n  * 물음표를 누르면 크레딧이 줄어드는 방법을 볼 수 있어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "설정의 AI 크레딧 카드가 더 간결해졌어요",
+            "물음표를 누르면 크레딧이 줄어드는 방법을 볼 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.41.1",
       "project_type": "flutter",
