@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.core.AiCallType;
@@ -223,11 +224,23 @@ class RoutineQuotaGuardTest {
   @DisplayName("보유 개수 한도를 넘으면 거부한다")
   void ownedLimitExceeded_throws() {
     limits(Entitlement.UNLIMITED, Entitlement.UNLIMITED);
-    when(routineRepository.countByProfileMemberId(MEMBER_ID)).thenReturn(3L);
+    when(routineRepository.countByCreatedBy(MEMBER_ID)).thenReturn(3L);
     when(entitlementService.isWithinLimit(
       PlanType.FREE, Entitlement.ROUTINE_MAX_COUNT, 3L)).thenReturn(false);
 
     assertRejectedWith(() -> guard.guard(MEMBER_ID), ErrorCode.ROUTINE_COUNT_LIMIT_EXCEEDED);
+  }
+
+  @Test
+  @DisplayName("E42 보유 개수는 내가 만든 일과만 센다 — 함께 돌보는 사람이 만든 일과가 내 한도를 먹지 않는다")
+  void e42_ownedCount_countsOnlyRoutinesICreated() {
+    limits(Entitlement.UNLIMITED, Entitlement.UNLIMITED);
+    when(routineRepository.countByCreatedBy(MEMBER_ID)).thenReturn(1L);
+    when(entitlementService.isWithinLimit(
+      PlanType.FREE, Entitlement.ROUTINE_MAX_COUNT, 1L)).thenReturn(true);
+
+    assertThatCode(() -> guard.guard(MEMBER_ID)).doesNotThrowAnyException();
+    verify(routineRepository).countByCreatedBy(MEMBER_ID);
   }
 
   @Test
@@ -237,7 +250,7 @@ class RoutineQuotaGuardTest {
         .countByMemberIdAndCallTypeInAndSuccessIsTrueAndCreatedAtGreaterThanEqual(
           anyString(), anyCollection(), any(LocalDateTime.class)))
       .thenThrow(new RuntimeException("DB 장애"));
-    lenient().when(routineRepository.countByProfileMemberId(anyString()))
+    lenient().when(routineRepository.countByCreatedBy(anyString()))
       .thenThrow(new RuntimeException("DB 장애"));
     // 한도가 0 이어도 — 집계를 못 했으면 막을 근거가 없다.
     limits(0, 0);
