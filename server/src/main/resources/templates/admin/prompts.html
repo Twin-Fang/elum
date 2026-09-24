@@ -60,8 +60,13 @@
     </div>
 
 <script th:inline="javascript">
-  const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-  const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+  // CSRF 토큰은 공통 골격(admin-layout)이 meta 로 낸다. 여기서 meta 를 바로 .content 로 읽으면
+  // meta 가 빠졌을 때 첫 줄에서 예외가 나 아래 버튼 처리기가 하나도 붙지 않는다 — 눌러도 반응이 없고
+  // 요청이 나가지 않아 서버 로그에도 흔적이 없다(#399). 그래서 요청할 때 읽고, 없으면 화면에 알린다.
+  function readMeta(name) {
+    const meta = document.querySelector('meta[name="' + name + '"]');
+    return meta && meta.content ? meta.content : null;
+  }
 
   function getContentFor(key) {
     return document.querySelector('.prompt-content[data-key="' + key + '"]').value;
@@ -81,17 +86,43 @@
   }
 
   async function callPromptApi(key, path, body) {
-    const response = await fetch('/admin/prompts/' + key + path, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        [csrfHeader]: csrfToken
-      },
-      body: JSON.stringify(body)
-    });
-    const data = await response.json();
+    const csrfToken = readMeta('_csrf');
+    const csrfHeader = readMeta('_csrf_header');
+    if (!csrfToken || !csrfHeader) {
+      // 토큰 없이 보내면 서버가 403 으로 막는다. 보내지 않고 무엇을 하면 되는지 말한다.
+      console.error('[프롬프트] CSRF meta 가 없어 요청하지 않았어요 (E-PRM-CSRF)');
+      throw new Error('보안 토큰을 찾지 못했어요 — 새로고침해 주세요. (E-PRM-CSRF)');
+    }
+    let response;
+    try {
+      response = await fetch('/admin/prompts/' + key + path, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [csrfHeader]: csrfToken
+        },
+        body: JSON.stringify(body)
+      });
+    } catch (e) {
+      console.error('[프롬프트] 요청이 서버에 닿지 못했어요 (E-PRM-NET)', e);
+      throw new Error('서버에 닿지 못했어요. 연결을 확인하고 다시 눌러 주세요. (E-PRM-NET)');
+    }
+    // 403(토큰 만료)·로그인 화면 같은 HTML 응답도 온다. 파싱 오류 문구가 그대로 뜨지 않게 가린다.
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (e) {
+      data = null;
+    }
+    if (response.status === 403) {
+      throw new Error('보안 토큰이 맞지 않아요 — 새로고침해 주세요. (E-PRM-403)');
+    }
     if (!response.ok) {
-      throw new Error(data.errorMessage || '요청이 실패했습니다.');
+      throw new Error((data && data.errorMessage) || ('요청이 실패했어요. (E-PRM-HTTP-' + response.status + ')'));
+    }
+    if (!data) {
+      // 로그인이 풀리면 로그인 화면(200 HTML)으로 돌아온다.
+      throw new Error('응답을 읽지 못했어요. 로그인이 풀렸을 수 있어요 — 새로고침해 주세요. (E-PRM-PARSE)');
     }
     return data;
   }
