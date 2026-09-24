@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * 일과를 수행하는 당사자.
@@ -32,6 +33,9 @@ import lombok.Setter;
  * <p>보호자는 여럿일 수 있다 — 관계는 {@link ProfileGuardian} 표가 들고 있다 (다중 보호자 명세 4-1).
  * 형제가 있거나 기관에서 여러 이용자를 지원하는 경우가 이 구조 위에서 그대로 돌아간다.
  */
+// 바뀐 컬럼만 UPDATE 한다. 전체 컬럼을 쓰면 이름·캐릭터를 고치는 트랜잭션이 그사이 쿼리로 더한 별을
+// 옛 값으로 덮어쓴다 (다중 보호자 E23·E25 — 두 보호자·두 기기가 동시에 쓴다).
+@DynamicUpdate
 @Entity
 @Getter
 @Setter

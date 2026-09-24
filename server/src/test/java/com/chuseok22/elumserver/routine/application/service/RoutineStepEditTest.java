@@ -2,6 +2,8 @@ package com.chuseok22.elumserver.routine.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
@@ -222,7 +224,7 @@ class RoutineStepEditTest {
 
     routineService.deleteStep(GUARDIAN, "routine-1", "step-1");
 
-    assertThat(routine.getProfile().getTotalStars()).isZero();
+    verify(profileRepository).addStars("profile-1", -1);
     assertThat(routine.getSteps()).hasSize(2);
   }
 
@@ -236,7 +238,7 @@ class RoutineStepEditTest {
 
     routineService.deleteStep(GUARDIAN, "routine-1", "step-3");
 
-    assertThat(routine.getProfile().getTotalStars()).isEqualTo(1);
+    verify(profileRepository, never()).addStars(anyString(), anyInt());
   }
 
   @Test

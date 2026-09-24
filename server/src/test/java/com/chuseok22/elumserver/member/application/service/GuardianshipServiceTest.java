@@ -3,6 +3,8 @@ package com.chuseok22.elumserver.member.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -230,6 +232,7 @@ class GuardianshipServiceTest {
     guardianshipService.leave("A", "p1");
 
     assertThat(p1.getTotalStars()).isEqualTo(7);
+    verify(profileRepository, never()).addStars(anyString(), anyInt());
   }
 
   @Test

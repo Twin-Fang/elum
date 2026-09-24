@@ -355,7 +355,8 @@ public class RoutineService {
     LocalDateTime now = LocalDateTime.now();
     targetStep.setCompleted(true);
     targetStep.setCompletedAt(now);
-    routine.getProfile().setTotalStars(routine.getProfile().getTotalStars() + 1);
+    // 별은 쿼리로 더한다 — 두 기기가 동시에 체크해도 하나가 사라지지 않는다 (E25).
+    profileRepository.addStars(routine.getProfile().getId(), 1);
 
     boolean allCompleted = steps.stream().allMatch(step -> Boolean.TRUE.equals(step.getCompleted()));
     if (allCompleted) {
@@ -392,7 +393,7 @@ public class RoutineService {
 
     targetStep.setCompleted(false);
     targetStep.setCompletedAt(null);
-    routine.getProfile().setTotalStars(routine.getProfile().getTotalStars() - 1);
+    profileRepository.addStars(routine.getProfile().getId(), -1);
 
     if (routine.getStatus() == RoutineStatus.COMPLETED) {
       routine.setStatus(RoutineStatus.CONFIRMED);
@@ -437,8 +438,10 @@ public class RoutineService {
     }
     int after = countCompleted(steps);
 
-    Profile profile = routine.getProfile();
-    profile.setTotalStars(Math.max(0, profile.getTotalStars() + (after - before)));
+    // 완료 수의 차이만큼만 움직인다(멱등). 변화가 없으면 쿼리도 보내지 않는다.
+    if (after != before) {
+      profileRepository.addStars(routine.getProfile().getId(), after - before);
+    }
 
     boolean allCompleted = !steps.isEmpty() && after == steps.size();
     if (allCompleted) {
@@ -543,9 +546,9 @@ public class RoutineService {
     // 별은 "완료한 카드 수"를 따라간다 — completeStep(+1) · cancelStep(-1) ·
     // syncProgress(증감분)가 모두 그 규칙이다. 카드가 사라졌는데 별만 남으면
     // 이룸이 화면의 별 개수가 무엇을 센 것인지 설명할 수 없게 된다.
+    // 보호자가 스스로 카드를 지울 때의 동작이다. 나가기에 의한 삭제는 별을 건드리지 않는다 (명세 4-3).
     if (Boolean.TRUE.equals(targetStep.getCompleted())) {
-      Profile profile = routine.getProfile();
-      profile.setTotalStars(Math.max(0, profile.getTotalStars() - 1));
+      profileRepository.addStars(routine.getProfile().getId(), -1);
     }
 
     steps.remove(targetStep);

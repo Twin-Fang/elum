@@ -3,10 +3,13 @@ package com.chuseok22.elumserver.routine.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -542,7 +545,7 @@ class RoutineServiceTest {
     assertThat(routine.getSteps()).extracting(RoutineStep::getCompleted).containsExactly(true, true, false);
     assertThat(routine.getSteps().get(0).getCompletedAt()).isNotNull();
     assertThat(routine.getSteps().get(2).getCompletedAt()).isNull();
-    assertThat(profile.getTotalStars()).isEqualTo(2);
+    verify(profileRepository).addStars("profile-1", 2);
     assertThat(routine.getStatus()).isEqualTo(RoutineStatus.CONFIRMED);
     assertThat(response.progressPercent()).isEqualTo(66);
   }
@@ -576,7 +579,7 @@ class RoutineServiceTest {
 
     assertThat(routine.getSteps()).extracting(RoutineStep::getCompleted).containsExactly(true, false, false);
     assertThat(routine.getSteps().get(1).getCompletedAt()).isNull();
-    assertThat(profile.getTotalStars()).isEqualTo(1);
+    verify(profileRepository).addStars("profile-1", -2);
     assertThat(routine.getStatus()).isEqualTo(RoutineStatus.CONFIRMED);
     assertThat(routine.getCompletedAt()).isNull();
   }
@@ -591,7 +594,8 @@ class RoutineServiceTest {
     routineService.syncProgress(GUARDIAN, "routine-1", List.of("step-1"));
     routineService.syncProgress(GUARDIAN, "routine-1", List.of("step-1"));
 
-    assertThat(profile.getTotalStars()).isEqualTo(1);
+    // 두 번째 요청은 달라진 것이 없어 쿼리도 없다
+    verify(profileRepository, times(1)).addStars("profile-1", 1);
   }
 
   @Test
@@ -606,7 +610,7 @@ class RoutineServiceTest {
   }
 
   @Test
-  @DisplayName("syncProgress: 별이 0인 상태에서 해제 요청이 와도 음수가 되지 않는다")
+  @DisplayName("syncProgress: 해제하면 별을 1 빼는 쿼리를 보낸다 — 0 아래는 쿼리가 막는다")
   void syncProgress_neverGoesBelowZeroStars() {
     Profile profile = profileWithStars(0);
     Routine routine = confirmedRoutine(profile, 1);
@@ -615,7 +619,8 @@ class RoutineServiceTest {
 
     routineService.syncProgress(GUARDIAN, "routine-1", List.of());
 
-    assertThat(profile.getTotalStars()).isZero();
+    // 0 아래로 막는 것은 쿼리가 한다 (ProfileStarsAtomicTest.addStarsClampsAtZero)
+    verify(profileRepository).addStars("profile-1", -1);
   }
 
   @Test
@@ -975,5 +980,42 @@ class RoutineServiceTest {
     routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null));
 
     assertThat(saved.getValue().getCreatedBy()).isEqualTo("member-1");
+  }
+
+  @Test
+  @DisplayName("E25 단계를 체크하면 별은 쿼리로 1 오른다 — 엔티티 값을 읽어 더하지 않는다")
+  void e25_completeStep_addsStarAtomically() {
+    Profile profile = profileWithStars(5);
+    Routine routine = confirmedRoutine(profile, 2);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.completeStep(GUARDIAN, "routine-1", "step-1");
+
+    verify(profileRepository).addStars("profile-1", 1);
+    assertThat(profile.getTotalStars()).as("엔티티 값으로 더하면 동시 요청 하나가 덮어쓴다").isEqualTo(5);
+  }
+
+  @Test
+  @DisplayName("E25 체크를 풀면 별은 쿼리로 1 내려간다")
+  void e25_cancelStep_subtractsStarAtomically() {
+    Profile profile = profileWithStars(5);
+    Routine routine = confirmedRoutine(profile, 2);
+    routine.getSteps().get(0).setCompleted(true);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.cancelStep(GUARDIAN, "routine-1", "step-1");
+
+    verify(profileRepository).addStars("profile-1", -1);
+  }
+
+  @Test
+  @DisplayName("syncProgress: 달라진 것이 없으면 별 쿼리를 보내지 않는다")
+  void syncProgress_noChange_sendsNoStarQuery() {
+    Routine routine = confirmedRoutine(profileWithStars(0), 2);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.syncProgress(GUARDIAN, "routine-1", List.of());
+
+    verify(profileRepository, never()).addStars(anyString(), anyInt());
   }
 }
