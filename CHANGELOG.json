@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-24T15:14:51Z",
-    "currentVersion": "1.41.2",
+    "lastUpdated": "2026-09-24T15:31:38Z",
+    "currentVersion": "1.42.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 172
+    "totalReleases": 173
   },
   "releases": [
+    {
+      "version": "1.42.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-24",
+      "pr_number": 412,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * OpenAI로 만든 카드 문장 기록을 운영 화면에서 확인할 수 있어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "OpenAI로 만든 카드 문장 기록을 운영 화면에서 확인할 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.41.2",
       "project_type": "flutter",
