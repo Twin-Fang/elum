@@ -55,7 +55,7 @@ public class WithdrawnMemberService {
   private final SubscriptionService subscriptionService;
   private final SystemConfigService systemConfigService;
 
-  /** 탈퇴 뒤 남겨 두는 일수. 관리자 설정값이다 (임시 365, 법 확인 뒤 확정). */
+  /** 탈퇴 뒤 남겨 두는 일수. 관리자 설정값이다 (기본 365 — 개인정보처리방침 4조의 1년과 같다). */
   public int retentionDays() {
     return systemConfigService.getInt(ConfigKey.MEMBER_WITHDRAWN_RETENTION_DAYS);
   }
