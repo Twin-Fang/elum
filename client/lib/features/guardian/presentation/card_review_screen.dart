@@ -32,8 +32,15 @@ class CardReviewScreen extends ConsumerStatefulWidget {
   /// 흐름 배경(#380)이 이 값을 보고 오로라를 가라앉힌다.
   static const aurora = AuroraTone.none;
 
+  /// 카드 폭과 카드 사이 (시안 `262:5124` 카드 333 @ x=30 · 옆 카드 x=373 · #401).
+  ///
+  /// 한 장 폭을 카드+사이로 잘라야 가운데 카드가 x=30 에 서고 옆 카드가 20 보인다.
+  /// 전에는 0.88 에 양옆 8 이라 카드가 329.8 @ 31.6, 사이가 16 이었다.
+  static const _cardWidth = 333.0;
+  static const _cardGap = 10.0;
+
   /// 옆 카드가 걸쳐 보이는 정도. 1.0이면 한 장만 꽉 찬다.
-  static const _viewportFraction = 0.88;
+  static const _viewportFraction = (_cardWidth + _cardGap) / 393;
 
   @override
   ConsumerState<CardReviewScreen> createState() => _CardReviewScreenState();
@@ -215,7 +222,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
               // 카드를 넘기면 수정 칩의 대상도 바뀐다
               onPageChanged: (index) => setState(() => _currentIndex = index),
               itemBuilder: (context, index) => Padding(
-                padding: EdgeInsets.symmetric(horizontal: space.xs),
+                padding: EdgeInsets.symmetric(
+                  horizontal: (CardReviewScreen._cardGap / 2).w,
+                ),
                 child: ActionCardView(
                   key: ValueKey(cards[index].id),
                   card: cards[index],

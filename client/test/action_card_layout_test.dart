@@ -20,7 +20,10 @@ void main() {
   // 40 짜리 배지가 81 로 측정된다 — 멀쩡한 코드를 결함으로 오판한다 (#335).
   useFigmaViewport();
 
-  Widget wrap(ActionCard card) {
+  Widget wrap(
+    ActionCard card, {
+    ActionCardLayout layout = ActionCardLayout.review,
+  }) {
     return ProviderScope(
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
@@ -30,7 +33,7 @@ void main() {
             body: SizedBox(
               width: 345,
               height: 431,
-              child: ActionCardView(card: card, index: 0),
+              child: ActionCardView(card: card, index: 0, layout: layout),
             ),
           ),
         ),
@@ -41,15 +44,27 @@ void main() {
   ActionCard card(String title, String description) =>
       ActionCard(id: 'c1', title: title, description: description);
 
-  testWidgets('이미지 칸은 항상 313:264 비율이다', (tester) async {
-    // 카드마다 비율이 다르면 넘길 때 그림이 들쭉날쭉해 보인다.
-    // 시안(`309:3548`)이 그린 칸이 313×264다 — 4:3으로 두면 칸이 32 낮아지고
-    // 카드 전체가 시안보다 46 짧아진다 (#297). 그림은 `contain`이라 안 잘린다.
+  testWidgets('이미지 칸은 카드확인 313:230, 이룸이 상세 313:264 비율이다', (tester) async {
+    // 카드마다 비율이 다르면 넘길 때 그림이 들쭉날쭉해 보인다. 그림은 `contain`이라
+    // 안 잘린다. 두 시안이 칸 높이를 따로 정한다 — 카드확인(`262:5124`)은 313×230
+    // (#401), 이룸이 상세(`309:3548`)는 313×264다. 4:3으로 두면 이룸이 상세 칸이
+    // 32 낮아지고 카드 전체가 시안보다 46 짧아진다 (#297).
     await tester.pumpWidget(wrap(card('옷을 입어요', '학교에 갈 옷을 입어요')));
     await tester.pump();
 
-    final size = tester.getSize(find.byType(AspectRatio));
-    expect(size.width / size.height, closeTo(313 / 264, 0.01));
+    final review = tester.getSize(find.byType(AspectRatio));
+    expect(review.width / review.height, closeTo(313 / 230, 0.01));
+
+    await tester.pumpWidget(
+      wrap(
+        card('옷을 입어요', '학교에 갈 옷을 입어요'),
+        layout: ActionCardLayout.childDetail,
+      ),
+    );
+    await tester.pump();
+
+    final child = tester.getSize(find.byType(AspectRatio));
+    expect(child.width / child.height, closeTo(313 / 264, 0.01));
   });
 
   testWidgets('제목이 길어도 이미지 크기가 같다', (tester) async {
@@ -199,11 +214,13 @@ void main() {
       );
     });
 
-    testWidgets('고치기 전 자리(390)였다면 잘린다 — 되돌림 감시', (tester) async {
+    // #335 에서는 390 자리면 16.7 이 숨었다(되돌림 감시였다). #401 에서 카드확인
+    // 그림칸이 시안대로 34 낮아지면서(313×230) 390 에서도 두 줄이 다 보인다.
+    // 아래 간격 셋을 xs 로 줄인 것(#335)은 되돌릴 수 있게 됐다 — 이슈 #401 질문.
+    testWidgets('그림칸이 시안대로 낮아져(#401) 390 자리에서도 두 줄이 다 보인다', (tester) async {
       expect(
-        await hidden(tester, description: real.first, height: 390, width: 332),
-        greaterThan(0),
-        reason: '이 값이 0 이 되면 자리가 넉넉해진 것이니 간격을 되돌려도 된다',
+        await hidden(tester, description: real.first, height: 390, width: 333),
+        0,
       );
     });
   });

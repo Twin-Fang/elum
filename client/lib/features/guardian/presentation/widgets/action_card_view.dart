@@ -37,6 +37,12 @@ class ActionCardView extends StatefulWidget {
   /// 들어간다. 세 줄은 시안 자리 자체가 모자라 어느 화면에서도 넘친다 (#335).
   static const designIllustrationAspect = 313 / 264;
 
+  /// 카드확인 시안 그림칸 비율 (`262:5124` — 313×230, 2026-09-24 덤프 · #401).
+  ///
+  /// 이룸이 상세보다 34 낮다. 카드확인은 보상 줄(#239)이 세로를 나눠 써 카드가
+  /// 시안(410)보다 짧아서, 그림칸이 낮은 만큼 설명이 들어갈 자리가 남는다.
+  static const reviewIllustrationAspect = 313 / 230;
+
   final ActionCard card;
 
   /// 이미지를 받아오는 데 쓴다. 비면 대체 일러스트를 그린다.
@@ -64,14 +70,20 @@ class ActionCardView extends StatefulWidget {
 }
 
 class _ActionCardViewState extends State<ActionCardView> {
-  /// 배지 줄 아래 → 설명. 카드확인은 예전 값(17)을 그대로 쓴다.
-  static const _titleToBody = 17.0;
-
   /// 이룸이 상세 — 배지 줄 아래 → 설명 (시안 `309:3548` 배지 끝 517 → 설명 535).
   static const _childTitleToBody = 18.0;
 
   /// 이룸이 상세 — 그림칸 아래 → 배지 (시안 `309:3548` 그림칸 끝 460 → 배지 477).
   static const _childIllustrationToTitle = 17.0;
+
+  /// 카드확인 — 테두리를 포함한 안쪽 여백 (시안 `262:5124` 카드 30 → 그림칸 40 · #401).
+  static const _reviewInset = 10.0;
+
+  /// 카드확인 — 그림칸 아래 → 배지 (시안 그림칸 끝 443 → 배지 453).
+  static const _reviewIllustrationToTitle = 10.0;
+
+  /// 카드확인 — 배지 줄 아래 → 설명 (시안 배지 끝 493 → 설명 511).
+  static const _reviewTitleToBody = 18.0;
 
   /// 카드 테두리 두께 (시안 `Rectangle 30` — 2, 안쪽 선).
   static const _borderWidth = 2.0;
@@ -118,6 +130,14 @@ class _ActionCardViewState extends State<ActionCardView> {
     final palette = CardPalette.at(widget.index);
     final space = context.space;
     final childLayout = widget.layout == ActionCardLayout.childDetail;
+    // 두 시안이 여백·그림칸·간격을 따로 정한다 — 한곳에서 고른다.
+    final inset = childLayout ? space.md : _reviewInset.w;
+    final illustrationAspect = childLayout
+        ? ActionCardView.designIllustrationAspect
+        : ActionCardView.reviewIllustrationAspect;
+    final illustrationToTitle =
+        childLayout ? _childIllustrationToTitle : _reviewIllustrationToTitle;
+    final titleToBody = childLayout ? _childTitleToBody : _reviewTitleToBody;
     final speaker = AppPressable(
       onTap: widget.onSpeak,
       scaleDown: AppPressable.scaleIcon,
@@ -144,13 +164,17 @@ class _ActionCardViewState extends State<ActionCardView> {
         color: palette.fill,
         borderRadius: BorderRadius.circular(space.cardRadius),
         border: Border.all(color: palette.border, width: _borderWidth.w),
-        boxShadow: [
-          BoxShadow(
-            color: context.colors.glassShadow,
-            blurRadius: 5.w,
-            offset: Offset(0, 2.h),
-          ),
-        ],
+        // 그림자는 이룸이 상세 시안(`309:3548` 0 2 5 · 5%)에만 있다. 카드확인
+        // 시안(`262:5124`)은 effects 가 비어 있다 (#401).
+        boxShadow: childLayout
+            ? [
+                BoxShadow(
+                  color: context.colors.glassShadow,
+                  blurRadius: 5.w,
+                  offset: Offset(0, 2.h),
+                ),
+              ]
+            : null,
       ),
       // 페이드가 카드 모서리를 넘지 않게 카드 radius로 함께 잘라낸다.
       child: ClipRRect(
@@ -158,13 +182,12 @@ class _ActionCardViewState extends State<ActionCardView> {
         child: Stack(
           children: [
             Padding(
-              // 이룸이 상세는 **테두리를 빼고 준다.** Container 는 테두리 두께만큼
-              // 안쪽을 이미 띄운다. md(16)를 그대로 주면 그림칸이 바깥에서 18
-              // 들어가 시안(16, 안쪽 선이라 테두리 포함)보다 2 안쪽에 4 좁게
-              // 그려진다 (#394).
-              padding: EdgeInsets.all(
-                childLayout ? space.md - _borderWidth.w : space.md,
-              ),
+              // **테두리를 빼고 준다.** Container 는 테두리 두께만큼 안쪽을 이미
+              // 띄운다. 시안 여백(이룸이 상세 16 · 카드확인 10)은 안쪽 선이라 테두리를
+              // 포함한 값이다 — 그대로 주면 그림칸이 2 안쪽에 4 좁게 그려진다
+              // (#394). 카드확인은 여백 16(실제 18)을 쓰고 있어 설명이 제목과 줄이
+              // 안 맞았다 (#401).
+              padding: EdgeInsets.all(inset - _borderWidth.w),
               // 제목이 두 줄이 되면 카드 높이를 넘길 수 있다. 넘치면 스크롤한다 —
               // 노란 줄무늬 오버플로 경고가 뜨면 안 된다.
               child: SingleChildScrollView(
@@ -180,18 +203,14 @@ class _ActionCardViewState extends State<ActionCardView> {
                     // Expanded로 두면 남는 공간을 다 먹어 제목 길이에 따라 카드마다 이미지
                     // 크기와 텍스트 시작 높이가 달라진다.
                     AspectRatio(
-                      aspectRatio: ActionCardView.designIllustrationAspect,
+                      aspectRatio: illustrationAspect,
                       child: _Illustration(
                         routineId: widget.routineId,
                         stepId: widget.card.id,
                         onDelete: widget.onDelete,
                       ),
                     ),
-                    SizedBox(
-                      height: childLayout
-                          ? _childIllustrationToTitle
-                          : space.md,
-                    ),
+                    SizedBox(height: illustrationToTitle),
                     Row(
                       // center로 두면 한 줄/두 줄 모두 별도 측정 없이 배지·제목이
                       // Row 높이(둘 중 큰 쪽) 기준으로 세로 중앙 정렬된다 — 이슈 #105
@@ -201,8 +220,8 @@ class _ActionCardViewState extends State<ActionCardView> {
                           order: widget.index + 1,
                           color: palette.border,
                         ),
-                        // 이룸이 상세는 배지 → 제목 8 (시안 배지 끝 80 → 제목 88).
-                        SizedBox(width: childLayout ? space.xs : space.sm),
+                        // 배지 → 제목 8 (두 시안 모두 배지 끝 80 → 제목 88).
+                        SizedBox(width: space.xs),
                         Expanded(
                           child: Text(
                             // 제목을 …로 자르지 않는다. 아동이 무엇을 해야 하는지
@@ -218,27 +237,19 @@ class _ActionCardViewState extends State<ActionCardView> {
                     ),
                     // 제목 아래 17 — 시안 제목 끝(509) → 설명(535). 토큰(12)을
                     // 쓰면 설명이 5 올라간다 (#297).
-                    SizedBox(
-                      height: childLayout ? _childTitleToBody : _titleToBody,
-                    ),
+                    SizedBox(height: titleToBody),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // **이룸이 상세는 스피커를 배지 칸 한가운데에 둔다.** 시안은
-                        // 스피커를 배지(40) 아래 가운데(x=48)에, 설명을 제목과 같은
-                        // x(88)에 그린다. 카드 왼끝에 붙이면 스피커가 6 왼쪽, 설명이
-                        // 10 왼쪽으로 가 제목과 줄이 안 맞는다 (#394).
-                        //
-                        // 카드확인은 예전 자리 그대로다 — 앱 카드가 시안(333)보다
-                        // 좁아 설명 칸을 8 줄이면 `차례대\n로`처럼 낱말 중간에서 꺾인다.
-                        if (childLayout)
-                          SizedBox(
-                            width: _NumberBadge.size.w,
-                            child: Center(child: speaker),
-                          )
-                        else
-                          speaker,
-                        SizedBox(width: childLayout ? space.xs : space.sm),
+                        // **스피커를 배지 칸 한가운데에 둔다.** 두 시안 모두 스피커를
+                        // 배지(40) 아래 가운데(x=48)에, 설명을 제목과 같은 x(88)에
+                        // 그린다. 카드 왼끝에 붙이면 설명이 제목보다 왼쪽에서 시작해
+                        // 줄이 안 맞는다 (이룸이 상세 #394 · 카드확인 #401).
+                        SizedBox(
+                          width: _NumberBadge.size.w,
+                          child: Center(child: speaker),
+                        ),
+                        SizedBox(width: space.xs),
                         Expanded(
                           child: Text(
                             widget.card.description,
@@ -316,10 +327,13 @@ class _Illustration extends StatelessWidget {
             ),
           ),
         ),
+        // 지우기 원(30)은 그림칸 위·오른쪽에서 6 안쪽이다 (시안 `262:5124` 그림칸
+        // 40,213 · 원 317,219 · #401). 누름 영역(44)이 원보다 7씩 넓어 그만큼 뺀다 —
+        // 전에는 누름 영역을 8 안쪽에 둬 원이 15 안쪽에 있었다.
         if (onDelete != null)
           Positioned(
-            top: space.xs,
-            right: space.xs,
+            top: _DeleteButton.designInset.w - _DeleteButton.touchPad.w,
+            right: _DeleteButton.designInset.w - _DeleteButton.touchPad.w,
             child: _DeleteButton(onTap: onDelete!),
           ),
       ],
@@ -337,6 +351,12 @@ class _DeleteButton extends StatelessWidget {
   /// 투명 여백으로 넓힌다.
   static const _visualSize = 30.0;
   static const _touchSize = 44.0;
+
+  /// 원이 그림칸 모서리에서 떨어진 거리 (시안 `262:5124`).
+  static const designInset = 6.0;
+
+  /// 누름 영역이 원보다 한쪽에 더 넓은 만큼.
+  static const touchPad = (_touchSize - _visualSize) / 2;
 
   @override
   Widget build(BuildContext context) {
@@ -398,7 +418,9 @@ class _NumberBadge extends StatelessWidget {
 
 /// 카드 안 배치. 두 화면의 시안이 따로 움직여 값이 다르다.
 enum ActionCardLayout {
-  /// 보호자 카드확인 (`262:5124`). 여백 16(테두리 밖)·배지 → 제목 12·스피커는 왼끝.
+  /// 보호자 카드확인 (`262:5124`, 2026-09-24 덤프 · #401). 테두리 포함 여백 10·
+  /// 그림칸 313×230·그림칸 → 배지 10·배지 → 제목 8·스피커는 배지 칸 가운데·
+  /// 설명은 제목과 같은 x·배지 → 설명 18·그림자 없음.
   review,
 
   /// 이룸이 일과 상세 (`309:3548`). 테두리 포함 여백 16·그림칸 → 배지 17·
