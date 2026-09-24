@@ -43,11 +43,14 @@ public interface AiCreditAccountRepository extends JpaRepository<AiCreditAccount
   Optional<AiCreditAccount> findByMemberIdForUpdate(@Param("memberId") String memberId);
 
   /**
-   * 완전 삭제된 회원의 식별자만 뗀다. 행·원장은 남긴다 — 같은 소셜 신원으로 돌아오면 이어 붙인다.
+   * 완전 삭제된 회원의 식별자와 소셜 신원 해시를 뗀다. 행·원장은 운영 지표로 남긴다(ai_call_log 와 같다).
+   *
+   * <p>해시까지 비우는 이유 — 방침 4조는 탈퇴 정보를 1년 보관한 뒤 파기한다. 1년 안의 재가입은 같은 계정이
+   * 복원돼 장부가 member_id 로 이어지므로, 보관 기간이 지난 뒤에 해시를 남길 근거가 없다.
    *
    * <p>member 에 외래키가 없어 DB 가 대신 처리해 주지 않는다.
    */
   @Modifying(clearAutomatically = true, flushAutomatically = true)
-  @Query("update AiCreditAccount a set a.memberId = null where a.memberId = :memberId")
+  @Query("update AiCreditAccount a set a.memberId = null, a.identityKey = null where a.memberId = :memberId")
   int detachMember(@Param("memberId") String memberId);
 }

@@ -134,8 +134,8 @@ public class WithdrawnMemberService {
     // 보관하던 것. 소셜 신원은 지우고, AI 호출 기록은 운영 지표라 행을 남기되 누가 썼는지를 뗀다 (#191).
     authIdentityRepository.deleteAllByMemberId(memberId);
     aiCallLogRepository.detachMember(memberId);
-    // 크레딧 계정도 행·원장은 남기고 회원만 뗀다 (#407). 같은 소셜 신원으로 돌아오면 identity_key 로 다시 붙어
-    // 이번 주 사용량이 이어진다 — 지우면 탈퇴·재가입으로 주간 지급을 새로 받는다.
+    // 크레딧 계정도 행·원장은 운영 지표로 남기고 회원과 소셜 신원 해시를 뗀다 (#407). 1년 안의 재가입은
+    // 같은 계정이 복원돼 사용량이 이어지고, 보관 기간이 지난 뒤에는 방침대로 식별값을 파기한다.
     aiCreditAccountRepository.detachMember(memberId);
 
     memberRepository.delete(member);

@@ -67,4 +67,16 @@ class WithdrawnRetentionMatchesPrivacyPolicyTest {
     assertThat(flat).doesNotContain("계정·이룸이 정보·일과·로그인 토큰을 지체 없이 삭제합니다");
     assertThat(flat).doesNotContain("회원 탈퇴로 전체 삭제를 요청할 수 있습니다");
   }
+
+  @Test
+  @DisplayName("보관 기간이 지나 완전히 지울 때 크레딧 장부의 소셜 신원 해시도 함께 비운다 (#407)")
+  void purgeClearsCreditIdentityKey() throws NoSuchMethodException {
+    // 방침은 탈퇴 정보를 1년 보관한 뒤 파기한다. 신원 해시를 남기면 방침에 없는 식별값을 계속 들고 있게 된다.
+    // 1년 안의 재가입은 같은 계정이 복원되므로 장부는 member_id 로 이어지고, 해시가 필요 없다.
+    String jpql = com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditAccountRepository.class
+      .getMethod("detachMember", String.class)
+      .getAnnotation(org.springframework.data.jpa.repository.Query.class)
+      .value();
+    assertThat(jpql).contains("a.memberId = null").contains("a.identityKey = null");
+  }
 }
