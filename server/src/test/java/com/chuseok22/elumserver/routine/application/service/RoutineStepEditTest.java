@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -13,6 +14,8 @@ import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.application.service.Caller;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.RoutineAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -53,6 +56,7 @@ class RoutineStepEditTest {
   @Mock private RoutineAiPipeline routineAiPipeline;
   @Mock private RoutineRequestCooldownGuard routineRequestCooldownGuard;
   @Mock private RoutineStepImageFiller routineStepImageFiller;
+  @Mock private ProfileAccessGuard profileAccessGuard;
 
   @InjectMocks private RoutineService routineService;
 
@@ -260,15 +264,17 @@ class RoutineStepEditTest {
   }
 
   @Test
-  @DisplayName("남의 일과는 건드릴 수 없다")
-  void addStep_notOwner_throws() {
+  @DisplayName("E30 남이 만든 일과에는 카드를 더할 수 없다 — 돈 드는 그림 생성도 시작하지 않는다")
+  void e30_addStep_notCreator_throws() {
     Routine routine = routine(RoutineStatus.PENDING_REVIEW, 1, false);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+    doThrow(new CustomException(ErrorCode.ROUTINE_NOT_CREATOR)).when(profileAccessGuard)
+      .checkRoutine(Caller.guardian("other-member"), "profile-1", "member-1", RoutineAction.EDIT);
 
     assertThatThrownBy(() -> routineService.addStep(Caller.guardian("other-member"), "routine-1",
       new RoutineStepCreateRequest("제목", "설명")))
       .isInstanceOf(CustomException.class)
-      .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_ACCESS_DENIED);
+      .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_NOT_CREATOR);
 
     verify(routineStepImageFiller, never()).scheduleAfterCommit(any(), any(), any(), any(), any(), any());
   }
@@ -294,6 +300,7 @@ class RoutineStepEditTest {
     routine.setId("routine-1");
     routine.setProfile(profile);
     routine.setStatus(status);
+    routine.setCreatedBy("member-1");
 
     List<RoutineStep> steps = new ArrayList<>();
     for (int i = 1; i <= stepCount; i++) {

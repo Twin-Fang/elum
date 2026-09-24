@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.RoutineAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
@@ -155,6 +156,8 @@ public class RoutineService {
 
     Routine routine = new Routine();
     routine.setProfile(profile);
+    // 만든 사람만 승인·수정·삭제한다 (명세 4-2). 새 코드는 늘 채운다 — 비면 아무도 고치지 못한다.
+    routine.setCreatedBy(caller.memberId());
     routine.setRawInputText(request.rawInputText());
     // 가공하지 않으므로 원문과 같다. 컬럼을 없애는 것은 마이그레이션이 필요해 따로 한다 (#377).
     routine.setSanitizedInputText(request.rawInputText());
@@ -186,7 +189,7 @@ public class RoutineService {
 
   @Transactional
   public RoutineResponse confirm(Caller caller, String routineId) {
-    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
     if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
@@ -202,7 +205,7 @@ public class RoutineService {
   /// "보호자가 관리한다"가 성립한다 (2026-09-13 자문).
   @Transactional
   public RoutineResponse updateReward(Caller caller, String routineId, RewardUpdateRequest request) {
-    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
     routine.setRewardText(trimReward(request.rewardText()));
     routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
     return RoutineResponse.from(routine);
@@ -234,10 +237,12 @@ public class RoutineService {
   /// 서비스 원칙에 맞추고, 복제본은 카드만 있으면 수행에 지장이 없다.
   @Transactional
   public RoutineResponse duplicate(Caller caller, String routineId) {
-    Routine origin = getOwnedRoutine(caller.memberId(), routineId);
+    Routine origin = getRoutineFor(caller, routineId, RoutineAction.COPY);
 
     Routine copy = new Routine();
     copy.setProfile(origin.getProfile());
+    // 복제본은 복제한 사람의 일과다. 원본을 누가 만들었든 원본은 그대로 남는다.
+    copy.setCreatedBy(caller.memberId());
     copy.setRawInputText(origin.getTitle());
     copy.setSanitizedInputText(origin.getTitle());
     copy.setTitle(origin.getTitle());
@@ -270,7 +275,7 @@ public class RoutineService {
   /// 보호자가 "이 날은 왜 못 했지"를 확인하는 근거다.
   @Transactional
   public void delete(Caller caller, String routineId) {
-    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
     if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
@@ -325,7 +330,7 @@ public class RoutineService {
 
   @Transactional
   public RoutineResponse completeStep(Caller caller, String routineId, String stepId) {
-    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.PROGRESS);
     if (routine.getStatus() != RoutineStatus.CONFIRMED) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
@@ -363,7 +368,7 @@ public class RoutineService {
 
   @Transactional
   public RoutineResponse cancelStep(Caller caller, String routineId, String stepId) {
-    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.PROGRESS);
     if (routine.getStatus() != RoutineStatus.CONFIRMED && routine.getStatus() != RoutineStatus.COMPLETED) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
@@ -404,7 +409,7 @@ public class RoutineService {
   // 보내도 결과가 같다(멱등).
   @Transactional
   public RoutineResponse syncProgress(Caller caller, String routineId, List<String> completedStepIds) {
-    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.PROGRESS);
     if (routine.getStatus() != RoutineStatus.CONFIRMED && routine.getStatus() != RoutineStatus.COMPLETED) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
@@ -457,7 +462,7 @@ public class RoutineService {
   public RoutineResponse updateStep(
     Caller caller, String routineId, String stepId, RoutineStepUpdateRequest request
   ) {
-    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
     requireEditableRoutine(routine);
 
     List<RoutineStep> steps = routine.getSteps();
@@ -521,7 +526,7 @@ public class RoutineService {
 
   @Transactional
   public RoutineResponse deleteStep(Caller caller, String routineId, String stepId) {
-    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
     requireEditableRoutine(routine);
 
     List<RoutineStep> steps = routine.getSteps();
@@ -567,7 +572,7 @@ public class RoutineService {
   public RoutineResponse addStep(
     Caller caller, String routineId, RoutineStepCreateRequest request
   ) {
-    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
     requireEditableRoutine(routine);
 
     List<RoutineStep> steps = routine.getSteps();
@@ -634,7 +639,7 @@ public class RoutineService {
   }
 
   public RoutineResponse getRoutine(Caller caller, String routineId) {
-    return RoutineResponse.from(getOwnedRoutine(caller.memberId(), routineId));
+    return RoutineResponse.from(getRoutineFor(caller, routineId, RoutineAction.VIEW));
   }
 
   public List<RoutineResponse> getMyRoutines(Caller caller) {
@@ -671,7 +676,7 @@ public class RoutineService {
   }
 
   public RoutineImageStorage.ImageContent getStepImage(Caller caller, String routineId, String stepId) {
-    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.VIEW);
     RoutineStep targetStep = routine.getSteps().stream()
       .filter(step -> step.getId().equals(stepId))
       .findFirst()
@@ -743,7 +748,7 @@ public class RoutineService {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
     }
 
-    Routine routine = getOwnedRoutine(caller.memberId(), routineId);
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
     List<RoutineStep> steps = routine.getSteps();
 
     // 일부만 보내면 빠진 단계의 차례가 어디인지 알 수 없다. 전체가 와야 한다.
@@ -767,12 +772,17 @@ public class RoutineService {
     }
   }
 
-  private Routine getOwnedRoutine(String memberId, String routineId) {
+  /**
+   * 일과 하나를 꺼내며 이 요청자가 이 동작을 해도 되는지 묻는다 (다중 보호자 명세 4-2).
+   *
+   * <p>판단은 {@link ProfileAccessGuard} 한 곳에서 한다. 예전에는 "프로필의 주인 = 요청자"를 여기서 직접
+   * 비교했는데, 보호자가 여럿이 되면 주인이 하나가 아니고 이룸이 휴대폰은 연결로 이룸이가 정해진다.
+   * 어떤 상태 검사보다 먼저 부른다 — 거절될 요청이 무엇도 바꾸지 않게.
+   */
+  private Routine getRoutineFor(Caller caller, String routineId, RoutineAction action) {
     Routine routine = routineRepository.findById(routineId)
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_NOT_FOUND));
-    if (!routine.getProfile().getMember().getId().equals(memberId)) {
-      throw new CustomException(ErrorCode.ROUTINE_ACCESS_DENIED);
-    }
+    profileAccessGuard.checkRoutine(caller, routine.getProfile().getId(), routine.getCreatedBy(), action);
     return routine;
   }
 

@@ -17,13 +17,17 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.RoutineAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
+import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreateRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
@@ -112,14 +116,13 @@ class RoutineServiceTest {
   @Test
   @DisplayName("다른 회원의 일과에 접근하면 ROUTINE_ACCESS_DENIED를 던진다")
   void getStepImage_notOwner_throwsAccessDenied() {
-    Member member = new Member();
-    member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     Routine routine = new Routine();
     routine.setProfile(profile);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+    doThrow(new CustomException(ErrorCode.ROUTINE_ACCESS_DENIED))
+      .when(profileAccessGuard).checkRoutine(Caller.guardian("member-2"), "profile-1", null, RoutineAction.VIEW);
 
     assertThatThrownBy(() -> routineService.getStepImage(Caller.guardian("member-2"), "routine-1", "step-1"))
       .isInstanceOf(CustomException.class)
@@ -726,6 +729,8 @@ class RoutineServiceTest {
     Profile others = profileOf("profile-2", "member-2");
     Routine routine = routineWithSteps("r-1", others, stepOf("s-a", 1));
     when(routineRepository.findById("r-1")).thenReturn(Optional.of(routine));
+    doThrow(new CustomException(ErrorCode.ROUTINE_ACCESS_DENIED))
+      .when(profileAccessGuard).checkRoutine(GUARDIAN, "profile-2", null, RoutineAction.EDIT);
 
     assertThatThrownBy(() -> routineService.reorderSteps(GUARDIAN, "r-1", List.of("s-a")))
       .isInstanceOf(CustomException.class)
@@ -889,5 +894,86 @@ class RoutineServiceTest {
     verify(profileAccessGuard).profileFor(GUARDIAN, expected);
     // 판단 전에 AI 를 부르지 않는다 — 거절될 요청에 돈을 쓰지 않는다
     verifyNoInteractions(routineAiPipeline);
+  }
+
+  static Stream<Arguments> routineCalls() {
+    return Stream.of(
+      Arguments.of("confirm", RoutineAction.EDIT, (Consumer<RoutineService>) s -> s.confirm(GUARDIAN, "routine-1")),
+      Arguments.of("updateReward", RoutineAction.EDIT,
+        (Consumer<RoutineService>) s -> s.updateReward(GUARDIAN, "routine-1", new RewardUpdateRequest("젤리", null))),
+      Arguments.of("delete", RoutineAction.EDIT, (Consumer<RoutineService>) s -> s.delete(GUARDIAN, "routine-1")),
+      Arguments.of("updateStep", RoutineAction.EDIT,
+        (Consumer<RoutineService>) s -> s.updateStep(GUARDIAN, "routine-1", "step-1", new RoutineStepUpdateRequest("제목", null, null))),
+      Arguments.of("deleteStep", RoutineAction.EDIT, (Consumer<RoutineService>) s -> s.deleteStep(GUARDIAN, "routine-1", "step-1")),
+      Arguments.of("addStep", RoutineAction.EDIT,
+        (Consumer<RoutineService>) s -> s.addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("제목", "설명"))),
+      Arguments.of("reorderSteps", RoutineAction.EDIT,
+        (Consumer<RoutineService>) s -> s.reorderSteps(GUARDIAN, "routine-1", List.of("step-2", "step-1"))),
+      Arguments.of("completeStep", RoutineAction.PROGRESS, (Consumer<RoutineService>) s -> s.completeStep(GUARDIAN, "routine-1", "step-1")),
+      Arguments.of("cancelStep", RoutineAction.PROGRESS, (Consumer<RoutineService>) s -> s.cancelStep(GUARDIAN, "routine-1", "step-1")),
+      Arguments.of("syncProgress", RoutineAction.PROGRESS,
+        (Consumer<RoutineService>) s -> s.syncProgress(GUARDIAN, "routine-1", List.of("step-1"))),
+      Arguments.of("getRoutine", RoutineAction.VIEW, (Consumer<RoutineService>) s -> s.getRoutine(GUARDIAN, "routine-1")),
+      Arguments.of("getStepImage", RoutineAction.VIEW, (Consumer<RoutineService>) s -> s.getStepImage(GUARDIAN, "routine-1", "step-1")),
+      Arguments.of("duplicate", RoutineAction.COPY, (Consumer<RoutineService>) s -> s.duplicate(GUARDIAN, "routine-1"))
+    );
+  }
+
+  @ParameterizedTest(name = "{0} → {1}")
+  @MethodSource("routineCalls")
+  @DisplayName("E30 일과 API마다 권한 표의 알맞은 칸을 묻고, 거절되면 아무것도 바꾸지 않는다")
+  void e30_routineCalls_askTheirPermissionFirst(String name, RoutineAction expected, Consumer<RoutineService> call) {
+    Routine routine = confirmedRoutine(profileWithStars(0), 2);
+    routine.setCreatedBy("member-1");
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+    doThrow(new CustomException(ErrorCode.ROUTINE_NOT_CREATOR))
+      .when(profileAccessGuard).checkRoutine(any(), any(), any(), any());
+
+    assertThatThrownBy(() -> call.accept(routineService))
+      .isInstanceOf(CustomException.class)
+      .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_NOT_CREATOR);
+    verify(profileAccessGuard).checkRoutine(GUARDIAN, "profile-1", "member-1", expected);
+    assertThat(routine.getSteps()).extracting(RoutineStep::getCompleted).containsOnly(false);
+    assertThat(routine.getStatus()).isEqualTo(RoutineStatus.CONFIRMED);
+    verify(routineRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("E11 나간 보호자의 일과를 이룸이 폰이 이어서 부르면 404 — 앱은 목록을 다시 받는다")
+  void e11_routineRemovedByLeave_elumiGetsNotFound() {
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> routineService.completeStep(Caller.elumi("member-1", "l1"), "routine-1", "step-1"))
+      .isInstanceOf(CustomException.class)
+      .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_NOT_FOUND);
+    verifyNoInteractions(profileAccessGuard);
+  }
+
+  @Test
+  @DisplayName("복제한 일과는 복제한 사람이 만든 것이다 — 원본을 누가 만들었든")
+  void duplicate_recordsCallerAsCreator() {
+    Routine origin = confirmedRoutine(profileWithStars(0), 1);
+    origin.setTitle("병원 다녀오기");
+    origin.setCreatedBy("someone-else");
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(origin));
+    ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
+    when(routineRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+
+    routineService.duplicate(GUARDIAN, "routine-1");
+
+    assertThat(saved.getValue().getCreatedBy()).isEqualTo("member-1");
+  }
+
+  @Test
+  @DisplayName("새로 만든 일과에는 만든 사람이 늘 채워진다 — 비어 있으면 아무도 고치지 못한다")
+  void create_recordsCallerAsCreator() {
+    Profile profile = profileWithNickname("하늘이");
+    stubCreatePipeline(profile);
+    ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
+    when(routineRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+
+    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null));
+
+    assertThat(saved.getValue().getCreatedBy()).isEqualTo("member-1");
   }
 }
