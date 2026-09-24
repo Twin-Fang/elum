@@ -7,12 +7,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.auth.application.dto.request.LoginRequest;
+import com.chuseok22.elumserver.auth.application.dto.request.SignUpRequest;
 import com.chuseok22.elumserver.auth.application.dto.response.TokenResponse;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
+import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.member.application.service.GuardianshipService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -52,6 +55,12 @@ class AuthServiceTest {
 
   @Mock
   private WithdrawnMemberService withdrawnMemberService;
+
+  @Mock
+  private GuardianshipService guardianshipService;
+
+  @Mock
+  private SubscriptionService subscriptionService;
 
   @InjectMocks
   private AuthService authService;
@@ -238,5 +247,17 @@ class AuthServiceTest {
     assertThat(member.getStatus()).isEqualTo(MemberStatus.WITHDRAWN);
     verify(jwtProvider, never()).createAccessToken(org.mockito.ArgumentMatchers.anyString(),
       org.mockito.ArgumentMatchers.anyString());
+  }
+
+  @Test
+  @DisplayName("가입하면 이룸이를 관계와 함께 만든다 — 관계가 없으면 새 서버가 그 이룸이를 못 찾는다")
+  void signUp_createsProfileThroughGuardianship() {
+    when(memberRepository.existsByUsername("parent1")).thenReturn(false);
+    when(passwordEncoder.encode("pw")).thenReturn("encoded");
+
+    authService.signUp(new SignUpRequest("parent1", "pw"));
+
+    verify(guardianshipService).createOwnProfile(
+      org.mockito.ArgumentMatchers.argThat(member -> "parent1".equals(member.getUsername())));
   }
 }

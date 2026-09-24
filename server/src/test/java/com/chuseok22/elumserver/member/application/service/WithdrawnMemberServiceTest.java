@@ -19,7 +19,6 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
-import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -53,6 +52,9 @@ class WithdrawnMemberServiceTest {
 
   @Mock
   private ProfileGuardianRepository profileGuardianRepository;
+
+  @Mock
+  private GuardianshipService guardianshipService;
 
   @Mock
   private RoutineRepository routineRepository;
@@ -186,12 +188,10 @@ class WithdrawnMemberServiceTest {
 
     withdrawnMemberService.revive(member);
 
-    ArgumentCaptor<Profile> profile = ArgumentCaptor.forClass(Profile.class);
-    verify(profileRepository).save(profile.capture());
-    assertThat(profile.getValue().getMember()).isSameAs(member);
-    // 이름이 비어 있어야 앱이 온보딩부터 다시 시작한다.
-    assertThat(profile.getValue().getNickname()).isNull();
-    assertThat(profile.getValue().getCharacter()).isEqualTo(CharacterType.LULU);
+    // 가입과 같은 길로 만든다 — 빈 이룸이(이름 없음 → 온보딩)와 관계 한 줄. 관계가 없으면 새 서버가
+    // 그 이룸이를 못 찾는다 (다중 보호자 #360).
+    verify(guardianshipService).createOwnProfile(member);
+    verify(profileRepository, never()).save(any(Profile.class));
     verify(subscriptionService).createFreeIfAbsent(member);
     // 일과는 만들지 않는다 — 탈퇴 때 지운 것은 돌아오지 않는다.
     verifyNoInteractions(routineRepository);

@@ -9,13 +9,11 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.member.application.service.GuardianshipService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
-import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
-import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,7 +29,7 @@ public class AuthService {
 
   private final MemberRepository memberRepository;
 
-  private final ProfileRepository profileRepository;
+  private final GuardianshipService guardianshipService;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager memberAuthenticationManager;
   private final JwtProvider jwtProvider;
@@ -51,12 +49,9 @@ public class AuthService {
     member.setPassword(passwordEncoder.encode(request.password()));
     memberRepository.save(member);
 
-    // 계정과 함께 당사자 프로필을 만든다. 온보딩에서 이름·캐릭터를 채운다.
+    // 계정과 함께 당사자 프로필을 관계와 함께 만든다. 온보딩에서 이름·캐릭터를 채운다.
     // 가입 시점에 만들어 두지 않으면 이후 모든 조회가 "프로필 없음"을 분기해야 한다.
-    Profile profile = new Profile();
-    profile.setMember(member);
-    profile.setCharacter(CharacterType.LULU);
-    profileRepository.save(profile);
+    guardianshipService.createOwnProfile(member);
 
     // 로그인하는 사람은 일단 Free다. 행이 없어도 Free로 보긴 하지만, 만들어 두면
     // 관리자 화면에서 모든 계정의 구독이 같은 모양으로 보이고 시작 시점도 남는다.

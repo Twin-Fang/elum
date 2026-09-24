@@ -24,6 +24,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
+import com.chuseok22.elumserver.member.application.service.GuardianshipService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
@@ -114,12 +115,14 @@ class OAuthLoginServiceTest {
     // S3 — 같은 사람이 같은 이메일로 다른 제공자를 쓰는 경우
     OAuthVerifier naver = new StubVerifier(
       OAuthProvider.NAVER, new OAuthUser("naver-1234", "parent@kakao.com", true));
+    // 가입·되살리기가 이룸이를 관계와 함께 만드는지까지 보려고 목이 아니라 실제 서비스를 쓴다.
+    GuardianshipService guardianshipService = new GuardianshipService(profileRepository, profileGuardianRepository);
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
       memberRepository, profileRepository, profileGuardianRepository, routineRepository,
       authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
-      subscriptionService, systemConfigService);
+      subscriptionService, systemConfigService, guardianshipService);
     oAuthLoginService = new OAuthLoginService(
-      List.of(kakao, naver), authIdentityRepository, memberRepository, profileRepository,
+      List.of(kakao, naver), authIdentityRepository, memberRepository, guardianshipService,
       subscriptionService, passwordEncoder, jwtProvider, jwtProperties, refreshTokenService,
       withdrawnMemberService);
   }
@@ -209,6 +212,9 @@ class OAuthLoginServiceTest {
     verify(profileRepository).save(org.mockito.ArgumentMatchers.argThat(saved ->
       saved.getCharacter() == CharacterType.LULU
     ));
+    // 관계 한 줄도 함께 — 새 서버는 관계 표로 이룸이를 찾는다 (다중 보호자 #360).
+    verify(profileGuardianRepository).save(org.mockito.ArgumentMatchers.argThat(guardian ->
+      "new-m".equals(guardian.getMember().getId())));
   }
 
   @Test
@@ -296,6 +302,8 @@ class OAuthLoginServiceTest {
     // 이룸이·일과 없이 온보딩부터 — 빈 프로필과 Free 구독만 만든다.
     verify(profileRepository).save(org.mockito.ArgumentMatchers.argThat(saved ->
       saved.getMember() == member && saved.getNickname() == null));
+    verify(profileGuardianRepository).save(org.mockito.ArgumentMatchers.argThat(guardian ->
+      guardian.getMember() == member));
     verify(subscriptionService).createFreeIfAbsent(member);
     // 가입 때처럼 이메일을 다시 적는다 — 새 가입의 이메일 충돌 안내가 이 값을 본다.
     assertThat(identity.getEmail()).isEqualTo("parent@kakao.com");

@@ -8,10 +8,8 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
-import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
-import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
@@ -56,6 +54,7 @@ public class WithdrawnMemberService {
   private final SubscriptionRepository subscriptionRepository;
   private final SubscriptionService subscriptionService;
   private final SystemConfigService systemConfigService;
+  private final GuardianshipService guardianshipService;
 
   /** 탈퇴 뒤 남겨 두는 일수. 관리자 설정값이다 (기본 365 — 개인정보처리방침 4조의 1년과 같다). */
   public int retentionDays() {
@@ -101,11 +100,8 @@ public class WithdrawnMemberService {
     member.clearConsents();
     // tokenInvalidBefore 는 그대로 둔다 — 비우면 탈퇴 전에 발급된 토큰이 되살아난다 (S4).
 
-    // 가입 때와 같은 기본 프로필. 이름이 비어 있어 앱이 온보딩으로 보낸다.
-    Profile profile = new Profile();
-    profile.setMember(member);
-    profile.setCharacter(CharacterType.LULU);
-    profileRepository.save(profile);
+    // 가입 때와 같은 기본 프로필을 관계와 함께 만든다. 이름이 비어 있어 앱이 온보딩으로 보낸다.
+    guardianshipService.createOwnProfile(member);
     subscriptionService.createFreeIfAbsent(member);
 
     log.info("보관 중이던 탈퇴 계정을 되살렸습니다: memberId={}", member.getId());

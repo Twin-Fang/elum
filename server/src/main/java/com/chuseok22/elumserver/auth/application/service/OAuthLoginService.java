@@ -11,13 +11,11 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
+import com.chuseok22.elumserver.member.application.service.GuardianshipService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
-import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
-import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import java.time.LocalDateTime;
 import java.util.EnumMap;
 import java.util.List;
@@ -46,7 +44,7 @@ public class OAuthLoginService {
   private final Map<OAuthProvider, OAuthVerifier> verifiers = new EnumMap<>(OAuthProvider.class);
   private final AuthIdentityRepository authIdentityRepository;
   private final MemberRepository memberRepository;
-  private final ProfileRepository profileRepository;
+  private final GuardianshipService guardianshipService;
   private final SubscriptionService subscriptionService;
   private final PasswordEncoder passwordEncoder;
   private final JwtProvider jwtProvider;
@@ -58,7 +56,7 @@ public class OAuthLoginService {
     List<OAuthVerifier> oAuthVerifiers,
     AuthIdentityRepository authIdentityRepository,
     MemberRepository memberRepository,
-    ProfileRepository profileRepository,
+    GuardianshipService guardianshipService,
     SubscriptionService subscriptionService,
     PasswordEncoder passwordEncoder,
     JwtProvider jwtProvider,
@@ -69,7 +67,7 @@ public class OAuthLoginService {
     oAuthVerifiers.forEach(verifier -> this.verifiers.put(verifier.provider(), verifier));
     this.authIdentityRepository = authIdentityRepository;
     this.memberRepository = memberRepository;
-    this.profileRepository = profileRepository;
+    this.guardianshipService = guardianshipService;
     this.subscriptionService = subscriptionService;
     this.passwordEncoder = passwordEncoder;
     this.jwtProvider = jwtProvider;
@@ -187,11 +185,8 @@ public class OAuthLoginService {
     identity.setEmailVerified(oAuthUser.emailVerified());
     authIdentityRepository.save(identity);
 
-    // 가입 즉시 당사자 프로필을 만든다. 이후 조회가 "프로필 없음"을 분기하지 않아도 된다.
-    Profile profile = new Profile();
-    profile.setMember(member);
-    profile.setCharacter(CharacterType.LULU);
-    profileRepository.save(profile);
+    // 가입 즉시 당사자 프로필을 관계와 함께 만든다. 이후 조회가 "프로필 없음"을 분기하지 않아도 된다.
+    guardianshipService.createOwnProfile(member);
 
     // 소셜로 들어온 계정도 똑같이 Free로 시작한다.
     subscriptionService.createFreeIfAbsent(member);
