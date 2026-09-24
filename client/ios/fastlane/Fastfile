@@ -74,12 +74,20 @@ platform :ios do
       end
       UI.message("📝 whatsNew 메타 작성: #{release_notes}")
 
-      # 심사 메모(Notes) 초기화: 이전 버전 거절 대응 소명서가 자동 승계되는 문제 방지.
-      # review_information/notes.txt만 공란으로 → 연락처·데모계정 등 다른 심사정보는 ASC 기존값 보존.
+      # 심사 메모(Notes)는 레포의 review_notes.txt 를 원본으로 삼는다 (#414).
+      # 예전엔 거절 소명서 승계를 막으려 매번 공란으로 덮었는데, 이 앱은 공용 계정 없이
+      # "Apple로 계속하기" 안내를 Notes에만 두므로 공란이면 심사자가 로그인 방법을 모른다.
+      # 파일이 없으면 notes.txt 를 만들지 않아 ASC 기존값을 그대로 둔다. 연락처 등 다른 심사정보도 보존.
+      notes_src = File.join(workspace, ENV["APP_ROOT"] || ".", "ios", "fastlane", "review_notes.txt")
       review_dir = File.join(metadata_path, "review_information")
       FileUtils.mkdir_p(review_dir)
-      File.write(File.join(review_dir, "notes.txt"), "")
-      UI.message("🧹 심사 Notes 초기화 (review_information/notes.txt 공란)")
+      if File.file?(notes_src) && !File.read(notes_src).strip.empty?
+        File.write(File.join(review_dir, "notes.txt"), File.read(notes_src).strip)
+        UI.message("📝 심사 Notes 작성: #{notes_src}")
+      else
+        FileUtils.rm_f(File.join(review_dir, "notes.txt"))
+        UI.message("⏭️  review_notes.txt 없음 — 심사 Notes는 ASC 기존값 유지")
+      end
 
       UI.message("📂 metadata_path=#{metadata_path}")
 
