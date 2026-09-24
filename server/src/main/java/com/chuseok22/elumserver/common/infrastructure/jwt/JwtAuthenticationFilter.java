@@ -39,7 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
       // 서명이 유효해도 정지 계정·강제 로그아웃(tokenInvalidBefore 이전 발급) 토큰은
       // 인증을 세팅하지 않는다 → JwtAuthenticationEntryPoint가 401을 반환한다.
-      if (tokenAccessValidator.isAllowed(memberId, claims.getIssuedAt())) {
+      // 발급 시각은 밀리초로 본다 — 초 단위 iat 로는 탈퇴한 같은 초에 다시 받은 토큰이 막힌다 (#372 D2).
+      if (tokenAccessValidator.isAllowed(memberId, jwtProvider.issuedAt(claims))) {
         // ROLE_MEMBER는 그대로 둔다 — 기존 설정이 이 권한을 본다.
         // role 클레임은 "어느 휴대폰인가"를 더한 것이다 (이슈 #200).
         // 클레임이 없던 시절 토큰은 보호자로 본다. 없다고 막으면 기존 세션이 전부 끊긴다.

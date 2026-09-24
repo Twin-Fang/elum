@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
@@ -65,11 +66,16 @@ public class AdminMemberController {
     @RequestParam(name = "memo") String memo,
     RedirectAttributes redirectAttributes
   ) {
-    // 화면 컨트롤러라 예외를 그대로 올리면 500 페이지가 뜬다. 무엇이 잘못됐는지
-    // 화면에서 알려줘야 관리자가 다시 시도할 수 있다.
+    // 사유가 비었을 때만 상세 화면에 머물러 다시 넣게 한다. 입력 실수라 오류 화면으로 보내면 번거롭다.
+    // 나머지(탈퇴 계정·없는 회원)는 잡지 않는다 — 전에는 전부 "사유를 입력해주세요"로 바꿔, 상세를 열어 둔
+    // 사이 탈퇴한 계정에 사유를 넣고 눌러도 그 안내가 떴고 원인이 로그에도 남지 않았다 (#372 D1).
+    // 올려 보내면 AdminViewExceptionHandler 가 정지·강제 로그아웃과 같은 409 안내를 내고 로그에 남긴다.
     try {
       adminMemberService.grantPro(id, days, memo);
     } catch (CustomException e) {
+      if (e.getErrorCode() != ErrorCode.INVALID_INPUT_VALUE) {
+        throw e;
+      }
       redirectAttributes.addFlashAttribute("errorMessage",
         "Pro 발급 실패: 사유를 입력해주세요. (E-ADM-001)");
       return "redirect:/admin/members/" + id;

@@ -47,15 +47,25 @@
           <div class="text-base-content/60">보관 만료 예정일</div>
           <div th:text="${member.retentionExpiresAt() != null ? #temporals.format(member.retentionExpiresAt(), 'yyyy-MM-dd HH:mm') : '다음 정리 때'}">-</div>
         </div>
+        <!-- 개인정보처리방침 4조 [탈퇴 후 1년간 보관하는 정보] 와 같은 말을 한다 (#372 D3).
+             관리자가 정보주체 문의에 이 문구로 답하므로, 남기는 값이 바뀌면 방침과 함께 고친다. -->
         <p class="text-sm text-base-content/70">
-          이룸이 정보와 일과는 탈퇴할 때 지웠어요. 지금은 소셜 로그인 식별값과 AI 이용 기록만 남아 있어요.
-          보관 만료 예정일이 지나면 자동으로 완전히 지워요. 그 전에 같은 소셜 계정으로 다시 가입하면
-          이 계정이 빈 상태로 되살아나고 AI 사용량이 이어져요.
+          이룸이 정보와 일과는 탈퇴할 때 지웠어요. 지금은 개인정보처리방침 4조의 보관 항목만 남아 있어요.
+        </p>
+        <ul class="list-disc list-inside text-sm text-base-content/70 space-y-1">
+          <li>계정 식별값 — 소셜 로그인 제공자와 그 회원 식별번호, 서비스 아이디</li>
+          <li>AI 이용 기록 — 하루·주간 한도를 이어서 세는 데 써요</li>
+          <li>비밀번호 변환값 — 아이디로 가입한 경우만. 같은 아이디로 돌아올 때 본인 확인에 써요</li>
+          <li>약관 동의 기록 — 무엇에 언제 동의했는지 증빙이에요</li>
+        </ul>
+        <p class="text-sm text-base-content/70">
+          보관 만료 예정일이 지나면 자동으로 완전히 지워요. 그 전에 같은 소셜 계정이나 같은 아이디와 비밀번호로
+          다시 로그인하면 이 계정이 빈 상태로 되살아나고 AI 사용량이 이어져요. 약관 동의는 다시 받아요.
         </p>
         <!-- 정보주체가 삭제를 요구했을 때 누른다 (S9). 되돌릴 수 없으므로 확인 창을 거친다. -->
         <form th:if="${member.status().name() == 'WITHDRAWN'}"
               th:action="@{/admin/members/{id}/purge(id=${member.id()})}" method="post"
-              onsubmit="return confirm('이 탈퇴 계정을 지금 완전히 지울까요?\n\n되돌릴 수 없어요. 남아 있는 소셜 로그인 식별값을 지우고 AI 이용 기록에서 회원을 떼요. 같은 소셜 계정으로 다시 가입하면 새 계정이 되고 AI 사용량도 0부터 시작해요.');">
+              onsubmit="return confirm('이 탈퇴 계정을 지금 완전히 지울까요?\n\n되돌릴 수 없어요. 남아 있는 계정 식별값·비밀번호 변환값·약관 동의 기록을 지우고 AI 이용 기록에서 회원을 떼요. 같은 소셜 계정이나 같은 아이디로 다시 가입하면 새 계정이 되고 AI 사용량도 0부터 시작해요.');">
           <button type="submit" class="btn btn-error btn-sm">지금 완전히 지우기</button>
         </form>
       </div>

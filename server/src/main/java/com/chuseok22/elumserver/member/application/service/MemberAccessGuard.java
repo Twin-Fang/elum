@@ -56,6 +56,8 @@ public class MemberAccessGuard implements TokenAccessValidator {
     }
   }
 
+  // tokenIssuedAt 은 필터가 밀리초로 넘긴다(JwtProvider#issuedAt). 초 단위 iat 로 견주면
+  // 탈퇴·강제 로그아웃한 같은 초에 다시 받은 토큰까지 막힌다 (#372 D2).
   private boolean isIssuedBeforeInvalidation(Date tokenIssuedAt, LocalDateTime tokenInvalidBefore) {
     if (tokenIssuedAt == null || tokenInvalidBefore == null) {
       return false;

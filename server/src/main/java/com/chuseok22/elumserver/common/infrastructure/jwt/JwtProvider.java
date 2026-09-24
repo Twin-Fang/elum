@@ -7,16 +7,38 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.util.Date;
 import javax.crypto.SecretKey;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class JwtProvider {
 
+  /**
+   * 밀리초 단위 발급 시각 클레임 (이슈 #372 D2).
+   *
+   * <p>표준 {@code iat} 는 초 단위라, 탈퇴·강제 로그아웃과 같은 초에 받은 토큰은 그 전에 받은 토큰과
+   * 발급 시각이 똑같이 잘린다. 둘을 가르려면 발급 쪽에 초 아래 자리가 있어야 한다. 서명 안에 들어가므로
+   * 바꿀 수 없다. 표준 {@code iat} 는 그대로 둔다 — 다른 도구와 옛 판정이 그 값을 본다.
+   */
+  static final String ISSUED_AT_MILLIS_CLAIM = "iatMs";
+
   private final JwtProperties jwtProperties;
+  private final Clock clock;
+
+  // 생성자가 둘이라 스프링이 쓸 것을 명시한다. 빠뜨리면 서버가 뜨지 않는다.
+  @Autowired
+  public JwtProvider(JwtProperties jwtProperties) {
+    this(jwtProperties, Clock.systemDefaultZone());
+  }
+
+  // 테스트가 같은 초 안의 발급 순서를 고정할 수 있게 시계를 밖에서 받는다.
+  JwtProvider(JwtProperties jwtProperties, Clock clock) {
+    this.jwtProperties = jwtProperties;
+    this.clock = clock;
+  }
 
   /** 보호자 휴대폰용. 기존 호출부가 그대로 쓴다. */
   public String createAccessToken(String memberId, String username) {
@@ -41,13 +63,14 @@ public class JwtProvider {
    * 계속 일과를 본다.
    */
   public String createAccessToken(String memberId, String username, LinkRole role, String linkId) {
-    Date now = new Date();
+    Date now = Date.from(clock.instant());
     Date expiry = new Date(now.getTime() + jwtProperties.accessExpMillis());
 
     var builder = Jwts.builder()
       .subject(memberId)
       .claim("username", username)
-      .claim("role", role.name());
+      .claim("role", role.name())
+      .claim(ISSUED_AT_MILLIS_CLAIM, now.getTime());
     if (linkId != null) {
       builder = builder.claim("linkId", linkId);
     }
@@ -62,10 +85,25 @@ public class JwtProvider {
 
   public Claims parseClaims(String token) {
     return Jwts.parser()
+      .clock(() -> Date.from(clock.instant()))
       .verifyWith(signingKey())
       .build()
       .parseSignedClaims(token)
       .getPayload();
+  }
+
+  /**
+   * 토큰 발급 시각. 무효화 기준({@code tokenInvalidBefore})과 견줄 때 쓴다.
+   *
+   * <p>밀리초 클레임이 없는 토큰(이 수정 전에 발급된 것)은 표준 {@code iat}(초 단위)로 본다.
+   * 그러면 같은 초의 새 토큰이 막히는 옛 동작 그대로라 탈퇴 전 토큰이 살아나는 일은 없다.
+   * 액세스 토큰은 하루면 만료되므로 옛 토큰은 곧 사라진다.
+   */
+  public Date issuedAt(Claims claims) {
+    if (claims.get(ISSUED_AT_MILLIS_CLAIM) instanceof Number millis) {
+      return new Date(millis.longValue());
+    }
+    return claims.getIssuedAt();
   }
 
   public boolean isValid(String token) {
