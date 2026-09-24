@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-24T15:46:02Z",
-    "currentVersion": "1.43.0",
+    "lastUpdated": "2026-09-24T16:41:16Z",
+    "currentVersion": "1.44.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 174
+    "totalReleases": 175
   },
   "releases": [
+    {
+      "version": "1.44.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-24",
+      "pr_number": 417,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * iOS 업데이트 안내에서 App Store로 바로 갈 수 있어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "iOS 업데이트 안내에서 App Store로 바로 갈 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.43.0",
       "project_type": "flutter",
