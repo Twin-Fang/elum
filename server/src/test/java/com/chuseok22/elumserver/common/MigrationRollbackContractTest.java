@@ -45,16 +45,17 @@ class MigrationRollbackContractTest {
   @Test
   @DisplayName("E38 관계 표의 외래키는 ON DELETE CASCADE 다 — 옛 서버의 탈퇴는 이 표를 모르고 profile·member 를 지운다")
   void e38_guardianForeignKeysCascade() throws IOException {
-    String sql = normalizedSql();
-    assertThat(sql).contains("profile_id varchar(255) not null references profile (id) on delete cascade");
-    assertThat(sql).contains("member_id varchar(255) not null references member (id) on delete cascade");
+    // 표마다 따로 본다 — 초대 표에도 같은 모양의 줄이 있어 파일 전체로 보면 관계 표에서 빠져도 통과한다.
+    String table = tableBlock("profile_guardian");
+    assertThat(table).contains("profile_id varchar(255) not null references profile (id) on delete cascade");
+    assertThat(table).contains("member_id varchar(255) not null references member (id) on delete cascade");
   }
 
   @Test
   @DisplayName("E38 초대 코드 표도 이룸이·발급자를 CASCADE 로 잡는다 — 1단계 서버로 되돌려도 탈퇴가 막히지 않는다")
   void e38_inviteForeignKeysDoNotBlockDeletes() throws IOException {
-    String sql = normalizedSql();
-    assertThat(sql).contains("create table if not exists profile_invite");
+    String sql = tableBlock("profile_invite");
+    assertThat(sql).contains("profile_id varchar(255) not null references profile (id) on delete cascade");
     assertThat(sql).contains("issued_by varchar(255) not null references member (id) on delete cascade");
     assertThat(sql).contains("redeemed_by varchar(255) references member (id) on delete set null");
   }
@@ -64,6 +65,14 @@ class MigrationRollbackContractTest {
   void e31_backfillsCreatorFromProfileOwner() throws IOException {
     assertThat(normalizedSql()).contains(
       "update routine r set created_by = (select p.member_id from profile p where p.id = r.profile_id) where r.created_by is null");
+  }
+
+  /** create table 한 덩이 — 여는 괄호부터 그 표를 닫는 ");" 까지. */
+  private String tableBlock(String table) throws IOException {
+    String sql = normalizedSql();
+    int start = sql.indexOf("create table if not exists " + table + " (");
+    assertThat(start).as("%s 표를 만드는 문장이 없다", table).isNotNegative();
+    return sql.substring(start, sql.indexOf(");", start));
   }
 
   /** 주석을 빼고 공백을 하나로, 소문자로 — 주석에 적힌 "not null" 설명이 검사를 속이지 않게 한다. */
