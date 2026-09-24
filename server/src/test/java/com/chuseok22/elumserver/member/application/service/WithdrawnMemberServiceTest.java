@@ -24,6 +24,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -49,6 +50,9 @@ class WithdrawnMemberServiceTest {
 
   @Mock
   private ProfileRepository profileRepository;
+
+  @Mock
+  private ProfileGuardianRepository profileGuardianRepository;
 
   @Mock
   private RoutineRepository routineRepository;

@@ -29,8 +29,8 @@ import lombok.Setter;
  * 섞여 있으면 당사자 기기가 서버에 접속하려고 보호자의 아이디·비밀번호를 써야 하고,
  * 그 기기를 잃어버리면 계정 전체가 열린다.
  *
- * <p>지금은 계정당 하나지만 관계는 N:1로 열어 둔다. 형제가 있거나 기관에서
- * 여러 이용자를 지원하는 경우가 이 구조 위에서 그대로 돌아간다.
+ * <p>보호자는 여럿일 수 있다 — 관계는 {@link ProfileGuardian} 표가 들고 있다 (다중 보호자 명세 4-1).
+ * 형제가 있거나 기관에서 여러 이용자를 지원하는 경우가 이 구조 위에서 그대로 돌아간다.
  */
 @Entity
 @Getter
@@ -41,9 +41,15 @@ public class Profile extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
-  /** 이 프로필을 소유한 로그인 계정(보호자). */
+  /**
+   * 옛 서버 호환용 대표 보호자. <b>새 코드는 권한·조회에 읽지 않는다.</b>
+   *
+   * <p>배포 뒤 옛 서버로 되돌리면 옛 코드가 이 값으로 프로필을 찾는다. 그래서 4단계(#364)에서 지우기 전까지
+   * 가입 때 채우고, 대표가 나가면 남은 사람 중 가장 먼저 합류한 사람으로 바꾼다. 처음 만든 보호자가
+   * 나가도 이룸이가 남아야 해서 비워 둘 수 있다 (V25).
+   */
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_id", nullable = false)
+  @JoinColumn(name = "member_id", nullable = true)
   private Member member;
 
   /** 당사자를 부르는 이름. 화면 인사말과 카드 문구에 쓴다. */

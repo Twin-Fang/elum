@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -46,6 +47,7 @@ public class WithdrawnMemberService {
 
   private final MemberRepository memberRepository;
   private final ProfileRepository profileRepository;
+  private final ProfileGuardianRepository profileGuardianRepository;
   private final RoutineRepository routineRepository;
   private final AuthIdentityRepository authIdentityRepository;
   private final RefreshTokenRepository refreshTokenRepository;
@@ -128,6 +130,7 @@ public class WithdrawnMemberService {
 
     // 탈퇴 때 이미 지운 것이지만 한 번 더 지운다. 남아 있으면 계정 행이 외래키에 걸려 삭제가 실패한다.
     routineRepository.deleteAll(routineRepository.findAllByProfileMemberId(memberId));
+    profileGuardianRepository.deleteAllByMemberId(memberId);
     profileRepository.deleteAllByMemberId(memberId);
     subscriptionRepository.deleteByMemberId(memberId);
     refreshTokenRepository.deleteAllByMemberId(memberId);

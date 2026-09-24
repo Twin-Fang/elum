@@ -17,6 +17,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
@@ -34,6 +35,7 @@ public class MemberService {
   private final MemberRepository memberRepository;
 
   private final ProfileRepository profileRepository;
+  private final ProfileGuardianRepository profileGuardianRepository;
 
   private final RoutineRepository routineRepository;
 
@@ -122,6 +124,8 @@ public class MemberService {
     // 일과 → 프로필 순으로 지운다. 참조가 남으면 외래키가 걸린다.
     List<Routine> routines = routineRepository.findAllByProfileMemberId(memberId);
     routineRepository.deleteAll(routines);
+    // 관계 행이 프로필·계정을 외래키로 잡는다. 1:1 인 동안은 이 사람의 관계만 지우면 된다.
+    profileGuardianRepository.deleteAllByMemberId(memberId);
     profileRepository.deleteAllByMemberId(memberId);
     // 세션. member를 외래키로 참조하지 않아 DB가 대신 지워 주지 않는다.
     refreshTokenRepository.deleteAllByMemberId(memberId);
