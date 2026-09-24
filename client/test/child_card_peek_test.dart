@@ -356,6 +356,113 @@ void main() {
     });
   });
 
+  // P8 — 시안(`309:3648`)은 체크해도 카드 자체는 그대로고 아래 버튼만 바뀐다. 그래서
+  // 옆에 걸친 16 띠에는 체크 여부가 드러나지 않았다. 옆 띠 안에 앱의 체크 표시(민트
+  // 원 + 흰 체크)를 둔다. 가운데 카드는 시안대로 아래 버튼으로만 알린다.
+  group('P8 체크한 카드는 옆에 걸쳐 있을 때도 알아본다', () {
+    Future<ProviderContainer> check(WidgetTester tester, int index) async {
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(ChildRoutineDetailScreen)),
+      );
+      container.read(childRoutineProvider.notifier).toggle(
+        routine: Routine(
+          id: 'local',
+          title: '비 오는 날 학교에 가요',
+          status: 'CONFIRMED',
+          steps: threeCards,
+        ),
+        card: threeCards[index],
+      );
+      await tester.pump();
+      return container;
+    }
+
+    Finder mark(String id) => find.byKey(ValueKey('side-check-$id'));
+
+    testWidgets('첫 카드를 체크하고 넘기면 왼쪽 띠 안에 체크 표시가 보인다', (tester) async {
+      await pumpScreen(tester);
+      await check(tester, 0);
+      controllerOf(tester).jumpToPage(1);
+      await tester.pump();
+
+      expect(mark('c1'), findsOneWidget);
+      final strip = cardRect(tester, 'c1');
+      final m = tester.getRect(mark('c1'));
+      // 화면 안, 옆 카드가 보이는 띠(0 ~ 16) 안에 든다 — 간격 쪽으로 조금 걸친다
+      expect(m.left, greaterThanOrEqualTo(0));
+      expect(m.right, lessThanOrEqualTo(strip.right + ChildCardPager.cardGap / 2));
+      expect(m.left, lessThan(strip.right));
+      // 옆 카드는 흐리게(0.5) 그리지만 표시는 또렷하다
+      expect(_markOpacity(tester, mark('c1')), closeTo(1, 0.001));
+      // 앱에 이미 있는 체크 그림을 쓴다 — 새 그림을 만들지 않는다
+      expect(
+        find.descendant(of: mark('c1'), matching: svgWithAsset(AppAssets.childCheckMark)),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('오른쪽에 걸친 체크한 카드는 오른쪽 띠 안에 보인다', (tester) async {
+      await pumpScreen(tester);
+      await check(tester, 1);
+
+      expect(mark('c2'), findsOneWidget);
+      final strip = cardRect(tester, 'c2');
+      final m = tester.getRect(mark('c2'));
+      expect(m.right, lessThanOrEqualTo(screenWidth));
+      expect(m.left, greaterThanOrEqualTo(strip.left - ChildCardPager.cardGap / 2));
+      expect(m.right, greaterThan(strip.left));
+    });
+
+    testWidgets('체크하지 않은 옆 카드에는 표시가 없다', (tester) async {
+      await pumpScreen(tester);
+
+      expect(mark('c2'), findsNothing);
+    });
+
+    testWidgets('가운데 카드는 체크해도 시안대로 카드에 표시하지 않는다', (tester) async {
+      await pumpScreen(tester);
+      await check(tester, 0);
+
+      // 가운데 카드는 아래 체크 버튼이 이미 알린다 (시안 309:3648)
+      expect(mark('c1'), findsNothing);
+    });
+
+    testWidgets('넘기는 동안 표시가 옆으로 갈수록 또렷해진다', (tester) async {
+      await pumpScreen(tester);
+      await check(tester, 0);
+
+      final controller = controllerOf(tester);
+      final itemWidth =
+          controller.position.viewportDimension * controller.viewportFraction;
+      controller.jumpTo(itemWidth * 0.5);
+      await tester.pump();
+
+      expect(_markOpacity(tester, mark('c1')), closeTo(0.5, 0.01));
+    });
+
+    testWidgets('동작 줄이기면 옆에 있을 때 바로 또렷하다', (tester) async {
+      await pumpScreen(tester, reduceMotion: true);
+      await check(tester, 1);
+
+      expect(_markOpacity(tester, mark('c2')), 1);
+    });
+
+    testWidgets('화면 낭독기는 옆 카드와 그 표시를 여전히 읽지 않는다', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pumpScreen(tester);
+      await check(tester, 1);
+
+      expect(mark('c2'), findsOneWidget);
+      expect(find.semantics.byLabel(RegExp('우산을 챙겨요')), findsNothing);
+      // 표시는 옆 카드와 같은 가림 안에 있다
+      final excluded = tester.widget<ExcludeSemantics>(
+        find.ancestor(of: mark('c2'), matching: find.byType(ExcludeSemantics)).first,
+      );
+      expect(excluded.excluding, isTrue);
+      handle.dispose();
+    });
+  });
+
   group('P7 좁은 폭 · 큰 글꼴', () {
     testWidgets('360 폭 · 글꼴 2.0 에서도 넘치지 않고 가운데 카드 내용을 다 볼 수 있다', (
       tester,
@@ -407,3 +514,10 @@ class _CountingSpeech implements SpeechService {
   @override
   void dispose() {}
 }
+
+/// 체크 표시에 걸린 불투명도 — 표시 바로 위의 Opacity.
+double _markOpacity(WidgetTester tester, Finder mark) => tester
+    .widget<Opacity>(
+      find.ancestor(of: mark, matching: find.byType(Opacity)).first,
+    )
+    .opacity;

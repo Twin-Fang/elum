@@ -277,6 +277,8 @@ class _ChildRoutineDetailScreenState
                   // 카드를 넘기면 체크 버튼 대상도 바뀐다
                   onPageChanged: (_) => setState(() {}),
                   onSideTap: _goToPage,
+                  // 옆에 걸친 카드에도 한 것을 표시한다 (#394 P8)
+                  isChecked: (card) => progress.isChecked(routine.id, card),
                 ),
               ),
             ),

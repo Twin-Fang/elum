@@ -2,7 +2,10 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/assets/app_assets.dart';
+import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../guardian/presentation/widgets/action_card_view.dart';
 
@@ -25,6 +28,7 @@ class ChildCardPager extends StatelessWidget {
     required this.onSpeak,
     required this.onPageChanged,
     required this.onSideTap,
+    required this.isChecked,
   });
 
   /// 시안 카드 폭 (`309:3568` — 345 @ x=24).
@@ -71,6 +75,20 @@ class ChildCardPager extends StatelessWidget {
 
   /// 옆 카드를 눌렀을 때. 그 카드로 넘어간다.
   final ValueChanged<int> onSideTap;
+
+  /// 이 카드를 이미 했는가. 옆에 걸친 카드에 체크 표시를 둘지 정한다 (#394 P8).
+  final bool Function(ActionCard card) isChecked;
+
+  /// 옆 카드 체크 표시 지름 (#394 P8). 보이는 띠가 [peekWidth](16)라 그 안에
+  /// 들어갈 만큼만 — 더 키우면 화면 끝에 잘리거나 가운데 카드에 닿는다.
+  static const sideCheckSize = 16.0;
+
+  /// 체크 표시가 옆 카드의 가운데 쪽 가장자리 밖(간격 쪽)으로 나가는 폭.
+  /// 띠 안에만 두면 화면 끝에 붙는다 — 간격(8) 쪽으로 2 걸쳐 양쪽에 숨 쉴 틈을 둔다.
+  static const sideCheckOverhang = 2.0;
+
+  /// 체크 표시의 위쪽 자리 — 카드 모서리 곡선(r20)이 끝나는 아래.
+  static const sideCheckTop = 16.0;
 
   /// [index] 카드가 가운데에서 얼마나 떨어졌는지 (0 = 가운데, 1 = 한 장 옆).
   double _distance(int index) {
@@ -134,16 +152,42 @@ class ChildCardPager extends StatelessWidget {
                 final t = reduceMotion
                     ? (isSide ? 1.0 : 0.0)
                     : _distance(index);
-                return Opacity(
-                  opacity: lerpDouble(1, sideOpacity, t)!,
-                  child: Transform.scale(
-                    scale: lerpDouble(1, sideScale, t)!,
-                    // **가운데 쪽 가장자리를 붙잡고 줄인다.** 가운데를 붙잡으면
-                    // 바깥 끝이 10 씩 안으로 들어와 보이는 띠가 16 → 6 으로 준다.
-                    alignment: index > _page
-                        ? Alignment.centerLeft
-                        : Alignment.centerRight,
-                    child: child,
+                // 오른쪽에 걸친 카드는 왼쪽 가장자리가, 왼쪽에 걸친 카드는 오른쪽
+                // 가장자리가 화면에 보이는 띠다.
+                final onRight = index > _page;
+                return Transform.scale(
+                  scale: lerpDouble(1, sideScale, t)!,
+                  // **가운데 쪽 가장자리를 붙잡고 줄인다.** 가운데를 붙잡으면
+                  // 바깥 끝이 10 씩 안으로 들어와 보이는 띠가 16 → 6 으로 준다.
+                  alignment: onRight
+                      ? Alignment.centerLeft
+                      : Alignment.centerRight,
+                  child: Stack(
+                    // 카드는 자리 크기를 그대로 받는다 — loose 로 풀면 카드가 줄어든다.
+                    fit: StackFit.passthrough,
+                    clipBehavior: Clip.none,
+                    children: [
+                      Opacity(
+                        opacity: lerpDouble(1, sideOpacity, t)!,
+                        child: child,
+                      ),
+                      // P8 — 시안(`309:3648`)은 체크해도 카드는 그대로고 아래 버튼만
+                      // 바뀐다. 가운데 카드는 그걸로 충분하지만 옆 띠(16)에는 버튼이
+                      // 없어 했는지 안 했는지 모른다. 옆으로 갈수록(t) 체크 표시가
+                      // 또렷해진다 — 카드처럼 흐리게 두면 알아보기 어렵다.
+                      if (t > 0 && isChecked(card))
+                        Positioned(
+                          top: sideCheckTop.w,
+                          left: onRight ? -sideCheckOverhang.w : null,
+                          right: onRight ? null : -sideCheckOverhang.w,
+                          child: Opacity(
+                            opacity: t,
+                            child: _SideCheck(
+                              key: ValueKey('side-check-${card.id}'),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 );
               },
@@ -159,6 +203,39 @@ class ChildCardPager extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// 옆에 걸친 카드의 체크 표시 (#394 P8) — 체크 버튼과 같은 민트 원 + 흰 체크.
+///
+/// 새 그림을 만들지 않고 체크 버튼(`309:3682`)의 색·그림을 줄여 쓴다. 흰 테두리는
+/// 민트 계열 카드 테두리(#93DBCC) 위에서도 원이 묻히지 않게 한다.
+class _SideCheck extends StatelessWidget {
+  const _SideCheck({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    // 원이라 가로세로 모두 .w
+    final size = ChildCardPager.sideCheckSize.w;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: colors.checkDone,
+        border: Border.all(color: colors.surface, width: 1.5.w),
+      ),
+      alignment: Alignment.center,
+      // 체크 버튼 그림(48×35.76 in 88)과 같은 비율로 줄인다
+      child: SvgPicture.asset(
+        AppAssets.childCheckMark,
+        width: size * 48 / 88,
+        height: size * 35.76 / 88,
+        colorFilter: ColorFilter.mode(colors.surface, BlendMode.srcIn),
+        excludeFromSemantics: true,
       ),
     );
   }
