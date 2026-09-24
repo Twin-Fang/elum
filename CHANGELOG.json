@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-23T23:45:43Z",
-    "currentVersion": "1.36.0",
+    "lastUpdated": "2026-09-24T02:35:32Z",
+    "currentVersion": "1.37.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 162
+    "totalReleases": 163
   },
   "releases": [
+    {
+      "version": "1.37.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-24",
+      "pr_number": 396,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 탈퇴 후 1년 안에 다시 가입하면 이전 계정이 빈 상태로 복원돼요\n  * 개인정보처리방침에 탈퇴 정보 보관 기간을 적었어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "탈퇴 후 1년 안에 다시 가입하면 이전 계정이 빈 상태로 복원돼요",
+            "개인정보처리방침에 탈퇴 정보 보관 기간을 적었어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.36.0",
       "project_type": "flutter",
