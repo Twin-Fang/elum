@@ -103,9 +103,10 @@ public class GeminiImageClient implements ImageGenerationClient {
     // 모델명은 호출 시점마다 시스템 설정에서 읽는다 — 관리자가 바꾸면 재배포 없이 반영된다.
     String model = systemConfigService.getString(ConfigKey.GEMINI_IMAGE_MODEL);
     long startedAt = System.currentTimeMillis();
+    // API 키는 로그에 남기지 않는다 — 예전에는 원문을 찍어 운영 로그와 관리자 로그 화면에 드러났다 (#397).
     log.info(
-      "Gemini 이미지 생성 호출 시작: model={}, apiKey={}, characterType={}, prompt={}",
-      model, geminiProperties.apiKey(), characterType, promptText
+      "Gemini 이미지 생성 호출 시작: model={}, characterType={}, prompt={}",
+      model, characterType, promptText
     );
     try {
       GeminiGenerateContentResponse response = geminiRestClient.post()
