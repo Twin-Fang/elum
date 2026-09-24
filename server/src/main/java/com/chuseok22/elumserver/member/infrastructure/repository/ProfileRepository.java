@@ -35,4 +35,13 @@ public interface ProfileRepository extends JpaRepository<Profile, String> {
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("select p from Profile p where p.id = :id")
   Optional<Profile> findByIdForUpdate(@Param("id") String id);
+
+  /**
+   * 이 보호자가 연결된 이룸이들, 먼저 합류한 차례로 (다중 보호자 4-4).
+   *
+   * <p>첫 번째가 "기본 이룸이"다 — 헤더 없이 부르는 지금 앱이 보는 이룸이. {@code g.profile} 을 바로
+   * 고르므로 지연 프록시가 아니라 채워진 엔티티가 온다(트랜잭션 밖 AI 생성 경로가 그대로 쓴다).
+   */
+  @Query("select g.profile from ProfileGuardian g where g.member.id = :memberId order by g.joinedAt asc, g.profile.id asc")
+  List<Profile> findAllGuardedBy(@Param("memberId") String memberId);
 }
