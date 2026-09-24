@@ -19,8 +19,11 @@
   <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}"></div>
 
   <div class="np-page">
+    <!-- data-was-live: 지금 앱에 나가고 있는지(저장된 상태). 나가고 있지 않던 공지가 저장하는 순간
+         나가게 될 때만 한 번 묻는다 — 이미 게시 중인 공지의 오타 수정까지 묻지 않는다 (#385 E). -->
     <form id="notice-form" class="space-y-6" method="post" enctype="multipart/form-data"
-          th:action="${notice == null} ? @{/admin/notices} : @{/admin/notices/{id}(id=${notice.id})}">
+          th:action="${notice == null} ? @{/admin/notices} : @{/admin/notices/{id}(id=${notice.id})}"
+          th:data-was-live="${status != null and status.name() == 'LIVE'}">
       <div class="card bg-base-100 shadow-md">
         <div class="card-body space-y-4">
           <h2 class="card-title text-base">무엇을 알릴까요</h2>
@@ -143,6 +146,13 @@
               <span class="block text-xs text-base-content/60">켜야 게시 기간에 앱에 나가요. 처음에는 꺼 두고 미리보기로 확인한 뒤 켜요</span>
             </span>
           </label>
+          <!-- 저장하면 어떻게 되는지 (#385 E). 켜 둔 채 저장하면 곧바로 보호자 모두에게 나가는데 그걸
+               알려 주는 곳이 없었다. 스크립트가 켜기·게시 기간·플랫폼을 보고 "바로" · "시작 시각부터"로
+               고쳐 쓴다(notice-preview.js). 스크립트가 돌지 않아도 이 줄은 남는다. -->
+          <p id="notice-publish-note" class="rounded-box bg-base-200 p-3 text-sm font-semibold" aria-live="polite"
+             th:text="${form.isEnabled()} ? '켜 둔 채라 저장하면 게시 기간에 맞춰 보호자 모두에게 보여요.' : '꺼 둔 채라 저장해도 앱에는 아직 나가지 않아요.'">
+            꺼 둔 채라 저장해도 앱에는 아직 나가지 않아요.
+          </p>
 
           <!-- "다시 보이게"는 이미 나간 공지를 고칠 때만 뜻이 있다. -->
           <label th:if="${notice != null}" class="label cursor-pointer justify-start gap-3 rounded-box bg-base-200 p-3">

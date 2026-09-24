@@ -24,6 +24,9 @@
  *   2. 문구 도움 — 금지어·해요체·글자 수·강조 짝·이미지 형식/크기/비율을 입력 즉시 짚는다
  *      (경고만 한다. 저장을 막는 것은 서버 검증이다)
  *   3. 지우기 확인 — 게시 중이면 한 번 더 묻는다
+ *   4. 저장하면 어떻게 되는지 (#385 E) — 켜기 아래 한 줄로 "바로 보호자 모두에게 보여요" ·
+ *      "시작 시각부터 보여요" · "아직 나가지 않아요"를 말하고, 나가고 있지 않던 공지가 저장·켜기
+ *      한 번에 곧바로 나가게 될 때만 한 번 묻는다
  */
 (function () {
   'use strict';
@@ -105,11 +108,12 @@
       var data = typeof raw === 'string' ? JSON.parse(raw) : raw;
       return {
         hideDays: data && data.hideDays > 0 ? data.hideDays : 7,
-        notices: data && Array.isArray(data.notices) ? data.notices : []
+        notices: data && Array.isArray(data.notices) ? data.notices : [],
+        serverNow: data && typeof data.serverNow === 'number' ? data.serverNow : null
       };
     } catch (e) {
       // 자료가 깨져도 편집은 된다. 이 공지 하나만 미리 본다.
-      return { hideDays: 7, notices: [] };
+      return { hideDays: 7, notices: [], serverNow: null };
     }
   }
 
@@ -470,7 +474,6 @@
     var platformSelect = $('notice-platform');
     var priority = $('notice-priority');
     var startsAt = $('notice-starts-at');
-    var enabled = $('notice-enabled');
     var wording = $('notice-wording');
     var imageNote = $('notice-image-note');
     var note = document.querySelector('[data-preview-note]');
@@ -518,7 +521,6 @@
         }
         slides = ordered.slice(0, APP.maxSlides);
       }
-      if (enabled && !enabled.checked) messages.push('꺼 둔 채라 저장해도 앱에는 아직 나가지 않아요.');
       var drawn = renderPopup(container, slides, data.hideDays, index);
       // 버튼 문구는 두 줄까지가 보기 좋다(#390 R2). 넘어도 잘리지는 않지만 버튼이 커진다.
       if (drawn.linkLabel && drawn.linkLabel.offsetHeight > APP.buttonSize * 2 + 1) {
@@ -599,7 +601,7 @@
       });
       counter(input);
     });
-    [platformSelect, enabled, removeImage].forEach(function (input) {
+    [platformSelect, removeImage].forEach(function (input) {
       if (input) input.addEventListener('change', render);
     });
     if (image) image.addEventListener('change', onImagePicked);
@@ -621,6 +623,139 @@
     setActive(platformButtons, 'data-preview-platform', previewPlatform);
 
     render();
+  }
+
+  // ── 저장하면 어떻게 되는지 (#385 E) ─────────────────────────
+  //
+  // 켜 둔 채 저장하면 곧바로 보호자 모두에게 나가는데, 화면은 꺼 둔 채일 때만 말하고 있었다.
+  // 미리보기와 따로 둔다 — 미리보기 그리기가 깨져도 이 안내와 확인은 돌아야 한다.
+
+  // 게시 기간 판단에 쓰는 지금 시각. 서버가 실어 준 시각을 기준으로 흐른 만큼 더한다 —
+  // 관리자 PC 시계가 틀려도 앱 API(서버 시계)와 같은 판단을 한다. 없으면 PC 시계.
+  var clockOffset = (function () {
+    var serverNow = readData().serverNow;
+    return serverNow === null ? 0 : serverNow - Date.now();
+  })();
+
+  function nowMillis() {
+    return Date.now() + clockOffset;
+  }
+
+  // datetime-local 칸 값(한국 시각, 'YYYY-MM-DDTHH:mm')을 시각으로. 한국은 서머타임이 없어 +09:00 고정.
+  function kstMillis(value) {
+    var m = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/.exec(value || '');
+    return m ? Date.parse(m[1] + ':00+09:00') : NaN;
+  }
+
+  function kstLabel(value) {
+    var m = /^\d{4}-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value || '');
+    return m ? Number(m[1]) + '월 ' + Number(m[2]) + '일 ' + m[3] + ':' + m[4] : value;
+  }
+
+  // 누구에게 가는지. 플랫폼을 좁혔으면 그 휴대폰 보호자만이다.
+  function audience(platform) {
+    if (platform === 'IOS') return 'iOS 보호자 모두에게';
+    if (platform === 'ANDROID') return 'Android 보호자 모두에게';
+    return '보호자 모두에게';
+  }
+
+  /**
+   * 지금 입력대로 저장하면 어떻게 되는지.
+   * kind: off · stop · live · scheduled · ended · invalid · unknown
+   * 서버 판단(NoticeStatus.of)과 같은 규칙이다 — 시작은 그 순간부터, 종료는 그 순간부터 빠진다.
+   */
+  function publishOutcome(input) {
+    var who = audience(input.platform);
+    if (!input.enabled) {
+      return input.wasLive
+        ? { kind: 'stop', text: '꺼 둔 채 저장하면 다음에 앱을 켜는 보호자부터 안 보여요.' }
+        : { kind: 'off', text: '꺼 둔 채라 저장해도 앱에는 아직 나가지 않아요.' };
+    }
+    var start = kstMillis(input.startsAt);
+    var end = input.endsAt ? kstMillis(input.endsAt) : null;
+    if (isNaN(start) || (end !== null && isNaN(end))) {
+      return { kind: 'unknown', text: '켜 둔 채라 저장하면 게시 기간에 맞춰 ' + who + ' 보여요.' };
+    }
+    if (end !== null && end <= start) {
+      return { kind: 'invalid', text: '종료가 시작보다 빨라요. 이대로는 저장되지 않아요.' };
+    }
+    var now = nowMillis();
+    if (end !== null && end <= now) {
+      return { kind: 'ended', text: '종료 시각이 지나 켜 둬도 앱에는 나가지 않아요.' };
+    }
+    if (start > now) {
+      return {
+        kind: 'scheduled',
+        text: '켜 둔 채라 게시 시작 시각(' + kstLabel(input.startsAt) + ')부터 ' + who + ' 보여요.'
+      };
+    }
+    if (input.wasLive) {
+      // 이미 나가고 있는 공지를 고치는 중. 보지 않기로 숨긴 보호자에게 다시 뜨는지는 "다시 보이게"가 정한다.
+      return {
+        kind: 'live',
+        text: '게시 중이라 저장하면 고친 내용이 바로 보여요. '
+          + (input.bumpRevision ? '숨긴 보호자에게도 다시 떠요.' : '보지 않기로 숨긴 보호자에게는 다시 뜨지 않아요.')
+      };
+    }
+    return { kind: 'live', text: '켜 둔 채라 저장하면 바로 ' + who + ' 보여요. 다음에 앱을 켜는 보호자부터 떠요.' };
+  }
+
+  function initPublishNote(form) {
+    var note = document.getElementById('notice-publish-note');
+    var enabled = document.getElementById('notice-enabled');
+    var startsAt = document.getElementById('notice-starts-at');
+    var endsAt = document.getElementById('notice-ends-at');
+    var platform = document.getElementById('notice-platform');
+    var bump = form.querySelector('[name="bumpRevision"]');
+    var wasLive = form.getAttribute('data-was-live') === 'true';
+
+    function current() {
+      return publishOutcome({
+        enabled: !!(enabled && enabled.checked),
+        startsAt: startsAt ? startsAt.value : '',
+        endsAt: endsAt ? endsAt.value : '',
+        platform: platform ? platform.value : 'ALL',
+        bumpRevision: !!(bump && bump.checked),
+        wasLive: wasLive
+      });
+    }
+
+    function update() {
+      if (note) note.textContent = current().text;
+    }
+
+    [enabled, startsAt, endsAt, platform, bump].forEach(function (input) {
+      if (!input) return;
+      input.addEventListener('input', update);
+      input.addEventListener('change', update);
+    });
+
+    // 나가고 있지 않던 공지가 이 저장으로 곧바로 나가게 될 때만 한 번 묻는다. 게시 중인 공지의
+    // 오타 수정·예약 공지 저장까지 매번 물으면 확인 창을 읽지 않고 누르는 버릇이 든다.
+    form.addEventListener('submit', function (event) {
+      var outcome = current();
+      if (outcome.kind === 'live' && !wasLive
+        && !window.confirm('저장하면 바로 ' + audience(platform ? platform.value : 'ALL')
+          + ' 보여요. 다음에 앱을 켜는 보호자부터 떠요. 저장할까요?')) {
+        event.preventDefault();
+      }
+    });
+
+    update();
+  }
+
+  // 목록의 "켜기" — 게시 기간 안이라 누르는 순간 나가는 줄만 묻는다. 판단은 서버가 했다(data-goes-live).
+  function initEnableConfirm() {
+    document.querySelectorAll('form[data-notice-enable]').forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (form.getAttribute('data-goes-live') !== 'true') return;
+        var title = (form.getAttribute('data-title') || '').split('**').join('');
+        if (!window.confirm("'" + title + "' 공지를 켜면 바로 " + audience(form.getAttribute('data-platform'))
+          + ' 보여요. 켤까요?')) {
+          event.preventDefault();
+        }
+      });
+    });
   }
 
   // ── 지우기 확인 ─────────────────────────────────────────────
@@ -653,9 +788,19 @@
       // 미리보기가 깨져도 입력과 저장은 된다. 원인은 콘솔에 남긴다.
       if (window.console) console.error('[공지 미리보기] 그리지 못했어요 (E-NTC-JS)', e);
     }
+    try {
+      var form = document.getElementById('notice-form');
+      if (form) initPublishNote(form);
+    } catch (e) {
+      // 안내 줄은 서버가 그려 둔 글 그대로 남는다. 원인은 콘솔에 남긴다.
+      if (window.console) console.error('[공지 편집] 저장 안내를 고치지 못했어요 (E-NTC-JS)', e);
+    }
+    initEnableConfirm();
     initDeleteConfirm();
   });
 
   // 테스트나 콘솔에서 쓸 수 있게 드러낸다.
-  window.ElumNoticePreview = { renderPopup: renderPopup, titleParts: titleParts, APP: APP };
+  window.ElumNoticePreview = {
+    renderPopup: renderPopup, titleParts: titleParts, publishOutcome: publishOutcome, APP: APP
+  };
 })();

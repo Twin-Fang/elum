@@ -64,7 +64,10 @@
             <td>
               <div class="flex items-center gap-1">
                 <a th:href="@{/admin/notices/{id}(id=${n.id})}" class="btn btn-primary btn-xs">고치기</a>
-                <form th:action="@{/admin/notices/{id}/enabled(id=${n.id})}" method="post">
+                <!-- 켜는 즉시 게시 기간 안이면 누르는 순간 보호자 모두에게 나간다. 그 줄만 한 번 묻는다 (#385 E). -->
+                <form th:action="@{/admin/notices/{id}/enabled(id=${n.id})}" method="post"
+                      data-notice-enable th:data-goes-live="${!n.enabled and row.liveIfEnabled}"
+                      th:data-platform="${n.platform.name()}" th:data-title="${n.title}">
                   <input type="hidden" name="enabled" th:value="${!n.enabled}"/>
                   <button type="submit" class="btn btn-ghost btn-xs" th:text="${n.enabled} ? '끄기' : '켜기'">끄기</button>
                 </form>

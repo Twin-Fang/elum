@@ -5,12 +5,14 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminNoticeRow;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.notice.application.service.NoticeService;
 import com.chuseok22.elumserver.notice.core.NoticeEmphasis;
+import com.chuseok22.elumserver.notice.core.NoticeStatus;
 import com.chuseok22.elumserver.notice.infrastructure.entity.AppNotice;
 import com.chuseok22.elumserver.notice.infrastructure.storage.NoticeImageStorage.ImageContent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,8 +53,10 @@ public class AdminNoticeController {
 
   @GetMapping("/admin/notices")
   public String list(Model model) {
+    LocalDateTime now = noticeService.now();
     List<AdminNoticeRow> rows = noticeService.getAll().stream()
-      .map(notice -> new AdminNoticeRow(notice, noticeService.statusOf(notice)))
+      .map(notice -> new AdminNoticeRow(notice, noticeService.statusOf(notice),
+        NoticeStatus.of(true, notice.getStartsAt(), notice.getEndsAt(), now).isLive()))
       .toList();
     model.addAttribute("rows", rows);
     addPreview(model, null);
@@ -193,6 +197,9 @@ public class AdminNoticeController {
     Map<String, Object> data = new LinkedHashMap<>();
     data.put("hideDays", hideDays);
     data.put("notices", slides);
+    // 편집 화면이 "저장하면 바로 나가요 / 시작 시각부터 나가요"를 말할 때 쓰는 서버 시각(밀리초).
+    // 관리자 PC 시계로 판단하면 앱 API(서버 시계)와 다른 말을 한다 (#385 E).
+    data.put("serverNow", noticeService.now().atZone(NoticeService.ZONE).toInstant().toEpochMilli());
     model.addAttribute("hideDays", hideDays);
     model.addAttribute("previewJson", toJson(data));
   }

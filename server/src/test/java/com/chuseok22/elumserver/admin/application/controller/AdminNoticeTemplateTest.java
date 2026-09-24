@@ -112,8 +112,8 @@ class AdminNoticeTemplateTest {
     AppNotice off = notice("n2", "추석 안내", NoticePlatform.ALL);
     off.setEnabled(false);
 
-    String html = renderList(List.of(new AdminNoticeRow(live, NoticeStatus.LIVE),
-      new AdminNoticeRow(off, NoticeStatus.DISABLED)));
+    String html = renderList(List.of(new AdminNoticeRow(live, NoticeStatus.LIVE, true),
+      new AdminNoticeRow(off, NoticeStatus.DISABLED, true)));
 
     assertThat(html).contains("공지 관리").contains("게시 중").contains("꺼짐")
       .contains("2026-09-23 09:00").contains("2026-09-30 18:00").contains("iOS")
@@ -156,12 +156,64 @@ class AdminNoticeTemplateTest {
       .contains("E-NTC-001").contains("게시 중").contains("판 2");
   }
 
+  @Test
+  @DisplayName("꺼 둔 채 저장하면 — 켜기 아래 안내 줄이 아직 나가지 않는다고 말한다 (#385 E)")
+  void edit_publishNote_off() {
+    String html = renderEdit(null, null);
+
+    assertThat(publishNote(html)).contains("꺼 둔 채라 저장해도 앱에는 아직 나가지 않아요");
+    // 새 공지는 아직 앱에 나가고 있지 않다 — 켜서 저장하면 "새로 나가는 순간"이라 한 번 묻는다
+    assertThat(html).contains("data-was-live=\"false\"");
+  }
+
+  @Test
+  @DisplayName("켜 둔 채 저장하면 — 안내 줄이 보호자 모두에게 보인다고 말한다 (#385 E)")
+  void edit_publishNote_on() {
+    String html = renderEdit(notice("n1", "공지", NoticePlatform.ALL), null);
+
+    // 스크립트가 게시 기간을 보고 "바로" · "시작 시각부터"로 고친다. 스크립트가 없어도 이 줄은 남는다.
+    assertThat(publishNote(html)).contains("켜 둔 채라 저장하면 게시 기간에 맞춰 보호자 모두에게 보여요");
+    // 이미 게시 중인 공지를 고칠 때는 새로 나가는 것이 아니라 확인 창을 띄우지 않는다
+    assertThat(html).contains("data-was-live=\"true\"");
+  }
+
+  @Test
+  @DisplayName("목록의 켜기 — 켜는 즉시 나가는 줄만 확인 창 표시를 단다 (#385 E)")
+  void list_enableConfirmMarker() {
+    AppNotice now = notice("n1", "지금 나갈 공지", NoticePlatform.IOS);
+    now.setEnabled(false);
+    AppNotice later = notice("n2", "나중 공지", NoticePlatform.ALL);
+    later.setEnabled(false);
+
+    String html = renderList(List.of(new AdminNoticeRow(now, NoticeStatus.DISABLED, true),
+      new AdminNoticeRow(later, NoticeStatus.DISABLED, false)));
+
+    assertThat(toggleForm(html, "n1")).contains("data-notice-enable").contains("data-goes-live=\"true\"")
+      .contains("data-platform=\"IOS\"");
+    assertThat(toggleForm(html, "n2")).contains("data-goes-live=\"false\"");
+  }
+
+  /** 켜기 아래 안내 줄의 글. */
+  private String publishNote(String html) {
+    Matcher matcher = Pattern.compile("(?s)<p[^>]*id=\"notice-publish-note\"[^>]*>(.*?)</p>").matcher(html);
+    assertThat(matcher.find()).as("안내 줄 notice-publish-note").isTrue();
+    assertThat(matcher.group(0)).contains("aria-live=\"polite\"");
+    return matcher.group(1);
+  }
+
+  /** 목록 한 줄의 켜기/끄기 폼 여는 태그. */
+  private String toggleForm(String html, String id) {
+    Matcher matcher = Pattern.compile("<form[^>]*action=\"/admin/notices/" + id + "/enabled\"[^>]*>").matcher(html);
+    assertThat(matcher.find()).as(id + " 켜기 폼").isTrue();
+    return matcher.group();
+  }
+
   @ParameterizedTest
   @ValueSource(strings = {"list", "new", "edit"})
   @DisplayName("그려진 화면의 태그 여닫기 수가 맞다 — 짝 없는 닫는 태그가 휴대폰 메뉴를 망가뜨린다")
   void renderedTagsBalanced(String page) {
     String html = switch (page) {
-      case "list" -> renderList(List.of(new AdminNoticeRow(notice("n1", "공지", NoticePlatform.ALL), NoticeStatus.LIVE)));
+      case "list" -> renderList(List.of(new AdminNoticeRow(notice("n1", "공지", NoticePlatform.ALL), NoticeStatus.LIVE, true)));
       case "new" -> renderEdit(null, "오류 (E-NTC-000)");
       default -> renderEdit(notice("n1", "공지", NoticePlatform.ALL), null);
     };

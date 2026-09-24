@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.admin.application.dto.request.NoticeEditForm;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminNoticeRow;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.notice.application.dto.request.NoticeInput;
@@ -182,5 +183,37 @@ class AdminNoticeControllerTest {
     assertThat(form.platform()).isEqualTo("ALL");
     assertThat(model.get("hideDays")).isEqualTo(7);
     assertThat((String) model.get("previewJson")).contains("\"hideDays\":7");
+  }
+
+  @Test
+  @DisplayName("목록 — 꺼진 공지를 켜면 바로 나가는지는 서버 시계로 판단해 넘긴다 (#385 E)")
+  void list_marksRowsThatGoLiveWhenEnabled() {
+    // 지금 12:00. 09:00 에 시작한 꺼진 공지는 켜는 즉시 나가고, 내일 시작하는 것은 아니다.
+    AppNotice now = stored("n1");
+    now.setEnabled(false);
+    AppNotice tomorrow = stored("n2");
+    tomorrow.setEnabled(false);
+    tomorrow.setStartsAt(LocalDateTime.of(2026, 9, 24, 9, 0));
+    AppNotice ended = stored("n3");
+    ended.setEnabled(false);
+    ended.setEndsAt(LocalDateTime.of(2026, 9, 23, 11, 0));
+    when(noticeService.getAll()).thenReturn(List.of(now, tomorrow, ended));
+    when(noticeService.statusOf(any())).thenReturn(NoticeStatus.DISABLED);
+
+    controller.list(model);
+
+    @SuppressWarnings("unchecked")
+    List<AdminNoticeRow> rows = (List<AdminNoticeRow>) model.get("rows");
+    assertThat(rows).extracting(AdminNoticeRow::liveIfEnabled).containsExactly(true, false, false);
+  }
+
+  @Test
+  @DisplayName("미리보기 자료에 서버 시각을 싣는다 — 편집 화면이 관리자 PC 시계가 아니라 서버 시계로 게시 여부를 말한다 (#385 E)")
+  void preview_carriesServerNow() {
+    controller.newForm(model);
+
+    // 2026-09-23 12:00 한국 시각 = 03:00 UTC
+    long expected = LocalDateTime.of(2026, 9, 23, 3, 0).toEpochSecond(java.time.ZoneOffset.UTC) * 1000;
+    assertThat((String) model.get("previewJson")).contains("\"serverNow\":" + expected);
   }
 }
