@@ -166,7 +166,7 @@ public final class PromptDefaults {
 
       [출력 계약]
       반드시 제공된 JSON Schema 형식으로만 응답합니다. JSON 외부에 설명, Markdown, 다른 \
-      문자열을 출력하지 않습니다.
+      문자열을 출력하지 않습니다. JSON 은 들여쓰기 없이 공백과 줄바꿈 없이 한 줄로 씁니다.
 
       [예시]
       routineText가 "비 오는 날 학교 가기"이고 additionalAnswers에 "우산"이 있으면 title은 \
@@ -210,7 +210,7 @@ public final class PromptDefaults {
 
       [출력 계약]
       반드시 제공된 JSON Schema 형식으로만 응답합니다. JSON 외부에 설명, Markdown, 다른 \
-      문자열을 출력하지 않습니다.
+      문자열을 출력하지 않습니다. JSON 은 들여쓰기 없이 공백과 줄바꿈 없이 한 줄로 씁니다.
 
       [예시]
       routineText가 "내일 비 오는 날 학교에 가기"이고 supportGoals에 PREPARE_ITEMS와 \
@@ -259,7 +259,44 @@ public final class PromptDefaults {
       - 워터마크나 로고를 넣지 않습니다.
       - 신체를 왜곡하거나 캐릭터를 여러 명 복제하지 않습니다.
       - 하나의 이미지에 분할 화면이나 여러 패널을 만들지 않습니다.
-      - 위험한 행동을 과장하거나 모방을 유도하는 표현을 넣지 않습니다."""
+      - 위험한 행동을 과장하거나 모방을 유도하는 표현을 넣지 않습니다.""",
+
+    // 운영 DB 에 있던 한국어 지시문(2026-09-23, 893자)을 옮긴 것이다 — 코드 기본값보다 그쪽이
+    // 관리자가 다듬은 최신본이다. 같은 규칙을 영어로 쓰면 토큰이 약 1/3 이다 (#375).
+    // 'card'·'disabilities' 는 넣지 않았다 — 카드·설명서처럼 글자가 들어가는 그림을 부른다 (#373).
+    PromptKey.ROUTINE_IMAGE_PREFIX_EN, """
+      Never draw any text: no letters in any language, no numbers, symbols, signs, or speech bubbles.
+
+      Draw one simple illustration of one everyday action. A viewer must understand the main action \
+      from the picture alone. Clarity of the action matters more than beauty.
+
+      [Character - required]
+      - Draw exactly the look in character.appearance. That is the main character. Never turn it into \
+      a person or another animal.
+      - If a reference image is attached, follow it first and use appearance as support. Copy its face, \
+      head, clothes, colors, and body proportions exactly. Do not reinterpret.
+      - Only when there is no character, draw a simple figure whose age is hard to guess.
+      - Do not add other characters.
+      - No overly realistic or intense style. No scary or confusing faces.
+
+      [Style - required]
+      - Simple flat vector without thick outlines. Mostly flat pastel colors. Minimal shadow and texture.
+      - Fill the background with white or one very light solid color. No gradient, dark, or photo-like \
+      background.
+      - Keep the same style in every scene.
+
+      [Main scene - required]
+      - Draw only the one main action in scene.stepDescription under "Scene info" below.
+      - Show clearly who does the action and what it is done to.
+      - No multiple viewpoints or sequential actions in one image.
+      - Do not add unrelated props or people.
+
+      [Never]
+      - Letters, sentences, numbers, signs, or speech bubbles (very important).
+      - Watermarks or logos.
+      - Distorted bodies or duplicated characters.
+      - Split screens or multiple panels.
+      - Dangerous actions."""
   );
 
   private PromptDefaults() {

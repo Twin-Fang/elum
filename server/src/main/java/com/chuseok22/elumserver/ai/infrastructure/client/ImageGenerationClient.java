@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
+import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 
@@ -34,5 +35,7 @@ public interface ImageGenerationClient {
   GeneratedImage generateImage(String stepDescription, CharacterType characterType);
 
   /// 관리자 테스트 전용: 저장된 프롬프트 대신 전달받은 prefix를 그대로 쓴다.
-  GeneratedImage generateImageForTest(String prefix, String sampleInput, CharacterType characterType);
+  /// language 는 그 prefix 가 어느 언어 키의 것인지 — 장면 머리말·생김새를 맞춰 싣는다 (#375).
+  GeneratedImage generateImageForTest(
+    String prefix, ImagePromptLanguage language, String sampleInput, CharacterType characterType);
 }

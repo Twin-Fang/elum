@@ -77,4 +77,30 @@ class PromptDefaultsTest {
 
     assertThat(content).contains("\"아이\", \"아동\"").contains("이름이 아닙니다");
   }
+
+  @Test
+  @DisplayName("영어 그림 지시문은 한국어 없이 같은 규칙을 담는다 — 같은 지시가 토큰 1/3 이다 (#375)")
+  void englishImagePrompt_hasNoKoreanAndKeepsRules() {
+    String content = PromptDefaults.DEFAULTS.get(PromptKey.ROUTINE_IMAGE_PREFIX_EN);
+
+    assertThat(content).isNotBlank();
+    assertThat(content).doesNotContainPattern("[가-힣]");
+    // 빌더가 싣는 필드 이름과 장면 라벨을 가리켜야 모델이 무엇을 따를지 안다.
+    assertThat(content).contains("character.appearance").contains("scene.stepDescription")
+      .contains("Scene info");
+    assertThat(content.toLowerCase()).contains("text").contains("speech bubble");
+    // 한국어판보다 짧아야 줄이는 의미가 있다(글자 수가 아니라 토큰이 목적이지만 최소한의 확인).
+    assertThat(content.length()).isLessThan(
+      PromptDefaults.DEFAULTS.get(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX).length() * 2);
+  }
+
+  @Test
+  @DisplayName("글 응답은 공백 없는 한 줄 JSON 으로 달라고 한다 — 들여쓰기 공백도 출력 토큰이다 (#375)")
+  void textPrompts_askForCompactJson() {
+    for (PromptKey key : new PromptKey[]{
+        PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, PromptKey.GEMINI_ROUTINE_QUESTION_PREFIX}) {
+      assertThat(PromptDefaults.DEFAULTS.get(key)).as(key.name())
+        .contains("공백과 줄바꿈 없이 한 줄로");
+    }
+  }
 }

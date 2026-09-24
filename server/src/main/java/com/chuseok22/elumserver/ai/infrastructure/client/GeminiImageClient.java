@@ -1,11 +1,10 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
-import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
+import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
-import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -31,7 +30,7 @@ public class GeminiImageClient implements ImageGenerationClient {
   @Qualifier("geminiRestClient")
   private final RestClient geminiRestClient;
   private final GeminiProperties geminiProperties;
-  private final PromptTemplateService promptTemplateService;
+  private final RoutineImagePromptComposer promptComposer;
   private final CharacterReferenceProvider characterReferenceProvider;
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
   private final SystemConfigService systemConfigService;
@@ -56,27 +55,31 @@ public class GeminiImageClient implements ImageGenerationClient {
 
   @Override
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
-    String prefix = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
-    return callGenerateImage(prefix, stepDescription, characterType);
+    // 참조 이미지는 캐릭터가 있을 때만 보낸다 — 프롬프트에도 사실대로 적는다 (#269).
+    String promptText = promptComposer.compose(stepDescription, characterType, characterType != null);
+    return callGenerateImage(promptText, characterType);
   }
 
   // 관리자 테스트 전용: DB 조회 없이 전달받은 prefix를 그대로 사용한다.
   @Override
-  public GeneratedImage generateImageForTest(String prefix, String sampleInput, CharacterType characterType) {
-    return callGenerateImage(prefix, sampleInput, characterType);
+  public GeneratedImage generateImageForTest(
+    String prefix, ImagePromptLanguage language, String sampleInput, CharacterType characterType
+  ) {
+    String promptText = imagePromptBuilder.build(
+      prefix, sampleInput, characterType, characterType != null, language);
+    return callGenerateImage(promptText, characterType);
   }
 
   // characterType이 있으면 캐릭터 참조 이미지를 텍스트 파트보다 먼저 담아 함께 전송한다
   // (Gemini 멀티모달 입력 권장 순서). characterType이 null이면(온보딩에서 캐릭터를 아직
   // 선택하지 않은 회원) 지금까지와 동일하게 텍스트 파트만 전송해 루틴 생성이 끊기지 않게 한다.
-  private GeneratedImage callGenerateImage(String prefix, String stepDescription, CharacterType characterType) {
+  private GeneratedImage callGenerateImage(String promptText, CharacterType characterType) {
     List<GeminiGenerateContentRequest.GeminiPart> parts = new ArrayList<>();
     if (characterType != null) {
       byte[] characterImage = characterReferenceProvider.get(characterType);
       String base64Image = Base64.getEncoder().encodeToString(characterImage);
       parts.add(GeminiGenerateContentRequest.GeminiPart.ofInlineData("image/png", base64Image));
     }
-    String promptText = imagePromptBuilder.build(prefix, stepDescription, characterType, characterType != null);
     parts.add(new GeminiGenerateContentRequest.GeminiPart(promptText));
 
     // responseModalities를 명시하지 않으면 이미지 생성 모델이 간헐적으로 텍스트만

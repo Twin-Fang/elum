@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
+import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,16 +26,30 @@ public class GeminiRoutineImagePromptBuilder {
     String prefix, String stepDescription, CharacterType characterType,
     boolean referenceImageProvided
   ) {
+    return build(prefix, stepDescription, characterType, referenceImageProvided, ImagePromptLanguage.KO);
+  }
+
+  /**
+   * @param language 지시문 언어. EN 이면 장면 머리말과 생김새도 영어로 싣는다 — 지시문만 영어이고
+   *                 생김새가 한국어면 줄인 토큰이 다시 는다 (#375). 카드 설명은 언어와 무관하게
+   *                 그대로 싣는다(보호자가 쓴 한국어, 짧다).
+   */
+  public String build(
+    String prefix, String stepDescription, CharacterType characterType,
+    boolean referenceImageProvided, ImagePromptLanguage language
+  ) {
     GeminiImageAiInput input = new GeminiImageAiInput(
       "CREATE_ROUTINE_CARD_IMAGE",
       new GeminiImageAiInput.Scene(stepDescription),
       characterType == null
         ? null
         : new GeminiImageAiInput.Character(
-          characterType, characterType.getAppearance(), referenceImageProvided
+          characterType,
+          language == ImagePromptLanguage.EN ? characterType.getAppearanceEn() : characterType.getAppearance(),
+          referenceImageProvided
         )
     );
-    return prefix + "\n\n장면 정보:\n" + toJson(input);
+    return prefix + "\n\n" + language.getSceneLabel() + ":\n" + toJson(input);
   }
 
   private String toJson(GeminiImageAiInput input) {

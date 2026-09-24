@@ -33,7 +33,9 @@
           <input type="text" class="sample-input input input-bordered w-full"
                  th:attr="data-key=${prompt.promptKey}" placeholder="샘플 입력값을 입력하세요"/>
 
-          <select th:if="${prompt.promptKey.name() == 'GEMINI_ROUTINE_IMAGE_PREFIX'}"
+          <!-- 그림 지시문이면 캐릭터를 고른다. 한국어·영어 지시문 둘 다 (#375) -->
+          <select th:if="${prompt.promptKey.name() == 'GEMINI_ROUTINE_IMAGE_PREFIX'
+                           or prompt.promptKey.name() == 'ROUTINE_IMAGE_PREFIX_EN'}"
                   class="character-select select select-bordered w-full"
                   th:attr="data-key=${prompt.promptKey}">
             <option value="">캐릭터 미지정</option>

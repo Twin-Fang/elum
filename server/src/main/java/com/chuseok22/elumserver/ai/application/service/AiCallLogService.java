@@ -56,7 +56,8 @@ public class AiCallLogService {
       callLog.setLatencyMs(latencyMs);
       if (usage != null) {
         callLog.setPromptTokens(usage.promptTokenCount());
-        callLog.setOutputTokens(usage.candidatesTokenCount());
+        // 생각 토큰까지 출력으로 센다 — 청구가 그렇게 된다 (#375).
+        callLog.setOutputTokens(usage.billableOutputTokens());
         callLog.setTotalTokens(usage.totalTokenCount());
       }
       callLog.setEstimatedCostUsd(success ? estimateCostUsd(callType, usage) : 0.0);
@@ -85,7 +86,7 @@ public class AiCallLogService {
           yield 0.0;
         }
         double promptTokens = usage.promptTokenCount() == null ? 0 : usage.promptTokenCount();
-        double outputTokens = usage.candidatesTokenCount() == null ? 0 : usage.candidatesTokenCount();
+        double outputTokens = billableOutput(usage);
         yield promptTokens / TOKENS_PER_MILLION
           * systemConfigService.getDouble(ConfigKey.PRICE_GEMINI_TEXT_INPUT_PER_1M)
           + outputTokens / TOKENS_PER_MILLION
@@ -122,9 +123,14 @@ public class AiCallLogService {
       return 0.0;
     }
     double promptTokens = usage.promptTokenCount() == null ? 0 : usage.promptTokenCount();
-    double outputTokens = usage.candidatesTokenCount() == null ? 0 : usage.candidatesTokenCount();
+    double outputTokens = billableOutput(usage);
     return promptTokens / TOKENS_PER_MILLION * systemConfigService.getDouble(inputPriceKey)
       + outputTokens / TOKENS_PER_MILLION * systemConfigService.getDouble(outputPriceKey);
+  }
+
+  private double billableOutput(GeminiGenerateContentResponse.UsageMetadata usage) {
+    Integer tokens = usage.billableOutputTokens();
+    return tokens == null ? 0 : tokens;
   }
 
   private String truncate(String message) {

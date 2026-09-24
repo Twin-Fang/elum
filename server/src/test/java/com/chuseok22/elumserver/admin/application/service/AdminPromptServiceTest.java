@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
+import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiRoutineImagePromptBuilder;
@@ -68,7 +69,7 @@ class AdminPromptServiceTest {
     // 프롬프트가 달라지므로, 미리보기가 실제와 같으려면 같은 판단을 거쳐야 한다.
     when(imageClientRouter.current()).thenReturn(imageGenerationClient);
     when(imageGenerationClient.supportsCharacterReference()).thenReturn(true);
-    when(imagePromptBuilder.build("이미지 프롬프트", "옷을 입어요", CharacterType.LULU, true))
+    when(imagePromptBuilder.build("이미지 프롬프트", "옷을 입어요", CharacterType.LULU, true, ImagePromptLanguage.KO))
       .thenReturn("이미지 프롬프트\n\n장면 정보:\n{...}");
 
     String result = adminPromptService.preview(
@@ -76,6 +77,21 @@ class AdminPromptServiceTest {
     );
 
     assertThat(result).isEqualTo("이미지 프롬프트\n\n장면 정보:\n{...}");
+  }
+
+  @Test
+  @DisplayName("영어 그림 지시문 preview 는 영어로 조립한다 — 한국어 머리말·생김새가 섞이면 미리보기를 믿을 수 없다 (#375)")
+  void preview_englishImagePrefix_buildsInEnglish() {
+    when(imageClientRouter.current()).thenReturn(imageGenerationClient);
+    when(imageGenerationClient.supportsCharacterReference()).thenReturn(false);
+    when(imagePromptBuilder.build("English rules", "옷을 입어요", CharacterType.LULU, false, ImagePromptLanguage.EN))
+      .thenReturn("English rules\n\nScene info:\n{...}");
+
+    String result = adminPromptService.preview(
+      PromptKey.ROUTINE_IMAGE_PREFIX_EN, "English rules", "옷을 입어요", CharacterType.LULU
+    );
+
+    assertThat(result).isEqualTo("English rules\n\nScene info:\n{...}");
   }
 
   @Test

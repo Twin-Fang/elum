@@ -20,6 +20,19 @@ public enum ConfigKey {
     "텍스트 생성 무작위성 (0=결정적, 최대 2)",
     ConfigValueType.DECIMAL, List.of(), "0"
   ),
+  // Gemini 2.5 계열은 답하기 전에 "생각"하고 그 토큰을 출력 단가로 청구한다 (#375).
+  // 기본값 UNSET 은 요청에 thinkingConfig 를 싣지 않는다 — 배포만으로는 지금 동작 그대로다.
+  // 값이 모델에 맞지 않아 400 이 나도 다시 부르지 않는다(호출이 두 배가 된다). 일과 만들기 실패로
+  // 안내되므로 관리자가 되돌린다. 선택지로만 두는 이유 — 자유 입력이면 모델마다 다른 허용 범위를
+  // 화면에서 검증할 수 없다.
+  GEMINI_TEXT_THINKING_BUDGET(
+    ConfigGroup.GEMINI_TEXT, "생각 토큰 상한 (thinkingBudget)",
+    "UNSET 이면 보내지 않는다(모델 기본값 · 지금까지와 같다). 0 이면 생각을 끈다 — gemini-2.5-flash · "
+      + "2.5-flash-lite 는 받지만 gemini-2.5-pro 는 끌 수 없어 400 이 난다. -1 은 모델이 정한다(동적). "
+      + "gemini-flash-latest 같은 별칭은 가리키는 모델이 바뀔 수 있으니 바꾼 뒤 관리자 프롬프트 시험으로 "
+      + "한 번 확인한다. 400 이 나면 다시 부르지 않고 일과 만들기 실패로 안내된다. 번역 호출에도 같이 걸린다",
+    ConfigValueType.SELECT, List.of("UNSET", "0", "-1", "512", "1024", "2048"), "UNSET"
+  ),
   GEMINI_IMAGE_MODEL(
     ConfigGroup.GEMINI_IMAGE, "이미지 모델",
     "루틴 단계 삽화 생성에 사용하는 Gemini 이미지 모델명",
@@ -42,7 +55,8 @@ public enum ConfigKey {
   ),
   PRICE_GEMINI_TEXT_OUTPUT_PER_1M(
     ConfigGroup.PRICING, "텍스트 출력 단가 (USD/1M 토큰)",
-    "Gemini 텍스트 출력 토큰 100만 개당 요금. AI 호출 비용 추정에 사용",
+    "Gemini 텍스트 출력 토큰 100만 개당 요금. AI 호출 비용 추정에 사용. "
+      + "2026-09-24 배포부터 생각(thinking) 토큰도 출력으로 세어 합계가 전보다 커 보일 수 있다 (#375)",
     ConfigValueType.DECIMAL, List.of(), "2.50"
   ),
   PRICE_GEMINI_IMAGE_PER_IMAGE(
@@ -86,6 +100,16 @@ public enum ConfigKey {
     ConfigGroup.IMAGE_PROVIDER, "FLUX 모델",
     "fal.ai 모델 경로. 예: fal-ai/flux/schnell",
     ConfigValueType.STRING, List.of(), "fal-ai/flux/schnell"
+  ),
+  // OpenAI·Gemini 그림 지시문 언어 (#375). 운영 DB 프롬프트는 배포로 바뀌지 않으므로 전환도
+  // 관리자 화면에서 한다. 기본값 KO 는 지금 동작 그대로다.
+  IMAGE_PROMPT_LANGUAGE(
+    ConfigGroup.IMAGE_PROVIDER, "그림 지시문 언어",
+    "OpenAI·Gemini 그림에 쓸 지시문. EN 이면 '그림 지시문 (영어 · OpenAI/Gemini)' 프롬프트와 캐릭터 "
+      + "영어 생김새를 쓴다 — 입력 토큰이 약 1/3 이라 OpenAI 그림 한 장이 약 22% 싸진다. 바꾸기 전에 "
+      + "같은 카드를 두 언어로 그려 비교한다. 그림에 글자가 찍히면 KO 로 되돌린다(배포 불필요). "
+      + "FLUX 는 이 값과 무관하게 전용 영어 지시문을 쓴다",
+    ConfigValueType.SELECT, List.of("KO", "EN"), "KO"
   ),
   // --- 텍스트 생성 제공자 ---
   //

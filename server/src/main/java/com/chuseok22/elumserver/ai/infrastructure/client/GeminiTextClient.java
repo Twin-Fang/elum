@@ -14,8 +14,10 @@ import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigSer
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -206,12 +208,33 @@ public class GeminiTextClient implements TextGenerationClient {
     }
   }
 
-  private Map<String, Object> generationConfig(Map<String, Object> schema) {
-    return Map.of(
-      "responseMimeType", "application/json",
-      "responseSchema", schema,
-      "temperature", systemConfigService.getDouble(ConfigKey.GEMINI_TEXT_TEMPERATURE)
-    );
+  // 테스트가 요청 모양을 직접 보도록 패키지 공개로 둔다.
+  Map<String, Object> generationConfig(Map<String, Object> schema) {
+    Map<String, Object> config = new LinkedHashMap<>();
+    config.put("responseMimeType", "application/json");
+    config.put("responseSchema", schema);
+    config.put("temperature", systemConfigService.getDouble(ConfigKey.GEMINI_TEXT_TEMPERATURE));
+    thinkingBudget().ifPresent(budget -> config.put("thinkingConfig", Map.of("thinkingBudget", budget)));
+    return config;
+  }
+
+  /**
+   * 관리자가 정한 생각 토큰 상한. UNSET 이거나 값이 망가졌으면 비어 있다 — 그러면 보내지 않는다.
+   *
+   * <p>망가진 값을 기본값(UNSET)처럼 다루는 이유: 이상한 숫자를 그대로 실으면 400 으로 일과 만들기가
+   * 통째로 실패한다. 설정 파싱 실패를 기본값으로 덮는 SystemConfigService 방침과 같다.
+   */
+  private Optional<Integer> thinkingBudget() {
+    String raw = systemConfigService.getString(ConfigKey.GEMINI_TEXT_THINKING_BUDGET);
+    if (raw == null || raw.isBlank() || "UNSET".equals(raw.trim())) {
+      return Optional.empty();
+    }
+    try {
+      return Optional.of(Integer.parseInt(raw.trim()));
+    } catch (NumberFormatException e) {
+      log.warn("생각 토큰 상한 설정을 읽지 못해 보내지 않는다: value={}", raw);
+      return Optional.empty();
+    }
   }
 
   public Map<String, Object> responseSchema() {

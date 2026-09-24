@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.admin.application.service;
 import com.chuseok22.elumserver.admin.application.dto.response.PromptTestResponse;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
+import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
@@ -71,7 +72,13 @@ public class AdminPromptService {
       // 실제 프롬프트가 달라지는데, 여기서 다르게 보이면 미리보기를 믿을 수 없다 (#269).
       case GEMINI_ROUTINE_IMAGE_PREFIX -> imagePromptBuilder.build(
         content, sampleInput, character,
-        character != null && imageClientRouter.current().supportsCharacterReference()
+        character != null && imageClientRouter.current().supportsCharacterReference(),
+        ImagePromptLanguage.KO
+      );
+      case ROUTINE_IMAGE_PREFIX_EN -> imagePromptBuilder.build(
+        content, sampleInput, character,
+        character != null && imageClientRouter.current().supportsCharacterReference(),
+        ImagePromptLanguage.EN
       );
     };
   }
@@ -91,7 +98,12 @@ public class AdminPromptService {
         yield new PromptTestResponse(draft, null);
       }
       case GEMINI_ROUTINE_IMAGE_PREFIX -> {
-        String dataUri = testGeminiImage(content, sampleInput, characterType);
+        String dataUri = testGeminiImage(content, ImagePromptLanguage.KO, sampleInput, characterType);
+        yield new PromptTestResponse(null, dataUri);
+      }
+      // 저장하기 전에 영어 지시문을 지금 제공자로 그려 볼 수 있어야 언어를 바꿀지 정할 수 있다 (#375).
+      case ROUTINE_IMAGE_PREFIX_EN -> {
+        String dataUri = testGeminiImage(content, ImagePromptLanguage.EN, sampleInput, characterType);
         yield new PromptTestResponse(null, dataUri);
       }
     };
@@ -117,10 +129,12 @@ public class AdminPromptService {
     }
   }
 
-  private String testGeminiImage(String prefix, String sampleInput, CharacterType characterType) {
+  private String testGeminiImage(
+    String prefix, ImagePromptLanguage language, String sampleInput, CharacterType characterType
+  ) {
     try {
       GeneratedImage image =
-        imageClientRouter.current().generateImageForTest(prefix, sampleInput, characterType);
+        imageClientRouter.current().generateImageForTest(prefix, language, sampleInput, characterType);
       String base64 = Base64.getEncoder().encodeToString(image.bytes());
       return "data:image/" + image.extension() + ";base64," + base64;
     } catch (Exception e) {

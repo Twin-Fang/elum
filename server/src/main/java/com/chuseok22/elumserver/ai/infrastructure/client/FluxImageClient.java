@@ -1,11 +1,10 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
-import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
+import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
-import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
@@ -37,7 +36,7 @@ public class FluxImageClient implements ImageGenerationClient {
   private static final String IMAGE_SIZE = "landscape_4_3";
   private static final int INFERENCE_STEPS = 4;
 
-  private final PromptTemplateService promptTemplateService;
+  private final RoutineImagePromptComposer promptComposer;
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
   private final SystemConfigService systemConfigService;
   private final AiCallLogService aiCallLogService;
@@ -63,17 +62,17 @@ public class FluxImageClient implements ImageGenerationClient {
 
   @Override
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
-    String prefix = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
-    return call(prefix, stepDescription, characterType);
+    return call(promptComposer.compose(stepDescription, characterType, false), characterType);
   }
 
   @Override
-  public GeneratedImage generateImageForTest(String prefix, String sampleInput, CharacterType characterType) {
-    return call(prefix, sampleInput, characterType);
+  public GeneratedImage generateImageForTest(
+    String prefix, ImagePromptLanguage language, String sampleInput, CharacterType characterType
+  ) {
+    return call(imagePromptBuilder.build(prefix, sampleInput, characterType, false, language), characterType);
   }
 
-  private GeneratedImage call(String prefix, String stepDescription, CharacterType characterType) {
-    String prompt = imagePromptBuilder.build(prefix, stepDescription, characterType, false);
+  private GeneratedImage call(String prompt, CharacterType characterType) {
     String model = systemConfigService.getString(ConfigKey.FLUX_IMAGE_MODEL);
     String apiKey = systemConfigService.getSecret(ConfigKey.FLUX_API_KEY);
 
