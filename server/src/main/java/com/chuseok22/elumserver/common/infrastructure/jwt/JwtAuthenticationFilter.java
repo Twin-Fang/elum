@@ -60,6 +60,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           List.of(new SimpleGrantedAuthority("ROLE_MEMBER"),
                   new SimpleGrantedAuthority(role.authority()))
         );
+        // 이룸이 휴대폰이 어느 이룸이를 보는지는 연결이 정한다 — 서비스까지 연결 ID 를 가져간다 (#360).
+        authentication.setDetails(new AccessTokenDetails(
+          role == LinkRole.ELUMI ? asString(claims.get("linkId")) : null));
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }
     }
