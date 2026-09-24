@@ -87,12 +87,12 @@ abstract final class AppConfig {
   /// Play 스토어 패키지명. `android/app/build.gradle.kts` 의 `applicationId` 와 같아야 한다.
   static const androidPackageId = 'kr.twinfang.elum';
 
-  /// App Store Connect 의 Apple ID(숫자). **아직 모른다** — 레포·이슈 어디에도 없다.
+  /// App Store Connect 의 Apple ID(숫자). 첫 출시 후 받은 값이다
+  /// (https://apps.apple.com/kr/app/id6792970508).
   ///
-  /// 비어 있으면 iOS 강제 업데이트 화면은 스토어 버튼을 숨긴다. 검색 주소로 대신
+  /// 비우면 iOS 강제 업데이트 화면은 스토어 버튼을 숨긴다. 검색 주소로 대신
   /// 보내지 않는다 — 같은 이름의 다른 앱으로 보낼 수 있다.
-  /// 콘솔 `앱 정보 > 일반 정보 > Apple ID` 값을 넣으면 버튼이 켜진다.
-  static const iosAppStoreId = '';
+  static const iosAppStoreId = '6792970508';
 
   /// 플랫폼별 스토어 상세 주소. 보낼 곳을 모르면 null 이다.
   static Uri? storeUrl(TargetPlatform platform) => switch (platform) {

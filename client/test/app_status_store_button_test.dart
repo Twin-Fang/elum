@@ -14,7 +14,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 /// 강제 업데이트 화면에서 스토어로 바로 보낸다 (이슈 #279 남은 일).
 ///
 /// 전에는 "스토어에서 이룸을 업데이트해주세요" 문구뿐이라 사용자가 스토어를 직접
-/// 찾아가야 했다. iOS 는 App Store 앱 ID 가 아직 없어 버튼을 숨기고 예전처럼 둔다.
+/// 찾아가야 했다. iOS 는 첫 출시로 App Store 앱 ID 를 받아 같은 버튼을 켠다.
 void main() {
   setUp(() => PackageInfo.setMockInitialValues(
         appName: 'elum',
@@ -53,10 +53,12 @@ void main() {
       );
     });
 
-    test('iOS 는 App Store 앱 ID 가 없으면 주소가 없다 — 검색 화면으로 흘리지 않는다', () {
-      // ID 가 정해지면 이 테스트를 itms-apps 주소 확인으로 바꾼다
-      expect(AppConfig.iosAppStoreId, isEmpty);
-      expect(AppConfig.storeUrl(TargetPlatform.iOS), isNull);
+    test('iOS 는 App Store 앱을 바로 열어 이룸 상세로 보낸다', () {
+      // 브라우저를 거치지 않도록 itms-apps 스킴을 쓴다
+      expect(
+        AppConfig.storeUrl(TargetPlatform.iOS),
+        Uri.parse('itms-apps://apps.apple.com/app/id6792970508'),
+      );
     });
   });
 
@@ -106,7 +108,7 @@ void main() {
       expect(find.textContaining('E-UPDATE-STORE'), findsOneWidget);
     }, variant: android);
 
-    testWidgets('iOS — 앱 ID 가 없으면 스토어 버튼을 숨기고 예전 버튼을 둔다', (tester) async {
+    testWidgets('iOS — 업데이트하러 가기를 누르면 App Store 를 연다', (tester) async {
       final opened = <Uri>[];
       await tester.pumpWidget(wrap(launcher: (url) async {
         opened.add(url);
@@ -114,9 +116,12 @@ void main() {
       }));
       await tester.pumpAndSettle();
 
-      expect(find.text('업데이트하러 가기'), findsNothing);
-      expect(find.text('업데이트했어요'), findsOneWidget);
-      expect(opened, isEmpty);
+      expect(find.text('업데이트했어요'), findsNothing);
+
+      await tester.tap(find.text('업데이트하러 가기'));
+      await tester.pumpAndSettle();
+
+      expect(opened, [AppConfig.storeUrl(TargetPlatform.iOS)]);
     }, variant: ios);
   });
 }
