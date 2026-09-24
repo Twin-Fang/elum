@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
@@ -807,8 +808,8 @@ class RoutineServiceTest {
   }
 
   @Test
-  @DisplayName("없는 일과가 섞이면 거부한다 — 절반만 반영되면 화면과 서버가 어긋난다")
-  void reorder_missingRoutine_rejected() {
+  @DisplayName("E24 보낸 일과가 그사이 지워졌으면 409 — 앱이 목록을 다시 받는다")
+  void e24_reorder_routineDeletedMeanwhile_conflict() {
     Profile profile = profileOf("profile-1", "member-1");
     when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
     when(routineRepository.findAllById(List.of("r-a", "없는것")))
@@ -817,7 +818,44 @@ class RoutineServiceTest {
     assertThatThrownBy(() -> routineService.reorder(GUARDIAN, List.of("r-a", "없는것")))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
-        .isEqualTo(ErrorCode.ROUTINE_NOT_FOUND));
+        .isEqualTo(ErrorCode.ROUTINE_ORDER_CONFLICT));
+  }
+
+  @Test
+  @DisplayName("E24 그사이 다른 사람이 오늘 일과를 더했으면 409 — 보낸 목록으로는 새 일과의 자리를 알 수 없다")
+  void e24_reorder_routineAddedMeanwhile_conflict() {
+    Profile profile = profileOf("profile-1", "member-1");
+    when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
+    Routine a = ownedRoutine("r-a", profile);
+    Routine b = ownedRoutine("r-b", profile);
+    when(routineRepository.findAllById(List.of("r-b", "r-a"))).thenReturn(List.of(a, b));
+    Routine added = ownedRoutine("r-new", profile);
+    added.getSteps().add(stepOf("s-1", 1));
+    when(routineRepository.findTodayOrdered(eq("profile-1"), anyList(), any(), any())).thenReturn(List.of(a, b, added));
+
+    assertThatThrownBy(() -> routineService.reorder(GUARDIAN, List.of("r-b", "r-a")))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.ROUTINE_ORDER_CONFLICT));
+    assertThat(a.getDisplayOrder()).isZero();
+  }
+
+  @Test
+  @DisplayName("지금 앱이 보내는 목록(방금 저장한 일과 포함, 단계 없는 일과 제외)은 409 가 아니다")
+  void reorder_currentAppList_accepted() {
+    Profile profile = profileOf("profile-1", "member-1");
+    when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
+    Routine justSaved = ownedRoutine("r-saved", profile);   // 앱 흐름에 남은 일과 — 오늘 목록에 아직 없을 수 있다
+    Routine a = ownedRoutine("r-a", profile);
+    a.getSteps().add(stepOf("s-1", 1));
+    Routine noSteps = ownedRoutine("r-empty", profile);     // 앱이 빼고 보낸다
+    when(routineRepository.findAllById(List.of("r-saved", "r-a"))).thenReturn(List.of(justSaved, a));
+    when(routineRepository.findTodayOrdered(eq("profile-1"), anyList(), any(), any())).thenReturn(List.of(a, noSteps));
+
+    routineService.reorder(GUARDIAN, List.of("r-saved", "r-a"));
+
+    assertThat(justSaved.getDisplayOrder()).isEqualTo(1);
+    assertThat(a.getDisplayOrder()).isEqualTo(2);
   }
 
   @Test

@@ -701,6 +701,10 @@ public class RoutineService {
    *
    * <p>하나라도 남의 것이거나 없는 것이 섞이면 <b>아무것도 바꾸지 않고</b> 거부한다.
    * 절반만 반영되면 화면과 서버의 순서가 어긋나 더 나쁘다.
+   *
+   * <p>그사이 목록이 늘거나 줄었으면 409 다 (다중 보호자 E24). 보호자가 여럿이면(또는 한 보호자가 휴대폰
+   * 둘로) 옛 목록을 보고 동시에 순서를 보낼 수 있다. 비교 기준은 앱이 실제로 보내는 목록 — 보호자 홈의
+   * 오늘 목록(단계가 있는 것)이다.
    */
   @Transactional
   public void reorder(Caller caller, List<String> routineIds) {
@@ -714,8 +718,9 @@ public class RoutineService {
 
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     List<Routine> routines = routineRepository.findAllById(routineIds);
+    // 보낸 일과가 그사이 지워졌다 — 화면이 옛 목록이다.
     if (routines.size() != routineIds.size()) {
-      throw new CustomException(ErrorCode.ROUTINE_NOT_FOUND);
+      throw new CustomException(ErrorCode.ROUTINE_ORDER_CONFLICT);
     }
 
     Map<String, Routine> byId = new HashMap<>();
@@ -725,10 +730,31 @@ public class RoutineService {
       }
       byId.put(routine.getId(), routine);
     }
+    // 그사이 오늘 일과가 늘었다 — 보낸 목록으로는 새 일과의 자리를 알 수 없다.
+    if (hasTodayRoutineMissingFrom(profile.getId(), byId.keySet())) {
+      throw new CustomException(ErrorCode.ROUTINE_ORDER_CONFLICT);
+    }
 
     for (int i = 0; i < routineIds.size(); i++) {
       byId.get(routineIds.get(i)).setDisplayOrder(i + 1);
     }
+  }
+
+  /**
+   * 지금 오늘 목록에 있는데 보낸 목록에 없는 일과가 있는가.
+   *
+   * <p>앱은 오늘 목록 중 단계가 있는 것만 보내고, 방금 저장한 일과를 앞에 더해 보낸다
+   * (today_routine_section.dart homeRoutinesProvider). 같은 기준으로 세야 멀쩡한 요청을 409 로 막지 않는다
+   * — 보낸 목록에만 있는 일과는 문제가 아니다.
+   */
+  private boolean hasTodayRoutineMissingFrom(String profileId, Set<String> sent) {
+    LocalDate today = LocalDate.now();
+    return routineRepository.findTodayOrdered(
+        profileId, List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED),
+        today.atStartOfDay(), today.atTime(LocalTime.MAX))
+      .stream()
+      .filter(routine -> !routine.getSteps().isEmpty())
+      .anyMatch(routine -> !sent.contains(routine.getId()));
   }
 
   /**
