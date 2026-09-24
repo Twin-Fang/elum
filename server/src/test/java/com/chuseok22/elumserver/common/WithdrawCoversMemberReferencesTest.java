@@ -39,6 +39,10 @@ class WithdrawCoversMemberReferencesTest {
     "com/chuseok22/elumserver/member/application/service/MemberService.java");
   private static final Path WITHDRAWN_MEMBER_SERVICE = SOURCE_ROOT.resolve(
     "com/chuseok22/elumserver/member/application/service/WithdrawnMemberService.java");
+  /// 탈퇴와 완전 삭제는 이룸이 정리를 "나가기"(GuardianshipService.leaveAll)에 맡긴다 (다중 보호자 4-3, #360).
+  /// 관계·일과·이룸이·이룸이 휴대폰은 거기서 지워지므로 두 곳을 함께 본다.
+  private static final Path GUARDIANSHIP_SERVICE = SOURCE_ROOT.resolve(
+    "com/chuseok22/elumserver/member/application/service/GuardianshipService.java");
 
   /// 탈퇴해도 보관 기간 동안 남기는 표와 그 이유. 여기에 없는 표는 탈퇴할 때 지운다 (최소 보관).
   private static final Map<String, String> RETAINED_ON_WITHDRAW = Map.of(
@@ -49,7 +53,7 @@ class WithdrawCoversMemberReferencesTest {
   @Test
   @DisplayName("탈퇴는 남기기로 정한 표 말고는 회원을 참조하는 표를 모두 지운다")
   void withdrawDeletesEveryReferenceExceptRetained() throws IOException {
-    String withdraw = methodBody(MEMBER_SERVICE, "public void withdraw(");
+    String withdraw = withdrawWithLeaving();
     List<String> uncovered = new ArrayList<>();
 
     for (String entity : entitiesReferencingMember()) {
@@ -71,7 +75,7 @@ class WithdrawCoversMemberReferencesTest {
   @Test
   @DisplayName("탈퇴는 남기기로 정한 표를 지우거나 회원 식별자를 떼지 않는다")
   void withdrawKeepsRetainedTables() throws IOException {
-    String withdraw = methodBody(MEMBER_SERVICE, "public void withdraw(");
+    String withdraw = withdrawWithLeaving();
     List<String> violations = new ArrayList<>();
 
     for (String entity : RETAINED_ON_WITHDRAW.keySet()) {
@@ -103,6 +107,8 @@ class WithdrawCoversMemberReferencesTest {
   @DisplayName("완전 삭제는 회원을 참조하는 표를 모두 정리한 뒤 계정 행을 지운다")
   void purgeCleansEveryMemberReference() throws IOException {
     String purge = methodBody(WITHDRAWN_MEMBER_SERVICE, "public void purge(");
+    assertThat(purge).as("완전 삭제도 나가기 규칙으로 이룸이를 정리한다").contains("guardianshipService.leaveAll(");
+    purge = purge + guardianshipSource();
     List<String> uncovered = new ArrayList<>();
 
     for (String entity : entitiesReferencingMember()) {
@@ -127,8 +133,10 @@ class WithdrawCoversMemberReferencesTest {
       for (Path file : files.filter(p -> p.toString().endsWith(".java")).toList()) {
         String source = Files.readString(file);
         boolean isEntity = source.contains("@Entity");
+        // routine.created_by 도 member 를 외래키로 잡는다 (V25). 남기면 완전 삭제의 계정 삭제가 막힌다.
         boolean referencesMember = source.contains("@JoinColumn(name = \"member_id\"")
-          || source.contains("@Column(name = \"member_id\"");
+          || source.contains("@Column(name = \"member_id\"")
+          || source.contains("@Column(name = \"created_by\"");
         if (isEntity && referencesMember) {
           entities.add(file.getFileName().toString().replace(".java", ""));
         }
@@ -138,6 +146,18 @@ class WithdrawCoversMemberReferencesTest {
       .as("검사가 헛돌지 않도록 — 회원을 참조하는 엔티티가 하나도 안 잡히면 규칙이 깨진 것이다")
       .isNotEmpty();
     return entities;
+  }
+
+  /// 탈퇴 본문 + 탈퇴가 부르는 나가기. 탈퇴가 나가기를 부르지 않으면 나가기 쪽 지우기는 세지 않는다.
+  private static String withdrawWithLeaving() throws IOException {
+    String withdraw = methodBody(MEMBER_SERVICE, "public void withdraw(");
+    assertThat(withdraw).as("탈퇴는 나가기 규칙으로 이룸이를 정리한다").contains("guardianshipService.leaveAll(");
+    return withdraw + guardianshipSource();
+  }
+
+  /// 나가기 서비스 전체(주석 뺀). 나가기·마지막 보호자 정리가 private 도우미에 나뉘어 있어 파일로 본다.
+  private static String guardianshipSource() throws IOException {
+    return Files.readString(GUARDIANSHIP_SERVICE).replaceAll("//[^\n]*", "");
   }
 
   /// Profile → profileRepository, AiCallLog → aiCallLogRepository

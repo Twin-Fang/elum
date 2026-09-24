@@ -23,9 +23,6 @@ public interface ProfileGuardianRepository extends JpaRepository<ProfileGuardian
   @Query("select g.profile.id from ProfileGuardian g where g.member.id = :memberId")
   List<String> findProfileIdsByMemberId(@Param("memberId") String memberId);
 
-  /** 탈퇴 정리 — 나가기 규칙(Task 5)이 들어오기 전까지만 쓴다. */
-  void deleteAllByMemberId(String memberId);
-
   /**
    * 관계가 하나도 없는 프로필에 대표 보호자로 관계를 채운다 — V25 의 채우기와 같은 문장이다.
    *

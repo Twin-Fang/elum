@@ -23,7 +23,6 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -49,9 +48,6 @@ class WithdrawnMemberServiceTest {
 
   @Mock
   private ProfileRepository profileRepository;
-
-  @Mock
-  private ProfileGuardianRepository profileGuardianRepository;
 
   @Mock
   private GuardianshipService guardianshipService;
@@ -234,6 +230,10 @@ class WithdrawnMemberServiceTest {
     verify(aiCallLogRepository).detachMember("m1");
     verify(aiCallLogRepository, never()).deleteAll();
     // 탈퇴 때 지웠어야 할 것도 한 번 더 지운다 — 남아 있으면 계정 행이 외래키에 걸린다.
+    // 이룸이는 나가기 규칙으로 — 함께 돌보는 이룸이는 남은 보호자에게 남긴다 (다중 보호자 4-3).
+    InOrder leaveFirst = inOrder(guardianshipService, memberRepository);
+    leaveFirst.verify(guardianshipService).leaveAll("m1");
+    leaveFirst.verify(memberRepository).delete(member);
     verify(profileRepository).deleteAllByMemberId("m1");
     verify(subscriptionRepository).deleteByMemberId("m1");
     verify(refreshTokenRepository).deleteAllByMemberId("m1");

@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.member.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -26,10 +27,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
-import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
-import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -52,10 +50,7 @@ class MemberServiceTest {
   private ProfileRepository profileRepository;
 
   @Mock
-  private ProfileGuardianRepository profileGuardianRepository;
-
-  @Mock
-  private RoutineRepository routineRepository;
+  private GuardianshipService guardianshipService;
 
   @Mock
   private AuthIdentityRepository authIdentityRepository;
@@ -108,7 +103,6 @@ class MemberServiceTest {
   void withdraw_keepsMemberRowAsWithdrawn() {
     Member member = activeMember("member-1");
     when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByProfileMemberId("member-1")).thenReturn(List.of());
 
     LocalDateTime before = LocalDateTime.now();
     memberService.withdraw("member-1");
@@ -130,21 +124,17 @@ class MemberServiceTest {
   }
 
   @Test
-  @DisplayName("탈퇴하면 이룸이 정보·일과·세션·이룸이 휴대폰 연결·구독은 즉시 지운다 (최소 보관)")
+  @DisplayName("탈퇴하면 연결된 이룸이마다 나가기를 하고 세션·이룸이 휴대폰 연결·구독은 즉시 지운다 (최소 보관 · 다중 보호자 4-3)")
   void withdraw_deletesEverythingNotNeededForRejoin() {
     Member member = activeMember("member-1");
-    Routine routine = new Routine();
-    routine.setId("routine-1");
-    List<Routine> routines = List.of(routine);
     when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByProfileMemberId("member-1")).thenReturn(routines);
 
     memberService.withdraw("member-1");
 
-    // 일과 → 프로필 순이어야 외래키에 걸리지 않는다.
-    InOrder callOrder = inOrder(routineRepository, profileRepository);
-    callOrder.verify(routineRepository).deleteAll(routines);
-    callOrder.verify(profileRepository).deleteAllByMemberId("member-1");
+    // 이룸이·일과는 나가기 규칙이 정리한다 — 내가 만든 일과, 내가 붙인 휴대폰, 관계. 혼자 돌보던 이룸이는
+    // 지우고 함께 돌보는 이룸이는 남은 보호자에게 남긴다. 계정의 "모든 프로필"을 지우지 않는다.
+    verify(guardianshipService).leaveAll("member-1");
+    verify(profileRepository, never()).deleteAllByMemberId(any());
     verify(refreshTokenRepository).deleteAllByMemberId("member-1");
     verify(deviceLinkRepository).deleteAllByMemberId("member-1");
     verify(subscriptionRepository).deleteByMemberId("member-1");
@@ -155,7 +145,6 @@ class MemberServiceTest {
   void withdraw_keepsAiCallLogOwner() {
     Member member = activeMember("member-3");
     when(memberRepository.findById("member-3")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByProfileMemberId("member-3")).thenReturn(List.of());
 
     memberService.withdraw("member-3");
 
@@ -170,7 +159,6 @@ class MemberServiceTest {
     Member member = activeMember("member-5");
     AuthIdentity identity = kakaoIdentity("member-5");
     when(memberRepository.findById("member-5")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByProfileMemberId("member-5")).thenReturn(List.of());
     when(authIdentityRepository.findAllByMemberId("member-5")).thenReturn(List.of(identity));
 
     memberService.withdraw("member-5");
@@ -189,7 +177,6 @@ class MemberServiceTest {
   void withdraw_invalidatesIssuedTokens() {
     Member member = activeMember("member-6");
     when(memberRepository.findById("member-6")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByProfileMemberId("member-6")).thenReturn(List.of());
 
     LocalDateTime before = LocalDateTime.now();
     memberService.withdraw("member-6");
@@ -204,7 +191,6 @@ class MemberServiceTest {
   void withdraw_failureMidway_propagatesAndLeavesStatus() {
     Member member = activeMember("member-7");
     when(memberRepository.findById("member-7")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByProfileMemberId("member-7")).thenReturn(List.of());
     doThrow(new IllegalStateException("구독 삭제 실패"))
       .when(subscriptionRepository).deleteByMemberId("member-7");
 
@@ -214,6 +200,40 @@ class MemberServiceTest {
       .isInstanceOf(IllegalStateException.class);
     assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
     assertThat(member.getWithdrawnAt()).isNull();
+  }
+
+  @Test
+  @DisplayName("E20 나가기 도중 실패하면 예외를 그대로 올리고 계정 상태·소셜 신원을 건드리지 않는다 — 트랜잭션이 전부 되돌린다")
+  void e20_withdraw_leaveFails_keepsAccount() {
+    Member member = activeMember("member-9");
+    when(memberRepository.findById("member-9")).thenReturn(Optional.of(member));
+    doThrow(new IllegalStateException("DB 끊김")).when(guardianshipService).leaveAll("member-9");
+
+    assertThatThrownBy(() -> memberService.withdraw("member-9")).isInstanceOf(IllegalStateException.class);
+
+    assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
+    verify(authIdentityRepository, never()).findAllByMemberId(any());
+    verify(subscriptionRepository, never()).deleteByMemberId(any());
+  }
+
+  @Test
+  @DisplayName("E19 나가기가 먼저고 상태 변경이 마지막이다 — 이룸이 정리가 실패하면 WITHDRAWN 이 남지 않는다")
+  void e19_withdraw_leavesProfilesBeforeMarkingWithdrawn() {
+    Member member = activeMember("member-10");
+    when(memberRepository.findById("member-10")).thenReturn(Optional.of(member));
+    doAnswer(invocation -> {
+      // 나가는 동안 계정은 아직 살아 있다 — 대표 보호자 넘기기가 이 계정을 지워질 사람으로 보지 않는다.
+      assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
+      return null;
+    }).when(guardianshipService).leaveAll("member-10");
+
+    memberService.withdraw("member-10");
+
+    InOrder order = inOrder(guardianshipService, refreshTokenRepository, subscriptionRepository);
+    order.verify(guardianshipService).leaveAll("member-10");
+    order.verify(refreshTokenRepository).deleteAllByMemberId("member-10");
+    order.verify(subscriptionRepository).deleteByMemberId("member-10");
+    assertThat(member.getStatus()).isEqualTo(MemberStatus.WITHDRAWN);
   }
 
   @Test
@@ -232,7 +252,6 @@ class MemberServiceTest {
   void withdraw_deletesDeviceLinks() {
     Member member = activeMember("member-4");
     when(memberRepository.findById("member-4")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByProfileMemberId("member-4")).thenReturn(List.of());
 
     memberService.withdraw("member-4");
 
@@ -266,7 +285,7 @@ class MemberServiceTest {
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.MEMBER_NOT_FOUND));
-    verify(routineRepository, never()).deleteAll(any());
+    verify(guardianshipService, never()).leaveAll(any());
   }
 
   @Test

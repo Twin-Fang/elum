@@ -17,12 +17,8 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
-import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
-import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,9 +31,8 @@ public class MemberService {
   private final MemberRepository memberRepository;
 
   private final ProfileRepository profileRepository;
-  private final ProfileGuardianRepository profileGuardianRepository;
 
-  private final RoutineRepository routineRepository;
+  private final GuardianshipService guardianshipService;
 
   private final AuthIdentityRepository authIdentityRepository;
 
@@ -120,13 +115,11 @@ public class MemberService {
     Member member = requireMember(memberId);
 
     // ── 지운다 ──
-    // 이룸이 정보·일과·단계. 발달장애 당사자에 대한 서술이라 오래 둘수록 위험하고, 악용 방지에는 필요 없다.
-    // 일과 → 프로필 순으로 지운다. 참조가 남으면 외래키가 걸린다.
-    List<Routine> routines = routineRepository.findAllByProfileMemberId(memberId);
-    routineRepository.deleteAll(routines);
-    // 관계 행이 프로필·계정을 외래키로 잡는다. 1:1 인 동안은 이 사람의 관계만 지우면 된다.
-    profileGuardianRepository.deleteAllByMemberId(memberId);
-    profileRepository.deleteAllByMemberId(memberId);
+    // 연결된 이룸이마다 "나가기"를 한다 (다중 보호자 명세 4-3, #360). 내가 만든 일과·내가 붙인 이룸이 휴대폰·
+    // 관계를 지우고, 혼자 돌보던 이룸이는 이룸이 정보까지 지운다 — 발달장애 당사자에 대한 서술이라 오래 둘수록
+    // 위험하고, 악용 방지에는 필요 없다. 다른 보호자와 함께 돌보던 이룸이와 그들의 일과는 남는다.
+    // 대표 보호자(profile.member_id)도 남은 사람에게 넘어가므로 보관 중인 이 계정 행을 가리키는 이룸이가 없다.
+    guardianshipService.leaveAll(memberId);
     // 세션. member를 외래키로 참조하지 않아 DB가 대신 지워 주지 않는다.
     refreshTokenRepository.deleteAllByMemberId(memberId);
     // 이룸이 휴대폰 연결 (이슈 #200). 되살아나도 예전 휴대폰은 새 연결 암호로만 붙는다 (S8).

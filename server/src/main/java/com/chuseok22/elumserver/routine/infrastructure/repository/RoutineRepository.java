@@ -113,4 +113,10 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
     where r.created_by is null
     """)
   int backfillCreatorFromProfileOwner();
+
+  /// 한 이룸이에서 이 보호자가 만든 일과. 나가기가 지운다 (다중 보호자 4-3).
+  List<Routine> findAllByProfileIdAndCreatedBy(String profileId, String createdBy);
+
+  /// 이 보호자가 만든 일과 전부. 탈퇴 마지막에 관계 밖에 남은 것을 치운다.
+  List<Routine> findAllByCreatedBy(String createdBy);
 }

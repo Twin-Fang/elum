@@ -14,4 +14,10 @@ public interface DeviceLinkRepository extends JpaRepository<DeviceLink, String> 
 
   /** 탈퇴 시 정리. member를 외래키로 참조하지 않아 DB가 대신 지워 주지 않는다. */
   void deleteAllByMemberId(String memberId);
+
+  /** 이 보호자가 이 이룸이에 붙인 휴대폰들. 나가면 끊는다 (다중 보호자 E13). */
+  List<DeviceLink> findAllByMemberIdAndProfileId(String memberId, String profileId);
+
+  /** 이 이룸이에 붙은 휴대폰 전부. 마지막 보호자가 나가 이룸이를 지울 때 함께 치운다. */
+  List<DeviceLink> findAllByProfileId(String profileId);
 }

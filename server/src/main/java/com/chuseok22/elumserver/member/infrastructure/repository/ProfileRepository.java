@@ -1,9 +1,13 @@
 package com.chuseok22.elumserver.member.infrastructure.repository;
 
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ProfileRepository extends JpaRepository<Profile, String> {
 
@@ -21,4 +25,14 @@ public interface ProfileRepository extends JpaRepository<Profile, String> {
   List<Profile> findAllByMemberIdIn(java.util.Collection<String> memberIds);
 
   void deleteAllByMemberId(String memberId);
+
+  /**
+   * 이룸이 행을 잠그고 읽는다 (다중 보호자 E15 · E17).
+   *
+   * <p>나가기와 AI 일과 저장이 같은 이룸이를 두고 겹치면 "남은 보호자 수"와 "아직 연결돼 있나"를 서로
+   * 옛 값으로 본다. 둘 다 이 행을 먼저 잠가 차례로 줄 세운다.
+   */
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select p from Profile p where p.id = :id")
+  Optional<Profile> findByIdForUpdate(@Param("id") String id);
 }

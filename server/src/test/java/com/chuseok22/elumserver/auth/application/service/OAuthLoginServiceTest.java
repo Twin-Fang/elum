@@ -116,9 +116,10 @@ class OAuthLoginServiceTest {
     OAuthVerifier naver = new StubVerifier(
       OAuthProvider.NAVER, new OAuthUser("naver-1234", "parent@kakao.com", true));
     // 가입·되살리기가 이룸이를 관계와 함께 만드는지까지 보려고 목이 아니라 실제 서비스를 쓴다.
-    GuardianshipService guardianshipService = new GuardianshipService(profileRepository, profileGuardianRepository);
+    GuardianshipService guardianshipService = new GuardianshipService(
+      profileRepository, profileGuardianRepository, routineRepository, deviceLinkRepository, refreshTokenRepository);
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
-      memberRepository, profileRepository, profileGuardianRepository, routineRepository,
+      memberRepository, profileRepository, routineRepository,
       authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
       subscriptionService, systemConfigService, guardianshipService);
     oAuthLoginService = new OAuthLoginService(
