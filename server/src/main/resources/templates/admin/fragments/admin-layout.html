@@ -21,6 +21,10 @@
   <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <!-- 화면 스크립트가 fetch 로 POST 할 때 쓰는 CSRF 토큰 (#399). #248 에서 머리 부분을 골격으로
+         옮기며 빠져, 프롬프트 화면 스크립트가 첫 줄에서 멈추고 버튼이 동작하지 않았다. -->
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
     <title th:text="'이룸 관리자 · ' + ${title}">이룸 관리자</title>
     <!-- CDN이 아니라 동봉한 파일이다. 개발용 CDN 빌드는 브라우저에서 컴파일해
          프로덕션 경고가 뜨고, 스타일 적용 전 화면이 한 번 깜빡인다. -->
