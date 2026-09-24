@@ -511,6 +511,8 @@ jobs:
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           SKIP_WAITING_FOR_BUILD_PROCESSING: ${{ env.SKIP_WAITING_FOR_BUILD_PROCESSING }}
           APP_ROOT: ${{ env.APP_ROOT }}   # 아래 스크립트가 셸 변수로 참조한다
+          # App Store '새로운 기능' 임시 덮어쓰기. 비어 있으면 Fastfile이 CHANGELOG를 쓴다 (#414)
+          APPSTORE_RELEASE_NOTES: ${{ vars.IOS_APPSTORE_RELEASE_NOTES }}
         run: |
           # IPA 절대경로 탐색
           IPA_PATH=$(find "$GITHUB_WORKSPACE/${APP_ROOT}/ios/build/ipa" -name "*.ipa" | head -1)
