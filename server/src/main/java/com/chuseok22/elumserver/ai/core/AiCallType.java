@@ -20,6 +20,7 @@ public enum AiCallType {
   OPENAI_IMAGE("OpenAI 이미지", AiCallPurpose.CARD_IMAGE),
   FLUX_IMAGE("FLUX 이미지", AiCallPurpose.CARD_IMAGE),
   LOCAL_LLM_DLP("로컬 LLM 민감정보 검사", AiCallPurpose.SENSITIVE_INFO_CHECK),
+  GEMINI_TEXT_IMAGE_PROMPT("Gemini 그림 문장 번역", AiCallPurpose.IMAGE_PROMPT_TRANSLATE),
   ;
 
   private final String label;

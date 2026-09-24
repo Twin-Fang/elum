@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -142,7 +143,7 @@ public class RoutineService {
     try {
       generation = routineAiPipeline.generateForCreate(
         request.rawInputText(), profile.getNickname(), profile.getSupportGoals(), answers,
-        profile.getCharacter()
+        profile.getCharacter(), profile.getId()
       );
     } finally {
       AiCallContext.clear();
@@ -587,7 +588,8 @@ public class RoutineService {
     // 커밋된 뒤에 그림을 만든다. 트랜잭션 안에서 돌리면 Gemini 호출(수 초) 동안
     // DB 커넥션을 붙잡고, 롤백되면 방금 쓴 이미지 파일이 고아로 남는다.
     routineStepImageFiller.scheduleAfterCommit(
-      memberId, routineId, step.getId(), step.getDescription(), routine.getProfile().getCharacter());
+      memberId, routineId, step.getId(), step.getDescription(), routine.getProfile().getCharacter(),
+      FluxSeed.routineKey(routine.getProfile().getId(), routine.getTitle()));
 
     return RoutineResponse.from(routine);
   }

@@ -103,4 +103,26 @@ class PromptDefaultsTest {
         .contains("공백과 줄바꿈 없이 한 줄로");
     }
   }
+
+  @Test
+  @DisplayName("FLUX 지시문은 짧은 영어 — 글자를 부르는 말(card·disabilities)이 없고 글자 금지를 적는다 (#373)")
+  void fluxPrompt_shortEnglishWithoutTextInvitingWords() {
+    String content = PromptDefaults.DEFAULTS.get(PromptKey.FLUX_ROUTINE_IMAGE_PREFIX);
+
+    assertThat(content).doesNotContainPattern("[가-힣]");
+    assertThat(content.toLowerCase()).doesNotContain("card").doesNotContain("disabilit")
+      .doesNotContain("children").contains("no letters");
+    // 2차 시험의 지시문 길이 수준. 길어지면 schnell 이 그림 속 글자로 찍는다.
+    assertThat(content.length()).isLessThan(400);
+  }
+
+  @Test
+  @DisplayName("번역 지시문은 'The character' 주어와 물건 상태를 요구하고 글자를 부르는 말을 막는다 (#373)")
+  void translatePrompt_asksSubjectAndConcreteObjects() {
+    String content = PromptDefaults.DEFAULTS.get(PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE);
+
+    assertThat(content).doesNotContainPattern("[가-힣]");
+    assertThat(content).contains("The character").contains("imagePromptEn");
+    assertThat(content.toLowerCase()).contains("letters").contains("cards");
+  }
 }

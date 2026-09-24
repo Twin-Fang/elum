@@ -17,4 +17,7 @@ public enum AiCallPurpose {
   CARD_IMAGE,
   /// 보호자 입력의 민감정보 검사.
   SENSITIVE_INFO_CHECK,
+  /// FLUX 그림용 영어 장면 한 줄 번역 (#373). 보호자가 직접 추가한 카드처럼 글 AI 가 영어를 주지
+  /// 않은 카드에만 붙는다. 일과 생성으로 세면 카드 추가 한 번이 일과 한 개로 잡혀 한도를 깎는다.
+  IMAGE_PROMPT_TRANSLATE,
 }

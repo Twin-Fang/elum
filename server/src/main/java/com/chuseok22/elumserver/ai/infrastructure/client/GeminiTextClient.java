@@ -56,9 +56,10 @@ public class GeminiTextClient implements TextGenerationClient {
 
   @Override
   public String generateRoutineJson(
-    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers
+    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers,
+    boolean includeImagePromptEn
   ) {
-    return firstText(generate(sanitizedInputText, nickname, supportGoals, answers));
+    return firstText(generate(sanitizedInputText, nickname, supportGoals, answers, includeImagePromptEn));
   }
 
   @Override
@@ -101,12 +102,68 @@ public class GeminiTextClient implements TextGenerationClient {
   }
 
   public GeminiGenerateContentResponse generate(
-    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers
+    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers,
+    boolean includeImagePromptEn
   ) {
     String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
     String userContent = buildCreateRoutineUserContent(sanitizedInputText, nickname, supportGoals, answers);
-    return callGenerateContent(systemPrompt, userContent, responseSchema(), AiCallType.GEMINI_TEXT_CREATE);
+    return callGenerateContent(
+      systemPrompt, userContent, responseSchema(includeImagePromptEn), AiCallType.GEMINI_TEXT_CREATE);
   }
+
+  /**
+   * 카드 설명 한 줄을 FLUX 용 영어 장면으로 옮긴다 (#373).
+   *
+   * <p>일과 만들기 때는 같은 호출에서 영어 장면을 받으므로 이 호출이 없다. 보호자가 직접 추가한
+   * 카드처럼 영어가 없는 카드만 탄다. 실패하면 던진다 — 부르는 쪽이 그 카드만 OpenAI 로 그린다.
+   */
+  public String translateImagePrompt(String stepDescription) {
+    return translate(promptTemplateService.getContent(PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE), stepDescription);
+  }
+
+  /// 관리자 시험 전용: 저장된 지시문 대신 넘겨받은 것을 쓴다.
+  public String translateImagePromptForTest(String systemPrompt, String sampleInput) {
+    return translate(systemPrompt, sampleInput);
+  }
+
+  private String translate(String systemPrompt, String stepDescription) {
+    if (stepDescription == null || stepDescription.isBlank()) {
+      throw new IllegalStateException("번역할 카드 설명이 없음");
+    }
+    String userContent = buildTranslateUserContent(stepDescription);
+    String json = firstText(callGenerateContent(
+      systemPrompt, userContent, IMAGE_PROMPT_SCHEMA, AiCallType.GEMINI_TEXT_IMAGE_PROMPT));
+    try {
+      String line = objectMapper.readTree(json).path("imagePromptEn").asText("");
+      line = line.replaceAll("\\s+", " ").trim();
+      if (line.isBlank()) {
+        throw new IllegalStateException("번역 결과가 비어 있음");
+      }
+      return line;
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException("번역 응답을 읽지 못함", e);
+    }
+  }
+
+  // 관리자 미리보기와 실제 호출이 같은 조립을 쓴다.
+  public String buildTranslateUserContent(String stepDescription) {
+    return toJson(Map.of("task", "TRANSLATE_CARD_SCENE", "stepDescription",
+      stepDescription == null ? "" : stepDescription));
+  }
+
+  private static final Map<String, Object> IMAGE_PROMPT_SCHEMA = Map.of(
+    "type", "object",
+    "properties", Map.of("imagePromptEn", Map.of("type", "string")),
+    "required", List.of("imagePromptEn")
+  );
+
+  /// 카드마다 받는 영어 장면 한 줄의 설명. 지시문(운영 DB)이 아니라 스키마에 둔다 — 스키마는 코드라
+  /// 배포로 바로 바뀌고, FLUX 를 고르지 않으면 통째로 빠져 토큰도 들지 않는다 (#373).
+  private static final String IMAGE_PROMPT_EN_DESCRIPTION =
+    "One English sentence (under 30 words) describing this step's picture for an illustrator. "
+      + "Start with 'The character'. Show the one action and name the concrete objects and their state "
+      + "(e.g. 'The character pulls the bottom drawer of a small wooden dresser half open.'). "
+      + "Never mention text, letters, signs, cards, or disabilities.";
 
   // 실제 호출과 관리자 preview가 같은 조립 결과를 쓰도록 조립 로직만 따로 뗀 메서드.
   // Gemini를 호출하지 않으므로 AdminPromptService.preview()에서도 그대로 재사용한다.
@@ -144,9 +201,10 @@ public class GeminiTextClient implements TextGenerationClient {
 
   // 관리자 테스트 전용: DB 조회 없이 전달받은 systemPrompt를 그대로 사용해
   // 저장 전 미리보기/저장된 값 테스트를 동일한 호출 경로로 지원한다.
+  // 관리자 시험은 영어 장면까지 받아 본다 — 글 AI 가 FLUX 용 문장을 어떻게 쓰는지 볼 곳이 여기다.
   public GeminiGenerateContentResponse generateForTest(String systemPrompt, String sampleInput) {
     String userContent = buildCreateRoutineUserContent(sampleInput, null, Set.of(), List.of());
-    return callGenerateContent(systemPrompt, userContent, responseSchema(), AiCallType.GEMINI_TEXT_CREATE);
+    return callGenerateContent(systemPrompt, userContent, responseSchema(true), AiCallType.GEMINI_TEXT_CREATE);
   }
 
   public GeminiGenerateContentResponse generateQuestionForTest(String systemPrompt, String sampleInput) {
@@ -238,6 +296,11 @@ public class GeminiTextClient implements TextGenerationClient {
   }
 
   public Map<String, Object> responseSchema() {
+    return responseSchema(false);
+  }
+
+  /// @param includeImagePromptEn 카드마다 FLUX 용 영어 장면(imagePromptEn)을 필수로 받는다 (#373)
+  public Map<String, Object> responseSchema(boolean includeImagePromptEn) {
     return Map.of(
       "type", "object",
       "properties", Map.of(
@@ -249,9 +312,15 @@ public class GeminiTextClient implements TextGenerationClient {
         "steps", Map.of(
           "type", "array",
           "maxItems", 10,
-          "items", Map.of(
-            "type", "object",
-            "properties", Map.of(
+          "items", stepSchema(includeImagePromptEn)
+        )
+      ),
+      "required", List.of("title", "steps")
+    );
+  }
+
+  private Map<String, Object> stepSchema(boolean includeImagePromptEn) {
+    Map<String, Object> properties = new LinkedHashMap<>(Map.of(
               "order", Map.of("type", "integer"),
               "title", Map.of(
                 "type", "string",
@@ -264,13 +333,13 @@ public class GeminiTextClient implements TextGenerationClient {
                 "소리 내어 읽어줄 문장. title보다 조금 더 자세하게 서술 "
                   + "(예: '학교에 입고 갈 옷을 차례대로 입어요')"
               )
-            ),
-            "required", List.of("order", "title", "description")
-          )
-        )
-      ),
-      "required", List.of("title", "steps")
-    );
+    ));
+    List<String> required = new java.util.ArrayList<>(List.of("order", "title", "description"));
+    if (includeImagePromptEn) {
+      properties.put("imagePromptEn", Map.of("type", "string", "description", IMAGE_PROMPT_EN_DESCRIPTION));
+      required.add("imagePromptEn");
+    }
+    return Map.of("type", "object", "properties", properties, "required", required);
   }
 
   // 선택된 도움 목표 중 질문 생성 대상(PREPARE_ITEMS/PREPARE_NEW)의 개수만큼 questions

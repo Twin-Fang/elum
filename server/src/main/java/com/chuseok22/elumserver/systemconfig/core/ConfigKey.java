@@ -159,10 +159,12 @@ public enum ConfigKey {
     "생성 이미지 토큰 요금. 0이면 장당 고정 단가를 쓴다",
     ConfigValueType.DECIMAL, List.of(), "0"
   ),
+  // fal 은 한 장을 최소 1MP 로 청구한다 — 640×544 도 1MP 값이었다(#373 대시보드 실측).
+  // 서버는 1MP 안(1024×864)으로 그리므로 장당 schnell 1MP 단가 그대로다. 운영 값은 이미 0.003.
   PRICE_FLUX_IMAGE_PER_IMAGE(
     ConfigGroup.PRICING, "FLUX 이미지 단가 (USD/장)",
-    "FLUX 이미지 1장 생성 요금. 비용 추정에 사용",
-    ConfigValueType.DECIMAL, List.of(), "0.006"
+    "FLUX 이미지 1장 생성 요금. 비용 추정에 사용. fal 은 1MP 미만도 1MP 로 청구한다 (schnell $0.003/MP)",
+    ConfigValueType.DECIMAL, List.of(), "0.003"
   ),
 
   // 탈퇴 계정 보관 기간 (이슈 #372).

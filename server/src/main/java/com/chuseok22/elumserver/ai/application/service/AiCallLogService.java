@@ -81,7 +81,8 @@ public class AiCallLogService {
         ConfigKey.PRICE_OPENAI_TEXT_INPUT_PER_1M,
         ConfigKey.PRICE_OPENAI_TEXT_OUTPUT_PER_1M
       );
-      case GEMINI_TEXT_CREATE, GEMINI_TEXT_QUESTION -> {
+      // 번역도 같은 Gemini 글 모델이다. 돈이 드는 호출은 전부 하루 비용 상한 합계에 잡혀야 한다.
+      case GEMINI_TEXT_CREATE, GEMINI_TEXT_QUESTION, GEMINI_TEXT_IMAGE_PROMPT -> {
         if (usage == null) {
           yield 0.0;
         }

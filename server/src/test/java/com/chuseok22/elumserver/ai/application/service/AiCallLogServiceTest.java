@@ -206,4 +206,19 @@ class AiCallLogServiceTest {
     assertThat(response.usageMetadata().candidatesTokenCount()).isEqualTo(233);
   }
 
+  @Test
+  @DisplayName("FLUX 용 번역도 Gemini 글 단가로 셈한다 — 돈이 드는 호출은 하루 비용 상한에 잡혀야 한다 (#373)")
+  void recordSuccess_imagePromptTranslate_usesGeminiTextPrice() {
+    when(systemConfigService.getDouble(ConfigKey.PRICE_GEMINI_TEXT_INPUT_PER_1M)).thenReturn(0.30);
+    when(systemConfigService.getDouble(ConfigKey.PRICE_GEMINI_TEXT_OUTPUT_PER_1M)).thenReturn(2.50);
+
+    aiCallLogService.recordSuccess(
+      AiCallType.GEMINI_TEXT_IMAGE_PROMPT, "gemini-flash-latest", 800,
+      new UsageMetadata(1_000_000, 1_000_000, 2_000_000, null)
+    );
+
+    ArgumentCaptor<AiCallLog> captor = ArgumentCaptor.forClass(AiCallLog.class);
+    verify(aiCallLogRepository).save(captor.capture());
+    assertThat(captor.getValue().getEstimatedCostUsd()).isEqualTo(2.80);
+  }
 }

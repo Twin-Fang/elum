@@ -1,5 +1,10 @@
 package com.chuseok22.elumserver.routine.application.service;
 
+import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
+import com.chuseok22.elumserver.ai.core.FluxSeed;
+import com.chuseok22.elumserver.ai.core.ImageProvider;
+import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -45,7 +50,11 @@ class RoutineStepImageFillerTest {
 
   private static final GeneratedImage IMAGE = new GeneratedImage(new byte[]{1, 2, 3}, "png");
 
+  private static final String SEED_KEY = FluxSeed.routineKey("profile-1", "비 오는 날 학교에 가요");
+
   @Mock private ImageClientRouter imageClientRouter;
+  @Mock private FluxImageClient fluxImageClient;
+  @Mock private GeminiTextClient geminiTextClient;
   @Mock private ImageGenerationClient imageClient;
   @Mock private RoutineImageStorage routineImageStorage;
   @Mock private RoutineStepRepository routineStepRepository;
@@ -57,8 +66,11 @@ class RoutineStepImageFillerTest {
   @BeforeEach
   void setUp() {
     // 창 제한은 가짜가 아니라 실제 메모리 저장소로 돌린다.
+    // 제공자 고르기는 실제 CardImageGenerator 로 돈다. 고른 제공자가 FLUX 가 아니면(가짜 라우터는
+    // null) 지금처럼 current() 로 간다.
     filler = new RoutineStepImageFiller(
-      imageClientRouter, routineImageStorage, routineStepRepository, aiDailyBudgetGuard,
+      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      routineImageStorage, routineStepRepository, aiDailyBudgetGuard,
       new RoutineStepImageThrottle(new InMemorySharedStateStore())
     );
     lenient().when(imageClientRouter.current()).thenReturn(imageClient);
@@ -74,7 +86,7 @@ class RoutineStepImageFillerTest {
   }
 
   private void fill(String memberId) {
-    filler.fill(memberId, "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU);
+    filler.fill(memberId, "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, SEED_KEY);
   }
 
   @Test
@@ -155,7 +167,7 @@ class RoutineStepImageFillerTest {
     TransactionSynchronizationManager.initSynchronization();
     try {
       filler.scheduleAfterCommit(
-        "member-1", "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU);
+        "member-1", "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, SEED_KEY);
       TransactionSynchronizationManager.getSynchronizations()
         .forEach(TransactionSynchronization::afterCommit);
     } finally {
@@ -174,5 +186,22 @@ class RoutineStepImageFillerTest {
     fill("member-1");
 
     assertThat(AiCallContext.currentMemberId()).isNull();
+  }
+
+  @Test
+  @DisplayName("FLUX 면 추가 카드는 영어 장면이 없어 번역해 그리고, 일과의 seed 로 그린다 (#373)")
+  void flux_translatesAndUsesRoutineSeed() {
+    when(aiDailyBudgetGuard.isReached()).thenReturn(false);
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.FLUX);
+    when(fluxImageClient.available()).thenReturn(true);
+    when(geminiTextClient.translateImagePrompt("현관에서 우산을 챙겨요."))
+      .thenReturn("The character picks up an umbrella at the front door.");
+    when(fluxImageClient.generate(any(), any(), any())).thenReturn(IMAGE);
+
+    fill("member-1");
+
+    verify(fluxImageClient).generate(
+      "The character picks up an umbrella at the front door.", CharacterType.LULU, FluxSeed.of(SEED_KEY));
+    assertThat(step.getImagePath()).isEqualTo("images/step-1/1.png");
   }
 }

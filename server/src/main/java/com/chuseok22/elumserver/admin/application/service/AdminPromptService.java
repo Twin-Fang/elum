@@ -4,6 +4,10 @@ import com.chuseok22.elumserver.admin.application.dto.response.PromptTestRespons
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
+import com.chuseok22.elumserver.ai.core.ImageProvider;
+import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.FluxPromptBuilder;
+import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
@@ -21,6 +25,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +46,8 @@ public class AdminPromptService {
   private final TextClientRouter textClientRouter;
   private final ImageClientRouter imageClientRouter;
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
+  private final FluxImageClient fluxImageClient;
+  private final FluxPromptBuilder fluxPromptBuilder;
 
   public List<PromptTemplate> getAll() {
     return promptTemplateService.getAll();
@@ -80,6 +87,10 @@ public class AdminPromptService {
         character != null && imageClientRouter.current().supportsCharacterReference(),
         ImagePromptLanguage.EN
       );
+      // FLUX 는 JSON 장면 정보 없이 짧은 영어 한 덩어리다. 샘플 입력은 영어 장면 한 줄로 받는다 (#373).
+      case FLUX_ROUTINE_IMAGE_PREFIX -> fluxPromptBuilder.build(content, sampleInput, character);
+      case FLUX_IMAGE_PROMPT_TRANSLATE -> "[System]\n" + content + "\n\n[User]\n"
+        + geminiTextClient.buildTranslateUserContent(sampleInput);
     };
   }
 
@@ -106,6 +117,16 @@ public class AdminPromptService {
         String dataUri = testGeminiImage(content, ImagePromptLanguage.EN, sampleInput, characterType);
         yield new PromptTestResponse(null, dataUri);
       }
+      // 지금 고른 제공자와 무관하게 FLUX 로 그린다 — 운영을 OPENAI 로 둔 채 지시문을 다듬을 수 있어야
+      // 전환 여부를 정할 수 있다. 한 번에 $0.003 (#373).
+      case FLUX_ROUTINE_IMAGE_PREFIX -> {
+        String dataUri = testFluxImage(content, sampleInput, characterType);
+        yield new PromptTestResponse(null, dataUri);
+      }
+      case FLUX_IMAGE_PROMPT_TRANSLATE -> {
+        String line = testTranslate(content, sampleInput);
+        yield new PromptTestResponse(Map.of("imagePromptEn", line), null);
+      }
     };
   }
 
@@ -129,12 +150,50 @@ public class AdminPromptService {
     }
   }
 
+  private String testFluxImage(String prefix, String sampleScene, CharacterType characterType) {
+    try {
+      return toDataUri(fluxImageClient.generateForTest(prefix, sampleScene, characterType));
+    } catch (Exception e) {
+      log.warn("[관리자 테스트] FLUX 이미지 생성 실패: prefix={}, sampleInput={}", prefix, sampleScene, e);
+      throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_IMAGE_FAILED);
+    }
+  }
+
+  private String testTranslate(String systemPrompt, String sampleInput) {
+    try {
+      return geminiTextClient.translateImagePromptForTest(systemPrompt, sampleInput);
+    } catch (Exception e) {
+      log.warn("[관리자 테스트] 그림 문장 번역 실패: sampleInput={}", sampleInput, e);
+      throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED);
+    }
+  }
+
+  private String toDataUri(GeneratedImage image) {
+    return "data:image/" + image.extension() + ";base64," + Base64.getEncoder().encodeToString(image.bytes());
+  }
+
+  /**
+   * 한국어·영어 그림 지시문을 시험할 제공자.
+   *
+   * <p>FLUX 를 골라 두었으면 이 지시문들은 FLUX 가 아니라 <b>OpenAI fallback</b> 이 쓴다. FLUX 로
+   * 그리면 한국어 지시문을 받아 사람을 그린다(#373). 그래서 그때는 OpenAI 로 시험한다.
+   */
+  private ImageGenerationClient promptTestImageClient() {
+    ImageGenerationClient current = imageClientRouter.current();
+    if (current.provider() != ImageProvider.FLUX) {
+      return current;
+    }
+    return imageClientRouter.of(ImageProvider.OPENAI)
+      .filter(ImageGenerationClient::available)
+      .orElse(current);
+  }
+
   private String testGeminiImage(
     String prefix, ImagePromptLanguage language, String sampleInput, CharacterType characterType
   ) {
     try {
       GeneratedImage image =
-        imageClientRouter.current().generateImageForTest(prefix, language, sampleInput, characterType);
+        promptTestImageClient().generateImageForTest(prefix, language, sampleInput, characterType);
       String base64 = Base64.getEncoder().encodeToString(image.bytes());
       return "data:image/" + image.extension() + ";base64," + base64;
     } catch (Exception e) {

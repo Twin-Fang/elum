@@ -2,7 +2,7 @@ package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
-import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
+import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThrottle;
@@ -53,7 +53,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @RequiredArgsConstructor
 public class RoutineStepImageFiller {
 
-  private final ImageClientRouter imageClientRouter;
+  private final CardImageGenerator cardImageGenerator;
   private final RoutineImageStorage routineImageStorage;
   private final RoutineStepRepository routineStepRepository;
   private final AiDailyBudgetGuard aiDailyBudgetGuard;
@@ -68,8 +68,10 @@ public class RoutineStepImageFiller {
    * <p>트랜잭션 밖에서 불리거나 설명이 비어 있으면 아무 일도 하지 않는다 —
    * 빈 프롬프트로 부르면 돈만 쓰고 엉뚱한 그림이 나온다.
    */
+  /// @param seedKey {@code FluxSeed.routineKey} — 일과를 만들 때와 같은 seed 로 그려 같은 캐릭터가 나온다 (#373)
   public void scheduleAfterCommit(
-    String memberId, String routineId, String stepId, String description, CharacterType characterType
+    String memberId, String routineId, String stepId, String description, CharacterType characterType,
+    String seedKey
   ) {
     if (description == null || description.isBlank()) {
       return;
@@ -80,7 +82,7 @@ public class RoutineStepImageFiller {
     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
       @Override
       public void afterCommit() {
-        executor.execute(() -> fill(memberId, routineId, stepId, description, characterType));
+        executor.execute(() -> fill(memberId, routineId, stepId, description, characterType, seedKey));
       }
     });
   }
@@ -97,7 +99,8 @@ public class RoutineStepImageFiller {
    * 상한을 먼저 본다. 상한 때문에 건너뛴 그림이 회원의 횟수를 깎으면 안 된다.
    */
   void fill(
-    String memberId, String routineId, String stepId, String description, CharacterType characterType
+    String memberId, String routineId, String stepId, String description, CharacterType characterType,
+    String seedKey
   ) {
     // 이 스레드는 요청 스레드가 아니라 회원 맥락이 없다(addStep 은 세우지 않는다). 여기서 세워야
     // 그림 호출 기록에 회원이 남는다 — 전에는 회원 없이 남아 계정별로는 볼 수 없었다 (#368).
@@ -113,8 +116,9 @@ public class RoutineStepImageFiller {
           memberId, routineId, stepId);
         return;
       }
-      GeneratedImage image =
-        imageClientRouter.current().generateImage(description, characterType);
+      // 직접 추가한 카드엔 영어 장면이 없다 — FLUX 면 CardImageGenerator 가 번역한다 (#373).
+      GeneratedImage image = cardImageGenerator.generate(
+        new CardImageGenerator.CardImageRequest(description, null, characterType, seedKey));
       if (image == null) {
         log.warn("추가 카드 이미지가 비어 돌아왔다: routineId={}, stepId={}", routineId, stepId);
         return;

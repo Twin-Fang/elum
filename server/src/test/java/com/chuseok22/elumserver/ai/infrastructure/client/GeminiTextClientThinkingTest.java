@@ -111,7 +111,7 @@ class GeminiTextClientThinkingTest {
       .andExpect(jsonPath("$.generationConfig.thinkingConfig.thinkingBudget").value(0))
       .andRespond(withSuccess(OK_BODY, MediaType.APPLICATION_JSON));
 
-    client.generateRoutineJson("비 오는 날 학교 가기", null, Set.of(), List.of());
+    client.generateRoutineJson("비 오는 날 학교 가기", null, Set.of(), List.of(), false);
 
     server.verify();
     ArgumentCaptor<GeminiGenerateContentResponse.UsageMetadata> usage =
@@ -130,7 +130,7 @@ class GeminiTextClientThinkingTest {
       .andRespond(withBadRequest().body("{\"error\":{\"message\":\"thinking budget not supported\"}}")
         .contentType(MediaType.APPLICATION_JSON));
 
-    assertThatThrownBy(() -> client.generateRoutineJson("병원 가기", null, Set.of(), List.of()))
+    assertThatThrownBy(() -> client.generateRoutineJson("병원 가기", null, Set.of(), List.of(), false))
       .isInstanceOf(HttpClientErrorException.BadRequest.class);
 
     server.verify();

@@ -66,14 +66,15 @@ public class OpenAiTextClient implements TextGenerationClient {
 
   @Override
   public String generateRoutineJson(
-    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers
+    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers,
+    boolean includeImagePromptEn
   ) {
     String systemPrompt = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
     String userContent = geminiTextClient.buildCreateRoutineUserContent(
       sanitizedInputText, nickname, supportGoals, answers
     );
     return call(
-      systemPrompt, userContent, geminiTextClient.responseSchema(),
+      systemPrompt, userContent, geminiTextClient.responseSchema(includeImagePromptEn),
       "routine", AiCallType.OPENAI_TEXT_CREATE
     );
   }
@@ -97,8 +98,9 @@ public class OpenAiTextClient implements TextGenerationClient {
     String userContent = geminiTextClient.buildCreateRoutineUserContent(
       sampleInput, null, Set.of(), List.of()
     );
+    // 관리자 시험은 영어 장면까지 받아 본다 — 글 AI 가 FLUX 용 문장을 어떻게 쓰는지 볼 곳이 여기다.
     return call(
-      systemPrompt, userContent, geminiTextClient.responseSchema(),
+      systemPrompt, userContent, geminiTextClient.responseSchema(true),
       "routine", AiCallType.OPENAI_TEXT_CREATE
     );
   }

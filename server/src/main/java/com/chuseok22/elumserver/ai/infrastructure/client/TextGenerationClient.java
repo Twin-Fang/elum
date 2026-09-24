@@ -30,8 +30,12 @@ public interface TextGenerationClient {
   boolean available();
 
   /// 일과 생성. 반환값은 일과 제목·단계 배열이 담긴 JSON 문자열.
+  ///
+  /// @param includeImagePromptEn 카드마다 FLUX 용 영어 장면 한 줄(imagePromptEn)도 받을지. 같은 호출이라
+  ///                             호출 수는 그대로지만 출력 토큰이 늘어, FLUX 를 고른 때만 켠다 (#373).
   String generateRoutineJson(
-    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers
+    String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers,
+    boolean includeImagePromptEn
   );
 
   /// 도움 목표 기반 추가 질문 생성. 반환값은 questions 배열이 담긴 JSON 문자열.

@@ -1,5 +1,8 @@
 package com.chuseok22.elumserver.routine.infrastructure.ai;
 
+import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
+import com.chuseok22.elumserver.ai.core.FluxSeed;
+import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
@@ -39,17 +42,23 @@ public class RoutineAiPipeline {
 
   private final TextClientRouter textClientRouter;
   private final ImageClientRouter imageClientRouter;
+  private final CardImageGenerator cardImageGenerator;
   private final RoutineImageStorage routineImageStorage;
 
+  /**
+   * @param profileId FLUX seed 를 이 이룸이 + 일과 제목으로 정한다. 일과 id 는 저장 전이라 아직 없다 (#373)
+   */
   public RoutineGenerationResult generateForCreate(
     String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> maskedAnswers,
-    CharacterType characterType
+    CharacterType characterType, String profileId
   ) {
+    // FLUX 일 때만 카드마다 영어 장면을 같은 호출로 받는다 — 다른 제공자는 쓰지 않을 출력 토큰이다.
+    boolean includeImagePromptEn = imageClientRouter.selected() == ImageProvider.FLUX;
     RoutineStepDraft draft = parseDraft(
       () -> textClientRouter.current()
-        .generateRoutineJson(sanitizedInputText, nickname, supportGoals, maskedAnswers)
+        .generateRoutineJson(sanitizedInputText, nickname, supportGoals, maskedAnswers, includeImagePromptEn)
     );
-    return buildResult(draft, characterType, Map.of());
+    return buildResult(draft, characterType, Map.of(), FluxSeed.routineKey(profileId, draft.title()));
   }
 
   private static final int MIN_OPTIONS = 3;
@@ -191,20 +200,21 @@ public class RoutineAiPipeline {
     List<RoutineStepDraft.StepDraft> normalized = new ArrayList<>();
     for (int i = 0; i < draft.steps().size(); i++) {
       RoutineStepDraft.StepDraft step = draft.steps().get(i);
-      normalized.add(new RoutineStepDraft.StepDraft(i + 1, step.title(), step.description()));
+      normalized.add(new RoutineStepDraft.StepDraft(i + 1, step.title(), step.description(), step.imagePromptEn()));
     }
     return new RoutineStepDraft(draft.title(), normalized);
   }
 
   private RoutineGenerationResult buildResult(
-    RoutineStepDraft draft, CharacterType characterType, Map<Integer, String> reusableImagePathsByOrder
+    RoutineStepDraft draft, CharacterType characterType, Map<Integer, String> reusableImagePathsByOrder,
+    String seedKey
   ) {
     String batchId = UUID.randomUUID().toString();
     ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     try {
       List<CompletableFuture<StepResult>> futures = draft.steps().stream()
         .map(stepDraft -> CompletableFuture.supplyAsync(
-          () -> resolveStepResult(stepDraft, characterType, reusableImagePathsByOrder), executor
+          () -> resolveStepResult(stepDraft, characterType, reusableImagePathsByOrder, seedKey), executor
         ))
         .toList();
 
@@ -250,13 +260,15 @@ public class RoutineAiPipeline {
 
   private StepResult resolveStepResult(
     RoutineStepDraft.StepDraft stepDraft, CharacterType characterType,
-    Map<Integer, String> reusableImagePathsByOrder
+    Map<Integer, String> reusableImagePathsByOrder, String seedKey
   ) {
     String reusablePath = reusableImagePathsByOrder.get(stepDraft.order());
     if (reusablePath != null) {
       return new StepResult(stepDraft, null, reusablePath);
     }
-    return new StepResult(stepDraft, generateImageWithRetry(stepDraft.description(), characterType), null);
+    CardImageGenerator.CardImageRequest request = new CardImageGenerator.CardImageRequest(
+      stepDraft.description(), stepDraft.imagePromptEn(), characterType, seedKey);
+    return new StepResult(stepDraft, generateImageWithRetry(request), null);
   }
 
   // 이미지 단계 하나가 일시적으로 실패해도 전체 루틴 생성을 곧바로 포기하지 않도록, 실패한
@@ -264,13 +276,16 @@ public class RoutineAiPipeline {
   // 재시도까지 실패하면 예외를 던지지 않고 null을 반환한다 — 이 단계만 이미지 없이(imagePath=null)
   // 저장하고 나머지 단계와 일과 자체는 살린다. 예외를 던지면 buildResult()에서 일과 전체가
   // ROUTINE_AI_GENERATION_FAILED로 죽어 서버에 저장조차 되지 않는다(이 버그의 근본 원인).
-  private GeneratedImage generateImageWithRetry(String description, CharacterType characterType) {
+  // FLUX 실패의 OpenAI fallback 은 CardImageGenerator 안에서 이미 한 번 일어난다. 여기 재시도는 그
+  // 둘이 다 실패했을 때의 것이다.
+  private GeneratedImage generateImageWithRetry(CardImageGenerator.CardImageRequest request) {
+    String description = request.description();
     try {
-      return imageClientRouter.current().generateImage(description, characterType);
+      return cardImageGenerator.generate(request);
     } catch (Exception first) {
       log.warn("이미지 생성 1차 실패, 1회 재시도: description={}", description, first);
       try {
-        return imageClientRouter.current().generateImage(description, characterType);
+        return cardImageGenerator.generate(request);
       } catch (Exception retry) {
         // 재시도까지 실패 — 이 단계만 이미지 없이 진행한다. 일과 전체를 포기하지 않는다.
         log.warn("이미지 생성 재시도까지 실패, 이미지 없이 진행: description={}", description, retry);

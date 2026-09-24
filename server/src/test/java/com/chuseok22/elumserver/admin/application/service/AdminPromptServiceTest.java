@@ -2,7 +2,13 @@ package com.chuseok22.elumserver.admin.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
+import com.chuseok22.elumserver.admin.application.dto.response.PromptTestResponse;
+import com.chuseok22.elumserver.ai.core.GeneratedImage;
+import com.chuseok22.elumserver.ai.infrastructure.client.FluxPromptBuilder;
+import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
@@ -43,6 +49,12 @@ class AdminPromptServiceTest {
 
   @Mock
   private ImageGenerationClient imageGenerationClient;
+
+  @Mock
+  private FluxImageClient fluxImageClient;
+
+  @Mock
+  private FluxPromptBuilder fluxPromptBuilder;
 
   @InjectMocks
   private AdminPromptService adminPromptService;
@@ -105,5 +117,42 @@ class AdminPromptServiceTest {
 
     assertThat(result).contains("{\"text\":\"김민준입니다\"}");
     assertThat(result).doesNotContain("<text>");
+  }
+
+  @Test
+  @DisplayName("FLUX 지시문 preview 는 FLUX 조립기 그대로 — 샘플 입력은 영어 장면 한 줄이다 (#373)")
+  void preview_fluxPrefix_usesFluxBuilder() {
+    when(fluxPromptBuilder.build("Style.", "The character waves.", CharacterType.LULU))
+      .thenReturn("Style. Only one character: ... The kitten waves.");
+
+    String result = adminPromptService.preview(
+      PromptKey.FLUX_ROUTINE_IMAGE_PREFIX, "Style.", "The character waves.", CharacterType.LULU);
+
+    assertThat(result).isEqualTo("Style. Only one character: ... The kitten waves.");
+  }
+
+  @Test
+  @DisplayName("FLUX 지시문 시험은 지금 고른 제공자와 무관하게 FLUX 로 그린다 — 운영은 OPENAI 인 채로 시험한다 (#373)")
+  void test_fluxPrefix_callsFluxEvenIfNotSelected() {
+    when(fluxImageClient.generateForTest("Style.", "The character waves.", CharacterType.LULU))
+      .thenReturn(new GeneratedImage(new byte[]{1, 2}, "jpg"));
+
+    PromptTestResponse response = adminPromptService.test(
+      PromptKey.FLUX_ROUTINE_IMAGE_PREFIX, "Style.", "The character waves.", CharacterType.LULU);
+
+    assertThat(response.imageDataUri()).startsWith("data:image/jpg;base64,");
+    verify(imageClientRouter, never()).current();
+  }
+
+  @Test
+  @DisplayName("번역 지시문 시험은 한 줄 결과를 보여준다 (#373)")
+  void test_translatePrompt_showsLine() {
+    when(geminiTextClient.translateImagePromptForTest("Rewrite.", "우산을 챙겨요"))
+      .thenReturn("The character picks up an umbrella.");
+
+    PromptTestResponse response = adminPromptService.test(
+      PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE, "Rewrite.", "우산을 챙겨요", null);
+
+    assertThat(response.result()).isEqualTo(java.util.Map.of("imagePromptEn", "The character picks up an umbrella."));
   }
 }

@@ -25,6 +25,8 @@ class AiCallTypeTest {
     AiCallType.GEMINI_IMAGE, AiCallPurpose.CARD_IMAGE,
     AiCallType.OPENAI_IMAGE, AiCallPurpose.CARD_IMAGE,
     AiCallType.FLUX_IMAGE, AiCallPurpose.CARD_IMAGE,
+    // FLUX 용 영어 한 줄 번역. 일과 생성으로 세면 카드 추가 한 번이 일과 한 개로 잡힌다 (#373).
+    AiCallType.GEMINI_TEXT_IMAGE_PROMPT, AiCallPurpose.IMAGE_PROMPT_TRANSLATE,
     AiCallType.LOCAL_LLM_DLP, AiCallPurpose.SENSITIVE_INFO_CHECK
   );
 

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -12,6 +13,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
+import com.chuseok22.elumserver.ai.core.FluxSeed;
+import com.chuseok22.elumserver.ai.core.ImageProvider;
+import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 
@@ -29,7 +35,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -51,12 +56,23 @@ class RoutineAiPipelineTest {
   @Mock
   private RoutineImageStorage routineImageStorage;
 
-  @InjectMocks
+  @Mock
+  private FluxImageClient fluxImageClient;
+
+  @Mock
+  private GeminiTextClient geminiTextClient;
+
   private RoutineAiPipeline routineAiPipeline;
 
 
   @BeforeEach
   void setUp() {
+    // 제공자 고르기는 실제 CardImageGenerator 로 돈다. 가짜 라우터의 selected() 는 null 이라
+    // FLUX 가 아니고, 지금처럼 current() 의 제공자로 그린다.
+    routineAiPipeline = new RoutineAiPipeline(
+      textClientRouter, imageClientRouter,
+      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      routineImageStorage);
     lenient().when(imageClientRouter.current()).thenReturn(imageGenerationClient);
     lenient().when(textClientRouter.current()).thenReturn(textGenerationClient);
   }
@@ -213,13 +229,13 @@ class RoutineAiPipelineTest {
     String json = "{\"title\":\"비 오는 날 학교 가기\",\"steps\":["
       + "{\"order\":2,\"title\":\"우산을 챙겨요\",\"description\":\"우산을 챙겨요\"},"
       + "{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
-    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
     when(imageGenerationClient.generateImage(any(), any()))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
-      "내일 비 오는 날 학교 가기", "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), null, CharacterType.LULU
+      "내일 비 오는 날 학교 가기", "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), null, CharacterType.LULU, "profile-1"
     );
 
     assertThat(result.title()).isEqualTo("비 오는 날 학교 가기");
@@ -238,12 +254,12 @@ class RoutineAiPipelineTest {
   @DisplayName("캐릭터를 선택하지 않은 회원이면 이미지 생성 호출에 캐릭터 없이(null) 전달된다")
   void generateForCreate_noCharacter_passesNullCharacterToImageClient() {
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
-    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
     when(imageGenerationClient.generateImage(any(), any()))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
-    routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null);
+    routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, "profile-1");
 
     verify(imageGenerationClient).generateImage("옷을 입어요", null);
   }
@@ -252,10 +268,10 @@ class RoutineAiPipelineTest {
   @DisplayName("Gemini가 title 없이 응답하면 ROUTINE_AI_GENERATION_FAILED를 던진다")
   void generateForCreate_missingTitle_throwsGenerationFailed() {
     String json = "{\"steps\":[{\"order\":1,\"description\":\"설명\"}]}";
-    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
 
     assertThatThrownBy(() ->
-      routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null))
+      routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, "profile-1"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_AI_GENERATION_FAILED));
@@ -265,10 +281,10 @@ class RoutineAiPipelineTest {
   @DisplayName("Gemini가 빈 steps를 반환하면 ROUTINE_STEP_LIMIT_EXCEEDED를 던진다")
   void generateForCreate_emptySteps_throwsStepLimitExceeded() {
     String json = "{\"title\":\"제목\",\"steps\":[]}";
-    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
 
     assertThatThrownBy(() ->
-      routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null))
+      routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, "profile-1"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED));
@@ -278,14 +294,14 @@ class RoutineAiPipelineTest {
   @DisplayName("이미지 생성이 1차 실패해도 재시도로 성공하면 정상 저장된다")
   void generateForCreate_imageFailsOnce_retriesAndSucceeds() {
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
-    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
     when(imageGenerationClient.generateImage(any(), any()))
       .thenThrow(new RuntimeException("일시적 실패"))
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
-      "내일 병원 가기", "하늘이", Set.of(), List.of(), null
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), null, "profile-1"
     );
 
     assertThat(result.steps()).hasSize(1);
@@ -299,11 +315,11 @@ class RoutineAiPipelineTest {
     // 이미지 하나가 끝까지 실패해도 일과 전체를 포기하지 않는다(서비스 원칙 6). 예외를 던지면
     // create()가 500으로 죽어 일과가 서버에 저장조차 안 되던 버그의 근본 원인이었다.
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
-    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any())).thenReturn(json);
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
     when(imageGenerationClient.generateImage(any(), any())).thenThrow(new RuntimeException("계속 실패"));
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
-      "내일 병원 가기", "하늘이", Set.of(), List.of(), null
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), null, "profile-1"
     );
 
     assertThat(result.steps()).hasSize(1);
@@ -311,5 +327,38 @@ class RoutineAiPipelineTest {
     // 이미지가 없으므로 저장은 아예 호출되지 않는다.
     verify(routineImageStorage, never()).save(any(), any(), any());
     verify(imageGenerationClient, times(2)).generateImage(any(), any());
+  }
+
+  @Test
+  @DisplayName("FLUX 를 고르면 같은 글 호출에서 카드마다 영어 장면을 받아 그대로 FLUX 에 넘긴다 — seed 는 이 일과로 고정 (#373)")
+  void generateForCreate_flux_passesEnglishSceneAndRoutineSeed() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.FLUX);
+    when(fluxImageClient.available()).thenReturn(true);
+    String json = "{\"title\":\"비 오는 날 학교에 가요\",\"steps\":["
+      + "{\"order\":1,\"title\":\"우산을 챙겨요\",\"description\":\"우산을 챙겨요\","
+      + "\"imagePromptEn\":\"The character picks up a closed red umbrella.\"}]}";
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), eq(true))).thenReturn(json);
+    when(fluxImageClient.generate(any(), any(), any())).thenReturn(new GeneratedImage(new byte[]{1}, "jpg"));
+    when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.jpg");
+
+    routineAiPipeline.generateForCreate("비 오는 날 학교", "하늘이", Set.of(), null, CharacterType.LULU, "profile-1");
+
+    verify(fluxImageClient).generate(
+      "The character picks up a closed red umbrella.", CharacterType.LULU,
+      FluxSeed.of(FluxSeed.routineKey("profile-1", "비 오는 날 학교에 가요")));
+    verify(geminiTextClient, never()).translateImagePrompt(any());
+  }
+
+  @Test
+  @DisplayName("FLUX 가 아니면 영어 장면을 달라고 하지 않는다 — 쓰지도 않을 출력 토큰 (#375)")
+  void generateForCreate_notFlux_doesNotAskEnglishScene() {
+    String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), eq(false))).thenReturn(json);
+    when(imageGenerationClient.generateImage(any(), any())).thenReturn(new GeneratedImage(new byte[]{1}, "png"));
+    when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
+
+    routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, "profile-1");
+
+    verify(textGenerationClient).generateRoutineJson(any(), any(), any(), any(), eq(false));
   }
 }
