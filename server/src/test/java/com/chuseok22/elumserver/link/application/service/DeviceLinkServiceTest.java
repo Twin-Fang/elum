@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.auth.application.dto.response.TokenResponse;
 import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -212,9 +213,9 @@ class DeviceLinkServiceTest {
     service.revoke("m1", "l1");
 
     assertThat(l.getRevokedAt()).isNotNull();
-    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-1"), any());
+    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-1"), any(), eq(RevokeReason.DEVICE_UNLINKED));
     // 계정 전체를 끊으면 보호자까지 로그아웃된다.
-    verify(refreshTokenRepository, never()).revokeAllByMemberId(anyString(), any());
+    verify(refreshTokenRepository, never()).revokeAllByMemberId(anyString(), any(), any());
   }
 
   @Test
@@ -229,7 +230,7 @@ class DeviceLinkServiceTest {
 
     service.revoke("m1", "l1");
 
-    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-l1"), any());
+    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-l1"), any(), eq(RevokeReason.DEVICE_UNLINKED));
   }
 
   @Test
@@ -294,7 +295,7 @@ class DeviceLinkServiceTest {
 
     assertThat(first.getRevokedAt()).isNotNull();
     assertThat(second.getRevokedAt()).isNull();
-    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-l1"), any());
+    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-l1"), any(), eq(RevokeReason.DEVICE_UNLINKED));
   }
 
   @Test

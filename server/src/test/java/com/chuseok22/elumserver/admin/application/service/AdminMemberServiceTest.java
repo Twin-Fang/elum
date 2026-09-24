@@ -15,6 +15,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberRespon
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
 import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
@@ -169,7 +170,7 @@ class AdminMemberServiceTest {
     adminMemberService.suspend("m1");
     assertThat(member.getStatus()).isEqualTo(MemberStatus.SUSPENDED);
     // 정지만 하고 세션을 두면 리프레시로 계속 접속을 시도한다.
-    verify(refreshTokenService).revokeAll("m1");
+    verify(refreshTokenService).revokeAll("m1", RevokeReason.SUSPENDED);
 
     adminMemberService.unsuspend("m1");
     assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
@@ -185,7 +186,7 @@ class AdminMemberServiceTest {
 
     assertThat(member.getTokenInvalidBefore()).isNotNull();
     // 액세스 토큰만 막으면 리프레시로 곧바로 다시 들어온다.
-    verify(refreshTokenService).revokeAll("m1");
+    verify(refreshTokenService).revokeAll("m1", RevokeReason.FORCE_LOGOUT);
   }
 
   @Test
@@ -315,7 +316,7 @@ class AdminMemberServiceTest {
     assertThat(member.getStatus()).isEqualTo(MemberStatus.WITHDRAWN);
     verify(subscriptionService, never()).grantPro(any(), any(), any());
     verify(subscriptionService, never()).revokePro(any(), any());
-    verify(refreshTokenService, never()).revokeAll(any());
+    verify(refreshTokenService, never()).revokeAll(any(), any());
   }
 
   @Test
@@ -360,6 +361,6 @@ class AdminMemberServiceTest {
 
     adminMemberService.forceLogout("m1");
 
-    verify(refreshTokenService).revokeAll("m1");
+    verify(refreshTokenService).revokeAll("m1", RevokeReason.FORCE_LOGOUT);
   }
 }

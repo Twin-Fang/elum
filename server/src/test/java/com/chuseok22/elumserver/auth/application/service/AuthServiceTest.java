@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.auth.application.dto.request.LoginRequest;
 import com.chuseok22.elumserver.auth.application.dto.request.SignUpRequest;
 import com.chuseok22.elumserver.auth.application.dto.response.TokenResponse;
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
@@ -146,7 +147,7 @@ class AuthServiceTest {
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.MEMBER_SUSPENDED));
 
-    verify(refreshTokenService).revokeAll("m1");
+    verify(refreshTokenService).revokeAll("m1", RevokeReason.SUSPENDED);
     verify(jwtProvider, never()).createAccessToken(org.mockito.ArgumentMatchers.anyString(),
       org.mockito.ArgumentMatchers.anyString());
   }
@@ -189,7 +190,7 @@ class AuthServiceTest {
     authService.logout("some-refresh");
 
     verify(refreshTokenService).revokeSession("some-refresh");
-    verify(refreshTokenService, never()).revokeAll(org.mockito.ArgumentMatchers.anyString());
+    verify(refreshTokenService, never()).revokeAll(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any());
   }
   @Test
   @DisplayName("S1 보관 중인 탈퇴 계정에 아이디·비밀번호로 로그인하면 새 계정 없이 이전 계정을 되살린다")

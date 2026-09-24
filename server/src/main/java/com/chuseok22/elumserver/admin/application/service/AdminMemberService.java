@@ -6,6 +6,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscription
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
 import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
@@ -140,7 +141,7 @@ public class AdminMemberService {
     // 남은 리프레시 토큰을 끊지 않으면 정지된 계정이 갱신으로 계속 접속을 시도한다.
     // 일과·관계는 건드리지 않는다 — 나간 것이 아니다 (다중 보호자 E32). 그가 붙인 이룸이 휴대폰도
     // 토큰 주인(sub)이 같아 함께 막힌다.
-    refreshTokenService.revokeAll(memberId);
+    refreshTokenService.revokeAll(memberId, RevokeReason.SUSPENDED);
   }
 
   @Transactional
@@ -155,7 +156,7 @@ public class AdminMemberService {
     // 액세스 토큰만 막으면 리프레시로 새 토큰을 받아 그대로 다시 들어온다.
     // 강제 로그아웃이 성립하려면 세션 자체를 끊어야 한다.
     // 이 보호자가 붙인 이룸이 휴대폰도 토큰 주인(sub)이 같아 함께 끊긴다 — 받아들인 동작이다 (다중 보호자 E35).
-    refreshTokenService.revokeAll(memberId);
+    refreshTokenService.revokeAll(memberId, RevokeReason.FORCE_LOGOUT);
   }
 
   /**

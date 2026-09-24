@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.link.application.service;
 
 import com.chuseok22.elumserver.auth.application.dto.response.TokenResponse;
 import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -192,7 +193,7 @@ public class DeviceLinkService {
     // linkedDeviceId 는 연결할 때 서버가 넣으므로 비어 있을 수 없다.
     String deviceId = link.getLinkedDeviceId() != null
       ? link.getLinkedDeviceId() : ElumiDeviceId.of(link.getId());
-    int killed = refreshTokenRepository.revokeByMemberIdAndDeviceId(memberId, deviceId, now);
+    int killed = refreshTokenRepository.revokeByMemberIdAndDeviceId(memberId, deviceId, now, RevokeReason.DEVICE_UNLINKED);
     log.info("이룸이 휴대폰 연결 끊음: memberId={}, deviceId={}, 끊은 세션={}",
       memberId, deviceId, killed);
   }

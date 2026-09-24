@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.auth.application.service;
 import com.chuseok22.elumserver.auth.application.dto.request.LoginRequest;
 import com.chuseok22.elumserver.auth.application.dto.request.SignUpRequest;
 import com.chuseok22.elumserver.auth.application.dto.response.TokenResponse;
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
@@ -113,7 +114,7 @@ public class AuthService {
     // 갱신은 로그인만큼 자주 일어난다. 정지된 계정이 갱신으로 계속 살아 있지 않도록
     // 여기서도 상태를 확인하고, 걸리면 남은 세션까지 끊는다.
     if (member.getStatus() == MemberStatus.SUSPENDED) {
-      refreshTokenService.revokeAll(member.getId());
+      refreshTokenService.revokeAll(member.getId(), RevokeReason.SUSPENDED);
       throw new CustomException(ErrorCode.MEMBER_SUSPENDED);
     }
 

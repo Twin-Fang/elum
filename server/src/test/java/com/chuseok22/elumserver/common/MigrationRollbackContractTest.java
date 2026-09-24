@@ -105,6 +105,21 @@ class MigrationRollbackContractTest {
     assertThat(sql).contains("not exists (select 1 from ai_credit_ledger l where l.grant_id = g.id)");
   }
 
+  // --- V27 리프레시 토큰 폐기 사유 (#360 D1) — 같은 "추가만 한다" 약속 ---
+
+  private static final Path V27 = Path.of("src/main/resources/db/migration/V27__add_refresh_token_revoke_reason.sql");
+
+  @Test
+  @DisplayName("V27 은 폐기 사유 컬럼을 비워 둘 수 있게 더하기만 한다 — 옛 서버는 이 컬럼을 모르고 토큰을 쓴다")
+  void v27_addsNullableRevokeReasonOnly() throws IOException {
+    String sql = normalizedSql(V27);
+    assertThat(sql).doesNotContain("drop column").doesNotContain("drop table").doesNotContain("drop not null");
+    assertThat(sql).contains("alter table refresh_token add column if not exists revoke_reason varchar(30);");
+    assertThat(sql).doesNotContainPattern("revoke_reason[^;]*not null");
+    // 옛 행을 ROTATED 로 채우면 로그아웃했던 토큰이 탈취로 읽혀 다른 휴대폰까지 끊긴다 (D1 그대로).
+    assertThat(sql).doesNotContain("update refresh_token");
+  }
+
   /** create table 한 덩이 — 여는 괄호부터 그 표를 닫는 ");" 까지. */
   private String tableBlock(String table) throws IOException {
     String sql = normalizedSql();

@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.auth.application.service;
 
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.link.core.ElumiDeviceId;
 import java.time.LocalDateTime;
@@ -33,7 +34,9 @@ public class RefreshTokenRevoker {
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public int revokeGuardianSessionsInNewTransaction(String memberId, LocalDateTime now) {
-    return refreshTokenRepository.revokeGuardianSessions(memberId, ElumiDeviceId.LIKE_PATTERN, now);
+    // 회전이 아닌 사유로 남긴다 — 이렇게 끊긴 토큰이 또 와도 다시 전부 끊지 않는다 (#360 D1).
+    return refreshTokenRepository.revokeGuardianSessions(
+      memberId, ElumiDeviceId.LIKE_PATTERN, now, RevokeReason.REUSE_DETECTED);
   }
 
   /**
@@ -41,9 +44,11 @@ public class RefreshTokenRevoker {
    *
    * <p>끊긴 연결의 이룸이 휴대폰이 갱신하러 왔을 때 쓴다. 계정 전체를 끊으면 보호자까지
    * 로그아웃된다.
+   *
+   * @param reason 연결이 끊겨 거절하면 {@link RevokeReason#DEVICE_UNLINKED}, 재사용이면 {@link RevokeReason#REUSE_DETECTED}
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public int revokeDeviceInNewTransaction(String memberId, String deviceId, LocalDateTime now) {
-    return refreshTokenRepository.revokeByMemberIdAndDeviceId(memberId, deviceId, now);
+  public int revokeDeviceInNewTransaction(String memberId, String deviceId, LocalDateTime now, RevokeReason reason) {
+    return refreshTokenRepository.revokeByMemberIdAndDeviceId(memberId, deviceId, now, reason);
   }
 }

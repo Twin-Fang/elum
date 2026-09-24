@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.auth.infrastructure.repository;
 
 import com.chuseok22.elumserver.auth.infrastructure.entity.RefreshToken;
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -15,11 +16,13 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Stri
 
   List<RefreshToken> findAllByMemberIdAndRevokedAtIsNull(String memberId);
 
-  /** 로그아웃·탈취 감지 시 계정의 살아 있는 토큰을 한 번에 끊는다. */
+  /** 계정 정지·강제 로그아웃 시 계정의 살아 있는 토큰을 한 번에 끊는다. 사유는 부른 쪽이 정한다. */
   @Modifying
-  @Query("update RefreshToken t set t.revokedAt = :now "
+  @Query("update RefreshToken t set t.revokedAt = :now, t.revokeReason = :reason "
     + "where t.memberId = :memberId and t.revokedAt is null")
-  int revokeAllByMemberId(@Param("memberId") String memberId, @Param("now") LocalDateTime now);
+  int revokeAllByMemberId(@Param("memberId") String memberId,
+                          @Param("now") LocalDateTime now,
+                          @Param("reason") RevokeReason reason);
 
   /**
    * 한 기기의 세션만 끊는다 (이슈 #200).
@@ -28,11 +31,12 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Stri
    * 기기를 짚어서 끊어야 한다.
    */
   @Modifying
-  @Query("update RefreshToken t set t.revokedAt = :now "
+  @Query("update RefreshToken t set t.revokedAt = :now, t.revokeReason = :reason "
     + "where t.memberId = :memberId and t.deviceId = :deviceId and t.revokedAt is null")
   int revokeByMemberIdAndDeviceId(@Param("memberId") String memberId,
                                   @Param("deviceId") String deviceId,
-                                  @Param("now") LocalDateTime now);
+                                  @Param("now") LocalDateTime now,
+                                  @Param("reason") RevokeReason reason);
 
   /**
    * 이 보호자의 <b>보호자 휴대폰</b> 세션만 끊는다 (다중 보호자 E34).
@@ -42,12 +46,13 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Stri
    * {@code device_id} 가 비어 있기 쉬워 NULL 도 보호자로 친다.
    */
   @Modifying
-  @Query("update RefreshToken t set t.revokedAt = :now "
+  @Query("update RefreshToken t set t.revokedAt = :now, t.revokeReason = :reason "
     + "where t.memberId = :memberId and t.revokedAt is null "
     + "and (t.deviceId is null or t.deviceId not like :elumiPattern)")
   int revokeGuardianSessions(@Param("memberId") String memberId,
                              @Param("elumiPattern") String elumiPattern,
-                             @Param("now") LocalDateTime now);
+                             @Param("now") LocalDateTime now,
+                             @Param("reason") RevokeReason reason);
 
   /** 회원 탈퇴 시 남은 세션 기록까지 지운다. */
   void deleteAllByMemberId(String memberId);

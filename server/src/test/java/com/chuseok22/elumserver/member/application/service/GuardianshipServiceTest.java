@@ -12,6 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -165,7 +166,8 @@ class GuardianshipServiceTest {
     guardianshipService.leave("A", "p1");
 
     assertThat(myPhone.getRevokedAt()).isNotNull();
-    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("A"), eq("elumi-l1"), any(LocalDateTime.class));
+    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(
+      eq("A"), eq("elumi-l1"), any(LocalDateTime.class), eq(RevokeReason.DEVICE_UNLINKED));
     // 연결 이력은 남긴다 — 끊긴 기록도 보여줘야 한다 (DeviceLink 설계)
     verify(deviceLinkRepository, never()).deleteAll(any());
   }
@@ -219,7 +221,8 @@ class GuardianshipServiceTest {
     guardianshipService.leave("A", "p1");
 
     verify(routineRepository).deleteAll(List.of(orphan));
-    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("A"), eq("elumi-l9"), any(LocalDateTime.class));
+    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(
+      eq("A"), eq("elumi-l9"), any(LocalDateTime.class), eq(RevokeReason.DEVICE_UNLINKED));
     verify(deviceLinkRepository).deleteAll(List.of(phone));
     verify(profileRepository).delete(p1);
   }

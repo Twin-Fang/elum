@@ -3,6 +3,8 @@ package com.chuseok22.elumserver.auth.infrastructure.entity;
 import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -59,6 +61,14 @@ public class RefreshToken extends BaseEntity {
   /** 회전이나 로그아웃으로 무효화된 시각. null이면 살아 있다. */
   private LocalDateTime revokedAt;
 
+  /**
+   * 끊긴 이유 (이슈 #360 D1). 재사용 감지는 {@link RevokeReason#ROTATED} 인 토큰에만 한다.
+   * V27 이전에 끊긴 행은 비어 있다 — 사유를 모르므로 탈취로 보지 않는다.
+   */
+  @Enumerated(EnumType.STRING)
+  @Column(name = "revoke_reason", length = 30)
+  private RevokeReason revokeReason;
+
   /** 회전으로 이 토큰을 대체한 토큰. 재사용 감지 시 체인을 따라 전부 끊는다. */
   private String replacedById;
 
@@ -66,5 +76,14 @@ public class RefreshToken extends BaseEntity {
 
   public boolean isUsable(LocalDateTime now) {
     return revokedAt == null && expiresAt.isAfter(now);
+  }
+
+  /** 살아 있으면 끊고 사유를 남긴다. 이미 끊긴 토큰은 처음 사유를 덮지 않는다 — 회전 흔적이 탈취 감지의 근거다. */
+  public void revoke(LocalDateTime now, RevokeReason reason) {
+    if (revokedAt != null) {
+      return;
+    }
+    revokedAt = now;
+    revokeReason = reason;
   }
 }

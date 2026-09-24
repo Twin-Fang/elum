@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.auth.application.service;
 
 import com.chuseok22.elumserver.auth.infrastructure.entity.RefreshToken;
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -30,9 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
  * 해시만 남긴다. 해시로 두면 DB가 통째로 새도 토큰 자체는 새지 않는다.
  *
  * <p><b>회전과 재사용 감지</b> — 갱신할 때마다 새 토큰을 주고 쓴 토큰은 즉시 끊는다.
- * 이미 끊긴 토큰이 다시 오면 누군가 복사본을 들고 있다는 뜻이므로 그 보호자의 보호자 휴대폰
+ * 회전으로 끊긴 토큰이 다시 오면 누군가 복사본을 들고 있다는 뜻이므로 그 보호자의 보호자 휴대폰
  * 세션을 끊는다(이룸이 휴대폰은 남긴다). 이룸이 휴대폰 토큰이면 그 휴대폰만 끊는다 (다중 보호자 E34).
  * 정상 사용자는 다시 로그인하면 되지만, 회전이 없으면 탈취를 영영 모른다.
+ *
+ * <p><b>폐기 사유</b> — 로그아웃·연결 끊기·정지처럼 다른 이유로 끊긴 토큰이 오면 401 만 준다 (#360 D1).
+ * 로그아웃 요청과 자동 갱신이 겹치면 정상 앱도 그 토큰을 한 번 더 보낸다.
  */
 @Slf4j
 @Service
@@ -84,25 +88,36 @@ public class RefreshTokenService {
     // 폐기는 별도 트랜잭션이다. 같은 트랜잭션이면 아래 예외에 롤백된다.
     if (linkId != null && !linkAccessValidator.isLinkActive(linkId)) {
       int revoked = refreshTokenRevoker.revokeDeviceInNewTransaction(
-        current.getMemberId(), current.getDeviceId(), now);
+        current.getMemberId(), current.getDeviceId(), now, RevokeReason.DEVICE_UNLINKED);
       log.info("끊긴 연결의 이룸이 휴대폰 갱신을 거절했습니다. memberId={}, deviceId={}, 끊은 세션={}",
         current.getMemberId(), current.getDeviceId(), revoked);
       throw new CustomException(ErrorCode.REFRESH_TOKEN_INVALID);
     }
 
-    // 이미 끊긴 토큰이 다시 왔다 = 복사본이 돌아다닌다.
+    // 회전으로 끊긴 토큰이 다시 왔다 = 복사본이 돌아다닌다.
+    // 정상 앱은 새 토큰을 받는 즉시 옛 것을 버리므로, 이 토큰을 다시 보낼 이유가 없다.
     //
     // 폐기는 **별도 트랜잭션**에서 해야 한다. 같은 트랜잭션에서 하면 바로 아래
     // 예외가 롤백을 일으켜 폐기가 되돌아간다 — 감지만 하고 세션은 살아 있게 된다.
     // 보호자 토큰이면 보호자 휴대폰들을, 이룸이 휴대폰 토큰이면 그 휴대폰만 끊는다 (다중 보호자 E34).
     // 둘은 따로 믿는 대상이라 한쪽이 새었다고 다른 쪽을 끊지 않는다.
-    if (current.getRevokedAt() != null) {
+    if (current.getRevokedAt() != null && current.getRevokeReason() == RevokeReason.ROTATED) {
       int revoked = linkId != null
-        ? refreshTokenRevoker.revokeDeviceInNewTransaction(current.getMemberId(), current.getDeviceId(), now)
+        ? refreshTokenRevoker.revokeDeviceInNewTransaction(
+            current.getMemberId(), current.getDeviceId(), now, RevokeReason.REUSE_DETECTED)
         : refreshTokenRevoker.revokeGuardianSessionsInNewTransaction(current.getMemberId(), now);
       log.warn("리프레시 토큰이 재사용되어 세션을 끊었습니다. memberId={}, 이룸이 휴대폰={}, 끊은 수={}",
         current.getMemberId(), linkId != null, revoked);
       throw new CustomException(ErrorCode.REFRESH_TOKEN_REUSED);
+    }
+
+    // 회전이 아닌 사유(로그아웃·연결 끊기·정지·강제 로그아웃·재사용 감지)로 끊긴 토큰은 그냥 거절한다 (#360 D1).
+    // 사유가 비었으면(V27 이전에 끊긴 행) 회전인지 로그아웃인지 몰라 역시 거절만 한다 — 모르는 신호로
+    // 다른 휴대폰까지 끊으면 D1 이 그대로 남는다. 끊긴 토큰은 어차피 쓸 수 없다.
+    if (current.getRevokedAt() != null) {
+      log.info("이미 끊긴 리프레시 토큰으로 갱신을 거절했습니다. memberId={}, 사유={}",
+        current.getMemberId(), current.getRevokeReason());
+      throw new CustomException(ErrorCode.REFRESH_TOKEN_INVALID);
     }
 
     if (!current.isUsable(now)) {
@@ -116,7 +131,7 @@ public class RefreshTokenService {
     String nextDeviceId = followHeader ? deviceId : current.getDeviceId();
     IssuedToken next = save(current.getMemberId(), nextDeviceId, current.getId());
 
-    current.setRevokedAt(now);
+    current.revoke(now, RevokeReason.ROTATED);
     current.setLastUsedAt(now);
     current.setReplacedById(next.entity().getId());
 
@@ -143,19 +158,18 @@ public class RefreshTokenService {
       RefreshToken cursor = start;
       // 하루 한 번 갱신해도 반년이면 180 개다. 체인이 꼬여 돌아도 여기서 멈춘다.
       for (int hops = 0; cursor != null && hops < MAX_CHAIN_HOPS; hops++) {
-        if (cursor.getRevokedAt() == null) {
-          cursor.setRevokedAt(now);
-        }
+        // 이미 회전으로 끊긴 앞 토큰은 사유를 덮지 않는다 — 그 복사본이 오면 여전히 탈취 신호다.
+        cursor.revoke(now, RevokeReason.LOGOUT);
         String nextId = cursor.getReplacedById();
         cursor = nextId == null ? null : refreshTokenRepository.findById(nextId).orElse(null);
       }
     });
   }
 
-  /** 회원 탈퇴·강제 로그아웃용. */
+  /** 계정 정지·강제 로그아웃용. 탈퇴는 토큰 행을 지운다. */
   @Transactional
-  public void revokeAll(String memberId) {
-    refreshTokenRepository.revokeAllByMemberId(memberId, LocalDateTime.now());
+  public void revokeAll(String memberId, RevokeReason reason) {
+    refreshTokenRepository.revokeAllByMemberId(memberId, LocalDateTime.now(), reason);
   }
 
   private IssuedToken save(String memberId, String deviceId, String previousId) {

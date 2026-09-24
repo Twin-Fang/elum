@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.auth.infrastructure.entity.RefreshToken;
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -22,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -107,6 +110,8 @@ class RefreshTokenServiceTest {
     assertThat(result.memberId()).isEqualTo("m1");
     assertThat(result.refreshToken()).isNotBlank();
     assertThat(previous.getRevokedAt()).isNotNull();
+    // 회전으로 끊겼다고 적어야 이 토큰이 다시 올 때 복사본(탈취)으로 볼 수 있다 (#360 D1).
+    assertThat(previous.getRevokeReason()).isEqualTo(RevokeReason.ROTATED);
     // 체인을 남겨야 재사용이 감지됐을 때 어디서 갈라졌는지 추적할 수 있다.
     assertThat(previous.getReplacedById()).isEqualTo("rt-1");
   }
@@ -116,6 +121,7 @@ class RefreshTokenServiceTest {
   void e34_rotate_reusedGuardianToken_revokesGuardianSessionsOnly() {
     RefreshToken used = livingToken();
     used.setRevokedAt(LocalDateTime.now().minusMinutes(5));
+    used.setRevokeReason(RevokeReason.ROTATED);
     when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(used));
 
     assertThatThrownBy(() -> refreshTokenService.rotate("raw-used", "device-1"))
@@ -126,7 +132,7 @@ class RefreshTokenServiceTest {
     // 폐기는 별도 트랜잭션으로 나가야 한다. 같은 트랜잭션이면 아래 예외에 롤백돼
     // 감지만 하고 세션이 살아남는다.
     verify(refreshTokenRevoker).revokeGuardianSessionsInNewTransaction(eq("m1"), any(LocalDateTime.class));
-    verify(refreshTokenRevoker, never()).revokeDeviceInNewTransaction(anyString(), anyString(), any());
+    verify(refreshTokenRevoker, never()).revokeDeviceInNewTransaction(anyString(), anyString(), any(), any());
     verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
   }
 
@@ -135,6 +141,7 @@ class RefreshTokenServiceTest {
   void e34_rotate_reusedElumiToken_revokesThatPhoneOnly() {
     RefreshToken used = elumiToken();
     used.setRevokedAt(LocalDateTime.now().minusMinutes(5));
+    used.setRevokeReason(RevokeReason.ROTATED);
     when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(used));
     when(linkAccessValidator.isLinkActive("l1")).thenReturn(true);
 
@@ -143,8 +150,80 @@ class RefreshTokenServiceTest {
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.REFRESH_TOKEN_REUSED));
 
-    verify(refreshTokenRevoker).revokeDeviceInNewTransaction(eq("m1"), eq("elumi-l1"), any(LocalDateTime.class));
+    verify(refreshTokenRevoker).revokeDeviceInNewTransaction(
+      eq("m1"), eq("elumi-l1"), any(LocalDateTime.class), eq(RevokeReason.REUSE_DETECTED));
     verify(refreshTokenRevoker, never()).revokeGuardianSessionsInNewTransaction(anyString(), any());
+  }
+
+  @Test
+  @DisplayName("D1 로그아웃으로 끊긴 토큰이 다시 오면 401 만 준다 — 같은 보호자의 다른 휴대폰 세션은 그대로다")
+  void d1_rotate_logoutRevokedToken_rejectsWithoutRevokingOthers() {
+    RefreshToken loggedOut = livingToken();
+    loggedOut.setRevokedAt(LocalDateTime.now().minusMinutes(1));
+    loggedOut.setRevokeReason(RevokeReason.LOGOUT);
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(loggedOut));
+
+    assertThatThrownBy(() -> refreshTokenService.rotate("raw-logged-out", null))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.REFRESH_TOKEN_INVALID));
+
+    // 로그아웃 요청과 자동 갱신이 겹치면 정상 앱도 이 토큰을 한 번 더 보낸다. 탈취 신호가 아니다.
+    verify(refreshTokenRevoker, never()).revokeGuardianSessionsInNewTransaction(anyString(), any());
+    verify(refreshTokenRevoker, never()).revokeDeviceInNewTransaction(anyString(), anyString(), any(), any());
+    verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @EnumSource(value = RevokeReason.class, names = "ROTATED", mode = EnumSource.Mode.EXCLUDE)
+  @DisplayName("D1 회전이 아닌 사유로 끊긴 토큰은 재사용으로 보지 않는다 — 401 만 준다")
+  void d1_rotate_nonRotationRevokedToken_rejectsOnly(RevokeReason reason) {
+    RefreshToken revoked = livingToken();
+    revoked.setRevokedAt(LocalDateTime.now().minusMinutes(1));
+    revoked.setRevokeReason(reason);
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(revoked));
+
+    assertThatThrownBy(() -> refreshTokenService.rotate("raw-revoked", null))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.REFRESH_TOKEN_INVALID));
+
+    verify(refreshTokenRevoker, never()).revokeGuardianSessionsInNewTransaction(anyString(), any());
+    verify(refreshTokenRevoker, never()).revokeDeviceInNewTransaction(anyString(), anyString(), any(), any());
+  }
+
+  @Test
+  @DisplayName("D1 사유가 없는 옛 폐기 토큰(V27 이전)은 401 만 준다 — 회전인지 로그아웃인지 몰라 세션을 끊지 않는다")
+  void d1_rotate_legacyRevokedTokenWithoutReason_rejectsOnly() {
+    RefreshToken legacy = livingToken();
+    legacy.setRevokedAt(LocalDateTime.now().minusDays(3));
+    legacy.setRevokeReason(null);
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(legacy));
+
+    assertThatThrownBy(() -> refreshTokenService.rotate("raw-legacy", null))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.REFRESH_TOKEN_INVALID));
+
+    verify(refreshTokenRevoker, never()).revokeGuardianSessionsInNewTransaction(anyString(), any());
+    verify(refreshTokenRevoker, never()).revokeDeviceInNewTransaction(anyString(), anyString(), any(), any());
+  }
+
+  @Test
+  @DisplayName("D1 로그아웃한 이룸이 휴대폰 토큰이 다시 와도 401 만 준다 — 그 휴대폰을 다시 끊으러 가지 않는다")
+  void d1_rotate_logoutRevokedElumiToken_rejectsOnly() {
+    RefreshToken loggedOut = elumiToken();
+    loggedOut.setRevokedAt(LocalDateTime.now().minusMinutes(1));
+    loggedOut.setRevokeReason(RevokeReason.LOGOUT);
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(loggedOut));
+    when(linkAccessValidator.isLinkActive("l1")).thenReturn(true);
+
+    assertThatThrownBy(() -> refreshTokenService.rotate("raw-elumi", null))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.REFRESH_TOKEN_INVALID));
+
+    verify(refreshTokenRevoker, never()).revokeDeviceInNewTransaction(anyString(), anyString(), any(), any());
   }
 
   @Test
@@ -156,8 +235,10 @@ class RefreshTokenServiceTest {
     refreshTokenService.revokeSession("raw-old");
 
     assertThat(current.getRevokedAt()).isNotNull();
-    verify(refreshTokenRepository, never()).revokeAllByMemberId(anyString(), any());
-    verify(refreshTokenRepository, never()).revokeByMemberIdAndDeviceId(anyString(), anyString(), any());
+    // 로그아웃이라고 적어야 이 토큰이 한 번 더 와도 다른 휴대폰까지 끊지 않는다 (#360 D1).
+    assertThat(current.getRevokeReason()).isEqualTo(RevokeReason.LOGOUT);
+    verify(refreshTokenRepository, never()).revokeAllByMemberId(anyString(), any(), any());
+    verify(refreshTokenRepository, never()).revokeByMemberIdAndDeviceId(anyString(), anyString(), any(), any());
   }
 
   @Test
@@ -165,6 +246,7 @@ class RefreshTokenServiceTest {
   void e33_revokeSession_staleToken_followsRotationChain() {
     RefreshToken stale = livingToken();
     stale.setRevokedAt(LocalDateTime.now().minusDays(1));
+    stale.setRevokeReason(RevokeReason.ROTATED);
     stale.setReplacedById("rt-live");
     RefreshToken live = livingToken();
     live.setId("rt-live");
@@ -174,6 +256,17 @@ class RefreshTokenServiceTest {
     refreshTokenService.revokeSession("raw-stale");
 
     assertThat(live.getRevokedAt()).isNotNull();
+    assertThat(live.getRevokeReason()).isEqualTo(RevokeReason.LOGOUT);
+    // 이미 회전으로 끊긴 앞 토큰은 사유를 덮지 않는다 — 그 복사본이 오면 여전히 탈취 신호다.
+    assertThat(stale.getRevokeReason()).isEqualTo(RevokeReason.ROTATED);
+  }
+
+  @Test
+  @DisplayName("계정 전체를 끊을 때 부른 쪽이 준 사유를 함께 남긴다")
+  void revokeAll_recordsGivenReason() {
+    refreshTokenService.revokeAll("m1", RevokeReason.FORCE_LOGOUT);
+
+    verify(refreshTokenRepository).revokeAllByMemberId(eq("m1"), any(LocalDateTime.class), eq(RevokeReason.FORCE_LOGOUT));
   }
 
   @Test
@@ -272,7 +365,8 @@ class RefreshTokenServiceTest {
         .isEqualTo(ErrorCode.REFRESH_TOKEN_INVALID));
 
     // 예외에 롤백되지 않도록 별도 트랜잭션으로 끊는다. 기기만 짚는다 — 계정 전체면 보호자까지 로그아웃된다.
-    verify(refreshTokenRevoker).revokeDeviceInNewTransaction(eq("m1"), eq("elumi-l1"), any(LocalDateTime.class));
+    verify(refreshTokenRevoker).revokeDeviceInNewTransaction(
+      eq("m1"), eq("elumi-l1"), any(LocalDateTime.class), eq(RevokeReason.DEVICE_UNLINKED));
     verify(refreshTokenRevoker, never()).revokeGuardianSessionsInNewTransaction(anyString(), any(LocalDateTime.class));
     verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
   }

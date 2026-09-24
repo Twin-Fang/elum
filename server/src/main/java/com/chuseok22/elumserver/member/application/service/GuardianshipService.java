@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -171,7 +172,7 @@ public class GuardianshipService {
       // 연결할 때 서버가 넣으므로 비어 있을 수 없지만, 비었으면 규칙대로 만든다 (DeviceLinkService.revoke 와 같다).
       String deviceId = phone.getLinkedDeviceId() != null
         ? phone.getLinkedDeviceId() : ElumiDeviceId.of(phone.getId());
-      refreshTokenRepository.revokeByMemberIdAndDeviceId(phone.getMemberId(), deviceId, now);
+      refreshTokenRepository.revokeByMemberIdAndDeviceId(phone.getMemberId(), deviceId, now, RevokeReason.DEVICE_UNLINKED);
     }
   }
 }
