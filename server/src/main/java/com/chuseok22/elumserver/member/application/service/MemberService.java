@@ -146,9 +146,13 @@ public class MemberService {
     member.setWithdrawnAt(now);
     // 이미 발급된 액세스 토큰도 즉시 막는다 (S4). 되살아나도 이 값은 그대로라 탈퇴 전 토큰은 계속 막힌다.
     member.setTokenInvalidBefore(now);
-    // 재가입 판별에 필요 없는 활동 기록은 비운다 (최소 보관).
+    // 재가입 판별에 필요 없는 활동 기록은 비운다 (최소 보관). 방침 4조 보관 항목에 없는 값이다.
+    // 로그인 횟수는 not null 열이라 0 으로 둔다 — 되살리면 로그인하면서 1 부터 다시 센다.
     member.setLastLoginAt(null);
     member.setLastActivityAt(null);
+    member.setLoginCount(0);
+    // 남기는 값: 아이디·비밀번호 변환값(1년 안 같은 아이디로 복원), 동의 기록(값·시각·버전 — 동의 증빙).
+    // 둘 다 방침 4조 보관 항목이다. 여기서 남기는 값을 늘리면 방침도 함께 고친다.
   }
 
   /** 탈퇴한 계정은 없는 회원으로 본다 — 탈퇴 전 행을 지우던 때와 같은 응답이다. */

@@ -19,7 +19,11 @@ void main() {
     expect(flat, contains('탈퇴일로부터 1년간 보관한 뒤 파기합니다'));
     expect(flat, contains('소셜 로그인 제공자와 그 회원 식별번호, 서비스 아이디'));
     expect(flat, contains('AI 기능 이용 기록(이용 일시·횟수)'));
-    expect(flat, contains('부정 이용 방지 외의 목적으로 이용하지 않습니다'));
+    expect(flat, contains('서비스 아이디로 가입한 경우 비밀번호의 변환값'));
+    expect(flat, contains('약관 동의 기록(동의 여부·동의 일시·동의한 문서 버전)'));
+    expect(flat, contains('무엇에 언제 동의했는지 증빙하기 위해'));
+    expect(flat, contains('위에 적은 목적 외에는 이용하지 않습니다'));
+    expect(flat, contains('최근 로그인 일시와 로그인 횟수'));
     expect(flat, contains('이전 계정이 빈 상태로 복원되어'));
     expect(flat, contains('즉시 삭제를 요구하시면 지체 없이 파기합니다'));
     // 탈퇴하면 계정까지 곧바로 지운다는 옛 약속이 남으면 동작과 어긋난다.
@@ -30,6 +34,17 @@ void main() {
     expect(flat, contains('이 방침은 2026년 10월 1일부터 적용됩니다.'));
     expect(flat, contains('2026년 9월 23일 공고, 9월 30일 시행'));
     expect(flat, contains('2026년 9월 24일 공고, 10월 1일 시행'));
+  });
+
+  test('보관 정보는 4조 안의 소제목으로 묶인다', () {
+    final blocks = parseConsentBody(privacy);
+    final sub = blocks.indexWhere((b) =>
+        b.kind == ConsentBlockKind.subsection && b.text == '탈퇴 후 1년간 보관하는 정보');
+    final s4 = blocks.indexWhere((b) => b.text == '4. 보유 기간');
+    final s5 = blocks.indexWhere((b) => b.text == '5. 보호자의 권리');
+
+    expect(sub, greaterThan(s4));
+    expect(sub, lessThan(s5));
   });
 
   test('줄바꿈 자리가 조항 제목으로 잘못 읽히지 않는다', () {

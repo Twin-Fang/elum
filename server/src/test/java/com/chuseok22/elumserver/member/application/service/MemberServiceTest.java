@@ -81,8 +81,11 @@ class MemberServiceTest {
     member.setStatus(MemberStatus.ACTIVE);
     member.setLastLoginAt(LocalDateTime.now().minusHours(1));
     member.setLastActivityAt(LocalDateTime.now().minusMinutes(5));
+    member.setLoginCount(12);
+    member.setPassword("{bcrypt}hash");
     member.setTermsAgreed(true);
     member.setConsentedAt(LocalDateTime.now().minusDays(30));
+    member.setConsentVersion("2026-09-24");
     return member;
   }
 
@@ -110,11 +113,16 @@ class MemberServiceTest {
     assertThat(member.getWithdrawnAt()).isAfterOrEqualTo(before);
     // 재가입을 알아볼 기준이라 행은 남긴다. 지우면 같은 소셜 계정이 새 계정으로 들어온다.
     verify(memberRepository, never()).delete(any(Member.class));
-    // 동의 값은 남긴다 — 무엇에 동의했었는지의 증빙이다. 되살릴 때 비운다.
+    // 동의 기록(값·시각·버전)은 남긴다 — 무엇에 동의했었는지의 증빙이다. 되살릴 때 비운다. 방침 4조 보관 항목.
     assertThat(member.getTermsAgreed()).isTrue();
-    // 재가입 판별에 필요 없는 활동 기록은 비운다 (최소 보관).
+    assertThat(member.getConsentedAt()).isNotNull();
+    assertThat(member.getConsentVersion()).isEqualTo("2026-09-24");
+    // 아이디 로그인 비밀번호 변환값은 남긴다 — 1년 안에 같은 아이디로 오면 확인해 되살려야 한다. 방침 4조 보관 항목.
+    assertThat(member.getPassword()).isEqualTo("{bcrypt}hash");
+    // 재가입 판별에 필요 없는 활동 기록은 비운다 (최소 보관). 방침 4조가 보관 항목으로 적지 않은 값이다.
     assertThat(member.getLastLoginAt()).isNull();
     assertThat(member.getLastActivityAt()).isNull();
+    assertThat(member.getLoginCount()).isZero();
   }
 
   @Test

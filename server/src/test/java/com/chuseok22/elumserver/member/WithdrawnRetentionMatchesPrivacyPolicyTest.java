@@ -36,16 +36,23 @@ class WithdrawnRetentionMatchesPrivacyPolicyTest {
   }
 
   @Test
-  @DisplayName("방침이 보관 항목·목적·다른 목적 이용 금지·복원·즉시 삭제를 모두 적는다")
+  @DisplayName("방침이 보관 항목·목적·다른 목적 이용 금지·복원·즉시 삭제와 탈퇴 때 비우는 값을 모두 적는다")
   void policyStatesWhatIsKeptAndWhy() throws IOException {
     String flat = privacy().replaceAll("\\s+", " ");
     assertThat(flat)
       // 보관 항목 — 코드가 남기는 것과 같아야 한다 (소셜 신원 · 아이디 · AI 호출 기록의 회원 식별자)
       .contains("소셜 로그인 제공자와 그 회원 식별번호, 서비스 아이디")
       .contains("AI 기능 이용 기록(이용 일시·횟수)")
+      // 탈퇴 때 비우지 않는 값도 항목과 목적을 적는다 — MemberService.withdraw 가 남기는 값과 같아야 한다
+      .contains("서비스 아이디로 가입한 경우 비밀번호의 변환값")
+      .contains("약관 동의 기록(동의 여부·동의 일시·동의한 문서 버전)")
       // 목적
       .contains("무료 이용 한도를 탈퇴와 재가입으로 되풀이해 받는 부정 이용을 막기 위해")
-      .contains("부정 이용 방지 외의 목적으로 이용하지 않습니다")
+      .contains("본인인지 확인하고 이전 계정을 복원하기 위해")
+      .contains("무엇에 언제 동의했는지 증빙하기 위해")
+      .contains("위에 적은 목적 외에는 이용하지 않습니다")
+      // 탈퇴 때 비우는 활동 기록
+      .contains("최근 로그인 일시와 로그인 횟수")
       // 재가입 시 빈 계정 복원
       .contains("이전 계정이 빈 상태로 복원되어")
       // 즉시 삭제 요구
