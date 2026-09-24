@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-24T08:58:26Z",
-    "currentVersion": "1.41.0",
+    "lastUpdated": "2026-09-24T12:16:09Z",
+    "currentVersion": "1.41.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 170
+    "totalReleases": 171
   },
   "releases": [
+    {
+      "version": "1.41.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-24",
+      "pr_number": 409,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 운영 화면의 AI 사용 비용 통계가 더 정확해졌어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "운영 화면의 AI 사용 비용 통계가 더 정확해졌어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.41.0",
       "project_type": "flutter",
