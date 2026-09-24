@@ -54,7 +54,7 @@ public class MemberService {
     Profile current = caller.profileId() != null
       ? profileAccessGuard.profileFor(caller, ProfileAction.VIEW)
       : profiles.stream().findFirst().orElse(null);
-    return MemberResponse.from(member, current, entitlementService.snapshot(caller.memberId()));
+    return MemberResponse.from(member, current, profiles, entitlementService.snapshot(caller.memberId()));
   }
 
   // 이룸이 정보는 연결된 보호자 누구나 고친다. 마지막에 바꾼 값이 남는다 (명세 2장 · E23).
@@ -63,7 +63,8 @@ public class MemberService {
     Member member = requireMember(caller.memberId());
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     profile.setNickname(request.nickname());
-    return MemberResponse.from(member, profile, entitlementService.snapshot(caller.memberId()));
+    return MemberResponse.from(
+      member, profile, profileAccessGuard.profilesOf(caller), entitlementService.snapshot(caller.memberId()));
   }
 
   @Transactional
@@ -72,7 +73,8 @@ public class MemberService {
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     profile.getSupportGoals().clear();
     profile.getSupportGoals().addAll(request.supportGoals());
-    return MemberResponse.from(member, profile, entitlementService.snapshot(caller.memberId()));
+    return MemberResponse.from(
+      member, profile, profileAccessGuard.profilesOf(caller), entitlementService.snapshot(caller.memberId()));
   }
 
   @Transactional
@@ -80,7 +82,8 @@ public class MemberService {
     Member member = requireMember(caller.memberId());
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     profile.setCharacter(request.character());
-    return MemberResponse.from(member, profile, entitlementService.snapshot(caller.memberId()));
+    return MemberResponse.from(
+      member, profile, profileAccessGuard.profilesOf(caller), entitlementService.snapshot(caller.memberId()));
   }
 
   public MemberConsentResponse getConsents(String memberId) {

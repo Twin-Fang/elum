@@ -22,6 +22,7 @@ import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRe
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
+import com.chuseok22.elumserver.member.application.dto.response.ProfileSummaryResponse;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
@@ -296,6 +297,7 @@ class MemberServiceTest {
     profile.setMember(member);
     when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
     when(profileAccessGuard.profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE)).thenReturn(profile);
+    when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of(profile));
 
     MemberResponse response =
       memberService.updateCharacter(Caller.guardian("member-1"), new MemberCharacterUpdateRequest(CharacterType.LULU));
@@ -326,6 +328,7 @@ class MemberServiceTest {
 
     assertThat(response.nickname()).isNull();
     assertThat(response.totalStars()).isZero();
+    assertThat(response.profiles()).isEmpty();
   }
 
   @Test
@@ -341,5 +344,42 @@ class MemberServiceTest {
     when(profileAccessGuard.profileFor(caller, ProfileAction.VIEW)).thenReturn(p2);
 
     assertThat(memberService.getMyInfo(caller).nickname()).isEqualTo("바다");
+  }
+
+  @Test
+  @DisplayName("내 정보에 연결된 이룸이 목록이 붙는다 — 앱이 이룸이를 고를 때 쓴다 (명세 4-4)")
+  void getMyInfo_listsConnectedProfiles() {
+    Member member = activeMember("member-1");
+    Profile p1 = new Profile();
+    p1.setId("p1");
+    p1.setNickname("하늘");
+    p1.setCharacter(CharacterType.LULU);
+    Profile p2 = new Profile();
+    p2.setId("p2");
+    p2.setNickname("바다");
+    p2.setCharacter(CharacterType.POPO);
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of(p1, p2));
+
+    MemberResponse response = memberService.getMyInfo(Caller.guardian("member-1"));
+
+    // 기존 필드는 가장 먼저 연결된 이룸이 그대로 — 지금 앱이 보는 값
+    assertThat(response.nickname()).isEqualTo("하늘");
+    assertThat(response.profiles()).containsExactly(
+      new ProfileSummaryResponse("p1", "하늘", CharacterType.LULU),
+      new ProfileSummaryResponse("p2", "바다", CharacterType.POPO));
+  }
+
+  @Test
+  @DisplayName("이룸이 휴대폰의 내 정보에는 그 연결의 이룸이 하나만 보인다 — 붙여 준 보호자의 다른 이룸이를 흘리지 않는다")
+  void getMyInfo_elumiPhone_listsOnlyLinkedProfile() {
+    Member member = activeMember("member-1");
+    Profile linked = new Profile();
+    linked.setId("p2");
+    Caller phone = Caller.elumi("member-1", "l1");
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(profileAccessGuard.profilesOf(phone)).thenReturn(List.of(linked));
+
+    assertThat(memberService.getMyInfo(phone).profiles()).extracting(ProfileSummaryResponse::id).containsExactly("p2");
   }
 }

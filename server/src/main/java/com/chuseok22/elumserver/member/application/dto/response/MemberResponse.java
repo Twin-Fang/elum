@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Schema(description = "보호자 회원 정보 응답")
@@ -39,19 +40,25 @@ public record MemberResponse(
 
   @Schema(description = "이 계정이 지금 쓸 수 있는 것들. 화면마다 따로 묻지 않도록 한 번에 내려준다. "
     + "수치 한도는 -1이면 무제한이다. 기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.")
-  EntitlementSnapshot entitlements
+  EntitlementSnapshot entitlements,
+
+  @Schema(description = "연결된 이룸이 목록, 먼저 연결된 차례. 헤더 없이 부르면 첫 번째가 위의 당사자 항목이다. "
+    + "이룸이 휴대폰에는 그 연결의 이룸이 하나만 내려간다. 기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.")
+  List<ProfileSummaryResponse> profiles
 ) {
 
   /**
-   * 계정과 프로필을 합쳐 기존 응답 형식 그대로 만든다.
+   * 계정과 프로필을 합쳐 기존 응답 형식 그대로 만들고, 연결된 이룸이 목록을 끝에 더한다 (다중 보호자 4-4).
    *
-   * <p>필드가 두 엔티티로 갈렸지만 **응답 JSON은 바뀌지 않는다.** 이미 배포된 앱이
+   * <p>필드가 두 엔티티로 갈렸지만 **기존 필드의 JSON 은 바뀌지 않는다.** 이미 배포된 앱이
    * 이 형식을 쓰고 있어, 내부 구조 변경이 클라이언트에 새어 나가면 안 된다.
    *
-   * <p>[profile]이 없으면 당사자 항목을 비워 응답한다. 가입 직후 프로필 생성에
-   * 실패한 예외적인 상태에서도 화면이 죽지 않게 한다.
+   * <p>[profile]이 없으면 당사자 항목을 비워 응답한다. 연결된 이룸이가 없는 상태(E29)에서도
+   * 화면이 죽지 않게 한다.
    */
-  public static MemberResponse from(Member member, Profile profile, EntitlementSnapshot entitlements) {
+  public static MemberResponse from(
+    Member member, Profile profile, List<Profile> profiles, EntitlementSnapshot entitlements
+  ) {
     return new MemberResponse(
       member.getId(),
       member.getUsername(),
@@ -61,7 +68,8 @@ public record MemberResponse(
       profile == null ? null : profile.getCharacter(),
       member.hasRequiredConsents(),
       member.getCreatedAt(),
-      entitlements
+      entitlements,
+      profiles.stream().map(ProfileSummaryResponse::from).toList()
     );
   }
 }
