@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-24T04:41:06Z",
-    "currentVersion": "1.38.3",
+    "lastUpdated": "2026-09-24T04:50:52Z",
+    "currentVersion": "1.39.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 167
+    "totalReleases": 168
   },
   "releases": [
+    {
+      "version": "1.39.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-24",
+      "pr_number": 404,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 여러 보호자가 한 이룸이를 함께 돌볼 수 있는 기반을 마련했어요\n  * 이룸이의 별이 동시에 여러 번 쌓여도 정확하게 셈해요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "여러 보호자가 한 이룸이를 함께 돌볼 수 있는 기반을 마련했어요",
+            "이룸이의 별이 동시에 여러 번 쌓여도 정확하게 셈해요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.38.3",
       "project_type": "flutter",
