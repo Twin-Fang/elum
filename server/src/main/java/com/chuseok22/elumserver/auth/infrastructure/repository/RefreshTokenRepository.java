@@ -34,6 +34,21 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Stri
                                   @Param("deviceId") String deviceId,
                                   @Param("now") LocalDateTime now);
 
+  /**
+   * 이 보호자의 <b>보호자 휴대폰</b> 세션만 끊는다 (다중 보호자 E34).
+   *
+   * <p>재사용이 감지되면 그 보호자의 세션을 끊는데, 그가 붙여 준 이룸이 휴대폰까지 끊으면 이룸이가
+   * 일과를 못 본다. 이룸이 휴대폰은 따로 믿는 대상이다. 앱이 기기 값을 안 보내 보호자 세션은
+   * {@code device_id} 가 비어 있기 쉬워 NULL 도 보호자로 친다.
+   */
+  @Modifying
+  @Query("update RefreshToken t set t.revokedAt = :now "
+    + "where t.memberId = :memberId and t.revokedAt is null "
+    + "and (t.deviceId is null or t.deviceId not like :elumiPattern)")
+  int revokeGuardianSessions(@Param("memberId") String memberId,
+                             @Param("elumiPattern") String elumiPattern,
+                             @Param("now") LocalDateTime now);
+
   /** 회원 탈퇴 시 남은 세션 기록까지 지운다. */
   void deleteAllByMemberId(String memberId);
 

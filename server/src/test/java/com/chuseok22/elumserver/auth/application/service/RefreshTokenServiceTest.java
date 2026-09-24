@@ -112,8 +112,8 @@ class RefreshTokenServiceTest {
   }
 
   @Test
-  @DisplayName("이미 쓴 토큰이 다시 오면 탈취로 보고 그 계정의 세션을 모두 끊는다")
-  void rotate_reusedToken_revokesEverySession() {
+  @DisplayName("E34 보호자 토큰이 재사용되면 그 보호자의 보호자 휴대폰 세션을 끊는다 — 그가 붙인 이룸이 휴대폰은 남긴다")
+  void e34_rotate_reusedGuardianToken_revokesGuardianSessionsOnly() {
     RefreshToken used = livingToken();
     used.setRevokedAt(LocalDateTime.now().minusMinutes(5));
     when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(used));
@@ -125,8 +125,65 @@ class RefreshTokenServiceTest {
 
     // 폐기는 별도 트랜잭션으로 나가야 한다. 같은 트랜잭션이면 아래 예외에 롤백돼
     // 감지만 하고 세션이 살아남는다.
-    verify(refreshTokenRevoker).revokeAllInNewTransaction(eq("m1"), any(LocalDateTime.class));
+    verify(refreshTokenRevoker).revokeGuardianSessionsInNewTransaction(eq("m1"), any(LocalDateTime.class));
+    verify(refreshTokenRevoker, never()).revokeDeviceInNewTransaction(anyString(), anyString(), any());
     verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
+  }
+
+  @Test
+  @DisplayName("E34 이룸이 휴대폰 토큰이 재사용되면 그 휴대폰 세션만 끊는다 — 보호자 휴대폰은 따로 믿는다")
+  void e34_rotate_reusedElumiToken_revokesThatPhoneOnly() {
+    RefreshToken used = elumiToken();
+    used.setRevokedAt(LocalDateTime.now().minusMinutes(5));
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(used));
+    when(linkAccessValidator.isLinkActive("l1")).thenReturn(true);
+
+    assertThatThrownBy(() -> refreshTokenService.rotate("raw-elumi", null))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.REFRESH_TOKEN_REUSED));
+
+    verify(refreshTokenRevoker).revokeDeviceInNewTransaction(eq("m1"), eq("elumi-l1"), any(LocalDateTime.class));
+    verify(refreshTokenRevoker, never()).revokeGuardianSessionsInNewTransaction(anyString(), any());
+  }
+
+  @Test
+  @DisplayName("E33 로그아웃은 넘어온 토큰의 기기 세션만 끊는다 — 계정 전체를 끊지 않는다")
+  void e33_revokeSession_revokesOnlyThatDevice() {
+    RefreshToken current = livingToken();
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(current));
+
+    refreshTokenService.revokeSession("raw-old");
+
+    assertThat(current.getRevokedAt()).isNotNull();
+    verify(refreshTokenRepository, never()).revokeAllByMemberId(anyString(), any());
+    verify(refreshTokenRepository, never()).revokeByMemberIdAndDeviceId(anyString(), anyString(), any());
+  }
+
+  @Test
+  @DisplayName("E33 옛 토큰으로 로그아웃해도 그 기기의 살아 있는 토큰까지 따라가 끊는다 — 앱은 기기 값을 보내지 않는다")
+  void e33_revokeSession_staleToken_followsRotationChain() {
+    RefreshToken stale = livingToken();
+    stale.setRevokedAt(LocalDateTime.now().minusDays(1));
+    stale.setReplacedById("rt-live");
+    RefreshToken live = livingToken();
+    live.setId("rt-live");
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(stale));
+    when(refreshTokenRepository.findById("rt-live")).thenReturn(Optional.of(live));
+
+    refreshTokenService.revokeSession("raw-stale");
+
+    assertThat(live.getRevokedAt()).isNotNull();
+  }
+
+  @Test
+  @DisplayName("모르는 토큰으로 로그아웃하면 아무 일도 없다")
+  void revokeSession_unknownToken_noop() {
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.empty());
+
+    refreshTokenService.revokeSession("raw-unknown");
+
+    verify(refreshTokenRepository, never()).findById(anyString());
   }
 
   @Test
@@ -142,7 +199,7 @@ class RefreshTokenServiceTest {
         .isEqualTo(ErrorCode.REFRESH_TOKEN_INVALID));
 
     // 만료는 정상적인 수명 종료다. 탈취로 보고 계정을 끊으면 안 된다.
-    verify(refreshTokenRevoker, never()).revokeAllInNewTransaction(anyString(), any(LocalDateTime.class));
+    verify(refreshTokenRevoker, never()).revokeGuardianSessionsInNewTransaction(anyString(), any(LocalDateTime.class));
   }
 
   @Test
@@ -216,7 +273,7 @@ class RefreshTokenServiceTest {
 
     // 예외에 롤백되지 않도록 별도 트랜잭션으로 끊는다. 기기만 짚는다 — 계정 전체면 보호자까지 로그아웃된다.
     verify(refreshTokenRevoker).revokeDeviceInNewTransaction(eq("m1"), eq("elumi-l1"), any(LocalDateTime.class));
-    verify(refreshTokenRevoker, never()).revokeAllInNewTransaction(anyString(), any(LocalDateTime.class));
+    verify(refreshTokenRevoker, never()).revokeGuardianSessionsInNewTransaction(anyString(), any(LocalDateTime.class));
     verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
   }
 
@@ -234,7 +291,7 @@ class RefreshTokenServiceTest {
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.REFRESH_TOKEN_INVALID));
 
-    verify(refreshTokenRevoker, never()).revokeAllInNewTransaction(anyString(), any(LocalDateTime.class));
+    verify(refreshTokenRevoker, never()).revokeGuardianSessionsInNewTransaction(anyString(), any(LocalDateTime.class));
   }
 
   @Test

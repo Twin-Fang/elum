@@ -136,7 +136,10 @@ public class AuthService {
   }
 
   /**
-   * 로그아웃. 해당 계정의 리프레시 토큰을 모두 끊는다.
+   * 로그아웃. <b>그 기기의 세션만</b> 끊는다 (다중 보호자 E33).
+   *
+   * <p>같은 보호자의 다른 휴대폰과 그가 붙인 이룸이 휴대폰은 그대로다. 이룸이 휴대폰이 로그아웃해도
+   * 보호자 휴대폰 세션을 끊지 않는다 — 두 토큰의 주인이 같은 보호자라 예전에는 함께 끊겼다.
    *
    * <p>액세스 토큰은 만료 전까지 살아 있다. 무효화하려면 서버가 모든 요청마다 DB를
    * 확인해야 해서 stateless의 이점이 사라진다. 그 대신 액세스를 짧게 두고,
@@ -144,6 +147,6 @@ public class AuthService {
    */
   @Transactional
   public void logout(String refreshToken) {
-    refreshTokenService.revokeByToken(refreshToken);
+    refreshTokenService.revokeSession(refreshToken);
   }
 }

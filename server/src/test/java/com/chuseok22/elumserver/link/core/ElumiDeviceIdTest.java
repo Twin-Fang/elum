@@ -21,4 +21,11 @@ class ElumiDeviceIdTest {
     assertThat(ElumiDeviceId.linkIdOf(null)).isNull();
     assertThat(ElumiDeviceId.linkIdOf("ELUMI-l1")).isNull();
   }
+
+  @Test
+  @DisplayName("이룸이 휴대폰 기기 값 전체를 고르는 LIKE 패턴 — 만드는 규칙과 같은 접두어다")
+  void likePattern_matchesGeneratedValues() {
+    assertThat(ElumiDeviceId.LIKE_PATTERN).isEqualTo("elumi-%");
+    assertThat(ElumiDeviceId.of("l1")).startsWith(ElumiDeviceId.LIKE_PATTERN.replace("%", ""));
+  }
 }

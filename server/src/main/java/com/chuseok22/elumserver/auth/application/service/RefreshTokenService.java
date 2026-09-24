@@ -30,8 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
  * 해시만 남긴다. 해시로 두면 DB가 통째로 새도 토큰 자체는 새지 않는다.
  *
  * <p><b>회전과 재사용 감지</b> — 갱신할 때마다 새 토큰을 주고 쓴 토큰은 즉시 끊는다.
- * 이미 끊긴 토큰이 다시 오면 누군가 복사본을 들고 있다는 뜻이므로 그 계정의 모든 토큰을
- * 끊는다. 정상 사용자는 다시 로그인하면 되지만, 회전이 없으면 탈취를 영영 모른다.
+ * 이미 끊긴 토큰이 다시 오면 누군가 복사본을 들고 있다는 뜻이므로 그 보호자의 보호자 휴대폰
+ * 세션을 끊는다(이룸이 휴대폰은 남긴다). 이룸이 휴대폰 토큰이면 그 휴대폰만 끊는다 (다중 보호자 E34).
+ * 정상 사용자는 다시 로그인하면 되지만, 회전이 없으면 탈취를 영영 모른다.
  */
 @Slf4j
 @Service
@@ -40,6 +41,8 @@ public class RefreshTokenService {
 
   private static final SecureRandom RANDOM = new SecureRandom();
   private static final int TOKEN_BYTES = 48;
+  /// 로그아웃이 회전 체인을 따라가는 최대 길이. 꼬인 체인에서 무한히 돌지 않게 한다.
+  private static final int MAX_CHAIN_HOPS = 500;
 
   private final RefreshTokenRepository refreshTokenRepository;
   private final RefreshTokenRevoker refreshTokenRevoker;
@@ -87,14 +90,18 @@ public class RefreshTokenService {
       throw new CustomException(ErrorCode.REFRESH_TOKEN_INVALID);
     }
 
-    // 이미 끊긴 토큰이 다시 왔다 = 복사본이 돌아다닌다. 계정 전체를 끊는다.
+    // 이미 끊긴 토큰이 다시 왔다 = 복사본이 돌아다닌다.
     //
     // 폐기는 **별도 트랜잭션**에서 해야 한다. 같은 트랜잭션에서 하면 바로 아래
     // 예외가 롤백을 일으켜 폐기가 되돌아간다 — 감지만 하고 세션은 살아 있게 된다.
+    // 보호자 토큰이면 보호자 휴대폰들을, 이룸이 휴대폰 토큰이면 그 휴대폰만 끊는다 (다중 보호자 E34).
+    // 둘은 따로 믿는 대상이라 한쪽이 새었다고 다른 쪽을 끊지 않는다.
     if (current.getRevokedAt() != null) {
-      int revoked = refreshTokenRevoker.revokeAllInNewTransaction(current.getMemberId(), now);
-      log.warn("리프레시 토큰이 재사용되어 계정의 세션을 모두 끊었습니다. memberId={}, 끊은 수={}",
-        current.getMemberId(), revoked);
+      int revoked = linkId != null
+        ? refreshTokenRevoker.revokeDeviceInNewTransaction(current.getMemberId(), current.getDeviceId(), now)
+        : refreshTokenRevoker.revokeGuardianSessionsInNewTransaction(current.getMemberId(), now);
+      log.warn("리프레시 토큰이 재사용되어 세션을 끊었습니다. memberId={}, 이룸이 휴대폰={}, 끊은 수={}",
+        current.getMemberId(), linkId != null, revoked);
       throw new CustomException(ErrorCode.REFRESH_TOKEN_REUSED);
     }
 
@@ -116,14 +123,33 @@ public class RefreshTokenService {
     return new RotationResult(current.getMemberId(), next.rawToken(), linkId);
   }
 
-  /** 로그아웃. 넘어온 토큰이 속한 계정의 세션을 전부 끊는다. */
+  /**
+   * 로그아웃. <b>그 기기의 세션만</b> 끊는다 (다중 보호자 E33).
+   *
+   * <p>예전에는 넘어온 토큰의 계정 세션을 전부 끊었다 — 보호자 휴대폰 한 대에서 로그아웃하면 그 보호자가
+   * 붙인 이룸이 휴대폰과 다른 휴대폰까지 끊겼다(2026-09-23 실측).
+   *
+   * <p>앱은 기기 값을 보내지 않아 {@code device_id} 로는 기기를 가릴 수 없다(보호자 세션은 대개 NULL).
+   * 그래서 넘어온 토큰에서 시작해 회전으로 이어진 뒤 토큰들을 따라가며 끊는다 — 그 줄기가 곧 그 기기의
+   * 세션이다. 앱이 옛 토큰을 보내도 살아 있는 끝까지 닿는다.
+   */
   @Transactional
-  public void revokeByToken(String rawToken) {
+  public void revokeSession(String rawToken) {
     if (rawToken == null || rawToken.isBlank()) {
       return;
     }
-    refreshTokenRepository.findByTokenHash(hash(rawToken))
-      .ifPresent(token -> refreshTokenRepository.revokeAllByMemberId(token.getMemberId(), LocalDateTime.now()));
+    refreshTokenRepository.findByTokenHash(hash(rawToken)).ifPresent(start -> {
+      LocalDateTime now = LocalDateTime.now();
+      RefreshToken cursor = start;
+      // 하루 한 번 갱신해도 반년이면 180 개다. 체인이 꼬여 돌아도 여기서 멈춘다.
+      for (int hops = 0; cursor != null && hops < MAX_CHAIN_HOPS; hops++) {
+        if (cursor.getRevokedAt() == null) {
+          cursor.setRevokedAt(now);
+        }
+        String nextId = cursor.getReplacedById();
+        cursor = nextId == null ? null : refreshTokenRepository.findById(nextId).orElse(null);
+      }
+    });
   }
 
   /** 회원 탈퇴·강제 로그아웃용. */

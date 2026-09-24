@@ -184,11 +184,12 @@ class AuthServiceTest {
   }
 
   @Test
-  @DisplayName("로그아웃은 해당 계정의 리프레시 토큰을 끊는다")
-  void logout_revokesRefreshToken() {
+  @DisplayName("E33 로그아웃은 그 기기 세션만 끊는다")
+  void e33_logout_revokesOnlyThatDeviceSession() {
     authService.logout("some-refresh");
 
-    verify(refreshTokenService).revokeByToken("some-refresh");
+    verify(refreshTokenService).revokeSession("some-refresh");
+    verify(refreshTokenService, never()).revokeAll(org.mockito.ArgumentMatchers.anyString());
   }
   @Test
   @DisplayName("S1 보관 중인 탈퇴 계정에 아이디·비밀번호로 로그인하면 새 계정 없이 이전 계정을 되살린다")

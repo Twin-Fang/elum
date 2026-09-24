@@ -14,6 +14,9 @@ public final class ElumiDeviceId {
 
   private static final String PREFIX = "elumi-";
 
+  /** 이룸이 휴대폰 기기 값 전체를 고르는 LIKE 패턴. 보호자 세션만 끊을 때 이것을 뺀다 (다중 보호자 E34). */
+  public static final String LIKE_PATTERN = PREFIX + "%";
+
   private ElumiDeviceId() {
   }
 
