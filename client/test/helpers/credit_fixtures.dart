@@ -6,6 +6,8 @@ Map<String, Object?> creditJson({
   int bonus = 0,
   bool? canStartRoutine,
   List<Object?> inProgress = const [],
+  int routineTextCost = 1,
+  int cardImageCost = 1,
 }) => {
   'enabled': enabled,
   'available': available,
@@ -15,7 +17,7 @@ Map<String, Object?> creditJson({
   'reserved': 0,
   'periodStart': '2026-09-21T00:00:00',
   'nextResetAt': '2026-09-28T00:00:00',
-  'costs': {'routineText': 1, 'cardImage': 1},
+  'costs': {'routineText': routineTextCost, 'cardImage': cardImageCost},
   'maxCardsPerRoutine': 10,
   'inProgress': inProgress,
   'canStartRoutine': canStartRoutine ?? available >= 1,

@@ -21,6 +21,7 @@ class AiCreditCard extends ConsumerWidget {
   static const loadingKey = ValueKey('ai-credit-loading');
   static const barKey = ValueKey('ai-credit-bar');
   static const contentKey = ValueKey('ai-credit-content');
+  static const infoKey = ValueKey('ai-credit-info');
 
   /// 카드 아래 → 첫 설정 줄. 카드가 없으면 이 간격도 없다.
   static const _gapBelow = 16.0;
