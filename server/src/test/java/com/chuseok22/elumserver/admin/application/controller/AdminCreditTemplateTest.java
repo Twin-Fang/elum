@@ -123,7 +123,7 @@ class AdminCreditTemplateTest {
   private AdminCreditOverview overview(boolean enabled, long used, Double perCredit, long stuck, long mismatch,
     List<AdminCreditOverview.ModelCost> models, List<AdminCreditOverview.KindCost> kinds, boolean current) {
     return new AdminCreditOverview(PERIOD, "2026-W38", current ? null : "2026-W40", current, 12, 1200, 30, used, 2,
-      900, 1, 8, 3, 2, 1.23, perCredit, models, kinds, stuck, mismatch, true, policy(enabled));
+      900, 1, 8, 3, 2, 1.23, 0.5, perCredit, models, kinds, stuck, mismatch, true, policy(enabled));
   }
 
   @Test

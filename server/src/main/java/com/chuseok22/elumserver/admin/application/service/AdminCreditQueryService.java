@@ -207,13 +207,16 @@ public class AdminCreditQueryService {
         cost.getKind(), cost.getJobCount(), cost.getCallCount(), cost.getTotalCostUsd()))
       .toList();
 
+    // 원가는 크레딧 작업에 연결된 호출만 센다 — 분모(사용 크레딧)와 같은 작업 집합이어야 나눈 값이 뜻을 가진다.
+    double linkedUsd = kinds.stream().mapToDouble(AdminCreditOverview.KindCost::usd).sum();
+
     long stuck = jobRepository.countByStatusAndStartedAtBefore(CreditJobStatus.RESERVED, stuckThreshold(policy, now));
     long mismatch = jobRepository.countSettledWithoutCallLog(CreditJobStatus.SETTLED, period.start(), period.end());
 
     CreditPeriod prev = CreditPeriod.of(period.start().minusWeeks(1));
     String nextKey = current ? null : CreditPeriod.of(period.end()).key();
     return new AdminCreditOverview(period, prev.key(), nextKey, current, active, granted, bonus, used, reserved,
-      remaining, overageJobs, overageCredits, released, exhausted, totalUsd, perCredit(totalUsd, used), models, kinds,
+      remaining, overageJobs, overageCredits, released, exhausted, totalUsd, linkedUsd, perCredit(linkedUsd, used), models, kinds,
       stuck, mismatch, budgetReached(), policy);
   }
 

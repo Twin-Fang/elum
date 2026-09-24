@@ -99,10 +99,12 @@
       <div class="card-body space-y-3">
         <h2 class="card-title text-lg">실제 AI 비용</h2>
         <div class="grid grid-cols-2 gap-2 text-sm">
-          <div class="text-base-content/60">그 주 추정 USD</div>
+          <div class="text-base-content/60">그 주 전체 USD <span class="text-base-content/40">(크레딧 밖 호출 포함)</span></div>
           <div class="font-mono" th:text="'$' + ${#numbers.formatDecimal(overview.totalUsd(), 1, 4)}">$0</div>
+          <div class="text-base-content/60">크레딧 작업 USD</div>
+          <div class="font-mono" th:text="'$' + ${#numbers.formatDecimal(overview.creditLinkedUsd(), 1, 4)}">$0</div>
           <div class="text-base-content/60">크레딧당 평균 원가</div>
-          <!-- 사용이 0 이면 나눌 수 없다. 0 으로 보이면 "공짜"로 오해한다. -->
+          <!-- 크레딧 작업 USD ÷ 사용 크레딧. 사용이 0 이면 나눌 수 없다. 0 으로 보이면 "공짜"로 오해한다. -->
           <div class="font-mono"
                th:text="${overview.costPerCredit() != null} ? '$' + ${#numbers.formatDecimal(overview.costPerCredit(), 1, 4)} : '—'">—</div>
         </div>

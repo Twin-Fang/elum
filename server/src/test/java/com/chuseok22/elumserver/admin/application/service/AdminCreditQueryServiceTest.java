@@ -202,6 +202,33 @@ class AdminCreditQueryServiceTest {
   }
 
   @Test
+  @DisplayName("개요 — 크레딧당 원가는 크레딧 작업에 연결된 호출 비용만 나눈다 (정책 전·관리자 테스트 호출 제외)")
+  void overview_costPerCreditUsesLinkedCallsOnly() {
+    store.account("a1", "m1");
+    store.weekly("a1", NOW, 100, 94);
+    when(ledgerRepository.sumDeltaByAccount(eq(CreditLedgerType.CONSUME), any(), any()))
+      .thenReturn(List.of(total("a1", -6)));
+    // 그 주 전체 USD 에는 정책 시작 전 호출이 섞여 있다 (#407 배포 주 운영 실측: $0.31 중 크레딧 작업 몫 $0.0177).
+    AiCallLogRepository.ModelCost all = org.mockito.Mockito.mock(AiCallLogRepository.ModelCost.class);
+    when(all.getModel()).thenReturn("gpt-image-1-mini");
+    when(all.getCallCount()).thenReturn(78L);
+    when(all.getTotalCostUsd()).thenReturn(0.3126);
+    when(aiCallLogRepository.sumCostByModelBetween(any(), any())).thenReturn(List.of(all));
+    AiCreditJobRepository.KindCost routine = org.mockito.Mockito.mock(AiCreditJobRepository.KindCost.class);
+    when(routine.getKind()).thenReturn(CreditJobKind.ROUTINE_CREATE);
+    when(routine.getJobCount()).thenReturn(1L);
+    when(routine.getCallCount()).thenReturn(6L);
+    when(routine.getTotalCostUsd()).thenReturn(0.0177);
+    when(jobRepository.sumCostByKind(any(), any(), any())).thenReturn(List.of(routine));
+
+    AdminCreditOverview overview = service.overview(null);
+
+    assertThat(overview.totalUsd()).isEqualTo(0.3126);
+    assertThat(overview.creditLinkedUsd()).isEqualTo(0.0177);
+    assertThat(overview.costPerCredit()).isCloseTo(0.0177 / 6, org.assertj.core.data.Offset.offset(1e-9));
+  }
+
+  @Test
   @DisplayName("작업 줄 — 청구가 있는데 연결 호출 0 이면 불일치, TTL 넘긴 예약은 멈춤")
   void jobRows_flagMismatchAndStuck() {
     store.account("a1", "m1");
