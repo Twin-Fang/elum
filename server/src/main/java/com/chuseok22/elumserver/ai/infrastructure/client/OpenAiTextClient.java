@@ -121,18 +121,8 @@ public class OpenAiTextClient implements TextGenerationClient {
     String model = systemConfigService.getString(ConfigKey.OPENAI_TEXT_MODEL);
     String apiKey = systemConfigService.getSecret(ConfigKey.OPENAI_API_KEY);
 
-    Map<String, Object> body = Map.of(
-      "model", model,
-      "messages", List.of(
-        Map.of("role", "system", "content", systemPrompt),
-        Map.of("role", "user", "content", userContent)
-      ),
-      // temperature는 일부러 보내지 않는다. 일부 모델이 지정값을 거부해, 관리자가
-      // 모델명만 바꿨을 뿐인데 호출이 통째로 깨지는 일을 막는다.
-      "response_format", Map.of(
-        "type", "json_schema",
-        "json_schema", Map.of("name", schemaName, "strict", true, "schema", toStrictSchema(geminiSchema))
-      )
+    Map<String, Object> body = buildRequestBody(
+      model, systemPrompt, userContent, geminiSchema, schemaName, callType
     );
 
     long startedAt = System.currentTimeMillis();
@@ -157,6 +147,30 @@ public class OpenAiTextClient implements TextGenerationClient {
       aiCallLogService.recordFailure(callType, model, elapsedMs, e.getMessage());
       throw e;
     }
+  }
+
+  static Map<String, Object> buildRequestBody(
+    String model, String systemPrompt, String userContent, Map<String, Object> geminiSchema,
+    String schemaName, AiCallType callType
+  ) {
+    return Map.of(
+      "model", model,
+      "messages", List.of(
+        Map.of("role", "system", "content", systemPrompt),
+        Map.of("role", "user", "content", userContent)
+      ),
+      // temperature는 일부러 보내지 않는다. 일부 모델이 지정값을 거부해, 관리자가
+      // 모델명만 바꿨을 뿐인데 호출이 통째로 깨지는 일을 막는다.
+      "response_format", Map.of(
+        "type", "json_schema",
+        "json_schema", Map.of("name", schemaName, "strict", true, "schema", toStrictSchema(geminiSchema))
+      ),
+      // Chat Completions 는 store 를 보내야만 대시보드 Logs(Completions 탭)에 남는다 (#411).
+      // 추가 요금은 없고, 보관은 처리방침 9항 "업체 정책에 따름"에 든다.
+      "store", true,
+      // Logs 에서 일과 만들기와 추가 질문을 갈라 보려고 호출 종류를 붙인다.
+      "metadata", Map.of("call_type", callType.name())
+    );
   }
 
   private String extractContent(OpenAiChatResponse response) {
