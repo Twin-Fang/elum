@@ -31,10 +31,10 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   // 회원 목록 화면용 회원별 루틴 개수 집계 — N+1을 피하기 위해 in + group by 한 번에.
   @org.springframework.data.jpa.repository.Query("""
-    select r.profile.member.id as memberId, count(r) as routineCount
+    select r.createdBy as memberId, count(r) as routineCount
     from Routine r
-    where r.profile.member.id in :memberIds
-    group by r.profile.member.id
+    where r.createdBy in :memberIds
+    group by r.createdBy
     """)
   List<MemberRoutineCount> countByMemberIds(
     @org.springframework.data.repository.query.Param("memberIds") List<String> memberIds
@@ -46,9 +46,6 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
     long getRoutineCount();
   }
-
-  /** 계정 아래 모든 프로필의 일과. 회원 탈퇴 시 정리용. */
-  List<Routine> findAllByProfileMemberId(String memberId);
 
   /// 이 보호자가 만든 일과 수. 보유 개수 한도에 쓴다 (다중 보호자 E42).
   ///

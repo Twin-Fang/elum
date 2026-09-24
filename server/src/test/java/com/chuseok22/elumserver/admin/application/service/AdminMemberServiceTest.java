@@ -7,20 +7,24 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
+import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
+import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
+import com.chuseok22.elumserver.member.infrastructure.entity.ProfileGuardian;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository.MemberRoutineCount;
@@ -48,6 +52,9 @@ class AdminMemberServiceTest {
 
   @Mock
   private RoutineRepository routineRepository;
+
+  @Mock
+  private ProfileGuardianRepository profileGuardianRepository;
 
   @Mock
   private AiCallLogRepository aiCallLogRepository;
@@ -186,7 +193,7 @@ class AdminMemberServiceTest {
   void getDetail_includesAiUsageAndRecentCalls() {
     Member member = member("m1", "parent1");
     when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByProfileMemberId("m1")).thenReturn(List.of());
+    when(routineRepository.findAllByCreatedBy("m1")).thenReturn(List.of());
     when(aiCallLogRepository.aggregateUsageByMemberIds(anyList()))
       .thenReturn(List.of(aiUsage("m1", 5, 1000, 0.01)));
     when(aiCallLogRepository.findTop20ByMemberIdOrderByCreatedAtDesc("m1")).thenReturn(List.of());
@@ -252,7 +259,7 @@ class AdminMemberServiceTest {
     LocalDateTime withdrawnAt = LocalDateTime.of(2026, 9, 23, 10, 0);
     Member member = withdrawnMember("m9", withdrawnAt);
     when(memberRepository.findById("m9")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByProfileMemberId("m9")).thenReturn(List.of());
+    when(routineRepository.findAllByCreatedBy("m9")).thenReturn(List.of());
     when(aiCallLogRepository.aggregateUsageByMemberIds(anyList())).thenReturn(List.of());
     when(aiCallLogRepository.findTop20ByMemberIdOrderByCreatedAtDesc("m9")).thenReturn(List.of());
     when(withdrawnMemberService.retentionExpiresAt(member)).thenReturn(withdrawnAt.plusDays(365));
@@ -309,5 +316,50 @@ class AdminMemberServiceTest {
     verify(subscriptionService, never()).grantPro(any(), any(), any());
     verify(subscriptionService, never()).revokePro(any(), any());
     verify(refreshTokenService, never()).revokeAll(any());
+  }
+
+  @Test
+  @DisplayName("회원 목록의 이룸이는 관계로 붙인다 — 가장 먼저 합류한 이룸이")
+  void search_attachesEarliestJoinedProfileThroughRelation() {
+    Member member = member("m1", "parent1");
+    Profile first = new Profile();
+    first.setNickname("하늘");
+    Profile later = new Profile();
+    later.setNickname("바다");
+    ProfileGuardian g1 = new ProfileGuardian();
+    g1.setMember(member);
+    g1.setProfile(first);
+    ProfileGuardian g2 = new ProfileGuardian();
+    g2.setMember(member);
+    g2.setProfile(later);
+    when(memberRepository.findByStatusNot(eq(MemberStatus.WITHDRAWN), any(Pageable.class)))
+      .thenReturn(new PageImpl<>(List.of(member)));
+    when(profileGuardianRepository.findAllWithProfileByMemberIdIn(List.of("m1"))).thenReturn(List.of(g1, g2));
+
+    AdminMemberResponse response = adminMemberService.search(null, null, 0).getContent().get(0);
+
+    assertThat(response.nickname()).isEqualTo("하늘");
+  }
+
+  @Test
+  @DisplayName("E32 정지해도 그 사람의 일과와 관계는 남는다 — 나간 것이 아니다")
+  void e32_suspend_keepsRoutinesAndRelations() {
+    Member member = member("m1", "parent1");
+    when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
+
+    adminMemberService.suspend("m1");
+
+    verifyNoInteractions(routineRepository, profileGuardianRepository, profileRepository);
+  }
+
+  @Test
+  @DisplayName("E35 강제 로그아웃은 그 보호자의 토큰 전부를 끊는다 — 그가 붙인 이룸이 휴대폰도 sub 가 같아 함께 끊긴다(받아들인 동작)")
+  void e35_forceLogout_revokesEveryTokenIncludingLinkedPhones() {
+    Member member = member("m1", "parent1");
+    when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
+
+    adminMemberService.forceLogout("m1");
+
+    verify(refreshTokenService).revokeAll("m1");
   }
 }

@@ -1,8 +1,8 @@
 package com.chuseok22.elumserver.admin.application.service;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
-import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionSummary;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionSummary;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
 import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
@@ -13,7 +13,9 @@ import com.chuseok22.elumserver.member.application.service.WithdrawnMemberServic
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
+import com.chuseok22.elumserver.member.infrastructure.entity.ProfileGuardian;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
@@ -44,6 +46,7 @@ public class AdminMemberService {
 
   private final ProfileRepository profileRepository;
   private final RoutineRepository routineRepository;
+  private final ProfileGuardianRepository profileGuardianRepository;
   private final AiCallLogRepository aiCallLogRepository;
   private final RefreshTokenService refreshTokenService;
   private final SubscriptionService subscriptionService;
@@ -63,10 +66,10 @@ public class AdminMemberService {
       : aiCallLogRepository.aggregateUsageByMemberIds(memberIds).stream()
         .collect(Collectors.toMap(MemberAiUsage::getMemberId, Function.identity()));
 
-    // 회원 수만큼 프로필을 따로 조회하지 않는다 — 한 번에 받아 맵으로 쓴다.
+    // 회원 수만큼 이룸이를 따로 조회하지 않는다 — 관계를 한 번에 받아 가장 먼저 합류한 이룸이를 붙인다.
     Map<String, Profile> profiles = memberIds.isEmpty() ? Map.of()
-      : profileRepository.findAllByMemberIdIn(memberIds).stream()
-        .collect(Collectors.toMap(p -> p.getMember().getId(), Function.identity(), (a, b) -> a));
+      : profileGuardianRepository.findAllWithProfileByMemberIdIn(memberIds).stream()
+        .collect(Collectors.toMap(g -> g.getMember().getId(), ProfileGuardian::getProfile, (first, later) -> first));
 
     return members.map(member -> AdminMemberResponse.of(
       member,
@@ -79,8 +82,9 @@ public class AdminMemberService {
 
   public AdminMemberDetailResponse getDetail(String memberId) {
     Member member = findOrThrow(memberId);
-    List<Routine> routines = routineRepository.findAllByProfileMemberId(memberId);
-    Profile profile = profileRepository.findFirstByMemberIdOrderByCreatedAtAsc(memberId).orElse(null);
+    // 이 사람이 만든 일과 — 이룸이를 함께 돌보면 다른 사람의 일과는 그 사람 화면에 있다.
+    List<Routine> routines = routineRepository.findAllByCreatedBy(memberId);
+    Profile profile = profileRepository.findAllGuardedBy(memberId).stream().findFirst().orElse(null);
     MemberAiUsage aiUsage = aiCallLogRepository.aggregateUsageByMemberIds(List.of(memberId)).stream()
       .findFirst().orElse(null);
     return AdminMemberDetailResponse.of(
@@ -134,6 +138,8 @@ public class AdminMemberService {
   public void suspend(String memberId) {
     requireNotWithdrawn(memberId).setStatus(MemberStatus.SUSPENDED);
     // 남은 리프레시 토큰을 끊지 않으면 정지된 계정이 갱신으로 계속 접속을 시도한다.
+    // 일과·관계는 건드리지 않는다 — 나간 것이 아니다 (다중 보호자 E32). 그가 붙인 이룸이 휴대폰도
+    // 토큰 주인(sub)이 같아 함께 막힌다.
     refreshTokenService.revokeAll(memberId);
   }
 
@@ -148,6 +154,7 @@ public class AdminMemberService {
     requireNotWithdrawn(memberId).setTokenInvalidBefore(LocalDateTime.now());
     // 액세스 토큰만 막으면 리프레시로 새 토큰을 받아 그대로 다시 들어온다.
     // 강제 로그아웃이 성립하려면 세션 자체를 끊어야 한다.
+    // 이 보호자가 붙인 이룸이 휴대폰도 토큰 주인(sub)이 같아 함께 끊긴다 — 받아들인 동작이다 (다중 보호자 E35).
     refreshTokenService.revokeAll(memberId);
   }
 

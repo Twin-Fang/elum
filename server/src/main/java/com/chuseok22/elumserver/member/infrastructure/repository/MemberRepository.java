@@ -19,17 +19,17 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
   Page<Member> findByStatus(MemberStatus status, Pageable pageable);
 
-  // 아이 별명은 Member가 아니라 Profile에 있다. 계정 하나에 프로필이 여럿이 돼도
-  // 결과가 중복되지 않도록 join 대신 exists를 쓴다.
+  // 이룸이 호칭은 Member가 아니라 Profile에 있고, 둘은 관계 표로 잇는다 (다중 보호자 #360).
+  // 한 보호자에 이룸이가 여럿이어도 결과가 중복되지 않도록 join 대신 exists를 쓴다.
   //
   // 별명이 null인 프로필은 like가 null(불일치)로 평가돼 자연스럽게 제외된다.
   @Query("""
     select m from Member m
     where lower(m.username) like lower(concat('%', :keyword, '%'))
        or exists (
-         select 1 from Profile p
-         where p.member = m
-           and lower(p.nickname) like lower(concat('%', :keyword, '%'))
+         select 1 from ProfileGuardian g
+         where g.member = m
+           and lower(g.profile.nickname) like lower(concat('%', :keyword, '%'))
        )
     """)
   Page<Member> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
@@ -38,9 +38,9 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     select m from Member m
     where (lower(m.username) like lower(concat('%', :keyword, '%'))
        or exists (
-         select 1 from Profile p
-         where p.member = m
-           and lower(p.nickname) like lower(concat('%', :keyword, '%'))
+         select 1 from ProfileGuardian g
+         where g.member = m
+           and lower(g.profile.nickname) like lower(concat('%', :keyword, '%'))
        ))
       and m.status = :status
     """)
@@ -59,9 +59,9 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     select m from Member m
     where (lower(m.username) like lower(concat('%', :keyword, '%'))
        or exists (
-         select 1 from Profile p
-         where p.member = m
-           and lower(p.nickname) like lower(concat('%', :keyword, '%'))
+         select 1 from ProfileGuardian g
+         where g.member = m
+           and lower(g.profile.nickname) like lower(concat('%', :keyword, '%'))
        ))
       and m.status <> :status
     """)

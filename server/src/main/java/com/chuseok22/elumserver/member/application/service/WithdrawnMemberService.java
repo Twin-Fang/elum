@@ -11,8 +11,6 @@ import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkReposit
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
-import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
@@ -43,8 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class WithdrawnMemberService {
 
   private final MemberRepository memberRepository;
-  private final ProfileRepository profileRepository;
-  private final RoutineRepository routineRepository;
   private final AuthIdentityRepository authIdentityRepository;
   private final RefreshTokenRepository refreshTokenRepository;
   private final AiCallLogRepository aiCallLogRepository;
@@ -125,11 +121,10 @@ public class WithdrawnMemberService {
     // 탈퇴 때 이미 지운 것이지만 한 번 더 지운다. 남아 있으면 계정 행이 외래키에 걸려 삭제가 실패한다.
     // 이룸이는 탈퇴와 같은 나가기 규칙으로 — 계정의 "모든 프로필"을 지우면 다른 보호자와 함께 돌보는 이룸이까지
     // 사라진다 (다중 보호자 4-3). 관계·내가 만든 일과(created_by)·대표 보호자가 여기서 정리된다.
+    // 관계 없이 대표 보호자로만 이 계정을 가리키는 이룸이(옛 서버로 되돌린 동안 생긴 것)는 부팅 때 관계를
+    // 채우므로(GuardianshipBackfillInitializer) 여기서도 나가기 규칙으로 정리된다. 그래도 남아 있으면
+    // 계정 행 삭제가 외래키에 걸려 이번 삭제만 실패하고, 다음 부팅의 채우기 뒤 스케줄러가 다시 지운다.
     guardianshipService.leaveAll(memberId);
-    // 관계 없이 대표 보호자로만 이 계정을 가리키는 이룸이(옛 서버로 되돌린 동안 생기고 부팅 채우기가 못 메운 것).
-    // 돌볼 사람이 이 계정뿐이라 지운다. 평소에는 0 건이다.
-    routineRepository.deleteAll(routineRepository.findAllByProfileMemberId(memberId));
-    profileRepository.deleteAllByMemberId(memberId);
     subscriptionRepository.deleteByMemberId(memberId);
     refreshTokenRepository.deleteAllByMemberId(memberId);
     deviceLinkRepository.deleteAllByMemberId(memberId);

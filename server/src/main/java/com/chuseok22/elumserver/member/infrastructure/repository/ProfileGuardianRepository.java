@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.member.infrastructure.repository;
 
 import com.chuseok22.elumserver.member.infrastructure.entity.ProfileGuardian;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,4 +41,8 @@ public interface ProfileGuardianRepository extends JpaRepository<ProfileGuardian
       and not exists (select 1 from profile_guardian g where g.profile_id = p.id)
     """)
   int backfillFromProfileOwner();
+
+  /** 관리자 회원 목록 — 회원마다 따로 묻지 않도록 이룸이까지 한 번에, 합류 순서대로 가져온다. */
+  @Query("select g from ProfileGuardian g join fetch g.profile where g.member.id in :memberIds order by g.joinedAt asc")
+  List<ProfileGuardian> findAllWithProfileByMemberIdIn(@Param("memberIds") Collection<String> memberIds);
 }

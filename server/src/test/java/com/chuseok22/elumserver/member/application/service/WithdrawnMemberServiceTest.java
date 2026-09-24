@@ -9,6 +9,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
@@ -21,10 +22,7 @@ import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRe
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
-import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
-import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
@@ -47,13 +45,7 @@ class WithdrawnMemberServiceTest {
   private MemberRepository memberRepository;
 
   @Mock
-  private ProfileRepository profileRepository;
-
-  @Mock
   private GuardianshipService guardianshipService;
-
-  @Mock
-  private RoutineRepository routineRepository;
 
   @Mock
   private AuthIdentityRepository authIdentityRepository;
@@ -187,10 +179,9 @@ class WithdrawnMemberServiceTest {
     // 가입과 같은 길로 만든다 — 빈 이룸이(이름 없음 → 온보딩)와 관계 한 줄. 관계가 없으면 새 서버가
     // 그 이룸이를 못 찾는다 (다중 보호자 #360).
     verify(guardianshipService).createOwnProfile(member);
-    verify(profileRepository, never()).save(any(Profile.class));
     verify(subscriptionService).createFreeIfAbsent(member);
-    // 일과는 만들지 않는다 — 탈퇴 때 지운 것은 돌아오지 않는다.
-    verifyNoInteractions(routineRepository);
+    // 일과는 만들지 않는다 — 탈퇴 때 지운 것은 돌아오지 않는다. 예전에 함께 돌보던 이룸이에도 다시 붙지 않는다.
+    verifyNoMoreInteractions(guardianshipService);
   }
 
   @Test
@@ -221,7 +212,6 @@ class WithdrawnMemberServiceTest {
   void purge_removesRetainedRowsAndDetachesAiLogs() {
     Member member = withdrawn("m1", LocalDateTime.now().minusDays(400));
     when(memberRepository.findById("m1")).thenReturn(Optional.of(member));
-    when(routineRepository.findAllByProfileMemberId("m1")).thenReturn(List.of());
 
     withdrawnMemberService.purge("m1");
 
@@ -234,7 +224,6 @@ class WithdrawnMemberServiceTest {
     InOrder leaveFirst = inOrder(guardianshipService, memberRepository);
     leaveFirst.verify(guardianshipService).leaveAll("m1");
     leaveFirst.verify(memberRepository).delete(member);
-    verify(profileRepository).deleteAllByMemberId("m1");
     verify(subscriptionRepository).deleteByMemberId("m1");
     verify(refreshTokenRepository).deleteAllByMemberId("m1");
     verify(deviceLinkRepository).deleteAllByMemberId("m1");

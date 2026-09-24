@@ -119,8 +119,7 @@ class OAuthLoginServiceTest {
     GuardianshipService guardianshipService = new GuardianshipService(
       profileRepository, profileGuardianRepository, routineRepository, deviceLinkRepository, refreshTokenRepository);
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
-      memberRepository, profileRepository, routineRepository,
-      authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
+      memberRepository, authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
       subscriptionService, systemConfigService, guardianshipService);
     oAuthLoginService = new OAuthLoginService(
       List.of(kakao, naver), authIdentityRepository, memberRepository, guardianshipService,
@@ -341,7 +340,6 @@ class OAuthLoginServiceTest {
       .thenReturn(Optional.of(retainedIdentity()));
     when(memberRepository.findById("m1")).thenReturn(Optional.of(old));
     when(systemConfigService.getInt(ConfigKey.MEMBER_WITHDRAWN_RETENTION_DAYS)).thenReturn(365);
-    when(routineRepository.findAllByProfileMemberId("m1")).thenReturn(List.of());
     when(authIdentityRepository.findFirstByEmailAndEmailVerifiedTrue("parent@kakao.com"))
       .thenReturn(Optional.empty());
     when(passwordEncoder.encode(anyString())).thenReturn("encoded");
