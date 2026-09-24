@@ -50,8 +50,12 @@ platform :ios do
     # 2) App Store 버전 준비 (+ store_submit이면 심사 자동 제출)
     if prepare_appstore
       app_ver = ENV["APP_VERSION"]
-      release_notes = (ENV["RELEASE_NOTES"] || "버그를 수정하고 안정성을 개선했습니다.").strip
-      release_notes = "버그를 수정하고 안정성을 개선했습니다." if release_notes.empty?
+      # App Store '새로운 기능'은 고정 문구로 넣는다 (#414).
+      # CHANGELOG(RELEASE_NOTES)에는 서버·운영 화면 변경이 섞이고, 직전 출시 이후 여러 버전이
+      # 한꺼번에 나가 한 버전 항목만으로는 사실과 어긋난다. TestFlight What to Test는 위 pilot이 그대로 쓴다.
+      default_notes = "이번 버전에서 버그를 고치고 성능을 개선했어요."
+      release_notes = (ENV["APPSTORE_RELEASE_NOTES"] || default_notes).strip
+      release_notes = default_notes if release_notes.empty?
 
       # whatsNew 메타를 절대경로로 생성 (상대경로는 fastlane CWD와 어긋나 공란 → 제출 거부).
       # release_notes.txt만 만들고 다른 메타는 안 만듦 → ASC 기존 메타(설명/키워드 등) 보존.
