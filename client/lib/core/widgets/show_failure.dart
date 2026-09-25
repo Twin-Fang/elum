@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../theme/theme_context_ext.dart';
 
 import '../network/app_failure.dart';
 import 'elum_dialog.dart';
@@ -59,7 +62,20 @@ void showFailureSnack(
   final failure = AppFailure.of(error);
   if (failure.isSilent) return;
 
+  final space = context.space;
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(failure.describe(fallback, fallbackCode))),
+    SnackBar(
+      content: Text(failure.describe(fallback, fallbackCode)),
+      // 하단 버튼 위에 띄운다 (#427 ④). 바닥에 붙이면 카드 확인의 `저장하기`를
+      // 덮어, 실패한 저장을 다시 누르려면 스낵바가 사라질 때까지 기다려야 했다.
+      // 버튼 높이 + 버튼 아래 여백만큼 올리고 좌우는 버튼과 맞춘다.
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.fromLTRB(
+        space.buttonMarginH.w,
+        0,
+        space.buttonMarginH.w,
+        (space.buttonH + space.lg + space.md).h,
+      ),
+    ),
   );
 }
