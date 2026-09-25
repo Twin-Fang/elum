@@ -76,7 +76,11 @@ class CreditSummary {
       used: _optionalInt(json['used'], 0),
       reserved: _optionalInt(json['reserved'], 0),
       periodStart: DateTime.tryParse(json['periodStart']?.toString() ?? ''),
-      nextResetAt: _requireDate(json, 'nextResetAt'),
+      // 시간대가 있는 값을 먼저 쓰고 기기 시간대로 바꾼다 (#421 ③). 옛 서버는 시간대 없는
+      // 값만 준다 — 그때는 예전처럼 읽는다(한국 기기에서는 맞고 해외에서만 어긋난다).
+      nextResetAt: DateTime.tryParse(json['nextResetAtOffset']?.toString() ?? '')
+              ?.toLocal() ??
+          _requireDate(json, 'nextResetAt'),
       routineTextCost: _optionalInt(costs is Map ? costs['routineText'] : null, 1),
       cardImageCost: _optionalInt(costs is Map ? costs['cardImage'] : null, 1),
       maxCardsPerRoutine: _optionalInt(json['maxCardsPerRoutine'], 10),
@@ -98,12 +102,6 @@ class CreditSummary {
           : true,
     );
   }
-
-  /// 직전 안내 기준 — 일과 하나가 최대로 쓸 수 있는 양(글 1 + 카드 10장 × 1 = 11).
-  /// 이보다 적으면 "끝까지 만들어지지만 0 이 될 수 있다" 고 미리 알린다.
-  int get lowThreshold => routineTextCost + maxCardsPerRoutine * cardImageCost;
-
-  bool get isLow => available < lowThreshold;
 
   bool get isExhausted => available <= 0;
 

@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.credit.application.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -25,6 +26,11 @@ public record CreditSummaryResponse(
   LocalDateTime periodStart,
   @Schema(description = "다음 초기화(다음 월요일 0시)", example = "2026-09-28T00:00:00", nullable = true)
   LocalDateTime nextResetAt,
+  // 시간대가 붙은 같은 순간 (#421 ③). nextResetAt 은 시간대가 없어 해외 시간대 기기가 자기 시각으로
+  // 읽었다. 기존 필드를 바꾸면 이미 깔린 앱이 시각을 틀리게 보이므로 새 필드로 더한다.
+  @Schema(description = "다음 초기화 — 서버 시간대 오프셋 포함. 앱은 이 값을 기기 시간대로 바꿔 보여준다",
+    example = "2026-09-28T00:00:00+09:00", nullable = true)
+  OffsetDateTime nextResetAtOffset,
   @Schema(description = "행동별 단가")
   Costs costs,
   @Schema(description = "일과 하나의 최대 카드 수 — 앱이 직전 안내 기준(글 + 카드 × 그림 단가)을 계산한다", example = "10")
@@ -56,7 +62,7 @@ public record CreditSummaryResponse(
 
   /// 정책이 꺼져 있을 때. 앱은 카드를 숨기고 아무것도 막지 않는다.
   public static CreditSummaryResponse disabled(int maxCardsPerRoutine) {
-    return new CreditSummaryResponse(false, 0, 0, 0, 0, 0, null, null, new Costs(0, 0),
+    return new CreditSummaryResponse(false, 0, 0, 0, 0, 0, null, null, null, new Costs(0, 0),
       maxCardsPerRoutine, List.of(), true, true);
   }
 }

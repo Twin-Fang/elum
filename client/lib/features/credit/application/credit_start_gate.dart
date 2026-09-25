@@ -24,7 +24,12 @@ Future<CreditSummary?> creditBlocksRoutineStart(WidgetRef ref) async {
         .read(creditRepositoryProvider)
         .getMine()
         .timeout(creditStartCheckTimeout);
-    if (summary.enabled && !summary.canStartRoutine) return summary;
+    // 진행 중인 일과 만들기가 있으면 서버가 409 로 막는다 — 미리 막는다 (#421 ②).
+    // `canStartRoutine` 은 잔액·동결만 보고 진행 중 여부는 담지 않는다.
+    if (summary.enabled &&
+        (!summary.canStartRoutine || summary.isGeneratingRoutine)) {
+      return summary;
+    }
     return null;
   } catch (e) {
     // 삼키지 않고 남긴다 — 막지 않는 것은 의도지만 실패가 묻히면 원인을 못 찾는다.

@@ -26,6 +26,7 @@ import com.chuseok22.elumserver.license.core.PlanType;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -101,6 +102,10 @@ class CreditQueryServiceTest {
     assertThat(summary.reserved()).isEqualTo(1);
     assertThat(summary.periodStart()).isEqualTo(LocalDateTime.of(2026, 9, 21, 0, 0));
     assertThat(summary.nextResetAt()).isEqualTo(LocalDateTime.of(2026, 9, 28, 0, 0));
+    // 시간대가 있는 초기화 시각 (#421 ③). 기존 nextResetAt 은 시간대가 없어 해외 시간대
+    // 기기가 자기 시각으로 읽고 날짜를 틀리게 보였다. 같은 순간에 서버 시간대 오프셋을 붙인다.
+    assertThat(summary.nextResetAtOffset()).isEqualTo(
+      OffsetDateTime.parse("2026-09-28T00:00:00+09:00"));
     assertThat(summary.costs()).isEqualTo(new CreditSummaryResponse.Costs(1, 2));
     assertThat(summary.maxCardsPerRoutine()).isEqualTo(10);
     assertThat(summary.inProgress()).singleElement().satisfies(job -> {
@@ -181,6 +186,7 @@ class CreditQueryServiceTest {
     assertThat(summary.available()).isZero();
     assertThat(summary.periodStart()).isNull();
     assertThat(summary.nextResetAt()).isNull();
+    assertThat(summary.nextResetAtOffset()).isNull();
     assertThat(summary.inProgress()).isEmpty();
     assertThat(summary.canStartRoutine()).isTrue();
     assertThat(summary.canGenerateImage()).isTrue();

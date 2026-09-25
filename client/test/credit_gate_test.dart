@@ -88,6 +88,23 @@ void main() {
       expect(find.text('일과 입력'), findsNothing);
     });
 
+    // 진행 중인 일과가 있으면 서버가 생성 요청을 409 로 막는다. 홈이 미리 막지
+    // 않으면 입력·보상까지 다 적은 뒤에야 실패 화면을 본다 (#421 ②).
+    testWidgets('이미 만들고 있으면 팝업을 띄우고 들어가지 않는다 (#421)', (tester) async {
+      await pumpHome(
+        tester,
+        _FakeCredit(CreditSummary.fromJson(creditJson(
+          available: 30,
+          inProgress: [
+            {'jobId': 'j1', 'kind': 'ROUTINE_CREATE', 'startedAt': '2026-09-24T10:00:00'},
+          ],
+        ))),
+      );
+
+      expect(find.text('이미 일과를 만들고 있어요'), findsOneWidget);
+      expect(find.text('일과 입력'), findsNothing);
+    });
+
     testWidgets('남아 있으면 바로 들어간다', (tester) async {
       await pumpHome(tester, _FakeCredit(CreditSummary.fromJson(creditJson())));
 
@@ -196,7 +213,10 @@ void main() {
       testWidgets('$code — 다시 하기를 숨기고 홈으로를 둔다', (tester) async {
         await pumpError(tester, code);
 
-        expect(find.text('카드를 만들지 못했어요'), findsOneWidget);
+        // 크레딧 때문에 막혔는데 "만들지 못했어요"라고 하면 AI 가 실패한 줄 안다.
+        // 이유는 아래 서버 문구가 말한다 (#421, 실기기 실측).
+        expect(find.text('지금은 만들 수 없어요'), findsOneWidget);
+        expect(find.text('카드를 만들지 못했어요'), findsNothing);
         expect(find.text('서버가 준 문구'), findsOneWidget);
         expect(find.text(code), findsOneWidget, reason: '추적 코드는 그대로 보인다');
         expect(find.text('다시 하기'), findsNothing);
@@ -266,7 +286,8 @@ void main() {
       }
 
       expect(find.text('카드 생성 로딩'), findsNothing);
-      expect(find.text('질문을 준비하지 못했어요'), findsOneWidget);
+      // 크레딧으로 막힌 것은 질문 준비 실패가 아니다 (#421).
+      expect(find.text('지금은 만들 수 없어요'), findsOneWidget);
       expect(find.text('서버가 준 문구'), findsOneWidget);
       expect(find.text('AI_CREDIT_INSUFFICIENT'), findsOneWidget);
       expect(find.text('다시 하기'), findsNothing);

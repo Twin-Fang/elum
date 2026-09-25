@@ -7,7 +7,6 @@ import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
 import 'package:elum/features/guardian/presentation/reward_setup_screen.dart';
-import 'package:elum/features/guardian/presentation/widgets/credit_low_notice.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/credit_usage.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -26,8 +25,6 @@ import 'helpers/test_storage.dart';
 void main() {
   useFigmaViewport();
 
-  const notice =
-      '크레딧이 7개 남았어요. 그림이 여러 장 생성돼도 이번 일과는 끝까지 만들어지고 크레딧은 0이 될 수 있어요';
 
   /// [credit] 이 null 이면 조회에 실패한다.
   Future<ProviderContainer> pump(
@@ -96,63 +93,26 @@ void main() {
     answers: ['우산'],
   );
 
-  group('추가 질문 — `카드 만들기` 위', () {
-    testWidgets('11 보다 적으면 남은 양과 함께 안내한다', (tester) async {
-      await pump(tester, const QuestionScreen(), credit: credit(7), flow: answered);
+  // 만드는 흐름(추가 질문 · 보상)에는 크레딧 경고 띠를 두지 않는다 (#421 ·
+  // 2026-09-25 사용자 결정 — "내 크레딧이 몇인지 warning 문구 굳이 추가하지 말지?
+  // 괜히 이상하고 별론데"). 잔액은 설정 카드가, 모자라면 생성 실패 화면이 말한다.
+  group('만드는 흐름에는 크레딧 경고가 없다', () {
+    for (final available in [0, 7]) {
+      testWidgets('추가 질문 — 잔액 $available 이어도 버튼만 있다', (tester) async {
+        await pump(tester, const QuestionScreen(), credit: credit(available), flow: answered);
 
-      expect(find.text(notice), findsOneWidget);
-      final noticeBox = tester.getRect(find.byType(CreditLowNotice));
-      final cta = tester.getRect(find.text('카드 만들기'));
-      expect(noticeBox.top, lessThan(cta.top), reason: 'CTA 위에 선다');
-    });
+        expect(find.textContaining('크레딧이'), findsNothing);
+        expect(find.textContaining('끝까지 만들어지고'), findsNothing);
+        expect(find.text('카드 만들기'), findsOneWidget);
+      });
 
-    testWidgets('넉넉하면 안내가 없다', (tester) async {
-      await pump(tester, const QuestionScreen(), credit: credit(50), flow: answered);
-      expect(find.textContaining('크레딧이'), findsNothing);
-    });
+      testWidgets('보상 — 잔액 $available 이어도 버튼만 있다', (tester) async {
+        await pump(tester, const RewardSetupScreen(), credit: credit(available));
 
-    testWidgets('조회에 실패하면 안내가 없다 — 흐름을 막지 않는다', (tester) async {
-      await pump(tester, const QuestionScreen(), flow: answered);
-      expect(find.textContaining('크레딧이'), findsNothing);
-      expect(find.text('카드 만들기'), findsOneWidget);
-    });
-
-    testWidgets('꺼져 있으면 안내가 없다', (tester) async {
-      await pump(
-        tester,
-        const QuestionScreen(),
-        credit: const CreditSummary.disabled(),
-        flow: answered,
-      );
-      expect(find.textContaining('크레딧이'), findsNothing);
-    });
-
-    testWidgets('글꼴 2.0 에서도 넘치지 않는다', (tester) async {
-      await pump(
-        tester,
-        const QuestionScreen(),
-        credit: credit(7),
-        flow: answered,
-        textScale: 2,
-      );
-      expect(tester.takeException(), isNull);
-    });
-  });
-
-  group('보상 — 아래 버튼 위', () {
-    testWidgets('11 보다 적으면 안내한다', (tester) async {
-      await pump(tester, const RewardSetupScreen(), credit: credit(7));
-
-      expect(find.text(notice), findsOneWidget);
-      final noticeBox = tester.getRect(find.byType(CreditLowNotice));
-      final cta = tester.getRect(find.text('다음'));
-      expect(noticeBox.top, lessThan(cta.top));
-    });
-
-    testWidgets('넉넉하면 안내가 없다', (tester) async {
-      await pump(tester, const RewardSetupScreen(), credit: credit(50));
-      expect(find.textContaining('크레딧이'), findsNothing);
-    });
+        expect(find.textContaining('크레딧이'), findsNothing);
+        expect(find.text('다음'), findsOneWidget);
+      });
+    }
   });
 
   group('카드 확인 — 머리 아래 사용량 줄', () {

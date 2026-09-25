@@ -114,18 +114,12 @@ void main() {
     expect(find.textContaining('추가'), findsNothing);
   });
 
-  testWidgets('적음(<11) — 끝까지 만들어지지만 0 이 될 수 있다고 알린다', (tester) async {
-    await pump(tester, () async => summary(available: 10));
+  // 적어도 경고 문구를 덧붙이지 않는다 — 숫자와 막대로 충분하다
+  // (2026-09-25 사용자 결정, #421).
+  testWidgets('잔액이 적어도 경고 문구가 없다', (tester) async {
+    await pump(tester, () async => summary(available: 3));
 
-    expect(
-      find.text('그림이 여러 장 생성돼도 이번 일과는 끝까지 만들어지고 크레딧은 0이 될 수 있어요'),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('11 이상이면 적음 줄이 없다', (tester) async {
-    await pump(tester, () async => summary(available: 11));
-
+    expect(find.textContaining('끝까지 만들어지고'), findsNothing);
     expect(find.textContaining('0이 될 수 있어요'), findsNothing);
   });
 
@@ -301,7 +295,8 @@ void main() {
     expect(node.label, contains('10 / 100 크레딧 남음'));
     expect(node.label, contains('추가 5'));
     expect(node.label, contains('9월 28일(월) 0시에 다시 채워져요'));
-    expect(node.label, contains('0이 될 수 있어요'));
+    // 적음 경고 문구는 없앴다 (#421) — 낭독기에도 읽히지 않는다.
+    expect(node.label, isNot(contains('0이 될 수 있어요')));
     handle.dispose();
   });
 

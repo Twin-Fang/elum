@@ -133,11 +133,15 @@ class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton> {
       final blocked = await creditBlocksRoutineStart(ref);
       if (!mounted) return;
       if (blocked != null) {
+        // 다 쓴 것이 먼저다 — 진행 중인 것이 끝나도 새로 만들 수 없기 때문이다.
+        final generating = blocked.canStartRoutine && blocked.isGeneratingRoutine;
         await showElumDialog<void>(
           context: context,
           icon: ElumDialogIcon.warning,
-          title: '이번 주 크레딧을 모두 사용했어요',
-          message: '${blocked.resetLabel}부터 다시 만들 수 있어요',
+          title: generating ? '이미 일과를 만들고 있어요' : '이번 주 크레딧을 모두 사용했어요',
+          message: generating
+              ? '다 만든 뒤에 새 일과를 만들 수 있어요'
+              : '${blocked.resetLabel}부터 다시 만들 수 있어요',
           actions: const [ElumDialogAction(label: '확인')],
         );
         return;

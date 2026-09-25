@@ -93,6 +93,8 @@ public class CreditQueryService {
       balance.reserved(),
       balance.period().start(),
       balance.period().end(),
+      // 주기를 잰 시계와 같은 시간대로 오프셋을 붙인다 (운영 TZ=Asia/Seoul → +09:00).
+      balance.period().end().atZone(clock.getZone()).toOffsetDateTime(),
       new CreditSummaryResponse.Costs(routineText, cardImage),
       MAX_CARDS_PER_ROUTINE,
       inProgress,

@@ -26,9 +26,6 @@ class AiCreditSummaryView extends StatelessWidget {
 
   final CreditSummary summary;
 
-  /// 적음(<11) 안내. 직전 안내(질문·보상 화면)와 같은 말을 한다.
-  static const lowLine = '그림이 여러 장 생성돼도 이번 일과는 끝까지 만들어지고 크레딧은 0이 될 수 있어요';
-
   static const _dividerGap = 14.0;
 
   @override
@@ -41,11 +38,12 @@ class AiCreditSummaryView extends StatelessWidget {
     final bonus = s.bonus > 0 ? '+ 추가 ${s.bonus}' : null;
     final lines = <(String, Color)>[
       if (s.isGeneratingRoutine) ('일과를 만들고 있어요', colors.textPrimary),
+      // 적을 때 "끝까지 만들어지지만 0 이 될 수 있다"는 경고는 두지 않는다 — 숫자와
+      // 막대로 충분하고, 경고 문구는 이상하고 불편하다 (2026-09-25 사용자 결정, #421).
       if (s.isExhausted) ...[
         ('이번 주 크레딧을 모두 사용했어요', colors.textPrimary),
         ('만든 일과 보기와 직접 고치기는 계속 할 수 있어요', colors.textSecondary),
-      ] else if (s.isLow)
-        (lowLine, colors.creditAccentText),
+      ],
     ];
     final reset = '${s.resetLabel}에 다시 채워져요';
 

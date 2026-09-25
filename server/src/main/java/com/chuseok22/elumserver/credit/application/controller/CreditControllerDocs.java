@@ -30,6 +30,9 @@ public interface CreditControllerDocs {
       3. 사용 가능 = 유효한 적립의 남은 양 − 진행 중 예약. `bonus`는 주간이 아닌 적립의 남은 양,
          `used`는 이번 주기에 실제로 차감한 양입니다.
       4. `canStartRoutine` = 사용 가능 ≥ 일과 글 단가이고 멈춘 계정이 아님. `canGenerateImage`는 그림 단가로 같은 판정.
+      5. `nextResetAt`은 시간대가 없는 서버 시각(한국 시각)이고, `nextResetAtOffset`은 같은 순간에 오프셋을 붙인 값입니다
+         (예 `2026-09-28T00:00:00+09:00`). 앱은 `nextResetAtOffset`을 기기 시간대로 바꿔 보여줍니다 (#421).
+         `canStartRoutine`에는 진행 중 작업이 들어가지 않습니다 — 진행 중인 일과 만들기는 `inProgress`로 판단합니다.
 
       **크레딧이 꺼져 있으면** `enabled=false`, 숫자는 0, 시각은 null, `canStartRoutine`·`canGenerateImage`는 true 입니다.
       앱은 카드를 숨기고 아무것도 막지 않습니다.

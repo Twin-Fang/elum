@@ -64,11 +64,6 @@ void main() {
   });
 
   group('파생 값', () {
-    test('적음 기준은 일과 글 + 최대 카드 수 × 그림 단가 = 11', () {
-      expect(CreditSummary.fromJson(creditJson(available: 11)).isLow, isFalse);
-      expect(CreditSummary.fromJson(creditJson(available: 10)).isLow, isTrue);
-      expect(CreditSummary.fromJson(creditJson(available: 0)).isLow, isTrue);
-    });
 
     test('0 이면 소진이다', () {
       expect(CreditSummary.fromJson(creditJson(available: 0)).isExhausted, isTrue);
@@ -89,6 +84,30 @@ void main() {
 
     test('다음 초기화를 `9월 28일(월) 0시` 로 적는다', () {
       expect(CreditSummary.fromJson(creditJson()).resetLabel, '9월 28일(월) 0시');
+    });
+
+    // 시간대가 있는 값을 기기 시간대로 바꿔 적는다 (#421 ③). 시간대 없는 값만 쓰면
+    // 뉴욕 시간대 기기에서도 `9월 28일(월) 0시` 로 나왔다 — 실제는 27일(일) 오전 11시.
+    test('시간대가 있는 초기화 시각을 쓰고 기기 시간대로 바꿔 적는다 (#421)', () {
+      final s = CreditSummary.fromJson({
+        ...creditJson(),
+        'nextResetAtOffset': '2026-09-28T00:00:00+09:00',
+      });
+
+      // 한국 월요일 0시 = UTC 일요일 15시. 같은 순간이어야 한다.
+      expect(s.nextResetAt!.isAtSameMomentAs(DateTime.utc(2026, 9, 27, 15)), isTrue);
+      // 적는 것은 기기 시간대 기준이다 — 이 테스트가 어느 시간대에서 돌든 맞아야 한다.
+      final local = DateTime.utc(2026, 9, 27, 15).toLocal();
+      const days = ['월', '화', '수', '목', '금', '토', '일'];
+      final minute = local.minute == 0 ? '' : ' ${local.minute}분';
+      expect(
+        s.resetLabel,
+        '${local.month}월 ${local.day}일(${days[local.weekday - 1]}) ${local.hour}시$minute',
+      );
+    });
+
+    test('시간대 있는 값이 없는 옛 서버 응답은 기존 값을 쓴다', () {
+      expect(CreditSummary.fromJson(creditJson()).nextResetAt, DateTime(2026, 9, 28));
     });
   });
 

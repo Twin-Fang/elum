@@ -271,10 +271,14 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
         leave: RoutineLeave.discard,
         child: _GenerateError(
           // 준비 로딩은 질문을 받다 실패한 것이다 — 카드는 아직 시작도 안 했다 (#393 S1).
-          title: switch (widget.kind) {
-            RoutineLoadingKind.prepare => '질문을 준비하지 못했어요',
-            RoutineLoadingKind.generate => '카드를 만들지 못했어요',
-          },
+          // 크레딧 때문에 막힌 것은 AI 가 실패한 것이 아니다 — "만들지 못했어요"라고
+          // 하면 다시 하면 될 줄 안다. 이유는 아래 서버 문구가 말한다 (#421, 실측).
+          title: isCreditBlockingCode(flow.errorCode)
+              ? '지금은 만들 수 없어요'
+              : switch (widget.kind) {
+                  RoutineLoadingKind.prepare => '질문을 준비하지 못했어요',
+                  RoutineLoadingKind.generate => '카드를 만들지 못했어요',
+                },
           errorCode: flow.errorCode,
           errorMessage: flow.errorMessage,
           errorHint: flow.errorHint,
