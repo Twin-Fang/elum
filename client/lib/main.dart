@@ -7,6 +7,7 @@ import 'core/config/client_tuning.dart';
 import 'core/dev/dev_log_buffer.dart';
 import 'core/dev/dev_log_file.dart';
 import 'core/logger/app_logger.dart';
+import 'core/state/provider_retry.dart';
 import 'core/storage/local_storage.dart';
 import 'core/storage/token_store.dart';
 import 'features/auth/data/auth_repository.dart';
@@ -63,6 +64,8 @@ Future<void> main() async {
 
   runApp(
     ProviderScope(
+      // 실패한 provider 를 저절로 다시 부르지 않는다 — 실패를 40초 늦게 보여 줬다 (#429).
+      retry: elumProviderRetry,
       overrides: [
         localStorageProvider.overrideWithValue(storage),
         tokenStoreProvider.overrideWithValue(tokens),
