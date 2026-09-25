@@ -129,15 +129,8 @@ class _GuardianSettingsScreenState
       backTop: 67,
       horizontalPadding: 16,
       // 크레딧 카드(#407)가 들어와 글꼴을 키우면 한 화면을 넘는다 — 스크롤로 끝까지
-      // 볼 수 있게 하되, 짧을 때는 버전 줄이 지금처럼 맨 아래에 붙게 최소 높이를 준다.
-      child: LayoutBuilder(
-        builder: (context, box) => SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: box.maxHeight),
-            child: IntrinsicHeight(child: _list(space)),
-          ),
-        ),
-      ),
+      // 볼 수 있게 한다.
+      child: SingleChildScrollView(child: _list(space)),
     );
   }
 
@@ -169,6 +162,10 @@ class _GuardianSettingsScreenState
                   ),
                 ),
         ),
+        // 앱 버전은 **목록의 한 줄**로 둔다 (#418). 예전에는 화면 맨 아래 가운데
+        // 글자였는데(#289) 목록과 떨어져 있어 "앱 정보"로 찾기 어려웠다.
+        // 제보를 받았을 때 어느 빌드인지 알아야 재현할 수 있다.
+        const _AppInfoTile(),
         // `문의하기`는 **일부러 뺐다** (#312, 2026-09-23 결정).
         // 시안(`1022:4467`)에는 이 자리(약관과 로그아웃 사이)에 그려져 있지만
         // App Store 심사 기간에는 두지 않는다 — 애플이 요구하는 것은 스토어
@@ -183,36 +180,29 @@ class _GuardianSettingsScreenState
           onTap: _busy ? null : _deleteAccount,
           destructive: true,
         ),
-        // 게시된 도움말 페이지가 "앱 버전 — 설정 화면 맨 아래"라고 안내한다.
-        // 제보를 받았을 때 어느 빌드인지 알아야 재현할 수 있다 (이슈 #289).
-        const Spacer(),
-        const _VersionLine(),
         SizedBox(height: space.lg),
       ],
     );
   }
 }
 
-/// 설정 맨 아래 버전 줄. 읽지 못하면 아무것도 그리지 않는다.
+/// `앱 정보` 줄. 오른쪽에 `v1.44.0` 처럼 앱 버전을 보여주고, 누를 수는 없다.
 ///
-/// 버전을 못 읽는 것(플러그인 미등록·테스트 환경)은 사용자가 할 수 있는 일이
-/// 없으므로 오류로 보여줄 이유가 없다. 그 자리는 그냥 비워 둔다.
-class _VersionLine extends ConsumerWidget {
-  const _VersionLine();
+/// 버전을 못 읽으면(플러그인 미등록·테스트 환경) 값 자리만 비운다. 사용자가 할 수
+/// 있는 일이 없으므로 오류로 보여줄 이유가 없고, 줄은 남겨 자리가 흔들리지 않게 한다.
+class _AppInfoTile extends ConsumerWidget {
+  const _AppInfoTile();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final version = ref
         .watch(appVersionProvider)
         .maybeWhen(data: (value) => value, orElse: () => '');
-    if (version.isEmpty) return const SizedBox.shrink();
 
-    return Text(
-      '버전 $version',
-      textAlign: TextAlign.center,
-      style: context.typo.caption.copyWith(
-        color: context.colors.textPlaceholder,
-      ),
+    return SettingsTile(
+      label: '앱 정보',
+      onTap: null,
+      valueText: version.isEmpty ? '' : 'v$version',
     );
   }
 }

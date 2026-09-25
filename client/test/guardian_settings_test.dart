@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:elum/core/app_status/app_status_repository.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
@@ -30,7 +31,7 @@ void main() {
 
   late _FakeAuth auth;
 
-  Widget wrap() {
+  Widget wrap({String version = '1.24.1'}) {
     final router = GoRouter(
       initialLocation: Routes.guardianSettings,
       routes: [
@@ -50,6 +51,7 @@ void main() {
         authRepositoryProvider.overrideWithValue(auth),
         // 약관 목록은 서버·캐시를 타므로 테스트에서는 앱 번들 기본값으로 고정한다.
         consentBundleProvider.overrideWith((ref) async => ConsentBundle.bundled),
+        appVersionProvider.overrideWith((ref) async => version),
       ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
@@ -62,6 +64,30 @@ void main() {
   }
 
   setUp(() => auth = _FakeAuth());
+
+  // 버전은 맨 아래 떨어진 글자가 아니라 목록의 한 줄이다 (#418).
+  testWidgets('앱 정보 줄에 버전이 보이고 화살표는 없다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    final row = find.ancestor(of: find.text('앱 정보'), matching: find.byType(Row));
+    expect(find.descendant(of: row, matching: find.text('v1.24.1')), findsOneWidget);
+    // 들어갈 화면이 없는 줄이다. 화살표가 있으면 누를 곳처럼 읽힌다.
+    expect(
+      find.descendant(of: row, matching: find.byIcon(Icons.chevron_right_rounded)),
+      findsNothing,
+    );
+    // 예전 맨 아래 글자는 없어졌다.
+    expect(find.text('버전 1.24.1'), findsNothing);
+  });
+
+  testWidgets('버전을 읽지 못해도 앱 정보 줄은 남는다', (tester) async {
+    await tester.pumpWidget(wrap(version: ''));
+    await tester.pumpAndSettle();
+
+    expect(find.text('앱 정보'), findsOneWidget);
+    expect(find.textContaining(RegExp(r'^v\d')), findsNothing);
+  });
 
   testWidgets('설정에는 로그아웃과 회원 탈퇴가 있다', (tester) async {
     await tester.pumpWidget(wrap());
@@ -109,6 +135,8 @@ void main() {
       '이룸이 휴대폰 연결하기',
       '임시저장',
       '약관 및 개인정보처리방침',
+      // `앱 정보`(#418)는 약관과 로그아웃 사이에 새로 들어온 줄이다 — 시안에는 아직 없다.
+      '앱 정보',
       '로그아웃',
       '회원탈퇴',
     ];

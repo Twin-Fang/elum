@@ -61,6 +61,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.promptPlaceholder,
     required this.promptCaption,
     required this.lastLoginBadge,
+    required this.appVersionTag,
     required this.settingsTileLabel,
     required this.creditTitle,
     required this.creditNumber,
@@ -287,6 +288,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// promptCaption과 값은 같지만 쓰임이 달라 따로 둔다 — 한쪽을 고칠 때
   /// 다른 쪽이 딸려 바뀌면 안 된다.
   final TextStyle lastLoginBadge;
+
+  /// 로그인 화면 구석의 앱 버전 `v1.44.0` (10/w400 Pretendard, #418).
+  /// **시안이 없는 개발 쪽 임시값이다.** 알고 찾아야 보일 만큼 작게 둔다 —
+  /// caption(12)보다 작은 글자는 이것뿐이다.
+  final TextStyle appVersionTag;
 
   /// 설정 목록 한 줄의 라벨 (16/w400 Pretendard, Figma `1022:4467`).
   ///
@@ -723,6 +729,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.0,
     ),
+    appVersionTag: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 10,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
     actionCardTitle: TextStyle(
       fontFamily: fontFamily,
       fontSize: 25,
@@ -819,6 +831,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? promptPlaceholder,
     TextStyle? promptCaption,
     TextStyle? lastLoginBadge,
+    TextStyle? appVersionTag,
     TextStyle? settingsTileLabel,
     TextStyle? creditTitle,
     TextStyle? creditNumber,
@@ -887,6 +900,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       promptPlaceholder: promptPlaceholder ?? this.promptPlaceholder,
       promptCaption: promptCaption ?? this.promptCaption,
       lastLoginBadge: lastLoginBadge ?? this.lastLoginBadge,
+      appVersionTag: appVersionTag ?? this.appVersionTag,
       settingsTileLabel: settingsTileLabel ?? this.settingsTileLabel,
       creditTitle: creditTitle ?? this.creditTitle,
       creditNumber: creditNumber ?? this.creditNumber,
@@ -968,6 +982,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
           TextStyle.lerp(promptPlaceholder, other.promptPlaceholder, t)!,
       promptCaption: TextStyle.lerp(promptCaption, other.promptCaption, t)!,
       lastLoginBadge: TextStyle.lerp(lastLoginBadge, other.lastLoginBadge, t)!,
+      appVersionTag: TextStyle.lerp(appVersionTag, other.appVersionTag, t)!,
       settingsTileLabel:
           TextStyle.lerp(settingsTileLabel, other.settingsTileLabel, t)!,
       creditTitle: TextStyle.lerp(creditTitle, other.creditTitle, t)!,

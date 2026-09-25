@@ -1,3 +1,4 @@
+import 'package:elum/core/app_status/app_status_repository.dart';
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
@@ -47,7 +48,7 @@ void main() {
         .clearAccessibilityFeaturesTestValue();
   });
 
-  Widget wrap() {
+  Widget wrap({String? version}) {
     final router = GoRouter(
       initialLocation: Routes.login,
       routes: [
@@ -59,7 +60,11 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [testStorageOverride()],
+      overrides: [
+        testStorageOverride(),
+        if (version != null)
+          appVersionProvider.overrideWith((ref) async => version),
+      ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
         builder: (context, child) => MaterialApp.router(
@@ -69,6 +74,29 @@ void main() {
       ),
     );
   }
+
+  // 로그인하지 못한 사용자는 설정에 갈 수 없다. 제보할 때 빌드를 확인할 곳은
+  // 여기뿐이다 (#418).
+  testWidgets('우측 상단에 앱 버전이 작게 보인다', (tester) async {
+    await tester.pumpWidget(wrap(version: '1.24.1'));
+    await tester.pumpAndSettle();
+
+    final label = find.text('v1.24.1');
+    expect(label, findsOneWidget);
+    // 오른쪽 위 구석이다 — 그림·버튼이 있는 아래쪽이 아니다.
+    final rect = tester.getRect(label);
+    expect(rect.right, greaterThan(393 - 40));
+    expect(rect.top, lessThan(100));
+  });
+
+  testWidgets('버전을 읽지 못하면 아무것도 그리지 않는다', (tester) async {
+    await tester.pumpWidget(wrap(version: ''));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining(RegExp(r'^v\d')), findsNothing);
+    // 버튼은 그대로다 — 버전 때문에 화면이 흔들리지 않는다.
+    expect(find.text('카카오로 로그인'), findsOneWidget);
+  });
 
   testWidgets('글자 제목 대신 로고를 쓴다', (tester) async {
     await tester.pumpWidget(wrap());
