@@ -18,6 +18,49 @@ void main() {
       ]);
     });
 
+    // 서비스 이용약관은 `제N조`가 제목이고 그 아래 `1.` 은 본문 항목이다 (#430).
+    // `1.` 을 제목으로 보면 들여쓴 다음 줄이 떨어져 문장이 중간에서 끊겼고,
+    // `제N조`는 제목이 되지 못해 앞 문단에 붙었다 (실기기 실측).
+    test('제N조가 있는 문서는 제N조가 제목이고 번호 줄은 본문 항목이다 (#430)', () {
+      final blocks = parseConsentBody('''
+제3조 (계정)
+1. 계정은 카카오·네이버·구글·애플 로그인으로 만듭니다.
+2. 로그인 수단마다 별개의 계정이 만들어집니다. 다른 수단으로 로그인하면
+   이전 계정의 정보가 보이지 않습니다.
+
+제5조 (서비스의 변경·중단)
+회사는 서비스 내용을 변경하거나 중단할 수 있습니다.''');
+
+      expect(blocks, [
+        const ConsentBlock(ConsentBlockKind.section, '제3조 (계정)'),
+        const ConsentBlock(
+          ConsentBlockKind.paragraph,
+          '1. 계정은 카카오·네이버·구글·애플 로그인으로 만듭니다.',
+        ),
+        const ConsentBlock(
+          ConsentBlockKind.paragraph,
+          '2. 로그인 수단마다 별개의 계정이 만들어집니다. 다른 수단으로 로그인하면 '
+          '이전 계정의 정보가 보이지 않습니다.',
+        ),
+        const ConsentBlock(ConsentBlockKind.section, '제5조 (서비스의 변경·중단)'),
+        const ConsentBlock(
+          ConsentBlockKind.paragraph,
+          '회사는 서비스 내용을 변경하거나 중단할 수 있습니다.',
+        ),
+      ]);
+    });
+
+    test('서비스 이용약관 전문에서 조항 7개가 모두 제목이 된다 (#430)', () {
+      final terms = consentItems.firstWhere((d) => d.key == 'termsAgreed');
+      final sections = parseConsentBody(terms.body)
+          .where((b) => b.kind == ConsentBlockKind.section)
+          .map((b) => b.text)
+          .toList();
+
+      expect(sections, hasLength(7));
+      expect(sections, everyElement(startsWith('제')));
+    });
+
     test('대괄호로 감싼 줄은 소제목이다', () {
       final blocks = parseConsentBody('[계정]');
 

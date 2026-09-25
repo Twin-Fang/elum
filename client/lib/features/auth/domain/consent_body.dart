@@ -52,6 +52,9 @@ class ConsentBlock {
 }
 
 final _section = RegExp(r'^\d+\.\s+(.+)$');
+// 법률 문서식 조항 제목 — `제3조 (계정)` (#430). 이 줄이 있는 문서는 조항이 제목이고,
+// 그 아래 `1.` `2.` 는 제목이 아니라 **본문 항목**이다.
+final _article = RegExp(r'^제\d+조(\s|\(|$)');
 // 대괄호 **뒤에 꼬리가 붙는** 소제목이 있다 — `[이룸이 정보] — 보호자가 직접 입력합니다`.
 // `^\[.+\]$`로 잡으면 이런 줄이 통째로 평범한 문단이 되어 소제목 자리를 잃는다.
 final _subsection = RegExp(r'^\[([^\]]+)\]\s*(.*)$');
@@ -85,6 +88,12 @@ List<ConsentBlock> parseConsentBody(String raw) {
   String? label;
   var bulleted = false;
   final buffer = StringBuffer();
+
+  // 조항식 문서인가 — 서비스 이용약관은 `제N조` 가 제목이고 `1.` 은 항목이다.
+  // 이걸 모르면 `1.` 을 제목으로 잘라 들여쓴 다음 줄이 떨어지고(문장이 중간에서
+  // 끊김), `제N조` 는 제목이 못 되어 앞 문단에 붙었다 (#430, 실기기 실측).
+  // 개인정보처리방침처럼 `1. 수집하는 항목` 이 제목인 문서는 그대로 둔다.
+  final usesArticles = raw.split('\n').any((l) => _article.hasMatch(l.trim()));
 
   void flush() {
     if (kind == null) return;
@@ -121,6 +130,19 @@ List<ConsentBlock> parseConsentBody(String raw) {
     //   줄로 두면 `이름(별명)`이 떨어져 다른 값처럼 읽힌다.
     if (kind == ConsentBlockKind.row && line.startsWith(RegExp(r'\s'))) {
       buffer.write(_endsMidSentence(buffer.toString()) ? ' $trimmed' : '\n$trimmed');
+      continue;
+    }
+
+    if (usesArticles && _article.hasMatch(trimmed)) {
+      start(ConsentBlockKind.section, trimmed);
+      flush();
+      continue;
+    }
+
+    // 조항식 문서의 `1.` 은 본문 항목이다 — 새 문단으로 시작하고, 들여쓴 다음 줄은
+    // 아래 '이어지는 줄' 규칙으로 이 항목에 붙는다.
+    if (usesArticles && _section.hasMatch(trimmed)) {
+      start(ConsentBlockKind.paragraph, trimmed);
       continue;
     }
 
