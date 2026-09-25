@@ -107,7 +107,31 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
       _errorMessage = message;
       _failCount++;
     });
-    _focusNode.requestFocus();
+    // 다음 프레임에 연다 — 화면에 처음 들어올 때와 같은 방식이다. 같은 프레임에서
+    // 포커스를 잡으면 Android 가 키보드를 올리지 않았다 (실측).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _openKeyboard();
+    });
+  }
+
+  /// 키보드를 연다 — **포커스가 이미 있어도** 입력 연결을 새로 잡는다 (#428).
+  ///
+  /// 보낼 때 키보드를 내렸다가 실패하면 포커스만 돌아오고 키보드는 내려간 채였다.
+  /// 그 뒤 칸을 누르면 `requestFocus` 는 이미 포커스가 있어 아무 일도 하지 않아,
+  /// 뒤로 나갔다 들어오기 전에는 다시 칠 수 없었다 (Android·iOS 실측).
+  ///
+  /// 키보드만 다시 띄우면(`TextInput.show`) 키보드는 올라와도 **친 글자가 칸에
+  /// 들어가지 않았다** — 입력 연결은 끊긴 채였다 (Android 실측). 그래서 포커스를
+  /// 한 번 풀고 다음 프레임에 다시 잡아 연결부터 새로 만든다.
+  void _openKeyboard() {
+    if (!_focusNode.hasFocus) {
+      _focusNode.requestFocus();
+      return;
+    }
+    _focusNode.unfocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusNode.requestFocus();
+    });
   }
 
   @override
@@ -157,7 +181,7 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
             label: '연결 암호 넣기',
             value: _typed,
             child: GestureDetector(
-              onTap: _focusNode.requestFocus,
+              onTap: _openKeyboard,
               behavior: HitTestBehavior.opaque,
               child: AppShake(
                 trigger: _failCount,

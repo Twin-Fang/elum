@@ -161,6 +161,29 @@ void main() {
       );
     });
 
+    // 화면 문구가 두 문장(무엇이 안 됐는지 + 할 일)이면 안내가 붙을 때 할 일이
+    // 두 개가 된다 — `연결하지 못했어요. 인터넷을 확인해주세요 · 인터넷 연결을
+    // 확인해주세요` (실기기 실측, #428 · #427). 할 일은 안내 하나만 말한다.
+    test('안내가 붙으면 화면 문구는 첫 문장만 쓴다 — 할 일을 두 번 말하지 않는다', () {
+      const f = AppFailure(fault: NetworkFault.offline);
+      expect(
+        f.describe('연결하지 못했어요. 인터넷을 확인해주세요', 'E-NET'),
+        '연결하지 못했어요 · 인터넷 연결을 확인해주세요 (E-NET-OFFLINE)',
+      );
+      expect(
+        f.describe('일과를 저장하지 못했어요. 다시 해주세요', 'E-SAVE'),
+        '일과를 저장하지 못했어요 · 인터넷 연결을 확인해주세요 (E-NET-OFFLINE)',
+      );
+    });
+
+    test('안내가 없으면 화면 문구를 그대로 쓴다', () {
+      final f = AppFailure.of(_res(null, status: 500));
+      expect(
+        f.describe('일과를 저장하지 못했어요. 다시 해주세요', 'E-SAVE'),
+        '일과를 저장하지 못했어요. 다시 해주세요 (E-SAVE/500)',
+      );
+    });
+
     test('서버가 이유를 말했으면 덧붙이지 않는다 — 두 번 말하지 않는다', () {
       final f = AppFailure.of(_res({
         'errorCode': 'MEMBER_SUSPENDED',

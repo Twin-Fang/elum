@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
+import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/features/link/presentation/widgets/code_boxes.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/presentation/link_enter_screen.dart';
 import 'package:flutter/material.dart';
@@ -113,6 +115,51 @@ void main() {
     expect(find.text('이룸이 홈'), findsNothing);
     // 비우지 않으면 다시 치려고 지우는 것부터 해야 한다.
     expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, isEmpty);
+  });
+
+  // 틀린 뒤 칸을 눌러도 키보드가 안 올라와 다시 칠 수 없었다 (#428, Android·iOS
+  // 실측). 보낼 때 키보드를 내렸다가 실패하면 포커스만 돌아오고, 칸을 누르면
+  // requestFocus 가 이미 포커스가 있어 아무 일도 안 했다.
+  testWidgets('틀린 뒤 칸을 누르면 키보드를 다시 띄운다 (#428)', (tester) async {
+    repo.outcome = RedeemOutcome.notFound;
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+    await type(tester, 'A7K3M9');
+    expect(find.text('암호가 맞지 않아요'), findsOneWidget);
+
+    tester.testTextInput.log.clear();
+    await tester.tap(find.bySemanticsLabel('연결 암호 넣기'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.testTextInput.log.map((call) => call.method),
+      contains('TextInput.show'),
+      reason: '포커스가 이미 있어도 키보드를 다시 올려야 칠 수 있다',
+    );
+  });
+
+  // 이룸이가 보는 화면이다. 틀림은 흔들림으로 알리고 색으로 겁주지 않는다
+  // (docs/08-design-principles.md §6 — 코드 틀림 빨간 테두리 ❌, #427 ①).
+  testWidgets('틀려도 칸 테두리에 경고색을 쓰지 않는다 (#427)', (tester) async {
+    repo.outcome = RedeemOutcome.notFound;
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+    await type(tester, 'A7K3M9');
+
+    final danger = AppTheme.light.extension<AppColors>()!.danger;
+    final borders = tester
+        .widgetList<Container>(find.descendant(
+          of: find.byType(CodeBoxes),
+          matching: find.byType(Container),
+        ))
+        .map((c) => c.decoration)
+        .whereType<BoxDecoration>()
+        .map((d) => d.border)
+        .whereType<Border>()
+        .map((b) => b.top.color)
+        .toList();
+    expect(borders, isNotEmpty);
+    expect(borders, everyElement(isNot(danger)));
   });
 
   testWidgets('만료와 못 맞춤을 구분해 말한다 — 할 일이 다르다', (tester) async {

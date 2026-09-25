@@ -40,9 +40,11 @@ class CodeBoxes extends StatelessWidget {
             decoration: BoxDecoration(
               color: colors.surface,
               borderRadius: BorderRadius.circular(space.buttonRadius.r),
+              // 틀려도 경고색을 쓰지 않는다 — 이룸이 휴대폰 화면이다. 틀림은 흔들림과
+              // 짧은 문구로 알린다 (docs/08-design-principles.md §6, #427).
               border: Border.all(
                 color: hasError
-                    ? colors.danger
+                    ? colors.textSecondary
                     : (i < value.length ? colors.textPrimary : colors.border),
                 width: i < value.length || hasError ? 1.5 : 1,
               ),

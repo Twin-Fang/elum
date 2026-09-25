@@ -153,10 +153,20 @@ class AppFailure {
   /// 서버가 이유를 말해 줬으면 그것으로 충분하다. 말이 없고 네트워크 사정을
   /// 아는 경우에만 [hint] 를 덧붙인다 — 무엇이 안 됐는지(화면 몫)와 무엇을 하면
   /// 되는지(여기 몫)가 둘 다 있어야 사용자가 다음 수를 안다.
+  ///
+  /// 안내를 붙일 때는 화면 문구의 **첫 문장만** 쓴다. 화면 문구가 할 일까지 말하면
+  /// (`…못했어요. 다시 해주세요`) 할 일이 두 개가 된다 — 실기기에서 `인터넷을
+  /// 확인해주세요 · 인터넷 연결을 확인해주세요`로 같은 말이 두 번 나왔다 (#428 · #427).
   String describe(String fallback, String fallbackCode) {
     final body = serverMessage ??
-        (hint == null ? fallback : '$fallback · $hint');
+        (hint == null ? fallback : '${_headline(fallback)} · $hint');
     return '$body (${badgeOr(fallbackCode)})';
+  }
+
+  /// 문구의 첫 문장 — `무엇이 안 됐는지`. 마침표로 끝나는 첫 문장을 떼고 마침표는 뺀다.
+  static String _headline(String text) {
+    final end = text.indexOf('. ');
+    return end < 0 ? text : text.substring(0, end);
   }
 
   /// **무엇이 던져져도 받는다.** 이 함수가 앱의 단일 판정 지점이다.
