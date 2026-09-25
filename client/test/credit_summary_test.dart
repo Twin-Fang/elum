@@ -70,11 +70,16 @@ void main() {
       expect(CreditSummary.fromJson(creditJson(available: 1)).isExhausted, isFalse);
     });
 
-    test('남은 비율은 주간 + 보너스 대비이고 0~1 로 묶인다', () {
+    test('남은 비율은 주간 지급량 대비이고 0~1 로 묶인다', () {
       expect(CreditSummary.fromJson(creditJson(available: 72)).remainingRatio, closeTo(0.72, 1e-9));
       expect(
         CreditSummary.fromJson(creditJson(available: 120, bonus: 20)).remainingRatio,
         closeTo(1.0, 1e-9),
+      );
+      // 주간분을 다 쓰고 보너스만 50 남았으면 화면은 `50 / 100` — 막대도 절반이다
+      expect(
+        CreditSummary.fromJson(creditJson(available: 50, bonus: 50)).remainingRatio,
+        closeTo(0.5, 1e-9),
       );
       expect(
         CreditSummary.fromJson(creditJson(available: 0, weeklyGrant: 0)).remainingRatio,

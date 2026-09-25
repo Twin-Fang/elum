@@ -102,16 +102,13 @@ void main() {
     expect(bar.widthFactor, closeTo(0.72, 1e-9));
   });
 
-  testWidgets('보너스가 있으면 `+ 추가 N` 을 붙인다', (tester) async {
+  // 보너스는 큰 숫자에 이미 들어 있다 — 따로 적으면 합계로 오해한다 (#421).
+  testWidgets('보너스가 있어도 `+ 추가 N` 을 적지 않는다', (tester) async {
     await pump(tester, () async => summary(available: 90, bonus: 20));
 
-    expect(find.text('+ 추가 20'), findsOneWidget);
-  });
-
-  testWidgets('보너스가 없으면 추가 줄이 없다', (tester) async {
-    await pump(tester, () async => summary());
-
     expect(find.textContaining('추가'), findsNothing);
+    expect(find.textContaining('90 / 100 크레딧 남음', findRichText: true),
+        findsOneWidget);
   });
 
   // 적어도 경고 문구를 덧붙이지 않는다 — 숫자와 막대로 충분하다
@@ -293,7 +290,7 @@ void main() {
     final node = tester.getSemantics(find.byKey(AiCreditCard.contentKey));
     expect(node.label, contains('이번 주 AI 생성'));
     expect(node.label, contains('10 / 100 크레딧 남음'));
-    expect(node.label, contains('추가 5'));
+    expect(node.label, isNot(contains('추가')));
     expect(node.label, contains('9월 28일(월) 0시에 다시 채워져요'));
     // 적음 경고 문구는 없앴다 (#421) — 낭독기에도 읽히지 않는다.
     expect(node.label, isNot(contains('0이 될 수 있어요')));

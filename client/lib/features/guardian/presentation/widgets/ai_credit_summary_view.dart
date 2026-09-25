@@ -35,7 +35,8 @@ class AiCreditSummaryView extends StatelessWidget {
     final s = summary;
 
     final amount = '${s.available} / ${s.weeklyGrant} 크레딧 남음';
-    final bonus = s.bonus > 0 ? '+ 추가 ${s.bonus}' : null;
+    // 보너스는 따로 적지 않는다 — 큰 숫자(available)에 이미 들어 있어 `+ 추가 N` 은
+    // 합계를 부풀려 읽히게 했다 (2026-09-25 사용자 결정, #421).
     final lines = <(String, Color)>[
       if (s.isGeneratingRoutine) ('일과를 만들고 있어요', colors.textPrimary),
       // 적을 때 "끝까지 만들어지지만 0 이 될 수 있다"는 경고는 두지 않는다 — 숫자와
@@ -54,7 +55,6 @@ class AiCreditSummaryView extends StatelessWidget {
       label: [
         '이번 주 AI 생성',
         amount,
-        ?bonus,
         for (final (text, _) in lines) text,
         reset,
       ].join(', '),
@@ -91,13 +91,6 @@ class AiCreditSummaryView extends StatelessWidget {
               ],
             ),
           ),
-          if (bonus != null)
-            Text(
-              bonus,
-              style: context.typo.creditCaption.copyWith(
-                color: colors.creditAccentText,
-              ),
-            ),
           SizedBox(height: space.sm),
           AiCreditBar(
             key: AiCreditCard.barKey,

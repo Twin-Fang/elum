@@ -109,9 +109,10 @@ class CreditSummary {
   bool get isGeneratingRoutine =>
       inProgress.any((job) => job.kind == 'ROUTINE_CREATE');
 
-  /// 막대 길이. 분모는 이번 주에 받은 전부(주간 + 보너스)다.
+  /// 막대 길이. 분모는 화면 숫자(`N / 50`)와 같은 주간 지급량이다 — 보너스를 분모에
+  /// 넣으면 `50 / 50` 인데 막대가 덜 찬다. 보너스로 넘치면 가득 찬 것으로 본다.
   double get remainingRatio {
-    final total = weeklyGrant + bonus;
+    final total = weeklyGrant;
     if (total <= 0) return 0;
     return (available / total).clamp(0.0, 1.0);
   }
