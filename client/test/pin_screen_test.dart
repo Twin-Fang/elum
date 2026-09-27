@@ -70,6 +70,12 @@ void main() {
   Future<void> submit(WidgetTester tester) async {
     await tester.tap(find.byType(ElumButton));
     await tester.pumpAndSettle();
+    // 시험에는 서버가 없어 프로필 저장이 실패한다. 실패 팝업을 닫아야 다음 화면으로
+    // 넘어간다 — 팝업을 띄운 채 넘어가면 팝업이 홈 위에 남는다 (#433).
+    if (find.text('확인').evaluate().isNotEmpty) {
+      await tester.tap(find.text('확인'));
+      await tester.pumpAndSettle();
+    }
   }
 
   /// 채워진 점 개수를 센다
@@ -226,8 +232,7 @@ void main() {
       await enterPin(tester, '9999'); // 한 번 틀림
       await enterPin(tester, '1234'); // 처음 정한 암호로 다시
 
-      await tester.tap(find.text('시작하기'));
-      await tester.pumpAndSettle();
+      await submit(tester);
 
       expect(find.text('완료 화면'), findsOneWidget);
     });

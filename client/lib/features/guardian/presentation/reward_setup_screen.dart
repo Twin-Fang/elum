@@ -136,13 +136,16 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
       if (!mounted) return;
       // 저장에 실패해도 화면은 되돌아간다 — 로컬에는 반영됐다. 다만 말은 해 준다.
       // **서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다** (#352).
+      // 팝업을 닫은 뒤에 돌아간다 — 먼저 돌아가면 팝업이 다음 화면 위에 남는다.
       if (failure != null) {
-        showFailureSnack(
+        await showFailure(
           context,
           failure,
-          fallback: '보상을 저장하지 못했어요',
+          title: '보상을 저장하지 못했어요',
+          fallback: '잠시 후 다시 시도해주세요',
           fallbackCode: 'E-REWARD',
         );
+        if (!mounted) return;
       }
       context.pop();
       return;

@@ -78,13 +78,16 @@ void main() {
         _FakeCredit(CreditSummary.fromJson(creditJson(available: 0))),
       );
 
-      expect(find.text('이번 주 크레딧을 모두 사용했어요'), findsOneWidget);
-      expect(find.text('9월 28일(월) 0시부터 다시 만들 수 있어요'), findsOneWidget);
+      // 시안 `로그인실패` 변형처럼 두 줄 문장 하나다 (#433)
+      expect(
+        find.text('이번 주 크레딧을 모두 사용했어요.\n9월 28일(월) 0시부터 다시 만들 수 있어요'),
+        findsOneWidget,
+      );
       expect(find.text('일과 입력'), findsNothing);
 
       await tester.tap(find.text('확인'));
       await tester.pumpAndSettle();
-      expect(find.text('이번 주 크레딧을 모두 사용했어요'), findsNothing);
+      expect(find.textContaining('이번 주 크레딧을 모두 사용했어요'), findsNothing);
       expect(find.text('일과 입력'), findsNothing);
     });
 
@@ -101,7 +104,10 @@ void main() {
         ))),
       );
 
-      expect(find.text('이미 일과를 만들고 있어요'), findsOneWidget);
+      expect(
+        find.text('이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요'),
+        findsOneWidget,
+      );
       expect(find.text('일과 입력'), findsNothing);
     });
 
@@ -121,7 +127,7 @@ void main() {
       await pumpHome(tester, _FakeCredit(null));
 
       expect(find.text('일과 입력'), findsOneWidget);
-      expect(find.text('이번 주 크레딧을 모두 사용했어요'), findsNothing);
+      expect(find.textContaining('이번 주 크레딧을 모두 사용했어요'), findsNothing);
    
     });
 
@@ -161,7 +167,7 @@ void main() {
       // 뒤늦게 온 응답이 막힘 팝업을 띄우지 않는다.
       credit.complete(CreditSummary.fromJson(creditJson(available: 0)));
       await tester.pumpAndSettle();
-      expect(find.text('이번 주 크레딧을 모두 사용했어요'), findsNothing);
+      expect(find.textContaining('이번 주 크레딧을 모두 사용했어요'), findsNothing);
     });
   });
 

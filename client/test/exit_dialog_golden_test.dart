@@ -34,7 +34,7 @@ void main() {
     final (title, message) = RoutineLeave.copyOf(kind);
     final loses = kind == RoutineLeave.discard;
     return ElumDialogCard<bool>(
-      icon: loses ? ElumDialogIcon.warning : null,
+      icon: loses ? ElumDialogIcon.alert : null,
       title: title,
       message: message,
       actions: [
@@ -46,19 +46,19 @@ void main() {
         ElumDialogAction(
           label: '나가기',
           value: true,
-          tone: loses ? ElumDialogTone.warn : ElumDialogTone.primary,
+          tone: loses ? ElumDialogTone.danger : ElumDialogTone.primary,
         ),
       ],
     );
   }
 
-  testWidgets('나갈 때 팝업 — 카드 만들기 전 (warn)', (tester) async {
+  testWidgets('나갈 때 팝업 — 카드 만들기 전 (alert)', (tester) async {
     await tester.pumpWidget(wrap(leaveCard(RoutineLeave.discard)));
     await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(ElumDialogCard<bool>),
-      matchesGoldenFile('goldens/dialog_warn_exit.png'),
+      matchesGoldenFile('goldens/dialog_discard_exit.png'),
     );
   });
 
@@ -92,7 +92,7 @@ void main() {
     );
   });
 
-  testWidgets('세 무게를 나란히 — primary · warn · danger', (tester) async {
+  testWidgets('무게를 나란히 — primary · 잃는 나가기 · danger', (tester) async {
     await tester.pumpWidget(wrap(
       const SingleChildScrollView(
         child: Column(
@@ -104,14 +104,14 @@ void main() {
             ),
             SizedBox(height: 16),
             ElumDialogCard<bool>(
-              icon: ElumDialogIcon.warning,
+              icon: ElumDialogIcon.alert,
               title: '만들던 일과가 사라져요',
               actions: [
                 ElumDialogAction(
                   label: '계속 만들기',
                   tone: ElumDialogTone.neutral,
                 ),
-                ElumDialogAction(label: '나가기', tone: ElumDialogTone.warn),
+                ElumDialogAction(label: '나가기', tone: ElumDialogTone.danger),
               ],
             ),
             SizedBox(height: 16),

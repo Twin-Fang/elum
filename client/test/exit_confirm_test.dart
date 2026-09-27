@@ -1,5 +1,4 @@
 import 'package:elum/core/router/app_router.dart';
-import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/features/guardian/presentation/widgets/routine_flow_scaffold.dart';
@@ -147,9 +146,9 @@ void main() {
 
       expect(card.title, '일과 만들기를 그만둘까요?');
       expect(card.message, '지금 나가면 적은 내용은 남지 않아요');
-      // 정말 잃는다 — 노란 경고 톤 (#242 그대로)
-      expect(card.icon, ElumDialogIcon.warning);
-      expect(leaveTone(card), ElumDialogTone.warn);
+      // 정말 잃는다 — 시안 팝업의 느낌표 + 붉은 버튼 (#433, 노란 경고는 없다)
+      expect(card.icon, ElumDialogIcon.alert);
+      expect(leaveTone(card), ElumDialogTone.danger);
     });
 
     testWidgets('카드 만든 뒤 — 임시저장에 두고 · 경고가 아니다 (T1)', (tester) async {
@@ -159,7 +158,7 @@ void main() {
       expect(card.message, '설정의 임시저장에서\n이어서 만들 수 있어요');
       // 되돌릴 수 없는 동작이 아니다 — 경고 아이콘도 경고 버튼도 없다.
       expect(card.icon, isNull);
-      expect(leaveTone(card), isNot(anyOf(ElumDialogTone.warn, ElumDialogTone.danger)));
+      expect(leaveTone(card), isNot(ElumDialogTone.danger));
       expect(find.text('계속 만들기'), findsOneWidget);
       expect(find.text('나가기'), findsOneWidget);
     });
@@ -170,7 +169,7 @@ void main() {
       expect(card.title, '임시저장에 두고 나갈까요?');
       expect(card.message, '카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요');
       expect(card.icon, isNull);
-      expect(leaveTone(card), isNot(anyOf(ElumDialogTone.warn, ElumDialogTone.danger)));
+      expect(leaveTone(card), isNot(ElumDialogTone.danger));
     });
 
     testWidgets('이미 저장한 일과를 고치다 — 저장하지 않고 나갈까요', (tester) async {
@@ -273,12 +272,4 @@ void main() {
     });
   });
 
-  test('warn과 danger는 다른 색이다 (이슈 #242)', () {
-    const colors = AppColors.light;
-
-    // 아동도 보는 화면이라 붉은 경고를 함부로 쓰지 않는다.
-    // `danger`는 되돌릴 수 없는 파괴(회원탈퇴)에만 쓴다.
-    expect(colors.warn, isNot(colors.danger));
-    expect(colors.warnText, colors.surface);
-  });
 }

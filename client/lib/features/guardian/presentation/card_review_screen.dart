@@ -103,11 +103,15 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     if (!ok) _showFailure();
   }
 
-  /// 소리를 낼 수 없을 때. 아동은 못 읽지만 보호자가 제보할 때 필요하다.
+  /// 소리를 낼 수 없을 때. 식별자는 보호자가 제보할 때 필요하다.
   void _showFailure() {
-    ScaffoldMessenger.of(
+    showFailure(
       context,
-    ).showSnackBar(const SnackBar(content: Text('소리를 재생할 수 없어요 (E-TTS)')));
+      null,
+      title: '소리를 재생하지 못했어요',
+      fallback: '휴대폰 소리를 켜고 다시 눌러주세요',
+      fallbackCode: 'E-TTS',
+    );
   }
 
   Future<void> _save() async {
@@ -121,10 +125,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     // 정작 이룸이 휴대폰에는 아무것도 뜨지 않는다. 그때 보호자가 의심할 곳은
     // 앱이 아니라 이룸이다.
     if (failure != null) {
-      showFailureSnack(
+      showFailure(
         context,
         failure,
-        fallback: '일과를 저장하지 못했어요. 다시 해주세요',
+        title: '일과를 저장하지 못했어요',
+        fallback: '잠시 후 다시 시도해주세요',
         fallbackCode: 'E-CONFIRM',
       );
       return;
@@ -157,10 +162,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     // 서버 반영 실패 — 로컬에는 반영됐지만 저장하기(승인) 전에 앱을 끄면
     // 사라진다. 에러 코드가 있어야 제보를 추적할 수 있다.
     if (failure != null && mounted) {
-      showFailureSnack(
+      showFailure(
         context,
         failure,
-        fallback: '고친 내용을 저장하지 못했어요',
+        title: '고친 내용을 저장하지 못했어요',
+        fallback: '잠시 후 다시 시도해주세요',
         fallbackCode: 'E-STEP',
       );
     }

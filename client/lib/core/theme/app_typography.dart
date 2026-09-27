@@ -33,6 +33,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.linkTimer,
     required this.linkRetryChip,
     required this.dialogTitle,
+    required this.dialogSentence,
     required this.dialogAction,
     required this.linkLater,
     required this.helpLink,
@@ -171,6 +172,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 팝업 제목 (18/w500 Pretendard).
   final TextStyle dialogTitle;
+
+  /// 두 줄로 말하는 팝업 문장 (18/w500 · 줄 21.6). 시안 `팝업` 변형 `로그인실패`
+  /// (1045:5079). [dialogTitle] 과 크기·굵기가 같지만 두 줄이라 줄 간격이 120% 다 (#433).
+  final TextStyle dialogSentence;
 
   /// 팝업 버튼 문구 (18/w600 Pretendard).
   final TextStyle dialogAction;
@@ -506,6 +511,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.0,
     ),
+    dialogSentence: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+      height: 1.2,
+    ),
     dialogAction: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 18,
@@ -803,6 +814,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? linkTimer,
     TextStyle? linkRetryChip,
     TextStyle? dialogTitle,
+    TextStyle? dialogSentence,
     TextStyle? dialogAction,
     TextStyle? linkLater,
     TextStyle? helpLink,
@@ -872,6 +884,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       linkTimer: linkTimer ?? this.linkTimer,
       linkRetryChip: linkRetryChip ?? this.linkRetryChip,
       dialogTitle: dialogTitle ?? this.dialogTitle,
+      dialogSentence: dialogSentence ?? this.dialogSentence,
       dialogAction: dialogAction ?? this.dialogAction,
       linkLater: linkLater ?? this.linkLater,
       helpLink: helpLink ?? this.helpLink,
@@ -947,6 +960,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       linkRetryChip:
           TextStyle.lerp(linkRetryChip, other.linkRetryChip, t)!,
       dialogTitle: TextStyle.lerp(dialogTitle, other.dialogTitle, t)!,
+      dialogSentence:
+          TextStyle.lerp(dialogSentence, other.dialogSentence, t)!,
       dialogAction: TextStyle.lerp(dialogAction, other.dialogAction, t)!,
       linkLater: TextStyle.lerp(linkLater, other.linkLater, t)!,
       helpLink: TextStyle.lerp(helpLink, other.helpLink, t)!,

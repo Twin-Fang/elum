@@ -344,11 +344,12 @@ Future<bool> confirmLeaveRoutineFlow(
 ]) async {
   final (title, message) = RoutineLeave.copyOf(kind);
   // 정말 잃을 때만 경고한다. 임시저장에 남는 나가기는 되돌릴 수 있는 동작이라
-  // 경고 아이콘·노란 버튼을 쓰지 않는다 — 괜히 겁을 주면 저장된 것도 못 믿는다 (#387).
+  // 경고 아이콘·붉은 버튼을 쓰지 않는다 — 괜히 겁을 주면 저장된 것도 못 믿는다 (#387).
+  // 경고는 시안 팝업의 느낌표 + 붉은 버튼이다. 노란 변형은 시안에 없다 (#433).
   final loses = kind == RoutineLeave.discard;
   final leave = await showElumDialog<bool>(
     context: context,
-    icon: loses ? ElumDialogIcon.warning : null,
+    icon: loses ? ElumDialogIcon.alert : null,
     title: title,
     message: message,
     actions: [
@@ -361,7 +362,7 @@ Future<bool> confirmLeaveRoutineFlow(
       ElumDialogAction(
         label: '나가기',
         value: true,
-        tone: loses ? ElumDialogTone.warn : ElumDialogTone.primary,
+        tone: loses ? ElumDialogTone.danger : ElumDialogTone.primary,
       ),
     ],
   );

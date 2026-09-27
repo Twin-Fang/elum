@@ -156,7 +156,7 @@ void main() {
       await tester.tap(find.text('업데이트하러 가기'));
       await tester.pumpAndSettle();
 
-      expect(find.text('스토어를 열지 못했어요'), findsOneWidget);
+      expect(find.textContaining('스토어를 열지 못했어요'), findsOneWidget);
       expect(find.textContaining('E-UPDATE-STORE'), findsOneWidget);
 
       // 닫으면 업데이트 화면으로 돌아와 다시 누를 수 있다

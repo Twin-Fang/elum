@@ -11,6 +11,7 @@ import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
 import 'widgets/reward_banner.dart';
@@ -115,11 +116,15 @@ class _ChildRoutineDetailScreenState
     if (!ok) _showFailure();
   }
 
-  /// 소리를 낼 수 없을 때. 아동은 못 읽지만 보호자가 제보할 때 필요하다.
+  /// 소리를 낼 수 없을 때. 식별자는 보호자가 제보할 때 필요하다.
   void _showFailure() {
-    ScaffoldMessenger.of(
+    showFailure(
       context,
-    ).showSnackBar(const SnackBar(content: Text('소리를 재생할 수 없어요 (E-TTS)')));
+      null,
+      title: '소리를 재생하지 못했어요',
+      fallback: '휴대폰 소리를 켜고 다시 눌러주세요',
+      fallbackCode: 'E-TTS',
+    );
   }
 
   /// 현재 보고 있는 카드. 체크 버튼이 이 카드를 대상으로 한다.

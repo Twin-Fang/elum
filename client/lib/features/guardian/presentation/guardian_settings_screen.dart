@@ -41,15 +41,14 @@ class _GuardianSettingsScreenState
     // 모양으로 하게 된다 — 일과 삭제는 팝업, 로그아웃은 시트였다 (#353).
     final ok = await showElumDialog<bool>(
       context: context,
-      // **한 단계 낮춰 쓴다.** 시안은 로그아웃과 회원탈퇴를 한 변형으로 묶어
-      // 둘 다 붉게 칠하지만, 로그아웃은 다시 들어오면 그대로다. 둘을 같은
-      // 빨강으로 두면 진짜 되돌릴 수 없는 쪽과 구분이 사라진다 (#188 의 판단을
-      // 유지한다). 색과 아이콘만 낮추고 **모양은 시안 팝업 그대로다** (#353).
-      icon: ElumDialogIcon.warning,
+      // 시안 그대로 붉게 칠한다. 예전에는 로그아웃을 한 단계 낮춰 노랑으로
+      // 칠했는데(#188 · #353), 시안에 노란 변형이 없어 #433 에서 되돌렸다.
+      // 되돌릴 수 없는 탈퇴와는 설명 문장 유무로 구분된다.
+      icon: ElumDialogIcon.alert,
       title: '로그아웃 하실건가요?',
       actions: const [
         ElumDialogAction(label: '취소', value: false, tone: ElumDialogTone.neutral),
-        ElumDialogAction(label: '확인', value: true, tone: ElumDialogTone.primary),
+        ElumDialogAction(label: '확인', value: true, tone: ElumDialogTone.danger),
       ],
     );
     if (ok != true) return;
@@ -87,10 +86,11 @@ class _GuardianSettingsScreenState
   /// 어디서 멈췄는지 알 수 있다.
   void _tellFailed(AppFailure? failure) {
     // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다 (#352).
-    showFailureSnack(
+    showFailure(
       context,
       failure,
-      fallback: '탈퇴하지 못했어요. 잠시 후 다시 해주세요',
+      title: '탈퇴하지 못했어요',
+      fallback: '잠시 후 다시 시도해주세요',
       fallbackCode: 'E-DEL',
     );
   }
