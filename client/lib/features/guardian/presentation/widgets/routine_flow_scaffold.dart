@@ -235,9 +235,16 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      // 시안(262:4766)은 상단 아이콘이 y=87 에서 시작한다. 안전영역(59) 안에서
-      // 28 이다 — 12 로 두면 화면 전체가 16 위로 뜬다 (#297).
-      padding: EdgeInsets.only(left: context.space.screenH, top: 28.h),
+      // 시안(262:4766)은 버튼 상자(40)가 y=67, 아이콘(24)이 y=75 에서 시작한다.
+      // 안전영역(59) 안에서 16 이다 (#436 — 시안이 79 에서 67 로 올렸다).
+      //
+      // **아래에 12 를 더 준다.** 버튼만 올라갔고 아래 내용은 시안에서 제자리다.
+      // 위 여백만 줄이면 상단바가 낮아져 화면 전체가 12 위로 뜬다 (#297 과 같은 함정).
+      padding: EdgeInsets.only(
+        left: context.space.screenH,
+        top: 16.h,
+        bottom: 12.h,
+      ),
       child: Row(
         children: [
           if (onBack != null)
