@@ -43,6 +43,10 @@ void main() {
           path: Routes.login,
           builder: (context, state) => const Scaffold(body: Text('로그인 화면')),
         ),
+        GoRoute(
+          path: Routes.guardianPinChange,
+          builder: (context, state) => const Scaffold(body: Text('비밀암호 변경 화면')),
+        ),
       ],
     );
 
@@ -134,6 +138,8 @@ void main() {
     const order = [
       '이룸이 휴대폰 연결하기',
       '임시저장',
+      // 시안(`1022:4467`)에 새로 들어온 줄 — 임시저장과 약관 사이 (#437)
+      '비밀암호 변경하기',
       '약관 및 개인정보처리방침',
       // `앱 정보`(#418)는 약관과 로그아웃 사이에 새로 들어온 줄이다 — 시안에는 아직 없다.
       '앱 정보',
@@ -145,6 +151,15 @@ void main() {
       expect(ys[i] - ys[i - 1], closeTo(60, 0.5),
           reason: '${order[i]} 줄이 바로 앞 줄(${order[i - 1]})에 붙어야 한다');
     }
+  });
+
+  testWidgets('비밀암호 변경하기 줄을 누르면 변경 화면이 열린다 (#437)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('비밀암호 변경하기'));
+    await tester.pumpAndSettle();
+    expect(find.text('비밀암호 변경 화면'), findsOneWidget);
   });
 
   testWidgets('약관 줄을 누르면 문서 목록이 열린다', (tester) async {
