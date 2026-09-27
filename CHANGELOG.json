@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-25T13:54:51Z",
-    "currentVersion": "1.45.0",
+    "lastUpdated": "2026-09-27T12:14:29Z",
+    "currentVersion": "1.46.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 176
+    "totalReleases": 177
   },
   "releases": [
+    {
+      "version": "1.46.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-27",
+      "pr_number": 435,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 일과 순서를 바꿀 때 번호는 그대로, 카드만 움직여요\n  * 편집하기·일과 다시하기 버튼이 목록 위에 떠 있어요\n  * 문제가 생기면 같은 모양의 안내 창으로 알려 드려요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과 순서를 바꿀 때 번호는 그대로, 카드만 움직여요",
+            "편집하기·일과 다시하기 버튼이 목록 위에 떠 있어요",
+            "문제가 생기면 같은 모양의 안내 창으로 알려 드려요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "1.45.0",
       "project_type": "flutter",
