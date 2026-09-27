@@ -24,22 +24,15 @@ abstract final class AppAssets {
   /// 원과 체크가 한 파일에 있어 크기만 바꿔 쓰면 된다.
   static const dialogCheck = 'assets/icon/dialog/check_round.svg';
 
-  /// 공통 팝업의 경고 아이콘 (40×40 원 + 흰 느낌표). 이슈 #242.
-  ///
-  /// **빨강이 아니라 노랑이다.** 아동도 볼 수 있는 화면이라 붉은 경고를 쓰지
-  /// 않는다 (client/CLAUDE.md). `danger`(되돌릴 수 없음)와 그래서 색이 다르다.
-  static const dialogWarn = 'assets/icon/dialog/warn_round.svg';
-
   /// 공통 팝업의 삭제 아이콘 (40×40 붉은 원 + 흰 휴지통). Figma 931:4877.
   ///
-  /// **여기만 붉다.** 경고(dialogWarn)는 노랑이지만 삭제는 되돌릴 수 없어
-  /// 색으로 먼저 멈춰 세운다. 보호자 화면에만 쓴다.
+  /// 이미 저장된 것을 지울 때만 쓴다. 그 밖의 주의·실패는 [dialogAlert] 다.
   static const dialogTrash = 'assets/icon/dialog/trash_round.svg';
 
-  /// 되돌릴 수 없는 것을 묻는 팝업 — 붉은 원에 느낌표 (Figma `팝업` 1045:5212).
+  /// 주의·실패 팝업 — 붉은 원에 느낌표 (Figma `팝업` 1045:5212 · 1045:5098).
   ///
-  /// 로그아웃·회원탈퇴·로그인 실패가 같은 아이콘을 쓴다. **보호자 화면 전용이다** —
-  /// 이룸이도 보는 화면에는 붉은 경고를 쓰지 않는다.
+  /// 로그아웃·회원탈퇴·모든 실패가 같은 아이콘을 쓴다. 이룸이 화면도 같다 —
+  /// 시안에 노란 경고가 없어 #433 에서 #242 의 노란 아이콘을 없앴다.
   static const dialogAlert = 'assets/icon/dialog/alert_round.svg';
 
   /// 도움 목표 아이콘 (40×40). Figma `온보딩_목표`(204:1002)의 Group 62~65,

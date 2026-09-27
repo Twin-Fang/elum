@@ -106,10 +106,11 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
     // 서버가 받지 못했으면 화면을 되돌린다. 화면만 바뀐 채 두면 다음에 열었을 때
     // 바꾼 적 없는 것처럼 보인다.
     setState(() => _steps = before);
-    showFailureSnack(
+    showFailure(
       context,
       failure,
-      fallback: '순서를 저장하지 못했어요',
+      title: '순서를 저장하지 못했어요',
+      fallback: '잠시 후 다시 시도해주세요',
       fallbackCode: 'E-STEP-ORDER',
     );
   }

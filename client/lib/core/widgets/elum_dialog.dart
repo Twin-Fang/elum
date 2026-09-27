@@ -11,13 +11,10 @@ import 'app_pressable.dart';
 
 /// 팝업 위쪽에 놓이는 원형 아이콘.
 ///
-/// 지금은 성공 하나뿐이다. 경고·물음이 생기면 여기에 값을 더하고
-/// [_iconAsset]에 에셋을 한 줄 추가한다 — 화면 코드는 건드리지 않는다.
+/// 시안 `팝업`(931:4878)의 변형과 1:1 이다. **노란 경고는 없다** — 시안에 그런
+/// 변형이 없어 #433 에서 뺐다. 주의·실패는 모두 [alert] 다.
 enum ElumDialogIcon {
   success,
-
-  /// 주의 — **붉지 않다.** 아동도 보는 화면이라 빨간 경고를 쓰지 않는다 (#242).
-  warning,
 
   /// 삭제 — 붉은 원에 휴지통. **보호자 화면에만 쓴다** (#258).
   ///
@@ -25,10 +22,10 @@ enum ElumDialogIcon {
   /// 것이 사라지면 trash다.
   trash,
 
-  /// 되돌릴 수 없는 것을 묻는다 — 붉은 원에 느낌표 (`팝업` 변형 `로그아웃/회원탈퇴`).
+  /// 붉은 원에 느낌표 — 실패(`로그인실패`)와 확인(`로그아웃/회원탈퇴`) 변형이 함께 쓴다.
   ///
   /// `trash`와 나누는 기준 — 지우는 대상이 눈에 보이는 하나면 trash(일과 삭제),
-  /// 계정처럼 통째로 끝나는 것이면 alert다.
+  /// 그 밖의 실패·주의는 alert다. 이룸이 화면도 같다 (#433 에서 #242 를 뒤집었다).
   alert,
 }
 
@@ -40,14 +37,10 @@ enum ElumDialogTone {
   /// 보조 동작(닫기·취소). 회색 배경 + 검정 글자.
   neutral,
 
-  /// 되돌릴 수 없는 동작. 붉은 배경 + 흰 글자.
-  danger,
-
-  /// 지금 나가면 **잃는다**. 노란 배경 + 흰 글자 (#242).
+  /// 되돌릴 수 없는 동작·실패 확인. 붉은 배경 + 흰 글자.
   ///
-  /// `danger`와 나누는 기준 — 계정이나 저장된 것이 사라지면 `danger`,
-  /// 만들던 중인 것만 사라지면 `warn`이다.
-  warn,
+  /// 시안에 노란 버튼이 없어 잃는 나가기도 이 톤이다 (#433).
+  danger,
 }
 
 /// 팝업 버튼 하나.
@@ -91,6 +84,7 @@ Future<T?> showElumDialog<T>({
   List<ElumDialogAction<T>> actions = const [],
   bool barrierDismissible = false,
   bool keepWordsInMessage = false,
+  String? code,
 }) {
   return showDialog<T>(
     context: context,
@@ -110,6 +104,7 @@ Future<T?> showElumDialog<T>({
       icon: icon,
       actions: actions,
       keepWordsInMessage: keepWordsInMessage,
+      code: code,
     ),
   );
 }
@@ -126,6 +121,7 @@ class ElumDialogCard<T> extends StatelessWidget {
     this.icon,
     this.actions = const [],
     this.keepWordsInMessage = false,
+    this.code,
   });
 
   final String title;
@@ -136,6 +132,12 @@ class ElumDialogCard<T> extends StatelessWidget {
   /// 설명을 낱말 단위로 줄바꿈한다 — [showElumDialog] 참조.
   final bool keepWordsInMessage;
 
+  /// 추적용 식별자(`E-AUTH` 등). 문장 아래에 작은 글자로 적는다.
+  ///
+  /// 문장 안 괄호로 넣지 않는다 — 시안 `로그인실패` 는 문장 하나뿐이라 식별자가
+  /// 섞이면 두 줄 문장이 세 줄로 꺾인다. 그래도 제보 단서라 **반드시 보인다** (#433).
+  final String? code;
+
   /// 아이콘 40 · 아이콘↔제목 20 · 제목 묶음↔버튼 32
   static const _iconSize = 40.0;
   static const _iconToTitle = 20.0;
@@ -143,7 +145,6 @@ class ElumDialogCard<T> extends StatelessWidget {
 
   static String _iconAsset(ElumDialogIcon icon) => switch (icon) {
     ElumDialogIcon.success => AppAssets.dialogCheck,
-    ElumDialogIcon.warning => AppAssets.dialogWarn,
     ElumDialogIcon.trash => AppAssets.dialogTrash,
     ElumDialogIcon.alert => AppAssets.dialogAlert,
   };
@@ -175,10 +176,12 @@ class ElumDialogCard<T> extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              // 앱 본문색이 아니라 시안 그대로 순검정이다 (#318)
-              style: context.typo.dialogTitle.copyWith(
-                color: colors.dialogTitleText,
-              ),
+              // 앱 본문색이 아니라 시안 그대로 순검정이다 (#318).
+              // 두 줄 문장은 시안 `로그인실패` 처럼 줄 간격을 벌린다 (#433).
+              style: (title.contains('\n')
+                      ? context.typo.dialogSentence
+                      : context.typo.dialogTitle)
+                  .copyWith(color: colors.dialogTitleText),
             ),
             if (message != null) ...[
               SizedBox(height: context.space.sm),
@@ -188,6 +191,16 @@ class ElumDialogCard<T> extends StatelessWidget {
                 semanticsLabel: keepWordsInMessage ? message : null,
                 textAlign: TextAlign.center,
                 style: context.typo.body.copyWith(color: colors.textSecondary),
+              ),
+            ],
+            if (code != null) ...[
+              SizedBox(height: context.space.sm),
+              Text(
+                code!,
+                textAlign: TextAlign.center,
+                style: context.typo.bodySmall.copyWith(
+                  color: colors.textSecondary,
+                ),
               ),
             ],
             SizedBox(height: _bodyToActions.h),
@@ -339,7 +352,6 @@ class ElumDialogButton extends StatelessWidget {
         colors.dialogNeutralText,
       ),
       ElumDialogTone.danger => (colors.dialogDanger, colors.dangerText),
-      ElumDialogTone.warn => (colors.warn, colors.warnText),
     };
 
     // 버튼마다 제 접근성 노드를 세운다. 안 세우면 누르는 동작이 위쪽 노드로 합쳐져

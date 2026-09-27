@@ -137,12 +137,14 @@ class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton> {
         final generating = blocked.canStartRoutine && blocked.isGeneratingRoutine;
         await showElumDialog<void>(
           context: context,
-          icon: ElumDialogIcon.warning,
-          title: generating ? '이미 일과를 만들고 있어요' : '이번 주 크레딧을 모두 사용했어요',
-          message: generating
-              ? '다 만든 뒤에 새 일과를 만들 수 있어요'
-              : '${blocked.resetLabel}부터 다시 만들 수 있어요',
-          actions: const [ElumDialogAction(label: '확인')],
+          // 시안 `로그인실패` 변형 모양 — 느낌표 + 두 줄 문장 + 붉은 확인 (#433).
+          icon: ElumDialogIcon.alert,
+          title: generating
+              ? '이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요'
+              : '이번 주 크레딧을 모두 사용했어요.\n${blocked.resetLabel}부터 다시 만들 수 있어요',
+          actions: const [
+            ElumDialogAction(label: '확인', tone: ElumDialogTone.danger),
+          ],
         );
         return;
       }

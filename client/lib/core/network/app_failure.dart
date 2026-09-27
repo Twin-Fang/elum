@@ -157,11 +157,13 @@ class AppFailure {
   /// 안내를 붙일 때는 화면 문구의 **첫 문장만** 쓴다. 화면 문구가 할 일까지 말하면
   /// (`…못했어요. 다시 해주세요`) 할 일이 두 개가 된다 — 실기기에서 `인터넷을
   /// 확인해주세요 · 인터넷 연결을 확인해주세요`로 같은 말이 두 번 나왔다 (#428 · #427).
-  String describe(String fallback, String fallbackCode) {
-    final body = serverMessage ??
-        (hint == null ? fallback : '${_headline(fallback)} · $hint');
-    return '$body (${badgeOr(fallbackCode)})';
-  }
+  String describe(String fallback, String fallbackCode) =>
+      '${bodyOr(fallback)} (${badgeOr(fallbackCode)})';
+
+  /// [describe] 에서 식별자를 뺀 문장. 팝업은 식별자를 문장과 따로 적는다 (#433).
+  String bodyOr(String fallback) =>
+      serverMessage ??
+      (hint == null ? fallback : '${_headline(fallback)} · $hint');
 
   /// 문구의 첫 문장 — `무엇이 안 됐는지`. 마침표로 끝나는 첫 문장을 떼고 마침표는 뺀다.
   static String _headline(String text) {

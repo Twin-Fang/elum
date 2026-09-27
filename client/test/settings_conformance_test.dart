@@ -163,8 +163,8 @@ void main() {
   // 전에는 바텀시트로 따로 그려 두고 있었다 — 같은 확인을 앱이 두 모양으로
   // 했다 (#353).
   for (final (name, title, message, icon, tone) in [
-    ('logout', '로그아웃 하실건가요?', null, ElumDialogIcon.warning,
-        ElumDialogTone.primary),
+    ('logout', '로그아웃 하실건가요?', null, ElumDialogIcon.alert,
+        ElumDialogTone.danger),
     (
       'withdraw',
       '회원탈퇴 하실건가요?',
@@ -198,6 +198,26 @@ void main() {
       );
     });
   }
+
+  // 실패 팝업 (Figma `팝업` 1045:5079 `로그인실패`). 앱의 실패는 전부 이 모양이다 (#433).
+  //
+  // **알려진 차이 — 식별자 줄.** 시안에는 없지만 제보 단서라 문장 아래에 적는다
+  // (docs 예외처리 규칙). 그만큼(8 + 14줄) 버튼이 아래로 내려간다.
+  testWidgets('실패 팝업 (Figma 1045:5079)', (tester) async {
+    await _pump(
+      tester,
+      const ElumDialogCard<void>(
+        title: '로그인하지 못했어요.\n잠시 후 다시 시도해주세요',
+        code: 'E-AUTH',
+        icon: ElumDialogIcon.alert,
+        actions: [ElumDialogAction(label: '확인', tone: ElumDialogTone.danger)],
+      ),
+    );
+    await expectLater(
+      find.byType(ElumDialogCard<void>),
+      matchesGoldenFile('figma/popup_loginfail_1045-5079.png'),
+    );
+  });
 }
 
 /// 암호를 고정한다. 진짜 저장소를 쓰면 매번 다른 여섯 글자가 나와 골든이 흔들린다.

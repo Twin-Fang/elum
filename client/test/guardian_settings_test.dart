@@ -273,7 +273,7 @@ void main() {
     expect(fillBehind('확인'), isNot(colors.buttonEnabled));
   });
 
-  testWidgets('로그아웃은 같은 팝업을 쓰되 한 단계 낮은 색이다', (tester) async {
+  testWidgets('로그아웃은 시안 그대로 붉은 확인이다 (#433)', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
@@ -281,15 +281,12 @@ void main() {
     await tester.pumpAndSettle();
 
     // 시안(`팝업` 1045:5194)은 로그아웃과 회원탈퇴를 한 변형으로 묶어 둘 다
-    // 붉게 칠한다. **모양은 그대로 따르되 색만 낮춘다** — 로그아웃은 다시
-    // 들어오면 그대로라, 둘을 같은 빨강으로 두면 진짜 되돌릴 수 없는 쪽과
-    // 구분이 사라진다 (#188 의 판단을 유지, #353 에서 확인받음).
+    // 붉게 칠한다. 예전에는 로그아웃만 낮춰 칠했는데(#188 · #353) 시안에 없는
+    // 색이라 #433 에서 시안대로 되돌렸다. 탈퇴와는 설명 문장으로 구분된다.
     final box = tester.widget<Container>(
       find.ancestor(of: find.text('확인'), matching: find.byType(Container)).first,
     );
-    expect((box.decoration as BoxDecoration?)?.color, AppColors.light.checkDone);
-    expect((box.decoration as BoxDecoration?)?.color,
-        isNot(AppColors.light.dialogDanger));
+    expect((box.decoration as BoxDecoration?)?.color, AppColors.light.dialogDanger);
     expect(find.textContaining('되돌릴 수 없어요'), findsNothing,
         reason: '로그아웃은 되돌아올 수 있다 — 탈퇴와 같은 말을 하면 안 된다');
   });
@@ -321,6 +318,9 @@ void main() {
 
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('확인'));
+    await tester.pumpAndSettle();
+    // 실패 팝업을 닫는다 — 스낵바가 아니라 팝업이라 닫아야 설정으로 돌아온다 (#433)
     await tester.tap(find.text('확인'));
     await tester.pumpAndSettle();
 

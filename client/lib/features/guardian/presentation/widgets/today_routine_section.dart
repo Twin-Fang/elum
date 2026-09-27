@@ -134,7 +134,13 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
       // 서버가 받지 못했으면 화면만 바뀐 채로 두지 않는다 —
       // 다음에 열면 옛 순서로 돌아와 보호자가 바꾼 적 없다고 여긴다.
       setState(() => _order = null);
-      _toast(failure.describe('순서를 저장하지 못했어요', 'E-ORDER'));
+      showFailure(
+        context,
+        failure,
+        title: '순서를 저장하지 못했어요',
+        fallback: '잠시 후 다시 시도해주세요',
+        fallbackCode: 'E-ORDER',
+      );
       return;
     }
     ref.refreshRoutines();
@@ -159,7 +165,13 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     final failure = await ref.read(routineRepositoryProvider).delete(routine.id);
     if (!mounted) return;
     if (failure != null) {
-      _toast(failure.describe('일과를 삭제하지 못했어요', 'E-DEL'));
+      showFailure(
+        context,
+        failure,
+        title: '일과를 삭제하지 못했어요',
+        fallback: '잠시 후 다시 시도해주세요',
+        fallbackCode: 'E-DEL',
+      );
       return;
     }
     // 방금 만든 일과를 지웠다면 흐름에 남은 것도 함께 치운다 —
@@ -190,12 +202,6 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     final action = await RoutineDetailSheet.show(context, routine);
     if (action != RoutineSheetAction.edit || !mounted) return;
     _edit(routine);
-  }
-
-  void _toast(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -333,10 +339,11 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
     setState(() => _rerunning = null);
 
     if (!copy.isOk) {
-      showFailureSnack(
+      showFailure(
         context,
         copy.failure,
-        fallback: '일과를 다시 만들지 못했어요',
+        title: '일과를 다시 만들지 못했어요',
+        fallback: '잠시 후 다시 시도해주세요',
         fallbackCode: 'E-DUP',
       );
       return;

@@ -139,13 +139,16 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     // 로컬에는 저장돼 있어 앱은 그대로 쓸 수 있다. 다만 서버에 못 남겼다는 것을
     // 알려야 "재설치했더니 설정이 사라졌다"를 나중에 겪지 않는다.
     // **서버가 왜 거절했는지 말해줬으면 그 문구를 그대로 쓴다** (#352).
+    // 팝업을 닫은 뒤에 넘어간다 — 먼저 넘어가면 팝업이 홈 위에 남는다.
     if (failure != null) {
-      showFailureSnack(
+      await showFailure(
         context,
         failure,
-        fallback: '설정을 서버에 저장하지 못했어요. 설정 화면에서 다시 확인해주세요',
+        title: '설정을 저장하지 못했어요',
+        fallback: '설정 화면에서 다시 확인해주세요',
         fallbackCode: 'E-PROFILE',
       );
+      if (!mounted) return;
     }
     context.go(Routes.guardian);
   }

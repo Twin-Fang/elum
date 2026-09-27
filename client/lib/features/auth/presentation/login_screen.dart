@@ -132,28 +132,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         await _alert(
           result,
           title: '로그인하지 못했어요',
-          fallback: '잠시 후 다시 해주세요',
+          fallback: '잠시 후 다시 시도해주세요',
           fallbackCode: 'E-AUTH-SDK',
         );
       case AuthOutcome.failedToken:
         await _alert(
           result,
           title: '로그인하지 못했어요',
-          fallback: '잠시 후 다시 해주세요',
+          fallback: '잠시 후 다시 시도해주세요',
           fallbackCode: 'E-AUTH-TOKEN',
         );
       case AuthOutcome.failedApi:
         await _alert(
           result,
           title: '로그인하지 못했어요',
-          fallback: '잠시 후 다시 해주세요',
+          fallback: '잠시 후 다시 시도해주세요',
           fallbackCode: 'E-AUTH-API',
         );
       case AuthOutcome.failed:
         await _alert(
           result,
           title: '로그인하지 못했어요',
-          fallback: '잠시 후 다시 해주세요',
+          fallback: '잠시 후 다시 시도해주세요',
           fallbackCode: 'E-AUTH',
         );
     }
