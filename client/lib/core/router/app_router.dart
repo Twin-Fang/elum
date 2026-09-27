@@ -6,6 +6,7 @@ import '../../features/guardian/presentation/card_review_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/guardian/presentation/draft_routines_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
+import '../../features/guardian/presentation/pin_change_screen.dart';
 import '../../features/link/presentation/link_code_screen.dart';
 import '../../features/link/presentation/link_enter_screen.dart';
 import '../../features/child/presentation/child_home_screen.dart';
@@ -60,6 +61,9 @@ abstract final class Routes {
 
   /// 임시저장 — 만들다 만 일과 (#349).
   static const guardianDrafts = '/guardian/settings/drafts';
+
+  /// 비밀암호 변경 (#437). 시안이 없어 온보딩 비밀번호 화면 모양을 쓴다 (#438).
+  static const guardianPinChange = '/guardian/settings/pin';
   static const routineInput = '/guardian/routine/input';
   /// DLP 마스킹 + 추가 질문 준비 로딩 (Figma 262:4569).
   /// 경로 이름은 DLP 시절 것을 유지한다 — 마스킹이 이 단계에서 일어나므로
@@ -289,6 +293,11 @@ GoRouter createRouter({
       GoRoute(
         path: Routes.guardianDrafts,
         builder: (context, state) => const DraftRoutinesScreen(),
+      ),
+      GoRoute(
+        path: Routes.guardianPinChange,
+        pageBuilder: (context, state) =>
+            slidePage(state, const PinChangeScreen()),
       ),
       // --- 일과 만들기 흐름 ---
       // 흐름 전체가 **배경 하나**를 함께 쓴다 (#380). 화면이 바뀌면 글자만 넘어가고

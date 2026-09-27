@@ -1,0 +1,216 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/widgets/app_shake.dart';
+import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_header.dart';
+import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/show_failure.dart';
+import '../../onboarding/application/onboarding_notifier.dart';
+import '../../onboarding/domain/onboarding_profile.dart';
+import '../../onboarding/presentation/widgets/pin_keypad.dart';
+
+/// 설정 → 비밀암호 변경하기 (#437).
+///
+/// **시안이 없다.** 설정 시안(`1022:4467`)에는 줄만 있어, 온보딩 비밀번호 화면
+/// (`238:1909` · `238:2767`)의 점·키패드·간격을 그대로 쓴다. 시안 요청은 #438.
+///
+/// 지금 암호를 **먼저 묻는다.** 보호자 화면이 열린 휴대폰을 이룸이가 들고 있을 때
+/// 바로 바꿀 수 있으면 보호자 화면을 지키는 암호가 의미를 잃는다.
+class PinChangeScreen extends ConsumerStatefulWidget {
+  const PinChangeScreen({super.key});
+
+  @override
+  ConsumerState<PinChangeScreen> createState() => _PinChangeScreenState();
+}
+
+enum _Step { verify, enter, confirm }
+
+class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
+  final _controller = TextEditingController();
+  final _focusNode = FocusNode();
+
+  /// 저장된 암호. 읽기 전에는 null — 그동안 점만 보여준다.
+  String? _saved;
+  bool _loaded = false;
+
+  _Step _step = _Step.verify;
+
+  /// 새 암호(2단계 입력). 한번 더가 틀려도 살린다 — 온보딩과 같다.
+  String? _newPin;
+
+  String? _errorMessage;
+
+  /// 틀린 횟수. 값이 바뀔 때마다 점이 한 번 흔들린다.
+  int _mismatchCount = 0;
+  bool _saving = false;
+
+  String get _current => _controller.text;
+  static const _len = OnboardingProfile.pinLength;
+
+  bool get _canSave =>
+      _step == _Step.confirm && _current.length == _len && _current == _newPin;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onChanged);
+    _loadSaved();
+  }
+
+  Future<void> _loadSaved() async {
+    final saved = await ref.read(localStorageProvider).getPin();
+    if (!mounted) return;
+    setState(() {
+      _saved = saved;
+      _loaded = true;
+      // 암호를 정한 적 없는 휴대폰(온보딩을 건너뛴 개발 상태)은 확인할 것이 없다.
+      // 모드 전환 화면도 이때 그냥 통과시킨다.
+      if (saved == null || saved.isEmpty) _step = _Step.enter;
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller
+      ..removeListener(_onChanged)
+      ..dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onChanged() {
+    // 다시 누르기 시작하면 실패 안내를 거둔다. 비우는 순간(빈 값)에는 남겨 둔다 —
+    // 방금 띄운 안내가 곧바로 사라져 무엇이 틀렸는지 읽을 틈이 없어진다.
+    setState(() {
+      if (_errorMessage != null && _current.isNotEmpty) _errorMessage = null;
+    });
+    if (!_loaded || _current.length != _len) return;
+
+    switch (_step) {
+      case _Step.verify:
+        _current == _saved ? _next(_Step.enter) : _mismatch();
+      case _Step.enter:
+        final entered = _current;
+        _next(_Step.confirm, keep: entered);
+      case _Step.confirm:
+        // 맞으면 키패드를 내려 `저장하기`를 드러낸다. 가려 두면 다 넣고도 다음에
+        // 뭘 할지 모른다 — 온보딩에서 실제로 막혔다.
+        _current == _newPin ? _revealSave() : _mismatch();
+    }
+  }
+
+  /// 다음 단계로. clear()가 _onChanged 를 다시 부르므로 프레임 이후로 미룬다.
+  void _next(_Step step, {String? keep}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _step = step;
+        if (keep != null) _newPin = keep;
+      });
+      _clearInput();
+    });
+  }
+
+  /// 틀렸다 — 입력만 비우고 흔든다. 경고색·아이콘은 쓰지 않는다 (입력 오류 규칙).
+  void _mismatch() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _clearInput();
+      setState(() {
+        _errorMessage = '암호가 달라요. 다시 넣어주세요';
+        _mismatchCount++;
+      });
+    });
+  }
+
+  void _revealSave() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusNode.unfocus();
+    });
+  }
+
+  void _clearInput() {
+    _controller.clear();
+    _focusNode.requestFocus();
+  }
+
+  Future<void> _save() async {
+    if (_saving) return;
+    final pin = _current;
+    setState(() => _saving = true);
+    final storage = ref.read(localStorageProvider);
+    await storage.setPin(pin);
+    // `setPin` 은 저장 실패를 삼킨다(로그만 남긴다). 다시 읽어 봐야 실제로 바뀌었는지
+    // 안다. 바뀌지 않았는데 "바꿨어요"라고 하면 다음 전환 때 새 암호가 안 먹는다.
+    final stored = await storage.getPin();
+    if (!mounted) return;
+    setState(() => _saving = false);
+
+    if (stored != pin) {
+      await showFailure(
+        context,
+        null,
+        title: '비밀암호를 바꾸지 못했어요',
+        fallback: '잠시 후 다시 시도해주세요',
+        fallbackCode: 'E-PIN',
+      );
+      return;
+    }
+    // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다 (#433).
+    final messenger = ScaffoldMessenger.of(context);
+    context.pop();
+    messenger.showSnackBar(const SnackBar(content: Text('비밀암호를 바꿨어요')));
+  }
+
+  (String, String) get _copy => switch (_step) {
+    _Step.verify => ('지금 비밀암호를\n입력해주세요', '확인한 뒤에 새 암호로 바꿀 수 있어요'),
+    _Step.enter => ('새 비밀암호를\n입력해주세요', '보호자모드로 변경할 때 사용하는 암호예요'),
+    // 온보딩 재입력(238:2767)과 같은 문구다
+    _Step.confirm => ('암호를 한번 더\n입력해주세요', '보호자모드로 변경할 때 사용하는 암호예요'),
+  };
+
+  /// 설명 하단 → 점. 온보딩 비밀번호 화면(`238:1996`)과 같은 값이다.
+  static const _descriptionToDots = 72.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final (title, description) = _copy;
+    return ElumScaffold(
+      onBack: () => context.pop(),
+      // 온보딩처럼 **다 맞았을 때만** 버튼이 나타난다 (#231). 나타나는 것이 신호다.
+      bottomButton: _canSave
+          ? ElumButton(label: '저장하기', onPressed: _saving ? null : _save)
+          : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ElumHeader(title: title, description: _errorMessage ?? description),
+          SizedBox(height: _descriptionToDots.h),
+          // 실제 입력칸은 투명이라 낭독기에서 빠진다. 키패드를 여는 길은 이 점
+          // 자리뿐이라 이름을 준다 (#339). 넣은 숫자는 암호라 읽지 않는다.
+          Semantics(
+            container: true,
+            button: true,
+            label: '암호 넣기',
+            child: GestureDetector(
+              onTap: _focusNode.requestFocus,
+              behavior: HitTestBehavior.opaque,
+              child: AppShake(
+                trigger: _mismatchCount,
+                child: PinDots(length: _len, filled: _current.length),
+              ),
+            ),
+          ),
+          PinInputField(
+            controller: _controller,
+            focusNode: _focusNode,
+            maxLength: _len,
+          ),
+        ],
+      ),
+    );
+  }
+}

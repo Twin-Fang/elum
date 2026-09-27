@@ -152,6 +152,11 @@ class _GuardianSettingsScreenState
           label: '임시저장',
           onTap: _busy ? null : () => context.push(Routes.guardianDrafts),
         ),
+        // 시안(`1022:4467`) 자리 그대로 — 임시저장과 약관 사이 (#437).
+        SettingsTile(
+          label: '비밀암호 변경하기',
+          onTap: _busy ? null : () => context.push(Routes.guardianPinChange),
+        ),
         SettingsTile(
           label: '약관 및 개인정보처리방침',
           onTap: _busy
