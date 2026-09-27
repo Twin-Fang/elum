@@ -121,6 +121,12 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
     final typo = context.typo;
     final height = MediaQuery.sizeOf(context).height * _heightRatio;
 
+    // 떠 있는 버튼 자리. 시안(963:4448) 버튼은 y492~558 이고 시트가 614 라
+    // **아래가 56**이다. 안전영역을 더하지 않는다 — 시트가 이미 화면 바닥까지
+    // 내려와 있고 시안의 56 안에 홈 인디케이터 자리가 들어 있다.
+    final buttonBottom = 56.h;
+    final buttonHeight = 66.h;
+
     return Container(
       height: height,
       // **자식까지 둥근 모양으로 자른다.** `decoration`의 라운드는 배경만 둥글게
@@ -132,80 +138,133 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
         color: colors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
-      child: Column(
+      // **버튼은 목록 위에 떠 있다** (#434). 전에는 목록 아래에 버튼 칸을 따로
+      // 잘라 두어 목록이 버튼 위에서 끝났다. 시안은 버튼을 시트 바닥 위에 띄우고
+      // 목록이 그 뒤로 지나가게 그렸다.
+      child: Stack(
         children: [
-          // --- 고정: 핸들바 + 제목 (덤프의 `스크롤 시 fix 영역`) ---
-          _Header(title: widget.routine.title),
+          Column(
+            children: [
+              // --- 고정: 핸들바 + 제목 (덤프의 `스크롤 시 fix 영역`) ---
+              _Header(title: widget.routine.title),
 
-          // --- 스크롤: 단계 + 보상 ---
-          //
-          // **`Flexible`이 아니라 `Expanded`다.** Flexible 은 목록이 내용만큼만
-          // 차지하게 두어, 단계가 적으면 남는 자리가 그대로 남고 **버튼이 그만큼
-          // 위로 딸려 올라간다.** 시트 높이는 고정인데 버튼만 떠 있어 시안보다
-          // 28 위에 있었다.
-          Expanded(
-            child: ReorderableListView.builder(
-              shrinkWrap: true,
-              // 시안(956:4084) 헤더가 68 에서 끝나고 첫 단계가 76 에서 시작한다.
-              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
-              buildDefaultDragHandles: false,
-              // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
-              // 들어올림은 줄이 직접 그리므로 여기서는 자리만 잡아 준다 (#274).
-              proxyDecorator: (child, index, animation) =>
-                  Material(color: Colors.transparent, child: child),
-              itemCount: _steps.length,
-              // 지난 일과는 자리를 바꿔도 의미가 없으므로 받기만 하고 버린다.
-              onReorder: widget.isPast ? (_, _) {} : _reorder,
-              onReorderStart: (index) => setState(() => _draggingIndex = index),
-              onReorderEnd: (_) => setState(() => _draggingIndex = null),
-              footer: _RewardRow(routine: widget.routine),
-              itemBuilder: (context, index) {
-                final step = _steps[index];
-                return Padding(
-                  key: ValueKey(step.id),
-                  padding: EdgeInsets.only(bottom: 8.h),
-                  child: _StepRow(
-                    step: step,
-                    index: index,
-                    dragging: _draggingIndex == index,
-                    // 손잡이를 아예 그리지 않는다 (시안 980:4777)
-                    reorderable: !widget.isPast,
-                  ),
-                );
-              },
-            ),
+              // --- 스크롤: 단계 + 보상 ---
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      // 시안(956:4084) 헤더가 68 에서 끝나고 첫 단계가 76 에서 시작한다.
+                      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                      // **번호 칸과 카드 칸을 나란히 따로 둔다** (#434).
+                      //
+                      // 전에는 번호와 카드를 한 줄로 묶어, 오래 누르면 번호까지 들리고
+                      // 끄는 동안 번호가 카드를 따라 미끄러졌다. 번호는 몇 번째 자리인가를
+                      // 뜻하므로 제자리에 두고 **카드만** 순서 바꾸기에 올린다. 시안도
+                      // 번호(`1번`~`4번`, x=16)와 카드 묶음(`행동단계`, x=60)을 따로 그렸다.
+                      //
+                      // 한 스크롤 안에 두어야 같이 스크롤되고, 끌면서 가장자리에 닿았을 때의
+                      // 자동 스크롤도 이 목록 하나로 돈다.
+                      sliver: SliverCrossAxisGroup(
+                        slivers: [
+                          SliverConstrainedCrossAxis(
+                            // 뱃지 40 + 카드와의 틈 4
+                            maxExtent: 44.w,
+                            sliver: SliverList.builder(
+                              itemCount: _steps.length,
+                              itemBuilder: (context, index) => Padding(
+                                padding: EdgeInsets.only(
+                                  right: 4.w,
+                                  bottom: 8.h,
+                                ),
+                                child: _StepBadge(index: index),
+                              ),
+                            ),
+                          ),
+                          SliverReorderableList(
+                            // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
+                            // 들어올림은 카드가 직접 그리므로 여기서는 자리만 잡아 준다 (#274).
+                            proxyDecorator: (child, index, animation) =>
+                                Material(
+                                  color: Colors.transparent,
+                                  child: child,
+                                ),
+                            itemCount: _steps.length,
+                            // 지난 일과는 자리를 바꿔도 의미가 없으므로 받기만 하고 버린다.
+                            onReorder: widget.isPast ? (_, _) {} : _reorder,
+                            onReorderStart: (index) =>
+                                setState(() => _draggingIndex = index),
+                            onReorderEnd: (_) =>
+                                setState(() => _draggingIndex = null),
+                            itemBuilder: (context, index) {
+                              final step = _steps[index];
+                              // **전역 키로 한 번 더 감싼다.** 끌기가 시작되면 목록은 이
+                              // 카드를 빼고 시트 위의 사본으로 다시 그린다. 전역 키가 없으면
+                              // 그때 카드 상태가 버려져, 손을 떼는 순간 이미 사라진 들어올림
+                              // 애니메이션을 되돌리려다 오류가 난다. `ReorderableListView`는
+                              // 이 일을 안에서 해 주지만 `SliverReorderableList`는 하지 않는다.
+                              return KeyedSubtree(
+                                key: ValueKey(step.id),
+                                child: KeyedSubtree(
+                                  key: _StepItemKey(step.id, this),
+                                  child: Padding(
+                                    padding: EdgeInsets.only(bottom: 8.h),
+                                    child: _StepCard(
+                                      step: step,
+                                      index: index,
+                                      dragging: _draggingIndex == index,
+                                      // 손잡이를 아예 그리지 않는다 (시안 980:4777)
+                                      reorderable: !widget.isPast,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    SliverPadding(
+                      // 아래 여백은 떠 있는 버튼 높이만큼 더 준다. 단계가 많아 끝까지
+                      // 스크롤했을 때 마지막 보상 줄이 버튼에 가리면 안 된다.
+                      // 단계가 네 개 이하면 스크롤이 생기지 않아 시안 자리 그대로다.
+                      padding: EdgeInsets.fromLTRB(
+                        16.w,
+                        0,
+                        16.w,
+                        buttonBottom + buttonHeight + space.md,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: _RewardRow(routine: widget.routine),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
 
-          // --- 고정: 편집하기 · 다시하기 (목록이 길어져도 밀려나지 않는다) ---
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              16.w,
-              space.md,
-              16.w,
-              // 시안(963:4448) 버튼은 y492~558 이고 시트가 614 이라 **아래가 56**이다.
-              // 안전영역을 더하지 않는다 — 시트가 이미 화면 바닥까지 내려와 있고
-              // 시안의 56 안에 홈 인디케이터 자리가 들어 있다.
-              56.h,
-            ),
-            child: SizedBox(
-              width: double.infinity,
-              height: 66.h,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: colors.textPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.r),
-                  ),
+          // --- 떠 있는: 편집하기 · 다시하기 (목록이 길어져도 밀려나지 않는다) ---
+          // 뒤로 지나가는 목록을 흐리게 가리는 처리는 넣지 않는다 — 시안에 없다.
+          Positioned(
+            left: 16.w,
+            right: 16.w,
+            bottom: buttonBottom,
+            height: buttonHeight,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: colors.textPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.r),
                 ),
-                onPressed: () => Navigator.of(context).pop(
-                  widget.isPast
-                      ? RoutineSheetAction.rerun
-                      : RoutineSheetAction.edit,
-                ),
-                child: Text(
-                  widget.isPast ? '일과 다시하기' : '편집하기',
-                  style: typo.sheetActionLabel.copyWith(color: colors.surface),
-                ),
+              ),
+              onPressed: () => Navigator.of(context).pop(
+                widget.isPast
+                    ? RoutineSheetAction.rerun
+                    : RoutineSheetAction.edit,
+              ),
+              child: Text(
+                widget.isPast ? '일과 다시하기' : '편집하기',
+                style: typo.sheetActionLabel.copyWith(color: colors.surface),
               ),
             ),
           ),
@@ -213,6 +272,23 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
       ),
     );
   }
+}
+
+/// 단계 카드의 전역 키. 같은 단계면 같은 키가 되도록 id 와 시트 상태로 비교한다
+/// (`ReorderableListView` 내부 키와 같은 방식).
+@optionalTypeArgs
+class _StepItemKey extends GlobalObjectKey {
+  const _StepItemKey(this.id, this.sheet) : super(id);
+
+  final String id;
+  final State sheet;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _StepItemKey && other.id == id && other.sheet == sheet;
+
+  @override
+  int get hashCode => Object.hash(id, sheet);
 }
 
 /// 스크롤해도 남는 머리 부분.
@@ -263,7 +339,45 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// 단계 한 줄 — 번호 뱃지 + 제목·설명 + 완료 표시 + 순서 손잡이.
+/// 단계 번호 뱃지. **순서를 바꿔도 움직이지 않는다** (#434).
+///
+/// 번호는 카드의 이름표가 아니라 몇 번째 자리인가를 뜻한다(#296). 그래서 카드
+/// 목록과 떼어 왼쪽 칸에 세워 두고, 끌기에도 들어올림에도 끼지 않는다. 카드를
+/// 옮기면 왼쪽 줄은 1·2·3·4 그대로 서 있고 오른쪽 내용만 자리를 바꾼다.
+class _StepBadge extends StatelessWidget {
+  const _StepBadge({required this.index});
+
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    // 네 색을 차례로 쓰고 다섯 번째부터 다시 처음으로 (카드는 최대 10장이다).
+    final palette = [
+      colors.stepBadge1,
+      colors.stepBadge2,
+      colors.stepBadge3,
+      colors.stepBadge4,
+    ];
+
+    return Container(
+      width: 40.w,
+      height: 68.h,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: palette[index % palette.length],
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Text(
+        '${index + 1}',
+        style: context.typo.stepBadgeNumber.copyWith(color: colors.surface),
+      ),
+    );
+  }
+}
+
+/// 단계 카드 — 제목·설명 + 완료 표시 + 순서 손잡이. 순서 바꾸기는 이 카드만 옮긴다.
 ///
 /// **손잡이는 길게 눌러야 잡힌다** (#274). 닿는 즉시 끌리게 두면 목록을 스크롤하려던
 /// 손가락이 손잡이를 스치는 것만으로 순서가 바뀐다. 고칠 생각이 없었는데 일과가
@@ -272,8 +386,8 @@ class _Header extends StatelessWidget {
 /// 누르고 있는 동안 줄이 **점점 떠오른다.** 예전에는 움직여야 그림자가 나타나서
 /// 누르는 내내 아무 일도 없다가 갑자기 뜨는 것처럼 보였다. 다 떠오른 순간이 곧
 /// 잡힌 순간이므로 진동으로 함께 알리고, 도중에 손을 떼면 제자리로 내려앉는다.
-class _StepRow extends StatefulWidget {
-  const _StepRow({
+class _StepCard extends StatefulWidget {
+  const _StepCard({
     required this.step,
     required this.index,
     this.dragging = false,
@@ -283,7 +397,7 @@ class _StepRow extends StatefulWidget {
   final ActionCard step;
   final int index;
 
-  /// 지금 끌려가는 중인가. 끌기가 시작되면 이 줄은 시트 위의 사본으로 다시
+  /// 지금 끌려가는 중인가. 끌기가 시작되면 이 카드는 시트 위의 사본으로 다시
   /// 그려지므로, 들린 상태로 시작하지 않으면 그림자가 한 번 깜빡인다.
   final bool dragging;
 
@@ -291,10 +405,10 @@ class _StepRow extends StatefulWidget {
   final bool reorderable;
 
   @override
-  State<_StepRow> createState() => _StepRowState();
+  State<_StepCard> createState() => _StepCardState();
 }
 
-class _StepRowState extends State<_StepRow>
+class _StepCardState extends State<_StepCard>
     with SingleTickerProviderStateMixin {
   /// 누르고 있는 정도(0~1).
   ///
@@ -323,7 +437,7 @@ class _StepRowState extends State<_StepRow>
   }
 
   @override
-  void didUpdateWidget(_StepRow oldWidget) {
+  void didUpdateWidget(_StepCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.dragging == oldWidget.dragging) return;
     if (widget.dragging) {
@@ -357,53 +471,17 @@ class _StepRowState extends State<_StepRow>
     final colors = context.colors;
     final typo = context.typo;
 
-    // 네 색을 차례로 쓰고 다섯 번째부터 다시 처음으로 (카드는 최대 10장이다).
-    final palette = [
-      colors.stepBadge1,
-      colors.stepBadge2,
-      colors.stepBadge3,
-      colors.stepBadge4,
-    ];
-
     return AnimatedBuilder(
       animation: _lift,
       builder: (context, _) {
         final t = _lift.value;
-        // 뱃지와 카드에 따로 그림자를 준다. 줄 전체를 한 덩어리로 감싸면
-        // 둘 사이 틈까지 사각형으로 덮인다.
         final shadow = _shadow(t);
 
+        // 번호 뱃지는 여기 없다 — 왼쪽 칸에 따로 서 있어 들리지 않는다 (#434).
         return Transform.scale(
           scale: 1 + _liftScale * t,
           child: Row(
             children: [
-              // 끌고 있는 동안에는 뱃지를 감춘다 (이슈 #296).
-              //
-              // **번호는 카드의 이름표가 아니라 몇 번째 자리인가를 뜻한다.** 뱃지가
-              // 카드를 따라다니면 내려놓는 순간 번호가 한꺼번에 다시 매겨져,
-              // 무엇을 어디로 옮겼는지 눈으로 좇기 어렵다. 카드만 떠오르게 두면
-              // 왼쪽 줄은 1·2·3·4 그대로 서 있고 내용만 자리를 바꾼다.
-              //
-              // 자리는 남겨 둔다. 통째로 들어내면 떠오른 카드의 폭이 달라져
-              // 놓을 자리를 가늠하기 어려워진다.
-              Opacity(
-                opacity: widget.dragging ? 0 : 1,
-                child: Container(
-                  width: 40.w,
-                  height: 68.h,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: palette[widget.index % palette.length],
-                    borderRadius: BorderRadius.circular(16.r),
-                    boxShadow: shadow,
-                  ),
-                  child: Text(
-                    '${widget.index + 1}',
-                    style: typo.stepBadgeNumber.copyWith(color: colors.surface),
-                  ),
-                ),
-              ),
-              SizedBox(width: 4.w),
               Expanded(
                 child: Container(
                   height: 68.h,

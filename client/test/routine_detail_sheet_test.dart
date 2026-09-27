@@ -231,6 +231,8 @@ void main() {
     expect(repo.lastStepIds, isNotNull);
     expect(repo.lastStepIds, hasLength(3));
     expect(repo.lastStepIds, containsAll(['c1', 'c2', 'c3']));
+    // 번호 칸과 카드 칸을 나눠도(#434) 끈 카드가 실제로 자리를 옮긴다.
+    expect(repo.lastStepIds!.first, isNot('c1'), reason: '맨 위 카드를 아래로 옮겼다');
   });
 
   testWidgets('순서 저장에 실패하면 알린다 — 조용히 넘어가지 않는다 (#266)', (tester) async {
@@ -295,6 +297,62 @@ void main() {
 
     await gesture.up();
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('끄는 동안 번호는 제자리에 그대로 있고 카드만 떠오른다 (#434)', (tester) async {
+    await tester.pumpWidget(wrap(_FakeRepo()));
+    await tester.pump();
+
+    Rect badge(String n) => tester.getRect(find.text(n));
+    final before = {for (final n in ['1', '2', '3']) n: badge(n)};
+
+    // 번호 뱃지만 골라내는 조건 — 숫자 글자를 품은 Container
+    bool badgeLifted() => ['1', '2', '3'].any((n) {
+          final box = tester.widget<Container>(
+            find.ancestor(of: find.text(n), matching: find.byType(Container)).first,
+          );
+          return ((box.decoration as BoxDecoration?)?.boxShadow ?? []).isNotEmpty;
+        });
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(svgWithAsset(AppAssets.sheetReorderHandle).first),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    // 누르고 있는 동안 떠오르는 것은 카드뿐이다. 번호까지 들리면 번호가 카드의
+    // 이름표처럼 읽힌다 — 번호는 몇 번째 자리인가를 뜻한다.
+    expect(badgeLifted(), isFalse, reason: '번호 뱃지는 떠오르지 않는다');
+
+    await tester.pump(kLongPressTimeout);
+    await gesture.moveBy(const Offset(0, 90));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // 끄는 도중에도 1·2·3 이 모두 보이고 자리를 옮기지 않는다.
+    for (final n in ['1', '2', '3']) {
+      expect(find.text(n), findsOneWidget, reason: '끄는 동안 번호 $n 이 숨지 않는다');
+      expect(badge(n), before[n], reason: '끄는 동안 번호 $n 이 움직이지 않는다');
+    }
+    expect(badgeLifted(), isFalse);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('편집하기 버튼은 목록 위에 떠 있다 — 목록이 버튼 뒤로 지나간다 (#434)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap(_FakeRepo()));
+    await tester.pump();
+
+    final list = tester.getRect(find.byType(Scrollable).first);
+    final button = tester.getRect(find.widgetWithText(FilledButton, '편집하기'));
+
+    // 버튼 칸을 따로 잘라 두면 목록이 버튼 위에서 끝난다. 떠 있으면 목록 영역이
+    // 버튼 아래까지 이어진다 (시안 956:4084).
+    expect(list.bottom, greaterThanOrEqualTo(button.bottom));
+    expect(list.overlaps(button), isTrue);
   });
 
   testWidgets('스치듯 끌면 순서가 바뀌지 않는다 — 스크롤하다 놀라면 안 된다 (#274)', (
