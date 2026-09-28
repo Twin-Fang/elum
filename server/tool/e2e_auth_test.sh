@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
 #
-# 인증 플로우 E2E — 실제 배포된 서버에 요청을 보내 가입부터 세션 회전까지 검증한다.
+# 구형 비밀번호 인증 플로우 E2E — 로컬 개발 서버에서만 가입부터 세션 회전까지 검증한다.
 #
 # 단위 테스트는 목(mock)이라 JPQL 오류·트랜잭션 전파 문제를 잡지 못한다.
 # 실제로 한 번 터졌던 것들이라 배포 후 이 스크립트로 실측 확인한다.
 #
-# 사용법: ./e2e_auth_test.sh [베이스URL]
+# 운영에서는 구형 인증 API가 매핑되지 않는다. 서버를
+# ELUM_AUTH_LEGACY_PASSWORD_ENABLED=true로 실행한 뒤 로컬에서만 사용한다.
+# 사용법: ./e2e_auth_test.sh [로컬 베이스URL]
 set -uo pipefail
 
-BASE="${1:-https://api.elum.chuseok22.com}"
+BASE="${1:-http://localhost:8080}"
+case "$BASE" in
+  http://localhost:*|http://127.0.0.1:*) ;;
+  *) echo "[ERROR] 구형 비밀번호 인증 E2E는 로컬 서버에서만 실행할 수 있습니다."; exit 2 ;;
+esac
 USER="e2e$(date +%s)"
 PASS="Test1234!"
 PASS_CNT=0 FAIL_CNT=0
