@@ -146,6 +146,11 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.starsNumberStart,
     required this.editChipBg,
     required this.editChipLabel,
+    required this.topBarActionText,
+    required this.sheetFieldLabelText,
+    required this.sheetScrim,
+    required this.rewardLineLead,
+    required this.editChipPressedBg,
     required this.loginKakaoBg,
     required this.loginKakaoLabel,
     required this.loginNaverBg,
@@ -543,6 +548,21 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 같은 칩의 문구색 (#000000). chipLabel(선택 항목)과 쓰임이 달라 분리한다.
   final Color editChipLabel;
 
+  /// 상단바 오른쪽 `임시저장` 글자 (#74757D, 시안 1173:5591).
+  final Color topBarActionText;
+
+  /// 카드 수정·추가 시트의 `제목`·`설명` 라벨 (#74757D, 시안 1197:6027).
+  final Color sheetFieldLabelText;
+
+  /// 카드 수정·추가 시트 뒤 어두운 막 (rgba(0,0,0,0.5), 시안 1197:5923 Scrim).
+  final Color sheetScrim;
+
+  /// 카드확인 보상 줄의 `완료 시` 부분 (#74757D, 시안 1173:5544). 뒤의 보상 이름은 textPrimary 라 회색/검정으로 갈린다.
+  final Color rewardLineLead;
+
+  /// 카드확인 도구 버튼이 눌린 상태의 배경 (#D7D3D1, 시안 1197:5798 순서 변경 모드의 `카드 순서 변경`). 다른 화면의 #D7D3D1 과 값만 같다.
+  final Color editChipPressedBg;
+
   // --- 소셜 로그인 버튼 ---
   //
   // 각 제공자가 정한 **브랜드 고정값**이다. 디자이너가 바꾸는 값이 아니며,
@@ -784,7 +804,12 @@ class AppColors extends ThemeExtension<AppColors> {
     rewardChipHighlight: Color(0xFF40BBA6),
     starsNumberStart: Color(0xFFFFDD00),
     editChipBg: Color(0xFFEEE9E6),
-    editChipLabel: Color(0xFF000000),
+    editChipLabel: Color(0xFF74757D),
+    topBarActionText: Color(0xFF74757D),
+    sheetFieldLabelText: Color(0xFF74757D),
+    sheetScrim: Color(0x80000000),
+    rewardLineLead: Color(0xFF74757D),
+    editChipPressedBg: Color(0xFFD7D3D1),
     loginKakaoBg: Color(0xFFFEE500),
     loginKakaoLabel: Color(0xFF191600),
     loginNaverBg: Color(0xFF03C75A),
@@ -944,6 +969,11 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? starsNumberStart,
     Color? editChipBg,
     Color? editChipLabel,
+    Color? topBarActionText,
+    Color? sheetFieldLabelText,
+    Color? sheetScrim,
+    Color? rewardLineLead,
+    Color? editChipPressedBg,
     Color? loginLastUsedBg,
     Color? settingsDestructive,
     Color? settingsChevron,
@@ -1093,6 +1123,11 @@ class AppColors extends ThemeExtension<AppColors> {
       starsNumberStart: starsNumberStart ?? this.starsNumberStart,
       editChipBg: editChipBg ?? this.editChipBg,
       editChipLabel: editChipLabel ?? this.editChipLabel,
+      topBarActionText: topBarActionText ?? this.topBarActionText,
+      sheetFieldLabelText: sheetFieldLabelText ?? this.sheetFieldLabelText,
+      sheetScrim: sheetScrim ?? this.sheetScrim,
+      rewardLineLead: rewardLineLead ?? this.rewardLineLead,
+      editChipPressedBg: editChipPressedBg ?? this.editChipPressedBg,
       loginLastUsedBg: loginLastUsedBg ?? this.loginLastUsedBg,
       settingsDestructive: settingsDestructive ?? this.settingsDestructive,
       settingsChevron: settingsChevron ?? this.settingsChevron,
@@ -1400,6 +1435,11 @@ class AppColors extends ThemeExtension<AppColors> {
       )!,
       editChipBg: Color.lerp(editChipBg, other.editChipBg, t)!,
       editChipLabel: Color.lerp(editChipLabel, other.editChipLabel, t)!,
+      topBarActionText: Color.lerp(topBarActionText, other.topBarActionText, t)!,
+      sheetFieldLabelText: Color.lerp(sheetFieldLabelText, other.sheetFieldLabelText, t)!,
+      sheetScrim: Color.lerp(sheetScrim, other.sheetScrim, t)!,
+      rewardLineLead: Color.lerp(rewardLineLead, other.rewardLineLead, t)!,
+      editChipPressedBg: Color.lerp(editChipPressedBg, other.editChipPressedBg, t)!,
       loginLastUsedBg: Color.lerp(loginLastUsedBg, other.loginLastUsedBg, t)!,
       settingsDestructive:
           Color.lerp(settingsDestructive, other.settingsDestructive, t)!,

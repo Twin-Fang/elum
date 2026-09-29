@@ -460,6 +460,13 @@ void main() {
 
 /// 정해진 질문만 돌려주는 저장소. 실서버를 타지 않는다.
 class _FakeRepo with FakeRewardApi implements RoutineRepository {
+  // 카드확인 카드 추가 (#444) — 이 테스트는 쓰지 않는다
+  @override
+  Future<({Routine routine, AppFailure? failure})> addStep(
+    Routine routine, {
+    required String title,
+    required String description,
+  }) async => (routine: routine, failure: null);
   _FakeRepo(this.question);
 
   final RoutineQuestion question;

@@ -263,6 +263,24 @@ abstract final class AppAssets {
   /// 같은 자리의 수정 아이콘 (24×24, 흰색). Figma `fi-br-pencil`(931:4364).
   static const iconPencil = '$_images/icon_pencil.svg';
 
+  // --- 카드확인 도구 버튼·순서 변경 (시안 1173:5541 / 1197:5798, #444) ---
+
+  /// `카드 순서 변경` 버튼 아이콘 (16×16, 시안 1173:5577).
+  static const iconInterlining = '$_images/icon_interlining.svg';
+
+  /// 수정 연필 (16×16, 시안 931:4421). 도구 버튼에서는 원색, 보상 줄에서는 민트로 칠한다.
+  static const iconPencilEdit = '$_images/icon_pencil_edit.svg';
+
+  /// `카드 추가` 버튼 아이콘 (16×16, 시안 204:908).
+  static const iconPlus = '$_images/icon_plus.svg';
+
+  /// 순서 변경 모드의 닫기 ✕ (40×40 안에 20×20, 시안 1197:5917).
+  static const iconClose = '$_images/icon_close.svg';
+
+  /// 카드확인 머리의 회색 반짝임 (18×22, 시안 1173:5593).
+  /// [iconSparklesLarge]는 30×36 이라 이 자리에 맞지 않는다.
+  static const iconSparklesHead = '$_images/icon_sparkles_head.svg';
+
   /// `지난 일과` 섹션 제목 아이콘 (18×18). Figma `fi-br-time-forward`(931:3867).
   static const iconTimePast = '$_images/icon_time_past.svg';
 

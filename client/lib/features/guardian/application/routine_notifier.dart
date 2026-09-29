@@ -6,6 +6,7 @@ import '../../../core/network/idempotency_key.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
+import '../../../shared/models/action_card.dart';
 import '../../../shared/models/credit_usage.dart';
 import '../../../shared/models/routine.dart';
 import '../../credit/data/credit_repository.dart';
@@ -323,6 +324,21 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   /// 없는 카드를 또 지우러 가면 안 된다.
   final _removedStepIds = <String>{};
 
+  /// 일과 하나의 최대 카드 수 — 서버 `RoutineService.STEP_MAX_COUNT` 와 같은 값이다(#444).
+  ///
+  /// 서버는 **자기가 가진 카드**를 센다. 보호자가 화면에서 뺀 카드는 저장하기 전까지 서버에
+  /// 남아 있어서, 화면은 9장인데 서버는 10장이라 추가가 거절될 수 있다.
+  static const _maxSteps = 10;
+
+  /// 화면에서 카드 순서를 바꿨지만 서버에는 아직 안 보낸 상태 (#444).
+  ///
+  /// 뺀 카드([_removedStepIds])와 같은 이유로 **저장하기가 보낸다.** 서버 순서 API 는
+  /// 카드 전체를 요구하는데(개수가 다르면 400) 뺀 카드는 그때까지 서버에 남아 있어서,
+  /// 옮길 때마다 보내면 늘 실패한다. 저장하기는 삭제를 먼저 해 개수를 맞춘 뒤 보낸다.
+  ///
+  /// 순서를 바꿨다 되돌려도 true 로 남을 수 있다 — 한 번 더 보내는 것뿐이라 해가 없다.
+  var _orderDirty = false;
+
   /// [RoutineFlowState.idempotencyKey]를 발급할 때의 요청 내용.
   ///
   /// 내용이 같으면 재시도라 같은 키, 다르면(되돌아가 입력·답·보상을 고쳤다) 새 요청이라
@@ -495,6 +511,104 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     state = state.copyWith(step: RoutineFlowStep.error, errorCode: 'E-1002');
   }
 
+  /// 카드확인에서 카드를 직접 추가한다 (#444 · 시안 1197:6044).
+  ///
+  /// 서버에 **바로** 넣는다 — 새 카드의 id 는 서버가 준다. 성공하면 새 카드를 화면
+  /// 목록 **맨 뒤**에 붙인다. 서버가 돌려준 전체 목록을 그대로 쓰지 않는다: 그 안에는
+  /// 보호자가 이미 뺀(저장 전이라 서버에 남은) 카드가 있어 되살아난다.
+  ///
+  /// null 이면 성공. 실패하면 이유가 담겨 오고 목록은 그대로다.
+  Future<AppFailure?> addStep({
+    required String title,
+    required String description,
+  }) async {
+    // 제목·설명은 보호자가 쓴 글이라 로그에 남기지 않는다 (docs 원칙 5번)
+    AppLogger.notifierCall('RoutineFlowNotifier', 'addStep');
+
+    final routine = state.routine;
+    if (routine == null) return const AppFailure(fault: NetworkFault.app);
+
+    final repo = ref.read(routineRepositoryProvider);
+
+    // 서버 카드가 상한이면(화면에서 뺀 카드까지 세어) 뺀 카드를 먼저 지운다. 안 그러면 화면은
+    // 9장인데 "카드는 10장까지 만들 수 있습니다" 로 거절돼 보호자가 이유를 알 수 없다.
+    // **꽉 찼을 때만** 미리 지운다 — 그 밖에는 나가기 팝업의 "뺀 카드는 저장하기를 눌러야
+    // 빠져요" 를 그대로 지킨다. 하나라도 실패하면 추가하지 않는다.
+    if (_removedStepIds.isNotEmpty &&
+        routine.steps.length + _removedStepIds.length >= _maxSteps) {
+      final failure = await _deleteRemovedSteps(repo, routine.id);
+      if (failure != null) return failure;
+    }
+
+    final result = await repo.addStep(
+      routine,
+      title: title,
+      description: description,
+    );
+    if (result.failure != null) return result.failure;
+
+    // 응답에서 새로 생긴 카드만 뽑는다. 하나도 없으면 서버가 무엇을 했는지 알 수 없다 —
+    // 없는 카드를 만들어 내지 않고 실패로 본다.
+    final known = {for (final s in routine.steps) s.id, ..._removedStepIds};
+    final added = [
+      for (final s in result.routine.steps)
+        if (!known.contains(s.id)) s,
+    ];
+    if (added.isEmpty) return const AppFailure(fault: NetworkFault.app);
+
+    // 서버 응답에는 카드 제목이 없다(RoutineStep 에 title 컬럼이 없다, #77) —
+    // 보호자가 쓴 제목을 되살린다.
+    final withTitle = [
+      for (final s in added) s.title.isEmpty ? s.copyWith(title: title) : s,
+    ];
+    state = state.copyWith(
+      routine: routine.copyWith(steps: [...routine.steps, ...withTitle]),
+    );
+    return null;
+  }
+
+  /// 순서 변경 모드에 들어가는 순간의 순서. `✕` 로 나올 때 되돌린다 (#444).
+  ({List<ActionCard> steps, bool dirty}) snapshotOrder() => (
+    steps: List.of(state.routine?.steps ?? const <ActionCard>[]),
+    dirty: _orderDirty,
+  );
+
+  /// [snapshotOrder] 로 되돌린다.
+  void restoreOrder(({List<ActionCard> steps, bool dirty}) snapshot) {
+    final routine = state.routine;
+    if (routine == null) return;
+    _orderDirty = snapshot.dirty;
+    state = state.copyWith(routine: routine.copyWith(steps: snapshot.steps));
+  }
+
+  /// 카드 한 장을 옮긴다 (#444 · 시안 1197:5798 길게 눌러 순서 변경).
+  ///
+  /// [newIndex] 는 `ReorderableListView.onReorder` 가 주는 값 그대로다 — 아래로
+  /// 옮길 때 **제거 전** 위치를 주므로 여기서 하나 뺀다. 범위를 벗어나면 무시한다.
+  /// 서버는 부르지 않는다. [save] 가 보낸다.
+  void moveStep(int oldIndex, int newIndex) {
+    final routine = state.routine;
+    if (routine == null) return;
+    final steps = List.of(routine.steps);
+    if (oldIndex < 0 || oldIndex >= steps.length) return;
+    if (newIndex < 0 || newIndex > steps.length) return;
+
+    final target = newIndex > oldIndex ? newIndex - 1 : newIndex;
+    if (target == oldIndex) return;
+
+    steps.insert(target, steps.removeAt(oldIndex));
+    _orderDirty = true;
+    state = state.copyWith(
+      routine: routine.copyWith(
+        steps: [
+          // 번호는 자리다 — 카드와 함께 옮기지 않고 자리대로 다시 매긴다
+          for (var i = 0; i < steps.length; i++)
+            steps[i].copyWith(stepOrder: i + 1),
+        ],
+      ),
+    );
+  }
+
   /// 카드확인에서 카드를 뺀다 (Figma 364:8305 X 버튼).
   ///
   /// 로컬에서만 지우고 서버 반영은 저장(승인) 시점의 목록으로 정리된다.
@@ -565,6 +679,29 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     return result.failure;
   }
 
+  /// 화면에서 뺀 카드를 서버에서 지운다 (#405). [save] 와 [addStep] 이 함께 쓴다.
+  ///
+  /// null 이면 전부 지웠다. 하나라도 실패하면 이유를 돌려주고 **멈춘다** — 성공한 것은
+  /// 기억에서 지워 다시 부를 때 남은 것만 보낸다.
+  Future<AppFailure?> _deleteRemovedSteps(
+    RoutineRepository repo,
+    String routineId,
+  ) async {
+    for (final stepId in _removedStepIds.toList()) {
+      final failure = await repo.deleteStep(routineId, stepId);
+
+      // 이미 없는 카드는 빠진 것으로 본다 — 다른 휴대폰에서 먼저 지웠을 때다.
+      // 결과가 같으므로 실패로 다루면 보호자가 영영 저장할 수 없다.
+      final gone = failure?.server?.code == ServerErrorCode.routineStepNotFound;
+      if (failure == null || gone) {
+        _removedStepIds.remove(stepId);
+        continue;
+      }
+      return failure;
+    }
+    return null;
+  }
+
   /// 카드확인의 `저장하기` (이슈 #405).
   ///
   /// 하는 일이 **일과의 상태에 따라 다르다.**
@@ -594,17 +731,18 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
 
     // 뺀 카드를 서버에서 지운다. 하나라도 실패하면 승인하지 않는다 —
     // 뺀 카드가 남은 채로 이룸이에게 가면 보호자가 지운 것이 되살아난 셈이다.
-    for (final stepId in _removedStepIds.toList()) {
-      final failure = await repo.deleteStep(routine.id, stepId);
+    final deleteFailure = await _deleteRemovedSteps(repo, routine.id);
+    if (deleteFailure != null) return deleteFailure;
 
-      // 이미 없는 카드는 빠진 것으로 본다 — 다른 휴대폰에서 먼저 지웠을 때다.
-      // 결과가 같으므로 실패로 다루면 보호자가 영영 저장할 수 없다.
-      final gone = failure?.server?.code == ServerErrorCode.routineStepNotFound;
-      if (failure == null || gone) {
-        _removedStepIds.remove(stepId);
-        continue;
-      }
-      return failure;
+    // 바꾼 순서를 보낸다. **삭제 다음이다** — 서버는 카드 전체를 요구해서 뺀 카드가
+    // 남아 있으면 개수가 달라 거절한다. **승인 앞이다** — 승인하는 순간 이룸이 화면에
+    // 카드가 나가므로 순서가 맞은 채로 나가야 한다.
+    if (_orderDirty) {
+      final failure = await repo.reorderSteps(routine.id, [
+        for (final s in state.routine?.steps ?? routine.steps) s.id,
+      ]);
+      if (failure != null) return failure;
+      _orderDirty = false;
     }
 
     // 이미 저장한 일과는 여기서 끝이다. 승인 API 는 임시저장만 받는다.
@@ -636,6 +774,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     });
     // 앞서 다른 일과에서 뺀 카드가 남아 있으면 엉뚱한 카드를 지우러 간다 (#405).
     _removedStepIds.clear();
+    _orderDirty = false;
     state = RoutineFlowState(
       step: RoutineFlowStep.review,
       routine: routine,
@@ -654,6 +793,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     _generating = null;
     _blockedCalls = 0;
     _removedStepIds.clear();
+    _orderDirty = false;
     _keyIssuedFor = null;
     state = const RoutineFlowState();
   }

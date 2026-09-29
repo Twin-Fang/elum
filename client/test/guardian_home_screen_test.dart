@@ -560,6 +560,13 @@ void main() {
 
 /// 홈이 부르는 것만 받는 저장소. 삭제·순서·복제는 **보냈는지**를 기록한다.
 class _FakeRoutineRepo with FakeRewardApi implements RoutineRepository {
+  // 카드확인 카드 추가 (#444) — 이 테스트는 쓰지 않는다
+  @override
+  Future<({Routine routine, AppFailure? failure})> addStep(
+    Routine routine, {
+    required String title,
+    required String description,
+  }) async => (routine: routine, failure: null);
   _FakeRoutineRepo({required this.routines, required this.past, this.today});
 
   final List<Routine> routines;

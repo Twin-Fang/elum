@@ -604,6 +604,13 @@ class _PushCounter extends NavigatorObserver {
 }
 
 class _FakeRepo with FakeRewardApi implements RoutineRepository {
+  // 카드확인 카드 추가 (#444) — 이 테스트는 쓰지 않는다
+  @override
+  Future<({Routine routine, AppFailure? failure})> addStep(
+    Routine routine, {
+    required String title,
+    required String description,
+  }) async => (routine: routine, failure: null);
   List<RecentReward> recents = const [];
   bool recentsThrows = false;
 

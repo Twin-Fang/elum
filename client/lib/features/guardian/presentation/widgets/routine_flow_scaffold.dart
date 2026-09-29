@@ -35,6 +35,9 @@ class RoutineFlowScaffold extends ConsumerWidget {
     this.leave,
     this.backLeavesFlow = false,
     this.belowButton,
+    this.topBar,
+    this.showDraftAction = false,
+    this.bottomFigmaInset,
   });
 
   final Widget child;
@@ -63,6 +66,25 @@ class RoutineFlowScaffold extends ConsumerWidget {
   /// 단독으로 열렸을 때(테스트·대조 렌더) 쓴다. 두 값이 같은지는
   /// `routine_flow_backdrop_test`가 본다.
   final AuroraTone aurora;
+
+  /// 상단바를 통째로 바꾼다. null 이면 뒤로가기 + 홈이다.
+  ///
+  /// 순서 변경 모드(#444, 시안 1197:5798)는 `✕` 와 가운데 제목이라 뒤로·홈이 없다.
+  /// 높이는 기본 상단바와 **같아야** 한다 — 다르면 모드를 바꿀 때 화면이 출렁인다.
+  final Widget? topBar;
+
+  /// 상단바 오른쪽에 `임시저장` 을 둔다 (#444, 시안 1173:5589).
+  ///
+  /// 누르면 홈 버튼과 같다 — [leave] 로 묻고 나간다. 임시저장은 이미 서버에 남아 있어
+  /// (#387) 저장 동작이 따로 없고, 그래서 나가기와 같은 길로 보낸다.
+  final bool showDraftAction;
+
+  /// CTA 아래 여백을 **프레임 바닥(852)에서** 잰 값으로 준다. null 이면 기본 여백이다.
+  ///
+  /// 카드확인(시안 1173:5541)은 저장 버튼이 y=730~796 이라 바닥에서 56 이다.
+  /// `pinCtaToFigmaY` 는 CTA 윗변을 고정하지만 이 화면은 내용이 길어 **바닥 기준**이 맞다.
+  /// 기기 홈 인디케이터만큼은 뺀다(안전영역이 이미 그만큼 먹었다).
+  final double? bottomFigmaInset;
 
   /// CTA **아래**에 붙는 빠져나가는 길 (`나중에 할게요`). [ElumScaffold]와 같은 자리다.
   ///
@@ -167,21 +189,27 @@ class RoutineFlowScaffold extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                _TopBar(
-                  onBack: onBack == null
-                      ? null
-                      : () async {
-                          if (!await _mayLeave(context, ref, back: true)) {
-                            return;
-                          }
-                          dismissKeyboard();
-                          onBack!();
-                        },
-                  onHome: () async {
-                    final ok = await _mayLeave(context, ref, back: false);
-                    if (ok && context.mounted) context.go(Routes.guardian);
-                  },
-                ),
+                topBar ??
+                    _TopBar(
+                      showDraft: showDraftAction,
+                      onDraft: () async {
+                        final ok = await _mayLeave(context, ref, back: false);
+                        if (ok && context.mounted) context.go(Routes.guardian);
+                      },
+                      onBack: onBack == null
+                          ? null
+                          : () async {
+                              if (!await _mayLeave(context, ref, back: true)) {
+                                return;
+                              }
+                              dismissKeyboard();
+                              onBack!();
+                            },
+                      onHome: () async {
+                        final ok = await _mayLeave(context, ref, back: false);
+                        if (ok && context.mounted) context.go(Routes.guardian);
+                      },
+                    ),
                 Expanded(child: child),
                 if (bottomButton != null)
                   Padding(
@@ -193,7 +221,11 @@ class RoutineFlowScaffold extends ConsumerWidget {
                       // 역산한다 — 프레임 하단(852)에서 CTA 하단(741)까지 111을
                       // 두되 기기 홈인디케이터만큼은 뺀다. 아래에 보조 동작이
                       // 붙으면 그 줄(781)부터 잰다.
-                      pinCtaToFigmaY
+                      bottomFigmaInset != null
+                          ? (bottomFigmaInset!.h -
+                                    MediaQuery.paddingOf(context).bottom)
+                                .clamp(0.0, double.infinity)
+                          : pinCtaToFigmaY
                           ? ((belowButton == null
                                             ? 852 - space.ctaTop - space.buttonH
                                             : _belowBottom)
@@ -225,9 +257,18 @@ class RoutineFlowScaffold extends ConsumerWidget {
 
 /// 뒤로가기 + 홈 (Figma x=24 / x=72, y=87)
 class _TopBar extends StatelessWidget {
-  const _TopBar({this.onBack, required this.onHome});
+  const _TopBar({
+    this.onBack,
+    required this.onHome,
+    required this.showDraft,
+    required this.onDraft,
+  });
 
   final VoidCallback? onBack;
+
+  /// 오른쪽 `임시저장` (#444). 홈과 같은 확인을 거친다.
+  final bool showDraft;
+  final VoidCallback onDraft;
 
   /// 홈도 나가는 길이다 — 뒤로가기와 같은 확인을 거친다 (#242).
   final VoidCallback onHome;
@@ -306,6 +347,44 @@ class _TopBar extends StatelessWidget {
               ),
             ),
           ),
+          if (showDraft) ...[
+            const Spacer(),
+            // 시안 1173:5589 — 터치 영역 72×40 @ x=305(오른쪽 여백 16), 글자 16/w600.
+            // 자리는 아이콘 높이 그대로 두고 **그 위로** 40 높이 누름 영역을 덮는다 (#306).
+            Padding(
+              padding: EdgeInsets.only(right: 16.w),
+              child: AppPressable(
+                onTap: onDraft,
+                semanticLabel: '임시저장',
+                child: SizedBox(
+                  width: 72.w,
+                  height: 24.w,
+                  child: OverflowBox(
+                    maxWidth: 72.w,
+                    maxHeight: 40.w,
+                    child: SizedBox(
+                      width: 72.w,
+                      height: 40.w,
+                      // 글꼴을 키우면 `임시저 / 장` 으로 꺾여 둘째 줄이 잘린다 — 한 줄로 줄인다
+                      child: Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            '임시저장',
+                            maxLines: 1,
+                            softWrap: false,
+                            style: context.typo.topBarAction.copyWith(
+                              color: context.colors.topBarActionText,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

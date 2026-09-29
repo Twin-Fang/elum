@@ -187,10 +187,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
     }
 
-    testWidgets('수정 칩이 있고 삭제 X는 에셋으로 그린다', (tester) async {
+    testWidgets('수정 버튼이 있고 삭제 X는 에셋으로 그린다', (tester) async {
       await pumpReview(tester, _FakeRepo(synced: true));
 
-      expect(find.text('이 카드 수정하기'), findsOneWidget);
+      expect(find.text('이 카드 수정'), findsOneWidget);
       // 흐린 원 + X는 코드로 그리지 않는다 — Figma 393:4010 에셋
       expect(svgWithAsset(AppAssets.iconCardDelete), findsWidgets);
       // 이전 시안의 이미지 위 버튼은 사라졌다
@@ -214,24 +214,24 @@ void main() {
       expect(find.byType(AuroraBackground), findsNothing);
     });
 
-    testWidgets('칩을 누르면 수정 시트가 뜨고 저장하면 카드가 바뀐다', (tester) async {
+    testWidgets('수정 버튼을 누르면 수정 시트가 뜨고 완료하면 카드가 바뀐다', (tester) async {
       await pumpReview(tester, _FakeRepo(synced: true));
 
-      await tester.tap(find.text('이 카드 수정하기'));
+      await tester.tap(find.text('이 카드 수정'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(find.text('카드 고치기'), findsOneWidget);
+      expect(find.text('카드 수정'), findsOneWidget);
 
       // 첫 필드가 제목, 둘째가 설명
       final fields = find.byType(TextField);
       await tester.enterText(fields.first, '가방을 싸요');
       await tester.enterText(fields.last, '책과 준비물을 가방에 넣어요');
-      await tester.tap(find.text('저장하기').last);
+      await tester.tap(find.text('완료').last);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(find.text('카드 고치기'), findsNothing, reason: '저장하면 시트가 닫힌다');
+      expect(find.text('카드 수정'), findsNothing, reason: '완료하면 시트가 닫힌다');
       expect(find.text('가방을 싸요'), findsOneWidget);
       expect(find.text('책과 준비물을 가방에 넣어요'), findsOneWidget);
     });
@@ -260,7 +260,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      await tester.tap(find.text('이 카드 수정하기'));
+      await tester.tap(find.text('이 카드 수정'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
@@ -272,25 +272,25 @@ void main() {
         reason: 'title 없는 카드는 제목칸이 비어 열려야 한다',
       );
       // 저장 버튼은 제목이 비어 비활성 — 제목=설명으로 저장될 수 없다
-      final saveButton = find.text('저장하기').last;
+      final saveButton = find.text('완료').last;
       expect(saveButton, findsOneWidget);
     });
 
     testWidgets('제목을 지우면 저장할 수 없다', (tester) async {
       await pumpReview(tester, _FakeRepo(synced: true));
 
-      await tester.tap(find.text('이 카드 수정하기'));
+      await tester.tap(find.text('이 카드 수정'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
       await tester.enterText(find.byType(TextField).first, '   ');
       await tester.pump();
-      await tester.tap(find.text('저장하기').last);
+      await tester.tap(find.text('완료').last);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
       expect(
-        find.text('카드 고치기'),
+        find.text('카드 수정'),
         findsOneWidget,
         reason: '빈 제목으로는 저장되지 않고 시트가 남는다',
       );
@@ -299,10 +299,10 @@ void main() {
     testWidgets('서버 반영 실패 시 에러 코드를 보여준다', (tester) async {
       await pumpReview(tester, _FakeRepo(synced: false));
 
-      await tester.tap(find.text('이 카드 수정하기'));
+      await tester.tap(find.text('이 카드 수정'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
-      await tester.tap(find.text('저장하기').last);
+      await tester.tap(find.text('완료').last);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
@@ -347,6 +347,13 @@ void main() {
 /// updateStep 응답은 실제 서버처럼 **step title 없이** 돌아온다 —
 /// notifier의 제목 복원 로직이 이 조건에서 검증된다.
 class _FakeRepo with FakeRewardApi implements RoutineRepository {
+  // 카드확인 카드 추가 (#444) — 이 테스트는 쓰지 않는다
+  @override
+  Future<({Routine routine, AppFailure? failure})> addStep(
+    Routine routine, {
+    required String title,
+    required String description,
+  }) async => (routine: routine, failure: null);
   _FakeRepo({required this.synced});
 
   final bool synced;

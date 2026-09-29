@@ -115,7 +115,7 @@ void main() {
     }
   });
 
-  group('카드 확인 — 머리 아래 사용량 줄', () {
+  group('카드 확인 — 머리 아래 사용량 줄은 그리지 않는다 (#444)', () {
     const routine = Routine(
       id: 'r1',
       title: '학교에 가요',
@@ -123,7 +123,9 @@ void main() {
       steps: [ActionCard(id: 'c1', stepOrder: 1, title: '옷', description: '옷을 입어요')],
     );
 
-    testWidgets('생성 응답의 credit 을 한 줄로 보인다', (tester) async {
+    // 새 시안(1173:5541)의 머리는 반짝임 + `카드 N개를 만들었어요` 뿐이다.
+    // #407 이 시안 밖에 덧붙였던 `AI 그림 N장 · M크레딧 사용` 줄은 뺐다 — 시안이 기준이다.
+    testWidgets('생성 응답에 credit 이 있어도 사용량 줄이 없다', (tester) async {
       await pump(
         tester,
         const CardReviewScreen(),
@@ -139,10 +141,9 @@ void main() {
         ),
       );
 
-      expect(find.text('AI 그림 4장 · 5크레딧 사용 · 67 남음'), findsOneWidget);
-      final title = tester.getRect(find.text('카드 1개를 만들었어요'));
-      final line = tester.getRect(find.text('AI 그림 4장 · 5크레딧 사용 · 67 남음'));
-      expect(line.top, greaterThanOrEqualTo(title.bottom));
+      expect(find.text('카드 1개를 만들었어요'), findsOneWidget);
+      expect(find.textContaining('크레딧 사용'), findsNothing);
+      expect(find.textContaining('AI 그림'), findsNothing);
     });
 
     testWidgets('credit 이 없으면 줄이 없다', (tester) async {

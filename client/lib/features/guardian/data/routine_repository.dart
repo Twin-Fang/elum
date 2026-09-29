@@ -7,6 +7,7 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/storage/local_storage.dart';
+import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
 import '../../credit/domain/credit_summary.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
@@ -72,6 +73,20 @@ abstract interface class RoutineRepository {
   ///
   /// null 이면 성공. 실패하면 서버가 알려준 이유가 담겨 온다 (#352).
   Future<AppFailure?> deleteStep(String routineId, String stepId);
+
+  /// 카드 한 장을 직접 추가한다 (#444 · 시안 1197:6044 `새로운 카드 추가`).
+  ///
+  /// **그림은 만들지 않는다.** 서버는 `generateImage` 를 줄 때만 그림을 그리고(#407),
+  /// 시안에는 그림을 고르는 자리가 없다.
+  ///
+  /// [failure]가 null이 아니면 서버에 못 넣었다는 뜻이고 [routine]은 그대로다 — 수정과 달리
+  /// **로컬에만 넣지 않는다.** 새 카드는 서버가 준 id 가 있어야 이후에 고치고 옮길 수 있다.
+  /// (서버가 없는 로컬 데모 일과는 로컬에 넣는다.)
+  Future<({Routine routine, AppFailure? failure})> addStep(
+    Routine routine, {
+    required String title,
+    required String description,
+  });
 
   /// 카드 문장 수정.
   ///
@@ -331,6 +346,48 @@ class RoutineRepositoryImpl implements RoutineRepository {
     final confirmed = Routine.fromJson(body);
     AppLogger.repositorySuccess('RoutineRepository', 'confirm', '일과 승인 완료');
     return confirmed;
+  }
+
+  @override
+  Future<({Routine routine, AppFailure? failure})> addStep(
+    Routine routine, {
+    required String title,
+    required String description,
+  }) async {
+    // 제목·설명은 보호자가 쓴 글이라 로그에 남기지 않는다 (docs 원칙 5번)
+    AppLogger.repositoryCall('RoutineRepository', 'addStep', {
+      'routineId': routine.id,
+    });
+
+    // 서버에 없는 로컬 일과 — 데모가 끝까지 가도록 로컬에 넣는다
+    if (routine.id.isEmpty) {
+      final added = ActionCard(
+        id: 'local_${DateTime.now().microsecondsSinceEpoch}',
+        title: title,
+        description: description,
+        stepOrder: routine.steps.length + 1,
+      );
+      return (
+        routine: routine.copyWith(steps: [...routine.steps, added]),
+        failure: null,
+      );
+    }
+
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/api/routines/${routine.id}/steps',
+        data: {'title': title, 'description': description},
+      );
+      final body = res.data;
+      if (body == null) {
+        return (routine: routine, failure: const AppFailure(fault: NetworkFault.app));
+      }
+      AppLogger.repositorySuccess('RoutineRepository', 'addStep', '카드 추가 완료');
+      return (routine: Routine.fromJson(body), failure: null);
+    } catch (e) {
+      AppLogger.repositoryError('RoutineRepository', 'addStep', e);
+      return (routine: routine, failure: AppFailure.of(e));
+    }
   }
 
   @override

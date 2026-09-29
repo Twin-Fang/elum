@@ -58,6 +58,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.sheetStepBody,
     required this.sheetActionLabel,
     required this.editChipLabel,
+    required this.topBarAction,
+    required this.sheetFieldText,
+    required this.sheetFieldLabel,
+    required this.sheetHeading,
+    required this.reorderTitle,
+    required this.rewardLine,
     required this.childDetailTitle,
     required this.childGreeting,
     required this.rewardChipLabel,
@@ -273,9 +279,27 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   // --- 카드확인·아이 상세 (Figma 262:5124 / 309:3548, 2026-07-22 덤프) ---
 
-  /// `이 카드 수정하기` 칩 (14/w600 Pretendard).
-  /// chipLabel(14/w500)과 굵기가 달라 별개 토큰이다.
+  /// 카드확인 도구 버튼 3개의 라벨 (14/w500 Pretendard, 시안 1173:5575).
+  /// 옛 `이 카드 수정하기` 칩(w600)이 이 자리로 바뀌었다 (#444).
   final TextStyle editChipLabel;
+
+  /// 상단바 오른쪽 `임시저장` (16/w600, 시안 1173:5591).
+  final TextStyle topBarAction;
+
+  /// 시트 입력칸 글자 (Tmoney 16/w400, 줄 1.2, 시안 1197:6042).
+  final TextStyle sheetFieldText;
+
+  /// 시트의 `제목`·`설명` 라벨 (16/w400, 시안 1197:6027).
+  final TextStyle sheetFieldLabel;
+
+  /// 카드 수정·추가 시트 제목 (20/w700, 시안 1197:6030).
+  final TextStyle sheetHeading;
+
+  /// 순서 변경 모드 상단 제목 `카드 순서 변경` (18/w600, 시안 1197:5895).
+  final TextStyle reorderTitle;
+
+  /// 카드확인 보상 줄 (14/w600 Pretendard, 시안 1173:5544). 색은 부분마다 다르다.
+  final TextStyle rewardLine;
 
   /// 아이 상세 상단바의 일과 제목 (18/w800).
   /// childTileTitle(18/w400)과 굵기가 달라 별개 토큰이다.
@@ -673,6 +697,42 @@ class AppTypography extends ThemeExtension<AppTypography> {
     editChipLabel: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 14,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    topBarAction: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    sheetFieldText: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.2,
+    ),
+    sheetFieldLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    sheetHeading: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+      height: 1.0,
+    ),
+    reorderTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    rewardLine: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
       fontWeight: FontWeight.w600,
       height: 1.0,
     ),
@@ -860,6 +920,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? sheetStepBody,
     TextStyle? sheetActionLabel,
     TextStyle? editChipLabel,
+    TextStyle? topBarAction,
+    TextStyle? sheetFieldText,
+    TextStyle? sheetFieldLabel,
+    TextStyle? sheetHeading,
+    TextStyle? reorderTitle,
+    TextStyle? rewardLine,
     TextStyle? childDetailTitle,
     TextStyle? childGreeting,
     TextStyle? rewardChipLabel,
@@ -932,6 +998,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       sheetStepBody: sheetStepBody ?? this.sheetStepBody,
       sheetActionLabel: sheetActionLabel ?? this.sheetActionLabel,
       editChipLabel: editChipLabel ?? this.editChipLabel,
+      topBarAction: topBarAction ?? this.topBarAction,
+      sheetFieldText: sheetFieldText ?? this.sheetFieldText,
+      sheetFieldLabel: sheetFieldLabel ?? this.sheetFieldLabel,
+      sheetHeading: sheetHeading ?? this.sheetHeading,
+      reorderTitle: reorderTitle ?? this.reorderTitle,
+      rewardLine: rewardLine ?? this.rewardLine,
       childDetailTitle: childDetailTitle ?? this.childDetailTitle,
       childGreeting: childGreeting ?? this.childGreeting,
       rewardChipLabel: rewardChipLabel ?? this.rewardChipLabel,
@@ -1016,6 +1088,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
         t,
       )!,
       editChipLabel: TextStyle.lerp(editChipLabel, other.editChipLabel, t)!,
+      topBarAction: TextStyle.lerp(topBarAction, other.topBarAction, t)!,
+      sheetFieldText: TextStyle.lerp(sheetFieldText, other.sheetFieldText, t)!,
+      sheetFieldLabel: TextStyle.lerp(sheetFieldLabel, other.sheetFieldLabel, t)!,
+      sheetHeading: TextStyle.lerp(sheetHeading, other.sheetHeading, t)!,
+      reorderTitle: TextStyle.lerp(reorderTitle, other.reorderTitle, t)!,
+      rewardLine: TextStyle.lerp(rewardLine, other.rewardLine, t)!,
       childDetailTitle:
           TextStyle.lerp(childDetailTitle, other.childDetailTitle, t)!,
       childGreeting: TextStyle.lerp(childGreeting, other.childGreeting, t)!,

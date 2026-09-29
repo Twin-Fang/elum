@@ -182,6 +182,32 @@ color: destructive ? colors.textSecondary : colors.textPrimary,
 들어 있다 — 전역 의미가 없고, 백엔드가 추천을 내려주면 색도 함께 올 값이기 때문이다.
 (`lib/features/guardian/domain/recommended_routine.dart`)
 
+### 보호자 카드확인 (`보호자_카드확인` `1173:5541` · 2026-09-29 덤프, #444)
+
+도구 버튼 3개·보상 줄·순서 변경 모드·수정/추가 시트가 쓰는 토큰이다.
+
+| 토큰 | 값 | 어디에 |
+|---|---|---|
+| `editChipBg` | `#EEE9E6` | 도구 버튼·보상 줄 배경 (110×60 r18 · 333×46 r8) |
+| `editChipPressedBg` | `#D7D3D1` | 순서 변경 모드에서 눌린 `카드 순서 변경` |
+| `editChipLabel` | `#74757D` | 도구 버튼 라벨. **옛 값은 검정이었다** — 옛 칩이 없어졌다 |
+| `rewardLineLead` | `#74757D` | 보상 줄의 `완료 시` (뒤 보상 이름은 `textPrimary`) |
+| `sheetScrim` | `#000000` 50% | 수정·추가 시트 뒤 막 |
+| `sheetFieldLabelText` | `#74757D` | 시트의 `제목`·`설명` 라벨 |
+| `topBarActionText` | `#74757D` | 상단 `임시저장` |
+
+| 글자 토큰 | 값 | 어디에 |
+|---|---|---|
+| `editChipLabel` | Pretendard 14/w500 | 도구 버튼 라벨 (옛 칩은 w600) |
+| `rewardLine` | Pretendard 14/w600 | 보상 줄 |
+| `reorderTitle` | Pretendard 18/w600 | 순서 변경 모드 상단 제목 |
+| `sheetHeading` | Pretendard 20/w700 | 시트 제목 |
+| `sheetFieldLabel` | Pretendard 16/w400 | 시트 라벨 |
+| `sheetFieldText` | Tmoney 16/w400 · 줄 1.2 | 시트 입력칸 글자 |
+| `topBarAction` | Pretendard 16/w600 | 상단 `임시저장` |
+
+머리 문구는 `promptBody`(16/w500)에 `promptMuted`(40%)를 쓴다. 시안 문구가 이미 능동형이다.
+
 ### 캐릭터 / 일러스트 팔레트
 
 `#FFFADB` `#FFDFBD` `#FFDAC7` `#F4A753` `#EB9B73` `#F3F2E1` `#CED8FF` `#C8DD94` `#B5EAEC` `#CDC8C3`

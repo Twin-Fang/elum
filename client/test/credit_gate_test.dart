@@ -337,6 +337,13 @@ class _FakeCredit extends CreditRepository {
 }
 
 class _HomeRepo with FakeRewardApi implements RoutineRepository {
+  // 카드확인 카드 추가 (#444) — 이 테스트는 쓰지 않는다
+  @override
+  Future<({Routine routine, AppFailure? failure})> addStep(
+    Routine routine, {
+    required String title,
+    required String description,
+  }) async => (routine: routine, failure: null);
   @override
   Future<List<Routine>> getMyRoutines() async => const [];
   @override

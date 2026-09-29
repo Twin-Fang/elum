@@ -907,8 +907,25 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
   });
 
-  // 카드확인 (#297). **이 화면만 오로라를 껐다** — 배경이 정지라 대조가 정확하다.
-  testWidgets('카드확인 (Figma 262:5124)', (tester) async {
+  // 카드확인 (#444). 시안이 새로 나왔다 — 기본·순서 변경·수정 시트(+키보드)·추가 시트 다섯 장.
+  // 옛 시안 262:5124 대조는 이 다섯 장으로 바뀌었다. **이 화면만 오로라를 껐다** — 배경이 정지라 대조가 정확하다.
+  //
+  // 시안(1173:5541)은 카드 다섯 장의 첫 장을 보여 주고 보상은 `젤리 4개 먹기`다.
+  // 내용이 다르면 diff 가 통째로 붉어져 정작 봐야 할 어긋남이 묻힌다.
+  const reviewCards = [
+    ActionCard(
+      id: 'c1',
+      stepOrder: 1,
+      title: '옷을 입어요',
+      description: '학교에 입고 갈 옷을 차례대로 입어요',
+    ),
+    ActionCard(id: 'c2', stepOrder: 2, title: '가방을 챙겨요', description: '설명'),
+    ActionCard(id: 'c3', stepOrder: 3, title: '신발을 신어요', description: '설명'),
+    ActionCard(id: 'c4', stepOrder: 4, title: '문을 열어요', description: '설명'),
+    ActionCard(id: 'c5', stepOrder: 5, title: '길을 걸어요', description: '설명'),
+  ];
+
+  Future<void> pumpCardReview(WidgetTester tester) async {
     final container = ProviderContainer(
       overrides: [
         testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
@@ -916,44 +933,13 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
-
-    // 시안(262:5124)은 카드 다섯 장을 그리고 첫 장을 보여 준다.
-    container.read(routineFlowProvider.notifier).state = RoutineFlowState(
-      routine: const Routine(
+    container.read(routineFlowProvider.notifier).state = const RoutineFlowState(
+      routine: Routine(
         id: 'r1',
         title: '학교에 가요',
-        steps: [
-          ActionCard(
-            id: 'c1',
-            stepOrder: 1,
-            title: '옷을 입어요',
-            description: '학교에 입고 갈 옷을 차례대로 입어요',
-          ),
-          ActionCard(
-            id: 'c2',
-            stepOrder: 2,
-            title: '가방을 챙겨요',
-            description: '설명',
-          ),
-          ActionCard(
-            id: 'c3',
-            stepOrder: 3,
-            title: '신발을 신어요',
-            description: '설명',
-          ),
-          ActionCard(
-            id: 'c4',
-            stepOrder: 4,
-            title: '문을 열어요',
-            description: '설명',
-          ),
-          ActionCard(
-            id: 'c5',
-            stepOrder: 5,
-            title: '길을 걸어요',
-            description: '설명',
-          ),
-        ],
+        status: 'PENDING_REVIEW',
+        rewardText: '젤리 4개 먹기',
+        steps: reviewCards,
       ),
     );
 
@@ -987,10 +973,74 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
+  }
+
+  Future<void> settleReview(WidgetTester tester) async {
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+  }
+
+  testWidgets('카드확인 (Figma 1173:5541)', (tester) async {
+    await pumpCardReview(tester);
 
     await expectLater(
       find.byType(CardReviewScreen),
-      matchesGoldenFile('figma/card_review_262-5124.png'),
+      matchesGoldenFile('figma/card_review_1173-5541.png'),
+    );
+  });
+
+  testWidgets('카드확인 순서 변경 (Figma 1197:5798)', (tester) async {
+    await pumpCardReview(tester);
+    await tester.tap(find.text('카드 순서 변경'));
+    await settleReview(tester);
+
+    await expectLater(
+      find.byType(CardReviewScreen),
+      matchesGoldenFile('figma/card_review_reorder_1197-5798.png'),
+    );
+  });
+
+  testWidgets('카드 수정 시트 (Figma 1197:5923)', (tester) async {
+    await pumpCardReview(tester);
+    await tester.tap(find.text('이 카드 수정'));
+    await settleReview(tester);
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/card_edit_sheet_1197-5923.png'),
+    );
+  });
+
+  // 시안의 키보드는 iOS 가 그린다 — 앱은 입력칸이 키보드 위에 남는지·시트가 y=82 까지
+  // 자라는지만 맞댄다. 아래 291(키보드) 는 대조에서 가린다.
+  testWidgets('카드 수정 시트 + 키보드 (Figma 1197:6161)', (tester) async {
+    await pumpCardReview(tester);
+    await tester.tap(find.text('이 카드 수정'));
+    await settleReview(tester);
+    showKeyboard(tester, height: 291);
+    await settleReview(tester);
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/card_edit_keyboard_1197-6161.png'),
+    );
+  });
+
+  // 시안 추가 시트는 입력칸에 `제목` · `설명` 이 값으로 들어 있다. 같은 글을 넣어 맞댄다.
+  // 시안에 복사하다 남은 검은 `설명`(1197:6160) 한 글자는 그리지 않아 그 자리가 다르다.
+  testWidgets('카드 추가 시트 (Figma 1197:6044)', (tester) async {
+    await pumpCardReview(tester);
+    await tester.tap(find.text('카드 추가'));
+    await settleReview(tester);
+    await tester.enterText(find.byType(TextField).first, '제목');
+    await tester.enterText(find.byType(TextField).last, '설명');
+    await tester.pump();
+    FocusManager.instance.primaryFocus?.unfocus();
+    await settleReview(tester);
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/card_add_sheet_1197-6044.png'),
     );
   });
 
@@ -1917,6 +1967,13 @@ class _QuestionRepo with FakeRewardApi implements RoutineRepository {
 
 /// 목록만 돌려준다. 대조용이라 쓰기는 일어나지 않는다.
 class _StubRepo with FakeRewardApi implements RoutineRepository {
+  // 카드확인 카드 추가 (#444) — 이 테스트는 쓰지 않는다
+  @override
+  Future<({Routine routine, AppFailure? failure})> addStep(
+    Routine routine, {
+    required String title,
+    required String description,
+  }) async => (routine: routine, failure: null);
   _StubRepo({required this.routines, required this.past});
 
   final List<Routine> routines;

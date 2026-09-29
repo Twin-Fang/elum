@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/show_failure.dart';
-import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
-import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/theme/app_motion.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../shared/models/action_card.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../child/data/speech_service.dart';
 import '../application/routine_notifier.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
-import 'widgets/credit_usage_line.dart';
+import 'widgets/card_review_parts.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 
-/// Figma `보호자_새로운 일과 만들기_카드확인`(262:5124 / 309:2763).
+/// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경, #444).
+///
+/// 옛 시안(262:5124)은 하단이 `이 카드 수정하기` 칩 하나였다. 새 시안은 도구 버튼
+/// 3개(순서 변경 · 수정 · 추가)이고 순서 변경은 같은 화면이 모드로 바뀐다.
 ///
 /// AI가 만든 카드를 보호자가 확인하고 저장한다. **승인 전에는 아동에게
 /// 노출되지 않는다** (docs 원칙 3번).
@@ -50,7 +50,16 @@ class CardReviewScreen extends ConsumerStatefulWidget {
 class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
   late final _controller = PageController(
     viewportFraction: CardReviewScreen._viewportFraction,
+    // 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다 — 옛 위치를 기억하면 카드
+    // 순서가 바뀐 뒤 엉뚱한 카드에 서 있다. 첫 카드에서 시작한다.
+    keepPage: false,
   );
+
+  /// 순서 변경 모드 (시안 1197:5798). 같은 화면이 모드로 바뀐다.
+  var _reorderMode = false;
+
+  /// 모드에 들어오는 순간의 순서. `✕` 가 이 순서로 되돌린다.
+  ({List<ActionCard> steps, bool dirty})? _orderSnapshot;
 
   /// 지금 읽고 있는 카드 id. null이면 아무것도 안 읽고 있다.
   String? _speakingId;
@@ -172,214 +181,186 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     }
   }
 
+  /// 새 카드를 직접 추가한다 (시안 1197:6044).
+  ///
+  /// 서버에 **시트 안에서** 넣는다 — 실패하면 시트가 열린 채 쓴 글이 남는다.
+  /// 그림은 만들지 않는다(시안에 고르는 자리가 없다). 성공하면 새 카드로 넘어간다.
+  Future<void> _add() async {
+    final notifier = ref.read(routineFlowProvider.notifier);
+    final before = ref.read(routineFlowProvider).routine?.steps.length ?? 0;
+
+    final added = await CardEditSheet.showAdd(
+      context,
+      onSubmit: (title, description) async {
+        final failure = await notifier.addStep(
+          title: title,
+          description: description,
+        );
+        if (failure == null) return true;
+        if (mounted) {
+          showFailure(
+            context,
+            failure,
+            title: '카드를 추가하지 못했어요',
+            fallback: '잠시 후 다시 시도해주세요',
+            fallbackCode: 'E-STEP-ADD',
+          );
+        }
+        return false;
+      },
+    );
+    if (added == null || !mounted) return;
+
+    // 새 카드는 맨 뒤다. 다음 프레임에 페이지 수가 늘어난 뒤 그 카드로 간다.
+    final last = before; // 추가 전 개수 = 새 카드의 인덱스
+    setState(() => _currentIndex = last);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _controller.hasClients) {
+        _controller.animateToPage(
+          last,
+          duration: AppMotion.normal,
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  /// 순서 변경 모드에 들어간다. 읽던 소리는 끊는다 — 카드가 움직이는데 이어 읽으면 어긋난다.
+  void _enterReorder() {
+    _speech?.stop();
+    setState(() {
+      _speakingId = null;
+      _orderSnapshot = ref.read(routineFlowProvider.notifier).snapshotOrder();
+      _reorderMode = true;
+    });
+  }
+
+  /// `완료` — 바꾼 순서를 두고 나온다. 서버에는 저장하기가 보낸다.
+  void _finishReorder() => _leaveReorder();
+
+  /// `✕`·시스템 뒤로 — 들어오기 전 순서로 되돌리고 나온다.
+  void _cancelReorder() {
+    final snapshot = _orderSnapshot;
+    if (snapshot != null) {
+      ref.read(routineFlowProvider.notifier).restoreOrder(snapshot);
+    }
+    _leaveReorder();
+  }
+
+  void _leaveReorder() {
+    setState(() {
+      _reorderMode = false;
+      _orderSnapshot = null;
+      // 페이지 뷰가 새로 만들어져 첫 카드에서 시작한다
+      _currentIndex = 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final routine = ref.watch(routineFlowProvider).routine;
-    final cards = routine?.steps ?? const [];
+    final cards = routine?.steps ?? const <ActionCard>[];
     final routineId = routine?.id ?? '';
-    final space = context.space;
+    final notifier = ref.read(routineFlowProvider.notifier);
 
     // 만들어진 카드가 없으면 확인할 것이 없다. 홈으로 돌려보낸다.
     if (cards.isEmpty) {
       return const RoutineFlowScaffold(
         aurora: CardReviewScreen.aurora,
-        child: _EmptyCards(),
+        child: CardReviewEmpty(),
       );
     }
 
     return RoutineFlowScaffold(
-      // 카드를 만든 순간 서버에 임시저장으로 남는다 — 나가도 날아가지 않는다 (#387).
+      // 순서 변경 중에는 나가도 잃을 것이 없다 — 뒤로는 모드만 닫는다(되돌림 포함).
+      // 그 밖에는 카드를 만든 순간 서버에 임시저장으로 남는다 — 나가도 날아가지 않는다 (#387).
       // 홈에서 편집하러 온 이미 저장한 일과는 뺀 카드만 저장하기를 기다린다.
-      leave: routine?.status == 'PENDING_REVIEW'
+      leave: _reorderMode
+          ? null
+          : routine?.status == 'PENDING_REVIEW'
           ? RoutineLeave.draft
           : RoutineLeave.edit,
       // 뒤로도 흐름을 떠난다 — 홈과 같이 묻고, 나가면 흐름을 연 화면(홈·임시저장)으로
       // 간다. 카드를 만든 뒤 흐름 안으로 되돌아가면 앞 화면들이 `남지 않아요` 라고
       // 사실과 다르게 말하고, 거기서 바꾼 보상·답은 다시 만들지 않아 버려진다 (#387 D1).
       backLeavesFlow: true,
-      onBack: () => leaveRoutineFlow(context),
-      bottomButton: ElumButton(label: '저장하기', onPressed: _save),
+      onBack: _reorderMode ? _cancelReorder : () => leaveRoutineFlow(context),
+      topBar: _reorderMode
+          ? CardReviewReorderTopBar(onClose: _cancelReorder)
+          : null,
+      showDraftAction: !_reorderMode,
+      // 저장 버튼은 시안 y=730~796 — 프레임 바닥에서 56 (#444)
+      bottomFigmaInset: 56,
+      bottomButton: ElumButton(
+        label: _reorderMode ? '완료' : '카드 저장하기',
+        onPressed: _reorderMode ? _finishReorder : _save,
+      ),
       aurora: CardReviewScreen.aurora,
       child: Column(
         children: [
-          // 시안(262:5124)은 상단 아이콘이 110 에서 끝나고 반짝임이 117 에서
-          // 시작한다 — 사이가 7 이다. 토큰(16)을 쓰면 12 내려간다 (#297).
-          SizedBox(height: 4.h),
-          SvgPicture.asset(
-            AppAssets.iconSparklesLarge,
-            width: 30.w,
-            height: 36.h,
+          // 상단바(끝 111) → 머리 y=123 → 카드 y=161. 순서 모드는 머리가 없어도 같은 높이다.
+          SizedBox(height: 12.h),
+          SizedBox(
+            height: 22.h,
+            child: _reorderMode ? null : CardReviewHead(count: cards.length),
           ),
-          SizedBox(height: space.md),
-          Text(
-            // 시안은 `카드 5개가 생성되었어요`인데 **피동형이라 쓸 수 없다**
-            // (루트 CLAUDE.md 말투 규칙). 능동으로 바꿔 둔다.
-            '카드 ${cards.length}개를 만들었어요',
-            style: context.typo.reviewTitle.copyWith(
-              color: context.colors.textPrimary,
-            ),
-          ),
-          // 이번 생성이 쓴 크레딧 (#407). 없으면 크기 0 이라 배치가 그대로다.
-          const CreditUsageLine(),
-          // 시안은 제목이 190 에서 끝나고 카드가 바로 이어진다 — 토큰(24)을
-          // 쓰면 카드가 17 내려간다 (#297).
-          SizedBox(height: 7.h),
+          SizedBox(height: 16.h),
           Expanded(
-            child: PageView.builder(
-              controller: _controller,
-              itemCount: cards.length,
-              // 카드를 넘기면 수정 칩의 대상도 바뀐다
-              onPageChanged: (index) => setState(() => _currentIndex = index),
-              itemBuilder: (context, index) => Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: (CardReviewScreen._cardGap / 2).w,
-                ),
-                child: ActionCardView(
-                  key: ValueKey(cards[index].id),
-                  card: cards[index],
-                  index: index,
-                  routineId: routineId,
-                  onSpeak: () => _speak(cards[index]),
-                  isSpeaking: _speakingId == cards[index].id,
-                  // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
-                  onDelete: cards.length > 1
-                      ? () => ref
-                            .read(routineFlowProvider.notifier)
-                            .removeStep(cards[index].id)
-                      : null,
-                ),
-              ),
+            child: _reorderMode
+                ? CardReviewReorderList(
+                    cards: cards,
+                    routineId: routineId,
+                    cardWidth: CardReviewScreen._cardWidth,
+                    cardGap: CardReviewScreen._cardGap,
+                    onReorder: notifier.moveStep,
+                  )
+                : PageView.builder(
+                    controller: _controller,
+                    itemCount: cards.length,
+                    // 카드를 넘기면 수정 버튼의 대상도 바뀐다
+                    onPageChanged: (index) =>
+                        setState(() => _currentIndex = index),
+                    itemBuilder: (context, index) => Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: (CardReviewScreen._cardGap / 2).w,
+                      ),
+                      child: ActionCardView(
+                        key: ValueKey(cards[index].id),
+                        card: cards[index],
+                        index: index,
+                        routineId: routineId,
+                        onSpeak: () => _speak(cards[index]),
+                        isSpeaking: _speakingId == cards[index].id,
+                        // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
+                        onDelete: cards.length > 1
+                            ? () => notifier.removeStep(cards[index].id)
+                            : null,
+                      ),
+                    ),
+                  ),
+          ),
+          // 카드 끝 571 → 보상 줄 587
+          SizedBox(height: 16.h),
+          if (_reorderMode)
+            const CardReviewReorderHint()
+          else
+            CardReviewRewardRow(
+              reward: routine?.hasReward ?? false
+                  ? routine!.rewardDisplay
+                  : null,
+              onTap: () => context.push(Routes.routineReward, extra: true),
             ),
+          // 보상 줄 끝 633 → 도구 버튼 654
+          SizedBox(height: 21.h),
+          CardReviewToolRow(
+            reorderMode: _reorderMode,
+            onReorder: _enterReorder,
+            // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
+            onEdit: () =>
+                _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),
+            onAdd: _add,
           ),
-          // **아래 간격을 md(16)가 아니라 xs(8)로 둔다.** 보상 줄(#239)이
-          // 들어오면서 카드가 시안보다 41 짧아졌다. 셋을 줄여 24를 카드에
-          // 돌려준다 — 그만큼 설명이 잘리는 양이 준다 (이슈 #335).
-          SizedBox(height: space.xs),
-          // 보상 줄 — 정한 것을 보여주고, 건너뛰었으면 여기서 정할 수 있다 (#239).
-          _RewardRow(
-            reward: routine?.hasReward ?? false ? routine!.rewardDisplay : null,
-            onTap: () => context.push(Routes.routineReward, extra: true),
-          ),
-          SizedBox(height: space.xs),
-          // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
-          _EditChip(
-            onTap: () => _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),
-          ),
-          SizedBox(height: space.xs),
         ],
-      ),
-    );
-  }
-}
-
-/// `이 카드 수정하기` 알약 칩 (Figma 262:5124 — 393:3995, r20, 패딩 10×20).
-class _EditChip extends StatelessWidget {
-  const _EditChip({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-
-    return AppPressable(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-        decoration: BoxDecoration(
-          color: context.colors.editChipBg,
-          borderRadius: BorderRadius.circular(space.cardRadius.r),
-        ),
-        child: Text(
-          // 시안 `262:5124` 문구 그대로 — `고치기`로 줄여 두었었다 (#297)
-          '이 카드 수정하기',
-          style: context.typo.editChipLabel.copyWith(
-            color: context.colors.editChipLabel,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 카드가 없을 때. 로딩이 실패해도 여기까지 올 수 있다.
-class _EmptyCards extends StatelessWidget {
-  const _EmptyCards();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: context.space.screenH),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '만들어진 카드가 없어요',
-              textAlign: TextAlign.center,
-              style: context.typo.promptTitle.copyWith(
-                color: context.colors.textPrimary,
-              ),
-            ),
-            SizedBox(height: context.space.md),
-            Text(
-              // 에러 코드를 함께 보여줘야 제보를 추적할 수 있다
-              '다시 만들어 주세요 (E-CARD)',
-              style: context.typo.promptBody.copyWith(
-                color: context.colors.promptMuted,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// 카드 검토의 보상 줄 (이슈 #239).
-///
-/// 보호자가 정한 보상을 여기서 다시 확인하고 고칠 수 있다.
-/// **건너뛴 사람에게는 정하라고 권한다** — 카드를 다 보고 나서야 "무엇을 주지"가
-/// 떠오르는 경우가 있다.
-class _RewardRow extends StatelessWidget {
-  const _RewardRow({required this.reward, required this.onTap});
-
-  /// 정해진 보상 (`🍪 젤리 먹기`). null이면 아직 없다.
-  final String? reward;
-  final VoidCallback onTap;
-
-  static const _padV = 10.0;
-  static const _padH = 16.0;
-  static const _radius = 20.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final has = reward != null;
-
-    return AppPressable(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: _padV.h, horizontal: _padH.w),
-        decoration: BoxDecoration(
-          color: has ? colors.rewardBannerBg : colors.editChipBg,
-          borderRadius: BorderRadius.circular(_radius.r),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              has ? '다 하면 $reward' : '보상 정하기',
-              style: context.typo.chipLabel.copyWith(color: colors.textPrimary),
-            ),
-            SizedBox(width: context.space.xs.w),
-            Icon(
-              has ? Icons.edit_outlined : Icons.add,
-              size: context.space.checkSize.w,
-              color: colors.textSecondary,
-            ),
-          ],
-        ),
       ),
     );
   }

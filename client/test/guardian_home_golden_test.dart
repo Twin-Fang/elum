@@ -245,6 +245,13 @@ void main() {
 
 /// 목록만 돌려주는 저장소. 쓰기는 골든에서 일어나지 않는다.
 class _GoldenRepo with FakeRewardApi implements RoutineRepository {
+  // 카드확인 카드 추가 (#444) — 이 테스트는 쓰지 않는다
+  @override
+  Future<({Routine routine, AppFailure? failure})> addStep(
+    Routine routine, {
+    required String title,
+    required String description,
+  }) async => (routine: routine, failure: null);
   _GoldenRepo({required this.routines, required this.past});
 
   final List<Routine> routines;
