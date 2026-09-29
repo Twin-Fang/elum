@@ -64,4 +64,36 @@ void main() {
       );
     }
   });
+
+  // --- 릴리스(R8) 전용 결함 (#446) ---
+  //
+  // debug 빌드는 R8 을 돌리지 않아 위 태스크 문제를 고쳐도 **릴리스에서만** 네이버 로그인이 죽었다
+  // (2026-09-29 실측). 네이버가 인증 코드를 주고 앱까지 돌려줘도 SDK 의 토큰 교환이
+  // `ClassCastException: java.lang.Class cannot be cast to java.lang.reflect.ParameterizedType`
+  // 으로 실패하고 화면에는 E-AUTH-SDK 가 떴다. SDK 가 쓰는 Retrofit(+코루틴)이 제네릭 시그니처를
+  // 리플렉션으로 읽는데 R8 풀 모드가 그 정보를 지운다. 규칙 파일을 읽어 다시 빠지지 못하게 한다.
+  group('R8 규칙 — 릴리스 네이버 로그인', () {
+    final rules = File('android/app/proguard-rules.pro')
+        .readAsStringSync()
+        .split('\n')
+        .where((l) => !l.trimLeft().startsWith('#'))
+        .join('\n');
+
+    test('제네릭 시그니처를 남긴다 — Retrofit 이 반환 타입을 리플렉션으로 읽는다', () {
+      expect(rules, contains('-keepattributes Signature'));
+    });
+
+    test('코루틴 Continuation 을 지킨다 — suspend 메서드 반환 타입이 타입 인자에 있다', () {
+      expect(rules, contains('kotlin.coroutines.Continuation'));
+    });
+
+    test('Retrofit 서비스 인터페이스와 Response 를 지킨다 — 풀 모드가 Proxy 구현을 못 봐 지운다', () {
+      expect(rules, contains('@retrofit2.http.*'));
+      expect(rules, contains('retrofit2.Response'));
+    });
+
+    test('네이버 SDK 자체 규칙이 남아 있다', () {
+      expect(rules, contains('com.navercorp.nid'));
+    });
+  });
 }
