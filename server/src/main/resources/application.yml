@@ -40,6 +40,13 @@ chuseok22:
 server:
   forward-headers-strategy: framework
 
+elum:
+  auth:
+    legacy-password:
+      # 구형 이름 가입 APK가 운영 DB에 계정을 다시 만들지 못하게 기본값을 닫아 둔다.
+      # 로컬 E2E에서만 ELUM_AUTH_LEGACY_PASSWORD_ENABLED=true로 명시적으로 연다.
+      enabled: ${ELUM_AUTH_LEGACY_PASSWORD_ENABLED:false}
+
 springdoc:
   title: ELUM API
   description: 이룸(ELUM) 보호자/아동 행동 카드 서비스 API 문서
