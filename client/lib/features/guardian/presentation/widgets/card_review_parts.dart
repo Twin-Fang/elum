@@ -352,31 +352,46 @@ class CardReviewReorderList extends StatelessWidget {
         child: child,
         builder: (context, inner) {
           final lift = Curves.easeOut.transform(animation.value);
-          return Transform.scale(
-            scale: 1 + _liftScale * lift,
-            child: Stack(
-              children: [
-                // 그림자는 카드 자리(양옆 간격 절반을 뺀 폭)에 맞춰 뒤에 깐다.
-                // 항목 전체에 그리면 카드보다 10 넓게 번진다.
-                Positioned.fill(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: (cardGap / 2).w),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(radius),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.24 * lift),
-                            blurRadius: 24 * lift,
-                            offset: Offset(0, 10 * lift),
-                          ),
-                        ],
+          // 이 목록은 항목에 가로 제약을 주지 않고(무한) **높이만** 고정해 준다.
+          // 그래서 Stack 에 넣으면 카드가 내용 높이로 줄어 아래가 잘려 보인다 —
+          // `StackFit.expand` 는 무한 폭 때문에 쓸 수 없어, 받은 높이를 카드에 직접 넘긴다 (#451).
+          return LayoutBuilder(
+            builder: (context, box) => Transform.scale(
+              scale: 1 + _liftScale * lift,
+              child: Stack(
+                children: [
+                  // 그림자는 카드 자리(양옆 간격 절반을 뺀 폭)에 맞춰 뒤에 깐다.
+                  // 항목 전체에 그리면 카드보다 10 넓게 번진다.
+                  Positioned.fill(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: (cardGap / 2).w,
+                      ),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(radius),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(
+                                alpha: 0.24 * lift,
+                              ),
+                              blurRadius: 24 * lift,
+                              offset: Offset(0, 10 * lift),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Material(type: MaterialType.transparency, child: inner),
-              ],
+                  SizedBox(
+                    height: box.maxHeight,
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: inner,
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },

@@ -437,6 +437,34 @@ void main() {
       expect(anyScaledUp(tester), isFalse, reason: '놓으면 제 크기로 돌아온다');
     });
 
+    testWidgets('잡은 카드는 원래 높이를 그대로 지킨다 — 아래가 잘리고 그림자만 남지 않는다 (#451)', (
+      tester,
+    ) async {
+      await pump(tester);
+      await tester.tap(find.text('카드 순서 변경'));
+      await settle(tester);
+
+      final idle = tester.getSize(find.byKey(const ValueKey('c1')));
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const ValueKey('c1'))),
+      );
+      await tester.pump(const Duration(milliseconds: 700));
+      await gesture.moveBy(const Offset(kTouchSlop + 1, 0));
+      await tester.pump();
+      await gesture.moveBy(const Offset(60, 0));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // 들린 사본이 그림자를 깔려고 감싼 Stack 에서 카드가 내용 높이로 줄어들었다.
+      final lifted = tester.getSize(find.byKey(const ValueKey('c1')));
+      expect(lifted.height, moreOrLessEquals(idle.height, epsilon: 0.5));
+      expect(lifted.width, moreOrLessEquals(idle.width, epsilon: 0.5));
+
+      await gesture.up();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+    });
+
     testWidgets('짧게 눌러서는 카드가 집히지 않는다', (tester) async {
       final container = await pump(tester);
       await tester.tap(find.text('카드 순서 변경'));
