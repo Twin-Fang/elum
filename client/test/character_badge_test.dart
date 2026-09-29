@@ -26,25 +26,29 @@ void main() {
 
   /// 배지 SVG 를 **바로** 감싼 ClipRRect. 화면 위쪽의 다른 ClipRRect 는 세지 않는다.
   Finder clipAround(CardCharacter character) => find.byWidgetPredicate((w) {
-        if (w is! ClipRRect) return false;
-        final child = w.child;
-        if (child is! SvgPicture) return false;
-        final loader = child.bytesLoader;
-        return loader is SvgAssetLoader &&
-            loader.assetName == AppAssets.characterBadgeFramed(character);
-      });
+    if (w is! ClipRRect) return false;
+    final child = w.child;
+    if (child is! SvgPicture) return false;
+    final loader = child.bytesLoader;
+    return loader is SvgAssetLoader &&
+        loader.assetName == AppAssets.characterBadgeFramed(character);
+  });
 
   Widget screenUtil(Widget child) => ScreenUtilInit(
-        designSize: const Size(393, 852),
-        builder: (context, _) => child,
-      );
+    designSize: const Size(393, 852),
+    builder: (context, _) => child,
+  );
 
   group('CharacterBadge', () {
     Future<void> pumpBadge(WidgetTester tester, CardCharacter character) =>
-        tester.pumpWidget(screenUtil(MaterialApp(
-          theme: AppTheme.light,
-          home: Scaffold(body: CharacterBadge(character: character)),
-        )));
+        tester.pumpWidget(
+          screenUtil(
+            MaterialApp(
+              theme: AppTheme.light,
+              home: Scaffold(body: CharacterBadge(character: character)),
+            ),
+          ),
+        );
 
     testWidgets('여우는 모서리 16 둥근 사각형으로 잘라낸다', (tester) async {
       await pumpBadge(tester, CardCharacter.fox);
@@ -62,50 +66,6 @@ void main() {
     });
   });
 
-  group('이룸이 홈 배지', () {
-    Future<void> pumpChildHome(
-      WidgetTester tester,
-      CardCharacter character,
-    ) async {
-      final router = GoRouter(
-        initialLocation: Routes.child,
-        routes: [
-          GoRoute(
-            path: Routes.child,
-            builder: (context, state) => const ChildHomeScreen(),
-          ),
-        ],
-      );
-      await tester.pumpWidget(ProviderScope(
-        overrides: [
-          testStorageOverride(
-            onboardingCompleted: true,
-            character: character.apiValue,
-          ),
-          // 실서버를 타지 않는다
-          myRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
-          todayRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
-          memberProvider.overrideWith((ref) async => null),
-        ],
-        child: screenUtil(
-          MaterialApp.router(theme: AppTheme.light, routerConfig: router),
-        ),
-      ));
-      await tester.pumpAndSettle();
-    }
-
-    testWidgets('여우를 고르면 배지를 잘라낸다 — 보호자 홈과 같다', (tester) async {
-      await pumpChildHome(tester, CardCharacter.fox);
-
-      expect(find.byType(CharacterBadge), findsOneWidget);
-      expect(clipAround(CardCharacter.fox), findsOneWidget);
-    });
-
-    testWidgets('고양이를 고르면 자르지 않는다', (tester) async {
-      await pumpChildHome(tester, CardCharacter.cat);
-
-      expect(find.byType(CharacterBadge), findsOneWidget);
-      expect(clipAround(CardCharacter.cat), findsNothing);
-    });
-  });
+  // 이룸이 홈 오른쪽 위는 시안이 바뀌어(#445) 캐릭터 배지 대신 톱니가 들어갔다.
+  // 배지 자르기는 보호자 홈 그룹이 계속 본다.
 }

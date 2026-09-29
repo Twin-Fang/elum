@@ -59,6 +59,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.sheetActionLabel,
     required this.editChipLabel,
     required this.childDetailTitle,
+    required this.childGreeting,
+    required this.rewardChipLabel,
     required this.promptPlaceholder,
     required this.promptCaption,
     required this.lastLoginBadge,
@@ -278,6 +280,13 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 아이 상세 상단바의 일과 제목 (18/w800).
   /// childTileTitle(18/w400)과 굵기가 달라 별개 토큰이다.
   final TextStyle childDetailTitle;
+
+  /// 아이 홈 인사말 (22/w800, 줄 높이 1.2). Figma 1197:6810.
+  /// [greeting](24)보다 작다 — 빈 상태 제목만 24 를 쓴다.
+  final TextStyle childGreeting;
+
+  /// 이룸이 화면 보상 칩 문구 (16/w600 Pretendard). Figma 1197:6775 · 1197:6942.
+  final TextStyle rewardChipLabel;
 
   // --- 일과 입력 (Figma 238:1846, 2026-07-22 덤프) ---
 
@@ -673,6 +682,18 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.0,
     ),
+    childGreeting: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 22,
+      fontWeight: FontWeight.w800,
+      height: 1.2,
+    ),
+    rewardChipLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
     promptPlaceholder: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 16,
@@ -840,6 +861,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? sheetActionLabel,
     TextStyle? editChipLabel,
     TextStyle? childDetailTitle,
+    TextStyle? childGreeting,
+    TextStyle? rewardChipLabel,
     TextStyle? promptPlaceholder,
     TextStyle? promptCaption,
     TextStyle? lastLoginBadge,
@@ -910,6 +933,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       sheetActionLabel: sheetActionLabel ?? this.sheetActionLabel,
       editChipLabel: editChipLabel ?? this.editChipLabel,
       childDetailTitle: childDetailTitle ?? this.childDetailTitle,
+      childGreeting: childGreeting ?? this.childGreeting,
+      rewardChipLabel: rewardChipLabel ?? this.rewardChipLabel,
       promptPlaceholder: promptPlaceholder ?? this.promptPlaceholder,
       promptCaption: promptCaption ?? this.promptCaption,
       lastLoginBadge: lastLoginBadge ?? this.lastLoginBadge,
@@ -993,6 +1018,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       editChipLabel: TextStyle.lerp(editChipLabel, other.editChipLabel, t)!,
       childDetailTitle:
           TextStyle.lerp(childDetailTitle, other.childDetailTitle, t)!,
+      childGreeting: TextStyle.lerp(childGreeting, other.childGreeting, t)!,
+      rewardChipLabel:
+          TextStyle.lerp(rewardChipLabel, other.rewardChipLabel, t)!,
       promptPlaceholder:
           TextStyle.lerp(promptPlaceholder, other.promptPlaceholder, t)!,
       promptCaption: TextStyle.lerp(promptCaption, other.promptCaption, t)!,

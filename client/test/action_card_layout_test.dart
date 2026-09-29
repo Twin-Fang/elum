@@ -44,11 +44,10 @@ void main() {
   ActionCard card(String title, String description) =>
       ActionCard(id: 'c1', title: title, description: description);
 
-  testWidgets('이미지 칸은 카드확인 313:230, 이룸이 상세 313:264 비율이다', (tester) async {
+  testWidgets('이미지 칸은 카드확인과 이룸이 상세 모두 313:230 비율이다', (tester) async {
     // 카드마다 비율이 다르면 넘길 때 그림이 들쭉날쭉해 보인다. 그림은 `contain`이라
-    // 안 잘린다. 두 시안이 칸 높이를 따로 정한다 — 카드확인(`262:5124`)은 313×230
-    // (#401), 이룸이 상세(`309:3548`)는 313×264다. 4:3으로 두면 이룸이 상세 칸이
-    // 32 낮아지고 카드 전체가 시안보다 46 짧아진다 (#297).
+    // 안 잘린다. 이룸이 상세 시안(`1197:6775`)이 카드확인(`262:5124`)과 같은 313×230
+    // 카드로 바뀌었다 (#445). 예전 이룸이 상세는 313×264 였다.
     await tester.pumpWidget(wrap(card('옷을 입어요', '학교에 갈 옷을 입어요')));
     await tester.pump();
 
@@ -64,7 +63,7 @@ void main() {
     await tester.pump();
 
     final child = tester.getSize(find.byType(AspectRatio));
-    expect(child.width / child.height, closeTo(313 / 264, 0.01));
+    expect(child.width / child.height, closeTo(313 / 230, 0.01));
   });
 
   testWidgets('제목이 길어도 이미지 크기가 같다', (tester) async {
@@ -175,32 +174,31 @@ void main() {
       '학교에 가져갈 가방을 손으로 챙겨요. 빠뜨린 것이 없는지 살펴요.',
     ];
 
-    testWidgets('이룸이 카드 상세 (431) — 두 줄은 다 보인다', (tester) async {
+    testWidgets('이룸이 카드 상세 (410) — 두 줄은 다 보인다', (tester) async {
       expect(
         await hidden(
           tester,
           description: real.first,
-          height: 431,
-          width: 345,
+          height: 410,
+          width: 333,
           layout: ActionCardLayout.childDetail,
         ),
         0,
       );
     });
 
-    testWidgets('세 줄은 시안 자리에서도 넘친다 — 알고 남겨 둔 한계', (tester) async {
-      // 시안(`309:3548`)은 설명을 두 줄로 그렸다. 세 줄짜리 문구가 오면
-      // **어느 화면에서도** 카드 안에 다 안 들어간다. 카드 자리를 늘리거나
-      // 문구 길이를 제한해야 하는 문제라 여기서 고치지 않는다 (#335).
+    testWidgets('이룸이 카드 상세 (410) — 세 줄도 들어간다', (tester) async {
+      // 그림칸이 313×230 으로 낮아져(#445) 예전(431 · 그림칸 264)엔 넘치던
+      // 세 줄짜리 문구(#335)도 카드 안에 다 들어간다.
       expect(
         await hidden(
           tester,
           description: real.last,
-          height: 431,
-          width: 345,
+          height: 410,
+          width: 333,
           layout: ActionCardLayout.childDetail,
         ),
-        greaterThan(0),
+        0,
       );
     });
 

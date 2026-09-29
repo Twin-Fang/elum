@@ -31,19 +31,18 @@ class ChildCardPager extends StatelessWidget {
     required this.isChecked,
   });
 
-  /// 시안 카드 폭 (`309:3568` — 345 @ x=24).
-  static const cardWidth = 345.0;
+  /// 시안 카드 폭 (`1197:6775` — 333 @ x=30).
+  static const cardWidth = 333.0;
 
   /// 시안 카드 왼쪽 여백 — 화면 가장자리에서 카드까지.
-  static const _sideMargin = 24.0;
+  static const _sideMargin = 30.0;
 
-  /// 카드 사이 간격. `space.xs`(8)와 같은 값이다.
+  /// 카드 사이 간격 (시안 `1197:6775` — 카드 끝 363 → 옆 카드 373).
   ///
-  /// 여백 24 안에서 간격과 보이는 폭을 나눠 가진다. 간격을 줄이면 카드가 붙어
+  /// 여백 30 안에서 간격과 보이는 폭을 나눠 가진다. 간격을 줄이면 카드가 붙어
   /// 한 장처럼 보이고, 늘리면 보이는 폭이 모서리 곡선(r20)보다 좁아져 무엇인지
-  /// 알아보기 어렵다. 8 이면 16 이 보인다 — 보호자 카드확인 시안(`262:5124`)이
-  /// 옆 카드를 20 걸친 것과 비슷한 정도다.
-  static const cardGap = 8.0;
+  /// 알아보기 어렵다. 10 이면 20 이 보인다 — 시안이 옆 카드를 그린 자리 그대로다.
+  static const cardGap = 10.0;
 
   /// 옆 카드가 화면 안에 보이는 폭 (393 기준).
   static const peekWidth = _sideMargin - cardGap;
@@ -52,13 +51,14 @@ class ChildCardPager extends StatelessWidget {
   /// 시작하도록 맞춘다 — 폭과 간격이 같은 비율(`.w`)로 늘고 주니 기기 폭과 무관하다.
   static const viewportFraction = (cardWidth + cardGap) / 393;
 
-  /// 옆 카드 크기. 조금만 줄여 가운데 카드가 "지금 할 것"으로 읽히게 한다.
-  /// 더 줄이면 보이는 띠가 짧아져 카드로 안 보인다.
-  static const sideScale = 0.94;
+  /// 옆 카드 크기. 예전엔 0.94 로 줄여 가운데 카드가 "지금 할 것"으로 읽히게 했다.
+  /// 시안(`1197:6775`)은 옆 카드를 같은 크기로 그린다 — 시안을 따른다 (#445).
+  /// 값을 되돌리면 넘기는 동안의 크기 변화가 다시 살아난다.
+  static const sideScale = 1.0;
 
-  /// 옆 카드 불투명도. 가운데 카드와 같은 선명도면 체크 버튼이 어느 카드를
-  /// 가리키는지 흐려진다.
-  static const sideOpacity = 0.5;
+  /// 옆 카드 불투명도. 예전엔 0.5 였다. 시안은 흐리게 그리지 않는다 (#445).
+  /// 어느 카드를 체크하는지는 가운데 위치와 아래 체크 버튼으로 알린다.
+  static const sideOpacity = 1.0;
 
   final PageController controller;
   final List<ActionCard> cards;

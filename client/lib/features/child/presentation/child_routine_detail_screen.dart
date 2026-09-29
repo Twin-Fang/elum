@@ -39,14 +39,20 @@ class ChildRoutineDetailScreen extends ConsumerStatefulWidget {
   /// 아동 모드 접근성 하한. 좁은 기기에서 `.w`로 줄어들어도 이 아래로 가지 않는다.
   static const minTouchTarget = 64.0;
 
-  /// 상단바 아래에서 카드 윗변까지 (시안 `309:3548` — 카드 y=180).
-  static const _cardTopGap = 41.0;
+  /// 안전영역(59) 아래 → 뒤로가기 윗변 (시안 `1197:6775` — 뒤로가기 y=67).
+  static const _backTop = 8.0;
 
-  /// 카드 자리 높이 (시안 345×431). 카드가 이보다 짧아도 이 자리는 유지한다.
-  static const _cardBoxHeight = 431.0;
+  /// 뒤로가기 상자(40) 아래(107) → 보상 칩 윗변(159).
+  static const _topBarToReward = 52.0;
 
-  /// 카드 자리 아래(611)에서 체크 버튼(675)까지.
-  static const _cardToCheck = 64.0;
+  /// 보상 칩 아래(207) → 카드 윗변(231).
+  static const _rewardToCard = 24.0;
+
+  /// 카드 자리 높이 (시안 333×410). 카드가 이보다 짧아도 이 자리는 유지한다.
+  static const _cardBoxHeight = 410.0;
+
+  /// 카드 자리 아래(641)에서 체크 버튼(675)까지.
+  static const _cardToCheck = 34.0;
 
   /// 체크 버튼. 화면에 누를 것이 여럿이라 테스트가 타입만으로는 갈라내지 못한다.
   static const checkButtonKey = ValueKey('child.routine.check');
@@ -231,45 +237,39 @@ class _ChildRoutineDetailScreenState
     final routine = _resolveRoutine(ref.watch(childRoutinesProvider));
     final cards = routine.steps;
     final progress = ref.watch(childRoutineProvider);
-    final space = context.space;
 
     return Scaffold(
       backgroundColor: context.colors.background,
       body: SafeArea(
         child: Column(
           children: [
+            SizedBox(height: ChildRoutineDetailScreen._backTop.h),
             _TopBar(onBack: () => context.pop(), title: routine.displayTitle),
+            SizedBox(height: ChildRoutineDetailScreen._topBarToReward.h),
             // 🔴 하는 동안 보상이 계속 보인다 (이슈 #239 · 2026-09-13 자문 핵심).
             // 완료 후에만 뜨는 별 연출과 다른 기능이다 — 끝까지 가는 힘이 여기서 나온다.
-            // 보상이 없으면 자리도 없다.
-            if (routine.hasReward) ...[
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  space.screenH,
-                  space.xs,
-                  space.screenH,
-                  0,
-                ),
-                child: RewardBanner.maybe(routine, compact: true),
-              ),
-            ],
-            // 상단바 아래(139)에서 시안 카드 윗변(y=180)까지 41.
-            // 토큰(16)을 쓰면 카드가 25 올라간다.
-            SizedBox(height: ChildRoutineDetailScreen._cardTopGap.h),
+            //
+            // **보상이 없어도 칩 자리는 비워 둔다.** 시안은 칩·카드·버튼이 모두 고정
+            // 자리라, 자리를 걷으면 일과마다 카드가 오르내려 보인다 (#445).
+            SizedBox(
+              height: RewardBanner.height.h,
+              child: RewardBanner.maybe(routine),
+            ),
+            SizedBox(height: ChildRoutineDetailScreen._rewardToCard.h),
             // **카드 자리를 시안 높이로 못 박는다.**
             //
             // `Expanded`로 남는 높이를 카드에 다 주면 그 아래 체크 버튼이 화면
-            // 바닥까지 밀려 **시안보다 36 내려간다** (#297). 시안은 카드도 버튼도
-            // 자리가 고정이다 — 카드 y=180 (345×431), 버튼 y=675 (88×88).
+            // 바닥까지 밀려 시안보다 내려간다 (#297). 시안은 카드도 버튼도
+            // 자리가 고정이다 — 카드 y=231 (333×410), 버튼 y=675 (88×88).
             //
             // `Flexible`로 감싸 두면 화면이 짧을 때 이 상자가 먼저 줄어들어
             // 버튼이 잘려 나가지 않는다.
             Flexible(
               child: SizedBox(
                 height: ChildRoutineDetailScreen._cardBoxHeight.h,
-                // 가운데 카드는 시안 자리(345 @ x=24) 그대로, 옆 카드는 가장자리에
-                // 16 걸친다 (#394 — 승인된 시안 이탈). 카드는 이 자리 높이를
-                // 채운다 — 내용 높이로 두면 시안(431)보다 13 짧아진다.
+                // 가운데 카드는 시안 자리(333 @ x=30) 그대로, 옆 카드는 가장자리에
+                // 20 걸친다 (#394 — 승인된 시안 이탈, 시안도 옆 카드를 x373에 둔다).
+                // 카드는 이 자리 높이를 채운다.
                 child: ChildCardPager(
                   controller: _controller,
                   cards: cards,
@@ -287,7 +287,7 @@ class _ChildRoutineDetailScreenState
                 ),
               ),
             ),
-            // 시안 카드 아래(611) → 체크 버튼(675) 사이 64
+            // 시안 카드 아래(641) → 체크 버튼(675) 사이 34
             SizedBox(height: ChildRoutineDetailScreen._cardToCheck.h),
             Builder(
               builder: (context) {
@@ -306,9 +306,10 @@ class _ChildRoutineDetailScreenState
   }
 }
 
-/// 뒤로가기 + 일과 제목 (Figma 309:3548 상단, 2026-07-22 시안).
+/// 뒤로가기 + 일과 제목 (Figma 1197:6775 상단).
 ///
-/// 캐릭터 배지가 빠지고 어떤 일과의 카드인지 제목이 중앙에 뜬다.
+/// 뒤로가기는 다른 화면과 같은 40×40 상자(x16 · y67)고, 제목 18/800 은 그 상자와
+/// 세로 가운데(y78~96)에 놓인다. 캐릭터 배지는 없다.
 class _TopBar extends StatelessWidget {
   const _TopBar({required this.onBack, required this.title});
 
@@ -317,63 +318,46 @@ class _TopBar extends StatelessWidget {
   /// 일과 제목 (`Routine.displayTitle`). 비어도 대체어가 온다.
   final String title;
 
+  /// 뒤로가기 상자 한 변 — 누를 자리와 그림 자리가 한 값이다 (ElumScaffold 와 같다).
+  static const _box = 40.0;
+  static const _left = 16.0;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        context.space.screenH,
-        context.space.md,
-        context.space.screenH,
-        0,
-      ),
-      // **위에서부터 쌓는다.** 가운데 정렬로 두면 제목이 64 상자의 한가운데로
-      // 가 시안보다 8 내려간다 (#297).
+      // 좌우 16 씩 같은 폭을 비워 제목이 정확히 가운데 온다
+      padding: EdgeInsets.symmetric(horizontal: _left.w),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppPressable(
             onTap: onBack,
             scaleDown: AppPressable.scaleIcon,
             semanticLabel: ElumScaffold.backLabel,
-            // 아동 모드 터치 타겟을 넉넉히 잡는다
             child: SizedBox(
-              width: 64.w,
-              height: 64.w,
-              // **누를 자리와 그림 자리를 따로 둔다.** 64 상자 한가운데에
-              // 그리면 시안(`356:5169` — 24×24 @ 24,87)보다 12 오른쪽·6 아래로
-              // 밀리고 크기도 28이라 넷 크다 (#297). 상자 왼위 모서리에 붙이고
-              // 위로만 12 띄우면 그림이 시안 자리에 온다 — 좌우 여백
-              // (`screenH` 24)이 이미 시안 x와 같다. 누를 자리는 64 그대로다.
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Padding(
-                  padding: EdgeInsets.only(top: 12.h),
-                  child: SvgPicture.asset(
-                    AppAssets.iconBack,
-                    width: 24.w,
-                    height: 24.w,
-                  ),
+              width: _box.w,
+              height: _box.w,
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.iconBack,
+                  width: 24.w,
+                  height: 24.w,
+                  excludeFromSemantics: true,
                 ),
               ),
             ),
           ),
           Expanded(
-            // 시안 제목은 y=90 — 상단바 시작(75)에서 15 아래다.
-            child: Padding(
-              padding: EdgeInsets.only(top: 15.h),
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.typo.childDetailTitle.copyWith(
-                  color: context.colors.textPrimary,
-                ),
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.typo.childDetailTitle.copyWith(
+                color: context.colors.textPrimary,
               ),
             ),
           ),
-          // 뒤로가기와 같은 폭을 비워 제목이 정확히 가운데 온다
-          SizedBox(width: 64.w),
+          SizedBox(width: _box.w),
         ],
       ),
     );

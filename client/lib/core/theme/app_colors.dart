@@ -142,6 +142,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.routineEmptyHint,
     required this.childTileDone,
     required this.starCount,
+    required this.rewardChipHighlight,
     required this.starsNumberStart,
     required this.editChipBg,
     required this.editChipLabel,
@@ -527,6 +528,10 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 별 배지 숫자 (#CB9500)
   final Color starCount;
 
+  /// 밝은 화면 보상 칩에서 보상 글자 (#40BBA6). 시안 PNG 실측 — Figma 덤프에는
+  /// 글자 구간별 색이 오지 않아 `다하면`과 한 색으로 보인다. 어두운 화면은 checkDone(#55CFBA).
+  final Color rewardChipHighlight;
+
   /// 아이_별 화면 숫자 그라데이션 시작 (#FFDD00 → 흰색)
   final Color starsNumberStart;
 
@@ -776,6 +781,7 @@ class AppColors extends ThemeExtension<AppColors> {
     routineEmptyHint: Color(0xFFAEB0B7),
     childTileDone: Color(0xFFB5EAEC),
     starCount: Color(0xFFCB9500),
+    rewardChipHighlight: Color(0xFF40BBA6),
     starsNumberStart: Color(0xFFFFDD00),
     editChipBg: Color(0xFFEEE9E6),
     editChipLabel: Color(0xFF000000),
@@ -934,6 +940,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? routineEmptyHint,
     Color? childTileDone,
     Color? starCount,
+    Color? rewardChipHighlight,
     Color? starsNumberStart,
     Color? editChipBg,
     Color? editChipLabel,
@@ -1082,6 +1089,7 @@ class AppColors extends ThemeExtension<AppColors> {
       routineEmptyHint: routineEmptyHint ?? this.routineEmptyHint,
       childTileDone: childTileDone ?? this.childTileDone,
       starCount: starCount ?? this.starCount,
+      rewardChipHighlight: rewardChipHighlight ?? this.rewardChipHighlight,
       starsNumberStart: starsNumberStart ?? this.starsNumberStart,
       editChipBg: editChipBg ?? this.editChipBg,
       editChipLabel: editChipLabel ?? this.editChipLabel,
@@ -1383,6 +1391,8 @@ class AppColors extends ThemeExtension<AppColors> {
       )!,
       childTileDone: Color.lerp(childTileDone, other.childTileDone, t)!,
       starCount: Color.lerp(starCount, other.starCount, t)!,
+      rewardChipHighlight:
+          Color.lerp(rewardChipHighlight, other.rewardChipHighlight, t)!,
       starsNumberStart: Color.lerp(
         starsNumberStart,
         other.starsNumberStart,

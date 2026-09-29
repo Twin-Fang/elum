@@ -73,37 +73,42 @@ void main() {
 
   // riverpod 3.x가 `Override` 타입을 export하지 않아 파라미터로 받지 않는다.
   Widget wrap(Widget child) => ProviderScope(
-        overrides: [testStorageOverride(nickname: '하늘이')],
-        child: ScreenUtilInit(
-          designSize: const Size(393, 852),
-          useInheritedMediaQuery: true,
-          builder: (context, _) => MaterialApp(
-            theme: AppTheme.light,
-            home: child is Scaffold ? child : Scaffold(body: child),
+    overrides: [testStorageOverride(nickname: '하늘이')],
+    child: ScreenUtilInit(
+      designSize: const Size(393, 852),
+      useInheritedMediaQuery: true,
+      builder: (context, _) => MaterialApp(
+        theme: AppTheme.light,
+        home: child is Scaffold ? child : Scaffold(body: child),
+      ),
+    ),
+  );
+
+  testWidgets('이룸이 보상 칩 — 밝은 화면·어두운 화면', (tester) async {
+    // 수행 화면 전체는 컨페티·TTS가 플랫폼 채널을 잡아 테스트에서 못 띄운다.
+    // 이 이슈가 더한 것은 **칩 하나**이므로 그것만 찍는다.
+    await tester.pumpWidget(
+      wrap(
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('수행 중 (밝은 화면)'),
+              const SizedBox(height: 8),
+              RewardBanner.maybe(routine),
+              const SizedBox(height: 32),
+              const Text('완료 (어두운 화면)'),
+              const SizedBox(height: 8),
+              ColoredBox(
+                color: const Color(0xFF242634),
+                child: RewardBanner.maybe(routine, onDark: true),
+              ),
+            ],
           ),
         ),
-      );
-
-  testWidgets('이룸이 수행 중 — 상단 고정 바', (tester) async {
-    // 수행 화면 전체는 컨페티·TTS가 플랫폼 채널을 잡아 테스트에서 못 띄운다.
-    // 이 이슈가 더한 것은 **바 하나**이므로 그것만 찍는다.
-    await tester.pumpWidget(wrap(
-      Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('수행 중 (작게)'),
-            const SizedBox(height: 8),
-            RewardBanner.maybe(routine, compact: true),
-            const SizedBox(height: 32),
-            const Text('시작·완료 (크게)'),
-            const SizedBox(height: 8),
-            RewardBanner.maybe(routine),
-          ],
-        ),
       ),
-    ));
+    );
     await tester.pump();
 
     await expectLater(
@@ -113,12 +118,14 @@ void main() {
   });
 
   testWidgets('이룸이 완료 — 별과 보상을 함께 보여준다', (tester) async {
-    await tester.pumpWidget(wrap(
-      const RewardScreen(
-        character: RewardCharacter.lumi,
-        reward: (emoji: '🍪', text: '젤리 먹기'),
+    await tester.pumpWidget(
+      wrap(
+        const RewardScreen(
+          character: RewardCharacter.lumi,
+          reward: (emoji: '🍪', text: '젤리 먹기'),
+        ),
       ),
-    ));
+    );
     await tester.pump();
     // 별은 PNG라 로딩을 기다려야 그려진다
     await precacheAllImages(tester);
@@ -129,5 +136,4 @@ void main() {
       matchesGoldenFile('goldens/reward_on_complete.png'),
     );
   });
-
 }

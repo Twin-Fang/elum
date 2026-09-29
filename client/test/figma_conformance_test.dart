@@ -356,7 +356,11 @@ void main() {
           data: MediaQuery.of(context).copyWith(padding: deviceInsets),
           child: child!,
         ),
-        home: RewardScreen(character: character),
+        // 시안(1197:6942)은 보상 칩 `다하면 젤리 4개 먹기`를 함께 그린다
+        home: RewardScreen(
+          character: character,
+          reward: (emoji: '', text: '젤리 4개 먹기'),
+        ),
       ),
     ),
   );
@@ -553,13 +557,13 @@ void main() {
 
   // 이룸이가 직접 쓰는 화면이라 올려 둔다. 값으로 대조했을 때는 열두 값이
   // 모두 맞았지만(#297), 픽셀로 맞대본 적은 없었다.
-  testWidgets('이룸이 홈 (Figma 356:5079)', (tester) async {
+  testWidgets('이룸이 홈 (Figma 1197:6810)', (tester) async {
     await tester.pumpWidget(
       wrapChild(
         // 시안이 그린 내용 그대로. 다르면 차이 그림이 통째로 붉어진다.
         routines: [
-          routine('c1', '비 오는 날 학교에 가요', percent: 50),
-          routine('c2', '학원 준비물을 챙겨요', percent: 100),
+          routine('c1', '스스로 옷을 입어요', reward: '젤리 4개 먹기', percent: 100),
+          routine('c2', '밥 먹기 전에 손을 씻어요', reward: '거실에서 저녁 먹기', percent: 50),
         ],
         stars: 15,
       ),
@@ -568,7 +572,7 @@ void main() {
 
     await expectLater(
       find.byType(ChildHomeScreen),
-      matchesGoldenFile('figma/child_home_356-5079.png'),
+      matchesGoldenFile('figma/child_home_1197-6810.png'),
     );
   });
 
@@ -1012,21 +1016,21 @@ void main() {
 
   // 이룸이 홈 빈 상태 (#297). 일과가 하나도 없을 때 무엇을 보여주는지는
   // 시안에 따로 그려져 있다 — 빈 화면이 아니라 시무룩한 캐릭터와 안내다.
-  testWidgets('이룸이 홈 — 빈 상태 (Figma 343:4543)', (tester) async {
+  testWidgets('이룸이 홈 — 빈 상태 (Figma 1197:6846)', (tester) async {
     await tester.pumpWidget(wrapChild(routines: const [], stars: 0));
     await tester.pumpAndSettle();
     await precacheAllImages(tester);
 
     await expectLater(
       find.byType(ChildHomeScreen),
-      matchesGoldenFile('figma/child_home_empty_343-4543.png'),
+      matchesGoldenFile('figma/child_home_empty_1197-6846.png'),
     );
   });
 
   // 보상 화면 (#297). 별이 둥둥 떠다녀 pumpAndSettle 이 끝나지 않으므로
   // 등장 연출(700ms) 뒤 float 주기의 두 배 지점 — sin 이 0 으로 돌아오는 자리 —
   // 에서 프레임을 고정한다. 그래야 캡처마다 별 높이가 달라지지 않는다.
-  testWidgets('보상 — 루미 (Figma 309:4055)', (tester) async {
+  testWidgets('보상 — 루미 (Figma 1197:6942)', (tester) async {
     await tester.pumpWidget(wrapReward());
     await tester.pump();
     await precacheAllImages(tester);
@@ -1034,13 +1038,13 @@ void main() {
 
     await expectLater(
       find.byType(RewardScreen),
-      matchesGoldenFile('figma/reward_lumi_309-4055.png'),
+      matchesGoldenFile('figma/reward_lumi_1197-6942.png'),
     );
   });
 
   // 보상 — 포포 · 루루 (#297). 캐릭터만 바뀌는 같은 화면이지만 **그림과 문구가
   // 다르다** — 루미만 올려 두면 나머지 둘이 어긋나도 드러나지 않는다.
-  testWidgets('보상 — 포포 (Figma 334:4320)', (tester) async {
+  testWidgets('보상 — 포포 (Figma 1197:6988)', (tester) async {
     await tester.pumpWidget(wrapReward(character: RewardCharacter.popo));
     await tester.pump();
     await precacheAllImages(tester);
@@ -1048,11 +1052,11 @@ void main() {
 
     await expectLater(
       find.byType(RewardScreen),
-      matchesGoldenFile('figma/reward_popo_334-4320.png'),
+      matchesGoldenFile('figma/reward_popo_1197-6988.png'),
     );
   });
 
-  testWidgets('보상 — 루루 (Figma 343:4434)', (tester) async {
+  testWidgets('보상 — 루루 (Figma 1197:7034)', (tester) async {
     await tester.pumpWidget(wrapReward(character: RewardCharacter.ruru));
     await tester.pump();
     await precacheAllImages(tester);
@@ -1060,7 +1064,7 @@ void main() {
 
     await expectLater(
       find.byType(RewardScreen),
-      matchesGoldenFile('figma/reward_ruru_343-4434.png'),
+      matchesGoldenFile('figma/reward_ruru_1197-7034.png'),
     );
   });
 
@@ -1454,8 +1458,9 @@ void main() {
               builder: (context, state) => ChildRoutineDetailScreen(
                 routine: Routine(
                   id: 'd1',
-                  title: '비 오는 날 학교에 가요',
+                  title: '스스로 옷을 입어요',
                   status: 'CONFIRMED',
+                  rewardText: '젤리 4개 먹기',
                   steps: [
                     ActionCard(
                       id: 'd-c1',
@@ -1487,7 +1492,7 @@ void main() {
     ),
   );
 
-  testWidgets('이룸이 카드 — 안 체크 (Figma 309:3548)', (tester) async {
+  testWidgets('이룸이 카드 — 안 체크 (Figma 1197:6775)', (tester) async {
     await tester.pumpWidget(wrapCardDetail());
     await tester.pump();
     await precacheAllImages(tester);
@@ -1495,14 +1500,14 @@ void main() {
 
     await expectLater(
       find.byType(ChildRoutineDetailScreen),
-      matchesGoldenFile('figma/childhome_309-3548.png'),
+      matchesGoldenFile('figma/childhome_1197-6775.png'),
     );
   });
 
   // 체크한 뒤(`309:3648`)도 올린다. **누르지 않고 체크된 채로 그린다** —
   // 누르면 색종이가 터지고 조각 자리가 매번 무작위라 골든이 스스로 깨진다.
   // `completed`가 참인 카드는 기록 없이도 체크로 보이므로(`isChecked`) 그 길을 쓴다.
-  testWidgets('이룸이 카드 — 체크한 뒤 (Figma 309:3648)', (tester) async {
+  testWidgets('이룸이 카드 — 체크한 뒤 (Figma 1197:6895)', (tester) async {
     await tester.pumpWidget(wrapCardDetail(completed: true));
     await tester.pump();
     await precacheAllImages(tester);
@@ -1510,7 +1515,7 @@ void main() {
 
     await expectLater(
       find.byType(ChildRoutineDetailScreen),
-      matchesGoldenFile('figma/childhome_309-3648.png'),
+      matchesGoldenFile('figma/childhome_done_1197-6895.png'),
     );
   });
 
@@ -1683,7 +1688,7 @@ void main() {
 
   // 이룸이 홈 — 빈 상태, 포포를 고른 경우 (#297). 시안 `364:8537`.
   // 고른 친구에 따라 **시무룩한 그림과 배지가 바뀐다** — 루루만 보고 있었다.
-  testWidgets('이룸이 홈 — 빈 상태 · 포포 (Figma 364:8537)', (tester) async {
+  testWidgets('이룸이 홈 — 빈 상태 · 포포 (Figma 1197:6869)', (tester) async {
     await tester.pumpWidget(
       wrapChild(routines: const [], stars: 0, character: CardCharacter.fox),
     );
@@ -1692,7 +1697,7 @@ void main() {
 
     await expectLater(
       find.byType(ChildHomeScreen),
-      matchesGoldenFile('figma/childhome_empty_364-8537.png'),
+      matchesGoldenFile('figma/childhome_empty_1197-6869.png'),
     );
   });
 

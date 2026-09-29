@@ -75,7 +75,7 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
             children: [
               // **`Spacer`가 아니다.** 남는 공간을 나누면 화면 높이에 따라 별이
               // 오르내려 시안과 어긋난다. 실제로 별이 44, 글자가 26 아래에
-              // 있었다. 시안(309:4055) 좌표에서 뽑은 값을 그대로 둔다 (#297).
+              // 있었다. 시안 좌표에서 뽑은 값을 그대로 둔다 (#297 · #445).
               SizedBox(height: _RewardLayout.topToStar),
               _RewardHero(character: _character),
               SizedBox(height: _RewardLayout.starToTitle),
@@ -100,16 +100,15 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
                 ),
               ),
               // 보호자가 정한 보상 — 이제 받을 차례다 (이슈 #239).
+              // 시안: 문구(y548) 아래 32 → 칩(y580, 333×48). 어두운 배경 위 반투명 칩 (#445).
               if (widget.reward != null) ...[
-                SizedBox(height: space.lg),
+                SizedBox(height: 32.h),
                 _FadeSlideIn(
                   delay: AppMotion.slow,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: space.lg),
-                    child: RewardBanner(
-                      emoji: widget.reward!.emoji,
-                      text: widget.reward!.text,
-                    ),
+                  child: RewardBanner(
+                    emoji: widget.reward!.emoji,
+                    text: widget.reward!.text,
+                    onDark: true,
                   ),
                 ),
               ],
@@ -150,14 +149,14 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
 /// 달라 **별과 글자가 함께 오르내린다.** 시안은 절대 좌표로 그려져 있으므로
 /// 위를 고정하고 아래만 남는 자리를 쓰게 한다.
 class _RewardLayout {
-  /// 안전영역 아래부터 별 에셋 윗변까지 — 시안 140.
-  static double get topToStar => 81.4.h;
+  /// 안전영역 아래부터 별 에셋 윗변까지. 시안(`1197:6942`)이 별 묶음을 29 올렸다 (#445).
+  static double get topToStar => 52.4.h;
 
-  /// 별 묶음 → `축하해요!` — 시안 494.
-  static double get starToTitle => 50.h;
+  /// 별 묶음 → `축하해요!` — 시안 454.
+  static double get starToTitle => 49.h;
 
-  /// 제목 → 문구 — 시안 542.
-  static double get titleToBody => 18.h;
+  /// 제목 → 문구 — 시안 500.
+  static double get titleToBody => 16.h;
 
   /// 버튼 아래 — 시안 버튼이 675~741 이고 안전영역 안에서 90 이 남는다.
   static double get buttonBottom => 90.h;
@@ -184,21 +183,22 @@ class _RewardHero extends StatelessWidget {
   static double get _heroLeftInFrame => (393 - RewardStar.mainSize) / 2;
   static const _heroTopInFrame = 133.75;
 
-  /// 바닥 그림자 (Figma `Ellipse 23` — x162 y430, 65×16).
-  static const _shadowFrame = (x: 162.0, y: 430.0, w: 65.0, h: 16.0);
+  /// 바닥 그림자 (Figma `Ellipse 23` — x162, 65×16). 시안(`1197:6942`)에서 별과 캐릭터가
+  /// 서로 가까워져 y 가 430 → 420 이 됐다 (#445, 시안 PNG 실측).
+  static const _shadowFrame = (x: 162.0, y: 420.0, w: 65.0, h: 16.0);
 
   /// 별만 위로 끌어올리는 양. Figma는 별 하단이 캐릭터 머리에 거의 닿아
   /// 겹쳐 보인다. 별만 이만큼 올려 간격을 확보한다 — 캐릭터는 그대로다
   /// (이슈 #107). blur 후광까지 감안한 실측값이다.
   static const _starLift = 28.0;
 
-  /// 캐릭터 실측 배치 (Figma 절대좌표).
+  /// 캐릭터 실측 배치 (시안 PNG 실측 — 2026-09-29 시안에서 별에 가까워져 y 가 올랐다 #445).
   /// 포포는 레이아웃 박스(131.06, 321) 122.65×118의 중앙에 실측 117×104가 들어간다.
   ({double x, double y, double w, double h}) get _charFrame =>
       switch (character) {
-        RewardCharacter.lumi => (x: 131.06, y: 325, w: 124.7, h: 114),
-        RewardCharacter.popo => (x: 133.89, y: 328, w: 117, h: 104),
-        RewardCharacter.ruru => (x: 131.06, y: 341.44, w: 122.7, h: 97.6),
+        RewardCharacter.lumi => (x: 131.06, y: 316, w: 124.7, h: 114),
+        RewardCharacter.popo => (x: 133.89, y: 324, w: 117, h: 104),
+        RewardCharacter.ruru => (x: 131.06, y: 332.44, w: 122.7, h: 97.6),
       };
 
   @override

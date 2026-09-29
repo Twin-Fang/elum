@@ -31,16 +31,10 @@ class ActionCardView extends StatefulWidget {
     this.layout = ActionCardLayout.review,
   });
 
-  /// 시안 그림칸 비율 (`309:3548` — 313×264).
-  ///
-  /// 카드 자리가 시안 높이(431)면 이 비율로 설명 **두 줄까지** 넘침 없이
-  /// 들어간다. 세 줄은 시안 자리 자체가 모자라 어느 화면에서도 넘친다 (#335).
-  static const designIllustrationAspect = 313 / 264;
-
   /// 카드확인 시안 그림칸 비율 (`262:5124` — 313×230, 2026-09-24 덤프 · #401).
   ///
-  /// 이룸이 상세보다 34 낮다. 카드확인은 보상 줄(#239)이 세로를 나눠 써 카드가
-  /// 시안(410)보다 짧아서, 그림칸이 낮은 만큼 설명이 들어갈 자리가 남는다.
+  /// 카드확인과 이룸이 상세(`1197:6775`, #445)가 같이 쓴다. 카드 자리가 410 이라
+  /// 그림칸이 낮은 만큼 설명이 들어갈 자리가 남는다.
   static const reviewIllustrationAspect = 313 / 230;
 
   final ActionCard card;
@@ -70,12 +64,6 @@ class ActionCardView extends StatefulWidget {
 }
 
 class _ActionCardViewState extends State<ActionCardView> {
-  /// 이룸이 상세 — 배지 줄 아래 → 설명 (시안 `309:3548` 배지 끝 517 → 설명 535).
-  static const _childTitleToBody = 18.0;
-
-  /// 이룸이 상세 — 그림칸 아래 → 배지 (시안 `309:3548` 그림칸 끝 460 → 배지 477).
-  static const _childIllustrationToTitle = 17.0;
-
   /// 카드확인 — 테두리를 포함한 안쪽 여백 (시안 `262:5124` 카드 30 → 그림칸 40 · #401).
   static const _reviewInset = 10.0;
 
@@ -130,14 +118,12 @@ class _ActionCardViewState extends State<ActionCardView> {
     final palette = CardPalette.at(widget.index);
     final space = context.space;
     final childLayout = widget.layout == ActionCardLayout.childDetail;
-    // 두 시안이 여백·그림칸·간격을 따로 정한다 — 한곳에서 고른다.
-    final inset = childLayout ? space.md : _reviewInset.w;
-    final illustrationAspect = childLayout
-        ? ActionCardView.designIllustrationAspect
-        : ActionCardView.reviewIllustrationAspect;
-    final illustrationToTitle =
-        childLayout ? _childIllustrationToTitle : _reviewIllustrationToTitle;
-    final titleToBody = childLayout ? _childTitleToBody : _reviewTitleToBody;
+    // 이룸이 상세 시안(`1197:6775`)이 카드확인과 같은 카드로 바뀌었다 (#445).
+    // 여백·그림칸·간격이 같고 **그림자만 이룸이 상세에 있다.**
+    final inset = _reviewInset.w;
+    final illustrationAspect = ActionCardView.reviewIllustrationAspect;
+    final illustrationToTitle = _reviewIllustrationToTitle;
+    final titleToBody = _reviewTitleToBody;
     final speaker = AppPressable(
       onTap: widget.onSpeak,
       scaleDown: AppPressable.scaleIcon,
@@ -423,7 +409,8 @@ enum ActionCardLayout {
   /// 설명은 제목과 같은 x·배지 → 설명 18·그림자 없음.
   review,
 
-  /// 이룸이 일과 상세 (`309:3548`). 테두리 포함 여백 16·그림칸 → 배지 17·
-  /// 배지 → 제목 8·스피커는 배지 칸 가운데·설명은 제목과 같은 x·배지 → 설명 18 (#394).
+  /// 이룸이 일과 상세 (`1197:6775`, 2026-09-29 시안 · #445). 카드확인과 배치가 같고
+  /// (여백 10·그림칸 313×230·배지 → 설명 18) **그림자(0 2 5 · 5%)만 있다.**
+  /// 예전(`309:3548` 345×431, 여백 16·그림칸 313×264)은 카드가 더 컸다.
   childDetail,
 }

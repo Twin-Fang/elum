@@ -32,7 +32,7 @@ enum RewardCharacter {
   /// 고양이
   ruru(
     '멋져요!',
-    '{name}{josa} 할 일을 해내서\n루루가 선물을 가져왔어요',
+    '{name}{josa} 할 일을 해내서\n루루가 선물을 가져왔다고 해요',
     '신난다!',
   );
 

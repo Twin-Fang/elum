@@ -22,15 +22,15 @@ void main() {
   useFigmaViewport();
 
   Widget wrap(Widget child) => ProviderScope(
-        overrides: [testStorageOverride(nickname: '하늘이')],
-        child: ScreenUtilInit(
-          designSize: const Size(393, 852),
-          builder: (context, _) => MaterialApp(
-            theme: AppTheme.light,
-            home: Scaffold(body: child),
-          ),
-        ),
-      );
+    overrides: [testStorageOverride(nickname: '하늘이')],
+    child: ScreenUtilInit(
+      designSize: const Size(393, 852),
+      builder: (context, _) => MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(body: child),
+      ),
+    ),
+  );
 
   group('보상 배너', () {
     testWidgets('보상이 있으면 다 하면과 함께 보여준다', (tester) async {
@@ -43,10 +43,8 @@ void main() {
       await tester.pumpWidget(wrap(RewardBanner.maybe(routine)));
       await tester.pump();
 
-      // 조건을 먼저 말해야 보상만 보고 넘어가지 않는다
-      expect(find.text('다 하면'), findsOneWidget);
-      expect(find.text('젤리 먹기'), findsOneWidget);
-      expect(find.text('🍪'), findsOneWidget);
+      // 조건을 먼저 말해야 보상만 보고 넘어가지 않는다 (시안 `다하면 젤리 4개 먹기`)
+      expect(find.text('다하면 🍪 젤리 먹기'), findsOneWidget);
     });
 
     testWidgets('보상이 없으면 자리도 없다', (tester) async {
@@ -56,13 +54,11 @@ void main() {
       await tester.pump();
 
       // 빈 배너가 남으면 무엇이 빠진 것처럼 보인다
-      expect(find.text('다 하면'), findsNothing);
+      expect(find.textContaining('다하면'), findsNothing);
       expect(find.byType(RewardBanner), findsNothing);
     });
 
-    testWidgets('모르는 프리셋 키가 와도 글자는 나온다 — 그림은 지어내지 않는다 (#275)', (
-      tester,
-    ) async {
+    testWidgets('모르는 프리셋 키가 와도 글자는 나온다 — 그림은 지어내지 않는다 (#275)', (tester) async {
       const routine = Routine(
         id: 'r1',
         rewardText: '새로 생긴 보상',
@@ -73,24 +69,24 @@ void main() {
       await tester.pump();
 
       // 서버에 프리셋이 늘었는데 앱이 아직 모를 때 화면이 죽으면 안 된다
-      expect(find.text('새로 생긴 보상'), findsOneWidget);
+      expect(find.textContaining('새로 생긴 보상'), findsOneWidget);
       // 모르는 것을 별로 메우지 않는다 — 별은 일과를 끝냈을 때의 연출이라 뜻이 겹친다
       expect(find.text('⭐'), findsNothing);
     });
 
-    testWidgets('수행 중에는 작게 — 카드를 가리지 않는다', (tester) async {
-      const routine = Routine(id: 'r1', rewardText: '산책', rewardPresetKey: 'WALK');
-
-      await tester.pumpWidget(wrap(RewardBanner.maybe(routine, compact: true)));
-      await tester.pump();
-
-      final compact = tester.getSize(find.byType(RewardBanner)).height;
+    testWidgets('칩은 시안 크기 333×48 이다 (#445)', (tester) async {
+      const routine = Routine(
+        id: 'r1',
+        rewardText: '산책',
+        rewardPresetKey: 'WALK',
+      );
 
       await tester.pumpWidget(wrap(RewardBanner.maybe(routine)));
       await tester.pump();
-      final large = tester.getSize(find.byType(RewardBanner)).height;
 
-      expect(compact, lessThan(large));
+      final size = tester.getSize(find.byType(RewardBanner));
+      expect(size.width, closeTo(333, 0.5));
+      expect(size.height, closeTo(48, 0.5));
     });
   });
 
@@ -107,7 +103,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 600));
 
       // 별은 "해냈다", 보상은 "이제 받는다" — 서로를 대신하지 못한다
-      expect(find.text('젤리 먹기'), findsOneWidget);
+      expect(find.textContaining('젤리 먹기'), findsOneWidget);
     });
 
     testWidgets('보상 없이 끝내면 별 연출만 돈다', (tester) async {

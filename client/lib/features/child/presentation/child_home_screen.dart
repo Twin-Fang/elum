@@ -12,7 +12,6 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/character_badge.dart';
 import '../../../core/widgets/routine_progress_ring.dart';
 import '../../../shared/utils/korean_particle.dart';
 import '../../../shared/models/routine.dart';
@@ -84,8 +83,9 @@ class ChildHomeScreen extends ConsumerWidget {
                       // 코드는 실제로 무엇이 터졌는지를 쓴다 — 연결이 끊긴 것과
                       // 서버가 막은 것이 같은 코드로 보이면 제보를 못 가린다 (#352).
                       errorCode: routinesAsync.hasError
-                          ? AppFailure.of(routinesAsync.error)
-                              .badgeOr('E-CHLIST')
+                          ? AppFailure.of(
+                              routinesAsync.error,
+                            ).badgeOr('E-CHLIST')
                           : null,
                     ),
                   ),
@@ -97,25 +97,25 @@ class ChildHomeScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const _TopBar(),
-                    // 시안(356:5197)은 인사말이 y150 에서 시작한다. 토큰(32)을
-                    // 쓰면 화면 전체가 13 내려가 타일까지 따라 밀린다 (#297).
-                    // 상단 줄을 시안 자리(74)로 6 올렸으므로 여기서 되돌려 준다.
-                    SizedBox(height: 25.h),
+                    // 시안(1197:6810)은 인사말이 y150 에서 시작한다. 상단 줄 아래(122)에서 28.
+                    SizedBox(height: 28.h),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: space.screenH),
                       child: Text(
-                        // Figma 문구 (356:5197).
+                        // Figma 문구 (1197:6810 · 356:5197).
                         //
                         // 조사를 '가'로 박아 두었더니 받침 있는 이름에서 **민준가**가
                         // 나왔다. 이름은 보호자가 직접 적으므로 받침을 보고 고른다.
-                        // 반말(`힘내보자!`)도 지웠다 — 이룸이는 20대 당사자다.
-                        '오늘 $childName${childName.subjectParticle}\n할 일이에요',
-                        style: context.typo.greeting.copyWith(
+                        // 시안이 `할 일들이에요. 힘내봐요!`로 바뀌었다 (#445) — 해요체다.
+                        '오늘 $childName${childName.subjectParticle}\n할 일들이에요. 힘내봐요!',
+                        // 이 화면 인사말은 22다. 빈 상태 제목(24)과 다르다.
+                        style: context.typo.childGreeting.copyWith(
                           color: context.colors.textPrimary,
                         ),
                       ),
                     ),
-                    SizedBox(height: space.xl),
+                    // 인사말 아래(202) → 첫 타일(242)
+                    SizedBox(height: 40.h),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: space.md),
                       child: _RoutineList(routines: routines),
@@ -128,12 +128,21 @@ class ChildHomeScreen extends ConsumerWidget {
   }
 }
 
-/// 로고 + 별 배지 + 캐릭터 배지 (Figma 356:5079 상단).
+/// 로고 + 별 배지 + 설정 톱니 (Figma 1197:6810 상단).
+///
+/// 시안이 바뀌어(#445) 캐릭터 얼굴 버튼이 톱니로 대체됐다. 톱니는 **보호자 화면으로
+/// 돌아가는 유일한 입구**라 지금은 예전 얼굴 버튼처럼 비밀암호 화면을 연다.
+/// 시안에 톱니의 동작이 그려져 있지 않아 임시로 이어 둔 것이다 — 디자이너 확인 후 바꾼다.
 class _TopBar extends ConsumerWidget {
   const _TopBar();
 
-  /// 안전영역 아래 여백 — 시안 상단 줄이 y=74다 (59 + 15, 로고 안 여백 5를 뺀 값).
-  static const _topBarTop = 10.0;
+  /// 안전영역 아래 여백 — 시안 상단 줄이 y=74다 (59 + 15). 줄 높이가 별 배지(48)라
+  /// 배지 윗변이 그대로 74에 선다. 로고(30)는 세로 가운데라 y=83이다.
+  static const _topBarTop = 15.0;
+
+  /// 톱니 그림 크기(24)와 누를 자리(48). 아동 화면은 터치 타겟을 넉넉히 잡는다.
+  static const _gearIcon = 24.0;
+  static const _gearHit = 48.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -142,15 +151,19 @@ class _TopBar extends ConsumerWidget {
     final stars = ref
         .watch(memberProvider)
         .maybeWhen(data: (member) => member?.totalStars ?? 0, orElse: () => 0);
-    // 온보딩에서 고른 캐릭터. 배지 테두리 색이 캐릭터마다 다르다.
-    // 아직 안 골랐으면 고양이(루루)로 둔다 — 화면은 떠야 한다.
-    final character =
-        ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
+
+    // 누를 자리를 그림보다 12 씩 키운 만큼 바깥 여백·간격에서 뺀다.
+    // 그림이 시안 자리(별 배지 오른쪽 끝 x321 → 톱니 x345~369)에 그대로 선다.
+    const overhang = (_gearHit - _gearIcon) / 2;
 
     return Padding(
       // 안전영역(59) 아래 10 → 상단 줄이 시안 y=74에 선다.
-      // `space.md`(16)를 쓰고 있어 이룸이 홈 **세 화면 모두** 6 내려가 있었다 (#297).
-      padding: EdgeInsets.fromLTRB(space.screenH, _topBarTop, space.screenH, 0),
+      padding: EdgeInsets.fromLTRB(
+        space.screenH,
+        _topBarTop,
+        (space.screenH - overhang).w,
+        0,
+      ),
       child: Row(
         children: [
           SvgPicture.asset(AppAssets.homeLogo, width: 80.w, height: 30.h),
@@ -164,7 +177,8 @@ class _TopBar extends ConsumerWidget {
             semanticLabel: '별 $stars개 모았어요',
             child: _StarBadge(count: stars),
           ),
-          SizedBox(width: space.md),
+          // 시안 별 배지(~x321)와 톱니(x345) 사이 24에서 누를 자리 몫을 뺀다
+          SizedBox(width: (space.screenH - overhang).w),
           // 보호자로 돌아가려면 암호가 필요하다
           AppPressable(
             onTap: () => context.push(
@@ -172,8 +186,19 @@ class _TopBar extends ConsumerWidget {
             ),
             scaleDown: AppPressable.scaleIcon,
             semanticLabel: '보호자 화면으로 가기',
-            // 여우 배지 자르기(#311)가 보호자 홈과 같아야 해 공용 위젯을 쓴다
-            child: CharacterBadge(character: character),
+            child: SizedBox(
+              width: _gearHit.w,
+              height: _gearHit.w,
+              child: Center(
+                child: SvgPicture.asset(
+                  AppAssets.iconSettings,
+                  // 정사각형 아이콘 — 가로세로 모두 .w
+                  width: _gearIcon.w,
+                  height: _gearIcon.w,
+                  excludeFromSemantics: true,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -257,8 +282,8 @@ class _RoutineTile extends StatelessWidget {
       onTap: () => context.push(Routes.childRoutineDetail, extra: routine),
       scaleDown: AppPressable.scaleCard,
       child: Container(
-        // 보상이 있으면 한 줄이 늘어 타일이 높아진다 (이슈 #239).
-        height: (routine.hasReward ? 88 : 68).h,
+        // 보상이 있으면 한 줄이 늘어 타일이 높아진다 (이슈 #239). 시안은 92 (#445).
+        height: (routine.hasReward ? 92 : 68).h,
         // Figma 실측 — 제목 좌 24, 화살표 우 16
         padding: EdgeInsets.only(left: 24.w, right: 16.w),
         decoration: BoxDecoration(
@@ -276,28 +301,43 @@ class _RoutineTile extends StatelessWidget {
                     routine.displayTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: context.typo.childTileTitle.copyWith(
+                    // 시안 제목은 18/800이다. 예전엔 w400이었다 (#445).
+                    style: context.typo.childDetailTitle.copyWith(
                       color: colors.chipLabel,
                     ),
                   ),
                   // 목록에서부터 "다 하면 뭘 받는지"가 보인다 (이슈 #239).
                   // 들어가야 알 수 있으면 시작할 이유가 약해진다.
+                  // 시안: `다하면`은 회색(#74757D), 보상은 검정 70% — 둘 다 16 (#445).
                   if (routine.hasReward) ...[
-                    SizedBox(height: 4.h),
-                    Text(
-                      '다 하면 ${routine.rewardDisplay}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.typo.caption.copyWith(
-                        color: colors.textSecondary,
-                      ),
+                    SizedBox(height: 10.h),
+                    Row(
+                      children: [
+                        Text(
+                          '다하면',
+                          style: context.typo.body.copyWith(
+                            color: colors.routineTileLabel,
+                          ),
+                        ),
+                        SizedBox(width: space.xs),
+                        Expanded(
+                          child: Text(
+                            routine.rewardDisplay,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.typo.body.copyWith(
+                              color: Colors.black.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ],
               ),
             ),
             SizedBox(width: space.xs),
-            RoutineProgressRing(progress: progress),
+            RoutineProgressRing(progress: progress, boldCheck: true),
             SizedBox(width: space.xs),
             // 아래 방향 원본을 반시계 90° 돌려 `>`로 만든다
             Transform.rotate(
@@ -306,6 +346,11 @@ class _RoutineTile extends StatelessWidget {
                 AppAssets.iconAngleSmall,
                 width: 24.w,
                 height: 24.w,
+                // 시안 PNG 실측 #74757D (`다하면` 글자와 같은 회색)
+                colorFilter: ColorFilter.mode(
+                  colors.routineTileLabel,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
           ],
@@ -333,7 +378,7 @@ class _NoRoutine extends StatelessWidget {
 
   /// 상단 줄 아래부터 제목까지 — 시안(343:4543)은 제목이 234 에서 시작한다.
   /// 상단 줄 아래 → 시무룩한 그림. 상단을 6 올린 만큼 여기서 되돌린다.
-  static double get _emptyTop => 106.h;
+  static double get _emptyTop => 109.h;
 
   @override
   Widget build(BuildContext context) {
@@ -351,67 +396,65 @@ class _NoRoutine extends StatelessWidget {
     // 시작하므로 위 여백을 고정한다 (#297).
     return SingleChildScrollView(
       child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: _emptyTop),
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: _emptyTop),
+          Text(
+            '아직 $childName의\n일과가 없어요',
+            textAlign: TextAlign.center,
+            style: context.typo.greeting.copyWith(color: colors.textPrimary),
+          ),
+          SizedBox(height: 14.h),
+          Text(
+            '보호자 모드에서 일과를 만들 수 있어요',
+            style: context.typo.body.copyWith(color: colors.textSecondary),
+          ),
+          if (errorCode != null) ...[
+            SizedBox(height: 8.h),
             Text(
-              '아직 $childName의\n일과가 없어요',
-              textAlign: TextAlign.center,
-              style: context.typo.greeting.copyWith(color: colors.textPrimary),
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              '보호자 화면에서 일과를 만들 수 있어요',
-              style: context.typo.body.copyWith(color: colors.textSecondary),
-            ),
-            if (errorCode != null) ...[
-              SizedBox(height: 8.h),
-              Text(
-                '($errorCode)',
-                style: context.typo.caption.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-            ],
-            // 설명 → 시무룩한 그림. 48을 쓰면 그림이 15 내려간다 (#297).
-            SizedBox(height: 33.h),
-            // 캐릭터 뒤 은은한 빛 — 단순 원이라 코드로 그린다
-            // (Figma blur 100 ≈ sigma 50)
-            SizedBox(
-              width: 200.w,
-              height: 200.w,
-              child: Stack(
-                alignment: Alignment.center,
-                clipBehavior: Clip.none,
-                children: [
-                  ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 50.w, sigmaY: 50.w),
-                    child: Container(
-                      width: 180.w,
-                      height: 180.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: glowColor,
-                      ),
-                    ),
-                  ),
-                  // 발밑 그림자 (Figma Ellipse 2 — 64×16). 캐릭터보다 뒤에 깐다
-                  Positioned(
-                    bottom: 10.w,
-                    child: ClipOval(
-                      child: SizedBox(
-                        width: 64.w,
-                        height: 16.w,
-                        child: ColoredBox(color: colors.childEmptyShadow),
-                      ),
-                    ),
-                  ),
-                  // 시무룩한 캐릭터 — 형태가 있는 일러스트는 반드시 에셋
-                  SvgPicture.asset(sadAsset, width: 164.w, height: 164.w),
-                ],
-              ),
+              '($errorCode)',
+              style: context.typo.caption.copyWith(color: colors.textSecondary),
             ),
           ],
+          // 설명 → 시무룩한 그림. 48을 쓰면 그림이 15 내려간다 (#297).
+          SizedBox(height: 35.h),
+          // 캐릭터 뒤 은은한 빛 — 단순 원이라 코드로 그린다
+          // (Figma blur 100 ≈ sigma 50)
+          SizedBox(
+            width: 200.w,
+            height: 200.w,
+            child: Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 50.w, sigmaY: 50.w),
+                  child: Container(
+                    width: 180.w,
+                    height: 180.w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: glowColor,
+                    ),
+                  ),
+                ),
+                // 발밑 그림자 (Figma Ellipse 2 — 64×16). 캐릭터보다 뒤에 깐다
+                Positioned(
+                  bottom: 10.w,
+                  child: ClipOval(
+                    child: SizedBox(
+                      width: 64.w,
+                      height: 16.w,
+                      child: ColoredBox(color: colors.childEmptyShadow),
+                    ),
+                  ),
+                ),
+                // 시무룩한 캐릭터 — 형태가 있는 일러스트는 반드시 에셋
+                SvgPicture.asset(sadAsset, width: 164.w, height: 164.w),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

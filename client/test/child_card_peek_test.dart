@@ -21,9 +21,10 @@ import 'helpers/test_storage.dart';
 
 /// 행동카드 넘기기 화면에서 양옆 카드가 살짝 보인다 (이슈 #394).
 ///
-/// 시안(`309:3548`)은 가운데 카드 한 장만 그린다. 옆으로 넘기면 더 있다는 것을
-/// 글이 아니라 그림으로 알리려고 **양옆 카드를 가장자리에 조금 걸친다** — 사용자가
-/// 승인한 시안 이탈이다. 가운데 카드의 크기·자리(345×431 @ 24,180)는 그대로다.
+/// 시안(`1197:6775`)은 가운데 카드와 오른쪽 옆 카드(x373)를 그린다. 옆으로 넘기면
+/// 더 있다는 것을 글이 아니라 그림으로 알리려고 **양옆 카드를 가장자리에 걸친다** —
+/// 사용자가 승인한 시안 이탈(#394)을 시안이 따라왔다. 가운데 카드의 크기·자리
+/// (333×410 @ 30,231)는 시안 그대로다.
 void main() {
   useFigmaViewport();
 
@@ -49,7 +50,7 @@ void main() {
   ];
 
   /// 시안 좌표 — 가운데 카드 자리와 화면 폭.
-  const designCard = Rect.fromLTWH(24, 180, 345, 431);
+  const designCard = Rect.fromLTWH(30, 231, 333, 410);
   const screenWidth = 393.0;
 
   /// id를 `local`로 둔다 — 서버에 없는 일과라 동기화를 타지 않는다.
@@ -146,14 +147,14 @@ void main() {
       (r.right.clamp(0, screenWidth) - r.left.clamp(0, screenWidth)).toDouble();
 
   group('가운데 카드는 시안 자리 그대로다', () {
-    testWidgets('345×431 @ 24,180', (tester) async {
+    testWidgets('333×410 @ 30,231', (tester) async {
       await pumpScreen(tester);
 
       final r = cardRect(tester, 'c1');
       expect(r.left, closeTo(designCard.left, 0.5));
       expect(r.top, closeTo(designCard.top, 0.5));
       expect(r.width, closeTo(designCard.width, 0.5));
-      // **카드가 자리 높이(431)를 채운다.** 내용 높이로 두면 시안보다 13 짧다.
+      // **카드가 자리 높이(410)를 채운다.**
       expect(r.height, closeTo(designCard.height, 0.5));
     });
 
@@ -169,11 +170,11 @@ void main() {
     });
   });
 
-  // 시안 `309:3548` 카드 안 — 테두리(2, 안쪽)를 포함해 바깥에서 16 들어온 자리에
-  // 그림칸 313×264, 그 아래 17 에 배지(40), 배지 오른쪽 8 에 제목, 배지 아래 18 에
+  // 시안 `1197:6775` 카드 안 — 테두리(2, 안쪽)를 포함해 바깥에서 10 들어온 자리에
+  // 그림칸 313×230, 그 아래 10 에 배지(40), 배지 오른쪽 8 에 제목, 배지 아래 18 에
   // 설명. 스피커(24)는 배지 칸 한가운데, 설명은 제목과 같은 x 에서 시작한다.
   group('카드 안 배치는 시안대로다', () {
-    testWidgets('그림칸 313×264 @ 40,196', (tester) async {
+    testWidgets('그림칸 313×230 @ 40,241', (tester) async {
       await pumpScreen(tester);
 
       final r = tester.getRect(
@@ -183,9 +184,9 @@ void main() {
         ),
       );
       expect(r.left, closeTo(40, 0.5));
-      expect(r.top, closeTo(196, 0.5));
+      expect(r.top, closeTo(241, 0.5));
       expect(r.width, closeTo(313, 0.5));
-      expect(r.height, closeTo(264, 0.5));
+      expect(r.height, closeTo(230, 0.5));
     });
 
     testWidgets('제목과 설명은 x=88 에서 시작한다 — 배지 오른쪽 8', (tester) async {
@@ -194,11 +195,11 @@ void main() {
       expect(tester.getRect(find.text('옷을 입어요')).left, closeTo(88, 0.5));
       final desc = tester.getRect(find.text('학교에 갈 옷을 차례대로 입어요'));
       expect(desc.left, closeTo(88, 0.5));
-      // 배지 아래(517)에서 18
-      expect(desc.top, closeTo(535, 0.5));
+      // 배지 아래(521)에서 18
+      expect(desc.top, closeTo(539, 0.5));
     });
 
-    testWidgets('스피커는 배지 칸 가운데(48,535)에 24×24', (tester) async {
+    testWidgets('스피커는 배지 칸 가운데(48,539)에 24×24', (tester) async {
       await pumpScreen(tester);
 
       final r = tester.getRect(
@@ -208,7 +209,7 @@ void main() {
         ),
       );
       expect(r.left, closeTo(48, 0.5));
-      expect(r.top, closeTo(535, 0.5));
+      expect(r.top, closeTo(539, 0.5));
       expect(r.width, closeTo(24, 0.5));
     });
   });
@@ -218,10 +219,13 @@ void main() {
       await pumpScreen(tester);
 
       final right = cardRect(tester, 'c2');
-      // 가운데 카드 오른끝(369) + 카드 사이 간격 = 옆 카드 왼끝
-      expect(right.left, closeTo(369 + ChildCardPager.cardGap, 0.5));
+      // 가운데 카드 오른끝(363) + 카드 사이 간격 = 옆 카드 왼끝(373)
+      expect(
+        right.left,
+        closeTo(designCard.right + ChildCardPager.cardGap, 0.5),
+      );
       expect(visibleWidth(right), closeTo(ChildCardPager.peekWidth, 0.5));
-      // 첫 카드 왼쪽에는 아무 카드도 없다 — 가장자리 24 가 비어 있다
+      // 첫 카드 왼쪽에는 아무 카드도 없다 — 가장자리 30 이 비어 있다
       expect(find.byKey(const ValueKey('c0')), findsNothing);
       for (final id in ['c2', 'c3']) {
         if (find.byKey(ValueKey(id)).evaluate().isEmpty) continue;
@@ -235,7 +239,10 @@ void main() {
       await tester.pump();
 
       final left = cardRect(tester, 'c2');
-      expect(left.right, closeTo(24 - ChildCardPager.cardGap, 0.5));
+      expect(
+        left.right,
+        closeTo(designCard.left - ChildCardPager.cardGap, 0.5),
+      );
       expect(visibleWidth(left), closeTo(ChildCardPager.peekWidth, 0.5));
 
       final last = cardRect(tester, 'c3');
@@ -258,7 +265,7 @@ void main() {
       expect(opacityOf(tester, 'c2'), ChildCardPager.sideOpacity);
 
       final side = cardRect(tester, 'c2');
-      expect(side.height, closeTo(431 * ChildCardPager.sideScale, 0.5));
+      expect(side.height, closeTo(410 * ChildCardPager.sideScale, 0.5));
       // 줄어도 세로 가운데는 가운데 카드와 같다 — 아래로 처지지 않는다
       expect(side.center.dy, closeTo(designCard.center.dy, 0.5));
     });
@@ -364,15 +371,17 @@ void main() {
       final container = ProviderScope.containerOf(
         tester.element(find.byType(ChildRoutineDetailScreen)),
       );
-      container.read(childRoutineProvider.notifier).toggle(
-        routine: Routine(
-          id: 'local',
-          title: '비 오는 날 학교에 가요',
-          status: 'CONFIRMED',
-          steps: threeCards,
-        ),
-        card: threeCards[index],
-      );
+      container
+          .read(childRoutineProvider.notifier)
+          .toggle(
+            routine: Routine(
+              id: 'local',
+              title: '비 오는 날 학교에 가요',
+              status: 'CONFIRMED',
+              steps: threeCards,
+            ),
+            card: threeCards[index],
+          );
       await tester.pump();
       return container;
     }
@@ -390,13 +399,19 @@ void main() {
       final m = tester.getRect(mark('c1'));
       // 화면 안, 옆 카드가 보이는 띠(0 ~ 16) 안에 든다 — 간격 쪽으로 조금 걸친다
       expect(m.left, greaterThanOrEqualTo(0));
-      expect(m.right, lessThanOrEqualTo(strip.right + ChildCardPager.cardGap / 2));
+      expect(
+        m.right,
+        lessThanOrEqualTo(strip.right + ChildCardPager.cardGap / 2),
+      );
       expect(m.left, lessThan(strip.right));
       // 옆 카드는 흐리게(0.5) 그리지만 표시는 또렷하다
       expect(_markOpacity(tester, mark('c1')), closeTo(1, 0.001));
       // 앱에 이미 있는 체크 그림을 쓴다 — 새 그림을 만들지 않는다
       expect(
-        find.descendant(of: mark('c1'), matching: svgWithAsset(AppAssets.childCheckMark)),
+        find.descendant(
+          of: mark('c1'),
+          matching: svgWithAsset(AppAssets.childCheckMark),
+        ),
         findsOneWidget,
       );
     });
@@ -409,7 +424,10 @@ void main() {
       final strip = cardRect(tester, 'c2');
       final m = tester.getRect(mark('c2'));
       expect(m.right, lessThanOrEqualTo(screenWidth));
-      expect(m.left, greaterThanOrEqualTo(strip.left - ChildCardPager.cardGap / 2));
+      expect(
+        m.left,
+        greaterThanOrEqualTo(strip.left - ChildCardPager.cardGap / 2),
+      );
       expect(m.right, greaterThan(strip.left));
     });
 
@@ -456,7 +474,9 @@ void main() {
       expect(find.semantics.byLabel(RegExp('우산을 챙겨요')), findsNothing);
       // 표시는 옆 카드와 같은 가림 안에 있다
       final excluded = tester.widget<ExcludeSemantics>(
-        find.ancestor(of: mark('c2'), matching: find.byType(ExcludeSemantics)).first,
+        find
+            .ancestor(of: mark('c2'), matching: find.byType(ExcludeSemantics))
+            .first,
       );
       expect(excluded.excluding, isTrue);
       handle.dispose();

@@ -168,7 +168,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('일과가 없어요'), findsOneWidget);
-      expect(find.text('보호자 화면에서 일과를 만들 수 있어요'), findsOneWidget);
+      expect(find.text('보호자 모드에서 일과를 만들 수 있어요'), findsOneWidget);
       // 시무룩한 루루는 코드가 아니라 에셋으로 그린다
       expect(svgWithAsset(AppAssets.ruruSad), findsOneWidget);
     });
@@ -191,14 +191,14 @@ void main() {
       expect(find.text('별 화면'), findsOneWidget);
     });
 
-    testWidgets('캐릭터 배지는 테두리가 있는 에셋을 쓴다', (tester) async {
-      // 테두리 없는 맨 일러스트(characterBadgeRuru)를 쓰면 캐릭터만 덩그러니
-      // 뜬다. Figma 356:5106은 둥근 사각형 테두리까지 포함한다.
+    testWidgets('오른쪽 위는 캐릭터 배지가 아니라 톱니다 (시안 1197:6810)', (tester) async {
+      // 시안이 바뀌어(#445) 캐릭터 얼굴 버튼이 톱니(24×24)로 대체됐다.
       await pumpChild(tester);
 
+      expect(svgWithAsset(AppAssets.iconSettings), findsOneWidget);
       expect(
         svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
-        findsOneWidget,
+        findsNothing,
       );
     });
   });
@@ -299,7 +299,7 @@ void main() {
       );
       expect(
         RewardCharacter.ruru.messageFor('하늘이'),
-        '하늘이가 할 일을 해내서\n루루가 선물을 가져왔어요',
+        '하늘이가 할 일을 해내서\n루루가 선물을 가져왔다고 해요',
       );
       expect(
         RewardCharacter.popo.messageFor('하늘이'),
@@ -416,13 +416,11 @@ void main() {
       // 배지를 눌러 곧장 보호자 홈으로 가면 아이가 혼자 빠져나갈 수 있다.
       await pumpChild(tester, pin: '1234');
 
-      // 상단 오른쪽 캐릭터 배지가 보호자 모드로 나가는 유일한 입구다
+      // 상단 오른쪽 톱니가 보호자 모드로 나가는 유일한 입구다 (#445)
       await tester.tap(
         find
             .ancestor(
-              of: svgWithAsset(
-                AppAssets.characterBadgeFramed(CardCharacter.cat),
-              ),
+              of: svgWithAsset(AppAssets.iconSettings),
               matching: find.byType(AppPressable),
             )
             .first,
@@ -498,8 +496,11 @@ void main() {
       await pumpChild(tester, member: const Member(totalStars: 10));
 
       expectLabeledButton(tester, '별 10개 모았어요');
-      expect(find.bySemanticsLabel('10'), findsNothing,
-          reason: '숫자만 따로 한 번 더 읽히면 안 된다');
+      expect(
+        find.bySemanticsLabel('10'),
+        findsNothing,
+        reason: '숫자만 따로 한 번 더 읽히면 안 된다',
+      );
     });
 
     testWidgets('캐릭터 배지는 보호자 화면으로 가는 입구라고 읽힌다', (tester) async {
