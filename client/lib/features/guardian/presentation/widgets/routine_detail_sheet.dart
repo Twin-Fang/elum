@@ -460,11 +460,25 @@ class _StepCardState extends State<_StepCard>
     if (t == 0) return const [];
     return [
       BoxShadow(
-        color: Colors.black.withValues(alpha: 0.16 * t),
-        blurRadius: 18 * t,
-        offset: Offset(0, 6 * t),
+        // 카드가 옅은 회색이라 예전 0.16 은 배경에 묻혔다 (#451)
+        color: Colors.black.withValues(alpha: 0.26 * t),
+        blurRadius: 22 * t,
+        offset: Offset(0, 8 * t),
       ),
     ];
+  }
+
+  /// 잡힌 카드의 테두리. 눌리지 않았으면 그리지 않는다.
+  ///
+  /// 손가락이 18px 손잡이를 가려도 카드 가장자리는 보인다. 그림자·크기와 달리
+  /// 색은 "지금 이 카드를 쥐고 있다"를 한눈에 알린다 (#451).
+  /// 배경 테두리로 그리면 안쪽 여백이 밀려 글이 움직이므로 위에 덧그린다.
+  BoxDecoration? _outline(double t, Color color) {
+    if (t == 0) return null;
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(20.r),
+      border: Border.all(color: color.withValues(alpha: t), width: 2.w),
+    );
   }
 
   @override
@@ -492,6 +506,7 @@ class _StepCardState extends State<_StepCard>
                     borderRadius: BorderRadius.circular(20.r),
                     boxShadow: shadow,
                   ),
+                  foregroundDecoration: _outline(t, colors.brandOrange),
                   child: Row(
                     children: [
                       Expanded(
@@ -548,13 +563,32 @@ class _StepCardState extends State<_StepCard>
                           onPointerCancel: (_) => _lift.reverse(),
                           child: ReorderableDelayedDragStartListener(
                             index: widget.index,
-                            child: SvgPicture.asset(
-                              // **`Icons.drag_handle`이 아니다.** 그건 줄이 둘인데
-                              // 시안(`963:4240` 순서변경)은 셋이고 색도 `#CACACA`로
-                              // 더 진하다. 색은 에셋에 들어 있으니 덧칠하지 않는다.
-                              AppAssets.sheetReorderHandle,
-                              width: 18.w,
-                              height: 18.w,
+                            child: Stack(
+                              children: [
+                                // **`Icons.drag_handle`이 아니다.** 그건 줄이 둘인데
+                                // 시안(`963:4240` 순서변경)은 셋이고 색도 `#CACACA`로
+                                // 더 진하다. 눌리지 않았을 때는 에셋 색 그대로다.
+                                SvgPicture.asset(
+                                  AppAssets.sheetReorderHandle,
+                                  width: 18.w,
+                                  height: 18.w,
+                                ),
+                                // 잡히는 만큼 브랜드색이 위에 짙어진다 (#451). 에셋 색을
+                                // 코드에 옮겨 적지 않으려고 값을 섞지 않고 겹친다.
+                                if (t > 0)
+                                  Opacity(
+                                    opacity: t,
+                                    child: SvgPicture.asset(
+                                      AppAssets.sheetReorderHandle,
+                                      width: 18.w,
+                                      height: 18.w,
+                                      colorFilter: ColorFilter.mode(
+                                        colors.brandOrange,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),

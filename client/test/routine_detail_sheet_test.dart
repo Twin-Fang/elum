@@ -299,6 +299,33 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('잡힌 카드는 테두리로 알아본다 — 손가락이 손잡이를 가려도 보인다 (#451)', (tester) async {
+    await tester.pumpWidget(wrap(_FakeRepo()));
+    await tester.pump();
+
+    // 테두리는 foregroundDecoration 에 그린다 — 배경 테두리는 안쪽 여백을 밀어 글이 움직인다.
+    bool anyOutlined() => tester
+        .widgetList<Container>(find.byType(Container))
+        .any((c) {
+          final d = c.foregroundDecoration;
+          return d is BoxDecoration && d.border != null;
+        });
+
+    expect(anyOutlined(), isFalse, reason: '손대기 전에는 테두리가 없다');
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(svgWithAsset(AppAssets.sheetReorderHandle).first),
+    );
+    await tester.pump();
+    // 다 잡힐 때까지(kLongPressTimeout) 기다린다.
+    await tester.pump(kLongPressTimeout);
+    expect(anyOutlined(), isTrue, reason: '잡히면 테두리가 생긴다');
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(anyOutlined(), isFalse, reason: '놓으면 테두리가 사라진다');
+  });
+
   testWidgets('끄는 동안 번호는 제자리에 그대로 있고 카드만 떠오른다 (#434)', (tester) async {
     await tester.pumpWidget(wrap(_FakeRepo()));
     await tester.pump();
