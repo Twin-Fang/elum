@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../shared/models/action_card.dart';
@@ -115,7 +116,8 @@ class _ActionCardViewState extends State<ActionCardView> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = CardPalette.at(widget.index);
+    // 자리가 바뀌면 이 색으로 **서서히** 옮겨 간다 (#451). 아래 빌더가 맡는다.
+    final target = CardPalette.at(widget.index);
     final space = context.space;
     final childLayout = widget.layout == ActionCardLayout.childDetail;
     // 이룸이 상세 시안(`1197:6775`)이 카드확인과 같은 카드로 바뀌었다 (#445).
@@ -145,6 +147,48 @@ class _ActionCardViewState extends State<ActionCardView> {
       ),
     );
 
+    // 순서를 바꾸면 카드가 새 자리 색을 입는다. 그대로 두면 카드 한 장이 통째로 한
+    // 프레임에 바뀌어 어지럽다 — 배경과 테두리·배지를 [AppMotion.normal] 동안 섞는다.
+    // 처음 그릴 때는 목적 색에서 시작하므로 등장 시에는 움직이지 않는다 (#451).
+    return TweenAnimationBuilder<Color?>(
+      tween: ColorTween(end: target.fill),
+      duration: AppMotion.normal,
+      builder: (context, fillColor, _) => TweenAnimationBuilder<Color?>(
+        tween: ColorTween(end: target.border),
+        duration: AppMotion.normal,
+        builder: (context, borderColor, _) {
+          final palette = CardPalette(
+            fill: fillColor ?? target.fill,
+            border: borderColor ?? target.border,
+          );
+          return _buildCard(
+            context,
+            palette: palette,
+            space: space,
+            childLayout: childLayout,
+            inset: inset,
+            illustrationAspect: illustrationAspect,
+            illustrationToTitle: illustrationToTitle,
+            titleToBody: titleToBody,
+            speaker: speaker,
+          );
+        },
+      ),
+    );
+  }
+
+  /// 색이 정해진 카드 본체. [build] 의 색 전환 빌더가 매 프레임 부른다.
+  Widget _buildCard(
+    BuildContext context, {
+    required CardPalette palette,
+    required AppSpacing space,
+    required bool childLayout,
+    required double inset,
+    required double illustrationAspect,
+    required double illustrationToTitle,
+    required double titleToBody,
+    required Widget speaker,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: palette.fill,

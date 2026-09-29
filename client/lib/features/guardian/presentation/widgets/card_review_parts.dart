@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -326,8 +327,13 @@ class CardReviewReorderList extends StatelessWidget {
   final double cardGap;
   final void Function(int oldIndex, int newIndex) onReorder;
 
+  /// 잡힌 카드가 커지는 비율. 카드가 화면 폭을 거의 채워 크게 키우면 옆 카드를 덮는다.
+  static const _liftScale = 0.04;
+
   @override
   Widget build(BuildContext context) {
+    final radius = context.space.cardRadius;
+
     return ReorderableListView.builder(
       scrollDirection: Axis.horizontal,
       // 손잡이 없이 카드 어디든 **길게** 눌러 끈다 (시안 문구)
@@ -336,9 +342,45 @@ class CardReviewReorderList extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 25.w),
       itemCount: cards.length,
       onReorder: onReorder,
-      // 들린 카드에 기본 그림자·모서리를 입히지 않는다 — 시안에 없다
-      proxyDecorator: (child, index, animation) =>
-          Material(type: MaterialType.transparency, child: child),
+      // 잡히는 순간 진동으로 알린다. 길게 눌러 잡는 화면이라 손가락이 카드를 가리므로
+      // 눈으로 보이는 변화와 함께 손끝으로도 알려 준다 (#451).
+      onReorderStart: (_) => HapticFeedback.mediumImpact(),
+      // 들린 카드를 조금 키우고 그림자를 깐다. 예전에는 아무 변화가 없어 잡혔는지
+      // 알 수 없었다 (#451). **시안 `1197:5798`에는 없는 동작이다** — 디자이너 확인 대상.
+      proxyDecorator: (child, index, animation) => AnimatedBuilder(
+        animation: animation,
+        child: child,
+        builder: (context, inner) {
+          final lift = Curves.easeOut.transform(animation.value);
+          return Transform.scale(
+            scale: 1 + _liftScale * lift,
+            child: Stack(
+              children: [
+                // 그림자는 카드 자리(양옆 간격 절반을 뺀 폭)에 맞춰 뒤에 깐다.
+                // 항목 전체에 그리면 카드보다 10 넓게 번진다.
+                Positioned.fill(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: (cardGap / 2).w),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(radius),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.24 * lift),
+                            blurRadius: 24 * lift,
+                            offset: Offset(0, 10 * lift),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Material(type: MaterialType.transparency, child: inner),
+              ],
+            ),
+          );
+        },
+      ),
       itemBuilder: (context, index) => ReorderableDelayedDragStartListener(
         key: ValueKey('reorder_${cards[index].id}'),
         index: index,

@@ -7,12 +7,14 @@ import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
+import 'package:elum/features/guardian/domain/card_palette.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/card_review_parts.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -324,6 +326,115 @@ void main() {
 
       expect(find.text('카드 저장하기'), findsOneWidget);
       expect(idsOf(container).first, isNot('c1'), reason: '완료는 순서를 그대로 둔다');
+    });
+
+    /// 카드 [id] 의 배경색 — 카드 루트 Container 의 decoration.
+    Color fillOf(WidgetTester tester, String id) {
+      final box = tester.widget<Container>(
+        find
+            .descendant(
+              of: find.byKey(ValueKey(id)),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      return (box.decoration as BoxDecoration).color!;
+    }
+
+    /// 지금 화면에 확대(scale>1)되어 서 있는 Transform 이 있는가 — 들린 카드의 표시.
+    bool anyScaledUp(WidgetTester tester) => tester
+        .widgetList<Transform>(find.byType(Transform))
+        .any((t) => t.transform.getMaxScaleOnAxis() > 1.01);
+
+    testWidgets('놓으면 카드 색이 새 자리 색으로 서서히 섞인다 — 확 바뀌지 않는다 (#451)', (
+      tester,
+    ) async {
+      final container = await pump(tester);
+      await tester.tap(find.text('카드 순서 변경'));
+      await settle(tester);
+
+      final before = fillOf(tester, 'c1');
+      expect(before, CardPalette.at(0).fill, reason: '첫 자리 색으로 시작한다');
+
+      // dragCard 와 같되 손을 뗀 직후의 색을 잰다
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const ValueKey('c1'))),
+      );
+      await tester.pump(const Duration(milliseconds: 700));
+      await gesture.moveBy(const Offset(kTouchSlop + 1, 0));
+      await tester.pump();
+      for (var i = 0; i < 8; i++) {
+        await gesture.moveBy(Offset((230 - kTouchSlop - 1) / 8, 0));
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      await gesture.up();
+      await tester.pump();
+      // 놓는 애니메이션이 끝나 순서가 확정되는 프레임까지 흘린다
+      for (var i = 0; i < 60 && idsOf(container).indexOf('c1') == 0; i++) {
+        await tester.pump(const Duration(milliseconds: 20));
+      }
+
+      final newIndex = idsOf(container).indexOf('c1');
+      expect(newIndex, isNot(0), reason: '카드가 다른 자리로 갔다');
+      final target = CardPalette.at(newIndex).fill;
+
+      // 색 전환(300ms)의 도중
+      await tester.pump(const Duration(milliseconds: 100));
+      final mid = fillOf(tester, 'c1');
+      expect(mid, isNot(before), reason: '이미 옛 색을 떠났다');
+      expect(mid, isNot(target), reason: '아직 새 색에 닿지 않았다 — 한 번에 바뀌면 안 된다');
+
+      await tester.pump(const Duration(seconds: 1));
+      expect(fillOf(tester, 'c1'), target, reason: '끝나면 새 자리 색이다');
+    });
+
+    testWidgets('잡아 끄는 동안 카드가 확대되고 그림자가 생기며 진동이 울린다 (#451)', (tester) async {
+      final haptics = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'HapticFeedback.vibrate') {
+            haptics.add('${call.arguments}');
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger
+            .setMockMethodCallHandler(SystemChannels.platform, null),
+      );
+
+      await pump(tester);
+      await tester.tap(find.text('카드 순서 변경'));
+      await settle(tester);
+
+      expect(anyScaledUp(tester), isFalse, reason: '손대기 전에는 들린 카드가 없다');
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const ValueKey('c1'))),
+      );
+      await tester.pump(const Duration(milliseconds: 700));
+      await gesture.moveBy(const Offset(kTouchSlop + 1, 0));
+      await tester.pump();
+      await gesture.moveBy(const Offset(60, 0));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(anyScaledUp(tester), isTrue, reason: '잡힌 카드는 커진다');
+      final shadowed = tester.widgetList<DecoratedBox>(find.byType(DecoratedBox)).any(
+        (d) => (d.decoration is BoxDecoration) &&
+            ((d.decoration as BoxDecoration).boxShadow ?? []).isNotEmpty,
+      );
+      expect(shadowed, isTrue, reason: '잡힌 카드에는 그림자가 진다');
+      expect(
+        haptics.where((h) => h.contains('mediumImpact')),
+        isNotEmpty,
+        reason: '잡히는 순간 진동으로 알린다',
+      );
+
+      await gesture.up();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(anyScaledUp(tester), isFalse, reason: '놓으면 제 크기로 돌아온다');
     });
 
     testWidgets('짧게 눌러서는 카드가 집히지 않는다', (tester) async {
