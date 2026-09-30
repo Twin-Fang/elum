@@ -11,6 +11,13 @@ import '../../features/onboarding/domain/support_goal.dart';
 abstract final class AppAssets {
   static const _images = 'assets/images';
 
+  /// 카드 그림 자리의 무료 픽토그램 — Mulberry Symbols v3.6.1 (CC BY-SA 4.0, #469).
+  ///
+  /// [id] 는 서버가 내려주는 `pictogramId` (SVG 파일명 stem, 예 `get_dressed_,_to`).
+  /// **원본 SVG 를 고치거나 다시 칠하지 않는다** — 라이선스가 변형을 막는다. 크기와 배치만 바꾼다.
+  /// 허용 id 는 `PictogramCatalog` 가 걸러 준다.
+  static String pictogram(String id) => 'assets/pictograms/$id.svg';
+
   /// 소셜 로그인 제공자 로고 (22×22). Figma `로그인`(238:1808)에서 받았다.
   ///
   /// **각 사의 브랜드 자산이다.** 색·비율을 바꾸면 제공자 검수·스토어 심사에서

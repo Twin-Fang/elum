@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../pictogram/pictogram_catalog.dart';
+
 part 'action_card.freezed.dart';
 
 /// AI가 생성한 행동 카드 한 장 — 서버의 `RoutineStep`에 대응한다.
@@ -35,6 +37,12 @@ abstract class ActionCard with _$ActionCard {
 
     /// 수행 완료 여부. 서버 `completed`.
     @Default(false) bool completed,
+
+    /// 그림 자리에 보여줄 무료 픽토그램 id (Mulberry Symbols, #469 · 서버 #247).
+    ///
+    /// **사진·AI 그림이 없을 때만** 쓰인다(우선순위: 사진/AI > 픽토그램 > 기본 카드).
+    /// 옛 카드는 null 이고, 서버가 카탈로그에 없는 값을 주면 [fromJson] 이 null 로 돌린다.
+    String? pictogramId,
   }) = _ActionCard;
 
   const ActionCard._();
@@ -57,6 +65,8 @@ abstract class ActionCard with _$ActionCard {
       },
       imagePath: json['imagePath']?.toString(),
       completed: json['completed'] == true,
+      // 모르는 id 는 버린다 — 번들에 없는 자산을 그리려다 그림 자리가 깨지지 않게
+      pictogramId: PictogramCatalog.parse(json['pictogramId']),
     );
   }
 
@@ -67,5 +77,6 @@ abstract class ActionCard with _$ActionCard {
         'stepOrder': stepOrder,
         'imagePath': imagePath,
         'completed': completed,
+        'pictogramId': pictogramId,
       };
 }

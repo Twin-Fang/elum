@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_dialog.dart';
+import '../../../../shared/models/action_card.dart';
 import '../../application/routine_notifier.dart';
 import '../../data/card_image_repository.dart';
 import '../../data/card_photo.dart';
@@ -61,11 +62,11 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
   /// 고르는 중이거나 올리는 중 — 칩·다시 하기를 또 눌러도 새 흐름이 시작되지 않는다.
   var _busy = false;
 
-  String? _imagePath() {
+  ActionCard? _step() {
     final steps = ref.watch(routineFlowProvider).routine?.steps;
     if (steps == null) return null;
     for (final s in steps) {
-      if (s.id == widget.stepId) return s.imagePath;
+      if (s.id == widget.stepId) return s;
     }
     return null;
   }
@@ -203,7 +204,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final space = context.space;
-    final imagePath = _imagePath();
+    final step = _step();
 
     return SizedBox(
       height: CardPhotoBlock.height.h,
@@ -221,8 +222,11 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
                 child: CardImage(
                   routineId: widget.routineId,
                   stepId: widget.stepId,
-                  imagePath: imagePath,
-                  // 그림이 없으면 기본 카드(#458)의 '사진 추가' 자리를 그대로 두고, 눌러도 같은 사진 흐름이
+                  imagePath: step?.imagePath,
+                  // 사진·AI 그림이 없으면 무료 픽토그램이 자리를 채운다(#469). 사진 바꾸기 칩은 그대로다.
+                  pictogramId: step?.pictogramId,
+                  pictogramLabel: step?.displayTitle ?? '',
+                  // 픽토그램도 없으면 기본 카드(#458)의 '사진 추가' 자리를 그대로 두고, 눌러도 같은 사진 흐름이
                   // 시작되게 잇는다(#456). 올리는 중에는 누를 수 없다.
                   emptyBuilder: (_) => DefaultCardPhotoSlot(
                     onAddPhoto: _phase == _Phase.idle && !_busy ? _start : null,
