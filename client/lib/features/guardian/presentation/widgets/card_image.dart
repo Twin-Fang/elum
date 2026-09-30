@@ -21,11 +21,6 @@ class CardImage extends ConsumerWidget {
   final String routineId;
   final String stepId;
 
-  // 서버가 "4:3"으로 요청해도 Gemini가 반환하는 실제 비율이 미세하게 어긋날
-  // 때가 있어, 카드 4:3 박스와 안 맞아 가장자리에 배경색 라인이 비친다.
-  // 살짝 확대해 넘치는 부분을 ClipRRect(부모)로 잘라내면 오차를 흡수한다.
-  static const _overscanScale = 1.03;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 아직 서버에 저장되지 않은 카드는 이미지도 없다. 요청 자체를 하지 않는다.
@@ -47,11 +42,16 @@ class CardImage extends ConsumerWidget {
           : AnimatedSwitcher(
               // 이미지가 툭 나타나지 않게 부드럽게 바꾼다
               duration: AppMotion.fast,
-              child: Transform.scale(
-                scale: _overscanScale,
+              // **칸에 꽉 채운다** (시안 `Rectangle 31` 313×230 · objectFit cover).
+              // AnimatedSwitcher 의 Stack 은 자식에게 느슨한 제약만 줘서 expand 없이는
+              // 그림이 제 비율대로 줄어 칸 안에 떠 버린다 — 정사각 그림이면 좌우로 흰 띠가
+              // 생겼다 (#461). 칸 비율과 다른 그림은 cover 가 넘치는 쪽을 잘라 맞춘다.
+              // 예전엔 4:3 칸의 비율 오차를 1.03 확대로 가렸는데, cover 가 오차를 이미
+              // 흡수하므로 확대는 그림을 3% 더 자를 뿐이라 뺐다.
+              child: SizedBox.expand(
+                key: ValueKey(stepId),
                 child: Image.memory(
                   bytes,
-                  key: ValueKey(stepId),
                   fit: BoxFit.cover,
                   // 디코딩 실패도 앱을 죽이면 안 된다
                   errorBuilder: (_, _, _) => const _Fallback(),
