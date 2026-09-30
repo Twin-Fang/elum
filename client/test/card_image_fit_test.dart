@@ -28,15 +28,17 @@ void main() {
   Future<void> pumpBox(WidgetTester tester, Uint8List png) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          cardImageProvider.overrideWith((ref, key) async => png),
-        ],
-        child: const MaterialApp(
+        overrides: [cardImageProvider.overrideWith((ref, key) async => png)],
+        child: MaterialApp(
           home: Center(
             child: SizedBox(
               width: boxW,
               height: boxH,
-              child: CardImage(routineId: 'r1', stepId: 's1'),
+              child: CardImage(
+                routineId: 'r1',
+                stepId: 's1',
+                emptyBuilder: (_) => const SizedBox(),
+              ),
             ),
           ),
         ),

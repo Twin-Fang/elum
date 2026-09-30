@@ -7,6 +7,7 @@ import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
 import '../../../core/network/app_failure.dart';
+import '../../guardian/data/card_image_disk_cache.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import 'oauth_sdk.dart';
 
@@ -92,15 +93,20 @@ class AuthRepository {
     required LocalStorage storage,
     required TokenStore tokens,
     required OAuthSdk sdk,
+    CardImageDiskCache? imageCache,
   })  : _dio = dio,
         _storage = storage,
         _tokens = tokens,
-        _sdk = sdk;
+        _sdk = sdk,
+        _imageCache = imageCache;
 
   final Dio _dio;
   final LocalStorage _storage;
   final TokenStore _tokens;
   final OAuthSdk _sdk;
+
+  /// 기기에 남은 카드 그림. 보호자가 올린 사진이 들어 있어 계정이 끝나면 함께 지운다 (#462).
+  final CardImageDiskCache? _imageCache;
 
   /// 진행 중인 갱신 요청. **동시에 여러 번 갱신하지 않기 위한 장치다.**
   ///
@@ -270,6 +276,7 @@ class AuthRepository {
     }
     await _tokens.clear();
     await _storage.clearAll();
+    await _imageCache?.clear();
   }
 
   /// 회원삭제 — 서버 계정과 로컬 저장값을 모두 지운다. 지워졌으면 true.
@@ -294,6 +301,7 @@ class AuthRepository {
     }
     await _tokens.clear();
     await _storage.clearAll();
+    await _imageCache?.clear();
     return null;
   }
 }
@@ -315,6 +323,7 @@ final tokenRefresherProvider = Provider<AuthRepository>((ref) {
     storage: ref.watch(localStorageProvider),
     tokens: ref.watch(tokenStoreProvider),
     sdk: ref.watch(oAuthSdkProvider),
+    imageCache: ref.watch(cardImageDiskCacheProvider),
   );
 });
 
@@ -325,5 +334,6 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
     storage: ref.watch(localStorageProvider),
     tokens: ref.watch(tokenStoreProvider),
     sdk: ref.watch(oAuthSdkProvider),
+    imageCache: ref.watch(cardImageDiskCacheProvider),
   );
 });
