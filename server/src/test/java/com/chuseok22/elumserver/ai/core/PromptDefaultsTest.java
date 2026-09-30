@@ -152,22 +152,34 @@ class PromptDefaultsTest {
       .doesNotContain("The character")
       .doesNotContain("pastel")
       .doesNotContain("Simple flat vector")
-      .doesNotContain("[Character");
-    // 사진 같은 그림·글자 금지·카드당 행동 하나는 남아 있어야 한다
-    assertThat(content).contains("realistic").contains("photo").contains("Never draw any text")
-      .contains("one action").contains("Scene info");
-    // 캐릭터·만화는 '금지'로만 나온다
-    assertThat(content).contains("[Never]").contains("cartoon");
+      .doesNotContain("[Character")
+      .doesNotContain("cartoon");
+    // 사진 같은 그림·물건 하나·글자 없음은 남아 있어야 한다 (긍정문 태그)
+    assertThat(content).contains("realistic photo").contains("One single object").contains("No text");
   }
 
   @Test
-  @DisplayName("실사 번역 지시문은 The character 로 시작하라고 하지 않는다 — 물건·장소 중심, 30단어 미만")
+  @DisplayName("실사 지시문·번역 지시문에 card·sign·hands·label 단어가 없다 — FLUX schnell 이 그 단어를 그대로 그렸다")
+  void realisticPrompts_avoidWordsThatFluxDraws() {
+    // 1차 실측(fal-ai/flux/schnell)에서 'One card, one action'·'signs, labels'·'show only hands'·'Never draw ...' 의
+    // 단어가 그림에 나왔다(카드를 든 손·금지 표시·로고·글자). 부정문도 schnell 은 무시하고 단어를 그린다.
+    for (PromptKey key : new PromptKey[]{
+      PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX, PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE}) {
+      String lower = PromptDefaults.DEFAULTS.get(key).toLowerCase();
+      assertThat(lower).as(key.name())
+        .doesNotContain("card").doesNotContain("sign").doesNotContain("hand").doesNotContain("label")
+        .doesNotContain("logo").doesNotContain("never");
+    }
+  }
+
+  @Test
+  @DisplayName("실사 번역 지시문은 The character 로 시작하라고 하지 않는다 — 물건 하나, 고정 문장 형식, 30단어 미만")
   void realisticTranslate_isObjectCentered() {
     String content = PromptDefaults.DEFAULTS.get(PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE);
 
-    assertThat(content).doesNotContain("Start with \"The character\"").contains("Never start with \"The character\"");
-    assertThat(content).contains("Under 30 words").contains("imagePromptEn");
-    assertThat(content).contains("plain light surface").contains("Do not describe weather");
+    assertThat(content).doesNotContain("Start with \"The character\"").doesNotContain("The character");
+    assertThat(content).contains("imagePromptEn").contains("Under 25 words");
+    assertThat(content).contains("A {object and its state} on a plain light gray surface.");
   }
 
   @Test
