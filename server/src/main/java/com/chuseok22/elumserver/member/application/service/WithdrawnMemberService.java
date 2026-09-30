@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
@@ -51,6 +52,7 @@ public class WithdrawnMemberService {
   private final SystemConfigService systemConfigService;
   private final GuardianshipService guardianshipService;
   private final AiCreditAccountRepository aiCreditAccountRepository;
+  private final AdRewardSessionRepository adRewardSessionRepository;
 
   /** 탈퇴 뒤 남겨 두는 일수. 관리자 설정값이다 (기본 365 — 개인정보처리방침 4조의 1년과 같다). */
   public int retentionDays() {
@@ -128,6 +130,7 @@ public class WithdrawnMemberService {
     // 계정 행 삭제가 외래키에 걸려 이번 삭제만 실패하고, 다음 부팅의 채우기 뒤 스케줄러가 다시 지운다.
     guardianshipService.leaveAll(memberId);
     subscriptionRepository.deleteByMemberId(memberId);
+    adRewardSessionRepository.deleteAllByMemberId(memberId);
     refreshTokenRepository.deleteAllByMemberId(memberId);
     deviceLinkRepository.deleteAllByMemberId(memberId);
 

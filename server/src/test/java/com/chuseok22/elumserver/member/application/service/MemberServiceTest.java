@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.member.application.service;
 
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
+import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,6 +61,9 @@ class MemberServiceTest {
 
   @Mock
   private RefreshTokenRepository refreshTokenRepository;
+
+  @Mock
+  private AdRewardSessionRepository adRewardSessionRepository;
 
   @Mock
   private AiCallLogRepository aiCallLogRepository;
@@ -140,6 +144,8 @@ class MemberServiceTest {
     verify(refreshTokenRepository).deleteAllByMemberId("member-1");
     verify(deviceLinkRepository).deleteAllByMemberId("member-1");
     verify(subscriptionRepository).deleteByMemberId("member-1");
+    // 광고 보상 세션은 회원을 가리키는 운영 기록이라 탈퇴 즉시 지운다 (#463).
+    verify(adRewardSessionRepository).deleteAllByMemberId("member-1");
   }
 
   @Test

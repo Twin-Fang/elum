@@ -29,6 +29,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 // 클래스 단위 적용이라 같은 컨트롤러에 SSR/REST 엔드포인트를 함께 두면 안 된다, fable5 검토에서 발견).
 @RestControllerAdvice(
   basePackages = {
+    "com.chuseok22.elumserver.adreward",
     "com.chuseok22.elumserver.ai",
     "com.chuseok22.elumserver.auth",
     "com.chuseok22.elumserver.member",

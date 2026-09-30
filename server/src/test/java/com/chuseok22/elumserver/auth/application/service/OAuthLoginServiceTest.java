@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.auth.application.service;
 
+import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -88,6 +89,9 @@ class OAuthLoginServiceTest {
   private RefreshTokenRepository refreshTokenRepository;
 
   @Mock
+  private AdRewardSessionRepository adRewardSessionRepository;
+
+  @Mock
   private AiCallLogRepository aiCallLogRepository;
 
   @Mock
@@ -128,7 +132,8 @@ class OAuthLoginServiceTest {
       profileRepository, profileGuardianRepository, routineRepository, deviceLinkRepository, refreshTokenRepository);
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
       memberRepository, authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
-      subscriptionService, systemConfigService, guardianshipService, aiCreditAccountRepository);
+      subscriptionService, systemConfigService, guardianshipService, aiCreditAccountRepository,
+      adRewardSessionRepository);
     oAuthLoginService = new OAuthLoginService(
       List.of(kakao, naver), authIdentityRepository, memberRepository, guardianshipService,
       subscriptionService, passwordEncoder, jwtProvider, jwtProperties, refreshTokenService,

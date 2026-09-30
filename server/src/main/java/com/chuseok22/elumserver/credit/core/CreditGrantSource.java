@@ -11,6 +11,8 @@ public enum CreditGrantSource {
   WEEKLY,
   /// 관리자가 손으로 준 보너스. 만료는 지급 때 고른다(기본 이번 주 말, 무기한 가능).
   ADMIN_BONUS,
+  /// 보상형 광고를 끝까지 보고 받은 크레딧 (#463). 이번 주 끝에 만료된다.
+  AD_REWARD,
   PROMO,
   PURCHASE,
 }

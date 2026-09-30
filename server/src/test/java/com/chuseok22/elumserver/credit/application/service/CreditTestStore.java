@@ -76,6 +76,11 @@ public final class CreditTestStore {
         .filter(g -> inv.getArgument(0).equals(g.getPeriodKey()) && g.getSource() == inv.getArgument(1))
         .map(AiCreditGrant::getAccountId)
         .toList());
+    lenient().when(grantRepository.countByAccountIdAndSourceAndValidFromGreaterThanEqual(
+      anyString(), any(CreditGrantSource.class), any(java.time.LocalDateTime.class))).thenAnswer(inv -> grants.stream()
+      .filter(g -> g.getAccountId().equals(inv.getArgument(0)) && g.getSource() == inv.getArgument(1)
+        && !g.getValidFrom().isBefore(inv.<java.time.LocalDateTime>getArgument(2)))
+      .count());
     lenient().when(grantRepository.findById(anyString())).thenAnswer(inv -> grants.stream()
       .filter(g -> g.getId().equals(inv.getArgument(0))).findFirst());
     lenient().when(grantRepository.save(any(AiCreditGrant.class))).thenAnswer(inv -> {
