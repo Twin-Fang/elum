@@ -45,4 +45,8 @@ public interface TextGenerationClient {
   String generateRoutineJsonForTest(String systemPrompt, String sampleInput);
 
   String generateQuestionJsonForTest(String systemPrompt, String sampleInput);
+
+  /// 직접 추가한 카드에 붙일 무료 픽토그램 고르기 (#247). 반환값은 {"pictogramId": "..."|null} JSON 문자열.
+  /// 카탈로그(id 목록)는 구현체가 요청에 싣는다. 검증·폴백은 부르는 쪽(PictogramPicker) 몫이다.
+  String pickPictogramJson(String stepTitle, String stepDescription);
 }

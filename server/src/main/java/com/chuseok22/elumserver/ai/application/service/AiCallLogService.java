@@ -78,13 +78,13 @@ public class AiCallLogService {
       // 달라지는데 장당 고정값은 그것을 따라가지 못한다.
       case OPENAI_IMAGE -> openAiImageCostUsd(usage);
       case FLUX_IMAGE -> systemConfigService.getDouble(ConfigKey.PRICE_FLUX_IMAGE_PER_IMAGE);
-      case OPENAI_TEXT_CREATE, OPENAI_TEXT_QUESTION -> textCostUsd(
+      case OPENAI_TEXT_CREATE, OPENAI_TEXT_QUESTION, OPENAI_TEXT_PICTOGRAM -> textCostUsd(
         usage,
         ConfigKey.PRICE_OPENAI_TEXT_INPUT_PER_1M,
         ConfigKey.PRICE_OPENAI_TEXT_OUTPUT_PER_1M
       );
       // 번역도 같은 Gemini 글 모델이다. 돈이 드는 호출은 전부 하루 비용 상한 합계에 잡혀야 한다.
-      case GEMINI_TEXT_CREATE, GEMINI_TEXT_QUESTION, GEMINI_TEXT_IMAGE_PROMPT -> {
+      case GEMINI_TEXT_CREATE, GEMINI_TEXT_QUESTION, GEMINI_TEXT_IMAGE_PROMPT, GEMINI_TEXT_PICTOGRAM -> {
         if (usage == null) {
           yield 0.0;
         }

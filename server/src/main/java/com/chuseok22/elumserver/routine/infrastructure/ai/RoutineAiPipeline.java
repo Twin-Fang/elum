@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.routine.infrastructure.ai;
 
 import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
 import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
@@ -45,6 +46,7 @@ public class RoutineAiPipeline {
   private final ImageClientRouter imageClientRouter;
   private final CardImageGenerator cardImageGenerator;
   private final RoutineImageStorage routineImageStorage;
+  private final PictogramCatalog pictogramCatalog;
 
   /**
    * @param profileId FLUX seed 를 이 이룸이 + 일과 제목으로 정한다. 일과 id 는 저장 전이라 아직 없다 (#373)
@@ -201,11 +203,25 @@ public class RoutineAiPipeline {
 
   // 모델이 order를 중복/누락되게 반환해도(예: 1,1,2) 이미지 파일 경로가 충돌하지 않도록,
   // 배열 순서를 유일한 기준으로 삼아 order를 1부터 다시 채번한다(fable5 검토에서 발견).
+  //
+  // pictogramId 도 여기서 확정한다(#247). 카탈로그에 없거나 비었거나 null 이면(모델이 못 골랐거나 옛 프롬프트라 필드를
+  // 빠뜨렸거나 환각) 폴백 id 로 바꾼다 — 카드에는 항상 그림이 있어야 하고, 이 때문에 카드 생성이 실패하면 안 된다.
   private RoutineStepDraft normalizeOrder(RoutineStepDraft draft) {
     List<RoutineStepDraft.StepDraft> normalized = new ArrayList<>();
+    int fallbackCount = 0;
     for (int i = 0; i < draft.steps().size(); i++) {
       RoutineStepDraft.StepDraft step = draft.steps().get(i);
-      normalized.add(new RoutineStepDraft.StepDraft(i + 1, step.title(), step.description(), step.imagePromptEn()));
+      String pictogramId = pictogramCatalog.resolve(step.pictogramId());
+      // 골라 온 값이 유효하지 않아 폴백으로 바뀐 경우만 센다(카탈로그가 비어 null 인 경우는 세지 않는다).
+      if (pictogramId != null && !pictogramCatalog.contains(step.pictogramId() == null ? null : step.pictogramId().trim())) {
+        fallbackCount++;
+      }
+      normalized.add(new RoutineStepDraft.StepDraft(
+        i + 1, step.title(), step.description(), step.imagePromptEn(), pictogramId));
+    }
+    // 폴백 비율이 높으면 스키마 설명·카탈로그를 손봐야 한다는 신호다.
+    if (fallbackCount > 0) {
+      log.info("픽토그램 폴백 적용: fallback={}/{}", fallbackCount, draft.steps().size());
     }
     return new RoutineStepDraft(draft.title(), normalized);
   }
@@ -235,7 +251,8 @@ public class RoutineAiPipeline {
           result.stepDraft().order(),
           result.stepDraft().title(),
           result.stepDraft().description(),
-          resolveImagePath(batchId, result)
+          resolveImagePath(batchId, result),
+          result.stepDraft().pictogramId()
         ))
         .toList();
 
@@ -319,8 +336,15 @@ public class RoutineAiPipeline {
 
   }
 
-  public record GeneratedStep(Integer order, String title, String description, String imagePath) {
+  /// @param pictogramId 무료 픽토그램 id(#247). 검증·폴백을 마친 값이라 카탈로그가 있으면 항상 채워져 있다.
+  ///                    그림 방식·이미지 성공 여부와 무관하게 저장한다(앱이 사진 > AI 그림 > 픽토그램 순으로 고른다).
+  public record GeneratedStep(
+    Integer order, String title, String description, String imagePath, String pictogramId
+  ) {
 
+    public GeneratedStep(Integer order, String title, String description, String imagePath) {
+      this(order, title, description, imagePath, null);
+    }
   }
 
   public record RoutineQuestionResult(List<QuestionResultItem> questions) {

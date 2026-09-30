@@ -1,0 +1,11 @@
+-- 카드별 무료 픽토그램 id (#247): Mulberry Symbols SVG 파일명 stem (예: get_dressed_,_to). SVG 는 앱이 번들하고
+-- 서버는 id 만 저장한다. AI 그림이 없을 때(직접 사진·AI 실패·요금제) 앱이 이 id 로 그림을 보여 준다.
+--
+-- 운영은 ddl-auto: validate 라 Hibernate 가 컬럼을 만들지 않는다. 이 마이그레이션이 없으면 RoutineStep 엔티티가
+-- pictogram_id 를 읽다가 서버가 뜨지 않는다.
+--
+-- 추가만 한다 (V25·V28 원칙). 배포 뒤 옛 서버 이미지로 되돌려도 이 스키마 위에서 옛 코드가 돌아야 한다.
+-- 옛 코드는 pictogram_id 를 모르고 routine_step 을 INSERT 하므로 NOT NULL 을 걸지 않는다(NULL 허용, DEFAULT 없음).
+-- 기존 행은 NULL 로 남고, 앱은 NULL 이면 기본 그림으로 대체한다.
+-- 로컬(ddl-auto: update)에서 이미 만들어졌을 수 있어 IF NOT EXISTS 로 양쪽 모두 안전하게 한다.
+ALTER TABLE routine_step ADD COLUMN IF NOT EXISTS pictogram_id VARCHAR(100);

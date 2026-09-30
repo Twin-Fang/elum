@@ -36,7 +36,7 @@ class RoutineControllerStepImageTest {
   void delegatesToService() {
     Authentication auth = new TestingAuthenticationToken("member-1", null);
     MockMultipartFile file = new MockMultipartFile("image", "a.jpg", "image/jpeg", new byte[]{1});
-    RoutineStepResponse body = new RoutineStepResponse("step-1", 1, "제목", "설명", "step-1/new.jpg", false, null);
+    RoutineStepResponse body = new RoutineStepResponse("step-1", 1, "제목", "설명", "step-1/new.jpg", false, null, null);
     when(photoService.replaceStepImage(any(), any(), any(), any())).thenReturn(body);
 
     ResponseEntity<RoutineStepResponse> response = controller.replaceStepImage(auth, "routine-1", "step-1", file);

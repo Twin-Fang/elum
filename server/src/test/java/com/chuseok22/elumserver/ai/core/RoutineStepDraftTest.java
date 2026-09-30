@@ -33,4 +33,19 @@ class RoutineStepDraftTest {
     assertThat(draft.steps().get(0).imagePromptEn()).isEqualTo("The character puts on a shirt.");
     assertThat(draft.steps().get(1).imagePromptEn()).isNull();
   }
+
+  @Test
+  @DisplayName("pictogramId 는 선택 필드다 — 있으면 받고, 빠지거나 null 이어도 역직렬화가 실패하지 않는다 (#247)")
+  void deserialize_pictogramIdIsOptional() throws Exception {
+    String json = "{\"title\":\"t\",\"steps\":["
+      + "{\"order\":1,\"title\":\"a\",\"description\":\"b\",\"pictogramId\":\"brush_teeth\"},"
+      + "{\"order\":2,\"title\":\"c\",\"description\":\"d\",\"pictogramId\":null},"
+      + "{\"order\":3,\"title\":\"e\",\"description\":\"f\"}]}";
+
+    RoutineStepDraft draft = objectMapper.readValue(json, RoutineStepDraft.class);
+
+    assertThat(draft.steps().get(0).pictogramId()).isEqualTo("brush_teeth");
+    assertThat(draft.steps().get(1).pictogramId()).isNull();
+    assertThat(draft.steps().get(2).pictogramId()).isNull();
+  }
 }

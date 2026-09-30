@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.ChildProfileInput;
@@ -38,6 +39,7 @@ public class GeminiTextClient implements TextGenerationClient {
   private final PromptTemplateService promptTemplateService;
   private final SystemConfigService systemConfigService;
   private final AiCallLogService aiCallLogService;
+  private final PictogramCatalog pictogramCatalog;
 
   // Spring Boot 4.1은 Jackson 3 기반이라 Jackson 2 ObjectMapper 빈이 자동 구성되지 않으므로
   // RoutineAiPipeline과 동일하게 직접 생성해서 쓴다.
@@ -78,6 +80,51 @@ public class GeminiTextClient implements TextGenerationClient {
   public String generateQuestionJsonForTest(String systemPrompt, String sampleInput) {
     return firstText(generateQuestionForTest(systemPrompt, sampleInput));
   }
+
+  /// 직접 추가한 카드 한 장의 픽토그램 id 를 고른다 (#247). 지시문은 운영 DB 가 아니라 코드에 둔다 —
+  /// 배포로 바로 바뀌고, 관리자 화면에서 실수로 지울 수 없다.
+  @Override
+  public String pickPictogramJson(String stepTitle, String stepDescription) {
+    return firstText(callGenerateContent(
+      PICTOGRAM_PICK_SYSTEM_PROMPT, buildPictogramPickUserContent(stepTitle, stepDescription),
+      PICTOGRAM_PICK_SCHEMA, AiCallType.GEMINI_TEXT_PICTOGRAM));
+  }
+
+  // OpenAiTextClient 가 같은 조립을 재사용한다 — 제공자를 바꿔도 지시가 달라지면 두 제공자를 비교할 수 없다.
+  String buildPictogramPickUserContent(String stepTitle, String stepDescription) {
+    Map<String, Object> input = new LinkedHashMap<>();
+    input.put("task", "PICK_PICTOGRAM");
+    input.put("stepTitle", stepTitle == null ? "" : stepTitle);
+    input.put("stepDescription", stepDescription == null ? "" : stepDescription);
+    input.put("pictogramCatalog", pictogramCatalog.ids());
+    return toJson(input);
+  }
+
+  static final String PICTOGRAM_PICK_SYSTEM_PROMPT =
+    "당신은 발달장애인용 행동 카드에 붙일 픽토그램을 고르는 도우미입니다. "
+      + "입력의 stepTitle·stepDescription 이 나타내는 행동이나 사물을 가장 잘 나타내는 픽토그램 id 를 "
+      + "pictogramCatalog 안에서 하나만 고르세요. "
+      + "알맞은 것이 없거나 확신이 없으면 null 을 주세요. 억지로 고르지 마세요(비슷하지만 뜻이 다른 것은 금지).";
+
+  /// 카드 그림 id 의 설명. 지시는 여기(코드)에 둔다 — 프롬프트는 운영 DB 값이라 배포로 안 바뀐다 (#247).
+  static final String PICTOGRAM_ID_DESCRIPTION =
+    "pictogramCatalog 안에서 이 단계의 행동이나 사물을 가장 잘 나타내는 id 하나. "
+      + "알맞은 것이 없거나 확신이 없으면 null. 억지로 고르지 마세요(비슷하지만 뜻이 다른 것 금지)";
+
+  // nullable string — enum 으로 만들지 않는다(값이 811개라 스키마가 비대해진다). 검증은 응답을 받은 뒤 서버가 한다.
+  private static Map<String, Object> pictogramIdSchema() {
+    return Map.of("type", "string", "nullable", true, "description", PICTOGRAM_ID_DESCRIPTION);
+  }
+
+  static Map<String, Object> pictogramPickSchema() {
+    return PICTOGRAM_PICK_SCHEMA;
+  }
+
+  private static final Map<String, Object> PICTOGRAM_PICK_SCHEMA = Map.of(
+    "type", "object",
+    "properties", Map.of("pictogramId", pictogramIdSchema()),
+    "required", List.of("pictogramId")
+  );
 
   /**
    * 응답에서 JSON 본문 한 덩어리를 꺼낸다.
@@ -186,7 +233,8 @@ public class GeminiTextClient implements TextGenerationClient {
       "CREATE_ROUTINE",
       routineText,
       new ChildProfileInput(nickname, supportGoals == null ? Set.of() : supportGoals),
-      answers == null ? List.of() : answers
+      answers == null ? List.of() : answers,
+      pictogramCatalog.ids()
     );
     return toJson(input);
   }
@@ -244,7 +292,7 @@ public class GeminiTextClient implements TextGenerationClient {
     long startedAt = System.currentTimeMillis();
     log.info(
       "Gemini 텍스트 생성 호출 시작: model={}, systemPrompt={}, userContent={}",
-      model, systemPrompt, userContentText
+      model, systemPrompt, foldPictogramCatalog(userContentText)
     );
     try {
       GeminiGenerateContentResponse response = geminiRestClient.post()
@@ -345,6 +393,11 @@ public class GeminiTextClient implements TextGenerationClient {
               )
     ));
     List<String> required = new java.util.ArrayList<>(List.of("order", "title", "description"));
+    // 선택 필드다 — Gemini 는 required 에 넣지 않아 모델이 빠뜨려도 카드 생성이 실패하지 않는다(#247).
+    // 카탈로그를 못 읽은 서버는 요청·스키마 어디에도 싣지 않는다.
+    if (!pictogramCatalog.isEmpty()) {
+      properties.put("pictogramId", pictogramIdSchema());
+    }
     if (includeImagePromptEn) {
       properties.put("imagePromptEn", Map.of("type", "string", "description", IMAGE_PROMPT_EN_DESCRIPTION));
       required.add("imagePromptEn");
@@ -403,5 +456,11 @@ public class GeminiTextClient implements TextGenerationClient {
       ),
       "required", List.of("supportGoal", "question", "options")
     );
+  }
+
+  /// 로그에서 픽토그램 카탈로그(811개 id, 약 10KB)를 접는다 — 한 줄이 너무 길어져 로그를 읽기 어렵고 값도 고정이라 남길 이유가 없다 (#247).
+  static String foldPictogramCatalog(String userContent) {
+    return userContent == null ? null
+      : userContent.replaceAll("\"pictogramCatalog\"\\s*:\\s*\\[[^\\]]*\\]", "\"pictogramCatalog\":\"[생략]\"");
   }
 }

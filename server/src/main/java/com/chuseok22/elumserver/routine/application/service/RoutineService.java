@@ -107,6 +107,7 @@ public class RoutineService {
   private final RoutineStepRepository routineStepRepository;
   private final CreditReservationService creditReservationService;
   private final CreditQueryService creditQueryService;
+  private final PictogramPicker pictogramPicker;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
@@ -352,6 +353,8 @@ public class RoutineService {
       copied.setDescription(step.getDescription());
       // 이미지는 새로 만들지 않고 그대로 쓴다 — 재생성은 비용이고 같은 행동이면 같은 그림이면 된다.
       copied.setImagePath(step.getImagePath());
+      // 픽토그램도 그대로 — 같은 행동이면 같은 그림이고, 복제에서 AI 를 다시 부르지 않는다.
+      copied.setPictogramId(step.getPictogramId());
       copied.setCompleted(false);
       copiedSteps.add(copied);
     }
@@ -684,6 +687,9 @@ public class RoutineService {
     step.setRoutine(routine);
     step.setTitle(request.title().trim());
     step.setDescription(request.descriptionOrEmpty());
+    // 그림이 없어도(직접 사진·AI 그림 실패·요금제) 카드에는 무료 픽토그램이 붙는다(#247). 고르기는 절대 던지지 않는다.
+    // 글 호출 단가 수준이라 크레딧을 잡지 않고, 그림 예약·건너뜀 판정(imageSkippedReason)과도 무관하다.
+    step.setPictogramId(pictogramPicker.pick(caller.memberId(), step.getTitle(), step.getDescription()));
     // 맨 뒤에 붙인다. 뒤이어 renumberSteps가 1..N으로 정규화하므로
     // 기존 값이 비어 있거나 겹쳐 있어도 결과는 연속값이 된다.
     step.setStepOrder(steps.size() + 1);
@@ -953,6 +959,7 @@ public class RoutineService {
         entity.setDescription(step.description());
         entity.setTitle(step.title());
         entity.setImagePath(step.imagePath());
+        entity.setPictogramId(step.pictogramId());
         return entity;
       })
       .toList();

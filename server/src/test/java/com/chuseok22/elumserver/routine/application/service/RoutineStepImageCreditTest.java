@@ -78,6 +78,7 @@ class RoutineStepImageCreditTest {
   @Mock private RoutineStepRepository routineStepRepository;
   @Mock private CreditReservationService creditReservationService;
   @Mock private CreditQueryService creditQueryService;
+  @Mock private PictogramPicker pictogramPicker;
 
   @InjectMocks private RoutineService routineService;
 

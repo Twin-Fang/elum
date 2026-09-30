@@ -58,4 +58,19 @@ class RoutineResponseTest {
     assertThat(response.totalStepCount()).isEqualTo(0);
     assertThat(response.progressPercent()).isEqualTo(0);
   }
+
+  @Test
+  @DisplayName("단계 응답은 pictogramId 를 그대로 싣고, 없으면 null 이다 (#247)")
+  void stepResponse_carriesPictogramId() {
+    RoutineStep withPictogram = new RoutineStep();
+    withPictogram.setStepOrder(1);
+    withPictogram.setDescription("d");
+    withPictogram.setPictogramId("get_dressed_,_to");
+    RoutineStep without = new RoutineStep();
+    without.setStepOrder(2);
+    without.setDescription("d");
+
+    assertThat(RoutineStepResponse.from(withPictogram).pictogramId()).isEqualTo("get_dressed_,_to");
+    assertThat(RoutineStepResponse.from(without).pictogramId()).isNull();
+  }
 }

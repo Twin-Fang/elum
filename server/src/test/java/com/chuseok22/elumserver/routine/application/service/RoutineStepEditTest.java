@@ -26,6 +26,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreateRequest;
+import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
@@ -65,6 +66,7 @@ class RoutineStepEditTest {
   @Mock private ProfileAccessGuard profileAccessGuard;
   @Mock private RoutineStepRepository routineStepRepository;
   @Mock private CreditReservationService creditReservationService;
+  @Mock private PictogramPicker pictogramPicker;
 
   @InjectMocks private RoutineService routineService;
 
@@ -87,6 +89,32 @@ class RoutineStepEditTest {
     assertThat(added.getCompleted()).isFalse();
     // 그림은 아직 없다 — 응답을 붙잡지 않으므로 나중에 채워진다
     assertThat(added.getImagePath()).isNull();
+  }
+
+  @Test
+  @DisplayName("추가한 카드에 픽커가 고른 pictogramId 가 저장되고 응답에 실린다 (#247)")
+  void addStep_storesPickedPictogramId() {
+    Routine routine = routine(RoutineStatus.PENDING_REVIEW, 1, false);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+    when(pictogramPicker.pick("member-1", "양치해요", "이를 닦아요")).thenReturn("brush_teeth");
+
+    RoutineResponse response = routineService.addStep(GUARDIAN, "routine-1",
+      new RoutineStepCreateRequest("양치해요", "이를 닦아요", null));
+
+    assertThat(routine.getSteps().get(1).getPictogramId()).isEqualTo("brush_teeth");
+    assertThat(response.steps().get(1).pictogramId()).isEqualTo("brush_teeth");
+  }
+
+  @Test
+  @DisplayName("그림 요청 없이 추가해도 픽토그램은 고른다 — 그림이 없는 카드에도 그림이 있어야 한다")
+  void addStep_picksPictogramEvenWithoutImageRequest() {
+    Routine routine = routine(RoutineStatus.PENDING_REVIEW, 1, false);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+    when(pictogramPicker.pick(anyString(), anyString(), anyString())).thenReturn("go_,_to");
+
+    routineService.addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("양치해요", "", false));
+
+    assertThat(routine.getSteps().get(1).getPictogramId()).isEqualTo("go_,_to");
   }
 
   @Test

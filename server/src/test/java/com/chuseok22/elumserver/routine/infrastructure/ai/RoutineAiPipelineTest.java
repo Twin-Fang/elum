@@ -14,6 +14,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
 import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
@@ -73,7 +74,7 @@ class RoutineAiPipelineTest {
     routineAiPipeline = new RoutineAiPipeline(
       textClientRouter, imageClientRouter,
       new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
-      routineImageStorage);
+      routineImageStorage, PictogramCatalog.empty());
     lenient().when(imageClientRouter.current()).thenReturn(imageGenerationClient);
     lenient().when(textClientRouter.current()).thenReturn(textGenerationClient);
   }
@@ -426,5 +427,89 @@ class RoutineAiPipelineTest {
 
     assertThat(result.steps().get(0).imagePath()).isEqualTo("data/routine-images/batch/1.png");
     verify(imageGenerationClient, never()).generateImage(any(), any());
+  }
+
+  // ── 무료 픽토그램 (#247) ────────────────────────────────────────────
+
+  private static final String FALLBACK_ID = "go_,_to";
+
+  private RoutineAiPipeline pipelineWith(PictogramCatalog catalog) {
+    return new RoutineAiPipeline(
+      textClientRouter, imageClientRouter,
+      new CardImageGenerator(imageClientRouter, fluxImageClient, geminiTextClient),
+      routineImageStorage, catalog);
+  }
+
+  private final PictogramCatalog catalog =
+    new PictogramCatalog(List.of("brush_teeth", "get_dressed_,_to", FALLBACK_ID), FALLBACK_ID);
+
+  private List<RoutineAiPipeline.GeneratedStep> createPhotoOnly(RoutineAiPipeline pipeline, String stepsJson) {
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean()))
+      .thenReturn("{\"title\":\"아침\",\"steps\":[" + stepsJson + "]}");
+    return pipeline.generateForCreate(
+      "아침 준비", "하늘이", Set.of(), List.of(), CharacterType.LULU, ImageStyle.PHOTO_ONLY, "profile-1").steps();
+  }
+
+  @Test
+  @DisplayName("모델이 카탈로그의 id 를 고르면 그대로 카드에 실린다")
+  void pictogram_validIdIsKept() {
+    var steps = createPhotoOnly(pipelineWith(catalog),
+      "{\"order\":1,\"title\":\"양치해요\",\"description\":\"a\",\"pictogramId\":\"brush_teeth\"}");
+
+    assertThat(steps.get(0).pictogramId()).isEqualTo("brush_teeth");
+  }
+
+  @Test
+  @DisplayName("카탈로그에 없는 id(환각)는 그대로 저장하지 않고 폴백 id 로 바꾼다")
+  void pictogram_invalidIdBecomesFallback() {
+    var steps = createPhotoOnly(pipelineWith(catalog),
+      "{\"order\":1,\"title\":\"양치해요\",\"description\":\"a\",\"pictogramId\":\"teleport_to_moon\"}");
+
+    assertThat(steps.get(0).pictogramId()).isEqualTo(FALLBACK_ID);
+  }
+
+  @Test
+  @DisplayName("null 이거나 필드가 빠져도(옛 프롬프트·모델) 카드 생성은 성공하고 폴백 id 가 붙는다")
+  void pictogram_nullOrMissingBecomesFallback() {
+    var steps = createPhotoOnly(pipelineWith(catalog),
+      "{\"order\":1,\"title\":\"a\",\"description\":\"a\",\"pictogramId\":null},"
+        + "{\"order\":2,\"title\":\"b\",\"description\":\"b\"}");
+
+    assertThat(steps).extracting(RoutineAiPipeline.GeneratedStep::pictogramId).containsExactly(FALLBACK_ID, FALLBACK_ID);
+  }
+
+  @Test
+  @DisplayName("직접 사진(그림 호출 없음)이어도 pictogramId 를 저장한다 — 그림 방식과 무관")
+  void pictogram_savedEvenWhenPhotoOnly() {
+    var steps = createPhotoOnly(pipelineWith(catalog),
+      "{\"order\":1,\"title\":\"양치해요\",\"description\":\"a\",\"pictogramId\":\"get_dressed_,_to\"}");
+
+    assertThat(steps.get(0).imagePath()).isNull();
+    assertThat(steps.get(0).pictogramId()).isEqualTo("get_dressed_,_to");
+  }
+
+  @Test
+  @DisplayName("AI 그림이 실패해도(재시도까지) pictogramId 는 남는다 — 앱이 픽토그램으로 대체한다")
+  void pictogram_savedWhenImageFails() {
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(
+      "{\"title\":\"아침\",\"steps\":[{\"order\":1,\"title\":\"양치해요\",\"description\":\"a\","
+        + "\"pictogramId\":\"brush_teeth\"}]}");
+    when(imageGenerationClient.generateImage(any(), any())).thenThrow(new IllegalStateException("이미지 실패"));
+
+    var steps = pipelineWith(catalog).generateForCreate(
+      "아침 준비", "하늘이", Set.of(), List.of(), CharacterType.LULU, ImageStyle.CARTOON, "profile-1").steps();
+
+    assertThat(steps.get(0).imagePath()).isNull();
+    assertThat(steps.get(0).pictogramId()).isEqualTo("brush_teeth");
+  }
+
+  @Test
+  @DisplayName("카탈로그를 못 읽은 서버는 pictogramId 가 항상 null 이고 카드 생성은 성공한다")
+  void pictogram_emptyCatalogGivesNull() {
+    var steps = createPhotoOnly(pipelineWith(PictogramCatalog.empty()),
+      "{\"order\":1,\"title\":\"양치해요\",\"description\":\"a\",\"pictogramId\":\"brush_teeth\"}");
+
+    assertThat(steps).hasSize(1);
+    assertThat(steps.get(0).pictogramId()).isNull();
   }
 }

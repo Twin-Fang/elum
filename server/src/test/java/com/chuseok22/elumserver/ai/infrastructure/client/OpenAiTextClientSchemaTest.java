@@ -126,4 +126,34 @@ class OpenAiTextClientSchemaTest {
     assertThat(goal.get("description")).isEqualTo("도움 목표");
     assertThat(stringList(goal.get("enum"))).containsExactly("PREPARE_ITEMS", "PREPARE_NEW");
   }
+
+  @Test
+  @DisplayName("nullable string(pictogramId)은 strict 규격의 type [string, null] 로 바뀌고 nullable 키는 사라진다 — 남기면 400")
+  void nullableStringBecomesTypeUnion() {
+    Map<String, Object> source = Map.of(
+      "type", "object",
+      "properties", Map.of(
+        "pictogramId", Map.of("type", "string", "nullable", true, "description", "고르세요")
+      ),
+      "required", List.of()
+    );
+
+    Map<String, Object> converted = OpenAiTextClient.toStrictSchema(source);
+
+    @SuppressWarnings("unchecked")
+    Map<String, Object> field = (Map<String, Object>) ((Map<String, Object>) converted.get("properties")).get("pictogramId");
+    assertThat(field.get("type")).isEqualTo(List.of("string", "null"));
+    assertThat(field).doesNotContainKey("nullable").doesNotContainKey("enum");
+    assertThat(field.get("description")).isEqualTo("고르세요");
+    // strict 는 선택 필드도 required 에 넣어야 하므로 null 허용이 "비워 둠"의 유일한 길이다.
+    assertThat(stringList(converted.get("required"))).contains("pictogramId");
+  }
+
+  @Test
+  @DisplayName("nullable 이 아닌 string 은 그대로 둔다")
+  void plainStringIsUntouched() {
+    Map<String, Object> converted = OpenAiTextClient.toStrictSchema(Map.of("type", "string"));
+
+    assertThat(converted.get("type")).isEqualTo("string");
+  }
 }

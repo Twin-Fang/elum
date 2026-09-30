@@ -13,6 +13,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
+import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.PromptKey;
@@ -58,7 +59,7 @@ class GeminiTextClientImagePromptTest {
     when(systemConfigService.getDouble(ConfigKey.GEMINI_TEXT_TEMPERATURE)).thenReturn(0.0);
     client = new GeminiTextClient(
       builder.build(), new GeminiProperties("key", null, "text-model", "image-model", 1000),
-      promptTemplateService, systemConfigService, aiCallLogService
+      promptTemplateService, systemConfigService, aiCallLogService, PictogramCatalog.empty()
     );
   }
 

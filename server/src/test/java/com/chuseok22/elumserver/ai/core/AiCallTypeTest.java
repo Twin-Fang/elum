@@ -17,17 +17,20 @@ import org.junit.jupiter.api.Test;
 class AiCallTypeTest {
 
   /// 유형마다 무엇을 위한 호출인지. 새 유형을 더하면 여기에 분류를 적어야 테스트가 통과한다.
-  private static final Map<AiCallType, AiCallPurpose> EXPECTED = Map.of(
-    AiCallType.GEMINI_TEXT_CREATE, AiCallPurpose.ROUTINE_CREATE,
-    AiCallType.OPENAI_TEXT_CREATE, AiCallPurpose.ROUTINE_CREATE,
-    AiCallType.GEMINI_TEXT_QUESTION, AiCallPurpose.ROUTINE_QUESTION,
-    AiCallType.OPENAI_TEXT_QUESTION, AiCallPurpose.ROUTINE_QUESTION,
-    AiCallType.GEMINI_IMAGE, AiCallPurpose.CARD_IMAGE,
-    AiCallType.OPENAI_IMAGE, AiCallPurpose.CARD_IMAGE,
-    AiCallType.FLUX_IMAGE, AiCallPurpose.CARD_IMAGE,
+  private static final Map<AiCallType, AiCallPurpose> EXPECTED = Map.ofEntries(
+    Map.entry(AiCallType.GEMINI_TEXT_CREATE, AiCallPurpose.ROUTINE_CREATE),
+    Map.entry(AiCallType.OPENAI_TEXT_CREATE, AiCallPurpose.ROUTINE_CREATE),
+    Map.entry(AiCallType.GEMINI_TEXT_QUESTION, AiCallPurpose.ROUTINE_QUESTION),
+    Map.entry(AiCallType.OPENAI_TEXT_QUESTION, AiCallPurpose.ROUTINE_QUESTION),
+    Map.entry(AiCallType.GEMINI_IMAGE, AiCallPurpose.CARD_IMAGE),
+    Map.entry(AiCallType.OPENAI_IMAGE, AiCallPurpose.CARD_IMAGE),
+    Map.entry(AiCallType.FLUX_IMAGE, AiCallPurpose.CARD_IMAGE),
     // FLUX 용 영어 한 줄 번역. 일과 생성으로 세면 카드 추가 한 번이 일과 한 개로 잡힌다 (#373).
-    AiCallType.GEMINI_TEXT_IMAGE_PROMPT, AiCallPurpose.IMAGE_PROMPT_TRANSLATE,
-    AiCallType.LOCAL_LLM_DLP, AiCallPurpose.SENSITIVE_INFO_CHECK
+    Map.entry(AiCallType.GEMINI_TEXT_IMAGE_PROMPT, AiCallPurpose.IMAGE_PROMPT_TRANSLATE),
+    // 카드 직접 추가 시 픽토그램 고르기 (#247). 일과 생성으로 세면 카드 추가 한 번이 일과 한 개로 잡힌다.
+    Map.entry(AiCallType.GEMINI_TEXT_PICTOGRAM, AiCallPurpose.PICTOGRAM_PICK),
+    Map.entry(AiCallType.OPENAI_TEXT_PICTOGRAM, AiCallPurpose.PICTOGRAM_PICK),
+    Map.entry(AiCallType.LOCAL_LLM_DLP, AiCallPurpose.SENSITIVE_INFO_CHECK)
   );
 
   @Test

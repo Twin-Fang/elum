@@ -26,7 +26,12 @@ public record RoutineStepResponse(
   Boolean completed,
 
   @Schema(description = "완료 시각(KST), 미완료 시 null")
-  LocalDateTime completedAt
+  LocalDateTime completedAt,
+
+  @Schema(
+    description = "무료 픽토그램 id(SVG 파일명, 앱에 번들). 사진·AI 그림이 없을 때 앱이 보여준다. "
+      + "null 이면 이 카드는 픽토그램이 없다(이 기능 이전 카드 등) — 앱이 기본 그림으로 대체", example = "get_dressed_,_to")
+  String pictogramId
 ) {
 
   public static RoutineStepResponse from(RoutineStep step) {
@@ -37,7 +42,8 @@ public record RoutineStepResponse(
       step.getDescription(),
       step.getImagePath(),
       step.getCompleted(),
-      step.getCompletedAt()
+      step.getCompletedAt(),
+      step.getPictogramId()
     );
   }
 }

@@ -106,6 +106,15 @@ public class OpenAiTextClient implements TextGenerationClient {
   }
 
   @Override
+  public String pickPictogramJson(String stepTitle, String stepDescription) {
+    return call(
+      GeminiTextClient.PICTOGRAM_PICK_SYSTEM_PROMPT,
+      geminiTextClient.buildPictogramPickUserContent(stepTitle, stepDescription),
+      GeminiTextClient.pictogramPickSchema(), "pictogram", AiCallType.OPENAI_TEXT_PICTOGRAM
+    );
+  }
+
+  @Override
   public String generateQuestionJsonForTest(String systemPrompt, String sampleInput) {
     String userContent = geminiTextClient.buildQuestionUserContent(sampleInput, null, Set.of());
     return call(
@@ -218,6 +227,11 @@ public class OpenAiTextClient implements TextGenerationClient {
         continue;
       }
       converted.put(key, convertValue(entry.getValue()));
+    }
+    // Gemini 의 nullable:true 는 strict 스키마에 없는 키워드다 — 그대로 두면 400. type 을 [원래, "null"] 로 바꾼다.
+    // (pictogramId 처럼 선택 필드도 strict 는 required 에 넣어야 하므로 null 을 허용하는 것이 유일한 "비워 둠"이다.)
+    if (Boolean.TRUE.equals(converted.remove("nullable")) && converted.get("type") instanceof String type) {
+      converted.put("type", List.of(type, "null"));
     }
     if ("object".equals(source.get("type"))) {
       Object properties = converted.get("properties");

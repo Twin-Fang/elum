@@ -107,6 +107,9 @@ class RoutineServiceTest {
   private CreditQueryService creditQueryService;
 
   @Mock
+  private PictogramPicker pictogramPicker;
+
+  @Mock
   private RoutineStepRepository routineStepRepository;
 
   @InjectMocks
@@ -1031,6 +1034,24 @@ class RoutineServiceTest {
     routineService.duplicate(GUARDIAN, "routine-1");
 
     assertThat(saved.getValue().getCreatedBy()).isEqualTo("member-1");
+  }
+
+  @Test
+  @DisplayName("복제한 카드는 원본의 pictogramId 를 그대로 가진다 — 복제에서 AI 를 다시 부르지 않는다 (#247)")
+  void duplicate_copiesPictogramId() {
+    Routine origin = confirmedRoutine(profileWithStars(0), 2);
+    origin.setTitle("아침 준비");
+    origin.getSteps().get(0).setPictogramId("brush_teeth");
+    origin.getSteps().get(1).setPictogramId(null);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(origin));
+    ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
+    when(routineRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+
+    routineService.duplicate(GUARDIAN, "routine-1");
+
+    assertThat(saved.getValue().getSteps()).extracting(RoutineStep::getPictogramId)
+      .containsExactly("brush_teeth", null);
+    org.mockito.Mockito.verifyNoInteractions(pictogramPicker);
   }
 
   @Test

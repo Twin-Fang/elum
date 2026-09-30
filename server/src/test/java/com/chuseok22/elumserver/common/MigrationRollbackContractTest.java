@@ -135,6 +135,20 @@ class MigrationRollbackContractTest {
     assertThat(sql).containsPattern("not null default");
   }
 
+  // --- V29 카드 픽토그램 id (#247) — 같은 "추가만 한다" 약속 ---
+
+  private static final Path V29 = Path.of("src/main/resources/db/migration/V29__add_routine_step_pictogram_id.sql");
+
+  @Test
+  @DisplayName("V29 는 pictogram_id 를 NULL 허용으로 더하기만 한다 — 옛 서버는 이 컬럼을 모르고 routine_step 을 INSERT 한다")
+  void v29_addsNullableColumnOnly() throws IOException {
+    String sql = normalizedSql(V29);
+    assertThat(sql).doesNotContain("drop ").doesNotContain("rename ").doesNotContain("update routine_step");
+    assertThat(sql).contains("alter table routine_step add column if not exists pictogram_id varchar(100);");
+    // NOT NULL 이면 옛 서버의 INSERT 가 전부 실패한다.
+    assertThat(sql).doesNotContainPattern("pictogram_id[^;]*not null");
+  }
+
   /** create table 한 덩이 — 여는 괄호부터 그 표를 닫는 ");" 까지. */
   private String tableBlock(String table) throws IOException {
     String sql = normalizedSql();
