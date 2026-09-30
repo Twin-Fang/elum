@@ -185,4 +185,22 @@ class PromptDefaultsTest {
     assertThat(PromptDefaults.DEFAULTS.get(PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE)).contains("Start with \"The character\"");
     assertThat(PromptDefaults.DEFAULTS.get(PromptKey.ROUTINE_IMAGE_PREFIX_EN)).contains("[Character - required]");
   }
+
+  /**
+   * 이슈 #453 — 카드 설명(description)이 길어 이해하기 어렵다는 현장 피드백.
+   *
+   * <p>서버에서 글자 수를 자르지 않고 <b>AI에게 짧게 쓰라고 요청</b>해서 푼다.
+   * 프롬프트의 예시가 그대로 길이 기준이 되므로 예시도 짧아야 한다.
+   */
+  @Test
+  @DisplayName("루틴 생성 프롬프트는 설명을 짧은 한 문장으로 요청하고 긴 예시를 두지 않는다 (이슈 #453)")
+  void createPrompt_asksForShortDescription() {
+    String content = PromptDefaults.DEFAULTS.get(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
+
+    assertThat(content)
+        .contains("12자 안팎")
+        .doesNotContain("조금 더 자세")
+        .doesNotContain("학교에 입고 갈 옷을 차례대로 입어요")
+        .doesNotContain("잠옷을 벗고 학교에 입고 갈 옷으로 갈아입어요");
+  }
 }
