@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.license.application.service.EntitlementService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
+import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
@@ -82,6 +83,24 @@ public class MemberService {
     Member member = requireMember(caller.memberId());
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     profile.setCharacter(request.character());
+    return MemberResponse.from(
+      member, profile, profileAccessGuard.profilesOf(caller), entitlementService.snapshot(caller.memberId()));
+  }
+
+  /**
+   * 카드 그림 방식을 바꾼다 (#457). 캐릭터 설정과 같은 흐름·권한(MANAGE)이다 — 이룸이 휴대폰은 거절된다.
+   *
+   * <p>request DTO 에 검증 어노테이션을 달지 않는 규칙이라 null 은 여기서 막는다. 비워 저장하면
+   * 그림 방식이 조용히 만화로 돌아가 보호자가 고른 것과 어긋난다.
+   */
+  @Transactional
+  public MemberResponse updateImageStyle(Caller caller, MemberImageStyleUpdateRequest request) {
+    Member member = requireMember(caller.memberId());
+    if (request == null || request.imageStyle() == null) {
+      throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+    }
+    Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
+    profile.setImageStyle(request.imageStyle());
     return MemberResponse.from(
       member, profile, profileAccessGuard.profilesOf(caller), entitlementService.snapshot(caller.memberId()));
   }

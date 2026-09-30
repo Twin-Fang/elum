@@ -64,6 +64,16 @@ public class Profile extends BaseEntity {
   private CharacterType character;
 
   /**
+   * 카드 그림 방식 (#457). 캐릭터를 쓰는 만화(기본)·실사·직접 사진(AI 그림 생략).
+   *
+   * <p>운영은 ddl-auto: validate 라 컬럼이 V28 마이그레이션에 있어야 서버가 뜬다. 옛 행·옛 서버가 넣은 행은
+   * DEFAULT 'CARTOON' 이 채우고, 그래도 null 이 읽히면 getter 가 만화로 돌려 기존 동작을 지킨다.
+   */
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 20, columnDefinition = "varchar(20) not null default 'CARTOON'")
+  private ImageStyle imageStyle = ImageStyle.CARTOON;
+
+  /**
    * 개인화 축. 진단명이나 장애 유형은 수집하지 않는다 (docs 서비스 원칙 1번).
    * 무엇을 도와줄지만 받는다.
    */
@@ -76,4 +86,9 @@ public class Profile extends BaseEntity {
   /** 누적 별. 당사자가 카드를 완료할 때마다 늘어난다. */
   @Column(nullable = false, columnDefinition = "integer not null default 0")
   private Integer totalStars = 0;
+
+  /// null 이면 만화 — 그림 방식이 생기기 전 행과 옛 코드가 넣은 행이 기존 동작을 그대로 타게 한다.
+  public ImageStyle getImageStyle() {
+    return ImageStyle.orDefault(imageStyle);
+  }
 }

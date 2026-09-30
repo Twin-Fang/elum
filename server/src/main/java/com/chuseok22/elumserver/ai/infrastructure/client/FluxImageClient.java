@@ -102,6 +102,12 @@ public class FluxImageClient implements ImageGenerationClient {
     return call(fluxPromptBuilder.build(prefix, sceneEn, characterType), seed);
   }
 
+  /// 실사(#457): 실사 지시문 + 영어 장면. seed 규칙은 만화와 같다(일과마다 고정).
+  public GeneratedImage generateRealistic(String sceneEn, Integer seed) {
+    String prefix = promptTemplateService.getContent(PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX);
+    return call(fluxPromptBuilder.buildRealistic(prefix, sceneEn), seed);
+  }
+
   /// 관리자 시험 전용: 저장된 지시문 대신 넘겨받은 것을 쓴다. seed 는 두지 않는다.
   public GeneratedImage generateForTest(String prefix, String sceneEn, CharacterType characterType) {
     return call(fluxPromptBuilder.build(prefix, sceneEn, characterType), null);

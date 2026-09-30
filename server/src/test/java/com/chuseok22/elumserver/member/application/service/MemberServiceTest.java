@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +26,7 @@ import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import com.chuseok22.elumserver.member.application.dto.response.ProfileSummaryResponse;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -366,8 +368,8 @@ class MemberServiceTest {
     // 기존 필드는 가장 먼저 연결된 이룸이 그대로 — 지금 앱이 보는 값
     assertThat(response.nickname()).isEqualTo("하늘");
     assertThat(response.profiles()).containsExactly(
-      new ProfileSummaryResponse("p1", "하늘", CharacterType.LULU),
-      new ProfileSummaryResponse("p2", "바다", CharacterType.POPO));
+      new ProfileSummaryResponse("p1", "하늘", CharacterType.LULU, ImageStyle.CARTOON),
+      new ProfileSummaryResponse("p2", "바다", CharacterType.POPO, ImageStyle.CARTOON));
   }
 
   @Test
@@ -381,5 +383,77 @@ class MemberServiceTest {
     when(profileAccessGuard.profilesOf(phone)).thenReturn(List.of(linked));
 
     assertThat(memberService.getMyInfo(phone).profiles()).extracting(ProfileSummaryResponse::id).containsExactly("p2");
+  }
+
+
+  // ── 카드 그림 방식 (#457) ───────────────────────────────────────────
+
+  @Test
+  @DisplayName("그림 방식을 설정하면 이룸이에 저장되고 응답에 반영된다 — 권한은 MANAGE")
+  void updateImageStyle_validRequest_updatesAndAsksManage() {
+    Member member = new Member();
+    member.setId("member-1");
+    Profile profile = new Profile();
+    profile.setMember(member);
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(profileAccessGuard.profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE)).thenReturn(profile);
+    when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of(profile));
+
+    MemberResponse response = memberService.updateImageStyle(
+      Caller.guardian("member-1"), new MemberImageStyleUpdateRequest(ImageStyle.REALISTIC));
+
+    assertThat(profile.getImageStyle()).isEqualTo(ImageStyle.REALISTIC);
+    assertThat(response.imageStyle()).isEqualTo(ImageStyle.REALISTIC);
+    assertThat(response.profiles()).extracting(ProfileSummaryResponse::imageStyle).containsExactly(ImageStyle.REALISTIC);
+    verify(profileAccessGuard).profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE);
+  }
+
+  @Test
+  @DisplayName("이룸이 휴대폰처럼 관리 권한이 없으면 판단자가 던진 거절이 그대로 올라오고 값은 바뀌지 않는다")
+  void updateImageStyle_noManagePermission_propagatesRejection() {
+    Member member = new Member();
+    member.setId("member-1");
+    Caller phone = Caller.elumi("member-1", "l1");
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(profileAccessGuard.profileFor(phone, ProfileAction.MANAGE))
+      .thenThrow(new CustomException(ErrorCode.PROFILE_ACCESS_DENIED));
+
+    assertThatThrownBy(() -> memberService.updateImageStyle(phone, new MemberImageStyleUpdateRequest(ImageStyle.PHOTO_ONLY)))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.PROFILE_ACCESS_DENIED));
+  }
+
+  @Test
+  @DisplayName("존재하지 않는 회원이면 MEMBER_NOT_FOUND")
+  void updateImageStyle_missingMember_throwsMemberNotFound() {
+    when(memberRepository.findById("missing")).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> memberService.updateImageStyle(
+      Caller.guardian("missing"), new MemberImageStyleUpdateRequest(ImageStyle.REALISTIC)))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND));
+  }
+
+  @Test
+  @DisplayName("imageStyle 을 비워 보내면 INVALID_INPUT_VALUE — 조용히 만화로 돌아가지 않는다")
+  void updateImageStyle_nullStyle_throwsInvalidInput() {
+    Member member = new Member();
+    member.setId("member-1");
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+
+    assertThatThrownBy(() -> memberService.updateImageStyle(
+      Caller.guardian("member-1"), new MemberImageStyleUpdateRequest(null)))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
+  }
+
+  @Test
+  @DisplayName("연결된 이룸이가 없으면 내 정보의 그림 방식은 기본 만화다 — 화면이 null 을 만나지 않는다")
+  void getMyInfo_noProfiles_imageStyleDefaultsToCartoon() {
+    Member member = activeMember("member-1");
+    when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
+    when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of());
+
+    assertThat(memberService.getMyInfo(Caller.guardian("member-1")).imageStyle()).isEqualTo(ImageStyle.CARTOON);
   }
 }

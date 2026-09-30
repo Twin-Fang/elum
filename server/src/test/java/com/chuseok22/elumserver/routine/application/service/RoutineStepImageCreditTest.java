@@ -26,6 +26,7 @@ import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
@@ -135,7 +136,7 @@ class RoutineStepImageCreditTest {
 
     assertThat(response.imageSkippedReason()).isNull();
     verify(routineStepImageFiller).scheduleAfterCommit(eq("member-1"), eq("routine-1"), any(),
-      eq("현관에서 우산을 챙겨요."), any(), any(), eq("job-7"));
+      eq("현관에서 우산을 챙겨요."), any(), any(), eq("job-7"), any());
     // 카드를 지금 저장해 id 를 받는다 — 그래야 그림 채우기·정산이 카드를 찾는다
     verify(routineStepRepository).save(any(RoutineStep.class));
   }
@@ -178,13 +179,13 @@ class RoutineStepImageCreditTest {
 
     routineService.addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("우산", "현관에서 우산을 챙겨요.", true));
 
-    verify(routineStepImageFiller).scheduleAfterCommit(any(), any(), any(), any(), any(), any(), eq(null));
+    verify(routineStepImageFiller).scheduleAfterCommit(any(), any(), any(), any(), any(), any(), eq(null), any());
   }
 
   // ── 그림 채우기 ────────────────────────────────────────────────────
 
   private void fill(String jobId) {
-    filler.fill("member-1", "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, "seed", jobId);
+    filler.fill("member-1", "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, "seed", jobId, ImageStyle.CARTOON);
   }
 
   @Test
@@ -277,7 +278,7 @@ class RoutineStepImageCreditTest {
   @Test
   @DisplayName("트랜잭션 밖에서 예약하면 그림을 걸 수 없어 반환한다")
   void schedule_outsideTransaction_releases() {
-    filler.scheduleAfterCommit("member-1", "routine-1", "step-1", "설명", CharacterType.LULU, "seed", "job-7");
+    filler.scheduleAfterCommit("member-1", "routine-1", "step-1", "설명", CharacterType.LULU, "seed", "job-7", ImageStyle.CARTOON);
 
     verify(creditReservationService).release(eq("job-7"), anyString());
   }
@@ -307,5 +308,61 @@ class RoutineStepImageCreditTest {
     routine.setSteps(steps);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
     return routine;
+  }
+
+
+  // ── 그림 방식 (#457) ────────────────────────────────────────────────
+
+  @Test
+  @DisplayName("직접 사진 방식이면 generateImage=true 여도 예약도 채우기 예약도 하지 않고 사유를 싣는다")
+  void addStep_photoOnly_noReserveNoSchedule_reportsReason() {
+    Routine routine = givenRoutine();
+    routine.getProfile().setImageStyle(ImageStyle.PHOTO_ONLY);
+
+    RoutineResponse response = routineService.addStep(GUARDIAN, "routine-1",
+      new RoutineStepCreateRequest("우산", "현관에서 우산을 챙겨요.", true));
+
+    assertThat(response.imageSkippedReason()).isEqualTo("IMAGE_STYLE_PHOTO_ONLY");
+    verifyNoInteractions(routineStepImageFiller, creditReservationService);
+    // 카드는 저장된다 — 그림만 건너뛴다
+    verify(routineStepRepository).save(any(RoutineStep.class));
+  }
+
+  @Test
+  @DisplayName("직접 사진 방식에서 그림을 요청하지 않았으면 사유 없이 카드만 저장한다")
+  void addStep_photoOnly_withoutWantingImage_noReason() {
+    Routine routine = givenRoutine();
+    routine.getProfile().setImageStyle(ImageStyle.PHOTO_ONLY);
+
+    RoutineResponse response = routineService.addStep(GUARDIAN, "routine-1",
+      new RoutineStepCreateRequest("우산", "현관에서 우산을 챙겨요.", null));
+
+    assertThat(response.imageSkippedReason()).isNull();
+    verifyNoInteractions(routineStepImageFiller, creditReservationService);
+  }
+
+  @Test
+  @DisplayName("실사 방식이면 이룸이의 그림 방식을 그림 채우기에 넘긴다 — 크레딧 예약은 만화와 같다")
+  void addStep_realistic_passesStyleToFiller() {
+    Routine routine = givenRoutine();
+    routine.getProfile().setImageStyle(ImageStyle.REALISTIC);
+    when(creditReservationService.reserve(eq("member-1"), eq(CreditJobKind.CARD_IMAGE), startsWith("card-image:"), eq(false)))
+      .thenReturn(CreditReservation.reserved("job-7"));
+
+    routineService.addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("우산", "현관에서 우산을 챙겨요.", true));
+
+    verify(routineStepImageFiller).scheduleAfterCommit(eq("member-1"), eq("routine-1"), any(),
+      eq("현관에서 우산을 챙겨요."), any(), any(), eq("job-7"), eq(ImageStyle.REALISTIC));
+  }
+
+  @Test
+  @DisplayName("그림 채우기는 이룸이의 그림 방식을 그림 생성 요청에 실어 보낸다")
+  void fill_passesImageStyleToGenerator() {
+    filler.fill("member-1", "routine-1", "step-1", "설명", CharacterType.LULU, "seed", "job-7", ImageStyle.REALISTIC);
+
+    org.mockito.ArgumentCaptor<CardImageGenerator.CardImageRequest> captor =
+      org.mockito.ArgumentCaptor.forClass(CardImageGenerator.CardImageRequest.class);
+    verify(cardImageGenerator).generate(captor.capture());
+    assertThat(captor.getValue().imageStyle()).isEqualTo(ImageStyle.REALISTIC);
   }
 }

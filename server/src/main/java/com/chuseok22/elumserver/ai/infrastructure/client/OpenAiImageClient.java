@@ -67,6 +67,12 @@ public class OpenAiImageClient implements ImageGenerationClient {
     return call(promptComposer.compose(stepDescription, characterType, false), characterType);
   }
 
+  /// 실사(#457): Gemini 와 같은 실사 지시문을 쓴다 — 제공자를 바꿨다고 그림의 결이 달라지면 안 된다.
+  @Override
+  public GeneratedImage generateRealisticImage(String stepDescription) {
+    return call(promptComposer.composeRealistic(stepDescription), null);
+  }
+
   @Override
   public GeneratedImage generateImageForTest(
     String prefix, ImagePromptLanguage language, String sampleInput, CharacterType characterType

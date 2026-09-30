@@ -155,4 +155,62 @@ class AdminPromptServiceTest {
 
     assertThat(response.result()).isEqualTo(java.util.Map.of("imagePromptEn", "The character picks up an umbrella."));
   }
+
+
+  @Test
+  @DisplayName("실사 그림 지시문 preview 는 선택한 캐릭터를 무시하고 캐릭터 없이 영어로 조립한다 (#457)")
+  void preview_realisticPrefix_ignoresCharacter() {
+    when(imagePromptBuilder.build("Realistic rules", "우산", null, false, ImagePromptLanguage.EN))
+      .thenReturn("Realistic rules\n\nScene info:\n{...}");
+
+    String result = adminPromptService.preview(
+      PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX, "Realistic rules", "우산", CharacterType.LULU);
+
+    assertThat(result).isEqualTo("Realistic rules\n\nScene info:\n{...}");
+  }
+
+  @Test
+  @DisplayName("실사 번역 지시문 preview 는 [System]/[User] 로 조립한다 (#457)")
+  void preview_realisticTranslate_buildsSystemAndUser() {
+    when(geminiTextClient.buildTranslateUserContent("우산을 챙겨요")).thenReturn("{\"task\":\"TRANSLATE_CARD_SCENE\"}");
+
+    String result = adminPromptService.preview(
+      PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE, "Rewrite.", "우산을 챙겨요", null);
+
+    assertThat(result).contains("[System]\nRewrite.").contains("TRANSLATE_CARD_SCENE");
+  }
+
+  @Test
+  @DisplayName("실사 그림 지시문 시험은 캐릭터 없이(null) 영어 지시문으로 그린다 (#457)")
+  void test_realisticPrefix_drawsWithoutCharacter() {
+    when(imageClientRouter.current()).thenReturn(imageGenerationClient);
+    when(imageGenerationClient.generateImageForTest("Realistic rules", ImagePromptLanguage.EN, "우산", null))
+      .thenReturn(new GeneratedImage(new byte[]{1, 2}, "png"));
+
+    PromptTestResponse response = adminPromptService.test(
+      PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX, "Realistic rules", "우산", CharacterType.POPO);
+
+    assertThat(response.imageDataUri()).startsWith("data:image/png;base64,");
+  }
+
+  @Test
+  @DisplayName("실사 번역 지시문 시험은 한 줄 결과를 보여준다 (#457)")
+  void test_realisticTranslate_showsLine() {
+    when(geminiTextClient.translateImagePromptForTest("Rewrite.", "우산을 챙겨요"))
+      .thenReturn("A red umbrella leaning on a white wall.");
+
+    PromptTestResponse response = adminPromptService.test(
+      PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE, "Rewrite.", "우산을 챙겨요", null);
+
+    assertThat(response.result()).isEqualTo(java.util.Map.of("imagePromptEn", "A red umbrella leaning on a white wall."));
+  }
+
+  @Test
+  @DisplayName("모든 프롬프트 키가 preview 를 예외 없이 처리한다 — 새 키가 switch 에서 빠지면 관리자 화면이 죽는다")
+  void preview_everyKey_noException() {
+    for (PromptKey key : PromptKey.values()) {
+      org.assertj.core.api.Assertions.assertThatCode(
+        () -> adminPromptService.preview(key, "content", "sample", null)).as(key.name()).doesNotThrowAnyException();
+    }
+  }
 }

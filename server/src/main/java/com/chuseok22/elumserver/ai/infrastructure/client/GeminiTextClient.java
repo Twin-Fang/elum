@@ -121,6 +121,12 @@ public class GeminiTextClient implements TextGenerationClient {
     return translate(promptTemplateService.getContent(PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE), stepDescription);
   }
 
+  /// 실사(#457): 캐릭터 없이 물건·장소 중심 한 줄로 옮긴다. 만화용과 달리 "The character" 로 시작하지 않는다.
+  public String translateRealisticImagePrompt(String stepDescription) {
+    return translate(
+      promptTemplateService.getContent(PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE), stepDescription);
+  }
+
   /// 관리자 시험 전용: 저장된 지시문 대신 넘겨받은 것을 쓴다.
   public String translateImagePromptForTest(String systemPrompt, String sampleInput) {
     return translate(systemPrompt, sampleInput);

@@ -27,6 +27,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextGenerationClient;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.util.List;
@@ -235,7 +236,7 @@ class RoutineAiPipelineTest {
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
-      "내일 비 오는 날 학교 가기", "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), null, CharacterType.LULU, "profile-1"
+      "내일 비 오는 날 학교 가기", "하늘이", Set.of(SupportGoal.PREPARE_ITEMS), null, CharacterType.LULU, ImageStyle.CARTOON, "profile-1"
     );
 
     assertThat(result.title()).isEqualTo("비 오는 날 학교 가기");
@@ -259,7 +260,7 @@ class RoutineAiPipelineTest {
       .thenReturn(new GeneratedImage(new byte[]{1, 2, 3}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
-    routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, "profile-1");
+    routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, ImageStyle.CARTOON, "profile-1");
 
     verify(imageGenerationClient).generateImage("옷을 입어요", null);
   }
@@ -271,7 +272,7 @@ class RoutineAiPipelineTest {
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
 
     assertThatThrownBy(() ->
-      routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, "profile-1"))
+      routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, ImageStyle.CARTOON, "profile-1"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_AI_GENERATION_FAILED));
@@ -284,7 +285,7 @@ class RoutineAiPipelineTest {
     when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
 
     assertThatThrownBy(() ->
-      routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, "profile-1"))
+      routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, ImageStyle.CARTOON, "profile-1"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED));
@@ -301,7 +302,7 @@ class RoutineAiPipelineTest {
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
-      "내일 병원 가기", "하늘이", Set.of(), List.of(), null, "profile-1"
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), null, ImageStyle.CARTOON, "profile-1"
     );
 
     assertThat(result.steps()).hasSize(1);
@@ -319,7 +320,7 @@ class RoutineAiPipelineTest {
     when(imageGenerationClient.generateImage(any(), any())).thenThrow(new RuntimeException("계속 실패"));
 
     RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
-      "내일 병원 가기", "하늘이", Set.of(), List.of(), null, "profile-1"
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), null, ImageStyle.CARTOON, "profile-1"
     );
 
     assertThat(result.steps()).hasSize(1);
@@ -341,7 +342,7 @@ class RoutineAiPipelineTest {
     when(fluxImageClient.generate(any(), any(), any())).thenReturn(new GeneratedImage(new byte[]{1}, "jpg"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.jpg");
 
-    routineAiPipeline.generateForCreate("비 오는 날 학교", "하늘이", Set.of(), null, CharacterType.LULU, "profile-1");
+    routineAiPipeline.generateForCreate("비 오는 날 학교", "하늘이", Set.of(), null, CharacterType.LULU, ImageStyle.CARTOON, "profile-1");
 
     verify(fluxImageClient).generate(
       "The character picks up a closed red umbrella.", CharacterType.LULU,
@@ -357,8 +358,73 @@ class RoutineAiPipelineTest {
     when(imageGenerationClient.generateImage(any(), any())).thenReturn(new GeneratedImage(new byte[]{1}, "png"));
     when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
 
-    routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, "profile-1");
+    routineAiPipeline.generateForCreate("내일 병원 가기", "하늘이", Set.of(), null, null, ImageStyle.CARTOON, "profile-1");
 
     verify(textGenerationClient).generateRoutineJson(any(), any(), any(), any(), eq(false));
+  }
+
+
+  // ── 그림 방식 (#457) ────────────────────────────────────────────────
+
+  private static final String ONE_STEP_JSON =
+    "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";
+
+  @Test
+  @DisplayName("직접 사진이면 그림 호출을 하지 않고 imagePath 는 null — 카드 글은 그대로 만든다")
+  void generateForCreate_photoOnly_skipsImageButKeepsText() {
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(ONE_STEP_JSON);
+
+    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), CharacterType.LULU, ImageStyle.PHOTO_ONLY, "profile-1");
+
+    assertThat(result.title()).isEqualTo("병원 가기");
+    assertThat(result.steps()).hasSize(1);
+    assertThat(result.steps().get(0).title()).isEqualTo("옷을 입어요");
+    assertThat(result.steps().get(0).imagePath()).isNull();
+    org.mockito.Mockito.verifyNoInteractions(imageGenerationClient, fluxImageClient, geminiTextClient, routineImageStorage);
+  }
+
+  @Test
+  @DisplayName("직접 사진은 FLUX 를 골라 둬도 영어 장면을 요청하지 않는다 — 쓰지 않을 출력 토큰")
+  void generateForCreate_photoOnly_doesNotAskForEnglishScene() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.FLUX);
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(ONE_STEP_JSON);
+
+    routineAiPipeline.generateForCreate(
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), CharacterType.LULU, ImageStyle.PHOTO_ONLY, "profile-1");
+
+    verify(textGenerationClient).generateRoutineJson(any(), any(), any(), any(), eq(false));
+  }
+
+  @Test
+  @DisplayName("만화 + FLUX 는 영어 장면을 요청한다 — 기존 동작 그대로")
+  void generateForCreate_cartoonFlux_asksForEnglishScene() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.FLUX);
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(ONE_STEP_JSON);
+    when(fluxImageClient.available()).thenReturn(false);
+    when(imageClientRouter.of(ImageProvider.OPENAI)).thenReturn(java.util.Optional.of(imageGenerationClient));
+    when(imageGenerationClient.available()).thenReturn(true);
+    when(imageGenerationClient.generateImage(any(), any())).thenReturn(new GeneratedImage(new byte[]{1}, "png"));
+    when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
+
+    routineAiPipeline.generateForCreate(
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), CharacterType.LULU, ImageStyle.CARTOON, "profile-1");
+
+    verify(textGenerationClient).generateRoutineJson(any(), any(), any(), any(), eq(true));
+  }
+
+  @Test
+  @DisplayName("실사면 캐릭터 없는 실사 호출로 그리고 만화 호출은 하지 않는다")
+  void generateForCreate_realistic_usesRealisticImageCall() {
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(ONE_STEP_JSON);
+    when(imageGenerationClient.generateRealisticImage("옷을 입어요"))
+      .thenReturn(new GeneratedImage(new byte[]{1}, "png"));
+    when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
+
+    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
+      "내일 병원 가기", "하늘이", Set.of(), List.of(), CharacterType.LULU, ImageStyle.REALISTIC, "profile-1");
+
+    assertThat(result.steps().get(0).imagePath()).isEqualTo("data/routine-images/batch/1.png");
+    verify(imageGenerationClient, never()).generateImage(any(), any());
   }
 }

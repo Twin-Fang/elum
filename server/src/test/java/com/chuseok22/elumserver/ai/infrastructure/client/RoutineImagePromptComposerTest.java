@@ -31,6 +31,7 @@ class RoutineImagePromptComposerTest {
     PromptTemplateService promptTemplateService = mock(PromptTemplateService.class);
     when(promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX)).thenReturn("한국어 지시문");
     when(promptTemplateService.getContent(PromptKey.ROUTINE_IMAGE_PREFIX_EN)).thenReturn("English rules");
+    when(promptTemplateService.getContent(PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX)).thenReturn("Realistic rules");
     composer = new RoutineImagePromptComposer(
       promptTemplateService, systemConfigService, new GeminiRoutineImagePromptBuilder());
   }
@@ -69,5 +70,29 @@ class RoutineImagePromptComposerTest {
 
     assertThat(composer.language()).isEqualTo(ImagePromptLanguage.KO);
     assertThat(composer.compose("옷을 입어요.", null, false)).startsWith("한국어 지시문");
+  }
+
+
+  @Test
+  @DisplayName("실사(#457)는 언어 설정과 무관하게 실사 영어 키를 쓰고 캐릭터·참조 이미지 블록이 없다")
+  void realistic_ignoresLanguageAndHasNoCharacter() {
+    for (String value : new String[]{"KO", "EN"}) {
+      language(value);
+
+      String prompt = composer.composeRealistic("옷을 입어요.");
+
+      assertThat(prompt).startsWith("Realistic rules\n\nScene info:\n");
+      assertThat(prompt).contains("\"stepDescription\":\"옷을 입어요.\"");
+      assertThat(prompt).doesNotContain("\"character\"").doesNotContain("appearance")
+        .doesNotContain("referenceImageProvided");
+    }
+  }
+
+  @Test
+  @DisplayName("만화(기본) 조립은 그대로 — KO 는 한국어 키, 실사 키를 건드리지 않는다")
+  void cartoon_stillUsesKoreanKey() {
+    language("KO");
+
+    assertThat(composer.compose("옷을 입어요.", CharacterType.LULU, false)).startsWith("한국어 지시문\n\n장면 정보:\n");
   }
 }

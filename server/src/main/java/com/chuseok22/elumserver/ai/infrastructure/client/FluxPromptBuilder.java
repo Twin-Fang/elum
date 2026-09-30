@@ -23,6 +23,15 @@ public class FluxPromptBuilder {
   private static final String NO_CHARACTER = "a simple friendly figure whose age is hard to guess";
   private static final String NO_CHARACTER_SUBJECT = "figure";
 
+  /**
+   * 실사 방식(#457) — 지시문 + 장면 한 줄. 캐릭터가 없으니 "Only one character:" 도 "The character" 치환도 없다.
+   * 장면은 항상 실사용 번역으로 만든 물건·장소 문장이라 치환할 주어가 없다.
+   */
+  public String buildRealistic(String prefix, String sceneEn) {
+    String scene = WHITESPACE.matcher(sceneEn == null ? "" : sceneEn).replaceAll(" ").trim();
+    return prefix.trim() + " " + scene;
+  }
+
   public String build(String prefix, String sceneEn, CharacterType characterType) {
     String appearance = characterType == null ? NO_CHARACTER : characterType.getAppearanceEn();
     String subject = characterType == null ? NO_CHARACTER_SUBJECT : characterType.getSubjectEn();

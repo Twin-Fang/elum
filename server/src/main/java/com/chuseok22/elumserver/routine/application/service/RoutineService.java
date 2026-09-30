@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.RoutineAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
@@ -85,6 +86,8 @@ public class RoutineService {
   /// 아니다 — 지우면 자리가 다시 나서 추가·삭제를 되풀이할 수 있다. 그림 횟수는
   /// {@link RoutineStepImageFiller}가 따로 묶는다 (#368).
   private static final int STEP_MAX_COUNT = 10;
+  /// 카드 추가 응답 imageSkippedReason — 이룸이의 그림 방식이 직접 사진이라 AI 그림을 만들지 않았다(#457).
+  static final String IMAGE_SKIPPED_PHOTO_ONLY = "IMAGE_STYLE_PHOTO_ONLY";
 
   /// 멱등 키 최대 길이 — ai_credit_job.request_key 가 varchar(255) 다. 넘으면 저장에서 터지기 전에 400.
   private static final int IDEMPOTENCY_KEY_MAX_LENGTH = 255;
@@ -199,7 +202,7 @@ public class RoutineService {
     try {
       generation = routineAiPipeline.generateForCreate(
         request.rawInputText(), profile.getNickname(), profile.getSupportGoals(), answers,
-        profile.getCharacter(), profile.getId()
+        profile.getCharacter(), profile.getImageStyle(), profile.getId()
       );
     } catch (RuntimeException e) {
       // 만들지 못했으면 청구하지 않는다 — 예약을 돌려준다.
@@ -695,6 +698,13 @@ public class RoutineService {
     // 비어 있다 — 예전에는 그래서 그림 채우기가 "카드 없음"으로 끝났다.
     routineStepRepository.save(step);
 
+    // 직접 사진 방식(#457): 그림 요청 여부와 무관하게 예약도 채우기 예약도 하지 않는다. 그림 몫 크레딧을
+    // 잡지 않으니 청구도 없다. 그림을 원했는데 안 나온 까닭을 클라가 알 수 있게 사유를 싣는다.
+    if (routine.getProfile().getImageStyle() == ImageStyle.PHOTO_ONLY) {
+      RoutineResponse response = RoutineResponse.from(routine);
+      return request.wantsImage() ? response.withImageSkippedReason(IMAGE_SKIPPED_PHOTO_ONLY) : response;
+    }
+
     if (!request.wantsImage() || step.getDescription().isBlank()) {
       return RoutineResponse.from(routine);
     }
@@ -719,7 +729,8 @@ public class RoutineService {
     // DB 커넥션을 붙잡고, 롤백되면 방금 쓴 이미지 파일이 고아로 남는다. 롤백되면 예약도 함께 사라진다.
     routineStepImageFiller.scheduleAfterCommit(
       caller.memberId(), routineId, step.getId(), step.getDescription(), routine.getProfile().getCharacter(),
-      FluxSeed.routineKey(routine.getProfile().getId(), routine.getTitle()), creditJobId);
+      FluxSeed.routineKey(routine.getProfile().getId(), routine.getTitle()), creditJobId,
+      routine.getProfile().getImageStyle());
 
     return RoutineResponse.from(routine);
   }

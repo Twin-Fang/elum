@@ -125,4 +125,64 @@ class PromptDefaultsTest {
     assertThat(content).contains("The character").contains("imagePromptEn");
     assertThat(content.toLowerCase()).contains("letters").contains("cards");
   }
+
+
+  // ── 실사 방식 (#457) ────────────────────────────────────────────────
+
+  @Test
+  @DisplayName("모든 프롬프트 키에 기본값이 있다 — 새 키가 시딩에서 빠지면 첫 기동 때 비어 있다")
+  void everyKeyHasDefault() {
+    assertThat(PromptDefaults.DEFAULTS).hasSize(PromptKey.values().length);
+    for (PromptKey key : PromptKey.values()) {
+      assertThat(PromptDefaults.DEFAULTS.get(key)).as(key.name()).isNotBlank();
+    }
+    assertThat(PromptDefaults.DEFAULTS).hasSize(9);
+  }
+
+  @Test
+  @DisplayName("실사 그림 지시문은 캐릭터 관례가 없다 — 참조 이미지·생김새·Only one character·플랫 벡터·파스텔 지시가 없다")
+  void realisticPrefix_hasNoCharacterOrCartoonInstruction() {
+    String content = PromptDefaults.DEFAULTS.get(PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX);
+
+    assertThat(content).isNotBlank().doesNotContainPattern("[가-힣]");
+    assertThat(content)
+      .doesNotContain("character.appearance")
+      .doesNotContain("reference image")
+      .doesNotContain("Only one character")
+      .doesNotContain("The character")
+      .doesNotContain("pastel")
+      .doesNotContain("Simple flat vector")
+      .doesNotContain("[Character");
+    // 사진 같은 그림·글자 금지·카드당 행동 하나는 남아 있어야 한다
+    assertThat(content).contains("realistic").contains("photo").contains("Never draw any text")
+      .contains("one action").contains("Scene info");
+    // 캐릭터·만화는 '금지'로만 나온다
+    assertThat(content).contains("[Never]").contains("cartoon");
+  }
+
+  @Test
+  @DisplayName("실사 번역 지시문은 The character 로 시작하라고 하지 않는다 — 물건·장소 중심, 30단어 미만")
+  void realisticTranslate_isObjectCentered() {
+    String content = PromptDefaults.DEFAULTS.get(PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE);
+
+    assertThat(content).doesNotContain("Start with \"The character\"").contains("Never start with \"The character\"");
+    assertThat(content).contains("Under 30 words").contains("imagePromptEn");
+  }
+
+  @Test
+  @DisplayName("실사 지시문에도 아이·아동 호칭이 없다 (이슈 #197)")
+  void realisticPrompts_doNotAddressUserAsChild() {
+    for (PromptKey key : new PromptKey[]{
+      PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX, PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE}) {
+      assertThat(PromptDefaults.DEFAULTS.get(key)).as(key.name())
+        .doesNotContain("아이").doesNotContain("아동").doesNotContain("child").doesNotContain("kid");
+    }
+  }
+
+  @Test
+  @DisplayName("만화 쪽 기본값은 그대로다 — 실사 추가가 기존 지시문을 건드리지 않는다")
+  void cartoonPrompts_keepCharacterConvention() {
+    assertThat(PromptDefaults.DEFAULTS.get(PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE)).contains("Start with \"The character\"");
+    assertThat(PromptDefaults.DEFAULTS.get(PromptKey.ROUTINE_IMAGE_PREFIX_EN)).contains("[Character - required]");
+  }
 }

@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThrottle;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
@@ -73,11 +74,12 @@ public class RoutineStepImageFiller {
    * 빈 프롬프트로 부르면 돈만 쓰고 엉뚱한 그림이 나온다.
    */
   /// @param seedKey     {@code FluxSeed.routineKey} — 일과를 만들 때와 같은 seed 로 그려 같은 캐릭터가 나온다 (#373)
+  /// @param imageStyle  이룸이의 그림 방식(#457). 실사면 실사 프롬프트로 그린다. 직접 사진은 호출부가 예약 전에 걸러 여기 오지 않는다
   /// @param creditJobId 이 그림에 잡아 둔 크레딧 작업(#407). 크레딧이 꺼져 있으면 null. 그림을 붙이면 정산,
   ///                    못 붙이면 반환한다 — 어느 쪽으로든 반드시 끝낸다
   public void scheduleAfterCommit(
     String memberId, String routineId, String stepId, String description, CharacterType characterType,
-    String seedKey, String creditJobId
+    String seedKey, String creditJobId, ImageStyle imageStyle
   ) {
     if (description == null || description.isBlank()) {
       releaseCredit(creditJobId, "설명이 비어 그림을 만들지 않음");
@@ -92,7 +94,7 @@ public class RoutineStepImageFiller {
       @Override
       public void afterCommit() {
         try {
-          executor.execute(() -> fill(memberId, routineId, stepId, description, characterType, seedKey, creditJobId));
+          executor.execute(() -> fill(memberId, routineId, stepId, description, characterType, seedKey, creditJobId, imageStyle));
         } catch (RuntimeException e) {
           // 실행기가 거절하면(종료 중) 그림은 없다. 예약만 돌려준다.
           log.warn("추가 카드 그림 작업을 시작하지 못했다: routineId={}, stepId={}", routineId, stepId, e);
@@ -115,7 +117,7 @@ public class RoutineStepImageFiller {
    */
   void fill(
     String memberId, String routineId, String stepId, String description, CharacterType characterType,
-    String seedKey, String creditJobId
+    String seedKey, String creditJobId, ImageStyle imageStyle
   ) {
     // 이 스레드는 요청 스레드가 아니라 회원 맥락이 없다(addStep 은 세우지 않는다). 여기서 세워야
     // 그림 호출 기록에 회원이 남는다 — 전에는 회원 없이 남아 계정별로는 볼 수 없었다 (#368).
@@ -145,7 +147,7 @@ public class RoutineStepImageFiller {
       }
       // 직접 추가한 카드엔 영어 장면이 없다 — FLUX 면 CardImageGenerator 가 번역한다 (#373).
       GeneratedImage image = cardImageGenerator.generate(
-        new CardImageGenerator.CardImageRequest(description, null, characterType, seedKey));
+        new CardImageGenerator.CardImageRequest(description, null, characterType, seedKey, imageStyle));
       if (image == null) {
         log.warn("추가 카드 이미지가 비어 돌아왔다: routineId={}, stepId={}", routineId, stepId);
         releaseReason = "그림 생성 결과 없음";

@@ -19,6 +19,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,7 +60,7 @@ class CardImageGeneratorTest {
   }
 
   private CardImageGenerator.CardImageRequest request(String imagePromptEn) {
-    return new CardImageGenerator.CardImageRequest("우산을 챙겨요", imagePromptEn, CharacterType.LULU, SEED_KEY);
+    return new CardImageGenerator.CardImageRequest("우산을 챙겨요", imagePromptEn, CharacterType.LULU, SEED_KEY, ImageStyle.CARTOON);
   }
 
   @Test
@@ -150,5 +151,90 @@ class CardImageGeneratorTest {
 
     assertThatThrownBy(() -> generator.generate(request("The character picks up an umbrella.")))
       .hasMessageContaining("FLUX 실패");
+  }
+
+
+  // ── 그림 방식 (#457) ────────────────────────────────────────────────
+
+  private CardImageGenerator.CardImageRequest realistic(String imagePromptEn) {
+    return new CardImageGenerator.CardImageRequest(
+      "우산을 챙겨요", imagePromptEn, CharacterType.LULU, SEED_KEY, ImageStyle.REALISTIC);
+  }
+
+  @Test
+  @DisplayName("그림 방식을 비워 만든 요청은 만화다 — 기존 호출부가 그대로 만화로 돈다")
+  void nullImageStyle_isCartoon() {
+    assertThat(new CardImageGenerator.CardImageRequest("설명", null, null, "k", null).imageStyle())
+      .isEqualTo(ImageStyle.CARTOON);
+  }
+
+  @Test
+  @DisplayName("실사 + FLUX 가 아닌 제공자 — 캐릭터 없는 실사 전용 호출을 부르고 만화 호출은 부르지 않는다")
+  void realistic_otherProvider_callsRealisticOnly() {
+    when(imageClientRouter.selected()).thenReturn(ImageProvider.OPENAI);
+    when(imageClientRouter.current()).thenReturn(openAiClient);
+    when(openAiClient.generateRealisticImage("우산을 챙겨요")).thenReturn(OPENAI_IMAGE);
+
+    assertThat(generator.generate(realistic("The character picks up an umbrella."))).isSameAs(OPENAI_IMAGE);
+
+    verify(openAiClient, never()).generateImage(anyString(), any());
+    verifyNoInteractions(fluxImageClient, translator);
+  }
+
+  @Test
+  @DisplayName("실사 + FLUX — 글 AI 의 영어 장면(The character 관례)을 버리고 실사용 번역으로 카드마다 새로 만든다")
+  void realistic_flux_ignoresImagePromptEnAndTranslatesRealistic() {
+    when(translator.translateRealisticImagePrompt("우산을 챙겨요"))
+      .thenReturn("A red umbrella leaning on a white wall.");
+    when(fluxImageClient.generateRealistic(any(), any())).thenReturn(FLUX_IMAGE);
+
+    assertThat(generator.generate(realistic("The character picks up a red umbrella."))).isSameAs(FLUX_IMAGE);
+
+    verify(fluxImageClient).generateRealistic("A red umbrella leaning on a white wall.", FluxSeed.of(SEED_KEY));
+    verify(translator, never()).translateImagePrompt(anyString());
+    verify(fluxImageClient, never()).generate(any(), any(), any());
+  }
+
+  @Test
+  @DisplayName("실사 + FLUX 번역이 실패하면 그 카드만 OpenAI 실사로 — 만화 프롬프트로 새지 않는다")
+  void realistic_translationFails_fallsBackToOpenAiRealistic() {
+    when(translator.translateRealisticImagePrompt(anyString())).thenThrow(new IllegalStateException("번역 실패"));
+    when(openAiClient.generateRealisticImage("우산을 챙겨요")).thenReturn(OPENAI_IMAGE);
+
+    assertThat(generator.generate(realistic(null))).isSameAs(OPENAI_IMAGE);
+
+    verify(openAiClient, never()).generateImage(anyString(), any());
+    verify(fluxImageClient, never()).generateRealistic(any(), any());
+  }
+
+  @Test
+  @DisplayName("실사 + FLUX 가 실패하면 그 카드만 OpenAI 실사로")
+  void realistic_fluxFails_fallsBackToOpenAiRealistic() {
+    when(translator.translateRealisticImagePrompt(anyString())).thenReturn("A red umbrella on a white wall.");
+    when(fluxImageClient.generateRealistic(any(), any())).thenThrow(new IllegalStateException("FLUX 실패"));
+    when(openAiClient.generateRealisticImage("우산을 챙겨요")).thenReturn(OPENAI_IMAGE);
+
+    assertThat(generator.generate(realistic(null))).isSameAs(OPENAI_IMAGE);
+    verify(openAiClient, never()).generateImage(anyString(), any());
+  }
+
+  @Test
+  @DisplayName("실사 + FLUX 키 없음 — FLUX 도 번역도 부르지 않고 OpenAI 실사로")
+  void realistic_fluxUnavailable_fallsBackToOpenAiRealistic() {
+    when(fluxImageClient.available()).thenReturn(false);
+    when(openAiClient.generateRealisticImage("우산을 챙겨요")).thenReturn(OPENAI_IMAGE);
+
+    assertThat(generator.generate(realistic(null))).isSameAs(OPENAI_IMAGE);
+    verifyNoInteractions(translator);
+  }
+
+  @Test
+  @DisplayName("직접 사진이 여기까지 오면 아무 제공자도 부르지 않고 막는다 — 돈이 나가기 전에")
+  void photoOnly_neverCallsAnyProvider() {
+    CardImageGenerator.CardImageRequest photoOnly = new CardImageGenerator.CardImageRequest(
+      "우산을 챙겨요", null, CharacterType.LULU, SEED_KEY, ImageStyle.PHOTO_ONLY);
+
+    assertThatThrownBy(() -> generator.generate(photoOnly)).isInstanceOf(IllegalStateException.class);
+    verifyNoInteractions(fluxImageClient, translator, openAiClient);
   }
 }

@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.member.application.controller;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
+import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
@@ -165,6 +166,42 @@ public interface MemberControllerDocs {
     Authentication authentication,
     @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
     MemberCharacterUpdateRequest request
+  );
+
+  @Operation(
+    summary = "카드 그림 방식 설정",
+    description = """
+      이룸이의 카드 그림 방식을 저장합니다 (#457). 캐릭터 설정과 같은 권한(보호자, 이룸이 휴대폰은 거절)입니다.
+
+      | imageStyle | 동작 |
+      |---|---|
+      | CARTOON | 기본. 캐릭터 만화 그림 (기존 동작 그대로) |
+      | REALISTIC | 캐릭터 없이 물건·장소를 사진처럼 그립니다 |
+      | PHOTO_ONLY | AI 그림을 만들지 않습니다(카드 글은 AI 가 만듭니다). 카드 imagePath 는 null 이며 그림 몫 크레딧을 청구하지 않습니다. 카드 추가 응답의 imageSkippedReason 에 IMAGE_STYLE_PHOTO_ONLY 가 담깁니다 |
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "저장 성공",
+      content = @Content(schema = @Schema(implementation = MemberResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "400",
+      description = "imageStyle 이 비었거나 CARTOON/REALISTIC/PHOTO_ONLY 가 아닌 값인 경우",
+      content = @Content(
+        schema = @Schema(implementation = ErrorResponse.class),
+        examples = @ExampleObject(
+          value = "{\"errorCode\":\"INVALID_INPUT_VALUE\",\"errorMessage\":\"입력값이 올바르지 않습니다.\"}"
+        )
+      )
+    )
+  })
+  ResponseEntity<MemberResponse> updateImageStyle(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
+    MemberImageStyleUpdateRequest request
   );
 
   @Operation(
