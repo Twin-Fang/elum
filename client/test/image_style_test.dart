@@ -188,8 +188,8 @@ void main() {
       });
     });
 
-    // E3 — 서버 저장이 실패해도 로컬에는 남고, 실패 이유를 돌려준다.
-    test('E3 서버가 실패해도 로컬에는 남고 실패를 돌려준다', () async {
+    // E3 — 서버 저장이 실패하면 이전 값으로 되돌리고, 실패 이유를 돌려준다.
+    test('E3 서버가 실패하면 이전 값으로 되돌리고 실패를 돌려준다', () async {
       final c = make({
         'PATCH /api/member/image-style': const FakeHttpError(503),
       });
@@ -199,8 +199,8 @@ void main() {
           .changeImageStyle(ImageStyle.photoOnly);
 
       expect(failure, isNotNull);
-      expect(c.read(onboardingProvider).imageStyle, ImageStyle.photoOnly);
-      expect(storage.imageStyle, 'PHOTO_ONLY');
+      expect(c.read(onboardingProvider).imageStyle, ImageStyle.cartoon);
+      expect(storage.imageStyle, ImageStyle.cartoon.apiValue);
     });
 
     // E19 — 온보딩이 끝날 때 함께 저장한다. 건너뛰면 만화가 저장된다.

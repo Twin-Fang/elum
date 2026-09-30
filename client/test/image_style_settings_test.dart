@@ -327,8 +327,8 @@ void main() {
       expect(adapter.sentBodies[patch], {'imageStyle': 'REALISTIC'});
     });
 
-    // E3 — 서버가 거절해도 화면은 살아 있고, 고른 값은 로컬에 남고, 에러 코드가 보인다.
-    testWidgets('E3 서버가 실패하면 팝업(에러 코드)을 띄우고 화면·로컬은 남는다', (tester) async {
+    // E3 — 서버가 거절해도 화면은 살아 있고, 이전 값으로 되돌아가고, 에러 코드가 보인다.
+    testWidgets('E3 서버가 실패하면 팝업(에러 코드)을 띄우고 이전 값으로 되돌린다', (tester) async {
       await tester.pumpWidget(wrap(patchResponse: const FakeHttpError(500)));
       await tester.pumpAndSettle();
       await openScreen(tester);
@@ -339,7 +339,7 @@ void main() {
       // 서버가 코드를 주지 않으면 화면 코드에 상태가 붙는다 (E-STYLE/500)
       expect(find.textContaining('E-STYLE'), findsOneWidget);
       expect(find.textContaining('그림 방식을 저장하지 못했어요'), findsOneWidget);
-      expect(storage.imageStyle, 'REALISTIC');
+      expect(storage.imageStyle, isNot('REALISTIC'));
       // 스낵바는 성공에만 쓴다
       expect(find.text('그림 방식을 바꿨어요'), findsNothing);
 
@@ -378,7 +378,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('E-NET-OFFLINE'), findsOneWidget);
-      expect(storage.imageStyle, 'PHOTO_ONLY');
+      expect(storage.imageStyle, isNot('PHOTO_ONLY'));
       expect(tester.takeException(), isNull);
     });
 
