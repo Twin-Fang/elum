@@ -65,6 +65,9 @@ class ActionCardView extends StatefulWidget {
 
   /// 그림이 없는 카드의 `사진 추가`를 눌렀을 때 (보호자 화면만 쓴다 · #458).
   ///
+  /// **픽토그램이 그림 자리를 채우면(#469) 이 자리가 없어진다** — 사진은 카드 수정 시트의
+  /// `사진 바꾸기` 칩(#456)에서 넣는다. 카드마다 칩을 또 얹으면 카드확인이 어수선해진다.
+  ///
   /// **null 이면 누를 수 없다.** 사진 바꾸기(#456)가 이 훅에 연결한다 — 그 전에는
   /// 자리만 보이고 눌러도 아무 일이 없다. 이룸이 화면([ActionCardLayout.childDetail])은
   /// 사진을 넣는 자리가 아니라 무시한다.
@@ -214,7 +217,11 @@ class _ActionCardViewState extends State<ActionCardView> {
   }) {
     // 이룸이 화면은 그림이 없을 때 제목이 그림 자리로 올라간다 (#458). 줄에 또 두면
     // 같은 글이 두 번 나온다. 받는 중에는 그림이 올 수 있어 줄에 그대로 둔다.
-    final titleInArt = childLayout && imageState == CardImageState.none;
+    // 픽토그램이 그림 자리를 채우면(#469) 제목은 줄에 그대로 둔다 — 그림이 뜻을 전하고
+    // 글자는 줄에서 읽는다.
+    final titleInArt = childLayout &&
+        imageState == CardImageState.none &&
+        !showsPictogram(imageState, widget.card.pictogramId);
     return Container(
       decoration: BoxDecoration(
         color: palette.fill,
@@ -263,6 +270,8 @@ class _ActionCardViewState extends State<ActionCardView> {
                         routineId: widget.routineId,
                         stepId: widget.card.id,
                         imagePath: widget.card.imagePath,
+                        pictogramId: widget.card.pictogramId,
+                        pictogramLabel: widget.card.displayTitle,
                         onDelete: widget.onDelete,
                         // 이룸이 화면은 사진을 넣는 자리가 아니다
                         emptyBuilder: (context) => childLayout
@@ -386,6 +395,8 @@ class _Illustration extends StatelessWidget {
     required this.routineId,
     required this.stepId,
     this.imagePath,
+    this.pictogramId,
+    this.pictogramLabel = '',
     required this.emptyBuilder,
     this.onDelete,
   });
@@ -393,6 +404,8 @@ class _Illustration extends StatelessWidget {
   final String routineId;
   final String stepId;
   final String? imagePath;
+  final String? pictogramId;
+  final String pictogramLabel;
   final WidgetBuilder emptyBuilder;
   final VoidCallback? onDelete;
 
@@ -414,6 +427,8 @@ class _Illustration extends StatelessWidget {
                 routineId: routineId,
                 stepId: stepId,
                 imagePath: imagePath,
+                pictogramId: pictogramId,
+                pictogramLabel: pictogramLabel,
                 emptyBuilder: emptyBuilder,
               ),
             ),

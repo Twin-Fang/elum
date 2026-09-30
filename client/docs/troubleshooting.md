@@ -25,6 +25,7 @@
 - [일러스트가 사각형으로 렌더링됨](#일러스트가-사각형으로-렌더링됨)
 - [버튼 enable 색을 잘못 읽음](#버튼-enable-색을-잘못-읽음)
 - [로고 폰트를 못 구해 텍스트로 대체함](#로고-폰트를-못-구해-텍스트로-대체함)
+- [외부 SVG 262개가 검은 실루엣으로 그려짐](#외부-svg-262개가-검은-실루엣으로-그려짐)
 
 **서버 연동**
 - [SupportGoal enum 값이 서버와 전부 달랐음](#supportgoal-enum-값이-서버와-전부-달랐음)
@@ -552,3 +553,19 @@ Set에 7장이 다 들어 있어 100%로 보였다. 로컬 상태는 메모리�
 - 관련 테스트: `test/child_step_sync_test.dart` — 순서 거부 · 서버 거부 되돌림 ·
   직렬 전송 · 서버 완료 카드 재진입을 고정한다
 - 근본 구조 개선은 이슈 #140에서 완료했다 — 기기 기록(`RoutineProgressRecord`, shared_preferences)이 진실, 완료 집합을 `PUT /api/routines/{id}/progress`로 멱등 반영, 대기열(`progress.pending`)로 오프라인 재전송(`SyncTriggers`: 앱 시작·복귀·온라인 전환). 순서 제한(`canToggle`)은 서버 일괄 API가 순서를 검사하지 않으므로 제거됐다.
+
+---
+
+## 외부 SVG 262개가 검은 실루엣으로 그려짐
+**언제**: 2026-09-30 · 이슈 #469
+**증상**: 무료 픽토그램(Mulberry Symbols 811개)을 그림 자리에 그렸더니 "손 씻기"·"묻기"·"먹기" 같은
+32%가 색이 사라지고 검은 덩어리로 나왔다. 나머지는 멀쩡했다. 로그에는 `unhandled element <style/>` 한 줄뿐.
+**원인**: 일러스트레이터가 내보낸 SVG 는 색을 `<style>.st0{fill:#ed1e29}</style>` 클래스로 적는다.
+flutter_svg 는 `<style>` 을 읽지 못하고 버린다 (메모리 `flutter-svg-drops-filters` 와 같은 계열).
+`<filter>`·`mask` 는 이 세트에 0개라 문제가 아니었고, 클래스 CSS 가 진짜 원인이었다.
+**해결**: 원본은 고치지 않고(CC BY-SA — 변형 금지) 읽을 때 메모리에서만 클래스 규칙을 요소 속성으로
+풀어 준다 — `shared/pictogram/svg_style_inliner.dart`, 로더 `pictogram_svg_loader.dart`.
+**재발 방지**: 외부 SVG 를 새로 들일 때는 **`<style` · `<filter` · `<mask` · `<text` 를 grep 하고 실제로 그려서**
+눈으로 본다(파싱이 성공해도 색이 틀릴 수 있다). 테스트: `test/pictogram/svg_style_inliner_test.dart` 가
+262개 전수에서 `<style>`·클래스 참조가 남지 않는지, 빨간 입술이 실제 픽셀로 나오는지 확인한다.
+남은 한계: `<text>` 를 쓴 4개(`open_shop`·`ambulance` 등)는 flutter_svg 가 글자를 못 그려 간판 글자만 빠진다.

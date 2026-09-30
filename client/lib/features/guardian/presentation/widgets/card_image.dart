@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_motion.dart';
+import '../../../../shared/pictogram/pictogram_catalog.dart';
 import '../../data/card_image_repository.dart';
+import 'pictogram_art.dart';
 
 /// 카드 그림 조회 상태 — 화면이 "그림이 없다"를 알아야 할 때 쓴다 (#458).
 enum CardImageState {
@@ -45,6 +47,14 @@ CardImageState watchCardImageState(
       );
 }
 
+/// 이 카드가 그림 자리에 픽토그램을 보여주는가 (#469).
+///
+/// 사진·AI 그림이 **없을 때만**(우선순위: 사진/AI > 픽토그램 > 기본 카드) 그리고
+/// 번들에 있는 id 일 때만 참이다. [CardImage] 와 카드 안 배치(제목 줄)가 **같은 판정**을
+/// 써야 그림 자리는 픽토그램인데 제목이 그림 자리로 올라가는 어긋남이 없다.
+bool showsPictogram(CardImageState state, String? pictogramId) =>
+    state == CardImageState.none && PictogramCatalog.parse(pictogramId) != null;
+
 /// 카드 이미지.
 ///
 /// 서버가 AI로 만든 그림을 `GET /api/routines/{id}/steps/{stepId}/image`로 준다.
@@ -60,18 +70,37 @@ class CardImage extends ConsumerWidget {
     required this.routineId,
     required this.stepId,
     this.imagePath,
+    this.pictogramId,
+    this.pictogramLabel = '',
     required this.emptyBuilder,
   });
 
   final String routineId;
   final String stepId;
 
+  /// 그림이 없을 때 보여줄 무료 픽토그램 id (#469). null·카탈로그에 없는 값이면 [emptyBuilder].
+  final String? pictogramId;
+
+  /// 낭독기가 픽토그램 대신 읽을 이름 — 카드 제목.
+  final String pictogramLabel;
+
   /// 서버가 준 그림 열쇠. **캐시 열쇠의 일부다** — 보호자가 사진으로 바꾸면 값이 바뀌고,
   /// 그 순간 옛 그림 캐시를 버리고 새로 받는다 (#456). 모르면 null.
   final String? imagePath;
 
-  /// 그림이 없을 때 자리를 채울 기본 카드.
+  /// 그림도 픽토그램도 없을 때 자리를 채울 기본 카드.
   final WidgetBuilder emptyBuilder;
+
+  /// 그림이 없을 때 자리를 채운다: 픽토그램 > 기본 카드 (#469).
+  WidgetBuilder get _noPictureBuilder {
+    final id = PictogramCatalog.parse(pictogramId);
+    if (id == null) return emptyBuilder;
+    return (context) => PictogramArt(
+      id: id,
+      label: pictogramLabel,
+      fallbackBuilder: emptyBuilder,
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -89,13 +118,14 @@ class CardImage extends ConsumerWidget {
       CardImageState.loading => const SizedBox.expand(key: ValueKey('loading')),
       CardImageState.none => KeyedSubtree(
         key: const ValueKey('none'),
-        child: emptyBuilder(context),
+        child: _noPictureBuilder(context),
       ),
       CardImageState.ready => _Picture(
         routineId: routineId,
         stepId: stepId,
         imagePath: imagePath,
-        emptyBuilder: emptyBuilder,
+        // 받은 바이트가 깨졌을 때도 픽토그램이 있으면 그것을 먼저 보여준다
+        emptyBuilder: _noPictureBuilder,
       ),
     };
 
