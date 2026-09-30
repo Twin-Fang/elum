@@ -3,15 +3,8 @@
     <!-- 서버 통신에 필수. debug/profile 매니페스트에만 있으면 릴리스 빌드에서
          DNS 조회부터 막혀 "Failed host lookup (errno = 7)"로 실패한다. -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- 광고 ID 권한을 **일부러 뺀다** (tools:node="remove").
-         광고 SDK(google_mobile_ads)가 이 권한을 합쳐 넣는데, Play Console 의 광고 ID 선언이 "쓰지 않음"이면
-         Play 가 업로드를 거절한다: "This release includes the AD_ID permission but your declaration on Play
-         Console says your app doesn't use advertising ID" (v2.2.0 릴리스가 이 이유로 실패했다).
-         지금 릴리스 빌드는 광고 단위가 비어 광고가 뜨지 않으므로 손해가 없다.
-         **Play 광고 ID 선언(#466)을 마친 뒤 이 줄을 지운다.** 그래야 Android 13+ 에서 광고 식별자가 실려 단가가 오른다. -->
-    <uses-permission
-        android:name="com.google.android.gms.permission.AD_ID"
-        tools:node="remove"/>
+    <!-- 광고 ID. Android 13(API 33)+에서 선언하지 않으면 광고 식별자가 0으로 나와 단가가 떨어진다. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
     <application
         android:label="이룸"
