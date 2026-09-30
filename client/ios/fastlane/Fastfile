@@ -117,8 +117,15 @@ platform :ios do
         metadata_path: metadata_path,
         skip_screenshots: true,
         precheck_include_in_app_purchases: false,
+        # 광고 식별자(IDFA) 답변 — 광고 SDK(google_mobile_ads)와 ATT 안내가 들어 있어 "사용함"이어야 한다.
+        # false 로 두면 바이너리의 IDFA 참조와 어긋나 심사에서 반려된다(#281).
+        # 사용처는 보호자 화면의 광고 게재뿐이고, 설치·행동 추적(어트리뷰션)은 하지 않는다.
         submission_information: {
-          add_id_info_uses_idfa: false
+          add_id_info_uses_idfa: true,
+          add_id_info_serves_ads: true,
+          add_id_info_tracks_install: false,
+          add_id_info_tracks_action: false,
+          add_id_info_limits_tracking: true
         }
       )
       if submit_to_appstore
