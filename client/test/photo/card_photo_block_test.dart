@@ -346,7 +346,7 @@ void main() {
       await settle(tester);
 
       expect(find.text('사진을 올리지 못했어요'), findsOneWidget);
-      expect(find.text('E-PHOTO/500'), findsOneWidget);
+      expect(find.text('ROUTINE_STEP_IMAGE_SAVE_FAILED'), findsOneWidget);
       expect(find.text('다시 하기'), findsOneWidget);
       expect(imagePathNow(), 'k/old.jpg', reason: '실패하면 옛 그림 그대로다');
 
@@ -374,7 +374,7 @@ void main() {
       await settle(tester);
 
       expect(find.text('사진은 5MB 까지 올릴 수 있어요.'), findsOneWidget);
-      expect(find.text('E-PHOTO/400'), findsOneWidget);
+      expect(find.text('ROUTINE_STEP_IMAGE_TOO_LARGE'), findsOneWidget);
 
       await tester.tap(find.text('다시 하기'));
       await settle(tester);

@@ -271,7 +271,7 @@ void main() {
       await settle(tester);
 
       expect(find.textContaining('사진을 올리지 못했어요'), findsOneWidget);
-      expect(find.text('E-PHOTO/500'), findsOneWidget);
+      expect(find.text('ROUTINE_STEP_IMAGE_SAVE_FAILED'), findsOneWidget);
       expect(imagePathOf('c1'), 'k/old.jpg');
     });
   });

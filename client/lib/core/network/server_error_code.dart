@@ -39,6 +39,10 @@ enum ServerErrorCode {
   routineStepMinCount('ROUTINE_STEP_MIN_COUNT'),
   routineStepMaxCount('ROUTINE_STEP_MAX_COUNT'),
   routineStepImageNotFound('ROUTINE_STEP_IMAGE_NOT_FOUND'),
+  // 카드 그림을 사진으로 바꿀 때 (#455). 형식·크기·저장 실패를 서버가 문구와 함께 내려준다.
+  routineStepImageInvalidType('ROUTINE_STEP_IMAGE_INVALID_TYPE'),
+  routineStepImageTooLarge('ROUTINE_STEP_IMAGE_TOO_LARGE'),
+  routineStepImageSaveFailed('ROUTINE_STEP_IMAGE_SAVE_FAILED'),
   routineRequestTooFrequent('ROUTINE_REQUEST_TOO_FREQUENT'),
 
   // PROMPT

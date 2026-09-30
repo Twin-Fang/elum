@@ -106,7 +106,7 @@ void main() {
 
     expect(r.failure?.message, '사진은 5MB 까지 올릴 수 있어요.');
     // 앱이 아직 모르는 서버 코드는 자리 코드 + 상태로 남긴다
-    expect(r.failure?.code, 'E-PHOTO/400');
+    expect(r.failure?.code, 'ROUTINE_STEP_IMAGE_TOO_LARGE');
     expect(r.failure?.kind, PhotoFailureKind.pickAnother);
   });
 
@@ -133,7 +133,7 @@ void main() {
 
     final r = await repo.uploadPhoto(routineId: 'r1', stepId: 's1', photo: jpeg);
 
-    expect(r.failure?.code, 'E-PHOTO/500');
+    expect(r.failure?.code, 'ROUTINE_STEP_IMAGE_SAVE_FAILED');
     expect(r.failure?.kind, PhotoFailureKind.retrySame);
   });
 
