@@ -71,17 +71,31 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
 
   /// 설정에서 그림 방식을 바꾼다 — 화면·로컬·서버에 바로 남긴다 (#458).
   ///
-  /// 로컬 저장이 먼저고 서버 저장은 그 뒤다. **서버가 실패해도 로컬 값은 남는다**
-  /// (캐릭터 저장과 같은 규칙) — 화면은 고른 값 그대로 살고, 부르는 쪽이 돌려받은
-  /// 실패로 에러 코드를 띄운다. null 이면 서버까지 저장됐다.
+  /// 로컬 저장이 먼저고 서버 저장은 그 뒤다. **서버가 실패하면 이전 값으로 되돌린다.**
+  /// 서버 값이 곧 AI 그림 생성 여부(크레딧)를 정하므로, 실패했는데 화면만 "직접 사진"으로
+  /// 남으면 AI를 껐다고 믿는 사이 서버는 계속 그림을 만든다. 되돌린 뒤 부르는 쪽이
+  /// 돌려받은 실패로 에러 코드를 띄운다. null 이면 서버까지 저장됐다.
   Future<AppFailure?> changeImageStyle(ImageStyle style) async {
+    final previous = state.imageStyle;
     state = state.copyWith(imageStyle: style);
     try {
       await ref.read(localStorageProvider).setImageStyle(style.apiValue);
     } catch (e) {
       debugPrint('[onboarding] 그림 방식 로컬 저장 실패, 서버 저장은 시도: $e');
     }
-    return ref.read(memberRepositoryProvider).updateImageStyle(style.apiValue);
+    final failure = await ref
+        .read(memberRepositoryProvider)
+        .updateImageStyle(style.apiValue);
+    if (failure == null) return null;
+
+    // 서버와 어긋난 채 남지 않게 화면·로컬을 이전 값으로 복원한다
+    state = state.copyWith(imageStyle: previous);
+    try {
+      await ref.read(localStorageProvider).setImageStyle(previous.apiValue);
+    } catch (e) {
+      debugPrint('[onboarding] 그림 방식 로컬 복원 실패: $e');
+    }
+    return failure;
   }
 
   void setPin(String pin) {
