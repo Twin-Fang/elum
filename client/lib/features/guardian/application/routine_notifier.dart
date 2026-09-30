@@ -567,6 +567,26 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     return null;
   }
 
+  /// 카드 그림을 사진으로 바꾼 뒤 새 `imagePath` 를 반영한다 (#456).
+  ///
+  /// 서버 응답 전체를 쓰지 않고 **`imagePath` 만** 바꾼다 — 응답에는 카드 제목이 없어
+  /// 통째로 덮으면 로컬 제목이 지워진다([updateStep] 과 같은 사정). 그 사이 지워진 카드면
+  /// 아무것도 하지 않는다. 목록 캐시도 버려, 홈·이룸이 쪽이 새 열쇠를 받게 한다.
+  void applyStepImage(String stepId, String imagePath) {
+    final routine = state.routine;
+    if (routine == null || !routine.steps.any((s) => s.id == stepId)) return;
+
+    state = state.copyWith(
+      routine: routine.copyWith(
+        steps: [
+          for (final s in routine.steps)
+            if (s.id == stepId) s.copyWith(imagePath: imagePath) else s,
+        ],
+      ),
+    );
+    ref.refreshRoutines();
+  }
+
   /// 순서 변경 모드에 들어가는 순간의 순서. `✕` 로 나올 때 되돌린다 (#444).
   ({List<ActionCard> steps, bool dirty}) snapshotOrder() => (
     steps: List.of(state.routine?.steps ?? const <ActionCard>[]),

@@ -41,6 +41,12 @@
 	<true/>
 <key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- 카드 그림을 카메라·갤러리 사진으로 바꾼다 (이슈 #456). 없으면 iOS 가 앱을 강제 종료한다.
+	     문구는 사용자에게 그대로 보이므로 해요체로 쓴다. -->
+	<key>NSCameraUsageDescription</key>
+	<string>카드 그림으로 쓸 사진을 찍으려고 카메라를 사용해요</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>카드 그림으로 쓸 사진을 고르려고 사진 보관함을 사용해요</string>
 	<!-- 소셜 로그인. 값은 ios/Flutter/Secrets.xcconfig가 채운다
 	     (tool/gen_ios_secrets.sh가 .env로 생성, 커밋 제외). -->
 	<key>CFBundleURLTypes</key>

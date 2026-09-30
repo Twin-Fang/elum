@@ -10,6 +10,7 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../shared/models/action_card.dart';
 import '../../child/data/speech_service.dart';
 import '../application/routine_notifier.dart';
+import '../data/card_photo.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
 import 'widgets/card_review_parts.dart';
@@ -156,6 +157,11 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
       // 똑같아진다. title이 비면 제목칸도 비워 사용자가 직접 채우게 한다.
       title: card.title,
       description: card.description,
+      // 서버 id 가 있는 카드만 사진으로 바꿀 수 있다 (#456). 아니면 칩이 없다.
+      photo: CardPhotoTarget.of(
+        routineId: ref.read(routineFlowProvider).routine?.id ?? '',
+        stepId: card.id,
+      ),
     );
     // 저장 없이 닫았다 — 아무것도 바꾸지 않는다
     if (edited == null || !mounted) return;

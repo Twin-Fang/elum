@@ -925,7 +925,12 @@ void main() {
     ActionCard(id: 'c5', stepOrder: 5, title: '길을 걸어요', description: '설명'),
   ];
 
-  Future<void> pumpCardReview(WidgetTester tester) async {
+  Future<void> pumpCardReview(
+    WidgetTester tester, {
+    // 사진 바꾸기 칩(#456)은 서버 카드의 수정 시트만 키운다. 시안 1197:5923 은 그림 칸이
+    // 없는 시트라 그 대조는 서버 id 없는 일과('')로 한다.
+    String routineId = 'r1',
+  }) async {
     final container = ProviderContainer(
       overrides: [
         testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
@@ -933,9 +938,9 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
-    container.read(routineFlowProvider.notifier).state = const RoutineFlowState(
+    container.read(routineFlowProvider.notifier).state = RoutineFlowState(
       routine: Routine(
-        id: 'r1',
+        id: routineId,
         title: '학교에 가요',
         status: 'PENDING_REVIEW',
         rewardText: '젤리 4개 먹기',
@@ -1001,7 +1006,7 @@ void main() {
   });
 
   testWidgets('카드 수정 시트 (Figma 1197:5923)', (tester) async {
-    await pumpCardReview(tester);
+    await pumpCardReview(tester, routineId: '');
     await tester.tap(find.text('이 카드 수정'));
     await settleReview(tester);
 

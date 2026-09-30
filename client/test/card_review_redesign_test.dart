@@ -47,6 +47,9 @@ void main() {
     String rewardText = '젤리 4개 먹기',
     String status = 'PENDING_REVIEW',
     List<ActionCard> steps = cards,
+    // 사진 바꾸기 칩(#456)은 서버 카드의 수정 시트만 키운다(그림 칸 +166). 시안
+    // 1197:5923 은 그림 칸이 없는 시트라, 그 좌표는 서버 id 없는 일과('')로 잰다.
+    String routineId = 'r1',
   }) async {
     repo = _Repo();
     final container = ProviderContainer(
@@ -60,7 +63,7 @@ void main() {
     addTearDown(container.dispose);
     container.read(routineFlowProvider.notifier).state = RoutineFlowState(
       routine: Routine(
-        id: 'r1',
+        id: routineId,
         title: '학교에 가요',
         status: status,
         rewardText: rewardText,
@@ -764,7 +767,7 @@ void main() {
         rectOfContainerAround(tester, find.byType(TextField).at(index));
 
     testWidgets('수정 시트는 높이 450 이고 시안 자리에 선다', (tester) async {
-      await pump(tester);
+      await pump(tester, routineId: '');
       await tester.tap(find.text('이 카드 수정'));
       await settle(tester);
 
@@ -807,7 +810,7 @@ void main() {
     });
 
     testWidgets('손잡이는 선 가운데가 y=16 이다 (윗변 14 · 굵기 4 · 폭 40)', (tester) async {
-      await pump(tester);
+      await pump(tester, routineId: '');
       await tester.tap(find.text('이 카드 수정'));
       await settle(tester);
 
