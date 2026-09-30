@@ -353,6 +353,8 @@ public final class PromptDefaults {
       person, or mascot as the subject. If a person is needed, mention only hands.
       - Never start with "The character". Example: "A small wooden dresser with the bottom drawer \
       half open, in a bright bedroom."
+      - Put the object alone on a plain light surface such as a white table. Do not describe weather, \
+      rain, sunlight, or extra furniture.
       - Under 30 words. Never mention text, letters, signs, labels, cards, or disabilities.
       Reply only with JSON: {"imagePromptEn":"..."}""")
   );

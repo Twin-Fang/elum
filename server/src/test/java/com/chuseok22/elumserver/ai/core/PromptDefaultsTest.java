@@ -167,6 +167,7 @@ class PromptDefaultsTest {
 
     assertThat(content).doesNotContain("Start with \"The character\"").contains("Never start with \"The character\"");
     assertThat(content).contains("Under 30 words").contains("imagePromptEn");
+    assertThat(content).contains("plain light surface").contains("Do not describe weather");
   }
 
   @Test
