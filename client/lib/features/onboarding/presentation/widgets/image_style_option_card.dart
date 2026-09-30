@@ -46,18 +46,28 @@ class ImageStyleOptionCard extends StatelessWidget {
     final colors = context.colors;
     final space = context.space;
 
+    // 선택하면 테두리가 두꺼워져 안쪽 내용이 그만큼 밀렸다(통합 E2E 실측: 선택 카드의 그림이 2~3px 어긋남).
+    // 두꺼워진 만큼 안쪽 여백을 줄여 내용 위치를 그대로 둔다.
+    final borderWidth = isSelected
+        ? space.selectedBorderWidth
+        : space.borderWidth;
+    final inset = (space.selectedBorderWidth - borderWidth).clamp(0.0, 8.0);
+
     return AnimatedContainer(
       duration: AppMotion.fast,
       curve: AppMotion.standard,
       constraints: BoxConstraints(minHeight: minHeight.h),
       // 글자를 키우면 카드가 늘어난다 — 고정 높이면 설명이 잘린다
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+      padding: EdgeInsets.symmetric(
+        horizontal: 14.w + inset,
+        vertical: 14.h + inset,
+      ),
       decoration: BoxDecoration(
         color: isSelected ? colors.goalSelectedFill : colors.surface,
         borderRadius: BorderRadius.circular(space.cardRadius.r),
         border: Border.all(
           color: isSelected ? colors.goalSelectedBorder : colors.border,
-          width: isSelected ? space.selectedBorderWidth : space.borderWidth,
+          width: borderWidth,
         ),
       ),
       child: Row(
@@ -75,7 +85,9 @@ class ImageStyleOptionCard extends StatelessWidget {
               children: [
                 Text(
                   style.label,
-                  style: context.typo.subtitle.copyWith(color: colors.textPrimary),
+                  style: context.typo.subtitle.copyWith(
+                    color: colors.textPrimary,
+                  ),
                 ),
                 SizedBox(height: space.xs.h / 2),
                 Text(
@@ -83,7 +95,9 @@ class ImageStyleOptionCard extends StatelessWidget {
                   // 띄어쓰기에서만 줄바꿈하게 한다. 낭독기에는 원문을 준다.
                   keepWords(style.description),
                   semanticsLabel: style.description,
-                  style: context.typo.body.copyWith(color: colors.textSecondary),
+                  style: context.typo.body.copyWith(
+                    color: colors.textSecondary,
+                  ),
                 ),
               ],
             ),
