@@ -60,6 +60,12 @@ public class GeminiImageClient implements ImageGenerationClient {
     return callGenerateImage(promptText, characterType);
   }
 
+  /// 실사(#457): 캐릭터가 없으니 참조 이미지도 붙이지 않는다. 지시문은 실사 전용 키 하나(영어 단일).
+  @Override
+  public GeneratedImage generateRealisticImage(String stepDescription) {
+    return callGenerateImage(promptComposer.composeRealistic(stepDescription), null);
+  }
+
   // 관리자 테스트 전용: DB 조회 없이 전달받은 prefix를 그대로 사용한다.
   @Override
   public GeneratedImage generateImageForTest(

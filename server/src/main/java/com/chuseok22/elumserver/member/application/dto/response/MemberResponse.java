@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.member.application.dto.response;
 
 import com.chuseok22.elumserver.license.application.service.EntitlementSnapshot;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
@@ -44,7 +45,11 @@ public record MemberResponse(
 
   @Schema(description = "연결된 이룸이 목록, 먼저 연결된 차례. 헤더 없이 부르면 첫 번째가 위의 당사자 항목이다. "
     + "이룸이 휴대폰에는 그 연결의 이룸이 하나만 내려간다. 기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.")
-  List<ProfileSummaryResponse> profiles
+  List<ProfileSummaryResponse> profiles,
+
+  @Schema(description = "카드 그림 방식. CARTOON(만화, 기본) · REALISTIC(실사) · PHOTO_ONLY(직접 사진). "
+    + "기존 클라이언트는 이 필드를 무시하므로 동작에 영향이 없다.", example = "CARTOON")
+  ImageStyle imageStyle
 ) {
 
   /**
@@ -69,7 +74,9 @@ public record MemberResponse(
       member.hasRequiredConsents(),
       member.getCreatedAt(),
       entitlements,
-      profiles.stream().map(ProfileSummaryResponse::from).toList()
+      profiles.stream().map(ProfileSummaryResponse::from).toList(),
+      // 당사자 항목이 없으면(E29) 기본 만화 — 화면이 null 을 만나지 않게 한다
+      profile == null ? ImageStyle.CARTOON : profile.getImageStyle()
     );
   }
 }

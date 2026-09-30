@@ -11,6 +11,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,18 +48,22 @@ public class RoutineAiPipeline {
 
   /**
    * @param profileId FLUX seed 를 이 이룸이 + 일과 제목으로 정한다. 일과 id 는 저장 전이라 아직 없다 (#373)
+   * @param imageStyle 이룸이의 그림 방식(#457). PHOTO_ONLY 면 그림 호출을 건너뛰고 imagePath 를 null 로 둔다
    */
   public RoutineGenerationResult generateForCreate(
     String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> maskedAnswers,
-    CharacterType characterType, String profileId
+    CharacterType characterType, ImageStyle imageStyle, String profileId
   ) {
-    // FLUX 일 때만 카드마다 영어 장면을 같은 호출로 받는다 — 다른 제공자는 쓰지 않을 출력 토큰이다.
-    boolean includeImagePromptEn = imageClientRouter.selected() == ImageProvider.FLUX;
+    // FLUX + 만화일 때만 카드마다 영어 장면을 같은 호출로 받는다 — 다른 제공자·방식은 쓰지 않을 출력 토큰이다.
+    // 실사는 그 문장("The character" 관례)을 버리고 실사용 번역을 따로 하고, 직접 사진은 그림을 안 그린다.
+    boolean includeImagePromptEn =
+      imageClientRouter.selected() == ImageProvider.FLUX && ImageStyle.orDefault(imageStyle) == ImageStyle.CARTOON;
     RoutineStepDraft draft = parseDraft(
       () -> textClientRouter.current()
         .generateRoutineJson(sanitizedInputText, nickname, supportGoals, maskedAnswers, includeImagePromptEn)
     );
-    return buildResult(draft, characterType, Map.of(), FluxSeed.routineKey(profileId, draft.title()));
+    return buildResult(
+      draft, characterType, ImageStyle.orDefault(imageStyle), Map.of(), FluxSeed.routineKey(profileId, draft.title()));
   }
 
   private static final int MIN_OPTIONS = 3;
@@ -206,15 +211,15 @@ public class RoutineAiPipeline {
   }
 
   private RoutineGenerationResult buildResult(
-    RoutineStepDraft draft, CharacterType characterType, Map<Integer, String> reusableImagePathsByOrder,
-    String seedKey
+    RoutineStepDraft draft, CharacterType characterType, ImageStyle imageStyle,
+    Map<Integer, String> reusableImagePathsByOrder, String seedKey
   ) {
     String batchId = UUID.randomUUID().toString();
     ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     try {
       List<CompletableFuture<StepResult>> futures = draft.steps().stream()
         .map(stepDraft -> CompletableFuture.supplyAsync(
-          () -> resolveStepResult(stepDraft, characterType, reusableImagePathsByOrder, seedKey), executor
+          () -> resolveStepResult(stepDraft, characterType, imageStyle, reusableImagePathsByOrder, seedKey), executor
         ))
         .toList();
 
@@ -259,15 +264,20 @@ public class RoutineAiPipeline {
   }
 
   private StepResult resolveStepResult(
-    RoutineStepDraft.StepDraft stepDraft, CharacterType characterType,
+    RoutineStepDraft.StepDraft stepDraft, CharacterType characterType, ImageStyle imageStyle,
     Map<Integer, String> reusableImagePathsByOrder, String seedKey
   ) {
     String reusablePath = reusableImagePathsByOrder.get(stepDraft.order());
     if (reusablePath != null) {
       return new StepResult(stepDraft, null, reusablePath);
     }
+    // 직접 사진: 그림 호출 자체를 하지 않는다. 카드는 imagePath=null 로 저장되고(허용됨) 보호자가 사진을 넣는다.
+    // 재시도·기본 그림 대체 경로도 타지 않는다 — 실패가 아니라 선택이다.
+    if (imageStyle == ImageStyle.PHOTO_ONLY) {
+      return new StepResult(stepDraft, null, null);
+    }
     CardImageGenerator.CardImageRequest request = new CardImageGenerator.CardImageRequest(
-      stepDraft.description(), stepDraft.imagePromptEn(), characterType, seedKey);
+      stepDraft.description(), stepDraft.imagePromptEn(), characterType, seedKey, imageStyle);
     return new StepResult(stepDraft, generateImageWithRetry(request), null);
   }
 

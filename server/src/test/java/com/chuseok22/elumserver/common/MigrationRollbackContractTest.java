@@ -120,6 +120,21 @@ class MigrationRollbackContractTest {
     assertThat(sql).doesNotContain("update refresh_token");
   }
 
+  // --- V28 이룸이 그림 방식 (#457) — 같은 "추가만 한다" 약속 ---
+
+  private static final Path V28 = Path.of("src/main/resources/db/migration/V28__add_profile_image_style.sql");
+
+  @Test
+  @DisplayName("V28 은 image_style 을 DEFAULT 와 함께 더하기만 한다 — 옛 서버는 이 컬럼을 모르고 profile 을 INSERT 한다")
+  void v28_addsColumnWithDefaultOnly() throws IOException {
+    String sql = normalizedSql(V28);
+    assertThat(sql).doesNotContain("drop ").doesNotContain("rename ");
+    assertThat(sql).contains(
+      "alter table profile add column if not exists image_style varchar(20) not null default 'cartoon';".toLowerCase());
+    // NOT NULL 이면 DEFAULT 가 같은 문장에 있어야 한다 — 없으면 옛 서버의 INSERT 가 전부 실패한다.
+    assertThat(sql).containsPattern("not null default");
+  }
+
   /** create table 한 덩이 — 여는 괄호부터 그 표를 닫는 ");" 까지. */
   private String tableBlock(String table) throws IOException {
     String sql = normalizedSql();

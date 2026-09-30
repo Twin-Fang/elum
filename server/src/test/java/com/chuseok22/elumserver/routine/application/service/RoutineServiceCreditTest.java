@@ -99,7 +99,7 @@ class RoutineServiceCreditTest {
 
   /// 카드 3장 중 2장에만 그림이 붙은 생성 결과.
   private void stubPipeline() {
-    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any()))
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any(), any()))
       .thenReturn(new RoutineAiPipeline.RoutineGenerationResult("병원 다녀오기", List.of(
         new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발", "img/b/1.png"),
         new RoutineAiPipeline.GeneratedStep(2, "차 타요", "차", null),
@@ -265,7 +265,7 @@ class RoutineServiceCreditTest {
   void create_aiFails_releases() {
     profile();
     reserved("key-1");
-    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any()))
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any(), any()))
       .thenThrow(new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED));
 
     assertThatThrownBy(() -> routineService.create(GUARDIAN, REQUEST, "key-1"))
@@ -280,7 +280,7 @@ class RoutineServiceCreditTest {
     profile();
     reserved("key-1");
     AtomicReference<String> seen = new AtomicReference<>();
-    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any())).thenAnswer(i -> {
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any(), any())).thenAnswer(i -> {
       seen.set(AiCallContext.currentCreditJobId());
       return new RoutineAiPipeline.RoutineGenerationResult("t", List.of(
         new RoutineAiPipeline.GeneratedStep(1, "d", "t", null)), "batch-1");
@@ -344,7 +344,7 @@ class RoutineServiceCreditTest {
     order.verify(aiDailyBudgetGuard).guard();
     order.verify(profileAccessGuard).profileFor(eq(GUARDIAN), any(ProfileAction.class));
     order.verify(creditReservationService).reserve(anyString(), any(), anyString(), eq(true));
-    order.verify(routineAiPipeline).generateForCreate(any(), any(), any(), any(), any(), any());
+    order.verify(routineAiPipeline).generateForCreate(any(), any(), any(), any(), any(), any(), any());
   }
 
   @Test

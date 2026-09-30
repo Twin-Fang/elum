@@ -56,4 +56,22 @@ class FluxPromptBuilderTest {
 
     assertThat(prompt).endsWith("The kitten waves.");
   }
+
+
+  @Test
+  @DisplayName("실사(#457)는 지시문 + 장면 한 줄뿐 — 'Only one character' 도 캐릭터·figure 치환도 없다")
+  void realistic_hasNoCharacterConvention() {
+    String prompt = builder.buildRealistic(
+      "Realistic photo.  ", "  A small wooden dresser\n with the bottom drawer half open.  ");
+
+    assertThat(prompt).isEqualTo("Realistic photo. A small wooden dresser with the bottom drawer half open.");
+    assertThat(prompt).doesNotContain("Only one character").doesNotContain("figure");
+  }
+
+  @Test
+  @DisplayName("만화 경로의 프롬프트 문자열은 그대로다 — 실사 추가가 기존 조립을 바꾸지 않는다")
+  void cartoon_promptUnchanged() {
+    assertThat(builder.build("Style.", "The character waves.", CharacterType.POPO))
+      .isEqualTo("Style. Only one character: " + CharacterType.POPO.getAppearanceEn() + ". The fox cub waves.");
+  }
 }

@@ -17,6 +17,10 @@ public enum PromptKey {
   FLUX_ROUTINE_IMAGE_PREFIX("FLUX 그림 지시문 (영어 전용)"),
   // 영어 장면이 없는 카드(보호자가 직접 추가)를 FLUX 용 한 줄로 옮기는 지시문 (#373).
   FLUX_IMAGE_PROMPT_TRANSLATE("FLUX 그림 문장 번역"),
+  // 그림 방식 '실사'(#457) 전용. 캐릭터 없이 물건·장소를 사진처럼 그린다. OpenAI·Gemini·FLUX 가 영어 단일로 같이 쓴다.
+  REALISTIC_ROUTINE_IMAGE_PREFIX("실사 그림 지시문 (영어 · 전 제공자)"),
+  // 실사용 영어 장면 번역. 'The character' 관례 없이 물건·장소 중심 (#457).
+  REALISTIC_IMAGE_PROMPT_TRANSLATE("실사 그림 문장 번역"),
   ;
 
   private final String label;

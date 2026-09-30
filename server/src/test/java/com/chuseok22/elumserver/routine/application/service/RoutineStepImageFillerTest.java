@@ -23,6 +23,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
 import com.chuseok22.elumserver.common.infrastructure.store.InMemorySharedStateStore;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineStepImageThrottle;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
@@ -88,7 +89,7 @@ class RoutineStepImageFillerTest {
   }
 
   private void fill(String memberId) {
-    filler.fill(memberId, "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, SEED_KEY, null);
+    filler.fill(memberId, "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, SEED_KEY, null, ImageStyle.CARTOON);
   }
 
   @Test
@@ -169,7 +170,7 @@ class RoutineStepImageFillerTest {
     TransactionSynchronizationManager.initSynchronization();
     try {
       filler.scheduleAfterCommit(
-        "member-1", "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, SEED_KEY, null);
+        "member-1", "routine-1", "step-1", "현관에서 우산을 챙겨요.", CharacterType.LULU, SEED_KEY, null, ImageStyle.CARTOON);
       TransactionSynchronizationManager.getSynchronizations()
         .forEach(TransactionSynchronization::afterCommit);
     } finally {

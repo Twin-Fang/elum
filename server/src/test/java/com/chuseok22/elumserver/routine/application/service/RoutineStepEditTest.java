@@ -107,7 +107,7 @@ class RoutineStepEditTest {
     // FLUX seed 열쇠도 넘긴다 — 일과 만들 때와 같은 공식이라 추가 카드도 같은 캐릭터로 그린다 (#373).
     verify(routineStepImageFiller).scheduleAfterCommit(
       eq("member-1"), eq("routine-1"), any(), eq("현관에서 우산을 챙겨요."), eq(CharacterType.LULU),
-      eq(FluxSeed.routineKey(routine.getProfile().getId(), routine.getTitle())), eq(null));
+      eq(FluxSeed.routineKey(routine.getProfile().getId(), routine.getTitle())), eq(null), any());
   }
 
   @Test

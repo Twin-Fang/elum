@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.member.application.dto.response;
 
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -14,10 +15,14 @@ public record ProfileSummaryResponse(
   String nickname,
 
   @Schema(description = "캐릭터, 미설정 시 null", example = "LULU")
-  CharacterType character
+  CharacterType character,
+
+  @Schema(description = "카드 그림 방식. CARTOON(만화, 기본) · REALISTIC(실사) · PHOTO_ONLY(직접 사진)", example = "CARTOON")
+  ImageStyle imageStyle
 ) {
 
   public static ProfileSummaryResponse from(Profile profile) {
-    return new ProfileSummaryResponse(profile.getId(), profile.getNickname(), profile.getCharacter());
+    return new ProfileSummaryResponse(profile.getId(), profile.getNickname(), profile.getCharacter(),
+      profile.getImageStyle());
   }
 }

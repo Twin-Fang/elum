@@ -91,6 +91,11 @@ public class AdminPromptService {
       case FLUX_ROUTINE_IMAGE_PREFIX -> fluxPromptBuilder.build(content, sampleInput, character);
       case FLUX_IMAGE_PROMPT_TRANSLATE -> "[System]\n" + content + "\n\n[User]\n"
         + geminiTextClient.buildTranslateUserContent(sampleInput);
+      // 실사(#457)는 캐릭터가 없다 — 선택한 캐릭터가 있어도 무시하고 캐릭터 블록·참조 이미지 없이 만든다.
+      case REALISTIC_ROUTINE_IMAGE_PREFIX -> imagePromptBuilder.build(
+        content, sampleInput, null, false, ImagePromptLanguage.EN);
+      case REALISTIC_IMAGE_PROMPT_TRANSLATE -> "[System]\n" + content + "\n\n[User]\n"
+        + geminiTextClient.buildTranslateUserContent(sampleInput);
     };
   }
 
@@ -124,6 +129,15 @@ public class AdminPromptService {
         yield new PromptTestResponse(null, dataUri);
       }
       case FLUX_IMAGE_PROMPT_TRANSLATE -> {
+        String line = testTranslate(content, sampleInput);
+        yield new PromptTestResponse(Map.of("imagePromptEn", line), null);
+      }
+      // 실사 지시문은 언어와 무관하게 영어 단일이고 캐릭터가 없다(#457). 지금 제공자(FLUX 면 OpenAI)로 그려 본다.
+      case REALISTIC_ROUTINE_IMAGE_PREFIX -> {
+        String dataUri = testGeminiImage(content, ImagePromptLanguage.EN, sampleInput, null);
+        yield new PromptTestResponse(null, dataUri);
+      }
+      case REALISTIC_IMAGE_PROMPT_TRANSLATE -> {
         String line = testTranslate(content, sampleInput);
         yield new PromptTestResponse(Map.of("imagePromptEn", line), null);
       }

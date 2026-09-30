@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.member.application.controller;
 
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
+import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
@@ -82,6 +83,17 @@ public class MemberController implements MemberControllerDocs {
     @RequestBody @Valid MemberCharacterUpdateRequest request
   ) {
     MemberResponse response = memberService.updateCharacter(Caller.from(authentication, profileId), request);
+    return ResponseEntity.ok(response);
+  }
+
+  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @PatchMapping("/image-style")
+  public ResponseEntity<MemberResponse> updateImageStyle(
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
+    @RequestBody @Valid MemberImageStyleUpdateRequest request
+  ) {
+    MemberResponse response = memberService.updateImageStyle(Caller.from(authentication, profileId), request);
     return ResponseEntity.ok(response);
   }
 

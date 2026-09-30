@@ -373,14 +373,14 @@ class RoutineServiceTest {
       List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발 신기", "data/routine-images/batch-1/1.png")),
       "batch-1"
     );
-    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU), any()))
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU), any(), any()))
       .thenReturn(generationResult);
     when(routineCreationWriter.save(any(), any(), any(), any(), anyInt())).thenAnswer(invocation -> new RoutineCreationWriter.SavedRoutine(invocation.getArgument(2), null));
 
     routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
 
     verify(routineAiPipeline).generateForCreate(
-      eq("내일 병원 가기"), eq("하늘이"), eq(Set.of()), eq(List.of()), eq(CharacterType.LULU), any()
+      eq("내일 병원 가기"), eq("하늘이"), eq(Set.of()), eq(List.of()), eq(CharacterType.LULU), any(), any()
     );
   }
 
@@ -395,7 +395,7 @@ class RoutineServiceTest {
   @DisplayName("일과 만들기는 입력 글과 답변을 가공하지 않고 그대로 AI 에 넘긴다 (이슈 #377)")
   void create_passesRawInputAndAnswersAsIs() {
     Profile profile = profileWithNickname("하늘이");
-    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU), any()))
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU), any(), any()))
       .thenReturn(new RoutineAiPipeline.RoutineGenerationResult(
         "병원 다녀오기",
         List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발 신기",
@@ -410,7 +410,7 @@ class RoutineServiceTest {
 
     verify(routineAiPipeline).generateForCreate(
       eq("내일 병원 가기 010-1234-5678"), eq("하늘이"), any(),
-      eq(List.of("우산", "엄마 010-9999-8888")), eq(CharacterType.LULU), any()
+      eq(List.of("우산", "엄마 010-9999-8888")), eq(CharacterType.LULU), any(), any()
     );
     // 가공하지 않으므로 저장되는 두 칸이 같다. 컬럼 정리는 별도.
     assertThat(saved.getValue().getSanitizedInputText()).isEqualTo("내일 병원 가기 010-1234-5678");
@@ -491,7 +491,7 @@ class RoutineServiceTest {
   }
 
   private void stubCreatePipeline(Profile profile) {
-    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU), any()))
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU), any(), any()))
       .thenReturn(new RoutineAiPipeline.RoutineGenerationResult(
         "병원 다녀오기",
         List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발 신기",

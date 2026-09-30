@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -48,14 +49,25 @@ public class CardImageGenerator {
    * @param description   카드 설명(한국어). FLUX 가 아니거나 OpenAI 로 돌릴 때 그대로 쓴다
    * @param imagePromptEn 글 AI 가 같은 호출에서 준 영어 장면. 없으면 null
    * @param seedKey       {@link FluxSeed#routineKey} — 한 일과의 카드들이 같은 캐릭터로 나오게
+   * @param imageStyle    이룸이의 그림 방식(#457). null 이면 만화 — 기존 동작
    */
   public record CardImageRequest(
-    String description, String imagePromptEn, CharacterType characterType, String seedKey
+    String description, String imagePromptEn, CharacterType characterType, String seedKey, ImageStyle imageStyle
   ) {
 
+    public CardImageRequest {
+      imageStyle = ImageStyle.orDefault(imageStyle);
+    }
   }
 
   public GeneratedImage generate(CardImageRequest request) {
+    // 직접 사진은 호출부가 여기 오기 전에 건너뛴다. 그래도 왔다면 돈이 나가기 전에 막는다.
+    if (request.imageStyle() == ImageStyle.PHOTO_ONLY) {
+      throw new IllegalStateException("직접 사진 방식은 AI 그림을 만들지 않는다");
+    }
+    if (request.imageStyle() == ImageStyle.REALISTIC) {
+      return generateRealistic(request);
+    }
     if (imageClientRouter.selected() != ImageProvider.FLUX) {
       return imageClientRouter.current().generateImage(request.description(), request.characterType());
     }
@@ -87,6 +99,42 @@ public class CardImageGenerator {
     }
   }
 
+  /**
+   * 실사 방식(#457) — 캐릭터를 아예 쓰지 않는다(참조 이미지·생김새·"The character" 관례 없음).
+   *
+   * <p>FLUX 는 글 AI 가 준 {@code imagePromptEn} 을 쓰지 않는다. 그 문장은 "The character …" 관례라 실사에
+   * 캐릭터를 부른다. 그래서 카드마다 실사용 번역 지시문으로 물건·장소 문장을 새로 만든다. 실패하면 그 카드만
+   * OpenAI 로 돌리는 규칙은 만화와 같다.
+   */
+  private GeneratedImage generateRealistic(CardImageRequest request) {
+    if (imageClientRouter.selected() != ImageProvider.FLUX) {
+      return imageClientRouter.current().generateRealisticImage(request.description());
+    }
+    if (!fluxImageClient.available()) {
+      log.warn("FLUX 를 골랐지만 키가 없다 — 이 실사 카드는 OpenAI 로 그린다");
+      return fallbackToOpenAi(request, new IllegalStateException("FLUX 키가 없음"));
+    }
+
+    String scene;
+    try {
+      scene = usableScene(imagePromptTranslator.translateRealisticImagePrompt(request.description()));
+    } catch (Exception e) {
+      log.warn("FLUX 용 실사 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: description={}", request.description(), e);
+      return fallbackToOpenAi(request, e);
+    }
+    if (scene == null) {
+      log.warn("실사 번역 결과를 FLUX 에 쓸 수 없다(비었거나 한국어·너무 김) — 이 카드는 OpenAI 로 그린다");
+      return fallbackToOpenAi(request, new IllegalStateException("번역 결과를 쓸 수 없음"));
+    }
+
+    try {
+      return fluxImageClient.generateRealistic(scene, FluxSeed.of(request.seedKey()));
+    } catch (Exception e) {
+      log.warn("FLUX 실사 그림 실패 — 이 카드는 OpenAI 로 그린다: scene={}", scene, e);
+      return fallbackToOpenAi(request, e);
+    }
+  }
+
   /// FLUX 에 넣을 수 있는 한 줄인가. 한국어가 섞이면 schnell 이 사람을 그렸다(#373 1차).
   private String usableScene(String raw) {
     if (raw == null) {
@@ -111,6 +159,9 @@ public class CardImageGenerator {
         throw runtime;
       }
       throw new IllegalStateException("FLUX 실패, OpenAI 도 쓸 수 없음", cause);
+    }
+    if (request.imageStyle() == ImageStyle.REALISTIC) {
+      return openAi.get().generateRealisticImage(request.description());
     }
     return openAi.get().generateImage(request.description(), request.characterType());
   }
