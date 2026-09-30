@@ -102,6 +102,21 @@ class PictogramCatalogTest {
   }
 
   @Test
+  @DisplayName("모델이 꼬리(,_to)를 잘라 낸 id 는 접두어가 하나로 걸리면 살리고, 모호하면 폴백이다")
+  void truncatedId_resolvesByUniquePrefix() {
+    PictogramCatalog catalog = new PictogramCatalog(
+      java.util.List.of("get_dressed_,_to", "go_outside_,_to", "go_,_to", "wash_face_,_to", "wash_hands_,_to"),
+      "go_,_to");
+
+    assertThat(catalog.resolve("get_dressed_")).isEqualTo("get_dressed_,_to");
+    assertThat(catalog.resolve("go_outside_")).isEqualTo("go_outside_,_to");
+    // wash_ 는 둘에 걸려 모호하다
+    assertThat(catalog.resolve("wash_")).isEqualTo("go_,_to");
+    // 너무 짧은 접두어는 우연히 걸릴 수 있어 쓰지 않는다
+    assertThat(catalog.resolve("get")).isEqualTo("go_,_to");
+  }
+
+  @Test
   @DisplayName("중복 id 는 한 번만 올린다")
   void duplicateIds_areDeduplicated() {
     PictogramCatalog catalog = PictogramCatalog.fromClasspath("pictograms/small.json");

@@ -89,10 +89,33 @@ public class PictogramCatalog {
    * 개념이 없어도 비워 두지 않는다. 카탈로그가 비었으면 null.
    */
   public String resolve(String candidate) {
-    if (candidate != null && idSet.contains(candidate.trim())) {
-      return candidate.trim();
+    if (candidate == null) {
+      return fallbackId;
     }
-    return fallbackId;
+    String trimmed = candidate.trim();
+    if (idSet.contains(trimmed)) {
+      return trimmed;
+    }
+    String matched = uniquePrefixMatch(trimmed);
+    return matched != null ? matched : fallbackId;
+  }
+
+  /// 모델이 id 끝의 ",_to" 같은 꼬리를 잘라 내는 일이 실측으로 잦아(get_dressed_ → get_dressed_,_to),
+  /// 접두어로 딱 하나만 걸리면 그 id 로 본다. 둘 이상이면 모호하니 고르지 않는다.
+  private String uniquePrefixMatch(String prefix) {
+    if (prefix.length() < 4) {
+      return null;
+    }
+    String found = null;
+    for (String id : ids) {
+      if (id.startsWith(prefix)) {
+        if (found != null) {
+          return null;
+        }
+        found = id;
+      }
+    }
+    return found;
   }
 
   private record Loaded(List<String> ids, String fallbackId) {
