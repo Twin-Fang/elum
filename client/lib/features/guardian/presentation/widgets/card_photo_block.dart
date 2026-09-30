@@ -12,6 +12,7 @@ import '../../data/card_photo_picker.dart';
 import 'card_image.dart';
 import 'card_photo_permission_screen.dart';
 import 'card_photo_source_sheet.dart';
+import 'default_card_art.dart';
 
 /// 카드 수정 시트 안의 그림 칸 — 그림 위 `사진 바꾸기` 칩과 그 뒤의 모든 상태 (#456).
 ///
@@ -221,6 +222,11 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
                   routineId: widget.routineId,
                   stepId: widget.stepId,
                   imagePath: imagePath,
+                  // 그림이 없으면 기본 카드(#458)의 '사진 추가' 자리를 그대로 두고, 눌러도 같은 사진 흐름이
+                  // 시작되게 잇는다(#456). 올리는 중에는 누를 수 없다.
+                  emptyBuilder: (_) => DefaultCardPhotoSlot(
+                    onAddPhoto: _phase == _Phase.idle && !_busy ? _start : null,
+                  ),
                 ),
               ),
             ),
@@ -393,7 +399,10 @@ class _FailureOverlay extends StatelessWidget {
                 constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
                 child: Container(
                   alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
                   decoration: BoxDecoration(
                     color: colors.editChipBg,
                     borderRadius: BorderRadius.circular(18.r),
@@ -402,7 +411,11 @@ class _FailureOverlay extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (!dismiss) ...[
-                        Icon(Icons.refresh, size: 16.w, color: colors.textPrimary),
+                        Icon(
+                          Icons.refresh,
+                          size: 16.w,
+                          color: colors.textPrimary,
+                        ),
                         SizedBox(width: 6.w),
                       ],
                       Text(

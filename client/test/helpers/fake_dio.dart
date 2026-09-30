@@ -31,6 +31,10 @@ class FakeAdapter implements HttpClientAdapter {
   /// 실제로 나간 요청. "무엇을 불렀는가"를 검증할 때 쓴다.
   final List<String> calls = [];
 
+  /// 요청 본문. `메서드 경로` 키마다 마지막에 보낸 값이다 — "무엇을 보냈는가"를
+  /// 검증할 때 쓴다 (예: 그림 방식 PATCH 가 `{"imageStyle": "REALISTIC"}` 를 보냈는가).
+  final Map<String, Object?> sentBodies = {};
+
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
@@ -39,6 +43,7 @@ class FakeAdapter implements HttpClientAdapter {
   ) async {
     final key = '${options.method} ${options.path}';
     calls.add(key);
+    sentBodies[key] = options.data;
 
     if (delay > Duration.zero) await Future<void>.delayed(delay);
 

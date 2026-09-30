@@ -5,6 +5,7 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../guardian/data/member_repository.dart';
 import '../domain/character.dart';
+import '../domain/image_style.dart';
 import '../domain/onboarding_profile.dart';
 import '../domain/support_goal.dart';
 
@@ -38,6 +39,8 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
           .whereType<SupportGoal>()
           .toSet(),
       cardCharacter: CardCharacter.fromApiValue(storage.character),
+      // 로컬 값이 없으면(기존 설치 앱·건너뜀) 만화다
+      imageStyle: ImageStyle.fromApiValue(storage.imageStyle),
     );
   }
 
@@ -59,6 +62,26 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
   /// 캐릭터는 단일 선택이다
   void setCharacter(CardCharacter character) {
     state = state.copyWith(cardCharacter: character);
+  }
+
+  /// 그림 방식은 단일 선택이다. 온보딩에서는 상태에만 담고 [complete]가 한꺼번에 저장한다.
+  void setImageStyle(ImageStyle style) {
+    state = state.copyWith(imageStyle: style);
+  }
+
+  /// 설정에서 그림 방식을 바꾼다 — 화면·로컬·서버에 바로 남긴다 (#458).
+  ///
+  /// 로컬 저장이 먼저고 서버 저장은 그 뒤다. **서버가 실패해도 로컬 값은 남는다**
+  /// (캐릭터 저장과 같은 규칙) — 화면은 고른 값 그대로 살고, 부르는 쪽이 돌려받은
+  /// 실패로 에러 코드를 띄운다. null 이면 서버까지 저장됐다.
+  Future<AppFailure?> changeImageStyle(ImageStyle style) async {
+    state = state.copyWith(imageStyle: style);
+    try {
+      await ref.read(localStorageProvider).setImageStyle(style.apiValue);
+    } catch (e) {
+      debugPrint('[onboarding] 그림 방식 로컬 저장 실패, 서버 저장은 시도: $e');
+    }
+    return ref.read(memberRepositoryProvider).updateImageStyle(style.apiValue);
   }
 
   void setPin(String pin) {
@@ -104,14 +127,16 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
       if (character != null) {
         await storage.setCharacter(character.apiValue);
       }
+      // 건너뛴 경우에도 기본값(만화)이 명시로 남는다
+      await storage.setImageStyle(state.imageStyle.apiValue);
       await storage.setPin(state.guardianPin);
       await storage.setOnboardingCompleted(true);
     } catch (e) {
       debugPrint('[onboarding] 로컬 저장 실패, 진행은 계속: $e');
     }
 
-    // 서버 연동 — nickname·goals·character를 계정에 남긴다. 하나가 실패해도
-    // 나머지는 시도한다 — 셋 중 둘이라도 남는 편이 낫다.
+    // 서버 연동 — nickname·goals·character·imageStyle을 계정에 남긴다. 하나가
+    // 실패해도 나머지는 시도한다 — 일부라도 남는 편이 낫다.
     final member = ref.read(memberRepositoryProvider);
     var failure = await member.updateNickname(state.childNickname);
     failure ??= await member.updateSupportGoals(
@@ -121,6 +146,7 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
     if (character != null) {
       failure ??= await member.updateCharacter(character.apiValue);
     }
+    failure ??= await member.updateImageStyle(state.imageStyle.apiValue);
     return failure;
   }
 }

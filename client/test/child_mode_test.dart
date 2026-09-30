@@ -25,6 +25,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/card_title_finder.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/semantics_audit.dart';
 import 'helpers/svg_finder.dart';
@@ -143,7 +144,7 @@ void main() {
       await tester.tap(find.text('비 오는 날 학교에 가요'));
       await tester.pumpAndSettle();
 
-      expect(find.text('옷을 입어요'), findsOneWidget);
+      expect(cardTitle('옷을 입어요'), findsOneWidget);
       expect(find.text('학교에 갈 옷을 차례대로 입어요'), findsOneWidget);
     });
 

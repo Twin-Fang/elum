@@ -20,6 +20,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/semantics_audit.dart';
+import 'helpers/test_storage.dart';
 
 /// 보호자 설정 화면 (이슈 #181).
 ///
@@ -52,6 +53,8 @@ void main() {
 
     return ProviderScope(
       overrides: [
+        // 그림 방식 줄(#458)이 저장된 값을 읽는다
+        testStorageOverride(),
         authRepositoryProvider.overrideWithValue(auth),
         // 약관 목록은 서버·캐시를 타므로 테스트에서는 앱 번들 기본값으로 고정한다.
         consentBundleProvider.overrideWith((ref) async => ConsentBundle.bundled),
@@ -140,6 +143,8 @@ void main() {
       '임시저장',
       // 시안(`1022:4467`)에 새로 들어온 줄 — 임시저장과 약관 사이 (#437)
       '비밀암호 변경하기',
+      // 카드 그림 방식 줄(#458) — 시안 줄 순서를 깨지 않게 비밀암호와 약관 사이에 둔다.
+      '그림 방식',
       '약관 및 개인정보처리방침',
       // `앱 정보`(#418)는 약관과 로그아웃 사이에 새로 들어온 줄이다 — 시안에는 아직 없다.
       '앱 정보',

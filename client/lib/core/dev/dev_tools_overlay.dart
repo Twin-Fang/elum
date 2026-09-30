@@ -759,6 +759,7 @@ class _NavigateView extends StatelessWidget {
     ('온보딩 · 이름', Routes.onboardingName),
     ('온보딩 · 목표', Routes.onboardingGoals),
     ('온보딩 · 캐릭터', Routes.onboardingCharacter),
+    ('온보딩 · 그림 방식', Routes.onboardingImageStyle),
     ('온보딩 · PIN', Routes.onboardingPin),
     ('일과 · 보상 정하기', Routes.routineReward),
     ('보호자 홈', Routes.guardian),

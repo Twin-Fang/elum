@@ -80,6 +80,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.contactSheetTitle,
     required this.contactSheetEmail,
     required this.actionCardTitle,
+    required this.defaultCardTitle,
     required this.noticeTitle,
     required this.noticeBody,
     required this.noticeHideLabel,
@@ -366,6 +367,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 행동 카드 제목 (25/w800, style_GKEQ8F).
   /// 순서 배지 숫자용 cardHeadline(30/w800)과 크기가 달라 별개 토큰이다.
   final TextStyle actionCardTitle;
+
+  /// 그림 없는 카드(이룸이 화면)의 그림 자리 제목 (44/w800 · #458 임시 시안).
+  /// 글자가 곧 그림 노릇을 하므로 [actionCardTitle](25)보다 아주 크게 둔다.
+  final TextStyle defaultCardTitle;
 
   // --- 공지 팝업 (이슈 #390 · 시안 `팝업` 1090:4922 `방침`) ---
   // 공통 팝업의 변형이다. 버튼 문구는 공통 팝업 `dialogAction` 을 그대로 쓴다.
@@ -833,6 +838,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1.0,
     ),
+    defaultCardTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 44,
+      fontWeight: FontWeight.w800,
+      height: 1.2,
+    ),
     noticeTitle: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 18,
@@ -942,6 +953,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? contactSheetTitle,
     TextStyle? contactSheetEmail,
     TextStyle? actionCardTitle,
+    TextStyle? defaultCardTitle,
     TextStyle? noticeTitle,
     TextStyle? noticeBody,
     TextStyle? noticeHideLabel,
@@ -1020,6 +1032,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       contactSheetTitle: contactSheetTitle ?? this.contactSheetTitle,
       contactSheetEmail: contactSheetEmail ?? this.contactSheetEmail,
       actionCardTitle: actionCardTitle ?? this.actionCardTitle,
+      defaultCardTitle: defaultCardTitle ?? this.defaultCardTitle,
       noticeTitle: noticeTitle ?? this.noticeTitle,
       noticeBody: noticeBody ?? this.noticeBody,
       noticeHideLabel: noticeHideLabel ?? this.noticeHideLabel,
@@ -1117,6 +1130,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
           TextStyle.lerp(contactSheetEmail, other.contactSheetEmail, t)!,
       actionCardTitle:
           TextStyle.lerp(actionCardTitle, other.actionCardTitle, t)!,
+      defaultCardTitle:
+          TextStyle.lerp(defaultCardTitle, other.defaultCardTitle, t)!,
       noticeTitle: TextStyle.lerp(noticeTitle, other.noticeTitle, t)!,
       noticeBody: TextStyle.lerp(noticeBody, other.noticeBody, t)!,
       noticeHideLabel:

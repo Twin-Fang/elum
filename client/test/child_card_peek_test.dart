@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
@@ -5,6 +7,7 @@ import 'package:elum/features/child/application/child_routine_notifier.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
 import 'package:elum/features/child/presentation/widgets/child_card_pager.dart';
+import 'package:elum/features/guardian/data/card_image_repository.dart';
 import 'package:elum/features/guardian/presentation/widgets/action_card_view.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -14,6 +17,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/card_title_finder.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/svg_finder.dart';
@@ -59,9 +63,13 @@ void main() {
     bool reduceMotion = false,
     double textScale = 1,
     _CountingSpeech? speech,
+    Uint8List? imageBytes,
   }) => ProviderScope(
     overrides: [
       offlineDioOverride(),
+      // 그림이 있는 카드를 만들 때만 — 없으면 이 일과(`local`)는 그림이 없는 기본 카드다
+      if (imageBytes != null)
+        cardImageProvider.overrideWith((ref, key) async => imageBytes),
       testStorageOverride(onboardingCompleted: true),
       speechServiceProvider.overrideWithValue(speech ?? _CountingSpeech()),
     ],
@@ -86,7 +94,7 @@ void main() {
               path: Routes.childRoutineDetail,
               builder: (context, state) => ChildRoutineDetailScreen(
                 routine: Routine(
-                  id: 'local',
+                  id: imageBytes != null ? 'r1' : 'local',
                   title: '비 오는 날 학교에 가요',
                   status: 'CONFIRMED',
                   steps: cards,
@@ -109,6 +117,7 @@ void main() {
     bool reduceMotion = false,
     double textScale = 1,
     _CountingSpeech? speech,
+    Uint8List? imageBytes,
   }) async {
     await tester.pumpWidget(
       wrap(
@@ -116,6 +125,7 @@ void main() {
         reduceMotion: reduceMotion,
         textScale: textScale,
         speech: speech,
+        imageBytes: imageBytes,
       ),
     );
     await tester.pump();
@@ -189,13 +199,32 @@ void main() {
       expect(r.height, closeTo(230, 0.5));
     });
 
-    testWidgets('제목과 설명은 x=88 에서 시작한다 — 배지 오른쪽 8', (tester) async {
-      await pumpScreen(tester);
+    testWidgets('그림이 있는 카드는 제목과 설명이 x=88 에서 시작한다 — 배지 오른쪽 8',
+        (tester) async {
+      await pumpScreen(tester, imageBytes: _png);
 
       expect(tester.getRect(find.text('옷을 입어요')).left, closeTo(88, 0.5));
       final desc = tester.getRect(find.text('학교에 갈 옷을 차례대로 입어요'));
       expect(desc.left, closeTo(88, 0.5));
       // 배지 아래(521)에서 18
+      expect(desc.top, closeTo(539, 0.5));
+    });
+
+    // 그림이 없는 카드(#458)는 제목이 그림 자리로 올라가고 줄에는 번호만 남는다.
+    // 설명 자리는 그대로다 — 그림이 있든 없든 카드 높이·설명 위치가 같다.
+    testWidgets('그림이 없는 카드는 제목이 그림 자리에 있고 설명 자리는 그대로다', (tester) async {
+      await pumpScreen(tester);
+
+      final art = tester.getRect(
+        find.descendant(
+          of: find.byKey(const ValueKey('c1')),
+          matching: find.byType(AspectRatio),
+        ),
+      );
+      final title = tester.getRect(cardTitle('옷을 입어요'));
+      expect(art.contains(title.center), isTrue);
+      final desc = tester.getRect(find.text('학교에 갈 옷을 차례대로 입어요'));
+      expect(desc.left, closeTo(88, 0.5));
       expect(desc.top, closeTo(539, 0.5));
     });
 
@@ -541,3 +570,13 @@ double _markOpacity(WidgetTester tester, Finder mark) => tester
       find.ancestor(of: mark, matching: find.byType(Opacity)).first,
     )
     .opacity;
+
+/// 1x1 PNG. 그림이 있는 카드를 만들 때만 쓴다.
+final _png = Uint8List.fromList(const [
+  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
+  0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+  0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
+  0x0D, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0xF8, 0xDF, 0xC0, 0xF0,
+  0x1F, 0x00, 0x06, 0x80, 0x02, 0x7F, 0x10, 0x4C, 0x1B, 0xE1, 0x00, 0x00,
+  0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+]);

@@ -20,6 +20,7 @@ class SelectableGroup<T> extends StatelessWidget {
     this.allowDeselect = true,
     this.gap = 0,
     this.semanticLabelOf,
+    this.asRadio = false,
   });
 
   final List<T> items;
@@ -46,6 +47,12 @@ class SelectableGroup<T> extends StatelessWidget {
   /// 카드 자체에는 이름이 없었다. 주면 고른 상태(selected)도 함께 알린다.
   /// 목표 칩처럼 안에 글자가 있으면 주지 않는다 — 그 글자가 이미 이름이다.
   final String Function(T item)? semanticLabelOf;
+
+  /// true면 낭독기에 **라디오 버튼**으로 알린다 (#458). 기본은 `선택됨` 버튼이다.
+  ///
+  /// 그림 방식처럼 "셋 중 하나"인 선택은 낭독기가 `선택함 · 3개 중 1번째`로 읽어야
+  /// 지금 무엇이 골라져 있는지 안다. [semanticLabelOf]가 있을 때만 뜻이 있다.
+  final bool asRadio;
 
   void _toggle(T item) {
     final isSelected = selected.contains(item);
@@ -75,6 +82,7 @@ class SelectableGroup<T> extends StatelessWidget {
             onTap: () => _toggle(item),
             label: semanticLabelOf?.call(item),
             isSelected: selected.contains(item),
+            asRadio: asRadio,
             child: itemBuilder(context, item, selected.contains(item)),
           ),
         ],
@@ -89,6 +97,7 @@ class SelectableGroup<T> extends StatelessWidget {
       onTap: () => _toggle(item),
       label: semanticLabelOf?.call(item),
       isSelected: selected.contains(item),
+      asRadio: asRadio,
       child: itemBuilder(context, item, selected.contains(item)),
     );
   }
@@ -100,6 +109,7 @@ class _SelectableItem extends StatelessWidget {
     required this.child,
     required this.isSelected,
     this.label,
+    this.asRadio = false,
   });
 
   final VoidCallback onTap;
@@ -108,6 +118,9 @@ class _SelectableItem extends StatelessWidget {
 
   /// null 이면 안의 글자가 그대로 이름이 된다 (지금까지와 같다).
   final String? label;
+
+  /// 라디오 버튼으로 알릴지 ([SelectableGroup.asRadio]).
+  final bool asRadio;
 
   @override
   Widget build(BuildContext context) {
@@ -123,8 +136,11 @@ class _SelectableItem extends StatelessWidget {
     // 제스처 바깥에 두어야 이름과 누름 동작이 한 노드에 모인다.
     return Semantics(
       container: true,
-      button: true,
-      selected: isSelected,
+      // 라디오는 `checked` + 같은 묶음, 그 밖에는 `선택됨` 버튼이다
+      button: !asRadio,
+      selected: asRadio ? null : isSelected,
+      checked: asRadio ? isSelected : null,
+      inMutuallyExclusiveGroup: asRadio ? true : null,
       label: label,
       child: pressable,
     );

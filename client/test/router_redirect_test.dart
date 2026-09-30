@@ -64,8 +64,12 @@ void main() {
       );
     });
 
-    test('캐릭터·PIN 단계도 그대로 간다', () {
-      for (final step in [Routes.onboardingCharacter, Routes.onboardingPin]) {
+    test('캐릭터·그림 방식·PIN 단계도 그대로 간다', () {
+      for (final step in [
+        Routes.onboardingCharacter,
+        Routes.onboardingImageStyle,
+        Routes.onboardingPin,
+      ]) {
         expect(
           destination(step, hasSession: true, onboardingCompleted: false),
           step,

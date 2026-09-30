@@ -6,6 +6,7 @@ import '../../features/guardian/presentation/card_review_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/guardian/presentation/draft_routines_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
+import '../../features/guardian/presentation/image_style_settings_screen.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
 import '../../features/link/presentation/link_code_screen.dart';
 import '../../features/link/presentation/link_enter_screen.dart';
@@ -24,6 +25,7 @@ import '../../features/guardian/presentation/widgets/aurora_background.dart';
 import '../../features/guardian/presentation/widgets/routine_flow_backdrop.dart';
 import '../../features/onboarding/presentation/card_completion_screen.dart';
 import '../../features/onboarding/presentation/character_screen.dart';
+import '../../features/onboarding/presentation/image_style_screen.dart';
 import '../../features/onboarding/presentation/goals_screen.dart';
 import '../../features/onboarding/presentation/name_screen.dart';
 import '../../features/onboarding/presentation/pin_screen.dart';
@@ -51,6 +53,9 @@ abstract final class Routes {
   static const onboardingName = '/onboarding/name';
   static const onboardingGoals = '/onboarding/goals';
   static const onboardingCharacter = '/onboarding/character';
+
+  /// 카드 그림 방식 (#458). 캐릭터 다음, 비밀암호 앞. 건너뛸 수 있다.
+  static const onboardingImageStyle = '/onboarding/image-style';
   static const onboardingPin = '/onboarding/pin';
   static const cardCompletion = '/onboarding/card-completion';
 
@@ -64,6 +69,9 @@ abstract final class Routes {
 
   /// 비밀암호 변경 (#437). 시안이 없어 온보딩 비밀번호 화면 모양을 쓴다 (#438).
   static const guardianPinChange = '/guardian/settings/pin';
+
+  /// 그림 방식 선택 (#458). 시안이 없어 임시 화면이다.
+  static const guardianImageStyle = '/guardian/settings/image-style';
   static const routineInput = '/guardian/routine/input';
   /// DLP 마스킹 + 추가 질문 준비 로딩 (Figma 262:4569).
   /// 경로 이름은 DLP 시절 것을 유지한다 — 마스킹이 이 단계에서 일어나므로
@@ -250,6 +258,11 @@ GoRouter createRouter({
             slidePage(state, const CharacterScreen()),
       ),
       GoRoute(
+        path: Routes.onboardingImageStyle,
+        pageBuilder: (context, state) =>
+            slidePage(state, const ImageStyleScreen()),
+      ),
+      GoRoute(
         path: Routes.onboardingPin,
         pageBuilder: (context, state) => slidePage(state, const PinScreen()),
       ),
@@ -293,6 +306,11 @@ GoRouter createRouter({
       GoRoute(
         path: Routes.guardianDrafts,
         builder: (context, state) => const DraftRoutinesScreen(),
+      ),
+      GoRoute(
+        path: Routes.guardianImageStyle,
+        pageBuilder: (context, state) =>
+            slidePage(state, const ImageStyleSettingsScreen()),
       ),
       GoRoute(
         path: Routes.guardianPinChange,

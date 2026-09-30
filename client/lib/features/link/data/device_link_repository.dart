@@ -6,6 +6,7 @@ import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
+import '../../onboarding/domain/image_style.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../domain/link_status.dart';
@@ -150,6 +151,13 @@ class DeviceLinkRepository {
       final character = res.data?['character']?.toString();
       if (character != null && character.isNotEmpty) {
         await _storage.setCharacter(character);
+      }
+      // 보호자가 정한 그림 방식 (#458). 없거나 모르는 값이면 담지 않는다 — 로컬이 비면
+      // 읽는 쪽이 만화로 처리하므로 옛 서버·새 값이어도 연결은 그대로 성공한다.
+      final imageStyle = res.data?['imageStyle'];
+      if (imageStyle is String &&
+          ImageStyle.values.any((s) => s.apiValue == imageStyle)) {
+        await _storage.setImageStyle(imageStyle);
       }
       await _storage.setOnboardingCompleted(true);
     } catch (e) {

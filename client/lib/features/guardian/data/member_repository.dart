@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
+import '../../onboarding/domain/image_style.dart';
 
 /// 보호자 회원 정보 — 서버 `MemberResponse`에 대응한다.
 ///
@@ -14,6 +15,7 @@ class Member {
     this.nickname,
     this.totalStars = 0,
     this.supportGoals = const [],
+    this.imageStyle = ImageStyle.cartoon,
   });
 
   /// 아이 호칭. 미설정이면 null이다 (서버가 null을 준다).
@@ -24,6 +26,10 @@ class Member {
 
   /// 선택한 도움 목표의 서버 enum 값
   final List<String> supportGoals;
+
+  /// 카드 그림 방식 (#458). 필드가 없거나 모르는 값이면 만화다 —
+  /// 옛 서버·새 값이 와도 화면이 죽지 않는다.
+  final ImageStyle imageStyle;
 
   /// 서버 응답 파싱. 필드가 비거나 타입이 달라도 예외를 던지지 않는다.
   factory Member.fromJson(Map<String, dynamic> json) {
@@ -38,6 +44,9 @@ class Member {
         final List<dynamic> list => list.map((e) => e.toString()).toList(),
         _ => const <String>[],
       },
+      imageStyle: ImageStyle.fromApiValue(
+        json['imageStyle'] is String ? json['imageStyle'] as String : null,
+      ),
     );
   }
 }
@@ -110,6 +119,24 @@ class MemberRepository {
       return null;
     } catch (e) {
       debugPrint('[member] 캐릭터 저장 실패, 로컬에는 남아 있다: $e');
+      return AppFailure.of(e);
+    }
+  }
+
+  /// 카드 그림 방식 저장 (#458).
+  ///
+  /// ⚠️ [imageStyle]은 서버 enum 값이어야 한다 (`CARTOON` / `REALISTIC` /
+  /// `PHOTO_ONLY`). `ImageStyle.apiValue`를 그대로 넘긴다.
+  /// 대상 프로필은 캐릭터 저장과 같은 방식으로 정해진다(인증 인터셉터).
+  Future<AppFailure?> updateImageStyle(String imageStyle) async {
+    try {
+      await _dio.patch<dynamic>(
+        '/api/member/image-style',
+        data: {'imageStyle': imageStyle},
+      );
+      return null;
+    } catch (e) {
+      debugPrint('[member] 그림 방식 저장 실패, 로컬에는 남아 있다: $e');
       return AppFailure.of(e);
     }
   }

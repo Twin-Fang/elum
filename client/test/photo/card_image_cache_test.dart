@@ -24,7 +24,9 @@ void main() {
     adapter = _CountingAdapter();
     final dio = Dio(BaseOptions(baseUrl: 'https://test.local'))
       ..httpClientAdapter = adapter;
-    container = ProviderContainer(overrides: [dioProvider.overrideWithValue(dio)]);
+    container = ProviderContainer(
+      overrides: [dioProvider.overrideWithValue(dio)],
+    );
   });
 
   tearDown(() => container.dispose());
@@ -39,10 +41,18 @@ void main() {
 
   test('imagePath 가 바뀌면 캐시를 버리고 새로 받는다', () async {
     await container.read(
-      cardImageProvider((routineId: 'r1', stepId: 's1', imagePath: 'k/a.png')).future,
+      cardImageProvider((
+        routineId: 'r1',
+        stepId: 's1',
+        imagePath: 'k/a.png',
+      )).future,
     );
     await container.read(
-      cardImageProvider((routineId: 'r1', stepId: 's1', imagePath: 'k/b.png')).future,
+      cardImageProvider((
+        routineId: 'r1',
+        stepId: 's1',
+        imagePath: 'k/b.png',
+      )).future,
     );
 
     expect(adapter.gets, 2);
@@ -58,7 +68,12 @@ void main() {
           home: SizedBox(
             width: 200,
             height: 150,
-            child: CardImage(routineId: 'r1', stepId: 's1', imagePath: path),
+            child: CardImage(
+              routineId: 'r1',
+              stepId: 's1',
+              imagePath: path,
+              emptyBuilder: (_) => const SizedBox(),
+            ),
           ),
         ),
       ),
@@ -73,36 +88,39 @@ void main() {
     expect(adapter.gets, 2);
   });
 
-  testWidgets('카드 한 장(이룸이 화면도 쓰는 ActionCardView)도 새 imagePath 를 받으면 그림을 다시 받는다', (tester) async {
-    ActionCard card(String path) => ActionCard(
-      id: 's1',
-      title: '옷을 입어요',
-      description: '옷을 입어요',
-      stepOrder: 1,
-      imagePath: path,
-    );
-    Widget host(String path) => UncontrolledProviderScope(
-      container: container,
-      child: ScreenUtilInit(
-        designSize: const Size(393, 852),
-        builder: (_, _) => MaterialApp(
-          theme: AppTheme.light,
-          home: Scaffold(
-            body: ActionCardView(card: card(path), index: 0, routineId: 'r1'),
+  testWidgets(
+    '카드 한 장(이룸이 화면도 쓰는 ActionCardView)도 새 imagePath 를 받으면 그림을 다시 받는다',
+    (tester) async {
+      ActionCard card(String path) => ActionCard(
+        id: 's1',
+        title: '옷을 입어요',
+        description: '옷을 입어요',
+        stepOrder: 1,
+        imagePath: path,
+      );
+      Widget host(String path) => UncontrolledProviderScope(
+        container: container,
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          builder: (_, _) => MaterialApp(
+            theme: AppTheme.light,
+            home: Scaffold(
+              body: ActionCardView(card: card(path), index: 0, routineId: 'r1'),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.pumpWidget(host('k/a.png'));
-    await _settle(tester);
-    expect(adapter.gets, 1);
+      await tester.pumpWidget(host('k/a.png'));
+      await _settle(tester);
+      expect(adapter.gets, 1);
 
-    // 서버가 새 열쇠를 준 일과로 다시 그린다(이룸이 휴대폰이 목록을 새로 받은 경우와 같다)
-    await tester.pumpWidget(host('k/b.png'));
-    await _settle(tester);
-    expect(adapter.gets, 2);
-  });
+      // 서버가 새 열쇠를 준 일과로 다시 그린다(이룸이 휴대폰이 목록을 새로 받은 경우와 같다)
+      await tester.pumpWidget(host('k/b.png'));
+      await _settle(tester);
+      expect(adapter.gets, 2);
+    },
+  );
 }
 
 /// dio 요청 사슬이 Timer 를 끼고 돌아 여러 번 나눠 흘려야 어댑터까지 닿는다.
