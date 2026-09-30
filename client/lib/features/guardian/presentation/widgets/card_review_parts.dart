@@ -371,8 +371,16 @@ class _CardReviewReorderListState extends State<CardReviewReorderList> {
 
   /// 놓기: 순서를 바꾸고 → 그 카드를 정중앙에 붙이고 → 붙은 뒤에 색·번호를 새 자리로 바꾼다.
   Future<void> _onReorder(int oldIndex, int newIndex) async {
-    widget.onReorder(oldIndex, newIndex);
     final landed = newIndex > oldIndex ? newIndex - 1 : newIndex;
+
+    // 바뀐 자리를 **목록이 다시 그려지기를 기다리지 않고 직접 계산한다.** 스크롤이 이미
+    // 끝에 있으면(맨 끝 자리로 옮길 때) 붙는 애니메이션이 곧바로 끝나, 부모가 새 순서를
+    // 내려 주기 전의 옛 목록을 읽어 색이 그대로 남았다 (#451).
+    final order = [for (final card in widget.cards) card.id];
+    order.insert(landed, order.removeAt(oldIndex));
+    final nextShown = {for (var i = 0; i < order.length; i++) order[i]: i};
+
+    widget.onReorder(oldIndex, newIndex);
     final token = ++_dropToken;
 
     if (_scroll.hasClients) {
@@ -389,7 +397,7 @@ class _CardReviewReorderListState extends State<CardReviewReorderList> {
     }
     if (!mounted || token != _dropToken) return;
     HapticFeedback.selectionClick();
-    setState(() => _shown = _indexOf(widget.cards));
+    setState(() => _shown = nextShown);
   }
 
   @override

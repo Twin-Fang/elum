@@ -108,9 +108,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
   }
 
-  Rect rectOfContainerAround(WidgetTester tester, Finder inner) => tester.getRect(
-    find.ancestor(of: inner, matching: find.byType(Container)).first,
-  );
+  Rect rectOfContainerAround(WidgetTester tester, Finder inner) =>
+      tester.getRect(
+        find.ancestor(of: inner, matching: find.byType(Container)).first,
+      );
 
   /// 순서 변경 모드에서 [id] 카드를 오른쪽으로 [dx] 만큼 길게 눌러 끈다.
   Future<void> dragCard(WidgetTester tester, String id, double dx) async {
@@ -154,7 +155,9 @@ void main() {
       expect(find.textContaining('크레딧'), findsNothing);
     });
 
-    testWidgets('바닥에서 카드 끝 571 · 보상 587 · 버튼 654 · 저장 730~796 이다', (tester) async {
+    testWidgets('바닥에서 카드 끝 571 · 보상 587 · 버튼 654 · 저장 730~796 이다', (
+      tester,
+    ) async {
       await pump(tester);
 
       final card = tester.getRect(find.byKey(const ValueKey('c1')));
@@ -318,7 +321,11 @@ void main() {
       await settle(tester);
 
       await dragCard(tester, 'c1', 360);
-      expect(idsOf(container), isNot(['c1', 'c2', 'c3']), reason: '첫 카드가 뒤로 갔다');
+      expect(
+        idsOf(container),
+        isNot(['c1', 'c2', 'c3']),
+        reason: '첫 카드가 뒤로 갔다',
+      );
       expect(idsOf(container).first, isNot('c1'));
 
       await tester.tap(find.text('완료'));
@@ -398,7 +405,8 @@ void main() {
       await tester.tap(find.text('카드 순서 변경'));
       await settle(tester);
 
-      final screenCenter = tester.getSize(find.byType(Scaffold).first).width / 2;
+      final screenCenter =
+          tester.getSize(find.byType(Scaffold).first).width / 2;
 
       final gesture = await tester.startGesture(
         tester.getCenter(find.byKey(const ValueKey('c1'))),
@@ -433,8 +441,10 @@ void main() {
       await tester.tap(find.text('카드 순서 변경'));
       await settle(tester);
 
-      final screenCenter = tester.getSize(find.byType(Scaffold).first).width / 2;
-      double centerOf(String id) => tester.getCenter(find.byKey(ValueKey(id))).dx;
+      final screenCenter =
+          tester.getSize(find.byType(Scaffold).first).width / 2;
+      double centerOf(String id) =>
+          tester.getCenter(find.byKey(ValueKey(id))).dx;
 
       // 카드 폭의 절반도 안 되게 살짝 넘기면 원래 카드로 돌아와 붙는다
       await tester.drag(find.byKey(const ValueKey('c1')), const Offset(-60, 0));
@@ -442,9 +452,70 @@ void main() {
       expect(centerOf('c1'), moreOrLessEquals(screenCenter, epsilon: 1));
 
       // 반쯤(카드 한 장의 절반을 넘게) 넘기면 다음 카드가 정면에 붙는다
-      await tester.drag(find.byKey(const ValueKey('c1')), const Offset(-200, 0));
+      await tester.drag(
+        find.byKey(const ValueKey('c1')),
+        const Offset(-200, 0),
+      );
       await tester.pumpAndSettle();
       expect(centerOf('c2'), moreOrLessEquals(screenCenter, epsilon: 1));
+    });
+
+    /// 애니메이션이 프레임마다 흐르도록 잘게 나눠 시간을 보낸다 — 한 번에 길게 넘기면
+    /// 붙는 애니메이션이 끝난 프레임에서 멈춰 그 뒤에 시작하는 색 전환을 못 본다.
+    Future<void> pumpFrames(WidgetTester tester, int ms) async {
+      for (var t = 0; t < ms; t += 16) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+    }
+
+    testWidgets('스크롤이 이미 끝인 채 맨 끝 자리로 옮겨도 색과 번호가 새 자리로 바뀐다 (#451)', (
+      tester,
+    ) async {
+      final container = await pump(tester);
+      await tester.tap(find.text('카드 순서 변경'));
+      await settle(tester);
+
+      // 먼저 맨 끝 카드까지 스크롤해 둔다 — 붙는 애니메이션의 목표가 지금 위치와 같아지는 조건
+      await tester.drag(
+        find.byKey(const ValueKey('c1')),
+        const Offset(-700, 0),
+      );
+      await tester.pumpAndSettle();
+      final width = tester.getSize(find.byType(Scaffold).first).width;
+      expect(
+        tester.getCenter(find.byKey(const ValueKey('c3'))).dx,
+        moreOrLessEquals(width / 2, epsilon: 1),
+        reason: '마지막 카드가 정면에 서 있다',
+      );
+
+      // 왼쪽에 빼꼼 보이는 두 번째 카드를 잡아 마지막 카드 너머로 끈다
+      final y = tester.getCenter(find.byKey(const ValueKey('c3'))).dy;
+      final gesture = await tester.startGesture(Offset(10, y));
+      await pumpFrames(tester, 700);
+      await gesture.moveBy(const Offset(kTouchSlop + 1, 0));
+      await tester.pump();
+      for (var i = 0; i < 8; i++) {
+        await gesture.moveBy(const Offset(46, 0));
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      await gesture.up();
+      await pumpFrames(tester, 2500);
+
+      final ids = idsOf(container);
+      expect(ids.last, 'c2', reason: '두 번째 카드가 맨 끝으로 갔다');
+      expect(
+        fillOf(tester, 'c2'),
+        CardPalette.at(2).fill,
+        reason: '끝 자리(3번) 색으로 바뀐다',
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('c2')),
+          matching: find.text('3'),
+        ),
+        findsOneWidget,
+        reason: '번호도 3으로 바뀐다',
+      );
     });
 
     testWidgets('눌린 `카드 순서 변경` 버튼을 다시 누르면 모드를 나온다 — 옮긴 순서는 그대로 (#451)', (
@@ -483,8 +554,10 @@ void main() {
         },
       );
       addTearDown(
-        () => tester.binding.defaultBinaryMessenger
-            .setMockMethodCallHandler(SystemChannels.platform, null),
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
       );
 
       await pump(tester);
@@ -503,10 +576,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(anyScaledUp(tester), isTrue, reason: '잡힌 카드는 커진다');
-      final shadowed = tester.widgetList<DecoratedBox>(find.byType(DecoratedBox)).any(
-        (d) => (d.decoration is BoxDecoration) &&
-            ((d.decoration as BoxDecoration).boxShadow ?? []).isNotEmpty,
-      );
+      final shadowed = tester
+          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+          .any(
+            (d) =>
+                (d.decoration is BoxDecoration) &&
+                ((d.decoration as BoxDecoration).boxShadow ?? []).isNotEmpty,
+          );
       expect(shadowed, isTrue, reason: '잡힌 카드에는 그림자가 진다');
       expect(
         haptics.where((h) => h.contains('mediumImpact')),
@@ -684,10 +760,8 @@ void main() {
   });
 
   group('시트 좌표 (1197:5923 · 1197:6044 · 1197:6161)', () {
-    Rect fieldRect(WidgetTester tester, int index) => rectOfContainerAround(
-      tester,
-      find.byType(TextField).at(index),
-    );
+    Rect fieldRect(WidgetTester tester, int index) =>
+        rectOfContainerAround(tester, find.byType(TextField).at(index));
 
     testWidgets('수정 시트는 높이 450 이고 시안 자리에 선다', (tester) async {
       await pump(tester);
@@ -712,16 +786,21 @@ void main() {
         tester.getRect(find.text('설명')).top,
         moreOrLessEquals(402 + 193, epsilon: 1),
       );
-      expect(fieldRect(tester, 1).top, moreOrLessEquals(402 + 218, epsilon: 0.5));
+      expect(
+        fieldRect(tester, 1).top,
+        moreOrLessEquals(402 + 218, epsilon: 0.5),
+      );
 
       final button = tester.getRect(
-        find.descendant(
-          of: find.ancestor(
-            of: find.text('완료'),
-            matching: find.byType(ElumButton),
-          ),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.ancestor(
+                of: find.text('완료'),
+                matching: find.byType(ElumButton),
+              ),
+              matching: find.byType(Container),
+            )
+            .first,
       );
       expect(button.bottom, moreOrLessEquals(796, epsilon: 0.5));
       expect(button.height, moreOrLessEquals(66, epsilon: 0.5));
@@ -759,12 +838,18 @@ void main() {
         tester.getRect(find.text('제목')).top,
         moreOrLessEquals(364 + 124, epsilon: 1),
       );
-      expect(fieldRect(tester, 0).top, moreOrLessEquals(364 + 149, epsilon: 0.5));
+      expect(
+        fieldRect(tester, 0).top,
+        moreOrLessEquals(364 + 149, epsilon: 0.5),
+      );
       expect(
         tester.getRect(find.text('설명')).top,
         moreOrLessEquals(364 + 233, epsilon: 1),
       );
-      expect(fieldRect(tester, 1).top, moreOrLessEquals(364 + 258, epsilon: 0.5));
+      expect(
+        fieldRect(tester, 1).top,
+        moreOrLessEquals(364 + 258, epsilon: 0.5),
+      );
     });
 
     testWidgets('키보드가 올라오면 시트가 y=82 까지 자라고 입력칸은 그대로 키보드 위다', (tester) async {
@@ -790,7 +875,12 @@ void main() {
 
   group('실패해도 화면이 깨지지 않는다', () {
     testWidgets('카드가 한 장이어도 순서 변경·추가 버튼이 있고 X 는 없다', (tester) async {
-      await pump(tester, steps: const [ActionCard(id: 'c1', stepOrder: 1, title: '옷', description: '설명')]);
+      await pump(
+        tester,
+        steps: const [
+          ActionCard(id: 'c1', stepOrder: 1, title: '옷', description: '설명'),
+        ],
+      );
 
       expect(find.text('카드 순서 변경'), findsOneWidget);
       expect(find.text('카드 추가'), findsOneWidget);
@@ -820,7 +910,11 @@ void main() {
 
       final hint = tester.getRect(find.text('카드를 길게 눌러 순서를 변경하세요'));
       final box = tester.getRect(find.byType(CardReviewReorderHint));
-      expect(hint.bottom, lessThanOrEqualTo(box.bottom + 0.5), reason: '안내가 자리 밖으로 잘리지 않는다');
+      expect(
+        hint.bottom,
+        lessThanOrEqualTo(box.bottom + 0.5),
+        reason: '안내가 자리 밖으로 잘리지 않는다',
+      );
       expect(hint.width, lessThanOrEqualTo(box.width + 0.5));
     });
 
@@ -876,7 +970,10 @@ class _Repo implements RoutineRepository {
   Future<AppFailure?> deleteStep(String routineId, String stepId) async => null;
 
   @override
-  Future<AppFailure?> reorderSteps(String routineId, List<String> stepIds) async {
+  Future<AppFailure?> reorderSteps(
+    String routineId,
+    List<String> stepIds,
+  ) async {
     reorderCalls.add(stepIds);
     return null;
   }
