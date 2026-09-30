@@ -92,7 +92,7 @@ public class GeminiImageClient implements ImageGenerationClient {
     // 응답하고 이미지 데이터(inlineData)를 아예 포함하지 않는 경우가 있어(운영 로그에서
     // "Gemini 응답에 이미지 데이터가 없음" 실패로 확인됨), TEXT/IMAGE 모달리티를 모두
     // 요청해 이미지 출력을 강제한다.
-    // aspectRatio 기본값은 4:3 — 클라이언트 카드 이미지 영역(Figma 313×264, 약 1.19:1)이
+    // aspectRatio 기본값은 4:3 — 클라이언트 카드 이미지 영역(Figma 313×230, 1.361:1 — #460 에서 재확인)이
     // 정사각형이 아니라서 1:1로 받으면 크게 크롭돼야 한다. 관리자가 시스템 설정에서
     // 다른 비율로 바꿀 수 있다.
     GeminiGenerateContentRequest request = new GeminiGenerateContentRequest(

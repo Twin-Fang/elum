@@ -20,17 +20,17 @@ class FluxImageClientTest {
     mock(SystemConfigService.class), mock(AiCallLogService.class));
 
   @Test
-  @DisplayName("1024×864 · 4 steps · 한 장 — fal 은 1MP 미만도 1MP 로 받으니 1MP 안에서 카드 비율(1.19:1)로 크게")
+  @DisplayName("1152×848 · 4 steps · 한 장 — fal 은 1MP 미만도 1MP 로 받으니 1MP 안에서 카드 비율(1.361:1)로 크게")
   void body_sizeStepsCount() {
     Map<String, Object> body = client.requestBody("prompt", 12345);
 
-    assertThat(body.get("image_size")).isEqualTo(Map.of("width", 1024, "height", 864));
+    assertThat(body.get("image_size")).isEqualTo(Map.of("width", 1152, "height", 848));
     assertThat(body.get("num_inference_steps")).isEqualTo(4);
     assertThat(body.get("num_images")).isEqualTo(1);
     assertThat(body.get("prompt")).isEqualTo("prompt");
     assertThat(body.get("seed")).isEqualTo(12345);
-    // 1024×864 = 0.88MP — 1MP 를 넘으면 2MP 로 청구된다.
-    assertThat(1024 * 864).isLessThanOrEqualTo(1024 * 1024);
+    // 1152×848 = 0.977MP — 1MP 를 넘으면 2MP 로 청구된다.
+    assertThat(1152 * 848).isLessThanOrEqualTo(1024 * 1024);
   }
 
   @Test

@@ -34,9 +34,11 @@ import org.springframework.web.client.RestClient;
 public class OpenAiImageClient implements ImageGenerationClient {
 
   private static final String BASE_URL = "https://api.openai.com";
-  // 카드 이미지 영역이 약 1.19:1이라 정사각형이 가장 가깝다. 가로형(1536x1024)은
-  // 1.5:1이라 오히려 더 많이 잘린다.
-  private static final String IMAGE_SIZE = "1024x1024";
+  // 카드 그림 칸은 Figma 313×230(1.361:1)이다 (#460, 2026-09-30 재확인). 정사각(1024x1024)은 칸에 채울 때
+  // 위·아래가 26.5% 잘리고, 공식 지원 크기 중 가장 가까운 가로형(1536x1024, 1.5:1)은 좌·우 9.3% 만 잘린다.
+  // 픽셀이 1.5배라 같은 품질(low)에서도 더 선명하다. 가격은 크기가 클수록 조금 오른다(low 기준 약 $0.005→0.006
+  // 으로 추정, 크기별 공식 가격표는 확인하지 못했다).
+  static final String IMAGE_SIZE = "1536x1024";
 
   private final RoutineImagePromptComposer promptComposer;
   private final GeminiRoutineImagePromptBuilder imagePromptBuilder;
