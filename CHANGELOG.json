@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-30T12:28:42Z",
-    "currentVersion": "2.4.0",
+    "lastUpdated": "2026-09-30T15:49:21Z",
+    "currentVersion": "2.4.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 185
+    "totalReleases": 186
   },
   "releases": [
+    {
+      "version": "2.4.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-30",
+      "pr_number": 476,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 보호자 화면의 광고 안내를 담아 이용약관과 개인정보처리방침을 정리했어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "보호자 화면의 광고 안내를 담아 이용약관과 개인정보처리방침을 정리했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.4.0",
       "project_type": "flutter",
