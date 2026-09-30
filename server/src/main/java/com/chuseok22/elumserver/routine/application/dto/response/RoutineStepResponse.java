@@ -16,7 +16,7 @@ public record RoutineStepResponse(
   @Schema(description = "카드에 표시할 짧은 라벨. 이 변경 이전에 생성된 기존 루틴은 null일 수 있음", example = "옷을 입어요")
   String title,
 
-  @Schema(description = "아동에게 소리 내어 읽어줄 문장", example = "학교에 입고 갈 옷을 차례대로 입어요")
+  @Schema(description = "아동에게 소리 내어 읽어줄 문장", example = "학교 갈 옷을 입어요")
   String description,
 
   @Schema(description = "생성된 이미지 저장 경로")

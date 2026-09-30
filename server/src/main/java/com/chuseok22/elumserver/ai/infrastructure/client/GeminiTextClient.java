@@ -157,6 +157,12 @@ public class GeminiTextClient implements TextGenerationClient {
     "required", List.of("imagePromptEn")
   );
 
+  /// 카드 설명(description) 스키마 설명. 지시문(운영 DB)과 별개로 스키마는 코드라 배포로 바로 바뀐다.
+  /// 길이 기준이 예시에 끌려가므로 예시도 짧게 둔다 (#453).
+  static final String STEP_DESCRIPTION_HINT =
+    "소리 내어 읽어줄 아주 짧은 한 문장. 공백 포함 12자 안팎, 행동 하나만. "
+      + "title을 되풀이하지 않고 쉬운 말로 (예: '학교 갈 옷을 입어요')";
+
   /// 카드마다 받는 영어 장면 한 줄의 설명. 지시문(운영 DB)이 아니라 스키마에 둔다 — 스키마는 코드라
   /// 배포로 바로 바뀌고, FLUX 를 고르지 않으면 통째로 빠져 토큰도 들지 않는다 (#373).
   private static final String IMAGE_PROMPT_EN_DESCRIPTION =
@@ -329,9 +335,7 @@ public class GeminiTextClient implements TextGenerationClient {
               ),
               "description", Map.of(
                 "type", "string",
-                "description",
-                "소리 내어 읽어줄 문장. title보다 조금 더 자세하게 서술 "
-                  + "(예: '학교에 입고 갈 옷을 차례대로 입어요')"
+                "description", STEP_DESCRIPTION_HINT
               )
     ));
     List<String> required = new java.util.ArrayList<>(List.of("order", "title", "description"));
