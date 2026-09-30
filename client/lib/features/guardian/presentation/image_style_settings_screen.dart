@@ -1,0 +1,117 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/selectable_group.dart';
+import '../../../core/widgets/show_failure.dart';
+import '../../onboarding/application/onboarding_notifier.dart';
+import '../../onboarding/domain/character.dart';
+import '../../onboarding/domain/image_style.dart';
+import '../../onboarding/presentation/widgets/image_style_option_card.dart';
+
+/// 보호자 설정의 `그림 방식` 선택 화면 (이슈 #458).
+///
+/// ⚠️ **임시 시안이다** (디자이너 확정 전 제시용 — 목업 opt1_A). 카드를 누르면
+/// 바로 저장하고 설정으로 돌아간다 — 셋 중 하나를 고르는 화면에 `저장` 단추까지 두면
+/// 결정이 둘이 된다(원칙 ① 화면 하나에 결정 하나).
+///
+/// **보호자 전용이다.** 이룸이 화면에는 이 화면으로 오는 길이 없다 — 이룸이가 카드
+/// 그림 방식을 바꿀 이유가 없고, 보호자 화면은 PIN 을 거쳐야 열린다.
+class ImageStyleSettingsScreen extends ConsumerStatefulWidget {
+  const ImageStyleSettingsScreen({super.key});
+
+  @override
+  ConsumerState<ImageStyleSettingsScreen> createState() =>
+      _ImageStyleSettingsScreenState();
+}
+
+class _ImageStyleSettingsScreenState
+    extends ConsumerState<ImageStyleSettingsScreen> {
+  /// 저장 중 중복 탭 방지. 서버 요청이 섞여 있어 즉시 끝나지 않는다.
+  bool _busy = false;
+
+  /// 서버 저장에 실패한 방식. **로컬에는 남았지만 서버는 아직 모른다.**
+  ///
+  /// 실패 팝업이 "다시 시도"를 말하는데 같은 방식을 다시 눌러도 아무 일이 없으면
+  /// 막다른 길이다. 이 값과 같은 방식을 누르면 다시 저장을 시도한다.
+  ImageStyle? _unsynced;
+
+  Future<void> _choose(ImageStyle picked) async {
+    if (_busy) return;
+
+    final current = ref.read(onboardingProvider).imageStyle;
+    // 이미 고른 방식을 다시 누르면 바뀔 것이 없다 — 요청도 알림도 없이 돌아간다.
+    if (picked == current && _unsynced != picked) {
+      context.pop();
+      return;
+    }
+
+    setState(() => _busy = true);
+    final failure = await ref
+        .read(onboardingProvider.notifier)
+        .changeImageStyle(picked);
+    if (!mounted) return;
+    setState(() => _busy = false);
+
+    if (failure == null) {
+      _unsynced = null;
+      // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다 (#433).
+      final messenger = ScaffoldMessenger.of(context);
+      context.pop();
+      messenger.showSnackBar(const SnackBar(content: Text('그림 방식을 바꿨어요')));
+      return;
+    }
+
+    // 로컬에는 고른 값이 남아 있다. 화면은 그대로 두고 이유와 에러 코드만 알린다.
+    _unsynced = picked;
+    await showFailure(
+      context,
+      failure,
+      title: '그림 방식을 저장하지 못했어요',
+      fallback: '잠시 후 다시 시도해주세요',
+      fallbackCode: 'E-STYLE',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = ref.watch(onboardingProvider);
+    // 만화 예시에는 온보딩에서 고른 친구를 그린다 (없으면 고양이)
+    final character = profile.cardCharacter ?? CardCharacter.cat;
+
+    final group = SelectableGroup<ImageStyle>(
+      items: ImageStyle.values,
+      selected: {profile.imageStyle},
+      // 셋 중 하나가 늘 골라져 있다. 같은 것을 다시 누른 것은 [_choose]가 처리한다.
+      allowDeselect: true,
+      gap: 12.h,
+      asRadio: true,
+      onChanged: (next) =>
+          _choose(next.isEmpty ? profile.imageStyle : next.first),
+      itemBuilder: (context, style, isSelected) => ImageStyleOptionCard(
+        style: style,
+        isSelected: isSelected,
+        character: character,
+      ),
+      semanticLabelOf: ImageStyleOptionCard.semanticLabel,
+    );
+
+    return ElumScaffold(
+      onBack: _busy ? null : () => context.pop(),
+      title: '그림 방식',
+      // 설정 묶음 시안(1022:4467)과 같은 머리 — 뒤로가기 y=67, 좌우 16
+      backTop: 67,
+      horizontalPadding: 16,
+      // 글자를 키우면 카드 셋이 한 화면을 넘는다 — 스크롤로 끝까지 볼 수 있게 한다
+      child: SingleChildScrollView(
+        child: Padding(
+          // 설정 첫 줄과 같은 자리(y=147)에서 시작한다
+          padding: EdgeInsets.only(top: 40.h, bottom: 24.h),
+          child: group,
+        ),
+      ),
+    );
+  }
+}

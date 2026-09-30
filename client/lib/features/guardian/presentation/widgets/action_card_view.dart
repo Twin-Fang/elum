@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -10,6 +11,7 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../domain/card_palette.dart';
 import 'card_image.dart';
+import 'default_card_art.dart';
 
 /// 행동 카드 한 장.
 ///
@@ -30,6 +32,7 @@ class ActionCardView extends StatefulWidget {
     this.onSpeak,
     this.isSpeaking = false,
     this.layout = ActionCardLayout.review,
+    this.onAddPhoto,
   });
 
   /// 카드확인 시안 그림칸 비율 (`262:5124` — 313×230, 2026-09-24 덤프 · #401).
@@ -59,6 +62,13 @@ class ActionCardView extends StatefulWidget {
 
   /// 카드 안 배치. 이룸이 일과 상세만 [ActionCardLayout.childDetail]을 쓴다.
   final ActionCardLayout layout;
+
+  /// 그림이 없는 카드의 `사진 추가`를 눌렀을 때 (보호자 화면만 쓴다 · #458).
+  ///
+  /// **null 이면 누를 수 없다.** 사진 바꾸기(#456)가 이 훅에 연결한다 — 그 전에는
+  /// 자리만 보이고 눌러도 아무 일이 없다. 이룸이 화면([ActionCardLayout.childDetail])은
+  /// 사진을 넣는 자리가 아니라 무시한다.
+  final VoidCallback? onAddPhoto;
 
   @override
   State<ActionCardView> createState() => _ActionCardViewState();
@@ -150,30 +160,41 @@ class _ActionCardViewState extends State<ActionCardView> {
     // 순서를 바꾸면 카드가 새 자리 색을 입는다. 그대로 두면 카드 한 장이 통째로 한
     // 프레임에 바뀌어 어지럽다 — 배경과 테두리·배지를 [AppMotion.normal] 동안 섞는다.
     // 처음 그릴 때는 목적 색에서 시작하므로 등장 시에는 움직이지 않는다 (#451).
-    return TweenAnimationBuilder<Color?>(
-      tween: ColorTween(end: target.fill),
-      duration: AppMotion.normal,
-      builder: (context, fillColor, _) => TweenAnimationBuilder<Color?>(
-        tween: ColorTween(end: target.border),
-        duration: AppMotion.normal,
-        builder: (context, borderColor, _) {
-          final palette = CardPalette(
-            fill: fillColor ?? target.fill,
-            border: borderColor ?? target.border,
-          );
-          return _buildCard(
-            context,
-            palette: palette,
-            space: space,
-            childLayout: childLayout,
-            inset: inset,
-            illustrationAspect: illustrationAspect,
-            illustrationToTitle: illustrationToTitle,
-            titleToBody: titleToBody,
-            speaker: speaker,
-          );
-        },
-      ),
+    return Consumer(
+      // 그림이 없다는 사실을 그림 자리와 제목 줄이 **같이** 알아야 한다 (#458).
+      builder: (context, ref, _) {
+        final imageState = watchCardImageState(
+          ref,
+          routineId: widget.routineId,
+          stepId: widget.card.id,
+        );
+        return TweenAnimationBuilder<Color?>(
+          tween: ColorTween(end: target.fill),
+          duration: AppMotion.normal,
+          builder: (context, fillColor, _) => TweenAnimationBuilder<Color?>(
+            tween: ColorTween(end: target.border),
+            duration: AppMotion.normal,
+            builder: (context, borderColor, _) {
+              final palette = CardPalette(
+                fill: fillColor ?? target.fill,
+                border: borderColor ?? target.border,
+              );
+              return _buildCard(
+                context,
+                palette: palette,
+                space: space,
+                childLayout: childLayout,
+                inset: inset,
+                illustrationAspect: illustrationAspect,
+                illustrationToTitle: illustrationToTitle,
+                titleToBody: titleToBody,
+                speaker: speaker,
+                imageState: imageState,
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -188,7 +209,11 @@ class _ActionCardViewState extends State<ActionCardView> {
     required double illustrationToTitle,
     required double titleToBody,
     required Widget speaker,
+    required CardImageState imageState,
   }) {
+    // 이룸이 화면은 그림이 없을 때 제목이 그림 자리로 올라간다 (#458). 줄에 또 두면
+    // 같은 글이 두 번 나온다. 받는 중에는 그림이 올 수 있어 줄에 그대로 둔다.
+    final titleInArt = childLayout && imageState == CardImageState.none;
     return Container(
       decoration: BoxDecoration(
         color: palette.fill,
@@ -238,32 +263,59 @@ class _ActionCardViewState extends State<ActionCardView> {
                         routineId: widget.routineId,
                         stepId: widget.card.id,
                         onDelete: widget.onDelete,
+                        // 이룸이 화면은 사진을 넣는 자리가 아니다
+                        emptyBuilder: (context) => childLayout
+                            ? DefaultCardTitleArt(
+                                title: widget.card.displayTitle,
+                                color: palette.border,
+                              )
+                            : DefaultCardPhotoSlot(onAddPhoto: widget.onAddPhoto),
                       ),
                     ),
                     SizedBox(height: illustrationToTitle),
-                    Row(
-                      // center로 두면 한 줄/두 줄 모두 별도 측정 없이 배지·제목이
-                      // Row 높이(둘 중 큰 쪽) 기준으로 세로 중앙 정렬된다 — 이슈 #105
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        _NumberBadge(
-                          order: widget.index + 1,
-                          color: palette.border,
-                        ),
-                        // 배지 → 제목 8 (두 시안 모두 배지 끝 80 → 제목 88).
-                        SizedBox(width: space.xs),
-                        Expanded(
-                          child: Text(
-                            // 제목을 …로 자르지 않는다. 아동이 무엇을 해야 하는지
-                            // 알려주는 문장이라 잘리면 의미가 사라진다.
-                            widget.card.displayTitle,
-                            // 제목은 25/w800(style_GKEQ8F) — 순서 배지(cardHeadline 30)와 크기가 다르다
-                            style: context.typo.actionCardTitle.copyWith(
-                              color: context.colors.textPrimary,
+                    // 그림이 없어 제목이 그림 자리로 올라가면 줄 높이가 배지(40)로 줄어든다.
+                    // 툭 줄지 않게 부드럽게 맞춘다.
+                    AnimatedSize(
+                      duration: AppMotion.fast,
+                      alignment: Alignment.topLeft,
+                      child: Row(
+                        // center로 두면 한 줄/두 줄 모두 별도 측정 없이 배지·제목이
+                        // Row 높이(둘 중 큰 쪽) 기준으로 세로 중앙 정렬된다 — 이슈 #105
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          _NumberBadge(
+                            order: widget.index + 1,
+                            color: palette.border,
+                          ),
+                          // 배지 → 제목 8 (두 시안 모두 배지 끝 80 → 제목 88).
+                          SizedBox(width: space.xs),
+                          Expanded(
+                            // 제목이 그림 자리로 올라가는 순간 줄의 제목이 툭 사라지면 그림 자리가
+                            // 채워지기 전 한 순간 제목이 어디에도 없다. 그림 자리가 나타나는 속도와
+                            // 같이 서서히 바꾼다.
+                            child: AnimatedSwitcher(
+                              duration: AppMotion.fast,
+                              // 기본 배치는 가운데라 제목이 왼쪽 x=88 에서 밀린다
+                              layoutBuilder: (current, previous) => Stack(
+                                alignment: Alignment.centerLeft,
+                                children: [...previous, ?current],
+                              ),
+                              child: titleInArt
+                                  ? const SizedBox(key: ValueKey('title-in-art'))
+                                  : Text(
+                                      key: const ValueKey('title-in-row'),
+                                      // 제목을 …로 자르지 않는다. 아동이 무엇을 해야 하는지
+                                      // 알려주는 문장이라 잘리면 의미가 사라진다.
+                                      widget.card.displayTitle,
+                                      // 제목은 25/w800(style_GKEQ8F) — 순서 배지(cardHeadline 30)와 크기가 다르다
+                                      style: context.typo.actionCardTitle.copyWith(
+                                        color: context.colors.textPrimary,
+                                      ),
+                                    ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     // 제목 아래 17 — 시안 제목 끝(509) → 설명(535). 토큰(12)을
                     // 쓰면 설명이 5 올라간다 (#297).
@@ -326,17 +378,19 @@ class _ActionCardViewState extends State<ActionCardView> {
 
 /// 카드 이미지 자리.
 ///
-/// 서버가 만든 그림을 보여주고, 못 받으면 캐릭터 일러스트로 대체한다.
+/// 서버가 만든 그림을 보여주고, 없으면 [emptyBuilder]의 기본 카드로 채운다 (#458).
 /// 자리를 비우면 카드 비율이 무너진다.
 class _Illustration extends StatelessWidget {
   const _Illustration({
     required this.routineId,
     required this.stepId,
+    required this.emptyBuilder,
     this.onDelete,
   });
 
   final String routineId;
   final String stepId;
+  final WidgetBuilder emptyBuilder;
   final VoidCallback? onDelete;
 
   @override
@@ -353,7 +407,11 @@ class _Illustration extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(space.xs),
-              child: CardImage(routineId: routineId, stepId: stepId),
+              child: CardImage(
+                routineId: routineId,
+                stepId: stepId,
+                emptyBuilder: emptyBuilder,
+              ),
             ),
           ),
         ),

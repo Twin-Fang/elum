@@ -166,6 +166,9 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginLastUsedBg,
     required this.settingsDestructive,
     required this.settingsChevron,
+    required this.cardPhotoSlotDash,
+    required this.imageStyleExampleFill,
+    required this.imageStyleExampleLabel,
     required this.creditCardBg,
     required this.creditBarTrack,
     required this.creditBarFill,
@@ -621,6 +624,20 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 설정 목록의 오른쪽 화살표 (실측 #CDCDCD).
   final Color settingsChevron;
 
+  // --- 그림 방식 · 기본 카드 (#458 · 임시 시안, 디자이너 확정 전) ---
+  // 값이 다른 토큰과 같아도(#DADADA 등) 쓰임이 달라 따로 둔다 — 시안이 확정되면
+  // 이 자리들만 따로 바뀐다.
+
+  /// 그림 없는 카드(보호자)의 `사진 추가` 점선 자리 테두리.
+  final Color cardPhotoSlotDash;
+
+  /// 그림 방식 선택 카드의 예시 그림 자리표시 상자 배경(`실사 예시`·`내 사진`).
+  /// 최종 예시 그림은 디자이너 몫이라 회색 상자로 둔다.
+  final Color imageStyleExampleFill;
+
+  /// 예시 자리표시 상자 위 글자·카메라 아이콘.
+  final Color imageStyleExampleLabel;
+
   // --- AI 크레딧 (#407) ---
 
   /// AI 크레딧 카드 면 (#407 이슈 시안 — 흰 카드).
@@ -826,6 +843,9 @@ class AppColors extends ThemeExtension<AppColors> {
     loginLastUsedBg: Color(0x80FFFADC),
     settingsDestructive: Color(0xFFDA5050),
     settingsChevron: Color(0xFFCDCDCD),
+    cardPhotoSlotDash: Color(0xFFDADADA),
+    imageStyleExampleFill: Color(0xFFD9D9D9),
+    imageStyleExampleLabel: Color(0xFF555561),
     creditCardBg: Color(0xFFFFFFFF),
     creditBarTrack: Color(0xFFEFEFEF),
     creditBarFill: Color(0xFFFF8B22),
@@ -977,6 +997,9 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? loginLastUsedBg,
     Color? settingsDestructive,
     Color? settingsChevron,
+    Color? cardPhotoSlotDash,
+    Color? imageStyleExampleFill,
+    Color? imageStyleExampleLabel,
     Color? creditCardBg,
     Color? creditBarTrack,
     Color? creditBarFill,
@@ -1131,6 +1154,10 @@ class AppColors extends ThemeExtension<AppColors> {
       loginLastUsedBg: loginLastUsedBg ?? this.loginLastUsedBg,
       settingsDestructive: settingsDestructive ?? this.settingsDestructive,
       settingsChevron: settingsChevron ?? this.settingsChevron,
+      cardPhotoSlotDash: cardPhotoSlotDash ?? this.cardPhotoSlotDash,
+      imageStyleExampleFill: imageStyleExampleFill ?? this.imageStyleExampleFill,
+      imageStyleExampleLabel:
+          imageStyleExampleLabel ?? this.imageStyleExampleLabel,
       creditCardBg: creditCardBg ?? this.creditCardBg,
       creditBarTrack: creditBarTrack ?? this.creditBarTrack,
       creditBarFill: creditBarFill ?? this.creditBarFill,
@@ -1444,6 +1471,12 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsDestructive:
           Color.lerp(settingsDestructive, other.settingsDestructive, t)!,
       settingsChevron: Color.lerp(settingsChevron, other.settingsChevron, t)!,
+      cardPhotoSlotDash:
+          Color.lerp(cardPhotoSlotDash, other.cardPhotoSlotDash, t)!,
+      imageStyleExampleFill:
+          Color.lerp(imageStyleExampleFill, other.imageStyleExampleFill, t)!,
+      imageStyleExampleLabel:
+          Color.lerp(imageStyleExampleLabel, other.imageStyleExampleLabel, t)!,
       creditCardBg: Color.lerp(creditCardBg, other.creditCardBg, t)!,
       creditBarTrack: Color.lerp(creditBarTrack, other.creditBarTrack, t)!,
       creditBarFill: Color.lerp(creditBarFill, other.creditBarFill, t)!,

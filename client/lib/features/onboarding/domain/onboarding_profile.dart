@@ -1,14 +1,20 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'character.dart';
+import 'image_style.dart';
 import 'support_goal.dart';
 
 part 'onboarding_profile.freezed.dart';
 
 /// 온보딩이 수집하는 정보의 전부.
 ///
-/// 호칭 / 도움 목표 / 카드 캐릭터 / PIN — 이 4개뿐이다.
+/// 호칭 / 도움 목표 / 카드 캐릭터 / 그림 방식 / PIN — 이 5개뿐이다.
 /// 필드를 추가할 땐 "진단명 없는 개인화" 원칙을 깨는지 먼저 검토한다.
+///
+/// 그림 방식(#458)은 **서비스 원칙 1(진단명·장애 유형 수집 금지)을 어기지 않는다.**
+/// 이룸이가 어떤 사람인지가 아니라 "카드 그림을 어떤 방식으로 만들지"라는 화면
+/// 취향이고, 만화·실사·직접 사진은 캐릭터 고르기와 같은 성격의 선택이다.
+/// 원칙 2·5도 해당 없다 — 보호자 입력 원문이 아니라 세 값 중 하나만 저장한다.
 @freezed
 abstract class OnboardingProfile with _$OnboardingProfile {
   const factory OnboardingProfile({
@@ -16,6 +22,9 @@ abstract class OnboardingProfile with _$OnboardingProfile {
     @Default('') String childNickname,
     @Default(<SupportGoal>{}) Set<SupportGoal> supportGoals,
     CardCharacter? cardCharacter,
+
+    /// 카드 그림 방식. 건너뛰면 기본 만화다 — 필수 입력이 아니다.
+    @Default(ImageStyle.cartoon) ImageStyle imageStyle,
 
     /// 보호자 모드 전환용 4자리 PIN
     @Default('') String guardianPin,

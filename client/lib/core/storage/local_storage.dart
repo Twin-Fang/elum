@@ -27,6 +27,13 @@ abstract interface class LocalStorage {
   String? get character;
   Future<void> setCharacter(String v);
 
+  /// 카드 그림 방식 (#458 · `ImageStyle.apiValue`). 고른 적이 없으면 null —
+  /// 기존 설치 앱을 올렸을 때가 그렇고, 읽는 쪽이 만화로 처리한다.
+  ///
+  /// `character`와 같은 이유로 enum 이 아니라 문자열이다 (core 가 feature 를 모른다).
+  String? get imageStyle;
+  Future<void> setImageStyle(String v);
+
   bool get isOnboardingCompleted;
   Future<void> setOnboardingCompleted(bool v);
 
@@ -134,6 +141,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kLastProvider = 'lastLoginProvider';
   static const _kGoals = 'supportGoals';
   static const _kCharacter = 'cardCharacter';
+  static const _kImageStyle = 'imageStyle';
   static const _kCompleted = 'onboardingCompleted';
   static const _kPin = 'guardianPin';
   static const _kElumiDevice = 'isElumiDevice';
@@ -200,6 +208,19 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setCharacter(String v) {
     AppLogger.storageWrite(_kCharacter, v);
     return _prefs.setString(_kCharacter, v);
+  }
+
+  @override
+  String? get imageStyle {
+    final value = _prefs.getString(_kImageStyle);
+    AppLogger.storageRead(_kImageStyle, value);
+    return value;
+  }
+
+  @override
+  Future<void> setImageStyle(String v) {
+    AppLogger.storageWrite(_kImageStyle, v);
+    return _prefs.setString(_kImageStyle, v);
   }
 
   @override
@@ -344,7 +365,14 @@ class SharedPrefsStorage implements LocalStorage {
 
   @override
   Future<void> clearChildProfile() async {
-    for (final key in [_kNickname, _kGoals, _kCharacter, _kCompleted, _kPin]) {
+    for (final key in [
+      _kNickname,
+      _kGoals,
+      _kCharacter,
+      _kImageStyle,
+      _kCompleted,
+      _kPin,
+    ]) {
       await _prefs.remove(key);
     }
     // 진행 기록·캐시도 이전 아이의 것이다
@@ -388,6 +416,7 @@ class InMemoryStorage implements LocalStorage {
   String? _nickname;
   List<String> _goals = const [];
   String? _character;
+  String? _imageStyle;
   String? _pin;
   bool _completed;
   String? _accessToken;
@@ -421,6 +450,12 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<void> setCharacter(String v) async => _character = v;
+
+  @override
+  String? get imageStyle => _imageStyle;
+
+  @override
+  Future<void> setImageStyle(String v) async => _imageStyle = v;
 
   @override
   bool get isOnboardingCompleted => _completed;
@@ -513,6 +548,7 @@ class InMemoryStorage implements LocalStorage {
     _nickname = null;
     _goals = const [];
     _character = null;
+    _imageStyle = null;
     _pin = null;
     _completed = false;
     _progress.clear();
@@ -524,6 +560,7 @@ class InMemoryStorage implements LocalStorage {
     _nickname = null;
     _goals = const [];
     _character = null;
+    _imageStyle = null;
     _pin = null;
     _completed = false;
     _accessToken = null;

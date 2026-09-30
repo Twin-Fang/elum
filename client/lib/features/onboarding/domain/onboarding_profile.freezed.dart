@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 mixin _$OnboardingProfile {
 
 /// 아이 호칭. 실명이 아니어도 된다고 온보딩에서 안내한다.
- String get childNickname; Set<SupportGoal> get supportGoals; CardCharacter? get cardCharacter;/// 보호자 모드 전환용 4자리 PIN
+ String get childNickname; Set<SupportGoal> get supportGoals; CardCharacter? get cardCharacter;/// 카드 그림 방식. 건너뛰면 기본 만화다 — 필수 입력이 아니다.
+ ImageStyle get imageStyle;/// 보호자 모드 전환용 4자리 PIN
  String get guardianPin;
 /// Create a copy of OnboardingProfile
 /// with the given fields replaced by the non-null parameter values.
@@ -27,16 +28,16 @@ $OnboardingProfileCopyWith<OnboardingProfile> get copyWith => _$OnboardingProfil
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OnboardingProfile&&(identical(other.childNickname, childNickname) || other.childNickname == childNickname)&&const DeepCollectionEquality().equals(other.supportGoals, supportGoals)&&(identical(other.cardCharacter, cardCharacter) || other.cardCharacter == cardCharacter)&&(identical(other.guardianPin, guardianPin) || other.guardianPin == guardianPin));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OnboardingProfile&&(identical(other.childNickname, childNickname) || other.childNickname == childNickname)&&const DeepCollectionEquality().equals(other.supportGoals, supportGoals)&&(identical(other.cardCharacter, cardCharacter) || other.cardCharacter == cardCharacter)&&(identical(other.imageStyle, imageStyle) || other.imageStyle == imageStyle)&&(identical(other.guardianPin, guardianPin) || other.guardianPin == guardianPin));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,childNickname,const DeepCollectionEquality().hash(supportGoals),cardCharacter,guardianPin);
+int get hashCode => Object.hash(runtimeType,childNickname,const DeepCollectionEquality().hash(supportGoals),cardCharacter,imageStyle,guardianPin);
 
 @override
 String toString() {
-  return 'OnboardingProfile(childNickname: $childNickname, supportGoals: $supportGoals, cardCharacter: $cardCharacter, guardianPin: $guardianPin)';
+  return 'OnboardingProfile(childNickname: $childNickname, supportGoals: $supportGoals, cardCharacter: $cardCharacter, imageStyle: $imageStyle, guardianPin: $guardianPin)';
 }
 
 
@@ -47,7 +48,7 @@ abstract mixin class $OnboardingProfileCopyWith<$Res>  {
   factory $OnboardingProfileCopyWith(OnboardingProfile value, $Res Function(OnboardingProfile) _then) = _$OnboardingProfileCopyWithImpl;
 @useResult
 $Res call({
- String childNickname, Set<SupportGoal> supportGoals, CardCharacter? cardCharacter, String guardianPin
+ String childNickname, Set<SupportGoal> supportGoals, CardCharacter? cardCharacter, ImageStyle imageStyle, String guardianPin
 });
 
 
@@ -64,12 +65,13 @@ class _$OnboardingProfileCopyWithImpl<$Res>
 
 /// Create a copy of OnboardingProfile
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? childNickname = null,Object? supportGoals = null,Object? cardCharacter = freezed,Object? guardianPin = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? childNickname = null,Object? supportGoals = null,Object? cardCharacter = freezed,Object? imageStyle = null,Object? guardianPin = null,}) {
   return _then(_self.copyWith(
 childNickname: null == childNickname ? _self.childNickname : childNickname // ignore: cast_nullable_to_non_nullable
 as String,supportGoals: null == supportGoals ? _self.supportGoals : supportGoals // ignore: cast_nullable_to_non_nullable
 as Set<SupportGoal>,cardCharacter: freezed == cardCharacter ? _self.cardCharacter : cardCharacter // ignore: cast_nullable_to_non_nullable
-as CardCharacter?,guardianPin: null == guardianPin ? _self.guardianPin : guardianPin // ignore: cast_nullable_to_non_nullable
+as CardCharacter?,imageStyle: null == imageStyle ? _self.imageStyle : imageStyle // ignore: cast_nullable_to_non_nullable
+as ImageStyle,guardianPin: null == guardianPin ? _self.guardianPin : guardianPin // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -155,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String childNickname,  Set<SupportGoal> supportGoals,  CardCharacter? cardCharacter,  String guardianPin)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String childNickname,  Set<SupportGoal> supportGoals,  CardCharacter? cardCharacter,  ImageStyle imageStyle,  String guardianPin)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnboardingProfile() when $default != null:
-return $default(_that.childNickname,_that.supportGoals,_that.cardCharacter,_that.guardianPin);case _:
+return $default(_that.childNickname,_that.supportGoals,_that.cardCharacter,_that.imageStyle,_that.guardianPin);case _:
   return orElse();
 
 }
@@ -176,10 +178,10 @@ return $default(_that.childNickname,_that.supportGoals,_that.cardCharacter,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String childNickname,  Set<SupportGoal> supportGoals,  CardCharacter? cardCharacter,  String guardianPin)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String childNickname,  Set<SupportGoal> supportGoals,  CardCharacter? cardCharacter,  ImageStyle imageStyle,  String guardianPin)  $default,) {final _that = this;
 switch (_that) {
 case _OnboardingProfile():
-return $default(_that.childNickname,_that.supportGoals,_that.cardCharacter,_that.guardianPin);case _:
+return $default(_that.childNickname,_that.supportGoals,_that.cardCharacter,_that.imageStyle,_that.guardianPin);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +198,10 @@ return $default(_that.childNickname,_that.supportGoals,_that.cardCharacter,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String childNickname,  Set<SupportGoal> supportGoals,  CardCharacter? cardCharacter,  String guardianPin)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String childNickname,  Set<SupportGoal> supportGoals,  CardCharacter? cardCharacter,  ImageStyle imageStyle,  String guardianPin)?  $default,) {final _that = this;
 switch (_that) {
 case _OnboardingProfile() when $default != null:
-return $default(_that.childNickname,_that.supportGoals,_that.cardCharacter,_that.guardianPin);case _:
+return $default(_that.childNickname,_that.supportGoals,_that.cardCharacter,_that.imageStyle,_that.guardianPin);case _:
   return null;
 
 }
@@ -211,7 +213,7 @@ return $default(_that.childNickname,_that.supportGoals,_that.cardCharacter,_that
 
 
 class _OnboardingProfile extends OnboardingProfile {
-  const _OnboardingProfile({this.childNickname = '', final  Set<SupportGoal> supportGoals = const <SupportGoal>{}, this.cardCharacter, this.guardianPin = ''}): _supportGoals = supportGoals,super._();
+  const _OnboardingProfile({this.childNickname = '', final  Set<SupportGoal> supportGoals = const <SupportGoal>{}, this.cardCharacter, this.imageStyle = ImageStyle.cartoon, this.guardianPin = ''}): _supportGoals = supportGoals,super._();
   
 
 /// 아이 호칭. 실명이 아니어도 된다고 온보딩에서 안내한다.
@@ -224,6 +226,8 @@ class _OnboardingProfile extends OnboardingProfile {
 }
 
 @override final  CardCharacter? cardCharacter;
+/// 카드 그림 방식. 건너뛰면 기본 만화다 — 필수 입력이 아니다.
+@override@JsonKey() final  ImageStyle imageStyle;
 /// 보호자 모드 전환용 4자리 PIN
 @override@JsonKey() final  String guardianPin;
 
@@ -237,16 +241,16 @@ _$OnboardingProfileCopyWith<_OnboardingProfile> get copyWith => __$OnboardingPro
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnboardingProfile&&(identical(other.childNickname, childNickname) || other.childNickname == childNickname)&&const DeepCollectionEquality().equals(other._supportGoals, _supportGoals)&&(identical(other.cardCharacter, cardCharacter) || other.cardCharacter == cardCharacter)&&(identical(other.guardianPin, guardianPin) || other.guardianPin == guardianPin));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnboardingProfile&&(identical(other.childNickname, childNickname) || other.childNickname == childNickname)&&const DeepCollectionEquality().equals(other._supportGoals, _supportGoals)&&(identical(other.cardCharacter, cardCharacter) || other.cardCharacter == cardCharacter)&&(identical(other.imageStyle, imageStyle) || other.imageStyle == imageStyle)&&(identical(other.guardianPin, guardianPin) || other.guardianPin == guardianPin));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,childNickname,const DeepCollectionEquality().hash(_supportGoals),cardCharacter,guardianPin);
+int get hashCode => Object.hash(runtimeType,childNickname,const DeepCollectionEquality().hash(_supportGoals),cardCharacter,imageStyle,guardianPin);
 
 @override
 String toString() {
-  return 'OnboardingProfile(childNickname: $childNickname, supportGoals: $supportGoals, cardCharacter: $cardCharacter, guardianPin: $guardianPin)';
+  return 'OnboardingProfile(childNickname: $childNickname, supportGoals: $supportGoals, cardCharacter: $cardCharacter, imageStyle: $imageStyle, guardianPin: $guardianPin)';
 }
 
 
@@ -257,7 +261,7 @@ abstract mixin class _$OnboardingProfileCopyWith<$Res> implements $OnboardingPro
   factory _$OnboardingProfileCopyWith(_OnboardingProfile value, $Res Function(_OnboardingProfile) _then) = __$OnboardingProfileCopyWithImpl;
 @override @useResult
 $Res call({
- String childNickname, Set<SupportGoal> supportGoals, CardCharacter? cardCharacter, String guardianPin
+ String childNickname, Set<SupportGoal> supportGoals, CardCharacter? cardCharacter, ImageStyle imageStyle, String guardianPin
 });
 
 
@@ -274,12 +278,13 @@ class __$OnboardingProfileCopyWithImpl<$Res>
 
 /// Create a copy of OnboardingProfile
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? childNickname = null,Object? supportGoals = null,Object? cardCharacter = freezed,Object? guardianPin = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? childNickname = null,Object? supportGoals = null,Object? cardCharacter = freezed,Object? imageStyle = null,Object? guardianPin = null,}) {
   return _then(_OnboardingProfile(
 childNickname: null == childNickname ? _self.childNickname : childNickname // ignore: cast_nullable_to_non_nullable
 as String,supportGoals: null == supportGoals ? _self._supportGoals : supportGoals // ignore: cast_nullable_to_non_nullable
 as Set<SupportGoal>,cardCharacter: freezed == cardCharacter ? _self.cardCharacter : cardCharacter // ignore: cast_nullable_to_non_nullable
-as CardCharacter?,guardianPin: null == guardianPin ? _self.guardianPin : guardianPin // ignore: cast_nullable_to_non_nullable
+as CardCharacter?,imageStyle: null == imageStyle ? _self.imageStyle : imageStyle // ignore: cast_nullable_to_non_nullable
+as ImageStyle,guardianPin: null == guardianPin ? _self.guardianPin : guardianPin // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

@@ -61,7 +61,7 @@ class CharacterScreen extends ConsumerWidget {
       bottomButton: ElumButton(
         label: '다음',
         onPressed: profile.canProceedFromCharacter
-            ? () => context.push(Routes.onboardingPin)
+            ? () => context.push(Routes.onboardingImageStyle)
             : null,
       ),
       // 작은 기기에서 카드(202px)가 잘리지 않게 스크롤을 허용한다

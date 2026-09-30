@@ -16,6 +16,7 @@ class SettingsTile extends StatelessWidget {
     required this.onTap,
     this.destructive = false,
     this.valueText,
+    this.showChevronWithValue = false,
   });
 
   final String label;
@@ -26,6 +27,10 @@ class SettingsTile extends StatelessWidget {
   /// 값을 보여주는 줄은 누를 곳이 아니다 — 화살표를 함께 두면 들어갈 화면이
   /// 있는 것처럼 읽힌다 (#418).
   final String? valueText;
+
+  /// 값을 보여주면서 **들어갈 화면도 있는** 줄이면 true — 값 옆에 화살표를 함께 그린다 (#458).
+  /// (`그림 방식  만화 ›`) 기본 false 라 앱 정보처럼 값만 보여주는 기존 줄은 그대로다.
+  final bool showChevronWithValue;
 
   /// 되돌릴 수 없는 항목. 색으로 구분해 실수로 누르는 것을 줄인다.
   final bool destructive;
@@ -38,6 +43,11 @@ class SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final value = valueText;
+    final chevron = Icon(
+      Icons.chevron_right_rounded,
+      size: 20.w,
+      color: colors.settingsChevron,
+    );
 
     final row = SizedBox(
       height: _height.h,
@@ -67,13 +77,11 @@ class SettingsTile extends StatelessWidget {
                 style: context.typo.settingsTileLabel.copyWith(
                   color: colors.textPlaceholder,
                 ),
-              )
-            else
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 20.w,
-                color: colors.settingsChevron,
               ),
+            if (value == null || showChevronWithValue) ...[
+              if (value != null) SizedBox(width: 4.w),
+              chevron,
+            ],
           ],
         ),
       ),

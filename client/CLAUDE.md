@@ -73,6 +73,7 @@ Swagger  https://api.elum.chuseok22.com/v3/api-docs      ← 배포된 계약(Op
 | --- | --- | --- |
 | PATCH | `/api/member/nickname` | 호칭 저장 |
 | PATCH | `/api/member/support-goals` | 도움 목표 저장 |
+| PATCH | `/api/member/image-style` | 카드 그림 방식 저장 (`CARTOON` / `REALISTIC` / `PHOTO_ONLY`, #458 · 서버 #457) |
 | GET | `/api/member/me` | 프로필 조회 |
 
 #### API가 실패하면 서버 로그부터 본다 ⚠️

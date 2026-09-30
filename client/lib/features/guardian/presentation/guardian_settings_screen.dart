@@ -14,6 +14,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
+import '../../onboarding/application/onboarding_notifier.dart';
 import 'widgets/ai_credit_card.dart';
 
 /// 보호자 설정 화면 (이슈 #181).
@@ -157,6 +158,10 @@ class _GuardianSettingsScreenState
           label: '비밀암호 변경하기',
           onTap: _busy ? null : () => context.push(Routes.guardianPinChange),
         ),
+        // 카드 그림을 어떤 방식으로 만들지 (#458). 시안(`1022:4467`)에 없는 줄이라
+        // **임시 시안**이다 — 시안 줄 순서(연결·임시저장·비밀암호·약관)를 깨지 않게
+        // 비밀암호와 약관 사이에 둔다. 오른쪽에 지금 값과 화살표를 함께 보여준다.
+        _ImageStyleTile(busy: _busy),
         SettingsTile(
           label: '약관 및 개인정보처리방침',
           onTap: _busy
@@ -187,6 +192,24 @@ class _GuardianSettingsScreenState
         ),
         SizedBox(height: space.lg),
       ],
+    );
+  }
+}
+
+/// `그림 방식` 줄. 오른쪽에 지금 방식(`만화`)을 보여주고 누르면 선택 화면이 열린다 (#458).
+class _ImageStyleTile extends ConsumerWidget {
+  const _ImageStyleTile({required this.busy});
+
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final style = ref.watch(onboardingProvider.select((p) => p.imageStyle));
+    return SettingsTile(
+      label: '그림 방식',
+      valueText: style.label,
+      showChevronWithValue: true,
+      onTap: busy ? null : () => context.push(Routes.guardianImageStyle),
     );
   }
 }

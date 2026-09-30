@@ -37,6 +37,12 @@ void main() {
           path: Routes.onboardingCharacter,
           builder: (context, state) => const CharacterScreen(),
         ),
+        // 캐릭터 다음은 그림 방식 단계다 (#458). 비밀암호는 그 다음이다.
+        GoRoute(
+          path: Routes.onboardingImageStyle,
+          builder: (context, state) =>
+              const Scaffold(body: Text('그림 방식 화면')),
+        ),
         GoRoute(
           path: Routes.onboardingPin,
           builder: (context, state) => const Scaffold(body: Text('PIN 화면')),
@@ -88,6 +94,20 @@ void main() {
 
       // Figma 204:1029의 CTA는 disable variant
       expect(isCtaEnabled(tester), isFalse);
+    });
+
+    // 그림 방식 단계가 캐릭터와 비밀암호 사이에 들어왔다 (#458)
+    testWidgets('다음을 누르면 그림 방식 화면으로 간다 (비밀암호가 아니다)', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      await tester.tap(cardOf(CardCharacter.cat));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('다음'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('그림 방식 화면'), findsOneWidget);
+      expect(find.text('PIN 화면'), findsNothing);
     });
 
     testWidgets('여우를 고르면 복숭아색이 된다 (204:1121)', (tester) async {
