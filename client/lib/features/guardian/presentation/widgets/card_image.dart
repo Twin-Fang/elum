@@ -16,10 +16,19 @@ import '../../data/card_image_repository.dart';
 /// 실패하면 캐릭터 일러스트로 대체한다. 자리를 비우면 카드 비율이 무너지고,
 /// 아동에게 깨진 이미지 아이콘을 보여줄 수는 없다.
 class CardImage extends ConsumerWidget {
-  const CardImage({super.key, required this.routineId, required this.stepId});
+  const CardImage({
+    super.key,
+    required this.routineId,
+    required this.stepId,
+    this.imagePath,
+  });
 
   final String routineId;
   final String stepId;
+
+  /// 서버가 준 그림 열쇠. **캐시 열쇠의 일부다** — 보호자가 사진으로 바꾸면 값이 바뀌고,
+  /// 그 순간 옛 그림 캐시를 버리고 새로 받는다 (#456). 모르면 null.
+  final String? imagePath;
 
   // 서버가 "4:3"으로 요청해도 Gemini가 반환하는 실제 비율이 미세하게 어긋날
   // 때가 있어, 카드 4:3 박스와 안 맞아 가장자리에 배경색 라인이 비친다.
@@ -35,7 +44,9 @@ class CardImage extends ConsumerWidget {
     if (!canFetch) return const _Fallback();
 
     final image = ref.watch(
-      cardImageProvider((routineId: routineId, stepId: stepId)),
+      cardImageProvider(
+        (routineId: routineId, stepId: stepId, imagePath: imagePath),
+      ),
     );
 
     return image.when(
@@ -47,11 +58,12 @@ class CardImage extends ConsumerWidget {
           : AnimatedSwitcher(
               // 이미지가 툭 나타나지 않게 부드럽게 바꾼다
               duration: AppMotion.fast,
+              // 그림이 바뀌면(사진 교체) 열쇠가 달라 부드럽게 갈아 끼운다
+              key: ValueKey('$stepId|$imagePath'),
               child: Transform.scale(
                 scale: _overscanScale,
                 child: Image.memory(
                   bytes,
-                  key: ValueKey(stepId),
                   fit: BoxFit.cover,
                   // 디코딩 실패도 앱을 죽이면 안 된다
                   errorBuilder: (_, _, _) => const _Fallback(),

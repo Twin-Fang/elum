@@ -237,6 +237,7 @@ class _ActionCardViewState extends State<ActionCardView> {
                       child: _Illustration(
                         routineId: widget.routineId,
                         stepId: widget.card.id,
+                        imagePath: widget.card.imagePath,
                         onDelete: widget.onDelete,
                       ),
                     ),
@@ -332,11 +333,13 @@ class _Illustration extends StatelessWidget {
   const _Illustration({
     required this.routineId,
     required this.stepId,
+    this.imagePath,
     this.onDelete,
   });
 
   final String routineId;
   final String stepId;
+  final String? imagePath;
   final VoidCallback? onDelete;
 
   @override
@@ -353,7 +356,11 @@ class _Illustration extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(space.xs),
-              child: CardImage(routineId: routineId, stepId: stepId),
+              child: CardImage(
+                routineId: routineId,
+                stepId: stepId,
+                imagePath: imagePath,
+              ),
             ),
           ),
         ),

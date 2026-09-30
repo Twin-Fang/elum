@@ -5,6 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_button.dart';
+import '../../data/card_photo.dart';
+import 'card_photo_block.dart';
 import 'routine_flow_scaffold.dart' show dismissKeyboard;
 
 /// 시트가 카드를 고치는지, 새로 넣는지.
@@ -27,9 +29,14 @@ class CardEditSheet extends StatefulWidget {
     this.initialTitle = '',
     this.initialDescription = '',
     this.onSubmit,
+    this.photo,
   });
 
   final CardSheetMode mode;
+
+  /// 그림을 사진으로 바꿀 카드 (#456). **서버 id 가 있는 수정 시트에서만** 준다 —
+  /// null 이면 그림 칸도 `사진 바꾸기` 칩도 없다(추가 시트·서버에 없는 카드).
+  final CardPhotoTarget? photo;
 
   /// 값을 받아 서버에 넣는다. true 면 시트가 닫히고, false 면 **열린 채 입력을 남긴다.**
   ///
@@ -58,11 +65,16 @@ class CardEditSheet extends StatefulWidget {
   static const _descFieldY = 218.0;
   static const _addOffset = 40.0;
 
+  /// 그림 칸이 들어오면 제목 줄부터 아래가 이만큼 밀린다 — 그림 150 + 사이 16 (#456).
+  /// **임시 시안**(디자이너 확정 전) 값이다.
+  static const _photoOffset = CardPhotoBlock.height + 16;
+
   /// 수정 결과. 완료를 눌러야만 값이 돌아오고, 밖을 탭해 닫으면 null이다.
   static Future<({String title, String description})?> show(
     BuildContext context, {
     required String title,
     required String description,
+    CardPhotoTarget? photo,
   }) {
     return _open(
       context,
@@ -70,6 +82,7 @@ class CardEditSheet extends StatefulWidget {
         mode: CardSheetMode.edit,
         initialTitle: title,
         initialDescription: description,
+        photo: photo,
       ),
     );
   }
@@ -154,11 +167,18 @@ class _CardEditSheetState extends State<CardEditSheet> {
     final space = context.space;
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     // 추가 시트는 제목 위에 40 이 더 있다
-    final off = _isAdd ? CardEditSheet._addOffset : 0.0;
+    // 그림 칸은 키보드가 올라오면 접는다 — 밀린 입력칸이 키보드 뒤로 들어간다
+    final photo = widget.photo;
+    final showPhoto = photo != null && !_isAdd && !keyboardOpen;
+    final off =
+        (_isAdd ? CardEditSheet._addOffset : 0.0) +
+        (showPhoto ? CardEditSheet._photoOffset : 0.0);
 
     final height = keyboardOpen
         ? (852 - CardEditSheet._keyboardTop).h
-        : (_isAdd ? CardEditSheet._heightAdd : CardEditSheet._heightEdit).h;
+        : ((_isAdd ? CardEditSheet._heightAdd : CardEditSheet._heightEdit) +
+                  (showPhoto ? CardEditSheet._photoOffset : 0.0))
+              .h;
 
     return GestureDetector(
       // 빈 곳을 누르면 키보드가 내려간다 — 버튼이 키보드 뒤에 있어 내려야 누를 수 있다
@@ -199,6 +219,22 @@ class _CardEditSheetState extends State<CardEditSheet> {
                 style: typo.sheetHeading.copyWith(color: colors.textPrimary),
               ),
             ),
+            // 그림 칸 — 키보드가 올라와도 **상태를 지킨다**(올리는 중일 수 있다).
+            // 접기만 하고 트리에서 빼지 않는다.
+            if (photo != null && !_isAdd)
+              Positioned(
+                left: 16.w,
+                right: 16.w,
+                top: CardEditSheet._titleLabelY.h,
+                child: Visibility(
+                  visible: showPhoto,
+                  maintainState: true,
+                  child: CardPhotoBlock(
+                    routineId: photo.routineId,
+                    stepId: photo.stepId,
+                  ),
+                ),
+              ),
             Positioned(
               left: 24.w,
               top: (CardEditSheet._titleLabelY + off).h,
