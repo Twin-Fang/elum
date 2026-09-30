@@ -302,6 +302,41 @@ jobs:
           echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
           echo "📋 테스트 빌드: 버전=$VERSION, 빌드번호=$BUILD_NUMBER"
 
+      # App Store 출시 버전 사전 점검 (이슈 #452).
+      #
+      # 출시(승인)된 버전은 TestFlight 자리가 영구히 닫혀, 그 버전 이름으로는 빌드 번호가 아무리
+      # 커도 업로드가 거부된다("Invalid Pre-Release Train ... is closed"). 테스트 빌드는 version.yml 의
+      # 버전을 그대로 쓰므로 **출시 직후 다음 릴리스까지** 모든 iOS 테스트 빌드가 12~18분 뒤에 실패했다.
+      # IPA 를 만들기 전에 App Store Connect 를 읽어, 닫힌 버전이면 사유와 함께 바로 멈춘다.
+      #
+      # 조회 자체가 실패하면(시크릿 없음·네트워크) **막지 않고 경고만 남긴다** — 점검이 없던 때와
+      # 같게 동작해야 지금까지 되던 빌드가 깨지지 않는다. 다음 패치 버전으로 자동 상향하는 것은
+      # 하지 않는다: 테스트 빌드 번호(이슈 번호 기반, 4만대)가 다음 정식 릴리스 빌드 번호보다 커서
+      # 정식 릴리스가 "번호가 낮다"고 거부될 수 있다. 빌드 번호 체계를 통일한 뒤 다룬다.
+      # 원인과 실측은 projectops 이슈 #643 참고. (projectops 템플릿 갱신 시 이 스텝이 사라지지 않게 주의)
+      - name: App Store 출시 버전 사전 점검
+        id: released_guard
+        working-directory: ${{ github.workspace }}
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          IOS_BUNDLE_ID: ${{ secrets.IOS_BUNDLE_ID || vars.IOS_BUNDLE_ID }}
+        run: |
+          python3 ./.github/scripts/asc_released_version.py "${{ steps.test_version.outputs.version }}" > "$RUNNER_TEMP/released_guard.out"
+          cat "$RUNNER_TEMP/released_guard.out"
+          cat "$RUNNER_TEMP/released_guard.out" >> "$GITHUB_OUTPUT"
+
+          STATUS=$(sed -n 's/^status=//p' "$RUNNER_TEMP/released_guard.out")
+          REASON=$(sed -n 's/^reason=//p' "$RUNNER_TEMP/released_guard.out")
+          if [ "$STATUS" = "blocked" ]; then
+            echo "::error title=이미 출시된 버전이라 테스트 빌드를 멈춘다::$REASON"
+            exit 1
+          fi
+          if [ "$STATUS" = "skipped" ]; then
+            echo "::warning title=출시 버전 사전 점검을 건너뛰었다::$REASON"
+          fi
+
       # 브랜치명에서 이슈 번호 추출 및 GitHub API로 이슈 정보 가져오기
       - name: 브랜치명에서 이슈 정보 추출
         id: issue_info
@@ -354,7 +389,10 @@ jobs:
         run: |
           BUILD_NUMBER="${{ steps.test_version.outputs.build_number }}"
           BRANCH_NAME="${{ steps.issue_info.outputs.branch_name }}"
-          COMMIT_SHA="${{ github.sha }}"
+          # ⚠️ `github.sha` 를 쓰지 않는다 (#452). 이슈 댓글로 트리거하는 repository_dispatch 에서
+          #    github.sha 는 **기본 브랜치(main)의 끝**이라, 어느 브랜치를 빌드하든 같은 커밋이 찍혔다.
+          #    앞 스텝이 체크아웃한 실제 커밋을 읽는다.
+          COMMIT_SHA="$(git rev-parse HEAD)"
           COMMIT_SHORT=$(echo "$COMMIT_SHA" | cut -c1-7)
           BUILD_DATE=$(date '+%Y-%m-%d %H:%M:%S')
 
@@ -419,6 +457,9 @@ jobs:
 
       # 진행 상황 업데이트 - 준비 실패
       - name: 진행 상황 업데이트 - 준비 실패
+        env:
+          GUARD_STATUS: ${{ steps.released_guard.outputs.status }}
+          GUARD_REASON: ${{ steps.released_guard.outputs.reason }}
         if: failure() && github.event_name == 'repository_dispatch' && github.event.client_payload.pr_number != '' && needs.notify-start.outputs.comment_id != ''
         uses: actions/github-script@v7
         with:
@@ -428,6 +469,9 @@ jobs:
             const startTime = parseInt('${{ needs.notify-start.outputs.start_time }}');
             const branchName = '${{ github.event.client_payload.branch_name }}';
             const buildNumber = '${{ github.event.client_payload.build_number }}';
+            // 값은 env 로 받는다 — 사유에 따옴표가 있어도 스크립트가 깨지지 않게 (#452)
+            const guardBlocked = process.env.GUARD_STATUS === 'blocked';
+            const guardReason = process.env.GUARD_REASON || '';
             const runId = '${{ github.run_id }}';
             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId}`;
 
@@ -451,7 +495,9 @@ jobs:
               `| **빌드 번호** | \`${buildNumber}\` |`,
               `| **브랜치** | \`${branchName}\` |`,
               '',
-              '❌ **환경 준비 중 오류가 발생했습니다.**',
+              guardBlocked
+                ? `🚫 **이미 출시된 버전이라 빌드를 시작하지 않았습니다.**\n\n${guardReason}`
+                : '❌ **환경 준비 중 오류가 발생했습니다.**',
               '',
               `🔗 [워크플로우 실행 로그 확인](${runUrl})`
             ].join('\n');
@@ -952,7 +998,34 @@ jobs:
           # 마법사가 까는 Fastfile을 손대는 대신 있는 lane을 쓴다 —
           # Fastfile을 다시 깔면 손으로 더한 lane은 사라진다.
           cd ios
-          bundle exec fastlane deploy
+          # 출력을 파일에도 남긴다 — 거부 사유를 봇 댓글에 싣기 위해서다 (#452).
+          # pipefail 이 없으면 tee 의 종료코드에 fastlane 실패가 가려진다.
+          set -o pipefail
+          bundle exec fastlane deploy 2>&1 | tee "$RUNNER_TEMP/fastlane_upload.log"
+
+      # 업로드가 거부되면 Apple 이 준 사유를 한 줄로 뽑아 봇 댓글에 싣는다 (#452).
+      # 전에는 "TestFlight 배포 중 오류가 발생했습니다"만 나와 18분 뒤 로그를 직접 열어야 했다.
+      # 못 찾으면 비워 두고, 그때는 댓글이 예전 문구로 나간다.
+      - name: 업로드 거부 사유 추출
+        id: upload_failure
+        if: failure()
+        run: |
+          LOG="$RUNNER_TEMP/fastlane_upload.log"
+          REASON=""
+          if [ -f "$LOG" ]; then
+            # 색 코드를 걷어내고, 알려진 거부 문구 중 우선순위가 높은 것의 첫 줄 하나를 고른다
+            CLEAN=$(perl -pe 's/\e\[[0-9;]*m//g' "$LOG")
+            for PATTERN in "Invalid Pre-Release Train" "must contain a higher version" "Invalid Bundle" "already been used" "ITMS-[0-9]+" "ERROR:"; do
+              LINE=$(printf '%s\n' "$CLEAN" | grep -m1 -E "$PATTERN" || true)
+              if [ -n "$LINE" ]; then
+                # 시각·[altool] 같은 접두를 걷어 낸 한 줄
+                REASON=$(printf '%s' "$LINE" | sed -E 's/^[0-9T:.Z-]+ *//; s/^\[[0-9:]+\]: *//; s/^\[altool\] *//' | sed -E "s/ The server.s response was.*$//" | tr -s ' ' | cut -c1-300)
+                break
+              fi
+            done
+          fi
+          echo "reason=$REASON" >> "$GITHUB_OUTPUT"
+          echo "추출한 사유: ${REASON:-<없음>}"
 
       - name: Notify TestFlight Upload Success
         if: success()
@@ -964,7 +1037,7 @@ jobs:
             echo "PR 번호: ${{ needs.prepare-test-build.outputs.pr_number }}"
           fi
           echo "브랜치: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.branch_name || github.ref_name }}"
-          echo "커밋: ${{ github.sha }}"
+          echo "커밋: ${{ needs.prepare-test-build.outputs.commit_hash }}"
           if [ -n "${{ needs.prepare-test-build.outputs.issue_url }}" ]; then
             echo "관련 이슈: ${{ needs.prepare-test-build.outputs.issue_url }}"
           fi
@@ -1040,6 +1113,8 @@ jobs:
 
       # 진행 상황 최종 업데이트 - 실패
       - name: 진행 상황 최종 업데이트 - 실패
+        env:
+          UPLOAD_FAILURE_REASON: ${{ steps.upload_failure.outputs.reason }}
         if: failure() && github.event_name == 'repository_dispatch' && github.event.client_payload.pr_number != '' && needs.notify-start.outputs.comment_id != ''
         uses: actions/github-script@v7
         with:
@@ -1068,6 +1143,9 @@ jobs:
               step3Elapsed = s3Min > 0 ? `${s3Min}분 ${s3Sec}초` : `${s3Sec}초`;
             }
 
+            // 사유는 env 로 받는다 — 따옴표가 있어도 스크립트가 깨지지 않게 (#452)
+            const failureReason = process.env.UPLOAD_FAILURE_REASON || '';
+
             const body = [
               '## 🍎 ❌ iOS TestFlight 배포 실패',
               '',
@@ -1084,6 +1162,7 @@ jobs:
               `| **커밋** | \`${commitHash}\` |`,
               '',
               '❌ **TestFlight 배포 중 오류가 발생했습니다.**',
+              ...(failureReason ? ['', `> ${failureReason}`] : []),
               '',
               `🔗 [워크플로우 실행 로그 확인](${runUrl})`
             ].join('\n');
