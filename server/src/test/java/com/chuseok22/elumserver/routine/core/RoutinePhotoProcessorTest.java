@@ -349,4 +349,44 @@ class RoutinePhotoProcessorTest {
       writeU16(out, value & 0xFFFF, false);
     }
   }
+
+  // ── 실기기 E2E 에서 드러난 구멍 (이슈 #455) ────────────
+
+  @Test
+  @DisplayName("끝이 잘린 JPEG 는 거절한다 — 읽지 못한 부분이 회색으로 채워진 그림을 저장하지 않는다")
+  void truncatedJpeg_rejected() throws IOException {
+    byte[] whole = encode(noisy(300, 300), "jpeg");
+    byte[] truncated = java.util.Arrays.copyOf(whole, whole.length / 2);
+
+    assertInvalidType(truncated);
+  }
+
+  @Test
+  @DisplayName("끝에 덧붙은 데이터가 있어도 온전한 JPEG 는 통과한다 — 일부 폰이 EOI 뒤에 동영상·썸네일을 붙인다")
+  void jpegWithTrailingData_passes() throws IOException {
+    byte[] whole = encode(noisy(120, 120), "jpeg");
+    byte[] withTrailer = java.util.Arrays.copyOf(whole, whole.length + 4096);
+
+    assertThat(isJpeg(processor.process(withTrailer))).isTrue();
+  }
+
+  @Test
+  @DisplayName("CMYK JPEG 는 거절한다 — 색이 어긋난 그림을 조용히 저장하지 않는다")
+  void cmykJpeg_rejected() {
+    // PIL 로 만든 8x8 CMYK(Adobe) JPEG. ImageIO 는 이것을 읽지만 색 변환이 정확하지 않다.
+    byte[] cmyk = java.util.Base64.getDecoder().decode("/9j/7gAOQWRvYmUAZAAAAAAA/9sAQwADAgIDAgIDAwMDBAMDBAUIBQUEBAUKBwcGCAwKDAwLCgsLDQ4SEA0OEQ4LCxAWEBETFBUVFQwPFxgWFBgSFBUU/8AAFAgACAAIBEMRAE0RAFkRAEsRAP/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/aAA4EQwBNAFkASwAAPwD9OK06+PK+6K//2Q==");
+
+    assertInvalidType(cmyk);
+  }
+
+  private static BufferedImage noisy(int width, int height) {
+    BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    java.util.Random random = new java.util.Random(7);
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        image.setRGB(x, y, random.nextInt(0xFFFFFF));
+      }
+    }
+    return image;
+  }
 }
