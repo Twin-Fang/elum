@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/ads/ad_banner_slot.dart';
+import '../../../core/ads/ad_ids.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -59,6 +61,8 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
       title: '임시저장',
       backTop: 67,
       horizontalPadding: 16,
+      // 하단 배너(#281). 로드 전·실패 시 높이 0이라 자리를 남기지 않는다.
+      bottomBanner: const AdBannerSlot(placement: AdPlacement.bannerDrafts),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

@@ -361,6 +361,39 @@ public enum ConfigKey {
     "공지 팝업에서 보지 않기를 체크하고 닫으면 이 날짜 수만큼 그 팝업의 공지를 숨긴다. 7이면 \"일주일간 보지 않기\". 1~30",
     ConfigValueType.INTEGER, List.of(), "7", 1, 30
   ),
+
+  // --- 광고 보상 (이슈 #463) ---
+  //
+  // 보상형 광고를 끝까지 보면 AI 생성 크레딧을 준다. 크레딧은 곧 AI 비용이라 **기본값은 꺼짐**이다 —
+  // 배포만으로는 동작이 바뀌지 않는다. 지급량·상한은 운영 eCPM 을 보고 관리자 화면에서 조절한다.
+  AD_REWARD_ENABLED(
+    ConfigGroup.AD_REWARD, "광고 보상 켜기",
+    "켜야 앱이 광고 보상 세션을 만들 수 있고 Google 콜백이 크레딧을 준다. 끄면 새 세션이 막히고 "
+      + "이미 열린 세션의 콜백도 지급하지 않는다. 문제가 생기면 이것만 끄면 멈춘다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  AD_REWARD_CREDITS_PER_VIEW(
+    ConfigGroup.AD_REWARD, "시청 1회당 크레딧",
+    "보상형 광고를 끝까지 볼 때마다 주는 크레딧(정수). 0 이하면 주지 않는다. 일과 하나 만드는 비용과 "
+      + "광고 수익을 견줘 정한다. 지급분은 이번 주 끝(다음 월요일 0시)에 사라진다",
+    ConfigValueType.INTEGER, List.of(), "2", 0, 100
+  ),
+  AD_REWARD_DAILY_LIMIT(
+    ConfigGroup.AD_REWARD, "회원별 하루 지급 횟수",
+    "한 회원이 하루(한국 시각 0시 시작)에 광고로 받을 수 있는 최대 횟수. 0 이하면 주지 않는다",
+    ConfigValueType.INTEGER, List.of(), "5", 0, 100
+  ),
+  AD_REWARD_SESSION_TTL_MINUTES(
+    ConfigGroup.AD_REWARD, "세션 유효 시간(분)",
+    "세션을 만든 뒤 이 시간 안에 시청 콜백이 와야 지급한다. 광고를 보는 시간과 콜백 지연을 넉넉히 덮는다",
+    ConfigValueType.INTEGER, List.of(), "30", 1, 1440
+  ),
+  AD_REWARD_ALLOWED_AD_UNITS(
+    ConfigGroup.AD_REWARD, "보상형 광고 단위(허용 목록)",
+    "쉼표로 나눈 광고 단위. 전체 ID(ca-app-pub-…/숫자)나 뒤의 숫자만 적는다. 콜백의 광고 단위가 여기 없으면 "
+      + "지급하지 않는다. 비면 아무것도 지급하지 않는다. 기본값은 이룸 보상형 광고 단위(iOS·Android)다",
+    ConfigValueType.STRING, List.of(), "8857966475,6517734434"
+  ),
   ;
 
 

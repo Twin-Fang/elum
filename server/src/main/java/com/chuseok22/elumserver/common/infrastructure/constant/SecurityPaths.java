@@ -49,6 +49,13 @@ public final class SecurityPaths {
   public static final String API_APP_NOTICES = "/api/app/notices";
   public static final String API_APP_NOTICE_IMAGE = "/api/app/notices/*/image";
   /**
+   * Google AdMob 이 보상형 광고 시청이 끝날 때 부르는 서버 콜백 (이슈 #463).
+   *
+   * <p>토큰이 없다 — Google 서버가 부른다. **인증은 쿼리의 ECDSA 서명이다**(서명이 틀리면 400, 아무것도 주지 않는다).
+   * 점검 중에는 막는다(다른 API 와 같다).
+   */
+  public static final String API_ADS_SSV = "/api/ads/ssv";
+  /**
    * 해커톤 때 수동 검증용으로 연 경로 (이슈 #382). <b>API 체인에서 누구도 부를 수 없게 막는다.</b>
    *
    * <p>API 체인의 마지막 규칙이 보호자 권한이라, 따로 막지 않으면 가입만 하면 누구나 로컬 LLM 을

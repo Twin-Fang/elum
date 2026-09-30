@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.AuthIdentityRepository;
 import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -42,6 +43,7 @@ public class MemberService {
 
   private final DeviceLinkRepository deviceLinkRepository;
   private final SubscriptionRepository subscriptionRepository;
+  private final AdRewardSessionRepository adRewardSessionRepository;
   private final EntitlementService entitlementService;
 
   /**
@@ -159,6 +161,8 @@ public class MemberService {
     deviceLinkRepository.deleteAllByMemberId(memberId);
     // 구독. 되살릴 때 가입처럼 Free 로 새로 만든다.
     subscriptionRepository.deleteByMemberId(memberId);
+    // 광고 보상 세션(nonce·transaction_id)은 회원을 가리키는 운영 기록이라 탈퇴에서 지운다. 받은 크레딧은 묶음·원장에 남는다 (#463).
+    adRewardSessionRepository.deleteAllByMemberId(memberId);
 
     // ── 남긴다 (보관 기간 동안) ──
     // 소셜 신원: 같은 소셜 계정이 다시 오면 이 행으로 이전 계정을 찾는다. 이메일은 비운다 —

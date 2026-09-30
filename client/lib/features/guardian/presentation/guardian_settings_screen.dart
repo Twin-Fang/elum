@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/ads/ad_banner_slot.dart';
+import '../../../core/ads/ad_ids.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/widgets/show_failure.dart';
@@ -130,6 +132,8 @@ class _GuardianSettingsScreenState
       // 줄이 x=16 에서 시작한다. 뼈대 기본 여백(24)이면 8 만큼 안쪽으로 밀린다.
       backTop: 67,
       horizontalPadding: 16,
+      // 하단 배너(#281). 로드 전·실패 시 높이 0이라 자리를 남기지 않는다.
+      bottomBanner: const AdBannerSlot(placement: AdPlacement.bannerSettings),
       // 크레딧 카드(#407)가 들어와 글꼴을 키우면 한 화면을 넘는다 — 스크롤로 끝까지
       // 볼 수 있게 한다.
       child: SingleChildScrollView(child: _list(space)),

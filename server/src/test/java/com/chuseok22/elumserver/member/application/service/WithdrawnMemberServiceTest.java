@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
@@ -53,6 +54,9 @@ class WithdrawnMemberServiceTest {
 
   @Mock
   private RefreshTokenRepository refreshTokenRepository;
+
+  @Mock
+  private AdRewardSessionRepository adRewardSessionRepository;
 
   @Mock
   private AiCallLogRepository aiCallLogRepository;
@@ -232,6 +236,7 @@ class WithdrawnMemberServiceTest {
     leaveFirst.verify(guardianshipService).leaveAll("m1");
     leaveFirst.verify(memberRepository).delete(member);
     verify(subscriptionRepository).deleteByMemberId("m1");
+    verify(adRewardSessionRepository).deleteAllByMemberId("m1");
     verify(refreshTokenRepository).deleteAllByMemberId("m1");
     verify(deviceLinkRepository).deleteAllByMemberId("m1");
 

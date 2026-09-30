@@ -63,6 +63,8 @@ dependencies:
   # 공지 팝업의 링크 버튼을 외부 브라우저로 연다 (이슈 #371). 앱에 링크를 여는 길이
   # 이것뿐이다 — #279 에서 스토어 링크가 생길 때 들이기로 미뤄 둔 그 의존성이다.
   url_launcher: ^6.3.2
+  google_mobile_ads: ^7.0.0
+  app_tracking_transparency: ^2.0.7
 
   # 카드 그림을 카메라·갤러리 사진으로 바꾼다 (이슈 #456). 권한 요청과 촬영 UI 는 OS 가 한다.
   image_picker: ^1.2.1

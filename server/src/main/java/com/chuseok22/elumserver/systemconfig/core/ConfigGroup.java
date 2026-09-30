@@ -24,6 +24,8 @@ public enum ConfigGroup {
   APP_TUNING("앱 대기·연출 시간"),
   // 보호자 홈 공지 팝업 (이슈 #370). 공지 내용은 "공지 관리" 화면에서, 팝업 전체에 걸리는 값만 여기에 둔다.
   NOTICE("앱 공지"),
+  // 보상형 광고를 보면 AI 생성 크레딧을 주는 기능 (이슈 #463).
+  AD_REWARD("광고 보상"),
   ;
 
   private final String label;

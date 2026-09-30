@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/ads/ad_banner_slot.dart';
+import '../../../core/ads/ad_ids.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -48,7 +50,9 @@ class GuardianHomeScreen extends ConsumerWidget {
     // 서버 호칭 → 로컬 온보딩 값 → 대체어 순으로 고른다.
     // 서버가 죽어도 화면은 떠야 한다 (docs 원칙 6번).
     final localName = ref.watch(onboardingProvider).displayName;
-    final childName = ref.watch(memberProvider).maybeWhen(
+    final childName = ref
+        .watch(memberProvider)
+        .maybeWhen(
           data: (member) => member?.nickname ?? localName,
           orElse: () => localName,
         );
@@ -61,41 +65,49 @@ class GuardianHomeScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: space.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _Header(childName: childName, character: character),
-              SizedBox(height: _toCreateButton.h),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: _listInset.w),
-                child: const _StartRoutineButton(),
-              ),
-              SizedBox(height: _toSections.h),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: _listInset.w),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(bottom: space.xl),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const RoutineSectionTitle(
-                      iconAsset: AppAssets.iconTodayRoutine,
-                      label: '오늘 일과',
+                    _Header(childName: childName, character: character),
+                    SizedBox(height: _toCreateButton.h),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: _listInset.w),
+                      child: const _StartRoutineButton(),
                     ),
-                    SizedBox(height: _titleToList.h),
-                    const TodayRoutineSection(),
-                    SizedBox(height: _betweenSections.h),
-                    const RoutineSectionTitle(
-                      iconAsset: AppAssets.iconTimePast,
-                      label: '지난 일과',
+                    SizedBox(height: _toSections.h),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: _listInset.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const RoutineSectionTitle(
+                            iconAsset: AppAssets.iconTodayRoutine,
+                            label: '오늘 일과',
+                          ),
+                          SizedBox(height: _titleToList.h),
+                          const TodayRoutineSection(),
+                          SizedBox(height: _betweenSections.h),
+                          const RoutineSectionTitle(
+                            iconAsset: AppAssets.iconTimePast,
+                            label: '지난 일과',
+                          ),
+                          SizedBox(height: _titleToList.h),
+                          const PastRoutineSection(),
+                        ],
+                      ),
                     ),
-                    SizedBox(height: _titleToList.h),
-                    const PastRoutineSection(),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+            // 하단 배너(#281). 로드 전·실패 시 높이 0이라 스크롤 영역이 원래 크기 그대로다.
+            const AdBannerSlot(placement: AdPlacement.bannerHome),
+          ],
         ),
       ),
     );
@@ -134,7 +146,8 @@ class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton> {
       if (!mounted) return;
       if (blocked != null) {
         // 다 쓴 것이 먼저다 — 진행 중인 것이 끝나도 새로 만들 수 없기 때문이다.
-        final generating = blocked.canStartRoutine && blocked.isGeneratingRoutine;
+        final generating =
+            blocked.canStartRoutine && blocked.isGeneratingRoutine;
         await showElumDialog<void>(
           context: context,
           // 시안 `로그인실패` 변형 모양 — 느낌표 + 두 줄 문장 + 붉은 확인 (#433).

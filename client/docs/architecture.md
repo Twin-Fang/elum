@@ -159,6 +159,31 @@ CardRepository cardRepository(Ref ref) => MockCardRepository();  // ← 한 줄 
 
 > **보호자가 입력한 일과 원문은 로컬에도 남기지 않는다.** (루트 docs 원칙 5번)
 
+## 광고 (AdMob, #281)
+
+`lib/core/ads/`가 광고를 전담한다. 화면은 `AdBannerSlot` 하나만 안다.
+
+| 파일 | 역할 |
+|---|---|
+| `ad_ids.dart` | 배치(`AdPlacement`)·플랫폼별 광고 단위 ID. **테스트 모드면 `.env`를 읽지 않는다** |
+| `ad_gate.dart` | `adsEnabledProvider` — 모바일이면 켜짐. 나중에 `FREE/PRO_ADS_REMOVED`를 여기 연결 |
+| `ad_consent.dart` | iOS ATT 요청, 거부·실패면 비개인화 |
+| `ad_banner_loader.dart` | 로더 인터페이스와 google_mobile_ads 구현. 테스트는 가짜로 바꾼다 |
+| `ad_banner_slot.dart` | 로드 전·실패 시 **높이 0**, 성공하면 그 높이만큼 본문이 줄어든다 |
+
+지켜야 할 것.
+
+- **광고를 import할 수 있는 화면은 보호자 홈·임시저장·설정뿐이다.** 이룸이 화면·일과 만들기
+  흐름·보상 연출·온보딩에는 광고 코드가 닿지 않는다. `test/ads/ad_boundary_test.dart`가 잠근다.
+- `google_mobile_ads`는 `core/ads` 안에서만 쓴다. 광고 요청에는 `nonPersonalizedAds` 외 사용자 정보를 넘기지 않는다.
+- **개발·디버그·프로필·dev 빌드는 Google 테스트 광고 단위만 쓴다**(`AppConfig.useTestAds`). 실제 ID는
+  릴리스 빌드의 `.env`로만 들어간다. 개발 중 실제 광고를 누르면 AdMob 계정이 정지될 수 있다.
+- 하단 배너는 `ElumScaffold.bottomBanner`로 둔다. `bottomButton`·`belowButton`과 함께 쓰면 assert로 막힌다.
+- **`google_mobile_ads`는 `^7.0.0`(광고 SDK iOS 12.14)으로 고정한다.** 9.x(iOS 13.7)는 Xcode 26 미만에서
+  `Include of non-modular header inside framework module` 오류로 iOS 빌드가 실패한다(로컬 Xcode 16.2에서 확인).
+  Xcode 26 이상만 쓰게 되면 올려도 된다.
+- 광고 단위·앱 ID 발급 내역은 이슈 #281 마지막 댓글, 설계는 `docs/superpowers/specs/2026-09-30-admob-ads-design.md`.
+
 ## 코드 생성
 
 Freezed / Riverpod / json_serializable은 코드 생성이 필요하다.

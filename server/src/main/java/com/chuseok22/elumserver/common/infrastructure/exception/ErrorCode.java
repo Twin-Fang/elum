@@ -117,6 +117,14 @@ public enum ErrorCode {
   // 장부를 못 읽으면 막는다(fail-closed) — 열어 두면 비용이 장부 밖으로 샌다.
   AI_CREDIT_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "잠시 뒤에 다시 시도해주세요."),
 
+  // 광고 보상 (#463). 꺼짐·상한·동결은 앱이 "광고 보고 더 만들기"를 숨기거나 안내로 바꾸는 신호다.
+  AD_REWARD_DISABLED(HttpStatus.FORBIDDEN, "지금은 광고로 크레딧을 받을 수 없어요."),
+  AD_REWARD_DAILY_LIMIT(HttpStatus.FORBIDDEN, "오늘은 광고로 더 받을 수 없어요. 내일 다시 해주세요."),
+  AD_REWARD_ACCOUNT_FROZEN(HttpStatus.FORBIDDEN, "지금은 광고로 크레딧을 받을 수 없어요."),
+  AD_REWARD_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "확인할 수 없는 광고 보상이에요."),
+  // 장부를 못 읽으면 막는다(fail-closed).
+  AD_REWARD_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "잠시 뒤에 다시 시도해주세요."),
+
   // 비밀값(외부 API 키) 저장.
   SECRET_MASTER_KEY_MISSING(HttpStatus.SERVICE_UNAVAILABLE,
     "비밀값을 저장할 수 없습니다. 서버에 암호화 키가 설정되지 않았습니다."),

@@ -142,6 +142,8 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.POST, SecurityPaths.API_DEVICE_LINK_REDEEM).permitAll()
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_APP_STATUS).permitAll()
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_CONSENT_DOCUMENTS).permitAll()
+        // Google 보상형 광고 콜백 — 인증은 서명이다 (이슈 #463)
+        .requestMatchers(HttpMethod.GET, SecurityPaths.API_ADS_SSV).permitAll()
         // 공지 팝업 — 읽기 전용, 인증 없음 (이슈 #370)
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_APP_NOTICES, SecurityPaths.API_APP_NOTICE_IMAGE).permitAll()
         // ── 이룸이 휴대폰이 할 수 있는 것 (이슈 #200) ──
