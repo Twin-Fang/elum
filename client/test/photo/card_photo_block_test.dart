@@ -4,6 +4,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/card_photo.dart';
 import 'package:elum/features/guardian/data/card_photo_picker.dart';
+import 'package:elum/features/guardian/presentation/widgets/card_image.dart';
 import 'package:elum/features/guardian/presentation/widgets/card_photo_block.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -106,6 +107,23 @@ void main() {
       await settle(tester);
 
       expect(find.text('사진 바꾸기'), findsOneWidget);
+    });
+
+    testWidgets('미리보기는 카드 그림 칸과 같은 비율(313:230)이다 — 띠가 아니다', (tester) async {
+      await tester.pumpWidget(host({}));
+      await settle(tester);
+
+      // 시트 폭 전체의 띠(약 2.4:1)였을 때는 사진이 카드에서 어떻게 잘리는지 알 수 없었다 (통합 E2E 실측).
+      final size = tester.getSize(
+        find
+            .ancestor(
+              of: find.byType(CardImage),
+              matching: find.byType(AspectRatio),
+            )
+            .first,
+      );
+
+      expect(size.width / size.height, closeTo(313 / 230, 0.02));
     });
 
     testWidgets('칩을 누르면 사진 찍기·갤러리에서 고르기·닫기와 안내가 뜬다', (tester) async {
