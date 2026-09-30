@@ -10,6 +10,7 @@ import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/card_palette.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/card_review_parts.dart';
+import 'package:elum/features/guardian/presentation/widgets/card_review_reorder_list.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/gestures.dart';
@@ -338,6 +339,14 @@ void main() {
       expect(idsOf(container).first, isNot('c1'), reason: '완료는 순서를 그대로 둔다');
     });
 
+    /// 애니메이션이 프레임마다 흐르도록 잘게 나눠 시간을 보낸다 — 한 번에 길게 넘기면
+    /// 붙는 애니메이션이 끝난 프레임에서 멈춰 그 뒤에 시작하는 색 전환을 못 본다.
+    Future<void> pumpFrames(WidgetTester tester, int ms) async {
+      for (var t = 0; t < ms; t += 16) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+    }
+
     /// 카드 [id] 의 배경색 — 카드 루트 Container 의 decoration.
     Color fillOf(WidgetTester tester, String id) {
       final box = tester.widget<Container>(
@@ -351,12 +360,7 @@ void main() {
       return (box.decoration as BoxDecoration).color!;
     }
 
-    /// 지금 화면에 확대(scale>1)되어 서 있는 Transform 이 있는가 — 들린 카드의 표시.
-    bool anyScaledUp(WidgetTester tester) => tester
-        .widgetList<Transform>(find.byType(Transform))
-        .any((t) => t.transform.getMaxScaleOnAxis() > 1.01);
-
-    testWidgets('놓으면 카드 색이 새 자리 색으로 서서히 섞인다 — 확 바뀌지 않는다 (#451)', (
+    testWidgets('놓으면 카드가 안착한 뒤에 새 자리 색으로 서서히 섞인다 — 확 바뀌지 않는다 (#451 · #471)', (
       tester,
     ) async {
       final container = await pump(tester);
@@ -366,40 +370,34 @@ void main() {
       final before = fillOf(tester, 'c1');
       expect(before, CardPalette.at(0).fill, reason: '첫 자리 색으로 시작한다');
 
-      // dragCard 와 같되 손을 뗀 직후의 색을 잰다
+      // 맨 끝 자리 너머로 끌어다 놓는다
       final gesture = await tester.startGesture(
         tester.getCenter(find.byKey(const ValueKey('c1'))),
       );
       await tester.pump(const Duration(milliseconds: 700));
-      await gesture.moveBy(const Offset(kTouchSlop + 1, 0));
-      await tester.pump();
-      for (var i = 0; i < 8; i++) {
-        await gesture.moveBy(Offset((230 - kTouchSlop - 1) / 8, 0));
-        await tester.pump(const Duration(milliseconds: 50));
-      }
+      await tester.pump(const Duration(milliseconds: 400));
+      await gesture.moveBy(const Offset(180, 0));
+      await tester.pump(const Duration(milliseconds: 300));
       await gesture.up();
       await tester.pump();
-      // 놓는 애니메이션이 끝나 순서가 확정되는 프레임까지 흘린다
-      for (var i = 0; i < 60 && idsOf(container).indexOf('c1') == 0; i++) {
-        await tester.pump(const Duration(milliseconds: 20));
-      }
+      expect(
+        idsOf(container).indexOf('c1'),
+        isNot(0),
+        reason: '놓는 순간 순서가 정해진다',
+      );
+      final target = CardPalette.at(idsOf(container).indexOf('c1')).fill;
 
-      final newIndex = idsOf(container).indexOf('c1');
-      expect(newIndex, isNot(0), reason: '카드가 다른 자리로 갔다');
-      final target = CardPalette.at(newIndex).fill;
+      // 안착하는 300ms 동안에는 색이 그대로다 — 자리에 들어간 다음에 바뀐다
+      await pumpFrames(tester, 150);
+      expect(fillOf(tester, 'c1'), before, reason: '안착하는 도중에는 아직 옛 색이다');
 
-      // 카드가 정중앙으로 붙는 동안(400ms)에는 색이 그대로다 — 붙은 다음에 바뀐다 (#451)
-      await tester.pump(const Duration(milliseconds: 150));
-      expect(fillOf(tester, 'c1'), before, reason: '붙는 도중에는 아직 옛 색이다');
-
-      // 다 붙은 직후부터 색이 섞인다(300ms)
-      await tester.pump(const Duration(milliseconds: 400));
-      await tester.pump(const Duration(milliseconds: 100));
+      // 안착이 끝난 다음부터 색이 섞인다(300ms)
+      await pumpFrames(tester, 320);
       final mid = fillOf(tester, 'c1');
-      expect(mid, isNot(before), reason: '붙은 뒤 옛 색을 떠났다');
+      expect(mid, isNot(before), reason: '안착한 뒤 옛 색을 떠났다');
       expect(mid, isNot(target), reason: '아직 새 색에 닿지 않았다 — 한 번에 바뀌면 안 된다');
 
-      await tester.pump(const Duration(seconds: 1));
+      await pumpFrames(tester, 800);
       expect(fillOf(tester, 'c1'), target, reason: '끝나면 새 자리 색이다');
     });
 
@@ -462,14 +460,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(centerOf('c2'), moreOrLessEquals(screenCenter, epsilon: 1));
     });
-
-    /// 애니메이션이 프레임마다 흐르도록 잘게 나눠 시간을 보낸다 — 한 번에 길게 넘기면
-    /// 붙는 애니메이션이 끝난 프레임에서 멈춰 그 뒤에 시작하는 색 전환을 못 본다.
-    Future<void> pumpFrames(WidgetTester tester, int ms) async {
-      for (var t = 0; t < ms; t += 16) {
-        await tester.pump(const Duration(milliseconds: 16));
-      }
-    }
 
     testWidgets('스크롤이 이미 끝인 채 맨 끝 자리로 옮겨도 색과 번호가 새 자리로 바뀐다 (#451)', (
       tester,
@@ -545,7 +535,9 @@ void main() {
       expect(idsOf(container), moved, reason: '나가도 옮긴 순서는 그대로다(완료와 같다)');
     });
 
-    testWidgets('잡아 끄는 동안 카드가 확대되고 그림자가 생기며 진동이 울린다 (#451)', (tester) async {
+    testWidgets('잡아 끄는 동안 카드가 이웃보다 크고 그림자가 생기며 진동이 울린다 (#451 · #471)', (
+      tester,
+    ) async {
       final haptics = <String>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
@@ -567,18 +559,21 @@ void main() {
       await tester.tap(find.text('카드 순서 변경'));
       await settle(tester);
 
-      expect(anyScaledUp(tester), isFalse, reason: '손대기 전에는 들린 카드가 없다');
+      final idle = tester.getSize(find.byKey(const ValueKey('c2'))).width;
 
       final gesture = await tester.startGesture(
         tester.getCenter(find.byKey(const ValueKey('c1'))),
       );
       await tester.pump(const Duration(milliseconds: 700));
-      await gesture.moveBy(const Offset(kTouchSlop + 1, 0));
-      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
       await gesture.moveBy(const Offset(60, 0));
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 100));
 
-      expect(anyScaledUp(tester), isTrue, reason: '잡힌 카드는 커진다');
+      // 화면이 줄어든 만큼 이웃은 작아지고, 잡힌 카드는 그보다 4% 더 크다
+      final neighbor = tester.getRect(find.byKey(const ValueKey('c2'))).width;
+      final held = tester.getRect(find.byKey(const ValueKey('c1'))).width;
+      expect(neighbor, lessThan(idle * 0.6), reason: '화면 전체가 줌아웃했다');
+      expect(held / neighbor, moreOrLessEquals(1.04, epsilon: 0.005));
       final shadowed = tester
           .widgetList<DecoratedBox>(find.byType(DecoratedBox))
           .any(
@@ -594,9 +589,13 @@ void main() {
       );
 
       await gesture.up();
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-      expect(anyScaledUp(tester), isFalse, reason: '놓으면 제 크기로 돌아온다');
+      await pumpFrames(tester, 1200);
+      final back = tester.getRect(find.byKey(const ValueKey('c1'))).width;
+      expect(
+        back,
+        moreOrLessEquals(idle, epsilon: 0.5),
+        reason: '놓으면 제 크기로 돌아온다',
+      );
     });
 
     testWidgets('잡은 카드는 원래 높이를 그대로 지킨다 — 아래가 잘리고 그림자만 남지 않는다 (#451)', (
@@ -685,6 +684,367 @@ void main() {
       expect(repo.reorderCalls, hasLength(1));
       expect(repo.reorderCalls.single.toSet(), {'c1', 'c2', 'c3'});
       expect(repo.reorderCalls.single.first, isNot('c1'));
+    });
+  });
+
+  group('손가락을 따라다니는 순서 변경 (#471)', () {
+    /// [id] 카드를 길게 눌러 집고 줌아웃이 끝날 때까지 기다린다.
+    Future<TestGesture> grab(WidgetTester tester, String id) async {
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(ValueKey(id))),
+      );
+      // 길게 누름(500ms) 뒤 줌아웃(300ms)이 끝나기까지
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump(const Duration(milliseconds: 400));
+      return gesture;
+    }
+
+    Rect rectOf(WidgetTester tester, String id) =>
+        tester.getRect(find.byKey(ValueKey(id)));
+
+    double screenWidth(WidgetTester tester) =>
+        tester.getSize(find.byType(Scaffold).first).width;
+
+    Future<void> enter(WidgetTester tester) async {
+      await tester.tap(find.text('카드 순서 변경'));
+      await settle(tester);
+    }
+
+    Future<void> frames(WidgetTester tester, int ms) async {
+      for (var t = 0; t < ms; t += 16) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+    }
+
+    test('들어갈 사이는 눈에 보이는 배치(벌어진 틈 포함)에서 중심이 지나온 카드 수다', () {
+      int at(double x, int gap) => reorderInsertionIndex(
+        contentX: x,
+        count: 3,
+        leading: 25,
+        extent: 343,
+        gap: gap,
+      );
+
+      // 틈이 맨 앞(0)이면 카드 셋의 중심은 539.5 · 882.5 · 1225.5
+      expect(at(0, 0), 0);
+      expect(at(400, 0), 0, reason: '틈 안에 있는 동안은 자리가 바뀌지 않는다');
+      expect(at(540, 0), 1, reason: '첫 이웃의 중심을 지나야 틈이 옮겨 간다');
+      // 틈이 1 이면 중심은 196.5 · 882.5 · 1225.5 — 이웃이 틈 앞으로 물러나 있다
+      expect(at(190, 1), 0);
+      expect(at(200, 1), 1);
+      expect(at(700, 1), 1, reason: '틈(368~711) 안에서는 그대로다');
+      expect(at(5000, 2), 3, reason: '맨 끝 너머는 맨 뒤 자리다');
+    });
+
+    test('나머지 카드가 없으면 들어갈 자리는 하나뿐이다', () {
+      expect(
+        reorderInsertionIndex(
+          contentX: 300,
+          count: 0,
+          leading: 25,
+          extent: 343,
+          gap: 0,
+        ),
+        0,
+      );
+    });
+
+    testWidgets('3번을 보다 들어가도 1번으로 튀지 않고 3번이 그대로 선다', (tester) async {
+      await pump(tester);
+      final width = screenWidth(tester);
+      // 기본 화면에서 세 번째 카드까지 넘긴다
+      for (var i = 0; i < 2; i++) {
+        await tester.drag(
+          find.byKey(ValueKey(i == 0 ? 'c1' : 'c2')),
+          const Offset(-300, 0),
+        );
+        await tester.pumpAndSettle();
+      }
+      expect(
+        rectOf(tester, 'c3').center.dx,
+        moreOrLessEquals(width / 2, epsilon: 1),
+      );
+
+      await enter(tester);
+
+      expect(
+        rectOf(tester, 'c3').center.dx,
+        moreOrLessEquals(width / 2, epsilon: 1),
+        reason: '순서 변경에 들어가도 보던 3번 카드가 정면이다',
+      );
+    });
+
+    testWidgets('옮기고 완료하면 옮긴 카드에서 이어 본다 — 첫 카드로 돌아가지 않는다', (tester) async {
+      final container = await pump(tester);
+      await enter(tester);
+      final width = screenWidth(tester);
+
+      final gesture = await grab(tester, 'c1');
+      await gesture.moveBy(const Offset(330, 0));
+      await frames(tester, 300);
+      await gesture.up();
+      await frames(tester, 1200);
+      expect(idsOf(container).last, 'c1');
+
+      await tester.tap(find.text('완료'));
+      await settle(tester);
+
+      expect(
+        rectOf(tester, 'c1').center.dx,
+        moreOrLessEquals(width / 2, epsilon: 1),
+        reason: '옮긴 카드가 보이는 자리에서 기본 화면이 이어진다',
+      );
+    });
+
+    testWidgets('✕ 로 나오면 들어오기 전에 보던 카드로 돌아간다', (tester) async {
+      await pump(tester);
+      final width = screenWidth(tester);
+      await tester.drag(
+        find.byKey(const ValueKey('c1')),
+        const Offset(-300, 0),
+      );
+      await tester.pumpAndSettle();
+      await enter(tester);
+      final gesture = await grab(tester, 'c2');
+      await gesture.moveBy(const Offset(-330, 0));
+      await frames(tester, 300);
+      await gesture.up();
+      await frames(tester, 1200);
+
+      await tester.tap(svgWithAsset(AppAssets.iconClose));
+      await settle(tester);
+
+      expect(
+        rectOf(tester, 'c2').center.dx,
+        moreOrLessEquals(width / 2, epsilon: 1),
+      );
+    });
+
+    testWidgets('집으면 화면이 줌아웃해 옆 카드가 더 보인다', (tester) async {
+      await pump(tester);
+      await enter(tester);
+      final width = screenWidth(tester);
+      expect(
+        rectOf(tester, 'c2').right,
+        greaterThan(width),
+        reason: '평소에는 두 번째 카드가 화면 밖으로 걸쳐 있다',
+      );
+      final idle = rectOf(tester, 'c2').width;
+
+      final gesture = await grab(tester, 'c1');
+
+      expect(
+        rectOf(tester, 'c2').center.dx,
+        lessThan(width),
+        reason: '줌아웃하면 두 번째 카드가 화면 안으로 들어온다',
+      );
+      expect(
+        rectOf(tester, 'c2').width,
+        lessThan(idle * 0.5),
+        reason: '카드가 절반 밑으로 줄어든다',
+      );
+      await gesture.up();
+      await frames(tester, 1200);
+    });
+
+    testWidgets('잡은 카드는 손가락을 따라 위아래로도 움직인다', (tester) async {
+      await pump(tester);
+      await enter(tester);
+      final gesture = await grab(tester, 'c1');
+      final before = rectOf(tester, 'c1');
+
+      await gesture.moveBy(const Offset(0, 120));
+      await tester.pump(const Duration(milliseconds: 50));
+      final after = rectOf(tester, 'c1');
+      expect(after.top - before.top, moreOrLessEquals(120, epsilon: 1));
+
+      await gesture.moveBy(const Offset(40, 0));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(
+        rectOf(tester, 'c1').left - after.left,
+        moreOrLessEquals(40, epsilon: 1),
+      );
+
+      await gesture.up();
+      await frames(tester, 1200);
+    });
+
+    testWidgets('카드를 사이에 가져다 대면 그 자리가 벌어진다', (tester) async {
+      await pump(tester);
+      await enter(tester);
+      final gesture = await grab(tester, 'c1');
+      final y = tester.getCenter(find.byKey(const ValueKey('c1'))).dy;
+      await frames(tester, 300);
+      final rest = rectOf(tester, 'c2');
+      final cardWidth = rest.width;
+
+      // 집은 카드의 원래 자리가 그대로 손가락 아래에 열려 있다
+      expect(
+        rest.left,
+        greaterThan(cardWidth * 0.9),
+        reason: '두 번째 카드 앞에 빈 자리(집은 카드의 자리)가 있다',
+      );
+
+      // 두 번째 카드의 중심을 지나 두 번째와 세 번째 카드 사이로 가져간다
+      await gesture.moveTo(Offset(rest.center.dx + 12, y));
+      await frames(tester, 400);
+      final opened = rectOf(tester, 'c2');
+
+      expect(
+        rest.left - opened.left,
+        greaterThan(cardWidth * 0.9),
+        reason: '두 번째 카드가 앞으로 당겨진다',
+      );
+      expect(
+        rectOf(tester, 'c3').left - opened.right,
+        greaterThan(cardWidth * 0.9),
+        reason: '두 카드 사이에 카드 한 장만 한 틈이 열린다',
+      );
+
+      // 손가락이 틈 안에 있는 동안은 자리가 그대로다
+      // (가장자리 자동 스크롤 구역을 피해 틈 안쪽 왼편에 둔다)
+      await gesture.moveTo(Offset(opened.right + 30, y));
+      await frames(tester, 300);
+      expect(
+        rectOf(tester, 'c2').left,
+        moreOrLessEquals(opened.left, epsilon: 1),
+      );
+
+      // 다시 앞으로 돌아가면 벌어진 자리도 따라간다
+      await gesture.moveTo(Offset(opened.center.dx - 12, y));
+      await frames(tester, 400);
+      // (두 번째 카드의 중심이 화면 가장자리 구역에 걸려 스크롤이 조금 밀렸을 수 있다)
+      expect(
+        rectOf(tester, 'c2').left,
+        greaterThan(opened.left + cardWidth * 0.5),
+        reason: '틈이 앞으로 돌아가 두 번째 카드가 다시 뒤로 밀린다',
+      );
+      await gesture.up();
+      await frames(tester, 1200);
+    });
+
+    testWidgets('놓으면 벌어져 있던 사이로 들어간다', (tester) async {
+      final container = await pump(tester);
+      await enter(tester);
+      final gesture = await grab(tester, 'c1');
+      final y = tester.getCenter(find.byKey(const ValueKey('c1'))).dy;
+      await frames(tester, 300);
+      final rest = rectOf(tester, 'c2');
+
+      await gesture.moveTo(Offset(rest.center.dx + 12, y));
+      await frames(tester, 400);
+      await gesture.up();
+      await tester.pump();
+
+      expect(idsOf(container), ['c2', 'c1', 'c3'], reason: '놓는 순간 순서가 정해진다');
+      await frames(tester, 1200);
+      final width = screenWidth(tester);
+      expect(
+        rectOf(tester, 'c1').center.dx,
+        moreOrLessEquals(width / 2, epsilon: 1),
+        reason: '안착하면서 화면이 원래 크기로 돌아와 그 카드가 정면이다',
+      );
+      expect(
+        rectOf(tester, 'c1').width,
+        moreOrLessEquals(rectOf(tester, 'c3').width, epsilon: 0.5),
+      );
+    });
+
+    testWidgets('제스처가 끊기면 옮기지 않고 원래 자리로 돌아온다', (tester) async {
+      final container = await pump(tester);
+      await enter(tester);
+      final gesture = await grab(tester, 'c1');
+      await gesture.moveBy(const Offset(320, 0));
+      await frames(tester, 300);
+
+      await gesture.cancel();
+      await frames(tester, 1200);
+
+      expect(idsOf(container), ['c1', 'c2', 'c3']);
+      final width = screenWidth(tester);
+      expect(
+        rectOf(tester, 'c1').center.dx,
+        moreOrLessEquals(width / 2, epsilon: 1),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('가장자리에서 자동 스크롤은 빠르지 않다 — 한 번에 두세 장씩 밀리지 않는다', (tester) async {
+      final many = [
+        for (var i = 1; i <= 8; i++)
+          ActionCard(
+            id: 'k$i',
+            stepOrder: i,
+            title: '카드$i',
+            description: '설명$i',
+          ),
+      ];
+      await pump(tester, steps: many);
+      await enter(tester);
+      final gesture = await grab(tester, 'k1');
+      final start = tester.getCenter(find.byKey(const ValueKey('k1')));
+
+      // 손가락을 오른쪽 끝에 붙이고 1초 기다린다
+      await gesture.moveTo(Offset(screenWidth(tester) - 4, start.dy));
+      final scroll = tester
+          .widget<SingleChildScrollView>(
+            find
+                .descendant(
+                  of: find.byType(CardReviewReorderList),
+                  matching: find.byType(SingleChildScrollView),
+                )
+                .first,
+          )
+          .controller!;
+      final before = scroll.offset;
+      await frames(tester, 1000);
+      final moved = scroll.offset - before;
+
+      expect(moved, greaterThan(50), reason: '가장자리에 닿으면 스크롤된다');
+      expect(moved, lessThan(380), reason: '1초에 카드 두 장(줌아웃 기준 약 380)을 넘지 않는다');
+      await gesture.up();
+      await frames(tester, 1200);
+    });
+
+    testWidgets('카드가 한 장이면 길게 눌러도 집히지 않는다', (tester) async {
+      await pump(tester, steps: [cards.first]);
+      await enter(tester);
+      final idle = rectOf(tester, 'c1');
+
+      final gesture = await grab(tester, 'c1');
+      await gesture.moveBy(const Offset(0, 100));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(rectOf(tester, 'c1'), idle, reason: '줌아웃도 따라오기도 없다');
+      await gesture.up();
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('스크린리더가 카드를 한 칸씩 옮길 수 있다', (tester) async {
+      final handle = tester.ensureSemantics();
+      final container = await pump(tester);
+      await enter(tester);
+
+      final movable = find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            (w.properties.customSemanticsActions?.keys.any(
+                  (a) => a.label == '뒤로 옮기기',
+                ) ??
+                false),
+      );
+      expect(movable, findsWidgets);
+      final action = movable.evaluate().first.widget as Semantics;
+      final back = action.properties.customSemanticsActions!.entries
+          .firstWhere((e) => e.key.label == '뒤로 옮기기')
+          .value;
+
+      back();
+      await frames(tester, 800);
+
+      expect(idsOf(container), ['c2', 'c1', 'c3']);
+      handle.dispose();
     });
   });
 

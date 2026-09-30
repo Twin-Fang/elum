@@ -14,6 +14,7 @@ import '../data/card_photo.dart';
 import 'widgets/action_card_view.dart';
 import 'widgets/card_edit_sheet.dart';
 import 'widgets/card_review_parts.dart';
+import 'widgets/card_review_reorder_list.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 
@@ -49,10 +50,13 @@ class CardReviewScreen extends ConsumerStatefulWidget {
 }
 
 class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
-  late final _controller = PageController(
+  late PageController _controller = _newController(0);
+
+  /// 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다. 옛 위치를 기억하면 카드
+  /// 순서가 바뀐 뒤 엉뚱한 카드에 서 있으므로, 나오는 쪽이 서 있을 카드를 정해 준다 (#471).
+  static PageController _newController(int page) => PageController(
+    initialPage: page,
     viewportFraction: CardReviewScreen._viewportFraction,
-    // 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다 — 옛 위치를 기억하면 카드
-    // 순서가 바뀐 뒤 엉뚱한 카드에 서 있다. 첫 카드에서 시작한다.
     keepPage: false,
   );
 
@@ -61,6 +65,12 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
   /// 모드에 들어오는 순간의 순서. `✕` 가 이 순서로 되돌린다.
   ({List<ActionCard> steps, bool dirty})? _orderSnapshot;
+
+  /// 모드에 들어올 때 보던 카드 자리 (`✕` 로 나오면 그 순서 그대로이니 여기로 돌아간다)
+  int _indexAtEnter = 0;
+
+  /// 순서 변경 모드에서 정면에 서 있는 카드 자리. `완료`로 나오면 그 카드부터 이어 본다.
+  int _reorderFocus = 0;
 
   /// 지금 읽고 있는 카드 id. null이면 아무것도 안 읽고 있다.
   String? _speakingId;
@@ -237,12 +247,15 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     setState(() {
       _speakingId = null;
       _orderSnapshot = ref.read(routineFlowProvider.notifier).snapshotOrder();
+      // 보던 카드에서 시작한다 — 예전에는 늘 1번으로 돌아가 있었다 (#471)
+      _indexAtEnter = _currentIndex;
+      _reorderFocus = _currentIndex;
       _reorderMode = true;
     });
   }
 
   /// `완료` — 바꾼 순서를 두고 나온다. 서버에는 저장하기가 보낸다.
-  void _finishReorder() => _leaveReorder();
+  void _finishReorder() => _leaveReorder(_reorderFocus);
 
   /// `✕`·시스템 뒤로 — 들어오기 전 순서로 되돌리고 나온다.
   void _cancelReorder() {
@@ -250,16 +263,22 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     if (snapshot != null) {
       ref.read(routineFlowProvider.notifier).restoreOrder(snapshot);
     }
-    _leaveReorder();
+    _leaveReorder(_indexAtEnter);
   }
 
-  void _leaveReorder() {
+  /// 모드를 나온다. 페이지 뷰는 새로 만들어지므로 [index] 카드에 세워 이어 본다.
+  void _leaveReorder(int index) {
+    final last = ref.read(routineFlowProvider).routine?.steps.length ?? 1;
+    final page = index.clamp(0, last > 0 ? last - 1 : 0);
+    final old = _controller;
     setState(() {
       _reorderMode = false;
       _orderSnapshot = null;
-      // 페이지 뷰가 새로 만들어져 첫 카드에서 시작한다
-      _currentIndex = 0;
+      _currentIndex = page;
+      _controller = _newController(page);
     });
+    // 옛 컨트롤러는 모드 동안 붙은 화면이 없다. 새 프레임이 그려진 뒤 치운다.
+    WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
   }
 
   @override
@@ -319,6 +338,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
                     cardWidth: CardReviewScreen._cardWidth,
                     cardGap: CardReviewScreen._cardGap,
                     onReorder: notifier.moveStep,
+                    initialIndex: _indexAtEnter,
+                    onFocusChanged: (index) => _reorderFocus = index,
                   )
                 : PageView.builder(
                     controller: _controller,
