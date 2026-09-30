@@ -11,7 +11,7 @@ import '../../../../shared/pictogram/pictogram_svg_loader.dart';
 /// 오프라인에서도 보이고 인증·캐시가 필요 없다.
 ///
 /// ⚠️ **심볼을 변형하지 않는다.** 색을 바꾸거나 다른 그림과 합성하지 않고, 흰 바탕 위에
-/// 크기(contain)와 배치만 정한다 — 라이선스가 변형을 막는다. 출처는 설정의 `그림 출처`에 있다.
+/// 크기(contain)와 배치만 정한다 — 라이선스가 변형을 막는다. 출처는 이용약관 제5조의3(그림 출처)에 있다 (#477).
 class PictogramArt extends StatefulWidget {
   const PictogramArt({
     super.key,

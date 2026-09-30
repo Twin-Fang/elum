@@ -15,7 +15,6 @@ import '../../../core/widgets/settings_tile.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
-import 'pictogram_credit_screen.dart';
 import 'widgets/ai_credit_card.dart';
 
 /// 보호자 설정 화면 (이슈 #181).
@@ -180,18 +179,6 @@ class _GuardianSettingsScreenState
               : () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => const ConsentDocumentListScreen(),
-                  ),
-                ),
-        ),
-        // 카드 그림에 쓰는 무료 픽토그램(Mulberry Symbols, CC BY-SA 4.0)의 저작자 표기 (#469).
-        // 약관 옆 읽을거리 묶음에 둔다. 시안에 없는 줄이라 **임시 시안**이다(디자인 요청 #459).
-        SettingsTile(
-          label: '그림 출처',
-          onTap: _busy
-              ? null
-              : () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const PictogramCreditScreen(),
                   ),
                 ),
         ),
