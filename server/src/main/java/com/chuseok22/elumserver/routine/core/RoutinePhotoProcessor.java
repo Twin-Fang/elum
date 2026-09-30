@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Locale;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
@@ -92,15 +93,34 @@ public class RoutinePhotoProcessor {
       if (subsampling > 1) {
         param.setSourceSubsampling(subsampling, subsampling, 0, 0);
       }
+      // 끝이 잘린 JPEG 는 예외 없이 경고만 내고 읽지 못한 부분을 회색으로 채워 돌려준다. 경고를 잡아 거절한다.
+      // 경고 문구는 지역에 따라 번역되므로 영어로 고정한다. "Premature end" 만 본다 — 폰 사진에 흔한
+      // 무해한 경고(불필요한 바이트 등)까지 거절하면 멀쩡한 사진이 막힌다.
+      boolean[] truncated = {false};
+      // setLocale 은 리더가 지원하지 않는 언어를 주면 예외를 던진다(PNG 리더는 지원 언어 목록이 없다).
+      Locale[] supported = reader.getAvailableLocales();
+      if (supported != null && java.util.Arrays.asList(supported).contains(Locale.ENGLISH)) {
+        reader.setLocale(Locale.ENGLISH);
+      }
+      reader.addIIOReadWarningListener((source, warning) -> {
+        if (warning != null && warning.toLowerCase(Locale.ROOT).contains("premature end")) {
+          truncated[0] = true;
+        }
+      });
       BufferedImage image = reader.read(0, param);
-      if (image == null) {
+      if (image == null || truncated[0]) {
+        throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_INVALID_TYPE);
+      }
+      // JPEG 에는 투명도가 없으니 4채널이면 CMYK·YCCK 다. ImageIO 가 읽기는 하지만 색 변환이 정확하지 않아
+      // 색이 어긋난 그림이 저장된다(실측: 평균색이 원본보다 밝게 나왔다). 폰 카메라는 만들지 않으니 거절한다.
+      if ("jpeg".equalsIgnoreCase(reader.getFormatName()) && image.getRaster().getNumBands() > 3) {
         throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_INVALID_TYPE);
       }
       return image;
     } catch (CustomException e) {
       throw e;
     } catch (IOException | RuntimeException e) {
-      // 깨진 파일, 지원하지 않는 색 공간(CMYK 등)이 여기로 온다. 사용자에겐 "이 사진은 못 쓴다"이다.
+      // 깨진 파일, 읽지 못하는 색 공간이 여기로 온다. 사용자에겐 "이 사진은 못 쓴다"이다.
       log.warn("카드 사진 디코드 실패: {}", e.toString());
       throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_INVALID_TYPE);
     } finally {
