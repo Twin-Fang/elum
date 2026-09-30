@@ -199,6 +199,7 @@ class PromptDefaultsTest {
 
     assertThat(content)
         .contains("12자 안팎")
+        .contains("조심히")
         .doesNotContain("조금 더 자세")
         .doesNotContain("학교에 입고 갈 옷을 차례대로 입어요")
         .doesNotContain("잠옷을 벗고 학교에 입고 갈 옷으로 갈아입어요");
