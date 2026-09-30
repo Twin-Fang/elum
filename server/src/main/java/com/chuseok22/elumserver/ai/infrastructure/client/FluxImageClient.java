@@ -44,9 +44,10 @@ public class FluxImageClient implements ImageGenerationClient {
 
   private static final String BASE_URL = "https://fal.run";
   // fal 은 한 장을 최소 1MP 로 청구한다 — 작게 그려도 싸지지 않는다(#373 대시보드 실측).
-  // 1MP 안에서 카드 그림칸(313×264, 약 1.19:1) 비율로 가장 크게: 1024×864 = 0.88MP.
-  static final int IMAGE_WIDTH = 1024;
-  static final int IMAGE_HEIGHT = 864;
+  // 1MP 안에서 카드 그림칸(Figma 313×230, 1.361:1, #460) 비율로 가장 크게: 1152×848 = 0.977MP(1.358:1).
+  // 1MP 를 넘기면 2MP 로 청구되므로 넘기지 않는다. 옛 1024×864(1.185:1)는 칸에 채울 때 위·아래가 12.9% 잘렸다.
+  static final int IMAGE_WIDTH = 1152;
+  static final int IMAGE_HEIGHT = 848;
   // schnell 은 4단계로 줄인 모델이다. 8단계로 올려도 동작이 나아지지 않았다(#373 3차).
   private static final int INFERENCE_STEPS = 4;
 
