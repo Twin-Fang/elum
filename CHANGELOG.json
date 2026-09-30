@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-30T11:04:26Z",
-    "currentVersion": "2.2.0",
+    "lastUpdated": "2026-09-30T12:10:03Z",
+    "currentVersion": "2.3.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 183
+    "totalReleases": 184
   },
   "releases": [
+    {
+      "version": "2.3.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-09-30",
+      "pr_number": 472,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 카드 순서를 바꿀 때 화면이 줄어들어 전체 카드를 한눈에 볼 수 있어요\n  * 카드를 길게 눌러 손가락을 따라 옮기고, 놓을 자리가 미리 벌어져요\n  * 순서 변경을 열어도 보던 카드에서 시작해요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드 순서를 바꿀 때 화면이 줄어들어 전체 카드를 한눈에 볼 수 있어요",
+            "카드를 길게 눌러 손가락을 따라 옮기고, 놓을 자리가 미리 벌어져요",
+            "순서 변경을 열어도 보던 카드에서 시작해요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.2.0",
       "project_type": "flutter",
