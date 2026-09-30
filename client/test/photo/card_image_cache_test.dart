@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/features/guardian/data/card_image_disk_cache.dart';
 import 'package:elum/features/guardian/data/card_image_repository.dart';
 import 'package:elum/features/guardian/presentation/widgets/action_card_view.dart';
 import 'package:elum/features/guardian/presentation/widgets/card_image.dart';
@@ -24,7 +25,14 @@ void main() {
     adapter = _CountingAdapter();
     final dio = Dio(BaseOptions(baseUrl: 'https://test.local'))
       ..httpClientAdapter = adapter;
-    container = ProviderContainer(overrides: [dioProvider.overrideWithValue(dio)]);
+    container = ProviderContainer(overrides: [
+      dioProvider.overrideWithValue(dio),
+      // 이 테스트는 메모리 캐시 열쇠만 본다. 실제 플랫폼 폴더 조회는 위젯 테스트에서 끝나지
+      // 않으므로, 폴더를 못 찾는 캐시(= 디스크 없이 동작)로 바꿔 둔다.
+      cardImageDiskCacheProvider.overrideWithValue(
+        CardImageDiskCache(rootProvider: () async => throw StateError('no disk')),
+      ),
+    ]);
   });
 
   tearDown(() => container.dispose());

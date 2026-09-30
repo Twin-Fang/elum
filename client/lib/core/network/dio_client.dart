@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/data/auth_repository.dart';
+import '../../features/guardian/data/card_image_disk_cache.dart';
 import '../app_status/app_status_recheck.dart';
 import '../config/app_config.dart';
 import '../logger/app_logger.dart';
@@ -72,8 +75,12 @@ final dioProvider = Provider<Dio>((ref) {
       refresh: () => ref.read(tokenRefresherProvider).refreshAccessToken(),
       // 갱신까지 실패하면 세션이 끝난 것이다. 화면이 캐시로 계속 그려지지 않도록
       // 앱 전역에 알린다 — 듣고 있는 쪽이 로그인으로 되돌린다 (이슈 #175).
-      onSessionExpired: () =>
-          ref.read(sessionExpiryProvider.notifier).markExpired(),
+      onSessionExpired: () {
+        // 세션이 끝났으면 기기에 남은 카드 그림(보호자 사진 포함)도 치운다 (#462).
+        // 다른 계정이 이어 로그인해도 이전 계정의 그림이 남지 않게 한다. clear 는 throw 하지 않는다.
+        unawaited(ref.read(cardImageDiskCacheProvider).clear());
+        ref.read(sessionExpiryProvider.notifier).markExpired();
+      },
     ),
   );
 

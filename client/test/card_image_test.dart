@@ -22,7 +22,7 @@ void main() {
   test('이미지 바이트를 그대로 돌려준다', () async {
     adapter.stub(200, [1, 2, 3, 4]);
 
-    final bytes = await repo.fetch(routineId: 'r1', stepId: 's1');
+    final bytes = await repo.fetch(routineId: 'r1', stepId: 's1', imagePath: 'k/a.png');
 
     expect(bytes, isA<Uint8List>());
     expect(bytes, [1, 2, 3, 4]);
@@ -31,7 +31,7 @@ void main() {
   test('올바른 경로로 요청한다', () async {
     adapter.stub(200, [1]);
 
-    await repo.fetch(routineId: 'r1', stepId: 's1');
+    await repo.fetch(routineId: 'r1', stepId: 's1', imagePath: 'k/a.png');
 
     expect(adapter.lastPath, '/api/routines/r1/steps/s1/image');
   });
@@ -40,24 +40,24 @@ void main() {
     // 이미지 한 장 때문에 카드가 사라지면 안 된다
     adapter.stub(404, []);
 
-    expect(await repo.fetch(routineId: 'r1', stepId: 's1'), isNull);
+    expect(await repo.fetch(routineId: 'r1', stepId: 's1', imagePath: 'k/a.png'), isNull);
   });
 
   test('빈 응답도 null로 처리한다', () async {
     // 0바이트를 Image.memory에 넘기면 터진다
     adapter.stub(200, []);
 
-    expect(await repo.fetch(routineId: 'r1', stepId: 's1'), isNull);
+    expect(await repo.fetch(routineId: 'r1', stepId: 's1', imagePath: 'k/a.png'), isNull);
   });
 
   test('서버가 죽어도 예외가 새어나오지 않는다', () async {
     adapter.stub(502, []);
 
     expect(
-      () => repo.fetch(routineId: 'r1', stepId: 's1'),
+      () => repo.fetch(routineId: 'r1', stepId: 's1', imagePath: 'k/a.png'),
       returnsNormally,
     );
-    expect(await repo.fetch(routineId: 'r1', stepId: 's1'), isNull);
+    expect(await repo.fetch(routineId: 'r1', stepId: 's1', imagePath: 'k/a.png'), isNull);
   });
 }
 
