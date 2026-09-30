@@ -355,6 +355,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
           CardReviewToolRow(
             reorderMode: _reorderMode,
             onReorder: _enterReorder,
+            // 눌린 버튼을 다시 누르면 `완료` 처럼 나온다 (#451)
+            onFinishReorder: _finishReorder,
             // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
             onEdit: () =>
                 _edit(cards[_currentIndex.clamp(0, cards.length - 1)]),

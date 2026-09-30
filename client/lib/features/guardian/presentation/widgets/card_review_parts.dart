@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../shared/models/action_card.dart';
@@ -148,18 +149,22 @@ class CardReviewReorderHint extends StatelessWidget {
 /// 도구 버튼 3개 — `카드 순서 변경` · `이 카드 수정` · `카드 추가` (시안 1173:5574).
 ///
 /// 순서 변경 모드에서는 `카드 순서 변경` 만 눌린 색이고 나머지 둘은 흐려진 채
-/// 눌리지 않는다 (시안 1197:5798, 투명도 0.4).
+/// 눌리지 않는다 (시안 1197:5798, 투명도 0.4). 눌린 버튼을 다시 누르면 모드를 나온다.
 class CardReviewToolRow extends StatelessWidget {
   const CardReviewToolRow({
     super.key,
     required this.reorderMode,
     required this.onReorder,
+    required this.onFinishReorder,
     required this.onEdit,
     required this.onAdd,
   });
 
   final bool reorderMode;
   final VoidCallback onReorder;
+
+  /// 모드 안에서 눌린 `카드 순서 변경` 을 다시 눌렀을 때 — `완료` 와 같다.
+  final VoidCallback onFinishReorder;
   final VoidCallback onEdit;
   final VoidCallback onAdd;
 
@@ -175,8 +180,9 @@ class CardReviewToolRow extends StatelessWidget {
             icon: AppAssets.iconInterlining,
             label: '카드 순서 변경',
             pressed: reorderMode,
-            // 모드 안에서 다시 눌러도 할 일이 없다 — 나가는 길은 `완료`·`✕` 다
-            onTap: reorderMode ? null : onReorder,
+            // 켜고 끄는 버튼이다 — 눌린 상태에서 다시 누르면 나온다(옮긴 순서는 둔다).
+            // 전에는 여기가 막혀 `완료`·`✕` 로만 나올 수 있어 불편했다 (#451).
+            onTap: reorderMode ? onFinishReorder : onReorder,
           ),
           _ToolButton(
             icon: AppAssets.iconPencilEdit,
@@ -309,7 +315,10 @@ class CardReviewReorderTopBar extends StatelessWidget {
 ///
 /// 기본 화면과 같은 자리(카드 333 @ x=30, 사이 10)에 서서, 모드를 바꿔도 카드가
 /// 움직이지 않는다. 카드 X 는 그리지 않는다(시안 첫 카드에 없다).
-class CardReviewReorderList extends StatelessWidget {
+///
+/// **스크롤도 기본 화면처럼 한 장씩 정면에 붙는다** — 기본 화면은 페이지 뷰라 자석처럼
+/// 붙는데 이 목록은 자유 스크롤이라 카드 두 장이 반쯤 걸쳐 보였다 (#451).
+class CardReviewReorderList extends StatefulWidget {
   const CardReviewReorderList({
     super.key,
     required this.cards,
@@ -327,21 +336,78 @@ class CardReviewReorderList extends StatelessWidget {
   final double cardGap;
   final void Function(int oldIndex, int newIndex) onReorder;
 
+  @override
+  State<CardReviewReorderList> createState() => _CardReviewReorderListState();
+}
+
+class _CardReviewReorderListState extends State<CardReviewReorderList> {
   /// 잡힌 카드가 커지는 비율. 카드가 화면 폭을 거의 채워 크게 키우면 옆 카드를 덮는다.
   static const _liftScale = 0.04;
+
+  final _scroll = ScrollController();
+
+  /// 카드 id → 색·번호를 정하는 자리.
+  ///
+  /// 놓은 카드가 정중앙에 붙은 **다음에** 새 자리로 갱신한다. 그래야 색이 카드가 자리를
+  /// 잡은 뒤에 섞인다 — 옮겨지는 도중에 바뀌면 어지럽다 (#451).
+  late Map<String, int> _shown = _indexOf(widget.cards);
+
+  /// 놓기를 겹쳐 하면 마지막 것만 색을 갱신한다.
+  int _dropToken = 0;
+
+  /// 카드 한 장이 차지하는 폭. 스크롤 위치가 이 값의 배수일 때 카드가 정중앙에 선다
+  /// (앞 여백 25 + 카드 옆 간격 5 = 30 = 카드 왼쪽 여백).
+  double get _itemExtent => (widget.cardWidth + widget.cardGap).w;
+
+  static Map<String, int> _indexOf(List<ActionCard> cards) => {
+    for (var i = 0; i < cards.length; i++) cards[i].id: i,
+  };
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// 놓기: 순서를 바꾸고 → 그 카드를 정중앙에 붙이고 → 붙은 뒤에 색·번호를 새 자리로 바꾼다.
+  Future<void> _onReorder(int oldIndex, int newIndex) async {
+    widget.onReorder(oldIndex, newIndex);
+    final landed = newIndex > oldIndex ? newIndex - 1 : newIndex;
+    final token = ++_dropToken;
+
+    if (_scroll.hasClients) {
+      final position = _scroll.position;
+      final target = (landed * _itemExtent).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      );
+      await _scroll.animateTo(
+        target,
+        duration: AppMotion.slow,
+        curve: Curves.easeOutCubic,
+      );
+    }
+    if (!mounted || token != _dropToken) return;
+    HapticFeedback.selectionClick();
+    setState(() => _shown = _indexOf(widget.cards));
+  }
 
   @override
   Widget build(BuildContext context) {
     final radius = context.space.cardRadius;
+    final cardGap = widget.cardGap;
 
     return ReorderableListView.builder(
+      scrollController: _scroll,
       scrollDirection: Axis.horizontal,
+      // 스크롤을 놓으면 가장 가까운 카드가 정면에 붙는다
+      physics: _CardSnapPhysics(itemExtent: _itemExtent),
       // 손잡이 없이 카드 어디든 **길게** 눌러 끈다 (시안 문구)
       buildDefaultDragHandles: false,
       // 첫 카드가 x=30 에 서도록 양옆 카드 사이의 반(5)을 뺀 값
       padding: EdgeInsets.symmetric(horizontal: 25.w),
-      itemCount: cards.length,
-      onReorder: onReorder,
+      itemCount: widget.cards.length,
+      onReorder: _onReorder,
       // 잡히는 순간 진동으로 알린다. 길게 눌러 잡는 화면이라 손가락이 카드를 가리므로
       // 눈으로 보이는 변화와 함께 손끝으로도 알려 준다 (#451).
       onReorderStart: (_) => HapticFeedback.mediumImpact(),
@@ -396,28 +462,82 @@ class CardReviewReorderList extends StatelessWidget {
           );
         },
       ),
-      itemBuilder: (context, index) => ReorderableDelayedDragStartListener(
-        key: ValueKey('reorder_${cards[index].id}'),
-        index: index,
-        child: SizedBox(
-          width: (cardWidth + cardGap).w,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: (cardGap / 2).w),
-            child: ActionCardView(
-              key: ValueKey(cards[index].id),
-              card: cards[index],
-              index: index,
-              routineId: routineId,
-              // 모드 안에서는 소리를 읽지 않는다 — 카드가 움직이는 중이다
-              onSpeak: () {},
-              isSpeaking: false,
-              onDelete: null,
+      itemBuilder: (context, index) {
+        final card = widget.cards[index];
+        return ReorderableDelayedDragStartListener(
+          key: ValueKey('reorder_${card.id}'),
+          index: index,
+          child: SizedBox(
+            width: (widget.cardWidth + cardGap).w,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: (cardGap / 2).w),
+              child: ActionCardView(
+                key: ValueKey(card.id),
+                card: card,
+                // 색·번호는 놓은 카드가 정중앙에 붙은 뒤에 새 자리로 바뀐다
+                index: _shown[card.id] ?? index,
+                routineId: widget.routineId,
+                // 모드 안에서는 소리를 읽지 않는다 — 카드가 움직이는 중이다
+                onSpeak: () {},
+                isSpeaking: false,
+                onDelete: null,
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
+}
+
+/// 스크롤을 놓으면 가장 가까운 카드가 정면(정중앙)에 붙는 물리.
+///
+/// 기본 화면의 페이지 뷰와 같은 동작이다. 속도가 있으면 그 방향 다음 카드로 넘어간다.
+class _CardSnapPhysics extends ScrollPhysics {
+  const _CardSnapPhysics({required this.itemExtent, super.parent});
+
+  final double itemExtent;
+
+  @override
+  _CardSnapPhysics applyTo(ScrollPhysics? ancestor) =>
+      _CardSnapPhysics(itemExtent: itemExtent, parent: buildParent(ancestor));
+
+  double _targetPixels(ScrollMetrics position, double velocity) {
+    var page = position.pixels / itemExtent;
+    if (velocity < -toleranceFor(position).velocity) {
+      page -= 0.5;
+    } else if (velocity > toleranceFor(position).velocity) {
+      page += 0.5;
+    }
+    return page.roundToDouble() * itemExtent;
+  }
+
+  @override
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
+    // 양 끝 밖으로 나가 있으면 기본 물리가 되돌린다
+    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final target = _targetPixels(
+      position,
+      velocity,
+    ).clamp(position.minScrollExtent, position.maxScrollExtent);
+    if (target == position.pixels) return null;
+    return ScrollSpringSimulation(
+      spring,
+      position.pixels,
+      target,
+      velocity,
+      tolerance: toleranceFor(position),
+    );
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
 }
 
 /// 카드가 없을 때. 로딩이 실패해도 여기까지 올 수 있다.

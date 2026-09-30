@@ -378,14 +378,97 @@ void main() {
       expect(newIndex, isNot(0), reason: '카드가 다른 자리로 갔다');
       final target = CardPalette.at(newIndex).fill;
 
-      // 색 전환(300ms)의 도중
+      // 카드가 정중앙으로 붙는 동안(400ms)에는 색이 그대로다 — 붙은 다음에 바뀐다 (#451)
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(fillOf(tester, 'c1'), before, reason: '붙는 도중에는 아직 옛 색이다');
+
+      // 다 붙은 직후부터 색이 섞인다(300ms)
+      await tester.pump(const Duration(milliseconds: 400));
       await tester.pump(const Duration(milliseconds: 100));
       final mid = fillOf(tester, 'c1');
-      expect(mid, isNot(before), reason: '이미 옛 색을 떠났다');
+      expect(mid, isNot(before), reason: '붙은 뒤 옛 색을 떠났다');
       expect(mid, isNot(target), reason: '아직 새 색에 닿지 않았다 — 한 번에 바뀌면 안 된다');
 
       await tester.pump(const Duration(seconds: 1));
       expect(fillOf(tester, 'c1'), target, reason: '끝나면 새 자리 색이다');
+    });
+
+    testWidgets('놓으면 카드가 화면 정중앙으로 붙는다 — 자리에 걸쳐 있지 않다 (#451)', (tester) async {
+      final container = await pump(tester);
+      await tester.tap(find.text('카드 순서 변경'));
+      await settle(tester);
+
+      final screenCenter = tester.getSize(find.byType(Scaffold).first).width / 2;
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const ValueKey('c1'))),
+      );
+      await tester.pump(const Duration(milliseconds: 700));
+      await gesture.moveBy(const Offset(kTouchSlop + 1, 0));
+      await tester.pump();
+      // 카드 한 장 폭의 절반쯤만 끌어 놓아 정중앙에서 어긋난 자리에 놓는다
+      for (var i = 0; i < 8; i++) {
+        await gesture.moveBy(Offset((230 - kTouchSlop - 1) / 8, 0));
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      await gesture.up();
+      await tester.pump();
+      for (var i = 0; i < 60 && idsOf(container).indexOf('c1') == 0; i++) {
+        await tester.pump(const Duration(milliseconds: 20));
+      }
+      expect(idsOf(container).indexOf('c1'), isNot(0));
+
+      await tester.pump(const Duration(seconds: 1));
+      expect(
+        tester.getCenter(find.byKey(const ValueKey('c1'))).dx,
+        moreOrLessEquals(screenCenter, epsilon: 1),
+        reason: '놓은 카드가 화면 정중앙에 선다',
+      );
+    });
+
+    testWidgets('순서 변경 모드에서 옆으로 스크롤해도 카드가 한 장씩 정면에 붙는다 — 두 장이 걸치지 않는다 (#451)', (
+      tester,
+    ) async {
+      await pump(tester);
+      await tester.tap(find.text('카드 순서 변경'));
+      await settle(tester);
+
+      final screenCenter = tester.getSize(find.byType(Scaffold).first).width / 2;
+      double centerOf(String id) => tester.getCenter(find.byKey(ValueKey(id))).dx;
+
+      // 카드 폭의 절반도 안 되게 살짝 넘기면 원래 카드로 돌아와 붙는다
+      await tester.drag(find.byKey(const ValueKey('c1')), const Offset(-60, 0));
+      await tester.pumpAndSettle();
+      expect(centerOf('c1'), moreOrLessEquals(screenCenter, epsilon: 1));
+
+      // 반쯤(카드 한 장의 절반을 넘게) 넘기면 다음 카드가 정면에 붙는다
+      await tester.drag(find.byKey(const ValueKey('c1')), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      expect(centerOf('c2'), moreOrLessEquals(screenCenter, epsilon: 1));
+    });
+
+    testWidgets('눌린 `카드 순서 변경` 버튼을 다시 누르면 모드를 나온다 — 옮긴 순서는 그대로 (#451)', (
+      tester,
+    ) async {
+      final container = await pump(tester);
+      await tester.tap(find.text('카드 순서 변경'));
+      await settle(tester);
+      await dragCard(tester, 'c1', 360);
+      final moved = idsOf(container);
+      expect(moved.first, isNot('c1'));
+
+      // 상단바 제목과 같은 글이라 도구 버튼 줄 안에서 찾는다
+      await tester.tap(
+        find.descendant(
+          of: find.byType(CardReviewToolRow),
+          matching: find.text('카드 순서 변경'),
+        ),
+      );
+      await settle(tester);
+
+      expect(find.text('카드 저장하기'), findsOneWidget, reason: '모드를 나왔다');
+      expect(find.text('카드를 길게 눌러 순서를 변경하세요'), findsNothing);
+      expect(idsOf(container), moved, reason: '나가도 옮긴 순서는 그대로다(완료와 같다)');
     });
 
     testWidgets('잡아 끄는 동안 카드가 확대되고 그림자가 생기며 진동이 울린다 (#451)', (tester) async {
