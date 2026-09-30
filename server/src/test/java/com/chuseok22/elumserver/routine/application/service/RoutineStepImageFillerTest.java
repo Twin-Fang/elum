@@ -224,14 +224,16 @@ class RoutineStepImageFillerTest {
   }
 
   @Test
-  @DisplayName("E18 그림을 만드는 사이 카드가 지워졌으면 그 그림을 지우고 조용히 끝낸다 — 다시 시도하지 않는다")
+  @DisplayName("E18·#455 그림을 만드는 사이 카드가 지워졌거나 사진으로 바뀌었으면 AI 그림 파일만 지우고 끝낸다 — 다시 시도하지 않는다")
   void e18_stepGoneDuringGeneration_discardsImageQuietly() {
     when(aiDailyBudgetGuard.isReached()).thenReturn(false);
     when(routineStepRepository.updateImagePath("step-1", "images/step-1/1.png")).thenReturn(0);
 
     assertThatCode(() -> fill("member-1")).doesNotThrowAnyException();
 
-    verify(routineImageStorage).deleteBatch("step-1");
+    // 폴더째(deleteBatch) 지우면 보호자가 올린 사진까지 사라진다 — 방금 만든 파일 하나만 지운다
+    verify(routineImageStorage).delete("images/step-1/1.png");
+    verify(routineImageStorage, never()).deleteBatch(anyString());
     verify(imageClient, times(1)).generateImage(anyString(), any());
   }
 

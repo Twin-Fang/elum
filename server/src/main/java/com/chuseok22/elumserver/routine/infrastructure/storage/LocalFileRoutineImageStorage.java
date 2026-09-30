@@ -5,9 +5,13 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.RoutineProperties;
 import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
+import java.util.Locale;
+import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,16 +81,68 @@ public class LocalFileRoutineImageStorage implements RoutineImageStorage {
   }
 
   @Override
+  public String saveUploaded(String stepId, byte[] bytes) {
+    String key = stepId + "/" + UUID.randomUUID() + ".jpg";
+    Path temp = null;
+    try {
+      Path file = resolve(key);
+      Files.createDirectories(file.getParent());
+      // 임시 파일에 다 쓴 뒤 옮긴다 — 쓰다 끊겨도 반쪽짜리 파일이 열쇠 자리에 남지 않는다.
+      temp = Files.createTempFile(file.getParent(), ".upload-", ".tmp");
+      Files.write(temp, bytes);
+      try {
+        Files.move(temp, file, StandardCopyOption.ATOMIC_MOVE);
+      } catch (AtomicMoveNotSupportedException e) {
+        Files.move(temp, file);
+      }
+      return key;
+    } catch (IOException | RuntimeException e) {
+      log.warn("카드 사진 저장 실패: stepId={}", stepId, e);
+      if (temp != null) {
+        try {
+          Files.deleteIfExists(temp);
+        } catch (IOException cleanup) {
+          log.warn("카드 사진 임시 파일 정리 실패: path={}", temp, cleanup);
+        }
+      }
+      throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_SAVE_FAILED);
+    }
+  }
+
+  @Override
+  public void delete(String key) {
+    if (key == null || key.isBlank()) {
+      return;
+    }
+    try {
+      Files.deleteIfExists(resolve(key));
+    } catch (IOException e) {
+      log.warn("카드 그림 삭제 실패: key={}", key, e);
+    }
+  }
+
+  @Override
   public ImageContent read(String key) {
     try {
       Path path = resolve(key);
       byte[] bytes = Files.readAllBytes(path);
-      String contentType = Files.probeContentType(path);
-      return new ImageContent(bytes, contentType != null ? contentType : "application/octet-stream");
+      // 운영체제의 형식 추측(probeContentType)은 환경마다 달라 확장자로 정한다 — 저장할 때 정한 확장자다.
+      return new ImageContent(bytes, contentTypeOf(key));
     } catch (IOException e) {
       log.warn("일과 이미지 조회 실패: key={}", key, e);
       throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND);
     }
+  }
+
+  private static String contentTypeOf(String key) {
+    int dot = key.lastIndexOf('.');
+    String extension = dot < 0 ? "" : key.substring(dot + 1).toLowerCase(Locale.ROOT);
+    return switch (extension) {
+      case "jpg", "jpeg" -> "image/jpeg";
+      case "png" -> "image/png";
+      case "webp" -> "image/webp";
+      default -> "application/octet-stream";
+    };
   }
 
   private Path base() {

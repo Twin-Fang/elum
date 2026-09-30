@@ -229,7 +229,7 @@ class RoutineStepImageCreditTest {
   }
 
   @Test
-  @DisplayName("카드가 그사이 지워졌으면 반환한다 — 그림을 만든 뒤 지워진 경우도")
+  @DisplayName("카드가 그사이 지워졌거나 사진으로 바뀌었으면 반환한다 — 그림을 만든 뒤 그렇게 된 경우도")
   void fill_cardDeleted_releases() {
     when(routineStepRepository.updateImagePath(anyString(), anyString())).thenReturn(0);
 

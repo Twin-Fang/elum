@@ -156,11 +156,15 @@ public class RoutineStepImageFiller {
       // 나중에 추가한 그림까지 함께 지워진다.
       String imagePath = routineImageStorage.save(stepId, 1, image);
       if (routineStepRepository.updateImagePath(stepId, imagePath) == 0) {
-        // 그림을 만드는 사이 지워졌다 (E18 — 나가기·일과 삭제·카드 삭제). 아무도 가리키지 않는 파일을
-        // 남기지 않는다. 다시 시도하지 않는다.
-        log.warn("그림을 만드는 사이 카드가 지워져 그림을 버린다: routineId={}, stepId={}", routineId, stepId);
-        routineImageStorage.deleteBatch(stepId);
-        releaseReason = "그림을 만드는 사이 카드가 지워짐";
+        // 0 은 둘 중 하나다 — 그림을 만드는 사이 카드가 지워졌거나(E18 — 나가기·일과 삭제·카드 삭제),
+        // 보호자가 찍은 사진으로 먼저 바꿨다(#455). 어느 쪽이든 아무도 가리키지 않는 AI 파일은 남기지 않는다.
+        // deleteBatch(stepId) 를 쓰지 않는다 — 그 폴더에는 보호자가 올린 사진도 있어 함께 지워진다.
+        // 정산은 하지 않고 반환한다: 카드에 붙지 않은 그림은 청구하지 않는다. (카드 삭제와 사진 교체를
+        // 구분하지 않고 같은 규칙으로 다룬다 — 두 경우 모두 보호자는 AI 그림을 받지 못했다.)
+        log.warn("그림을 만드는 사이 카드가 지워졌거나 사진으로 바뀌어 AI 그림을 버린다: routineId={}, stepId={}",
+          routineId, stepId);
+        routineImageStorage.delete(imagePath);
+        releaseReason = "그림을 만드는 사이 카드가 지워졌거나 사진으로 바뀜";
         return;
       }
       log.info("추가 카드 이미지 완료: routineId={}, stepId={}", routineId, stepId);

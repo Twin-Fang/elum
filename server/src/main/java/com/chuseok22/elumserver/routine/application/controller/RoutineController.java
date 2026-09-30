@@ -13,7 +13,9 @@ import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardRes
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
+import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
+import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.logging.annotation.LogMonitoring;
 import jakarta.validation.Valid;
@@ -32,7 +34,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequestMapping("/api/routines")
 @RestController
@@ -40,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoutineController implements RoutineControllerDocs {
 
   private final RoutineService routineService;
+  private final RoutineStepPhotoService routineStepPhotoService;
 
   // rawInputText에 민감정보 원문이 포함될 수 있으므로 logParameters/logResult를 false로 둔다.
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
@@ -278,6 +283,21 @@ public class RoutineController implements RoutineControllerDocs {
   ) {
     RoutineResponse response =
       routineService.updateStep(Caller.from(authentication), routineId, stepId, request);
+    return ResponseEntity.ok(response);
+  }
+
+  // 카드 그림을 보호자가 찍은 사진으로 바꾼다 (이슈 #455). AI·크레딧을 쓰지 않는다.
+  // 파일 바이트를 로그에 남기지 않도록 파라미터·결과 모두 뺀다.
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PutMapping(value = "/{routineId}/steps/{stepId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<RoutineStepResponse> replaceStepImage(
+    Authentication authentication,
+    @PathVariable String routineId,
+    @PathVariable String stepId,
+    @RequestPart("image") MultipartFile image
+  ) {
+    RoutineStepResponse response =
+      routineStepPhotoService.replaceStepImage(Caller.from(authentication), routineId, stepId, image);
     return ResponseEntity.ok(response);
   }
 

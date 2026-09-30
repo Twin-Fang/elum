@@ -13,6 +13,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 // admin은 Thymeleaf SSR이라 JSON 에러 대신 기본 에러 페이지를 받아야 하므로,
 // 이 어드바이스는 REST API 도메인(ai, auth, member, common, consent, credit, link, notice, routine)에만 적용되도록 범위를 좁힌다.
@@ -88,6 +91,28 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
     log.warn("[HttpRequestMethodNotSupportedException] 발생: {}", e.getMessage());
     ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
+    return ResponseEntity
+      .status(errorCode.getStatus())
+      .body(new ErrorResponse(errorCode, errorCode.getMessage()));
+  }
+
+  // 사진 업로드가 스프링 multipart 한도를 넘거나 multipart 형식이 아닐 때 (이슈 #455).
+  // 처리하지 않으면 하위 Exception.class 로 흘러 500 이 된다. 한도(현재 200MB)는 공지 업로드와 공유라 그대로 두고,
+  // 카드 사진 5MB 는 서비스에서 따로 막는다.
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  public ResponseEntity<ErrorResponse> handleMaxUploadSize(MaxUploadSizeExceededException e) {
+    log.warn("[MaxUploadSizeExceededException] 발생: {}", e.getMessage());
+    ErrorCode errorCode = ErrorCode.ROUTINE_STEP_IMAGE_TOO_LARGE;
+    return ResponseEntity
+      .status(errorCode.getStatus())
+      .body(new ErrorResponse(errorCode, errorCode.getMessage()));
+  }
+
+  // multipart 파싱 실패, 필수 파트(image) 누락은 클라이언트 입력 오류다.
+  @ExceptionHandler({MultipartException.class, MissingServletRequestPartException.class})
+  public ResponseEntity<ErrorResponse> handleMultipart(Exception e) {
+    log.warn("[MultipartException] 발생: {}", e.getMessage());
+    ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
     return ResponseEntity
       .status(errorCode.getStatus())
       .body(new ErrorResponse(errorCode, errorCode.getMessage()));

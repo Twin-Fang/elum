@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
+import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -46,5 +47,16 @@ class RoutineRepositoryDerivedQueryTest {
       .toList();
     assertThat(props).containsExactly(
       "profile.id:SIMPLE_PROPERTY", "status:IN", "scheduledAt:BEFORE");
+  }
+
+  @Test
+  @DisplayName("카드 그림 공유 확인 쿼리(#455)는 RoutineStep 속성으로 풀리고, 경로 갱신은 비어 있을 때만 고친다")
+  void routineStepQueries() throws NoSuchMethodException {
+    assertThatCode(() -> new PartTree("existsByImagePathAndIdNot", RoutineStep.class)).doesNotThrowAnyException();
+
+    Query update = RoutineStepRepository.class
+      .getMethod("updateImagePath", String.class, String.class).getAnnotation(Query.class);
+    // 늦게 도착한 AI 그림이 보호자가 올린 사진을 덮지 않게 하는 조건이다
+    assertThat(update.value()).contains("s.imagePath is null");
   }
 }

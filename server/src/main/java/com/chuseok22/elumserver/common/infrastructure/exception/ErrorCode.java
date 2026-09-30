@@ -40,6 +40,10 @@ public enum ErrorCode {
   ROUTINE_STEP_MIN_COUNT(HttpStatus.CONFLICT, "마지막 남은 단계는 삭제할 수 없습니다."),
   ROUTINE_STEP_MAX_COUNT(HttpStatus.CONFLICT, "카드는 10장까지 만들 수 있습니다."),
   ROUTINE_STEP_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "이미지를 찾을 수 없습니다."),
+  // 보호자가 카드 그림을 직접 찍은 사진으로 바꿀 때 (이슈 #455). 화면에 그대로 나가는 문구라 해요체다.
+  ROUTINE_STEP_IMAGE_INVALID_TYPE(HttpStatus.BAD_REQUEST, "png, jpg 사진만 올릴 수 있어요."),
+  ROUTINE_STEP_IMAGE_TOO_LARGE(HttpStatus.BAD_REQUEST, "사진이 너무 커요. 더 작은 사진으로 올려주세요."),
+  ROUTINE_STEP_IMAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "사진을 저장하지 못했어요. 잠시 후 다시 시도해주세요."),
   ROUTINE_REQUEST_TOO_FREQUENT(HttpStatus.TOO_MANY_REQUESTS, "너무 잦은 요청입니다. 30초 후 다시 시도해주세요."),
 
   // PROMPT

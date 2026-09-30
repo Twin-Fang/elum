@@ -38,6 +38,26 @@ public interface RoutineImageStorage {
    */
   void deleteBatch(String batchId);
 
+  /**
+   * 보호자가 올린 사진 한 장을 담고 <b>열쇠</b>를 돌려준다 (이슈 #455).
+   *
+   * <p>열쇠는 매번 새로 만든다({@code {stepId}/{UUID}.jpg}). 같은 자리에 덮어쓰면 열쇠가 그대로라 앱의
+   * 이미지 캐시가 옛 그림을 계속 보여준다 — 열쇠가 바뀌는 것이 캐시 갱신 신호다.
+   *
+   * @param bytes 이미 JPEG 로 다시 만든 바이트
+   * @throws com.chuseok22.elumserver.common.infrastructure.exception.CustomException 쓰기에 실패하면
+   *         {@code ROUTINE_STEP_IMAGE_SAVE_FAILED}
+   */
+  String saveUploaded(String stepId, byte[] bytes);
+
+  /**
+   * 열쇠 하나의 파일을 지운다 (이슈 #455).
+   *
+   * <p>없어도 조용히 끝나고, 지우다 실패해도 예외를 내지 않는다 — 지우는 시점엔 이미 본 작업이 끝났다.
+   * 남은 파일은 로그로만 남긴다.
+   */
+  void delete(String key);
+
   ImageContent read(String key);
 
   record ImageContent(byte[] bytes, String contentType) {

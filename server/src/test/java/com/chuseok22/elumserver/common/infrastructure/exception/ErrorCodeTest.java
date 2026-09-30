@@ -36,4 +36,15 @@ class ErrorCodeTest {
       ErrorCode.ROUTINE_NOT_CREATOR, ErrorCode.ROUTINE_ORDER_CONFLICT);
     assertThat(added).allSatisfy(code -> assertThat(code.getMessage()).doesNotContain("아이").endsWith("요."));
   }
+
+  @Test
+  @DisplayName("카드 사진 업로드 코드 — 형식·크기는 400, 저장 실패는 500, 문구는 해요체이고 '아이'가 없다 (#455)")
+  void routineStepImageCodes() {
+    assertThat(ErrorCode.ROUTINE_STEP_IMAGE_INVALID_TYPE.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(ErrorCode.ROUTINE_STEP_IMAGE_TOO_LARGE.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(ErrorCode.ROUTINE_STEP_IMAGE_SAVE_FAILED.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    assertThat(List.of(ErrorCode.ROUTINE_STEP_IMAGE_INVALID_TYPE, ErrorCode.ROUTINE_STEP_IMAGE_TOO_LARGE,
+      ErrorCode.ROUTINE_STEP_IMAGE_SAVE_FAILED))
+      .allSatisfy(code -> assertThat(code.getMessage()).doesNotContain("아이").containsPattern("요\\.$|요\\. .*요\\.$"));
+  }
 }

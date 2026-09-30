@@ -20,10 +20,21 @@ public interface RoutineStepRepository extends JpaRepository<RoutineStep, String
    *
    * <p>그림은 커밋 뒤 다른 스레드에서 만들어져 트랜잭션이 없다. 엔티티를 읽어 setter 로 고치면 읽기가
    * 끝나는 순간 분리돼 아무것도 저장되지 않는다. 한 줄 UPDATE 로 저장하고, 고친 행 수로 카드가 그새
-   * 지워졌는지 안다 (0 이면 없다).
+   * 지워졌는지 안다.
+   *
+   * <p><b>그림이 비어 있을 때만 채운다</b> (이슈 #455). 보호자가 찍은 사진으로 이미 바꿨는데 늦게 도착한
+   * AI 그림이 덮으면 사진이 사라진다. 반환 0 은 "카드가 지워졌거나 이미 그림이 있다" 둘 중 하나다.
    */
   @Transactional
   @Modifying
-  @Query("update RoutineStep s set s.imagePath = :imagePath where s.id = :stepId")
+  @Query("update RoutineStep s set s.imagePath = :imagePath where s.id = :stepId and s.imagePath is null")
   int updateImagePath(@Param("stepId") String stepId, @Param("imagePath") String imagePath);
+
+  /**
+   * 다른 카드가 같은 그림 파일을 가리키는지 본다 (이슈 #455).
+   *
+   * <p>일과 복제는 그림 파일을 새로 만들지 않고 같은 열쇠를 공유한다. 옛 그림을 지우기 전에 이것으로
+   * 확인하지 않으면 복제본의 그림이 깨진다.
+   */
+  boolean existsByImagePathAndIdNot(String imagePath, String id);
 }
