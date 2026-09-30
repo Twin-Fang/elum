@@ -11,8 +11,8 @@ void main() {
   // 하드랩된 원문이라 줄바꿈을 공백으로 펴서 본다.
   final flat = privacy.replaceAll(RegExp(r'\s+'), ' ');
 
-  test('번들 버전은 보관 조항을 넣은 판이다', () {
-    expect(consentVersion, '2026-09-24');
+  test('번들 버전은 광고 고지를 넣은 판이다', () {
+    expect(consentVersion, '2026-10-01');
   });
 
   test('보관 기간 1년과 보관 항목·목적·복원·즉시 삭제를 적는다', () {
@@ -30,10 +30,30 @@ void main() {
     expect(flat, isNot(contains('계정·이룸이 정보·일과·로그인 토큰을 지체 없이 삭제합니다')));
   });
 
-  test('시행일은 10월 1일이고 두 번의 변경이 모두 보인다', () {
-    expect(flat, contains('이 방침은 2026년 10월 1일부터 적용됩니다.'));
+  test('시행일은 10월 8일이고 세 번의 변경이 모두 보인다', () {
+    expect(flat, contains('이 방침은 2026년 10월 8일부터 적용됩니다.'));
     expect(flat, contains('2026년 9월 23일 공고, 9월 30일 시행'));
     expect(flat, contains('2026년 9월 24일 공고, 10월 1일 시행'));
+    expect(flat, contains('2026년 10월 1일 공고, 10월 8일 시행'));
+  });
+
+  test('광고: 수집 항목·이용 목적·국외 이전·거부 방법과 이룸이 화면 제외를 적는다', () {
+    expect(flat, contains('Google이 직접 수집합니다'));
+    expect(flat, contains('광고 식별자(iOS 광고 식별자, Android 광고 ID)'));
+    expect(flat, contains('광고 게재, 광고 성과 측정, 부정 이용 방지(Google)'));
+    expect(flat, contains('이룸이 화면과 일과 만들기 과정에는 나타나지 않습니다'));
+    expect(flat, contains('앱에 입력한 정보는 광고에 쓰거나 Google에 전달하지 않습니다'));
+    expect(flat, contains('추적 허용 안내에서 거부할 수 있고'));
+    expect(flat, contains('[광고 관련 국외 이전]'));
+    // 위치정보를 통째로 "수집하지 않는다"고 하면 대략적인 위치와 어긋난다.
+    expect(flat, contains('정확한 위치정보(GPS)'));
+  });
+
+  test('약관에 광고 조항이 있다', () {
+    final terms = consentItems.firstWhere((i) => i.key == 'termsAgreed').body;
+    final flatTerms = terms.replaceAll(RegExp(r'\s+'), ' ');
+    expect(flatTerms, contains('제5조의2 (광고)'));
+    expect(flatTerms, contains('이룸이 화면에는 표시되지 않습니다'));
   });
 
   test('보관 정보는 4조 안의 소제목으로 묶인다', () {
