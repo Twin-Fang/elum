@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// 광고 코드를 import할 수 있는 화면은 이 셋뿐이다.
+/// 광고 코드를 import할 수 있는 화면은 이 둘뿐이다. 설정은 `회원탈퇴` 줄과 가까워 뺐다.
 ///
 /// 이룸이 화면·일과 만들기 흐름·보상 연출·온보딩에 광고가 생기면 되돌릴 방법을
 /// 모르는 사용자가 잘못 누른다. 실수로 import가 늘면 이 테스트가 실패한다.
@@ -12,10 +12,9 @@ void main() {
       .whereType<File>()
       .where((f) => f.path.endsWith('.dart'));
 
-  test('core/ads를 쓰는 화면은 보호자 홈·임시저장·설정뿐이다', () {
+  test('core/ads를 쓰는 화면은 보호자 홈·임시저장뿐이다', () {
     const allowed = {
       'lib/features/guardian/presentation/guardian_home_screen.dart',
-      'lib/features/guardian/presentation/guardian_settings_screen.dart',
       'lib/features/guardian/presentation/draft_routines_screen.dart',
     };
     final users = dartFiles('lib')

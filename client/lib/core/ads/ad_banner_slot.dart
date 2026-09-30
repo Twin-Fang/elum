@@ -14,9 +14,17 @@ import 'ad_ids.dart';
 ///
 /// 실패하면 30초·60초 뒤 각 한 번만 다시 시도하고 그만둔다.
 class AdBannerSlot extends ConsumerStatefulWidget {
-  const AdBannerSlot({super.key, required this.placement});
+  const AdBannerSlot({
+    super.key,
+    required this.placement,
+    this.padding = EdgeInsets.zero,
+  });
 
   final AdPlacement placement;
+
+  /// **광고가 뜬 뒤에만** 배너 둘레에 두는 여백. 광고가 없으면 이 여백도 없다 — 목록 중간에 넣을 때 광고가
+  /// 없다고 빈 줄이 남지 않게 한다. 눌러도 되는 다른 요소와 떨어뜨리는 데도 쓴다(오클릭 방지).
+  final EdgeInsets padding;
 
   @override
   ConsumerState<AdBannerSlot> createState() => _AdBannerSlotState();
@@ -83,10 +91,13 @@ class _AdBannerSlotState extends ConsumerState<AdBannerSlot> {
         }
         final banner = _banner;
         if (banner == null) return const SizedBox.shrink();
-        return SizedBox(
-          height: banner.height,
-          width: double.infinity,
-          child: Center(child: banner.widget),
+        return Padding(
+          padding: widget.padding,
+          child: SizedBox(
+            height: banner.height,
+            width: double.infinity,
+            child: Center(child: banner.widget),
+          ),
         );
       },
     );

@@ -3,6 +3,9 @@
 /// 배치마다 단위를 나눠 두면 콘솔에서 자리별 수익을 비교할 수 있다.
 enum AdPlacement {
   bannerHome('BANNER_HOME'),
+
+  /// 보호자 홈 목록 한가운데(오늘 일과와 지난 일과 사이). 하단 배너와 별개로 노출을 늘린다.
+  bannerHomeMiddle('BANNER_HOME_MIDDLE'),
   bannerDrafts('BANNER_DRAFTS'),
   bannerSettings('BANNER_SETTINGS'),
   nativeHomePast('NATIVE_HOME_PAST'),
@@ -28,6 +31,7 @@ abstract final class AdIds {
   /// Google이 공개한 공식 테스트 광고 단위.
   static const _testIds = <AdPlacement, ({String android, String ios})>{
     AdPlacement.bannerHome: _banner,
+    AdPlacement.bannerHomeMiddle: _banner,
     AdPlacement.bannerDrafts: _banner,
     AdPlacement.bannerSettings: _banner,
     AdPlacement.nativeHomePast: (

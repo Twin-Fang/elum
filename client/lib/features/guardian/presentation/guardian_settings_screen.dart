@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/ads/ad_banner_slot.dart';
-import '../../../core/ads/ad_ids.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/widgets/show_failure.dart';
@@ -51,7 +49,11 @@ class _GuardianSettingsScreenState
       icon: ElumDialogIcon.alert,
       title: '로그아웃 하실건가요?',
       actions: const [
-        ElumDialogAction(label: '취소', value: false, tone: ElumDialogTone.neutral),
+        ElumDialogAction(
+          label: '취소',
+          value: false,
+          tone: ElumDialogTone.neutral,
+        ),
         ElumDialogAction(label: '확인', value: true, tone: ElumDialogTone.danger),
       ],
     );
@@ -75,7 +77,11 @@ class _GuardianSettingsScreenState
       // 팝업 컴포넌트는 두 줄 제목을 이미 담는다(`로그인실패` 변형이 그렇다).
       message: '만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요',
       actions: const [
-        ElumDialogAction(label: '취소', value: false, tone: ElumDialogTone.neutral),
+        ElumDialogAction(
+          label: '취소',
+          value: false,
+          tone: ElumDialogTone.neutral,
+        ),
         ElumDialogAction(label: '확인', value: true, tone: ElumDialogTone.danger),
       ],
     );
@@ -132,8 +138,8 @@ class _GuardianSettingsScreenState
       // 줄이 x=16 에서 시작한다. 뼈대 기본 여백(24)이면 8 만큼 안쪽으로 밀린다.
       backTop: 67,
       horizontalPadding: 16,
-      // 하단 배너(#281). 로드 전·실패 시 높이 0이라 자리를 남기지 않는다.
-      bottomBanner: const AdBannerSlot(placement: AdPlacement.bannerSettings),
+      // 설정에는 광고를 두지 않는다(#281). 맨 아래 `회원탈퇴` 줄과 가까워 광고를 잘못 누르면 되돌릴 수 없는
+      // 동작으로 이어질 수 있다. 시안에서 간격이 정해지기 전까지 뺀다.
       // 크레딧 카드(#407)가 들어와 글꼴을 키우면 한 화면을 넘는다 — 스크롤로 끝까지
       // 볼 수 있게 한다.
       child: SingleChildScrollView(child: _list(space)),
