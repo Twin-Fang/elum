@@ -13,7 +13,10 @@ SUGGESTED REVIEW FLOW (about 3 minutes)
 7. Switch to 이룸이 화면 (the user screen) to see the cards one at a time. Returning to the guardian screen asks for the PIN from step 3.
 
 WHAT THE APP DOES NOT DO
-- No ads, no in-app purchase, no third-party advertising or tracking SDK.
+- No in-app purchase.
+- Ads (Google AdMob banners) appear only on the guardian's own screens: the home screen and the saved-drafts list. There are no ads on the user screen (이룸이 화면), while creating a routine, or on the reward/completion screens. This is not a Kids Category app and its audience is guardians.
+- On first launch of the guardian screens the app shows the App Tracking Transparency prompt once. Declining it does not change any feature; the app then requests non-personalized ads.
+- No ad request contains the routine text, names or any information entered in the app.
 - We do not collect diagnoses or disability types.
 - The guardian's text is sent to an AI provider only to generate the cards. The app asks guardians not to enter personal information, and the raw text is not stored in any audit log.
 - AI-generated cards are always confirmed by the guardian before the user screen shows them.
