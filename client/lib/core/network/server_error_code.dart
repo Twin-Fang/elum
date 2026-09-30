@@ -114,6 +114,14 @@ enum ServerErrorCode {
   aiCreditAccountFrozen('AI_CREDIT_ACCOUNT_FROZEN'),
   aiCreditUnavailable('AI_CREDIT_UNAVAILABLE'),
 
+  // 광고 보상 (#463). 꺼짐·오늘 상한·멈춘 계정이면 앱은 "광고 보고 더 만들기"를 숨기거나 안내로 바꾼다.
+  // 장부 오류(UNAVAILABLE)만 잠시 뒤 다시 시도할 수 있다.
+  adRewardDisabled('AD_REWARD_DISABLED'),
+  adRewardDailyLimit('AD_REWARD_DAILY_LIMIT'),
+  adRewardAccountFrozen('AD_REWARD_ACCOUNT_FROZEN'),
+  adRewardSessionNotFound('AD_REWARD_SESSION_NOT_FOUND'),
+  adRewardUnavailable('AD_REWARD_UNAVAILABLE'),
+
   // 비밀값(외부 API 키) 저장.
   secretMasterKeyMissing('SECRET_MASTER_KEY_MISSING'),
   secretEncryptFailed('SECRET_ENCRYPT_FAILED'),
