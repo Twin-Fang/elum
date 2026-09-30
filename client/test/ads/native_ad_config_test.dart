@@ -4,12 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// 앱 ID가 비면 SDK가 시작하다 앱이 죽는다. 네이티브 설정이 빠지면 바로 알린다.
 void main() {
-  test('Android 매니페스트에 광고 앱 ID와 광고 ID 권한이 있다', () {
+  // 광고 ID 권한은 Play Console 선언(#466)을 마칠 때까지 일부러 뺀다 — 선언과 어긋나면 Play 업로드가 거절된다
+  // (v2.2.0 릴리스가 실패했다). 선언을 마치면 이 테스트를 "권한이 있다"로 되돌린다.
+  test('Android 매니페스트에 광고 앱 ID가 있고 광고 ID 권한은 일부러 뺐다', () {
     final manifest =
         File('android/app/src/main/AndroidManifest.xml').readAsStringSync();
     expect(manifest, contains('com.google.android.gms.ads.APPLICATION_ID'));
     expect(manifest, contains(r'${admobAppId}'));
     expect(manifest, contains('com.google.android.gms.permission.AD_ID'));
+    expect(manifest, contains('tools:node="remove"'));
   });
 
   test('Android 빌드가 앱 ID를 .env에서 읽고 비면 테스트 앱 ID를 쓴다', () {
