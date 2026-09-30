@@ -44,6 +44,9 @@ class CardPhotoBlock extends ConsumerStatefulWidget {
   /// 그림 칸 높이 (목업 150).
   static const height = 150.0;
 
+  /// 미리보기 비율 — Figma 카드 그림 칸 313×230 (#461).
+  static const previewAspect = 313 / 230;
+
   @override
   ConsumerState<CardPhotoBlock> createState() => _CardPhotoBlockState();
 }
@@ -209,28 +212,42 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
       width: double.infinity,
       child: Stack(
         children: [
+          // 카드 그림 칸과 **같은 비율**(313:230)의 미리보기를 가운데에 둔다. 전에는 시트 폭 전체(845×352,
+          // 약 2.4:1)의 띠라서 사진이 카드에서 어떻게 잘리는지 알 수 없었다 (통합 E2E 실측, #456).
+          // 칩은 이 미리보기 안쪽 오른쪽 아래에 붙는다.
           Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(space.xs),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(space.xs),
-                child: CardImage(
-                  routineId: widget.routineId,
-                  stepId: widget.stepId,
-                  imagePath: imagePath,
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: CardPhotoBlock.previewAspect,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: BorderRadius.circular(space.xs),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(space.xs),
+                          child: CardImage(
+                            routineId: widget.routineId,
+                            stepId: widget.stepId,
+                            imagePath: imagePath,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (_phase == _Phase.idle)
+                      Positioned(
+                        right: 4.w,
+                        bottom: 0,
+                        child: _Chip(onTap: _busy ? null : _start),
+                      ),
+                  ],
                 ),
               ),
             ),
           ),
-          if (_phase == _Phase.idle)
-            Positioned(
-              right: 8.w,
-              bottom: 0,
-              child: _Chip(onTap: _busy ? null : _start),
-            ),
           if (_phase == _Phase.uploading) const _UploadingOverlay(),
           if (_phase == _Phase.failed && _failure != null)
             _FailureOverlay(failure: _failure!, onButton: _onFailureButton),
@@ -393,7 +410,10 @@ class _FailureOverlay extends StatelessWidget {
                 constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
                 child: Container(
                   alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
                   decoration: BoxDecoration(
                     color: colors.editChipBg,
                     borderRadius: BorderRadius.circular(18.r),
@@ -402,7 +422,11 @@ class _FailureOverlay extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (!dismiss) ...[
-                        Icon(Icons.refresh, size: 16.w, color: colors.textPrimary),
+                        Icon(
+                          Icons.refresh,
+                          size: 16.w,
+                          color: colors.textPrimary,
+                        ),
                         SizedBox(width: 6.w),
                       ],
                       Text(
