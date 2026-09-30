@@ -65,6 +65,10 @@ android {
         // 카카오톡에서 돌아올 때 쓰는 커스텀 스킴. "kakao" + 네이티브 앱 키다.
         manifestPlaceholders["kakaoScheme"] = "kakao" + env("ELUM_KAKAO_NATIVE_APP_KEY")
 
+        // AdMob 앱 ID. 비면 SDK가 시작하다 죽으므로 Google 테스트 앱 ID를 기본값으로 둔다.
+        manifestPlaceholders["admobAppId"] =
+            env("ELUM_ADMOB_ANDROID_APP_ID").ifEmpty { "ca-app-pub-3940256099942544~3347511713" }
+
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "kr.twinfang.elum"
         // You can update the following values to match your application needs.

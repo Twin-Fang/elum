@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import '../ads/ad_ids.dart';
 import 'client_tuning.dart';
 
 /// 환경변수 접근 단일 창구.
@@ -211,6 +212,23 @@ abstract final class AppConfig {
 
   /// 개발용 빌드에서만 true. 제출용 APK에서는 어떤 설정을 넣어도 false다.
   static bool get isDevBuild => _flavor == 'dev';
+
+  // --- 광고 ---
+
+  /// 테스트 광고만 쓸지. 디버그·프로필·개발용(dev) 빌드는 항상 true다.
+  ///
+  /// 릴리스 빌드에서만 false라 `.env`의 실제 광고 단위를 읽는다.
+  /// 개발 중 실제 광고를 누르면 AdMob 계정이 정지될 수 있다.
+  static bool get useTestAds => kDebugMode || kProfileMode || isDevBuild;
+
+  /// 배치별 광고 단위 ID. 릴리스에서 `.env`에 값이 없으면 null이다.
+  static String? adUnitId(AdPlacement placement, {required bool isIos}) =>
+      AdIds.resolve(
+        placement: placement,
+        isIos: isIos,
+        useTestIds: useTestAds,
+        readEnv: (key) => _string(key, ''),
+      );
 
   // --- 개발 ---
 

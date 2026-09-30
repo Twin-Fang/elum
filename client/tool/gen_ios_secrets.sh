@@ -29,6 +29,10 @@ NAVER_SECRET="$(read_env ELUM_NAVER_CLIENT_SECRET)"
 NAVER_NAME="$(read_env ELUM_NAVER_CLIENT_NAME)"
 GOOGLE_IOS_ID="$(read_env ELUM_GOOGLE_IOS_CLIENT_ID)"
 
+# 비면 SDK가 시작하다 죽으므로 Google 테스트 앱 ID를 기본값으로 둔다.
+ADMOB_APP_ID="$(read_env ELUM_ADMOB_IOS_APP_ID)"
+[ -z "$ADMOB_APP_ID" ] && ADMOB_APP_ID="ca-app-pub-3940256099942544~1458002511"
+
 # 구글은 클라이언트 ID를 뒤집은 값을 URL 스킴으로 쓴다.
 #   123-abc.apps.googleusercontent.com → com.googleusercontent.apps.123-abc
 GOOGLE_SCHEME=""
@@ -44,6 +48,7 @@ ELUM_NAVER_CLIENT_ID=${NAVER_ID}
 ELUM_NAVER_CLIENT_SECRET=${NAVER_SECRET}
 ELUM_NAVER_CLIENT_NAME=${NAVER_NAME}
 ELUM_GOOGLE_REVERSED_CLIENT_ID=${GOOGLE_SCHEME}
+ELUM_ADMOB_APP_ID=${ADMOB_APP_ID}
 EOF
 
 echo "[gen_ios_secrets] ios/Flutter/Secrets.xcconfig 생성 완료"

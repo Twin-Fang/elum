@@ -32,11 +32,15 @@ class ElumScaffold extends StatelessWidget {
     required this.child,
     this.bottomButton,
     this.belowButton,
+    this.bottomBanner,
     this.onBack,
     this.title,
     this.backTop,
     this.horizontalPadding,
-  });
+  }) : assert(
+         bottomBanner == null || (bottomButton == null && belowButton == null),
+         '하단 고정 버튼과 배너를 함께 쓰면 버튼을 가린다 — 배너는 버튼이 없는 화면에만 둔다',
+       );
 
   final Widget child;
 
@@ -48,6 +52,13 @@ class ElumScaffold extends StatelessWidget {
   /// CTA 안에 함께 넣지 않는 이유 — 이건 버튼이 아니라 빠져나가는 길이다.
   /// 같은 무게로 두면 무엇이 주 동작인지 흐려진다 (Figma 732:5709).
   final Widget? belowButton;
+
+  /// 화면 맨 아래 광고 자리. 없으면 자리도 없다.
+  ///
+  /// [bottomButton]·[belowButton]과 함께 못 쓰게 assert로 막는다 — 광고가 하단 고정
+  /// 버튼을 가리면 심사 4.0에서 반려된다. 값이 `AdBannerSlot`이면 로드 전·실패 시
+  /// 높이 0이라 자리를 차지하지 않는다.
+  final Widget? bottomBanner;
 
   /// 뒤로가기. null이면 버튼을 그리지 않는다 (첫 화면).
   final VoidCallback? onBack;
@@ -252,6 +263,7 @@ class ElumScaffold extends StatelessWidget {
                   ),
                   child: belowButton,
                 ),
+              ?bottomBanner,
             ],
           ),
         ),
