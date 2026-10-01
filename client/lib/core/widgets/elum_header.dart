@@ -21,6 +21,7 @@ class ElumHeader extends StatelessWidget {
     this.description,
     this.hasBackButton = false,
     this.titleY,
+    this.descriptionColor,
   });
 
   /// 2줄로 줄바꿈된 제목. 줄바꿈 위치는 디자인이 정한 대로 전달한다.
@@ -42,6 +43,9 @@ class ElumHeader extends StatelessWidget {
   /// 함께 서고(뒤로가기 y=67 → 하단 107) 본문은 147에서 시작한다
   /// (`1027:4617` 이룸이휴대폰연결). 기본값 131을 그대로 쓰면 제목이 16 뜬다.
   final double? titleY;
+
+  /// 설명 글자색. 기본은 보조색이다. 비밀암호 변경의 틀림 안내(`1274:9466`)가 붉은색을 쓴다.
+  final Color? descriptionColor;
 
   /// Figma 제목 y좌표 (화면 최상단 기준)
   static const _titleY = 131.0;
@@ -80,8 +84,9 @@ class ElumHeader extends StatelessWidget {
           SizedBox(height: _titleToDescription.h),
           Text(
             description!,
-            style:
-                context.typo.body.copyWith(color: context.colors.textSecondary),
+            style: context.typo.body.copyWith(
+              color: descriptionColor ?? context.colors.textSecondary,
+            ),
           ),
         ],
       ],

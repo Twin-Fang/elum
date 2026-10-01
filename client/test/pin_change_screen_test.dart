@@ -76,7 +76,7 @@ void main() {
     await enterPin(tester, '9999');
 
     expect(find.text('지금 비밀암호를\n입력해주세요'), findsOneWidget);
-    expect(find.text('암호가 달라요. 다시 넣어주세요'), findsOneWidget);
+    expect(find.text('암호가 달라요. 다시 입력해주세요'), findsOneWidget);
     expect(find.byType(ElumDialogCard<void>), findsNothing);
   });
 
@@ -86,7 +86,7 @@ void main() {
     expect(find.text('새 비밀암호를\n입력해주세요'), findsOneWidget);
 
     await enterPin(tester, '5678');
-    expect(find.text('암호를 한번 더\n입력해주세요'), findsOneWidget);
+    expect(find.text('비밀암호를 한번 더\n입력해주세요'), findsOneWidget);
 
     await enterPin(tester, '5678');
     await tester.tap(find.byType(ElumButton));
@@ -103,8 +103,8 @@ void main() {
     await enterPin(tester, '5678');
     await enterPin(tester, '0000');
 
-    expect(find.text('암호를 한번 더\n입력해주세요'), findsOneWidget);
-    expect(find.text('암호가 달라요. 다시 넣어주세요'), findsOneWidget);
+    expect(find.text('비밀암호를 한번 더\n입력해주세요'), findsOneWidget);
+    expect(find.text('암호가 달라요. 다시 입력해주세요'), findsOneWidget);
     expect(find.byType(ElumButton), findsNothing);
 
     await enterPin(tester, '5678');
