@@ -260,6 +260,13 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
                 textAlign: TextAlign.center,
                 style: context.typo.body.copyWith(color: colors.textSecondary),
               ),
+              SizedBox(height: _timerToRetry.h),
+              // 초대 코드는 보호자용이다. 이룸이가 쓰는 휴대폰은 따로 붙인다 (#506).
+              Text(
+                '이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요\n설정의 이룸이 휴대폰에서 연결해요',
+                textAlign: TextAlign.center,
+                style: context.typo.bodySmall.copyWith(color: colors.textSecondary),
+              ),
             ],
           ],
         ),

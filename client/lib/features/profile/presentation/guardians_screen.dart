@@ -63,14 +63,14 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
     final ok = await showElumDialog<bool>(
       context: context,
       icon: ElumDialogIcon.alert,
-      title: '이 이룸이에서 나갈까요?',
+      title: '함께 돌보기를 그만둘까요?',
       // 무엇이 사라지고 무엇이 남는지 먼저 말한다 (되돌릴 수 없는 일 · 서버 명세 4-3).
       message: isLast
           ? '함께하는 보호자가 없어요\n나가면 이룸이와 만든 일과, 모은 별이 모두 사라져요\n되돌릴 수 없어요'
           : '내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요',
       actions: const [
         ElumDialogAction(label: '취소', value: false, tone: ElumDialogTone.neutral),
-        ElumDialogAction(label: '나가기', value: true, tone: ElumDialogTone.danger),
+        ElumDialogAction(label: '그만두기', value: true, tone: ElumDialogTone.danger),
       ],
     );
     if (ok != true || !mounted) return;
@@ -174,6 +174,8 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
   List<Widget> _body(AppSpacing space, String profileId, String profileName) {
     final async = ref.watch(guardiansProvider(profileId));
     final guardians = async.value;
+    // 목록을 받았고 "나" 외에 아무도 없으면 혼자 돌보는 것이다.
+    final isAlone = guardians != null && guardians.isNotEmpty && guardians.every((g) => g.me);
 
     return [
       // 한 줄 설명. 이름을 알면 이름을 쓴다.
@@ -184,6 +186,10 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
           style: context.typo.body.copyWith(color: context.colors.textSecondary),
         ),
       ),
+      SizedBox(height: space.xs),
+      // 둘 다 6자리 코드라 헷갈린다 — 이 화면은 "사람(보호자)"이고 이룸이가 쓰는 휴대폰은 따로
+      // 붙인다는 것을 먼저 말한다 (#506).
+      const _Caption('일과를 같이 만드는 가족이나 선생님이에요. 이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요'),
       SizedBox(height: space.sm),
       if (async.hasError)
         ElumErrorView.failure(
@@ -208,26 +214,52 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
             guardian: g,
             onTap: g.me && !_busy ? () => _editMe(profileId, g) : null,
           ),
+      // 목록에 내 줄만 있으면 비어 보인다 — 무엇을 하면 되는지 알려 준다.
+      if (isAlone) const _Caption('아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요'),
       SizedBox(height: space.md),
       SettingsTile(
-        label: '초대 코드 만들기',
+        label: '다른 보호자 초대하기',
         onTap: _busy ? null : () => context.push(Routes.guardianInvite),
       ),
       SettingsTile(
-        label: '초대 코드 넣기',
+        label: '받은 초대 코드 넣기',
         onTap: _busy ? null : () => context.push(Routes.inviteEnter),
       ),
       // 되돌릴 수 없는 줄은 맨 아래에 두고 위험색으로 칠한다. 목록을 못 받았으면 몇 명인지
       // 모르므로 누를 수 없다.
       SettingsTile(
-        label: '이 이룸이에서 나가기',
+        label: '함께 돌보기 그만두기',
         destructive: true,
         onTap: (_busy || guardians == null || guardians.isEmpty)
             ? null
             : () => _leave(profileId, profileName, guardians),
       ),
+      // 줄만 봐서는 무슨 일이 일어나는지 모른다 — 누르기 전에 읽히게 둔다. 목록을 못 받았으면
+      // 혼자인지 모르므로 말하지 않는다.
+      if (guardians != null && guardians.isNotEmpty)
+        _Caption(
+          isAlone
+              ? '혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요'
+              : '내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요',
+        ),
     ];
   }
+}
+
+/// 목록 줄 사이에 끼는 작은 설명 글. 설정 줄의 안쪽 여백과 같은 선에 맞춘다.
+class _Caption extends StatelessWidget {
+  const _Caption(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(SettingsTile.padH.w, 4.h, SettingsTile.padH.w, 0),
+    child: Text(
+      text,
+      style: context.typo.bodySmall.copyWith(color: context.colors.textSecondary),
+    ),
+  );
 }
 
 class _Loading extends StatelessWidget {

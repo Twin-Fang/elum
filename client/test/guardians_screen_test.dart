@@ -93,9 +93,9 @@ void main() {
       expect(find.textContaining('E-NET-OFFLINE'), findsOneWidget);
       expect(find.textContaining('다시 시도'), findsOneWidget);
       // 몇 명인지 모르면 "마지막 보호자"인지 말할 수 없다 — 누르게 두지 않는다
-      await tester.tap(find.text('이 이룸이에서 나가기'));
+      await tester.tap(find.text('함께 돌보기 그만두기'));
       await tester.pumpAndSettle();
-      expect(find.text('이 이룸이에서 나갈까요?'), findsNothing);
+      expect(find.text('함께 돌보기를 그만둘까요?'), findsNothing);
 
       repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
       await tester.tap(find.textContaining('다시 시도'));
@@ -111,6 +111,36 @@ void main() {
       expect(find.textContaining('E-PPL-NONE'), findsOneWidget);
     });
 
+    testWidgets('#506 이룸이 휴대폰과 헷갈리지 않게, 사람을 위한 화면이라는 설명이 늘 나온다', (tester) async {
+      await open(tester);
+
+      expect(find.textContaining('이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요'), findsOneWidget);
+    });
+
+    testWidgets('#506 혼자 돌보면 혼자라는 안내와, 그만두면 이룸이까지 사라진다는 설명이 나온다', (tester) async {
+      repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
+      await open(tester);
+
+      expect(find.text('아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요'), findsOneWidget);
+      expect(find.text('혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요'), findsOneWidget);
+      expect(find.text('내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요'), findsNothing);
+    });
+
+    testWidgets('#506 다른 보호자가 있으면 내가 만든 일과만 사라진다고 말하고 혼자라는 안내는 없다', (tester) async {
+      await open(tester);
+
+      expect(find.text('내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요'), findsOneWidget);
+      expect(find.textContaining('혼자 돌보고 있어'), findsNothing);
+    });
+
+    testWidgets('#506 목록을 못 받으면 혼자인지 모르므로 그만두기 설명을 말하지 않는다', (tester) async {
+      repo.guardiansResult = const Attempt.failed(AppFailure(fault: NetworkFault.offline));
+      await open(tester);
+
+      expect(find.textContaining('그만두면'), findsNothing);
+      expect(find.textContaining('내가 만든 일과만'), findsNothing);
+    });
+
     testWidgets('이름 없는 누름 자리가 없다', (tester) async {
       await open(tester);
 
@@ -122,13 +152,13 @@ void main() {
     testWidgets('초대 코드 만들기·넣기로 갈 수 있다', (tester) async {
       await open(tester);
 
-      await tester.tap(find.text('초대 코드 만들기'));
+      await tester.tap(find.text('다른 보호자 초대하기'));
       await tester.pumpAndSettle();
       expect(find.text('초대 코드 만들기 화면'), findsOneWidget);
 
       GoRouter.of(tester.element(find.text('초대 코드 만들기 화면'))).pop();
       await tester.pumpAndSettle();
-      await tester.tap(find.text('초대 코드 넣기'));
+      await tester.tap(find.text('받은 초대 코드 넣기'));
       await tester.pumpAndSettle();
       expect(find.text('초대 코드 넣기 화면'), findsOneWidget);
     });
@@ -138,10 +168,10 @@ void main() {
     testWidgets('먼저 무엇이 사라지고 무엇이 남는지 말한다 — 확인 전에는 아무것도 보내지 않는다', (tester) async {
       await open(tester);
 
-      await tester.tap(find.text('이 이룸이에서 나가기'));
+      await tester.tap(find.text('함께 돌보기 그만두기'));
       await tester.pumpAndSettle();
 
-      expect(find.text('이 이룸이에서 나갈까요?'), findsOneWidget);
+      expect(find.text('함께 돌보기를 그만둘까요?'), findsOneWidget);
       expect(find.textContaining('내가 만든 일과는 사라져요'), findsOneWidget);
       expect(find.textContaining('다른 보호자의 일과·별은 그대로예요'), findsOneWidget);
       expect(repo.calls.where((c) => c.startsWith('leave')), isEmpty);
@@ -149,7 +179,7 @@ void main() {
 
     testWidgets('취소하면 아무것도 지우지 않고 그 자리에 남는다', (tester) async {
       await open(tester);
-      await tester.tap(find.text('이 이룸이에서 나가기'));
+      await tester.tap(find.text('함께 돌보기 그만두기'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('취소'));
@@ -164,7 +194,7 @@ void main() {
       repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true, displayName: '엄마')]);
       await open(tester);
 
-      await tester.tap(find.text('이 이룸이에서 나가기'));
+      await tester.tap(find.text('함께 돌보기 그만두기'));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('함께하는 보호자가 없어요'), findsOneWidget);
@@ -176,9 +206,9 @@ void main() {
     testWidgets('나가면 서버에 알리고 남은 이룸이로 옮겨 홈으로 간다 (선택 상태 정리)', (tester) async {
       await open(tester);
 
-      await tester.tap(find.text('이 이룸이에서 나가기'));
+      await tester.tap(find.text('함께 돌보기 그만두기'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('나가기'));
+      await tester.tap(find.text('그만두기'));
       await tester.pumpAndSettle();
 
       expect(repo.calls, contains('leave:p-a'));
@@ -192,9 +222,9 @@ void main() {
       repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
       await open(tester);
 
-      await tester.tap(find.text('이 이룸이에서 나가기'));
+      await tester.tap(find.text('함께 돌보기 그만두기'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('나가기'));
+      await tester.tap(find.text('그만두기'));
       await tester.pumpAndSettle();
 
       expect(find.text('이룸이 등록'), findsOneWidget);
@@ -206,9 +236,9 @@ void main() {
       repo.leaveFailure = serverFailure(500, ServerErrorCode.internalServerError, '잠시 후 다시 시도해주세요.');
       await open(tester);
 
-      await tester.tap(find.text('이 이룸이에서 나가기'));
+      await tester.tap(find.text('함께 돌보기 그만두기'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('나가기'));
+      await tester.tap(find.text('그만두기'));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('나가지 못했어요'), findsOneWidget);
@@ -226,9 +256,9 @@ void main() {
       repo.leaveFailure = const AppFailure(fault: NetworkFault.offline);
       await open(tester);
 
-      await tester.tap(find.text('이 이룸이에서 나가기'));
+      await tester.tap(find.text('함께 돌보기 그만두기'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('나가기'));
+      await tester.tap(find.text('그만두기'));
       await tester.pumpAndSettle();
 
       expect(find.text('E-NET-OFFLINE'), findsOneWidget);
@@ -240,9 +270,9 @@ void main() {
       repo.leaveFailure = serverFailure(404, ServerErrorCode.profileNotFound, '등록된 이룸이가 없어요.');
       await open(tester);
 
-      await tester.tap(find.text('이 이룸이에서 나가기'));
+      await tester.tap(find.text('함께 돌보기 그만두기'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('나가기'));
+      await tester.tap(find.text('그만두기'));
       await tester.pumpAndSettle();
 
       expect(find.text('보호자 홈'), findsOneWidget);
@@ -251,10 +281,10 @@ void main() {
 
     testWidgets('빨리 두 번 눌러도 한 번만 보낸다', (tester) async {
       await open(tester);
-      await tester.tap(find.text('이 이룸이에서 나가기'));
+      await tester.tap(find.text('함께 돌보기 그만두기'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('나가기'));
+      await tester.tap(find.text('그만두기'));
       await tester.pump();
       await tester.pumpAndSettle();
 

@@ -97,6 +97,13 @@ void main() {
     expect(find.textContaining('하늘이'), findsWidgets);
   });
 
+  testWidgets('#506 초대 코드는 보호자용이고 이룸이 휴대폰은 따로 연결한다고 알린다', (tester) async {
+    await open(tester);
+
+    expect(find.textContaining('이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요'), findsOneWidget);
+    expect(find.textContaining('설정의 이룸이 휴대폰에서 연결해요'), findsOneWidget);
+  });
+
   testWidgets('다시 만들면 새로 발급하고 이전 코드는 쓸 수 없다고 알린다 (E9)', (tester) async {
     await open(tester);
     expect(find.textContaining('이전 코드'), findsOneWidget);

@@ -88,13 +88,13 @@ void main() {
     repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
     await pump(tester, Routes.guardianPeople, const GuardiansScreen());
 
-    await tester.ensureVisible(find.text('이 이룸이에서 나가기'));
+    await tester.ensureVisible(find.text('함께 돌보기 그만두기'));
     await tester.pump();
-    await tester.tap(find.text('이 이룸이에서 나가기'));
+    await tester.tap(find.text('함께 돌보기 그만두기'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('되돌릴 수 없어요'), findsOneWidget);
-    expect(find.text('나가기'), findsOneWidget);
+    expect(find.text('그만두기'), findsOneWidget);
     expect(find.text('취소'), findsOneWidget);
   });
 }
