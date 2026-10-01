@@ -31,7 +31,7 @@ public interface DeviceLinkControllerDocs {
     description = "여섯 글자 연결 암호를 만듭니다. 10분 동안 한 번만 쓸 수 있습니다.\n\n"
       + "- 헷갈리는 글자(`0 O 1 I L U`)는 만들지 않습니다 — 불러주고 받아적기 때문입니다.\n"
       + "- **이전에 발급한 미사용 암호는 폐기됩니다.** 화면에 보이는 암호만 통해야 합니다.\n"
-      + "- 이미 연결된 이룸이 휴대폰은 그대로 둡니다. 연결을 끊으려면 `DELETE /current`를 씁니다.\n"
+      + "- 이미 연결된 이룸이 휴대폰은 그대로 둡니다. 연결을 끊으려면 `DELETE /{linkId}`를 씁니다.\n"
       + "- 응답의 `code`가 원문이 나가는 유일한 자리입니다. 서버에는 해시만 남습니다.",
     security = @SecurityRequirement(name = "bearerAuth")
   )
@@ -50,19 +50,24 @@ public interface DeviceLinkControllerDocs {
   @Operation(
     summary = "연결 상태 조회 (보호자)",
     description = "설정 화면이 쓰는 값입니다.\n\n"
-      + "- `devices` — 연결된 휴대폰들. **여러 대가 붙을 수 있습니다.** 비어 있으면 `이룸이 휴대폰 연결하기`\n"
-      + "- `pendingExpiresAt` — 암호를 발급했고 아직 아무도 안 쓴 경우의 만료 시각",
+      + "- `devices` — 연결된 휴대폰들. **여러 대가 붙을 수 있습니다.** 비어 있으면 `이룸이 휴대폰 연결하기`. "
+      + "**이룸이 기준**이라 함께 돌보는 다른 보호자가 붙인 휴대폰도 보입니다.\n"
+      + "- `pendingExpiresAt` — 내가 암호를 발급했고 아직 아무도 안 쓴 경우의 만료 시각",
     security = @SecurityRequirement(name = "bearerAuth")
   )
   @ApiResponse(responseCode = "200", description = "조회 성공")
-  ResponseEntity<LinkStatusResponse> status(Authentication authentication);
+  ResponseEntity<LinkStatusResponse> status(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId
+  );
 
   @Operation(
     summary = "연결 끊기 (보호자)",
     description = "`linkId`가 가리키는 연결 하나를 끊습니다. **그 기기의 세션만** 폐기하므로 "
       + "보호자 로그인은 유지됩니다.\n\n"
       + "이룸이 휴대폰을 잃어버렸거나 기기를 바꿨거나 남의 폰에 잘못 연결했을 때 "
-      + "보호자가 끊을 수 있는 유일한 길입니다.",
+      + "보호자가 끊을 수 있는 유일한 길입니다. **그 이룸이를 함께 돌보는 보호자는 누구나** 끊을 수 있습니다 "
+      + "(붙인 사람이 아니어도). 돌보지 않는 이룸이의 연결은 없는 연결과 같은 404 입니다.",
     security = @SecurityRequirement(name = "bearerAuth")
   )
   @ApiResponses({
@@ -71,6 +76,24 @@ public interface DeviceLinkControllerDocs {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   ResponseEntity<Void> revoke(Authentication authentication, String linkId);
+
+  @Operation(
+    summary = "내 연결 끊기 (이룸이 휴대폰)",
+    description = "이룸이 휴대폰이 **자기** 연결을 끊습니다. 설정의 로그아웃·회원 탈퇴가 부릅니다.\n\n"
+      + "- 어느 연결인지는 토큰의 연결 ID 가 정합니다 — 요청에는 아무것도 싣지 않습니다.\n"
+      + "- 그 휴대폰의 세션만 폐기합니다. 보호자 계정·이룸이·일과·별은 그대로 남습니다.\n"
+      + "- 이미 끊긴 연결이면 404 `DEVICE_LINK_NOT_CONNECTED` 입니다. 앱은 이미 끊긴 것으로 받아들입니다.\n"
+      + "- 보호자 토큰으로 부르면 403 `DEVICE_LINK_ONLY_FOR_ELUMI` 입니다.",
+    security = @SecurityRequirement(name = "bearerAuth")
+  )
+  @ApiResponses({
+    @ApiResponse(responseCode = "204", description = "끊음"),
+    @ApiResponse(responseCode = "403", description = "보호자 토큰으로는 쓸 수 없음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "404", description = "이미 끊겼거나 연결된 휴대폰이 아님",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  ResponseEntity<Void> revokeCurrent(Authentication authentication);
 
   @Operation(
     summary = "연결 암호 넣기 (이룸이 휴대폰) — 인증 불필요",

@@ -12,6 +12,9 @@ public interface DeviceLinkRepository extends JpaRepository<DeviceLink, String> 
   /** 이 계정의 살아 있는 연결·발급분. 최신이 앞에 온다. */
   List<DeviceLink> findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc(String memberId);
 
+  /** 이 이룸이에 붙은 살아 있는 연결·발급분. 함께 돌보는 보호자가 서로의 휴대폰을 보고 끊는다 (#363). */
+  List<DeviceLink> findByProfileIdAndRevokedAtIsNullOrderByCreatedAtDesc(String profileId);
+
   /** 탈퇴 시 정리. member를 외래키로 참조하지 않아 DB가 대신 지워 주지 않는다. */
   void deleteAllByMemberId(String memberId);
 

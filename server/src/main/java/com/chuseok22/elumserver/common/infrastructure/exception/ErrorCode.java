@@ -86,6 +86,8 @@ public enum ErrorCode {
   DEVICE_LINK_TOO_MANY_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, "암호가 만료됐어요. 새 암호를 받아주세요."),
   DEVICE_LINK_NOT_CONNECTED(HttpStatus.NOT_FOUND, "연결된 이룸이 휴대폰이 없습니다."),
   DEVICE_LINK_FORBIDDEN_FOR_ELUMI(HttpStatus.FORBIDDEN, "이룸이 휴대폰에서는 할 수 없어요."),
+  // 자기 연결 끊기(DELETE /current)는 이룸이 휴대폰 전용이다 (#363). 보호자는 linkId 로 끊는다.
+  DEVICE_LINK_ONLY_FOR_ELUMI(HttpStatus.FORBIDDEN, "이룸이 휴대폰에서만 할 수 있어요."),
 
   // 이룸이 · 함께 돌보는 보호자 (다중 보호자 1단계).
   // 연결되지 않은 이룸이와 없는 이룸이를 같은 404로 뭉치지 않는다 — 앱이 403이면 머물고, 404면 이룸이 등록으로 보낸다(E29).

@@ -155,6 +155,8 @@ public class SecurityConfig {
           "/api/routines/*/steps/*/complete",
           "/api/routines/*/steps/*/cancel").hasAnyAuthority(ELUMI, GUARDIAN)
         .requestMatchers(HttpMethod.PUT, "/api/routines/*/progress").hasAnyAuthority(ELUMI, GUARDIAN)
+        // 이룸이 휴대폰이 자기 연결을 끊는다 (#363). 보호자 토큰도 컨트롤러까지 보내 코드가 있는 403 으로 답하게 한다.
+        .requestMatchers(HttpMethod.DELETE, "/api/device-links/current").hasAnyAuthority(ELUMI, GUARDIAN)
         // 해커톤 시험용 창구는 아무도 못 부른다 (이슈 #382). anyRequest 보다 앞에 둬야 한다 —
         // 뒤에 두면 보호자 권한 규칙에 먼저 걸려 가입한 누구나 로컬 LLM 을 돌릴 수 있다.
         .requestMatchers(SecurityPaths.API_INTERNAL_MATCHER).denyAll()
