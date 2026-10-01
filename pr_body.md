@@ -5,7 +5,7 @@
 ## 릴리스 노트
 
 * **버그 수정**
-  * 서버가 잠시 바쁠 때 카드 그림이 기본 그림으로 남던 문제를 고쳤어요
+  * 다른 계정으로 로그인했을 때 이전 계정의 캐릭터가 남던 문제를 고쳤어요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
