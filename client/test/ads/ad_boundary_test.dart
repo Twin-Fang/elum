@@ -19,6 +19,8 @@ void main() {
       'lib/features/guardian/presentation/draft_routines_screen.dart',
       // 홈 크레딧 소진 안내(#464)가 부르는 보상형 흐름. 아래 테스트가 호출처를 홈 하나로 잠근다.
       'lib/features/credit/application/ad_reward_flow.dart',
+      // 홈 '지난 일과' 목록 사이 네이티브 광고(#465). 아래 테스트가 지난 일과 구역 안으로 잠근다.
+      'lib/features/guardian/presentation/widgets/today_routine_section.dart',
     };
     final users = dartFiles('lib')
         .where((f) => !f.path.startsWith('lib/core/ads/'))
@@ -52,8 +54,12 @@ void main() {
   });
 
   test('광고 요청에 사용자 정보를 넘기지 않는다', () {
-    // 배너·보상형 모두 — 요청을 만드는 모든 로더가 같은 모양이어야 한다.
-    for (final name in ['ad_banner_loader.dart', 'rewarded_ad_loader.dart']) {
+    // 배너·네이티브·보상형 모두 — 요청을 만드는 모든 로더가 같은 모양이어야 한다.
+    for (final name in [
+      'ad_banner_loader.dart',
+      'rewarded_ad_loader.dart',
+      'ad_native_loader.dart',
+    ]) {
       final src = File('lib/core/ads/$name').readAsStringSync();
       expect(src, isNot(contains('keywords')), reason: name);
       expect(src, isNot(contains('contentUrl')), reason: name);
@@ -93,5 +99,24 @@ void main() {
     expect(importers('rewarded_ad_loader'), {
       'lib/features/credit/application/ad_reward_flow.dart',
     });
+  });
+
+  // 한 파일에 오늘·지난 일과 구역이 함께 있어, 파일 단위로는 오늘 일과에 끼었는지 못 가린다.
+  test('네이티브 광고는 지난 일과 구역에서만 쓴다', () {
+    final users = dartFiles('lib')
+        .where((f) => !f.path.startsWith('lib/core/ads/'))
+        .where((f) => f.readAsStringSync().contains('AdNativeSlot'))
+        .map((f) => f.path)
+        .toSet();
+    expect(users, {
+      'lib/features/guardian/presentation/widgets/today_routine_section.dart',
+    });
+
+    final src = File(users.single).readAsStringSync();
+    final pastStart = src.indexOf('class PastRoutineSection');
+    expect(pastStart, greaterThan(0));
+    // 지난 일과 구역 앞(오늘 일과·공용 위젯)에는 슬롯이 없다.
+    expect(src.substring(0, pastStart), isNot(contains('AdNativeSlot(')));
+    expect(src.substring(pastStart), contains('AdNativeSlot('));
   });
 }

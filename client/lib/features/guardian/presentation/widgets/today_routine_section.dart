@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/ads/ad_ids.dart';
+import '../../../../core/ads/ad_native_slot.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_motion.dart';
@@ -62,6 +64,14 @@ double routineProgress(Routine routine, ChildRoutineState progress) {
 
 /// 카드 사이 간격 (Figma 931:4013 — gap 8)
 const _tileGap = 8.0;
+
+/// 지난 일과 사이 광고가 일과 카드와 떨어지는 만큼 더한 간격(오클릭 방지, #465).
+/// 광고가 없으면 이 간격도 없다.
+const _adExtraGap = 8.0;
+
+/// 광고를 끼우는 자리 — 두 번째 일과 다음. 세 개 미만이면 "사이"가 없어 넣지 않는다.
+const _nativeAdAfterIndex = 1;
+const _nativeAdMinItems = 3;
 
 /// 보호자 홈 `오늘 일과` (Figma 931:3896 / 931:4179 / 931:4879 · 이슈 #258).
 ///
@@ -399,6 +409,17 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
               );
             },
           ),
+          // 지난 일과 사이 네이티브 광고 한 개 (#465). 목록이 짧으면 넣지 않고, 로드에
+          // 실패하면 항목 자체가 없어 빈 자리가 남지 않는다. 오늘 일과에는 끼우지 않는다.
+          if (index == _nativeAdAfterIndex &&
+              routines.length >= _nativeAdMinItems)
+            AdNativeSlot(
+              placement: AdPlacement.nativeHomePast,
+              padding: EdgeInsets.only(
+                top: (_tileGap + _adExtraGap).h,
+                bottom: _adExtraGap.h,
+              ),
+            ),
         ],
       ],
     );
