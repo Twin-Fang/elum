@@ -82,7 +82,7 @@ void main() {
     expect(() => repo.getTodayRoutines(), throwsA(anything));
   });
 
-  test('Routine.toJson은 fromJson과 왕복한다', () {
+  test('Routine.toJson은 fromJson과 왕복한다 (원문 계열은 제외)', () {
     const routine = Routine(
       id: 'r1',
       title: '제목',
@@ -97,9 +97,65 @@ void main() {
       progressPercent: 100,
     );
 
-    final restored = Routine.fromJson(routine.toJson());
+    final json = routine.toJson();
+    final restored = Routine.fromJson(json);
 
-    expect(restored, routine);
+    // 원문은 저장 대상이 아니므로 비워서 맞춘다 (#358)
+    expect(restored, routine.copyWith(rawInputText: '', sanitizedInputText: ''));
+    expect(json.containsKey('rawInputText'), isFalse);
+    expect(json.containsKey('sanitizedInputText'), isFalse);
+  });
+
+  group('보호자 원문은 캐시에 남지 않는다 (#358)', () {
+    const withRaw = [
+      {
+        'id': 'r1',
+        'title': '제목',
+        'rawInputText': '비밀 원문 하나',
+        'sanitizedInputText': '비밀 마스킹본 둘',
+        'revisionFeedback': '비밀 피드백 셋',
+        'status': 'CONFIRMED',
+        'steps': [],
+      },
+    ];
+
+    test('서버 응답에 원문이 있어도 캐시 문자열에는 없다', () async {
+      adapter.stubJson(200, withRaw);
+
+      await repo.getTodayRoutines();
+
+      final cached = storage.cachedTodayRoutinesJson!;
+      expect(cached, isNot(contains('rawInputText')));
+      expect(cached, isNot(contains('sanitizedInputText')));
+      expect(cached, isNot(contains('비밀')));
+      expect(cached, contains('r1'));
+    });
+
+    test('옛 빌드가 저장한 캐시는 읽을 때 원문을 지워 다시 쓴다', () async {
+      await storage.setCachedTodayRoutinesJson(jsonEncode(withRaw));
+      adapter.fail = true;
+
+      final routines = await repo.getTodayRoutines();
+
+      expect(routines.map((r) => r.id), ['r1']);
+      final cached = storage.cachedTodayRoutinesJson!;
+      expect(cached, isNot(contains('rawInputText')));
+      expect(cached, isNot(contains('sanitizedInputText')));
+      expect(cached, isNot(contains('비밀')));
+    });
+
+    test('형식이 깨진 캐시여도 앱이 죽지 않는다', () async {
+      adapter.fail = true;
+      for (final broken in ['not json', '{"a":1}', '[1,"x",null]']) {
+        await storage.setCachedTodayRoutinesJson(broken);
+        // 캐시를 못 쓰면 폴백(전체 조회)도 실패해 던진다 — 형식 오류로 죽는 것과 구분한다.
+        try {
+          await repo.getTodayRoutines();
+        } on DioException {
+          // 네트워크 실패는 정상 경로
+        }
+      }
+    });
   });
 }
 
