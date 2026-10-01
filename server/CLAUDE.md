@@ -25,14 +25,18 @@
 
 ## 배포 서버 로그 확인
 
-배포된 백엔드(`elum-back` 컨테이너)의 로그는 아래로 확인한다.
+배포된 백엔드는 Blue/Green 무중단 배포라 컨테이너가 `elum-back-blue`(8085) · `elum-back-green`(8086)
+둘 중 하나로 떠 있다. 배포할 때마다 서로 바뀌므로 **둘 중 지금 떠 있는 쪽**으로 조회한다.
+한쪽에서 로그가 안 나오면 다른 쪽을 조회한다.
 
 ```bash
-# 전체 로그를 실시간으로 따라간다
-curl -N "http://chuseok22.synology.me:8888/containers/elum-back/logs?lines=all&follow=true"
+# 전체 로그를 실시간으로 따라간다 (blue 또는 green)
+curl -N "http://chuseok22.synology.me:8888/containers/elum-back-blue/logs?lines=all&follow=true"
+curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines=all&follow=true"
 
 # 최근 로그만 보고 끝낸다 (follow 없이)
-curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back/logs?lines=500" | tail -50
+curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back-blue/logs?lines=500" | tail -50
+curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines=500" | tail -50
 ```
 
 **`lines`는 `500` · `1000` · `all` · 빈 값만 받는다.** 그 외 숫자를 넣으면
