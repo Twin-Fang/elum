@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
+import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +31,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 class RoutineControllerStepImageTest {
 
   private final RoutineStepPhotoService photoService = mock(RoutineStepPhotoService.class);
-  private final RoutineController controller = new RoutineController(mock(RoutineService.class), photoService);
+  private final RoutineController controller = new RoutineController(mock(RoutineService.class), photoService,
+    new RoutineAuthorResolver(mock(ProfileGuardianRepository.class)));
 
   @Test
   @DisplayName("호출자와 경로 값, 파일을 서비스에 그대로 넘기고 카드 응답을 200 으로 돌려준다")

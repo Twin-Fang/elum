@@ -42,7 +42,24 @@ public interface ProfileGuardianRepository extends JpaRepository<ProfileGuardian
     """)
   int backfillFromProfileOwner();
 
-  /** 관리자 회원 목록 — 회원마다 따로 묻지 않도록 이룸이까지 한 번에, 합류 순서대로 가져온다. */
+  /** 계정 ID 와 이 이룸이 안에서 부르는 이름만 읽는 투영. 엔티티(이룸이·계정)를 불러오지 않는다. */
+  interface GuardianName {
+
+    String getMemberId();
+
+    String getDisplayName();
+  }
+
+  /**
+   * 일과 응답에 만든 사람 이름을 싣는다 (#361). 목록의 만든 사람들을 한 번에 묻는다 — 일과마다 묻지 않는다.
+   * {@code g.member.id} 는 외래키 값이라 조인하지 않는다.
+   */
+  @Query("select g.member.id as memberId, g.displayName as displayName "
+    + "from ProfileGuardian g where g.profile.id = :profileId and g.member.id in :memberIds")
+  List<GuardianName> findNamesByProfileIdAndMemberIdIn(
+    @Param("profileId") String profileId, @Param("memberIds") Collection<String> memberIds);
+
+  /** 관리자 회원 목록 —회원마다 따로 묻지 않도록 이룸이까지 한 번에, 합류 순서대로 가져온다. */
   @Query("select g from ProfileGuardian g join fetch g.profile where g.member.id in :memberIds order by g.joinedAt asc")
   List<ProfileGuardian> findAllWithProfileByMemberIdIn(@Param("memberIds") Collection<String> memberIds);
 }

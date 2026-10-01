@@ -8,8 +8,10 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.jwt.AccessTokenDetails;
 import com.chuseok22.elumserver.member.application.service.Caller;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
+import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import java.util.List;
@@ -31,7 +33,8 @@ class RoutineControllerSourceTextTest {
   private static final String FEEDBACK = "좀 더 짧게 해줘";
 
   private final RoutineService service = mock(RoutineService.class);
-  private final RoutineController controller = new RoutineController(service, mock(RoutineStepPhotoService.class));
+  private final RoutineController controller = new RoutineController(service, mock(RoutineStepPhotoService.class),
+    new RoutineAuthorResolver(mock(ProfileGuardianRepository.class)));
 
   private final Authentication elumi = elumiAuth();
   private final Authentication guardian = new TestingAuthenticationToken("member-1", null);
@@ -49,7 +52,7 @@ class RoutineControllerSourceTextTest {
   /// createdBy 가 만든 보호자인 일과. guardian 토큰의 memberId 는 member-1 이다.
   private static RoutineResponse routineBy(String createdBy) {
     return new RoutineResponse("r1", "제목", RAW, MASKED, null, "CONFIRMED", FEEDBACK, null,
-      0, 0, 0, null, null, List.of(), null, null, createdBy);
+      0, 0, 0, null, null, List.of(), null, null, createdBy, null, null, null);
   }
 
   private static void assertStripped(RoutineResponse r) {

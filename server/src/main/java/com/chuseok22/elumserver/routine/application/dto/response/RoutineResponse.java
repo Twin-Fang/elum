@@ -63,7 +63,21 @@ public record RoutineResponse(
   /// 일과를 만든 보호자 ID. 응답에는 싣지 않는다 — forCaller 가 원문을 가릴지 판단하는 데만 쓴다.
   @JsonIgnore
   @Schema(hidden = true)
-  String createdBy
+  String createdBy,
+
+  @Schema(description = "이 일과를 만든 사람이 나인가 (#361). 승인·수정·삭제는 만든 사람만 하므로 앱이 남의 일과에서 그 버튼을 숨긴다. "
+    + "이룸이 휴대폰은 항상 false. 만든 사람이 비어 있는 옛 일과는 null(모름) — 앱은 버튼을 보이고 서버가 최종 판단한다",
+    nullable = true)
+  Boolean createdByMe,
+
+  @Schema(description = "만든 보호자가 이 이룸이 안에서 불리는 이름(예: 엄마). 정하지 않았으면 null — 앱이 '보호자'로 부른다. "
+    + "계정 ID·아이디·이메일은 싣지 않는다. 이룸이 휴대폰에는 주지 않는다(null)", example = "엄마", nullable = true)
+  String creatorName,
+
+  /// 일과가 속한 이룸이 ID. 응답에는 싣지 않는다 — 만든 사람의 이름을 이룸이 단위로 한 번에 찾는 데만 쓴다.
+  @JsonIgnore
+  @Schema(hidden = true)
+  String profileId
 ) {
 
   /**
@@ -86,14 +100,14 @@ public record RoutineResponse(
   public RoutineResponse withCredit(CreditUsage usage) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      usage, imageSkippedReason, createdBy);
+      usage, imageSkippedReason, createdBy, createdByMe, creatorName, profileId);
   }
 
   /// 그림을 건너뛴 까닭을 붙인 응답.
   public RoutineResponse withImageSkippedReason(String reason) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, reason, createdBy);
+      credit, reason, createdBy, createdByMe, creatorName, profileId);
   }
 
   /// 보호자가 쓴 말(원문·마스킹본·재생성 피드백)을 뺀 응답 (#357). 이룸이 휴대폰은 화면에 쓰지 않는 값이라
@@ -101,7 +115,7 @@ public record RoutineResponse(
   public RoutineResponse withoutSourceText() {
     return new RoutineResponse(id, title, null, null, scheduledAt, status, null,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, imageSkippedReason, createdBy);
+      credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId);
   }
 
   /// 보호자 원문을 가려야 하는 호출자인가.
@@ -117,9 +131,37 @@ public record RoutineResponse(
     return createdBy != null && !createdBy.equals(caller.memberId());
   }
 
-  /// 호출자에 따라 보호자 원문을 뺀다. 일과를 만든 보호자 본인에게만 그대로 돌려준다.
+  /// 이 일과를 만든 사람이 호출자 본인인가 (#361).
+  /// - 이룸이 휴대폰: false. 일과를 만들지도 고치지도 못한다.
+  /// - 만든 사람이 비어 있는 옛 일과: null(모름). 서버는 EDIT 에서 createdBy 가 호출자와 같아야 허락하므로
+  ///   (ProfileAccessGuard.checkRoutine) 비어 있으면 아무도 못 고친다 — true 는 서버가 거절할 약속이고, false 는
+  ///   앱이 "다른 보호자가 만든 일과"라고 잘못 부르게 한다. 앱은 null 을 "버튼을 보이고 서버가 판단"으로 읽는다.
+  ///   이 상태는 옛 서버로 되돌린 동안 생긴 행이고 서버가 뜰 때 created_by 를 채워 사라진다.
+  private Boolean createdByMeFor(Caller caller) {
+    if (caller.isElumi()) {
+      return false;
+    }
+    return createdBy == null ? null : createdBy.equals(caller.memberId());
+  }
+
+  /// 호출자에 따라 보호자 원문을 뺀다 (일과를 만든 보호자 본인에게만 그대로). 같은 판단으로 createdByMe 를 정한다.
+  /// 만든 사람 이름(creatorName)은 이름을 찾아야 하므로 RoutineAuthorResolver 가 채운다.
   public RoutineResponse forCaller(Caller caller) {
-    return hidesSourceTextFrom(caller) ? withoutSourceText() : this;
+    RoutineResponse base = hidesSourceTextFrom(caller) ? withoutSourceText() : this;
+    return base.withCreatedByMe(createdByMeFor(caller));
+  }
+
+  /// 만든 사람 이름을 붙인 응답.
+  public RoutineResponse withCreatorName(String name) {
+    return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
+      completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
+      credit, imageSkippedReason, createdBy, createdByMe, name, profileId);
+  }
+
+  private RoutineResponse withCreatedByMe(Boolean mine) {
+    return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
+      completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
+      credit, imageSkippedReason, createdBy, mine, creatorName, profileId);
   }
 
   public static RoutineResponse from(Routine routine) {
@@ -148,7 +190,11 @@ public record RoutineResponse(
       stepResponses,
       null,
       null,
-      routine.getCreatedBy()
+      routine.getCreatedBy(),
+      null,
+      null,
+      // 프록시의 getId 는 이룸이를 읽지 않는다
+      routine.getProfile() == null ? null : routine.getProfile().getId()
     );
   }
 }
