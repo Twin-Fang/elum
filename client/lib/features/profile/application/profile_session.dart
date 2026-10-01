@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
+import '../../../core/network/app_failure.dart';
 import '../../../core/network/session_expiry.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../guardian/application/routine_notifier.dart';
@@ -141,6 +142,57 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
     await ref
         .read(onboardingProvider.notifier)
         .applyServerProfile(target, goals: member.supportGoals);
+  }
+
+  Future<Attempt<bool>>? _ensuring;
+
+  /// 이룸이 등록(온보딩)을 마치기 전에 **이룸이가 있게 한다** — 마지막 이룸이에서 나간 보호자가
+  /// 다시 등록할 때, 서버는 이룸이 없이는 이름 저장을 `404 PROFILE_NOT_FOUND` 로 막는다 (#362).
+  ///
+  /// 돌려주는 값: `ok(true)` 새로 만들었다 · `ok(false)` 할 일이 없었다 · `failed` 만들지 못했다
+  /// (저장을 이어 가면 안 된다 — 같은 화면에서 다시 시도한다).
+  ///
+  /// **회원 정보가 이룸이 없음을 확실히 말할 때만** 부른다 ([Member.profilesKnown] 이면서 비어
+  /// 있음). 옛 서버의 "필드 없음"은 없음이 아니라 모름이라 건드리지 않는다. 이룸이 휴대폰은
+  /// 서버가 403 을 주므로 아예 부르지 않는다. 경로를 모르는 옛 서버(404·405)는 기존 동작 그대로
+  /// 두고 이어 간다. 동시에 여러 번 불려도 요청은 하나다.
+  Future<Attempt<bool>> ensureProfile() =>
+      _ensuring ??= _ensureProfile().whenComplete(() => _ensuring = null);
+
+  Future<Attempt<bool>> _ensureProfile() async {
+    if (_isElumi) return const Attempt.ok(false);
+    final repo = ref.read(memberRepositoryProvider);
+
+    var member = ref.read(memberProvider).value;
+    if (member == null || !member.profilesKnown) {
+      // 아직 못 받았거나 모른다 — 한 번 직접 받아 본다. provider 를 무효화하지 않는 이유는
+      // 아래 성공 처리에 적었다.
+      member = await repo.getMyInfo();
+    }
+    if (member == null || !member.profilesKnown || member.profiles.isNotEmpty) {
+      return const Attempt.ok(false);
+    }
+
+    final result = await repo.createProfile();
+    final failure = result.failure;
+    if (failure != null) {
+      // 경로가 없는 옛 서버는 이룸이를 가입 때 이미 만들어 둔다 — 기존 흐름으로 이어 간다.
+      if (MemberRepository.isRouteMissing(failure)) return const Attempt.ok(false);
+      return Attempt.failed(failure);
+    }
+    final profile = result.value!.profiles.first;
+
+    // 새 이룸이를 고른다. 저장 API 가 헤더 없이도 이 이룸이에 닿지만, 이후 요청이 같은 이룸이를
+    // 가리키도록 명시해 둔다.
+    try {
+      await _storage?.setSelectedProfileId(profile.id);
+    } catch (e) {
+      debugPrint('[profile] 새 이룸이 선택 저장 실패, 서버에는 만들었다: $e');
+    }
+    if (ref.mounted) state = ProfileSession(selectedId: profile.id);
+    // memberProvider 는 여기서 무효화하지 않는다 — 다시 받은 빈 이룸이로 [_reconcile] 이 돌면
+    // 방금 입력한 이름·캐릭터를 비워 버린다. 저장을 마친 뒤 부르는 쪽이 새로 받는다.
+    return const Attempt.ok(true);
   }
 
   /// 이룸이를 바꾼다. 같은 이룸이면 아무것도 하지 않는다.

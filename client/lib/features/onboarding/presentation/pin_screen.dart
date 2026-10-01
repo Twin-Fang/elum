@@ -9,6 +9,8 @@ import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../guardian/data/routine_repository.dart' show memberProvider;
+import '../../profile/application/profile_session.dart';
 import '../application/onboarding_notifier.dart';
 import '../domain/onboarding_profile.dart';
 import 'widgets/pin_keypad.dart';
@@ -130,8 +132,31 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     });
   }
 
+  /// 저장 중이다 — 두 번 눌러도 이룸이 만들기·저장이 한 번만 나가게 한다.
+  bool _saving = false;
+
   /// 최종 확정 — 2단계 일치 상태에서 CTA를 눌렀을 때만 호출된다.
   void _onComplete() async {
+    if (_saving) return;
+    setState(() => _saving = true);
+
+    // 이룸이가 없는 보호자(마지막 이룸이에서 나간 뒤)는 서버가 저장을 막으므로 이룸이부터 만든다.
+    // 못 만들었으면 저장을 이어 가지 않고 이 화면에 남는다 — 다시 누르면 다시 시도한다 (#362).
+    final ensured = await ref.read(profileSessionProvider.notifier).ensureProfile();
+    if (!mounted) return;
+    final createFailure = ensured.failure;
+    if (createFailure != null) {
+      await showFailure(
+        context,
+        createFailure,
+        title: '이룸이를 만들지 못했어요',
+        fallback: '잠시 후 다시 시도해주세요',
+        fallbackCode: 'E-PROFILE-NEW',
+      );
+      if (mounted) setState(() => _saving = false);
+      return;
+    }
+
     ref.read(onboardingProvider.notifier).setPin(_current);
     final failure = await ref.read(onboardingProvider.notifier).complete();
     if (!mounted) return;
@@ -149,6 +174,10 @@ class _PinScreenState extends ConsumerState<PinScreen> {
         fallbackCode: 'E-PROFILE',
       );
       if (!mounted) return;
+    } else if (ensured.value == true) {
+      // 방금 만든 이룸이의 이름·캐릭터까지 저장됐다 — 비어 있던 회원 정보를 새로 받는다.
+      // 저장이 실패했으면 받지 않는다: 서버의 빈 값이 로컬 입력을 덮는다.
+      ref.invalidate(memberProvider);
     }
     context.go(Routes.guardian);
   }

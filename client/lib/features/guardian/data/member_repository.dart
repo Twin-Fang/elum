@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/network/server_error_code.dart';
 import '../../onboarding/domain/image_style.dart';
 import '../../profile/domain/profile_summary.dart';
 
@@ -95,6 +96,40 @@ class MemberRepository {
       debugPrint('[member] 조회 실패 → 로컬 온보딩 값 사용: $e');
       return null;
     }
+  }
+
+  /// 내 몫의 새 이룸이를 만든다 (`POST /api/member/profile` · 서버 #361·#362).
+  ///
+  /// 마지막 이룸이에서 나간 보호자가 이룸이를 다시 등록하려면 저장 API 보다 먼저 불러야 한다 —
+  /// 이룸이가 없으면 서버가 저장을 `404 PROFILE_NOT_FOUND` 로 막는다. 서버는 **멱등**이라 이미
+  /// 이룸이가 있으면 아무것도 만들지 않고 지금 상태를 200 으로 준다.
+  ///
+  /// 응답은 [getMyInfo] 와 같은 모양이다. **이룸이 목록이 없는 응답은 성공으로 읽지 않는다** —
+  /// 어느 이룸이가 생겼는지 모르면 이어서 저장할 수 없다.
+  Future<Attempt<Member>> createProfile() async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>('/api/member/profile');
+      final body = res.data;
+      final member = body == null ? null : Member.fromJson(body);
+      if (member == null || member.profiles.isEmpty) {
+        debugPrint('[member] 이룸이 만들기 응답에 이룸이 목록이 없다');
+        return const Attempt.failed(AppFailure(fault: NetworkFault.app));
+      }
+      return Attempt.ok(member);
+    } catch (e) {
+      debugPrint('[member] 이룸이 만들기 실패: $e');
+      return Attempt.failed(AppFailure.of(e));
+    }
+  }
+
+  /// 이 경로를 모르는 서버(다중 보호자 이전)가 준 실패인가.
+  ///
+  /// 서버가 코드를 붙인 404(예: `PROFILE_NOT_FOUND`)는 해당하지 않는다 — 그건 경로가 있는
+  /// 서버가 한 말이다. 코드 없는 404·405 만 "그런 API 가 없다"로 읽는다.
+  static bool isRouteMissing(AppFailure failure) {
+    final s = failure.server;
+    if (s == null || s.code != ServerErrorCode.unknown) return false;
+    return s.statusCode == 404 || s.statusCode == 405;
   }
 
   /// 아이 호칭 저장. 온보딩 결과를 서버와 맞춘다.
