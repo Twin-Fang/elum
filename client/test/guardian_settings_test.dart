@@ -12,6 +12,8 @@ import 'package:elum/features/auth/data/oauth_sdk.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/auth/presentation/consent_document_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_settings_screen.dart';
+import 'package:elum/features/link/data/device_link_repository.dart';
+import 'package:elum/features/link/domain/link_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -32,7 +34,10 @@ void main() {
 
   late _FakeAuth auth;
 
-  Widget wrap({String version = '1.24.1'}) {
+  Widget wrap({
+    String version = '1.24.1',
+    Attempt<LinkStatus>? link,
+  }) {
     final router = GoRouter(
       initialLocation: Routes.guardianSettings,
       routes: [
@@ -48,6 +53,14 @@ void main() {
           path: Routes.guardianPinChange,
           builder: (context, state) => const Scaffold(body: Text('비밀암호 변경 화면')),
         ),
+        GoRoute(
+          path: Routes.linkCode,
+          builder: (context, state) => const Scaffold(body: Text('연결 암호 화면')),
+        ),
+        GoRoute(
+          path: Routes.guardianLinkStatus,
+          builder: (context, state) => const Scaffold(body: Text('연결 상태 화면')),
+        ),
       ],
     );
 
@@ -59,6 +72,10 @@ void main() {
         // 약관 목록은 서버·캐시를 타므로 테스트에서는 앱 번들 기본값으로 고정한다.
         consentBundleProvider.overrideWith((ref) async => ConsentBundle.bundled),
         appVersionProvider.overrideWith((ref) async => version),
+        // 이룸이 휴대폰 연결 상태 (#363). 서버를 타지 않는다
+        linkStatusProvider.overrideWith(
+          (ref) async => link ?? Attempt.ok(LinkStatus.empty),
+        ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
@@ -71,6 +88,70 @@ void main() {
   }
 
   setUp(() => auth = _FakeAuth());
+
+  // 이룸이 휴대폰 줄 (#363 · 명세 §8-4) — 연결 전에는 할 일(`연결하기`), 연결된 뒤에는 상태(`연결됨 ›`).
+  group('이룸이 휴대폰 줄', () {
+    final connected = Attempt.ok(
+      LinkStatus(
+        devices: [LinkedDevice(linkId: 'l1', linkedAt: DateTime(2026, 9, 18))],
+      ),
+    );
+
+    testWidgets('연결 전에는 `이룸이 휴대폰 연결하기`이고 누르면 연결 암호 만들기로 간다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      expect(find.text('이룸이 휴대폰 연결하기'), findsOneWidget);
+      expect(find.text('연결됨'), findsNothing);
+
+      await tester.tap(find.text('이룸이 휴대폰 연결하기'));
+      await tester.pumpAndSettle();
+      expect(find.text('연결 암호 화면'), findsOneWidget);
+    });
+
+    testWidgets('연결된 뒤에는 `이룸이 휴대폰 · 연결됨 ›`으로 바뀌고 누르면 연결 상태로 간다', (tester) async {
+      await tester.pumpWidget(wrap(link: connected));
+      await tester.pumpAndSettle();
+
+      expect(find.text('이룸이 휴대폰 연결하기'), findsNothing);
+      final row = find.ancestor(of: find.text('이룸이 휴대폰'), matching: find.byType(Row));
+      expect(find.descendant(of: row, matching: find.text('연결됨')), findsOneWidget);
+      expect(
+        find.descendant(of: row, matching: find.byIcon(Icons.chevron_right_rounded)),
+        findsOneWidget,
+        reason: '값이 있어도 들어갈 화면이 있다 (그림 방식 줄과 같다)',
+      );
+
+      await tester.tap(find.text('이룸이 휴대폰'));
+      await tester.pumpAndSettle();
+      expect(find.text('연결 상태 화면'), findsOneWidget);
+      expect(find.text('연결 암호 화면'), findsNothing);
+    });
+
+    testWidgets('상태를 못 불러와도 설정은 멈추지 않는다 — `연결하기`로 둔다', (tester) async {
+      await tester.pumpWidget(
+        wrap(link: const Attempt.failed(AppFailure(fault: NetworkFault.offline))),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('이룸이 휴대폰 연결하기'), findsOneWidget);
+      expect(find.text('로그아웃'), findsOneWidget);
+    });
+
+    testWidgets('줄 자리는 연결 전후 같다 — 시안(1022:4467) 첫 줄이다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+      final before = tester.getTopLeft(find.text('이룸이 휴대폰 연결하기')).dy;
+
+      // 앞 화면을 완전히 걷어 낸 뒤 다시 올린다 — 같은 자리에 겹쳐 올리면 이전 override 가 남는다
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(wrap(link: connected));
+      await tester.pumpAndSettle();
+      final after = tester.getTopLeft(find.text('이룸이 휴대폰')).dy;
+
+      expect(after, before);
+    });
+  });
 
   // 버전은 맨 아래 떨어진 글자가 아니라 목록의 한 줄이다 (#418).
   testWidgets('앱 정보 줄에 버전이 보이고 화살표는 없다', (tester) async {

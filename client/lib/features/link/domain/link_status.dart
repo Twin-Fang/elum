@@ -5,6 +5,12 @@ class LinkedDevice {
   final String linkId;
   final DateTime? linkedAt;
 
+  /// 상태 화면의 `9월 18일부터`. 시각을 모르면 null — 줄째 그리지 않는다 (#363).
+  String? get sinceLabel {
+    final at = linkedAt;
+    return at == null ? null : '${at.month}월 ${at.day}일부터';
+  }
+
   static LinkedDevice? fromJson(Map<String, dynamic> json) {
     final id = json['linkId']?.toString();
     if (id == null || id.isEmpty) return null;

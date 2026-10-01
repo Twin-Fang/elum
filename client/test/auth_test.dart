@@ -52,6 +52,32 @@ void main() {
       };
 
   group('소셜 로그인', () {
+    // #363 — 전에 이룸이 휴대폰이었던 휴대폰이 보호자로 로그인한다. 표식이 남으면 라우터가 보호자 화면을 막아
+    // 로그인하고도 들어가지 못한다. 소셜 로그인은 보호자의 길이라 이 휴대폰은 이제 보호자 휴대폰이다.
+    test('이룸이 휴대폰이었던 휴대폰이 로그인하면 이룸이 휴대폰 표식과 끊김 표식을 내린다', () async {
+      storage = InMemoryStorage(elumiDevice: true);
+      await storage.setElumiLinkLost(true);
+      adapter
+        ..stub('/api/auth/oauth/kakao', 200, tokenBody('access-1', 'refresh-1'))
+        ..stub('/api/member/me', 200, memberBody(nickname: '하늘이'));
+
+      await buildRepo(const OAuthSdkSuccess('kakao-token'))
+          .signInWith(OAuthProvider.kakao);
+
+      expect(storage.isElumiDevice, isFalse);
+      expect(storage.isElumiLinkLost, isFalse);
+    });
+
+    test('로그인이 실패하면 표식을 건드리지 않는다 — 이룸이 휴대폰은 그대로다', () async {
+      storage = InMemoryStorage(elumiDevice: true);
+      adapter.stub('/api/auth/oauth/kakao', 500, {});
+
+      await buildRepo(const OAuthSdkSuccess('kakao-token'))
+          .signInWith(OAuthProvider.kakao);
+
+      expect(storage.isElumiDevice, isTrue);
+    });
+
     test('토큰을 받아 저장하고, 동의 전이면 동의 화면으로 보낸다', () async {
       adapter
         ..stub('/api/auth/oauth/kakao', 200, tokenBody('access-1', 'refresh-1'))

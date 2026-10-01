@@ -14,6 +14,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
+import '../../link/data/device_link_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import 'widgets/ai_credit_card.dart';
 
@@ -153,10 +154,7 @@ class _GuardianSettingsScreenState
         SizedBox(height: 40.h),
         // 이번 주 AI 생성 (#407). 제목 아래·첫 줄 위 — 꺼져 있으면 자리도 없다.
         const AiCreditCard(),
-        SettingsTile(
-          label: '이룸이 휴대폰 연결하기',
-          onTap: _busy ? null : () => context.push(Routes.linkCode),
-        ),
+        _LinkTile(busy: _busy),
         // 계정을 정리하는 항목(로그아웃·탈퇴) 위에 둔다. 읽을거리와 되돌릴 수 없는
         // 동작이 섞이면 실수로 누르기 쉽다.
         SettingsTile(
@@ -202,6 +200,42 @@ class _GuardianSettingsScreenState
         ),
         SizedBox(height: space.lg),
       ],
+    );
+  }
+}
+
+/// `이룸이 휴대폰` 줄 (#363 · 명세 §8-4).
+///
+/// 연결 전에는 `연결하기`(할 일이 있다), 연결된 뒤에는 `연결됨 ›`(상태를 보여 주고 끊기로 들어간다).
+/// **상태를 못 알아도 `연결하기`로 둔다** — 로딩·실패가 설정 화면을 막으면 안 된다. 연결된 보호자가
+/// 잘못 `연결하기`를 눌러도 새 암호만 만들어질 뿐 기존 연결은 그대로다(서버가 발급과 끊기를 나눈다).
+class _LinkTile extends ConsumerWidget {
+  const _LinkTile({required this.busy});
+
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final connected = ref
+        .watch(linkStatusProvider)
+        .maybeWhen(
+          data: (attempt) => attempt.value?.hasDevice ?? false,
+          orElse: () => false,
+        );
+
+    return SettingsTile(
+      label: connected ? '이룸이 휴대폰' : '이룸이 휴대폰 연결하기',
+      valueText: connected ? '연결됨' : null,
+      showChevronWithValue: connected,
+      onTap: busy
+          ? null
+          : () async {
+              await context.push(
+                connected ? Routes.guardianLinkStatus : Routes.linkCode,
+              );
+              // 돌아오면 그사이 연결·끊기가 있었을 수 있다 — 줄을 다시 맞춘다
+              ref.invalidate(linkStatusProvider);
+            },
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
 import '../../onboarding/domain/image_style.dart';
@@ -48,6 +49,34 @@ class RedeemResult {
   final AppFailure? failure;
 }
 
+/// 연결 하나를 끊은 결과 (#363).
+///
+/// 갈래가 셋인 이유 — `이미 끊겨 있었다`를 실패로 보이면 보호자는 끊겼는데 "못 끊었어요"를 본다.
+/// 끊으려던 결과(연결이 없다)는 이미 이뤄졌으므로 성공과 같이 다루되, 말은 다르게 한다.
+enum RevokeOutcome {
+  /// 이번에 끊었다.
+  done,
+
+  /// 이미 끊겨 있었다 — 이룸이 휴대폰이 스스로 끊었거나 다른 보호자가 먼저 끊었다.
+  alreadyGone,
+
+  /// 끊지 못했다. 연결은 그대로다.
+  failed,
+}
+
+/// [DeviceLinkRepository.revoke] 의 결과 — 갈래와 **실패 이유**를 함께 돌려준다 (#352).
+class RevokeResult {
+  const RevokeResult(this.outcome, {this.failure});
+
+  final RevokeOutcome outcome;
+
+  /// 끊지 못했을 때 서버·네트워크가 알려준 것. 성공이면 null.
+  final AppFailure? failure;
+
+  /// 연결이 이제 없다 — 이번에 끊었든 이미 끊겨 있었든.
+  bool get isGone => outcome != RevokeOutcome.failed;
+}
+
 class DeviceLinkRepository {
   DeviceLinkRepository({
     required Dio dio,
@@ -60,6 +89,9 @@ class DeviceLinkRepository {
   final Dio _dio;
   final TokenStore _tokens;
   final LocalStorage _storage;
+
+  /// 이 이룸이 휴대폰의 연결이 **밖에서 끊겼다**(보호자가 끊었거나 세션이 끝났다) — 연결 화면이 말한다 (#363).
+  bool get linkWasLost => _storage.isElumiLinkLost;
 
   /// 새 연결 암호를 만든다.
   ///
@@ -84,27 +116,82 @@ class DeviceLinkRepository {
     }
   }
 
-  /// 연결 상태. 실패하면 비어 있는 상태로 돌려준다 — 설정 화면이 멈추지 않게.
-  Future<LinkStatus> status() async {
+  /// 연결 상태 — 실패하면 **이유와 함께** 돌려준다 (#363).
+  ///
+  /// 상태 화면이 빈 화면·무한 로딩 대신 `다시 시도`와 에러 코드를 보여줘야 한다.
+  Future<Attempt<LinkStatus>> statusResult() async {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/api/device-links');
       final data = res.data;
-      return data == null ? LinkStatus.empty : LinkStatus.fromJson(data);
+      return Attempt.ok(data == null ? LinkStatus.empty : LinkStatus.fromJson(data));
     } catch (e) {
       AppLogger.error('연결 상태 조회', e);
-      return LinkStatus.empty;
+      return Attempt.failed(AppFailure.of(e));
     }
   }
 
-  /// 연결 하나를 끊는다.
-  Future<bool> revoke(String linkId) async {
+  /// 연결 하나를 끊는다 — 보호자 휴대폰에서 (명세 §8-5).
+  ///
+  /// 404(`DEVICE_LINK_NOT_CONNECTED`)는 실패가 아니라 [RevokeOutcome.alreadyGone] 이다. 이룸이 휴대폰이
+  /// 스스로 끊었거나 다른 보호자가 먼저 끊은 경우라, 보호자가 원한 상태(연결 없음)가 이미 됐다.
+  /// 그 밖의 실패(403·5xx·오프라인)는 연결이 그대로이니 이유를 담아 돌려준다.
+  Future<RevokeResult> revoke(String linkId) async {
     try {
       await _dio.delete<dynamic>('/api/device-links/$linkId');
-      return true;
+      return const RevokeResult(RevokeOutcome.done);
     } catch (e) {
+      final failure = AppFailure.of(e);
+      if (_isAlreadyDisconnected(e, failure)) {
+        return const RevokeResult(RevokeOutcome.alreadyGone);
+      }
       AppLogger.error('연결 끊기', e);
-      return false;
+      return RevokeResult(RevokeOutcome.failed, failure: failure);
     }
+  }
+
+  /// 서버가 "연결된 휴대폰이 아니다"라고 답했는가. 프록시가 바꿔 보낸 404 와 구분하려고 코드를 함께 본다.
+  bool _isAlreadyDisconnected(Object e, AppFailure failure) =>
+      e is DioException &&
+      e.response?.statusCode == 404 &&
+      failure.server?.code == ServerErrorCode.deviceLinkNotConnected;
+
+  /// 이 휴대폰(이룸이)이 **스스로** 연결을 끊는다 — 설정의 로그아웃·회원탈퇴 (#363).
+  ///
+  /// 서버가 연결을 끊은 **뒤에만** 로컬을 정리한다. 서버가 안 끊겼는데 로컬만 비우면 보호자 화면에는
+  /// 계속 `연결됨`이 남고 이 휴대폰은 연결 화면으로 가 버린다 — 되돌릴 수 없다고 안내한 동작은 됐는지
+  /// 안 됐는지를 말해야 한다 (#187). 그래서 실패하면 아무것도 지우지 않고 이유만 돌려준다.
+  ///
+  /// 이미 끊겨 있으면(404 `DEVICE_LINK_NOT_CONNECTED`·401) 원하는 결과가 이미 됐으므로 정리하고 끝낸다.
+  /// 401 은 토큰 갱신까지 실패했다는 뜻이라 서버가 이 연결을 더는 인정하지 않는 것이다.
+  ///
+  /// null 이면 끊겼고 로컬도 정리했다.
+  Future<AppFailure?> disconnectThisPhone() async {
+    try {
+      await _dio.delete<dynamic>('/api/device-links/current');
+    } catch (e) {
+      final failure = AppFailure.of(e);
+      final gone = _isAlreadyDisconnected(e, failure) ||
+          (e is DioException && e.response?.statusCode == 401);
+      if (!gone) {
+        AppLogger.error('이 휴대폰 연결 끊기', e);
+        return failure;
+      }
+    }
+    await releaseThisPhone(lost: false);
+    return null;
+  }
+
+  /// 연결이 끊긴 이룸이 휴대폰의 로컬을 비운다 (#363).
+  ///
+  /// 지우는 것 — 토큰, 이룸이 정보(이름·캐릭터·그림 방식), 일과 캐시, 체크 기록. **남기는 것 — `이룸이 휴대폰`
+  /// 표식**이다. 지우면 이 휴대폰이 로그인 화면으로 가 누를 것이 하나도 없는 길이 된다(#206). 보호자가 이 휴대폰을
+  /// 보호자 휴대폰으로 쓰려면 로그인하면 되고, 그때 표식이 내려간다([AuthRepository]).
+  ///
+  /// [lost] 가 true 면 `연결이 끊어졌어요`를 다음 연결 화면에서 말한다. 스스로 끊은 것은 false 다.
+  Future<void> releaseThisPhone({required bool lost}) async {
+    await _tokens.clear();
+    await _storage.clearChildProfile();
+    await _storage.setElumiLinkLost(lost);
   }
 
   /// 이룸이 휴대폰이 암호를 넣는다. **로그인 전이라 토큰 없이 부른다.**
@@ -124,6 +211,8 @@ class DeviceLinkRepository {
       // 이 휴대폰이 이룸이 것임을 남긴다. 세션이 끊겼을 때 보호자 로그인 화면이 아니라
       // 연결 화면으로 되돌리려면 토큰이 사라진 뒤에도 알 수 있어야 한다 (이슈 #206).
       await _storage.setElumiDevice(true);
+      // 새로 이어졌다 — 전에 끊겼다는 안내는 거둔다 (#363)
+      await _storage.setElumiLinkLost(false);
       await _pullProfile();
       return const RedeemResult(RedeemOutcome.linked);
     } on DioException catch (e) {
@@ -197,4 +286,11 @@ final deviceLinkRepositoryProvider = Provider<DeviceLinkRepository>((ref) {
     tokens: ref.watch(tokenStoreProvider),
     storage: ref.watch(localStorageProvider),
   );
+});
+
+/// 보호자 휴대폰의 이룸이 휴대폰 연결 상태. 설정 줄과 상태 화면이 함께 본다 (#363).
+///
+/// 화면을 떠나면 버린다 — 연결은 다른 사람(이룸이 휴대폰·다른 보호자)이 언제든 바꾸므로 오래된 값을 두지 않는다.
+final linkStatusProvider = FutureProvider.autoDispose<Attempt<LinkStatus>>((ref) {
+  return ref.watch(deviceLinkRepositoryProvider).statusResult();
 });

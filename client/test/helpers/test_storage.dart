@@ -19,6 +19,7 @@ testStorageOverride({
   String? pin,
   String? nickname,
   String? character,
+  bool elumiDevice = false,
 }) {
   return localStorageProvider.overrideWithValue(
     InMemoryStorage(
@@ -26,6 +27,7 @@ testStorageOverride({
       pin: pin,
       nickname: nickname,
       character: character,
+      elumiDevice: elumiDevice,
     ),
   );
 }
