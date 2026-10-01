@@ -8,18 +8,21 @@ import '../../../core/ads/ad_ids.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
+import 'widgets/routine_swipe_actions.dart';
 
-/// 임시저장 — 만들다 만 일과를 이어서 만든다 (Figma `설정_임시저장` 1045:4910).
+/// 임시저장 — 만들다 만 일과를 이어서 만든다 (Figma `설정_임시저장` 1045:4910 ·
+/// 밀어서 삭제 `설정_임시저장_삭제` 1274:9262, #496).
 ///
-/// **시안은 헤더만 있고 내용이 비어 있다.** 디자인이 아직 안 나왔으므로 이 앱에
-/// 이미 있는 것들로만 짰다 — 목록은 보호자 홈과 같은 [RoutineSummaryTile]을 쓰고,
-/// 빈 상태와 실패 상태는 공통 위젯을 쓴다. 새 시각 언어를 만들면 시안이 나왔을 때
-/// 두 번 고치게 된다 (#349).
+/// 줄은 361×68 이고 제목 아래에 `완료 시 · 보상` 을 적는다. 오른쪽에 흰 `이어서`
+/// 알약이 서고, 줄을 왼쪽으로 밀면 삭제 하나가 나온다(수정은 없다 — 이어서 만들면
+/// 고칠 수 있다). 지우기 전에 한 번 묻는다. 빈 상태와 실패 상태는 공통 위젯을 쓴다.
 ///
 /// 서버의 `PENDING_REVIEW`가 곧 임시저장이다. **`승인 대기`라 부르지 않는다** —
 /// 만들다 만 것이지 심사가 아니다 (용어 규칙).
@@ -32,6 +35,12 @@ class DraftRoutinesScreen extends ConsumerStatefulWidget {
 }
 
 class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
+  /// 지금 밀려 열려 있는 줄. 둘이 동시에 열리면 어느 버튼이 누구 것인지 모른다.
+  String? _openId;
+
+  /// 지우는 중인 줄. 두 번 눌러 같은 일과를 두 번 지우지 않게 잠근다.
+  String? _deletingId;
+
   @override
   void initState() {
     super.initState();
@@ -66,7 +75,8 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: 40.h),
+          // 시안 — 첫 줄 윗변이 y=131 (머리 영역 끝 107 에서 24, 1045:4910)
+          SizedBox(height: 24.h),
           Expanded(
             child: drafts.when(
               // 로딩과 0건을 **구분한다.** 같은 화면으로 두면 느린 연결에서
@@ -87,12 +97,29 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
                   : ListView.separated(
                       padding: EdgeInsets.only(bottom: space.xl),
                       itemCount: list.length,
-                      separatorBuilder: (_, _) => SizedBox(height: space.sm),
+                      // 시안 — 줄과 줄 사이 8 (131 + 68 → 207)
+                      separatorBuilder: (_, _) => SizedBox(height: 8.h),
                       itemBuilder: (context, i) {
                         final routine = list[i];
-                        return _DraftTile(
-                          routine: routine,
-                          onTap: () => _resume(context, ref, routine),
+                        return RoutineSwipeActions(
+                          isOpen: _openId == routine.id,
+                          onOpenChanged: (open) => setState(
+                            () => _openId = open ? routine.id : null,
+                          ),
+                          onDelete: () => _delete(routine),
+                          // 시안(1274:9262) — 버튼 끝이 줄 끝(377)보다 2 안쪽이다
+                          endInset: 2,
+                          deleteLabel: '임시저장 삭제',
+                          // 지우는 중에는 밀리지 않는다
+                          enabled: _deletingId == null,
+                          child: _DraftTile(
+                            routine: routine,
+                            highlighted: _openId == routine.id,
+                            // 열려 있을 때 누르면 이어서가 아니라 닫는다
+                            onTap: () => _openId == routine.id
+                                ? setState(() => _openId = null)
+                                : _resume(context, ref, routine),
+                          ),
                         );
                       },
                     ),
@@ -101,6 +128,52 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
         ],
       ),
     );
+  }
+
+  /// 임시저장 지우기 — **먼저 묻고** 지운다 (#496).
+  ///
+  /// 바로 지우면 잘못 밀어도 되돌릴 길이 없다. 서버는 일과 삭제 API 로 지운다(임시저장도
+  /// 일과다). 실패하면 줄을 그대로 두고 에러 코드를 보여준다.
+  Future<void> _delete(Routine routine) async {
+    if (_deletingId != null) return;
+    final confirmed = await showElumDialog<bool>(
+      context: context,
+      title: '임시저장을 삭제하실건가요?',
+      icon: ElumDialogIcon.trash,
+      actions: const [
+        ElumDialogAction(
+          label: '취소',
+          value: false,
+          tone: ElumDialogTone.neutral,
+        ),
+        ElumDialogAction(label: '삭제', value: true, tone: ElumDialogTone.danger),
+      ],
+    );
+    // 바깥을 눌러 닫으면 null — 취소로 다룬다
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _deletingId = routine.id);
+    final failure = await ref.read(routineRepositoryProvider).delete(routine.id);
+    if (!mounted) return;
+    setState(() {
+      _deletingId = null;
+      if (failure == null) _openId = null;
+    });
+    if (failure != null) {
+      await showFailure(
+        context,
+        failure,
+        title: '임시저장을 삭제하지 못했어요',
+        fallback: '잠시 후 다시 시도해주세요',
+        fallbackCode: 'E-DRAFT-DEL',
+      );
+      return;
+    }
+    // 지금 이어 만들던 일과를 지웠다면 흐름에 남은 것도 함께 치운다
+    if (ref.read(routineFlowProvider).routine?.id == routine.id) {
+      ref.read(routineFlowProvider.notifier).reset();
+    }
+    ref.refreshRoutines();
   }
 
   /// 이어서 만들기 — 카드확인 화면으로 보낸다.
@@ -113,53 +186,110 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
   }
 }
 
-/// 임시저장 한 줄.
+/// 임시저장 한 줄 (Figma 1045:4910 · 1274:9262).
 ///
 /// **보호자 홈의 [RoutineSummaryTile]을 쓰지 않는다.** 그 타일은 진행률 링·다시하기·
 /// 예정일처럼 홈 화면의 데이터 모양을 전제하는데, 임시저장에는 셋 다 없다.
-/// 실제로 얹어 보니 고정 높이 안에서 43 넘쳤다. 없는 것을 그리는 자리를 비워 두느니
-/// 필요한 것만 담은 줄을 따로 둔다 (#349).
+/// 글자 크기와 색은 홈 타일의 토큰을 그대로 쓴다 — 시안도 같은 값이다.
 class _DraftTile extends StatelessWidget {
-  const _DraftTile({required this.routine, required this.onTap});
+  const _DraftTile({
+    required this.routine,
+    required this.onTap,
+    this.highlighted = false,
+  });
 
   final Routine routine;
   final VoidCallback onTap;
 
+  /// 밀려 열려 있다. 줄이 한 단계 어두워진다 (`#D7D3D1`).
+  final bool highlighted;
+
+  /// Figma 실측 — 줄 높이 68 · 글 왼쪽 18 · 제목과 보상 줄 8.
+  /// 글 두 줄(16+8+13)이 68 한가운데 서면 제목 윗변이 시안 y=16 이다.
+  static const _height = 68.0;
+  static const _padLeft = 18.0;
+  static const _titleToMeta = 8.0;
+
+  /// `완료 시`(18~55)와 보상(61~) 사이
+  static const _labelGap = 6.0;
+
+  /// `이어서` 알약의 오른쪽 여백. 시안은 x=268 에서 시작해 글자 폭만큼 선다.
+  static const _padRight = 11.0;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final typo = context.typo;
     final space = context.space;
+    // 보상을 안 정했으면 줄을 감추지 않고 `미설정` 이라 적는다 (시안 1274:9276).
+    final reward = routine.hasReward ? routine.rewardDisplay : '미설정';
 
     return AppPressable(
       onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: space.lg,
-          vertical: space.md,
-        ),
+      scaleDown: AppPressable.scaleCard,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        height: _height.h,
         decoration: BoxDecoration(
-          color: colors.routineTileBg,
+          color: highlighted ? colors.routineTileSwiped : colors.routineTileBg,
           borderRadius: BorderRadius.circular(space.cardRadius),
         ),
         child: Row(
           children: [
+            SizedBox(width: _padLeft.w),
             Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    routine.displayTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: typo.routineTileTitle.copyWith(
+                      color: colors.chipLabel,
+                    ),
+                  ),
+                  SizedBox(height: _titleToMeta.h),
+                  Row(
+                    children: [
+                      Text(
+                        '완료 시',
+                        style: typo.routineTileMeta.copyWith(
+                          color: colors.routineTileLabel,
+                        ),
+                      ),
+                      SizedBox(width: _labelGap.w),
+                      Expanded(
+                        child: Text(
+                          reward,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: typo.routineTileReward.copyWith(
+                            color: colors.routineTileReward,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // 누르면 무엇이 되는지 말로 적는다 — 줄 전체가 눌린다
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Text(
-                routine.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.typo.settingsTileLabel.copyWith(
-                  color: colors.textPrimary,
+                '이어서',
+                style: typo.routineSectionLabel.copyWith(
+                  color: colors.chipLabel,
                 ),
               ),
             ),
-            // 누르면 무엇이 되는지 말로 적는다 — 화살표만 두면 열어 보기 전에는 모른다.
-            Text(
-              '이어서',
-              style: context.typo.settingsTileLabel.copyWith(
-                color: colors.textSecondary,
-              ),
-            ),
+            SizedBox(width: _padRight.w),
           ],
         ),
       ),

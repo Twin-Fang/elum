@@ -22,7 +22,9 @@ class RoutineSwipeActions extends StatefulWidget {
     required this.isOpen,
     required this.onOpenChanged,
     required this.onDelete,
-    required this.onEdit,
+    this.onEdit,
+    this.endInset = 0,
+    this.deleteLabel = '일과 삭제',
     this.enabled = true,
   });
 
@@ -33,7 +35,16 @@ class RoutineSwipeActions extends StatefulWidget {
   final ValueChanged<bool> onOpenChanged;
 
   final VoidCallback onDelete;
-  final VoidCallback onEdit;
+
+  /// null이면 **삭제 하나만** 나온다. 임시저장은 고칠 것이 없다 (#496, 시안 1274:9262).
+  final VoidCallback? onEdit;
+
+  /// 삭제 버튼 오른쪽 끝에서 목록 끝까지 남기는 거리. 일과 목록(931:4179)은 버튼이
+  /// 끝에 딱 붙지만 임시저장(1274:9262)은 줄 끝(377)보다 2 안쪽(375)에서 끝난다.
+  final double endInset;
+
+  /// 스크린리더가 삭제 버튼에서 읽을 이름.
+  final String deleteLabel;
 
   /// false면 밀리지 않는다. 지난 일과처럼 고칠 수 없는 줄에 쓴다.
   final bool enabled;
@@ -95,7 +106,16 @@ class _RoutineSwipeActionsState extends State<RoutineSwipeActions>
     super.dispose();
   }
 
-  double get _reveal => RoutineSwipeActions.revealWidth.w;
+  /// 카드가 비켜나는 거리. 수정이 없으면 삭제 하나와 끝 여백만큼이다.
+  double get _reveal {
+    final onlyDelete = widget.onEdit == null;
+    final logical = onlyDelete
+        ? RoutineSwipeActions.actionGap +
+              RoutineSwipeActions.deleteWidth +
+              widget.endInset
+        : RoutineSwipeActions.revealWidth;
+    return logical.w;
+  }
 
   void _settle(bool open, {double velocity = 0}) {
     final target = open ? 1.0 : 0.0;
@@ -153,6 +173,8 @@ class _RoutineSwipeActionsState extends State<RoutineSwipeActions>
               progress: _open.value.clamp(0.0, 1.0),
               onDelete: widget.onDelete,
               onEdit: widget.onEdit,
+              endInset: widget.endInset,
+              deleteLabel: widget.deleteLabel,
             ),
           ),
         ),
@@ -181,11 +203,15 @@ class _ActionRow extends StatelessWidget {
     required this.progress,
     required this.onDelete,
     required this.onEdit,
+    required this.endInset,
+    required this.deleteLabel,
   });
 
   final double progress;
   final VoidCallback onDelete;
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
+  final double endInset;
+  final String deleteLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -200,21 +226,24 @@ class _ActionRow extends StatelessWidget {
           width: RoutineSwipeActions.deleteWidth,
           color: colors.routineSwipeDelete,
           icon: AppAssets.iconTrash,
-          label: '일과 삭제',
+          label: deleteLabel,
           onTap: onDelete,
           progress: progress,
         ),
-        SizedBox(width: RoutineSwipeActions.actionGap.w),
-        _ActionButton(
-          width: RoutineSwipeActions.editWidth,
-          color: colors.routineSwipeEdit,
-          icon: AppAssets.iconPencil,
-          label: '일과 수정',
-          onTap: onEdit,
-          // 수정이 아주 조금 늦게 따라 나온다. 둘이 동시에 뜨면 한 덩어리로 보인다.
-          progress: progress,
-          iconDelay: 0.12,
-        ),
+        if (onEdit case final edit?) ...[
+          SizedBox(width: RoutineSwipeActions.actionGap.w),
+          _ActionButton(
+            width: RoutineSwipeActions.editWidth,
+            color: colors.routineSwipeEdit,
+            icon: AppAssets.iconPencil,
+            label: '일과 수정',
+            onTap: edit,
+            // 수정이 아주 조금 늦게 따라 나온다. 둘이 동시에 뜨면 한 덩어리로 보인다.
+            progress: progress,
+            iconDelay: 0.12,
+          ),
+        ],
+        if (endInset > 0) SizedBox(width: endInset.w),
       ],
     );
   }

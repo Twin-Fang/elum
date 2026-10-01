@@ -20,6 +20,7 @@ import 'package:elum/features/guardian/presentation/guardian_settings_screen.dar
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
 import 'package:elum/features/link/presentation/link_code_screen.dart';
+import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -116,15 +117,46 @@ void main() {
     );
   });
 
-  testWidgets('설정 — 임시저장 0건 (Figma 1045:4910)', (tester) async {
+  // 시안 1045:4910 은 이제 줄이 둘 그려져 있다(#496). 첫 줄은 보상이 있고 둘째 줄은 `미설정`이다.
+  final draftRoutines = [
+    const Routine(
+      id: 'd1',
+      title: '스스로 옷을 입어요',
+      status: 'PENDING_REVIEW',
+      rewardText: '유튜브 시청 20분',
+    ),
+    const Routine(
+      id: 'd2',
+      title: '스스로 옷을 입어요',
+      status: 'PENDING_REVIEW',
+    ),
+  ];
+
+  testWidgets('설정 — 임시저장 (Figma 1045:4910)', (tester) async {
     await _pump(
       tester,
       const DraftRoutinesScreen(),
-      extra: [myRoutinesProvider.overrideWith((ref) async => const [])],
+      extra: [myRoutinesProvider.overrideWith((ref) async => draftRoutines)],
     );
     await expectLater(
       find.byType(DraftRoutinesScreen),
       matchesGoldenFile('figma/settings_drafts_1045-4910.png'),
+    );
+  });
+
+  // 둘째 줄을 왼쪽으로 밀어 삭제 버튼이 나온 모습 (Figma 1274:9262, #496).
+  testWidgets('설정 — 임시저장 밀어서 삭제 (Figma 1274:9262)', (tester) async {
+    await _pump(
+      tester,
+      const DraftRoutinesScreen(),
+      extra: [myRoutinesProvider.overrideWith((ref) async => draftRoutines)],
+    );
+    // 시안은 줄이 75 비켜난 모습이다
+    await tester.drag(find.text('미설정'), const Offset(-80, 0));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(DraftRoutinesScreen),
+      matchesGoldenFile('figma/settings_drafts_delete_1274-9262.png'),
     );
   });
 
