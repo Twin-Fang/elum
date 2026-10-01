@@ -140,6 +140,13 @@ abstract interface class LocalStorage {
   String? getNoticeHiddenJson(String noticeId);
   Future<void> setNoticeHiddenJson(String noticeId, String json);
 
+  /// 보호자 홈 코치마크를 이 휴대폰에서 이미 봤는가 (#505).
+  ///
+  /// 공지 숨김과 같은 이유로 **계정이 아니라 휴대폰에 속한다.** [clearAll] 이 지우지 않는다 —
+  /// 로그아웃했다 들어왔다고 안내를 처음부터 다시 보여 주면 귀찮기만 하다.
+  bool get isHomeCoachSeen;
+  Future<void> setHomeCoachSeen(bool v);
+
   /// 저장된 온보딩 결과를 전부 지운다. **개발·테스트 전용.**
   ///
   /// 일부만 지우면 어중간한 상태가 남아 더 헷갈리므로 5개 값을 모두 비운다.
@@ -179,6 +186,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedConsent = 'cache.consentDocuments';
   static const _kCachedTuning = 'cache.clientTuning';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
+  static const _kHomeCoachSeen = 'coach.homeSeen';
 
   static Future<LocalStorage> create() async {
     return SharedPrefsStorage(await SharedPreferences.getInstance());
@@ -395,6 +403,15 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  bool get isHomeCoachSeen => _prefs.getBool(_kHomeCoachSeen) ?? false;
+
+  @override
+  Future<void> setHomeCoachSeen(bool v) async {
+    AppLogger.storageWrite(_kHomeCoachSeen, '$v');
+    await _prefs.setBool(_kHomeCoachSeen, v);
+  }
+
+  @override
   bool get isElumiDevice => _prefs.getBool(_kElumiDevice) ?? false;
 
   @override
@@ -472,7 +489,11 @@ class InMemoryStorage implements LocalStorage {
     String? nickname,
     String? character,
     bool elumiDevice = false,
+    // 기본은 "이미 봤다" — 홈을 띄우는 기존 테스트마다 코치마크가 화면을 덮으면 안 된다.
+    // 코치마크를 검증하는 테스트만 false 를 준다. 실제 앱의 첫 실행 기본값은 false 다.
+    bool homeCoachSeen = true,
   }) : _completed = onboardingCompleted,
+       _homeCoachSeen = homeCoachSeen,
        _pin = pin,
        _nickname = nickname,
        _character = character,
@@ -480,6 +501,7 @@ class InMemoryStorage implements LocalStorage {
 
   bool _elumi;
   bool _elumiLinkLost = false;
+  bool _homeCoachSeen;
 
   String? _nickname;
   List<String> _goals = const [];
@@ -629,6 +651,12 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setNoticeHiddenJson(String noticeId, String json) async =>
       _noticeHidden[noticeId] = json;
+
+  @override
+  bool get isHomeCoachSeen => _homeCoachSeen;
+
+  @override
+  Future<void> setHomeCoachSeen(bool v) async => _homeCoachSeen = v;
 
   @override
   Future<void> clearChildProfile() async {

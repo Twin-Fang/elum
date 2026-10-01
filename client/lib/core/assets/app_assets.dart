@@ -270,6 +270,14 @@ abstract final class AppAssets {
   /// 아이 홈에서는 90° 돌려 `>`로 쓴다.
   static const iconAngleSmall = '$_images/icon_angle_small_up.svg';
 
+  // --- 코치마크 (시안 1291:10801, #505) ---
+
+  /// 말풍선 위 점선 화살표 (12×31, 흰색). 시안 1291:10730 — 아래를 가리킨다.
+  static const coachArrow = '$_images/coach_arrow.svg';
+
+  /// 코치마크 닫기 ✕ (40×40 안에 20×20). 시안 1291:10802.
+  static const coachClose = '$_images/coach_close.svg';
+
   /// 일과를 밀었을 때 나오는 삭제 아이콘 (24×24, 흰색). Figma `fi-br-trash`(384:3479).
   static const iconTrash = '$_images/icon_trash.svg';
 

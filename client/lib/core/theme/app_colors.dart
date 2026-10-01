@@ -144,6 +144,9 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.childTileDone,
     required this.starCount,
     required this.rewardChipHighlight,
+    required this.coachScrim,
+    required this.coachAccent,
+    required this.coachText,
     required this.starsNumberStart,
     required this.editChipBg,
     required this.editChipLabel,
@@ -542,6 +545,15 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 글자 구간별 색이 오지 않아 `다하면`과 한 색으로 보인다. 어두운 화면은 checkDone(#55CFBA).
   final Color rewardChipHighlight;
 
+  /// 코치마크 막 (검정 75%, 시안 1274:10393). 구멍 밖 화면을 덮는다.
+  final Color coachScrim;
+
+  /// 코치마크 말풍선의 강조 글자 (#55CFBA, 시안 1274:10400 실측).
+  final Color coachAccent;
+
+  /// 코치마크 말풍선의 기본 글자 (흰색, 시안 1274:10400).
+  final Color coachText;
+
   /// 아이_별 화면 숫자 그라데이션 시작 (#FFDD00 → 흰색)
   final Color starsNumberStart;
 
@@ -815,6 +827,9 @@ class AppColors extends ThemeExtension<AppColors> {
     childTileDone: Color(0xFFB5EAEC),
     starCount: Color(0xFFCB9500),
     rewardChipHighlight: Color(0xFF40BBA6),
+    coachScrim: Color(0xBF000000),
+    coachAccent: Color(0xFF55CFBA),
+    coachText: Color(0xFFFFFFFF),
     starsNumberStart: Color(0xFFFFDD00),
     editChipBg: Color(0xFFEEE9E6),
     editChipLabel: Color(0xFF74757D),
@@ -981,6 +996,9 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? childTileDone,
     Color? starCount,
     Color? rewardChipHighlight,
+    Color? coachScrim,
+    Color? coachAccent,
+    Color? coachText,
     Color? starsNumberStart,
     Color? editChipBg,
     Color? editChipLabel,
@@ -1138,6 +1156,9 @@ class AppColors extends ThemeExtension<AppColors> {
       childTileDone: childTileDone ?? this.childTileDone,
       starCount: starCount ?? this.starCount,
       rewardChipHighlight: rewardChipHighlight ?? this.rewardChipHighlight,
+      coachScrim: coachScrim ?? this.coachScrim,
+      coachAccent: coachAccent ?? this.coachAccent,
+      coachText: coachText ?? this.coachText,
       starsNumberStart: starsNumberStart ?? this.starsNumberStart,
       editChipBg: editChipBg ?? this.editChipBg,
       editChipLabel: editChipLabel ?? this.editChipLabel,
@@ -1452,6 +1473,9 @@ class AppColors extends ThemeExtension<AppColors> {
       starCount: Color.lerp(starCount, other.starCount, t)!,
       rewardChipHighlight:
           Color.lerp(rewardChipHighlight, other.rewardChipHighlight, t)!,
+      coachScrim: Color.lerp(coachScrim, other.coachScrim, t)!,
+      coachAccent: Color.lerp(coachAccent, other.coachAccent, t)!,
+      coachText: Color.lerp(coachText, other.coachText, t)!,
       starsNumberStart: Color.lerp(
         starsNumberStart,
         other.starsNumberStart,

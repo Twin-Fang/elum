@@ -14,6 +14,7 @@ import '../../../../core/widgets/elum_error_view.dart';
 import 'routine_detail_sheet.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../child/application/child_routine_notifier.dart';
+import '../../application/home_coach_notifier.dart';
 import '../../application/routine_notifier.dart';
 import '../../data/routine_repository.dart';
 import '../../../../shared/models/routine.dart';
@@ -89,7 +90,10 @@ const _nativeAdMinItems = 3;
 /// - **펼치기가 없다.** 카드 목록은 수정 화면에서 본다. 여러 개가 펼쳐지면
 ///   화면이 끝없이 길어지고, 줄 높이가 달라져 순서를 바꿀 때 자리가 튄다.
 class TodayRoutineSection extends ConsumerStatefulWidget {
-  const TodayRoutineSection({super.key});
+  const TodayRoutineSection({super.key, this.coachKey});
+
+  /// 코치마크가 가리킬 줄(밀 수 있는 첫 줄)에 달 키 (#505).
+  final GlobalKey? coachKey;
 
   @override
   ConsumerState<TodayRoutineSection> createState() =>
@@ -243,6 +247,13 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
 
     final progress = ref.watch(childRoutineProvider);
 
+    // 코치마크가 "밀어 보세요"를 말하는 동안, 밀 수 있는 첫 줄을 실제로 열어 보여준다.
+    // 말로만 하면 밀면 뭐가 나오는지 알 수 없다. 열고 닫는 것은 줄이 스스로 미끄러진다.
+    final demoOpen = ref.watch(
+      homeCoachProvider.select((s) => s.demoSwipeOpen),
+    );
+    final coachId = routines.where((r) => r.isEditableByMe).firstOrNull?.id;
+
     return ReorderableListView.builder(
       shrinkWrap: true,
       // 바깥 화면이 이미 스크롤한다. 여기까지 스크롤하면 둘이 맞물려 튄다.
@@ -281,12 +292,15 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
             bottom: index == routines.length - 1 ? 0 : _tileGap.h,
           ),
           child: ReorderableDelayedDragStartListener(
+            // 코치마크가 가리키는 줄에만 키를 단다. 목록 항목의 키(위 Padding)와는 따로다.
+            key: routine.id == coachId ? widget.coachKey : null,
             index: index,
             child: RoutineSwipeActions(
               // 남이 만든 일과는 밀어도 삭제·수정이 나오지 않는다 — 서버가 403 으로 막는 동작이다
               // (다중 보호자 #362 · E46). 만든 사람을 모르면 지금처럼 민다.
               enabled: routine.isEditableByMe,
-              isOpen: _openId == routine.id,
+              isOpen:
+                  _openId == routine.id || (demoOpen && routine.id == coachId),
               onOpenChanged: (open) =>
                   setState(() => _openId = open ? routine.id : null),
               onDelete: () => _delete(routine),
@@ -294,7 +308,10 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
               child: RoutineSummaryTile(
                 routine: routine,
                 progress: routineProgress(routine, progress),
-                highlighted: _openId == routine.id || _draggingId == routine.id,
+                highlighted:
+                    _openId == routine.id ||
+                    _draggingId == routine.id ||
+                    (demoOpen && routine.id == coachId),
                 // **손잡이를 그리지 않는다.** 시안(931:3896)에서 빠졌다 — 홈에서는
                 // 줄을 밀어 편집·삭제하고, 순서는 줄을 눌러 여는 시트에서 바꾼다.
                 // 손잡이가 있으면 링이 그만큼 왼쪽으로 밀려 시안과 어긋난다.

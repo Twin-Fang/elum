@@ -52,6 +52,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.routineSectionLabel,
     required this.routineCreateLabel,
     required this.routineEmptyTitle,
+    required this.coachMessage,
     required this.routineEmptyPast,
     required this.starsCount,
     required this.stepBadgeNumber,
@@ -257,6 +258,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 빈 상태 첫 줄 (Pretendard 500/16). 일과 카드 제목(600)보다 얇다 —
   /// 진짜 일과가 아니라 자리를 지키는 문구다.
   final TextStyle routineEmptyTitle;
+
+  /// 코치마크 말풍선 글 (Pretendard 500 · 20 · 줄 높이 1.2, 시안 1274:10400).
+  final TextStyle coachMessage;
 
   /// `지난 일과가 없어요` (Pretendard 500/15). 오늘 쪽(16)보다 1 작다 — 시안 그대로다.
   final TextStyle routineEmptyPast;
@@ -665,6 +669,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.0,
     ),
+    coachMessage: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 20,
+      fontWeight: FontWeight.w500,
+      height: 1.2,
+    ),
     routineEmptyTitle: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 16,
@@ -945,6 +955,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? routineSectionLabel,
     TextStyle? routineCreateLabel,
     TextStyle? routineEmptyTitle,
+    TextStyle? coachMessage,
     TextStyle? routineEmptyPast,
     TextStyle? starsCount,
     TextStyle? stepBadgeNumber,
@@ -1027,6 +1038,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineSectionLabel: routineSectionLabel ?? this.routineSectionLabel,
       routineCreateLabel: routineCreateLabel ?? this.routineCreateLabel,
       routineEmptyTitle: routineEmptyTitle ?? this.routineEmptyTitle,
+      coachMessage: coachMessage ?? this.coachMessage,
       routineEmptyPast: routineEmptyPast ?? this.routineEmptyPast,
       starsCount: starsCount ?? this.starsCount,
       stepBadgeNumber: stepBadgeNumber ?? this.stepBadgeNumber,
@@ -1124,6 +1136,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       routineSectionLabel: TextStyle.lerp(routineSectionLabel, other.routineSectionLabel, t)!,
       routineCreateLabel: TextStyle.lerp(routineCreateLabel, other.routineCreateLabel, t)!,
       routineEmptyTitle: TextStyle.lerp(routineEmptyTitle, other.routineEmptyTitle, t)!,
+      coachMessage: TextStyle.lerp(coachMessage, other.coachMessage, t)!,
       routineEmptyPast: TextStyle.lerp(routineEmptyPast, other.routineEmptyPast, t)!,
       starsCount: TextStyle.lerp(starsCount, other.starsCount, t)!,
       stepBadgeNumber: TextStyle.lerp(stepBadgeNumber, other.stepBadgeNumber, t)!,

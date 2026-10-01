@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,9 +18,11 @@ import '../../credit/presentation/credit_blocked_dialog.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/character.dart';
 import '../../profile/application/profile_session.dart';
+import '../application/home_coach_notifier.dart';
 import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
 import 'widgets/create_routine_button.dart';
+import 'widgets/home_coach_mark.dart';
 import 'widgets/routine_summary_tile.dart';
 import 'widgets/today_routine_section.dart';
 
@@ -31,8 +35,24 @@ import 'widgets/today_routine_section.dart';
 /// - `새로운 일과 만들기`가 설명 붙은 카드에서 알약 버튼으로 줄었다.
 /// - 섹션 순서가 상태에 따라 바뀌지 않는다. 오늘이 늘 먼저다 — 목록이 비었다고
 ///   자리가 뒤바뀌면 다음에 열었을 때 어디를 봐야 할지 다시 찾게 된다.
-class GuardianHomeScreen extends ConsumerWidget {
+///
+/// **처음 들어오면 코치마크가 뜬다** (시안 1291:10801 · 이슈 #505). 가리킬 위젯 셋의
+/// [GlobalKey]를 여기서 들고 있고, 언제 띄울지는 [_maybeStartCoach] 가 정한다.
+class GuardianHomeScreen extends ConsumerStatefulWidget {
   const GuardianHomeScreen({super.key});
+
+  @override
+  ConsumerState<GuardianHomeScreen> createState() => _GuardianHomeScreenState();
+}
+
+class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
+  /// 코치마크가 가리킬 자리. 화면마다 따로 둔다 — 전환 중 홈이 둘 겹쳐도 키가 부딪히지 않는다.
+  final _createKey = GlobalKey(debugLabel: 'coach.create');
+  final _swipeKey = GlobalKey(debugLabel: 'coach.swipe');
+  final _modeKey = GlobalKey(debugLabel: 'coach.mode');
+
+  /// 화면 전환이 끝나길 기다리는 중인가. 전환 도중에 띄우면 대상이 움직이는 중이라 위치가 어긋난다.
+  bool _waitingRoute = false;
 
   /// Figma 실측 — 카드·버튼은 화면 끝에서 16, 글은 24
   static const _listInset = 16.0;
@@ -44,8 +64,92 @@ class GuardianHomeScreen extends ConsumerWidget {
 
   static const _titleToList = 8.0;
 
+  /// 홈이 맨 앞이 아닐 때(공지 팝업 등) 다시 확인할 타이머와 횟수.
+  Timer? _coachRetry;
+  var _coachRetries = 0;
+
+  /// 홈이 맨 앞에서 가만히 있는지 지켜보는 타이머.
+  Timer? _coachSettle;
+
+  /// 다시 확인하는 간격과 최대 횟수(0.5초 × 60 = 30초). 팝업은 닫혀도 홈이 다시 그려지지
+  /// 않아서, 기다렸다 물어보지 않으면 코치마크가 그 실행에서 영영 시작하지 못한다.
+  static const _coachRetryEvery = Duration(milliseconds: 500);
+  static const _coachMaxRetries = 60;
+
+  /// 홈이 이만큼 맨 앞에 머물러야 시작한다. 공지 팝업이 연달아 뜰 때 앞 팝업이 닫히고
+  /// 다음 팝업이 올라오는 찰나에 홈이 잠깐 맨 앞이 된다 — 그때 시작하면 다음 팝업이
+  /// 코치마크 위에 겹친다 (실기기에서 확인).
+  static const _coachSettleFor = Duration(milliseconds: 1200);
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void dispose() {
+    _coachRetry?.cancel();
+    _coachSettle?.cancel();
+    super.dispose();
+  }
+
+  /// 코치마크를 띄워도 되는 때인지 보고, 맞으면 켠다.
+  ///
+  /// - 일과 목록을 **받아 온 뒤**여야 한다. 불러오는 중이거나 실패했으면 가리킬 줄이 있는지 모른다.
+  /// - 홈이 맨 위에 있고 화면 전환이 끝난 뒤, [_coachSettleFor] 동안 그대로여야 한다.
+  ///   다른 화면 위에 막만 덮이면 안 된다.
+  void _maybeStartCoach() {
+    if (!mounted) return;
+    // 호출 시점의 값으로 다시 판단한다 — 기다리는 사이 목록이 바뀌었을 수 있다.
+    if (!ref.read(todayRoutinesProvider).hasValue) return;
+
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) {
+      _coachSettle?.cancel();
+      _coachSettle = null;
+      _retryCoachLater();
+      return;
+    }
+
+    final animation = route?.animation;
+    if (animation != null && animation.status != AnimationStatus.completed) {
+      if (_waitingRoute) return;
+      _waitingRoute = true;
+      void onStatus(AnimationStatus status) {
+        if (status != AnimationStatus.completed) return;
+        animation.removeStatusListener(onStatus);
+        _waitingRoute = false;
+        _maybeStartCoach();
+      }
+
+      animation.addStatusListener(onStatus);
+      return;
+    }
+
+    // 맨 앞이다. 바로 켜지 않고 잠시 지켜본다 — 그 사이 다시 가려지면 타이머가 취소된다.
+    if (_coachSettle?.isActive ?? false) return;
+    _coachSettle = Timer(_coachSettleFor, _startCoachNow);
+  }
+
+  void _startCoachNow() {
+    _coachSettle = null;
+    if (!mounted) return;
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) {
+      _retryCoachLater();
+      return;
+    }
+    final hasSwipeTarget = ref
+        .read(homeRoutinesProvider)
+        .any((r) => r.isEditableByMe);
+    ref
+        .read(homeCoachProvider.notifier)
+        .maybeStart(hasSwipeTarget: hasSwipeTarget);
+  }
+
+  void _retryCoachLater() {
+    if (_coachRetry?.isActive ?? false) return;
+    if (_coachRetries++ >= _coachMaxRetries) return;
+    _coachRetry = Timer(_coachRetryEvery, _maybeStartCoach);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     final space = context.space;
 
@@ -71,7 +175,16 @@ class GuardianHomeScreen extends ConsumerWidget {
     final character =
         ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
 
-    return Scaffold(
+    // 코치마크: 오늘 일과를 받아 온 뒤에, 밀어 볼 수 있는 줄이 있는지 함께 알려 준다.
+    // 받아 오지 못했으면(실패·로딩) 켜지 않는다 — 가리킬 대상이 있는지 모른다.
+    // (두 값을 watch 해야 목록이 도착하는 순간 다시 그려져 여기로 들어온다.)
+    final loaded = ref.watch(todayRoutinesProvider).hasValue;
+    ref.watch(homeRoutinesProvider);
+    if (loaded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartCoach());
+    }
+
+    final scaffold = Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
@@ -82,11 +195,19 @@ class GuardianHomeScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Header(childName: childName, character: character),
+                    _Header(
+                      childName: childName,
+                      character: character,
+                      modeKey: _modeKey,
+                    ),
                     SizedBox(height: _toCreateButton.h),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: _listInset.w),
-                      child: const _StartRoutineButton(),
+                      // 코치마크가 가리키는 자리 — 키만 달고 모양은 건드리지 않는다.
+                      child: KeyedSubtree(
+                        key: _createKey,
+                        child: const _StartRoutineButton(),
+                      ),
                     ),
                     SizedBox(height: _toSections.h),
                     Padding(
@@ -99,7 +220,7 @@ class GuardianHomeScreen extends ConsumerWidget {
                             label: '오늘 일과',
                           ),
                           SizedBox(height: _titleToList.h),
-                          const TodayRoutineSection(),
+                          TodayRoutineSection(coachKey: _swipeKey),
                           SizedBox(height: _betweenSections.h),
                           const RoutineSectionTitle(
                             iconAsset: AppAssets.iconTimePast,
@@ -119,6 +240,24 @@ class GuardianHomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+
+    return Stack(
+      children: [
+        scaffold,
+        // 처음 들어왔을 때만 뜨는 안내. 평소에는 높이 0이라 아무것도 그리지 않는다.
+        // Scaffold 밖이라 글 스타일을 주는 Material 이 없어 투명 Material 로 감싼다.
+        Positioned.fill(
+          child: Material(
+            type: MaterialType.transparency,
+            child: HomeCoachMark(
+              createKey: _createKey,
+              swipeKey: _swipeKey,
+              modeKey: _modeKey,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -173,10 +312,17 @@ class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton> {
 /// 셋이 y=98을 가운데로 나란히 선다. 크기가 제각각(30 · 56 · 24)이라
 /// 위를 맞추면 어긋나 보인다.
 class _Header extends StatelessWidget {
-  const _Header({required this.childName, required this.character});
+  const _Header({
+    required this.childName,
+    required this.character,
+    required this.modeKey,
+  });
 
   final String childName;
   final CardCharacter character;
+
+  /// 코치마크가 캐릭터 배지를 가리킬 때 쓰는 키.
+  final GlobalKey modeKey;
 
   /// Figma 실측 — 안전영역(59) 기준 상단 여백
   static const _top = 11.0;
@@ -220,7 +366,10 @@ class _Header extends StatelessWidget {
                     // 이룸이 화면으로 가는 유일한 입구다. 그림뿐이라 이름을 주지
                     // 않으면 화면 낭독기로는 이 길을 찾을 수 없다 (#339).
                     semanticLabel: '이룸이 화면으로 가기',
-                    child: CharacterBadge(character: character),
+                    child: KeyedSubtree(
+                      key: modeKey,
+                      child: CharacterBadge(character: character),
+                    ),
                   ),
                   SizedBox(width: _badgeToSettings.w),
                   // 설정 진입점 (#181). 개편 시안에서 배지 오른쪽으로 옮겨졌다.
