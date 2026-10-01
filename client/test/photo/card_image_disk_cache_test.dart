@@ -258,7 +258,7 @@ void main() {
       expect(adapter.gets, 2);
     });
 
-    test('E18 실패는 자동으로 재시도하지 않는다 (무한 루프 없음)', () async {
+    test('E18 실패는 정해진 간격이 오기 전에는 다시 부르지 않는다 (무한 루프 없음)', () async {
       const key = (routineId: 'r1', stepId: 's1', imagePath: 'k/a.png');
       final container = ProviderContainer(overrides: [
         dioProvider.overrideWithValue(dio),

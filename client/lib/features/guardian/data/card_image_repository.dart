@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,9 +21,26 @@ import 'card_photo.dart';
 ///
 /// **절대 throw하지 않는다.** 이미지 한 장 때문에 카드가 사라지면 안 된다.
 class CardImageRepository {
-  CardImageRepository({Dio? dio, CardImageDiskCache? diskCache})
-      : _dio = dio ?? DioClient.create(),
+  CardImageRepository({
+    Dio? dio,
+    CardImageDiskCache? diskCache,
+    this.retryDelays = defaultRetryDelays,
+  })  : _dio = dio ?? DioClient.create(),
         _disk = diskCache;
+
+  /// 일시 오류 뒤 자동으로 다시 받을 때 기다리는 시간 (#500).
+  ///
+  /// 서버를 재배포하는 동안(약 3~4분) 502 가 와도 넘기도록 합이 3분 남짓이다.
+  /// 횟수가 상한이라 끝없이 두드리지 않는다.
+  static const defaultRetryDelays = [
+    Duration(seconds: 3),
+    Duration(seconds: 10),
+    Duration(seconds: 30),
+    Duration(seconds: 60),
+    Duration(seconds: 90),
+  ];
+
+  final List<Duration> retryDelays;
 
   final Dio _dio;
 
@@ -30,6 +49,19 @@ class CardImageRepository {
 
   /// 진행 중인 요청. 같은 그림을 여러 위젯이 동시에 달라고 해도 받기·쓰기는 한 번이다.
   final Map<String, Future<Uint8List?>> _inFlight = {};
+
+  /// 일시 오류로 실패한 그림과, 자동으로 다시 받아 본 횟수 (#500).
+  /// 일시 오류가 아닌 실패(404·401 등)는 여기에 넣지 않아 다시 시도하지 않는다.
+  final Map<String, int> _transientFailures = {};
+
+  /// [imagePath] 그림이 일시 오류로 실패했다면 다음 자동 재시도까지 기다릴 시간.
+  /// 일시 오류가 아니거나 상한을 넘었으면 null — 더는 자동으로 다시 받지 않는다.
+  Duration? nextRetryDelay(String imagePath) {
+    final attempts = _transientFailures[imagePath];
+    if (attempts == null || attempts >= retryDelays.length) return null;
+    _transientFailures[imagePath] = attempts + 1;
+    return retryDelays[attempts];
+  }
 
   /// 디스크 → 네트워크 순으로 그림을 준다. 실패하면 null. 화면은 캐릭터 일러스트로 대체한다.
   ///
@@ -56,8 +88,13 @@ class CardImageRepository {
     final cached = await disk?.read(imagePath);
     if (cached != null) return cached;
 
-    final bytes = await _download(routineId: routineId, stepId: stepId);
+    final bytes = await _download(
+      routineId: routineId,
+      stepId: stepId,
+      imagePath: imagePath,
+    );
     if (bytes == null) return null;
+    _transientFailures.remove(imagePath);
 
     // 저장 실패는 캐시가 삼킨다 — 받은 그림은 그대로 화면에 간다
     await disk?.write(imagePath, bytes, generation: generation);
@@ -67,6 +104,7 @@ class CardImageRepository {
   Future<Uint8List?> _download({
     required String routineId,
     required String stepId,
+    required String imagePath,
   }) async {
     try {
       final res = await _dio.get<List<int>>(
@@ -78,7 +116,35 @@ class CardImageRepository {
       return Uint8List.fromList(bytes);
     } catch (e) {
       debugPrint('[card] 이미지 조회 실패 → 대체 일러스트 사용: $e');
+      // 서버를 재배포하는 동안의 502 같은 일시 오류는 기억해 둬 자동으로 다시 받게 한다 (#500).
+      // 이미 센 횟수는 지우지 않는다 — 상한을 지키려는 것이다.
+      if (isTransientFailure(e)) {
+        _transientFailures.putIfAbsent(imagePath, () => 0);
+      } else {
+        _transientFailures.remove(imagePath);
+      }
       return null;
+    }
+  }
+
+  /// 잠시 뒤 다시 하면 될 수 있는 실패인가 (#500).
+  ///
+  /// 시간 초과·연결 끊김·502/503/504 는 서버를 재배포하거나 망이 흔들릴 때 나온다.
+  /// 404(그림 없음)·401·403 은 다시 해도 같으므로 제외한다.
+  @visibleForTesting
+  static bool isTransientFailure(Object e) {
+    if (e is! DioException) return false;
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.connectionError:
+        return true;
+      case DioExceptionType.badResponse:
+        final code = e.response?.statusCode;
+        return code == 408 || code == 429 || code == 502 || code == 503 || code == 504;
+      default:
+        return false;
     }
   }
 
@@ -152,8 +218,13 @@ final cardImageRepositoryProvider = Provider<CardImageRepository>(
 /// 1MB가 넘는 이미지를 화면마다 다시 받으면 느리고 비싸다.
 ///
 /// **실패(null)는 붙들지 않는다.** 붙들면 오프라인에서 한 번 실패한 카드가 앱을 다시 켤
-/// 때까지 기본 그림에 갇힌다. 위젯이 사라졌다 다시 그려질 때 한 번 더 시도한다
-/// (자동 재시도 루프는 없다).
+/// 때까지 기본 그림에 갇힌다. 위젯이 사라졌다 다시 그려질 때 한 번 더 시도한다.
+///
+/// **일시 오류(502·시간 초과 등)는 정해진 간격으로 몇 번 스스로 다시 받는다 (#500).**
+/// 서버를 재배포하는 동안 502 가 오면 위젯을 다시 그리기 전까지 기본 그림에 갇혔다.
+/// 다시 받는 동안에는 지금처럼 기본 그림을 보여 주다가 받아지면 그 자리에서 바뀐다.
+/// 횟수에 상한이 있고(`CardImageRepository.retryDelays`) **화면이 보고 있는 동안만** 돈다 —
+/// 아무도 안 보면 버려지고 타이머도 멈춘다.
 ///
 /// **캐시 열쇠에 `imagePath` 를 넣는다 (#456).** 보호자가 사진으로 바꾸면 서버가 새
 /// `imagePath` 를 준다. 열쇠가 (일과, 카드)뿐이면 옛 그림이 캐시에 그대로 남아 바꾼 사진이
@@ -165,12 +236,25 @@ final cardImageProvider = FutureProvider.autoDispose.family<
     // 결과가 나오는 동안 버려지지 않게 먼저 붙든다. 실패하면 아래에서 놓는다.
     final link = ref.keepAlive();
 
-    final bytes = await ref.watch(cardImageRepositoryProvider).fetch(
-          routineId: key.routineId,
-          stepId: key.stepId,
-          imagePath: key.imagePath,
-        );
-    if (bytes == null) link.close();
-    return bytes;
+    final repo = ref.watch(cardImageRepositoryProvider);
+    final bytes = await repo.fetch(
+      routineId: key.routineId,
+      stepId: key.stepId,
+      imagePath: key.imagePath,
+    );
+    if (bytes != null) return bytes;
+
+    // 실패는 붙들지 않는다 — 화면이 보고 있지 않으면 곧 버려져 다시 접근할 때 바로 새로 받는다.
+    link.close();
+
+    // 일시 오류면 잠시 뒤 스스로 다시 부른다. **화면이 보고 있는 동안만** 돈다 — 버려지면
+    // onDispose 가 타이머를 멈춘다. 기다리는 동안 카드는 기본 그림을 그대로 보여 준다.
+    final path = key.imagePath;
+    final delay = path == null ? null : repo.nextRetryDelay(path);
+    if (delay != null) {
+      final timer = Timer(delay, ref.invalidateSelf);
+      ref.onDispose(timer.cancel);
+    }
+    return null;
   },
 );
