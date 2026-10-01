@@ -15,6 +15,7 @@ import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/widgets/login_scene.dart';
 import '../../guardian/data/routine_repository.dart' show memberProvider;
+import '../application/account_reset.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../profile/application/profile_session.dart';
 import '../data/auth_repository.dart';
@@ -103,6 +104,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }.contains(result.outcome)) {
       ref.invalidate(memberProvider);
       ref.invalidate(profileSessionProvider);
+      // 일과 목록도 이전 계정 것이다 — 비우지 않으면 새 계정 홈이 앱을 껐다 켤 때까지 옛 일과를 그린다 (#482).
+      ref.forgetPreviousAccountRoutines();
     }
 
     switch (result.outcome) {
