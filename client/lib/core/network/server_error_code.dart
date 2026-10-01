@@ -95,6 +95,15 @@ enum ServerErrorCode {
   // 두 사람(두 기기)이 동시에 순서를 바꿔 보낸 목록이 옛 목록이 됐다 (E24).
   routineOrderConflict('ROUTINE_ORDER_CONFLICT'),
 
+  // 초대 코드 (다중 보호자 2단계, #361). 없는 코드와 이미 쓴 코드는 같은 문구로 온다.
+  profileInviteNotFound('PROFILE_INVITE_NOT_FOUND'),
+  profileInviteExpired('PROFILE_INVITE_EXPIRED'),
+  profileInviteTooManyAttempts('PROFILE_INVITE_TOO_MANY_ATTEMPTS'),
+  // 이미 함께하는 이룸이에 코드를 넣었다 (자기가 만든 코드 포함). 코드는 쓰이지 않는다.
+  profileAlreadyGuardian('PROFILE_ALREADY_GUARDIAN'),
+  // 약관 동의 전에는 초대 코드로 합류할 수 없다 (E6).
+  consentRequired('CONSENT_REQUIRED'),
+
   // 요금제 한도.
   // 문구는 해요체·능동형으로 쓰고 "아이"라는 말을 쓰지 않는다 (docs 용어 규칙).
   routineCreateLimitExceeded('ROUTINE_CREATE_LIMIT_EXCEEDED'),

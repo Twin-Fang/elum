@@ -12,11 +12,14 @@ import com.chuseok22.elumserver.member.infrastructure.entity.GuardianKind;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.ProfileGuardian;
+import com.chuseok22.elumserver.member.infrastructure.entity.ProfileInvite;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileInviteRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +44,7 @@ public class GuardianshipService {
   private final RoutineRepository routineRepository;
   private final DeviceLinkRepository deviceLinkRepository;
   private final RefreshTokenRepository refreshTokenRepository;
+  private final ProfileInviteRepository profileInviteRepository;
 
   /**
    * 가입한 사람의 빈 이룸이를 만든다. 온보딩에서 이름·캐릭터를 채운다.
@@ -130,8 +134,9 @@ public class GuardianshipService {
       }
     }
     revokePhoneSessions(myPhones, now);
-    // 이 사람이 발급한 초대 코드(E4)는 발급 경로가 생기는 2단계에서 여기서 폐기한다. 지금은 발급할 길이 없고,
-    // 이룸이를 지우면 표의 CASCADE 가 남은 코드를 치운다 (V22).
+    // 내가 낸 초대 코드 — 쓰이기 전에 나가면 그 코드로는 더 합류할 수 없다 (E4). 나간 사람의 이름으로 사람이 들어오면 안 된다.
+    // 마지막 보호자였다면 이룸이를 지울 때 표의 CASCADE 가 남은 코드까지 치운다.
+    revokeOpenInvites(profileId, memberId, now);
 
     profileGuardianRepository.delete(mine);
 
@@ -152,6 +157,58 @@ public class GuardianshipService {
     return true;
   }
 
+  /** 이 사람이 이 이룸이에 낸, 아직 쓰이지 않은 초대 코드를 폐기한다. 이미 쓰인 코드는 기록이라 그대로 둔다. */
+  private void revokeOpenInvites(String profileId, String memberId, LocalDateTime now) {
+    for (ProfileInvite invite : profileInviteRepository
+      .findAllByProfileIdAndIssuedByAndRedeemedAtIsNullAndRevokedAtIsNull(profileId, memberId)) {
+      invite.setRevokedAt(now);
+    }
+  }
+
+  /**
+   * 합류한 사람의 빈 이룸이를 지운다 (명세 4-4, E6).
+   *
+   * <p>가입할 때 이룸이가 자동으로 하나 생긴다. 초대로 합류한 사람이 온보딩을 하지 않았다면 그 빈 이룸이는 쓸모가
+   * 없고, 남겨 두면 "기본 이룸이"(가장 먼저 합류한 이룸이)가 빈 이룸이로 남아 앱이 온보딩으로 보내 버린다.
+   *
+   * <p><b>지우는 것은 아래를 모두 만족하는 이룸이뿐이다</b> — 혼자 돌보고, 이름이 없고, 도움 목표를 안 골랐고,
+   * 일과가 0건이고, 연결된 이룸이 휴대폰이 없다. 하나라도 있으면 사용자가 손댄 이룸이라 남긴다.
+   *
+   * <p>CustomException 을 던지지 않는다 — 합류 트랜잭션이 코드 실패 횟수를 커밋하려고 CustomException 에도
+   * 롤백하지 않는데({@code ProfileInviteService#redeem}), 합류를 쓴 뒤에 여기서 던지면 반쯤 쓴 채 커밋된다.
+   *
+   * @param exceptProfileId 방금 합류한 이룸이. 건드리지 않는다
+   * @return 지운 이룸이 id 들
+   */
+  @Transactional
+  public List<String> removeEmptyOwnProfiles(String memberId, String exceptProfileId) {
+    List<String> removed = new ArrayList<>();
+    // 이룸이 id 순서로 잠근다 — 탈퇴(leaveAll)와 같은 규칙이다.
+    List<String> candidates = profileGuardianRepository.findProfileIdsByMemberId(memberId).stream()
+      .filter(id -> !id.equals(exceptProfileId))
+      .sorted()
+      .toList();
+    for (String profileId : candidates) {
+      Profile profile = profileRepository.findByIdForUpdate(profileId).orElse(null);
+      if (profile != null && isEmptyOwnProfile(memberId, profile)) {
+        leaveLocked(memberId, profile);
+        removed.add(profileId);
+      }
+    }
+    return removed;
+  }
+
+  private boolean isEmptyOwnProfile(String memberId, Profile profile) {
+    String profileId = profile.getId();
+    List<ProfileGuardian> guardians = profileGuardianRepository.findAllByProfileIdOrderByJoinedAtAsc(profileId);
+    boolean aloneAndMine = guardians.size() == 1 && memberId.equals(guardians.get(0).getMember().getId());
+    boolean untouched = (profile.getNickname() == null || profile.getNickname().isBlank())
+      && profile.getSupportGoals().isEmpty();
+    boolean noRoutines = !routineRepository.existsByProfileId(profileId);
+    boolean noPhone = deviceLinkRepository.findAllByProfileId(profileId).stream().noneMatch(DeviceLink::isLinked);
+    return aloneAndMine && untouched && noRoutines && noPhone;
+  }
+
   /** 마지막 보호자가 나갔다. 돌볼 사람이 없으므로 이룸이를 지운다 (명세 4-3). */
   private void removeProfile(Profile profile, LocalDateTime now) {
     String profileId = profile.getId();
@@ -160,6 +217,9 @@ public class GuardianshipService {
     List<DeviceLink> phones = deviceLinkRepository.findAllByProfileId(profileId);
     revokePhoneSessions(phones, now);
     deviceLinkRepository.deleteAll(phones);
+    // 남은 초대 코드(쓰인 기록 포함). 운영 스키마는 profile 삭제에 CASCADE 가 걸려 있지만, 그것에 기대지 않고 직접 치운다 —
+    // 로컬(ddl-auto)에는 그 외래키가 없어 코드 행이 이룸이 없이 남는다.
+    profileInviteRepository.deleteAllByProfileId(profileId);
     profileRepository.delete(profile);
   }
 

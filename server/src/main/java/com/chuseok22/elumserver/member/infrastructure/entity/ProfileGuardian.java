@@ -55,6 +55,15 @@ public class ProfileGuardian extends BaseEntity {
   private GuardianKind kind = GuardianKind.GUARDIAN;
 
   /**
+   * 이 이룸이 안에서 부르는 이름 — "엄마", "센터 선생님" (#361). 본인만 정하고 바꾼다.
+   *
+   * <p>member 에는 표시 이름이 없고 소셜 가입자의 username 은 내부 식별자라 다른 보호자에게 보일 수 없다.
+   * 비어 있으면 앱이 "보호자"로 부른다.
+   */
+  @Column(name = "display_name", length = 30)
+  private String displayName;
+
+  /**
    * 이 이룸이에 붙은 시각. 기본 이룸이(가장 먼저 합류한 이룸이)와 대표 보호자 넘기기(남은 사람 중
    * 가장 먼저 합류한 사람)가 이 값으로 정해진다.
    */

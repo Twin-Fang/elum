@@ -149,6 +149,30 @@ class MigrationRollbackContractTest {
     assertThat(sql).doesNotContainPattern("pictogram_id[^;]*not null");
   }
 
+  // --- V31 함께하는 사람의 표시 이름 (#361) — 같은 "추가만 한다" 약속 ---
+
+  private static final Path V31 = Path.of("src/main/resources/db/migration/V31__add_profile_guardian_display_name.sql");
+
+  @Test
+  @DisplayName("V31 은 display_name 을 NULL 허용으로 더하기만 한다 — 옛 서버는 이 컬럼을 모르고 profile_guardian 을 INSERT 한다")
+  void v31_addsNullableColumnOnly() throws IOException {
+    String sql = normalizedSql(V31);
+    assertThat(sql).doesNotContain("drop ").doesNotContain("rename ").doesNotContain("update profile_guardian");
+    assertThat(sql).contains("alter table profile_guardian add column if not exists display_name varchar(30);");
+    // NOT NULL 이면 옛 서버(1단계 서버)의 관계 INSERT 가 전부 실패한다 — 가입이 통째로 죽는다.
+    assertThat(sql).doesNotContainPattern("display_name[^;]*not null");
+  }
+
+  @Test
+  @DisplayName("V31 은 엔티티와 같다 — 운영은 validate 라 컬럼 이름·길이가 어긋나면 서버가 뜨지 않는다")
+  void v31_matchesEntityColumn() throws Exception {
+    var column = com.chuseok22.elumserver.member.infrastructure.entity.ProfileGuardian.class
+      .getDeclaredField("displayName").getAnnotation(jakarta.persistence.Column.class);
+    assertThat(column.name()).isEqualTo("display_name");
+    assertThat(column.length()).isEqualTo(30);
+    assertThat(column.nullable()).isTrue();
+  }
+
   /** create table 한 덩이 — 여는 괄호부터 그 표를 닫는 ");" 까지. */
   private String tableBlock(String table) throws IOException {
     String sql = normalizedSql();

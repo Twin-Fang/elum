@@ -16,6 +16,9 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   List<Routine> findAllByProfileId(String profileId);
 
+  /** 이 이룸이에 일과가 하나라도 있는가. 합류한 사람의 빈 이룸이를 가릴 때 쓴다 (다중 보호자 4-4). */
+  boolean existsByProfileId(String profileId);
+
   /**
    * 관리자 목록 검색 (이슈 #248). 제목과 이룸이 호칭으로 찾는다.
    *

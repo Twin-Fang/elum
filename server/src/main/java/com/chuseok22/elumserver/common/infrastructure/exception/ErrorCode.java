@@ -96,6 +96,17 @@ public enum ErrorCode {
   // 두 사람(두 기기)이 동시에 순서를 바꿔 보낸 목록이 옛 목록이 됐다 (E24).
   ROUTINE_ORDER_CONFLICT(HttpStatus.CONFLICT, "그사이 일과가 바뀌었어요. 목록을 다시 불러와 주세요."),
 
+  // 초대 코드 (다중 보호자 2단계, #361). 연결 암호(DEVICE_LINK_*)와 같은 체계다 — 없는 코드와 이미 쓴 코드는
+  // 같은 문구로 돌려줘 어떤 코드가 존재했는지가 새어 나가지 않게 한다.
+  PROFILE_INVITE_NOT_FOUND(HttpStatus.NOT_FOUND, "초대 코드가 맞지 않아요."),
+  PROFILE_INVITE_EXPIRED(HttpStatus.GONE, "초대 코드가 만료됐어요. 새 코드를 받아주세요."),
+  // 코드 하나에 5번 틀렸거나, 한 계정이 짧은 시간에 너무 많이 시도했다.
+  PROFILE_INVITE_TOO_MANY_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, "여러 번 잘못 입력했어요. 잠시 뒤에 다시 하거나 새 코드를 받아주세요."),
+  // 이미 이 이룸이를 함께 돌보는 사람이 코드를 넣었다 (자기가 만든 코드 포함). 코드는 쓰이지 않고 그대로 남는다.
+  PROFILE_ALREADY_GUARDIAN(HttpStatus.CONFLICT, "이미 함께하고 있는 이룸이예요."),
+  // 약관 동의를 마치기 전에는 이룸이 정보를 볼 근거가 없다 (E6).
+  CONSENT_REQUIRED(HttpStatus.FORBIDDEN, "약관에 먼저 동의해주세요."),
+
   // 요금제 한도.
   // 문구는 해요체·능동형으로 쓰고 "아이"라는 말을 쓰지 않는다 (docs 용어 규칙).
   ROUTINE_CREATE_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "이번 주에 만들 수 있는 일과를 다 썼어요."),

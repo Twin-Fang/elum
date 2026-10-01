@@ -11,6 +11,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.link.application.dto.response.LinkCodeResponse;
 import com.chuseok22.elumserver.link.application.dto.response.LinkStatusResponse;
 import com.chuseok22.elumserver.link.application.dto.response.LinkedDeviceResponse;
+import com.chuseok22.elumserver.link.core.CodeDigest;
 import com.chuseok22.elumserver.link.core.ElumiDeviceId;
 import com.chuseok22.elumserver.link.core.LinkCode;
 import com.chuseok22.elumserver.link.core.LinkRole;
@@ -21,12 +22,8 @@ import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HexFormat;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,8 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DeviceLinkService {
 
-  /** 불러주고 받아적는 시간. 카운트다운으로 쫓지 않되 하루 종일 살아 있지도 않게. */
-  public static final Duration CODE_TTL = Duration.ofMinutes(10);
+  /** 불러주고 받아적는 시간. 초대 코드와 같은 값을 쓴다 ({@link CodeDigest}). */
+  public static final Duration CODE_TTL = CodeDigest.CODE_TTL;
 
   /**
    * 한 암호에 허용하는 실패 횟수.
@@ -54,7 +51,7 @@ public class DeviceLinkService {
    * 횟수를 세지 않으면 두드릴 수 있고, 뚫리면 남의 가정 당사자의 일과가 그대로 보인다.
    * 사람이 받아적다 틀리는 횟수로는 5회면 넉넉하다.
    */
-  public static final int MAX_FAILED_ATTEMPTS = 5;
+  public static final int MAX_FAILED_ATTEMPTS = CodeDigest.MAX_FAILED_ATTEMPTS;
 
   private final DeviceLinkRepository deviceLinkRepository;
   private final MemberRepository memberRepository;
@@ -211,13 +208,8 @@ public class DeviceLinkService {
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
   }
 
-  /** refresh_token과 같은 방식. 원문은 어디에도 남기지 않는다. */
+  /** 해시 규칙은 초대 코드와 함께 쓴다 ({@link CodeDigest}). */
   private String hash(String raw) {
-    try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      return HexFormat.of().formatHex(digest.digest(raw.getBytes(StandardCharsets.UTF_8)));
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException("SHA-256을 쓸 수 없습니다", e);
-    }
+    return CodeDigest.sha256(raw);
   }
 }

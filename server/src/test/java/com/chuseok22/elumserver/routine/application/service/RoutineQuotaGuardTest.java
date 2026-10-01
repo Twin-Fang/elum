@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -248,6 +249,21 @@ class RoutineQuotaGuardTest {
 
     assertThatCode(() -> guard.guard(MEMBER_ID)).doesNotThrowAnyException();
     verify(routineRepository).countByCreatedBy(MEMBER_ID);
+  }
+
+  @Test
+  @DisplayName("E41 무료 보호자는 Pro 보호자의 이룸이에 합류해도 자기 한도로 만든다 — 한도는 만드는 사람의 요금제와 일과로 잰다")
+  void e41_joinedFreeGuardian_isLimitedByOwnPlanAndOwnRoutines() {
+    // 이룸이는 Pro 보호자(m-pro)의 것이고 무료 보호자(m1)가 초대로 합류했다. 가드는 이룸이가 아니라 만드는 사람만 받는다.
+    limits(Entitlement.UNLIMITED, Entitlement.UNLIMITED);
+    when(routineRepository.countByCreatedBy(MEMBER_ID)).thenReturn(3L);
+    when(entitlementService.isWithinLimit(PlanType.FREE, Entitlement.ROUTINE_MAX_COUNT, 3L)).thenReturn(false);
+    lenient().when(entitlementService.planOf("m-pro")).thenReturn(PlanType.PRO);
+
+    assertRejectedWith(() -> guard.guard(MEMBER_ID), ErrorCode.ROUTINE_COUNT_LIMIT_EXCEEDED);
+    // Pro 보호자의 요금제는 읽지도, 그 사람의 일과를 세지도 않는다
+    verify(entitlementService, never()).planOf("m-pro");
+    verify(routineRepository, never()).countByCreatedBy("m-pro");
   }
 
   @Test

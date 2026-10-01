@@ -24,7 +24,9 @@ import com.chuseok22.elumserver.member.infrastructure.entity.GuardianKind;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.entity.ProfileGuardian;
+import com.chuseok22.elumserver.member.infrastructure.entity.ProfileInvite;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileInviteRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
@@ -63,6 +65,9 @@ class GuardianshipServiceTest {
 
   @Mock
   private RefreshTokenRepository refreshTokenRepository;
+
+  @Mock
+  private ProfileInviteRepository profileInviteRepository;
 
   @InjectMocks
   private GuardianshipService guardianshipService;
@@ -322,5 +327,125 @@ class GuardianshipServiceTest {
       assertThat(tx).as(method.getName()).isNotNull();
       assertThat(tx.readOnly()).as(method.getName()).isFalse();
     }
+  }
+
+  // --- 초대 코드 (#361) ---
+
+  private ProfileInvite openInvite(String id, String profileId, String issuedBy) {
+    ProfileInvite invite = new ProfileInvite();
+    invite.setId(id);
+    invite.setProfileId(profileId);
+    invite.setIssuedBy(issuedBy);
+    invite.setExpiresAt(LocalDateTime.now().plusMinutes(5));
+    return invite;
+  }
+
+  @Test
+  @DisplayName("E4 나가면 내가 이 이룸이에 낸 미사용 초대 코드는 폐기된다 — 나간 사람의 이름으로 사람이 들어오지 못한다")
+  void e4_leave_revokesMyOpenInvites() {
+    sharedProfileWhereALeaves(List.of(), List.of());
+    ProfileInvite mine = openInvite("i1", "p1", "A");
+    when(profileInviteRepository.findAllByProfileIdAndIssuedByAndRedeemedAtIsNullAndRevokedAtIsNull("p1", "A"))
+      .thenReturn(List.of(mine));
+
+    guardianshipService.leave("A", "p1");
+
+    assertThat(mine.getRevokedAt()).isNotNull();
+    // 다른 사람이 낸 코드는 조회조차 하지 않는다 — 내 것만 폐기한다
+    verify(profileInviteRepository, never()).findAllByProfileIdAndIssuedByAndRedeemedAtIsNullAndRevokedAtIsNull(
+      eq("p1"), eq("B"));
+  }
+
+  @Test
+  @DisplayName("E4 탈퇴(leaveAll)도 같은 규칙으로 내 초대 코드를 폐기한다")
+  void e4_leaveAll_revokesMyOpenInvites() {
+    sharedProfileWhereALeaves(List.of(), List.of());
+    when(profileGuardianRepository.findProfileIdsByMemberId("A")).thenReturn(List.of("p1"));
+    ProfileInvite mine = openInvite("i1", "p1", "A");
+    when(profileInviteRepository.findAllByProfileIdAndIssuedByAndRedeemedAtIsNullAndRevokedAtIsNull("p1", "A"))
+      .thenReturn(List.of(mine));
+
+    guardianshipService.leaveAll("A");
+
+    assertThat(mine.getRevokedAt()).isNotNull();
+  }
+
+  /** 가입 때 생긴 빈 이룸이: 나 혼자, 이름·목표·일과·휴대폰 없음. */
+  private Profile emptyOwnProfile(String id, Member me) {
+    Profile profile = profile(id, me, 0);
+    when(profileRepository.findByIdForUpdate(id)).thenReturn(Optional.of(profile));
+    ProfileGuardian mine = guardian(profile, me, LocalDateTime.of(2026, 1, 1, 9, 0));
+    when(profileGuardianRepository.findByProfileIdAndMemberId(id, me.getId())).thenReturn(Optional.of(mine));
+    // 지우기 전에는 나 혼자, 지운 뒤(auto flush)에는 아무도 없다
+    when(profileGuardianRepository.findAllByProfileIdOrderByJoinedAtAsc(id))
+      .thenReturn(List.of(mine))
+      .thenReturn(List.of());
+    return profile;
+  }
+
+  @Test
+  @DisplayName("E6 합류한 사람의 빈 이룸이는 지운다 — 혼자 돌보고 이름·목표·일과·휴대폰이 모두 없는 것")
+  void e6_removeEmptyOwnProfiles_removesUntouchedProfile() {
+    Member joiner = member("J");
+    Profile empty = emptyOwnProfile("empty", joiner);
+    when(profileGuardianRepository.findProfileIdsByMemberId("J")).thenReturn(List.of("empty", "joined"));
+
+    List<String> removed = guardianshipService.removeEmptyOwnProfiles("J", "joined");
+
+    assertThat(removed).containsExactly("empty");
+    verify(profileRepository).delete(empty);
+    // 방금 합류한 이룸이는 건드리지 않는다
+    verify(profileRepository, never()).findByIdForUpdate("joined");
+  }
+
+  @Test
+  @DisplayName("E6 이름을 적은 이룸이는 남긴다 — 사용자가 손댄 이룸이다")
+  void e6_removeEmptyOwnProfiles_keepsNamedProfile() {
+    Member joiner = member("J");
+    Profile named = emptyOwnProfile("named", joiner);
+    named.setNickname("하늘이");
+    when(profileGuardianRepository.findProfileIdsByMemberId("J")).thenReturn(List.of("named"));
+
+    assertThat(guardianshipService.removeEmptyOwnProfiles("J", "joined")).isEmpty();
+    verify(profileRepository, never()).delete(any(Profile.class));
+  }
+
+  @Test
+  @DisplayName("E6 일과가 있는 이룸이는 남긴다")
+  void e6_removeEmptyOwnProfiles_keepsProfileWithRoutines() {
+    Member joiner = member("J");
+    emptyOwnProfile("busy", joiner);
+    when(routineRepository.existsByProfileId("busy")).thenReturn(true);
+    when(profileGuardianRepository.findProfileIdsByMemberId("J")).thenReturn(List.of("busy"));
+
+    assertThat(guardianshipService.removeEmptyOwnProfiles("J", "joined")).isEmpty();
+    verify(profileRepository, never()).delete(any(Profile.class));
+  }
+
+  @Test
+  @DisplayName("E6 이룸이 휴대폰이 연결된 이룸이는 남긴다")
+  void e6_removeEmptyOwnProfiles_keepsProfileWithLinkedPhone() {
+    Member joiner = member("J");
+    emptyOwnProfile("phone", joiner);
+    when(deviceLinkRepository.findAllByProfileId("phone")).thenReturn(List.of(linkedPhone("l1", "J", "phone")));
+    when(profileGuardianRepository.findProfileIdsByMemberId("J")).thenReturn(List.of("phone"));
+
+    assertThat(guardianshipService.removeEmptyOwnProfiles("J", "joined")).isEmpty();
+    verify(profileRepository, never()).delete(any(Profile.class));
+  }
+
+  @Test
+  @DisplayName("E6 다른 보호자와 함께 돌보는 이룸이는 비어 보여도 남긴다")
+  void e6_removeEmptyOwnProfiles_keepsSharedProfile() {
+    Member joiner = member("J");
+    Profile shared = profile("shared", joiner, 0);
+    when(profileRepository.findByIdForUpdate("shared")).thenReturn(Optional.of(shared));
+    when(profileGuardianRepository.findAllByProfileIdOrderByJoinedAtAsc("shared")).thenReturn(List.of(
+      guardian(shared, joiner, LocalDateTime.of(2026, 1, 1, 9, 0)),
+      guardian(shared, member("B"), LocalDateTime.of(2026, 2, 1, 9, 0))));
+    when(profileGuardianRepository.findProfileIdsByMemberId("J")).thenReturn(List.of("shared"));
+
+    assertThat(guardianshipService.removeEmptyOwnProfiles("J", "joined")).isEmpty();
+    verify(profileRepository, never()).delete(any(Profile.class));
   }
 }

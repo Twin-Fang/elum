@@ -35,6 +35,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
+import com.chuseok22.elumserver.member.infrastructure.repository.ProfileInviteRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -65,6 +66,9 @@ class OAuthLoginServiceTest {
 
   @Mock
   private ProfileGuardianRepository profileGuardianRepository;
+
+  @Mock
+  private ProfileInviteRepository profileInviteRepository;
 
   @Mock
   private SubscriptionService subscriptionService;
@@ -129,7 +133,8 @@ class OAuthLoginServiceTest {
       OAuthProvider.NAVER, new OAuthUser("naver-1234", "parent@kakao.com", true));
     // 가입·되살리기가 이룸이를 관계와 함께 만드는지까지 보려고 목이 아니라 실제 서비스를 쓴다.
     GuardianshipService guardianshipService = new GuardianshipService(
-      profileRepository, profileGuardianRepository, routineRepository, deviceLinkRepository, refreshTokenRepository);
+      profileRepository, profileGuardianRepository, routineRepository, deviceLinkRepository, refreshTokenRepository,
+      profileInviteRepository);
     WithdrawnMemberService withdrawnMemberService = new WithdrawnMemberService(
       memberRepository, authIdentityRepository, refreshTokenRepository, aiCallLogRepository, deviceLinkRepository, subscriptionRepository,
       subscriptionService, systemConfigService, guardianshipService, aiCreditAccountRepository,
