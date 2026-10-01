@@ -67,6 +67,7 @@ class ChildHomeScreen extends ConsumerWidget {
     // 아직 안 골랐으면 고양이(루루)로 둔다 — 화면은 떠야 한다.
     final character =
         ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
+    final isElumiDevice = ref.watch(localStorageProvider).isElumiDevice;
 
     return Scaffold(
       backgroundColor: context.colors.background,
@@ -79,6 +80,7 @@ class ChildHomeScreen extends ConsumerWidget {
                     child: _NoRoutine(
                       childName: childName,
                       character: character,
+                      isElumiDevice: isElumiDevice,
                       // 조회가 실패했으면 제보 추적용 코드를 함께 보여준다.
                       // 아동 화면이라 빨강·경고 아이콘은 쓰지 않는다.
                       // 코드는 실제로 무엇이 터졌는지를 쓴다 — 연결이 끊긴 것과
@@ -419,10 +421,17 @@ class _NoRoutine extends StatelessWidget {
   const _NoRoutine({
     required this.childName,
     required this.character,
+    required this.isElumiDevice,
     this.errorCode,
   });
 
   final String childName;
+
+  /// 이룸이 휴대폰인가. 두 휴대폰의 시안 문구가 다르다 (#491).
+  ///
+  /// 보호자 휴대폰 시안(`343:4543`)은 `보호자 화면에서`, 이룸이 휴대폰 시안(`1197:6846`)은
+  /// `보호자 모드에서`다. 한 위젯을 같이 쓰므로 휴대폰별로 갈라 각자 시안대로 맞춘다.
+  final bool isElumiDevice;
 
   /// 온보딩에서 고른 캐릭터. 시무룩한 일러스트·글로우 색이 갈린다.
   final CardCharacter character;
@@ -460,7 +469,9 @@ class _NoRoutine extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           Text(
-            '보호자 모드에서 일과를 만들 수 있어요',
+            isElumiDevice
+                ? '보호자 모드에서 일과를 만들 수 있어요'
+                : '보호자 화면에서 일과를 만들 수 있어요',
             style: context.typo.body.copyWith(color: colors.textSecondary),
           ),
           if (errorCode != null) ...[

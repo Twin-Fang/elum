@@ -53,6 +53,7 @@ void main() {
     List<ActionCard> steps = cards,
     String? pin,
     Member? member,
+    bool elumiDevice = false,
   }) {
     final router = GoRouter(
       initialLocation: Routes.child,
@@ -86,7 +87,11 @@ void main() {
 
     return ProviderScope(
       overrides: [
-        testStorageOverride(onboardingCompleted: true, pin: pin),
+        testStorageOverride(
+          onboardingCompleted: true,
+          pin: pin,
+          elumiDevice: elumiDevice,
+        ),
         // 실서버를 타지 않는다
         myRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
         todayRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
@@ -169,9 +174,19 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('일과가 없어요'), findsOneWidget);
-      expect(find.text('보호자 모드에서 일과를 만들 수 있어요'), findsOneWidget);
+      // 보호자 휴대폰 시안(343:4543)은 `보호자 화면에서`다 (#491)
+      expect(find.text('보호자 화면에서 일과를 만들 수 있어요'), findsOneWidget);
       // 시무룩한 루루는 코드가 아니라 에셋으로 그린다
       expect(svgWithAsset(AppAssets.ruruSad), findsOneWidget);
+    });
+
+    testWidgets('이룸이 휴대폰의 빈 상태 문구는 자기 시안대로 보호자 모드다 (#491)', (tester) async {
+      // 이룸이 휴대폰 시안(1197:6846)은 `보호자 모드에서`라 두 휴대폰이 서로 다르다
+      await tester.pumpWidget(wrap(const ChildHomeScreen(), elumiDevice: true));
+      await tester.pumpAndSettle();
+
+      expect(find.text('보호자 모드에서 일과를 만들 수 있어요'), findsOneWidget);
+      expect(find.text('보호자 화면에서 일과를 만들 수 있어요'), findsNothing);
     });
 
     testWidgets('별 배지가 보이고 탭하면 별 화면으로 간다', (tester) async {
