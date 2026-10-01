@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-09-30T15:49:21Z",
-    "currentVersion": "2.4.1",
+    "lastUpdated": "2026-10-01T00:05:24Z",
+    "currentVersion": "2.5.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 186
+    "totalReleases": 187
   },
   "releases": [
+    {
+      "version": "2.5.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-01",
+      "pr_number": 478,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 카드 그림의 출처를 이용약관에서 볼 수 있어요\n  * 설정 화면에서 그림 출처 줄을 없앴어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드 그림의 출처를 이용약관에서 볼 수 있어요",
+            "설정 화면에서 그림 출처 줄을 없앴어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.4.1",
       "project_type": "flutter",
