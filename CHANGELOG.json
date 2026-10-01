@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-01T07:15:25Z",
-    "currentVersion": "2.6.0",
+    "lastUpdated": "2026-10-01T13:58:26Z",
+    "currentVersion": "2.7.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 188
+    "totalReleases": 189
   },
   "releases": [
+    {
+      "version": "2.7.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-01",
+      "pr_number": 483,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 다른 계정으로 로그인했을 때 이전 계정의 일과가 보이던 문제를 고쳤어요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "다른 계정으로 로그인했을 때 이전 계정의 일과가 보이던 문제를 고쳤어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.6.0",
       "project_type": "flutter",
