@@ -9,6 +9,7 @@ import '../config/app_config.dart';
 import '../logger/app_logger.dart';
 import 'ad_consent.dart';
 import 'ad_ids.dart';
+import 'ad_sdk.dart';
 
 /// 로드가 끝난 배너. 슬롯이 그리고 화면을 떠날 때 [dispose]로 해제한다.
 class LoadedBanner {
@@ -38,18 +39,6 @@ final adBannerLoaderProvider = Provider<AdBannerLoader>(
 /// SDK는 **처음 배너를 요청할 때** 초기화한다. 이룸이 전용 휴대폰은 보호자 화면을
 /// 열지 않으므로 SDK가 시작되지도 않는다.
 class GoogleAdBannerLoader implements AdBannerLoader {
-  static Future<void>? _init;
-
-  static Future<void> _ensureInitialized() => _init ??= () async {
-        await MobileAds.instance.updateRequestConfiguration(
-          RequestConfiguration(
-            // 성인·선정 광고를 줄인다. 보호자 화면이라도 이룸이가 볼 수 있다.
-            maxAdContentRating: MaxAdContentRating.pg,
-          ),
-        );
-        await MobileAds.instance.initialize();
-      }();
-
   @override
   Future<LoadedBanner?> load(AdPlacement placement, int widthDp) async {
     // 폭 0에서 적응형 배너를 요청하면 예외가 난다(첫 프레임).
@@ -59,7 +48,7 @@ class GoogleAdBannerLoader implements AdBannerLoader {
       // 릴리스인데 .env가 비었다 — 광고를 띄우지 않는다.
       if (unitId == null) return null;
 
-      await _ensureInitialized();
+      await AdSdk.ensureInitialized();
       final nonPersonalized = await AdConsent.useNonPersonalized();
       final size =
           await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(

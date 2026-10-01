@@ -51,11 +51,16 @@ class ElumDialogAction<T> {
     required this.label,
     this.value,
     this.tone = ElumDialogTone.primary,
+    this.centerLines = false,
   });
 
   final String label;
   final T? value;
   final ElumDialogTone tone;
+
+  /// 문구가 두 줄로 꺾일 수 있는 버튼 — 줄마다 가운데로 맞춘다.
+  /// 두 버튼이 나란한 팝업에서 긴 문구(광고 보고 더 만들기)가 꺾일 때 쓴다.
+  final bool centerLines;
 }
 
 /// 앱 공통 팝업 (Figma `팝업` 732:5835 · 이슈 #232).
@@ -210,6 +215,7 @@ class ElumDialogCard<T> extends StatelessWidget {
                   ElumDialogButton(
                     label: action.label,
                     tone: action.tone,
+                    centerLines: action.centerLines,
                     onTap: () => Navigator.of(context).pop(action.value),
                   ),
               ],

@@ -11,8 +11,8 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/character_badge.dart';
-import '../../../core/widgets/elum_dialog.dart';
 import '../../credit/application/credit_start_gate.dart';
+import '../../credit/presentation/credit_blocked_dialog.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/character.dart';
 import '../application/routine_notifier.dart';
@@ -154,20 +154,8 @@ class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton> {
       final blocked = await creditBlocksRoutineStart(ref);
       if (!mounted) return;
       if (blocked != null) {
-        // 다 쓴 것이 먼저다 — 진행 중인 것이 끝나도 새로 만들 수 없기 때문이다.
-        final generating =
-            blocked.canStartRoutine && blocked.isGeneratingRoutine;
-        await showElumDialog<void>(
-          context: context,
-          // 시안 `로그인실패` 변형 모양 — 느낌표 + 두 줄 문장 + 붉은 확인 (#433).
-          icon: ElumDialogIcon.alert,
-          title: generating
-              ? '이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요'
-              : '이번 주 크레딧을 모두 사용했어요.\n${blocked.resetLabel}부터 다시 만들 수 있어요',
-          actions: const [
-            ElumDialogAction(label: '확인', tone: ElumDialogTone.danger),
-          ],
-        );
+        // 안내 + (서버가 켜 둔 경우에만) 광고 보고 더 만들기 (#464). 들어가지 않고 홈에 남는다.
+        await showCreditBlockedDialog(context, ref, blocked);
         return;
       }
       ref.read(routineFlowProvider.notifier).reset();

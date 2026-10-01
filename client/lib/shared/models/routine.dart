@@ -73,6 +73,19 @@ abstract class Routine with _$Routine {
   /// isConfirmed만 걸면 다 끝낸 일과가 목록에서 사라진다 (이슈 #75).
   bool get isVisibleToChild => isConfirmed || status == 'COMPLETED';
 
+  /// [now] 날짜의 오늘 일과로 보여도 되는가 (#353).
+  ///
+  /// 서버 `/today` 와 같은 규칙이다 — 승인 전(`PENDING_REVIEW`)은 빼고,
+  /// `scheduledAt` 이 오늘이어야 한다. 앱이 받아 둔 값(메모리·오프라인 캐시·폴백)은
+  /// 서버가 거른 뒤에 날짜가 지났을 수 있어 앱이 한 번 더 거른다.
+  /// `scheduledAt` 이 없으면 날짜를 알 수 없어 서버가 거른 것으로 믿는다.
+  bool isTodayOn(DateTime now) {
+    if (status == 'PENDING_REVIEW') return false;
+    final at = scheduledAt;
+    if (at == null) return true;
+    return at.year == now.year && at.month == now.month && at.day == now.day;
+  }
+
   /// DLP가 실제로 무언가를 바꿨는가.
   /// 둘이 같으면 탐지된 민감정보가 없다는 뜻이다.
   bool get hasMaskedContent =>
