@@ -112,9 +112,20 @@ class _DevToolsOverlayState extends State<DevToolsOverlay> {
             // 직접 그리면 조상에 의존하지 않아 어느 위치에 놓여도 동작한다.
             if (_panelOpen)
               Positioned.fill(
-                child: _DevToolsSheet(
-                  onClose: () => setState(() => _panelOpen = false),
-                  onNavigate: widget.onNavigate,
+                // 패널이 자기 Overlay 를 갖는다 (#501). 이 위젯은 Navigator·Overlay 보다 위에
+                // 있어서, 로그 글자(SelectableText)를 누르면 선택 손잡이를 그릴 Overlay 를 못 찾아
+                // `Null check operator used on a null value` 가 났다.
+                child: Overlay(
+                  initialEntries: [
+                    OverlayEntry(
+                      builder: (_) => SizedBox.expand(
+                        child: _DevToolsSheet(
+                          onClose: () => setState(() => _panelOpen = false),
+                          onNavigate: widget.onNavigate,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
           ],

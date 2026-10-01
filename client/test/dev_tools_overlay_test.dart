@@ -1,3 +1,4 @@
+import 'package:elum/core/dev/dev_log_buffer.dart';
 import 'package:elum/core/dev/dev_tools_overlay.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/token_store.dart';
@@ -133,6 +134,32 @@ void main() {
     expect(find.text('개발자 도구'), findsOneWidget);
     expect(find.text('회원삭제'), findsOneWidget);
     expect(find.text('로그 보기'), findsOneWidget);
+  });
+
+  // 로그 글자를 눌러도 오류가 나지 않는다 (#501). 패널이 Navigator·Overlay 위에 떠 있어서
+  // 선택 손잡이를 그릴 Overlay 를 못 찾고 `Null check operator used on a null value` 가 났다.
+  testWidgets('로그 글자를 눌러도 예외가 나지 않는다', (tester) async {
+    dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
+    DevLogBuffer.install();
+    try {
+      debugPrint('눌러 볼 로그 한 줄');
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.bug_report));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('로그 보기'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.textContaining('눌러 볼 로그 한 줄').first);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull, reason: '로그 글자를 누르자 예외가 났다');
+    } finally {
+      // 가로챈 debugPrint 를 **테스트 끝나기 전에** 되돌린다 — 테스트 틀이 끝에서 바뀐 전역값을
+      // 검사한다. 다음 테스트(`아직 로그가 없어요`)가 오염되는 것도 막는다.
+      DevLogBuffer.uninstall();
+    }
   });
 
   // 각 하위 화면은 Navigator 없이 시트 안에서 전환된다.

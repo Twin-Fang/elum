@@ -67,6 +67,11 @@ abstract final class AppLogger {
 
     if (value is String) return _cap(value);
 
+    // 바이트 목록은 숫자를 펼치지 않는다 (#501). 카드 그림 응답(수 MB)이 `[137,80,...]`로
+    // 한 줄에 수천 자씩 찍혀 로그를 내보내거나 읽을 수 없었다.
+    final bytes = _asBytes(value);
+    if (bytes != null) return _describeBytes(bytes);
+
     // Map·List는 JSON으로 펼친다. 직렬화할 수 없는 값이 섞이면 toString으로 떨어뜨려
     // **로그 한 줄 때문에 예외가 나지 않게** 한다.
     if (value is Map || value is List) {
@@ -78,6 +83,30 @@ abstract final class AppLogger {
     }
     return _cap(value.toString());
   }
+
+  /// 바이트 목록처럼 보이면 그 목록을, 아니면 null. 앞 16개만 보고 판단해 큰 목록을 훑지 않는다.
+  static List<int>? _asBytes(dynamic value) {
+    if (value is! List || value.length < _minBytesLength) return null;
+    if (value is List<int>) return value;
+    for (var i = 0; i < 16; i++) {
+      final e = value[i];
+      if (e is! int || e < 0 || e > 255) return null;
+    }
+    return value.cast<int>();
+  }
+
+  /// `바이트 N개`로 줄인다. 앞부분이 글자로 읽히면(502 HTML 오류 페이지 등) 무슨 오류인지
+  /// 알 수 있게 앞 120자를 함께 보여 준다. 그림 같은 바이너리는 개수만 남긴다.
+  static String _describeBytes(List<int> bytes) {
+    final head = bytes.length > _bytesPreview ? bytes.sublist(0, _bytesPreview) : bytes;
+    final readable = head.every((b) => b == 9 || b == 10 || b == 13 || (b >= 32 && b <= 126));
+    if (!readable) return '바이트 ${bytes.length}개';
+    return '바이트 ${bytes.length}개 (${String.fromCharCodes(head).replaceAll(RegExp(r'\s+'), ' ')}…)';
+  }
+
+  /// 이 길이 이상의 정수 목록만 바이트로 본다. 짧은 id 목록 같은 것은 그대로 펼친다.
+  static const _minBytesLength = 64;
+  static const _bytesPreview = 120;
 
   static String _cap(String s) => s.length > _maxExpandedLength
       ? '${s.substring(0, _maxExpandedLength)}… (${s.length}자 중 앞부분)'
