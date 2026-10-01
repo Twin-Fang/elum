@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
+import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -127,7 +128,10 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
       if (!mounted) return;
       _clearInput();
       setState(() {
-        _errorMessage = '암호가 달라요. 다시 넣어주세요';
+        // 시안(`1274:9466`)은 `다시 입력해주세요` 다. 만들기(createOnly)는 온보딩 문구를 따른다.
+        _errorMessage = widget.createOnly
+            ? '암호가 달라요. 다시 넣어주세요'
+            : '암호가 달라요. 다시 입력해주세요';
         _mismatchCount++;
       });
     });
@@ -179,26 +183,43 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     );
   }
 
-  (String, String) get _copy => switch (_step) {
-    _Step.verify => ('지금 비밀암호를\n입력해주세요', '확인한 뒤에 새 암호로 바꿀 수 있어요'),
+  (String, String?) get _copy => switch (_step) {
+    // 시안(`1027:4683`)은 설명이 없다
+    _Step.verify => ('지금 비밀암호를\n입력해주세요', null),
     _Step.enter when widget.createOnly => (
       // 온보딩 비밀번호 화면(238:1909)과 같은 문구
       '보호자님만 아는\n비밀암호를 만들어주세요',
       '보호자모드로 변경할 때 사용하는 암호예요',
     ),
     _Step.enter => ('새 비밀암호를\n입력해주세요', '보호자모드로 변경할 때 사용하는 암호예요'),
-    // 온보딩 재입력(238:2767)과 같은 문구다
-    _Step.confirm => ('암호를 한번 더\n입력해주세요', '보호자모드로 변경할 때 사용하는 암호예요'),
+    // 만들기는 온보딩 재입력(238:2767)과 같은 문구다
+    _Step.confirm when widget.createOnly => (
+      '암호를 한번 더\n입력해주세요',
+      '보호자모드로 변경할 때 사용하는 암호예요',
+    ),
+    // 바꾸기는 시안 `1274:9661` — 제목이 `비밀암호를`, 설명은 끝이 가까웠다는 말이다
+    _Step.confirm => ('비밀암호를 한번 더\n입력해주세요', '이제 곧 비밀암호 변경이 끝나요'),
   };
 
   /// 설명 하단 → 점. 온보딩 비밀번호 화면(`238:1996`)과 같은 값이다.
   static const _descriptionToDots = 72.0;
 
+  /// 바꾸기(설정에서 들어옴)는 시안(`1027:4683` 외)이 설정 계열 머리를 쓴다 — 뒤로가기 줄(y=67)에
+  /// `비밀암호 변경하기` 제목이 서고 큰 제목은 y=148 에서 시작한다. 점 자리(y≈299)는 그대로라
+  /// 설명과 점 사이가 그만큼(17) 줄어든다.
+  static const _changeBackTop = 67.0;
+  static const _changeTitleY = 148.0;
+  static const _changeDescriptionToDots = 55.0;
+
   @override
   Widget build(BuildContext context) {
     final (title, description) = _copy;
+    // 만들기(createOnly)는 온보딩 머리 그대로다. 바꾸기만 설정 계열 머리다.
+    final change = !widget.createOnly;
     return ElumScaffold(
       onBack: () => context.pop(),
+      title: change ? '비밀암호 변경하기' : null,
+      backTop: change ? _changeBackTop : null,
       // 온보딩처럼 **다 맞았을 때만** 버튼이 나타난다 (#231). 나타나는 것이 신호다.
       bottomButton: _canSave
           ? ElumButton(label: '저장하기', onPressed: _saving ? null : _save)
@@ -206,8 +227,18 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ElumHeader(title: title, description: _errorMessage ?? description),
-          SizedBox(height: _descriptionToDots.h),
+          ElumHeader(
+            title: title,
+            titleY: change ? _changeTitleY : null,
+            description: _errorMessage ?? description,
+            // 틀림 안내만 붉다 (시안 `1274:9466` — #DA5050). 만들기는 온보딩처럼 보조색이다.
+            descriptionColor: _errorMessage != null && !widget.createOnly
+                ? context.colors.settingsDestructive
+                : null,
+          ),
+          SizedBox(
+            height: (change ? _changeDescriptionToDots : _descriptionToDots).h,
+          ),
           // 실제 입력칸은 투명이라 낭독기에서 빠진다. 키패드를 여는 길은 이 점
           // 자리뿐이라 이름을 준다 (#339). 넣은 숫자는 암호라 읽지 않는다.
           Semantics(
