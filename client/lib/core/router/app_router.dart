@@ -9,6 +9,10 @@ import '../../features/guardian/presentation/guardian_settings_screen.dart';
 import '../../features/guardian/presentation/image_style_settings_screen.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
 import '../../features/link/presentation/link_code_screen.dart';
+import '../../features/profile/presentation/guardians_screen.dart';
+import '../../features/profile/presentation/invite_code_screen.dart';
+import '../../features/profile/presentation/invite_enter_screen.dart';
+import '../../features/profile/presentation/profile_switch_screen.dart';
 import '../../features/link/presentation/link_enter_screen.dart';
 import '../../features/child/presentation/child_home_screen.dart';
 import '../../features/child/presentation/child_routine_detail_screen.dart';
@@ -72,6 +76,20 @@ abstract final class Routes {
 
   /// 그림 방식 선택 (#458). 시안이 없어 임시 화면이다.
   static const guardianImageStyle = '/guardian/settings/image-style';
+
+  /// 함께하는 사람 (다중 보호자 #362). 시안이 없어 임시 화면이다.
+  static const guardianPeople = '/guardian/settings/people';
+
+  /// 초대 코드 만들기 (#362). 시안이 없어 임시 화면이다.
+  static const guardianInvite = '/guardian/settings/people/invite';
+
+  /// 이룸이 바꾸기 (#362). 연결된 이룸이가 둘 이상일 때만 설정에 보인다. 임시 화면이다.
+  static const guardianProfileSwitch = '/guardian/settings/profile';
+
+  /// 초대 코드 넣기 (#362). **온보딩 아래에 둔 이유** — 새로 가입한 보호자는 이룸이 등록
+  /// (온보딩)을 건너뛰고 들어오므로 온보딩을 마치기 전에도 열려야 한다. 이미 쓰는 보호자는
+  /// 설정에서 들어온다. 임시 화면이다.
+  static const inviteEnter = '/onboarding/invite';
   static const routineInput = '/guardian/routine/input';
 
   /// DLP 마스킹 + 추가 질문 준비 로딩 (Figma 262:4569).
@@ -120,6 +138,13 @@ abstract final class Routes {
 ///
 /// 보호 화면에 토큰 없이 접근하면 **시작 화면**으로 되돌린다.
 
+/// 보호자 휴대폰에서만 열리는 다중 보호자 화면의 경로 (#362).
+const _guardianOnlyPaths = [
+  Routes.guardianPeople,
+  Routes.guardianProfileSwitch,
+  Routes.inviteEnter,
+];
+
 /// 경로 가드. **순수 함수로 떼어 두었다** — 라우터를 위젯 트리에 올리지 않고도
 /// 검증할 수 있어야 하기 때문이다.
 ///
@@ -142,6 +167,13 @@ String? resolveRedirect(
   /// 약관 동의 뒤 역할을 골랐는가 (이슈 #212).
   bool hasRole = true,
 }) {
+  // 이룸이 휴대폰에서는 다중 보호자 기능(함께하는 사람·초대·이룸이 바꾸기)이 열리지 않는다 (#362).
+  // 설정에 줄이 없어 화면으로 들어갈 길은 없지만, 딥링크나 옛 경로로 열려도 막는다 —
+  // 이룸이 휴대폰 토큰은 서버도 403 으로 막으므로 열어 봐야 실패 화면만 본다.
+  if (isElumiDevice && _guardianOnlyPaths.any(path.startsWith)) {
+    return Routes.child;
+  }
+
   // 가입 절차도 로그인이 있어야 한다. 계정이 없으면 동의를 기록할 곳도,
   // 아이 정보를 저장할 곳도 없다.
   final isSignUpFlow =
@@ -263,6 +295,12 @@ GoRouter createRouter({
         pageBuilder: (context, state) =>
             slidePage(state, const CharacterScreen()),
       ),
+      // 초대 코드 넣기 — 새로 가입한 보호자가 이룸이 등록 대신 들어온다 (#362 · E6).
+      GoRoute(
+        path: Routes.inviteEnter,
+        pageBuilder: (context, state) =>
+            slidePage(state, const InviteEnterScreen()),
+      ),
       GoRoute(
         path: Routes.onboardingImageStyle,
         pageBuilder: (context, state) =>
@@ -317,6 +355,22 @@ GoRouter createRouter({
         path: Routes.guardianImageStyle,
         pageBuilder: (context, state) =>
             slidePage(state, const ImageStyleSettingsScreen()),
+      ),
+      // 다중 보호자 (#362) — 시안이 없는 임시 화면들이다.
+      GoRoute(
+        path: Routes.guardianPeople,
+        pageBuilder: (context, state) =>
+            slidePage(state, const GuardiansScreen()),
+      ),
+      GoRoute(
+        path: Routes.guardianInvite,
+        pageBuilder: (context, state) =>
+            slidePage(state, const InviteCodeScreen()),
+      ),
+      GoRoute(
+        path: Routes.guardianProfileSwitch,
+        pageBuilder: (context, state) =>
+            slidePage(state, const ProfileSwitchScreen()),
       ),
       GoRoute(
         path: Routes.guardianPinChange,

@@ -24,6 +24,7 @@ class ElumTextField extends StatelessWidget {
     this.onChanged,
     this.onSubmitted,
     this.explicitTextAlign,
+    this.maxLength,
   });
 
   final String hintText;
@@ -35,6 +36,10 @@ class ElumTextField extends StatelessWidget {
 
   /// 정렬을 강제로 지정할 때만 넘긴다. null이면 좌측 정렬(디자인 기본)이다.
   final TextAlign? explicitTextAlign;
+
+  /// 글자 수 상한. null 이면 제한하지 않는다 (이름 입력은 기존 그대로).
+  /// 서버가 길이를 막는 입력(보호자 표시 이름 20자)에 쓴다 — 넘기면 400 이라 미리 막는다.
+  final int? maxLength;
 
   TextAlign get resolvedTextAlign => explicitTextAlign ?? TextAlign.start;
 
@@ -73,7 +78,10 @@ class ElumTextField extends StatelessWidget {
         textInputAction: TextInputAction.done,
         // 소프트키보드가 아닌 경로(붙여넣기·하드웨어 키보드·일부 IME)로 들어오는
         // 개행까지 막는다. textInputAction만으로는 이 경로가 안 막힌다.
-        inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\n'))],
+        inputFormatters: [
+          FilteringTextInputFormatter.deny(RegExp(r'\n')),
+          if (maxLength != null) LengthLimitingTextInputFormatter(maxLength),
+        ],
         style: context.typo.input.copyWith(color: colors.textPrimary),
         decoration: InputDecoration(
           hintText: hintText,

@@ -15,6 +15,8 @@ import '../../../core/widgets/settings_tile.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../profile/application/profile_session.dart';
+import '../data/routine_repository.dart' show memberProvider;
 import 'widgets/ai_credit_card.dart';
 
 /// 보호자 설정 화면 (이슈 #181).
@@ -119,6 +121,9 @@ class _GuardianSettingsScreenState
     }
     if (!mounted) return;
     if (failure == null) {
+      // 고른 이룸이(저장소)는 로그아웃·탈퇴의 clearAll 이 이미 지웠다. 메모리의 이룸이 상태와
+      // 회원 정보 캐시는 **다음 로그인에서** 버린다 (다중 보호자 #362 · LoginScreen). 여기서 버리면
+      // 이 화면이 아직 떠 있는 동안 회원 정보를 다시 받아 지운 선택을 되살린다.
       context.go(Routes.login);
     } else {
       _tellFailed(failure);
@@ -156,6 +161,13 @@ class _GuardianSettingsScreenState
         SettingsTile(
           label: '이룸이 휴대폰 연결하기',
           onTap: _busy ? null : () => context.push(Routes.linkCode),
+        ),
+        // 다중 보호자 (#362). 시안(`1022:4467`)에 없는 줄이라 **임시 시안**이다 — 이룸이 휴대폰
+        // 연결 바로 아래에 둔다. 둘 다 "누구와 누구를 잇는가"를 다루는 줄이다.
+        _ProfileSwitchTile(busy: _busy),
+        SettingsTile(
+          label: '함께하는 사람',
+          onTap: _busy ? null : () => context.push(Routes.guardianPeople),
         ),
         // 계정을 정리하는 항목(로그아웃·탈퇴) 위에 둔다. 읽을거리와 되돌릴 수 없는
         // 동작이 섞이면 실수로 누르기 쉽다.
@@ -202,6 +214,32 @@ class _GuardianSettingsScreenState
         ),
         SizedBox(height: space.lg),
       ],
+    );
+  }
+}
+
+/// `이룸이 바꾸기` 줄 — **연결된 이룸이가 둘 이상일 때만** 보인다 (#362).
+///
+/// 이룸이가 하나뿐인 보호자 대부분에게는 고를 것이 없는 줄이다. 회원 정보를 못 받았을 때도
+/// 숨긴다 — 이룸이가 몇 명인지 모르면 있는 줄도 없는 줄도 믿을 수 없다.
+class _ProfileSwitchTile extends ConsumerWidget {
+  const _ProfileSwitchTile({required this.busy});
+
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final count = ref.watch(
+      memberProvider.select((m) => m.value?.profiles.length ?? 0),
+    );
+    if (count < 2) return const SizedBox.shrink();
+    final active = ref.watch(activeProfileProvider);
+    return SettingsTile(
+      label: '이룸이 바꾸기',
+      // 지금 보는 이룸이 이름을 값으로 보여 준다
+      valueText: active?.displayName,
+      showChevronWithValue: true,
+      onTap: busy ? null : () => context.push(Routes.guardianProfileSwitch),
     );
   }
 }

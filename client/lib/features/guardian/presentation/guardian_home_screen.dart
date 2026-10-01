@@ -15,6 +15,7 @@ import '../../credit/application/credit_start_gate.dart';
 import '../../credit/presentation/credit_blocked_dialog.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/character.dart';
+import '../../profile/application/profile_session.dart';
 import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
 import 'widgets/create_routine_button.dart';
@@ -49,6 +50,13 @@ class GuardianHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final space = context.space;
+
+    // 연결된 이룸이가 하나도 없으면 이룸이 등록(온보딩)으로 보낸다 (다중 보호자 #362 · E29).
+    // 마지막 보호자로 나갔거나 다른 휴대폰에서 이룸이가 지워진 경우다. 라우터 가드는 화면을
+    // 옮길 때만 평가되므로 머무는 중에 알게 되면 여기서 직접 옮긴다.
+    ref.listen<bool>(profileSessionProvider.select((s) => s.noProfile), (_, none) {
+      if (none) context.go(Routes.onboardingName);
+    });
 
     // 서버 호칭 → 로컬 온보딩 값 → 대체어 순으로 고른다.
     // 서버가 죽어도 화면은 떠야 한다 (docs 원칙 6번).

@@ -39,6 +39,10 @@ class SettingsTile extends StatelessWidget {
   static const _height = 60.0;
   static const _padH = 16.0;
 
+  /// 같은 줄 모양을 따르는 다른 목록(함께하는 사람)이 쓴다 — 두 곳이 따로 적으면 어긋난다.
+  static const height = _height;
+  static const padH = _padH;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;

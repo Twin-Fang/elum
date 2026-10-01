@@ -1,0 +1,226 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/network/app_failure.dart';
+import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/elum_error_view.dart';
+import '../../../core/widgets/elum_header.dart';
+import '../../../core/widgets/elum_scaffold.dart';
+import '../../../shared/utils/korean_particle.dart';
+import '../../guardian/data/routine_repository.dart' show memberProvider;
+import '../../link/domain/link_status.dart';
+import '../../link/presentation/widgets/link_code_text.dart';
+import '../../onboarding/application/onboarding_notifier.dart';
+import '../application/profile_session.dart';
+import '../data/profile_repository.dart';
+
+/// 초대 코드 만들기 — 연결된 보호자가 **함께 돌볼 보호자**를 부른다 (다중 보호자 #362).
+///
+/// > ⚠️ **임시 시안이다.** 디자인 시안이 없어 연결 암호 만들기(`LinkCodeScreen`)의 설정 진입
+/// > 모양(제목 줄·코드 3-3·`MM:SS`·다시 만들기 칩)을 그대로 빌렸다. 시안이 나오면 바꾼다.
+///
+/// ## 연결 암호와 말을 섞지 않는다
+///
+/// 이룸이 **휴대폰**을 붙이는 것은 `연결 암호`, 다른 **보호자**를 붙이는 것은 `초대 코드`다.
+/// 2026-09-18 합의(#228)의 `코드` 예외는 그 온보딩 시안에만 적용되므로 여기서는 `초대 코드`로
+/// 구분한다 — 두 갈래가 같은 말이면 보호자가 어느 쪽을 만드는지 헷갈린다.
+///
+/// ## 상태
+///
+/// | | 코드 | 타이머 | 다시 만들기 |
+/// | --- | --- | --- | --- |
+/// | 만드는 중 | — | — | — |
+/// | 대기 | 보임 | `09:59` | 있음 |
+/// | 만료 | 흐리게 | `만료됐어요` | 있음 |
+/// | 실패 | — | — | 서버가 다시 해도 같은 이유면 없음 |
+///
+/// 이전에 만든 미사용 코드는 서버가 폐기한다 (E9) — 그래서 다시 만들면 앞 코드를 쓸 수 없다고
+/// 먼저 알린다 (되돌릴 수 없는 일은 먼저 말한다).
+class InviteCodeScreen extends ConsumerStatefulWidget {
+  const InviteCodeScreen({super.key});
+
+  @override
+  ConsumerState<InviteCodeScreen> createState() => _InviteCodeScreenState();
+}
+
+class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
+  IssuedLinkCode? _issued;
+  AppFailure? _failure;
+  bool _loading = true;
+
+  /// 연결된 이룸이가 없어 부를 곳이 없다 (E29). 서버 실패가 아니라 앱이 아는 상태다.
+  bool _noProfile = false;
+
+  /// 코드를 만들 이룸이. 서버 조회가 끝나야 알 수 있어 [_issue] 가 정한다.
+  String _name = '이룸이';
+
+  Timer? _ticker;
+
+  /// 설정 진입 시안(`1027:4617`)과 같은 머리 — 뒤로가기 y=67, 제목 y=147.
+  static const _settingsBackTop = 67.0;
+  static const _settingsTitleY = 147.0;
+
+  static const _descriptionToCode = 72.0;
+  static const _codeToTimer = 24.0;
+  static const _timerToRetry = 16.0;
+  static const _codeLetterGap = 20.0;
+  static const _codeGroupGap = 40.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _issue();
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _issue() async {
+    setState(() {
+      _loading = true;
+      _failure = null;
+      _noProfile = false;
+    });
+
+    // 이룸이는 회원 정보가 알려 준다. 조회가 실패해도 고른 이룸이 id 가 있으면 계속한다.
+    final member = await ref.read(memberProvider.future);
+    if (!mounted) return;
+    final active = pickActiveProfile(
+      member,
+      ref.read(profileSessionProvider).selectedId,
+    );
+    if (active == null) {
+      setState(() {
+        _loading = false;
+        _noProfile = true;
+      });
+      return;
+    }
+    final local = ref.read(onboardingProvider).childNickname.trim();
+    _name = active.nickname?.trim().isNotEmpty == true
+        ? active.displayName
+        : (local.isEmpty ? '이룸이' : local);
+
+    final attempt = await ref.read(profileRepositoryProvider).issueInvite(active.id);
+    if (!mounted) return;
+
+    if (!attempt.isOk) {
+      setState(() {
+        _loading = false;
+        _failure = attempt.failure;
+      });
+      return;
+    }
+    setState(() {
+      _issued = attempt.value;
+      _loading = false;
+    });
+    _startTicker();
+  }
+
+  /// 남은 시간을 초까지 보여 주므로 1초마다 다시 그린다. 만료되면 멈춘다.
+  void _startTicker() {
+    _ticker?.cancel();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return t.cancel();
+      if (_issued?.isExpired ?? true) t.cancel();
+      setState(() {});
+    });
+  }
+
+  /// 남은 시간 `MM:SS` — 올림이 아니라 **내림**이다. 실제보다 길게 말하면 믿고 기다리다 만료된다.
+  String _remainingLabel(IssuedLinkCode issued) {
+    if (issued.isExpired) return '초대 코드가 만료됐어요';
+    final total = issued.remaining().inSeconds;
+    final mm = (total ~/ 60).toString().padLeft(2, '0');
+    final ss = (total % 60).toString().padLeft(2, '0');
+    return '$mm:$ss';
+  }
+
+  /// 다시 해도 같은 이유로 막히는 실패인가. 그때는 다시 시도 버튼을 두지 않는다.
+  bool get _retryable {
+    final f = _failure;
+    if (f == null) return false;
+    if (f.isUnreachable) return true;
+    final status = f.server?.statusCode;
+    // 연결 안 됨·이룸이 휴대폰(403)은 몇 번을 해도 같다. 시도 한도(429)·서버 오류는 시간이 지나면 풀린다.
+    return status != 403;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final issued = _issued;
+    final failure = _failure;
+
+    return ElumScaffold(
+      onBack: () => context.pop(),
+      title: '초대 코드',
+      backTop: _settingsBackTop,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ElumHeader(
+              titleY: _settingsTitleY,
+              title: '함께할 보호자에게\n코드를 알려주세요',
+              description: '받은 분이 $_name${_name.objectParticle} 함께 돌봐요',
+            ),
+            SizedBox(height: _descriptionToCode.h),
+            if (_loading)
+              const Center(child: CircularProgressIndicator())
+            else if (_noProfile)
+              // 이룸이가 없으면 다시 해도 같다 — 버튼 없이 이유와 코드만 보여 준다.
+              const ElumErrorView(
+                message: '함께 돌볼 이룸이가 없어요',
+                description: '이룸이를 먼저 등록해주세요',
+                errorCode: 'E-INV-NONE',
+              )
+            else if (failure != null)
+              ElumErrorView.failure(
+                failure,
+                fallback: '초대 코드를 만들지 못했어요',
+                fallbackCode: 'E-INV-NEW',
+                onRetry: _retryable ? _issue : null,
+              )
+            else if (issued != null) ...[
+              LinkCodeText(
+                code: issued.code,
+                dimmed: issued.isExpired,
+                letterGap: _codeLetterGap,
+                groupGap: _codeGroupGap,
+              ),
+              SizedBox(height: _codeToTimer.h),
+              Text(
+                _remainingLabel(issued),
+                textAlign: TextAlign.center,
+                style: context.typo.linkTimer.copyWith(color: colors.linkTimer),
+              ),
+              SizedBox(height: _timerToRetry.h),
+              Center(
+                child: LinkRetryChip(
+                  label: '초대 코드 다시 만들기',
+                  onTap: _loading ? null : _issue,
+                ),
+              ),
+              SizedBox(height: _timerToRetry.h),
+              // 되돌릴 수 없는 일(앞 코드가 쓸 수 없게 된다)을 먼저 말한다. 한 줄이다.
+              Text(
+                '다시 만들면 이전 코드는 쓸 수 없어요',
+                textAlign: TextAlign.center,
+                style: context.typo.body.copyWith(color: colors.textSecondary),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}

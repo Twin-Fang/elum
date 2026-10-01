@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
@@ -61,6 +63,24 @@ class _NameScreenState extends ConsumerState<NameScreen> {
         label: '다음',
         // 진행 조건은 모델이 안다 — 화면마다 재구현하지 않는다
         onPressed: canSubmit ? _submit : null,
+      ),
+      // 다른 보호자가 이미 만든 이룸이에 합류하는 길 (다중 보호자 #362 · E6). **임시 시안이다** —
+      // 진입점을 어디에 둘지 시안이 정하지 않았다(역할 선택 vs 이 화면). CTA 아래 보조 동작 자리에
+      // 연결 암호의 `나중에 할게요`와 같은 모양으로 둔다. 합류하면 이룸이 등록은 건너뛴다.
+      belowButton: Center(
+        child: AppPressable(
+          onTap: () => context.push(Routes.inviteEnter),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: context.space.xs.h),
+            child: Text(
+              '초대 코드가 있어요',
+              style: context.typo.linkLater.copyWith(
+                color: context.colors.linkLaterLabel,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

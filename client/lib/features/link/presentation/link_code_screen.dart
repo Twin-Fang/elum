@@ -15,6 +15,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_status.dart';
+import 'widgets/link_code_text.dart';
 
 /// 연결 암호 만들기 — **보호자 휴대폰** (이슈 #205 · 디자인 #232).
 ///
@@ -243,7 +244,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
             if (_loading)
               const Center(child: CircularProgressIndicator())
             else if (issued != null) ...[
-              _CodeText(
+              LinkCodeText(
                 code: issued.code,
                 dimmed: expired,
                 letterGap: _codeLetterGap,
@@ -259,7 +260,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
                 ),
                 SizedBox(height: _timerToRetry.h),
                 Center(
-                  child: _RetryChip(
+                  child: LinkRetryChip(
                     onTap: _loading ? null : _issue,
                   ),
                 ),
@@ -281,79 +282,5 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     final mm = (total ~/ 60).toString().padLeft(2, '0');
     final ss = (total % 60).toString().padLeft(2, '0');
     return '$mm:$ss';
-  }
-}
-
-/// 암호 여섯 글자. 3-3으로 묶고 가운데를 더 벌린다 (Figma 732:5710).
-///
-/// `Text` 하나에 `letterSpacing`을 주지 않는 이유 — 마지막 글자 뒤에도 자간이
-/// 붙어 묶음이 왼쪽으로 치우친다. 글자를 낱개로 놓아야 가운데가 맞는다.
-class _CodeText extends StatelessWidget {
-  const _CodeText({
-    required this.code,
-    required this.dimmed,
-    required this.letterGap,
-    required this.groupGap,
-  });
-
-  final String code;
-  final bool dimmed;
-  final double letterGap;
-  final double groupGap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final style = context.typo.linkCode.copyWith(
-      color: dimmed ? colors.textPlaceholder : colors.textPrimary,
-    );
-    final letters = code.split('');
-    final half = letters.length ~/ 2;
-
-    // 글꼴 2.0 이면 여섯 글자가 화면 폭을 100 넘는다. 폭에 맞춰 줄이기만 한다 —
-    // 들어갈 때(글꼴 1.0)는 그대로라 시안 크기가 바뀌지 않는다 (#393 S6).
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final (i, ch) in letters.indexed) ...[
-            if (i > 0) SizedBox(width: (i == half ? groupGap : letterGap).w),
-            Text(ch, style: style),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// `코드 다시 만들기` 칩 (Figma 732:5718 — padding 10/20, r20).
-class _RetryChip extends StatelessWidget {
-  const _RetryChip({required this.onTap});
-
-  final VoidCallback? onTap;
-
-  static const _padV = 10.0;
-  static const _padH = 20.0;
-  static const _radius = 20.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return AppPressable(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: _padV.h, horizontal: _padH.w),
-        decoration: BoxDecoration(
-          color: colors.linkRetryChipBg,
-          borderRadius: BorderRadius.circular(_radius.r),
-        ),
-        child: Text(
-          '코드 다시 만들기',
-          style: context.typo.linkRetryChip.copyWith(color: colors.textPrimary),
-        ),
-      ),
-    );
   }
 }

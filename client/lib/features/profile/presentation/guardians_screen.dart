@@ -1,0 +1,298 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/network/server_error_code.dart';
+import '../../../core/router/app_router.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_dialog.dart';
+import '../../../core/widgets/elum_error_view.dart';
+import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/settings_tile.dart';
+import '../../../core/widgets/show_failure.dart';
+import '../../guardian/data/routine_repository.dart' show memberProvider;
+import '../application/profile_session.dart';
+import '../data/profile_repository.dart';
+import '../domain/guardian_member.dart';
+import 'guardian_edit_sheet.dart';
+
+/// 지금 보는 이룸이를 함께 돌보는 사람 (다중 보호자 #362).
+///
+/// 서버가 알려 주는 것은 이룸이 안에서 불리는 **이름·구분·합류 순서**뿐이다 — 계정 ID·아이디는
+/// 내려오지 않는다. 그래서 이 화면에도 나오지 않는다.
+///
+/// 목록은 이룸이마다 다르다. 이룸이를 바꾸면 이 화면을 다시 열어야 하고, 열 때마다 새로 받는다
+/// (autoDispose) — 다른 휴대폰에서 누가 들어오거나 나갔을 수 있다.
+final guardiansProvider = FutureProvider.autoDispose
+    .family<List<Guardian>, String>((ref, profileId) async {
+      final attempt = await ref.watch(profileRepositoryProvider).listGuardians(profileId);
+      // 실패는 던져서 화면이 에러 코드와 다시 시도를 그리게 한다.
+      if (!attempt.isOk) throw attempt.failure!;
+      return attempt.value!;
+    });
+
+/// 함께하는 사람 화면.
+///
+/// > ⚠️ **임시 시안이다.** 시안이 없어 설정 화면의 모양(제목 줄·`SettingsTile`)과 확인 팝업
+/// > (`showElumDialog`)을 그대로 빌렸다. 시안이 나오면 바꾼다.
+///
+/// ## 나가기는 되돌릴 수 없다
+///
+/// 확인 팝업이 **먼저 무엇이 사라지고 무엇이 남는지** 말한다. 확인하기 전에는 서버에 아무것도
+/// 보내지 않는다. 마지막 보호자이면 이룸이도 사라진다고 알린다 — 몇 명인지 모르면(목록을
+/// 못 받았으면) 마지막인지 말할 수 없으므로 나가기를 막는다.
+class GuardiansScreen extends ConsumerStatefulWidget {
+  const GuardiansScreen({super.key});
+
+  @override
+  ConsumerState<GuardiansScreen> createState() => _GuardiansScreenState();
+}
+
+class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
+  /// 나가기·이름 저장 중. 같은 요청을 두 번 보내지 않는다.
+  bool _busy = false;
+
+  Future<void> _leave(String profileId, String profileName, List<Guardian> guardians) async {
+    if (_busy) return;
+    // 목록에서 "나" 외에 다른 사람이 없으면 마지막 보호자다.
+    final isLast = guardians.every((g) => g.me);
+
+    final ok = await showElumDialog<bool>(
+      context: context,
+      icon: ElumDialogIcon.alert,
+      title: '이 이룸이에서 나갈까요?',
+      // 무엇이 사라지고 무엇이 남는지 먼저 말한다 (되돌릴 수 없는 일 · 서버 명세 4-3).
+      message: isLast
+          ? '함께하는 보호자가 없어요\n나가면 이룸이와 만든 일과, 모은 별이 모두 사라져요\n되돌릴 수 없어요'
+          : '내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요',
+      actions: const [
+        ElumDialogAction(label: '취소', value: false, tone: ElumDialogTone.neutral),
+        ElumDialogAction(label: '나가기', value: true, tone: ElumDialogTone.danger),
+      ],
+    );
+    if (ok != true || !mounted) return;
+
+    setState(() => _busy = true);
+    final failure = await ref.read(profileRepositoryProvider).leave(profileId);
+    if (!mounted) return;
+
+    // 이미 지워진 이룸이(404)는 나가려던 목적이 이루어진 것이다 — 정리만 한다.
+    final alreadyGone = failure?.server?.code == ServerErrorCode.profileNotFound;
+    if (failure != null && !alreadyGone) {
+      setState(() => _busy = false);
+      await showFailure(
+        context,
+        failure,
+        title: '나가지 못했어요',
+        fallback: '잠시 후 다시 시도해주세요',
+        fallbackCode: 'E-LEAVE',
+      );
+      // 서버가 "이 이룸이는 볼 수 없다"고 답했다면 목록이 옛것이다 — 다시 받는다.
+      if (mounted) ref.invalidate(guardiansProvider(profileId));
+      return;
+    }
+
+    final outcome = await ref.read(profileSessionProvider.notifier).left(profileId);
+    if (!mounted) return;
+    // 화면을 옮기기 전에 잡아 둔다 — 옮긴 뒤에는 이 화면의 context 가 없다.
+    final messenger = ScaffoldMessenger.of(context);
+    switch (outcome) {
+      case LeftOutcome.none:
+        // 이룸이가 하나도 없다 — 이룸이 등록(온보딩)으로 보낸다 (E29).
+        context.go(Routes.onboardingName);
+      case LeftOutcome.switched || LeftOutcome.stayed:
+        context.go(Routes.guardian);
+    }
+    messenger.showSnackBar(SnackBar(content: Text('$profileName에서 나왔어요')));
+  }
+
+  Future<void> _editMe(String profileId, Guardian me) async {
+    if (_busy) return;
+    final edit = await showGuardianEditSheet(context, me: me);
+    if (edit == null || edit.isEmpty || !mounted) return;
+
+    setState(() => _busy = true);
+    final attempt = await ref.read(profileRepositoryProvider).updateMyGuardian(
+      profileId,
+      kind: edit.kind,
+      displayName: edit.displayName,
+    );
+    if (!mounted) return;
+    setState(() => _busy = false);
+
+    if (!attempt.isOk) {
+      await showFailure(
+        context,
+        attempt.failure,
+        title: '이름을 고치지 못했어요',
+        fallback: '잠시 후 다시 시도해주세요',
+        fallbackCode: 'E-PPL-EDIT',
+      );
+      return;
+    }
+    ref.invalidate(guardiansProvider(profileId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final space = context.space;
+    final active = ref.watch(activeProfileProvider);
+    final memberAsync = ref.watch(memberProvider).isLoading;
+
+    return ElumScaffold(
+      onBack: _busy ? null : () => context.pop(),
+      title: '함께하는 사람',
+      backTop: 67,
+      horizontalPadding: 16,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: 40.h),
+            if (active == null)
+              // 이룸이를 알아내는 중이거나 이룸이가 없다.
+              memberAsync
+                  ? const _Loading()
+                  : const ElumErrorView(
+                      message: '함께하는 사람을 볼 이룸이가 없어요',
+                      description: '이룸이를 먼저 등록해주세요',
+                      errorCode: 'E-PPL-NONE',
+                      compact: true,
+                    )
+            else
+              ..._body(space, active.id, active.displayName),
+            SizedBox(height: space.lg),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _body(AppSpacing space, String profileId, String profileName) {
+    final async = ref.watch(guardiansProvider(profileId));
+    final guardians = async.value;
+
+    return [
+      // 한 줄 설명. 이름을 알면 이름을 쓴다.
+      Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        child: Text(
+          '$profileName를 함께 돌보는 사람이에요',
+          style: context.typo.body.copyWith(color: context.colors.textSecondary),
+        ),
+      ),
+      SizedBox(height: space.sm),
+      if (async.hasError)
+        ElumErrorView.failure(
+          async.error,
+          fallback: '함께하는 사람을 불러오지 못했어요',
+          fallbackCode: 'E-PPL',
+          onRetry: () => ref.invalidate(guardiansProvider(profileId)),
+          compact: true,
+        )
+      else if (guardians == null)
+        const _Loading()
+      else if (guardians.isEmpty)
+        // 보호자가 한 명도 없는 이룸이는 서버에 있을 수 없다. 형식이 달라진 것이다.
+        const ElumErrorView(
+          message: '함께하는 사람을 찾지 못했어요',
+          errorCode: 'E-PPL-EMPTY',
+          compact: true,
+        )
+      else
+        for (final g in guardians)
+          _GuardianTile(
+            guardian: g,
+            onTap: g.me && !_busy ? () => _editMe(profileId, g) : null,
+          ),
+      SizedBox(height: space.md),
+      SettingsTile(
+        label: '초대 코드 만들기',
+        onTap: _busy ? null : () => context.push(Routes.guardianInvite),
+      ),
+      SettingsTile(
+        label: '초대 코드 넣기',
+        onTap: _busy ? null : () => context.push(Routes.inviteEnter),
+      ),
+      // 되돌릴 수 없는 줄은 맨 아래에 두고 위험색으로 칠한다. 목록을 못 받았으면 몇 명인지
+      // 모르므로 누를 수 없다.
+      SettingsTile(
+        label: '이 이룸이에서 나가기',
+        destructive: true,
+        onTap: (_busy || guardians == null || guardians.isEmpty)
+            ? null
+            : () => _leave(profileId, profileName, guardians),
+      ),
+    ];
+  }
+}
+
+class _Loading extends StatelessWidget {
+  const _Loading();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.symmetric(vertical: 24.h),
+    child: const Center(child: CircularProgressIndicator()),
+  );
+}
+
+/// 함께하는 사람 한 줄. 이름 · (나) · 구분. **내 줄만 누를 수 있다** — 남의 표시는 못 고친다.
+class _GuardianTile extends StatelessWidget {
+  const _GuardianTile({required this.guardian, required this.onTap});
+
+  final Guardian guardian;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typo = context.typo;
+
+    final row = SizedBox(
+      height: SettingsTile.height.h,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: SettingsTile.padH.w),
+        child: Row(
+          children: [
+            Flexible(
+              child: Text(
+                guardian.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: typo.settingsTileLabel.copyWith(color: colors.textPrimary),
+              ),
+            ),
+            if (guardian.me) ...[
+              SizedBox(width: 8.w),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: colors.border,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Text('나', style: typo.bodySmall.copyWith(color: colors.textSecondary)),
+              ),
+            ],
+            const Spacer(),
+            Text(
+              guardian.kind.label,
+              style: typo.settingsTileLabel.copyWith(color: colors.textPlaceholder),
+            ),
+            if (onTap != null) ...[
+              SizedBox(width: 4.w),
+              Icon(Icons.chevron_right_rounded, size: 20.w, color: colors.settingsChevron),
+            ],
+          ],
+        ),
+      ),
+    );
+
+    // 값만 보여 주는 줄은 눌림 반응을 주지 않는다 (설정의 앱 정보와 같다).
+    if (onTap == null) return MergeSemantics(child: row);
+    return AppPressable(onTap: onTap, child: row);
+  }
+}
