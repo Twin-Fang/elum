@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/app_info_tile.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/widgets/show_failure.dart';
-import '../../../core/app_status/app_status_repository.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -195,7 +195,7 @@ class _GuardianSettingsScreenState
         // 앱 버전은 **목록의 한 줄**로 둔다 (#418). 예전에는 화면 맨 아래 가운데
         // 글자였는데(#289) 목록과 떨어져 있어 "앱 정보"로 찾기 어려웠다.
         // 제보를 받았을 때 어느 빌드인지 알아야 재현할 수 있다.
-        const _AppInfoTile(),
+        const AppInfoTile(),
         // `문의하기`는 **일부러 뺐다** (#312, 2026-09-23 결정).
         // 시안(`1022:4467`)에는 이 자리(약관과 로그아웃 사이)에 그려져 있지만
         // App Store 심사 기간에는 두지 않는다 — 애플이 요구하는 것은 스토어
@@ -292,27 +292,6 @@ class _ImageStyleTile extends ConsumerWidget {
       valueText: style.label,
       showChevronWithValue: true,
       onTap: busy ? null : () => context.push(Routes.guardianImageStyle),
-    );
-  }
-}
-
-/// `앱 정보` 줄. 오른쪽에 `v1.44.0` 처럼 앱 버전을 보여주고, 누를 수는 없다.
-///
-/// 버전을 못 읽으면(플러그인 미등록·테스트 환경) 값 자리만 비운다. 사용자가 할 수
-/// 있는 일이 없으므로 오류로 보여줄 이유가 없고, 줄은 남겨 자리가 흔들리지 않게 한다.
-class _AppInfoTile extends ConsumerWidget {
-  const _AppInfoTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final version = ref
-        .watch(appVersionProvider)
-        .maybeWhen(data: (value) => value, orElse: () => '');
-
-    return SettingsTile(
-      label: '앱 정보',
-      onTap: null,
-      valueText: version.isEmpty ? '' : 'v$version',
     );
   }
 }

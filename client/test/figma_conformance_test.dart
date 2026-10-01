@@ -216,9 +216,13 @@ void main() {
     required List<Routine> routines,
     int stars = 0,
     CardCharacter character = CardCharacter.cat,
+    // 시안 1197:6774 는 이룸이 휴대폰(별 + 톱니)이다. 보호자 휴대폰(425:4392)은 캐릭터 배지라
+    // 상단 줄이 다르다 (#485).
+    bool elumiDevice = false,
   }) => ProviderScope(
         overrides: [
           testStorageOverride(
+            elumiDevice: elumiDevice,
             onboardingCompleted: true,
             nickname: '하늘이',
             character: character.apiValue,
@@ -557,7 +561,7 @@ void main() {
 
   // 이룸이가 직접 쓰는 화면이라 올려 둔다. 값으로 대조했을 때는 열두 값이
   // 모두 맞았지만(#297), 픽셀로 맞대본 적은 없었다.
-  testWidgets('이룸이 홈 (Figma 1197:6810)', (tester) async {
+  testWidgets('이룸이 홈 — 이룸이 휴대폰 (Figma 1197:6810)', (tester) async {
     await tester.pumpWidget(
       wrapChild(
         // 시안이 그린 내용 그대로. 다르면 차이 그림이 통째로 붉어진다.
@@ -566,6 +570,7 @@ void main() {
           routine('c2', '밥 먹기 전에 손을 씻어요', reward: '거실에서 저녁 먹기', percent: 50),
         ],
         stars: 15,
+        elumiDevice: true,
       ),
     );
     await tester.pumpAndSettle();
@@ -1077,7 +1082,7 @@ void main() {
   // 이룸이 홈 빈 상태 (#297). 일과가 하나도 없을 때 무엇을 보여주는지는
   // 시안에 따로 그려져 있다 — 빈 화면이 아니라 시무룩한 캐릭터와 안내다.
   testWidgets('이룸이 홈 — 빈 상태 (Figma 1197:6846)', (tester) async {
-    await tester.pumpWidget(wrapChild(routines: const [], stars: 0));
+    await tester.pumpWidget(wrapChild(routines: const [], stars: 0, elumiDevice: true));
     await tester.pumpAndSettle();
     await precacheAllImages(tester);
 
@@ -1750,7 +1755,12 @@ void main() {
   // 고른 친구에 따라 **시무룩한 그림과 배지가 바뀐다** — 루루만 보고 있었다.
   testWidgets('이룸이 홈 — 빈 상태 · 포포 (Figma 1197:6869)', (tester) async {
     await tester.pumpWidget(
-      wrapChild(routines: const [], stars: 0, character: CardCharacter.fox),
+      wrapChild(
+        routines: const [],
+        stars: 0,
+        character: CardCharacter.fox,
+        elumiDevice: true,
+      ),
     );
     await tester.pumpAndSettle();
     await precacheAllImages(tester);

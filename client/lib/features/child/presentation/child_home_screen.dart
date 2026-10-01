@@ -12,6 +12,7 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/character_badge.dart';
 import '../../../core/widgets/routine_progress_ring.dart';
 import '../../../shared/utils/korean_particle.dart';
 import '../../../shared/models/routine.dart';
@@ -129,32 +130,35 @@ class ChildHomeScreen extends ConsumerWidget {
   }
 }
 
-/// 로고 + 별 배지 + 설정 톱니 (Figma 1197:6810 상단).
+/// 이룸이 홈 상단 줄. **휴대폰 종류에 따라 시안이 둘이다** (#485).
 ///
-/// 시안이 바뀌어(#445) 캐릭터 얼굴 버튼이 톱니로 대체됐다. **톱니가 하는 일은 휴대폰 종류에 따라 갈린다**
-/// (#363 · #198 19번).
-///
-/// | | 보호자 휴대폰 | 이룸이 휴대폰 (연결 암호로 붙은 휴대폰) |
+/// | | 보호자 휴대폰 (`425:4392`) | 이룸이 휴대폰 (`1197:6774`) |
 /// | --- | --- | --- |
-/// | 톱니 자리 | 별 **오른쪽** (시안 그대로) | 별 **왼쪽** (임시 시안) |
-/// | 누르면 | 비밀암호 → 보호자 화면 | 설정 시트 (`로그아웃` · `회원탈퇴`) |
+/// | 별 배지 | x247 | x271 |
+/// | 오른쪽 끝 | **캐릭터 배지** 56×56 (x313, y70) | **설정 톱니** 24×24 (x345, y86) |
+/// | 누르면 | 비밀암호 → 보호자 화면 | 설정 시트 (`약관` · `앱 정보` · `로그아웃` · `회원탈퇴`) |
+///
+/// #445가 이룸이 화면을 새 시안(`1197:6774`)으로 맞출 때 이 시안이 **이룸이 휴대폰** 것이라는 것을 놓쳐
+/// 보호자 휴대폰까지 톱니로 만들었다. 보호자 휴대폰은 `425:4392` 그대로 캐릭터 배지를 쓴다.
 ///
 /// 이룸이 휴대폰은 보호자 화면에 갈 곳이 없다 — 암호를 맞춰도 라우터가 막는다. 그래서 그 길(비밀암호
-/// 화면)로 보내는 버튼을 두지 않고 설정을 둔다. 시안(1197:6810)이 그린 것은 보호자 휴대폰이라 거기는 그대로
-/// 두고, 이룸이 휴대폰 배치는 시안이 없어 이슈 #198 19번의 그림(`[로고] [⚙️] [⭐12]`)을 따랐다.
+/// 화면)로 보내는 버튼 대신 설정을 둔다 (#363).
 class _TopBar extends ConsumerWidget {
   const _TopBar();
 
-  /// 안전영역 아래 여백 — 시안 상단 줄이 y=74다 (59 + 15). 줄 높이가 별 배지(48)라
-  /// 배지 윗변이 그대로 74에 선다. 로고(30)는 세로 가운데라 y=83이다.
-  static const _topBarTop = 15.0;
+  /// 안전영역(59) 아래 여백. 줄 윗변이 시안 y 에 서도록 휴대폰 종류별로 다르다.
+  /// - 이룸이 휴대폰: 줄 높이가 별 배지(48)라 윗변이 곧 별 윗변 y74 → 59 + 15
+  /// - 보호자 휴대폰: 줄 높이가 캐릭터 배지(56)라 윗변이 배지 윗변 y70 → 59 + 11.
+  ///   별(48)은 세로 가운데에 서 y74 가 되고, 로고(30)도 가운데라 y83 이다.
+  static const _elumiTop = 15.0;
+  static const _guardianTop = 11.0;
 
   /// 톱니 그림 크기(24)와 누를 자리(48). 아동 화면은 터치 타겟을 넉넉히 잡는다.
   static const _gearIcon = 24.0;
   static const _gearHit = 48.0;
 
-  /// 이룸이 휴대폰에서 톱니 누를 자리와 별 배지 사이. 누를 자리끼리 8 이상 떨어진다 (docs 7-1).
-  static const _gearToStarGap = 8.0;
+  /// 보호자 휴대폰에서 별 배지 오른쪽 끝(x297)과 캐릭터 배지(x313) 사이.
+  static const _starToBadgeGap = 16.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -164,10 +168,6 @@ class _TopBar extends ConsumerWidget {
         .watch(memberProvider)
         .maybeWhen(data: (member) => member?.totalStars ?? 0, orElse: () => 0);
     final isElumi = ref.watch(localStorageProvider).isElumiDevice;
-
-    // 누를 자리를 그림보다 12 씩 키운 만큼 바깥 여백·간격에서 뺀다.
-    // 그림이 시안 자리(별 배지 오른쪽 끝 x321 → 톱니 x345~369)에 그대로 선다.
-    const overhang = (_gearHit - _gearIcon) / 2;
 
     // 별 배지 — 탭하면 누적 별 화면으로 (Figma 364:8219)
     final star = AppPressable(
@@ -179,15 +179,50 @@ class _TopBar extends ConsumerWidget {
       child: _StarBadge(count: stars),
     );
 
-    final gear = AppPressable(
-      onTap: isElumi
-          ? () => ElumiSettingsSheet.show(context)
-          // 보호자로 돌아가려면 암호가 필요하다
-          : () => context.push(
-              '${Routes.modeSwitch}?to=${ModeSwitchTarget.guardian.name}',
+    if (!isElumi) {
+      // 보호자 휴대폰 (425:4392) — 별 + 캐릭터 배지
+      // 온보딩에서 고른 캐릭터. 배지 테두리 색이 캐릭터마다 다르다.
+      // 아직 안 골랐으면 고양이(루루)로 둔다 — 화면은 떠야 한다.
+      final character =
+          ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
+
+      return Padding(
+        padding: EdgeInsets.fromLTRB(
+          space.screenH,
+          _guardianTop,
+          space.screenH,
+          0,
+        ),
+        child: Row(
+          children: [
+            SvgPicture.asset(AppAssets.homeLogo, width: 80.w, height: 30.h),
+            const Spacer(),
+            star,
+            SizedBox(width: _starToBadgeGap.w),
+            // 보호자로 돌아가려면 암호가 필요하다
+            AppPressable(
+              onTap: () => context.push(
+                '${Routes.modeSwitch}?to=${ModeSwitchTarget.guardian.name}',
+              ),
+              scaleDown: AppPressable.scaleIcon,
+              semanticLabel: '보호자 화면으로 가기',
+              // 여우 배지 자르기(#311)가 보호자 홈과 같아야 해 공용 위젯을 쓴다
+              child: CharacterBadge(character: character),
             ),
+          ],
+        ),
+      );
+    }
+
+    // 이룸이 휴대폰 (1197:6774) — 별 + 설정 톱니. 톱니가 별 오른쪽 x345 에 선다.
+    // 누를 자리를 그림보다 12 씩 키운 만큼 바깥 여백·간격에서 뺀다.
+    // 그림이 시안 자리(별 배지 오른쪽 끝 x321 → 톱니 x345~369)에 그대로 선다.
+    const overhang = (_gearHit - _gearIcon) / 2;
+
+    final gear = AppPressable(
+      onTap: () => ElumiSettingsSheet.show(context),
       scaleDown: AppPressable.scaleIcon,
-      semanticLabel: isElumi ? '설정 열기' : '보호자 화면으로 가기',
+      semanticLabel: '설정 열기',
       child: SizedBox(
         width: _gearHit.w,
         height: _gearHit.w,
@@ -204,28 +239,21 @@ class _TopBar extends ConsumerWidget {
     );
 
     return Padding(
-      // 안전영역(59) 아래 10 → 상단 줄이 시안 y=74에 선다.
       padding: EdgeInsets.fromLTRB(
         space.screenH,
-        _topBarTop,
-        // 이룸이 휴대폰은 별이 맨 오른쪽이라 톱니 몫을 빼지 않는다
-        (isElumi ? space.screenH : space.screenH - overhang).w,
+        _elumiTop,
+        (space.screenH - overhang).w,
         0,
       ),
       child: Row(
         children: [
           SvgPicture.asset(AppAssets.homeLogo, width: 80.w, height: 30.h),
           const Spacer(),
-          if (isElumi) ...[
-            gear,
-            SizedBox(width: _gearToStarGap.w),
-            star,
-          ] else ...[
-            star,
-            // 시안 별 배지(~x321)와 톱니(x345) 사이 24에서 누를 자리 몫을 뺀다
-            SizedBox(width: (space.screenH - overhang).w),
-            gear,
-          ],
+          star,
+          // 시안 별 배지(~x321)와 톱니(x345) 사이 24에서 누를 자리 몫을 뺀다.
+          // 누를 자리끼리 12 떨어진다 (docs 7-1: 8 이상).
+          SizedBox(width: (space.screenH - overhang).w),
+          gear,
         ],
       ),
     );

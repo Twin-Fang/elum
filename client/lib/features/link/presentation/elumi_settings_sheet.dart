@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/app_info_tile.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
+import '../../auth/presentation/consent_document_list_screen.dart';
 import '../application/link_reset.dart';
 import '../data/device_link_repository.dart';
 
@@ -163,6 +165,20 @@ class _ElumiSettingsSheetState extends ConsumerState<ElumiSettingsSheet> {
                   ),
                 ),
                 SizedBox(height: 8.h),
+                // 읽을거리와 되돌릴 수 없는 동작을 섞지 않는다 — 계정을 끊는 두 줄은 맨 아래다.
+                // 순서는 보호자 설정과 같다 (약관 → 앱 정보 → 로그아웃 → 회원탈퇴).
+                SettingsTile(
+                  label: '약관 및 개인정보처리방침',
+                  // 시트 위에 화면을 올린다 — 돌아오면 시트가 그대로 있다
+                  onTap: _busy
+                      ? null
+                      : () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const ConsentDocumentListScreen(),
+                          ),
+                        ),
+                ),
+                const AppInfoTile(),
                 SettingsTile(
                   label: '로그아웃',
                   onTap: _busy ? null : () => _exit(_Exit.logout),

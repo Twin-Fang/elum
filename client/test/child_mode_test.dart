@@ -192,15 +192,17 @@ void main() {
       expect(find.text('별 화면'), findsOneWidget);
     });
 
-    testWidgets('오른쪽 위는 캐릭터 배지가 아니라 톱니다 (시안 1197:6810)', (tester) async {
-      // 시안이 바뀌어(#445) 캐릭터 얼굴 버튼이 톱니(24×24)로 대체됐다.
+    testWidgets('보호자 휴대폰 — 오른쪽 위는 톱니가 아니라 캐릭터 배지다 (시안 425:4392)', (
+      tester,
+    ) async {
+      // #445가 이룸이 휴대폰 시안(1197:6774)을 보호자 휴대폰에도 적용해 톱니로 바꿨던 것을 되돌렸다 (#485).
       await pumpChild(tester);
 
-      expect(svgWithAsset(AppAssets.iconSettings), findsOneWidget);
       expect(
         svgWithAsset(AppAssets.characterBadgeFramed(CardCharacter.cat)),
-        findsNothing,
+        findsOneWidget,
       );
+      expect(svgWithAsset(AppAssets.iconSettings), findsNothing);
     });
   });
 
@@ -425,11 +427,13 @@ void main() {
       // 배지를 눌러 곧장 보호자 홈으로 가면 아이가 혼자 빠져나갈 수 있다.
       await pumpChild(tester, pin: '1234');
 
-      // 상단 오른쪽 톱니가 보호자 모드로 나가는 유일한 입구다 (#445)
+      // 상단 오른쪽 캐릭터 배지가 보호자 화면으로 나가는 유일한 입구다 (#485)
       await tester.tap(
         find
             .ancestor(
-              of: svgWithAsset(AppAssets.iconSettings),
+              of: svgWithAsset(
+                AppAssets.characterBadgeFramed(CardCharacter.cat),
+              ),
               matching: find.byType(AppPressable),
             )
             .first,
