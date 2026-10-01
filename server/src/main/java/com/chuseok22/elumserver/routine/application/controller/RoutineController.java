@@ -81,8 +81,8 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<RoutineResponse> getRoutine(
     Authentication authentication, @PathVariable String routineId
   ) {
-    RoutineResponse response = routineService.getRoutine(Caller.from(authentication), routineId);
-    return ResponseEntity.ok(response);
+    Caller caller = Caller.from(authentication);
+    return ResponseEntity.ok(routineService.getRoutine(caller, routineId).forCaller(caller));
   }
 
   @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
@@ -91,8 +91,8 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication,
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
   ) {
-    List<RoutineResponse> responses = routineService.getMyRoutines(Caller.from(authentication, profileId));
-    return ResponseEntity.ok(responses);
+    Caller caller = Caller.from(authentication, profileId);
+    return ResponseEntity.ok(forCaller(caller, routineService.getMyRoutines(caller)));
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
@@ -102,8 +102,8 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication,
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
   ) {
-    List<RoutineResponse> responses = routineService.getTodayRoutines(Caller.from(authentication, profileId));
-    return ResponseEntity.ok(responses);
+    Caller caller = Caller.from(authentication, profileId);
+    return ResponseEntity.ok(forCaller(caller, routineService.getTodayRoutines(caller)));
   }
 
   @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
@@ -177,8 +177,8 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication,
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
   ) {
-    List<RoutineResponse> response = routineService.getPastRoutines(Caller.from(authentication, profileId));
-    return ResponseEntity.ok(response);
+    Caller caller = Caller.from(authentication, profileId);
+    return ResponseEntity.ok(forCaller(caller, routineService.getPastRoutines(caller)));
   }
 
   @LogMonitoring
@@ -187,8 +187,8 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication,
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
   ) {
-    List<RoutineResponse> response = routineService.getDraftRoutines(Caller.from(authentication, profileId));
-    return ResponseEntity.ok(response);
+    Caller caller = Caller.from(authentication, profileId);
+    return ResponseEntity.ok(forCaller(caller, routineService.getDraftRoutines(caller)));
   }
 
   // AI를 호출하지 않는다. 같은 카드로 오늘 일과를 하나 더 만드는 것뿐이다.
@@ -226,8 +226,8 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<RoutineResponse> completeStep(
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
   ) {
-    RoutineResponse response = routineService.completeStep(Caller.from(authentication), routineId, stepId);
-    return ResponseEntity.ok(response);
+    Caller caller = Caller.from(authentication);
+    return ResponseEntity.ok(routineService.completeStep(caller, routineId, stepId).forCaller(caller));
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
@@ -236,8 +236,8 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<RoutineResponse> cancelStep(
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
   ) {
-    RoutineResponse response = routineService.cancelStep(Caller.from(authentication), routineId, stepId);
-    return ResponseEntity.ok(response);
+    Caller caller = Caller.from(authentication);
+    return ResponseEntity.ok(routineService.cancelStep(caller, routineId, stepId).forCaller(caller));
   }
 
   // 오프라인 퍼스트 동기화 — 완료 집합을 통째로 받아 멱등 반영한다 (이슈 #140).
@@ -249,10 +249,9 @@ public class RoutineController implements RoutineControllerDocs {
     @PathVariable String routineId,
     @RequestBody RoutineProgressSyncRequest request
   ) {
-    RoutineResponse response = routineService.syncProgress(
-      Caller.from(authentication), routineId, request.completedStepIdsOrEmpty()
-    );
-    return ResponseEntity.ok(response);
+    Caller caller = Caller.from(authentication);
+    RoutineResponse response = routineService.syncProgress(caller, routineId, request.completedStepIdsOrEmpty());
+    return ResponseEntity.ok(response.forCaller(caller));
   }
 
   // 보호자가 카드를 한 장 직접 추가한다 (이슈 #199).
@@ -309,5 +308,10 @@ public class RoutineController implements RoutineControllerDocs {
   ) {
     RoutineResponse response = routineService.deleteStep(Caller.from(authentication), routineId, stepId);
     return ResponseEntity.ok(response);
+  }
+
+  // 이룸이 휴대폰이면 보호자 원문 계열을 뺀 목록으로 바꾼다 (#357).
+  private static List<RoutineResponse> forCaller(Caller caller, List<RoutineResponse> responses) {
+    return responses.stream().map(r -> r.forCaller(caller)).toList();
   }
 }

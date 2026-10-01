@@ -253,6 +253,62 @@ class RoutineAiPipelineTest {
   }
 
   @Test
+  @DisplayName("AI 가 쓴 이룸이는 제목·카드 제목·설명에서 실제 이름으로 바뀌고 조사도 맞춰진다. 그림은 자리표시 문장으로 그린다 (#374)")
+  void generateForCreate_restoresNicknameInTextButDrawsWithPlaceholder() {
+    String json = "{\"title\":\"이룸이가 치과에 가요\",\"steps\":["
+      + "{\"order\":1,\"title\":\"이룸이는 칫솔을 챙겨요\",\"description\":\"이룸이와 함께 가요\"}]}";
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
+    when(imageGenerationClient.generateImage(any(), any()))
+      .thenReturn(new GeneratedImage(new byte[]{1}, "png"));
+    when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
+
+    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
+      "치과 가기", "하늘", Set.of(), null, CharacterType.LULU, ImageStyle.CARTOON, "profile-1"
+    );
+
+    assertThat(result.title()).isEqualTo("하늘이 치과에 가요");
+    assertThat(result.steps().get(0).title()).isEqualTo("하늘은 칫솔을 챙겨요");
+    assertThat(result.steps().get(0).description()).isEqualTo("하늘과 함께 가요");
+    // 이름은 그림 AI(OpenAI·FLUX)에도 가면 안 된다 — 치환은 그림을 그린 뒤에 한다
+    verify(imageGenerationClient).generateImage("이룸이와 함께 가요", CharacterType.LULU);
+  }
+
+  @Test
+  @DisplayName("이름이 비어 있으면 AI 가 쓴 이룸이를 그대로 둔다 (#374 E1)")
+  void generateForCreate_blankNickname_keepsPlaceholder() {
+    String json = "{\"title\":\"이룸이가 치과에 가요\",\"steps\":["
+      + "{\"order\":1,\"title\":\"칫솔을 챙겨요\",\"description\":\"칫솔을 챙겨요\"}]}";
+    when(textGenerationClient.generateRoutineJson(any(), any(), any(), any(), anyBoolean())).thenReturn(json);
+    when(imageGenerationClient.generateImage(any(), any()))
+      .thenReturn(new GeneratedImage(new byte[]{1}, "png"));
+    when(routineImageStorage.save(any(), any(), any())).thenReturn("data/routine-images/batch/1.png");
+
+    RoutineAiPipeline.RoutineGenerationResult result = routineAiPipeline.generateForCreate(
+      "치과 가기", " ", Set.of(), null, CharacterType.LULU, ImageStyle.CARTOON, "profile-1"
+    );
+
+    assertThat(result.title()).isEqualTo("이룸이가 치과에 가요");
+  }
+
+  @Test
+  @DisplayName("추가 질문의 질문 문장과 선택지에 든 이룸이도 실제 이름으로 바뀐다 (#374 E8)")
+  void generateQuestion_restoresNicknameInQuestionAndOptions() {
+    String json = "{\"questions\":[{\"supportGoal\":\"PREPARE_ITEMS\",\"question\":\"이룸이가 혼자 잠들 때 챙겨야 할 물건이 있나요?\","
+      + "\"options\":[{\"emoji\":\"🧸\",\"label\":\"이룸이의 인형\"},{\"emoji\":\"💡\",\"label\":\"무드등\"},"
+      + "{\"emoji\":\"🛏️\",\"label\":\"이불\"}]}]}";
+    when(textGenerationClient.generateQuestionJson(any(), any(), any())).thenReturn(json);
+
+    RoutineAiPipeline.RoutineQuestionResult result = routineAiPipeline.generateQuestion(
+      "하늘", Set.of(SupportGoal.PREPARE_ITEMS), "잠자기"
+    );
+
+    assertThat(result.questions().get(0).question()).isEqualTo("하늘이 혼자 잠들 때 챙겨야 할 물건이 있나요?");
+    assertThat(result.questions().get(0).options())
+      .extracting(RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult::label)
+      .containsExactly("하늘의 인형", "무드등", "이불");
+  }
+
+  @Test
   @DisplayName("캐릭터를 선택하지 않은 회원이면 이미지 생성 호출에 캐릭터 없이(null) 전달된다")
   void generateForCreate_noCharacter_passesNullCharacterToImageClient() {
     String json = "{\"title\":\"병원 가기\",\"steps\":[{\"order\":1,\"title\":\"옷을 입어요\",\"description\":\"옷을 입어요\"}]}";

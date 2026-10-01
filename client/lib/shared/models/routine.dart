@@ -112,12 +112,12 @@ abstract class Routine with _$Routine {
   }
 
   /// 오프라인 캐시 저장용 — [fromJson]과 대칭이어야 한다 (이슈 #140).
-  /// 원문(rawInputText)도 포함되므로 **이 결과를 로그에 찍지 않는다** (docs 원칙 5번).
+  /// 원문(rawInputText)·마스킹본(sanitizedInputText)은 **일부러 넣지 않는다** —
+  /// 화면이 읽지 않는 값이고 로컬에 남기면 docs 원칙 5번을 어긴다 (#358).
+  /// 그래서 왕복하면 두 필드는 빈 문자열이 된다.
   Map<String, dynamic> toJson() => {
     'id': id,
     'title': title,
-    'rawInputText': rawInputText,
-    'sanitizedInputText': sanitizedInputText,
     'status': status,
     'steps': steps.map((s) => s.toJson()).toList(),
     'completedStepCount': completedStepCount,

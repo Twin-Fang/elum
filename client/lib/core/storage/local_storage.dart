@@ -309,7 +309,7 @@ class SharedPrefsStorage implements LocalStorage {
 
   @override
   Future<void> setCachedTodayRoutinesJson(String json) {
-    // 서버 응답에는 보호자 원문(rawInputText)이 들어 있다 — 값은 로그에 찍지 않는다 (docs 원칙 5번).
+    // 호출부가 원문 계열 키를 뺀 JSON 만 넘긴다(#358). 그래도 값은 로그에 찍지 않는다.
     AppLogger.storageWrite(_kCachedToday, '${json.length}B');
     return _prefs.setString(_kCachedToday, json);
   }
