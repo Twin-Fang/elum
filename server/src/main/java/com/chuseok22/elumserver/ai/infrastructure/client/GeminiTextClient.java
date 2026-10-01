@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.ChildProfileInput;
+import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionAiInput;
@@ -226,14 +227,19 @@ public class GeminiTextClient implements TextGenerationClient {
 
   // 실제 호출과 관리자 preview가 같은 조립 결과를 쓰도록 조립 로직만 따로 뗀 메서드.
   // Gemini를 호출하지 않으므로 AdminPromptService.preview()에서도 그대로 재사용한다.
+  //
+  // 이룸이 이름은 AI(Gemini·OpenAI 모두 이 조립기를 쓴다)에 나가지 않는다 (#374). nickname 은 자리표시로
+  // 바꿔 싣고, 보호자가 글·답변에 적은 이름도 자리표시로 바꾼다. 응답의 자리표시는 RoutineAiPipeline 이 되돌린다.
   public String buildCreateRoutineUserContent(
     String routineText, String nickname, Set<SupportGoal> supportGoals, List<String> answers
   ) {
+    List<String> maskedAnswers = answers == null ? List.<String>of()
+      : answers.stream().map(answer -> NicknamePlaceholder.mask(answer, nickname)).toList();
     RoutineCreateAiInput input = new RoutineCreateAiInput(
       "CREATE_ROUTINE",
-      routineText,
-      new ChildProfileInput(nickname, supportGoals == null ? Set.of() : supportGoals),
-      answers == null ? List.of() : answers,
+      NicknamePlaceholder.mask(routineText, nickname),
+      new ChildProfileInput(NicknamePlaceholder.forAi(nickname), supportGoals == null ? Set.of() : supportGoals),
+      maskedAnswers,
       pictogramCatalog.ids()
     );
     return toJson(input);
@@ -253,8 +259,8 @@ public class GeminiTextClient implements TextGenerationClient {
 
   public String buildQuestionUserContent(String routineText, String nickname, Set<SupportGoal> supportGoals) {
     RoutineQuestionAiInput input = new RoutineQuestionAiInput(
-      "GENERATE_ROUTINE_QUESTIONS", routineText,
-      new ChildProfileInput(nickname, supportGoals == null ? Set.of() : supportGoals)
+      "GENERATE_ROUTINE_QUESTIONS", NicknamePlaceholder.mask(routineText, nickname),
+      new ChildProfileInput(NicknamePlaceholder.forAi(nickname), supportGoals == null ? Set.of() : supportGoals)
     );
     return toJson(input);
   }

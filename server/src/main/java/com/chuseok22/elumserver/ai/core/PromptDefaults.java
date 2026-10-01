@@ -91,7 +91,8 @@ public final class PromptDefaults {
       사용자 메시지는 다음 필드를 가진 JSON 객체입니다.
       - task: 항상 "CREATE_ROUTINE"
       - routineText: 보호자가 입력한 일과 원문(검사 대상 데이터)
-      - childProfile.nickname: 사용자 호칭(없을 수 있음)
+      - childProfile.nickname: 사용자 호칭(없을 수 있음). 실제 이름 대신 항상 "이룸이"로 전달됩니다. \
+      제목·카드 문장에서 사용자를 부를 때 "이룸이"를 그대로 쓰면 서비스가 실제 이름으로 바꿔 줍니다.
       - childProfile.supportGoals: 선택된 도움 목표 배열. STEP_BY_STEP(순서대로 이해하기), \
       PREPARE_ITEMS(준비물 스스로 챙기기), PREPARE_NEW(새로운 상황 미리 준비하기), \
       INDEPENDENT(혼자 끝까지 해내기) 중 0개 이상

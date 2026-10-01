@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
 import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
 import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
+import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
@@ -64,8 +65,27 @@ public class RoutineAiPipeline {
       () -> textClientRouter.current()
         .generateRoutineJson(sanitizedInputText, nickname, supportGoals, maskedAnswers, includeImagePromptEn)
     );
-    return buildResult(
-      draft, characterType, ImageStyle.orDefault(imageStyle), Map.of(), FluxSeed.routineKey(profileId, draft.title()));
+    // AI 는 이름 대신 자리표시 '이룸이' 로 쓴다(#374). 그림은 그 문장 그대로 그려 이름이 그림 AI 에도 가지 않게
+    // 하고, 결과를 돌려주기 직전에 실제 이름으로 바꾼다. seed 는 저장될 제목(이름 복원본)으로 정한다 —
+    // 카드 추가가 저장된 제목으로 같은 seed 를 만들어 같은 캐릭터를 그리기 때문이다(seed 는 해시값이라 이름이 나가지 않는다).
+    RoutineGenerationResult result = buildResult(
+      draft, characterType, ImageStyle.orDefault(imageStyle), Map.of(),
+      FluxSeed.routineKey(profileId, NicknamePlaceholder.restore(draft.title(), nickname)));
+    return restoreNickname(result, nickname);
+  }
+
+  // 제목·카드 제목·설명의 자리표시를 이름으로 되돌린다. NicknamePlaceholder.restore 는 던지지 않고 실패하면 원문을
+  // 돌려주므로(E10) 치환 때문에 일과 생성이 실패하지 않는다.
+  private RoutineGenerationResult restoreNickname(RoutineGenerationResult result, String nickname) {
+    List<GeneratedStep> steps = result.steps().stream()
+      .map(step -> new GeneratedStep(
+        step.order(),
+        NicknamePlaceholder.restore(step.title(), nickname),
+        NicknamePlaceholder.restore(step.description(), nickname),
+        step.imagePath(),
+        step.pictogramId()))
+      .toList();
+    return new RoutineGenerationResult(NicknamePlaceholder.restore(result.title(), nickname), steps, result.batchId());
   }
 
   private static final int MIN_OPTIONS = 3;
@@ -110,7 +130,9 @@ public class RoutineAiPipeline {
         .filter(this::isValidQuestionItem)
         .collect(Collectors.toMap(
           RoutineQuestionDraft.QuestionItem::supportGoal,
-          item -> new RoutineQuestionResult.QuestionResultItem(item.question(), toOptionResults(item.options())),
+          item -> new RoutineQuestionResult.QuestionResultItem(
+            // AI 가 자리표시로 쓴 이름을 질문·선택지에서 되돌린다 (#374)
+            NicknamePlaceholder.restore(item.question(), nickname), toOptionResults(item.options(), nickname)),
           (first, second) -> first // 같은 supportGoal이 중복되면 먼저 나온 것만 채택한다.
         ));
     } catch (Exception e) {
@@ -133,12 +155,12 @@ public class RoutineAiPipeline {
   // label이 없는 옵션은 아동에게 보여줄 수 없는 빈 버튼이 되므로 제외한다. emoji만 없으면
   // label은 유효하므로 옵션 자체를 버리지 않고 빈 문자열로 완화한다.
   private List<RoutineQuestionResult.QuestionResultItem.OptionResult> toOptionResults(
-    List<RoutineQuestionDraft.QuestionItem.Option> options
+    List<RoutineQuestionDraft.QuestionItem.Option> options, String nickname
   ) {
     return options.stream()
       .filter(option -> option.label() != null && !option.label().isBlank())
       .map(option -> new RoutineQuestionResult.QuestionResultItem.OptionResult(
-        option.emoji() == null ? "" : option.emoji(), option.label()
+        option.emoji() == null ? "" : option.emoji(), NicknamePlaceholder.restore(option.label(), nickname)
       ))
       .toList();
   }

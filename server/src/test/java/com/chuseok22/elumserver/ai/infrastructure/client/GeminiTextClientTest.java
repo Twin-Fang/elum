@@ -53,10 +53,52 @@ class GeminiTextClientTest {
     JsonNode node = objectMapper.readTree(json);
     assertThat(node.get("task").asText()).isEqualTo("CREATE_ROUTINE");
     assertThat(node.get("routineText").asText()).isEqualTo("비 오는 날 학교 가기");
-    assertThat(node.get("childProfile").get("nickname").asText()).isEqualTo("하늘이");
+    // 실제 이름은 AI 로 나가지 않는다 — 자리표시만 간다 (#374)
+    assertThat(node.get("childProfile").get("nickname").asText()).isEqualTo("이룸이");
+    assertThat(json).doesNotContain("하늘이");
     assertThat(node.get("childProfile").get("supportGoals").get(0).asText()).isEqualTo("PREPARE_ITEMS");
     assertThat(node.get("additionalAnswers").get(0).asText()).isEqualTo("우산");
     assertThat(node.get("additionalAnswers").get(1).asText()).isEqualTo("물통");
+  }
+
+  @Test
+  @DisplayName("글 생성 요청에 실제 이름이 없다 — 닉네임은 자리표시, 입력 글·추가 답변 속 이름도 자리표시로 바뀐다 (#374)")
+  void buildCreateRoutineUserContent_masksNickname() throws Exception {
+    String json = geminiTextClient.buildCreateRoutineUserContent(
+      "하늘이가 내일 치과에 가요", "하늘", Set.of(SupportGoal.PREPARE_ITEMS), List.of("하늘이는 칫솔이 필요해요")
+    );
+
+    assertThat(json).doesNotContain("하늘");
+    JsonNode node = objectMapper.readTree(json);
+    assertThat(node.get("childProfile").get("nickname").asText()).isEqualTo("이룸이");
+    assertThat(node.get("routineText").asText()).isEqualTo("이룸이가 내일 치과에 가요");
+    assertThat(node.get("additionalAnswers").get(0).asText()).isEqualTo("이룸이는 칫솔이 필요해요");
+  }
+
+  @Test
+  @DisplayName("질문 생성 요청에도 실제 이름이 없다 (#374)")
+  void buildQuestionUserContent_masksNickname() throws Exception {
+    String json = geminiTextClient.buildQuestionUserContent(
+      "하늘이가 내일 치과에 가요", "하늘", Set.of(SupportGoal.PREPARE_ITEMS)
+    );
+
+    assertThat(json).doesNotContain("하늘");
+    JsonNode node = objectMapper.readTree(json);
+    assertThat(node.get("childProfile").get("nickname").asText()).isEqualTo("이룸이");
+    assertThat(node.get("routineText").asText()).isEqualTo("이룸이가 내일 치과에 가요");
+  }
+
+  @Test
+  @DisplayName("이름이 없으면(null·빈 값) nickname 은 null 로 두고 글은 그대로 보낸다 (#374 E1)")
+  void buildUserContent_blankNickname_keepsNull() throws Exception {
+    JsonNode create = objectMapper.readTree(
+      geminiTextClient.buildCreateRoutineUserContent("병원 가기", "  ", Set.of(), List.of()));
+    JsonNode question = objectMapper.readTree(
+      geminiTextClient.buildQuestionUserContent("병원 가기", null, Set.of()));
+
+    assertThat(create.get("childProfile").get("nickname").isNull()).isTrue();
+    assertThat(create.get("routineText").asText()).isEqualTo("병원 가기");
+    assertThat(question.get("childProfile").get("nickname").isNull()).isTrue();
   }
 
   @Test
