@@ -401,6 +401,10 @@ public class RoutineService {
 
   /// 보호자 홈 "임시저장" — 카드는 만들었지만 아직 아이에게 보내지 않은 일과.
   public List<RoutineResponse> getDraftRoutines(Caller caller) {
+    // 임시저장은 전부 승인 전이라 이룸이 토큰에는 줄 것이 없다 (#356).
+    if (caller.isElumi()) {
+      return List.of();
+    }
     return routineRepository
       .findAllByProfileIdAndStatusOrderByCreatedAtDesc(profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId(), RoutineStatus.PENDING_REVIEW)
       .stream()
@@ -788,6 +792,9 @@ public class RoutineService {
 
   public List<RoutineResponse> getMyRoutines(Caller caller) {
     return routineRepository.findAllByProfileId(profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId()).stream()
+      // 이룸이 토큰은 승인 전 일과를 받지 않는다 — 보호자 승인 후에만 이룸이에게 노출한다 (#356).
+      // 임시저장·설정이 쓰는 보호자 호출은 전체를 그대로 받는다.
+      .filter(r -> !caller.isElumi() || r.getStatus() != RoutineStatus.PENDING_REVIEW)
       .map(RoutineResponse::from)
       .toList();
   }
@@ -953,6 +960,10 @@ public class RoutineService {
     Routine routine = routineRepository.findById(routineId)
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_NOT_FOUND));
     profileAccessGuard.checkRoutine(caller, routine.getProfile().getId(), routine.getCreatedBy(), action);
+    // 이룸이 토큰에는 승인 전 일과가 없는 것과 같다 — 존재 여부도 알리지 않는다 (#356).
+    if (caller.isElumi() && routine.getStatus() == RoutineStatus.PENDING_REVIEW) {
+      throw new CustomException(ErrorCode.ROUTINE_NOT_FOUND);
+    }
     return routine;
   }
 

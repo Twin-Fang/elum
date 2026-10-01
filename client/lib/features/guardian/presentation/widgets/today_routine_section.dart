@@ -41,12 +41,18 @@ final homeRoutinesProvider = Provider<List<Routine>>((ref) {
   // 목록을 봐야 보호자가 믿는 것과 이룸이 화면이 같아진다 (#353).
   final fetched = ref.watch(todayRoutinesProvider).value ?? const <Routine>[];
 
+  // 날짜를 한 번 더 본다 — 앱이 자정을 넘겨 켜져 있으면 받아 둔 값과 흐름에 남은
+  // 일과가 어제 것이 된다. 다시 받아 오기 전에도 어제 일과가 남지 않게 한다 (#353).
+  final now = DateTime.now();
+
   return [
     if (current != null &&
         current.steps.isNotEmpty &&
-        current.status != 'PENDING_REVIEW')
+        current.isTodayOn(now))
       current,
-    ...fetched.where((r) => r.id != current?.id && r.steps.isNotEmpty),
+    ...fetched.where(
+      (r) => r.id != current?.id && r.steps.isNotEmpty && r.isTodayOn(now),
+    ),
   ];
 });
 

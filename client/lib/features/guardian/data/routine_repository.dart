@@ -482,16 +482,17 @@ class RoutineRepositoryImpl implements RoutineRepository {
         'getTodayRoutines (캐시)',
         '${cached.length}개 오프라인 캐시 사용',
       );
-      return cached;
+      return _onlyToday(cached);
     }
 
-    // 캐시도 없으면 전체 조회로 폴백. 승인 여부 필터는 화면 provider가 한 번 더 거른다 (docs 원칙 3번).
+    // 캐시도 없으면 전체 조회로 폴백. 전체에는 어제 것·승인 전 것이 섞여 있어 오늘 것만
+    // 남긴다 — 거르지 않으면 보호자 홈 오늘 일과에 그대로 뜬다 (#353, docs 원칙 3번).
     AppLogger.repositorySuccess(
       'RoutineRepository',
       'getTodayRoutines (폴백)',
       '전체 일과 조회로 대체',
     );
-    return getMyRoutines();
+    return _onlyToday(await getMyRoutines());
   }
 
   // --- 보상(강화물) · 일과 정리 (이슈 #148~150) ---
@@ -733,6 +734,13 @@ class RoutineRepositoryImpl implements RoutineRepository {
   ///
   /// 옛 빌드가 저장한 캐시에는 보호자 원문 키가 남아 있을 수 있다 (#358).
   /// 읽을 때 그 키를 지워 다시 쓰므로, 오프라인으로만 열어도 원문이 오래 남지 않는다.
+  /// 서버 `/today` 와 같은 규칙으로 거른다 — 어제 받아 둔 캐시나 전체 목록 폴백이
+  /// 오늘 일과로 나가지 않게 한다 (#353).
+  List<Routine> _onlyToday(List<Routine> routines) {
+    final now = DateTime.now();
+    return routines.where((r) => r.isTodayOn(now)).toList();
+  }
+
   List<Routine>? _readCachedToday() {
     final json = _storage?.cachedTodayRoutinesJson;
     if (json == null) return null;
