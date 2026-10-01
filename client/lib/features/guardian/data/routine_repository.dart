@@ -463,7 +463,8 @@ class RoutineRepositoryImpl implements RoutineRepository {
           'getTodayRoutines',
           '${routines.length}개 오늘 일과 조회됨',
         );
-        // 성공한 응답을 캐시해 둔다 — 다음에 오프라인이면 이걸 보여준다 (이슈 #140)
+        // 성공한 응답을 캐시해 둔다 — 다음에 오프라인이면 이걸 보여준다 (이슈 #140).
+        // toJson 이 보호자 원문을 빼고 직렬화한다 (#358).
         await _storage?.setCachedTodayRoutinesJson(
           jsonEncode(routines.map((r) => r.toJson()).toList()),
         );
@@ -729,18 +730,40 @@ class RoutineRepositoryImpl implements RoutineRepository {
   }
 
   /// 캐시가 깨져 있으면 null — 폴백으로 넘긴다. 캐시 한 건 때문에 화면이 죽으면 안 된다.
+  ///
+  /// 옛 빌드가 저장한 캐시에는 보호자 원문 키가 남아 있을 수 있다 (#358).
+  /// 읽을 때 그 키를 지워 다시 쓰므로, 오프라인으로만 열어도 원문이 오래 남지 않는다.
   List<Routine>? _readCachedToday() {
     final json = _storage?.cachedTodayRoutinesJson;
     if (json == null) return null;
     try {
       final decoded = jsonDecode(json);
       if (decoded is! List) return null;
-      return decoded
-          .whereType<Map<String, dynamic>>()
-          .map(Routine.fromJson)
-          .toList();
+      final maps = decoded.whereType<Map<String, dynamic>>().toList();
+      final routines = maps.map(Routine.fromJson).toList();
+      if (maps.any(
+        (m) => m.containsKey('rawInputText') || m.containsKey('sanitizedInputText'),
+      )) {
+        _rewriteCachedWithoutRaw(routines);
+      }
+      return routines;
     } catch (_) {
       return null;
+    }
+  }
+
+  /// 원문 키가 빠진 형태로 캐시를 덮어쓴다. 쓰기 실패는 읽기 결과에 영향 주지 않는다.
+  void _rewriteCachedWithoutRaw(List<Routine> routines) {
+    try {
+      _storage
+          ?.setCachedTodayRoutinesJson(
+            jsonEncode(routines.map((r) => r.toJson()).toList()),
+          )
+          .catchError((Object e) {
+            AppLogger.repositoryError('RoutineRepository', 'cacheMigrate', e);
+          });
+    } catch (e) {
+      AppLogger.repositoryError('RoutineRepository', 'cacheMigrate', e);
     }
   }
 

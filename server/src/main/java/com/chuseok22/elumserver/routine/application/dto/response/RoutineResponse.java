@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.dto.response;
 
+import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -87,6 +88,19 @@ public record RoutineResponse(
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
       credit, reason);
+  }
+
+  /// 보호자가 쓴 말(원문·마스킹본·재생성 피드백)을 뺀 응답 (#357). 이룸이 휴대폰은 화면에 쓰지 않는 값이라
+  /// 보낼 이유가 없다. 보내지 않으면 휴대폰 캐시·네트워크 로그에도 남을 수 없다.
+  public RoutineResponse withoutSourceText() {
+    return new RoutineResponse(id, title, null, null, scheduledAt, status, null,
+      completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
+      credit, imageSkippedReason);
+  }
+
+  /// 호출자가 이룸이 휴대폰이면 보호자 원문을 뺀다. 보호자 휴대폰은 그대로 돌려준다.
+  public RoutineResponse forCaller(Caller caller) {
+    return caller.isElumi() ? withoutSourceText() : this;
   }
 
   public static RoutineResponse from(Routine routine) {
