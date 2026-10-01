@@ -7,16 +7,20 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/show_failure.dart';
 import '../../../shared/utils/korean_particle.dart';
 import '../../guardian/data/routine_repository.dart' show memberProvider;
 import '../../link/domain/link_status.dart';
 import '../../link/presentation/widgets/link_code_text.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../application/invite_sharer.dart';
 import '../application/profile_session.dart';
 import '../data/profile_repository.dart';
+import '../domain/invite_link.dart';
 
 /// 초대 코드 만들기 — 연결된 보호자가 **함께 돌볼 보호자**를 부른다 (다중 보호자 #362).
 ///
@@ -40,6 +44,16 @@ import '../data/profile_repository.dart';
 ///
 /// 이전에 만든 미사용 코드는 서버가 폐기한다 (E9) — 그래서 다시 만들면 앞 코드를 쓸 수 없다고
 /// 먼저 알린다 (되돌릴 수 없는 일은 먼저 말한다).
+///
+/// ## 링크로 보내기 (#365)
+///
+/// 여섯 글자를 불러주는 대신 **링크 하나를 메신저로 보낸다.** 받은 사람이 누르면 앱이 열리고 초대 코드
+/// 넣기 화면에 코드가 채워진다 — 링크는 코드를 대신 전달하는 수단일 뿐이다. 공유 문구에는 남은 시간
+/// (10분)과 링크가 열리지 않을 때 직접 넣을 코드가 들어간다. **임시 시안** — 하단 버튼 자리는 다른
+/// 화면의 `다음` 버튼을 빌렸다.
+///
+/// 만료된 코드는 보내지 않는다 (버튼이 꺼진다). 다시 만들면 앞 코드가 폐기되므로 **보낼 때마다 지금 화면에
+/// 보이는 코드**로 링크를 만든다.
 class InviteCodeScreen extends ConsumerStatefulWidget {
   const InviteCodeScreen({super.key});
 
@@ -135,6 +149,28 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
     });
   }
 
+  /// 공유 시트로 링크를 보낸다. 시트를 못 열면 팝업으로 알린다 — 코드는 화면에 그대로 있어 불러줄 수 있다.
+  Future<void> _share() async {
+    final issued = _issued;
+    // 만료됐거나 아직 없다면 보내지 않는다 — 받은 사람이 못 쓰는 코드를 눌러 서버에서 되돌려 받게 된다
+    if (issued == null || issued.isExpired) return;
+    try {
+      await ref.read(inviteSharerProvider)(
+        InviteLink.shareMessage(issued.code, validFor: issued.remaining()),
+      );
+    } catch (e) {
+      // 코드는 로그에 남기지 않는다 — 예외만 넘긴다
+      if (!mounted) return;
+      await showFailure(
+        context,
+        e,
+        title: '링크를 보내지 못했어요',
+        fallback: '초대 코드를 직접 알려주세요',
+        fallbackCode: 'E-INV-SHARE',
+      );
+    }
+  }
+
   /// 남은 시간 `MM:SS` — 올림이 아니라 **내림**이다. 실제보다 길게 말하면 믿고 기다리다 만료된다.
   String _remainingLabel(IssuedLinkCode issued) {
     if (issued.isExpired) return '초대 코드가 만료됐어요';
@@ -164,6 +200,13 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       onBack: () => context.pop(),
       title: '초대 코드',
       backTop: _settingsBackTop,
+      // 코드가 있을 때만 — 만들지 못했거나 이룸이가 없으면 보낼 것이 없다 (임시 시안)
+      bottomButton: issued != null && failure == null && !_loading && !_noProfile
+          ? ElumButton(
+              label: '링크로 보내기',
+              onPressed: issued.isExpired ? null : _share,
+            )
+          : null,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

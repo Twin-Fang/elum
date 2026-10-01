@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import 'core/app_status/app_status_gate.dart';
 import 'core/app_status/app_status_repository.dart';
@@ -15,6 +16,9 @@ import 'features/child/application/sync_triggers.dart';
 import 'features/link/application/link_reset.dart';
 import 'features/link/data/device_link_repository.dart';
 import 'features/onboarding/application/onboarding_notifier.dart';
+import 'features/profile/application/invite_inbox.dart';
+import 'features/profile/application/invite_link_intake.dart';
+import 'features/profile/presentation/invite_link_host.dart';
 
 class ElumApp extends ConsumerStatefulWidget {
   const ElumApp({super.key});
@@ -26,7 +30,7 @@ class ElumApp extends ConsumerStatefulWidget {
 class _ElumAppState extends ConsumerState<ElumApp> {
   // 라우터는 앱 수명 동안 하나만 유지한다.
   // build마다 새로 만들면 화면 전환 시 스택이 초기화된다.
-  late final _router = createRouter(
+  late final GoRouter _router = createRouter(
     // 온보딩 미완료 상태로 보호자·아동 화면에 들어오는 것을 막는다
     isOnboardingCompleted: () =>
         ref.read(localStorageProvider).isOnboardingCompleted,
@@ -36,6 +40,19 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
     // 역할을 고르기 전에는 보호자·이룸이 어느 쪽 화면도 열지 않는다 (이슈 #212)
     hasRole: () => ref.read(localStorageProvider).selectedRole != null,
+    // 앱이 꺼져 있다 초대 링크로 열릴 때 (#365). 켜져 있을 때는 아래 InviteLinkHost 가 먼저 받는다.
+    onInviteLink: (link) => _inviteIntake.accept(link),
+  );
+
+  // 초대 링크를 알맞은 때에 입력 화면으로 이어 준다 (#365).
+  late final InviteLinkIntake _inviteIntake = InviteLinkIntake(
+    inbox: ref.read(inviteInboxProvider),
+    isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
+    hasSession: () => ref.read(authRepositoryProvider).hasSession,
+    // 위에 쌓은 화면까지 센 맨 위 화면 — 설정 하위 화면 위에 입력 화면을 얹지 않는다
+    topLocation: () =>
+        _router.routerDelegate.currentConfiguration.lastOrNull?.matchedLocation,
+    open: () => _router.push(Routes.inviteEnter),
   );
 
   @override
@@ -76,6 +93,15 @@ class _ElumAppState extends ConsumerState<ElumApp> {
       );
     });
 
+    // 켜져 있는 앱에 들어오는 초대 링크를 라우터보다 먼저 받는다 — MaterialApp.router 위에 둔다.
+    return InviteLinkHost(
+      router: _router,
+      intake: _inviteIntake,
+      child: _buildApp(),
+    );
+  }
+
+  Widget _buildApp() {
     return ScreenUtilInit(
       // Figma 프레임 크기(iPhone 16). 이 기준으로 .w/.h/.sp가 계산되므로
       // 화면 코드에서 Figma 좌표를 그대로 쓸 수 있다.

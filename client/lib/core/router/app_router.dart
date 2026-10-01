@@ -9,6 +9,7 @@ import '../../features/guardian/presentation/guardian_settings_screen.dart';
 import '../../features/guardian/presentation/image_style_settings_screen.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
 import '../../features/link/presentation/link_code_screen.dart';
+import '../../features/profile/domain/invite_link.dart';
 import '../../features/profile/presentation/guardians_screen.dart';
 import '../../features/profile/presentation/invite_code_screen.dart';
 import '../../features/profile/presentation/invite_enter_screen.dart';
@@ -267,26 +268,60 @@ AuroraTone routineFlowToneOf(String path) => switch (path) {
   _ => RoutineInputScreen.aurora,
 };
 
+/// 초대 링크가 열렸을 때 라우터가 **어디에 머물 것인가** (#365).
+///
+/// 링크는 화면 경로가 아니다. 주소(`elum://invite?...`)를 그대로 라우트로 풀면 일치하는 화면이
+/// 없어 오류 화면이 뜨고, 앱이 막 켜졌다면 로그인·온보딩 상태도 모르는 채 입력 화면을 열게 된다.
+/// 그래서 링크는 [InviteInbox](우편함)에 맡기고 라우터는 **자리를 바꾸지 않는다.**
+///
+/// - 앱이 켜져 있었다면([currentLocation]) 보던 화면 그대로 — 하던 일을 잃지 않는다.
+/// - 막 켜졌다면(null) 시작 화면 — 시작 화면이 로그인·역할·온보딩 상태를 보고 갈 곳을 정한다.
+///
+/// 입력 화면은 우편함을 지켜보던 쪽(`ElumApp`)이 알맞은 자리에서 연다.
+@visibleForTesting
+String resolveInviteLinkLocation({String? currentLocation}) =>
+    (currentLocation == null || currentLocation.isEmpty)
+    ? Routes.splash
+    : currentLocation;
+
 /// 온보딩 단계 사이의 진행은 각 화면 CTA가 막으므로 여기서 관여하지 않는다.
 ///
 /// 콜백을 넘기지 않으면 가드가 비활성화된다(테스트용).
+///
+/// [onInviteLink] — 초대 링크(`InviteLink`)가 열렸을 때 불린다 (#365). 이룸이 휴대폰에서 열린 링크는
+/// 부르지 않고 무시한다 (이룸이 휴대폰은 초대를 받을 수 없다). 코드는 로그에 남기지 않는다.
 GoRouter createRouter({
   bool Function()? isOnboardingCompleted,
   bool Function()? hasToken,
   bool Function()? isElumiDevice,
   bool Function()? hasRole,
+  void Function(InviteLink link)? onInviteLink,
 }) {
-  return GoRouter(
+  // 리다이렉트가 라우터 자신의 현재 위치를 알아야 한다 — 만들어진 뒤에 채운다.
+  late final GoRouter router;
+  router = GoRouter(
     initialLocation: Routes.splash,
-    redirect: (context, state) => resolveRedirect(
-      state.matchedLocation,
-      hasSession: hasToken?.call() ?? true,
-      onboardingCompleted: isOnboardingCompleted?.call() ?? true,
-      skipOnboarding: AppConfig.skipOnboarding,
-      isElumiDevice: isElumiDevice?.call() ?? false,
-      hasRole: hasRole?.call() ?? true,
-      modeSwitchTo: state.uri.queryParameters['to'],
-    ),
+    redirect: (context, state) {
+      // 초대 링크는 다른 가드보다 먼저 본다. 주소가 우리 라우트가 아니라 아래 규칙이 그대로 두면
+      // 오류 화면이 된다.
+      final link = InviteLink.parse(state.uri);
+      if (link != null) {
+        if (!(isElumiDevice?.call() ?? false)) onInviteLink?.call(link);
+        // 막 켜졌다면 아직 위치가 없어 빈 문자열이다
+        return resolveInviteLinkLocation(
+          currentLocation: router.routerDelegate.currentConfiguration.uri.toString(),
+        );
+      }
+      return resolveRedirect(
+        state.matchedLocation,
+        hasSession: hasToken?.call() ?? true,
+        onboardingCompleted: isOnboardingCompleted?.call() ?? true,
+        skipOnboarding: AppConfig.skipOnboarding,
+        isElumiDevice: isElumiDevice?.call() ?? false,
+        hasRole: hasRole?.call() ?? true,
+        modeSwitchTo: state.uri.queryParameters['to'],
+      );
+    },
     routes: [
       GoRoute(
         path: Routes.splash,
@@ -527,6 +562,7 @@ GoRouter createRouter({
     // 잘못된 경로로 들어와도 앱이 죽지 않는다 — 발표 중 치명적이다
     errorBuilder: (context, state) => const _Placeholder('화면을 찾을 수 없어요'),
   );
+  return router;
 }
 
 /// 아직 구현하지 않은 화면. 라우트 구조를 먼저 고정해두기 위한 자리표시자다.

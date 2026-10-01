@@ -39,6 +39,16 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- 초대 링크 (#365). 안내 페이지의 `앱에서 열기` 가 elum://invite?code=… 를 부르면 앱이 열린다.
+                 host 를 invite 로 좁혀 다른 elum:// 주소(소셜 로그인 콜백 등)를 가로채지 않는다.
+                 https 웹 링크를 앱이 바로 받는 App Links 는 도메인 검증 파일(assetlinks.json)을
+                 twin-fang.github.io 루트에 둘 수 있을 때 더한다 — 지금은 선언하지 않는다. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="elum" android:host="invite"/>
+            </intent-filter>
         </activity>
         <!-- 카카오 로그인 리다이렉트.
              카카오톡·카카오계정 로그인을 마치면 이 스킴으로 앱이 다시 열린다.
