@@ -14,12 +14,13 @@ public record AdminRoutineResponse(
   LocalDateTime completedAt
 ) {
 
-  public static AdminRoutineResponse from(Routine routine) {
+  /** 보호자 칸은 일과를 만든 사람의 계정 이름이다 (옛 대표 보호자 컬럼은 V32 에서 지웠다). */
+  public static AdminRoutineResponse from(Routine routine, String creatorUsername) {
     return new AdminRoutineResponse(
       routine.getId(),
       routine.getTitle(),
       routine.getProfile().getNickname(),
-      routine.getProfile().getMember().getUsername(),
+      creatorUsername,
       routine.getStatus(),
       routine.getScheduledAt(),
       routine.getCompletedAt()

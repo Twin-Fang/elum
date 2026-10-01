@@ -183,7 +183,6 @@ public class MemberService {
     // 연결된 이룸이마다 "나가기"를 한다 (다중 보호자 명세 4-3, #360). 내가 만든 일과·내가 붙인 이룸이 휴대폰·
     // 관계를 지우고, 혼자 돌보던 이룸이는 이룸이 정보까지 지운다 — 발달장애 당사자에 대한 서술이라 오래 둘수록
     // 위험하고, 악용 방지에는 필요 없다. 다른 보호자와 함께 돌보던 이룸이와 그들의 일과는 남는다.
-    // 대표 보호자(profile.member_id)도 남은 사람에게 넘어가므로 보관 중인 이 계정 행을 가리키는 이룸이가 없다.
     guardianshipService.leaveAll(memberId);
     // 세션. member를 외래키로 참조하지 않아 DB가 대신 지워 주지 않는다.
     refreshTokenRepository.deleteAllByMemberId(memberId);

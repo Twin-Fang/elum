@@ -42,7 +42,7 @@ public class DeviceLink extends BaseEntity {
   private String memberId;
 
   /** 어느 프로필(이룸이)의 일과를 보게 되는가. 프로필이 여럿이 되면 이 값이 갈린다. */
-  @Column(name = "profile_id")
+  @Column(name = "profile_id", nullable = false)
   private String profileId;
 
   /** 연결 암호 원문의 SHA-256. 조회는 이 값으로만 한다. */

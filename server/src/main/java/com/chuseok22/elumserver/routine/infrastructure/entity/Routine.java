@@ -46,10 +46,9 @@ public class Routine extends BaseEntity {
    * <p>한 이룸이에 보호자가 여럿이면 일과는 모두가 보지만 승인·수정·삭제는 만든 사람만 한다.
    * 보유 일과 한도도 이 값으로 센다 — 남이 만든 일과가 내 한도를 먹지 않게 (E42).
    *
-   * <p>DB 는 비워 둘 수 있다. 옛 서버로 되돌렸을 때 옛 코드가 이 컬럼을 모르고 일과를 만들기 때문이다
-   * (V25). 새 코드는 항상 채운다. NOT NULL 은 4단계(#364)에서 건다.
+   * <p>V32(#364)부터 NOT NULL 이다. 이 컬럼을 모르는 옛 서버는 일과를 만들지 못하므로 옛 이미지로 되돌릴 수 없다.
    */
-  @Column(name = "created_by")
+  @Column(name = "created_by", nullable = false)
   private String createdBy;
 
   @Column(nullable = false, columnDefinition = "TEXT")

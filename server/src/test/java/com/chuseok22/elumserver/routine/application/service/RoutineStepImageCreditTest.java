@@ -291,7 +291,6 @@ class RoutineStepImageCreditTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     Routine routine = new Routine();
     routine.setId("routine-1");
     routine.setTitle("학교 가기");

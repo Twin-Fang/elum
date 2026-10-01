@@ -355,7 +355,7 @@ class OAuthLoginServiceTest {
     assertThat(member.hasRequiredConsents()).isFalse();
     // 이룸이·일과 없이 온보딩부터 — 빈 프로필과 Free 구독만 만든다.
     verify(profileRepository).save(org.mockito.ArgumentMatchers.argThat(saved ->
-      saved.getMember() == member && saved.getNickname() == null));
+      saved.getNickname() == null));
     verify(profileGuardianRepository).save(org.mockito.ArgumentMatchers.argThat(guardian ->
       guardian.getMember() == member));
     verify(subscriptionService).createFreeIfAbsent(member);

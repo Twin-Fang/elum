@@ -12,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
@@ -32,6 +31,7 @@ import org.hibernate.annotations.DynamicUpdate;
  *
  * <p>보호자는 여럿일 수 있다 — 관계는 {@link ProfileGuardian} 표가 들고 있다 (다중 보호자 명세 4-1).
  * 형제가 있거나 기관에서 여러 이용자를 지원하는 경우가 이 구조 위에서 그대로 돌아간다.
+ * 옛 대표 보호자 컬럼(profile.member_id)은 V32(#364)에서 지웠다 — 이룸이의 보호자는 관계 표만 안다.
  */
 // 바뀐 컬럼만 UPDATE 한다. 전체 컬럼을 쓰면 이름·캐릭터를 고치는 트랜잭션이 그사이 쿼리로 더한 별을
 // 옛 값으로 덮어쓴다 (다중 보호자 E23·E25 — 두 보호자·두 기기가 동시에 쓴다).
@@ -44,17 +44,6 @@ public class Profile extends BaseEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
-
-  /**
-   * 옛 서버 호환용 대표 보호자. <b>새 코드는 권한·조회에 읽지 않는다.</b>
-   *
-   * <p>배포 뒤 옛 서버로 되돌리면 옛 코드가 이 값으로 프로필을 찾는다. 그래서 4단계(#364)에서 지우기 전까지
-   * 가입 때 채우고, 대표가 나가면 남은 사람 중 가장 먼저 합류한 사람으로 바꾼다. 처음 만든 보호자가
-   * 나가도 이룸이가 남아야 해서 비워 둘 수 있다 (V25).
-   */
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_id", nullable = true)
-  private Member member;
 
   /** 당사자를 부르는 이름. 화면 인사말과 카드 문구에 쓴다. */
   private String nickname;

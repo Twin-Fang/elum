@@ -19,6 +19,11 @@ import org.junit.jupiter.api.Test;
  * <p>명세는 이 마이그레이션을 V22 로 적었지만 그 번호는 공지(#370)·탈퇴 보관(#372)·프롬프트 키(#375)가
  * 먼저 썼다(운영 최신 V24). 내용은 명세 5장 "V22 — 늘리고 옮긴다" 그대로다.
  *
+ * <p><b>V32(#364)만 예외다.</b> 4단계 마이그레이션은 옛 대표 보호자 컬럼을 지우고 NOT NULL 을 걸어 옛 서버로
+ * 되돌릴 수 없게 만든다. 그 사실을 파일 머리 주석에 적었는지, 순서(메우기 → 실패 확인 → NOT NULL → 삭제)가 지켜지는지를
+ * 아래 V32 시험이 지킨다. V25~V31 의 "추가만 한다" 시험은 그대로다 — V32 가 아닌 다른 마이그레이션이 슬쩍 줄이지 못하게
+ * {@link #onlyV32DropsOrTightens} 가 막는다.
+ *
  * <p>DB 를 띄우지 않는다. 실제 적용은 운영 사본 리허설에서 본다.
  */
 class MigrationRollbackContractTest {
@@ -171,6 +176,80 @@ class MigrationRollbackContractTest {
     assertThat(column.name()).isEqualTo("display_name");
     assertThat(column.length()).isEqualTo(30);
     assertThat(column.nullable()).isTrue();
+  }
+
+  // --- V32 줄이기 (#364) — 되돌릴 수 없다. 위 V25~V31 약속의 유일한 예외 ---
+
+  private static final Path V32 = Path.of("src/main/resources/db/migration/V32__drop_profile_member_and_require_creator.sql");
+
+  @Test
+  @DisplayName("V32 는 머리 주석에 '되돌릴 수 없다 · 옛 서버 이미지로 되돌리면 깨진다'를 적는다 — 읽는 사람이 모르고 롤백하지 않게")
+  void v32_headerStatesIrreversible() throws IOException {
+    String raw = String.join("\n", Files.readAllLines(V32));
+    String header = raw.substring(0, raw.indexOf("do $$"));
+    assertThat(header).contains("되돌릴 수 없다").contains("옛 서버 이미지로 되돌리면 깨진다");
+    assertThat(header).contains("profile.member_id").contains("routine.created_by").contains("device_link.profile_id");
+  }
+
+  @Test
+  @DisplayName("V32 순서: 빈칸 메우기 → 메울 수 없으면 중단 → NOT NULL → 컬럼 삭제는 마지막")
+  void v32_order() throws IOException {
+    String sql = normalizedSql(V32);
+    int fill = sql.indexOf("update routine r set created_by");
+    int deviceFill = sql.indexOf("update device_link d set profile_id");
+    int abort = sql.indexOf("raise exception 'v32 중단: routine.created_by");
+    int notNullCreator = sql.indexOf("alter table routine alter column created_by set not null");
+    int notNullLink = sql.indexOf("alter table device_link alter column profile_id set not null");
+    int drop = sql.indexOf("alter table profile drop column if exists member_id");
+    assertThat(fill).isNotNegative();
+    assertThat(deviceFill).isNotNegative();
+    assertThat(abort).isGreaterThan(fill).isGreaterThan(deviceFill);
+    assertThat(notNullCreator).isGreaterThan(abort);
+    assertThat(notNullLink).isGreaterThan(abort);
+    assertThat(drop).as("컬럼 삭제는 맨 마지막").isGreaterThan(notNullCreator).isGreaterThan(notNullLink);
+    assertThat(sql.indexOf("drop ", sql.indexOf("drop column if exists member_id") + 1)).as("삭제 뒤에 더 지우는 것이 없다").isNegative();
+  }
+
+  @Test
+  @DisplayName("V32 는 메울 수 없는 행에서 조용히 넘기지 않고 원인을 적어 멈춘다 — 지울 컬럼 값이 관계 표에 없는 경우 포함")
+  void v32_failsLoudlyInsteadOfDroppingData() throws IOException {
+    String sql = normalizedSql(V32);
+    assertThat(sql).contains("raise exception 'v32 중단: routine.created_by");
+    assertThat(sql).contains("raise exception 'v32 중단: device_link.profile_id");
+    assertThat(sql).contains("raise exception 'v32 중단: profile.member_id 가 관계 표(profile_guardian)에 없는");
+    // 일과·연결 행을 지워서 NOT NULL 을 맞추지 않는다 — 데이터를 버리는 방식으로 풀지 않는다.
+    assertThat(sql).doesNotContain("delete from").doesNotContain("truncate");
+  }
+
+  @Test
+  @DisplayName("V25~V31 은 V32 이전 그대로 추가만 한다 — 줄이거나 조이는 것은 V32 하나뿐이다")
+  void onlyV32DropsOrTightens() throws IOException {
+    try (var files = Files.list(Path.of("src/main/resources/db/migration"))) {
+      for (Path file : files.toList()) {
+        String name = file.getFileName().toString();
+        int version = Integer.parseInt(name.substring(1, name.indexOf("__")));
+        if (version < 25 || version == 32) {
+          continue;
+        }
+        String sql = normalizedSql(file);
+        assertThat(sql).as("%s 는 옛 서버 호환을 깨면 안 된다", name)
+          .doesNotContain("drop column").doesNotContain("drop table").doesNotContain("set not null");
+      }
+    }
+  }
+
+  @Test
+  @DisplayName("V32 는 엔티티와 같다 — 운영은 validate 라 어긋나면 서버가 뜨지 않는다: created_by·profile_id 필수, member_id 필드 없음")
+  void v32_matchesEntities() throws Exception {
+    var createdBy = com.chuseok22.elumserver.routine.infrastructure.entity.Routine.class
+      .getDeclaredField("createdBy").getAnnotation(jakarta.persistence.Column.class);
+    assertThat(createdBy.name()).isEqualTo("created_by");
+    assertThat(createdBy.nullable()).isFalse();
+    var profileId = com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink.class
+      .getDeclaredField("profileId").getAnnotation(jakarta.persistence.Column.class);
+    assertThat(profileId.nullable()).isFalse();
+    assertThat(com.chuseok22.elumserver.member.infrastructure.entity.Profile.class.getDeclaredFields())
+      .extracting(java.lang.reflect.Field::getName).doesNotContain("member");
   }
 
   /** create table 한 덩이 — 여는 괄호부터 그 표를 닫는 ");" 까지. */
