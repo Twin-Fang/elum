@@ -283,6 +283,9 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
           child: ReorderableDelayedDragStartListener(
             index: index,
             child: RoutineSwipeActions(
+              // 남이 만든 일과는 밀어도 삭제·수정이 나오지 않는다 — 서버가 403 으로 막는 동작이다
+              // (다중 보호자 #362 · E46). 만든 사람을 모르면 지금처럼 민다.
+              enabled: routine.isEditableByMe,
               isOpen: _openId == routine.id,
               onOpenChanged: (open) =>
                   setState(() => _openId = open ? routine.id : null),

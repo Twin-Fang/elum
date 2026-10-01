@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../utils/korean_particle.dart';
 import 'action_card.dart';
 import 'credit_usage.dart';
 import 'reward_preset.dart';
@@ -62,9 +63,34 @@ abstract class Routine with _$Routine {
     /// 이번 생성이 쓴 크레딧 (#407). **생성 응답에만 있다** — 캐시([toJson])에
     /// 넣지 않는다. 다시 읽은 일과에 옛 사용량이 붙어 있으면 거짓말이 된다.
     CreditUsage? creditUsage,
+
+    // --- 만든 사람 (다중 보호자 #362 · E30·E46) ---
+    // 한 이룸이에 보호자가 여럿이면 일과는 모두가 보지만 승인·수정·삭제는 **만든 사람만** 한다.
+    // 서버 `RoutineResponse` 에 이 두 필드가 아직 없다(서버 #361 범위 밖) — 앱은 받을 준비만
+    // 해 두고, 없으면 null(알 수 없음)이라 지금처럼 모든 버튼을 보인다. 서버가 최종 판단한다.
+
+    /// 이 일과를 만든 사람이 나인가. null 이면 서버가 알려 주지 않았다.
+    bool? createdByMe,
+
+    /// 만든 사람이 이 이룸이 안에서 불리는 이름. 비어 있으면 null.
+    String? creatorName,
   }) = _Routine;
 
   const Routine._();
+
+  /// 내가 고칠 수 있는 일과인가. **남이 만든 것으로 확인된 경우에만 false** 다.
+  ///
+  /// 만든 사람을 모르면(null) true — 버튼을 숨겨서 내 일과를 못 고치게 하는 것보다 누른 뒤
+  /// 서버가 막는 쪽(403 `ROUTINE_NOT_CREATOR`)이 낫다. 서버가 최종 판단한다.
+  bool get isEditableByMe => createdByMe != false;
+
+  /// 남이 만든 일과에 붙이는 `엄마가 만든 일과예요`. 내가 만들었거나 모르면 null.
+  String? get foreignCreatorLabel {
+    if (createdByMe != false) return null;
+    final name = creatorName?.trim();
+    if (name == null || name.isEmpty) return '다른 보호자가 만든 일과예요';
+    return '$name${name.subjectParticle} 만든 일과예요';
+  }
 
   /// 보호자가 승인했는가. 승인 전에는 아동 화면에 노출하지 않는다 (docs 원칙 3번).
   bool get isConfirmed => status == 'CONFIRMED';
@@ -139,6 +165,9 @@ abstract class Routine with _$Routine {
     'scheduledAt': scheduledAt?.toIso8601String(),
     'rewardText': rewardText,
     'rewardPresetKey': rewardPresetKey,
+    // 오프라인으로 목록을 열어도 남의 일과 버튼이 도로 생기지 않게 남긴다 (#362).
+    if (createdByMe != null) 'createdByMe': createdByMe,
+    if (creatorName != null) 'creatorName': creatorName,
   };
 
   factory Routine.fromJson(Map<String, dynamic> json) {
@@ -166,6 +195,9 @@ abstract class Routine with _$Routine {
       rewardPresetKey: json['rewardPresetKey']?.toString() ?? '',
       // 크레딧이 꺼져 있거나 모양이 다르면 null — 사용량 줄을 그리지 않는다.
       creditUsage: CreditUsage.tryParse(json['credit']),
+      // bool 이 아니면 모른다 — 문자열 `yes` 같은 모양을 참으로 읽지 않는다.
+      createdByMe: json['createdByMe'] is bool ? json['createdByMe'] as bool : null,
+      creatorName: json['creatorName']?.toString(),
     );
   }
 

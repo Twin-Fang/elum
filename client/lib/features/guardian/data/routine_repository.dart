@@ -840,7 +840,11 @@ final myRoutinesProvider = FutureProvider<List<Routine>>((ref) {
 /// 서버에 상태 필터를 다는 편이 낫지만, 지금은 한 보호자의 일과가 많지 않다.
 final draftRoutinesProvider = FutureProvider<List<Routine>>((ref) async {
   final all = await ref.watch(myRoutinesProvider.future);
-  return all.where((r) => r.status == 'PENDING_REVIEW').toList();
+  // 남이 만든 임시저장은 이어서 만들 수 없다 — 승인·수정은 만든 사람만 한다 (다중 보호자 #362).
+  // 서버는 이룸이의 임시저장을 만든 사람과 상관없이 모두 준다.
+  return all
+      .where((r) => r.status == 'PENDING_REVIEW' && r.isEditableByMe)
+      .toList();
 });
 
 /// 오늘 할 일 목록. **보호자 홈과 이룸이 홈이 같이 본다** (이슈 #75 · #353).

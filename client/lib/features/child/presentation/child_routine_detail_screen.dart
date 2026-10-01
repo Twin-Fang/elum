@@ -234,6 +234,15 @@ class _ChildRoutineDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    // 보던 일과가 사라졌다 — 그 일과를 만든 보호자가 이룸이에서 나갔다 (다중 보호자 #362 · E11).
+    // 오류 화면을 띄우지 않고 홈으로 돌아간다. 홈은 같은 때 목록을 다시 받는다.
+    ref.listen<bool>(
+      childRoutineProvider.select((s) => s.gone.contains(widget.routine.id)),
+      (_, gone) {
+        if (gone) context.go(Routes.child);
+      },
+    );
+
     final routine = _resolveRoutine(ref.watch(childRoutinesProvider));
     final cards = routine.steps;
     final progress = ref.watch(childRoutineProvider);

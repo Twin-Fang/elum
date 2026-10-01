@@ -9,8 +9,11 @@ import '../../../core/network/dio_client.dart';
 /// - [accepted]: 반영됨. 대기열에서 빼도 된다.
 /// - [rejected]: 서버가 이 상태를 거부했다(승인 전 일과, 삭제된 단계 등). 로컬 기록을
 ///   버리고 서버 값으로 돌아가야 한다.
+/// - [gone]: 일과가 **사라졌다**(404). 그 일과를 만든 보호자가 이룸이에서 나갔다 (다중 보호자
+///   #362 · E11). 기록을 버리는 것은 [rejected]와 같지만, 보던 화면이 없는 일과를 붙잡고
+///   있으면 안 되므로 따로 알린다 — 화면이 오류가 아니라 홈으로 돌아가 목록을 다시 받는다.
 /// - [unreachable]: 네트워크·서버 장애. 로컬 기록을 유지하고 다음에 다시 보낸다.
-enum SyncOutcome { accepted, rejected, unreachable }
+enum SyncOutcome { accepted, rejected, gone, unreachable }
 
 /// 아동 카드 진행 상태를 서버에 반영한다 (이슈 #140).
 ///
@@ -38,9 +41,14 @@ class StepProgressRepository {
       return SyncOutcome.accepted;
     } on DioException catch (e) {
       final status = e.response?.statusCode;
+      // 404 는 일과가 없어졌다는 뜻이다 — 다른 거부와 다르게 다룬다 (E11).
+      if (status == 404) {
+        debugPrint('[sync] 일과가 사라짐(404): $routineId');
+        return SyncOutcome.gone;
+      }
       // 4xx 중 서버가 "이 상태는 안 된다"고 답한 것만 거부로 본다.
       // 401은 인터셉터가 토큰을 재발급하므로 여기까지 오면 일시 장애로 취급한다.
-      if (status != null && const {400, 403, 404, 409}.contains(status)) {
+      if (status != null && const {400, 403, 409}.contains(status)) {
         debugPrint('[sync] 서버가 진행 상태를 거부함 ($status): $routineId');
         return SyncOutcome.rejected;
       }

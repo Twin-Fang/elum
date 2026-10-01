@@ -16,7 +16,11 @@ import '../domain/routine_progress_record.dart';
 /// 기록을 보여준다. 기록이 없는 일과만 서버 값을 쓴다. 서버 반영이 안 끝난 일과는
 /// [pending]에 남아 있다가 다음 기회에 다시 전송된다.
 class ChildRoutineState {
-  const ChildRoutineState({this.progress = const {}, this.pending = const {}});
+  const ChildRoutineState({
+    this.progress = const {},
+    this.pending = const {},
+    this.gone = const {},
+  });
 
   /// routineId → 로컬 진행 기록.
   final Map<String, RoutineProgressRecord> progress;
@@ -24,13 +28,19 @@ class ChildRoutineState {
   /// 서버 반영이 아직 안 끝난 routineId.
   final Set<String> pending;
 
+  /// 서버가 "없다"고 답한 routineId — 그 일과를 만든 보호자가 이룸이에서 나갔다 (E11).
+  /// 일과 상세 화면이 이것을 보고 홈으로 돌아간다.
+  final Set<String> gone;
+
   ChildRoutineState copyWith({
     Map<String, RoutineProgressRecord>? progress,
     Set<String>? pending,
+    Set<String>? gone,
   }) {
     return ChildRoutineState(
       progress: progress ?? this.progress,
       pending: pending ?? this.pending,
+      gone: gone ?? this.gone,
     );
   }
 
@@ -165,6 +175,19 @@ class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
         final progress = Map<String, RoutineProgressRecord>.from(state.progress)
           ..remove(routineId);
         state = state.copyWith(progress: progress);
+        await _store.remove(routineId);
+        await _clearPending(routineId);
+        _refreshLists();
+      case SyncOutcome.gone:
+        // 일과가 사라졌다 (E11). 기록을 버리고 사라졌다고 표시한다 — 화면이 홈으로 돌아가
+        // 목록을 다시 받는다. 오류로 알리지 않는다: 이룸이가 잘못한 것이 아니다.
+        debugPrint('[sync] 일과가 사라짐 — 로컬 기록 폐기: $routineId');
+        final progress = Map<String, RoutineProgressRecord>.from(state.progress)
+          ..remove(routineId);
+        state = state.copyWith(
+          progress: progress,
+          gone: {...state.gone, routineId},
+        );
         await _store.remove(routineId);
         await _clearPending(routineId);
         _refreshLists();

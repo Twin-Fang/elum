@@ -86,6 +86,10 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
   /// 그림자가 한 번 꺼졌다 켜진다 (#274).
   int? _draggingIndex;
 
+  /// 이 시트에서 고칠 수 있는가 — 남이 만든 일과는 보기만 한다 (다중 보호자 #362 · E46).
+  /// 지난 일과는 원래 고치지 않는다([RoutineDetailSheet.isPast]).
+  bool get _canEdit => !widget.isPast && widget.routine.isEditableByMe;
+
   Future<void> _reorder(int oldIndex, int newIndex) async {
     // ReorderableListView는 아래로 옮길 때 제거 전 위치를 준다.
     final to = newIndex > oldIndex ? newIndex - 1 : newIndex;
@@ -147,7 +151,13 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
           Column(
             children: [
               // --- 고정: 핸들바 + 제목 (덤프의 `스크롤 시 fix 영역`) ---
-              _Header(title: widget.routine.title),
+              _Header(
+                title: widget.routine.title,
+                // 남이 만든 일과면 누가 만들었는지 먼저 말한다 — 왜 고칠 수 없는지의 답이다.
+                caption: widget.isPast
+                    ? null
+                    : widget.routine.foreignCreatorLabel,
+              ),
 
               // --- 스크롤: 단계 + 보상 ---
               Expanded(
@@ -191,7 +201,8 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                 ),
                             itemCount: _steps.length,
                             // 지난 일과는 자리를 바꿔도 의미가 없으므로 받기만 하고 버린다.
-                            onReorder: widget.isPast ? (_, _) {} : _reorder,
+                            // 남이 만든 일과도 카드 순서는 만든 사람의 몫이라 같다.
+                            onReorder: _canEdit ? _reorder : (_, _) {},
                             onReorderStart: (index) =>
                                 setState(() => _draggingIndex = index),
                             onReorderEnd: (_) =>
@@ -214,7 +225,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                       index: index,
                                       dragging: _draggingIndex == index,
                                       // 손잡이를 아예 그리지 않는다 (시안 980:4777)
-                                      reorderable: !widget.isPast,
+                                      reorderable: _canEdit,
                                     ),
                                   ),
                                 ),
@@ -246,29 +257,31 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
 
           // --- 떠 있는: 편집하기 · 다시하기 (목록이 길어져도 밀려나지 않는다) ---
           // 뒤로 지나가는 목록을 흐리게 가리는 처리는 넣지 않는다 — 시안에 없다.
-          Positioned(
-            left: 16.w,
-            right: 16.w,
-            bottom: buttonBottom,
-            height: buttonHeight,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: colors.textPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18.r),
+          // 남이 만든 일과는 버튼이 없다 — 편집하기를 눌러도 서버가 403 으로 막는다.
+          if (widget.isPast || widget.routine.isEditableByMe)
+            Positioned(
+              left: 16.w,
+              right: 16.w,
+              bottom: buttonBottom,
+              height: buttonHeight,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: colors.textPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.r),
+                  ),
+                ),
+                onPressed: () => Navigator.of(context).pop(
+                  widget.isPast
+                      ? RoutineSheetAction.rerun
+                      : RoutineSheetAction.edit,
+                ),
+                child: Text(
+                  widget.isPast ? '일과 다시하기' : '편집하기',
+                  style: typo.sheetActionLabel.copyWith(color: colors.surface),
                 ),
               ),
-              onPressed: () => Navigator.of(context).pop(
-                widget.isPast
-                    ? RoutineSheetAction.rerun
-                    : RoutineSheetAction.edit,
-              ),
-              child: Text(
-                widget.isPast ? '일과 다시하기' : '편집하기',
-                style: typo.sheetActionLabel.copyWith(color: colors.surface),
-              ),
             ),
-          ),
         ],
       ),
     );
@@ -294,9 +307,12 @@ class _StepItemKey extends GlobalObjectKey {
 
 /// 스크롤해도 남는 머리 부분.
 class _Header extends StatelessWidget {
-  const _Header({required this.title});
+  const _Header({required this.title, this.caption});
 
   final String title;
+
+  /// 제목 아래 한 줄 (`엄마가 만든 일과예요`). 없으면 자리도 없다 — 내 일과의 시트는 그대로다.
+  final String? caption;
 
   @override
   Widget build(BuildContext context) {
@@ -334,6 +350,13 @@ class _Header extends StatelessWidget {
               color: colors.sheetTitleText,
             ),
           ),
+          if (caption != null) ...[
+            SizedBox(height: 4.h),
+            Text(
+              caption!,
+              style: context.typo.body.copyWith(color: colors.textSecondary),
+            ),
+          ],
         ],
       ),
     );
