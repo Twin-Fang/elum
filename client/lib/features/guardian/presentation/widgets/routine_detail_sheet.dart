@@ -12,6 +12,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../../shared/models/routine.dart';
 import '../../data/routine_repository.dart';
+import 'step_card_viewer.dart';
 
 /// 오늘 일과를 눌렀을 때 올라오는 시트 (Figma 956:4084, 이슈 #266).
 ///
@@ -226,6 +227,13 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                       dragging: _draggingIndex == index,
                                       // 손잡이를 아예 그리지 않는다 (시안 980:4777)
                                       reorderable: _canEdit,
+                                      // 카드를 눌러 크게 본다 (시안 1274:8864, #495)
+                                      onOpen: () => StepCardViewer.show(
+                                        context,
+                                        cards: _steps,
+                                        initialIndex: index,
+                                        routineId: widget.routine.id,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -416,10 +424,14 @@ class _StepCard extends StatefulWidget {
     required this.index,
     this.dragging = false,
     this.reorderable = true,
+    this.onOpen,
   });
 
   final ActionCard step;
   final int index;
+
+  /// 글 자리를 눌렀을 때 — 카드를 크게 연다 (#495). 손잡이와 체크는 따로 받는다.
+  final VoidCallback? onOpen;
 
   /// 지금 끌려가는 중인가. 끌기가 시작되면 이 카드는 시트 위의 사본으로 다시
   /// 그려지므로, 들린 상태로 시작하지 않으면 그림자가 한 번 깜빡인다.
@@ -518,37 +530,46 @@ class _StepCardState extends State<_StepCard>
                   child: Row(
                     children: [
                       Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.step.displayTitle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              // 시안(963:4236)은 순검정이다. 앱 본문색(#242634)이
-                              // 아니다 — 시트 제목과 같은 토큰을 쓴다.
-                              style: typo.sheetStepTitle.copyWith(
-                                color: colors.sheetTitleText,
-                              ),
-                            ),
-                            if (widget.step.description.isNotEmpty) ...[
-                              // 시안 제목 y15(16 높이) · 설명 y39 → 사이 8
-                              SizedBox(height: 8.h),
-                              Text(
-                                widget.step.description,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                // 시안의 `sub_color`(#74757D). 일과 타일 설명과 같은
-                                // 값이라 토큰을 함께 쓴다 — 디자이너가 한 변수로
-                                // 두었으므로 한쪽만 바뀌어서는 안 된다.
-                                // `textSecondary`(#898B98)는 다른 자리의 색이다.
-                                style: typo.sheetStepBody.copyWith(
-                                  color: colors.routineTileLabel,
+                        child: GestureDetector(
+                          // 글자 사이 빈 곳도 눌리게 한다. 손잡이는 이 바깥이라 끌기와 겹치지 않는다.
+                          behavior: HitTestBehavior.opaque,
+                          onTap: widget.onOpen,
+                          child: Semantics(
+                            button: widget.onOpen != null,
+                            hint: '눌러서 카드 크게 보기',
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.step.displayTitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  // 시안(963:4236)은 순검정이다. 앱 본문색(#242634)이
+                                  // 아니다 — 시트 제목과 같은 토큰을 쓴다.
+                                  style: typo.sheetStepTitle.copyWith(
+                                    color: colors.sheetTitleText,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ],
+                                if (widget.step.description.isNotEmpty) ...[
+                                  // 시안 제목 y15(16 높이) · 설명 y39 → 사이 8
+                                  SizedBox(height: 8.h),
+                                  Text(
+                                    widget.step.description,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    // 시안의 `sub_color`(#74757D). 일과 타일 설명과 같은
+                                    // 값이라 토큰을 함께 쓴다 — 디자이너가 한 변수로
+                                    // 두었으므로 한쪽만 바뀌어서는 안 된다.
+                                    // `textSecondary`(#898B98)는 다른 자리의 색이다.
+                                    style: typo.sheetStepBody.copyWith(
+                                      color: colors.routineTileLabel,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                       // 시안(963:4239)은 글 오른쪽 끝(227)과 체크(231) 사이가 4다.
