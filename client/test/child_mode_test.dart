@@ -381,7 +381,11 @@ void main() {
 
     testWidgets('보호자 방향 문구도 맞다', (tester) async {
       await tester.pumpWidget(
-        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.guardian)),
+        wrap(
+          const ModeSwitchScreen(target: ModeSwitchTarget.guardian),
+          // 암호가 없으면 보호자 방향은 입력창이 아니라 만들기·안내로 간다 (#355)
+          pin: '1234',
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -391,7 +395,11 @@ void main() {
     testWidgets('PIN이 틀려도 경고색을 쓰지 않는다', (tester) async {
       // 아동도 보는 화면이다 (CLAUDE.md)
       await tester.pumpWidget(
-        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.guardian)),
+        wrap(
+          const ModeSwitchScreen(target: ModeSwitchTarget.guardian),
+          // 암호가 없으면 보호자 방향은 입력창이 아니라 만들기·안내로 간다 (#355)
+          pin: '1234',
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -573,7 +581,11 @@ void main() {
       // 실제 입력칸은 투명이라 화면 낭독기에 드러나지 않는다. 키보드를 여는
       // 길은 이 점 자리 하나뿐이다.
       await tester.pumpWidget(
-        wrap(const ModeSwitchScreen(target: ModeSwitchTarget.guardian)),
+        wrap(
+          const ModeSwitchScreen(target: ModeSwitchTarget.guardian),
+          // 암호가 없으면 보호자 방향은 입력창이 아니라 만들기·안내로 간다 (#355)
+          pin: '1234',
+        ),
       );
       await tester.pumpAndSettle();
 

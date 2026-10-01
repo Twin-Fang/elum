@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_shake.dart';
+import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/show_failure.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
@@ -23,6 +25,9 @@ class ModeSwitchScreen extends ConsumerStatefulWidget {
   /// 어디로 갈 것인가. 문구와 이동 경로가 갈린다.
   final ModeSwitchTarget target;
 
+  /// 암호 만들기 화면에 "여기서 왔다"를 알리는 값. 만든 뒤 보호자 홈으로 보낸다.
+  static const pinCreateFrom = 'mode-switch';
+
   @override
   ConsumerState<ModeSwitchScreen> createState() => _ModeSwitchScreenState();
 }
@@ -37,10 +42,66 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   /// 실패 안내. null이면 원래 설명을 보여준다.
   String? _errorMessage;
 
+  /// 보호자 화면으로 갈 때 저장된 암호가 없는 이룸이 휴대폰이다 (#355).
+  /// 이때는 입력창 대신 안내만 보인다.
+  bool _blocked = false;
+
   @override
   void initState() {
     super.initState();
     _controller.addListener(_onChanged);
+    // 입력을 받기 전에 암호가 있는지부터 본다. 숫자를 다 넣은 뒤에야 "만들어라"를
+    // 하면 이미 넣은 네 자리가 무엇이었는지 모호해진다.
+    if (widget.target == ModeSwitchTarget.guardian) _guardGuardianEntry();
+  }
+
+  /// 저장된 암호를 읽는다. 읽기에서 예외가 나면 실패 팝업을 띄우고 null 이 아니라
+  /// `ok=false` 로 알린다 — 읽지 못한 것을 "암호 없음"으로 보면 그대로 열어 주게 된다.
+  Future<({bool ok, String? pin})> _readPin() async {
+    try {
+      return (ok: true, pin: await ref.read(localStorageProvider).getPin());
+    } catch (e) {
+      debugPrint('[mode-switch] 암호 읽기 실패: $e');
+      if (!mounted) return (ok: false, pin: null);
+      await showFailure(
+        context,
+        e,
+        title: '암호를 확인하지 못했어요',
+        fallback: '잠시 후 다시 해주세요',
+        fallbackCode: 'E-PIN-READ',
+      );
+      return (ok: false, pin: null);
+    }
+  }
+
+  /// 보호자 화면 입구를 지킨다 (#355).
+  ///
+  /// 암호가 없는 휴대폰은 **비교 없이 통과시키지 않는다.** 예전에는 "온보딩을 건너뛴
+  /// 개발 상태"를 위해 열어 줬는데, 연결 암호로 붙은 이룸이 휴대폰과 다시 로그인한
+  /// 보호자 휴대폰이 실제로 이 상태가 된다.
+  ///
+  /// - 보호자 휴대폰: 암호를 새로 만들게 한다. 정한 사람만 아는 값이 생기므로 막은 것이다.
+  /// - 이룸이 휴대폰: 암호를 만들게 하면 이룸이가 직접 정해 들어올 수 있다. 막고
+  ///   안내만 보인다.
+  Future<void> _guardGuardianEntry() async {
+    final read = await _readPin();
+    if (!mounted) return;
+    if (!read.ok) {
+      // 빈 화면에 남지 않게 돌려보낸다
+      if (context.canPop()) context.pop();
+      return;
+    }
+    final pin = read.pin;
+    if (pin != null && pin.isNotEmpty) return; // 있으면 평소처럼 입력을 받는다
+
+    if (ref.read(localStorageProvider).isElumiDevice) {
+      setState(() => _blocked = true);
+      return;
+    }
+    // 뒤로가기가 이 화면이 아니라 이룸이 홈으로 가도록 교체한다
+    context.pushReplacement(
+      '${Routes.guardianPinChange}?from=${ModeSwitchScreen.pinCreateFrom}',
+    );
   }
 
   @override
@@ -63,13 +124,22 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   }
 
   Future<void> _verify() async {
-    final saved = await ref.read(localStorageProvider).getPin();
-
-    // PIN을 설정하지 않았으면(온보딩을 건너뛴 개발 상태) 그냥 통과시킨다.
-    // 여기서 막으면 화면을 열어볼 방법이 없다.
-    final isValid = saved == null || saved.isEmpty || saved == _controller.text;
-
+    final read = await _readPin();
     if (!mounted) return;
+    if (!read.ok) return;
+    final saved = read.pin;
+
+    // 보호자 화면으로 가는데 암호가 없으면 통과시키지 않는다 (#355). 입구에서 이미
+    // 걸러지지만 입력 중에 암호가 지워진 경우까지 막는 두 번째 줄이다.
+    final hasPin = saved != null && saved.isNotEmpty;
+    if (!hasPin && widget.target == ModeSwitchTarget.guardian) {
+      _controller.clear();
+      _guardGuardianEntry();
+      return;
+    }
+
+    // 이룸이 화면으로 가는 쪽은 지킬 대상이 아니라 암호가 없어도 지나간다.
+    final isValid = !hasPin || saved == _controller.text;
 
     if (isValid) {
       context.go(widget.target.route);
@@ -105,6 +175,16 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_blocked) {
+      return ElumScaffold(
+        onBack: () => context.pop(),
+        bottomButton: ElumButton(label: '돌아가기', onPressed: () => context.pop()),
+        child: const ElumHeader(
+          title: '보호자 휴대폰에서\n열어 주세요',
+          description: '이 휴대폰에서는 보호자 화면을 열 수 없어요',
+        ),
+      );
+    }
     return ElumScaffold(
       onBack: () => context.pop(),
       child: Column(

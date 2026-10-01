@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -20,7 +21,13 @@ import '../../onboarding/presentation/widgets/pin_keypad.dart';
 /// 지금 암호를 **먼저 묻는다.** 보호자 화면이 열린 휴대폰을 이룸이가 들고 있을 때
 /// 바로 바꿀 수 있으면 보호자 화면을 지키는 암호가 의미를 잃는다.
 class PinChangeScreen extends ConsumerStatefulWidget {
-  const PinChangeScreen({super.key});
+  const PinChangeScreen({super.key, this.createOnly = false});
+
+  /// 암호가 없는 휴대폰이 보호자 화면에 들어오려고 처음 만드는 경우 (#355).
+  ///
+  /// 문구가 "바꾸기"가 아니라 "만들기"가 되고, 저장하면 설정으로 돌아가는 대신
+  /// 보호자 홈으로 들어간다. 입력 단계는 설정과 같다.
+  final bool createOnly;
 
   @override
   ConsumerState<PinChangeScreen> createState() => _PinChangeScreenState();
@@ -153,7 +160,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
       await showFailure(
         context,
         null,
-        title: '비밀암호를 바꾸지 못했어요',
+        title: widget.createOnly ? '비밀암호를 만들지 못했어요' : '비밀암호를 바꾸지 못했어요',
         fallback: '잠시 후 다시 시도해주세요',
         fallbackCode: 'E-PIN',
       );
@@ -161,12 +168,24 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     }
     // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다 (#433).
     final messenger = ScaffoldMessenger.of(context);
-    context.pop();
-    messenger.showSnackBar(const SnackBar(content: Text('비밀암호를 바꿨어요')));
+    if (widget.createOnly) {
+      // 방금 만든 암호가 곧 통과의 증거다. 보호자 홈으로 바로 들어간다.
+      context.go(Routes.guardian);
+    } else {
+      context.pop();
+    }
+    messenger.showSnackBar(
+      SnackBar(content: Text(widget.createOnly ? '비밀암호를 만들었어요' : '비밀암호를 바꿨어요')),
+    );
   }
 
   (String, String) get _copy => switch (_step) {
     _Step.verify => ('지금 비밀암호를\n입력해주세요', '확인한 뒤에 새 암호로 바꿀 수 있어요'),
+    _Step.enter when widget.createOnly => (
+      // 온보딩 비밀번호 화면(238:1909)과 같은 문구
+      '보호자님만 아는\n비밀암호를 만들어주세요',
+      '보호자모드로 변경할 때 사용하는 암호예요',
+    ),
     _Step.enter => ('새 비밀암호를\n입력해주세요', '보호자모드로 변경할 때 사용하는 암호예요'),
     // 온보딩 재입력(238:2767)과 같은 문구다
     _Step.confirm => ('암호를 한번 더\n입력해주세요', '보호자모드로 변경할 때 사용하는 암호예요'),

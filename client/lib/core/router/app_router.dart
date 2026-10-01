@@ -73,6 +73,7 @@ abstract final class Routes {
   /// 그림 방식 선택 (#458). 시안이 없어 임시 화면이다.
   static const guardianImageStyle = '/guardian/settings/image-style';
   static const routineInput = '/guardian/routine/input';
+
   /// DLP 마스킹 + 추가 질문 준비 로딩 (Figma 262:4569).
   /// 경로 이름은 DLP 시절 것을 유지한다 — 마스킹이 이 단계에서 일어나므로
   /// 의미가 어긋나지 않는다.
@@ -134,17 +135,21 @@ String? resolveRedirect(
   required bool hasSession,
   required bool onboardingCompleted,
   required bool skipOnboarding,
+
   /// 이룸이(당사자) 휴대폰인가. 여기에는 로그인할 계정이 없다 (이슈 #206).
   bool isElumiDevice = false,
+
   /// 약관 동의 뒤 역할을 골랐는가 (이슈 #212).
   bool hasRole = true,
 }) {
   // 가입 절차도 로그인이 있어야 한다. 계정이 없으면 동의를 기록할 곳도,
   // 아이 정보를 저장할 곳도 없다.
-  final isSignUpFlow = path.startsWith(Routes.consent) ||
+  final isSignUpFlow =
+      path.startsWith(Routes.consent) ||
       path.startsWith(Routes.roleSelect) ||
       path.startsWith('/onboarding');
-  final needsSession = isSignUpFlow ||
+  final needsSession =
+      isSignUpFlow ||
       path.startsWith(Routes.guardian) ||
       path.startsWith(Routes.child);
   if (!needsSession) return null;
@@ -234,7 +239,8 @@ GoRouter createRouter({
 
       GoRoute(
         path: Routes.consent,
-        pageBuilder: (context, state) => slidePage(state, const ConsentScreen()),
+        pageBuilder: (context, state) =>
+            slidePage(state, const ConsentScreen()),
       ),
       GoRoute(
         path: Routes.roleSelect,
@@ -314,8 +320,15 @@ GoRouter createRouter({
       ),
       GoRoute(
         path: Routes.guardianPinChange,
-        pageBuilder: (context, state) =>
-            slidePage(state, const PinChangeScreen()),
+        pageBuilder: (context, state) => slidePage(
+          state,
+          // 암호가 없는 휴대폰이 보호자 화면에 들어올 때 거치는 길이다 (#355)
+          PinChangeScreen(
+            createOnly:
+                state.uri.queryParameters['from'] ==
+                ModeSwitchScreen.pinCreateFrom,
+          ),
+        ),
       ),
       // --- 일과 만들기 흐름 ---
       // 흐름 전체가 **배경 하나**를 함께 쓴다 (#380). 화면이 바뀌면 글자만 넘어가고
