@@ -39,6 +39,8 @@ chuseok22:
 
 server:
   forward-headers-strategy: framework
+  # Blue/Green 전환 때 옛 컨테이너가 처리 중이던 요청을 끝내고 내려가게 한다. 없으면 SIGTERM 즉시 끊긴다.
+  shutdown: graceful
 
 elum:
   auth:
