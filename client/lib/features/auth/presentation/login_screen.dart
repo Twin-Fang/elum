@@ -373,6 +373,9 @@ class _LastUsedSlot extends StatelessWidget {
   static const _pillHeight = 28.0;
   static const _pillRadius = 20.0;
 
+  /// 글자가 알약 가장자리에 붙지 않게 하는 좌우 여백. 글꼴 1.0 에서는 최소 폭 안에 묻힌다.
+  static const _pillPadding = 8.0;
+
   /// 버튼 우측에서 16 · 버튼 위로 10.
   static const _right = 16.0;
   static const _top = 10.0;
@@ -390,17 +393,28 @@ class _LastUsedSlot extends StatelessWidget {
           right: _right.w,
           top: -_top.h,
           child: Container(
-            width: _pillWidth.w,
-            height: _pillHeight.h,
-            alignment: Alignment.center,
+            // 시안 91×28 은 **최소 크기**다. 글꼴이 커져 글자가 들어가지 않으면
+            // 알약이 자란다 — 고정이면 글자가 줄바꿈돼 잘렸다 (#342).
+            constraints: BoxConstraints(
+              minWidth: _pillWidth.w,
+              minHeight: _pillHeight.h,
+            ),
+            padding: EdgeInsets.symmetric(horizontal: _pillPadding.w),
             decoration: BoxDecoration(
               color: context.colors.loginLastUsedBg,
               borderRadius: BorderRadius.circular(_pillRadius.r),
             ),
-            child: Text(
-              '최근 로그인',
-              style: context.typo.lastLoginBadge.copyWith(
-                color: context.colors.textPrimary,
+            // 글자 크기만큼만 차지하고 알약 안 가운데에 둔다.
+            child: Center(
+              widthFactor: 1,
+              heightFactor: 1,
+              child: Text(
+                '최근 로그인',
+                maxLines: 1,
+                softWrap: false,
+                style: context.typo.lastLoginBadge.copyWith(
+                  color: context.colors.textPrimary,
+                ),
               ),
             ),
           ),
@@ -437,6 +451,9 @@ class _ProviderButton extends StatelessWidget {
   static const _iconSize = 22.0;
   static const _iconLeft = 64.0;
 
+  /// 로고와 문구 사이 최소 간격.
+  static const _labelGap = 8.0;
+
   @override
   Widget build(BuildContext context) {
     final space = context.space;
@@ -460,9 +477,21 @@ class _ProviderButton extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Text(
-              label,
-              style: context.typo.loginProvider.copyWith(color: labelColor),
+            // 문구는 로고 오른쪽부터 좌우 대칭 여백 안에 둔다. 글꼴 1.0 에서는 문구가 이 폭보다
+            // 좁아 버튼 가운데 그대로다. 커지면 로고 쪽으로 자라 붙거나 낱말이 중간에서 끊기는
+            // 대신 **한 줄로 폭에 맞춰 줄인다** — 버튼 높이(66)는 시안 그대로 둔다 (#342).
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: (_iconLeft + _iconSize + _labelGap).w,
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: context.typo.loginProvider.copyWith(color: labelColor),
+                ),
+              ),
             ),
             Positioned(
               left: _iconLeft.w,

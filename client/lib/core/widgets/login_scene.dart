@@ -219,6 +219,35 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
     );
   }
 
+  /// 문구 한 줄이 화면 폭을 넘으면 줄을 바꾸지 않고 **그 폭에 맞춰 줄인다** (#342).
+  ///
+  /// 줄이 바뀌면 `함께해 / 요` 처럼 낱말이 중간에서 끊긴다. 슬로건이라 한 줄로 읽혀야
+  /// 한다. **폭 안이면 손대지 않고 그대로 낸다** — 감싸기만 해도 글자가 반 픽셀 밀려
+  /// 글꼴 1.0 에서 시안 대조 골든이 어긋난다.
+  Widget _fitLine(BuildContext context, String text, TextStyle style) {
+    final available = (393 - 32).w;
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final fits = painter.width <= available;
+    painter.dispose();
+
+    final line = Text(text, textAlign: TextAlign.center, style: style);
+    if (fits) return line;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        // 위에 붙인다 — 칸이 최소 높이로 늘어나도 글자는 시안 y 에 선다.
+        alignment: Alignment.topCenter,
+        child: line,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -305,46 +334,64 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
             ),
           ],
 
-          // 문구 — 가로 중앙 정렬, 함께 등장.
-          // 두 시안 모두 문구 묶음의 중심이 화면 중앙(196.5)이라 좌표는 y만 다르다.
+          // 문구 둘 + 로고 — 한 줄기(Column)로 쌓는다 (#342).
+          //
+          // 시안은 세 요소를 y 고정으로 놓았다(문구 간격 28 · 로고까지 46). 글꼴이
+          // 커지면 글자 높이가 그 간격을 넘어 서로 물렸다. 칸마다 **시안 간격을 최소
+          // 높이**로 주고 글자가 그보다 크면 칸이 자라 아래 요소를 밀어 내린다.
+          // 글꼴 1.0 에서는 글자(20·26, 줄높이 1.0)가 최소 높이보다 작아 시안 좌표와
+          // 같고, **큰 글꼴에서만** 반응한다.
+          //
+          // 두 문구의 중심은 화면 중앙(196.5)이라 가로는 393 폭 안에서 가운데 정렬한다.
           Positioned(
             left: 0,
             top: layout.captionTop.h,
             width: 393.w,
-            child: AppFadeSlideIn(
-              child: Text(
-                '오늘의 하루,',
-                textAlign: TextAlign.center,
-                style: context.typo.subtitle.copyWith(
-                  color: colors.textSecondary,
-                  fontSize: 20.sp,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: (layout.titleTop - layout.captionTop).h,
+                  ),
+                  child: AppFadeSlideIn(
+                    child: _fitLine(
+                      context,
+                      '오늘의 하루,',
+                      context.typo.subtitle.copyWith(
+                        color: colors.textSecondary,
+                        fontSize: 20.sp,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            top: layout.titleTop.h,
-            width: 393.w,
-            child: AppFadeSlideIn(
-              child: Text(
-                '차근차근 함께해요',
-                textAlign: TextAlign.center,
-                style: context.typo.headline.copyWith(
-                  color: colors.splashTitle,
-                  fontSize: 26.sp,
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: (layout.logoTop - layout.titleTop).h,
+                  ),
+                  child: AppFadeSlideIn(
+                    child: _fitLine(
+                      context,
+                      '차근차근 함께해요',
+                      context.typo.headline.copyWith(
+                        color: colors.splashTitle,
+                        fontSize: 26.sp,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-
-          // 로고 (x=115, 164×60) — 폰트가 아니라 SVG다. 문구 다음에 등장.
-          Positioned(
-            left: 115.w,
-            top: layout.logoTop.h,
-            child: AppFadeSlideIn(
-              delay: AppMotion.sceneStagger,
-              child: SvgPicture.asset(AppAssets.logo, width: 164.w),
+                // 로고 (x=115, 164×60) — 폰트가 아니라 SVG다. 문구 다음에 등장.
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 115.w),
+                    child: AppFadeSlideIn(
+                      delay: AppMotion.sceneStagger,
+                      child: SvgPicture.asset(AppAssets.logo, width: 164.w),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
