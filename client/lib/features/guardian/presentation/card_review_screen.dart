@@ -7,6 +7,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_dialog.dart';
 import '../../../shared/models/action_card.dart';
 import '../../child/data/speech_service.dart';
 import '../application/routine_notifier.dart';
@@ -97,6 +98,30 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     _speech?.stop();
     _controller.dispose();
     super.dispose();
+  }
+
+  /// 카드 지우기 — **묻고 나서** 뺀다 (#497).
+  ///
+  /// `✕` 가 곧바로 지우면 잘못 눌러도 되돌릴 길이 없다. 카드 그림은 AI 가 만든
+  /// 것이라 다시 받으려면 크레딧이 든다. 일과 삭제 팝업과 같은 모양을 쓴다.
+  /// 바깥을 눌러 닫으면 null 이므로 취소로 다룬다.
+  Future<void> _confirmRemove(ActionCard card) async {
+    final confirmed = await showElumDialog<bool>(
+      context: context,
+      title: '카드를 삭제하실건가요?',
+      icon: ElumDialogIcon.trash,
+      actions: const [
+        ElumDialogAction(
+          label: '취소',
+          value: false,
+          tone: ElumDialogTone.neutral,
+        ),
+        ElumDialogAction(label: '삭제', value: true, tone: ElumDialogTone.danger),
+      ],
+    );
+    // 팝업이 떠 있는 사이 화면이 닫혔으면 건드리지 않는다
+    if (confirmed != true || !mounted) return;
+    ref.read(routineFlowProvider.notifier).removeStep(card.id);
   }
 
   /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다.
@@ -360,7 +385,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
                         isSpeaking: _speakingId == cards[index].id,
                         // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다
                         onDelete: cards.length > 1
-                            ? () => notifier.removeStep(cards[index].id)
+                            ? () => _confirmRemove(cards[index])
                             : null,
                       ),
                     ),
