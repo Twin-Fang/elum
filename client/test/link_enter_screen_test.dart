@@ -4,6 +4,7 @@ import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/link/presentation/widgets/code_boxes.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/presentation/link_enter_screen.dart';
@@ -59,12 +60,19 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// 칸을 채우고 `시작하기`를 누른다 — 시안(1274:7988)은 버튼을 눌러 보낸다 (#493).
+  Future<void> typeAndStart(WidgetTester tester, String code) async {
+    await type(tester, code);
+    await tester.tap(find.text('시작하기'));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('어디서 암호를 받는지 화면이 알려준다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
     // 이룸이 혼자 보고도 다음 행동을 알 수 있어야 한다.
-    expect(find.textContaining('보호자 휴대폰에서'), findsOneWidget);
+    expect(find.textContaining('보호자 휴대폰의'), findsOneWidget);
     expect(find.textContaining('설정 → 이룸이 휴대폰 연결하기'), findsOneWidget);
   });
 
@@ -85,21 +93,48 @@ void main() {
     );
   });
 
-  testWidgets('여섯 자를 채우면 확인 버튼 없이 바로 보낸다', (tester) async {
+  testWidgets('여섯 자를 채우면 시작하기가 켜지고, 누르면 보낸다 (#493)', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
+    // 채우기 전에는 꺼져 있다 (시안 1274:7909)
+    ElumButton startButton() =>
+        tester.widget<ElumButton>(find.widgetWithText(ElumButton, '시작하기'));
+    expect(startButton().onPressed, isNull);
+
     await type(tester, 'A7K3M9');
+
+    // 다 채워도 버튼을 누르기 전에는 보내지 않는다 (시안 1274:7988)
+    expect(repo.sent, isEmpty);
+    expect(startButton().onPressed, isNotNull);
+
+    await tester.tap(find.text('시작하기'));
+    await tester.pumpAndSettle();
 
     expect(repo.sent, ['A7K3M9']);
     expect(find.text('이룸이 홈'), findsOneWidget);
+  });
+
+  testWidgets('여섯 자가 안 되면 시작하기가 꺼져 있다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await type(tester, 'A7K3M');
+
+    expect(
+      tester
+          .widget<ElumButton>(find.widgetWithText(ElumButton, '시작하기'))
+          .onPressed,
+      isNull,
+    );
+    expect(repo.sent, isEmpty);
   });
 
   testWidgets('소문자·공백으로 쳐도 대문자로 보낸다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await type(tester, 'a7k 3m9');
+    await typeAndStart(tester, 'a7k 3m9');
 
     expect(repo.sent, ['A7K3M9']);
   });
@@ -109,7 +144,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await type(tester, 'A7K3M9');
+    await typeAndStart(tester, 'A7K3M9');
 
     expect(find.text('암호가 맞지 않아요'), findsOneWidget);
     expect(find.text('이룸이 홈'), findsNothing);
@@ -124,7 +159,7 @@ void main() {
     repo.outcome = RedeemOutcome.notFound;
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
-    await type(tester, 'A7K3M9');
+    await typeAndStart(tester, 'A7K3M9');
     expect(find.text('암호가 맞지 않아요'), findsOneWidget);
 
     tester.testTextInput.log.clear();
@@ -144,7 +179,7 @@ void main() {
     repo.outcome = RedeemOutcome.notFound;
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
-    await type(tester, 'A7K3M9');
+    await typeAndStart(tester, 'A7K3M9');
 
     final danger = AppTheme.light.extension<AppColors>()!.danger;
     final borders = tester
@@ -167,7 +202,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await type(tester, 'A7K3M9');
+    await typeAndStart(tester, 'A7K3M9');
 
     expect(find.textContaining('새 암호를 받아주세요'), findsOneWidget);
   });
@@ -177,7 +212,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    await type(tester, 'A7K3M9');
+    await typeAndStart(tester, 'A7K3M9');
 
     expect(find.textContaining('E-NET'), findsOneWidget);
   });
@@ -187,7 +222,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 0 은 서버가 만들지 않는 글자다. 보내 봐야 시도 횟수만 축낸다.
-    await type(tester, 'A0K3M9');
+    await typeAndStart(tester, 'A0K3M9');
 
     expect(repo.sent, isEmpty);
     expect(find.text('암호가 맞지 않아요'), findsOneWidget);

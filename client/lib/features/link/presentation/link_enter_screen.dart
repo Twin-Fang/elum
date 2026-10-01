@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_shake.dart';
+import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../data/device_link_repository.dart';
@@ -15,7 +16,11 @@ import 'widgets/code_boxes.dart';
 
 /// 연결 암호 넣기 — **이룸이 휴대폰** (이슈 #205 · 명세 §5-2).
 ///
-/// 로그인 전에 서는 화면이다. 여기서 암호를 넣으면 계정에 붙고 이룸이 홈으로 간다.
+/// 로그인 전에 서는 화면이다. 여섯 칸을 채우면 `시작하기`가 켜지고, 누르면 계정에 붙어
+/// 이룸이 홈으로 간다 (Figma `코드연결` 1274:7909 · `코드연결_입력` 1274:7988, #493).
+///
+/// 시안이 버튼을 그려서 **다 채우면 바로 보내던 동작을 버튼으로 옮겼다.** 시안 이전에는
+/// 확인 버튼이 없어 자동으로 보냈다(#205 §5-2).
 ///
 /// PIN 화면과 달리 **시스템 키보드**를 쓴다 — 암호에 영문이 섞여 숫자패드로는 칠 수 없다.
 /// 6칸 모양은 PIN과 맞추되 글자를 드러낸다(가리면 받아적을 수 없다).
@@ -65,11 +70,8 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
 
   void _onChanged() {
     if (_sending) return;
+    // 칸과 시작하기(여섯 자일 때만 켜짐)를 다시 그린다
     setState(() {});
-    // 여섯 자를 채우면 바로 보낸다 — 확인 버튼을 따로 누르게 하지 않는다 (§5-2).
-    if (_typed.length == LinkCode.length) {
-      _submit();
-    }
   }
 
   Future<void> _submit() async {
@@ -140,46 +142,40 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
     });
   }
 
+  /// 시안 `1274:7909` — 뒤로가기 하단(119)에서 코드 칸 윗변(339)까지.
+  /// 머리 글(제목 + 설명)이 한 줄이든 두 줄이든 칸이 이 자리에 선다.
+  static const _headerRegionHeight = 220.0;
+
+  /// 코드 안내 — 시안 문구. 밑줄 친 부분이 보호자 휴대폰에서 코드를 찾는 길이다.
+  static const _guide = '코드는 보호자 휴대폰의\n설정 → 이룸이 휴대폰 연결하기에 있어요';
+  static const _guidePath = '설정 → 이룸이 휴대폰 연결하기';
+
   @override
   Widget build(BuildContext context) {
     final space = context.space;
-    final colors = context.colors;
 
     return ElumScaffold(
       onBack: _sending ? null : () => context.pop(),
+      // 여섯 칸을 다 채워야 켜진다. 보내는 중에는 다시 누를 수 없다 — 1회용 암호다.
+      bottomButton: ElumButton(
+        label: '시작하기',
+        onPressed: _typed.length == LinkCode.length && !_sending
+            ? _submit
+            : null,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ElumHeader(
-            title: '보호자에게 연결 암호를\n받아주세요',
-            // 틀린 암호 안내가 있으면 그것이 먼저다 — 지금 일어난 일이다
-            description: _errorMessage ?? (_linkLost ? '연결이 끊어졌어요' : null),
-          ),
-          SizedBox(height: space.lg),
-          // 어디서 받는지 적어 준다. 이 안내는 **보호자가 읽어도 말이 되게** 쓴다 —
-          // 보호자가 대신 넣어 주는 경우가 많다 (§5-2).
-          Container(
-            padding: EdgeInsets.all(space.lg),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(space.cardRadius.r),
-              border: Border.all(color: colors.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('보호자 휴대폰에서',
-                    style: context.typo.body.copyWith(color: colors.textSecondary)),
-                SizedBox(height: space.sm),
-                Text('설정 → 이룸이 휴대폰 연결하기',
-                    style: context.typo.subtitle.copyWith(color: colors.textPrimary)),
-                SizedBox(height: space.sm),
-                Text('여섯 글자가 나와요',
-                    style: context.typo.body.copyWith(color: colors.textSecondary)),
-              ],
+          SizedBox(
+            height: _headerRegionHeight.h,
+            child: ElumHeader(
+              title: '보호자에게서 받은 코드를\n입력해주세요',
+              // 틀린 암호 안내가 있으면 그것이 먼저다 — 지금 일어난 일이다
+              description: _errorMessage ?? (_linkLost ? '연결이 끊어졌어요' : _guide),
+              underlinedInDescription:
+                  _errorMessage == null && !_linkLost ? _guidePath : null,
             ),
           ),
-          SizedBox(height: space.xl),
           // 실제 입력칸은 투명이라 화면 낭독기에서 빠진다. 키보드를 여는 길은 이
           // 여섯 칸뿐이라 이름을 주고, 칸에 보이는 글자는 값으로 함께 읽힌다 (#339).
           Semantics(
@@ -195,7 +191,10 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
                 // 칸마다 글자를 따로 읽으면 한 글자씩 끊겨 들린다 — 위 값 하나로
                 // 읽힌다. 바깥에서 빼면 누름 동작까지 함께 빠져 안쪽에서 뺀다.
                 child: ExcludeSemantics(
-                  child: CodeBoxes(value: _typed, hasError: _errorMessage != null),
+                  child: CodeBoxes.figma(
+                    value: _typed,
+                    hasError: _errorMessage != null,
+                  ),
                 ),
               ),
             ),

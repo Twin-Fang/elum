@@ -21,12 +21,17 @@ class ElumHeader extends StatelessWidget {
     this.description,
     this.hasBackButton = false,
     this.titleY,
+    this.underlinedInDescription,
   });
 
   /// 2줄로 줄바꿈된 제목. 줄바꿈 위치는 디자인이 정한 대로 전달한다.
   final String title;
 
   final String? description;
+
+  /// 설명 안에서 밑줄을 그을 부분 (이룸이 연결 코드 입력의 `설정 → 이룸이 휴대폰 연결하기`,
+  /// 시안 `1274:7909`). 설명에 들어 있지 않으면 밑줄 없이 그대로 그린다.
+  final String? underlinedInDescription;
 
   /// 위에 뒤로가기 버튼이 있는지.
   ///
@@ -78,13 +83,39 @@ class ElumHeader extends StatelessWidget {
         ),
         if (description != null) ...[
           SizedBox(height: _titleToDescription.h),
-          Text(
-            description!,
-            style:
-                context.typo.body.copyWith(color: context.colors.textSecondary),
-          ),
+          _description(context),
         ],
       ],
+    );
+  }
+
+  Widget _description(BuildContext context) {
+    final marked = underlinedInDescription;
+    // 두 줄 설명(`1274:7909`)은 줄 높이가 1.3 이다. 한 줄 설명은 기존 그대로 1.0.
+    final style = context.typo.body.copyWith(
+      color: context.colors.textSecondary,
+      height: marked == null ? null : 1.3,
+    );
+    final text = description!;
+    final at = marked == null ? -1 : text.indexOf(marked);
+    if (marked == null || at < 0) return Text(text, style: style);
+
+    return Text.rich(
+      TextSpan(
+        style: style,
+        children: [
+          TextSpan(text: text.substring(0, at)),
+          TextSpan(
+            text: marked,
+            // 밑줄도 글자와 같은 연한 회색이다 (시안 1274:7909)
+            style: TextStyle(
+              decoration: TextDecoration.underline,
+              decorationColor: context.colors.textSecondary,
+            ),
+          ),
+          TextSpan(text: text.substring(at + marked.length)),
+        ],
+      ),
     );
   }
 }
