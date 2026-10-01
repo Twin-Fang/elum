@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-01T13:58:26Z",
-    "currentVersion": "2.7.0",
+    "lastUpdated": "2026-10-01T14:39:07Z",
+    "currentVersion": "2.7.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 189
+    "totalReleases": 190
   },
   "releases": [
+    {
+      "version": "2.7.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-01",
+      "pr_number": 486,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 보호자 휴대폰의 이룸이 화면에서 오른쪽 위가 다시 캐릭터 버튼으로 바뀌었어요\n  * 이룸이 휴대폰의 설정 버튼이 별 오른쪽 제자리로 옮겨졌어요\n  * 이룸이 휴대폰 설정에서 약관과 앱 정보를 볼 수 있어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "보호자 휴대폰의 이룸이 화면에서 오른쪽 위가 다시 캐릭터 버튼으로 바뀌었어요",
+            "이룸이 휴대폰의 설정 버튼이 별 오른쪽 제자리로 옮겨졌어요",
+            "이룸이 휴대폰 설정에서 약관과 앱 정보를 볼 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.7.0",
       "project_type": "flutter",
