@@ -54,10 +54,38 @@ class ConsentBlock {
 final _section = RegExp(r'^\d+\.\s+(.+)$');
 // 법률 문서식 조항 제목 — `제3조 (계정)` (#430). 이 줄이 있는 문서는 조항이 제목이고,
 // 그 아래 `1.` `2.` 는 제목이 아니라 **본문 항목**이다.
-final _article = RegExp(r'^제\d+조(\s|\(|$)');
+// 중간에 끼워 넣은 조항은 `제5조의2 (광고)` 처럼 `의N` 이 붙는다 (#475) — 놓치면 평범한 문단이 된다.
+final _article = RegExp(r'^제\d+조(의\d+)?(\s|\(|$)');
 // 대괄호 **뒤에 꼬리가 붙는** 소제목이 있다 — `[이룸이 정보] — 보호자가 직접 입력합니다`.
 // `^\[.+\]$`로 잡으면 이런 줄이 통째로 평범한 문단이 되어 소제목 자리를 잃는다.
 final _subsection = RegExp(r'^\[([^\]]+)\]\s*(.*)$');
+
+/// 대괄호 없는 소제목 줄의 최대 길이 (#475). 하드랩된 문장의 첫 줄은 화면 폭에 맞춰
+/// 40자 안팎으로 끊기고, 원문의 소제목은 가장 긴 것(`상황 설명에는 개인정보를 적지 말아
+/// 주세요`)이 21자다. 그 사이에서 가른다.
+const _maxPlainSubsection = 24;
+
+/// 대괄호 없이 한 줄로 선 소제목인가 (#475).
+///
+/// 국외 이전 동의서의 `보유 및 이용 기간` · `동의를 거부할 권리` 가 이런 모양이다.
+/// 소제목으로 알아보지 못하면 아래 줄에 하드랩으로 붙어 `보유 및 이용 기간 전달받는
+/// 업체의 …` 처럼 읽힌다. 오인하면 평범한 문장이 굵은 제목이 되므로 **좁게** 잡는다.
+///
+/// - 덩이의 첫 줄이다 (앞이 빈 줄이거나 문서 처음)
+/// - 짧고 문장부호·조사·연결어미로 끝나지 않는다
+/// - 바로 아래에 이어지는 줄이 있다 (홀로 선 짧은 줄은 그냥 문단이다)
+bool _isPlainSubsection(List<String> lines, int i) {
+  final text = lines[i].trim();
+  if (text.isEmpty || text.length > _maxPlainSubsection) return false;
+  if (RegExp(r'[.,;:!?)\]·]$').hasMatch(text)) return false;
+  // 조사·연결어미로 끝나면 문장 가운데서 끊긴 줄이다 (`아래 정보가` / `국외로 …`).
+  if (RegExp(r'[은는을를에가와과도로며고서면]$').hasMatch(text)) return false;
+  if (i > 0 && lines[i - 1].trim().isNotEmpty) return false;
+  if (i + 1 >= lines.length) return false;
+  final next = lines[i + 1];
+  // 들여쓴 아래 줄은 이 줄의 이어짐이다.
+  return next.trim().isNotEmpty && !next.startsWith(RegExp(r'\s'));
+}
 
 /// 약관 전문을 덩이로 나눈다 (이슈 #235).
 ///
@@ -115,7 +143,9 @@ List<ConsentBlock> parseConsentBody(String raw) {
     buffer.write(text);
   }
 
-  for (final line in raw.split('\n')) {
+  final lines = raw.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    final line = lines[i];
     final trimmed = line.trim();
 
     // 빈 줄은 덩이의 끝이다.
@@ -161,6 +191,15 @@ List<ConsentBlock> parseConsentBody(String raw) {
         ConsentBlockKind.subsection,
         tail.isEmpty ? sub.group(1)! : '${sub.group(1)} $tail',
       );
+      flush();
+      continue;
+    }
+
+    // 표 행·불릿보다 앞에 두지 않는다 — `- ` 줄이나 두 칸 공백 표 행은 아래에서 먼저 잡힌다.
+    if (!trimmed.startsWith('- ') &&
+        _splitRow(trimmed) == null &&
+        _isPlainSubsection(lines, i)) {
+      start(ConsentBlockKind.subsection, trimmed);
       flush();
       continue;
     }

@@ -50,15 +50,16 @@ void main() {
       ]);
     });
 
-    test('서비스 이용약관 전문에서 조항 7개가 모두 제목이 된다 (#430)', () {
+    test('서비스 이용약관 전문에서 조항 9개(제5조의2·의3 포함)가 모두 제목이 된다 (#430 #475)', () {
       final terms = consentItems.firstWhere((d) => d.key == 'termsAgreed');
       final sections = parseConsentBody(terms.body)
           .where((b) => b.kind == ConsentBlockKind.section)
           .map((b) => b.text)
           .toList();
 
-      expect(sections, hasLength(7));
+      expect(sections, hasLength(9));
       expect(sections, everyElement(startsWith('제')));
+      expect(sections, containsAll(['제5조의2 (광고)', '제5조의3 (그림 출처)']));
     });
 
     test('대괄호로 감싼 줄은 소제목이다', () {
@@ -314,6 +315,119 @@ void main() {
     test('빈 문자열은 빈 목록이다 — 화면이 죽지 않는다', () {
       expect(parseConsentBody(''), isEmpty);
       expect(parseConsentBody('   \n  \n'), isEmpty);
+    });
+  });
+
+  // 이슈 #475 — 조항 제목은 `제N조` 뿐 아니라 `제N조의M` 도 있다. 이걸 놓치면
+  // 제5조의2·의3 이 평범한 문단 글씨로 나온다. 대괄호 없는 소제목은 다음 문단에 붙었다.
+  group('조항·소제목 규칙 (#475)', () {
+    test('제N조의M 도 조항 제목이다', () {
+      final blocks = parseConsentBody('''
+제5조의2 (광고)
+1. 서비스에는 광고가 포함될 수 있습니다.
+
+제5조의3 (그림 출처)
+1. 서비스의 카드 그림 중 일부를 사용합니다.''');
+
+      expect(blocks.map((b) => b.kind), [
+        ConsentBlockKind.section,
+        ConsentBlockKind.paragraph,
+        ConsentBlockKind.section,
+        ConsentBlockKind.paragraph,
+      ]);
+      expect(blocks.first.text, '제5조의2 (광고)');
+    });
+
+    test('제5조의3 의 번호 항목 1~4 는 항목마다 한 문단이고 URL 이 잘리지 않는다', () {
+      final terms = consentItems.firstWhere((d) => d.key == 'termsAgreed');
+      final blocks = parseConsentBody(terms.body);
+      final at = blocks.indexWhere((b) => b.text == '제5조의3 (그림 출처)');
+
+      expect(blocks[at].kind, ConsentBlockKind.section);
+      final items = blocks.sublist(at + 1, at + 5);
+      expect(items.map((b) => b.kind), everyElement(ConsentBlockKind.paragraph));
+      expect(items.map((b) => b.text.substring(0, 2)), ['1.', '2.', '3.', '4.']);
+      // 들여쓴 둘째 줄이 같은 항목에 붙는다
+      expect(items[0].text, contains('Mulberry Symbols(https://mulberrysymbols.org)를 사용합니다.'));
+      expect(items[3].text, contains('https://creativecommons.org/licenses/by-sa/4.0/'));
+      // 다음 조항은 제6조
+      expect(blocks[at + 5].text, '제6조 (면책)');
+    });
+
+    test('대괄호 없는 짧은 소제목 줄은 다음 줄과 떨어진 소제목이다', () {
+      final blocks = parseConsentBody('''
+보유 및 이용 기간
+전달받는 업체의 정책에 따라 처리되며, 이룸은 응답을 받은 뒤 원본 요청을
+보관하지 않습니다.''');
+
+      expect(blocks, [
+        const ConsentBlock(ConsentBlockKind.subsection, '보유 및 이용 기간'),
+        const ConsentBlock(
+          ConsentBlockKind.paragraph,
+          '전달받는 업체의 정책에 따라 처리되며, 이룸은 응답을 받은 뒤 원본 요청을 보관하지 않습니다.',
+        ),
+      ]);
+    });
+
+    test('소제목 아래가 불릿이어도 소제목이다', () {
+      final blocks = parseConsentBody('이전 목적\n- 카드 그림 생성');
+
+      expect(blocks, [
+        const ConsentBlock(ConsentBlockKind.subsection, '이전 목적'),
+        const ConsentBlock(ConsentBlockKind.bullet, '카드 그림 생성'),
+      ]);
+    });
+
+    test('문장부호로 끝나거나 긴 첫 줄, 홀로 선 짧은 줄은 소제목이 아니다', () {
+      // 마침표로 끝나면 문장이다.
+      expect(
+        parseConsentBody('이 동의는 선택입니다.\n동의하지 않아도 이용할 수 있습니다.').single.kind,
+        ConsentBlockKind.paragraph,
+      );
+      // 길면 하드랩된 문장의 첫 줄이다.
+      expect(
+        parseConsentBody('이룸의 계정은 보호자가 만들고 사용합니다. 계정을 만드는 분이\n만 14세 이상인지 확인합니다.')
+            .single
+            .kind,
+        ConsentBlockKind.paragraph,
+      );
+      // 아래에 이을 줄이 없으면 그냥 문단이다.
+      expect(parseConsentBody('짧은 한 줄').single.kind, ConsentBlockKind.paragraph);
+      // 문단 가운데 줄은 앞 줄이 비어 있지 않으므로 소제목이 될 수 없다.
+      expect(
+        parseConsentBody('이룸은 보호자가 계정을 만들고,\n정보 입력\n대신 합니다.').single.kind,
+        ConsentBlockKind.paragraph,
+      );
+    });
+
+    test('국외 이전 동의서의 소제목 다섯 줄이 모두 소제목이 된다', () {
+      final doc = consentItems.firstWhere((d) => d.key == 'overseasTransferAgreed');
+      final subs = parseConsentBody(doc.body)
+          .where((b) => b.kind == ConsentBlockKind.subsection)
+          .map((b) => b.text)
+          .toList();
+
+      expect(subs, [
+        '이전되는 항목',
+        '이전 목적',
+        '보유 및 이용 기간',
+        '상황 설명에는 개인정보를 적지 말아 주세요',
+        '동의를 거부할 권리',
+      ]);
+    });
+
+    test('다른 문서(개인정보·연령·마케팅)는 소제목이 늘지 않는다 — 회귀 없음', () {
+      for (final key in ['privacyAgreed', 'guardianConfirmed', 'marketingAgreed']) {
+        final doc = consentItems.firstWhere((d) => d.key == key);
+        final subs = parseConsentBody(doc.body)
+            .where((b) => b.kind == ConsentBlockKind.subsection)
+            .map((b) => b.text)
+            .toList();
+        // 개인정보처리방침의 대괄호 소제목만 있고, 평범한 문단이 제목으로 오인되지 않는다.
+        for (final s in subs) {
+          expect(doc.body, contains('[${s.split(' — ').first}'), reason: '$key: "$s" 가 소제목이 됐다');
+        }
+      }
     });
   });
 }
