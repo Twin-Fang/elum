@@ -101,12 +101,23 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     super.dispose();
   }
 
+  /// 이 화면이 열릴 때 이미 붙어 있던 휴대폰들. 새로 붙은 것만 `연결 성공`이다 (#363).
+  /// 다시 만들기를 눌러도 처음 기준을 유지한다 — 그사이 붙은 것은 새로 붙은 것이다.
+  Set<String>? _knownLinkIds;
+
   Future<void> _issue() async {
     setState(() {
       _loading = true;
       _errorMessage = null;
     });
-    final attempt = await ref.read(deviceLinkRepositoryProvider).issue();
+    final repo = ref.read(deviceLinkRepositoryProvider);
+    // 기준은 암호를 만드는 것과 함께 잡는다 — 새 암호는 아직 쓰이지 않았으니 목록에 끼지 않는다.
+    final baseline = _knownLinkIds == null ? repo.statusResult() : null;
+    final attempt = await repo.issue();
+    final before = await baseline;
+    if (before != null && before.isOk) {
+      _knownLinkIds ??= before.value!.devices.map((d) => d.linkId).toSet();
+    }
     if (!mounted) return;
 
     if (!attempt.isOk) {
@@ -138,9 +149,16 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     // 3초는 서버에 부담이 크지 않으면서 사람이 기다린다고 느끼지 않는 간격이다.
     _poller = Timer.periodic(const Duration(seconds: 3), (t) async {
       if (!mounted) return t.cancel();
-      final status = await ref.read(deviceLinkRepositoryProvider).status();
+      final attempt = await ref.read(deviceLinkRepositoryProvider).statusResult();
       if (!mounted) return;
-      if (status.hasDevice) {
+      // 못 물었으면 이번 박자는 건너뛴다 — 실패를 `연결 없음`으로 읽으면 안 된다.
+      if (!attempt.isOk) return;
+      final ids = attempt.value!.devices.map((d) => d.linkId).toSet();
+      // **이 화면이 열린 뒤 새로 붙은 휴대폰만** 성공으로 알린다 (#363). 이미 연결된 보호자가
+      // 새 암호를 만들러 들어오면 예전 연결을 방금 성공한 것처럼 팝업을 띄웠다. 열 때 기준을 못
+      // 잡았으면(첫 조회 실패) 처음 성공한 응답을 기준으로 삼는다 — 틀리게 알리는 것보다 낫다.
+      final known = _knownLinkIds ??= ids;
+      if (ids.difference(known).isNotEmpty) {
         t.cancel();
         _ticker?.cancel();
         setState(() => _linked = true);

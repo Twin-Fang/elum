@@ -121,8 +121,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       // 연결 암호 넣기는 **뒤로 갈 수 있어야 한다** (이슈 #212). go로 바로 띄우면
       // 스택이 비어 pop이 실패하므로, 역할 선택을 깔고 그 위에 얹는다.
       if (route == Routes.linkEnter) {
-        router.go(Routes.roleSelect);
-        router.push(Routes.linkEnter);
+        goToLinkEnter(router);
         return;
       }
       router.go(route);

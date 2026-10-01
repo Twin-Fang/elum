@@ -168,6 +168,39 @@ void main() {
     });
   });
 
+  // #363 — 이미 연결된 상태에서 이 화면을 열면 예전 연결을 방금 성공한 것처럼 알렸다.
+  // 화면이 3초마다 상태를 물어 `hasDevice` 만 보았기 때문이다. 이 화면이 열린 뒤 **새로 붙은** 휴대폰만 알린다.
+  group('이미 연결된 휴대폰이 있을 때 (#363)', () {
+    testWidgets('예전 연결을 방금 성공한 것처럼 알리지 않는다', (tester) async {
+      repo.deviceIds.add('l-old');
+      await tester.pumpWidget(wrap());
+      await settleIssue(tester);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+
+      expect(find.text('휴대폰 연결에 성공했어요!'), findsNothing);
+      // 암호는 그대로 보이고 기다린다 — 타이머도 살아 있다
+      expect(find.textContaining(RegExp(r'^\d{2}:\d{2}$')), findsOneWidget);
+    });
+
+    testWidgets('그 뒤에 새 휴대폰이 붙으면 그때는 알린다', (tester) async {
+      repo.deviceIds.add('l-old');
+      await tester.pumpWidget(wrap());
+      await settleIssue(tester);
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+
+      repo.deviceIds.add('l-new');
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+
+      expect(find.text('휴대폰 연결에 성공했어요!'), findsOneWidget);
+    });
+  });
+
   // #393 S6 — 보상 화면(#380 실기기 A)과 같은 구조였다. 자리를 글자 높이 16 으로
   // 못 박고 OverflowBox 로 덮어, 글꼴을 키우면 글자가 16 상자에 갇혀 아래가 잘린다.
   // 넘친 것이 아니라 잘린 것이라 넘침 검사로는 못 잡는다 — 그려진 높이를 잰다.
@@ -217,15 +250,20 @@ class _FakeLink extends DeviceLinkRepository {
 
   bool linked = false;
 
+  /// 이 화면을 열기 전부터 붙어 있던 휴대폰들 (#363).
+  final deviceIds = <String>[];
+
   @override
   Future<Attempt<IssuedLinkCode>> issue() async => Attempt.ok(
         IssuedLinkCode.fromNow(code: '5NJ280', expiresInSeconds: 600),
       );
 
   @override
-  Future<LinkStatus> status() async => LinkStatus(
-        devices: linked
-            ? [LinkedDevice(linkId: 'l1', linkedAt: DateTime(2026, 9, 18))]
-            : const [],
-      );
+  Future<Attempt<LinkStatus>> statusResult() async =>
+      Attempt.ok(LinkStatus(
+        devices: [
+          for (final id in [...deviceIds, if (linked) 'l1'])
+            LinkedDevice(linkId: id, linkedAt: DateTime(2026, 9, 18)),
+        ],
+      ));
 }

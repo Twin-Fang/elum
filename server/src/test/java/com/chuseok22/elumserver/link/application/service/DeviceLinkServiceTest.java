@@ -245,17 +245,17 @@ class DeviceLinkServiceTest {
   @Test
   @DisplayName("상태 — 연결 전에는 비어 있고, 발급하면 만료 시각이, 연결하면 목록이 찬다")
   void status() throws Exception {
-    assertThat(service.status("m1").devices()).isEmpty();
-    assertThat(service.status("m1").pendingExpiresAt()).isNull();
+    assertThat(service.status(GUARDIAN).devices()).isEmpty();
+    assertThat(service.status(GUARDIAN).pendingExpiresAt()).isNull();
 
     DeviceLink pending = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
     when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
       .thenReturn(List.of(pending));
-    assertThat(service.status("m1").pendingExpiresAt()).isNotNull();
-    assertThat(service.status("m1").devices()).isEmpty();
+    assertThat(service.status(GUARDIAN).pendingExpiresAt()).isNotNull();
+    assertThat(service.status(GUARDIAN).devices()).isEmpty();
 
     pending.setRedeemedAt(LocalDateTime.now());
-    LinkStatusResponse linked = service.status("m1");
+    LinkStatusResponse linked = service.status(GUARDIAN);
     assertThat(linked.devices()).hasSize(1);
     assertThat(linked.devices().get(0).linkedAt()).isNotNull();
     assertThat(linked.pendingExpiresAt()).isNull();
@@ -273,7 +273,7 @@ class DeviceLinkServiceTest {
     when(deviceLinkRepository.findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc("m1"))
       .thenReturn(List.of(second, first));
 
-    assertThat(service.status("m1").devices())
+    assertThat(service.status(GUARDIAN).devices())
       .extracting(d -> d.linkId())
       .containsExactly("l2", "l1");
   }
@@ -320,5 +320,135 @@ class DeviceLinkServiceTest {
     service.issue(GUARDIAN);
 
     verify(deviceLinkRepository).save(org.mockito.ArgumentMatchers.argThat(link -> "p1".equals(link.getProfileId())));
+  }
+
+  // --- #363: 함께 돌보는 보호자가 서로 붙인 휴대폰을 보고 끊는다 (명세 4-2 권한 표) ---
+
+  private void stubProfile() {
+    Profile p = new Profile();
+    p.setId("p1");
+    when(profileAccessGuard.profilesOf(GUARDIAN)).thenReturn(List.of(p));
+  }
+
+  /** 보호자 a(m1)가 p1 에 붙인, 연결된 휴대폰. */
+  private DeviceLink linkedByM1OnP1() throws Exception {
+    DeviceLink l = link("A7K3M9", LocalDateTime.now().minusMinutes(1));
+    l.setProfileId("p1");
+    l.setRedeemedAt(LocalDateTime.now().minusMinutes(1));
+    l.setLinkedDeviceId("elumi-1");
+    return l;
+  }
+
+  @Test
+  @DisplayName("#363 같은 이룸이를 돌보는 다른 보호자도 그 휴대폰을 끊는다 — 세션은 붙인 보호자 것을 폐기한다")
+  void revoke_byOtherGuardianOfSameProfile() throws Exception {
+    DeviceLink l = linkedByM1OnP1();
+    when(deviceLinkRepository.findById("l1")).thenReturn(Optional.of(l));
+    when(profileAccessGuard.isGuardianOf("m2", "p1")).thenReturn(true);
+
+    service.revoke("m2", "l1");
+
+    assertThat(l.getRevokedAt()).isNotNull();
+    // 토큰의 주인(sub)은 붙인 보호자 m1 이다. 끊는 사람(m2)의 세션을 건드리면 엉뚱한 사람이 로그아웃된다.
+    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-1"), any(), eq(RevokeReason.DEVICE_UNLINKED));
+    verify(refreshTokenRepository, never()).revokeByMemberIdAndDeviceId(eq("m2"), anyString(), any(), any());
+  }
+
+  @Test
+  @DisplayName("#363 그 이룸이를 돌보지 않는 보호자는 linkId 를 알아도 못 끊고, 있는지도 알 수 없다")
+  void revoke_byGuardianOfOtherProfile() throws Exception {
+    DeviceLink l = linkedByM1OnP1();
+    when(deviceLinkRepository.findById("l1")).thenReturn(Optional.of(l));
+    when(profileAccessGuard.isGuardianOf("m3", "p1")).thenReturn(false);
+
+    assertThatThrownBy(() -> service.revoke("m3", "l1"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.DEVICE_LINK_NOT_CONNECTED));
+
+    assertThat(l.getRevokedAt()).isNull();
+    verify(refreshTokenRepository, never()).revokeByMemberIdAndDeviceId(anyString(), anyString(), any(), any());
+  }
+
+  @Test
+  @DisplayName("#363 상태는 이룸이 기준이다 — 다른 보호자가 붙인 휴대폰도 보인다")
+  void status_includesLinksOtherGuardiansMade() throws Exception {
+    DeviceLink byOther = linkedByM1OnP1();
+    byOther.setMemberId("m2");
+    byOther.setId("l9");
+    stubProfile();
+    when(deviceLinkRepository.findByProfileIdAndRevokedAtIsNullOrderByCreatedAtDesc("p1"))
+      .thenReturn(List.of(byOther));
+
+    assertThat(service.status(GUARDIAN).devices()).extracting(d -> d.linkId()).containsExactly("l9");
+  }
+
+  @Test
+  @DisplayName("#363 다른 보호자가 발급한 아직 안 쓴 암호는 내 상태의 '발급 중'으로 보이지 않는다")
+  void status_pendingIsOnlyMine() throws Exception {
+    DeviceLink othersPending = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
+    othersPending.setMemberId("m2");
+    othersPending.setProfileId("p1");
+    stubProfile();
+    when(deviceLinkRepository.findByProfileIdAndRevokedAtIsNullOrderByCreatedAtDesc("p1"))
+      .thenReturn(List.of(othersPending));
+
+    assertThat(service.status(GUARDIAN).pendingExpiresAt()).isNull();
+  }
+
+  @Test
+  @DisplayName("#363 이룸이가 없는 보호자(E29)의 상태는 오류가 아니라 비어 있다 — 설정 화면이 멈추지 않게")
+  void status_noProfileIsEmpty() {
+    when(profileAccessGuard.profilesOf(GUARDIAN)).thenReturn(List.of());
+
+    assertThat(service.status(GUARDIAN).devices()).isEmpty();
+  }
+
+  @Test
+  @DisplayName("#363 이룸이 휴대폰이 자기 연결을 끊는다 — 그 휴대폰의 세션만 폐기한다")
+  void revokeCurrent_killsOwnDeviceOnly() throws Exception {
+    DeviceLink l = linkedByM1OnP1();
+    when(deviceLinkRepository.findById("l1")).thenReturn(Optional.of(l));
+
+    service.revokeCurrent(Caller.elumi("m1", "l1"));
+
+    assertThat(l.getRevokedAt()).isNotNull();
+    verify(refreshTokenRepository).revokeByMemberIdAndDeviceId(eq("m1"), eq("elumi-1"), any(), eq(RevokeReason.DEVICE_UNLINKED));
+    verify(refreshTokenRepository, never()).revokeAllByMemberId(anyString(), any(), any());
+  }
+
+  @Test
+  @DisplayName("#363 이미 끊긴 연결을 다시 끊으면 404 — 앱은 이미 끊긴 것으로 받아들인다")
+  void revokeCurrent_alreadyRevoked() throws Exception {
+    DeviceLink l = linkedByM1OnP1();
+    l.setRevokedAt(LocalDateTime.now());
+    when(deviceLinkRepository.findById("l1")).thenReturn(Optional.of(l));
+
+    assertThatThrownBy(() -> service.revokeCurrent(Caller.elumi("m1", "l1")))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.DEVICE_LINK_NOT_CONNECTED));
+  }
+
+  @Test
+  @DisplayName("#363 이룸이 토큰의 계정과 연결의 주인이 다르면 끊지 않는다")
+  void revokeCurrent_foreignLink() throws Exception {
+    DeviceLink l = linkedByM1OnP1();
+    l.setMemberId("someone-else");
+    when(deviceLinkRepository.findById("l1")).thenReturn(Optional.of(l));
+
+    assertThatThrownBy(() -> service.revokeCurrent(Caller.elumi("m1", "l1")))
+      .isInstanceOf(CustomException.class);
+
+    assertThat(l.getRevokedAt()).isNull();
+  }
+
+  @Test
+  @DisplayName("#363 보호자 토큰(연결 ID 없음)으로는 자기 연결 끊기를 쓸 수 없다")
+  void revokeCurrent_guardianRejected() {
+    assertThatThrownBy(() -> service.revokeCurrent(GUARDIAN))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.DEVICE_LINK_ONLY_FOR_ELUMI));
   }
 }

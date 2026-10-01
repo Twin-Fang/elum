@@ -14,6 +14,7 @@ import '../../features/profile/presentation/invite_code_screen.dart';
 import '../../features/profile/presentation/invite_enter_screen.dart';
 import '../../features/profile/presentation/profile_switch_screen.dart';
 import '../../features/link/presentation/link_enter_screen.dart';
+import '../../features/link/presentation/link_status_screen.dart';
 import '../../features/child/presentation/child_home_screen.dart';
 import '../../features/child/presentation/child_routine_detail_screen.dart';
 import '../../features/child/presentation/child_stars_screen.dart';
@@ -90,6 +91,9 @@ abstract final class Routes {
   /// (온보딩)을 건너뛰고 들어오므로 온보딩을 마치기 전에도 열려야 한다. 이미 쓰는 보호자는
   /// 설정에서 들어온다. 임시 화면이다.
   static const inviteEnter = '/onboarding/invite';
+
+  /// 이룸이 휴대폰 연결 상태·끊기 (#363 · 명세 §8-5). 연결된 뒤에만 설정에서 들어온다.
+  static const guardianLinkStatus = '/guardian/settings/link-status';
   static const routineInput = '/guardian/routine/input';
 
   /// DLP 마스킹 + 추가 질문 준비 로딩 (Figma 262:4569).
@@ -166,7 +170,19 @@ String? resolveRedirect(
 
   /// 약관 동의 뒤 역할을 골랐는가 (이슈 #212).
   bool hasRole = true,
+
+  /// 모드 전환 화면의 `to` 쿼리. 경로(`/mode-switch`)만으로는 어느 쪽으로 가는지 알 수 없다.
+  String? modeSwitchTo,
 }) {
+  // 이룸이 휴대폰은 보호자 화면에 들어갈 수 없다 (#363 · #355 A 경로).
+  //
+  // 가장 먼저 본다 — 아래 규칙은 "세션이 있으면 열어 준다"라, 이룸이 휴대폰이 계정의 토큰을 들고
+  // 있다는 이유로 보호자 홈이 열렸다. 동물(톱니) 버튼을 숨기는 것과 별개로 여기서 최종으로 막는다.
+  // 세션이 없으면 로그인이 아니라 연결 화면이다 (이슈 #206).
+  if (isElumiDevice && _isGuardianOnly(path, modeSwitchTo)) {
+    return hasSession ? Routes.child : Routes.linkEnter;
+  }
+
   // 이룸이 휴대폰에서는 다중 보호자 기능(함께하는 사람·초대·이룸이 바꾸기)이 열리지 않는다 (#362).
   // 설정에 줄이 없어 화면으로 들어갈 길은 없지만, 딥링크나 옛 경로로 열려도 막는다 —
   // 이룸이 휴대폰 토큰은 서버도 403 으로 막으므로 열어 봐야 실패 화면만 본다.
@@ -212,6 +228,26 @@ String? resolveRedirect(
   return onboardingCompleted ? null : Routes.onboardingName;
 }
 
+/// 보호자 휴대폰에서만 열리는 경로인가. 이룸이 휴대폰이 들어오면 막는다.
+bool _isGuardianOnly(String path, String? modeSwitchTo) {
+  if (path == Routes.guardian || path.startsWith('${Routes.guardian}/')) {
+    return true;
+  }
+  // 모드 전환은 양방향이라 경로만으로는 모른다. 보호자 쪽으로 여는 것만 막는다.
+  return path == Routes.modeSwitch &&
+      ModeSwitchTarget.fromName(modeSwitchTo) == ModeSwitchTarget.guardian;
+}
+
+/// 연결 암호 넣기 화면까지 쌓는 경로. **뒤로 갈 수 있어야 한다** (이슈 #212) — go 로 바로 띄우면
+/// 스택이 비어 pop 이 실패하므로 역할 선택을 깔고 그 위에 얹는다.
+const linkEnterStack = [Routes.roleSelect, Routes.linkEnter];
+
+/// 이룸이 휴대폰을 연결 암호 넣기 화면으로 보낸다 — 끊은 뒤·세션이 끝난 뒤 공통 도착지다 (#206 흐름).
+void goToLinkEnter(GoRouter router) {
+  router.go(linkEnterStack.first);
+  router.push(linkEnterStack.last);
+}
+
 /// 일과 만들기 흐름에서 [path] 화면이 까는 배경 색 (#380).
 ///
 /// 흐름 배경은 라우터가 **맨 위 화면의 위치**로 정한다. 화면이 스스로 알리게
@@ -249,6 +285,7 @@ GoRouter createRouter({
       skipOnboarding: AppConfig.skipOnboarding,
       isElumiDevice: isElumiDevice?.call() ?? false,
       hasRole: hasRole?.call() ?? true,
+      modeSwitchTo: state.uri.queryParameters['to'],
     ),
     routes: [
       GoRoute(
@@ -371,6 +408,11 @@ GoRouter createRouter({
         path: Routes.guardianProfileSwitch,
         pageBuilder: (context, state) =>
             slidePage(state, const ProfileSwitchScreen()),
+      ),
+      GoRoute(
+        path: Routes.guardianLinkStatus,
+        pageBuilder: (context, state) =>
+            slidePage(state, const LinkStatusScreen()),
       ),
       GoRoute(
         path: Routes.guardianPinChange,

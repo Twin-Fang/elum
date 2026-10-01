@@ -20,6 +20,7 @@ import '../../guardian/data/routine_repository.dart';
 import '../../guardian/presentation/widgets/today_routine_section.dart'
     show routineProgress;
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../link/presentation/elumi_settings_sheet.dart';
 import '../../onboarding/domain/character.dart';
 import '../application/child_routine_notifier.dart';
 import 'mode_switch_screen.dart';
@@ -130,9 +131,17 @@ class ChildHomeScreen extends ConsumerWidget {
 
 /// 로고 + 별 배지 + 설정 톱니 (Figma 1197:6810 상단).
 ///
-/// 시안이 바뀌어(#445) 캐릭터 얼굴 버튼이 톱니로 대체됐다. 톱니는 **보호자 화면으로
-/// 돌아가는 유일한 입구**라 지금은 예전 얼굴 버튼처럼 비밀암호 화면을 연다.
-/// 시안에 톱니의 동작이 그려져 있지 않아 임시로 이어 둔 것이다 — 디자이너 확인 후 바꾼다.
+/// 시안이 바뀌어(#445) 캐릭터 얼굴 버튼이 톱니로 대체됐다. **톱니가 하는 일은 휴대폰 종류에 따라 갈린다**
+/// (#363 · #198 19번).
+///
+/// | | 보호자 휴대폰 | 이룸이 휴대폰 (연결 암호로 붙은 휴대폰) |
+/// | --- | --- | --- |
+/// | 톱니 자리 | 별 **오른쪽** (시안 그대로) | 별 **왼쪽** (임시 시안) |
+/// | 누르면 | 비밀암호 → 보호자 화면 | 설정 시트 (`로그아웃` · `회원탈퇴`) |
+///
+/// 이룸이 휴대폰은 보호자 화면에 갈 곳이 없다 — 암호를 맞춰도 라우터가 막는다. 그래서 그 길(비밀암호
+/// 화면)로 보내는 버튼을 두지 않고 설정을 둔다. 시안(1197:6810)이 그린 것은 보호자 휴대폰이라 거기는 그대로
+/// 두고, 이룸이 휴대폰 배치는 시안이 없어 이슈 #198 19번의 그림(`[로고] [⚙️] [⭐12]`)을 따랐다.
 class _TopBar extends ConsumerWidget {
   const _TopBar();
 
@@ -144,6 +153,9 @@ class _TopBar extends ConsumerWidget {
   static const _gearIcon = 24.0;
   static const _gearHit = 48.0;
 
+  /// 이룸이 휴대폰에서 톱니 누를 자리와 별 배지 사이. 누를 자리끼리 8 이상 떨어진다 (docs 7-1).
+  static const _gearToStarGap = 8.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
@@ -151,55 +163,69 @@ class _TopBar extends ConsumerWidget {
     final stars = ref
         .watch(memberProvider)
         .maybeWhen(data: (member) => member?.totalStars ?? 0, orElse: () => 0);
+    final isElumi = ref.watch(localStorageProvider).isElumiDevice;
 
     // 누를 자리를 그림보다 12 씩 키운 만큼 바깥 여백·간격에서 뺀다.
     // 그림이 시안 자리(별 배지 오른쪽 끝 x321 → 톱니 x345~369)에 그대로 선다.
     const overhang = (_gearHit - _gearIcon) / 2;
+
+    // 별 배지 — 탭하면 누적 별 화면으로 (Figma 364:8219)
+    final star = AppPressable(
+      onTap: () => context.push(Routes.childStars),
+      scaleDown: AppPressable.scaleIcon,
+      // 배지 안 글자는 숫자뿐이라 그대로 두면 "10"만 읽힌다. 무엇이 10인지
+      // 붙여 읽힌다 — 이름이 안의 숫자를 덮으므로 두 번 읽히지 않는다 (#339).
+      semanticLabel: '별 $stars개 모았어요',
+      child: _StarBadge(count: stars),
+    );
+
+    final gear = AppPressable(
+      onTap: isElumi
+          ? () => ElumiSettingsSheet.show(context)
+          // 보호자로 돌아가려면 암호가 필요하다
+          : () => context.push(
+              '${Routes.modeSwitch}?to=${ModeSwitchTarget.guardian.name}',
+            ),
+      scaleDown: AppPressable.scaleIcon,
+      semanticLabel: isElumi ? '설정 열기' : '보호자 화면으로 가기',
+      child: SizedBox(
+        width: _gearHit.w,
+        height: _gearHit.w,
+        child: Center(
+          child: SvgPicture.asset(
+            AppAssets.iconSettings,
+            // 정사각형 아이콘 — 가로세로 모두 .w
+            width: _gearIcon.w,
+            height: _gearIcon.w,
+            excludeFromSemantics: true,
+          ),
+        ),
+      ),
+    );
 
     return Padding(
       // 안전영역(59) 아래 10 → 상단 줄이 시안 y=74에 선다.
       padding: EdgeInsets.fromLTRB(
         space.screenH,
         _topBarTop,
-        (space.screenH - overhang).w,
+        // 이룸이 휴대폰은 별이 맨 오른쪽이라 톱니 몫을 빼지 않는다
+        (isElumi ? space.screenH : space.screenH - overhang).w,
         0,
       ),
       child: Row(
         children: [
           SvgPicture.asset(AppAssets.homeLogo, width: 80.w, height: 30.h),
           const Spacer(),
-          // 별 배지 — 탭하면 누적 별 화면으로 (Figma 364:8219)
-          AppPressable(
-            onTap: () => context.push(Routes.childStars),
-            scaleDown: AppPressable.scaleIcon,
-            // 배지 안 글자는 숫자뿐이라 그대로 두면 "10"만 읽힌다. 무엇이 10인지
-            // 붙여 읽힌다 — 이름이 안의 숫자를 덮으므로 두 번 읽히지 않는다 (#339).
-            semanticLabel: '별 $stars개 모았어요',
-            child: _StarBadge(count: stars),
-          ),
-          // 시안 별 배지(~x321)와 톱니(x345) 사이 24에서 누를 자리 몫을 뺀다
-          SizedBox(width: (space.screenH - overhang).w),
-          // 보호자로 돌아가려면 암호가 필요하다
-          AppPressable(
-            onTap: () => context.push(
-              '${Routes.modeSwitch}?to=${ModeSwitchTarget.guardian.name}',
-            ),
-            scaleDown: AppPressable.scaleIcon,
-            semanticLabel: '보호자 화면으로 가기',
-            child: SizedBox(
-              width: _gearHit.w,
-              height: _gearHit.w,
-              child: Center(
-                child: SvgPicture.asset(
-                  AppAssets.iconSettings,
-                  // 정사각형 아이콘 — 가로세로 모두 .w
-                  width: _gearIcon.w,
-                  height: _gearIcon.w,
-                  excludeFromSemantics: true,
-                ),
-              ),
-            ),
-          ),
+          if (isElumi) ...[
+            gear,
+            SizedBox(width: _gearToStarGap.w),
+            star,
+          ] else ...[
+            star,
+            // 시안 별 배지(~x321)와 톱니(x345) 사이 24에서 누를 자리 몫을 뺀다
+            SizedBox(width: (space.screenH - overhang).w),
+            gear,
+          ],
         ],
       ),
     );

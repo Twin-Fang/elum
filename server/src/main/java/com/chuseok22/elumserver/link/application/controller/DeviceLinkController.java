@@ -47,8 +47,11 @@ public class DeviceLinkController implements DeviceLinkControllerDocs {
 
   @Override
   @GetMapping
-  public ResponseEntity<LinkStatusResponse> status(Authentication authentication) {
-    return ResponseEntity.ok(deviceLinkService.status(authentication.getName()));
+  public ResponseEntity<LinkStatusResponse> status(
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
+  ) {
+    return ResponseEntity.ok(deviceLinkService.status(Caller.from(authentication, profileId)));
   }
 
   @Override
@@ -57,6 +60,24 @@ public class DeviceLinkController implements DeviceLinkControllerDocs {
   public ResponseEntity<Void> revoke(Authentication authentication, @PathVariable String linkId) {
     requireGuardian(authentication);
     deviceLinkService.revoke(authentication.getName(), linkId);
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * 이룸이 휴대폰이 자기 연결을 끊는다 (#363). 이룸이 휴대폰의 설정(로그아웃·회원 탈퇴)이 부른다.
+   *
+   * <p>{@code /{linkId}} 보다 앞에 있어도 되는 리터럴 경로다 — Spring 은 변수 경로보다 리터럴을 먼저 고른다.
+   * 어느 연결인지는 토큰의 연결 ID 가 정하므로 요청에는 아무것도 싣지 않는다.
+   */
+  @Override
+  @LogMonitoring(logExecutionTime = true)
+  @DeleteMapping("/current")
+  public ResponseEntity<Void> revokeCurrent(Authentication authentication) {
+    // URL 규칙은 보호자도 이 경로까지 들여보낸다 — 코드가 있는 403 으로 답하려고 여기서 막는다.
+    if (!isElumi(authentication)) {
+      throw new CustomException(ErrorCode.DEVICE_LINK_ONLY_FOR_ELUMI);
+    }
+    deviceLinkService.revokeCurrent(Caller.from(authentication));
     return ResponseEntity.noContent().build();
   }
 
@@ -83,12 +104,15 @@ public class DeviceLinkController implements DeviceLinkControllerDocs {
    * 끊거나 새 암호를 뿌릴 수 있다.
    */
   private void requireGuardian(Authentication authentication) {
-    boolean isElumi = authentication.getAuthorities().stream()
-      .map(GrantedAuthority::getAuthority)
-      .anyMatch(LinkRole.ELUMI.authority()::equals);
-    if (isElumi) {
+    if (isElumi(authentication)) {
       throw new CustomException(ErrorCode.DEVICE_LINK_FORBIDDEN_FOR_ELUMI);
     }
+  }
+
+  private boolean isElumi(Authentication authentication) {
+    return authentication.getAuthorities().stream()
+      .map(GrantedAuthority::getAuthority)
+      .anyMatch(LinkRole.ELUMI.authority()::equals);
   }
 
   /** 프록시 뒤라 원격 주소가 전부 같을 수 있다. X-Real-IP가 있으면 그것을 쓴다. */

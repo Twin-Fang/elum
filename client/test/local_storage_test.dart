@@ -1,5 +1,6 @@
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// `clearAll()`은 개발자 도구의 "온보딩 초기화"가 쓰는 동작이다.
 ///
@@ -75,6 +76,60 @@ void main() {
 
       await storage.clearCachedTodayRoutines();
       expect(storage.cachedTodayRoutinesJson, isNull);
+    });
+  });
+
+  // 이룸이 휴대폰의 연결이 밖에서 끊겼다는 표식 (#363). 연결 화면이 `연결이 끊어졌어요`를 말하는 근거다.
+  group('이룸이 휴대폰 연결 끊김 표식', () {
+    test('처음에는 서 있지 않고, 세우고 내릴 수 있다 (메모리)', () async {
+      final storage = InMemoryStorage();
+      expect(storage.isElumiLinkLost, isFalse);
+
+      await storage.setElumiLinkLost(true);
+      expect(storage.isElumiLinkLost, isTrue);
+
+      await storage.setElumiLinkLost(false);
+      expect(storage.isElumiLinkLost, isFalse);
+    });
+
+    test('앱을 다시 켜도 남는다 (SharedPreferences)', () async {
+      SharedPreferences.setMockInitialValues({});
+      final first = await SharedPrefsStorage.create();
+      await first.setElumiLinkLost(true);
+
+      // 같은 저장소를 새로 열어 읽는다 — 앱 재시작과 같다
+      final reopened = await SharedPrefsStorage.create();
+      expect(reopened.isElumiLinkLost, isTrue);
+    });
+
+    test(
+      '아이 정보만 지우는 정리(clearChildProfile)는 표식도 이룸이 휴대폰 표식도 건드리지 않는다',
+      () async {
+        final storage = InMemoryStorage(elumiDevice: true);
+        await storage.setElumiLinkLost(true);
+        await storage.setNickname('하늘이');
+
+        await storage.clearChildProfile();
+
+        expect(storage.nickname, isNull);
+        expect(
+          storage.isElumiDevice,
+          isTrue,
+          reason: '이 휴대폰은 여전히 이룸이 휴대폰이라 연결 화면으로 간다',
+        );
+        expect(storage.isElumiLinkLost, isTrue);
+      },
+    );
+
+    test('clearAll 은 표식도 함께 지운다 — 완전히 처음 상태로 돌아간다', () async {
+      SharedPreferences.setMockInitialValues({});
+      final shared = await SharedPrefsStorage.create();
+      final memory = InMemoryStorage(elumiDevice: true);
+      for (final s in [shared, memory]) {
+        await s.setElumiLinkLost(true);
+        await s.clearAll();
+        expect(s.isElumiLinkLost, isFalse);
+      }
     });
   });
 }

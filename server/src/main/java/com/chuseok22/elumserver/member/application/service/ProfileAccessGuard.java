@@ -97,6 +97,11 @@ public class ProfileAccessGuard {
     return profileRepository.findAllGuardedBy(caller.memberId());
   }
 
+  /** 이 보호자가 이 이룸이를 함께 돌보는가. 예외 없이 답만 한다 — 있는지 없는지를 흘리지 않으려는 호출부용. */
+  public boolean isGuardianOf(String memberId, String profileId) {
+    return profileGuardianRepository.existsByProfileIdAndMemberId(profileId, memberId);
+  }
+
   /** 이 보호자가 이 이룸이에 연결돼 있지 않으면 403. */
   public void requireGuardianOf(String memberId, String profileId) {
     if (!profileGuardianRepository.existsByProfileIdAndMemberId(profileId, memberId)) {

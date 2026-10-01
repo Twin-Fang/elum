@@ -54,6 +54,15 @@ abstract interface class LocalStorage {
 
   Future<void> setElumiDevice(bool v);
 
+  /// 이 이룸이 휴대폰의 연결이 **밖에서 끊겼다** — 보호자가 끊었거나 세션이 끝났다 (#363).
+  ///
+  /// 연결 암호 넣기 화면이 `연결이 끊어졌어요`를 말하는 근거다. 앱이 꺼져 있는 사이에 끊겨도
+  /// 다음에 열 때 알 수 있어야 해서 저장한다. 스스로 끊은 것(로그아웃)에는 세우지 않고,
+  /// 새로 연결에 성공하면 내린다.
+  bool get isElumiLinkLost;
+
+  Future<void> setElumiLinkLost(bool v);
+
   /// 약관 동의 뒤에 고른 역할 (이슈 #212 · `AppRole.storageValue`).
   ///
   /// enum이 아니라 문자열로 주고받는다 — core가 feature의 `AppRole`을 알면
@@ -161,6 +170,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kSelectedProfile = 'selectedProfileId';
   static const _kPin = 'guardianPin';
   static const _kElumiDevice = 'isElumiDevice';
+  static const _kElumiLinkLost = 'isElumiLinkLost';
   static const _kSelectedRole = 'selectedRole';
   static const _kAccessToken = 'accessToken';
   static const _kProgressPrefix = 'progress.';
@@ -394,6 +404,15 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  bool get isElumiLinkLost => _prefs.getBool(_kElumiLinkLost) ?? false;
+
+  @override
+  Future<void> setElumiLinkLost(bool v) async {
+    AppLogger.storageWrite(_kElumiLinkLost, '$v');
+    await _prefs.setBool(_kElumiLinkLost, v);
+  }
+
+  @override
   String? get selectedRole => _prefs.getString(_kSelectedRole);
 
   @override
@@ -434,7 +453,12 @@ class SharedPrefsStorage implements LocalStorage {
     await clearChildProfile();
     // 역할도 지운다 — 이룸이 휴대폰에서의 로그아웃은 곧 연결 끊기다 (§8-5).
     // 잘못 고른 사람이 로그아웃으로 빠져나올 수 있어야 한다 (이슈 #212).
-    for (final key in [_kAccessToken, _kElumiDevice, _kSelectedRole]) {
+    for (final key in [
+      _kAccessToken,
+      _kElumiDevice,
+      _kElumiLinkLost,
+      _kSelectedRole,
+    ]) {
       await _prefs.remove(key);
     }
   }
@@ -447,12 +471,15 @@ class InMemoryStorage implements LocalStorage {
     String? pin,
     String? nickname,
     String? character,
+    bool elumiDevice = false,
   }) : _completed = onboardingCompleted,
        _pin = pin,
        _nickname = nickname,
-       _character = character;
+       _character = character,
+       _elumi = elumiDevice;
 
-  bool _elumi = false;
+  bool _elumi;
+  bool _elumiLinkLost = false;
 
   String? _nickname;
   List<String> _goals = const [];
@@ -519,6 +546,12 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<void> setElumiDevice(bool v) async => _elumi = v;
+
+  @override
+  bool get isElumiLinkLost => _elumiLinkLost;
+
+  @override
+  Future<void> setElumiLinkLost(bool v) async => _elumiLinkLost = v;
 
   String? _role;
 
@@ -621,6 +654,7 @@ class InMemoryStorage implements LocalStorage {
     _selectedProfileId = null;
     _accessToken = null;
     _elumi = false;
+    _elumiLinkLost = false;
     _role = null;
     _progress.clear();
     _pendingSync = const [];

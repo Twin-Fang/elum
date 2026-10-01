@@ -158,6 +158,10 @@ class AuthRepository {
       // 다음 로그인 화면에서 "지난번에 이걸로 하셨어요"를 보여주기 위해 남긴다.
       // 다른 수단으로 들어와 빈 계정이 생기는 사고를 막는 장치다.
       await _storage.setLastLoginProvider(provider.name);
+      // 소셜 로그인은 보호자의 길이다. 이 휴대폰이 전에 이룸이 휴대폰이었더라도 지금은 보호자 휴대폰이다 —
+      // 표식이 남으면 라우터가 보호자 화면을 막아(#363) 로그인하고도 들어가지 못한다.
+      await _storage.setElumiDevice(false);
+      await _storage.setElumiLinkLost(false);
       return AuthResult(await _resolveDestination());
     } on DioException catch (e) {
       // 판정은 전역 인터셉터가 이미 해 뒀다. 여기서 본문을 다시 파싱하지 않는다.

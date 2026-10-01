@@ -21,10 +21,14 @@ import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -102,12 +106,15 @@ public class DeviceLinkService {
    *
    * <p>휴대폰은 <b>여러 대 붙을 수 있다.</b> 태블릿과 휴대폰을 함께 쓰는 경우가 있고,
    * 한 대만 허용하면 새 기기를 붙이는 순간 쓰던 기기가 조용히 끊긴다.
+   *
+   * <p><b>이룸이 기준으로 보여 준다</b> (#363, 명세 4-2). 연결된 보호자는 모두 동등해서, 다른 보호자가 붙인
+   * 휴대폰도 보여야 끊을 수 있다. 연결 ID(`profile_id`)가 비어 있는 옛 행만 붙인 사람 기준으로 남긴다.
+   * 아직 안 쓴 암호(발급 중)는 **내가 발급한 것만** 보인다 — 남이 발급한 암호의 만료까지 내 화면에 올릴 이유가 없다.
    */
   @Transactional(readOnly = true)
-  public LinkStatusResponse status(String memberId) {
+  public LinkStatusResponse status(Caller caller) {
     LocalDateTime now = LocalDateTime.now();
-    List<DeviceLink> alive = deviceLinkRepository
-      .findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc(memberId);
+    List<DeviceLink> alive = aliveLinksVisibleTo(caller);
 
     List<LinkedDeviceResponse> devices = alive.stream()
       .filter(DeviceLink::isLinked)
@@ -115,12 +122,32 @@ public class DeviceLinkService {
       .toList();
 
     LocalDateTime pending = alive.stream()
+      .filter(l -> l.getMemberId().equals(caller.memberId()))
       .filter(l -> l.isRedeemable(now))
       .map(DeviceLink::getExpiresAt)
       .findFirst()
       .orElse(null);
 
     return new LinkStatusResponse(devices, pending);
+  }
+
+  /** 이 보호자가 보는 살아 있는 연결 — 이룸이의 것 + 이룸이가 비어 있는 옛 행 중 내 것. 최신이 앞에 온다. */
+  private List<DeviceLink> aliveLinksVisibleTo(Caller caller) {
+    List<DeviceLink> own = deviceLinkRepository
+      .findByMemberIdAndRevokedAtIsNullOrderByCreatedAtDesc(caller.memberId()).stream()
+      .filter(l -> l.getProfileId() == null)
+      .toList();
+    // 예외를 잡아 넘기지 않는다 — 판단자의 예외가 이 트랜잭션을 rollback-only 로 만들어 커밋에서
+    // UnexpectedRollbackException 이 난다. 이룸이가 없는 보호자(E29)는 목록이 비어 오는 쪽을 쓴다.
+    Optional<String> profileId = caller.profileId() != null
+      ? Optional.of(profileAccessGuard.profileFor(caller, ProfileAction.MANAGE).getId())
+      : profileAccessGuard.profilesOf(caller).stream().findFirst().map(Profile::getId);
+    List<DeviceLink> ofProfile = profileId
+      .map(deviceLinkRepository::findByProfileIdAndRevokedAtIsNullOrderByCreatedAtDesc)
+      .orElse(List.of());
+    return Stream.concat(ofProfile.stream(), own.stream())
+      .sorted(Comparator.comparing(DeviceLink::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+      .toList();
   }
 
   /**
@@ -174,25 +201,62 @@ public class DeviceLinkService {
    * 끊을 길이 없으면 그 폰이 계속 일과를 본다.
    *
    * <p>여러 대가 붙어 있을 수 있으므로 <b>어느 연결인지 짚어서</b> 끊는다.
-   * 다른 사람의 연결을 끊지 못하도록 memberId도 함께 확인한다.
+   *
+   * <p><b>그 이룸이를 함께 돌보는 보호자는 누구나 끊는다</b> (#363, 명세 4-2 권한 표). 붙인 사람에게 묶는 것은
+   * 토큰의 주인(`sub`)뿐이라 세션은 붙인 보호자의 것을 폐기한다. 돌보지 않는 사람에게는 연결이 있는지조차
+   * 알리지 않으려고 없는 연결과 같은 404 로 답한다.
    */
   @Transactional
   public void revoke(String memberId, String linkId) {
-    LocalDateTime now = LocalDateTime.now();
     DeviceLink link = deviceLinkRepository.findById(linkId)
-      .filter(l -> l.getMemberId().equals(memberId))
       .filter(DeviceLink::isLinked)
+      .filter(l -> mayManage(memberId, l))
       .orElseThrow(() -> new CustomException(ErrorCode.DEVICE_LINK_NOT_CONNECTED));
 
+    terminate(link);
+  }
+
+  /**
+   * 이룸이 휴대폰이 <b>자기</b> 연결을 끊는다 (#363). 설정의 로그아웃·회원 탈퇴가 부른다.
+   *
+   * <p>예전에는 이룸이 휴대폰의 로그아웃이 리프레시 토큰만 끊고 연결은 두어서, 보호자 설정에는 계속
+   * `연결됨`으로 남았다. 어느 연결인지는 토큰의 `linkId` 가 정한다 — 요청이 짚지 않는다. 그래서 남의 연결을
+   * 끊을 길이 없고, 이미 끊긴 연결은 404 라 앱이 "이미 끊김"으로 받아들일 수 있다.
+   */
+  @Transactional
+  public void revokeCurrent(Caller caller) {
+    if (!caller.isElumi()) {
+      throw new CustomException(ErrorCode.DEVICE_LINK_ONLY_FOR_ELUMI);
+    }
+    DeviceLink link = deviceLinkRepository.findById(caller.linkId())
+      .filter(DeviceLink::isLinked)
+      .filter(l -> l.getMemberId().equals(caller.memberId()))
+      .orElseThrow(() -> new CustomException(ErrorCode.DEVICE_LINK_NOT_CONNECTED));
+
+    terminate(link);
+  }
+
+  /** 이 보호자가 이 연결을 끊어도 되는가 — 그 이룸이를 돌보는 사람. 이룸이가 비어 있는 옛 행은 붙인 사람만. */
+  private boolean mayManage(String memberId, DeviceLink link) {
+    if (link.getProfileId() == null) {
+      return link.getMemberId().equals(memberId);
+    }
+    return profileAccessGuard.isGuardianOf(memberId, link.getProfileId());
+  }
+
+  /** 연결을 끊고 그 기기의 세션만 폐기한다. 세션의 주인은 붙인 보호자(`link.memberId`)다. */
+  private void terminate(DeviceLink link) {
+    LocalDateTime now = LocalDateTime.now();
     link.setRevokedAt(now);
 
     // 기기를 짚어서 끊는다. 계정 전체를 끊으면 보호자까지 로그아웃된다.
     // linkedDeviceId 는 연결할 때 서버가 넣으므로 비어 있을 수 없다.
     String deviceId = link.getLinkedDeviceId() != null
       ? link.getLinkedDeviceId() : ElumiDeviceId.of(link.getId());
-    int killed = refreshTokenRepository.revokeByMemberIdAndDeviceId(memberId, deviceId, now, RevokeReason.DEVICE_UNLINKED);
+    int killed = refreshTokenRepository.revokeByMemberIdAndDeviceId(
+      link.getMemberId(), deviceId, now, RevokeReason.DEVICE_UNLINKED);
     log.info("이룸이 휴대폰 연결 끊음: memberId={}, deviceId={}, 끊은 세션={}",
-      memberId, deviceId, killed);
+      link.getMemberId(), deviceId, killed);
   }
 
   private void countFailure(DeviceLink link, LocalDateTime now) {

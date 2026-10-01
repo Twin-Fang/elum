@@ -243,5 +243,6 @@ class _FakeLink extends DeviceLinkRepository {
   );
 
   @override
-  Future<LinkStatus> status() async => const LinkStatus(devices: []);
+  Future<Attempt<LinkStatus>> statusResult() async =>
+      Attempt.ok(const LinkStatus(devices: []));
 }

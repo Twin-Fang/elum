@@ -32,6 +32,12 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
 
   String? _errorMessage;
 
+  /// 연결이 밖에서 끊겨 이 화면에 왔다 (#363). 보호자가 끊었거나 세션이 끝났다.
+  ///
+  /// 시안 §8-5 는 `다음에 열 때 연결이 끊어졌어요`를 말한다. 앱이 꺼져 있는 사이에 끊겨도 알 수 있게
+  /// 저장된 표식을 읽는다 — 스스로 로그아웃한 사람에게는 서 있지 않다.
+  late final bool _linkLost = ref.read(deviceLinkRepositoryProvider).linkWasLost;
+
   /// 틀린 횟수. 값이 바뀔 때마다 칸이 한 번 흔들린다.
   int _failCount = 0;
 
@@ -146,7 +152,8 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
         children: [
           ElumHeader(
             title: '보호자에게 연결 암호를\n받아주세요',
-            description: _errorMessage,
+            // 틀린 암호 안내가 있으면 그것이 먼저다 — 지금 일어난 일이다
+            description: _errorMessage ?? (_linkLost ? '연결이 끊어졌어요' : null),
           ),
           SizedBox(height: space.lg),
           // 어디서 받는지 적어 준다. 이 안내는 **보호자가 읽어도 말이 되게** 쓴다 —
