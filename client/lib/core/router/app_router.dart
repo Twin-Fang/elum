@@ -19,6 +19,7 @@ import '../../features/link/presentation/link_status_screen.dart';
 import '../../features/child/presentation/child_home_screen.dart';
 import '../../features/child/presentation/child_routine_detail_screen.dart';
 import '../../features/child/presentation/child_stars_screen.dart';
+import '../../features/link/presentation/elumi_settings_screen.dart';
 import '../../features/child/presentation/mode_switch_screen.dart';
 import '../../features/child/presentation/reward_screen.dart';
 import '../../shared/models/routine.dart';
@@ -124,6 +125,9 @@ abstract final class Routes {
 
   /// 일과 상세 — 카드 페이저 (Figma 309:3548). `extra`로 Routine을 넘긴다.
   static const childRoutineDetail = '/child/routine';
+
+  /// 이룸이 휴대폰 설정 — 보호자 설정과 같은 페이지 모양 (#488)
+  static const childSettings = '/child/settings';
 
   /// 누적 별 (Figma 364:8219)
   static const childStars = '/child/stars';
@@ -534,6 +538,11 @@ GoRouter createRouter({
       ),
       // 어두운 밤하늘 배경이라 옆에서 밀려드는 슬라이드가 부자연스럽다.
       // fade로 쓱 나타나게 한다 (이슈 #107).
+      GoRoute(
+        path: Routes.childSettings,
+        pageBuilder: (context, state) =>
+            slidePage(state, const ElumiSettingsScreen()),
+      ),
       GoRoute(
         path: Routes.childStars,
         pageBuilder: (context, state) =>

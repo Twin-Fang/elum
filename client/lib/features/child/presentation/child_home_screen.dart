@@ -21,7 +21,6 @@ import '../../guardian/data/routine_repository.dart';
 import '../../guardian/presentation/widgets/today_routine_section.dart'
     show routineProgress;
 import '../../onboarding/application/onboarding_notifier.dart';
-import '../../link/presentation/elumi_settings_sheet.dart';
 import '../../onboarding/domain/character.dart';
 import '../application/child_routine_notifier.dart';
 import 'mode_switch_screen.dart';
@@ -136,7 +135,7 @@ class ChildHomeScreen extends ConsumerWidget {
 /// | --- | --- | --- |
 /// | 별 배지 | x247 | x271 |
 /// | 오른쪽 끝 | **캐릭터 배지** 56×56 (x313, y70) | **설정 톱니** 24×24 (x345, y86) |
-/// | 누르면 | 비밀암호 → 보호자 화면 | 설정 시트 (`약관` · `앱 정보` · `로그아웃` · `회원탈퇴`) |
+/// | 누르면 | 비밀암호 → 보호자 화면 | 설정 페이지 (`약관` · `앱 정보` · `로그아웃` · `회원탈퇴`) |
 ///
 /// #445가 이룸이 화면을 새 시안(`1197:6774`)으로 맞출 때 이 시안이 **이룸이 휴대폰** 것이라는 것을 놓쳐
 /// 보호자 휴대폰까지 톱니로 만들었다. 보호자 휴대폰은 `425:4392` 그대로 캐릭터 배지를 쓴다.
@@ -220,7 +219,8 @@ class _TopBar extends ConsumerWidget {
     const overhang = (_gearHit - _gearIcon) / 2;
 
     final gear = AppPressable(
-      onTap: () => ElumiSettingsSheet.show(context),
+      // 보호자 설정처럼 설정 페이지로 간다 (#488 — 바텀시트가 아니다)
+      onTap: () => context.push(Routes.childSettings),
       scaleDown: AppPressable.scaleIcon,
       semanticLabel: '설정 열기',
       child: SizedBox(

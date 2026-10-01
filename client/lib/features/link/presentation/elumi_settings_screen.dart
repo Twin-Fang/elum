@@ -1,0 +1,165 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/router/app_router.dart';
+import '../../../core/widgets/app_info_tile.dart';
+import '../../../core/widgets/elum_dialog.dart';
+import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/settings_tile.dart';
+import '../../../core/widgets/show_failure.dart';
+import '../../auth/presentation/consent_document_list_screen.dart';
+import '../application/link_reset.dart';
+import '../data/device_link_repository.dart';
+
+/// 이룸이 휴대폰의 설정 페이지 (이슈 #363 · #198 19번 · #488).
+///
+/// 홈 오른쪽 위 톱니를 누르면 열린다. 처음에는 바텀시트였으나(#363) 보호자 설정은 페이지인데 이룸이
+/// 설정만 모양이 달랐다. **보호자 설정과 같은 뼈대**(`ElumScaffold` · 뒤로가기와 같은 줄의 제목 ·
+/// `SettingsTile` 목록)로 맞췄다 (#488).
+///
+/// **시안이 없어 보호자 설정 모양을 따랐다** — 디자인 요청 대상이다.
+///
+/// 항목은 넷이다 — `약관 및 개인정보처리방침` · `앱 정보` · `로그아웃` · `회원탈퇴`. 암호를 묻지 않는다.
+/// 보호자 설정의 AI 크레딧·이룸이 휴대폰 연결·임시저장·비밀암호 변경과 일과 만들기·고치기·지우기는 넣지
+/// 않는다 (전부 보호자 휴대폰에 있다).
+///
+/// ## 로그아웃·회원탈퇴는 이 휴대폰의 연결만 끊는다
+///
+/// 이룸이 휴대폰에는 로그인할 계정이 없다. 그래서 `회원탈퇴`도 보호자 계정·이룸이·일과·별을 지우지
+/// **않는다** — 이 휴대폰이 그 이룸이를 더는 보지 않게 연결만 끊는다 (명세 §8-5 "로그아웃이 곧 연결 끊기").
+/// 두 줄이 같은 일을 하지만 시안(19번)이 둘을 두고, 사용자가 찾는 말이 달라서 둘 다 둔다. 팝업 문구가 다르다.
+///
+/// ## 실패하면 머문다
+///
+/// 서버가 연결을 끊은 **뒤에만** 로컬을 비우고 이동한다. 서버에 닿지 못했으면 이 페이지에 머문 채 에러
+/// 코드를 보여준다 — 끊기지도 않았는데 연결 화면으로 가면 보호자 설정에는 계속 `연결됨`이 남는다.
+class ElumiSettingsScreen extends ConsumerStatefulWidget {
+  const ElumiSettingsScreen({super.key});
+
+  @override
+  ConsumerState<ElumiSettingsScreen> createState() =>
+      _ElumiSettingsScreenState();
+}
+
+/// 두 줄이 같은 일을 하되 팝업 문구가 갈린다.
+enum _Exit {
+  logout(
+    title: '로그아웃 하실건가요?',
+    message: '이 휴대폰의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요',
+    failTitle: '로그아웃하지 못했어요',
+  ),
+  withdraw(
+    title: '회원탈퇴 하실건가요?',
+    message: '이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에\n그대로 남아요',
+    failTitle: '탈퇴하지 못했어요',
+  );
+
+  const _Exit({
+    required this.title,
+    required this.message,
+    required this.failTitle,
+  });
+
+  final String title;
+  final String message;
+  final String failTitle;
+}
+
+class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
+  /// 처리 중 중복 탭 방지 — 같은 요청이 두 번 나가면 두 번째는 404 로 돌아온다.
+  bool _busy = false;
+
+  Future<void> _exit(_Exit kind) async {
+    final ok = await showElumDialog<bool>(
+      context: context,
+      icon: ElumDialogIcon.alert,
+      title: kind.title,
+      message: kind.message,
+      actions: const [
+        ElumDialogAction(
+          label: '취소',
+          value: false,
+          tone: ElumDialogTone.neutral,
+        ),
+        ElumDialogAction(label: '확인', value: true, tone: ElumDialogTone.danger),
+      ],
+    );
+    if (ok != true || !mounted) return;
+
+    // 연결 암호 화면으로 옮기면 이 화면은 사라진다 — 옮긴 뒤에도 쓸 것을 미리 잡아 둔다.
+    final router = GoRouter.of(context);
+    final container = ProviderScope.containerOf(context);
+
+    setState(() => _busy = true);
+    final failure = await ref
+        .read(deviceLinkRepositoryProvider)
+        .disconnectThisPhone();
+    if (!mounted) return;
+    setState(() => _busy = false);
+
+    if (failure != null) {
+      // 연결은 그대로다 — 이 페이지에 머물고 이유와 에러 코드를 보여준다.
+      await showFailure(
+        context,
+        failure,
+        title: kind.failTitle,
+        fallback: '잠시 후 다시 시도해주세요',
+        fallbackCode: 'E-LINK-OUT',
+      );
+      return;
+    }
+
+    // 끊겼다 — 연결 암호 넣기로 보낸다 (#206 흐름). 스택을 비우고 가므로 이 페이지도 닫힌다.
+    // 메모리는 이동 뒤에 비운다.
+    goToLinkEnter(router);
+    container.forgetLinkedProfile();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElumScaffold(
+      // 끊는 중에는 뒤로 갈 수 없다 — 결과를 알릴 곳이 없어진다
+      onBack: _busy ? null : () => context.pop(),
+      // 보호자 설정과 같다: 제목이 뒤로가기와 **같은 줄**에 서고 줄은 x=16 에서 시작한다.
+      title: '설정',
+      backTop: 67,
+      horizontalPadding: 16,
+      // 글자를 키우면 한 화면을 넘을 수 있어 스크롤로 받는다
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 보호자 설정과 같은 자리에서 첫 줄이 시작한다 (뒤로가기 상자 하단에서 28)
+            SizedBox(height: 40.h),
+            // 읽을거리와 되돌릴 수 없는 동작을 섞지 않는다 — 연결을 끊는 두 줄은 맨 아래다.
+            // 순서는 보호자 설정과 같다 (약관 → 앱 정보 → 로그아웃 → 회원탈퇴).
+            SettingsTile(
+              label: '약관 및 개인정보처리방침',
+              onTap: _busy
+                  ? null
+                  : () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ConsentDocumentListScreen(),
+                      ),
+                    ),
+            ),
+            const AppInfoTile(),
+            SettingsTile(
+              label: '로그아웃',
+              onTap: _busy ? null : () => _exit(_Exit.logout),
+            ),
+            // 위험색이되 가장 약하게 (docs 5-3). 위 줄과 간격으로 떨어뜨린다.
+            SettingsTile(
+              label: '회원탈퇴',
+              destructive: true,
+              onTap: _busy ? null : () => _exit(_Exit.withdraw),
+            ),
+            SizedBox(height: 24.h),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -6,10 +6,12 @@ import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/character_badge.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
+import 'package:elum/core/widgets/elum_scaffold.dart';
 import 'package:elum/features/auth/presentation/consent_document_list_screen.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/link/presentation/elumi_settings_screen.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -23,9 +25,9 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 
-/// 이룸이 휴대폰의 상단 바와 설정 시트 (이슈 #363 · #198 19번).
+/// 이룸이 휴대폰의 상단 바와 설정 페이지 (이슈 #363 · #198 19번 · #488).
 ///
-/// 이룸이 휴대폰은 보호자 화면에 갈 곳이 없다. 톱니가 설정 시트를 열고, 시트의 `로그아웃`·`회원탈퇴`는
+/// 이룸이 휴대폰은 보호자 화면에 갈 곳이 없다. 톱니가 설정 **페이지**를 열고(보호자 설정과 같다 — 바텀시트가 아니다, #488), 페이지의 `로그아웃`·`회원탈퇴`는
 /// **이 휴대폰의 연결만** 끊는다. 되돌릴 수 없는 동작이라 성공·실패·이미 끊김을 모두 밟는다 —
 /// 서버가 끊기지 않았는데 로컬만 비우면 보호자 설정에는 계속 `연결됨`이 남는다.
 void main() {
@@ -55,6 +57,10 @@ void main() {
         GoRoute(
           path: Routes.child,
           builder: (context, state) => const ChildHomeScreen(),
+        ),
+        GoRoute(
+          path: Routes.childSettings,
+          builder: (context, state) => const ElumiSettingsScreen(),
         ),
         GoRoute(
           path: Routes.childStars,
@@ -102,7 +108,8 @@ void main() {
 
   Finder labeled(String label) => find.bySemanticsLabel(label);
 
-  Future<void> openSheet(WidgetTester tester) async {
+  /// 설정 톱니를 눌러 설정 페이지로 간다 (#488 — 바텀시트가 아니라 페이지).
+  Future<void> openSettings(WidgetTester tester) async {
     await tester.tap(labeled('설정 열기'));
     await tester.pumpAndSettle();
   }
@@ -171,12 +178,33 @@ void main() {
     });
   });
 
-  group('설정 시트', () {
+  group('설정 페이지', () {
+    testWidgets('톱니를 누르면 바텀시트가 아니라 설정 페이지로 간다 (#488)', (tester) async {
+      await pump(tester);
+      await openSettings(tester);
+
+      expect(find.byType(ElumiSettingsScreen), findsOneWidget);
+      expect(find.byType(BottomSheet), findsNothing, reason: '보호자 설정과 같은 페이지다');
+      // 홈은 뒤로 밀려 보이지 않는다
+      expect(find.byType(ChildHomeScreen), findsNothing);
+    });
+
+    testWidgets('뒤로가기를 누르면 이룸이 홈으로 돌아온다', (tester) async {
+      await pump(tester);
+      await openSettings(tester);
+
+      await tester.tap(labeled(ElumScaffold.backLabel));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ElumiSettingsScreen), findsNothing);
+      expect(find.byType(ChildHomeScreen), findsOneWidget);
+    });
+
     testWidgets('항목은 넷뿐이다 — 약관 · 앱 정보 · 로그아웃 · 회원탈퇴. 일과를 만들거나 고치는 길은 없다', (
       tester,
     ) async {
       await pump(tester);
-      await openSheet(tester);
+      await openSettings(tester);
 
       expect(find.text('설정'), findsOneWidget);
       expect(find.text('약관 및 개인정보처리방침'), findsOneWidget);
@@ -197,7 +225,7 @@ void main() {
 
     testWidgets('약관 줄을 누르면 약관 목록 화면이 열린다', (tester) async {
       await pump(tester);
-      await openSheet(tester);
+      await openSettings(tester);
 
       await tester.tap(find.text('약관 및 개인정보처리방침'));
       await tester.pumpAndSettle();
@@ -207,7 +235,7 @@ void main() {
 
     testWidgets('설정 시트는 암호를 묻지 않는다 — 비밀암호 화면으로 가지 않는다', (tester) async {
       await pump(tester);
-      await openSheet(tester);
+      await openSettings(tester);
 
       expect(find.text('비밀암호 화면'), findsNothing);
     });
@@ -216,7 +244,7 @@ void main() {
   group('로그아웃 · 회원탈퇴 — 이 휴대폰의 연결만 끊는다', () {
     testWidgets('로그아웃: 확인 팝업에서 취소하면 아무 일도 없다', (tester) async {
       await pump(tester);
-      await openSheet(tester);
+      await openSettings(tester);
 
       await tester.tap(find.text('로그아웃'));
       await tester.pumpAndSettle();
@@ -228,12 +256,12 @@ void main() {
 
       expect(adapter.calls, isEmpty);
       expect(tokens.hasSession, isTrue);
-      expect(find.text('로그아웃'), findsOneWidget, reason: '시트에 그대로 남는다');
+      expect(find.text('로그아웃'), findsOneWidget, reason: '설정 페이지에 그대로 남는다');
     });
 
     testWidgets('로그아웃 확인: 서버가 끊긴 뒤 로컬을 비우고 연결 암호 넣기로 간다', (tester) async {
       await pump(tester);
-      await openSheet(tester);
+      await openSettings(tester);
 
       await tester.tap(find.text('로그아웃'));
       await tester.pumpAndSettle();
@@ -259,7 +287,7 @@ void main() {
 
     testWidgets('연결 화면에서 뒤로 가면 역할 선택이다 — 스택이 비지 않는다 (#212)', (tester) async {
       await pump(tester);
-      await openSheet(tester);
+      await openSettings(tester);
       await tester.tap(find.text('로그아웃'));
       await tester.pumpAndSettle();
       await tester.tap(dialogButton('확인'));
@@ -271,7 +299,7 @@ void main() {
 
     testWidgets('회원탈퇴: 일과와 별이 보호자 휴대폰에 남는다고 말하고, 같은 연결 끊기를 한다', (tester) async {
       await pump(tester);
-      await openSheet(tester);
+      await openSettings(tester);
 
       await tester.tap(find.text('회원탈퇴'));
       await tester.pumpAndSettle();
@@ -295,7 +323,7 @@ void main() {
       );
       expect(container.read(onboardingProvider).childNickname, '하늘이');
 
-      await openSheet(tester);
+      await openSettings(tester);
       await tester.tap(find.text('로그아웃'));
       await tester.pumpAndSettle();
       await tester.tap(dialogButton('확인'));
@@ -310,7 +338,7 @@ void main() {
         errorCode: 'DEVICE_LINK_NOT_CONNECTED',
       );
       await pump(tester);
-      await openSheet(tester);
+      await openSettings(tester);
       await tester.tap(find.text('로그아웃'));
       await tester.pumpAndSettle();
       await tester.tap(dialogButton('확인'));
@@ -336,7 +364,7 @@ void main() {
       testWidgets('$name: 머물고 에러 코드를 보여주며 아무것도 지우지 않는다', (tester) async {
         routes['DELETE /api/device-links/current'] = response;
         await pump(tester);
-        await openSheet(tester);
+        await openSettings(tester);
         await tester.tap(find.text('회원탈퇴'));
         await tester.pumpAndSettle();
         await tester.tap(dialogButton('확인'));
@@ -350,7 +378,7 @@ void main() {
 
         // 서버에는 연결이 살아 있다 — 연결 화면으로 가면 보호자 설정과 어긋난다
         expect(find.text('연결 암호 넣기'), findsNothing);
-        expect(find.text('로그아웃'), findsOneWidget, reason: '시트에 머문다');
+        expect(find.text('로그아웃'), findsOneWidget, reason: '설정 페이지에 머문다');
         expect(tokens.hasSession, isTrue);
         expect(storage.nickname, '하늘이');
         expect(storage.cachedTodayRoutinesJson, isNotNull);
@@ -360,7 +388,7 @@ void main() {
     testWidgets('로그아웃 실패는 `로그아웃하지 못했어요`로 알린다 — 탈퇴와 문구가 갈린다', (tester) async {
       routes['DELETE /api/device-links/current'] = const FakeHttpError(500);
       await pump(tester);
-      await openSheet(tester);
+      await openSettings(tester);
       await tester.tap(find.text('로그아웃'));
       await tester.pumpAndSettle();
       await tester.tap(dialogButton('확인'));
