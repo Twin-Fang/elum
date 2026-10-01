@@ -32,17 +32,25 @@ class MultiGuardianMappingTest {
   }
 
   @Test
-  @DisplayName("일과를 만든 사람은 created_by 에 담기고 비워 둘 수 있다 — 옛 서버가 이 컬럼을 모른다")
-  void routine_createdByIsNullableColumn() throws NoSuchFieldException {
+  @DisplayName("일과를 만든 사람은 created_by 에 담기고 필수다 (V32) — 비어 있으면 아무도 승인·수정을 못 한다")
+  void routine_createdByIsRequiredColumn() throws NoSuchFieldException {
     Column createdBy = column(Routine.class, "createdBy");
     assertThat(createdBy.name()).isEqualTo("created_by");
-    assertThat(createdBy.nullable()).isTrue();
+    assertThat(createdBy.nullable()).isFalse();
   }
 
   @Test
-  @DisplayName("profile.member_id 는 비워 둘 수 있다 — 처음 만든 보호자가 나가도 이룸이가 남는다")
-  void profile_memberIsNullable() throws NoSuchFieldException {
-    assertThat(joinColumn(Profile.class, "member").nullable()).isTrue();
+  @DisplayName("이룸이 휴대폰 연결의 이룸이는 필수다 (V32) — 비어 있으면 휴대폰이 어느 이룸이의 일과를 볼지 모른다")
+  void deviceLink_profileIdIsRequiredColumn() throws NoSuchFieldException {
+    Column profileId = column(com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink.class, "profileId");
+    assertThat(profileId.name()).isEqualTo("profile_id");
+    assertThat(profileId.nullable()).isFalse();
+  }
+
+  @Test
+  @DisplayName("이룸이 행은 대표 보호자를 담지 않는다 (V32) — profile.member_id 컬럼을 지웠다")
+  void profile_hasNoMemberField() {
+    assertThat(Profile.class.getDeclaredFields()).extracting(java.lang.reflect.Field::getName).doesNotContain("member");
   }
 
   private JoinColumn joinColumn(Class<?> type, String field) throws NoSuchFieldException {

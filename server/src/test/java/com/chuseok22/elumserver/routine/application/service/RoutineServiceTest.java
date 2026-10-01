@@ -129,7 +129,6 @@ class RoutineServiceTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     Routine routine = new Routine();
     routine.setProfile(profile);
     RoutineStep step = new RoutineStep();
@@ -170,7 +169,6 @@ class RoutineServiceTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     Routine routine = new Routine();
     routine.setProfile(profile);
     routine.setSteps(List.of());
@@ -193,7 +191,6 @@ class RoutineServiceTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
     when(routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
       eq("profile-1"), any(), any(LocalDateTime.class))).thenReturn(List.of());
@@ -215,7 +212,6 @@ class RoutineServiceTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
     when(routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
       eq("profile-1"), any(), any(LocalDateTime.class))).thenReturn(List.of());
@@ -312,7 +308,6 @@ class RoutineServiceTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     profile.setSupportGoals(Set.of(SupportGoal.STEP_BY_STEP));
     when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
 
@@ -330,7 +325,6 @@ class RoutineServiceTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     profile.setNickname("하늘이");
     profile.setSupportGoals(Set.of(SupportGoal.PREPARE_ITEMS));
     when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
@@ -438,7 +432,6 @@ class RoutineServiceTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     profile.setNickname("하늘이");
     profile.setSupportGoals(Set.of());
     profile.setCharacter(CharacterType.LULU);
@@ -582,7 +575,6 @@ class RoutineServiceTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     Routine routine = new Routine();
     routine.setId("routine-1");
     routine.setTitle("병원 다녀오기");
@@ -630,7 +622,6 @@ class RoutineServiceTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     profile.setTotalStars(stars);
     return profile;
   }
@@ -866,7 +857,6 @@ class RoutineServiceTest {
     member.setId(memberId);
     Profile profile = new Profile();
     profile.setId(profileId);
-    profile.setMember(member);
     return profile;
   }
 
@@ -983,7 +973,6 @@ class RoutineServiceTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
     // 최신순. 같은 보상이 두 번, 빈 보상이 한 번 섞여 있다 — 둘 다 칸을 차지하면 안 된다.
     List<Routine> newestFirst = List.of(

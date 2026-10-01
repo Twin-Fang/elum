@@ -6,12 +6,16 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineStatu
 import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineStepImage;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +31,7 @@ public class AdminRoutineService {
 
   private final RoutineRepository routineRepository;
   private final RoutineImageStorage routineImageStorage;
+  private final MemberRepository memberRepository;
 
   /** 한 쪽에 보여줄 개수. 회원 목록과 같은 리듬으로 둔다. */
   private static final int PAGE_SIZE = 20;
@@ -45,13 +50,21 @@ public class AdminRoutineService {
     Page<Routine> routines = normalized == null
       ? routineRepository.findAll(pageable)
       : routineRepository.searchForAdmin(normalized, pageable);
-    return routines.map(AdminRoutineResponse::from);
+    // 만든 사람 이름은 한 쪽(20건)을 한 번에 묻는다 — 일과마다 묻지 않는다.
+    Map<String, String> usernames = usernamesOf(routines.getContent());
+    return routines.map(routine -> AdminRoutineResponse.from(routine, usernames.get(routine.getCreatedBy())));
   }
 
   public AdminRoutineDetailResponse getDetail(String routineId) {
     Routine routine = routineRepository.findById(routineId)
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_NOT_FOUND));
-    return AdminRoutineDetailResponse.from(routine);
+    return AdminRoutineDetailResponse.from(routine, usernamesOf(List.of(routine)).get(routine.getCreatedBy()));
+  }
+
+  private Map<String, String> usernamesOf(List<Routine> routines) {
+    List<String> ids = routines.stream().map(Routine::getCreatedBy).distinct().toList();
+    return memberRepository.findAllById(ids).stream()
+      .collect(Collectors.toMap(Member::getId, Member::getUsername));
   }
 
   public AdminRoutineStatusCounts getStatusCounts() {

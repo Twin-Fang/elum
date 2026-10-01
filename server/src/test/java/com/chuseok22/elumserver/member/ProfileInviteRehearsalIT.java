@@ -115,8 +115,9 @@ class ProfileInviteRehearsalIT {
     assertThat(left).extracting(Routine::getTitle).containsExactly("B의 일과");
     assertThat(profileRepository.findById(pA.getId()).orElseThrow().getTotalStars()).as("별은 남는다").isEqualTo(7);
     assertThat(profileGuardianRepository.findAllByProfileIdOrderByJoinedAtAsc(pA.getId())).hasSize(1);
-    // 대표 보호자(옛 서버 호환)가 남은 B 로 넘어갔다 (E14)
-    assertThat(profileRepository.findById(pA.getId()).orElseThrow().getMember().getId()).isEqualTo(b.getId());
+    // 남은 관계는 B 하나다 — 이룸이 행에 따로 넘길 대표 보호자는 없다 (V32)
+    assertThat(profileGuardianRepository.findAllByProfileIdOrderByJoinedAtAsc(pA.getId()).get(0).getMember().getId())
+      .isEqualTo(b.getId());
 
     call(delete("/api/profiles/" + pA.getId() + "/guardians/me"), b, null, 204);
 

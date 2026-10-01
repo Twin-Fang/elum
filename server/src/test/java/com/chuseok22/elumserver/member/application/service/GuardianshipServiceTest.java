@@ -79,10 +79,10 @@ class GuardianshipServiceTest {
     return member;
   }
 
-  private Profile profile(String id, Member representative, int stars) {
+  /// 두 번째 인자는 처음 돌본 사람이다 — 이룸이 행에는 더 이상 담기지 않고(V32) 읽기 쉽게 남겨 둔 자리일 뿐이다.
+  private Profile profile(String id, Member firstGuardian, int stars) {
     Profile profile = new Profile();
     profile.setId(id);
-    profile.setMember(representative);
     profile.setTotalStars(stars);
     return profile;
   }
@@ -132,13 +132,12 @@ class GuardianshipServiceTest {
   }
 
   @Test
-  @DisplayName("가입하면 빈 이룸이와 관계 한 줄이 함께 생기고 대표 보호자도 채운다 — V23 전까지 옛 서버가 읽는다")
+  @DisplayName("가입하면 빈 이룸이와 관계 한 줄이 함께 생긴다 — 이룸이 행에 대표 보호자는 더 담지 않는다(V32)")
   void createOwnProfile_createsProfileAndRelation() {
     Member member = member("A");
 
     Profile created = guardianshipService.createOwnProfile(member);
 
-    assertThat(created.getMember()).isSameAs(member);
     assertThat(created.getCharacter()).isEqualTo(CharacterType.LULU);
     verify(profileRepository).save(created);
     verify(profileGuardianRepository).save(argThat(guardian ->
@@ -178,22 +177,23 @@ class GuardianshipServiceTest {
   }
 
   @Test
-  @DisplayName("E14 대표 보호자가 나가면 남은 사람 중 가장 먼저 합류한 사람으로 바꾼다 — 안 바꾸면 탈퇴가 외래키에 걸린다")
-  void e14_leave_representativeLeaves_handsOverToEarliestRemaining() {
+  @DisplayName("E14 처음 만든 보호자가 나가도 이룸이는 남는다 — 넘길 대표 보호자 컬럼이 없고 관계 한 줄만 지운다(V32)")
+  void e14_leave_firstGuardianLeaves_profileKeptWithRemainingRelations() {
     Member a = member("A");
     Member b = member("B");
     Member c = member("C");
     Profile p1 = profile("p1", a, 0);
     when(profileRepository.findByIdForUpdate("p1")).thenReturn(Optional.of(p1));
-    when(profileGuardianRepository.findByProfileIdAndMemberId("p1", "A"))
-      .thenReturn(Optional.of(guardian(p1, a, LocalDateTime.of(2026, 1, 1, 9, 0))));
+    ProfileGuardian mine = guardian(p1, a, LocalDateTime.of(2026, 1, 1, 9, 0));
+    when(profileGuardianRepository.findByProfileIdAndMemberId("p1", "A")).thenReturn(Optional.of(mine));
     when(profileGuardianRepository.findAllByProfileIdOrderByJoinedAtAsc("p1")).thenReturn(List.of(
       guardian(p1, b, LocalDateTime.of(2026, 2, 1, 9, 0)),
       guardian(p1, c, LocalDateTime.of(2026, 3, 1, 9, 0))));
 
     guardianshipService.leave("A", "p1");
 
-    assertThat(p1.getMember()).isSameAs(b);
+    verify(profileGuardianRepository).delete(mine);
+    verify(profileRepository, never()).delete(p1);
   }
 
   @Test
@@ -288,7 +288,6 @@ class GuardianshipServiceTest {
 
     verify(profileRepository).delete(solo);
     verify(profileRepository, never()).delete(shared);
-    assertThat(shared.getMember()).isSameAs(b);
   }
 
   @Test

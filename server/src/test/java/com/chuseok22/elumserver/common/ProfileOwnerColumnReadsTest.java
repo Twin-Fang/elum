@@ -17,26 +17,27 @@ import org.junit.jupiter.api.Test;
 /**
  * 새 코드는 {@code profile.member_id}(옛 서버 호환용 대표 보호자)를 읽지 않는다 (다중 보호자 명세 5장).
  *
- * <p>4단계(#364, 명세의 V23)가 이 컬럼을 지운다. 읽는 곳이 하나라도 남으면 그 배포에서 터진다. 허용 목록은
- * 그 전에 옮겨야 할 곳이다 — 줄어들기만 해야 한다.
+ * <p>4단계(#364, V32)가 이 컬럼을 지웠다. 읽는 곳이 하나라도 남으면 운영(validate)이 뜨지 않거나 쿼리가 터진다.
+ * 허용 목록은 비었고 늘리지 않는다. 엔티티 필드가 없어 자바 코드는 컴파일에서 막히지만, 네이티브 SQL 문자열과
+ * 옛 접근 이름은 컴파일이 못 잡아 글로 막는다.
  */
 class ProfileOwnerColumnReadsTest {
 
   private static final Pattern OWNER_READ = Pattern.compile(
     "getProfile\\(\\)\\.getMember\\(\\)|\\bp\\.member\\b|\\br\\.profile\\.member\\b"
-      + "|ProfileMemberId|findFirstByMemberIdOrderByCreatedAtAsc|findAllByMemberIdIn\\(");
+      + "|ProfileMemberId|findFirstByMemberIdOrderByCreatedAtAsc|findAllByMemberIdIn\\("
+      + "|\\bp\\.member_id\\b|profile\\.member_id");
 
-  /** 관리자 일과 화면의 "보호자" 칸. 1단계 동안은 대표 보호자를 계속 채우므로 동작한다. 4단계(#364) 전에 created_by 로 옮긴다. */
-  private static final Set<String> ALLOWED_UNTIL_PHASE4 = Set.of(
-    "AdminRoutineResponse.java", "AdminRoutineDetailResponse.java");
+  /** 허용 목록은 비었다 — 마지막 두 곳(관리자 일과 화면)은 created_by 로 옮겼다. */
+  private static final Set<String> ALLOWED = Set.of();
 
   @Test
-  @DisplayName("대표 보호자 컬럼을 읽는 코드는 허용 목록(4단계 전 할 일) 밖에 없다")
+  @DisplayName("대표 보호자 컬럼을 읽는 코드는 없다")
   void nobodyReadsProfileOwnerOutsideAllowList() throws IOException {
     List<String> offenders = new ArrayList<>();
     try (Stream<Path> files = Files.walk(Path.of("src/main/java"))) {
       for (Path file : files.filter(p -> p.toString().endsWith(".java")).toList()) {
-        if (ALLOWED_UNTIL_PHASE4.contains(file.getFileName().toString())) {
+        if (ALLOWED.contains(file.getFileName().toString())) {
           continue;
         }
         // 주석은 빼고 본다 — 설명 문장이 검사를 속이지 않게.

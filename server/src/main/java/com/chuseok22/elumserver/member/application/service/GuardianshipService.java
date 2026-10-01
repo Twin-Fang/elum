@@ -55,8 +55,6 @@ public class GuardianshipService {
   @Transactional
   public Profile createOwnProfile(Member member) {
     Profile profile = new Profile();
-    // 옛 서버 호환용 대표 보호자. V23 전까지 계속 채운다 — 되돌리면 옛 코드가 이 값으로 프로필을 찾는다.
-    profile.setMember(member);
     profile.setCharacter(CharacterType.LULU);
     profileRepository.save(profile);
 
@@ -145,13 +143,9 @@ public class GuardianshipService {
       .stream()
       .filter(guardian -> !memberId.equals(guardian.getMember().getId()))
       .toList();
+    // 남은 보호자가 있으면 관계 한 줄만 지우면 끝이다 — 이룸이가 가리키는 "대표 보호자"는 더 없다(V32).
     if (remaining.isEmpty()) {
       removeProfile(profile, now);
-    } else {
-      // 대표 보호자(옛 서버 호환)는 늘 "가장 먼저 합류한 사람"이다 (E14). 나간 사람이 대표였다면 여기서
-      // 바뀌고, 아니었다면 같은 값이라 UPDATE 가 나가지 않는다. 안 바꾸면 탈퇴 때 profile.member_id 가
-      // 지워질 계정을 가리켜 외래키에 걸린다.
-      profile.setMember(remaining.get(0).getMember());
     }
     log.info("이룸이에서 나갔습니다: memberId={}, profileId={}, 남은 보호자={}", memberId, profileId, remaining.size());
     return true;

@@ -19,7 +19,7 @@ public record AdminRoutineDetailResponse(
   List<AdminRoutineStepResponse> steps
 ) {
 
-  public static AdminRoutineDetailResponse from(Routine routine) {
+  public static AdminRoutineDetailResponse from(Routine routine, String creatorUsername) {
     List<AdminRoutineStepResponse> stepResponses = routine.getSteps().stream()
       .map(AdminRoutineStepResponse::from)
       .toList();
@@ -27,7 +27,7 @@ public record AdminRoutineDetailResponse(
       routine.getId(),
       routine.getTitle(),
       routine.getProfile().getNickname(),
-      routine.getProfile().getMember().getUsername(),
+      creatorUsername,
       routine.getStatus(),
       routine.getRawInputText(),
       routine.getSanitizedInputText(),

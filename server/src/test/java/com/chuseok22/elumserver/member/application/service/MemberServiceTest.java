@@ -302,7 +302,6 @@ class MemberServiceTest {
     Member member = new Member();
     member.setId("member-1");
     Profile profile = new Profile();
-    profile.setMember(member);
     when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
     when(profileAccessGuard.profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE)).thenReturn(profile);
     when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of(profile));
@@ -400,7 +399,6 @@ class MemberServiceTest {
     Member member = new Member();
     member.setId("member-1");
     Profile profile = new Profile();
-    profile.setMember(member);
     when(memberRepository.findById("member-1")).thenReturn(Optional.of(member));
     when(profileAccessGuard.profileFor(Caller.guardian("member-1"), ProfileAction.MANAGE)).thenReturn(profile);
     when(profileAccessGuard.profilesOf(Caller.guardian("member-1"))).thenReturn(List.of(profile));

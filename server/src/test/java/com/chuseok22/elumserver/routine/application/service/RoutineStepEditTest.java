@@ -331,7 +331,6 @@ class RoutineStepEditTest {
     member.setId("member-1");
     Profile profile = new Profile();
     profile.setId("profile-1");
-    profile.setMember(member);
     profile.setTotalStars(0);
 
     Routine routine = new Routine();
