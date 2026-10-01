@@ -46,6 +46,7 @@ import 'package:elum/features/child/presentation/child_routine_detail_screen.dar
 import 'package:elum/core/theme/app_motion.dart';
 import 'package:elum/features/child/domain/reward_character.dart';
 import 'package:elum/features/child/presentation/reward_screen.dart';
+import 'package:elum/features/child/presentation/routine_done_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
@@ -1130,6 +1131,36 @@ void main() {
     await expectLater(
       find.byType(RewardScreen),
       matchesGoldenFile('figma/reward_ruru_1197-7034.png'),
+    );
+  });
+
+  // 일과완료 화면 (#490). 시안(1274:9831)은 보상 칩 `젤리 4개 먹기`를 함께 그린다.
+  // 진입 연출(FadeIn)이 끝난 뒤 한 장으로 고정한다.
+  testWidgets('일과완료 (Figma 1274:9831)', (tester) async {
+    await tester.pumpWidget(
+      ScreenUtilInit(
+        designSize: const Size(393, 852),
+        useInheritedMediaQuery: true,
+        builder: (context, _) => MaterialApp(
+          theme: AppTheme.light,
+          debugShowCheckedModeBanner: false,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+            child: child!,
+          ),
+          home: const RoutineDoneScreen(
+            reward: (emoji: '', text: '젤리 4개 먹기'),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await precacheAllImages(tester);
+    await tester.pump(const Duration(seconds: 2));
+
+    await expectLater(
+      find.byType(RoutineDoneScreen),
+      matchesGoldenFile('figma/routine_done_1274-9831.png'),
     );
   });
 

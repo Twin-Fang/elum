@@ -116,6 +116,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.checkPending,
     required this.rewardBackdropTop,
     required this.rewardBackdropBottom,
+    required this.routineDoneBackdropBottom,
     required this.rewardStar,
     required this.rewardStarGlow,
     required this.rewardStarHalo,
@@ -444,6 +445,9 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 보상 화면 배경 아래
   final Color rewardBackdropBottom;
+
+  /// 일과완료 화면 배경 아래 끝색 (Figma 1274:9831, 위 끝은 [rewardBackdropTop]).
+  final Color routineDoneBackdropBottom;
 
   /// 보상 큰 별
   final Color rewardStar;
@@ -792,6 +796,7 @@ class AppColors extends ThemeExtension<AppColors> {
     checkPending: Color(0xFFC9D6D4),
     rewardBackdropTop: Color(0xFF0C0D1A),
     rewardBackdropBottom: Color(0xFF242634),
+    routineDoneBackdropBottom: Color(0xFF39514D),
     rewardStar: Color(0xFFD0FF00),
     rewardStarGlow: Color(0x4DD0FF00),
     rewardStarHalo: Color(0xFFFFDD00),
@@ -959,6 +964,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? checkPending,
     Color? rewardBackdropTop,
     Color? rewardBackdropBottom,
+    Color? routineDoneBackdropBottom,
     Color? rewardStar,
     Color? rewardStarGlow,
     Color? rewardStarHalo,
@@ -1116,6 +1122,8 @@ class AppColors extends ThemeExtension<AppColors> {
       checkPending: checkPending ?? this.checkPending,
       rewardBackdropTop: rewardBackdropTop ?? this.rewardBackdropTop,
       rewardBackdropBottom: rewardBackdropBottom ?? this.rewardBackdropBottom,
+      routineDoneBackdropBottom:
+          routineDoneBackdropBottom ?? this.routineDoneBackdropBottom,
       rewardStar: rewardStar ?? this.rewardStar,
       rewardStarGlow: rewardStarGlow ?? this.rewardStarGlow,
       rewardStarHalo: rewardStarHalo ?? this.rewardStarHalo,
@@ -1353,6 +1361,11 @@ class AppColors extends ThemeExtension<AppColors> {
       rewardBackdropBottom: Color.lerp(
         rewardBackdropBottom,
         other.rewardBackdropBottom,
+        t,
+      )!,
+      routineDoneBackdropBottom: Color.lerp(
+        routineDoneBackdropBottom,
+        other.routineDoneBackdropBottom,
         t,
       )!,
       rewardStar: Color.lerp(rewardStar, other.rewardStar, t)!,

@@ -22,6 +22,7 @@ import '../../features/child/presentation/child_stars_screen.dart';
 import '../../features/link/presentation/elumi_settings_screen.dart';
 import '../../features/child/presentation/mode_switch_screen.dart';
 import '../../features/child/presentation/reward_screen.dart';
+import '../../features/child/presentation/routine_done_screen.dart';
 import '../../shared/models/routine.dart';
 import '../../features/guardian/domain/routine_stage.dart';
 import '../../features/guardian/presentation/routine_loading_screen.dart';
@@ -134,6 +135,9 @@ abstract final class Routes {
 
   /// 아이 보상 (Figma 309:4055 등 3종 랜덤)
   static const childReward = '/child/reward';
+
+  /// 일과를 다 끝냈을 때 한 번 뜨는 화면 (이슈 #490). 보상은 `extra`로 온다.
+  static const childRoutineDone = '/child/routine-done';
 
   /// 모드 전환 PIN. `?to=child|guardian`으로 방향을 준다.
   static const modeSwitch = '/mode-switch';
@@ -555,6 +559,18 @@ GoRouter createRouter({
         pageBuilder: (context, state) => fadePage(
           state,
           RewardScreen(
+            reward: state.extra is ({String emoji, String text})
+                ? state.extra! as ({String emoji, String text})
+                : null,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: Routes.childRoutineDone,
+        // 보상은 `extra`로 온다. 없으면(개발자 도구로 직접 들어온 경우 포함) 칩 없이 그린다.
+        pageBuilder: (context, state) => fadePage(
+          state,
+          RoutineDoneScreen(
             reward: state.extra is ({String emoji, String text})
                 ? state.extra! as ({String emoji, String text})
                 : null,

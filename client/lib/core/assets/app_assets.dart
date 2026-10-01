@@ -344,4 +344,17 @@ abstract final class AppAssets {
   /// 후광(`boxShadow 0 0 10px`)이 구워진 PNG라 렌더러가 버리지 않는다.
   static const rewardStarGreen = '$_images/reward_star_green.png';
   static const rewardStarPurple = '$_images/reward_star_purple.png';
+
+  /// 일과완료 화면 (Figma `1274:9831`).
+  ///
+  /// 캐릭터와 별은 후광·그라디언트가 구워진 PNG다 — SVG 필터는 렌더러가 버린다.
+  /// 별의 투명도(초록 50%, 분홍 30%)도 그림에 구워져 있어 코드에서 또 주지 않는다.
+  /// 윙크 하는 눈(8×3 획)만 시안이 따로 그려 SVG 로 얹는다.
+  static const routineDoneLumi = '$_images/routine_done_lumi.png';
+  static const routineDoneWink = '$_images/routine_done_wink.svg';
+  static const routineDoneStarGreen = '$_images/routine_done_star_green.png';
+  static const routineDoneStarOrange = '$_images/routine_done_star_orange.png';
+  static const routineDoneStarRed = '$_images/routine_done_star_red.png';
+  static const routineDoneStarPink = '$_images/routine_done_star_pink.png';
+  static const routineDoneStarPurple = '$_images/routine_done_star_purple.png';
 }

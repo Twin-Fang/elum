@@ -190,7 +190,27 @@ class _ChildRoutineDetailScreenState
           : null,
     );
     if (!mounted) return;
+
+    // 마지막 카드까지 끝냈으면 일과완료 화면을 이어서 보여 준다 (이슈 #490).
+    // 그 화면의 버튼이 홈으로 보내므로 여기서는 카드를 넘기지 않는다.
+    if (_isRoutineDone) {
+      await context.push(
+        Routes.childRoutineDone,
+        extra: routine.hasReward
+            ? (emoji: routine.rewardEmoji, text: routine.rewardText)
+            : null,
+      );
+      return;
+    }
     _advanceToNextUnchecked();
+  }
+
+  /// 모든 카드가 체크됐는지. 기기 기록이 서버 값보다 우선한다.
+  bool get _isRoutineDone {
+    final routine = _routine;
+    final progress = ref.read(childRoutineProvider);
+    return routine.steps.isNotEmpty &&
+        routine.steps.every((card) => progress.isChecked(routine.id, card));
   }
 
   /// 별 화면을 닫은 뒤 **아직 안 한 카드 중 가장 앞**으로 넘어간다 (이슈 #293).
@@ -201,7 +221,7 @@ class _ChildRoutineDetailScreenState
   ///
   /// **"다음"을 순서가 아니라 남은 일로 정의한다.** 중간을 건너뛰고 뒤를 체크했을 때
   /// 그저 앞으로만 가면 빠뜨린 카드가 영영 남는다. 남은 것이 없으면 움직이지 않는다 —
-  /// 일과를 다 끝냈을 때 보여줄 화면은 시안이 나온 뒤 따로 만든다.
+  /// 일과를 다 끝낸 경우는 호출 전에 일과완료 화면(#490)이 가져간다.
   ///
   /// 체크 해제와 재체크 때는 이 함수까지 오지 않는다. 별 화면이 뜨지 않기 때문인데,
   /// 연출 없이 화면만 바뀌면 이룸이가 무엇이 일어났는지 알 수 없다.

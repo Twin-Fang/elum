@@ -4,6 +4,7 @@ import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
 import 'package:elum/features/child/presentation/reward_screen.dart';
+import 'package:elum/features/child/presentation/routine_done_screen.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/action_card.dart';
@@ -67,6 +68,14 @@ void main() {
           path: Routes.childReward,
           builder: (context, state) => const RewardScreen(),
         ),
+        GoRoute(
+          path: Routes.childRoutineDone,
+          builder: (context, state) => RoutineDoneScreen(
+            reward: state.extra is ({String emoji, String text})
+                ? state.extra! as ({String emoji, String text})
+                : null,
+          ),
+        ),
       ],
     );
 
@@ -89,19 +98,20 @@ void main() {
   /// 홈에 일과를 주입하고 상세 화면까지 들어간다.
   ///
   /// id를 `local`로 둔다 — 서버에 없는 일과라 동기화를 타지 않고 전환 규칙만 본다.
-  Future<void> pumpDetail(WidgetTester tester) async {
+  Future<void> pumpDetail(WidgetTester tester, {String rewardText = ''}) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
     final container = ProviderScope.containerOf(
       tester.element(find.byType(ChildHomeScreen)),
     );
-    container.read(routineFlowProvider.notifier).state = const RoutineFlowState(
+    container.read(routineFlowProvider.notifier).state = RoutineFlowState(
       routine: Routine(
         id: 'local',
         title: '비 오는 날 학교에 가요',
         status: 'CONFIRMED',
         steps: cards,
+        rewardText: rewardText,
       ),
     );
     await tester.pumpAndSettle();
@@ -167,20 +177,69 @@ void main() {
     );
   });
 
-  testWidgets('안 한 카드가 없으면 그대로 머문다', (tester) async {
-    await pumpDetail(tester);
-
-    // 첫째 → 둘째까지 끝내고 마지막 하나만 남긴다
+  /// 카드 둘을 끝내고 마지막 하나만 남긴 상태까지 간다.
+  Future<void> finishUntilLast(WidgetTester tester) async {
     await tapCheck(tester);
     await closeReward(tester);
     await tapCheck(tester);
     await closeReward(tester);
     expect(currentPage(tester), 2);
+  }
+
+  testWidgets('마지막 카드를 끝내면 별 화면 다음에 일과완료 화면이 뜬다 (#490)', (tester) async {
+    await pumpDetail(tester, rewardText: '젤리 4개 먹기');
+    await finishUntilLast(tester);
+
+    await tapCheck(tester);
+    expect(find.byType(RoutineDoneScreen), findsNothing, reason: '별 화면이 먼저다');
+    await closeReward(tester);
+
+    expect(find.byType(RoutineDoneScreen), findsOneWidget);
+    expect(find.text('일과를 끝냈어요!'), findsOneWidget);
+    expect(find.textContaining('젤리 4개 먹기'), findsOneWidget);
+  });
+
+  testWidgets('보상이 없으면 일과완료 화면에 칩을 그리지 않는다 (#490)', (tester) async {
+    await pumpDetail(tester);
+    await finishUntilLast(tester);
 
     await tapCheck(tester);
     await closeReward(tester);
 
-    expect(currentPage(tester), 2, reason: '남은 카드가 없으면 움직이지 않는다');
+    expect(find.byType(RoutineDoneScreen), findsOneWidget);
+    expect(find.text('일과를 끝냈어요!'), findsOneWidget);
+    expect(find.text('오예!'), findsOneWidget, reason: '제목과 버튼은 보상과 상관없이 뜬다');
+    expect(find.textContaining('젤리'), findsNothing);
+  });
+
+  testWidgets('일과완료 화면의 오예! 를 누르면 이룸이 홈으로 돌아간다 (#490)', (tester) async {
+    await pumpDetail(tester);
+    await finishUntilLast(tester);
+    await tapCheck(tester);
+    await closeReward(tester);
+
+    await tester.tap(find.text('오예!'));
+    await settle(tester);
+
+    expect(find.byType(RoutineDoneScreen), findsNothing);
+    expect(find.byType(ChildRoutineDetailScreen), findsNothing);
+    expect(find.byType(ChildHomeScreen), findsOneWidget);
+  });
+
+  testWidgets('끝낸 일과의 마지막 카드를 다시 체크해도 일과완료 화면이 뜨지 않는다 (#490)', (tester) async {
+    await pumpDetail(tester);
+    await finishUntilLast(tester);
+    await tapCheck(tester);
+    await closeReward(tester);
+    // 일과완료를 닫지 않고 뒤로 돌아와 같은 카드를 해제 → 재체크하는 상황을 만든다.
+    tester.element(find.byType(RoutineDoneScreen)).pop();
+    await settle(tester);
+
+    await tapCheck(tester); // 해제
+    await tapCheck(tester); // 재체크 — 보상 이력이 남아 별도, 완료 화면도 뜨지 않는다
+
+    expect(find.byType(RewardScreen), findsNothing);
+    expect(find.byType(RoutineDoneScreen), findsNothing);
   });
 
   testWidgets('체크를 해제할 때는 넘어가지 않는다', (tester) async {
