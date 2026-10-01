@@ -104,6 +104,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }.contains(result.outcome)) {
       ref.invalidate(memberProvider);
       ref.invalidate(profileSessionProvider);
+      // 이룸이 설정(캐릭터·도움 목표·그림 방식·PIN)도 이전 계정 것이다. 온보딩 경로만 비우면 이미 가입한
+      // 계정(home)으로 들어올 때 서버 값이 없는 항목이 이전 계정 값으로 남는다 (#503).
+      // 저장소는 로그아웃·탈퇴에서 이미 비워졌고 provider 는 그 저장소 값으로 다시 만들어진다.
+      ref.invalidate(onboardingProvider);
       // 일과 목록도 이전 계정 것이다 — 비우지 않으면 새 계정 홈이 앱을 껐다 켤 때까지 옛 일과를 그린다 (#482).
       ref.forgetPreviousAccountRoutines();
     }
