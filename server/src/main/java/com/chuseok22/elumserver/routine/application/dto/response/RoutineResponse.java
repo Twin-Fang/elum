@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.routine.application.dto.response;
 
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,7 +58,12 @@ public record RoutineResponse(
 
   @Schema(description = "카드 추가에서 그림을 만들지 않은 까닭 (#407). 그림을 요청했는데 크레딧이 모자라면 "
     + "AI_CREDIT_INSUFFICIENT — 카드는 저장했다. 그 밖에는 null", example = "AI_CREDIT_INSUFFICIENT", nullable = true)
-  String imageSkippedReason
+  String imageSkippedReason,
+
+  /// 일과를 만든 보호자 ID. 응답에는 싣지 않는다 — forCaller 가 원문을 가릴지 판단하는 데만 쓴다.
+  @JsonIgnore
+  @Schema(hidden = true)
+  String createdBy
 ) {
 
   /**
@@ -80,14 +86,14 @@ public record RoutineResponse(
   public RoutineResponse withCredit(CreditUsage usage) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      usage, imageSkippedReason);
+      usage, imageSkippedReason, createdBy);
   }
 
   /// 그림을 건너뛴 까닭을 붙인 응답.
   public RoutineResponse withImageSkippedReason(String reason) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, reason);
+      credit, reason, createdBy);
   }
 
   /// 보호자가 쓴 말(원문·마스킹본·재생성 피드백)을 뺀 응답 (#357). 이룸이 휴대폰은 화면에 쓰지 않는 값이라
@@ -95,12 +101,25 @@ public record RoutineResponse(
   public RoutineResponse withoutSourceText() {
     return new RoutineResponse(id, title, null, null, scheduledAt, status, null,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, imageSkippedReason);
+      credit, imageSkippedReason, createdBy);
   }
 
-  /// 호출자가 이룸이 휴대폰이면 보호자 원문을 뺀다. 보호자 휴대폰은 그대로 돌려준다.
+  /// 보호자 원문을 가려야 하는 호출자인가.
+  /// - 이룸이 휴대폰: 화면에 쓰지 않는다 (#357).
+  /// - 같은 이룸이에 합류한 다른 보호자: 남이 쓴 원문·피드백을 볼 이유가 없다 (서비스 원칙 5). 제목·카드·상태는 그대로 본다.
+  /// - 만든 사람이 비어 있는 옛 일과(V25 이전·롤백 중 생성)는 가리지 않는다. 그 시절엔 대표 보호자 한 명뿐이었고
+  ///   부팅 때 created_by 가 채워지는 일시 상태라, 가리면 오히려 만든 본인의 원문이 사라질 수 있다.
+  ///   (호출자가 이 이룸이의 보호자인지는 서비스 단계의 접근 판단이 이미 확인했다)
+  private boolean hidesSourceTextFrom(Caller caller) {
+    if (caller.isElumi()) {
+      return true;
+    }
+    return createdBy != null && !createdBy.equals(caller.memberId());
+  }
+
+  /// 호출자에 따라 보호자 원문을 뺀다. 일과를 만든 보호자 본인에게만 그대로 돌려준다.
   public RoutineResponse forCaller(Caller caller) {
-    return caller.isElumi() ? withoutSourceText() : this;
+    return hidesSourceTextFrom(caller) ? withoutSourceText() : this;
   }
 
   public static RoutineResponse from(Routine routine) {
@@ -128,7 +147,8 @@ public record RoutineResponse(
       routine.getRewardPresetKey(),
       stepResponses,
       null,
-      null
+      null,
+      routine.getCreatedBy()
     );
   }
 }
