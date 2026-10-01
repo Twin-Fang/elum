@@ -1,20 +1,13 @@
 import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/character_badge.dart';
-import 'package:elum/features/child/presentation/child_home_screen.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/onboarding/domain/character.dart';
-import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
-import 'helpers/test_storage.dart';
 
 /// 캐릭터 배지는 **여우만** 둥근 사각형으로 잘라낸다 (이슈 #311).
 ///
