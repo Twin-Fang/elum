@@ -233,6 +233,78 @@ class RoutineServiceTest {
       .doesNotContain(RoutineStatus.PENDING_REVIEW);
   }
 
+  // --- 이룸이 토큰은 승인 전 일과를 받지 않는다 (이슈 #356, 서비스 원칙 3) ---
+
+  private Routine routineWithStatus(String id, Profile profile, RoutineStatus status) {
+    Routine routine = ownedRoutine(id, profile);
+    routine.setStatus(status);
+    return routine;
+  }
+
+  @Test
+  @DisplayName("이룸이가 전체 목록을 부르면 승인 전 일과는 빠진다")
+  void getMyRoutines_elumi_excludesPendingReview() {
+    Caller elumi = Caller.elumi("member-1", "link-1");
+    Profile profile = profileOf("profile-1", "member-1");
+    when(profileAccessGuard.profileFor(eq(elumi), any(ProfileAction.class))).thenReturn(profile);
+    when(routineRepository.findAllByProfileId("profile-1")).thenReturn(List.of(
+      routineWithStatus("r-draft", profile, RoutineStatus.PENDING_REVIEW),
+      routineWithStatus("r-sent", profile, RoutineStatus.CONFIRMED),
+      routineWithStatus("r-done", profile, RoutineStatus.COMPLETED)));
+
+    assertThat(routineService.getMyRoutines(elumi))
+      .extracting(RoutineResponse::id)
+      .containsExactlyInAnyOrder("r-sent", "r-done");
+  }
+
+  @Test
+  @DisplayName("보호자가 전체 목록을 부르면 승인 전 일과도 그대로 온다 — 임시저장·설정이 쓴다")
+  void getMyRoutines_guardian_keepsPendingReview() {
+    Profile profile = profileOf("profile-1", "member-1");
+    when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
+    when(routineRepository.findAllByProfileId("profile-1")).thenReturn(List.of(
+      routineWithStatus("r-draft", profile, RoutineStatus.PENDING_REVIEW),
+      routineWithStatus("r-sent", profile, RoutineStatus.CONFIRMED)));
+
+    assertThat(routineService.getMyRoutines(GUARDIAN)).hasSize(2);
+  }
+
+  @Test
+  @DisplayName("이룸이가 임시저장 목록을 부르면 조회 없이 빈 목록이다")
+  void getDraftRoutines_elumi_returnsEmptyWithoutQuery() {
+    Caller elumi = Caller.elumi("member-1", "link-1");
+
+    assertThat(routineService.getDraftRoutines(elumi)).isEmpty();
+
+    verify(routineRepository, never()).findAllByProfileIdAndStatusOrderByCreatedAtDesc(anyString(), any());
+  }
+
+  @Test
+  @DisplayName("이룸이가 승인 전 일과 한 건을 부르면 없는 일과처럼 ROUTINE_NOT_FOUND 다")
+  void getRoutine_elumi_pendingReview_notFound() {
+    Caller elumi = Caller.elumi("member-1", "link-1");
+    Profile profile = profileOf("profile-1", "member-1");
+    when(routineRepository.findById("r-draft"))
+      .thenReturn(Optional.of(routineWithStatus("r-draft", profile, RoutineStatus.PENDING_REVIEW)));
+
+    assertThatThrownBy(() -> routineService.getRoutine(elumi, "r-draft"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ROUTINE_NOT_FOUND));
+  }
+
+  @Test
+  @DisplayName("이룸이도 보낸 일과 한 건은 받고, 보호자는 승인 전 일과 한 건도 받는다")
+  void getRoutine_sentForElumi_andDraftForGuardian_ok() {
+    Profile profile = profileOf("profile-1", "member-1");
+    when(routineRepository.findById("r-sent"))
+      .thenReturn(Optional.of(routineWithStatus("r-sent", profile, RoutineStatus.CONFIRMED)));
+    when(routineRepository.findById("r-draft"))
+      .thenReturn(Optional.of(routineWithStatus("r-draft", profile, RoutineStatus.PENDING_REVIEW)));
+
+    assertThat(routineService.getRoutine(Caller.elumi("member-1", "link-1"), "r-sent").id()).isEqualTo("r-sent");
+    assertThat(routineService.getRoutine(GUARDIAN, "r-draft").id()).isEqualTo("r-draft");
+  }
+
   @Test
   @DisplayName("선택한 도움 목표가 없으면 질문 없이 required:false를 반환한다")
   void generateQuestion_noRelevantGoals_returnsNotRequired() {
