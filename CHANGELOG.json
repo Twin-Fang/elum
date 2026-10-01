@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-01T16:21:30Z",
-    "currentVersion": "2.11.0",
+    "lastUpdated": "2026-10-01T16:51:27Z",
+    "currentVersion": "2.12.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 196
+    "totalReleases": 197
   },
   "releases": [
+    {
+      "version": "2.12.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-01",
+      "pr_number": 509,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 보호자 홈에 처음 들어오면 사용법을 알려줘요\n  * 일과 만들기, 밀어서 수정·삭제, 이룸이 화면 바꾸기를 차례로 안내해요\n  * 안내는 언제든 닫을 수 있고, 한 번 보면 다시 나오지 않아요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "보호자 홈에 처음 들어오면 사용법을 알려줘요",
+            "일과 만들기, 밀어서 수정·삭제, 이룸이 화면 바꾸기를 차례로 안내해요",
+            "안내는 언제든 닫을 수 있고, 한 번 보면 다시 나오지 않아요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.11.0",
       "project_type": "flutter",
