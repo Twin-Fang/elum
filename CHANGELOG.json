@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-01T15:11:20Z",
-    "currentVersion": "2.8.0",
+    "lastUpdated": "2026-10-01T15:17:00Z",
+    "currentVersion": "2.9.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 191
+    "totalReleases": 192
   },
   "releases": [
+    {
+      "version": "2.9.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-01",
+      "pr_number": 492,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 보호자 홈 중간에 뜨던 광고를 없앴어요\n  * Pro 요금제에서는 광고가 나타나지 않아요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "보호자 홈 중간에 뜨던 광고를 없앴어요",
+            "Pro 요금제에서는 광고가 나타나지 않아요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.8.0",
       "project_type": "flutter",
