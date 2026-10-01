@@ -60,6 +60,36 @@ public class MemberService {
     return MemberResponse.from(member, current, profiles, entitlementService.snapshot(caller.memberId()));
   }
 
+  /**
+   * 내 몫의 새 이룸이를 만든다 — 연결된 이룸이가 하나도 없는 보호자가 부른다 (#361·#362).
+   *
+   * <p>이룸이는 가입 때만 생겼다. 마지막 이룸이에서 나간 보호자가 이름을 저장하면 PROFILE_NOT_FOUND 로 막혔다.
+   * 가입과 같은 {@link GuardianshipService#createOwnProfile}을 쓴다 — 이름·캐릭터는 비어 있고 그다음에
+   * 기존 저장 API(닉네임·캐릭터·도움 목표)가 채운다.
+   *
+   * <p><b>멱등이다.</b> 이미 연결된 이룸이가 있으면 아무것도 만들지 않고 지금 상태를 돌려준다. 재시도나 두 기기의
+   * 동시 호출이 이룸이를 둘 만들지 않는다. 계정 행을 먼저 잠근 뒤에 세므로 동시 호출 둘 중 나중 것은 첫 호출이 만든
+   * 이룸이를 본다. 이룸이 수 상한은 두지 않는다(명세 E43) — 이미 이룸이가 있는 보호자가 더 만드는 길도 아니다.
+   * 합류(초대 코드)로 얻은 이룸이는 이미 있는 것이라 여기서 만들지 않는다.
+   *
+   * @throws CustomException 이룸이 휴대폰이면 DEVICE_LINK_FORBIDDEN_FOR_ELUMI, 없는·탈퇴한 계정이면 MEMBER_NOT_FOUND
+   */
+  @Transactional
+  public MemberResponse createProfile(Caller caller) {
+    if (caller.isElumi()) {
+      throw new CustomException(ErrorCode.DEVICE_LINK_FORBIDDEN_FOR_ELUMI);
+    }
+    Member member = memberRepository.findByIdForUpdate(caller.memberId())
+      .filter(m -> m.getStatus() != MemberStatus.WITHDRAWN)
+      .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+    List<Profile> profiles = profileAccessGuard.profilesOf(caller);
+    if (profiles.isEmpty()) {
+      profiles = List.of(guardianshipService.createOwnProfile(member));
+    }
+    return MemberResponse.from(member, profiles.get(0), profiles, entitlementService.snapshot(caller.memberId()));
+  }
+
   // 이룸이 정보는 연결된 보호자 누구나 고친다. 마지막에 바꾼 값이 남는다 (명세 2장 · E23).
   @Transactional
   public MemberResponse updateNickname(Caller caller, MemberNicknameUpdateRequest request) {

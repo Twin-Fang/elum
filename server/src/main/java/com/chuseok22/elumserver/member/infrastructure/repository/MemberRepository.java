@@ -7,13 +7,23 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface MemberRepository extends JpaRepository<Member, String> {
 
   boolean existsByUsername(String username);
+
+  /**
+   * 계정 행을 잠그고 읽는다. 같은 보호자의 새 이룸이 만들기가 겹칠 때 차례로 줄 세우려는 것이다 —
+   * 아직 없는 이룸이는 잠글 행이 없어서, 이 보호자의 계정 행을 대신 잠근다.
+   */
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select m from Member m where m.id = :id")
+  Optional<Member> findByIdForUpdate(@Param("id") String id);
 
   Optional<Member> findByUsername(String username);
 

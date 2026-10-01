@@ -79,6 +79,39 @@ public interface MemberControllerDocs {
   );
 
   @Operation(
+    summary = "새 이룸이 만들기",
+    description = """
+      내 몫의 새 이룸이(이름·캐릭터가 빈 상태)를 만듭니다 (#361·#362). 이룸이는 가입 때만 생겼기 때문에, 마지막 이룸이에서
+      나간 보호자가 이름을 저장하면 `404 PROFILE_NOT_FOUND` 로 막혔습니다. 이 호출 뒤에 닉네임·캐릭터·도움 목표 저장 API 로 채웁니다.
+
+      **멱등입니다.** 이미 연결된 이룸이가 있으면 아무것도 만들지 않고 지금 상태를 그대로 돌려줍니다(200). 재시도나 두 기기의
+      동시 호출이 이룸이를 둘로 만들지 않습니다. 새로 만들었는지는 응답의 `profiles` 로 확인합니다.
+
+      **앱 계약**
+      - `GET /api/member/me` 의 `profiles` 가 비어 있고 이룸이를 등록하려 할 때 이 API 를 먼저 부릅니다.
+      - 응답은 `/api/member/me` 와 같은 모양이고, 새 이룸이가 당사자 항목(nickname·character)이자 `profiles[0]` 입니다.
+      - 그 뒤 `X-Profile-Id` 없이 부르는 저장 API 는 이 이룸이에 적용됩니다.
+      - 이룸이 수 상한은 두지 않습니다. 초대 코드로 합류한 이룸이는 이미 있는 것이라 여기서 만들지 않습니다.
+
+      이룸이 휴대폰 토큰은 403(`DEVICE_LINK_FORBIDDEN_FOR_ELUMI`)입니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "만들었거나, 이미 있어 그대로 돌려줌",
+      content = @Content(schema = @Schema(implementation = MemberResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "이룸이 휴대폰 토큰",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    )
+  })
+  ResponseEntity<MemberResponse> createProfile(Authentication authentication);
+
+  @Operation(
     summary = "아이 호칭 설정",
     description = "보호자가 아이를 부를 호칭(별명)을 저장합니다. 이후 AI 카드 생성 프롬프트와 응답에 반영됩니다."
   )

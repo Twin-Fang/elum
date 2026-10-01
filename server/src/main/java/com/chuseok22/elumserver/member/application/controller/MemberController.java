@@ -54,6 +54,12 @@ public class MemberController implements MemberControllerDocs {
   }
 
   @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @PostMapping("/profile")
+  public ResponseEntity<MemberResponse> createProfile(Authentication authentication) {
+    return ResponseEntity.ok(memberService.createProfile(Caller.from(authentication)));
+  }
+
+  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
   @PatchMapping("/nickname")
   public ResponseEntity<MemberResponse> updateNickname(
     Authentication authentication,
