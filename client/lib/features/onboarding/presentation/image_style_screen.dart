@@ -17,8 +17,8 @@ import 'widgets/image_style_option_card.dart';
 
 /// 온보딩의 `그림 방식` 단계 — 캐릭터 다음, 비밀암호 앞 (이슈 #458).
 ///
-/// ⚠️ **임시 시안이다** (디자이너 확정 전 제시용 — 목업 opt1_C). 시안에 없던 단계라
-/// 위치·문구가 확정되면 바뀔 수 있다.
+/// Figma `그림방식` 1274:9883 · 1274:10129 (#494). 정식 시안으로 바꿨다 — 제목·설명은
+/// 다른 온보딩과 같은 x=24 이고 카드 셋은 344×94, 사이 16, 첫 카드 윗변 y=279 다.
 ///
 /// 원칙 ④ — 되돌릴 수 있다고 먼저 말하고(`나중에 설정에서 바꿀 수 있어요`)
 /// `건너뛰기`를 늘 연다. 건너뛰면 만화다.
@@ -31,12 +31,8 @@ import 'widgets/image_style_option_card.dart';
 class ImageStyleScreen extends ConsumerWidget {
   const ImageStyleScreen({super.key});
 
-  /// 카드 좌우 여백 — 캐릭터 화면과 같이 16이다.
-  static const _marginH = 16.0;
-
-  /// 제목·설명은 다른 온보딩 화면과 같은 x=24. 본문 여백을 16으로 낮췄으므로
-  /// 헤더에만 차액 8을 되돌려준다.
-  static const _headerExtraInset = 8.0;
+  /// 카드 사이 (시안 279 → 389 → 499, 카드 높이 94)
+  static const _cardGap = 16.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -52,7 +48,7 @@ class ImageStyleScreen extends ConsumerWidget {
       selected: {profile.imageStyle},
       // 늘 하나가 골라져 있어야 한다 — 해제를 막는다
       allowDeselect: false,
-      gap: 12.h,
+      gap: _cardGap.h,
       asRadio: true,
       onChanged: (next) {
         if (next.isNotEmpty) notifier.setImageStyle(next.first);
@@ -67,7 +63,6 @@ class ImageStyleScreen extends ConsumerWidget {
 
     return ElumScaffold(
       onBack: () => context.pop(),
-      horizontalPadding: _marginH,
       // 만화가 처음부터 골라져 있어 다음은 늘 열려 있다
       bottomButton: ElumButton(
         label: '다음',
@@ -97,13 +92,10 @@ class ImageStyleScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: _headerExtraInset),
-              child: ElumHeader(
-                title: '카드 그림은 어떤 방식으로\n만들까요?',
-                description: '나중에 설정에서 바꿀 수 있어요',
-                hasBackButton: true,
-              ),
+            const ElumHeader(
+              title: '카드 그림은 어떤 방식으로\n만들까요?',
+              description: '나중에 설정에서 바꿀 수 있어요',
+              hasBackButton: true,
             ),
             SizedBox(height: space.headerToContent),
             group,

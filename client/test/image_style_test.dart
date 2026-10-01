@@ -23,7 +23,7 @@ void main() {
     });
 
     // 순서가 화면 배치다 — 만화(기본)가 맨 위.
-    test('enum 순서가 화면 배치(만화, 실사, 직접 사진)를 유지한다', () {
+    test('enum 순서가 화면 배치(만화, 실사, 직접 찍은 사진)를 유지한다', () {
       expect(ImageStyle.values, [
         ImageStyle.cartoon,
         ImageStyle.realistic,
@@ -48,7 +48,7 @@ void main() {
     test('화면 문구는 시안(임시) 그대로다', () {
       expect(ImageStyle.cartoon.label, '만화');
       expect(ImageStyle.realistic.label, '실사');
-      expect(ImageStyle.photoOnly.label, '직접 사진');
+      expect(ImageStyle.photoOnly.label, '직접 찍은 사진');
       expect(ImageStyle.cartoon.description, '캐릭터가 나오는 그림이에요');
       expect(ImageStyle.realistic.description, '실제 물건 사진처럼 보여요');
       expect(
