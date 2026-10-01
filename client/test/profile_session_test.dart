@@ -274,6 +274,36 @@ void main() {
     });
   });
 
+  group('나가기 — 남은 이룸이를 모를 때', () {
+    test('회원 정보를 못 받은 채 나가도 이룸이 없음으로 읽지 않는다 — 온보딩 값을 지우지 않는다', () async {
+      // 서버 응답이 한 번 실패해 목록을 모른다. 모르는 것을 "하나도 없다"로 읽으면 다른 이룸이가
+      // 남아 있는데도 이룸이 값이 지워지고 온보딩으로 쫓겨난다.
+      final c = ProviderContainer(
+        overrides: [
+          localStorageProvider.overrideWithValue(storage),
+          memberProvider.overrideWith((ref) async => null),
+          todayRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
+          pastRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
+          myRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
+          routineSuggestionsProvider.overrideWith((ref) async => const []),
+        ],
+      );
+      addTearDown(c.dispose);
+      await storage.setSelectedProfileId('p-a');
+      await storage.setNickname('하늘이');
+      c.listen(profileSessionProvider, (_, _) {});
+
+      final outcome = await c.read(profileSessionProvider.notifier).left('p-a');
+
+      expect(outcome, LeftOutcome.stayed);
+      expect(c.read(profileSessionProvider).noProfile, isFalse);
+      expect(storage.isOnboardingCompleted, isTrue);
+      expect(storage.nickname, '하늘이');
+      // 나간 이룸이는 더 고르지 않는다 — 다음에 받은 목록이 새로 정해 준다
+      expect(storage.selectedProfileId, isNull);
+    });
+  });
+
   group('초대로 합류했다', () {
     test('합류한 이룸이를 고르고 온보딩을 마친 것으로 둔다 (E6)', () async {
       storage = InMemoryStorage(); // 새 가입자 — 온보딩 전

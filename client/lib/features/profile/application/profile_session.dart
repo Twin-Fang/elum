@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/session_expiry.dart';
 import '../../../core/storage/local_storage.dart';
-import '../../child/application/child_routine_notifier.dart';
 import '../../guardian/application/routine_notifier.dart';
 import '../../guardian/data/member_repository.dart';
 import '../../guardian/data/routine_repository.dart';
@@ -181,8 +180,25 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
   ///
   /// 나가기 전에 지우는 것은 없다 — 서버가 성공을 알린 뒤에만 이 메서드가 불린다.
   Future<LeftOutcome> left(String profileId) async {
-    final profiles = ref.read(memberProvider).value?.profiles ?? const [];
-    final remaining = profiles.where((p) => p.id != profileId).toList();
+    var member = ref.read(memberProvider).value;
+    if (member == null || !member.profilesKnown) {
+      // 목록을 모른다(조회 실패·옛 서버). 한 번 더 받아 본다.
+      ref.invalidate(memberProvider);
+      member = await ref.read(memberProvider.future);
+    }
+    if (member == null || !member.profilesKnown) {
+      // 그래도 모르면 **없다고 읽지 않는다** — 다른 이룸이가 남아 있는데 이룸이 값을 지우고
+      // 온보딩으로 보내면 되돌릴 수 없다. 나간 이룸이만 고르지 않은 것으로 하고 다음에 받는 목록이
+      // 새로 정해 준다.
+      if (state.selectedId == profileId) {
+        state = const ProfileSession();
+        await _storage?.clearSelectedProfileId();
+      }
+      await _refreshScoped();
+      return LeftOutcome.stayed;
+    }
+
+    final remaining = member.profiles.where((p) => p.id != profileId).toList();
 
     if (remaining.isEmpty) {
       await _enterNoProfile();
@@ -250,7 +266,8 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
       debugPrint('[profile] 오늘 일과 캐시 정리 실패: $e');
     }
     ref.read(routineFlowProvider.notifier).reset();
-    ref.read(childRoutineProvider.notifier).reset();
+    // 이룸이 화면의 체크 기록·서버 반영 대기열(childRoutineProvider)은 비우지 않는다 — 아직 서버에
+    // 못 보낸 체크가 대기열에 있을 수 있고, 메모리만 비우면 앱을 다시 켜기 전까지 다시 보내지 않는다.
     ref.refreshRoutines();
     ref.invalidate(routineSuggestionsProvider);
     ref.invalidate(memberProvider);
