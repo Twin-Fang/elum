@@ -30,6 +30,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.docSection,
     required this.docBody,
     required this.linkCode,
+    required this.imageStyleOptionTitle,
+    required this.imageStyleOptionBody,
     required this.linkTimer,
     required this.linkRetryChip,
     required this.dialogTitle,
@@ -169,6 +171,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 연결 암호 여섯 글자 (40/w800). 이 화면에서 가장 큰 글자다.
   final TextStyle linkCode;
+
+  /// 그림 방식 선택 카드의 제목 (18/w800 Tmoney, Figma `1274:9973`).
+  final TextStyle imageStyleOptionTitle;
+
+  /// 그림 방식 선택 카드의 설명 (14/w400 Tmoney, Figma `1274:9982`).
+  final TextStyle imageStyleOptionBody;
 
   /// 연결 암호 남은 시간 `09:59` (16/w500 Pretendard).
   final TextStyle linkTimer;
@@ -529,6 +537,18 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontFamily: fontFamily,
       fontSize: 40,
       fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
+    imageStyleOptionTitle: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w800,
+      height: 1.0,
+    ),
+    imageStyleOptionBody: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
       height: 1.0,
     ),
     linkTimer: TextStyle(
@@ -903,6 +923,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? docSection,
     TextStyle? docBody,
     TextStyle? linkCode,
+    TextStyle? imageStyleOptionTitle,
+    TextStyle? imageStyleOptionBody,
     TextStyle? linkTimer,
     TextStyle? linkRetryChip,
     TextStyle? dialogTitle,
@@ -982,6 +1004,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       docSection: docSection ?? this.docSection,
       docBody: docBody ?? this.docBody,
       linkCode: linkCode ?? this.linkCode,
+      imageStyleOptionTitle:
+          imageStyleOptionTitle ?? this.imageStyleOptionTitle,
+      imageStyleOptionBody: imageStyleOptionBody ?? this.imageStyleOptionBody,
       linkTimer: linkTimer ?? this.linkTimer,
       linkRetryChip: linkRetryChip ?? this.linkRetryChip,
       dialogTitle: dialogTitle ?? this.dialogTitle,
@@ -1066,6 +1091,16 @@ class AppTypography extends ThemeExtension<AppTypography> {
       docSection: TextStyle.lerp(docSection, other.docSection, t)!,
       docBody: TextStyle.lerp(docBody, other.docBody, t)!,
       linkCode: TextStyle.lerp(linkCode, other.linkCode, t)!,
+      imageStyleOptionTitle: TextStyle.lerp(
+        imageStyleOptionTitle,
+        other.imageStyleOptionTitle,
+        t,
+      )!,
+      imageStyleOptionBody: TextStyle.lerp(
+        imageStyleOptionBody,
+        other.imageStyleOptionBody,
+        t,
+      )!,
       linkTimer: TextStyle.lerp(linkTimer, other.linkTimer, t)!,
       linkRetryChip:
           TextStyle.lerp(linkRetryChip, other.linkRetryChip, t)!,

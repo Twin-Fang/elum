@@ -14,7 +14,7 @@ enum ImageStyle {
   cartoon('만화', 'CARTOON', '캐릭터가 나오는 그림이에요'),
   realistic('실사', 'REALISTIC', '실제 물건 사진처럼 보여요'),
   photoOnly(
-    '직접 사진',
+    '직접 찍은 사진',
     'PHOTO_ONLY',
     '그림은 직접 찍은 사진으로 넣어요. 글은 계속 만들어 드려요',
   );

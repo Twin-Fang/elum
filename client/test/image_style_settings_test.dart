@@ -4,6 +4,7 @@ import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_colors.dart';
+import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/settings_tile.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'helpers/svg_finder.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/semantics_audit.dart';
@@ -147,7 +149,7 @@ void main() {
     testWidgets('저장된 방식이 값으로 보인다', (tester) async {
       await tester.pumpWidget(wrap(savedStyle: 'PHOTO_ONLY'));
       await tester.pumpAndSettle();
-      expect(find.text('직접 사진'), findsOneWidget);
+      expect(find.text('직접 찍은 사진'), findsOneWidget);
       expect(find.text('만화'), findsNothing);
     });
 
@@ -212,7 +214,7 @@ void main() {
   });
 
   group('선택 화면', () {
-    testWidgets('제목과 선택지 셋의 문구가 시안(임시)대로 보인다', (tester) async {
+    testWidgets('제목과 선택지 셋의 문구가 시안대로 보인다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
       await openScreen(tester);
@@ -229,10 +231,9 @@ void main() {
           findsOneWidget,
         );
       }
-      // 실사·직접 사진의 예시는 회색 자리표시 상자다 (최종 그림은 디자이너 몫)
-      expect(find.text('실사 예시'), findsOneWidget);
-      expect(find.text('내 사진'), findsOneWidget);
-      expect(find.byIcon(Icons.photo_camera_outlined), findsOneWidget);
+      // 실사·직접 사진의 예시는 시안의 사진 에셋이다 (#494)
+      expect(imageWithAsset(AppAssets.imageStyleRealistic), findsOneWidget);
+      expect(imageWithAsset(AppAssets.imageStylePhoto), findsOneWidget);
     });
 
     testWidgets('현재 값이 선택색(민트)으로 보이고 나머지는 흰 카드다', (tester) async {
@@ -319,7 +320,7 @@ void main() {
 
       await tester.tap(find.text('실사'));
       await tester.pump(const Duration(milliseconds: 50));
-      await tester.tap(find.text('직접 사진'));
+      await tester.tap(find.text('직접 찍은 사진'));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.pumpAndSettle();
 
@@ -374,7 +375,7 @@ void main() {
       await tester.pumpAndSettle();
       await openScreen(tester);
 
-      await tester.tap(find.text('직접 사진'));
+      await tester.tap(find.text('직접 찍은 사진'));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('E-NET-OFFLINE'), findsOneWidget);
@@ -407,11 +408,11 @@ void main() {
 
       expect(tester.takeException(), isNull);
       await tester.scrollUntilVisible(
-        find.text('직접 사진'),
+        find.text('직접 찍은 사진'),
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('직접 사진'), findsOneWidget);
+      expect(find.text('직접 찍은 사진'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

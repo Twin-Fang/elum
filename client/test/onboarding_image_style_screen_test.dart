@@ -136,7 +136,7 @@ void main() {
     await open(tester);
 
     // 다른 걸 골랐다가 건너뛰면 만화로 돌아온다
-    await tester.tap(find.text('직접 사진'));
+    await tester.tap(find.text('직접 찍은 사진'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('건너뛰기'));
     await tester.pumpAndSettle();
@@ -150,7 +150,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await open(tester);
 
-    await tester.tap(find.text('직접 사진'));
+    await tester.tap(find.text('직접 찍은 사진'));
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('뒤로 가기'));
     await tester.pumpAndSettle();
