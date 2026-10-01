@@ -42,8 +42,6 @@ class GuardianHomeScreen extends ConsumerWidget {
   static const _toSections = 40.0;
   static const _betweenSections = 32.0;
 
-  /// 목록 중간 배너 위 간격. 아래는 [_betweenSections]가 맡는다.
-  static const _aroundInlineAd = 24.0;
   static const _titleToList = 8.0;
 
   @override
@@ -102,12 +100,6 @@ class GuardianHomeScreen extends ConsumerWidget {
                           ),
                           SizedBox(height: _titleToList.h),
                           const TodayRoutineSection(),
-                          // 목록 한가운데 배너(#281). 광고가 없으면 높이·여백 모두 0이라 원래 간격 그대로다.
-                          // 위아래로 띄워 일과 카드·'지난 일과' 제목을 잘못 누르지 않게 한다.
-                          AdBannerSlot(
-                            placement: AdPlacement.bannerHomeMiddle,
-                            padding: EdgeInsets.only(top: _aroundInlineAd.h),
-                          ),
                           SizedBox(height: _betweenSections.h),
                           const RoutineSectionTitle(
                             iconAsset: AppAssets.iconTimePast,

@@ -166,7 +166,7 @@ CardRepository cardRepository(Ref ref) => MockCardRepository();  // ← 한 줄 
 | 파일 | 역할 |
 |---|---|
 | `ad_ids.dart` | 배치(`AdPlacement`)·플랫폼별 광고 단위 ID. **테스트 모드면 `.env`를 읽지 않는다** |
-| `ad_gate.dart` | `adsEnabledProvider` — 모바일이면 켜짐. 나중에 `FREE/PRO_ADS_REMOVED`를 여기 연결 |
+| `ad_gate.dart` | `adsEnabledProvider` — 모바일이고 서버 `entitlements.adsRemoved`가 false일 때만 켜짐(Pro는 꺼짐). 요금제를 모르면(조회 중·실패) 광고를 요청하지 않는다 |
 | `ad_consent.dart` | iOS ATT 요청, 거부·실패면 비개인화 |
 | `ad_banner_loader.dart` | 로더 인터페이스와 google_mobile_ads 구현. 테스트는 가짜로 바꾼다 |
 | `ad_banner_slot.dart` | 로드 전·실패 시 **높이 0**, 성공하면 그 높이만큼 본문이 줄어든다 |
@@ -178,7 +178,7 @@ CardRepository cardRepository(Ref ref) => MockCardRepository();  // ← 한 줄 
 - `google_mobile_ads`는 `core/ads` 안에서만 쓴다. 광고 요청에는 `nonPersonalizedAds` 외 사용자 정보를 넘기지 않는다.
 - **개발·디버그·프로필·dev 빌드는 Google 테스트 광고 단위만 쓴다**(`AppConfig.useTestAds`). 실제 ID는
   릴리스 빌드의 `.env`로만 들어간다. 개발 중 실제 광고를 누르면 AdMob 계정이 정지될 수 있다.
-- 하단 배너는 `ElumScaffold.bottomBanner`로 둔다. 홈은 하단 배너에 더해 **목록 한가운데**(오늘 일과와 지난 일과 사이, `bannerHomeMiddle`)에도 둔다. `AdBannerSlot.padding`은 광고가 뜬 뒤에만 적용돼 광고가 없으면 자리가 0이다. `bottomButton`·`belowButton`과 함께 쓰면 assert로 막힌다.
+- 하단 배너는 `ElumScaffold.bottomBanner`로 둔다. 홈의 목록 한가운데(오늘 일과와 지난 일과 사이)에는 배너를 두지 않는다 — 앱 디자인을 해쳐 뺐다. `AdBannerSlot.padding`은 광고가 뜬 뒤에만 적용돼 광고가 없으면 자리가 0이다. `bottomButton`·`belowButton`과 함께 쓰면 assert로 막힌다.
 - **`google_mobile_ads`는 `^7.0.0`(광고 SDK iOS 12.14)으로 고정한다.** 9.x(iOS 13.7)는 Xcode 26 미만에서
   `Include of non-modular header inside framework module` 오류로 iOS 빌드가 실패한다(로컬 Xcode 16.2에서 확인).
   Xcode 26 이상만 쓰게 되면 올려도 된다.

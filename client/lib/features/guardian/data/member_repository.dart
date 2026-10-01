@@ -19,6 +19,7 @@ class Member {
     this.supportGoals = const [],
     this.imageStyle = ImageStyle.cartoon,
     this.profiles = const [],
+    this.adsRemoved = false,
     bool? profilesKnown,
   }) : _profilesKnown = profilesKnown;
 
@@ -40,6 +41,11 @@ class Member {
   /// 옛 서버(필드 없음)나 모양이 달라도 빈 목록이다. 위 [nickname] 등은 `X-Profile-Id` 로
   /// 짚은 이룸이(없으면 첫 이룸이)의 값이다.
   final List<ProfileSummary> profiles;
+
+  /// 이 계정의 요금제가 광고를 없애는가 (`entitlements.adsRemoved` · 요금제별 `*_ADS_REMOVED`).
+  ///
+  /// 필드가 없거나 모양이 달라도 false(광고 표시)다. 광고 게이트가 이 값으로 Pro 의 광고를 끈다.
+  final bool adsRemoved;
 
   final bool? _profilesKnown;
 
@@ -71,6 +77,10 @@ class Member {
         final List<dynamic> list =>
           list.map(ProfileSummary.tryParse).whereType<ProfileSummary>().toList(),
         _ => const <ProfileSummary>[],
+      },
+      adsRemoved: switch (json['entitlements']) {
+        final Map<dynamic, dynamic> e => e['adsRemoved'] == true,
+        _ => false,
       },
       profilesKnown: json['profiles'] is List,
     );
