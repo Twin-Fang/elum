@@ -100,6 +100,18 @@ void main() {
       expect(storage.lastLoginProvider, 'naver');
     });
 
+    test('로그인하면 고른 이룸이를 잊는다 — 이전 계정의 이룸이 id 가 새 계정 요청에 실리면 403 이다 (#362)', () async {
+      await storage.setSelectedProfileId('p-of-previous-account');
+      adapter
+        ..stub('/api/auth/oauth/kakao', 200, tokenBody('access-1', 'refresh-1'))
+        ..stub('/api/member/me', 200, memberBody(nickname: '하늘이'));
+
+      await buildRepo(const OAuthSdkSuccess('kakao-token'))
+          .signInWith(OAuthProvider.kakao);
+
+      expect(storage.selectedProfileId, isNull);
+    });
+
     test('사용자가 제공자 화면을 닫으면 서버를 부르지 않는다', () async {
       final result = await buildRepo(const OAuthSdkCancelled())
           .signInWith(OAuthProvider.kakao);

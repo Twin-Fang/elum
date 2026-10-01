@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
 import '../../onboarding/domain/image_style.dart';
+import '../../profile/domain/profile_summary.dart';
 
 /// 보호자 회원 정보 — 서버 `MemberResponse`에 대응한다.
 ///
@@ -16,7 +17,9 @@ class Member {
     this.totalStars = 0,
     this.supportGoals = const [],
     this.imageStyle = ImageStyle.cartoon,
-  });
+    this.profiles = const [],
+    bool? profilesKnown,
+  }) : _profilesKnown = profilesKnown;
 
   /// 아이 호칭. 미설정이면 null이다 (서버가 null을 준다).
   final String? nickname;
@@ -30,6 +33,22 @@ class Member {
   /// 카드 그림 방식 (#458). 필드가 없거나 모르는 값이면 만화다 —
   /// 옛 서버·새 값이 와도 화면이 죽지 않는다.
   final ImageStyle imageStyle;
+
+  /// 연결된 이룸이 목록 — 먼저 연결된 차례 (다중 보호자 #360 · `MemberResponse.profiles`).
+  ///
+  /// 옛 서버(필드 없음)나 모양이 달라도 빈 목록이다. 위 [nickname] 등은 `X-Profile-Id` 로
+  /// 짚은 이룸이(없으면 첫 이룸이)의 값이다.
+  final List<ProfileSummary> profiles;
+
+  final bool? _profilesKnown;
+
+  /// 응답에 이룸이 목록이 **있었는가.** 옛 서버(다중 보호자 이전)는 필드가 없다 — 그때 빈
+  /// [profiles] 는 "이룸이가 없다"가 아니라 "모른다"다. 둘을 섞으면 옛 서버를 만난 앱이 이룸이
+  /// 정보를 비우고 온보딩으로 돌려보낸다.
+  ///
+  /// 직접 만들 때 정하지 않으면 **목록이 비어 있지 않을 때만** 안다고 본다 — 비어 있는 것을
+  /// "없다"로 읽는 쪽은 서버 응답을 읽은 [Member.fromJson] 뿐이다.
+  bool get profilesKnown => _profilesKnown ?? profiles.isNotEmpty;
 
   /// 서버 응답 파싱. 필드가 비거나 타입이 달라도 예외를 던지지 않는다.
   factory Member.fromJson(Map<String, dynamic> json) {
@@ -47,6 +66,12 @@ class Member {
       imageStyle: ImageStyle.fromApiValue(
         json['imageStyle'] is String ? json['imageStyle'] as String : null,
       ),
+      profiles: switch (json['profiles']) {
+        final List<dynamic> list =>
+          list.map(ProfileSummary.tryParse).whereType<ProfileSummary>().toList(),
+        _ => const <ProfileSummary>[],
+      },
+      profilesKnown: json['profiles'] is List,
     );
   }
 }

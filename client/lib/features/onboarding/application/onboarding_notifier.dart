@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../guardian/data/member_repository.dart';
+import '../../profile/domain/profile_summary.dart';
 import '../domain/character.dart';
 import '../domain/image_style.dart';
 import '../domain/onboarding_profile.dart';
@@ -100,6 +101,52 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
 
   void setPin(String pin) {
     state = state.copyWith(guardianPin: pin);
+  }
+
+  /// 서버가 알려 준 이룸이 값으로 화면·로컬을 맞춘다 (다중 보호자 #362 · E44).
+  ///
+  /// 로컬에는 이룸이 값(이름·캐릭터·도움 목표·그림 방식)이 **한 벌뿐**이다. 이룸이를 바꾸거나
+  /// 초대로 합류하면 서버 값을 우선해 덮는다 — 안 덮으면 다른 이룸이의 이름이 남아 홈 인사말에
+  /// 뜨고, 일과를 만들 때 그 이룸이의 도움 목표가 AI 로 간다.
+  ///
+  /// [goals] 는 서버 enum 값이다. null 이면 건드리지 않는다 (목록 항목에는 도움 목표가 없다).
+  /// 저장 실패는 화면 상태를 막지 않는다 — 서버 값이 곧 진실이고 다음 조회에 다시 맞춘다.
+  Future<void> applyServerProfile(
+    ProfileSummary profile, {
+    List<String>? goals,
+  }) async {
+    final character =
+        CardCharacter.fromApiValue(profile.character) ?? state.cardCharacter;
+    final parsedGoals = goals
+        ?.map(SupportGoal.fromApiValue)
+        .whereType<SupportGoal>()
+        .toSet();
+    state = state.copyWith(
+      childNickname: profile.nickname ?? '',
+      cardCharacter: character,
+      imageStyle: profile.imageStyle,
+      supportGoals: parsedGoals ?? state.supportGoals,
+    );
+
+    final storage = ref.read(localStorageProvider);
+    try {
+      await storage.setNickname(profile.nickname ?? '');
+      if (character != null) await storage.setCharacter(character.apiValue);
+      await storage.setImageStyle(profile.imageStyle.apiValue);
+      if (parsedGoals != null) {
+        await storage.setGoals(parsedGoals.map((g) => g.apiValue).toList());
+      }
+    } catch (e) {
+      debugPrint('[onboarding] 이룸이 값 로컬 저장 실패, 화면은 서버 값으로 간다: $e');
+    }
+  }
+
+  /// 이룸이 값을 전부 비운다 — 연결된 이룸이가 하나도 없을 때 (E29).
+  ///
+  /// 비밀암호는 **이룸이가 아니라 이 휴대폰의 것**이라 저장소에서 지킨다 (E45). 여기서는
+  /// 화면 상태만 비운다.
+  void resetProfile() {
+    state = const OnboardingProfile();
   }
 
   /// 기존 계정으로 복귀했을 때 온보딩을 건너뛴다.

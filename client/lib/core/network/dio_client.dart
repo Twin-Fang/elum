@@ -6,11 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/guardian/data/card_image_disk_cache.dart';
+import '../../features/onboarding/application/onboarding_notifier.dart' show localStorageProvider;
+import '../../features/profile/application/profile_session.dart';
 import '../app_status/app_status_recheck.dart';
 import '../config/app_config.dart';
 import '../logger/app_logger.dart';
 import 'auth_interceptor.dart';
 import 'failure_interceptor.dart';
+import 'profile_header_interceptor.dart';
 // 비활성 상태지만 되살릴 때 바로 쓰도록 남겨둔다 (이슈 #182)
 // ignore: unused_import
 import 'encryption_interceptor.dart';
@@ -64,6 +67,30 @@ abstract final class DioClient {
 /// 부르면 인터셉터 없는 인스턴스가 생겨 401이 그대로 터진다.
 final dioProvider = Provider<Dio>((ref) {
   final dio = DioClient.create();
+
+  // 보호자가 고른 이룸이를 모든 요청에 싣는다 (다중 보호자 #362). 인증보다 먼저 붙인다 —
+  // 토큰 갱신 뒤 요청을 되살릴 때도 같은 헤더로 나간다.
+  dio.interceptors.add(
+    ProfileHeaderInterceptor(
+      profileId: () {
+        try {
+          final storage = ref.read(localStorageProvider);
+          // 이룸이 휴대폰은 연결된 이룸이만 본다. 다른 이룸이를 지정하면 서버가 403 을 준다.
+          return storage.isElumiDevice ? null : storage.selectedProfileId;
+        } catch (_) {
+          // 저장소를 올리지 않은 곳(일부 테스트)은 헤더 없이 — 서버가 첫 이룸이를 쓴다.
+          return null;
+        }
+      },
+      // 실패 응답 처리 중에 상태를 바꾸지 않는다 — 다음 마이크로태스크에서 한다.
+      onProfileLost: (id) => Future<void>.microtask(() {
+        if (ref.mounted) ref.read(profileSessionProvider.notifier).lost(id);
+      }),
+      onNoProfile: () => Future<void>.microtask(() {
+        if (ref.mounted) ref.read(profileSessionProvider.notifier).markNoProfile();
+      }),
+    ),
+  );
 
   dio.interceptors.add(
     AuthInterceptor(

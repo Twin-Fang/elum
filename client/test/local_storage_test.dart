@@ -40,4 +40,41 @@ void main() {
       await expectLater(storage.clearAll(), completes);
     });
   });
+
+  // 다중 보호자 (#362). 고른 이룸이는 이 휴대폰·이 로그인에만 속한다.
+  group('선택한 이룸이', () {
+    test('저장하고 지운다', () async {
+      final storage = InMemoryStorage();
+      expect(storage.selectedProfileId, isNull);
+
+      await storage.setSelectedProfileId('p-1');
+      expect(storage.selectedProfileId, 'p-1');
+
+      await storage.clearSelectedProfileId();
+      expect(storage.selectedProfileId, isNull);
+    });
+
+    test('로그아웃(clearAll)과 새 계정 정리(clearChildProfile)가 함께 지운다', () async {
+      // 다른 계정으로 들어왔을 때 옛 이룸이 id 가 헤더에 실리면 서버가 403 을 준다.
+      final a = InMemoryStorage();
+      await a.setSelectedProfileId('p-1');
+      await a.clearAll();
+      expect(a.selectedProfileId, isNull);
+
+      final b = InMemoryStorage();
+      await b.setSelectedProfileId('p-1');
+      await b.clearChildProfile();
+      expect(b.selectedProfileId, isNull);
+    });
+
+    test('오늘 일과 캐시를 따로 지울 수 있다 (이룸이를 바꿀 때)', () async {
+      // 오프라인이면 캐시를 보여 주는데, 다른 이룸이의 일과가 남아 있으면 안 된다 (E44).
+      final storage = InMemoryStorage();
+      await storage.setCachedTodayRoutinesJson('[]');
+      expect(storage.cachedTodayRoutinesJson, isNotNull);
+
+      await storage.clearCachedTodayRoutines();
+      expect(storage.cachedTodayRoutinesJson, isNull);
+    });
+  });
 }

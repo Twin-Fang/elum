@@ -14,7 +14,9 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/widgets/login_scene.dart';
+import '../../guardian/data/routine_repository.dart' show memberProvider;
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../profile/application/profile_session.dart';
 import '../data/auth_repository.dart';
 import '../data/oauth_sdk.dart';
 
@@ -91,6 +93,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final result = await repo.signInWith(provider);
 
     if (!mounted) return;
+
+    // 로그인에 성공했으면 이전 세션의 이룸이 상태를 버린다 (다중 보호자 #362). 회원 정보
+    // 캐시가 남아 있으면 다른 계정의 이룸이 목록으로 고른 이룸이를 정해 버린다.
+    if (const {
+      AuthOutcome.consentRequired,
+      AuthOutcome.onboarding,
+      AuthOutcome.home,
+    }.contains(result.outcome)) {
+      ref.invalidate(memberProvider);
+      ref.invalidate(profileSessionProvider);
+    }
 
     switch (result.outcome) {
       case AuthOutcome.consentRequired:

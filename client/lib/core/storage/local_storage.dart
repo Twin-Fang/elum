@@ -37,6 +37,15 @@ abstract interface class LocalStorage {
   bool get isOnboardingCompleted;
   Future<void> setOnboardingCompleted(bool v);
 
+  /// 보호자가 지금 보고 있는 이룸이 id (다중 보호자 #362).
+  ///
+  /// 모든 요청에 `X-Profile-Id` 로 실린다. 비어 있으면 서버가 "가장 먼저 합류한 이룸이"를
+  /// 쓴다. **이 로그인 세션에만 속한다** — 다른 계정으로 들어왔을 때 남아 있으면 서버가
+  /// 403 을 주므로 로그아웃·새 계정 정리가 함께 지운다.
+  String? get selectedProfileId;
+  Future<void> setSelectedProfileId(String v);
+  Future<void> clearSelectedProfileId();
+
   /// 이 휴대폰이 이룸이(당사자) 것인가 (이슈 #206).
   ///
   /// 연결 암호로 붙은 휴대폰에는 로그인할 계정이 없다. 세션이 끊겼을 때
@@ -91,6 +100,12 @@ abstract interface class LocalStorage {
   String? get cachedTodayRoutinesJson;
   Future<void> setCachedTodayRoutinesJson(String json);
 
+  /// 오늘 일과 캐시만 지운다. 이룸이를 바꿀 때 쓴다 (#362 · E44).
+  ///
+  /// 오프라인이면 이 캐시를 보여 주는데, 바꾸기 전 이룸이의 일과가 남아 있으면
+  /// 다른 이룸이의 일과가 이 이룸이 것처럼 뜬다.
+  Future<void> clearCachedTodayRoutines();
+
   /// 마지막으로 서버에서 받은 약관 전문 (이슈 #278).
   ///
   /// 약관은 서버가 원본을 들고 있지만 **서버를 못 봐도 읽을 수 있어야 한다** —
@@ -143,6 +158,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCharacter = 'cardCharacter';
   static const _kImageStyle = 'imageStyle';
   static const _kCompleted = 'onboardingCompleted';
+  static const _kSelectedProfile = 'selectedProfileId';
   static const _kPin = 'guardianPin';
   static const _kElumiDevice = 'isElumiDevice';
   static const _kSelectedRole = 'selectedRole';
@@ -259,6 +275,24 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  String? get selectedProfileId {
+    final value = _prefs.getString(_kSelectedProfile);
+    return (value == null || value.isEmpty) ? null : value;
+  }
+
+  @override
+  Future<void> setSelectedProfileId(String v) {
+    AppLogger.storageWrite(_kSelectedProfile, v);
+    return _prefs.setString(_kSelectedProfile, v);
+  }
+
+  @override
+  Future<void> clearSelectedProfileId() {
+    AppLogger.storageDelete(_kSelectedProfile);
+    return _prefs.remove(_kSelectedProfile);
+  }
+
+  @override
   String? get accessToken {
     final value = _prefs.getString(_kAccessToken);
     AppLogger.storageRead(_kAccessToken, value != null ? '***' : null);
@@ -312,6 +346,12 @@ class SharedPrefsStorage implements LocalStorage {
     // 호출부가 원문 계열 키를 뺀 JSON 만 넘긴다(#358). 그래도 값은 로그에 찍지 않는다.
     AppLogger.storageWrite(_kCachedToday, '${json.length}B');
     return _prefs.setString(_kCachedToday, json);
+  }
+
+  @override
+  Future<void> clearCachedTodayRoutines() {
+    AppLogger.storageDelete(_kCachedToday);
+    return _prefs.remove(_kCachedToday);
   }
 
   @override
@@ -371,6 +411,7 @@ class SharedPrefsStorage implements LocalStorage {
       _kCharacter,
       _kImageStyle,
       _kCompleted,
+      _kSelectedProfile,
       _kPin,
     ]) {
       await _prefs.remove(key);
@@ -419,6 +460,7 @@ class InMemoryStorage implements LocalStorage {
   String? _imageStyle;
   String? _pin;
   bool _completed;
+  String? _selectedProfileId;
   String? _accessToken;
   final Map<String, String> _progress = {};
   List<String> _pendingSync = const [];
@@ -462,6 +504,15 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<void> setOnboardingCompleted(bool v) async => _completed = v;
+
+  @override
+  String? get selectedProfileId => _selectedProfileId;
+
+  @override
+  Future<void> setSelectedProfileId(String v) async => _selectedProfileId = v;
+
+  @override
+  Future<void> clearSelectedProfileId() async => _selectedProfileId = null;
 
   @override
   bool get isElumiDevice => _elumi;
@@ -520,6 +571,9 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setCachedTodayRoutinesJson(String json) async =>
       _cachedToday = json;
 
+  @override
+  Future<void> clearCachedTodayRoutines() async => _cachedToday = null;
+
   String? _cachedTuning;
 
   @override
@@ -551,6 +605,7 @@ class InMemoryStorage implements LocalStorage {
     _imageStyle = null;
     _pin = null;
     _completed = false;
+    _selectedProfileId = null;
     _progress.clear();
     _cachedToday = null;
   }
@@ -563,6 +618,7 @@ class InMemoryStorage implements LocalStorage {
     _imageStyle = null;
     _pin = null;
     _completed = false;
+    _selectedProfileId = null;
     _accessToken = null;
     _elumi = false;
     _role = null;

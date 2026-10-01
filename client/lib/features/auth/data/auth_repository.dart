@@ -152,6 +152,9 @@ class AuthRepository {
       }
 
       await _tokens.save(accessToken: access, refreshToken: refresh);
+      // 고른 이룸이는 이 로그인 세션의 것이다 (다중 보호자 #362). 이전 계정의 id 가 남은 채
+      // 아래 회원 정보를 부르면 서버가 403 을 준다 — 요청에 헤더로 실리기 때문이다.
+      await _storage.clearSelectedProfileId();
       // 다음 로그인 화면에서 "지난번에 이걸로 하셨어요"를 보여주기 위해 남긴다.
       // 다른 수단으로 들어와 빈 계정이 생기는 사고를 막는 장치다.
       await _storage.setLastLoginProvider(provider.name);

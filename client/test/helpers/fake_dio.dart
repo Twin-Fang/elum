@@ -35,6 +35,10 @@ class FakeAdapter implements HttpClientAdapter {
   /// 검증할 때 쓴다 (예: 그림 방식 PATCH 가 `{"imageStyle": "REALISTIC"}` 를 보냈는가).
   final Map<String, Object?> sentBodies = {};
 
+  /// 요청 헤더. `메서드 경로` 키마다 마지막에 보낸 값이다 — `X-Profile-Id` 같은
+  /// 헤더가 실렸는지 검증할 때 쓴다.
+  final Map<String, Map<String, dynamic>> sentHeaders = {};
+
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
@@ -44,6 +48,7 @@ class FakeAdapter implements HttpClientAdapter {
     final key = '${options.method} ${options.path}';
     calls.add(key);
     sentBodies[key] = options.data;
+    sentHeaders[key] = Map<String, dynamic>.of(options.headers);
 
     if (delay > Duration.zero) await Future<void>.delayed(delay);
 
