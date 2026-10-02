@@ -19,7 +19,9 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 public final class ErrorMessages {
 
   private static final String BASENAME = "i18n/messages";
-  private static final ErrorMessages STANDARD = new ErrorMessages(standardSource());
+  private static final ErrorMessages DEFAULT = new ErrorMessages(standardSource());
+  // 테스트가 가짜 문구를 끼울 수 있게 비final 로 둔다. 운영 코드는 바꾸지 않는다.
+  private static volatile ErrorMessages standard = DEFAULT;
 
   private final MessageSource source;
 
@@ -28,7 +30,16 @@ public final class ErrorMessages {
   }
 
   public static ErrorMessages standard() {
-    return STANDARD;
+    return standard;
+  }
+
+  /** 테스트 전용: standard() 를 가짜로 바꾼다. 반드시 {@link #resetStandardForTesting()} 으로 되돌린다. */
+  public static void overrideStandardForTesting(ErrorMessages replacement) {
+    standard = replacement;
+  }
+
+  public static void resetStandardForTesting() {
+    standard = DEFAULT;
   }
 
   private static MessageSource standardSource() {
