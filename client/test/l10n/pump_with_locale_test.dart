@@ -65,9 +65,24 @@ void main() {
     expect(100.h, closeTo(100, 0.001));
   });
 
-  testWidgets('글자 배율 설정이 위젯에 닿는다', (tester) async {
-    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
-    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+  testWidgets('textScale 인자가 위젯에 닿는다', (tester) async {
+    late BuildContext captured;
+    await pumpWithLocale(
+      tester,
+      Builder(
+        builder: (context) {
+          captured = context;
+          return const SizedBox();
+        },
+      ),
+      textScale: 1.5,
+    );
+
+    expect(MediaQuery.textScalerOf(captured).scale(10), 15);
+  });
+
+  // 위 테스트가 건 배율이 다음 테스트로 새지 않는지 - 두 테스트를 이어 둔다
+  testWidgets('textScale 은 테스트가 끝나면 원복된다 (앞 테스트 1.5 가 안 샌다)', (tester) async {
     late BuildContext captured;
     await pumpWithLocale(
       tester,
@@ -79,7 +94,7 @@ void main() {
       ),
     );
 
-    expect(MediaQuery.textScalerOf(captured).scale(10), 15);
+    expect(MediaQuery.textScalerOf(captured).scale(10), 10);
   });
 
   testWidgets('theme 을 넘기면 비 ko 언어에서도 그 테마가 이긴다', (tester) async {

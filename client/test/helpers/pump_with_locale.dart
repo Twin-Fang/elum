@@ -14,6 +14,9 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// - [locale]: 앱 언어. 기본 `ko`. `routerArgs` 의 강제 언어로 넘기므로 항상 이 언어가 이긴다.
 /// - [theme]: 기본은 [locale] 에 맞는 `AppTheme.lightFor`. 넘기면 비 ko 언어에서도 이 테마가 이긴다.
+///   **보통은 넘기지 않는다** - 기본 경로(`MaterialApp.theme` + 앱과 같은 `themed`)가 앱과 가장 가깝다.
+/// - [textScale]: 글자 배율. 기본 1.0. 안 쓰는 테스트는 그대로 돈다(가산). 넘침 검사가 1.5·2.0 을
+///   각 테스트에서 직접 걸다 `addTearDown` 을 빼먹어 다음 테스트로 새는 것을 막으려고 헬퍼가 걸고 원복한다.
 /// - [wrap]: `ProviderScope` 같은 바깥 껍질을 씌울 때. `(app) => ProviderScope(overrides: [...], child: app)`
 ///
 /// 화면 크기는 호출 쪽이 `useFigmaViewport()` 로 맞춘다 (`test/helpers/device_viewport.dart`).
@@ -22,8 +25,13 @@ Future<void> pumpWithLocale(
   Widget home, {
   Locale locale = const Locale('ko'),
   ThemeData? theme,
+  double textScale = 1.0,
   Widget Function(Widget app)? wrap,
 }) async {
+  if (textScale != 1.0) {
+    tester.platformDispatcher.textScaleFactorTestValue = textScale;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+  }
   final l10n = AppL10n.routerArgs(
     forcedLocale: locale,
     // 개발자 도구 빌드 설정과 무관하게 테스트는 항상 [locale] 을 강제한다
