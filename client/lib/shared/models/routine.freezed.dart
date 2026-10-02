@@ -42,7 +42,11 @@ mixin _$Routine {
 // 해 두고, 없으면 null(알 수 없음)이라 지금처럼 모든 버튼을 보인다. 서버가 최종 판단한다.
 /// 이 일과를 만든 사람이 나인가. null 이면 서버가 알려 주지 않았다.
  bool? get createdByMe;/// 만든 사람이 이 이룸이 안에서 불리는 이름. 비어 있으면 null.
- String? get creatorName;
+ String? get creatorName;/// 이 일과의 콘텐츠 언어(`ko` `en` `ja` `zh` `es`) — 서버 `RoutineResponse.language`.
+///
+/// 일과를 만든 보호자 휴대폰의 화면 언어다. 이룸이 휴대폰은 카드 글과 음성을 화면 언어가 아니라
+/// **이 값**으로 보여준다. 옛 서버·옛 캐시에는 없다 — 그때는 모두 한국어 일과였으므로 `ko`.
+ String get language;
 /// Create a copy of Routine
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -53,16 +57,16 @@ $RoutineCopyWith<Routine> get copyWith => _$RoutineCopyWithImpl<Routine>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Routine&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.rawInputText, rawInputText) || other.rawInputText == rawInputText)&&(identical(other.sanitizedInputText, sanitizedInputText) || other.sanitizedInputText == sanitizedInputText)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.steps, steps)&&(identical(other.completedStepCount, completedStepCount) || other.completedStepCount == completedStepCount)&&(identical(other.totalStepCount, totalStepCount) || other.totalStepCount == totalStepCount)&&(identical(other.progressPercent, progressPercent) || other.progressPercent == progressPercent)&&(identical(other.scheduledAt, scheduledAt) || other.scheduledAt == scheduledAt)&&(identical(other.rewardText, rewardText) || other.rewardText == rewardText)&&(identical(other.rewardPresetKey, rewardPresetKey) || other.rewardPresetKey == rewardPresetKey)&&(identical(other.creditUsage, creditUsage) || other.creditUsage == creditUsage)&&(identical(other.createdByMe, createdByMe) || other.createdByMe == createdByMe)&&(identical(other.creatorName, creatorName) || other.creatorName == creatorName));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Routine&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.rawInputText, rawInputText) || other.rawInputText == rawInputText)&&(identical(other.sanitizedInputText, sanitizedInputText) || other.sanitizedInputText == sanitizedInputText)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.steps, steps)&&(identical(other.completedStepCount, completedStepCount) || other.completedStepCount == completedStepCount)&&(identical(other.totalStepCount, totalStepCount) || other.totalStepCount == totalStepCount)&&(identical(other.progressPercent, progressPercent) || other.progressPercent == progressPercent)&&(identical(other.scheduledAt, scheduledAt) || other.scheduledAt == scheduledAt)&&(identical(other.rewardText, rewardText) || other.rewardText == rewardText)&&(identical(other.rewardPresetKey, rewardPresetKey) || other.rewardPresetKey == rewardPresetKey)&&(identical(other.creditUsage, creditUsage) || other.creditUsage == creditUsage)&&(identical(other.createdByMe, createdByMe) || other.createdByMe == createdByMe)&&(identical(other.creatorName, creatorName) || other.creatorName == creatorName)&&(identical(other.language, language) || other.language == language));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,title,rawInputText,sanitizedInputText,status,const DeepCollectionEquality().hash(steps),completedStepCount,totalStepCount,progressPercent,scheduledAt,rewardText,rewardPresetKey,creditUsage,createdByMe,creatorName);
+int get hashCode => Object.hash(runtimeType,id,title,rawInputText,sanitizedInputText,status,const DeepCollectionEquality().hash(steps),completedStepCount,totalStepCount,progressPercent,scheduledAt,rewardText,rewardPresetKey,creditUsage,createdByMe,creatorName,language);
 
 @override
 String toString() {
-  return 'Routine(id: $id, title: $title, rawInputText: $rawInputText, sanitizedInputText: $sanitizedInputText, status: $status, steps: $steps, completedStepCount: $completedStepCount, totalStepCount: $totalStepCount, progressPercent: $progressPercent, scheduledAt: $scheduledAt, rewardText: $rewardText, rewardPresetKey: $rewardPresetKey, creditUsage: $creditUsage, createdByMe: $createdByMe, creatorName: $creatorName)';
+  return 'Routine(id: $id, title: $title, rawInputText: $rawInputText, sanitizedInputText: $sanitizedInputText, status: $status, steps: $steps, completedStepCount: $completedStepCount, totalStepCount: $totalStepCount, progressPercent: $progressPercent, scheduledAt: $scheduledAt, rewardText: $rewardText, rewardPresetKey: $rewardPresetKey, creditUsage: $creditUsage, createdByMe: $createdByMe, creatorName: $creatorName, language: $language)';
 }
 
 
@@ -73,7 +77,7 @@ abstract mixin class $RoutineCopyWith<$Res>  {
   factory $RoutineCopyWith(Routine value, $Res Function(Routine) _then) = _$RoutineCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String rawInputText, String sanitizedInputText, String status, List<ActionCard> steps, int completedStepCount, int totalStepCount, int progressPercent, DateTime? scheduledAt, String rewardText, String rewardPresetKey, CreditUsage? creditUsage, bool? createdByMe, String? creatorName
+ String id, String title, String rawInputText, String sanitizedInputText, String status, List<ActionCard> steps, int completedStepCount, int totalStepCount, int progressPercent, DateTime? scheduledAt, String rewardText, String rewardPresetKey, CreditUsage? creditUsage, bool? createdByMe, String? creatorName, String language
 });
 
 
@@ -90,7 +94,7 @@ class _$RoutineCopyWithImpl<$Res>
 
 /// Create a copy of Routine
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? rawInputText = null,Object? sanitizedInputText = null,Object? status = null,Object? steps = null,Object? completedStepCount = null,Object? totalStepCount = null,Object? progressPercent = null,Object? scheduledAt = freezed,Object? rewardText = null,Object? rewardPresetKey = null,Object? creditUsage = freezed,Object? createdByMe = freezed,Object? creatorName = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? rawInputText = null,Object? sanitizedInputText = null,Object? status = null,Object? steps = null,Object? completedStepCount = null,Object? totalStepCount = null,Object? progressPercent = null,Object? scheduledAt = freezed,Object? rewardText = null,Object? rewardPresetKey = null,Object? creditUsage = freezed,Object? createdByMe = freezed,Object? creatorName = freezed,Object? language = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -107,7 +111,8 @@ as String,rewardPresetKey: null == rewardPresetKey ? _self.rewardPresetKey : rew
 as String,creditUsage: freezed == creditUsage ? _self.creditUsage : creditUsage // ignore: cast_nullable_to_non_nullable
 as CreditUsage?,createdByMe: freezed == createdByMe ? _self.createdByMe : createdByMe // ignore: cast_nullable_to_non_nullable
 as bool?,creatorName: freezed == creatorName ? _self.creatorName : creatorName // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -192,10 +197,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName,  String language)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Routine() when $default != null:
-return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName);case _:
+return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName,_that.language);case _:
   return orElse();
 
 }
@@ -213,10 +218,10 @@ return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName,  String language)  $default,) {final _that = this;
 switch (_that) {
 case _Routine():
-return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName);case _:
+return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName,_that.language);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -233,10 +238,10 @@ return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String rawInputText,  String sanitizedInputText,  String status,  List<ActionCard> steps,  int completedStepCount,  int totalStepCount,  int progressPercent,  DateTime? scheduledAt,  String rewardText,  String rewardPresetKey,  CreditUsage? creditUsage,  bool? createdByMe,  String? creatorName,  String language)?  $default,) {final _that = this;
 switch (_that) {
 case _Routine() when $default != null:
-return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName);case _:
+return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText,_that.status,_that.steps,_that.completedStepCount,_that.totalStepCount,_that.progressPercent,_that.scheduledAt,_that.rewardText,_that.rewardPresetKey,_that.creditUsage,_that.createdByMe,_that.creatorName,_that.language);case _:
   return null;
 
 }
@@ -248,7 +253,7 @@ return $default(_that.id,_that.title,_that.rawInputText,_that.sanitizedInputText
 
 
 class _Routine extends Routine {
-  const _Routine({required this.id, this.title = '', this.rawInputText = '', this.sanitizedInputText = '', this.status = '', final  List<ActionCard> steps = const <ActionCard>[], this.completedStepCount = 0, this.totalStepCount = 0, this.progressPercent = 0, this.scheduledAt, this.rewardText = '', this.rewardPresetKey = '', this.creditUsage, this.createdByMe, this.creatorName}): _steps = steps,super._();
+  const _Routine({required this.id, this.title = '', this.rawInputText = '', this.sanitizedInputText = '', this.status = '', final  List<ActionCard> steps = const <ActionCard>[], this.completedStepCount = 0, this.totalStepCount = 0, this.progressPercent = 0, this.scheduledAt, this.rewardText = '', this.rewardPresetKey = '', this.creditUsage, this.createdByMe, this.creatorName, this.language = 'ko'}): _steps = steps,super._();
   
 
 @override final  String id;
@@ -300,6 +305,11 @@ class _Routine extends Routine {
 @override final  bool? createdByMe;
 /// 만든 사람이 이 이룸이 안에서 불리는 이름. 비어 있으면 null.
 @override final  String? creatorName;
+/// 이 일과의 콘텐츠 언어(`ko` `en` `ja` `zh` `es`) — 서버 `RoutineResponse.language`.
+///
+/// 일과를 만든 보호자 휴대폰의 화면 언어다. 이룸이 휴대폰은 카드 글과 음성을 화면 언어가 아니라
+/// **이 값**으로 보여준다. 옛 서버·옛 캐시에는 없다 — 그때는 모두 한국어 일과였으므로 `ko`.
+@override@JsonKey() final  String language;
 
 /// Create a copy of Routine
 /// with the given fields replaced by the non-null parameter values.
@@ -311,16 +321,16 @@ _$RoutineCopyWith<_Routine> get copyWith => __$RoutineCopyWithImpl<_Routine>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Routine&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.rawInputText, rawInputText) || other.rawInputText == rawInputText)&&(identical(other.sanitizedInputText, sanitizedInputText) || other.sanitizedInputText == sanitizedInputText)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._steps, _steps)&&(identical(other.completedStepCount, completedStepCount) || other.completedStepCount == completedStepCount)&&(identical(other.totalStepCount, totalStepCount) || other.totalStepCount == totalStepCount)&&(identical(other.progressPercent, progressPercent) || other.progressPercent == progressPercent)&&(identical(other.scheduledAt, scheduledAt) || other.scheduledAt == scheduledAt)&&(identical(other.rewardText, rewardText) || other.rewardText == rewardText)&&(identical(other.rewardPresetKey, rewardPresetKey) || other.rewardPresetKey == rewardPresetKey)&&(identical(other.creditUsage, creditUsage) || other.creditUsage == creditUsage)&&(identical(other.createdByMe, createdByMe) || other.createdByMe == createdByMe)&&(identical(other.creatorName, creatorName) || other.creatorName == creatorName));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Routine&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.rawInputText, rawInputText) || other.rawInputText == rawInputText)&&(identical(other.sanitizedInputText, sanitizedInputText) || other.sanitizedInputText == sanitizedInputText)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._steps, _steps)&&(identical(other.completedStepCount, completedStepCount) || other.completedStepCount == completedStepCount)&&(identical(other.totalStepCount, totalStepCount) || other.totalStepCount == totalStepCount)&&(identical(other.progressPercent, progressPercent) || other.progressPercent == progressPercent)&&(identical(other.scheduledAt, scheduledAt) || other.scheduledAt == scheduledAt)&&(identical(other.rewardText, rewardText) || other.rewardText == rewardText)&&(identical(other.rewardPresetKey, rewardPresetKey) || other.rewardPresetKey == rewardPresetKey)&&(identical(other.creditUsage, creditUsage) || other.creditUsage == creditUsage)&&(identical(other.createdByMe, createdByMe) || other.createdByMe == createdByMe)&&(identical(other.creatorName, creatorName) || other.creatorName == creatorName)&&(identical(other.language, language) || other.language == language));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,title,rawInputText,sanitizedInputText,status,const DeepCollectionEquality().hash(_steps),completedStepCount,totalStepCount,progressPercent,scheduledAt,rewardText,rewardPresetKey,creditUsage,createdByMe,creatorName);
+int get hashCode => Object.hash(runtimeType,id,title,rawInputText,sanitizedInputText,status,const DeepCollectionEquality().hash(_steps),completedStepCount,totalStepCount,progressPercent,scheduledAt,rewardText,rewardPresetKey,creditUsage,createdByMe,creatorName,language);
 
 @override
 String toString() {
-  return 'Routine(id: $id, title: $title, rawInputText: $rawInputText, sanitizedInputText: $sanitizedInputText, status: $status, steps: $steps, completedStepCount: $completedStepCount, totalStepCount: $totalStepCount, progressPercent: $progressPercent, scheduledAt: $scheduledAt, rewardText: $rewardText, rewardPresetKey: $rewardPresetKey, creditUsage: $creditUsage, createdByMe: $createdByMe, creatorName: $creatorName)';
+  return 'Routine(id: $id, title: $title, rawInputText: $rawInputText, sanitizedInputText: $sanitizedInputText, status: $status, steps: $steps, completedStepCount: $completedStepCount, totalStepCount: $totalStepCount, progressPercent: $progressPercent, scheduledAt: $scheduledAt, rewardText: $rewardText, rewardPresetKey: $rewardPresetKey, creditUsage: $creditUsage, createdByMe: $createdByMe, creatorName: $creatorName, language: $language)';
 }
 
 
@@ -331,7 +341,7 @@ abstract mixin class _$RoutineCopyWith<$Res> implements $RoutineCopyWith<$Res> {
   factory _$RoutineCopyWith(_Routine value, $Res Function(_Routine) _then) = __$RoutineCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String rawInputText, String sanitizedInputText, String status, List<ActionCard> steps, int completedStepCount, int totalStepCount, int progressPercent, DateTime? scheduledAt, String rewardText, String rewardPresetKey, CreditUsage? creditUsage, bool? createdByMe, String? creatorName
+ String id, String title, String rawInputText, String sanitizedInputText, String status, List<ActionCard> steps, int completedStepCount, int totalStepCount, int progressPercent, DateTime? scheduledAt, String rewardText, String rewardPresetKey, CreditUsage? creditUsage, bool? createdByMe, String? creatorName, String language
 });
 
 
@@ -348,7 +358,7 @@ class __$RoutineCopyWithImpl<$Res>
 
 /// Create a copy of Routine
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? rawInputText = null,Object? sanitizedInputText = null,Object? status = null,Object? steps = null,Object? completedStepCount = null,Object? totalStepCount = null,Object? progressPercent = null,Object? scheduledAt = freezed,Object? rewardText = null,Object? rewardPresetKey = null,Object? creditUsage = freezed,Object? createdByMe = freezed,Object? creatorName = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? rawInputText = null,Object? sanitizedInputText = null,Object? status = null,Object? steps = null,Object? completedStepCount = null,Object? totalStepCount = null,Object? progressPercent = null,Object? scheduledAt = freezed,Object? rewardText = null,Object? rewardPresetKey = null,Object? creditUsage = freezed,Object? createdByMe = freezed,Object? creatorName = freezed,Object? language = null,}) {
   return _then(_Routine(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -365,7 +375,8 @@ as String,rewardPresetKey: null == rewardPresetKey ? _self.rewardPresetKey : rew
 as String,creditUsage: freezed == creditUsage ? _self.creditUsage : creditUsage // ignore: cast_nullable_to_non_nullable
 as CreditUsage?,createdByMe: freezed == createdByMe ? _self.createdByMe : createdByMe // ignore: cast_nullable_to_non_nullable
 as bool?,creatorName: freezed == creatorName ? _self.creatorName : creatorName // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

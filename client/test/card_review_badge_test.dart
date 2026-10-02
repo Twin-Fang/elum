@@ -144,7 +144,7 @@ void main() {
 /// 배지 테스트에선 재생이 필요 없다.
 class _SilentSpeech implements SpeechService {
   @override
-  Future<bool> speak(String text) async => true;
+  Future<bool> speak(String text, {String language = 'ko'}) async => true;
 
   @override
   Future<void> stop() async {}

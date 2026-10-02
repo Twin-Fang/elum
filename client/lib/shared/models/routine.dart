@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../core/l10n/batchim.dart';
+import '../../core/l10n/content_locale.dart';
 import '../../core/l10n/current_l10n.dart';
 import '../../core/l10n/date_labels.dart';
 import 'action_card.dart';
@@ -76,6 +77,12 @@ abstract class Routine with _$Routine {
 
     /// 만든 사람이 이 이룸이 안에서 불리는 이름. 비어 있으면 null.
     String? creatorName,
+
+    /// 이 일과의 콘텐츠 언어(`ko` `en` `ja` `zh` `es`) — 서버 `RoutineResponse.language`.
+    ///
+    /// 일과를 만든 보호자 휴대폰의 화면 언어다. 이룸이 휴대폰은 카드 글과 음성을 화면 언어가 아니라
+    /// **이 값**으로 보여준다. 옛 서버·옛 캐시에는 없다 — 그때는 모두 한국어 일과였으므로 `ko`.
+    @Default('ko') String language,
   }) = _Routine;
 
   const Routine._();
@@ -180,6 +187,8 @@ abstract class Routine with _$Routine {
     // 오프라인으로 목록을 열어도 남의 일과 버튼이 도로 생기지 않게 남긴다 (#362).
     if (createdByMe != null) 'createdByMe': createdByMe,
     if (creatorName != null) 'creatorName': creatorName,
+    // 오프라인으로 이룸이 화면을 열어도 카드 글·음성이 일과 언어를 따르게 남긴다
+    'language': language,
   };
 
   factory Routine.fromJson(Map<String, dynamic> json) {
@@ -212,6 +221,7 @@ abstract class Routine with _$Routine {
           ? json['createdByMe'] as bool
           : null,
       creatorName: json['creatorName']?.toString(),
+      language: normalizeContentLanguage(json['language']),
     );
   }
 

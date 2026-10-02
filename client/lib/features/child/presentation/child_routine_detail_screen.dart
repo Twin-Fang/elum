@@ -122,7 +122,10 @@ class _ChildRoutineDetailScreenState
 
     // 제목만 읽으면 무엇을 해야 하는지가 빠지고, 설명만 읽으면 화면의
     // 큰 제목과 어긋난다. 둘을 이어 붙인다.
-    final ok = await speech.speak('${card.displayTitle}. ${card.description}');
+    final ok = await speech.speak(
+      '${card.displayTitle}. ${card.description}',
+      language: _routine.language,
+    );
 
     if (!mounted) return;
     setState(() => _speakingId = null);
@@ -345,6 +348,7 @@ class _ChildRoutineDetailScreenState
                   controller: _controller,
                   cards: cards,
                   routineId: routine.id,
+                  language: routine.language,
                   currentIndex: cards.isEmpty
                       ? 0
                       : _currentIndex.clamp(0, cards.length - 1),

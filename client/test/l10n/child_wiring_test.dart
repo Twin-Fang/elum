@@ -268,7 +268,7 @@ void main() {
 /// 소리를 못 내는 읽기 엔진.
 class _FailingSpeech implements SpeechService {
   @override
-  Future<bool> speak(String text) async => false;
+  Future<bool> speak(String text, {String language = 'ko'}) async => false;
 
   @override
   Future<void> stop() async {}

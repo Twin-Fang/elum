@@ -26,6 +26,7 @@ class StepCardViewer extends ConsumerStatefulWidget {
     required this.cards,
     required this.initialIndex,
     this.routineId = '',
+    this.language = 'ko',
   });
 
   final List<ActionCard> cards;
@@ -36,12 +37,16 @@ class StepCardViewer extends ConsumerStatefulWidget {
   /// 카드 그림을 받아오는 데 쓴다. 비면 대체 일러스트를 그린다.
   final String routineId;
 
+  /// 카드 글·음성의 언어(일과 언어).
+  final String language;
+
   /// 카드를 크게 연다. 카드가 없으면 아무것도 열지 않는다.
   static Future<void> show(
     BuildContext context, {
     required List<ActionCard> cards,
     required int initialIndex,
     String routineId = '',
+    String language = 'ko',
   }) {
     if (cards.isEmpty) return Future.value();
     return showGeneralDialog<void>(
@@ -56,6 +61,7 @@ class StepCardViewer extends ConsumerStatefulWidget {
         cards: cards,
         initialIndex: initialIndex.clamp(0, cards.length - 1),
         routineId: routineId,
+        language: language,
       ),
       transitionBuilder: (context, animation, _, child) =>
           FadeTransition(opacity: animation, child: child),
@@ -106,7 +112,10 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
     }
 
     setState(() => _speakingId = card.id);
-    final ok = await speech.speak('${card.displayTitle}. ${card.description}');
+    final ok = await speech.speak(
+      '${card.displayTitle}. ${card.description}',
+      language: widget.language,
+    );
     if (!mounted) return;
     setState(() => _speakingId = null);
 
@@ -147,6 +156,7 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
                   card: cards[index],
                   index: index,
                   routineId: widget.routineId,
+                  language: widget.language,
                   onSpeak: () => _speak(cards[index]),
                   isSpeaking: _speakingId == cards[index].id,
                 ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
@@ -29,6 +30,7 @@ class ActionCardView extends StatefulWidget {
     required this.card,
     required this.index,
     this.routineId = '',
+    this.language = 'ko',
     this.onDelete,
     this.onSpeak,
     this.isSpeaking = false,
@@ -46,6 +48,9 @@ class ActionCardView extends StatefulWidget {
 
   /// 이미지를 받아오는 데 쓴다. 비면 대체 일러스트를 그린다.
   final String routineId;
+
+  /// 카드 글의 언어 — 일과의 언어(`Routine.language`)다. 화면 언어와 다를 수 있다.
+  final String language;
 
   /// 색을 정하는 순서. `stepOrder`가 아니라 목록 인덱스다 —
   /// 서버가 순서를 1부터 주지 않을 수도 있다.
@@ -166,7 +171,9 @@ class _ActionCardViewState extends State<ActionCardView> {
     // 순서를 바꾸면 카드가 새 자리 색을 입는다. 그대로 두면 카드 한 장이 통째로 한
     // 프레임에 바뀌어 어지럽다 — 배경과 테두리·배지를 [AppMotion.normal] 동안 섞는다.
     // 처음 그릴 때는 목적 색에서 시작하므로 등장 시에는 움직이지 않는다 (#451).
-    return Consumer(
+    return ContentLocale(
+      language: widget.language,
+      child: Consumer(
       // 그림이 없다는 사실을 그림 자리와 제목 줄이 **같이** 알아야 한다 (#458).
       builder: (context, ref, _) {
         final imageState = watchCardImageState(
@@ -202,6 +209,7 @@ class _ActionCardViewState extends State<ActionCardView> {
           ),
         );
       },
+      ),
     );
   }
 

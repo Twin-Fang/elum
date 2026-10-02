@@ -1300,7 +1300,7 @@ class _Speech implements SpeechService {
   final bool ok;
 
   @override
-  Future<bool> speak(String text) async => ok;
+  Future<bool> speak(String text, {String language = 'ko'}) async => ok;
 
   @override
   Future<void> stop() async {}

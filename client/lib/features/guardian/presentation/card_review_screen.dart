@@ -145,7 +145,10 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
     // 제목만 읽으면 무엇을 해야 하는지가 빠지고, 설명만 읽으면 화면의
     // 큰 제목과 어긋난다. 둘을 이어 붙인다.
-    final ok = await speech.speak('${card.displayTitle}. ${card.description}');
+    final ok = await speech.speak(
+      '${card.displayTitle}. ${card.description}',
+      language: ref.read(routineFlowProvider).routine?.language ?? 'ko',
+    );
 
     if (!mounted) return;
     setState(() => _speakingId = null);
@@ -367,6 +370,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
                 ? CardReviewReorderList(
                     cards: cards,
                     routineId: routineId,
+                    language: routine?.language ?? 'ko',
                     cardWidth: CardReviewScreen._cardWidth,
                     cardGap: CardReviewScreen._cardGap,
                     onReorder: notifier.moveStep,
@@ -388,6 +392,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
                         card: cards[index],
                         index: index,
                         routineId: routineId,
+                        language: routine?.language ?? 'ko',
                         onSpeak: () => _speak(cards[index]),
                         isSpeaking: _speakingId == cards[index].id,
                         // 마지막 한 장은 지울 수 없다 — 버튼 자체를 숨긴다

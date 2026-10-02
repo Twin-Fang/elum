@@ -51,6 +51,7 @@ class CardReviewReorderList extends StatefulWidget {
     super.key,
     required this.cards,
     required this.routineId,
+    this.language = 'ko',
     required this.cardWidth,
     required this.cardGap,
     required this.onReorder,
@@ -60,6 +61,9 @@ class CardReviewReorderList extends StatefulWidget {
 
   final List<ActionCard> cards;
   final String routineId;
+
+  /// 카드 글의 언어(일과 언어).
+  final String language;
 
   /// 카드 폭과 카드 사이 (기본 화면과 같은 값 — 모드를 바꿔도 카드가 움직이지 않는다)
   final double cardWidth;
@@ -543,6 +547,7 @@ class _CardReviewReorderListState extends State<CardReviewReorderList>
         // 색·번호는 안착한 뒤에 새 자리로 바뀐다
         index: _shown[card.id] ?? index,
         routineId: widget.routineId,
+        language: widget.language,
         // 모드 안에서는 소리를 읽지 않는다 — 카드가 움직이는 중이다
         onSpeak: () {},
         isSpeaking: false,
@@ -585,6 +590,7 @@ class _CardReviewReorderListState extends State<CardReviewReorderList>
                 card: card,
                 index: _shown[card.id] ?? index,
                 routineId: widget.routineId,
+        language: widget.language,
                 onSpeak: () {},
                 isSpeaking: false,
                 onDelete: null,

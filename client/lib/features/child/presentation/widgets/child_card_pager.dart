@@ -24,6 +24,7 @@ class ChildCardPager extends StatelessWidget {
     required this.controller,
     required this.cards,
     required this.routineId,
+    this.language = 'ko',
     required this.currentIndex,
     required this.speakingId,
     required this.onSpeak,
@@ -64,6 +65,9 @@ class ChildCardPager extends StatelessWidget {
   final PageController controller;
   final List<ActionCard> cards;
   final String routineId;
+
+  /// 카드 글의 언어(일과 언어). 이 휴대폰의 화면 언어와 다를 수 있다.
+  final String language;
 
   /// 지금 가운데 있는 카드. 체크 버튼 대상이자 화면 낭독기가 읽는 카드다.
   final int currentIndex;
@@ -197,6 +201,7 @@ class ChildCardPager extends StatelessWidget {
                 card: card,
                 index: index,
                 routineId: routineId,
+                language: language,
                 onSpeak: () => onSpeak(card),
                 isSpeaking: speakingId == card.id,
                 layout: ActionCardLayout.childDetail,

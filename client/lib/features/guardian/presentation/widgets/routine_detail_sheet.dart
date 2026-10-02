@@ -251,6 +251,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                         cards: _steps,
                                         initialIndex: index,
                                         routineId: widget.routine.id,
+                                        language: widget.routine.language,
                                       ),
                                     ),
                                   ),
