@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core/ads/ad_consent.dart';
 import 'core/app_status/app_status_gate.dart';
 import 'core/app_status/app_status_repository.dart';
 import 'core/config/client_tuning.dart';
@@ -54,6 +55,18 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         _router.routerDelegate.currentConfiguration.lastOrNull?.matchedLocation,
     open: () => _router.push(Routes.inviteEnter),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    // 추적 허용(ATT)은 광고 요청이 아니라 앱을 열자마자 묻는다. 광고가 안 뜨는 경로로 쓰는
+    // 사람도 팝업을 보게 하려는 것이다(#519 심사 2.1). 첫 프레임을 그린 뒤 불러야 팝업이 뜬다.
+    // 이룸이 전용 휴대폰은 광고를 보여 주지 않으므로 묻지 않는다.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || ref.read(localStorageProvider).isElumiDevice) return;
+      AdConsent.requestOnLaunch();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
