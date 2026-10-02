@@ -19,6 +19,10 @@
           <span th:if="${routine.status().name() == 'CONFIRMED'}" class="badge badge-info">확정</span>
           <span th:if="${routine.status().name() == 'COMPLETED'}" class="badge badge-success">완료</span>
         </div>
+        <div class="flex items-center gap-2">
+          <span class="text-base-content/60">콘텐츠 언어</span>
+          <span class="badge badge-outline" th:text="${routine.language()}">ko</span>
+        </div>
         <div>
           <div class="text-base-content/60">원본 입력</div>
           <p th:text="${routine.rawInputText()}" class="whitespace-pre-wrap">원본 입력</p>
