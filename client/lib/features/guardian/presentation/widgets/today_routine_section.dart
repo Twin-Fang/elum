@@ -58,12 +58,19 @@ final homeRoutinesProvider = Provider<List<Routine>>((ref) {
 
 /// 일과의 진행률(0.0~1.0).
 ///
-/// 기기 기록이 있으면 그것이 기준이다 — 서버 반영이 늦어도(오프라인 포함)
-/// 방금 체크한 카드가 진행률에 바로 보여야 하고, 로컬에서 푼 카드는 빠져야 한다.
+/// 서버에 아직 못 보낸 체크가 있는 동안(오프라인 포함)에만 기기 기록이 기준이다 —
+/// 방금 체크한 카드가 바로 보여야 하고, 로컬에서 푼 카드는 빠져야 한다.
+/// 다 보낸 뒤에는 서버 값이 기준이다. 기록이 남아 있다는 이유로 계속 따르면
+/// 다른 휴대폰이 끝낸 카드가 이 휴대폰에는 반영되지 않는다.
 double routineProgress(Routine routine, ChildRoutineState progress) {
   if (routine.steps.isEmpty) return 0;
+  // 서버에 올리지 않는 로컬 일과는 보낼 곳이 없으므로 항상 기기 기록이 기준이다
+  final isLocalOnly = routine.id.isEmpty || routine.id == 'local';
+  final useLocal = isLocalOnly || progress.pending.contains(routine.id);
   final done = routine.steps
-      .where((s) => progress.isChecked(routine.id, s))
+      .where(
+        (s) => useLocal ? progress.isChecked(routine.id, s) : s.completed,
+      )
       .length;
   return done / routine.steps.length;
 }
