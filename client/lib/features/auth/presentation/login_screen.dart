@@ -119,7 +119,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         context.go(Routes.consent);
       case AuthOutcome.onboarding:
         _forgetPreviousChild();
-        context.go(Routes.onboardingName);
+        // 약관은 마쳤지만 이룸이 정보가 없는 계정이다. 보호자로 가다 멈춘 사람만이 아니라 **이룸이를 골랐던
+        // 사람**(연결한 뒤 로그아웃)도 여기 온다. 이름 입력으로 곧장 보내면 이룸이를 다시 고를 길이 없다.
+        // 약관 다음과 같은 자리(역할 선택)에서 다시 묻는다 (#542).
+        context.go(Routes.roleSelect);
       case AuthOutcome.home:
         // 이미 아이 정보를 채운 계정이다. 온보딩을 건너뛰고 홈으로 보낸다.
         final nickname = ref.read(localStorageProvider).nickname ?? '';

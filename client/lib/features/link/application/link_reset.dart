@@ -41,6 +41,7 @@ Future<void> endElumiLinkAfterSessionLoss({
   required ProviderContainer container,
 }) async {
   await repo.releaseThisPhone(lost: true);
-  goToLinkEnter(router);
+  // 토큰을 방금 지웠다 — 뒤로가기는 로그인 화면으로 간다 (#542)
+  goToLinkEnter(router, hasSession: false);
   container.forgetLinkedProfile();
 }

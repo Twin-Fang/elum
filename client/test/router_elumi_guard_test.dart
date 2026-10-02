@@ -111,7 +111,24 @@ void main() {
     });
   });
 
-  test('연결 암호 넣기 화면으로 가는 길은 뒤로 갈 수 있게 역할 선택을 깐다 (#212)', () {
-    expect(linkEnterStack, [Routes.roleSelect, Routes.linkEnter]);
+  group('연결 암호 넣기 아래에 깔 화면 (#212 · #542)', () {
+    test('세션이 있으면 역할 선택 — 잘못 고른 사람이 돌아간다', () {
+      expect(linkEnterBackTarget(hasSession: true), Routes.roleSelect);
+    });
+
+    test('세션이 없으면 로그인 — 역할 선택은 가드가 연결 화면으로 바꿔 갇힌다', () {
+      expect(linkEnterBackTarget(hasSession: false), Routes.login);
+      // 깔 화면이 가드에 걸려 다른 곳으로 바뀌면 안 된다
+      expect(
+        resolveRedirect(
+          linkEnterBackTarget(hasSession: false),
+          hasSession: false,
+          onboardingCompleted: true,
+          skipOnboarding: false,
+          isElumiDevice: true,
+        ),
+        isNull,
+      );
+    });
   });
 }

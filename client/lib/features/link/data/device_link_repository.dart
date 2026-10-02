@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +9,7 @@ import '../../../core/network/dio_client.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
+import '../../guardian/data/card_image_disk_cache.dart';
 import '../../onboarding/domain/image_style.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
@@ -82,11 +85,16 @@ class DeviceLinkRepository {
     required Dio dio,
     required TokenStore tokens,
     required LocalStorage storage,
+    CardImageDiskCache? imageCache,
   })  : _dio = dio,
         _tokens = tokens,
-        _storage = storage;
+        _storage = storage,
+        _imageCache = imageCache;
 
   final Dio _dio;
+
+  /// 받아 둔 카드 그림. 스스로 로그아웃할 때 함께 비운다 — 보호자 로그아웃과 같다.
+  final CardImageDiskCache? _imageCache;
   final TokenStore _tokens;
   final LocalStorage _storage;
 
@@ -164,6 +172,10 @@ class DeviceLinkRepository {
   /// 이미 끊겨 있으면(404 `DEVICE_LINK_NOT_CONNECTED`·401) 원하는 결과가 이미 됐으므로 정리하고 끝낸다.
   /// 401 은 토큰 갱신까지 실패했다는 뜻이라 서버가 이 연결을 더는 인정하지 않는 것이다.
   ///
+  /// **로컬은 보호자 로그아웃처럼 전부 비운다** — `이룸이 휴대폰` 표식과 역할까지 (#542). 스스로 나간
+  /// 사람은 로그인 화면으로 간다. 표식을 남기면 연결 화면에 갇히고, 역할(`이룸이`)을 남기면 다시
+  /// 로그인해도 연결 화면으로 끌려간다. 밖에서 끊긴 경우([releaseThisPhone])와 다르다.
+  ///
   /// null 이면 끊겼고 로컬도 정리했다.
   Future<AppFailure?> disconnectThisPhone() async {
     try {
@@ -177,15 +189,22 @@ class DeviceLinkRepository {
         return failure;
       }
     }
-    await releaseThisPhone(lost: false);
+    await _tokens.clear();
+    await _storage.clearAll();
+    // 파일 삭제는 기다리지 않는다 — 화면 이동이 디스크에 묶이면 안 된다. 세대 표식은 부르는 즉시 올라가
+    // 진행 중인 다운로드가 뒤늦게 저장하지 못한다 (세션 만료 때 dio_client 와 같다).
+    if (_imageCache != null) unawaited(_imageCache.clear());
     return null;
   }
 
   /// 연결이 끊긴 이룸이 휴대폰의 로컬을 비운다 (#363).
   ///
   /// 지우는 것 — 토큰, 이룸이 정보(이름·캐릭터·그림 방식), 일과 캐시, 체크 기록. **남기는 것 — `이룸이 휴대폰`
-  /// 표식**이다. 지우면 이 휴대폰이 로그인 화면으로 가 누를 것이 하나도 없는 길이 된다(#206). 보호자가 이 휴대폰을
-  /// 보호자 휴대폰으로 쓰려면 로그인하면 되고, 그때 표식이 내려간다([AuthRepository]).
+  /// 표식**이다. 이 휴대폰은 스스로 나간 것이 아니라 밖에서 끊겼으므로, 다시 켜도 연결 화면에서 `연결이
+  /// 끊어졌어요`를 말하고 같은 이룸이에게 다시 붙을 수 있어야 한다(#206). 연결 화면의 뒤로가기는 로그인으로
+  /// 간다(#542). 로그인하면 표식이 내려간다([AuthRepository]).
+  ///
+  /// 스스로 로그아웃·탈퇴한 경우는 여기가 아니다 — [disconnectThisPhone] 이 표식까지 전부 지운다.
   ///
   /// [lost] 가 true 면 `연결이 끊어졌어요`를 다음 연결 화면에서 말한다. 스스로 끊은 것은 false 다.
   Future<void> releaseThisPhone({required bool lost}) async {
@@ -285,6 +304,7 @@ final deviceLinkRepositoryProvider = Provider<DeviceLinkRepository>((ref) {
     dio: ref.watch(dioProvider),
     tokens: ref.watch(tokenStoreProvider),
     storage: ref.watch(localStorageProvider),
+    imageCache: ref.watch(cardImageDiskCacheProvider),
   );
 });
 
