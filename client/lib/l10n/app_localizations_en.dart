@@ -887,4 +887,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noticeCloseBarrier => '공지 닫기';
+
+  @override
+  String get cardPhotoTooLarge => '사진이 너무 커요. 다른 사진을 골라 주세요';
+
+  @override
+  String get cardPhotoWrongType => 'JPG나 PNG 사진만 올릴 수 있어요';
+
+  @override
+  String get cardPhotoUnreadable => '사진을 읽지 못했어요. 다른 사진을 골라 주세요';
+
+  @override
+  String get cardPhotoPickFailed => '사진을 가져오지 못했어요. 다시 해주세요';
+
+  @override
+  String get routineLoadingPrepareTitle => '루미가 내용을\n정리하고 있어요';
+
+  @override
+  String get routineLoadingGenerateTitle => '루미가 행동카드를\n만들고 있어요';
+
+  @override
+  String get routineStageReviewSituation => '적어 주신 상황을 살펴보고 있어요';
+
+  @override
+  String get routineStageTidyEssentials => '꼭 필요한 내용만 정리해요';
+
+  @override
+  String get routineStageThinkQuestions => '추가 질문을 생각하고 있어요';
+
+  @override
+  String get routineStageReadRoutine => '오늘의 일과를 읽고 있어요';
+
+  @override
+  String get routineStageFindItems => '중요한 준비물을 찾고 있어요';
+
+  @override
+  String get routineStageOrderSteps => '순서를 정리하고 있어요';
+
+  @override
+  String get suggestionRainyText => '비 오는 날 등교';
+
+  @override
+  String get suggestionRainyPrompt => '비 오는 날 우산 챙겨서 학교 가는 준비를 하고 싶어요';
+
+  @override
+  String get suggestionHospitalText => '병원 방문 준비';
+
+  @override
+  String get suggestionHospitalPrompt => '이룸이와 함께 병원에 가야 하는데 무서워하지 않게 준비하고 싶어요';
+
+  @override
+  String get suggestionTripText => '체험학습 준비';
+
+  @override
+  String get suggestionTripPrompt => '체험학습 가는 날 아침에 챙길 것들을 순서대로 알려주고 싶어요';
+
+  @override
+  String get suggestionNewPlaceText => '새로운 장소 방문';
+
+  @override
+  String get suggestionNewPlacePrompt =>
+      '처음 가보는 장소에 가기 전에 이룸이가 마음의 준비를 하게 돕고 싶어요';
+
+  @override
+  String get suggestionAfterSchoolText => '여름방학 방과후 수업 준비';
+
+  @override
+  String get suggestionAfterSchoolPrompt => '방학 중 방과후 수업에 갈 준비를 순서대로 알려주고 싶어요';
 }

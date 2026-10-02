@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/current_l10n.dart';
+
 /// 추천 일과 — 서버 `GET /api/routines/suggestions` 응답.
 ///
 /// 출처: server/.../routine/application/dto/response/RoutineSuggestionResponse.java
@@ -63,33 +65,34 @@ class RoutineSuggestion {
   /// (docs 원칙 6번). 문구는 Figma `보호자_홈`(217:2655) 원본이다.
   // 서버가 naturalLanguageExample을 내려주므로(#39 반영됨) 아래 문장들은
   // 서버가 죽었을 때만 쓰인다.
-  static const fallback = [
+  /// 앱 언어의 문구로 **부를 때마다** 만든다.
+  static List<RoutineSuggestion> get fallback => [
     RoutineSuggestion(
       icon: '☔️',
-      text: '비 오는 날 등교',
-      prompt: '비 오는 날 우산 챙겨서 학교 가는 준비를 하고 싶어요',
+      text: appL10n.suggestionRainyText,
+      prompt: appL10n.suggestionRainyPrompt,
     ),
     RoutineSuggestion(
       icon: '🏥',
-      text: '병원 방문 준비',
-      prompt: '이룸이와 함께 병원에 가야 하는데 무서워하지 않게 준비하고 싶어요',
+      text: appL10n.suggestionHospitalText,
+      prompt: appL10n.suggestionHospitalPrompt,
     ),
     RoutineSuggestion(
       icon: '🌱',
-      text: '체험학습 준비',
-      prompt: '체험학습 가는 날 아침에 챙길 것들을 순서대로 알려주고 싶어요',
+      text: appL10n.suggestionTripText,
+      prompt: appL10n.suggestionTripPrompt,
     ),
     RoutineSuggestion(
       icon: '🚗',
-      text: '새로운 장소 방문',
-      prompt: '처음 가보는 장소에 가기 전에 이룸이가 마음의 준비를 하게 돕고 싶어요',
+      text: appL10n.suggestionNewPlaceText,
+      prompt: appL10n.suggestionNewPlacePrompt,
     ),
     // 다섯 번째 — 시안(`238:1643`)이 그린 마지막 칩이다. 넷만 두면 칩이 두 줄에
     // 그쳐 시안(세 줄)과 화면이 어긋난다 (#297).
     RoutineSuggestion(
       icon: '🎒',
-      text: '여름방학 방과후 수업 준비',
-      prompt: '방학 중 방과후 수업에 갈 준비를 순서대로 알려주고 싶어요',
+      text: appL10n.suggestionAfterSchoolText,
+      prompt: appL10n.suggestionAfterSchoolPrompt,
     ),
   ];
 

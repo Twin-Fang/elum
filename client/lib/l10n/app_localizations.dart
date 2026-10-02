@@ -1657,6 +1657,138 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'공지 닫기'**
   String get noticeCloseBarrier;
+
+  /// 카드 사진 업로드 실패 — 크기
+  ///
+  /// In ko, this message translates to:
+  /// **'사진이 너무 커요. 다른 사진을 골라 주세요'**
+  String get cardPhotoTooLarge;
+
+  /// 카드 사진 업로드 실패 — 형식
+  ///
+  /// In ko, this message translates to:
+  /// **'JPG나 PNG 사진만 올릴 수 있어요'**
+  String get cardPhotoWrongType;
+
+  /// 카드 사진 업로드 실패 — 읽기
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 읽지 못했어요. 다른 사진을 골라 주세요'**
+  String get cardPhotoUnreadable;
+
+  /// 카드 사진 고르기 실패
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 가져오지 못했어요. 다시 해주세요'**
+  String get cardPhotoPickFailed;
+
+  /// 추가 질문 준비 로딩의 제목(줄바꿈 위치는 시안대로)
+  ///
+  /// In ko, this message translates to:
+  /// **'루미가 내용을\n정리하고 있어요'**
+  String get routineLoadingPrepareTitle;
+
+  /// 행동카드 생성 로딩의 제목(줄바꿈 위치는 시안대로)
+  ///
+  /// In ko, this message translates to:
+  /// **'루미가 행동카드를\n만들고 있어요'**
+  String get routineLoadingGenerateTitle;
+
+  /// 준비 로딩 체크리스트 1
+  ///
+  /// In ko, this message translates to:
+  /// **'적어 주신 상황을 살펴보고 있어요'**
+  String get routineStageReviewSituation;
+
+  /// 준비 로딩 체크리스트 2
+  ///
+  /// In ko, this message translates to:
+  /// **'꼭 필요한 내용만 정리해요'**
+  String get routineStageTidyEssentials;
+
+  /// 준비 로딩 체크리스트 3
+  ///
+  /// In ko, this message translates to:
+  /// **'추가 질문을 생각하고 있어요'**
+  String get routineStageThinkQuestions;
+
+  /// 생성 로딩 체크리스트 1
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘의 일과를 읽고 있어요'**
+  String get routineStageReadRoutine;
+
+  /// 생성 로딩 체크리스트 2
+  ///
+  /// In ko, this message translates to:
+  /// **'중요한 준비물을 찾고 있어요'**
+  String get routineStageFindItems;
+
+  /// 생성 로딩 체크리스트 3
+  ///
+  /// In ko, this message translates to:
+  /// **'순서를 정리하고 있어요'**
+  String get routineStageOrderSteps;
+
+  /// 서버가 죽었을 때의 추천 칩 1 글
+  ///
+  /// In ko, this message translates to:
+  /// **'비 오는 날 등교'**
+  String get suggestionRainyText;
+
+  /// 추천 칩 1 이 입력창에 채우는 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'비 오는 날 우산 챙겨서 학교 가는 준비를 하고 싶어요'**
+  String get suggestionRainyPrompt;
+
+  /// 추천 칩 2 글
+  ///
+  /// In ko, this message translates to:
+  /// **'병원 방문 준비'**
+  String get suggestionHospitalText;
+
+  /// 추천 칩 2 가 입력창에 채우는 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이와 함께 병원에 가야 하는데 무서워하지 않게 준비하고 싶어요'**
+  String get suggestionHospitalPrompt;
+
+  /// 추천 칩 3 글
+  ///
+  /// In ko, this message translates to:
+  /// **'체험학습 준비'**
+  String get suggestionTripText;
+
+  /// 추천 칩 3 이 입력창에 채우는 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'체험학습 가는 날 아침에 챙길 것들을 순서대로 알려주고 싶어요'**
+  String get suggestionTripPrompt;
+
+  /// 추천 칩 4 글
+  ///
+  /// In ko, this message translates to:
+  /// **'새로운 장소 방문'**
+  String get suggestionNewPlaceText;
+
+  /// 추천 칩 4 가 입력창에 채우는 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'처음 가보는 장소에 가기 전에 이룸이가 마음의 준비를 하게 돕고 싶어요'**
+  String get suggestionNewPlacePrompt;
+
+  /// 추천 칩 5 글
+  ///
+  /// In ko, this message translates to:
+  /// **'여름방학 방과후 수업 준비'**
+  String get suggestionAfterSchoolText;
+
+  /// 추천 칩 5 가 입력창에 채우는 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'방학 중 방과후 수업에 갈 준비를 순서대로 알려주고 싶어요'**
+  String get suggestionAfterSchoolPrompt;
 }
 
 class _AppLocalizationsDelegate

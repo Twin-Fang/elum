@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../../../core/l10n/current_l10n.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../shared/models/action_card.dart';
 
@@ -71,36 +72,44 @@ enum PhotoFailureKind {
 class PhotoFailure {
   const PhotoFailure({
     required this.code,
-    required this.message,
+    required String Function() messageOf,
     required this.kind,
-  });
+  }) : _messageOf = messageOf;
 
   final String code;
-  final String message;
   final PhotoFailureKind kind;
+  final String Function() _messageOf;
+
+  /// 사용자에게 보일 문구 — 앱 언어로 **읽을 때** 푼다(const 인스턴스가 언어에 묶이지 않게).
+  String get message => _messageOf();
+
+  static String _tooLarge() => appL10n.cardPhotoTooLarge;
+  static String _wrongType() => appL10n.cardPhotoWrongType;
+  static String _unreadable() => appL10n.cardPhotoUnreadable;
+  static String _pickFailed() => appL10n.cardPhotoPickFailed;
 
   static const size = PhotoFailure(
     code: 'E-PHOTO-SIZE',
-    message: '사진이 너무 커요. 다른 사진을 골라 주세요',
+    messageOf: _tooLarge,
     kind: PhotoFailureKind.pickAnother,
   );
 
   static const type = PhotoFailure(
     code: 'E-PHOTO-TYPE',
-    message: 'JPG나 PNG 사진만 올릴 수 있어요',
+    messageOf: _wrongType,
     kind: PhotoFailureKind.pickAnother,
   );
 
   static const unreadable = PhotoFailure(
     code: 'E-PHOTO-READ',
-    message: '사진을 읽지 못했어요. 다른 사진을 골라 주세요',
+    messageOf: _unreadable,
     kind: PhotoFailureKind.pickAnother,
   );
 
   /// 사진 앱을 여는 것부터 실패했다 — 권한 거부·취소가 아닌 그 밖의 경우.
   static const pick = PhotoFailure(
     code: 'E-PHOTO-PICK',
-    message: '사진을 가져오지 못했어요. 다시 해주세요',
+    messageOf: _pickFailed,
     kind: PhotoFailureKind.pickAnother,
   );
 
@@ -117,7 +126,8 @@ class PhotoFailure {
     };
     return PhotoFailure(
       code: f.badgeOr('E-PHOTO'),
-      message: f.serverMessage ?? f.hint ?? '잠시 후 다시 해주세요',
+      // 서버 문구는 그대로, 앱이 만든 문구(hint·기본)는 읽을 때 앱 언어로 푼다.
+      messageOf: () => f.serverMessage ?? f.hint ?? appL10n.commonRetryLater,
       kind: kind,
     );
   }

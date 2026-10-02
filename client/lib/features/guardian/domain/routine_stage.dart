@@ -1,3 +1,5 @@
+import '../../../core/l10n/current_l10n.dart';
+
 /// 로딩 화면 종류.
 ///
 /// Figma에 `보호자_새로운 일과 만들기_로딩` 프레임이 **둘** 있다. 이름이 같아
@@ -22,40 +24,47 @@ enum RoutineLoadingKind {
   /// 바꿨고 디자이너에게 시안 반영을 요청했다(#383). 뒤 화면 첫 줄 `…읽고 있어요` 와 동사가
   /// 겹치지 않게 `살펴보고` 로 골랐다.
   prepare(
-    title: '루미가 내용을\n정리하고 있어요',
     lumiSide: LumiSide.left,
     stages: [
-      RoutineStage(label: '적어 주신 상황을 살펴보고 있어요', percent: 15, hold: _holdLong),
-      RoutineStage(label: '꼭 필요한 내용만 정리해요', percent: 40, hold: _holdShort),
-      RoutineStage(label: '추가 질문을 생각하고 있어요', percent: 65, hold: _holdLong),
+      RoutineStage(text: RoutineStageText.reviewSituation, percent: 15, hold: _holdLong),
+      RoutineStage(text: RoutineStageText.tidyEssentials, percent: 40, hold: _holdShort),
+      RoutineStage(text: RoutineStageText.thinkQuestions, percent: 65, hold: _holdLong),
     ],
   ),
 
   /// 262:4703 — 행동카드 생성
   generate(
-    title: '루미가 행동카드를\n만들고 있어요',
     lumiSide: LumiSide.right,
     stages: [
-      RoutineStage(label: '오늘의 일과를 읽고 있어요', percent: 70, hold: _holdLong),
-      RoutineStage(label: '중요한 준비물을 찾고 있어요', percent: 80, hold: _holdShort),
-      RoutineStage(label: '순서를 정리하고 있어요', percent: 90, hold: _holdLong),
+      RoutineStage(text: RoutineStageText.readRoutine, percent: 70, hold: _holdLong),
+      RoutineStage(text: RoutineStageText.findItems, percent: 80, hold: _holdShort),
+      RoutineStage(text: RoutineStageText.orderSteps, percent: 90, hold: _holdLong),
     ],
   );
 
-  const RoutineLoadingKind({
-    required this.title,
-    required this.stages,
-    required this.lumiSide,
-  });
-
-  /// 화면 제목 (Figma 원문 — 줄바꿈 위치까지 그대로)
-  final String title;
+  const RoutineLoadingKind({required this.stages, required this.lumiSide});
 
   /// 체크리스트 3줄
   final List<RoutineStage> stages;
 
   /// 루미가 나오는 방향 (Figma `Group 26` x좌표)
   final LumiSide lumiSide;
+
+  /// 화면 제목 (Figma 원문 — 줄바꿈 위치까지 그대로) — 앱 언어의 문구다.
+  String get title => switch (this) {
+    RoutineLoadingKind.prepare => appL10n.routineLoadingPrepareTitle,
+    RoutineLoadingKind.generate => appL10n.routineLoadingGenerateTitle,
+  };
+}
+
+/// 체크리스트 문구의 열쇠 — 문구는 ARB 에 있고 여기서는 어느 문구인지만 안다.
+enum RoutineStageText {
+  reviewSituation,
+  tidyEssentials,
+  thinkQuestions,
+  readRoutine,
+  findItems,
+  orderSteps,
 }
 
 /// 루미가 어느 쪽에서 나오는가.
@@ -92,13 +101,22 @@ const _holdShort = Duration(milliseconds: 1500);
 
 class RoutineStage {
   const RoutineStage({
-    required this.label,
+    required this.text,
     required this.percent,
     required this.hold,
   });
 
-  /// 화면에 보이는 문구 (Figma 원문)
-  final String label;
+  final RoutineStageText text;
+
+  /// 화면에 보이는 문구 (Figma 원문) — 앱 언어의 문구다.
+  String get label => switch (text) {
+    RoutineStageText.reviewSituation => appL10n.routineStageReviewSituation,
+    RoutineStageText.tidyEssentials => appL10n.routineStageTidyEssentials,
+    RoutineStageText.thinkQuestions => appL10n.routineStageThinkQuestions,
+    RoutineStageText.readRoutine => appL10n.routineStageReadRoutine,
+    RoutineStageText.findItems => appL10n.routineStageFindItems,
+    RoutineStageText.orderSteps => appL10n.routineStageOrderSteps,
+  };
 
   /// 이 단계에 도달했을 때 보여줄 진행률.
   ///

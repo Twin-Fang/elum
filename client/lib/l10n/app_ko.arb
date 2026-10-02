@@ -826,5 +826,70 @@
   "@noticeLinkOpenFailed": {"description": "공지의 링크 버튼이 외부 브라우저를 못 열었을 때. 괄호 안은 추적용 에러 코드(번역하지 않는다)", "placeholders": {"code": {"type": "String"}}},
 
   "noticeCloseBarrier": "공지 닫기",
-  "@noticeCloseBarrier": {"description": "공지 팝업 바깥 배경 막을 낭독기가 읽는 이름"}
+  "@noticeCloseBarrier": {"description": "공지 팝업 바깥 배경 막을 낭독기가 읽는 이름"},
+  "cardPhotoTooLarge": "사진이 너무 커요. 다른 사진을 골라 주세요",
+  "@cardPhotoTooLarge": { "description": "카드 사진 업로드 실패 — 크기" },
+
+  "cardPhotoWrongType": "JPG나 PNG 사진만 올릴 수 있어요",
+  "@cardPhotoWrongType": { "description": "카드 사진 업로드 실패 — 형식" },
+
+  "cardPhotoUnreadable": "사진을 읽지 못했어요. 다른 사진을 골라 주세요",
+  "@cardPhotoUnreadable": { "description": "카드 사진 업로드 실패 — 읽기" },
+
+  "cardPhotoPickFailed": "사진을 가져오지 못했어요. 다시 해주세요",
+  "@cardPhotoPickFailed": { "description": "카드 사진 고르기 실패" },
+
+  "routineLoadingPrepareTitle": "루미가 내용을\n정리하고 있어요",
+  "@routineLoadingPrepareTitle": { "description": "추가 질문 준비 로딩의 제목(줄바꿈 위치는 시안대로)" },
+
+  "routineLoadingGenerateTitle": "루미가 행동카드를\n만들고 있어요",
+  "@routineLoadingGenerateTitle": { "description": "행동카드 생성 로딩의 제목(줄바꿈 위치는 시안대로)" },
+
+  "routineStageReviewSituation": "적어 주신 상황을 살펴보고 있어요",
+  "@routineStageReviewSituation": { "description": "준비 로딩 체크리스트 1" },
+
+  "routineStageTidyEssentials": "꼭 필요한 내용만 정리해요",
+  "@routineStageTidyEssentials": { "description": "준비 로딩 체크리스트 2" },
+
+  "routineStageThinkQuestions": "추가 질문을 생각하고 있어요",
+  "@routineStageThinkQuestions": { "description": "준비 로딩 체크리스트 3" },
+
+  "routineStageReadRoutine": "오늘의 일과를 읽고 있어요",
+  "@routineStageReadRoutine": { "description": "생성 로딩 체크리스트 1" },
+
+  "routineStageFindItems": "중요한 준비물을 찾고 있어요",
+  "@routineStageFindItems": { "description": "생성 로딩 체크리스트 2" },
+
+  "routineStageOrderSteps": "순서를 정리하고 있어요",
+  "@routineStageOrderSteps": { "description": "생성 로딩 체크리스트 3" },
+
+  "suggestionRainyText": "비 오는 날 등교",
+  "@suggestionRainyText": { "description": "서버가 죽었을 때의 추천 칩 1 글" },
+
+  "suggestionRainyPrompt": "비 오는 날 우산 챙겨서 학교 가는 준비를 하고 싶어요",
+  "@suggestionRainyPrompt": { "description": "추천 칩 1 이 입력창에 채우는 문장" },
+
+  "suggestionHospitalText": "병원 방문 준비",
+  "@suggestionHospitalText": { "description": "추천 칩 2 글" },
+
+  "suggestionHospitalPrompt": "이룸이와 함께 병원에 가야 하는데 무서워하지 않게 준비하고 싶어요",
+  "@suggestionHospitalPrompt": { "description": "추천 칩 2 가 입력창에 채우는 문장" },
+
+  "suggestionTripText": "체험학습 준비",
+  "@suggestionTripText": { "description": "추천 칩 3 글" },
+
+  "suggestionTripPrompt": "체험학습 가는 날 아침에 챙길 것들을 순서대로 알려주고 싶어요",
+  "@suggestionTripPrompt": { "description": "추천 칩 3 이 입력창에 채우는 문장" },
+
+  "suggestionNewPlaceText": "새로운 장소 방문",
+  "@suggestionNewPlaceText": { "description": "추천 칩 4 글" },
+
+  "suggestionNewPlacePrompt": "처음 가보는 장소에 가기 전에 이룸이가 마음의 준비를 하게 돕고 싶어요",
+  "@suggestionNewPlacePrompt": { "description": "추천 칩 4 가 입력창에 채우는 문장" },
+
+  "suggestionAfterSchoolText": "여름방학 방과후 수업 준비",
+  "@suggestionAfterSchoolText": { "description": "추천 칩 5 글" },
+
+  "suggestionAfterSchoolPrompt": "방학 중 방과후 수업에 갈 준비를 순서대로 알려주고 싶어요",
+  "@suggestionAfterSchoolPrompt": { "description": "추천 칩 5 가 입력창에 채우는 문장" }
 }
