@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | `POST /api/routines` | 일과 생성 (DLP → AI 카드 생성 파이프라인 진입) | 필수 |
 | `PUT /api/routines/{id}` | 보호자가 수정한 카드 반영 | 선택 |
-| `POST /api/routines/{id}/steps/{stepId}/complete` | 아동 수행 완료 상태 저장 | 선택 |
+| `POST /api/routines/{id}/steps/{stepId}/complete` | 이룸이 수행 완료 상태 저장 | 선택 |
 
 - MVP 데모에서는 **수정과 완료 상태를 프론트 로컬 상태로 처리해도 된다.**
 - 추가 질문 → 답변 → 최종 카드 생성의 API 분리 방식(단일 엔드포인트 2단계 호출 vs 별도 엔드포인트)은 미확정.
@@ -27,7 +27,7 @@
 {
   "nickname": "하늘이",
   "supportGoals": ["PREPARE_ITEMS", "PREPARE_NEW_SITUATIONS"],
-  "routineInput": "내일 비가 많이 올 예정이야. 아이가 학교에 갈 수 있게 준비해야 해."
+  "routineInput": "내일 비가 많이 올 예정이야. 이룸이가 학교에 갈 수 있게 준비해야 해."
 }
 ```
 
