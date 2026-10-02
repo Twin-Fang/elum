@@ -11,6 +11,8 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/haptics/child_haptics.dart';
+import '../../../core/widgets/settings_switch_tile.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
@@ -182,6 +184,9 @@ class _GuardianSettingsScreenState
         // **임시 시안**이다 — 시안 줄 순서(연결·임시저장·비밀암호·약관)를 깨지 않게
         // 비밀암호와 약관 사이에 둔다. 오른쪽에 지금 값과 화살표를 함께 보여준다.
         _ImageStyleTile(busy: _busy),
+        // 이룸이가 카드를 체크할 때 진동으로 알려줄지 (#515). 시안에 없는 줄이라 **임시 시안**이다.
+        // 이룸이 휴대폰 설정에도 같은 줄이 있고, 한 휴대폰에 값 하나를 함께 본다.
+        const _HapticTile(),
         SettingsTile(
           label: '약관 및 개인정보처리방침',
           onTap: _busy
@@ -292,6 +297,20 @@ class _ImageStyleTile extends ConsumerWidget {
       valueText: style.label,
       showChevronWithValue: true,
       onTap: busy ? null : () => context.push(Routes.guardianImageStyle),
+    );
+  }
+}
+
+/// 이룸이 카드 진동 켜기/끄기 줄 (#515).
+class _HapticTile extends ConsumerWidget {
+  const _HapticTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SettingsSwitchTile(
+      label: '카드 체크 진동',
+      value: ref.watch(childHapticOnProvider),
+      onChanged: (on) => ref.read(childHapticOnProvider.notifier).set(on),
     );
   }
 }

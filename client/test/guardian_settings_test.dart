@@ -89,6 +89,20 @@ void main() {
 
   setUp(() => auth = _FakeAuth());
 
+  // 이룸이 카드 진동 스위치 (#515) — 이룸이 설정과 같은 값 하나를 본다.
+  testWidgets('카드 체크 진동 줄을 누르면 스위치가 꺼진다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expect(find.text('카드 체크 진동'), findsOneWidget);
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
+
+    await tester.tap(find.text('카드 체크 진동'));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+  });
+
   // 이룸이 휴대폰 줄 (#363 · 명세 §8-4) — 연결 전에는 할 일(`연결하기`), 연결된 뒤에는 상태(`연결됨 ›`).
   group('이룸이 휴대폰 줄', () {
     final connected = Attempt.ok(
@@ -229,6 +243,8 @@ void main() {
       '비밀암호 변경하기',
       // 카드 그림 방식 줄(#458) — 시안 줄 순서를 깨지 않게 비밀암호와 약관 사이에 둔다.
       '그림 방식',
+      // 이룸이 카드 진동 스위치(#515) — 시안에 없는 줄이라 그림 방식 바로 아래 둔다.
+      '카드 체크 진동',
       '약관 및 개인정보처리방침',
       // `앱 정보`(#418)는 약관과 로그아웃 사이에 새로 들어온 줄이다 — 시안에는 아직 없다.
       '앱 정보',
@@ -321,6 +337,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('회원탈퇴'));
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
 
@@ -358,6 +375,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('회원탈퇴'));
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
 
@@ -401,6 +419,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('회원탈퇴'));
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('확인'));
@@ -420,6 +439,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('회원탈퇴'));
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('확인'));
@@ -430,6 +450,7 @@ void main() {
 
     // 실패 후에도 버튼이 잠겨 있으면 그 자리에서 할 수 있는 일이 없어진다.
     auth.deleteSucceeds = true;
+    await tester.ensureVisible(find.text('회원탈퇴'));
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('확인'));
@@ -443,6 +464,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('회원탈퇴'));
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('취소'));

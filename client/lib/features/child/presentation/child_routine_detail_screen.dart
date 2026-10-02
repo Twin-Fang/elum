@@ -18,6 +18,7 @@ import 'widgets/reward_banner.dart';
 import '../../guardian/data/routine_repository.dart';
 import 'widgets/child_card_pager.dart';
 import '../application/child_routine_notifier.dart';
+import '../../../core/haptics/child_haptics.dart';
 import '../data/speech_service.dart';
 import 'child_home_screen.dart' show childRoutinesProvider;
 
@@ -171,6 +172,13 @@ class _ChildRoutineDetailScreenState
       _confetti.play();
     }
 
+    // 손에도 알린다 (#515). 컨페티와 같은 순간에 울리되, 동작 줄이기와는 별개다 — 움직임과 진동은
+    // 다른 감각이다. 끄고 켜는 것은 설정의 스위치가 정한다. 기다리지 않는다.
+    final haptics = ref.read(childHapticsProvider);
+    haptics.play(
+      becameChecked ? ChildHapticKind.check : ChildHapticKind.uncheck,
+    );
+
     if (!shouldReward) return;
 
     // 컨페티가 눈에 보인 뒤 보상이 뜨게 한다. 바로 넘어가면 색종이가 안 보인다.
@@ -183,6 +191,7 @@ class _ChildRoutineDetailScreenState
     // 카드를 하나 끝낼 때마다 별을 보여준다. 보호자가 정한 보상도 함께 뜬다 (이슈 #239).
     // 같은 카드를 다시 체크할 때는 뜨지 않는다 — 위 `shouldReward`가 걸러 준다.
     final routine = widget.routine;
+    haptics.play(ChildHapticKind.star);
     await context.push(
       Routes.childReward,
       extra: routine.hasReward
@@ -194,6 +203,7 @@ class _ChildRoutineDetailScreenState
     // 마지막 카드까지 끝냈으면 일과완료 화면을 이어서 보여 준다 (이슈 #490).
     // 그 화면의 버튼이 홈으로 보내므로 여기서는 카드를 넘기지 않는다.
     if (_isRoutineDone) {
+      haptics.play(ChildHapticKind.complete);
       await context.push(
         Routes.childRoutineDone,
         extra: routine.hasReward

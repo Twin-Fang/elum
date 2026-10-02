@@ -7,6 +7,8 @@ import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_info_tile.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/haptics/child_haptics.dart';
+import '../../../core/widgets/settings_switch_tile.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
@@ -135,6 +137,14 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
             SizedBox(height: 40.h),
             // 읽을거리와 되돌릴 수 없는 동작을 섞지 않는다 — 연결을 끊는 두 줄은 맨 아래다.
             // 순서는 보호자 설정과 같다 (약관 → 앱 정보 → 로그아웃 → 회원탈퇴).
+            // 카드를 체크할 때 진동으로 알려줄지 (#515). 보호자 설정과 같은 값을 본다.
+            // 시안이 없어 **임시 시안**이다 — 읽을거리 위, 설정값을 맨 앞에 둔다.
+            SettingsSwitchTile(
+              label: '카드 체크 진동',
+              value: ref.watch(childHapticOnProvider),
+              onChanged: (on) =>
+                  ref.read(childHapticOnProvider.notifier).set(on),
+            ),
             SettingsTile(
               label: '약관 및 개인정보처리방침',
               onTap: _busy

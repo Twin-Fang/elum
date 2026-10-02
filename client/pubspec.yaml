@@ -68,6 +68,7 @@ dependencies:
 
   # 카드 그림을 카메라·갤러리 사진으로 바꾼다 (이슈 #456). 권한 요청과 촬영 UI 는 OS 가 한다.
   image_picker: ^1.2.1
+  vibration: ^3.1.8
 
 # path_provider_foundation 2.5+가 끌고 오는 objective_c의 build hook이
 # build_runner AOT 컴파일을 깨뜨린다 (troubleshooting.md "build_runner AOT 컴파일 실패").

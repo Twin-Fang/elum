@@ -105,12 +105,19 @@ void main() {
       await tester.pumpAndSettle();
 
       // 시안(1022:4467) 줄 순서를 깨지 않는다 — 다른 줄과 같은 60 간격.
+      // 카드 체크 진동 줄(#515)은 그림 방식 바로 아래 들어와 약관을 한 칸 밀어 낸다.
       final ys = [
-        for (final l in ['비밀암호 변경하기', '그림 방식', '약관 및 개인정보처리방침'])
+        for (final l in [
+          '비밀암호 변경하기',
+          '그림 방식',
+          '카드 체크 진동',
+          '약관 및 개인정보처리방침',
+        ])
           tester.getTopLeft(find.text(l)).dy,
       ];
       expect(ys[1] - ys[0], closeTo(60, 0.5));
       expect(ys[2] - ys[1], closeTo(60, 0.5));
+      expect(ys[3] - ys[2], closeTo(60, 0.5));
 
       final row = find.ancestor(of: find.text('그림 방식'), matching: find.byType(Row));
       expect(find.descendant(of: row, matching: find.text('만화')), findsOneWidget);

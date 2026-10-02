@@ -147,6 +147,13 @@ abstract interface class LocalStorage {
   bool get isHomeCoachSeen;
   Future<void> setHomeCoachSeen(bool v);
 
+  /// 이룸이 화면의 카드 진동을 켜 두었는가 (#515). **기본은 켜짐**이라 저장된 적이 없으면 true.
+  ///
+  /// 코치마크와 같은 이유로 **계정이 아니라 휴대폰에 속한다.** [clearAll] 이 지우지 않는다 —
+  /// 진동에 예민한 이룸이가 쓰는 휴대폰이 로그아웃 한 번에 다시 울리면 안 된다.
+  bool get isChildHapticOn;
+  Future<void> setChildHapticOn(bool v);
+
   /// 저장된 온보딩 결과를 전부 지운다. **개발·테스트 전용.**
   ///
   /// 일부만 지우면 어중간한 상태가 남아 더 헷갈리므로 5개 값을 모두 비운다.
@@ -187,6 +194,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedTuning = 'cache.clientTuning';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
   static const _kHomeCoachSeen = 'coach.homeSeen';
+  static const _kChildHapticOn = 'haptic.childOn';
 
   static Future<LocalStorage> create() async {
     return SharedPrefsStorage(await SharedPreferences.getInstance());
@@ -412,6 +420,15 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  bool get isChildHapticOn => _prefs.getBool(_kChildHapticOn) ?? true;
+
+  @override
+  Future<void> setChildHapticOn(bool v) async {
+    AppLogger.storageWrite(_kChildHapticOn, '$v');
+    await _prefs.setBool(_kChildHapticOn, v);
+  }
+
+  @override
   bool get isElumiDevice => _prefs.getBool(_kElumiDevice) ?? false;
 
   @override
@@ -492,7 +509,9 @@ class InMemoryStorage implements LocalStorage {
     // 기본은 "이미 봤다" — 홈을 띄우는 기존 테스트마다 코치마크가 화면을 덮으면 안 된다.
     // 코치마크를 검증하는 테스트만 false 를 준다. 실제 앱의 첫 실행 기본값은 false 다.
     bool homeCoachSeen = true,
-  }) : _completed = onboardingCompleted,
+    bool childHapticOn = true,
+  }) : _childHapticOn = childHapticOn,
+       _completed = onboardingCompleted,
        _homeCoachSeen = homeCoachSeen,
        _pin = pin,
        _nickname = nickname,
@@ -562,6 +581,14 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<void> clearSelectedProfileId() async => _selectedProfileId = null;
+
+  bool _childHapticOn;
+
+  @override
+  bool get isChildHapticOn => _childHapticOn;
+
+  @override
+  Future<void> setChildHapticOn(bool v) async => _childHapticOn = v;
 
   @override
   bool get isElumiDevice => _elumi;
