@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// 번역 delegate·Figma 기준 화면 크기(393×852)·`appL10n` 동기화를 갖춘 앱으로 [home] 을 띄운다.
 ///
 /// 기존 테스트는 `MaterialApp` 을 제각각 만들고 `context.l10n` 의 `ko` 대체로 돈다. 이 헬퍼는
-/// **다른 언어로 띄워야 하는 새 테스트**(하위 계획 5 의 넘침 검사 등)를 위한 것이다.
+/// **다른 언어로 띄워야 하는 새 테스트**(넘침 검사 등)를 위한 것이다.
 ///
 /// 언어 배선(delegate·`syncAppL10n`·글꼴 테마)은 앱과 같은 `AppL10n.routerArgs` 를 그대로 써서
 /// 복제하지 않는다. 다만 앱은 `MaterialApp.router` 이고 이 헬퍼는 `MaterialApp(home:)` 이다.

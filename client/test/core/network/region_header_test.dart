@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/fake_dio.dart';
 
 /// `X-Elum-Region` 은 `Accept-Language` 와 함께 나가되, 지역이 없거나 비정상이면 **헤더만 빠지고**
-/// 요청은 정상으로 나간다 (Review Focus). 지역 코드를 돌려주는 함수를 주입해 값을 고정한다.
+/// 요청은 정상으로 나간다. 지역 코드를 돌려주는 함수를 주입해 값을 고정한다.
 void main() {
   late FakeAdapter adapter;
   String? region;

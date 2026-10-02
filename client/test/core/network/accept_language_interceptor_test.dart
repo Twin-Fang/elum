@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_dio.dart';
 
-/// 요청마다 앱 언어를 `Accept-Language` 로 싣는다 (마스터 C1). 서버가 이것으로 문구 언어를 고른다.
+/// 요청마다 앱 언어를 `Accept-Language` 로 싣는다. 서버가 이것으로 문구 언어를 고른다.
 void main() {
   late FakeAdapter adapter;
   var phone = const Locale('ko');

@@ -3,7 +3,7 @@ import 'package:elum/core/l10n/locale_policy.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// 휴대폰 언어 → 앱 언어 (스펙 4.1): 5개 안이면 그것, 밖이면 en. 번체 중국어는 밖이다.
+/// 휴대폰 언어 → 앱 언어: 5개 안이면 그것, 밖이면 en. 번체 중국어는 밖이다.
 void main() {
   const zhHans = Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans');
   Locale resolve(List<Locale>? phone) => resolveAppLocale(phone, supportedAppLocales);

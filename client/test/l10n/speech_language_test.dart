@@ -2,7 +2,7 @@ import 'package:elum/features/child/data/speech_service.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// 음성도 일과 언어를 따른다 (Review Focus). 기기 TTS 언어를 일과 언어로 맞춘다.
+/// 음성도 일과 언어를 따른다. 기기 TTS 언어를 일과 언어로 맞춘다.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

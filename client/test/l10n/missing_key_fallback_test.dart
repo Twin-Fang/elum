@@ -5,7 +5,7 @@ import 'package:elum/l10n/app_localizations.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// 번역이 빠진 키가 화면을 깨지 않는다 (Review Focus).
+/// 번역이 빠진 키가 화면을 깨지 않는다.
 ///
 /// gen-l10n 은 빠진 키를 템플릿(`ko`) 문구로 채운다. 스펙의 `en → ko` 순서와 달리 `ko` 로
 /// 곧바로 간다(이 계획 결정 D1). 번역이 채워진 언어는 자기 문구를 주므로, **ARB 파일에 그 키가

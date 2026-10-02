@@ -19,7 +19,7 @@ import '../helpers/fake_dio.dart';
 import '../helpers/test_storage.dart';
 
 /// 두 휴대폰의 언어가 다를 때: 버튼·메뉴는 **그 휴대폰의 화면 언어**, 카드 글과 음성은
-/// **일과 언어**다 (스펙 4.2, Review Focus).
+/// **일과 언어**다.
 void main() {
   useFigmaViewport();
 

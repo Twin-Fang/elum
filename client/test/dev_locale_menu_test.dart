@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/test_storage.dart';
 
-/// 개발자 도구 패널에서 언어를 강제한다 (스펙 4.1 ④).
+/// 개발자 도구 패널에서 언어를 강제한다.
 void main() {
   Widget subject() => ProviderScope(
     overrides: [

@@ -2,7 +2,7 @@ import 'package:elum/core/l10n/region_code.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// 지역 코드는 두 글자 대문자만 통과시킨다 (마스터 C1-2). 그 밖은 "없음"이라 헤더를 안 보낸다.
+/// 지역 코드는 두 글자 대문자만 통과시킨다. 그 밖은 "없음"이라 헤더를 안 보낸다.
 void main() {
   final binding = TestWidgetsFlutterBinding.ensureInitialized();
 

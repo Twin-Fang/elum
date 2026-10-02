@@ -8,12 +8,12 @@ import '../helpers/device_viewport.dart';
 import '../helpers/pump_with_locale.dart';
 import '../helpers/text_fit.dart';
 
-/// 번역이 길어도(스페인어) 고정 높이 위젯에서 글이 넘치지 않는다 (Review Focus).
+/// 번역이 길어도(스페인어) 고정 높이 위젯에서 글이 넘치지 않는다.
 ///
 /// **파일럿이다.** 하네스(`pumpWithLocale` + 393×852 뷰포트 + 글자 배율 + [expectTextFits])가
-/// 동작함을 보이고 가장 흔한 공용 위젯 셋을 본다. 전 화면 넘침 검사는 하위 계획 5 가 이 하네스로 한다.
+/// 동작함을 보이고 가장 흔한 공용 위젯 셋을 본다. 전 화면 넘침 검사는 이 하네스로 이어서 한다.
 ///
-/// ## 이 파일럿이 잡는 것 / 못 잡는 것 (계획 5 인수인계)
+/// ## 이 파일럿이 잡는 것 / 못 잡는 것
 /// - **`tester.takeException()`** (`flutter_test_config.dart` 가 `overflowed` 를 예외로 바꾼다)은
 ///   `Row`/`Column` **주축** 넘침만 잡는다. `maxLines`+`ellipsis` 로 잘린 글, `FittedBox` 로 줄어든 글,
 ///   cross-axis 넘침, 고정 높이 상자 안에서 글이 상자 밖으로 그려지는 것은 **못 잡는다**.
@@ -109,13 +109,13 @@ void main() {
     expect(surface.height, lessThanOrEqualTo(852), reason: '대화상자가 화면 높이를 넘는다');
   }
 
-  // 발견된 실제 결함 - 이 계획에서 고치지 않는다(ko 화면이 달라질 수 있다). 계획 5 로 넘긴다.
+  // 발견된 실제 결함 - 여기서 고치지 않는다(ko 화면이 달라질 수 있다). 전 화면 넘침 검사로 넘긴다.
   // ElumButton(66 높이 고정): 1.5배 글 높이 68, 2.0배 90. SettingsTile(60): 2.0배 64.
   String? knownButton(double scale) => scale >= 1.5
-      ? ' [SKIP 계획 5 넘침 검사 대상 - ElumButton 고정 높이 66, es "$buttonEs" 배율 $scale 에서 글 높이 ${scale == 1.5 ? 68 : 90}]'
+      ? ' [SKIP 넘침 검사 대상 - ElumButton 고정 높이 66, es "$buttonEs" 배율 $scale 에서 글 높이 ${scale == 1.5 ? 68 : 90}]'
       : null;
   String? knownTile(double scale) => scale >= 2.0
-      ? ' [SKIP 계획 5 넘침 검사 대상 - SettingsTile 고정 높이 60, es "$tileEs" 배율 $scale 에서 글 높이 64]'
+      ? ' [SKIP 넘침 검사 대상 - SettingsTile 고정 높이 60, es "$tileEs" 배율 $scale 에서 글 높이 64]'
       : null;
 
   for (final scale in [1.0, 1.5, 2.0]) {

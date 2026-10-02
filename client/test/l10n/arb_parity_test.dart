@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// **언어를 연다는 것 = 그 언어가 [openedLocales] 에 들어온다는 것**이다. 열린 언어는
 /// ko 템플릿의 모든 키와 자리표시자를 빠짐없이 가져야 한다. 아직 안 연 언어는 비어 있어도
 /// 된다 — 이때 gen-l10n 이 빠진 키를 ko 문구로 채우므로 화면은 깨지지 않는다.
-/// 하위 계획 5 가 이 목록을 늘리고, 이 테스트를 CI 에 연결한다.
+/// 번역을 채우면 이 목록을 늘린다.
 const openedLocales = <String>{'ko'};
 
 /// ko 에만 있고 다른 언어는 쓰지 않아도 되는 자리표시자.
