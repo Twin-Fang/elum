@@ -1,9 +1,12 @@
 package com.chuseok22.elumserver.routine.infrastructure.entity;
 
 import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.AppLocaleConverter;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -96,6 +99,19 @@ public class Routine extends BaseEntity {
    */
   @Column(nullable = false, columnDefinition = "integer not null default 0")
   private Integer displayOrder = 0;
+
+  /**
+   * 일과의 콘텐츠 언어 (다국어 #526). 카드 글과 음성이 이 언어다.
+   *
+   * <p>일과를 만든 요청의 화면 언어를 켜진 언어 목록(ENABLED_CONTENT_LOCALES)에 비춰 정한다. 보호자가 고르지 않고
+   * 만든 뒤에는 바꾸지 않는다. 기존 일과는 V33 이 ko 로 채웠다.
+   *
+   * <p>columnDefinition 은 로컬(ddl-auto: update)에서 행이 있는 표에 NOT NULL 컬럼을 더할 때 DEFAULT 가 필요해서 둔다
+   * (displayOrder 와 같은 이유).
+   */
+  @Convert(converter = AppLocaleConverter.class)
+  @Column(name = "language", nullable = false, length = 8, columnDefinition = "varchar(8) not null default 'ko'")
+  private AppLocale language = AppLocale.KO;
 
   private LocalDateTime completedAt;
 

@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.routine.application.dto.response;
 
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -77,7 +78,10 @@ public record RoutineResponse(
   /// 일과가 속한 이룸이 ID. 응답에는 싣지 않는다 — 만든 사람의 이름을 이룸이 단위로 한 번에 찾는 데만 쓴다.
   @JsonIgnore
   @Schema(hidden = true)
-  String profileId
+  String profileId,
+
+  @Schema(description = "일과의 콘텐츠 언어 코드(ko·en·ja·zh·es). 카드 글과 음성이 이 언어다. 기존 일과는 ko", example = "ko")
+  String language
 ) {
 
   /**
@@ -100,14 +104,14 @@ public record RoutineResponse(
   public RoutineResponse withCredit(CreditUsage usage) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      usage, imageSkippedReason, createdBy, createdByMe, creatorName, profileId);
+      usage, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language);
   }
 
   /// 그림을 건너뛴 까닭을 붙인 응답.
   public RoutineResponse withImageSkippedReason(String reason) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, reason, createdBy, createdByMe, creatorName, profileId);
+      credit, reason, createdBy, createdByMe, creatorName, profileId, language);
   }
 
   /// 보호자가 쓴 말(원문·마스킹본·재생성 피드백)을 뺀 응답 (#357). 이룸이 휴대폰은 화면에 쓰지 않는 값이라
@@ -115,7 +119,7 @@ public record RoutineResponse(
   public RoutineResponse withoutSourceText() {
     return new RoutineResponse(id, title, null, null, scheduledAt, status, null,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId);
+      credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language);
   }
 
   /// 보호자 원문을 가려야 하는 호출자인가.
@@ -155,13 +159,13 @@ public record RoutineResponse(
   public RoutineResponse withCreatorName(String name) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, imageSkippedReason, createdBy, createdByMe, name, profileId);
+      credit, imageSkippedReason, createdBy, createdByMe, name, profileId, language);
   }
 
   private RoutineResponse withCreatedByMe(Boolean mine) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, imageSkippedReason, createdBy, mine, creatorName, profileId);
+      credit, imageSkippedReason, createdBy, mine, creatorName, profileId, language);
   }
 
   public static RoutineResponse from(Routine routine) {
@@ -194,7 +198,9 @@ public record RoutineResponse(
       null,
       null,
       // 프록시의 getId 는 이룸이를 읽지 않는다
-      routine.getProfile() == null ? null : routine.getProfile().getId()
+      routine.getProfile() == null ? null : routine.getProfile().getId(),
+      // 마이그레이션 전 코드로 만든 행은 null 일 수 있어 ko 로 떨어뜨린다
+      routine.getLanguage() == null ? AppLocale.KO.code() : routine.getLanguage().code()
     );
   }
 }

@@ -22,6 +22,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
+import com.chuseok22.elumserver.common.locale.EnabledLocales;
 import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
 import com.chuseok22.elumserver.credit.application.service.CreditReservation;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
@@ -115,6 +116,9 @@ class RoutineServiceTest {
   private PictogramPicker pictogramPicker;
 
   @Mock
+  private EnabledLocales enabledLocales;
+
+  @Mock
   private RoutineStepRepository routineStepRepository;
 
   @InjectMocks
@@ -125,6 +129,12 @@ class RoutineServiceTest {
     // 크레딧이 꺼져 있을 때의 기존 동작을 본다. 켜짐은 RoutineServiceCreditTest 가 본다 (#407).
     lenient().when(creditReservationService.reserve(anyString(), any(), anyString(), anyBoolean()))
       .thenReturn(CreditReservation.disabled());
+  }
+
+  @BeforeEach
+  void contentLocaleDefaultsToKo() {
+    // 헤더가 없는 옛 앱: 요청 언어 KO -> 일과 언어 KO (다국어 #526)
+    lenient().when(enabledLocales.resolveContentLocale(any())).thenReturn(AppLocale.KO);
   }
 
   @Test
@@ -1217,5 +1227,81 @@ class RoutineServiceTest {
     routineService.syncProgress(GUARDIAN, "routine-1", List.of());
 
     verify(profileRepository, never()).addStars(anyString(), anyInt());
+  }
+
+  @Test
+  @DisplayName("헤더가 없으면 일과 언어는 ko 다 - 이미 배포된 앱")
+  void create_headerless_languageIsKo() {
+    Routine saved = createAndCaptureSavedRoutine();
+
+    assertThat(saved.getLanguage()).isEqualTo(AppLocale.KO);
+  }
+
+  @Test
+  @DisplayName("일과 언어는 요청 언어를 켜진 언어 목록에 비춰 정한다 - 일본어 요청이 en 으로 처리되는 설정")
+  void create_languageFollowsEnabledLocales() {
+    when(enabledLocales.resolveContentLocale(AppLocale.JA)).thenReturn(AppLocale.EN);
+
+    Routine saved = CurrentLocale.callAs(AppLocale.JA, this::createAndCaptureSavedRoutine);
+
+    assertThat(saved.getLanguage()).isEqualTo(AppLocale.EN);
+    verify(enabledLocales).resolveContentLocale(AppLocale.JA);
+  }
+
+  @Test
+  @DisplayName("켜진 언어에 ja 가 있고 일본어로 요청하면 일과 언어는 ja 로 저장된다")
+  void create_enabledRequestedLanguage_isStored() {
+    when(enabledLocales.resolveContentLocale(AppLocale.JA)).thenReturn(AppLocale.JA);
+
+    Routine saved = CurrentLocale.callAs(AppLocale.JA, this::createAndCaptureSavedRoutine);
+
+    assertThat(saved.getLanguage()).isEqualTo(AppLocale.JA);
+  }
+
+  @Test
+  @DisplayName("켜진 언어에 요청 언어가 없고 en 도 꺼져 있으면 ko 다")
+  void create_requestedDisabledAndEnDisabled_isKo() {
+    when(enabledLocales.resolveContentLocale(AppLocale.JA)).thenReturn(AppLocale.KO);
+
+    Routine saved = CurrentLocale.callAs(AppLocale.JA, this::createAndCaptureSavedRoutine);
+
+    assertThat(saved.getLanguage()).isEqualTo(AppLocale.KO);
+  }
+
+  @Test
+  @DisplayName("복제한 일과는 원본의 언어를 그대로 가진다 - 복제하는 요청의 화면 언어가 아니라")
+  void duplicate_keepsOriginLanguage() {
+    Routine origin = confirmedRoutine(profileWithStars(0), 1);
+    origin.setTitle("Go to the hospital");
+    origin.setLanguage(AppLocale.EN);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(origin));
+    ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
+    when(routineRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+
+    CurrentLocale.callAs(AppLocale.JA, () -> routineService.duplicate(GUARDIAN, "routine-1"));
+
+    assertThat(saved.getValue().getLanguage()).isEqualTo(AppLocale.EN);
+  }
+
+  /** 일과 생성을 한 번 돌리고 저장기에 넘어간 Routine 을 돌려준다. */
+  private Routine createAndCaptureSavedRoutine() {
+    Profile profile = new Profile();
+    profile.setId("profile-1");
+    profile.setNickname("하늘이");
+    profile.setSupportGoals(Set.of());
+    profile.setCharacter(CharacterType.LULU);
+    when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
+    when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), eq(CharacterType.LULU), any(), any()))
+      .thenReturn(new RoutineAiPipeline.RoutineGenerationResult(
+        "병원 다녀오기",
+        List.of(new RoutineAiPipeline.GeneratedStep(1, "신발 신어요", "신발 신기", "data/routine-images/batch-1/1.png")),
+        "batch-1"));
+    ArgumentCaptor<Routine> routine = ArgumentCaptor.forClass(Routine.class);
+    when(routineCreationWriter.save(any(), any(), routine.capture(), any(), anyInt()))
+      .thenAnswer(invocation -> new RoutineCreationWriter.SavedRoutine(invocation.getArgument(2), null));
+
+    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
+
+    return routine.getValue();
   }
 }

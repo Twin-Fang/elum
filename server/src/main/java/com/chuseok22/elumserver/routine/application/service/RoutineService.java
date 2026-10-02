@@ -6,6 +6,7 @@ import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
+import com.chuseok22.elumserver.common.locale.EnabledLocales;
 import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
 import com.chuseok22.elumserver.credit.application.service.CreditReservation;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
@@ -110,6 +111,7 @@ public class RoutineService {
   private final CreditReservationService creditReservationService;
   private final CreditQueryService creditQueryService;
   private final PictogramPicker pictogramPicker;
+  private final EnabledLocales enabledLocales;
 
   // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
   // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
@@ -217,6 +219,9 @@ public class RoutineService {
 
     // 이룸이·만든 사람·순서 번호는 저장기가 이룸이 행을 잠근 뒤 채운다 (E17).
     Routine routine = new Routine();
+    // 일과의 콘텐츠 언어 - 만든 요청의 화면 언어를 켜진 언어 목록에 비춰 정한다 (다국어 #526). 보호자가 고르지 않는다.
+    // 헤더가 없는 옛 앱은 KO 라 지금과 같다. 필터가 심은 값이라 요청 스레드에서만 읽는다.
+    routine.setLanguage(enabledLocales.resolveContentLocale(CurrentLocale.get()));
     routine.setRawInputText(request.rawInputText());
     // 가공하지 않으므로 원문과 같다. 컬럼을 없애는 것은 마이그레이션이 필요해 따로 한다 (#377).
     routine.setSanitizedInputText(request.rawInputText());
@@ -340,6 +345,8 @@ public class RoutineService {
     copy.setRawInputText(origin.getTitle());
     copy.setSanitizedInputText(origin.getTitle());
     copy.setTitle(origin.getTitle());
+    // 카드 글이 원본 그대로이므로 언어도 원본을 따른다 (복제한 사람의 화면 언어가 아니다)
+    copy.setLanguage(origin.getLanguage());
     copy.setScheduledAt(LocalDate.now().atTime(9, 0));
     // 이미 검토를 거친 카드라 다시 승인받지 않는다. 바로 오늘 할 일이 된다.
     copy.setStatus(RoutineStatus.CONFIRMED);

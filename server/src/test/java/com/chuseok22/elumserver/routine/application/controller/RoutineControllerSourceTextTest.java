@@ -52,7 +52,7 @@ class RoutineControllerSourceTextTest {
   /// createdBy 가 만든 보호자인 일과. guardian 토큰의 memberId 는 member-1 이다.
   private static RoutineResponse routineBy(String createdBy) {
     return new RoutineResponse("r1", "제목", RAW, MASKED, null, "CONFIRMED", FEEDBACK, null,
-      0, 0, 0, null, null, List.of(), null, null, createdBy, null, null, null);
+      0, 0, 0, null, null, List.of(), null, null, createdBy, null, null, null, "ko");
   }
 
   private static void assertStripped(RoutineResponse r) {

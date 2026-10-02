@@ -32,7 +32,7 @@ class RoutineControllerAuthorTest {
 
   private static RoutineResponse routineBy(String createdBy) {
     return new RoutineResponse("r1", "제목", "원문", "마스킹본", null, "CONFIRMED", null, null,
-      0, 0, 0, null, null, List.of(), null, null, createdBy, null, null, "p1");
+      0, 0, 0, null, null, List.of(), null, null, createdBy, null, null, "p1", "ko");
   }
 
   private static GuardianName dad() {
