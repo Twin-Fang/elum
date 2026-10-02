@@ -41,6 +41,7 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
     super.key,
     required this.routine,
     this.isPast = false,
+    this.isFinished = false,
   });
 
   final Routine routine;
@@ -52,17 +53,29 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
   /// 손잡이도 그리지 않는다 — 그날의 결과를 그대로 보여 주는 화면이다.
   final bool isPast;
 
+  /// 이룸이가 다 끝낸 오늘 일과인가 (#534).
+  ///
+  /// **끝낸 일과는 고치지 않는다.** 이룸이 화면은 다 끝낸 일과를 다시 그리지 않아
+  /// 보호자가 고쳐도 아무 데도 반영되지 않는다. 버튼을 숨기지 않고 눌리지 않게 두어
+  /// 왜 못 고치는지 버튼 글자로 알린다. 같은 휴대폰의 기기 기록까지 보는 쪽이 판단해 넘긴다.
+  final bool isFinished;
+
   /// 시트를 띄운다. 눌린 버튼이 [RoutineSheetAction]으로 돌아온다.
   static Future<RoutineSheetAction?> show(
     BuildContext context,
     Routine routine, {
     bool isPast = false,
+    bool isFinished = false,
   }) {
     return showModalBottomSheet<RoutineSheetAction>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => RoutineDetailSheet(routine: routine, isPast: isPast),
+      builder: (_) => RoutineDetailSheet(
+        routine: routine,
+        isPast: isPast,
+        isFinished: isFinished,
+      ),
     );
   }
 
@@ -87,9 +100,13 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
   /// 그림자가 한 번 꺼졌다 켜진다 (#274).
   int? _draggingIndex;
 
+  /// 오늘 일과인데 이룸이가 다 끝냈다 — 하단 버튼을 막는다 (#534).
+  bool get _finishedToday => !widget.isPast && widget.isFinished;
+
   /// 이 시트에서 고칠 수 있는가 — 남이 만든 일과는 보기만 한다 (다중 보호자 #362 · E46).
-  /// 지난 일과는 원래 고치지 않는다([RoutineDetailSheet.isPast]).
-  bool get _canEdit => !widget.isPast && widget.routine.isEditableByMe;
+  /// 지난 일과는 원래 고치지 않는다([RoutineDetailSheet.isPast]). 다 끝낸 일과도 같다 (#534).
+  bool get _canEdit =>
+      !widget.isPast && !widget.isFinished && widget.routine.isEditableByMe;
 
   Future<void> _reorder(int oldIndex, int newIndex) async {
     // ReorderableListView는 아래로 옮길 때 제거 전 위치를 준다.
@@ -275,18 +292,30 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
               child: FilledButton(
                 style: FilledButton.styleFrom(
                   backgroundColor: colors.textPrimary,
+                  disabledBackgroundColor: colors.buttonDisabled,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18.r),
                   ),
                 ),
-                onPressed: () => Navigator.of(context).pop(
-                  widget.isPast
-                      ? RoutineSheetAction.rerun
-                      : RoutineSheetAction.edit,
-                ),
+                // 다 끝낸 오늘 일과는 눌리지 않는다 (#534). 지난 일과의 `다시하기`는 그대로 둔다.
+                onPressed: _finishedToday
+                    ? null
+                    : () => Navigator.of(context).pop(
+                        widget.isPast
+                            ? RoutineSheetAction.rerun
+                            : RoutineSheetAction.edit,
+                      ),
                 child: Text(
-                  widget.isPast ? '일과 다시하기' : '편집하기',
-                  style: typo.sheetActionLabel.copyWith(color: colors.surface),
+                  widget.isPast
+                      ? '일과 다시하기'
+                      : _finishedToday
+                      ? '다 끝낸 일과예요'
+                      : '편집하기',
+                  style: typo.sheetActionLabel.copyWith(
+                    color: _finishedToday
+                        ? colors.buttonDisabledText
+                        : colors.surface,
+                  ),
                 ),
               ),
             ),

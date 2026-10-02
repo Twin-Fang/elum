@@ -181,6 +181,12 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     actions: const [ElumDialogAction(label: '확인')],
   );
 
+  /// 이룸이가 다 끝낸 일과인가 (#534). 같은 휴대폰의 기기 기록도 본다 — 서버 반영 전에도
+  /// 링이 체크로 바뀌는데 편집만 열려 있으면 둘이 어긋난다.
+  bool _isFinished(Routine routine) =>
+      routine.isFinished ||
+      routineProgress(routine, ref.read(childRoutineProvider)) >= 1;
+
   Future<void> _delete(Routine routine) async {
     // 시작한 일과는 서버가 지우지 않는다(수행 기록·별). 묻고 나서 실패 팝업을 띄우면
     // 보호자는 "삭제가 고장났다"고 여긴다 (#533). 누르기 전에 이유를 먼저 알린다.
@@ -254,7 +260,11 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
   /// 맥락은 끊기지 않는다.
   Future<void> _openSheet(Routine routine) async {
     setState(() => _openId = null);
-    final action = await RoutineDetailSheet.show(context, routine);
+    final action = await RoutineDetailSheet.show(
+      context,
+      routine,
+      isFinished: _isFinished(routine),
+    );
     if (action != RoutineSheetAction.edit || !mounted) return;
     _edit(routine);
   }
@@ -287,7 +297,10 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     final demoOpen = ref.watch(
       homeCoachProvider.select((s) => s.demoSwipeOpen),
     );
-    final coachId = routines.where((r) => r.isEditableByMe).firstOrNull?.id;
+    final coachId = routines
+        .where((r) => r.isEditableByMe && !_isFinished(r))
+        .firstOrNull
+        ?.id;
 
     return ReorderableListView.builder(
       shrinkWrap: true,
@@ -333,7 +346,11 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
             child: RoutineSwipeActions(
               // 남이 만든 일과는 밀어도 삭제·수정이 나오지 않는다 — 서버가 403 으로 막는 동작이다
               // (다중 보호자 #362 · E46). 만든 사람을 모르면 지금처럼 민다.
-              enabled: routine.isEditableByMe,
+              //
+              // 다 끝낸 일과도 밀리지 않는다 (#534) — 이룸이 화면은 끝낸 일과를 다시 그리지
+              // 않아 고쳐도 반영되지 않고, 삭제는 서버가 막는다(#533). 줄을 누르면 시트에서
+              // `다 끝낸 일과예요`로 이유를 본다.
+              enabled: routine.isEditableByMe && !_isFinished(routine),
               isOpen:
                   _openId == routine.id || (demoOpen && routine.id == coachId),
               onOpenChanged: (open) =>
