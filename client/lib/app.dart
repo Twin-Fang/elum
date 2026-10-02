@@ -6,13 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'core/ads/ad_consent.dart';
 import 'core/app_status/app_status_gate.dart';
 import 'core/app_status/app_status_repository.dart';
-import 'core/config/app_config.dart';
 import 'core/config/client_tuning.dart';
 import 'core/dev/dev_locale_override.dart';
 import 'core/dev/dev_tools_overlay.dart';
 import 'core/l10n/app_l10n.dart';
-import 'core/l10n/current_l10n.dart';
-import 'core/l10n/l10n_context.dart';
 import 'core/network/dio_client.dart';
 import 'core/network/session_expiry.dart';
 import 'core/router/app_router.dart';
@@ -120,10 +117,23 @@ class _ElumAppState extends ConsumerState<ElumApp> {
   }
 
   Widget _buildApp() {
-    // 개발자 도구가 언어를 강제했으면 그 값, 아니면 null — 휴대폰 언어를 따른다 (스펙 4.1).
-    // 릴리스 빌드(개발자 도구 꺼짐)는 provider 도 null 만 갖지만 한 번 더 막는다.
-    final forcedLocale =
-        AppConfig.showDevTools ? ref.watch(devLocaleOverrideProvider) : null;
+    // 언어 관련 인자는 AppL10n 한 곳에서 만든다 — 개발자 도구 강제 언어의 게이트도 거기서 건다.
+    final l10n = AppL10n.routerArgs(
+      forcedLocale: ref.watch(devLocaleOverrideProvider),
+      inner: (context, child) => SyncTriggers(
+        // 동기화 트리거는 라우터·오버레이와 무관하므로 가장 바깥에 둔다 (이슈 #140)
+        child: AppStatusGate(
+          // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다 (이슈 #279).
+          // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
+          child: DevToolsOverlay(
+            // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
+            // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
+            onNavigate: _router.go,
+            child: child ?? const SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
 
     return ScreenUtilInit(
       // Figma 프레임 크기(iPhone 16). 이 기준으로 .w/.h/.sp가 계산되므로
@@ -131,37 +141,16 @@ class _ElumAppState extends ConsumerState<ElumApp> {
       designSize: const Size(393, 852),
       minTextAdapt: true,
       builder: (context, child) => MaterialApp.router(
-        // 앱 이름은 운영체제 앱 전환 화면에 보인다 — 언어마다 다를 수 있어 ARB 에서 읽는다
-        onGenerateTitle: (context) => context.l10n.appTitle,
+        onGenerateTitle: l10n.onGenerateTitle,
         theme: AppTheme.light,
-        locale: forcedLocale,
-        supportedLocales: AppL10n.supportedLocales,
-        localizationsDelegates: AppL10n.delegates,
-        localeListResolutionCallback: AppL10n.resolveLocales,
+        locale: l10n.locale,
+        supportedLocales: l10n.supportedLocales,
+        localizationsDelegates: l10n.localizationsDelegates,
+        localeListResolutionCallback: l10n.localeListResolutionCallback,
         routerConfig: _router,
         debugShowCheckedModeBanner: false,
-        // 개발자 도구를 모든 화면 위에 얹는다. 화면별 코드는 건드리지 않는다.
-        // 플래그가 꺼지면 child를 그대로 반환해 비용이 0이다. (이슈 #13)
-        builder: (context, child) {
-          // context 가 없는 층(도메인 getter·저장소 대체 문구)이 쓰는 문구를 지금 언어에 맞춘다
-          syncAppL10n(context);
-          return AppL10n.themed(
-            context,
-            SyncTriggers(
-              // 동기화 트리거는 라우터·오버레이와 무관하므로 가장 바깥에 둔다 (이슈 #140)
-              child: AppStatusGate(
-                // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다 (이슈 #279).
-                // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
-                child: DevToolsOverlay(
-                  // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
-                  // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
-                  onNavigate: _router.go,
-                  child: child ?? const SizedBox.shrink(),
-                ),
-              ),
-            ),
-          );
-        },
+        // 개발자 도구를 모든 화면 위에 얹는다. 화면별 코드는 건드리지 않는다. (이슈 #13)
+        builder: l10n.builder,
       ),
     );
   }
