@@ -5,12 +5,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
@@ -408,7 +408,7 @@ class _TopBar extends StatelessWidget {
           AppPressable(
             onTap: onBack,
             scaleDown: AppPressable.scaleIcon,
-            semanticLabel: ElumScaffold.backLabel,
+            semanticLabel: context.l10n.commonBack,
             child: SizedBox(
               width: _box.w,
               height: _box.w,

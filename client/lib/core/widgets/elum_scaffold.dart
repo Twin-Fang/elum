@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../l10n/l10n_context.dart';
 import '../assets/app_assets.dart';
 import '../theme/theme_context_ext.dart';
 
@@ -96,12 +97,6 @@ class ElumScaffold extends StatelessWidget {
 
   /// 뒤로가기 상자 하단 — [ElumHeader]가 제목 y를 여기서 이어 계산한다.
   static const backBoxBottom = _backBoxY + _backBoxSize;
-
-  /// 뒤로가기 화살표를 화면 낭독기가 읽는 이름 (#339).
-  ///
-  /// 이 뼈대를 쓰지 않는 화면(흐름·이룸이·별 화면)의 화살표도 이 값을 쓴다.
-  /// 화면마다 따로 쓰면 같은 버튼이 곳곳에서 다르게 읽힌다.
-  static const backLabel = '뒤로 가기';
 
   /// Figma 프레임 전체 높이. CTA 하단 여백을 화면 하단 기준으로 역산한다.
   ///
@@ -205,7 +200,7 @@ class ElumScaffold extends StatelessWidget {
                     child: Semantics(
                       container: true,
                       button: true,
-                      label: backLabel,
+                        label: context.l10n.commonBack,
                       child: GestureDetector(
                         onTap: onBack,
                         behavior: HitTestBehavior.opaque,

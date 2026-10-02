@@ -181,6 +181,168 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'다음 주 월요일 0시'**
   String get creditResetFallback;
+
+  /// 팝업 바깥 배경 막을 낭독기가 읽는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'팝업 닫기'**
+  String get commonPopupClose;
+
+  /// 뒤로가기 화살표를 낭독기가 읽는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'뒤로 가기'**
+  String get commonBack;
+
+  /// 잘못된 경로로 들어왔을 때의 화면 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'화면을 찾을 수 없어요'**
+  String get commonScreenNotFound;
+
+  /// 서버가 이유를 주지 않은 일시 실패의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 해주세요'**
+  String get commonRetryLater;
+
+  /// 실패 화면의 다시 시도 버튼. 괄호 안은 추적용 에러 코드(번역하지 않는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 시도 ({code})'**
+  String commonRetryWithCode(String code);
+
+  /// 제목 문장이 문장부호 없이 끝날 때 붙이는 마침표. 일본어·중국어는 。
+  ///
+  /// In ko, this message translates to:
+  /// **'.'**
+  String get sentenceStop;
+
+  /// 서버에 닿지 못했을 때(오프라인) 무엇을 하면 되는지
+  ///
+  /// In ko, this message translates to:
+  /// **'인터넷 연결을 확인해주세요'**
+  String get failureHintOffline;
+
+  /// 서버가 제때 답하지 않았을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'연결이 느려요. 잠시 후 다시 해주세요'**
+  String get failureHintTimeout;
+
+  /// 공용 와이파이 가로채기 등 인증서 문제의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'안전하지 않은 연결이에요. 다른 망에서 해주세요'**
+  String get failureHintBadCertificate;
+
+  /// 코치마크 한 단계를 낭독기가 읽는 문장. message 는 강조 표식을 걷어낸 안내문
+  ///
+  /// In ko, this message translates to:
+  /// **'안내 {index}/{total}. {message}'**
+  String coachStepLabel(int index, int total, String message);
+
+  /// 광고임을 알리는 라벨(일과로 오인해 누르는 것을 막는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'광고'**
+  String get commonAd;
+
+  /// 설정의 앱 정보 줄 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'앱 정보'**
+  String get commonAppInfo;
+
+  /// 코치마크를 닫는 버튼·동작의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'안내 닫기'**
+  String get coachCloseHint;
+
+  /// 코치마크 다음 단계로 가는 동작의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 안내'**
+  String get coachNextHint;
+
+  /// 마지막 코치마크 단계의 안내 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'화면을 누르면 닫혀요'**
+  String get coachTapToClose;
+
+  /// 코치마크 중간 단계의 안내 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'화면을 누르면 다음으로 넘어가요'**
+  String get coachTapToNext;
+
+  /// 로그인 장면의 윗줄 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘의 하루,'**
+  String get loginSceneEyebrow;
+
+  /// 로그인 장면의 큰 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'차근차근 함께해요'**
+  String get loginSceneTitle;
+
+  /// 스토어 열기 실패 팝업의 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'스토어를 열지 못했어요'**
+  String get appStatusStoreOpenFailedTitle;
+
+  /// 스토어 열기 실패 시 직접 하는 방법 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'스토어에서 이룸을 찾아 업데이트해주세요'**
+  String get appStatusStoreOpenFailedFallback;
+
+  /// 점검 중 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 쉬고 있어요'**
+  String get appStatusMaintenanceTitle;
+
+  /// 점검 중 화면의 기본 설명(서버가 문구를 주면 그것이 이긴다)
+  ///
+  /// In ko, this message translates to:
+  /// **'조금 뒤에 다시 열어주세요'**
+  String get appStatusMaintenanceBody;
+
+  /// 점검 화면의 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 확인하기'**
+  String get appStatusRecheck;
+
+  /// 강제 업데이트 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'새 이룸이 나왔어요'**
+  String get appStatusUpdateTitle;
+
+  /// 강제 업데이트 화면 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'앱을 새로 받아야 이어서 쓸 수 있어요.\n스토어에서 이룸을 업데이트해주세요'**
+  String get appStatusUpdateBody;
+
+  /// 스토어 주소가 없을 때의 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'업데이트했어요'**
+  String get appStatusUpdated;
+
+  /// 스토어로 가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'업데이트하러 가기'**
+  String get appStatusGoUpdate;
 }
 
 class _AppLocalizationsDelegate

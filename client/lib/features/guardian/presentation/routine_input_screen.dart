@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
@@ -15,7 +16,6 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/elum_scaffold.dart';
 import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
 import '../domain/routine_suggestion.dart';
@@ -186,7 +186,7 @@ class _BackRow extends StatelessWidget {
             context.pop();
           },
           scaleDown: AppPressable.scaleIcon,
-          semanticLabel: ElumScaffold.backLabel,
+          semanticLabel: context.l10n.commonBack,
           // **자리가 40×40 이다.** 시안(976:4611)이 그 크기로 두고, 안에
           // 화살표를 가운데 놓는다 — 박스 중심과 화살표 중심이 같다.
           // 아래 여백은 이 40을 감안해 잡혀 있으므로(topToSparkles) 여기를

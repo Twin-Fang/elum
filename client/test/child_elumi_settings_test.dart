@@ -6,7 +6,6 @@ import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/character_badge.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
-import 'package:elum/core/widgets/elum_scaffold.dart';
 import 'package:elum/features/auth/presentation/consent_document_list_screen.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
@@ -193,7 +192,7 @@ void main() {
       await pump(tester);
       await openSettings(tester);
 
-      await tester.tap(labeled(ElumScaffold.backLabel));
+      await tester.tap(labeled('뒤로 가기'));
       await tester.pumpAndSettle();
 
       expect(find.byType(ElumiSettingsScreen), findsNothing);

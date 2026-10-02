@@ -56,5 +56,96 @@
   },
 
   "creditResetFallback": "다음 주 월요일 0시",
-  "@creditResetFallback": { "description": "다음 초기화 시각을 서버가 주지 않았을 때의 문구" }
+  "@creditResetFallback": { "description": "다음 초기화 시각을 서버가 주지 않았을 때의 문구" },
+
+  "commonPopupClose": "팝업 닫기",
+  "@commonPopupClose": { "description": "팝업 바깥 배경 막을 낭독기가 읽는 이름" },
+
+  "commonBack": "뒤로 가기",
+  "@commonBack": { "description": "뒤로가기 화살표를 낭독기가 읽는 이름" },
+
+  "commonScreenNotFound": "화면을 찾을 수 없어요",
+  "@commonScreenNotFound": { "description": "잘못된 경로로 들어왔을 때의 화면 문구" },
+
+  "commonRetryLater": "잠시 후 다시 해주세요",
+  "@commonRetryLater": { "description": "서버가 이유를 주지 않은 일시 실패의 기본 안내" },
+
+  "commonRetryWithCode": "다시 시도 ({code})",
+  "@commonRetryWithCode": {
+    "description": "실패 화면의 다시 시도 버튼. 괄호 안은 추적용 에러 코드(번역하지 않는다)",
+    "placeholders": { "code": { "type": "String" } }
+  },
+
+  "sentenceStop": ".",
+  "@sentenceStop": { "description": "제목 문장이 문장부호 없이 끝날 때 붙이는 마침표. 일본어·중국어는 。" },
+
+  "failureHintOffline": "인터넷 연결을 확인해주세요",
+  "@failureHintOffline": { "description": "서버에 닿지 못했을 때(오프라인) 무엇을 하면 되는지" },
+
+  "failureHintTimeout": "연결이 느려요. 잠시 후 다시 해주세요",
+  "@failureHintTimeout": { "description": "서버가 제때 답하지 않았을 때의 안내" },
+
+  "failureHintBadCertificate": "안전하지 않은 연결이에요. 다른 망에서 해주세요",
+  "@failureHintBadCertificate": { "description": "공용 와이파이 가로채기 등 인증서 문제의 안내" },
+
+  "coachStepLabel": "안내 {index}/{total}. {message}",
+  "@coachStepLabel": {
+    "description": "코치마크 한 단계를 낭독기가 읽는 문장. message 는 강조 표식을 걷어낸 안내문",
+    "placeholders": {
+      "index": { "type": "int" },
+      "total": { "type": "int" },
+      "message": { "type": "String" }
+    }
+  },
+
+  "commonAd": "광고",
+  "@commonAd": { "description": "광고임을 알리는 라벨(일과로 오인해 누르는 것을 막는다)" },
+
+  "commonAppInfo": "앱 정보",
+  "@commonAppInfo": { "description": "설정의 앱 정보 줄 이름" },
+
+  "coachCloseHint": "안내 닫기",
+  "@coachCloseHint": { "description": "코치마크를 닫는 버튼·동작의 낭독 이름" },
+
+  "coachNextHint": "다음 안내",
+  "@coachNextHint": { "description": "코치마크 다음 단계로 가는 동작의 낭독 이름" },
+
+  "coachTapToClose": "화면을 누르면 닫혀요",
+  "@coachTapToClose": { "description": "마지막 코치마크 단계의 안내 문구" },
+
+  "coachTapToNext": "화면을 누르면 다음으로 넘어가요",
+  "@coachTapToNext": { "description": "코치마크 중간 단계의 안내 문구" },
+
+  "loginSceneEyebrow": "오늘의 하루,",
+  "@loginSceneEyebrow": { "description": "로그인 장면의 윗줄 문구" },
+
+  "loginSceneTitle": "차근차근 함께해요",
+  "@loginSceneTitle": { "description": "로그인 장면의 큰 문구" },
+
+  "appStatusStoreOpenFailedTitle": "스토어를 열지 못했어요",
+  "@appStatusStoreOpenFailedTitle": { "description": "스토어 열기 실패 팝업의 제목" },
+
+  "appStatusStoreOpenFailedFallback": "스토어에서 이룸을 찾아 업데이트해주세요",
+  "@appStatusStoreOpenFailedFallback": { "description": "스토어 열기 실패 시 직접 하는 방법 안내" },
+
+  "appStatusMaintenanceTitle": "잠시 쉬고 있어요",
+  "@appStatusMaintenanceTitle": { "description": "점검 중 화면 제목" },
+
+  "appStatusMaintenanceBody": "조금 뒤에 다시 열어주세요",
+  "@appStatusMaintenanceBody": { "description": "점검 중 화면의 기본 설명(서버가 문구를 주면 그것이 이긴다)" },
+
+  "appStatusRecheck": "다시 확인하기",
+  "@appStatusRecheck": { "description": "점검 화면의 버튼" },
+
+  "appStatusUpdateTitle": "새 이룸이 나왔어요",
+  "@appStatusUpdateTitle": { "description": "강제 업데이트 화면 제목" },
+
+  "appStatusUpdateBody": "앱을 새로 받아야 이어서 쓸 수 있어요.\n스토어에서 이룸을 업데이트해주세요",
+  "@appStatusUpdateBody": { "description": "강제 업데이트 화면 설명" },
+
+  "appStatusUpdated": "업데이트했어요",
+  "@appStatusUpdated": { "description": "스토어 주소가 없을 때의 버튼" },
+
+  "appStatusGoUpdate": "업데이트하러 가기",
+  "@appStatusGoUpdate": { "description": "스토어로 가는 버튼" }
 }

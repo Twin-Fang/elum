@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -293,7 +294,7 @@ class _TopBar extends StatelessWidget {
               onTap: onBack,
               scaleDown: AppPressable.scaleIcon,
               // 일과 만들기 흐름 화면 전부가 이 상단바를 쓴다 — 여기가 비면 다 빈다 (#339)
-              semanticLabel: ElumScaffold.backLabel,
+              semanticLabel: context.l10n.commonBack,
               // 정사각형 아이콘이라 가로세로 모두 .w
               // 자리는 아이콘 크기 그대로 두고 **그 위로** 40×40 누름 영역을 덮는다 (#306).
               // 자리째 키우면 상단바가 높아져 화면 전체가 아래로 밀린다.

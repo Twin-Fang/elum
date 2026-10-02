@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../l10n/l10n_context.dart';
 import '../assets/app_assets.dart';
 import '../network/app_failure.dart';
 import '../theme/theme_context_ext.dart';
@@ -117,7 +118,9 @@ class ElumErrorView extends StatelessWidget {
               TextButton(
                 onPressed: onRetry,
                 child: Text(
-                  errorCode == null ? '다시 시도' : '다시 시도 ($errorCode)',
+                  errorCode == null
+                      ? context.l10n.commonRetry
+                      : context.l10n.commonRetryWithCode(errorCode!),
                   style: typo.promptBody.copyWith(color: colors.promptMuted),
                 ),
               )
@@ -151,13 +154,13 @@ class ElumErrorView extends StatelessWidget {
           ),
           SizedBox(height: space.sm),
           Text(
-            description ?? '잠시 후 다시 해주세요',
+            description ?? context.l10n.commonRetryLater,
             textAlign: TextAlign.center,
             style: typo.promptBody.copyWith(color: colors.promptMuted),
           ),
           if (onRetry != null) ...[
             SizedBox(height: space.lg),
-            ElumButton(label: '다시 시도', onPressed: onRetry),
+            ElumButton(label: context.l10n.commonRetry, onPressed: onRetry),
           ],
           if (errorCode != null) ...[
             SizedBox(height: space.md),
