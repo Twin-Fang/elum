@@ -287,4 +287,129 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get consentGroupOptional => '선택항목';
+
+  @override
+  String get commonElumiName => '이룸이';
+
+  @override
+  String get characterCatLabel => '고양이';
+
+  @override
+  String get characterCatName => '루루';
+
+  @override
+  String get characterFoxLabel => '여우';
+
+  @override
+  String get characterFoxName => '포포';
+
+  @override
+  String get agentChickLabel => '병아리';
+
+  @override
+  String get imageStyleCartoonLabel => '만화';
+
+  @override
+  String get imageStyleCartoonDescription => '캐릭터가 나오는 그림이에요';
+
+  @override
+  String get imageStyleRealisticLabel => '실사';
+
+  @override
+  String get imageStyleRealisticDescription => '실제 물건 사진처럼 보여요';
+
+  @override
+  String get imageStylePhotoOnlyLabel => '직접 찍은 사진';
+
+  @override
+  String get imageStylePhotoOnlyDescription =>
+      '그림은 직접 찍은 사진으로 넣어요. 글은 계속 만들어 드려요';
+
+  @override
+  String get goalStepByStep => '해야 할 일을 순서대로 이해해요';
+
+  @override
+  String get goalPrepareItems => '필요한 준비물을 스스로 챙겨요';
+
+  @override
+  String get goalPrepareNew => '새로운 상황을 미리 준비해요';
+
+  @override
+  String get goalIndependent => '혼자 끝까지 해내는 경험을 만들어요';
+
+  @override
+  String onboardingCharacterTitle(String name) {
+    return '$name의 하루를 함께할\n친구를 골라주세요';
+  }
+
+  @override
+  String get onboardingCharacterDescription => '선택한 친구가 카드 속 주인공이 되어 도와줘요';
+
+  @override
+  String onboardingGoalsTitle(String name) {
+    return '$name의 어떤 순간을\n도와주고 싶으신가요?';
+  }
+
+  @override
+  String get onboardingGoalsDescription => '여러 개를 선택할 수 있어요';
+
+  @override
+  String get onboardingImageStyleTitle => '카드 그림은 어떤 방식으로\n만들까요?';
+
+  @override
+  String get onboardingImageStyleDescription => '나중에 설정에서 바꿀 수 있어요';
+
+  @override
+  String get onboardingImageStyleSkip => '건너뛰기';
+
+  @override
+  String get onboardingNameTitle => '이룸이를 어떻게\n불러드릴까요?';
+
+  @override
+  String get onboardingNameDescription => '정확한 실명이 아니어도 괜찮아요';
+
+  @override
+  String get onboardingNameHint => '이름을 입력해주세요';
+
+  @override
+  String get onboardingNameInviteLink => '초대 코드가 있어요';
+
+  @override
+  String get onboardingCompletionTitle => '내용 정리가 모두\n완료됐어요';
+
+  @override
+  String get onboardingCompletionProgress => '100% 완료!';
+
+  @override
+  String get onboardingSplashLogoLabel => '이룸';
+
+  @override
+  String get pinCreateTitle => '보호자님만 아는\n비밀암호를 만들어주세요';
+
+  @override
+  String get pinConfirmTitle => '암호를 한번 더\n입력해주세요';
+
+  @override
+  String get pinDescription => '보호자모드로 변경할 때 사용하는 암호예요';
+
+  @override
+  String get pinMismatch => '암호가 달라요. 다시 넣어주세요';
+
+  @override
+  String get pinInputSemanticLabel => '암호 넣기';
+
+  @override
+  String get pinStartButton => '시작하기';
+
+  @override
+  String get pinProfileCreateFailedTitle => '이룸이를 만들지 못했어요';
+
+  @override
+  String get pinProfileCreateFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get pinSaveFailedTitle => '설정을 저장하지 못했어요';
+
+  @override
+  String get pinSaveFailedFallback => '설정 화면에서 다시 확인해주세요';
 }

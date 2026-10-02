@@ -1,3 +1,5 @@
+import '../../../core/l10n/current_l10n.dart';
+
 /// 보호자가 선택하는 "도움 목표".
 ///
 /// 이룸은 진단명·장애 유형을 수집하지 않는다. 개인화는 오직 이 목표로만 한다.
@@ -9,15 +11,20 @@
 ///
 /// [label]은 Figma `온보딩_목표` 프레임 문구를 따른다 (서버 label과 어미가 다르다).
 enum SupportGoal {
-  stepByStep('해야 할 일을 순서대로 이해해요', 'STEP_BY_STEP'),
-  prepareItems('필요한 준비물을 스스로 챙겨요', 'PREPARE_ITEMS'),
-  prepareNew('새로운 상황을 미리 준비해요', 'PREPARE_NEW'),
-  independent('혼자 끝까지 해내는 경험을 만들어요', 'INDEPENDENT');
+  stepByStep('STEP_BY_STEP'),
+  prepareItems('PREPARE_ITEMS'),
+  prepareNew('PREPARE_NEW'),
+  independent('INDEPENDENT');
 
-  const SupportGoal(this.label, this.apiValue);
+  const SupportGoal(this.apiValue);
 
-  /// 화면에 표시되는 문구 (Figma 기준)
-  final String label;
+  /// 화면에 표시되는 문구 (Figma 기준). 호출 시점의 언어로 읽는다.
+  String get label => switch (this) {
+    SupportGoal.stepByStep => appL10n.goalStepByStep,
+    SupportGoal.prepareItems => appL10n.goalPrepareItems,
+    SupportGoal.prepareNew => appL10n.goalPrepareNew,
+    SupportGoal.independent => appL10n.goalIndependent,
+  };
 
   /// 서버 전송용 값 (서버 enum name과 동일)
   final String apiValue;

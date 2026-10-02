@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -60,7 +61,7 @@ class _NameScreenState extends ConsumerState<NameScreen> {
     return ElumScaffold(
       onBack: canGoBack ? () => context.pop() : null,
       bottomButton: ElumButton(
-        label: '다음',
+        label: context.l10n.commonNext,
         // 진행 조건은 모델이 안다 — 화면마다 재구현하지 않는다
         onPressed: canSubmit ? _submit : null,
       ),
@@ -73,7 +74,7 @@ class _NameScreenState extends ConsumerState<NameScreen> {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: context.space.xs.h),
             child: Text(
-              '초대 코드가 있어요',
+              context.l10n.onboardingNameInviteLink,
               style: context.typo.linkLater.copyWith(
                 color: context.colors.linkLaterLabel,
                 decoration: TextDecoration.underline,
@@ -87,16 +88,16 @@ class _NameScreenState extends ConsumerState<NameScreen> {
         children: [
           ElumHeader(
             // 시안(204:996) 문구 그대로. `부를까요`로 줄여 두었던 것을 되돌린다.
-            title: '이룸이를 어떻게\n불러드릴까요?',
+            title: context.l10n.onboardingNameTitle,
             // 개인정보 최소수집 원칙의 UI 표현 — 삭제하지 않는다
-            description: '정확한 실명이 아니어도 괜찮아요',
+            description: context.l10n.onboardingNameDescription,
             hasBackButton: canGoBack,
           ),
           // Figma 설명 하단(227) → 입력 필드(279)
           SizedBox(height: context.space.headerToContent),
           ElumTextField(
             controller: _controller,
-            hintText: '이름을 입력해주세요',
+            hintText: context.l10n.onboardingNameHint,
             onChanged: ref.read(onboardingProvider.notifier).setNickname,
             // 완료 키로도 다음 단계로 간다.
             //

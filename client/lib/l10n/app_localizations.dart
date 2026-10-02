@@ -589,6 +589,246 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'선택항목'**
   String get consentGroupOptional;
+
+  /// 이룸을 쓰는 당사자를 부르는 말. 이름을 못 받았을 때의 대체 호칭이기도 하다. 번역 여부는 용어집이 정한다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이'**
+  String get commonElumiName;
+
+  /// 캐릭터 종류(접근성 안내)
+  ///
+  /// In ko, this message translates to:
+  /// **'고양이'**
+  String get characterCatLabel;
+
+  /// 고양이 캐릭터의 카드 아래 이름. 번역 여부는 용어집이 정한다
+  ///
+  /// In ko, this message translates to:
+  /// **'루루'**
+  String get characterCatName;
+
+  /// 캐릭터 종류(접근성 안내)
+  ///
+  /// In ko, this message translates to:
+  /// **'여우'**
+  String get characterFoxLabel;
+
+  /// 여우 캐릭터의 카드 아래 이름. 번역 여부는 용어집이 정한다
+  ///
+  /// In ko, this message translates to:
+  /// **'포포'**
+  String get characterFoxName;
+
+  /// 서비스 에이전트(루미)의 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'병아리'**
+  String get agentChickLabel;
+
+  /// 카드 그림 방식 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'만화'**
+  String get imageStyleCartoonLabel;
+
+  /// 카드 그림 방식 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터가 나오는 그림이에요'**
+  String get imageStyleCartoonDescription;
+
+  /// 카드 그림 방식 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'실사'**
+  String get imageStyleRealisticLabel;
+
+  /// 카드 그림 방식 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'실제 물건 사진처럼 보여요'**
+  String get imageStyleRealisticDescription;
+
+  /// 카드 그림 방식 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'직접 찍은 사진'**
+  String get imageStylePhotoOnlyLabel;
+
+  /// 카드 그림 방식 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'그림은 직접 찍은 사진으로 넣어요. 글은 계속 만들어 드려요'**
+  String get imageStylePhotoOnlyDescription;
+
+  /// 도움 목표 선택지
+  ///
+  /// In ko, this message translates to:
+  /// **'해야 할 일을 순서대로 이해해요'**
+  String get goalStepByStep;
+
+  /// 도움 목표 선택지
+  ///
+  /// In ko, this message translates to:
+  /// **'필요한 준비물을 스스로 챙겨요'**
+  String get goalPrepareItems;
+
+  /// 도움 목표 선택지
+  ///
+  /// In ko, this message translates to:
+  /// **'새로운 상황을 미리 준비해요'**
+  String get goalPrepareNew;
+
+  /// 도움 목표 선택지
+  ///
+  /// In ko, this message translates to:
+  /// **'혼자 끝까지 해내는 경험을 만들어요'**
+  String get goalIndependent;
+
+  /// 캐릭터 고르기 화면 제목. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}의 하루를 함께할\n친구를 골라주세요'**
+  String onboardingCharacterTitle(String name);
+
+  /// 캐릭터 고르기 화면 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'선택한 친구가 카드 속 주인공이 되어 도와줘요'**
+  String get onboardingCharacterDescription;
+
+  /// 도움 목표 화면 제목. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}의 어떤 순간을\n도와주고 싶으신가요?'**
+  String onboardingGoalsTitle(String name);
+
+  /// 도움 목표 화면 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'여러 개를 선택할 수 있어요'**
+  String get onboardingGoalsDescription;
+
+  /// 카드 그림 방식 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림은 어떤 방식으로\n만들까요?'**
+  String get onboardingImageStyleTitle;
+
+  /// 카드 그림 방식 화면 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에 설정에서 바꿀 수 있어요'**
+  String get onboardingImageStyleDescription;
+
+  /// 카드 그림 방식 화면의 건너뛰기 링크
+  ///
+  /// In ko, this message translates to:
+  /// **'건너뛰기'**
+  String get onboardingImageStyleSkip;
+
+  /// 이름 입력 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이를 어떻게\n불러드릴까요?'**
+  String get onboardingNameTitle;
+
+  /// 이름 입력 화면 설명(개인정보 최소수집 안내)
+  ///
+  /// In ko, this message translates to:
+  /// **'정확한 실명이 아니어도 괜찮아요'**
+  String get onboardingNameDescription;
+
+  /// 이름 입력칸 힌트
+  ///
+  /// In ko, this message translates to:
+  /// **'이름을 입력해주세요'**
+  String get onboardingNameHint;
+
+  /// 이름 입력 화면에서 초대 코드로 합류하는 링크
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드가 있어요'**
+  String get onboardingNameInviteLink;
+
+  /// 온보딩 완료 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'내용 정리가 모두\n완료됐어요'**
+  String get onboardingCompletionTitle;
+
+  /// 온보딩 완료 화면의 진행도 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'100% 완료!'**
+  String get onboardingCompletionProgress;
+
+  /// 스플래시 로고를 화면 낭독기가 읽는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸'**
+  String get onboardingSplashLogoLabel;
+
+  /// 비밀암호 만들기 1단계 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자님만 아는\n비밀암호를 만들어주세요'**
+  String get pinCreateTitle;
+
+  /// 비밀암호 재입력 단계 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'암호를 한번 더\n입력해주세요'**
+  String get pinConfirmTitle;
+
+  /// 비밀암호 화면 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자모드로 변경할 때 사용하는 암호예요'**
+  String get pinDescription;
+
+  /// 재입력이 처음 암호와 다를 때 설명 자리에 뜨는 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'암호가 달라요. 다시 넣어주세요'**
+  String get pinMismatch;
+
+  /// 암호 점 영역을 화면 낭독기가 읽는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'암호 넣기'**
+  String get pinInputSemanticLabel;
+
+  /// 비밀암호를 두 번 맞춘 뒤 나타나는 확정 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'시작하기'**
+  String get pinStartButton;
+
+  /// 이룸이 만들기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이를 만들지 못했어요'**
+  String get pinProfileCreateFailedTitle;
+
+  /// 이룸이 만들기 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get pinProfileCreateFailedFallback;
+
+  /// 설정 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'설정을 저장하지 못했어요'**
+  String get pinSaveFailedTitle;
+
+  /// 설정 저장 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 화면에서 다시 확인해주세요'**
+  String get pinSaveFailedFallback;
 }
 
 class _AppLocalizationsDelegate

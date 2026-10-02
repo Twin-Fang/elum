@@ -1,3 +1,5 @@
+import '../../../core/l10n/current_l10n.dart';
+
 /// 카드 그림을 어떤 방식으로 만들지 (이슈 #458 · 서버 #457).
 ///
 /// 현장 피드백 — 만화풍 그림은 발달장애인에게 추상적이라 옷장 그림을 옷장으로
@@ -11,24 +13,28 @@ enum ImageStyle {
   //
   // apiValue 는 서버 `ImageStyle` enum name 과 같아야 한다. 어긋나면
   // PATCH /api/member/image-style 이 역직렬화에 실패한다.
-  cartoon('만화', 'CARTOON', '캐릭터가 나오는 그림이에요'),
-  realistic('실사', 'REALISTIC', '실제 물건 사진처럼 보여요'),
-  photoOnly(
-    '직접 찍은 사진',
-    'PHOTO_ONLY',
-    '그림은 직접 찍은 사진으로 넣어요. 글은 계속 만들어 드려요',
-  );
+  cartoon('CARTOON'),
+  realistic('REALISTIC'),
+  photoOnly('PHOTO_ONLY');
 
-  const ImageStyle(this.label, this.apiValue, this.description);
+  const ImageStyle(this.apiValue);
 
-  /// 화면 이름 (선택 카드 제목·설정 줄의 값)
-  final String label;
+  /// 화면 이름 (선택 카드 제목·설정 줄의 값). 호출 시점의 언어로 읽는다.
+  String get label => switch (this) {
+    ImageStyle.cartoon => appL10n.imageStyleCartoonLabel,
+    ImageStyle.realistic => appL10n.imageStyleRealisticLabel,
+    ImageStyle.photoOnly => appL10n.imageStylePhotoOnlyLabel,
+  };
 
   /// 서버 enum 값
   final String apiValue;
 
   /// 선택 카드의 한 줄 설명
-  final String description;
+  String get description => switch (this) {
+    ImageStyle.cartoon => appL10n.imageStyleCartoonDescription,
+    ImageStyle.realistic => appL10n.imageStyleRealisticDescription,
+    ImageStyle.photoOnly => appL10n.imageStylePhotoOnlyDescription,
+  };
 
   /// 저장소·서버에 남은 문자열을 되돌린다.
   ///

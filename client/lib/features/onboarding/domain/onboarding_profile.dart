@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../core/l10n/current_l10n.dart';
 import 'character.dart';
 import 'image_style.dart';
 import 'support_goal.dart';
@@ -35,13 +36,11 @@ abstract class OnboardingProfile with _$OnboardingProfile {
   /// PIN 자릿수 — 화면과 검증이 같은 값을 보게 한다
   static const pinLength = 4;
 
-  /// 호칭이 없을 때 제목에 쓸 대체어.
+  /// 화면 제목에 넣을 호칭. 비어있으면 자연스러운 대체어(이룸이)를 준다.
   /// 딥링크로 중간 진입하면 호칭이 비어 "의 어떤 순간을..."처럼 조사만 남는다.
-  static const _nicknameFallback = '이룸이';
-
-  /// 화면 제목에 넣을 호칭. 비어있으면 자연스러운 대체어를 준다.
-  String get displayName =>
-      childNickname.trim().isEmpty ? _nicknameFallback : childNickname.trim();
+  String get displayName => childNickname.trim().isEmpty
+      ? appL10n.commonElumiName
+      : childNickname.trim();
 
   // 각 단계의 진행 조건을 모델이 스스로 안다.
   // 화면마다 조건을 재구현하면 하나만 틀려도 CTA가 잘못 열린다.
