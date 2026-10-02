@@ -356,7 +356,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
       _blockedCalls++;
       debugPrint(
         '[cost] 카드 생성 중복 호출 차단 (누적 $_blockedCalls회) — '
-        '이미 ${state.routine != null ? "생성 완료" : "생성 중"}. 서버 요청 안 보냄',
+        '이미 ${state.routine != null ? "생성 완료" : "생성 중"}. 서버 요청 안 보냄', // l10n-ignore: 로그
       );
       return running;
     }

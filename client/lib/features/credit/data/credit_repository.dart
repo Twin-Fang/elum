@@ -26,7 +26,7 @@ class CreditRepository {
       AppLogger.repositorySuccess(
         'CreditRepository',
         'getMine',
-        summary.enabled ? '남음 ${summary.available}' : '꺼짐',
+        summary.enabled ? '남음 ${summary.available}' : '꺼짐', // l10n-ignore: 로그
       );
       return summary;
     } catch (e) {

@@ -159,7 +159,7 @@ abstract final class AppConfig {
       _string('ELUM_NAVER_CLIENT_SECRET', '');
 
   /// 네이버 로그인 동의 화면에 표시되는 서비스 이름.
-  static String get naverClientName => _string('ELUM_NAVER_CLIENT_NAME', '이룸');
+  static String get naverClientName => _string('ELUM_NAVER_CLIENT_NAME', '이룸'); // l10n-ignore: 네이버 SDK 에 넘기는 앱 이름 기본값 — 계획 6(네이티브)
 
   /// 구글 **웹** 클라이언트 ID. 안드로이드 클라이언트 ID가 아니다.
   /// 안드로이드에서 ID 토큰을 받으려면 serverClientId에 웹 ID를 넘겨야 한다.
