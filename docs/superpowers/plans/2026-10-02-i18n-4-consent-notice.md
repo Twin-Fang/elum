@@ -2,13 +2,13 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 약관을 (약관 키, 언어) 한 쌍으로 저장·조회하고, 동의할 때 동의한 언어를 기록하며, 공지에 언어별 번역 행을 달고, 관리자 화면에서 언어별로 편집·확인하게 한다. 약관이 게시되지 않은 언어에서는 가입이 막히고 "약관을 불러오지 못했어요" + 재시도가 나온다.
+**Goal:** 약관을 (약관 키, 언어) 한 쌍으로 저장·조회하고, 동의할 때 동의한 언어를 기록하며, 공지에 언어별 번역 행을 달고, 관리자 화면에서 언어별로 편집·확인하게 한다. 약관이 게시되지 않은 언어에서는 가입이 막히고 "약관을 불러오지 못했어요" + 재시도가 나온다. 공지에는 **대상 국가**(`app_notice.target_countries`)를 지정할 수 있고, 서버가 요청 국가로 걸러서 내려준다.
 
-**Architecture:** 서버는 `Accept-Language` 를 `AppLocale.fromAcceptLanguage` 로 해석해 **그 언어의 게시본만** 준다(약관은 `en` 으로 대체하지 않는다. 공지는 요청 → `en` → `ko`). 약관의 "게시"는 **그 언어의 필수 4종(이용약관·개인정보·국외 이전·나이 확인)이 모두 있는 상태**다. 동의 기록은 `member.consent_locale` 에 남기고, 게시되지 않은 언어로는 동의를 받지 않는다(서버가 400). 클라이언트는 번들 기본값을 `ko` 한 벌만 두고(`en` 은 법무 확인 본문이 들어올 때 한 줄로 추가), 캐시는 언어별로 나눈다. 공지는 `app_notice_translation` 에 언어별 제목·본문·버튼 문구를 두고, 이미지·링크·기간·플랫폼은 공지 하나가 공유한다. 관리자 화면은 쿼리 `?locale=` 로 언어를 고르고, 공지 편집은 언어 탭 + 미리보기 언어 연동이다.
+**Architecture:** 서버는 `Accept-Language` 를 `AppLocale.fromAcceptLanguage` 로 해석해 **그 언어의 게시본만** 준다(약관은 `en` 으로 대체하지 않는다. 공지는 요청 → `en` → `ko`). 약관의 "게시"는 **그 언어의 필수 4종(이용약관·개인정보·국외 이전·나이 확인)이 모두 있는 상태**다. 동의 기록은 `member.consent_locale` 에 남기고, 게시되지 않은 언어로는 동의를 받지 않는다(서버가 400). 클라이언트는 번들 기본값을 `ko` 한 벌만 두고(`en` 은 법무 확인 본문이 들어올 때 한 줄로 추가), 캐시는 언어별로 나눈다. 공지는 `app_notice_translation` 에 언어별 제목·본문·버튼 문구를 두고, 이미지·링크·기간·플랫폼은 공지 하나가 공유한다. 관리자 화면은 쿼리 `?locale=` 로 언어를 고르고, 공지 편집은 언어 탭 + 미리보기 언어 연동이다. 공지의 **대상 국가**는 공지 한 장이 공유하는 값(`app_notice.target_countries`, 쉼표 구분 ISO 코드, 비면 전체)이고, `NoticeService` 가 요청 국가(`CurrentRegion.get()`, 컨트롤러가 읽어 넘긴다)로 걸러서 내려준다. 앱은 공지 표시 코드를 바꾸지 않는다.
 
 **Tech Stack:** Spring Boot 4.1 / JPA / Flyway / Thymeleaf / Mockito, 정적 JS(`notice-preview.js`), Flutter(Riverpod 3, Dio), Python 3.11(`tool/check_public_pages.py`), GitHub Actions.
 
-**Spec:** `docs/superpowers/specs/2026-10-02-multi-language-design.md` (4.4 약관과 동의 기록, 4.5 관리자 화면)
+**Spec:** `docs/superpowers/specs/2026-10-02-multi-language-design.md` (4.3.1 국가 판정, 4.4 약관과 동의 기록, 4.5 관리자 화면)
 
 **마스터:** `docs/superpowers/plans/2026-10-02-i18n-0-master.md` (공통 계약 C1~C5)
 
@@ -17,6 +17,7 @@
 - 지원 언어는 `ko` `en` `ja` `zh`(간체) `es` 다섯이다. RTL과 번체 중국어는 범위 밖이다.
 - **앱 안에는 언어 선택 화면을 만들지 않는다.** 언어 강제 스위치는 개발자 도구(`core/dev`)에만 둔다.
 - 대체 순서는 어디서든 **요청 언어 → `en` → `ko`** 이다.
+- 요청 국가는 `CurrentRegion.get()` 이다(헤더 `X-Elum-Region`, **없으면 `KR`**, 비었거나 형식이 틀리면 `null` = 국가 미상). 이 계획은 그것을 **소비만** 한다. 국가 미상에게는 대상 국가를 지정하지 않은 공지만 보인다. 약관·개인정보방침은 국가와 무관하게 언어로만 고른다.
 - `Accept-Language` 헤더가 **없으면 `ko`**, 5개 밖이거나 깨진 값이면 `en` 이다. 이미 배포된 앱의 응답은 바뀌지 않는다.
 - 에러 문구는 서버가 번역해 내려보내고 클라이언트는 서버 문구를 그대로 보여준다(#347). 클라이언트가 에러 코드를 번역하지 않는다.
 - `ko` 화면은 **1단계 이후에도 지금과 픽셀 단위로 같다.** 기존 앱 테스트와 골든이 그대로 통과해야 한다.
@@ -44,6 +45,10 @@
 - 공지 응답이 `Vary: Accept-Language` 를 붙인다(60초 캐시가 언어를 섞지 않게). (Task 6)
 - 관리자 미리보기의 줄바꿈 표시 규칙이 앱과 같은 언어 집합(`ja`·`zh` 는 표시 없음)을 쓴다. (Task 9)
 - 이 마이그레이션(V34·V35)은 `MigrationRollbackContractTest` 의 "V32 만 줄인다" 규칙을 어기지 않는다. (Task 1, Task 5)
+- 국가 미상(`null`) 사용자에게 대상 국가가 지정된 공지가 새지 않는다. (Task 5 `AppNoticeTargetCountriesTest#unknownRegion_onlyUntargeted`, Task 6 `NoticeCountryTest#unknownRegion_neverSeesTargeted`·`otherCountryNoticesDoNotTakeSlots`)
+- 대상 국가 목록에 형식이 틀린 코드가 들어가지 않는다 — 두 글자 대문자만, 중복 제거, 255자 안. 걸리면 아무것도 저장하지 않는다. (Task 6 `NoticeCountryTest#create_rejectsMalformed`·`create_maxLength`·`update_invalid_keepsOldValue`, Task 8 `create_invalidTargetCountries_code`)
+- 헤더가 없는 기존 앱(= `KR`)은 기존과 같은 공지를 본다 — 대상이 비어 있는 기존 공지는 전과 같이 나오고 응답 본문 모양도 같다. (Task 6 `NoticeCountryTest#headerlessOldApp_seesWhatItAlwaysSaw`·`response_doesNotExposeTargetCountries`)
+- 국가별로 달라지는 공지 응답을 60초 캐시가 섞지 않는다 — `Vary` 에 `X-Elum-Region` 이 있다. (Task 6 `NoticeControllerTest`)
 
 ## 선행 조건 (시작 전에 확인한다)
 
@@ -51,6 +56,7 @@
 
 | 필요한 것 | 출처 | 쓰는 Task | 확인 명령 | 기대 결과 |
 | --- | --- | --- | --- | --- |
+| `com.chuseok22.elumserver.common.locale.CurrentRegion` (`get()` → 대문자 ISO 코드 또는 `null` = 국가 미상, 요청 밖·헤더 없음은 `KR`, 상수 `HEADER = "X-Elum-Region"`·`DEFAULT = "KR"`). 헤더는 클라이언트(계획 1 Task 25)가 보낸다 | 계획 2 Task 3, C1-2 | 서버 Task 6 (이 계획은 **소비만** 한다) | `grep -rn "class CurrentRegion" server/src/main/java` | 1건. **없으면 Task 6 의 대상 국가 부분을 시작하지 않는다**(이 계획에서 만들지 않는다) |
 | `com.chuseok22.elumserver.common.locale.AppLocale` (`code()`, `fallbackChain()`, `fromCode`, `fromAcceptLanguage`, 상수 `KO EN JA ZH ES`) | 계획 2, C2 | 서버 Task 2~9 | `grep -rn "enum AppLocale" server/src/main/java` | 1건 |
 | Flyway 다음 빈 번호 | C3 | Task 1, 5 | `ls server/src/main/resources/db/migration \| sort -V \| tail -3` | 마지막이 V33 이면 V34·V35 를 그대로 쓴다. 더 크면 이 계획의 V34·V35 를 그 다음 번호로 바꿔 쓴다(파일 이름·계약 테스트 경로만 바뀐다) |
 | `context.l10n`, `supportedAppLocales`, `AppLocalizations` | 계획 1, C4 | 클라 Task 10~11 | `grep -rn "supportedAppLocales" client/lib/core/l10n` | 1건 이상 |
@@ -65,7 +71,7 @@
 server/src/main/
   resources/consent/ko/{terms,privacy,overseas,age,marketing}.txt   ← git mv (내용 불변)
   resources/db/migration/V34__add_locale_to_consent.sql              (새)
-  resources/db/migration/V35__create_app_notice_translation.sql      (새)
+  resources/db/migration/V35__create_app_notice_translation.sql      (새 · 번역 표 + app_notice.target_countries)
   java/.../consent/core/ConsentKey.java                              (label→koLabel, 본문 경로 언어별)
   java/.../consent/infrastructure/entity/{ConsentDocument,ConsentDocumentHistory}.java  (locale)
   java/.../consent/infrastructure/repository/*                        (언어 조건 조회)
@@ -100,6 +106,12 @@ tool/check_public_pages.py, tool/test_check_public_pages.py          (언어별 
 | 공지의 한국어 필드(`title`·`body`·`buttonLabel`)는 계속 입력 폼의 최상위 필드다 | `ko` 필수·나머지 선택 규칙이 모양에 그대로 드러나고, 기존 폼·시험이 거의 안 바뀐다. 나머지 언어는 `translations[en].title` 같은 이름으로 따로 묶인다. |
 | `AppNotice.getTitle()` 등은 **한국어 번역 행**을 읽는 편의 메서드로 남긴다 | 관리자 목록·로그·기존 시험이 그대로 한국어 제목을 쓴다. 필드는 없으므로 Hibernate 는 무시한다. |
 | 공지의 버튼 링크·이미지는 언어와 무관하게 공유한다 | C3 의 번역 표 열이 제목·본문·버튼 문구뿐이다. 이미지에 글이 박힌 공지는 언어별로 다르게 못 낸다(알려진 한계 — 관리자 화면에 적어 둔다). |
+| 대상 국가는 공지 한 장의 열 하나(`target_countries`, 쉼표 구분 문자열)다. 별도 표를 두지 않는다 | 국가는 목록이 짧고 조회 조건이 아니라 노출 필터다(공지는 몇십 건이라 메모리에서 거른다). 언어별 번역과 달리 1:N 관계의 속성을 더 붙일 일이 없다. |
+| 국가는 컨트롤러가 `CurrentRegion.get()` 으로 읽어 `NoticeService` 에 인자로 넘긴다 | 서비스가 요청 컨텍스트에 기대면 단위 테스트가 어렵다(`CurrentLocale` 을 컨트롤러가 직접 받는 것과 같은 이유). 국가 미상(`null`)도 인자로 그대로 시험할 수 있다. (`CurrentRegion.set` 은 같은 패키지 전용이라 컨트롤러 시험은 "요청 밖 = `KR`" 만 볼 수 있다.) |
+| 검증은 `NoticeService.normalizeTargetCountries` 한 곳이다. `NoticeInput` 에는 검증 어노테이션을 두지 않는다 | `server/CLAUDE.md` — request DTO 에 `jakarta.validation` 계열을 쓰지 않는다. 입력은 문자열 그대로 받고 서비스가 다듬는다. |
+| 국가 코드는 **두 글자 대문자만** 받고 소문자·세 글자는 거절한다. 허용 국가 목록은 두지 않는다 | 형식만 지키면 새 국가를 코드 수정 없이 쓸 수 있다. 소문자를 몰래 고치면 "KR" 로 저장된 줄 모르는 채 화면 값과 달라진다. 거절하면 쓰던 칸은 그대로 남는다. |
+| 노출 판단 순서: 게시 기간·켜짐 → 플랫폼 → **대상 국가** → 언어 글 고르기 → 최대 5개 | 국가·플랫폼으로 빠지는 공지가 5개 슬롯을 차지하지 않게 `limit` 앞에서 거른다. |
+| 응답 `Vary` 에 `X-Elum-Region` 을 더한다 | 같은 주소·같은 언어라도 국가가 다르면 응답이 다르다. 60초 캐시가 한국 응답을 일본 요청에 주면 안 된다. |
 
 ---
 
@@ -1832,6 +1844,7 @@ git add server/src/main/java/com/chuseok22/elumserver/consent/application/contro
 - Modify: `server/src/main/java/com/chuseok22/elumserver/notice/infrastructure/entity/AppNotice.java:1-94` (전체 교체)
 - Test: `server/src/test/java/com/chuseok22/elumserver/notice/NoticeTranslationMigrationTest.java` (새)
 - Test: `server/src/test/java/com/chuseok22/elumserver/notice/infrastructure/entity/AppNoticeTranslationTest.java` (새)
+- Test: `server/src/test/java/com/chuseok22/elumserver/notice/infrastructure/entity/AppNoticeTargetCountriesTest.java` (새 — 대상 국가)
 
 **Interfaces:**
 - Consumes: `AppLocale#code()`
@@ -1844,6 +1857,8 @@ git add server/src/main/java/com/chuseok22/elumserver/consent/application/contro
   - `AppNotice#retainTranslations(Set<AppLocale>): void` — 목록 밖 언어 행을 지운다(고아 제거)
   - `AppNotice#getTitle()/getBody()/getButtonLabel()` + `setTitle/setBody/setButtonLabel` — **한국어 행**을 읽고 쓰는 편의 메서드(필드는 없다)
   - `AppNotice#hasButton(): boolean`(한국어 기준), `AppNotice#hasButton(AppNoticeTranslation): boolean`
+  - 대상 국가(스펙 4.3.1): `AppNotice.TARGET_COUNTRIES_MAX_LENGTH = 255`, `AppNotice#getTargetCountries(): String` / `setTargetCountries(String)` (쉼표 구분 대문자 ISO 코드, `null` 또는 빈 값 = 전체 국가), `AppNotice#targetCountryList(): List<String>` (공백·빈 토큰 무시, 대문자로 맞춤, 중복 제거), `AppNotice#targetsRegion(String region): boolean` — 대상이 비면 `true`, 값이 있으면 `region` 이 목록에 있을 때만 `true`(**`region == null`(국가 미상)이면 `false`**)
+  - 스키마: `app_notice.target_countries VARCHAR(255) NULL`(V35 에 같이 넣는다)
 
 - [ ] **Step 1: 실패하는 시험을 쓴다**
 
@@ -1901,6 +1916,25 @@ class NoticeTranslationMigrationTest {
     assertThat(sql).contains("alter table app_notice alter column title drop not null;");
     assertThat(sql).contains("alter table app_notice alter column body drop not null;");
     assertThat(sql).doesNotContain("drop column").doesNotContain("drop table").doesNotContain("set not null");
+  }
+
+  @Test
+  @DisplayName("V35 는 대상 국가 열을 NULL 허용·기본값 없이 더한다 — 기존 공지는 전부 전체 국가이고 옛 서버는 그대로 돈다")
+  void v35_addsNullableTargetCountries() throws IOException {
+    String sql = normalizedSql();
+    assertThat(sql).contains(
+      "alter table app_notice add column if not exists target_countries varchar(255);");
+    // NOT NULL·DEFAULT 를 걸면 옛 서버가 공지를 만들 때 깨진다 (MigrationRollbackContractTest 의 "추가만 한다").
+    assertThat(sql).doesNotContain("target_countries varchar(255) not null")
+      .doesNotContain("target_countries varchar(255) default");
+  }
+
+  @Test
+  @DisplayName("엔티티의 대상 국가 열은 V35 와 같다 — 255자, NULL 허용")
+  void entityMatchesTargetCountriesColumn() throws Exception {
+    Column column = AppNotice.class.getDeclaredField("targetCountries").getAnnotation(Column.class);
+    assertThat(column.length()).isEqualTo(AppNotice.TARGET_COUNTRIES_MAX_LENGTH).isEqualTo(255);
+    assertThat(column.nullable()).isTrue();
   }
 
   @Test
@@ -2026,10 +2060,74 @@ class AppNoticeTranslationTest {
 }
 ```
 
+`server/src/test/java/com/chuseok22/elumserver/notice/infrastructure/entity/AppNoticeTargetCountriesTest.java`:
+
+```java
+package com.chuseok22.elumserver.notice.infrastructure.entity;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+/**
+ * 공지의 대상 국가 판단 (이슈 #521, 스펙 4.3.1).
+ *
+ * <p>대상이 비면 전체 국가다. 값이 있으면 그 국가만이고, <b>국가를 모르는 요청은 값이 있는 공지를 못 본다</b>.
+ */
+class AppNoticeTargetCountriesTest {
+
+  private AppNotice notice(String targetCountries) {
+    AppNotice notice = new AppNotice();
+    notice.setTargetCountries(targetCountries);
+    return notice;
+  }
+
+  @Test
+  @DisplayName("대상이 null·빈 값·쉼표뿐이면 전체 국가다 — 어떤 국가에도, 국가 미상에도 보인다")
+  void emptyTargets_meansEveryone() {
+    for (String targets : new String[] {null, "", "  ", " , ,"}) {
+      AppNotice notice = notice(targets);
+      assertThat(notice.targetCountryList()).as("[%s]", targets).isEmpty();
+      assertThat(notice.targetsRegion("KR")).as("[%s] KR", targets).isTrue();
+      assertThat(notice.targetsRegion("US")).as("[%s] US", targets).isTrue();
+      assertThat(notice.targetsRegion(null)).as("[%s] 국가 미상", targets).isTrue();
+    }
+  }
+
+  @Test
+  @DisplayName("대상이 있으면 목록에 든 국가에만 보인다")
+  void listedTargets_onlyThoseCountries() {
+    AppNotice notice = notice("KR,JP");
+
+    assertThat(notice.targetsRegion("KR")).isTrue();
+    assertThat(notice.targetsRegion("JP")).isTrue();
+    assertThat(notice.targetsRegion("US")).isFalse();
+  }
+
+  @Test
+  @DisplayName("국가 미상(null)에게는 대상이 지정된 공지가 보이지 않는다 — 대상이 하나뿐이어도")
+  void unknownRegion_onlyUntargeted() {
+    assertThat(notice("KR").targetsRegion(null)).isFalse();
+    assertThat(notice("KR,JP").targetsRegion(null)).isFalse();
+    assertThat(notice(null).targetsRegion(null)).isTrue();
+  }
+
+  @Test
+  @DisplayName("DB 를 손으로 고친 값도 터지지 않는다 — 공백·빈 토큰·소문자·중복을 다듬어 읽는다")
+  void targetCountryList_toleratesHandEditedValue() {
+    AppNotice notice = notice(" kr, JP ,,kr");
+
+    assertThat(notice.targetCountryList()).containsExactly("KR", "JP");
+    assertThat(notice.targetsRegion("KR")).isTrue();
+  }
+}
+```
+
 - [ ] **Step 2: 실행해 실패를 확인한다**
 
-Run: `cd server && ./gradlew test --tests 'com.chuseok22.elumserver.notice.NoticeTranslationMigrationTest' --tests 'com.chuseok22.elumserver.notice.infrastructure.entity.AppNoticeTranslationTest'`
-Expected: FAIL — 컴파일 오류(`AppNoticeTranslation` 없음).
+Run: `cd server && ./gradlew test --tests 'com.chuseok22.elumserver.notice.NoticeTranslationMigrationTest' --tests 'com.chuseok22.elumserver.notice.infrastructure.entity.AppNoticeTranslationTest' --tests 'com.chuseok22.elumserver.notice.infrastructure.entity.AppNoticeTargetCountriesTest'`
+Expected: FAIL — 컴파일 오류(`AppNoticeTranslation`·`setTargetCountries` 없음).
 
 - [ ] **Step 3: 마이그레이션을 쓴다**
 
@@ -2076,6 +2174,14 @@ WHERE n.title IS NOT NULL
 
 ALTER TABLE app_notice ALTER COLUMN title DROP NOT NULL;
 ALTER TABLE app_notice ALTER COLUMN body DROP NOT NULL;
+
+-- 공지를 보여줄 대상 국가 (스펙 4.3.1). NULL 또는 빈 값 = 전체 국가, 값이 있으면 쉼표로 구분한 ISO 3166-1 alpha-2
+-- 대문자 코드 목록이다(예: KR,JP). 형식은 서버(NoticeService)가 저장 전에 맞춘다.
+--
+-- 기본값 없이 NULL 로 더하므로 기존 공지는 모두 전체 국가라 지금과 똑같이 보인다. NOT NULL·DEFAULT 도 걸지 않는다 —
+-- 옛 서버가 이 열을 모른 채 공지를 만들어도 돌아야 한다. (옛 서버로 되돌리면 대상 국가를 정한 공지도 모두에게
+-- 보인다. 대상 국가를 쓰기 전에는 일어나지 않는다.) 다시 돌려도 안전하다(멱등).
+ALTER TABLE app_notice ADD COLUMN IF NOT EXISTS target_countries VARCHAR(255);
 ```
 
 - [ ] **Step 4: 엔티티를 쓴다**
@@ -2160,7 +2266,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import lombok.Getter;
@@ -2186,6 +2294,7 @@ public class AppNotice extends BaseEntity {
   public static final int BODY_MAX_LENGTH = 1000;
   public static final int BUTTON_LABEL_MAX_LENGTH = 20;
   public static final int BUTTON_URL_MAX_LENGTH = 500;
+  public static final int TARGET_COUNTRIES_MAX_LENGTH = 255;
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -2209,6 +2318,14 @@ public class AppNotice extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
   private NoticePlatform platform = NoticePlatform.ALL;
+
+  /**
+   * 대상 국가. 쉼표로 구분한 ISO 3166-1 alpha-2 대문자 코드({@code KR,JP}). {@code null} 이나 빈 값이면 전체
+   * 국가다. 언어와 달리 공지 한 장이 하나를 공유한다. 형식(두 글자 대문자·중복 없음)은 저장 전에
+   * {@code NoticeService} 가 맞춘다.
+   */
+  @Column(length = TARGET_COUNTRIES_MAX_LENGTH)
+  private String targetCountries;
 
   /** 클수록 먼저. 같으면 시작이 늦은 것이 먼저다. */
   @Column(nullable = false)
@@ -2240,6 +2357,37 @@ public class AppNotice extends BaseEntity {
 
   public NoticeStatus statusAt(LocalDateTime now) {
     return NoticeStatus.of(enabled, startsAt, endsAt, now);
+  }
+
+  // ── 대상 국가 ───────────────────────────────────────
+
+  /**
+   * 대상 국가 목록. 비면 전체 국가다. DB 를 손으로 고친 값(공백·빈 토큰·소문자·중복)도 터지지 않게 다듬어 읽는다.
+   * 템플릿(목록 화면)도 이것을 쓴다.
+   */
+  public List<String> targetCountryList() {
+    if (targetCountries == null) {
+      return List.of();
+    }
+    return Arrays.stream(targetCountries.split(","))
+      .map(String::strip)
+      .filter(code -> !code.isEmpty())
+      .map(code -> code.toUpperCase(Locale.ROOT))
+      .distinct()
+      .toList();
+  }
+
+  /**
+   * 이 공지가 [region] 국가에 나가는가. 대상이 비면 어느 국가에든 나간다. 값이 있으면 목록에 든 국가에만 나가고,
+   * <b>국가를 모르는 요청([region] 이 {@code null})에는 나가지 않는다</b> — 대상을 정한 공지가 엉뚱한 국가에 새지
+   * 않게 한다(스펙 4.3.1).
+   */
+  public boolean targetsRegion(String region) {
+    List<String> targets = targetCountryList();
+    if (targets.isEmpty()) {
+      return true;
+    }
+    return region != null && targets.contains(region);
   }
 
   // ── 언어별 글 ───────────────────────────────────────
@@ -2332,7 +2480,7 @@ public class AppNotice extends BaseEntity {
 - [ ] **Step 5: 통과를 확인한다**
 
 Run: `cd server && ./gradlew test --tests 'com.chuseok22.elumserver.notice.*' --tests 'com.chuseok22.elumserver.common.MigrationRollbackContractTest'`
-Expected: 신규 시험 PASS. 기존 공지 시험은 `AppNoticeResponse.from` 이 제거되기 전이라 **컴파일이 깨지지 않는다**(Task 6 에서 바꾼다). 단 `AppNoticeResponse` 가 `notice.getButtonLabel()`·`hasButton()` 을 그대로 쓰므로 한국어 행만 있는 기존 시험은 전부 통과해야 한다.
+Expected: 신규 시험 PASS(`AppNoticeTargetCountriesTest` 4건, `NoticeTranslationMigrationTest` 6건). 기존 공지 시험은 `AppNoticeResponse.from` 이 제거되기 전이라 **컴파일이 깨지지 않는다**(Task 6 에서 바꾼다). 단 `AppNoticeResponse` 가 `notice.getButtonLabel()`·`hasButton()` 을 그대로 쓰므로 한국어 행만 있는 기존 시험은 전부 통과해야 한다.
 
 - [ ] **Step 6: 커밋 (`/pro-commit`)**
 
@@ -2341,7 +2489,8 @@ git add server/src/main/resources/db/migration/V35__create_app_notice_translatio
   server/src/main/java/com/chuseok22/elumserver/notice/infrastructure/entity/AppNotice.java \
   server/src/main/java/com/chuseok22/elumserver/notice/infrastructure/entity/AppNoticeTranslation.java \
   server/src/test/java/com/chuseok22/elumserver/notice/NoticeTranslationMigrationTest.java \
-  server/src/test/java/com/chuseok22/elumserver/notice/infrastructure/entity/AppNoticeTranslationTest.java
+  server/src/test/java/com/chuseok22/elumserver/notice/infrastructure/entity/AppNoticeTranslationTest.java \
+  server/src/test/java/com/chuseok22/elumserver/notice/infrastructure/entity/AppNoticeTargetCountriesTest.java
 ```
 
 ---
@@ -2356,20 +2505,22 @@ git add server/src/main/resources/db/migration/V35__create_app_notice_translatio
 - Modify: `server/src/main/java/com/chuseok22/elumserver/notice/application/service/NoticeService.java:3-33, 99-112, 249-317`
 - Modify: `server/src/main/java/com/chuseok22/elumserver/notice/application/controller/NoticeController.java:27-39`
 - Modify: `server/src/main/java/com/chuseok22/elumserver/notice/application/controller/NoticeControllerDocs.java:62-67`
-- Modify: `server/src/main/java/com/chuseok22/elumserver/common/infrastructure/exception/ErrorCode.java:182` 아래에 세 줄 추가
+- Modify: `server/src/main/java/com/chuseok22/elumserver/common/infrastructure/exception/ErrorCode.java:182` 아래에 다섯 줄 추가
 - Modify: `server/src/test/java/com/chuseok22/elumserver/notice/application/controller/NoticeControllerTest.java:35-47`
 - Test: `server/src/test/java/com/chuseok22/elumserver/notice/application/service/NoticeLocaleTest.java` (새)
+- Test: `server/src/test/java/com/chuseok22/elumserver/notice/application/service/NoticeCountryTest.java` (새 — 대상 국가 노출 규칙·저장 검증)
 
 **Interfaces:**
-- Consumes: Task 5 의 `AppNotice#translation/putTranslation/retainTranslations`, `AppLocale#fallbackChain()`
+- Consumes: Task 5 의 `AppNotice#translation/putTranslation/retainTranslations`, `AppNotice#targetsRegion/targetCountryList/setTargetCountries`, `AppLocale#fallbackChain()`, 계획 2 의 `CurrentRegion.get()`(대문자 ISO 코드 또는 `null` = 국가 미상. **소비만 한다**)
 - Produces:
   - `NoticeTextInput(String title, String body, String buttonLabel)` + `isBlank(): boolean`
-  - `NoticeInput(..., boolean enabled, Map<String, NoticeTextInput> translations)` — 마지막 컴포넌트. 옛 9인자 생성자는 `translations = Map.of()` 로 남는다
+  - `NoticeInput(..., boolean enabled, Map<String, NoticeTextInput> translations, String targetCountries)` — 마지막 두 컴포넌트. 옛 9인자·10인자 생성자는 `translations = Map.of()`·`targetCountries = ""` 로 남는다. 대상 국가는 쉼표로 구분한 문자열 그대로 받는다(검증은 서비스에서)
   - `NoticeLocaleException(ErrorCode, AppLocale)` extends `CustomException`, `getLocale(): AppLocale`
-  - `NoticeService#publishedFor(String platform, AppLocale locale): AppNoticesResponse` — 요청 → `en` → `ko`. 옛 `publishedFor(String)` 은 `KO` 로 위임
+  - `NoticeService#publishedFor(String platform, AppLocale locale, String region): AppNoticesResponse` — 순서: 게시 기간·켜짐 → 플랫폼 → **대상 국가(`region`; `null` = 국가 미상)** → 언어 글 고르기(요청 → `en` → `ko`) → 최대 5개. `publishedFor(platform, locale)` 은 `KR`(헤더 없는 옛 앱), `publishedFor(platform)` 은 `KO`·`KR` 로 위임
+  - `NoticeService.normalizeTargetCountries(String): String` (package-private static) — 쉼표 구분 → 공백 제거·빈 토큰 무시·중복 제거(처음 나온 순서 유지) → 두 글자 대문자만 허용 → 255자 이내. 비면 `null`(전체 국가). 어기면 `CustomException`
   - `AppNoticeResponse.from(AppNotice, AppNoticeTranslation)` (옛 `from(AppNotice)` 는 지운다)
-  - `NoticeController#notices(String platform, String acceptLanguage)` — `Vary: Accept-Language`
-  - `ErrorCode.NOTICE_TRANSLATION_INCOMPLETE(400)`, `ErrorCode.NOTICE_LOCALE_INVALID(400)`
+  - `NoticeController#notices(String platform, String acceptLanguage)` — `Vary: Accept-Language, X-Elum-Region`. 국가는 `CurrentRegion.get()` 으로 읽어 서비스에 넘긴다
+  - `ErrorCode.NOTICE_TRANSLATION_INCOMPLETE(400)`, `ErrorCode.NOTICE_LOCALE_INVALID(400)`, `ErrorCode.NOTICE_TARGET_COUNTRIES_INVALID(400)`, `ErrorCode.NOTICE_TARGET_COUNTRIES_TOO_LONG(400)`
 
 - [ ] **Step 1: 실패하는 시험을 쓴다**
 
@@ -2679,10 +2830,300 @@ class NoticeLocaleTest {
 }
 ```
 
+`server/src/test/java/com/chuseok22/elumserver/notice/application/service/NoticeCountryTest.java`:
+
+```java
+package com.chuseok22.elumserver.notice.application.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.properties.NoticeProperties;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.notice.application.dto.request.NoticeInput;
+import com.chuseok22.elumserver.notice.application.dto.response.AppNoticeResponse;
+import com.chuseok22.elumserver.notice.application.dto.response.AppNoticesResponse;
+import com.chuseok22.elumserver.notice.core.NoticePlatform;
+import com.chuseok22.elumserver.notice.infrastructure.entity.AppNotice;
+import com.chuseok22.elumserver.notice.infrastructure.repository.AppNoticeRepository;
+import com.chuseok22.elumserver.notice.infrastructure.storage.LocalFileNoticeImageStorage;
+import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+/**
+ * 공지의 대상 국가 노출 규칙과 저장 검증 (이슈 #521, 스펙 4.3.1).
+ *
+ * <p>요청 국가는 컨트롤러가 {@code CurrentRegion.get()} 으로 읽어 넘긴다. 헤더 없는 옛 앱은 {@code KR},
+ * 형식이 틀린 헤더는 {@code null}(국가 미상)이다. 국가 미상에게는 대상을 정하지 않은 공지만 보인다.
+ */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class NoticeCountryTest {
+
+  private static final Instant NOW = Instant.parse("2026-09-23T03:00:00Z"); // 한국 12:00
+  private static final LocalDateTime NOW_KST = LocalDateTime.of(2026, 9, 23, 12, 0);
+
+  @TempDir
+  Path tempDir;
+
+  @Mock
+  private AppNoticeRepository repository;
+  @Mock
+  private SystemConfigService systemConfigService;
+
+  private final List<AppNotice> stored = new ArrayList<>();
+  private NoticeService service;
+
+  @BeforeEach
+  void setUp() {
+    service = new NoticeService(repository, systemConfigService,
+      new LocalFileNoticeImageStorage(new NoticeProperties(tempDir.toString())),
+      Clock.fixed(NOW, ZoneOffset.UTC));
+    when(repository.findAll()).thenReturn(stored);
+    when(repository.save(any(AppNotice.class))).thenAnswer(invocation -> {
+      AppNotice notice = invocation.getArgument(0);
+      if (notice.getId() == null) {
+        notice.setId("notice-" + (stored.size() + 1));
+        stored.add(notice);
+      }
+      return notice;
+    });
+    when(repository.findById(any())).thenAnswer(invocation -> stored.stream()
+      .filter(notice -> notice.getId().equals(invocation.getArgument(0))).findFirst());
+    when(systemConfigService.getInt(ConfigKey.NOTICE_HIDE_DAYS)).thenReturn(7);
+  }
+
+  /** 지금 게시 중인 공지. [priority] 가 클수록 먼저 나온다. */
+  private AppNotice live(String id, String targetCountries, int priority) {
+    AppNotice notice = new AppNotice();
+    notice.setId(id);
+    notice.setTitle("제목 " + id);
+    notice.setBody("본문 " + id);
+    notice.setButtonUrl("https://example.com");
+    notice.setButtonLabel("자세히");
+    notice.setPlatform(NoticePlatform.ALL);
+    notice.setPriority(priority);
+    notice.setTargetCountries(targetCountries);
+    notice.setStartsAt(NOW_KST.minusDays(1));
+    notice.setEnabled(true);
+    notice.setCreatedBy("admin");
+    notice.setUpdatedBy("admin");
+    stored.add(notice);
+    return notice;
+  }
+
+  private List<String> ids(AppNoticesResponse response) {
+    return response.notices().stream().map(AppNoticeResponse::id).toList();
+  }
+
+  // ── 노출 규칙 ───────────────────────────────────────
+
+  @Test
+  @DisplayName("대상이 비어 있는 공지(null·빈 값)는 어느 국가에도, 국가 미상에도 보인다")
+  void noTarget_shownToEveryRegionIncludingUnknown() {
+    live("all", null, 2);
+    live("blank", "", 1);
+
+    for (String region : new String[] {"KR", "US", "JP", null}) {
+      assertThat(ids(service.publishedFor("IOS", AppLocale.KO, region)))
+        .as("국가 %s", region).containsExactly("all", "blank");
+    }
+  }
+
+  @Test
+  @DisplayName("대상이 있으면 목록에 든 국가에만 보인다")
+  void targeted_shownOnlyToListedRegions() {
+    live("kr-jp", "KR,JP", 0);
+
+    assertThat(ids(service.publishedFor("IOS", AppLocale.KO, "KR"))).containsExactly("kr-jp");
+    assertThat(ids(service.publishedFor("IOS", AppLocale.KO, "JP"))).containsExactly("kr-jp");
+    assertThat(service.publishedFor("IOS", AppLocale.KO, "US").notices()).isEmpty();
+  }
+
+  @Test
+  @DisplayName("국가 미상(null)에게는 대상이 지정된 공지가 새지 않는다 — 대상이 비어 있는 공지만 보인다")
+  void unknownRegion_neverSeesTargeted() {
+    live("targeted", "KR", 5);
+    live("open", null, 1);
+
+    assertThat(ids(service.publishedFor("IOS", AppLocale.KO, null))).containsExactly("open");
+    // 같은 데이터를 한국 사용자는 둘 다 본다 — 필터가 국가 미상에만 걸린다.
+    assertThat(ids(service.publishedFor("IOS", AppLocale.KO, "KR"))).containsExactly("targeted", "open");
+  }
+
+  @Test
+  @DisplayName("다른 국가 공지가 5개 슬롯을 차지하지 않는다 — 국가는 limit 앞에서 거른다")
+  void otherCountryNoticesDoNotTakeSlots() {
+    for (int i = 0; i < NoticeService.MAX_SLIDES; i++) {
+      live("jp-" + i, "JP", 100 + i);
+    }
+    live("open", null, 1);
+
+    assertThat(ids(service.publishedFor("IOS", AppLocale.KO, "KR"))).containsExactly("open");
+    assertThat(ids(service.publishedFor("IOS", AppLocale.KO, null))).containsExactly("open");
+    assertThat(service.publishedFor("IOS", AppLocale.KO, "JP").notices()).hasSize(NoticeService.MAX_SLIDES);
+  }
+
+  @Test
+  @DisplayName("플랫폼·기간·켜짐·우선순위와 함께 동작한다 — 국가가 맞아도 다른 조건이 안 맞으면 빠진다")
+  void combinesWithPlatformPeriodAndOrder() {
+    AppNotice iosOnly = live("ios-kr", "KR", 3);
+    iosOnly.setPlatform(NoticePlatform.IOS);
+    live("all-kr", "KR", 2);
+    AppNotice ended = live("ended-kr", "KR", 9);
+    ended.setEndsAt(NOW_KST.minusHours(1));
+    AppNotice off = live("off-kr", "KR", 9);
+    off.setEnabled(false);
+    AppNotice future = live("future-kr", "KR", 9);
+    future.setStartsAt(NOW_KST.plusDays(1));
+
+    // 우선순위 순서가 그대로다(3 → 2).
+    assertThat(ids(service.publishedFor("IOS", AppLocale.KO, "KR"))).containsExactly("ios-kr", "all-kr");
+    assertThat(ids(service.publishedFor("ANDROID", AppLocale.KO, "KR"))).containsExactly("all-kr");
+    assertThat(service.publishedFor("IOS", AppLocale.KO, "JP").notices()).isEmpty();
+  }
+
+  @Test
+  @DisplayName("헤더가 없는 기존 앱은 KR 이다 — 대상이 비어 있는 기존 공지는 전과 같이 보이고, 다른 국가용은 안 보인다")
+  void headerlessOldApp_seesWhatItAlwaysSaw() {
+    live("old", null, 0);
+    live("jp-only", "JP", 9);
+    live("kr-only", "KR", 8);
+
+    // 국가 인자가 없는 호출은 헤더 없는 옛 앱과 같다.
+    assertThat(ids(service.publishedFor("IOS"))).containsExactly("kr-only", "old");
+    assertThat(ids(service.publishedFor("IOS", AppLocale.KO))).containsExactly("kr-only", "old");
+    assertThat(ids(service.publishedFor("IOS", AppLocale.KO, "KR"))).containsExactly("kr-only", "old");
+  }
+
+  @Test
+  @DisplayName("응답 본문에는 대상 국가가 나가지 않는다 — 대상이 있어도 없어도 같은 모양이다")
+  void response_doesNotExposeTargetCountries() throws Exception {
+    live("n1", "KR", 0);
+
+    String json = new ObjectMapper().writeValueAsString(service.publishedFor("IOS"));
+
+    assertThat(json).doesNotContain("targetCountries").doesNotContain("KR");
+    assertThat(json).isEqualTo(
+      "{\"hideDays\":7,\"notices\":[{\"id\":\"n1\",\"revision\":1,\"title\":\"제목 n1\",\"body\":\"본문 n1\","
+        + "\"imageUrl\":null,\"button\":{\"label\":\"자세히\",\"url\":\"https://example.com\"}}]}");
+  }
+
+  // ── 저장 ────────────────────────────────────────────
+
+  private NoticeInput inputWith(String targetCountries) {
+    return new NoticeInput("베타 기간 안내", "하루 3개까지 만들 수 있어요", "", "",
+      "ALL", "0", "2026-09-23T09:00", "", true, Map.of(), targetCountries);
+  }
+
+  @Test
+  @DisplayName("공백·빈 토큰·중복을 다듬어 저장한다 — 처음 나온 순서를 지킨다")
+  void create_normalizes() {
+    AppNotice saved = service.create(inputWith(" KR , JP ,KR,\n"), null, "admin");
+
+    assertThat(saved.getTargetCountries()).isEqualTo("KR,JP");
+  }
+
+  @Test
+  @DisplayName("비었거나 쉼표·공백뿐이면 전체 국가다 — null 로 저장한다")
+  void create_blank_meansAll() {
+    for (String blank : new String[] {null, "", "  ", " , ,"}) {
+      stored.clear();
+      AppNotice saved = service.create(inputWith(blank), null, "admin");
+      assertThat(saved.getTargetCountries()).as("[%s]", blank).isNull();
+    }
+  }
+
+  @Test
+  @DisplayName("형식이 틀린 코드는 거절하고 아무것도 저장하지 않는다 — 소문자·세 글자·숫자·한글·전각·다른 구분자")
+  void create_rejectsMalformed() {
+    for (String bad : new String[] {"kr", "Kr", "KOR", "K", "K1", "한국", "KR JP", "KR;JP", "KR|JP", "ＫＲ", "KR,jp"}) {
+      assertThatThrownBy(() -> service.create(inputWith(bad), null, "admin"))
+        .as("[%s]", bad)
+        .extracting("errorCode").isEqualTo(ErrorCode.NOTICE_TARGET_COUNTRIES_INVALID);
+    }
+    verify(repository, never()).save(any(AppNotice.class));
+  }
+
+  @Test
+  @DisplayName("허용 국가 목록은 없다 — 형식만 맞으면 새 국가 코드도 받는다")
+  void create_acceptsAnyWellFormedCode() {
+    AppNotice saved = service.create(inputWith("ZZ,XK"), null, "admin");
+
+    assertThat(saved.getTargetCountries()).isEqualTo("ZZ,XK");
+  }
+
+  /** "AA,AB,…" 서로 다른 두 글자 코드 [count] 개. */
+  private String codes(int count) {
+    return IntStream.range(0, count)
+      .mapToObj(i -> "" + (char) ('A' + i / 26) + (char) ('A' + i % 26))
+      .collect(Collectors.joining(","));
+  }
+
+  @Test
+  @DisplayName("255자까지다 — 85개(254자)는 되고 86개(257자)는 막는다")
+  void create_maxLength() {
+    AppNotice saved = service.create(inputWith(codes(85)), null, "admin");
+    assertThat(saved.getTargetCountries()).hasSize(254);
+
+    assertThatThrownBy(() -> service.create(inputWith(codes(86)), null, "admin"))
+      .extracting("errorCode").isEqualTo(ErrorCode.NOTICE_TARGET_COUNTRIES_TOO_LONG);
+  }
+
+  @Test
+  @DisplayName("고칠 때 바꾸고 비울 수 있다 — 비우면 전체 국가로 돌아간다")
+  void update_changeAndClear() {
+    AppNotice saved = service.create(inputWith("KR"), null, "admin");
+
+    AppNotice changed = service.update(saved.getId(), inputWith("JP, US"), false, null, false, "admin");
+    assertThat(changed.getTargetCountries()).isEqualTo("JP,US");
+
+    AppNotice cleared = service.update(saved.getId(), inputWith(""), false, null, false, "admin");
+    assertThat(cleared.getTargetCountries()).isNull();
+  }
+
+  @Test
+  @DisplayName("고치다 형식이 틀리면 거절하고 지금 값을 건드리지 않는다")
+  void update_invalid_keepsOldValue() {
+    AppNotice saved = service.create(inputWith("KR"), null, "admin");
+
+    assertThatThrownBy(() -> service.update(saved.getId(), inputWith("kr,jp"), false, null, false, "admin"))
+      .extracting("errorCode").isEqualTo(ErrorCode.NOTICE_TARGET_COUNTRIES_INVALID);
+
+    assertThat(saved.getTargetCountries()).isEqualTo("KR");
+  }
+}
+```
+
 - [ ] **Step 2: 실행해 실패를 확인한다**
 
-Run: `cd server && ./gradlew test --tests 'com.chuseok22.elumserver.notice.application.service.NoticeLocaleTest'`
-Expected: FAIL — 컴파일 오류(`NoticeTextInput`·`NoticeLocaleException`·`publishedFor(String, AppLocale)` 없음).
+Run: `cd server && ./gradlew test --tests 'com.chuseok22.elumserver.notice.application.service.NoticeLocaleTest' --tests 'com.chuseok22.elumserver.notice.application.service.NoticeCountryTest'`
+Expected: FAIL — 컴파일 오류(`NoticeTextInput`·`NoticeLocaleException`·`publishedFor(String, AppLocale)`·`publishedFor(String, AppLocale, String)`·`NoticeInput` 열한 번째 인자 없음).
 
 - [ ] **Step 3: 에러 코드와 입력·예외 타입을 더한다**
 
@@ -2692,6 +3133,9 @@ Expected: FAIL — 컴파일 오류(`NoticeTextInput`·`NoticeLocaleException`·
   // 언어별 공지 (이슈 #521). 한국어는 필수라 비면 NOTICE_TITLE_BLANK 같은 기존 코드로 막힌다.
   NOTICE_TRANSLATION_INCOMPLETE(HttpStatus.BAD_REQUEST, "다른 언어는 제목과 본문을 함께 적어주세요."),
   NOTICE_LOCALE_INVALID(HttpStatus.BAD_REQUEST, "알 수 없는 언어예요."),
+  // 대상 국가 (이슈 #521). 허용 목록은 없고 형식(두 글자 대문자)과 길이만 본다.
+  NOTICE_TARGET_COUNTRIES_INVALID(HttpStatus.BAD_REQUEST, "대상 국가는 KR,JP 처럼 두 글자 대문자 코드를 쉼표로 적어주세요."),
+  NOTICE_TARGET_COUNTRIES_TOO_LONG(HttpStatus.BAD_REQUEST, "대상 국가는 255자까지 적을 수 있어요."),
 ```
 
 `NoticeTextInput.java`:
@@ -2750,6 +3194,8 @@ public class NoticeLocaleException extends CustomException {
  * @param endsAt   비우면 끌 때까지
  * @param translations 한국어 이외 언어의 글. 키는 언어 코드({@code en} {@code ja} {@code zh} {@code es}).
  *                 한국어는 위의 {@code title}·{@code body}·{@code buttonLabel} 이고 필수다 (이슈 #521)
+ * @param targetCountries 대상 국가. 쉼표로 구분한 두 글자 대문자 코드({@code KR,JP}), 비우면 전체 국가.
+ *                 문자열 그대로 받고 형식은 {@code NoticeService} 가 검사한다 (request DTO 에는 검증을 두지 않는다)
  */
 public record NoticeInput(
   String title,
@@ -2761,11 +3207,22 @@ public record NoticeInput(
   String startsAt,
   String endsAt,
   boolean enabled,
-  Map<String, NoticeTextInput> translations
+  Map<String, NoticeTextInput> translations,
+  String targetCountries
 ) {
 
   public NoticeInput {
     translations = translations == null ? Map.of() : translations;
+    targetCountries = targetCountries == null ? "" : targetCountries;
+  }
+
+  /** 언어별 글은 있고 대상 국가는 없는(전체 국가) 입력. */
+  public NoticeInput(
+    String title, String body, String buttonLabel, String buttonUrl, String platform,
+    String priority, String startsAt, String endsAt, boolean enabled,
+    Map<String, NoticeTextInput> translations
+  ) {
+    this(title, body, buttonLabel, buttonUrl, platform, priority, startsAt, endsAt, enabled, translations, "");
   }
 
   /** 한국어만 있는 입력. 번역이 없던 시절의 호출부와 시험이 그대로 쓴다. */
@@ -2799,7 +3256,12 @@ public record NoticeInput(
 
 `NoticeService.java`:
 
-1. import 에 추가: `com.chuseok22.elumserver.common.locale.AppLocale`, `com.chuseok22.elumserver.notice.application.dto.request.NoticeTextInput`, `com.chuseok22.elumserver.notice.core.NoticeLocaleException`, `com.chuseok22.elumserver.notice.infrastructure.entity.AppNoticeTranslation`, `java.util.EnumMap`, `java.util.Map`, `java.util.Optional`.
+1. import 에 추가: `com.chuseok22.elumserver.common.locale.AppLocale`, `com.chuseok22.elumserver.notice.application.dto.request.NoticeTextInput`, `com.chuseok22.elumserver.notice.core.NoticeLocaleException`, `com.chuseok22.elumserver.notice.infrastructure.entity.AppNoticeTranslation`, `java.util.EnumMap`, `java.util.LinkedHashSet`, `java.util.Map`, `java.util.Optional`, `java.util.Set`, `java.util.regex.Pattern`. import `com.chuseok22.elumserver.common.locale.CurrentRegion` 도 더한다(`CurrentRegion.DEFAULT` 상수만 쓴다 — 요청 컨텍스트는 읽지 않는다). 상수 하나를 `MAX_SLIDES`(50행) 아래에 둔다.
+
+```java
+  /** 대상 국가 한 개의 형식. 허용 목록은 두지 않는다 — 형식만 본다. */
+  private static final Pattern COUNTRY_CODE = Pattern.compile("[A-Z]{2}");
+```
 
 2. 99~112행(`publishedFor`)을 바꾼다.
 
@@ -2817,16 +3279,27 @@ public record NoticeInput(
   /**
    * 그 언어로 고른 글을 담아 준다. 고르는 순서는 요청 언어 → en → ko 다. 번역 행이 하나도 없는 공지는
    * 건너뛴다 — 글 없는 팝업이 뜨는 것보다 그 공지만 빠지는 편이 낫다(다른 공지는 그대로 나간다).
+   *
+   * <p>[region] 은 요청 국가다(컨트롤러가 {@code CurrentRegion.get()} 으로 읽어 넘긴다). 대상 국가를 정하지 않은
+   * 공지는 어느 국가에나, 정한 공지는 그 국가에만 나간다. <b>{@code null}(국가 미상)에는 대상을 정하지 않은
+   * 공지만</b> 나간다 (스펙 4.3.1).
    */
-  public AppNoticesResponse publishedFor(String platform, AppLocale locale) {
+  public AppNoticesResponse publishedFor(String platform, AppLocale locale, String region) {
     NoticePlatform requested = NoticePlatform.parse(platform);
     List<AppNoticeResponse> notices = liveInSlideOrder().stream()
       .filter(notice -> notice.getPlatform().reaches(requested))
+      // 국가는 limit 앞에서 거른다. 다른 국가용 공지가 5개 슬롯을 차지하면 이 국가 공지가 밀려난다.
+      .filter(notice -> notice.targetsRegion(region))
       .map(notice -> pick(notice, locale).map(text -> AppNoticeResponse.from(notice, text)))
       .flatMap(Optional::stream)
       .limit(MAX_SLIDES)
       .toList();
     return new AppNoticesResponse(hideDays(), notices);
+  }
+
+  /** 국가를 모르는 호출부는 헤더 없는 옛 앱과 같다 — {@code KR}({@code CurrentRegion.DEFAULT}). */
+  public AppNoticesResponse publishedFor(String platform, AppLocale locale) {
+    return publishedFor(platform, locale, CurrentRegion.DEFAULT);
   }
 
   /** 요청 언어 → en → ko 순으로 처음 있는 글. */
@@ -2848,7 +3321,7 @@ public record NoticeInput(
   /** 검증을 통과한, 다듬은 값. 이것만 엔티티에 들어간다. */
   private record Draft(
     Map<AppLocale, Text> texts, String buttonUrl, NoticePlatform platform,
-    int priority, LocalDateTime startsAt, LocalDateTime endsAt, boolean enabled
+    int priority, LocalDateTime startsAt, LocalDateTime endsAt, boolean enabled, String targetCountries
   ) {
 
     void applyTo(AppNotice notice) {
@@ -2862,6 +3335,7 @@ public record NoticeInput(
       notice.setStartsAt(startsAt);
       notice.setEndsAt(endsAt);
       notice.setEnabled(enabled);
+      notice.setTargetCountries(targetCountries);
     }
   }
 
@@ -2900,7 +3374,10 @@ public record NoticeInput(
       throw new CustomException(ErrorCode.NOTICE_PERIOD_INVALID);
     }
 
-    return new Draft(texts, emptyToNull(buttonUrl), platform, priority, startsAt, endsAt, input.enabled());
+    String targetCountries = normalizeTargetCountries(input.targetCountries());
+
+    return new Draft(texts, emptyToNull(buttonUrl), platform, priority, startsAt, endsAt, input.enabled(),
+      targetCountries);
   }
 
   /** translations 의 키. 모르는 코드와 ko(최상위 필드가 한국어다)는 화면이 만들 수 없으므로 거절한다. */
@@ -2914,6 +3391,39 @@ public record NoticeInput(
       // 아래에서 같은 오류로 거절한다
     }
     throw new CustomException(ErrorCode.NOTICE_LOCALE_INVALID);
+  }
+
+  /**
+   * 쉼표로 구분한 대상 국가를 다듬는다 (스펙 4.3.1). 공백과 빈 토큰(끝 쉼표)은 봐 주고 중복은 처음 것만 남긴다.
+   * 코드는 <b>두 글자 대문자</b>만 받는다 — 소문자를 몰래 고치면 관리자가 쓴 값과 저장된 값이 달라지므로 거절한다.
+   * 허용 국가 목록은 두지 않는다. 비면 {@code null}(전체 국가).
+   *
+   * <p>길이는 다듬은 뒤 255자(열 길이)로 막는다. 검사에 걸리면 아무것도 저장하지 않는다(호출부가 저장 전에
+   * 부른다).
+   */
+  static String normalizeTargetCountries(String raw) {
+    if (raw == null || raw.isBlank()) {
+      return null;
+    }
+    Set<String> codes = new LinkedHashSet<>();
+    for (String token : raw.split(",", -1)) {
+      String code = token.strip();
+      if (code.isEmpty()) {
+        continue;
+      }
+      if (!COUNTRY_CODE.matcher(code).matches()) {
+        throw new CustomException(ErrorCode.NOTICE_TARGET_COUNTRIES_INVALID);
+      }
+      codes.add(code);
+    }
+    if (codes.isEmpty()) {
+      return null;
+    }
+    String joined = String.join(",", codes);
+    if (joined.length() > AppNotice.TARGET_COUNTRIES_MAX_LENGTH) {
+      throw new CustomException(ErrorCode.NOTICE_TARGET_COUNTRIES_TOO_LONG);
+    }
+    return joined;
   }
 
   /**
@@ -2984,14 +3494,16 @@ public record NoticeInput(
   ) {
     // 헤더가 없으면 ko(이미 배포된 앱), 5개 밖이거나 깨진 값이면 en 이다 (C1).
     AppLocale locale = AppLocale.fromAcceptLanguage(acceptLanguage);
+    // 국가는 휴대폰 지역 설정(X-Elum-Region)이다. 헤더가 없으면 KR, 형식이 틀리면 null(국가 미상) — C1-2.
+    String region = CurrentRegion.get();
     return ResponseEntity.ok()
       .cacheControl(CACHE)
-      // 60초 캐시가 언어를 섞지 않게 한다. 없으면 중간 캐시가 한국어 응답을 영어 요청에 준다.
-      .header(HttpHeaders.VARY, HttpHeaders.ACCEPT_LANGUAGE)
-      .body(noticeService.publishedFor(platform, locale));
+      // 60초 캐시가 언어·국가를 섞지 않게 한다. 없으면 중간 캐시가 한국 응답을 영어·일본 요청에 준다.
+      .varyBy(HttpHeaders.ACCEPT_LANGUAGE, CurrentRegion.HEADER)
+      .body(noticeService.publishedFor(platform, locale, region));
   }
 ```
-import 에 `com.chuseok22.elumserver.common.locale.AppLocale`, `org.springframework.http.HttpHeaders`, `org.springframework.web.bind.annotation.RequestHeader` 를 더한다.
+import 에 `com.chuseok22.elumserver.common.locale.AppLocale`, `com.chuseok22.elumserver.common.locale.CurrentRegion`, `org.springframework.http.HttpHeaders`, `org.springframework.web.bind.annotation.RequestHeader` 를 더한다. 헤더 이름은 `CurrentRegion.HEADER` 를 쓴다(응답이 국가에 따라 달라지므로 `Vary` 에 넣는다).
 
 `NoticeControllerDocs.java` 62~67행:
 
@@ -3009,7 +3521,9 @@ import 에 `com.chuseok22.elumserver.common.locale.AppLocale`, `org.springframew
 ```java
       - 언어는 `Accept-Language` 로 고릅니다. 그 언어 글이 없으면 `en`, 그것도 없으면 `ko` 글을 줍니다.
         이미지·링크·기간은 모든 언어가 같고, 버튼은 그 언어 문구가 있을 때만 있습니다.
-      - 60초 캐시되고 `Vary: Accept-Language` 가 붙습니다(`Cache-Control: max-age=60`).
+      - 국가는 `X-Elum-Region`(휴대폰 지역 설정, 예 `KR`)으로 정합니다. 헤더가 없으면 `KR` 입니다. 공지에 대상 국가가
+        있으면 그 국가에만 나가고, 지역을 알 수 없는(형식이 틀린) 요청에는 대상 국가가 없는 공지만 나갑니다.
+      - 60초 캐시되고 `Vary: Accept-Language, X-Elum-Region` 이 붙습니다(`Cache-Control: max-age=60`).
 ```
 
 `NoticeControllerTest.java` 35~47행(첫 시험)을 새 시그니처에 맞춘다.
@@ -3020,15 +3534,16 @@ import 에 `com.chuseok22.elumserver.common.locale.AppLocale`, `org.springframew
   void notices_cacheable() {
     AppNoticesResponse body = new AppNoticesResponse(7, List.of(
       new AppNoticeResponse("n1", 1, "**하루 3개**까지", "본문", null, null)));
-    when(noticeService.publishedFor("IOS", AppLocale.KO)).thenReturn(body);
+    // 요청 밖(단위 시험)에서 CurrentRegion.get() 은 KR 이다 — 헤더 없는 옛 앱과 같다.
+    when(noticeService.publishedFor("IOS", AppLocale.KO, "KR")).thenReturn(body);
 
     ResponseEntity<AppNoticesResponse> response = controller.notices("IOS", null);
 
     assertThat(response.getStatusCode().value()).isEqualTo(200);
     assertThat(response.getBody()).isEqualTo(body);
     assertThat(response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL)).isEqualTo("max-age=60");
-    // 캐시가 언어를 섞지 않는다.
-    assertThat(response.getHeaders().getVary()).contains("Accept-Language");
+    // 캐시가 언어와 국가를 섞지 않는다.
+    assertThat(response.getHeaders().getVary()).contains("Accept-Language", "X-Elum-Region");
   }
 
   @Test
@@ -3038,9 +3553,9 @@ import 에 `com.chuseok22.elumserver.common.locale.AppLocale`, `org.springframew
     controller.notices("IOS", "zh-Hans");
     controller.notices("IOS", "xx-YY");
 
-    org.mockito.Mockito.verify(noticeService).publishedFor("IOS", AppLocale.JA);
-    org.mockito.Mockito.verify(noticeService).publishedFor("IOS", AppLocale.ZH);
-    org.mockito.Mockito.verify(noticeService).publishedFor("IOS", AppLocale.EN);
+    org.mockito.Mockito.verify(noticeService).publishedFor("IOS", AppLocale.JA, "KR");
+    org.mockito.Mockito.verify(noticeService).publishedFor("IOS", AppLocale.ZH, "KR");
+    org.mockito.Mockito.verify(noticeService).publishedFor("IOS", AppLocale.EN, "KR");
   }
 ```
 import 에 `com.chuseok22.elumserver.common.locale.AppLocale` 를 더한다.
@@ -3048,7 +3563,7 @@ import 에 `com.chuseok22.elumserver.common.locale.AppLocale` 를 더한다.
 - [ ] **Step 5: 통과를 확인한다**
 
 Run: `cd server && ./gradlew test --tests 'com.chuseok22.elumserver.notice.*'`
-Expected: PASS — 신규 `NoticeLocaleTest` 13건, `NoticeControllerTest` 3건, 기존 `NoticeSaveTest`·`NoticePublishTest`·`NoticeImageFlowTest` 전부(한국어 편의 메서드와 9인자 `NoticeInput` 생성자가 지킨다).
+Expected: PASS — 신규 `NoticeLocaleTest` 15건, `NoticeCountryTest` 14건, `NoticeControllerTest` 3건, 기존 `NoticeSaveTest`·`NoticePublishTest`·`NoticeImageFlowTest` 전부(한국어 편의 메서드와 9인자 `NoticeInput` 생성자가 지킨다).
 
 - [ ] **Step 6: 전체 서버 시험**
 
@@ -3061,6 +3576,7 @@ Expected: 컴파일은 통과하고, 관리자 공지 시험(`AdminNoticeControl
 git add server/src/main/java/com/chuseok22/elumserver/notice \
   server/src/main/java/com/chuseok22/elumserver/common/infrastructure/exception/ErrorCode.java \
   server/src/test/java/com/chuseok22/elumserver/notice/application/service/NoticeLocaleTest.java \
+  server/src/test/java/com/chuseok22/elumserver/notice/application/service/NoticeCountryTest.java \
   server/src/test/java/com/chuseok22/elumserver/notice/application/controller/NoticeControllerTest.java
 ```
 
@@ -4237,7 +4753,7 @@ git add server/src/main/java/com/chuseok22/elumserver/admin/application/dto/resp
 
 **Files:**
 - Create: `server/src/main/java/com/chuseok22/elumserver/admin/application/dto/request/NoticeTextsForm.java`
-- Modify: `server/src/main/java/com/chuseok22/elumserver/admin/application/dto/request/NoticeEditForm.java:55-83` (`koFilled`, `toInput(NoticeTextsForm)`)
+- Modify: `server/src/main/java/com/chuseok22/elumserver/admin/application/dto/request/NoticeEditForm.java:15-83` (`targetCountries` 컴포넌트, `blank`·`of`, `koFilled`, `toInput`, `toInput(NoticeTextsForm)`)
 - Modify: `server/src/main/java/com/chuseok22/elumserver/admin/application/controller/AdminNoticeController.java:66-129, 172-229, 232-253`
 - Modify: `server/src/main/resources/templates/admin/notices.html:19-61, 103-114`
 - Modify: `server/src/main/resources/templates/admin/notice-edit.html:27-108, 177-193`
@@ -4250,6 +4766,7 @@ git add server/src/main/java/com/chuseok22/elumserver/admin/application/dto/resp
 - Produces:
   - `NoticeTextsForm` — JavaBean. `getTranslations(): Map<String, NoticeTextsForm.Text>`(폼 이름 `translations[en].title` 으로 묶인다), `textOf(String code): Text`, `filled(String code): boolean`, `toInputs(): Map<String, NoticeTextInput>`, `static of(AppNotice): NoticeTextsForm`
   - `NoticeEditForm#koFilled(): boolean`, `NoticeEditForm#toInput(NoticeTextsForm): NoticeInput`
+  - 대상 국가: `NoticeEditForm` 의 마지막 컴포넌트 `String targetCountries`(쉼표 구분 문자열 그대로, 없으면 `""`), 입력 이름 `targetCountries`·아이디 `notice-target-countries`. 목록·편집 화면은 `AppNotice#targetCountryList()` 를 읽는다. 검증은 Task 6 의 `NoticeService` 한 곳이고 이 화면은 에러 문구(`E-NTC-018`·`E-NTC-019`)만 안내한다
   - `AdminNoticeController#create(NoticeEditForm form, NoticeTextsForm texts, MultipartFile image, Principal, Model, HttpServletResponse, RedirectAttributes)`, `#update(String id, NoticeEditForm form, NoticeTextsForm texts, MultipartFile image, …)`
   - 모델 속성 `locales: List<AdminLocaleOption>`(모든 공지 화면), `texts: NoticeTextsForm`(편집 화면), 미리보기 JSON 슬라이드의 `texts: {언어: {title, body, buttonLabel}}`
 
@@ -4465,10 +4982,30 @@ public class NoticeTextsForm {
   /** 다른 언어 칸까지 담은 서비스 입력. */
   public NoticeInput toInput(NoticeTextsForm texts) {
     return new NoticeInput(title, body, buttonLabel, buttonUrl, platform, priority, startsAt, endsAt,
-      isEnabled(), texts == null ? Map.of() : texts.toInputs());
+      isEnabled(), texts == null ? Map.of() : texts.toInputs(), targetCountries);
   }
 ```
 import 에 `java.util.Map` 을 더한다.
+
+대상 국가(스펙 4.3.1)를 폼 값으로 더한다. 문자열 그대로 담아 검증에 걸려 다시 그릴 때 쓰던 값이 남게 한다(약관·공지 편집 폼과 같은 이유). **생성자를 하나 더 만들지 않는다** — 스프링 폼 바인딩은 record 생성자가 하나일 때만 믿을 수 있어(컨트롤러를 직접 부르는 단위 시험은 이것을 못 잡는다), 컴포넌트를 더하고 호출부(`blank`·`of`·시험 세 곳)를 고친다.
+
+```java
+public record NoticeEditForm(
+  // … 기존 컴포넌트 그대로 …
+  Boolean removeImage,
+  // 쉼표로 구분한 대상 국가(KR,JP). 비우면 전체 국가. 형식은 NoticeService 가 검사한다.
+  String targetCountries
+) {
+
+  /** 칸이 오지 않으면 null 이 묶인다. 빈 값은 전체 국가라 같은 뜻이다. */
+  public NoticeEditForm {
+    targetCountries = targetCountries == null ? "" : targetCountries;
+  }
+  // …
+}
+```
+
+`blank` 의 마지막 인자에 `""` 를 더하고(`false, false, false, ""`), `of` 는 `false,\n      false,\n      nullToEmpty(notice.getTargetCountries())` 로 끝낸다. 인자 없는 `toInput()` 은 `return toInput(null);` 로 바꿔 대상 국가가 빠지지 않게 한다.
 
 - [ ] **Step 4: 폼 시험 통과를 확인한다**
 
@@ -4488,7 +5025,9 @@ Expected: PASS (5건). 첫 시험(`bindsIndexedNames`)이 통과해야 Step 6 �
 | 134 | `controller.update("n1", form, null, admin, …)` | `controller.update("n1", form, new NoticeTextsForm(), null, admin, …)` |
 | 151 | `controller.update("n1", form, null, admin, …)` | `controller.update("n1", form, new NoticeTextsForm(), null, admin, …)` |
 
-import 에 `com.chuseok22.elumserver.admin.application.dto.request.NoticeTextsForm`, `com.chuseok22.elumserver.common.locale.AppLocale`, `com.chuseok22.elumserver.notice.core.NoticeLocaleException`, `org.mockito.ArgumentCaptor` 를 더하고, 클래스 끝(마지막 `}` 앞)에 시험 네 개를 더한다.
+`NoticeEditForm` 생성자 호출 세 곳에 마지막 인자 `""`(대상 국가)를 더한다 — `AdminNoticeControllerTest.java:59`(`form(String)` 도우미)·`:148`, `AdminNoticeTemplateTest.java:97`(`renderEdit`).
+
+import 에 `com.chuseok22.elumserver.admin.application.dto.request.NoticeTextsForm`, `com.chuseok22.elumserver.common.infrastructure.exception.CustomException`, `com.chuseok22.elumserver.common.locale.AppLocale`, `com.chuseok22.elumserver.notice.core.NoticeLocaleException`, `org.mockito.ArgumentCaptor` 를 더하고(이미 있으면 건너뛴다), 클래스 끝(마지막 `}` 앞)에 시험 일곱 개를 더한다.
 
 ```java
   @Test
@@ -4551,6 +5090,48 @@ import 에 `com.chuseok22.elumserver.admin.application.dto.request.NoticeTextsFo
     assertThat(json).contains("\"title\":\"**하루 3개**까지\"");
     assertThat(model.get("locales")).isNotNull();
   }
+
+  @Test
+  @DisplayName("대상 국가 칸이 서비스 입력으로 그대로 넘어간다 — 다듬기는 서비스가 한다")
+  void create_passesTargetCountries() {
+    NoticeEditForm withTargets = new NoticeEditForm("공지", "본문", "", "", "ALL", "0", "2026-09-23T09:00", "",
+      true, false, false, "KR, JP");
+    when(noticeService.create(any(NoticeInput.class), any(), any())).thenReturn(stored("n1"));
+
+    controller.create(withTargets, new NoticeTextsForm(), null, admin, model, response, redirect);
+
+    ArgumentCaptor<NoticeInput> captor = ArgumentCaptor.forClass(NoticeInput.class);
+    verify(noticeService).create(captor.capture(), any(), eq("kimchi"));
+    assertThat(captor.getValue().targetCountries()).isEqualTo("KR, JP");
+  }
+
+  @Test
+  @DisplayName("형식이 틀린 대상 국가는 E-NTC-018 로 안내하고 쓰던 값을 그대로 다시 그린다")
+  void create_invalidTargetCountries_code() {
+    NoticeEditForm bad = new NoticeEditForm("공지", "본문", "", "", "ALL", "0", "2026-09-23T09:00", "",
+      true, false, false, "kr");
+    when(noticeService.create(any(NoticeInput.class), any(), any()))
+      .thenThrow(new CustomException(ErrorCode.NOTICE_TARGET_COUNTRIES_INVALID));
+
+    String view = controller.create(bad, new NoticeTextsForm(), null, admin, model, response, redirect);
+
+    assertThat(view).isEqualTo("admin/notice-edit");
+    assertThat(response.getStatus()).isEqualTo(400);
+    assertThat((String) model.get("errorMessage")).contains("E-NTC-018").contains("두 글자 대문자");
+    // 틀린 값이 칸에 그대로 남는다 — 어디를 고칠지 보인다.
+    assertThat(model.get("form")).isSameAs(bad);
+  }
+
+  @Test
+  @DisplayName("대상 국가가 너무 길면 E-NTC-019 로 안내한다")
+  void create_targetCountriesTooLong_code() {
+    when(noticeService.create(any(NoticeInput.class), any(), any()))
+      .thenThrow(new CustomException(ErrorCode.NOTICE_TARGET_COUNTRIES_TOO_LONG));
+
+    controller.create(form("공지"), new NoticeTextsForm(), null, admin, model, response, redirect);
+
+    assertThat((String) model.get("errorMessage")).contains("E-NTC-019").contains("255");
+  }
 ```
 
 `AdminNoticeTemplateTest.java` — import 에 `com.chuseok22.elumserver.admin.application.dto.request.NoticeTextsForm`, `com.chuseok22.elumserver.admin.application.dto.response.AdminLocaleOption`, `com.chuseok22.elumserver.common.locale.AppLocale` 를 더하고 도우미 둘을 고친다.
@@ -4604,7 +5185,9 @@ import 에 `com.chuseok22.elumserver.admin.application.dto.request.NoticeTextsFo
     String html = renderEdit(null, null);
 
     assertThat(html).contains("data-preview-lang-label").contains("data-preview-fixed-note")
-      .contains("data-preview-font-note").contains("글자 모양과 줄이 나뉘는 자리가 앱과 다를 수 있어요");
+      .contains("data-preview-font-note").contains("글자 모양과 줄이 나뉘는 자리가 앱과 다를 수 있어요")
+      // 미리보기는 국가와 무관하다 — 대상 국가를 정한 공지도 그대로 보이므로 그렇다고 알린다.
+      .contains("data-preview-country-note").contains("대상 국가와 상관없이");
   }
 
   @Test
@@ -4617,6 +5200,37 @@ import 에 `com.chuseok22.elumserver.admin.application.dto.request.NoticeTextsFo
 
     assertThat(html).contains("ko ✓").contains("en ✓").contains("ja −").contains("zh −").contains("es −");
     assertThat(html).contains("data-preview-lang=\"ja\"").contains("data-preview-font-note");
+  }
+
+  @Test
+  @DisplayName("편집 화면에 대상 국가 칸이 있다 — 필수가 아니고, 저장된 값이 칸에 들어 있고, 비우면 전체 국가라고 알린다")
+  void edit_targetCountriesField() {
+    AppNotice notice = notice("n1", "공지", NoticePlatform.ALL);
+    notice.setTargetCountries("KR,JP");
+
+    String html = renderEdit(notice, null);
+
+    assertThat(field(html, "notice-target-countries")).contains("name=\"targetCountries\"")
+      .contains("value=\"KR,JP\"").doesNotContain("required");
+    assertThat(html).contains("비우면 모든 국가");
+    // 대상 국가가 없는 새 공지는 빈 칸이다.
+    assertThat(field(renderEdit(null, null), "notice-target-countries")).contains("value=\"\"");
+  }
+
+  @Test
+  @DisplayName("목록에 대상 국가 열이 있다 — 비면 전체 국가, 있으면 코드마다 배지, 켜기 확인 창이 쓸 값도 실린다")
+  void list_targetCountriesColumn() {
+    AppNotice all = notice("n1", "전체 공지", NoticePlatform.ALL);
+    AppNotice targeted = notice("n2", "일본 공지", NoticePlatform.ALL);
+    targeted.setTargetCountries("KR,JP");
+
+    String html = renderList(List.of(
+      new AdminNoticeRow(all, NoticeStatus.LIVE, true), new AdminNoticeRow(targeted, NoticeStatus.LIVE, true)));
+
+    assertThat(html).contains("<th>대상 국가</th>").contains("전체 국가")
+      .contains(">KR</span>").contains(">JP</span>").contains("data-target-countries=\"KR,JP\"");
+    // 공지마다 한 칸이다.
+    assertThat(html.split("data-target-countries-cell", -1)).hasSize(3);
   }
 
   /** 아이디가 [id] 인 입력 칸의 여는 태그. */
@@ -4756,20 +5370,24 @@ Expected: FAIL — 컴파일 오류(`create` 시그니처).
     slide.put("texts", texts);
 ```
 
-6. `failureReason`(232~253행)의 `NOTICE_NOT_FOUND` 줄 아래에 두 줄을 더한다.
+6. `failureReason`(232~253행)의 `NOTICE_NOT_FOUND` 줄 아래에 네 줄(`case` 넷)을 더한다.
 
 ```java
       case NOTICE_TRANSLATION_INCOMPLETE ->
         "다른 언어는 제목과 본문을 함께 적거나 세 칸을 모두 비워 주세요. 비우면 그 언어는 영어 → 한국어 순으로 대신 보여요. (E-NTC-016)";
       case NOTICE_LOCALE_INVALID -> "알 수 없는 언어 칸이에요. 화면을 새로 열어 다시 시도해 주세요. (E-NTC-017)";
+      case NOTICE_TARGET_COUNTRIES_INVALID ->
+        "대상 국가는 KR,JP 처럼 두 글자 대문자 코드를 쉼표로 적어 주세요. 소문자나 세 글자 코드는 받지 않아요. 비우면 전체 국가예요. (E-NTC-018)";
+      case NOTICE_TARGET_COUNTRIES_TOO_LONG ->
+        "대상 국가는 " + AppNotice.TARGET_COUNTRIES_MAX_LENGTH + "자까지예요. (E-NTC-019)";
 ```
 
 - [ ] **Step 8: 템플릿을 고친다**
 
 `notices.html`:
 
-1. 19~28행(`<thead>`)에 언어 열을 더한다 — `<th>제목</th>` 다음 줄에 `<th>언어</th>` 를 더한다.
-2. 33행의 빈 줄 안내를 `emptyRow(7, …)` 로 바꾼다(열이 일곱 개가 됐다).
+1. 19~28행(`<thead>`)에 언어 열과 대상 국가 열을 더한다 — `<th>제목</th>` 다음 줄에 `<th>언어</th>`, `<th>대상 · 순서</th>` 다음 줄에 `<th>대상 국가</th>` 를 더한다.
+2. 33행의 빈 줄 안내를 `emptyRow(8, …)` 로 바꾼다(열이 여덟 개가 됐다).
 3. 49행(`</td>` — 제목 칸 끝) 다음에 언어 칸을 더한다.
 
 ```html
@@ -4803,12 +5421,33 @@ Expected: FAIL — 컴파일 오류(`create` 시그니처).
         <p class="text-xs text-base-content/60" data-preview-fixed-note hidden>
           '보지 않기'·'닫기' 같은 앱 고정 문구는 앱에서 휴대폰 언어로 나와요. 미리보기는 한국어로 보여요.
         </p>
+        <!-- 미리보기는 대상 국가를 거르지 않는다. 앱 팝업의 모양을 보는 도구라 국가와 무관하다. -->
+        <p class="text-xs text-base-content/60" data-preview-country-note>
+          대상 국가와 상관없이 게시 중인 공지를 모두 보여줘요. 실제로는 대상 국가로 정한 나라의 휴대폰에만 나가요.
+        </p>
         <p class="text-xs text-warning" data-preview-font-note hidden>
           미리보기 글꼴은 한글·라틴 글자만 담고 있어 일본어·중국어는 시스템 글꼴로 보여요.
           글자 모양과 줄이 나뉘는 자리가 앱과 다를 수 있어요.
         </p>
       </div>
     </aside>
+```
+
+5. 대상 국가 칸. 플랫폼·우선순위 칸(`<td class="text-xs">`) 바로 다음에 더한다. 비면 "전체 국가"라고 적어 빈 칸이 누락으로 보이지 않게 한다.
+
+```html
+            <!-- 대상 국가. 비면 전체 국가다. 지역을 알 수 없는 휴대폰에는 대상을 정한 공지가 나가지 않는다 (스펙 4.3.1). -->
+            <td class="text-xs" data-target-countries-cell>
+              <span th:if="${n.targetCountryList().isEmpty()}" class="text-base-content/60">전체 국가</span>
+              <span th:each="code : ${n.targetCountryList()}" class="badge badge-sm badge-outline mr-1 font-mono"
+                    th:text="${code}">KR</span>
+            </td>
+```
+6. 켜기 확인 창이 "누구에게 나가는지"를 대상 국가까지 말하도록 켜기 폼에 값을 싣는다. `th:data-platform="${n.platform.name()}"` 바로 뒤에 한 속성을 더한다(없으면 속성이 빠져 전체 국가로 읽힌다).
+
+```html
+                      th:data-platform="${n.platform.name()}" th:data-target-countries="${n.targetCountries}"
+                      th:data-title="${n.title}">
 ```
 
 `notice-edit.html`:
@@ -4990,6 +5629,10 @@ Expected: FAIL — 컴파일 오류(`create` 시그니처).
         <p class="text-xs text-base-content/60" data-preview-fixed-note hidden>
           '보지 않기'·'닫기' 같은 앱 고정 문구는 앱에서 휴대폰 언어로 나와요. 미리보기는 한국어로 보여요.
         </p>
+        <!-- 미리보기는 대상 국가를 거르지 않는다. 앱 팝업의 모양을 보는 도구라 국가와 무관하다. -->
+        <p class="text-xs text-base-content/60" data-preview-country-note>
+          대상 국가와 상관없이 게시 중인 공지를 모두 보여줘요. 실제로는 대상 국가로 정한 나라의 휴대폰에만 나가요.
+        </p>
         <p class="text-xs text-warning" data-preview-font-note hidden>
           미리보기 글꼴은 한글·라틴 글자만 담고 있어 일본어·중국어는 시스템 글꼴로 보여요.
           글자 모양과 줄이 나뉘는 자리가 앱과 다를 수 있어요.
@@ -4998,10 +5641,28 @@ Expected: FAIL — 컴파일 오류(`create` 시그니처).
     </aside>
 ```
 
+3. 대상 국가 칸. "언제, 누구에게" 카드(`<h2 class="card-title text-base">언제, 누구에게</h2>`)의 `grid` 안, 우선순위 `</label>` 바로 다음에 더한다. 비우면 전체 국가이고 필수가 아니다. 형식 검사는 서버가 한다(틀리면 쓰던 값 그대로 다시 그리고 `E-NTC-018`).
+
+```html
+            <label class="form-control md:col-span-2">
+              <div class="label"><span class="label-text">대상 국가 (선택)</span></div>
+              <input id="notice-target-countries" type="text" name="targetCountries"
+                     class="input input-bordered font-mono" maxlength="255" autocomplete="off" spellcheck="false"
+                     th:value="${form.targetCountries}" placeholder="비우면 전체 국가 (예: KR,JP)"/>
+              <div class="label">
+                <span class="label-text-alt">
+                  두 글자 대문자 국가 코드를 쉼표로 적어요(KR,JP). 비우면 모든 국가의 휴대폰에 나가요.
+                  휴대폰의 지역 설정이 기준이고, 지역을 알 수 없는 휴대폰에는 대상 국가를 정한 공지가 나가지 않아요.
+                  앱을 업데이트하지 않은 휴대폰은 KR 로 봐요.
+                </span>
+              </div>
+            </label>
+```
+
 - [ ] **Step 9: 통과를 확인한다**
 
 Run: `cd server && ./gradlew test --tests 'com.chuseok22.elumserver.admin.*'`
-Expected: PASS — `NoticeTextsFormTest` 5건, `AdminNoticeControllerTest`(기존 + 신규 4건), `AdminNoticeTemplateTest`(기존 + 신규 4건; `renderedTagsBalanced`·`sourceTagsBalanced` 가 새 마크업의 여닫기를 본다), `AdminTemplateTagBalanceTest`.
+Expected: PASS — `NoticeTextsFormTest` 5건, `AdminNoticeControllerTest`(기존 + 신규 7건), `AdminNoticeTemplateTest`(기존 + 신규 6건; `renderedTagsBalanced`·`sourceTagsBalanced` 가 새 마크업의 여닫기를 본다), `AdminTemplateTagBalanceTest`.
 
 - [ ] **Step 10: 커밋 (`/pro-commit`)**
 
@@ -5021,14 +5682,15 @@ git add server/src/main/java/com/chuseok22/elumserver/admin/application/dto/requ
 ## Task 9: 관리자 미리보기 스크립트 — `notice-preview.js` 언어 탭·줄바꿈 규칙·글꼴 안내
 
 **Files:**
-- Modify: `server/src/main/resources/static/admin/js/notice-preview.js:71` (상수), `:148-164` (`keepWordsParts`), `:166-179` (언어 도움 함수 추가), `:432-626` (`initListPreview`·`initEditor` 교체), `:803-805` (노출)
+- Modify: `server/src/main/resources/static/admin/js/notice-preview.js:71` (상수), `:148-164` (`keepWordsParts`), `:166-179` (언어 도움 함수 추가), `:432-626` (`initListPreview`·`initEditor` 교체), `:656-762` (`audience`·`publishOutcome`·`initPublishNote`·`initEnableConfirm` — 대상 국가 문구), `:803-805` (노출)
 - Test: `server/src/test/java/com/chuseok22/elumserver/admin/application/controller/NoticePreviewScriptTest.java` (새)
 
 **Interfaces:**
-- Consumes: Task 8 이 만든 템플릿 속성 `data-lang-tab` / `data-lang-panel` / `data-lang-mark` / `data-preview-lang` / `data-preview-lang-label` / `data-preview-fixed-note` / `data-preview-font-note`, 칸 아이디 `notice-title[-언어]` · `notice-body[-언어]` · `notice-button-label[-언어]`, 미리보기 JSON 의 `texts`
+- Consumes: Task 8 이 만든 템플릿 속성 `data-lang-tab` / `data-lang-panel` / `data-lang-mark` / `data-preview-lang` / `data-preview-lang-label` / `data-preview-fixed-note` / `data-preview-font-note`, 칸 아이디 `notice-title[-언어]` · `notice-body[-언어]` · `notice-button-label[-언어]`, 미리보기 JSON 의 `texts`, 대상 국가 칸 아이디 `notice-target-countries` 와 목록 켜기 폼의 `data-target-countries`
 - Produces:
   - 상수 `NO_JOINER_LANGS = ['ja', 'zh']` — **앱 `keep_words.dart` 가 줄바꿈 표시를 넣지 않는 언어와 같은 집합**
   - `window.ElumNoticePreview.keepWordsFor(text, lang): string`, `window.ElumNoticePreview.resolveText(texts, lang): {lang, text}`
+  - `publishOutcome(input)` 의 `input.targetCountries`(쉼표 구분 문자열, 없으면 전체) — 저장 안내·확인 창이 "누구에게"를 대상 국가까지 말한다. **미리보기 그리기(`renderPopup`·슬라이드 목록)는 대상 국가와 무관하다** — 앱 팝업의 모양을 보는 도구라서 국가로 거르지 않는다(Task 8 의 `data-preview-country-note` 안내가 그렇게 말한다)
 
 > **같은 규칙이어야 하는 이유.** 이 스크립트 머리 주석이 말하듯 줄바꿈 표시(U+2060) 규칙은 앱과 **같아야** 한다. 앱은 `ja`·`zh` 에서 표시를 넣지 않는다(띄어쓰기가 없어 표시를 넣으면 줄을 바꿀 자리가 사라진다 — 계획 1). 미리보기가 표시를 넣으면 관리자가 본 줄과 보호자가 본 줄이 다시 달라진다.
 
@@ -5082,7 +5744,9 @@ class NoticePreviewScriptTest {
   void script_handlesLanguageControls() throws IOException {
     String js = Files.readString(SCRIPT);
     assertThat(js).contains("data-lang-tab").contains("data-lang-panel").contains("data-lang-mark")
-      .contains("data-preview-lang").contains("data-preview-font-note").contains("FONT_LACKING_LANGS");
+      .contains("data-preview-lang").contains("data-preview-font-note").contains("FONT_LACKING_LANGS")
+      // 저장 안내가 대상 국가를 읽는다(편집 칸·목록 켜기 폼).
+      .contains("notice-target-countries").contains("data-target-countries");
   }
 
   @Test
@@ -5134,6 +5798,31 @@ class NoticePreviewScriptTest {
     assertThat(out).containsEntry("ko", "ko").containsEntry("en", "en").containsEntry("es", "es")
       // 일본어는 미완성이라 영어로, 중국어는 글이 없어 영어로 내려간다.
       .containsEntry("ja", "en").containsEntry("zh", "en");
+  }
+
+  @Test
+  @DisplayName("저장 안내는 대상 국가를 말한다 — 없으면 이전과 같은 '보호자 모두에게', 있으면 그 국가 보호자에게")
+  void publishOutcome_namesTargetCountries() throws Exception {
+    assumeTrue(nodeAvailable(), "node 가 없어 건너뛴다");
+
+    Map<String, String> out = runNode("""
+      global.window = {};
+      global.document = { readyState: 'loading', currentScript: null, addEventListener() {}, querySelector() { return null; } };
+      require(process.argv[1]);
+      const p = window.ElumNoticePreview;
+      const base = { enabled: true, startsAt: '2020-01-01T00:00', endsAt: '', platform: 'ALL', bumpRevision: false, wasLive: false };
+      const result = {
+        all: p.publishOutcome({ ...base, targetCountries: '' }).text,
+        none: p.publishOutcome({ ...base }).text,
+        some: p.publishOutcome({ ...base, platform: 'IOS', targetCountries: ' KR , JP ,' }).text
+      };
+      console.log(JSON.stringify(result));
+      """);
+
+    assertThat(out.get("all")).contains("보호자 모두에게");
+    // 값이 아예 없는 입력(옛 호출부)도 같다.
+    assertThat(out.get("none")).isEqualTo(out.get("all"));
+    assertThat(out.get("some")).contains("iOS 보호자 중 대상 국가(KR, JP)의 보호자에게");
   }
 
   private static boolean nodeAvailable() {
@@ -5597,12 +6286,65 @@ Expected: FAIL — `NO_JOINER_LANGS` 가 없다(글 계약 시험 둘), node 시
   };
 ```
 
-- [ ] **Step 8: 통과를 확인한다**
+- [ ] **Step 8: 저장 안내와 확인 창에 대상 국가를 넣는다**
+
+공지에 대상 국가가 생겨서 "누구에게 나가는지" 문장이 "보호자 모두에게" 로만 나가면 거짓이 된다. 저장 안내(`#notice-publish-note`)와 두 확인 창(편집 저장·목록 켜기)이 대상 국가를 함께 말하게 한다. 대상 국가가 없을 때의 문장은 이전과 글자까지 같다. 함수 이름으로 찾는다(원본 656~762행).
+
+1. `audience` 를 바꾸고 아래 도움 함수를 바로 아래에 더한다.
+
+```js
+  // 누구에게 가는지. 플랫폼을 좁혔으면 그 휴대폰 보호자만이고, 대상 국가를 정했으면 그 국가 보호자만이다 (#521).
+  // 대상 국가가 없을 때의 문장은 이전과 같다("보호자 모두에게").
+  function audience(platform, countries) {
+    var who = platform === 'IOS' ? 'iOS 보호자' : (platform === 'ANDROID' ? 'Android 보호자' : '보호자');
+    var list = parseCountries(countries);
+    return list.length ? who + ' 중 대상 국가(' + list.join(', ') + ')의 보호자에게' : who + ' 모두에게';
+  }
+
+  // 쉼표로 구분한 국가 코드 칸 값을 목록으로. 형식 검사는 서버가 한다 — 여기는 안내 문구용이라 다듬기만 한다.
+  function parseCountries(raw) {
+    return (raw || '').split(',')
+      .map(function (code) { return code.trim(); })
+      .filter(function (code) { return code.length > 0; });
+  }
+```
+
+2. `publishOutcome` 의 첫 줄을 바꾼다.
+
+```js
+    var who = audience(input.platform, input.targetCountries);
+```
+
+3. `initPublishNote` — 칸을 읽고, 바뀔 때 안내를 다시 쓰고, 확인 창에도 넣는다.
+
+```js
+    var countries = document.getElementById('notice-target-countries');
+```
+(`var platform = …` 줄 아래.) `current()` 의 `publishOutcome({ … })` 인자에 `targetCountries: countries ? countries.value : '',` 를 `platform:` 줄 아래에 더한다. 변경 감지 목록 `[enabled, startsAt, endsAt, platform, bump]` 에 `countries` 를 더한다. 제출 확인 창의 `audience(platform ? platform.value : 'ALL')` 는 아래로 바꾼다.
+
+```js
+        && !window.confirm('저장하면 바로 ' + audience(platform ? platform.value : 'ALL', countries ? countries.value : '')
+```
+
+4. `initEnableConfirm` — 목록 켜기 폼이 싣고 온 값(Task 8)을 읽는다.
+
+```js
+        if (!window.confirm("'" + title + "' 공지를 켜면 바로 "
+          + audience(form.getAttribute('data-platform'), form.getAttribute('data-target-countries'))
+```
+
+5. 목록·편집 **미리보기**(`initListPreview`·`initEditor`·`renderPopup`)는 **바꾸지 않는다.** 게시 중인 공지를 국가로 거르지 않고 전부 보여주는 것이 맞다 — 이 화면은 팝업의 치수·글꼴·줄바꿈을 보는 도구이고 국가와 무관하다. 대신 Task 8 의 템플릿이 "대상 국가와 상관없이 게시 중인 공지를 모두 보여줘요" 안내를 둔다. `notice-preview.js` 머리 주석의 "하는 일" 목록에도 한 줄을 더한다.
+
+```
+ * 대상 국가(#521): 미리보기는 국가를 거르지 않는다(모양을 보는 도구). 저장 안내·확인 창만 대상 국가를 말한다.
+```
+
+- [ ] **Step 9: 통과를 확인한다**
 
 Run: `cd server && ./gradlew test --tests 'com.chuseok22.elumserver.admin.*'`
-Expected: PASS — `NoticePreviewScriptTest` 4건(node 가 있으면 모두, 없으면 앞의 둘만 돌고 나머지는 건너뜀).
+Expected: PASS — `NoticePreviewScriptTest` 5건(node 가 있으면 모두, 없으면 앞의 둘만 돌고 나머지는 건너뜀).
 
-- [ ] **Step 9: 브라우저로 눈으로 확인한다 (`/pro-launch`)**
+- [ ] **Step 10: 브라우저로 눈으로 확인한다 (`/pro-launch`)**
 
 서버를 로컬로 띄우고(`/pro-launch`, 로컬 DB 리허설은 `elum-local-db-rehearsal` 기록 참고) 관리자 로그인 후 `/admin/notices/new` 를 연다.
 
@@ -5611,10 +6353,11 @@ Expected: PASS — `NoticePreviewScriptTest` 4건(node 가 있으면 모두, 없
 3. 일본어 탭에서는 "글꼴 안내"가 보이고, 한국어 탭에서는 보이지 않는다. 한국어가 아니면 "앱 고정 문구" 안내가 보인다.
 4. 한국어 제목을 비운 채 영어 탭에서 저장을 누르면 **한국어 탭이 열리며** 브라우저 검증 말풍선이 뜬다(조용히 안 되지 않는다).
 5. 제목에 `**` 짝을 깨뜨리면(영어 칸) 문구 도움에 `[영어] 제목의 ** 짝이…` 가 뜬다.
+6. 대상 국가 칸에 `KR, JP` 를 적고 켜기를 켜면 저장 안내 줄이 "…iOS 보호자 중 대상 국가(KR, JP)의 보호자에게…" 처럼 바뀐다(플랫폼을 iOS 로 골랐을 때). 칸을 비우면 "보호자 모두에게" 로 돌아온다. 미리보기 옆에는 "대상 국가와 상관없이 …" 안내가 늘 보인다.
 
-Expected: 위 다섯 가지가 모두 보인다. 안 되면 콘솔의 `E-NTC-JS` 로그를 먼저 본다.
+Expected: 위 여섯 가지가 모두 보인다. 안 되면 콘솔의 `E-NTC-JS` 로그를 먼저 본다.
 
-- [ ] **Step 10: 커밋 (`/pro-commit`)**
+- [ ] **Step 11: 커밋 (`/pro-commit`)**
 
 ```bash
 git add server/src/main/resources/static/admin/js/notice-preview.js \
@@ -7166,7 +7909,7 @@ git add tool/check_public_pages.py tool/test_check_public_pages.py \
 - [ ] **Step 1: 서버 전체 시험**
 
 Run: `cd server && ./gradlew test`
-Expected: PASS. 이 계획이 더한 시험 클래스가 모두 돈다 — `ConsentLocaleMigrationTest`, `ConsentDocumentInitializerTest`, `ConsentDocumentServiceLocaleTest`, `ConsentControllerTest`, `MemberServiceTest`(신규 5건), `NoticeTranslationMigrationTest`, `AppNoticeTranslationTest`, `NoticeLocaleTest`, `NoticeControllerTest`, `NoticeTextsFormTest`, `AdminConsent*Test`, `AdminNotice*Test`, `NoticePreviewScriptTest`, 그리고 기존 `MigrationRollbackContractTest`·`AdminTemplateTagBalanceTest`.
+Expected: PASS. 이 계획이 더한 시험 클래스가 모두 돈다 — `ConsentLocaleMigrationTest`, `ConsentDocumentInitializerTest`, `ConsentDocumentServiceLocaleTest`, `ConsentControllerTest`, `MemberServiceTest`(신규 5건), `NoticeTranslationMigrationTest`, `AppNoticeTranslationTest`, `AppNoticeTargetCountriesTest`, `NoticeLocaleTest`, `NoticeCountryTest`, `NoticeControllerTest`, `NoticeTextsFormTest`, `AdminConsent*Test`, `AdminNotice*Test`, `NoticePreviewScriptTest`, 그리고 기존 `MigrationRollbackContractTest`·`AdminTemplateTagBalanceTest`.
 
 - [ ] **Step 2: 클라이언트 전체 시험과 분석**
 
@@ -7205,8 +7948,13 @@ python3 -c "import json; d=json.load(open('/tmp/consent-ko.json')); print(d['ver
 curl -s -D - -H "Accept-Language: ja" "http://<host>/api/consents/documents" | head -20
 # 공지 — Vary 가 붙는다
 curl -s -D - -H "Accept-Language: en" "http://<host>/api/app/notices?platform=IOS" | grep -i "vary\|cache-control"
+# 대상 국가 — 관리자 /admin/notices/new 에서 대상 국가를 JP 로, 켠 채 저장한 공지가 하나 있다고 하자(로컬 DB)
+curl -s "http://<host>/api/app/notices?platform=IOS" | python3 -c "import sys,json; print([n['title'] for n in json.load(sys.stdin)['notices']])"
+curl -s -H "X-Elum-Region: JP" "http://<host>/api/app/notices?platform=IOS" | python3 -c "import sys,json; print([n['title'] for n in json.load(sys.stdin)['notices']])"
+curl -s -H "X-Elum-Region: japan" "http://<host>/api/app/notices?platform=IOS" | python3 -c "import sys,json; print([n['title'] for n in json.load(sys.stdin)['notices']])"
+curl -s -D - -H "X-Elum-Region: JP" "http://<host>/api/app/notices?platform=IOS" -o /dev/null | grep -i "vary"
 ```
-Expected: 첫째 — `Content-Language: ko`, `Vary: Accept-Language`, 버전·키 다섯 개가 이전과 같다. 둘째 — `{"version":"","documents":[]}` 와 `Content-Language: ja`. 셋째 — `Vary: Accept-Language` 와 `Cache-Control: max-age=60`.
+Expected: 첫째 — `Content-Language: ko`, `Vary: Accept-Language`, 버전·키 다섯 개가 이전과 같다. 둘째 — `{"version":"","documents":[]}` 와 `Content-Language: ja`. 셋째 — `Vary: Accept-Language, X-Elum-Region` 와 `Cache-Control: max-age=60`. 넷째 — 헤더 없음(= `KR`)에는 그 공지가 **없고**(기존 공지는 그대로), `JP` 에는 **있고**, 형식이 틀린 `japan`(국가 미상)에는 **없다**. 마지막 줄은 `Vary` 에 `X-Elum-Region` 이 있다.
 
 - [ ] **Step 6: 게시 → 가입 흐름을 한 번 밟는다 (`/pro-agent-test`)**
 
@@ -7230,6 +7978,7 @@ Expected: 디자인 이슈 URL. 이 이슈에 시안이 나오면 Task 11 의 `C
 
 - **서버를 먼저 배포한다.** 헤더 없는 옛 앱은 `ko` 로 응답받고 본문 모양이 같다. V34·V35 는 추가 위주다(다른 언어 약관을 게시하기 전까지는 옛 이미지로 되돌려도 돈다).
 - 공지 V35 는 옛 열을 남긴다. 되돌려도 옛 서버는 마이그레이션 시점의 한국어 글을 본다.
+- **대상 국가**: `X-Elum-Region` 헤더는 클라이언트(계획 1)가 보낸다. 앱을 업데이트하지 않은 사용자는 헤더가 없어 `KR` 로 판정된다 — 일본 대상 공지는 업데이트 전의 휴대폰에는 나가지 않는다(한국 사용자와 같은 취급). `target_countries` 는 NULL 허용 추가라 옛 서버 이미지로 되돌려도 돌지만, 되돌려 있는 동안에는 대상 국가를 정한 공지가 모든 국가에 보인다. 서버를 먼저 배포하고, 대상 국가를 쓰는 첫 공지는 클라이언트 릴리스가 퍼진 뒤에 올린다.
 - **운영 DB 의 약관은 배포로 갱신되지 않는다.** 언어를 열 때: ① 법무 확인 본문을 `consent/<언어>/` 에 커밋(게시 페이지 검사가 요구) ② 게시본을 `/{언어}/` 에 올림 ③ 관리자 화면에서 필수 4종 "최초 게시" ④ 앱의 해당 언어 번역·프롬프트 행이 준비됐는지 확인 후 일과 생성 가능 언어를 켠다(계획 2·3·5).
 - `en` 앱 번들 기본값은 법무 확인 전이라 넣지 않았다. 영어 사용자는 첫 실행에 네트워크가 있어야 약관을 읽는다.
 

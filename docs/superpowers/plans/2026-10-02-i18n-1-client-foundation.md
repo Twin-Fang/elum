@@ -35,6 +35,7 @@
 - 번역이 하나도 없는 키가 화면을 깨지지 않는다. (계획 1, 2) → Task 1 `missing_key_fallback_test.dart`, Task 3 `l10n_context_test.dart`. 단, 대체 순서는 `en` 이 아니라 곧바로 `ko` 다 — 아래 "마스터·스펙과 실제 코드가 부딪힌 곳" 2번.
 - 이룸이 휴대폰과 보호자 휴대폰의 언어가 다를 때 카드 글과 음성이 일과 언어를 따른다. (계획 1, 3) → Task 24 `content_locale_test.dart`, `speech_language_test.dart`.
 - 번역 문자열이 길어도(스페인어) 고정 폭 위젯에서 넘치지 않는다. (계획 1, 5) → Task 8 `overflow_pilot_test.dart`(하네스 검증용 파일럿. 전수 검사는 계획 5).
+- 휴대폰 지역 코드가 없거나 비정상(소문자·세 글자·빈 값)일 때 `X-Elum-Region` 을 보내지 않고 요청은 정상으로 동작한다. 개발자 언어 강제 중에도 지역은 시스템 값이다. (계획 1, 2) → Task 25 `region_header_test.dart`, `region_code_test.dart`.
 
 마스터의 네 번째 줄(번역 파일 간 키·자리표시자 불일치를 CI 가 잡는다)은 계획 5 소유다. 이 계획은 그 검사의 **골격**(`test/l10n/arb_parity_test.dart`)만 만들고 CI 연결은 하지 않는다.
 
@@ -135,7 +136,8 @@
 | `client/lib/core/l10n/date_labels.dart` | 날짜·요일 라벨 확장 |
 | `client/lib/core/l10n/content_locale.dart` | `ContentLocale`, `contentLocaleOf` |
 | `client/lib/core/dev/dev_locale_override.dart` | `devLocaleOverrideProvider` |
-| `client/lib/core/network/accept_language_interceptor.dart` | `AcceptLanguageInterceptor` |
+| `client/lib/core/l10n/region_code.dart` | `systemRegionCode`, `normalizeRegionCode` |
+| `client/lib/core/network/accept_language_interceptor.dart` | `AcceptLanguageInterceptor`(`Accept-Language` 과 `X-Elum-Region`) |
 | `client/tool/check_hangul_literals.dart`, `client/tool/l10n_ko_audit.dart` | 검증 도구 |
 | `client/test/l10n/*`, `client/test/helpers/pump_with_locale.dart` | 테스트 기반 |
 
@@ -170,7 +172,7 @@ cp -n client/.env.example client/.env   # .env 가 없을 때만. 커밋하지 �
 cd client && flutter test 2>&1 | tail -3
 ```
 
-Expected: `All tests passed!` 와 `+N` 개수. **N 을 이 계획 끝(Task 26)의 비교 기준으로 적어 둔다**(기준 커밋 메시지는 2180). 골든 PNG 가 `git status` 에 안 잡히는지도 본다: `git status --short client/test | grep -c png` → `0`.
+Expected: `All tests passed!` 와 `+N` 개수. **N 을 이 계획 끝(Task 27)의 비교 기준으로 적어 둔다**(기준 커밋 메시지는 2180). 골든 PNG 가 `git status` 에 안 잡히는지도 본다: `git status --short client/test | grep -c png` → `0`.
 
 - [ ] **Step 2: 실패하는 테스트를 쓴다**
 
@@ -1491,7 +1493,7 @@ import 'core/l10n/l10n_context.dart';
 - [ ] **Step 4: 통과를 확인한다**
 
 Run: `cd client && flutter test test/l10n/app_l10n_wiring_test.dart test/splash_screen_test.dart test/router_redirect_test.dart && flutter analyze`
-Expected: **PASS**, `No issues found!`. (`ElumApp` 자체를 띄우는 테스트는 없다 — `invite_link_flow_test.dart` 는 같은 배선을 흉내 낼 뿐이다. 실제 앱 동작은 Task 26 의 시뮬레이터 확인에서 본다.)
+Expected: **PASS**, `No issues found!`. (`ElumApp` 자체를 띄우는 테스트는 없다 — `invite_link_flow_test.dart` 는 같은 배선을 흉내 낼 뿐이다. 실제 앱 동작은 Task 27 의 시뮬레이터 확인에서 본다.)
 
 - [ ] **Step 5: 커밋 (`/pro-commit`)**
 
@@ -5649,7 +5651,7 @@ git add client/lib/features/guardian/presentation/widgets/create_routine_button.
 - Consumes: `context.l10n`·`appL10n` (Task 3), `batchimOf` (Task 11), `commonElumiName` (Task 15)
 - Produces: ARB 키 `childHomeGreeting(name, batchim)` `childHomeEmptyTitle(name)` `childHomeEmptyHint` `childHomeEmptyHintDevice` `childStarsEarned(count)` `childStarsSemantics(count)` `childCardPagerLabel(total, index)` `rewardLumiTitle` `rewardLumiMessage(name)` `rewardLumiButton` `rewardPopoTitle` `rewardPopoMessage(name)` `rewardPopoButton` `rewardRuruTitle` `rewardRuruMessage(name, batchim)` `rewardRuruButton` `modeSwitchToChild` `modeSwitchToGuardian` … `RewardCharacter.title`·`buttonLabel`·`messageFor(childName)`, `ModeSwitchTarget.description` 의 **API 는 그대로**다.
 
-이 Task 가 끝나면 lib 의 `KoreanParticle` 호출이 0곳이 된다(Task 26 에서 `grep` 으로 확인).
+이 Task 가 끝나면 lib 의 `KoreanParticle` 호출이 0곳이 된다(Task 27 에서 `grep` 으로 확인).
 
 대상:
 
@@ -5941,7 +5943,7 @@ git add client/lib/features/child/domain/reward_character.dart client/lib/featur
 
 ---
 
-# 3단계 — 일과 언어와 마무리 (Task 24~26)
+# 3단계 — 일과 언어와 마무리 (Task 24~27)
 
 ## Task 24: 일과 언어 — 카드 글·음성이 일과의 `language` 를 따른다
 
@@ -6564,14 +6566,326 @@ Expected: **PASS**, `No issues found!`. 골든 PNG 변경 `git status --short cl
 git add client/lib/core/l10n/content_locale.dart client/lib/shared/models/routine.dart client/lib/shared/models/routine.freezed.dart client/lib/features/child/data/speech_service.dart client/lib/features/guardian/presentation/widgets/action_card_view.dart client/lib/features/child/presentation/widgets/child_card_pager.dart client/lib/features/child/presentation/child_routine_detail_screen.dart client/lib/features/guardian/presentation/card_review_screen.dart client/lib/features/guardian/presentation/widgets/card_review_reorder_list.dart client/lib/features/guardian/presentation/widgets/step_card_viewer.dart client/lib/features/guardian/presentation/widgets/routine_detail_sheet.dart client/test/card_review_badge_test.dart client/test/card_review_redesign_test.dart client/test/child_card_peek_test.dart client/test/card_review_delete_confirm_test.dart client/test/step_card_viewer_test.dart client/test/speech_service_test.dart client/test/photo/card_edit_sheet_photo_test.dart client/test/l10n/routine_language_test.dart client/test/l10n/content_locale_test.dart client/test/l10n/speech_language_test.dart client/test/l10n/content_language_flow_test.dart
 ```
 
-## Task 25: 규칙 문서와 다른 계획에 넘기는 인터페이스
+## Task 25: `X-Elum-Region` — 요청마다 휴대폰 지역 코드를 싣는다
+
+**Files:**
+- Create: `client/lib/core/l10n/region_code.dart`
+- Modify: `client/lib/core/network/accept_language_interceptor.dart` — 생성자(`AcceptLanguageInterceptor`), `onRequest`(Task 7 Step 3 에서 만든 파일)
+- Modify: `client/lib/core/network/dio_client.dart` — `dioProvider` 의 `AcceptLanguageInterceptor(...)` 등록부(Task 7 Step 3 에서 더한 블록)
+- Test: `client/test/core/l10n/region_code_test.dart`, `client/test/core/network/region_header_test.dart`, `client/test/accept_language_dio_wiring_test.dart`(Modify — 끝에 테스트 추가)
+
+**Interfaces:**
+- Consumes: `AcceptLanguageInterceptor` · `effectiveAppLocale` (Task 7·Task 4), `devLocaleOverrideProvider` (Task 4)
+- Produces: `String? systemRegionCode()` — 휴대폰 지역 코드(ISO 3166-1 alpha-2 대문자) 또는 `null`. `String? normalizeRegionCode(String? raw)`. `AcceptLanguageInterceptor({required Locale Function() locale, String? Function()? region})` 와 `static const regionHeaderName = 'X-Elum-Region'` — 마스터 C1-2 (서버 `CurrentRegion` 이 읽는다)
+
+지역은 **언어와 따로** 판정한다. 개발자 언어 강제(Task 4)는 화면·`Accept-Language` 만 바꾸고 `X-Elum-Region` 은 시스템 로케일 값 그대로 보낸다 — 공지의 대상 국가는 사용자가 실제로 있는 곳이어야 하고, 언어를 시험하려고 강제한 값이 국가 판정을 바꾸면 안 된다.
+
+- [ ] **Step 1: 실패하는 테스트를 쓴다**
+
+`client/test/core/l10n/region_code_test.dart`
+
+```dart
+import 'package:elum/core/l10n/region_code.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+/// 지역 코드는 두 글자 대문자만 통과시킨다 (마스터 C1-2). 그 밖은 "없음"이라 헤더를 안 보낸다.
+void main() {
+  final binding = TestWidgetsFlutterBinding.ensureInitialized();
+
+  tearDown(binding.platformDispatcher.clearLocalesTestValue);
+
+  group('normalizeRegionCode', () {
+    test('두 글자 대문자는 그대로', () {
+      expect(normalizeRegionCode('US'), 'US');
+      expect(normalizeRegionCode('KR'), 'KR');
+    });
+
+    test('null·빈 값은 null', () {
+      expect(normalizeRegionCode(null), isNull);
+      expect(normalizeRegionCode(''), isNull);
+    });
+
+    test('소문자·세 글자·숫자·공백 섞임은 null — 고쳐 쓰지 않는다', () {
+      expect(normalizeRegionCode('us'), isNull);
+      expect(normalizeRegionCode('Us'), isNull);
+      expect(normalizeRegionCode('USA'), isNull);
+      expect(normalizeRegionCode('U'), isNull);
+      expect(normalizeRegionCode('U1'), isNull);
+      expect(normalizeRegionCode(' US'), isNull);
+    });
+  });
+
+  group('systemRegionCode — 시스템 로케일의 countryCode', () {
+    test('en_US → US, ko_KR → KR', () {
+      binding.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
+      expect(systemRegionCode(), 'US');
+      binding.platformDispatcher.localesTestValue = const [Locale('ko', 'KR')];
+      expect(systemRegionCode(), 'KR');
+    });
+
+    test('지역이 없는 로케일(ja)은 null', () {
+      binding.platformDispatcher.localesTestValue = const [Locale('ja')];
+      expect(systemRegionCode(), isNull);
+    });
+
+    test('로케일 목록이 비어도 죽지 않고 null', () {
+      binding.platformDispatcher.localesTestValue = const <Locale>[];
+      expect(systemRegionCode(), isNull);
+    });
+
+    test('첫 로케일의 지역을 쓴다 — 두 번째 이후 언어의 지역이 아니다', () {
+      binding.platformDispatcher.localesTestValue = const [
+        Locale('es'),
+        Locale('en', 'US'),
+      ];
+      expect(systemRegionCode(), isNull);
+    });
+  });
+}
+```
+
+`client/test/core/network/region_header_test.dart`
+
+```dart
+import 'package:dio/dio.dart';
+import 'package:elum/core/network/accept_language_interceptor.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../helpers/fake_dio.dart';
+
+/// `X-Elum-Region` 은 `Accept-Language` 와 함께 나가되, 지역이 없거나 비정상이면 **헤더만 빠지고**
+/// 요청은 정상으로 나간다 (Review Focus). 지역 코드를 돌려주는 함수를 주입해 값을 고정한다.
+void main() {
+  late FakeAdapter adapter;
+  String? region;
+
+  Dio build() {
+    adapter = FakeAdapter({'GET /api/ping': {'ok': true}});
+    return Dio(BaseOptions(baseUrl: 'https://test.local'))
+      ..httpClientAdapter = adapter
+      ..interceptors.add(
+        AcceptLanguageInterceptor(
+          locale: () => const Locale('ko'),
+          region: () => region,
+        ),
+      );
+  }
+
+  Future<Map<String, dynamic>> send() async {
+    final res = await build().get<dynamic>('/api/ping');
+    expect(res.statusCode, 200, reason: '지역 헤더가 없어도 요청은 성공해야 한다');
+    return adapter.sentHeaders['GET /api/ping']!;
+  }
+
+  bool hasRegion(Map<String, dynamic> h) =>
+      h.keys.any((k) => k.toLowerCase() == 'x-elum-region');
+
+  setUp(() => region = null);
+
+  test('US 를 싣는다', () async {
+    region = 'US';
+    final sent = await send();
+    expect(sent['X-Elum-Region'], 'US');
+    expect(sent['Accept-Language'], 'ko', reason: '언어 헤더와 함께 나간다');
+  });
+
+  test('KR 을 싣는다', () async {
+    region = 'KR';
+    expect((await send())['X-Elum-Region'], 'KR');
+  });
+
+  test('지역 코드가 없으면(null) 헤더를 붙이지 않는다', () async {
+    region = null;
+    final sent = await send();
+    expect(hasRegion(sent), isFalse);
+    expect(sent['Accept-Language'], 'ko');
+  });
+
+  test('소문자 us · 세 글자 USA · 빈 값은 헤더를 붙이지 않는다', () async {
+    for (final bad in ['us', 'USA', '']) {
+      region = bad;
+      expect(hasRegion(await send()), isFalse, reason: '"$bad"');
+    }
+  });
+
+  test('요청마다 지금 지역을 읽는다 — 값이 아니라 함수를 받는다', () async {
+    final dio = build();
+    region = 'US';
+    await dio.get<dynamic>('/api/ping');
+    region = null;
+    await dio.get<dynamic>('/api/ping');
+    expect(hasRegion(adapter.sentHeaders['GET /api/ping']!), isFalse);
+  });
+
+  test('호출부가 직접 정한 값은 덮지 않는다', () async {
+    region = 'US';
+    final dio = build();
+    await dio.get<dynamic>(
+      '/api/ping',
+      options: Options(headers: {'x-elum-region': 'JP'}),
+    );
+    final sent = adapter.sentHeaders['GET /api/ping']!;
+    expect(sent['x-elum-region'] ?? sent['X-Elum-Region'], 'JP');
+    expect(
+      sent.keys.where((k) => k.toLowerCase() == 'x-elum-region'),
+      hasLength(1),
+    );
+  });
+
+  test('region 을 주지 않은 기존 생성 방식은 지역 헤더 없이 그대로 동작한다', () async {
+    adapter = FakeAdapter({'GET /api/ping': {'ok': true}});
+    final dio = Dio(BaseOptions(baseUrl: 'https://test.local'))
+      ..httpClientAdapter = adapter
+      ..interceptors.add(AcceptLanguageInterceptor(locale: () => const Locale('en')));
+    await dio.get<dynamic>('/api/ping');
+    final sent = adapter.sentHeaders['GET /api/ping']!;
+    expect(sent['Accept-Language'], 'en');
+    expect(hasRegion(sent), isFalse);
+  });
+}
+```
+
+`client/test/accept_language_dio_wiring_test.dart` 의 `main()` 끝(마지막 `test(...)` 다음)에 더한다.
+
+```dart
+  test('휴대폰 지역이 X-Elum-Region 으로 나간다', () async {
+    binding.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
+    final c = build();
+    await c.read(dioProvider).get<dynamic>('/api/ping');
+    expect(adapter.sentHeaders['GET /api/ping']!['X-Elum-Region'], 'US');
+
+    binding.platformDispatcher.localesTestValue = const [Locale('ko', 'KR')];
+    await c.read(dioProvider).get<dynamic>('/api/ping');
+    expect(adapter.sentHeaders['GET /api/ping']!['X-Elum-Region'], 'KR');
+  });
+
+  test('개발자 도구가 언어를 강제해도 지역은 시스템 로케일 값이다', () async {
+    dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
+    binding.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
+    final c = build();
+    c.read(devLocaleOverrideProvider.notifier).set(const Locale('ja'));
+    await c.read(dioProvider).get<dynamic>('/api/ping');
+    final sent = adapter.sentHeaders['GET /api/ping']!;
+    expect(sent['Accept-Language'], 'ja', reason: '강제는 언어만 바꾼다');
+    expect(sent['X-Elum-Region'], 'US', reason: '지역은 시스템 값 그대로');
+  });
+
+  test('휴대폰 지역이 없으면 지역 헤더 없이 나가고 요청은 성공한다', () async {
+    binding.platformDispatcher.localesTestValue = const [Locale('ja')];
+    final c = build();
+    final res = await c.read(dioProvider).get<dynamic>('/api/ping');
+    expect(res.statusCode, 200);
+    expect(
+      adapter.sentHeaders['GET /api/ping']!.keys.map((k) => k.toLowerCase()),
+      isNot(contains('x-elum-region')),
+    );
+  });
+```
+
+- [ ] **Step 2: 실행해 실패를 확인한다**
+
+Run: `cd client && flutter test test/core/l10n/region_code_test.dart test/core/network/region_header_test.dart test/accept_language_dio_wiring_test.dart`
+Expected: **FAIL** — `region_code.dart` 가 없고 `AcceptLanguageInterceptor` 에 `region` 인자가 없다.
+
+- [ ] **Step 3: 최소 구현**
+
+`client/lib/core/l10n/region_code.dart`
+
+```dart
+import 'package:flutter/widgets.dart';
+
+/// 서버가 받는 지역 코드 형식: ISO 3166-1 alpha-2 대문자 두 글자 (마스터 C1-2).
+final _regionPattern = RegExp(r'^[A-Z]{2}$');
+
+/// 형식이 맞는 지역 코드만 돌려주고 나머지는 `null`.
+///
+/// 소문자·세 글자를 고쳐 쓰지 않는다 — 잘못 짐작한 국가로 공지가 나가느니 "미상"으로 두는 쪽이 안전하다.
+String? normalizeRegionCode(String? raw) =>
+    raw != null && _regionPattern.hasMatch(raw) ? raw : null;
+
+/// 휴대폰(시스템 로케일)의 지역 코드. 없거나 비정상이면 `null`.
+///
+/// 개발자 언어 강제(`devLocaleOverrideProvider`)는 **언어만** 바꾸는 시험 장치라 지역에는 쓰지 않는다.
+/// 강제 값을 섞으면 언어를 시험하다가 공지 대상 국가까지 바뀐다.
+/// 테스트가 `localesTestValue` 로 바꿀 수 있도록 `PlatformDispatcher.instance` 가 아니라 바인딩의 것을 읽는다
+/// (`locale_policy.dart` 와 같은 이유).
+String? systemRegionCode() {
+  final locales = WidgetsBinding.instance.platformDispatcher.locales;
+  if (locales.isEmpty) return null;
+  return normalizeRegionCode(locales.first.countryCode);
+}
+```
+
+`client/lib/core/network/accept_language_interceptor.dart` 를 고친다. import 와 생성자·필드·`onRequest`:
+
+```dart
+  AcceptLanguageInterceptor({required this.locale, this.region});
+
+  static const headerName = 'Accept-Language';
+
+  /// 휴대폰 지역을 싣는 헤더 (마스터 C1-2). 서버 `CurrentRegion` 이 읽는다.
+  static const regionHeaderName = 'X-Elum-Region';
+
+  /// 요청 시점의 앱 언어. OS 언어가 바뀌어도 다음 요청부터 따라가도록 값이 아니라 함수다.
+  final Locale Function() locale;
+
+  /// 요청 시점의 지역 코드. 주지 않으면(기존 생성 방식) 지역 헤더를 붙이지 않는다.
+  /// 테스트가 값을 고정할 수 있도록 함수로 주입한다.
+  final String? Function()? region;
+```
+
+```dart
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    // 호출부가 직접 정한 값(예: 약관을 다른 언어로 미리보기)은 덮지 않는다.
+    // Dio 헤더는 대소문자를 가리지 않아 `accept-language` 로 넣은 값도 막아 준다.
+    options.headers.putIfAbsent(headerName, () => headerValue(locale()));
+
+    // 지역 코드가 없거나 형식이 틀리면 헤더만 뺀다 — 서버는 헤더 없음을 `KR`(옛 앱)로 본다.
+    // 여기서 다시 검사하는 이유: 주입된 함수가 정규화를 안 거친 값을 줘도 깨진 헤더가 나가지 않게.
+    final code = normalizeRegionCode(region?.call());
+    if (code != null) {
+      options.headers.putIfAbsent(regionHeaderName, () => code);
+    }
+    handler.next(options);
+  }
+```
+
+파일 맨 위 import 에 `import '../l10n/region_code.dart';` 를 더한다. `dio_client.dart` 에는 같은 import 를 더하고, Task 7 에서 더한 `AcceptLanguageInterceptor(` 호출에 인자를 하나 더한다.
+
+```dart
+  dio.interceptors.add(
+    AcceptLanguageInterceptor(
+      locale: () => effectiveAppLocale(
+        devOverride: ref.read(devLocaleOverrideProvider),
+      ),
+      // 지역은 언어 강제와 무관하게 시스템 값 (region_code.dart)
+      region: systemRegionCode,
+    ),
+  );
+```
+
+- [ ] **Step 4: 통과를 확인한다**
+
+Run: `cd client && flutter test test/core/l10n/region_code_test.dart test/core/network/region_header_test.dart test/core/network/accept_language_interceptor_test.dart test/accept_language_dio_wiring_test.dart test/dio_client_test.dart test/profile_dio_wiring_test.dart test/profile_header_test.dart && flutter analyze`
+Expected: **PASS**(Task 7 의 기존 테스트 포함 — 생성자를 안 고쳐도 통과), `No issues found!`
+
+- [ ] **Step 5: 커밋 (`/pro-commit`)**
+
+```bash
+git add client/lib/core/l10n/region_code.dart client/lib/core/network/accept_language_interceptor.dart client/lib/core/network/dio_client.dart client/test/core/l10n/region_code_test.dart client/test/core/network/region_header_test.dart client/test/accept_language_dio_wiring_test.dart
+```
+
+## Task 26: 규칙 문서와 다른 계획에 넘기는 인터페이스
 
 **Files:**
 - Modify: `client/CLAUDE.md` — `### 필수` 목록(`## 코딩 규칙` 아래) 끝에 다국어 규칙 추가
 - Modify: `docs/superpowers/plans/2026-10-02-i18n-0-master.md` — C4 표(`## 공통 계약` → `### C4. 클라이언트`)의 개발자 강제 행과 추가 이름
 
 **Interfaces:**
-- Consumes: Task 1~24 의 이름
+- Consumes: Task 1~25 의 이름
 - Produces: 새 화면·새 문구를 쓰는 사람이 따를 규칙, 하위 계획 3·4·5·6 이 쓸 클라이언트 이름 목록
 
 - [ ] **Step 1: `client/CLAUDE.md` 에 규칙을 더한다**
@@ -6609,7 +6923,7 @@ git add client/lib/core/l10n/content_locale.dart client/lib/shared/models/routin
 
 | 받는 계획 | 넘기는 것 |
 | --- | --- |
-| 2 서버 | 클라이언트는 이미 `Accept-Language`(C1 형식)를 모든 요청에 싣는다. 서버가 `RoutineResponse.language` 를 내려주면 앱이 읽는다(없으면 `ko`). 이름·소개 등 **길이 제한은 서버가 코드 단위로 세는지 확인**해야 한다 — 앱은 글자(grapheme) 단위로 제한한다. |
+| 2 서버 | 클라이언트는 이미 `Accept-Language`(C1 형식)와 `X-Elum-Region`(C1-2, 두 글자 대문자만, 없거나 비정상이면 헤더 생략)을 모든 요청에 싣는다. 서버가 `RoutineResponse.language` 를 내려주면 앱이 읽는다(없으면 `ko`). 이름·소개 등 **길이 제한은 서버가 코드 단위로 세는지 확인**해야 한다 — 앱은 글자(grapheme) 단위로 제한한다. |
 | 3 AI·음성 | `SpeechService.speak(..., language:)` 가 일과 언어를 받는다. `DeviceSpeech` 는 기기 TTS 언어를 맞추기만 한다. 기기 음성이 그 언어를 못 읽을 때 서버 음성으로 대체, 서버 음성 언어별 목소리, 500자 제한 점검은 계획 3. 일과 생성 요청의 언어는 `Accept-Language` 로 서버가 정한다(요청 필드 없음). |
 | 4 약관·공지 | `usesWordJoiner` 규칙을 `notice-preview.js` 의 `keepWords` 에 반영(`ko` 만 표시). `consent_documents.dart`(번들 기본값 `ko`·`en`)와 `consent_body.dart`(약관 본문 파서의 `제N조`·조사 정규식)는 이 계획이 건드리지 않았다. |
 | 5 번역·품질 | `arb_parity_test.dart` 의 `openedLocales` 를 늘리고 CI(`PROJECT-FLUTTER-CI.yaml`)에 `flutter test test/l10n/` 를 연결한다. `pumpWithLocale` 로 넘침 검사를 전 화면에 확장한다(`overflow_pilot_test.dart` 참고). 용어 `이룸이`·캐릭터 이름 번역 여부, 번체 중국어 처리, 일본어·중국어 폰트 번들(결정 D3)은 계획 5. 번역을 채울 때 `plural` 은 `one` 을 더하고 `batchim` 은 쓰지 않는다. |
@@ -6621,13 +6935,13 @@ git add client/lib/core/l10n/content_locale.dart client/lib/shared/models/routin
 git add client/CLAUDE.md docs/superpowers/plans/2026-10-02-i18n-0-master.md
 ```
 
-## Task 26: 통과 조건 — 분석·전체 테스트·골든 0건·`ko` 불변
+## Task 27: 통과 조건 — 분석·전체 테스트·골든 0건·`ko` 불변
 
 **Files:**
 - (수정 없음. 실패하면 원인 파일을 고친다.)
 
 **Interfaces:**
-- Consumes: Task 1~25 전부
+- Consumes: Task 1~26 전부
 - Produces: 하위 계획 1 완료 판정
 
 이 Task 가 통과하기 전에는 **완료라고 말하지 않는다.**
@@ -6663,7 +6977,7 @@ Expected: `--- 사용자 노출 한글 리터럴 0줄`, `--- 조각 N개 중 기
 - [ ] **Step 5: 개발자 도구로 언어 강제를 실제로 밟는다** (`/pro-launch`)
 
 `ELUM_SHOW_DEV_TOOLS=true` 개발 빌드를 iOS 시뮬레이터에 띄워(`/pro-launch`) 개발자 도구 → `언어 강제` → `English` 를 고른 뒤 아무 API 가 나가게 하고, 개발자 도구의 로그 보기에서 요청 헤더에 `Accept-Language: en` 이 있는지 본다. `日本語` 를 고르면 `ja`, `简体中文` 은 `zh-Hans`. `휴대폰 언어 따르기` 로 풀면 시뮬레이터 언어가 나간다. 이 단계에서 **아직 번역이 비어 있어 화면 문구는 한국어 그대로**다(정상). 실기기의 OS 언어 전환은 계획 6 이후에야 확인할 수 있다.
-Expected: 로그에 `Accept-Language` 가 강제한 값으로 찍힌다.
+Expected: 로그에 `Accept-Language` 가 강제한 값으로 찍히고, `X-Elum-Region` 은 강제와 무관하게 시뮬레이터 지역(예: `US`)이 찍힌다.
 
 - [ ] **Step 6: 실패했을 때 — 어느 파일의 어느 문구가 달라졌는지 찾는 절차**
 

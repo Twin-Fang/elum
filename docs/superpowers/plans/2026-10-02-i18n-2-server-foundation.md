@@ -31,12 +31,12 @@
 - 예외는 `CustomException` + `ErrorCode` + `GlobalExceptionHandler` 만 쓴다. 이 계획이 더하는 오류는 `ErrorCode.CONTENT_LOCALE_NOT_READY` 하나다.
 - request DTO(`dto/request`)에 검증 어노테이션을 **새로 더하지 않는다.** 이 계획은 DTO 를 고치지 않는다(이미 있는 `message` 문구의 번역 키만 만든다).
 - 새 REST 엔드포인트는 없다. 모든 엔티티는 `BaseEntity` 를 이미 상속한다.
-- `.gitignore` 는 건드리지 않는다. 새 리소스는 `server/src/main/resources/i18n/` 에 둔다(무시되지 않음을 Task 4 에서 `git status` 로 확인한다).
+- `.gitignore` 는 건드리지 않는다. 새 리소스는 `server/src/main/resources/i18n/` 에 둔다(무시되지 않음을 Task 5 에서 `git status` 로 확인한다).
 
 ## 공통 계약 (마스터 C1~C3, C5 중 이 계획이 구현하는 것 — 이름·타입·경로 그대로)
 
 - `com.chuseok22.elumserver.common.locale.AppLocale` : `KO("ko") EN("en") JA("ja") ZH("zh") ES("es")`, `code()`, `fallbackChain()`, `fromCode(String)`, `fromAcceptLanguage(String)`
-- `CurrentLocale.get()` (같은 패키지). `EnabledLocales.contains(AppLocale)` / `EnabledLocales.resolveContentLocale(AppLocale)` (같은 패키지, 스프링 빈)
+- `CurrentLocale.get()` (같은 패키지). `CurrentRegion.get()` (같은 패키지, 대문자 ISO 코드 또는 `null`=국가 미상, 요청 밖·헤더 없음은 `KR`). `EnabledLocales.contains(AppLocale)` / `EnabledLocales.resolveContentLocale(AppLocale)` (같은 패키지, 스프링 빈)
 - `ConfigKey.ENABLED_CONTENT_LOCALES` (CSV, 기본 `ko`)
 - Flyway `V33__add_routine_language.sql` : `routine.language VARCHAR(8) NOT NULL DEFAULT 'ko'`
 - `Routine.language`(`AppLocale`), `RoutineResponse.language`(문자열 코드). 일과 생성 요청에는 언어 필드를 **더하지 않는다.**
@@ -45,11 +45,12 @@
 
 | 줄 | 고정하는 Task | 테스트 |
 | --- | --- | --- |
-| 헤더가 없는 요청(이미 배포된 앱)의 응답은 이전과 **바이트 단위로 같다** | Task 4, 6, 7 | `ErrorMessageParityTest`, `LocalizedErrorResponsesTest`, `GlobalExceptionHandlerLocaleMvcTest` |
-| `Accept-Language: zh-TW`, `zh-Hant`, `ar`, 빈 값, `*`, 품질값(`en;q=0.1, ja;q=0.9`)이 터지지 않고 정해진 언어로 떨어진다 | Task 1, 2, 7 | `AppLocaleTest`, `AcceptLanguageFilterTest`, `GlobalExceptionHandlerLocaleMvcTest` |
-| 번역이 하나도 없는 키가 화면을 깨지 않는다(`en` → `ko` 대체) | Task 3, 4 | `ErrorMessagesTest`, `ErrorMessageParityTest` |
-| 폴백 질문·추천 목록 파일이 한 언어라도 비면 서버가 뜨지 않는다 | Task 8, 10 | `RoutinePhrasesTest`, `RoutinePhrasesStartupGuardTest` |
-| (추가) 헤더가 없으면 일과 언어·추천·폴백 질문도 `ko` 다 | Task 8, 11, 13 | `RoutinePhrasesParityTest`, `RoutineServiceTest`, 호환 묶음 실행 |
+| 헤더가 없는 요청(이미 배포된 앱)의 응답은 이전과 **바이트 단위로 같다** | Task 5, 7, 8 | `ErrorMessageParityTest`, `LocalizedErrorResponsesTest`, `GlobalExceptionHandlerLocaleMvcTest` |
+| `Accept-Language: zh-TW`, `zh-Hant`, `ar`, 빈 값, `*`, 품질값(`en;q=0.1, ja;q=0.9`)이 터지지 않고 정해진 언어로 떨어진다 | Task 1, 2, 8 | `AppLocaleTest`, `AcceptLanguageFilterTest`, `GlobalExceptionHandlerLocaleMvcTest` |
+| 번역이 하나도 없는 키가 화면을 깨지 않는다(`en` → `ko` 대체) | Task 4, 5 | `ErrorMessagesTest`, `ErrorMessageParityTest` |
+| 폴백 질문·추천 목록 파일이 한 언어라도 비면 서버가 뜨지 않는다 | Task 9, 11 | `RoutinePhrasesTest`, `RoutinePhrasesStartupGuardTest` |
+| (추가) `X-Elum-Region` 헤더가 없는 기존 앱 요청은 `KR`, 형식이 틀리면 국가 미상(`null`)이며 요청이 끝나면 비워진다 | Task 3 | `CurrentRegionTest` |
+| (추가) 헤더가 없으면 일과 언어·추천·폴백 질문도 `ko` 다 | Task 9, 12, 14 | `RoutinePhrasesParityTest`, `RoutineServiceTest`, 호환 묶음 실행 |
 
 ## 실제 코드와 계약이 부딪힌 곳 (구현 전에 읽는다)
 
@@ -562,7 +563,279 @@ git add server/src/main/java/com/chuseok22/elumserver/common/locale/CurrentLocal
 
 ---
 
-## Task 3: `ErrorMessages` — `MessageSource` 와 대체 순서
+## Task 3: 요청 범위 `CurrentRegion` 과 `RegionFilter` (`X-Elum-Region`)
+
+공지를 국가별로 보여주기 위한 **국가 판정의 접근자와 파서만** 만든다(마스터 C1-2, 스펙 4.3.1). 이 계획에서는 지역을 **소비하는 곳을 만들지 않는다** — 공지 대상 국가 지정은 계획 4 다. 새 에러 코드도 만들지 않는다(형식이 틀린 값은 오류가 아니라 "국가 미상"이다).
+
+**필터를 따로 만드는 근거.** 기존 `AcceptLanguageFilter` 를 늘리지 않고 같은 패턴(`OncePerRequestFilter` + 스레드 로컬 + `finally` 에서 비움 + 보안 체인보다 앞 순서)의 `RegionFilter` 를 하나 더 둔다. (1) 언어와 지역은 헤더도 값의 의미도 달라 한 클래스에 섞으면 Task 2 의 테스트·계약(`CurrentLocale`)이 지역 규칙까지 떠안는다. (2) `AcceptLanguageFilter` 는 Task 2 에서 이미 테스트로 고정됐으므로 건드리지 않아야 헤더 없음 = `ko` 증명이 흔들리지 않는다. (3) 계획 4 가 지역만 쓰는 자리에서 언어 필터에 기대지 않는다.
+
+**Files:**
+- Create: `server/src/main/java/com/chuseok22/elumserver/common/locale/CurrentRegion.java`
+- Create: `server/src/main/java/com/chuseok22/elumserver/common/locale/RegionFilter.java`
+- Test: `server/src/test/java/com/chuseok22/elumserver/common/locale/CurrentRegionTest.java`
+
+**Interfaces:**
+- Consumes: 없음(서블릿 요청 헤더 `X-Elum-Region` 만 읽는다)
+- Produces:
+  ```java
+  public final class CurrentRegion {
+    public static final String HEADER = "X-Elum-Region";
+    public static final String DEFAULT = "KR";            // 헤더가 없거나 요청 밖
+    public static String get();                           // 대문자 ISO 코드 또는 null(국가 미상). 요청 밖은 "KR"
+    static String parse(String header);                   // 같은 패키지(필터·테스트)만
+    static void set(String region);   // null 도 "국가 미상"으로 저장한다
+    static void clear();
+  }
+  @Component @Order(Ordered.HIGHEST_PRECEDENCE + 11)
+  public class RegionFilter extends OncePerRequestFilter { }
+  ```
+  - 소비자는 아직 없다. 계획 4(공지)가 `CurrentRegion.get()` 을 읽는다. `null` 은 "국가 미상"이라 대상 국가를 지정하지 않은(전체) 공지만 보인다.
+
+**파싱 규칙(마스터 C1-2).**
+
+| 헤더 | 결과 |
+| --- | --- |
+| 없음 | `KR` |
+| `KR` · `JP` | 그대로 |
+| `us` · ` us ` | `US` (앞뒤 공백 제거, 대문자로 정규화) |
+| 빈 값 · 공백만 · `USA` · `1` · `한국` · `K1` | `null` (국가 미상) |
+
+`null` 과 "요청 밖"을 구분해야 한다. 스레드 로컬이 비어 있는 것(요청 밖 → `KR`)과 **국가 미상(`null`)을 저장한 것**은 다르므로 내부에 미상 표식을 둔다.
+
+- [ ] **Step 1: 실패하는 테스트를 쓴다**
+
+`server/src/test/java/com/chuseok22/elumserver/common/locale/CurrentRegionTest.java`:
+
+```java
+package com.chuseok22.elumserver.common.locale;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import jakarta.servlet.ServletException;
+import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.core.annotation.Order;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+
+class CurrentRegionTest {
+
+  private final RegionFilter filter = new RegionFilter();
+
+  /** 요청을 처리하는 동안(체인 안)의 CurrentRegion. 헤더 null 이면 헤더를 아예 보내지 않는다. */
+  private String seenDuring(String header) throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/notices");
+    if (header != null) {
+      request.addHeader(CurrentRegion.HEADER, header);
+    }
+    AtomicReference<String> seen = new AtomicReference<>("untouched");
+    filter.doFilter(request, new MockHttpServletResponse(), (req, res) -> seen.set(CurrentRegion.get()));
+    return seen.get();
+  }
+
+  @Test
+  @DisplayName("KR 은 KR, JP 는 JP")
+  void validCodes_passThrough() throws Exception {
+    assertThat(seenDuring("KR")).isEqualTo("KR");
+    assertThat(seenDuring("JP")).isEqualTo("JP");
+  }
+
+  @Test
+  @DisplayName("소문자는 대문자로, 앞뒤 공백은 지운다")
+  void normalizes_caseAndWhitespace() throws Exception {
+    assertThat(seenDuring("us")).isEqualTo("US");
+    assertThat(seenDuring("  es ")).isEqualTo("ES");
+  }
+
+  @Test
+  @DisplayName("헤더가 없으면 KR — 이미 배포된 앱의 사용자는 모두 한국 사용자")
+  void noHeader_isKr() throws Exception {
+    assertThat(seenDuring(null)).isEqualTo("KR");
+  }
+
+  @Test
+  @DisplayName("비었거나 두 글자 영문이 아니면 국가 미상(null) — KR 로 새지 않는다")
+  void malformed_isUnknown() throws Exception {
+    assertThat(seenDuring("")).isNull();
+    assertThat(seenDuring("   ")).isNull();
+    assertThat(seenDuring("USA")).isNull();
+    assertThat(seenDuring("1")).isNull();
+    assertThat(seenDuring("한국")).isNull();
+    assertThat(seenDuring("K1")).isNull();
+    assertThat(seenDuring("U S")).isNull();
+  }
+
+  @Test
+  @DisplayName("요청 밖에서 부르면 KR")
+  void outsideRequest_isKr() {
+    assertThat(CurrentRegion.get()).isEqualTo("KR");
+  }
+
+  @Test
+  @DisplayName("요청이 끝나면 비운다 — 국가 미상(null)도 다음 요청에 새지 않는다")
+  void clearedAfterRequest() throws Exception {
+    seenDuring("JP");
+    assertThat(CurrentRegion.get()).isEqualTo("KR");
+
+    seenDuring("USA");   // 미상을 저장한 요청
+    assertThat(CurrentRegion.get()).isEqualTo("KR");
+  }
+
+  @Test
+  @DisplayName("체인이 던져도 비운다")
+  void clearedWhenChainThrows() {
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/notices");
+    request.addHeader(CurrentRegion.HEADER, "US");
+
+    assertThatThrownBy(() -> filter.doFilter(request, new MockHttpServletResponse(), (req, res) -> {
+      throw new ServletException("boom");
+    })).isInstanceOf(ServletException.class);
+
+    assertThat(CurrentRegion.get()).isEqualTo("KR");
+  }
+
+  @Test
+  @DisplayName("필터는 Spring Security 체인(기본 순서 -100)보다 앞에 있다")
+  void runsBeforeSecurityChain() {
+    Order order = RegionFilter.class.getAnnotation(Order.class);
+    assertThat(order).isNotNull();
+    assertThat(order.value()).isLessThan(-100);
+  }
+}
+```
+
+- [ ] **Step 2: 실행해서 실패를 확인한다**
+
+Run: `cd server && ./gradlew test --tests 'com.chuseok22.elumserver.common.locale.CurrentRegionTest'`
+Expected: **FAIL** (컴파일 오류 — `CurrentRegion`, `RegionFilter` 없음)
+
+- [ ] **Step 3: 최소 구현**
+
+`server/src/main/java/com/chuseok22/elumserver/common/locale/CurrentRegion.java`:
+
+```java
+package com.chuseok22.elumserver.common.locale;
+
+import java.util.regex.Pattern;
+
+/**
+ * 지금 처리 중인 요청의 국가 (다국어 #521, 스펙 4.3.1).
+ *
+ * <p>앱이 휴대폰 지역 설정을 {@code X-Elum-Region} 으로 보낸다. 헤더가 없으면 KR 이다(이미 배포된 앱의 사용자는 모두 한국).
+ * 값이 비었거나 두 글자 영문이 아니면 <b>국가 미상(null)</b> 이다 — 오류가 아니라 "대상 국가를 지정하지 않은 공지만 보인다"로
+ * 처리되므로 예외를 던지지 않는다. IP 위치로는 판정하지 않는다(위치 수집은 개인정보 최소 수집 원칙과 부딪힌다).
+ *
+ * <p>{@link CurrentLocale} 과 같은 이유로 InheritableThreadLocal 을 쓴다. 풀의 스레드는 {@link RegionFilter} 가 매번 비운다.
+ */
+public final class CurrentRegion {
+
+  public static final String HEADER = "X-Elum-Region";
+  public static final String DEFAULT = "KR";
+
+  private static final Pattern ISO_ALPHA2 = Pattern.compile("^[A-Za-z]{2}$");
+
+  /** 요청이 "국가 미상"을 저장했다는 표식. 스레드 로컬이 비어 있는 것(요청 밖 → KR)과 구분한다. */
+  private static final String UNKNOWN = "";
+
+  private static final InheritableThreadLocal<String> CURRENT = new InheritableThreadLocal<>();
+
+  private CurrentRegion() {
+  }
+
+  /** 대문자 ISO 3166-1 alpha-2 코드. 국가 미상이면 null, 요청 밖이면 KR. */
+  public static String get() {
+    String stored = CURRENT.get();
+    if (stored == null) {
+      return DEFAULT;
+    }
+    return stored.isEmpty() ? null : stored;
+  }
+
+  /** 헤더 값을 국가로 푼다. null(헤더 없음) → KR, 형식이 틀리면 null(국가 미상). */
+  static String parse(String header) {
+    if (header == null) {
+      return DEFAULT;
+    }
+    String trimmed = header.trim();
+    if (!ISO_ALPHA2.matcher(trimmed).matches()) {
+      return null;
+    }
+    return trimmed.toUpperCase(java.util.Locale.ROOT);
+  }
+
+  static void set(String region) {
+    CURRENT.set(region == null ? UNKNOWN : region);
+  }
+
+  static void clear() {
+    CURRENT.remove();
+  }
+}
+```
+
+`server/src/main/java/com/chuseok22/elumserver/common/locale/RegionFilter.java`:
+
+```java
+package com.chuseok22.elumserver.common.locale;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+/**
+ * {@code X-Elum-Region} 을 읽어 요청 범위의 {@link CurrentRegion} 에 담는다 (다국어 #521).
+ *
+ * <p>{@link AcceptLanguageFilter} 와 같은 패턴이다. 보안 체인(기본 -100)보다 앞에 두어 보안 필터가 쓰는 응답에서도 국가를 알 수 있고,
+ * 요청이 끝나면 예외가 나도 비워 스레드 재사용으로 다음 요청에 국가가 새지 않게 한다.
+ */
+@Component
+@Order(Ordered.HIGHEST_PRECEDENCE + 11)
+public class RegionFilter extends OncePerRequestFilter {
+
+  /** 비동기 재진입에서도 지역을 다시 심는다(스레드가 바뀌므로). */
+  @Override
+  protected boolean shouldNotFilterAsyncDispatch() {
+    return false;
+  }
+
+  @Override
+  protected void doFilterInternal(
+    HttpServletRequest request, HttpServletResponse response, FilterChain chain
+  ) throws ServletException, IOException {
+    CurrentRegion.set(CurrentRegion.parse(request.getHeader(CurrentRegion.HEADER)));
+    try {
+      chain.doFilter(request, response);
+    } finally {
+      CurrentRegion.clear();
+    }
+  }
+}
+```
+
+- [ ] **Step 4: 실행해서 통과를 확인한다**
+
+Run: `cd server && ./gradlew test --tests 'com.chuseok22.elumserver.common.locale.CurrentRegionTest' --tests 'com.chuseok22.elumserver.common.locale.AcceptLanguageFilterTest' --tests 'com.chuseok22.elumserver.common.BeanConstructorAmbiguityTest'`
+Expected: **PASS** (새 `@Component` 가 생성자 모호성 검사를 통과하는지, 언어 필터 테스트가 그대로인지도 함께 본다)
+
+- [ ] **Step 5: 커밋 (`/pro-commit`)**
+
+```bash
+git add server/src/main/java/com/chuseok22/elumserver/common/locale/CurrentRegion.java \
+        server/src/main/java/com/chuseok22/elumserver/common/locale/RegionFilter.java \
+        server/src/test/java/com/chuseok22/elumserver/common/locale/CurrentRegionTest.java
+```
+
+---
+
+## Task 4: `ErrorMessages` — `MessageSource` 와 대체 순서
 
 **Files:**
 - Create: `server/src/main/java/com/chuseok22/elumserver/common/infrastructure/exception/ErrorMessages.java`
@@ -771,7 +1044,7 @@ git add server/src/main/java/com/chuseok22/elumserver/common/infrastructure/exce
 
 ---
 
-## Task 4: `ErrorCode` 문구를 ko 리소스로 옮기고 패리티를 증명한다
+## Task 5: `ErrorCode` 문구를 ko 리소스로 옮기고 패리티를 증명한다
 
 번역 값은 **채우지 않는다**(계획 5). en·ja·zh·es 파일은 머리 주석만 둔다.
 
@@ -782,7 +1055,7 @@ git add server/src/main/java/com/chuseok22/elumserver/common/infrastructure/exce
 - Test: `server/src/test/java/com/chuseok22/elumserver/common/infrastructure/exception/ErrorMessageParityTest.java`
 
 **Interfaces:**
-- Consumes: `ErrorMessages.standard()` (Task 3), `ErrorCode`(기존, 아직 문구를 들고 있다)
+- Consumes: `ErrorMessages.standard()` (Task 4), `ErrorCode`(기존, 아직 문구를 들고 있다)
 - Produces: ko 리소스 = 기존 enum 문구와 글자 하나까지 같음을 증명하는 테스트. golden 은 이후에도 ko 불변의 기준이다(ko 문구를 의도적으로 바꾸는 PR 이 golden 을 같이 고친다).
 
 - [ ] **Step 1: 패리티 테스트를 먼저 쓴다**
@@ -959,13 +1232,13 @@ git add server/src/main/resources/i18n/messages_ko.properties \
 
 ---
 
-## Task 5: `ErrorCode` 에서 한글 문구를 빼고 `getMessage()` 를 ko 리소스로 돌린다
+## Task 6: `ErrorCode` 에서 한글 문구를 빼고 `getMessage()` 를 ko 리소스로 돌린다
 
 원본을 한 곳(리소스)으로 만든다. `getMessage()` 는 남긴다 — `CustomException` 의 예외 메시지, 관리자 화면, `MaintenanceModeFilter` 등 기존 호출부와 테스트가 그대로 동작해야 한다.
 
 **Files:**
 - Modify: `server/src/main/java/com/chuseok22/elumserver/common/infrastructure/exception/ErrorCode.java` (생성자 인자 104곳 + 끝의 필드 2줄 — 약 7-160행)
-- Test: `ErrorMessageParityTest`(Task 4), `ErrorCodeTest`, `MaintenanceModeFilterTest`, `AdminGrantProFailureTest`, `AdminCreditControllerTest`(기존)
+- Test: `ErrorMessageParityTest`(Task 5), `ErrorCodeTest`, `MaintenanceModeFilterTest`, `AdminGrantProFailureTest`, `AdminCreditControllerTest`(기존)
 
 **Interfaces:**
 - Consumes: `ErrorMessages.standard()`, `AppLocale.KO`
@@ -1035,7 +1308,7 @@ git add server/src/main/java/com/chuseok22/elumserver/common/infrastructure/exce
 
 ---
 
-## Task 6: 응답을 만드는 곳이 요청 언어로 문구를 고르게 한다
+## Task 7: 응답을 만드는 곳이 요청 언어로 문구를 고르게 한다
 
 `GlobalExceptionHandler`·`MultipartLimitExceptionHandler`·`MaintenanceModeFilter`·`JwtAuthenticationEntryPoint`·`AidlpDecryptionFilter`. 모두 기존 생성자를 바꾸지 않고(정적 `ErrorMessages.standard()`) 기존 테스트가 그대로 돈다.
 
@@ -1245,7 +1518,7 @@ class LocalizedErrorResponsesTest {
 Run: `cd server && ./gradlew test --tests 'com.chuseok22.elumserver.common.LocalizedErrorResponsesTest'`
 Expected: **FAIL** (`maintenance_defaultText_followsLocale` 는 코드가 아직 `getMessage()` 를 써서, 대체 순서가 고른 값과 다를 수 있다. 번역 파일이 비어 있는 지금은 ko 와 같은 글자가 나오므로 일부 테스트는 통과할 수 있다 — **실패하는 것이 있는지 확인하고, 없으면 Step 3 구현 뒤 `jaRequest_keepsStatusAndCode_andFollowsChain` 의 의미가 구현을 통해서만 성립함을 코드 리뷰로 확인한다**)
 
-> 참고: 번역 파일이 비어 있는 동안에는 ja 요청이 ko 와 같은 글자를 받으므로 이 테스트들은 구현 전에도 우연히 통과할 수 있다. 그래서 Task 3 의 `ErrorMessagesTest`(가짜 리소스로 대체 순서를 직접 검증)가 대체 순서의 증거이고, 이 Task 의 테스트는 **헤더 없음 = 바이트 동일** 과 **배선**을 지킨다. 배선이 끊기면(누군가 `getMessage()` 로 되돌리면) 번역을 채운 순간 ja 요청이 ko 문구를 받는 것을 `jaRequest_keepsStatusAndCode_andFollowsChain` 이 잡는다.
+> 참고: 번역 파일이 비어 있는 동안에는 ja 요청이 ko 와 같은 글자를 받으므로 이 테스트들은 구현 전에도 우연히 통과할 수 있다. 그래서 Task 4 의 `ErrorMessagesTest`(가짜 리소스로 대체 순서를 직접 검증)가 대체 순서의 증거이고, 이 Task 의 테스트는 **헤더 없음 = 바이트 동일** 과 **배선**을 지킨다. 배선이 끊기면(누군가 `getMessage()` 로 되돌리면) 번역을 채운 순간 ja 요청이 ko 문구를 받는 것을 `jaRequest_keepsStatusAndCode_andFollowsChain` 이 잡는다.
 
 - [ ] **Step 3: 구현**
 
@@ -1259,7 +1532,7 @@ Expected: **FAIL** (`maintenance_defaultText_followsLocale` 는 코드가 아직
 
 ```
 3. 파일 안의 `new ErrorResponse(errorCode, errorCode.getMessage())` 를 **모두** `new ErrorResponse(errorCode, messages.of(errorCode))` 로 바꾼다(Edit `replace_all`, 6곳: 54·88·97·109·119·128행).
-4. 검증 오류 핸들러의 `.orElse(ErrorCode.INVALID_INPUT_VALUE.getMessage());` 를 `.orElse(messages.of(ErrorCode.INVALID_INPUT_VALUE));` 로 바꾼다. (필드별 문구와 "요청 본문을 읽을 수 없습니다." 는 Task 7)
+4. 검증 오류 핸들러의 `.orElse(ErrorCode.INVALID_INPUT_VALUE.getMessage());` 를 `.orElse(messages.of(ErrorCode.INVALID_INPUT_VALUE));` 로 바꾼다. (필드별 문구와 "요청 본문을 읽을 수 없습니다." 는 Task 8)
 
 **`MultipartLimitExceptionHandler.java`**: import `ErrorMessages` 를 더하고, 클래스 안에 `private final ErrorMessages messages = ErrorMessages.standard();` 를 더한 뒤 40행 `errorCode.getMessage()` 를 `messages.of(errorCode)` 로 바꾼다.
 
@@ -1317,7 +1590,7 @@ git add server/src/main/java/com/chuseok22/elumserver/common/application/excepti
 
 ---
 
-## Task 7: 검증 오류(`@Valid`)와 "요청 본문을 읽을 수 없습니다" 문구
+## Task 8: 검증 오류(`@Valid`)와 "요청 본문을 읽을 수 없습니다" 문구
 
 `GlobalExceptionHandler` 의 `detail` 경로는 두 가지다 — (1) `MethodArgumentNotValidException` 의 첫 필드 오류 `"필드: DTO message"`, (2) `HttpMessageNotReadableException` 의 고정 문장. 둘 다 에러 코드는 `INVALID_INPUT_VALUE` 이고 문구가 `errorMessage` 로 나간다. 필드 이름 부분(`rawInputText: `)은 영어 식별자라 그대로 둔다.
 
@@ -1685,7 +1958,7 @@ git add server/src/main/java/com/chuseok22/elumserver/common/infrastructure/exce
 
 ---
 
-## Task 8: 서버가 만드는 문장 — `RoutinePhrases` (폴백 질문 · 추천 일과)
+## Task 9: 서버가 만드는 문장 — `RoutinePhrases` (폴백 질문 · 추천 일과)
 
 `RoutineAiPipeline` 폴백 질문(질문 1 + 선택지 라벨/이모지)과 `RoutineSuggestionCatalog` 58개를 언어별 properties 로 옮긴다. **한 파일이 "한 벌"** 이다 — 키가 하나라도 비면 그 언어는 미완성으로 보고 대체 순서(`en` → `ko`)로 넘긴다(여러 언어가 한 목록에 섞이지 않게).
 
@@ -2060,7 +2333,7 @@ Expected: **FAIL** (컴파일 오류 — `RoutinePhrases`, `RoutineSuggestionCat
 
 - [ ] **Step 5: 문구 파일과 golden 을 기존 코드에서 생성한다 (1회용)**
 
-Task 4 와 같은 방식이다(고정 커밋 `0164a36a`, 레포 루트에서 실행, 스크립트는 저장소에 넣지 않는다). 폴백 질문의 이모지(ZWJ·변형 선택자)를 손으로 옮겨 적지 않고 원본 소스에서 그대로 읽는다.
+Task 5 와 같은 방식이다(고정 커밋 `0164a36a`, 레포 루트에서 실행, 스크립트는 저장소에 넣지 않는다). 폴백 질문의 이모지(ZWJ·변형 선택자)를 손으로 옮겨 적지 않고 원본 소스에서 그대로 읽는다.
 
 ```bash
 python3 - <<'PY'
@@ -2424,7 +2697,7 @@ git add server/src/main/java/com/chuseok22/elumserver/routine/infrastructure/con
 
 ---
 
-## Task 9: 일과 생성 가능 언어 — `ENABLED_CONTENT_LOCALES` 와 `EnabledLocales`
+## Task 10: 일과 생성 가능 언어 — `ENABLED_CONTENT_LOCALES` 와 `EnabledLocales`
 
 **Files:**
 - Modify: `server/src/main/java/com/chuseok22/elumserver/systemconfig/core/ConfigGroup.java` (28행 `AD_REWARD("광고 보상"),` 아래)
@@ -2440,7 +2713,7 @@ git add server/src/main/java/com/chuseok22/elumserver/routine/infrastructure/con
 - Test: `server/src/test/java/com/chuseok22/elumserver/admin/application/controller/AdminConfigControllerLocaleTest.java`
 
 **Interfaces:**
-- Consumes: `SystemConfigService.getString(ConfigKey)`, `AppLocale`, `RoutinePhrases.incompleteLocales(...)`(Task 8), `CustomException`/`ErrorCode`
+- Consumes: `SystemConfigService.getString(ConfigKey)`, `AppLocale`, `RoutinePhrases.incompleteLocales(...)`(Task 9), `CustomException`/`ErrorCode`
 - Produces:
   ```java
   @Component public class EnabledLocales {
@@ -3012,14 +3285,14 @@ git add server/src/main/java/com/chuseok22/elumserver/common/locale/EnabledLocal
 
 ---
 
-## Task 10: 기동 검사 — 켜진 언어의 문구 한 벌이 비면 서버가 뜨지 않는다
+## Task 11: 기동 검사 — 켜진 언어의 문구 한 벌이 비면 서버가 뜨지 않는다
 
 **Files:**
 - Create: `server/src/main/java/com/chuseok22/elumserver/routine/infrastructure/guard/RoutinePhrasesStartupGuard.java`
 - Test: `server/src/test/java/com/chuseok22/elumserver/routine/infrastructure/guard/RoutinePhrasesStartupGuardTest.java`
 
 **Interfaces:**
-- Consumes: `EnabledLocales.current()`(Task 9), `RoutinePhrases.incompleteLocales(...)`(Task 8)
+- Consumes: `EnabledLocales.current()`(Task 10), `RoutinePhrases.incompleteLocales(...)`(Task 9)
 - Produces: `ApplicationRunner` — 켜진 언어(+ko) 중 하나라도 한 벌이 미완성이면 `IllegalStateException` 으로 기동을 실패시킨다.
 
 기존 시작 작업(`SystemConfigInitializer`)이 `ApplicationRunner` 이므로 같은 스타일을 따른다. 이 검사는 DB 시딩 순서에 의존하지 않는다 — 시딩 전이면 `getString` 이 기본값 `ko` 를 돌려준다.
@@ -3225,7 +3498,7 @@ git add server/src/main/java/com/chuseok22/elumserver/routine/infrastructure/gua
 
 ---
 
-## Task 11: 일과 언어 — V33 · `Routine.language` · `RoutineResponse.language`
+## Task 12: 일과 언어 — V33 · `Routine.language` · `RoutineResponse.language`
 
 **Files:**
 - Create: `server/src/main/resources/db/migration/V33__add_routine_language.sql`
@@ -3240,7 +3513,7 @@ git add server/src/main/java/com/chuseok22/elumserver/routine/infrastructure/gua
 - Test: `RoutineResponseTest`(기존 파일에 테스트 추가), `RoutineServiceTest`(기존 파일에 테스트 추가)
 
 **Interfaces:**
-- Consumes: `AppLocale`, `CurrentLocale`, `EnabledLocales.resolveContentLocale(...)`(Task 9)
+- Consumes: `AppLocale`, `CurrentLocale`, `EnabledLocales.resolveContentLocale(...)`(Task 10)
 - Produces:
   ```java
   // Routine
@@ -3616,7 +3889,7 @@ import 를 더한다.
 ```java
 import com.chuseok22.elumserver.common.locale.EnabledLocales;
 ```
-(`CurrentLocale` import 는 Task 8 에서 더했다.) 필드(`private final PictogramPicker pictogramPicker;` 아래, 111행)에 더한다.
+(`CurrentLocale` import 는 Task 9 에서 더했다.) 필드(`private final PictogramPicker pictogramPicker;` 아래, 111행)에 더한다.
 ```java
   private final EnabledLocales enabledLocales;
 ```
@@ -3665,7 +3938,7 @@ git add server/src/main/resources/db/migration/V33__add_routine_language.sql \
 
 ---
 
-## Task 12: 관리자 화면에 일과 언어 표시
+## Task 13: 관리자 화면에 일과 언어 표시
 
 운영자용 화면이라 번역하지 않는다(스펙 4.5). 일과 목록과 상세에 언어만 보인다.
 
@@ -3677,7 +3950,7 @@ git add server/src/main/resources/db/migration/V33__add_routine_language.sql \
 - Test: `server/src/test/java/com/chuseok22/elumserver/admin/application/controller/AdminRoutineLanguageTemplateTest.java`
 
 **Interfaces:**
-- Consumes: `Routine.getLanguage()`(Task 11)
+- Consumes: `Routine.getLanguage()`(Task 12)
 - Produces: `AdminRoutineResponse.language()`, `AdminRoutineDetailResponse.language()`(문자열 코드)
 
 - [ ] **Step 1: 실패하는 테스트를 쓴다**
@@ -3868,7 +4141,7 @@ git add server/src/main/java/com/chuseok22/elumserver/admin/application/dto/resp
 
 ---
 
-## Task 13: 헤더 없음 호환 묶음과 전체 통과
+## Task 14: 헤더 없음 호환 묶음과 전체 통과
 
 이 Task 는 새 코드를 쓰지 않는다. **이미 배포된 앱(헤더 없음)이 모든 새 경로에서 `ko` 로 동작함**을 한 번에 다시 증명하고, 전체 테스트가 기준선 이하로 줄지 않았음을 확인한다.
 
@@ -3876,7 +4149,7 @@ git add server/src/main/java/com/chuseok22/elumserver/admin/application/dto/resp
 - Test: (기존 테스트 실행만)
 
 **Interfaces:**
-- Consumes: Task 1~12 의 테스트
+- Consumes: Task 1~13 의 테스트
 - Produces: 통과 기록
 
 - [ ] **Step 1: 헤더 없음 = ko 인 모든 새 경로를 묶어서 돌린다**
@@ -3890,13 +4163,14 @@ git add server/src/main/java/com/chuseok22/elumserver/admin/application/dto/resp
 | 추천 일과·폴백 질문 | `RoutinePhrasesParityTest`, `RoutineAiPipelineFallbackLocaleTest.headerless_*` |
 | 일과 언어 | `RoutineServiceTest.create_headerless_languageIsKo`, `RoutineResponseTest.from_carriesLanguageCode` |
 | 일과 생성 가능 언어 기본값 | `EnabledLocalesTest.default_isKoOnly`, `SystemConfigInitializerLocaleTest` |
+| 지역 헤더 없음 = `KR`, 틀린 값 = 국가 미상 | `CurrentRegionTest` |
 | 이상한 헤더 | `AppLocaleTest`, `AcceptLanguageFilterTest`, `GlobalExceptionHandlerLocaleMvcTest.weirdHeaders_*` |
 | 파일이 비면 서버가 뜨지 않음 | `RoutinePhrasesTest`, `RoutinePhrasesStartupGuardTest` |
 
 Run:
 ```bash
 cd server && ./gradlew test \
-  --tests '*AppLocaleTest' --tests '*AcceptLanguageFilterTest' --tests '*ErrorMessagesTest' \
+  --tests '*AppLocaleTest' --tests '*AcceptLanguageFilterTest' --tests '*CurrentRegionTest' --tests '*ErrorMessagesTest' \
   --tests '*ErrorMessageParityTest' --tests '*ValidationMessageKeysTest' \
   --tests '*LocalizedErrorResponsesTest' --tests '*GlobalExceptionHandlerLocaleMvcTest' \
   --tests '*RoutinePhrasesTest' --tests '*RoutinePhrasesParityTest' --tests '*RoutineAiPipelineFallbackLocaleTest' \
@@ -3946,19 +4220,20 @@ Expected: 각 계획이 `AppLocale` · `ENABLED_CONTENT_LOCALES` 를 같은 철�
 
 | 요구 | 위치 |
 | --- | --- |
-| `Accept-Language` 처리(품질값·`*`·빈 값·`zh-TW`·`ar` 등) | Task 1, 2, 7 |
-| `ErrorCode` 문구를 `MessageSource`(키 = 코드 이름)로, 호환 유지 | Task 3, 4, 5, 6 |
-| 패리티 테스트(ko 리소스 == 기존 enum 문구)를 먼저, 헤더 없는 응답 바이트 동일 | Task 4 (golden, 먼저 실패), Task 6, 7 |
-| 다른 언어 파일은 만들되 비어도 대체 순서로 동작, 번역 채우기는 계획 5 | Task 4 Step 3, Task 8 Step 5, `everyLocaleAlwaysGetsAMessage` |
-| 검증 오류 `detail` 경로 | Task 7 (실제 코드 확인: 17줄, 키 체계, 기본 문구 대체) |
-| 서버 생성 문장(폴백 질문·추천 58개)을 언어별 파일로 | Task 8 |
-| 시작 시 검증 + 기동 검사 테스트 | Task 10 (+ 관리자 화면 저장 가드 Task 9) |
-| `Routine.language`(V33·엔티티·`RoutineResponse.language`·기본 ko)·관리자 표시 | Task 11, 12 |
-| `ENABLED_CONTENT_LOCALES`·`EnabledLocales`·잘못된 값 | Task 9 |
-| 이미 배포된 앱 호환(모든 새 경로) | Task 13 표 |
+| `Accept-Language` 처리(품질값·`*`·빈 값·`zh-TW`·`ar` 등) | Task 1, 2, 8 |
+| `ErrorCode` 문구를 `MessageSource`(키 = 코드 이름)로, 호환 유지 | Task 4, 5, 6, 7 |
+| 패리티 테스트(ko 리소스 == 기존 enum 문구)를 먼저, 헤더 없는 응답 바이트 동일 | Task 5 (golden, 먼저 실패), Task 7, 8 |
+| 다른 언어 파일은 만들되 비어도 대체 순서로 동작, 번역 채우기는 계획 5 | Task 5 Step 3, Task 9 Step 5, `everyLocaleAlwaysGetsAMessage` |
+| 검증 오류 `detail` 경로 | Task 8 (실제 코드 확인: 17줄, 키 체계, 기본 문구 대체) |
+| 서버 생성 문장(폴백 질문·추천 58개)을 언어별 파일로 | Task 9 |
+| 시작 시 검증 + 기동 검사 테스트 | Task 11 (+ 관리자 화면 저장 가드 Task 10) |
+| 국가 판정(`X-Elum-Region`, 마스터 C1-2) — 접근자·파서만, 소비자는 계획 4 | Task 3 |
+| `Routine.language`(V33·엔티티·`RoutineResponse.language`·기본 ko)·관리자 표시 | Task 12, 13 |
+| `ENABLED_CONTENT_LOCALES`·`EnabledLocales`·잘못된 값 | Task 10 |
+| 이미 배포된 앱 호환(모든 새 경로) | Task 14 표 |
 
 **placeholder 점검:** TBD/TODO/"적절히" 없음. 코드 단계는 모두 실제 코드. 1회용 생성 스크립트는 Python 전문을 적었고 저장소에 넣지 않는다(삭제 문제도 없다).
 
-**타입 일관성:** `AppLocale`(C2 시그니처 그대로) · `CurrentLocale.get()` · `EnabledLocales.contains/resolveContentLocale` · `ConfigKey.ENABLED_CONTENT_LOCALES` · V33 · `RoutineResponse.language`(문자열) 모두 마스터 계약과 같다. 추가한 이름(`ErrorMessages`, `RoutinePhrases`, `RoutinePhrasesStartupGuard`, `AcceptLanguageFilter`, `AppLocaleConverter`, `ErrorCode.CONTENT_LOCALE_NOT_READY`, `ConfigGroup.LANGUAGE`, `CurrentLocale.callAs/runAs`, `EnabledLocales.parse/normalize/current`)은 마스터 표에 없는 **내부 구현 이름**이고 계획 3·4 가 소비할 때는 위 Interfaces 를 그대로 쓴다.
+**타입 일관성:** `AppLocale`(C2 시그니처 그대로) · `CurrentLocale.get()` · `EnabledLocales.contains/resolveContentLocale` · `ConfigKey.ENABLED_CONTENT_LOCALES` · V33 · `RoutineResponse.language`(문자열) 모두 마스터 계약과 같다. 추가한 이름(`ErrorMessages`, `RoutinePhrases`, `RoutinePhrasesStartupGuard`, `AcceptLanguageFilter`, `AppLocaleConverter`, `ErrorCode.CONTENT_LOCALE_NOT_READY`, `RegionFilter`, `ConfigGroup.LANGUAGE`, `CurrentLocale.callAs/runAs`, `EnabledLocales.parse/normalize/current`)은 마스터 표에 없는 **내부 구현 이름**이고 계획 3·4 가 소비할 때는 위 Interfaces 를 그대로 쓴다.
 
-**Review Focus 대응:** 위 표(5줄)가 각각 Task 와 테스트 클래스를 가리킨다.
+**Review Focus 대응:** 위 표(6줄)가 각각 Task 와 테스트 클래스를 가리킨다.
