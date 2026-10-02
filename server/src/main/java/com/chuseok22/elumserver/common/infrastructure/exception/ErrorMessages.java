@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import java.util.Locale;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.validation.FieldError;
 
 /**
  * 에러 응답 문구를 요청 언어로 고른다 (다국어 #526).
@@ -72,5 +73,14 @@ public final class ErrorMessages {
       }
     }
     return defaultText;
+  }
+
+  /**
+   * 요청 검증 실패 필드 하나의 문구. 키는 {@code validation.{객체이름}.{필드}.{제약}} 이다.
+   * 어느 언어에도 키가 없으면 DTO 에 적은 message(한국어)를 그대로 준다 — 헤더 없는 앱의 응답이 바뀌지 않는다.
+   */
+  public String ofValidation(FieldError error, AppLocale locale) {
+    String key = "validation." + error.getObjectName() + "." + error.getField() + "." + error.getCode();
+    return of(key, locale, error.getDefaultMessage());
   }
 }

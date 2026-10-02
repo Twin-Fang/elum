@@ -6,6 +6,8 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -60,10 +62,12 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
+    // 필드 이름은 식별자라 그대로 두고 문구만 요청 언어로 고른다. 키가 없으면 DTO message(한국어)다.
+    AppLocale locale = CurrentLocale.get();
     String detail = e.getBindingResult().getFieldErrors().stream()
-      .map(error -> error.getField() + ": " + error.getDefaultMessage())
+      .map(error -> error.getField() + ": " + messages.ofValidation(error, locale))
       .findFirst()
-      .orElse(messages.of(ErrorCode.INVALID_INPUT_VALUE));
+      .orElse(messages.of(ErrorCode.INVALID_INPUT_VALUE, locale));
     log.warn("[ValidationException] 발생: {}", detail);
     ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
     return ResponseEntity
@@ -77,7 +81,8 @@ public class GlobalExceptionHandler {
     ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
     return ResponseEntity
       .status(errorCode.getStatus())
-      .body(new ErrorResponse(errorCode, "요청 본문을 읽을 수 없습니다."));
+      .body(new ErrorResponse(errorCode,
+        messages.of("detail.requestBodyUnreadable", CurrentLocale.get(), "요청 본문을 읽을 수 없습니다.")));
   }
 
   // @RequestParam 타입 파싱 실패(예: count에 숫자가 아닌 값 전달)를 400으로 처리한다.
