@@ -26,8 +26,8 @@ import lombok.extern.slf4j.Slf4j;
  * 한 언어의 파일이 그 키를 모두 채워야 완성이다. 미완성인 언어는 요청이 와도 건너뛰고 요청 언어 → en → ko 중 완성된
  * 첫 언어의 한 벌을 쓴다(두 언어가 한 목록에 섞이지 않게). KO 요청은 영어로 새지 않는다.
  *
- * <p>켜진 언어의 한 벌이 비면 {@code RoutinePhrasesStartupGuard}(후속 Task 예정)가 서버를 세우지 않는다 — AI 가 실패하는 순간에
- * 문구도 없는 일을 막는다.
+ * <p>서버가 뜰 때 {@code RoutinePhrasesStartupGuard} 가 켜진 언어의 한 벌을 검사해, 비어 있으면 서버를 세우지 않는다 —
+ * AI 가 실패하는 순간에 문구도 없는 일을 막는다.
  */
 @Slf4j
 public final class RoutinePhrases {
@@ -68,6 +68,43 @@ public final class RoutinePhrases {
   /** 이 언어의 파일에서 비어 있는 키. ko 파일의 키(+필수 구조)가 기준이고, 비어 있으면 완성이다. */
   public List<String> missingKeys(AppLocale locale) {
     return missing.computeIfAbsent(locale, this::computeMissing);
+  }
+
+  /**
+   * ko 파일의 번호 구멍. 목록 길이를 "01부터 끊기지 않는 번호"로 정하므로 구멍 뒤의 문구는 조용히 잘린다 —
+   * missingKeys 는 이를 못 잡아 따로 본다. 구멍이 없으면 빈 목록.
+   */
+  public List<String> koNumberingProblems() {
+    Map<String, String> ko = file(AppLocale.KO);
+    List<String> problems = new ArrayList<>();
+    int suggestions = 0;
+    while (ko.containsKey(suggestionKey(suggestions + 1, "text"))) {
+      suggestions++;
+    }
+    collectOrphans(ko, "suggestion.", suggestions, problems);
+    for (SupportGoal goal : FALLBACK_GOALS) {
+      int options = 0;
+      while (ko.containsKey(optionKey(goal.name(), options + 1, "label"))) {
+        options++;
+      }
+      collectOrphans(ko, "fallback." + goal.name() + ".option.", options, problems);
+    }
+    return problems;
+  }
+
+  /** prefix 뒤 번호가 끊기지 않고 이어지는 길이(run)를 넘는 키는 구멍 뒤라 읽히지 않는다. */
+  private static void collectOrphans(Map<String, String> ko, String prefix, int run, List<String> problems) {
+    ko.keySet().stream().sorted().forEach(key -> {
+      if (!key.startsWith(prefix)) {
+        return;
+      }
+      String rest = key.substring(prefix.length());
+      int dot = rest.indexOf('.');
+      String number = dot < 0 ? rest : rest.substring(0, dot);
+      if (number.matches("\\d+") && Integer.parseInt(number) > run) {
+        problems.add("%s (번호 %d 까지만 이어져 읽히지 않음)".formatted(key, run));
+      }
+    });
   }
 
   /** 미완성인 언어와 빠진 키. 완성된 언어는 담기지 않는다. */
