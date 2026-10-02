@@ -866,4 +866,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String profileSwitchSelected(String name) {
     return '$name, 지금 보는 이룸이';
   }
+
+  @override
+  String get noticeHideWeek => '일주일간 보지 않기';
+
+  @override
+  String noticeHideDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days일간 보지 않기',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String noticeLinkOpenFailed(String code) {
+    return '링크를 열지 못했어요 ($code)';
+  }
+
+  @override
+  String get noticeCloseBarrier => '공지 닫기';
 }

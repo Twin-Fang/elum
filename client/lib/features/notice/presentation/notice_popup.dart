@@ -168,7 +168,9 @@ class _NoticePopupCardState extends State<NoticePopupCard> {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
-                '링크를 열지 못했어요 (${NoticePopupCard.linkFailureCode})',
+                context.l10n.noticeLinkOpenFailed(
+                  NoticePopupCard.linkFailureCode,
+                ),
                 textAlign: TextAlign.center,
                 style: context.typo.noticeHideLabel.copyWith(
                   color: colors.noticeHideLabel,
@@ -181,7 +183,7 @@ class _NoticePopupCardState extends State<NoticePopupCard> {
             children: [
               ElumDialogButton(
                 key: NoticePopupCard.closeKey,
-                label: '닫기',
+                label: context.l10n.commonClose,
                 tone: button == null
                     ? ElumDialogTone.primary
                     : ElumDialogTone.neutral,

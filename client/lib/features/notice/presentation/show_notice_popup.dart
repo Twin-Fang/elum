@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/logger/app_logger.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../domain/app_notice.dart';
 import 'notice_popup.dart';
 
@@ -50,10 +51,6 @@ class NoticePopupResult {
   final bool hide;
 }
 
-/// 배경 막을 읽어 줄 이름 (#385 C). 앱에 한국어 지역화가 없어 기본값이 영어 `Dismiss`
-/// 로 읽혔다. 이번에는 공지 팝업에서만 이름을 준다 — 앱 전체 지역화는 따로 다룬다.
-const noticeBarrierLabel = '공지 닫기';
-
 /// 공지 한 건을 띄우고, **닫히는 모습이 끝난 뒤에** 결과를 돌려준다.
 ///
 /// 끝날 때까지 기다리는 이유 — 다음 공지가 바로 이어서 뜬다(#390). 앞 팝업이 사라지는
@@ -72,7 +69,7 @@ Future<NoticePopupResult> showNoticePopup(
   final route = DialogRoute<NoticeCloseHow>(
     context: context,
     barrierDismissible: true,
-    barrierLabel: noticeBarrierLabel,
+    barrierLabel: context.l10n.noticeCloseBarrier,
     // 공통 팝업과 같은 dim — 검정 50%
     barrierColor: Colors.black.withValues(alpha: 0.5),
     // 공통 팝업처럼 화면 전체 가운데에 둔다 (#297). 안전영역은 카드가 스스로 피한다.

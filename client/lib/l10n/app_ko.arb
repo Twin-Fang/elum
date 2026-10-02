@@ -814,5 +814,17 @@
   "@profileSwitchLoadFailedMessage": {"description": "목록이 비었을 때의 안내 제목"},
 
   "profileSwitchSelected": "{name}, 지금 보는 이룸이",
-  "@profileSwitchSelected": {"description": "이룸이 바꾸기 목록에서 지금 고른 줄을 낭독기가 읽는 문장. name 은 이룸이 호칭", "placeholders": {"name": {"type": "String"}}}
+  "@profileSwitchSelected": {"description": "이룸이 바꾸기 목록에서 지금 고른 줄을 낭독기가 읽는 문장. name 은 이룸이 호칭", "placeholders": {"name": {"type": "String"}}},
+
+  "noticeHideWeek": "일주일간 보지 않기",
+  "@noticeHideWeek": {"description": "공지 팝업 체크박스. 숨기는 기간이 기본(7일)일 때"},
+
+  "noticeHideDays": "{days, plural, other{{days}일간 보지 않기}}",
+  "@noticeHideDays": {"description": "공지 팝업 체크박스. 숨기는 기간이 기본이 아닐 때. days 는 일수", "placeholders": {"days": {"type": "int"}}},
+
+  "noticeLinkOpenFailed": "링크를 열지 못했어요 ({code})",
+  "@noticeLinkOpenFailed": {"description": "공지의 링크 버튼이 외부 브라우저를 못 열었을 때. 괄호 안은 추적용 에러 코드(번역하지 않는다)", "placeholders": {"code": {"type": "String"}}},
+
+  "noticeCloseBarrier": "공지 닫기",
+  "@noticeCloseBarrier": {"description": "공지 팝업 바깥 배경 막을 낭독기가 읽는 이름"}
 }

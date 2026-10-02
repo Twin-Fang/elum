@@ -1633,6 +1633,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{name}, 지금 보는 이룸이'**
   String profileSwitchSelected(String name);
+
+  /// 공지 팝업 체크박스. 숨기는 기간이 기본(7일)일 때
+  ///
+  /// In ko, this message translates to:
+  /// **'일주일간 보지 않기'**
+  String get noticeHideWeek;
+
+  /// 공지 팝업 체크박스. 숨기는 기간이 기본이 아닐 때. days 는 일수
+  ///
+  /// In ko, this message translates to:
+  /// **'{days, plural, other{{days}일간 보지 않기}}'**
+  String noticeHideDays(int days);
+
+  /// 공지의 링크 버튼이 외부 브라우저를 못 열었을 때. 괄호 안은 추적용 에러 코드(번역하지 않는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'링크를 열지 못했어요 ({code})'**
+  String noticeLinkOpenFailed(String code);
+
+  /// 공지 팝업 바깥 배경 막을 낭독기가 읽는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'공지 닫기'**
+  String get noticeCloseBarrier;
 }
 
 class _AppLocalizationsDelegate
