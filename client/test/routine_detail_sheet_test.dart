@@ -48,7 +48,12 @@ void main() {
     rewardText: '유튜브 시청 20분',
   );
 
-  Widget wrap(_FakeRepo repo, {Routine value = routine, bool isPast = false}) {
+  Widget wrap(
+    _FakeRepo repo, {
+    Routine value = routine,
+    bool isPast = false,
+    bool isFinished = false,
+  }) {
     return ProviderScope(
       overrides: [
         offlineDioOverride(),
@@ -60,7 +65,11 @@ void main() {
         builder: (context, _) => MaterialApp(
           theme: AppTheme.light,
           home: Scaffold(
-            body: RoutineDetailSheet(routine: value, isPast: isPast),
+            body: RoutineDetailSheet(
+              routine: value,
+              isPast: isPast,
+              isFinished: isFinished,
+            ),
           ),
         ),
       ),
@@ -146,6 +155,42 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(result, RoutineSheetAction.edit);
+  });
+
+  // --- 다 끝낸 오늘 일과 (#534) ---
+  //
+  // 이룸이 화면은 다 끝낸 일과를 다시 그리지 않는다. 보호자가 고쳐도 반영되지 않으므로
+  // 편집 버튼을 막고, 숨기지 않고 글자로 이유를 보인다.
+  group('다 끝낸 일과 시트', () {
+    testWidgets('편집하기 대신 눌리지 않는 버튼이 보인다', (tester) async {
+      await tester.pumpWidget(wrap(_FakeRepo(), isFinished: true));
+      await tester.pumpAndSettle();
+
+      expect(find.text('편집하기'), findsNothing);
+      final button = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, '다 끝낸 일과예요'),
+      );
+      expect(button.onPressed, isNull);
+    });
+
+    testWidgets('순서를 바꾸는 손잡이가 없다', (tester) async {
+      await tester.pumpWidget(wrap(_FakeRepo(), isFinished: true));
+      await tester.pumpAndSettle();
+
+      expect(svgWithAsset(AppAssets.sheetReorderHandle), findsNothing);
+    });
+
+    testWidgets('지난 일과는 다 끝냈어도 다시하기가 눌린다', (tester) async {
+      await tester.pumpWidget(
+        wrap(_FakeRepo(), isPast: true, isFinished: true),
+      );
+      await tester.pumpAndSettle();
+
+      final button = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, '일과 다시하기'),
+      );
+      expect(button.onPressed, isNotNull);
+    });
   });
 
   // --- 지난 일과 (시안 980:4777 · #310) ---
@@ -269,17 +314,14 @@ void main() {
     expect(repo.lastStepIds, hasLength(3));
   });
 
-  testWidgets('길게 누르고 있으면 줄이 떠오른다 — 움직이기 전에 잡혔음을 보여준다 (#274)', (
-    tester,
-  ) async {
+  testWidgets('길게 누르고 있으면 줄이 떠오른다 — 움직이기 전에 잡혔음을 보여준다 (#274)', (tester) async {
     await tester.pumpWidget(wrap(_FakeRepo()));
     await tester.pump();
 
     bool anyLifted() => tester
         .widgetList<Container>(find.byType(Container))
         .any(
-          (c) =>
-              ((c.decoration as BoxDecoration?)?.boxShadow ?? []).isNotEmpty,
+          (c) => ((c.decoration as BoxDecoration?)?.boxShadow ?? []).isNotEmpty,
         );
 
     expect(anyLifted(), isFalse, reason: '손대기 전에는 떠오른 줄이 없다');
@@ -304,15 +346,17 @@ void main() {
     await tester.pump();
 
     Rect badge(String n) => tester.getRect(find.text(n));
-    final before = {for (final n in ['1', '2', '3']) n: badge(n)};
+    final before = {
+      for (final n in ['1', '2', '3']) n: badge(n),
+    };
 
     // 번호 뱃지만 골라내는 조건 — 숫자 글자를 품은 Container
     bool badgeLifted() => ['1', '2', '3'].any((n) {
-          final box = tester.widget<Container>(
-            find.ancestor(of: find.text(n), matching: find.byType(Container)).first,
-          );
-          return ((box.decoration as BoxDecoration?)?.boxShadow ?? []).isNotEmpty;
-        });
+      final box = tester.widget<Container>(
+        find.ancestor(of: find.text(n), matching: find.byType(Container)).first,
+      );
+      return ((box.decoration as BoxDecoration?)?.boxShadow ?? []).isNotEmpty;
+    });
 
     final gesture = await tester.startGesture(
       tester.getCenter(svgWithAsset(AppAssets.sheetReorderHandle).first),
@@ -340,9 +384,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('편집하기 버튼은 목록 위에 떠 있다 — 목록이 버튼 뒤로 지나간다 (#434)', (
-    tester,
-  ) async {
+  testWidgets('편집하기 버튼은 목록 위에 떠 있다 — 목록이 버튼 뒤로 지나간다 (#434)', (tester) async {
     await tester.pumpWidget(wrap(_FakeRepo()));
     await tester.pump();
 
@@ -355,9 +397,7 @@ void main() {
     expect(list.overlaps(button), isTrue);
   });
 
-  testWidgets('스치듯 끌면 순서가 바뀌지 않는다 — 스크롤하다 놀라면 안 된다 (#274)', (
-    tester,
-  ) async {
+  testWidgets('스치듯 끌면 순서가 바뀌지 않는다 — 스크롤하다 놀라면 안 된다 (#274)', (tester) async {
     final repo = _FakeRepo();
     await tester.pumpWidget(wrap(repo));
     await tester.pump();
@@ -372,7 +412,6 @@ void main() {
     // 잡지 않았으므로 아무 일도 일어나지 않는다 — 서버로도 보내지 않는다
     expect(repo.lastStepIds, isNull);
   });
-
 }
 
 /// 손잡이를 **길게 눌러 잡은 뒤** 끈다.
@@ -397,7 +436,10 @@ class _FakeRepo with FakeRewardApi implements RoutineRepository {
   List<String>? lastStepIds;
 
   @override
-  Future<AppFailure?> reorderSteps(String routineId, List<String> stepIds) async {
+  Future<AppFailure?> reorderSteps(
+    String routineId,
+    List<String> stepIds,
+  ) async {
     lastStepIds = stepIds;
     return reorderSucceeds ? null : const AppFailure(fault: NetworkFault.app);
   }

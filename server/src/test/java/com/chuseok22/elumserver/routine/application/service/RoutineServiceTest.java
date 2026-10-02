@@ -1304,4 +1304,56 @@ class RoutineServiceTest {
 
     return routine.getValue();
   }
+
+  // --- 일과 삭제 (#533) ---
+
+  @Test
+  @DisplayName("delete: 보냈지만 한 단계도 하지 않은 일과는 지운다 — 잘못 보낸 일과를 거둘 수 있어야 한다")
+  void delete_confirmedNotStarted_deletes() {
+    Routine routine = confirmedRoutine(profileWithStars(0), 2);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.delete(GUARDIAN, "routine-1");
+
+    verify(routineRepository).delete(routine);
+  }
+
+  @Test
+  @DisplayName("delete: 임시저장 일과는 지운다")
+  void delete_pendingReview_deletes() {
+    Routine routine = confirmedRoutine(profileWithStars(0), 2);
+    routine.setStatus(RoutineStatus.PENDING_REVIEW);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.delete(GUARDIAN, "routine-1");
+
+    verify(routineRepository).delete(routine);
+  }
+
+  @Test
+  @DisplayName("delete: 한 단계라도 한 일과는 지우지 않는다 — 수행 기록이고 별이 묶여 있다")
+  void delete_confirmedStarted_throws() {
+    Routine routine = confirmedRoutine(profileWithStars(1), 2);
+    routine.getSteps().get(0).setCompleted(true);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    assertThatThrownBy(() -> routineService.delete(GUARDIAN, "routine-1"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ROUTINE_INVALID_STATUS));
+    verify(routineRepository, never()).delete(any(Routine.class));
+  }
+
+  @Test
+  @DisplayName("delete: 다 끝낸 일과는 지우지 않는다")
+  void delete_completed_throws() {
+    Routine routine = confirmedRoutine(profileWithStars(2), 2);
+    routine.getSteps().forEach(step -> step.setCompleted(true));
+    routine.setStatus(RoutineStatus.COMPLETED);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    assertThatThrownBy(() -> routineService.delete(GUARDIAN, "routine-1"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ROUTINE_INVALID_STATUS));
+    verify(routineRepository, never()).delete(any(Routine.class));
+  }
 }

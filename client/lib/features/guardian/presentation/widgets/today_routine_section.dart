@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/ads/ad_ids.dart';
 import '../../../../core/ads/ad_native_slot.dart';
+import '../../../../core/network/server_error_code.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_motion.dart';
@@ -47,9 +48,7 @@ final homeRoutinesProvider = Provider<List<Routine>>((ref) {
   final now = DateTime.now();
 
   return [
-    if (current != null &&
-        current.steps.isNotEmpty &&
-        current.isTodayOn(now))
+    if (current != null && current.steps.isNotEmpty && current.isTodayOn(now))
       current,
     ...fetched.where(
       (r) => r.id != current?.id && r.steps.isNotEmpty && r.isTodayOn(now),
@@ -166,7 +165,37 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     ref.refreshRoutines();
   }
 
+  /// 이룸이가 한 단계라도 한 일과인가 (#533). 같은 휴대폰에서 방금 체크한 것은 서버에
+  /// 아직 안 갔을 수 있어 기기 기록도 함께 본다.
+  bool _hasStarted(Routine routine) =>
+      routine.hasStarted ||
+      routineProgress(routine, ref.read(childRoutineProvider)) > 0;
+
+  /// 시작한 일과를 지우려 할 때의 안내. 실패가 아니라 정해진 규칙이라 확인 하나만 둔다.
+  Future<void> _showStartedNotice() => showElumDialog<void>(
+    context: context,
+    title: '이룸이가 시작한 일과예요',
+    message: '한 일이 기록으로 남도록 지울 수 없어요',
+    icon: ElumDialogIcon.alert,
+    code: 'E-DEL-STARTED',
+    actions: const [ElumDialogAction(label: '확인')],
+  );
+
+  /// 이룸이가 다 끝낸 일과인가 (#534). 같은 휴대폰의 기기 기록도 본다 — 서버 반영 전에도
+  /// 링이 체크로 바뀌는데 편집만 열려 있으면 둘이 어긋난다.
+  bool _isFinished(Routine routine) =>
+      routine.isFinished ||
+      routineProgress(routine, ref.read(childRoutineProvider)) >= 1;
+
   Future<void> _delete(Routine routine) async {
+    // 시작한 일과는 서버가 지우지 않는다(수행 기록·별). 묻고 나서 실패 팝업을 띄우면
+    // 보호자는 "삭제가 고장났다"고 여긴다 (#533). 누르기 전에 이유를 먼저 알린다.
+    if (_hasStarted(routine)) {
+      setState(() => _openId = null);
+      await _showStartedNotice();
+      return;
+    }
+
     final confirmed = await showElumDialog<bool>(
       context: context,
       title: '일과를 삭제하실건가요?',
@@ -182,9 +211,21 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     );
     if (confirmed != true || !mounted) return;
 
-    final failure = await ref.read(routineRepositoryProvider).delete(routine.id);
+    final failure = await ref
+        .read(routineRepositoryProvider)
+        .delete(routine.id);
     if (!mounted) return;
     if (failure != null) {
+      // 묻는 사이에 이룸이가 시작했다 — 서버가 상태로 거절한다 (#533).
+      // 새로 받아 와야 화면도 시작한 일과로 바뀐다.
+      // showFailure 를 쓰지 않는다 — 서버 문구(`현재 상태에서는 처리할 수 없습니다`)가
+      // 이 안내를 덮어 왜 안 되는지 알 수 없다.
+      if (failure.server?.code == ServerErrorCode.routineInvalidStatus) {
+        setState(() => _openId = null);
+        ref.refreshRoutines();
+        await _showStartedNotice();
+        return;
+      }
       showFailure(
         context,
         failure,
@@ -219,7 +260,11 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
   /// 맥락은 끊기지 않는다.
   Future<void> _openSheet(Routine routine) async {
     setState(() => _openId = null);
-    final action = await RoutineDetailSheet.show(context, routine);
+    final action = await RoutineDetailSheet.show(
+      context,
+      routine,
+      isFinished: _isFinished(routine),
+    );
     if (action != RoutineSheetAction.edit || !mounted) return;
     _edit(routine);
   }
@@ -252,7 +297,10 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     final demoOpen = ref.watch(
       homeCoachProvider.select((s) => s.demoSwipeOpen),
     );
-    final coachId = routines.where((r) => r.isEditableByMe).firstOrNull?.id;
+    final coachId = routines
+        .where((r) => r.isEditableByMe && !_isFinished(r))
+        .firstOrNull
+        ?.id;
 
     return ReorderableListView.builder(
       shrinkWrap: true,
@@ -298,7 +346,11 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
             child: RoutineSwipeActions(
               // 남이 만든 일과는 밀어도 삭제·수정이 나오지 않는다 — 서버가 403 으로 막는 동작이다
               // (다중 보호자 #362 · E46). 만든 사람을 모르면 지금처럼 민다.
-              enabled: routine.isEditableByMe,
+              //
+              // 다 끝낸 일과도 밀리지 않는다 (#534) — 이룸이 화면은 끝낸 일과를 다시 그리지
+              // 않아 고쳐도 반영되지 않고, 삭제는 서버가 막는다(#533). 줄을 누르면 시트에서
+              // `다 끝낸 일과예요`로 이유를 본다.
+              enabled: routine.isEditableByMe && !_isFinished(routine),
               isOpen:
                   _openId == routine.id || (demoOpen && routine.id == coachId),
               onOpenChanged: (open) =>

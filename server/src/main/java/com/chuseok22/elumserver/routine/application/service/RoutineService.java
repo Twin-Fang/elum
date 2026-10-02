@@ -372,17 +372,29 @@ public class RoutineService {
     return RoutineResponse.from(routineRepository.save(copy));
   }
 
-  /// 임시저장(`PENDING_REVIEW`) 일과만 삭제한다.
+  /// 이룸이가 **아직 시작하지 않은** 일과만 삭제한다 (#533).
   ///
-  /// 승인된 일과는 지우지 않는다 — 수행률 추이의 원본 데이터이고,
-  /// 보호자가 "이 날은 왜 못 했지"를 확인하는 근거다.
+  /// 임시저장(`PENDING_REVIEW`)과, 보냈지만 한 단계도 하지 않은 `CONFIRMED` 가 대상이다.
+  /// 예전에는 임시저장만 지울 수 있었는데, 보호자 홈 `오늘 일과`에 삭제 버튼이 있어
+  /// 누를 때마다 409 만 받았다. 잘못 보낸 일과를 거둘 길이 없었다.
+  ///
+  /// 한 단계라도 한 일과는 지우지 않는다 — 수행률 추이의 원본 데이터이고,
+  /// 보호자가 "이 날은 왜 못 했지"를 확인하는 근거다. 받은 별도 그 기록에 묶여 있다.
   @Transactional
   public void delete(Caller caller, String routineId) {
     Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
-    if (routine.getStatus() != RoutineStatus.PENDING_REVIEW) {
+    if (!isDeletable(routine)) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
     routineRepository.delete(routine);
+  }
+
+  private boolean isDeletable(Routine routine) {
+    return switch (routine.getStatus()) {
+      case PENDING_REVIEW -> true;
+      case CONFIRMED -> countCompleted(routine.getSteps()) == 0;
+      default -> false;
+    };
   }
 
   /// 보호자 홈 "지난 일과" — 오늘 이전 것만 최신순 10개.
