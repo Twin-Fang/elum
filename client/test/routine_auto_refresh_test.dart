@@ -121,4 +121,40 @@ void main() {
     await tester.pump();
     expect(fetchCount, 2);
   });
+
+  // 보호자 화면에서 받아 둔 목록을 들고 이룸이 화면으로 넘어오는 상황 (이슈 #541).
+  testWidgets('이미 받아 둔 목록이 있으면 들어오자마자 다시 받는다', (tester) async {
+    final showRefresher = ValueNotifier(false);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          todayRoutinesProvider.overrideWith((ref) async {
+            fetchCount++;
+            return <Routine>[];
+          }),
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Consumer(
+            builder: (context, ref, _) {
+              ref.watch(todayRoutinesProvider);
+              return ValueListenableBuilder<bool>(
+                valueListenable: showRefresher,
+                builder: (_, show, _) => show
+                    ? const RoutineAutoRefresh(child: SizedBox())
+                    : const SizedBox(),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(fetchCount, 1, reason: '앞 화면이 한 번 받아 두었다');
+
+    showRefresher.value = true;
+    await tester.pump();
+    await tester.pump();
+    expect(fetchCount, 2, reason: '30초를 기다리지 않고 바로 받는다');
+  });
 }
