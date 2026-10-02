@@ -39,7 +39,7 @@ class ElumScaffold extends StatelessWidget {
     this.horizontalPadding,
   }) : assert(
          bottomBanner == null || (bottomButton == null && belowButton == null),
-         '하단 고정 버튼과 배너를 함께 쓰면 버튼을 가린다 — 배너는 버튼이 없는 화면에만 둔다', // l10n-ignore: 개발자용 assert 메시지
+         '하단 고정 버튼과 배너를 함께 쓰면 버튼을 가린다 — 배너는 버튼이 없는 화면에만 둔다',
        );
 
   final Widget child;
