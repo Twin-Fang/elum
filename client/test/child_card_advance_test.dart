@@ -173,6 +173,27 @@ void main() {
     expect(currentPage(tester), 0, reason: '셋째를 먼저 했어도 빠뜨린 첫째로 되짚어야 한다');
   });
 
+  testWidgets('별 화면을 기다리는 사이 다른 카드를 체크해도 별 화면이 쌓이지 않는다', (tester) async {
+    await pumpDetail(tester);
+
+    // 첫 카드를 체크하고, 별 화면이 뜨기 전에 둘째 카드도 체크한다
+    await tester.tap(find.byKey(ChildRoutineDetailScreen.checkButtonKey));
+    await tester.pump(const Duration(milliseconds: 50));
+    await goToCard(tester, 1);
+    await tester.tap(find.byKey(ChildRoutineDetailScreen.checkButtonKey));
+    await settle(tester);
+
+    expect(find.byType(RewardScreen), findsOneWidget);
+    await tester.tap(find.byType(ElumButton));
+    await settle(tester);
+
+    expect(
+      find.byType(RewardScreen),
+      findsNothing,
+      reason: '별 화면이 두 겹이면 닫아도 같은 화면이 또 떠서 안 닫힌 것처럼 보인다',
+    );
+  });
+
   /// 카드 둘을 끝내고 마지막 하나만 남긴 상태까지 간다.
   Future<void> finishUntilLast(WidgetTester tester) async {
     await tapCheck(tester);
