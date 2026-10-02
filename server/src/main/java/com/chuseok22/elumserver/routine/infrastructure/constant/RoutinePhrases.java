@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  * 한 언어의 파일이 그 키를 모두 채워야 완성이다. 미완성인 언어는 요청이 와도 건너뛰고 요청 언어 → en → ko 중 완성된
  * 첫 언어의 한 벌을 쓴다(두 언어가 한 목록에 섞이지 않게). KO 요청은 영어로 새지 않는다.
  *
- * <p>켜진 언어의 한 벌이 비면 {@code RoutinePhrasesStartupGuard} 가 서버를 세우지 않는다 — AI 가 실패하는 순간에
+ * <p>켜진 언어의 한 벌이 비면 {@code RoutinePhrasesStartupGuard}(후속 Task 예정)가 서버를 세우지 않는다 — AI 가 실패하는 순간에
  * 문구도 없는 일을 막는다.
  */
 @Slf4j
@@ -49,6 +49,11 @@ public final class RoutinePhrases {
 
   public static RoutinePhrases standard() {
     return standard;
+  }
+
+  /** 훅과 무관한 실제 클래스패스 문구. RoutineSuggestionCatalog.ALL 처럼 클래스 로드 때 굳는 값이 훅에 오염되지 않게 쓴다. */
+  static RoutinePhrases classpath() {
+    return DEFAULT;
   }
 
   /** 테스트 전용: standard() 를 가짜로 바꾼다. 반드시 {@link #resetStandardForTesting()} 으로 되돌린다. */

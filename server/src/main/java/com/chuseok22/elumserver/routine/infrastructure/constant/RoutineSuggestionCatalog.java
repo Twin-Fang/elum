@@ -16,7 +16,8 @@ import java.util.List;
 public final class RoutineSuggestionCatalog {
 
   /** 한국어 목록(기존 이름 유지). 헤더 없는 앱이 받는 목록이다. */
-  public static final List<RoutineSuggestionResponse> ALL = RoutinePhrases.standard().suggestions(AppLocale.KO);
+  // 클래스 로드 때 굳는 값이라 테스트 훅(standard())이 아닌 실제 클래스패스 문구로 만든다.
+  public static final List<RoutineSuggestionResponse> ALL = RoutinePhrases.classpath().suggestions(AppLocale.KO);
 
   /** 요청 언어의 목록. 그 언어의 문구 파일이 한 벌 갖춰지지 않았으면 en → ko 순서로 대체한다. */
   public static List<RoutineSuggestionResponse> forLocale(AppLocale locale) {
