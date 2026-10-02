@@ -343,6 +343,54 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'업데이트하러 가기'**
   String get appStatusGoUpdate;
+
+  /// 다른 보호자가 만든 일과에 붙는 문구. name 은 만든 사람이 이 이룸이 안에서 불리는 이름. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}{batchim, select, yes{이} other{가}} 만든 일과예요'**
+  String routineForeignCreator(String name, String batchim);
+
+  /// 만든 사람 이름을 모를 때의 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 보호자가 만든 일과예요'**
+  String get routineForeignCreatorUnknown;
+
+  /// AI 가 제목을 못 만들었을 때의 대체 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘의 일과'**
+  String get routineDefaultTitle;
+
+  /// 보상 프리셋 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'좋아하는 간식'**
+  String get rewardPresetSnack;
+
+  /// 보상 프리셋 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'유튜브 10분'**
+  String get rewardPresetVideo;
+
+  /// 보상 프리셋 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'좋아하는 놀이'**
+  String get rewardPresetPlay;
+
+  /// 보상 프리셋 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'산책'**
+  String get rewardPresetWalk;
+
+  /// 프리셋에 없는 보상을 직접 적는 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'직접 입력'**
+  String get rewardPresetCustom;
 }
 
 class _AppLocalizationsDelegate

@@ -1,6 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../utils/korean_particle.dart';
+import '../../core/l10n/batchim.dart';
+import '../../core/l10n/current_l10n.dart';
+import '../../core/l10n/date_labels.dart';
 import 'action_card.dart';
 import 'credit_usage.dart';
 import 'reward_preset.dart';
@@ -88,8 +90,9 @@ abstract class Routine with _$Routine {
   String? get foreignCreatorLabel {
     if (createdByMe != false) return null;
     final name = creatorName?.trim();
-    if (name == null || name.isEmpty) return '다른 보호자가 만든 일과예요';
-    return '$name${name.subjectParticle} 만든 일과예요';
+    if (name == null || name.isEmpty) return appL10n.routineForeignCreatorUnknown;
+    // 조사 글자는 문구가 정한다 — 코드는 받침 판정값만 넘긴다
+    return appL10n.routineForeignCreator(name, batchimOf(name));
   }
 
   /// 보호자가 승인했는가. 승인 전에는 아동 화면에 노출하지 않는다 (docs 원칙 3번).
@@ -119,7 +122,8 @@ abstract class Routine with _$Routine {
 
   /// 홈·아이 목록에 보여줄 제목.
   /// AI가 title을 못 만들어도 화면이 비지 않게 대체어를 준다 (docs 원칙 6번).
-  String get displayTitle => title.trim().isNotEmpty ? title.trim() : '오늘의 일과';
+  String get displayTitle =>
+      title.trim().isNotEmpty ? title.trim() : appL10n.routineDefaultTitle;
 
   /// 모든 카드를 마쳤는가. 아이 홈 타일의 완료 배경 판단에 쓴다.
   bool get isAllDone => steps.isNotEmpty && steps.every((s) => s.completed);
@@ -147,7 +151,7 @@ abstract class Routine with _$Routine {
   String get scheduledDateLabel {
     final at = scheduledAt;
     if (at == null) return '';
-    return '${at.year}년 ${at.month}월 ${at.day}일';
+    return appL10n.yearMonthDay(at);
   }
 
   /// 오프라인 캐시 저장용 — [fromJson]과 대칭이어야 한다 (이슈 #140).

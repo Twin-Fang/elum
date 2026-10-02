@@ -147,5 +147,32 @@
   "@appStatusUpdated": { "description": "스토어 주소가 없을 때의 버튼" },
 
   "appStatusGoUpdate": "업데이트하러 가기",
-  "@appStatusGoUpdate": { "description": "스토어로 가는 버튼" }
+  "@appStatusGoUpdate": { "description": "스토어로 가는 버튼" },
+
+  "routineForeignCreator": "{name}{batchim, select, yes{이} other{가}} 만든 일과예요",
+  "@routineForeignCreator": {
+    "description": "다른 보호자가 만든 일과에 붙는 문구. name 은 만든 사람이 이 이룸이 안에서 불리는 이름. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다",
+    "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } }
+  },
+
+  "routineForeignCreatorUnknown": "다른 보호자가 만든 일과예요",
+  "@routineForeignCreatorUnknown": { "description": "만든 사람 이름을 모를 때의 문구" },
+
+  "routineDefaultTitle": "오늘의 일과",
+  "@routineDefaultTitle": { "description": "AI 가 제목을 못 만들었을 때의 대체 제목" },
+
+  "rewardPresetSnack": "좋아하는 간식",
+  "@rewardPresetSnack": { "description": "보상 프리셋 칩" },
+
+  "rewardPresetVideo": "유튜브 10분",
+  "@rewardPresetVideo": { "description": "보상 프리셋 칩" },
+
+  "rewardPresetPlay": "좋아하는 놀이",
+  "@rewardPresetPlay": { "description": "보상 프리셋 칩" },
+
+  "rewardPresetWalk": "산책",
+  "@rewardPresetWalk": { "description": "보상 프리셋 칩" },
+
+  "rewardPresetCustom": "직접 입력",
+  "@rewardPresetCustom": { "description": "프리셋에 없는 보상을 직접 적는 칩" }
 }

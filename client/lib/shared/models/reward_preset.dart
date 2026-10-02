@@ -1,3 +1,5 @@
+import '../../core/l10n/current_l10n.dart';
+
 /// 보호자가 고를 수 있는 보상(강화물) 프리셋.
 ///
 /// 서버 `RewardPreset`과 **키가 1:1로 맞아야 한다.**
@@ -8,22 +10,28 @@
 ///
 /// 2026-09-13 서울 ABA연구소 자문 — *"한 달 뒤 선물보다 오늘 받을 수 있는 것이 낫다"*
 enum RewardPreset {
-  snack('SNACK', '좋아하는 간식', '🍪'),
-  video('VIDEO', '유튜브 10분', '📺'),
-  play('PLAY', '좋아하는 놀이', '🧸'),
-  walk('WALK', '산책', '🚶'),
+  snack('SNACK', '🍪'),
+  video('VIDEO', '📺'),
+  play('PLAY', '🧸'),
+  walk('WALK', '🚶'),
 
   /// 프리셋에 없는 것을 보호자가 직접 적은 경우.
   /// **대표 그림이 없다** — 보호자가 적지 않은 별을 앱이 지어내면 안 된다 (#275).
-  custom('CUSTOM', '직접 입력', '');
+  custom('CUSTOM', '');
 
-  const RewardPreset(this.key, this.label, this.emoji);
+  const RewardPreset(this.key, this.emoji);
 
   /// 서버로 보내는 값. enum 이름(`snack`)이 아니라 이 값을 쓴다.
   final String key;
 
-  /// 보호자 화면 칩에 보여줄 이름.
-  final String label;
+  /// 보호자 화면 칩에 보여줄 이름 — 호출 시점의 앱 언어 문구다(상수로 굳히지 않는다).
+  String get label => switch (this) {
+    RewardPreset.snack => appL10n.rewardPresetSnack,
+    RewardPreset.video => appL10n.rewardPresetVideo,
+    RewardPreset.play => appL10n.rewardPresetPlay,
+    RewardPreset.walk => appL10n.rewardPresetWalk,
+    RewardPreset.custom => appL10n.rewardPresetCustom,
+  };
 
   /// 아동 화면용. 프리셋 그림이 준비되기 전까지 이모지로 대신한다.
   /// **[custom]은 비어 있다** — 직접 적은 말에 어울리는 그림은 앱이 알 수 없다.

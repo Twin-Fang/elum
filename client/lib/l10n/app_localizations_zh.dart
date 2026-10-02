@@ -155,4 +155,31 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get appStatusGoUpdate => '업데이트하러 가기';
+
+  @override
+  String routineForeignCreator(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
+    return '$name$_temp0 만든 일과예요';
+  }
+
+  @override
+  String get routineForeignCreatorUnknown => '다른 보호자가 만든 일과예요';
+
+  @override
+  String get routineDefaultTitle => '오늘의 일과';
+
+  @override
+  String get rewardPresetSnack => '좋아하는 간식';
+
+  @override
+  String get rewardPresetVideo => '유튜브 10분';
+
+  @override
+  String get rewardPresetPlay => '좋아하는 놀이';
+
+  @override
+  String get rewardPresetWalk => '산책';
+
+  @override
+  String get rewardPresetCustom => '직접 입력';
 }
