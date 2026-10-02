@@ -12,6 +12,7 @@ import '../app_status/app_status_recheck.dart';
 import '../config/app_config.dart';
 import '../dev/dev_locale_override.dart';
 import '../l10n/effective_locale.dart';
+import '../l10n/region_code.dart';
 import '../logger/app_logger.dart';
 import 'accept_language_interceptor.dart';
 import 'auth_interceptor.dart';
@@ -78,6 +79,8 @@ final dioProvider = Provider<Dio>((ref) {
       locale: () => effectiveAppLocale(
         devOverride: ref.read(devLocaleOverrideProvider),
       ),
+      // 지역은 언어 강제와 무관하게 시스템 값을 싣는다 (region_code.dart)
+      region: systemRegionCode,
     ),
   );
 

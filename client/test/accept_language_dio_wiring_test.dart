@@ -68,4 +68,37 @@ void main() {
     c.read(devLocaleOverrideProvider.notifier).set(const Locale('ja'));
     expect(await sentLanguage(c), 'ko');
   });
+
+  test('휴대폰 지역이 X-Elum-Region 으로 나간다', () async {
+    binding.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
+    final c = build();
+    await c.read(dioProvider).get<dynamic>('/api/ping');
+    expect(adapter.sentHeaders['GET /api/ping']!['X-Elum-Region'], 'US');
+
+    binding.platformDispatcher.localesTestValue = const [Locale('ko', 'KR')];
+    await c.read(dioProvider).get<dynamic>('/api/ping');
+    expect(adapter.sentHeaders['GET /api/ping']!['X-Elum-Region'], 'KR');
+  });
+
+  test('개발자 도구가 언어를 강제해도 지역은 시스템 로케일 값이다', () async {
+    dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
+    binding.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
+    final c = build();
+    c.read(devLocaleOverrideProvider.notifier).set(const Locale('ja'));
+    await c.read(dioProvider).get<dynamic>('/api/ping');
+    final sent = adapter.sentHeaders['GET /api/ping']!;
+    expect(sent['Accept-Language'], 'ja', reason: '강제는 언어만 바꾼다');
+    expect(sent['X-Elum-Region'], 'US', reason: '지역은 시스템 값 그대로');
+  });
+
+  test('휴대폰 지역이 없으면 지역 헤더 없이 나가고 요청은 성공한다', () async {
+    binding.platformDispatcher.localesTestValue = const [Locale('ja')];
+    final c = build();
+    final res = await c.read(dioProvider).get<dynamic>('/api/ping');
+    expect(res.statusCode, 200);
+    expect(
+      adapter.sentHeaders['GET /api/ping']!.keys.map((k) => k.toLowerCase()),
+      isNot(contains('x-elum-region')),
+    );
+  });
 }
