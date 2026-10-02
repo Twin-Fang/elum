@@ -2971,6 +2971,216 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*'**
   String get homeCoachSwitch;
+
+  /// 이룸이 홈 인사말(시안 문구, 줄바꿈 위치 유지). name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 {name}{batchim, select, yes{이} other{가}}\n할 일들이에요. 힘내봐요!'**
+  String childHomeGreeting(String name, String batchim);
+
+  /// 이룸이 홈에 일과가 하나도 없을 때의 제목. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 {name}의\n일과가 없어요'**
+  String childHomeEmptyTitle(String name);
+
+  /// 일과가 없을 때의 안내(보호자 폰에서 보는 이룸이 화면)
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 화면에서 일과를 만들 수 있어요'**
+  String get childHomeEmptyHint;
+
+  /// 일과가 없을 때의 안내(이룸이 전용 휴대폰)
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 모드에서 일과를 만들 수 있어요'**
+  String get childHomeEmptyHintDevice;
+
+  /// 이룸이 홈 오른쪽 위 캐릭터 배지를 낭독기가 읽는 이름(보호자 화면으로 이동)
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 화면으로 가기'**
+  String get childHomeToGuardianLabel;
+
+  /// 이룸이 홈 오른쪽 위 톱니 아이콘을 낭독기가 읽는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 열기'**
+  String get childHomeSettingsLabel;
+
+  /// 이룸이 홈 일과 타일에서 보상 앞에 붙는 말(회색)
+  ///
+  /// In ko, this message translates to:
+  /// **'다하면'**
+  String get childHomeRewardPrefix;
+
+  /// 별 화면 문구. count 는 모은 별 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{{count}개의 별을 얻었어요\n할 일을 해내고 별을 더 찾아봐요!}}'**
+  String childStarsEarned(int count);
+
+  /// 이룸이 홈 별 표시를 낭독기가 읽는 문장. count 는 모은 별 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{별 {count}개 모았어요}}'**
+  String childStarsSemantics(int count);
+
+  /// 카드 넘기기 영역을 낭독기가 읽는 문장. total 은 전체 장수, index 는 지금 몇 번째(1부터)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 {total}장 중 {index}번째'**
+  String childCardPagerLabel(int total, int index);
+
+  /// 카드 읽어 주기(음성)가 실패했을 때 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'소리를 재생하지 못했어요'**
+  String get childDetailSoundFailedTitle;
+
+  /// 카드 읽어 주기(음성)가 실패했을 때 팝업 본문
+  ///
+  /// In ko, this message translates to:
+  /// **'휴대폰 소리를 켜고 다시 눌러주세요'**
+  String get childDetailSoundFailedFallback;
+
+  /// 카드 상세의 체크 버튼을 낭독기가 읽는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'다 했어요'**
+  String get childDetailCheckLabel;
+
+  /// 보상 칩에서 보상 글 앞에 붙는 말. 끝의 공백 한 칸이 보상 글과의 사이다
+  ///
+  /// In ko, this message translates to:
+  /// **'다하면 '**
+  String get rewardBannerPrefix;
+
+  /// 보상 화면(루미) 큰 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'축하해요!'**
+  String get rewardLumiTitle;
+
+  /// 보상 화면(루미) 두 줄 설명. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'할 일을 해내서 루미가\n{name}에게 별을 가져왔어요'**
+  String rewardLumiMessage(String name);
+
+  /// 보상 화면(루미) 하단 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'오예!'**
+  String get rewardLumiButton;
+
+  /// 보상 화면(포포) 큰 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'잘했어요!'**
+  String get rewardPopoTitle;
+
+  /// 보상 화면(포포) 두 줄 설명. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'포포가 {name}에게\n축하의 선물로 큰 별을 가져왔어요'**
+  String rewardPopoMessage(String name);
+
+  /// 보상 화면(포포) 하단 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'좋아요!'**
+  String get rewardPopoButton;
+
+  /// 보상 화면(루루) 큰 제목. 루루만 별이 아니라 선물을 가져온다
+  ///
+  /// In ko, this message translates to:
+  /// **'멋져요!'**
+  String get rewardRuruTitle;
+
+  /// 보상 화면(루루) 두 줄 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}{batchim, select, yes{이} other{가}} 할 일을 해내서\n루루가 선물을 가져왔다고 해요'**
+  String rewardRuruMessage(String name, String batchim);
+
+  /// 보상 화면(루루) 하단 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'신난다!'**
+  String get rewardRuruButton;
+
+  /// 일과를 다 끝냈을 때 한 번 뜨는 화면의 큰 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 끝냈어요!'**
+  String get routineDoneTitle;
+
+  /// 일과 완료 화면 하단 버튼(누르면 이룸이 홈으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'오예!'**
+  String get routineDoneButton;
+
+  /// 보호자 → 이룸이 화면 전환의 암호 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'암호를 입력하면 이룸이 화면으로 바뀌어요'**
+  String get modeSwitchToChild;
+
+  /// 이룸이 → 보호자 화면 전환의 암호 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'암호를 입력하면 보호자 화면으로 바뀌어요'**
+  String get modeSwitchToGuardian;
+
+  /// 화면 전환 암호 입력 화면의 제목(시안 문구)
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호를 입력하세요'**
+  String get modeSwitchTitle;
+
+  /// 화면 전환 암호가 틀렸을 때 설명 자리에 뜨는 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'암호가 달라요. 다시 넣어주세요'**
+  String get modeSwitchMismatch;
+
+  /// 암호 점 영역을 낭독기가 읽는 이름(누르면 키패드가 올라온다)
+  ///
+  /// In ko, this message translates to:
+  /// **'암호 넣기'**
+  String get modeSwitchPinLabel;
+
+  /// 저장된 암호를 읽지 못했을 때 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'암호를 확인하지 못했어요'**
+  String get modeSwitchReadFailedTitle;
+
+  /// 저장된 암호를 읽지 못했을 때 팝업 본문
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 해주세요'**
+  String get modeSwitchReadFailedFallback;
+
+  /// 암호가 없는 이룸이 휴대폰에서 보호자 화면을 열려 할 때 제목(줄바꿈 위치 유지)
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 휴대폰에서\n열어 주세요'**
+  String get modeSwitchBlockedTitle;
+
+  /// 암호가 없는 이룸이 휴대폰에서 보호자 화면을 열려 할 때 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'이 휴대폰에서는 보호자 화면을 열 수 없어요'**
+  String get modeSwitchBlockedDescription;
+
+  /// 보호자 화면을 열 수 없다는 안내의 하단 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'돌아가기'**
+  String get modeSwitchBlockedBack;
 }
 
 class _AppLocalizationsDelegate

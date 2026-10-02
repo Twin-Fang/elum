@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -63,7 +64,7 @@ class RoutineDoneScreen extends StatelessWidget {
                   _FadeIn(
                     delay: AppMotion.normal,
                     child: Text(
-                      '일과를 끝냈어요!',
+                      context.l10n.routineDoneTitle,
                       style: context.typo.cardHeadline.copyWith(
                         color: colors.surface,
                       ),
@@ -93,7 +94,7 @@ class RoutineDoneScreen extends StatelessWidget {
                     child: _FadeIn(
                       delay: AppMotion.slow,
                       child: ElumButton(
-                        label: '오예!',
+                        label: context.l10n.routineDoneButton,
                         backgroundColor: colors.rewardButton,
                         labelColor: colors.textPrimary,
                         // 일과를 다 끝냈으니 상세로 돌아갈 곳이 없다 — 홈으로 간다.

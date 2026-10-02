@@ -1583,4 +1583,137 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeCoachSwitch => '캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*';
+
+  @override
+  String childHomeGreeting(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
+    return '오늘 $name$_temp0\n할 일들이에요. 힘내봐요!';
+  }
+
+  @override
+  String childHomeEmptyTitle(String name) {
+    return '아직 $name의\n일과가 없어요';
+  }
+
+  @override
+  String get childHomeEmptyHint => '보호자 화면에서 일과를 만들 수 있어요';
+
+  @override
+  String get childHomeEmptyHintDevice => '보호자 모드에서 일과를 만들 수 있어요';
+
+  @override
+  String get childHomeToGuardianLabel => '보호자 화면으로 가기';
+
+  @override
+  String get childHomeSettingsLabel => '설정 열기';
+
+  @override
+  String get childHomeRewardPrefix => '다하면';
+
+  @override
+  String childStarsEarned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개의 별을 얻었어요\n할 일을 해내고 별을 더 찾아봐요!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String childStarsSemantics(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '별 $count개 모았어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String childCardPagerLabel(int total, int index) {
+    return '카드 $total장 중 $index번째';
+  }
+
+  @override
+  String get childDetailSoundFailedTitle => '소리를 재생하지 못했어요';
+
+  @override
+  String get childDetailSoundFailedFallback => '휴대폰 소리를 켜고 다시 눌러주세요';
+
+  @override
+  String get childDetailCheckLabel => '다 했어요';
+
+  @override
+  String get rewardBannerPrefix => '다하면 ';
+
+  @override
+  String get rewardLumiTitle => '축하해요!';
+
+  @override
+  String rewardLumiMessage(String name) {
+    return '할 일을 해내서 루미가\n$name에게 별을 가져왔어요';
+  }
+
+  @override
+  String get rewardLumiButton => '오예!';
+
+  @override
+  String get rewardPopoTitle => '잘했어요!';
+
+  @override
+  String rewardPopoMessage(String name) {
+    return '포포가 $name에게\n축하의 선물로 큰 별을 가져왔어요';
+  }
+
+  @override
+  String get rewardPopoButton => '좋아요!';
+
+  @override
+  String get rewardRuruTitle => '멋져요!';
+
+  @override
+  String rewardRuruMessage(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
+    return '$name$_temp0 할 일을 해내서\n루루가 선물을 가져왔다고 해요';
+  }
+
+  @override
+  String get rewardRuruButton => '신난다!';
+
+  @override
+  String get routineDoneTitle => '일과를 끝냈어요!';
+
+  @override
+  String get routineDoneButton => '오예!';
+
+  @override
+  String get modeSwitchToChild => '암호를 입력하면 이룸이 화면으로 바뀌어요';
+
+  @override
+  String get modeSwitchToGuardian => '암호를 입력하면 보호자 화면으로 바뀌어요';
+
+  @override
+  String get modeSwitchTitle => '비밀암호를 입력하세요';
+
+  @override
+  String get modeSwitchMismatch => '암호가 달라요. 다시 넣어주세요';
+
+  @override
+  String get modeSwitchPinLabel => '암호 넣기';
+
+  @override
+  String get modeSwitchReadFailedTitle => '암호를 확인하지 못했어요';
+
+  @override
+  String get modeSwitchReadFailedFallback => '잠시 후 다시 해주세요';
+
+  @override
+  String get modeSwitchBlockedTitle => '보호자 휴대폰에서\n열어 주세요';
+
+  @override
+  String get modeSwitchBlockedDescription => '이 휴대폰에서는 보호자 화면을 열 수 없어요';
+
+  @override
+  String get modeSwitchBlockedBack => '돌아가기';
 }

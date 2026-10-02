@@ -14,7 +14,8 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/character_badge.dart';
 import '../../../core/widgets/routine_progress_ring.dart';
-import '../../../shared/utils/korean_particle.dart';
+import '../../../core/l10n/batchim.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../shared/models/routine.dart';
 import '../../guardian/application/routine_notifier.dart';
 import '../../guardian/data/routine_repository.dart';
@@ -115,7 +116,10 @@ class ChildHomeScreen extends ConsumerWidget {
                           // 조사를 '가'로 박아 두었더니 받침 있는 이름에서 **민준가**가
                           // 나왔다. 이름은 보호자가 직접 적으므로 받침을 보고 고른다.
                           // 시안이 `할 일들이에요. 힘내봐요!`로 바뀌었다 (#445) — 해요체다.
-                          '오늘 $childName${childName.subjectParticle}\n할 일들이에요. 힘내봐요!',
+                          context.l10n.childHomeGreeting(
+                            childName,
+                            batchimOf(childName),
+                          ),
                           // 이 화면 인사말은 22다. 빈 상태 제목(24)과 다르다.
                           style: context.typo.childGreeting.copyWith(
                             color: context.colors.textPrimary,
@@ -182,7 +186,7 @@ class _TopBar extends ConsumerWidget {
       scaleDown: AppPressable.scaleIcon,
       // 배지 안 글자는 숫자뿐이라 그대로 두면 "10"만 읽힌다. 무엇이 10인지
       // 붙여 읽힌다 — 이름이 안의 숫자를 덮으므로 두 번 읽히지 않는다 (#339).
-      semanticLabel: '별 $stars개 모았어요',
+      semanticLabel: context.l10n.childStarsSemantics(stars),
       child: _StarBadge(count: stars),
     );
 
@@ -212,7 +216,7 @@ class _TopBar extends ConsumerWidget {
                 '${Routes.modeSwitch}?to=${ModeSwitchTarget.guardian.name}',
               ),
               scaleDown: AppPressable.scaleIcon,
-              semanticLabel: '보호자 화면으로 가기',
+              semanticLabel: context.l10n.childHomeToGuardianLabel,
               // 여우 배지 자르기(#311)가 보호자 홈과 같아야 해 공용 위젯을 쓴다
               child: CharacterBadge(character: character),
             ),
@@ -230,7 +234,7 @@ class _TopBar extends ConsumerWidget {
       // 보호자 설정처럼 설정 페이지로 간다 (#488 — 바텀시트가 아니다)
       onTap: () => context.push(Routes.childSettings),
       scaleDown: AppPressable.scaleIcon,
-      semanticLabel: '설정 열기',
+      semanticLabel: context.l10n.childHomeSettingsLabel,
       child: SizedBox(
         width: _gearHit.w,
         height: _gearHit.w,
@@ -376,7 +380,7 @@ class _RoutineTile extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          '다하면',
+                          context.l10n.childHomeRewardPrefix,
                           style: context.typo.body.copyWith(
                             color: colors.routineTileLabel,
                           ),
@@ -469,13 +473,15 @@ class _NoRoutine extends StatelessWidget {
         children: [
           SizedBox(height: _emptyTop),
           Text(
-            '아직 $childName의\n일과가 없어요',
+            context.l10n.childHomeEmptyTitle(childName),
             textAlign: TextAlign.center,
             style: context.typo.greeting.copyWith(color: colors.textPrimary),
           ),
           SizedBox(height: 14.h),
           Text(
-            isElumiDevice ? '보호자 모드에서 일과를 만들 수 있어요' : '보호자 화면에서 일과를 만들 수 있어요',
+            isElumiDevice
+                ? context.l10n.childHomeEmptyHintDevice
+                : context.l10n.childHomeEmptyHint,
             style: context.typo.body.copyWith(color: colors.textSecondary),
           ),
           if (errorCode != null) ...[

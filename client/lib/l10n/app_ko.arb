@@ -1479,5 +1479,113 @@
   "@homeCoachSwipe": {"description": "홈 코치마크 2단계. *로 감싼 부분이 강조된다"},
 
   "homeCoachSwitch": "캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*",
-  "@homeCoachSwitch": {"description": "홈 코치마크 3단계. *로 감싼 부분이 강조된다"}
+  "@homeCoachSwitch": {"description": "홈 코치마크 3단계. *로 감싼 부분이 강조된다"},
+
+  "childHomeGreeting": "오늘 {name}{batchim, select, yes{이} other{가}}\n할 일들이에요. 힘내봐요!",
+  "@childHomeGreeting": {
+    "description": "이룸이 홈 인사말(시안 문구, 줄바꿈 위치 유지). name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다",
+    "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } }
+  },
+
+  "childHomeEmptyTitle": "아직 {name}의\n일과가 없어요",
+  "@childHomeEmptyTitle": {
+    "description": "이룸이 홈에 일과가 하나도 없을 때의 제목. name 은 이룸이 호칭",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "childHomeEmptyHint": "보호자 화면에서 일과를 만들 수 있어요",
+  "@childHomeEmptyHint": { "description": "일과가 없을 때의 안내(보호자 폰에서 보는 이룸이 화면)" },
+  "childHomeEmptyHintDevice": "보호자 모드에서 일과를 만들 수 있어요",
+  "@childHomeEmptyHintDevice": { "description": "일과가 없을 때의 안내(이룸이 전용 휴대폰)" },
+
+  "childHomeToGuardianLabel": "보호자 화면으로 가기",
+  "@childHomeToGuardianLabel": { "description": "이룸이 홈 오른쪽 위 캐릭터 배지를 낭독기가 읽는 이름(보호자 화면으로 이동)" },
+  "childHomeSettingsLabel": "설정 열기",
+  "@childHomeSettingsLabel": { "description": "이룸이 홈 오른쪽 위 톱니 아이콘을 낭독기가 읽는 이름" },
+  "childHomeRewardPrefix": "다하면",
+  "@childHomeRewardPrefix": { "description": "이룸이 홈 일과 타일에서 보상 앞에 붙는 말(회색)" },
+
+  "childStarsEarned": "{count, plural, other{{count}개의 별을 얻었어요\n할 일을 해내고 별을 더 찾아봐요!}}",
+  "@childStarsEarned": {
+    "description": "별 화면 문구. count 는 모은 별 수",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "childStarsSemantics": "{count, plural, other{별 {count}개 모았어요}}",
+  "@childStarsSemantics": {
+    "description": "이룸이 홈 별 표시를 낭독기가 읽는 문장. count 는 모은 별 수",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "childCardPagerLabel": "카드 {total}장 중 {index}번째",
+  "@childCardPagerLabel": {
+    "description": "카드 넘기기 영역을 낭독기가 읽는 문장. total 은 전체 장수, index 는 지금 몇 번째(1부터)",
+    "placeholders": { "total": { "type": "int" }, "index": { "type": "int" } }
+  },
+
+  "childDetailSoundFailedTitle": "소리를 재생하지 못했어요",
+  "@childDetailSoundFailedTitle": { "description": "카드 읽어 주기(음성)가 실패했을 때 팝업 제목" },
+  "childDetailSoundFailedFallback": "휴대폰 소리를 켜고 다시 눌러주세요",
+  "@childDetailSoundFailedFallback": { "description": "카드 읽어 주기(음성)가 실패했을 때 팝업 본문" },
+  "childDetailCheckLabel": "다 했어요",
+  "@childDetailCheckLabel": { "description": "카드 상세의 체크 버튼을 낭독기가 읽는 이름" },
+
+  "rewardBannerPrefix": "다하면 ",
+  "@rewardBannerPrefix": { "description": "보상 칩에서 보상 글 앞에 붙는 말. 끝의 공백 한 칸이 보상 글과의 사이다" },
+
+  "rewardLumiTitle": "축하해요!",
+  "@rewardLumiTitle": { "description": "보상 화면(루미) 큰 제목" },
+  "rewardLumiMessage": "할 일을 해내서 루미가\n{name}에게 별을 가져왔어요",
+  "@rewardLumiMessage": {
+    "description": "보상 화면(루미) 두 줄 설명. name 은 이룸이 호칭",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "rewardLumiButton": "오예!",
+  "@rewardLumiButton": { "description": "보상 화면(루미) 하단 버튼" },
+
+  "rewardPopoTitle": "잘했어요!",
+  "@rewardPopoTitle": { "description": "보상 화면(포포) 큰 제목" },
+  "rewardPopoMessage": "포포가 {name}에게\n축하의 선물로 큰 별을 가져왔어요",
+  "@rewardPopoMessage": {
+    "description": "보상 화면(포포) 두 줄 설명. name 은 이룸이 호칭",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "rewardPopoButton": "좋아요!",
+  "@rewardPopoButton": { "description": "보상 화면(포포) 하단 버튼" },
+
+  "rewardRuruTitle": "멋져요!",
+  "@rewardRuruTitle": { "description": "보상 화면(루루) 큰 제목. 루루만 별이 아니라 선물을 가져온다" },
+  "rewardRuruMessage": "{name}{batchim, select, yes{이} other{가}} 할 일을 해내서\n루루가 선물을 가져왔다고 해요",
+  "@rewardRuruMessage": {
+    "description": "보상 화면(루루) 두 줄 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다",
+    "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } }
+  },
+  "rewardRuruButton": "신난다!",
+  "@rewardRuruButton": { "description": "보상 화면(루루) 하단 버튼" },
+
+  "routineDoneTitle": "일과를 끝냈어요!",
+  "@routineDoneTitle": { "description": "일과를 다 끝냈을 때 한 번 뜨는 화면의 큰 제목" },
+  "routineDoneButton": "오예!",
+  "@routineDoneButton": { "description": "일과 완료 화면 하단 버튼(누르면 이룸이 홈으로)" },
+
+  "modeSwitchToChild": "암호를 입력하면 이룸이 화면으로 바뀌어요",
+  "@modeSwitchToChild": { "description": "보호자 → 이룸이 화면 전환의 암호 안내" },
+  "modeSwitchToGuardian": "암호를 입력하면 보호자 화면으로 바뀌어요",
+  "@modeSwitchToGuardian": { "description": "이룸이 → 보호자 화면 전환의 암호 안내" },
+  "modeSwitchTitle": "비밀암호를 입력하세요",
+  "@modeSwitchTitle": { "description": "화면 전환 암호 입력 화면의 제목(시안 문구)" },
+  "modeSwitchMismatch": "암호가 달라요. 다시 넣어주세요",
+  "@modeSwitchMismatch": { "description": "화면 전환 암호가 틀렸을 때 설명 자리에 뜨는 안내" },
+  "modeSwitchPinLabel": "암호 넣기",
+  "@modeSwitchPinLabel": { "description": "암호 점 영역을 낭독기가 읽는 이름(누르면 키패드가 올라온다)" },
+  "modeSwitchReadFailedTitle": "암호를 확인하지 못했어요",
+  "@modeSwitchReadFailedTitle": { "description": "저장된 암호를 읽지 못했을 때 팝업 제목" },
+  "modeSwitchReadFailedFallback": "잠시 후 다시 해주세요",
+  "@modeSwitchReadFailedFallback": { "description": "저장된 암호를 읽지 못했을 때 팝업 본문" },
+  "modeSwitchBlockedTitle": "보호자 휴대폰에서\n열어 주세요",
+  "@modeSwitchBlockedTitle": { "description": "암호가 없는 이룸이 휴대폰에서 보호자 화면을 열려 할 때 제목(줄바꿈 위치 유지)" },
+  "modeSwitchBlockedDescription": "이 휴대폰에서는 보호자 화면을 열 수 없어요",
+  "@modeSwitchBlockedDescription": { "description": "암호가 없는 이룸이 휴대폰에서 보호자 화면을 열려 할 때 설명" },
+  "modeSwitchBlockedBack": "돌아가기",
+  "@modeSwitchBlockedBack": { "description": "보호자 화면을 열 수 없다는 안내의 하단 버튼" }
 }

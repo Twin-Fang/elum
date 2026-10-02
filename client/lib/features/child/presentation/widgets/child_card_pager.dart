@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../guardian/presentation/widgets/action_card_view.dart';
@@ -112,7 +113,7 @@ class ChildCardPager extends StatelessWidget {
       container: true,
       explicitChildNodes: true,
       liveRegion: true,
-      label: '카드 ${cards.length}장 중 ${currentIndex + 1}번째',
+      label: context.l10n.childCardPagerLabel(cards.length, currentIndex + 1),
       child: PageView.builder(
         controller: controller,
         itemCount: cards.length,

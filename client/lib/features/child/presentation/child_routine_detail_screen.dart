@@ -135,8 +135,8 @@ class _ChildRoutineDetailScreenState
     showFailure(
       context,
       null,
-      title: '소리를 재생하지 못했어요',
-      fallback: '휴대폰 소리를 켜고 다시 눌러주세요',
+      title: context.l10n.childDetailSoundFailedTitle,
+      fallback: context.l10n.childDetailSoundFailedFallback,
       fallbackCode: 'E-TTS',
     );
   }
@@ -490,7 +490,7 @@ class _CheckButton extends StatelessWidget {
           container: true,
           button: true,
           checked: isChecked,
-          label: '다 했어요',
+          label: context.l10n.childDetailCheckLabel,
           child: AppPressable(
             key: ChildRoutineDetailScreen.checkButtonKey,
             onTap: onTap,

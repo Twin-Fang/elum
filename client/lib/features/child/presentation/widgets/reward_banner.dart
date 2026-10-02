@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/routine.dart';
 
@@ -74,7 +75,7 @@ class RewardBanner extends StatelessWidget {
         TextSpan(
           children: [
             TextSpan(
-              text: '다하면 ',
+              text: context.l10n.rewardBannerPrefix,
               style: TextStyle(
                 color: onDark ? colors.surface : colors.routineTileLabel,
               ),
