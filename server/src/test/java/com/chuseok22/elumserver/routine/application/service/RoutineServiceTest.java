@@ -20,6 +20,8 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
 import com.chuseok22.elumserver.credit.application.service.CreditReservation;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
@@ -42,6 +44,7 @@ import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestion
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
+import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineSuggestionCatalog;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
@@ -52,10 +55,12 @@ import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRep
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -363,6 +368,41 @@ class RoutineServiceTest {
     assertThat(result).hasSize(4);
     assertThat(result).isSubsetOf(RoutineSuggestionCatalog.ALL);
     assertThat(result).doesNotHaveDuplicates();
+  }
+
+  @AfterEach
+  void resetRoutinePhrases() {
+    // 가짜 추천 문구가 다른 테스트로 새지 않게 원복한다
+    RoutinePhrases.resetStandardForTesting();
+  }
+
+  // 완성된 한 벌이어야 고르므로 폴백 질문 키도 함께 채운다
+  private static Map<String, String> fakePhrases(String tag) {
+    Map<String, String> map = new java.util.HashMap<>();
+    map.put("suggestion.01.icon", tag + "-icon-01");
+    map.put("suggestion.01.text", tag + "-text-01");
+    map.put("suggestion.01.example", tag + "-ex-01");
+    for (String goal : List.of("PREPARE_ITEMS", "PREPARE_NEW")) {
+      map.put("fallback." + goal + ".question", tag + "-q-" + goal);
+      for (int i = 1; i <= 3; i++) {
+        map.put("fallback." + goal + ".option." + i + ".emoji", "E" + i);
+        map.put("fallback." + goal + ".option." + i + ".label", tag + "-o" + i);
+      }
+    }
+    return map;
+  }
+
+  @Test
+  @DisplayName("추천 일과는 요청 언어의 문구 한 벌로 나가고, 헤더 없음(ko)은 ko 문구다 (배선 증명)")
+  void getSuggestions_usesRequestLanguagePhrases() {
+    Map<AppLocale, Map<String, String>> files = Map.of(AppLocale.KO, fakePhrases("ko"), AppLocale.JA, fakePhrases("ja"));
+    RoutinePhrases.overrideStandardForTesting(new RoutinePhrases(locale -> files.getOrDefault(locale, Map.of())));
+
+    List<RoutineSuggestionResponse> japanese = CurrentLocale.callAs(AppLocale.JA, () -> routineService.getSuggestions(1));
+    List<RoutineSuggestionResponse> headerless = routineService.getSuggestions(1);
+
+    assertThat(japanese).extracting("text").containsExactly("ja-text-01");
+    assertThat(headerless).extracting("text").containsExactly("ko-text-01");
   }
 
   @Test

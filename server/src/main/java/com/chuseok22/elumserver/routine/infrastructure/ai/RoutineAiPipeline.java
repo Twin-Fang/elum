@@ -12,6 +12,8 @@ import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.CurrentLocale;
+import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
@@ -167,27 +169,16 @@ public class RoutineAiPipeline {
 
   // 목표 하나에 대한 고정 대체 질문. "직접 입력"은 보호자가 자유 텍스트를 입력하도록
   // 유도하는 항목이라 추천 답변 목록에 절대 포함하지 않는다(서비스 정책).
+  // 문구는 요청 언어의 문구 파일에서 온다(다국어 #526). 헤더 없는 옛 앱은 KO 라 지금과 같다.
+  // 요청 스레드에서 불리므로 CurrentLocale 을 읽는다 — 다른 스레드로 옮기면 언어를 인자로 받게 바꾼다.
   private RoutineQuestionResult.QuestionResultItem fallbackQuestionItem(SupportGoal goal) {
-    if (goal == SupportGoal.PREPARE_ITEMS) {
-      return new RoutineQuestionResult.QuestionResultItem(
-        "꼭 챙겨야 하는 준비물이 있나요?",
-        List.of(
-          option("☔", "우산"), option("🧥", "우비"), option("👖", "장화"),
-          option("🧦", "여벌 양말"), option("🧻", "작은 수건")
-        )
-      );
-    }
+    RoutinePhrases.FallbackQuestion fallback = RoutinePhrases.standard().fallbackQuestion(goal, CurrentLocale.get());
     return new RoutineQuestionResult.QuestionResultItem(
-      "평소와 다르게 준비해야 하는 점이 있나요?",
-      List.of(
-        option("⏰", "시간 변경"), option("📍", "장소 변경"),
-        option("🧑‍🤝‍🧑", "동행자 변경"), option("🌦️", "날씨/환경 변화")
-      )
+      fallback.question(),
+      fallback.options().stream()
+        .map(option -> new RoutineQuestionResult.QuestionResultItem.OptionResult(option.emoji(), option.label()))
+        .toList()
     );
-  }
-
-  private RoutineQuestionResult.QuestionResultItem.OptionResult option(String emoji, String label) {
-    return new RoutineQuestionResult.QuestionResultItem.OptionResult(emoji, label);
   }
 
   // AI 호출 자체(RestClient의 RestClientResponseException/ResourceAccessException 등)와

@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
 import com.chuseok22.elumserver.credit.application.service.CreditReservation;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
@@ -818,10 +819,12 @@ public class RoutineService {
   // count는 프론트가 요청한 반환 개수다. 1 미만이거나 카탈로그 전체 개수를 초과하면
   // 항상 이 범위 안에서만 뽑을 수 있으므로 잘못된 요청으로 간주해 거부한다.
   public List<RoutineSuggestionResponse> getSuggestions(int count) {
-    if (count < 1 || count > RoutineSuggestionCatalog.ALL.size()) {
+    // 요청 언어의 목록(다국어 #526). 한 벌이 갖춰지지 않은 언어는 en → ko 로 대체된다. 헤더 없으면 ALL(ko) 그대로다.
+    List<RoutineSuggestionResponse> catalog = RoutineSuggestionCatalog.forLocale(CurrentLocale.get());
+    if (count < 1 || count > catalog.size()) {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
     }
-    List<RoutineSuggestionResponse> pool = new ArrayList<>(RoutineSuggestionCatalog.ALL);
+    List<RoutineSuggestionResponse> pool = new ArrayList<>(catalog);
     Collections.shuffle(pool);
     return List.copyOf(pool.subList(0, count));
   }
