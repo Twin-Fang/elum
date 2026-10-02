@@ -232,6 +232,13 @@ class _DraftTile extends StatelessWidget {
         ? routine.rewardDisplay
         : context.l10n.draftRoutinesRewardUnset;
 
+    final rewardText = Text(
+      reward,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: typo.routineTileReward.copyWith(color: colors.routineTileReward),
+    );
+
     return AppPressable(
       onTap: onTap,
       scaleDown: AppPressable.scaleCard,
@@ -272,14 +279,13 @@ class _DraftTile extends StatelessWidget {
                       ),
                       SizedBox(width: _labelGap.w),
                       Expanded(
-                        child: Text(
-                          reward,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: typo.routineTileReward.copyWith(
-                            color: colors.routineTileReward,
-                          ),
-                        ),
+                        // 보상 글만 일과 언어다. `미설정` 은 화면 문구라 따르지 않는다.
+                        child: routine.hasReward
+                            ? ContentLocale(
+                                language: routine.language,
+                                child: rewardText,
+                              )
+                            : rewardText,
                       ),
                     ],
                   ),

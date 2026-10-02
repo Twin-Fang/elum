@@ -175,6 +175,25 @@ void main() {
       );
     });
 
+    testWidgets('보상 줄은 보상 글만 일과 언어, 앞 문구는 화면 언어', (tester) async {
+      await pumpReview(tester);
+
+      final rich = find.byWidgetPredicate(
+        (w) =>
+            w is Text &&
+            w.textSpan is TextSpan &&
+            ((w.textSpan! as TextSpan).children ?? const []).any(
+              (c) => c is TextSpan && (c.text ?? '').contains('ゼリーを食べる'),
+            ),
+      );
+      expect(rich, findsOneWidget);
+      final spans = (tester.widget<Text>(rich).textSpan! as TextSpan).children!
+          .cast<TextSpan>();
+      expect(spans.last.style?.locale, ja);
+      expect(spans.first.style?.locale, isNot(ja), reason: '앞 문구는 화면 문구');
+      expect(Localizations.localeOf(tester.element(rich)), const Locale('ko'));
+    });
+
     testWidgets('순서 바꾸기 목록의 카드도 일과 언어로 그린다', (tester) async {
       await pumpReview(tester);
       await tester.tap(find.text('카드 순서 변경'));
@@ -259,6 +278,15 @@ void main() {
       );
       expect(prefix, findsOneWidget);
       expect(styleLocale(tester, prefix), isNot(ja));
+    });
+
+    testWidgets('이룸이 홈 타일의 보상 글은 일과 언어', (tester) async {
+      await pumpChild(tester, const ChildHomeScreen(), today: [jaRoutine]);
+
+      final reward = find.textContaining('ゼリーを食べる');
+      expect(reward, findsOneWidget);
+      expect(styleLocale(tester, reward), ja);
+      expect(Localizations.localeOf(tester.element(reward)), const Locale('en'));
     });
 
     testWidgets('일과 상세 상단 제목은 일과 언어', (tester) async {
@@ -374,6 +402,34 @@ void main() {
       expect(title, findsOneWidget);
       expect(styleLocale(tester, title), ja);
       expect(Localizations.localeOf(tester.element(title)), const Locale('en'));
+
+      // 보상 글은 일과 언어
+      final reward = find.textContaining('ゼリーを食べる');
+      expect(reward, findsOneWidget);
+      expect(styleLocale(tester, reward), ja);
+    });
+
+    testWidgets('임시저장 타일의 보상이 비면 미설정 안내는 화면 문구다', (tester) async {
+      final draft = jaRoutine.copyWith(status: 'PENDING_REVIEW', rewardText: '');
+      await pumpWithLocale(
+        tester,
+        const DraftRoutinesScreen(),
+        locale: const Locale('en'),
+        wrap: (app) => ProviderScope(
+          overrides: [
+            testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+            myRoutinesProvider.overrideWith((ref) async => [draft]),
+          ],
+          child: app,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final unset = find.text(
+        tester.element(find.byType(DraftRoutinesScreen)).l10n.draftRoutinesRewardUnset,
+      );
+      expect(unset, findsOneWidget);
+      expect(styleLocale(tester, unset), isNot(ja));
     });
   });
 }

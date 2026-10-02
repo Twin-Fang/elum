@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -47,11 +48,15 @@ class CardReviewRewardRow extends StatelessWidget {
     super.key,
     required this.reward,
     required this.onTap,
+    this.rewardLanguage = 'ko',
   });
 
   /// 정해진 보상 (`🍪 젤리 먹기`). null 이면 아직 없다.
   final String? reward;
   final VoidCallback onTap;
+
+  /// 보상 글의 언어(일과 언어). 앞 문구와 안내는 화면 문구라 따르지 않는다.
+  final String rewardLanguage;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +87,10 @@ class CardReviewRewardRow extends StatelessWidget {
                           ),
                           TextSpan(
                             text: reward,
-                            style: style.copyWith(color: colors.textPrimary),
+                            style: style.copyWith(
+                              color: colors.textPrimary,
+                              locale: contentLocaleOf(rewardLanguage),
+                            ),
                           ),
                         ]
                       : [

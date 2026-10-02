@@ -391,12 +391,15 @@ class _RoutineTile extends StatelessWidget {
                         ),
                         SizedBox(width: space.xs),
                         Expanded(
-                          child: Text(
-                            routine.rewardDisplay,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.typo.body.copyWith(
-                              color: Colors.black.withValues(alpha: 0.7),
+                          child: ContentLocale(
+                            language: routine.language,
+                            child: Text(
+                              routine.rewardDisplay,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.typo.body.copyWith(
+                                color: Colors.black.withValues(alpha: 0.7),
+                              ),
                             ),
                           ),
                         ),

@@ -412,6 +412,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
               reward: routine?.hasReward ?? false
                   ? routine!.rewardDisplay
                   : null,
+              rewardLanguage: routine?.language ?? 'ko',
               onTap: () => context.push(Routes.routineReward, extra: true),
             ),
           // 보상 줄 끝 633 → 도구 버튼 654
