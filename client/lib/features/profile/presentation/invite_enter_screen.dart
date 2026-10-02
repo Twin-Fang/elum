@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/batchim.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -13,13 +15,57 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
-import '../../../shared/utils/korean_particle.dart';
 import '../../link/domain/link_code.dart';
 import '../../link/presentation/widgets/code_boxes.dart';
 import '../application/invite_inbox.dart';
 import '../application/profile_session.dart';
 import '../data/profile_repository.dart';
 import '../domain/invite_problem.dart';
+
+/// 입력 아래에 보이는 안내의 종류. 문구가 아니라 종류를 들고 있다가 그릴 때 푼다 — 실패 순간에
+/// 문구로 굳히면 언어가 바뀐 뒤에도 옛 언어로 남는다.
+enum _InviteFault {
+  /// 링크는 맞는데 코드를 못 쓰는 모양이다 (`E-INV-LINK`, 서버를 거치지 않는다).
+  linkInvalid,
+
+  /// 직접 친 코드의 모양이 틀렸다 (`E-INV-FORM`, 서버를 거치지 않는다).
+  formInvalid,
+  notFound,
+  expired,
+  tooManyAttempts,
+  alreadyGuardian,
+  forbiddenForElumi,
+  invalidInput,
+  offline,
+  other,
+}
+
+class _InviteError {
+  const _InviteError(this.fault, [this.failure]);
+
+  final _InviteFault fault;
+
+  /// 서버가 준 실패. 이유를 말해 줬으면 그 문구가 기본 문구를 이긴다 (#347).
+  final AppFailure? failure;
+
+  String message(AppLocalizations l10n) {
+    String say(String fallback, String code) =>
+        failure?.describe(fallback, code) ?? '$fallback ($code)';
+
+    return switch (fault) {
+      _InviteFault.linkInvalid => l10n.inviteEnterLinkInvalid,
+      _InviteFault.formInvalid => l10n.inviteEnterFormInvalid,
+      _InviteFault.notFound => say(l10n.inviteEnterNotFound, 'E-INV-404'),
+      _InviteFault.expired => say(l10n.inviteEnterExpired, 'E-INV-410'),
+      _InviteFault.tooManyAttempts => say(l10n.inviteEnterTooManyAttempts, 'E-INV-429'),
+      _InviteFault.alreadyGuardian => say(l10n.inviteEnterAlreadyGuardian, 'E-INV-409'),
+      _InviteFault.forbiddenForElumi => say(l10n.inviteEnterForbiddenForElumi, 'E-INV-403'),
+      _InviteFault.invalidInput => say(l10n.inviteEnterInvalidInput, 'E-INV-400'),
+      _InviteFault.offline => say(l10n.inviteEnterOffline, 'E-NET'),
+      _InviteFault.other => say(l10n.inviteEnterOther, 'E-INV'),
+    };
+  }
+}
 
 /// 초대 코드 넣기 — 함께하는 보호자에게 받은 코드로 **그 이룸이에 합류**한다 (다중 보호자 #362).
 ///
@@ -80,7 +126,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
   /// 프로그램이 칸을 채우는 중. 사용자가 친 것으로 보고 자동 제출하지 않게 한다.
   bool _filling = false;
 
-  String? _errorMessage;
+  _InviteError? _error;
 
   /// 틀린 횟수. 값이 바뀔 때마다 칸이 한 번 흔들린다.
   int _failCount = 0;
@@ -140,11 +186,11 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     _offline = false;
     if (code != null) {
       _fromLink = true;
-      _errorMessage = null;
+      _error = null;
     } else {
       _fromLink = false;
       // 직접 친 코드의 형식 오류(E-INV-FORM)와 갈래를 나눠 제보를 받으면 어느 쪽인지 안다
-      _errorMessage = '초대 링크가 맞지 않아요. 보낸 분께 다시 받아주세요 (E-INV-LINK)';
+      _error = const _InviteError(_InviteFault.linkInvalid);
       _failCount++;
     }
   }
@@ -163,7 +209,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     final code = _typed;
     if (!LinkCode.hasValidShape(code)) {
       // 우리가 만들 수 없는 모양은 서버에 보내지 않는다 — 계정당 시도 한도만 축낸다.
-      _fail('초대 코드가 맞지 않아요 (E-INV-FORM)');
+      _fail(const _InviteError(_InviteFault.formInvalid));
       return;
     }
 
@@ -194,7 +240,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     _filling = false;
     setState(() {
       _fromLink = false;
-      _errorMessage = null;
+      _error = null;
       _offline = false;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -207,45 +253,43 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     await ref.read(profileSessionProvider.notifier).joined(join);
     if (!mounted) return;
     final name = join.profile.displayName;
+    final joined = context.l10n.inviteJoined(name, batchimOf(name));
     // 화면을 옮기기 전에 잡아 둔다 — 옮긴 뒤에는 이 화면의 context 가 없다.
     final messenger = ScaffoldMessenger.of(context);
     context.go(Routes.guardian);
     messenger.showSnackBar(
-      SnackBar(content: Text('$name${name.objectParticle} 함께 돌보게 됐어요')),
+      SnackBar(content: Text(joined)),
     );
   }
 
   Future<void> _handleFailure(AppFailure failure) async {
-    String say(String fallback, String code) =>
-        failure.describe(fallback, code);
-
     switch (InviteProblem.of(failure)) {
       case InviteProblem.notFound:
-        _fail(say('초대 코드가 맞지 않아요', 'E-INV-404'));
+        _fail(_InviteError(_InviteFault.notFound, failure));
       case InviteProblem.expired:
-        _fail(say('초대 코드가 만료됐어요. 새 코드를 받아주세요', 'E-INV-410'));
+        _fail(_InviteError(_InviteFault.expired, failure));
       case InviteProblem.tooManyAttempts:
         // 잠근다 — 더 입력하면 시도만 늘고 같은 이유로 막힌다.
-        _fail(say('잠시 뒤에 다시 해주세요', 'E-INV-429'), lock: true);
+        _fail(_InviteError(_InviteFault.tooManyAttempts, failure), lock: true);
       case InviteProblem.alreadyGuardian:
-        _fail(say('이미 함께하고 있는 이룸이예요', 'E-INV-409'));
+        _fail(_InviteError(_InviteFault.alreadyGuardian, failure));
       case InviteProblem.forbiddenForElumi:
-        _fail(say('이룸이 휴대폰에서는 할 수 없어요', 'E-INV-403'), lock: true);
+        _fail(_InviteError(_InviteFault.forbiddenForElumi, failure), lock: true);
       case InviteProblem.invalidInput:
-        _fail(say('초대 코드가 맞지 않아요', 'E-INV-400'));
+        _fail(_InviteError(_InviteFault.invalidInput, failure));
       case InviteProblem.offline:
         // 입력을 남긴다 — 인터넷이 돌아오면 다시 칠 필요 없이 `다시 시도`만 누르면 된다.
         setState(() {
           _offline = true;
-          _errorMessage = say('연결하지 못했어요. 인터넷을 확인해주세요', 'E-NET');
+          _error = _InviteError(_InviteFault.offline, failure);
         });
       case InviteProblem.consentRequired:
         final linked = _fromLink ? _typed : null;
         await showFailure(
           context,
           failure,
-          title: '초대 코드를 넣지 못했어요',
-          fallback: '약관에 먼저 동의해주세요',
+          title: context.l10n.inviteEnterConsentFailTitle,
+          fallback: context.l10n.inviteEnterConsentFallback,
           fallbackCode: 'E-INV-CONSENT',
         );
         if (!mounted) return;
@@ -257,17 +301,17 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
         }
         context.go(Routes.consent);
       case InviteProblem.other:
-        _fail(say('연결하지 못했어요. 다시 해주세요', 'E-INV'));
+        _fail(_InviteError(_InviteFault.other, failure));
     }
   }
 
   /// 실패 — 입력을 비우고 흔들어 알린다. 붉은 경고를 크게 쓰지 않는다.
-  void _fail(String message, {bool lock = false}) {
+  void _fail(_InviteError error, {bool lock = false}) {
     _controller.clear();
     setState(() {
       // 링크로 받은 코드도 실패하면 확인 상태를 거두고 직접 입력으로 돌아간다
       _fromLink = false;
-      _errorMessage = message;
+      _error = error;
       _failCount++;
       _locked = lock;
     });
@@ -301,7 +345,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
       // 링크로 받은 코드는 사람이 눌러야 보낸다 (#365). **임시 시안** — 하단 버튼·보조 링크는 다른 입력
       // 화면(이름 입력 `다음` · `초대 코드가 있어요`)의 배치를 그대로 빌렸다.
       bottomButton: _fromLink
-          ? ElumButton(label: '함께하기', onPressed: _sending ? null : _submit)
+          ? ElumButton(label: context.l10n.inviteEnterJoinButton, onPressed: _sending ? null : _submit)
           : null,
       belowButton: _fromLink
           ? Center(
@@ -310,7 +354,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: space.xs.h),
                   child: Text(
-                    '다른 코드 넣기',
+                    context.l10n.inviteEnterManualLink,
                     style: context.typo.linkLater.copyWith(
                       color: colors.linkLaterLabel,
                       decoration: TextDecoration.underline,
@@ -325,12 +369,12 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElumHeader(
-              title: '초대 코드를\n넣어주세요',
+              title: context.l10n.inviteEnterTitle,
               description:
-                  _errorMessage ??
+                  _error?.message(context.l10n) ??
                   (_fromLink
-                      ? '링크로 받은 초대 코드예요. 맞으면 함께하기를 눌러주세요'
-                      : '함께하는 보호자에게 받은 여섯 글자예요'),
+                      ? context.l10n.inviteEnterDescriptionFromLink
+                      : context.l10n.inviteEnterDescriptionManual),
             ),
             SizedBox(height: space.lg),
             // 어디서 받는지 적어 준다. 받는 사람은 처음 보는 화면이다. 링크로 받았다면 이미 안다.
@@ -346,21 +390,21 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '함께하는 보호자 휴대폰에서',
+                      context.l10n.inviteEnterWhereFrom,
                       style: context.typo.body.copyWith(
                         color: colors.textSecondary,
                       ),
                     ),
                     SizedBox(height: space.sm),
                     Text(
-                      '설정 → 함께하는 사람',
+                      context.l10n.inviteEnterWherePath,
                       style: context.typo.subtitle.copyWith(
                         color: colors.textPrimary,
                       ),
                     ),
                     SizedBox(height: space.sm),
                     Text(
-                      '초대 코드를 만들면 여섯 글자가 나와요',
+                      context.l10n.inviteEnterWhereHow,
                       style: context.typo.body.copyWith(
                         color: colors.textSecondary,
                       ),
@@ -374,7 +418,9 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
             Semantics(
               container: true,
               button: true,
-              label: _fromLink ? '링크로 받은 초대 코드' : '초대 코드 넣기',
+              label: _fromLink
+                  ? context.l10n.inviteEnterSemanticsFromLink
+                  : context.l10n.inviteEnterSemanticsInput,
               value: _typed,
               child: GestureDetector(
                 // 링크로 받은 코드는 칸을 눌러도 고쳐지지 않는다 — `다른 코드 넣기` 로 바꾼다
@@ -385,7 +431,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
                   child: ExcludeSemantics(
                     child: CodeBoxes(
                       value: _typed,
-                      hasError: _errorMessage != null,
+                      hasError: _error != null,
                     ),
                   ),
                 ),
@@ -413,7 +459,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
                       vertical: space.sm.h,
                     ),
                     child: Text(
-                      '다시 시도',
+                      context.l10n.commonRetry,
                       style: context.typo.linkLater.copyWith(
                         color: colors.linkLaterLabel,
                         decoration: TextDecoration.underline,

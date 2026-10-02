@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_error_view.dart';
@@ -42,8 +43,9 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
     if (!mounted) return;
     // 화면을 닫기 전에 잡아 둔다.
     final messenger = ScaffoldMessenger.of(context);
+    final changed = context.l10n.profileSwitchChanged;
     context.pop();
-    messenger.showSnackBar(const SnackBar(content: Text('이룸이를 바꿨어요')));
+    messenger.showSnackBar(SnackBar(content: Text(changed)));
   }
 
   @override
@@ -53,7 +55,7 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
 
     return ElumScaffold(
       onBack: _busy ? null : () => context.pop(),
-      title: '이룸이 바꾸기',
+      title: context.l10n.profileSwitchTitle,
       backTop: 67,
       horizontalPadding: 16,
       child: SingleChildScrollView(
@@ -69,7 +71,7 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
     if (async.hasError && async.value == null) {
       return ElumErrorView.failure(
         async.error,
-        fallback: '이룸이 목록을 불러오지 못했어요',
+        fallback: context.l10n.profileSwitchLoadFailedFallback,
         fallbackCode: 'E-PRO-LOAD',
         onRetry: () => ref.invalidate(memberProvider),
         compact: true,
@@ -85,7 +87,7 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
     if (profiles.isEmpty) {
       // 서버가 목록을 못 줬거나(옛 서버·조회 실패) 연결된 이룸이가 없다. 둘 다 고를 것이 없다.
       return ElumErrorView(
-        message: '이룸이 목록을 불러오지 못했어요',
+        message: context.l10n.profileSwitchLoadFailedMessage,
         errorCode: 'E-PRO-LOAD',
         onRetry: () => ref.invalidate(memberProvider),
         compact: true,
@@ -124,7 +126,7 @@ class _ProfileTile extends StatelessWidget {
     return AppPressable(
       onTap: onTap,
       // 지금 보는 이룸이임을 낭독기가 말하게 한다 — 체크 그림만으로는 전해지지 않는다.
-      semanticLabel: selected ? '${profile.displayName}, 지금 보는 이룸이' : profile.displayName,
+      semanticLabel: selected ? context.l10n.profileSwitchSelected(profile.displayName) : profile.displayName,
       child: SizedBox(
         height: SettingsTile.height.h,
         child: Padding(

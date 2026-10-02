@@ -1105,6 +1105,438 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'연결하지 못했어요. 다시 해주세요'**
   String get linkEnterFailed;
+
+  /// 이름이 없는 보호자를 부르는 대체 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자'**
+  String get commonGuardianName;
+
+  /// 함께하는 사람의 구분 이름(가족·보호자). 표시용이며 서버로 가는 값이 아니다
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자'**
+  String get guardianKindGuardian;
+
+  /// 함께하는 사람의 구분 이름(센터·기관 선생님). 표시용이며 서버로 가는 값이 아니다
+  ///
+  /// In ko, this message translates to:
+  /// **'센터 선생님'**
+  String get guardianKindCaregiver;
+
+  /// 초대 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 초대 코드
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이를 함께 돌봐요. 아래 링크를 누르면 이룸 앱에 초대 코드가 채워져요.\n초대 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n초대 코드 {code}'**
+  String inviteShareMessage(int minutes, String url, String code);
+
+  /// 내 이름·구분 고치기 시트의 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'내 이름 고치기'**
+  String get guardiansEditTitle;
+
+  /// 내 이름 고치기 시트의 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'이 이룸이를 함께 돌보는 사람에게 보이는 이름이에요. 실명이 아니어도 괜찮아요'**
+  String get guardiansEditDescription;
+
+  /// 내 이름 입력칸의 예시 글
+  ///
+  /// In ko, this message translates to:
+  /// **'엄마, 아빠, 센터 선생님'**
+  String get guardiansEditNameHint;
+
+  /// 내 이름 고치기 시트의 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장'**
+  String get guardiansEditSave;
+
+  /// 함께 돌보기 그만두기 확인 팝업 제목(되돌릴 수 없는 일)
+  ///
+  /// In ko, this message translates to:
+  /// **'함께 돌보기를 그만둘까요?'**
+  String get guardiansLeaveConfirmTitle;
+
+  /// 마지막 보호자가 나갈 때의 확인 팝업 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 보호자가 없어요\n나가면 이룸이와 만든 일과, 모은 별이 모두 사라져요\n되돌릴 수 없어요'**
+  String get guardiansLeaveConfirmMessageLast;
+
+  /// 다른 보호자가 남아 있을 때의 확인 팝업 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요'**
+  String get guardiansLeaveConfirmMessageOthers;
+
+  /// 함께 돌보기 그만두기 확인 팝업의 위험 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'그만두기'**
+  String get guardiansLeaveConfirmAction;
+
+  /// 함께 돌보기 그만두기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'나가지 못했어요'**
+  String get guardiansLeaveFailTitle;
+
+  /// 나가기 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get guardiansLeaveFailedFallback;
+
+  /// 함께 돌보기를 그만둔 뒤의 알림. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}에서 나왔어요'**
+  String guardiansLeft(String name);
+
+  /// 내 이름 고치기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이름을 고치지 못했어요'**
+  String get guardiansNameEditFailTitle;
+
+  /// 이름 고치기 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get guardiansNameEditFailedFallback;
+
+  /// 함께하는 사람 화면의 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 사람'**
+  String get guardiansTitle;
+
+  /// 이룸이가 없을 때의 안내 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 사람을 볼 이룸이가 없어요'**
+  String get guardiansNoProfileMessage;
+
+  /// 이룸이가 없을 때의 안내 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이를 먼저 등록해주세요'**
+  String get guardiansNoProfileDescription;
+
+  /// 함께하는 사람 목록의 머리 설명. name 은 이룸이 호칭(한국어는 조사를 `를` 로 고정해 둔 현행 문구)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}를 함께 돌보는 사람이에요'**
+  String guardiansCaption(String name);
+
+  /// 함께하는 사람 화면의 보조 설명(보호자와 이룸이 휴대폰 연결을 구분)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 같이 만드는 가족이나 선생님이에요. 이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요'**
+  String get guardiansIntro;
+
+  /// 목록 조회 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 사람을 불러오지 못했어요'**
+  String get guardiansLoadFailedFallback;
+
+  /// 목록이 비어 있을 때의 안내(서버에 있을 수 없는 상태)
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 사람을 찾지 못했어요'**
+  String get guardiansEmptyMessage;
+
+  /// 목록에 내 줄만 있을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요'**
+  String get guardiansAloneHint;
+
+  /// 초대 코드 만들기로 가는 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 보호자 초대하기'**
+  String get guardiansInviteAction;
+
+  /// 초대 코드 넣기로 가는 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'받은 초대 코드 넣기'**
+  String get guardiansEnterCodeAction;
+
+  /// 함께 돌보기 그만두기 줄(위험색)
+  ///
+  /// In ko, this message translates to:
+  /// **'함께 돌보기 그만두기'**
+  String get guardiansLeaveAction;
+
+  /// 그만두기 줄 아래 설명(혼자 돌볼 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요'**
+  String get guardiansLeaveHintAlone;
+
+  /// 그만두기 줄 아래 설명(다른 보호자가 있을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요'**
+  String get guardiansLeaveHintWithOthers;
+
+  /// 목록에서 내 줄에 붙는 작은 표시
+  ///
+  /// In ko, this message translates to:
+  /// **'나'**
+  String get guardiansMeBadge;
+
+  /// 초대 링크 공유 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'링크를 보내지 못했어요'**
+  String get inviteCodeShareFailTitle;
+
+  /// 초대 링크 공유 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 직접 알려주세요'**
+  String get inviteCodeShareFailFallback;
+
+  /// 초대 코드 화면의 남은 시간 자리에 보이는 만료 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드가 만료됐어요'**
+  String get inviteCodeExpired;
+
+  /// 초대 코드 만들기 화면의 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드'**
+  String get inviteCodeTitle;
+
+  /// 초대 링크를 공유 시트로 보내는 하단 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'링크로 보내기'**
+  String get inviteCodeShareButton;
+
+  /// 초대 코드 화면의 머리 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'함께할 보호자에게\n코드를 알려주세요'**
+  String get inviteCodeHeaderTitle;
+
+  /// 초대 코드 화면 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'받은 분이 {name}{batchim, select, yes{을} other{를}} 함께 돌봐요'**
+  String inviteCodeAsk(String name, String batchim);
+
+  /// 이룸이가 없을 때의 안내 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'함께 돌볼 이룸이가 없어요'**
+  String get inviteCodeNoProfileMessage;
+
+  /// 이룸이가 없을 때의 안내 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이를 먼저 등록해주세요'**
+  String get inviteCodeNoProfileDescription;
+
+  /// 초대 코드 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 만들지 못했어요'**
+  String get inviteCodeIssueFailedFallback;
+
+  /// 초대 코드를 다시 만드는 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드 다시 만들기'**
+  String get inviteCodeRetryChip;
+
+  /// 다시 만들기 아래 안내(앞 코드가 폐기됨)
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 만들면 이전 코드는 쓸 수 없어요'**
+  String get inviteCodeRetryNote;
+
+  /// 초대 코드는 보호자용이라는 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요\n설정의 이룸이 휴대폰에서 연결해요'**
+  String get inviteCodeElumiPhoneNote;
+
+  /// 링크로 열렸지만 코드를 못 쓰는 모양일 때의 안내. 에러 코드를 문구에 함께 둔다
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 링크가 맞지 않아요. 보낸 분께 다시 받아주세요 (E-INV-LINK)'**
+  String get inviteEnterLinkInvalid;
+
+  /// 직접 친 코드의 모양이 틀릴 때의 안내. 에러 코드를 문구에 함께 둔다
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드가 맞지 않아요 (E-INV-FORM)'**
+  String get inviteEnterFormInvalid;
+
+  /// 초대 코드를 넣고 합류했을 때의 알림. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}{batchim, select, yes{을} other{를}} 함께 돌보게 됐어요'**
+  String inviteJoined(String name, String batchim);
+
+  /// 없는·쓴 코드일 때 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드가 맞지 않아요'**
+  String get inviteEnterNotFound;
+
+  /// 만료된 코드일 때 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드가 만료됐어요. 새 코드를 받아주세요'**
+  String get inviteEnterExpired;
+
+  /// 시도 한도에 걸렸을 때 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤에 다시 해주세요'**
+  String get inviteEnterTooManyAttempts;
+
+  /// 이미 함께하는 이룸이일 때 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 함께하고 있는 이룸이예요'**
+  String get inviteEnterAlreadyGuardian;
+
+  /// 이룸이 휴대폰에서 합류하려 할 때 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 휴대폰에서는 할 수 없어요'**
+  String get inviteEnterForbiddenForElumi;
+
+  /// 서버가 코드 모양을 거절했을 때 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드가 맞지 않아요'**
+  String get inviteEnterInvalidInput;
+
+  /// 오프라인일 때 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'연결하지 못했어요. 인터넷을 확인해주세요'**
+  String get inviteEnterOffline;
+
+  /// 그 밖의 실패일 때 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'연결하지 못했어요. 다시 해주세요'**
+  String get inviteEnterOther;
+
+  /// 약관 미동의로 합류가 막혔을 때의 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 넣지 못했어요'**
+  String get inviteEnterConsentFailTitle;
+
+  /// 약관 미동의 팝업에서 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'약관에 먼저 동의해주세요'**
+  String get inviteEnterConsentFallback;
+
+  /// 링크로 받은 코드로 합류하는 하단 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하기'**
+  String get inviteEnterJoinButton;
+
+  /// 링크로 받은 코드를 거두고 직접 입력으로 바꾸는 밑줄 글
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 코드 넣기'**
+  String get inviteEnterManualLink;
+
+  /// 초대 코드 넣기 화면의 머리 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를\n넣어주세요'**
+  String get inviteEnterTitle;
+
+  /// 링크로 받은 코드가 채워졌을 때의 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'링크로 받은 초대 코드예요. 맞으면 함께하기를 눌러주세요'**
+  String get inviteEnterDescriptionFromLink;
+
+  /// 직접 입력할 때의 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 보호자에게 받은 여섯 글자예요'**
+  String get inviteEnterDescriptionManual;
+
+  /// 초대 코드를 어디서 받는지 알려 주는 안내 카드의 첫 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 보호자 휴대폰에서'**
+  String get inviteEnterWhereFrom;
+
+  /// 안내 카드의 길 안내(강조 줄)
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 → 함께하는 사람'**
+  String get inviteEnterWherePath;
+
+  /// 안내 카드의 마지막 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드를 만들면 여섯 글자가 나와요'**
+  String get inviteEnterWhereHow;
+
+  /// 화면 낭독기가 읽는 여섯 칸의 이름(링크로 받았을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'링크로 받은 초대 코드'**
+  String get inviteEnterSemanticsFromLink;
+
+  /// 화면 낭독기가 읽는 여섯 칸의 이름(직접 입력)
+  ///
+  /// In ko, this message translates to:
+  /// **'초대 코드 넣기'**
+  String get inviteEnterSemanticsInput;
+
+  /// 이룸이를 바꾼 뒤의 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이를 바꿨어요'**
+  String get profileSwitchChanged;
+
+  /// 이룸이 바꾸기 화면의 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 바꾸기'**
+  String get profileSwitchTitle;
+
+  /// 목록 조회 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 목록을 불러오지 못했어요'**
+  String get profileSwitchLoadFailedFallback;
+
+  /// 목록이 비었을 때의 안내 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 목록을 불러오지 못했어요'**
+  String get profileSwitchLoadFailedMessage;
+
+  /// 이룸이 바꾸기 목록에서 지금 고른 줄을 낭독기가 읽는 문장. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}, 지금 보는 이룸이'**
+  String profileSwitchSelected(String name);
 }
 
 class _AppLocalizationsDelegate

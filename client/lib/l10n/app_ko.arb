@@ -549,5 +549,221 @@
   "@linkEnterOffline": { "description": "연결 중 오프라인일 때 서버가 문구를 못 줄 때의 기본 안내" },
 
   "linkEnterFailed": "연결하지 못했어요. 다시 해주세요",
-  "@linkEnterFailed": { "description": "연결 중 그 밖의 실패 시 서버가 문구를 못 줄 때의 기본 안내" }
+  "@linkEnterFailed": { "description": "연결 중 그 밖의 실패 시 서버가 문구를 못 줄 때의 기본 안내" },
+
+  "commonGuardianName": "보호자",
+  "@commonGuardianName": {"description": "이름이 없는 보호자를 부르는 대체 호칭"},
+
+  "guardianKindGuardian": "보호자",
+  "@guardianKindGuardian": {"description": "함께하는 사람의 구분 이름(가족·보호자). 표시용이며 서버로 가는 값이 아니다"},
+
+  "guardianKindCaregiver": "센터 선생님",
+  "@guardianKindCaregiver": {"description": "함께하는 사람의 구분 이름(센터·기관 선생님). 표시용이며 서버로 가는 값이 아니다"},
+
+  "inviteShareMessage": "이룸이를 함께 돌봐요. 아래 링크를 누르면 이룸 앱에 초대 코드가 채워져요.\n초대 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n초대 코드 {code}",
+  "@inviteShareMessage": {"description": "초대 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 초대 코드", "placeholders": {"minutes": {"type": "int"}, "url": {"type": "String"}, "code": {"type": "String"}}},
+
+  "guardiansEditTitle": "내 이름 고치기",
+  "@guardiansEditTitle": {"description": "내 이름·구분 고치기 시트의 제목"},
+
+  "guardiansEditDescription": "이 이룸이를 함께 돌보는 사람에게 보이는 이름이에요. 실명이 아니어도 괜찮아요",
+  "@guardiansEditDescription": {"description": "내 이름 고치기 시트의 설명"},
+
+  "guardiansEditNameHint": "엄마, 아빠, 센터 선생님",
+  "@guardiansEditNameHint": {"description": "내 이름 입력칸의 예시 글"},
+
+  "guardiansEditSave": "저장",
+  "@guardiansEditSave": {"description": "내 이름 고치기 시트의 저장 버튼"},
+
+  "guardiansLeaveConfirmTitle": "함께 돌보기를 그만둘까요?",
+  "@guardiansLeaveConfirmTitle": {"description": "함께 돌보기 그만두기 확인 팝업 제목(되돌릴 수 없는 일)"},
+
+  "guardiansLeaveConfirmMessageLast": "함께하는 보호자가 없어요\n나가면 이룸이와 만든 일과, 모은 별이 모두 사라져요\n되돌릴 수 없어요",
+  "@guardiansLeaveConfirmMessageLast": {"description": "마지막 보호자가 나갈 때의 확인 팝업 설명"},
+
+  "guardiansLeaveConfirmMessageOthers": "내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요",
+  "@guardiansLeaveConfirmMessageOthers": {"description": "다른 보호자가 남아 있을 때의 확인 팝업 설명"},
+
+  "guardiansLeaveConfirmAction": "그만두기",
+  "@guardiansLeaveConfirmAction": {"description": "함께 돌보기 그만두기 확인 팝업의 위험 버튼"},
+
+  "guardiansLeaveFailTitle": "나가지 못했어요",
+  "@guardiansLeaveFailTitle": {"description": "함께 돌보기 그만두기 실패 팝업 제목"},
+
+  "guardiansLeaveFailedFallback": "잠시 후 다시 시도해주세요",
+  "@guardiansLeaveFailedFallback": {"description": "나가기 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "guardiansLeft": "{name}에서 나왔어요",
+  "@guardiansLeft": {"description": "함께 돌보기를 그만둔 뒤의 알림. name 은 이룸이 호칭", "placeholders": {"name": {"type": "String"}}},
+
+  "guardiansNameEditFailTitle": "이름을 고치지 못했어요",
+  "@guardiansNameEditFailTitle": {"description": "내 이름 고치기 실패 팝업 제목"},
+
+  "guardiansNameEditFailedFallback": "잠시 후 다시 시도해주세요",
+  "@guardiansNameEditFailedFallback": {"description": "이름 고치기 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "guardiansTitle": "함께하는 사람",
+  "@guardiansTitle": {"description": "함께하는 사람 화면의 제목"},
+
+  "guardiansNoProfileMessage": "함께하는 사람을 볼 이룸이가 없어요",
+  "@guardiansNoProfileMessage": {"description": "이룸이가 없을 때의 안내 제목"},
+
+  "guardiansNoProfileDescription": "이룸이를 먼저 등록해주세요",
+  "@guardiansNoProfileDescription": {"description": "이룸이가 없을 때의 안내 설명"},
+
+  "guardiansCaption": "{name}를 함께 돌보는 사람이에요",
+  "@guardiansCaption": {"description": "함께하는 사람 목록의 머리 설명. name 은 이룸이 호칭(한국어는 조사를 `를` 로 고정해 둔 현행 문구)", "placeholders": {"name": {"type": "String"}}},
+
+  "guardiansIntro": "일과를 같이 만드는 가족이나 선생님이에요. 이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요",
+  "@guardiansIntro": {"description": "함께하는 사람 화면의 보조 설명(보호자와 이룸이 휴대폰 연결을 구분)"},
+
+  "guardiansLoadFailedFallback": "함께하는 사람을 불러오지 못했어요",
+  "@guardiansLoadFailedFallback": {"description": "목록 조회 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "guardiansEmptyMessage": "함께하는 사람을 찾지 못했어요",
+  "@guardiansEmptyMessage": {"description": "목록이 비어 있을 때의 안내(서버에 있을 수 없는 상태)"},
+
+  "guardiansAloneHint": "아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요",
+  "@guardiansAloneHint": {"description": "목록에 내 줄만 있을 때의 안내"},
+
+  "guardiansInviteAction": "다른 보호자 초대하기",
+  "@guardiansInviteAction": {"description": "초대 코드 만들기로 가는 줄"},
+
+  "guardiansEnterCodeAction": "받은 초대 코드 넣기",
+  "@guardiansEnterCodeAction": {"description": "초대 코드 넣기로 가는 줄"},
+
+  "guardiansLeaveAction": "함께 돌보기 그만두기",
+  "@guardiansLeaveAction": {"description": "함께 돌보기 그만두기 줄(위험색)"},
+
+  "guardiansLeaveHintAlone": "혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요",
+  "@guardiansLeaveHintAlone": {"description": "그만두기 줄 아래 설명(혼자 돌볼 때)"},
+
+  "guardiansLeaveHintWithOthers": "내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요",
+  "@guardiansLeaveHintWithOthers": {"description": "그만두기 줄 아래 설명(다른 보호자가 있을 때)"},
+
+  "guardiansMeBadge": "나",
+  "@guardiansMeBadge": {"description": "목록에서 내 줄에 붙는 작은 표시"},
+
+  "inviteCodeShareFailTitle": "링크를 보내지 못했어요",
+  "@inviteCodeShareFailTitle": {"description": "초대 링크 공유 실패 팝업 제목"},
+
+  "inviteCodeShareFailFallback": "초대 코드를 직접 알려주세요",
+  "@inviteCodeShareFailFallback": {"description": "초대 링크 공유 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteCodeExpired": "초대 코드가 만료됐어요",
+  "@inviteCodeExpired": {"description": "초대 코드 화면의 남은 시간 자리에 보이는 만료 안내"},
+
+  "inviteCodeTitle": "초대 코드",
+  "@inviteCodeTitle": {"description": "초대 코드 만들기 화면의 제목"},
+
+  "inviteCodeShareButton": "링크로 보내기",
+  "@inviteCodeShareButton": {"description": "초대 링크를 공유 시트로 보내는 하단 버튼"},
+
+  "inviteCodeHeaderTitle": "함께할 보호자에게\n코드를 알려주세요",
+  "@inviteCodeHeaderTitle": {"description": "초대 코드 화면의 머리 제목"},
+
+  "inviteCodeAsk": "받은 분이 {name}{batchim, select, yes{을} other{를}} 함께 돌봐요",
+  "@inviteCodeAsk": {"description": "초대 코드 화면 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다", "placeholders": {"name": {"type": "String"}, "batchim": {"type": "String"}}},
+
+  "inviteCodeNoProfileMessage": "함께 돌볼 이룸이가 없어요",
+  "@inviteCodeNoProfileMessage": {"description": "이룸이가 없을 때의 안내 제목"},
+
+  "inviteCodeNoProfileDescription": "이룸이를 먼저 등록해주세요",
+  "@inviteCodeNoProfileDescription": {"description": "이룸이가 없을 때의 안내 설명"},
+
+  "inviteCodeIssueFailedFallback": "초대 코드를 만들지 못했어요",
+  "@inviteCodeIssueFailedFallback": {"description": "초대 코드 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteCodeRetryChip": "초대 코드 다시 만들기",
+  "@inviteCodeRetryChip": {"description": "초대 코드를 다시 만드는 칩"},
+
+  "inviteCodeRetryNote": "다시 만들면 이전 코드는 쓸 수 없어요",
+  "@inviteCodeRetryNote": {"description": "다시 만들기 아래 안내(앞 코드가 폐기됨)"},
+
+  "inviteCodeElumiPhoneNote": "이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요\n설정의 이룸이 휴대폰에서 연결해요",
+  "@inviteCodeElumiPhoneNote": {"description": "초대 코드는 보호자용이라는 안내"},
+
+  "inviteEnterLinkInvalid": "초대 링크가 맞지 않아요. 보낸 분께 다시 받아주세요 (E-INV-LINK)",
+  "@inviteEnterLinkInvalid": {"description": "링크로 열렸지만 코드를 못 쓰는 모양일 때의 안내. 에러 코드를 문구에 함께 둔다"},
+
+  "inviteEnterFormInvalid": "초대 코드가 맞지 않아요 (E-INV-FORM)",
+  "@inviteEnterFormInvalid": {"description": "직접 친 코드의 모양이 틀릴 때의 안내. 에러 코드를 문구에 함께 둔다"},
+
+  "inviteJoined": "{name}{batchim, select, yes{을} other{를}} 함께 돌보게 됐어요",
+  "@inviteJoined": {"description": "초대 코드를 넣고 합류했을 때의 알림. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)", "placeholders": {"name": {"type": "String"}, "batchim": {"type": "String"}}},
+
+  "inviteEnterNotFound": "초대 코드가 맞지 않아요",
+  "@inviteEnterNotFound": {"description": "없는·쓴 코드일 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterExpired": "초대 코드가 만료됐어요. 새 코드를 받아주세요",
+  "@inviteEnterExpired": {"description": "만료된 코드일 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterTooManyAttempts": "잠시 뒤에 다시 해주세요",
+  "@inviteEnterTooManyAttempts": {"description": "시도 한도에 걸렸을 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterAlreadyGuardian": "이미 함께하고 있는 이룸이예요",
+  "@inviteEnterAlreadyGuardian": {"description": "이미 함께하는 이룸이일 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterForbiddenForElumi": "이룸이 휴대폰에서는 할 수 없어요",
+  "@inviteEnterForbiddenForElumi": {"description": "이룸이 휴대폰에서 합류하려 할 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterInvalidInput": "초대 코드가 맞지 않아요",
+  "@inviteEnterInvalidInput": {"description": "서버가 코드 모양을 거절했을 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterOffline": "연결하지 못했어요. 인터넷을 확인해주세요",
+  "@inviteEnterOffline": {"description": "오프라인일 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterOther": "연결하지 못했어요. 다시 해주세요",
+  "@inviteEnterOther": {"description": "그 밖의 실패일 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterConsentFailTitle": "초대 코드를 넣지 못했어요",
+  "@inviteEnterConsentFailTitle": {"description": "약관 미동의로 합류가 막혔을 때의 팝업 제목"},
+
+  "inviteEnterConsentFallback": "약관에 먼저 동의해주세요",
+  "@inviteEnterConsentFallback": {"description": "약관 미동의 팝업에서 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterJoinButton": "함께하기",
+  "@inviteEnterJoinButton": {"description": "링크로 받은 코드로 합류하는 하단 버튼"},
+
+  "inviteEnterManualLink": "다른 코드 넣기",
+  "@inviteEnterManualLink": {"description": "링크로 받은 코드를 거두고 직접 입력으로 바꾸는 밑줄 글"},
+
+  "inviteEnterTitle": "초대 코드를\n넣어주세요",
+  "@inviteEnterTitle": {"description": "초대 코드 넣기 화면의 머리 제목"},
+
+  "inviteEnterDescriptionFromLink": "링크로 받은 초대 코드예요. 맞으면 함께하기를 눌러주세요",
+  "@inviteEnterDescriptionFromLink": {"description": "링크로 받은 코드가 채워졌을 때의 설명"},
+
+  "inviteEnterDescriptionManual": "함께하는 보호자에게 받은 여섯 글자예요",
+  "@inviteEnterDescriptionManual": {"description": "직접 입력할 때의 설명"},
+
+  "inviteEnterWhereFrom": "함께하는 보호자 휴대폰에서",
+  "@inviteEnterWhereFrom": {"description": "초대 코드를 어디서 받는지 알려 주는 안내 카드의 첫 줄"},
+
+  "inviteEnterWherePath": "설정 → 함께하는 사람",
+  "@inviteEnterWherePath": {"description": "안내 카드의 길 안내(강조 줄)"},
+
+  "inviteEnterWhereHow": "초대 코드를 만들면 여섯 글자가 나와요",
+  "@inviteEnterWhereHow": {"description": "안내 카드의 마지막 줄"},
+
+  "inviteEnterSemanticsFromLink": "링크로 받은 초대 코드",
+  "@inviteEnterSemanticsFromLink": {"description": "화면 낭독기가 읽는 여섯 칸의 이름(링크로 받았을 때)"},
+
+  "inviteEnterSemanticsInput": "초대 코드 넣기",
+  "@inviteEnterSemanticsInput": {"description": "화면 낭독기가 읽는 여섯 칸의 이름(직접 입력)"},
+
+  "profileSwitchChanged": "이룸이를 바꿨어요",
+  "@profileSwitchChanged": {"description": "이룸이를 바꾼 뒤의 알림"},
+
+  "profileSwitchTitle": "이룸이 바꾸기",
+  "@profileSwitchTitle": {"description": "이룸이 바꾸기 화면의 제목"},
+
+  "profileSwitchLoadFailedFallback": "이룸이 목록을 불러오지 못했어요",
+  "@profileSwitchLoadFailedFallback": {"description": "목록 조회 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "profileSwitchLoadFailedMessage": "이룸이 목록을 불러오지 못했어요",
+  "@profileSwitchLoadFailedMessage": {"description": "목록이 비었을 때의 안내 제목"},
+
+  "profileSwitchSelected": "{name}, 지금 보는 이룸이",
+  "@profileSwitchSelected": {"description": "이룸이 바꾸기 목록에서 지금 고른 줄을 낭독기가 읽는 문장. name 은 이룸이 호칭", "placeholders": {"name": {"type": "String"}}}
 }

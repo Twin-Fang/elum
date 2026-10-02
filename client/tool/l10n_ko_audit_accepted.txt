@@ -2,3 +2,7 @@ creditResetAt: "{month}월 {day}일({weekday}) {hour}시" # lib/features/credit/
 creditResetAtMinute: "{month}월 {day}일({weekday}) {hour}시 {minute}분" # 같은 줄 126 과 대조 — minute 가 ' ${at.minute}분'(줄 125, 앞 공백 한 칸 포함)일 때의 결과와 같다
 routineForeignCreator: "{name}이 만든 일과예요" # lib/shared/models/routine.dart:92 `'$name${name.subjectParticle} 만든 일과예요'` 와 한 글자씩 대조 — 받침 있는 이름의 결과(subjectParticle 이, korean_particle.dart:23). 조사 도우미 호출이라 한 리터럴이 아니다
 routineForeignCreator: "{name}가 만든 일과예요" # 같은 줄 92 와 대조 — 받침 없는 이름의 결과(subjectParticle 가). 조사 도우미 호출이라 한 리터럴이 아니다
+inviteCodeAsk: "받은 분이 {name}을 함께 돌봐요" # lib/features/profile/presentation/invite_code_screen.dart:217(기준 커밋 3cfec577) `'받은 분이 $_name${_name.objectParticle} 함께 돌봐요'` 와 한 글자씩 대조 — 받침 있는 이름의 결과(objectParticle 을). 조사 도우미 호출이라 한 리터럴이 아니다
+inviteCodeAsk: "받은 분이 {name}를 함께 돌봐요" # 같은 줄 217 과 대조 — 받침 없는 이름의 결과(objectParticle 를). 조사 도우미 호출이라 한 리터럴이 아니다
+inviteJoined: "{name}을 함께 돌보게 됐어요" # lib/features/profile/presentation/invite_enter_screen.dart:214(기준 커밋 3cfec577) `'$name${name.objectParticle} 함께 돌보게 됐어요'` 와 한 글자씩 대조 — 받침 있는 이름의 결과(을). 조사 도우미 호출이라 한 리터럴이 아니다
+inviteJoined: "{name}를 함께 돌보게 됐어요" # 같은 줄 214 와 대조 — 받침 없는 이름의 결과(를). 조사 도우미 호출이라 한 리터럴이 아니다

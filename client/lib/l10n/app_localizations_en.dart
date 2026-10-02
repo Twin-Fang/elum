@@ -559,4 +559,247 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkEnterFailed => '연결하지 못했어요. 다시 해주세요';
+
+  @override
+  String get commonGuardianName => '보호자';
+
+  @override
+  String get guardianKindGuardian => '보호자';
+
+  @override
+  String get guardianKindCaregiver => '센터 선생님';
+
+  @override
+  String inviteShareMessage(int minutes, String url, String code) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes분',
+    );
+    return '이룸이를 함께 돌봐요. 아래 링크를 누르면 이룸 앱에 초대 코드가 채워져요.\n초대 코드는 $_temp0 동안만 쓸 수 있어요.\n\n$url\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n초대 코드 $code';
+  }
+
+  @override
+  String get guardiansEditTitle => '내 이름 고치기';
+
+  @override
+  String get guardiansEditDescription =>
+      '이 이룸이를 함께 돌보는 사람에게 보이는 이름이에요. 실명이 아니어도 괜찮아요';
+
+  @override
+  String get guardiansEditNameHint => '엄마, 아빠, 센터 선생님';
+
+  @override
+  String get guardiansEditSave => '저장';
+
+  @override
+  String get guardiansLeaveConfirmTitle => '함께 돌보기를 그만둘까요?';
+
+  @override
+  String get guardiansLeaveConfirmMessageLast =>
+      '함께하는 보호자가 없어요\n나가면 이룸이와 만든 일과, 모은 별이 모두 사라져요\n되돌릴 수 없어요';
+
+  @override
+  String get guardiansLeaveConfirmMessageOthers =>
+      '내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요';
+
+  @override
+  String get guardiansLeaveConfirmAction => '그만두기';
+
+  @override
+  String get guardiansLeaveFailTitle => '나가지 못했어요';
+
+  @override
+  String get guardiansLeaveFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String guardiansLeft(String name) {
+    return '$name에서 나왔어요';
+  }
+
+  @override
+  String get guardiansNameEditFailTitle => '이름을 고치지 못했어요';
+
+  @override
+  String get guardiansNameEditFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get guardiansTitle => '함께하는 사람';
+
+  @override
+  String get guardiansNoProfileMessage => '함께하는 사람을 볼 이룸이가 없어요';
+
+  @override
+  String get guardiansNoProfileDescription => '이룸이를 먼저 등록해주세요';
+
+  @override
+  String guardiansCaption(String name) {
+    return '$name를 함께 돌보는 사람이에요';
+  }
+
+  @override
+  String get guardiansIntro =>
+      '일과를 같이 만드는 가족이나 선생님이에요. 이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요';
+
+  @override
+  String get guardiansLoadFailedFallback => '함께하는 사람을 불러오지 못했어요';
+
+  @override
+  String get guardiansEmptyMessage => '함께하는 사람을 찾지 못했어요';
+
+  @override
+  String get guardiansAloneHint => '아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요';
+
+  @override
+  String get guardiansInviteAction => '다른 보호자 초대하기';
+
+  @override
+  String get guardiansEnterCodeAction => '받은 초대 코드 넣기';
+
+  @override
+  String get guardiansLeaveAction => '함께 돌보기 그만두기';
+
+  @override
+  String get guardiansLeaveHintAlone => '혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요';
+
+  @override
+  String get guardiansLeaveHintWithOthers =>
+      '내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요';
+
+  @override
+  String get guardiansMeBadge => '나';
+
+  @override
+  String get inviteCodeShareFailTitle => '링크를 보내지 못했어요';
+
+  @override
+  String get inviteCodeShareFailFallback => '초대 코드를 직접 알려주세요';
+
+  @override
+  String get inviteCodeExpired => '초대 코드가 만료됐어요';
+
+  @override
+  String get inviteCodeTitle => '초대 코드';
+
+  @override
+  String get inviteCodeShareButton => '링크로 보내기';
+
+  @override
+  String get inviteCodeHeaderTitle => '함께할 보호자에게\n코드를 알려주세요';
+
+  @override
+  String inviteCodeAsk(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
+    return '받은 분이 $name$_temp0 함께 돌봐요';
+  }
+
+  @override
+  String get inviteCodeNoProfileMessage => '함께 돌볼 이룸이가 없어요';
+
+  @override
+  String get inviteCodeNoProfileDescription => '이룸이를 먼저 등록해주세요';
+
+  @override
+  String get inviteCodeIssueFailedFallback => '초대 코드를 만들지 못했어요';
+
+  @override
+  String get inviteCodeRetryChip => '초대 코드 다시 만들기';
+
+  @override
+  String get inviteCodeRetryNote => '다시 만들면 이전 코드는 쓸 수 없어요';
+
+  @override
+  String get inviteCodeElumiPhoneNote =>
+      '이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요\n설정의 이룸이 휴대폰에서 연결해요';
+
+  @override
+  String get inviteEnterLinkInvalid =>
+      '초대 링크가 맞지 않아요. 보낸 분께 다시 받아주세요 (E-INV-LINK)';
+
+  @override
+  String get inviteEnterFormInvalid => '초대 코드가 맞지 않아요 (E-INV-FORM)';
+
+  @override
+  String inviteJoined(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
+    return '$name$_temp0 함께 돌보게 됐어요';
+  }
+
+  @override
+  String get inviteEnterNotFound => '초대 코드가 맞지 않아요';
+
+  @override
+  String get inviteEnterExpired => '초대 코드가 만료됐어요. 새 코드를 받아주세요';
+
+  @override
+  String get inviteEnterTooManyAttempts => '잠시 뒤에 다시 해주세요';
+
+  @override
+  String get inviteEnterAlreadyGuardian => '이미 함께하고 있는 이룸이예요';
+
+  @override
+  String get inviteEnterForbiddenForElumi => '이룸이 휴대폰에서는 할 수 없어요';
+
+  @override
+  String get inviteEnterInvalidInput => '초대 코드가 맞지 않아요';
+
+  @override
+  String get inviteEnterOffline => '연결하지 못했어요. 인터넷을 확인해주세요';
+
+  @override
+  String get inviteEnterOther => '연결하지 못했어요. 다시 해주세요';
+
+  @override
+  String get inviteEnterConsentFailTitle => '초대 코드를 넣지 못했어요';
+
+  @override
+  String get inviteEnterConsentFallback => '약관에 먼저 동의해주세요';
+
+  @override
+  String get inviteEnterJoinButton => '함께하기';
+
+  @override
+  String get inviteEnterManualLink => '다른 코드 넣기';
+
+  @override
+  String get inviteEnterTitle => '초대 코드를\n넣어주세요';
+
+  @override
+  String get inviteEnterDescriptionFromLink =>
+      '링크로 받은 초대 코드예요. 맞으면 함께하기를 눌러주세요';
+
+  @override
+  String get inviteEnterDescriptionManual => '함께하는 보호자에게 받은 여섯 글자예요';
+
+  @override
+  String get inviteEnterWhereFrom => '함께하는 보호자 휴대폰에서';
+
+  @override
+  String get inviteEnterWherePath => '설정 → 함께하는 사람';
+
+  @override
+  String get inviteEnterWhereHow => '초대 코드를 만들면 여섯 글자가 나와요';
+
+  @override
+  String get inviteEnterSemanticsFromLink => '링크로 받은 초대 코드';
+
+  @override
+  String get inviteEnterSemanticsInput => '초대 코드 넣기';
+
+  @override
+  String get profileSwitchChanged => '이룸이를 바꿨어요';
+
+  @override
+  String get profileSwitchTitle => '이룸이 바꾸기';
+
+  @override
+  String get profileSwitchLoadFailedFallback => '이룸이 목록을 불러오지 못했어요';
+
+  @override
+  String get profileSwitchLoadFailedMessage => '이룸이 목록을 불러오지 못했어요';
+
+  @override
+  String profileSwitchSelected(String name) {
+    return '$name, 지금 보는 이룸이';
+  }
 }

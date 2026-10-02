@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/current_l10n.dart';
 import '../../onboarding/domain/image_style.dart';
 
 /// 연결된 이룸이 한 명 — 서버 `ProfileSummaryResponse`에 대응한다 (다중 보호자 #360).
@@ -30,7 +31,7 @@ class ProfileSummary {
   /// 목록에 적을 이름. 비어 있으면 `이룸이`다 (이름을 모를 때 쓰는 말).
   String get displayName {
     final name = nickname?.trim();
-    return (name == null || name.isEmpty) ? '이룸이' : name;
+    return (name == null || name.isEmpty) ? appL10n.commonElumiName : name;
   }
 
   /// 서버 응답 한 항목. **id 가 없으면 null** — 어느 이룸이인지 모르면 고를 수 없다.
