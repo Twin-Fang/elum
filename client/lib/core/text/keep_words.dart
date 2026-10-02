@@ -15,6 +15,17 @@ bool _isSpace(String ch) => ch.trim().isEmpty;
 bool usesWordJoiner(Locale? locale) =>
     locale == null || locale.languageCode == 'ko';
 
+/// 글에 한글 음절이 하나라도 있는가.
+///
+/// 번역 전에는 영어·일본어 휴대폰에서도 화면 글이 한국어다. 언어 설정만 보면 그 한국어가 글자
+/// 단위로 끊기므로 글 자체도 함께 본다.
+bool _hasHangul(String text) {
+  for (final unit in text.runes) {
+    if (unit >= 0xAC00 && unit <= 0xD7A3) return true;
+  }
+  return false;
+}
+
 /// 한글을 **어절 단위로** 줄바꿈하게 만든다 (이슈 #390 · #385 A).
 ///
 /// Flutter 는 한글을 글자 단위로 끊는다 — "자세한 내용은 방 / 침에서". CSS 의
@@ -28,7 +39,8 @@ bool usesWordJoiner(Locale? locale) =>
 /// 관리자 미리보기(`notice-preview.js` 의 `keepWords`)가 **같은 규칙**으로 표시를
 /// 넣는다 — 한쪽만 바꾸면 관리자가 본 줄과 보호자가 본 줄이 다시 달라진다.
 ///
-/// [locale] 이 한국어가 아니면 원문을 그대로 돌려준다 ([usesWordJoiner]).
+/// [locale] 이 한국어가 아니어도 글에 한글이 있으면 같은 규칙을 건다. 한글이 없는 글은
+/// 원문을 그대로 돌려준다 ([usesWordJoiner]).
 /// 화면 낭독기에 표시가 섞이지 않게, 그리는 쪽은 원문을 `semanticsLabel` 로 준다.
 String keepWords(String text, {Locale? locale}) =>
     keepWordsParts([text], locale: locale).single;
@@ -36,7 +48,8 @@ String keepWords(String text, {Locale? locale}) =>
 /// [keepWords] 를 여러 조각에 걸쳐 한다. 강조(`**…**`)로 나뉜 제목처럼 한 줄 글이
 /// 여러 조각일 때, **조각 경계도** 붙어 있으면 한 어절로 본다 — "9월 30일"+"에".
 List<String> keepWordsParts(List<String> parts, {Locale? locale}) {
-  if (!usesWordJoiner(locale)) return List.of(parts);
+  // 언어가 한국어이거나 글에 한글이 있을 때만 건다 (번역 전 한국어 폴백 보호)
+  if (!usesWordJoiner(locale) && !parts.any(_hasHangul)) return List.of(parts);
 
   final out = <String>[];
   String? prev;

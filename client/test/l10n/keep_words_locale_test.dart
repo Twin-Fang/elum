@@ -23,25 +23,25 @@ void main() {
     });
 
     test('ko 는 표시를 넣는다', () {
-      expect(
-        keepWords('방침에서', locale: const Locale('ko')),
-        '방$wj침$wj에$wj서',
-      );
+      expect(keepWords('방침에서', locale: const Locale('ko')), '방$wj침$wj에$wj서');
     });
 
-    test('en·es·ja·zh(zh, zh-Hans) 는 원문 그대로다 — 일본어·중국어에 넣으면 줄바꿈이 막힌다', () {
-      for (final l in [
-        const Locale('en'),
-        const Locale('es'),
-        const Locale('ja'),
-        const Locale('zh'),
-        zhHans,
-      ]) {
-        final out = keepWords('Hello 日本語 방침에서', locale: l);
-        expect(out, 'Hello 日本語 방침에서', reason: '$l');
-        expect(out, isNot(contains(wj)), reason: '$l');
-      }
-    });
+    test(
+      'en·es·ja·zh(zh, zh-Hans) 는 한글이 없으면 원문 그대로다 — 일본어·중국어에 넣으면 줄바꿈이 막힌다',
+      () {
+        for (final l in [
+          const Locale('en'),
+          const Locale('es'),
+          const Locale('ja'),
+          const Locale('zh'),
+          zhHans,
+        ]) {
+          final out = keepWords('Hello 日本語', locale: l);
+          expect(out, 'Hello 日本語', reason: '$l');
+          expect(out, isNot(contains(wj)), reason: '$l');
+        }
+      },
+    );
 
     test('같은 입력의 ko 결과와 ja 결과는 서로 다르다', () {
       expect(
@@ -55,13 +55,21 @@ void main() {
     });
 
     test('keepWordsParts 도 같은 규칙이다 — ko 는 조각 경계도 한 어절로 본다', () {
-      expect(
-        keepWordsParts(['9월', '30일'], locale: const Locale('ko')),
-        ['9$wj월', '${wj}3${wj}0$wj일'],
-      );
+      expect(keepWordsParts(['9월', '30일'], locale: const Locale('ko')), [
+        '9$wj월',
+        '${wj}3${wj}0$wj일',
+      ]);
       expect(keepWordsParts(['9월', '30일']), ['9$wj월', '${wj}3${wj}0$wj일']);
-      for (final l in [const Locale('ja'), const Locale('en'), const Locale('zh'), zhHans]) {
-        expect(keepWordsParts(['9월', '30일'], locale: l), ['9월', '30일'], reason: '$l');
+      for (final l in [
+        const Locale('ja'),
+        const Locale('en'),
+        const Locale('zh'),
+        zhHans,
+      ]) {
+        expect(keepWordsParts(['9月', '30日'], locale: l), [
+          '9月',
+          '30日',
+        ], reason: '$l');
       }
     });
 
@@ -73,6 +81,48 @@ void main() {
       expect(usesWordJoiner(const Locale('es')), isFalse);
       expect(usesWordJoiner(const Locale('zh')), isFalse);
       expect(usesWordJoiner(zhHans), isFalse);
+    });
+  });
+
+  group('keepWords — 글자에 한글이 있으면 언어와 무관하게 어절 표시를 넣는다', () {
+    // 번역 전에는 영어·일본어 OS 에서도 화면 글이 한국어라 끊김을 막아야 한다
+    test('en 이어도 한글 문구에는 표시가 있다', () {
+      expect(keepWords('방침에서', locale: const Locale('en')), '방$wj침$wj에$wj서');
+    });
+
+    test('ja 의 한글 없는 일본어 문구에는 표시가 없다', () {
+      expect(keepWords('方針について', locale: const Locale('ja')), '方針について');
+    });
+
+    test('ja 여도 번역 전 한국어 문구에는 표시가 있다', () {
+      expect(keepWords('방침에서', locale: const Locale('ja')), '방$wj침$wj에$wj서');
+    });
+
+    test('ko 는 한글이 없는 영문·숫자에도 기존처럼 표시를 넣는다', () {
+      expect(
+        keepWords('AB12', locale: const Locale('ko')),
+        'A${wj}B${wj}1${wj}2',
+      );
+    });
+
+    test('en 의 한글·영문 섞인 문구에는 표시가 있다', () {
+      expect(keepWords('방침 ab', locale: const Locale('en')), '방$wj침 a${wj}b');
+    });
+
+    test('null locale 은 기존대로 한국어로 본다', () {
+      expect(keepWords('AB'), 'A${wj}B');
+      expect(keepWords('方針'), '方$wj針');
+    });
+
+    test('keepWordsParts 도 조각 어디에든 한글이 있으면 표시를 넣는다', () {
+      expect(keepWordsParts(['9월', '30일'], locale: const Locale('en')), [
+        '9$wj월',
+        '${wj}3${wj}0$wj일',
+      ]);
+      expect(keepWordsParts(['日本', '語'], locale: const Locale('ja')), [
+        '日本',
+        '語',
+      ]);
     });
   });
 
@@ -98,7 +148,10 @@ void main() {
       return calls;
     }
 
-    final defFile = 'lib/core/text/keep_words.dart'.replaceAll('/', Platform.pathSeparator);
+    final defFile = 'lib/core/text/keep_words.dart'.replaceAll(
+      '/',
+      Platform.pathSeparator,
+    );
     final sources = Directory('lib')
         .listSync(recursive: true)
         .whereType<File>()
@@ -116,7 +169,11 @@ void main() {
         all.addAll(calls);
         where.addAll(calls.map((_) => f.path));
       }
-      expect(all.length, 8, reason: '호출이 늘면 locale 을 넘기는지 확인하고 이 숫자를 고친다: $where');
+      expect(
+        all.length,
+        8,
+        reason: '호출이 늘면 locale 을 넘기는지 확인하고 이 숫자를 고친다: $where',
+      );
       for (var i = 0; i < all.length; i++) {
         expect(
           all[i],
@@ -129,19 +186,28 @@ void main() {
     });
 
     test('주석 속 호출은 세지 않는다', () {
-      expect(callsIn(stripComments('// keepWords(a)\n/* keepWords(b) */\nkeepWords(c)')), ['c']);
+      expect(
+        callsIn(
+          stripComments('// keepWords(a)\n/* keepWords(b) */\nkeepWords(c)'),
+        ),
+        ['c'],
+      );
     });
   });
 
   group('팝업 설명', () {
-    Future<String> shownMessage(WidgetTester tester, Locale locale) async {
+    Future<String> shownMessage(
+      WidgetTester tester,
+      Locale locale,
+      String message,
+    ) async {
       await pumpWithLocale(
         tester,
-        const Scaffold(
+        Scaffold(
           body: Center(
             child: ElumDialogCard<void>(
               title: '제목',
-              message: '방침에서 확인해요',
+              message: message,
               keepWordsInMessage: true,
             ),
           ),
@@ -150,30 +216,46 @@ void main() {
       );
       // 낭독기에는 원문을 주므로(semanticsLabel) 그것으로 위젯을 찾는다
       final text = tester.widget<Text>(
-        find.byWidgetPredicate(
-          (w) => w is Text && w.semanticsLabel == '방침에서 확인해요',
-        ),
+        find.byWidgetPredicate((w) => w is Text && w.semanticsLabel == message),
       );
       expect(text.semanticsLabel, isNot(contains(wj)));
       return text.data!;
     }
 
     testWidgets('ko 팝업 설명에는 어절 표시가 들어간다 — 지금과 같다', (tester) async {
-      expect(await shownMessage(tester, const Locale('ko')), contains(wj));
+      expect(
+        await shownMessage(tester, const Locale('ko'), '방침에서 확인해요'),
+        contains(wj),
+      );
     });
 
-    testWidgets('ja 팝업 설명에는 표시가 없다', (tester) async {
-      expect(await shownMessage(tester, const Locale('ja')), isNot(contains(wj)));
+    testWidgets('ja 의 일본어 팝업 설명에는 표시가 없다', (tester) async {
+      expect(
+        await shownMessage(tester, const Locale('ja'), '方針を確認してください'),
+        isNot(contains(wj)),
+      );
+    });
+
+    testWidgets('ja 여도 번역 전 한국어 팝업 설명에는 표시가 있다', (tester) async {
+      expect(
+        await shownMessage(tester, const Locale('ja'), '방침에서 확인해요'),
+        contains(wj),
+      );
     });
   });
 
   group('공지 내용', () {
-    Future<(String, String)> shown(WidgetTester tester, Locale locale) async {
-      const notice = AppNotice(
+    Future<(String, String)> shown(
+      WidgetTester tester,
+      Locale locale, {
+      required String noticeTitle,
+      required String noticeBody,
+    }) async {
+      final notice = AppNotice(
         id: 'n1',
         revision: 1,
-        title: '새 **기능**이 생겼어요',
-        body: '자세한 내용은 방침에서 확인해요',
+        title: noticeTitle,
+        body: noticeBody,
       );
       await pumpWithLocale(
         tester,
@@ -189,23 +271,48 @@ void main() {
         ),
         locale: locale,
       );
-      final title = tester.widget<Text>(find.byKey(const ValueKey('notice-title-n1')));
-      final body = tester.widget<Text>(find.byKey(const ValueKey('notice-body-n1')));
-      expect(body.semanticsLabel, '자세한 내용은 방침에서 확인해요');
-      expect(title.semanticsLabel, '새 기능이 생겼어요');
+      final title = tester.widget<Text>(
+        find.byKey(const ValueKey('notice-title-n1')),
+      );
+      final body = tester.widget<Text>(
+        find.byKey(const ValueKey('notice-body-n1')),
+      );
+      expect(body.semanticsLabel, noticeBody);
+      expect(title.semanticsLabel, noticeTitle.replaceAll('**', ''));
       return (title.textSpan!.toPlainText(), body.data!);
     }
 
     testWidgets('ko 제목·본문에는 어절 표시가 들어간다', (tester) async {
-      final (title, body) = await shown(tester, const Locale('ko'));
+      final (title, body) = await shown(
+        tester,
+        const Locale('ko'),
+        noticeTitle: '새 **기능**이 생겼어요',
+        noticeBody: '자세한 내용은 방침에서 확인해요',
+      );
       expect(title, contains(wj));
       expect(body, contains(wj));
     });
 
-    testWidgets('ja 제목·본문에는 표시가 없다 — 원문 그대로', (tester) async {
-      final (title, body) = await shown(tester, const Locale('ja'));
-      expect(title, '새 기능이 생겼어요');
-      expect(body, '자세한 내용은 방침에서 확인해요');
+    testWidgets('ja 의 일본어 제목·본문에는 표시가 없다 — 원문 그대로', (tester) async {
+      final (title, body) = await shown(
+        tester,
+        const Locale('ja'),
+        noticeTitle: '新しい**機能**ができました',
+        noticeBody: '詳しい内容は方針をご確認ください',
+      );
+      expect(title, '新しい機能ができました');
+      expect(body, '詳しい内容は方針をご確認ください');
+    });
+
+    testWidgets('ja 여도 번역 전 한국어 제목·본문에는 표시가 있다', (tester) async {
+      final (title, body) = await shown(
+        tester,
+        const Locale('ja'),
+        noticeTitle: '새 **기능**이 생겼어요',
+        noticeBody: '자세한 내용은 방침에서 확인해요',
+      );
+      expect(title, contains(wj));
+      expect(body, contains(wj));
     });
   });
 }
