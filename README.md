@@ -6,11 +6,11 @@
 보호자가 적은 하루 일과를, 이룸이가 따라 할 수 있는 **행동 카드**로 만들어 주는 앱이에요.
 AI가 일과를 작은 행동으로 나누고 그림과 함께 보여줘요. 카드는 보호자가 확인한 뒤에야 이룸이에게 보여요.
 
-<!-- 스토어에 공개되면 아래 두 줄을 스토어 링크가 걸린 배지로 교체한다 -->
-![App Store 출시 준비 중](https://img.shields.io/badge/App_Store-%EC%B6%9C%EC%8B%9C_%EC%A4%80%EB%B9%84_%EC%A4%91-lightgrey?logo=apple&logoColor=white)
+<!-- Google Play가 공개되면 두 번째 배지를 스토어 링크가 걸린 배지로 교체한다 -->
+[![App Store에서 받기](https://img.shields.io/badge/App_Store-%EB%B0%9B%EA%B8%B0-black?logo=apple&logoColor=white)](https://apps.apple.com/kr/app/id6792970508)
 ![Google Play 출시 준비 중](https://img.shields.io/badge/Google_Play-%EC%B6%9C%EC%8B%9C_%EC%A4%80%EB%B9%84_%EC%A4%91-lightgrey?logo=googleplay&logoColor=white)
 
-스토어 출시 소식은 이 자리에 가장 먼저 알릴게요.
+iPhone은 App Store에서 받을 수 있어요. Android는 Google Play 출시를 준비하고 있어요.
 
 [도움말](https://twin-fang.github.io/elum/) · [개인정보처리방침](https://twin-fang.github.io/elum/privacy.html) · [계정·데이터 삭제 안내](https://twin-fang.github.io/elum/delete.html)
 
