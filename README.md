@@ -241,3 +241,7 @@ cd server
 | 서새찬 | PM · Frontend |
 | 백지훈 | Backend · AI |
 | 이예람 | UX/UI |
+
+## 저작권
+
+© 2026 팀 룸룸(LUMLUM). 모든 권리 보유. 자세한 내용은 [LICENSE](./LICENSE)를 참고해 주세요.
