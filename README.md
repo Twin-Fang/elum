@@ -143,7 +143,6 @@ Thymeleaf + daisyUI 기반 관리자 콘솔을 함께 구축했다. 회원·일�
 | 구성 | 상태 |
 | --- | --- |
 | API 서버 | `https://api.elum.chuseok22.com` — Docker Swarm 운영, 헬스체크 기반 무중단 관리 |
-| API 문서 | Swagger 공개 (`/docs/swagger`) — 전체 엔드포인트 문서화 완료 |
 | 앱 | Android APK · iOS TestFlight 빌드 파이프라인 가동 |
 | DB | PostgreSQL + Flyway 마이그레이션 (스키마 버전 관리) |
 
