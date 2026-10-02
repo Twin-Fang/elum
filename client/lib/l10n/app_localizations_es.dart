@@ -71,6 +71,70 @@ class AppLocalizationsEs extends AppLocalizations {
   String get creditResetFallback => '다음 주 월요일 0시';
 
   @override
+  String get creditBlockedBusy => '이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요';
+
+  @override
+  String creditBlockedExhausted(String reset) {
+    return '이번 주 크레딧을 모두 사용했어요.\n$reset부터 다시 만들 수 있어요';
+  }
+
+  @override
+  String creditAdOffer(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '광고를 끝까지 보면 크레딧 $count개를 받아요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String creditReceivedTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '크레딧 $count개를 받았어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditReceivedTitleNoCount => '크레딧을 받았어요';
+
+  @override
+  String get creditAdWatchMore => '광고 보고 더 만들기';
+
+  @override
+  String get adRewardPreparing => '광고를 준비하고 있어요';
+
+  @override
+  String get adRewardConfirming => '크레딧을 확인하고 있어요';
+
+  @override
+  String get adRewardLoadFailed => '지금은 광고를 불러올 수 없어요.\n잠시 후 다시 해주세요';
+
+  @override
+  String get adRewardNotWatched => '광고를 끝까지 봐야 크레딧을 받을 수 있어요.\n처음부터 다시 해주세요';
+
+  @override
+  String get adRewardSlow => '크레딧 확인이 늦어지고 있어요.\n잠시 후 설정에서 확인해주세요';
+
+  @override
+  String get adRewardDailyLimit => '오늘은 광고로 받을 수 있는 크레딧을 모두 받았어요.\n내일 다시 해주세요';
+
+  @override
+  String get adRewardCheckAccount => '지금은 광고로 크레딧을 받을 수 없어요.\n계정 상태를 확인해주세요';
+
+  @override
+  String get adRewardUnavailable => '지금은 광고로 크레딧을 받을 수 없어요.';
+
+  @override
+  String get adRewardUnavailableRetry => '지금은 광고로 크레딧을 받을 수 없어요.\n잠시 후 다시 해주세요';
+
+  @override
+  String get adRewardFailed => '크레딧을 받지 못했어요.\n잠시 후 다시 해주세요';
+
+  @override
   String get commonPopupClose => '팝업 닫기';
 
   @override

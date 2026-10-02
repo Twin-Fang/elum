@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../application/ad_reward_flow.dart';
@@ -27,6 +28,7 @@ Future<void> showCreditBlockedDialog(
   WidgetRef ref,
   CreditSummary blocked,
 ) async {
+  final l10n = context.l10n; // await 뒤에서 context 를 읽지 않으려고 미리 잡는다
   // 다 쓴 것이 먼저다 — 진행 중인 것이 끝나도 새로 만들 수 없기 때문이다.
   final generating = blocked.canStartRoutine && blocked.isGeneratingRoutine;
   final flow = ref.read(adRewardFlowProvider);
@@ -38,23 +40,24 @@ Future<void> showCreditBlockedDialog(
     // 시안 `로그인실패` 변형 모양 — 느낌표 + 두 줄 문장 + 붉은 확인 (#433).
     icon: ElumDialogIcon.alert,
     title: generating
-        ? '이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요'
-        : '이번 주 크레딧을 모두 사용했어요.\n${blocked.resetLabel}부터 다시 만들 수 있어요',
-    message: offer == null
-        ? null
-        : '광고를 끝까지 보면 크레딧 ${offer.creditsPerView}개를 받아요',
+        ? l10n.creditBlockedBusy
+        : l10n.creditBlockedExhausted(blocked.resetLabel),
+    message: offer == null ? null : l10n.creditAdOffer(offer.creditsPerView),
     actions: offer == null
-        ? const [
-            ElumDialogAction<bool>(label: '확인', tone: ElumDialogTone.danger),
-          ]
-        : const [
+        ? [
             ElumDialogAction<bool>(
-              label: '닫기',
+              label: l10n.commonConfirm,
+              tone: ElumDialogTone.danger,
+            ),
+          ]
+        : [
+            ElumDialogAction<bool>(
+              label: l10n.commonClose,
               value: false,
               tone: ElumDialogTone.neutral,
             ),
             ElumDialogAction<bool>(
-              label: '광고 보고 더 만들기',
+              label: l10n.creditAdWatchMore,
               value: true,
               centerLines: true,
             ),
@@ -72,6 +75,7 @@ Future<void> _watchAd(
   WidgetRef ref,
   AdRewardFlow flow,
 ) async {
+  final l10n = context.l10n; // await 뒤에서 context 를 읽지 않으려고 미리 잡는다
   final stage = ValueNotifier(AdRewardStage.preparing);
   // 광고를 불러오고 서버 확인을 기다리는 동안 홈을 누를 수 없게 막는다.
   unawaited(
@@ -96,7 +100,9 @@ Future<void> _watchAd(
     await showElumDialog<void>(
       context: context,
       icon: ElumDialogIcon.success,
-      title: n > 0 ? '크레딧 $n개를 받았어요' : '크레딧을 받았어요',
+      title: n > 0
+          ? l10n.creditReceivedTitle(n)
+          : l10n.creditReceivedTitleNoCount,
     );
     return;
   }
@@ -107,7 +113,9 @@ Future<void> _watchAd(
     icon: ElumDialogIcon.alert,
     title: failure.sentence,
     code: failure.code,
-    actions: const [ElumDialogAction(label: '확인', tone: ElumDialogTone.danger)],
+    actions: [
+      ElumDialogAction(label: l10n.commonConfirm, tone: ElumDialogTone.danger),
+    ],
   );
 }
 
@@ -141,8 +149,8 @@ class _WaitDialog extends StatelessWidget {
               SizedBox(height: 20.h),
               Text(
                 switch (value) {
-                  AdRewardStage.preparing => '광고를 준비하고 있어요',
-                  AdRewardStage.confirming => '크레딧을 확인하고 있어요',
+                  AdRewardStage.preparing => context.l10n.adRewardPreparing,
+                  AdRewardStage.confirming => context.l10n.adRewardConfirming,
                 },
                 textAlign: TextAlign.center,
                 style: context.typo.dialogTitle.copyWith(

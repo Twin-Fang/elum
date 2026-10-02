@@ -182,6 +182,102 @@ abstract class AppLocalizations {
   /// **'다음 주 월요일 0시'**
   String get creditResetFallback;
 
+  /// AI 일과를 만드는 중에 새로 만들려 할 때의 팝업 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요'**
+  String get creditBlockedBusy;
+
+  /// 이번 주 크레딧을 다 써서 막힌 팝업 문장. reset 은 다시 채워지는 시각(예: 9월 28일(월) 0시)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 크레딧을 모두 사용했어요.\n{reset}부터 다시 만들 수 있어요'**
+  String creditBlockedExhausted(String reset);
+
+  /// 광고 보고 크레딧을 받는 제안 문장. count 는 광고 한 번에 받는 크레딧 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{광고를 끝까지 보면 크레딧 {count}개를 받아요}}'**
+  String creditAdOffer(int count);
+
+  /// 광고 시청 뒤 크레딧을 받았다는 팝업 제목. count 는 받은 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{크레딧 {count}개를 받았어요}}'**
+  String creditReceivedTitle(int count);
+
+  /// 받은 수를 모를 때의 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 받았어요'**
+  String get creditReceivedTitleNoCount;
+
+  /// 크레딧이 없을 때 광고를 보러 가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'광고 보고 더 만들기'**
+  String get creditAdWatchMore;
+
+  /// 광고를 불러오는 동안의 대기 팝업
+  ///
+  /// In ko, this message translates to:
+  /// **'광고를 준비하고 있어요'**
+  String get adRewardPreparing;
+
+  /// 광고를 본 뒤 서버 지급을 기다리는 동안의 대기 팝업
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 확인하고 있어요'**
+  String get adRewardConfirming;
+
+  /// 광고 로드 실패 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 광고를 불러올 수 없어요.\n잠시 후 다시 해주세요'**
+  String get adRewardLoadFailed;
+
+  /// 광고를 중간에 닫았을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'광고를 끝까지 봐야 크레딧을 받을 수 있어요.\n처음부터 다시 해주세요'**
+  String get adRewardNotWatched;
+
+  /// 시청은 끝났는데 지급 확인이 오지 않을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 확인이 늦어지고 있어요.\n잠시 후 설정에서 확인해주세요'**
+  String get adRewardSlow;
+
+  /// 하루 한도를 다 받았을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘은 광고로 받을 수 있는 크레딧을 모두 받았어요.\n내일 다시 해주세요'**
+  String get adRewardDailyLimit;
+
+  /// 계정이 동결돼 받을 수 없을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 광고로 크레딧을 받을 수 없어요.\n계정 상태를 확인해주세요'**
+  String get adRewardCheckAccount;
+
+  /// 광고 보상 기능이 꺼져 있을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 광고로 크레딧을 받을 수 없어요.'**
+  String get adRewardUnavailable;
+
+  /// 세션을 못 만든 알 수 없는 이유의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 광고로 크레딧을 받을 수 없어요.\n잠시 후 다시 해주세요'**
+  String get adRewardUnavailableRetry;
+
+  /// 서버가 지급하지 않은 그 밖의 이유의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 받지 못했어요.\n잠시 후 다시 해주세요'**
+  String get adRewardFailed;
+
   /// 팝업 바깥 배경 막을 낭독기가 읽는 이름
   ///
   /// In ko, this message translates to:

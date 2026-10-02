@@ -58,6 +58,55 @@
   "creditResetFallback": "다음 주 월요일 0시",
   "@creditResetFallback": { "description": "다음 초기화 시각을 서버가 주지 않았을 때의 문구" },
 
+  "creditBlockedBusy": "이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요",
+  "@creditBlockedBusy": { "description": "AI 일과를 만드는 중에 새로 만들려 할 때의 팝업 문장" },
+
+  "creditBlockedExhausted": "이번 주 크레딧을 모두 사용했어요.\n{reset}부터 다시 만들 수 있어요",
+  "@creditBlockedExhausted": {
+    "description": "이번 주 크레딧을 다 써서 막힌 팝업 문장. reset 은 다시 채워지는 시각(예: 9월 28일(월) 0시)",
+    "placeholders": { "reset": { "type": "String" } }
+  },
+
+  "creditAdOffer": "{count, plural, other{광고를 끝까지 보면 크레딧 {count}개를 받아요}}",
+  "@creditAdOffer": {
+    "description": "광고 보고 크레딧을 받는 제안 문장. count 는 광고 한 번에 받는 크레딧 수",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "creditReceivedTitle": "{count, plural, other{크레딧 {count}개를 받았어요}}",
+  "@creditReceivedTitle": {
+    "description": "광고 시청 뒤 크레딧을 받았다는 팝업 제목. count 는 받은 수",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "creditReceivedTitleNoCount": "크레딧을 받았어요",
+  "@creditReceivedTitleNoCount": { "description": "받은 수를 모를 때의 팝업 제목" },
+
+  "creditAdWatchMore": "광고 보고 더 만들기",
+  "@creditAdWatchMore": { "description": "크레딧이 없을 때 광고를 보러 가는 버튼" },
+
+  "adRewardPreparing": "광고를 준비하고 있어요",
+  "@adRewardPreparing": { "description": "광고를 불러오는 동안의 대기 팝업" },
+  "adRewardConfirming": "크레딧을 확인하고 있어요",
+  "@adRewardConfirming": { "description": "광고를 본 뒤 서버 지급을 기다리는 동안의 대기 팝업" },
+
+  "adRewardLoadFailed": "지금은 광고를 불러올 수 없어요.\n잠시 후 다시 해주세요",
+  "@adRewardLoadFailed": { "description": "광고 로드 실패 안내" },
+  "adRewardNotWatched": "광고를 끝까지 봐야 크레딧을 받을 수 있어요.\n처음부터 다시 해주세요",
+  "@adRewardNotWatched": { "description": "광고를 중간에 닫았을 때의 안내" },
+  "adRewardSlow": "크레딧 확인이 늦어지고 있어요.\n잠시 후 설정에서 확인해주세요",
+  "@adRewardSlow": { "description": "시청은 끝났는데 지급 확인이 오지 않을 때의 안내" },
+  "adRewardDailyLimit": "오늘은 광고로 받을 수 있는 크레딧을 모두 받았어요.\n내일 다시 해주세요",
+  "@adRewardDailyLimit": { "description": "하루 한도를 다 받았을 때의 안내" },
+  "adRewardCheckAccount": "지금은 광고로 크레딧을 받을 수 없어요.\n계정 상태를 확인해주세요",
+  "@adRewardCheckAccount": { "description": "계정이 동결돼 받을 수 없을 때의 안내" },
+  "adRewardUnavailable": "지금은 광고로 크레딧을 받을 수 없어요.",
+  "@adRewardUnavailable": { "description": "광고 보상 기능이 꺼져 있을 때의 안내" },
+  "adRewardUnavailableRetry": "지금은 광고로 크레딧을 받을 수 없어요.\n잠시 후 다시 해주세요",
+  "@adRewardUnavailableRetry": { "description": "세션을 못 만든 알 수 없는 이유의 안내" },
+  "adRewardFailed": "크레딧을 받지 못했어요.\n잠시 후 다시 해주세요",
+  "@adRewardFailed": { "description": "서버가 지급하지 않은 그 밖의 이유의 안내" },
+
   "commonPopupClose": "팝업 닫기",
   "@commonPopupClose": { "description": "팝업 바깥 배경 막을 낭독기가 읽는 이름" },
 
