@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmProperties;
 import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
+import com.chuseok22.elumserver.common.locale.EnabledLocales;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.core.ConfigValueType;
 import com.chuseok22.elumserver.systemconfig.core.StoreUrlPolicy;
@@ -289,6 +290,10 @@ public class SystemConfigService {
     }
     String value = rawValue.trim();
     try {
+      if (key == ConfigKey.ENABLED_CONTENT_LOCALES) {
+        // 모르는 코드는 저장하지 않는다. ko 는 늘 켜 두므로 앞에 붙여 정규화한다 (다국어 #526).
+        return EnabledLocales.normalize(value);
+      }
       if (key.getValueType() == ConfigValueType.INTEGER) {
         int number = Integer.parseInt(value);
         // 시간값에 0 이나 음수가 들어가면 앱의 요청이 끝없이 기다리게 된다. 범위가 있는 키만 본다.

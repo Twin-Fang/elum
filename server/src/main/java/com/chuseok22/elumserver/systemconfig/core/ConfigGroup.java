@@ -26,6 +26,8 @@ public enum ConfigGroup {
   NOTICE("앱 공지"),
   // 보상형 광고를 보면 AI 생성 크레딧을 주는 기능 (이슈 #463).
   AD_REWARD("광고 보상"),
+  // 일과를 만들 수 있는 언어 (다국어 #526).
+  LANGUAGE("언어"),
   ;
 
   private final String label;

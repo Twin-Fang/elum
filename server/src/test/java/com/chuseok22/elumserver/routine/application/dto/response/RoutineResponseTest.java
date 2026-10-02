@@ -2,6 +2,8 @@ package com.chuseok22.elumserver.routine.application.dto.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
@@ -72,5 +74,61 @@ class RoutineResponseTest {
 
     assertThat(RoutineStepResponse.from(withPictogram).pictogramId()).isEqualTo("get_dressed_,_to");
     assertThat(RoutineStepResponse.from(without).pictogramId()).isNull();
+  }
+
+  @Test
+  @DisplayName("응답은 일과의 언어를 코드 문자열로 싣는다 — 기존 일과(기본값)는 ko")
+  void from_carriesLanguageCode() {
+    Routine routine = new Routine();
+    routine.setId("routine-1");
+    routine.setTitle("병원 다녀오기");
+    routine.setRawInputText("raw");
+    routine.setSanitizedInputText("sanitized");
+    routine.setStatus(RoutineStatus.CONFIRMED);
+    routine.setSteps(List.of());
+
+    assertThat(RoutineResponse.from(routine).language()).isEqualTo("ko");
+
+    routine.setLanguage(AppLocale.JA);
+    assertThat(RoutineResponse.from(routine).language()).isEqualTo("ja");
+  }
+
+  @Test
+  @DisplayName("언어가 null 인 행(마이그레이션 전 코드·픽스처)도 응답 변환이 죽지 않고 ko 로 떨어진다")
+  void from_nullLanguage_fallsBackToKo() {
+    Routine routine = new Routine();
+    routine.setId("routine-1");
+    routine.setTitle("제목");
+    routine.setStatus(RoutineStatus.CONFIRMED);
+    routine.setSteps(List.of());
+    routine.setLanguage(null);
+
+    RoutineResponse base = RoutineResponse.from(routine);
+
+    assertThat(base.language()).isEqualTo("ko");
+    assertThat(base.withCredit(new RoutineResponse.CreditUsage(1, 1, 1, 1)).language()).isEqualTo("ko");
+  }
+
+  @Test
+  @DisplayName("언어는 응답을 가공하는 다섯 메서드(withCreatedByMe 는 forCaller 경유)를 거쳐도 그대로다")
+  void language_survivesEveryTransformation() {
+    Routine routine = new Routine();
+    routine.setId("routine-1");
+    routine.setTitle("제목");
+    routine.setRawInputText("raw");
+    routine.setSanitizedInputText("sanitized");
+    routine.setStatus(RoutineStatus.CONFIRMED);
+    routine.setCreatedBy("member-1");
+    routine.setSteps(List.of());
+    routine.setLanguage(AppLocale.ES);
+    RoutineResponse base = RoutineResponse.from(routine);
+
+    assertThat(base.language()).isEqualTo("es");
+    assertThat(base.withCredit(new RoutineResponse.CreditUsage(1, 1, 1, 1)).language()).isEqualTo("es");
+    assertThat(base.withImageSkippedReason("AI_CREDIT_INSUFFICIENT").language()).isEqualTo("es");
+    assertThat(base.withoutSourceText().language()).isEqualTo("es");
+    assertThat(base.withCreatorName("엄마").language()).isEqualTo("es");
+    assertThat(base.forCaller(Caller.guardian("member-1")).language()).isEqualTo("es");
+    assertThat(base.forCaller(Caller.guardian("someone-else")).language()).isEqualTo("es");
   }
 }

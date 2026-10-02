@@ -36,7 +36,7 @@ class RoutineAuthorResolverTest {
 
   private static RoutineResponse routine(String id, String profileId, String createdBy) {
     return new RoutineResponse(id, "제목", "원문", "마스킹본", null, "CONFIRMED", "피드백", null,
-      0, 0, 0, null, null, List.of(), null, null, createdBy, null, null, profileId);
+      0, 0, 0, null, null, List.of(), null, null, createdBy, null, null, profileId, "ko");
   }
 
   /// 쿼리 투영 대역. 목으로 만들면 thenReturn 안에서 중첩 스텁이 된다.
