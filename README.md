@@ -1,74 +1,111 @@
-# 이룸 (ELUM)
+# ELUM
 
 <!-- AUTO-VERSION-SECTION: DO NOT EDIT MANUALLY -->
-## 최신 버전 : v2.12.3 (2026-10-02)
+## Latest Version : v2.12.3 (2026-10-02)
 
-보호자가 적은 하루 일과를, 이룸이가 따라 할 수 있는 **그림 행동 카드**로 만들어 주는 앱이에요.
-AI가 일과를 작은 행동으로 나누고 단계마다 그림을 그려 줘요. 카드는 보호자가 확인한 뒤에야 이룸이에게 보여요.
+**English** · [한국어](README.ko.md) · [简体中文](README.zh.md) · [日本語](README.ja.md)
 
-<!-- Google Play가 공개되면 두 번째 배지를 스토어 링크가 걸린 배지로 교체한다 -->
-[![App Store에서 받기](https://img.shields.io/badge/App_Store-%EB%B0%9B%EA%B8%B0-black?logo=apple&logoColor=white)](https://apps.apple.com/kr/app/id6792970508)
-![Google Play 출시 준비 중](https://img.shields.io/badge/Google_Play-%EC%B6%9C%EC%8B%9C_%EC%A4%80%EB%B9%84_%EC%A4%91-lightgrey?logo=googleplay&logoColor=white)
+<p align="center">
+  <img src="docs/images/readme/hero.jpg" alt="ELUM: today, step by step, together" width="720">
+</p>
 
-[도움말](https://twin-fang.github.io/elum/) · [개인정보처리방침](https://twin-fang.github.io/elum/privacy.html) · [계정·데이터 삭제 안내](https://twin-fang.github.io/elum/delete.html)
+<p align="center">
+  <b>Today, step by step, together.</b><br>
+  A mobile service that helps people with developmental disabilities carry out their daily routines on their own.
+</p>
 
-## 이렇게 써요
-
-1. **보호자가 일과를 적어요.** "내일 비가 많이 올 예정이야. 학교에 갈 수 있게 준비해야 해."처럼 평소 말투 그대로요.
-2. **AI가 카드로 만들고 보호자가 확인해요.** 어색한 곳은 보호자가 고칠 수 있어요.
-3. **이룸이가 카드를 따라 해요.** 그림과 짧은 문장, 음성 안내, 체크리스트로 다음 행동을 알려 주고 마치면 별을 모아요.
-
-보호자 화면과 이룸이 화면은 한 앱 안에 있고 비밀암호로 오가요.
-
-## 이런 앱이에요
-
-- **진단명을 묻지 않아요.** 개인화는 보호자가 고른 도움 목표만으로 해요.
-- **한 카드에 하나의 행동만** 담아요.
-- **이룸이가 고른 캐릭터**(고양이 루루, 여우 포포)가 모든 카드에 같이 나와요.
-- **보상은 보호자가 정해요.** 앱은 별로 성취를 보여 주고, 간식·산책 같은 실제 보상은 보호자가 정한 대로 알려 줘요.
-- **실패해도 멈추지 않아요.** 재시도 안내와 오류 번호를 보여 줘서 문제가 생긴 곳을 찾을 수 있어요.
+<p align="center">
+  <a href="https://apps.apple.com/kr/app/id6792970508"><img src="https://img.shields.io/badge/App_Store-Download-black?logo=apple&logoColor=white" alt="Download on the App Store"></a>
+  <a href="https://play.google.com/store/apps/details?id=kr.twinfang.elum"><img src="https://img.shields.io/badge/Google_Play-Get_it-3DDC84?logo=googleplay&logoColor=white" alt="Get it on Google Play"></a>
+</p>
 
 ---
 
-## 개발자를 위한 정보
+## What is ELUM?
 
-```
-elum/
-├── client/   Flutter 앱 (보호자 화면 + 이룸이 화면)
-├── server/   Spring Boot 서버 (관리자 페이지 포함)
-└── docs/     초기 기획·해커톤 기록 (현재 동작과 다를 수 있어요)
-```
+A guardian types what the day looks like, in everyday words. ELUM's AI turns it into short, illustrated **step-by-step action cards**. The person follows them one at a time, ticks each one off, and is praised with stars along the way.
 
-| 영역 | 사용 기술 |
+For the person using it, that means a daily routine that is easy to understand and a positive experience of getting it done. For guardians, it takes away the burden of preparing the same things again and again.
+
+<p align="center">
+  <img src="docs/images/readme/flow.gif" alt="From typing a routine to earning stars" width="360">
+</p>
+
+## Why we built it
+
+- **Guardians** repeat the same instructions endlessly, and making visual schedules and picture cards by hand takes a lot of time.
+- **People with developmental disabilities** often find abstract or multi-part instructions hard to follow, and hard to turn into a sequence of actions on their own.
+
+ELUM's goal is to be a self-reliance support service: so that a person can carry out their routine without a guardian having to step in every time.
+
+## How it works
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/readme/screen-create.png" alt="Tell ELUM about the day" width="340"><br>
+      <b>1. Tell ELUM about today</b><br>
+      The guardian types what needs to be done. ELUM asks a few follow-up questions when it needs more context.
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/readme/screen-cards.png" alt="Action cards are created" width="340"><br>
+      <b>2. Cards are created</b><br>
+      The routine becomes several small steps, each with a picture. The guardian can edit the order and content, and cards are shown only after the guardian confirms.
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="docs/images/readme/screen-follow.png" alt="Follow the cards and check them off" width="340"><br>
+      <b>3. Follow along and check off</b><br>
+      The person looks at the picture, does the action, and checks it off. Small successes add up.
+    </td>
+    <td align="center">
+      <img src="docs/images/readme/screen-stars.png" alt="Praise and stars" width="340"><br>
+      <b>4. Praise and stars</b><br>
+      Finishing an action brings praise and a star, so progress is something the person can see.
+    </td>
+  </tr>
+</table>
+
+## Designed with ABA principles in mind
+
+ELUM's three-step design draws on the principles of Applied Behavior Analysis (ABA).
+
+| Step | What happens in ELUM |
 | --- | --- |
-| 앱 | Flutter, Dart, Riverpod, go_router |
-| 서버 | Spring Boot, Java 21, PostgreSQL, Flyway |
-| 로그인 | 카카오, 네이버, 구글, 애플 |
-| AI | Gemini, OpenAI, fal (카드 문장과 그림) |
-| 관리자 | Thymeleaf, daisyUI |
-| 자동화 | GitHub Actions |
+| **1. Prompt** | Each card gives a short, clear instruction for one action. |
+| **2. Action** | The person carries it out one step at a time, following the picture. |
+| **3. Reinforcement** | Rewards chosen by the guardian are brought up before, during, and after the action. |
 
-**앱 실행**
+The stars in the app are a way to celebrate progress. The real rewards, such as a snack, playtime, or a walk, are set by the guardian.
 
-```bash
-cd client
-cp .env.example .env    # 필요한 키는 .env.example 주석에 있어요
-flutter pub get
-flutter run
-```
+## Features
 
-서버는 `server/`에서 `./gradlew bootRun`으로 실행해요. PostgreSQL과 로컬 설정 파일이 필요하고, 작업 규칙은 [server/CLAUDE.md](./server/CLAUDE.md), [client/CLAUDE.md](./client/CLAUDE.md)에 있어요.
+- **Illustrated action cards** made by AI from a plain description of the day
+- **Voice guidance** that reads each card aloud
+- **Friendly characters** that appear on every card
+- **Guardian in control**: review and edit every card before the person sees it
+- **Rewards set by the guardian**, with stars to celebrate each finished action
+- **Two screens in one app**: one for the guardian and one for the person following the routine, switched with a secret passcode
 
-## 만든 사람들
+## Languages
 
-해커톤 「2026 장애 플러스 기술」에 팀 룸룸(LUMLUM)으로 참가하며 시작했고, 지금은 스토어 출시를 향해 계속 만들고 있어요.
+Korean is available today. English, Chinese, and Japanese are on the way.
 
-| 팀원 | 역할 |
+## Help and policies
+
+[Help](https://twin-fang.github.io/elum/) · [Privacy Policy](https://twin-fang.github.io/elum/privacy.html) · [Delete your account and data](https://twin-fang.github.io/elum/delete.html)
+
+## Team
+
+ELUM began at the 2026 hackathon 「장애 플러스 기술」 (Disability Plus Technology) as Team LUMLUM.
+
+| Member | Role |
 | --- | --- |
-| 서새찬 | PM · Frontend |
-| 백지훈 | Backend · AI |
-| 이예람 | UX/UI |
+| Saechan Suh | PM, Frontend |
+| Jihoon Baek | Backend, AI |
+| Yeram Lee | UX/UI |
 
-## 저작권
+## License
 
-© 2026 팀 룸룸(LUMLUM). 모든 권리 보유. 자세한 내용은 [LICENSE](./LICENSE)를 참고해 주세요.
+© 2026 Team LUMLUM. All rights reserved. See [LICENSE](./LICENSE).
