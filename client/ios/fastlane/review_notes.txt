@@ -15,7 +15,7 @@ SUGGESTED REVIEW FLOW (about 3 minutes)
 WHAT THE APP DOES NOT DO
 - No in-app purchase.
 - Ads (Google AdMob banners) appear only on the guardian's own screens: the home screen and the saved-drafts list. There are no ads on the user screen (이룸이 화면), while creating a routine, or on the reward/completion screens. This is not a Kids Category app and its audience is guardians.
-- On first launch of the guardian screens the app shows the App Tracking Transparency prompt once. Declining it does not change any feature; the app then requests non-personalized ads.
+- Right after a fresh install, as soon as the app opens (before sign-in, on the first screen "이 휴대폰은 누가 사용하나요?"), the app shows the App Tracking Transparency prompt once. Declining it does not change any feature; the app then requests non-personalized ads. The prompt is not shown again once answered.
 - No ad request contains the routine text, names or any information entered in the app.
 - We do not collect diagnoses or disability types.
 - The guardian's text is sent to an AI provider only to generate the cards. The app asks guardians not to enter personal information, and the raw text is not stored in any audit log.

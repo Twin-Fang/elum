@@ -15,6 +15,8 @@ void main() {
 
   test('core/ads를 쓰는 화면은 보호자 홈·임시저장뿐이다', () {
     const allowed = {
+      // 앱 시작 때 ATT 팝업을 묻는다(#519). 광고를 그리지 않고 AdConsent.requestOnLaunch 만 부른다.
+      'lib/app.dart',
       'lib/features/guardian/presentation/guardian_home_screen.dart',
       'lib/features/guardian/presentation/draft_routines_screen.dart',
       // 홈 크레딧 소진 안내(#464)가 부르는 보상형 흐름. 아래 테스트가 호출처를 홈 하나로 잠근다.
