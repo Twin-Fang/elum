@@ -2,6 +2,7 @@ import 'package:elum/core/ads/ad_banner_loader.dart';
 import 'package:elum/core/ads/ad_gate.dart';
 import 'package:elum/core/ads/ad_ids.dart';
 import 'package:elum/core/ads/ad_native_loader.dart';
+import 'package:elum/core/ads/ad_native_slot.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
@@ -123,20 +124,36 @@ void main() {
     expect(loader.calls, 0);
   });
 
-  // 목록이 짧아도 광고를 넣는다(#540). 사이가 없으면 마지막 일과 다음에 둔다.
-  group('지난 일과가 1~2개면 마지막 일과 다음에 넣는다', () {
-    for (final n in [1, 2]) {
-      testWidgets('지난 일과 $n건', (tester) async {
-        await pumpHome(tester, pastList: past(n));
+  // 2개부터는 언제나 일과 사이에 든다(#465 오클릭 방지, #540).
+  testWidgets('지난 일과 2건이면 두 일과 사이에 넣는다', (tester) async {
+    await pumpHome(tester, pastList: past(2));
 
-        expect(find.text('광고'), findsOneWidget);
-        expect(loader.calls, 1);
+    expect(find.text('광고'), findsOneWidget);
+    expect(loader.calls, 1);
 
-        final last = tester.getTopLeft(find.text('지난 $n')).dy;
-        final ad = tester.getTopLeft(find.byKey(const Key('광고 틀'))).dy;
-        expect(ad, greaterThan(last));
-      });
-    }
+    final first = tester.getTopLeft(find.text('지난 1')).dy;
+    final ad = tester.getTopLeft(find.byKey(const Key('광고 틀'))).dy;
+    final second = tester.getTopLeft(find.text('지난 2')).dy;
+    expect(ad, greaterThan(first));
+    expect(ad, lessThan(second));
+  });
+
+  // 사이가 없는 1건만 끝에 붙는다. 아래가 하단 배너라 사이 광고보다 더 띄운다(#540).
+  // 위 여백과 광고 내용은 같으므로 칸 높이 차이가 곧 아래 여백 차이다.
+  testWidgets('지난 일과 1건이면 끝에 넣고 아래를 더 띄운다', (tester) async {
+    await pumpHome(tester, pastList: past(3));
+    final between = tester.getSize(find.byType(AdNativeSlot)).height;
+    await tester.pumpWidget(const SizedBox());
+
+    await pumpHome(tester, pastList: past(1));
+    expect(find.text('광고'), findsOneWidget);
+    final only = tester.getTopLeft(find.text('지난 1')).dy;
+    expect(
+      tester.getTopLeft(find.byKey(const Key('광고 틀'))).dy,
+      greaterThan(only),
+    );
+    final trailing = tester.getSize(find.byType(AdNativeSlot)).height;
+    expect(trailing, greaterThan(between));
   });
 
   // 빈 상태 아래에 광고를 두면 하단 배너와 함께 내용 없는 화면에 광고 둘이 붙는다.
