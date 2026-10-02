@@ -42,6 +42,16 @@ class ErrorMessageParityTest {
   }
 
   @Test
+  @DisplayName("원본 이후 더한 코드는 golden 밖에서 따로 단언한다 — golden 을 다시 만들면 원본 증명이 흐려진다")
+  void codesAddedAfterOriginal_areAssertedSeparately() {
+    assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 1);
+    assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
+    assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
+    assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
+      .isEqualTo("이 언어는 아직 켤 수 없어요. 서버 문구 파일이 비어 있어요.");
+  }
+
+  @Test
   @DisplayName("ko 리소스의 문구는 기존 enum 문구와 글자 하나까지 같다")
   void koResource_equalsLegacyText() {
     GOLDEN.forEach((name, legacy) -> {
