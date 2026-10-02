@@ -179,8 +179,27 @@ class RoutinePhrasesStartupGuardTest {
   }
 
   @Test
-  @DisplayName("ApplicationRunner 로 등록돼 기동 때 실제로 검사한다")
-  void isAnApplicationRunner() {
+  @DisplayName("기동 진입점 run() 이 검사를 실제로 부른다 — 켜진 es 가 비면 run() 이 예외를 던진다")
+  void run_invokesVerify_blocksStartup() {
+    ApplicationRunner runner = guard("ko,es", Map.of(AppLocale.KO, full("ko")));
+
+    assertThatThrownBy(() -> runner.run(null))
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessageContaining("es 빈 키")
+      .hasMessageContaining("fallback.PREPARE_ITEMS");
+  }
+
+  @Test
+  @DisplayName("정상 설정에서는 run() 이 예외 없이 끝난다")
+  void run_passesWhenComplete() {
+    ApplicationRunner runner = guard("ko", Map.of(AppLocale.KO, full("ko")));
+
+    assertThatCode(() -> runner.run(null)).doesNotThrowAnyException();
+  }
+
+  @Test
+  @DisplayName("타입만 본다: ApplicationRunner 구현이다 (연결은 run_* 테스트가 증명)")
+  void typeOnly_isAnApplicationRunner() {
     assertThat(ApplicationRunner.class).isAssignableFrom(RoutinePhrasesStartupGuard.class);
   }
 
