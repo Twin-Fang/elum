@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../guardian/data/routine_repository.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// Figma `아이_별`(364:8219) — 지금까지 모은 별을 보여준다.
 ///
@@ -133,7 +133,7 @@ class ChildStarsScreen extends ConsumerWidget {
                   maxWidth: _backTouch.w,
                   maxHeight: _backTouch.w,
                   child: AppPressable(
-                    onTap: () => context.pop(),
+                    onTap: context.popOrHome,
                     scaleDown: AppPressable.scaleIcon,
                     semanticLabel: context.l10n.commonBack,
                     child: SizedBox(

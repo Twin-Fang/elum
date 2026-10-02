@@ -41,6 +41,24 @@ Future<void> endElumiLinkAfterSessionLoss({
   required ProviderContainer container,
 }) async {
   await repo.releaseThisPhone(lost: true);
-  goToLinkEnter(router);
+  // 토큰을 방금 지웠다 — 뒤로가기는 로그인 화면으로 간다 (#542)
+  goToLinkEnter(router, hasSession: false);
   container.forgetLinkedProfile();
+}
+
+/// 세션이 끝났을 때(토큰 갱신 실패) 갈 곳. 보호자 휴대폰은 로그인, 이룸이 휴대폰은 연결이 끊긴 것이라
+/// [endElumiLinkAfterSessionLoss].
+Future<void> handleSessionExpired({
+  required GoRouter router,
+  required ProviderContainer container,
+}) async {
+  if (!container.read(localStorageProvider).isElumiDevice) {
+    router.go(Routes.login);
+    return;
+  }
+  await endElumiLinkAfterSessionLoss(
+    repo: container.read(deviceLinkRepositoryProvider),
+    router: router,
+    container: container,
+  );
 }

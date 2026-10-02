@@ -23,6 +23,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
+import 'helpers/no_disk_cache.dart';
 
 /// 이룸이 휴대폰의 상단 바와 설정 페이지 (이슈 #363 · #198 19번 · #488).
 ///
@@ -77,6 +78,11 @@ void main() {
           path: Routes.linkEnter,
           builder: (context, state) => const Scaffold(body: Text('연결 암호 넣기')),
         ),
+        // 스스로 로그아웃·탈퇴한 뒤의 도착지 (#542)
+        GoRoute(
+          path: Routes.login,
+          builder: (context, state) => const Scaffold(body: Text('로그인')),
+        ),
       ],
     );
     if (!elumi) storage = InMemoryStorage(onboardingCompleted: true);
@@ -85,6 +91,7 @@ void main() {
         dioProvider.overrideWithValue(dio),
         tokenStoreProvider.overrideWithValue(tokens),
         localStorageProvider.overrideWithValue(storage),
+        noDiskCacheOverride(),
         // 실서버를 타지 않는다
         myRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
         todayRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
@@ -258,7 +265,7 @@ void main() {
       expect(find.text('로그아웃'), findsOneWidget, reason: '설정 페이지에 그대로 남는다');
     });
 
-    testWidgets('로그아웃 확인: 서버가 끊긴 뒤 로컬을 비우고 연결 암호 넣기로 간다', (tester) async {
+    testWidgets('로그아웃 확인: 서버가 끊긴 뒤 로컬을 전부 비우고 로그인 화면으로 간다 (#542)', (tester) async {
       await pump(tester);
       await openSettings(tester);
 
@@ -268,14 +275,15 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(adapter.calls, ['DELETE /api/device-links/current']);
-      expect(find.text('연결 암호 넣기'), findsOneWidget);
+      expect(find.text('로그인'), findsOneWidget);
+      expect(find.text('연결 암호 넣기'), findsNothing, reason: '연결 화면에 갇혔었다 (#542)');
       expect(tokens.hasSession, isFalse);
       expect(storage.nickname, isNull);
       expect(storage.cachedTodayRoutinesJson, isNull);
       expect(
         storage.isElumiDevice,
-        isTrue,
-        reason: '여전히 이룸이 휴대폰 — 로그인 화면이 아니라 연결 화면으로 간다',
+        isFalse,
+        reason: '스스로 나갔다 — 표식이 남으면 다시 켤 때 연결 화면에 갇힌다 (#542)',
       );
       expect(
         storage.isElumiLinkLost,
@@ -284,7 +292,7 @@ void main() {
       );
     });
 
-    testWidgets('연결 화면에서 뒤로 가면 역할 선택이다 — 스택이 비지 않는다 (#212)', (tester) async {
+    testWidgets('로그인 화면은 스택을 비우고 연다 — 뒤로가기로 설정·이룸이 홈에 돌아가지 않는다', (tester) async {
       await pump(tester);
       await openSettings(tester);
       await tester.tap(find.text('로그아웃'));
@@ -292,8 +300,8 @@ void main() {
       await tester.tap(dialogButton('확인'));
       await tester.pumpAndSettle();
 
-      final router = GoRouter.of(tester.element(find.text('연결 암호 넣기')));
-      expect(router.canPop(), isTrue);
+      final router = GoRouter.of(tester.element(find.text('로그인')));
+      expect(router.canPop(), isFalse);
     });
 
     testWidgets('회원탈퇴: 일과와 별이 보호자 휴대폰에 남는다고 말하고, 같은 연결 끊기를 한다', (tester) async {
@@ -310,7 +318,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(adapter.calls, ['DELETE /api/device-links/current']);
-      expect(find.text('연결 암호 넣기'), findsOneWidget);
+      expect(find.text('로그인'), findsOneWidget);
     });
 
     testWidgets('끊은 뒤 메모리에 남은 이전 이룸이 정보도 비운다 — 다른 이룸이에게 붙어도 섞이지 않는다', (
@@ -331,7 +339,7 @@ void main() {
       expect(container.read(onboardingProvider).childNickname, isNot('하늘이'));
     });
 
-    testWidgets('이미 끊겨 있으면(404) 실패로 보이지 않고 정리한 뒤 연결 화면으로 간다', (tester) async {
+    testWidgets('이미 끊겨 있으면(404) 실패로 보이지 않고 정리한 뒤 로그인 화면으로 간다', (tester) async {
       routes['DELETE /api/device-links/current'] = const FakeHttpError(
         404,
         errorCode: 'DEVICE_LINK_NOT_CONNECTED',
@@ -343,7 +351,7 @@ void main() {
       await tester.tap(dialogButton('확인'));
       await tester.pumpAndSettle();
 
-      expect(find.text('연결 암호 넣기'), findsOneWidget);
+      expect(find.text('로그인'), findsOneWidget);
       expect(tokens.hasSession, isFalse);
     });
 
@@ -375,8 +383,8 @@ void main() {
         await tester.tap(find.text('확인'));
         await tester.pumpAndSettle();
 
-        // 서버에는 연결이 살아 있다 — 연결 화면으로 가면 보호자 설정과 어긋난다
-        expect(find.text('연결 암호 넣기'), findsNothing);
+        // 서버에는 연결이 살아 있다 — 화면을 옮기면 보호자 설정과 어긋난다
+        expect(find.text('로그인'), findsNothing);
         expect(find.text('로그아웃'), findsOneWidget, reason: '설정 페이지에 머문다');
         expect(tokens.hasSession, isTrue);
         expect(storage.nickname, '하늘이');

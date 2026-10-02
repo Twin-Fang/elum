@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/elum_scaffold.dart';
@@ -11,6 +10,7 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/character.dart';
 import '../../onboarding/domain/image_style.dart';
 import '../../onboarding/presentation/widgets/image_style_option_card.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 보호자 설정의 `그림 방식` 선택 화면 (이슈 #458).
 ///
@@ -46,7 +46,7 @@ class _ImageStyleSettingsScreenState
     final current = ref.read(onboardingProvider).imageStyle;
     // 이미 고른 방식을 다시 누르면 바뀔 것이 없다 — 요청도 알림도 없이 돌아간다.
     if (picked == current && _unsynced != picked) {
-      context.pop();
+      context.popOrHome();
       return;
     }
 
@@ -62,7 +62,7 @@ class _ImageStyleSettingsScreenState
       // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다 (#433).
       final messenger = ScaffoldMessenger.of(context);
       final changedText = context.l10n.imageStyleChangedSnack;
-      context.pop();
+      context.popOrHome();
       messenger.showSnackBar(
         SnackBar(content: Text(changedText)),
       );
@@ -104,7 +104,7 @@ class _ImageStyleSettingsScreenState
     );
 
     return ElumScaffold(
-      onBack: _busy ? null : () => context.pop(),
+      onBack: _busy ? null : context.popOrHome,
       title: context.l10n.imageStyleTitle,
       // 설정 묶음 시안(1022:4467)과 같은 머리 — 뒤로가기 y=67, 좌우 16
       backTop: 67,

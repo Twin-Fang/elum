@@ -18,6 +18,7 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_status.dart';
 import 'widgets/link_code_text.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 연결 암호 만들기 — **보호자 휴대폰** (이슈 #205 · 디자인 #232).
 ///
@@ -204,7 +205,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     final fromSettings = !widget.fromOnboarding;
 
     return ElumScaffold(
-      onBack: () => context.pop(),
+      onBack: context.popOrHome,
       title: fromSettings ? context.l10n.linkCodeSettingsTitle : null,
       backTop: fromSettings ? _settingsBackTop : null,
       // 온보딩 시안은 연결되기 전에도 버튼을 **보여주되 누를 수 없게** 둔다

@@ -21,6 +21,7 @@ import '../data/routine_repository.dart';
 import '../domain/routine_suggestion.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_backdrop.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// Figma `보호자_새로운 일과 만들기`(238:1643) — 자연어로 일과를 받는다.
 ///
@@ -92,7 +93,7 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
           return;
         }
         dismissKeyboard();
-        context.pop();
+        context.popOrHome();
       },
       child: _scaffold(context, canSubmit, space),
     );
@@ -177,13 +178,13 @@ class _BackRow extends StatelessWidget {
           onTap: () async {
             if (!confirmExit) {
               dismissKeyboard();
-              return context.pop();
+              return context.popOrHome();
             }
             if (!await confirmLeaveRoutineFlow(context) || !context.mounted) {
               return;
             }
             dismissKeyboard();
-            context.pop();
+            context.popOrHome();
           },
           scaleDown: AppPressable.scaleIcon,
           semanticLabel: context.l10n.commonBack,

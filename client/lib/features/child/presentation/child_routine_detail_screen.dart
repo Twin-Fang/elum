@@ -22,6 +22,7 @@ import '../application/child_routine_notifier.dart';
 import '../../../core/haptics/child_haptics.dart';
 import '../data/speech_service.dart';
 import 'child_home_screen.dart' show childRoutinesProvider;
+import '../../../core/router/pop_or_home.dart';
 
 /// 일과 상세 — 카드를 넘기며 체크한다 (Figma 309:3548 체크 전 / 309:3648 체크 후).
 ///
@@ -320,7 +321,7 @@ class _ChildRoutineDetailScreenState
           children: [
             SizedBox(height: ChildRoutineDetailScreen._backTop.h),
             _TopBar(
-              onBack: () => context.pop(),
+              onBack: context.popOrHome,
               title: routine.displayTitle,
               language: routine.language,
             ),

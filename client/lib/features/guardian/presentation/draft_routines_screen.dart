@@ -18,6 +18,7 @@ import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
 import 'widgets/routine_swipe_actions.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 임시저장 — 만들다 만 일과를 이어서 만든다 (Figma `설정_임시저장` 1045:4910 ·
 /// 밀어서 삭제 `설정_임시저장_삭제` 1274:9262, #496).
@@ -67,7 +68,7 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
     final space = context.space;
 
     return ElumScaffold(
-      onBack: () => context.pop(),
+      onBack: context.popOrHome,
       // 시안(`1045:4910`)도 같은 네비게이션 제목이다.
       title: context.l10n.draftRoutinesTitle,
       backTop: 67,

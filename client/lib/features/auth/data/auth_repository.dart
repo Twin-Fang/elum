@@ -10,6 +10,7 @@ import '../../../core/network/app_failure.dart';
 import '../../guardian/data/card_image_disk_cache.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import 'oauth_sdk.dart';
+import '../../../core/storage/account_wipe.dart';
 
 /// 로그인 결과. 화면이 다음 목적지를 정하는 데 쓴다.
 enum AuthOutcome {
@@ -281,9 +282,11 @@ class AuthRepository {
         AppLogger.error('로그아웃', e);
       }
     }
-    await _tokens.clear();
-    await _storage.clearAll();
-    await _imageCache?.clear();
+    await wipeLocalAccount(
+      tokens: _tokens,
+      storage: _storage,
+      imageCache: _imageCache,
+    );
   }
 
   /// 회원삭제 — 서버 계정과 로컬 저장값을 모두 지운다. 지워졌으면 true.
@@ -306,9 +309,11 @@ class AuthRepository {
       AppLogger.error('회원삭제', e);
       return AppFailure.of(e);
     }
-    await _tokens.clear();
-    await _storage.clearAll();
-    await _imageCache?.clear();
+    await wipeLocalAccount(
+      tokens: _tokens,
+      storage: _storage,
+      imageCache: _imageCache,
+    );
     return null;
   }
 }

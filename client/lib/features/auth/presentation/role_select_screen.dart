@@ -12,6 +12,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../domain/app_role.dart';
 import 'widgets/role_card.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 역할 선택 (Figma `732:5176`·`732:5258` · 이슈 #212 · #229).
 ///
@@ -70,7 +71,7 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
   Widget build(BuildContext context) {
     return ElumScaffold(
       // 약관에서 왔으므로 돌아갈 곳이 있다. 스택이 없으면 버튼을 그리지 않는다.
-      onBack: context.canPop() ? context.pop : null,
+      onBack: context.canPop() ? context.popOrHome : null,
       bottomButton: ElumButton(
         label: context.l10n.commonNext,
         onPressed: _selected != null ? _submit : null,

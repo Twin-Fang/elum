@@ -15,6 +15,7 @@ import '../../profile/application/profile_session.dart';
 import '../application/onboarding_notifier.dart';
 import '../domain/onboarding_profile.dart';
 import 'widgets/pin_keypad.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// Figma `온보딩_비밀번호` — 보호자 모드 전환용 PIN을 만든다.
 ///
@@ -200,7 +201,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   @override
   Widget build(BuildContext context) {
     return ElumScaffold(
-      onBack: () => context.pop(),
+      onBack: context.popOrHome,
       // 시안(238:2924)에는 **입력 중에 버튼이 아예 없다** (이슈 #231).
       //
       // 전에는 비활성 버튼을 깔아 뒀는데, 그러면 네 자리를 넣고도 "이걸 눌러야

@@ -76,9 +76,18 @@ const _tileGap = 8.0;
 /// 광고가 없으면 이 간격도 없다.
 const _adExtraGap = 8.0;
 
-/// 광고를 끼우는 자리 — 두 번째 일과 다음. 세 개 미만이면 "사이"가 없어 넣지 않는다.
-const _nativeAdAfterIndex = 1;
-const _nativeAdMinItems = 3;
+/// 광고가 목록 끝에 붙을 때(지난 일과 1개) 아래로 더 띄우는 간격.
+///
+/// 끝에 붙으면 바로 아래가 하단 고정 배너라 광고 둘이 가깝게 보인다. 오클릭을 줄이려고
+/// 사이 광고(아래 8)보다 넓게 띄운다 (#540).
+const _adTrailingGap = 24.0;
+
+/// 광고를 끼울 일과 순번(이 일과 다음). 지난 일과가 1개 이상일 때만 부른다 (#540).
+///
+/// 3개 이상이면 두 번째 다음, 2개면 첫 번째 다음이라 광고는 언제나 일과 **사이**에 든다
+/// (#465 의 오클릭 방지 의도). 1개만 사이가 없어 끝에 붙는다. 0개면 넣지 않는다 —
+/// 빈 상태 아래에 두면 하단 배너와 함께 내용 없는 화면에 광고 둘이 붙어 AdMob 정책 위험이 있다.
+int _nativeAdAfterIndex(int count) => count >= 3 ? 1 : 0;
 
 /// 보호자 홈 `오늘 일과` (Figma 931:3896 / 931:4179 / 931:4879 · 이슈 #258).
 ///
@@ -496,15 +505,19 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
               );
             },
           ),
-          // 지난 일과 사이 네이티브 광고 한 개 (#465). 목록이 짧으면 넣지 않고, 로드에
-          // 실패하면 항목 자체가 없어 빈 자리가 남지 않는다. 오늘 일과에는 끼우지 않는다.
-          if (index == _nativeAdAfterIndex &&
-              routines.length >= _nativeAdMinItems)
+          // 지난 일과 네이티브 광고 한 개 (#465 · #540). 로드에 실패하면 항목 자체가
+          // 없어 빈 자리가 남지 않는다. 오늘 일과에는 끼우지 않는다.
+          if (index == _nativeAdAfterIndex(routines.length))
             AdNativeSlot(
               placement: AdPlacement.nativeHomePast,
               padding: EdgeInsets.only(
                 top: (_tileGap + _adExtraGap).h,
-                bottom: _adExtraGap.h,
+                // 마지막 줄 다음이면 아래가 하단 배너다 — 더 띄운다.
+                bottom:
+                    (index == routines.length - 1
+                            ? _adTrailingGap
+                            : _adExtraGap)
+                        .h,
               ),
             ),
         ],

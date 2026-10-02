@@ -14,6 +14,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 설정 → 비밀암호 변경하기 (#437).
 ///
@@ -179,7 +180,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
       // 방금 만든 암호가 곧 통과의 증거다. 보호자 홈으로 바로 들어간다.
       context.go(Routes.guardian);
     } else {
-      context.pop();
+      context.popOrHome();
     }
     messenger.showSnackBar(
       SnackBar(
@@ -235,7 +236,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     // 만들기(createOnly)는 온보딩 머리 그대로다. 바꾸기만 설정 계열 머리다.
     final change = !widget.createOnly;
     return ElumScaffold(
-      onBack: () => context.pop(),
+      onBack: context.popOrHome,
       title: change ? context.l10n.pinChangeHeaderTitle : null,
       backTop: change ? _changeBackTop : null,
       // 온보딩처럼 **다 맞았을 때만** 버튼이 나타난다 (#231). 나타나는 것이 신호다.

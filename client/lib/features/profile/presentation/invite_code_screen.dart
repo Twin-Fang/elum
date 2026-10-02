@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
@@ -22,6 +21,7 @@ import '../application/invite_sharer.dart';
 import '../application/profile_session.dart';
 import '../data/profile_repository.dart';
 import '../domain/invite_link.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 초대 코드 만들기 — 연결된 보호자가 **함께 돌볼 보호자**를 부른다 (다중 보호자 #362).
 ///
@@ -200,7 +200,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
     final name = _name ?? context.l10n.commonElumiName;
 
     return ElumScaffold(
-      onBack: () => context.pop(),
+      onBack: context.popOrHome,
       title: context.l10n.inviteCodeTitle,
       backTop: _settingsBackTop,
       // 코드가 있을 때만 — 만들지 못했거나 이룸이가 없으면 보낼 것이 없다 (임시 시안)

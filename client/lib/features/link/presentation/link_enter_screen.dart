@@ -12,9 +12,11 @@ import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../auth/data/auth_repository.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_code.dart';
 import 'widgets/code_boxes.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 연결 실패의 종류. 문구가 아니라 종류를 들고 있다가 그릴 때 푼다 — 실패 순간에 문구로
 /// 굳히면 언어가 바뀐 뒤에도 옛 언어로 남는다.
@@ -171,6 +173,22 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   /// 머리 글(제목 + 설명)이 한 줄이든 두 줄이든 칸이 이 자리에 선다.
   static const _headerRegionHeight = 220.0;
 
+  /// 뒤로가기. **어떤 길로 들어왔든 막다른 화면이 되지 않게 한다** (#542).
+  ///
+  /// 이 화면은 여러 곳에서 온다 — 역할 선택, 앱 시작, 세션 종료. 아래에 돌아갈 화면이 없으면 pop 이 아무 일도
+  /// 하지 않아 사용자가 갇혔다. 그때는 [linkEnterBackTarget] 과 같은 규칙으로 갈 곳을 정해 직접 옮긴다.
+  void _back() {
+    if (context.canPop()) {
+      context.popOrHome();
+      return;
+    }
+    context.go(
+      linkEnterBackTarget(
+        hasSession: ref.read(authRepositoryProvider).hasSession,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final space = context.space;
@@ -178,7 +196,7 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
     final error = _error;
 
     return ElumScaffold(
-      onBack: _sending ? null : () => context.pop(),
+      onBack: _sending ? null : _back,
       // 여섯 칸을 다 채워야 켜진다. 보내는 중에는 다시 누를 수 없다 — 1회용 암호다.
       bottomButton: ElumButton(
         label: l10n.linkEnterStartButton,

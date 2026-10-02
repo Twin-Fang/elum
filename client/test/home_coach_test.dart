@@ -127,7 +127,8 @@ void main() {
   Finder message(String part) => find.textContaining(part, findRichText: true);
   final overlay = find.byType(CoachMarkOverlay);
 
-  CoachDots dots(WidgetTester tester) => tester.widget<CoachDots>(find.byType(CoachDots));
+  CoachDots dots(WidgetTester tester) =>
+      tester.widget<CoachDots>(find.byType(CoachDots));
 
   group('보여지는 조건', () {
     testWidgets('처음 들어오면 1단계가 뜬다', (tester) async {
@@ -327,12 +328,7 @@ void main() {
     });
 
     testWidgets('저장하지 못해도 앱은 계속 되고, 같은 실행에서 다시 뜨지 않는다', (tester) async {
-      await open(
-        tester,
-        wrap(
-          store: _WriteFailingStorage(),
-        ),
-      );
+      await open(tester, wrap(store: _WriteFailingStorage()));
       await tapAnywhere(tester);
       await tapAnywhere(tester);
       expect(overlay, findsNothing);
@@ -365,10 +361,22 @@ void main() {
       final text = tester.getRect(message('수행할'));
       final arrow = _arrowRect(tester);
 
-      expect(arrow.top, closeTo(button.bottom, _bob), reason: '시안 323 → 화살표 시작 323');
+      expect(
+        arrow.top,
+        closeTo(button.bottom, _bob),
+        reason: '시안 323 → 화살표 시작 323',
+      );
       expect(arrow.center.dx, closeTo(button.center.dx, 1));
-      expect(text.top - button.bottom, closeTo(42, 0.5), reason: '시안 365 − 323');
-      expect(text.center.dx, closeTo(button.center.dx, 2), reason: '1단계는 가운데 맞춤');
+      expect(
+        text.top - button.bottom,
+        closeTo(42, 0.5),
+        reason: '시안 365 − 323',
+      );
+      expect(
+        text.center.dx,
+        closeTo(button.center.dx, 2),
+        reason: '1단계는 가운데 맞춤',
+      );
     });
 
     testWidgets('2단계: 글 오른쪽 끝이 버튼 쌍 가운데 + 13 이다', (tester) async {
@@ -376,13 +384,26 @@ void main() {
       await tapAnywhere(tester);
 
       final row = tester.getRect(find.byType(RoutineSwipeActions));
-      final actionsCenter = row.right - RoutineSwipeActions.revealWidth.w / 2 + 4.w / 2;
+      final actionsCenter =
+          row.right - RoutineSwipeActions.revealWidth.w / 2 + 4.w / 2;
       final text = tester.getRect(message('스와이프'));
       final arrow = _arrowRect(tester);
 
-      expect(arrow.top, closeTo(row.bottom, _bob), reason: '시안 줄 바닥 533 → 화살표 534');
-      expect(arrow.center.dx, closeTo(actionsCenter, 2), reason: '시안 화살표 x=305');
-      expect(text.right, closeTo(arrow.center.dx + 13, 2), reason: '시안 글 오른쪽 318');
+      expect(
+        arrow.top,
+        closeTo(row.bottom, _bob),
+        reason: '시안 줄 바닥 533 → 화살표 534',
+      );
+      expect(
+        arrow.center.dx,
+        closeTo(actionsCenter, 2),
+        reason: '시안 화살표 x=305',
+      );
+      expect(
+        text.right,
+        closeTo(arrow.center.dx + 13, 2),
+        reason: '시안 글 오른쪽 318',
+      );
     });
 
     testWidgets('3단계: 배지 3 아래에서 화살표가 시작하고 글이 오른쪽 맞춤이다', (tester) async {
@@ -394,16 +415,29 @@ void main() {
       final text = tester.getRect(message('이룸이모드'));
       final arrow = _arrowRect(tester);
 
-      expect(arrow.top - badge.bottom, closeTo(3, _bob), reason: '시안 126 → 129');
+      expect(
+        arrow.top - badge.bottom,
+        closeTo(3, _bob),
+        reason: '시안 126 → 129',
+      );
       expect(arrow.center.dx, closeTo(badge.center.dx, 1));
-      expect(text.right, closeTo(badge.center.dx + 13, 2), reason: '시안 314 = 301 + 13');
+      expect(
+        text.right,
+        closeTo(badge.center.dx + 13, 2),
+        reason: '시안 314 = 301 + 13',
+      );
     });
   });
 
   group('구멍과 막', () {
     testWidgets('구멍 안은 원래 화면 그대로, 밖은 어둡다', (tester) async {
       final key = GlobalKey();
-      await tester.pumpWidget(RepaintBoundary(key: key, child: wrap(today: [routine('a', '손 씻기')])));
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: key,
+          child: wrap(today: [routine('a', '손 씻기')]),
+        ),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       await tester.pump(const Duration(milliseconds: 1300));
@@ -412,13 +446,21 @@ void main() {
 
       final button = tester.getRect(find.byType(CreateRoutineButton));
       final inside = await _pixel(tester, key, button.center);
-      final outside = await _pixel(tester, key, Offset(button.center.dx, button.bottom + 300));
+      final outside = await _pixel(
+        tester,
+        key,
+        Offset(button.center.dx, button.bottom + 300),
+      );
 
       // 바깥은 배경(밝음)에 검정 75% 가 얹혀 어둡다. 구멍 안은 알약 버튼 색 그대로다.
       final insideLuma = (inside.r + inside.g + inside.b) / 3;
       final outsideLuma = (outside.r + outside.g + outside.b) / 3;
       expect(outsideLuma, lessThan(0.30), reason: '막이 75% 덮는다');
-      expect(insideLuma, greaterThan(outsideLuma + 0.25), reason: '구멍 안은 가려지지 않는다');
+      expect(
+        insideLuma,
+        greaterThan(outsideLuma + 0.25),
+        reason: '구멍 안은 가려지지 않는다',
+      );
     });
   });
 
@@ -448,7 +490,11 @@ void main() {
 
       final button = tester.getRect(find.byType(CreateRoutineButton));
       final early = holeNow(tester)!;
-      expect(early.rect.width, greaterThan(button.width + 20), reason: '처음엔 대상보다 넓다');
+      expect(
+        early.rect.width,
+        greaterThan(button.width + 20),
+        reason: '처음엔 대상보다 넓다',
+      );
       expect(scrimAlpha(tester), lessThan(0.5), reason: '막은 한 번에 덮이지 않는다');
 
       await tester.pump(const Duration(milliseconds: 150));
@@ -484,11 +530,23 @@ void main() {
       final goingDown = end.top > start.top;
       // 같은 방향으로만 가고(되돌아오지 않고), 첫 프레임에 도착해 있지도 않다
       for (var i = 1; i < samples.length; i++) {
-        expect(goingDown ? samples[i] >= samples[i - 1] : samples[i] <= samples[i - 1], isTrue,
-            reason: '뒷걸음질·출렁임이 없어야 한다: $samples');
+        expect(
+          goingDown
+              ? samples[i] >= samples[i - 1]
+              : samples[i] <= samples[i - 1],
+          isTrue,
+          reason: '뒷걸음질·출렁임이 없어야 한다: $samples',
+        );
       }
-      expect((samples.first - end.top).abs(), greaterThan(1), reason: '순간이동하지 않는다');
-      expect(end.top, closeTo(tester.getRect(find.byType(RoutineSwipeActions)).top, 0.01));
+      expect(
+        (samples.first - end.top).abs(),
+        greaterThan(1),
+        reason: '순간이동하지 않는다',
+      );
+      expect(
+        end.top,
+        closeTo(tester.getRect(find.byType(RoutineSwipeActions)).top, 0.01),
+      );
     });
 
     testWidgets('말풍선은 겹쳐 바뀐다 — 옛 글이 사라지는 동안 새 글이 나타난다', (tester) async {
@@ -529,8 +587,11 @@ void main() {
       const screen = Rect.fromLTWH(0, 0, 393, 852);
       for (var i = 0; i < 3; i++) {
         final text = tester.getRect(message(['수행할', '스와이프', '이룸이모드'][i]));
-        expect(screen.contains(text.topLeft) && screen.contains(text.bottomRight), isTrue,
-            reason: '${i + 1}단계 글이 화면 밖으로 나갔다: $text');
+        expect(
+          screen.contains(text.topLeft) && screen.contains(text.bottomRight),
+          isTrue,
+          reason: '${i + 1}단계 글이 화면 밖으로 나갔다: $text',
+        );
         if (i < 2) await tapAnywhere(tester);
       }
     });
@@ -538,7 +599,9 @@ void main() {
     testWidgets('동작 줄이기를 켜도 모든 단계가 똑같이 동작한다', (tester) async {
       tester.platformDispatcher.accessibilityFeaturesTestValue =
           const FakeAccessibilityFeatures(disableAnimations: true);
-      addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
 
       await open(tester, wrap(today: [routine('a', '손 씻기')]));
       expect(message('수행할'), findsOneWidget);
@@ -619,6 +682,76 @@ void main() {
       expect(spans[0].text, '이룸이가 수행할 ');
       expect(spans[1].text, '새로운\n일과를 만들 수 있어요');
       expect(spans[1].style?.color, const Color(0xFF55CFBA));
+    });
+  });
+
+  group('스크롤 (이슈 #546)', () {
+    // 화면보다 길어 스크롤되는 목록
+    List<Routine> many() => [
+      for (var i = 0; i < 8; i++) routine('r$i', '일과 $i'),
+    ];
+
+    ScrollPosition position(WidgetTester tester) =>
+        tester.state<ScrollableState>(find.byType(Scrollable).first).position;
+
+    /// 코치마크가 뜨기 전 찰나에 스크롤한 상황을 만든다.
+    Future<void> scrollBeforeStart(WidgetTester tester, Widget app) async {
+      await tester.pumpWidget(app);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.drag(
+        find.byType(SingleChildScrollView),
+        const Offset(0, -300),
+      );
+      await tester.pump();
+      expect(position(tester).pixels, greaterThan(0), reason: '시작 전에 스크롤된 상태');
+    }
+
+    testWidgets('시작 전에 스크롤했어도 맨 위로 돌아와 버튼을 가리킨다', (tester) async {
+      await scrollBeforeStart(tester, wrap(today: many()));
+      await tester.pump(const Duration(milliseconds: 1300));
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump(const Duration(milliseconds: 700));
+
+      expect(position(tester).pixels, 0);
+      expect(overlay, findsOneWidget);
+      expect(message('수행할'), findsOneWidget);
+      expect(dots(tester).index, 0, reason: '화면 밖이라 건너뛰지 않는다');
+    });
+
+    testWidgets('떠 있는 동안 홈 목록은 스크롤되지 않고, 닫으면 풀린다', (tester) async {
+      await open(tester, wrap(today: many()));
+
+      SingleChildScrollView scroll() => tester.widget<SingleChildScrollView>(
+        find.byType(SingleChildScrollView),
+      );
+      expect(scroll().physics, isA<NeverScrollableScrollPhysics>());
+
+      await tester.tap(svgWithAsset(AppAssets.coachClose));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+
+      expect(overlay, findsNothing);
+      expect(scroll().physics, isNull);
+    });
+
+    testWidgets('이미 본 사람의 스크롤은 건드리지 않는다', (tester) async {
+      await scrollBeforeStart(
+        tester,
+        wrap(
+          today: many(),
+          store: InMemoryStorage(
+            onboardingCompleted: true,
+            nickname: '하늘이',
+            homeCoachSeen: true,
+          ),
+        ),
+      );
+      final before = position(tester).pixels;
+      await tester.pump(const Duration(milliseconds: 2000));
+
+      expect(position(tester).pixels, before);
+      expect(overlay, findsNothing);
     });
   });
 }

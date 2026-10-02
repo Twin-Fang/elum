@@ -30,6 +30,22 @@ abstract final class AppTheme {
         surface: colors.surface,
       ),
       textTheme: typo.toTextTheme(colors.textPrimary, colors.textSecondary),
+      // 저장·변경 뒤 잠깐 뜨는 알림 (#543). **시안이 없는 임시 값이다.**
+      //
+      // 기본값은 colorScheme 에서 뽑힌 갈색 직사각형이 바닥에 붙어 앱과 따로 놀았다.
+      // 띄우는 곳(7곳)이 문구만 넘기므로 여기 한 곳만 고치면 모두 바뀐다.
+      // 시안이 나오면 이 값만 바꾼다 — 화면마다 스타일을 덧쓰지 않는다.
+      snackBarTheme: SnackBarThemeData(
+        // 바닥에 붙이지 않고 띄운다. 하단 광고·홈 인디케이터와 붙어 보이지 않게.
+        behavior: SnackBarBehavior.floating,
+        // 배경은 본문색(#242634). 화면 배경(#F7F2EF) 위에서 가장 또렷하고, 새 색을 만들지 않는다.
+        backgroundColor: colors.textPrimary,
+        // body 는 줄 높이 1.0 이라 이름이 길어 두 줄이 되면 위아래 줄이 붙는다.
+        contentTextStyle: typo.body.copyWith(color: colors.surface, height: 1.4),
+        insetPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 4,
+      ),
       extensions: const [colors, typo, AppSpacing.standard],
     );
   }

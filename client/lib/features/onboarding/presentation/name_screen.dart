@@ -12,6 +12,7 @@ import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_text_field.dart';
 import '../application/onboarding_notifier.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// Figma `온보딩_이름` — 아이 호칭을 받는다.
 class NameScreen extends ConsumerStatefulWidget {
@@ -59,7 +60,7 @@ class _NameScreenState extends ConsumerState<NameScreen> {
     final canGoBack = context.canPop();
 
     return ElumScaffold(
-      onBack: canGoBack ? () => context.pop() : null,
+      onBack: canGoBack ? context.popOrHome : null,
       bottomButton: ElumButton(
         label: context.l10n.commonNext,
         // 진행 조건은 모델이 안다 — 화면마다 재구현하지 않는다

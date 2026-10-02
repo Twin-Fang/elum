@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -13,6 +12,7 @@ import '../../guardian/data/member_repository.dart';
 import '../../guardian/data/routine_repository.dart' show memberProvider;
 import '../application/profile_session.dart';
 import '../domain/profile_summary.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 이룸이 바꾸기 — 여러 이룸이를 돌보는 보호자(복지사 등)가 지금 볼 이룸이를 고른다 (다중 보호자 #362).
 ///
@@ -35,7 +35,7 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
   Future<void> _pick(ProfileSummary profile, ProfileSummary? active) async {
     if (_busy) return;
     if (profile.id == active?.id) {
-      context.pop();
+      context.popOrHome();
       return;
     }
     setState(() => _busy = true);
@@ -44,7 +44,7 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
     // 화면을 닫기 전에 잡아 둔다.
     final messenger = ScaffoldMessenger.of(context);
     final changed = context.l10n.profileSwitchChanged;
-    context.pop();
+    context.popOrHome();
     messenger.showSnackBar(SnackBar(content: Text(changed)));
   }
 
@@ -54,7 +54,7 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
     final active = ref.watch(activeProfileProvider);
 
     return ElumScaffold(
-      onBack: _busy ? null : () => context.pop(),
+      onBack: _busy ? null : context.popOrHome,
       title: context.l10n.profileSwitchTitle,
       backTop: 67,
       horizontalPadding: 16,

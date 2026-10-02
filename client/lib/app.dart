@@ -17,7 +17,6 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/child/application/sync_triggers.dart';
 import 'features/link/application/link_reset.dart';
-import 'features/link/data/device_link_repository.dart';
 import 'features/onboarding/application/onboarding_notifier.dart';
 import 'features/profile/application/invite_inbox.dart';
 import 'features/profile/application/invite_link_intake.dart';
@@ -123,18 +122,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
 
     ref.listen<int>(sessionExpiryProvider, (previous, next) async {
       if (previous == null || next <= previous) return;
-      // 이룸이 휴대폰에는 로그인할 계정이 없다. 로그인 화면으로 보내면
-      // 누를 것이 하나도 없는 막다른 길이 된다 (이슈 #206).
-      final isElumi = ref.read(localStorageProvider).isElumiDevice;
-      if (!isElumi) {
-        _router.go(Routes.login);
-        return;
-      }
-      // 이룸이 휴대폰의 세션이 끝났다 = 연결이 끊어졌다 (#363). 보호자가 끊었거나 서버가 이 연결을 더는
-      // 인정하지 않는다. 남은 이룸이 정보·일과 캐시를 비워야 다른 이룸이에게 새로 연결해도 이전 것이 보이지
-      // 않고, 연결 화면이 `연결이 끊어졌어요`를 말한다 (앱을 껐다 켜도 남는 표식).
-      await endElumiLinkAfterSessionLoss(
-        repo: ref.read(deviceLinkRepositoryProvider),
+      await handleSessionExpired(
         router: _router,
         container: ProviderScope.containerOf(context),
       );

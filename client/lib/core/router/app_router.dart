@@ -197,7 +197,8 @@ String? resolveRedirect(
   // 설정에 줄이 없어 화면으로 들어갈 길은 없지만, 딥링크나 옛 경로로 열려도 막는다 —
   // 이룸이 휴대폰 토큰은 서버도 403 으로 막으므로 열어 봐야 실패 화면만 본다.
   if (isElumiDevice && _guardianOnlyPaths.any(path.startsWith)) {
-    return Routes.child;
+    // 세션이 없으면 이룸이 홈도 막히므로 한 번에 연결 화면으로
+    return hasSession ? Routes.child : Routes.linkEnter;
   }
 
   // 가입 절차도 로그인이 있어야 한다. 계정이 없으면 동의를 기록할 곳도,
@@ -234,6 +235,10 @@ String? resolveRedirect(
     return Routes.roleSelect;
   }
 
+  // 이룸이 휴대폰에는 온보딩이 없다(정보는 보호자 계정에 있다). 연결 직후 정보 조회가 실패해 `온보딩 완료`가
+  // 비어 있어도 보호자 온보딩으로 보내면 안 된다.
+  if (isElumiDevice) return null;
+
   // 보호자·아이 화면은 온보딩을 마쳐야 들어갈 수 있다.
   return onboardingCompleted ? null : Routes.onboardingName;
 }
@@ -248,14 +253,20 @@ bool _isGuardianOnly(String path, String? modeSwitchTo) {
       ModeSwitchTarget.fromName(modeSwitchTo) == ModeSwitchTarget.guardian;
 }
 
-/// 연결 암호 넣기 화면까지 쌓는 경로. **뒤로 갈 수 있어야 한다** (이슈 #212) — go 로 바로 띄우면
-/// 스택이 비어 pop 이 실패하므로 역할 선택을 깔고 그 위에 얹는다.
-const linkEnterStack = [Routes.roleSelect, Routes.linkEnter];
+/// 연결 암호 넣기 화면 아래에 깔아 둘 화면 — **뒤로가기의 도착지**다 (이슈 #212 · #542).
+///
+/// 세션이 있으면 역할 선택(잘못 고른 사람이 돌아간다), 없으면 로그인이다. 역할 선택은 세션이 있어야
+/// 열리는 화면이라, 세션 없이 깔면 가드가 연결 화면으로 바꿔 스택이 `[연결, 연결]`이 된다 — 뒤로가기가
+/// 같은 화면만 다시 보여 주고 빠져나갈 길이 없었다 (#542).
+String linkEnterBackTarget({required bool hasSession}) =>
+    hasSession ? Routes.roleSelect : Routes.login;
 
-/// 이룸이 휴대폰을 연결 암호 넣기 화면으로 보낸다 — 끊은 뒤·세션이 끝난 뒤 공통 도착지다 (#206 흐름).
-void goToLinkEnter(GoRouter router) {
-  router.go(linkEnterStack.first);
-  router.push(linkEnterStack.last);
+/// 연결 암호 넣기 화면으로 보낸다 — 앱을 켰을 때·세션이 끝난 뒤 공통 도착지다 (#206 흐름).
+///
+/// go 로 바로 띄우면 스택이 비어 뒤로 갈 수 없으므로 [linkEnterBackTarget] 을 깔고 그 위에 얹는다.
+void goToLinkEnter(GoRouter router, {required bool hasSession}) {
+  router.go(linkEnterBackTarget(hasSession: hasSession));
+  router.push(Routes.linkEnter);
 }
 
 /// 일과 만들기 흐름에서 [path] 화면이 까는 배경 색 (#380).

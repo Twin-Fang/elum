@@ -19,6 +19,7 @@ import '../application/profile_session.dart';
 import '../data/profile_repository.dart';
 import '../domain/guardian_member.dart';
 import 'guardian_edit_sheet.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 지금 보는 이룸이를 함께 돌보는 사람 (다중 보호자 #362).
 ///
@@ -150,7 +151,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
     final memberAsync = ref.watch(memberProvider).isLoading;
 
     return ElumScaffold(
-      onBack: _busy ? null : () => context.pop(),
+      onBack: _busy ? null : context.popOrHome,
       title: context.l10n.guardiansTitle,
       backTop: 67,
       horizontalPadding: 16,

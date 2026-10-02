@@ -21,6 +21,7 @@ import '../application/invite_inbox.dart';
 import '../application/profile_session.dart';
 import '../data/profile_repository.dart';
 import '../domain/invite_problem.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 입력 아래에 보이는 안내의 종류. 문구가 아니라 종류를 들고 있다가 그릴 때 푼다 — 실패 순간에
 /// 문구로 굳히면 언어가 바뀐 뒤에도 옛 언어로 남는다.
@@ -341,7 +342,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     final colors = context.colors;
 
     return ElumScaffold(
-      onBack: _sending ? null : () => context.pop(),
+      onBack: _sending ? null : context.popOrHome,
       // 링크로 받은 코드는 사람이 눌러야 보낸다 (#365). **임시 시안** — 하단 버튼·보조 링크는 다른 입력
       // 화면(이름 입력 `다음` · `초대 코드가 있어요`)의 배치를 그대로 빌렸다.
       bottomButton: _fromLink

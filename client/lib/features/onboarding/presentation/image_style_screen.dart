@@ -15,6 +15,7 @@ import '../application/onboarding_notifier.dart';
 import '../domain/character.dart';
 import '../domain/image_style.dart';
 import 'widgets/image_style_option_card.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 온보딩의 `그림 방식` 단계 — 캐릭터 다음, 비밀암호 앞 (이슈 #458).
 ///
@@ -63,7 +64,7 @@ class ImageStyleScreen extends ConsumerWidget {
     );
 
     return ElumScaffold(
-      onBack: () => context.pop(),
+      onBack: context.popOrHome,
       // 만화가 처음부터 골라져 있어 다음은 늘 열려 있다
       bottomButton: ElumButton(
         label: context.l10n.commonNext,
