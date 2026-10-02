@@ -21,6 +21,8 @@ void main() {
         useInheritedMediaQuery: true,
         builder: (context, _) => MaterialApp(
           theme: AppTheme.light,
+          // 앱에 없는 리본이라 골든을 디자이너에게 보여줄 때 헷갈린다
+          debugShowCheckedModeBanner: false,
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(textScale),
