@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="robots" content="noindex"/>
+<title>이룸 ELUM — 페이지를 찾을 수 없어요</title>
+<link rel="icon" href="/elum/assets/lumi.svg"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
+<style>
+:root{
+  --bg:#F7F2EF; --ink:#242634; --muted:#6B6C78; --faint:rgba(36,38,52,.45);
+  --line:rgba(36,38,52,.09); --card:#fff; --accent:#FF8B26;
+  --cream:#EFEDE8; --peach:#FFDAC7; --butter:#FFF2BB; --mint:#9AFFE9;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --r:26px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.62;
+  font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+a{color:inherit}
+
+/* 헤더 */
+header{position:sticky;top:0;z-index:20;background:rgba(247,242,239,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;height:68px;gap:18px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img{height:26px;display:block}
+.brand b{font-size:15px;letter-spacing:-.01em}
+nav{margin-left:auto;display:flex;gap:26px}
+nav a{font-size:14px;color:var(--muted);text-decoration:none}
+nav a:hover{color:var(--ink)}
+
+/* 히어로 */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding:84px 0 68px}
+h1{margin:14px 0 0;font-size:clamp(38px,5.6vw,68px);line-height:1.06;letter-spacing:-.035em;font-weight:800}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{margin:20px 0 0;color:var(--muted);font-size:17px;max-width:30em}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:14px 24px;
+  font-weight:700;font-size:15px;text-decoration:none;border:1px solid transparent;
+  transition:transform .16s ease, box-shadow .16s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn-solid{background:var(--ink);color:#fff;box-shadow:0 10px 22px rgba(36,38,52,.18)}
+.btn-ghost{border-color:var(--line);background:#fff}
+.btn-soon{border-color:var(--line);background:rgba(255,255,255,.6);color:var(--faint);cursor:default}
+.btn-soon:hover{transform:none}
+
+/* 캐릭터 무대 */
+.stage{position:relative;min-height:320px}
+.blob{position:absolute;inset:6% 4%;border-radius:46% 54% 50% 50%/52% 46% 54% 48%;
+  background:radial-gradient(120% 120% at 30% 25%, #FFF6E4 0%, var(--peach) 62%, #FFD0AE 100%);
+  filter:blur(.4px)}
+.stage img{position:absolute;display:block;filter:drop-shadow(0 14px 26px rgba(36,38,52,.16))}
+.c-popo{width:44%;left:27%;bottom:6%;z-index:3}
+.c-lulu{width:33%;left:2%;bottom:14%;z-index:2}
+.c-lumi{width:20%;right:4%;bottom:26%;z-index:2}
+
+/* 세 칸 */
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+.tile .num{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--faint);margin-bottom:10px}
+.tile .rule{width:26px;height:3px;border-radius:2px;margin-bottom:14px}
+.tile h2{margin:0 0 6px;font-size:16px;font-weight:800;letter-spacing:-.01em}
+.tile p{margin:0;color:var(--muted);font-size:14px}
+
+section{padding:78px 0;border-top:1px solid var(--line);margin-top:56px}
+h2{margin:12px 0 0;font-size:clamp(28px,3.6vw,42px);line-height:1.12;letter-spacing:-.03em;font-weight:800}
+.sub{margin:14px 0 0;color:var(--muted);max-width:36em}
+
+/* FAQ */
+.faq{margin-top:34px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+details{border-bottom:1px solid var(--line)}
+details:last-child{border-bottom:0}
+summary{cursor:pointer;list-style:none;padding:20px 56px 20px 24px;font-weight:700;font-size:16px;position:relative}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";position:absolute;right:24px;top:50%;width:9px;height:9px;
+  border-right:2px solid var(--faint);border-bottom:2px solid var(--faint);
+  transform:translateY(-70%) rotate(45deg);transition:transform .18s}
+details[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+details .body{padding:0 24px 22px;color:var(--muted);max-width:46em}
+details .body b{color:var(--ink)}
+code{font-family:var(--mono);font-size:.92em;background:rgba(36,38,52,.06);padding:2px 6px;border-radius:6px}
+
+/* 문의 */
+.contact{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:34px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:30px}
+.card.mailcard{background:linear-gradient(140deg,#fff 0%,#FFF7EE 100%)}
+.mail{display:inline-block;margin-top:12px;font-size:clamp(20px,2.8vw,30px);font-weight:800;
+  letter-spacing:-.02em;text-decoration:none;word-break:break-all}
+.mail:hover{color:var(--accent)}
+.hint{margin-top:14px;color:var(--faint);font-size:13px}
+.check{margin:16px 0 0;padding:0;list-style:none;color:var(--muted);font-size:14px}
+.check li{position:relative;padding-left:24px;margin:9px 0}
+.check li::before{content:"";position:absolute;left:4px;top:8px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+
+footer{border-top:1px solid var(--line);padding:32px 0 60px;color:var(--faint);font-size:13px}
+.fl{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+.fl img{height:18px;opacity:.85}
+
+@media (max-width:880px){
+  .hero{grid-template-columns:1fr;padding:56px 0 40px;gap:18px}
+  .stage{min-height:250px;order:-1}
+  .trio{grid-template-columns:1fr}
+  .contact{grid-template-columns:1fr}
+  nav{display:none}
+  section{padding:56px 0;margin-top:36px}
+}
+</style>
+<style>.nf{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding:84px 28px 96px}
+@media (max-width:880px){.nf{grid-template-columns:1fr;padding:56px 28px 64px;gap:18px}}</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="/elum/"><img src="/elum/assets/logo.svg" alt="이룸 ELUM"/></a>
+  </div>
+</header>
+<div class="wrap nf">
+  <div>
+    <div class="tag">404</div>
+    <h1>찾으시는 페이지가<br/><em>없어요.</em></h1>
+    <p class="lede">주소가 바뀌었거나 잘못 입력됐을 수 있어요. 처음 화면에서 다시 찾아보세요.</p>
+    <div class="cta">
+      <a class="btn btn-solid" href="/elum/">처음으로 →</a>
+      <a class="btn btn-ghost" href="/elum/#contact">문의하기</a>
+    </div>
+  </div>
+  <div class="stage" aria-hidden="true">
+    <div class="blob"></div>
+    <img class="c-popo" src="/elum/assets/popo.svg" alt=""/>
+    <img class="c-lulu" src="/elum/assets/lulu.svg" alt=""/>
+  </div>
+</div>
+</body>
+</html>
