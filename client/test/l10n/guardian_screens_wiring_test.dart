@@ -855,7 +855,7 @@ void main() {
       expectKey('cardReviewSave');
       expect(find.text('⟦cardReviewReorderDone⟧'), findsNothing);
 
-      await tester.tap(find.text('카드 순서 변경'));
+      await tester.tap(find.text('⟦cardReviewToolReorder⟧'));
       await settle(tester);
       expectKey('cardReviewReorderDone');
       expect(find.text('⟦cardReviewSave⟧'), findsNothing);
@@ -866,7 +866,8 @@ void main() {
       await tester.tap(
         find
             .byWidgetPredicate(
-              (w) => w is AppPressable && w.semanticLabel == '이 카드 지우기',
+              (w) =>
+                  w is AppPressable && w.semanticLabel == '⟦cardDeleteLabel⟧',
             )
             .first,
       );
@@ -895,7 +896,7 @@ void main() {
     testWidgets('소리를 못 내면 실패 제목·안내가 키를 읽는다', (tester) async {
       final handle = tester.ensureSemantics();
       await pumpReview(tester, soundFails: true);
-      await tester.tap(find.bySemanticsLabel('소리로 듣기').first);
+      await tester.tap(find.bySemanticsLabel('⟦cardSpeak⟧').first);
       await settle(tester);
 
       expect(
@@ -911,11 +912,11 @@ void main() {
 
     testWidgets('카드를 고치다 서버가 거절하면 실패 제목·기본 안내가 키를 읽는다', (tester) async {
       await pumpReview(tester);
-      await tester.tap(find.text('이 카드 수정'));
+      await tester.tap(find.text('⟦cardReviewToolEdit⟧'));
       await settle(tester);
       await tester.enterText(find.byType(TextField).first, '가방을 싸요');
       await tester.enterText(find.byType(TextField).last, '책을 넣어요');
-      await tester.tap(find.text('완료').last);
+      await tester.tap(find.text('⟦cardEditDoneAction⟧').last);
       await settle(tester);
 
       expect(
@@ -930,12 +931,12 @@ void main() {
 
     testWidgets('카드를 추가하다 서버가 거절하면 실패 제목·기본 안내가 키를 읽는다', (tester) async {
       await pumpReview(tester);
-      await tester.tap(find.text('카드 추가'));
+      await tester.tap(find.text('⟦cardReviewToolAdd⟧'));
       await settle(tester);
       await tester.enterText(find.byType(TextField).first, '양치를 해요');
       await tester.enterText(find.byType(TextField).last, '이를 닦아요');
       await tester.pump();
-      await tester.tap(find.text('추가하기'));
+      await tester.tap(find.text('⟦cardEditAddAction⟧'));
       await settle(tester);
 
       expect(find.textContaining('⟦cardReviewAddFailedTitle⟧'), findsOneWidget);

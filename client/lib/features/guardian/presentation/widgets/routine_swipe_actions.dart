@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 
@@ -24,7 +25,7 @@ class RoutineSwipeActions extends StatefulWidget {
     required this.onDelete,
     this.onEdit,
     this.endInset = 0,
-    this.deleteLabel = '일과 삭제',
+    this.deleteLabel,
     this.enabled = true,
   });
 
@@ -43,8 +44,8 @@ class RoutineSwipeActions extends StatefulWidget {
   /// 끝에 딱 붙지만 임시저장(1274:9262)은 줄 끝(377)보다 2 안쪽(375)에서 끝난다.
   final double endInset;
 
-  /// 스크린리더가 삭제 버튼에서 읽을 이름.
-  final String deleteLabel;
+  /// 스크린리더가 삭제 버튼에서 읽을 이름. 비우면 기본 이름을 쓴다.
+  final String? deleteLabel;
 
   /// false면 밀리지 않는다. 지난 일과처럼 고칠 수 없는 줄에 쓴다.
   final bool enabled;
@@ -211,7 +212,7 @@ class _ActionRow extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback? onEdit;
   final double endInset;
-  final String deleteLabel;
+  final String? deleteLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -226,7 +227,7 @@ class _ActionRow extends StatelessWidget {
           width: RoutineSwipeActions.deleteWidth,
           color: colors.routineSwipeDelete,
           icon: AppAssets.iconTrash,
-          label: deleteLabel,
+          label: deleteLabel ?? context.l10n.routineSwipeDelete,
           onTap: onDelete,
           progress: progress,
         ),
@@ -236,7 +237,7 @@ class _ActionRow extends StatelessWidget {
             width: RoutineSwipeActions.editWidth,
             color: colors.routineSwipeEdit,
             icon: AppAssets.iconPencil,
-            label: '일과 수정',
+            label: context.l10n.routineSwipeEdit,
             onTap: edit,
             // 수정이 아주 조금 늦게 따라 나온다. 둘이 동시에 뜨면 한 덩어리로 보인다.
             progress: progress,

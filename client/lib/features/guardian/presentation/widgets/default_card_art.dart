@@ -56,7 +56,7 @@ class DefaultCardPhotoSlot extends StatelessWidget {
                 ),
                 SizedBox(height: space.xs.h),
                 Text(
-                  '사진 추가',
+                  context.l10n.cardAddPhoto,
                   style: context.typo.body.copyWith(color: colors.textSecondary),
                 ),
               ],
@@ -75,7 +75,7 @@ class DefaultCardPhotoSlot extends StatelessWidget {
     return AppPressable(
       onTap: tap,
       scaleDown: AppPressable.scaleCard,
-      semanticLabel: '사진 추가',
+      semanticLabel: context.l10n.cardAddPhoto,
       child: slot,
     );
   }

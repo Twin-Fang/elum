@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -144,7 +145,9 @@ class _ActionCardViewState extends State<ActionCardView> {
       scaleDown: AppPressable.scaleIcon,
       // 읽는 중에 다시 누르면 멈춘다. 흐려지는 것만으로는
       // 화면 낭독기에 닿지 않아 이름도 함께 바꾼다 (#339).
-      semanticLabel: widget.isSpeaking ? '읽기 멈추기' : '소리로 듣기',
+      semanticLabel: widget.isSpeaking
+          ? context.l10n.cardSpeakStop
+          : context.l10n.cardSpeak,
       // SVG가 25×25인데 Figma 배치는 24×24다. 크기만 지정하면
       // 비율이 눌려 아이콘이 찌그러진다 — contain으로 비율을 지킨다.
       // 정사각형 아이콘이라 가로세로 모두 .w로 맞춘다
@@ -470,7 +473,7 @@ class _DeleteButton extends StatelessWidget {
     return AppPressable(
       onTap: onTap,
       scaleDown: AppPressable.scaleIcon,
-      semanticLabel: '이 카드 지우기',
+      semanticLabel: context.l10n.cardDeleteLabel,
       // 정사각형 버튼 — 가로세로 모두 .w
       child: SizedBox(
         width: _touchSize.w,

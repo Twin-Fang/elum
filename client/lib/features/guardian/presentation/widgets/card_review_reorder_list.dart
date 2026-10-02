@@ -7,6 +7,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
@@ -505,13 +506,14 @@ class _CardReviewReorderListState extends State<CardReviewReorderList>
     );
 
     if (canMove) {
+      final l10n = context.l10n;
       child = Semantics(
         customSemanticsActions: {
           if (index > 0)
-            const CustomSemanticsAction(label: '앞으로 옮기기'): () =>
+            CustomSemanticsAction(label: l10n.cardMoveForward): () =>
                 _nudge(index, -1),
           if (index < widget.cards.length - 1)
-            const CustomSemanticsAction(label: '뒤로 옮기기'): () =>
+            CustomSemanticsAction(label: l10n.cardMoveBackward): () =>
                 _nudge(index, 1),
         },
         child: child,

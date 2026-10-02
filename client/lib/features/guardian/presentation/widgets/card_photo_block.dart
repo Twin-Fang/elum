@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_dialog.dart';
@@ -169,11 +170,14 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
     if (rootContext.mounted) {
       await showElumDialog<void>(
         context: rootContext,
-        title: '사진을 올리지 못했어요.\n${failure.message}',
+        title: rootContext.l10n.cardPhotoUploadFailedDialog(failure.message),
         code: failure.code,
         icon: ElumDialogIcon.alert,
-        actions: const [
-          ElumDialogAction(label: '확인', tone: ElumDialogTone.danger),
+        actions: [
+          ElumDialogAction(
+            label: rootContext.l10n.commonConfirm,
+            tone: ElumDialogTone.danger,
+          ),
         ],
       );
     }
@@ -281,7 +285,7 @@ class _Chip extends StatelessWidget {
 
     return AppPressable(
       onTap: onTap,
-      semanticLabel: '사진 바꾸기',
+      semanticLabel: context.l10n.cardPhotoChange,
       child: SizedBox(
         key: CardPhotoBlock.chipTapKey,
         height: 48.h < 48 ? 48 : 48.h,
@@ -302,7 +306,7 @@ class _Chip extends StatelessWidget {
                 ),
                 SizedBox(width: 6.w),
                 Text(
-                  '사진 바꾸기',
+                  context.l10n.cardPhotoChange,
                   style: context.typo.editChipLabel.copyWith(
                     color: colors.textPrimary,
                     fontWeight: FontWeight.w700,
@@ -367,7 +371,7 @@ class _UploadingOverlay extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             Text(
-              '사진을 올리고 있어요',
+              context.l10n.cardPhotoUploading,
               style: context.typo.body.copyWith(color: colors.textPrimary),
             ),
           ],
@@ -396,7 +400,7 @@ class _FailureOverlay extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '사진을 올리지 못했어요',
+              context.l10n.cardPhotoUploadFailed,
               style: typo.body.copyWith(
                 color: colors.textPrimary,
                 fontWeight: FontWeight.w700,
@@ -417,7 +421,9 @@ class _FailureOverlay extends StatelessWidget {
             SizedBox(height: 8.h),
             AppPressable(
               onTap: onButton,
-              semanticLabel: dismiss ? '확인' : '다시 하기',
+              semanticLabel: dismiss
+                  ? context.l10n.commonConfirm
+                  : context.l10n.cardPhotoRetry,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
                 child: Container(
@@ -442,7 +448,9 @@ class _FailureOverlay extends StatelessWidget {
                         SizedBox(width: 6.w),
                       ],
                       Text(
-                        dismiss ? '확인' : '다시 하기',
+                        dismiss
+                            ? context.l10n.commonConfirm
+                            : context.l10n.cardPhotoRetry,
                         style: typo.editChipLabel.copyWith(
                           color: colors.textPrimary,
                           fontWeight: FontWeight.w700,

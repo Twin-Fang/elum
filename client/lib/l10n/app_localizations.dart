@@ -2335,6 +2335,624 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{label} 지우기'**
   String questionClearLabel(String label);
+
+  /// 카드 검토 화면 머리. count 는 만들어진 카드 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{카드 {count}개를 만들었어요}}'**
+  String cardReviewMade(int count);
+
+  /// 카드 검토 화면 보상 줄의 앞말. 뒤에 보상 글이 이어 붙으므로 끝의 공백을 유지한다
+  ///
+  /// In ko, this message translates to:
+  /// **'완료 시 '**
+  String get cardReviewRewardLead;
+
+  /// 카드 검토 화면에서 보상을 아직 안 정했을 때 보상 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'보상 정하기'**
+  String get cardReviewRewardSet;
+
+  /// 카드 검토 화면 아래 순서 변경 안내 한 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 길게 눌러 순서를 변경하세요'**
+  String get cardReviewReorderHint;
+
+  /// 카드 검토 화면 도구 버튼. 순서 변경 모드를 켜고 끈다
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 순서 변경'**
+  String get cardReviewToolReorder;
+
+  /// 카드 검토 화면 도구 버튼. 지금 보는 카드를 고친다
+  ///
+  /// In ko, this message translates to:
+  /// **'이 카드 수정'**
+  String get cardReviewToolEdit;
+
+  /// 카드 검토 화면 도구 버튼. 카드를 새로 더한다
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 추가'**
+  String get cardReviewToolAdd;
+
+  /// 카드 순서 변경 모드의 위쪽 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 순서 변경'**
+  String get cardReviewReorderTitle;
+
+  /// 카드 순서 변경 모드의 닫기 버튼 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'순서 변경 취소'**
+  String get cardReviewReorderCancel;
+
+  /// 카드 검토 화면의 빈 상태 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'만들어진 카드가 없어요'**
+  String get cardReviewEmptyTitle;
+
+  /// 카드 검토 화면의 빈 상태 안내. 제보 추적용 에러 코드를 문구에 함께 적는다
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 만들어 주세요 (E-CARD)'**
+  String get cardReviewEmptyBody;
+
+  /// 카드 순서 바꾸기에서 낭독기 사용자가 쓰는 동작 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'앞으로 옮기기'**
+  String get cardMoveForward;
+
+  /// 카드 순서 바꾸기에서 낭독기 사용자가 쓰는 동작 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'뒤로 옮기기'**
+  String get cardMoveBackward;
+
+  /// 카드를 읽어 주는 중일 때 소리 버튼의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'읽기 멈추기'**
+  String get cardSpeakStop;
+
+  /// 카드를 읽어 주는 소리 버튼의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'소리로 듣기'**
+  String get cardSpeak;
+
+  /// 카드 검토 화면 카드 위 지우기 버튼의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'이 카드 지우기'**
+  String get cardDeleteLabel;
+
+  /// 사진이 없는 카드의 그림 자리 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 추가'**
+  String get cardAddPhoto;
+
+  /// 카드 크게 보기 팝업의 배경 막 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 닫기'**
+  String get cardViewerBarrierLabel;
+
+  /// 카드 크게 보기에서 소리 재생이 실패했을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'소리를 재생하지 못했어요'**
+  String get cardViewerSoundFailedTitle;
+
+  /// 카드 크게 보기에서 소리 재생이 실패했을 때 서버 문구가 없을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'휴대폰 소리를 켜고 다시 눌러주세요'**
+  String get cardViewerSoundFailedFallback;
+
+  /// 카드 크게 보기의 닫기 버튼 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 닫기'**
+  String get cardViewerClose;
+
+  /// 카드 수정 시트가 추가 모드일 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'새로운 카드 추가'**
+  String get cardEditAddTitle;
+
+  /// 카드 수정 시트가 수정 모드일 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 수정'**
+  String get cardEditTitle;
+
+  /// 카드 수정 시트의 제목 입력칸 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'제목'**
+  String get cardEditFieldTitle;
+
+  /// 카드 수정 시트 제목 입력칸 안내 글
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 제목을 적어주세요'**
+  String get cardEditTitleHint;
+
+  /// 카드 수정 시트의 설명 입력칸 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'설명'**
+  String get cardEditFieldDescription;
+
+  /// 카드 수정 시트 설명 입력칸 안내 글
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 설명을 적어주세요'**
+  String get cardEditDescriptionHint;
+
+  /// 카드 수정 시트가 추가 모드일 때 아래 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'추가하기'**
+  String get cardEditAddAction;
+
+  /// 카드 수정 시트가 수정 모드일 때 아래 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get cardEditDoneAction;
+
+  /// 사진 권한 안내 화면에서 사진 찍기로 바꾸는 아래 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 찍기'**
+  String get cardPhotoPermissionTake;
+
+  /// 사진 권한 안내 화면에서 갤러리로 바꾸는 아래 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'갤러리에서 고르기'**
+  String get cardPhotoPermissionGallery;
+
+  /// 사진 권한 안내 화면의 휴대폰 설정 열기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 열기'**
+  String get cardPhotoPermissionOpenSettings;
+
+  /// 카메라 권한이 막혔을 때 사진 권한 안내 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'카메라를 쓸 수 없어요'**
+  String get cardPhotoPermissionCameraTitle;
+
+  /// 사진 접근 권한이 막혔을 때 사진 권한 안내 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 볼 수 없어요'**
+  String get cardPhotoPermissionGalleryTitle;
+
+  /// 카메라 권한이 막혔을 때 사진 권한 안내 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'휴대폰 설정에서 카메라를 켜면 사진을 찍을 수 있어요'**
+  String get cardPhotoPermissionCameraBody;
+
+  /// 사진 접근 권한이 막혔을 때 사진 권한 안내 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'휴대폰 설정에서 사진 접근을 켜면 고를 수 있어요'**
+  String get cardPhotoPermissionGalleryBody;
+
+  /// 사진 권한 안내에서 휴대폰 설정을 못 열었을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'설정을 열지 못했어요'**
+  String get cardPhotoSettingsFailedTitle;
+
+  /// 사진 권한 안내에서 휴대폰 설정을 못 열었을 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'휴대폰 설정에서 직접 켜 주세요'**
+  String get cardPhotoSettingsFailedFallback;
+
+  /// 사진 고르기 시트의 사진 찍기 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 찍기'**
+  String get cardPhotoSourceTake;
+
+  /// 사진 고르기 시트의 갤러리 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'갤러리에서 고르기'**
+  String get cardPhotoSourceGallery;
+
+  /// 사진 고르기 시트 아래 개인정보 주의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'얼굴이나 개인정보가 나오지 않게 찍어 주세요'**
+  String get cardPhotoSourcePrivacy;
+
+  /// 사진 올리기가 실패했는데 자리가 없어 팝업으로 알릴 때 제목. message 는 실패 사유(서버 문구가 우선)
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 올리지 못했어요.\n{message}'**
+  String cardPhotoUploadFailedDialog(String message);
+
+  /// 카드 그림 아래 사진 바꾸기 칩의 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 바꾸기'**
+  String get cardPhotoChange;
+
+  /// 사진을 올리는 동안 그림 위에 덮이는 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 올리고 있어요'**
+  String get cardPhotoUploading;
+
+  /// 사진 올리기 실패 때 그림 위에 덮이는 안내 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 올리지 못했어요'**
+  String get cardPhotoUploadFailed;
+
+  /// 사진 올리기 실패 안내의 다시 하기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 하기'**
+  String get cardPhotoRetry;
+
+  /// AI 크레딧 카드 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 AI 생성'**
+  String get creditCardTitle;
+
+  /// AI 크레딧 카드가 불러오는 중일 때 낭독 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 AI 생성 사용량을 불러오고 있어요'**
+  String get creditCardLoading;
+
+  /// AI 크레딧 카드 조회가 실패했을 때 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'사용량을 불러오지 못했어요'**
+  String get creditCardLoadFailed;
+
+  /// AI 크레딧 카드 조회 실패의 다시 하기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 하기'**
+  String get creditCardRetry;
+
+  /// AI 크레딧 카드에서 일과를 만드는 중일 때 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 만들고 있어요'**
+  String get creditGenerating;
+
+  /// AI 크레딧 카드에서 크레딧을 다 썼을 때 첫 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 크레딧을 모두 사용했어요'**
+  String get creditExhausted;
+
+  /// AI 크레딧 카드에서 크레딧을 다 썼을 때 둘째 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'만든 일과 보기와 직접 고치기는 계속 할 수 있어요'**
+  String get creditExhaustedStillOk;
+
+  /// AI 크레딧 카드의 안내 버튼 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 크레딧 안내'**
+  String get creditInfoLabel;
+
+  /// AI 크레딧 카드의 낭독용 숫자 줄. available 은 남은 수, weekly 는 주간 지급량
+  ///
+  /// In ko, this message translates to:
+  /// **'{available} / {weekly} 크레딧 남음'**
+  String creditAmountLeft(int available, int weekly);
+
+  /// AI 크레딧 카드에서 큰 숫자(남은 수) 뒤에 이어 붙는 작은 글자. 앞의 공백을 유지한다
+  ///
+  /// In ko, this message translates to:
+  /// **' / {weekly} 크레딧 남음'**
+  String creditAmountRest(int weekly);
+
+  /// AI 크레딧이 다시 채워지는 시각 줄. reset 은 시각 문구(예: 9월 28일(월) 0시)
+  ///
+  /// In ko, this message translates to:
+  /// **'{reset}에 다시 채워져요'**
+  String aiCreditResetLine(String reset);
+
+  /// AI 크레딧 안내 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 크레딧은 이렇게 줄어요'**
+  String get creditCostTitle;
+
+  /// AI 크레딧 단가 안내. textCost 는 일과 글 단가, imageCost 는 카드 그림 한 장 단가(서버 값)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 글을 만들 때 {textCost, plural, other{{textCost}개}}, 그림이 완성된 카드 1장마다 {imageCost, plural, other{{imageCost}개}}씩 써요.'**
+  String creditCostLine(int textCost, int imageCost);
+
+  /// AI 크레딧 안내 팝업의 둘째 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧이 남아 있을 때 시작한 일과는 그림이 많아도 끝까지 만들어져요.'**
+  String get creditCostKeepGoing;
+
+  /// AI 크레딧 안내 팝업의 셋째 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'매주 월요일 0시에 다시 채워져요.'**
+  String get creditWeeklyRefill;
+
+  /// 보호자 홈의 새 일과 만들기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'새로운 일과 만들기'**
+  String get routineCreateButton;
+
+  /// 일과 줄을 밀었을 때 나오는 삭제 버튼 기본 글자
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 삭제'**
+  String get routineSwipeDelete;
+
+  /// 일과 줄을 밀었을 때 나오는 수정 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 수정'**
+  String get routineSwipeEdit;
+
+  /// 일과 입력 화면의 추천 목록이 실패했을 때 한 줄(서버 문구가 우선)
+  ///
+  /// In ko, this message translates to:
+  /// **'추천을 불러오지 못했어요 · 다시 시도'**
+  String get routineSuggestLoadFailed;
+
+  /// 일과 만들기 흐름 위쪽 집 버튼 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'홈으로 가기'**
+  String get routineFlowHomeLabel;
+
+  /// 일과 만들기 흐름 위쪽 임시저장 버튼의 글자와 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'임시저장'**
+  String get routineFlowDraftLabel;
+
+  /// 일과 만들기를 나가는 팝업의 머무는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'계속 만들기'**
+  String get routineFlowLeaveStay;
+
+  /// 일과 만들기를 나가는 팝업의 나가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'나가기'**
+  String get routineFlowLeaveConfirm;
+
+  /// 일과 만들기를 나가는 팝업 제목. 적은 내용이 사라지는 경우
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 만들기를 그만둘까요?'**
+  String get routineLeaveDiscardTitle;
+
+  /// 일과 만들기를 나가는 팝업 설명. 적은 내용이 사라지는 경우
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 나가면 적은 내용은 남지 않아요'**
+  String get routineLeaveDiscardMessage;
+
+  /// 카드를 만드는 중에 나가는 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'임시저장에 두고 나갈까요?'**
+  String get routineLeaveDraftWhenReadyTitle;
+
+  /// 카드를 만드는 중에 나가는 팝업 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요'**
+  String get routineLeaveDraftWhenReadyMessage;
+
+  /// 카드 검토 화면에서 나가는 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'임시저장에 두고 나갈까요?'**
+  String get routineLeaveDraftTitle;
+
+  /// 카드 검토 화면에서 나가는 팝업 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'설정의 임시저장에서\n이어서 만들 수 있어요'**
+  String get routineLeaveDraftMessage;
+
+  /// 저장한 일과를 고치다 나가는 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하지 않고 나갈까요?'**
+  String get routineLeaveEditTitle;
+
+  /// 저장한 일과를 고치다 나가는 팝업 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'뺀 카드는 저장하기를 눌러야 빠져요'**
+  String get routineLeaveEditMessage;
+
+  /// 일과 줄 아래 보상 글자 앞의 이름표
+  ///
+  /// In ko, this message translates to:
+  /// **'완료 시'**
+  String get routineTileRewardLabel;
+
+  /// 지난 일과 줄의 다시하기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 다시하기'**
+  String get routineTileRerun;
+
+  /// 일과 상세 시트에서 카드 순서 저장이 실패했을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'순서를 저장하지 못했어요'**
+  String get routineDetailReorderFailedTitle;
+
+  /// 일과 상세 시트에서 카드 순서 저장이 실패했을 때 서버 문구가 없을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get routineDetailReorderFailedFallback;
+
+  /// 지난 일과 상세 시트 아래 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 다시하기'**
+  String get routineDetailRerun;
+
+  /// 오늘 일과 상세 시트 아래 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'편집하기'**
+  String get routineDetailEdit;
+
+  /// 일과 상세 시트의 카드 줄 낭독 힌트
+  ///
+  /// In ko, this message translates to:
+  /// **'눌러서 카드 크게 보기'**
+  String get routineDetailOpenHint;
+
+  /// 일과 상세 시트에서 보상을 정하지 않았을 때 보상 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 완료 후 보상이 없어요'**
+  String get routineDetailNoReward;
+
+  /// 보상 직접 입력칸 안내 글
+  ///
+  /// In ko, this message translates to:
+  /// **'예) 유튜브 10분 보기'**
+  String get rewardInputHint;
+
+  /// 보호자 홈에서 일과 순서 저장이 실패했을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'순서를 저장하지 못했어요'**
+  String get todayRoutineReorderFailedTitle;
+
+  /// 보호자 홈에서 일과 순서 저장이 실패했을 때 서버 문구가 없을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get todayRoutineReorderFailedFallback;
+
+  /// 보호자 홈에서 일과를 지우기 전 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 삭제하실건가요?'**
+  String get todayRoutineDeleteConfirmTitle;
+
+  /// 보호자 홈 일과 삭제 확인 팝업의 삭제 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제'**
+  String get todayRoutineDeleteAction;
+
+  /// 보호자 홈에서 일과 삭제가 실패했을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 삭제하지 못했어요'**
+  String get todayRoutineDeleteFailedTitle;
+
+  /// 보호자 홈에서 일과 삭제가 실패했을 때 서버 문구가 없을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get todayRoutineDeleteFailedFallback;
+
+  /// 보호자 홈 오늘 일과 조회가 실패했을 때 서버 문구가 없을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 불러오지 못했어요'**
+  String get todayRoutineLoadFailedFallback;
+
+  /// 지난 일과를 오늘로 복제하다 실패했을 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 다시 만들지 못했어요'**
+  String get todayRoutineRerunFailedTitle;
+
+  /// 지난 일과를 오늘로 복제하다 실패했을 때 서버 문구가 없을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get todayRoutineRerunFailedFallback;
+
+  /// 지난 일과를 오늘 일과로 복제한 뒤의 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를) 로 쓴다)
+  ///
+  /// In ko, this message translates to:
+  /// **'{title}을(를) 오늘 일과에 담았어요'**
+  String todayRoutineCopied(String title);
+
+  /// 보호자 홈 지난 일과 조회가 실패했을 때 서버 문구가 없을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 일과를 불러오지 못했어요'**
+  String get todayRoutinePastLoadFailedFallback;
+
+  /// 보호자 홈 오늘 일과가 0건일 때 첫 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 만든 일과가 없어요'**
+  String get todayRoutineEmptyTitle;
+
+  /// 보호자 홈 오늘 일과가 0건일 때 둘째 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘의 첫 행동카드를 만들어보세요'**
+  String get todayRoutineEmptyHint;
+
+  /// 보호자 홈 지난 일과가 0건일 때 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 일과가 없어요'**
+  String get todayRoutinePastEmpty;
+
+  /// 홈 코치마크 1단계. *로 감싼 부분이 강조된다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 수행할 *새로운\n일과를 만들 수 있어요*'**
+  String get homeCoachCreate;
+
+  /// 홈 코치마크 2단계. *로 감싼 부분이 강조된다
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 *왼쪽으로 스와이프*하면\n*수정하거나 삭제*할 수 있어요'**
+  String get homeCoachSwipe;
+
+  /// 홈 코치마크 3단계. *로 감싼 부분이 강조된다
+  ///
+  /// In ko, this message translates to:
+  /// **'캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*'**
+  String get homeCoachSwitch;
 }
 
 class _AppLocalizationsDelegate

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/show_failure.dart';
@@ -47,7 +48,7 @@ class StepCardViewer extends ConsumerStatefulWidget {
       context: context,
       barrierDismissible: true,
       // 배경 막을 읽어 줄 이름 — 기본값은 영어 `Dismiss` 로 읽힌다 (#393 S7)
-      barrierLabel: '카드 닫기',
+      barrierLabel: context.l10n.cardViewerBarrierLabel,
       // 시안 `Scrim` — 검정 70%
       barrierColor: Colors.black.withValues(alpha: 0.7),
       transitionDuration: const Duration(milliseconds: 180),
@@ -113,8 +114,8 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
       showFailure(
         context,
         null,
-        title: '소리를 재생하지 못했어요',
-        fallback: '휴대폰 소리를 켜고 다시 눌러주세요',
+        title: context.l10n.cardViewerSoundFailedTitle,
+        fallback: context.l10n.cardViewerSoundFailedFallback,
         fallbackCode: 'E-TTS',
       );
     }
@@ -159,7 +160,7 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
             child: AppPressable(
               onTap: () => Navigator.of(context).maybePop(),
               scaleDown: AppPressable.scaleIcon,
-              semanticLabel: '카드 닫기',
+              semanticLabel: context.l10n.cardViewerClose,
               child: SizedBox(
                 width: StepCardViewer.closeSize.w,
                 height: StepCardViewer.closeSize.w,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -195,7 +196,7 @@ class _RewardLine extends StatelessWidget {
     return Row(
       children: [
         Text(
-          '완료 시',
+          context.l10n.routineTileRewardLabel,
           style: typo.routineTileMeta.copyWith(color: colors.routineTileLabel),
         ),
         SizedBox(width: _labelGap.w),
@@ -238,7 +239,7 @@ class _RerunButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(_radius.w),
         ),
         child: Text(
-          '일과 다시하기',
+          context.l10n.routineTileRerun,
           style: context.typo.chipLabel.copyWith(color: colors.routineTileLabel),
         ),
       ),

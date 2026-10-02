@@ -1235,4 +1235,343 @@ class AppLocalizationsJa extends AppLocalizations {
   String questionClearLabel(String label) {
     return '$label 지우기';
   }
+
+  @override
+  String cardReviewMade(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '카드 $count개를 만들었어요',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cardReviewRewardLead => '완료 시 ';
+
+  @override
+  String get cardReviewRewardSet => '보상 정하기';
+
+  @override
+  String get cardReviewReorderHint => '카드를 길게 눌러 순서를 변경하세요';
+
+  @override
+  String get cardReviewToolReorder => '카드 순서 변경';
+
+  @override
+  String get cardReviewToolEdit => '이 카드 수정';
+
+  @override
+  String get cardReviewToolAdd => '카드 추가';
+
+  @override
+  String get cardReviewReorderTitle => '카드 순서 변경';
+
+  @override
+  String get cardReviewReorderCancel => '순서 변경 취소';
+
+  @override
+  String get cardReviewEmptyTitle => '만들어진 카드가 없어요';
+
+  @override
+  String get cardReviewEmptyBody => '다시 만들어 주세요 (E-CARD)';
+
+  @override
+  String get cardMoveForward => '앞으로 옮기기';
+
+  @override
+  String get cardMoveBackward => '뒤로 옮기기';
+
+  @override
+  String get cardSpeakStop => '읽기 멈추기';
+
+  @override
+  String get cardSpeak => '소리로 듣기';
+
+  @override
+  String get cardDeleteLabel => '이 카드 지우기';
+
+  @override
+  String get cardAddPhoto => '사진 추가';
+
+  @override
+  String get cardViewerBarrierLabel => '카드 닫기';
+
+  @override
+  String get cardViewerSoundFailedTitle => '소리를 재생하지 못했어요';
+
+  @override
+  String get cardViewerSoundFailedFallback => '휴대폰 소리를 켜고 다시 눌러주세요';
+
+  @override
+  String get cardViewerClose => '카드 닫기';
+
+  @override
+  String get cardEditAddTitle => '새로운 카드 추가';
+
+  @override
+  String get cardEditTitle => '카드 수정';
+
+  @override
+  String get cardEditFieldTitle => '제목';
+
+  @override
+  String get cardEditTitleHint => '카드 제목을 적어주세요';
+
+  @override
+  String get cardEditFieldDescription => '설명';
+
+  @override
+  String get cardEditDescriptionHint => '카드 설명을 적어주세요';
+
+  @override
+  String get cardEditAddAction => '추가하기';
+
+  @override
+  String get cardEditDoneAction => '완료';
+
+  @override
+  String get cardPhotoPermissionTake => '사진 찍기';
+
+  @override
+  String get cardPhotoPermissionGallery => '갤러리에서 고르기';
+
+  @override
+  String get cardPhotoPermissionOpenSettings => '설정 열기';
+
+  @override
+  String get cardPhotoPermissionCameraTitle => '카메라를 쓸 수 없어요';
+
+  @override
+  String get cardPhotoPermissionGalleryTitle => '사진을 볼 수 없어요';
+
+  @override
+  String get cardPhotoPermissionCameraBody => '휴대폰 설정에서 카메라를 켜면 사진을 찍을 수 있어요';
+
+  @override
+  String get cardPhotoPermissionGalleryBody => '휴대폰 설정에서 사진 접근을 켜면 고를 수 있어요';
+
+  @override
+  String get cardPhotoSettingsFailedTitle => '설정을 열지 못했어요';
+
+  @override
+  String get cardPhotoSettingsFailedFallback => '휴대폰 설정에서 직접 켜 주세요';
+
+  @override
+  String get cardPhotoSourceTake => '사진 찍기';
+
+  @override
+  String get cardPhotoSourceGallery => '갤러리에서 고르기';
+
+  @override
+  String get cardPhotoSourcePrivacy => '얼굴이나 개인정보가 나오지 않게 찍어 주세요';
+
+  @override
+  String cardPhotoUploadFailedDialog(String message) {
+    return '사진을 올리지 못했어요.\n$message';
+  }
+
+  @override
+  String get cardPhotoChange => '사진 바꾸기';
+
+  @override
+  String get cardPhotoUploading => '사진을 올리고 있어요';
+
+  @override
+  String get cardPhotoUploadFailed => '사진을 올리지 못했어요';
+
+  @override
+  String get cardPhotoRetry => '다시 하기';
+
+  @override
+  String get creditCardTitle => '이번 주 AI 생성';
+
+  @override
+  String get creditCardLoading => '이번 주 AI 생성 사용량을 불러오고 있어요';
+
+  @override
+  String get creditCardLoadFailed => '사용량을 불러오지 못했어요';
+
+  @override
+  String get creditCardRetry => '다시 하기';
+
+  @override
+  String get creditGenerating => '일과를 만들고 있어요';
+
+  @override
+  String get creditExhausted => '이번 주 크레딧을 모두 사용했어요';
+
+  @override
+  String get creditExhaustedStillOk => '만든 일과 보기와 직접 고치기는 계속 할 수 있어요';
+
+  @override
+  String get creditInfoLabel => 'AI 크레딧 안내';
+
+  @override
+  String creditAmountLeft(int available, int weekly) {
+    return '$available / $weekly 크레딧 남음';
+  }
+
+  @override
+  String creditAmountRest(int weekly) {
+    return ' / $weekly 크레딧 남음';
+  }
+
+  @override
+  String aiCreditResetLine(String reset) {
+    return '$reset에 다시 채워져요';
+  }
+
+  @override
+  String get creditCostTitle => 'AI 크레딧은 이렇게 줄어요';
+
+  @override
+  String creditCostLine(int textCost, int imageCost) {
+    String _temp0 = intl.Intl.pluralLogic(
+      textCost,
+      locale: localeName,
+      other: '$textCost개',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      imageCost,
+      locale: localeName,
+      other: '$imageCost개',
+    );
+    return '일과 글을 만들 때 $_temp0, 그림이 완성된 카드 1장마다 $_temp1씩 써요.';
+  }
+
+  @override
+  String get creditCostKeepGoing => '크레딧이 남아 있을 때 시작한 일과는 그림이 많아도 끝까지 만들어져요.';
+
+  @override
+  String get creditWeeklyRefill => '매주 월요일 0시에 다시 채워져요.';
+
+  @override
+  String get routineCreateButton => '새로운 일과 만들기';
+
+  @override
+  String get routineSwipeDelete => '일과 삭제';
+
+  @override
+  String get routineSwipeEdit => '일과 수정';
+
+  @override
+  String get routineSuggestLoadFailed => '추천을 불러오지 못했어요 · 다시 시도';
+
+  @override
+  String get routineFlowHomeLabel => '홈으로 가기';
+
+  @override
+  String get routineFlowDraftLabel => '임시저장';
+
+  @override
+  String get routineFlowLeaveStay => '계속 만들기';
+
+  @override
+  String get routineFlowLeaveConfirm => '나가기';
+
+  @override
+  String get routineLeaveDiscardTitle => '일과 만들기를 그만둘까요?';
+
+  @override
+  String get routineLeaveDiscardMessage => '지금 나가면 적은 내용은 남지 않아요';
+
+  @override
+  String get routineLeaveDraftWhenReadyTitle => '임시저장에 두고 나갈까요?';
+
+  @override
+  String get routineLeaveDraftWhenReadyMessage =>
+      '카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요';
+
+  @override
+  String get routineLeaveDraftTitle => '임시저장에 두고 나갈까요?';
+
+  @override
+  String get routineLeaveDraftMessage => '설정의 임시저장에서\n이어서 만들 수 있어요';
+
+  @override
+  String get routineLeaveEditTitle => '저장하지 않고 나갈까요?';
+
+  @override
+  String get routineLeaveEditMessage => '뺀 카드는 저장하기를 눌러야 빠져요';
+
+  @override
+  String get routineTileRewardLabel => '완료 시';
+
+  @override
+  String get routineTileRerun => '일과 다시하기';
+
+  @override
+  String get routineDetailReorderFailedTitle => '순서를 저장하지 못했어요';
+
+  @override
+  String get routineDetailReorderFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get routineDetailRerun => '일과 다시하기';
+
+  @override
+  String get routineDetailEdit => '편집하기';
+
+  @override
+  String get routineDetailOpenHint => '눌러서 카드 크게 보기';
+
+  @override
+  String get routineDetailNoReward => '일과 완료 후 보상이 없어요';
+
+  @override
+  String get rewardInputHint => '예) 유튜브 10분 보기';
+
+  @override
+  String get todayRoutineReorderFailedTitle => '순서를 저장하지 못했어요';
+
+  @override
+  String get todayRoutineReorderFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get todayRoutineDeleteConfirmTitle => '일과를 삭제하실건가요?';
+
+  @override
+  String get todayRoutineDeleteAction => '삭제';
+
+  @override
+  String get todayRoutineDeleteFailedTitle => '일과를 삭제하지 못했어요';
+
+  @override
+  String get todayRoutineDeleteFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get todayRoutineLoadFailedFallback => '일과를 불러오지 못했어요';
+
+  @override
+  String get todayRoutineRerunFailedTitle => '일과를 다시 만들지 못했어요';
+
+  @override
+  String get todayRoutineRerunFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String todayRoutineCopied(String title) {
+    return '$title을(를) 오늘 일과에 담았어요';
+  }
+
+  @override
+  String get todayRoutinePastLoadFailedFallback => '지난 일과를 불러오지 못했어요';
+
+  @override
+  String get todayRoutineEmptyTitle => '아직 만든 일과가 없어요';
+
+  @override
+  String get todayRoutineEmptyHint => '오늘의 첫 행동카드를 만들어보세요';
+
+  @override
+  String get todayRoutinePastEmpty => '지난 일과가 없어요';
+
+  @override
+  String get homeCoachCreate => '이룸이가 수행할 *새로운\n일과를 만들 수 있어요*';
+
+  @override
+  String get homeCoachSwipe => '일과를 *왼쪽으로 스와이프*하면\n*수정하거나 삭제*할 수 있어요';
+
+  @override
+  String get homeCoachSwitch => '캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*';
 }

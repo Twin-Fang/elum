@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/character_badge.dart';
 import '../../../../core/widgets/coach_mark_overlay.dart';
@@ -51,7 +52,7 @@ class _HomeCoachMarkState extends ConsumerState<HomeCoachMark> {
       case HomeCoachStep.createRoutine:
         return CoachMarkStep(
           target: widget.createKey,
-          message: '이룸이가 수행할 *새로운\n일과를 만들 수 있어요*',
+          message: context.l10n.homeCoachCreate,
           holeRadius: _pillRadius.h,
           // 버튼이 자기 빛(글로우)을 갖고 있다. 칼같이 오리면 그 빛이 어둡게 잘린다.
           feather: 8.w,
@@ -66,7 +67,7 @@ class _HomeCoachMarkState extends ConsumerState<HomeCoachMark> {
                 .w;
         return CoachMarkStep(
           target: widget.swipeKey,
-          message: '일과를 *왼쪽으로 스와이프*하면\n*수정하거나 삭제*할 수 있어요',
+          message: context.l10n.homeCoachSwipe,
           align: CoachMarkAlign.end,
           holeRadius: context.space.cardRadius,
           // 밀려 나간 카드가 화면 왼쪽 끝에서 잘려 보이는 것까지 밝힌다.
@@ -89,7 +90,7 @@ class _HomeCoachMarkState extends ConsumerState<HomeCoachMark> {
       case HomeCoachStep.switchMode:
         return CoachMarkStep(
           target: widget.modeKey,
-          message: '캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*',
+          message: context.l10n.homeCoachSwitch,
           align: CoachMarkAlign.end,
           holeRadius: CharacterBadge.radius.w,
           // 시안의 화살표는 배지 바닥에서 3 떨어져 시작한다. 구멍을 키운 것이 아니다 —

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../data/card_photo.dart';
@@ -61,23 +62,23 @@ class CardPhotoSourceSheet extends StatelessWidget {
               SizedBox(height: 12.h),
               _Row(
                 icon: Icons.photo_camera_outlined,
-                label: '사진 찍기',
+                label: context.l10n.cardPhotoSourceTake,
                 onTap: () => Navigator.of(context).pop(PhotoSource.camera),
               ),
               _Row(
                 icon: Icons.photo_library_outlined,
-                label: '갤러리에서 고르기',
+                label: context.l10n.cardPhotoSourceGallery,
                 onTap: () => Navigator.of(context).pop(PhotoSource.gallery),
               ),
               _Row(
                 icon: Icons.close_rounded,
-                label: '닫기',
+                label: context.l10n.commonClose,
                 onTap: () => Navigator.of(context).pop(),
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 24.h),
                 child: Text(
-                  '얼굴이나 개인정보가 나오지 않게 찍어 주세요',
+                  context.l10n.cardPhotoSourcePrivacy,
                   style: typo.bodySmall.copyWith(
                     color: colors.textSecondary,
                     height: 1.3,

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
@@ -114,8 +115,8 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
     showFailure(
       context,
       failure,
-      title: '순서를 저장하지 못했어요',
-      fallback: '잠시 후 다시 시도해주세요',
+      title: context.l10n.routineDetailReorderFailedTitle,
+      fallback: context.l10n.routineDetailReorderFailedFallback,
       fallbackCode: 'E-STEP-ORDER',
     );
   }
@@ -285,7 +286,9 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                       : RoutineSheetAction.edit,
                 ),
                 child: Text(
-                  widget.isPast ? '일과 다시하기' : '편집하기',
+                  widget.isPast
+                      ? context.l10n.routineDetailRerun
+                      : context.l10n.routineDetailEdit,
                   style: typo.sheetActionLabel.copyWith(color: colors.surface),
                 ),
               ),
@@ -536,7 +539,7 @@ class _StepCardState extends State<_StepCard>
                           onTap: widget.onOpen,
                           child: Semantics(
                             button: widget.onOpen != null,
-                            hint: '눌러서 카드 크게 보기',
+                            hint: context.l10n.routineDetailOpenHint,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -726,7 +729,9 @@ class _RewardRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Text(
-                hasReward ? routine.rewardText.trim() : '일과 완료 후 보상이 없어요',
+                hasReward
+                    ? routine.rewardText.trim()
+                    : context.l10n.routineDetailNoReward,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: typo.sheetStepTitle.copyWith(

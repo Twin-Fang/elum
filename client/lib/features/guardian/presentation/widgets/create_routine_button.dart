@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -129,7 +130,7 @@ class CreateRoutineButton extends StatelessWidget {
                         ),
                         SizedBox(width: _sparkleGap.w),
                         Text(
-                          '새로운 일과 만들기',
+                          context.l10n.routineCreateButton,
                           style: context.typo.routineCreateLabel
                               .copyWith(color: white),
                         ),
