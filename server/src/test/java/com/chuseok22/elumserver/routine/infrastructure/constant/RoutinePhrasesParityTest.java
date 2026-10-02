@@ -27,6 +27,12 @@ class RoutinePhrasesParityTest {
   }
 
   @Test
+  @DisplayName("접미사 없는 routine-phrases.properties 는 없다 — 있으면 부모 체인으로 대체 순서가 조용히 깨진다")
+  void noBasePhrasesFile() {
+    assertThat(getClass().getResource("/i18n/routine-phrases.properties")).isNull();
+  }
+
+  @Test
   @DisplayName("ko 추천 일과 58개가 작업 전과 같은 순서·같은 글자다")
   void koSuggestions_identicalToLegacy() throws Exception {
     JsonNode legacy = golden().get("suggestions");

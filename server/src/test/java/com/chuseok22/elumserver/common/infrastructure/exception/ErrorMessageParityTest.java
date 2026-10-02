@@ -87,6 +87,12 @@ class ErrorMessageParityTest {
     }
   }
 
+  @Test
+  @DisplayName("접미사 없는 messages.properties 는 없다 — 있으면 ResourceBundle 부모 체인이 ja 요청에 en 보다 먼저 그 값을 줘 대체 순서가 조용히 깨진다")
+  void noBaseMessagesFile() {
+    assertThat(getClass().getResource("/i18n/messages.properties")).isNull();
+  }
+
   @ParameterizedTest
   @EnumSource(AppLocale.class)
   @DisplayName("언어마다 문구 파일이 있다 — 번역 값은 계획 5에서 채운다")

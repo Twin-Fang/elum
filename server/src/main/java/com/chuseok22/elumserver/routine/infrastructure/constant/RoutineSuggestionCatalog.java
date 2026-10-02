@@ -15,7 +15,7 @@ import java.util.List;
 //  2) 아동·학교 전제를 두지 않는다. 성인 사용자에게 "학교에 가요"가 뜨면 안 된다.
 public final class RoutineSuggestionCatalog {
 
-  /** 한국어 목록(기존 이름 유지). 헤더 없는 앱이 받는 목록이다. */
+  /** 한국어 기준 전체 목록(기존 이름 유지). 응답은 {@link #forLocale} 로 나가고 이 값은 테스트가 기준으로 쓴다. */
   // 클래스 로드 때 굳는 값이라 테스트 훅(standard())이 아닌 실제 클래스패스 문구로 만든다.
   public static final List<RoutineSuggestionResponse> ALL = RoutinePhrases.classpath().suggestions(AppLocale.KO);
 

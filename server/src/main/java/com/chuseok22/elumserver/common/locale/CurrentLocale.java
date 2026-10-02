@@ -7,7 +7,7 @@ import java.util.function.Supplier;
  *
  * <p>{@link AcceptLanguageFilter} 가 요청 앞에서 심고 뒤에서 비운다. 요청 밖(스케줄러·기동·테스트)은 KO 다.
  * {@code AiCallContext} 와 같은 이유로 InheritableThreadLocal 을 쓴다 — 이미지 생성이 가상 스레드로 병렬 실행되어도
- * 요청 언어가 따라간다. 풀의 스레드는 필터가 매번 비운다.
+ * 요청 언어가 따라간다. 요청 스레드는 필터가 끝에서 비운다.
  */
 public final class CurrentLocale {
 

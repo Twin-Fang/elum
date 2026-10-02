@@ -116,6 +116,11 @@ public class Routine extends BaseEntity {
   @Column(name = "language", nullable = false, length = 8, columnDefinition = "varchar(8) not null default 'ko'")
   private AppLocale language = AppLocale.KO;
 
+  /** 응답에 싣는 언어 코드. 언어가 없는 옛 행은 ko 로 본다. */
+  public String languageCode() {
+    return language == null ? AppLocale.KO.code() : language.code();
+  }
+
   private LocalDateTime completedAt;
 
   @OneToMany(mappedBy = "routine", cascade = CascadeType.ALL, orphanRemoval = true)

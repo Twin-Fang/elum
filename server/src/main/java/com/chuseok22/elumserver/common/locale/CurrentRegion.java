@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * <p>접속 IP 로는 판정하지 않는다. IP 판정이 지역별 공지에 더 흔한 방식이지만 GeoIP DB 도입·갱신 운영이 필요하고,
  * 공지를 잘못 보여주는 피해는 가벼워서 그 비용을 들이지 않는다.
  *
- * <p>{@link CurrentLocale} 과 같은 이유로 InheritableThreadLocal 을 쓴다. 풀의 스레드는 {@link RegionFilter} 가 매번 비운다.
+ * <p>{@link CurrentLocale} 과 같은 이유로 InheritableThreadLocal 을 쓴다. 요청 스레드는 {@link RegionFilter} 가 끝에서 비운다.
  */
 public final class CurrentRegion {
 

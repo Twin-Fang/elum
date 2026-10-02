@@ -1,6 +1,5 @@
 package com.chuseok22.elumserver.routine.application.dto.response;
 
-import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -200,7 +199,7 @@ public record RoutineResponse(
       // 프록시의 getId 는 이룸이를 읽지 않는다
       routine.getProfile() == null ? null : routine.getProfile().getId(),
       // 마이그레이션 전 코드로 만든 행은 null 일 수 있어 ko 로 떨어뜨린다
-      routine.getLanguage() == null ? AppLocale.KO.code() : routine.getLanguage().code()
+      routine.languageCode()
     );
   }
 }

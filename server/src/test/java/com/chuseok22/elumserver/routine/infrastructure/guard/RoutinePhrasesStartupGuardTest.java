@@ -27,10 +27,17 @@ class RoutinePhrasesStartupGuardTest {
   }
 
   private static Map<String, String> full(String tag) {
+    return full(tag, RoutinePhrasesStartupGuard.MIN_SUGGESTIONS);
+  }
+
+  private static Map<String, String> full(String tag, int suggestions) {
     Map<String, String> map = new HashMap<>();
-    map.put("suggestion.01.icon", "I");
-    map.put("suggestion.01.text", tag + "-text");
-    map.put("suggestion.01.example", tag + "-example");
+    for (int i = 1; i <= suggestions; i++) {
+      String n = "%02d".formatted(i);
+      map.put("suggestion." + n + ".icon", "I");
+      map.put("suggestion." + n + ".text", tag + "-text" + n);
+      map.put("suggestion." + n + ".example", tag + "-example" + n);
+    }
     for (String goal : List.of("PREPARE_ITEMS", "PREPARE_NEW")) {
       map.put("fallback." + goal + ".question", tag + "-q");
       for (int i = 1; i <= 3; i++) {
@@ -117,9 +124,10 @@ class RoutinePhrasesStartupGuardTest {
   @DisplayName("ko 추천 번호에 구멍이 있으면 구멍 뒤 문구가 잘리므로 서버가 뜨지 않는다 — 어느 키인지 알린다")
   void koSuggestionNumberHole_blocksStartup() {
     Map<String, String> ko = full("ko");
-    ko.put("suggestion.03.icon", "I");
-    ko.put("suggestion.03.text", "ko-text3");
-    ko.put("suggestion.03.example", "ko-example3");
+    // 02 를 빼면 03 이후는 번호가 끊겨 읽히지 않는다(개수 하한과 별개로 구멍을 알린다).
+    ko.remove("suggestion.02.icon");
+    ko.remove("suggestion.02.text");
+    ko.remove("suggestion.02.example");
 
     assertThatThrownBy(() -> guard("ko", Map.of(AppLocale.KO, ko)).verify())
       .isInstanceOf(IllegalStateException.class)
@@ -148,6 +156,29 @@ class RoutinePhrasesStartupGuardTest {
     assertThatThrownBy(() -> guard("ko", Map.of(AppLocale.KO, ko)).verify())
       .isInstanceOf(IllegalStateException.class)
       .hasMessageContaining("fallback.PREPARE_NEW.question");
+  }
+
+  @Test
+  @DisplayName("ko 추천이 하한보다 하나 적은 49개면 서버가 뜨지 않는다 — 몇 개인지 알린다")
+  void koSuggestionsBelowMinimum_blocksStartup() {
+    assertThatThrownBy(() -> guard("ko", Map.of(AppLocale.KO, full("ko", 49))).verify())
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessageContaining("ko 추천 일과 49개")
+      .hasMessageContaining("최소 50개");
+  }
+
+  @Test
+  @DisplayName("ko 추천이 하한과 같은 50개면 뜬다")
+  void koSuggestionsAtMinimum_starts() {
+    assertThatCode(() -> guard("ko", Map.of(AppLocale.KO, full("ko", 50))).verify()).doesNotThrowAnyException();
+  }
+
+  @Test
+  @DisplayName("ko 추천이 하나도 없어도 서버가 뜨지 않는다")
+  void koSuggestionsZero_blocksStartup() {
+    assertThatThrownBy(() -> guard("ko", Map.of(AppLocale.KO, full("ko", 0))).verify())
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessageContaining("ko 추천 일과 0개");
   }
 
   @Test

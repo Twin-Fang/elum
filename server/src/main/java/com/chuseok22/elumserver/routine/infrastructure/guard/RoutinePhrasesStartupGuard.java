@@ -28,6 +28,9 @@ import org.springframework.stereotype.Component;
 public class RoutinePhrasesStartupGuard implements ApplicationRunner {
 
   private static final int MAX_KEYS_IN_MESSAGE = 5;
+  // 현재 ko 추천은 58개다. 정확한 개수를 박지 않아 추가는 막지 않고, 꼬리가 크게 잘린 파일만 막는다
+  // (번호 구멍이 아닌 끝부분 삭제는 다른 검사로 못 잡고, 운영 빌드는 테스트를 건너뛴다).
+  static final int MIN_SUGGESTIONS = 50;
 
   private final EnabledLocales enabledLocales;
   private final RoutinePhrases phrases;
@@ -56,7 +59,8 @@ public class RoutinePhrasesStartupGuard implements ApplicationRunner {
 
     List<String> numbering = target.koNumberingProblems();
     Map<AppLocale, List<String>> incomplete = target.incompleteLocales(locales);
-    if (numbering.isEmpty() && incomplete.isEmpty()) {
+    int suggestionCount = target.suggestions(AppLocale.KO).size();
+    if (numbering.isEmpty() && incomplete.isEmpty() && suggestionCount >= MIN_SUGGESTIONS) {
       log.info("[RoutinePhrasesStartupGuard] 서버 문구 확인 완료: {}", locales);
       return;
     }
@@ -64,6 +68,9 @@ public class RoutinePhrasesStartupGuard implements ApplicationRunner {
     StringBuilder message = new StringBuilder("서버 문구 파일(i18n/routine-phrases_*.properties)에 문제가 있어 기동을 멈춥니다.");
     if (!numbering.isEmpty()) {
       message.append(" [ko 번호 구멍: ").append(summarize(numbering)).append("]");
+    }
+    if (suggestionCount < MIN_SUGGESTIONS) {
+      message.append(" [ko 추천 일과 ").append(suggestionCount).append("개: 최소 ").append(MIN_SUGGESTIONS).append("개 필요]");
     }
     incomplete.forEach((locale, keys) -> message
       .append(" [").append(locale.code()).append(" 빈 키: ").append(summarize(keys)).append("]"));

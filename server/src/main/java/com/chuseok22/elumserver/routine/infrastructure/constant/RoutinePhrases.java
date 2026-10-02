@@ -147,8 +147,8 @@ public final class RoutinePhrases {
 
   /** 요청 → en → ko 중 한 벌이 완성된 첫 언어. KO 요청은 ko 만 본다. 아무것도 없으면 ko. */
   private AppLocale resolve(AppLocale requested) {
-    List<AppLocale> chain = requested == AppLocale.KO ? List.of(AppLocale.KO) : requested.fallbackChain();
-    for (AppLocale candidate : chain) {
+    // KO 는 fallbackChain() 이 [KO] 만 주므로 영어로 새지 않는다.
+    for (AppLocale candidate : requested.fallbackChain()) {
       if (missingKeys(candidate).isEmpty()) {
         return candidate;
       }
