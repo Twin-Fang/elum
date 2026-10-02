@@ -5,7 +5,7 @@
 ## 릴리스 노트
 
 * **버그 수정**
-  * 앱을 처음 열면 추적 허용 안내가 바로 나타나도록 고쳤어요
+  * 일과 카드를 보는 중 순서가 바뀌어도 보던 카드가 유지돼요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
