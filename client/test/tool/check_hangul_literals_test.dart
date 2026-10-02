@@ -133,6 +133,69 @@ void main() {
     });
   });
 
+  group('개발자용 호출은 리터럴 단위로만 건너뛴다', () {
+    test('같은 줄의 다른 리터럴은 검사한다 — Key 와 사용자 문구', () {
+      expect(hitLines("ElumButton(key: Key('cta'), label: '다음')"), [1]);
+      expect(hitLines("ElumButton(key: const ValueKey('다음'), label: '다음')"), [
+        1,
+      ]);
+    });
+
+    test('같은 줄의 assert 가 사용자 문구를 가리지 않는다', () {
+      expect(hitLines("Text('확인했어요'); assert(true);"), [1]);
+      expect(hitLines("assert(true); Text('확인했어요');"), [1]);
+    });
+
+    test('같은 줄의 로그·throw 도 사용자 문구를 가리지 않는다', () {
+      expect(hitLines("debugPrint('로그'); Text('확인했어요');"), [1]);
+      expect(hitLines("AppLogger.info('로그'); Text('확인했어요');"), [1]);
+      expect(hitLines("if (a) throw StateError('메시지'); else Text('확인했어요');"), [
+        1,
+      ]);
+    });
+
+    test('호출을 닫고 나면 같은 줄의 뒤 리터럴은 사용자 문구다', () {
+      expect(hitLines("x(debugPrint('로그'), '확인했어요')"), [1]);
+    });
+
+    test('개발자용 리터럴은 놔둔다', () {
+      expect(scanLines("throw StateError('메시지');"), isEmpty);
+      expect(scanLines("debugPrint('로그');"), isEmpty);
+      expect(scanLines("assert(x, '메시지');"), isEmpty);
+      expect(scanLines("AppLogger.error('실패', e);"), isEmpty);
+      expect(scanLines("log('로그');"), isEmpty);
+      expect(scanLines("print('로그');"), isEmpty);
+      expect(scanLines("final k = const Key('광고 틀');"), isEmpty);
+      expect(scanLines("throw '메시지';"), isEmpty);
+      expect(scanLines("throw MyFailure('메시지');"), isEmpty);
+      expect(scanLines("@Deprecated('안내')\nint a = 1;"), isEmpty);
+    });
+
+    test('여러 줄에 걸친 개발자용 호출의 둘째 줄도 놔둔다', () {
+      const source =
+          "throw StateError(\n"
+          "  '메시지');\n"
+          "debugPrint(\n"
+          "  '[cost] 로그 '\n"
+          "  '이어서 \${a ? \"가\" : \"나\"}');\n"
+          "assert(\n"
+          "  a == null || (b == null),\n"
+          "  '메시지',\n"
+          ");\n"
+          "Text(\n"
+          "  '진짜');";
+      expect(hitLines(source), [11]);
+    });
+
+    test('개발자용 호출 인자 안의 중첩 호출은 사용자 문구일 수 있어 검사한다', () {
+      expect(hitLines("debugPrint(foo('가나'))"), [1]);
+    });
+
+    test('rethrow·식별자 끝이 throw 인 이름은 개발자용이 아니다', () {
+      expect(hitLines("final s = mythrow('가나');"), [1]);
+    });
+  });
+
   group('경계', () {
     test('이스케이프된 따옴표는 문자열을 끝내지 않는다', () {
       expect(hitLines(r"final s = 'it\'s 확인';"), [1]);
