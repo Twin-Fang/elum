@@ -56,9 +56,35 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     open: () => _router.push(Routes.inviteEnter),
   );
 
+  /// 보호자 휴대폰이 지금 어느 화면에 있는지 남긴다 (#532).
+  ///
+  /// 이룸이 화면으로 가는 길이 여럿이라(보호자 홈 버튼·일과 완료 뒤 등) 화면마다 저장하면
+  /// 하나를 빠뜨리기 쉽다. 라우터가 옮길 때마다 여기 한 곳에서 본다.
+  void _rememberScreen() {
+    final storage = ref.read(localStorageProvider);
+    // 이룸이 전용 휴대폰은 늘 이룸이 화면이다 — 따로 기억할 것이 없다
+    if (storage.isElumiDevice) return;
+    final path = _router.routerDelegate.currentConfiguration.uri.path;
+    final bool onElumi;
+    if (path == Routes.child || path.startsWith('${Routes.child}/')) {
+      onElumi = true;
+    } else if (path == Routes.guardian ||
+        path.startsWith('${Routes.guardian}/')) {
+      onElumi = false;
+    } else {
+      // 모드 전환·설정 밖 화면은 어느 쪽도 아니다. 마지막 값을 그대로 둔다.
+      return;
+    }
+    storage.setResumeOnElumiScreen(onElumi).catchError((Object e) {
+      // 저장에 실패해도 화면은 그대로 쓸 수 있다. 다음에 켤 때 보호자 홈이 열릴 뿐이다.
+      debugPrint('[E-SCREEN-SAVE] 마지막 화면 저장 실패: $e');
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _router.routerDelegate.addListener(_rememberScreen);
     // 추적 허용(ATT)은 광고 요청이 아니라 앱을 열자마자 묻는다. 광고가 안 뜨는 경로로 쓰는
     // 사람도 팝업을 보게 하려는 것이다(#519 심사 2.1). 첫 프레임을 그린 뒤 불러야 팝업이 뜬다.
     // 이룸이 전용 휴대폰은 광고를 보여 주지 않으므로 묻지 않는다.
@@ -66,6 +92,12 @@ class _ElumAppState extends ConsumerState<ElumApp> {
       if (!mounted || ref.read(localStorageProvider).isElumiDevice) return;
       AdConsent.requestOnLaunch();
     });
+  }
+
+  @override
+  void dispose() {
+    _router.routerDelegate.removeListener(_rememberScreen);
+    super.dispose();
   }
 
   @override
@@ -133,9 +165,9 @@ class _ElumAppState extends ConsumerState<ElumApp> {
             // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다 (이슈 #279).
             // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
             child: DevToolsOverlay(
-            // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
-            // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
-            onNavigate: _router.go,
+              // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
+              // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
+              onNavigate: _router.go,
               child: child ?? const SizedBox.shrink(),
             ),
           ),

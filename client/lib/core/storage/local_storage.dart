@@ -77,6 +77,18 @@ abstract interface class LocalStorage {
 
   Future<void> clearSelectedRole();
 
+  /// 보호자 휴대폰이 마지막에 **이룸이 화면**에 있었는가 (#532).
+  ///
+  /// 한 휴대폰을 보호자와 이룸이가 같이 쓰면, 보호자가 이룸이 화면으로 넘겨 준 뒤 휴대폰을
+  /// 껐다 켜도 이룸이 화면이어야 한다. 이 값이 없으면 시작 화면이 매번 보호자 홈을 열어
+  /// 이룸이가 암호 없이 보호자 화면을 보게 된다.
+  ///
+  /// ⚠️ [isElumiDevice]와 다르다. 그쪽은 연결로 붙은 **이룸이 전용 휴대폰**이고,
+  /// 이 값은 보호자 휴대폰이 지금 어느 화면을 띄우고 있는지다.
+  bool get resumeOnElumiScreen;
+
+  Future<void> setResumeOnElumiScreen(bool v);
+
   Future<void> setPin(String v);
   Future<String?> getPin();
 
@@ -186,6 +198,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kElumiDevice = 'isElumiDevice';
   static const _kElumiLinkLost = 'isElumiLinkLost';
   static const _kSelectedRole = 'selectedRole';
+  static const _kResumeElumiScreen = 'resumeOnElumiScreen';
   static const _kAccessToken = 'accessToken';
   static const _kProgressPrefix = 'progress.';
   static const _kPendingSync = 'progress.pending';
@@ -457,6 +470,17 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> clearSelectedRole() async => _prefs.remove(_kSelectedRole);
 
   @override
+  bool get resumeOnElumiScreen => _prefs.getBool(_kResumeElumiScreen) ?? false;
+
+  @override
+  Future<void> setResumeOnElumiScreen(bool v) async {
+    // 화면을 옮길 때마다 불린다. 같은 값이면 쓰지 않는다 — 로그만 쌓인다.
+    if (resumeOnElumiScreen == v) return;
+    AppLogger.storageWrite(_kResumeElumiScreen, '$v');
+    await _prefs.setBool(_kResumeElumiScreen, v);
+  }
+
+  @override
   Future<void> clearChildProfile() async {
     for (final key in [
       _kNickname,
@@ -492,6 +516,8 @@ class SharedPrefsStorage implements LocalStorage {
       _kElumiDevice,
       _kElumiLinkLost,
       _kSelectedRole,
+      // 다음에 로그인한 사람이 이룸이 화면에서 시작하면 안 된다 (#532)
+      _kResumeElumiScreen,
     ]) {
       await _prefs.remove(key);
     }
@@ -613,6 +639,14 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> clearSelectedRole() async => _role = null;
 
+  bool _resumeElumiScreen = false;
+
+  @override
+  bool get resumeOnElumiScreen => _resumeElumiScreen;
+
+  @override
+  Future<void> setResumeOnElumiScreen(bool v) async => _resumeElumiScreen = v;
+
   @override
   Future<void> setPin(String v) async => _pin = v;
 
@@ -662,7 +696,8 @@ class InMemoryStorage implements LocalStorage {
   String? get cachedClientTuningJson => _cachedTuning;
 
   @override
-  Future<void> setCachedClientTuningJson(String json) async => _cachedTuning = json;
+  Future<void> setCachedClientTuningJson(String json) async =>
+      _cachedTuning = json;
 
   @override
   String? get cachedConsentJson => _cachedConsent;
@@ -711,6 +746,7 @@ class InMemoryStorage implements LocalStorage {
     _elumi = false;
     _elumiLinkLost = false;
     _role = null;
+    _resumeElumiScreen = false;
     _progress.clear();
     _pendingSync = const [];
     _cachedToday = null;
