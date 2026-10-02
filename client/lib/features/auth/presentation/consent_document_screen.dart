@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../domain/consent_body.dart';
@@ -90,7 +91,12 @@ class ConsentDocumentScreen extends StatelessWidget {
             // 첫 화면 밖이라 시안과 맞대는 자리에는 걸리지 않는다.
             SizedBox(height: space.lg.h),
             Text(
-              '${item.required ? '필수' : '선택'} · 버전 ${item.version}',
+              context.l10n.consentDocumentMeta(
+                item.required
+                    ? context.l10n.consentRequiredTag
+                    : context.l10n.consentOptionalTag,
+                item.version,
+              ),
               style: context.typo.caption.copyWith(color: colors.textSecondary),
             ),
             SizedBox(height: space.xl.h),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -79,7 +80,9 @@ class ConsentChip extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        item.required ? '[필수] ${item.label}' : '[선택] ${item.label}',
+                        item.required
+                            ? context.l10n.consentChipRequired(item.label)
+                            : context.l10n.consentChipOptional(item.label),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         // Figma 칩 텍스트는 #000000이다. textPrimary가 아니다.

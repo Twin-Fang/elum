@@ -174,5 +174,113 @@
   "@rewardPresetWalk": { "description": "보상 프리셋 칩" },
 
   "rewardPresetCustom": "직접 입력",
-  "@rewardPresetCustom": { "description": "프리셋에 없는 보상을 직접 적는 칩" }
+  "@rewardPresetCustom": { "description": "프리셋에 없는 보상을 직접 적는 칩" },
+
+  "roleGuardianWord": "보호자",
+  "@roleGuardianWord": { "description": "역할 카드 제목에서 색이 다른 앞부분(민트). 뒤에 roleLabelSuffix 가 이어 붙는다" },
+
+  "roleElumiWord": "이룸이",
+  "@roleElumiWord": { "description": "역할 카드 제목에서 색이 다른 앞부분(주황)" },
+
+  "roleLabelSuffix": "가 사용해요",
+  "@roleLabelSuffix": { "description": "역할 카드 제목의 나머지. 앞부분과 이어 붙여 `보호자가 사용해요` 가 된다" },
+
+  "roleGuardianDescription": "일과를 만들고 관리해요",
+  "@roleGuardianDescription": { "description": "보호자 역할 카드 설명" },
+
+  "roleElumiDescription": "일과를 실천해요",
+  "@roleElumiDescription": { "description": "이룸이 역할 카드 설명" },
+
+  "roleSelectTitle": "이 휴대폰은 누가\n사용하나요?",
+  "@roleSelectTitle": { "description": "역할 선택 화면 제목. 줄바꿈 위치까지 문구의 일부" },
+
+  "roleSelectDescription": "보호자모드와 이룸이모드가 나눠져 있어요",
+  "@roleSelectDescription": { "description": "역할 선택 화면 부제" },
+
+  "loginKakaoButton": "카카오로 로그인",
+  "@loginKakaoButton": { "description": "카카오 로그인 버튼" },
+
+  "loginNaverButton": "네이버로 로그인",
+  "@loginNaverButton": { "description": "네이버 로그인 버튼" },
+
+  "loginAppleButton": "Apple로 로그인",
+  "@loginAppleButton": { "description": "Apple 로그인 버튼. 애플이 허용한 승인 문구라 번역 단계에서 공식 문구를 따른다" },
+
+  "loginConnecting": "연결하고 있어요",
+  "@loginConnecting": { "description": "소셜 로그인 진행 중 버튼 문구" },
+
+  "loginLastUsed": "최근 로그인",
+  "@loginLastUsed": { "description": "마지막으로 쓴 로그인 수단 표시" },
+
+  "loginDuplicateTitle": "이미 가입된 계정이에요",
+  "@loginDuplicateTitle": { "description": "같은 이메일로 다른 수단으로 가입돼 있을 때의 제목" },
+
+  "loginDuplicateFallback": "처음 쓰신 방법으로 로그인해주세요",
+  "@loginDuplicateFallback": { "description": "같은 경우의 안내(서버 문구가 이긴다)" },
+
+  "loginOfflineTitle": "인터넷 연결을 확인해주세요",
+  "@loginOfflineTitle": { "description": "로그인 중 오프라인일 때의 제목" },
+
+  "loginOfflineFallback": "연결한 뒤 다시 해주세요",
+  "@loginOfflineFallback": { "description": "같은 경우의 안내" },
+
+  "loginFailedTitle": "로그인하지 못했어요",
+  "@loginFailedTitle": { "description": "로그인 실패의 제목" },
+
+  "loginFailedFallback": "잠시 후 다시 시도해주세요",
+  "@loginFailedFallback": { "description": "로그인 실패의 안내(서버 문구가 이긴다)" },
+
+  "consentTitle": "약관에 동의해주세요",
+  "@consentTitle": { "description": "약관 동의 화면 제목(불러오는 중·본문 공통)" },
+
+  "consentLoading": "약관을 불러오고 있어요",
+  "@consentLoading": { "description": "약관을 읽어 오는 동안의 안내(동의 화면·약관 목록)" },
+
+  "consentSaving": "저장하고 있어요",
+  "@consentSaving": { "description": "동의를 저장하는 동안 버튼 문구" },
+
+  "consentSaveFailed": "동의를 저장하지 못했어요. 다시 해주세요",
+  "@consentSaveFailed": { "description": "동의 저장 실패의 기본 문구(서버 문구가 이긴다). 뒤에 에러 코드가 붙는다" },
+
+  "consentDescriptionReady": "항목을 눌러 상세 내용을 볼 수 있어요",
+  "@consentDescriptionReady": { "description": "필수 항목을 모두 켰을 때의 부제" },
+
+  "consentDescriptionNeeded": "서비스 사용을 위해 약관 동의가 필요해요",
+  "@consentDescriptionNeeded": { "description": "필수 항목이 남았을 때의 부제(다음 버튼이 꺼진 이유)" },
+
+  "consentAllAgree": "서비스 이용약관 전체 동의",
+  "@consentAllAgree": { "description": "전체 동의 버튼" },
+
+  "consentRequiredTag": "필수",
+  "@consentRequiredTag": { "description": "약관 행의 필수 표시. 약관 문서 화면의 머리 줄에도 쓴다" },
+
+  "consentOptionalTag": "선택",
+  "@consentOptionalTag": { "description": "약관 행의 선택 표시. 약관 문서 화면의 머리 줄에도 쓴다" },
+
+  "consentChipRequired": "[필수] {label}",
+  "@consentChipRequired": {
+    "description": "약관 칩의 필수 항목",
+    "placeholders": { "label": { "type": "String" } }
+  },
+
+  "consentChipOptional": "[선택] {label}",
+  "@consentChipOptional": {
+    "description": "약관 칩의 선택 항목",
+    "placeholders": { "label": { "type": "String" } }
+  },
+
+  "consentDocumentMeta": "{label} · 버전 {version}",
+  "@consentDocumentMeta": {
+    "description": "약관 문서 화면 끝의 줄. label 은 consentRequiredTag·consentOptionalTag 중 하나라 번역가가 순서·구분자를 바꿀 수 있다",
+    "placeholders": { "label": { "type": "String" }, "version": { "type": "String" } }
+  },
+
+  "consentListTitle": "약관 및 개인정보처리방침",
+  "@consentListTitle": { "description": "약관 목록 화면 제목" },
+
+  "consentGroupRequired": "필수항목",
+  "@consentGroupRequired": { "description": "약관 목록의 필수 묶음 제목" },
+
+  "consentGroupOptional": "선택항목",
+  "@consentGroupOptional": { "description": "약관 목록의 선택 묶음 제목" }
 }

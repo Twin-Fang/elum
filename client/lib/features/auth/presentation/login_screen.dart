@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/app_status/app_status_repository.dart';
 import '../../../core/assets/app_assets.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -88,6 +89,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _signIn(OAuthProvider provider) async {
+    // SDK await 뒤에는 context 를 쓰지 않으려고 문구 묶음을 먼저 잡는다.
+    final l10n = context.l10n;
     setState(() => _pending = provider);
 
     final repo = ref.read(authRepositoryProvider);
@@ -135,15 +138,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       case AuthOutcome.emailConflict:
         await _alert(
           result,
-          title: '이미 가입된 계정이에요',
-          fallback: '처음 쓰신 방법으로 로그인해주세요',
+          title: l10n.loginDuplicateTitle,
+          fallback: l10n.loginDuplicateFallback,
           fallbackCode: 'E-DUP',
         );
       case AuthOutcome.offline:
         await _alert(
           result,
-          title: '인터넷 연결을 확인해주세요',
-          fallback: '연결한 뒤 다시 해주세요',
+          title: l10n.loginOfflineTitle,
+          fallback: l10n.loginOfflineFallback,
           fallbackCode: 'E-NET',
         );
       // 사용자에게는 넷 다 같은 말이다. **코드만 다르다** — 제보를 받았을 때
@@ -151,29 +154,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       case AuthOutcome.failedSdk:
         await _alert(
           result,
-          title: '로그인하지 못했어요',
-          fallback: '잠시 후 다시 시도해주세요',
+          title: l10n.loginFailedTitle,
+          fallback: l10n.loginFailedFallback,
           fallbackCode: 'E-AUTH-SDK',
         );
       case AuthOutcome.failedToken:
         await _alert(
           result,
-          title: '로그인하지 못했어요',
-          fallback: '잠시 후 다시 시도해주세요',
+          title: l10n.loginFailedTitle,
+          fallback: l10n.loginFailedFallback,
           fallbackCode: 'E-AUTH-TOKEN',
         );
       case AuthOutcome.failedApi:
         await _alert(
           result,
-          title: '로그인하지 못했어요',
-          fallback: '잠시 후 다시 시도해주세요',
+          title: l10n.loginFailedTitle,
+          fallback: l10n.loginFailedFallback,
           fallbackCode: 'E-AUTH-API',
         );
       case AuthOutcome.failed:
         await _alert(
           result,
-          title: '로그인하지 못했어요',
-          fallback: '잠시 후 다시 시도해주세요',
+          title: l10n.loginFailedTitle,
+          fallback: l10n.loginFailedFallback,
           fallbackCode: 'E-AUTH',
         );
     }
@@ -259,7 +262,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             _LastUsedSlot(
               show: _lastProvider == OAuthProvider.kakao,
               child: _ProviderButton(
-              label: _pending == OAuthProvider.kakao ? '연결하고 있어요' : '카카오로 로그인',
+              label: _pending == OAuthProvider.kakao
+                  ? context.l10n.loginConnecting
+                  : context.l10n.loginKakaoButton,
               iconAsset: AppAssets.loginKakao,
               backgroundColor: context.colors.loginKakaoBg,
               labelColor: context.colors.loginKakaoLabel,
@@ -271,7 +276,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             _LastUsedSlot(
               show: _lastProvider == OAuthProvider.naver,
               child: _ProviderButton(
-              label: _pending == OAuthProvider.naver ? '연결하고 있어요' : '네이버로 로그인',
+              label: _pending == OAuthProvider.naver
+                  ? context.l10n.loginConnecting
+                  : context.l10n.loginNaverButton,
               iconAsset: AppAssets.loginNaver,
               backgroundColor: context.colors.loginNaverBg,
               labelColor: context.colors.loginNaverLabel,
@@ -302,7 +309,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               _LastUsedSlot(
                 show: _lastProvider == OAuthProvider.apple,
                 child: _ProviderButton(
-                  label: _pending == OAuthProvider.apple ? '연결하고 있어요' : 'Apple로 로그인',
+                  label: _pending == OAuthProvider.apple
+                      ? context.l10n.loginConnecting
+                      : context.l10n.loginAppleButton,
                   iconAsset: AppAssets.loginApple,
                   backgroundColor: context.colors.loginAppleBg,
                   labelColor: context.colors.loginAppleLabel,
@@ -429,7 +438,7 @@ class _LastUsedSlot extends StatelessWidget {
               widthFactor: 1,
               heightFactor: 1,
               child: Text(
-                '최근 로그인',
+                context.l10n.loginLastUsed,
                 maxLines: 1,
                 softWrap: false,
                 style: context.typo.lastLoginBadge.copyWith(

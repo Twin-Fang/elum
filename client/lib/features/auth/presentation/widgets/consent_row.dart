@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -83,7 +84,9 @@ class ConsentRow extends StatelessWidget {
                   SizedBox(
                     width: _badgeSlot.w,
                     child: Text(
-                      item.required ? '필수' : '선택',
+                      item.required
+                          ? context.l10n.consentRequiredTag
+                          : context.l10n.consentOptionalTag,
                       maxLines: 1,
                       softWrap: false,
                       // 필수는 포인트색으로 눈에 걸리게, 선택은 보조색으로 물러난다

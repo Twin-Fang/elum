@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -80,7 +81,7 @@ class ConsentAllAgreeButton extends StatelessWidget {
             ),
             SizedBox(width: _checkToLabel.w),
             Text(
-              '서비스 이용약관 전체 동의',
+              context.l10n.consentAllAgree,
               style: context.typo.consentAllAgree.copyWith(
                 color: checked ? colors.surface : point,
               ),

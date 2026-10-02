@@ -391,6 +391,204 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'직접 입력'**
   String get rewardPresetCustom;
+
+  /// 역할 카드 제목에서 색이 다른 앞부분(민트). 뒤에 roleLabelSuffix 가 이어 붙는다
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자'**
+  String get roleGuardianWord;
+
+  /// 역할 카드 제목에서 색이 다른 앞부분(주황)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이'**
+  String get roleElumiWord;
+
+  /// 역할 카드 제목의 나머지. 앞부분과 이어 붙여 `보호자가 사용해요` 가 된다
+  ///
+  /// In ko, this message translates to:
+  /// **'가 사용해요'**
+  String get roleLabelSuffix;
+
+  /// 보호자 역할 카드 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 만들고 관리해요'**
+  String get roleGuardianDescription;
+
+  /// 이룸이 역할 카드 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 실천해요'**
+  String get roleElumiDescription;
+
+  /// 역할 선택 화면 제목. 줄바꿈 위치까지 문구의 일부
+  ///
+  /// In ko, this message translates to:
+  /// **'이 휴대폰은 누가\n사용하나요?'**
+  String get roleSelectTitle;
+
+  /// 역할 선택 화면 부제
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자모드와 이룸이모드가 나눠져 있어요'**
+  String get roleSelectDescription;
+
+  /// 카카오 로그인 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'카카오로 로그인'**
+  String get loginKakaoButton;
+
+  /// 네이버 로그인 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'네이버로 로그인'**
+  String get loginNaverButton;
+
+  /// Apple 로그인 버튼. 애플이 허용한 승인 문구라 번역 단계에서 공식 문구를 따른다
+  ///
+  /// In ko, this message translates to:
+  /// **'Apple로 로그인'**
+  String get loginAppleButton;
+
+  /// 소셜 로그인 진행 중 버튼 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'연결하고 있어요'**
+  String get loginConnecting;
+
+  /// 마지막으로 쓴 로그인 수단 표시
+  ///
+  /// In ko, this message translates to:
+  /// **'최근 로그인'**
+  String get loginLastUsed;
+
+  /// 같은 이메일로 다른 수단으로 가입돼 있을 때의 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 가입된 계정이에요'**
+  String get loginDuplicateTitle;
+
+  /// 같은 경우의 안내(서버 문구가 이긴다)
+  ///
+  /// In ko, this message translates to:
+  /// **'처음 쓰신 방법으로 로그인해주세요'**
+  String get loginDuplicateFallback;
+
+  /// 로그인 중 오프라인일 때의 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'인터넷 연결을 확인해주세요'**
+  String get loginOfflineTitle;
+
+  /// 같은 경우의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'연결한 뒤 다시 해주세요'**
+  String get loginOfflineFallback;
+
+  /// 로그인 실패의 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'로그인하지 못했어요'**
+  String get loginFailedTitle;
+
+  /// 로그인 실패의 안내(서버 문구가 이긴다)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get loginFailedFallback;
+
+  /// 약관 동의 화면 제목(불러오는 중·본문 공통)
+  ///
+  /// In ko, this message translates to:
+  /// **'약관에 동의해주세요'**
+  String get consentTitle;
+
+  /// 약관을 읽어 오는 동안의 안내(동의 화면·약관 목록)
+  ///
+  /// In ko, this message translates to:
+  /// **'약관을 불러오고 있어요'**
+  String get consentLoading;
+
+  /// 동의를 저장하는 동안 버튼 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하고 있어요'**
+  String get consentSaving;
+
+  /// 동의 저장 실패의 기본 문구(서버 문구가 이긴다). 뒤에 에러 코드가 붙는다
+  ///
+  /// In ko, this message translates to:
+  /// **'동의를 저장하지 못했어요. 다시 해주세요'**
+  String get consentSaveFailed;
+
+  /// 필수 항목을 모두 켰을 때의 부제
+  ///
+  /// In ko, this message translates to:
+  /// **'항목을 눌러 상세 내용을 볼 수 있어요'**
+  String get consentDescriptionReady;
+
+  /// 필수 항목이 남았을 때의 부제(다음 버튼이 꺼진 이유)
+  ///
+  /// In ko, this message translates to:
+  /// **'서비스 사용을 위해 약관 동의가 필요해요'**
+  String get consentDescriptionNeeded;
+
+  /// 전체 동의 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'서비스 이용약관 전체 동의'**
+  String get consentAllAgree;
+
+  /// 약관 행의 필수 표시. 약관 문서 화면의 머리 줄에도 쓴다
+  ///
+  /// In ko, this message translates to:
+  /// **'필수'**
+  String get consentRequiredTag;
+
+  /// 약관 행의 선택 표시. 약관 문서 화면의 머리 줄에도 쓴다
+  ///
+  /// In ko, this message translates to:
+  /// **'선택'**
+  String get consentOptionalTag;
+
+  /// 약관 칩의 필수 항목
+  ///
+  /// In ko, this message translates to:
+  /// **'[필수] {label}'**
+  String consentChipRequired(String label);
+
+  /// 약관 칩의 선택 항목
+  ///
+  /// In ko, this message translates to:
+  /// **'[선택] {label}'**
+  String consentChipOptional(String label);
+
+  /// 약관 문서 화면 끝의 줄. label 은 consentRequiredTag·consentOptionalTag 중 하나라 번역가가 순서·구분자를 바꿀 수 있다
+  ///
+  /// In ko, this message translates to:
+  /// **'{label} · 버전 {version}'**
+  String consentDocumentMeta(String label, String version);
+
+  /// 약관 목록 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'약관 및 개인정보처리방침'**
+  String get consentListTitle;
+
+  /// 약관 목록의 필수 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'필수항목'**
+  String get consentGroupRequired;
+
+  /// 약관 목록의 선택 묶음 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'선택항목'**
+  String get consentGroupOptional;
 }
 
 class _AppLocalizationsDelegate

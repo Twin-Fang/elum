@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
+import '../../../core/network/app_failure.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -44,7 +46,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   final _checked = <String>{};
 
   bool _isSubmitting = false;
-  String? _errorMessage;
+  // 문구가 아니라 실패 자체를 들고 있다가 그릴 때 푼다 — 실패 순간에 문구로 굳히면
+  // 언어가 바뀐 뒤에도 옛 언어로 남는다.
+  AppFailure? _failure;
 
   bool _allRequiredChecked(ConsentBundle bundle) =>
       bundle.requiredItems.every((item) => _checked.contains(item.key));
@@ -75,7 +79,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   Future<void> _submit(ConsentBundle bundle) async {
     setState(() {
       _isSubmitting = true;
-      _errorMessage = null;
+      _failure = null;
     });
 
     final failure = await ref.read(consentRepositoryProvider).agree(
@@ -92,7 +96,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       setState(() {
         _isSubmitting = false;
         // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다 (#352).
-        _errorMessage = failure.describe('동의를 저장하지 못했어요. 다시 해주세요', 'E-CONSENT');
+        _failure = failure;
       });
       return;
     }
@@ -139,14 +143,14 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   /// 약관을 읽어 오는 동안. 골격은 같고 누를 것만 비활성이다.
   Widget _waiting() {
     return ElumScaffold(
-      bottomButton: const ElumButton(label: '다음', onPressed: null),
-      child: const SingleChildScrollView(
+      bottomButton: ElumButton(label: context.l10n.commonNext, onPressed: null),
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElumHeader(
-              title: '약관에 동의해주세요',
-              description: '약관을 불러오고 있어요',
+              title: context.l10n.consentTitle,
+              description: context.l10n.consentLoading,
             ),
           ],
         ),
@@ -160,7 +164,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
 
     return ElumScaffold(
       bottomButton: ElumButton(
-        label: _isSubmitting ? '저장하고 있어요' : '다음',
+        label: _isSubmitting ? context.l10n.consentSaving : context.l10n.commonNext,
         onPressed:
             allRequired && !_isSubmitting ? () => _submit(bundle) : null,
       ),
@@ -169,12 +173,12 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElumHeader(
-              title: '약관에 동의해주세요',
+              title: context.l10n.consentTitle,
               // 부제가 상태를 말한다. 왜 `다음`이 꺼져 있는지 여기서만 알 수 있다 —
               // 고정 문구로 두면 비활성 버튼 앞에서 막힌 사람이 이유를 모른다.
               description: allRequired
-                  ? '항목을 눌러 상세 내용을 볼 수 있어요'
-                  : '서비스 사용을 위해 약관 동의가 필요해요',
+                  ? context.l10n.consentDescriptionReady
+                  : context.l10n.consentDescriptionNeeded,
             ),
             SizedBox(height: _headerToAllAgree.h),
 
@@ -202,10 +206,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
 
             // 디자인에 에러 자리가 없다. 항목 아래 빈 공간(항목 끝 590 → CTA 675)에
             // 둔다 — CTA를 밀지 않고, 실패했을 때만 나타난다.
-            if (_errorMessage != null) ...[
+            if (_failure != null) ...[
               SizedBox(height: space.sm.h),
               Text(
-                _errorMessage!,
+                _failure!.describe(context.l10n.consentSaveFailed, 'E-CONSENT'),
                 style: context.typo.body.copyWith(
                   color: context.colors.textSecondary,
                 ),

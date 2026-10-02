@@ -182,4 +182,109 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get rewardPresetCustom => '직접 입력';
+
+  @override
+  String get roleGuardianWord => '보호자';
+
+  @override
+  String get roleElumiWord => '이룸이';
+
+  @override
+  String get roleLabelSuffix => '가 사용해요';
+
+  @override
+  String get roleGuardianDescription => '일과를 만들고 관리해요';
+
+  @override
+  String get roleElumiDescription => '일과를 실천해요';
+
+  @override
+  String get roleSelectTitle => '이 휴대폰은 누가\n사용하나요?';
+
+  @override
+  String get roleSelectDescription => '보호자모드와 이룸이모드가 나눠져 있어요';
+
+  @override
+  String get loginKakaoButton => '카카오로 로그인';
+
+  @override
+  String get loginNaverButton => '네이버로 로그인';
+
+  @override
+  String get loginAppleButton => 'Apple로 로그인';
+
+  @override
+  String get loginConnecting => '연결하고 있어요';
+
+  @override
+  String get loginLastUsed => '최근 로그인';
+
+  @override
+  String get loginDuplicateTitle => '이미 가입된 계정이에요';
+
+  @override
+  String get loginDuplicateFallback => '처음 쓰신 방법으로 로그인해주세요';
+
+  @override
+  String get loginOfflineTitle => '인터넷 연결을 확인해주세요';
+
+  @override
+  String get loginOfflineFallback => '연결한 뒤 다시 해주세요';
+
+  @override
+  String get loginFailedTitle => '로그인하지 못했어요';
+
+  @override
+  String get loginFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get consentTitle => '약관에 동의해주세요';
+
+  @override
+  String get consentLoading => '약관을 불러오고 있어요';
+
+  @override
+  String get consentSaving => '저장하고 있어요';
+
+  @override
+  String get consentSaveFailed => '동의를 저장하지 못했어요. 다시 해주세요';
+
+  @override
+  String get consentDescriptionReady => '항목을 눌러 상세 내용을 볼 수 있어요';
+
+  @override
+  String get consentDescriptionNeeded => '서비스 사용을 위해 약관 동의가 필요해요';
+
+  @override
+  String get consentAllAgree => '서비스 이용약관 전체 동의';
+
+  @override
+  String get consentRequiredTag => '필수';
+
+  @override
+  String get consentOptionalTag => '선택';
+
+  @override
+  String consentChipRequired(String label) {
+    return '[필수] $label';
+  }
+
+  @override
+  String consentChipOptional(String label) {
+    return '[선택] $label';
+  }
+
+  @override
+  String consentDocumentMeta(String label, String version) {
+    return '$label · 버전 $version';
+  }
+
+  @override
+  String get consentListTitle => '약관 및 개인정보처리방침';
+
+  @override
+  String get consentGroupRequired => '필수항목';
+
+  @override
+  String get consentGroupOptional => '선택항목';
 }
