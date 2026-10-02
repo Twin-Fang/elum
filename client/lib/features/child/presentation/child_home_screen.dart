@@ -23,6 +23,7 @@ import '../../guardian/presentation/widgets/today_routine_section.dart'
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/character.dart';
 import '../application/child_routine_notifier.dart';
+import '../application/routine_auto_refresh.dart';
 import 'mode_switch_screen.dart';
 
 /// 아이에게 보여줄 일과 목록.
@@ -69,63 +70,68 @@ class ChildHomeScreen extends ConsumerWidget {
         ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
     final isElumiDevice = ref.watch(localStorageProvider).isElumiDevice;
 
-    return Scaffold(
-      backgroundColor: context.colors.background,
-      body: SafeArea(
-        child: routines.isEmpty
-            ? Column(
-                children: [
-                  const _TopBar(),
-                  Expanded(
-                    child: _NoRoutine(
-                      childName: childName,
-                      character: character,
-                      isElumiDevice: isElumiDevice,
-                      // 조회가 실패했으면 제보 추적용 코드를 함께 보여준다.
-                      // 아동 화면이라 빨강·경고 아이콘은 쓰지 않는다.
-                      // 코드는 실제로 무엇이 터졌는지를 쓴다 — 연결이 끊긴 것과
-                      // 서버가 막은 것이 같은 코드로 보이면 제보를 못 가린다 (#352).
-                      errorCode: routinesAsync.hasError
-                          ? AppFailure.of(
-                              routinesAsync.error,
-                            ).badgeOr('E-CHLIST')
-                          : null,
-                    ),
-                  ),
-                ],
-              )
-            : SingleChildScrollView(
-                padding: EdgeInsets.only(bottom: space.xl),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    // 보호자가 새 일과를 저장해도 앱을 껐다 켜야 보였다 — 떠 있는 동안 주기 갱신 (#517)
+    return RoutineAutoRefresh(
+      child: Scaffold(
+        backgroundColor: context.colors.background,
+        body: SafeArea(
+          child: routines.isEmpty
+              ? Column(
                   children: [
                     const _TopBar(),
-                    // 시안(1197:6810)은 인사말이 y150 에서 시작한다. 상단 줄 아래(122)에서 28.
-                    SizedBox(height: 28.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: space.screenH),
-                      child: Text(
-                        // Figma 문구 (1197:6810 · 356:5197).
-                        //
-                        // 조사를 '가'로 박아 두었더니 받침 있는 이름에서 **민준가**가
-                        // 나왔다. 이름은 보호자가 직접 적으므로 받침을 보고 고른다.
-                        // 시안이 `할 일들이에요. 힘내봐요!`로 바뀌었다 (#445) — 해요체다.
-                        '오늘 $childName${childName.subjectParticle}\n할 일들이에요. 힘내봐요!',
-                        // 이 화면 인사말은 22다. 빈 상태 제목(24)과 다르다.
-                        style: context.typo.childGreeting.copyWith(
-                          color: context.colors.textPrimary,
-                        ),
+                    Expanded(
+                      child: _NoRoutine(
+                        childName: childName,
+                        character: character,
+                        isElumiDevice: isElumiDevice,
+                        // 조회가 실패했으면 제보 추적용 코드를 함께 보여준다.
+                        // 아동 화면이라 빨강·경고 아이콘은 쓰지 않는다.
+                        // 코드는 실제로 무엇이 터졌는지를 쓴다 — 연결이 끊긴 것과
+                        // 서버가 막은 것이 같은 코드로 보이면 제보를 못 가린다 (#352).
+                        errorCode: routinesAsync.hasError
+                            ? AppFailure.of(
+                                routinesAsync.error,
+                              ).badgeOr('E-CHLIST')
+                            : null,
                       ),
                     ),
-                    // 인사말 아래(202) → 첫 타일(242)
-                    SizedBox(height: 40.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: space.md),
-                      child: _RoutineList(routines: routines),
-                    ),
                   ],
+                )
+              : SingleChildScrollView(
+                  padding: EdgeInsets.only(bottom: space.xl),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const _TopBar(),
+                      // 시안(1197:6810)은 인사말이 y150 에서 시작한다. 상단 줄 아래(122)에서 28.
+                      SizedBox(height: 28.h),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: space.screenH,
+                        ),
+                        child: Text(
+                          // Figma 문구 (1197:6810 · 356:5197).
+                          //
+                          // 조사를 '가'로 박아 두었더니 받침 있는 이름에서 **민준가**가
+                          // 나왔다. 이름은 보호자가 직접 적으므로 받침을 보고 고른다.
+                          // 시안이 `할 일들이에요. 힘내봐요!`로 바뀌었다 (#445) — 해요체다.
+                          '오늘 $childName${childName.subjectParticle}\n할 일들이에요. 힘내봐요!',
+                          // 이 화면 인사말은 22다. 빈 상태 제목(24)과 다르다.
+                          style: context.typo.childGreeting.copyWith(
+                            color: context.colors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      // 인사말 아래(202) → 첫 타일(242)
+                      SizedBox(height: 40.h),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: space.md),
+                        child: _RoutineList(routines: routines),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
@@ -469,9 +475,7 @@ class _NoRoutine extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           Text(
-            isElumiDevice
-                ? '보호자 모드에서 일과를 만들 수 있어요'
-                : '보호자 화면에서 일과를 만들 수 있어요',
+            isElumiDevice ? '보호자 모드에서 일과를 만들 수 있어요' : '보호자 화면에서 일과를 만들 수 있어요',
             style: context.typo.body.copyWith(color: colors.textSecondary),
           ),
           if (errorCode != null) ...[
