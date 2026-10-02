@@ -74,7 +74,7 @@ on:
 # ===================================================================
 env:
   FLUTTER_VERSION: "3.38.9"
-  XCODE_VERSION: "26.0"
+  XCODE_VERSION: "26.6"
   PROJECT_TYPE: "flutter"
   ENV_FILE_PATH: ".env"
   # Flutter 루트 경로(레포 루트 기준). 단일레포면 ".", 모노레포면 "app" 등.

@@ -88,7 +88,7 @@ env:
   # flutter-action이 런타임에 덮어쓴다. 앱 디렉터리는 APP_ROOT로 분리한다.
   APP_ROOT: "client"
   FLUTTER_VERSION: "3.38.9"
-  XCODE_VERSION: "26.0"
+  XCODE_VERSION: "26.6"
   PROJECT_TYPE: "flutter"
 
   # ============================================
