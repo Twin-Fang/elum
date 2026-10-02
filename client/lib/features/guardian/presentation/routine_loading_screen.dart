@@ -18,6 +18,7 @@ import '../application/routine_notifier.dart';
 import '../domain/routine_stage.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// Figma `보호자_새로운 일과 만들기_로딩`.
 ///
@@ -245,7 +246,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
   /// 이미 나간 AI 요청은 되돌릴 수 없고, 결과는 상태에 남아 재진입 시 쓰인다.
   void _handleBack() {
     _navigated = true;
-    context.pop();
+    context.popOrHome();
   }
 
   /// 지금 보여줄 진행률 — 마지막으로 드러난 스텝의 값.

@@ -14,6 +14,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
 import '../application/link_reset.dart';
 import '../data/device_link_repository.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 이룸이 휴대폰의 설정 페이지 (이슈 #363 · #198 19번 · #488).
 ///
@@ -33,10 +34,15 @@ import '../data/device_link_repository.dart';
 /// **않는다** — 이 휴대폰이 그 이룸이를 더는 보지 않게 연결만 끊는다 (명세 §8-5 "로그아웃이 곧 연결 끊기").
 /// 두 줄이 같은 일을 하지만 시안(19번)이 둘을 두고, 사용자가 찾는 말이 달라서 둘 다 둔다. 팝업 문구가 다르다.
 ///
+/// ## 끊기면 로그인 화면으로 간다 (#542)
+///
+/// 이 휴대폰의 이룸이 표식·역할까지 지우고 로그인 화면으로 보낸다. 예전에는 연결 화면으로 보냈는데, 그 아래에
+/// 돌아갈 화면이 없어 뒤로가기로도 앱을 다시 켜도 빠져나올 수 없었다.
+///
 /// ## 실패하면 머문다
 ///
 /// 서버가 연결을 끊은 **뒤에만** 로컬을 비우고 이동한다. 서버에 닿지 못했으면 이 페이지에 머문 채 에러
-/// 코드를 보여준다 — 끊기지도 않았는데 연결 화면으로 가면 보호자 설정에는 계속 `연결됨`이 남는다.
+/// 코드를 보여준다 — 끊기지도 않았는데 로그인 화면으로 가면 보호자 설정에는 계속 `연결됨`이 남는다.
 class ElumiSettingsScreen extends ConsumerStatefulWidget {
   const ElumiSettingsScreen({super.key});
 
@@ -113,9 +119,10 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
       return;
     }
 
-    // 끊겼다 — 연결 암호 넣기로 보낸다 (#206 흐름). 스택을 비우고 가므로 이 페이지도 닫힌다.
-    // 메모리는 이동 뒤에 비운다.
-    goToLinkEnter(router);
+    // 끊겼다 — 로그인 화면으로 보낸다 (#542). 로그아웃은 로그인 화면으로 가는 것이 기본이고, 이 휴대폰도
+    // 소셜 로그인 → 역할 선택 → 연결 순서로 들어왔으므로 같은 길로 다시 들어올 수 있다. 연결 화면으로 보내면
+    // 돌아갈 곳이 없어 갇혔다. go 라 스택이 비워져 이 페이지도 닫힌다. 메모리는 이동 뒤에 비운다.
+    router.go(Routes.login);
     container.forgetLinkedProfile();
   }
 
@@ -123,7 +130,7 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
   Widget build(BuildContext context) {
     return ElumScaffold(
       // 끊는 중에는 뒤로 갈 수 없다 — 결과를 알릴 곳이 없어진다
-      onBack: _busy ? null : () => context.pop(),
+      onBack: _busy ? null : context.popOrHome,
       // 보호자 설정과 같다: 제목이 뒤로가기와 **같은 줄**에 서고 줄은 x=16 에서 시작한다.
       title: '설정',
       backTop: 67,

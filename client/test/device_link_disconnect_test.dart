@@ -126,14 +126,16 @@ void main() {
       expect(storage.getRoutineProgressJson('r1'), isNull);
     });
 
-    test('이룸이 휴대폰 표식은 남긴다 — 지우면 로그인 화면으로 가 누를 것이 없다 (#206)', () async {
+    test('이룸이 휴대폰 표식과 역할까지 지운다 — 남으면 연결 화면에 갇힌다 (#542)', () async {
+      await storage.setSelectedRole('elumi');
       final t = build({
         'DELETE /api/device-links/current': const <String, Object?>{},
       });
 
       await t.repo.disconnectThisPhone();
 
-      expect(storage.isElumiDevice, isTrue);
+      expect(storage.isElumiDevice, isFalse);
+      expect(storage.selectedRole, isNull);
     });
 
     test('스스로 끊은 것에는 `연결이 끊어졌어요` 표식을 세우지 않는다', () async {

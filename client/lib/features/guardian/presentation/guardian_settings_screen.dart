@@ -21,6 +21,7 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../../profile/application/profile_session.dart';
 import '../data/routine_repository.dart' show memberProvider;
 import 'widgets/ai_credit_card.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 보호자 설정 화면 (이슈 #181).
 ///
@@ -138,7 +139,7 @@ class _GuardianSettingsScreenState
     final space = context.space;
 
     return ElumScaffold(
-      onBack: _busy ? null : () => context.pop(),
+      onBack: _busy ? null : context.popOrHome,
       // 시안(`1022:4467`)은 제목이 뒤로가기와 **같은 줄**에 선다. 본문에 두면
       // 뒤로가기 아래로 내려간다 (#349).
       title: '설정',

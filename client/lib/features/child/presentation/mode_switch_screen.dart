@@ -12,6 +12,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// Figma `보호자_아이화면_전환`(309:2837).
 ///
@@ -88,7 +89,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
     if (!mounted) return;
     if (!read.ok) {
       // 빈 화면에 남지 않게 돌려보낸다
-      if (context.canPop()) context.pop();
+      context.popOrHome();
       return;
     }
     final pin = read.pin;
@@ -177,8 +178,8 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   Widget build(BuildContext context) {
     if (_blocked) {
       return ElumScaffold(
-        onBack: () => context.pop(),
-        bottomButton: ElumButton(label: '돌아가기', onPressed: () => context.pop()),
+        onBack: context.popOrHome,
+        bottomButton: ElumButton(label: '돌아가기', onPressed: context.popOrHome),
         child: const ElumHeader(
           title: '보호자 휴대폰에서\n열어 주세요',
           description: '이 휴대폰에서는 보호자 화면을 열 수 없어요',
@@ -186,7 +187,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       );
     }
     return ElumScaffold(
-      onBack: () => context.pop(),
+      onBack: context.popOrHome,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

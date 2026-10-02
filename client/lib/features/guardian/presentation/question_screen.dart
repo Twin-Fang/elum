@@ -18,6 +18,7 @@ import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// Figma `보호자_새로운 일과 만들기_추가질문`(262:4766 / 262:4854).
 ///
@@ -98,7 +99,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
       aurora: QuestionScreen.aurora,
       // 홈으로 나갈 때만 묻는다. 뒤로는 보상으로 한 칸이라 고른 답이 남는다 (#387 D3).
       leave: RoutineLeave.discard,
-      onBack: () => context.pop(),
+      onBack: context.popOrHome,
       // 시안(`262:4854`)은 CTA를 y=675에 둔다 — 약관·목표와 같은 자리다 (#297).
       pinCtaToFigmaY: true,
       // 답을 하나라도 골랐을 때만 CTA가 나타난다 (Figma 262:4854)

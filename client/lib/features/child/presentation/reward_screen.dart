@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/app_motion.dart';
@@ -13,6 +12,7 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../domain/reward_character.dart';
 import 'widgets/reward_banner.dart';
 import 'widgets/reward_star.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// Figma `아이_보상_루미`(309:4055) / `_포포`(334:4320) / `_루루`(343:4434).
 ///
@@ -126,7 +126,7 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
                     label: _character.buttonLabel,
                     backgroundColor: colors.rewardButton,
                     labelColor: colors.textPrimary,
-                    onPressed: () => context.pop(),
+                    onPressed: context.popOrHome,
                   ),
                 ),
               ),

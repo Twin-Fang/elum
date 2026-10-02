@@ -12,6 +12,7 @@ import '../../../core/widgets/selectable_group.dart';
 import '../application/onboarding_notifier.dart';
 import '../domain/character.dart';
 import 'widgets/character_card.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// Figma `온보딩_캐릭터` — 카드 속 주인공이 될 친구를 고른다.
 ///
@@ -55,7 +56,7 @@ class CharacterScreen extends ConsumerWidget {
     );
 
     return ElumScaffold(
-      onBack: () => context.pop(),
+      onBack: context.popOrHome,
       // Figma 카드가 x=16에서 시작한다 — 기본 24를 쓰면 카드가 8씩 좁아진다
       horizontalPadding: _cardMarginH,
       bottomButton: ElumButton(

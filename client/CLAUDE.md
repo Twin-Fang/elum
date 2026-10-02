@@ -123,6 +123,7 @@ curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines
 ### 필수
 
 - **주석은 한국어**, WHY 중심으로 간결하게. 코드만 봐도 아는 내용은 쓰지 않는다.
+  이슈 번호·과거 경위("예전엔…")는 주석에 쓰지 않는다 — 커밋과 이슈에 있다. 지금 로직에 필요한 것만 남긴다.
 - **디자인 토큰 하드코딩 금지.** 색·폰트·간격은 반드시 `core/theme/`의 `AppColors` / `AppTypography` / `AppSpacing`을 통해 쓴다.
   ```dart
   // ❌ Color(0xFF443E39), fontSize: 28
@@ -514,6 +515,17 @@ context.typo.cardTitle.copyWith(color: ...)
 | 3 | **위젯 테스트를 먼저 쓴다** (§6 참조) |
 | 4 | `features/<기능>/presentation/`에 화면 작성 |
 | 5 | 화면 전용 위젯은 그 아래 `widgets/`에 |
+
+**화면 이동 규칙**
+
+- 뒤로가기·돌아가기는 `context.popOrHome()`. 인자 없는 `context.pop()` 은 `test/no_raw_pop_test.dart` 가 막는다
+  (`go` 로 열린 화면에서 pop 은 예외를 던져 버튼이 먹통이 된다).
+- "지금 상태의 홈"은 `core/router/app_destination.dart` 한 곳에서 정한다. 시작 화면·뒤로가기가 함께 쓴다.
+- 로그아웃·탈퇴의 로컬 정리는 `wipeLocalAccount`, 세션 만료는 `handleSessionExpired`.
+- 가드·뒤로가기·로그아웃 도착지 테스트는 `test/helpers/real_router.dart` 로 **실제 `createRouter`** 를 띄운다.
+  가드 없는 가짜 `GoRouter` 로는 가드와의 충돌이 보이지 않는다.
+- 경로를 추가하면 `router_invariants_test`(상태 24가지 × 모든 경로)가 자동으로 검사한다. 실패하면 규칙을 고친다.
+- 계정 상태가 바뀌는 길을 더하면 `exit_paths_matrix_test` 에 행을 더한다.
 
 **공통 위젯 승격 기준**: 두 번째 화면이 같은 위젯을 필요로 할 때 `core/widgets/`로 옮긴다.
 화면 하나만 보고 미리 공통화하면 파라미터가 계속 붙어 결국 아무도 못 고치는 위젯이 된다.

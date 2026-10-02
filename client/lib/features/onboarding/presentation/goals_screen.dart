@@ -11,6 +11,7 @@ import '../../../core/widgets/selectable_group.dart';
 import '../application/onboarding_notifier.dart';
 import '../domain/support_goal.dart';
 import 'widgets/goal_chip.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// Figma `온보딩_목표`(204:1002) — 도움 목표를 여러 개 고른다.
 ///
@@ -28,7 +29,7 @@ class GoalsScreen extends ConsumerWidget {
     final notifier = ref.read(onboardingProvider.notifier);
 
     return ElumScaffold(
-      onBack: () => context.pop(),
+      onBack: context.popOrHome,
       bottomButton: ElumButton(
         label: '다음',
         onPressed: profile.canProceedFromGoals

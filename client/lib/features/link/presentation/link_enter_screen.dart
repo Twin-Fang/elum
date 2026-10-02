@@ -10,9 +10,11 @@ import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../auth/data/auth_repository.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_code.dart';
 import 'widgets/code_boxes.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 연결 암호 넣기 — **이룸이 휴대폰** (이슈 #205 · 명세 §5-2).
 ///
@@ -150,12 +152,28 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   static const _guide = '코드는 보호자 휴대폰의\n설정 → 이룸이 휴대폰 연결하기에 있어요';
   static const _guidePath = '설정 → 이룸이 휴대폰 연결하기';
 
+  /// 뒤로가기. **어떤 길로 들어왔든 막다른 화면이 되지 않게 한다** (#542).
+  ///
+  /// 이 화면은 여러 곳에서 온다 — 역할 선택, 앱 시작, 세션 종료. 아래에 돌아갈 화면이 없으면 pop 이 아무 일도
+  /// 하지 않아 사용자가 갇혔다. 그때는 [linkEnterBackTarget] 과 같은 규칙으로 갈 곳을 정해 직접 옮긴다.
+  void _back() {
+    if (context.canPop()) {
+      context.popOrHome();
+      return;
+    }
+    context.go(
+      linkEnterBackTarget(
+        hasSession: ref.read(authRepositoryProvider).hasSession,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final space = context.space;
 
     return ElumScaffold(
-      onBack: _sending ? null : () => context.pop(),
+      onBack: _sending ? null : _back,
       // 여섯 칸을 다 채워야 켜진다. 보내는 중에는 다시 누를 수 없다 — 1회용 암호다.
       bottomButton: ElumButton(
         label: '시작하기',

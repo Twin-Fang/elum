@@ -52,6 +52,11 @@ void main() {
             path: Routes.roleSelect,
             builder: (context, state) => const Scaffold(body: Text('역할 선택')),
           ),
+          // 세션이 끝난 뒤 연결 화면의 뒤로가기 도착지 (#542)
+          GoRoute(
+            path: Routes.login,
+            builder: (context, state) => const Scaffold(body: Text('로그인')),
+          ),
           GoRoute(
             path: Routes.linkEnter,
             builder: (context, state) => const LinkEnterScreen(),

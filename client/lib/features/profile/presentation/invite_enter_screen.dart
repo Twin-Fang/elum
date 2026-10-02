@@ -20,6 +20,7 @@ import '../application/invite_inbox.dart';
 import '../application/profile_session.dart';
 import '../data/profile_repository.dart';
 import '../domain/invite_problem.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 초대 코드 넣기 — 함께하는 보호자에게 받은 코드로 **그 이룸이에 합류**한다 (다중 보호자 #362).
 ///
@@ -297,7 +298,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     final colors = context.colors;
 
     return ElumScaffold(
-      onBack: _sending ? null : () => context.pop(),
+      onBack: _sending ? null : context.popOrHome,
       // 링크로 받은 코드는 사람이 눌러야 보낸다 (#365). **임시 시안** — 하단 버튼·보조 링크는 다른 입력
       // 화면(이름 입력 `다음` · `초대 코드가 있어요`)의 배치를 그대로 빌렸다.
       bottomButton: _fromLink

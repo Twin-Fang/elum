@@ -52,6 +52,9 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
   final _swipeKey = GlobalKey(debugLabel: 'coach.swipe');
   final _modeKey = GlobalKey(debugLabel: 'coach.mode');
 
+  /// 홈 목록 스크롤. 코치마크가 켜질 때 맨 위로 되돌리고, 떠 있는 동안 잠그는 데 쓴다.
+  final _scroll = ScrollController();
+
   /// 화면 전환이 끝나길 기다리는 중인가. 전환 도중에 띄우면 대상이 움직이는 중이라 위치가 어긋난다.
   bool _waitingRoute = false;
 
@@ -86,6 +89,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
   void dispose() {
     _coachRetry?.cancel();
     _coachSettle?.cancel();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -138,9 +142,13 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
     final hasSwipeTarget = ref
         .read(homeRoutinesProvider)
         .any((r) => r.isEditableByMe);
-    ref
+    final started = ref
         .read(homeCoachProvider.notifier)
         .maybeStart(hasSwipeTarget: hasSwipeTarget);
+    // 대기 중 스크롤했거나 관성이 도는 중이면 버튼이 밀려 구멍이 어긋난다. 켜질 때만 맨 위로
+    // 되돌린다 — 이미 본 사람의 스크롤까지 끌어올리면 안 된다. jumpTo 는 진행 중인 관성도 끊는다.
+    // 구멍은 다음 프레임 이후에 재므로 이 이동이 먼저 반영된다.
+    if (started && _scroll.hasClients) _scroll.jumpTo(0);
   }
 
   void _retryCoachLater() {
@@ -188,6 +196,8 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartCoach());
     }
 
+    final coachActive = ref.watch(homeCoachProvider.select((s) => s.active));
+
     final scaffold = Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
@@ -195,6 +205,12 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
+                controller: _scroll,
+                // 코치마크가 떠 있는 동안은 뒤 목록이 움직이지 않게 잠근다 — 구멍은 한 번만 재서
+                // 스크롤되면 대상과 어긋난다.
+                physics: coachActive
+                    ? const NeverScrollableScrollPhysics()
+                    : null,
                 padding: EdgeInsets.only(bottom: space.xl),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

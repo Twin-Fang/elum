@@ -1,5 +1,5 @@
 import 'package:elum/core/router/app_router.dart';
-import 'package:elum/features/onboarding/presentation/splash_screen.dart';
+import 'package:elum/core/router/app_destination.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 보호자 휴대폰이 이룸이 화면에 있던 채 꺼지면 다시 켰을 때도 이룸이 화면이다 (#532).
