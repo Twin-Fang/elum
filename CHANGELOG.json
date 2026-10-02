@@ -1,15 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-02T00:23:10Z",
-    "currentVersion": "2.12.2",
+    "lastUpdated": "2026-10-02T00:34:01Z",
+    "currentVersion": "2.12.3",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 199
+    "totalReleases": 200
   },
   "releases": [
+    {
+      "version": "2.12.3",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-02",
+      "pr_number": 513,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **문서**\n  * 앱 소개와 기획 문서를 지금 상태에 맞게 다시 정리했어요.\n\n* **기타**\n  * 앱 동작에는 바뀐 점이 없어요.",
+      "parsed_changes": {
+        "문서": {
+          "title": "문서",
+          "items": [
+            "앱 소개와 기획 문서를 지금 상태에 맞게 다시 정리했어요."
+          ]
+        },
+        "기타": {
+          "title": "기타",
+          "items": [
+            "앱 동작에는 바뀐 점이 없어요."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.12.2",
       "project_type": "flutter",
