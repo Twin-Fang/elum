@@ -1,0 +1,21 @@
+{
+  "@@locale": "ko",
+
+  "appTitle": "이룸",
+  "@appTitle": { "description": "앱 이름. 운영체제의 앱 전환 화면에 보인다." },
+
+  "commonConfirm": "확인",
+  "@commonConfirm": { "description": "팝업의 확인 버튼" },
+
+  "commonCancel": "취소",
+  "@commonCancel": { "description": "팝업·시트의 취소 버튼" },
+
+  "commonClose": "닫기",
+  "@commonClose": { "description": "팝업·시트의 닫기 버튼" },
+
+  "commonNext": "다음",
+  "@commonNext": { "description": "온보딩 등 단계 화면의 다음 버튼" },
+
+  "commonRetry": "다시 시도",
+  "@commonRetry": { "description": "실패 화면의 다시 시도 버튼" }
+}
