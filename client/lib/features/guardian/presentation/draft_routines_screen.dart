@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/ads/ad_banner_slot.dart';
 import '../../../core/ads/ad_ids.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -67,7 +68,7 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
     return ElumScaffold(
       onBack: () => context.pop(),
       // 시안(`1045:4910`)도 같은 네비게이션 제목이다.
-      title: '임시저장',
+      title: context.l10n.draftRoutinesTitle,
       backTop: 67,
       horizontalPadding: 16,
       // 하단 배너(#281). 로드 전·실패 시 높이 0이라 자리를 남기지 않는다.
@@ -85,7 +86,7 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
               // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다 (#352).
               error: (e, _) => ElumErrorView.failure(
                 e,
-                fallback: '임시저장을 불러오지 못했어요',
+                fallback: context.l10n.draftRoutinesLoadFailedFallback,
                 fallbackCode: 'E-DRAFT',
                 onRetry: () => ref.invalidate(myRoutinesProvider),
                 // 제목 아래 남는 자리에 들어간다. 큰 쪽은 일러스트까지 세워
@@ -109,7 +110,7 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
                           onDelete: () => _delete(routine),
                           // 시안(1274:9262) — 버튼 끝이 줄 끝(377)보다 2 안쪽이다
                           endInset: 2,
-                          deleteLabel: '임시저장 삭제',
+                          deleteLabel: context.l10n.draftRoutinesDeleteLabel,
                           // 지우는 중에는 밀리지 않는다
                           enabled: _deletingId == null,
                           child: _DraftTile(
@@ -138,15 +139,19 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
     if (_deletingId != null) return;
     final confirmed = await showElumDialog<bool>(
       context: context,
-      title: '임시저장을 삭제하실건가요?',
+      title: context.l10n.draftRoutinesDeleteConfirmTitle,
       icon: ElumDialogIcon.trash,
-      actions: const [
+      actions: [
         ElumDialogAction(
-          label: '취소',
+          label: context.l10n.commonCancel,
           value: false,
           tone: ElumDialogTone.neutral,
         ),
-        ElumDialogAction(label: '삭제', value: true, tone: ElumDialogTone.danger),
+        ElumDialogAction(
+          label: context.l10n.draftRoutinesDeleteAction,
+          value: true,
+          tone: ElumDialogTone.danger,
+        ),
       ],
     );
     // 바깥을 눌러 닫으면 null — 취소로 다룬다
@@ -163,8 +168,8 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
       await showFailure(
         context,
         failure,
-        title: '임시저장을 삭제하지 못했어요',
-        fallback: '잠시 후 다시 시도해주세요',
+        title: context.l10n.draftRoutinesDeleteFailedTitle,
+        fallback: context.l10n.draftRoutinesDeleteFailedFallback,
         fallbackCode: 'E-DRAFT-DEL',
       );
       return;
@@ -222,7 +227,9 @@ class _DraftTile extends StatelessWidget {
     final typo = context.typo;
     final space = context.space;
     // 보상을 안 정했으면 줄을 감추지 않고 `미설정` 이라 적는다 (시안 1274:9276).
-    final reward = routine.hasReward ? routine.rewardDisplay : '미설정';
+    final reward = routine.hasReward
+        ? routine.rewardDisplay
+        : context.l10n.draftRoutinesRewardUnset;
 
     return AppPressable(
       onTap: onTap,
@@ -254,7 +261,7 @@ class _DraftTile extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        '완료 시',
+                        context.l10n.draftRoutinesRewardLabel,
                         style: typo.routineTileMeta.copyWith(
                           color: colors.routineTileLabel,
                         ),
@@ -283,7 +290,7 @@ class _DraftTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                '이어서',
+                context.l10n.draftRoutinesResume,
                 style: typo.routineSectionLabel.copyWith(
                   color: colors.chipLabel,
                 ),
@@ -313,7 +320,7 @@ class _Empty extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              '만들다 만 일과가 없어요',
+              context.l10n.draftRoutinesEmptyTitle,
               textAlign: TextAlign.center,
               style: context.typo.promptTitle.copyWith(
                 color: colors.textPrimary,
@@ -321,7 +328,7 @@ class _Empty extends StatelessWidget {
             ),
             SizedBox(height: space.sm),
             Text(
-              '일과를 만들다 그만두면 여기에 남아요',
+              context.l10n.draftRoutinesEmptyBody,
               textAlign: TextAlign.center,
               style: context.typo.promptBody.copyWith(
                 color: colors.promptMuted,

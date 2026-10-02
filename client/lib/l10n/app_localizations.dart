@@ -1789,6 +1789,552 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'방학 중 방과후 수업에 갈 준비를 순서대로 알려주고 싶어요'**
   String get suggestionAfterSchoolPrompt;
+
+  /// 보호자 홈의 오늘 일과 구역 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 일과'**
+  String get guardianHomeTodayRoutine;
+
+  /// 보호자 홈의 지난 일과 구역 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'지난 일과'**
+  String get guardianHomePastRoutine;
+
+  /// 보호자 홈에서 이룸이 화면으로 넘어가는 배지 버튼의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 화면으로 가기'**
+  String get guardianHomeGoChildScreen;
+
+  /// 보호자 홈의 설정 아이콘 버튼 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'설정'**
+  String get guardianHomeSettings;
+
+  /// 보호자 홈의 인사말(Figma 문구, 줄바꿈 위치도 디자인이 정한 대로). name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'안녕하세요,\n{name} 보호자님 👋🏻'**
+  String guardianHomeGreeting(String name);
+
+  /// 보호자 홈 인사말 아래 안내 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘은 어떤 일과를 준비할까요?'**
+  String get guardianHomeSubtitle;
+
+  /// 비밀암호 만들기에서 확인 입력이 다를 때의 안내(온보딩 문구와 같다)
+  ///
+  /// In ko, this message translates to:
+  /// **'암호가 달라요. 다시 넣어주세요'**
+  String get pinChangeMismatchCreate;
+
+  /// 비밀암호 바꾸기에서 입력이 다를 때의 안내(시안 문구)
+  ///
+  /// In ko, this message translates to:
+  /// **'암호가 달라요. 다시 입력해주세요'**
+  String get pinChangeMismatch;
+
+  /// 비밀암호 만들기 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호를 만들지 못했어요'**
+  String get pinChangeCreateFailedTitle;
+
+  /// 비밀암호 바꾸기 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호를 바꾸지 못했어요'**
+  String get pinChangeFailedTitle;
+
+  /// 비밀암호 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get pinChangeFailedFallback;
+
+  /// 비밀암호 만들기를 마쳤을 때의 스낵바
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호를 만들었어요'**
+  String get pinChangeCreatedSnack;
+
+  /// 비밀암호 바꾸기를 마쳤을 때의 스낵바
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호를 바꿨어요'**
+  String get pinChangeChangedSnack;
+
+  /// 비밀암호 바꾸기 1단계(지금 암호 확인) 큰 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 비밀암호를\n입력해주세요'**
+  String get pinChangeVerifyTitle;
+
+  /// 비밀암호 만들기 입력 단계 큰 제목(온보딩 문구와 같다)
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자님만 아는\n비밀암호를 만들어주세요'**
+  String get pinChangeCreateTitle;
+
+  /// 비밀암호 만들기·재입력 단계와 바꾸기 새 암호 단계가 함께 쓰는 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자모드로 변경할 때 사용하는 암호예요'**
+  String get pinModeHint;
+
+  /// 비밀암호 바꾸기 2단계(새 암호) 큰 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'새 비밀암호를\n입력해주세요'**
+  String get pinChangeEnterTitle;
+
+  /// 비밀암호 만들기 재입력 단계 큰 제목(온보딩 문구와 같다)
+  ///
+  /// In ko, this message translates to:
+  /// **'암호를 한번 더\n입력해주세요'**
+  String get pinChangeCreateConfirmTitle;
+
+  /// 비밀암호 바꾸기 3단계(새 암호 재입력) 큰 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호를 한번 더\n입력해주세요'**
+  String get pinChangeConfirmTitle;
+
+  /// 비밀암호 바꾸기 3단계 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'이제 곧 비밀암호 변경이 끝나요'**
+  String get pinChangeConfirmHint;
+
+  /// 비밀암호 바꾸기 화면 머리 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호 변경하기'**
+  String get pinChangeHeaderTitle;
+
+  /// 비밀암호 변경 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get pinChangeSave;
+
+  /// 암호 점 자리를 낭독기가 읽는 이름(입력한 숫자는 읽지 않는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'암호 넣기'**
+  String get pinChangeInputLabel;
+
+  /// 보상 고치기 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'보상을 저장하지 못했어요'**
+  String get rewardSaveFailedTitle;
+
+  /// 보상 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get rewardSaveFailedFallback;
+
+  /// 보상 설명 팝업 제목이자 도움말 버튼 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'보상이 왜 필요한가요?'**
+  String get rewardWhyTitle;
+
+  /// 보상이 왜 필요한지 설명하는 팝업 본문(세 문장, 줄바꿈 유지)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 마친 뒤 기다리는 것이 있으면 이룸이가 끝까지 해낼 힘이 생겨요.\n한 달 뒤 선물보다 오늘 바로 줄 수 있는 작은 것이 더 잘 통해요.\n정하지 않아도 일과는 만들 수 있어요.'**
+  String get rewardWhyMessage;
+
+  /// 보상 정하기 화면 큰 제목(줄바꿈은 시안 그대로)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과가 끝나면\n어떤 보상을 줄까요?'**
+  String get rewardHeadlineTitle;
+
+  /// 보상 정하기 화면 부제
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 완료하는 데 큰 동기가 될 거예요'**
+  String get rewardHeadlineBody;
+
+  /// 보상 정하기를 건너뛰는 밑줄 링크
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에 할게요'**
+  String get rewardLater;
+
+  /// 그림 방식을 바꾼 뒤 스낵바
+  ///
+  /// In ko, this message translates to:
+  /// **'그림 방식을 바꿨어요'**
+  String get imageStyleChangedSnack;
+
+  /// 그림 방식 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'그림 방식을 저장하지 못했어요'**
+  String get imageStyleSaveFailedTitle;
+
+  /// 그림 방식 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get imageStyleSaveFailedFallback;
+
+  /// 그림 방식 설정 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'그림 방식'**
+  String get imageStyleTitle;
+
+  /// 크레딧 때문에 막혔을 때의 로딩 실패 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 만들 수 없어요'**
+  String get routineLoadingBlockedTitle;
+
+  /// 준비 로딩 실패 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'질문을 준비하지 못했어요'**
+  String get routineLoadingPrepareFailed;
+
+  /// 생성 로딩 실패 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 만들지 못했어요'**
+  String get routineLoadingGenerateFailed;
+
+  /// 일과 만들기 로딩의 진행률을 낭독기가 읽는 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'{percent}% 진행됐어요'**
+  String routineLoadingPercent(int percent);
+
+  /// 로딩 실패 화면의 다시 하기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 하기'**
+  String get routineLoadingRetry;
+
+  /// 로딩 실패 화면의 홈 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'홈으로'**
+  String get routineLoadingHome;
+
+  /// 임시저장 목록 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'임시저장'**
+  String get draftRoutinesTitle;
+
+  /// 임시저장 목록을 못 불러왔을 때의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'임시저장을 불러오지 못했어요'**
+  String get draftRoutinesLoadFailedFallback;
+
+  /// 줄을 밀면 나오는 삭제 버튼의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'임시저장 삭제'**
+  String get draftRoutinesDeleteLabel;
+
+  /// 임시저장 삭제 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'임시저장을 삭제하실건가요?'**
+  String get draftRoutinesDeleteConfirmTitle;
+
+  /// 임시저장 삭제 확인 팝업의 삭제 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제'**
+  String get draftRoutinesDeleteAction;
+
+  /// 임시저장 삭제 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'임시저장을 삭제하지 못했어요'**
+  String get draftRoutinesDeleteFailedTitle;
+
+  /// 임시저장 삭제 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get draftRoutinesDeleteFailedFallback;
+
+  /// 보상을 안 정한 임시저장 줄의 보상 자리 글
+  ///
+  /// In ko, this message translates to:
+  /// **'미설정'**
+  String get draftRoutinesRewardUnset;
+
+  /// 임시저장 줄의 보상 앞 말머리
+  ///
+  /// In ko, this message translates to:
+  /// **'완료 시'**
+  String get draftRoutinesRewardLabel;
+
+  /// 임시저장 줄 오른쪽 알약 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'이어서'**
+  String get draftRoutinesResume;
+
+  /// 임시저장이 0건일 때 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'만들다 만 일과가 없어요'**
+  String get draftRoutinesEmptyTitle;
+
+  /// 임시저장이 0건일 때 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 만들다 그만두면 여기에 남아요'**
+  String get draftRoutinesEmptyBody;
+
+  /// 카드 삭제 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 삭제하실건가요?'**
+  String get cardReviewDeleteConfirmTitle;
+
+  /// 카드 삭제 확인 팝업의 삭제 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제'**
+  String get cardReviewDeleteAction;
+
+  /// 카드 소리 재생 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'소리를 재생하지 못했어요'**
+  String get cardReviewSoundFailedTitle;
+
+  /// 카드 소리 재생 실패 팝업 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'휴대폰 소리를 켜고 다시 눌러주세요'**
+  String get cardReviewSoundFailedFallback;
+
+  /// 일과 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 저장하지 못했어요'**
+  String get cardReviewSaveFailedTitle;
+
+  /// 일과 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get cardReviewSaveFailedFallback;
+
+  /// 카드 고친 내용 저장 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'고친 내용을 저장하지 못했어요'**
+  String get cardReviewEditFailedTitle;
+
+  /// 카드 고친 내용 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get cardReviewEditFailedFallback;
+
+  /// 카드 추가 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'카드를 추가하지 못했어요'**
+  String get cardReviewAddFailedTitle;
+
+  /// 카드 추가 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get cardReviewAddFailedFallback;
+
+  /// 카드 순서 바꾸기 중 하단 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get cardReviewReorderDone;
+
+  /// 카드 검토 화면 하단 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 저장하기'**
+  String get cardReviewSave;
+
+  /// 일과 입력 화면 큰 제목(줄바꿈은 디자인이 정한 대로)
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘은 어떤 준비가\n필요한가요?'**
+  String get routineInputTitle;
+
+  /// 일과 입력 화면 부제
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 루미가 작은 행동 단계로 나눠드려요'**
+  String get routineInputSubtitle;
+
+  /// 일과 입력창 안내 글(포커스가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'평소 이야기하듯 입력해주세요'**
+  String get routineInputHint;
+
+  /// 일과 입력창 전송 버튼의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'보내기'**
+  String get routineInputSend;
+
+  /// 로그아웃 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'로그아웃 하실건가요?'**
+  String get guardianSettingsLogoutConfirmTitle;
+
+  /// 회원탈퇴 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'회원탈퇴 하실건가요?'**
+  String get guardianSettingsWithdrawConfirmTitle;
+
+  /// 회원탈퇴 확인 팝업의 되돌릴 수 없다는 고지
+  ///
+  /// In ko, this message translates to:
+  /// **'만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요'**
+  String get guardianSettingsWithdrawConfirmMessage;
+
+  /// 회원탈퇴 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴하지 못했어요'**
+  String get guardianSettingsWithdrawFailedTitle;
+
+  /// 회원탈퇴 실패 팝업의 기본 안내(서버 문구가 없을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get guardianSettingsWithdrawFailedFallback;
+
+  /// 보호자 설정 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'설정'**
+  String get guardianSettingsTitle;
+
+  /// 설정 줄 — 함께 돌보는 사람 목록
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 사람'**
+  String get guardianSettingsPeople;
+
+  /// 설정 줄 — 임시저장 목록
+  ///
+  /// In ko, this message translates to:
+  /// **'임시저장'**
+  String get guardianSettingsDrafts;
+
+  /// 설정 줄 — 비밀암호 바꾸기
+  ///
+  /// In ko, this message translates to:
+  /// **'비밀암호 변경하기'**
+  String get guardianSettingsPinChange;
+
+  /// 설정 줄 — 약관 목록
+  ///
+  /// In ko, this message translates to:
+  /// **'약관 및 개인정보처리방침'**
+  String get guardianSettingsTerms;
+
+  /// 설정 줄 — 로그아웃
+  ///
+  /// In ko, this message translates to:
+  /// **'로그아웃'**
+  String get guardianSettingsLogout;
+
+  /// 설정 줄 — 회원탈퇴
+  ///
+  /// In ko, this message translates to:
+  /// **'회원탈퇴'**
+  String get guardianSettingsWithdraw;
+
+  /// 설정 줄 — 이룸이 휴대폰이 이미 연결됐을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 휴대폰'**
+  String get guardianSettingsLinkConnected;
+
+  /// 설정 줄 — 이룸이 휴대폰을 아직 연결하지 않았을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 휴대폰 연결하기'**
+  String get guardianSettingsLinkConnect;
+
+  /// 설정 줄 — 이룸이 휴대폰 연결 상태 값
+  ///
+  /// In ko, this message translates to:
+  /// **'연결됨'**
+  String get guardianSettingsLinkStatus;
+
+  /// 설정 줄 — 연결된 이룸이가 둘 이상일 때 보는 이룸이를 바꾼다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 바꾸기'**
+  String get guardianSettingsProfileSwitch;
+
+  /// 설정 줄 — 카드 그림 방식
+  ///
+  /// In ko, this message translates to:
+  /// **'그림 방식'**
+  String get guardianSettingsImageStyle;
+
+  /// 설정 줄 — 이룸이가 카드를 체크할 때 진동 켜기/끄기
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 체크 진동'**
+  String get guardianSettingsHaptic;
+
+  /// 추가 질문 화면 하단 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 만들기'**
+  String get questionMakeCards;
+
+  /// 추가 질문의 직접 입력 칩
+  ///
+  /// In ko, this message translates to:
+  /// **'+ 직접 입력하기'**
+  String get questionCustomAdd;
+
+  /// 추가 질문 직접 입력칸 안내 글
+  ///
+  /// In ko, this message translates to:
+  /// **'직접 적어주세요'**
+  String get questionCustomHint;
+
+  /// 추가 질문 직접 입력칸의 닫기 버튼 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'직접 입력 닫기'**
+  String get questionCustomClose;
+
+  /// 추가 질문에서 고른 칩의 X 버튼을 낭독기가 읽는 이름. label 은 칩 글자
+  ///
+  /// In ko, this message translates to:
+  /// **'{label} 지우기'**
+  String questionClearLabel(String label);
 }
 
 class _AppLocalizationsDelegate

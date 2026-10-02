@@ -954,4 +954,285 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get suggestionAfterSchoolPrompt => '방학 중 방과후 수업에 갈 준비를 순서대로 알려주고 싶어요';
+
+  @override
+  String get guardianHomeTodayRoutine => '오늘 일과';
+
+  @override
+  String get guardianHomePastRoutine => '지난 일과';
+
+  @override
+  String get guardianHomeGoChildScreen => '이룸이 화면으로 가기';
+
+  @override
+  String get guardianHomeSettings => '설정';
+
+  @override
+  String guardianHomeGreeting(String name) {
+    return '안녕하세요,\n$name 보호자님 👋🏻';
+  }
+
+  @override
+  String get guardianHomeSubtitle => '오늘은 어떤 일과를 준비할까요?';
+
+  @override
+  String get pinChangeMismatchCreate => '암호가 달라요. 다시 넣어주세요';
+
+  @override
+  String get pinChangeMismatch => '암호가 달라요. 다시 입력해주세요';
+
+  @override
+  String get pinChangeCreateFailedTitle => '비밀암호를 만들지 못했어요';
+
+  @override
+  String get pinChangeFailedTitle => '비밀암호를 바꾸지 못했어요';
+
+  @override
+  String get pinChangeFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get pinChangeCreatedSnack => '비밀암호를 만들었어요';
+
+  @override
+  String get pinChangeChangedSnack => '비밀암호를 바꿨어요';
+
+  @override
+  String get pinChangeVerifyTitle => '지금 비밀암호를\n입력해주세요';
+
+  @override
+  String get pinChangeCreateTitle => '보호자님만 아는\n비밀암호를 만들어주세요';
+
+  @override
+  String get pinModeHint => '보호자모드로 변경할 때 사용하는 암호예요';
+
+  @override
+  String get pinChangeEnterTitle => '새 비밀암호를\n입력해주세요';
+
+  @override
+  String get pinChangeCreateConfirmTitle => '암호를 한번 더\n입력해주세요';
+
+  @override
+  String get pinChangeConfirmTitle => '비밀암호를 한번 더\n입력해주세요';
+
+  @override
+  String get pinChangeConfirmHint => '이제 곧 비밀암호 변경이 끝나요';
+
+  @override
+  String get pinChangeHeaderTitle => '비밀암호 변경하기';
+
+  @override
+  String get pinChangeSave => '저장하기';
+
+  @override
+  String get pinChangeInputLabel => '암호 넣기';
+
+  @override
+  String get rewardSaveFailedTitle => '보상을 저장하지 못했어요';
+
+  @override
+  String get rewardSaveFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get rewardWhyTitle => '보상이 왜 필요한가요?';
+
+  @override
+  String get rewardWhyMessage =>
+      '일과를 마친 뒤 기다리는 것이 있으면 이룸이가 끝까지 해낼 힘이 생겨요.\n한 달 뒤 선물보다 오늘 바로 줄 수 있는 작은 것이 더 잘 통해요.\n정하지 않아도 일과는 만들 수 있어요.';
+
+  @override
+  String get rewardHeadlineTitle => '일과가 끝나면\n어떤 보상을 줄까요?';
+
+  @override
+  String get rewardHeadlineBody => '일과를 완료하는 데 큰 동기가 될 거예요';
+
+  @override
+  String get rewardLater => '나중에 할게요';
+
+  @override
+  String get imageStyleChangedSnack => '그림 방식을 바꿨어요';
+
+  @override
+  String get imageStyleSaveFailedTitle => '그림 방식을 저장하지 못했어요';
+
+  @override
+  String get imageStyleSaveFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get imageStyleTitle => '그림 방식';
+
+  @override
+  String get routineLoadingBlockedTitle => '지금은 만들 수 없어요';
+
+  @override
+  String get routineLoadingPrepareFailed => '질문을 준비하지 못했어요';
+
+  @override
+  String get routineLoadingGenerateFailed => '카드를 만들지 못했어요';
+
+  @override
+  String routineLoadingPercent(int percent) {
+    return '$percent% 진행됐어요';
+  }
+
+  @override
+  String get routineLoadingRetry => '다시 하기';
+
+  @override
+  String get routineLoadingHome => '홈으로';
+
+  @override
+  String get draftRoutinesTitle => '임시저장';
+
+  @override
+  String get draftRoutinesLoadFailedFallback => '임시저장을 불러오지 못했어요';
+
+  @override
+  String get draftRoutinesDeleteLabel => '임시저장 삭제';
+
+  @override
+  String get draftRoutinesDeleteConfirmTitle => '임시저장을 삭제하실건가요?';
+
+  @override
+  String get draftRoutinesDeleteAction => '삭제';
+
+  @override
+  String get draftRoutinesDeleteFailedTitle => '임시저장을 삭제하지 못했어요';
+
+  @override
+  String get draftRoutinesDeleteFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get draftRoutinesRewardUnset => '미설정';
+
+  @override
+  String get draftRoutinesRewardLabel => '완료 시';
+
+  @override
+  String get draftRoutinesResume => '이어서';
+
+  @override
+  String get draftRoutinesEmptyTitle => '만들다 만 일과가 없어요';
+
+  @override
+  String get draftRoutinesEmptyBody => '일과를 만들다 그만두면 여기에 남아요';
+
+  @override
+  String get cardReviewDeleteConfirmTitle => '카드를 삭제하실건가요?';
+
+  @override
+  String get cardReviewDeleteAction => '삭제';
+
+  @override
+  String get cardReviewSoundFailedTitle => '소리를 재생하지 못했어요';
+
+  @override
+  String get cardReviewSoundFailedFallback => '휴대폰 소리를 켜고 다시 눌러주세요';
+
+  @override
+  String get cardReviewSaveFailedTitle => '일과를 저장하지 못했어요';
+
+  @override
+  String get cardReviewSaveFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get cardReviewEditFailedTitle => '고친 내용을 저장하지 못했어요';
+
+  @override
+  String get cardReviewEditFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get cardReviewAddFailedTitle => '카드를 추가하지 못했어요';
+
+  @override
+  String get cardReviewAddFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get cardReviewReorderDone => '완료';
+
+  @override
+  String get cardReviewSave => '카드 저장하기';
+
+  @override
+  String get routineInputTitle => '오늘은 어떤 준비가\n필요한가요?';
+
+  @override
+  String get routineInputSubtitle => 'AI 루미가 작은 행동 단계로 나눠드려요';
+
+  @override
+  String get routineInputHint => '평소 이야기하듯 입력해주세요';
+
+  @override
+  String get routineInputSend => '보내기';
+
+  @override
+  String get guardianSettingsLogoutConfirmTitle => '로그아웃 하실건가요?';
+
+  @override
+  String get guardianSettingsWithdrawConfirmTitle => '회원탈퇴 하실건가요?';
+
+  @override
+  String get guardianSettingsWithdrawConfirmMessage =>
+      '만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요';
+
+  @override
+  String get guardianSettingsWithdrawFailedTitle => '탈퇴하지 못했어요';
+
+  @override
+  String get guardianSettingsWithdrawFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get guardianSettingsTitle => '설정';
+
+  @override
+  String get guardianSettingsPeople => '함께하는 사람';
+
+  @override
+  String get guardianSettingsDrafts => '임시저장';
+
+  @override
+  String get guardianSettingsPinChange => '비밀암호 변경하기';
+
+  @override
+  String get guardianSettingsTerms => '약관 및 개인정보처리방침';
+
+  @override
+  String get guardianSettingsLogout => '로그아웃';
+
+  @override
+  String get guardianSettingsWithdraw => '회원탈퇴';
+
+  @override
+  String get guardianSettingsLinkConnected => '이룸이 휴대폰';
+
+  @override
+  String get guardianSettingsLinkConnect => '이룸이 휴대폰 연결하기';
+
+  @override
+  String get guardianSettingsLinkStatus => '연결됨';
+
+  @override
+  String get guardianSettingsProfileSwitch => '이룸이 바꾸기';
+
+  @override
+  String get guardianSettingsImageStyle => '그림 방식';
+
+  @override
+  String get guardianSettingsHaptic => '카드 체크 진동';
+
+  @override
+  String get questionMakeCards => '카드 만들기';
+
+  @override
+  String get questionCustomAdd => '+ 직접 입력하기';
+
+  @override
+  String get questionCustomHint => '직접 적어주세요';
+
+  @override
+  String get questionCustomClose => '직접 입력 닫기';
+
+  @override
+  String questionClearLabel(String label) {
+    return '$label 지우기';
+  }
 }

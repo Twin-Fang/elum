@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
@@ -108,15 +109,19 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
   Future<void> _confirmRemove(ActionCard card) async {
     final confirmed = await showElumDialog<bool>(
       context: context,
-      title: '카드를 삭제하실건가요?',
+      title: context.l10n.cardReviewDeleteConfirmTitle,
       icon: ElumDialogIcon.trash,
-      actions: const [
+      actions: [
         ElumDialogAction(
-          label: '취소',
+          label: context.l10n.commonCancel,
           value: false,
           tone: ElumDialogTone.neutral,
         ),
-        ElumDialogAction(label: '삭제', value: true, tone: ElumDialogTone.danger),
+        ElumDialogAction(
+          label: context.l10n.cardReviewDeleteAction,
+          value: true,
+          tone: ElumDialogTone.danger,
+        ),
       ],
     );
     // 팝업이 떠 있는 사이 화면이 닫혔으면 건드리지 않는다
@@ -153,8 +158,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     showFailure(
       context,
       null,
-      title: '소리를 재생하지 못했어요',
-      fallback: '휴대폰 소리를 켜고 다시 눌러주세요',
+      title: context.l10n.cardReviewSoundFailedTitle,
+      fallback: context.l10n.cardReviewSoundFailedFallback,
       fallbackCode: 'E-TTS',
     );
   }
@@ -173,8 +178,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
       showFailure(
         context,
         failure,
-        title: '일과를 저장하지 못했어요',
-        fallback: '잠시 후 다시 시도해주세요',
+        title: context.l10n.cardReviewSaveFailedTitle,
+        fallback: context.l10n.cardReviewSaveFailedFallback,
         fallbackCode: 'E-CONFIRM',
       );
       return;
@@ -215,8 +220,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
       showFailure(
         context,
         failure,
-        title: '고친 내용을 저장하지 못했어요',
-        fallback: '잠시 후 다시 시도해주세요',
+        title: context.l10n.cardReviewEditFailedTitle,
+        fallback: context.l10n.cardReviewEditFailedFallback,
         fallbackCode: 'E-STEP',
       );
     }
@@ -242,8 +247,8 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
           showFailure(
             context,
             failure,
-            title: '카드를 추가하지 못했어요',
-            fallback: '잠시 후 다시 시도해주세요',
+            title: context.l10n.cardReviewAddFailedTitle,
+            fallback: context.l10n.cardReviewAddFailedFallback,
             fallbackCode: 'E-STEP-ADD',
           );
         }
@@ -342,7 +347,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
       // 저장 버튼은 시안 y=730~796 — 프레임 바닥에서 56 (#444)
       bottomFigmaInset: 56,
       bottomButton: ElumButton(
-        label: _reorderMode ? '완료' : '카드 저장하기',
+        label: _reorderMode
+            ? context.l10n.cardReviewReorderDone
+            : context.l10n.cardReviewSave,
         onPressed: _reorderMode ? _finishReorder : _save,
       ),
       aurora: CardReviewScreen.aurora,

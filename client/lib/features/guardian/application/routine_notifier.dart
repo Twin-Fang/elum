@@ -41,7 +41,7 @@ class RoutineFlowState {
     this.routine,
     this.errorCode,
     this.errorMessage,
-    this.errorHint,
+    this.errorFault,
     this.idempotencyKey,
     this.creditUsage,
   });
@@ -90,10 +90,17 @@ class RoutineFlowState {
   /// 다시 누른다 (#347).
   final String? errorMessage;
 
+  /// 실패의 네트워크 사정. 문구가 아니라 **원인**을 담는다 — 문구를 담으면 앱 언어가
+  /// 바뀐 뒤에도 옛 언어로 남는다. [errorHint] 가 읽을 때 현재 언어로 푼다.
+  final NetworkFault? errorFault;
+
   /// 무엇을 하면 되는지 — 네트워크 사정이라 서버가 말해 줄 수 없을 때만 있다
   /// ([AppFailure.hint]). 오프라인인데 `잠시 후 다시 해주세요` 만 띄우면 끊긴 채로
-  /// 다시 하기만 누른다 (#352 규칙 · #387 D4).
-  final String? errorHint;
+  /// 다시 하기만 누른다 (#352 규칙 · #387 D4). 화면의 `build` 안에서 읽는다.
+  String? get errorHint {
+    final fault = errorFault;
+    return fault == null ? null : AppFailure(fault: fault).hint;
+  }
 
   /// 카드 생성 요청의 멱등 키 (#407). 같은 요청의 재시도는 이 키를 다시 쓴다.
   final String? idempotencyKey;
@@ -116,7 +123,7 @@ class RoutineFlowState {
     Routine? routine,
     String? errorCode,
     String? errorMessage,
-    String? errorHint,
+    NetworkFault? errorFault,
     String? idempotencyKey,
     CreditUsage? creditUsage,
   }) {
@@ -135,7 +142,7 @@ class RoutineFlowState {
       // errorCode는 null로 되돌릴 수 있어야 한다(재시도 시 초기화) → ?? 쓰지 않는다.
       errorCode: errorCode,
       errorMessage: errorMessage,
-      errorHint: errorHint,
+      errorFault: errorFault,
       idempotencyKey: idempotencyKey ?? this.idempotencyKey,
       creditUsage: creditUsage ?? this.creditUsage,
     );
@@ -218,7 +225,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
         step: RoutineFlowStep.error,
         errorCode: failure.badgeOr('E-1003'),
         errorMessage: failure.serverMessage,
-        errorHint: failure.hint,
+        errorFault: failure.fault,
       );
       return;
     }
@@ -467,7 +474,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
         step: RoutineFlowStep.error,
         errorCode: failure.badgeOr('E-1001'),
         errorMessage: failure.serverMessage,
-        errorHint: failure.hint,
+        errorFault: failure.fault,
       );
       // 실패해도 예약이 풀렸거나(반환) 부족이 드러났다 — 다음에 볼 숫자를 새로 받는다.
       ref.invalidate(creditSummaryProvider);

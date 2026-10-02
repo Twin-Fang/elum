@@ -891,5 +891,278 @@
   "@suggestionAfterSchoolText": { "description": "추천 칩 5 글" },
 
   "suggestionAfterSchoolPrompt": "방학 중 방과후 수업에 갈 준비를 순서대로 알려주고 싶어요",
-  "@suggestionAfterSchoolPrompt": { "description": "추천 칩 5 가 입력창에 채우는 문장" }
+  "@suggestionAfterSchoolPrompt": { "description": "추천 칩 5 가 입력창에 채우는 문장" },
+
+  "guardianHomeTodayRoutine": "오늘 일과",
+  "@guardianHomeTodayRoutine": { "description": "보호자 홈의 오늘 일과 구역 제목" },
+
+  "guardianHomePastRoutine": "지난 일과",
+  "@guardianHomePastRoutine": { "description": "보호자 홈의 지난 일과 구역 제목" },
+
+  "guardianHomeGoChildScreen": "이룸이 화면으로 가기",
+  "@guardianHomeGoChildScreen": { "description": "보호자 홈에서 이룸이 화면으로 넘어가는 배지 버튼의 낭독 이름" },
+
+  "guardianHomeSettings": "설정",
+  "@guardianHomeSettings": { "description": "보호자 홈의 설정 아이콘 버튼 낭독 이름" },
+
+  "guardianHomeGreeting": "안녕하세요,\n{name} 보호자님 👋🏻",
+  "@guardianHomeGreeting": { "description": "보호자 홈의 인사말(Figma 문구, 줄바꿈 위치도 디자인이 정한 대로). name 은 이룸이 호칭", "placeholders": {"name": {"type": "String"}} },
+
+  "guardianHomeSubtitle": "오늘은 어떤 일과를 준비할까요?",
+  "@guardianHomeSubtitle": { "description": "보호자 홈 인사말 아래 안내 문구" },
+
+  "pinChangeMismatchCreate": "암호가 달라요. 다시 넣어주세요",
+  "@pinChangeMismatchCreate": { "description": "비밀암호 만들기에서 확인 입력이 다를 때의 안내(온보딩 문구와 같다)" },
+
+  "pinChangeMismatch": "암호가 달라요. 다시 입력해주세요",
+  "@pinChangeMismatch": { "description": "비밀암호 바꾸기에서 입력이 다를 때의 안내(시안 문구)" },
+
+  "pinChangeCreateFailedTitle": "비밀암호를 만들지 못했어요",
+  "@pinChangeCreateFailedTitle": { "description": "비밀암호 만들기 저장 실패 팝업 제목" },
+
+  "pinChangeFailedTitle": "비밀암호를 바꾸지 못했어요",
+  "@pinChangeFailedTitle": { "description": "비밀암호 바꾸기 저장 실패 팝업 제목" },
+
+  "pinChangeFailedFallback": "잠시 후 다시 시도해주세요",
+  "@pinChangeFailedFallback": { "description": "비밀암호 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "pinChangeCreatedSnack": "비밀암호를 만들었어요",
+  "@pinChangeCreatedSnack": { "description": "비밀암호 만들기를 마쳤을 때의 스낵바" },
+
+  "pinChangeChangedSnack": "비밀암호를 바꿨어요",
+  "@pinChangeChangedSnack": { "description": "비밀암호 바꾸기를 마쳤을 때의 스낵바" },
+
+  "pinChangeVerifyTitle": "지금 비밀암호를\n입력해주세요",
+  "@pinChangeVerifyTitle": { "description": "비밀암호 바꾸기 1단계(지금 암호 확인) 큰 제목" },
+
+  "pinChangeCreateTitle": "보호자님만 아는\n비밀암호를 만들어주세요",
+  "@pinChangeCreateTitle": { "description": "비밀암호 만들기 입력 단계 큰 제목(온보딩 문구와 같다)" },
+
+  "pinModeHint": "보호자모드로 변경할 때 사용하는 암호예요",
+  "@pinModeHint": { "description": "비밀암호 만들기·재입력 단계와 바꾸기 새 암호 단계가 함께 쓰는 설명" },
+
+  "pinChangeEnterTitle": "새 비밀암호를\n입력해주세요",
+  "@pinChangeEnterTitle": { "description": "비밀암호 바꾸기 2단계(새 암호) 큰 제목" },
+
+  "pinChangeCreateConfirmTitle": "암호를 한번 더\n입력해주세요",
+  "@pinChangeCreateConfirmTitle": { "description": "비밀암호 만들기 재입력 단계 큰 제목(온보딩 문구와 같다)" },
+
+  "pinChangeConfirmTitle": "비밀암호를 한번 더\n입력해주세요",
+  "@pinChangeConfirmTitle": { "description": "비밀암호 바꾸기 3단계(새 암호 재입력) 큰 제목" },
+
+  "pinChangeConfirmHint": "이제 곧 비밀암호 변경이 끝나요",
+  "@pinChangeConfirmHint": { "description": "비밀암호 바꾸기 3단계 설명" },
+
+  "pinChangeHeaderTitle": "비밀암호 변경하기",
+  "@pinChangeHeaderTitle": { "description": "비밀암호 바꾸기 화면 머리 제목" },
+
+  "pinChangeSave": "저장하기",
+  "@pinChangeSave": { "description": "비밀암호 변경 저장 버튼" },
+
+  "pinChangeInputLabel": "암호 넣기",
+  "@pinChangeInputLabel": { "description": "암호 점 자리를 낭독기가 읽는 이름(입력한 숫자는 읽지 않는다)" },
+
+  "rewardSaveFailedTitle": "보상을 저장하지 못했어요",
+  "@rewardSaveFailedTitle": { "description": "보상 고치기 저장 실패 팝업 제목" },
+
+  "rewardSaveFailedFallback": "잠시 후 다시 시도해주세요",
+  "@rewardSaveFailedFallback": { "description": "보상 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "rewardWhyTitle": "보상이 왜 필요한가요?",
+  "@rewardWhyTitle": { "description": "보상 설명 팝업 제목이자 도움말 버튼 이름" },
+
+  "rewardWhyMessage": "일과를 마친 뒤 기다리는 것이 있으면 이룸이가 끝까지 해낼 힘이 생겨요.\n한 달 뒤 선물보다 오늘 바로 줄 수 있는 작은 것이 더 잘 통해요.\n정하지 않아도 일과는 만들 수 있어요.",
+  "@rewardWhyMessage": { "description": "보상이 왜 필요한지 설명하는 팝업 본문(세 문장, 줄바꿈 유지)" },
+
+  "rewardHeadlineTitle": "일과가 끝나면\n어떤 보상을 줄까요?",
+  "@rewardHeadlineTitle": { "description": "보상 정하기 화면 큰 제목(줄바꿈은 시안 그대로)" },
+
+  "rewardHeadlineBody": "일과를 완료하는 데 큰 동기가 될 거예요",
+  "@rewardHeadlineBody": { "description": "보상 정하기 화면 부제" },
+
+  "rewardLater": "나중에 할게요",
+  "@rewardLater": { "description": "보상 정하기를 건너뛰는 밑줄 링크" },
+
+  "imageStyleChangedSnack": "그림 방식을 바꿨어요",
+  "@imageStyleChangedSnack": { "description": "그림 방식을 바꾼 뒤 스낵바" },
+
+  "imageStyleSaveFailedTitle": "그림 방식을 저장하지 못했어요",
+  "@imageStyleSaveFailedTitle": { "description": "그림 방식 저장 실패 팝업 제목" },
+
+  "imageStyleSaveFailedFallback": "잠시 후 다시 시도해주세요",
+  "@imageStyleSaveFailedFallback": { "description": "그림 방식 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "imageStyleTitle": "그림 방식",
+  "@imageStyleTitle": { "description": "그림 방식 설정 화면 제목" },
+
+  "routineLoadingBlockedTitle": "지금은 만들 수 없어요",
+  "@routineLoadingBlockedTitle": { "description": "크레딧 때문에 막혔을 때의 로딩 실패 제목" },
+
+  "routineLoadingPrepareFailed": "질문을 준비하지 못했어요",
+  "@routineLoadingPrepareFailed": { "description": "준비 로딩 실패 제목" },
+
+  "routineLoadingGenerateFailed": "카드를 만들지 못했어요",
+  "@routineLoadingGenerateFailed": { "description": "생성 로딩 실패 제목" },
+
+  "routineLoadingPercent": "{percent}% 진행됐어요",
+  "@routineLoadingPercent": { "description": "일과 만들기 로딩의 진행률을 낭독기가 읽는 문장", "placeholders": {"percent": {"type": "int"}} },
+
+  "routineLoadingRetry": "다시 하기",
+  "@routineLoadingRetry": { "description": "로딩 실패 화면의 다시 하기 버튼" },
+
+  "routineLoadingHome": "홈으로",
+  "@routineLoadingHome": { "description": "로딩 실패 화면의 홈 버튼" },
+
+  "draftRoutinesTitle": "임시저장",
+  "@draftRoutinesTitle": { "description": "임시저장 목록 화면 제목" },
+
+  "draftRoutinesLoadFailedFallback": "임시저장을 불러오지 못했어요",
+  "@draftRoutinesLoadFailedFallback": { "description": "임시저장 목록을 못 불러왔을 때의 기본 안내(서버 문구가 없을 때)" },
+
+  "draftRoutinesDeleteLabel": "임시저장 삭제",
+  "@draftRoutinesDeleteLabel": { "description": "줄을 밀면 나오는 삭제 버튼의 낭독 이름" },
+
+  "draftRoutinesDeleteConfirmTitle": "임시저장을 삭제하실건가요?",
+  "@draftRoutinesDeleteConfirmTitle": { "description": "임시저장 삭제 확인 팝업 제목" },
+
+  "draftRoutinesDeleteAction": "삭제",
+  "@draftRoutinesDeleteAction": { "description": "임시저장 삭제 확인 팝업의 삭제 버튼" },
+
+  "draftRoutinesDeleteFailedTitle": "임시저장을 삭제하지 못했어요",
+  "@draftRoutinesDeleteFailedTitle": { "description": "임시저장 삭제 실패 팝업 제목" },
+
+  "draftRoutinesDeleteFailedFallback": "잠시 후 다시 시도해주세요",
+  "@draftRoutinesDeleteFailedFallback": { "description": "임시저장 삭제 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "draftRoutinesRewardUnset": "미설정",
+  "@draftRoutinesRewardUnset": { "description": "보상을 안 정한 임시저장 줄의 보상 자리 글" },
+
+  "draftRoutinesRewardLabel": "완료 시",
+  "@draftRoutinesRewardLabel": { "description": "임시저장 줄의 보상 앞 말머리" },
+
+  "draftRoutinesResume": "이어서",
+  "@draftRoutinesResume": { "description": "임시저장 줄 오른쪽 알약 버튼" },
+
+  "draftRoutinesEmptyTitle": "만들다 만 일과가 없어요",
+  "@draftRoutinesEmptyTitle": { "description": "임시저장이 0건일 때 제목" },
+
+  "draftRoutinesEmptyBody": "일과를 만들다 그만두면 여기에 남아요",
+  "@draftRoutinesEmptyBody": { "description": "임시저장이 0건일 때 설명" },
+
+  "cardReviewDeleteConfirmTitle": "카드를 삭제하실건가요?",
+  "@cardReviewDeleteConfirmTitle": { "description": "카드 삭제 확인 팝업 제목" },
+
+  "cardReviewDeleteAction": "삭제",
+  "@cardReviewDeleteAction": { "description": "카드 삭제 확인 팝업의 삭제 버튼" },
+
+  "cardReviewSoundFailedTitle": "소리를 재생하지 못했어요",
+  "@cardReviewSoundFailedTitle": { "description": "카드 소리 재생 실패 팝업 제목" },
+
+  "cardReviewSoundFailedFallback": "휴대폰 소리를 켜고 다시 눌러주세요",
+  "@cardReviewSoundFailedFallback": { "description": "카드 소리 재생 실패 팝업 안내" },
+
+  "cardReviewSaveFailedTitle": "일과를 저장하지 못했어요",
+  "@cardReviewSaveFailedTitle": { "description": "일과 저장 실패 팝업 제목" },
+
+  "cardReviewSaveFailedFallback": "잠시 후 다시 시도해주세요",
+  "@cardReviewSaveFailedFallback": { "description": "일과 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "cardReviewEditFailedTitle": "고친 내용을 저장하지 못했어요",
+  "@cardReviewEditFailedTitle": { "description": "카드 고친 내용 저장 실패 팝업 제목" },
+
+  "cardReviewEditFailedFallback": "잠시 후 다시 시도해주세요",
+  "@cardReviewEditFailedFallback": { "description": "카드 고친 내용 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "cardReviewAddFailedTitle": "카드를 추가하지 못했어요",
+  "@cardReviewAddFailedTitle": { "description": "카드 추가 실패 팝업 제목" },
+
+  "cardReviewAddFailedFallback": "잠시 후 다시 시도해주세요",
+  "@cardReviewAddFailedFallback": { "description": "카드 추가 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "cardReviewReorderDone": "완료",
+  "@cardReviewReorderDone": { "description": "카드 순서 바꾸기 중 하단 버튼" },
+
+  "cardReviewSave": "카드 저장하기",
+  "@cardReviewSave": { "description": "카드 검토 화면 하단 저장 버튼" },
+
+  "routineInputTitle": "오늘은 어떤 준비가\n필요한가요?",
+  "@routineInputTitle": { "description": "일과 입력 화면 큰 제목(줄바꿈은 디자인이 정한 대로)" },
+
+  "routineInputSubtitle": "AI 루미가 작은 행동 단계로 나눠드려요",
+  "@routineInputSubtitle": { "description": "일과 입력 화면 부제" },
+
+  "routineInputHint": "평소 이야기하듯 입력해주세요",
+  "@routineInputHint": { "description": "일과 입력창 안내 글(포커스가 없을 때)" },
+
+  "routineInputSend": "보내기",
+  "@routineInputSend": { "description": "일과 입력창 전송 버튼의 낭독 이름" },
+
+  "guardianSettingsLogoutConfirmTitle": "로그아웃 하실건가요?",
+  "@guardianSettingsLogoutConfirmTitle": { "description": "로그아웃 확인 팝업 제목" },
+
+  "guardianSettingsWithdrawConfirmTitle": "회원탈퇴 하실건가요?",
+  "@guardianSettingsWithdrawConfirmTitle": { "description": "회원탈퇴 확인 팝업 제목" },
+
+  "guardianSettingsWithdrawConfirmMessage": "만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요",
+  "@guardianSettingsWithdrawConfirmMessage": { "description": "회원탈퇴 확인 팝업의 되돌릴 수 없다는 고지" },
+
+  "guardianSettingsWithdrawFailedTitle": "탈퇴하지 못했어요",
+  "@guardianSettingsWithdrawFailedTitle": { "description": "회원탈퇴 실패 팝업 제목" },
+
+  "guardianSettingsWithdrawFailedFallback": "잠시 후 다시 시도해주세요",
+  "@guardianSettingsWithdrawFailedFallback": { "description": "회원탈퇴 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "guardianSettingsTitle": "설정",
+  "@guardianSettingsTitle": { "description": "보호자 설정 화면 제목" },
+
+  "guardianSettingsPeople": "함께하는 사람",
+  "@guardianSettingsPeople": { "description": "설정 줄 — 함께 돌보는 사람 목록" },
+
+  "guardianSettingsDrafts": "임시저장",
+  "@guardianSettingsDrafts": { "description": "설정 줄 — 임시저장 목록" },
+
+  "guardianSettingsPinChange": "비밀암호 변경하기",
+  "@guardianSettingsPinChange": { "description": "설정 줄 — 비밀암호 바꾸기" },
+
+  "guardianSettingsTerms": "약관 및 개인정보처리방침",
+  "@guardianSettingsTerms": { "description": "설정 줄 — 약관 목록" },
+
+  "guardianSettingsLogout": "로그아웃",
+  "@guardianSettingsLogout": { "description": "설정 줄 — 로그아웃" },
+
+  "guardianSettingsWithdraw": "회원탈퇴",
+  "@guardianSettingsWithdraw": { "description": "설정 줄 — 회원탈퇴" },
+
+  "guardianSettingsLinkConnected": "이룸이 휴대폰",
+  "@guardianSettingsLinkConnected": { "description": "설정 줄 — 이룸이 휴대폰이 이미 연결됐을 때" },
+
+  "guardianSettingsLinkConnect": "이룸이 휴대폰 연결하기",
+  "@guardianSettingsLinkConnect": { "description": "설정 줄 — 이룸이 휴대폰을 아직 연결하지 않았을 때" },
+
+  "guardianSettingsLinkStatus": "연결됨",
+  "@guardianSettingsLinkStatus": { "description": "설정 줄 — 이룸이 휴대폰 연결 상태 값" },
+
+  "guardianSettingsProfileSwitch": "이룸이 바꾸기",
+  "@guardianSettingsProfileSwitch": { "description": "설정 줄 — 연결된 이룸이가 둘 이상일 때 보는 이룸이를 바꾼다" },
+
+  "guardianSettingsImageStyle": "그림 방식",
+  "@guardianSettingsImageStyle": { "description": "설정 줄 — 카드 그림 방식" },
+
+  "guardianSettingsHaptic": "카드 체크 진동",
+  "@guardianSettingsHaptic": { "description": "설정 줄 — 이룸이가 카드를 체크할 때 진동 켜기/끄기" },
+
+  "questionMakeCards": "카드 만들기",
+  "@questionMakeCards": { "description": "추가 질문 화면 하단 버튼" },
+
+  "questionCustomAdd": "+ 직접 입력하기",
+  "@questionCustomAdd": { "description": "추가 질문의 직접 입력 칩" },
+
+  "questionCustomHint": "직접 적어주세요",
+  "@questionCustomHint": { "description": "추가 질문 직접 입력칸 안내 글" },
+
+  "questionCustomClose": "직접 입력 닫기",
+  "@questionCustomClose": { "description": "추가 질문 직접 입력칸의 닫기 버튼 낭독 이름" },
+
+  "questionClearLabel": "{label} 지우기",
+  "@questionClearLabel": { "description": "추가 질문에서 고른 칩의 X 버튼을 낭독기가 읽는 이름. label 은 칩 글자", "placeholders": {"label": {"type": "String"}} }
 }

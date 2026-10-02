@@ -264,13 +264,13 @@ class _Headline extends StatelessWidget {
         SizedBox(height: _RoutineInputLayout.sparklesToTitle),
         Text(
           // 줄바꿈 위치는 디자인이 정한 대로다
-          '오늘은 어떤 준비가\n필요한가요?',
+          context.l10n.routineInputTitle,
           textAlign: TextAlign.center,
           style: context.typo.promptTitle.copyWith(color: colors.textPrimary),
         ),
         SizedBox(height: context.space.sm),
         Text(
-          'AI 루미가 작은 행동 단계로 나눠드려요',
+          context.l10n.routineInputSubtitle,
           textAlign: TextAlign.center,
           style: context.typo.promptBody.copyWith(color: colors.promptMuted),
         ),
@@ -368,7 +368,7 @@ class _InputFieldState extends State<_InputField> {
                       // 시안(238:1723) 문구 그대로. `적어주세요`로 바꿔 두었던 것을 되돌린다.
                       hintText: _focusNode.hasFocus
                           ? ''
-                          : '평소 이야기하듯 입력해주세요',
+                          : context.l10n.routineInputHint,
                       // 플레이스홀더는 입력 텍스트(promptBody, w500)보다 가늘다 (Figma style_7YRXS7)
                       hintStyle: context.typo.promptPlaceholder.copyWith(
                         color: colors.promptMuted,
@@ -403,7 +403,7 @@ class _SendButton extends StatelessWidget {
       onTap: onTap,
       scaleDown: AppPressable.scaleIcon,
       // 입력창 안 화살표뿐이라 무엇을 하는 버튼인지 이름으로 알린다 (#339)
-      semanticLabel: '보내기',
+      semanticLabel: context.l10n.routineInputSend,
       child: Container(
         // 원형 버튼이라 가로세로 모두 .w
         width: 32.w,
