@@ -1,15 +1,55 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-02T11:59:48Z",
-    "currentVersion": "2.16.0",
+    "lastUpdated": "2026-10-02T12:20:01Z",
+    "currentVersion": "2.16.2",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 211
+    "totalReleases": 213
   },
   "releases": [
+    {
+      "version": "2.16.2",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-02",
+      "pr_number": 555,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 별 화면이 겹쳐 떠서 닫히지 않던 문제 해결",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "별 화면이 겹쳐 떠서 닫히지 않던 문제 해결"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.16.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-02",
+      "pr_number": 554,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 다른 휴대폰에서 끝낸 일과가 보호자 홈에 바로 반영돼요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "다른 휴대폰에서 끝낸 일과가 보호자 홈에 바로 반영돼요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.16.0",
       "project_type": "flutter",

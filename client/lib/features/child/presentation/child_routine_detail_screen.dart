@@ -189,6 +189,10 @@ class _ChildRoutineDetailScreenState
   bool _isCardChecked(ActionCard card) =>
       ref.read(childRoutineProvider).isChecked(widget.routine.id, card);
 
+  /// 보상(별 화면 → 일과완료 화면) 흐름이 진행 중인가. 도는 동안 다른 카드를 체크해도
+  /// 별 화면을 또 쌓지 않는다 — 쌓이면 `좋아요!`를 눌러도 같은 화면이 한 번 더 떠서 안 닫힌 것처럼 보인다.
+  bool _rewardFlowActive = false;
+
   Future<void> _toggle(ActionCard card) async {
     // toggle 전에 현재 상태를 읽어둔다 — 미체크→체크로 "바뀌는" 순간에만
     // 컨페티를 터뜨리기 위해서다. 체크 해제 때는 터지지 않는다.
@@ -215,40 +219,44 @@ class _ChildRoutineDetailScreenState
       becameChecked ? ChildHapticKind.check : ChildHapticKind.uncheck,
     );
 
-    if (!shouldReward) return;
-
-    // 컨페티가 눈에 보인 뒤 보상이 뜨게 한다. 바로 넘어가면 색종이가 안 보인다.
-    // 컨페티가 없는 경우(재체크 아님/동작 줄이기)라도 체크 색 전환은 보여야 하므로
-    // 최소 전환 시간만큼은 기다린다.
-    await Future<void>.delayed(
-      becameChecked ? AppMotion.slow + AppMotion.normal : AppMotion.normal,
-    );
-    if (!mounted) return;
-    // 카드를 하나 끝낼 때마다 별을 보여준다. 보호자가 정한 보상도 함께 뜬다 (이슈 #239).
-    // 같은 카드를 다시 체크할 때는 뜨지 않는다 — 위 `shouldReward`가 걸러 준다.
-    final routine = widget.routine;
-    haptics.play(ChildHapticKind.star);
-    await context.push(
-      Routes.childReward,
-      extra: routine.hasReward
-          ? (emoji: routine.rewardEmoji, text: routine.rewardText)
-          : null,
-    );
-    if (!mounted) return;
-
-    // 마지막 카드까지 끝냈으면 일과완료 화면을 이어서 보여 준다 (이슈 #490).
-    // 그 화면의 버튼이 홈으로 보내므로 여기서는 카드를 넘기지 않는다.
-    if (_isRoutineDone) {
-      haptics.play(ChildHapticKind.complete);
+    if (!shouldReward || _rewardFlowActive) return;
+    _rewardFlowActive = true;
+    try {
+      // 컨페티가 눈에 보인 뒤 보상이 뜨게 한다. 바로 넘어가면 색종이가 안 보인다.
+      // 컨페티가 없는 경우(재체크 아님/동작 줄이기)라도 체크 색 전환은 보여야 하므로
+      // 최소 전환 시간만큼은 기다린다.
+      await Future<void>.delayed(
+        becameChecked ? AppMotion.slow + AppMotion.normal : AppMotion.normal,
+      );
+      if (!mounted) return;
+      // 카드를 하나 끝낼 때마다 별을 보여준다. 보호자가 정한 보상도 함께 뜬다 (이슈 #239).
+      // 같은 카드를 다시 체크할 때는 뜨지 않는다 — 위 `shouldReward`가 걸러 준다.
+      final routine = widget.routine;
+      haptics.play(ChildHapticKind.star);
       await context.push(
-        Routes.childRoutineDone,
+        Routes.childReward,
         extra: routine.hasReward
             ? (emoji: routine.rewardEmoji, text: routine.rewardText)
             : null,
       );
-      return;
+      if (!mounted) return;
+
+      // 마지막 카드까지 끝냈으면 일과완료 화면을 이어서 보여 준다 (이슈 #490).
+      // 그 화면의 버튼이 홈으로 보내므로 여기서는 카드를 넘기지 않는다.
+      if (_isRoutineDone) {
+        haptics.play(ChildHapticKind.complete);
+        await context.push(
+          Routes.childRoutineDone,
+          extra: routine.hasReward
+              ? (emoji: routine.rewardEmoji, text: routine.rewardText)
+              : null,
+        );
+        return;
+      }
+      _advanceToNextUnchecked();
+    } finally {
+      _rewardFlowActive = false;
     }
-    _advanceToNextUnchecked();
   }
 
   /// 모든 카드가 체크됐는지. 기기 기록이 서버 값보다 우선한다.
