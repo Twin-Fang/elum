@@ -80,7 +80,7 @@ public record RoutineResponse(
   @Schema(hidden = true)
   String profileId,
 
-  @Schema(description = "일과의 콘텐츠 언어 코드(ko·en·ja·zh·es). 카드 글과 음성이 이 언어다. 기존 일과는 ko", example = "ko")
+  @Schema(description = "일과를 만들 때 정한 콘텐츠 언어 코드(ko·en·ja·zh·es). 기존 일과는 ko", example = "ko")
   String language
 ) {
 

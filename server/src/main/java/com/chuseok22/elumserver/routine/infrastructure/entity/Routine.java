@@ -101,10 +101,13 @@ public class Routine extends BaseEntity {
   private Integer displayOrder = 0;
 
   /**
-   * 일과의 콘텐츠 언어 (다국어 #526). 카드 글과 음성이 이 언어다.
+   * 일과의 콘텐츠 언어 (다국어 #526). 일과가 만들어질 때 정해진 언어를 저장한다.
    *
    * <p>일과를 만든 요청의 화면 언어를 켜진 언어 목록(ENABLED_CONTENT_LOCALES)에 비춰 정한다. 보호자가 고르지 않고
    * 만든 뒤에는 바꾸지 않는다. 기존 일과는 V33 이 ko 로 채웠다.
+   *
+   * <p>이 값은 만들어질 때의 콘텐츠 언어를 <b>저장</b>할 뿐이다. AI 의 출력 언어를 이 값으로 지정하는 작업이 들어오기 전에는
+   * 저장된 언어와 카드 글의 언어가 어긋날 수 있다.
    *
    * <p>columnDefinition 은 로컬(ddl-auto: update)에서 행이 있는 표에 NOT NULL 컬럼을 더할 때 DEFAULT 가 필요해서 둔다
    * (displayOrder 와 같은 이유).
