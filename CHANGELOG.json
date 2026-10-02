@@ -1,15 +1,39 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-02T02:35:10Z",
-    "currentVersion": "2.14.3",
+    "lastUpdated": "2026-10-02T08:34:46Z",
+    "currentVersion": "2.14.4",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 206
+    "totalReleases": 207
   },
   "releases": [
+    {
+      "version": "2.14.4",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-02",
+      "pr_number": 538,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 이룸이 화면에서 껐다 켜도 이룸이 화면이 열려요\n  * 아직 시작하지 않은 일과를 삭제할 수 있어요\n  * 이룸이가 시작한 일과는 지울 수 없는 이유를 알려줘요\n  * 다 끝낸 일과는 보호자 화면에서 편집할 수 없어요\n  * 보호자 홈에 일과 진행 상황이 바로 반영돼요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "이룸이 화면에서 껐다 켜도 이룸이 화면이 열려요",
+            "아직 시작하지 않은 일과를 삭제할 수 있어요",
+            "이룸이가 시작한 일과는 지울 수 없는 이유를 알려줘요",
+            "다 끝낸 일과는 보호자 화면에서 편집할 수 없어요",
+            "보호자 홈에 일과 진행 상황이 바로 반영돼요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.14.3",
       "project_type": "flutter",

@@ -2834,6 +2834,12 @@ abstract class AppLocalizations {
   /// **'편집하기'**
   String get routineDetailEdit;
 
+  /// 이룸이가 다 끝낸 오늘 일과의 상세 시트 아래 버튼(눌리지 않는다)
+  ///
+  /// In ko, this message translates to:
+  /// **'다 끝낸 일과예요'**
+  String get routineDetailFinishedToday;
+
   /// 일과 상세 시트의 카드 줄 낭독 힌트
   ///
   /// In ko, this message translates to:
@@ -2869,6 +2875,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'일과를 삭제하실건가요?'**
   String get todayRoutineDeleteConfirmTitle;
+
+  /// 이룸이가 한 단계라도 한 일과를 지우려 할 때 안내 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 시작한 일과예요'**
+  String get todayRoutineStartedTitle;
+
+  /// 시작한 일과를 지울 수 없는 이유를 알리는 안내 팝업 문장
+  ///
+  /// In ko, this message translates to:
+  /// **'한 일이 기록으로 남도록 지울 수 없어요'**
+  String get todayRoutineStartedMessage;
 
   /// 보호자 홈 일과 삭제 확인 팝업의 삭제 버튼
   ///

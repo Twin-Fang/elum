@@ -1514,6 +1514,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineDetailEdit => '편집하기';
 
   @override
+  String get routineDetailFinishedToday => '다 끝낸 일과예요';
+
+  @override
   String get routineDetailOpenHint => '눌러서 카드 크게 보기';
 
   @override
@@ -1530,6 +1533,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get todayRoutineDeleteConfirmTitle => '일과를 삭제하실건가요?';
+
+  @override
+  String get todayRoutineStartedTitle => '이룸이가 시작한 일과예요';
+
+  @override
+  String get todayRoutineStartedMessage => '한 일이 기록으로 남도록 지울 수 없어요';
 
   @override
   String get todayRoutineDeleteAction => '삭제';

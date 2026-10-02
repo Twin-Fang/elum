@@ -16,6 +16,7 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/character_badge.dart';
 import '../../credit/application/credit_start_gate.dart';
 import '../../credit/presentation/credit_blocked_dialog.dart';
+import '../../child/application/routine_auto_refresh.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/character.dart';
 import '../../profile/application/profile_session.dart';
@@ -157,7 +158,10 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
     // 연결된 이룸이가 하나도 없으면 이룸이 등록(온보딩)으로 보낸다 (다중 보호자 #362 · E29).
     // 마지막 보호자로 나갔거나 다른 휴대폰에서 이룸이가 지워진 경우다. 라우터 가드는 화면을
     // 옮길 때만 평가되므로 머무는 중에 알게 되면 여기서 직접 옮긴다.
-    ref.listen<bool>(profileSessionProvider.select((s) => s.noProfile), (_, none) {
+    ref.listen<bool>(profileSessionProvider.select((s) => s.noProfile), (
+      _,
+      none,
+    ) {
       if (none) context.go(Routes.onboardingName);
     });
 
@@ -243,22 +247,27 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
       ),
     );
 
-    return Stack(
-      children: [
-        scaffold,
-        // 처음 들어왔을 때만 뜨는 안내. 평소에는 높이 0이라 아무것도 그리지 않는다.
-        // Scaffold 밖이라 글 스타일을 주는 Material 이 없어 투명 Material 로 감싼다.
-        Positioned.fill(
-          child: Material(
-            type: MaterialType.transparency,
-            child: HomeCoachMark(
-              createKey: _createKey,
-              swipeKey: _swipeKey,
-              modeKey: _modeKey,
+    // 이룸이가 다른 휴대폰에서 단계를 끝내도 알려 줄 길이 없다(푸시·소켓 없음).
+    // 받아 둔 목록을 계속 쥐고 있어 마지막 단계를 끝낸 일과가 직전 퍼센트에 머물렀다 —
+    // 완료 체크가 나오지 않아 "100% 가 안 뜬다"로 보였다 (#535). 이룸이 홈과 같은 주기로 다시 받는다.
+    return RoutineAutoRefresh(
+      child: Stack(
+        children: [
+          scaffold,
+          // 처음 들어왔을 때만 뜨는 안내. 평소에는 높이 0이라 아무것도 그리지 않는다.
+          // Scaffold 밖이라 글 스타일을 주는 Material 이 없어 투명 Material 로 감싼다.
+          Positioned.fill(
+            child: Material(
+              type: MaterialType.transparency,
+              child: HomeCoachMark(
+                createKey: _createKey,
+                swipeKey: _swipeKey,
+                modeKey: _modeKey,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -1414,6 +1414,8 @@
 
   "routineDetailEdit": "편집하기",
   "@routineDetailEdit": {"description": "오늘 일과 상세 시트 아래 버튼"},
+  "routineDetailFinishedToday": "다 끝낸 일과예요",
+  "@routineDetailFinishedToday": {"description": "이룸이가 다 끝낸 오늘 일과의 상세 시트 아래 버튼(눌리지 않는다)"},
 
   "routineDetailOpenHint": "눌러서 카드 크게 보기",
   "@routineDetailOpenHint": {"description": "일과 상세 시트의 카드 줄 낭독 힌트"},
@@ -1432,6 +1434,10 @@
 
   "todayRoutineDeleteConfirmTitle": "일과를 삭제하실건가요?",
   "@todayRoutineDeleteConfirmTitle": {"description": "보호자 홈에서 일과를 지우기 전 확인 팝업 제목"},
+  "todayRoutineStartedTitle": "이룸이가 시작한 일과예요",
+  "@todayRoutineStartedTitle": {"description": "이룸이가 한 단계라도 한 일과를 지우려 할 때 안내 팝업 제목"},
+  "todayRoutineStartedMessage": "한 일이 기록으로 남도록 지울 수 없어요",
+  "@todayRoutineStartedMessage": {"description": "시작한 일과를 지울 수 없는 이유를 알리는 안내 팝업 문장"},
 
   "todayRoutineDeleteAction": "삭제",
   "@todayRoutineDeleteAction": {"description": "보호자 홈 일과 삭제 확인 팝업의 삭제 버튼"},
