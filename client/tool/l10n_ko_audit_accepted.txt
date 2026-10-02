@@ -1,0 +1,2 @@
+creditResetAt: "{month}월 {day}일({weekday}) {hour}시" # lib/features/credit/domain/credit_summary.dart:126 `'${at.month}월 ${at.day}일(${days[..]}) ${at.hour}시$minute'` 와 한 글자씩 대조 — 분이 0이라 minute 가 빈 문자열일 때의 결과와 같다. 끝의 $minute 보간 때문에 한 리터럴이 아니다
+creditResetAtMinute: "{month}월 {day}일({weekday}) {hour}시 {minute}분" # 같은 줄 126 과 대조 — minute 가 ' ${at.minute}분'(줄 125, 앞 공백 한 칸 포함)일 때의 결과와 같다

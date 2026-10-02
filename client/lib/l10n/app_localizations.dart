@@ -139,6 +139,48 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'다시 시도'**
   String get commonRetry;
+
+  /// 지난 일과 카드에 적는 날짜. 예: 2026년 9월 20일
+  ///
+  /// In ko, this message translates to:
+  /// **'{year}년 {month}월 {day}일'**
+  String dateYearMonthDay(int year, int month, int day);
+
+  /// 이룸이 휴대폰이 연결된 날. 예: 9월 18일부터
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}월 {day}일부터'**
+  String dateMonthDaySince(int month, int day);
+
+  /// 짧은 요일. weekday 는 mon·tue·wed·thu·fri·sat·sun 중 하나다.
+  ///
+  /// In ko, this message translates to:
+  /// **'{weekday, select, mon{월} tue{화} wed{수} thu{목} fri{금} sat{토} sun{일} other{}}'**
+  String weekdayShort(String weekday);
+
+  /// AI 크레딧이 다시 채워지는 시각. weekday 는 weekdayShort 결과다. 예: 9월 28일(월) 0시
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}월 {day}일({weekday}) {hour}시'**
+  String creditResetAt(int month, int day, String weekday, int hour);
+
+  /// creditResetAt 에서 분이 0이 아닐 때. 예: 9월 29일(화) 3시 30분
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}월 {day}일({weekday}) {hour}시 {minute}분'**
+  String creditResetAtMinute(
+    int month,
+    int day,
+    String weekday,
+    int hour,
+    int minute,
+  );
+
+  /// 다음 초기화 시각을 서버가 주지 않았을 때의 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'다음 주 월요일 0시'**
+  String get creditResetFallback;
 }
 
 class _AppLocalizationsDelegate

@@ -25,4 +25,48 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get commonRetry => '다시 시도';
+
+  @override
+  String dateYearMonthDay(int year, int month, int day) {
+    return '$year년 $month월 $day일';
+  }
+
+  @override
+  String dateMonthDaySince(int month, int day) {
+    return '$month월 $day일부터';
+  }
+
+  @override
+  String weekdayShort(String weekday) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      'mon': '월',
+      'tue': '화',
+      'wed': '수',
+      'thu': '목',
+      'fri': '금',
+      'sat': '토',
+      'sun': '일',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String creditResetAt(int month, int day, String weekday, int hour) {
+    return '$month월 $day일($weekday) $hour시';
+  }
+
+  @override
+  String creditResetAtMinute(
+    int month,
+    int day,
+    String weekday,
+    int hour,
+    int minute,
+  ) {
+    return '$month월 $day일($weekday) $hour시 $minute분';
+  }
+
+  @override
+  String get creditResetFallback => '다음 주 월요일 0시';
 }
