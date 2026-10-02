@@ -181,7 +181,8 @@ List<String> scan(String path, String source) {
   ];
 }
 
-bool _skipped(String path) => _skipPaths.keys.any(path.startsWith);
+/// 검사에서 빼는 경로인가 (CI 시험도 같은 규칙을 쓴다).
+bool isSkippedPath(String path) => _skipPaths.keys.any(path.startsWith);
 
 void main(List<String> args) {
   final roots = args.isEmpty ? ['lib'] : args;
@@ -201,7 +202,7 @@ void main(List<String> args) {
     };
     for (final path in files) {
       if (!path.endsWith('.dart') || path.endsWith('.freezed.dart')) continue;
-      if (_skipped(path)) continue;
+      if (isSkippedPath(path)) continue;
       hits.addAll(scan(path, File(path).readAsStringSync()));
     }
   }
