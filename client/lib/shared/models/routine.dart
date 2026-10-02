@@ -124,6 +124,14 @@ abstract class Routine with _$Routine {
   /// 모든 카드를 마쳤는가. 아이 홈 타일의 완료 배경 판단에 쓴다.
   bool get isAllDone => steps.isNotEmpty && steps.every((s) => s.completed);
 
+  /// 이룸이가 다 끝냈는가 (#534). 서버 상태가 늦게 바뀐 응답도 있어 단계로도 본다.
+  bool get isFinished => status == 'COMPLETED' || isAllDone;
+
+  /// 이룸이가 한 단계라도 했는가 (#533). 시작한 일과는 서버가 지우지 않는다 —
+  /// 수행 기록이고 받은 별이 묶여 있다.
+  bool get hasStarted =>
+      isFinished || completedStepCount > 0 || steps.any((s) => s.completed);
+
   /// 보상이 정해져 있는가. **false면 보상 관련 UI를 전부 숨긴다.**
   /// 보상을 정하지 않은 보호자에게 빈 자리를 보여주면 안 한 일처럼 느껴진다.
   bool get hasReward => rewardText.trim().isNotEmpty;
@@ -196,7 +204,9 @@ abstract class Routine with _$Routine {
       // 크레딧이 꺼져 있거나 모양이 다르면 null — 사용량 줄을 그리지 않는다.
       creditUsage: CreditUsage.tryParse(json['credit']),
       // bool 이 아니면 모른다 — 문자열 `yes` 같은 모양을 참으로 읽지 않는다.
-      createdByMe: json['createdByMe'] is bool ? json['createdByMe'] as bool : null,
+      createdByMe: json['createdByMe'] is bool
+          ? json['createdByMe'] as bool
+          : null,
       creatorName: json['creatorName']?.toString(),
     );
   }

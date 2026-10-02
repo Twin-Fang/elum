@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/ads/ad_ids.dart';
 import '../../../../core/ads/ad_native_slot.dart';
+import '../../../../core/network/server_error_code.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_motion.dart';
@@ -47,9 +48,7 @@ final homeRoutinesProvider = Provider<List<Routine>>((ref) {
   final now = DateTime.now();
 
   return [
-    if (current != null &&
-        current.steps.isNotEmpty &&
-        current.isTodayOn(now))
+    if (current != null && current.steps.isNotEmpty && current.isTodayOn(now))
       current,
     ...fetched.where(
       (r) => r.id != current?.id && r.steps.isNotEmpty && r.isTodayOn(now),
@@ -166,7 +165,31 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     ref.refreshRoutines();
   }
 
+  /// 이룸이가 한 단계라도 한 일과인가 (#533). 같은 휴대폰에서 방금 체크한 것은 서버에
+  /// 아직 안 갔을 수 있어 기기 기록도 함께 본다.
+  bool _hasStarted(Routine routine) =>
+      routine.hasStarted ||
+      routineProgress(routine, ref.read(childRoutineProvider)) > 0;
+
+  /// 시작한 일과를 지우려 할 때의 안내. 실패가 아니라 정해진 규칙이라 확인 하나만 둔다.
+  Future<void> _showStartedNotice() => showElumDialog<void>(
+    context: context,
+    title: '이룸이가 시작한 일과예요',
+    message: '한 일이 기록으로 남도록 지울 수 없어요',
+    icon: ElumDialogIcon.alert,
+    code: 'E-DEL-STARTED',
+    actions: const [ElumDialogAction(label: '확인')],
+  );
+
   Future<void> _delete(Routine routine) async {
+    // 시작한 일과는 서버가 지우지 않는다(수행 기록·별). 묻고 나서 실패 팝업을 띄우면
+    // 보호자는 "삭제가 고장났다"고 여긴다 (#533). 누르기 전에 이유를 먼저 알린다.
+    if (_hasStarted(routine)) {
+      setState(() => _openId = null);
+      await _showStartedNotice();
+      return;
+    }
+
     final confirmed = await showElumDialog<bool>(
       context: context,
       title: '일과를 삭제하실건가요?',
@@ -182,9 +205,21 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     );
     if (confirmed != true || !mounted) return;
 
-    final failure = await ref.read(routineRepositoryProvider).delete(routine.id);
+    final failure = await ref
+        .read(routineRepositoryProvider)
+        .delete(routine.id);
     if (!mounted) return;
     if (failure != null) {
+      // 묻는 사이에 이룸이가 시작했다 — 서버가 상태로 거절한다 (#533).
+      // 새로 받아 와야 화면도 시작한 일과로 바뀐다.
+      // showFailure 를 쓰지 않는다 — 서버 문구(`현재 상태에서는 처리할 수 없습니다`)가
+      // 이 안내를 덮어 왜 안 되는지 알 수 없다.
+      if (failure.server?.code == ServerErrorCode.routineInvalidStatus) {
+        setState(() => _openId = null);
+        ref.refreshRoutines();
+        await _showStartedNotice();
+        return;
+      }
       showFailure(
         context,
         failure,
