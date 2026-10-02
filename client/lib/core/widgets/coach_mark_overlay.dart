@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../l10n/l10n_context.dart';
 import '../assets/app_assets.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
@@ -343,10 +344,15 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
         child: Semantics(
           container: true,
           liveRegion: true,
-          label:
-              '안내 ${widget.index + 1}/${widget.steps.length}. ${coachPlainMessage(step.message)}',
+          label: context.l10n.coachStepLabel(
+            widget.index + 1,
+            widget.steps.length,
+            coachPlainMessage(step.message),
+          ),
           onTap: _tap,
-          onTapHint: last ? '안내 닫기' : '다음 안내',
+          onTapHint: last
+              ? context.l10n.coachCloseHint
+              : context.l10n.coachNextHint,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: _tap,
@@ -523,7 +529,9 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
             AnimatedSwitcher(
               duration: _reduceMotion ? Duration.zero : AppMotion.fast,
               child: Text(
-                last ? '화면을 누르면 닫혀요' : '화면을 누르면 다음으로 넘어가요',
+                last
+                    ? context.l10n.coachTapToClose
+                    : context.l10n.coachTapToNext,
                 key: ValueKey(last),
                 style: typo.body.copyWith(
                   color: colors.coachText.withValues(alpha: 0.7),
@@ -550,7 +558,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
       top: media.padding.top + 8.h - (hit - icon) / 2,
       child: Semantics(
         button: true,
-        label: '안내 닫기',
+        label: context.l10n.coachCloseHint,
         onTap: _close,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,

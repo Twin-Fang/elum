@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/settings_tile.dart';
@@ -28,7 +29,7 @@ class ConsentDocumentListScreen extends ConsumerWidget {
     return ElumScaffold(
       onBack: () => Navigator.of(context).pop(),
       // 시안(`1027:4683`)은 제목이 뒤로가기와 같은 줄에 선다 (#349).
-      title: '약관 및 개인정보처리방침',
+      title: context.l10n.consentListTitle,
       // 줄이 x=16 에서 시작한다.
       backTop: 67,
       horizontalPadding: 16,
@@ -60,7 +61,7 @@ class ConsentDocumentListScreen extends ConsumerWidget {
             Padding(
               padding: EdgeInsets.only(top: space.xl),
               child: Text(
-                '약관을 불러오고 있어요',
+                context.l10n.consentLoading,
                 textAlign: TextAlign.center,
                 style: context.typo.body.copyWith(
                   color: context.colors.textSecondary,
@@ -70,12 +71,12 @@ class ConsentDocumentListScreen extends ConsumerWidget {
           else ...[
             // **필수와 선택을 나눠 보여준다.** 시안이 그렇게 그렸고, 무엇을 빼도
             // 되는지는 묶어 두면 알 수 없다.
-            _GroupLabel('필수항목'),
+            _GroupLabel(context.l10n.consentGroupRequired),
             for (final item in bundle.requiredItems) _tile(context, item),
             if (bundle.optionalItems.isNotEmpty) ...[
               // 시안 — 마지막 필수 줄 하단(410)에서 `선택항목`(450)까지 40.
               SizedBox(height: 40.h),
-              _GroupLabel('선택항목'),
+              _GroupLabel(context.l10n.consentGroupOptional),
               for (final item in bundle.optionalItems) _tile(context, item),
             ],
           ],

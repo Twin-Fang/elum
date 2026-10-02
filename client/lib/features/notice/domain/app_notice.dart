@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../../core/l10n/current_l10n.dart';
 
 /// 공지 한 건 (이슈 #371 · #390 · 서버 #370 `AppNoticeResponse`). 팝업 하나에 하나씩 뜬다.
 @immutable
@@ -191,5 +192,6 @@ List<NoticeTitlePart> parseNoticeTitle(String title) {
 }
 
 /// `보지 않기` 문구. 일수는 관리자 설정 하나(`NOTICE_HIDE_DAYS`)라 모든 공지가 같다.
-String noticeHideLabel(int days) =>
-    days == NoticeFeed.defaultHideDays ? '일주일간 보지 않기' : '$days일간 보지 않기';
+String noticeHideLabel(int days) => days == NoticeFeed.defaultHideDays
+    ? appL10n.noticeHideWeek
+    : appL10n.noticeHideDays(days);

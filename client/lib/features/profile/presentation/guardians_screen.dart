@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -58,20 +59,26 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
 
   Future<void> _leave(String profileId, String profileName, List<Guardian> guardians) async {
     if (_busy) return;
+    // await 뒤에서 context 를 읽지 않도록 문구는 먼저 잡아 둔다.
+    final l10n = context.l10n;
     // 목록에서 "나" 외에 다른 사람이 없으면 마지막 보호자다.
     final isLast = guardians.every((g) => g.me);
 
     final ok = await showElumDialog<bool>(
       context: context,
       icon: ElumDialogIcon.alert,
-      title: '함께 돌보기를 그만둘까요?',
+      title: l10n.guardiansLeaveConfirmTitle,
       // 무엇이 사라지고 무엇이 남는지 먼저 말한다 (되돌릴 수 없는 일 · 서버 명세 4-3).
       message: isLast
-          ? '함께하는 보호자가 없어요\n나가면 이룸이와 만든 일과, 모은 별이 모두 사라져요\n되돌릴 수 없어요'
-          : '내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요',
-      actions: const [
-        ElumDialogAction(label: '취소', value: false, tone: ElumDialogTone.neutral),
-        ElumDialogAction(label: '그만두기', value: true, tone: ElumDialogTone.danger),
+          ? l10n.guardiansLeaveConfirmMessageLast
+          : l10n.guardiansLeaveConfirmMessageOthers,
+      actions: [
+        ElumDialogAction(label: l10n.commonCancel, value: false, tone: ElumDialogTone.neutral),
+        ElumDialogAction(
+          label: l10n.guardiansLeaveConfirmAction,
+          value: true,
+          tone: ElumDialogTone.danger,
+        ),
       ],
     );
     if (ok != true || !mounted) return;
@@ -87,8 +94,8 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
       await showFailure(
         context,
         failure,
-        title: '나가지 못했어요',
-        fallback: '잠시 후 다시 시도해주세요',
+        title: l10n.guardiansLeaveFailTitle,
+        fallback: l10n.guardiansLeaveFailedFallback,
         fallbackCode: 'E-LEAVE',
       );
       // 서버가 "이 이룸이는 볼 수 없다"고 답했다면 목록이 옛것이다 — 다시 받는다.
@@ -107,7 +114,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
       case LeftOutcome.switched || LeftOutcome.stayed:
         context.go(Routes.guardian);
     }
-    messenger.showSnackBar(SnackBar(content: Text('$profileName에서 나왔어요')));
+    messenger.showSnackBar(SnackBar(content: Text(l10n.guardiansLeft(profileName))));
   }
 
   Future<void> _editMe(String profileId, Guardian me) async {
@@ -128,8 +135,8 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
       await showFailure(
         context,
         attempt.failure,
-        title: '이름을 고치지 못했어요',
-        fallback: '잠시 후 다시 시도해주세요',
+        title: context.l10n.guardiansNameEditFailTitle,
+        fallback: context.l10n.guardiansNameEditFailedFallback,
         fallbackCode: 'E-PPL-EDIT',
       );
       return;
@@ -145,7 +152,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
 
     return ElumScaffold(
       onBack: _busy ? null : context.popOrHome,
-      title: '함께하는 사람',
+      title: context.l10n.guardiansTitle,
       backTop: 67,
       horizontalPadding: 16,
       child: SingleChildScrollView(
@@ -157,9 +164,9 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
               // 이룸이를 알아내는 중이거나 이룸이가 없다.
               memberAsync
                   ? const _Loading()
-                  : const ElumErrorView(
-                      message: '함께하는 사람을 볼 이룸이가 없어요',
-                      description: '이룸이를 먼저 등록해주세요',
+                  : ElumErrorView(
+                      message: context.l10n.guardiansNoProfileMessage,
+                      description: context.l10n.guardiansNoProfileDescription,
                       errorCode: 'E-PPL-NONE',
                       compact: true,
                     )
@@ -183,19 +190,19 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
       Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: Text(
-          '$profileName를 함께 돌보는 사람이에요',
+          context.l10n.guardiansCaption(profileName),
           style: context.typo.body.copyWith(color: context.colors.textSecondary),
         ),
       ),
       SizedBox(height: space.xs),
       // 둘 다 6자리 코드라 헷갈린다 — 이 화면은 "사람(보호자)"이고 이룸이가 쓰는 휴대폰은 따로
       // 붙인다는 것을 먼저 말한다 (#506).
-      const _Caption('일과를 같이 만드는 가족이나 선생님이에요. 이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요'),
+      _Caption(context.l10n.guardiansIntro),
       SizedBox(height: space.sm),
       if (async.hasError)
         ElumErrorView.failure(
           async.error,
-          fallback: '함께하는 사람을 불러오지 못했어요',
+          fallback: context.l10n.guardiansLoadFailedFallback,
           fallbackCode: 'E-PPL',
           onRetry: () => ref.invalidate(guardiansProvider(profileId)),
           compact: true,
@@ -204,8 +211,8 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
         const _Loading()
       else if (guardians.isEmpty)
         // 보호자가 한 명도 없는 이룸이는 서버에 있을 수 없다. 형식이 달라진 것이다.
-        const ElumErrorView(
-          message: '함께하는 사람을 찾지 못했어요',
+        ElumErrorView(
+          message: context.l10n.guardiansEmptyMessage,
           errorCode: 'E-PPL-EMPTY',
           compact: true,
         )
@@ -216,20 +223,20 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
             onTap: g.me && !_busy ? () => _editMe(profileId, g) : null,
           ),
       // 목록에 내 줄만 있으면 비어 보인다 — 무엇을 하면 되는지 알려 준다.
-      if (isAlone) const _Caption('아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요'),
+      if (isAlone) _Caption(context.l10n.guardiansAloneHint),
       SizedBox(height: space.md),
       SettingsTile(
-        label: '다른 보호자 초대하기',
+        label: context.l10n.guardiansInviteAction,
         onTap: _busy ? null : () => context.push(Routes.guardianInvite),
       ),
       SettingsTile(
-        label: '받은 초대 코드 넣기',
+        label: context.l10n.guardiansEnterCodeAction,
         onTap: _busy ? null : () => context.push(Routes.inviteEnter),
       ),
       // 되돌릴 수 없는 줄은 맨 아래에 두고 위험색으로 칠한다. 목록을 못 받았으면 몇 명인지
       // 모르므로 누를 수 없다.
       SettingsTile(
-        label: '함께 돌보기 그만두기',
+        label: context.l10n.guardiansLeaveAction,
         destructive: true,
         onTap: (_busy || guardians == null || guardians.isEmpty)
             ? null
@@ -240,8 +247,8 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
       if (guardians != null && guardians.isNotEmpty)
         _Caption(
           isAlone
-              ? '혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요'
-              : '내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요',
+              ? context.l10n.guardiansLeaveHintAlone
+              : context.l10n.guardiansLeaveHintWithOthers,
         ),
     ];
   }
@@ -307,7 +314,7 @@ class _GuardianTile extends StatelessWidget {
                   color: colors.border,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Text('나', style: typo.bodySmall.copyWith(color: colors.textSecondary)),
+                child: Text(context.l10n.guardiansMeBadge, style: typo.bodySmall.copyWith(color: colors.textSecondary)),
               ),
             ],
             const Spacer(),

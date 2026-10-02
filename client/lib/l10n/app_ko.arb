@@ -1,0 +1,1591 @@
+{
+  "@@locale": "ko",
+
+  "appTitle": "이룸",
+  "@appTitle": { "description": "앱 이름. 운영체제의 앱 전환 화면에 보인다." },
+
+  "commonConfirm": "확인",
+  "@commonConfirm": { "description": "팝업의 확인 버튼" },
+
+  "commonCancel": "취소",
+  "@commonCancel": { "description": "팝업·시트의 취소 버튼" },
+
+  "commonClose": "닫기",
+  "@commonClose": { "description": "팝업·시트의 닫기 버튼" },
+
+  "commonNext": "다음",
+  "@commonNext": { "description": "온보딩 등 단계 화면의 다음 버튼" },
+
+  "commonRetry": "다시 시도",
+  "@commonRetry": { "description": "실패 화면의 다시 시도 버튼" },
+
+  "dateYearMonthDay": "{year}년 {month}월 {day}일",
+  "@dateYearMonthDay": {
+    "description": "지난 일과 카드에 적는 날짜. 예: 2026년 9월 20일",
+    "placeholders": { "year": {"type": "int"}, "month": {"type": "int"}, "day": {"type": "int"} }
+  },
+
+  "dateMonthDaySince": "{month}월 {day}일부터",
+  "@dateMonthDaySince": {
+    "description": "이룸이 휴대폰이 연결된 날. 예: 9월 18일부터",
+    "placeholders": { "month": {"type": "int"}, "day": {"type": "int"} }
+  },
+
+  "weekdayShort": "{weekday, select, mon{월} tue{화} wed{수} thu{목} fri{금} sat{토} sun{일} other{}}",
+  "@weekdayShort": {
+    "description": "짧은 요일. weekday 는 mon·tue·wed·thu·fri·sat·sun 중 하나다.",
+    "placeholders": { "weekday": {"type": "String"} }
+  },
+
+  "creditResetAt": "{month}월 {day}일({weekday}) {hour}시",
+  "@creditResetAt": {
+    "description": "AI 크레딧이 다시 채워지는 시각. weekday 는 weekdayShort 결과다. 예: 9월 28일(월) 0시",
+    "placeholders": {
+      "month": {"type": "int"}, "day": {"type": "int"},
+      "weekday": {"type": "String"}, "hour": {"type": "int"}
+    }
+  },
+
+  "creditResetAtMinute": "{month}월 {day}일({weekday}) {hour}시 {minute}분",
+  "@creditResetAtMinute": {
+    "description": "creditResetAt 에서 분이 0이 아닐 때. 예: 9월 29일(화) 3시 30분",
+    "placeholders": {
+      "month": {"type": "int"}, "day": {"type": "int"},
+      "weekday": {"type": "String"}, "hour": {"type": "int"}, "minute": {"type": "int"}
+    }
+  },
+
+  "creditResetFallback": "다음 주 월요일 0시",
+  "@creditResetFallback": { "description": "다음 초기화 시각을 서버가 주지 않았을 때의 문구" },
+
+  "creditBlockedBusy": "이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요",
+  "@creditBlockedBusy": { "description": "AI 일과를 만드는 중에 새로 만들려 할 때의 팝업 문장" },
+
+  "creditBlockedExhausted": "이번 주 크레딧을 모두 사용했어요.\n{reset}부터 다시 만들 수 있어요",
+  "@creditBlockedExhausted": {
+    "description": "이번 주 크레딧을 다 써서 막힌 팝업 문장. reset 은 다시 채워지는 시각(예: 9월 28일(월) 0시)",
+    "placeholders": { "reset": { "type": "String" } }
+  },
+
+  "creditAdOffer": "{count, plural, other{광고를 끝까지 보면 크레딧 {count}개를 받아요}}",
+  "@creditAdOffer": {
+    "description": "광고 보고 크레딧을 받는 제안 문장. count 는 광고 한 번에 받는 크레딧 수",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "creditReceivedTitle": "{count, plural, other{크레딧 {count}개를 받았어요}}",
+  "@creditReceivedTitle": {
+    "description": "광고 시청 뒤 크레딧을 받았다는 팝업 제목. count 는 받은 수",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "creditReceivedTitleNoCount": "크레딧을 받았어요",
+  "@creditReceivedTitleNoCount": { "description": "받은 수를 모를 때의 팝업 제목" },
+
+  "creditAdWatchMore": "광고 보고 더 만들기",
+  "@creditAdWatchMore": { "description": "크레딧이 없을 때 광고를 보러 가는 버튼" },
+
+  "adRewardPreparing": "광고를 준비하고 있어요",
+  "@adRewardPreparing": { "description": "광고를 불러오는 동안의 대기 팝업" },
+  "adRewardConfirming": "크레딧을 확인하고 있어요",
+  "@adRewardConfirming": { "description": "광고를 본 뒤 서버 지급을 기다리는 동안의 대기 팝업" },
+
+  "adRewardLoadFailed": "지금은 광고를 불러올 수 없어요.\n잠시 후 다시 해주세요",
+  "@adRewardLoadFailed": { "description": "광고 로드 실패 안내" },
+  "adRewardNotWatched": "광고를 끝까지 봐야 크레딧을 받을 수 있어요.\n처음부터 다시 해주세요",
+  "@adRewardNotWatched": { "description": "광고를 중간에 닫았을 때의 안내" },
+  "adRewardSlow": "크레딧 확인이 늦어지고 있어요.\n잠시 후 설정에서 확인해주세요",
+  "@adRewardSlow": { "description": "시청은 끝났는데 지급 확인이 오지 않을 때의 안내" },
+  "adRewardDailyLimit": "오늘은 광고로 받을 수 있는 크레딧을 모두 받았어요.\n내일 다시 해주세요",
+  "@adRewardDailyLimit": { "description": "하루 한도를 다 받았을 때의 안내" },
+  "adRewardCheckAccount": "지금은 광고로 크레딧을 받을 수 없어요.\n계정 상태를 확인해주세요",
+  "@adRewardCheckAccount": { "description": "계정이 동결돼 받을 수 없을 때의 안내" },
+  "adRewardUnavailable": "지금은 광고로 크레딧을 받을 수 없어요.",
+  "@adRewardUnavailable": { "description": "광고 보상 기능이 꺼져 있을 때의 안내" },
+  "adRewardUnavailableRetry": "지금은 광고로 크레딧을 받을 수 없어요.\n잠시 후 다시 해주세요",
+  "@adRewardUnavailableRetry": { "description": "세션을 못 만든 알 수 없는 이유의 안내" },
+  "adRewardFailed": "크레딧을 받지 못했어요.\n잠시 후 다시 해주세요",
+  "@adRewardFailed": { "description": "서버가 지급하지 않은 그 밖의 이유의 안내" },
+
+  "commonPopupClose": "팝업 닫기",
+  "@commonPopupClose": { "description": "팝업 바깥 배경 막을 낭독기가 읽는 이름" },
+
+  "commonBack": "뒤로 가기",
+  "@commonBack": { "description": "뒤로가기 화살표를 낭독기가 읽는 이름" },
+
+  "commonScreenNotFound": "화면을 찾을 수 없어요",
+  "@commonScreenNotFound": { "description": "잘못된 경로로 들어왔을 때의 화면 문구" },
+
+  "commonRetryLater": "잠시 후 다시 해주세요",
+  "@commonRetryLater": { "description": "서버가 이유를 주지 않은 일시 실패의 기본 안내" },
+
+  "commonRetryWithCode": "다시 시도 ({code})",
+  "@commonRetryWithCode": {
+    "description": "실패 화면의 다시 시도 버튼. 괄호 안은 추적용 에러 코드(번역하지 않는다)",
+    "placeholders": { "code": { "type": "String" } }
+  },
+
+  "sentenceStop": ".",
+  "@sentenceStop": { "description": "제목 문장이 문장부호 없이 끝날 때 붙이는 마침표. 일본어·중국어는 。" },
+
+  "failureHintOffline": "인터넷 연결을 확인해주세요",
+  "@failureHintOffline": { "description": "서버에 닿지 못했을 때(오프라인) 무엇을 하면 되는지" },
+
+  "failureHintTimeout": "연결이 느려요. 잠시 후 다시 해주세요",
+  "@failureHintTimeout": { "description": "서버가 제때 답하지 않았을 때의 안내" },
+
+  "failureHintBadCertificate": "안전하지 않은 연결이에요. 다른 망에서 해주세요",
+  "@failureHintBadCertificate": { "description": "공용 와이파이 가로채기 등 인증서 문제의 안내" },
+
+  "coachStepLabel": "안내 {index}/{total}. {message}",
+  "@coachStepLabel": {
+    "description": "코치마크 한 단계를 낭독기가 읽는 문장. message 는 강조 표식을 걷어낸 안내문",
+    "placeholders": {
+      "index": { "type": "int" },
+      "total": { "type": "int" },
+      "message": { "type": "String" }
+    }
+  },
+
+  "commonAd": "광고",
+  "@commonAd": { "description": "광고임을 알리는 라벨(일과로 오인해 누르는 것을 막는다)" },
+
+  "commonAppInfo": "앱 정보",
+  "@commonAppInfo": { "description": "설정의 앱 정보 줄 이름" },
+
+  "coachCloseHint": "안내 닫기",
+  "@coachCloseHint": { "description": "코치마크를 닫는 버튼·동작의 낭독 이름" },
+
+  "coachNextHint": "다음 안내",
+  "@coachNextHint": { "description": "코치마크 다음 단계로 가는 동작의 낭독 이름" },
+
+  "coachTapToClose": "화면을 누르면 닫혀요",
+  "@coachTapToClose": { "description": "마지막 코치마크 단계의 안내 문구" },
+
+  "coachTapToNext": "화면을 누르면 다음으로 넘어가요",
+  "@coachTapToNext": { "description": "코치마크 중간 단계의 안내 문구" },
+
+  "loginSceneEyebrow": "오늘의 하루,",
+  "@loginSceneEyebrow": { "description": "로그인 장면의 윗줄 문구" },
+
+  "loginSceneTitle": "차근차근 함께해요",
+  "@loginSceneTitle": { "description": "로그인 장면의 큰 문구" },
+
+  "appStatusStoreOpenFailedTitle": "스토어를 열지 못했어요",
+  "@appStatusStoreOpenFailedTitle": { "description": "스토어 열기 실패 팝업의 제목" },
+
+  "appStatusStoreOpenFailedFallback": "스토어에서 이룸을 찾아 업데이트해주세요",
+  "@appStatusStoreOpenFailedFallback": { "description": "스토어 열기 실패 시 직접 하는 방법 안내" },
+
+  "appStatusMaintenanceTitle": "잠시 쉬고 있어요",
+  "@appStatusMaintenanceTitle": { "description": "점검 중 화면 제목" },
+
+  "appStatusMaintenanceBody": "조금 뒤에 다시 열어주세요",
+  "@appStatusMaintenanceBody": { "description": "점검 중 화면의 기본 설명(서버가 문구를 주면 그것이 이긴다)" },
+
+  "appStatusRecheck": "다시 확인하기",
+  "@appStatusRecheck": { "description": "점검 화면의 버튼" },
+
+  "appStatusUpdateTitle": "새 이룸이 나왔어요",
+  "@appStatusUpdateTitle": { "description": "강제 업데이트 화면 제목" },
+
+  "appStatusUpdateBody": "앱을 새로 받아야 이어서 쓸 수 있어요.\n스토어에서 이룸을 업데이트해주세요",
+  "@appStatusUpdateBody": { "description": "강제 업데이트 화면 설명" },
+
+  "appStatusUpdated": "업데이트했어요",
+  "@appStatusUpdated": { "description": "스토어 주소가 없을 때의 버튼" },
+
+  "appStatusGoUpdate": "업데이트하러 가기",
+  "@appStatusGoUpdate": { "description": "스토어로 가는 버튼" },
+
+  "routineForeignCreator": "{name}{batchim, select, yes{이} other{가}} 만든 일과예요",
+  "@routineForeignCreator": {
+    "description": "다른 보호자가 만든 일과에 붙는 문구. name 은 만든 사람이 이 이룸이 안에서 불리는 이름. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다",
+    "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } }
+  },
+
+  "routineForeignCreatorUnknown": "다른 보호자가 만든 일과예요",
+  "@routineForeignCreatorUnknown": { "description": "만든 사람 이름을 모를 때의 문구" },
+
+  "routineDefaultTitle": "오늘의 일과",
+  "@routineDefaultTitle": { "description": "AI 가 제목을 못 만들었을 때의 대체 제목" },
+
+  "rewardPresetSnack": "좋아하는 간식",
+  "@rewardPresetSnack": { "description": "보상 프리셋 칩" },
+
+  "rewardPresetVideo": "유튜브 10분",
+  "@rewardPresetVideo": { "description": "보상 프리셋 칩" },
+
+  "rewardPresetPlay": "좋아하는 놀이",
+  "@rewardPresetPlay": { "description": "보상 프리셋 칩" },
+
+  "rewardPresetWalk": "산책",
+  "@rewardPresetWalk": { "description": "보상 프리셋 칩" },
+
+  "rewardPresetCustom": "직접 입력",
+  "@rewardPresetCustom": { "description": "프리셋에 없는 보상을 직접 적는 칩" },
+
+  "roleGuardianWord": "보호자",
+  "@roleGuardianWord": { "description": "역할 카드 제목에서 색이 다른 앞부분(민트). 뒤에 roleLabelSuffix 가 이어 붙는다" },
+
+  "roleElumiWord": "이룸이",
+  "@roleElumiWord": { "description": "역할 카드 제목에서 색이 다른 앞부분(주황)" },
+
+  "roleLabelSuffix": "가 사용해요",
+  "@roleLabelSuffix": { "description": "역할 카드 제목의 나머지. 앞부분과 이어 붙여 `보호자가 사용해요` 가 된다" },
+
+  "roleGuardianDescription": "일과를 만들고 관리해요",
+  "@roleGuardianDescription": { "description": "보호자 역할 카드 설명" },
+
+  "roleElumiDescription": "일과를 실천해요",
+  "@roleElumiDescription": { "description": "이룸이 역할 카드 설명" },
+
+  "roleSelectTitle": "이 휴대폰은 누가\n사용하나요?",
+  "@roleSelectTitle": { "description": "역할 선택 화면 제목. 줄바꿈 위치까지 문구의 일부" },
+
+  "roleSelectDescription": "보호자모드와 이룸이모드가 나눠져 있어요",
+  "@roleSelectDescription": { "description": "역할 선택 화면 부제" },
+
+  "loginKakaoButton": "카카오로 로그인",
+  "@loginKakaoButton": { "description": "카카오 로그인 버튼" },
+
+  "loginNaverButton": "네이버로 로그인",
+  "@loginNaverButton": { "description": "네이버 로그인 버튼" },
+
+  "loginAppleButton": "Apple로 로그인",
+  "@loginAppleButton": { "description": "Apple 로그인 버튼. 애플이 허용한 승인 문구라 번역 단계에서 공식 문구를 따른다" },
+
+  "loginConnecting": "연결하고 있어요",
+  "@loginConnecting": { "description": "소셜 로그인 진행 중 버튼 문구" },
+
+  "loginLastUsed": "최근 로그인",
+  "@loginLastUsed": { "description": "마지막으로 쓴 로그인 수단 표시" },
+
+  "loginDuplicateTitle": "이미 가입된 계정이에요",
+  "@loginDuplicateTitle": { "description": "같은 이메일로 다른 수단으로 가입돼 있을 때의 제목" },
+
+  "loginDuplicateFallback": "처음 쓰신 방법으로 로그인해주세요",
+  "@loginDuplicateFallback": { "description": "같은 경우의 안내(서버 문구가 이긴다)" },
+
+  "loginOfflineTitle": "인터넷 연결을 확인해주세요",
+  "@loginOfflineTitle": { "description": "로그인 중 오프라인일 때의 제목" },
+
+  "loginOfflineFallback": "연결한 뒤 다시 해주세요",
+  "@loginOfflineFallback": { "description": "같은 경우의 안내" },
+
+  "loginFailedTitle": "로그인하지 못했어요",
+  "@loginFailedTitle": { "description": "로그인 실패의 제목" },
+
+  "loginFailedFallback": "잠시 후 다시 시도해주세요",
+  "@loginFailedFallback": { "description": "로그인 실패의 안내(서버 문구가 이긴다)" },
+
+  "consentTitle": "약관에 동의해주세요",
+  "@consentTitle": { "description": "약관 동의 화면 제목(불러오는 중·본문 공통)" },
+
+  "consentLoading": "약관을 불러오고 있어요",
+  "@consentLoading": { "description": "약관을 읽어 오는 동안의 안내(동의 화면·약관 목록)" },
+
+  "consentSaving": "저장하고 있어요",
+  "@consentSaving": { "description": "동의를 저장하는 동안 버튼 문구" },
+
+  "consentSaveFailed": "동의를 저장하지 못했어요. 다시 해주세요",
+  "@consentSaveFailed": { "description": "동의 저장 실패의 기본 문구(서버 문구가 이긴다). 뒤에 에러 코드가 붙는다" },
+
+  "consentDescriptionReady": "항목을 눌러 상세 내용을 볼 수 있어요",
+  "@consentDescriptionReady": { "description": "필수 항목을 모두 켰을 때의 부제" },
+
+  "consentDescriptionNeeded": "서비스 사용을 위해 약관 동의가 필요해요",
+  "@consentDescriptionNeeded": { "description": "필수 항목이 남았을 때의 부제(다음 버튼이 꺼진 이유)" },
+
+  "consentAllAgree": "서비스 이용약관 전체 동의",
+  "@consentAllAgree": { "description": "전체 동의 버튼" },
+
+  "consentRequiredTag": "필수",
+  "@consentRequiredTag": { "description": "약관 행의 필수 표시. 약관 문서 화면의 머리 줄에도 쓴다" },
+
+  "consentOptionalTag": "선택",
+  "@consentOptionalTag": { "description": "약관 행의 선택 표시. 약관 문서 화면의 머리 줄에도 쓴다" },
+
+  "consentChipRequired": "[필수] {label}",
+  "@consentChipRequired": {
+    "description": "약관 칩의 필수 항목",
+    "placeholders": { "label": { "type": "String" } }
+  },
+
+  "consentChipOptional": "[선택] {label}",
+  "@consentChipOptional": {
+    "description": "약관 칩의 선택 항목",
+    "placeholders": { "label": { "type": "String" } }
+  },
+
+  "consentDocumentMeta": "{label} · 버전 {version}",
+  "@consentDocumentMeta": {
+    "description": "약관 문서 화면 끝의 줄. label 은 consentRequiredTag·consentOptionalTag 중 하나라 번역가가 순서·구분자를 바꿀 수 있다",
+    "placeholders": { "label": { "type": "String" }, "version": { "type": "String" } }
+  },
+
+  "consentListTitle": "약관 및 개인정보처리방침",
+  "@consentListTitle": { "description": "약관 목록 화면 제목" },
+
+  "consentGroupRequired": "필수항목",
+  "@consentGroupRequired": { "description": "약관 목록의 필수 묶음 제목" },
+
+  "consentGroupOptional": "선택항목",
+  "@consentGroupOptional": { "description": "약관 목록의 선택 묶음 제목" },
+
+  "commonElumiName": "이룸이",
+  "@commonElumiName": { "description": "이룸을 쓰는 당사자를 부르는 말. 이름을 못 받았을 때의 대체 호칭이기도 하다. 번역 여부는 용어집이 정한다" },
+
+  "characterCatLabel": "고양이",
+  "@characterCatLabel": { "description": "캐릭터 종류(접근성 안내)" },
+
+  "characterCatName": "루루",
+  "@characterCatName": { "description": "고양이 캐릭터의 카드 아래 이름. 번역 여부는 용어집이 정한다" },
+
+  "characterFoxLabel": "여우",
+  "@characterFoxLabel": { "description": "캐릭터 종류(접근성 안내)" },
+
+  "characterFoxName": "포포",
+  "@characterFoxName": { "description": "여우 캐릭터의 카드 아래 이름. 번역 여부는 용어집이 정한다" },
+
+  "agentChickLabel": "병아리",
+  "@agentChickLabel": { "description": "서비스 에이전트(루미)의 종류 이름" },
+
+  "imageStyleCartoonLabel": "만화",
+  "@imageStyleCartoonLabel": { "description": "카드 그림 방식 이름" },
+
+  "imageStyleCartoonDescription": "캐릭터가 나오는 그림이에요",
+  "@imageStyleCartoonDescription": { "description": "카드 그림 방식 설명" },
+
+  "imageStyleRealisticLabel": "실사",
+  "@imageStyleRealisticLabel": { "description": "카드 그림 방식 이름" },
+
+  "imageStyleRealisticDescription": "실제 물건 사진처럼 보여요",
+  "@imageStyleRealisticDescription": { "description": "카드 그림 방식 설명" },
+
+  "imageStylePhotoOnlyLabel": "직접 찍은 사진",
+  "@imageStylePhotoOnlyLabel": { "description": "카드 그림 방식 이름" },
+
+  "imageStylePhotoOnlyDescription": "그림은 직접 찍은 사진으로 넣어요. 글은 계속 만들어 드려요",
+  "@imageStylePhotoOnlyDescription": { "description": "카드 그림 방식 설명" },
+
+  "goalStepByStep": "해야 할 일을 순서대로 이해해요",
+  "@goalStepByStep": { "description": "도움 목표 선택지" },
+
+  "goalPrepareItems": "필요한 준비물을 스스로 챙겨요",
+  "@goalPrepareItems": { "description": "도움 목표 선택지" },
+
+  "goalPrepareNew": "새로운 상황을 미리 준비해요",
+  "@goalPrepareNew": { "description": "도움 목표 선택지" },
+
+  "goalIndependent": "혼자 끝까지 해내는 경험을 만들어요",
+  "@goalIndependent": { "description": "도움 목표 선택지" },
+
+  "onboardingCharacterTitle": "{name}의 하루를 함께할\n친구를 골라주세요",
+  "@onboardingCharacterTitle": { "description": "캐릭터 고르기 화면 제목. name 은 이룸이 호칭", "placeholders": { "name": { "type": "String" } } },
+
+  "onboardingCharacterDescription": "선택한 친구가 카드 속 주인공이 되어 도와줘요",
+  "@onboardingCharacterDescription": { "description": "캐릭터 고르기 화면 설명" },
+
+  "onboardingGoalsTitle": "{name}의 어떤 순간을\n도와주고 싶으신가요?",
+  "@onboardingGoalsTitle": { "description": "도움 목표 화면 제목. name 은 이룸이 호칭", "placeholders": { "name": { "type": "String" } } },
+
+  "onboardingGoalsDescription": "여러 개를 선택할 수 있어요",
+  "@onboardingGoalsDescription": { "description": "도움 목표 화면 설명" },
+
+  "onboardingImageStyleTitle": "카드 그림은 어떤 방식으로\n만들까요?",
+  "@onboardingImageStyleTitle": { "description": "카드 그림 방식 화면 제목" },
+
+  "onboardingImageStyleDescription": "나중에 설정에서 바꿀 수 있어요",
+  "@onboardingImageStyleDescription": { "description": "카드 그림 방식 화면 설명" },
+
+  "onboardingImageStyleSkip": "건너뛰기",
+  "@onboardingImageStyleSkip": { "description": "카드 그림 방식 화면의 건너뛰기 링크" },
+
+  "onboardingNameTitle": "이룸이를 어떻게\n불러드릴까요?",
+  "@onboardingNameTitle": { "description": "이름 입력 화면 제목" },
+
+  "onboardingNameDescription": "정확한 실명이 아니어도 괜찮아요",
+  "@onboardingNameDescription": { "description": "이름 입력 화면 설명(개인정보 최소수집 안내)" },
+
+  "onboardingNameHint": "이름을 입력해주세요",
+  "@onboardingNameHint": { "description": "이름 입력칸 힌트" },
+
+  "onboardingNameInviteLink": "초대 코드가 있어요",
+  "@onboardingNameInviteLink": { "description": "이름 입력 화면에서 초대 코드로 합류하는 링크" },
+
+  "onboardingCompletionTitle": "내용 정리가 모두\n완료됐어요",
+  "@onboardingCompletionTitle": { "description": "온보딩 완료 화면 제목" },
+
+  "onboardingCompletionProgress": "100% 완료!",
+  "@onboardingCompletionProgress": { "description": "온보딩 완료 화면의 진행도 문구" },
+
+  "onboardingSplashLogoLabel": "이룸",
+  "@onboardingSplashLogoLabel": { "description": "스플래시 로고를 화면 낭독기가 읽는 이름" },
+
+  "pinCreateTitle": "보호자님만 아는\n비밀암호를 만들어주세요",
+  "@pinCreateTitle": { "description": "비밀암호 만들기 1단계 제목" },
+
+  "pinConfirmTitle": "암호를 한번 더\n입력해주세요",
+  "@pinConfirmTitle": { "description": "비밀암호 재입력 단계 제목" },
+
+  "pinDescription": "보호자모드로 변경할 때 사용하는 암호예요",
+  "@pinDescription": { "description": "비밀암호 화면 설명" },
+
+  "pinMismatch": "암호가 달라요. 다시 넣어주세요",
+  "@pinMismatch": { "description": "재입력이 처음 암호와 다를 때 설명 자리에 뜨는 안내" },
+
+  "pinInputSemanticLabel": "암호 넣기",
+  "@pinInputSemanticLabel": { "description": "암호 점 영역을 화면 낭독기가 읽는 이름" },
+
+  "pinStartButton": "시작하기",
+  "@pinStartButton": { "description": "비밀암호를 두 번 맞춘 뒤 나타나는 확정 버튼" },
+
+  "pinProfileCreateFailedTitle": "이룸이를 만들지 못했어요",
+  "@pinProfileCreateFailedTitle": { "description": "이룸이 만들기 실패 팝업 제목" },
+
+  "pinProfileCreateFailedFallback": "잠시 후 다시 시도해주세요",
+  "@pinProfileCreateFailedFallback": { "description": "이룸이 만들기 실패 시 서버가 문구를 못 줄 때의 기본 안내" },
+
+  "pinSaveFailedTitle": "설정을 저장하지 못했어요",
+  "@pinSaveFailedTitle": { "description": "설정 저장 실패 팝업 제목" },
+
+  "pinSaveFailedFallback": "설정 화면에서 다시 확인해주세요",
+  "@pinSaveFailedFallback": { "description": "설정 저장 실패 시 서버가 문구를 못 줄 때의 기본 안내" },
+
+  "elumiSettingsTitle": "설정",
+  "@elumiSettingsTitle": { "description": "이룸이 휴대폰 설정 페이지 제목" },
+
+  "elumiSettingsHapticLabel": "카드 체크 진동",
+  "@elumiSettingsHapticLabel": { "description": "이룸이 설정의 카드 체크 진동 스위치 줄" },
+
+  "elumiSettingsTermsLabel": "약관 및 개인정보처리방침",
+  "@elumiSettingsTermsLabel": { "description": "이룸이 설정의 약관 줄" },
+
+  "elumiSettingsLogoutLabel": "로그아웃",
+  "@elumiSettingsLogoutLabel": { "description": "이룸이 설정의 로그아웃 줄" },
+
+  "elumiSettingsWithdrawLabel": "회원탈퇴",
+  "@elumiSettingsWithdrawLabel": { "description": "이룸이 설정의 회원탈퇴 줄" },
+
+  "elumiSettingsLogoutTitle": "로그아웃 하실건가요?",
+  "@elumiSettingsLogoutTitle": { "description": "로그아웃 확인 팝업 제목" },
+
+  "elumiSettingsLogoutMessage": "이 휴대폰의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요",
+  "@elumiSettingsLogoutMessage": { "description": "로그아웃 확인 팝업 본문" },
+
+  "elumiSettingsLogoutFailTitle": "로그아웃하지 못했어요",
+  "@elumiSettingsLogoutFailTitle": { "description": "로그아웃 실패 팝업 제목" },
+
+  "elumiSettingsWithdrawTitle": "회원탈퇴 하실건가요?",
+  "@elumiSettingsWithdrawTitle": { "description": "회원탈퇴 확인 팝업 제목" },
+
+  "elumiSettingsWithdrawMessage": "이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에\n그대로 남아요",
+  "@elumiSettingsWithdrawMessage": { "description": "회원탈퇴 확인 팝업 본문" },
+
+  "elumiSettingsWithdrawFailTitle": "탈퇴하지 못했어요",
+  "@elumiSettingsWithdrawFailTitle": { "description": "회원탈퇴 실패 팝업 제목" },
+
+  "elumiSettingsExitFailedFallback": "잠시 후 다시 시도해주세요",
+  "@elumiSettingsExitFailedFallback": { "description": "연결 끊기 실패 시 서버가 문구를 못 줄 때의 기본 안내" },
+
+  "linkStatusTitle": "이룸이 휴대폰",
+  "@linkStatusTitle": { "description": "보호자 설정의 이룸이 휴대폰 연결 상태 화면 제목" },
+
+  "linkStatusRevokeConfirmTitle": "연결을 끊을까요?",
+  "@linkStatusRevokeConfirmTitle": { "description": "연결 끊기 확인 팝업 제목" },
+
+  "linkStatusRevokeConfirmMessage": "이룸이 휴대폰에서 일과를 볼 수 없어요\n다시 연결하려면 새 암호를 만들면 돼요",
+  "@linkStatusRevokeConfirmMessage": { "description": "연결 끊기 확인 팝업 본문" },
+
+  "linkStatusRevokeConfirmAction": "연결 끊기",
+  "@linkStatusRevokeConfirmAction": { "description": "연결 끊기 확인 팝업의 위험 버튼" },
+
+  "linkStatusRevokeFailTitle": "연결을 끊지 못했어요",
+  "@linkStatusRevokeFailTitle": { "description": "연결 끊기 실패 팝업 제목" },
+
+  "linkStatusRevokeFailedFallback": "잠시 후 다시 시도해주세요",
+  "@linkStatusRevokeFailedFallback": { "description": "연결 끊기 실패 시 서버가 문구를 못 줄 때의 기본 안내" },
+
+  "linkStatusRevoked": "연결을 끊었어요",
+  "@linkStatusRevoked": { "description": "연결 끊기 성공 스낵바" },
+
+  "linkStatusAlreadyRevoked": "이미 끊겨 있어요",
+  "@linkStatusAlreadyRevoked": { "description": "이미 끊긴 연결을 끊으려 했을 때 스낵바" },
+
+  "linkStatusLoadFailedFallback": "연결 상태를 불러오지 못했어요",
+  "@linkStatusLoadFailedFallback": { "description": "연결 상태 조회 실패 시 서버가 문구를 못 줄 때의 기본 안내" },
+
+  "linkDeviceNumbered": "이룸이 휴대폰 {number}",
+  "@linkDeviceNumbered": {
+    "description": "연결된 휴대폰이 여러 대일 때 붙이는 번호 제목",
+    "placeholders": { "number": { "type": "int" } }
+  },
+
+  "linkStatusConnected": "연결됨",
+  "@linkStatusConnected": { "description": "연결된 휴대폰의 상태 글자" },
+
+  "linkStatusRevokeButton": "연결 끊기",
+  "@linkStatusRevokeButton": { "description": "연결된 휴대폰 카드의 연결 끊기 버튼" },
+
+  "linkStatusRevokeHint": "끊으면 이룸이 휴대폰에서\n일과를 볼 수 없어요",
+  "@linkStatusRevokeHint": { "description": "연결 끊기 버튼 아래 안내" },
+
+  "linkStatusEmpty": "연결된 휴대폰이 없어요",
+  "@linkStatusEmpty": { "description": "연결된 휴대폰이 하나도 없을 때" },
+
+  "linkStatusConnectAction": "이룸이 휴대폰 연결하기",
+  "@linkStatusConnectAction": { "description": "연결 없음 상태에서 연결 암호 만들기로 가는 버튼" },
+
+  "linkCodeSettingsTitle": "이룸이 휴대폰 연결",
+  "@linkCodeSettingsTitle": { "description": "설정에서 연 연결 암호 화면의 제목" },
+
+  "linkCodeAskTitle": "{name}의 휴대폰을\n연결할까요?",
+  "@linkCodeAskTitle": {
+    "description": "보호자 휴대폰의 연결 암호 화면 제목. name 은 이룸이 호칭",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "linkCodeEnterHint": "{name}의 휴대폰에서 아래 코드를 입력하세요",
+  "@linkCodeEnterHint": {
+    "description": "연결 암호 화면의 설명. name 은 이룸이 호칭",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "linkCodeIssueFailedFallback": "암호를 만들지 못했어요. 다시 해주세요",
+  "@linkCodeIssueFailedFallback": { "description": "연결 암호 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내" },
+
+  "linkCodeExpired": "암호가 만료됐어요",
+  "@linkCodeExpired": { "description": "연결 암호 화면의 타이머 자리에 뜨는 만료 안내" },
+
+  "linkCodeSuccessTitle": "휴대폰 연결에 성공했어요!",
+  "@linkCodeSuccessTitle": { "description": "이룸이 휴대폰이 연결됐을 때 팝업 제목" },
+
+  "linkCodeStartButton": "시작하기",
+  "@linkCodeStartButton": { "description": "온보딩에서 연 연결 암호 화면의 시작 버튼" },
+
+  "linkCodeLater": "나중에 할게요",
+  "@linkCodeLater": { "description": "온보딩에서 연 연결 암호 화면의 건너뛰기 글자" },
+
+  "linkRetryChipLabel": "코드 다시 만들기",
+  "@linkRetryChipLabel": { "description": "연결 암호 화면의 다시 만들기 칩(시안 그대로)" },
+
+  "linkEnterTitle": "보호자에게서 받은 코드를\n입력해주세요",
+  "@linkEnterTitle": { "description": "이룸이 휴대폰의 코드 입력 화면 제목" },
+
+  "linkEnterGuide": "코드는 보호자 휴대폰의\n설정 → 이룸이 휴대폰 연결하기에 있어요",
+  "@linkEnterGuide": { "description": "이룸이 휴대폰의 코드 입력 안내. linkEnterGuidePath 를 문장 안에 그대로 포함해야 밑줄이 그려진다" },
+
+  "linkEnterGuidePath": "설정 → 이룸이 휴대폰 연결하기",
+  "@linkEnterGuidePath": { "description": "linkEnterGuide 안에서 밑줄을 그을 부분. 안내문에 똑같이 들어 있어야 한다" },
+
+  "linkEnterLinkLost": "연결이 끊어졌어요",
+  "@linkEnterLinkLost": { "description": "연결이 밖에서 끊겨 코드 입력 화면으로 돌아왔을 때 설명" },
+
+  "linkEnterStartButton": "시작하기",
+  "@linkEnterStartButton": { "description": "코드 입력 화면의 시작 버튼" },
+
+  "linkEnterInputLabel": "연결 암호 넣기",
+  "@linkEnterInputLabel": { "description": "여섯 칸 입력 영역을 화면 낭독기가 읽는 이름" },
+
+  "linkEnterWrongCode": "암호가 맞지 않아요",
+  "@linkEnterWrongCode": { "description": "연결 암호 입력 실패(모양이 틀리거나 없는 암호)" },
+
+  "linkEnterExpired": "암호가 만료됐어요. 새 암호를 받아주세요",
+  "@linkEnterExpired": { "description": "연결 암호가 만료됐을 때" },
+
+  "linkEnterOffline": "연결하지 못했어요. 인터넷을 확인해주세요",
+  "@linkEnterOffline": { "description": "연결 중 오프라인일 때 서버가 문구를 못 줄 때의 기본 안내" },
+
+  "linkEnterFailed": "연결하지 못했어요. 다시 해주세요",
+  "@linkEnterFailed": { "description": "연결 중 그 밖의 실패 시 서버가 문구를 못 줄 때의 기본 안내" },
+
+  "commonGuardianName": "보호자",
+  "@commonGuardianName": {"description": "이름이 없는 보호자를 부르는 대체 호칭"},
+
+  "guardianKindGuardian": "보호자",
+  "@guardianKindGuardian": {"description": "함께하는 사람의 구분 이름(가족·보호자). 표시용이며 서버로 가는 값이 아니다"},
+
+  "guardianKindCaregiver": "센터 선생님",
+  "@guardianKindCaregiver": {"description": "함께하는 사람의 구분 이름(센터·기관 선생님). 표시용이며 서버로 가는 값이 아니다"},
+
+  "inviteShareMessage": "이룸이를 함께 돌봐요. 아래 링크를 누르면 이룸 앱에 초대 코드가 채워져요.\n초대 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n초대 코드 {code}",
+  "@inviteShareMessage": {"description": "초대 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 초대 코드", "placeholders": {"minutes": {"type": "int"}, "url": {"type": "String"}, "code": {"type": "String"}}},
+
+  "guardiansEditTitle": "내 이름 고치기",
+  "@guardiansEditTitle": {"description": "내 이름·구분 고치기 시트의 제목"},
+
+  "guardiansEditDescription": "이 이룸이를 함께 돌보는 사람에게 보이는 이름이에요. 실명이 아니어도 괜찮아요",
+  "@guardiansEditDescription": {"description": "내 이름 고치기 시트의 설명"},
+
+  "guardiansEditNameHint": "엄마, 아빠, 센터 선생님",
+  "@guardiansEditNameHint": {"description": "내 이름 입력칸의 예시 글"},
+
+  "guardiansEditSave": "저장",
+  "@guardiansEditSave": {"description": "내 이름 고치기 시트의 저장 버튼"},
+
+  "guardiansLeaveConfirmTitle": "함께 돌보기를 그만둘까요?",
+  "@guardiansLeaveConfirmTitle": {"description": "함께 돌보기 그만두기 확인 팝업 제목(되돌릴 수 없는 일)"},
+
+  "guardiansLeaveConfirmMessageLast": "함께하는 보호자가 없어요\n나가면 이룸이와 만든 일과, 모은 별이 모두 사라져요\n되돌릴 수 없어요",
+  "@guardiansLeaveConfirmMessageLast": {"description": "마지막 보호자가 나갈 때의 확인 팝업 설명"},
+
+  "guardiansLeaveConfirmMessageOthers": "내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요",
+  "@guardiansLeaveConfirmMessageOthers": {"description": "다른 보호자가 남아 있을 때의 확인 팝업 설명"},
+
+  "guardiansLeaveConfirmAction": "그만두기",
+  "@guardiansLeaveConfirmAction": {"description": "함께 돌보기 그만두기 확인 팝업의 위험 버튼"},
+
+  "guardiansLeaveFailTitle": "나가지 못했어요",
+  "@guardiansLeaveFailTitle": {"description": "함께 돌보기 그만두기 실패 팝업 제목"},
+
+  "guardiansLeaveFailedFallback": "잠시 후 다시 시도해주세요",
+  "@guardiansLeaveFailedFallback": {"description": "나가기 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "guardiansLeft": "{name}에서 나왔어요",
+  "@guardiansLeft": {"description": "함께 돌보기를 그만둔 뒤의 알림. name 은 이룸이 호칭", "placeholders": {"name": {"type": "String"}}},
+
+  "guardiansNameEditFailTitle": "이름을 고치지 못했어요",
+  "@guardiansNameEditFailTitle": {"description": "내 이름 고치기 실패 팝업 제목"},
+
+  "guardiansNameEditFailedFallback": "잠시 후 다시 시도해주세요",
+  "@guardiansNameEditFailedFallback": {"description": "이름 고치기 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "guardiansTitle": "함께하는 사람",
+  "@guardiansTitle": {"description": "함께하는 사람 화면의 제목"},
+
+  "guardiansNoProfileMessage": "함께하는 사람을 볼 이룸이가 없어요",
+  "@guardiansNoProfileMessage": {"description": "이룸이가 없을 때의 안내 제목"},
+
+  "guardiansNoProfileDescription": "이룸이를 먼저 등록해주세요",
+  "@guardiansNoProfileDescription": {"description": "이룸이가 없을 때의 안내 설명"},
+
+  "guardiansCaption": "{name}를 함께 돌보는 사람이에요",
+  "@guardiansCaption": {"description": "함께하는 사람 목록의 머리 설명. name 은 이룸이 호칭(한국어는 조사를 `를` 로 고정해 둔 현행 문구)", "placeholders": {"name": {"type": "String"}}},
+
+  "guardiansIntro": "일과를 같이 만드는 가족이나 선생님이에요. 이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요",
+  "@guardiansIntro": {"description": "함께하는 사람 화면의 보조 설명(보호자와 이룸이 휴대폰 연결을 구분)"},
+
+  "guardiansLoadFailedFallback": "함께하는 사람을 불러오지 못했어요",
+  "@guardiansLoadFailedFallback": {"description": "목록 조회 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "guardiansEmptyMessage": "함께하는 사람을 찾지 못했어요",
+  "@guardiansEmptyMessage": {"description": "목록이 비어 있을 때의 안내(서버에 있을 수 없는 상태)"},
+
+  "guardiansAloneHint": "아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요",
+  "@guardiansAloneHint": {"description": "목록에 내 줄만 있을 때의 안내"},
+
+  "guardiansInviteAction": "다른 보호자 초대하기",
+  "@guardiansInviteAction": {"description": "초대 코드 만들기로 가는 줄"},
+
+  "guardiansEnterCodeAction": "받은 초대 코드 넣기",
+  "@guardiansEnterCodeAction": {"description": "초대 코드 넣기로 가는 줄"},
+
+  "guardiansLeaveAction": "함께 돌보기 그만두기",
+  "@guardiansLeaveAction": {"description": "함께 돌보기 그만두기 줄(위험색)"},
+
+  "guardiansLeaveHintAlone": "혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요",
+  "@guardiansLeaveHintAlone": {"description": "그만두기 줄 아래 설명(혼자 돌볼 때)"},
+
+  "guardiansLeaveHintWithOthers": "내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요",
+  "@guardiansLeaveHintWithOthers": {"description": "그만두기 줄 아래 설명(다른 보호자가 있을 때)"},
+
+  "guardiansMeBadge": "나",
+  "@guardiansMeBadge": {"description": "목록에서 내 줄에 붙는 작은 표시"},
+
+  "inviteCodeShareFailTitle": "링크를 보내지 못했어요",
+  "@inviteCodeShareFailTitle": {"description": "초대 링크 공유 실패 팝업 제목"},
+
+  "inviteCodeShareFailFallback": "초대 코드를 직접 알려주세요",
+  "@inviteCodeShareFailFallback": {"description": "초대 링크 공유 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteCodeExpired": "초대 코드가 만료됐어요",
+  "@inviteCodeExpired": {"description": "초대 코드 화면의 남은 시간 자리에 보이는 만료 안내"},
+
+  "inviteCodeTitle": "초대 코드",
+  "@inviteCodeTitle": {"description": "초대 코드 만들기 화면의 제목"},
+
+  "inviteCodeShareButton": "링크로 보내기",
+  "@inviteCodeShareButton": {"description": "초대 링크를 공유 시트로 보내는 하단 버튼"},
+
+  "inviteCodeHeaderTitle": "함께할 보호자에게\n코드를 알려주세요",
+  "@inviteCodeHeaderTitle": {"description": "초대 코드 화면의 머리 제목"},
+
+  "inviteCodeAsk": "받은 분이 {name}{batchim, select, yes{을} other{를}} 함께 돌봐요",
+  "@inviteCodeAsk": {"description": "초대 코드 화면 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다", "placeholders": {"name": {"type": "String"}, "batchim": {"type": "String"}}},
+
+  "inviteCodeNoProfileMessage": "함께 돌볼 이룸이가 없어요",
+  "@inviteCodeNoProfileMessage": {"description": "이룸이가 없을 때의 안내 제목"},
+
+  "inviteCodeNoProfileDescription": "이룸이를 먼저 등록해주세요",
+  "@inviteCodeNoProfileDescription": {"description": "이룸이가 없을 때의 안내 설명"},
+
+  "inviteCodeIssueFailedFallback": "초대 코드를 만들지 못했어요",
+  "@inviteCodeIssueFailedFallback": {"description": "초대 코드 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteCodeRetryChip": "초대 코드 다시 만들기",
+  "@inviteCodeRetryChip": {"description": "초대 코드를 다시 만드는 칩"},
+
+  "inviteCodeRetryNote": "다시 만들면 이전 코드는 쓸 수 없어요",
+  "@inviteCodeRetryNote": {"description": "다시 만들기 아래 안내(앞 코드가 폐기됨)"},
+
+  "inviteCodeElumiPhoneNote": "이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요\n설정의 이룸이 휴대폰에서 연결해요",
+  "@inviteCodeElumiPhoneNote": {"description": "초대 코드는 보호자용이라는 안내"},
+
+  "inviteEnterLinkInvalid": "초대 링크가 맞지 않아요. 보낸 분께 다시 받아주세요 (E-INV-LINK)",
+  "@inviteEnterLinkInvalid": {"description": "링크로 열렸지만 코드를 못 쓰는 모양일 때의 안내. 에러 코드를 문구에 함께 둔다"},
+
+  "inviteEnterFormInvalid": "초대 코드가 맞지 않아요 (E-INV-FORM)",
+  "@inviteEnterFormInvalid": {"description": "직접 친 코드의 모양이 틀릴 때의 안내. 에러 코드를 문구에 함께 둔다"},
+
+  "inviteJoined": "{name}{batchim, select, yes{을} other{를}} 함께 돌보게 됐어요",
+  "@inviteJoined": {"description": "초대 코드를 넣고 합류했을 때의 알림. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)", "placeholders": {"name": {"type": "String"}, "batchim": {"type": "String"}}},
+
+  "inviteEnterNotFound": "초대 코드가 맞지 않아요",
+  "@inviteEnterNotFound": {"description": "없는·쓴 코드일 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterExpired": "초대 코드가 만료됐어요. 새 코드를 받아주세요",
+  "@inviteEnterExpired": {"description": "만료된 코드일 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterTooManyAttempts": "잠시 뒤에 다시 해주세요",
+  "@inviteEnterTooManyAttempts": {"description": "시도 한도에 걸렸을 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterAlreadyGuardian": "이미 함께하고 있는 이룸이예요",
+  "@inviteEnterAlreadyGuardian": {"description": "이미 함께하는 이룸이일 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterForbiddenForElumi": "이룸이 휴대폰에서는 할 수 없어요",
+  "@inviteEnterForbiddenForElumi": {"description": "이룸이 휴대폰에서 합류하려 할 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterInvalidInput": "초대 코드가 맞지 않아요",
+  "@inviteEnterInvalidInput": {"description": "서버가 코드 모양을 거절했을 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterOffline": "연결하지 못했어요. 인터넷을 확인해주세요",
+  "@inviteEnterOffline": {"description": "오프라인일 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterOther": "연결하지 못했어요. 다시 해주세요",
+  "@inviteEnterOther": {"description": "그 밖의 실패일 때 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterConsentFailTitle": "초대 코드를 넣지 못했어요",
+  "@inviteEnterConsentFailTitle": {"description": "약관 미동의로 합류가 막혔을 때의 팝업 제목"},
+
+  "inviteEnterConsentFallback": "약관에 먼저 동의해주세요",
+  "@inviteEnterConsentFallback": {"description": "약관 미동의 팝업에서 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "inviteEnterJoinButton": "함께하기",
+  "@inviteEnterJoinButton": {"description": "링크로 받은 코드로 합류하는 하단 버튼"},
+
+  "inviteEnterManualLink": "다른 코드 넣기",
+  "@inviteEnterManualLink": {"description": "링크로 받은 코드를 거두고 직접 입력으로 바꾸는 밑줄 글"},
+
+  "inviteEnterTitle": "초대 코드를\n넣어주세요",
+  "@inviteEnterTitle": {"description": "초대 코드 넣기 화면의 머리 제목"},
+
+  "inviteEnterDescriptionFromLink": "링크로 받은 초대 코드예요. 맞으면 함께하기를 눌러주세요",
+  "@inviteEnterDescriptionFromLink": {"description": "링크로 받은 코드가 채워졌을 때의 설명"},
+
+  "inviteEnterDescriptionManual": "함께하는 보호자에게 받은 여섯 글자예요",
+  "@inviteEnterDescriptionManual": {"description": "직접 입력할 때의 설명"},
+
+  "inviteEnterWhereFrom": "함께하는 보호자 휴대폰에서",
+  "@inviteEnterWhereFrom": {"description": "초대 코드를 어디서 받는지 알려 주는 안내 카드의 첫 줄"},
+
+  "inviteEnterWherePath": "설정 → 함께하는 사람",
+  "@inviteEnterWherePath": {"description": "안내 카드의 길 안내(강조 줄)"},
+
+  "inviteEnterWhereHow": "초대 코드를 만들면 여섯 글자가 나와요",
+  "@inviteEnterWhereHow": {"description": "안내 카드의 마지막 줄"},
+
+  "inviteEnterSemanticsFromLink": "링크로 받은 초대 코드",
+  "@inviteEnterSemanticsFromLink": {"description": "화면 낭독기가 읽는 여섯 칸의 이름(링크로 받았을 때)"},
+
+  "inviteEnterSemanticsInput": "초대 코드 넣기",
+  "@inviteEnterSemanticsInput": {"description": "화면 낭독기가 읽는 여섯 칸의 이름(직접 입력)"},
+
+  "profileSwitchChanged": "이룸이를 바꿨어요",
+  "@profileSwitchChanged": {"description": "이룸이를 바꾼 뒤의 알림"},
+
+  "profileSwitchTitle": "이룸이 바꾸기",
+  "@profileSwitchTitle": {"description": "이룸이 바꾸기 화면의 제목"},
+
+  "profileSwitchLoadFailedFallback": "이룸이 목록을 불러오지 못했어요",
+  "@profileSwitchLoadFailedFallback": {"description": "목록 조회 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
+
+  "profileSwitchLoadFailedMessage": "이룸이 목록을 불러오지 못했어요",
+  "@profileSwitchLoadFailedMessage": {"description": "목록이 비었을 때의 안내 제목"},
+
+  "profileSwitchSelected": "{name}, 지금 보는 이룸이",
+  "@profileSwitchSelected": {"description": "이룸이 바꾸기 목록에서 지금 고른 줄을 낭독기가 읽는 문장. name 은 이룸이 호칭", "placeholders": {"name": {"type": "String"}}},
+
+  "noticeHideWeek": "일주일간 보지 않기",
+  "@noticeHideWeek": {"description": "공지 팝업 체크박스. 숨기는 기간이 기본(7일)일 때"},
+
+  "noticeHideDays": "{days, plural, other{{days}일간 보지 않기}}",
+  "@noticeHideDays": {"description": "공지 팝업 체크박스. 숨기는 기간이 기본이 아닐 때. days 는 일수", "placeholders": {"days": {"type": "int"}}},
+
+  "noticeLinkOpenFailed": "링크를 열지 못했어요 ({code})",
+  "@noticeLinkOpenFailed": {"description": "공지의 링크 버튼이 외부 브라우저를 못 열었을 때. 괄호 안은 추적용 에러 코드(번역하지 않는다)", "placeholders": {"code": {"type": "String"}}},
+
+  "noticeCloseBarrier": "공지 닫기",
+  "@noticeCloseBarrier": {"description": "공지 팝업 바깥 배경 막을 낭독기가 읽는 이름"},
+  "cardPhotoTooLarge": "사진이 너무 커요. 다른 사진을 골라 주세요",
+  "@cardPhotoTooLarge": { "description": "카드 사진 업로드 실패 — 크기" },
+
+  "cardPhotoWrongType": "JPG나 PNG 사진만 올릴 수 있어요",
+  "@cardPhotoWrongType": { "description": "카드 사진 업로드 실패 — 형식" },
+
+  "cardPhotoUnreadable": "사진을 읽지 못했어요. 다른 사진을 골라 주세요",
+  "@cardPhotoUnreadable": { "description": "카드 사진 업로드 실패 — 읽기" },
+
+  "cardPhotoPickFailed": "사진을 가져오지 못했어요. 다시 해주세요",
+  "@cardPhotoPickFailed": { "description": "카드 사진 고르기 실패" },
+
+  "routineLoadingPrepareTitle": "루미가 내용을\n정리하고 있어요",
+  "@routineLoadingPrepareTitle": { "description": "추가 질문 준비 로딩의 제목(줄바꿈 위치는 시안대로)" },
+
+  "routineLoadingGenerateTitle": "루미가 행동카드를\n만들고 있어요",
+  "@routineLoadingGenerateTitle": { "description": "행동카드 생성 로딩의 제목(줄바꿈 위치는 시안대로)" },
+
+  "routineStageReviewSituation": "적어 주신 상황을 살펴보고 있어요",
+  "@routineStageReviewSituation": { "description": "준비 로딩 체크리스트 1" },
+
+  "routineStageTidyEssentials": "꼭 필요한 내용만 정리해요",
+  "@routineStageTidyEssentials": { "description": "준비 로딩 체크리스트 2" },
+
+  "routineStageThinkQuestions": "추가 질문을 생각하고 있어요",
+  "@routineStageThinkQuestions": { "description": "준비 로딩 체크리스트 3" },
+
+  "routineStageReadRoutine": "오늘의 일과를 읽고 있어요",
+  "@routineStageReadRoutine": { "description": "생성 로딩 체크리스트 1" },
+
+  "routineStageFindItems": "중요한 준비물을 찾고 있어요",
+  "@routineStageFindItems": { "description": "생성 로딩 체크리스트 2" },
+
+  "routineStageOrderSteps": "순서를 정리하고 있어요",
+  "@routineStageOrderSteps": { "description": "생성 로딩 체크리스트 3" },
+
+  "suggestionRainyText": "비 오는 날 등교",
+  "@suggestionRainyText": { "description": "서버가 죽었을 때의 추천 칩 1 글" },
+
+  "suggestionRainyPrompt": "비 오는 날 우산 챙겨서 학교 가는 준비를 하고 싶어요",
+  "@suggestionRainyPrompt": { "description": "추천 칩 1 이 입력창에 채우는 문장" },
+
+  "suggestionHospitalText": "병원 방문 준비",
+  "@suggestionHospitalText": { "description": "추천 칩 2 글" },
+
+  "suggestionHospitalPrompt": "이룸이와 함께 병원에 가야 하는데 무서워하지 않게 준비하고 싶어요",
+  "@suggestionHospitalPrompt": { "description": "추천 칩 2 가 입력창에 채우는 문장" },
+
+  "suggestionTripText": "체험학습 준비",
+  "@suggestionTripText": { "description": "추천 칩 3 글" },
+
+  "suggestionTripPrompt": "체험학습 가는 날 아침에 챙길 것들을 순서대로 알려주고 싶어요",
+  "@suggestionTripPrompt": { "description": "추천 칩 3 이 입력창에 채우는 문장" },
+
+  "suggestionNewPlaceText": "새로운 장소 방문",
+  "@suggestionNewPlaceText": { "description": "추천 칩 4 글" },
+
+  "suggestionNewPlacePrompt": "처음 가보는 장소에 가기 전에 이룸이가 마음의 준비를 하게 돕고 싶어요",
+  "@suggestionNewPlacePrompt": { "description": "추천 칩 4 가 입력창에 채우는 문장" },
+
+  "suggestionAfterSchoolText": "여름방학 방과후 수업 준비",
+  "@suggestionAfterSchoolText": { "description": "추천 칩 5 글" },
+
+  "suggestionAfterSchoolPrompt": "방학 중 방과후 수업에 갈 준비를 순서대로 알려주고 싶어요",
+  "@suggestionAfterSchoolPrompt": { "description": "추천 칩 5 가 입력창에 채우는 문장" },
+
+  "guardianHomeTodayRoutine": "오늘 일과",
+  "@guardianHomeTodayRoutine": { "description": "보호자 홈의 오늘 일과 구역 제목" },
+
+  "guardianHomePastRoutine": "지난 일과",
+  "@guardianHomePastRoutine": { "description": "보호자 홈의 지난 일과 구역 제목" },
+
+  "guardianHomeGoChildScreen": "이룸이 화면으로 가기",
+  "@guardianHomeGoChildScreen": { "description": "보호자 홈에서 이룸이 화면으로 넘어가는 배지 버튼의 낭독 이름" },
+
+  "guardianHomeSettings": "설정",
+  "@guardianHomeSettings": { "description": "보호자 홈의 설정 아이콘 버튼 낭독 이름" },
+
+  "guardianHomeGreeting": "안녕하세요,\n{name} 보호자님 👋🏻",
+  "@guardianHomeGreeting": { "description": "보호자 홈의 인사말(Figma 문구, 줄바꿈 위치도 디자인이 정한 대로). name 은 이룸이 호칭", "placeholders": {"name": {"type": "String"}} },
+
+  "guardianHomeSubtitle": "오늘은 어떤 일과를 준비할까요?",
+  "@guardianHomeSubtitle": { "description": "보호자 홈 인사말 아래 안내 문구" },
+
+  "pinChangeMismatchCreate": "암호가 달라요. 다시 넣어주세요",
+  "@pinChangeMismatchCreate": { "description": "비밀암호 만들기에서 확인 입력이 다를 때의 안내(온보딩 문구와 같다)" },
+
+  "pinChangeMismatch": "암호가 달라요. 다시 입력해주세요",
+  "@pinChangeMismatch": { "description": "비밀암호 바꾸기에서 입력이 다를 때의 안내(시안 문구)" },
+
+  "pinChangeCreateFailedTitle": "비밀암호를 만들지 못했어요",
+  "@pinChangeCreateFailedTitle": { "description": "비밀암호 만들기 저장 실패 팝업 제목" },
+
+  "pinChangeFailedTitle": "비밀암호를 바꾸지 못했어요",
+  "@pinChangeFailedTitle": { "description": "비밀암호 바꾸기 저장 실패 팝업 제목" },
+
+  "pinChangeFailedFallback": "잠시 후 다시 시도해주세요",
+  "@pinChangeFailedFallback": { "description": "비밀암호 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "pinChangeCreatedSnack": "비밀암호를 만들었어요",
+  "@pinChangeCreatedSnack": { "description": "비밀암호 만들기를 마쳤을 때의 스낵바" },
+
+  "pinChangeChangedSnack": "비밀암호를 바꿨어요",
+  "@pinChangeChangedSnack": { "description": "비밀암호 바꾸기를 마쳤을 때의 스낵바" },
+
+  "pinChangeVerifyTitle": "지금 비밀암호를\n입력해주세요",
+  "@pinChangeVerifyTitle": { "description": "비밀암호 바꾸기 1단계(지금 암호 확인) 큰 제목" },
+
+  "pinChangeCreateTitle": "보호자님만 아는\n비밀암호를 만들어주세요",
+  "@pinChangeCreateTitle": { "description": "비밀암호 만들기 입력 단계 큰 제목(온보딩 문구와 같다)" },
+
+  "pinModeHint": "보호자모드로 변경할 때 사용하는 암호예요",
+  "@pinModeHint": { "description": "비밀암호 만들기·재입력 단계와 바꾸기 새 암호 단계가 함께 쓰는 설명" },
+
+  "pinChangeEnterTitle": "새 비밀암호를\n입력해주세요",
+  "@pinChangeEnterTitle": { "description": "비밀암호 바꾸기 2단계(새 암호) 큰 제목" },
+
+  "pinChangeCreateConfirmTitle": "암호를 한번 더\n입력해주세요",
+  "@pinChangeCreateConfirmTitle": { "description": "비밀암호 만들기 재입력 단계 큰 제목(온보딩 문구와 같다)" },
+
+  "pinChangeConfirmTitle": "비밀암호를 한번 더\n입력해주세요",
+  "@pinChangeConfirmTitle": { "description": "비밀암호 바꾸기 3단계(새 암호 재입력) 큰 제목" },
+
+  "pinChangeConfirmHint": "이제 곧 비밀암호 변경이 끝나요",
+  "@pinChangeConfirmHint": { "description": "비밀암호 바꾸기 3단계 설명" },
+
+  "pinChangeHeaderTitle": "비밀암호 변경하기",
+  "@pinChangeHeaderTitle": { "description": "비밀암호 바꾸기 화면 머리 제목" },
+
+  "pinChangeSave": "저장하기",
+  "@pinChangeSave": { "description": "비밀암호 변경 저장 버튼" },
+
+  "pinChangeInputLabel": "암호 넣기",
+  "@pinChangeInputLabel": { "description": "암호 점 자리를 낭독기가 읽는 이름(입력한 숫자는 읽지 않는다)" },
+
+  "rewardSaveFailedTitle": "보상을 저장하지 못했어요",
+  "@rewardSaveFailedTitle": { "description": "보상 고치기 저장 실패 팝업 제목" },
+
+  "rewardSaveFailedFallback": "잠시 후 다시 시도해주세요",
+  "@rewardSaveFailedFallback": { "description": "보상 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "rewardWhyTitle": "보상이 왜 필요한가요?",
+  "@rewardWhyTitle": { "description": "보상 설명 팝업 제목이자 도움말 버튼 이름" },
+
+  "rewardWhyMessage": "일과를 마친 뒤 기다리는 것이 있으면 이룸이가 끝까지 해낼 힘이 생겨요.\n한 달 뒤 선물보다 오늘 바로 줄 수 있는 작은 것이 더 잘 통해요.\n정하지 않아도 일과는 만들 수 있어요.",
+  "@rewardWhyMessage": { "description": "보상이 왜 필요한지 설명하는 팝업 본문(세 문장, 줄바꿈 유지)" },
+
+  "rewardHeadlineTitle": "일과가 끝나면\n어떤 보상을 줄까요?",
+  "@rewardHeadlineTitle": { "description": "보상 정하기 화면 큰 제목(줄바꿈은 시안 그대로)" },
+
+  "rewardHeadlineBody": "일과를 완료하는 데 큰 동기가 될 거예요",
+  "@rewardHeadlineBody": { "description": "보상 정하기 화면 부제" },
+
+  "rewardLater": "나중에 할게요",
+  "@rewardLater": { "description": "보상 정하기를 건너뛰는 밑줄 링크" },
+
+  "imageStyleChangedSnack": "그림 방식을 바꿨어요",
+  "@imageStyleChangedSnack": { "description": "그림 방식을 바꾼 뒤 스낵바" },
+
+  "imageStyleSaveFailedTitle": "그림 방식을 저장하지 못했어요",
+  "@imageStyleSaveFailedTitle": { "description": "그림 방식 저장 실패 팝업 제목" },
+
+  "imageStyleSaveFailedFallback": "잠시 후 다시 시도해주세요",
+  "@imageStyleSaveFailedFallback": { "description": "그림 방식 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "imageStyleTitle": "그림 방식",
+  "@imageStyleTitle": { "description": "그림 방식 설정 화면 제목" },
+
+  "routineLoadingBlockedTitle": "지금은 만들 수 없어요",
+  "@routineLoadingBlockedTitle": { "description": "크레딧 때문에 막혔을 때의 로딩 실패 제목" },
+
+  "routineLoadingPrepareFailed": "질문을 준비하지 못했어요",
+  "@routineLoadingPrepareFailed": { "description": "준비 로딩 실패 제목" },
+
+  "routineLoadingGenerateFailed": "카드를 만들지 못했어요",
+  "@routineLoadingGenerateFailed": { "description": "생성 로딩 실패 제목" },
+
+  "routineLoadingPercent": "{percent}% 진행됐어요",
+  "@routineLoadingPercent": { "description": "일과 만들기 로딩의 진행률을 낭독기가 읽는 문장", "placeholders": {"percent": {"type": "int"}} },
+
+  "routineLoadingRetry": "다시 하기",
+  "@routineLoadingRetry": { "description": "로딩 실패 화면의 다시 하기 버튼" },
+
+  "routineLoadingHome": "홈으로",
+  "@routineLoadingHome": { "description": "로딩 실패 화면의 홈 버튼" },
+
+  "draftRoutinesTitle": "임시저장",
+  "@draftRoutinesTitle": { "description": "임시저장 목록 화면 제목" },
+
+  "draftRoutinesLoadFailedFallback": "임시저장을 불러오지 못했어요",
+  "@draftRoutinesLoadFailedFallback": { "description": "임시저장 목록을 못 불러왔을 때의 기본 안내(서버 문구가 없을 때)" },
+
+  "draftRoutinesDeleteLabel": "임시저장 삭제",
+  "@draftRoutinesDeleteLabel": { "description": "줄을 밀면 나오는 삭제 버튼의 낭독 이름" },
+
+  "draftRoutinesDeleteConfirmTitle": "임시저장을 삭제하실건가요?",
+  "@draftRoutinesDeleteConfirmTitle": { "description": "임시저장 삭제 확인 팝업 제목" },
+
+  "draftRoutinesDeleteAction": "삭제",
+  "@draftRoutinesDeleteAction": { "description": "임시저장 삭제 확인 팝업의 삭제 버튼" },
+
+  "draftRoutinesDeleteFailedTitle": "임시저장을 삭제하지 못했어요",
+  "@draftRoutinesDeleteFailedTitle": { "description": "임시저장 삭제 실패 팝업 제목" },
+
+  "draftRoutinesDeleteFailedFallback": "잠시 후 다시 시도해주세요",
+  "@draftRoutinesDeleteFailedFallback": { "description": "임시저장 삭제 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "draftRoutinesRewardUnset": "미설정",
+  "@draftRoutinesRewardUnset": { "description": "보상을 안 정한 임시저장 줄의 보상 자리 글" },
+
+  "draftRoutinesRewardLabel": "완료 시",
+  "@draftRoutinesRewardLabel": { "description": "임시저장 줄의 보상 앞 말머리" },
+
+  "draftRoutinesResume": "이어서",
+  "@draftRoutinesResume": { "description": "임시저장 줄 오른쪽 알약 버튼" },
+
+  "draftRoutinesEmptyTitle": "만들다 만 일과가 없어요",
+  "@draftRoutinesEmptyTitle": { "description": "임시저장이 0건일 때 제목" },
+
+  "draftRoutinesEmptyBody": "일과를 만들다 그만두면 여기에 남아요",
+  "@draftRoutinesEmptyBody": { "description": "임시저장이 0건일 때 설명" },
+
+  "cardReviewDeleteConfirmTitle": "카드를 삭제하실건가요?",
+  "@cardReviewDeleteConfirmTitle": { "description": "카드 삭제 확인 팝업 제목" },
+
+  "cardReviewDeleteAction": "삭제",
+  "@cardReviewDeleteAction": { "description": "카드 삭제 확인 팝업의 삭제 버튼" },
+
+  "cardReviewSoundFailedTitle": "소리를 재생하지 못했어요",
+  "@cardReviewSoundFailedTitle": { "description": "카드 소리 재생 실패 팝업 제목" },
+
+  "cardReviewSoundFailedFallback": "휴대폰 소리를 켜고 다시 눌러주세요",
+  "@cardReviewSoundFailedFallback": { "description": "카드 소리 재생 실패 팝업 안내" },
+
+  "cardReviewSaveFailedTitle": "일과를 저장하지 못했어요",
+  "@cardReviewSaveFailedTitle": { "description": "일과 저장 실패 팝업 제목" },
+
+  "cardReviewSaveFailedFallback": "잠시 후 다시 시도해주세요",
+  "@cardReviewSaveFailedFallback": { "description": "일과 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "cardReviewEditFailedTitle": "고친 내용을 저장하지 못했어요",
+  "@cardReviewEditFailedTitle": { "description": "카드 고친 내용 저장 실패 팝업 제목" },
+
+  "cardReviewEditFailedFallback": "잠시 후 다시 시도해주세요",
+  "@cardReviewEditFailedFallback": { "description": "카드 고친 내용 저장 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "cardReviewAddFailedTitle": "카드를 추가하지 못했어요",
+  "@cardReviewAddFailedTitle": { "description": "카드 추가 실패 팝업 제목" },
+
+  "cardReviewAddFailedFallback": "잠시 후 다시 시도해주세요",
+  "@cardReviewAddFailedFallback": { "description": "카드 추가 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "cardReviewReorderDone": "완료",
+  "@cardReviewReorderDone": { "description": "카드 순서 바꾸기 중 하단 버튼" },
+
+  "cardReviewSave": "카드 저장하기",
+  "@cardReviewSave": { "description": "카드 검토 화면 하단 저장 버튼" },
+
+  "routineInputTitle": "오늘은 어떤 준비가\n필요한가요?",
+  "@routineInputTitle": { "description": "일과 입력 화면 큰 제목(줄바꿈은 디자인이 정한 대로)" },
+
+  "routineInputSubtitle": "AI 루미가 작은 행동 단계로 나눠드려요",
+  "@routineInputSubtitle": { "description": "일과 입력 화면 부제" },
+
+  "routineInputHint": "평소 이야기하듯 입력해주세요",
+  "@routineInputHint": { "description": "일과 입력창 안내 글(포커스가 없을 때)" },
+
+  "routineInputSend": "보내기",
+  "@routineInputSend": { "description": "일과 입력창 전송 버튼의 낭독 이름" },
+
+  "guardianSettingsLogoutConfirmTitle": "로그아웃 하실건가요?",
+  "@guardianSettingsLogoutConfirmTitle": { "description": "로그아웃 확인 팝업 제목" },
+
+  "guardianSettingsWithdrawConfirmTitle": "회원탈퇴 하실건가요?",
+  "@guardianSettingsWithdrawConfirmTitle": { "description": "회원탈퇴 확인 팝업 제목" },
+
+  "guardianSettingsWithdrawConfirmMessage": "만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요",
+  "@guardianSettingsWithdrawConfirmMessage": { "description": "회원탈퇴 확인 팝업의 되돌릴 수 없다는 고지" },
+
+  "guardianSettingsWithdrawFailedTitle": "탈퇴하지 못했어요",
+  "@guardianSettingsWithdrawFailedTitle": { "description": "회원탈퇴 실패 팝업 제목" },
+
+  "guardianSettingsWithdrawFailedFallback": "잠시 후 다시 시도해주세요",
+  "@guardianSettingsWithdrawFailedFallback": { "description": "회원탈퇴 실패 팝업의 기본 안내(서버 문구가 없을 때)" },
+
+  "guardianSettingsTitle": "설정",
+  "@guardianSettingsTitle": { "description": "보호자 설정 화면 제목" },
+
+  "guardianSettingsPeople": "함께하는 사람",
+  "@guardianSettingsPeople": { "description": "설정 줄 — 함께 돌보는 사람 목록" },
+
+  "guardianSettingsDrafts": "임시저장",
+  "@guardianSettingsDrafts": { "description": "설정 줄 — 임시저장 목록" },
+
+  "guardianSettingsPinChange": "비밀암호 변경하기",
+  "@guardianSettingsPinChange": { "description": "설정 줄 — 비밀암호 바꾸기" },
+
+  "guardianSettingsTerms": "약관 및 개인정보처리방침",
+  "@guardianSettingsTerms": { "description": "설정 줄 — 약관 목록" },
+
+  "guardianSettingsLogout": "로그아웃",
+  "@guardianSettingsLogout": { "description": "설정 줄 — 로그아웃" },
+
+  "guardianSettingsWithdraw": "회원탈퇴",
+  "@guardianSettingsWithdraw": { "description": "설정 줄 — 회원탈퇴" },
+
+  "guardianSettingsLinkConnected": "이룸이 휴대폰",
+  "@guardianSettingsLinkConnected": { "description": "설정 줄 — 이룸이 휴대폰이 이미 연결됐을 때" },
+
+  "guardianSettingsLinkConnect": "이룸이 휴대폰 연결하기",
+  "@guardianSettingsLinkConnect": { "description": "설정 줄 — 이룸이 휴대폰을 아직 연결하지 않았을 때" },
+
+  "guardianSettingsLinkStatus": "연결됨",
+  "@guardianSettingsLinkStatus": { "description": "설정 줄 — 이룸이 휴대폰 연결 상태 값" },
+
+  "guardianSettingsProfileSwitch": "이룸이 바꾸기",
+  "@guardianSettingsProfileSwitch": { "description": "설정 줄 — 연결된 이룸이가 둘 이상일 때 보는 이룸이를 바꾼다" },
+
+  "guardianSettingsImageStyle": "그림 방식",
+  "@guardianSettingsImageStyle": { "description": "설정 줄 — 카드 그림 방식" },
+
+  "guardianSettingsHaptic": "카드 체크 진동",
+  "@guardianSettingsHaptic": { "description": "설정 줄 — 이룸이가 카드를 체크할 때 진동 켜기/끄기" },
+
+  "questionMakeCards": "카드 만들기",
+  "@questionMakeCards": { "description": "추가 질문 화면 하단 버튼" },
+
+  "questionCustomAdd": "+ 직접 입력하기",
+  "@questionCustomAdd": { "description": "추가 질문의 직접 입력 칩" },
+
+  "questionCustomHint": "직접 적어주세요",
+  "@questionCustomHint": { "description": "추가 질문 직접 입력칸 안내 글" },
+
+  "questionCustomClose": "직접 입력 닫기",
+  "@questionCustomClose": { "description": "추가 질문 직접 입력칸의 닫기 버튼 낭독 이름" },
+
+  "questionClearLabel": "{label} 지우기",
+  "@questionClearLabel": { "description": "추가 질문에서 고른 칩의 X 버튼을 낭독기가 읽는 이름. label 은 칩 글자", "placeholders": {"label": {"type": "String"}} },
+
+  "cardReviewMade": "{count, plural, other{카드 {count}개를 만들었어요}}",
+  "@cardReviewMade": {"description": "카드 검토 화면 머리. count 는 만들어진 카드 수", "placeholders": {"count": {"type": "int"}}},
+
+  "cardReviewRewardLead": "완료 시 ",
+  "@cardReviewRewardLead": {"description": "카드 검토 화면 보상 줄의 앞말. 뒤에 보상 글이 이어 붙으므로 끝의 공백을 유지한다"},
+
+  "cardReviewRewardSet": "보상 정하기",
+  "@cardReviewRewardSet": {"description": "카드 검토 화면에서 보상을 아직 안 정했을 때 보상 줄"},
+
+  "cardReviewReorderHint": "카드를 길게 눌러 순서를 변경하세요",
+  "@cardReviewReorderHint": {"description": "카드 검토 화면 아래 순서 변경 안내 한 줄"},
+
+  "cardReviewToolReorder": "카드 순서 변경",
+  "@cardReviewToolReorder": {"description": "카드 검토 화면 도구 버튼. 순서 변경 모드를 켜고 끈다"},
+
+  "cardReviewToolEdit": "이 카드 수정",
+  "@cardReviewToolEdit": {"description": "카드 검토 화면 도구 버튼. 지금 보는 카드를 고친다"},
+
+  "cardReviewToolAdd": "카드 추가",
+  "@cardReviewToolAdd": {"description": "카드 검토 화면 도구 버튼. 카드를 새로 더한다"},
+
+  "cardReviewReorderTitle": "카드 순서 변경",
+  "@cardReviewReorderTitle": {"description": "카드 순서 변경 모드의 위쪽 제목"},
+
+  "cardReviewReorderCancel": "순서 변경 취소",
+  "@cardReviewReorderCancel": {"description": "카드 순서 변경 모드의 닫기 버튼 낭독 이름"},
+
+  "cardReviewEmptyTitle": "만들어진 카드가 없어요",
+  "@cardReviewEmptyTitle": {"description": "카드 검토 화면의 빈 상태 제목"},
+
+  "cardReviewEmptyBody": "다시 만들어 주세요 (E-CARD)",
+  "@cardReviewEmptyBody": {"description": "카드 검토 화면의 빈 상태 안내. 제보 추적용 에러 코드를 문구에 함께 적는다"},
+
+  "cardMoveForward": "앞으로 옮기기",
+  "@cardMoveForward": {"description": "카드 순서 바꾸기에서 낭독기 사용자가 쓰는 동작 이름"},
+
+  "cardMoveBackward": "뒤로 옮기기",
+  "@cardMoveBackward": {"description": "카드 순서 바꾸기에서 낭독기 사용자가 쓰는 동작 이름"},
+
+  "cardSpeakStop": "읽기 멈추기",
+  "@cardSpeakStop": {"description": "카드를 읽어 주는 중일 때 소리 버튼의 낭독 이름"},
+
+  "cardSpeak": "소리로 듣기",
+  "@cardSpeak": {"description": "카드를 읽어 주는 소리 버튼의 낭독 이름"},
+
+  "cardDeleteLabel": "이 카드 지우기",
+  "@cardDeleteLabel": {"description": "카드 검토 화면 카드 위 지우기 버튼의 낭독 이름"},
+
+  "cardAddPhoto": "사진 추가",
+  "@cardAddPhoto": {"description": "사진이 없는 카드의 그림 자리 글자와 낭독 이름"},
+
+  "cardViewerBarrierLabel": "카드 닫기",
+  "@cardViewerBarrierLabel": {"description": "카드 크게 보기 팝업의 배경 막 낭독 이름"},
+
+  "cardViewerSoundFailedTitle": "소리를 재생하지 못했어요",
+  "@cardViewerSoundFailedTitle": {"description": "카드 크게 보기에서 소리 재생이 실패했을 때 제목"},
+
+  "cardViewerSoundFailedFallback": "휴대폰 소리를 켜고 다시 눌러주세요",
+  "@cardViewerSoundFailedFallback": {"description": "카드 크게 보기에서 소리 재생이 실패했을 때 서버 문구가 없을 때의 안내"},
+
+  "cardViewerClose": "카드 닫기",
+  "@cardViewerClose": {"description": "카드 크게 보기의 닫기 버튼 낭독 이름"},
+
+  "cardEditAddTitle": "새로운 카드 추가",
+  "@cardEditAddTitle": {"description": "카드 수정 시트가 추가 모드일 때 제목"},
+
+  "cardEditTitle": "카드 수정",
+  "@cardEditTitle": {"description": "카드 수정 시트가 수정 모드일 때 제목"},
+
+  "cardEditFieldTitle": "제목",
+  "@cardEditFieldTitle": {"description": "카드 수정 시트의 제목 입력칸 이름"},
+
+  "cardEditTitleHint": "카드 제목을 적어주세요",
+  "@cardEditTitleHint": {"description": "카드 수정 시트 제목 입력칸 안내 글"},
+
+  "cardEditFieldDescription": "설명",
+  "@cardEditFieldDescription": {"description": "카드 수정 시트의 설명 입력칸 이름"},
+
+  "cardEditDescriptionHint": "카드 설명을 적어주세요",
+  "@cardEditDescriptionHint": {"description": "카드 수정 시트 설명 입력칸 안내 글"},
+
+  "cardEditAddAction": "추가하기",
+  "@cardEditAddAction": {"description": "카드 수정 시트가 추가 모드일 때 아래 버튼"},
+
+  "cardEditDoneAction": "완료",
+  "@cardEditDoneAction": {"description": "카드 수정 시트가 수정 모드일 때 아래 버튼"},
+
+  "cardPhotoPermissionTake": "사진 찍기",
+  "@cardPhotoPermissionTake": {"description": "사진 권한 안내 화면에서 사진 찍기로 바꾸는 아래 버튼"},
+
+  "cardPhotoPermissionGallery": "갤러리에서 고르기",
+  "@cardPhotoPermissionGallery": {"description": "사진 권한 안내 화면에서 갤러리로 바꾸는 아래 버튼"},
+
+  "cardPhotoPermissionOpenSettings": "설정 열기",
+  "@cardPhotoPermissionOpenSettings": {"description": "사진 권한 안내 화면의 휴대폰 설정 열기 버튼"},
+
+  "cardPhotoPermissionCameraTitle": "카메라를 쓸 수 없어요",
+  "@cardPhotoPermissionCameraTitle": {"description": "카메라 권한이 막혔을 때 사진 권한 안내 제목"},
+
+  "cardPhotoPermissionGalleryTitle": "사진을 볼 수 없어요",
+  "@cardPhotoPermissionGalleryTitle": {"description": "사진 접근 권한이 막혔을 때 사진 권한 안내 제목"},
+
+  "cardPhotoPermissionCameraBody": "휴대폰 설정에서 카메라를 켜면 사진을 찍을 수 있어요",
+  "@cardPhotoPermissionCameraBody": {"description": "카메라 권한이 막혔을 때 사진 권한 안내 설명"},
+
+  "cardPhotoPermissionGalleryBody": "휴대폰 설정에서 사진 접근을 켜면 고를 수 있어요",
+  "@cardPhotoPermissionGalleryBody": {"description": "사진 접근 권한이 막혔을 때 사진 권한 안내 설명"},
+
+  "cardPhotoSettingsFailedTitle": "설정을 열지 못했어요",
+  "@cardPhotoSettingsFailedTitle": {"description": "사진 권한 안내에서 휴대폰 설정을 못 열었을 때 제목"},
+
+  "cardPhotoSettingsFailedFallback": "휴대폰 설정에서 직접 켜 주세요",
+  "@cardPhotoSettingsFailedFallback": {"description": "사진 권한 안내에서 휴대폰 설정을 못 열었을 때 안내"},
+
+  "cardPhotoSourceTake": "사진 찍기",
+  "@cardPhotoSourceTake": {"description": "사진 고르기 시트의 사진 찍기 줄"},
+
+  "cardPhotoSourceGallery": "갤러리에서 고르기",
+  "@cardPhotoSourceGallery": {"description": "사진 고르기 시트의 갤러리 줄"},
+
+  "cardPhotoSourcePrivacy": "얼굴이나 개인정보가 나오지 않게 찍어 주세요",
+  "@cardPhotoSourcePrivacy": {"description": "사진 고르기 시트 아래 개인정보 주의 안내"},
+
+  "cardPhotoUploadFailedDialog": "사진을 올리지 못했어요.\n{message}",
+  "@cardPhotoUploadFailedDialog": {"description": "사진 올리기가 실패했는데 자리가 없어 팝업으로 알릴 때 제목. message 는 실패 사유(서버 문구가 우선)", "placeholders": {"message": {"type": "String"}}},
+
+  "cardPhotoChange": "사진 바꾸기",
+  "@cardPhotoChange": {"description": "카드 그림 아래 사진 바꾸기 칩의 글자와 낭독 이름"},
+
+  "cardPhotoUploading": "사진을 올리고 있어요",
+  "@cardPhotoUploading": {"description": "사진을 올리는 동안 그림 위에 덮이는 안내"},
+
+  "cardPhotoUploadFailed": "사진을 올리지 못했어요",
+  "@cardPhotoUploadFailed": {"description": "사진 올리기 실패 때 그림 위에 덮이는 안내 제목"},
+
+  "cardPhotoRetry": "다시 하기",
+  "@cardPhotoRetry": {"description": "사진 올리기 실패 안내의 다시 하기 버튼"},
+
+  "creditCardTitle": "이번 주 AI 생성",
+  "@creditCardTitle": {"description": "AI 크레딧 카드 제목"},
+
+  "creditCardLoading": "이번 주 AI 생성 사용량을 불러오고 있어요",
+  "@creditCardLoading": {"description": "AI 크레딧 카드가 불러오는 중일 때 낭독 문구"},
+
+  "creditCardLoadFailed": "사용량을 불러오지 못했어요",
+  "@creditCardLoadFailed": {"description": "AI 크레딧 카드 조회가 실패했을 때 안내"},
+
+  "creditCardRetry": "다시 하기",
+  "@creditCardRetry": {"description": "AI 크레딧 카드 조회 실패의 다시 하기 버튼"},
+
+  "creditGenerating": "일과를 만들고 있어요",
+  "@creditGenerating": {"description": "AI 크레딧 카드에서 일과를 만드는 중일 때 줄"},
+
+  "creditExhausted": "이번 주 크레딧을 모두 사용했어요",
+  "@creditExhausted": {"description": "AI 크레딧 카드에서 크레딧을 다 썼을 때 첫 줄"},
+
+  "creditExhaustedStillOk": "만든 일과 보기와 직접 고치기는 계속 할 수 있어요",
+  "@creditExhaustedStillOk": {"description": "AI 크레딧 카드에서 크레딧을 다 썼을 때 둘째 줄"},
+
+  "creditInfoLabel": "AI 크레딧 안내",
+  "@creditInfoLabel": {"description": "AI 크레딧 카드의 안내 버튼 낭독 이름"},
+
+  "creditAmountLeft": "{available} / {weekly} 크레딧 남음",
+  "@creditAmountLeft": {"description": "AI 크레딧 카드의 낭독용 숫자 줄. available 은 남은 수, weekly 는 주간 지급량", "placeholders": {"available": {"type": "int"}, "weekly": {"type": "int"}}},
+
+  "creditAmountRest": " / {weekly} 크레딧 남음",
+  "@creditAmountRest": {"description": "AI 크레딧 카드에서 큰 숫자(남은 수) 뒤에 이어 붙는 작은 글자. 앞의 공백을 유지한다", "placeholders": {"weekly": {"type": "int"}}},
+
+  "aiCreditResetLine": "{reset}에 다시 채워져요",
+  "@aiCreditResetLine": {"description": "AI 크레딧이 다시 채워지는 시각 줄. reset 은 시각 문구(예: 9월 28일(월) 0시)", "placeholders": {"reset": {"type": "String"}}},
+
+  "creditCostTitle": "AI 크레딧은 이렇게 줄어요",
+  "@creditCostTitle": {"description": "AI 크레딧 안내 팝업 제목"},
+
+  "creditCostLine": "일과 글을 만들 때 {textCost, plural, other{{textCost}개}}, 그림이 완성된 카드 1장마다 {imageCost, plural, other{{imageCost}개}}씩 써요.",
+  "@creditCostLine": {"description": "AI 크레딧 단가 안내. textCost 는 일과 글 단가, imageCost 는 카드 그림 한 장 단가(서버 값)", "placeholders": {"textCost": {"type": "int"}, "imageCost": {"type": "int"}}},
+
+  "creditCostKeepGoing": "크레딧이 남아 있을 때 시작한 일과는 그림이 많아도 끝까지 만들어져요.",
+  "@creditCostKeepGoing": {"description": "AI 크레딧 안내 팝업의 둘째 문장"},
+
+  "creditWeeklyRefill": "매주 월요일 0시에 다시 채워져요.",
+  "@creditWeeklyRefill": {"description": "AI 크레딧 안내 팝업의 셋째 문장"},
+
+  "routineCreateButton": "새로운 일과 만들기",
+  "@routineCreateButton": {"description": "보호자 홈의 새 일과 만들기 버튼"},
+
+  "routineSwipeDelete": "일과 삭제",
+  "@routineSwipeDelete": {"description": "일과 줄을 밀었을 때 나오는 삭제 버튼 기본 글자"},
+
+  "routineSwipeEdit": "일과 수정",
+  "@routineSwipeEdit": {"description": "일과 줄을 밀었을 때 나오는 수정 버튼"},
+
+  "routineSuggestLoadFailed": "추천을 불러오지 못했어요 · 다시 시도",
+  "@routineSuggestLoadFailed": {"description": "일과 입력 화면의 추천 목록이 실패했을 때 한 줄(서버 문구가 우선)"},
+
+  "routineFlowHomeLabel": "홈으로 가기",
+  "@routineFlowHomeLabel": {"description": "일과 만들기 흐름 위쪽 집 버튼 낭독 이름"},
+
+  "routineFlowDraftLabel": "임시저장",
+  "@routineFlowDraftLabel": {"description": "일과 만들기 흐름 위쪽 임시저장 버튼의 글자와 낭독 이름"},
+
+  "routineFlowLeaveStay": "계속 만들기",
+  "@routineFlowLeaveStay": {"description": "일과 만들기를 나가는 팝업의 머무는 버튼"},
+
+  "routineFlowLeaveConfirm": "나가기",
+  "@routineFlowLeaveConfirm": {"description": "일과 만들기를 나가는 팝업의 나가는 버튼"},
+
+  "routineLeaveDiscardTitle": "일과 만들기를 그만둘까요?",
+  "@routineLeaveDiscardTitle": {"description": "일과 만들기를 나가는 팝업 제목. 적은 내용이 사라지는 경우"},
+
+  "routineLeaveDiscardMessage": "지금 나가면 적은 내용은 남지 않아요",
+  "@routineLeaveDiscardMessage": {"description": "일과 만들기를 나가는 팝업 설명. 적은 내용이 사라지는 경우"},
+
+  "routineLeaveDraftWhenReadyTitle": "임시저장에 두고 나갈까요?",
+  "@routineLeaveDraftWhenReadyTitle": {"description": "카드를 만드는 중에 나가는 팝업 제목"},
+
+  "routineLeaveDraftWhenReadyMessage": "카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요",
+  "@routineLeaveDraftWhenReadyMessage": {"description": "카드를 만드는 중에 나가는 팝업 설명"},
+
+  "routineLeaveDraftTitle": "임시저장에 두고 나갈까요?",
+  "@routineLeaveDraftTitle": {"description": "카드 검토 화면에서 나가는 팝업 제목"},
+
+  "routineLeaveDraftMessage": "설정의 임시저장에서\n이어서 만들 수 있어요",
+  "@routineLeaveDraftMessage": {"description": "카드 검토 화면에서 나가는 팝업 설명"},
+
+  "routineLeaveEditTitle": "저장하지 않고 나갈까요?",
+  "@routineLeaveEditTitle": {"description": "저장한 일과를 고치다 나가는 팝업 제목"},
+
+  "routineLeaveEditMessage": "뺀 카드는 저장하기를 눌러야 빠져요",
+  "@routineLeaveEditMessage": {"description": "저장한 일과를 고치다 나가는 팝업 설명"},
+
+  "routineTileRewardLabel": "완료 시",
+  "@routineTileRewardLabel": {"description": "일과 줄 아래 보상 글자 앞의 이름표"},
+
+  "routineTileRerun": "일과 다시하기",
+  "@routineTileRerun": {"description": "지난 일과 줄의 다시하기 버튼"},
+
+  "routineDetailReorderFailedTitle": "순서를 저장하지 못했어요",
+  "@routineDetailReorderFailedTitle": {"description": "일과 상세 시트에서 카드 순서 저장이 실패했을 때 제목"},
+
+  "routineDetailReorderFailedFallback": "잠시 후 다시 시도해주세요",
+  "@routineDetailReorderFailedFallback": {"description": "일과 상세 시트에서 카드 순서 저장이 실패했을 때 서버 문구가 없을 때의 안내"},
+
+  "routineDetailRerun": "일과 다시하기",
+  "@routineDetailRerun": {"description": "지난 일과 상세 시트 아래 버튼"},
+
+  "routineDetailEdit": "편집하기",
+  "@routineDetailEdit": {"description": "오늘 일과 상세 시트 아래 버튼"},
+  "routineDetailFinishedToday": "다 끝낸 일과예요",
+  "@routineDetailFinishedToday": {"description": "이룸이가 다 끝낸 오늘 일과의 상세 시트 아래 버튼(눌리지 않는다)"},
+
+  "routineDetailOpenHint": "눌러서 카드 크게 보기",
+  "@routineDetailOpenHint": {"description": "일과 상세 시트의 카드 줄 낭독 힌트"},
+
+  "routineDetailNoReward": "일과 완료 후 보상이 없어요",
+  "@routineDetailNoReward": {"description": "일과 상세 시트에서 보상을 정하지 않았을 때 보상 줄"},
+
+  "rewardInputHint": "예) 유튜브 10분 보기",
+  "@rewardInputHint": {"description": "보상 직접 입력칸 안내 글"},
+
+  "todayRoutineReorderFailedTitle": "순서를 저장하지 못했어요",
+  "@todayRoutineReorderFailedTitle": {"description": "보호자 홈에서 일과 순서 저장이 실패했을 때 제목"},
+
+  "todayRoutineReorderFailedFallback": "잠시 후 다시 시도해주세요",
+  "@todayRoutineReorderFailedFallback": {"description": "보호자 홈에서 일과 순서 저장이 실패했을 때 서버 문구가 없을 때의 안내"},
+
+  "todayRoutineDeleteConfirmTitle": "일과를 삭제하실건가요?",
+  "@todayRoutineDeleteConfirmTitle": {"description": "보호자 홈에서 일과를 지우기 전 확인 팝업 제목"},
+  "todayRoutineStartedTitle": "이룸이가 시작한 일과예요",
+  "@todayRoutineStartedTitle": {"description": "이룸이가 한 단계라도 한 일과를 지우려 할 때 안내 팝업 제목"},
+  "todayRoutineStartedMessage": "한 일이 기록으로 남도록 지울 수 없어요",
+  "@todayRoutineStartedMessage": {"description": "시작한 일과를 지울 수 없는 이유를 알리는 안내 팝업 문장"},
+
+  "todayRoutineDeleteAction": "삭제",
+  "@todayRoutineDeleteAction": {"description": "보호자 홈 일과 삭제 확인 팝업의 삭제 버튼"},
+
+  "todayRoutineDeleteFailedTitle": "일과를 삭제하지 못했어요",
+  "@todayRoutineDeleteFailedTitle": {"description": "보호자 홈에서 일과 삭제가 실패했을 때 제목"},
+
+  "todayRoutineDeleteFailedFallback": "잠시 후 다시 시도해주세요",
+  "@todayRoutineDeleteFailedFallback": {"description": "보호자 홈에서 일과 삭제가 실패했을 때 서버 문구가 없을 때의 안내"},
+
+  "todayRoutineLoadFailedFallback": "일과를 불러오지 못했어요",
+  "@todayRoutineLoadFailedFallback": {"description": "보호자 홈 오늘 일과 조회가 실패했을 때 서버 문구가 없을 때의 안내"},
+
+  "todayRoutineRerunFailedTitle": "일과를 다시 만들지 못했어요",
+  "@todayRoutineRerunFailedTitle": {"description": "지난 일과를 오늘로 복제하다 실패했을 때 제목"},
+
+  "todayRoutineRerunFailedFallback": "잠시 후 다시 시도해주세요",
+  "@todayRoutineRerunFailedFallback": {"description": "지난 일과를 오늘로 복제하다 실패했을 때 서버 문구가 없을 때의 안내"},
+
+  "todayRoutineCopied": "{title}을(를) 오늘 일과에 담았어요",
+  "@todayRoutineCopied": {"description": "지난 일과를 오늘 일과로 복제한 뒤의 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를) 로 쓴다)", "placeholders": {"title": {"type": "String"}}},
+
+  "todayRoutinePastLoadFailedFallback": "지난 일과를 불러오지 못했어요",
+  "@todayRoutinePastLoadFailedFallback": {"description": "보호자 홈 지난 일과 조회가 실패했을 때 서버 문구가 없을 때의 안내"},
+
+  "todayRoutineEmptyTitle": "아직 만든 일과가 없어요",
+  "@todayRoutineEmptyTitle": {"description": "보호자 홈 오늘 일과가 0건일 때 첫 줄"},
+
+  "todayRoutineEmptyHint": "오늘의 첫 행동카드를 만들어보세요",
+  "@todayRoutineEmptyHint": {"description": "보호자 홈 오늘 일과가 0건일 때 둘째 줄"},
+
+  "todayRoutinePastEmpty": "지난 일과가 없어요",
+  "@todayRoutinePastEmpty": {"description": "보호자 홈 지난 일과가 0건일 때 줄"},
+
+  "homeCoachCreate": "이룸이가 수행할 *새로운\n일과를 만들 수 있어요*",
+  "@homeCoachCreate": {"description": "홈 코치마크 1단계. *로 감싼 부분이 강조된다"},
+
+  "homeCoachSwipe": "일과를 *왼쪽으로 스와이프*하면\n*수정하거나 삭제*할 수 있어요",
+  "@homeCoachSwipe": {"description": "홈 코치마크 2단계. *로 감싼 부분이 강조된다"},
+
+  "homeCoachSwitch": "캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*",
+  "@homeCoachSwitch": {"description": "홈 코치마크 3단계. *로 감싼 부분이 강조된다"},
+
+  "childHomeGreeting": "오늘 {name}{batchim, select, yes{이} other{가}}\n할 일들이에요. 힘내봐요!",
+  "@childHomeGreeting": {
+    "description": "이룸이 홈 인사말(시안 문구, 줄바꿈 위치 유지). name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다",
+    "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } }
+  },
+
+  "childHomeEmptyTitle": "아직 {name}의\n일과가 없어요",
+  "@childHomeEmptyTitle": {
+    "description": "이룸이 홈에 일과가 하나도 없을 때의 제목. name 은 이룸이 호칭",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "childHomeEmptyHint": "보호자 화면에서 일과를 만들 수 있어요",
+  "@childHomeEmptyHint": { "description": "일과가 없을 때의 안내(보호자 폰에서 보는 이룸이 화면)" },
+  "childHomeEmptyHintDevice": "보호자 모드에서 일과를 만들 수 있어요",
+  "@childHomeEmptyHintDevice": { "description": "일과가 없을 때의 안내(이룸이 전용 휴대폰)" },
+
+  "childHomeToGuardianLabel": "보호자 화면으로 가기",
+  "@childHomeToGuardianLabel": { "description": "이룸이 홈 오른쪽 위 캐릭터 배지를 낭독기가 읽는 이름(보호자 화면으로 이동)" },
+  "childHomeSettingsLabel": "설정 열기",
+  "@childHomeSettingsLabel": { "description": "이룸이 홈 오른쪽 위 톱니 아이콘을 낭독기가 읽는 이름" },
+  "childHomeRewardPrefix": "다하면",
+  "@childHomeRewardPrefix": { "description": "이룸이 홈 일과 타일에서 보상 앞에 붙는 말(회색)" },
+
+  "childStarsEarned": "{count, plural, other{{count}개의 별을 얻었어요\n할 일을 해내고 별을 더 찾아봐요!}}",
+  "@childStarsEarned": {
+    "description": "별 화면 문구. count 는 모은 별 수",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "childStarsSemantics": "{count, plural, other{별 {count}개 모았어요}}",
+  "@childStarsSemantics": {
+    "description": "이룸이 홈 별 표시를 낭독기가 읽는 문장. count 는 모은 별 수",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "childCardPagerLabel": "카드 {total}장 중 {index}번째",
+  "@childCardPagerLabel": {
+    "description": "카드 넘기기 영역을 낭독기가 읽는 문장. total 은 전체 장수, index 는 지금 몇 번째(1부터)",
+    "placeholders": { "total": { "type": "int" }, "index": { "type": "int" } }
+  },
+
+  "childDetailSoundFailedTitle": "소리를 재생하지 못했어요",
+  "@childDetailSoundFailedTitle": { "description": "카드 읽어 주기(음성)가 실패했을 때 팝업 제목" },
+  "childDetailSoundFailedFallback": "휴대폰 소리를 켜고 다시 눌러주세요",
+  "@childDetailSoundFailedFallback": { "description": "카드 읽어 주기(음성)가 실패했을 때 팝업 본문" },
+  "childDetailCheckLabel": "다 했어요",
+  "@childDetailCheckLabel": { "description": "카드 상세의 체크 버튼을 낭독기가 읽는 이름" },
+
+  "rewardBannerPrefix": "다하면 ",
+  "@rewardBannerPrefix": { "description": "보상 칩에서 보상 글 앞에 붙는 말. 끝의 공백 한 칸이 보상 글과의 사이다" },
+
+  "rewardLumiTitle": "축하해요!",
+  "@rewardLumiTitle": { "description": "보상 화면(루미) 큰 제목" },
+  "rewardLumiMessage": "할 일을 해내서 루미가\n{name}에게 별을 가져왔어요",
+  "@rewardLumiMessage": {
+    "description": "보상 화면(루미) 두 줄 설명. name 은 이룸이 호칭",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "rewardLumiButton": "오예!",
+  "@rewardLumiButton": { "description": "보상 화면(루미) 하단 버튼" },
+
+  "rewardPopoTitle": "잘했어요!",
+  "@rewardPopoTitle": { "description": "보상 화면(포포) 큰 제목" },
+  "rewardPopoMessage": "포포가 {name}에게\n축하의 선물로 큰 별을 가져왔어요",
+  "@rewardPopoMessage": {
+    "description": "보상 화면(포포) 두 줄 설명. name 은 이룸이 호칭",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "rewardPopoButton": "좋아요!",
+  "@rewardPopoButton": { "description": "보상 화면(포포) 하단 버튼" },
+
+  "rewardRuruTitle": "멋져요!",
+  "@rewardRuruTitle": { "description": "보상 화면(루루) 큰 제목. 루루만 별이 아니라 선물을 가져온다" },
+  "rewardRuruMessage": "{name}{batchim, select, yes{이} other{가}} 할 일을 해내서\n루루가 선물을 가져왔다고 해요",
+  "@rewardRuruMessage": {
+    "description": "보상 화면(루루) 두 줄 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다",
+    "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } }
+  },
+  "rewardRuruButton": "신난다!",
+  "@rewardRuruButton": { "description": "보상 화면(루루) 하단 버튼" },
+
+  "routineDoneTitle": "일과를 끝냈어요!",
+  "@routineDoneTitle": { "description": "일과를 다 끝냈을 때 한 번 뜨는 화면의 큰 제목" },
+  "routineDoneButton": "오예!",
+  "@routineDoneButton": { "description": "일과 완료 화면 하단 버튼(누르면 이룸이 홈으로)" },
+
+  "modeSwitchToChild": "암호를 입력하면 이룸이 화면으로 바뀌어요",
+  "@modeSwitchToChild": { "description": "보호자 → 이룸이 화면 전환의 암호 안내" },
+  "modeSwitchToGuardian": "암호를 입력하면 보호자 화면으로 바뀌어요",
+  "@modeSwitchToGuardian": { "description": "이룸이 → 보호자 화면 전환의 암호 안내" },
+  "modeSwitchTitle": "비밀암호를 입력하세요",
+  "@modeSwitchTitle": { "description": "화면 전환 암호 입력 화면의 제목(시안 문구)" },
+  "modeSwitchMismatch": "암호가 달라요. 다시 넣어주세요",
+  "@modeSwitchMismatch": { "description": "화면 전환 암호가 틀렸을 때 설명 자리에 뜨는 안내" },
+  "modeSwitchPinLabel": "암호 넣기",
+  "@modeSwitchPinLabel": { "description": "암호 점 영역을 낭독기가 읽는 이름(누르면 키패드가 올라온다)" },
+  "modeSwitchReadFailedTitle": "암호를 확인하지 못했어요",
+  "@modeSwitchReadFailedTitle": { "description": "저장된 암호를 읽지 못했을 때 팝업 제목" },
+  "modeSwitchReadFailedFallback": "잠시 후 다시 해주세요",
+  "@modeSwitchReadFailedFallback": { "description": "저장된 암호를 읽지 못했을 때 팝업 본문" },
+  "modeSwitchBlockedTitle": "보호자 휴대폰에서\n열어 주세요",
+  "@modeSwitchBlockedTitle": { "description": "암호가 없는 이룸이 휴대폰에서 보호자 화면을 열려 할 때 제목(줄바꿈 위치 유지)" },
+  "modeSwitchBlockedDescription": "이 휴대폰에서는 보호자 화면을 열 수 없어요",
+  "@modeSwitchBlockedDescription": { "description": "암호가 없는 이룸이 휴대폰에서 보호자 화면을 열려 할 때 설명" },
+  "modeSwitchBlockedBack": "돌아가기",
+  "@modeSwitchBlockedBack": { "description": "보호자 화면을 열 수 없다는 안내의 하단 버튼" }
+}

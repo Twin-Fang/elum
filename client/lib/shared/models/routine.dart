@@ -1,6 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../utils/korean_particle.dart';
+import '../../core/l10n/batchim.dart';
+import '../../core/l10n/content_locale.dart';
+import '../../core/l10n/current_l10n.dart';
+import '../../core/l10n/date_labels.dart';
 import 'action_card.dart';
 import 'credit_usage.dart';
 import 'reward_preset.dart';
@@ -74,6 +77,12 @@ abstract class Routine with _$Routine {
 
     /// 만든 사람이 이 이룸이 안에서 불리는 이름. 비어 있으면 null.
     String? creatorName,
+
+    /// 이 일과의 콘텐츠 언어(`ko` `en` `ja` `zh` `es`) — 서버 `RoutineResponse.language`.
+    ///
+    /// 일과를 만든 보호자 휴대폰의 화면 언어다. 이룸이 휴대폰은 카드 글과 음성을 화면 언어가 아니라
+    /// **이 값**으로 보여준다. 옛 서버·옛 캐시에는 없다 — 그때는 모두 한국어 일과였으므로 `ko`.
+    @Default('ko') String language,
   }) = _Routine;
 
   const Routine._();
@@ -88,8 +97,9 @@ abstract class Routine with _$Routine {
   String? get foreignCreatorLabel {
     if (createdByMe != false) return null;
     final name = creatorName?.trim();
-    if (name == null || name.isEmpty) return '다른 보호자가 만든 일과예요';
-    return '$name${name.subjectParticle} 만든 일과예요';
+    if (name == null || name.isEmpty) return appL10n.routineForeignCreatorUnknown;
+    // 조사 글자는 문구가 정한다 — 코드는 받침 판정값만 넘긴다
+    return appL10n.routineForeignCreator(name, batchimOf(name));
   }
 
   /// 보호자가 승인했는가. 승인 전에는 아동 화면에 노출하지 않는다 (docs 원칙 3번).
@@ -119,7 +129,8 @@ abstract class Routine with _$Routine {
 
   /// 홈·아이 목록에 보여줄 제목.
   /// AI가 title을 못 만들어도 화면이 비지 않게 대체어를 준다 (docs 원칙 6번).
-  String get displayTitle => title.trim().isNotEmpty ? title.trim() : '오늘의 일과';
+  String get displayTitle =>
+      title.trim().isNotEmpty ? title.trim() : appL10n.routineDefaultTitle;
 
   /// 모든 카드를 마쳤는가. 아이 홈 타일의 완료 배경 판단에 쓴다.
   bool get isAllDone => steps.isNotEmpty && steps.every((s) => s.completed);
@@ -155,7 +166,7 @@ abstract class Routine with _$Routine {
   String get scheduledDateLabel {
     final at = scheduledAt;
     if (at == null) return '';
-    return '${at.year}년 ${at.month}월 ${at.day}일';
+    return appL10n.yearMonthDay(at);
   }
 
   /// 오프라인 캐시 저장용 — [fromJson]과 대칭이어야 한다 (이슈 #140).
@@ -176,6 +187,8 @@ abstract class Routine with _$Routine {
     // 오프라인으로 목록을 열어도 남의 일과 버튼이 도로 생기지 않게 남긴다 (#362).
     if (createdByMe != null) 'createdByMe': createdByMe,
     if (creatorName != null) 'creatorName': creatorName,
+    // 오프라인으로 이룸이 화면을 열어도 카드 글·음성이 일과 언어를 따르게 남긴다
+    'language': language,
   };
 
   factory Routine.fromJson(Map<String, dynamic> json) {
@@ -208,6 +221,7 @@ abstract class Routine with _$Routine {
           ? json['createdByMe'] as bool
           : null,
       creatorName: json['creatorName']?.toString(),
+      language: normalizeContentLanguage(json['language']),
     );
   }
 

@@ -4,7 +4,6 @@ import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/core/widgets/elum_scaffold.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:flutter/material.dart';
@@ -85,6 +84,6 @@ String topOf(GoRouter router) =>
 
 /// 공통 뼈대의 뒤로가기를 누른다.
 Future<void> tapBack(WidgetTester tester) async {
-  await tester.tap(find.bySemanticsLabel(ElumScaffold.backLabel).last);
+  await tester.tap(find.bySemanticsLabel('뒤로 가기').last);
   await tester.pumpAndSettle();
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../l10n/l10n_context.dart';
 import '../app_status/app_status_repository.dart';
 import 'settings_tile.dart';
 
@@ -21,7 +22,7 @@ class AppInfoTile extends ConsumerWidget {
         .maybeWhen(data: (value) => value, orElse: () => '');
 
     return SettingsTile(
-      label: '앱 정보',
+      label: context.l10n.commonAppInfo,
       onTap: null,
       valueText: version.isEmpty ? '' : 'v$version',
     );

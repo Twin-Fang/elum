@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/selectable_group.dart';
 import '../../../core/widgets/show_failure.dart';
@@ -60,8 +61,11 @@ class _ImageStyleSettingsScreenState
       _unsynced = null;
       // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다 (#433).
       final messenger = ScaffoldMessenger.of(context);
+      final changedText = context.l10n.imageStyleChangedSnack;
       context.popOrHome();
-      messenger.showSnackBar(const SnackBar(content: Text('그림 방식을 바꿨어요')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(changedText)),
+      );
       return;
     }
 
@@ -70,8 +74,8 @@ class _ImageStyleSettingsScreenState
     await showFailure(
       context,
       failure,
-      title: '그림 방식을 저장하지 못했어요',
-      fallback: '잠시 후 다시 시도해주세요',
+      title: context.l10n.imageStyleSaveFailedTitle,
+      fallback: context.l10n.imageStyleSaveFailedFallback,
       fallbackCode: 'E-STYLE',
     );
   }
@@ -101,7 +105,7 @@ class _ImageStyleSettingsScreenState
 
     return ElumScaffold(
       onBack: _busy ? null : context.popOrHome,
-      title: '그림 방식',
+      title: context.l10n.imageStyleTitle,
       // 설정 묶음 시안(1022:4467)과 같은 머리 — 뒤로가기 y=67, 좌우 16
       backTop: 67,
       horizontalPadding: 16,

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+import '../l10n/current_l10n.dart';
 import 'server_error.dart';
 import 'server_error_code.dart';
 
@@ -108,9 +109,9 @@ class AppFailure {
   /// 세어 보니 인터넷을 언급하는 화면이 로그인·암호넣기 **둘뿐**이었다 — 화면마다
   /// 따로 쓰게 두면 나머지는 영영 안 쓴다. 그래서 여기서 한 번만 말한다 (#352).
   String? get hint => switch (fault) {
-    NetworkFault.offline => '인터넷 연결을 확인해주세요',
-    NetworkFault.timeout => '연결이 느려요. 잠시 후 다시 해주세요',
-    NetworkFault.badCertificate => '안전하지 않은 연결이에요. 다른 망에서 해주세요',
+    NetworkFault.offline => appL10n.failureHintOffline,
+    NetworkFault.timeout => appL10n.failureHintTimeout,
+    NetworkFault.badCertificate => appL10n.failureHintBadCertificate,
     _ => null,
   };
 
@@ -165,10 +166,10 @@ class AppFailure {
       serverMessage ??
       (hint == null ? fallback : '${_headline(fallback)} · $hint');
 
-  /// 문구의 첫 문장 — `무엇이 안 됐는지`. 마침표로 끝나는 첫 문장을 떼고 마침표는 뺀다.
+  /// 문구의 첫 문장 — `무엇이 안 됐는지`. 첫 문장 끝(`. ` 또는 `。`)에서 자르고 그 문장부호는 뺀다.
   static String _headline(String text) {
-    final end = text.indexOf('. ');
-    return end < 0 ? text : text.substring(0, end);
+    final end = RegExp(r'(\. |。)').firstMatch(text);
+    return end == null ? text : text.substring(0, end.start);
   }
 
   /// **무엇이 던져져도 받는다.** 이 함수가 앱의 단일 판정 지점이다.

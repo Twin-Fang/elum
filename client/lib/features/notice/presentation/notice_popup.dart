@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/logger/app_logger.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/text/keep_words.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
@@ -167,7 +168,9 @@ class _NoticePopupCardState extends State<NoticePopupCard> {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
-                '링크를 열지 못했어요 (${NoticePopupCard.linkFailureCode})',
+                context.l10n.noticeLinkOpenFailed(
+                  NoticePopupCard.linkFailureCode,
+                ),
                 textAlign: TextAlign.center,
                 style: context.typo.noticeHideLabel.copyWith(
                   color: colors.noticeHideLabel,
@@ -180,7 +183,7 @@ class _NoticePopupCardState extends State<NoticePopupCard> {
             children: [
               ElumDialogButton(
                 key: NoticePopupCard.closeKey,
-                label: '닫기',
+                label: context.l10n.commonClose,
                 tone: button == null
                     ? ElumDialogTone.primary
                     : ElumDialogTone.neutral,
@@ -190,7 +193,7 @@ class _NoticePopupCardState extends State<NoticePopupCard> {
                 ElumDialogButton(
                   key: ValueKey('notice-link-${_notice.id}'),
                   // 관리자가 쓴 문구라 길 수 있다(최대 20자). 말줄임 없이 어절에서 꺾는다 (R2)
-                  label: keepWords(button.label),
+                  label: keepWords(button.label, locale: context.appLocale),
                   semanticsLabel: button.label,
                   centerLines: true,
                   onTap: _open,

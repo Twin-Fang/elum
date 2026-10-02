@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/ads/ad_banner_slot.dart';
 import '../../../core/ads/ad_ids.dart';
 import '../../../core/assets/app_assets.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -235,16 +236,16 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const RoutineSectionTitle(
+                          RoutineSectionTitle(
                             iconAsset: AppAssets.iconTodayRoutine,
-                            label: '오늘 일과',
+                            label: context.l10n.guardianHomeTodayRoutine,
                           ),
                           SizedBox(height: _titleToList.h),
                           TodayRoutineSection(coachKey: _swipeKey),
                           SizedBox(height: _betweenSections.h),
-                          const RoutineSectionTitle(
+                          RoutineSectionTitle(
                             iconAsset: AppAssets.iconTimePast,
-                            label: '지난 일과',
+                            label: context.l10n.guardianHomePastRoutine,
                           ),
                           SizedBox(height: _titleToList.h),
                           const PastRoutineSection(),
@@ -390,7 +391,7 @@ class _Header extends StatelessWidget {
                     scaleDown: AppPressable.scaleIcon,
                     // 이룸이 화면으로 가는 유일한 입구다. 그림뿐이라 이름을 주지
                     // 않으면 화면 낭독기로는 이 길을 찾을 수 없다 (#339).
-                    semanticLabel: '이룸이 화면으로 가기',
+                    semanticLabel: context.l10n.guardianHomeGoChildScreen,
                     child: KeyedSubtree(
                       key: modeKey,
                       child: CharacterBadge(character: character),
@@ -403,7 +404,7 @@ class _Header extends StatelessWidget {
                     // 돌아갈 곳을 잃는다 — 화살표도 기기 뒤로가기도 먹통이 된다 (이슈 #194).
                     onTap: () => context.push(Routes.guardianSettings),
                     scaleDown: AppPressable.scaleIcon,
-                    semanticLabel: '설정',
+                    semanticLabel: context.l10n.guardianHomeSettings,
                     child: SvgPicture.asset(
                       AppAssets.iconSettings,
                       // 정사각형 아이콘 — 가로세로 모두 .w
@@ -418,12 +419,12 @@ class _Header extends StatelessWidget {
           SizedBox(height: _rowToGreeting.h),
           Text(
             // Figma 문구. 줄바꿈 위치도 디자인이 정한 대로다.
-            '안녕하세요,\n$childName 보호자님 👋🏻',
+            context.l10n.guardianHomeGreeting(childName),
             style: context.typo.greeting.copyWith(color: colors.textPrimary),
           ),
           SizedBox(height: _greetingToSubtitle.h),
           Text(
-            '오늘은 어떤 일과를 준비할까요?',
+            context.l10n.guardianHomeSubtitle,
             style: context.typo.body.copyWith(color: colors.routineTileLabel),
           ),
         ],

@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/l10n/current_l10n.dart';
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -293,7 +295,7 @@ class _TopBar extends StatelessWidget {
               onTap: onBack,
               scaleDown: AppPressable.scaleIcon,
               // 일과 만들기 흐름 화면 전부가 이 상단바를 쓴다 — 여기가 비면 다 빈다 (#339)
-              semanticLabel: ElumScaffold.backLabel,
+              semanticLabel: context.l10n.commonBack,
               // 정사각형 아이콘이라 가로세로 모두 .w
               // 자리는 아이콘 크기 그대로 두고 **그 위로** 40×40 누름 영역을 덮는다 (#306).
               // 자리째 키우면 상단바가 높아져 화면 전체가 아래로 밀린다.
@@ -324,7 +326,7 @@ class _TopBar extends StatelessWidget {
           AppPressable(
             onTap: onHome,
             scaleDown: AppPressable.scaleIcon,
-            semanticLabel: '홈으로 가기',
+            semanticLabel: context.l10n.routineFlowHomeLabel,
             // 자리는 아이콘 크기 그대로 두고 **그 위로** 40×40 누름 영역을 덮는다 (#306).
             // 자리째 키우면 상단바가 높아져 화면 전체가 아래로 밀린다.
             child: SizedBox(
@@ -355,7 +357,7 @@ class _TopBar extends StatelessWidget {
               padding: EdgeInsets.only(right: 16.w),
               child: AppPressable(
                 onTap: onDraft,
-                semanticLabel: '임시저장',
+                semanticLabel: context.l10n.routineFlowDraftLabel,
                 child: SizedBox(
                   width: 72.w,
                   height: 24.w,
@@ -370,7 +372,7 @@ class _TopBar extends StatelessWidget {
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            '임시저장',
+                            context.l10n.routineFlowDraftLabel,
                             maxLines: 1,
                             softWrap: false,
                             style: context.typo.topBarAction.copyWith(
@@ -440,13 +442,13 @@ Future<bool> confirmLeaveRoutineFlow(
     message: message,
     actions: [
       // 되돌아가는 쪽을 먼저 둔다 — 실수로 누르는 일이 잦다.
-      const ElumDialogAction(
-        label: '계속 만들기',
+      ElumDialogAction(
+        label: context.l10n.routineFlowLeaveStay,
         value: false,
         tone: ElumDialogTone.neutral,
       ),
       ElumDialogAction(
-        label: '나가기',
+        label: context.l10n.routineFlowLeaveConfirm,
         value: true,
         tone: loses ? ElumDialogTone.danger : ElumDialogTone.primary,
       ),
@@ -475,16 +477,21 @@ enum RoutineLeave {
   /// 제목과 설명. 해요체·능동·긍정형 (CLAUDE.md 말투 규칙 — `사라져요` 대신 무엇이
   /// 남는지·어디서 이어서 하는지를 말한다).
   ///
+  /// 문구는 부르는 때의 앱 언어로 읽는다 — 값을 들고 있지 말고 팝업을 띄울 때마다 부른다.
+  ///
   /// 설명 줄바꿈은 손으로 둔다 — 팝업 폭(322)에서 저절로 꺾이면 `요` 한 글자만
   /// 다음 줄로 떨어진다(실제로 그랬다).
   static (String, String) copyOf(RoutineLeave kind) => switch (kind) {
-    discard => ('일과 만들기를 그만둘까요?', '지금 나가면 적은 내용은 남지 않아요'),
-    draftWhenReady => (
-      '임시저장에 두고 나갈까요?',
-      '카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요',
+    discard => (
+      appL10n.routineLeaveDiscardTitle,
+      appL10n.routineLeaveDiscardMessage,
     ),
-    draft => ('임시저장에 두고 나갈까요?', '설정의 임시저장에서\n이어서 만들 수 있어요'),
-    edit => ('저장하지 않고 나갈까요?', '뺀 카드는 저장하기를 눌러야 빠져요'),
+    draftWhenReady => (
+      appL10n.routineLeaveDraftWhenReadyTitle,
+      appL10n.routineLeaveDraftWhenReadyMessage,
+    ),
+    draft => (appL10n.routineLeaveDraftTitle, appL10n.routineLeaveDraftMessage),
+    edit => (appL10n.routineLeaveEditTitle, appL10n.routineLeaveEditMessage),
   };
 }
 

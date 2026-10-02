@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -66,7 +67,7 @@ class ImageStyleScreen extends ConsumerWidget {
       onBack: context.popOrHome,
       // 만화가 처음부터 골라져 있어 다음은 늘 열려 있다
       bottomButton: ElumButton(
-        label: '다음',
+        label: context.l10n.commonNext,
         onPressed: () => context.push(Routes.onboardingPin),
       ),
       belowButton: Center(
@@ -79,7 +80,7 @@ class ImageStyleScreen extends ConsumerWidget {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: space.xs.h),
             child: Text(
-              '건너뛰기',
+              context.l10n.onboardingImageStyleSkip,
               style: context.typo.linkLater.copyWith(
                 color: colors.linkLaterLabel,
                 decoration: TextDecoration.underline,
@@ -93,9 +94,9 @@ class ImageStyleScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const ElumHeader(
-              title: '카드 그림은 어떤 방식으로\n만들까요?',
-              description: '나중에 설정에서 바꿀 수 있어요',
+            ElumHeader(
+              title: context.l10n.onboardingImageStyleTitle,
+              description: context.l10n.onboardingImageStyleDescription,
               hasBackButton: true,
             ),
             SizedBox(height: space.headerToContent),

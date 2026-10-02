@@ -7,7 +7,9 @@ import 'core/ads/ad_consent.dart';
 import 'core/app_status/app_status_gate.dart';
 import 'core/app_status/app_status_repository.dart';
 import 'core/config/client_tuning.dart';
+import 'core/dev/dev_locale_override.dart';
 import 'core/dev/dev_tools_overlay.dart';
+import 'core/l10n/app_l10n.dart';
 import 'core/network/dio_client.dart';
 import 'core/network/session_expiry.dart';
 import 'core/router/app_router.dart';
@@ -135,31 +137,40 @@ class _ElumAppState extends ConsumerState<ElumApp> {
   }
 
   Widget _buildApp() {
+    // 언어 관련 인자는 AppL10n 한 곳에서 만든다 — 개발자 도구 강제 언어의 게이트도 거기서 건다.
+    final l10n = AppL10n.routerArgs(
+      forcedLocale: ref.watch(devLocaleOverrideProvider),
+      inner: (context, child) => SyncTriggers(
+        // 동기화 트리거는 라우터·오버레이와 무관하므로 가장 바깥에 둔다 (이슈 #140)
+        child: AppStatusGate(
+          // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다 (이슈 #279).
+          // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
+          child: DevToolsOverlay(
+            // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
+            // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
+            onNavigate: _router.go,
+            child: child ?? const SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
+
     return ScreenUtilInit(
       // Figma 프레임 크기(iPhone 16). 이 기준으로 .w/.h/.sp가 계산되므로
       // 화면 코드에서 Figma 좌표를 그대로 쓸 수 있다.
       designSize: const Size(393, 852),
       minTextAdapt: true,
       builder: (context, child) => MaterialApp.router(
-        title: '이룸',
+        onGenerateTitle: l10n.onGenerateTitle,
         theme: AppTheme.light,
+        locale: l10n.locale,
+        supportedLocales: l10n.supportedLocales,
+        localizationsDelegates: l10n.localizationsDelegates,
+        localeListResolutionCallback: l10n.localeListResolutionCallback,
         routerConfig: _router,
         debugShowCheckedModeBanner: false,
-        // 개발자 도구를 모든 화면 위에 얹는다. 화면별 코드는 건드리지 않는다.
-        // 플래그가 꺼지면 child를 그대로 반환해 비용이 0이다. (이슈 #13)
-        builder: (context, child) => SyncTriggers(
-          // 동기화 트리거는 라우터·오버레이와 무관하므로 가장 바깥에 둔다 (이슈 #140)
-          child: AppStatusGate(
-            // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다 (이슈 #279).
-            // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
-            child: DevToolsOverlay(
-              // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
-              // 라우터를 들고 있는 여기서 이동 방법을 넘겨준다.
-              onNavigate: _router.go,
-              child: child ?? const SizedBox.shrink(),
-            ),
-          ),
-        ),
+        // 개발자 도구를 모든 화면 위에 얹는다. 화면별 코드는 건드리지 않는다. (이슈 #13)
+        builder: l10n.builder,
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../l10n/l10n_context.dart';
 import '../theme/theme_context_ext.dart';
 import 'ad_gate.dart';
 import 'ad_ids.dart';
@@ -123,7 +124,7 @@ class _AdNativeSlotState extends ConsumerState<AdNativeSlot> {
                 children: [
                   // 광고임을 알리는 라벨 — 일과로 오인해 누르는 것을 막는다. 필수다.
                   Text(
-                    '광고',
+                    context.l10n.commonAd,
                     style: context.typo.caption.copyWith(
                       color: colors.textSecondary,
                     ),

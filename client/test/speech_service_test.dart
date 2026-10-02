@@ -107,7 +107,7 @@ class _FakeSpeech implements SpeechService {
   var stopCount = 0;
 
   @override
-  Future<bool> speak(String text) async {
+  Future<bool> speak(String text, {String language = 'ko'}) async {
     spokenTexts.add(text);
     return succeeds;
   }

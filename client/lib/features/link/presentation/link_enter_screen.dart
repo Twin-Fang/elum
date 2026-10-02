@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
+import '../../../core/network/app_failure.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_shake.dart';
@@ -15,6 +17,33 @@ import '../data/device_link_repository.dart';
 import '../domain/link_code.dart';
 import 'widgets/code_boxes.dart';
 import '../../../core/router/pop_or_home.dart';
+
+/// 연결 실패의 종류. 문구가 아니라 종류를 들고 있다가 그릴 때 푼다 — 실패 순간에 문구로
+/// 굳히면 언어가 바뀐 뒤에도 옛 언어로 남는다.
+enum _EnterFault { wrongCode, expired, tooManyAttempts, offline, failed }
+
+class _EnterError {
+  const _EnterError(this.fault, [this.failure]);
+
+  final _EnterFault fault;
+
+  /// 서버가 준 실패. 이유를 말해 줬으면 그 문구가 기본 문구를 이긴다.
+  final AppFailure? failure;
+
+  String message(AppLocalizations l10n) {
+    // 서버가 이유를 알려줬으면 그 문구가 기본 문구를 이긴다.
+    String say(String fallback, String code) =>
+        failure?.describe(fallback, code) ?? '$fallback ($code)';
+
+    return switch (fault) {
+      _EnterFault.wrongCode => l10n.linkEnterWrongCode,
+      _EnterFault.expired => l10n.linkEnterExpired,
+      _EnterFault.tooManyAttempts => say(l10n.commonRetryLater, 'E-LINK-429'),
+      _EnterFault.offline => say(l10n.linkEnterOffline, 'E-NET'),
+      _EnterFault.failed => say(l10n.linkEnterFailed, 'E-LINK'),
+    };
+  }
+}
 
 /// 연결 암호 넣기 — **이룸이 휴대폰** (이슈 #205 · 명세 §5-2).
 ///
@@ -37,7 +66,7 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
 
-  String? _errorMessage;
+  _EnterError? _error;
 
   /// 연결이 밖에서 끊겨 이 화면에 왔다 (#363). 보호자가 끊었거나 세션이 끝났다.
   ///
@@ -80,7 +109,7 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
     final code = _typed;
     if (!LinkCode.hasValidShape(code)) {
       // 우리가 만들 수 없는 모양은 서버에 보내지 않는다 — 시도 횟수만 축낸다.
-      _fail('암호가 맞지 않아요');
+      _fail(const _EnterError(_EnterFault.wrongCode));
       return;
     }
 
@@ -90,31 +119,27 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
     if (!mounted) return;
     setState(() => _sending = false);
 
-    // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다 (#352).
-    String say(String fallback, String code) =>
-        result.failure?.describe(fallback, code) ?? '$fallback ($code)';
-
     switch (result.outcome) {
       case RedeemOutcome.linked:
         context.go(Routes.child);
       case RedeemOutcome.notFound:
-        _fail('암호가 맞지 않아요');
+        _fail(const _EnterError(_EnterFault.wrongCode));
       case RedeemOutcome.expired:
-        _fail('암호가 만료됐어요. 새 암호를 받아주세요');
+        _fail(const _EnterError(_EnterFault.expired));
       case RedeemOutcome.tooManyAttempts:
-        _fail(say('잠시 후 다시 해주세요', 'E-LINK-429'));
+        _fail(_EnterError(_EnterFault.tooManyAttempts, result.failure));
       case RedeemOutcome.offline:
-        _fail(say('연결하지 못했어요. 인터넷을 확인해주세요', 'E-NET'));
+        _fail(_EnterError(_EnterFault.offline, result.failure));
       case RedeemOutcome.failed:
-        _fail(say('연결하지 못했어요. 다시 해주세요', 'E-LINK'));
+        _fail(_EnterError(_EnterFault.failed, result.failure));
     }
   }
 
   /// 실패 — 입력을 비우고 흔들어 알린다. 붉은 경고를 크게 쓰지 않는다 (§5-2).
-  void _fail(String message) {
+  void _fail(_EnterError error) {
     _controller.clear();
     setState(() {
-      _errorMessage = message;
+      _error = error;
       _failCount++;
     });
     // 다음 프레임에 연다 — 화면에 처음 들어올 때와 같은 방식이다. 같은 프레임에서
@@ -148,10 +173,6 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   /// 머리 글(제목 + 설명)이 한 줄이든 두 줄이든 칸이 이 자리에 선다.
   static const _headerRegionHeight = 220.0;
 
-  /// 코드 안내 — 시안 문구. 밑줄 친 부분이 보호자 휴대폰에서 코드를 찾는 길이다.
-  static const _guide = '코드는 보호자 휴대폰의\n설정 → 이룸이 휴대폰 연결하기에 있어요';
-  static const _guidePath = '설정 → 이룸이 휴대폰 연결하기';
-
   /// 뒤로가기. **어떤 길로 들어왔든 막다른 화면이 되지 않게 한다** (#542).
   ///
   /// 이 화면은 여러 곳에서 온다 — 역할 선택, 앱 시작, 세션 종료. 아래에 돌아갈 화면이 없으면 pop 이 아무 일도
@@ -171,12 +192,14 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   @override
   Widget build(BuildContext context) {
     final space = context.space;
+    final l10n = context.l10n;
+    final error = _error;
 
     return ElumScaffold(
       onBack: _sending ? null : _back,
       // 여섯 칸을 다 채워야 켜진다. 보내는 중에는 다시 누를 수 없다 — 1회용 암호다.
       bottomButton: ElumButton(
-        label: '시작하기',
+        label: l10n.linkEnterStartButton,
         onPressed: _typed.length == LinkCode.length && !_sending
             ? _submit
             : null,
@@ -187,11 +210,15 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
           SizedBox(
             height: _headerRegionHeight.h,
             child: ElumHeader(
-              title: '보호자에게서 받은 코드를\n입력해주세요',
-              // 틀린 암호 안내가 있으면 그것이 먼저다 — 지금 일어난 일이다
-              description: _errorMessage ?? (_linkLost ? '연결이 끊어졌어요' : _guide),
-              underlinedInDescription:
-                  _errorMessage == null && !_linkLost ? _guidePath : null,
+              title: l10n.linkEnterTitle,
+              // 틀린 암호 안내가 있으면 그것이 먼저다 — 지금 일어난 일이다.
+              // 안내(시안 문구)의 밑줄 친 부분이 보호자 휴대폰에서 코드를 찾는 길이다.
+              description:
+                  error?.message(l10n) ??
+                  (_linkLost ? l10n.linkEnterLinkLost : l10n.linkEnterGuide),
+              underlinedInDescription: error == null && !_linkLost
+                  ? l10n.linkEnterGuidePath
+                  : null,
             ),
           ),
           // 실제 입력칸은 투명이라 화면 낭독기에서 빠진다. 키보드를 여는 길은 이
@@ -199,7 +226,7 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
           Semantics(
             container: true,
             button: true,
-            label: '연결 암호 넣기',
+            label: l10n.linkEnterInputLabel,
             value: _typed,
             child: GestureDetector(
               onTap: _openKeyboard,
@@ -211,7 +238,7 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
                 child: ExcludeSemantics(
                   child: CodeBoxes.figma(
                     value: _typed,
-                    hasError: _errorMessage != null,
+                    hasError: error != null,
                   ),
                 ),
               ),

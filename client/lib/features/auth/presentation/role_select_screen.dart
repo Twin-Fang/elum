@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -72,7 +73,7 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
       // 약관에서 왔으므로 돌아갈 곳이 있다. 스택이 없으면 버튼을 그리지 않는다.
       onBack: context.canPop() ? context.popOrHome : null,
       bottomButton: ElumButton(
-        label: '다음',
+        label: context.l10n.commonNext,
         onPressed: _selected != null ? _submit : null,
       ),
       child: SingleChildScrollView(
@@ -82,10 +83,10 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
             ElumHeader(
               // 시안은 `이 기기는`이었다. `기기`만 `휴대폰`으로 바꾼다 —
               // 50대 보호자가 실제로 못 알아듣는 말이라서다 (이슈 #228 합의).
-              title: '이 휴대폰은 누가\n사용하나요?',
+              title: context.l10n.roleSelectTitle,
               // `모드`는 시안 그대로 둔다. 널리 쓰이는 말이고, 시안을 고치면
               // 디자이너와 화면이 어긋나 매번 대조해야 한다 (이슈 #228 합의).
-              description: '보호자모드와 이룸이모드가 나눠져 있어요',
+              description: context.l10n.roleSelectDescription,
               hasBackButton: context.canPop(),
             ),
             SizedBox(height: _headerToCards.h),

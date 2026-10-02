@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/current_l10n.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -40,8 +42,9 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   /// 틀린 횟수. [AppShake]의 trigger로 쓴다 — 값이 바뀔 때마다 흔들린다.
   int _mismatchCount = 0;
 
-  /// 실패 안내. null이면 원래 설명을 보여준다.
-  String? _errorMessage;
+  /// 암호가 틀렸는가. true면 설명 자리에 실패 안내를 보인다.
+  /// 문구가 아니라 상태만 들고 있어야 앱 언어가 바뀌어도 새 언어로 읽힌다.
+  bool _mismatch = false;
 
   /// 보호자 화면으로 갈 때 저장된 암호가 없는 이룸이 휴대폰이다 (#355).
   /// 이때는 입력창 대신 안내만 보인다.
@@ -67,8 +70,8 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       await showFailure(
         context,
         e,
-        title: '암호를 확인하지 못했어요',
-        fallback: '잠시 후 다시 해주세요',
+        title: context.l10n.modeSwitchReadFailedTitle,
+        fallback: context.l10n.modeSwitchReadFailedFallback,
         fallbackCode: 'E-PIN-READ',
       );
       return (ok: false, pin: null);
@@ -117,8 +120,8 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   void _onChanged() {
     setState(() {
       // 다시 누르기 시작하면 실패 안내를 거둔다 — 남겨두면 지금 틀린 것처럼 보인다.
-      if (_errorMessage != null && _controller.text.isNotEmpty) {
-        _errorMessage = null;
+      if (_mismatch && _controller.text.isNotEmpty) {
+        _mismatch = false;
       }
     });
     if (_controller.text.length == OnboardingProfile.pinLength) _verify();
@@ -155,13 +158,13 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
     // 온보딩 PIN 화면(pin_screen)과 같은 방식이다.
     //
     // 비우는 것은 다음 프레임에 한다. 지금은 _onChanged가 도는 중이라
-    // 여기서 clear하면 그 리스너가 곧바로 _errorMessage를 지워버린다.
+    // 여기서 clear하면 그 리스너가 곧바로 _mismatch를 꺼버린다.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _controller.clear();
       _focusNode.requestFocus();
       setState(() {
-        _errorMessage = '암호가 달라요. 다시 넣어주세요';
+        _mismatch = true;
         _mismatchCount++;
       });
     });
@@ -179,10 +182,13 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
     if (_blocked) {
       return ElumScaffold(
         onBack: context.popOrHome,
-        bottomButton: ElumButton(label: '돌아가기', onPressed: context.popOrHome),
-        child: const ElumHeader(
-          title: '보호자 휴대폰에서\n열어 주세요',
-          description: '이 휴대폰에서는 보호자 화면을 열 수 없어요',
+        bottomButton: ElumButton(
+          label: context.l10n.modeSwitchBlockedBack,
+          onPressed: context.popOrHome,
+        ),
+        child: ElumHeader(
+          title: context.l10n.modeSwitchBlockedTitle,
+          description: context.l10n.modeSwitchBlockedDescription,
         ),
       );
     }
@@ -195,9 +201,11 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
           // 실제로 `space.xl`(32)을 쓰다 제목이 20 내려가 있었다 (#297).
           ElumHeader(
             // 시안 `309:2837` 문구 그대로
-            title: '비밀암호를 입력하세요',
+            title: context.l10n.modeSwitchTitle,
             // 틀렸을 때는 실패 안내로 바뀐다. 색은 그대로 둔다 (#180).
-            description: _errorMessage ?? widget.target.description,
+            description: _mismatch
+                ? context.l10n.modeSwitchMismatch
+                : widget.target.description,
           ),
           SizedBox(height: _descriptionToDots.h),
           // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)
@@ -206,7 +214,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
           Semantics(
             container: true,
             button: true,
-            label: '암호 넣기',
+            label: context.l10n.modeSwitchPinLabel,
             child: GestureDetector(
               onTap: _focusNode.requestFocus,
               behavior: HitTestBehavior.opaque,
@@ -235,13 +243,18 @@ enum ModeSwitchTarget {
   // 시안(`309:2837`)은 `암호를 입력하면 보호자 화면으로 전환돼요`다.
   // `입력하면`은 시안을 따르고, 끝은 **능동형**으로 둔다 — 피동형(`전환돼요`)은
   // 루트 CLAUDE.md 말투 규칙이 금지한다.
-  child('암호를 입력하면 이룸이 화면으로 바뀌어요', Routes.child),
-  guardian('암호를 입력하면 보호자 화면으로 바뀌어요', Routes.guardian);
+  child(Routes.child),
+  guardian(Routes.guardian);
 
-  const ModeSwitchTarget(this.description, this.route);
+  const ModeSwitchTarget(this.route);
 
-  final String description;
   final String route;
+
+  /// 암호 안내 문구. 읽을 때 푼다 — 값으로 들고 있으면 앱 언어가 바뀐 뒤에도 옛 언어가 남는다.
+  String get description => switch (this) {
+    ModeSwitchTarget.child => appL10n.modeSwitchToChild,
+    ModeSwitchTarget.guardian => appL10n.modeSwitchToGuardian,
+  };
 
   /// 쿼리 파라미터에서 복원한다. 모르는 값이면 아이 화면으로 본다.
   static ModeSwitchTarget fromName(String? name) {

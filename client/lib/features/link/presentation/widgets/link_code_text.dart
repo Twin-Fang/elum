@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 
@@ -50,12 +51,12 @@ class LinkCodeText extends StatelessWidget {
 
 /// `코드 다시 만들기` 칩 (Figma 732:5718 — padding 10/20, r20).
 class LinkRetryChip extends StatelessWidget {
-  const LinkRetryChip({super.key, required this.onTap, this.label = '코드 다시 만들기'});
+  const LinkRetryChip({super.key, required this.onTap, this.label});
 
   final VoidCallback? onTap;
 
-  /// 칩 글자. 연결 암호 화면은 `코드 다시 만들기`(시안 그대로)다.
-  final String label;
+  /// 칩 글자. 비우면 `코드 다시 만들기`(시안 그대로)다.
+  final String? label;
 
   static const _padV = 10.0;
   static const _padH = 20.0;
@@ -74,7 +75,7 @@ class LinkRetryChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(_radius.r),
         ),
         child: Text(
-          label,
+          label ?? context.l10n.linkRetryChipLabel,
           style: context.typo.linkRetryChip.copyWith(color: colors.textPrimary),
         ),
       ),

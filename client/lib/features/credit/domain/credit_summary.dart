@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/current_l10n.dart';
+import '../../../core/l10n/date_labels.dart';
 import '../../../core/network/server_error_code.dart';
 
 /// 진행 중인 생성 작업 한 건 — `inProgress[]`.
@@ -78,10 +80,15 @@ class CreditSummary {
       periodStart: DateTime.tryParse(json['periodStart']?.toString() ?? ''),
       // 시간대가 있는 값을 먼저 쓰고 기기 시간대로 바꾼다 (#421 ③). 옛 서버는 시간대 없는
       // 값만 준다 — 그때는 예전처럼 읽는다(한국 기기에서는 맞고 해외에서만 어긋난다).
-      nextResetAt: DateTime.tryParse(json['nextResetAtOffset']?.toString() ?? '')
-              ?.toLocal() ??
+      nextResetAt:
+          DateTime.tryParse(
+            json['nextResetAtOffset']?.toString() ?? '',
+          )?.toLocal() ??
           _requireDate(json, 'nextResetAt'),
-      routineTextCost: _optionalInt(costs is Map ? costs['routineText'] : null, 1),
+      routineTextCost: _optionalInt(
+        costs is Map ? costs['routineText'] : null,
+        1,
+      ),
       cardImageCost: _optionalInt(costs is Map ? costs['cardImage'] : null, 1),
       maxCardsPerRoutine: _optionalInt(json['maxCardsPerRoutine'], 10),
       inProgress: switch (json['inProgress']) {
@@ -91,7 +98,9 @@ class CreditSummary {
               CreditJob(
                 jobId: item['jobId']?.toString() ?? '',
                 kind: item['kind'].toString(),
-                startedAt: DateTime.tryParse(item['startedAt']?.toString() ?? ''),
+                startedAt: DateTime.tryParse(
+                  item['startedAt']?.toString() ?? '',
+                ),
               ),
         ],
         _ => const [],
@@ -120,10 +129,8 @@ class CreditSummary {
   /// `9월 28일(월) 0시` — 초기화 줄과 홈 막기 팝업이 함께 쓴다.
   String get resetLabel {
     final at = nextResetAt;
-    if (at == null) return '다음 주 월요일 0시';
-    const days = ['월', '화', '수', '목', '금', '토', '일'];
-    final minute = at.minute == 0 ? '' : ' ${at.minute}분';
-    return '${at.month}월 ${at.day}일(${days[at.weekday - 1]}) ${at.hour}시$minute';
+    if (at == null) return appL10n.creditResetFallback;
+    return appL10n.resetAt(at);
   }
 
   static int _requireInt(Map<String, dynamic> json, String key) {

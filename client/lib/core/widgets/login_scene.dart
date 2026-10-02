@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../l10n/l10n_context.dart';
 import '../assets/app_assets.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
@@ -357,7 +358,7 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
                   child: AppFadeSlideIn(
                     child: _fitLine(
                       context,
-                      '오늘의 하루,',
+                      context.l10n.loginSceneEyebrow,
                       context.typo.subtitle.copyWith(
                         color: colors.textSecondary,
                         fontSize: 20.sp,
@@ -372,7 +373,7 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
                   child: AppFadeSlideIn(
                     child: _fitLine(
                       context,
-                      '차근차근 함께해요',
+                      context.l10n.loginSceneTitle,
                       context.typo.headline.copyWith(
                         color: colors.splashTitle,
                         fontSize: 26.sp,

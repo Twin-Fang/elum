@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../guardian/presentation/widgets/aurora_background.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,7 +61,7 @@ class _CardCompletionScreenState extends ConsumerState<CardCompletionScreen> {
                 ),
                 SizedBox(height: _CompletionLayout.sparklesToTitle),
                 Text(
-                  '내용 정리가 모두\n완료됐어요',
+                  context.l10n.onboardingCompletionTitle,
                   textAlign: TextAlign.center,
                   style: context.typo.promptTitle.copyWith(
                     color: colors.textPrimary,
@@ -68,7 +69,7 @@ class _CardCompletionScreenState extends ConsumerState<CardCompletionScreen> {
                 ),
                 SizedBox(height: _CompletionLayout.titleToProgress),
                 Text(
-                  '100% 완료!',
+                  context.l10n.onboardingCompletionProgress,
                   textAlign: TextAlign.center,
                   style: context.typo.promptBody.copyWith(
                     color: colors.promptMuted,

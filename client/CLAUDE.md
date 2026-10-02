@@ -132,6 +132,9 @@ curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines
 - **화면 위젯은 `ConsumerWidget` 우선.** `StatefulWidget`은 애니메이션 컨트롤러가 필요할 때만.
 - **`build()` 안에서 비즈니스 로직 금지.** provider 또는 notifier로 뺀다.
 - 한 파일 300줄을 넘기면 위젯을 분리한다.
+- **사용자에게 보이는 문구는 코드에 쓰지 않는다.** `lib/l10n/app_ko.arb` 에만 키를 더하고(다른 언어는 번역 단계가 채운다) 위젯은 `context.l10n.키`, `context` 없는 층은 `appL10n.키` 를 쓴다. `cd client && flutter gen-l10n` 후 생성 파일을 함께 커밋하고, `dart run tool/check_hangul_literals.dart lib` 가 0줄이어야 한다.
+- **조사·개수·날짜를 코드로 조립하지 않는다.** 조사는 ARB `batchim` select + `batchimOf`, 개수는 ICU `plural`, 날짜는 `core/l10n/date_labels.dart`.
+- **카드·일과 글(AI가 만든 글, 일과 제목·보상)을 그리는 위젯은 `ContentLocale` 로 일과 언어를 입힌다.** 버튼·메뉴는 휴대폰 언어(`context.l10n`)로 둔다.
 
 ### 아동 모드 전용 규칙
 

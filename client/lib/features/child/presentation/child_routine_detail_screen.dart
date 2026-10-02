@@ -5,12 +5,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/content_locale.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
@@ -123,7 +124,10 @@ class _ChildRoutineDetailScreenState
 
     // 제목만 읽으면 무엇을 해야 하는지가 빠지고, 설명만 읽으면 화면의
     // 큰 제목과 어긋난다. 둘을 이어 붙인다.
-    final ok = await speech.speak('${card.displayTitle}. ${card.description}');
+    final ok = await speech.speak(
+      '${card.displayTitle}. ${card.description}',
+      language: _routine.language,
+    );
 
     if (!mounted) return;
     setState(() => _speakingId = null);
@@ -136,8 +140,8 @@ class _ChildRoutineDetailScreenState
     showFailure(
       context,
       null,
-      title: '소리를 재생하지 못했어요',
-      fallback: '휴대폰 소리를 켜고 다시 눌러주세요',
+      title: context.l10n.childDetailSoundFailedTitle,
+      fallback: context.l10n.childDetailSoundFailedFallback,
       fallbackCode: 'E-TTS',
     );
   }
@@ -324,7 +328,11 @@ class _ChildRoutineDetailScreenState
         child: Column(
           children: [
             SizedBox(height: ChildRoutineDetailScreen._backTop.h),
-            _TopBar(onBack: context.popOrHome, title: routine.displayTitle),
+            _TopBar(
+              onBack: context.popOrHome,
+              title: routine.displayTitle,
+              language: routine.language,
+            ),
             SizedBox(height: ChildRoutineDetailScreen._topBarToReward.h),
             // 🔴 하는 동안 보상이 계속 보인다 (이슈 #239 · 2026-09-13 자문 핵심).
             // 완료 후에만 뜨는 별 연출과 다른 기능이다 — 끝까지 가는 힘이 여기서 나온다.
@@ -354,6 +362,7 @@ class _ChildRoutineDetailScreenState
                   controller: _controller,
                   cards: cards,
                   routineId: routine.id,
+                  language: routine.language,
                   currentIndex: cards.isEmpty
                       ? 0
                       : _currentIndex.clamp(0, cards.length - 1),
@@ -396,12 +405,19 @@ class _ChildRoutineDetailScreenState
 /// 뒤로가기는 다른 화면과 같은 40×40 상자(x16 · y67)고, 제목 18/800 은 그 상자와
 /// 세로 가운데(y78~96)에 놓인다. 캐릭터 배지는 없다.
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onBack, required this.title});
+  const _TopBar({
+    required this.onBack,
+    required this.title,
+    this.language = 'ko',
+  });
 
   final VoidCallback onBack;
 
   /// 일과 제목 (`Routine.displayTitle`). 비어도 대체어가 온다.
   final String title;
+
+  /// 제목(일과 글)의 언어. 뒤로가기 이름은 화면 문구라 따르지 않는다.
+  final String language;
 
   /// 뒤로가기 상자 한 변 — 누를 자리와 그림 자리가 한 값이다 (ElumScaffold 와 같다).
   static const _box = 40.0;
@@ -417,7 +433,7 @@ class _TopBar extends StatelessWidget {
           AppPressable(
             onTap: onBack,
             scaleDown: AppPressable.scaleIcon,
-            semanticLabel: ElumScaffold.backLabel,
+            semanticLabel: context.l10n.commonBack,
             child: SizedBox(
               width: _box.w,
               height: _box.w,
@@ -432,13 +448,16 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.typo.childDetailTitle.copyWith(
-                color: context.colors.textPrimary,
+            child: ContentLocale(
+              language: language,
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.typo.childDetailTitle.copyWith(
+                  color: context.colors.textPrimary,
+                ),
               ),
             ),
           ),
@@ -499,7 +518,7 @@ class _CheckButton extends StatelessWidget {
           container: true,
           button: true,
           checked: isChecked,
-          label: '다 했어요',
+          label: context.l10n.childDetailCheckLabel,
           child: AppPressable(
             key: ChildRoutineDetailScreen.checkButtonKey,
             onTap: onTap,

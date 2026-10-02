@@ -10,7 +10,11 @@ import '../../features/onboarding/application/onboarding_notifier.dart' show loc
 import '../../features/profile/application/profile_session.dart';
 import '../app_status/app_status_recheck.dart';
 import '../config/app_config.dart';
+import '../dev/dev_locale_override.dart';
+import '../l10n/effective_locale.dart';
+import '../l10n/region_code.dart';
 import '../logger/app_logger.dart';
+import 'accept_language_interceptor.dart';
 import 'auth_interceptor.dart';
 import 'failure_interceptor.dart';
 import 'profile_header_interceptor.dart';
@@ -67,6 +71,18 @@ abstract final class DioClient {
 /// 부르면 인터셉터 없는 인스턴스가 생겨 401이 그대로 터진다.
 final dioProvider = Provider<Dio>((ref) {
   final dio = DioClient.create();
+
+  // 앱 언어를 모든 요청에 싣는다 (다국어 #525). 요청마다 판정해 OS 언어가 바뀌어도 따라간다.
+  // 맨 앞에 둔다 — 토큰 갱신 뒤 요청을 되살릴 때도 같은 헤더로 나간다.
+  dio.interceptors.add(
+    AcceptLanguageInterceptor(
+      locale: () => effectiveAppLocale(
+        devOverride: ref.read(devLocaleOverrideProvider),
+      ),
+      // 지역은 언어 강제와 무관하게 시스템 값을 싣는다 (region_code.dart)
+      region: systemRegionCode,
+    ),
+  );
 
   // 보호자가 고른 이룸이를 모든 요청에 싣는다 (다중 보호자 #362). 인증보다 먼저 붙인다 —
   // 토큰 갱신 뒤 요청을 되살릴 때도 같은 헤더로 나간다.

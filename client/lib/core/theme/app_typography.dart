@@ -95,6 +95,22 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// Figma가 이 화면군만 Pretendard로 그렸다 — 섞어 쓰는 게 아니라 화면군이 다르다.
   static const promptFontFamily = 'Pretendard';
 
+  /// 언어별 대체 글꼴 — 주 글꼴에 없는 글자가 이 순서로 떨어진다.
+  ///
+  /// 실측(fontTools 로 cmap 조회): `TmoneyRoundWind` 에는 스페인어 악센트 문자(á é í ó ú ñ ü)가
+  /// 없고, `Pretendard` 에는 있다. 둘 다 한자가 없다(가나는 있다).
+  /// - `ko`: 비운다. 기존 화면이 한 픽셀도 달라지면 안 된다.
+  /// - `en`·`es`: Pretendard.
+  /// - `ja`·`zh`: Pretendard(가나) 다음에 시스템 글꼴. 한자 자형이 일본어/중국어로 갈려서
+  ///   언어마다 이름이 다르다. 이름이 기기에 없으면 Flutter 가 건너뛰고 엔진 기본 대체로 간다.
+  static List<String> fontFamilyFallbackFor(Locale locale) =>
+      switch (locale.languageCode) {
+        'ko' => const [],
+        'ja' => const ['Pretendard', 'Hiragino Sans', 'Noto Sans CJK JP'],
+        'zh' => const ['Pretendard', 'PingFang SC', 'Noto Sans CJK SC'],
+        _ => const ['Pretendard'],
+      };
+
   /// 화면 제목 (2줄)
   final TextStyle title;
 

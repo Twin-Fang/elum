@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/l10n/batchim.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -11,7 +13,6 @@ import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
-import '../../../shared/utils/korean_particle.dart';
 import '../../guardian/data/routine_repository.dart' show memberProvider;
 import '../../link/domain/link_status.dart';
 import '../../link/presentation/widgets/link_code_text.dart';
@@ -69,8 +70,9 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   /// 연결된 이룸이가 없어 부를 곳이 없다 (E29). 서버 실패가 아니라 앱이 아는 상태다.
   bool _noProfile = false;
 
-  /// 코드를 만들 이룸이. 서버 조회가 끝나야 알 수 있어 [_issue] 가 정한다.
-  String _name = '이룸이';
+  /// 코드를 만들 이룸이 호칭. 서버 조회가 끝나야 알 수 있어 [_issue] 가 정한다.
+  /// 비어 있으면 그릴 때 공용 호칭(`이룸이`)으로 푼다 — 문구를 상태에 굳히지 않는다.
+  String? _name;
 
   Timer? _ticker;
 
@@ -120,7 +122,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
     final local = ref.read(onboardingProvider).childNickname.trim();
     _name = active.nickname?.trim().isNotEmpty == true
         ? active.displayName
-        : (local.isEmpty ? '이룸이' : local);
+        : (local.isEmpty ? null : local);
 
     final attempt = await ref.read(profileRepositoryProvider).issueInvite(active.id);
     if (!mounted) return;
@@ -164,8 +166,8 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       await showFailure(
         context,
         e,
-        title: '링크를 보내지 못했어요',
-        fallback: '초대 코드를 직접 알려주세요',
+        title: context.l10n.inviteCodeShareFailTitle,
+        fallback: context.l10n.inviteCodeShareFailFallback,
         fallbackCode: 'E-INV-SHARE',
       );
     }
@@ -173,7 +175,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
 
   /// 남은 시간 `MM:SS` — 올림이 아니라 **내림**이다. 실제보다 길게 말하면 믿고 기다리다 만료된다.
   String _remainingLabel(IssuedLinkCode issued) {
-    if (issued.isExpired) return '초대 코드가 만료됐어요';
+    if (issued.isExpired) return context.l10n.inviteCodeExpired;
     final total = issued.remaining().inSeconds;
     final mm = (total ~/ 60).toString().padLeft(2, '0');
     final ss = (total % 60).toString().padLeft(2, '0');
@@ -195,15 +197,16 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
     final colors = context.colors;
     final issued = _issued;
     final failure = _failure;
+    final name = _name ?? context.l10n.commonElumiName;
 
     return ElumScaffold(
       onBack: context.popOrHome,
-      title: '초대 코드',
+      title: context.l10n.inviteCodeTitle,
       backTop: _settingsBackTop,
       // 코드가 있을 때만 — 만들지 못했거나 이룸이가 없으면 보낼 것이 없다 (임시 시안)
       bottomButton: issued != null && failure == null && !_loading && !_noProfile
           ? ElumButton(
-              label: '링크로 보내기',
+              label: context.l10n.inviteCodeShareButton,
               onPressed: issued.isExpired ? null : _share,
             )
           : null,
@@ -213,23 +216,23 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
           children: [
             ElumHeader(
               titleY: _settingsTitleY,
-              title: '함께할 보호자에게\n코드를 알려주세요',
-              description: '받은 분이 $_name${_name.objectParticle} 함께 돌봐요',
+              title: context.l10n.inviteCodeHeaderTitle,
+              description: context.l10n.inviteCodeAsk(name, batchimOf(name)),
             ),
             SizedBox(height: _descriptionToCode.h),
             if (_loading)
               const Center(child: CircularProgressIndicator())
             else if (_noProfile)
               // 이룸이가 없으면 다시 해도 같다 — 버튼 없이 이유와 코드만 보여 준다.
-              const ElumErrorView(
-                message: '함께 돌볼 이룸이가 없어요',
-                description: '이룸이를 먼저 등록해주세요',
+              ElumErrorView(
+                message: context.l10n.inviteCodeNoProfileMessage,
+                description: context.l10n.inviteCodeNoProfileDescription,
                 errorCode: 'E-INV-NONE',
               )
             else if (failure != null)
               ElumErrorView.failure(
                 failure,
-                fallback: '초대 코드를 만들지 못했어요',
+                fallback: context.l10n.inviteCodeIssueFailedFallback,
                 fallbackCode: 'E-INV-NEW',
                 onRetry: _retryable ? _issue : null,
               )
@@ -249,21 +252,21 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
               SizedBox(height: _timerToRetry.h),
               Center(
                 child: LinkRetryChip(
-                  label: '초대 코드 다시 만들기',
+                  label: context.l10n.inviteCodeRetryChip,
                   onTap: _loading ? null : _issue,
                 ),
               ),
               SizedBox(height: _timerToRetry.h),
               // 되돌릴 수 없는 일(앞 코드가 쓸 수 없게 된다)을 먼저 말한다. 한 줄이다.
               Text(
-                '다시 만들면 이전 코드는 쓸 수 없어요',
+                context.l10n.inviteCodeRetryNote,
                 textAlign: TextAlign.center,
                 style: context.typo.body.copyWith(color: colors.textSecondary),
               ),
               SizedBox(height: _timerToRetry.h),
               // 초대 코드는 보호자용이다. 이룸이가 쓰는 휴대폰은 따로 붙인다 (#506).
               Text(
-                '이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요\n설정의 이룸이 휴대폰에서 연결해요',
+                context.l10n.inviteCodeElumiPhoneNote,
                 textAlign: TextAlign.center,
                 style: context.typo.bodySmall.copyWith(color: colors.textSecondary),
               ),

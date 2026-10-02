@@ -326,7 +326,7 @@ void main() {
 /// 소리를 내지 않는 fake — 카드확인 화면이 소리 서비스를 잡아 간다.
 class _SilentSpeech implements SpeechService {
   @override
-  Future<bool> speak(String text) async => true;
+  Future<bool> speak(String text, {String language = 'ko'}) async => true;
 
   @override
   Future<void> stop() async {}

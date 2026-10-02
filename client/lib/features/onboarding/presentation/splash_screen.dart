@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_destination.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -125,8 +126,6 @@ class _SplashCanvas extends StatelessWidget {
   /// 이 화면에는 **글자가 하나도 없다.** 이름을 안 주면 화면 낭독기에 아무것도
   /// 읽히지 않아 "빈 화면"으로 들린다. 실기기 E2E 도 이 이름으로 이 화면이
   /// 떴는지 안다 — 없으면 앱이 뜨기 전에 셔터가 내려가 홈 화면이 찍힌다 (#338).
-  static const _logoLabel = '이룸';
-
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
@@ -139,7 +138,7 @@ class _SplashCanvas extends StatelessWidget {
             child: SvgPicture.asset(
               AppAssets.logo,
               width: _logoWidth.w,
-              semanticsLabel: _logoLabel,
+              semanticsLabel: context.l10n.onboardingSplashLogoLabel,
             ),
           ),
         ],

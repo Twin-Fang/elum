@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_button.dart';
@@ -215,7 +216,9 @@ class _CardEditSheetState extends State<CardEditSheet> {
               left: 24.w,
               top: CardEditSheet._titleY.h,
               child: Text(
-                _isAdd ? '새로운 카드 추가' : '카드 수정',
+                _isAdd
+                    ? context.l10n.cardEditAddTitle
+                    : context.l10n.cardEditTitle,
                 style: typo.sheetHeading.copyWith(color: colors.textPrimary),
               ),
             ),
@@ -239,7 +242,7 @@ class _CardEditSheetState extends State<CardEditSheet> {
               left: 24.w,
               top: (CardEditSheet._titleLabelY + off).h,
               child: Text(
-                '제목',
+                context.l10n.cardEditFieldTitle,
                 style: typo.sheetFieldLabel.copyWith(
                   color: colors.sheetFieldLabelText,
                 ),
@@ -251,7 +254,7 @@ class _CardEditSheetState extends State<CardEditSheet> {
               top: (CardEditSheet._titleFieldY + off).h,
               child: _SheetField(
                 controller: _titleController,
-                hintText: '카드 제목을 적어주세요',
+                hintText: context.l10n.cardEditTitleHint,
                 maxLines: 1,
                 onChanged: (_) => setState(() {}),
               ),
@@ -260,7 +263,7 @@ class _CardEditSheetState extends State<CardEditSheet> {
               left: 24.w,
               top: (CardEditSheet._descLabelY + off).h,
               child: Text(
-                '설명',
+                context.l10n.cardEditFieldDescription,
                 style: typo.sheetFieldLabel.copyWith(
                   color: colors.sheetFieldLabelText,
                 ),
@@ -272,7 +275,7 @@ class _CardEditSheetState extends State<CardEditSheet> {
               top: (CardEditSheet._descFieldY + off).h,
               child: _SheetField(
                 controller: _descriptionController,
-                hintText: '카드 설명을 적어주세요',
+                hintText: context.l10n.cardEditDescriptionHint,
                 // 시안 칸은 한 줄 높이(68)다. 긴 설명은 두 줄까지 칸 안에서 보인다
                 maxLines: 2,
                 onChanged: (_) => setState(() {}),
@@ -284,7 +287,9 @@ class _CardEditSheetState extends State<CardEditSheet> {
               right: space.buttonMarginH.w,
               bottom: 56.h,
               child: ElumButton(
-                label: _isAdd ? '추가하기' : '완료',
+                label: _isAdd
+                    ? context.l10n.cardEditAddAction
+                    : context.l10n.cardEditDoneAction,
                 onPressed: _canSave && !_busy ? _save : null,
               ),
             ),

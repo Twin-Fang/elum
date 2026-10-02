@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../l10n/l10n_context.dart';
 import '../config/app_config.dart';
 import '../logger/app_logger.dart';
 import '../theme/theme_context_ext.dart';
@@ -55,6 +56,8 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
   /// 스토어를 연다. 못 열면 에러 코드와 함께 알리고 이 화면에 남는다 —
   /// 사용자는 다시 누르거나 스토어를 직접 찾아갈 수 있다.
   Future<void> _openStore(BuildContext noticeContext, Uri url) async {
+    // await 뒤에서 context 를 쓰지 않도록 문구를 먼저 잡는다.
+    final l10n = noticeContext.l10n;
     Object? error;
     var opened = false;
     try {
@@ -67,8 +70,8 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
     await showFailure(
       noticeContext,
       error,
-      title: '스토어를 열지 못했어요',
-      fallback: '스토어에서 이룸을 찾아 업데이트해주세요',
+      title: l10n.appStatusStoreOpenFailedTitle,
+      fallback: l10n.appStatusStoreOpenFailedFallback,
       fallbackCode: storeFailureCode,
     );
   }
@@ -86,11 +89,11 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
         if (status.maintenance) {
           return _FullNotice(
             emoji: '🛠️',
-            title: '잠시 쉬고 있어요',
+            title: context.l10n.appStatusMaintenanceTitle,
             body: status.maintenanceMessage.isEmpty
-                ? '조금 뒤에 다시 열어주세요'
+                ? context.l10n.appStatusMaintenanceBody
                 : status.maintenanceMessage,
-            actionLabel: '다시 확인하기',
+            actionLabel: context.l10n.appStatusRecheck,
             onAction: (_) => ref.invalidate(appStatusProvider),
           );
         }
@@ -103,13 +106,13 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
           );
           return _FullNotice(
             emoji: '✨',
-            title: '새 이룸이 나왔어요',
-            body:
-                '앱을 새로 받아야 이어서 쓸 수 있어요.\n'
-                '스토어에서 이룸을 업데이트해주세요',
+            title: context.l10n.appStatusUpdateTitle,
+            body: context.l10n.appStatusUpdateBody,
             // 누를 것은 하나만 둔다. 스토어에서 돌아오면 앱이 앞으로 올라오며
             // 알아서 다시 묻기 때문에 `업데이트했어요` 가 따로 필요 없다.
-            actionLabel: storeUrl == null ? '업데이트했어요' : '업데이트하러 가기',
+            actionLabel: storeUrl == null
+                ? context.l10n.appStatusUpdated
+                : context.l10n.appStatusGoUpdate,
             onAction: storeUrl == null
                 ? (_) => ref.invalidate(appStatusProvider)
                 : (noticeContext) => _openStore(noticeContext, storeUrl),

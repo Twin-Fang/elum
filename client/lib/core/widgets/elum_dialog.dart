@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../assets/app_assets.dart';
+import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
@@ -96,7 +97,7 @@ Future<T?> showElumDialog<T>({
     barrierDismissible: barrierDismissible,
     // 배경 막을 읽어 줄 이름 (#393 S7). 앱에 한국어 지역화가 없어 기본값이 영어
     // `Dismiss` 로 읽혔다 — 공지 팝업은 #385 C 에서 `공지 닫기` 로 먼저 고쳤다.
-    barrierLabel: elumDialogBarrierLabel,
+    barrierLabel: context.l10n.commonPopupClose,
     // 시안의 dim — 검정 50%.
     barrierColor: Colors.black.withValues(alpha: 0.5),
     // **화면 전체 가운데에 둔다.** 기본값(true)은 안전영역 안에서 가운데를
@@ -113,9 +114,6 @@ Future<T?> showElumDialog<T>({
     ),
   );
 }
-
-/// 공통 팝업 배경 막의 이름 (#393 S7). 막을 눌러 닫을 수 있을 때만 읽힌다.
-const elumDialogBarrierLabel = '팝업 닫기';
 
 /// 팝업 본체. [showElumDialog]가 쓰지만, 골든·테스트에서 직접 세울 수 있게 공개한다.
 class ElumDialogCard<T> extends StatelessWidget {
@@ -159,7 +157,9 @@ class ElumDialogCard<T> extends StatelessWidget {
     final colors = context.colors;
     // 버튼을 넘기지 않은 쪽이 더 흔하다. 확인 하나가 기본값이다.
     final resolved = actions.isEmpty
-        ? <ElumDialogAction<T>>[const ElumDialogAction(label: '확인')]
+        ? <ElumDialogAction<T>>[
+            ElumDialogAction(label: context.l10n.commonConfirm),
+          ]
         : actions;
 
     return Dialog(
@@ -191,7 +191,9 @@ class ElumDialogCard<T> extends StatelessWidget {
             if (message != null) ...[
               SizedBox(height: context.space.sm),
               Text(
-                keepWordsInMessage ? keepWords(message!) : message!,
+                keepWordsInMessage
+                    ? keepWords(message!, locale: context.appLocale)
+                    : message!,
                 // 끊지 말라는 표시가 낭독기에 섞이지 않게 원문을 준다
                 semanticsLabel: keepWordsInMessage ? message : null,
                 textAlign: TextAlign.center,

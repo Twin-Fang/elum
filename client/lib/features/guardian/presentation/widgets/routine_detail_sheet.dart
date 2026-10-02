@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/content_locale.dart';
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
@@ -131,8 +133,8 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
     showFailure(
       context,
       failure,
-      title: '순서를 저장하지 못했어요',
-      fallback: '잠시 후 다시 시도해주세요',
+      title: context.l10n.routineDetailReorderFailedTitle,
+      fallback: context.l10n.routineDetailReorderFailedFallback,
       fallbackCode: 'E-STEP-ORDER',
     );
   }
@@ -171,6 +173,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
               // --- 고정: 핸들바 + 제목 (덤프의 `스크롤 시 fix 영역`) ---
               _Header(
                 title: widget.routine.title,
+                language: widget.routine.language,
                 // 남이 만든 일과면 누가 만들었는지 먼저 말한다 — 왜 고칠 수 없는지의 답이다.
                 caption: widget.isPast
                     ? null
@@ -241,6 +244,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                     child: _StepCard(
                                       step: step,
                                       index: index,
+                                      language: widget.routine.language,
                                       dragging: _draggingIndex == index,
                                       // 손잡이를 아예 그리지 않는다 (시안 980:4777)
                                       reorderable: _canEdit,
@@ -250,6 +254,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                         cards: _steps,
                                         initialIndex: index,
                                         routineId: widget.routine.id,
+                                        language: widget.routine.language,
                                       ),
                                     ),
                                   ),
@@ -307,10 +312,10 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                       ),
                 child: Text(
                   widget.isPast
-                      ? '일과 다시하기'
+                      ? context.l10n.routineDetailRerun
                       : _finishedToday
-                      ? '다 끝낸 일과예요'
-                      : '편집하기',
+                      ? context.l10n.routineDetailFinishedToday
+                      : context.l10n.routineDetailEdit,
                   style: typo.sheetActionLabel.copyWith(
                     color: _finishedToday
                         ? colors.buttonDisabledText
@@ -344,9 +349,12 @@ class _StepItemKey extends GlobalObjectKey {
 
 /// 스크롤해도 남는 머리 부분.
 class _Header extends StatelessWidget {
-  const _Header({required this.title, this.caption});
+  const _Header({required this.title, required this.language, this.caption});
 
   final String title;
+
+  /// 제목(일과 글)의 언어. 아래 caption 은 화면 문구라 따르지 않는다.
+  final String language;
 
   /// 제목 아래 한 줄 (`엄마가 만든 일과예요`). 없으면 자리도 없다 — 내 일과의 시트는 그대로다.
   final String? caption;
@@ -381,10 +389,13 @@ class _Header extends StatelessWidget {
           // 위 여백에서 줄인 4 를 여기서 되돌린다 — 손잡이만 올라가고
           // 제목·목록은 시안 자리에 그대로 있어야 한다 (#297).
           SizedBox(height: 24.h),
-          Text(
-            title,
-            style: context.typo.sheetTitle.copyWith(
-              color: colors.sheetTitleText,
+          ContentLocale(
+            language: language,
+            child: Text(
+              title,
+              style: context.typo.sheetTitle.copyWith(
+                color: colors.sheetTitleText,
+              ),
             ),
           ),
           if (caption != null) ...[
@@ -451,6 +462,7 @@ class _StepCard extends StatefulWidget {
   const _StepCard({
     required this.step,
     required this.index,
+    this.language = 'ko',
     this.dragging = false,
     this.reorderable = true,
     this.onOpen,
@@ -458,6 +470,9 @@ class _StepCard extends StatefulWidget {
 
   final ActionCard step;
   final int index;
+
+  /// 카드 제목·설명의 언어(일과 언어).
+  final String language;
 
   /// 글 자리를 눌렀을 때 — 카드를 크게 연다 (#495). 손잡이와 체크는 따로 받는다.
   final VoidCallback? onOpen;
@@ -565,38 +580,41 @@ class _StepCardState extends State<_StepCard>
                           onTap: widget.onOpen,
                           child: Semantics(
                             button: widget.onOpen != null,
-                            hint: '눌러서 카드 크게 보기',
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.step.displayTitle,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  // 시안(963:4236)은 순검정이다. 앱 본문색(#242634)이
-                                  // 아니다 — 시트 제목과 같은 토큰을 쓴다.
-                                  style: typo.sheetStepTitle.copyWith(
-                                    color: colors.sheetTitleText,
-                                  ),
-                                ),
-                                if (widget.step.description.isNotEmpty) ...[
-                                  // 시안 제목 y15(16 높이) · 설명 y39 → 사이 8
-                                  SizedBox(height: 8.h),
+                            hint: context.l10n.routineDetailOpenHint,
+                            child: ContentLocale(
+                              language: widget.language,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    widget.step.description,
+                                    widget.step.displayTitle,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    // 시안의 `sub_color`(#74757D). 일과 타일 설명과 같은
-                                    // 값이라 토큰을 함께 쓴다 — 디자이너가 한 변수로
-                                    // 두었으므로 한쪽만 바뀌어서는 안 된다.
-                                    // `textSecondary`(#898B98)는 다른 자리의 색이다.
-                                    style: typo.sheetStepBody.copyWith(
-                                      color: colors.routineTileLabel,
+                                    // 시안(963:4236)은 순검정이다. 앱 본문색(#242634)이
+                                    // 아니다 — 시트 제목과 같은 토큰을 쓴다.
+                                    style: typo.sheetStepTitle.copyWith(
+                                      color: colors.sheetTitleText,
                                     ),
                                   ),
+                                  if (widget.step.description.isNotEmpty) ...[
+                                    // 시안 제목 y15(16 높이) · 설명 y39 → 사이 8
+                                    SizedBox(height: 8.h),
+                                    Text(
+                                      widget.step.description,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      // 시안의 `sub_color`(#74757D). 일과 타일 설명과 같은
+                                      // 값이라 토큰을 함께 쓴다 — 디자이너가 한 변수로
+                                      // 두었으므로 한쪽만 바뀌어서는 안 된다.
+                                      // `textSecondary`(#898B98)는 다른 자리의 색이다.
+                                      style: typo.sheetStepBody.copyWith(
+                                        color: colors.routineTileLabel,
+                                      ),
+                                    ),
+                                  ],
                                 ],
-                              ],
+                              ),
                             ),
                           ),
                         ),
@@ -714,6 +732,15 @@ class _RewardRow extends StatelessWidget {
     // 빈 칸이 아니라 "없어요"라고 말해 준다.
     final hasReward = routine.hasReward;
 
+    final rewardText = Text(
+      hasReward ? routine.rewardText.trim() : context.l10n.routineDetailNoReward,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: typo.sheetStepTitle.copyWith(
+        color: hasReward ? colors.textPrimary : colors.rewardEmptyLabel,
+      ),
+    );
+
     // **위 여백을 주지 않는다.** 단계 줄마다 아래 8 이 붙어 있어 여기서 또 주면
     // 마지막 단계와 보상 사이만 16 이 된다 (시안은 8).
     return Padding(
@@ -754,16 +781,10 @@ class _RewardRow extends StatelessWidget {
                 color: colors.editChipBg,
                 borderRadius: BorderRadius.circular(20.r),
               ),
-              child: Text(
-                hasReward ? routine.rewardText.trim() : '일과 완료 후 보상이 없어요',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: typo.sheetStepTitle.copyWith(
-                  color: hasReward
-                      ? colors.textPrimary
-                      : colors.rewardEmptyLabel,
-                ),
-              ),
+              // 보상 글은 일과 언어, 비었다는 안내는 화면 문구라 따로 둔다
+              child: hasReward
+                  ? ContentLocale(language: routine.language, child: rewardText)
+                  : rewardText,
             ),
           ),
         ],

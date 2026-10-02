@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/ads/ad_ids.dart';
 import '../../../../core/ads/ad_native_slot.dart';
 import '../../../../core/network/server_error_code.dart';
@@ -154,6 +155,8 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     int oldIndex,
     int newIndex,
   ) async {
+    // await 뒤에 쓸 문구를 미리 잡아 둔다
+    final l10n = context.l10n;
     // ReorderableListView는 "빼내기 전" 기준으로 목적지를 준다.
     final to = newIndex > oldIndex ? newIndex - 1 : newIndex;
     if (to == oldIndex) return;
@@ -172,8 +175,8 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
       showFailure(
         context,
         failure,
-        title: '순서를 저장하지 못했어요',
-        fallback: '잠시 후 다시 시도해주세요',
+        title: l10n.todayRoutineReorderFailedTitle,
+        fallback: l10n.todayRoutineReorderFailedFallback,
         fallbackCode: 'E-ORDER',
       );
       return;
@@ -190,11 +193,11 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
   /// 시작한 일과를 지우려 할 때의 안내. 실패가 아니라 정해진 규칙이라 확인 하나만 둔다.
   Future<void> _showStartedNotice() => showElumDialog<void>(
     context: context,
-    title: '이룸이가 시작한 일과예요',
-    message: '한 일이 기록으로 남도록 지울 수 없어요',
+    title: context.l10n.todayRoutineStartedTitle,
+    message: context.l10n.todayRoutineStartedMessage,
     icon: ElumDialogIcon.alert,
     code: 'E-DEL-STARTED',
-    actions: const [ElumDialogAction(label: '확인')],
+    actions: [ElumDialogAction(label: context.l10n.commonConfirm)],
   );
 
   /// 이룸이가 다 끝낸 일과인가 (#534). 같은 휴대폰의 기기 기록도 본다 — 서버 반영 전에도
@@ -204,6 +207,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
       routineProgress(routine, ref.read(childRoutineProvider)) >= 1;
 
   Future<void> _delete(Routine routine) async {
+    final l10n = context.l10n;
     // 시작한 일과는 서버가 지우지 않는다(수행 기록·별). 묻고 나서 실패 팝업을 띄우면
     // 보호자는 "삭제가 고장났다"고 여긴다 (#533). 누르기 전에 이유를 먼저 알린다.
     if (_hasStarted(routine)) {
@@ -214,15 +218,19 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
 
     final confirmed = await showElumDialog<bool>(
       context: context,
-      title: '일과를 삭제하실건가요?',
+      title: l10n.todayRoutineDeleteConfirmTitle,
       icon: ElumDialogIcon.trash,
-      actions: const [
+      actions: [
         ElumDialogAction(
-          label: '취소',
+          label: l10n.commonCancel,
           value: false,
           tone: ElumDialogTone.neutral,
         ),
-        ElumDialogAction(label: '삭제', value: true, tone: ElumDialogTone.danger),
+        ElumDialogAction(
+          label: l10n.todayRoutineDeleteAction,
+          value: true,
+          tone: ElumDialogTone.danger,
+        ),
       ],
     );
     if (confirmed != true || !mounted) return;
@@ -245,8 +253,8 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
       showFailure(
         context,
         failure,
-        title: '일과를 삭제하지 못했어요',
-        fallback: '잠시 후 다시 시도해주세요',
+        title: l10n.todayRoutineDeleteFailedTitle,
+        fallback: l10n.todayRoutineDeleteFailedFallback,
         fallbackCode: 'E-DEL',
       );
       return;
@@ -297,7 +305,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
       if (async.hasError) {
         return ElumErrorView.failure(
           async.error,
-          fallback: '일과를 불러오지 못했어요',
+          fallback: context.l10n.todayRoutineLoadFailedFallback,
           fallbackCode: 'E-HOME',
           onRetry: ref.refreshRoutines,
           compact: true,
@@ -433,6 +441,7 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
   }
 
   Future<void> _rerun(Routine routine) async {
+    final l10n = context.l10n;
     if (_rerunning != null) return;
     setState(() => _rerunning = routine.id);
 
@@ -446,15 +455,15 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
       showFailure(
         context,
         copy.failure,
-        title: '일과를 다시 만들지 못했어요',
-        fallback: '잠시 후 다시 시도해주세요',
+        title: l10n.todayRoutineRerunFailedTitle,
+        fallback: l10n.todayRoutineRerunFailedFallback,
         fallbackCode: 'E-DUP',
       );
       return;
     }
     ref.refreshRoutines();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${copy.value!.displayTitle}을(를) 오늘 일과에 담았어요')),
+      SnackBar(content: Text(l10n.todayRoutineCopied(copy.value!.displayTitle))),
     );
   }
 
@@ -470,7 +479,7 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
           height: _errorShellHeight,
           child: ElumErrorView.failure(
             async.error,
-            fallback: '지난 일과를 불러오지 못했어요',
+            fallback: context.l10n.todayRoutinePastLoadFailedFallback,
             fallbackCode: 'E-PAST',
             onRetry: () => ref.invalidate(pastRoutinesProvider),
             compact: true,
@@ -543,14 +552,14 @@ class EmptyRoutines extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '아직 만든 일과가 없어요',
+            context.l10n.todayRoutineEmptyTitle,
             style: typo.routineEmptyTitle.copyWith(
               color: colors.routineTileLabel,
             ),
           ),
           SizedBox(height: _emptyLineGap.h),
           Text(
-            '오늘의 첫 행동카드를 만들어보세요',
+            context.l10n.todayRoutineEmptyHint,
             style: typo.routineTileMeta.copyWith(
               color: colors.routineEmptyHint,
             ),
@@ -574,7 +583,7 @@ class _EmptyPastLabel extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: Text(
-        '지난 일과가 없어요',
+        context.l10n.todayRoutinePastEmpty,
         style: context.typo.routineEmptyPast.copyWith(
           color: context.colors.routineTileLabel,
         ),

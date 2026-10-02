@@ -10,8 +10,10 @@ import '../../features/guardian/application/routine_notifier.dart';
 import '../../features/guardian/data/routine_repository.dart';
 import '../../features/onboarding/application/onboarding_notifier.dart';
 import '../config/app_config.dart';
+import '../l10n/app_locales.dart';
 import '../router/app_router.dart';
 import 'dev_log_buffer.dart';
+import 'dev_locale_override.dart';
 import 'dev_log_file.dart';
 import 'dev_state_dump.dart';
 import 'dev_tools_visibility.dart';
@@ -196,7 +198,7 @@ class _DevToolsSheet extends StatefulWidget {
   State<_DevToolsSheet> createState() => _DevToolsSheetState();
 }
 
-enum _DevView { menu, logs, status, navigate, confirmReset, confirmLogout, dump }
+enum _DevView { menu, logs, status, navigate, confirmReset, confirmLogout, dump, locale }
 
 class _DevToolsSheetState extends State<_DevToolsSheet> {
   _DevView _view = _DevView.menu;
@@ -257,6 +259,7 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
       _DevView.confirmReset => '회원을 삭제할까요?',
       _DevView.confirmLogout => '로그아웃할까요?',
       _DevView.dump => '상태 덤프',
+      _DevView.locale => '언어 강제',
     };
 
     return Padding(
@@ -313,6 +316,7 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
             onDone: widget.onClose,
             onNavigate: widget.onNavigate,
           ),
+        _DevView.locale => const _LocaleView(),
         _DevView.dump => const _DumpView(),
       };
 }
@@ -371,6 +375,12 @@ class _DevMenuState extends State<_DevMenu> {
           subtitle: '온보딩 단계·보호자 홈',
           onTap: () => widget.onSelect(_DevView.navigate),
         ),
+        _Tile(
+          icon: Icons.language,
+          label: '언어 강제',
+          subtitle: '휴대폰 언어와 무관하게 앱 언어를 고른다 (QA·시연용)',
+          onTap: () => widget.onSelect(_DevView.locale),
+        ),
         const Divider(height: 1),
         _Tile(
           icon: Icons.logout,
@@ -400,6 +410,66 @@ class _DevMenuState extends State<_DevMenu> {
           },
         ),
       ],
+    );
+  }
+}
+
+/// 앱 언어 강제 — 휴대폰 언어를 바꾸지 않고 다른 언어 화면을 본다.
+///
+/// 값은 메모리에만 있다. 앱을 다시 켜면 휴대폰 언어로 돌아간다([DevLocaleOverrideNotifier]).
+class _LocaleView extends ConsumerWidget {
+  const _LocaleView();
+
+  /// 각 언어가 자기 이름으로 적힌다 — 어느 언어가 켜져 있어도 찾을 수 있게.
+  static const _names = {
+    'ko': '한국어',
+    'en': 'English',
+    'ja': '日本語',
+    'zh': '简体中文',
+    'es': 'Español',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final forced = ref.watch(devLocaleOverrideProvider);
+    final notifier = ref.read(devLocaleOverrideProvider.notifier);
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        _LocaleTile(
+          label: '휴대폰 언어 따르기',
+          selected: forced == null,
+          onTap: () => notifier.set(null),
+        ),
+        for (final l in supportedAppLocales)
+          _LocaleTile(
+            label: _names[l.languageCode] ?? l.languageCode,
+            selected: forced == l,
+            onTap: () => notifier.set(l),
+          ),
+      ],
+    );
+  }
+}
+
+class _LocaleTile extends StatelessWidget {
+  const _LocaleTile({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    // Radio 의 groupValue·onChanged 는 deprecated 라 체크 아이콘으로 고른 줄을 표시한다
+    return ListTile(
+      title: Text(label),
+      trailing: selected ? const Icon(Icons.check) : null,
+      onTap: onTap,
     );
   }
 }

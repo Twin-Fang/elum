@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_shake.dart';
@@ -29,7 +30,7 @@ class PinScreen extends ConsumerStatefulWidget {
 class _PinScreenState extends ConsumerState<PinScreen> {
   /// 1단계에서 입력한 PIN. null이면 아직 1단계다.
   String? _firstEntry;
-  String? _errorMessage;
+  bool _showMismatch = false;
 
   /// 재입력이 틀린 횟수. 값이 바뀔 때마다 점이 한 번 흔들린다.
   int _mismatchCount = 0;
@@ -71,8 +72,8 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     // 다시 입력하기 시작하면 이전 안내 문구를 지운다.
     // _clearInput()이 만드는 빈 값에는 반응하지 않는다 — 방금 띄운 안내가
     // 곧바로 사라져 무엇이 잘못됐는지 읽을 틈이 없어진다.
-    if (_errorMessage != null && _current.isNotEmpty) {
-      setState(() => _errorMessage = null);
+    if (_showMismatch && _current.isNotEmpty) {
+      setState(() => _showMismatch = false);
     } else {
       setState(() {});
     }
@@ -127,7 +128,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       if (!mounted) return;
       _clearInput();
       setState(() {
-        _errorMessage = '암호가 달라요. 다시 넣어주세요';
+        _showMismatch = true;
         _mismatchCount++;
       });
     });
@@ -139,19 +140,23 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   /// 최종 확정 — 2단계 일치 상태에서 CTA를 눌렀을 때만 호출된다.
   void _onComplete() async {
     if (_saving) return;
+    // await 뒤에서 context 를 읽지 않도록 문구를 먼저 잡는다
+    final l10n = context.l10n;
     setState(() => _saving = true);
 
     // 이룸이가 없는 보호자(마지막 이룸이에서 나간 뒤)는 서버가 저장을 막으므로 이룸이부터 만든다.
     // 못 만들었으면 저장을 이어 가지 않고 이 화면에 남는다 — 다시 누르면 다시 시도한다 (#362).
-    final ensured = await ref.read(profileSessionProvider.notifier).ensureProfile();
+    final ensured = await ref
+        .read(profileSessionProvider.notifier)
+        .ensureProfile();
     if (!mounted) return;
     final createFailure = ensured.failure;
     if (createFailure != null) {
       await showFailure(
         context,
         createFailure,
-        title: '이룸이를 만들지 못했어요',
-        fallback: '잠시 후 다시 시도해주세요',
+        title: l10n.pinProfileCreateFailedTitle,
+        fallback: l10n.pinProfileCreateFailedFallback,
         fallbackCode: 'E-PROFILE-NEW',
       );
       if (mounted) setState(() => _saving = false);
@@ -170,8 +175,8 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       await showFailure(
         context,
         failure,
-        title: '설정을 저장하지 못했어요',
-        fallback: '설정 화면에서 다시 확인해주세요',
+        title: l10n.pinSaveFailedTitle,
+        fallback: l10n.pinSaveFailedFallback,
         fallbackCode: 'E-PROFILE',
       );
       if (!mounted) return;
@@ -203,7 +208,10 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       // 하나" 하고 멈춘다. 눌리지 않는 버튼은 알려주는 게 없다. 두 번 맞춰
       // 넣으면 그때 나타나므로, **나타나는 것 자체가 다 됐다는 신호**가 된다.
       bottomButton: _canConfirm
-          ? ElumButton(label: '시작하기', onPressed: _onComplete)
+          ? ElumButton(
+              label: context.l10n.pinStartButton,
+              onPressed: _onComplete,
+            )
           : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -215,9 +223,12 @@ class _PinScreenState extends ConsumerState<PinScreen> {
             // **시안을 따르기로 합의했다** (이슈 #228 — 기기만 휴대폰으로 바꾸고
             // 코드·모드는 시안대로). 자세한 근거는 루트 CLAUDE.md 용어 규칙.
             title: _isConfirmStep
-                ? '암호를 한번 더\n입력해주세요'
-                : '보호자님만 아는\n비밀암호를 만들어주세요',
-            description: _errorMessage ?? '보호자모드로 변경할 때 사용하는 암호예요',
+                ? context.l10n.pinConfirmTitle
+                : context.l10n.pinCreateTitle,
+            // 불일치 안내는 상태가 아니라 플래그로 들고 있다가 그릴 때 문구를 읽는다(언어가 바뀌어도 맞는다)
+            description: _showMismatch
+                ? context.l10n.pinMismatch
+                : context.l10n.pinDescription,
           ),
           SizedBox(height: _descriptionToDots.h),
           // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)
@@ -226,7 +237,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           Semantics(
             container: true,
             button: true,
-            label: '암호 넣기',
+            label: context.l10n.pinInputSemanticLabel,
             child: GestureDetector(
               onTap: _focusNode.requestFocus,
               behavior: HitTestBehavior.opaque,

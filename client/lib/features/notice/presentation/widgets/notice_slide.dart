@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_dialog.dart';
@@ -46,7 +47,10 @@ class NoticeContent extends StatelessWidget {
     final typo = context.typo;
     final id = notice.id;
     final title = parseNoticeTitle(notice.title);
-    final kept = keepWordsParts([for (final part in title) part.text]);
+    final kept = keepWordsParts(
+      [for (final part in title) part.text],
+      locale: context.appLocale,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -84,7 +88,7 @@ class NoticeContent extends StatelessWidget {
         Semantics(
           container: true,
           child: Text(
-            keepWords(notice.body),
+            keepWords(notice.body, locale: context.appLocale),
             key: ValueKey('notice-body-$id'),
             semanticsLabel: notice.body,
             textAlign: TextAlign.center,

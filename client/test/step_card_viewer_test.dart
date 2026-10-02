@@ -199,7 +199,7 @@ class _Speech implements SpeechService {
   final spoken = <String>[];
 
   @override
-  Future<bool> speak(String text) async {
+  Future<bool> speak(String text, {String language = 'ko'}) async {
     spoken.add(text);
     return true;
   }

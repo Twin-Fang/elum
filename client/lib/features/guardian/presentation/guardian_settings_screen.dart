@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/app_info_tile.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/network/app_failure.dart';
@@ -52,14 +53,18 @@ class _GuardianSettingsScreenState
       // 칠했는데(#188 · #353), 시안에 노란 변형이 없어 #433 에서 되돌렸다.
       // 되돌릴 수 없는 탈퇴와는 설명 문장 유무로 구분된다.
       icon: ElumDialogIcon.alert,
-      title: '로그아웃 하실건가요?',
-      actions: const [
+      title: context.l10n.guardianSettingsLogoutConfirmTitle,
+      actions: [
         ElumDialogAction(
-          label: '취소',
+          label: context.l10n.commonCancel,
           value: false,
           tone: ElumDialogTone.neutral,
         ),
-        ElumDialogAction(label: '확인', value: true, tone: ElumDialogTone.danger),
+        ElumDialogAction(
+          label: context.l10n.commonConfirm,
+          value: true,
+          tone: ElumDialogTone.danger,
+        ),
       ],
     );
     if (ok != true) return;
@@ -74,20 +79,24 @@ class _GuardianSettingsScreenState
     final ok = await showElumDialog<bool>(
       context: context,
       icon: ElumDialogIcon.alert,
-      title: '회원탈퇴 하실건가요?',
+      title: context.l10n.guardianSettingsWithdrawConfirmTitle,
       // **설명 한 줄은 시안에 없지만 남긴다.** 시안은 로그아웃과 회원탈퇴를 한
       // 변형으로 묶어 제목만 두는데, 둘은 결정적으로 다르다 — 로그아웃은
       // 다시 들어오면 그대로지만 탈퇴는 되돌아오지 않는다. 되돌릴 수 없다는
       // 고지를 빼면 사용자가 잃는 것이 크다 (docs 예외처리 규칙 · #187).
       // 팝업 컴포넌트는 두 줄 제목을 이미 담는다(`로그인실패` 변형이 그렇다).
-      message: '만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요',
-      actions: const [
+      message: context.l10n.guardianSettingsWithdrawConfirmMessage,
+      actions: [
         ElumDialogAction(
-          label: '취소',
+          label: context.l10n.commonCancel,
           value: false,
           tone: ElumDialogTone.neutral,
         ),
-        ElumDialogAction(label: '확인', value: true, tone: ElumDialogTone.danger),
+        ElumDialogAction(
+          label: context.l10n.commonConfirm,
+          value: true,
+          tone: ElumDialogTone.danger,
+        ),
       ],
     );
     if (ok != true) return;
@@ -104,8 +113,8 @@ class _GuardianSettingsScreenState
     showFailure(
       context,
       failure,
-      title: '탈퇴하지 못했어요',
-      fallback: '잠시 후 다시 시도해주세요',
+      title: context.l10n.guardianSettingsWithdrawFailedTitle,
+      fallback: context.l10n.guardianSettingsWithdrawFailedFallback,
       fallbackCode: 'E-DEL',
     );
   }
@@ -142,7 +151,7 @@ class _GuardianSettingsScreenState
       onBack: _busy ? null : context.popOrHome,
       // 시안(`1022:4467`)은 제목이 뒤로가기와 **같은 줄**에 선다. 본문에 두면
       // 뒤로가기 아래로 내려간다 (#349).
-      title: '설정',
+      title: context.l10n.guardianSettingsTitle,
       // 줄이 x=16 에서 시작한다. 뼈대 기본 여백(24)이면 8 만큼 안쪽으로 밀린다.
       backTop: 67,
       horizontalPadding: 16,
@@ -167,18 +176,18 @@ class _GuardianSettingsScreenState
         // 연결 바로 아래에 둔다. 둘 다 "누구와 누구를 잇는가"를 다루는 줄이다.
         _ProfileSwitchTile(busy: _busy),
         SettingsTile(
-          label: '함께하는 사람',
+          label: context.l10n.guardianSettingsPeople,
           onTap: _busy ? null : () => context.push(Routes.guardianPeople),
         ),
         // 계정을 정리하는 항목(로그아웃·탈퇴) 위에 둔다. 읽을거리와 되돌릴 수 없는
         // 동작이 섞이면 실수로 누르기 쉽다.
         SettingsTile(
-          label: '임시저장',
+          label: context.l10n.guardianSettingsDrafts,
           onTap: _busy ? null : () => context.push(Routes.guardianDrafts),
         ),
         // 시안(`1022:4467`) 자리 그대로 — 임시저장과 약관 사이 (#437).
         SettingsTile(
-          label: '비밀암호 변경하기',
+          label: context.l10n.guardianSettingsPinChange,
           onTap: _busy ? null : () => context.push(Routes.guardianPinChange),
         ),
         // 카드 그림을 어떤 방식으로 만들지 (#458). 시안(`1022:4467`)에 없는 줄이라
@@ -189,7 +198,7 @@ class _GuardianSettingsScreenState
         // 이룸이 휴대폰 설정에도 같은 줄이 있고, 한 휴대폰에 값 하나를 함께 본다.
         const _HapticTile(),
         SettingsTile(
-          label: '약관 및 개인정보처리방침',
+          label: context.l10n.guardianSettingsTerms,
           onTap: _busy
               ? null
               : () => Navigator.of(context).push(
@@ -210,9 +219,12 @@ class _GuardianSettingsScreenState
         // 심사나 운영에서 문제가 되면 되살린다 — 누르면 뜨던 시트(`1045:5005`)는
         // `ce1271d` 에 있고, 주소(`AppConfig.supportEmail`)와 글자 토큰
         // (`contactSheetTitle`·`contactSheetEmail`)은 그대로 남겨 두었다.
-        SettingsTile(label: '로그아웃', onTap: _busy ? null : _logout),
         SettingsTile(
-          label: '회원탈퇴',
+          label: context.l10n.guardianSettingsLogout,
+          onTap: _busy ? null : _logout,
+        ),
+        SettingsTile(
+          label: context.l10n.guardianSettingsWithdraw,
           onTap: _busy ? null : _deleteAccount,
           destructive: true,
         ),
@@ -242,8 +254,10 @@ class _LinkTile extends ConsumerWidget {
         );
 
     return SettingsTile(
-      label: connected ? '이룸이 휴대폰' : '이룸이 휴대폰 연결하기',
-      valueText: connected ? '연결됨' : null,
+      label: connected
+          ? context.l10n.guardianSettingsLinkConnected
+          : context.l10n.guardianSettingsLinkConnect,
+      valueText: connected ? context.l10n.guardianSettingsLinkStatus : null,
       showChevronWithValue: connected,
       onTap: busy
           ? null
@@ -275,7 +289,7 @@ class _ProfileSwitchTile extends ConsumerWidget {
     if (count < 2) return const SizedBox.shrink();
     final active = ref.watch(activeProfileProvider);
     return SettingsTile(
-      label: '이룸이 바꾸기',
+      label: context.l10n.guardianSettingsProfileSwitch,
       // 지금 보는 이룸이 이름을 값으로 보여 준다
       valueText: active?.displayName,
       showChevronWithValue: true,
@@ -294,7 +308,7 @@ class _ImageStyleTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final style = ref.watch(onboardingProvider.select((p) => p.imageStyle));
     return SettingsTile(
-      label: '그림 방식',
+      label: context.l10n.guardianSettingsImageStyle,
       valueText: style.label,
       showChevronWithValue: true,
       onTap: busy ? null : () => context.push(Routes.guardianImageStyle),
@@ -309,7 +323,7 @@ class _HapticTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SettingsSwitchTile(
-      label: '카드 체크 진동',
+      label: context.l10n.guardianSettingsHaptic,
       value: ref.watch(childHapticOnProvider),
       onChanged: (on) => ref.read(childHapticOnProvider.notifier).set(on),
     );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_shake.dart';
@@ -50,7 +51,8 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
   /// 새 암호(2단계 입력). 한번 더가 틀려도 살린다 — 온보딩과 같다.
   String? _newPin;
 
-  String? _errorMessage;
+  /// 틀림 안내를 띄우는 중인가. 문구는 글자가 아니라 이 표시로 들고 있다가 `build` 에서 푼다.
+  bool _mismatched = false;
 
   /// 틀린 횟수. 값이 바뀔 때마다 점이 한 번 흔들린다.
   int _mismatchCount = 0;
@@ -94,7 +96,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     // 다시 누르기 시작하면 실패 안내를 거둔다. 비우는 순간(빈 값)에는 남겨 둔다 —
     // 방금 띄운 안내가 곧바로 사라져 무엇이 틀렸는지 읽을 틈이 없어진다.
     setState(() {
-      if (_errorMessage != null && _current.isNotEmpty) _errorMessage = null;
+      if (_mismatched && _current.isNotEmpty) _mismatched = false;
     });
     if (!_loaded || _current.length != _len) return;
 
@@ -130,9 +132,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
       _clearInput();
       setState(() {
         // 시안(`1274:9466`)은 `다시 입력해주세요` 다. 만들기(createOnly)는 온보딩 문구를 따른다.
-        _errorMessage = widget.createOnly
-            ? '암호가 달라요. 다시 넣어주세요'
-            : '암호가 달라요. 다시 입력해주세요';
+        _mismatched = true;
         _mismatchCount++;
       });
     });
@@ -165,14 +165,17 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
       await showFailure(
         context,
         null,
-        title: widget.createOnly ? '비밀암호를 만들지 못했어요' : '비밀암호를 바꾸지 못했어요',
-        fallback: '잠시 후 다시 시도해주세요',
+        title: widget.createOnly
+            ? context.l10n.pinChangeCreateFailedTitle
+            : context.l10n.pinChangeFailedTitle,
+        fallback: context.l10n.pinChangeFailedFallback,
         fallbackCode: 'E-PIN',
       );
       return;
     }
     // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다 (#433).
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
     if (widget.createOnly) {
       // 방금 만든 암호가 곧 통과의 증거다. 보호자 홈으로 바로 들어간다.
       context.go(Routes.guardian);
@@ -180,26 +183,35 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
       context.popOrHome();
     }
     messenger.showSnackBar(
-      SnackBar(content: Text(widget.createOnly ? '비밀암호를 만들었어요' : '비밀암호를 바꿨어요')),
+      SnackBar(
+        content: Text(
+          widget.createOnly
+              ? l10n.pinChangeCreatedSnack
+              : l10n.pinChangeChangedSnack,
+        ),
+      ),
     );
   }
 
   (String, String?) get _copy => switch (_step) {
     // 시안(`1027:4683`)은 설명이 없다
-    _Step.verify => ('지금 비밀암호를\n입력해주세요', null),
+    _Step.verify => (context.l10n.pinChangeVerifyTitle, null),
     _Step.enter when widget.createOnly => (
       // 온보딩 비밀번호 화면(238:1909)과 같은 문구
-      '보호자님만 아는\n비밀암호를 만들어주세요',
-      '보호자모드로 변경할 때 사용하는 암호예요',
+      context.l10n.pinChangeCreateTitle,
+      context.l10n.pinModeHint,
     ),
-    _Step.enter => ('새 비밀암호를\n입력해주세요', '보호자모드로 변경할 때 사용하는 암호예요'),
+    _Step.enter => (context.l10n.pinChangeEnterTitle, context.l10n.pinModeHint),
     // 만들기는 온보딩 재입력(238:2767)과 같은 문구다
     _Step.confirm when widget.createOnly => (
-      '암호를 한번 더\n입력해주세요',
-      '보호자모드로 변경할 때 사용하는 암호예요',
+      context.l10n.pinChangeCreateConfirmTitle,
+      context.l10n.pinModeHint,
     ),
     // 바꾸기는 시안 `1274:9661` — 제목이 `비밀암호를`, 설명은 끝이 가까웠다는 말이다
-    _Step.confirm => ('비밀암호를 한번 더\n입력해주세요', '이제 곧 비밀암호 변경이 끝나요'),
+    _Step.confirm => (
+      context.l10n.pinChangeConfirmTitle,
+      context.l10n.pinChangeConfirmHint,
+    ),
   };
 
   /// 설명 하단 → 점. 온보딩 비밀번호 화면(`238:1996`)과 같은 값이다.
@@ -215,15 +227,24 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
   @override
   Widget build(BuildContext context) {
     final (title, description) = _copy;
+    // 틀림 문구는 상태에 글자로 두지 않는다 — 언어가 바뀌면 옛 언어로 남는다.
+    final errorMessage = !_mismatched
+        ? null
+        : widget.createOnly
+        ? context.l10n.pinChangeMismatchCreate
+        : context.l10n.pinChangeMismatch;
     // 만들기(createOnly)는 온보딩 머리 그대로다. 바꾸기만 설정 계열 머리다.
     final change = !widget.createOnly;
     return ElumScaffold(
       onBack: context.popOrHome,
-      title: change ? '비밀암호 변경하기' : null,
+      title: change ? context.l10n.pinChangeHeaderTitle : null,
       backTop: change ? _changeBackTop : null,
       // 온보딩처럼 **다 맞았을 때만** 버튼이 나타난다 (#231). 나타나는 것이 신호다.
       bottomButton: _canSave
-          ? ElumButton(label: '저장하기', onPressed: _saving ? null : _save)
+          ? ElumButton(
+              label: context.l10n.pinChangeSave,
+              onPressed: _saving ? null : _save,
+            )
           : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -231,9 +252,9 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
           ElumHeader(
             title: title,
             titleY: change ? _changeTitleY : null,
-            description: _errorMessage ?? description,
+            description: errorMessage ?? description,
             // 틀림 안내만 붉다 (시안 `1274:9466` — #DA5050). 만들기는 온보딩처럼 보조색이다.
-            descriptionColor: _errorMessage != null && !widget.createOnly
+            descriptionColor: errorMessage != null && !widget.createOnly
                 ? context.colors.settingsDestructive
                 : null,
           ),
@@ -245,7 +266,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
           Semantics(
             container: true,
             button: true,
-            label: '암호 넣기',
+            label: context.l10n.pinChangeInputLabel,
             child: GestureDetector(
               onTap: _focusNode.requestFocus,
               behavior: HitTestBehavior.opaque,

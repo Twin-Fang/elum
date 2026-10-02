@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/current_l10n.dart';
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -34,26 +36,27 @@ class AiCreditSummaryView extends StatelessWidget {
     final space = context.space;
     final s = summary;
 
-    final amount = '${s.available} / ${s.weeklyGrant} 크레딧 남음';
+    final amount = context.l10n.creditAmountLeft(s.available, s.weeklyGrant);
     // 보너스는 따로 적지 않는다 — 큰 숫자(available)에 이미 들어 있어 `+ 추가 N` 은
     // 합계를 부풀려 읽히게 했다 (2026-09-25 사용자 결정, #421).
     final lines = <(String, Color)>[
-      if (s.isGeneratingRoutine) ('일과를 만들고 있어요', colors.textPrimary),
+      if (s.isGeneratingRoutine)
+        (context.l10n.creditGenerating, colors.textPrimary),
       // 적을 때 "끝까지 만들어지지만 0 이 될 수 있다"는 경고는 두지 않는다 — 숫자와
       // 막대로 충분하고, 경고 문구는 이상하고 불편하다 (2026-09-25 사용자 결정, #421).
       if (s.isExhausted) ...[
-        ('이번 주 크레딧을 모두 사용했어요', colors.textPrimary),
-        ('만든 일과 보기와 직접 고치기는 계속 할 수 있어요', colors.textSecondary),
+        (context.l10n.creditExhausted, colors.textPrimary),
+        (context.l10n.creditExhaustedStillOk, colors.textSecondary),
       ],
     ];
-    final reset = '${s.resetLabel}에 다시 채워져요';
+    final reset = context.l10n.aiCreditResetLine(s.resetLabel);
 
     final body = Semantics(
       key: AiCreditCard.contentKey,
       container: true,
       excludeSemantics: true,
       label: [
-        '이번 주 AI 생성',
+        context.l10n.creditCardTitle,
         amount,
         for (final (text, _) in lines) text,
         reset,
@@ -65,7 +68,7 @@ class AiCreditSummaryView extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(right: CreditInfoButton.box),
             child: Text(
-              '이번 주 AI 생성',
+              context.l10n.creditCardTitle,
               style: context.typo.creditTitle.copyWith(
                 color: colors.textPrimary,
               ),
@@ -83,7 +86,7 @@ class AiCreditSummaryView extends StatelessWidget {
                   ),
                 ),
                 TextSpan(
-                  text: ' / ${s.weeklyGrant} 크레딧 남음',
+                  text: context.l10n.creditAmountRest(s.weeklyGrant),
                   style: context.typo.creditBody.copyWith(
                     color: colors.textSecondary,
                   ),
@@ -141,14 +144,14 @@ class CreditInfoButton extends StatelessWidget {
   static const box = 44.0;
   static const _icon = 18.0;
 
-  static const title = 'AI 크레딧은 이렇게 줄어요';
+  /// 안내 팝업을 띄울 때 읽는다 — 값을 들고 있지 말고 부를 때마다 앱 언어로 푼다.
+  static String get title => appL10n.creditCostTitle;
 
   /// 서버 단가로 적는다 — 운영에서 단가를 바꾸면 문구도 따라간다.
   static String message(CreditSummary s) => [
-    '일과 글을 만들 때 ${s.routineTextCost}개, '
-        '그림이 완성된 카드 1장마다 ${s.cardImageCost}개씩 써요.',
-    '크레딧이 남아 있을 때 시작한 일과는 그림이 많아도 끝까지 만들어져요.',
-    '매주 월요일 0시에 다시 채워져요.',
+    appL10n.creditCostLine(s.routineTextCost, s.cardImageCost),
+    appL10n.creditCostKeepGoing,
+    appL10n.creditWeeklyRefill,
   ].join('\n');
 
   @override
@@ -164,7 +167,7 @@ class CreditInfoButton extends StatelessWidget {
     return AppPressable(
       key: AiCreditCard.infoKey,
       scaleDown: AppPressable.scaleIcon,
-      semanticLabel: 'AI 크레딧 안내',
+      semanticLabel: context.l10n.creditInfoLabel,
       onTap: () => showElumDialog<void>(
         context: context,
         title: title,

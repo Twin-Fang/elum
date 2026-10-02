@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/text/keep_words.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
@@ -111,7 +112,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
           : ElumButton(
               // 시안(262:4854) 그대로다. 보상이 앞으로 옮겨 오면서(#380) 이 버튼이
               // 여는 것이 정말로 카드 생성이 됐다 — 규칙(바로 다음 화면 이름)과도 맞는다.
-              label: '카드 만들기',
+              label: context.l10n.questionMakeCards,
               onPressed: _makeCards,
             ),
       child: SingleChildScrollView(
@@ -227,7 +228,7 @@ class _QuestionBlockState extends State<_QuestionBlock> {
           // AI 가 주는 질문은 `\n` 없이 온다. 엔진이 글자 단위로 꺾어 `있나 / 요?`가
           // 됐다 — 띄어쓰기에서만 꺾는다 (#393 S5). 낭독기에는 원문을 준다.
           child: Text(
-            keepWords(widget.item.question),
+            keepWords(widget.item.question, locale: context.appLocale),
             semanticsLabel: widget.item.question,
             textAlign: TextAlign.center,
             style: context.typo.promptTitle
@@ -272,7 +273,7 @@ class _QuestionBlockState extends State<_QuestionBlock> {
                 if (!_isWriting)
                   _OptionChip(
                     // 시안 `262:4854` 문구 그대로 — `직접 적기`로 줄여 두었었다 (#297)
-                    label: '+ 직접 입력하기',
+                    label: context.l10n.questionCustomAdd,
                     isSelected: false,
                     onTap: _open,
                   ),
@@ -351,7 +352,7 @@ class _CustomOptionField extends StatelessWidget {
                   style: context.typo.chipLabel
                       .copyWith(color: colors.textPrimary),
                   decoration: InputDecoration(
-                    hintText: '직접 적어주세요',
+                    hintText: context.l10n.questionCustomHint,
                     hintStyle: context.typo.chipLabel
                         .copyWith(color: colors.textPlaceholder),
                     // 글자수 카운터가 52 높이를 밀어낸다
@@ -365,7 +366,7 @@ class _CustomOptionField extends StatelessWidget {
               AppPressable(
                 onTap: onCancel,
                 scaleDown: AppPressable.scaleIcon,
-                semanticLabel: '직접 입력 닫기',
+                semanticLabel: context.l10n.questionCustomClose,
                 child: Padding(
                   padding: EdgeInsets.only(right: space.md),
                   child: Icon(Icons.close_rounded,
@@ -440,7 +441,7 @@ class _OptionChip extends StatelessWidget {
                   Semantics(
                     container: true,
                     button: true,
-                    label: '$label 지우기',
+                    label: context.l10n.questionClearLabel(label),
                     child: GestureDetector(
                       key: ValueKey('remove-$label'),
                       onTap: onRemove,

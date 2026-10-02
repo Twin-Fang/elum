@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 
@@ -133,7 +134,7 @@ class RewardInputField extends StatelessWidget {
               color: colors.textPrimary,
             ),
             decoration: InputDecoration.collapsed(
-              hintText: '예) 유튜브 10분 보기',
+              hintText: context.l10n.rewardInputHint,
               hintStyle: context.typo.promptPlaceholder.copyWith(
                 color: colors.promptMuted,
               ),

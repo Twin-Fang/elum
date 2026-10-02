@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -89,18 +90,18 @@ class _GuardianEditSheetState extends State<_GuardianEditSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '내 이름 고치기',
+              context.l10n.guardiansEditTitle,
               style: typo.sectionTitle.copyWith(color: colors.textPrimary),
             ),
             SizedBox(height: space.xs),
             Text(
-              '이 이룸이를 함께 돌보는 사람에게 보이는 이름이에요. 실명이 아니어도 괜찮아요',
+              context.l10n.guardiansEditDescription,
               style: typo.body.copyWith(color: colors.textSecondary),
             ),
             SizedBox(height: space.lg),
             ElumTextField(
               controller: _controller,
-              hintText: '엄마, 아빠, 센터 선생님',
+              hintText: context.l10n.guardiansEditNameHint,
               maxLength: _maxName,
               onSubmitted: (_) => FocusScope.of(context).unfocus(),
             ),
@@ -119,7 +120,7 @@ class _GuardianEditSheetState extends State<_GuardianEditSheet> {
               ],
             ),
             SizedBox(height: space.lg),
-            ElumButton(label: '저장', onPressed: _save),
+            ElumButton(label: context.l10n.guardiansEditSave, onPressed: _save),
           ],
         ),
       ),

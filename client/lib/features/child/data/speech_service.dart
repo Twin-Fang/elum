@@ -12,13 +12,25 @@ import '../../../core/config/app_config.dart';
 /// 화면은 이 인터페이스만 알면 되고, 어느 엔진이 소리를 냈는지 알 필요가 없다.
 abstract interface class SpeechService {
   /// 읽어준다. **절대 throw하지 않는다** — 실패하면 false.
-  Future<bool> speak(String text);
+  ///
+  /// [language] 는 읽을 글의 언어 — 일과 언어 코드(`ko` `en` `ja` `zh` `es`)다. 화면 언어가 아니다.
+  Future<bool> speak(String text, {String language = 'ko'});
 
   /// 재생 중이면 멈춘다. 화면을 벗어날 때도 부른다.
   Future<void> stop();
 
   void dispose();
 }
+
+/// 일과 언어 → 기기 TTS 언어 태그. 모르는 값은 한국어다.
+@visibleForTesting
+String ttsLocaleOf(String language) => switch (language) {
+  'en' => 'en-US',
+  'ja' => 'ja-JP',
+  'zh' => 'zh-CN',
+  'es' => 'es-ES',
+  _ => 'ko-KR',
+};
 
 /// 기기 내장 TTS.
 ///
@@ -28,15 +40,16 @@ class DeviceSpeech implements SpeechService {
   DeviceSpeech({FlutterTts? tts}) : _tts = tts ?? FlutterTts();
 
   final FlutterTts _tts;
-  var _configured = false;
+  String? _configuredLanguage;
+  var _rateSet = false;
 
   /// 아동이 듣기 편한 속도. 기본값(1.0)은 조금 빠르다.
   static const _rate = 0.45;
 
   @override
-  Future<bool> speak(String text) async {
+  Future<bool> speak(String text, {String language = 'ko'}) async {
     try {
-      await _ensureConfigured();
+      await _ensureConfigured(language);
 
       // 이전 재생이 남아 있으면 겹친다
       await _tts.stop();
@@ -50,12 +63,17 @@ class DeviceSpeech implements SpeechService {
     }
   }
 
-  Future<void> _ensureConfigured() async {
-    if (_configured) return;
-
-    await _tts.setLanguage('ko-KR');
-    await _tts.setSpeechRate(_rate);
-    _configured = true;
+  /// 읽을 언어가 바뀐 때만 기기 음성을 다시 맞춘다 — 같은 기기에서 일과마다 언어가 다를 수 있다.
+  Future<void> _ensureConfigured(String language) async {
+    final tag = ttsLocaleOf(language);
+    if (_configuredLanguage != tag) {
+      await _tts.setLanguage(tag);
+      _configuredLanguage = tag;
+    }
+    if (!_rateSet) {
+      await _tts.setSpeechRate(_rate);
+      _rateSet = true;
+    }
   }
 
   @override
@@ -96,7 +114,8 @@ class RemoteSpeech implements SpeechService {
   static const maxLength = 500;
 
   @override
-  Future<bool> speak(String text) async {
+  Future<bool> speak(String text, {String language = 'ko'}) async {
+    // 서버 음성은 한국어 `F1` 고정이라 [language] 를 아직 쓰지 않는다. 언어별 음성은 서버가 준비된 뒤에 붙인다.
     final apiKey = AppConfig.ttsApiKey;
     // 키가 없으면 서버를 부를 수 없다. 기기 음성만으로도 대개 동작한다.
     if (apiKey.isEmpty) {
@@ -155,11 +174,11 @@ class FallbackSpeech implements SpeechService {
   final SpeechService remote;
 
   @override
-  Future<bool> speak(String text) async {
+  Future<bool> speak(String text, {String language = 'ko'}) async {
     if (text.trim().isEmpty) return false;
 
-    if (await device.speak(text)) return true;
-    return remote.speak(text);
+    if (await device.speak(text, language: language)) return true;
+    return remote.speak(text, language: language);
   }
 
   @override

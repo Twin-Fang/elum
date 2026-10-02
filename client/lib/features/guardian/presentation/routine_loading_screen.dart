@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -275,10 +276,12 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
           // 크레딧 때문에 막힌 것은 AI 가 실패한 것이 아니다 — "만들지 못했어요"라고
           // 하면 다시 하면 될 줄 안다. 이유는 아래 서버 문구가 말한다 (#421, 실측).
           title: isCreditBlockingCode(flow.errorCode)
-              ? '지금은 만들 수 없어요'
+              ? context.l10n.routineLoadingBlockedTitle
               : switch (widget.kind) {
-                  RoutineLoadingKind.prepare => '질문을 준비하지 못했어요',
-                  RoutineLoadingKind.generate => '카드를 만들지 못했어요',
+                  RoutineLoadingKind.prepare =>
+                    context.l10n.routineLoadingPrepareFailed,
+                  RoutineLoadingKind.generate =>
+                    context.l10n.routineLoadingGenerateFailed,
                 },
           errorCode: flow.errorCode,
           errorMessage: flow.errorMessage,
@@ -355,7 +358,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
                   duration: AppMotion.slow,
                   curve: AppMotion.decelerate,
                   builder: (context, value, _) => Text(
-                    '${value.round()}% 진행됐어요',
+                    context.l10n.routineLoadingPercent(value.round()),
                     style: context.typo.promptBody
                         .copyWith(color: colors.promptMuted),
                   ),
@@ -679,15 +682,15 @@ class _GenerateError extends StatelessWidget {
             // 서버에 닿지도 못했으면 서버 문구가 없다 — 인터넷을 확인하라고 한다.
             errorMessage?.trim().isNotEmpty == true
                 ? errorMessage!.trim()
-                : errorHint ?? '잠시 후 다시 해주세요',
+                : errorHint ?? context.l10n.commonRetryLater,
             textAlign: TextAlign.center,
             style: context.typo.promptBody.copyWith(color: colors.promptMuted),
           ),
           SizedBox(height: space.lg),
           if (onRetry case final retry?)
-            ElumButton(label: '다시 하기', onPressed: retry)
+            ElumButton(label: context.l10n.routineLoadingRetry, onPressed: retry)
           else
-            ElumButton(label: '홈으로', onPressed: onHome),
+            ElumButton(label: context.l10n.routineLoadingHome, onPressed: onHome),
           if (errorCode != null) ...[
             SizedBox(height: space.md),
             // 추적용 식별자 — 사용자에겐 부차적이지만 제보 시 원인 추적의 유일한 단서다

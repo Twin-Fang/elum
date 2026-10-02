@@ -1,14 +1,21 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/current_l10n.dart';
+
 /// 보호자 구분 — 서버 `GuardianKind`. **표시용이다. 권한 차이는 없다** (명세 2장).
 enum GuardianKind {
-  guardian('GUARDIAN', '보호자'),
-  caregiver('CAREGIVER', '센터 선생님');
+  guardian('GUARDIAN'),
+  caregiver('CAREGIVER');
 
-  const GuardianKind(this.apiValue, this.label);
+  const GuardianKind(this.apiValue);
 
   final String apiValue;
-  final String label;
+
+  /// 표시용 구분 이름 — 앱 언어의 문구다. 서버로 가는 값은 [apiValue] 뿐이다.
+  String get label => switch (this) {
+    GuardianKind.guardian => appL10n.guardianKindGuardian,
+    GuardianKind.caregiver => appL10n.guardianKindCaregiver,
+  };
 
   /// 모르는 값이면 [guardian] 이다 — 서버가 새 구분을 먼저 배포해도 목록이 죽지 않는다.
   static GuardianKind fromApiValue(String? value) {
@@ -50,7 +57,7 @@ class Guardian {
   /// 목록에 적을 이름.
   String get label {
     final name = displayName?.trim();
-    return (name == null || name.isEmpty) ? '보호자' : name;
+    return (name == null || name.isEmpty) ? appL10n.commonGuardianName : name;
   }
 
   /// 서버 응답 한 항목. id 가 없으면 null. 모양이 달라도 던지지 않는다.

@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/elum_scaffold.dart';
 import '../../guardian/data/routine_repository.dart';
 import '../../../core/router/pop_or_home.dart';
 
@@ -116,7 +116,7 @@ class ChildStarsScreen extends ConsumerWidget {
               left: 0,
               right: 0,
               child: Text(
-                '$stars개의 별을 얻었어요\n할 일을 해내고 별을 더 찾아봐요!',
+                context.l10n.childStarsEarned(stars),
                 textAlign: TextAlign.center,
                 style: context.typo.cardDescription
                     .copyWith(color: colors.surface),
@@ -135,7 +135,7 @@ class ChildStarsScreen extends ConsumerWidget {
                   child: AppPressable(
                     onTap: context.popOrHome,
                     scaleDown: AppPressable.scaleIcon,
-                    semanticLabel: ElumScaffold.backLabel,
+                    semanticLabel: context.l10n.commonBack,
                     child: SizedBox(
                       width: _backTouch.w,
                       height: _backTouch.w,

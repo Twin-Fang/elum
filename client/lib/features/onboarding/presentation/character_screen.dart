@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -60,7 +61,7 @@ class CharacterScreen extends ConsumerWidget {
       // Figma 카드가 x=16에서 시작한다 — 기본 24를 쓰면 카드가 8씩 좁아진다
       horizontalPadding: _cardMarginH,
       bottomButton: ElumButton(
-        label: '다음',
+        label: context.l10n.commonNext,
         onPressed: profile.canProceedFromCharacter
             ? () => context.push(Routes.onboardingImageStyle)
             : null,
@@ -75,8 +76,10 @@ class CharacterScreen extends ConsumerWidget {
                 horizontal: _headerExtraInset,
               ),
               child: ElumHeader(
-                title: '${profile.displayName}의 하루를 함께할\n친구를 골라주세요',
-                description: '선택한 친구가 카드 속 주인공이 되어 도와줘요',
+                title: context.l10n.onboardingCharacterTitle(
+                  profile.displayName,
+                ),
+                description: context.l10n.onboardingCharacterDescription,
                 hasBackButton: true,
               ),
             ),
@@ -114,7 +117,9 @@ class CharacterScreen extends ConsumerWidget {
                         textAlign: TextAlign.center,
                         style: context.typo.subtitle.copyWith(
                           color: selected.contains(character)
-                              ? context.colors.characterSelected(character).border
+                              ? context.colors
+                                    .characterSelected(character)
+                                    .border
                               : context.colors.textSecondary,
                         ),
                       ),

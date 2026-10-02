@@ -1,3 +1,5 @@
+import '../../../core/l10n/current_l10n.dart';
+
 /// 아이가 온보딩에서 고르는 "친구" — 생성된 행동 카드 속 주인공이 된다.
 ///
 /// 카드 이미지 콘텐츠의 일부이며, 서비스 화자(AgentPersona)와는 역할이 다르다.
@@ -8,13 +10,16 @@ enum CardCharacter {
   // apiValue는 서버 CharacterType enum(LULU/POPO)에 맞춘다. 서버는 캐릭터를
   // '종류'(CAT/FOX)가 아니라 '이름'(루루/포포)으로 저장하므로 프론트가 이를 따른다.
   // 어긋나면 PATCH /api/member/character가 역직렬화에 실패한다 (이슈 #89).
-  cat('고양이', 'LULU', '루루'),
-  fox('여우', 'POPO', '포포');
+  cat('LULU'),
+  fox('POPO');
 
-  const CardCharacter(this.label, this.apiValue, this.displayName);
+  const CardCharacter(this.apiValue);
 
-  /// 종류 (접근성 안내·개발자용)
-  final String label;
+  /// 종류 (접근성 안내·개발자용). 문구는 호출 시점의 언어로 읽는다.
+  String get label => switch (this) {
+    CardCharacter.cat => appL10n.characterCatLabel,
+    CardCharacter.fox => appL10n.characterFoxLabel,
+  };
 
   /// 서버 `CharacterType` enum 값 (`LULU` / `POPO`)
   final String apiValue;
@@ -23,7 +28,10 @@ enum CardCharacter {
   ///
   /// 한때 이 자리가 회색 알약으로 비어 있어 화면에 넣지 않았는데,
   /// 2026-09-22 시안에는 카드 밖 y=493에 텍스트로 들어와 있다.
-  final String displayName;
+  String get displayName => switch (this) {
+    CardCharacter.cat => appL10n.characterCatName,
+    CardCharacter.fox => appL10n.characterFoxName,
+  };
 
   /// 저장소·서버에 남은 문자열을 되돌린다. 모르는 값이면 null —
   /// 호출부가 폴백을 정하게 두고 여기서 임의로 고르지 않는다.
@@ -41,9 +49,7 @@ enum CardCharacter {
 /// 선택 대상이 아니다. 카드 속 주인공으로 들어가서도 안 된다.
 /// CardCharacter와 한 타입으로 묶으면 병아리가 카드 주인공이 되는 버그가 가능해지므로 분리한다.
 enum AgentPersona {
-  chick('병아리');
+  chick;
 
-  const AgentPersona(this.label);
-
-  final String label;
+  String get label => appL10n.agentChickLabel;
 }

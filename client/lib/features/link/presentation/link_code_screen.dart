@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
+import '../../../core/network/app_failure.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -57,7 +59,10 @@ class LinkCodeScreen extends ConsumerStatefulWidget {
 class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   IssuedLinkCode? _issued;
   bool _loading = true;
-  String? _errorMessage;
+
+  // 문구가 아니라 실패 자체를 들고 있다가 그릴 때 푼다 — 실패 순간에 문구로 굳히면
+  // 언어가 바뀐 뒤에도 옛 언어로 남는다.
+  AppFailure? _issueFailure;
 
   /// 남은 시간을 1초마다 다시 그린다. 시안이 `09:59`를 초까지 보여준다 (#232).
   Timer? _ticker;
@@ -109,7 +114,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   Future<void> _issue() async {
     setState(() {
       _loading = true;
-      _errorMessage = null;
+      _issueFailure = null;
     });
     final repo = ref.read(deviceLinkRepositoryProvider);
     // 기준은 암호를 만드는 것과 함께 잡는다 — 새 암호는 아직 쓰이지 않았으니 목록에 끼지 않는다.
@@ -124,9 +129,8 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     if (!attempt.isOk) {
       setState(() {
         _loading = false;
-        // **서버가 이유를 알려줬으면 그 문구를 그대로 쓴다** (#352).
-        _errorMessage = attempt.failure!
-            .describe('암호를 만들지 못했어요. 다시 해주세요', 'E-LINK-NEW');
+        // 서버가 이유를 알려줬으면 그 문구를 그대로 쓴다 — 그릴 때 푼다.
+        _issueFailure = attempt.failure;
       });
       return;
     }
@@ -178,7 +182,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     await showElumDialog<void>(
       context: context,
       icon: ElumDialogIcon.success,
-      title: '휴대폰 연결에 성공했어요!',
+      title: context.l10n.linkCodeSuccessTitle,
     );
   }
 
@@ -188,7 +192,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   /// 바로 들어오면 이름이 없을 수 있다. `의`는 받침과 무관해 그냥 붙는다.
   String get _elumiName {
     final name = ref.watch(onboardingProvider).childNickname.trim();
-    return name.isEmpty ? '이룸이' : name;
+    return name.isEmpty ? context.l10n.commonElumiName : name;
   }
 
   @override
@@ -202,7 +206,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
 
     return ElumScaffold(
       onBack: context.popOrHome,
-      title: fromSettings ? '이룸이 휴대폰 연결' : null,
+      title: fromSettings ? context.l10n.linkCodeSettingsTitle : null,
       backTop: fromSettings ? _settingsBackTop : null,
       // 온보딩 시안은 연결되기 전에도 버튼을 **보여주되 누를 수 없게** 둔다
       // (732:5334) — 다음 할 일을 알려주는 이정표라 자리를 비우지 않는다.
@@ -210,7 +214,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
       bottomButton: fromSettings
           ? null
           : ElumButton(
-              label: '시작하기',
+              label: context.l10n.linkCodeStartButton,
               onPressed: _linked ? _goHome : null,
             ),
       // `나중에 할게요`는 CTA 아래에 붙는다 (시안 y=765).
@@ -233,7 +237,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
                   // 옆 여백은 전과 같은 8 — 바꾸면 글자가 반 픽셀 옮겨 골든이 흔들린다.
                   padding: EdgeInsets.symmetric(horizontal: space.xs.h),
                   child: Text(
-                    '나중에 할게요',
+                    context.l10n.linkCodeLater,
                     style: context.typo.linkLater.copyWith(
                       color: colors.linkLaterLabel,
                       decoration: TextDecoration.underline,
@@ -255,9 +259,14 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
               // 설정 시안은 제목이 147에서 시작한다 — 뒤로가기 줄에 제목이 함께
               // 서면서 머리가 107에서 끝나기 때문이다.
               titleY: fromSettings ? _settingsTitleY : null,
-              title: '$_elumiName의 휴대폰을\n연결할까요?',
+              title: context.l10n.linkCodeAskTitle(_elumiName),
+              // 서버가 이유를 알려줬으면 그 문구가 기본 문구를 이긴다.
               description:
-                  _errorMessage ?? '$_elumiName의 휴대폰에서 아래 코드를 입력하세요',
+                  _issueFailure?.describe(
+                    context.l10n.linkCodeIssueFailedFallback,
+                    'E-LINK-NEW',
+                  ) ??
+                  context.l10n.linkCodeEnterHint(_elumiName),
             ),
             SizedBox(height: _descriptionToCode.h),
             if (_loading)
@@ -296,7 +305,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   /// 올림이 아니라 **내림**이다. 남은 시간을 실제보다 길게 말하면 믿고 기다리다
   /// 만료된다.
   String _remainingLabel(IssuedLinkCode issued, bool expired) {
-    if (expired) return '암호가 만료됐어요';
+    if (expired) return context.l10n.linkCodeExpired;
     final total = issued.remaining().inSeconds;
     final mm = (total ~/ 60).toString().padLeft(2, '0');
     final ss = (total % 60).toString().padLeft(2, '0');

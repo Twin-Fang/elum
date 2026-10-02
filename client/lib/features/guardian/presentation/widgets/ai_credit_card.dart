@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/network/app_failure.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -82,13 +83,13 @@ class _LoadingBody extends StatelessWidget {
     final colors = context.colors;
     return Semantics(
       key: AiCreditCard.loadingKey,
-      label: '이번 주 AI 생성 사용량을 불러오고 있어요',
+      label: context.l10n.creditCardLoading,
       excludeSemantics: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '이번 주 AI 생성',
+            context.l10n.creditCardTitle,
             style: context.typo.creditTitle.copyWith(color: colors.textPrimary),
           ),
           SizedBox(height: context.space.md),
@@ -125,12 +126,12 @@ class _ErrorBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '이번 주 AI 생성',
+                context.l10n.creditCardTitle,
                 style: context.typo.creditTitle.copyWith(color: colors.textPrimary),
               ),
               SizedBox(height: space.xs),
               Text(
-                '사용량을 불러오지 못했어요',
+                context.l10n.creditCardLoadFailed,
                 style: context.typo.creditBody.copyWith(color: colors.textPrimary),
               ),
               if (hint != null)
@@ -150,7 +151,7 @@ class _ErrorBody extends StatelessWidget {
           children: [
             AppPressable(
               onTap: onRetry,
-              semanticLabel: '다시 하기',
+              semanticLabel: context.l10n.creditCardRetry,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: colors.creditNoticeBg,
@@ -162,7 +163,7 @@ class _ErrorBody extends StatelessWidget {
                     vertical: _chipPadV.h,
                   ),
                   child: Text(
-                    '다시 하기',
+                    context.l10n.creditCardRetry,
                     style: context.typo.creditBody.copyWith(
                       color: colors.creditAccentText,
                     ),

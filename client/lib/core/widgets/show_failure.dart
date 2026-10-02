@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n_context.dart';
 import '../network/app_failure.dart';
 import 'elum_dialog.dart';
 
@@ -38,6 +39,7 @@ Future<void> showFailure(
   final failure = AppFailure.of(error);
   if (failure.isSilent) return;
 
+  final l10n = context.l10n;
   await showElumDialog<void>(
     context: context,
     // 제목이 `무엇이 안 됐는지`를 이미 말하므로, 네트워크 안내가 있으면 할 일
@@ -47,21 +49,23 @@ Future<void> showFailure(
       title == null
           ? failure.bodyOr(fallback)
           : failure.serverMessage ?? failure.hint ?? fallback,
+      stop: l10n.sentenceStop,
     ),
     code: failure.badgeOr(fallbackCode),
     icon: ElumDialogIcon.alert,
-    actions: const [
-      ElumDialogAction(label: '확인', tone: ElumDialogTone.danger),
+    actions: [
+      ElumDialogAction(label: l10n.commonConfirm, tone: ElumDialogTone.danger),
     ],
   );
 }
 
 /// 제목과 할 일을 시안 문장 모양(`로그인하지 못했어요.\n잠시 후 다시 시도해주세요`)으로 잇는다.
 ///
-/// 제목이 이미 문장부호로 끝나면 마침표를 더하지 않는다 — `?` 뒤에 `.` 가 붙는다.
+/// 제목이 이미 문장부호로 끝나면 문장부호를 더하지 않는다 — `?` 뒤에 `.` 가 붙는다.
+/// 전각 문장부호(`。！？`)도 문장 끝이다. 붙일 문장부호는 언어마다 달라 [stop] 으로 받는다.
 @visibleForTesting
-String failureSentence(String? title, String body) {
+String failureSentence(String? title, String body, {String stop = '.'}) {
   if (title == null || title.isEmpty) return body;
-  final ended = RegExp(r'[.!?]$').hasMatch(title);
-  return '${ended ? title : '$title.'}\n$body';
+  final ended = RegExp(r'[.!?。！？]$').hasMatch(title);
+  return '${ended ? title : '$title$stop'}\n$body';
 }

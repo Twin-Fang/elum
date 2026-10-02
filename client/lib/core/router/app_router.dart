@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/l10n_context.dart';
 import '../../core/config/app_config.dart';
 import '../../features/guardian/presentation/card_review_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
@@ -596,7 +597,8 @@ GoRouter createRouter({
       ),
     ],
     // 잘못된 경로로 들어와도 앱이 죽지 않는다 — 발표 중 치명적이다
-    errorBuilder: (context, state) => const _Placeholder('화면을 찾을 수 없어요'),
+    errorBuilder: (context, state) =>
+        _Placeholder(context.l10n.commonScreenNotFound),
   );
   return router;
 }

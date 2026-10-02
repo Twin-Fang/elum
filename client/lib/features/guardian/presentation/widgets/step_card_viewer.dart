@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/show_failure.dart';
@@ -25,6 +26,7 @@ class StepCardViewer extends ConsumerStatefulWidget {
     required this.cards,
     required this.initialIndex,
     this.routineId = '',
+    this.language = 'ko',
   });
 
   final List<ActionCard> cards;
@@ -35,19 +37,23 @@ class StepCardViewer extends ConsumerStatefulWidget {
   /// 카드 그림을 받아오는 데 쓴다. 비면 대체 일러스트를 그린다.
   final String routineId;
 
+  /// 카드 글·음성의 언어(일과 언어).
+  final String language;
+
   /// 카드를 크게 연다. 카드가 없으면 아무것도 열지 않는다.
   static Future<void> show(
     BuildContext context, {
     required List<ActionCard> cards,
     required int initialIndex,
     String routineId = '',
+    String language = 'ko',
   }) {
     if (cards.isEmpty) return Future.value();
     return showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
       // 배경 막을 읽어 줄 이름 — 기본값은 영어 `Dismiss` 로 읽힌다 (#393 S7)
-      barrierLabel: '카드 닫기',
+      barrierLabel: context.l10n.cardViewerBarrierLabel,
       // 시안 `Scrim` — 검정 70%
       barrierColor: Colors.black.withValues(alpha: 0.7),
       transitionDuration: const Duration(milliseconds: 180),
@@ -55,6 +61,7 @@ class StepCardViewer extends ConsumerStatefulWidget {
         cards: cards,
         initialIndex: initialIndex.clamp(0, cards.length - 1),
         routineId: routineId,
+        language: language,
       ),
       transitionBuilder: (context, animation, _, child) =>
           FadeTransition(opacity: animation, child: child),
@@ -105,7 +112,10 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
     }
 
     setState(() => _speakingId = card.id);
-    final ok = await speech.speak('${card.displayTitle}. ${card.description}');
+    final ok = await speech.speak(
+      '${card.displayTitle}. ${card.description}',
+      language: widget.language,
+    );
     if (!mounted) return;
     setState(() => _speakingId = null);
 
@@ -113,8 +123,8 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
       showFailure(
         context,
         null,
-        title: '소리를 재생하지 못했어요',
-        fallback: '휴대폰 소리를 켜고 다시 눌러주세요',
+        title: context.l10n.cardViewerSoundFailedTitle,
+        fallback: context.l10n.cardViewerSoundFailedFallback,
         fallbackCode: 'E-TTS',
       );
     }
@@ -146,6 +156,7 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
                   card: cards[index],
                   index: index,
                   routineId: widget.routineId,
+                  language: widget.language,
                   onSpeak: () => _speak(cards[index]),
                   isSpeaking: _speakingId == cards[index].id,
                 ),
@@ -159,7 +170,7 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
             child: AppPressable(
               onTap: () => Navigator.of(context).maybePop(),
               scaleDown: AppPressable.scaleIcon,
-              semanticLabel: '카드 닫기',
+              semanticLabel: context.l10n.cardViewerClose,
               child: SizedBox(
                 width: StepCardViewer.closeSize.w,
                 height: StepCardViewer.closeSize.w,

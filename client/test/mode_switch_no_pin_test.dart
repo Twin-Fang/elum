@@ -2,7 +2,6 @@ import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
-import 'package:elum/core/widgets/elum_scaffold.dart';
 import 'package:elum/features/child/presentation/mode_switch_screen.dart';
 import 'package:elum/features/guardian/presentation/pin_change_screen.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
@@ -132,7 +131,7 @@ void main() {
     testWidgets('만들다가 뒤로 가면 이룸이 홈으로 돌아오고 암호는 생기지 않는다', (tester) async {
       await open(tester);
       await enterPin(tester, '1111');
-      await tester.tap(find.bySemanticsLabel(ElumScaffold.backLabel));
+      await tester.tap(find.bySemanticsLabel('뒤로 가기'));
       await tester.pumpAndSettle();
 
       expect(find.text('이룸이 홈'), findsOneWidget);

@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
@@ -15,7 +16,6 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/elum_scaffold.dart';
 import '../application/routine_notifier.dart';
 import '../data/routine_repository.dart';
 import '../domain/routine_suggestion.dart';
@@ -187,7 +187,7 @@ class _BackRow extends StatelessWidget {
             context.popOrHome();
           },
           scaleDown: AppPressable.scaleIcon,
-          semanticLabel: ElumScaffold.backLabel,
+          semanticLabel: context.l10n.commonBack,
           // **자리가 40×40 이다.** 시안(976:4611)이 그 크기로 두고, 안에
           // 화살표를 가운데 놓는다 — 박스 중심과 화살표 중심이 같다.
           // 아래 여백은 이 40을 감안해 잡혀 있으므로(topToSparkles) 여기를
@@ -265,13 +265,13 @@ class _Headline extends StatelessWidget {
         SizedBox(height: _RoutineInputLayout.sparklesToTitle),
         Text(
           // 줄바꿈 위치는 디자인이 정한 대로다
-          '오늘은 어떤 준비가\n필요한가요?',
+          context.l10n.routineInputTitle,
           textAlign: TextAlign.center,
           style: context.typo.promptTitle.copyWith(color: colors.textPrimary),
         ),
         SizedBox(height: context.space.sm),
         Text(
-          'AI 루미가 작은 행동 단계로 나눠드려요',
+          context.l10n.routineInputSubtitle,
           textAlign: TextAlign.center,
           style: context.typo.promptBody.copyWith(color: colors.promptMuted),
         ),
@@ -369,7 +369,7 @@ class _InputFieldState extends State<_InputField> {
                       // 시안(238:1723) 문구 그대로. `적어주세요`로 바꿔 두었던 것을 되돌린다.
                       hintText: _focusNode.hasFocus
                           ? ''
-                          : '평소 이야기하듯 입력해주세요',
+                          : context.l10n.routineInputHint,
                       // 플레이스홀더는 입력 텍스트(promptBody, w500)보다 가늘다 (Figma style_7YRXS7)
                       hintStyle: context.typo.promptPlaceholder.copyWith(
                         color: colors.promptMuted,
@@ -404,7 +404,7 @@ class _SendButton extends StatelessWidget {
       onTap: onTap,
       scaleDown: AppPressable.scaleIcon,
       // 입력창 안 화살표뿐이라 무엇을 하는 버튼인지 이름으로 알린다 (#339)
-      semanticLabel: '보내기',
+      semanticLabel: context.l10n.routineInputSend,
       child: Container(
         // 원형 버튼이라 가로세로 모두 .w
         width: 32.w,

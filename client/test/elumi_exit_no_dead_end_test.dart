@@ -5,7 +5,6 @@ import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
-import 'package:elum/core/widgets/elum_scaffold.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/domain/app_role.dart';
 import 'package:elum/features/link/application/link_reset.dart';
@@ -109,7 +108,7 @@ void main() {
       router.routerDelegate.currentConfiguration.last.matchedLocation;
 
   Future<void> tapBack(WidgetTester tester) async {
-    await tester.tap(find.bySemanticsLabel(ElumScaffold.backLabel).last);
+    await tester.tap(find.bySemanticsLabel('뒤로 가기').last);
     await tester.pumpAndSettle();
   }
 

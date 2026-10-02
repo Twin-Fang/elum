@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/l10n/content_locale.dart';
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -26,7 +28,7 @@ class CardReviewHead extends StatelessWidget {
         SvgPicture.asset(AppAssets.iconSparklesHead, width: 18.w, height: 22.w),
         SizedBox(width: 12.w),
         Text(
-          '카드 $count개를 만들었어요',
+          context.l10n.cardReviewMade(count),
           style: context.typo.promptBody.copyWith(
             color: context.colors.promptMuted,
           ),
@@ -46,11 +48,15 @@ class CardReviewRewardRow extends StatelessWidget {
     super.key,
     required this.reward,
     required this.onTap,
+    this.rewardLanguage = 'ko',
   });
 
   /// 정해진 보상 (`🍪 젤리 먹기`). null 이면 아직 없다.
   final String? reward;
   final VoidCallback onTap;
+
+  /// 보상 글의 언어(일과 언어). 앞 문구와 안내는 화면 문구라 따르지 않는다.
+  final String rewardLanguage;
 
   @override
   Widget build(BuildContext context) {
@@ -76,17 +82,20 @@ class CardReviewRewardRow extends StatelessWidget {
                   children: has
                       ? [
                           TextSpan(
-                            text: '완료 시 ',
+                            text: context.l10n.cardReviewRewardLead,
                             style: style.copyWith(color: colors.rewardLineLead),
                           ),
                           TextSpan(
                             text: reward,
-                            style: style.copyWith(color: colors.textPrimary),
+                            style: style.copyWith(
+                              color: colors.textPrimary,
+                              locale: contentLocaleOf(rewardLanguage),
+                            ),
                           ),
                         ]
                       : [
                           TextSpan(
-                            text: '보상 정하기',
+                            text: context.l10n.cardReviewRewardSet,
                             style: style.copyWith(color: colors.textPrimary),
                           ),
                         ],
@@ -128,7 +137,7 @@ class CardReviewReorderHint extends StatelessWidget {
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              '카드를 길게 눌러 순서를 변경하세요',
+              context.l10n.cardReviewReorderHint,
               maxLines: 1,
               softWrap: false,
               style: context.typo.promptBody.copyWith(
@@ -174,7 +183,7 @@ class CardReviewToolRow extends StatelessWidget {
         children: [
           _ToolButton(
             icon: AppAssets.iconInterlining,
-            label: '카드 순서 변경',
+            label: context.l10n.cardReviewToolReorder,
             pressed: reorderMode,
             // 켜고 끄는 버튼이다 — 눌린 상태에서 다시 누르면 나온다(옮긴 순서는 둔다).
             // 전에는 여기가 막혀 `완료`·`✕` 로만 나올 수 있어 불편했다 (#451).
@@ -182,13 +191,13 @@ class CardReviewToolRow extends StatelessWidget {
           ),
           _ToolButton(
             icon: AppAssets.iconPencilEdit,
-            label: '이 카드 수정',
+            label: context.l10n.cardReviewToolEdit,
             dimmed: reorderMode,
             onTap: reorderMode ? null : onEdit,
           ),
           _ToolButton(
             icon: AppAssets.iconPlus,
-            label: '카드 추가',
+            label: context.l10n.cardReviewToolAdd,
             dimmed: reorderMode,
             onTap: reorderMode ? null : onAdd,
           ),
@@ -281,7 +290,7 @@ class CardReviewReorderTopBar extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             Text(
-              '카드 순서 변경',
+              context.l10n.cardReviewReorderTitle,
               style: context.typo.reorderTitle.copyWith(
                 color: context.colors.textPrimary,
               ),
@@ -292,7 +301,7 @@ class CardReviewReorderTopBar extends StatelessWidget {
               child: AppPressable(
                 onTap: onClose,
                 scaleDown: AppPressable.scaleIcon,
-                semanticLabel: '순서 변경 취소',
+                semanticLabel: context.l10n.cardReviewReorderCancel,
                 child: SvgPicture.asset(
                   AppAssets.iconClose,
                   width: 40.w,
@@ -320,7 +329,7 @@ class CardReviewEmpty extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '만들어진 카드가 없어요',
+              context.l10n.cardReviewEmptyTitle,
               textAlign: TextAlign.center,
               style: context.typo.promptTitle.copyWith(
                 color: context.colors.textPrimary,
@@ -329,7 +338,7 @@ class CardReviewEmpty extends StatelessWidget {
             SizedBox(height: context.space.md),
             Text(
               // 에러 코드를 함께 보여줘야 제보를 추적할 수 있다
-              '다시 만들어 주세요 (E-CARD)',
+              context.l10n.cardReviewEmptyBody,
               style: context.typo.promptBody.copyWith(
                 color: context.colors.promptMuted,
               ),

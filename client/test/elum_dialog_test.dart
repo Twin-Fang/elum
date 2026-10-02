@@ -64,8 +64,7 @@ void main() {
     await open<void>(tester, title: '보상이 왜 필요한가요?', barrierDismissible: true);
 
     expect(find.bySemanticsLabel('Dismiss'), findsNothing);
-    expect(find.bySemanticsLabel(elumDialogBarrierLabel), findsOneWidget);
-    expect(elumDialogBarrierLabel, '팝업 닫기');
+    expect(find.bySemanticsLabel('팝업 닫기'), findsOneWidget);
     handle.dispose();
   });
 
@@ -75,7 +74,7 @@ void main() {
 
     // 눌러도 아무 일이 없는 자리를 `닫기`로 읽으면 낭독기 사용자가 헛누른다.
     expect(find.bySemanticsLabel('Dismiss'), findsNothing);
-    expect(find.bySemanticsLabel(elumDialogBarrierLabel), findsNothing);
+    expect(find.bySemanticsLabel('팝업 닫기'), findsNothing);
     handle.dispose();
   });
 

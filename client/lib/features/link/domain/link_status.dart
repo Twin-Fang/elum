@@ -1,3 +1,6 @@
+import '../../../core/l10n/current_l10n.dart';
+import '../../../core/l10n/date_labels.dart';
+
 /// 연결된 이룸이 휴대폰 하나.
 class LinkedDevice {
   const LinkedDevice({required this.linkId, required this.linkedAt});
@@ -8,7 +11,8 @@ class LinkedDevice {
   /// 상태 화면의 `9월 18일부터`. 시각을 모르면 null — 줄째 그리지 않는다 (#363).
   String? get sinceLabel {
     final at = linkedAt;
-    return at == null ? null : '${at.month}월 ${at.day}일부터';
+    // context 가 없는 층이라 전역 통로를 쓴다 — 위젯 build 안에서만 부른다.
+    return at == null ? null : appL10n.monthDaySince(at);
   }
 
   static LinkedDevice? fromJson(Map<String, dynamic> json) {

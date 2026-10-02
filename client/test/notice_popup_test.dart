@@ -613,7 +613,7 @@ void main() {
       final handle = tester.ensureSemantics();
       await open(tester, designNotice());
       expect(find.bySemanticsLabel('Dismiss'), findsNothing);
-      expect(find.bySemanticsLabel(noticeBarrierLabel), findsOneWidget);
+      expect(find.bySemanticsLabel('공지 닫기'), findsOneWidget);
       handle.dispose();
     });
   });

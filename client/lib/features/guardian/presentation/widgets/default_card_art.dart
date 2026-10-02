@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -55,7 +56,7 @@ class DefaultCardPhotoSlot extends StatelessWidget {
                 ),
                 SizedBox(height: space.xs.h),
                 Text(
-                  '사진 추가',
+                  context.l10n.cardAddPhoto,
                   style: context.typo.body.copyWith(color: colors.textSecondary),
                 ),
               ],
@@ -74,7 +75,7 @@ class DefaultCardPhotoSlot extends StatelessWidget {
     return AppPressable(
       onTap: tap,
       scaleDown: AppPressable.scaleCard,
-      semanticLabel: '사진 추가',
+      semanticLabel: context.l10n.cardAddPhoto,
       child: slot,
     );
   }
@@ -117,7 +118,11 @@ class DefaultCardTitleArt extends StatelessWidget {
                 child: Text(
                   // 큰 글자에서 `입/어요`처럼 어절이 갈라지지 않게 띄어쓰기에서만 줄바꿈한다.
                   // 낭독기에는 원문을 준다.
-                  keepWords(title),
+                  keepWords(
+                    title,
+                    // 카드 글은 일과 언어를 따른다(ContentLocale 이 입힌 값). 화면 언어가 아니다.
+                    locale: DefaultTextStyle.of(context).style.locale,
+                  ),
                   semanticsLabel: title,
                   textAlign: TextAlign.center,
                   style: context.typo.defaultCardTitle.copyWith(

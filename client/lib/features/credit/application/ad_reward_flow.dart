@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/ads/ad_gate.dart';
 import '../../../core/ads/rewarded_ad_loader.dart';
+import '../../../core/l10n/current_l10n.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/server_error_code.dart';
@@ -109,16 +110,16 @@ class AdRewardFlow {
     }
     switch (end) {
       case RewardedAdEnd.loadFailed:
-        return const AdRewardResult.failed(
+        return AdRewardResult.failed(
           AdRewardFailure(
-            sentence: '지금은 광고를 불러올 수 없어요.\n잠시 후 다시 해주세요',
+            sentence: appL10n.adRewardLoadFailed,
             code: 'E-AD-LOAD',
           ),
         );
       case RewardedAdEnd.dismissed:
-        return const AdRewardResult.failed(
+        return AdRewardResult.failed(
           AdRewardFailure(
-            sentence: '광고를 끝까지 봐야 크레딧을 받을 수 있어요.\n처음부터 다시 해주세요',
+            sentence: appL10n.adRewardNotWatched,
             code: 'E-AD-SKIP',
           ),
         );
@@ -155,23 +156,18 @@ class AdRewardFlow {
       }
     }
     // 시청은 끝났는데 확인이 오지 않았다. 늦게 지급될 수 있으니 설정에서 확인하게 한다.
-    return const AdRewardResult.failed(
-      AdRewardFailure(
-        sentence: '크레딧 확인이 늦어지고 있어요.\n잠시 후 설정에서 확인해주세요',
-        code: 'E-AD-WAIT',
-      ),
+    return AdRewardResult.failed(
+      AdRewardFailure(sentence: appL10n.adRewardSlow, code: 'E-AD-WAIT'),
     );
   }
 
   /// 세션을 못 만든 이유. 서버가 문구를 줬으면 그것이 이긴다(AppFailure 규칙).
   AdRewardFailure _sessionFailure(AppFailure failure) {
     final fallback = switch (failure.server?.code) {
-      ServerErrorCode.adRewardDailyLimit =>
-        '오늘은 광고로 받을 수 있는 크레딧을 모두 받았어요.\n내일 다시 해주세요',
-      ServerErrorCode.adRewardAccountFrozen =>
-        '지금은 광고로 크레딧을 받을 수 없어요.\n계정 상태를 확인해주세요',
-      ServerErrorCode.adRewardDisabled => '지금은 광고로 크레딧을 받을 수 없어요.',
-      _ => '지금은 광고로 크레딧을 받을 수 없어요.\n잠시 후 다시 해주세요',
+      ServerErrorCode.adRewardDailyLimit => appL10n.adRewardDailyLimit,
+      ServerErrorCode.adRewardAccountFrozen => appL10n.adRewardCheckAccount,
+      ServerErrorCode.adRewardDisabled => appL10n.adRewardUnavailable,
+      _ => appL10n.adRewardUnavailableRetry,
     };
     return AdRewardFailure(
       sentence: failure.serverMessage ?? failure.hint ?? fallback,
@@ -183,19 +179,19 @@ class AdRewardFlow {
   AdRewardFailure _rejectedFailure(String? reason) {
     final (sentence, code) = switch (reason) {
       'DAILY_LIMIT' => (
-        '오늘은 광고로 받을 수 있는 크레딧을 모두 받았어요.\n내일 다시 해주세요',
+        appL10n.adRewardDailyLimit,
         ServerErrorCode.adRewardDailyLimit.wire,
       ),
       'FROZEN' => (
-        '지금은 광고로 크레딧을 받을 수 없어요.\n계정 상태를 확인해주세요',
+        appL10n.adRewardCheckAccount,
         ServerErrorCode.adRewardAccountFrozen.wire,
       ),
       'DISABLED' => (
-        '지금은 광고로 크레딧을 받을 수 없어요.',
+        appL10n.adRewardUnavailable,
         ServerErrorCode.adRewardDisabled.wire,
       ),
       // EXPIRED · NOT_PENDING · AD_UNIT · 모르는 값 — 사용자가 할 일은 같다.
-      _ => ('크레딧을 받지 못했어요.\n잠시 후 다시 해주세요', 'AD_REWARD_${reason ?? 'UNKNOWN'}'),
+      _ => (appL10n.adRewardFailed, 'AD_REWARD_${reason ?? 'UNKNOWN'}'),
     };
     return AdRewardFailure(sentence: sentence, code: code);
   }

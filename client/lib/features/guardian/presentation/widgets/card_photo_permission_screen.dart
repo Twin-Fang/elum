@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_scaffold.dart';
@@ -55,13 +56,15 @@ class CardPhotoPermissionScreen extends ConsumerWidget {
     return ElumScaffold(
       onBack: () => Navigator.of(context).pop(PhotoPermissionChoice.back),
       bottomButton: ElumButton(
-        label: _cameraDenied ? '갤러리에서 고르기' : '사진 찍기',
+        label: _cameraDenied
+            ? context.l10n.cardPhotoPermissionGallery
+            : context.l10n.cardPhotoPermissionTake,
         onPressed: () =>
             Navigator.of(context).pop(PhotoPermissionChoice.alternative),
       ),
       belowButton: settings.available
           ? ElumButton(
-              label: '설정 열기',
+              label: context.l10n.cardPhotoPermissionOpenSettings,
               backgroundColor: colors.editChipBg,
               labelColor: colors.textPrimary,
               onPressed: () => _openSettings(context, settings),
@@ -83,15 +86,17 @@ class CardPhotoPermissionScreen extends ConsumerWidget {
               ),
               SizedBox(height: 24.h),
               Text(
-                _cameraDenied ? '카메라를 쓸 수 없어요' : '사진을 볼 수 없어요',
+                _cameraDenied
+                    ? context.l10n.cardPhotoPermissionCameraTitle
+                    : context.l10n.cardPhotoPermissionGalleryTitle,
                 textAlign: TextAlign.center,
                 style: typo.sheetHeading.copyWith(color: colors.textPrimary),
               ),
               SizedBox(height: 8.h),
               Text(
                 _cameraDenied
-                    ? '휴대폰 설정에서 카메라를 켜면 사진을 찍을 수 있어요'
-                    : '휴대폰 설정에서 사진 접근을 켜면 고를 수 있어요',
+                    ? context.l10n.cardPhotoPermissionCameraBody
+                    : context.l10n.cardPhotoPermissionGalleryBody,
                 textAlign: TextAlign.center,
                 style: typo.bodySmall.copyWith(
                   color: colors.textSecondary,
@@ -107,13 +112,15 @@ class CardPhotoPermissionScreen extends ConsumerWidget {
 
   /// 설정을 못 열어도 화면에 남는다 — 갤러리 길이 아직 있다.
   Future<void> _openSettings(BuildContext context, PhotoSettings settings) async {
+    // await 뒤에는 context 를 읽지 않으므로 문구를 미리 잡아 둔다
+    final l10n = context.l10n;
     final opened = await settings.open();
     if (opened || !context.mounted) return;
     await showFailure(
       context,
       null,
-      title: '설정을 열지 못했어요',
-      fallback: '휴대폰 설정에서 직접 켜 주세요',
+      title: l10n.cardPhotoSettingsFailedTitle,
+      fallback: l10n.cardPhotoSettingsFailedFallback,
       fallbackCode: 'E-PHOTO-SETTINGS',
     );
   }

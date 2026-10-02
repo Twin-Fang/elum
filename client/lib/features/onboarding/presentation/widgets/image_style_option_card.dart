@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -118,7 +119,10 @@ class ImageStyleOptionCard extends StatelessWidget {
                 Text(
                   // Flutter 는 한글을 글자 단위로 끊어 `넣어/요.` 처럼 갈라진다 —
                   // 띄어쓰기에서만 줄바꿈하게 한다. 낭독기에는 원문을 준다.
-                  keepWords(_breakAtSentence(style.description)),
+                  keepWords(
+                    _breakAtSentence(style.description),
+                    locale: context.appLocale,
+                  ),
                   semanticsLabel: style.description,
                   // 색 `#74757D`. 두 줄인 설명만 줄 높이 1.2 다(`1274:10078`).
                   style: typo.imageStyleOptionBody.copyWith(

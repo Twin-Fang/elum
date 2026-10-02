@@ -1,0 +1,14 @@
+creditResetAt: "{month}월 {day}일({weekday}) {hour}시" # lib/features/credit/domain/credit_summary.dart:126 `'${at.month}월 ${at.day}일(${days[..]}) ${at.hour}시$minute'` 와 한 글자씩 대조 — 분이 0이라 minute 가 빈 문자열일 때의 결과와 같다. 끝의 $minute 보간 때문에 한 리터럴이 아니다
+creditResetAtMinute: "{month}월 {day}일({weekday}) {hour}시 {minute}분" # 같은 줄 126 과 대조 — minute 가 ' ${at.minute}분'(줄 125, 앞 공백 한 칸 포함)일 때의 결과와 같다
+routineForeignCreator: "{name}이 만든 일과예요" # lib/shared/models/routine.dart:92 `'$name${name.subjectParticle} 만든 일과예요'` 와 한 글자씩 대조 — 받침 있는 이름의 결과(subjectParticle 이, korean_particle.dart:23). 조사 도우미 호출이라 한 리터럴이 아니다
+routineForeignCreator: "{name}가 만든 일과예요" # 같은 줄 92 와 대조 — 받침 없는 이름의 결과(subjectParticle 가). 조사 도우미 호출이라 한 리터럴이 아니다
+inviteCodeAsk: "받은 분이 {name}을 함께 돌봐요" # lib/features/profile/presentation/invite_code_screen.dart:217(기준 커밋 3cfec577) `'받은 분이 $_name${_name.objectParticle} 함께 돌봐요'` 와 한 글자씩 대조 — 받침 있는 이름의 결과(objectParticle 을). 조사 도우미 호출이라 한 리터럴이 아니다
+inviteCodeAsk: "받은 분이 {name}를 함께 돌봐요" # 같은 줄 217 과 대조 — 받침 없는 이름의 결과(objectParticle 를). 조사 도우미 호출이라 한 리터럴이 아니다
+inviteJoined: "{name}을 함께 돌보게 됐어요" # lib/features/profile/presentation/invite_enter_screen.dart:214(기준 커밋 3cfec577) `'$name${name.objectParticle} 함께 돌보게 됐어요'` 와 한 글자씩 대조 — 받침 있는 이름의 결과(을). 조사 도우미 호출이라 한 리터럴이 아니다
+inviteJoined: "{name}를 함께 돌보게 됐어요" # 같은 줄 214 와 대조 — 받침 없는 이름의 결과(를). 조사 도우미 호출이라 한 리터럴이 아니다
+childHomeGreeting: "오늘 {name}이\n할 일들이에요. 힘내봐요!" # lib/features/child/presentation/child_home_screen.dart:118(기준 커밋 3cfec577) `'오늘 $childName${childName.subjectParticle}\n할 일들이에요. 힘내봐요!'` 와 한 글자씩 대조 — 받침 있는 이름의 결과(subjectParticle 이, korean_particle.dart:23). 조사 도우미 호출이라 한 리터럴이 아니다
+childHomeGreeting: "오늘 {name}가\n할 일들이에요. 힘내봐요!" # 같은 줄 118 과 대조 — 받침 없는 이름의 결과(subjectParticle 가). 조사 도우미 호출이라 한 리터럴이 아니다
+rewardRuruMessage: "{name}이 할 일을 해내서\n루루가 선물을 가져왔다고 해요" # lib/features/child/domain/reward_character.dart:35(기준 커밋 3cfec577) `'{name}{josa} 할 일을 해내서\n루루가 선물을 가져왔다고 해요'` 와 한 글자씩 대조 — {name} 은 이름, {josa} 는 줄 61 의 name.subjectParticle 로 치환되므로 받침 있는 이름의 결과(이)다. 조사가 런타임 치환 토큰이라 한 리터럴이 아니다
+rewardRuruMessage: "{name}가 할 일을 해내서\n루루가 선물을 가져왔다고 해요" # 같은 줄 35 와 대조 — 받침 없는 이름의 결과(가)다. 조사가 런타임 치환 토큰이라 한 리터럴이 아니다
+rewardLumiMessage: "할 일을 해내서 루미가\n{name}에게 별을 가져왔어요" # lib/features/child/domain/reward_character.dart:21(기준 커밋 3cfec577) `'할 일을 해내서 루미가\n{name}에게 별을 가져왔어요'` 와 한 글자씩 대조 — 글이 같고 원본의 `{name}` 은 줄 60 의 replaceAll 이 이름으로 바꾸는 토큰이라 ARB 자리표시자와 같다. 소스에선 `{name}` 이 평문 글자라 자리 개수가 안 맞아 수용한다
+rewardPopoMessage: "포포가 {name}에게\n축하의 선물로 큰 별을 가져왔어요" # lib/features/child/domain/reward_character.dart:28(기준 커밋 3cfec577) `'포포가 {name}에게\n축하의 선물로 큰 별을 가져왔어요'` 와 한 글자씩 대조 — 글이 같고 `{name}` 은 줄 60 의 replaceAll 토큰이라 ARB 자리표시자와 같다. 소스에선 평문 글자라 자리 개수가 안 맞아 수용한다

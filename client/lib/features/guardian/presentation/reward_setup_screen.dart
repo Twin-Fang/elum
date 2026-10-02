@@ -7,6 +7,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
+import '../../../core/l10n/current_l10n.dart';
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -54,10 +56,7 @@ class RewardSetupScreen extends ConsumerStatefulWidget {
   static const aurora = AuroraTone.reward;
 
   /// `보상이 왜 필요한가요?` 팝업 본문 (#380 결정 3 · 개발 문구 — 디자인이 나오면 교체).
-  static const whyMessage =
-      '일과를 마친 뒤 기다리는 것이 있으면 이룸이가 끝까지 해낼 힘이 생겨요.\n'
-      '한 달 뒤 선물보다 오늘 바로 줄 수 있는 작은 것이 더 잘 통해요.\n'
-      '정하지 않아도 일과는 만들 수 있어요.';
+  static String get whyMessage => appL10n.rewardWhyMessage;
 
   /// 카드 검토 화면에서 뒤늦게 고치러 들어왔는가 (이슈 #239).
   ///
@@ -142,8 +141,8 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
         await showFailure(
           context,
           failure,
-          title: '보상을 저장하지 못했어요',
-          fallback: '잠시 후 다시 시도해주세요',
+          title: context.l10n.rewardSaveFailedTitle,
+          fallback: context.l10n.rewardSaveFailedFallback,
           fallbackCode: 'E-REWARD',
         );
         if (!mounted) return;
@@ -183,7 +182,7 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
   /// 있는 것"을 살렸다.
   Future<void> _explain() => showElumDialog<void>(
     context: context,
-    title: '보상이 왜 필요한가요?',
+    title: context.l10n.rewardWhyTitle,
     message: RewardSetupScreen.whyMessage,
     barrierDismissible: true,
     // 360 폭에서 `이룸이 / 가`처럼 낱말 가운데서 꺾였다 (#393 S4)
@@ -221,7 +220,7 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
           // 도움말 하단(659) → CTA(675)
           SizedBox(height: _RewardLayout.helpToCta),
           ElumButton(
-            label: '다음',
+            label: context.l10n.commonNext,
             onPressed: _rewardText.isEmpty ? null : _next,
           ),
         ],
@@ -311,13 +310,13 @@ class _Headline extends StatelessWidget {
       children: [
         Text(
           // 줄바꿈 위치는 시안이 정한 대로다
-          '일과가 끝나면\n어떤 보상을 줄까요?',
+          context.l10n.rewardHeadlineTitle,
           textAlign: TextAlign.center,
           style: context.typo.promptTitle.copyWith(color: colors.textPrimary),
         ),
         SizedBox(height: _RewardLayout.titleToBody),
         Text(
-          '일과를 완료하는 데 큰 동기가 될 거예요',
+          context.l10n.rewardHeadlineBody,
           textAlign: TextAlign.center,
           style: context.typo.promptBody.copyWith(color: colors.promptMuted),
         ),
@@ -384,7 +383,7 @@ class _HelpLink extends StatelessWidget {
 
     return AppPressable(
       onTap: onTap,
-      semanticLabel: '보상이 왜 필요한가요?',
+      semanticLabel: context.l10n.rewardWhyTitle,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -402,7 +401,7 @@ class _HelpLink extends StatelessWidget {
           SizedBox(width: _gap.w),
           Flexible(
             child: Text(
-              '보상이 왜 필요한가요?',
+              context.l10n.rewardWhyTitle,
               style: context.typo.helpLink.copyWith(color: color),
             ),
           ),
@@ -438,7 +437,7 @@ class _LaterLink extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: space.md.w),
         child: Text(
-          '나중에 할게요',
+          context.l10n.rewardLater,
           textAlign: TextAlign.center,
           style: context.typo.linkLater.copyWith(
             color: colors.linkLaterLabel,

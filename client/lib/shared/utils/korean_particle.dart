@@ -20,14 +20,14 @@ extension KoreanParticle on String {
   }
 
   /// 이/가
-  String get subjectParticle => _hasFinalConsonant ? '이' : '가';
+  String get subjectParticle => _hasFinalConsonant ? '이' : '가'; // l10n-ignore: 한국어 조사 확장 자체, 사용처가 batchimOf 로 바뀐 뒤 삭제 대상
 
   /// 을/를
-  String get objectParticle => _hasFinalConsonant ? '을' : '를';
+  String get objectParticle => _hasFinalConsonant ? '을' : '를'; // l10n-ignore: 한국어 조사 확장 자체, 사용처가 batchimOf 로 바뀐 뒤 삭제 대상
 
   /// 은/는
-  String get topicParticle => _hasFinalConsonant ? '은' : '는';
+  String get topicParticle => _hasFinalConsonant ? '은' : '는'; // l10n-ignore: 한국어 조사 확장 자체, 사용처가 batchimOf 로 바뀐 뒤 삭제 대상
 
   /// 와/과
-  String get withParticle => _hasFinalConsonant ? '과' : '와';
+  String get withParticle => _hasFinalConsonant ? '과' : '와'; // l10n-ignore: 한국어 조사 확장 자체, 사용처가 batchimOf 로 바뀐 뒤 삭제 대상
 }

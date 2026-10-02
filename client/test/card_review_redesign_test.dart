@@ -1351,7 +1351,7 @@ class _Repo implements RoutineRepository {
 
 class _SilentSpeech implements SpeechService {
   @override
-  Future<bool> speak(String text) async => true;
+  Future<bool> speak(String text, {String language = 'ko'}) async => true;
 
   @override
   Future<void> stop() async {}

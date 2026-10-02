@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../../../core/l10n/current_l10n.dart';
 import '../../link/domain/link_code.dart';
 
 /// 초대 링크 — **초대 코드를 대신 전달하는 수단** (이슈 #365).
@@ -175,12 +176,11 @@ class InviteLink {
     final normalized = _checked(code);
     // 올림에 가깝게: 발급 직후 599초를 `9분` 이라 하면 어색하다. 5초까지 봐준다 (실제보다 길게 말하지는 않는다).
     final minutes = math.max(1, (validFor.inSeconds + 5) ~/ 60);
-    return '이룸이를 함께 돌봐요. 아래 링크를 누르면 이룸 앱에 초대 코드가 채워져요.\n'
-        '초대 코드는 $minutes분 동안만 쓸 수 있어요.\n'
-        '\n'
-        '${shareUrl(normalized)}\n'
-        '\n'
-        '링크가 열리지 않으면 앱에서 직접 넣어주세요.\n'
-        '초대 코드 ${LinkCode.grouped(normalized)}';
+    // 보내는 사람의 앱 언어로 만든다(받는 사람의 언어는 알 수 없다). 부를 때마다 읽는다.
+    return appL10n.inviteShareMessage(
+      minutes,
+      shareUrl(normalized),
+      LinkCode.grouped(normalized),
+    );
   }
 }
