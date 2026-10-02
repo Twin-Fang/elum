@@ -22,6 +22,9 @@
 - REST API는 JWT(accessToken만, stateless), 관리자 페이지는 세션(formLogin)
 - `.gitignore` 현재 상태 유지(force add 금지)
 - request DTO(`dto/request` 패키지)에 `jakarta.validation.constraints` 계열 검증 어노테이션(`@NotBlank`, `@NotNull`, `@Size`, `@Pattern` 등)을 추가하지 않는다. 신규 DTO 작성 시에도 적용하지 않는다
+- 새 `ErrorCode`를 만들면 `i18n/messages_ko.properties`에 문구를 함께 더한다. 빠지면 `ErrorMessagesStartupGuard`가 서버 기동을 막는다. 사용자에게 가는 문장은 `ErrorCode`에 쓰지 않는다
+- 서버가 만들어 내려주는 사용자 노출 문장(추천 일과·폴백 질문)은 코드가 아니라 `i18n/routine-phrases_*.properties`에 둔다. 이 파일을 채워야 관리자 `ENABLED_CONTENT_LOCALES`에서 그 언어를 켤 수 있다
+- 일과 AI 출력은 아직 한국어 고정이고 `Routine.language`만 요청 언어로 저장된다. AI 출력 언어 지정이 배포되기 전에는 `ko` 외 언어를 켜지 않는다
 
 ## 배포 서버 로그 확인
 
