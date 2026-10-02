@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -45,21 +46,23 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
   bool _busy = false;
 
   Future<void> _confirmAndRevoke(LinkedDevice device) async {
+    // await 뒤에서 context 를 쓰지 않으려고 미리 잡는다
+    final l10n = context.l10n;
     // 되돌릴 수 있다고 함께 말한다 — 번호를 다시 만들면 된다 (docs 원칙 ④).
     // 탈퇴처럼 무겁지 않으나 이룸이 휴대폰이 바로 일과를 못 보게 되므로 확인을 거친다.
     final ok = await showElumDialog<bool>(
       context: context,
       icon: ElumDialogIcon.alert,
-      title: '연결을 끊을까요?',
-      message: '이룸이 휴대폰에서 일과를 볼 수 없어요\n다시 연결하려면 새 암호를 만들면 돼요',
-      actions: const [
+      title: l10n.linkStatusRevokeConfirmTitle,
+      message: l10n.linkStatusRevokeConfirmMessage,
+      actions: [
         ElumDialogAction(
-          label: '취소',
+          label: l10n.commonCancel,
           value: false,
           tone: ElumDialogTone.neutral,
         ),
         ElumDialogAction(
-          label: '연결 끊기',
+          label: l10n.linkStatusRevokeConfirmAction,
           value: true,
           tone: ElumDialogTone.danger,
         ),
@@ -79,8 +82,8 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
       await showFailure(
         context,
         result.failure,
-        title: '연결을 끊지 못했어요',
-        fallback: '잠시 후 다시 시도해주세요',
+        title: l10n.linkStatusRevokeFailTitle,
+        fallback: l10n.linkStatusRevokeFailedFallback,
         fallbackCode: 'E-LINK-OUT',
       );
       return;
@@ -92,7 +95,9 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(
       SnackBar(
         content: Text(
-          result.outcome == RevokeOutcome.done ? '연결을 끊었어요' : '이미 끊겨 있어요',
+          result.outcome == RevokeOutcome.done
+              ? l10n.linkStatusRevoked
+              : l10n.linkStatusAlreadyRevoked,
         ),
       ),
     );
@@ -111,7 +116,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
     return ElumScaffold(
       onBack: _busy ? null : () => context.pop(),
       // 설정 묶음 시안과 같은 머리(제목이 뒤로가기와 한 줄, 뒤로가기 y=67)
-      title: '이룸이 휴대폰',
+      title: context.l10n.linkStatusTitle,
       backTop: 67,
       horizontalPadding: 16,
       child: SingleChildScrollView(
@@ -141,7 +146,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
       padding: EdgeInsets.only(top: 80.h),
       child: ElumErrorView.failure(
         failure,
-        fallback: '연결 상태를 불러오지 못했어요',
+        fallback: context.l10n.linkStatusLoadFailedFallback,
         fallbackCode: 'E-LINK-STATUS',
         onRetry: () => ref.invalidate(linkStatusProvider),
         compact: true,
@@ -161,14 +166,14 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
           _DeviceBlock(
             device: device,
             // 여러 대면 구분할 이름을 붙인다. 한 대면 시안 그대로 `연결됨`이다.
-            title: many ? '이룸이 휴대폰 ${i + 1}' : null,
+            title: many ? context.l10n.linkDeviceNumbered(i + 1) : null,
             onDisconnect: _busy ? null : () => _confirmAndRevoke(device),
           ),
         ],
         SizedBox(height: 16.h),
         // 끊으면 어떻게 되는지 — 버튼 아래 한 줄 (명세 §8-5)
         Text(
-          '끊으면 이룸이 휴대폰에서\n일과를 볼 수 없어요',
+          context.l10n.linkStatusRevokeHint,
           textAlign: TextAlign.center,
           style: context.typo.promptBody.copyWith(
             color: context.colors.textSecondary,
@@ -185,7 +190,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
       child: Column(
         children: [
           Text(
-            '연결된 휴대폰이 없어요',
+            context.l10n.linkStatusEmpty,
             textAlign: TextAlign.center,
             style: context.typo.subtitle.copyWith(
               color: context.colors.textPrimary,
@@ -201,7 +206,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Text(
-                '이룸이 휴대폰 연결하기',
+                context.l10n.linkStatusConnectAction,
                 style: context.typo.settingsTileLabel.copyWith(
                   color: context.colors.textPrimary,
                 ),
@@ -250,7 +255,7 @@ class _DeviceBlock extends StatelessWidget {
                 SizedBox(height: 8.h),
               ],
               Text(
-                '연결됨',
+                context.l10n.linkStatusConnected,
                 style: typo.subtitle.copyWith(color: colors.textPrimary),
               ),
               if (since != null) ...[
@@ -280,7 +285,7 @@ class _DeviceBlock extends StatelessWidget {
               ),
             ),
             child: Text(
-              '연결 끊기',
+              context.l10n.linkStatusRevokeButton,
               style: typo.settingsTileLabel.copyWith(
                 color: onDisconnect == null
                     ? colors.settingsChevron

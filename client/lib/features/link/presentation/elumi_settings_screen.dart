@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_info_tile.dart';
 import '../../../core/widgets/elum_dialog.dart';
@@ -47,26 +48,24 @@ class ElumiSettingsScreen extends ConsumerStatefulWidget {
 
 /// 두 줄이 같은 일을 하되 팝업 문구가 갈린다.
 enum _Exit {
-  logout(
-    title: '로그아웃 하실건가요?',
-    message: '이 휴대폰의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요',
-    failTitle: '로그아웃하지 못했어요',
-  ),
-  withdraw(
-    title: '회원탈퇴 하실건가요?',
-    message: '이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에\n그대로 남아요',
-    failTitle: '탈퇴하지 못했어요',
-  );
+  logout,
+  withdraw;
 
-  const _Exit({
-    required this.title,
-    required this.message,
-    required this.failTitle,
-  });
+  // 문구는 값으로 들고 있지 않고 부를 때 읽는다 — 언어가 바뀌어도 굳지 않는다.
+  String title(AppLocalizations l10n) => switch (this) {
+    logout => l10n.elumiSettingsLogoutTitle,
+    withdraw => l10n.elumiSettingsWithdrawTitle,
+  };
 
-  final String title;
-  final String message;
-  final String failTitle;
+  String message(AppLocalizations l10n) => switch (this) {
+    logout => l10n.elumiSettingsLogoutMessage,
+    withdraw => l10n.elumiSettingsWithdrawMessage,
+  };
+
+  String failTitle(AppLocalizations l10n) => switch (this) {
+    logout => l10n.elumiSettingsLogoutFailTitle,
+    withdraw => l10n.elumiSettingsWithdrawFailTitle,
+  };
 }
 
 class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
@@ -74,18 +73,24 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
   bool _busy = false;
 
   Future<void> _exit(_Exit kind) async {
+    // await 뒤에서 context 를 쓰지 않으려고 미리 잡는다
+    final l10n = context.l10n;
     final ok = await showElumDialog<bool>(
       context: context,
       icon: ElumDialogIcon.alert,
-      title: kind.title,
-      message: kind.message,
-      actions: const [
+      title: kind.title(l10n),
+      message: kind.message(l10n),
+      actions: [
         ElumDialogAction(
-          label: '취소',
+          label: l10n.commonCancel,
           value: false,
           tone: ElumDialogTone.neutral,
         ),
-        ElumDialogAction(label: '확인', value: true, tone: ElumDialogTone.danger),
+        ElumDialogAction(
+          label: l10n.commonConfirm,
+          value: true,
+          tone: ElumDialogTone.danger,
+        ),
       ],
     );
     if (ok != true || !mounted) return;
@@ -106,8 +111,8 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
       await showFailure(
         context,
         failure,
-        title: kind.failTitle,
-        fallback: '잠시 후 다시 시도해주세요',
+        title: kind.failTitle(l10n),
+        fallback: l10n.elumiSettingsExitFailedFallback,
         fallbackCode: 'E-LINK-OUT',
       );
       return;
@@ -125,7 +130,7 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
       // 끊는 중에는 뒤로 갈 수 없다 — 결과를 알릴 곳이 없어진다
       onBack: _busy ? null : () => context.pop(),
       // 보호자 설정과 같다: 제목이 뒤로가기와 **같은 줄**에 서고 줄은 x=16 에서 시작한다.
-      title: '설정',
+      title: context.l10n.elumiSettingsTitle,
       backTop: 67,
       horizontalPadding: 16,
       // 글자를 키우면 한 화면을 넘을 수 있어 스크롤로 받는다
@@ -140,13 +145,13 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
             // 카드를 체크할 때 진동으로 알려줄지 (#515). 보호자 설정과 같은 값을 본다.
             // 시안이 없어 **임시 시안**이다 — 읽을거리 위, 설정값을 맨 앞에 둔다.
             SettingsSwitchTile(
-              label: '카드 체크 진동',
+              label: context.l10n.elumiSettingsHapticLabel,
               value: ref.watch(childHapticOnProvider),
               onChanged: (on) =>
                   ref.read(childHapticOnProvider.notifier).set(on),
             ),
             SettingsTile(
-              label: '약관 및 개인정보처리방침',
+              label: context.l10n.elumiSettingsTermsLabel,
               onTap: _busy
                   ? null
                   : () => Navigator.of(context).push(
@@ -157,12 +162,12 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
             ),
             const AppInfoTile(),
             SettingsTile(
-              label: '로그아웃',
+              label: context.l10n.elumiSettingsLogoutLabel,
               onTap: _busy ? null : () => _exit(_Exit.logout),
             ),
             // 위험색이되 가장 약하게 (docs 5-3). 위 줄과 간격으로 떨어뜨린다.
             SettingsTile(
-              label: '회원탈퇴',
+              label: context.l10n.elumiSettingsWithdrawLabel,
               destructive: true,
               onTap: _busy ? null : () => _exit(_Exit.withdraw),
             ),

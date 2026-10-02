@@ -829,6 +829,282 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'설정 화면에서 다시 확인해주세요'**
   String get pinSaveFailedFallback;
+
+  /// 이룸이 휴대폰 설정 페이지 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'설정'**
+  String get elumiSettingsTitle;
+
+  /// 이룸이 설정의 카드 체크 진동 스위치 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 체크 진동'**
+  String get elumiSettingsHapticLabel;
+
+  /// 이룸이 설정의 약관 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'약관 및 개인정보처리방침'**
+  String get elumiSettingsTermsLabel;
+
+  /// 이룸이 설정의 로그아웃 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'로그아웃'**
+  String get elumiSettingsLogoutLabel;
+
+  /// 이룸이 설정의 회원탈퇴 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'회원탈퇴'**
+  String get elumiSettingsWithdrawLabel;
+
+  /// 로그아웃 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'로그아웃 하실건가요?'**
+  String get elumiSettingsLogoutTitle;
+
+  /// 로그아웃 확인 팝업 본문
+  ///
+  /// In ko, this message translates to:
+  /// **'이 휴대폰의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요'**
+  String get elumiSettingsLogoutMessage;
+
+  /// 로그아웃 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'로그아웃하지 못했어요'**
+  String get elumiSettingsLogoutFailTitle;
+
+  /// 회원탈퇴 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'회원탈퇴 하실건가요?'**
+  String get elumiSettingsWithdrawTitle;
+
+  /// 회원탈퇴 확인 팝업 본문
+  ///
+  /// In ko, this message translates to:
+  /// **'이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에\n그대로 남아요'**
+  String get elumiSettingsWithdrawMessage;
+
+  /// 회원탈퇴 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴하지 못했어요'**
+  String get elumiSettingsWithdrawFailTitle;
+
+  /// 연결 끊기 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get elumiSettingsExitFailedFallback;
+
+  /// 보호자 설정의 이룸이 휴대폰 연결 상태 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 휴대폰'**
+  String get linkStatusTitle;
+
+  /// 연결 끊기 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'연결을 끊을까요?'**
+  String get linkStatusRevokeConfirmTitle;
+
+  /// 연결 끊기 확인 팝업 본문
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 휴대폰에서 일과를 볼 수 없어요\n다시 연결하려면 새 암호를 만들면 돼요'**
+  String get linkStatusRevokeConfirmMessage;
+
+  /// 연결 끊기 확인 팝업의 위험 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'연결 끊기'**
+  String get linkStatusRevokeConfirmAction;
+
+  /// 연결 끊기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'연결을 끊지 못했어요'**
+  String get linkStatusRevokeFailTitle;
+
+  /// 연결 끊기 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get linkStatusRevokeFailedFallback;
+
+  /// 연결 끊기 성공 스낵바
+  ///
+  /// In ko, this message translates to:
+  /// **'연결을 끊었어요'**
+  String get linkStatusRevoked;
+
+  /// 이미 끊긴 연결을 끊으려 했을 때 스낵바
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 끊겨 있어요'**
+  String get linkStatusAlreadyRevoked;
+
+  /// 연결 상태 조회 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'연결 상태를 불러오지 못했어요'**
+  String get linkStatusLoadFailedFallback;
+
+  /// 연결된 휴대폰이 여러 대일 때 붙이는 번호 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 휴대폰 {number}'**
+  String linkDeviceNumbered(int number);
+
+  /// 연결된 휴대폰의 상태 글자
+  ///
+  /// In ko, this message translates to:
+  /// **'연결됨'**
+  String get linkStatusConnected;
+
+  /// 연결된 휴대폰 카드의 연결 끊기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'연결 끊기'**
+  String get linkStatusRevokeButton;
+
+  /// 연결 끊기 버튼 아래 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'끊으면 이룸이 휴대폰에서\n일과를 볼 수 없어요'**
+  String get linkStatusRevokeHint;
+
+  /// 연결된 휴대폰이 하나도 없을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'연결된 휴대폰이 없어요'**
+  String get linkStatusEmpty;
+
+  /// 연결 없음 상태에서 연결 암호 만들기로 가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 휴대폰 연결하기'**
+  String get linkStatusConnectAction;
+
+  /// 설정에서 연 연결 암호 화면의 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 휴대폰 연결'**
+  String get linkCodeSettingsTitle;
+
+  /// 보호자 휴대폰의 연결 암호 화면 제목. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}의 휴대폰을\n연결할까요?'**
+  String linkCodeAskTitle(String name);
+
+  /// 연결 암호 화면의 설명. name 은 이룸이 호칭
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}의 휴대폰에서 아래 코드를 입력하세요'**
+  String linkCodeEnterHint(String name);
+
+  /// 연결 암호 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'암호를 만들지 못했어요. 다시 해주세요'**
+  String get linkCodeIssueFailedFallback;
+
+  /// 연결 암호 화면의 타이머 자리에 뜨는 만료 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'암호가 만료됐어요'**
+  String get linkCodeExpired;
+
+  /// 이룸이 휴대폰이 연결됐을 때 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'휴대폰 연결에 성공했어요!'**
+  String get linkCodeSuccessTitle;
+
+  /// 온보딩에서 연 연결 암호 화면의 시작 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'시작하기'**
+  String get linkCodeStartButton;
+
+  /// 온보딩에서 연 연결 암호 화면의 건너뛰기 글자
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에 할게요'**
+  String get linkCodeLater;
+
+  /// 연결 암호 화면의 다시 만들기 칩(시안 그대로)
+  ///
+  /// In ko, this message translates to:
+  /// **'코드 다시 만들기'**
+  String get linkRetryChipLabel;
+
+  /// 이룸이 휴대폰의 코드 입력 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자에게서 받은 코드를\n입력해주세요'**
+  String get linkEnterTitle;
+
+  /// 이룸이 휴대폰의 코드 입력 안내. linkEnterGuidePath 를 문장 안에 그대로 포함해야 밑줄이 그려진다
+  ///
+  /// In ko, this message translates to:
+  /// **'코드는 보호자 휴대폰의\n설정 → 이룸이 휴대폰 연결하기에 있어요'**
+  String get linkEnterGuide;
+
+  /// linkEnterGuide 안에서 밑줄을 그을 부분. 안내문에 똑같이 들어 있어야 한다
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 → 이룸이 휴대폰 연결하기'**
+  String get linkEnterGuidePath;
+
+  /// 연결이 밖에서 끊겨 코드 입력 화면으로 돌아왔을 때 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'연결이 끊어졌어요'**
+  String get linkEnterLinkLost;
+
+  /// 코드 입력 화면의 시작 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'시작하기'**
+  String get linkEnterStartButton;
+
+  /// 여섯 칸 입력 영역을 화면 낭독기가 읽는 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'연결 암호 넣기'**
+  String get linkEnterInputLabel;
+
+  /// 연결 암호 입력 실패(모양이 틀리거나 없는 암호)
+  ///
+  /// In ko, this message translates to:
+  /// **'암호가 맞지 않아요'**
+  String get linkEnterWrongCode;
+
+  /// 연결 암호가 만료됐을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'암호가 만료됐어요. 새 암호를 받아주세요'**
+  String get linkEnterExpired;
+
+  /// 연결 중 오프라인일 때 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'연결하지 못했어요. 인터넷을 확인해주세요'**
+  String get linkEnterOffline;
+
+  /// 연결 중 그 밖의 실패 시 서버가 문구를 못 줄 때의 기본 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'연결하지 못했어요. 다시 해주세요'**
+  String get linkEnterFailed;
 }
 
 class _AppLocalizationsDelegate

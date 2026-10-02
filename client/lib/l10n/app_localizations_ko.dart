@@ -412,4 +412,151 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get pinSaveFailedFallback => '설정 화면에서 다시 확인해주세요';
+
+  @override
+  String get elumiSettingsTitle => '설정';
+
+  @override
+  String get elumiSettingsHapticLabel => '카드 체크 진동';
+
+  @override
+  String get elumiSettingsTermsLabel => '약관 및 개인정보처리방침';
+
+  @override
+  String get elumiSettingsLogoutLabel => '로그아웃';
+
+  @override
+  String get elumiSettingsWithdrawLabel => '회원탈퇴';
+
+  @override
+  String get elumiSettingsLogoutTitle => '로그아웃 하실건가요?';
+
+  @override
+  String get elumiSettingsLogoutMessage =>
+      '이 휴대폰의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요';
+
+  @override
+  String get elumiSettingsLogoutFailTitle => '로그아웃하지 못했어요';
+
+  @override
+  String get elumiSettingsWithdrawTitle => '회원탈퇴 하실건가요?';
+
+  @override
+  String get elumiSettingsWithdrawMessage =>
+      '이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에\n그대로 남아요';
+
+  @override
+  String get elumiSettingsWithdrawFailTitle => '탈퇴하지 못했어요';
+
+  @override
+  String get elumiSettingsExitFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get linkStatusTitle => '이룸이 휴대폰';
+
+  @override
+  String get linkStatusRevokeConfirmTitle => '연결을 끊을까요?';
+
+  @override
+  String get linkStatusRevokeConfirmMessage =>
+      '이룸이 휴대폰에서 일과를 볼 수 없어요\n다시 연결하려면 새 암호를 만들면 돼요';
+
+  @override
+  String get linkStatusRevokeConfirmAction => '연결 끊기';
+
+  @override
+  String get linkStatusRevokeFailTitle => '연결을 끊지 못했어요';
+
+  @override
+  String get linkStatusRevokeFailedFallback => '잠시 후 다시 시도해주세요';
+
+  @override
+  String get linkStatusRevoked => '연결을 끊었어요';
+
+  @override
+  String get linkStatusAlreadyRevoked => '이미 끊겨 있어요';
+
+  @override
+  String get linkStatusLoadFailedFallback => '연결 상태를 불러오지 못했어요';
+
+  @override
+  String linkDeviceNumbered(int number) {
+    return '이룸이 휴대폰 $number';
+  }
+
+  @override
+  String get linkStatusConnected => '연결됨';
+
+  @override
+  String get linkStatusRevokeButton => '연결 끊기';
+
+  @override
+  String get linkStatusRevokeHint => '끊으면 이룸이 휴대폰에서\n일과를 볼 수 없어요';
+
+  @override
+  String get linkStatusEmpty => '연결된 휴대폰이 없어요';
+
+  @override
+  String get linkStatusConnectAction => '이룸이 휴대폰 연결하기';
+
+  @override
+  String get linkCodeSettingsTitle => '이룸이 휴대폰 연결';
+
+  @override
+  String linkCodeAskTitle(String name) {
+    return '$name의 휴대폰을\n연결할까요?';
+  }
+
+  @override
+  String linkCodeEnterHint(String name) {
+    return '$name의 휴대폰에서 아래 코드를 입력하세요';
+  }
+
+  @override
+  String get linkCodeIssueFailedFallback => '암호를 만들지 못했어요. 다시 해주세요';
+
+  @override
+  String get linkCodeExpired => '암호가 만료됐어요';
+
+  @override
+  String get linkCodeSuccessTitle => '휴대폰 연결에 성공했어요!';
+
+  @override
+  String get linkCodeStartButton => '시작하기';
+
+  @override
+  String get linkCodeLater => '나중에 할게요';
+
+  @override
+  String get linkRetryChipLabel => '코드 다시 만들기';
+
+  @override
+  String get linkEnterTitle => '보호자에게서 받은 코드를\n입력해주세요';
+
+  @override
+  String get linkEnterGuide => '코드는 보호자 휴대폰의\n설정 → 이룸이 휴대폰 연결하기에 있어요';
+
+  @override
+  String get linkEnterGuidePath => '설정 → 이룸이 휴대폰 연결하기';
+
+  @override
+  String get linkEnterLinkLost => '연결이 끊어졌어요';
+
+  @override
+  String get linkEnterStartButton => '시작하기';
+
+  @override
+  String get linkEnterInputLabel => '연결 암호 넣기';
+
+  @override
+  String get linkEnterWrongCode => '암호가 맞지 않아요';
+
+  @override
+  String get linkEnterExpired => '암호가 만료됐어요. 새 암호를 받아주세요';
+
+  @override
+  String get linkEnterOffline => '연결하지 못했어요. 인터넷을 확인해주세요';
+
+  @override
+  String get linkEnterFailed => '연결하지 못했어요. 다시 해주세요';
 }
