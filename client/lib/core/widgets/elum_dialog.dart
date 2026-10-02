@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../assets/app_assets.dart';
+import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
@@ -191,7 +192,9 @@ class ElumDialogCard<T> extends StatelessWidget {
             if (message != null) ...[
               SizedBox(height: context.space.sm),
               Text(
-                keepWordsInMessage ? keepWords(message!) : message!,
+                keepWordsInMessage
+                    ? keepWords(message!, locale: context.appLocale)
+                    : message!,
                 // 끊지 말라는 표시가 낭독기에 섞이지 않게 원문을 준다
                 semanticsLabel: keepWordsInMessage ? message : null,
                 textAlign: TextAlign.center,

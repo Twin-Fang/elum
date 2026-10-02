@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -62,7 +63,7 @@ class NoticeHideToggle extends StatelessWidget {
                     // 글꼴을 키우면 두 줄로 꺾는다 — 말줄임으로 자르면 무엇을 체크하는지
                     // 읽을 수 없다. 꺾을 때도 어절에서 꺾는다 ("일주일간 보지 / 않기").
                     child: Text(
-                      keepWords(label),
+                      keepWords(label, locale: context.appLocale),
                       textAlign: TextAlign.center,
                       style: context.typo.noticeHideLabel.copyWith(
                         color: colors.noticeHideLabel,

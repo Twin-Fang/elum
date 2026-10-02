@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
@@ -117,7 +118,7 @@ class DefaultCardTitleArt extends StatelessWidget {
                 child: Text(
                   // 큰 글자에서 `입/어요`처럼 어절이 갈라지지 않게 띄어쓰기에서만 줄바꿈한다.
                   // 낭독기에는 원문을 준다.
-                  keepWords(title),
+                  keepWords(title, locale: context.appLocale),
                   semanticsLabel: title,
                   textAlign: TextAlign.center,
                   style: context.typo.defaultCardTitle.copyWith(

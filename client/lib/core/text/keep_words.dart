@@ -5,6 +5,16 @@ const _joiner = '\u2060';
 
 bool _isSpace(String ch) => ch.trim().isEmpty;
 
+/// 끊지 말라는 표시를 넣는 언어인가 — **한국어만** 넣는다.
+///
+/// 한국어는 띄어쓰기가 있는데도 글자 단위로 끊겨서 표시가 필요하다. 영어·스페인어는 띄어쓰기에서만
+/// 끊기고, 일본어·중국어는 띄어쓰기가 없어 표시를 넣으면 **줄바꿈이 아예 막힌다**.
+/// [locale] 이 null 이면 한국어로 본다(언어를 모르는 기존 호출·테스트와 같다).
+///
+/// 관리자 미리보기(`notice-preview.js`)의 같은 함수도 이 규칙을 따라야 한다.
+bool usesWordJoiner(Locale? locale) =>
+    locale == null || locale.languageCode == 'ko';
+
 /// 한글을 **어절 단위로** 줄바꿈하게 만든다 (이슈 #390 · #385 A).
 ///
 /// Flutter 는 한글을 글자 단위로 끊는다 — "자세한 내용은 방 / 침에서". CSS 의
@@ -18,12 +28,16 @@ bool _isSpace(String ch) => ch.trim().isEmpty;
 /// 관리자 미리보기(`notice-preview.js` 의 `keepWords`)가 **같은 규칙**으로 표시를
 /// 넣는다 — 한쪽만 바꾸면 관리자가 본 줄과 보호자가 본 줄이 다시 달라진다.
 ///
+/// [locale] 이 한국어가 아니면 원문을 그대로 돌려준다 ([usesWordJoiner]).
 /// 화면 낭독기에 표시가 섞이지 않게, 그리는 쪽은 원문을 `semanticsLabel` 로 준다.
-String keepWords(String text) => keepWordsParts([text]).single;
+String keepWords(String text, {Locale? locale}) =>
+    keepWordsParts([text], locale: locale).single;
 
 /// [keepWords] 를 여러 조각에 걸쳐 한다. 강조(`**…**`)로 나뉜 제목처럼 한 줄 글이
 /// 여러 조각일 때, **조각 경계도** 붙어 있으면 한 어절로 본다 — "9월 30일"+"에".
-List<String> keepWordsParts(List<String> parts) {
+List<String> keepWordsParts(List<String> parts, {Locale? locale}) {
+  if (!usesWordJoiner(locale)) return List.of(parts);
+
   final out = <String>[];
   String? prev;
   for (final part in parts) {

@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n_context.dart';
 import '../../../core/text/keep_words.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
@@ -226,7 +227,7 @@ class _QuestionBlockState extends State<_QuestionBlock> {
           // AI 가 주는 질문은 `\n` 없이 온다. 엔진이 글자 단위로 꺾어 `있나 / 요?`가
           // 됐다 — 띄어쓰기에서만 꺾는다 (#393 S5). 낭독기에는 원문을 준다.
           child: Text(
-            keepWords(widget.item.question),
+            keepWords(widget.item.question, locale: context.appLocale),
             semanticsLabel: widget.item.question,
             textAlign: TextAlign.center,
             style: context.typo.promptTitle
