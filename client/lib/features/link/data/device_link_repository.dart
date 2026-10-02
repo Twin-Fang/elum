@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,6 +12,7 @@ import '../../onboarding/domain/image_style.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../domain/link_status.dart';
+import '../../../core/storage/account_wipe.dart';
 
 /// 연결 암호를 넣었을 때의 결과.
 ///
@@ -189,11 +188,11 @@ class DeviceLinkRepository {
         return failure;
       }
     }
-    await _tokens.clear();
-    await _storage.clearAll();
-    // 파일 삭제는 기다리지 않는다 — 화면 이동이 디스크에 묶이면 안 된다. 세대 표식은 부르는 즉시 올라가
-    // 진행 중인 다운로드가 뒤늦게 저장하지 못한다 (세션 만료 때 dio_client 와 같다).
-    if (_imageCache != null) unawaited(_imageCache.clear());
+    await wipeLocalAccount(
+      tokens: _tokens,
+      storage: _storage,
+      imageCache: _imageCache,
+    );
     return null;
   }
 

@@ -20,6 +20,7 @@ import '../data/routine_repository.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/reward_chip.dart';
 import 'widgets/routine_flow_scaffold.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 최근 보상. 실패하면 빈 목록이라 화면이 칩 자리를 비운다.
 final recentRewardsProvider = FutureProvider.autoDispose<List<RecentReward>>(
@@ -147,7 +148,7 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
         );
         if (!mounted) return;
       }
-      context.pop();
+      context.popOrHome();
       return;
     }
 
@@ -165,7 +166,7 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
     // (#380 실기기 B). 전에는 빈 값으로 저장해 확인도 없이 '젤리 2개'가 지워졌다.
     // "나중에"는 지금 안 고친다는 뜻이지 없앤다는 뜻이 아니다.
     if (widget.fromReview) {
-      context.pop();
+      context.popOrHome();
       return;
     }
 
@@ -199,7 +200,7 @@ class _RewardSetupScreenState extends ConsumerState<RewardSetupScreen>
       // 카드 만들기 전이라 나가면 적은 것이 남지 않는다. 고치러 온 길은 잃을 것이 없다.
       // 뒤로는 입력으로 한 칸이라 묻지 않는다 — 적은 것이 그대로 남는다 (#387 D3).
       leave: widget.fromReview ? null : RoutineLeave.discard,
-      onBack: () => context.pop(),
+      onBack: context.popOrHome,
       // 시안은 CTA를 y=675에 둔다 — 약관·목표·추가질문과 같은 자리다.
       pinCtaToFigmaY: true,
       // 크레딧 경고 띠는 두지 않는다 (2026-09-25 사용자 결정, #421). 도움말은 버튼 곁에 남긴다.

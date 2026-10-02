@@ -21,6 +21,7 @@ import '../application/child_routine_notifier.dart';
 import '../../../core/haptics/child_haptics.dart';
 import '../data/speech_service.dart';
 import 'child_home_screen.dart' show childRoutinesProvider;
+import '../../../core/router/pop_or_home.dart';
 
 /// 일과 상세 — 카드를 넘기며 체크한다 (Figma 309:3548 체크 전 / 309:3648 체크 후).
 ///
@@ -315,7 +316,7 @@ class _ChildRoutineDetailScreenState
         child: Column(
           children: [
             SizedBox(height: ChildRoutineDetailScreen._backTop.h),
-            _TopBar(onBack: () => context.pop(), title: routine.displayTitle),
+            _TopBar(onBack: context.popOrHome, title: routine.displayTitle),
             SizedBox(height: ChildRoutineDetailScreen._topBarToReward.h),
             // 🔴 하는 동안 보상이 계속 보인다 (이슈 #239 · 2026-09-13 자문 핵심).
             // 완료 후에만 뜨는 별 연출과 다른 기능이다 — 끝까지 가는 힘이 여기서 나온다.

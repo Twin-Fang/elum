@@ -12,6 +12,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_status.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 이룸이 휴대폰 — 연결 상태와 끊기 (명세 §8-5 · 이슈 #363).
 ///
@@ -100,7 +101,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
     final remaining = await ref.read(linkStatusProvider.future);
     if (!mounted) return;
     if (remaining.isOk && !remaining.value!.hasDevice) {
-      context.pop();
+      context.popOrHome();
     }
   }
 
@@ -109,7 +110,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
     final status = ref.watch(linkStatusProvider);
 
     return ElumScaffold(
-      onBack: _busy ? null : () => context.pop(),
+      onBack: _busy ? null : context.popOrHome,
       // 설정 묶음 시안과 같은 머리(제목이 뒤로가기와 한 줄, 뒤로가기 y=67)
       title: '이룸이 휴대폰',
       backTop: 67,

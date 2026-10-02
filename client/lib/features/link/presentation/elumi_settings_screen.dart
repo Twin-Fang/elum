@@ -14,6 +14,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
 import '../application/link_reset.dart';
 import '../data/device_link_repository.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 이룸이 휴대폰의 설정 페이지 (이슈 #363 · #198 19번 · #488).
 ///
@@ -129,7 +130,7 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
   Widget build(BuildContext context) {
     return ElumScaffold(
       // 끊는 중에는 뒤로 갈 수 없다 — 결과를 알릴 곳이 없어진다
-      onBack: _busy ? null : () => context.pop(),
+      onBack: _busy ? null : context.popOrHome,
       // 보호자 설정과 같다: 제목이 뒤로가기와 **같은 줄**에 서고 줄은 x=16 에서 시작한다.
       title: '설정',
       backTop: 67,

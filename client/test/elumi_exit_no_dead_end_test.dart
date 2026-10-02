@@ -19,6 +19,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
+import 'helpers/no_disk_cache.dart';
 
 /// 이룸이 휴대폰에서 나가는 모든 길이 막다른 화면이 되지 않는다 (#542).
 ///
@@ -78,6 +79,7 @@ void main() {
           dioProvider.overrideWithValue(dio),
           tokenStoreProvider.overrideWithValue(tokens),
           localStorageProvider.overrideWithValue(storage),
+        noDiskCacheOverride(),
         ],
         child: ScreenUtilInit(
           designSize: const Size(393, 852),

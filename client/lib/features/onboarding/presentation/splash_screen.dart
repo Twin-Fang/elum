@@ -7,8 +7,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
+import '../../../core/router/app_destination.dart';
 import '../../../core/router/app_router.dart';
-import '../../auth/domain/app_role.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../auth/data/auth_repository.dart';
 import '../application/onboarding_notifier.dart';
@@ -30,42 +30,6 @@ bool shouldSkipSplash({
   required bool onboardingCompleted,
   bool isElumiDevice = false,
 }) => hasSession && (onboardingCompleted || isElumiDevice);
-
-/// 세션이 있는 사람을 어디로 보낼지 (이슈 #212).
-///
-/// 역할([selectedRole])과 연결 여부([isElumiDevice])는 **다른 값**이다.
-/// 역할은 고른 순간, 연결은 성공한 순간 정해진다. 역할만 고르고 연결하지 않은
-/// 채로 앱을 닫는 사람이 있으므로 둘을 따로 본다.
-@visibleForTesting
-String resolveDestination({
-  required bool hasSession,
-  required bool onboardingCompleted,
-  required bool isElumiDevice,
-  required String? selectedRole,
-
-  /// 보호자 휴대폰이 마지막에 이룸이 화면에 있었는가 (#532).
-  bool resumeOnElumiScreen = false,
-}) {
-  if (!hasSession) {
-    // 이룸이 휴대폰은 로그인할 계정이 없다 — 연결 화면으로 보낸다 (이슈 #206)
-    return isElumiDevice ? Routes.linkEnter : Routes.login;
-  }
-  if (isElumiDevice) return Routes.child;
-
-  // 보호자가 이룸이 화면으로 넘겨 준 채 앱이 꺼졌다. 보호자 홈을 열면 이룸이가 암호 없이
-  // 보호자 화면을 보게 되므로, 넘겨 준 자리로 되돌린다 (#532).
-  final home = resumeOnElumiScreen ? Routes.child : Routes.guardian;
-
-  final role = AppRole.fromStorage(selectedRole);
-  return switch (role) {
-    // 역할이 없는데 온보딩을 마쳤다면 **역할이 생기기 전에 가입한 보호자**다.
-    // 이미 답한 것을 다시 묻지 않는다 (이슈 #212 — 기존 사용자 마이그레이션).
-    null => onboardingCompleted ? home : Routes.roleSelect,
-    // 이룸이라고는 했는데 아직 연결 전이다
-    AppRole.elumi => Routes.linkEnter,
-    AppRole.guardian => onboardingCompleted ? home : Routes.onboardingName,
-  };
-}
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -109,16 +73,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     });
   }
 
-  String _destination() {
-    final storage = ref.read(localStorageProvider);
-    return resolveDestination(
-      hasSession: ref.read(authRepositoryProvider).hasSession,
-      onboardingCompleted: storage.isOnboardingCompleted,
-      isElumiDevice: storage.isElumiDevice,
-      selectedRole: storage.selectedRole,
-      resumeOnElumiScreen: storage.resumeOnElumiScreen,
-    );
-  }
+  String _destination() => homeFor(ProviderScope.containerOf(context, listen: false));
 
   /// context.go()만으로는 DevToolsOverlay 레이어에서 라우터를 찾지 못한다.
   void _goTo(String route) {

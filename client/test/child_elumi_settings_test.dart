@@ -24,6 +24,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
+import 'helpers/no_disk_cache.dart';
 
 /// 이룸이 휴대폰의 상단 바와 설정 페이지 (이슈 #363 · #198 19번 · #488).
 ///
@@ -91,6 +92,7 @@ void main() {
         dioProvider.overrideWithValue(dio),
         tokenStoreProvider.overrideWithValue(tokens),
         localStorageProvider.overrideWithValue(storage),
+        noDiskCacheOverride(),
         // 실서버를 타지 않는다
         myRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
         todayRoutinesProvider.overrideWith((ref) async => const <Routine>[]),

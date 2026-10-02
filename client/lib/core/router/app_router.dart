@@ -196,7 +196,8 @@ String? resolveRedirect(
   // 설정에 줄이 없어 화면으로 들어갈 길은 없지만, 딥링크나 옛 경로로 열려도 막는다 —
   // 이룸이 휴대폰 토큰은 서버도 403 으로 막으므로 열어 봐야 실패 화면만 본다.
   if (isElumiDevice && _guardianOnlyPaths.any(path.startsWith)) {
-    return Routes.child;
+    // 세션이 없으면 이룸이 홈도 막히므로 한 번에 연결 화면으로
+    return hasSession ? Routes.child : Routes.linkEnter;
   }
 
   // 가입 절차도 로그인이 있어야 한다. 계정이 없으면 동의를 기록할 곳도,
@@ -232,6 +233,10 @@ String? resolveRedirect(
   if (!hasRole && !isElumiDevice && !onboardingCompleted) {
     return Routes.roleSelect;
   }
+
+  // 이룸이 휴대폰에는 온보딩이 없다(정보는 보호자 계정에 있다). 연결 직후 정보 조회가 실패해 `온보딩 완료`가
+  // 비어 있어도 보호자 온보딩으로 보내면 안 된다.
+  if (isElumiDevice) return null;
 
   // 보호자·아이 화면은 온보딩을 마쳐야 들어갈 수 있다.
   return onboardingCompleted ? null : Routes.onboardingName;

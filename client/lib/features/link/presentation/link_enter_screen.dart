@@ -14,6 +14,7 @@ import '../../auth/data/auth_repository.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_code.dart';
 import 'widgets/code_boxes.dart';
+import '../../../core/router/pop_or_home.dart';
 
 /// 연결 암호 넣기 — **이룸이 휴대폰** (이슈 #205 · 명세 §5-2).
 ///
@@ -157,7 +158,7 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   /// 하지 않아 사용자가 갇혔다. 그때는 [linkEnterBackTarget] 과 같은 규칙으로 갈 곳을 정해 직접 옮긴다.
   void _back() {
     if (context.canPop()) {
-      context.pop();
+      context.popOrHome();
       return;
     }
     context.go(
