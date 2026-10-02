@@ -170,11 +170,7 @@ void main() {
     await tapCheck(tester);
     await closeReward(tester);
 
-    expect(
-      currentPage(tester),
-      0,
-      reason: '셋째를 먼저 했어도 빠뜨린 첫째로 되짚어야 한다',
-    );
+    expect(currentPage(tester), 0, reason: '셋째를 먼저 했어도 빠뜨린 첫째로 되짚어야 한다');
   });
 
   /// 카드 둘을 끝내고 마지막 하나만 남긴 상태까지 간다.
@@ -265,10 +261,54 @@ void main() {
     await tapCheck(tester); // 재체크 — 보상 이력이 남아 별이 뜨지 않는다
 
     expect(find.byType(RewardScreen), findsNothing);
-    expect(
-      currentPage(tester),
-      0,
-      reason: '연출 없이 화면만 바뀌면 무엇이 일어났는지 알 수 없다',
+    expect(currentPage(tester), 0, reason: '연출 없이 화면만 바뀌면 무엇이 일어났는지 알 수 없다');
+  });
+
+  /// 일과의 카드 구성만 바꾼다 — 보호자가 순서를 바꾸거나 지운 것을 흉내 낸다 (#517).
+  Future<void> replaceCards(WidgetTester tester, List<ActionCard> next) async {
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ChildRoutineDetailScreen)),
     );
+    container.read(routineFlowProvider.notifier).state = RoutineFlowState(
+      routine: Routine(
+        id: 'local',
+        title: '비 오는 날 학교에 가요',
+        status: 'CONFIRMED',
+        steps: next,
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+  }
+
+  testWidgets('보호자가 카드 순서를 바꿔도 보던 카드를 계속 보여준다 (#517)', (tester) async {
+    await pumpDetail(tester);
+    await goToCard(tester, 2); // 신발을 신어요
+
+    // 보던 카드가 맨 앞으로 옮겨졌다
+    await replaceCards(tester, [cards[2], cards[0], cards[1]]);
+
+    expect(currentPage(tester), 0, reason: '보던 카드를 따라 새 자리로 가야 한다');
+  });
+
+  testWidgets('보던 카드가 없어져도 화면이 죽지 않는다 (#517)', (tester) async {
+    await pumpDetail(tester);
+    await goToCard(tester, 2);
+
+    await replaceCards(tester, [cards[0], cards[1]]);
+
+    expect(tester.takeException(), isNull);
+    expect(currentPage(tester), lessThan(2));
+  });
+
+  testWidgets('이룸이가 직접 넘기면 그 카드가 새 기준이 된다 (#517)', (tester) async {
+    await pumpDetail(tester);
+    await goToCard(tester, 1);
+    await goToCard(tester, 2);
+
+    // 순서가 바뀌어도 마지막에 본 카드(신발)를 따라간다
+    await replaceCards(tester, [cards[2], cards[1], cards[0]]);
+
+    expect(currentPage(tester), 0);
   });
 }

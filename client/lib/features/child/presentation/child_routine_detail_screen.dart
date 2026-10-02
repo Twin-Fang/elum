@@ -77,6 +77,13 @@ class _ChildRoutineDetailScreenState
   /// 지금 읽고 있는 카드 id. null이면 아무것도 안 읽고 있다.
   String? _speakingId;
 
+  /// 지금 보고 있는 카드의 id (#517).
+  ///
+  /// 목록이 주기적으로 갱신되므로 보호자가 카드 순서를 바꾸면 같은 자리(순번)에 다른
+  /// 카드가 올 수 있다. 이룸이가 양말을 체크하려다 가방을 체크하게 되므로, 순번이 아니라
+  /// 이 id 를 따라간다.
+  String? _anchorId;
+
   /// dispose에서 `ref`를 읽으면 "unmounted" 오류가 난다.
   /// 미리 잡아두고 정리할 때 쓴다.
   SpeechService? _speech;
@@ -148,6 +155,30 @@ class _ChildRoutineDetailScreenState
   );
 
   Routine get _routine => _resolveRoutine(ref.read(childRoutinesProvider));
+
+  /// 목록이 바뀌어도 이룸이가 보던 카드를 계속 보여준다 (#517).
+  ///
+  /// 보던 카드가 새 위치로 옮겨졌으면 그 위치로 따라간다. 카드가 없어졌으면 따라갈 곳이
+  /// 없으므로 그 자리를 그대로 두고 지금 보이는 카드를 새 기준으로 삼는다.
+  void _followCard(List<ActionCard> cards) {
+    if (cards.isEmpty) return;
+    final index = _currentIndex.clamp(0, cards.length - 1);
+    final anchor = _anchorId;
+    if (anchor == null || cards[index].id == anchor) {
+      _anchorId = cards[index].id;
+      return;
+    }
+    final moved = cards.indexWhere((card) => card.id == anchor);
+    if (moved < 0) {
+      _anchorId = cards[index].id;
+      return;
+    }
+    // build 중에 컨트롤러를 움직일 수 없다 — 프레임이 끝난 뒤 옮긴다.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_controller.hasClients) return;
+      _controller.jumpToPage(moved);
+    });
+  }
 
   /// [card]가 지금 체크된 상태인지. 기기 기록이 서버 값보다 우선한다.
   bool _isCardChecked(ActionCard card) =>
@@ -275,6 +306,7 @@ class _ChildRoutineDetailScreenState
 
     final routine = _resolveRoutine(ref.watch(childRoutinesProvider));
     final cards = routine.steps;
+    _followCard(cards);
     final progress = ref.watch(childRoutineProvider);
 
     return Scaffold(
@@ -319,7 +351,12 @@ class _ChildRoutineDetailScreenState
                   speakingId: _speakingId,
                   onSpeak: _speak,
                   // 카드를 넘기면 체크 버튼 대상도 바뀐다
-                  onPageChanged: (_) => setState(() {}),
+                  onPageChanged: (index) => setState(() {
+                    // 이룸이가 직접 넘긴 것이므로 새 카드를 기준으로 삼는다 (#517)
+                    if (index >= 0 && index < cards.length) {
+                      _anchorId = cards[index].id;
+                    }
+                  }),
                   onSideTap: _goToPage,
                   // 옆에 걸친 카드에도 한 것을 표시한다 (#394 P8)
                   isChecked: (card) => progress.isChecked(routine.id, card),
