@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:elum/core/app_status/app_status_repository.dart';
 import 'package:elum/core/l10n/current_l10n.dart';
@@ -55,9 +58,6 @@ import '../helpers/test_storage.dart';
 /// 남아 있는지 구분되지 않는다. 모든 문구를 `⟦키⟧` 로 돌려주는 번역을 심으면, 화면에
 /// 표식이 보이는 것이 곧 "그 자리가 그 키를 읽는다"는 증거다. 보간 인자는 괄호 안에 넣는다.
 class _KeySpy implements AppLocalizations {
-  /// 지금까지 화면이 읽은 키. 파일 끝의 점검이 이 목록으로 빠진 키를 가린다.
-  static final seen = <String>{};
-
   @override
   String get localeName => 'ko';
 
@@ -65,7 +65,6 @@ class _KeySpy implements AppLocalizations {
   dynamic noSuchMethod(Invocation invocation) {
     final raw = invocation.memberName.toString();
     final name = RegExp(r'"(.*)"').firstMatch(raw)!.group(1)!;
-    seen.add(name);
     if (invocation.isGetter) return '⟦$name⟧';
     return '⟦$name(${invocation.positionalArguments.join(',')})⟧';
   }
@@ -1146,13 +1145,14 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 400));
-      // ARB 가 비어 있는 언어는 ko 값으로 대체한다 (번역은 하위 계획 5)
+      // ARB 가 비어 있는 언어는 ko 값으로 대체한다 (번역은 나중에 채운다)
       expect(find.text('그림 방식'), findsOneWidget);
     });
   });
 
-  // 이 파일의 마지막 시험이다 (같은 파일의 시험은 선언 순서로 돈다).
-  test('이 폴더에서 새로 만든 키 91개를 화면이 모두 읽었다', () {
+  // 선언 순서·공유 상태에 기대지 않는다 — 키 목록을 상수로 두고 ARB 와 대조한다.
+  // 화면이 각 키를 읽는지는 위의 개별 연결 시험이 표식으로 확인한다.
+  test('이 폴더에서 새로 만든 키 91개가 ARB 에 모두 있다', () {
     const expected = <String>{
       'guardianHomeTodayRoutine',
       'guardianHomePastRoutine',
@@ -1246,10 +1246,17 @@ void main() {
       'questionCustomClose',
       'questionClearLabel',
     };
+    final arb =
+        (jsonDecode(File('lib/l10n/app_ko.arb').readAsStringSync())
+                as Map<String, dynamic>)
+            .keys
+            .where((k) => !k.startsWith('@'))
+            .toSet();
+    expect(expected.length, 91);
     expect(
-      expected.difference(_KeySpy.seen),
+      expected.difference(arb),
       isEmpty,
-      reason: '화면이 읽지 않은 키가 있다 — 연결이 끊겼거나 시험이 그 자리를 안 밟는다',
+      reason: 'ARB 에 없는 키가 있다 (오타이거나 키가 지워졌다)',
     );
   });
 }
