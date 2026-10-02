@@ -8,6 +8,9 @@ import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.EnabledLocales;
+import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigView;
 import com.chuseok22.elumserver.systemconfig.core.ConfigGroup;
@@ -16,6 +19,7 @@ import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -107,6 +111,8 @@ public class AdminConfigController {
         " 저장 실패: 서버에 암호화 키가 없어 비밀값을 저장할 수 없습니다. (E-CFG-002)";
       case IMAGE_PROVIDER_UNAVAILABLE, TEXT_PROVIDER_UNAVAILABLE ->
         " 저장 실패: 그 제공자의 API 키가 없습니다. 키를 먼저 저장하세요. (E-CFG-003)";
+      case CONTENT_LOCALE_NOT_READY ->
+        " 저장 실패: 그 언어의 서버 문구 파일(폴백 질문·추천)이 비어 있어 켤 수 없습니다. (E-CFG-004)";
       default -> " 저장 실패: 값이 올바르지 않습니다. (E-CFG-001)";
     };
   }
@@ -115,9 +121,22 @@ public class AdminConfigController {
     switch (key) {
       case IMAGE_PROVIDER_SELECTED -> rejectUnavailableImageProvider(value);
       case TEXT_PROVIDER_SELECTED -> rejectUnavailableTextProvider(value);
+      case ENABLED_CONTENT_LOCALES -> rejectIncompleteLocales(value);
       default -> {
         // 제공자 선택이 아닌 설정은 검사할 것이 없다.
       }
+    }
+  }
+
+  /**
+   * 서버 문구 파일(폴백 질문·추천)이 비어 있는 언어는 켤 수 없다 (다국어 #526).
+   * 켜 두면 다음 기동의 시작 검사(RoutinePhrasesStartupGuard)가 서버를 세우지 않으므로 화면에서 먼저 막는다.
+   * 모르는 코드는 normalize 가 SYSTEM_CONFIG_INVALID_VALUE 로 거절한다.
+   */
+  private void rejectIncompleteLocales(String value) {
+    Set<AppLocale> requested = EnabledLocales.parse(EnabledLocales.normalize(value));
+    if (!RoutinePhrases.standard().incompleteLocales(requested).isEmpty()) {
+      throw new CustomException(ErrorCode.CONTENT_LOCALE_NOT_READY);
     }
   }
 

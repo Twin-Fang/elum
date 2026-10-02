@@ -18,6 +18,8 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.EnabledLocales;
 import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
 import com.chuseok22.elumserver.credit.application.service.CreditReservation;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
@@ -44,6 +46,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -80,8 +83,14 @@ class RoutineServiceCreditTest {
   @Mock private CreditReservationService creditReservationService;
   @Mock private CreditQueryService creditQueryService;
   @Mock private PictogramPicker pictogramPicker;
+  @Mock private EnabledLocales enabledLocales;
 
   @InjectMocks private RoutineService routineService;
+
+  @BeforeEach
+  void contentLocaleDefaultsToKo() {
+    lenient().when(enabledLocales.resolveContentLocale(any())).thenReturn(AppLocale.KO);
+  }
 
   @AfterEach
   void tearDown() {

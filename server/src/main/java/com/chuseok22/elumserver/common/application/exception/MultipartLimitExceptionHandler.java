@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.common.application.exception;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,8 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class MultipartLimitExceptionHandler {
 
+  private final ErrorMessages messages = ErrorMessages.standard();
+
   @ExceptionHandler(MaxUploadSizeExceededException.class)
   public ResponseEntity<ErrorResponse> handleMaxUploadSize(MaxUploadSizeExceededException e, HttpServletRequest request) {
     log.warn("[MaxUploadSizeExceededException] 한도 초과 uri={}: {}", request.getRequestURI(), e.getMessage());
@@ -37,6 +40,6 @@ public class MultipartLimitExceptionHandler {
     ErrorCode errorCode = ErrorCode.ROUTINE_STEP_IMAGE_TOO_LARGE;
     return ResponseEntity
       .status(errorCode.getStatus())
-      .body(new ErrorResponse(errorCode, errorCode.getMessage()));
+      .body(new ErrorResponse(errorCode, messages.of(errorCode)));
   }
 }

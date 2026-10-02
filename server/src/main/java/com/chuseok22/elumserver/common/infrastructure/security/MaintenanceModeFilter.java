@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.common.infrastructure.security;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +48,7 @@ public class MaintenanceModeFilter extends OncePerRequestFilter {
 
   private final SystemConfigService systemConfigService;
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ErrorMessages messages = ErrorMessages.standard();
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -82,14 +84,19 @@ public class MaintenanceModeFilter extends OncePerRequestFilter {
     }
   }
 
-  /** 관리자가 적은 안내 문구를 그대로 준다. 앱이 점검 화면에 띄운다. */
+  /**
+   * 점검 안내. 관리자가 직접 쓴 문구(한국어)는 그대로 준다. 기본 문구를 그대로 둔 경우만 요청 언어로 바꾼다 —
+   * 기본 문구는 ErrorCode.MAINTENANCE_MODE 의 ko 문구와 같은 글자라 ko 응답은 이전과 같다.
+   */
   private String message() {
+    ErrorCode code = ErrorCode.MAINTENANCE_MODE;
     try {
       String configured = systemConfigService.getString(ConfigKey.MAINTENANCE_MESSAGE);
-      return configured == null || configured.isBlank()
-        ? ErrorCode.MAINTENANCE_MODE.getMessage() : configured;
+      boolean untouched = configured == null || configured.isBlank()
+        || configured.equals(ConfigKey.MAINTENANCE_MESSAGE.getDefaultValue());
+      return untouched ? messages.of(code) : configured;
     } catch (RuntimeException e) {
-      return ErrorCode.MAINTENANCE_MODE.getMessage();
+      return messages.of(code);
     }
   }
 }

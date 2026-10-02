@@ -16,7 +16,9 @@ public record AdminRoutineDetailResponse(
   String revisionFeedback,
   LocalDateTime scheduledAt,
   LocalDateTime completedAt,
-  List<AdminRoutineStepResponse> steps
+  List<AdminRoutineStepResponse> steps,
+  /** 일과의 콘텐츠 언어 코드. */
+  String language
 ) {
 
   public static AdminRoutineDetailResponse from(Routine routine, String creatorUsername) {
@@ -34,7 +36,9 @@ public record AdminRoutineDetailResponse(
       routine.getRevisionFeedback(),
       routine.getScheduledAt(),
       routine.getCompletedAt(),
-      stepResponses
+      stepResponses,
+      // 마이그레이션 전 행은 null 일 수 있어 ko 로 떨어뜨린다
+      routine.languageCode()
     );
   }
 }
