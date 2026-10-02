@@ -1,15 +1,38 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-02T08:34:46Z",
-    "currentVersion": "2.14.4",
+    "lastUpdated": "2026-10-02T11:18:53Z",
+    "currentVersion": "2.14.5",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 207
+    "totalReleases": 208
   },
   "releases": [
+    {
+      "version": "2.14.5",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-02",
+      "pr_number": 544,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 이룸이 화면에서 로그아웃하면 화면을 나갈 수 없던 문제 해결\n  * 연결이 끊긴 뒤 뒤로가기로 로그인 화면에 갈 수 있어요\n  * 다시 로그인하면 보호자·이룸이 중 고르는 화면부터 나와요\n  * 이룸이 화면으로 바꾸면 방금 만든 일과가 바로 보여요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "이룸이 화면에서 로그아웃하면 화면을 나갈 수 없던 문제 해결",
+            "연결이 끊긴 뒤 뒤로가기로 로그인 화면에 갈 수 있어요",
+            "다시 로그인하면 보호자·이룸이 중 고르는 화면부터 나와요",
+            "이룸이 화면으로 바꾸면 방금 만든 일과가 바로 보여요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.14.4",
       "project_type": "flutter",
