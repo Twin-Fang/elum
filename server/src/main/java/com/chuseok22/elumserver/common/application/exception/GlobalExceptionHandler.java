@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.admin.application.controller.AdminLogApiControll
 import com.chuseok22.elumserver.admin.application.controller.AdminPromptTestController;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -45,13 +46,16 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 @Slf4j
 public class GlobalExceptionHandler {
 
+  // 문구는 요청 언어로 고른다(다국어 #526). 헤더가 없으면 KO 라 이전 응답과 같다.
+  private final ErrorMessages messages = ErrorMessages.standard();
+
   @ExceptionHandler(CustomException.class)
   public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
     log.warn("[CustomException] 발생: {}", e.getMessage());
     ErrorCode errorCode = e.getErrorCode();
     return ResponseEntity
       .status(errorCode.getStatus())
-      .body(new ErrorResponse(errorCode, errorCode.getMessage()));
+      .body(new ErrorResponse(errorCode, messages.of(errorCode)));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -59,7 +63,7 @@ public class GlobalExceptionHandler {
     String detail = e.getBindingResult().getFieldErrors().stream()
       .map(error -> error.getField() + ": " + error.getDefaultMessage())
       .findFirst()
-      .orElse(ErrorCode.INVALID_INPUT_VALUE.getMessage());
+      .orElse(messages.of(ErrorCode.INVALID_INPUT_VALUE));
     log.warn("[ValidationException] 발생: {}", detail);
     ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
     return ResponseEntity
@@ -85,7 +89,7 @@ public class GlobalExceptionHandler {
     ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
     return ResponseEntity
       .status(errorCode.getStatus())
-      .body(new ErrorResponse(errorCode, errorCode.getMessage()));
+      .body(new ErrorResponse(errorCode, messages.of(errorCode)));
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
@@ -94,7 +98,7 @@ public class GlobalExceptionHandler {
     ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
     return ResponseEntity
       .status(errorCode.getStatus())
-      .body(new ErrorResponse(errorCode, errorCode.getMessage()));
+      .body(new ErrorResponse(errorCode, messages.of(errorCode)));
   }
 
   // 사진 업로드가 스프링 multipart 한도를 넘거나 multipart 형식이 아닐 때 (이슈 #455).
@@ -106,7 +110,7 @@ public class GlobalExceptionHandler {
     ErrorCode errorCode = ErrorCode.ROUTINE_STEP_IMAGE_TOO_LARGE;
     return ResponseEntity
       .status(errorCode.getStatus())
-      .body(new ErrorResponse(errorCode, errorCode.getMessage()));
+      .body(new ErrorResponse(errorCode, messages.of(errorCode)));
   }
 
   // multipart 파싱 실패, 필수 파트(image) 누락은 클라이언트 입력 오류다.
@@ -116,7 +120,7 @@ public class GlobalExceptionHandler {
     ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
     return ResponseEntity
       .status(errorCode.getStatus())
-      .body(new ErrorResponse(errorCode, errorCode.getMessage()));
+      .body(new ErrorResponse(errorCode, messages.of(errorCode)));
   }
 
   @ExceptionHandler(Exception.class)
@@ -125,6 +129,6 @@ public class GlobalExceptionHandler {
     ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
     return ResponseEntity
       .status(errorCode.getStatus())
-      .body(new ErrorResponse(errorCode, errorCode.getMessage()));
+      .body(new ErrorResponse(errorCode, messages.of(errorCode)));
   }
 }

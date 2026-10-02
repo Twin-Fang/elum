@@ -16,6 +16,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * <p><b>Spring Security 체인보다 앞에 둔다.</b> 체인의 기본 순서는 -100 이다. 뒤에 두면 점검 모드(503)·토큰 오류(401)처럼
  * 보안 필터가 직접 쓰는 오류 응답이 요청 언어를 모른다. 헤더가 없으면 KO 라 이미 배포된 앱의 응답은 그대로다.
+ *
+ * <p>에러 디스패치(/error)는 건너뛴다: 에러 문구를 만드는 5곳은 모두 본문을 직접 쓰고 sendError 를 쓰지 않는다(#526 확인).
+ * sendError 로 /error 에 맡기는 경로를 더하면 shouldNotFilterErrorDispatch 를 false 로 바꿔야 한다.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)

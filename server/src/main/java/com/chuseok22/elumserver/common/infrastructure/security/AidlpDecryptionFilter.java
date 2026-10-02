@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.common.infrastructure.security;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
 import com.chuseok22.elumserver.common.infrastructure.properties.AidlpProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +46,7 @@ public class AidlpDecryptionFilter extends OncePerRequestFilter {
   // 이 프로젝트는 ObjectMapper 빈을 주입하지 않고 각자 직접 생성해 쓴다(JwtAuthenticationEntryPoint 등 관례).
   // starter-webmvc 환경에서 필터 생성 시점에 ObjectMapper 빈이 없어 기동 실패했으므로 직접 생성으로 맞춘다.
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ErrorMessages messages = ErrorMessages.standard();
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -163,7 +165,7 @@ public class AidlpDecryptionFilter extends OncePerRequestFilter {
     response.setCharacterEncoding("UTF-8");
     // ErrorResponse(errorCode, errorMessage) 구조를 그대로 흉내낸다 — 클라가 errorCode 이름으로 분기한다.
     String body = objectMapper.writeValueAsString(
-      Map.of("errorCode", code.name(), "errorMessage", code.getMessage()));
+      Map.of("errorCode", code.name(), "errorMessage", messages.of(code)));
     response.getWriter().write(body);
   }
 

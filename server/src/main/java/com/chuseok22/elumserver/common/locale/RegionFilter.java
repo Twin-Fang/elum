@@ -16,7 +16,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * <p>{@link AcceptLanguageFilter} 와 같은 패턴이다. 보안 체인(기본 -100)보다 앞에 두어 보안 필터가 쓰는 응답에서도 국가를 알 수 있고,
  * 요청이 끝나면 예외가 나도 비워 스레드 재사용으로 다음 요청에 국가가 새지 않게 한다.
  *
- * <p>참고: OncePerRequestFilter 는 기본적으로 에러 디스패치(/error)를 건너뛴다. 에러 디스패치 처리는 에러 문구 번역 작업에서 다룬다.
+ * <p>참고: OncePerRequestFilter 는 기본적으로 에러 디스패치(/error)를 건너뛴다. 에러 문구를 만드는 5곳(어드바이스 2·점검 필터·401 진입점·DLP 필터)은 모두 본문을 직접 쓰고 sendError 를
+ * 쓰지 않아 /error 디스패치가 문구에 관여하지 않는다(#526 확인). sendError 경로를 더하면 이 설정을 다시 본다.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 11)
