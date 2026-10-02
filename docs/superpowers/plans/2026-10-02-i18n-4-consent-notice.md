@@ -12,6 +12,15 @@
 
 **마스터:** `docs/superpowers/plans/2026-10-02-i18n-0-master.md` (공통 계약 C1~C5)
 
+## 실행 중 정정 사항 (2026-10-02, 계획 2 최종 리뷰 반영)
+
+> 계획 2(서버 언어 기반)를 구현하며 확인한 사실이다. 이 계획을 실행할 때 **본문보다 우선한다.**
+
+- **`Vary` 헤더(필수):** `NoticeController`(`Cache-Control: max-age=60`)가 공지를 내려보내므로 **공지를 언어·국가별로 고르기 전에** 응답에 `Vary: Accept-Language, X-Elum-Region` 을 더한다. 안 그러면 캐시가 한 언어·국가의 공지를 다른 사용자에게 내보낸다. 이 계획의 Task 6(서버 공지)에 테스트와 함께 넣는다.
+- **`ENABLED_CONTENT_LOCALES` 가드의 위치:** 계획 2 는 가드를 `AdminConfigController` 에 두었다. 이 계획이 "언어 켜기"를 다른 화면에서 부르게 되면 `SystemConfigService.update` 직접 호출이 가드를 비켜 간다. 그때는 `systemconfig` 쪽에 설정 값 검증 훅(SPI)을 두어 의존 방향을 지키며 서비스로 내린다.
+- **기동 시 문구 검사 범위:** `RoutinePhrasesStartupGuard` 는 서버 문구 파일(추천·폴백 질문)만 본다. 약관 게시(이 계획)·프롬프트 행(계획 3)의 준비 검사는 각 계획이 같은 자리에 더한다.
+
+
 ## Global Constraints
 
 - 지원 언어는 `ko` `en` `ja` `zh`(간체) `es` 다섯이다. RTL과 번체 중국어는 범위 밖이다.

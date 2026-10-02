@@ -16,6 +16,15 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-02-multi-language-design.md` (4.2, 4.5, 5, 6, 7장 하위 3)
 
+## 실행 중 정정 사항 (2026-10-02, 계획 2 최종 리뷰 반영)
+
+> 계획 2(서버 언어 기반)를 구현하며 확인한 사실이다. 이 계획을 실행할 때 **본문보다 우선한다.**
+
+- **릴리스 순서 조건(필수):** `ENABLED_CONTENT_LOCALES` 에 `ko` 외 언어를 켜는 일은 **이 계획(AI 출력 언어 지정)이 배포된 뒤에만** 한다. 계획 2 가 일과 언어를 **저장만** 하므로, 그 전에 켜면 `language="es"` 인데 카드 글은 한국어인 일과가 생기고 API 가 그 값을 내보낸다. 오늘은 `routine-phrases_{en,ja,zh,es}.properties` 가 비어 있어 관리자 가드(`E-CFG-004`)가 막아 줄 뿐이다 — **계획 5 가 그 파일을 채우는 순간 이 보호는 사라진다.** 그래서 계획 5 는 이 계획이 머지된 뒤에만 문구 파일을 채운다. 또는 이 계획이 관리자 가드(`AdminConfigController.rejectIncompleteLocales`)에 **프롬프트 행 준비 검사**를 더한다(권장: 이 계획의 관리자 프롬프트 화면 Task 에서).
+- **폴백 질문의 언어는 바꾸지 않는다(정정):** 본문의 "폴백 질문도 일과 콘텐츠 언어를 읽게 바꾼다(계획 2 의 `RoutineAiPipelineFallbackLocaleTest` 한 곳을 고친다)" 는 **하지 않는다.** 폴백 질문은 일과가 존재하기 **전에** 요청 스레드에서 동기 호출되고(`RoutineService.generateQuestion` → `RoutineAiPipeline`) **보호자 화면에 보이는 UI 문장**이라 **요청 언어**가 맞다(스펙 4.2 는 입력 언어와 출력 언어를 분리한다). 오늘 동작(요청 언어, 헤더 없으면 ko, 켜진 언어 아닌 요청도 문구 파일이 완성된 언어면 그 언어)을 유지한다. 대신 선택지 라벨(요청 언어)이 AI 입력으로 들어가도 **AI 출력은 일과 언어**가 되게 한다.
+- **`Vary` 헤더:** `NoticeController` 가 `Cache-Control: max-age=60` 을 내므로 공지를 번역하기 전에(계획 4) `Vary: Accept-Language, X-Elum-Region` 을 더한다.
+
+
 ## Global Constraints
 
 - 지원 언어는 `ko` `en` `ja` `zh`(간체) `es` 다섯이다. RTL과 번체 중국어는 범위 밖이다.
