@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/content_locale.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/router/app_router.dart';
@@ -318,7 +319,11 @@ class _ChildRoutineDetailScreenState
         child: Column(
           children: [
             SizedBox(height: ChildRoutineDetailScreen._backTop.h),
-            _TopBar(onBack: () => context.pop(), title: routine.displayTitle),
+            _TopBar(
+              onBack: () => context.pop(),
+              title: routine.displayTitle,
+              language: routine.language,
+            ),
             SizedBox(height: ChildRoutineDetailScreen._topBarToReward.h),
             // 🔴 하는 동안 보상이 계속 보인다 (이슈 #239 · 2026-09-13 자문 핵심).
             // 완료 후에만 뜨는 별 연출과 다른 기능이다 — 끝까지 가는 힘이 여기서 나온다.
@@ -391,12 +396,19 @@ class _ChildRoutineDetailScreenState
 /// 뒤로가기는 다른 화면과 같은 40×40 상자(x16 · y67)고, 제목 18/800 은 그 상자와
 /// 세로 가운데(y78~96)에 놓인다. 캐릭터 배지는 없다.
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onBack, required this.title});
+  const _TopBar({
+    required this.onBack,
+    required this.title,
+    this.language = 'ko',
+  });
 
   final VoidCallback onBack;
 
   /// 일과 제목 (`Routine.displayTitle`). 비어도 대체어가 온다.
   final String title;
+
+  /// 제목(일과 글)의 언어. 뒤로가기 이름은 화면 문구라 따르지 않는다.
+  final String language;
 
   /// 뒤로가기 상자 한 변 — 누를 자리와 그림 자리가 한 값이다 (ElumScaffold 와 같다).
   static const _box = 40.0;
@@ -427,13 +439,16 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.typo.childDetailTitle.copyWith(
-                color: context.colors.textPrimary,
+            child: ContentLocale(
+              language: language,
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.typo.childDetailTitle.copyWith(
+                  color: context.colors.textPrimary,
+                ),
               ),
             ),
           ),

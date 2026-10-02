@@ -105,7 +105,10 @@ void main() {
         .where((f) => f.path.endsWith('.dart') && f.path != defFile)
         .toList();
 
-    test('정의 파일 밖의 호출은 8곳이고 전부 locale: context.appLocale 을 넘긴다', () {
+    // 카드 제목은 일과 언어를 따른다 — 화면 언어(appLocale)가 아니라 ContentLocale 이 입힌 글자 locale 이다
+    const cardTitleLocale = 'locale: DefaultTextStyle.of(context).style.locale';
+
+    test('정의 파일 밖의 호출은 8곳이고 앱 언어(카드 제목은 일과 언어)를 넘긴다', () {
       final all = <String>[];
       final where = <String>[];
       for (final f in sources) {
@@ -117,8 +120,10 @@ void main() {
       for (var i = 0; i < all.length; i++) {
         expect(
           all[i],
-          contains('locale: context.appLocale'),
-          reason: '${where[i]} 의 호출이 앱 언어를 넘기지 않는다 — ja·zh 에서 줄바꿈이 막힌다',
+          where[i].endsWith('default_card_art.dart')
+              ? contains(cardTitleLocale)
+              : contains('locale: context.appLocale'),
+          reason: '${where[i]} 의 호출이 언어를 넘기지 않는다 — ja·zh 에서 줄바꿈이 막힌다',
         );
       }
     });

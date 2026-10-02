@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/ads/ad_banner_slot.dart';
 import '../../../core/ads/ad_ids.dart';
+import '../../../core/l10n/content_locale.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -249,12 +250,15 @@ class _DraftTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    routine.displayTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: typo.routineTileTitle.copyWith(
-                      color: colors.chipLabel,
+                  ContentLocale(
+                    language: routine.language,
+                    child: Text(
+                      routine.displayTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: typo.routineTileTitle.copyWith(
+                        color: colors.chipLabel,
+                      ),
                     ),
                   ),
                   SizedBox(height: _titleToMeta.h),

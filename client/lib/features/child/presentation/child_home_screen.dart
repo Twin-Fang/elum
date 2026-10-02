@@ -15,6 +15,7 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/character_badge.dart';
 import '../../../core/widgets/routine_progress_ring.dart';
 import '../../../core/l10n/batchim.dart';
+import '../../../core/l10n/content_locale.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../shared/models/routine.dart';
 import '../../guardian/application/routine_notifier.dart';
@@ -363,13 +364,16 @@ class _RoutineTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    routine.displayTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    // 시안 제목은 18/800이다. 예전엔 w400이었다 (#445).
-                    style: context.typo.childDetailTitle.copyWith(
-                      color: colors.chipLabel,
+                  ContentLocale(
+                    language: routine.language,
+                    child: Text(
+                      routine.displayTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      // 시안 제목은 18/800이다. 예전엔 w400이었다 (#445).
+                      style: context.typo.childDetailTitle.copyWith(
+                        color: colors.chipLabel,
+                      ),
                     ),
                   ),
                   // 목록에서부터 "다 하면 뭘 받는지"가 보인다 (이슈 #239).

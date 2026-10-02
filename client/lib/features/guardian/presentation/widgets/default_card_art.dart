@@ -118,7 +118,11 @@ class DefaultCardTitleArt extends StatelessWidget {
                 child: Text(
                   // 큰 글자에서 `입/어요`처럼 어절이 갈라지지 않게 띄어쓰기에서만 줄바꿈한다.
                   // 낭독기에는 원문을 준다.
-                  keepWords(title, locale: context.appLocale),
+                  keepWords(
+                    title,
+                    // 카드 글은 일과 언어를 따른다(ContentLocale 이 입힌 값). 화면 언어가 아니다.
+                    locale: DefaultTextStyle.of(context).style.locale,
+                  ),
                   semanticsLabel: title,
                   textAlign: TextAlign.center,
                   style: context.typo.defaultCardTitle.copyWith(

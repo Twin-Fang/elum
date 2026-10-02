@@ -590,7 +590,7 @@ class _CardReviewReorderListState extends State<CardReviewReorderList>
                 card: card,
                 index: _shown[card.id] ?? index,
                 routineId: widget.routineId,
-        language: widget.language,
+                language: widget.language,
                 onSpeak: () {},
                 isSpeaking: false,
                 onDelete: null,

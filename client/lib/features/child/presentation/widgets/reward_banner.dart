@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/routine.dart';
@@ -28,6 +29,7 @@ class RewardBanner extends StatelessWidget {
     super.key,
     required this.emoji,
     required this.text,
+    this.language = 'ko',
     this.onDark = false,
   });
 
@@ -37,12 +39,16 @@ class RewardBanner extends StatelessWidget {
     return RewardBanner(
       emoji: routine.rewardEmoji,
       text: routine.rewardText,
+      language: routine.language,
       onDark: onDark,
     );
   }
 
   final String emoji;
   final String text;
+
+  /// 보상 글의 언어(일과 언어). 앞의 `다하면` 은 화면 문구라 따르지 않는다.
+  final String language;
 
   /// 어두운 배경(보상 화면) 위인가. 칩 바탕이 반투명으로 바뀐다.
   final bool onDark;
@@ -83,6 +89,7 @@ class RewardBanner extends StatelessWidget {
             TextSpan(
               text: display,
               style: TextStyle(
+                locale: contentLocaleOf(language),
                 color: onDark ? colors.checkDone : colors.rewardChipHighlight,
               ),
             ),
