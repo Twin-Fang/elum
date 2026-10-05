@@ -13,6 +13,7 @@ import 'package:elum/features/guardian/presentation/widgets/routine_swipe_action
 import 'package:elum/features/onboarding/domain/character.dart';
 import 'package:elum/features/onboarding/domain/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
+import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -208,6 +209,20 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('안녕하세요,\n하늘이 보호자님 👋🏻'), findsOneWidget);
+    });
+
+    testWidgets('기본 회원 이름보다 연결한 QA 프로필 이름을 표시한다', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          member: const Member(
+            nickname: '이룸이',
+            profiles: [ProfileSummary(id: 'qa', nickname: 'QA')],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('안녕하세요,\nQA 보호자님 👋🏻'), findsOneWidget);
     });
 
     testWidgets('서버 조회가 비어도 화면이 뜬다', (tester) async {

@@ -23,6 +23,8 @@ import '../../guardian/data/routine_repository.dart';
 import '../../guardian/presentation/widgets/today_routine_section.dart'
     show routineProgress;
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../profile/application/profile_display_name.dart';
+import '../../profile/application/profile_session.dart';
 import '../../onboarding/domain/character.dart';
 import '../application/child_routine_notifier.dart';
 import '../application/routine_auto_refresh.dart';
@@ -62,13 +64,11 @@ class ChildHomeScreen extends ConsumerWidget {
     final space = context.space;
     final routines = ref.watch(childRoutinesProvider);
     final routinesAsync = ref.watch(todayRoutinesProvider);
-    final localName = ref.watch(onboardingProvider).displayName;
-    final childName = ref
-        .watch(memberProvider)
-        .maybeWhen(
-          data: (member) => member?.nickname ?? localName,
-          orElse: () => localName,
-        );
+    final childName = resolveProfileDisplayName(
+      ref.watch(memberProvider).value,
+      ref.watch(profileSessionProvider.select((session) => session.selectedId)),
+      ref.watch(onboardingProvider).displayName,
+    );
     // 온보딩에서 고른 캐릭터. 빈 상태 일러스트가 캐릭터마다 다르다.
     // 아직 안 골랐으면 고양이(루루)로 둔다 — 화면은 떠야 한다.
     final character =

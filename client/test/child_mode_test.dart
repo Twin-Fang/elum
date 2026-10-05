@@ -18,6 +18,7 @@ import 'package:elum/features/guardian/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/card_palette.dart';
 import 'package:elum/shared/models/action_card.dart';
+import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -151,6 +152,18 @@ void main() {
 
       expect(cardTitle('옷을 입어요'), findsOneWidget);
       expect(find.text('학교에 갈 옷을 차례대로 입어요'), findsOneWidget);
+    });
+
+    testWidgets('보호자 휴대폰의 이룸이 홈도 연결한 QA 이름을 표시한다', (tester) async {
+      await pumpChild(
+        tester,
+        member: const Member(
+          nickname: '이룸이',
+          profiles: [ProfileSummary(id: 'qa', nickname: 'QA')],
+        ),
+      );
+      expect(find.textContaining('오늘 QA'), findsOneWidget);
+      expect(find.textContaining('오늘 이룸이'), findsNothing);
     });
 
     testWidgets('승인 전 일과는 목록에 없다', (tester) async {

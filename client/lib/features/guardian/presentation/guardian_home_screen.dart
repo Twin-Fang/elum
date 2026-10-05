@@ -18,6 +18,7 @@ import '../../credit/application/credit_start_gate.dart';
 import '../../credit/presentation/credit_blocked_dialog.dart';
 import '../../child/application/routine_auto_refresh.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../profile/application/profile_display_name.dart';
 import '../../onboarding/domain/character.dart';
 import '../../profile/application/profile_session.dart';
 import '../application/home_coach_notifier.dart';
@@ -173,15 +174,12 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
       if (none) context.go(Routes.onboardingName);
     });
 
-    // 서버 호칭 → 로컬 온보딩 값 → 대체어 순으로 고른다.
-    // 서버가 죽어도 화면은 떠야 한다 (docs 원칙 6번).
-    final localName = ref.watch(onboardingProvider).displayName;
-    final childName = ref
-        .watch(memberProvider)
-        .maybeWhen(
-          data: (member) => member?.nickname ?? localName,
-          orElse: () => localName,
-        );
+    // 함께하기로 선택한 이룸이 이름을 이룸이 홈과 동일하게 표시한다.
+    final childName = resolveProfileDisplayName(
+      ref.watch(memberProvider).value,
+      ref.watch(profileSessionProvider.select((session) => session.selectedId)),
+      ref.watch(onboardingProvider).displayName,
+    );
 
     // 온보딩에서 고른 캐릭터(고양이/여우) — 홈 전역의 마스코트를 이 값으로 맞춘다.
     // 선택 전(구버전 데이터 등) 폴백은 이룸이 홈과 동일하게 고양이로 둔다.
