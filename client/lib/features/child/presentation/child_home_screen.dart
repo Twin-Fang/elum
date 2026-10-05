@@ -37,13 +37,16 @@ final childRoutinesProvider = Provider<List<Routine>>((ref) {
   final current = ref.watch(routineFlowProvider).routine;
   // `.value`는 재조회 중에도 직전 목록을 유지한다 — 동기화 뒤 깜빡임 방지 (이슈 #140)
   final fetched = ref.watch(todayRoutinesProvider).value ?? const <Routine>[];
+  // 보호자 화면에서 만들었던 옛 일과가 남아 있어도 서버의 최신 완료 상태를 가리지 않는다.
+  final currentFetched = fetched.any((r) => r.id == current?.id);
 
   return [
-    if (current != null && current.isConfirmed && current.steps.isNotEmpty)
+    if (current != null &&
+        !currentFetched &&
+        current.isConfirmed &&
+        current.steps.isNotEmpty)
       current,
-    ...fetched.where(
-      (r) => r.id != current?.id && r.isVisibleToChild && r.steps.isNotEmpty,
-    ),
+    ...fetched.where((r) => r.isVisibleToChild && r.steps.isNotEmpty),
   ];
 });
 

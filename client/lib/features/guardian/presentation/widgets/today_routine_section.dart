@@ -27,8 +27,8 @@ import 'routine_swipe_actions.dart';
 
 /// 홈에 보여줄 일과 목록 — 방금 저장한 일과 + 서버 목록을 병합한다.
 ///
-/// 방금 저장한 일과를 먼저 둔다. 서버 목록 갱신을 기다리면 승인 직후 홈에
-/// 아무것도 없는 것처럼 보인다 (docs 원칙 6번 — 데모는 끊기지 않는다).
+/// 서버 목록에 아직 없는 새 일과만 먼저 둔다. 서버가 같은 일과를 돌려주면
+/// 최신 완료 상태를 쓴다 — 생성 직후의 옛 값이 다른 휴대폰의 체크를 가리지 않게 한다.
 /// steps가 빈 일과는 보여줄 것이 없어 제외한다.
 ///
 /// **흐름에 남은 일과가 임시저장(`PENDING_REVIEW`)이면 붙이지 않는다** (#387 결함 C).
@@ -47,13 +47,15 @@ final homeRoutinesProvider = Provider<List<Routine>>((ref) {
   // 날짜를 한 번 더 본다 — 앱이 자정을 넘겨 켜져 있으면 받아 둔 값과 흐름에 남은
   // 일과가 어제 것이 된다. 다시 받아 오기 전에도 어제 일과가 남지 않게 한다 (#353).
   final now = DateTime.now();
+  final currentFetched = fetched.any((r) => r.id == current?.id);
 
   return [
-    if (current != null && current.steps.isNotEmpty && current.isTodayOn(now))
+    if (current != null &&
+        !currentFetched &&
+        current.steps.isNotEmpty &&
+        current.isTodayOn(now))
       current,
-    ...fetched.where(
-      (r) => r.id != current?.id && r.steps.isNotEmpty && r.isTodayOn(now),
-    ),
+    ...fetched.where((r) => r.steps.isNotEmpty && r.isTodayOn(now)),
   ];
 });
 
