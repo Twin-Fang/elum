@@ -178,36 +178,43 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
   /// null 이면 셋 다 저장됐다. 하나라도 실패하면 **처음 실패한 이유**를 돌려준다 —
   /// 서버가 왜 거절했는지(잘못된 값·정지된 계정 등)를 화면이 그대로 띄운다 (#352).
   Future<AppFailure?> complete() async {
+    // 저장하는 사이 서버 응답이 상태를 덮어도 사용자가 입력한 값이 나가도록 시작 시점 값을 고정한다.
+    // 아니면 그림 방식이 기본값(만화)으로 저장돼 AI 그림 비용이 나간다.
+    final input = state;
     final storage = ref.read(localStorageProvider);
     try {
-      await storage.setNickname(state.childNickname);
+      await storage.setNickname(input.childNickname);
       await storage.setGoals(
-        state.supportGoals.map((g) => g.apiValue).toList(),
+        input.supportGoals.map((g) => g.apiValue).toList(),
       );
-      final character = state.cardCharacter;
+      final character = input.cardCharacter;
       if (character != null) {
         await storage.setCharacter(character.apiValue);
       }
       // 건너뛴 경우에도 기본값(만화)이 명시로 남는다
-      await storage.setImageStyle(state.imageStyle.apiValue);
-      await storage.setPin(state.guardianPin);
+      await storage.setImageStyle(input.imageStyle.apiValue);
+      await storage.setPin(input.guardianPin);
       await storage.setOnboardingCompleted(true);
     } catch (e) {
       debugPrint('[onboarding] 로컬 저장 실패, 진행은 계속: $e');
     }
 
     // 서버 연동 — nickname·goals·character·imageStyle을 계정에 남긴다. 하나가
-    // 실패해도 나머지는 시도한다 — 일부라도 남는 편이 낫다.
+    // 실패해도 나머지는 시도한다 — 일부라도 남는 편이 낫다. (`??=` 로 이으면 앞이 실패할 때
+    // 뒤 호출이 통째로 건너뛰어진다.)
     final member = ref.read(memberRepositoryProvider);
-    var failure = await member.updateNickname(state.childNickname);
-    failure ??= await member.updateSupportGoals(
-      state.supportGoals.map((g) => g.apiValue).toList(),
-    );
-    final character = state.cardCharacter;
-    if (character != null) {
-      failure ??= await member.updateCharacter(character.apiValue);
-    }
-    failure ??= await member.updateImageStyle(state.imageStyle.apiValue);
-    return failure;
+    final character = input.cardCharacter;
+    final failures = <AppFailure?>[
+      await member.updateNickname(input.childNickname),
+      await member.updateSupportGoals(
+        input.supportGoals.map((g) => g.apiValue).toList(),
+      ),
+      if (character != null) await member.updateCharacter(character.apiValue),
+      await member.updateImageStyle(input.imageStyle.apiValue),
+    ];
+    // 저장하는 사이 서버 응답이 상태를 비웠다면 저장한 값으로 되돌린다 — 설정 화면이 기본값을 보이지 않게.
+    if (ref.mounted && state != input) state = input;
+    // 처음 실패한 이유를 돌려준다
+    return failures.whereType<AppFailure>().firstOrNull;
   }
 }

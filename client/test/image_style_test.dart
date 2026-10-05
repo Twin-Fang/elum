@@ -237,6 +237,73 @@ void main() {
     });
   });
 
+  group('OnboardingNotifier.complete — 입력 값 보존', () {
+    late InMemoryStorage storage;
+    late FakeAdapter adapter;
+
+    ProviderContainer make(Map<String, Object?> routes) {
+      adapter = FakeAdapter(routes);
+      final dio = Dio(BaseOptions(baseUrl: 'https://test.local'))
+        ..httpClientAdapter = adapter;
+      final c = ProviderContainer(
+        overrides: [
+          localStorageProvider.overrideWithValue(storage),
+          memberRepositoryProvider.overrideWithValue(MemberRepository(dio: dio)),
+        ],
+      );
+      addTearDown(c.dispose);
+      return c;
+    }
+
+    setUp(() => storage = InMemoryStorage());
+
+    // 저장하는 사이 서버 응답이 상태를 비워도 사용자가 입력한 값이 나가야 한다.
+    // 아니면 "직접 찍은 사진"이 만화로 저장돼 AI 그림 비용이 나간다.
+    test('저장 도중 상태가 비워져도 입력한 값을 서버로 보낸다', () async {
+      final c = make({
+        'PATCH /api/member/nickname': <String, Object?>{},
+        'PATCH /api/member/support-goals': <String, Object?>{},
+        'PATCH /api/member/character': <String, Object?>{},
+        'PATCH /api/member/image-style': <String, Object?>{},
+      });
+      final n = c.read(onboardingProvider.notifier)
+        ..setNickname('하늘이')
+        ..setImageStyle(ImageStyle.photoOnly);
+
+      final saving = n.complete();
+      n.resetProfile(); // 저장이 도는 사이 서버의 빈 프로필이 상태를 덮은 상황
+      await saving;
+
+      expect(adapter.sentBodies['PATCH /api/member/nickname'], {
+        'nickname': '하늘이',
+      });
+      expect(adapter.sentBodies['PATCH /api/member/image-style'], {
+        'imageStyle': 'PHOTO_ONLY',
+      });
+      expect(storage.imageStyle, 'PHOTO_ONLY');
+    });
+
+    // 앞 저장이 실패해도 그림 방식은 반드시 시도한다 — 빠지면 서버가 만화로 둔다.
+    test('이름 저장이 실패해도 그림 방식 저장은 시도한다', () async {
+      final c = make({
+        'PATCH /api/member/nickname': const FakeHttpError(500),
+        'PATCH /api/member/support-goals': <String, Object?>{},
+        'PATCH /api/member/character': <String, Object?>{},
+        'PATCH /api/member/image-style': <String, Object?>{},
+      });
+      final n = c.read(onboardingProvider.notifier)
+        ..setNickname('하늘이')
+        ..setImageStyle(ImageStyle.photoOnly);
+
+      final failure = await n.complete();
+
+      expect(failure, isNotNull);
+      expect(adapter.sentBodies['PATCH /api/member/image-style'], {
+        'imageStyle': 'PHOTO_ONLY',
+      });
+    });
+  });
+
   test('OnboardingProfile 은 그림 방식을 몰라도 온보딩 완료 조건이 그대로다', () {
     // 그림 방식은 필수 입력이 아니다 — 건너뛰면 만화다.
     const profile = OnboardingProfile();

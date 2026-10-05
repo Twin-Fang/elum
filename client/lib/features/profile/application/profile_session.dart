@@ -138,6 +138,16 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
     if (!ref.mounted) return;
     state = ProfileSession(selectedId: target.id);
 
+    // 온보딩을 마치기 전의 서버 이룸이는 비어 있다(가입 직후). 그 빈 값으로 덮으면 입력 중인
+    // 이름·그림 방식이 지워져 기본값(만화)이 저장되고 AI 그림 비용이 나간다. 이름이 있는 서버
+    // 이룸이(다른 휴대폰에서 이어 받는 계정)는 그대로 덮는다.
+    final storage = _storage;
+    if (storage != null &&
+        !storage.isOnboardingCompleted &&
+        (target.nickname ?? '').trim().isEmpty) {
+      return;
+    }
+
     // 회원 정보의 당사자 항목은 헤더가 짚은 이룸이다 — 도움 목표는 여기서만 온다.
     await ref
         .read(onboardingProvider.notifier)

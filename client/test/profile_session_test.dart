@@ -75,6 +75,42 @@ void main() {
     todayFetches = 0;
   });
 
+  group('온보딩을 마치기 전', () {
+    // 가입 직후 서버 프로필은 비어 있다. 그 빈 값이 입력 중인 이름·그림 방식을 지우면
+    // "직접 찍은 사진"이 만화로 저장돼 AI 그림 비용이 나간다.
+    test('서버의 빈 이룸이가 입력 중인 값을 지우지 않는다', () async {
+      storage = InMemoryStorage(); // 온보딩 미완료
+      member = const Member(
+        profiles: [ProfileSummary(id: 'p-new', imageStyle: ImageStyle.cartoon)],
+      );
+      final c = build();
+      c.read(onboardingProvider.notifier)
+        ..setNickname('하늘이')
+        ..setCharacter(CardCharacter.fox)
+        ..setImageStyle(ImageStyle.photoOnly);
+      await settle(c);
+
+      final profile = c.read(onboardingProvider);
+      expect(profile.childNickname, '하늘이');
+      expect(profile.cardCharacter, CardCharacter.fox);
+      expect(profile.imageStyle, ImageStyle.photoOnly);
+      // 고른 이룸이는 맞춘다 — 이후 요청이 같은 이룸이를 가리켜야 한다.
+      expect(c.read(profileSessionProvider).selectedId, 'p-new');
+    });
+
+    // 새 휴대폰에서 기존 계정으로 들어온 경우는 서버 값이 이긴다.
+    test('이름이 있는 서버 이룸이는 그대로 덮는다', () async {
+      storage = InMemoryStorage();
+      member = const Member(profiles: [b]);
+      final c = build();
+      c.read(onboardingProvider.notifier).setNickname('옛 입력');
+      await settle(c);
+
+      expect(c.read(onboardingProvider).childNickname, '바다');
+      expect(c.read(onboardingProvider).imageStyle, ImageStyle.realistic);
+    });
+  });
+
   group('서버 목록에 맞춰 고른다', () {
     test('고른 적이 없으면 첫 이룸이를 고르고 저장한다 — 서버가 헤더 없이 주는 것과 같다', () async {
       final c = build();
