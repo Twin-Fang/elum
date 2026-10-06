@@ -3,6 +3,8 @@ import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
+import 'package:elum/core/widgets/elum_error_view.dart';
+import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/features/guardian/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/widgets/routine_detail_sheet.dart';
@@ -42,8 +44,14 @@ void main() {
     List<Routine> past = const [],
     List<Routine>? today,
     Member? member,
+    bool todayFails = false,
   }) {
-    repo = _FakeRoutineRepo(routines: routines, past: past, today: today);
+    repo = _FakeRoutineRepo(
+      routines: routines,
+      past: past,
+      today: today,
+      todayFails: todayFails,
+    );
 
     final router = GoRouter(
       initialLocation: Routes.guardian,
@@ -242,6 +250,25 @@ void main() {
 
       expect(find.text('아직 만든 일과가 없어요'), findsOneWidget);
       expect(find.text('지난 일과가 없어요'), findsOneWidget);
+    });
+
+    testWidgets('못 불러오면 실패를 로딩·빈 상태와 같은 회색 칸 안에 보인다', (tester) async {
+      await tester.pumpWidget(wrap(todayFails: true));
+      await tester.pumpAndSettle();
+
+      final error = find.byType(ElumErrorView);
+      expect(error, findsOneWidget);
+      // 칸은 일과 줄과 같은 바탕색의 상자다.
+      final shell = find.ancestor(
+        of: error,
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is AnimatedContainer &&
+              (w.decoration as BoxDecoration?)?.color ==
+                  AppColors.light.routineTileBg,
+        ),
+      );
+      expect(shell, findsOneWidget);
     });
 
     testWidgets('제목과 보상이 한 줄 요약으로 보인다', (tester) async {
@@ -582,7 +609,15 @@ class _FakeRoutineRepo with FakeRewardApi implements RoutineRepository {
     required String title,
     required String description,
   }) async => (routine: routine, failure: null);
-  _FakeRoutineRepo({required this.routines, required this.past, this.today});
+  _FakeRoutineRepo({
+    required this.routines,
+    required this.past,
+    this.today,
+    this.todayFails = false,
+  });
+
+  /// 오늘 목록 조회가 실패한다 (연결 끊김 등).
+  final bool todayFails;
 
   final List<Routine> routines;
   final List<Routine> past;
@@ -601,7 +636,10 @@ class _FakeRoutineRepo with FakeRewardApi implements RoutineRepository {
   // **전체 목록과 따로 준다.** 서버가 `/today` 와 `/api/routines` 를 다르게
   // 주는데 fake 가 같은 값을 주면, 홈이 어느 쪽을 보는지 테스트가 구분하지
   // 못한다 — 실제로 그래서 #353 이 테스트를 통과한 채 배포됐다.
-  Future<List<Routine>> getTodayRoutines() async => today ?? routines;
+  Future<List<Routine>> getTodayRoutines() async {
+    if (todayFails) throw Exception('오늘 목록 조회 실패');
+    return today ?? routines;
+  }
 
   @override
   Future<List<Routine>> getPastRoutines() async => past;

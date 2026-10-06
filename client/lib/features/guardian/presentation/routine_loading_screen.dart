@@ -13,7 +13,8 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/elum_error_view.dart';
+import '../../../core/widgets/elum_state_body.dart';
 import '../../credit/domain/credit_summary.dart';
 import '../application/routine_notifier.dart';
 import '../domain/routine_stage.dart';
@@ -266,30 +267,42 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     // 재시도는 로컬 가짜 일과가 아니라 AI를 다시 호출한다.
     final flow = ref.watch(routineFlowProvider);
     if (flow.step == RoutineFlowStep.error) {
+      final blocked = isCreditBlockingCode(flow.errorCode);
       return RoutineFlowScaffold(
         aurora: RoutineLoadingScreen.auroraOf(widget.kind),
         onBack: _handleBack,
         // 만들지 못했으니 서버에 남은 것이 없다 (T5). 뒤로는 흐름 안 한 칸이라 묻지 않는다.
         leave: RoutineLeave.discard,
-        child: _GenerateError(
-          // 준비 로딩은 질문을 받다 실패한 것이다 — 카드는 아직 시작도 안 했다 (#393 S1).
-          // 크레딧 때문에 막힌 것은 AI 가 실패한 것이 아니다 — "만들지 못했어요"라고
-          // 하면 다시 하면 될 줄 안다. 이유는 아래 서버 문구가 말한다 (#421, 실측).
-          title: isCreditBlockingCode(flow.errorCode)
-              ? context.l10n.routineLoadingBlockedTitle
-              : switch (widget.kind) {
-                  RoutineLoadingKind.prepare =>
-                    context.l10n.routineLoadingPrepareFailed,
-                  RoutineLoadingKind.generate =>
-                    context.l10n.routineLoadingGenerateFailed,
-                },
-          errorCode: flow.errorCode,
-          errorMessage: flow.errorMessage,
-          errorHint: flow.errorHint,
-          // 크레딧 부족·진행 중·동결은 다시 해도 같다 — 다시 하기 대신 홈으로 (#407).
-          // 떠나기 전에 묻지 않는다. 만든 것이 없어 잃을 것도 없다.
-          onRetry: isCreditBlockingCode(flow.errorCode) ? null : _retry,
-          onHome: () => context.go(Routes.guardian),
+        // 공통 실패 화면을 본문 가운데에 둔다 — 다른 실패 화면과 같은 모양·자리.
+        child: ElumStateBody(
+          child: ElumErrorView(
+            // 준비 로딩은 질문을 받다 실패한 것이다 — 카드는 아직 시작도 안 했다.
+            // 크레딧 때문에 막힌 것은 AI 가 실패한 것이 아니다 — "만들지 못했어요"라고
+            // 하면 다시 하면 될 줄 안다. 이유는 아래 서버 문구가 말한다.
+            message: blocked
+                ? context.l10n.routineLoadingBlockedTitle
+                : switch (widget.kind) {
+                    RoutineLoadingKind.prepare =>
+                      context.l10n.routineLoadingPrepareFailed,
+                    RoutineLoadingKind.generate =>
+                      context.l10n.routineLoadingGenerateFailed,
+                  },
+            // 서버 문구가 있으면 그대로 띄운다 — 앱이 다시 쓰면 서버에서 고쳐도 옛 문구가 나온다.
+            // 서버에 닿지도 못했으면 인터넷을 확인하라고 한다.
+            description: switch (flow.errorMessage?.trim()) {
+              final message? when message.isNotEmpty => message,
+              _ => flow.errorHint,
+            },
+            errorCode: flow.errorCode,
+            // 크레딧 부족·진행 중·동결은 다시 해도 같다 — 다시 하기 대신 홈으로.
+            // 떠나기 전에 묻지 않는다. 만든 것이 없어 잃을 것도 없다.
+            onRetry: blocked
+                ? () => context.go(Routes.guardian)
+                : () => _retry(),
+            actionLabel: blocked
+                ? context.l10n.routineLoadingHome
+                : context.l10n.routineLoadingRetry,
+          ),
         ),
       );
     }
@@ -622,85 +635,3 @@ class _StageRow extends StatelessWidget {
   }
 }
 
-/// 카드 생성 실패 화면.
-///
-/// 로컬 폴백을 없앤 뒤 실패 경로에 놓인다. 무한 로딩 대신 상태를 명확히 보여주고,
-/// **재시도는 로컬 가짜 일과가 아니라 AI를 다시 호출한다.** 화면 어딘가에
-/// 에러 코드를 남겨 제보 시 어디서 터졌는지 추적할 수 있게 한다(docs 예외처리 규칙).
-class _GenerateError extends StatelessWidget {
-  const _GenerateError({
-    required this.title,
-    required this.errorCode,
-    required this.errorMessage,
-    required this.errorHint,
-    required this.onRetry,
-    required this.onHome,
-  });
-
-  /// 무엇이 안 됐는지.
-  final String title;
-
-  final String? errorCode;
-
-  /// 서버가 보낸 문구. 있으면 이것을 그대로 띄운다 — 앱이 다시 쓰면 서버에서
-  /// 고쳐도 앱은 옛 문구를 보여준다 (#347).
-  final String? errorMessage;
-
-  /// 네트워크 사정일 때 무엇을 하면 되는지 (`인터넷 연결을 확인해주세요`).
-  final String? errorHint;
-
-  /// null 이면 다시 해도 풀리지 않는 실패다 — [onHome] 버튼을 대신 둔다.
-  final Future<void> Function()? onRetry;
-  final VoidCallback onHome;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 32.w),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            AppAssets.lumiThinking,
-            width: 100.w,
-            height: 100.w,
-            fit: BoxFit.contain,
-          ),
-          SizedBox(height: space.lg),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: context.typo.promptTitle.copyWith(color: colors.textPrimary),
-          ),
-          SizedBox(height: space.sm),
-          Text(
-            // 제목이 무엇이 안 됐는지, 이 줄이 무엇을 하면 되는지를 말한다 (#352).
-            // 주간 한도처럼 재시도로 풀리지 않는 실패는 서버가 정확히 알려준다.
-            // 서버에 닿지도 못했으면 서버 문구가 없다 — 인터넷을 확인하라고 한다.
-            errorMessage?.trim().isNotEmpty == true
-                ? errorMessage!.trim()
-                : errorHint ?? context.l10n.commonRetryLater,
-            textAlign: TextAlign.center,
-            style: context.typo.promptBody.copyWith(color: colors.promptMuted),
-          ),
-          SizedBox(height: space.lg),
-          if (onRetry case final retry?)
-            ElumButton(label: context.l10n.routineLoadingRetry, onPressed: retry)
-          else
-            ElumButton(label: context.l10n.routineLoadingHome, onPressed: onHome),
-          if (errorCode != null) ...[
-            SizedBox(height: space.md),
-            // 추적용 식별자 — 사용자에겐 부차적이지만 제보 시 원인 추적의 유일한 단서다
-            Text(
-              errorCode!,
-              style: context.typo.promptBody.copyWith(color: colors.promptMuted),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}

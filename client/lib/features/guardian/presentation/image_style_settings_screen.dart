@@ -11,6 +11,7 @@ import '../../onboarding/domain/character.dart';
 import '../../onboarding/domain/image_style.dart';
 import '../../onboarding/presentation/widgets/image_style_option_card.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/widgets/elum_toast.dart';
 
 /// 보호자 설정의 `그림 방식` 선택 화면 (이슈 #458).
 ///
@@ -60,12 +61,10 @@ class _ImageStyleSettingsScreenState
     if (failure == null) {
       _unsynced = null;
       // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다 (#433).
-      final messenger = ScaffoldMessenger.of(context);
+      final messenger = ScaffoldMessenger.maybeOf(context);
       final changedText = context.l10n.imageStyleChangedSnack;
       context.popOrHome();
-      messenger.showSnackBar(
-        SnackBar(content: Text(changedText)),
-      );
+      showElumToastOn(messenger, changedText);
       return;
     }
 

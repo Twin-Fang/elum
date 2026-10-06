@@ -13,6 +13,8 @@ import '../../guardian/data/routine_repository.dart' show memberProvider;
 import '../application/profile_session.dart';
 import '../domain/profile_summary.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/elum_toast.dart';
 
 /// 이룸이 바꾸기 — 여러 이룸이를 돌보는 보호자(복지사 등)가 지금 볼 이룸이를 고른다 (다중 보호자 #362).
 ///
@@ -42,10 +44,10 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
     await ref.read(profileSessionProvider.notifier).select(profile);
     if (!mounted) return;
     // 화면을 닫기 전에 잡아 둔다.
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = ScaffoldMessenger.maybeOf(context);
     final changed = context.l10n.profileSwitchChanged;
     context.popOrHome();
-    messenger.showSnackBar(SnackBar(content: Text(changed)));
+    showElumToastOn(messenger, changed);
   }
 
   @override
@@ -58,51 +60,51 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
       title: context.l10n.profileSwitchTitle,
       backTop: 67,
       horizontalPadding: 16,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(top: 40.h),
-          child: _content(async, active),
-        ),
-      ),
+      child: _content(async, active),
     );
   }
 
   Widget _content(AsyncValue<Member?> async, ProfileSummary? active) {
     if (async.hasError && async.value == null) {
-      return ElumErrorView.failure(
-        async.error,
-        fallback: context.l10n.profileSwitchLoadFailedFallback,
-        fallbackCode: 'E-PRO-LOAD',
-        onRetry: () => ref.invalidate(memberProvider),
-        compact: true,
+      return ElumStateBody(
+        child: ElumErrorView.failure(
+          async.error,
+          fallback: context.l10n.profileSwitchLoadFailedFallback,
+          fallbackCode: 'E-PRO-LOAD',
+          onRetry: () => ref.invalidate(memberProvider),
+          compact: true,
+        ),
       );
     }
     if (async.isLoading && async.value == null) {
-      return Padding(
-        padding: EdgeInsets.symmetric(vertical: 24.h),
-        child: const Center(child: CircularProgressIndicator()),
-      );
+      // 로딩·실패·0건은 같은 자리(본문 가운데)에 둔다 — 바뀔 때 튀지 않게.
+      return const ElumStateBody.loading();
     }
     final profiles = async.value?.profiles ?? const <ProfileSummary>[];
     if (profiles.isEmpty) {
       // 서버가 목록을 못 줬거나(옛 서버·조회 실패) 연결된 이룸이가 없다. 둘 다 고를 것이 없다.
-      return ElumErrorView(
-        message: context.l10n.profileSwitchLoadFailedMessage,
-        errorCode: 'E-PRO-LOAD',
-        onRetry: () => ref.invalidate(memberProvider),
-        compact: true,
+      return ElumStateBody(
+        child: ElumErrorView(
+          message: context.l10n.profileSwitchLoadFailedMessage,
+          errorCode: 'E-PRO-LOAD',
+          onRetry: () => ref.invalidate(memberProvider),
+          compact: true,
+        ),
       );
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final p in profiles)
-          _ProfileTile(
-            profile: p,
-            selected: p.id == active?.id,
-            onTap: _busy ? null : () => _pick(p, active),
-          ),
-      ],
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(top: 40.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final p in profiles)
+            _ProfileTile(
+              profile: p,
+              selected: p.id == active?.id,
+              onTap: _busy ? null : () => _pick(p, active),
+            ),
+        ],
+      ),
     );
   }
 }

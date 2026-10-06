@@ -4,6 +4,7 @@ import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
+import 'package:elum/core/widgets/elum_error_view.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/link/presentation/link_status_screen.dart';
 import 'package:elum/core/network/dio_client.dart';
@@ -134,6 +135,39 @@ void main() {
       await tester.tap(find.text('이룸이 휴대폰 연결하기'));
       await tester.pumpAndSettle();
       expect(find.text('연결 암호 화면'), findsOneWidget);
+    });
+
+    testWidgets('로딩·실패·빈 상태가 같은 자리(본문 가운데)에 놓여 바뀔 때 튀지 않는다', (tester) async {
+      // 응답을 늦춰 로딩을 붙잡는다.
+      routes['GET /api/device-links'] = const FakeOffline();
+      adapter = FakeAdapter(routes, delay: const Duration(milliseconds: 300));
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('설정 화면'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      final loadingY = tester
+          .getCenter(find.byType(CircularProgressIndicator))
+          .dy;
+
+      await tester.pumpAndSettle();
+      final failedY = tester.getCenter(find.byType(ElumErrorView)).dy;
+      expect(failedY, moreOrLessEquals(loadingY, epsilon: 1));
+
+      routes['GET /api/device-links'] = noDevice;
+      await tester.tap(find.textContaining('다시 시도'));
+      await tester.pumpAndSettle();
+      final emptyY = tester
+          .getCenter(
+            find
+                .ancestor(
+                  of: find.text('연결된 휴대폰이 없어요'),
+                  matching: find.byType(Column),
+                )
+                .first,
+          )
+          .dy;
+      expect(emptyY, moreOrLessEquals(loadingY, epsilon: 1));
     });
 
     testWidgets('상태를 못 불러오면 빈 화면이 아니라 이유·에러 코드·다시 시도가 보이고, 다시 시도하면 불러온다', (

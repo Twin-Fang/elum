@@ -22,6 +22,7 @@ import '../../data/routine_repository.dart';
 import '../../../../shared/models/routine.dart';
 import 'routine_summary_tile.dart';
 import 'routine_swipe_actions.dart';
+import '../../../../core/widgets/elum_toast.dart';
 
 // (참고) 제목 fallback은 Routine.displayTitle이 처리한다.
 
@@ -305,12 +306,16 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
       // "아직 만든 일과가 없어요"를 띄웠는데, 그러면 보호자는 자기가 만든
       // 일과가 사라진 줄 안다.
       if (async.hasError) {
-        return ElumErrorView.failure(
-          async.error,
-          fallback: context.l10n.todayRoutineLoadFailedFallback,
-          fallbackCode: 'E-HOME',
-          onRetry: ref.refreshRoutines,
-          compact: true,
+        // 로딩·빈 상태와 같은 회색 칸 안에 둔다 — 지난 일과 실패와 같은 자리.
+        return _GreyTileShell(
+          height: _errorShellHeight,
+          child: ElumErrorView.failure(
+            async.error,
+            fallback: context.l10n.todayRoutineLoadFailedFallback,
+            fallbackCode: 'E-HOME',
+            onRetry: ref.refreshRoutines,
+            compact: true,
+          ),
         );
       }
       return async.isLoading ? const _LoadingTile() : const EmptyRoutines();
@@ -464,9 +469,7 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
       return;
     }
     ref.refreshRoutines();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.todayRoutineCopied(copy.value!.displayTitle))),
-    );
+    showElumToast(context, l10n.todayRoutineCopied(copy.value!.displayTitle));
   }
 
   @override

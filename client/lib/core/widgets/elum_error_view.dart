@@ -26,6 +26,7 @@ class ElumErrorView extends StatelessWidget {
     this.description,
     this.errorCode,
     this.onRetry,
+    this.actionLabel,
     this.compact = false,
   });
 
@@ -40,6 +41,10 @@ class ElumErrorView extends StatelessWidget {
 
   /// null이면 버튼을 숨긴다 — 다시 눌러도 소용없는 실패에는 버튼을 두지 않는다.
   final VoidCallback? onRetry;
+
+  /// 버튼 글자. 비우면 `다시 시도`. 다시 해도 소용없어 홈으로 보내는 자리처럼
+  /// 버튼이 하는 일이 다를 때만 넘긴다.
+  final String? actionLabel;
 
   /// 화면 일부만 실패했을 때 쓰는 축소 모드.
   ///
@@ -160,7 +165,10 @@ class ElumErrorView extends StatelessWidget {
           ),
           if (onRetry != null) ...[
             SizedBox(height: space.lg),
-            ElumButton(label: context.l10n.commonRetry, onPressed: onRetry),
+            ElumButton(
+              label: actionLabel ?? context.l10n.commonRetry,
+              onPressed: onRetry,
+            ),
           ],
           if (errorCode != null) ...[
             SizedBox(height: space.md),

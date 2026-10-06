@@ -15,6 +15,7 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/widgets/elum_toast.dart';
 
 /// 설정 → 비밀암호 변경하기 (#437).
 ///
@@ -174,7 +175,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
       return;
     }
     // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다 (#433).
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = ScaffoldMessenger.maybeOf(context);
     final l10n = context.l10n;
     if (widget.createOnly) {
       // 방금 만든 암호가 곧 통과의 증거다. 보호자 홈으로 바로 들어간다.
@@ -182,14 +183,11 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     } else {
       context.popOrHome();
     }
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          widget.createOnly
-              ? l10n.pinChangeCreatedSnack
-              : l10n.pinChangeChangedSnack,
-        ),
-      ),
+    showElumToastOn(
+      messenger,
+      widget.createOnly
+          ? l10n.pinChangeCreatedSnack
+          : l10n.pinChangeChangedSnack,
     );
   }
 

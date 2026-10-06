@@ -21,6 +21,7 @@ import '../data/profile_repository.dart';
 import '../domain/guardian_member.dart';
 import 'guardian_edit_sheet.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/widgets/elum_toast.dart';
 
 /// 지금 보는 이룸이를 함께 돌보는 사람 (다중 보호자 #362).
 ///
@@ -107,7 +108,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
     final outcome = await ref.read(profileSessionProvider.notifier).left(profileId);
     if (!mounted) return;
     // 화면을 옮기기 전에 잡아 둔다 — 옮긴 뒤에는 이 화면의 context 가 없다.
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = ScaffoldMessenger.maybeOf(context);
     switch (outcome) {
       case LeftOutcome.none:
         // 이룸이가 하나도 없다 — 이룸이 등록(온보딩)으로 보낸다 (E29).
@@ -115,7 +116,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
       case LeftOutcome.switched || LeftOutcome.stayed:
         context.go(Routes.guardian);
     }
-    messenger.showSnackBar(SnackBar(content: Text(l10n.guardiansLeft(profileName))));
+    showElumToastOn(messenger, l10n.guardiansLeft(profileName));
   }
 
   Future<void> _editMe(String profileId, Guardian me) async {
@@ -168,11 +169,13 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
                 // 이룸이를 알아내는 중이거나 이룸이가 없다.
                 memberAsync
                     ? const _Loading()
-                    : ElumErrorView(
-                        message: context.l10n.guardiansNoProfileMessage,
-                        description: context.l10n.guardiansNoProfileDescription,
-                        errorCode: 'E-PPL-NONE',
-                        compact: true,
+                    : _StateSlot(
+                        child: ElumErrorView(
+                          message: context.l10n.guardiansNoProfileMessage,
+                          description: context.l10n.guardiansNoProfileDescription,
+                          errorCode: 'E-PPL-NONE',
+                          compact: true,
+                        ),
                       )
               else
                 ..._body(space, active.id, active.displayName),
@@ -216,21 +219,25 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
       SizedBox(height: space.sm),
       // 이미 받은 목록이 있으면 주기 갱신 실패(오프라인 등)로 목록을 오류 화면으로 바꾸지 않는다.
       if (async.hasError && guardians == null)
-        ElumErrorView.failure(
-          async.error,
-          fallback: context.l10n.guardiansLoadFailedFallback,
-          fallbackCode: 'E-PPL',
-          onRetry: () => ref.invalidate(guardiansProvider(profileId)),
-          compact: true,
+        _StateSlot(
+          child: ElumErrorView.failure(
+            async.error,
+            fallback: context.l10n.guardiansLoadFailedFallback,
+            fallbackCode: 'E-PPL',
+            onRetry: () => ref.invalidate(guardiansProvider(profileId)),
+            compact: true,
+          ),
         )
       else if (guardians == null)
         const _Loading()
       else if (guardians.isEmpty)
         // 보호자가 한 명도 없는 이룸이는 서버에 있을 수 없다. 형식이 달라진 것이다.
-        ElumErrorView(
-          message: context.l10n.guardiansEmptyMessage,
-          errorCode: 'E-PPL-EMPTY',
-          compact: true,
+        _StateSlot(
+          child: ElumErrorView(
+            message: context.l10n.guardiansEmptyMessage,
+            errorCode: 'E-PPL-EMPTY',
+            compact: true,
+          ),
         )
       else
         for (final g in guardians)
@@ -290,9 +297,20 @@ class _Loading extends StatelessWidget {
   const _Loading();
 
   @override
+  Widget build(BuildContext context) =>
+      const _StateSlot(child: Center(child: CircularProgressIndicator()));
+}
+
+/// 목록 자리의 로딩·실패·빈 상태가 함께 쓰는 여백 — 바뀔 때 시작 위치가 같다.
+class _StateSlot extends StatelessWidget {
+  const _StateSlot({required this.child});
+
+  final Widget child;
+
+  @override
   Widget build(BuildContext context) => Padding(
     padding: EdgeInsets.symmetric(vertical: 24.h),
-    child: const Center(child: CircularProgressIndicator()),
+    child: child,
   );
 }
 

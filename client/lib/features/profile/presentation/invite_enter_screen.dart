@@ -22,6 +22,7 @@ import '../application/profile_session.dart';
 import '../data/profile_repository.dart';
 import '../domain/invite_problem.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/widgets/elum_toast.dart';
 
 /// 입력 아래에 보이는 안내의 종류. 문구가 아니라 종류를 들고 있다가 그릴 때 푼다 — 실패 순간에
 /// 문구로 굳히면 언어가 바뀐 뒤에도 옛 언어로 남는다.
@@ -256,11 +257,9 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     final name = join.profile.displayName;
     final joined = context.l10n.inviteJoined(name, batchimOf(name));
     // 화면을 옮기기 전에 잡아 둔다 — 옮긴 뒤에는 이 화면의 context 가 없다.
-    final messenger = ScaffoldMessenger.of(context);
+    final messenger = ScaffoldMessenger.maybeOf(context);
     context.go(Routes.guardian);
-    messenger.showSnackBar(
-      SnackBar(content: Text(joined)),
-    );
+    showElumToastOn(messenger, joined);
   }
 
   Future<void> _handleFailure(AppFailure failure) async {

@@ -14,6 +14,8 @@ import '../../../core/widgets/show_failure.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_status.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/elum_toast.dart';
 
 /// 이룸이 휴대폰 — 연결 상태와 끊기 (명세 §8-5 · 이슈 #363).
 ///
@@ -93,14 +95,11 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
     // 끊었거나 이미 끊겨 있었다 — 어느 쪽이든 보호자가 원한 상태다. 목록을 다시 받아 보여준다.
     ref.invalidate(linkStatusProvider);
     if (!mounted) return;
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-      SnackBar(
-        content: Text(
-          result.outcome == RevokeOutcome.done
-              ? l10n.linkStatusRevoked
-              : l10n.linkStatusAlreadyRevoked,
-        ),
-      ),
+    showElumToast(
+      context,
+      result.outcome == RevokeOutcome.done
+          ? l10n.linkStatusRevoked
+          : l10n.linkStatusAlreadyRevoked,
     );
     // 남은 휴대폰이 없으면 설정으로 돌아간다 — 설정 줄이 `연결하기`로 되돌아가 있다.
     final remaining = await ref.read(linkStatusProvider.future);
@@ -120,31 +119,24 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
       title: context.l10n.linkStatusTitle,
       backTop: 67,
       horizontalPadding: 16,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 40.h),
-            status.when(
-              loading: () => Padding(
-                padding: EdgeInsets.only(top: 120.h),
-                child: const Center(child: CircularProgressIndicator()),
-              ),
-              // 조회 자체가 던지는 일은 없지만(저장소가 결과로 감싼다) 던져도 화면이 죽지 않게 한다.
-              error: (e, _) => _failed(e),
-              data: (attempt) => attempt.isOk
-                  ? _loaded(attempt.value!)
-                  : _failed(attempt.failure),
-            ),
-          ],
-        ),
+      // 로딩·실패·빈 상태는 같은 자리(본문 가운데)에 둔다 — 바뀔 때 튀지 않게.
+      child: status.when(
+        loading: () => const ElumStateBody.loading(),
+        // 조회 자체가 던지는 일은 없지만(저장소가 결과로 감싼다) 던져도 화면이 죽지 않게 한다.
+        error: (e, _) => _failed(e),
+        data: (attempt) => switch (attempt.value) {
+          final status? when attempt.isOk && status.hasDevice => _loaded(
+            status,
+          ),
+          final _? when attempt.isOk => ElumStateBody(child: _empty()),
+          _ => _failed(attempt.failure),
+        },
       ),
     );
   }
 
   Widget _failed(Object? failure) {
-    return Padding(
-      padding: EdgeInsets.only(top: 80.h),
+    return ElumStateBody(
       child: ElumErrorView.failure(
         failure,
         fallback: context.l10n.linkStatusLoadFailedFallback,
@@ -156,66 +148,65 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
   }
 
   Widget _loaded(LinkStatus status) {
-    if (!status.hasDevice) return _empty();
-
     final many = status.devices.length > 1;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final (i, device) in status.devices.indexed) ...[
-          if (i > 0) SizedBox(height: 32.h),
-          _DeviceBlock(
-            device: device,
-            // 여러 대면 구분할 이름을 붙인다. 한 대면 시안 그대로 `연결됨`이다.
-            title: many ? context.l10n.linkDeviceNumbered(i + 1) : null,
-            onDisconnect: _busy ? null : () => _confirmAndRevoke(device),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: 40.h),
+          for (final (i, device) in status.devices.indexed) ...[
+            if (i > 0) SizedBox(height: 32.h),
+            _DeviceBlock(
+              device: device,
+              // 여러 대면 구분할 이름을 붙인다. 한 대면 시안 그대로 `연결됨`이다.
+              title: many ? context.l10n.linkDeviceNumbered(i + 1) : null,
+              onDisconnect: _busy ? null : () => _confirmAndRevoke(device),
+            ),
+          ],
+          SizedBox(height: 16.h),
+          // 끊으면 어떻게 되는지 — 버튼 아래 한 줄 (명세 §8-5)
+          Text(
+            context.l10n.linkStatusRevokeHint,
+            textAlign: TextAlign.center,
+            style: context.typo.promptBody.copyWith(
+              color: context.colors.textSecondary,
+            ),
           ),
         ],
-        SizedBox(height: 16.h),
-        // 끊으면 어떻게 되는지 — 버튼 아래 한 줄 (명세 §8-5)
-        Text(
-          context.l10n.linkStatusRevokeHint,
-          textAlign: TextAlign.center,
-          style: context.typo.promptBody.copyWith(
-            color: context.colors.textSecondary,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
   /// 연결이 없다 — 다른 보호자가 먼저 끊었거나 이룸이 휴대폰이 스스로 끊었다.
   Widget _empty() {
-    return Padding(
-      padding: EdgeInsets.only(top: 80.h),
-      child: Column(
-        children: [
-          Text(
-            context.l10n.linkStatusEmpty,
-            textAlign: TextAlign.center,
-            style: context.typo.subtitle.copyWith(
-              color: context.colors.textPrimary,
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          context.l10n.linkStatusEmpty,
+          textAlign: TextAlign.center,
+          style: context.typo.subtitle.copyWith(
+            color: context.colors.textPrimary,
           ),
-          SizedBox(height: 24.h),
-          AppPressable(
-            onTap: () => context.pushReplacement(Routes.linkCode),
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 24.w),
-              decoration: BoxDecoration(
-                color: context.colors.linkRetryChipBg,
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Text(
-                context.l10n.linkStatusConnectAction,
-                style: context.typo.settingsTileLabel.copyWith(
-                  color: context.colors.textPrimary,
-                ),
+        ),
+        SizedBox(height: 24.h),
+        AppPressable(
+          onTap: () => context.pushReplacement(Routes.linkCode),
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 24.w),
+            decoration: BoxDecoration(
+              color: context.colors.linkRetryChipBg,
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: Text(
+              context.l10n.linkStatusConnectAction,
+              style: context.typo.settingsTileLabel.copyWith(
+                color: context.colors.textPrimary,
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
