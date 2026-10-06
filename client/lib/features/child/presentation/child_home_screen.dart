@@ -178,10 +178,9 @@ class _TopBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
-    // 별 개수. 조회 실패해도 0으로 화면은 뜬다 (docs 원칙 6번)
-    final stars = ref
-        .watch(memberProvider)
-        .maybeWhen(data: (member) => member?.totalStars ?? 0, orElse: () => 0);
+    // 별 개수. 값이 없을 때만 0으로 화면은 뜬다 (docs 원칙 6번).
+    // 다시 받는 중이나 갱신 실패에는 마지막 정상 값을 그대로 쓴다 — 0 으로 되돌리지 않는다.
+    final stars = ref.watch(memberProvider).value?.totalStars ?? 0;
     final isElumi = ref.watch(localStorageProvider).isElumiDevice;
 
     // 별 배지 — 탭하면 누적 별 화면으로 (Figma 364:8219)

@@ -67,6 +67,47 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  group('주기 갱신', () {
+    int listCalls() => repo.calls.where((c) => c == 'list:p-a').length;
+
+    testWidgets('다른 보호자가 바꾼 이름을 30초 뒤에 자동으로 받아 보여 준다', (tester) async {
+      await open(tester);
+      expect(find.text('엄마'), findsOneWidget);
+      expect(listCalls(), 1);
+
+      repo.guardiansResult = const Attempt.ok([
+        Guardian(id: 'g-1', me: true, displayName: '엄마'),
+        Guardian(id: 'g-2', me: false, displayName: '이모'),
+      ]);
+      await tester.pump(const Duration(seconds: 30));
+      await tester.pumpAndSettle();
+
+      expect(listCalls(), 2);
+      expect(find.text('이모'), findsOneWidget);
+    });
+
+    testWidgets('갱신이 실패해도(오프라인) 받아 둔 목록을 오류 화면으로 바꾸지 않는다', (tester) async {
+      await open(tester);
+
+      repo.guardiansResult = const Attempt.failed(AppFailure(fault: NetworkFault.offline));
+      await tester.pump(const Duration(seconds: 30));
+      await tester.pumpAndSettle();
+
+      // Riverpod 이 실패를 스스로 다시 시도할 수 있어 정확한 횟수 대신 시도했는지만 본다.
+      expect(listCalls(), greaterThanOrEqualTo(2), reason: '실패해도 시도는 했다');
+      expect(find.text('엄마'), findsOneWidget);
+      expect(find.textContaining('E-NET-OFFLINE'), findsNothing);
+    });
+
+    testWidgets('화면을 벗어나면 더 받지 않는다', (tester) async {
+      await open(tester);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(seconds: 120));
+
+      expect(listCalls(), 1);
+    });
+  });
+
   group('목록', () {
     testWidgets('함께하는 사람을 이름·구분과 함께 보여 주고 나를 표시한다', (tester) async {
       await open(tester);

@@ -12,6 +12,7 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/periodic_refresh.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../guardian/data/routine_repository.dart' show memberProvider;
@@ -150,33 +151,47 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
     final active = ref.watch(activeProfileProvider);
     final memberAsync = ref.watch(memberProvider).isLoading;
 
-    return ElumScaffold(
-      onBack: _busy ? null : context.popOrHome,
-      title: context.l10n.guardiansTitle,
-      backTop: 67,
-      horizontalPadding: 16,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 40.h),
-            if (active == null)
-              // 이룸이를 알아내는 중이거나 이룸이가 없다.
-              memberAsync
-                  ? const _Loading()
-                  : ElumErrorView(
-                      message: context.l10n.guardiansNoProfileMessage,
-                      description: context.l10n.guardiansNoProfileDescription,
-                      errorCode: 'E-PPL-NONE',
-                      compact: true,
-                    )
-            else
-              ..._body(space, active.id, active.displayName),
-            SizedBox(height: space.lg),
-          ],
+    // 다른 보호자의 이름 변경·합류·나가기가 푸시로 오지 않는다 — 화면이 떠 있는 동안 주기로 다시 받는다.
+    return PeriodicRefresh(
+      onRefresh: _refreshGuardians,
+      child: ElumScaffold(
+        onBack: _busy ? null : context.popOrHome,
+        title: context.l10n.guardiansTitle,
+        backTop: 67,
+        horizontalPadding: 16,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 40.h),
+              if (active == null)
+                // 이룸이를 알아내는 중이거나 이룸이가 없다.
+                memberAsync
+                    ? const _Loading()
+                    : ElumErrorView(
+                        message: context.l10n.guardiansNoProfileMessage,
+                        description: context.l10n.guardiansNoProfileDescription,
+                        errorCode: 'E-PPL-NONE',
+                        compact: true,
+                      )
+              else
+                ..._body(space, active.id, active.displayName),
+              SizedBox(height: space.lg),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  /// 목록을 조용히 다시 받는다. 나가기·저장 중이거나 받는 중이면 건너뛴다 —
+  /// 이미 떠난 이룸이를 조회해 404 를 받거나 요청이 겹치지 않게 한다.
+  void _refreshGuardians() {
+    final active = ref.read(activeProfileProvider);
+    if (_busy || active == null) return;
+    final provider = guardiansProvider(active.id);
+    if (ref.read(provider).isLoading) return;
+    ref.invalidate(provider);
   }
 
   List<Widget> _body(AppSpacing space, String profileId, String profileName) {
@@ -199,7 +214,8 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
       // 붙인다는 것을 먼저 말한다 (#506).
       _Caption(context.l10n.guardiansIntro),
       SizedBox(height: space.sm),
-      if (async.hasError)
+      // 이미 받은 목록이 있으면 주기 갱신 실패(오프라인 등)로 목록을 오류 화면으로 바꾸지 않는다.
+      if (async.hasError && guardians == null)
         ElumErrorView.failure(
           async.error,
           fallback: context.l10n.guardiansLoadFailedFallback,

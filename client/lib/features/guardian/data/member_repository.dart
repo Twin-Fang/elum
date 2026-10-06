@@ -57,6 +57,30 @@ class Member {
   /// "없다"로 읽는 쪽은 서버 응답을 읽은 [Member.fromJson] 뿐이다.
   bool get profilesKnown => _profilesKnown ?? profiles.isNotEmpty;
 
+  /// 화면에 쓰이는 값이 모두 같은가. 주기 갱신이 같은 값으로 구독자를 다시 그리지 않게 하려는 비교다.
+  bool sameAs(Member other) {
+    if (nickname != other.nickname ||
+        totalStars != other.totalStars ||
+        imageStyle != other.imageStyle ||
+        adsRemoved != other.adsRemoved ||
+        profilesKnown != other.profilesKnown ||
+        !listEquals(supportGoals, other.supportGoals) ||
+        profiles.length != other.profiles.length) {
+      return false;
+    }
+    for (var i = 0; i < profiles.length; i++) {
+      final a = profiles[i];
+      final b = other.profiles[i];
+      if (a.id != b.id ||
+          a.nickname != b.nickname ||
+          a.character != b.character ||
+          a.imageStyle != b.imageStyle) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /// 서버 응답 파싱. 필드가 비거나 타입이 달라도 예외를 던지지 않는다.
   factory Member.fromJson(Map<String, dynamic> json) {
     return Member(
