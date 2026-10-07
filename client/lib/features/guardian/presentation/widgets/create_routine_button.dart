@@ -145,7 +145,6 @@ class CreateRoutineButton extends StatelessWidget {
                           Flexible(
                             child: Text(
                               context.l10n.routineCreateButton,
-                              textAlign: TextAlign.center,
                               style: context.typo.routineCreateLabel.copyWith(
                                 color: white,
                               ),

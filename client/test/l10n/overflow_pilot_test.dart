@@ -110,13 +110,12 @@ void main() {
   }
 
   // 발견된 실제 결함 - 여기서 고치지 않는다(ko 화면이 달라질 수 있다). 전 화면 넘침 검사로 넘긴다.
-  // ElumButton(66 높이 고정): 1.5배 글 높이 68, 2.0배 90. SettingsTile(60): 2.0배 64.
+  // ElumButton(66 높이 고정): 1.5배 글 높이 68, 2.0배 90. 
   String? knownButton(double scale) => scale >= 1.5
       ? ' [SKIP 넘침 검사 대상 - ElumButton 고정 높이 66, es "$buttonEs" 배율 $scale 에서 글 높이 ${scale == 1.5 ? 68 : 90}]'
       : null;
-  String? knownTile(double scale) => scale >= 2.0
-      ? ' [SKIP 넘침 검사 대상 - SettingsTile 고정 높이 60, es "$tileEs" 배율 $scale 에서 글 높이 64]'
-      : null;
+  // SettingsTile 은 시안 높이(60)를 최소값으로 두고 글에 맞춰 자라므로 더는 건너뛰지 않는다.
+  String? knownTile(double scale) => null;
 
   for (final scale in [1.0, 1.5, 2.0]) {
     testWidgets('ElumButton - 현실 es 라벨, 글자 배율 $scale${knownButton(scale) ?? ''}', (tester) async {
@@ -143,7 +142,18 @@ void main() {
 
     testWidgets('SettingsTile', (tester) async {
       await pumpTile(tester, longEs, 1.0);
-      expect(() => expectTileFits(tester, longEs), throwsA(isA<TestFailure>()));
+      // 줄은 글에 맞춰 자라므로 줄 자신의 높이는 잣대가 못 된다. 시안 높이(60)를 잣대로 삼아
+      // 매우 긴 글이 그 안에 안 들어가는 것을 검사 함수가 잡는지 본다.
+      expect(tester.takeException(), isNull);
+      expect(
+        () => expectTextFits(
+          tester,
+          find.text(longEs),
+          maxHeight: SettingsTile.height,
+          label: 'SettingsTile 시안 높이',
+        ),
+        throwsA(isA<TestFailure>()),
+      );
     });
 
     testWidgets('ElumDialogCard - 화면보다 긴 제목', (tester) async {

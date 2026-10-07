@@ -32,9 +32,8 @@ class SettingsSwitchTile extends StatelessWidget {
         child: AppPressable(
           onTap: () => onChanged(!value),
           // 시안 높이는 최소값이다 — 글자가 커지면 줄이 늘어난다.
-          child: Container(
+          child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: SettingsTile.height.h),
-            alignment: Alignment.center,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: SettingsTile.padH.w),
               child: Row(

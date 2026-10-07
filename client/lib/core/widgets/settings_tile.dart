@@ -57,9 +57,9 @@ class SettingsTile extends StatelessWidget {
     );
 
     // 시안 높이는 최소값이다. 글자가 커져 줄이 늘어나면 다음 줄을 밀어낸다.
-    final row = Container(
+    final row = ConstrainedBox(
+      // 최소 높이를 Row 에 직접 걸어 기본 크기에서는 옛 고정 높이와 같은 세로 가운데 배치가 된다.
       constraints: BoxConstraints(minHeight: _height.h),
-      alignment: Alignment.center,
       // **구분선을 긋지 않는다.** 시안은 줄 사이가 배경 그대로다 — 렌더의
       // 경계 픽셀을 재 보면 배경색이 끊기지 않고 이어진다 (#349).
       child: Padding(
@@ -90,7 +90,6 @@ class SettingsTile extends StatelessWidget {
                 constraints: BoxConstraints(maxWidth: 140.w),
                 child: Text(
                   value,
-                  textAlign: TextAlign.end,
                   style: context.typo.settingsTileLabel.copyWith(
                     color: colors.textPlaceholder,
                   ),
