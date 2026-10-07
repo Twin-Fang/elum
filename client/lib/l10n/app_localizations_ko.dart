@@ -507,7 +507,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get elumiSettingsWithdrawMessage =>
-      '이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에\n그대로 남아요';
+      '이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요';
+
+  @override
+  String get inviteRejectedOnElumiDevice =>
+      '이 휴대폰에서는 초대를 받을 수 없어요\n보호자 휴대폰에서 열어주세요';
 
   @override
   String get elumiSettingsWithdrawFailTitle => '탈퇴하지 못했어요';
@@ -1599,7 +1603,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get childHomeEmptyHint => '보호자 화면에서 일과를 만들 수 있어요';
 
   @override
-  String get childHomeEmptyHintDevice => '보호자 모드에서 일과를 만들 수 있어요';
+  String get childHomeEmptyHintDevice => '보호자 휴대폰에서 일과를 만들 수 있어요';
 
   @override
   String get childHomeToGuardianLabel => '보호자 화면으로 가기';

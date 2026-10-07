@@ -983,8 +983,14 @@ abstract class AppLocalizations {
   /// 회원탈퇴 확인 팝업 본문
   ///
   /// In ko, this message translates to:
-  /// **'이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에\n그대로 남아요'**
+  /// **'이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요'**
   String get elumiSettingsWithdrawMessage;
+
+  /// 이룸이 전용 휴대폰에서 초대 링크를 열었을 때의 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'이 휴대폰에서는 초대를 받을 수 없어요\n보호자 휴대폰에서 열어주세요'**
+  String get inviteRejectedOnElumiDevice;
 
   /// 회원탈퇴 실패 팝업 제목
   ///
@@ -2993,7 +2999,7 @@ abstract class AppLocalizations {
   /// 일과가 없을 때의 안내(이룸이 전용 휴대폰)
   ///
   /// In ko, this message translates to:
-  /// **'보호자 모드에서 일과를 만들 수 있어요'**
+  /// **'보호자 휴대폰에서 일과를 만들 수 있어요'**
   String get childHomeEmptyHintDevice;
 
   /// 이룸이 홈 오른쪽 위 캐릭터 배지를 낭독기가 읽는 이름(보호자 화면으로 이동)

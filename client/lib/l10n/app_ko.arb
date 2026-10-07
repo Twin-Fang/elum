@@ -480,8 +480,11 @@
   "elumiSettingsWithdrawTitle": "회원탈퇴 하실건가요?",
   "@elumiSettingsWithdrawTitle": { "description": "회원탈퇴 확인 팝업 제목" },
 
-  "elumiSettingsWithdrawMessage": "이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에\n그대로 남아요",
+  "elumiSettingsWithdrawMessage": "이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요",
   "@elumiSettingsWithdrawMessage": { "description": "회원탈퇴 확인 팝업 본문" },
+
+  "inviteRejectedOnElumiDevice": "이 휴대폰에서는 초대를 받을 수 없어요\n보호자 휴대폰에서 열어주세요",
+  "@inviteRejectedOnElumiDevice": { "description": "이룸이 전용 휴대폰에서 초대 링크를 열었을 때의 토스트" },
 
   "elumiSettingsWithdrawFailTitle": "탈퇴하지 못했어요",
   "@elumiSettingsWithdrawFailTitle": { "description": "회원탈퇴 실패 팝업 제목" },
@@ -1495,7 +1498,7 @@
 
   "childHomeEmptyHint": "보호자 화면에서 일과를 만들 수 있어요",
   "@childHomeEmptyHint": { "description": "일과가 없을 때의 안내(보호자 폰에서 보는 이룸이 화면)" },
-  "childHomeEmptyHintDevice": "보호자 모드에서 일과를 만들 수 있어요",
+  "childHomeEmptyHintDevice": "보호자 휴대폰에서 일과를 만들 수 있어요",
   "@childHomeEmptyHintDevice": { "description": "일과가 없을 때의 안내(이룸이 전용 휴대폰)" },
 
   "childHomeToGuardianLabel": "보호자 화면으로 가기",

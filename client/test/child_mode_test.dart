@@ -193,12 +193,12 @@ void main() {
       expect(svgWithAsset(AppAssets.ruruSad), findsOneWidget);
     });
 
-    testWidgets('이룸이 휴대폰의 빈 상태 문구는 자기 시안대로 보호자 모드다 (#491)', (tester) async {
-      // 이룸이 휴대폰 시안(1197:6846)은 `보호자 모드에서`라 두 휴대폰이 서로 다르다
+    testWidgets('이룸이 휴대폰의 빈 상태 문구는 보호자 휴대폰을 가리킨다', (tester) async {
+      // 전용 휴대폰엔 보호자 화면이 없어 가리킬 곳은 보호자 휴대폰이다. 보호자 휴대폰의 이룸이 화면과 문구가 다르다
       await tester.pumpWidget(wrap(const ChildHomeScreen(), elumiDevice: true));
       await tester.pumpAndSettle();
 
-      expect(find.text('보호자 모드에서 일과를 만들 수 있어요'), findsOneWidget);
+      expect(find.text('보호자 휴대폰에서 일과를 만들 수 있어요'), findsOneWidget);
       expect(find.text('보호자 화면에서 일과를 만들 수 있어요'), findsNothing);
     });
 
