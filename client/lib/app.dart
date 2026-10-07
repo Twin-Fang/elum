@@ -59,13 +59,18 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     topLocation: () =>
         _router.routerDelegate.currentConfiguration.lastOrNull?.matchedLocation,
     open: () => _router.push(Routes.inviteEnter),
-    // 앱이 꺼져 있다 열린 링크는 첫 화면이 그려지기 전일 수 있어 다음 프레임에 띄운다
-    onElumiDeviceRejected: () => WidgetsBinding.instance.addPostFrameCallback(
-      (_) => showElumToastOn(
-        _messengerKey.currentState,
-        appL10n.inviteRejectedOnElumiDevice,
-      ),
-    ),
+    // 앱이 꺼져 있다 열린 링크는 첫 화면이 그려지기 전일 수 있어 다음 프레임에 띄운다.
+    // 켜져 있는 앱은 가만히 있으면 프레임이 없어 콜백이 다음 터치까지 밀리므로 프레임을 요청한다.
+    onElumiDeviceRejected: () {
+      WidgetsBinding.instance
+        ..addPostFrameCallback(
+          (_) => showElumToastOn(
+            _messengerKey.currentState,
+            appL10n.inviteRejectedOnElumiDevice,
+          ),
+        )
+        ..ensureVisualUpdate();
+    },
   );
 
   /// 컨텍스트 없이 토스트를 띄우기 위한 키 — 초대 링크는 화면 밖에서 들어온다.
