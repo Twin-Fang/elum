@@ -168,6 +168,51 @@ void main() {
       expect(failure, isNotNull);
     });
   });
+
+  group('updateStep', () {
+    test('PATCH 로 제목과 설명을 함께 보낸다', () async {
+      final f = setUp({
+        'PATCH /api/routines/r1/steps/c1': routineJson([
+          {
+            'id': 'c1',
+            'stepOrder': 1,
+            'title': '새 제목',
+            'description': '새 설명',
+          },
+          {'id': 'c2', 'stepOrder': 2, 'description': '가방을 챙겨요'},
+        ]),
+      });
+
+      final result = await f.repo.updateStep(
+        routine,
+        'c1',
+        title: '새 제목',
+        description: '새 설명',
+      );
+
+      expect(result.failure, isNull);
+      expect(f.adapter.bodies.single, {
+        'title': '새 제목',
+        'description': '새 설명',
+      });
+    });
+
+    test('서버 실패 시 로컬에는 제목도 반영하고 실패를 돌려준다', () async {
+      final f = setUp({});
+
+      final result = await f.repo.updateStep(
+        routine,
+        'c1',
+        title: '새 제목',
+        description: '새 설명',
+      );
+
+      expect(result.failure, isNotNull);
+      final step = result.routine.steps.first;
+      expect(step.title, '새 제목');
+      expect(step.description, '새 설명');
+    });
+  });
 }
 
 /// 나간 요청의 본문까지 남기는 가짜 어댑터. [FakeAdapter] 는 경로만 남긴다.

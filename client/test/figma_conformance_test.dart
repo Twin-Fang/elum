@@ -2067,7 +2067,8 @@ class _StubRepo with FakeRewardApi implements RoutineRepository {
   @override
   Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
-    String stepId,
-    String description,
-  ) async => (routine: routine, failure: null);
+    String stepId, {
+    required String title,
+    required String description,
+  }) async => (routine: routine, failure: null);
 }

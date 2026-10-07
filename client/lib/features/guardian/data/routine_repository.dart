@@ -96,9 +96,10 @@ abstract interface class RoutineRepository {
   /// 보호자는 저장된 줄 알고 앱을 끈다.
   Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
-    String stepId,
-    String description,
-  );
+    String stepId, {
+    required String title,
+    required String description,
+  });
 
   // --- 보상(강화물) · 일과 정리 (이슈 #148~150) ---
 
@@ -393,12 +394,14 @@ class RoutineRepositoryImpl implements RoutineRepository {
   @override
   Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
-    String stepId,
-    String description,
-  ) async {
+    String stepId, {
+    required String title,
+    required String description,
+  }) async {
     AppLogger.repositoryCall('RoutineRepository', 'updateStep', {
       'routineId': routine.id,
       'stepId': stepId,
+      'title': title,
       'description': description,
     });
 
@@ -410,7 +413,8 @@ class RoutineRepositoryImpl implements RoutineRepository {
       try {
         final res = await _dio.patch<Map<String, dynamic>>(
           '/api/routines/${routine.id}/steps/$stepId',
-          data: {'description': description},
+          // 보낸 필드만 바뀐다 — 제목도 함께 보내야 서버에 남는다
+          data: {'title': title, 'description': description},
         );
         final body = res.data;
         if (body != null) {
@@ -433,7 +437,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
       steps: [
         for (final step in routine.steps)
           if (step.id == stepId)
-            step.copyWith(description: description)
+            step.copyWith(title: title, description: description)
           else
             step,
       ],
@@ -699,8 +703,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
     }
 
     try {
-      // 응답으로 일과 전체가 오지만 쓰지 않는다 — 서버 응답에는 카드 제목이 없어
-      // (RoutineStep 에 title 컬럼이 없다, #77) 그대로 받으면 로컬 제목이 지워진다.
+      // 응답으로 일과 전체가 오지만 쓰지 않는다 — 로컬 카드 상태를 그대로 둔다.
       await _dio.delete<void>('/api/routines/$routineId/steps/$stepId');
       AppLogger.repositorySuccess('RoutineRepository', 'deleteStep', '카드 빠짐');
       return null;

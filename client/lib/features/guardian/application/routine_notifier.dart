@@ -665,9 +665,8 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   /// 돌려주는 값이 null 이 아니면 서버 반영에 실패해 로컬에만 저장됐다 —
   /// 그 안에 서버가 알려준 이유가 들어 있고, 화면이 그대로 안내한다 (#352).
   ///
-  /// **title은 서버에 보내지 않는다.** `RoutineStep`에 title 컬럼이 없다
-  /// (2026-07-22 서버 확인, 이슈 #77). 서버 응답에도 title이 없으므로
-  /// 그대로 받으면 다른 카드의 로컬 제목까지 지워진다 — 기존 제목을 되살려 합친다.
+  /// 제목·설명을 함께 서버에 보낸다. 응답 제목이 비어 오는 예전 카드는
+  /// 로컬 제목을 되살려 합친다.
   Future<AppFailure?> updateStep({
     required String stepId,
     required String title,
@@ -683,9 +682,14 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     if (routine == null) return null;
 
     final repo = ref.read(routineRepositoryProvider);
-    final result = await repo.updateStep(routine, stepId, description);
+    final result = await repo.updateStep(
+      routine,
+      stepId,
+      title: title,
+      description: description,
+    );
 
-    // 서버 응답에는 step title이 없다 — 로컬 제목을 복원하고 수정분만 덮는다
+    // 응답 제목이 비면 로컬 제목을 복원하고 수정한 카드는 입력값으로 덮는다
     final localTitles = {
       for (final step in routine.steps) step.id: step.title,
     };

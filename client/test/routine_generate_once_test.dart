@@ -166,9 +166,10 @@ class _CountingRepo with FakeRewardApi implements RoutineRepository {
   @override
   Future<({Routine routine, AppFailure? failure})> updateStep(
     Routine routine,
-    String stepId,
-    String description,
-  ) async =>
+    String stepId, {
+    required String title,
+    required String description,
+  }) async =>
       (routine: routine, failure: null);
 
   @override
