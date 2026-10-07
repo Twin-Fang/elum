@@ -323,9 +323,16 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
     // 만들어진 카드가 없으면 확인할 것이 없다. 홈으로 돌려보낸다.
     if (cards.isEmpty) {
-      return const RoutineFlowScaffold(
+      return RoutineFlowScaffold(
         aurora: CardReviewScreen.aurora,
-        child: CardReviewEmpty(),
+        child: CardReviewEmpty(
+          // 같은 입력으로 다시 쏘면 서버가 같은 빈 일과를 돌려줄 수 있고 AI 비용도
+          // 든다 — 흐름을 비우고 입력 첫 단계로 돌아간다.
+          onRetry: () {
+            notifier.reset();
+            context.pushReplacement(Routes.routineInput);
+          },
+        ),
       );
     }
 

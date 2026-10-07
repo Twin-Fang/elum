@@ -2396,11 +2396,17 @@ abstract class AppLocalizations {
   /// **'만들어진 카드가 없어요'**
   String get cardReviewEmptyTitle;
 
-  /// 카드 검토 화면의 빈 상태 안내. 제보 추적용 에러 코드를 문구에 함께 적는다
+  /// 카드 검토 화면의 빈 상태 안내. 에러 코드는 화면이 따로 붙인다
   ///
   /// In ko, this message translates to:
-  /// **'다시 만들어 주세요 (E-CARD)'**
+  /// **'일과를 처음부터 다시 만들어 주세요'**
   String get cardReviewEmptyBody;
+
+  /// 카드가 없을 때 일과 입력으로 돌아가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 만들기'**
+  String get cardReviewEmptyAction;
 
   /// 카드 순서 바꾸기에서 낭독기 사용자가 쓰는 동작 이름
   ///

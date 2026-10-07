@@ -7,6 +7,8 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/elum_error_view.dart';
+import '../../../../core/widgets/elum_state_body.dart';
 
 /// 카드확인 화면의 부품 (#444 · 시안 `1173:5541` 기본 / `1197:5798` 순서 변경).
 ///
@@ -317,34 +319,23 @@ class CardReviewReorderTopBar extends StatelessWidget {
 }
 
 /// 카드가 없을 때. 로딩이 실패해도 여기까지 올 수 있다.
+///
+/// 막다른 길이 되지 않게 [onRetry] 로 만들기 첫 단계로 돌아갈 수 있다.
 class CardReviewEmpty extends StatelessWidget {
-  const CardReviewEmpty({super.key});
+  const CardReviewEmpty({super.key, required this.onRetry});
+
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: context.space.screenH),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              context.l10n.cardReviewEmptyTitle,
-              textAlign: TextAlign.center,
-              style: context.typo.promptTitle.copyWith(
-                color: context.colors.textPrimary,
-              ),
-            ),
-            SizedBox(height: context.space.md),
-            Text(
-              // 에러 코드를 함께 보여줘야 제보를 추적할 수 있다
-              context.l10n.cardReviewEmptyBody,
-              style: context.typo.promptBody.copyWith(
-                color: context.colors.promptMuted,
-              ),
-            ),
-          ],
-        ),
+    return ElumStateBody(
+      child: ElumErrorView(
+        message: context.l10n.cardReviewEmptyTitle,
+        description: context.l10n.cardReviewEmptyBody,
+        // 에러 코드를 함께 보여줘야 제보를 추적할 수 있다
+        errorCode: 'E-CARD',
+        onRetry: onRetry,
+        actionLabel: context.l10n.cardReviewEmptyAction,
       ),
     );
   }
