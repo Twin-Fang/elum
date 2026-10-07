@@ -475,7 +475,7 @@ void main() {
                 onAdd: () {},
               ),
               CardReviewReorderTopBar(onClose: () {}),
-              const SizedBox(height: 200, child: CardReviewEmpty()),
+              SizedBox(height: 200, child: CardReviewEmpty(onRetry: () {})),
             ],
           ),
         ),

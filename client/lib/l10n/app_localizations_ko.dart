@@ -1278,7 +1278,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardReviewEmptyTitle => '만들어진 카드가 없어요';
 
   @override
-  String get cardReviewEmptyBody => '다시 만들어 주세요 (E-CARD)';
+  String get cardReviewEmptyBody => '일과를 처음부터 다시 만들어 주세요';
+
+  @override
+  String get cardReviewEmptyAction => '다시 만들기';
 
   @override
   String get cardMoveForward => '앞으로 옮기기';
