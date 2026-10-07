@@ -14,6 +14,6 @@ Locale effectiveAppLocale({Locale? devOverride}) {
   if (AppConfig.showDevTools && devOverride != null) return devOverride;
   return resolveAppLocale(
     WidgetsBinding.instance.platformDispatcher.locales,
-    supportedAppLocales,
+    openedAppLocales,
   );
 }

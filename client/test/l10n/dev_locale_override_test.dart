@@ -42,8 +42,12 @@ void main() {
     dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
     expect(effectiveAppLocale(), const Locale('ko'));
 
+    binding.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
+    expect(effectiveAppLocale(), const Locale('en'));
+
+    // ARB 만 있고 열지 않은 언어는 en
     binding.platformDispatcher.localesTestValue = const [Locale('es', 'MX')];
-    expect(effectiveAppLocale(), const Locale('es'));
+    expect(effectiveAppLocale(), const Locale('en'));
 
     binding.platformDispatcher.localesTestValue = const [Locale('fr', 'FR')];
     expect(effectiveAppLocale(), const Locale('en'));

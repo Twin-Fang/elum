@@ -59,11 +59,12 @@ void main() {
   }
 
   testWidgets('휴대폰이 한국어면 ko', (t) async => expect(await pumpPhone(t, const [Locale('ko', 'KR')]), 'ko'));
-  testWidgets('스페인어(멕시코)면 es', (t) async => expect(await pumpPhone(t, const [Locale('es', 'MX')]), 'es'));
-  testWidgets('중국어 간체면 zh', (t) async {
+  testWidgets('영어면 en', (t) async => expect(await pumpPhone(t, const [Locale('en', 'US')]), 'en'));
+  testWidgets('열지 않은 스페인어(멕시코)는 en', (t) async => expect(await pumpPhone(t, const [Locale('es', 'MX')]), 'en'));
+  testWidgets('열지 않은 중국어 간체는 en', (t) async {
     expect(
       await pumpPhone(t, const [Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN')]),
-      'zh',
+      'en',
     );
   });
   testWidgets('프랑스어는 en', (t) async => expect(await pumpPhone(t, const [Locale('fr', 'FR')]), 'en'));

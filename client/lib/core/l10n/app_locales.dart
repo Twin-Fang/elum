@@ -10,3 +10,12 @@ const supportedAppLocales = <Locale>[
   Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
   Locale('es'),
 ];
+
+/// 지금 실제로 여는 언어. 휴대폰 언어 판정은 이 목록에서만 고른다.
+///
+/// 언어를 더 열 때는 그 언어 ARB 번역을 채운 뒤 여기에 한 줄 더한다.
+/// [supportedAppLocales] 의 부분집합이다 — ARB 가 있어야 열 수 있다.
+const openedAppLocales = <Locale>[
+  Locale('ko'),
+  Locale('en'),
+];
