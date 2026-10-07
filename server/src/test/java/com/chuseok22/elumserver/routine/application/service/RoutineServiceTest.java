@@ -647,6 +647,27 @@ class RoutineServiceTest {
     );
   }
 
+  @Test
+  @DisplayName("보호자 A가 만든 일과를 이룸이 폰이 끝내면 보호자 B가 보는 오늘 목록에서도 100%다")
+  void getTodayRoutines_completedByElumi_is100PercentForOtherGuardian() {
+    Profile profile = profileWithStars(0);
+    Routine routine = confirmedRoutine(profile, 2);
+    routine.setCreatedBy("guardian-a");
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+    routineService.syncProgress(Caller.guardian("guardian-a"), "routine-1", List.of("step-1", "step-2"));
+
+    // 목록은 요청자가 아니라 이룸이 기준으로 조회하고, 진행률은 단계 완료에서만 계산한다.
+    Caller guardianB = Caller.guardian("guardian-b");
+    when(profileAccessGuard.profileFor(eq(guardianB), any(ProfileAction.class))).thenReturn(profile);
+    when(routineRepository.findTodayOrdered(eq("profile-1"), anyList(), any(), any()))
+      .thenReturn(List.of(routine));
+
+    RoutineResponse listed = routineService.getTodayRoutines(guardianB).get(0);
+
+    assertThat(listed.progressPercent()).isEqualTo(100);
+    assertThat(listed.status()).isEqualTo("COMPLETED");
+  }
+
   // --- 오프라인 퍼스트 일괄 반영 (이슈 #140) ---
 
   private Routine confirmedRoutine(Profile profile, int stepCount) {
