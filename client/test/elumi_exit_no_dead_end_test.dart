@@ -161,7 +161,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(where(app.router), Routes.linkEnter);
-      expect(find.text('연결이 끊어졌어요'), findsOneWidget);
+      expect(find.textContaining('연결이 끊어졌어요'), findsOneWidget);
 
       await tapBack(tester);
 

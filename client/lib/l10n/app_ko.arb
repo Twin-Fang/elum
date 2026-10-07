@@ -579,8 +579,8 @@
   "linkEnterGuidePath": "설정 → 이룸이 휴대폰 연결하기",
   "@linkEnterGuidePath": { "description": "linkEnterGuide 안에서 밑줄을 그을 부분. 안내문에 똑같이 들어 있어야 한다" },
 
-  "linkEnterLinkLost": "연결이 끊어졌어요",
-  "@linkEnterLinkLost": { "description": "연결이 밖에서 끊겨 코드 입력 화면으로 돌아왔을 때 설명" },
+  "linkEnterLinkLost": "연결이 끊어졌어요\n보호자에게 새 연결 암호를 받아 입력해주세요",
+  "@linkEnterLinkLost": { "description": "연결이 밖에서 끊겨 코드 입력 화면으로 돌아왔을 때 설명(다음 행동 포함)" },
 
   "linkEnterStartButton": "시작하기",
   "@linkEnterStartButton": { "description": "코드 입력 화면의 시작 버튼" },
@@ -630,7 +630,7 @@
   "guardiansLeaveConfirmMessageLast": "함께하는 보호자가 없어요\n나가면 이룸이와 만든 일과, 모은 별이 모두 사라져요\n되돌릴 수 없어요",
   "@guardiansLeaveConfirmMessageLast": {"description": "마지막 보호자가 나갈 때의 확인 팝업 설명"},
 
-  "guardiansLeaveConfirmMessageOthers": "내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요",
+  "guardiansLeaveConfirmMessageOthers": "내가 연결한 이룸이 휴대폰이 있다면 연결이 끊어져요\n남은 보호자가 새 연결 암호를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요",
   "@guardiansLeaveConfirmMessageOthers": {"description": "다른 보호자가 남아 있을 때의 확인 팝업 설명"},
 
   "guardiansLeaveConfirmAction": "그만두기",

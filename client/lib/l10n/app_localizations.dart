@@ -1160,10 +1160,10 @@ abstract class AppLocalizations {
   /// **'설정 → 이룸이 휴대폰 연결하기'**
   String get linkEnterGuidePath;
 
-  /// 연결이 밖에서 끊겨 코드 입력 화면으로 돌아왔을 때 설명
+  /// 연결이 밖에서 끊겨 코드 입력 화면으로 돌아왔을 때 설명(다음 행동 포함)
   ///
   /// In ko, this message translates to:
-  /// **'연결이 끊어졌어요'**
+  /// **'연결이 끊어졌어요\n보호자에게 새 연결 암호를 받아 입력해주세요'**
   String get linkEnterLinkLost;
 
   /// 코드 입력 화면의 시작 버튼
@@ -1265,7 +1265,7 @@ abstract class AppLocalizations {
   /// 다른 보호자가 남아 있을 때의 확인 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요'**
+  /// **'내가 연결한 이룸이 휴대폰이 있다면 연결이 끊어져요\n남은 보호자가 새 연결 암호를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요'**
   String get guardiansLeaveConfirmMessageOthers;
 
   /// 함께 돌보기 그만두기 확인 팝업의 위험 버튼

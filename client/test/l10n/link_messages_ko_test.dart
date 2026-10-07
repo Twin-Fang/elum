@@ -52,7 +52,7 @@ void main() {
     expect(ko.linkEnterOffline, '연결하지 못했어요. 인터넷을 확인해주세요');
     expect(ko.linkEnterFailed, '연결하지 못했어요. 다시 해주세요');
     expect(ko.commonRetryLater, '잠시 후 다시 해주세요');
-    expect(ko.linkEnterLinkLost, '연결이 끊어졌어요');
+    expect(ko.linkEnterLinkLost, '연결이 끊어졌어요\n보호자에게 새 연결 암호를 받아 입력해주세요');
   });
 
   test('이룸이 설정 팝업 문구 — 줄바꿈까지', () {
@@ -169,7 +169,7 @@ void main() {
       await pumpEnter(tester);
       await tester.pumpAndSettle();
 
-      expect(find.text('연결이 끊어졌어요'), findsOneWidget);
+      expect(find.textContaining('연결이 끊어졌어요'), findsOneWidget);
       expect(find.textContaining('보호자 휴대폰의'), findsNothing);
     });
 
