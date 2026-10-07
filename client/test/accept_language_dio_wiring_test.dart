@@ -42,13 +42,20 @@ void main() {
   });
 
   test('휴대폰 언어가 요청 헤더로 나간다', () async {
-    binding.platformDispatcher.localesTestValue = const [Locale('es', 'MX')];
-    expect(await sentLanguage(build()), 'es');
+    binding.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
+    expect(await sentLanguage(build()), 'en');
+    binding.platformDispatcher.localesTestValue = const [Locale('ko', 'KR')];
+    expect(await sentLanguage(build()), 'ko');
   });
 
-  test('중국어 간체는 zh-Hans, 지원 밖 언어는 en', () async {
+  test('열지 않은 스페인어 휴대폰은 en 으로 나간다', () async {
+    binding.platformDispatcher.localesTestValue = const [Locale('es', 'MX')];
+    expect(await sentLanguage(build()), 'en');
+  });
+
+  test('열지 않은 중국어 간체와 지원 밖 언어는 en', () async {
     binding.platformDispatcher.localesTestValue = const [Locale('zh', 'CN')];
-    expect(await sentLanguage(build()), 'zh-Hans');
+    expect(await sentLanguage(build()), 'en');
     binding.platformDispatcher.localesTestValue = const [Locale('fr', 'FR')];
     expect(await sentLanguage(build()), 'en');
   });
