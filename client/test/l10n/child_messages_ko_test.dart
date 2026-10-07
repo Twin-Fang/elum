@@ -42,7 +42,7 @@ void main() {
     expect(ko.childHomeEmptyTitle('하늘'), '아직 하늘의\n일과가 없어요');
     expect(ko.childHomeEmptyTitle('루미'), '아직 루미의\n일과가 없어요');
     expect(ko.childHomeEmptyHint, '보호자 화면에서 일과를 만들 수 있어요');
-    expect(ko.childHomeEmptyHintDevice, '보호자 모드에서 일과를 만들 수 있어요');
+    expect(ko.childHomeEmptyHintDevice, '보호자 휴대폰에서 일과를 만들 수 있어요');
   });
 
   test('홈 낭독 이름과 보상 접두어', () {

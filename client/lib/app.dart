@@ -10,10 +10,12 @@ import 'core/config/client_tuning.dart';
 import 'core/dev/dev_locale_override.dart';
 import 'core/dev/dev_tools_overlay.dart';
 import 'core/l10n/app_l10n.dart';
+import 'core/l10n/current_l10n.dart';
 import 'core/network/dio_client.dart';
 import 'core/network/session_expiry.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/elum_toast.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/child/application/sync_triggers.dart';
 import 'features/link/application/link_reset.dart';
@@ -55,7 +57,17 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     topLocation: () =>
         _router.routerDelegate.currentConfiguration.lastOrNull?.matchedLocation,
     open: () => _router.push(Routes.inviteEnter),
+    // 앱이 꺼져 있다 열린 링크는 첫 화면이 그려지기 전일 수 있어 다음 프레임에 띄운다
+    onElumiDeviceRejected: () => WidgetsBinding.instance.addPostFrameCallback(
+      (_) => showElumToastOn(
+        _messengerKey.currentState,
+        appL10n.inviteRejectedOnElumiDevice,
+      ),
+    ),
   );
+
+  /// 컨텍스트 없이 토스트를 띄우기 위한 키 — 초대 링크는 화면 밖에서 들어온다.
+  final _messengerKey = GlobalKey<ScaffoldMessengerState>();
 
   /// 보호자 휴대폰이 지금 어느 화면에 있는지 남긴다 (#532).
   ///
@@ -168,6 +180,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         localizationsDelegates: l10n.localizationsDelegates,
         localeListResolutionCallback: l10n.localeListResolutionCallback,
         routerConfig: _router,
+        scaffoldMessengerKey: _messengerKey,
         debugShowCheckedModeBanner: false,
         // 개발자 도구를 모든 화면 위에 얹는다. 화면별 코드는 건드리지 않는다. (이슈 #13)
         builder: l10n.builder,

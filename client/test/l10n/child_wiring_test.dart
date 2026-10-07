@@ -143,7 +143,7 @@ void main() {
       );
       expect(find.bySemanticsLabel('설정 열기'), findsOneWidget);
       expect(find.text('아직 하늘의\n일과가 없어요'), findsOneWidget);
-      expect(find.text('보호자 모드에서 일과를 만들 수 있어요'), findsOneWidget);
+      expect(find.text('보호자 휴대폰에서 일과를 만들 수 있어요'), findsOneWidget);
       handle.dispose();
     });
 

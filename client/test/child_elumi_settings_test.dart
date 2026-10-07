@@ -313,6 +313,8 @@ void main() {
       expect(find.text('회원탈퇴 하실건가요?'), findsOneWidget);
       expect(find.textContaining('일과와 별은 보호자 휴대폰에'), findsOneWidget);
       expect(find.textContaining('이 휴대폰의 연결만 끊어져요'), findsOneWidget);
+      // 로그아웃 확인창처럼 다시 쓰는 방법을 알려 준다
+      expect(find.textContaining('연결 암호를 받아야 해요'), findsOneWidget);
 
       await tester.tap(dialogButton('확인'));
       await tester.pumpAndSettle();

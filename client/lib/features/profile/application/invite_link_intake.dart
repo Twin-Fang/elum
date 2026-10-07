@@ -6,7 +6,7 @@ import 'invite_inbox.dart';
 ///
 /// 링크는 아무 때나 열린다. 이 클래스는 두 가지만 정한다.
 ///
-/// 1. **받을지** — 이룸이 휴대폰에서 열린 링크는 무시한다. 이룸이 휴대폰은 초대를 받을 수 없고
+/// 1. **받을지** — 이룸이 휴대폰에서 열린 링크는 받지 않고 안내만 한다. 이룸이 휴대폰은 초대를 받을 수 없고
 ///    (서버도 403), 이룸이에게 보호자용 입력 화면을 보여 줄 이유가 없다.
 /// 2. **언제 열지** — 우편함에 맡겨 두었다가 [readyLocations] 에 사람이 서 있을 때 연다.
 ///
@@ -31,6 +31,7 @@ class InviteLinkIntake {
     required this.hasSession,
     required this.topLocation,
     required this.open,
+    this.onElumiDeviceRejected,
   });
 
   final InviteInbox inbox;
@@ -43,13 +44,19 @@ class InviteLinkIntake {
   /// 입력 화면을 연다 (보던 화면 위에 얹는다).
   final void Function() open;
 
+  /// 이룸이 휴대폰에서 열린 링크를 받지 않았을 때 — 조용히 넘기지 않고 이유를 알린다.
+  final void Function()? onElumiDeviceRejected;
+
   /// 입력 화면을 열어도 되는 자리.
   static const readyLocations = {Routes.guardian, Routes.onboardingName};
 
   /// 링크가 열렸다.
   void accept(InviteLink link) {
-    // 이룸이 휴대폰은 조용히 무시한다 — 우편함에도 두지 않는다.
-    if (isElumiDevice()) return;
+    // 이룸이 휴대폰은 우편함에 두지 않고 이유만 알린다.
+    if (isElumiDevice()) {
+      onElumiDeviceRejected?.call();
+      return;
+    }
     inbox.receive(link.code);
     tryOpen();
   }

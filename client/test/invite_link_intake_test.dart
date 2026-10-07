@@ -50,7 +50,10 @@ void main() {
     late bool session;
     late String? top;
 
+    late int rejected;
+
     InviteLinkIntake build() => InviteLinkIntake(
+      onElumiDeviceRejected: () => rejected++,
       inbox: inbox,
       isElumiDevice: () => elumi,
       hasSession: () => session,
@@ -63,6 +66,7 @@ void main() {
     setUp(() {
       inbox = InviteInbox();
       opened = 0;
+      rejected = 0;
       elumi = false;
       session = true;
       top = Routes.guardian;
@@ -138,6 +142,14 @@ void main() {
       expect(inbox.hasPending, isFalse);
       // 열려 있는 입력 화면(이룸이 휴대폰에는 없지만)도 깨우지 않는다
       expect(notified, 0);
+      // 조용히 넘기지 않고 안내를 띄운다
+      expect(rejected, 1);
+    });
+
+    test('보호자 휴대폰에서 받은 링크는 거절 안내를 띄우지 않는다', () {
+      elumi = false;
+      build().accept(link('A7K3M9'));
+      expect(rejected, 0);
     });
 
     test('맡겨 둔 뒤 이룸이 휴대폰이 되었다면 버린다 — 이어 줄 이유가 없다', () {
