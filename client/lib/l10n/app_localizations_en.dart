@@ -1723,4 +1723,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get modeSwitchBlockedBack => '돌아가기';
+
+  @override
+  String get installationRetryMessage =>
+      'Could not check sign-in information on this phone. Please try again.';
+
+  @override
+  String get installationRetryButton => 'Try again';
 }

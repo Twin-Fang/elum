@@ -9,7 +9,48 @@ import UIKit
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
+    if let controller = window?.rootViewController as? FlutterViewController {
+      FlutterMethodChannel(name: "elum/installation", binaryMessenger: controller.binaryMessenger)
+        .setMethodCallHandler { call, result in
+          guard call.method == "getInstallationId" else {
+            result(FlutterMethodNotImplemented)
+            return
+          }
+          do { result(try Self.installationId()) }
+          catch { result(FlutterError(code: "E-INSTALL", message: "Installation marker unavailable", details: nil)) }
+        }
+    }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  private static func installationId() throws -> String {
+    let manager = FileManager.default
+    let support = try manager.url(for: .applicationSupportDirectory, in: .userDomainMask,
+                                  appropriateFor: nil, create: true)
+    var directory = support.appendingPathComponent("ElumInstallation", isDirectory: true)
+    try manager.createDirectory(at: directory, withIntermediateDirectories: true)
+    // 삭제 후 Keychain은 남아도 백업 제외 설치 표식은 복원되지 않아야 한다.
+    var values = URLResourceValues()
+    values.isExcludedFromBackup = true
+    try directory.setResourceValues(values)
+    var file = directory.appendingPathComponent("installation-id")
+    var existing: String?
+    do {
+      existing = try String(contentsOf: file, encoding: .utf8)
+    } catch let error as NSError where error.domain == NSCocoaErrorDomain && error.code == NSFileReadNoSuchFileError {
+      // 파일이 없을 때만 새 설치로 본다. 다른 읽기 오류는 그대로 던진다.
+      existing = nil
+    }
+    let id: String
+    if let existing = existing {
+      guard UUID(uuidString: existing) != nil else { throw NSError(domain: "E-INSTALL", code: 1) }
+      id = existing
+    } else {
+      id = UUID().uuidString
+      try id.write(to: file, atomically: true, encoding: .utf8)
+    }
+    try file.setResourceValues(values)
+    return id
   }
 
   /// 로그인을 마친 외부 앱이 우리 앱을 다시 열 때 들어온다.

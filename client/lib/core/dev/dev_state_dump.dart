@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/app_config.dart';
 import '../storage/token_store.dart';
+import '../storage/installation_store.dart';
 import 'dev_log_file.dart';
 
 /// 앱 내부 상태를 통째로 글로 뽑는다 (이슈 #219).
@@ -60,15 +61,15 @@ abstract final class DevStateDump {
   // ── 항목별 수집 ──────────────────────────────────────────────
 
   static Map<String, String> _app() => {
-        '패키지': 'kr.twinfang.elum',
-        '빌드 모드': kReleaseMode
-            ? 'release'
-            : kProfileMode
-                ? 'profile'
-                : 'debug',
-        '플레이버': AppConfig.isDevBuild ? 'dev' : '(없음)',
-        '뽑은 시각': DateTime.now().toIso8601String(),
-      };
+    '패키지': 'kr.twinfang.elum',
+    '빌드 모드': kReleaseMode
+        ? 'release'
+        : kProfileMode
+        ? 'profile'
+        : 'debug',
+    '플레이버': AppConfig.isDevBuild ? 'dev' : '(없음)',
+    '뽑은 시각': DateTime.now().toIso8601String(),
+  };
 
   static Map<String, String> _device(BuildContext? context) {
     final m = <String, String>{
@@ -78,30 +79,32 @@ abstract final class DevStateDump {
     if (context == null) return m;
     final mq = MediaQuery.of(context);
     m.addAll({
-      '화면': '${mq.size.width.toStringAsFixed(1)} × ${mq.size.height.toStringAsFixed(1)}',
+      '화면':
+          '${mq.size.width.toStringAsFixed(1)} × ${mq.size.height.toStringAsFixed(1)}',
       'DPR': mq.devicePixelRatio.toStringAsFixed(2),
       '글꼴 배율': mq.textScaler.scale(14).toStringAsFixed(2),
       '다크모드': '${mq.platformBrightness == Brightness.dark}',
       '동작 줄이기': '${mq.disableAnimations}',
-      '안전영역': '상 ${mq.padding.top.toStringAsFixed(0)} / 하 ${mq.padding.bottom.toStringAsFixed(0)}',
+      '안전영역':
+          '상 ${mq.padding.top.toStringAsFixed(0)} / 하 ${mq.padding.bottom.toStringAsFixed(0)}',
       '키보드': mq.viewInsets.bottom.toStringAsFixed(0),
     });
     return m;
   }
 
   static Map<String, String> _config() => {
-        'API 주소': AppConfig.apiBaseUrl,
-        '시간값 출처': AppConfig.tuningSource.name,
-        '연결 타임아웃': '${AppConfig.connectTimeout.inMilliseconds}ms',
-        '수신 타임아웃': '${AppConfig.receiveTimeout.inMilliseconds}ms',
-        'TTS 주소': AppConfig.ttsBaseUrl,
-        'DLP 최소 연출': '${AppConfig.dlpMinDelay.inMilliseconds}ms',
-        '약관 대기': '${AppConfig.consentFetchTimeout.inMilliseconds}ms',
-        '카드 최대 대기': '${AppConfig.loadingMaxWait.inMilliseconds}ms',
-        '개발자 도구': '${AppConfig.showDevTools}',
-        '온보딩 건너뛰기': '${AppConfig.skipOnboarding}',
-        '네트워크 로그': '${AppConfig.enableNetworkLog}',
-      };
+    'API 주소': AppConfig.apiBaseUrl,
+    '시간값 출처': AppConfig.tuningSource.name,
+    '연결 타임아웃': '${AppConfig.connectTimeout.inMilliseconds}ms',
+    '수신 타임아웃': '${AppConfig.receiveTimeout.inMilliseconds}ms',
+    'TTS 주소': AppConfig.ttsBaseUrl,
+    'DLP 최소 연출': '${AppConfig.dlpMinDelay.inMilliseconds}ms',
+    '약관 대기': '${AppConfig.consentFetchTimeout.inMilliseconds}ms',
+    '카드 최대 대기': '${AppConfig.loadingMaxWait.inMilliseconds}ms',
+    '개발자 도구': '${AppConfig.showDevTools}',
+    '온보딩 건너뛰기': '${AppConfig.skipOnboarding}',
+    '네트워크 로그': '${AppConfig.enableNetworkLog}',
+  };
 
   /// SharedPreferences에 실제로 들어 있는 **모든 키**를 읽는다.
   ///
@@ -116,7 +119,9 @@ abstract final class DevStateDump {
 
   /// 토큰은 **전문 그대로** 담는다 (위 주석 참조).
   static Future<Map<String, String>> _session() async {
-    final store = SecureTokenStore();
+    final store = SecureTokenStore(
+      installationId: await const InstallationStore().load(),
+    );
     await store.load();
     return {
       '세션 있음': '${store.hasSession}',
@@ -175,8 +180,8 @@ abstract final class DevStateDump {
   static String _kb(int bytes) => bytes < 1024
       ? '$bytes B'
       : bytes < 1024 * 1024
-          ? '${(bytes / 1024).toStringAsFixed(1)} KB'
-          : '${(bytes / 1024 / 1024).toStringAsFixed(2)} MB';
+      ? '${(bytes / 1024).toStringAsFixed(1)} KB'
+      : '${(bytes / 1024 / 1024).toStringAsFixed(2)} MB';
 
   /// UI가 같은 표기를 쓰도록 공개한다.
   static String formatBytes(int bytes) => _kb(bytes);

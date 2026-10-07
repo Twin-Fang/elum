@@ -1,3 +1,5 @@
 {
-  "@@locale": "en"
+  "@@locale": "en",
+  "installationRetryMessage": "Could not check sign-in information on this phone. Please try again.",
+  "installationRetryButton": "Try again"
 }

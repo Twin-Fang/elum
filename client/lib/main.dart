@@ -10,6 +10,8 @@ import 'core/logger/app_logger.dart';
 import 'core/state/provider_retry.dart';
 import 'core/storage/local_storage.dart';
 import 'core/storage/token_store.dart';
+import 'core/storage/installation_store.dart';
+import 'l10n/app_localizations.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/oauth_sdk.dart';
 import 'features/onboarding/application/onboarding_notifier.dart';
@@ -38,15 +40,37 @@ Future<void> main() async {
 
   // 지난번 서버에서 받은 시간값으로 시작한다. 서버에 닿기 전 첫 요청(Dio 생성)부터
   // 이 값을 쓴다. 한 번도 받은 적 없으면 코드 기본값 그대로다.
-  final cachedTuning = ClientTuning.tryParseJson(storage.cachedClientTuningJson);
+  final cachedTuning = ClientTuning.tryParseJson(
+    storage.cachedClientTuningJson,
+  );
   if (cachedTuning != null) {
     AppConfig.applyTuning(cachedTuning, source: TuningSource.cached);
   }
 
   // 토큰은 보안 저장소에 있어 읽기가 비동기다. 첫 화면이 세션 유무를 바로
   // 판단할 수 있도록 여기서 미리 읽어 메모리에 올린다.
-  final tokens = SecureTokenStore();
-  await tokens.load();
+  late final SecureTokenStore tokens;
+  try {
+    final installationId = await const InstallationStore().load();
+    tokens = SecureTokenStore(
+      installationId: installationId,
+      allowLegacyMigration: canMigrateLegacyInstallation(storage),
+    );
+    await tokens.load();
+    await storage.configureLock(installationId, reset: tokens.installationChanged);
+    if (tokens.installationChanged) {
+      // 큐와 프로필은 회원 대조까지 보존하되 연결 상태로 로그인을 우회하지 못하게 한다.
+      await storage.setElumiDevice(false);
+      await storage.setElumiLinkLost(false);
+      await storage.clearSelectedRole();
+      await storage.setResumeOnElumiScreen(false);
+      await storage.setOnboardingCompleted(false);
+    }
+  } catch (error) {
+    AppLogger.error('설치 세션 초기화', error);
+    runApp(InstallationRetryApp(onRetry: main));
+    return;
+  }
 
   // QA 세션 주입 (디버그 빌드 전용). 로그인 뒤 화면을 실기기로 밟기 위한 통로다.
   // 이미 세션이 있으면 건드리지 않는다 — 실제 로그인을 덮어쓰면 안 된다.
@@ -71,6 +95,53 @@ Future<void> main() async {
         tokenStoreProvider.overrideWithValue(tokens),
       ],
       child: const ElumApp(),
+    ),
+  );
+}
+
+/// 설치 표식 확인 전에는 인증과 잠금 화면을 만들지 않는다.
+class InstallationRetryApp extends StatefulWidget {
+  const InstallationRetryApp({required this.onRetry, super.key});
+  final Future<void> Function() onRetry;
+  @override
+  State<InstallationRetryApp> createState() => _InstallationRetryAppState();
+}
+
+class _InstallationRetryAppState extends State<InstallationRetryApp> {
+  bool _retrying = false;
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: Builder(
+      builder: (context) => Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(AppLocalizations.of(context).installationRetryMessage),
+                const Text('E-INSTALL'),
+                FilledButton(
+                  onPressed: _retrying
+                      ? null
+                      : () async {
+                          setState(() => _retrying = true);
+                          try {
+                            await widget.onRetry();
+                          } finally {
+                            if (mounted) setState(() => _retrying = false);
+                          }
+                        },
+                  child: Text(
+                    AppLocalizations.of(context).installationRetryButton,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     ),
   );
 }

@@ -282,5 +282,5 @@ class _UnreadablePinStorage extends InMemoryStorage {
   _UnreadablePinStorage() : super(onboardingCompleted: true);
 
   @override
-  Future<String?> getPin() async => throw StateError('읽기 실패');
+  Future<bool> hasPin() async => throw StateError('읽기 실패');
 }

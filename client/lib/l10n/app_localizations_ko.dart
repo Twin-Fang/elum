@@ -1723,4 +1723,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get modeSwitchBlockedBack => '돌아가기';
+
+  @override
+  String get installationRetryMessage => '휴대폰의 로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get installationRetryButton => '다시 시도';
 }

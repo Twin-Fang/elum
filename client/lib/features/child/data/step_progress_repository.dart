@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/dio_client.dart';
+import '../../auth/data/auth_repository.dart';
 
 /// 서버가 완료 집합을 받아들였는가.
 ///
@@ -23,7 +24,11 @@ enum SyncOutcome { accepted, rejected, gone, unreachable }
 ///
 /// **절대 throw하지 않는다.** 결과를 [SyncOutcome]으로 돌려주고 판단은 notifier가 한다.
 class StepProgressRepository {
-  StepProgressRepository({Dio? dio}) : _dio = dio ?? DioClient.create();
+  StepProgressRepository({Dio? dio, bool Function()? canSync})
+    : _dio = dio ?? DioClient.create(),
+      _canSync = canSync ?? (() => true);
+
+  final bool Function() _canSync;
 
   final Dio _dio;
 
@@ -31,6 +36,8 @@ class StepProgressRepository {
     required String routineId,
     required Set<String> completedStepIds,
   }) async {
+    // 새 계정 복원이 끝나기 전에는 이전 계정 큐를 새 토큰으로 보내지 않는다.
+    if (!_canSync()) return SyncOutcome.unreachable;
     // 로컬 카드(mock)는 서버에 없다. 보낼 곳이 없으므로 반영된 것으로 본다.
 
     try {
@@ -62,5 +69,8 @@ class StepProgressRepository {
 }
 
 final stepProgressRepositoryProvider = Provider<StepProgressRepository>(
-  (ref) => StepProgressRepository(dio: ref.watch(dioProvider)),
+  (ref) => StepProgressRepository(
+    dio: ref.watch(dioProvider),
+    canSync: () => ref.read(authRepositoryProvider).hasSession,
+  ),
 );

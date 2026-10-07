@@ -40,6 +40,8 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         ref.read(localStorageProvider).isOnboardingCompleted,
     // 세션이 없으면 로그인 화면으로 되돌린다 — 로그아웃·회원삭제 후 재진입을 막는다
     hasToken: () => ref.read(authRepositoryProvider).hasSession,
+    requiresGuardianPinSetup: () =>
+        ref.read(authRepositoryProvider).guardianPinSetupPending,
     // 이룸이 휴대폰은 로그인이 아니라 연결로 붙는다 (이슈 #206)
     isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
     // 역할을 고르기 전에는 보호자·이룸이 어느 쪽 화면도 열지 않는다 (이슈 #212)

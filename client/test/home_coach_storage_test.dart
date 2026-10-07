@@ -1,4 +1,6 @@
 import 'package:elum/core/storage/local_storage.dart';
+import 'package:elum/core/storage/guardian_lock_store.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,12 +9,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// 로그아웃(`clearAll`)·이룸이 정보 초기화(`clearChildProfile`)로 지워지면, 로그아웃했다
 /// 들어올 때마다 안내가 처음부터 다시 나온다.
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() => FlutterSecureStorage.setMockInitialValues({}));
   group('SharedPrefsStorage', () {
     late LocalStorage storage;
 
     setUp(() async {
       SharedPreferences.setMockInitialValues({});
-      storage = await SharedPrefsStorage.create();
+      storage = await SharedPrefsStorage.create(lock: GuardianLockStore(installationId: 'test-install'));
     });
 
     test('처음엔 안 본 것이다', () {

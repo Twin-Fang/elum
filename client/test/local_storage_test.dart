@@ -1,4 +1,6 @@
 import 'package:elum/core/storage/local_storage.dart';
+import 'package:elum/core/storage/guardian_lock_store.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// 일부 값만 지워지면 어중간한 상태가 남아 온보딩이 정상 진행되지 않는다.
 /// 5개 값이 전부 비워지는지 고정한다. (이슈 #13)
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() => FlutterSecureStorage.setMockInitialValues({}));
   group('InMemoryStorage.clearAll', () {
     test('저장한 값 5개를 모두 지운다', () async {
       final storage = InMemoryStorage();
@@ -21,7 +25,7 @@ void main() {
       expect(storage.nickname, isNull);
       expect(storage.goals, isEmpty);
       expect(storage.character, isNull);
-      expect(await storage.getPin(), isNull);
+      expect(await storage.hasPin(), isFalse);
       expect(storage.isOnboardingCompleted, isFalse);
     });
 
@@ -94,11 +98,11 @@ void main() {
 
     test('앱을 다시 켜도 남는다 (SharedPreferences)', () async {
       SharedPreferences.setMockInitialValues({});
-      final first = await SharedPrefsStorage.create();
+      final first = await SharedPrefsStorage.create(lock: GuardianLockStore(installationId: 'test-install'));
       await first.setElumiLinkLost(true);
 
       // 같은 저장소를 새로 열어 읽는다 — 앱 재시작과 같다
-      final reopened = await SharedPrefsStorage.create();
+      final reopened = await SharedPrefsStorage.create(lock: GuardianLockStore(installationId: 'test-install'));
       expect(reopened.isElumiLinkLost, isTrue);
     });
 
@@ -123,7 +127,7 @@ void main() {
 
     test('clearAll 은 표식도 함께 지운다 — 완전히 처음 상태로 돌아간다', () async {
       SharedPreferences.setMockInitialValues({});
-      final shared = await SharedPrefsStorage.create();
+      final shared = await SharedPrefsStorage.create(lock: GuardianLockStore(installationId: 'test-install'));
       final memory = InMemoryStorage(elumiDevice: true);
       for (final s in [shared, memory]) {
         await s.setElumiLinkLost(true);

@@ -306,7 +306,7 @@ void main() {
       expect(storage.isOnboardingCompleted, isFalse);
       expect(c.read(onboardingProvider).childNickname, isEmpty);
       // 비밀암호는 이룸이가 아니라 이 휴대폰의 것이다 (E45)
-      expect(await storage.getPin(), '1234');
+      expect(await storage.verifyPin('1234'), isTrue);
     });
   });
 

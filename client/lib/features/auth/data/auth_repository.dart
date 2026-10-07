@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/network/profile_header_interceptor.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
@@ -95,11 +96,11 @@ class AuthRepository {
     required TokenStore tokens,
     required OAuthSdk sdk,
     CardImageDiskCache? imageCache,
-  })  : _dio = dio,
-        _storage = storage,
-        _tokens = tokens,
-        _sdk = sdk,
-        _imageCache = imageCache;
+  }) : _dio = dio,
+       _storage = storage,
+       _tokens = tokens,
+       _sdk = sdk,
+       _imageCache = imageCache;
 
   final Dio _dio;
   final LocalStorage _storage;
@@ -117,13 +118,31 @@ class AuthRepository {
   /// 나머지는 그 결과를 함께 기다린다.
   Future<String?>? _refreshInFlight;
 
-  bool get hasSession => _tokens.hasSession;
+  bool _restoring = false;
+  bool lastSignInChangedAccount = false;
+  bool get hasSession => !_restoring && _tokens.hasSession;
+  bool _guardianPinSetupAllowed = false;
+  bool guardianPinSetupPending = false;
+
+  void finishGuardianPinSetup() {
+    guardianPinSetupPending = false;
+    _guardianPinSetupAllowed = false;
+  }
+
+  /// URL만으로 잠금을 새로 만들 수 없게 성공한 보호자 로그인에서 한 번만 허가한다.
+  bool consumeGuardianPinSetupPermit() {
+    final allowed =
+        _guardianPinSetupAllowed && hasSession && !_storage.isElumiDevice;
+    _guardianPinSetupAllowed = false;
+    return allowed;
+  }
 
   /// 제공자로 로그인한다.
   ///
   /// 실패는 **결과에 담아 돌려준다.** 저장소 필드에 남겨 화면이 꺼내 보게 하면
   /// 요청이 겹칠 때 엉뚱한 실패가 딸려 나온다 (#352).
   Future<AuthResult> signInWith(OAuthProvider provider) async {
+    _guardianPinSetupAllowed = false;
     final sdkResult = await _sdk.signIn(provider);
 
     switch (sdkResult) {
@@ -138,7 +157,17 @@ class AuthRepository {
   }
 
   /// 제공자 토큰을 우리 토큰으로 바꾼다.
-  Future<AuthResult> _exchange(OAuthProvider provider, String providerToken) async {
+  Future<AuthResult> _exchange(
+    OAuthProvider provider,
+    String providerToken,
+  ) async {
+    _guardianPinSetupAllowed = false;
+    _restoring = true;
+    final previousOwner =
+        _storage.accountMemberId ??
+        (_tokens is SecureTokenStore ? _tokens.previousMemberId : null);
+    final previousProfile = _storage.selectedProfileId;
+    var exchanged = false;
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/api/auth/oauth/${provider.path}',
@@ -147,24 +176,27 @@ class AuthRepository {
 
       final access = res.data?['accessToken']?.toString();
       final refresh = res.data?['refreshToken']?.toString();
-      if (access == null || access.isEmpty || refresh == null || refresh.isEmpty) {
+      if (access == null ||
+          access.isEmpty ||
+          refresh == null ||
+          refresh.isEmpty) {
         AppLogger.error('소셜 로그인', '서버 응답에 토큰이 없다');
         return const AuthResult(AuthOutcome.failedToken);
       }
 
-      await _tokens.save(accessToken: access, refreshToken: refresh);
-      // 고른 이룸이는 이 로그인 세션의 것이다 (다중 보호자 #362). 이전 계정의 id 가 남은 채
-      // 아래 회원 정보를 부르면 서버가 403 을 준다 — 요청에 헤더로 실리기 때문이다.
-      await _storage.clearSelectedProfileId();
-      // 다음 로그인 화면에서 "지난번에 이걸로 하셨어요"를 보여주기 위해 남긴다.
-      // 다른 수단으로 들어와 빈 계정이 생기는 사고를 막는 장치다.
+      // 회원 복원이 끝나기 전 토큰을 영속화하면 재실행 시 새 토큰에 옛 프로필이 붙는다.
+      exchanged = true;
+      await _tokens.clear();
+      final outcome = await _resolveDestination(
+        previousOwner,
+        previousProfile,
+        access,
+      );
       await _storage.setLastLoginProvider(provider.name);
-      // 소셜 로그인은 보호자의 길이다. 이 휴대폰이 전에 이룸이 휴대폰이었더라도 지금은 보호자 휴대폰이다 —
-      // 표식이 남으면 라우터가 보호자 화면을 막아(#363) 로그인하고도 들어가지 못한다.
-      await _storage.setElumiDevice(false);
-      await _storage.setElumiLinkLost(false);
-      return AuthResult(await _resolveDestination());
+      await _tokens.save(accessToken: access, refreshToken: refresh);
+      return AuthResult(outcome);
     } on DioException catch (e) {
+      if (exchanged) await _discardIncompleteSession();
       // 판정은 전역 인터셉터가 이미 해 뒀다. 여기서 본문을 다시 파싱하지 않는다.
       final failure = AppFailure.of(e);
       if (_isOffline(failure)) {
@@ -184,7 +216,19 @@ class AuthRepository {
       return AuthResult(AuthOutcome.failedApi, failure: failure);
     } catch (e) {
       AppLogger.error('소셜 로그인 교환', e);
+      if (exchanged) await _discardIncompleteSession();
       return AuthResult(AuthOutcome.failed, failure: AppFailure.of(e));
+    } finally {
+      _restoring = false;
+    }
+  }
+
+  Future<void> _discardIncompleteSession() async {
+    _guardianPinSetupAllowed = false;
+    try {
+      await _tokens.clear();
+    } catch (error) {
+      AppLogger.error('불완전 세션 삭제', error);
     }
   }
 
@@ -193,42 +237,116 @@ class AuthRepository {
   ///
   /// 순서는 **동의 → 아이 정보 → 홈**이다. 동의를 마지막에 받으면 아이 정보를
   /// 다 입력한 뒤 거부했을 때 그 입력이 전부 버려진다.
-  Future<AuthOutcome> _resolveDestination() async {
-    try {
-      final res = await _dio.get<Map<String, dynamic>>('/api/member/me');
-
-      final consented = res.data?['requiredConsentsCompleted'] == true;
-      if (!consented) {
-        // 동의도 하지 않은 계정이면 확실히 새 계정이다
-        await _storage.clearChildProfile();
-        return AuthOutcome.consentRequired;
+  Future<AuthOutcome> _resolveDestination(
+    String? previousOwner,
+    String? previousProfile,
+    String access,
+  ) async {
+    final res = await _dio.get<Map<String, dynamic>>(
+      '/api/member/me',
+      options: Options(
+        headers: {'Authorization': 'Bearer $access'},
+        extra: {ProfileHeaderInterceptor.skipKey: true},
+      ),
+    );
+    var body = res.data;
+    final memberId = body?['id'];
+    if (body == null ||
+        memberId is! String ||
+        memberId.isEmpty ||
+        body['requiredConsentsCompleted'] is! bool) {
+      throw const FormatException('invalid member snapshot');
+    }
+    final sameAccount = previousOwner == memberId;
+    final profiles = body['profiles'];
+    if (profiles != null && profiles is! List) {
+      throw const FormatException('invalid profile list');
+    }
+    String? selectedId;
+    if (profiles is List && profiles.isNotEmpty) {
+      if (profiles.any(
+        (p) => p is! Map || p['id'] is! String || (p['id'] as String).isEmpty,
+      )) {
+        throw const FormatException('invalid profile');
       }
-
-      final nickname = res.data?['nickname']?.toString();
-      if (nickname == null || nickname.isEmpty) {
-        // 이 계정에는 아직 아이 정보가 없다. 이전 계정의 값이 남아 있으면
-        // 이름 입력칸에 남의 이름이 미리 채워지고, 거기에 입력하면 이어붙는다.
-        // 토큰은 방금 받았으므로 아이 정보만 지운다. (이슈 #177)
-        await _storage.clearChildProfile();
-        return AuthOutcome.onboarding;
+      selectedId =
+          sameAccount &&
+              profiles.any((p) => (p as Map)['id'] == previousProfile)
+          ? previousProfile
+          : (profiles.first as Map)['id'] as String;
+      // 최초 응답은 첫 프로필의 정보다. 이전 선택이 살아있으면 그 프로필로 다시 읽는다.
+      if (selectedId != (profiles.first as Map)['id']) {
+        final selected = await _dio.get<Map<String, dynamic>>(
+          '/api/member/me',
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $access',
+              ProfileHeaderInterceptor.headerName: selectedId,
+            },
+            extra: {ProfileHeaderInterceptor.skipKey: true},
+          ),
+        );
+        body = selected.data;
+        if (body == null ||
+            body['id'] != memberId ||
+            body['requiredConsentsCompleted'] != true) {
+          throw const FormatException('invalid selected member snapshot');
+        }
       }
-
-      // 재설치한 기존 사용자다. 아이 이름을 로컬에도 되살려 둔다.
-      await _storage.setNickname(nickname);
-      return AuthOutcome.home;
-    } catch (e) {
-      // 조회가 실패해도 로그인 자체는 끝났다. 동의 화면부터 보내면
-      // 이미 동의한 사용자는 한 번 더 누르게 되지만, 건너뛰어서 동의 없이
-      // 서비스를 쓰게 되는 것보다 낫다.
-      AppLogger.error('회원 정보 조회', e);
+    }
+    final nickname = body['nickname'];
+    if (nickname != null && nickname is! String) {
+      throw const FormatException('invalid nickname');
+    }
+    final goals = body['supportGoals'];
+    if (goals != null && (goals is! List || goals.any((g) => g is! String))) {
+      throw const FormatException('invalid support goals');
+    }
+    final character = body['character'];
+    final imageStyle = body['imageStyle'];
+    if ((character != null && character is! String) ||
+        (imageStyle != null && imageStyle is! String)) {
+      throw const FormatException('invalid profile settings');
+    }
+    // 응답을 검증한 뒤에만 계정 범위 로컬 상태를 교체한다. 조회 실패는 기존 큐를 보존한다.
+    lastSignInChangedAccount = !sameAccount;
+    if (!sameAccount) await _storage.clearAll();
+    if (sameAccount &&
+        previousProfile != null &&
+        selectedId != previousProfile) {
+      await _storage.clearChildProfile();
+    }
+    await _storage.setAccountMemberId(memberId);
+    await _storage.setElumiDevice(false);
+    await _storage.setElumiLinkLost(false);
+    await _storage.setResumeOnElumiScreen(false);
+    await _storage.setSelectedRole('guardian');
+    if (body['requiredConsentsCompleted'] != true) {
+      await _storage.clearChildProfile();
       return AuthOutcome.consentRequired;
     }
+    if ((profiles is List && profiles.isEmpty) ||
+        nickname == null ||
+        nickname.trim().isEmpty) {
+      await _storage.clearChildProfile();
+      return AuthOutcome.onboarding;
+    }
+    if (selectedId != null) await _storage.setSelectedProfileId(selectedId);
+    await _storage.setNickname(nickname);
+    await _storage.setGoals(goals is List ? goals.cast<String>() : const []);
+    await _storage.setCharacter(character is String ? character : '');
+    await _storage.setImageStyle(imageStyle is String ? imageStyle : 'CARTOON');
+    await _storage.setOnboardingCompleted(true);
+    guardianPinSetupPending = !await _storage.hasPin();
+    _guardianPinSetupAllowed = guardianPinSetupPending;
+    return AuthOutcome.home;
   }
 
   /// 리프레시 토큰으로 액세스 토큰을 다시 받는다. [AuthInterceptor]가 401에서 부른다.
   Future<String?> refreshAccessToken() {
-    return _refreshInFlight ??=
-        _performRefresh().whenComplete(() => _refreshInFlight = null);
+    return _refreshInFlight ??= _performRefresh().whenComplete(
+      () => _refreshInFlight = null,
+    );
   }
 
   Future<String?> _performRefresh() async {
@@ -243,10 +361,15 @@ class AuthRepository {
 
       final access = res.data?['accessToken']?.toString();
       final nextRefresh = res.data?['refreshToken']?.toString();
-      if (access == null || access.isEmpty || nextRefresh == null || nextRefresh.isEmpty) {
+      if (access == null ||
+          access.isEmpty ||
+          nextRefresh == null ||
+          nextRefresh.isEmpty) {
         return null;
       }
 
+      // 기다리는 동안 다른 계정이 로그인하면 늦은 응답으로 새 세션을 덮어쓰지 않는다.
+      if (_tokens.refreshToken != refresh) return null;
       // 회전 방식이라 리프레시 토큰도 매번 새 값으로 바뀐다. 반드시 덮어쓴다.
       await _tokens.save(accessToken: access, refreshToken: nextRefresh);
       return access;
@@ -258,7 +381,7 @@ class AuthRepository {
       }
       // 401이면 토큰이 만료·폐기됐거나 재사용으로 감지된 것이다.
       // 어느 쪽이든 이 세션은 끝났으므로 지우고 다시 로그인시킨다.
-      if (e.response?.statusCode == 401) {
+      if (e.response?.statusCode == 401 && _tokens.refreshToken == refresh) {
         AppLogger.error('토큰 갱신', '세션이 만료되었다');
         await _tokens.clear();
       }
@@ -274,10 +397,14 @@ class AuthRepository {
   /// **서버 요청이 실패해도 로컬은 반드시 지운다.** 로컬에 남으면 사용자는
   /// 로그아웃했다고 생각하는데 앱은 로그인 상태로 동작한다.
   Future<void> logout() async {
+    finishGuardianPinSetup();
     final refresh = _tokens.refreshToken;
     if (refresh != null && refresh.isNotEmpty) {
       try {
-        await _dio.post<dynamic>('/api/auth/logout', data: {'refreshToken': refresh});
+        await _dio.post<dynamic>(
+          '/api/auth/logout',
+          data: {'refreshToken': refresh},
+        );
       } catch (e) {
         AppLogger.error('로그아웃', e);
       }
@@ -303,6 +430,7 @@ class AuthRepository {
   /// 갱신까지 실패해 세션 종료 경로로 빠진다 (이슈 #175). 그쪽에 맡긴다.
   /// null 이면 지워졌다. 실패하면 **서버가 알려준 이유**가 담겨 온다 (#352).
   Future<AppFailure?> deleteAccount() async {
+    finishGuardianPinSetup();
     try {
       await _dio.delete<dynamic>('/api/member/me');
     } catch (e) {

@@ -274,7 +274,7 @@ void main() {
 
       expect(find.text('이룸이 등록'), findsOneWidget);
       expect(storage.isOnboardingCompleted, isFalse);
-      expect(await storage.getPin(), '1234');
+      expect(await storage.verifyPin('1234'), isTrue);
     });
 
     testWidgets('실패하면 화면에 머물고 서버 문구와 에러 코드를 보인다 — 아무것도 바뀌지 않았다 (E20)', (tester) async {

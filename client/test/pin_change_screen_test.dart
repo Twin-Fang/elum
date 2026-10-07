@@ -12,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/pin_setup_auth.dart';
+import 'package:elum/features/auth/data/auth_repository.dart';
 
 /// 설정 → 비밀암호 변경하기 (#437). 시안이 없어 온보딩 비밀번호 화면 부품을 쓴다 (#438).
 ///
@@ -26,6 +28,7 @@ void main() {
     final router = GoRouter(
       initialLocation: '/settings',
       routes: [
+        GoRoute(path: Routes.login, builder: (_, _) => const Scaffold(body: Text('로그인'))),
         GoRoute(
           path: '/settings',
           builder: (context, state) => Scaffold(
@@ -44,7 +47,7 @@ void main() {
       ],
     );
     return ProviderScope(
-      overrides: [localStorageProvider.overrideWithValue(override ?? storage)],
+      overrides: [localStorageProvider.overrideWithValue(override ?? storage), authRepositoryProvider.overrideWithValue(PinSetupAuth(allowed: false))],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
         builder: (context, _) =>
@@ -92,7 +95,7 @@ void main() {
     await tester.tap(find.byType(ElumButton));
     await tester.pumpAndSettle();
 
-    expect(await storage.getPin(), '5678');
+    expect(await storage.verifyPin('5678'), isTrue);
     expect(find.text('설정 화면'), findsOneWidget);
     expect(find.text('비밀암호를 바꿨어요'), findsOneWidget);
   });
@@ -110,7 +113,7 @@ void main() {
     await enterPin(tester, '5678');
     await tester.tap(find.byType(ElumButton));
     await tester.pumpAndSettle();
-    expect(await storage.getPin(), '5678');
+    expect(await storage.verifyPin('5678'), isTrue);
   });
 
   testWidgets('확정 전에 나가면 암호는 그대로다', (tester) async {
@@ -120,12 +123,13 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('뒤로 가기'));
     await tester.pumpAndSettle();
-    expect(await storage.getPin(), '1234');
+    expect(await storage.verifyPin('1234'), isTrue);
   });
 
-  testWidgets('암호가 없던 휴대폰은 확인 없이 새 암호부터 받는다', (tester) async {
+  testWidgets('암호가 없던 휴대폰은 보호자 재로그인을 요구한다', (tester) async {
     await open(tester, pin: null);
-    expect(find.text('새 비밀암호를\n입력해주세요'), findsOneWidget);
+    expect(find.text('로그인'), findsOneWidget);
+    expect(find.byType(TextField), findsNothing);
   });
 
   testWidgets('저장이 안 됐으면 실패 팝업을 띄우고 화면에 남는다', (tester) async {
@@ -145,11 +149,10 @@ void main() {
   });
 }
 
-/// 쓰기가 조용히 실패하는 저장소. 실제 [SharedPrefsStorage.setPin] 은 예외를 삼키므로
-/// 화면은 다시 읽어 보고서야 실패를 안다.
+/// 보안 저장소 쓰기 오류를 호출부에 전달한다.
 class _BrokenPinStorage extends InMemoryStorage {
   _BrokenPinStorage() : super(onboardingCompleted: true, pin: '1234');
 
   @override
-  Future<void> setPin(String v) async {}
+  Future<void> setPin(String v) async => throw StateError('쓰기 실패');
 }

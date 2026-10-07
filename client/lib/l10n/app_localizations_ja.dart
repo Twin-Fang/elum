@@ -1723,4 +1723,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get modeSwitchBlockedBack => '돌아가기';
+
+  @override
+  String get installationRetryMessage => 'ログイン情報を確認できませんでした。もう一度お試しください。';
+
+  @override
+  String get installationRetryButton => '再試行';
 }

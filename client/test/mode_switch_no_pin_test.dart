@@ -33,6 +33,7 @@ void main() {
     final router = GoRouter(
       initialLocation: Routes.child,
       routes: [
+        GoRoute(path: Routes.login, builder: (_, _) => const Scaffold(body: Text('로그인'))),
         GoRoute(
           path: Routes.child,
           builder: (context, state) => Scaffold(
@@ -95,48 +96,17 @@ void main() {
   }
 
   group('보호자 휴대폰 — 암호가 없다', () {
-    testWidgets('아무 숫자를 넣어도 보호자 화면이 열리지 않고 암호 만들기로 간다', (tester) async {
+    testWidgets('암호 없이 보호자 홈을 열거나 임의 생성하지 않고 로그인한다', (tester) async {
       await open(tester);
-
-      // 비교할 암호가 없으니 입력창 대신 암호를 만드는 화면이 떠야 한다
-      expect(find.text('보호자님만 아는\n비밀암호를 만들어주세요'), findsOneWidget);
-
-      await enterPin(tester, '0000');
-
-      expect(find.text('보호자 홈'), findsNothing, reason: '암호 없이 보호자 홈에 도달했다');
-      expect(await storage.getPin(), isNull, reason: '확정 전에 저장되면 안 된다');
+      expect(find.text('로그인'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text('보호자 홈'), findsNothing);
+      expect(await storage.hasPin(), isFalse);
     });
-
-    testWidgets('암호를 만들어 저장하면 그 암호로 보호자 화면이 열린다', (tester) async {
-      await open(tester);
-      await enterPin(tester, '1111');
-      expect(find.text('암호를 한번 더\n입력해주세요'), findsOneWidget);
-      await enterPin(tester, '1111');
-      await tester.tap(find.text('저장하기'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('보호자 홈'), findsOneWidget);
-      expect(await storage.getPin(), '1111');
-      expect(find.text('비밀암호를 만들었어요'), findsOneWidget);
-    });
-
-    testWidgets('저장된 암호가 빈 문자열이어도 없는 것으로 본다', (tester) async {
+    testWidgets('빈 암호도 재인증을 요구한다', (tester) async {
       await open(tester, pin: '');
-      expect(find.text('보호자님만 아는\n비밀암호를 만들어주세요'), findsOneWidget);
-
-      await enterPin(tester, '0000');
-      expect(find.text('보호자 홈'), findsNothing);
-    });
-
-    testWidgets('만들다가 뒤로 가면 이룸이 홈으로 돌아오고 암호는 생기지 않는다', (tester) async {
-      await open(tester);
-      await enterPin(tester, '1111');
-      await tester.tap(find.bySemanticsLabel('뒤로 가기'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('이룸이 홈'), findsOneWidget);
-      expect(find.text('보호자 홈'), findsNothing);
-      expect(await storage.getPin(), isNull);
+      expect(find.text('로그인'), findsOneWidget);
+      expect(await storage.hasPin(), isFalse);
     });
   });
 
@@ -150,7 +120,7 @@ void main() {
       expect(find.text('보호자 홈'), findsNothing);
       // 이룸이가 암호를 만들 수 있는 화면으로도 보내지 않는다
       expect(find.text('보호자님만 아는\n비밀암호를 만들어주세요'), findsNothing);
-      expect(await storage.getPin(), isNull);
+      expect(await storage.hasPin(), isFalse);
     });
 
     testWidgets('돌아가기를 누르면 이룸이 홈으로 돌아온다', (tester) async {
@@ -206,5 +176,5 @@ class _UnreadablePinStorage extends InMemoryStorage {
   _UnreadablePinStorage() : super(onboardingCompleted: true);
 
   @override
-  Future<String?> getPin() async => throw StateError('읽기 실패');
+  Future<bool> hasPin() async => throw StateError('읽기 실패');
 }
