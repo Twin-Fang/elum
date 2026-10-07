@@ -17,7 +17,8 @@ import '../../domain/image_style.dart';
 /// 2px 테두리(`#93DBCC`)로 바뀐다.
 ///
 /// 만화 예시는 온보딩에서 고른 친구를 그린다(시안은 포포다). 고른 면이 민트색(`#93DBCC`)이고
-/// 고르지 않으면 바탕색이다. 실사·직접 사진은 시안의 사진 에셋이다.
+/// 고르지 않으면 바탕색이다. 실사는 시안의 사진 에셋, 기본 그림은 실제 카드에 들어가는
+/// 픽토그램이다.
 ///
 /// 두 화면이 같은 카드를 쓰므로 여기서만 고친다.
 class ImageStyleOptionCard extends StatelessWidget {
@@ -178,10 +179,17 @@ class _Example extends StatelessWidget {
         // 장식 그림이다 — 카드 이름이 이미 뜻을 말한다
         excludeFromSemantics: true,
       ),
-      ImageStyle.photoOnly => Image.asset(
-        AppAssets.imageStylePhoto,
-        fit: BoxFit.cover,
-        excludeFromSemantics: true,
+      // 픽토그램은 흰 면 위에 그려진 그림이라 카드 면(surface)에 여백을 두고 얹는다.
+      ImageStyle.photoOnly => ColoredBox(
+        color: colors.surface,
+        child: Padding(
+          padding: EdgeInsets.all(6.w),
+          child: SvgPicture.asset(
+            AppAssets.imageStyleBasic,
+            fit: BoxFit.contain,
+            excludeFromSemantics: true,
+          ),
+        ),
       ),
     };
 

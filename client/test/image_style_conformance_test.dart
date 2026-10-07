@@ -24,6 +24,9 @@ import 'helpers/precache_images.dart';
 /// 시안 `그림방식` 1274:9883(만화 선택) · 1274:10129(직접 찍은 사진 선택). 골든은 앱 렌더이고
 /// 시안 export 와는 `tool/figma_diff.py` 로 맞댄다 (`settings_conformance_test.dart` 와 같은 방식).
 ///
+/// ⚠️ 지금 앱은 시안과 일부러 다르다 — 기본 그림이 맨 위(기본값)이고 건너뛰기가 없으며 세 번째
+/// 이름·예시가 `기본 그림`·픽토그램이다. 시안이 갱신되면 다시 맞댄다.
+///
 /// 시안 만화 예시는 포포(여우)다. 앱은 온보딩에서 고른 친구를 그리므로 여우를 골라 맞춘다.
 const _deviceInsets = EdgeInsets.only(top: 59, bottom: 21);
 

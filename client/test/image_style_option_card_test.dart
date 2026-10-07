@@ -70,7 +70,7 @@ void main() {
       expect(thumb().color, colors.background);
     });
 
-    testWidgets('실사와 직접 찍은 사진은 시안의 사진 에셋을 쓴다', (tester) async {
+    testWidgets('실사는 시안의 사진 에셋, 기본 그림은 실제 카드의 픽토그램을 쓴다', (tester) async {
       await pump(
         tester,
         const Column(
@@ -88,7 +88,7 @@ void main() {
       );
 
       expect(imageWithAsset(AppAssets.imageStyleRealistic), findsOneWidget);
-      expect(imageWithAsset(AppAssets.imageStylePhoto), findsOneWidget);
+      expect(svgWithAsset(AppAssets.imageStyleBasic), findsOneWidget);
     });
 
     testWidgets('두 문장 설명은 문장 끝에서 줄이 나뉘고 낭독 이름은 원문이다', (tester) async {
@@ -111,7 +111,7 @@ void main() {
       expect(text.semanticsLabel, ImageStyle.photoOnly.description);
     });
 
-    testWidgets('카드 제목은 직접 찍은 사진이다 (시안 1274:10077)', (tester) async {
+    testWidgets('카드 제목은 기본 그림이다', (tester) async {
       await pump(
         tester,
         const ImageStyleOptionCard(
@@ -120,7 +120,7 @@ void main() {
         ),
       );
 
-      expect(find.text('직접 찍은 사진'), findsOneWidget);
+      expect(find.text('기본 그림'), findsOneWidget);
     });
   });
 }

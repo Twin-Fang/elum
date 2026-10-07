@@ -45,6 +45,8 @@ void main() {
     String? savedStyle,
   }) {
     storage = InMemoryStorage();
+    // 설정 화면은 온보딩을 마친 뒤에만 열린다
+    storage.setOnboardingCompleted(true);
     if (savedStyle != null) storage.setImageStyle(savedStyle);
     adapter = FakeAdapter({patch: patchResponse}, delay: delay);
     final dio = Dio(BaseOptions(baseUrl: 'https://test.local'))
@@ -156,7 +158,7 @@ void main() {
     testWidgets('저장된 방식이 값으로 보인다', (tester) async {
       await tester.pumpWidget(wrap(savedStyle: 'PHOTO_ONLY'));
       await tester.pumpAndSettle();
-      expect(find.text('직접 찍은 사진'), findsOneWidget);
+      expect(find.text('기본 그림'), findsOneWidget);
       expect(find.text('만화'), findsNothing);
     });
 
@@ -238,9 +240,9 @@ void main() {
           findsOneWidget,
         );
       }
-      // 실사·직접 사진의 예시는 시안의 사진 에셋이다 (#494)
+      // 실사 예시는 시안의 사진 에셋, 기본 그림 예시는 픽토그램이다
       expect(imageWithAsset(AppAssets.imageStyleRealistic), findsOneWidget);
-      expect(imageWithAsset(AppAssets.imageStylePhoto), findsOneWidget);
+      expect(svgWithAsset(AppAssets.imageStyleBasic), findsOneWidget);
     });
 
     testWidgets('현재 값이 선택색(민트)으로 보이고 나머지는 흰 카드다', (tester) async {
@@ -327,7 +329,7 @@ void main() {
 
       await tester.tap(find.text('실사'));
       await tester.pump(const Duration(milliseconds: 50));
-      await tester.tap(find.text('직접 찍은 사진'));
+      await tester.tap(find.text('기본 그림'));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.pumpAndSettle();
 
@@ -382,7 +384,7 @@ void main() {
       await tester.pumpAndSettle();
       await openScreen(tester);
 
-      await tester.tap(find.text('직접 찍은 사진'));
+      await tester.tap(find.text('기본 그림'));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('E-NET-OFFLINE'), findsOneWidget);
@@ -415,11 +417,11 @@ void main() {
 
       expect(tester.takeException(), isNull);
       await tester.scrollUntilVisible(
-        find.text('직접 찍은 사진'),
+        find.text('기본 그림'),
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('직접 찍은 사진'), findsOneWidget);
+      expect(find.text('기본 그림'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

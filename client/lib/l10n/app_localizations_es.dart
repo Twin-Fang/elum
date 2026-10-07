@@ -383,11 +383,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get imageStyleRealisticDescription => '실제 물건 사진처럼 보여요';
 
   @override
-  String get imageStylePhotoOnlyLabel => '직접 찍은 사진';
+  String get imageStylePhotoOnlyLabel => '기본 그림';
 
   @override
-  String get imageStylePhotoOnlyDescription =>
-      '그림은 직접 찍은 사진으로 넣어요. 글은 계속 만들어 드려요';
+  String get imageStylePhotoOnlyDescription => '간단한 그림 기호가 들어가요. 사진으로 바꿀 수 있어요';
 
   @override
   String get goalStepByStep => '해야 할 일을 순서대로 이해해요';
@@ -422,9 +421,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboardingImageStyleDescription => '나중에 설정에서 바꿀 수 있어요';
-
-  @override
-  String get onboardingImageStyleSkip => '건너뛰기';
 
   @override
   String get onboardingNameTitle => '이룸이를 어떻게\n불러드릴까요?';

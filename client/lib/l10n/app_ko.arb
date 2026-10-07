@@ -363,10 +363,10 @@
   "imageStyleRealisticDescription": "실제 물건 사진처럼 보여요",
   "@imageStyleRealisticDescription": { "description": "카드 그림 방식 설명" },
 
-  "imageStylePhotoOnlyLabel": "직접 찍은 사진",
+  "imageStylePhotoOnlyLabel": "기본 그림",
   "@imageStylePhotoOnlyLabel": { "description": "카드 그림 방식 이름" },
 
-  "imageStylePhotoOnlyDescription": "그림은 직접 찍은 사진으로 넣어요. 글은 계속 만들어 드려요",
+  "imageStylePhotoOnlyDescription": "간단한 그림 기호가 들어가요. 사진으로 바꿀 수 있어요",
   "@imageStylePhotoOnlyDescription": { "description": "카드 그림 방식 설명" },
 
   "goalStepByStep": "해야 할 일을 순서대로 이해해요",
@@ -399,8 +399,6 @@
   "onboardingImageStyleDescription": "나중에 설정에서 바꿀 수 있어요",
   "@onboardingImageStyleDescription": { "description": "카드 그림 방식 화면 설명" },
 
-  "onboardingImageStyleSkip": "건너뛰기",
-  "@onboardingImageStyleSkip": { "description": "카드 그림 방식 화면의 건너뛰기 링크" },
 
   "onboardingNameTitle": "이룸이를 어떻게\n불러드릴까요?",
   "@onboardingNameTitle": { "description": "이름 입력 화면 제목" },

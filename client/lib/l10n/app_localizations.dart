@@ -749,13 +749,13 @@ abstract class AppLocalizations {
   /// 카드 그림 방식 이름
   ///
   /// In ko, this message translates to:
-  /// **'직접 찍은 사진'**
+  /// **'기본 그림'**
   String get imageStylePhotoOnlyLabel;
 
   /// 카드 그림 방식 설명
   ///
   /// In ko, this message translates to:
-  /// **'그림은 직접 찍은 사진으로 넣어요. 글은 계속 만들어 드려요'**
+  /// **'간단한 그림 기호가 들어가요. 사진으로 바꿀 수 있어요'**
   String get imageStylePhotoOnlyDescription;
 
   /// 도움 목표 선택지
@@ -817,12 +817,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'나중에 설정에서 바꿀 수 있어요'**
   String get onboardingImageStyleDescription;
-
-  /// 카드 그림 방식 화면의 건너뛰기 링크
-  ///
-  /// In ko, this message translates to:
-  /// **'건너뛰기'**
-  String get onboardingImageStyleSkip;
 
   /// 이름 입력 화면 제목
   ///

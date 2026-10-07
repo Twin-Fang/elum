@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
@@ -22,8 +21,9 @@ import '../../../core/router/pop_or_home.dart';
 /// Figma `그림방식` 1274:9883 · 1274:10129 (#494). 정식 시안으로 바꿨다 — 제목·설명은
 /// 다른 온보딩과 같은 x=24 이고 카드 셋은 344×94, 사이 16, 첫 카드 윗변 y=279 다.
 ///
-/// 원칙 ④ — 되돌릴 수 있다고 먼저 말하고(`나중에 설정에서 바꿀 수 있어요`)
-/// `건너뛰기`를 늘 연다. 건너뛰면 만화다.
+/// 원칙 ④ — 되돌릴 수 있다고 먼저 말한다(`나중에 설정에서 바꿀 수 있어요`).
+/// 기본 그림이 처음부터 골라져 있어 `다음`만 누르면 되므로 건너뛰기는 두지 않는다.
+/// 크레딧(비용)은 여기서 말하지 않는다 — 처음 보는 보호자는 크레딧을 모른다.
 ///
 /// 선택은 여기서 저장하지 않는다. 온보딩이 끝날 때 [OnboardingNotifier.complete]가
 /// 호칭·목표·캐릭터와 함께 한꺼번에 남긴다 — 뒤로가기로 돌아와도 고른 값이 살아 있다.
@@ -40,7 +40,6 @@ class ImageStyleScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(onboardingProvider);
     final notifier = ref.read(onboardingProvider.notifier);
-    final colors = context.colors;
     final space = context.space;
 
     final character = profile.cardCharacter ?? CardCharacter.cat;
@@ -65,29 +64,10 @@ class ImageStyleScreen extends ConsumerWidget {
 
     return ElumScaffold(
       onBack: context.popOrHome,
-      // 만화가 처음부터 골라져 있어 다음은 늘 열려 있다
+      // 하나가 늘 골라져 있어 다음은 늘 열려 있다
       bottomButton: ElumButton(
         label: context.l10n.commonNext,
         onPressed: () => context.push(Routes.onboardingPin),
-      ),
-      belowButton: Center(
-        child: AppPressable(
-          // 건너뛰면 만화다 — 다른 걸 골랐다가 건너뛰어도 기본으로 돌아온다
-          onTap: () {
-            notifier.setImageStyle(ImageStyle.cartoon);
-            context.push(Routes.onboardingPin);
-          },
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: space.xs.h),
-            child: Text(
-              context.l10n.onboardingImageStyleSkip,
-              style: context.typo.linkLater.copyWith(
-                color: colors.linkLaterLabel,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ),
       ),
       // 글자를 키우면 제목 두 줄과 카드 셋이 한 화면을 넘는다 — 스크롤로 끝까지 본다
       child: SingleChildScrollView(

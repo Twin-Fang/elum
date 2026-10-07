@@ -22,13 +22,17 @@ void main() {
       expect(ImageStyle.photoOnly.apiValue, 'PHOTO_ONLY');
     });
 
-    // 순서가 화면 배치다 — 만화(기본)가 맨 위.
-    test('enum 순서가 화면 배치(만화, 실사, 직접 찍은 사진)를 유지한다', () {
+    // 순서가 화면 배치다 — 기본 그림(새 이룸이의 기본값)이 맨 위.
+    test('enum 순서가 화면 배치(기본 그림, 만화, 실사)를 유지한다', () {
       expect(ImageStyle.values, [
+        ImageStyle.photoOnly,
         ImageStyle.cartoon,
         ImageStyle.realistic,
-        ImageStyle.photoOnly,
       ]);
+    });
+
+    test('새 이룸이의 기본값은 기본 그림이다', () {
+      expect(ImageStyle.onboardingDefault, ImageStyle.photoOnly);
     });
 
     test('알려진 값은 그대로 되돌린다', () {
@@ -45,15 +49,15 @@ void main() {
       expect(ImageStyle.fromApiValue('realistic'), ImageStyle.cartoon);
     });
 
-    test('화면 문구는 시안(임시) 그대로다', () {
+    test('화면 문구', () {
       expect(ImageStyle.cartoon.label, '만화');
       expect(ImageStyle.realistic.label, '실사');
-      expect(ImageStyle.photoOnly.label, '직접 찍은 사진');
+      expect(ImageStyle.photoOnly.label, '기본 그림');
       expect(ImageStyle.cartoon.description, '캐릭터가 나오는 그림이에요');
       expect(ImageStyle.realistic.description, '실제 물건 사진처럼 보여요');
       expect(
         ImageStyle.photoOnly.description,
-        '그림은 직접 찍은 사진으로 넣어요. 글은 계속 만들어 드려요',
+        '간단한 그림 기호가 들어가요. 사진으로 바꿀 수 있어요',
       );
     });
   });
@@ -159,10 +163,23 @@ void main() {
 
     setUp(() => storage = InMemoryStorage());
 
-    // E13 — 기존 설치 앱을 올리면 로컬 값이 없다.
-    test('E13 로컬 값이 없으면 만화로 시작한다', () {
+    // E13 — 기존 설치 앱을 올리면 로컬 값이 없다. 서버 기본값(CARTOON)과 맞춘다.
+    test('E13 온보딩을 마친 기존 앱에 로컬 값이 없으면 만화다', () async {
+      await storage.setOnboardingCompleted(true);
       final c = make({});
       expect(c.read(onboardingProvider).imageStyle, ImageStyle.cartoon);
+    });
+
+    test('온보딩 중(로컬 값 없음)인 새 이룸이는 기본 그림으로 시작한다', () {
+      final c = make({});
+      expect(c.read(onboardingProvider).imageStyle, ImageStyle.photoOnly);
+    });
+
+    test('새 이룸이 추가(resetProfile)도 기본 그림으로 시작한다', () async {
+      await storage.setImageStyle('REALISTIC');
+      final c = make({});
+      c.read(onboardingProvider.notifier).resetProfile();
+      expect(c.read(onboardingProvider).imageStyle, ImageStyle.photoOnly);
     });
 
     test('저장된 값으로 시작하고, 모르는 값이면 만화다', () async {
@@ -190,6 +207,8 @@ void main() {
 
     // E3 — 서버 저장이 실패하면 이전 값으로 되돌리고, 실패 이유를 돌려준다.
     test('E3 서버가 실패하면 이전 값으로 되돌리고 실패를 돌려준다', () async {
+      // 설정 화면은 온보딩을 마친 뒤에만 열린다 — 로컬 값 없는 기존 앱은 만화다
+      await storage.setOnboardingCompleted(true);
       final c = make({
         'PATCH /api/member/image-style': const FakeHttpError(503),
       });
@@ -203,7 +222,7 @@ void main() {
       expect(storage.imageStyle, ImageStyle.cartoon.apiValue);
     });
 
-    // E19 — 온보딩이 끝날 때 함께 저장한다. 건너뛰면 만화가 저장된다.
+    // E19 — 온보딩이 끝날 때 함께 저장한다. 고르지 않으면 기본 그림이 저장된다.
     test('complete 가 그림 방식도 로컬과 서버에 저장한다', () async {
       final c = make({
         'PATCH /api/member/nickname': <String, Object?>{},
@@ -233,7 +252,7 @@ void main() {
       final failure = await c.read(onboardingProvider.notifier).complete();
 
       expect(failure, isNotNull);
-      expect(storage.imageStyle, 'CARTOON'); // 로컬에는 남았다
+      expect(storage.imageStyle, 'PHOTO_ONLY'); // 로컬에는 남았다
     });
   });
 
@@ -305,8 +324,8 @@ void main() {
   });
 
   test('OnboardingProfile 은 그림 방식을 몰라도 온보딩 완료 조건이 그대로다', () {
-    // 그림 방식은 필수 입력이 아니다 — 건너뛰면 만화다.
+    // 그림 방식은 고르지 않아도 된다 — 새 이룸이는 기본 그림이다.
     const profile = OnboardingProfile();
-    expect(profile.imageStyle, ImageStyle.cartoon);
+    expect(profile.imageStyle, ImageStyle.photoOnly);
   });
 }

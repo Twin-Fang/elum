@@ -24,8 +24,8 @@ abstract class OnboardingProfile with _$OnboardingProfile {
     @Default(<SupportGoal>{}) Set<SupportGoal> supportGoals,
     CardCharacter? cardCharacter,
 
-    /// 카드 그림 방식. 건너뛰면 기본 만화다 — 필수 입력이 아니다.
-    @Default(ImageStyle.cartoon) ImageStyle imageStyle,
+    /// 카드 그림 방식. 새 이룸이는 기본 그림으로 시작한다.
+    @Default(ImageStyle.onboardingDefault) ImageStyle imageStyle,
 
     /// 보호자 모드 전환용 4자리 PIN
     @Default('') String guardianPin,

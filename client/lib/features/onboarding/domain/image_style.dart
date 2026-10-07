@@ -5,17 +5,24 @@ import '../../../core/l10n/current_l10n.dart';
 /// 현장 피드백 — 만화풍 그림은 발달장애인에게 추상적이라 옷장 그림을 옷장으로
 /// 알아보지 못할 수 있다. 실제 물건 사진 같은 그림, 또는 보호자가 직접 찍은 사진이
 /// 필요해 방식을 고르게 한다. **글(카드 문장)은 어느 방식이든 계속 만든다.**
-///
-/// 문구는 시안이 나오기 전 **임시**다(디자이너 확정 전 제시용, 이슈 #458).
 enum ImageStyle {
-  // 순서가 화면 배치다 — 만화(기본)가 맨 위. 바꾸면 화면이 조용히 뒤집히므로
-  // 테스트로 고정해 뒀다.
+  // 순서가 화면 배치다 — 기본 그림(새 이룸이의 기본값)이 맨 위. 바꾸면 화면이 조용히
+  // 뒤집히므로 테스트로 고정해 뒀다.
   //
   // apiValue 는 서버 `ImageStyle` enum name 과 같아야 한다. 어긋나면
   // PATCH /api/member/image-style 이 역직렬화에 실패한다.
+
+  /// 화면 이름은 `기본 그림`이다. AI 그림을 그리지 않아 크레딧을 덜 쓰고, 그림 자리는
+  /// 서버가 고른 픽토그램이 채운다. 사진은 카드 수정에서 넣는다.
+  photoOnly('PHOTO_ONLY'),
   cartoon('CARTOON'),
-  realistic('REALISTIC'),
-  photoOnly('PHOTO_ONLY');
+  realistic('REALISTIC');
+
+  /// 새 이룸이를 만들 때 처음 골라져 있는 방식.
+  ///
+  /// [fromApiValue]의 기본값(만화)과 다르다 — 그쪽은 서버가 값을 안 준 **기존** 이룸이를
+  /// 서버 DB 기본값(CARTOON)과 맞춰 읽는 것이다.
+  static const onboardingDefault = ImageStyle.photoOnly;
 
   const ImageStyle(this.apiValue);
 

@@ -47,15 +47,15 @@ void main() {
       expect(ImageStyle.cartoon.description, '캐릭터가 나오는 그림이에요');
       expect(ImageStyle.realistic.label, '실사');
       expect(ImageStyle.realistic.description, '실제 물건 사진처럼 보여요');
-      expect(ImageStyle.photoOnly.label, '직접 찍은 사진');
+      expect(ImageStyle.photoOnly.label, '기본 그림');
       expect(
         ImageStyle.photoOnly.description,
-        '그림은 직접 찍은 사진으로 넣어요. 글은 계속 만들어 드려요',
+        '간단한 그림 기호가 들어가요. 사진으로 바꿀 수 있어요',
       );
       expect(ImageStyle.values.map((s) => s.apiValue), [
+        'PHOTO_ONLY',
         'CARTOON',
         'REALISTIC',
-        'PHOTO_ONLY',
       ]);
       expect(ImageStyle.fromApiValue('PHOTO_ONLY'), ImageStyle.photoOnly);
       // 라벨(한글)은 식별자가 아니다 — 알 수 없는 값은 기본 만화
@@ -138,7 +138,7 @@ void main() {
         await pumpScreen(tester, const ImageStyleScreen(), locale: locale);
         expect(find.text('카드 그림은 어떤 방식으로\n만들까요?'), findsOneWidget);
         expect(find.text('나중에 설정에서 바꿀 수 있어요'), findsOneWidget);
-        expect(find.text('건너뛰기'), findsOneWidget);
+        expect(find.text('건너뛰기'), findsNothing);
         expect(find.text('만화'), findsOneWidget);
       });
 

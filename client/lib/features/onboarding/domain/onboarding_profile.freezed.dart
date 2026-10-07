@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$OnboardingProfile {
 
 /// 아이 호칭. 실명이 아니어도 된다고 온보딩에서 안내한다.
- String get childNickname; Set<SupportGoal> get supportGoals; CardCharacter? get cardCharacter;/// 카드 그림 방식. 건너뛰면 기본 만화다 — 필수 입력이 아니다.
+ String get childNickname; Set<SupportGoal> get supportGoals; CardCharacter? get cardCharacter;/// 카드 그림 방식. 새 이룸이는 기본 그림으로 시작한다.
  ImageStyle get imageStyle;/// 보호자 모드 전환용 4자리 PIN
  String get guardianPin;
 /// Create a copy of OnboardingProfile
@@ -213,7 +213,7 @@ return $default(_that.childNickname,_that.supportGoals,_that.cardCharacter,_that
 
 
 class _OnboardingProfile extends OnboardingProfile {
-  const _OnboardingProfile({this.childNickname = '', final  Set<SupportGoal> supportGoals = const <SupportGoal>{}, this.cardCharacter, this.imageStyle = ImageStyle.cartoon, this.guardianPin = ''}): _supportGoals = supportGoals,super._();
+  const _OnboardingProfile({this.childNickname = '', final  Set<SupportGoal> supportGoals = const <SupportGoal>{}, this.cardCharacter, this.imageStyle = ImageStyle.onboardingDefault, this.guardianPin = ''}): _supportGoals = supportGoals,super._();
   
 
 /// 아이 호칭. 실명이 아니어도 된다고 온보딩에서 안내한다.
@@ -226,7 +226,7 @@ class _OnboardingProfile extends OnboardingProfile {
 }
 
 @override final  CardCharacter? cardCharacter;
-/// 카드 그림 방식. 건너뛰면 기본 만화다 — 필수 입력이 아니다.
+/// 카드 그림 방식. 새 이룸이는 기본 그림으로 시작한다.
 @override@JsonKey() final  ImageStyle imageStyle;
 /// 보호자 모드 전환용 4자리 PIN
 @override@JsonKey() final  String guardianPin;

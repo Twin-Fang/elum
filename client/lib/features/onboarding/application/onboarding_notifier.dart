@@ -40,8 +40,11 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
           .whereType<SupportGoal>()
           .toSet(),
       cardCharacter: CardCharacter.fromApiValue(storage.character),
-      // 로컬 값이 없으면(기존 설치 앱·건너뜀) 만화다
-      imageStyle: ImageStyle.fromApiValue(storage.imageStyle),
+      // 로컬 값이 없을 때 — 온보딩 중이면 새 이룸이라 기본 그림, 온보딩을 마친
+      // 기존 설치 앱이면 서버 기본값과 같은 만화다.
+      imageStyle: storage.imageStyle == null && !storage.isOnboardingCompleted
+          ? ImageStyle.onboardingDefault
+          : ImageStyle.fromApiValue(storage.imageStyle),
     );
   }
 

@@ -184,8 +184,8 @@ abstract final class AppAssets {
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
   static const imageStyleRealistic = '$_images/image_style_realistic.png';
 
-  /// 그림 방식 선택의 `직접 찍은 사진` 예시 (오리 사진, 70×70 cover). Figma `1274:10079`.
-  static const imageStylePhoto = '$_images/image_style_photo.png';
+  /// 그림 방식 선택의 `기본 그림` 예시. 이 방식의 카드에 실제로 들어가는 픽토그램을 그대로 보여 준다.
+  static final imageStyleBasic = pictogram('brush_teeth_,_to');
 
   /// 로딩 체크리스트의 완료 표시 (20×20). Figma 262:4692 `Group 27`.
   static const stageCheckDone = '$_images/stage_check_done.svg';
