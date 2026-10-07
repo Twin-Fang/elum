@@ -205,7 +205,9 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     final messenger = ScaffoldMessenger.maybeOf(context);
     final l10n = context.l10n;
     if (widget.createOnly) {
-      // 방금 만든 암호가 곧 통과의 증거다. 보호자 홈으로 바로 들어간다.
+      // 방금 만든 암호가 곧 통과의 증거다. 암호 만들기 대기를 끄지 않으면
+      // 경로 가드가 보호자 홈 진입을 다시 이 화면으로 돌려보낸다.
+      ref.read(authRepositoryProvider).finishGuardianPinSetup();
       context.go(Routes.guardian);
     } else {
       context.popOrHome();
