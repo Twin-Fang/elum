@@ -73,10 +73,20 @@ class RoutineProgressRing extends StatelessWidget {
                 strokeWidth: _stroke.w,
               ),
               child: Center(
-                child: Text(
-                  '${(value * 100).round()}%',
-                  style: context.typo.ringPercent.copyWith(
-                    color: colors.routineRingProgress,
+                // 글자가 커져도 `25`/`%` 로 쪼개지지 않게 한 덩어리로 줄여 담는다.
+                // 링 안쪽 지름이 고정이라 키울 자리가 없다.
+                child: Padding(
+                  padding: EdgeInsets.all(_stroke.w),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '${(value * 100).round()}%',
+                      maxLines: 1,
+                      softWrap: false,
+                      style: context.typo.ringPercent.copyWith(
+                        color: colors.routineRingProgress,
+                      ),
+                    ),
                   ),
                 ),
               ),

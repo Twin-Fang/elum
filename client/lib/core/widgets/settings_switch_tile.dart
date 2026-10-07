@@ -31,17 +31,23 @@ class SettingsSwitchTile extends StatelessWidget {
       child: ExcludeSemantics(
         child: AppPressable(
           onTap: () => onChanged(!value),
-          child: SizedBox(
-            height: SettingsTile.height.h,
+          // 시안 높이는 최소값이다 — 글자가 커지면 줄이 늘어난다.
+          child: Container(
+            constraints: BoxConstraints(minHeight: SettingsTile.height.h),
+            alignment: Alignment.center,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: SettingsTile.padH.w),
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      label,
-                      style: context.typo.settingsTileLabel.copyWith(
-                        color: colors.textPrimary,
+                    // 줄이 늘어날 때 위아래가 붙지 않게 글에만 여백을 둔다.
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.h),
+                      child: Text(
+                        label,
+                        style: context.typo.settingsTileLabel.copyWith(
+                          color: colors.textPrimary,
+                        ),
                       ),
                     ),
                   ),

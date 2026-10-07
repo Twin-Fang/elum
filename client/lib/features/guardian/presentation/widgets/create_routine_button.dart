@@ -40,6 +40,10 @@ class CreateRoutineButton extends StatelessWidget {
   static const _sparkleH = 18.0;
   static const _sparkleGap = 6.0;
 
+  /// 줄바꿈으로 높이가 늘었을 때 글이 가장자리에 붙지 않게 하는 여백. 기본 크기에서는 최소 높이 안에 들어간다.
+  static const _padH = 16.0;
+  static const _padV = 12.0;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -50,7 +54,8 @@ class CreateRoutineButton extends StatelessWidget {
       onTap: onTap,
       scaleDown: AppPressable.scaleCard,
       child: Container(
-        height: _height.h,
+        // 시안 높이는 최소값이다. 글자가 커져 문구가 줄바꿈되면 늘어난다.
+        constraints: BoxConstraints(minHeight: _height.h),
         decoration: BoxDecoration(
           borderRadius: radius,
           boxShadow: [
@@ -114,27 +119,40 @@ class CreateRoutineButton extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // heightFactor 1: 높이 제약이 열려 있어도 내용 높이로 서고, 최소 높이는 바깥 상자가 채운다.
                   child: Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SvgPicture.asset(
-                          AppAssets.iconSparkles,
-                          width: _sparkleW.w,
-                          height: _sparkleH.h,
-                          // 원본은 홈 카드용 파랑이다. 보라 위에 얹히므로 흰색으로 덮는다.
-                          colorFilter: ColorFilter.mode(
-                            white,
-                            BlendMode.srcIn,
+                    heightFactor: 1,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: _padH.w,
+                        vertical: _padV.h,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SvgPicture.asset(
+                            AppAssets.iconSparkles,
+                            width: _sparkleW.w,
+                            height: _sparkleH.h,
+                            // 원본은 홈 카드용 파랑이다. 보라 위에 얹히므로 흰색으로 덮는다.
+                            colorFilter: ColorFilter.mode(
+                              white,
+                              BlendMode.srcIn,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: _sparkleGap.w),
-                        Text(
-                          context.l10n.routineCreateButton,
-                          style: context.typo.routineCreateLabel
-                              .copyWith(color: white),
-                        ),
-                      ],
+                          SizedBox(width: _sparkleGap.w),
+                          // 글자가 커지면 한 줄에 못 담아 줄바꿈한다 — 잘리는 쪽보다 낫다.
+                          Flexible(
+                            child: Text(
+                              context.l10n.routineCreateButton,
+                              textAlign: TextAlign.center,
+                              style: context.typo.routineCreateLabel.copyWith(
+                                color: white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

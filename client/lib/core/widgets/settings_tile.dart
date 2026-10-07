@@ -39,6 +39,9 @@ class SettingsTile extends StatelessWidget {
   static const _height = 60.0;
   static const _padH = 16.0;
 
+  /// 글자가 커져 줄이 늘어났을 때 위아래가 붙지 않게 하는 여백. 기본 크기에서는 최소 높이 안에 들어간다.
+  static const _padV = 8.0;
+
   /// 같은 줄 모양을 따르는 다른 목록(함께하는 사람)이 쓴다 — 두 곳이 따로 적으면 어긋난다.
   static const height = _height;
   static const padH = _padH;
@@ -53,8 +56,10 @@ class SettingsTile extends StatelessWidget {
       color: colors.settingsChevron,
     );
 
-    final row = SizedBox(
-      height: _height.h,
+    // 시안 높이는 최소값이다. 글자가 커져 줄이 늘어나면 다음 줄을 밀어낸다.
+    final row = Container(
+      constraints: BoxConstraints(minHeight: _height.h),
+      alignment: Alignment.center,
       // **구분선을 긋지 않는다.** 시안은 줄 사이가 배경 그대로다 — 렌더의
       // 경계 픽셀을 재 보면 배경색이 끊기지 않고 이어진다 (#349).
       child: Padding(
@@ -62,24 +67,33 @@ class SettingsTile extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: Text(
-                label,
-                style: context.typo.settingsTileLabel.copyWith(
-                  // 흐리게 하면 "못 누르는 항목"으로 읽힌다. 누를 수 있다는 것과
-                  // 위험하다는 것을 동시에 전해야 한다 (이슈 #188).
-                  color: destructive
-                      ? colors.settingsDestructive
-                      : colors.textPrimary,
-                  // 시안은 회원탈퇴만 굵다.
-                  fontWeight: destructive ? FontWeight.w500 : null,
+              // 줄이 늘어날 때 위아래가 붙지 않게 글에만 여백을 둔다(기본 크기에서는 최소 높이 안).
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: _padV.h),
+                child: Text(
+                  label,
+                  style: context.typo.settingsTileLabel.copyWith(
+                    // 흐리게 하면 "못 누르는 항목"으로 읽힌다. 누를 수 있다는 것과
+                    // 위험하다는 것을 동시에 전해야 한다 (이슈 #188).
+                    color: destructive
+                        ? colors.settingsDestructive
+                        : colors.textPrimary,
+                    // 시안은 회원탈퇴만 굵다.
+                    fontWeight: destructive ? FontWeight.w500 : null,
+                  ),
                 ),
               ),
             ),
             if (value != null)
-              Text(
-                value,
-                style: context.typo.settingsTileLabel.copyWith(
-                  color: colors.textPlaceholder,
+              // 값이 길어도 제목을 0 폭으로 밀어내지 않게 폭 상한을 둔다.
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 140.w),
+                child: Text(
+                  value,
+                  textAlign: TextAlign.end,
+                  style: context.typo.settingsTileLabel.copyWith(
+                    color: colors.textPlaceholder,
+                  ),
                 ),
               ),
             if (value == null || showChevronWithValue) ...[

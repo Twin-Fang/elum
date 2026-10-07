@@ -359,6 +359,12 @@ class _Header extends StatelessWidget {
   static const _rowToGreeting = 11.0;
   static const _greetingToSubtitle = 12.0;
 
+  /// 2배를 넘을 때만 막는다. 그 아래는 null 이라 시스템 값을 그대로 쓴다.
+  static TextScaler? _greetingScaler(BuildContext context) {
+    final scaler = MediaQuery.textScalerOf(context);
+    return scaler.scale(1) > 2.0 ? scaler.clamp(maxScaleFactor: 2.0) : null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final space = context.space;
@@ -418,6 +424,8 @@ class _Header extends StatelessWidget {
           Text(
             // Figma 문구. 줄바꿈 위치도 디자인이 정한 대로다.
             context.l10n.guardianHomeGreeting(childName),
+            // 이미 24 짜리 큰 제목이라 최대 배율에서는 한 글자씩 꺾인다. 이 글만 2배에서 멈춘다.
+            textScaler: _greetingScaler(context),
             style: context.typo.greeting.copyWith(color: colors.textPrimary),
           ),
           SizedBox(height: _greetingToSubtitle.h),
