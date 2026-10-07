@@ -1716,4 +1716,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get modeSwitchBlockedBack => '돌아가기';
+
+  @override
+  String get installationRetryMessage => '无法检查登录信息。请重试。';
+
+  @override
+  String get installationRetryButton => '重试';
 }

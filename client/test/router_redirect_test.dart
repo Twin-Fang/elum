@@ -135,4 +135,28 @@ void main() {
       );
     });
   });
+
+  group('휴대폰 잠금을 만들기 전에는 보호자 화면을 열지 않는다', () {
+    String? go(String path, {bool elumi = false, bool pending = true}) =>
+        resolveRedirect(
+          path,
+          hasSession: true,
+          onboardingCompleted: true,
+          skipOnboarding: false,
+          isElumiDevice: elumi,
+          requiresGuardianPinSetup: pending,
+        );
+
+    test('보호자 홈은 암호 만들기로 보낸다', () {
+      expect(go(Routes.guardian), '${Routes.guardianPinChange}?from=login');
+    });
+
+    test('암호 만들기 화면 자체는 통과한다', () {
+      expect(go(Routes.guardianPinChange), isNull);
+    });
+
+    test('만들 차례가 아니면 그대로 연다', () {
+      expect(go(Routes.guardian, pending: false), isNull);
+    });
+  });
 }

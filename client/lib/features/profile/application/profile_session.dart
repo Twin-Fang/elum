@@ -302,9 +302,7 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
     final storage = _storage;
     if (storage != null) {
       try {
-        final pin = await storage.getPin();
         await storage.clearChildProfile();
-        if (pin != null) await storage.setPin(pin);
       } catch (e) {
         debugPrint('[profile] 이룸이 없음 정리 실패: $e');
       }

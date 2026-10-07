@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../logger/app_logger.dart';
+import 'installation_store.dart';
 
 /// 서버 토큰 보관소.
 ///
@@ -22,46 +25,101 @@ abstract class TokenStore {
   /// 앱 시작 시 한 번 호출한다.
   Future<void> load();
 
-  Future<void> save({required String accessToken, required String refreshToken});
+  Future<void> save({
+    required String accessToken,
+    required String refreshToken,
+  });
 
   Future<void> clear();
 }
 
 /// 기기 보안 저장소(iOS Keychain · Android Keystore)에 담는 구현.
 class SecureTokenStore implements TokenStore {
-  SecureTokenStore({FlutterSecureStorage? storage})
-      // 11.x 기본값이 이미 AES-GCM + RSA 키 래핑(Android) / Keychain(iOS)이다.
-      : _storage = storage ?? const FlutterSecureStorage();
+  SecureTokenStore({
+    FlutterSecureStorage? storage,
+    this.installationId,
+    this.allowLegacyMigration = false,
+  }) : _storage = storage ?? const FlutterSecureStorage();
 
   static const _kAccess = 'elum.accessToken';
   static const _kRefresh = 'elum.refreshToken';
-
+  static const _kInstallation = 'elum.tokenInstallation';
+  static const _kPreviousMember = 'elum.previousMemberId';
   final FlutterSecureStorage _storage;
-
+  final String? installationId;
+  final bool allowLegacyMigration;
   String? _accessToken;
   String? _refreshToken;
+  bool installationChanged = false;
+
+  /// 서명 검증 없는 캐시 소유자 힌트이며 권한 판단에는 사용하지 않는다.
+  String? previousMemberId;
 
   @override
   String? get accessToken => _accessToken;
-
   @override
   String? get refreshToken => _refreshToken;
-
   @override
-  bool get hasSession => _refreshToken != null && _refreshToken!.isNotEmpty;
+  bool get hasSession => _refreshToken?.isNotEmpty ?? false;
 
-  /// 실패해도 앱은 떠야 하므로 예외를 삼키고 로그아웃 상태로 시작한다 —
-  /// 기기 보안 저장소 접근이 막힌 환경도 있다.
   @override
   Future<void> load() async {
+    _accessToken = null;
+    _refreshToken = null;
     try {
-      _accessToken = await _storage.read(key: _kAccess);
-      _refreshToken = await _storage.read(key: _kRefresh);
-      AppLogger.storageRead(_kRefresh, _refreshToken != null ? '***' : null);
-    } catch (e) {
-      AppLogger.error('토큰 읽기', e);
+      if (installationId == null || installationId!.isEmpty) {
+        throw StateError('installation id required');
+      }
+      final boundId = await _storage.read(key: _kInstallation);
+      final access = await _storage.read(key: _kAccess);
+      final refresh = await _storage.read(key: _kRefresh);
+      previousMemberId = await _storage.read(key: _kPreviousMember);
+      if (boundId == null &&
+          allowLegacyMigration &&
+          refresh?.isNotEmpty == true) {
+        // 기존 로컬 설치 상태가 남아있는 업데이트만 일회 결합한다.
+        await _storage.write(key: _kInstallation, value: installationId);
+        installationChanged = false;
+        _accessToken = access;
+        _refreshToken = refresh;
+        return;
+      }
+      installationChanged = boundId != installationId;
+      if (installationChanged) {
+        // 이전 큐는 로그인한 회원과 대조할 때까지 보존하므로 소유자 힌트만 남긴다.
+        previousMemberId ??= memberIdHint(access);
+        if (previousMemberId != null) {
+          await _storage.write(key: _kPreviousMember, value: previousMemberId);
+        }
+        await _storage.delete(key: _kAccess);
+        await _storage.delete(key: _kRefresh);
+        return;
+      }
+      _accessToken = access;
+      _refreshToken = refresh;
+    } catch (error) {
       _accessToken = null;
       _refreshToken = null;
+      throw InstallationException(error);
+    }
+  }
+
+  static String? memberIdHint(String? token) {
+    try {
+      final parts = token?.split('.');
+      if (parts == null || parts.length != 3) return null;
+      final payload = jsonDecode(
+        utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+      );
+      final sub = payload is Map ? payload['sub'] : null;
+      return sub is String && sub.trim().isNotEmpty
+          ? sub
+          : sub is int
+          ? sub.toString()
+          : null;
+    } catch (_) {
+      // 손상된 JWT는 소유자도 알 수 없으므로 캐시 보존 근거로 삼지 않는다.
+      return null;
     }
   }
 
@@ -70,16 +128,29 @@ class SecureTokenStore implements TokenStore {
     required String accessToken,
     required String refreshToken,
   }) async {
-    _accessToken = accessToken;
-    _refreshToken = refreshToken;
-    AppLogger.storageWrite(_kRefresh, '***');
+    _accessToken = null;
+    _refreshToken = null;
     try {
+      if (installationId == null || installationId!.isEmpty) {
+        throw StateError('installation id required');
+      }
+      // 설치 결합을 마지막에 커밋해야 중간 쓰기 실패가 다음 실행 세션으로 살아나지 않는다.
+      await _storage.write(key: _kInstallation, value: 'invalidated');
       await _storage.write(key: _kAccess, value: accessToken);
       await _storage.write(key: _kRefresh, value: refreshToken);
-    } catch (e) {
-      // 메모리에는 남아 있으므로 이번 실행 동안은 동작한다.
-      // 다음 실행에서 다시 로그인하게 될 뿐 지금 흐름을 끊지 않는다.
-      AppLogger.error('토큰 저장', e);
+      final owner = memberIdHint(accessToken);
+      if (owner == null) {
+        await _storage.delete(key: _kPreviousMember);
+      } else {
+        await _storage.write(key: _kPreviousMember, value: owner);
+      }
+      await _storage.write(key: _kInstallation, value: installationId);
+      previousMemberId = owner;
+      _accessToken = accessToken;
+      _refreshToken = refreshToken;
+    } catch (error) {
+      AppLogger.error('토큰 저장', error);
+      throw InstallationException(error);
     }
   }
 
@@ -87,12 +158,13 @@ class SecureTokenStore implements TokenStore {
   Future<void> clear() async {
     _accessToken = null;
     _refreshToken = null;
-    AppLogger.storageDelete(_kRefresh);
     try {
+      // 삭제 실패가 재실행에서 토큰을 복원하지 못하도록 결합부터 끊는다.
+      await _storage.write(key: _kInstallation, value: 'invalidated');
       await _storage.delete(key: _kAccess);
       await _storage.delete(key: _kRefresh);
-    } catch (e) {
-      AppLogger.error('토큰 삭제', e);
+    } catch (error) {
+      throw InstallationException(error);
     }
   }
 }
@@ -100,8 +172,8 @@ class SecureTokenStore implements TokenStore {
 /// 테스트·미리보기용. 기기 저장소를 건드리지 않는다.
 class InMemoryTokenStore implements TokenStore {
   InMemoryTokenStore({String? accessToken, String? refreshToken})
-      : _accessToken = accessToken,
-        _refreshToken = refreshToken;
+    : _accessToken = accessToken,
+      _refreshToken = refreshToken;
 
   String? _accessToken;
   String? _refreshToken;

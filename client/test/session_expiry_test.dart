@@ -18,15 +18,15 @@ void main() {
   });
 
   DioException unauthorized({bool retried = false}) => DioException(
-        requestOptions: RequestOptions(
-          path: '/api/member/me',
-          extra: retried ? {'authRetried': true} : {},
-        ),
-        response: Response<dynamic>(
-          statusCode: 401,
-          requestOptions: RequestOptions(path: '/api/member/me'),
-        ),
-      );
+    requestOptions: RequestOptions(
+      path: '/api/member/me',
+      extra: retried ? {'authRetried': true} : {},
+    ),
+    response: Response<dynamic>(
+      statusCode: 401,
+      requestOptions: RequestOptions(path: '/api/member/me'),
+    ),
+  );
 
   /// onError를 부르고 handler가 무엇을 했는지 돌려준다.
   Future<void> fireError(AuthInterceptor sut, DioException err) {
@@ -42,7 +42,10 @@ void main() {
     final sut = AuthInterceptor(
       tokens: tokens,
       dio: dio,
-      refresh: () async => null, // 갱신 실패
+      refresh: () async {
+        await tokens.clear();
+        return null;
+      }, // 확정 401
       onSessionExpired: () => notified++,
     );
 
@@ -50,6 +53,20 @@ void main() {
 
     expect(notified, 1, reason: '알리지 않으면 화면이 정상처럼 남는다');
     expect(tokens.accessToken, isNull, reason: '쓸 수 없는 토큰은 남겨두지 않는다');
+  });
+
+  test('갱신 임시 실패는 세션과 오프라인 사용을 유지한다', () async {
+    await tokens.save(accessToken: 'a', refreshToken: 'r');
+    var notified = 0;
+    final sut = AuthInterceptor(
+      tokens: tokens,
+      dio: dio,
+      refresh: () async => null,
+      onSessionExpired: () => notified++,
+    );
+    await fireError(sut, unauthorized());
+    expect(tokens.hasSession, isTrue);
+    expect(notified, 0);
   });
 
   test('갱신에 성공하면 세션 종료를 알리지 않는다', () async {
@@ -105,7 +122,10 @@ class _RecordingHandler extends ErrorInterceptorHandler {
   }
 
   @override
-  void reject(DioException error, [bool callFollowingErrorInterceptor = false]) {
+  void reject(
+    DioException error, [
+    bool callFollowingErrorInterceptor = false,
+  ]) {
     if (!_completer.isCompleted) _completer.complete();
   }
 }

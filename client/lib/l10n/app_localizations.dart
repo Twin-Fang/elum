@@ -3181,6 +3181,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'돌아가기'**
   String get modeSwitchBlockedBack;
+
+  /// No description provided for @installationRetryMessage.
+  ///
+  /// In ko, this message translates to:
+  /// **'휴대폰의 로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.'**
+  String get installationRetryMessage;
+
+  /// No description provided for @installationRetryButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 시도'**
+  String get installationRetryButton;
 }
 
 class _AppLocalizationsDelegate

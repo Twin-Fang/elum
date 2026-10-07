@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../logger/app_logger.dart';
+import 'guardian_lock_store.dart';
 
 /// 로컬 저장소.
 ///
@@ -10,6 +11,10 @@ import '../logger/app_logger.dart';
 /// 보호자가 입력한 일과 원문은 어디에도 저장하지 않는다 (docs 원칙 5번).
 /// 저장되는 것은 온보딩 결과 4개(호칭·목표·캐릭터·PIN)뿐이다.
 abstract interface class LocalStorage {
+  /// 로컬 프로필·진행 큐의 소유자다. 권한 판정은 서버 인증이 담당한다.
+  String? get accountMemberId;
+  Future<void> setAccountMemberId(String id);
+
   String? get nickname;
   Future<void> setNickname(String v);
 
@@ -90,7 +95,8 @@ abstract interface class LocalStorage {
   Future<void> setResumeOnElumiScreen(bool v);
 
   Future<void> setPin(String v);
-  Future<String?> getPin();
+  Future<bool> hasPin();
+  Future<bool> verifyPin(String pin);
 
   // --- 인증 ---
   // Figma에 로그인 화면이 없어 아이 이름을 아이디로 쓴다 (이슈 #19).
@@ -183,10 +189,28 @@ abstract interface class LocalStorage {
 
 /// SharedPreferences 기반 실제 구현.
 class SharedPrefsStorage implements LocalStorage {
-  SharedPrefsStorage(this._prefs);
+  SharedPrefsStorage(this._prefs, {GuardianLockStore? lock}) : _lock = lock;
+
+  GuardianLockStore? _lock;
+  GuardianLockStore get _guardianLock => _lock ?? (throw StateError('E-PIN: installation not configured'));
+
+  /// 설치 판정 뒤에만 평문 레거시 값을 이전한다. 재설치 잔존 암호는 폐기한다.
+  Future<void> configureLock(String installationId, {required bool reset}) async {
+    _lock = GuardianLockStore(installationId: installationId);
+    if (reset) {
+      await _guardianLock.clear();
+    } else {
+      final legacy = _prefs.getString(_kPin);
+      if (legacy != null && legacy.isNotEmpty && !await _guardianLock.hasPin()) {
+        await _guardianLock.setPin(legacy);
+      }
+    }
+    if (!await _prefs.remove(_kPin)) throw StateError('E-PIN: legacy cleanup failed');
+  }
 
   final SharedPreferences _prefs;
 
+  static const _kAccountMemberId = 'accountMemberId';
   static const _kNickname = 'childNickname';
   static const _kLastProvider = 'lastLoginProvider';
   static const _kGoals = 'supportGoals';
@@ -209,9 +233,15 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kHomeCoachSeen = 'coach.homeSeen';
   static const _kChildHapticOn = 'haptic.childOn';
 
-  static Future<LocalStorage> create() async {
-    return SharedPrefsStorage(await SharedPreferences.getInstance());
+  static Future<SharedPrefsStorage> create({GuardianLockStore? lock}) async {
+    return SharedPrefsStorage(await SharedPreferences.getInstance(), lock: lock);
   }
+
+  @override
+  String? get accountMemberId => _prefs.getString(_kAccountMemberId);
+
+  @override
+  Future<void> setAccountMemberId(String id) => _prefs.setString(_kAccountMemberId, id);
 
   @override
   String? get nickname {
@@ -291,27 +321,14 @@ class SharedPrefsStorage implements LocalStorage {
     return _prefs.setBool(_kCompleted, v);
   }
 
-  // PIN 읽기·쓰기를 메서드로 감싸둔다.
-  // flutter_secure_storage로 옮길 때 호출부를 건드리지 않기 위함이다.
-  //
-  // ⚠️ 현재는 평문 저장이다. flutter_secure_storage는 objective_c의 build hook이
-  // build_runner의 AOT 컴파일을 깨뜨려 제외했다 (Dart 3.10 이슈).
   @override
-  Future<void> setPin(String v) async {
-    try {
-      AppLogger.storageWrite(_kPin, '***');
-      await _prefs.setString(_kPin, v);
-    } catch (e) {
-      AppLogger.error('storage', e);
-    }
-  }
+  Future<void> setPin(String v) => _guardianLock.setPin(v);
 
   @override
-  Future<String?> getPin() async {
-    final value = _prefs.getString(_kPin);
-    AppLogger.storageRead(_kPin, value != null ? '***' : null);
-    return value;
-  }
+  Future<bool> hasPin() => _guardianLock.hasPin();
+
+  @override
+  Future<bool> verifyPin(String pin) => _guardianLock.verifyPin(pin);
 
   @override
   String? get selectedProfileId {
@@ -489,7 +506,6 @@ class SharedPrefsStorage implements LocalStorage {
       _kImageStyle,
       _kCompleted,
       _kSelectedProfile,
-      _kPin,
     ]) {
       await _prefs.remove(key);
     }
@@ -508,10 +524,13 @@ class SharedPrefsStorage implements LocalStorage {
     //
     // 토큰도 함께 지운다 — 이것이 곧 로그아웃이다. 온보딩 값만 지우고 토큰이
     // 남으면 이전 계정의 일과가 새 이름과 섞여 보인다. (이슈 #13)
+    await _guardianLock.clear();
+    if (!await _prefs.remove(_kPin)) throw StateError('E-PIN: legacy cleanup failed');
     await clearChildProfile();
     // 역할도 지운다 — 이룸이 휴대폰에서의 로그아웃은 곧 연결 끊기다 (§8-5).
     // 잘못 고른 사람이 로그아웃으로 빠져나올 수 있어야 한다 (이슈 #212).
     for (final key in [
+      _kAccountMemberId,
       _kAccessToken,
       _kElumiDevice,
       _kElumiLinkLost,
@@ -543,6 +562,14 @@ class InMemoryStorage implements LocalStorage {
        _nickname = nickname,
        _character = character,
        _elumi = elumiDevice;
+
+  String? _accountMemberId;
+
+  @override
+  String? get accountMemberId => _accountMemberId;
+
+  @override
+  Future<void> setAccountMemberId(String id) async => _accountMemberId = id;
 
   bool _elumi;
   bool _elumiLinkLost = false;
@@ -651,7 +678,10 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setPin(String v) async => _pin = v;
 
   @override
-  Future<String?> getPin() async => _pin;
+  Future<bool> hasPin() async => _pin?.isNotEmpty ?? false;
+
+  @override
+  Future<bool> verifyPin(String pin) async => await hasPin() && _pin == pin;
 
   @override
   String? get accessToken => _accessToken;
@@ -726,7 +756,6 @@ class InMemoryStorage implements LocalStorage {
     _goals = const [];
     _character = null;
     _imageStyle = null;
-    _pin = null;
     _completed = false;
     _selectedProfileId = null;
     _progress.clear();
@@ -735,6 +764,7 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<void> clearAll() async {
+    _accountMemberId = null;
     _nickname = null;
     _goals = const [];
     _character = null;

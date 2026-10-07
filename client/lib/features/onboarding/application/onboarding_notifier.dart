@@ -196,7 +196,9 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
       await storage.setPin(input.guardianPin);
       await storage.setOnboardingCompleted(true);
     } catch (e) {
-      debugPrint('[onboarding] 로컬 저장 실패, 진행은 계속: $e');
+      debugPrint('[onboarding] 로컬 저장 실패: $e');
+      // 잠금 저장이 실패했는데 홈으로 가면 보호자 화면의 경계가 사라진다.
+      return AppFailure.of(e);
     }
 
     // 서버 연동 — nickname·goals·character·imageStyle을 계정에 남긴다. 하나가

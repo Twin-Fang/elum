@@ -21,6 +21,7 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../../profile/application/profile_session.dart';
 import '../data/auth_repository.dart';
 import '../data/oauth_sdk.dart';
+import '../../child/application/child_routine_notifier.dart';
 
 /// 로그인 화면. 온보딩 맨 앞에 선다.
 ///
@@ -113,6 +114,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ref.invalidate(onboardingProvider);
       // 일과 목록도 이전 계정 것이다 — 비우지 않으면 새 계정 홈이 앱을 껐다 켤 때까지 옛 일과를 그린다 (#482).
       ref.forgetPreviousAccountRoutines();
+      // 메모리 큐까지 다른 계정에 상속하지 않는다. 같은 계정은 로컬 큐에서 다시 복원한다.
+      ref.invalidate(childRoutineProvider);
+      await ref.read(childRoutineProvider.notifier).hydrate();
+      if (!mounted) return;
     }
 
     switch (result.outcome) {
@@ -128,10 +133,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         context.go(Routes.roleSelect);
       case AuthOutcome.home:
         // 이미 아이 정보를 채운 계정이다. 온보딩을 건너뛰고 홈으로 보낸다.
-        final nickname = ref.read(localStorageProvider).nickname ?? '';
-        await ref.read(onboardingProvider.notifier).restoreCompleted(nickname);
         if (!mounted) return;
-        context.go(Routes.guardian);
+        final hasPin = await ref.read(localStorageProvider).hasPin();
+        if (!mounted) return;
+        // 방금 인증한 보호자만 이 휴대폰 잠금을 새로 만들 수 있다.
+        context.go(
+          hasPin ? Routes.guardian : '${Routes.guardianPinChange}?from=login',
+        );
       case AuthOutcome.cancelled:
         // 사용자가 스스로 닫았다. 아무것도 띄우지 않는다.
         break;
@@ -235,12 +243,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: LoginScene(
         layout: _isIos ? LoginSceneLayout.ios : LoginSceneLayout.android,
         // 버전은 버튼 묶음과 따로 얹는다 — 버튼 배치를 건드리지 않는다 (#418).
-        overlay: Stack(
-          children: [
-            _buttons(context),
-            const _VersionCorner(),
-          ],
-        ),
+        overlay: Stack(children: [_buttons(context), const _VersionCorner()]),
       ),
     );
   }
@@ -257,7 +260,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Padding(
         // 시안 그대로 — 카카오 y=545 · 네이버 y=623 · Apple y=701, 높이 66.
         // 마지막 버튼 하단이 767이므로 아래 여백은 852 − 767 = 85다.
-        padding: EdgeInsets.fromLTRB(_sideInset.w, 0, _sideInset.w, _bottomInset.h),
+        padding: EdgeInsets.fromLTRB(
+          _sideInset.w,
+          0,
+          _sideInset.w,
+          _bottomInset.h,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -265,12 +273,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             _LastUsedSlot(
               show: _lastProvider == OAuthProvider.kakao,
               child: _ProviderButton(
-              label: _pending == OAuthProvider.kakao
-                  ? context.l10n.loginConnecting
-                  : context.l10n.loginKakaoButton,
-              iconAsset: AppAssets.loginKakao,
-              backgroundColor: context.colors.loginKakaoBg,
-              labelColor: context.colors.loginKakaoLabel,
+                label: _pending == OAuthProvider.kakao
+                    ? context.l10n.loginConnecting
+                    : context.l10n.loginKakaoButton,
+                iconAsset: AppAssets.loginKakao,
+                backgroundColor: context.colors.loginKakaoBg,
+                labelColor: context.colors.loginKakaoLabel,
                 onTap: isBusy ? null : () => _signIn(OAuthProvider.kakao),
               ),
             ),
@@ -279,12 +287,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             _LastUsedSlot(
               show: _lastProvider == OAuthProvider.naver,
               child: _ProviderButton(
-              label: _pending == OAuthProvider.naver
-                  ? context.l10n.loginConnecting
-                  : context.l10n.loginNaverButton,
-              iconAsset: AppAssets.loginNaver,
-              backgroundColor: context.colors.loginNaverBg,
-              labelColor: context.colors.loginNaverLabel,
+                label: _pending == OAuthProvider.naver
+                    ? context.l10n.loginConnecting
+                    : context.l10n.loginNaverButton,
+                iconAsset: AppAssets.loginNaver,
+                backgroundColor: context.colors.loginNaverBg,
+                labelColor: context.colors.loginNaverLabel,
                 onTap: isBusy ? null : () => _signIn(OAuthProvider.naver),
               ),
             ),

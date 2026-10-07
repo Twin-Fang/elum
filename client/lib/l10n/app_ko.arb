@@ -1587,5 +1587,7 @@
   "modeSwitchBlockedDescription": "이 휴대폰에서는 보호자 화면을 열 수 없어요",
   "@modeSwitchBlockedDescription": { "description": "암호가 없는 이룸이 휴대폰에서 보호자 화면을 열려 할 때 설명" },
   "modeSwitchBlockedBack": "돌아가기",
-  "@modeSwitchBlockedBack": { "description": "보호자 화면을 열 수 없다는 안내의 하단 버튼" }
+  "@modeSwitchBlockedBack": { "description": "보호자 화면을 열 수 없다는 안내의 하단 버튼" },
+  "installationRetryMessage": "휴대폰의 로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.",
+  "installationRetryButton": "다시 시도"
 }

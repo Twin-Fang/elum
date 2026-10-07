@@ -27,23 +27,20 @@ void main() {
   });
 
   AuthRepository buildRepo(OAuthSdkOutcome sdkResult) => AuthRepository(
-        dio: dio,
-        storage: storage,
-        tokens: tokens,
-        sdk: _FakeSdk(sdkResult),
-      );
+    dio: dio,
+    storage: storage,
+    tokens: tokens,
+    sdk: _FakeSdk(sdkResult),
+  );
 
   Map<String, dynamic> tokenBody(String access, String refresh) => {
-        'accessToken': access,
-        'tokenType': 'Bearer',
-        'expiresIn': 86400000,
-        'refreshToken': refresh,
-      };
+    'accessToken': access,
+    'tokenType': 'Bearer',
+    'expiresIn': 86400000,
+    'refreshToken': refresh,
+  };
 
-  Map<String, dynamic> memberBody({
-    bool consented = true,
-    String? nickname,
-  }) =>
+  Map<String, dynamic> memberBody({bool consented = true, String? nickname}) =>
       {
         'id': 'm1',
         'username': 'kakao_123',
@@ -61,8 +58,9 @@ void main() {
         ..stub('/api/auth/oauth/kakao', 200, tokenBody('access-1', 'refresh-1'))
         ..stub('/api/member/me', 200, memberBody(nickname: '하늘이'));
 
-      await buildRepo(const OAuthSdkSuccess('kakao-token'))
-          .signInWith(OAuthProvider.kakao);
+      await buildRepo(
+        const OAuthSdkSuccess('kakao-token'),
+      ).signInWith(OAuthProvider.kakao);
 
       expect(storage.isElumiDevice, isFalse);
       expect(storage.isElumiLinkLost, isFalse);
@@ -72,8 +70,9 @@ void main() {
       storage = InMemoryStorage(elumiDevice: true);
       adapter.stub('/api/auth/oauth/kakao', 500, {});
 
-      await buildRepo(const OAuthSdkSuccess('kakao-token'))
-          .signInWith(OAuthProvider.kakao);
+      await buildRepo(
+        const OAuthSdkSuccess('kakao-token'),
+      ).signInWith(OAuthProvider.kakao);
 
       expect(storage.isElumiDevice, isTrue);
     });
@@ -83,8 +82,9 @@ void main() {
         ..stub('/api/auth/oauth/kakao', 200, tokenBody('access-1', 'refresh-1'))
         ..stub('/api/member/me', 200, memberBody(consented: false));
 
-      final result = await buildRepo(const OAuthSdkSuccess('kakao-token'))
-          .signInWith(OAuthProvider.kakao);
+      final result = await buildRepo(
+        const OAuthSdkSuccess('kakao-token'),
+      ).signInWith(OAuthProvider.kakao);
 
       expect(result.outcome, AuthOutcome.consentRequired);
       expect(tokens.accessToken, 'access-1');
@@ -93,11 +93,16 @@ void main() {
 
     test('동의를 마쳤고 아이 정보가 없으면 온보딩으로 보낸다', () async {
       adapter
-        ..stub('/api/auth/oauth/google', 200, tokenBody('access-1', 'refresh-1'))
+        ..stub(
+          '/api/auth/oauth/google',
+          200,
+          tokenBody('access-1', 'refresh-1'),
+        )
         ..stub('/api/member/me', 200, memberBody(nickname: null));
 
-      final result = await buildRepo(const OAuthSdkSuccess('id-token'))
-          .signInWith(OAuthProvider.google);
+      final result = await buildRepo(
+        const OAuthSdkSuccess('id-token'),
+      ).signInWith(OAuthProvider.google);
 
       expect(result.outcome, AuthOutcome.onboarding);
     });
@@ -107,8 +112,9 @@ void main() {
         ..stub('/api/auth/oauth/kakao', 200, tokenBody('access-1', 'refresh-1'))
         ..stub('/api/member/me', 200, memberBody(nickname: '하늘이'));
 
-      final result = await buildRepo(const OAuthSdkSuccess('kakao-token'))
-          .signInWith(OAuthProvider.kakao);
+      final result = await buildRepo(
+        const OAuthSdkSuccess('kakao-token'),
+      ).signInWith(OAuthProvider.kakao);
 
       expect(result.outcome, AuthOutcome.home);
       // 재설치한 사용자도 아이 이름이 화면에 바로 보여야 한다
@@ -120,27 +126,37 @@ void main() {
         ..stub('/api/auth/oauth/naver', 200, tokenBody('access-1', 'refresh-1'))
         ..stub('/api/member/me', 200, memberBody(nickname: '하늘이'));
 
-      await buildRepo(const OAuthSdkSuccess('naver-token'))
-          .signInWith(OAuthProvider.naver);
+      await buildRepo(
+        const OAuthSdkSuccess('naver-token'),
+      ).signInWith(OAuthProvider.naver);
 
       expect(storage.lastLoginProvider, 'naver');
     });
 
-    test('로그인하면 고른 이룸이를 잊는다 — 이전 계정의 이룸이 id 가 새 계정 요청에 실리면 403 이다 (#362)', () async {
-      await storage.setSelectedProfileId('p-of-previous-account');
-      adapter
-        ..stub('/api/auth/oauth/kakao', 200, tokenBody('access-1', 'refresh-1'))
-        ..stub('/api/member/me', 200, memberBody(nickname: '하늘이'));
+    test(
+      '로그인하면 고른 이룸이를 잊는다 — 이전 계정의 이룸이 id 가 새 계정 요청에 실리면 403 이다 (#362)',
+      () async {
+        await storage.setSelectedProfileId('p-of-previous-account');
+        adapter
+          ..stub(
+            '/api/auth/oauth/kakao',
+            200,
+            tokenBody('access-1', 'refresh-1'),
+          )
+          ..stub('/api/member/me', 200, memberBody(nickname: '하늘이'));
 
-      await buildRepo(const OAuthSdkSuccess('kakao-token'))
-          .signInWith(OAuthProvider.kakao);
+        await buildRepo(
+          const OAuthSdkSuccess('kakao-token'),
+        ).signInWith(OAuthProvider.kakao);
 
-      expect(storage.selectedProfileId, isNull);
-    });
+        expect(storage.selectedProfileId, isNull);
+      },
+    );
 
     test('사용자가 제공자 화면을 닫으면 서버를 부르지 않는다', () async {
-      final result = await buildRepo(const OAuthSdkCancelled())
-          .signInWith(OAuthProvider.kakao);
+      final result = await buildRepo(
+        const OAuthSdkCancelled(),
+      ).signInWith(OAuthProvider.kakao);
 
       expect(result.outcome, AuthOutcome.cancelled);
       expect(adapter.pathsCalled, isEmpty);
@@ -149,10 +165,13 @@ void main() {
 
     test('같은 이메일이 다른 제공자로 가입돼 있으면 합치지 않고 알린다', () async {
       // 서버가 이메일로 계정을 병합하지 않기 때문에 409가 온다.
-      adapter.stub('/api/auth/oauth/google', 409, {'errorCode': 'OAUTH_EMAIL_CONFLICT'});
+      adapter.stub('/api/auth/oauth/google', 409, {
+        'errorCode': 'OAUTH_EMAIL_CONFLICT',
+      });
 
-      final result = await buildRepo(const OAuthSdkSuccess('id-token'))
-          .signInWith(OAuthProvider.google);
+      final result = await buildRepo(
+        const OAuthSdkSuccess('id-token'),
+      ).signInWith(OAuthProvider.google);
 
       expect(result.outcome, AuthOutcome.emailConflict);
       expect(tokens.hasSession, isFalse);
@@ -161,8 +180,9 @@ void main() {
     test('서버에 닿지 못하면 인증 실패와 구분해 알린다', () async {
       adapter.stubConnectionError('/api/auth/oauth/kakao');
 
-      final result = await buildRepo(const OAuthSdkSuccess('kakao-token'))
-          .signInWith(OAuthProvider.kakao);
+      final result = await buildRepo(
+        const OAuthSdkSuccess('kakao-token'),
+      ).signInWith(OAuthProvider.kakao);
 
       // 네트워크 문제인데 "다시 로그인하라"고 하면 사용자는 헛수고를 한다
       expect(result.outcome, AuthOutcome.offline);
@@ -176,8 +196,9 @@ void main() {
         'errorMessage': '정지된 계정이에요',
       });
 
-      final result = await buildRepo(const OAuthSdkSuccess('kakao-token'))
-          .signInWith(OAuthProvider.kakao);
+      final result = await buildRepo(
+        const OAuthSdkSuccess('kakao-token'),
+      ).signInWith(OAuthProvider.kakao);
 
       expect(result.outcome, AuthOutcome.failedApi);
       expect(result.failure, isNotNull);
@@ -188,8 +209,9 @@ void main() {
     test('서버가 문구를 주지 않으면 화면 기본 문구가 나선다', () async {
       adapter.stub('/api/auth/oauth/kakao', 500, {});
 
-      final result = await buildRepo(const OAuthSdkSuccess('kakao-token'))
-          .signInWith(OAuthProvider.kakao);
+      final result = await buildRepo(
+        const OAuthSdkSuccess('kakao-token'),
+      ).signInWith(OAuthProvider.kakao);
 
       expect(result.failure!.messageOr('잠시 후 다시 해주세요'), '잠시 후 다시 해주세요');
       // 코드를 몰라도 추적할 단서는 남는다.
@@ -197,13 +219,95 @@ void main() {
     });
 
     test('SDK가 실패하면 서버를 부르지 않는다', () async {
-      final result = await buildRepo(const OAuthSdkFailure('SDK-KAKAO'))
-          .signInWith(OAuthProvider.kakao);
+      final result = await buildRepo(
+        const OAuthSdkFailure('SDK-KAKAO'),
+      ).signInWith(OAuthProvider.kakao);
 
       // 갈래를 나눠 둔 이유는 제보 추적이다. 뭉뚱그린 `failed`가 아니라
       // `failedSdk`여야 화면에 `E-AUTH-SDK`가 붙는다 (#346).
       expect(result.outcome, AuthOutcome.failedSdk);
       expect(adapter.pathsCalled, isEmpty);
+    });
+  });
+
+  group('재로그인 회원 복원', () {
+    test('회원 조회 5xx는 동의 미완료가 아니라 실패다', () async {
+      adapter
+        ..stub('/api/auth/oauth/kakao', 200, tokenBody('a', 'r'))
+        ..stub('/api/member/me', 503, {});
+      final result = await buildRepo(
+        const OAuthSdkSuccess('provider'),
+      ).signInWith(OAuthProvider.kakao);
+      expect(result.outcome, AuthOutcome.failedApi);
+      expect(tokens.hasSession, isFalse);
+    });
+    test('회원 조회 오프라인은 가입 절차로 보내지 않는다', () async {
+      adapter
+        ..stub('/api/auth/oauth/kakao', 200, tokenBody('a', 'r'))
+        ..stubConnectionError('/api/member/me');
+      final result = await buildRepo(
+        const OAuthSdkSuccess('provider'),
+      ).signInWith(OAuthProvider.kakao);
+      expect(result.outcome, AuthOutcome.offline);
+      expect(tokens.hasSession, isFalse);
+    });
+    test('필수 필드가 없는 응답은 신규 회원이 아니다', () async {
+      adapter
+        ..stub('/api/auth/oauth/kakao', 200, tokenBody('a', 'r'))
+        ..stub('/api/member/me', 200, {});
+      final result = await buildRepo(
+        const OAuthSdkSuccess('provider'),
+      ).signInWith(OAuthProvider.kakao);
+      expect(result.outcome, AuthOutcome.failed);
+      expect(tokens.hasSession, isFalse);
+    });
+    test('같은 계정 재로그인은 진행 큐와 프로필을 복원한다', () async {
+      await storage.setAccountMemberId('m1');
+      await storage.setSelectedProfileId('p1');
+      await storage.setRoutineProgressJson('r1', 'old-progress');
+      await storage.setPendingSyncRoutineIds(['r1']);
+      adapter
+        ..stub('/api/auth/oauth/kakao', 200, tokenBody('a', 'r'))
+        ..stub('/api/member/me', 200, {
+          ...memberBody(nickname: '하늘이'),
+          'profiles': [
+            {'id': 'p1', 'nickname': '하늘이'},
+          ],
+          'supportGoals': ['PREPARE_ITEMS'],
+          'character': 'LULU',
+          'imageStyle': 'CARTOON',
+        });
+      final repo = buildRepo(const OAuthSdkSuccess('provider'));
+      expect(
+        (await repo.signInWith(OAuthProvider.kakao)).outcome,
+        AuthOutcome.home,
+      );
+      expect(storage.selectedProfileId, 'p1');
+      expect(storage.isOnboardingCompleted, isTrue);
+      expect(storage.selectedRole, 'guardian');
+      expect(storage.pendingSyncRoutineIds, ['r1']);
+      expect(storage.getRoutineProgressJson('r1'), isNotNull);
+      expect(repo.consumeGuardianPinSetupPermit(), isTrue);
+      expect(repo.consumeGuardianPinSetupPermit(), isFalse);
+    });
+    test('다른 회원은 이전 회원 큐와 PIN을 상속하지 않는다', () async {
+      await storage.setAccountMemberId('other');
+      await storage.setPin('1234');
+      await storage.setRoutineProgressJson('r1', 'old');
+      await storage.setPendingSyncRoutineIds(['r1']);
+      adapter
+        ..stub('/api/auth/oauth/kakao', 200, tokenBody('a', 'r'))
+        ..stub('/api/member/me', 200, memberBody(nickname: '하늘이'));
+      expect(
+        (await buildRepo(
+          const OAuthSdkSuccess('provider'),
+        ).signInWith(OAuthProvider.kakao)).outcome,
+        AuthOutcome.home,
+      );
+      expect(storage.accountMemberId, 'm1');
+      expect(storage.getRoutineProgressJson('r1'), isNull);
+      expect(storage.pendingSyncRoutineIds, isEmpty);
+      expect(await storage.hasPin(), isFalse);
     });
   });
 
@@ -253,7 +357,9 @@ void main() {
 
     test('갱신이 401이면 세션이 끝난 것이므로 토큰을 지운다', () async {
       tokens = InMemoryTokenStore(accessToken: 'old-a', refreshToken: 'old-r');
-      adapter.stub('/api/auth/refresh', 401, {'errorCode': 'REFRESH_TOKEN_REUSED'});
+      adapter.stub('/api/auth/refresh', 401, {
+        'errorCode': 'REFRESH_TOKEN_REUSED',
+      });
 
       final repo = AuthRepository(
         dio: dio,

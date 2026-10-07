@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../helpers/pin_setup_auth.dart';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -499,6 +500,7 @@ void main() {
         _page(Routes.guardian, const Scaffold(body: Text('보호자 홈'))),
       ],
       overrides: [
+        authRepositoryProvider.overrideWithValue(PinSetupAuth(allowed: createOnly)),
         localStorageProvider.overrideWithValue(
           storage ?? InMemoryStorage(onboardingCompleted: true, pin: pin),
         ),
@@ -1298,7 +1300,7 @@ class _BrokenPinStorage extends InMemoryStorage {
 
   /// 쓰기가 조용히 실패한다 — 화면은 다시 읽어 봐야 안다
   @override
-  Future<void> setPin(String v) async {}
+  Future<void> setPin(String v) async => throw StateError('쓰기 실패');
 }
 
 class _Speech implements SpeechService {

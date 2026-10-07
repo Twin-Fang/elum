@@ -49,6 +49,8 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   /// 보호자 화면으로 갈 때 저장된 암호가 없는 이룸이 휴대폰이다 (#355).
   /// 이때는 입력창 대신 안내만 보인다.
   bool _blocked = false;
+  bool _verifying = false;
+  bool _ready = false;
 
   @override
   void initState() {
@@ -56,17 +58,17 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
     _controller.addListener(_onChanged);
     // 입력을 받기 전에 암호가 있는지부터 본다. 숫자를 다 넣은 뒤에야 "만들어라"를
     // 하면 이미 넣은 네 자리가 무엇이었는지 모호해진다.
-    if (widget.target == ModeSwitchTarget.guardian) _guardGuardianEntry();
+    _guardGuardianEntry();
   }
 
   /// 저장된 암호를 읽는다. 읽기에서 예외가 나면 실패 팝업을 띄우고 null 이 아니라
   /// `ok=false` 로 알린다 — 읽지 못한 것을 "암호 없음"으로 보면 그대로 열어 주게 된다.
-  Future<({bool ok, String? pin})> _readPin() async {
+  Future<({bool ok, bool hasPin})> _readPin() async {
     try {
-      return (ok: true, pin: await ref.read(localStorageProvider).getPin());
+      return (ok: true, hasPin: await ref.read(localStorageProvider).hasPin());
     } catch (e) {
       debugPrint('[mode-switch] 암호 읽기 실패: $e');
-      if (!mounted) return (ok: false, pin: null);
+      if (!mounted) return (ok: false, hasPin: false);
       await showFailure(
         context,
         e,
@@ -74,7 +76,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
         fallback: context.l10n.modeSwitchReadFailedFallback,
         fallbackCode: 'E-PIN-READ',
       );
-      return (ok: false, pin: null);
+      return (ok: false, hasPin: false);
     }
   }
 
@@ -95,17 +97,17 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       context.popOrHome();
       return;
     }
-    final pin = read.pin;
-    if (pin != null && pin.isNotEmpty) return; // 있으면 평소처럼 입력을 받는다
+    if (read.hasPin || widget.target == ModeSwitchTarget.child) {
+      setState(() => _ready = true);
+      return;
+    }
 
     if (ref.read(localStorageProvider).isElumiDevice) {
       setState(() => _blocked = true);
       return;
     }
-    // 뒤로가기가 이 화면이 아니라 이룸이 홈으로 가도록 교체한다
-    context.pushReplacement(
-      '${Routes.guardianPinChange}?from=${ModeSwitchScreen.pinCreateFrom}',
-    );
+    // 잠금 부재는 보호자 재로그인으로 처리해 이룸이의 임의 암호 생성을 막는다.
+    context.go(Routes.login);
   }
 
   @override
@@ -124,26 +126,38 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
         _mismatch = false;
       }
     });
-    if (_controller.text.length == OnboardingProfile.pinLength) _verify();
+    if (_ready && !_verifying && _controller.text.length == OnboardingProfile.pinLength) _verify();
   }
 
   Future<void> _verify() async {
-    final read = await _readPin();
-    if (!mounted) return;
-    if (!read.ok) return;
-    final saved = read.pin;
-
-    // 보호자 화면으로 가는데 암호가 없으면 통과시키지 않는다 (#355). 입구에서 이미
-    // 걸러지지만 입력 중에 암호가 지워진 경우까지 막는 두 번째 줄이다.
-    final hasPin = saved != null && saved.isNotEmpty;
-    if (!hasPin && widget.target == ModeSwitchTarget.guardian) {
-      _controller.clear();
-      _guardGuardianEntry();
+    if (_verifying || !_ready) return;
+    _verifying = true;
+    final entered = _controller.text;
+    bool isValid;
+    try {
+      final storage = ref.read(localStorageProvider);
+      final hasPin = await storage.hasPin();
+      if (!mounted) return;
+      if (!hasPin && widget.target == ModeSwitchTarget.guardian) {
+        _ready = false;
+        await _guardGuardianEntry();
+        return;
+      }
+      isValid = !hasPin || await storage.verifyPin(entered);
+    } catch (e) {
+      if (mounted) {
+        _controller.clear();
+        await showFailure(context, null,
+          title: context.l10n.modeSwitchReadFailedTitle,
+          fallback: context.l10n.modeSwitchReadFailedFallback,
+          fallbackCode: e.toString().contains('E-PIN-LOCKED') ? 'E-PIN-LOCKED' : 'E-PIN',
+        );
+      }
       return;
+    } finally {
+      _verifying = false;
     }
-
-    // 이룸이 화면으로 가는 쪽은 지킬 대상이 아니라 암호가 없어도 지나간다.
-    final isValid = !hasPin || saved == _controller.text;
+    if (!mounted) return;
 
     if (isValid) {
       context.go(widget.target.route);

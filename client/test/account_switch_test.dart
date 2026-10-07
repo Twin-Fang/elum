@@ -29,7 +29,7 @@ void main() {
     expect(s.goals, isEmpty);
     expect(s.character, isNull);
     expect(s.isOnboardingCompleted, isFalse);
-    expect(await s.getPin(), isNull);
+    expect(await s.hasPin(), isTrue);
     expect(s.getRoutineProgressJson('r1'), isNull, reason: '이전 아이의 체크 기록');
     expect(s.cachedTodayRoutinesJson, isNull);
 

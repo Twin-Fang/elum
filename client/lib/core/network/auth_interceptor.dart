@@ -14,10 +14,10 @@ class AuthInterceptor extends Interceptor {
     required Dio dio,
     required Future<String?> Function() refresh,
     VoidCallback? onSessionExpired,
-  })  : _tokens = tokens,
-        _dio = dio,
-        _refresh = refresh,
-        _onSessionExpired = onSessionExpired;
+  }) : _tokens = tokens,
+       _dio = dio,
+       _refresh = refresh,
+       _onSessionExpired = onSessionExpired;
 
   final TokenStore _tokens;
   final Dio _dio;
@@ -64,14 +64,11 @@ class AuthInterceptor extends Interceptor {
 
     final token = await _refresh();
     if (token == null || token.isEmpty) {
-      // 갱신도 실패했다 — 세션이 끝난 것이다.
-      //
-      // 원래 401은 그대로 돌려줘 호출부가 각자 판단하게 두되, **세션이 끝났다는
-      // 사실은 따로 알린다.** 이것을 알리지 않으면 화면은 캐시로 계속 그려져
-      // 로그인이 풀린 줄 모른 채 쓰게 된다 (이슈 #175).
-      AppLogger.error('토큰 갱신', '갱신 실패 → 세션 종료');
-      await _tokens.clear();
-      _onSessionExpired?.call();
+      // 네트워크·서버 임시 실패는 세션 종료가 아니다. 확정 폐기 때만 갱신기가 토큰을 지운다.
+      if (!_tokens.hasSession) {
+        AppLogger.error('토큰 갱신', '세션 종료');
+        _onSessionExpired?.call();
+      }
       return handler.next(err);
     }
 

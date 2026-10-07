@@ -1716,4 +1716,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get modeSwitchBlockedBack => '돌아가기';
+
+  @override
+  String get installationRetryMessage =>
+      'No se pudo comprobar el inicio de sesión. Inténtalo de nuevo.';
+
+  @override
+  String get installationRetryButton => 'Reintentar';
 }

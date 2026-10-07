@@ -12,6 +12,7 @@ import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../auth/data/auth_repository.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
@@ -44,7 +45,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
   final _focusNode = FocusNode();
 
   /// 저장된 암호. 읽기 전에는 null — 그동안 점만 보여준다.
-  String? _saved;
+  bool _verifying = false;
   bool _loaded = false;
 
   _Step _step = _Step.verify;
@@ -73,15 +74,50 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
   }
 
   Future<void> _loadSaved() async {
-    final saved = await ref.read(localStorageProvider).getPin();
-    if (!mounted) return;
-    setState(() {
-      _saved = saved;
-      _loaded = true;
-      // 암호를 정한 적 없는 휴대폰(온보딩을 건너뛴 개발 상태)은 확인할 것이 없다.
-      // 모드 전환 화면도 이때 그냥 통과시킨다.
-      if (saved == null || saved.isEmpty) _step = _Step.enter;
-    });
+    try {
+      final hasPin = await ref.read(localStorageProvider).hasPin();
+      if (!mounted) return;
+      if (widget.createOnly || !hasPin) {
+        // URL·로컬 역할은 권한 증거가 아니다. 보호자 인증의 일회 허가만 소비한다.
+        if (hasPin || !ref.read(authRepositoryProvider).consumeGuardianPinSetupPermit()) {
+          context.go(Routes.login);
+          return;
+        }
+      }
+      setState(() {
+        _loaded = true;
+        _step = hasPin ? _Step.verify : _Step.enter;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      await _showPinFailure(e);
+      if (mounted) context.go(Routes.login);
+    }
+  }
+
+  Future<void> _showPinFailure(Object error) => showFailure(
+    context, null,
+    title: widget.createOnly ? context.l10n.pinChangeCreateFailedTitle : context.l10n.pinChangeFailedTitle,
+    fallback: context.l10n.pinChangeFailedFallback,
+    fallbackCode: error.toString().contains('E-PIN-LOCKED') ? 'E-PIN-LOCKED' : 'E-PIN',
+  );
+
+  Future<void> _verifyCurrent() async {
+    if (_verifying) return;
+    _verifying = true;
+    final pin = _current;
+    try {
+      final valid = await ref.read(localStorageProvider).verifyPin(pin);
+      if (!mounted) return;
+      valid ? _next(_Step.enter) : _mismatch();
+    } catch (e) {
+      if (mounted) {
+        _mismatch();
+        await _showPinFailure(e);
+      }
+    } finally {
+      _verifying = false;
+    }
   }
 
   @override
@@ -103,7 +139,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
 
     switch (_step) {
       case _Step.verify:
-        _current == _saved ? _next(_Step.enter) : _mismatch();
+        _verifyCurrent();
       case _Step.enter:
         final entered = _current;
         _next(_Step.confirm, keep: entered);
@@ -155,25 +191,16 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     final pin = _current;
     setState(() => _saving = true);
     final storage = ref.read(localStorageProvider);
-    await storage.setPin(pin);
-    // `setPin` 은 저장 실패를 삼킨다(로그만 남긴다). 다시 읽어 봐야 실제로 바뀌었는지
-    // 안다. 바뀌지 않았는데 "바꿨어요"라고 하면 다음 전환 때 새 암호가 안 먹는다.
-    final stored = await storage.getPin();
-    if (!mounted) return;
-    setState(() => _saving = false);
-
-    if (stored != pin) {
-      await showFailure(
-        context,
-        null,
-        title: widget.createOnly
-            ? context.l10n.pinChangeCreateFailedTitle
-            : context.l10n.pinChangeFailedTitle,
-        fallback: context.l10n.pinChangeFailedFallback,
-        fallbackCode: 'E-PIN',
-      );
+    try {
+      await storage.setPin(pin);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      await _showPinFailure(e);
       return;
     }
+    if (!mounted) return;
+    setState(() => _saving = false);
     // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다 (#433).
     final messenger = ScaffoldMessenger.maybeOf(context);
     final l10n = context.l10n;
@@ -234,7 +261,8 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     // 만들기(createOnly)는 온보딩 머리 그대로다. 바꾸기만 설정 계열 머리다.
     final change = !widget.createOnly;
     return ElumScaffold(
-      onBack: context.popOrHome,
+      // 저장 전 나가기는 잠금 없이 보호자 홈을 여는 통로가 될 수 없다.
+      onBack: widget.createOnly ? () => context.go(Routes.login) : context.popOrHome,
       title: change ? context.l10n.pinChangeHeaderTitle : null,
       backTop: change ? _changeBackTop : null,
       // 온보딩처럼 **다 맞았을 때만** 버튼이 나타난다 (#231). 나타나는 것이 신호다.

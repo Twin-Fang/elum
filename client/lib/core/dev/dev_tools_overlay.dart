@@ -806,12 +806,12 @@ class _StatusView extends ConsumerWidget {
         _Row('호칭', storage.nickname ?? '(없음)'),
         _Row('목표', storage.goals.isEmpty ? '(없음)' : storage.goals.join(', ')),
         _Row('캐릭터', storage.character ?? '(없음)'),
-        // PIN은 평문 저장 중이라 값을 띄우지 않는다 — 어깨너머 노출 방지
-        FutureBuilder<String?>(
-          future: storage.getPin(),
+        // 존재 여부만 조회해 암호 검증값이 개발 화면에도 노출되지 않게 한다
+        FutureBuilder<bool>(
+          future: storage.hasPin(),
           builder: (context, snap) => _Row(
             'PIN',
-            (snap.data?.isNotEmpty ?? false) ? '설정됨' : '(없음)',
+            (snap.data ?? false) ? '설정됨' : '(없음)',
           ),
         ),
         const SizedBox(height: 16),

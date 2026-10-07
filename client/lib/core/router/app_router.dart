@@ -183,7 +183,19 @@ String? resolveRedirect(
 
   /// 모드 전환 화면의 `to` 쿼리. 경로(`/mode-switch`)만으로는 어느 쪽으로 가는지 알 수 없다.
   String? modeSwitchTo,
+
+  /// 방금 인증한 보호자가 이 휴대폰 잠금을 아직 만들지 않았는가.
+  bool requiresGuardianPinSetup = false,
 }) {
+  // 잠금을 만들기 전에는 보호자 화면이 열리지 않는다 — 암호 만들기만 통과시킨다.
+  if (requiresGuardianPinSetup &&
+      hasSession &&
+      !isElumiDevice &&
+      path.startsWith(Routes.guardian) &&
+      path != Routes.guardianPinChange) {
+    return '${Routes.guardianPinChange}?from=login';
+  }
+
   // 이룸이 휴대폰은 보호자 화면에 들어갈 수 없다 (#363 · #355 A 경로).
   //
   // 가장 먼저 본다 — 아래 규칙은 "세션이 있으면 열어 준다"라, 이룸이 휴대폰이 계정의 토큰을 들고
@@ -315,6 +327,7 @@ GoRouter createRouter({
   bool Function()? hasToken,
   bool Function()? isElumiDevice,
   bool Function()? hasRole,
+  bool Function()? requiresGuardianPinSetup,
   void Function(InviteLink link)? onInviteLink,
 }) {
   // 리다이렉트가 라우터 자신의 현재 위치를 알아야 한다 — 만들어진 뒤에 채운다.
@@ -340,6 +353,7 @@ GoRouter createRouter({
         isElumiDevice: isElumiDevice?.call() ?? false,
         hasRole: hasRole?.call() ?? true,
         modeSwitchTo: state.uri.queryParameters['to'],
+        requiresGuardianPinSetup: requiresGuardianPinSetup?.call() ?? false,
       );
     },
     routes: [
@@ -476,8 +490,7 @@ GoRouter createRouter({
           // 암호가 없는 휴대폰이 보호자 화면에 들어올 때 거치는 길이다 (#355)
           PinChangeScreen(
             createOnly:
-                state.uri.queryParameters['from'] ==
-                ModeSwitchScreen.pinCreateFrom,
+                state.uri.queryParameters['from'] == 'login',
           ),
         ),
       ),
