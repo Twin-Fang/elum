@@ -66,6 +66,7 @@ class RoutineSummaryTile extends StatelessWidget {
 
   /// 제목 위 16 · 제목과 보상 줄 사이 8 · 보상 줄과 날짜 사이 21
   static const _padTop = 16.0;
+  static const _padBottom = 12.0;
   static const _titleToMeta = 8.0;
   static const _metaToDate = 21.0;
 
@@ -83,12 +84,15 @@ class RoutineSummaryTile extends StatelessWidget {
     final hasRerun = onRerun != null;
     // 날짜 줄이나 다시하기 버튼이 붙으면 68로는 담기지 않는다. 둘 중 하나만
     // 켜도 키운다 — 높이를 켜는 쪽과 내용을 넣는 쪽이 어긋나면 화면이 잘린다.
-    final isTall = hasRerun || (showDate && routine.scheduledDateLabel.isNotEmpty);
+    final isTall =
+        hasRerun || (showDate && routine.scheduledDateLabel.isNotEmpty);
+    final minHeight = (isTall ? _tallHeight : _shortHeight).h;
 
     final card = AnimatedContainer(
       duration: AppMotion.fast,
       curve: AppMotion.standard,
-      height: (isTall ? _tallHeight : _shortHeight).h,
+      // 시안 높이는 최소값이다. 글자 크기를 키우면 내용만큼 늘어난다.
+      constraints: BoxConstraints(minHeight: minHeight),
       decoration: BoxDecoration(
         color: highlighted ? colors.routineTileSwiped : colors.routineTileBg,
         borderRadius: BorderRadius.circular(space.cardRadius),
@@ -97,7 +101,7 @@ class RoutineSummaryTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(width: padLeft.w),
-          Expanded(child: _texts(context)),
+          Expanded(child: _texts(context, minHeight)),
           _trailing(context, hasRerun: hasRerun),
           if (dragHandle case final handle?) ...[
             SizedBox(width: _ringToHandle.w),
@@ -120,7 +124,7 @@ class RoutineSummaryTile extends StatelessWidget {
     );
   }
 
-  Widget _texts(BuildContext context) {
+  Widget _texts(BuildContext context, double minHeight) {
     final colors = context.colors;
     final typo = context.typo;
     final dateLabel = routine.scheduledDateLabel;
@@ -138,10 +142,14 @@ class RoutineSummaryTile extends StatelessWidget {
 
     // 보상도 날짜도 없으면 제목 하나뿐이다. 위에서 16 띄우면 아래로 처져 보인다.
     if (!routine.hasReward && !showsDate) {
-      return Align(alignment: Alignment.centerLeft, child: title);
+      // 높이가 내용에 맞춰 늘어나므로 가운데 맞춤 기준(최소 높이)을 직접 준다.
+      return ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minHeight),
+        child: Align(alignment: Alignment.centerLeft, child: title),
+      );
     }
 
-    return Column(
+    final column = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -161,6 +169,12 @@ class RoutineSummaryTile extends StatelessWidget {
           ),
         ],
       ],
+    );
+    // 글자가 커져 타일이 늘어날 때 마지막 줄이 아래 가장자리에 붙지 않게 한다.
+    // 기본 크기에서는 내용이 최소 높이 안에 들어가 이 여백이 높이를 바꾸지 않는다.
+    return Padding(
+      padding: EdgeInsets.only(bottom: _padBottom.h),
+      child: column,
     );
   }
 
@@ -211,8 +225,9 @@ class _RewardLine extends StatelessWidget {
               routine.rewardText.trim(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: typo.routineTileReward
-                  .copyWith(color: colors.routineTileReward),
+              style: typo.routineTileReward.copyWith(
+                color: colors.routineTileReward,
+              ),
             ),
           ),
         ),
@@ -247,7 +262,9 @@ class _RerunButton extends StatelessWidget {
         ),
         child: Text(
           context.l10n.routineTileRerun,
-          style: context.typo.chipLabel.copyWith(color: colors.routineTileLabel),
+          style: context.typo.chipLabel.copyWith(
+            color: colors.routineTileLabel,
+          ),
         ),
       ),
     );
@@ -323,8 +340,9 @@ class RoutineSectionTitle extends StatelessWidget {
           SizedBox(width: _gap.w),
           Text(
             label,
-            style: context.typo.routineSectionLabel
-                .copyWith(color: colors.routineTileLabel),
+            style: context.typo.routineSectionLabel.copyWith(
+              color: colors.routineTileLabel,
+            ),
           ),
         ],
       ),
