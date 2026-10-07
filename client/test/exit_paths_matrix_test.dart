@@ -146,7 +146,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(topOf(app.router), Routes.linkEnter);
-      expect(find.text('연결이 끊어졌어요'), findsOneWidget);
+      expect(find.textContaining('연결이 끊어졌어요'), findsOneWidget);
       expect(storage.isElumiDevice, isTrue, reason: '같은 이룸이에게 다시 붙을 수 있어야 한다');
 
       await tapBack(tester);

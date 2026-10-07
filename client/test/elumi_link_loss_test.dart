@@ -96,7 +96,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('보호자에게서 받은 코드를'), findsOneWidget);
-      expect(find.text('연결이 끊어졌어요'), findsOneWidget);
+      expect(find.textContaining('연결이 끊어졌어요'), findsOneWidget);
+      expect(find.textContaining('보호자에게 새 연결 암호를 받아 입력해주세요'), findsOneWidget);
       expect(storage.nickname, isNull);
       expect(storage.character, isNull);
       expect(storage.cachedTodayRoutinesJson, isNull);
@@ -164,7 +165,7 @@ void main() {
       await tester.pumpWidget(wrapEnter());
       await tester.pumpAndSettle();
 
-      expect(find.text('연결이 끊어졌어요'), findsNothing);
+      expect(find.textContaining('연결이 끊어졌어요'), findsNothing);
     });
 
     testWidgets('앱을 껐다 켜도 표식이 남아 있으면 말한다', (tester) async {
@@ -172,7 +173,7 @@ void main() {
       await tester.pumpWidget(wrapEnter());
       await tester.pumpAndSettle();
 
-      expect(find.text('연결이 끊어졌어요'), findsOneWidget);
+      expect(find.textContaining('연결이 끊어졌어요'), findsOneWidget);
     });
 
     testWidgets('틀린 암호를 넣으면 그 안내가 먼저다', (tester) async {
@@ -187,7 +188,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('암호가 맞지 않아요'), findsOneWidget);
-      expect(find.text('연결이 끊어졌어요'), findsNothing);
+      expect(find.textContaining('연결이 끊어졌어요'), findsNothing);
     });
   });
 }

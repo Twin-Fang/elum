@@ -213,6 +213,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('함께 돌보기를 그만둘까요?'), findsOneWidget);
+      // 이룸이 휴대폰 연결이 끊어지는 것을 일과보다 먼저 말한다.
+      expect(find.textContaining('내가 연결한 이룸이 휴대폰이 있다면 연결이 끊어져요'), findsOneWidget);
+      expect(find.textContaining('새 연결 암호를 만들어야 다시 쓸 수 있어요'), findsOneWidget);
       expect(find.textContaining('내가 만든 일과는 사라져요'), findsOneWidget);
       expect(find.textContaining('다른 보호자의 일과·별은 그대로예요'), findsOneWidget);
       expect(repo.calls.where((c) => c.startsWith('leave')), isEmpty);
@@ -241,6 +244,7 @@ void main() {
       expect(find.textContaining('함께하는 보호자가 없어요'), findsOneWidget);
       expect(find.textContaining('이룸이와 만든 일과, 모은 별이 모두 사라져요'), findsOneWidget);
       expect(find.textContaining('다른 보호자의 일과·별은 그대로예요'), findsNothing);
+      expect(find.textContaining('이룸이 휴대폰이 있다면 연결이 끊어져요'), findsNothing);
       expect(repo.calls.where((c) => c.startsWith('leave')), isEmpty);
     });
 

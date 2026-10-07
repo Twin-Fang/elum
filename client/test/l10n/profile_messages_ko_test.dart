@@ -136,7 +136,7 @@ void main() {
     );
     expect(
       ko.guardiansLeaveConfirmMessageOthers,
-      '내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요',
+      '내가 연결한 이룸이 휴대폰이 있다면 연결이 끊어져요\n남은 보호자가 새 연결 암호를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요',
     );
     expect(ko.guardiansLeaveConfirmAction, '그만두기');
     expect(ko.guardiansLeaveAction, '함께 돌보기 그만두기');

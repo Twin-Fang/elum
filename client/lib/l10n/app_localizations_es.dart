@@ -608,7 +608,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get linkEnterGuidePath => '설정 → 이룸이 휴대폰 연결하기';
 
   @override
-  String get linkEnterLinkLost => '연결이 끊어졌어요';
+  String get linkEnterLinkLost => '연결이 끊어졌어요\n보호자에게 새 연결 암호를 받아 입력해주세요';
 
   @override
   String get linkEnterStartButton => '시작하기';
@@ -669,7 +669,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get guardiansLeaveConfirmMessageOthers =>
-      '내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요';
+      '내가 연결한 이룸이 휴대폰이 있다면 연결이 끊어져요\n남은 보호자가 새 연결 암호를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요';
 
   @override
   String get guardiansLeaveConfirmAction => '그만두기';
