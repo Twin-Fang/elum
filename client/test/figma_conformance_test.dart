@@ -1495,7 +1495,9 @@ void main() {
   //
   // 담긴 일과는 `931:3896`과 **같다** — 시안이 같은 화면의 두 상태로 그렸다.
   // 두 번째 오늘 일과를 왼쪽으로 밀면 삭제·수정이 드러난다.
-  testWidgets('보호자 홈 — 일과를 민 뒤 (Figma 931:4179)', (tester) async {
+  // 시안은 끝낸 일과가 밀린 모양이지만 앱은 끝낸 일과의 밀기를 꺼 둔다.
+  // 931:4179 가 갱신되면 skip 을 풀고 골든을 다시 맞춘다.
+  testWidgets('보호자 홈 — 일과를 민 뒤 (Figma 931:4179)', skip: true, (tester) async {
     await tester.pumpWidget(
       wrap(
         routines: [

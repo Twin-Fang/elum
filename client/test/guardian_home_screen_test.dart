@@ -441,6 +441,20 @@ void main() {
       expect(revealOf(tester, actionIn('하나', AppAssets.iconTrash)), 0);
     });
 
+    testWidgets('다 끝낸 일과는 밀리지 않는다', (tester) async {
+      await tester.pumpWidget(
+        wrap(routines: [routine('손 씻기', 2, percent: 100)]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.text('손 씻기'), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+
+      // 끝낸 일과는 편집을 막는다 — 삭제·수정 버튼이 드러나면 안 된다
+      expect(svgWithAsset(AppAssets.iconTrash), findsNothing);
+      expect(svgWithAsset(AppAssets.iconPencil), findsNothing);
+    });
+
     testWidgets('지난 일과는 밀리지 않는다', (tester) async {
       await tester.pumpWidget(wrap(past: [routine('어제 한 일', 1)]));
       await tester.pumpAndSettle();
