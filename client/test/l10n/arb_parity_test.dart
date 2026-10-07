@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:elum/core/l10n/app_locales.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// ARB 언어 간 키·자리표시자 일치 검사 (골격).
@@ -9,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// ko 템플릿의 모든 키와 자리표시자를 빠짐없이 가져야 한다. 아직 안 연 언어는 비어 있어도
 /// 된다 — 이때 gen-l10n 이 빠진 키를 ko 문구로 채우므로 화면은 깨지지 않는다.
 /// 번역을 채우면 이 목록을 늘린다.
-const openedLocales = <String>{'ko'};
+const openedLocales = <String>{'ko', 'en'};
 
 /// ko 에만 있고 다른 언어는 쓰지 않아도 되는 자리표시자.
 /// `batchim` 은 한국어 조사 선택용이다 (`core/l10n/batchim.dart`).
@@ -56,6 +57,14 @@ void main() {
       if (undeclared.isNotEmpty) bad.add('$k: $undeclared');
     }
     expect(bad, isEmpty, reason: '메타에 없는 자리표시자 — gen-l10n 이 거부한다');
+  });
+
+  test('앱이 여는 언어 목록과 번역을 검사하는 언어가 같다', () {
+    expect(
+      openedAppLocales.map((l) => l.languageCode).toSet(),
+      openedLocales,
+      reason: '언어를 열 때 openedAppLocales 와 이 파일의 openedLocales 를 함께 늘린다',
+    );
   });
 
   for (final locale in allLocales.where(openedLocales.contains)) {
