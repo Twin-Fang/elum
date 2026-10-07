@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:elum/core/storage/guardian_lock_store.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/notice/data/notice_hide_store.dart';
 import 'package:elum/features/notice/domain/app_notice.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -117,8 +119,13 @@ void main() {
 
     test('SharedPrefsStorage — 키는 notice.hidden.{id}', () async {
       SharedPreferences.setMockInitialValues({});
+      FlutterSecureStorage.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
-      final real = SharedPrefsStorage(prefs);
+      // clearAll 은 휴대폰 잠금 저장소도 거치므로 설치 식별자를 가진 잠금을 달아 준다.
+      final real = SharedPrefsStorage(
+        prefs,
+        lock: GuardianLockStore(installationId: 'test-install'),
+      );
       final realStore = NoticeHideStore(real);
 
       await realStore.hide(notice('abc', revision: 2), days: 7, now: now);

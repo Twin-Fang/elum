@@ -181,7 +181,7 @@ void main() {
             .platformDispatcher
             .clearAccessibilityFeaturesTestValue,
       );
-      final storage = InMemoryStorage(onboardingCompleted: true);
+      final storage = InMemoryStorage(onboardingCompleted: true, pin: '1234');
       await storage.setSelectedProfileId('p-old');
       var memberFetches = 0;
       final router = GoRouter(

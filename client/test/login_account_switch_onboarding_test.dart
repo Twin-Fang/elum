@@ -116,6 +116,8 @@ class _LoginSucceeds extends AuthRepository {
   @override
   Future<AuthResult> signInWith(OAuthProvider provider) async {
     await _storage.clearSelectedProfileId();
+    // 홈 결과는 이 휴대폰에 잠금이 있어야 보호자 홈으로 간다 — 없으면 암호 만들기로 보낸다.
+    await _storage.setPin('4321');
     return const AuthResult(AuthOutcome.home);
   }
 }

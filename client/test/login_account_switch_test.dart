@@ -27,7 +27,7 @@ void main() {
 
   testWidgets('로그인하면 오늘·지난·전체 일과와 추천을 새 계정 기준으로 다시 받는다', (tester) async {
     final repo = _AccountRepo()..account = 'A';
-    final storage = InMemoryStorage(onboardingCompleted: true);
+    final storage = InMemoryStorage(onboardingCompleted: true, pin: '1234');
     final router = GoRouter(
       initialLocation: Routes.login,
       routes: [
