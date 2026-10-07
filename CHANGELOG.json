@@ -1,15 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-07T15:32:37Z",
-    "currentVersion": "2.18.3",
+    "lastUpdated": "2026-10-07T15:53:07Z",
+    "currentVersion": "2.19.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 219
+    "totalReleases": 220
   },
   "releases": [
+    {
+      "version": "2.19.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-07",
+      "pr_number": 591,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 카드 그림을 고를 때 '기본 그림'이 맨 위에 처음부터 골라져 있어요\n  * '직접 찍은 사진'을 '기본 그림'으로 이름과 예시 그림을 바꿨어요\n  * 그림 방식 화면에서 건너뛰기를 없애 바로 다음으로 넘어가요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드 그림을 고를 때 '기본 그림'이 맨 위에 처음부터 골라져 있어요",
+            "'직접 찍은 사진'을 '기본 그림'으로 이름과 예시 그림을 바꿨어요",
+            "그림 방식 화면에서 건너뛰기를 없애 바로 다음으로 넘어가요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.18.3",
       "project_type": "flutter",
