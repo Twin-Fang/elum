@@ -9,8 +9,9 @@ import UIKit
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
-    if let controller = window?.rootViewController as? FlutterViewController {
-      FlutterMethodChannel(name: "elum/installation", binaryMessenger: controller.binaryMessenger)
+    // rootViewController 형변환에 기대면 실패 시 채널이 없어 앱이 설치 오류 화면에 갇힌다.
+    if let registrar = self.registrar(forPlugin: "ElumInstallation") {
+      FlutterMethodChannel(name: "elum/installation", binaryMessenger: registrar.messenger())
         .setMethodCallHandler { call, result in
           guard call.method == "getInstallationId" else {
             result(FlutterMethodNotImplemented)

@@ -28,12 +28,12 @@ class InstallationStore {
   }
 }
 
-/// 백업 제외 표식 도입 이전 설치는 일관된 로컬 자료가 남았을 때만 이전한다.
-bool canMigrateLegacyInstallation(LocalStorage storage) {
-  final hasProfile =
-      storage.selectedProfileId?.isNotEmpty == true &&
-      storage.nickname?.trim().isNotEmpty == true;
-  return storage.isOnboardingCompleted &&
-      hasProfile &&
-      (storage.isElumiDevice || storage.selectedRole == 'guardian');
-}
+/// 백업 제외 표식 도입 이전 설치는 로컬 앱 상태가 남아 있을 때만 이전한다.
+///
+/// 앱을 지우면 로컬 상태가 함께 지워지고 업데이트면 남으므로, 재설치와 업데이트는 이것만으로
+/// 가린다. 프로필 ID·이름까지 요구하면 그 값이 비어 있던 기존 휴대폰(연결 직후 조회에 실패한
+/// 이룸이 휴대폰 등)이 업데이트만으로 로그아웃된다.
+bool canMigrateLegacyInstallation(LocalStorage storage) =>
+    storage.isOnboardingCompleted ||
+    storage.isElumiDevice ||
+    storage.selectedRole != null;

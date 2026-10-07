@@ -140,15 +140,23 @@ void main() {
       throwsA(isA<InstallationException>()),
     );
   });
-  test('legacy 이전은 완료된 프로필/역할 또는 연결 상태 필요', () async {
-    final local = InMemoryStorage();
-    expect(canMigrateLegacyInstallation(local), false);
-    await local.setOnboardingCompleted(true);
-    await local.setNickname('이룸');
-    await local.setSelectedProfileId('profile');
-    expect(canMigrateLegacyInstallation(local), false);
-    await local.setSelectedRole('guardian');
-    expect(canMigrateLegacyInstallation(local), true);
+  test('legacy 이전은 로컬 앱 상태가 하나라도 남았으면 허용', () async {
+    // 재설치는 로컬 상태가 비어 있다.
+    expect(canMigrateLegacyInstallation(InMemoryStorage()), false);
+
+    // 프로필 ID·이름이 비어 있는 이룸이 휴대폰도 업데이트로 로그아웃되지 않는다.
+    final elumi = InMemoryStorage();
+    await elumi.setElumiDevice(true);
+    expect(canMigrateLegacyInstallation(elumi), true);
+
+    final guardian = InMemoryStorage();
+    await guardian.setOnboardingCompleted(true);
+    expect(canMigrateLegacyInstallation(guardian), true);
+
+    // 온보딩 도중(역할만 고른 상태)도 세션을 이어 간다.
+    final midOnboarding = InMemoryStorage();
+    await midOnboarding.setSelectedRole('guardian');
+    expect(canMigrateLegacyInstallation(midOnboarding), true);
   });
   testWidgets('설치 오류 화면은 코드와 재시도를 제공', (tester) async {
     var retries = 0;
