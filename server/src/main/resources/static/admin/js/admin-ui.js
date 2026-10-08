@@ -11,6 +11,8 @@
   'use strict';
 
   var KEY = 'elum-admin-theme';
+  // 직접 고른 값이 없으면 시스템 설정과 무관하게 밝은 화면으로 시작한다.
+  var DEFAULT_THEME = 'light';
   var SIDEBAR_KEY = 'elum-admin-sidebar';
 
   function read() {
@@ -26,14 +28,6 @@
       localStorage.setItem(KEY, value);
     } catch (e) {
       /* 기억하지 못할 뿐이다. 이번 방문에는 적용된다. */
-    }
-  }
-
-  function systemTheme() {
-    try {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    } catch (e) {
-      return 'light';
     }
   }
 
@@ -72,10 +66,10 @@
   }
 
   // 저장값이 없으면 시스템 설정을 따른다.
-  apply(read() || systemTheme());
+  apply(read() || DEFAULT_THEME);
 
   document.addEventListener('DOMContentLoaded', function () {
-    apply(read() || systemTheme()); // 아이콘은 DOM이 생긴 뒤에야 맞출 수 있다
+    apply(read() || DEFAULT_THEME); // 아이콘은 DOM이 생긴 뒤에야 맞출 수 있다
     applySidebar(sidebarCollapsed());
 
     document.addEventListener('click', function (event) {
