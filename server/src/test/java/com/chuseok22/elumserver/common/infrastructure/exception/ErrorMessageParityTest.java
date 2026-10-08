@@ -44,12 +44,21 @@ class ErrorMessageParityTest {
   @Test
   @DisplayName("원본 이후 더한 코드는 golden 밖에서 따로 단언한다 — golden 을 다시 만들면 원본 증명이 흐려진다")
   void codesAddedAfterOriginal_areAssertedSeparately() {
-    assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 1 + ADDED_LOG_CODES.size());
+    assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
       .isEqualTo("이 언어는 아직 켤 수 없어요. 서버 문구 파일이 비어 있어요.");
   }
+
+  // 의견 보내기가 더한 코드.
+  private static final java.util.List<ErrorCode> ADDED_FEEDBACK_CODES = java.util.List.of(
+    ErrorCode.FEEDBACK_MESSAGE_EMPTY,
+    ErrorCode.FEEDBACK_MESSAGE_TOO_LONG,
+    ErrorCode.FEEDBACK_LOG_TOO_LARGE,
+    ErrorCode.FEEDBACK_RATE_LIMITED,
+    ErrorCode.FEEDBACK_NOT_FOUND
+  );
 
   // 관리자 로그 관리 화면이 더한 코드. 문구 끝의 (E-LOG-00N) 이 화면에 찍히는 추적용 식별자다.
   private static final Map<ErrorCode, String> ADDED_LOG_CODES = Map.of(
