@@ -4,43 +4,81 @@
 <body>
 
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
-  <div class="flex flex-wrap items-center gap-2">
-    <a th:href="@{/admin/feedback}" class="btn btn-ghost btn-sm">← 목록</a>
-    <h1 class="text-2xl font-bold">의견 상세</h1>
+  <div class="flex items-center justify-between flex-wrap gap-2">
+    <div class="flex items-center gap-2">
+      <h1 class="text-2xl font-bold">의견 상세</h1>
+      <span th:if="${feedback.hasAppLog()}" class="badge badge-info">앱 상태 기록 있음</span>
+      <span th:unless="${feedback.hasAppLog()}" class="badge badge-ghost">앱 상태 기록 없음</span>
+      <span th:if="${feedback.appLogErrorCount() > 0}" class="badge badge-error"
+            th:text="'오류 ' + ${feedback.appLogErrorCount()} + '건'">오류 1건</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a th:href="@{/admin/feedback}" class="btn btn-ghost btn-sm">목록으로</a>
+      <form th:action="@{/admin/feedback/{id}/delete(id=${feedback.id})}" method="post"
+            onsubmit="return confirm('이 의견을 지울까요? 되돌릴 수 없어요.');">
+        <button type="submit" class="btn btn-error btn-sm">지우기</button>
+      </form>
+    </div>
   </div>
 
-  <!-- 의견과 기록은 사용자 입력이다. 반드시 th:text 로 이스케이프한다. -->
-  <dl class="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-2 text-sm">
-    <dt class="text-base-content/60">보낸 때</dt>
-    <dd th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'yyyy-MM-dd HH:mm:ss') : '-'}">2026-10-08 10:00:00</dd>
-    <dt class="text-base-content/60">회원 id</dt>
-    <dd class="font-mono break-all" th:text="${feedback.memberId}">member-id</dd>
-    <dt class="text-base-content/60">앱 버전</dt>
-    <dd th:text="${feedback.appVersion != null ? feedback.appVersion : '-'}">1.0.40</dd>
-    <dt class="text-base-content/60">OS</dt>
-    <dd th:text="${feedback.os != null ? feedback.os : '-'}">iOS 18.1</dd>
-  </dl>
-
-  <section class="space-y-2">
-    <h2 class="font-semibold">의견</h2>
-    <div class="rounded-box bg-base-200 p-4 whitespace-pre-wrap wrap-anywhere" th:text="${feedback.message}">의견 전체</div>
-  </section>
-
-  <section class="space-y-2">
-    <h2 class="font-semibold">앱 상태 기록</h2>
-    <p th:unless="${feedback.hasAppLog()}" class="text-sm text-base-content/60">보내지 않았어요.</p>
-    <details th:if="${feedback.hasAppLog()}" class="collapse collapse-arrow bg-base-200">
-      <summary class="collapse-title text-sm">펼쳐서 보기</summary>
-      <div class="collapse-content">
-        <pre class="text-xs overflow-x-auto whitespace-pre-wrap wrap-anywhere" th:text="${feedback.appLog}">기록</pre>
+  <!-- 보낸 사람과 환경. 의견·기록은 사용자 입력이라 아래 모든 출력은 th:text 로 이스케이프한다. -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">보낸 때</div>
+      <div class="stat-value text-lg"
+           th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'yyyy-MM-dd') : '-'}">2026-10-08</div>
+      <div class="stat-desc"
+           th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'HH:mm:ss') : ''}">10:00:00</div>
+    </div>
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">회원</div>
+      <div class="stat-value text-lg font-mono"
+           th:text="${#strings.abbreviate(feedback.memberId, 12)}">member-id</div>
+      <div class="stat-desc">
+        <a th:href="@{/admin/members/{id}(id=${feedback.memberId})}" class="link link-hover">회원 정보 보기</a>
       </div>
-    </details>
-  </section>
+    </div>
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">앱 버전</div>
+      <div class="stat-value text-lg"
+           th:text="${feedback.appVersion != null ? feedback.appVersion : '-'}">1.0.40</div>
+    </div>
+    <div class="stat rounded-box bg-base-200 shadow">
+      <div class="stat-title text-sm">OS</div>
+      <div class="stat-value text-lg break-words"
+           th:text="${feedback.os != null ? feedback.os : '-'}">iOS 18.1</div>
+    </div>
+  </div>
 
-  <form th:action="@{/admin/feedback/{id}/delete(id=${feedback.id})}" method="post"
-        onsubmit="return confirm('이 의견을 지울까요? 되돌릴 수 없어요.');">
-    <button type="submit" class="btn btn-error btn-sm">지우기</button>
-  </form>
+  <div class="card bg-base-100 shadow-md border border-base-300">
+    <div class="card-body space-y-2">
+      <h2 class="card-title text-lg">의견</h2>
+      <p class="text-base leading-relaxed whitespace-pre-wrap wrap-anywhere"
+         th:text="${feedback.message}">의견 전체</p>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow-md border border-base-300">
+    <div class="card-body space-y-2">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <h2 class="card-title text-lg">앱 상태 기록</h2>
+        <div th:if="${feedback.hasAppLog()}" class="flex items-center gap-2">
+          <span class="text-xs text-base-content/60"
+                th:text="${#strings.length(feedback.appLog)} + '자'">1234자</span>
+          <button type="button" class="btn btn-outline btn-xs"
+                  onclick="navigator.clipboard.writeText(document.getElementById('app-log').textContent).then(() => { this.textContent = '복사했어요'; })">
+            복사
+          </button>
+        </div>
+      </div>
+      <p th:unless="${feedback.hasAppLog()}" class="text-sm text-base-content/60">
+        보내는 사람이 앱 상태 기록 보내기를 끄고 보냈어요.
+      </p>
+      <pre th:if="${feedback.hasAppLog()}" id="app-log"
+           class="rounded-box bg-neutral text-neutral-content p-4 text-xs leading-relaxed max-h-96 overflow-auto whitespace-pre-wrap wrap-anywhere"
+           th:text="${feedback.appLog}">기록</pre>
+    </div>
+  </div>
 </main>
 </body>
 </html>

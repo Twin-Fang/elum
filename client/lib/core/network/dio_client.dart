@@ -4,13 +4,17 @@ import 'package:flutter/foundation.dart';
 
 import '../config/app_config.dart';
 import '../logger/app_logger.dart';
+import 'app_log_interceptor.dart';
 // 비활성 상태지만 되살릴 때 바로 쓰도록 남겨둔다
 // ignore: unused_import
 import 'encryption_interceptor.dart';
 
 /// Dio 인스턴스 생성. 설정값은 전부 [AppConfig]에서 온다 — 하드코딩하지 않는다.
 abstract final class DioClient {
-  static Dio create() {
+  /// [attachLog] 가 true 면 의견 첨부용 기록 인터셉터를 붙인다.
+  /// 다른 인터셉터를 더 붙일 호출부는 false 로 받아 **맨 뒤에** 직접 붙인다 —
+  /// 앞에 붙으면 인증 갱신 전의 중간 결과와 나중에 붙는 헤더를 못 본다.
+  static Dio create({bool attachLog = true}) {
     final dio = Dio(
       BaseOptions(
         baseUrl: AppConfig.apiBaseUrl,
@@ -28,9 +32,7 @@ abstract final class DioClient {
     // 로깅보다 먼저 등록해야 봉투로 바뀐 본문만 로그에 남아 원문이 새지 않는다.
     // dio.interceptors.add(EncryptionInterceptor(secret: AppConfig.aidlpSecret));
 
-    if (AppConfig.enableNetworkLog) {
-      dio.interceptors.add(SafeLogInterceptor());
-    }
+    if (attachLog) dio.interceptors.add(AppLogInterceptor());
 
     return dio;
   }

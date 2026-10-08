@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/profile/domain/invite_link.dart';
 import '../config/app_config.dart';
+import '../logger/app_log_route_observer.dart';
 import '../l10n/l10n_context.dart';
 import 'route_redirect.dart';
 import 'routes.dart';
@@ -61,6 +62,8 @@ GoRouter createRouter({
   late final GoRouter router;
   router = GoRouter(
     initialLocation: Routes.splash,
+    // 화면 이동을 첨부 기록에 남긴다. 라우터마다 새로 만든다 — 관찰자는 하나의 네비게이터에 붙는다.
+    observers: [AppLogRouteObserver()],
     redirect: (context, state) {
       // 초대 링크는 다른 가드보다 먼저 본다. 주소가 우리 라우트가 아니라 아래 규칙이 그대로 두면
       // 오류 화면이 된다.

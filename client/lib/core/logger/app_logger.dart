@@ -19,7 +19,13 @@ abstract final class AppLogger {
   static const _tagData = '[데이터]';
 
   /// 타임스탐프 포함 로그 출력 (HH:mm:ss.SSS 형식)
-  static void _log(String tag, String message, [Map<String, dynamic>? data]) {
+  /// [toBuffer] 가 false 면 콘솔에만 찍는다(의견 첨부 기록의 소음 제거용).
+  static String _log(
+    String tag,
+    String message, [
+    Map<String, dynamic>? data,
+    bool toBuffer = true,
+  ]) {
     final now = DateTime.now();
     final timeStr = '${now.hour.toString().padLeft(2, '0')}:'
         '${now.minute.toString().padLeft(2, '0')}:'
@@ -33,9 +39,27 @@ abstract final class AppLogger {
       line = '[$timeStr] $tag $message\n  ${_formatData(data)}';
     }
     // 의견 보내기 첨부용. 출력 여부와 무관하게 항상 쌓는다.
-    AppLogBuffer.add(line);
+    if (toBuffer) AppLogBuffer.add(line);
     debugPrint(line);
+    return line;
   }
+
+  /// 스택 상위 [lines] 줄. 오류 추적에 필요한 건 앞쪽이다.
+  static String topStack(StackTrace? stack, [int lines = 12]) {
+    if (stack == null) return '';
+    return stack.toString().trimRight().split('\n').take(lines).join('\n');
+  }
+
+  // ========== 자유 형식 기록 (인터셉터·관찰자용) ==========
+
+  /// 네트워크 쪽 한 건(요청·응답·연결 상태).
+  static void network(String message) => _log(_tagNetwork, message);
+
+  /// 화면 이동.
+  static void screen(String message) => _log(_tagUI, message);
+
+  /// 앱 생명주기 변화.
+  static void lifecycle(String message) => _log(_tagLifecycle, message);
 
   /// 데이터를 보기 좋게 포맷팅
   static String _formatData(Map<String, dynamic> data) {
@@ -284,7 +308,8 @@ abstract final class AppLogger {
       'key': key,
       'value': value,
     };
-    _log(_tagStorage, '읽기', data);
+    // 읽기는 소음이라 첨부 기록에서 뺀다
+    _log(_tagStorage, '읽기', data, false);
   }
 
   /// SharedPreferences 쓰기
@@ -294,7 +319,8 @@ abstract final class AppLogger {
       'key': key,
       'value': value,
     };
-    _log(_tagStorage, '쓰기', data);
+    // 캐시 쓰기는 응답 캐싱마다 반복돼 기록을 덮는다
+    _log(_tagStorage, '쓰기', data, !key.startsWith('cache.'));
   }
 
   /// SharedPreferences 삭제
@@ -332,7 +358,10 @@ abstract final class AppLogger {
       if (stackTrace != null) 'stackTrace': stackTrace.toString().split('\n').first,
       if (context != null) ...context,
     };
-    _log(_tagError, '예외 발생', data);
+    final line = _log(_tagError, '예외 발생', data);
+    // 오류 전용 보관 — 일반 기록이 쏟아져도 밀리지 않는다
+    final stack = topStack(stackTrace);
+    AppLogBuffer.addError(stack.isEmpty ? line : '$line\n$stack');
   }
 
   // ========== 생명주기 로깅 ==========

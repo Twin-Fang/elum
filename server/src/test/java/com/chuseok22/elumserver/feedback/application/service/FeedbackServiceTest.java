@@ -93,16 +93,16 @@ class FeedbackServiceTest {
   }
 
   @Test
-  @DisplayName("로그는 UTF-8 바이트로 64KB 까지, 넘으면 FEEDBACK_LOG_TOO_LARGE")
+  @DisplayName("로그는 UTF-8 바이트로 256KB 까지, 넘으면 FEEDBACK_LOG_TOO_LARGE")
   void submit_logSize() {
     stubSave();
-    service.submit("m1", request("의견", "a".repeat(65536), null, null));
+    service.submit("m1", request("의견", "a".repeat(262144), null, null));
 
     // 한글 한 글자는 3바이트라 글자 수는 적어도 바이트로는 넘는다.
-    assertThatThrownBy(() -> service.submit("m1", request("의견", "가".repeat(21846), null, null)))
+    assertThatThrownBy(() -> service.submit("m1", request("의견", "가".repeat(87382), null, null)))
       .isInstanceOfSatisfying(CustomException.class,
         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.FEEDBACK_LOG_TOO_LARGE));
-    assertThatThrownBy(() -> service.submit("m1", request("의견", "a".repeat(65537), null, null)))
+    assertThatThrownBy(() -> service.submit("m1", request("의견", "a".repeat(262145), null, null)))
       .isInstanceOf(CustomException.class);
   }
 

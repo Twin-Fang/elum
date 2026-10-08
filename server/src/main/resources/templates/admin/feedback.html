@@ -36,6 +36,8 @@
         <td>
           <span th:if="${f.hasAppLog()}" class="badge badge-info badge-sm">있음</span>
           <span th:unless="${f.hasAppLog()}" class="badge badge-ghost badge-sm">없음</span>
+          <span th:if="${f.appLogErrorCount() > 0}" class="badge badge-error badge-sm"
+                th:text="'오류 ' + ${f.appLogErrorCount()} + '건'">오류 1건</span>
         </td>
         <td>
           <a th:href="@{/admin/feedback/{id}(id=${f.id})}" class="btn btn-primary btn-xs">보기</a>
