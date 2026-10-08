@@ -85,7 +85,7 @@ class RoutineServiceCreditTest {
   @Mock private PictogramPicker pictogramPicker;
   @Mock private EnabledLocales enabledLocales;
 
-  @InjectMocks private RoutineService routineService;
+  @InjectMocks private RoutineCreateService routineCreateService;
 
   @BeforeEach
   void contentLocaleDefaultsToKo() {
@@ -131,7 +131,7 @@ class RoutineServiceCreditTest {
     when(routineCreationWriter.save(eq("member-1"), eq("profile-1"), any(Routine.class), eq("job-1"), eq(2)))
       .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(3, 0, 97)));
 
-    RoutineResponse response = routineService.create(GUARDIAN, REQUEST, "key-1");
+    RoutineResponse response = routineCreateService.create(GUARDIAN, REQUEST, "key-1");
 
     // 그림 수 = imagePath 가 있는 카드만 — 실패해 비어 있는 카드는 청구하지 않는다
     assertThat(response.credit()).isEqualTo(new RoutineResponse.CreditUsage(3, 2, 3, 97));
@@ -147,7 +147,7 @@ class RoutineServiceCreditTest {
     when(routineCreationWriter.save(any(), any(), any(), eq("job-1"), anyInt()))
       .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(1, 2, 0)));
 
-    RoutineResponse response = routineService.create(GUARDIAN, REQUEST, "key-1");
+    RoutineResponse response = routineCreateService.create(GUARDIAN, REQUEST, "key-1");
 
     assertThat(response.id()).isNull(); // 목 저장이라 id 는 없다 — 일과 자체는 돌아왔다
     assertThat(response.steps()).hasSize(3);
@@ -164,7 +164,7 @@ class RoutineServiceCreditTest {
     RoutineResponse saved = RoutineResponse.from(routine("routine-9"));
     when(routineCreationWriter.loadSaved(GUARDIAN, "routine-9")).thenReturn(saved);
 
-    RoutineResponse response = routineService.create(GUARDIAN, REQUEST, "key-1");
+    RoutineResponse response = routineCreateService.create(GUARDIAN, REQUEST, "key-1");
 
     assertThat(response).isSameAs(saved);
     verifyNoInteractions(routineAiPipeline, routineImageStorage);
@@ -179,7 +179,7 @@ class RoutineServiceCreditTest {
     RoutineResponse saved = RoutineResponse.from(routine("routine-9"));
     when(routineCreationWriter.loadSaved(GUARDIAN, "routine-9")).thenReturn(saved);
 
-    RoutineResponse response = routineService.create(GUARDIAN, REQUEST, "key-1");
+    RoutineResponse response = routineCreateService.create(GUARDIAN, REQUEST, "key-1");
 
     assertThat(response).isSameAs(saved);
     verify(routineQuotaGuard, never()).guard(anyString());
@@ -197,7 +197,7 @@ class RoutineServiceCreditTest {
     RoutineResponse saved = RoutineResponse.from(routine("routine-9"));
     when(routineCreationWriter.loadSaved(GUARDIAN, "routine-9")).thenReturn(saved);
 
-    RoutineResponse response = routineService.create(GUARDIAN, REQUEST, "key-1");
+    RoutineResponse response = routineCreateService.create(GUARDIAN, REQUEST, "key-1");
 
     assertThat(response).isSameAs(saved);
     verify(routineRequestCooldownGuard, never()).guard(anyString());
@@ -211,7 +211,7 @@ class RoutineServiceCreditTest {
     when(routineCreationWriter.loadSaved(GUARDIAN, "routine-9"))
       .thenThrow(new CustomException(ErrorCode.ROUTINE_ACCESS_DENIED));
 
-    assertThatThrownBy(() -> routineService.create(GUARDIAN, REQUEST, "key-1"))
+    assertThatThrownBy(() -> routineCreateService.create(GUARDIAN, REQUEST, "key-1"))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_ACCESS_DENIED);
     verifyNoInteractions(routineAiPipeline);
   }
@@ -223,7 +223,7 @@ class RoutineServiceCreditTest {
     when(creditReservationService.reserve(anyString(), any(), anyString(), eq(true)))
       .thenThrow(new CustomException(ErrorCode.AI_CREDIT_INSUFFICIENT));
 
-    assertThatThrownBy(() -> routineService.create(GUARDIAN, REQUEST, null))
+    assertThatThrownBy(() -> routineCreateService.create(GUARDIAN, REQUEST, null))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.AI_CREDIT_INSUFFICIENT);
     verify(creditReservationService, never()).findSettledRoutineId(anyString(), anyString());
   }
@@ -235,7 +235,7 @@ class RoutineServiceCreditTest {
     when(creditReservationService.reserve(anyString(), any(), anyString(), eq(true)))
       .thenThrow(new CustomException(ErrorCode.AI_CREDIT_JOB_IN_PROGRESS));
 
-    assertThatThrownBy(() -> routineService.create(GUARDIAN, REQUEST, "key-1"))
+    assertThatThrownBy(() -> routineCreateService.create(GUARDIAN, REQUEST, "key-1"))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.AI_CREDIT_JOB_IN_PROGRESS);
     verifyNoInteractions(routineAiPipeline);
   }
@@ -247,7 +247,7 @@ class RoutineServiceCreditTest {
     when(creditReservationService.reserve(anyString(), any(), anyString(), eq(true)))
       .thenThrow(new CustomException(ErrorCode.AI_CREDIT_INSUFFICIENT));
 
-    assertThatThrownBy(() -> routineService.create(GUARDIAN, REQUEST, "key-1"))
+    assertThatThrownBy(() -> routineCreateService.create(GUARDIAN, REQUEST, "key-1"))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.AI_CREDIT_INSUFFICIENT);
     verifyNoInteractions(routineAiPipeline);
   }
@@ -261,7 +261,7 @@ class RoutineServiceCreditTest {
     when(routineCreationWriter.save(any(), any(), any(), eq("job-1"), anyInt()))
       .thenThrow(new CustomException(ErrorCode.PROFILE_ACCESS_DENIED));
 
-    assertThatThrownBy(() -> routineService.create(GUARDIAN, REQUEST, "key-1"))
+    assertThatThrownBy(() -> routineCreateService.create(GUARDIAN, REQUEST, "key-1"))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PROFILE_ACCESS_DENIED);
 
     verify(routineImageStorage).deleteBatch("batch-1");
@@ -278,7 +278,7 @@ class RoutineServiceCreditTest {
     when(routineAiPipeline.generateForCreate(any(), any(), any(), any(), any(), any(), any()))
       .thenThrow(new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED));
 
-    assertThatThrownBy(() -> routineService.create(GUARDIAN, REQUEST, "key-1"))
+    assertThatThrownBy(() -> routineCreateService.create(GUARDIAN, REQUEST, "key-1"))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_AI_GENERATION_FAILED);
     verify(creditReservationService).release(eq("job-1"), anyString());
     verify(routineCreationWriter, never()).save(any(), any(), any(), any(), anyInt());
@@ -298,7 +298,7 @@ class RoutineServiceCreditTest {
     when(routineCreationWriter.save(any(), any(), any(), any(), anyInt()))
       .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), new CreditSettlement(1, 0, 99)));
 
-    routineService.create(GUARDIAN, REQUEST, "key-1");
+    routineCreateService.create(GUARDIAN, REQUEST, "key-1");
 
     assertThat(seen.get()).isEqualTo("job-1");
     assertThat(AiCallContext.currentCreditJobId()).isNull();
@@ -314,7 +314,7 @@ class RoutineServiceCreditTest {
     when(routineCreationWriter.save(any(), any(), any(), eq(null), anyInt()))
       .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), null));
 
-    RoutineResponse response = routineService.create(GUARDIAN, REQUEST, "key-1");
+    RoutineResponse response = routineCreateService.create(GUARDIAN, REQUEST, "key-1");
 
     assertThat(response.credit()).isNull();
   }
@@ -330,7 +330,7 @@ class RoutineServiceCreditTest {
     when(routineCreationWriter.save(any(), any(), any(), any(), anyInt()))
       .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), null));
 
-    routineService.create(GUARDIAN, REQUEST, "  ");
+    routineCreateService.create(GUARDIAN, REQUEST, "  ");
 
     assertThat(key.getValue()).isNotBlank().hasSize(36);
   }
@@ -345,7 +345,7 @@ class RoutineServiceCreditTest {
     when(routineCreationWriter.save(any(), any(), any(), any(), anyInt()))
       .thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), null));
 
-    routineService.create(GUARDIAN, REQUEST, "key-1");
+    routineCreateService.create(GUARDIAN, REQUEST, "key-1");
 
     InOrder order = inOrder(routineRequestCooldownGuard, routineQuotaGuard, aiDailyBudgetGuard,
       profileAccessGuard, creditReservationService, routineAiPipeline);
@@ -362,7 +362,7 @@ class RoutineServiceCreditTest {
   void create_budgetReached_doesNotReserve() {
     doThrow(new CustomException(ErrorCode.AI_DAILY_BUDGET_EXCEEDED)).when(aiDailyBudgetGuard).guard();
 
-    assertThatThrownBy(() -> routineService.create(GUARDIAN, REQUEST, "key-1"))
+    assertThatThrownBy(() -> routineCreateService.create(GUARDIAN, REQUEST, "key-1"))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.AI_DAILY_BUDGET_EXCEEDED);
     // 끝난 키 선조회(읽기)는 한도 검사 앞이라 있다. 예약·반환은 없어야 한다.
     verify(creditReservationService, never()).reserve(anyString(), any(), anyString(), anyBoolean());
@@ -379,7 +379,7 @@ class RoutineServiceCreditTest {
     doThrow(new CustomException(ErrorCode.AI_CREDIT_INSUFFICIENT))
       .when(creditQueryService).requireCanStartRoutine("member-1");
 
-    assertThatThrownBy(() -> routineService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("학교 가기")))
+    assertThatThrownBy(() -> routineCreateService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("학교 가기")))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.AI_CREDIT_INSUFFICIENT);
     verifyNoInteractions(routineAiPipeline);
   }
@@ -392,7 +392,7 @@ class RoutineServiceCreditTest {
     when(routineAiPipeline.generateQuestion(any(), any(), any()))
       .thenReturn(new RoutineAiPipeline.RoutineQuestionResult(List.of()));
 
-    routineService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("학교 가기"));
+    routineCreateService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("학교 가기"));
 
     verify(creditQueryService).requireCanStartRoutine("member-1");
     verify(routineAiPipeline).generateQuestion(any(), any(), any());

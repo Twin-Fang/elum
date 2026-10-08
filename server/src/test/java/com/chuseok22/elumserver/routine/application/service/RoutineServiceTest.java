@@ -124,6 +124,18 @@ class RoutineServiceTest {
   @InjectMocks
   private RoutineService routineService;
 
+  @InjectMocks
+
+  private RoutineCreateService routineCreateService;
+
+  @InjectMocks
+
+  private RoutineProgressService routineProgressService;
+
+  @InjectMocks
+
+  private RoutineQueryService routineQueryService;
+
   @BeforeEach
   void creditDisabledByDefault() {
     // 크레딧이 꺼져 있을 때의 기존 동작을 본다. 켜짐은 RoutineServiceCreditTest 가 본다 (#407).
@@ -155,7 +167,7 @@ class RoutineServiceTest {
       new RoutineImageStorage.ImageContent(new byte[]{1, 2, 3}, "image/png");
     when(routineImageStorage.read("data/routine-images/batch-1/1.png")).thenReturn(expected);
 
-    RoutineImageStorage.ImageContent result = routineService.getStepImage(GUARDIAN, "routine-1", "step-1");
+    RoutineImageStorage.ImageContent result = routineQueryService.getStepImage(GUARDIAN, "routine-1", "step-1");
 
     assertThat(result).isEqualTo(expected);
   }
@@ -171,7 +183,7 @@ class RoutineServiceTest {
     doThrow(new CustomException(ErrorCode.ROUTINE_ACCESS_DENIED))
       .when(profileAccessGuard).checkRoutine(Caller.guardian("member-2"), "profile-1", null, RoutineAction.VIEW);
 
-    assertThatThrownBy(() -> routineService.getStepImage(Caller.guardian("member-2"), "routine-1", "step-1"))
+    assertThatThrownBy(() -> routineQueryService.getStepImage(Caller.guardian("member-2"), "routine-1", "step-1"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_ACCESS_DENIED));
@@ -189,7 +201,7 @@ class RoutineServiceTest {
     routine.setSteps(List.of());
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    assertThatThrownBy(() -> routineService.getStepImage(GUARDIAN, "routine-1", "missing-step"))
+    assertThatThrownBy(() -> routineQueryService.getStepImage(GUARDIAN, "routine-1", "missing-step"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_STEP_NOT_FOUND));
@@ -210,7 +222,7 @@ class RoutineServiceTest {
     when(routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
       eq("profile-1"), any(), any(LocalDateTime.class))).thenReturn(List.of());
 
-    routineService.getPastRoutines(GUARDIAN);
+    routineQueryService.getPastRoutines(GUARDIAN);
 
     // 프로필을 계정에서 떼어낸 뒤 두 값이 달라졌다. 회원 ID를 넘기면 쿼리는 성공하지만
     // 언제나 0건이라, 모든 보호자에게 지난 일과가 빈 칸으로 보인다.
@@ -231,7 +243,7 @@ class RoutineServiceTest {
     when(routineRepository.findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
       eq("profile-1"), any(), any(LocalDateTime.class))).thenReturn(List.of());
 
-    routineService.getPastRoutines(GUARDIAN);
+    routineQueryService.getPastRoutines(GUARDIAN);
 
     // 오늘 만들다 둔 임시저장은 scheduledAt 이 오늘이라 내일이면 "오늘 이전" 에 걸린다.
     // 상태로 거르지 않으면 보내지도 않은 일과가 지난 일과에 뜬다 (#387). 오늘 일과가
@@ -263,7 +275,7 @@ class RoutineServiceTest {
       routineWithStatus("r-sent", profile, RoutineStatus.CONFIRMED),
       routineWithStatus("r-done", profile, RoutineStatus.COMPLETED)));
 
-    assertThat(routineService.getMyRoutines(elumi))
+    assertThat(routineQueryService.getMyRoutines(elumi))
       .extracting(RoutineResponse::id)
       .containsExactlyInAnyOrder("r-sent", "r-done");
   }
@@ -277,7 +289,7 @@ class RoutineServiceTest {
       routineWithStatus("r-draft", profile, RoutineStatus.PENDING_REVIEW),
       routineWithStatus("r-sent", profile, RoutineStatus.CONFIRMED)));
 
-    assertThat(routineService.getMyRoutines(GUARDIAN)).hasSize(2);
+    assertThat(routineQueryService.getMyRoutines(GUARDIAN)).hasSize(2);
   }
 
   @Test
@@ -285,7 +297,7 @@ class RoutineServiceTest {
   void getDraftRoutines_elumi_returnsEmptyWithoutQuery() {
     Caller elumi = Caller.elumi("member-1", "link-1");
 
-    assertThat(routineService.getDraftRoutines(elumi)).isEmpty();
+    assertThat(routineQueryService.getDraftRoutines(elumi)).isEmpty();
 
     verify(routineRepository, never()).findAllByProfileIdAndStatusOrderByCreatedAtDesc(anyString(), any());
   }
@@ -298,7 +310,7 @@ class RoutineServiceTest {
     when(routineRepository.findById("r-draft"))
       .thenReturn(Optional.of(routineWithStatus("r-draft", profile, RoutineStatus.PENDING_REVIEW)));
 
-    assertThatThrownBy(() -> routineService.getRoutine(elumi, "r-draft"))
+    assertThatThrownBy(() -> routineQueryService.getRoutine(elumi, "r-draft"))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ROUTINE_NOT_FOUND));
   }
@@ -312,8 +324,8 @@ class RoutineServiceTest {
     when(routineRepository.findById("r-draft"))
       .thenReturn(Optional.of(routineWithStatus("r-draft", profile, RoutineStatus.PENDING_REVIEW)));
 
-    assertThat(routineService.getRoutine(Caller.elumi("member-1", "link-1"), "r-sent").id()).isEqualTo("r-sent");
-    assertThat(routineService.getRoutine(GUARDIAN, "r-draft").id()).isEqualTo("r-draft");
+    assertThat(routineQueryService.getRoutine(Caller.elumi("member-1", "link-1"), "r-sent").id()).isEqualTo("r-sent");
+    assertThat(routineQueryService.getRoutine(GUARDIAN, "r-draft").id()).isEqualTo("r-draft");
   }
 
   @Test
@@ -327,7 +339,7 @@ class RoutineServiceTest {
     when(profileAccessGuard.profileFor(eq(GUARDIAN), any(ProfileAction.class))).thenReturn(profile);
 
     RoutineQuestionResponse response =
-      routineService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("내일 병원 가기"));
+      routineCreateService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("내일 병원 가기"));
 
     assertThat(response.required()).isFalse();
     assertThat(response.questions()).isEmpty();
@@ -357,7 +369,7 @@ class RoutineServiceTest {
     )).thenReturn(pipelineResult);
 
     RoutineQuestionResponse response =
-      routineService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("내일 비 오는 날 학교 가기"));
+      routineCreateService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("내일 비 오는 날 학교 가기"));
 
     assertThat(response.required()).isTrue();
     assertThat(response.questions()).hasSize(1);
@@ -373,7 +385,7 @@ class RoutineServiceTest {
   @Test
   @DisplayName("추천 일과를 조회하면 카탈로그에서 요청한 개수만큼 무작위로 반환한다")
   void getSuggestions_validCount_returnsRequestedCountFromCatalog() {
-    List<RoutineSuggestionResponse> result = routineService.getSuggestions(4);
+    List<RoutineSuggestionResponse> result = routineQueryService.getSuggestions(4);
 
     assertThat(result).hasSize(4);
     assertThat(result).isSubsetOf(RoutineSuggestionCatalog.ALL);
@@ -408,8 +420,8 @@ class RoutineServiceTest {
     Map<AppLocale, Map<String, String>> files = Map.of(AppLocale.KO, fakePhrases("ko"), AppLocale.JA, fakePhrases("ja"));
     RoutinePhrases.overrideStandardForTesting(new RoutinePhrases(locale -> files.getOrDefault(locale, Map.of())));
 
-    List<RoutineSuggestionResponse> japanese = CurrentLocale.callAs(AppLocale.JA, () -> routineService.getSuggestions(1));
-    List<RoutineSuggestionResponse> headerless = routineService.getSuggestions(1);
+    List<RoutineSuggestionResponse> japanese = CurrentLocale.callAs(AppLocale.JA, () -> routineQueryService.getSuggestions(1));
+    List<RoutineSuggestionResponse> headerless = routineQueryService.getSuggestions(1);
 
     assertThat(japanese).extracting("text").containsExactly("ja-text-01");
     assertThat(headerless).extracting("text").containsExactly("ko-text-01");
@@ -420,7 +432,7 @@ class RoutineServiceTest {
   void getSuggestions_countEqualsCatalogSize_returnsEntireCatalogWithoutDuplicates() {
     int catalogSize = RoutineSuggestionCatalog.ALL.size();
 
-    List<RoutineSuggestionResponse> result = routineService.getSuggestions(catalogSize);
+    List<RoutineSuggestionResponse> result = routineQueryService.getSuggestions(catalogSize);
 
     assertThat(result).hasSize(catalogSize);
     assertThat(result).isSubsetOf(RoutineSuggestionCatalog.ALL);
@@ -430,7 +442,7 @@ class RoutineServiceTest {
   @Test
   @DisplayName("count가 1 미만이면 INVALID_INPUT_VALUE를 던진다")
   void getSuggestions_countBelowMinimum_throwsInvalidInputValue() {
-    assertThatThrownBy(() -> routineService.getSuggestions(0))
+    assertThatThrownBy(() -> routineQueryService.getSuggestions(0))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
@@ -441,7 +453,7 @@ class RoutineServiceTest {
   void getSuggestions_countAboveCatalogSize_throwsInvalidInputValue() {
     int tooMany = RoutineSuggestionCatalog.ALL.size() + 1;
 
-    assertThatThrownBy(() -> routineService.getSuggestions(tooMany))
+    assertThatThrownBy(() -> routineQueryService.getSuggestions(tooMany))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.INVALID_INPUT_VALUE));
@@ -453,7 +465,7 @@ class RoutineServiceTest {
     doThrow(new CustomException(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT))
       .when(routineRequestCooldownGuard).guard("member-1");
 
-    assertThatThrownBy(() -> routineService.create(GUARDIAN, new RoutineCreateRequest(null, null, null, null, null), null))
+    assertThatThrownBy(() -> routineCreateService.create(GUARDIAN, new RoutineCreateRequest(null, null, null, null, null), null))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.ROUTINE_REQUEST_TOO_FREQUENT));
@@ -466,7 +478,7 @@ class RoutineServiceTest {
     doThrow(new CustomException(ErrorCode.AI_DAILY_BUDGET_EXCEEDED))
       .when(aiDailyBudgetGuard).guard();
 
-    assertThatThrownBy(() -> routineService.create(
+    assertThatThrownBy(() -> routineCreateService.create(
       GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
@@ -495,7 +507,7 @@ class RoutineServiceTest {
       .thenReturn(generationResult);
     when(routineCreationWriter.save(any(), any(), any(), any(), anyInt())).thenAnswer(invocation -> new RoutineCreationWriter.SavedRoutine(invocation.getArgument(2), null));
 
-    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
+    routineCreateService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
 
     verify(routineAiPipeline).generateForCreate(
       eq("내일 병원 가기"), eq("하늘이"), eq(Set.of()), eq(List.of()), eq(CharacterType.LULU), any(), any()
@@ -523,7 +535,7 @@ class RoutineServiceTest {
     ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
     when(routineCreationWriter.save(any(), any(), saved.capture(), any(), anyInt())).thenAnswer(invocation -> new RoutineCreationWriter.SavedRoutine(invocation.getArgument(2), null));
 
-    routineService.create(GUARDIAN, new RoutineCreateRequest(
+    routineCreateService.create(GUARDIAN, new RoutineCreateRequest(
       "내일 병원 가기 010-1234-5678", null, List.of("우산", "엄마 010-9999-8888"), null, null), null);
 
     verify(routineAiPipeline).generateForCreate(
@@ -542,7 +554,7 @@ class RoutineServiceTest {
     when(routineAiPipeline.generateQuestion(any(), any(), any()))
       .thenReturn(new RoutineAiPipeline.RoutineQuestionResult(List.of()));
 
-    routineService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("학교 가기 010-1234-5678"));
+    routineCreateService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("학교 가기 010-1234-5678"));
 
     verify(routineAiPipeline).generateQuestion(
       eq("하늘이"), eq(Set.of(SupportGoal.PREPARE_ITEMS)), eq("학교 가기 010-1234-5678"));
@@ -572,7 +584,7 @@ class RoutineServiceTest {
     when(routineCreationWriter.save(any(), any(), saved.capture(), any(), anyInt())).thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), null));
 
     LocalDateTime before = LocalDateTime.now();
-    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
+    routineCreateService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
 
     assertThat(saved.getValue().getScheduledAt())
       .as("null로 저장하면 DB 제약에서 터진다")
@@ -594,7 +606,7 @@ class RoutineServiceTest {
     when(routineCreationWriter.save(any(), any(), any(), any(), anyInt())).thenThrow(new RuntimeException("DB 제약 위반"));
 
     assertThatThrownBy(() ->
-      routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null))
+      routineCreateService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null))
       .isInstanceOf(RuntimeException.class);
 
     verify(routineImageStorage).deleteBatch("batch-1");
@@ -638,7 +650,7 @@ class RoutineServiceTest {
       eq("profile-1"), eq(List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED)), any(), any()
     )).thenReturn(List.of(routine));
 
-    List<RoutineResponse> result = routineService.getTodayRoutines(GUARDIAN);
+    List<RoutineResponse> result = routineQueryService.getTodayRoutines(GUARDIAN);
 
     assertThat(result).hasSize(1);
     assertThat(result.get(0).id()).isEqualTo("routine-1");
@@ -654,7 +666,7 @@ class RoutineServiceTest {
     Routine routine = confirmedRoutine(profile, 2);
     routine.setCreatedBy("guardian-a");
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
-    routineService.syncProgress(Caller.guardian("guardian-a"), "routine-1", List.of("step-1", "step-2"));
+    routineProgressService.syncProgress(Caller.guardian("guardian-a"), "routine-1", List.of("step-1", "step-2"));
 
     // 목록은 요청자가 아니라 이룸이 기준으로 조회하고, 진행률은 단계 완료에서만 계산한다.
     Caller guardianB = Caller.guardian("guardian-b");
@@ -662,7 +674,7 @@ class RoutineServiceTest {
     when(routineRepository.findTodayOrdered(eq("profile-1"), anyList(), any(), any()))
       .thenReturn(List.of(routine));
 
-    RoutineResponse listed = routineService.getTodayRoutines(guardianB).get(0);
+    RoutineResponse listed = routineQueryService.getTodayRoutines(guardianB).get(0);
 
     assertThat(listed.progressPercent()).isEqualTo(100);
     assertThat(listed.status()).isEqualTo("COMPLETED");
@@ -704,7 +716,7 @@ class RoutineServiceTest {
     Routine routine = confirmedRoutine(profile, 3);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    RoutineResponse response = routineService.syncProgress(GUARDIAN, "routine-1", List.of("step-1", "step-2"));
+    RoutineResponse response = routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-1", "step-2"));
 
     assertThat(routine.getSteps()).extracting(RoutineStep::getCompleted).containsExactly(true, true, false);
     assertThat(routine.getSteps().get(0).getCompletedAt()).isNotNull();
@@ -720,7 +732,7 @@ class RoutineServiceTest {
     Routine routine = confirmedRoutine(profileWithStars(0), 2);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.syncProgress(GUARDIAN, "routine-1", List.of("step-1", "step-2"));
+    routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-1", "step-2"));
 
     assertThat(routine.getStatus()).isEqualTo(RoutineStatus.COMPLETED);
     assertThat(routine.getCompletedAt()).isNotNull();
@@ -739,7 +751,7 @@ class RoutineServiceTest {
     routine.setCompletedAt(java.time.LocalDateTime.now());
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.syncProgress(GUARDIAN, "routine-1", List.of("step-1"));
+    routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-1"));
 
     assertThat(routine.getSteps()).extracting(RoutineStep::getCompleted).containsExactly(true, false, false);
     assertThat(routine.getSteps().get(1).getCompletedAt()).isNull();
@@ -755,8 +767,8 @@ class RoutineServiceTest {
     Routine routine = confirmedRoutine(profile, 2);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.syncProgress(GUARDIAN, "routine-1", List.of("step-1"));
-    routineService.syncProgress(GUARDIAN, "routine-1", List.of("step-1"));
+    routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-1"));
+    routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-1"));
 
     // 두 번째 요청은 달라진 것이 없어 쿼리도 없다
     verify(profileRepository, times(1)).addStars("profile-1", 1);
@@ -768,7 +780,7 @@ class RoutineServiceTest {
     Routine routine = confirmedRoutine(profileWithStars(0), 3);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.syncProgress(GUARDIAN, "routine-1", List.of("step-3"));
+    routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-3"));
 
     assertThat(routine.getSteps()).extracting(RoutineStep::getCompleted).containsExactly(false, false, true);
   }
@@ -781,7 +793,7 @@ class RoutineServiceTest {
     routine.getSteps().get(0).setCompleted(true);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.syncProgress(GUARDIAN, "routine-1", List.of());
+    routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of());
 
     // 0 아래로 막는 것은 쿼리가 한다 (ProfileStarsAtomicTest.addStarsClampsAtZero)
     verify(profileRepository).addStars("profile-1", -1);
@@ -794,7 +806,7 @@ class RoutineServiceTest {
     routine.setStatus(RoutineStatus.PENDING_REVIEW);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    assertThatThrownBy(() -> routineService.syncProgress(GUARDIAN, "routine-1", List.of("step-1")))
+    assertThatThrownBy(() -> routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-1")))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ROUTINE_INVALID_STATUS));
   }
@@ -805,7 +817,7 @@ class RoutineServiceTest {
     Routine routine = confirmedRoutine(profileWithStars(0), 1);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    assertThatThrownBy(() -> routineService.syncProgress(GUARDIAN, "routine-1", List.of("step-1", "ghost")))
+    assertThatThrownBy(() -> routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of("step-1", "ghost")))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ROUTINE_STEP_NOT_FOUND));
   }
@@ -1058,7 +1070,7 @@ class RoutineServiceTest {
     when(routineRepository.findTop30ByProfileIdAndRewardTextIsNotNullOrderByCreatedAtDesc("profile-1"))
       .thenReturn(newestFirst);
 
-    List<RecentRewardResponse> result = routineService.getRecentRewards(GUARDIAN);
+    List<RecentRewardResponse> result = routineQueryService.getRecentRewards(GUARDIAN);
 
     // 넷째까지 온다. 셋에서 끊으면 시안의 둘째 줄이 한 칸만 차서 2·1 로 선다 (#380).
     assertThat(result).extracting(RecentRewardResponse::rewardText)
@@ -1071,28 +1083,33 @@ class RoutineServiceTest {
     return routine;
   }
 
+  /// 권한 표 검사를 서비스 경계와 상관없이 한 표로 돌리려고 묶는다.
+  record Services(RoutineService edit, RoutineCreateService create, RoutineQueryService query,
+    RoutineProgressService progress) {
+  }
+
   static Stream<Arguments> profileScopedCalls() {
     return Stream.of(
-      Arguments.of("getMyRoutines", ProfileAction.VIEW, (Consumer<RoutineService>) s -> s.getMyRoutines(GUARDIAN)),
-      Arguments.of("getTodayRoutines", ProfileAction.VIEW, (Consumer<RoutineService>) s -> s.getTodayRoutines(GUARDIAN)),
-      Arguments.of("getPastRoutines", ProfileAction.VIEW, (Consumer<RoutineService>) s -> s.getPastRoutines(GUARDIAN)),
-      Arguments.of("getDraftRoutines", ProfileAction.VIEW, (Consumer<RoutineService>) s -> s.getDraftRoutines(GUARDIAN)),
-      Arguments.of("getRecentRewards", ProfileAction.VIEW, (Consumer<RoutineService>) s -> s.getRecentRewards(GUARDIAN)),
+      Arguments.of("getMyRoutines", ProfileAction.VIEW, (Consumer<Services>) s -> s.query().getMyRoutines(GUARDIAN)),
+      Arguments.of("getTodayRoutines", ProfileAction.VIEW, (Consumer<Services>) s -> s.query().getTodayRoutines(GUARDIAN)),
+      Arguments.of("getPastRoutines", ProfileAction.VIEW, (Consumer<Services>) s -> s.query().getPastRoutines(GUARDIAN)),
+      Arguments.of("getDraftRoutines", ProfileAction.VIEW, (Consumer<Services>) s -> s.query().getDraftRoutines(GUARDIAN)),
+      Arguments.of("getRecentRewards", ProfileAction.VIEW, (Consumer<Services>) s -> s.query().getRecentRewards(GUARDIAN)),
       Arguments.of("generateQuestion", ProfileAction.MANAGE,
-        (Consumer<RoutineService>) s -> s.generateQuestion(GUARDIAN, new RoutineQuestionRequest("내일 병원 가기"))),
-      Arguments.of("reorder", ProfileAction.MANAGE, (Consumer<RoutineService>) s -> s.reorder(GUARDIAN, List.of("r-a"))),
+        (Consumer<Services>) s -> s.create().generateQuestion(GUARDIAN, new RoutineQuestionRequest("내일 병원 가기"))),
+      Arguments.of("reorder", ProfileAction.MANAGE, (Consumer<Services>) s -> s.edit().reorder(GUARDIAN, List.of("r-a"))),
       Arguments.of("create", ProfileAction.MANAGE,
-        (Consumer<RoutineService>) s -> s.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null))
+        (Consumer<Services>) s -> s.create().create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null))
     );
   }
 
   @ParameterizedTest(name = "{0} → {1}")
   @MethodSource("profileScopedCalls")
   @DisplayName("이룸이 단위 API마다 권한 표의 알맞은 칸을 묻는다 — 보기는 VIEW, 만들고 바꾸는 것은 MANAGE")
-  void profileScopedCalls_askTheirPermission(String name, ProfileAction expected, Consumer<RoutineService> call) {
+  void profileScopedCalls_askTheirPermission(String name, ProfileAction expected, Consumer<Services> call) {
     when(profileAccessGuard.profileFor(any(), any())).thenThrow(new CustomException(ErrorCode.PROFILE_ACCESS_DENIED));
 
-    assertThatThrownBy(() -> call.accept(routineService))
+    assertThatThrownBy(() -> call.accept(new Services(routineService, routineCreateService, routineQueryService, routineProgressService)))
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PROFILE_ACCESS_DENIED);
     verify(profileAccessGuard).profileFor(GUARDIAN, expected);
@@ -1102,38 +1119,38 @@ class RoutineServiceTest {
 
   static Stream<Arguments> routineCalls() {
     return Stream.of(
-      Arguments.of("confirm", RoutineAction.EDIT, (Consumer<RoutineService>) s -> s.confirm(GUARDIAN, "routine-1")),
+      Arguments.of("confirm", RoutineAction.EDIT, (Consumer<Services>) s -> s.edit().confirm(GUARDIAN, "routine-1")),
       Arguments.of("updateReward", RoutineAction.EDIT,
-        (Consumer<RoutineService>) s -> s.updateReward(GUARDIAN, "routine-1", new RewardUpdateRequest("젤리", null))),
-      Arguments.of("delete", RoutineAction.EDIT, (Consumer<RoutineService>) s -> s.delete(GUARDIAN, "routine-1")),
+        (Consumer<Services>) s -> s.edit().updateReward(GUARDIAN, "routine-1", new RewardUpdateRequest("젤리", null))),
+      Arguments.of("delete", RoutineAction.EDIT, (Consumer<Services>) s -> s.edit().delete(GUARDIAN, "routine-1")),
       Arguments.of("updateStep", RoutineAction.EDIT,
-        (Consumer<RoutineService>) s -> s.updateStep(GUARDIAN, "routine-1", "step-1", new RoutineStepUpdateRequest("제목", null, null))),
-      Arguments.of("deleteStep", RoutineAction.EDIT, (Consumer<RoutineService>) s -> s.deleteStep(GUARDIAN, "routine-1", "step-1")),
+        (Consumer<Services>) s -> s.edit().updateStep(GUARDIAN, "routine-1", "step-1", new RoutineStepUpdateRequest("제목", null, null))),
+      Arguments.of("deleteStep", RoutineAction.EDIT, (Consumer<Services>) s -> s.edit().deleteStep(GUARDIAN, "routine-1", "step-1")),
       Arguments.of("addStep", RoutineAction.EDIT,
-        (Consumer<RoutineService>) s -> s.addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("제목", "설명", null))),
+        (Consumer<Services>) s -> s.edit().addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("제목", "설명", null))),
       Arguments.of("reorderSteps", RoutineAction.EDIT,
-        (Consumer<RoutineService>) s -> s.reorderSteps(GUARDIAN, "routine-1", List.of("step-2", "step-1"))),
-      Arguments.of("completeStep", RoutineAction.PROGRESS, (Consumer<RoutineService>) s -> s.completeStep(GUARDIAN, "routine-1", "step-1")),
-      Arguments.of("cancelStep", RoutineAction.PROGRESS, (Consumer<RoutineService>) s -> s.cancelStep(GUARDIAN, "routine-1", "step-1")),
+        (Consumer<Services>) s -> s.edit().reorderSteps(GUARDIAN, "routine-1", List.of("step-2", "step-1"))),
+      Arguments.of("completeStep", RoutineAction.PROGRESS, (Consumer<Services>) s -> s.progress().completeStep(GUARDIAN, "routine-1", "step-1")),
+      Arguments.of("cancelStep", RoutineAction.PROGRESS, (Consumer<Services>) s -> s.progress().cancelStep(GUARDIAN, "routine-1", "step-1")),
       Arguments.of("syncProgress", RoutineAction.PROGRESS,
-        (Consumer<RoutineService>) s -> s.syncProgress(GUARDIAN, "routine-1", List.of("step-1"))),
-      Arguments.of("getRoutine", RoutineAction.VIEW, (Consumer<RoutineService>) s -> s.getRoutine(GUARDIAN, "routine-1")),
-      Arguments.of("getStepImage", RoutineAction.VIEW, (Consumer<RoutineService>) s -> s.getStepImage(GUARDIAN, "routine-1", "step-1")),
-      Arguments.of("duplicate", RoutineAction.COPY, (Consumer<RoutineService>) s -> s.duplicate(GUARDIAN, "routine-1"))
+        (Consumer<Services>) s -> s.progress().syncProgress(GUARDIAN, "routine-1", List.of("step-1"))),
+      Arguments.of("getRoutine", RoutineAction.VIEW, (Consumer<Services>) s -> s.query().getRoutine(GUARDIAN, "routine-1")),
+      Arguments.of("getStepImage", RoutineAction.VIEW, (Consumer<Services>) s -> s.query().getStepImage(GUARDIAN, "routine-1", "step-1")),
+      Arguments.of("duplicate", RoutineAction.COPY, (Consumer<Services>) s -> s.edit().duplicate(GUARDIAN, "routine-1"))
     );
   }
 
   @ParameterizedTest(name = "{0} → {1}")
   @MethodSource("routineCalls")
   @DisplayName("E30 일과 API마다 권한 표의 알맞은 칸을 묻고, 거절되면 아무것도 바꾸지 않는다")
-  void e30_routineCalls_askTheirPermissionFirst(String name, RoutineAction expected, Consumer<RoutineService> call) {
+  void e30_routineCalls_askTheirPermissionFirst(String name, RoutineAction expected, Consumer<Services> call) {
     Routine routine = confirmedRoutine(profileWithStars(0), 2);
     routine.setCreatedBy("member-1");
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
     doThrow(new CustomException(ErrorCode.ROUTINE_NOT_CREATOR))
       .when(profileAccessGuard).checkRoutine(any(), any(), any(), any());
 
-    assertThatThrownBy(() -> call.accept(routineService))
+    assertThatThrownBy(() -> call.accept(new Services(routineService, routineCreateService, routineQueryService, routineProgressService)))
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_NOT_CREATOR);
     verify(profileAccessGuard).checkRoutine(GUARDIAN, "profile-1", "member-1", expected);
@@ -1147,7 +1164,7 @@ class RoutineServiceTest {
   void e11_routineRemovedByLeave_elumiGetsNotFound() {
     when(routineRepository.findById("routine-1")).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> routineService.completeStep(Caller.elumi("member-1", "l1"), "routine-1", "step-1"))
+    assertThatThrownBy(() -> routineProgressService.completeStep(Caller.elumi("member-1", "l1"), "routine-1", "step-1"))
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_NOT_FOUND);
     verifyNoInteractions(profileAccessGuard);
@@ -1194,7 +1211,7 @@ class RoutineServiceTest {
     stubCreatePipeline(profile);
     when(routineCreationWriter.save(any(), any(), any(), any(), anyInt())).thenAnswer(i -> new RoutineCreationWriter.SavedRoutine(i.getArgument(2), null));
 
-    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
+    routineCreateService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
 
     verify(routineCreationWriter).save(eq("member-1"), eq("profile-1"), any(Routine.class), any(), anyInt());
   }
@@ -1208,7 +1225,7 @@ class RoutineServiceTest {
       .thenThrow(new CustomException(ErrorCode.PROFILE_ACCESS_DENIED));
 
     assertThatThrownBy(() ->
-      routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null))
+      routineCreateService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PROFILE_ACCESS_DENIED);
     verify(routineImageStorage).deleteBatch("batch-1");
   }
@@ -1220,7 +1237,7 @@ class RoutineServiceTest {
     Routine routine = confirmedRoutine(profile, 2);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.completeStep(GUARDIAN, "routine-1", "step-1");
+    routineProgressService.completeStep(GUARDIAN, "routine-1", "step-1");
 
     verify(profileRepository).addStars("profile-1", 1);
     assertThat(profile.getTotalStars()).as("엔티티 값으로 더하면 동시 요청 하나가 덮어쓴다").isEqualTo(5);
@@ -1234,7 +1251,7 @@ class RoutineServiceTest {
     routine.getSteps().get(0).setCompleted(true);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.cancelStep(GUARDIAN, "routine-1", "step-1");
+    routineProgressService.cancelStep(GUARDIAN, "routine-1", "step-1");
 
     verify(profileRepository).addStars("profile-1", -1);
   }
@@ -1245,7 +1262,7 @@ class RoutineServiceTest {
     Routine routine = confirmedRoutine(profileWithStars(0), 2);
     when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
 
-    routineService.syncProgress(GUARDIAN, "routine-1", List.of());
+    routineProgressService.syncProgress(GUARDIAN, "routine-1", List.of());
 
     verify(profileRepository, never()).addStars(anyString(), anyInt());
   }
@@ -1321,7 +1338,7 @@ class RoutineServiceTest {
     when(routineCreationWriter.save(any(), any(), routine.capture(), any(), anyInt()))
       .thenAnswer(invocation -> new RoutineCreationWriter.SavedRoutine(invocation.getArgument(2), null));
 
-    routineService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
+    routineCreateService.create(GUARDIAN, new RoutineCreateRequest("내일 병원 가기", null, null, null, null), null);
 
     return routine.getValue();
   }

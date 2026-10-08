@@ -53,5 +53,6 @@ member WithdrawnMemberService -> link.DeviceLinkRepository
 routine AiDailyBudgetGuard -> ai.AiCallLogRepository
 routine RoutineAuthorResolver -> member.ProfileGuardianRepository
 routine RoutineCreationWriter -> member.ProfileRepository
+routine RoutineProgressService -> member.ProfileRepository
 routine RoutineQuotaGuard -> ai.AiCallLogRepository
 routine RoutineService -> member.ProfileRepository

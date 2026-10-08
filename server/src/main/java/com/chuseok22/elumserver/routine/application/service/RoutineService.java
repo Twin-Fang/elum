@@ -1,83 +1,52 @@
 package com.chuseok22.elumserver.routine.application.service;
 
-import com.chuseok22.elumserver.ai.core.AiCallContext;
-import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.FluxSeed;
+import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
-import com.chuseok22.elumserver.common.locale.CurrentLocale;
-import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
-import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
 import com.chuseok22.elumserver.credit.application.service.CreditReservation;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
-import com.chuseok22.elumserver.credit.application.service.CreditSettlement;
 import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.member.application.service.Caller;
-import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.RoutineAction;
-import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
+import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
-import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
-import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepUpdateRequest;
-import com.chuseok22.elumserver.routine.application.dto.response.RecentRewardResponse;
-import com.chuseok22.elumserver.routine.application.dto.response.RoutineQuestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
-import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
 import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RewardPreset;
-import com.chuseok22.elumserver.routine.infrastructure.constant.RoutineSuggestionCatalog;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
-import com.chuseok22.elumserver.routine.infrastructure.guard.RoutineRequestCooldownGuard;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
-import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+/// 보호자가 일과를 승인·편집·정렬·삭제하는 쓰기. 생성·조회·진행은 각 서비스가 맡는다.
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RoutineService {
-
-  /// 보상 설정 화면 입력칸 아래에 띄울 "최근에 정한 보상" 개수.
-  /// 시안(1082:4801)이 칩을 2·2 넷으로 그린다 — 셋이면 둘째 줄이 한 칸만 차 2·1 로 선다 (#380).
-  /// 그 이상은 고르는 부담만 늘어난다.
-  private static final int RECENT_REWARD_LIMIT = 4;
-
-  /// 보호자 홈 "지난 일과" 노출 개수. 전부 내려주면 오늘 할 일이 묻힌다.
-  private static final int PAST_ROUTINE_LIMIT = 10;
-
-  /// 보상 텍스트 최대 길이. 아동 화면에 한 줄로 들어가야 하고,
-  /// 길어질수록 글을 읽는 사용자에게도 부담이 된다.
-  private static final int REWARD_TEXT_MAX_LENGTH = 100;
 
   /// 한 일과에 담을 수 있는 카드 수 상한 (이슈 #199).
   ///
@@ -89,202 +58,17 @@ public class RoutineService {
   /// 아니다 — 지우면 자리가 다시 나서 추가·삭제를 되풀이할 수 있다. 그림 횟수는
   /// {@link RoutineStepImageFiller}가 따로 묶는다 (#368).
   private static final int STEP_MAX_COUNT = 10;
+
   /// 카드 추가 응답 imageSkippedReason — 이룸이의 그림 방식이 직접 사진이라 AI 그림을 만들지 않았다(#457).
   static final String IMAGE_SKIPPED_PHOTO_ONLY = "IMAGE_STYLE_PHOTO_ONLY";
 
-  /// 멱등 키 최대 길이 — ai_credit_job.request_key 가 varchar(255) 다. 넘으면 저장에서 터지기 전에 400.
-  private static final int IDEMPOTENCY_KEY_MAX_LENGTH = 255;
-  /// 반환 사유 최대 길이 — ai_credit_job.fail_reason 이 varchar(500) 다.
-  private static final int RELEASE_REASON_MAX_LENGTH = 200;
-
   private final RoutineRepository routineRepository;
   private final ProfileRepository profileRepository;
-  private final RoutineAiPipeline routineAiPipeline;
-  private final RoutineImageStorage routineImageStorage;
-  private final RoutineRequestCooldownGuard routineRequestCooldownGuard;
-  private final RoutineQuotaGuard routineQuotaGuard;
-  private final AiDailyBudgetGuard aiDailyBudgetGuard;
   private final RoutineStepImageFiller routineStepImageFiller;
   private final ProfileAccessGuard profileAccessGuard;
-  private final RoutineCreationWriter routineCreationWriter;
   private final RoutineStepRepository routineStepRepository;
   private final CreditReservationService creditReservationService;
-  private final CreditQueryService creditQueryService;
   private final PictogramPicker pictogramPicker;
-  private final EnabledLocales enabledLocales;
-
-  // 질문 생성은 실패해도 항상 200을 반환한다(fail-open, RoutineAiPipeline.generateQuestion 참고).
-  // Gemini 호출(수 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 create()와 동일하게
-  // 클래스 레벨 readOnly 트랜잭션을 중단시킨다.
-  @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public RoutineQuestionResponse generateQuestion(Caller caller, RoutineQuestionRequest request) {
-    Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
-    // 질문은 차감이 없지만 곧 일과 생성으로 이어진다. 잔액이 모자라면 여기서 막는다(스펙 §3) — 아래 AI 실패
-    // 대체(fail-open)와 달리 이 거절은 403 으로 그대로 나간다. 목표와 무관하게 본다: 질문을 건너뛰는 목표여도
-    // 다음 단계인 카드 만들기에서 같은 이유로 막힌다.
-    creditQueryService.requireCanStartRoutine(caller.memberId());
-
-    Set<SupportGoal> goals = profile.getSupportGoals();
-    boolean needsQuestion = goals.contains(SupportGoal.PREPARE_ITEMS) || goals.contains(SupportGoal.PREPARE_NEW);
-    if (!needsQuestion) {
-      return new RoutineQuestionResponse(false, List.of());
-    }
-
-    // AI 호출 로그에 요청 회원을 연결한다. finally에서 반드시 비워 스레드 재사용 시
-    // 다른 회원에게 새어 들어가지 않게 한다.
-    AiCallContext.setMemberId(caller.memberId());
-    try {
-      // 입력 글을 가공하지 않고 넘긴다 — AI DLP(로컬 LLM 마스킹)는 해커톤 POC 라 쓰지 않는다 (#377).
-      RoutineAiPipeline.RoutineQuestionResult result =
-        routineAiPipeline.generateQuestion(profile.getNickname(), goals, request.rawInputText());
-      List<RoutineQuestionResponse.QuestionItem> questions = result.questions().stream()
-        .map(item -> new RoutineQuestionResponse.QuestionItem(item.question(), toOptionItems(item.options())))
-        .toList();
-      return new RoutineQuestionResponse(true, questions);
-    } finally {
-      AiCallContext.clear();
-    }
-  }
-
-  private List<RoutineQuestionResponse.QuestionItem.OptionItem> toOptionItems(
-    List<RoutineAiPipeline.RoutineQuestionResult.QuestionResultItem.OptionResult> options
-  ) {
-    return options.stream()
-      .map(option -> new RoutineQuestionResponse.QuestionItem.OptionItem(option.emoji(), option.label()))
-      .toList();
-  }
-
-  // Gemini 호출(수십 초 소요 가능) 동안 DB 커넥션을 점유하지 않도록 클래스 레벨
-  // readOnly 트랜잭션을 이 메서드에서만 명시적으로 중단시킨다. routine은 신규 엔티티라
-  // 지연 로딩 걱정이 없으므로 안전하다.
-  //
-  // 크레딧 (#407): 프로필 확인 뒤 예약 → AI → 저장 트랜잭션에서 정산, 실패하면 반환.
-  // 비용 상한까지 모든 거절을 예약 앞에 둔다 — 거절될 요청이 예약·원장을 남기지 않게.
-  @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public RoutineResponse create(Caller caller, RoutineCreateRequest request, String idempotencyKey) {
-    String requestKey = requestKeyOf(idempotencyKey);
-    // 같은 키가 이미 끝났으면 쿨다운·한도·예산보다 먼저 돌려준다. 응답을 놓친 재전송은 새 생성이 아니다 —
-    // 한도를 막 채운 요청이나 30초 안의 재전송이 막히면 이미 청구된 일과를 받을 길이 없다.
-    // 키가 없으면(구버전 앱) 서버가 방금 만든 키라 찾을 것이 없다.
-    if (idempotencyKey != null && !idempotencyKey.isBlank()) {
-      Optional<String> settledRoutineId = creditReservationService.findSettledRoutineId(caller.memberId(), requestKey);
-      if (settledRoutineId.isPresent()) {
-        log.info("같은 멱등 키의 일과를 돌려준다(한도 검사 전, AI 재호출 없음): memberId={}, routineId={}",
-          caller.memberId(), settledRoutineId.get());
-        return routineCreationWriter.loadSaved(caller, settledRoutineId.get());
-      }
-    }
-
-    routineRequestCooldownGuard.guard(caller.memberId());
-    // 쿨다운이 몰아치기를 막고, 여기서 오늘·이번 주에 얼마나 썼는지를 본다(크레딧이 켜져 있으면 보유 수만).
-    routineQuotaGuard.guard(caller.memberId());
-    // 계정과 무관하게 서비스 전체가 오늘 쓴 비용을 본다 (#368). 셋 다 AI 를 부르기 전이라
-    // 거절해도 비용이 0 이다.
-    aiDailyBudgetGuard.guard();
-
-    Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
-
-    // 같은 키로 다시 오면(앱의 "다시 하기"·응답 유실 재전송) 이미 끝난 일과를 돌려주고 AI 를 다시 부르지 않는다.
-    // 키가 없으면(구버전 앱) 요청마다 새 키 — 멱등은 없지만 크레딧은 똑같이 센다.
-    CreditReservation reservation = creditReservationService.reserve(
-      caller.memberId(), CreditJobKind.ROUTINE_CREATE, requestKey, true);
-    if (reservation.outcome() == CreditReservation.Outcome.ALREADY_SETTLED) {
-      // 선조회와 예약 사이에 같은 키가 끝난 경우다(동시 재전송).
-      log.info("같은 멱등 키의 일과를 돌려준다(AI 재호출 없음): memberId={}, routineId={}",
-        caller.memberId(), reservation.routineId());
-      return routineCreationWriter.loadSaved(caller, reservation.routineId());
-    }
-    String creditJobId = reservation.isReserved() ? reservation.jobId() : null;
-
-    // AI 호출 로그에 요청 회원을 연결한다 (텍스트·이미지 병렬 생성까지 전파).
-    // 입력 글과 답변은 가공하지 않고 넘긴다. 예전의 AI DLP(로컬 LLM 마스킹)는 해커톤 POC 였고
-    // 실패하면 원문을 그대로 넘기는 fail-open 이라 보장도 아니면서 호출마다 수 초가 걸렸다 (#377).
-    List<String> answers = request.answers() == null ? List.of() : request.answers();
-    RoutineAiPipeline.RoutineGenerationResult generation;
-    AiCallContext.setMemberId(caller.memberId());
-    // 호출 기록에 작업 id 를 달아 작업 하나의 실제 USD 를 대조한다. 그림 가상 스레드에도 전파된다.
-    AiCallContext.setCreditJobId(creditJobId);
-    try {
-      generation = routineAiPipeline.generateForCreate(
-        request.rawInputText(), profile.getNickname(), profile.getSupportGoals(), answers,
-        profile.getCharacter(), profile.getImageStyle(), profile.getId()
-      );
-    } catch (RuntimeException e) {
-      // 만들지 못했으면 청구하지 않는다 — 예약을 돌려준다.
-      releaseCredit(creditJobId, "AI 생성 실패", e);
-      throw e;
-    } finally {
-      AiCallContext.clear();
-    }
-
-    // 이룸이·만든 사람·순서 번호는 저장기가 이룸이 행을 잠근 뒤 채운다 (E17).
-    Routine routine = new Routine();
-    // 일과의 콘텐츠 언어 - 만든 요청의 화면 언어를 켜진 언어 목록에 비춰 정한다 (다국어 #526). 보호자가 고르지 않는다.
-    // 헤더가 없는 옛 앱은 KO 라 지금과 같다. 필터가 심은 값이라 요청 스레드에서만 읽는다.
-    routine.setLanguage(enabledLocales.resolveContentLocale(CurrentLocale.get()));
-    routine.setRawInputText(request.rawInputText());
-    // 가공하지 않으므로 원문과 같다. 컬럼을 없애는 것은 마이그레이션이 필요해 따로 한다 (#377).
-    routine.setSanitizedInputText(request.rawInputText());
-    routine.setTitle(generation.title());
-    // scheduledAt은 비워서 보낼 수 있다. DB는 NOT NULL이므로 **서버가 채운다** —
-    // 클라이언트도 지금 시각을 그대로 넣고 있었다(오늘 목록에 떠야 하므로). 값을 요구하면
-    // 빠뜨린 호출 하나가 AI를 다 태운 뒤 DB에서 터진다 (이슈 #215).
-    routine.setScheduledAt(
-      request.scheduledAt() != null ? request.scheduledAt() : LocalDateTime.now()
-    );
-    routine.setStatus(RoutineStatus.PENDING_REVIEW);
-    // 보상은 선택 항목이다. 보호자가 건너뛰면 null로 남고 이룸이 화면에서 보상 UI를 띄우지 않는다.
-    routine.setRewardText(trimReward(request.rewardText()));
-    routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
-    routine.setSteps(toStepEntities(routine, generation.steps()));
-
-    // 청구할 그림 수 = 카드에 실제로 붙은 그림. 실패해 비어 있는 카드는 세지 않는다.
-    int imageCount = (int) routine.getSteps().stream().filter(step -> step.getImagePath() != null).count();
-
-    // 이미지는 여기 오기 전에 이미 디스크에 쓰였다. 저장이 실패하면 — 그사이 이 보호자가 나가 거절된
-    // 경우(E17)를 포함해 — 아무도 참조하지 않는 파일이 남으므로 방금 만든 것만 되돌린다 (이슈 #215).
-    // 정산은 저장과 같은 트랜잭션이라 함께 되돌아간다. 예약은 따로 돌려준다.
-    RoutineCreationWriter.SavedRoutine saved;
-    try {
-      saved = routineCreationWriter.save(caller.memberId(), profile.getId(), routine, creditJobId, imageCount);
-    } catch (RuntimeException e) {
-      routineImageStorage.deleteBatch(generation.batchId());
-      releaseCredit(creditJobId, "일과 저장 실패", e);
-      throw e;
-    }
-    RoutineResponse response = RoutineResponse.from(saved.routine());
-    CreditSettlement settlement = saved.settlement();
-    if (settlement == null) {
-      return response;
-    }
-    return response.withCredit(new RoutineResponse.CreditUsage(
-      saved.routine().getSteps().size(), imageCount, settlement.charged(), settlement.balanceAfter()));
-  }
-
-  /// 앱이 보낸 멱등 키. 없으면(구버전 앱) 서버가 만든다.
-  private static String requestKeyOf(String idempotencyKey) {
-    if (idempotencyKey == null || idempotencyKey.isBlank()) {
-      return UUID.randomUUID().toString();
-    }
-    String key = idempotencyKey.trim();
-    if (key.length() > IDEMPOTENCY_KEY_MAX_LENGTH) {
-      throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
-    }
-    return key;
-  }
-
-  /// 예약을 돌려준다. 크레딧이 꺼져 예약이 없으면 할 일이 없다. release 는 던지지 않는다 — 원래 실패를 가리지 않게.
-  private void releaseCredit(String creditJobId, String what, RuntimeException cause) {
-    if (creditJobId == null) {
-      return;
-    }
-    String detail = cause instanceof CustomException custom
-      ? custom.getErrorCode().name()
-      : cause.getClass().getSimpleName();
-    String reason = what + ": " + detail;
-    creditReservationService.release(creditJobId,
-      reason.length() > RELEASE_REASON_MAX_LENGTH ? reason.substring(0, RELEASE_REASON_MAX_LENGTH) : reason);
-  }
 
   @Transactional
   public RoutineResponse confirm(Caller caller, String routineId) {
@@ -305,28 +89,9 @@ public class RoutineService {
   @Transactional
   public RoutineResponse updateReward(Caller caller, String routineId, RewardUpdateRequest request) {
     Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
-    routine.setRewardText(trimReward(request.rewardText()));
+    routine.setRewardText(RoutineRules.trimReward(request.rewardText()));
     routine.setRewardPresetKey(RewardPreset.normalize(request.rewardPresetKey()));
     return RoutineResponse.from(routine);
-  }
-
-  /// 최근에 사용한 보상 최대 4개. 보상 설정 화면 입력칸 아래에 띄워 두 번째 일과부터는
-  /// 탭 한 번으로 끝나게 한다 — 온보딩을 늘리지 않고 입력 부담을 줄이는 방법이다.
-  public List<RecentRewardResponse> getRecentRewards(Caller caller) {
-    LinkedHashMap<String, RecentRewardResponse> unique = new LinkedHashMap<>();
-    for (Routine routine : routineRepository
-      .findTop30ByProfileIdAndRewardTextIsNotNullOrderByCreatedAtDesc(profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId())) {
-      String text = routine.getRewardText();
-      if (text == null || text.isBlank()) {
-        continue;
-      }
-      // 같은 보상이 여러 일과에 쓰였으면 가장 최근 것 하나만 남긴다.
-      unique.putIfAbsent(text, new RecentRewardResponse(text, routine.getRewardPresetKey()));
-      if (unique.size() >= RECENT_REWARD_LIMIT) {
-        break;
-      }
-    }
-    return List.copyOf(unique.values());
   }
 
   /// 지난 일과를 오늘 일과로 복제한다. **AI를 호출하지 않는다** —
@@ -392,192 +157,9 @@ public class RoutineService {
   private boolean isDeletable(Routine routine) {
     return switch (routine.getStatus()) {
       case PENDING_REVIEW -> true;
-      case CONFIRMED -> countCompleted(routine.getSteps()) == 0;
+      case CONFIRMED -> RoutineRules.countCompleted(routine.getSteps()) == 0;
       default -> false;
     };
-  }
-
-  /// 보호자 홈 "지난 일과" — 오늘 이전 것만 최신순 10개.
-  /// 전부 내려주면 목록이 계속 쌓여 오늘 할 일이 묻힌다.
-  ///
-  /// 프로필을 계정에서 떼어낸 뒤로 profileId와 memberId는 서로 다른 값이다.
-  /// 여기에 memberId를 그대로 넘기고 있어서 **어떤 일과도 걸리지 않았다** —
-  /// 모든 보호자에게 지난 일과가 빈 칸으로 보였다. 같은 실수를 오늘 일과에서
-  /// 한 번 고쳤는데(getTodayRoutines) 이곳이 함께 고쳐지지 않았다.
-  ///
-  /// 보낸 일과(CONFIRMED·COMPLETED)만 준다 — 오늘 일과와 같은 기준이다 (#353).
-  /// 상태를 거르지 않으면 오늘 만들다 둔 임시저장이 내일 지난 일과에 뜬다 (#387).
-  public List<RoutineResponse> getPastRoutines(Caller caller) {
-    return routineRepository
-      .findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
-        profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId(),
-        List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED),
-        LocalDate.now().atStartOfDay())
-      .stream()
-      .limit(PAST_ROUTINE_LIMIT)
-      .map(RoutineResponse::from)
-      .toList();
-  }
-
-  /// 보호자 홈 "임시저장" — 카드는 만들었지만 아직 아이에게 보내지 않은 일과.
-  public List<RoutineResponse> getDraftRoutines(Caller caller) {
-    // 임시저장은 전부 승인 전이라 이룸이 토큰에는 줄 것이 없다 (#356).
-    if (caller.isElumi()) {
-      return List.of();
-    }
-    return routineRepository
-      .findAllByProfileIdAndStatusOrderByCreatedAtDesc(profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId(), RoutineStatus.PENDING_REVIEW)
-      .stream()
-      .map(RoutineResponse::from)
-      .toList();
-  }
-
-  /// 보상 텍스트 정리. 공백만 남으면 없는 것으로 본다.
-  /// 길이는 화면에서 막지만 서버도 잘라둔다 — 클라이언트만 믿지 않는다.
-  private String trimReward(String text) {
-    if (text == null) {
-      return null;
-    }
-    String trimmed = text.trim();
-    if (trimmed.isEmpty()) {
-      return null;
-    }
-    return trimmed.length() > REWARD_TEXT_MAX_LENGTH
-      ? trimmed.substring(0, REWARD_TEXT_MAX_LENGTH)
-      : trimmed;
-  }
-
-  @Transactional
-  public RoutineResponse completeStep(Caller caller, String routineId, String stepId) {
-    Routine routine = getRoutineFor(caller, routineId, RoutineAction.PROGRESS);
-    if (routine.getStatus() != RoutineStatus.CONFIRMED) {
-      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
-    }
-
-    List<RoutineStep> steps = routine.getSteps();
-    RoutineStep targetStep = steps.stream()
-      .filter(step -> step.getId().equals(stepId))
-      .findFirst()
-      .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
-
-    if (Boolean.TRUE.equals(targetStep.getCompleted())) {
-      throw new CustomException(ErrorCode.ROUTINE_STEP_ALREADY_COMPLETED);
-    }
-
-    boolean hasIncompletePriorStep = steps.stream()
-      .filter(step -> step.getStepOrder() < targetStep.getStepOrder())
-      .anyMatch(step -> !Boolean.TRUE.equals(step.getCompleted()));
-    if (hasIncompletePriorStep) {
-      throw new CustomException(ErrorCode.ROUTINE_STEP_ORDER_VIOLATION);
-    }
-
-    LocalDateTime now = LocalDateTime.now();
-    targetStep.setCompleted(true);
-    targetStep.setCompletedAt(now);
-    // 별은 쿼리로 더한다 — 두 기기가 동시에 체크해도 하나가 사라지지 않는다 (E25).
-    profileRepository.addStars(routine.getProfile().getId(), 1);
-
-    boolean allCompleted = steps.stream().allMatch(step -> Boolean.TRUE.equals(step.getCompleted()));
-    if (allCompleted) {
-      routine.setStatus(RoutineStatus.COMPLETED);
-      routine.setCompletedAt(now);
-    }
-
-    return RoutineResponse.from(routine);
-  }
-
-  @Transactional
-  public RoutineResponse cancelStep(Caller caller, String routineId, String stepId) {
-    Routine routine = getRoutineFor(caller, routineId, RoutineAction.PROGRESS);
-    if (routine.getStatus() != RoutineStatus.CONFIRMED && routine.getStatus() != RoutineStatus.COMPLETED) {
-      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
-    }
-
-    List<RoutineStep> steps = routine.getSteps();
-    RoutineStep targetStep = steps.stream()
-      .filter(step -> step.getId().equals(stepId))
-      .findFirst()
-      .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
-
-    if (!Boolean.TRUE.equals(targetStep.getCompleted())) {
-      throw new CustomException(ErrorCode.ROUTINE_STEP_NOT_COMPLETED);
-    }
-
-    boolean hasLaterCompletedStep = steps.stream()
-      .filter(step -> step.getStepOrder() > targetStep.getStepOrder())
-      .anyMatch(step -> Boolean.TRUE.equals(step.getCompleted()));
-    if (hasLaterCompletedStep) {
-      throw new CustomException(ErrorCode.ROUTINE_STEP_CANCEL_ORDER_VIOLATION);
-    }
-
-    targetStep.setCompleted(false);
-    targetStep.setCompletedAt(null);
-    profileRepository.addStars(routine.getProfile().getId(), -1);
-
-    if (routine.getStatus() == RoutineStatus.COMPLETED) {
-      routine.setStatus(RoutineStatus.CONFIRMED);
-      routine.setCompletedAt(null);
-    }
-
-    return RoutineResponse.from(routine);
-  }
-
-  // 오프라인 퍼스트 클라이언트가 "이 일과의 완료 집합은 이것이다"를 통째로 보낸다.
-  // 단계별 complete/cancel과 달리 **순서를 검사하지 않고** 최종 상태로 맞춘다 —
-  // 오프라인 재전송에서 요청 하나가 거부돼 뒤가 연쇄로 무너지는 문제(이슈 #139)를
-  // 구조적으로 없애기 위함. 별은 완료 수의 차이만큼만 움직여 같은 요청을 여러 번
-  // 보내도 결과가 같다(멱등).
-  @Transactional
-  public RoutineResponse syncProgress(Caller caller, String routineId, List<String> completedStepIds) {
-    Routine routine = getRoutineFor(caller, routineId, RoutineAction.PROGRESS);
-    if (routine.getStatus() != RoutineStatus.CONFIRMED && routine.getStatus() != RoutineStatus.COMPLETED) {
-      throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
-    }
-
-    List<RoutineStep> steps = routine.getSteps();
-    Set<String> target = new HashSet<>(completedStepIds);
-    Set<String> known = steps.stream().map(RoutineStep::getId).collect(Collectors.toSet());
-    if (!known.containsAll(target)) {
-      throw new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND);
-    }
-
-    LocalDateTime now = LocalDateTime.now();
-    int before = countCompleted(steps);
-    for (RoutineStep step : steps) {
-      boolean shouldComplete = target.contains(step.getId());
-      boolean isCompleted = Boolean.TRUE.equals(step.getCompleted());
-      if (shouldComplete && !isCompleted) {
-        step.setCompleted(true);
-        step.setCompletedAt(now);
-      } else if (!shouldComplete && isCompleted) {
-        step.setCompleted(false);
-        step.setCompletedAt(null);
-      }
-      // 이미 완료였고 여전히 완료면 completedAt을 건드리지 않는다 — 처음 완료한 시각이 기록이다.
-    }
-    int after = countCompleted(steps);
-
-    // 완료 수의 차이만큼만 움직인다(멱등). 변화가 없으면 쿼리도 보내지 않는다.
-    if (after != before) {
-      profileRepository.addStars(routine.getProfile().getId(), after - before);
-    }
-
-    boolean allCompleted = !steps.isEmpty() && after == steps.size();
-    if (allCompleted) {
-      if (routine.getStatus() != RoutineStatus.COMPLETED) {
-        routine.setStatus(RoutineStatus.COMPLETED);
-        routine.setCompletedAt(now);
-      }
-    } else {
-      routine.setStatus(RoutineStatus.CONFIRMED);
-      routine.setCompletedAt(null);
-    }
-
-    return RoutineResponse.from(routine);
-  }
-
-  private int countCompleted(List<RoutineStep> steps) {
-    return (int) steps.stream().filter(step -> Boolean.TRUE.equals(step.getCompleted())).count();
   }
 
   @Transactional
@@ -806,62 +388,6 @@ public class RoutineService {
     }
   }
 
-  public RoutineResponse getRoutine(Caller caller, String routineId) {
-    return RoutineResponse.from(getRoutineFor(caller, routineId, RoutineAction.VIEW));
-  }
-
-  public List<RoutineResponse> getMyRoutines(Caller caller) {
-    return routineRepository.findAllByProfileId(profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId()).stream()
-      // 이룸이 토큰은 승인 전 일과를 받지 않는다 — 보호자 승인 후에만 이룸이에게 노출한다 (#356).
-      // 임시저장·설정이 쓰는 보호자 호출은 전체를 그대로 받는다.
-      .filter(r -> !caller.isElumi() || r.getStatus() != RoutineStatus.PENDING_REVIEW)
-      .map(RoutineResponse::from)
-      .toList();
-  }
-
-  // 아이 홈 화면 "오늘 할 일" 리스트용. 보호자 승인 전(PENDING_REVIEW) 일과는 제외하고,
-  // scheduledAt이 오늘(KST) 안에 있는 CONFIRMED/COMPLETED 일과만 예정 시각 순으로 반환한다.
-  public List<RoutineResponse> getTodayRoutines(Caller caller) {
-    LocalDate today = LocalDate.now();
-    LocalDateTime startOfDay = today.atStartOfDay();
-    LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
-    // 프로필을 계정에서 떼어낸 뒤로 profileId와 memberId가 다른 값이 됐는데, 여기만
-    // memberId를 그대로 넘기고 있었다. 그 상태로는 어떤 일과도 걸리지 않는다.
-    // 보이는 순서 → 예정 시각 차례로 줄 세운다.
-    List<Routine> routines = routineRepository.findTodayOrdered(
-      profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId(),
-      List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED), startOfDay, endOfDay
-    );
-    return routines.stream().map(RoutineResponse::from).toList();
-  }
-
-  // count는 프론트가 요청한 반환 개수다. 1 미만이거나 카탈로그 전체 개수를 초과하면
-  // 항상 이 범위 안에서만 뽑을 수 있으므로 잘못된 요청으로 간주해 거부한다.
-  public List<RoutineSuggestionResponse> getSuggestions(int count) {
-    // 요청 언어의 목록(다국어 #526). 한 벌이 갖춰지지 않은 언어는 en → ko 로 대체된다. 헤더 없으면 ALL(ko) 그대로다.
-    List<RoutineSuggestionResponse> catalog = RoutineSuggestionCatalog.forLocale(CurrentLocale.get());
-    if (count < 1 || count > catalog.size()) {
-      throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
-    }
-    List<RoutineSuggestionResponse> pool = new ArrayList<>(catalog);
-    Collections.shuffle(pool);
-    return List.copyOf(pool.subList(0, count));
-  }
-
-  public RoutineImageStorage.ImageContent getStepImage(Caller caller, String routineId, String stepId) {
-    Routine routine = getRoutineFor(caller, routineId, RoutineAction.VIEW);
-    RoutineStep targetStep = routine.getSteps().stream()
-      .filter(step -> step.getId().equals(stepId))
-      .findFirst()
-      .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
-    // 이미지 생성에 실패해 imagePath가 null인 단계는 이미지가 없다. Path.of(null) NPE 대신
-    // 404로 명확히 응답한다(클라이언트는 이미지 자리를 비워 렌더링).
-    if (targetStep.getImagePath() == null) {
-      throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND);
-    }
-    return routineImageStorage.read(targetStep.getImagePath());
-  }
-
   /**
    * 홈 목록의 순서를 통째로 다시 매긴다.
    *
@@ -971,36 +497,7 @@ public class RoutineService {
     }
   }
 
-  /**
-   * 일과 하나를 꺼내며 이 요청자가 이 동작을 해도 되는지 묻는다 (다중 보호자 명세 4-2).
-   *
-   * <p>판단은 {@link ProfileAccessGuard} 한 곳에서 한다. 예전에는 "프로필의 주인 = 요청자"를 여기서 직접
-   * 비교했는데, 보호자가 여럿이 되면 주인이 하나가 아니고 이룸이 휴대폰은 연결로 이룸이가 정해진다.
-   * 어떤 상태 검사보다 먼저 부른다 — 거절될 요청이 무엇도 바꾸지 않게.
-   */
   private Routine getRoutineFor(Caller caller, String routineId, RoutineAction action) {
-    Routine routine = routineRepository.findById(routineId)
-      .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_NOT_FOUND));
-    profileAccessGuard.checkRoutine(caller, routine.getProfile().getId(), routine.getCreatedBy(), action);
-    // 이룸이 토큰에는 승인 전 일과가 없는 것과 같다 — 존재 여부도 알리지 않는다 (#356).
-    if (caller.isElumi() && routine.getStatus() == RoutineStatus.PENDING_REVIEW) {
-      throw new CustomException(ErrorCode.ROUTINE_NOT_FOUND);
-    }
-    return routine;
-  }
-
-  private List<RoutineStep> toStepEntities(Routine routine, List<RoutineAiPipeline.GeneratedStep> steps) {
-    return steps.stream()
-      .map(step -> {
-        RoutineStep entity = new RoutineStep();
-        entity.setRoutine(routine);
-        entity.setStepOrder(step.order());
-        entity.setDescription(step.description());
-        entity.setTitle(step.title());
-        entity.setImagePath(step.imagePath());
-        entity.setPictogramId(step.pictogramId());
-        return entity;
-      })
-      .toList();
+    return RoutineRules.routineFor(routineRepository, profileAccessGuard, caller, routineId, action);
   }
 }

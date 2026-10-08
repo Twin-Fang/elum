@@ -15,6 +15,9 @@ import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggestionResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
+import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
+import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
+import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
@@ -45,6 +48,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class RoutineController implements RoutineControllerDocs {
 
   private final RoutineService routineService;
+  private final RoutineCreateService routineCreateService;
+  private final RoutineQueryService routineQueryService;
+  private final RoutineProgressService routineProgressService;
   private final RoutineStepPhotoService routineStepPhotoService;
   // 원문 가리기(#357)와 만든 사람 정보(#361)를 모든 일과 응답에 같은 방식으로 입힌다.
   private final RoutineAuthorResolver routineAuthorResolver;
@@ -60,12 +66,12 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestBody @Valid RoutineCreateRequest request
   ) {
     Caller caller = Caller.from(authentication, profileId);
-    RoutineResponse response = routineService.create(caller, request, idempotencyKey);
+    RoutineResponse response = routineCreateService.create(caller, request, idempotencyKey);
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
   }
 
   // rawInputText에 민감정보 원문이 포함될 수 있으므로 logParameters를 false로 둔다.
-  // AI 가 실패해도 200을 반환한다(RoutineService.generateQuestion 참고). 크레딧 부족만 403 이다 (#407).
+  // AI 가 실패해도 200을 반환한다(RoutineCreateService.generateQuestion 참고). 크레딧 부족만 403 이다 (#407).
   @LogMonitoring(logParameters = false, logResult = true, logExecutionTime = true)
   @PostMapping("/questions")
   public ResponseEntity<RoutineQuestionResponse> generateQuestion(
@@ -74,7 +80,7 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestBody @Valid RoutineQuestionRequest request
   ) {
     RoutineQuestionResponse response =
-      routineService.generateQuestion(Caller.from(authentication, profileId), request);
+      routineCreateService.generateQuestion(Caller.from(authentication, profileId), request);
     return ResponseEntity.ok(response);
   }
 
@@ -85,7 +91,7 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication, @PathVariable String routineId
   ) {
     Caller caller = Caller.from(authentication);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineService.getRoutine(caller, routineId)));
+    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getRoutine(caller, routineId)));
   }
 
   @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
@@ -95,7 +101,7 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
   ) {
     Caller caller = Caller.from(authentication, profileId);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineService.getMyRoutines(caller)));
+    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getMyRoutines(caller)));
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
@@ -106,7 +112,7 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
   ) {
     Caller caller = Caller.from(authentication, profileId);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineService.getTodayRoutines(caller)));
+    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getTodayRoutines(caller)));
   }
 
   @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
@@ -114,7 +120,7 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<List<RoutineSuggestionResponse>> getSuggestions(
     @RequestParam(defaultValue = "4") int count
   ) {
-    List<RoutineSuggestionResponse> responses = routineService.getSuggestions(count);
+    List<RoutineSuggestionResponse> responses = routineQueryService.getSuggestions(count);
     return ResponseEntity.ok(responses);
   }
 
@@ -124,7 +130,7 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
   ) {
     RoutineImageStorage.ImageContent content =
-      routineService.getStepImage(Caller.from(authentication), routineId, stepId);
+      routineQueryService.getStepImage(Caller.from(authentication), routineId, stepId);
     return ResponseEntity.ok()
       .contentType(MediaType.parseMediaType(content.contentType()))
       .body(content.bytes());
@@ -171,7 +177,7 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication,
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
   ) {
-    List<RecentRewardResponse> response = routineService.getRecentRewards(Caller.from(authentication, profileId));
+    List<RecentRewardResponse> response = routineQueryService.getRecentRewards(Caller.from(authentication, profileId));
     return ResponseEntity.ok(response);
   }
 
@@ -182,7 +188,7 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
   ) {
     Caller caller = Caller.from(authentication, profileId);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineService.getPastRoutines(caller)));
+    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getPastRoutines(caller)));
   }
 
   @LogMonitoring
@@ -192,7 +198,7 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId
   ) {
     Caller caller = Caller.from(authentication, profileId);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineService.getDraftRoutines(caller)));
+    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getDraftRoutines(caller)));
   }
 
   // AI를 호출하지 않는다. 같은 카드로 오늘 일과를 하나 더 만드는 것뿐이다.
@@ -233,7 +239,7 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
   ) {
     Caller caller = Caller.from(authentication);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineService.completeStep(caller, routineId, stepId)));
+    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineProgressService.completeStep(caller, routineId, stepId)));
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
@@ -243,7 +249,7 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
   ) {
     Caller caller = Caller.from(authentication);
-    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineService.cancelStep(caller, routineId, stepId)));
+    return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineProgressService.cancelStep(caller, routineId, stepId)));
   }
 
   // 오프라인 퍼스트 동기화 — 완료 집합을 통째로 받아 멱등 반영한다 (이슈 #140).
@@ -256,7 +262,7 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestBody RoutineProgressSyncRequest request
   ) {
     Caller caller = Caller.from(authentication);
-    RoutineResponse response = routineService.syncProgress(caller, routineId, request.completedStepIdsOrEmpty());
+    RoutineResponse response = routineProgressService.syncProgress(caller, routineId, request.completedStepIdsOrEmpty());
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
   }
 

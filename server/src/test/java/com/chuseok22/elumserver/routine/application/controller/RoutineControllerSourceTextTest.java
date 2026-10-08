@@ -12,6 +12,9 @@ import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardian
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
+import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
+import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
+import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import java.util.List;
@@ -33,7 +36,10 @@ class RoutineControllerSourceTextTest {
   private static final String FEEDBACK = "좀 더 짧게 해줘";
 
   private final RoutineService service = mock(RoutineService.class);
-  private final RoutineController controller = new RoutineController(service, mock(RoutineStepPhotoService.class),
+  private final RoutineCreateService createService = mock(RoutineCreateService.class);
+  private final RoutineQueryService queryService = mock(RoutineQueryService.class);
+  private final RoutineProgressService progressService = mock(RoutineProgressService.class);
+  private final RoutineController controller = new RoutineController(service, createService, queryService, progressService, mock(RoutineStepPhotoService.class),
     new RoutineAuthorResolver(mock(ProfileGuardianRepository.class)));
 
   private final Authentication elumi = elumiAuth();
@@ -74,11 +80,11 @@ class RoutineControllerSourceTextTest {
   @Test
   @DisplayName("이룸이 토큰: 단건·목록·오늘·지난·임시저장 조회에서 원문 계열이 빠진다")
   void elumiReadsAreStripped() {
-    when(service.getRoutine(any(), anyString())).thenReturn(routine());
-    when(service.getMyRoutines(any())).thenReturn(List.of(routine()));
-    when(service.getTodayRoutines(any())).thenReturn(List.of(routine()));
-    when(service.getPastRoutines(any())).thenReturn(List.of(routine()));
-    when(service.getDraftRoutines(any())).thenReturn(List.of(routine()));
+    when(queryService.getRoutine(any(), anyString())).thenReturn(routine());
+    when(queryService.getMyRoutines(any())).thenReturn(List.of(routine()));
+    when(queryService.getTodayRoutines(any())).thenReturn(List.of(routine()));
+    when(queryService.getPastRoutines(any())).thenReturn(List.of(routine()));
+    when(queryService.getDraftRoutines(any())).thenReturn(List.of(routine()));
 
     assertStripped(controller.getRoutine(elumi, "r1").getBody());
     controller.getMyRoutines(elumi, null).getBody().forEach(RoutineControllerSourceTextTest::assertStripped);
@@ -90,9 +96,9 @@ class RoutineControllerSourceTextTest {
   @Test
   @DisplayName("이룸이 토큰: 단계 완료·취소·진행 동기화 응답에서도 원문 계열이 빠진다")
   void elumiProgressWritesAreStripped() {
-    when(service.completeStep(any(), anyString(), anyString())).thenReturn(routine());
-    when(service.cancelStep(any(), anyString(), anyString())).thenReturn(routine());
-    when(service.syncProgress(any(), anyString(), any())).thenReturn(routine());
+    when(progressService.completeStep(any(), anyString(), anyString())).thenReturn(routine());
+    when(progressService.cancelStep(any(), anyString(), anyString())).thenReturn(routine());
+    when(progressService.syncProgress(any(), anyString(), any())).thenReturn(routine());
 
     assertStripped(controller.completeStep(elumi, "r1", "s1").getBody());
     assertStripped(controller.cancelStep(elumi, "r1", "s1").getBody());
@@ -102,9 +108,9 @@ class RoutineControllerSourceTextTest {
   @Test
   @DisplayName("보호자 토큰: 조회 응답은 그대로다")
   void guardianReadsAreUntouched() {
-    when(service.getRoutine(any(), anyString())).thenReturn(routine());
-    when(service.getMyRoutines(any())).thenReturn(List.of(routine()));
-    when(service.getTodayRoutines(any())).thenReturn(List.of(routine()));
+    when(queryService.getRoutine(any(), anyString())).thenReturn(routine());
+    when(queryService.getMyRoutines(any())).thenReturn(List.of(routine()));
+    when(queryService.getTodayRoutines(any())).thenReturn(List.of(routine()));
 
     assertKept(controller.getRoutine(guardian, "r1").getBody());
     controller.getMyRoutines(guardian, null).getBody().forEach(RoutineControllerSourceTextTest::assertKept);
@@ -114,11 +120,11 @@ class RoutineControllerSourceTextTest {
   @Test
   @DisplayName("다른 보호자가 만든 일과: 보호자 토큰이어도 원문 계열이 빠지고 제목·상태는 그대로다")
   void otherGuardiansRoutineIsStripped() {
-    when(service.getRoutine(any(), anyString())).thenReturn(routineBy("member-2"));
-    when(service.getMyRoutines(any())).thenReturn(List.of(routineBy("member-2")));
-    when(service.getTodayRoutines(any())).thenReturn(List.of(routineBy("member-2")));
-    when(service.getPastRoutines(any())).thenReturn(List.of(routineBy("member-2")));
-    when(service.getDraftRoutines(any())).thenReturn(List.of(routineBy("member-2")));
+    when(queryService.getRoutine(any(), anyString())).thenReturn(routineBy("member-2"));
+    when(queryService.getMyRoutines(any())).thenReturn(List.of(routineBy("member-2")));
+    when(queryService.getTodayRoutines(any())).thenReturn(List.of(routineBy("member-2")));
+    when(queryService.getPastRoutines(any())).thenReturn(List.of(routineBy("member-2")));
+    when(queryService.getDraftRoutines(any())).thenReturn(List.of(routineBy("member-2")));
 
     assertStripped(controller.getRoutine(guardian, "r1").getBody());
     controller.getMyRoutines(guardian, null).getBody().forEach(RoutineControllerSourceTextTest::assertStripped);
@@ -130,9 +136,9 @@ class RoutineControllerSourceTextTest {
   @Test
   @DisplayName("다른 보호자가 만든 일과: 단계 완료·취소·진행 동기화 응답에서도 원문 계열이 빠진다")
   void otherGuardiansProgressWritesAreStripped() {
-    when(service.completeStep(any(), anyString(), anyString())).thenReturn(routineBy("member-2"));
-    when(service.cancelStep(any(), anyString(), anyString())).thenReturn(routineBy("member-2"));
-    when(service.syncProgress(any(), anyString(), any())).thenReturn(routineBy("member-2"));
+    when(progressService.completeStep(any(), anyString(), anyString())).thenReturn(routineBy("member-2"));
+    when(progressService.cancelStep(any(), anyString(), anyString())).thenReturn(routineBy("member-2"));
+    when(progressService.syncProgress(any(), anyString(), any())).thenReturn(routineBy("member-2"));
 
     assertStripped(controller.completeStep(guardian, "r1", "s1").getBody());
     assertStripped(controller.cancelStep(guardian, "r1", "s1").getBody());
@@ -142,8 +148,8 @@ class RoutineControllerSourceTextTest {
   @Test
   @DisplayName("만든 사람이 비어 있는 옛 일과: 연결된 보호자에게는 기존대로 보인다")
   void legacyRoutineWithoutCreatorStaysVisibleToGuardian() {
-    when(service.getRoutine(any(), anyString())).thenReturn(routineBy(null));
-    when(service.getMyRoutines(any())).thenReturn(List.of(routineBy(null)));
+    when(queryService.getRoutine(any(), anyString())).thenReturn(routineBy(null));
+    when(queryService.getMyRoutines(any())).thenReturn(List.of(routineBy(null)));
 
     assertKept(controller.getRoutine(guardian, "r1").getBody());
     controller.getMyRoutines(guardian, null).getBody().forEach(RoutineControllerSourceTextTest::assertKept);
@@ -152,7 +158,7 @@ class RoutineControllerSourceTextTest {
   @Test
   @DisplayName("만든 사람이 비어 있어도 이룸이 토큰에는 원문을 주지 않는다")
   void legacyRoutineWithoutCreatorIsStrippedForElumi() {
-    when(service.getRoutine(any(), anyString())).thenReturn(routineBy(null));
+    when(queryService.getRoutine(any(), anyString())).thenReturn(routineBy(null));
 
     assertStripped(controller.getRoutine(elumi, "r1").getBody());
   }

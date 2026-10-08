@@ -12,6 +12,9 @@ import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardian
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
+import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
+import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
+import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import java.util.List;
@@ -24,9 +27,12 @@ import org.springframework.security.core.Authentication;
 class RoutineControllerAuthorTest {
 
   private final RoutineService service = mock(RoutineService.class);
+  private final RoutineCreateService createService = mock(RoutineCreateService.class);
+  private final RoutineQueryService queryService = mock(RoutineQueryService.class);
+  private final RoutineProgressService progressService = mock(RoutineProgressService.class);
   private final ProfileGuardianRepository guardians = mock(ProfileGuardianRepository.class);
   private final RoutineController controller = new RoutineController(
-    service, mock(RoutineStepPhotoService.class), new RoutineAuthorResolver(guardians));
+    service, createService, queryService, progressService, mock(RoutineStepPhotoService.class), new RoutineAuthorResolver(guardians));
 
   private final Authentication guardian = new TestingAuthenticationToken("member-1", null);
 
@@ -54,9 +60,9 @@ class RoutineControllerAuthorTest {
   void everyRoutineResponseCarriesAuthor() {
     List<GuardianName> names = List.of(dad());
     when(guardians.findNamesByProfileIdAndMemberIdIn(anyString(), any())).thenReturn(names);
-    when(service.getRoutine(any(), anyString())).thenReturn(routineBy("member-2"));
-    when(service.getMyRoutines(any())).thenReturn(List.of(routineBy("member-2")));
-    when(service.create(any(), any(), any())).thenReturn(routineBy("member-1"));
+    when(queryService.getRoutine(any(), anyString())).thenReturn(routineBy("member-2"));
+    when(queryService.getMyRoutines(any())).thenReturn(List.of(routineBy("member-2")));
+    when(createService.create(any(), any(), any())).thenReturn(routineBy("member-1"));
 
     RoutineResponse one = controller.getRoutine(guardian, "r1").getBody();
     RoutineResponse listed = controller.getMyRoutines(guardian, null).getBody().get(0);
@@ -74,7 +80,7 @@ class RoutineControllerAuthorTest {
   void elumiGetsNoCreatorName() {
     TestingAuthenticationToken elumi = new TestingAuthenticationToken("member-1", null);
     elumi.setDetails(new AccessTokenDetails("link-1"));
-    when(service.getTodayRoutines(any())).thenReturn(List.of(routineBy("member-2")));
+    when(queryService.getTodayRoutines(any())).thenReturn(List.of(routineBy("member-2")));
 
     RoutineResponse r = controller.getTodayRoutines(elumi, null).getBody().get(0);
 
