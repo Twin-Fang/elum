@@ -118,7 +118,6 @@
   "onboardingGoalsDescription": "You can pick more than one",
   "onboardingImageStyleTitle": "How should the card\npictures be made?",
   "onboardingImageStyleDescription": "You can change this later in settings",
-  "onboardingImageStyleSkip": "Skip",
   "onboardingNameTitle": "What should we\ncall Elumi?",
   "onboardingNameDescription": "It doesn't have to be a real name",
   "onboardingNameHint": "Enter a name",
