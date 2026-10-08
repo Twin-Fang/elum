@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/domain/app_role.dart';
-import 'app_router.dart';
 import '../storage/local_storage.dart';
+import 'routes.dart';
 
 /// 지금 상태의 홈. 앱 시작과 뒤로가기 안전망([PopOrHome])이 같은 판단을 쓴다.
 String homeFor(ProviderContainer c) {

@@ -12,6 +12,7 @@ import 'package:elum/features/guardian/data/card_image_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:elum/app/dio_provider.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 카드 그림 디스크 캐시 (#462).
 ///

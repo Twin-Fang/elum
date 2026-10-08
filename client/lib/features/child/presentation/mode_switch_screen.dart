@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/current_l10n.dart';
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -15,6 +14,7 @@ import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/storage/local_storage.dart';
+import '../../../core/router/routes.dart';
 
 /// Figma `보호자_아이화면_전환`(309:2837).
 ///

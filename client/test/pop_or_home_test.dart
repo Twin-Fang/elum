@@ -1,4 +1,3 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/router/pop_or_home.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
@@ -7,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 뒤로가기 안전망. `go` 로 열린 화면은 돌아갈 화면이 없으므로 지금 상태의 홈으로 간다.
 void main() {

@@ -23,6 +23,7 @@ import 'helpers/device_viewport.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 보호자 홈 개편(이슈 #258)의 렌더 회귀 고정.
 ///

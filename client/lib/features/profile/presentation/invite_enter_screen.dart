@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -21,6 +20,7 @@ import '../data/profile_repository.dart';
 import '../domain/invite_problem.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
+import '../../../core/router/routes.dart';
 
 /// 입력 아래에 보이는 안내의 종류. 문구가 아니라 종류를 들고 있다가 그릴 때 푼다 — 실패 순간에
 /// 문구로 굳히면 언어가 바뀐 뒤에도 옛 언어로 남는다.

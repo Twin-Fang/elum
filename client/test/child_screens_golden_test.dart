@@ -24,6 +24,7 @@ import 'helpers/device_viewport.dart';
 import 'helpers/precache_images.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 아이 모드 화면 골든 (이슈 #69).
 ///

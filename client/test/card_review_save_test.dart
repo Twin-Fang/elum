@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 카드확인의 `저장하기` (이슈 #405).
 ///

@@ -1,8 +1,9 @@
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/guardian_lock_store.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/storage/shared_prefs_storage.dart';
 
 /// `clearAll()`은 개발자 도구의 "온보딩 초기화"가 쓰는 동작이다.
 ///

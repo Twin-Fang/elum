@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/features/guardian/data/routine_repository_impl.dart';
 
 /// 서버 실패 시 클라이언트가 **로컬 가짜 일과를 만들지 않는지** 고정한다.
 ///

@@ -15,7 +15,8 @@ const _skipPaths = <String, String>{
   'lib/features/auth/domain/consent_documents.dart': '약관 번들 기본값 — 하위 계획 4 소관',
   'lib/features/auth/domain/consent_body.dart': '약관 본문 파서의 한국어 규칙 — 하위 계획 4 소관',
   'lib/features/guardian/data/routine_repository.dart':
-      '로그·예외 문구와 로컬 마스킹 정규식뿐이다',
+      '로그·예외 문구뿐이다 (routine_repository_impl.dart 도 이 접두로 함께 빠진다)',
+  'lib/features/guardian/domain/local_dlp.dart': '로컬 마스킹 정규식의 유형 이름표뿐이다',
   'lib/features/guardian/data/demo_cards.dart': 'lib 어디서도 쓰지 않는 데모 카드(테스트만 참조)',
   'lib/core/assets/app_assets.dart': '@Deprecated 개발자 안내문뿐이다',
   'lib/features/auth/data/oauth_sdk.dart': '제공자 이름은 로그에만 쓴다(사용자에게 보이지 않는다)',

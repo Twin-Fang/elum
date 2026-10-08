@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/data/oauth_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 소셜 로그인 인증 테스트.
 ///

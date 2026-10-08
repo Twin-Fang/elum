@@ -1,7 +1,6 @@
 import 'package:elum/core/app_status/app_status_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/routine_progress_ring.dart';
@@ -29,8 +28,10 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 시스템 글자를 키운 보호자에게 홈·설정이 깨지지 않는다 (디자인 원칙 §7-2).
 ///

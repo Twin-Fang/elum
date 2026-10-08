@@ -1,8 +1,6 @@
 import 'package:elum/core/state/provider_retry.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/draft_routines_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 실패한 provider 를 저절로 다시 부르지 않는다 (이슈 #429).
 ///

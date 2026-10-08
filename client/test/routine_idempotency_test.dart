@@ -17,6 +17,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/features/guardian/data/routine_repository_impl.dart';
 
 /// 생성 요청 멱등 키 (#407 스펙 §3·§5).
 ///

@@ -1,12 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/aurora_background.dart';
@@ -20,6 +18,8 @@ import 'package:go_router/go_router.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/semantics_audit.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// Figma `보호자_새로운 일과 만들기`(238:1643) 정합 테스트.
 ///

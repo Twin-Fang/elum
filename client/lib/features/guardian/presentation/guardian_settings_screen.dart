@@ -8,7 +8,6 @@ import '../../../core/widgets/app_info_tile.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/widgets/show_failure.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_scaffold.dart';
@@ -23,6 +22,7 @@ import '../../profile/application/profile_session.dart';
 import 'widgets/ai_credit_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../member/application/member_providers.dart';
+import '../../../core/router/routes.dart';
 
 /// 보호자 설정 화면 (이슈 #181).
 ///

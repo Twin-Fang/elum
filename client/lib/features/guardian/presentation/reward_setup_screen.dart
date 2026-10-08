@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/current_l10n.dart';
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -18,11 +17,12 @@ import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/reward_preset.dart';
 import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
-import '../data/routine_repository.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/reward_chip.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../application/routine_providers.dart';
+import '../../../core/router/routes.dart';
 
 /// 최근 보상. 실패하면 빈 목록이라 화면이 칩 자리를 비운다.
 final recentRewardsProvider = FutureProvider.autoDispose<List<RecentReward>>(

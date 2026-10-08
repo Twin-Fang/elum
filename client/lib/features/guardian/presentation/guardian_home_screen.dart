@@ -10,7 +10,6 @@ import '../../ads/presentation/ad_banner_slot.dart';
 import '../../../core/config/ad_ids.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/character_badge.dart';
@@ -23,12 +22,13 @@ import '../../../shared/models/character.dart';
 import '../../profile/application/profile_session.dart';
 import '../application/home_coach_notifier.dart';
 import '../application/routine_notifier.dart';
-import '../data/routine_repository.dart';
 import 'widgets/create_routine_button.dart';
 import 'widgets/home_coach_mark.dart';
 import 'widgets/routine_summary_tile.dart';
 import 'widgets/today_routine_section.dart';
 import '../../member/application/member_providers.dart';
+import '../application/routine_providers.dart';
+import '../../../core/router/routes.dart';
 
 /// Figma `보호자_홈`(931:3896 기본 / 931:4179 밀림 / 931:4879 삭제 확인 · 이슈 #258).
 ///

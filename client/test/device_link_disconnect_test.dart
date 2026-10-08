@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error_code.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/fake_dio.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 이룸이 휴대폰 연결 끊기의 저장소 쪽 (#363 · 명세 §8-5).
 ///

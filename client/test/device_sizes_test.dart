@@ -16,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// **시안은 아이폰 한 기종으로만 그려져 있다.**
 ///

@@ -13,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import 'fake_dio.dart';
 import 'no_disk_cache.dart';
 import 'package:elum/app/dio_provider.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 실제 앱 라우터(`createRouter`)를 저장소·토큰과 묶어 띄운다. 가드·뒤로가기·로그아웃 도착지 테스트는 이것으로 한다.
 /// 가드 없는 가짜 `GoRouter` 로는 가드와 화면 쌓기의 충돌이 보이지 않는다.

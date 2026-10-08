@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/app_status/app_status_repository.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
@@ -23,6 +22,7 @@ import '../data/oauth_sdk.dart';
 import '../../child/application/child_routine_notifier.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../member/application/member_providers.dart';
+import '../../../core/router/routes.dart';
 
 /// 로그인 화면. 온보딩 맨 앞에 선다.
 ///

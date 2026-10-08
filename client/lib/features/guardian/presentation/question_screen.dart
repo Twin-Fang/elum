@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/text/keep_words.dart';
 import '../../../core/assets/app_assets.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -20,6 +19,8 @@ import '../application/routine_notifier.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/router/routes.dart';
+import '../application/routine_flow_state.dart';
 
 /// Figma `보호자_새로운 일과 만들기_추가질문`(262:4766 / 262:4854).
 ///

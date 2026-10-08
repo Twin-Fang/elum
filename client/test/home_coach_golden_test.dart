@@ -19,6 +19,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_reward_api.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 보호자 홈 코치마크 3단계의 렌더 회귀 고정 (Figma 코치마크_1·2·3 · 이슈 #505).
 ///

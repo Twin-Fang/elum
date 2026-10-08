@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/application/child_routine_notifier.dart';
 import 'package:elum/features/child/data/speech_service.dart';
@@ -22,6 +21,7 @@ import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 행동카드 넘기기 화면에서 양옆 카드가 살짝 보인다 (이슈 #394).
 ///

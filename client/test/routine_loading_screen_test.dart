@@ -1,5 +1,4 @@
 import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/domain/routine_stage.dart';
 import 'package:elum/features/guardian/presentation/routine_loading_screen.dart';
@@ -12,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// Figma `보호자_새로운 일과 만들기_로딩`(262:4569 / 262:4703) 정합 테스트.
 

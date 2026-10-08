@@ -1,4 +1,3 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/domain/app_role.dart';
@@ -11,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 역할 선택 (이슈 #212 · 명세 §4-3).
 ///

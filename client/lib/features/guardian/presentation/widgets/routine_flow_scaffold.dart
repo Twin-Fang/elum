@@ -7,15 +7,15 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/l10n/current_l10n.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
-import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_scaffold.dart';
-import '../../data/routine_repository.dart';
 import 'aurora_background.dart';
 import 'routine_flow_backdrop.dart';
+import '../../application/routine_providers.dart';
+import '../../../../core/router/routes.dart';
 
 /// 일과 만들기 흐름의 공통 뼈대.
 ///

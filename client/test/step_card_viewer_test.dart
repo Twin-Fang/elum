@@ -16,6 +16,7 @@ import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 일과 시트에서 카드를 눌러 크게 보기 (Figma `1274:8864`, 이슈 #495).
 ///

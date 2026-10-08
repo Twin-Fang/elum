@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../logger/app_logger.dart';
 import 'app_destination.dart';
-import 'app_router.dart';
+import 'routes.dart';
 
 /// 뒤로가기·돌아가기는 이것을 쓴다. 인자 없는 `context.pop()` 은 `test/no_raw_pop_test.dart` 가 막는다.
 ///

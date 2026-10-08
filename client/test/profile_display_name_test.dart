@@ -9,6 +9,7 @@ import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 void main() {
   const qa = ProfileSummary(id: 'qa', nickname: 'QA');

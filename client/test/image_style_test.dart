@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/fake_dio.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 그림 방식(#458) — 도메인·저장·서버 계약.
 ///

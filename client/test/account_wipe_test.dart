@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:elum/core/storage/account_wipe.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/auth/domain/app_role.dart';
 import 'package:elum/core/storage/card_image_disk_cache.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 계정 로컬 정리 — 보호자·이룸이의 로그아웃·탈퇴가 같은 함수로 비운다.
 void main() {

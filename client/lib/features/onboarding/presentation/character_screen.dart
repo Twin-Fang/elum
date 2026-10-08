@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -14,6 +13,7 @@ import '../application/onboarding_notifier.dart';
 import '../../../shared/models/character.dart';
 import 'widgets/character_card.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/router/routes.dart';
 
 /// Figma `온보딩_캐릭터` — 카드 속 주인공이 될 친구를 고른다.
 ///

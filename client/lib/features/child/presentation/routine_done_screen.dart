@@ -5,10 +5,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/router/routes.dart';
 
 /// 이룸이가 일과를 **다 끝냈을 때** 한 번 뜨는 화면 (Figma `일과완료` 1274:9831, 이슈 #490).
 ///

@@ -1,4 +1,3 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
@@ -6,7 +5,6 @@ import 'package:elum/features/child/presentation/child_routine_detail_screen.dar
 import 'package:elum/features/child/presentation/reward_screen.dart';
 import 'package:elum/features/child/presentation/routine_done_screen.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +16,9 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 카드를 체크하고 별 화면을 닫으면 다음 카드로 넘어간다 (이슈 #293).
 ///

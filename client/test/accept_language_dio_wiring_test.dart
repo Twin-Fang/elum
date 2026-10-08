@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/fake_dio.dart';
 import 'package:elum/app/dio_provider.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 앱이 실제로 쓰는 Dio(`dioProvider`)에 언어 헤더가 붙어 있는가.
 ///

@@ -1,6 +1,5 @@
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error_code.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/core/theme/app_theme.dart';
@@ -17,6 +16,8 @@ import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
 import 'helpers/semantics_audit.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 링크로 받은 초대 코드가 채워진 입력 화면 (#365).
 ///

@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/show_failure.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_dialog.dart';
@@ -19,6 +18,7 @@ import 'widgets/card_review_parts.dart';
 import 'widgets/card_review_reorder_list.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
+import '../../../core/router/routes.dart';
 
 /// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경, #444).
 ///

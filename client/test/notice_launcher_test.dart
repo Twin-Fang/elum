@@ -18,6 +18,8 @@ import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/app/dio_provider.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 보호자 홈에서만, 앱 실행 중 처음 한 번 (이슈 #371 · 명세 2장 · 3-2).
 /// 여러 개면 **차례로**, `보지 않기` 는 공지마다 (이슈 #390).

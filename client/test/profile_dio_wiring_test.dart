@@ -3,7 +3,6 @@ import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/member/data/member_repository.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/profile/application/profile_session.dart';
 import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -13,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'helpers/fake_dio.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/app/dio_provider.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 앱이 실제로 쓰는 Dio(`dioProvider`)에 이룸이 헤더가 붙어 있는가 (#362).
 ///

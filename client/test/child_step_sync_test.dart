@@ -6,11 +6,12 @@ import 'package:elum/features/child/application/child_routine_notifier.dart';
 import 'package:elum/features/child/data/progress_store.dart';
 import 'package:elum/features/child/data/step_progress_repository.dart';
 import 'package:elum/features/child/domain/routine_progress_record.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 카드 완료 체크의 오프라인 퍼스트 동기화 (이슈 #140).
 ///

@@ -1,6 +1,6 @@
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/features/guardian/domain/local_dlp.dart';
 
 /// DLP는 발표의 보안 와우 포인트다.
 /// "실제로 마스킹된다"가 데모 성립 조건이므로 동작을 고정한다.

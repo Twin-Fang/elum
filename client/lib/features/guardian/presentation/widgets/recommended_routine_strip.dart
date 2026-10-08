@@ -5,8 +5,8 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/network/app_failure.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
-import '../../data/routine_repository.dart';
 import '../../domain/routine_suggestion.dart';
+import '../../application/routine_providers.dart';
 
 /// 타일 한 장의 배경·원 색 한 쌍.
 typedef _TileColors = ({Color tile, Color circle});

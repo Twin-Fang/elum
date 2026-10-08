@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/data/consent_repository.dart';
@@ -16,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 약관 동의 화면 (이슈 #189).
 ///

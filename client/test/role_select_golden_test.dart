@@ -1,7 +1,6 @@
 @Tags(['golden'])
 library;
 
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/presentation/role_select_screen.dart';
@@ -10,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 역할 선택 두 상태 (Figma 732:5176 · 732:5258 · 이슈 #229).
 ///

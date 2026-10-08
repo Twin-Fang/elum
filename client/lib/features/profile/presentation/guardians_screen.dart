@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/server_error_code.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -23,6 +22,7 @@ import 'guardian_edit_sheet.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../member/application/member_providers.dart';
+import '../../../core/router/routes.dart';
 
 /// 지금 보는 이룸이를 함께 돌보는 사람 (다중 보호자 #362).
 ///

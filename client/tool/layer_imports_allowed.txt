@@ -2,12 +2,7 @@
 # 줄을 지울 수는 있어도 더할 수는 없다 — 새 코드는 그 기능의 application·domain 을 거친다.
 core/app_status/app_status_repository.dart -> app/dio_provider.dart
 features/ads/application/ad_gate.dart -> features/member/data/member_repository.dart
-features/auth/application/account_reset.dart -> features/guardian/data/routine_repository.dart
-features/child/application/child_routine_notifier.dart -> features/guardian/data/routine_repository.dart
-features/child/application/routine_auto_refresh.dart -> features/guardian/data/routine_repository.dart
-features/child/application/sync_triggers.dart -> features/guardian/data/routine_repository.dart
 features/child/data/step_progress_repository.dart -> features/auth/data/auth_repository.dart
-features/child/presentation/child_home_screen.dart -> features/guardian/data/routine_repository.dart
 features/child/presentation/child_home_screen.dart -> features/guardian/presentation/widgets/today_routine_section.dart
 features/child/presentation/mode_switch_screen.dart -> features/onboarding/presentation/widgets/pin_keypad.dart
 features/child/presentation/widgets/child_card_pager.dart -> features/guardian/presentation/widgets/action_card_view.dart
@@ -26,7 +21,6 @@ features/guardian/presentation/pin_change_screen.dart -> features/onboarding/pre
 features/guardian/presentation/widgets/ai_credit_card.dart -> features/credit/data/credit_repository.dart
 features/guardian/presentation/widgets/step_card_viewer.dart -> features/child/data/speech_service.dart
 features/guardian/presentation/widgets/today_routine_section.dart -> features/ads/presentation/ad_native_slot.dart
-features/link/application/link_reset.dart -> features/guardian/data/routine_repository.dart
 features/link/data/device_link_repository.dart -> features/auth/data/auth_repository.dart
 features/link/presentation/elumi_settings_screen.dart -> features/auth/presentation/consent_document_list_screen.dart
 features/link/presentation/link_enter_screen.dart -> features/auth/data/auth_repository.dart
@@ -34,7 +28,6 @@ features/onboarding/application/onboarding_notifier.dart -> features/member/data
 features/onboarding/presentation/card_completion_screen.dart -> features/guardian/presentation/widgets/aurora_background.dart
 features/onboarding/presentation/splash_screen.dart -> features/auth/data/auth_repository.dart
 features/profile/application/profile_display_name.dart -> features/member/data/member_repository.dart
-features/profile/application/profile_session.dart -> features/guardian/data/routine_repository.dart
 features/profile/application/profile_session.dart -> features/member/data/member_repository.dart
 features/profile/presentation/invite_code_screen.dart -> features/link/presentation/widgets/issued_code_panel.dart
 features/profile/presentation/invite_enter_screen.dart -> features/link/presentation/widgets/code_entry_field.dart

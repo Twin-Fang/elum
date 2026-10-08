@@ -1,5 +1,4 @@
 import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
@@ -15,6 +14,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// Figma `온보딩_목표`(204:1002) / `온보딩_목표_선택`(204:1147) 정합 테스트.
 ///

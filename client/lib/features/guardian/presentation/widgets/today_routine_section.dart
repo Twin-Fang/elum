@@ -9,7 +9,6 @@ import '../../../../core/config/ad_ids.dart';
 import '../../../ads/presentation/ad_native_slot.dart';
 import '../../../../core/network/server_error_code.dart';
 import '../../../../core/widgets/show_failure.dart';
-import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_error_view.dart';
@@ -18,12 +17,13 @@ import '../../../../core/widgets/elum_dialog.dart';
 import '../../../child/application/child_routine_notifier.dart';
 import '../../application/home_coach_notifier.dart';
 import '../../application/routine_notifier.dart';
-import '../../data/routine_repository.dart';
 import '../../../../shared/models/routine.dart';
 import 'routine_summary_tile.dart';
 import 'routine_swipe_actions.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../../../core/widgets/elum_toast.dart';
+import '../../application/routine_providers.dart';
+import '../../../../core/router/routes.dart';
 
 // (참고) 제목 fallback은 Routine.displayTitle이 처리한다.
 

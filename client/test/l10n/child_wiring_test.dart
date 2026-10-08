@@ -8,7 +8,6 @@ import 'package:elum/features/child/presentation/mode_switch_screen.dart';
 import 'package:elum/features/child/presentation/routine_done_screen.dart';
 import 'package:elum/features/child/presentation/widgets/reward_banner.dart';
 import 'package:elum/features/member/data/member_repository.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +18,8 @@ import '../helpers/device_viewport.dart';
 import '../helpers/pump_with_locale.dart';
 import '../helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 이룸이 화면이 앱 문구를 ARB 에서 읽는지 정확한 문자열로 확인한다.
 /// 시험마다 새 상태를 만든다 — 선언 순서나 앞 시험의 값에 기대지 않는다.

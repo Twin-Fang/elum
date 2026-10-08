@@ -5,6 +5,7 @@ import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 보호자 홈 `오늘 일과` 가 날짜가 바뀌면 초기화되고 승인 전 일과를 싣지 않는다 (이슈 #353).
 ///

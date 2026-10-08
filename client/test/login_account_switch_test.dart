@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
@@ -16,6 +15,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 다른 계정으로 로그인했을 때 이전 계정의 일과가 메모리에 남지 않는다 (#482).
 ///

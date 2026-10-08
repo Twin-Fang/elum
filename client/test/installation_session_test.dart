@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:elum/core/storage/installation_store.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

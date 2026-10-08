@@ -7,6 +7,7 @@ import 'package:elum/features/notice/data/notice_repository.dart';
 import 'package:elum/features/notice/domain/app_notice.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 무엇을 띄울지 정한다 (이슈 #371 · #390).
 ///

@@ -1,6 +1,5 @@
 import 'package:elum/core/l10n/current_l10n.dart';
 import 'package:elum/core/l10n/l10n_context.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/shared/models/character.dart';
 import 'package:elum/features/onboarding/domain/image_style.dart';
@@ -19,6 +18,7 @@ import 'package:go_router/go_router.dart';
 import '../helpers/device_viewport.dart';
 import '../helpers/pump_with_locale.dart';
 import '../helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 온보딩 문구를 ARB 로 옮겨도 API·`ko` 문구가 같고, 서버로 가는 값(apiValue)은 그대로다.
 void main() {

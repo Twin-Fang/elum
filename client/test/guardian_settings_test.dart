@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:elum/core/app_status/app_status_repository.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/router/app_router.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
@@ -23,6 +21,8 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/semantics_audit.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 보호자 설정 화면 (이슈 #181).
 ///

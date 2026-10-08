@@ -1,4 +1,3 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/features/profile/application/invite_inbox.dart';
 import 'package:elum/features/profile/application/invite_link_intake.dart';
 import 'package:elum/features/profile/domain/invite_link.dart';
@@ -7,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 열린 초대 링크를 알맞은 때에 입력 화면으로 이어 주는 판단 (#365).
 ///

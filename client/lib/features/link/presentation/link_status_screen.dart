@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
@@ -16,6 +15,7 @@ import '../domain/link_status.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/elum_toast.dart';
+import '../../../core/router/routes.dart';
 
 /// 이룸이 휴대폰 — 연결 상태와 끊기 (명세 §8-5 · 이슈 #363).
 ///

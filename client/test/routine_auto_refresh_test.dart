@@ -1,6 +1,5 @@
 import 'package:elum/features/child/application/routine_auto_refresh.dart';
 import 'package:elum/features/member/data/member_repository.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'dart:async';
 
@@ -8,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 이룸이 홈 일과 주기 갱신 (이슈 #517).
 void main() {

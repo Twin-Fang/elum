@@ -8,7 +8,6 @@ import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
 import 'package:elum/features/auth/presentation/login_screen.dart';
@@ -62,6 +61,10 @@ import 'helpers/precache_images.dart';
 import 'helpers/test_storage.dart';
 import 'helpers/svg_finder.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// **시안 대조용** 렌더. 회귀 확인이 목적인 `*_golden_test.dart`와 다르다.
 ///

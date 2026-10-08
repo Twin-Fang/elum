@@ -4,6 +4,8 @@ import 'package:elum/features/auth/domain/app_role.dart';
 import 'package:elum/features/child/presentation/mode_switch_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/core/router/route_redirect.dart';
 
 /// 화면 이동 규칙의 모든 상태 조합 검사. 상태 48가지 × 등록된 모든 경로를 기계적으로 돈다.
 /// 새 경로는 라우터 설정에서 읽혀 자동으로 검사된다. 생길 수 없는 조합도 돈다 — 저장값이 어긋난 채 켜져도

@@ -23,6 +23,7 @@ import 'features/profile/application/invite_link_intake.dart';
 import 'features/profile/presentation/invite_link_host.dart';
 import 'core/storage/local_storage.dart';
 import 'app/dio_provider.dart';
+import 'core/router/routes.dart';
 
 class ElumApp extends ConsumerStatefulWidget {
   const ElumApp({super.key});

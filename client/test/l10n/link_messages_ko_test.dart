@@ -3,7 +3,6 @@ import 'package:elum/core/l10n/l10n_context.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error.dart';
 import 'package:elum/core/network/server_error_code.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
@@ -17,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/device_viewport.dart';
 import '../helpers/pump_with_locale.dart';
 import '../helpers/test_storage.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 옮긴 link 문구가 옛 한국어와 같다 — 기대값은 손으로 쓴 한국어(옛 코드가 만들던 값)다.
 void main() {

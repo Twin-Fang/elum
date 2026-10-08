@@ -1,4 +1,3 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
@@ -14,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/semantics_audit.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// Figma `온보딩_비밀번호`(238:1909) / `_입력`(238:1997) / `_재확인`(238:2767) 정합 테스트.
 ///

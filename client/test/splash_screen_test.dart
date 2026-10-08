@@ -1,5 +1,4 @@
 import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
@@ -13,6 +12,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 시작 화면은 Figma `스플래시`(1022:4415)를 따른다.
 ///

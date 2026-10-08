@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/content_locale.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -23,6 +22,7 @@ import '../data/speech_service.dart';
 import 'child_home_screen.dart' show childRoutinesProvider;
 import '../../../core/router/pop_or_home.dart';
 import '../../member/application/member_providers.dart';
+import '../../../core/router/routes.dart';
 
 /// 일과 상세 — 카드를 넘기며 체크한다 (Figma 309:3548 체크 전 / 309:3648 체크 후).
 ///

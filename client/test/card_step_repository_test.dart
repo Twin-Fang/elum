@@ -2,12 +2,12 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/fake_dio.dart';
+import 'package:elum/features/guardian/data/routine_repository_impl.dart';
 
 /// 카드 추가·순서 저장의 **서버 계약** (#444).
 ///

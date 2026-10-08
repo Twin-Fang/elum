@@ -1,9 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_stage.dart';
 import 'package:elum/features/guardian/presentation/routine_loading_screen.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +13,9 @@ import 'package:go_router/go_router.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/app/dio_provider.dart';
+import 'package:elum/features/guardian/data/routine_repository_impl.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 추가 질문을 받아 오는 길 (#393 S1 · S2).
 ///

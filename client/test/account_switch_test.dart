@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 다른 계정으로 로그인했을 때 이전 아이 정보가 남으면, 이름 입력칸에 남의 이름이
 /// 미리 채워지고 거기에 입력하면 이어붙는다 (이슈 #177).

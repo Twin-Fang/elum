@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:elum/core/config/app_config.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/auth/domain/consent_documents.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 약관 3층 폴백 (이슈 #278).
 ///

@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/test_storage.dart';
 import 'helpers/fake_reward_api.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// `POST /api/routines`는 AI 호출이라 **한 번이 곧 비용**이다.
 ///

@@ -7,7 +7,6 @@ import '../../ads/presentation/ad_banner_slot.dart';
 import '../../../core/config/ad_ids.dart';
 import '../../../core/l10n/content_locale.dart';
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
@@ -17,9 +16,10 @@ import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
-import '../data/routine_repository.dart';
 import 'widgets/routine_swipe_actions.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../application/routine_providers.dart';
+import '../../../core/router/routes.dart';
 
 /// 임시저장 — 만들다 만 일과를 이어서 만든다 (Figma `설정_임시저장` 1045:4910 ·
 /// 밀어서 삭제 `설정_임시저장_삭제` 1274:9262, #496).

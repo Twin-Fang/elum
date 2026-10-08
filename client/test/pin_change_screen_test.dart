@@ -1,4 +1,3 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
@@ -13,6 +12,8 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/pin_setup_auth.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 설정 → 비밀암호 변경하기 (#437). 시안이 없어 온보딩 비밀번호 화면 부품을 쓴다 (#438).
 ///

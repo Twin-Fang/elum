@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:elum/core/app_status/app_status.dart';
 import 'package:elum/core/config/app_config.dart';
 import 'package:elum/core/config/client_tuning.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 앱 대기·연출 시간값을 서버에서 받는다.
 ///

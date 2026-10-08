@@ -4,8 +4,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../guardian/data/routine_repository.dart';
 import 'child_routine_notifier.dart';
+import '../../guardian/application/routine_providers.dart';
 
 /// 카드 진행 동기화를 언제 다시 시도할지 정하는 위젯 (이슈 #140).
 ///

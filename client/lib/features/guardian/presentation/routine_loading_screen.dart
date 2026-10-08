@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_error_view.dart';
@@ -21,6 +20,8 @@ import '../domain/routine_stage.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/router/routes.dart';
+import '../application/routine_flow_state.dart';
 
 /// Figma `보호자_새로운 일과 만들기_로딩`.
 ///

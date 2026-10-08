@@ -1,6 +1,5 @@
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
@@ -21,6 +20,9 @@ import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 카드 수정 바텀시트 · 카드확인/아이 상세 Figma 정합 (이슈 #77) ·
 /// `/today` 진행률 계약 (이슈 #75).

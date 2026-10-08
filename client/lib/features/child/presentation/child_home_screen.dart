@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/assets/app_assets.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/character_badge.dart';
@@ -19,7 +18,6 @@ import '../../../core/l10n/content_locale.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../shared/models/routine.dart';
 import '../../guardian/application/routine_notifier.dart';
-import '../../guardian/data/routine_repository.dart';
 import '../../guardian/presentation/widgets/today_routine_section.dart'
     show routineProgress;
 import '../../onboarding/application/onboarding_notifier.dart';
@@ -31,6 +29,8 @@ import '../application/routine_auto_refresh.dart';
 import 'mode_switch_screen.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../member/application/member_providers.dart';
+import '../../guardian/application/routine_providers.dart';
+import '../../../core/router/routes.dart';
 
 /// 아이에게 보여줄 일과 목록.
 ///

@@ -21,6 +21,9 @@ import 'helpers/device_viewport.dart';
 import 'helpers/aurora_probe.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/core/router/routes_routine_flow.dart';
 
 /// 일과 만들기 흐름의 배경이 화면을 넘어갈 때 **부드럽게 번지는가** (이슈 #380).
 ///

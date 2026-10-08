@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/show_failure.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -16,6 +15,7 @@ import '../domain/onboarding_profile.dart';
 import 'widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../member/application/member_providers.dart';
+import '../../../core/router/routes.dart';
 
 /// Figma `온보딩_비밀번호` — 보호자 모드 전환용 PIN을 만든다.
 ///

@@ -1,6 +1,8 @@
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/features/child/presentation/mode_switch_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/core/router/route_redirect.dart';
 
 /// 이룸이 휴대폰은 **보호자 화면 경로로 들어갈 수 없다** (#363 · #355 A 경로).
 ///

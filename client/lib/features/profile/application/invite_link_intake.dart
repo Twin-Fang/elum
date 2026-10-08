@@ -1,6 +1,6 @@
-import '../../../core/router/app_router.dart';
 import '../domain/invite_link.dart';
 import 'invite_inbox.dart';
+import '../../../core/router/routes.dart';
 
 /// 열린 초대 링크를 **알맞은 때에 입력 화면으로 이어 주는** 판단 (#365).
 ///

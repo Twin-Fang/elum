@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/credit/data/credit_repository.dart';
 import 'package:elum/features/credit/domain/credit_summary.dart';
@@ -25,6 +24,8 @@ import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 크레딧이 생성 흐름을 막는 자리 (#407 스펙 §5) — 홈 시작 전 · 생성 실패 화면.
 void main() {

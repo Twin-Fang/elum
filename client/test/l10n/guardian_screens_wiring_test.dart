@@ -30,7 +30,6 @@ import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/domain/routine_stage.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
@@ -52,6 +51,10 @@ import '../helpers/profile_fixtures.dart';
 import '../helpers/pump_with_locale.dart';
 import '../helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 화면이 **어느 ARB 키를 읽는지**를 키 이름 표식으로 가려내는 가짜 번역.
 ///

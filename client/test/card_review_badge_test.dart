@@ -1,4 +1,3 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
@@ -14,6 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// `secured by ELUM AI DLP` 배지는 **어느 화면에도 나오지 않는다**.
 ///

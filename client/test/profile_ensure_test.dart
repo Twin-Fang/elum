@@ -3,7 +3,6 @@ import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error_code.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/member/data/member_repository.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/features/profile/application/profile_session.dart';
 import 'package:elum/features/profile/domain/profile_summary.dart';
@@ -14,6 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/profile_fixtures.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 이룸이가 없는 보호자가 이룸이를 다시 등록할 때 `POST /api/member/profile` 을 먼저 부른다 (#362).
 /// 서버는 이룸이 없이 이름 저장을 404 PROFILE_NOT_FOUND 로 막는다.

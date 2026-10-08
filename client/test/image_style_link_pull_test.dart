@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/fake_dio.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 이룸이 휴대폰이 연결될 때 보호자가 정한 그림 방식도 내려받는다 (#458).
 ///

@@ -7,7 +7,6 @@ import 'package:elum/core/l10n/current_l10n.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error.dart';
 import 'package:elum/core/network/server_error_code.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/data/speech_service.dart';
@@ -58,6 +57,9 @@ import '../helpers/svg_finder.dart';
 import '../helpers/test_storage.dart';
 import '../photo/fake_photo_picker.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 모든 문구를 `⟦키⟧` 로 돌려주는 가짜 번역. 보간 인자는 괄호 안에 넣는다.
 ///

@@ -1,6 +1,5 @@
 import 'package:elum/core/haptics/child_haptics.dart';
 import 'package:elum/core/storage/local_storage.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
@@ -8,7 +7,6 @@ import 'package:elum/features/child/presentation/child_routine_detail_screen.dar
 import 'package:elum/features/child/presentation/reward_screen.dart';
 import 'package:elum/features/child/presentation/routine_done_screen.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/link/presentation/elumi_settings_screen.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -20,6 +18,10 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 이룸이 카드 진동 (이슈 #515).
 ///

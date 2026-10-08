@@ -3,8 +3,6 @@ library;
 
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/router/app_router.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
@@ -18,6 +16,8 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 연결 암호 세 상태 (Figma 732:5334 · 732:5702 · 732:5850 · 이슈 #232).
 ///

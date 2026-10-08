@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -17,6 +16,7 @@ import '../domain/consent_bundle.dart';
 import 'consent_document_screen.dart';
 import 'widgets/consent_all_agree_button.dart';
 import 'widgets/consent_row.dart';
+import '../../../core/router/routes.dart';
 
 /// 약관 동의 화면. 로그인 직후, 이룸이 정보를 받기 전에 선다.
 ///

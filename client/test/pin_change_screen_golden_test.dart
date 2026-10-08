@@ -1,7 +1,6 @@
 @Tags(['golden'])
 library;
 
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/presentation/pin_change_screen.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 비밀암호 변경 네 상태 (#437). **시안이 없는 임시 화면이다** — 시안 요청은 #438.
 ///

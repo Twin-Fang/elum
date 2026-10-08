@@ -1,4 +1,3 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
@@ -18,6 +17,9 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 만들다 나간 일과가 **임시저장에 바로 보이는가** (이슈 #387).
 ///

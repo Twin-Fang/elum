@@ -1,5 +1,4 @@
 import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
@@ -16,6 +15,7 @@ import 'helpers/device_viewport.dart';
 import 'helpers/semantics_audit.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// Figma `온보딩_캐릭터`(204:1029) / `_여우`(204:1121) / `_고양이`(204:1134) 정합 테스트.
 ///

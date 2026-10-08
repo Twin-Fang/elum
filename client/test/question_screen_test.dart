@@ -1,5 +1,4 @@
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
@@ -20,6 +19,8 @@ import 'helpers/semantics_audit.dart';
 import 'helpers/line_breaks.dart';
 import 'helpers/test_storage.dart';
 import 'helpers/fake_reward_api.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// Figma `보호자_새로운 일과 만들기_추가질문`(262:4766 / 262:4854) 정합 테스트.
 ///

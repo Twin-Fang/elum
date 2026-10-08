@@ -5,10 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
-import '../../guardian/data/routine_repository.dart';
 import '../data/progress_store.dart';
 import '../data/step_progress_repository.dart';
 import '../domain/routine_progress_record.dart';
+import '../../guardian/application/routine_providers.dart';
 
 /// 아이 모드에서 보는 일과 진행 상태 (오프라인 퍼스트, 이슈 #140).
 ///

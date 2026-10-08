@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -13,6 +12,7 @@ import '../application/onboarding_notifier.dart';
 import '../../../shared/models/support_goal.dart';
 import 'widgets/goal_chip.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/router/routes.dart';
 
 /// Figma `온보딩_목표`(204:1002) — 도움 목표를 여러 개 고른다.
 ///

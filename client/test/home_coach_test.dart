@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/coach_mark_overlay.dart';
@@ -28,6 +27,9 @@ import 'helpers/device_viewport.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/svg_finder.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 보호자 홈 첫 진입 코치마크 (Figma 코치마크 1291:10801 · 이슈 #505).
 ///

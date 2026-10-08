@@ -1,6 +1,5 @@
 import 'package:elum/core/dev/dev_log_buffer.dart';
 import 'package:elum/core/dev/dev_tools_overlay.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/test_storage.dart';
 import 'helpers/semantics_audit.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 오버레이는 개발용이므로 **꺼졌을 때 흔적이 남지 않는 것**이 가장 중요하다.
 /// 플래그를 끄고 배포했는데 버튼이 보이면 사용자에게 그대로 노출된다. (이슈 #13)

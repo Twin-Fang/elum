@@ -1,7 +1,7 @@
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/child/data/progress_store.dart';
 import 'package:elum/features/child/domain/routine_progress_record.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 아동 카드 진행 상태의 로컬 영속 (이슈 #140).
 ///

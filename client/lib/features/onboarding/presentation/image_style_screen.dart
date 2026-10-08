@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -15,6 +14,7 @@ import '../../../shared/models/character.dart';
 import '../domain/image_style.dart';
 import 'widgets/image_style_option_card.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/router/routes.dart';
 
 /// 온보딩의 `그림 방식` 단계 — 캐릭터 다음, 비밀암호 앞 (이슈 #458).
 ///

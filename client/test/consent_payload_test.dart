@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/app_pressable.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
@@ -15,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 서버로 나가는 동의 본문 (이슈 #278 QA).
 ///

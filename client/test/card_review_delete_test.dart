@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 카드확인 화면의 삭제 (Figma `보호자_카드확인_수정` 364:8305, 이슈 #69).
 ///

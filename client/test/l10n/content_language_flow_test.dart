@@ -1,7 +1,6 @@
 import 'package:elum/core/l10n/app_l10n.dart';
 import 'package:elum/core/l10n/content_locale.dart';
 import 'package:elum/core/l10n/l10n_context.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
@@ -17,6 +16,7 @@ import 'package:go_router/go_router.dart';
 import '../helpers/device_viewport.dart';
 import '../helpers/fake_dio.dart';
 import '../helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 두 휴대폰의 언어가 다를 때: 버튼·메뉴는 **그 휴대폰의 화면 언어**, 카드 글과 음성은
 /// **일과 언어**다.

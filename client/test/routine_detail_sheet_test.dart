@@ -15,6 +15,7 @@ import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 오늘 일과 시트 (Figma 956:4084, 이슈 #266).
 void main() {

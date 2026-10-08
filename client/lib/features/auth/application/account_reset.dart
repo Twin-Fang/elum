@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../guardian/application/routine_notifier.dart';
-import '../../guardian/data/routine_repository.dart';
+import '../../guardian/application/routine_providers.dart';
 
 /// 다른 계정으로 로그인했을 때 **이전 계정의 일과를 메모리에서 버린다** (#482).
 ///

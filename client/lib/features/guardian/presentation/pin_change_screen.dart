@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -17,6 +16,7 @@ import '../../onboarding/presentation/widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/storage/local_storage.dart';
+import '../../../core/router/routes.dart';
 
 /// 설정 → 비밀암호 변경하기 (#437).
 ///

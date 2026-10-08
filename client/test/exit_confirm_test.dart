@@ -1,4 +1,3 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/features/guardian/presentation/widgets/routine_flow_scaffold.dart';
@@ -10,6 +9,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 일과를 만들다 나갈 때 확인 (이슈 #242 · #387).
 ///

@@ -1,4 +1,3 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
@@ -12,6 +11,9 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/pin_setup_auth.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/core/router/route_redirect.dart';
 
 /// 첫 로그인 뒤 암호 만들기: 저장하면 실제 경로 가드를 거쳐도 보호자 홈에 도착해야 한다.
 /// 가짜 인증만 쓰면 `guardianPinSetupPending` 이 저장 뒤에도 켜져 있는 결함이 가려진다.

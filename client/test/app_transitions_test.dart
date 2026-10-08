@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 페이지 전환 — motion.md "전환 없는 즉시 교체 금지" 규칙 구현 검증.
 ///

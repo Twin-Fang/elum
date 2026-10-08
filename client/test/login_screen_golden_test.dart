@@ -1,7 +1,6 @@
 @Tags(['golden'])
 library;
 
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/presentation/login_screen.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 로그인 화면 (Figma `238:1808` iOS · `1022:4333` AOS · 이슈 #230 #338).
 ///

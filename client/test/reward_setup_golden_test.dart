@@ -2,7 +2,6 @@
 library;
 
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
@@ -18,6 +17,8 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 보상 설정 화면 8-1 (이슈 #239 · 시안 1082:4709 #380).
 ///

@@ -2,12 +2,13 @@ import 'package:elum/features/child/application/child_routine_notifier.dart';
 import 'package:elum/features/child/domain/routine_progress_record.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/widgets/today_routine_section.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 // 완료 기록이 서버에 있어도 만들기 흐름의 옛 값이 가리면 보호자마다 진행률이 달라진다.
 void main() {

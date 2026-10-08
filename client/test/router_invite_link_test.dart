@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 초대 링크가 열렸을 때 라우터의 동작 (#365).
 ///

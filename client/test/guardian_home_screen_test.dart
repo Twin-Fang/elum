@@ -1,6 +1,5 @@
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/core/widgets/elum_error_view.dart';
@@ -29,6 +28,8 @@ import 'helpers/semantics_audit.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// Figma `보호자_홈` 개편(931:3896 기본 / 931:4179 밀림 / 931:4879 삭제) 정합 테스트.
 ///

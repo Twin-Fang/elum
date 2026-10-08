@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/app_shake.dart';
 import 'package:elum/core/widgets/app_pressable.dart';
@@ -15,7 +14,6 @@ import 'package:elum/features/child/presentation/mode_switch_screen.dart';
 import 'package:elum/features/child/presentation/reward_screen.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/member/data/member_repository.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/card_palette.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/features/profile/domain/profile_summary.dart';
@@ -32,6 +30,9 @@ import 'helpers/semantics_audit.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// Figma `아이_홈`(309:3548/309:3648) · `아이_보상`(309:4055 등) 정합 테스트.
 void main() {

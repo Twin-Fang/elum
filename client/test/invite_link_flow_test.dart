@@ -17,6 +17,7 @@ import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 링크가 열려서 코드가 채워진 입력 화면에 닿기까지 — **`ElumApp` 과 같은 배선**으로 끝에서 끝까지 (#365).
 ///

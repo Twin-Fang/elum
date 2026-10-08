@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
@@ -13,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 약관은 마쳤지만 이룸이 정보가 없는 계정으로 로그인하면 **역할 선택부터** 묻는다 (#542).
 ///

@@ -8,7 +8,6 @@ import 'package:elum/features/ads/data/rewarded_ad_loader.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error.dart';
 import 'package:elum/core/network/server_error_code.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/credit/application/ad_reward_flow.dart';
 import 'package:elum/features/credit/data/credit_repository.dart';
@@ -31,6 +30,8 @@ import '../helpers/fake_ad_reward.dart';
 import '../helpers/fake_reward_api.dart';
 import '../helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 크레딧 소진 안내의 "광고 보고 더 만들기" (#464).
 ///

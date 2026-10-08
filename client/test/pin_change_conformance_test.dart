@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
 
 /// 설정 → 비밀암호 변경하기의 **시안 대조용** 렌더 (#498).
 ///

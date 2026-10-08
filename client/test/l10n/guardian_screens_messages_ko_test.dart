@@ -1,11 +1,11 @@
 import 'package:elum/core/l10n/current_l10n.dart';
 import 'package:elum/core/l10n/l10n_context.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/presentation/reward_setup_screen.dart';
 import 'package:elum/l10n/app_localizations_ko.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 실패 안내만 표식으로 바꾼 가짜 번역 — 언어가 바뀐 상황을 만든다.
 class _FakeL10n extends AppLocalizationsKo {

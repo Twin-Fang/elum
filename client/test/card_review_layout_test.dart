@@ -1,5 +1,4 @@
 import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
@@ -16,6 +15,8 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 카드 확인의 카드 안 배치 (#401 · Figma `262:5124` 보호자_카드확인, 2026-09-24 덤프).
 ///

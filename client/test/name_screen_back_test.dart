@@ -10,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 이름 화면은 어디로 들어와도 뒤로 갈 수 있어야 한다.
 /// go 로 들어오면(앱 재시작·함께 돌보기 그만두기 뒤) 쌓인 화면이 없어 pop 이 안 되므로,

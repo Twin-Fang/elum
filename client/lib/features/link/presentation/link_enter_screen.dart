@@ -14,6 +14,7 @@ import '../data/device_link_repository.dart';
 import '../domain/link_code.dart';
 import 'widgets/code_entry_field.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/router/routes.dart';
 
 /// 연결 실패의 종류. 문구가 아니라 종류를 들고 있다가 그릴 때 푼다 — 실패 순간에 문구로
 /// 굳히면 언어가 바뀐 뒤에도 옛 언어로 남는다.

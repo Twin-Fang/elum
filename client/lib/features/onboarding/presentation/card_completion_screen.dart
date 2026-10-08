@@ -7,8 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/router/routes.dart';
 
 /// Figma `보호자_새로운 일과 만들기_완료` (425:4199)
 ///

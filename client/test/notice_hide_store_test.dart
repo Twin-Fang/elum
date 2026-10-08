@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:elum/core/storage/guardian_lock_store.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/notice/data/notice_hide_store.dart';
 import 'package:elum/features/notice/domain/app_notice.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/storage/shared_prefs_storage.dart';
 
 /// "보지 않기" 기록 (이슈 #371 · 명세 3-2).
 ///

@@ -1,5 +1,6 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/core/router/route_redirect.dart';
 
 /// 라우터 가드 테스트.
 ///

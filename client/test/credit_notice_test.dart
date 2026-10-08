@@ -20,6 +20,7 @@ import 'helpers/credit_fixtures.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 생성 직전 안내와 완료 사용량 줄 (#407 스펙 §5). ⚠️ 둘 다 시안 밖 요소다.
 void main() {

@@ -1,4 +1,3 @@
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
@@ -18,6 +17,8 @@ import '../helpers/device_viewport.dart';
 import '../helpers/fake_dio.dart';
 import '../helpers/test_storage.dart';
 import 'fake_photo_picker.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 카드 수정 시트에 그림 칸이 들어온다 (#456).
 ///

@@ -5,11 +5,12 @@ import 'package:elum/features/child/application/sync_triggers.dart';
 import 'package:elum/features/child/data/progress_store.dart';
 import 'package:elum/features/child/data/step_progress_repository.dart';
 import 'package:elum/features/child/domain/routine_progress_record.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 동기화 트리거 (이슈 #140) — 앱 시작 시 복원·전송, 복귀 시 재전송.
 ///

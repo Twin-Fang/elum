@@ -1,7 +1,6 @@
 @Tags(['golden'])
 library;
 
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/onboarding/presentation/pin_screen.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 보호자 비밀암호 두 상태 (Figma 238:1909 · 238:2924 · 이슈 #231).
 ///

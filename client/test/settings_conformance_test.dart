@@ -3,7 +3,6 @@ library;
 
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
@@ -12,7 +11,6 @@ import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/auth/presentation/consent_document_list_screen.dart';
 import 'package:elum/features/credit/data/credit_repository.dart';
 import 'package:elum/features/credit/domain/credit_summary.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/draft_routines_screen.dart';
 import 'package:elum/features/auth/domain/consent_documents.dart';
 import 'package:elum/features/auth/presentation/consent_document_screen.dart';
@@ -31,6 +29,8 @@ import 'helpers/credit_fixtures.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/precache_images.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// 설정 묶음 화면의 **시안 대조용** 렌더 (#349).
 ///

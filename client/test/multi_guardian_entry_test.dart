@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:elum/core/app_status/app_status_repository.dart';
 import 'package:elum/features/auth/data/oauth_sdk.dart';
-import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
@@ -11,7 +10,6 @@ import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/presentation/login_screen.dart';
 import 'package:elum/features/profile/application/profile_session.dart';
 import 'package:elum/features/credit/data/credit_repository.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_settings_screen.dart';
 import 'package:elum/features/onboarding/presentation/name_screen.dart';
@@ -27,6 +25,10 @@ import 'helpers/credit_fixtures.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
+import 'package:elum/core/router/route_redirect.dart';
 
 /// 다중 보호자 화면으로 들어가는 길 (#362).
 ///

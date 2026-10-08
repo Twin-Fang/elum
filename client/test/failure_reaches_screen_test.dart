@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/draft_routines_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +12,7 @@ import 'package:elum/core/widgets/elum_error_view.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
 
 /// **서버가 준 문구가 실제로 화면까지 닿는가** (이슈 #352).
 ///

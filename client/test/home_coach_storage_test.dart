@@ -3,6 +3,8 @@ import 'package:elum/core/storage/guardian_lock_store.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/storage/shared_prefs_storage.dart';
 
 /// 홈 코치마크를 봤다는 기록은 계정이 아니라 휴대폰에 속한다 (이슈 #505).
 ///

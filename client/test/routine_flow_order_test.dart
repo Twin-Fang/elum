@@ -28,6 +28,8 @@ import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/features/guardian/application/routine_providers.dart';
+import 'package:elum/core/router/routes.dart';
 
 /// 일과 만들기 **흐름 순서** (#380 결정 1 — Figma 섹션 `1049:4654` 대로).
 ///

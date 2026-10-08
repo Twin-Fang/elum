@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -13,6 +12,7 @@ import '../domain/app_role.dart';
 import 'widgets/role_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/storage/local_storage.dart';
+import '../../../core/router/routes.dart';
 
 /// 역할 선택 (Figma `732:5176`·`732:5258` · 이슈 #212 · #229).
 ///
