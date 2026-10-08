@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-08T09:56:56Z",
-    "currentVersion": "2.26.2",
+    "lastUpdated": "2026-10-08T11:15:26Z",
+    "currentVersion": "2.26.3",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 229
+    "totalReleases": 230
   },
   "releases": [
+    {
+      "version": "2.26.3",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-08",
+      "pr_number": 620,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 폰에 한국어 음성이 없을 때도 카드를 또렷하게 읽어 줘요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "폰에 한국어 음성이 없을 때도 카드를 또렷하게 읽어 줘요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.26.2",
       "project_type": "flutter",
