@@ -43,6 +43,13 @@ enum ImageStyle {
     ImageStyle.photoOnly => appL10n.imageStylePhotoOnlyDescription,
   };
 
+  /// 이름 옆 배지 문구 — 카드 한 장마다 AI 그림을 그리는 방식은 크레딧이 들고,
+  /// 기본 그림은 들지 않는다.
+  String get badge => switch (this) {
+    ImageStyle.cartoon || ImageStyle.realistic => appL10n.imageStyleBadgeCredit,
+    ImageStyle.photoOnly => appL10n.imageStyleBadgeFree,
+  };
+
   /// 저장소·서버에 남은 문자열을 되돌린다.
   ///
   /// **없거나 모르는 값이면 [cartoon]이다.** 필드가 없거나 서버가 새 값을

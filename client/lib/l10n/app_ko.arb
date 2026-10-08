@@ -366,8 +366,14 @@
   "imageStylePhotoOnlyLabel": "기본 그림",
   "@imageStylePhotoOnlyLabel": { "description": "카드 그림 방식 이름" },
 
-  "imageStylePhotoOnlyDescription": "간단한 그림 기호가 들어가요. 사진으로 바꿀 수 있어요",
+  "imageStylePhotoOnlyDescription": "간단한 그림 기호가 들어가요",
   "@imageStylePhotoOnlyDescription": { "description": "카드 그림 방식 설명" },
+
+  "imageStyleBadgeCredit": "크레딧 사용",
+  "@imageStyleBadgeCredit": { "description": "그림 방식 카드 이름 옆 배지 — 카드 그림을 그릴 때 크레딧이 드는 방식(만화·실사)" },
+
+  "imageStyleBadgeFree": "무료",
+  "@imageStyleBadgeFree": { "description": "그림 방식 카드 이름 옆 배지 — 크레딧이 들지 않는 기본 그림" },
 
   "goalStepByStep": "해야 할 일을 순서대로 이해해요",
   "@goalStepByStep": { "description": "도움 목표 선택지" },

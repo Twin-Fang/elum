@@ -386,7 +386,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get imageStylePhotoOnlyLabel => '기본 그림';
 
   @override
-  String get imageStylePhotoOnlyDescription => '간단한 그림 기호가 들어가요. 사진으로 바꿀 수 있어요';
+  String get imageStylePhotoOnlyDescription => '간단한 그림 기호가 들어가요';
+
+  @override
+  String get imageStyleBadgeCredit => '크레딧 사용';
+
+  @override
+  String get imageStyleBadgeFree => '무료';
 
   @override
   String get goalStepByStep => '해야 할 일을 순서대로 이해해요';

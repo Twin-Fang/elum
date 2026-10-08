@@ -52,6 +52,7 @@ class ImageStyleOptionCard extends StatelessWidget {
   /// 칸 안에서 줄바꿈하므로 넘치면 아래로 꺾인다.
   static const _exampleToText = 10.0;
   static const _titleToBody = 8.0;
+  static const _titleToBadge = 8.0;
   static const _textToRadio = 2.0;
 
   /// 문장이 둘이면 문장 끝에서 줄을 나눈다 (시안 `1274:10078` — `...넣어요.` / `글은 ...`).
@@ -60,10 +61,10 @@ class ImageStyleOptionCard extends StatelessWidget {
   /// 낭독기에는 원문을 주므로 읽는 데는 영향이 없다.
   static String _breakAtSentence(String text) => text.replaceFirst('. ', '.\n');
 
-  /// 화면 낭독기가 읽는 이름. 제목과 설명을 함께 읽는다 —
+  /// 화면 낭독기가 읽는 이름. 제목·배지·설명을 함께 읽는다 —
   /// `직접 사진`만 들으면 "글은 계속 만들어 준다"는 핵심을 놓친다.
   static String semanticLabel(ImageStyle style) =>
-      '${style.label}, ${style.description}';
+      '${style.label}, ${style.badge}, ${style.description}';
 
   @override
   Widget build(BuildContext context) {
@@ -110,11 +111,20 @@ class ImageStyleOptionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  style.label,
-                  style: typo.imageStyleOptionTitle.copyWith(
-                    color: colors.textPrimary,
-                  ),
+                // 글자를 키우면 배지가 이름 아래로 꺾인다 (넘침 방지)
+                Wrap(
+                  spacing: _titleToBadge.w,
+                  runSpacing: 4.h,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      style.label,
+                      style: typo.imageStyleOptionTitle.copyWith(
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    _Badge(style: style),
+                  ],
                 ),
                 SizedBox(height: _titleToBody.h),
                 Text(
@@ -137,6 +147,43 @@ class ImageStyleOptionCard extends StatelessWidget {
           SizedBox(width: _textToRadio.w),
           _Radio(isSelected: isSelected),
         ],
+      ),
+    );
+  }
+}
+
+/// 이름 옆 알약 배지 — 크레딧이 드는 방식인지 한눈에 보이게 한다.
+///
+/// 임시 시안: 시안에 없는 추가라 디자이너 확정 전까지 이 모양을 쓴다.
+/// 흰 바탕이라 민트 선택 면 위에서도 읽힌다.
+class _Badge extends StatelessWidget {
+  const _Badge({required this.style});
+
+  final ImageStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typo = context.typo;
+    final isCredit = style != ImageStyle.photoOnly;
+    final textColor = isCredit ? colors.brandOrange : colors.textPrimary;
+    final borderColor = isCredit
+        ? colors.brandOrange.withValues(alpha: 0.4)
+        : colors.border;
+
+    // 낭독 라벨에 이미 배지 문구가 들어 있어 글자는 따로 읽지 않는다
+    return ExcludeSemantics(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(99.r),
+          border: Border.all(color: borderColor),
+        ),
+        child: Text(
+          style.badge,
+          style: typo.imageStyleOptionBadge.copyWith(color: textColor),
+        ),
       ),
     );
   }

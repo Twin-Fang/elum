@@ -169,7 +169,7 @@ void main() {
 
     expect(
       tester.getSemantics(
-        find.bySemanticsLabel('기본 그림, 간단한 그림 기호가 들어가요. 사진으로 바꿀 수 있어요'),
+        find.bySemanticsLabel('기본 그림, 무료, 간단한 그림 기호가 들어가요'),
       ),
       containsSemantics(isChecked: true, isInMutuallyExclusiveGroup: true),
     );

@@ -755,8 +755,20 @@ abstract class AppLocalizations {
   /// 카드 그림 방식 설명
   ///
   /// In ko, this message translates to:
-  /// **'간단한 그림 기호가 들어가요. 사진으로 바꿀 수 있어요'**
+  /// **'간단한 그림 기호가 들어가요'**
   String get imageStylePhotoOnlyDescription;
+
+  /// 그림 방식 카드 이름 옆 배지 — 카드 그림을 그릴 때 크레딧이 드는 방식(만화·실사)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 사용'**
+  String get imageStyleBadgeCredit;
+
+  /// 그림 방식 카드 이름 옆 배지 — 크레딧이 들지 않는 기본 그림
+  ///
+  /// In ko, this message translates to:
+  /// **'무료'**
+  String get imageStyleBadgeFree;
 
   /// 도움 목표 선택지
   ///

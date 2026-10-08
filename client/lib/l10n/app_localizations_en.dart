@@ -403,7 +403,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get imageStylePhotoOnlyDescription =>
-      'Pictures come from photos you take. We still write the text for you.';
+      'Simple picture symbols are used';
+
+  @override
+  String get imageStyleBadgeCredit => 'Uses credits';
+
+  @override
+  String get imageStyleBadgeFree => 'Free';
 
   @override
   String get goalStepByStep => 'Understand what to do, step by step';
