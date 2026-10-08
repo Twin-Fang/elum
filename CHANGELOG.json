@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-07T15:53:07Z",
-    "currentVersion": "2.19.0",
+    "lastUpdated": "2026-10-08T03:08:52Z",
+    "currentVersion": "2.20.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 220
+    "totalReleases": 221
   },
   "releases": [
+    {
+      "version": "2.20.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-08",
+      "pr_number": 603,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 휴대폰 언어가 영어면 앱을 영어로 볼 수 있어요\n  * 영어 휴대폰에서는 오류 안내도 영어로 보여요\n\n* **개선**\n  * 앱 전반의 안정성을 높였어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "휴대폰 언어가 영어면 앱을 영어로 볼 수 있어요",
+            "영어 휴대폰에서는 오류 안내도 영어로 보여요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "앱 전반의 안정성을 높였어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.19.0",
       "project_type": "flutter",
