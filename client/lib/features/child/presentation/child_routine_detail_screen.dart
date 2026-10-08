@@ -113,6 +113,8 @@ class _ChildRoutineDetailScreenState
   /// 아동이 여러 번 누를 때 소리가 겹치면 알아들을 수 없다.
   Future<void> _speak(ActionCard card) async {
     final speech = ref.read(speechServiceProvider);
+    // 눌렀다는 것을 손에도 알린다. 설정의 진동 스위치를 따른다.
+    ref.read(childHapticsProvider).play(ChildHapticKind.tap);
 
     if (_speakingId == card.id) {
       await speech.stop();

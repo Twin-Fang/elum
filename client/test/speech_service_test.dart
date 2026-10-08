@@ -2,6 +2,7 @@ import 'package:elum/core/config/app_config.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 /// 카드 읽어주기 테스트.
 ///
@@ -71,6 +72,53 @@ void main() {
     });
   });
 
+  group('기기 음성 엔진', () {
+    test('안드로이드에 Google 엔진이 있으면 그것으로 고정한다', () async {
+      final tts = _FakeTts(engines: ['com.samsung.SMT', DeviceSpeech.googleEngine]);
+
+      await DeviceSpeech(tts: tts, isAndroid: true).speak('옷을 입어요');
+
+      expect(tts.engineSet, DeviceSpeech.googleEngine);
+      expect(tts.spoken, ['옷을 입어요']);
+    });
+
+    test('Google 엔진이 없으면 기본 엔진 그대로 읽는다', () async {
+      final tts = _FakeTts(engines: ['com.samsung.SMT']);
+
+      final ok = await DeviceSpeech(tts: tts, isAndroid: true).speak('옷을 입어요');
+
+      expect(ok, isTrue);
+      expect(tts.engineSet, isNull);
+    });
+
+    test('엔진 목록을 못 읽어도 읽는다', () async {
+      final tts = _FakeTts(engines: null, enginesThrow: true);
+
+      final ok = await DeviceSpeech(tts: tts, isAndroid: true).speak('옷을 입어요');
+
+      expect(ok, isTrue);
+      expect(tts.spoken, ['옷을 입어요']);
+    });
+
+    test('안드로이드가 아니면 엔진을 건드리지 않는다', () async {
+      final tts = _FakeTts(engines: [DeviceSpeech.googleEngine]);
+
+      await DeviceSpeech(tts: tts, isAndroid: false).speak('옷을 입어요');
+
+      expect(tts.engineSet, isNull);
+    });
+
+    test('엔진은 처음 한 번만 고른다', () async {
+      final tts = _FakeTts(engines: [DeviceSpeech.googleEngine]);
+      final speech = DeviceSpeech(tts: tts, isAndroid: true);
+
+      await speech.speak('하나');
+      await speech.speak('둘');
+
+      expect(tts.engineCalls, 1);
+    });
+  });
+
   group('서버 음성', () {
     test('키가 없으면 서버 폴백만 꺼진다', () {
       // 키가 없어도 기기 음성은 동작해야 한다 — 기능 전체가 죽지 않는다.
@@ -117,4 +165,43 @@ class _FakeSpeech implements SpeechService {
 
   @override
   void dispose() {}
+}
+
+
+/// 플랫폼 채널 없이 엔진 선택만 기록하는 가짜 TTS.
+class _FakeTts extends FlutterTts {
+  _FakeTts({required this.engines, this.enginesThrow = false});
+
+  final List<String>? engines;
+  final bool enginesThrow;
+  String? engineSet;
+  var engineCalls = 0;
+  final spoken = <String>[];
+
+  @override
+  Future<dynamic> get getEngines async {
+    if (enginesThrow) throw Exception('엔진 목록 실패');
+    return engines;
+  }
+
+  @override
+  Future<dynamic> setEngine(String engine) async {
+    engineCalls++;
+    engineSet = engine;
+  }
+
+  @override
+  Future<dynamic> setLanguage(String language) async => 1;
+
+  @override
+  Future<dynamic> setSpeechRate(double rate) async => 1;
+
+  @override
+  Future<dynamic> stop() async => 1;
+
+  @override
+  Future<dynamic> speak(String text, {bool focus = false}) async {
+    spoken.add(text);
+    return 1;
+  }
 }

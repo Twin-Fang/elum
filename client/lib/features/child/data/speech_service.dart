@@ -38,11 +38,20 @@ String ttsLocaleOf(String language) => switch (language) {
 /// 네트워크가 필요 없고 지연이 짧아 **1순위**다.
 /// 다만 한국어 음성이 없는 기기·에뮬레이터에서는 조용히 실패한다.
 class DeviceSpeech implements SpeechService {
-  DeviceSpeech({FlutterTts? tts}) : _tts = tts ?? FlutterTts();
+  DeviceSpeech({FlutterTts? tts, bool? isAndroid})
+    : _tts = tts ?? FlutterTts(),
+      _isAndroid = isAndroid ?? defaultTargetPlatform == TargetPlatform.android;
 
   final FlutterTts _tts;
+  final bool _isAndroid;
   String? _configuredLanguage;
   var _rateSet = false;
+  var _engineChosen = false;
+
+  /// 안드로이드 기본 엔진은 제조사마다 달라 느린 속도에서 소리가 갈라지는 것이 있다.
+  /// Google 음성 서비스가 깔려 있으면 그것으로 고정한다.
+  @visibleForTesting
+  static const googleEngine = 'com.google.android.tts';
 
   /// 아동이 듣기 편한 속도. 기본값(1.0)은 조금 빠르다.
   static const _rate = 0.45;
@@ -66,6 +75,7 @@ class DeviceSpeech implements SpeechService {
 
   /// 읽을 언어가 바뀐 때만 기기 음성을 다시 맞춘다 — 같은 기기에서 일과마다 언어가 다를 수 있다.
   Future<void> _ensureConfigured(String language) async {
+    await _preferGoogleEngine();
     final tag = ttsLocaleOf(language);
     if (_configuredLanguage != tag) {
       await _tts.setLanguage(tag);
@@ -74,6 +84,22 @@ class DeviceSpeech implements SpeechService {
     if (!_rateSet) {
       await _tts.setSpeechRate(_rate);
       _rateSet = true;
+    }
+  }
+
+  /// 안드로이드에서 Google 엔진이 있으면 쓴다. 없거나 실패하면 기기 기본 엔진을 그대로 쓴다.
+  ///
+  /// 엔진을 못 고르는 것이 음성 자체를 막으면 안 되므로 예외는 삼키지 않고 기록만 하고 넘어간다.
+  Future<void> _preferGoogleEngine() async {
+    if (_engineChosen || !_isAndroid) return;
+    _engineChosen = true;
+    try {
+      final engines = await _tts.getEngines;
+      if (engines is List && engines.contains(googleEngine)) {
+        await _tts.setEngine(googleEngine);
+      }
+    } catch (e) {
+      AppLogger.error('tts', 'Google 음성 엔진 고르기 실패 → 기기 기본 엔진을 쓴다: $e');
     }
   }
 
@@ -99,8 +125,8 @@ class DeviceSpeech implements SpeechService {
 /// 항상 켜져 있다. GPU 엔진을 고르면 꺼져 있어 503이 난다.
 class RemoteSpeech implements SpeechService {
   RemoteSpeech({Dio? dio, AudioPlayer? player})
-      : _dio = dio ?? Dio(),
-        _player = player ?? AudioPlayer();
+    : _dio = dio ?? Dio(),
+      _player = player ?? AudioPlayer();
 
   final Dio _dio;
   final AudioPlayer _player;

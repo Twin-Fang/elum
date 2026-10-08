@@ -156,16 +156,7 @@ class _ActionCardViewState extends State<ActionCardView> {
       // SVG가 25×25인데 Figma 배치는 24×24다. 크기만 지정하면
       // 비율이 눌려 아이콘이 찌그러진다 — contain으로 비율을 지킨다.
       // 정사각형 아이콘이라 가로세로 모두 .w로 맞춘다
-      child: SizedBox(
-        width: _volumeIconSize.w,
-        height: _volumeIconSize.w,
-        // 읽는 중에는 흐리게 — 다시 누르면 멈춘다는 신호다
-        child: AnimatedOpacity(
-          duration: AppMotion.fast,
-          opacity: widget.isSpeaking ? 0.45 : 1,
-          child: SvgPicture.asset(AppAssets.iconVolume, fit: BoxFit.contain),
-        ),
-      ),
+      child: _SpeakerGlyph(size: _volumeIconSize.w, speaking: widget.isSpeaking),
     );
 
     // 순서를 바꾸면 카드가 새 자리 색을 입는다. 그대로 두면 카드 한 장이 통째로 한
@@ -401,6 +392,106 @@ class _ActionCardViewState extends State<ActionCardView> {
 ///
 /// 서버가 만든 그림을 보여주고, 없으면 [emptyBuilder]의 기본 카드로 채운다.
 /// 자리를 비우면 카드 비율이 무너진다.
+/// 스피커 아이콘. 읽는 중에는 주황 원 위로 파동이 퍼져 "지금 소리가 난다"가 한눈에 보인다.
+///
+/// 예전에는 아이콘을 흐리게만 해 소리가 나는 중인지 꺼진 것인지 구분되지 않았다.
+/// 동작 줄이기를 켰다면 파동은 빼고 색 원만 남긴다.
+class _SpeakerGlyph extends StatefulWidget {
+  const _SpeakerGlyph({required this.size, required this.speaking});
+
+  final double size;
+  final bool speaking;
+
+  @override
+  State<_SpeakerGlyph> createState() => _SpeakerGlyphState();
+}
+
+class _SpeakerGlyphState extends State<_SpeakerGlyph>
+    with SingleTickerProviderStateMixin {
+  // late final 로 두면 한 번도 안 쓴 채 dispose 될 때 그 자리에서 만들어져 틱커 오류가 난다
+  late final AnimationController _pulse;
+
+  @override
+  void didUpdateWidget(_SpeakerGlyph old) {
+    super.didUpdateWidget(old);
+    if (widget.speaking == old.speaking) return;
+    if (widget.speaking && !MediaQuery.disableAnimationsOf(context)) {
+      _pulse.repeat();
+    } else {
+      _pulse.stop();
+      _pulse.value = 0;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(vsync: this, duration: AppMotion.float ~/ 2);
+    // 처음 그릴 때 이미 읽는 중일 수 있다(화면이 다시 만들어진 경우)
+    if (widget.speaking) _pulse.repeat();
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = widget.size;
+    final orange = context.colors.brandOrange;
+    final reduce = MediaQuery.disableAnimationsOf(context);
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          if (widget.speaking && !reduce)
+            AnimatedBuilder(
+              animation: _pulse,
+              builder: (context, _) => Container(
+                width: size * (1 + _pulse.value * 0.9),
+                height: size * (1 + _pulse.value * 0.9),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: orange.withValues(alpha: 0.28 * (1 - _pulse.value)),
+                ),
+              ),
+            ),
+          // 읽는 중에는 주황 원과 그림자를 깔아 눌린 채 켜져 있음을 보여 준다
+          AnimatedContainer(
+            duration: AppMotion.fast,
+            width: size * 1.35,
+            height: size * 1.35,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: widget.speaking ? orange.withValues(alpha: 0.18) : Colors.transparent,
+              boxShadow: widget.speaking
+                  ? [
+                      BoxShadow(
+                        color: orange.withValues(alpha: 0.35),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : const [],
+            ),
+          ),
+          SizedBox(
+            width: size,
+            height: size,
+            child: SvgPicture.asset(AppAssets.iconVolume, fit: BoxFit.contain),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _Illustration extends StatelessWidget {
   const _Illustration({
     required this.routineId,
