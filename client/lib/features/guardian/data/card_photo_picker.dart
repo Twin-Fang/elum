@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'card_photo.dart';
 
+import '../../../core/logger/app_logger.dart';
+
 /// 사진 고르기 결과. **취소·거부·실패를 갈라 받는다** — 셋은 화면이 하는 일이 다르다.
 sealed class PhotoPickResult {
   const PhotoPickResult();
@@ -100,11 +102,11 @@ class ImagePickerCardPhotoPicker implements CardPhotoPicker {
       if (e.code == 'photo_access_denied') {
         return const PhotoPickDenied(PhotoSource.gallery);
       }
-      debugPrint('[photo] 사진 고르기 실패: ${e.code}');
+      AppLogger.error('photo', '사진 고르기 실패: ${e.code}');
       return const PhotoPickFailed(PhotoFailure.pick);
     } catch (e) {
       // 사진 앱이 없거나 예상 못 한 예외 — 화면이 죽지 않고 실패로 안내한다
-      debugPrint('[photo] 사진 고르기 실패: $e');
+      AppLogger.error('photo', '사진 고르기 실패: $e');
       return const PhotoPickFailed(PhotoFailure.pick);
     }
   }
@@ -133,7 +135,7 @@ class _SystemPhotoSettings implements PhotoSettings {
     try {
       return await launchUrl(Uri.parse('app-settings:'));
     } catch (e) {
-      debugPrint('[photo] 설정 열기 실패: $e');
+      AppLogger.error('photo', '설정 열기 실패: $e');
       return false;
     }
   }

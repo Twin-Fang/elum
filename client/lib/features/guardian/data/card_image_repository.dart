@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/logger/app_logger.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
@@ -115,7 +116,7 @@ class CardImageRepository {
       if (bytes == null || bytes.isEmpty) return null;
       return Uint8List.fromList(bytes);
     } catch (e) {
-      debugPrint('[card] 이미지 조회 실패 → 대체 일러스트 사용: $e');
+      AppLogger.error('card', '이미지 조회 실패 → 대체 일러스트 사용: $e');
       // 서버를 재배포하는 동안의 502 같은 일시 오류는 기억해 둬 자동으로 다시 받게 한다 (#500).
       // 이미 센 횟수는 지우지 않는다 — 상한을 지키려는 것이다.
       if (isTransientFailure(e)) {
@@ -198,7 +199,7 @@ class CardImageRepository {
       }
       return PhotoUploadResult.ok(card);
     } catch (e) {
-      debugPrint('[card] 사진 업로드 실패: $e');
+      AppLogger.error('card', '사진 업로드 실패: $e');
       return PhotoUploadResult.failed(PhotoFailure.from(AppFailure.of(e)));
     }
   }

@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/logger/app_logger.dart';
 import '../../../shared/models/action_card.dart';
 import '../../onboarding/domain/support_goal.dart';
 import 'demo_cards.dart';
@@ -28,7 +28,7 @@ abstract interface class CardRepository {
 /// 3단계 fallback 체인을 구현한다.
 ///
 /// 1차 서버 → 2차 목표 반영 기본 세트 → 3차 하드코딩 데모 카드.
-/// 어느 단계에서 떨어졌는지는 debugPrint로만 남기고 사용자에겐 드러내지 않는다.
+/// 어느 단계에서 떨어졌는지는 AppLogger로만 남기고 사용자에겐 드러내지 않는다.
 class CardRepositoryImpl implements CardRepository {
   const CardRepositoryImpl({this.remote});
 
@@ -42,18 +42,18 @@ class CardRepositoryImpl implements CardRepository {
       try {
         final cards = await remoteFn(request);
         if (cards.isNotEmpty) return cards;
-        debugPrint('[fallback:1] 서버가 빈 응답 → 기본 세트로 전환');
+        AppLogger.error('fallback:1', '서버가 빈 응답 → 기본 세트로 전환');
       } catch (e) {
-        debugPrint('[fallback:1] 서버 실패 → 기본 세트로 전환: $e');
+        AppLogger.error('fallback:1', '서버 실패 → 기본 세트로 전환: $e');
       }
     }
 
     try {
       final cards = DemoCards.forGoals(request.supportGoals);
       if (cards.isNotEmpty) return cards;
-      debugPrint('[fallback:2] 기본 세트가 비어있음 → 데모 카드로 전환');
+      AppLogger.error('fallback:2', '기본 세트가 비어있음 → 데모 카드로 전환');
     } catch (e) {
-      debugPrint('[fallback:2] 기본 세트 실패 → 데모 카드로 전환: $e');
+      AppLogger.error('fallback:2', '기본 세트 실패 → 데모 카드로 전환: $e');
     }
 
     // 3차는 순수 상수라 실패할 수 없다.

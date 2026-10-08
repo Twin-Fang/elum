@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/network/guarded_call.dart';
 import '../domain/app_notice.dart';
 
 /// 공지를 받을 플랫폼. 값은 서버 `NoticePlatform` enum 과 같다 (#370).
@@ -40,11 +41,13 @@ class NoticeRepository {
 
   Future<NoticeFeed> fetch(NoticePlatform platform) async {
     try {
-      final res = await _dio.get<Object?>(
-        '/api/app/notices',
-        queryParameters: {'platform': platform.wire},
-      );
-      return NoticeFeed.fromJson(res.data, baseUrl: _dio.options.baseUrl);
+      return await logged('NoticeRepository', 'fetch', () async {
+        final res = await _dio.get<Object?>(
+          '/api/app/notices',
+          queryParameters: {'platform': platform.wire},
+        );
+        return NoticeFeed.fromJson(res.data, baseUrl: _dio.options.baseUrl);
+      });
     } catch (e, st) {
       AppLogger.error('notice', e, st, {
         'step': 'fetch',

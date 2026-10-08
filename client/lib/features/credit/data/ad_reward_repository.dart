@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/logger/app_logger.dart';
+import '../../../core/network/guarded_call.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
 import '../domain/ad_reward.dart';
@@ -48,11 +48,10 @@ class AdRewardRepository {
   }
 
   Future<T> _call<T>(String name, Future<T> Function() run) async {
-    AppLogger.repositoryCall('AdRewardRepository', name);
     try {
-      return await run();
+      return await logged('AdRewardRepository', name, run);
     } catch (e) {
-      AppLogger.repositoryError('AdRewardRepository', name, e);
+      // 호출부가 코드를 보이는 안내로 바꿀 수 있게 AppFailure 로 통일해 던진다
       throw AppFailure.of(e);
     }
   }

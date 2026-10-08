@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/network/guarded_call.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../onboarding/domain/image_style.dart';
 import '../../profile/domain/profile_summary.dart';
@@ -120,14 +121,18 @@ class MemberRepository {
 
   final Dio _dio;
 
+  static const _repo = 'MemberRepository';
+
   Future<Member?> getMyInfo() async {
     try {
-      final res = await _dio.get<Map<String, dynamic>>('/api/member/me');
-      final body = res.data;
-      if (body == null) return null;
-      return Member.fromJson(body);
-    } catch (e) {
-      debugPrint('[member] 조회 실패 → 로컬 온보딩 값 사용: $e');
+      return await logged<Member?>(_repo, 'getMyInfo', () async {
+        final res = await _dio.get<Map<String, dynamic>>('/api/member/me');
+        final body = res.data;
+        if (body == null) return null;
+        return Member.fromJson(body);
+      });
+    } catch (_) {
+      // 실패 로그는 logged 가 남겼다. 홈은 로컬 온보딩 값으로 뜬다.
       return null;
     }
   }
@@ -141,19 +146,16 @@ class MemberRepository {
   /// 응답은 [getMyInfo] 와 같은 모양이다. **이룸이 목록이 없는 응답은 성공으로 읽지 않는다** —
   /// 어느 이룸이가 생겼는지 모르면 이어서 저장할 수 없다.
   Future<Attempt<Member>> createProfile() async {
-    try {
+    return guarded(_repo, 'createProfile', () async {
       final res = await _dio.post<Map<String, dynamic>>('/api/member/profile');
       final body = res.data;
       final member = body == null ? null : Member.fromJson(body);
       if (member == null || member.profiles.isEmpty) {
-        debugPrint('[member] 이룸이 만들기 응답에 이룸이 목록이 없다');
-        return const Attempt.failed(AppFailure(fault: NetworkFault.app));
+        // 목록이 없으면 어느 이룸이가 생겼는지 몰라 실패로 본다
+        throw const AppFailure(fault: NetworkFault.app);
       }
-      return Attempt.ok(member);
-    } catch (e) {
-      debugPrint('[member] 이룸이 만들기 실패: $e');
-      return Attempt.failed(AppFailure.of(e));
-    }
+      return member;
+    });
   }
 
   /// 이 경로를 모르는 서버(다중 보호자 이전)가 준 실패인가.
@@ -168,18 +170,16 @@ class MemberRepository {
 
   /// 아이 호칭 저장. 온보딩 결과를 서버와 맞춘다.
   Future<AppFailure?> updateNickname(String nickname) async {
-    try {
-      await _dio.patch<dynamic>(
+    // 서버에는 없고 로컬에만 남은 상태라, 실패를 호출부에 돌려줘 사용자에게 알리게 한다
+    final r = await guarded<void>(
+      _repo,
+      'updateNickname',
+      () => _dio.patch<dynamic>(
         '/api/member/nickname',
         data: {'nickname': nickname},
-      );
-      return null;
-    } catch (e) {
-      // 로컬에는 남아 있지만 서버에는 없다 — 재설치하면 사라진다.
-      // 부르는 쪽이 알아야 사용자에게 알릴 수 있다.
-      debugPrint('[member] 호칭 저장 실패, 로컬에는 남아 있다: $e');
-      return AppFailure.of(e);
-    }
+      ),
+    );
+    return r.failure;
   }
 
   /// 도움 목표 저장 (전체 교체).
@@ -188,16 +188,16 @@ class MemberRepository {
   /// (`STEP_BY_STEP` / `PREPARE_ITEMS` / `PREPARE_NEW` / `INDEPENDENT`).
   /// 없는 값을 보내면 서버가 400을 준다.
   Future<AppFailure?> updateSupportGoals(List<String> goals) async {
-    try {
-      await _dio.patch<dynamic>(
+    // 서버에는 없고 로컬에만 남은 상태라, 실패를 호출부에 돌려줘 사용자에게 알리게 한다
+    final r = await guarded<void>(
+      _repo,
+      'updateSupportGoals',
+      () => _dio.patch<dynamic>(
         '/api/member/support-goals',
         data: {'supportGoals': goals},
-      );
-      return null;
-    } catch (e) {
-      debugPrint('[member] 목표 저장 실패, 로컬에는 남아 있다: $e');
-      return AppFailure.of(e);
-    }
+      ),
+    );
+    return r.failure;
   }
 
   /// 캐릭터 저장. 온보딩 결과를 서버와 맞춘다.
@@ -205,16 +205,16 @@ class MemberRepository {
   /// ⚠️ [character]는 서버 `CharacterType` enum 값이어야 한다 (`LULU` / `POPO`).
   /// `CardCharacter.apiValue`를 그대로 넘긴다. 없는 값을 보내면 서버가 400을 준다.
   Future<AppFailure?> updateCharacter(String character) async {
-    try {
-      await _dio.patch<dynamic>(
+    // 서버에는 없고 로컬에만 남은 상태라, 실패를 호출부에 돌려줘 사용자에게 알리게 한다
+    final r = await guarded<void>(
+      _repo,
+      'updateCharacter',
+      () => _dio.patch<dynamic>(
         '/api/member/character',
         data: {'character': character},
-      );
-      return null;
-    } catch (e) {
-      debugPrint('[member] 캐릭터 저장 실패, 로컬에는 남아 있다: $e');
-      return AppFailure.of(e);
-    }
+      ),
+    );
+    return r.failure;
   }
 
   /// 카드 그림 방식 저장 (#458).
@@ -223,16 +223,16 @@ class MemberRepository {
   /// `PHOTO_ONLY`). `ImageStyle.apiValue`를 그대로 넘긴다.
   /// 대상 프로필은 캐릭터 저장과 같은 방식으로 정해진다(인증 인터셉터).
   Future<AppFailure?> updateImageStyle(String imageStyle) async {
-    try {
-      await _dio.patch<dynamic>(
+    // 서버에는 없고 로컬에만 남은 상태라, 실패를 호출부에 돌려줘 사용자에게 알리게 한다
+    final r = await guarded<void>(
+      _repo,
+      'updateImageStyle',
+      () => _dio.patch<dynamic>(
         '/api/member/image-style',
         data: {'imageStyle': imageStyle},
-      );
-      return null;
-    } catch (e) {
-      debugPrint('[member] 그림 방식 저장 실패, 로컬에는 남아 있다: $e');
-      return AppFailure.of(e);
-    }
+      ),
+    );
+    return r.failure;
   }
 }
 

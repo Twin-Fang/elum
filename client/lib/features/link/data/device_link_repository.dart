@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/network/guarded_call.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
@@ -90,6 +91,8 @@ class DeviceLinkRepository {
         _storage = storage,
         _imageCache = imageCache;
 
+  static const _repo = 'DeviceLinkRepository';
+
   final Dio _dio;
 
   /// 받아 둔 카드 그림. 스스로 로그아웃할 때 함께 비운다 — 보호자 로그아웃과 같다.
@@ -103,38 +106,30 @@ class DeviceLinkRepository {
   /// 새 연결 암호를 만든다.
   ///
   /// 실패하면 **이유까지 담아** 돌려준다 — 화면이 서버 문구를 그대로 띄운다 (#352).
-  Future<Attempt<IssuedLinkCode>> issue() async {
-    try {
+  Future<Attempt<IssuedLinkCode>> issue() {
+    return guarded(_repo, 'issue', () async {
       final res = await _dio.post<Map<String, dynamic>>('/api/device-links');
       final code = res.data?['code']?.toString();
       // 서버의 절대 시각이 아니라 **남은 초**를 쓴다. 두 시계가 어긋나 있으면
-      // 절대 시각을 그대로 믿을 때 남은 시간이 서버보다 길게 나온다 (이슈 #205).
+      // 절대 시각을 그대로 믿을 때 남은 시간이 서버보다 길게 나온다.
       final seconds = (res.data?['expiresInSeconds'] as num?)?.toInt();
       if (code == null || code.isEmpty || seconds == null || seconds <= 0) {
-        AppLogger.error('연결 암호 발급', '응답에 code/expiresInSeconds가 없습니다');
-        return const Attempt.failed(AppFailure(fault: NetworkFault.app));
+        // 암호를 못 읽으면 보여줄 것이 없어 앱 오류로 본다
+        throw const AppFailure(fault: NetworkFault.app);
       }
-      return Attempt.ok(
-        IssuedLinkCode.fromNow(code: code, expiresInSeconds: seconds),
-      );
-    } catch (e) {
-      AppLogger.error('연결 암호 발급', e);
-      return Attempt.failed(AppFailure.of(e));
-    }
+      return IssuedLinkCode.fromNow(code: code, expiresInSeconds: seconds);
+    });
   }
 
   /// 연결 상태 — 실패하면 **이유와 함께** 돌려준다 (#363).
   ///
   /// 상태 화면이 빈 화면·무한 로딩 대신 `다시 시도`와 에러 코드를 보여줘야 한다.
-  Future<Attempt<LinkStatus>> statusResult() async {
-    try {
+  Future<Attempt<LinkStatus>> statusResult() {
+    return guarded(_repo, 'statusResult', () async {
       final res = await _dio.get<Map<String, dynamic>>('/api/device-links');
       final data = res.data;
-      return Attempt.ok(data == null ? LinkStatus.empty : LinkStatus.fromJson(data));
-    } catch (e) {
-      AppLogger.error('연결 상태 조회', e);
-      return Attempt.failed(AppFailure.of(e));
-    }
+      return data == null ? LinkStatus.empty : LinkStatus.fromJson(data);
+    });
   }
 
   /// 연결 하나를 끊는다 — 보호자 휴대폰에서 (명세 §8-5).

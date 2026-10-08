@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import '../../../core/logger/app_logger.dart';
 import '../../../core/config/app_config.dart';
 
 /// 카드 문장을 소리로 읽어준다.
@@ -58,7 +59,7 @@ class DeviceSpeech implements SpeechService {
       // 플랫폼마다 1 또는 null을 준다. null도 성공으로 본다 — iOS가 그렇다.
       return result == null || result == 1;
     } catch (e) {
-      debugPrint('[tts] 기기 음성 실패 → 서버로 넘어간다: $e');
+      AppLogger.error('tts', '기기 음성 실패 → 서버로 넘어간다: $e');
       return false;
     }
   }
@@ -81,7 +82,7 @@ class DeviceSpeech implements SpeechService {
     try {
       await _tts.stop();
     } catch (e) {
-      debugPrint('[tts] 기기 음성 정지 실패: $e');
+      AppLogger.error('tts', '기기 음성 정지 실패: $e');
     }
   }
 
@@ -119,7 +120,7 @@ class RemoteSpeech implements SpeechService {
     final apiKey = AppConfig.ttsApiKey;
     // 키가 없으면 서버를 부를 수 없다. 기기 음성만으로도 대개 동작한다.
     if (apiKey.isEmpty) {
-      debugPrint('[tts] 서버 키가 없어 건너뛴다');
+      AppLogger.error('tts', '서버 키가 없어 건너뛴다');
       return false;
     }
 
@@ -145,7 +146,7 @@ class RemoteSpeech implements SpeechService {
       await _player.play(BytesSource(Uint8List.fromList(bytes)));
       return true;
     } catch (e) {
-      debugPrint('[tts] 서버 음성 실패: $e');
+      AppLogger.error('tts', '서버 음성 실패: $e');
       return false;
     }
   }
@@ -155,7 +156,7 @@ class RemoteSpeech implements SpeechService {
     try {
       await _player.stop();
     } catch (e) {
-      debugPrint('[tts] 서버 음성 정지 실패: $e');
+      AppLogger.error('tts', '서버 음성 정지 실패: $e');
     }
   }
 

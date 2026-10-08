@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../../core/logger/app_logger.dart';
+
 /// 카드 그림을 기기 저장소에 보관한다 (#462).
 ///
 /// 메모리 캐시만 있으면 앱을 다시 켜거나 오프라인일 때 전에 본 그림도 사라진다.
@@ -17,7 +19,7 @@ import 'package:path_provider/path_provider.dart';
 /// 폴더째 지운다. OS 가 임의로 비우는 캐시 폴더가 아니라 앱 지원 폴더를 쓴다.
 ///
 /// **절대 throw 하지 않는다.** 저장소가 막혀도(디스크 가득·권한) 그림은 네트워크로 계속
-/// 보여야 한다. 실패는 [debugPrint] 로만 남기고 사진 내용·경로는 남기지 않는다.
+/// 보여야 한다. 실패는 AppLogger 로만 남기고 사진 내용·경로는 남기지 않는다.
 class CardImageDiskCache {
   CardImageDiskCache({
     required Future<Directory> Function() rootProvider,
@@ -59,7 +61,7 @@ class CardImageDiskCache {
       return _dirCache = Directory('${root.path}${Platform.pathSeparator}$_dirName');
     } catch (e) {
       // 저장소 폴더를 못 찾으면 캐시 없이 동작한다(매번 다시 시도)
-      debugPrint('[card-cache] 저장 폴더를 찾지 못했다 → 디스크 캐시 없이 동작: $e');
+      AppLogger.error('card-cache', '저장 폴더를 찾지 못했다 → 디스크 캐시 없이 동작: $e');
       return null;
     }
   }
@@ -82,7 +84,7 @@ class CardImageDiskCache {
       final bytes = await file.readAsBytes();
       if (!looksLikeImage(bytes)) {
         // 반쯤 쓰다 끊겼거나 빈 파일이다 — 다시 받게 치운다
-        debugPrint('[card-cache] 깨진 캐시 파일을 버렸다 (${bytes.length}B)');
+        AppLogger.error('card-cache', '깨진 캐시 파일을 버렸다 (${bytes.length}B)');
         await _tryDelete(file);
         return null;
       }
@@ -90,11 +92,11 @@ class CardImageDiskCache {
         // 별도 색인 없이 수정 시각을 "마지막 접근"으로 쓴다 (LRU)
         await file.setLastModified(DateTime.now());
       } catch (e) {
-        debugPrint('[card-cache] 접근 시각 갱신 실패(무시): $e');
+        AppLogger.error('card-cache', '접근 시각 갱신 실패(무시): $e');
       }
       return bytes;
     } catch (e) {
-      debugPrint('[card-cache] 읽기 실패 → 다시 받는다: $e');
+      AppLogger.error('card-cache', '읽기 실패 → 다시 받는다: $e');
       return null;
     }
   }
@@ -126,7 +128,7 @@ class CardImageDiskCache {
       tmp = null;
     } catch (e) {
       // 디스크 가득·권한 오류. 그림은 화면에 이미 간다
-      debugPrint('[card-cache] 저장 실패 → 메모리로만 보여준다: $e');
+      AppLogger.error('card-cache', '저장 실패 → 메모리로만 보여준다: $e');
       if (tmp != null) await _tryDelete(tmp);
       return false;
     }
@@ -167,7 +169,7 @@ class CardImageDiskCache {
         }
       }
     } catch (e) {
-      debugPrint('[card-cache] 용량 정리 실패(화면엔 영향 없음): $e');
+      AppLogger.error('card-cache', '용량 정리 실패(화면엔 영향 없음): $e');
     }
   }
 
@@ -182,7 +184,7 @@ class CardImageDiskCache {
           await dir.delete(recursive: true);
         }
       } catch (e) {
-        debugPrint('[card-cache] 캐시 폴더 삭제 실패: $e');
+        AppLogger.error('card-cache', '캐시 폴더 삭제 실패: $e');
       }
     });
     _chain = run.then((_) {}, onError: (_) {});
@@ -194,7 +196,7 @@ class CardImageDiskCache {
       await f.delete();
       return true;
     } catch (e) {
-      debugPrint('[card-cache] 파일 삭제 실패: $e');
+      AppLogger.error('card-cache', '파일 삭제 실패: $e');
       return false;
     }
   }

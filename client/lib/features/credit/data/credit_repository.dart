@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/logger/app_logger.dart';
+import '../../../core/network/guarded_call.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
 import '../domain/credit_summary.dart';
@@ -17,20 +17,20 @@ class CreditRepository {
   final Dio _dio;
 
   Future<CreditSummary> getMine() async {
-    AppLogger.repositoryCall('CreditRepository', 'getMine');
     try {
-      final res = await _dio.get<Map<String, dynamic>>('/api/credits/me');
-      final body = res.data;
-      if (body == null) throw const FormatException('빈 응답');
-      final summary = CreditSummary.fromJson(body);
-      AppLogger.repositorySuccess(
+      return await logged(
         'CreditRepository',
         'getMine',
-        summary.enabled ? '남음 ${summary.available}' : '꺼짐',
+        () async {
+          final res = await _dio.get<Map<String, dynamic>>('/api/credits/me');
+          final body = res.data;
+          if (body == null) throw const FormatException('빈 응답');
+          return CreditSummary.fromJson(body);
+        },
+        describe: (s) => s.enabled ? '남음 ${s.available}' : '꺼짐', // l10n-ignore: 로그 요약
       );
-      return summary;
     } catch (e) {
-      AppLogger.repositoryError('CreditRepository', 'getMine', e);
+      // 화면이 실패 유형을 알 수 있게 AppFailure 로 통일해 던진다
       throw AppFailure.of(e);
     }
   }
