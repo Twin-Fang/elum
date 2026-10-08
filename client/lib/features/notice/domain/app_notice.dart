@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../../../core/l10n/current_l10n.dart';
 
-/// 공지 한 건 (이슈 #371 · #390 · 서버 #370 `AppNoticeResponse`). 팝업 하나에 하나씩 뜬다.
+/// 공지 한 건 (서버 `AppNoticeResponse`). 팝업 하나에 하나씩 뜬다.
 @immutable
 class AppNotice {
   const AppNotice({
@@ -62,7 +62,7 @@ class NoticeFeed {
   /// 항목 하나가 깨졌다고 나머지 공지까지 버리면 관리자가 올린 다른 안내가 사라진다.
   /// 그래서 **그 항목만** 버린다.
   ///
-  /// [baseUrl] 은 서버 주소다. #370 은 이미지를 `/api/app/notices/{id}/image?v=…`
+  /// [baseUrl] 은 서버 주소다. 서버는 이미지를 `/api/app/notices/{id}/image?v=…`
   /// 처럼 경로로만 보내므로 여기서 붙여 둔다.
   factory NoticeFeed.fromJson(Object? json, {required String baseUrl}) {
     if (json is! Map) return empty;

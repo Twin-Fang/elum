@@ -46,7 +46,7 @@ class _InviteError {
 
   final _InviteFault fault;
 
-  /// 서버가 준 실패. 이유를 말해 줬으면 그 문구가 기본 문구를 이긴다 (#347).
+  /// 서버가 준 실패. 이유를 말해 줬으면 그 문구가 기본 문구를 이긴다.
   final AppFailure? failure;
 
   String message(AppLocalizations l10n) {
@@ -68,11 +68,11 @@ class _InviteError {
   }
 }
 
-/// 초대 코드 넣기 — 함께하는 보호자에게 받은 코드로 **그 이룸이에 합류**한다 (다중 보호자 #362).
+/// 초대 코드 넣기 — 함께하는 보호자에게 받은 코드로 **그 이룸이에 합류**한다.
 ///
 /// > ⚠️ **임시 시안이다.** 디자인 시안이 없어 연결 암호 넣기(`LinkEnterScreen`)의 여섯 칸·
 /// > 시스템 키보드·자동 제출·흔들림 모양을 그대로 빌렸다. 진입점도 시안이 정하지 않았다
-/// > (이슈 #362 "정할 것") — 지금은 온보딩 이름 화면의 링크와 설정의 `함께하는 사람`에서 온다.
+/// > 지금은 온보딩 이름 화면의 링크와 설정의 `함께하는 사람`에서 온다.
 ///
 /// ## 새로 가입한 보호자 (E6)
 ///
@@ -93,7 +93,7 @@ class _InviteError {
 /// 문구는 서버가 준 것을 그대로 쓰고 **에러 코드를 함께 보인다** (제보를 받았을 때 추적).
 /// 틀려도 붉게 칠하지 않는다 — 이 앱은 이룸이 휴대폰에도 깔린다.
 ///
-/// ## 링크로 열렸을 때 (#365)
+/// ## 링크로 열렸을 때
 ///
 /// 보호자가 공유한 링크를 누르면 [InviteInbox](우편함)에 코드가 맡겨지고, 이 화면이 열리면서 꺼내 **칸에
 /// 채운다.** 링크는 코드를 대신 전달하는 수단일 뿐이라 코드 흐름·합류 규칙은 그대로다.
@@ -115,7 +115,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
 
-  /// 링크로 받은 코드를 맡겨 두는 곳 (#365).
+  /// 링크로 받은 코드를 맡겨 두는 곳.
   late final InviteInbox _inbox = ref.read(inviteInboxProvider);
 
   /// 링크로 받은 코드가 채워져 **확인을 기다린다.** 이때는 자동 제출도 키보드도 없다.
@@ -321,7 +321,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     });
   }
 
-  /// 키보드를 연다 — 포커스가 이미 있어도 입력 연결을 새로 잡는다 (연결 암호 #428 과 같은 이유).
+  /// 키보드를 연다 — 포커스가 이미 있어도 입력 연결을 새로 잡는다 (연결 암호 입력과 같은 이유).
   void _openKeyboard() {
     if (_locked) return;
     if (!_focusNode.hasFocus) {
@@ -341,7 +341,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
 
     return ElumScaffold(
       onBack: _sending ? null : context.popOrHome,
-      // 링크로 받은 코드는 사람이 눌러야 보낸다 (#365). **임시 시안** — 하단 버튼·보조 링크는 다른 입력
+      // 링크로 받은 코드는 사람이 눌러야 보낸다. **임시 시안** — 하단 버튼·보조 링크는 다른 입력
       // 화면(이름 입력 `다음` · `초대 코드가 있어요`)의 배치를 그대로 빌렸다.
       bottomButton: _fromLink
           ? ElumButton(label: context.l10n.inviteEnterJoinButton, onPressed: _sending ? null : _submit)

@@ -26,7 +26,7 @@ enum GuardianKind {
   }
 }
 
-/// 이룸이를 함께 돌보는 사람 한 명 — 서버 `GuardianResponse`에 대응한다 (#361).
+/// 이룸이를 함께 돌보는 사람 한 명 — 서버 `GuardianResponse`에 대응한다.
 ///
 /// 출처: server/.../member/application/dto/response/GuardianResponse.java
 ///

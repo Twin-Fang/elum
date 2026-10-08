@@ -26,7 +26,7 @@ import '../features/profile/application/profile_session.dart';
 final dioProvider = Provider<Dio>((ref) {
   final dio = DioClient.create();
 
-  // 앱 언어를 모든 요청에 싣는다 (다국어 #525). 요청마다 판정해 OS 언어가 바뀌어도 따라간다.
+  // 앱 언어를 모든 요청에 싣는다. 요청마다 판정해 OS 언어가 바뀌어도 따라간다.
   // 맨 앞에 둔다 — 토큰 갱신 뒤 요청을 되살릴 때도 같은 헤더로 나간다.
   dio.interceptors.add(
     AcceptLanguageInterceptor(
@@ -38,7 +38,7 @@ final dioProvider = Provider<Dio>((ref) {
     ),
   );
 
-  // 보호자가 고른 이룸이를 모든 요청에 싣는다 (다중 보호자 #362). 인증보다 먼저 붙인다 —
+  // 보호자가 고른 이룸이를 모든 요청에 싣는다. 인증보다 먼저 붙인다 —
   // 토큰 갱신 뒤 요청을 되살릴 때도 같은 헤더로 나간다.
   dio.interceptors.add(
     ProfileHeaderInterceptor(
@@ -71,9 +71,9 @@ final dioProvider = Provider<Dio>((ref) {
       // 무력화된다. 같은 리프레시 토큰이 두 번 나가면 세션이 전부 끊긴다.
       refresh: () => ref.read(tokenRefresherProvider).refreshAccessToken(),
       // 갱신까지 실패하면 세션이 끝난 것이다. 화면이 캐시로 계속 그려지지 않도록
-      // 앱 전역에 알린다 — 듣고 있는 쪽이 로그인으로 되돌린다 (이슈 #175).
+      // 앱 전역에 알린다 — 듣고 있는 쪽이 로그인으로 되돌린다.
       onSessionExpired: () {
-        // 세션이 끝났으면 기기에 남은 카드 그림(보호자 사진 포함)도 치운다 (#462).
+        // 세션이 끝났으면 기기에 남은 카드 그림(보호자 사진 포함)도 치운다.
         // 다른 계정이 이어 로그인해도 이전 계정의 그림이 남지 않게 한다. clear 는 throw 하지 않는다.
         unawaited(ref.read(cardImageDiskCacheProvider).clear());
         ref.read(sessionExpiryProvider.notifier).markExpired();
@@ -82,7 +82,7 @@ final dioProvider = Provider<Dio>((ref) {
   );
 
   // 서버가 점검 중이라 막으면 앱 상태를 다시 묻는다. 이미 앱을 열어 둔 사람도
-  // 다음 요청에서 곧바로 점검 화면으로 넘어간다 (이슈 #279 QA).
+  // 다음 요청에서 곧바로 점검 화면으로 넘어간다.
   dio.interceptors.add(
     MaintenanceInterceptor(
       onMaintenance: () => ref.read(appStatusRecheckProvider.notifier).request(),
@@ -90,7 +90,7 @@ final dioProvider = Provider<Dio>((ref) {
   );
 
   // **맨 뒤에 붙인다.** 앞의 인증 인터셉터가 토큰을 갱신해 요청을 되살리면
-  // 그건 실패가 아니다 — 먼저 붙이면 되살아날 401 까지 실패로 남는다 (#352).
+  // 그건 실패가 아니다 — 먼저 붙이면 되살아날 401 까지 실패로 남는다.
   dio.interceptors.add(const FailureInterceptor());
 
   return dio;

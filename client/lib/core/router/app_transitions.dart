@@ -50,7 +50,7 @@ CustomTransitionPage<void> fadePage(GoRouterState state, Widget child) {
   );
 }
 
-/// 일과 만들기 흐름 안의 전환 — **배경은 두고 글자만 넘어간다** (#380).
+/// 일과 만들기 흐름 안의 전환 — **배경은 두고 글자만 넘어간다**.
 ///
 /// 흐름은 배경 하나(`RoutineFlowBackdrop`)를 함께 쓰고 화면은 바탕이 투명하다.
 /// 그래서 [slidePage]처럼 들어오는 화면이 나가는 화면을 덮을 수 없다 — 둘 다

@@ -1,5 +1,4 @@
-// 파일 이름은 #371 의 "슬라이드 한 장"에서 왔다. #390 에서 슬라이드를 없애고 공지 한 건의
-// 내용(그림·제목·본문)만 남았다. 이름을 바꾸려면 옛 파일을 지워야 해서 그대로 둔다.
+// 파일 이름은 슬라이드 시절 이름이 남은 것이다. 내용은 공지 한 건(그림·제목·본문)뿐이다.
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -14,7 +13,7 @@ typedef NoticeImageResolver = ImageProvider Function(String url);
 
 /// 공지 한 건의 글 자리 — (그림) · 제목 · 본문 (시안 1090:4922 `내용`).
 ///
-/// 줄바꿈은 **어절 단위다** ([keepWords]). 관리자 미리보기와 같은 줄에서 끊기게 한다(#385 A).
+/// 줄바꿈은 **어절 단위다** ([keepWords]). 관리자 미리보기와 같은 줄에서 끊기게 한다.
 /// 낭독기에는 표시 없는 원문을 준다.
 class NoticeContent extends StatelessWidget {
   const NoticeContent({
@@ -62,7 +61,7 @@ class NoticeContent extends StatelessWidget {
           SizedBox(height: imageToTitle.h),
         ],
         // 제목·본문을 제 노드로 세운다. 안 세우면 아래 버튼의 누름 동작이 이 글들과
-        // 한 노드로 합쳐져 버튼 영역이 글까지 덮는다 (#385 C).
+        // 한 노드로 합쳐져 버튼 영역이 글까지 덮는다.
         Semantics(
           container: true,
           child: Text.rich(
@@ -80,7 +79,7 @@ class NoticeContent extends StatelessWidget {
             ),
             semanticsLabel: title.map((p) => p.text).join(),
             textAlign: TextAlign.center,
-            // 공통 팝업 제목과 같은 순검정 (#318)
+            // 공통 팝업 제목과 같은 순검정
             style: typo.noticeTitle.copyWith(color: colors.dialogTitleText),
           ),
         ),
@@ -100,7 +99,7 @@ class NoticeContent extends StatelessWidget {
     );
   }
 
-  /// **시안 밖이다** (#390). 그림 있는 공지 변형은 디자이너 시안 전이라, 공통 팝업
+  /// **시안 밖이다**. 그림 있는 공지 변형은 디자이너 시안 전이라, 공통 팝업
   /// 규칙 안에서 임시로 둔다 — 아이콘 자리(제목 위)에 카드 안쪽 폭 그대로, 모서리는
   /// 같은 카드 안의 버튼과 같은 8. 시안이 오면 이 자리만 바꾼다.
   Widget _image(BuildContext context, String url) {

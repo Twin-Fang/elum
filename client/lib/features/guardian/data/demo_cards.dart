@@ -8,7 +8,7 @@ abstract final class DemoCards {
   /// 최종 fallback — 순수 상수라 어떤 상황에서도 실패하지 않는다.
   ///
   /// 문구는 Figma `보호자_홈_최근일과`(309:3739) 원본이다. 서버가 불안정한
-  /// 동안 이 카드로 화면을 확인하므로 디자인과 같아야 한다. (이슈 #34)
+  /// 동안 이 카드로 화면을 확인하므로 디자인과 같아야 한다.
   static const List<ActionCard> rainySchoolDay = [
     ActionCard(
       id: 'demo-1',

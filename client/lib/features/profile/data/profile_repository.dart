@@ -10,7 +10,7 @@ import '../domain/guardian_member.dart';
 import '../domain/profile_summary.dart';
 import '../../../app/dio_provider.dart';
 
-/// 초대 코드로 합류한 결과 — 서버 `ProfileJoinResponse` (#361).
+/// 초대 코드로 합류한 결과 — 서버 `ProfileJoinResponse`.
 @immutable
 class ProfileJoin {
   const ProfileJoin({required this.profile, this.removedProfileIds = const []});
@@ -23,10 +23,10 @@ class ProfileJoin {
   final List<String> removedProfileIds;
 }
 
-/// 초대·함께하는 사람·나가기 (다중 보호자 2단계 · 서버 #361).
+/// 초대·함께하는 사람·나가기.
 ///
 /// **절대 throw하지 않는다.** 실패는 [Attempt]·[AppFailure] 로 돌려준다 — 서버가 알려준
-/// 코드·문구를 화면이 그대로 띄울 수 있어야 하고(#352), 호출부마다 catch 가 흩어지면
+/// 코드·문구를 화면이 그대로 띄울 수 있어야 하고, 호출부마다 catch 가 흩어지면
 /// 빠뜨린 곳에서 화면이 죽는다.
 class ProfileRepository {
   ProfileRepository({required Dio dio}) : _dio = dio;
@@ -41,7 +41,7 @@ class ProfileRepository {
       );
       final code = res.data?['code']?.toString();
       // 서버의 절대 시각이 아니라 **남은 초**를 쓴다 — 두 시계가 어긋나면 남은 시간이
-      // 실제보다 길게 나온다 (연결 암호 #205 와 같은 이유).
+      // 실제보다 길게 나온다 (연결 암호와 같은 이유).
       final seconds = (res.data?['expiresInSeconds'] as num?)?.toInt();
       if (code == null || code.isEmpty || seconds == null || seconds <= 0) {
         // 코드 원문은 로그에 남기지 않는다. 있고 없고만 적는다.

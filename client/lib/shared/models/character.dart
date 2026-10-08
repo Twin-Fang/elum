@@ -9,7 +9,7 @@ enum CardCharacter {
   //
   // apiValue는 서버 CharacterType enum(LULU/POPO)에 맞춘다. 서버는 캐릭터를
   // '종류'(CAT/FOX)가 아니라 '이름'(루루/포포)으로 저장하므로 프론트가 이를 따른다.
-  // 어긋나면 PATCH /api/member/character가 역직렬화에 실패한다 (이슈 #89).
+  // 어긋나면 PATCH /api/member/character가 역직렬화에 실패한다.
   cat('LULU'),
   fox('POPO');
 
@@ -26,8 +26,7 @@ enum CardCharacter {
 
   /// 카드 아래에 표시되는 이름 (Figma `732:5320` 루루 / `732:5319` 포포).
   ///
-  /// 한때 이 자리가 회색 알약으로 비어 있어 화면에 넣지 않았는데,
-  /// 2026-09-22 시안에는 카드 밖 y=493에 텍스트로 들어와 있다.
+  /// 시안에서 카드 밖 y=493에 텍스트로 놓인다.
   String get displayName => switch (this) {
     CardCharacter.cat => appL10n.characterCatName,
     CardCharacter.fox => appL10n.characterFoxName,

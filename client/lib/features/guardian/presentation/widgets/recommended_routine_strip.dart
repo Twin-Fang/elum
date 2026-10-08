@@ -15,10 +15,10 @@ typedef _TileColors = ({Color tile, Color circle});
 ///
 /// Figma 좌표가 `x=16, 106, 196, 286`(간격 90 = 타일 86 + 여백 4)이고 4번째 타일
 /// 우측 끝이 372로 콘텐츠 영역 368을 넘어간다. **이 넘침이 스와이프 어포던스다** —
-/// 잘린 타일이 보여야 "더 있다"가 전달되므로 의도적으로 살린다. (이슈 #19)
+/// 잘린 타일이 보여야 "더 있다"가 전달되므로 의도적으로 살린다.
 ///
 /// 목록은 서버 `GET /api/routines/suggestions`에서 온다. **개수를 고정하지 않는다** —
-/// 서버가 몇 개를 주든 팔레트가 순환하므로 깨지지 않는다. (이슈 #36)
+/// 서버가 몇 개를 주든 팔레트가 순환하므로 깨지지 않는다.
 class RecommendedRoutineStrip extends ConsumerWidget {
   const RecommendedRoutineStrip({super.key, required this.onTap});
 
@@ -54,8 +54,8 @@ class RecommendedRoutineStrip extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final suggestions = ref.watch(routineSuggestionsProvider);
 
-    // 실패하면 왜 비었는지 알려준다. 예전에는 repository가 내장 추천으로
-    // 대신해 실패가 드러나지 않았다(#264).
+    // 실패하면 왜 비었는지 알려준다. 내장 추천으로 대신하면
+    // 실패가 드러나지 않는다.
     if (suggestions.hasError) {
       // 자리가 105 높이뿐이라 전체 실패 화면(ElumErrorView)은 넘친다.
       // 추천은 입력을 돕는 곁가지이므로 한 줄로 알리고 다시 시도만 준다.
@@ -65,7 +65,7 @@ class RecommendedRoutineStrip extends ConsumerWidget {
           child: TextButton(
             onPressed: () => ref.invalidate(routineSuggestionsProvider),
             child: Text(
-              // 서버가 이유를 알려줬으면 그 문구를 쓴다 (#352).
+              // 서버가 이유를 알려줬으면 그 문구를 쓴다.
               AppFailure.of(suggestions.error).describe(
                 context.l10n.routineSuggestLoadFailed,
                 'E-SUGGEST',

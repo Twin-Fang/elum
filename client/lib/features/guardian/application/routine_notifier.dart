@@ -67,9 +67,9 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     AppLogger.notifierCall('RoutineFlowNotifier', 'askQuestion');
     AppLogger.notifierStateChange('RoutineFlowNotifier', state.step.name, 'question');
 
-    // 같은 입력으로 이미 받은 질문이 있으면 그것을 다시 쓴다 (#393 S2). 보상으로
+    // 같은 입력으로 이미 받은 질문이 있으면 그것을 다시 쓴다. 보상으로
     // 되돌아갔다 오면 여기가 또 불린다 — 다시 부르면 AI 비용이 한 번 더 들고, 질문이
-    // 달라져 전에 고른 답이 엉뚱한 질문 옆에 남는다. 서버 질문은 입력만 보고 만든다.
+    // 달라져 앞서 고른 답이 엉뚱한 질문 옆에 남는다. 서버 질문은 입력만 보고 만든다.
     final cached = state.question;
     if (cached != null && state.questionInput == state.rawInput) {
       state = state.copyWith(step: RoutineFlowStep.question);
@@ -81,8 +81,8 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     try {
       question = await repo.generateQuestion(state.rawInput);
     } catch (e) {
-      // 서버에 닿지 못했다 (#393 S1). 입력과 무관한 질문을 띄우지 않고 연결 안내와
-      // 다시 하기를 띄운다 — 다음 단계(카드 만들기)도 같은 이유로 실패한다 (#352).
+      // 서버에 닿지 못했다. 입력과 무관한 질문을 띄우지 않고 연결 안내와
+      // 다시 하기를 띄운다 — 다음 단계(카드 만들기)도 같은 이유로 실패한다.
       final failure = AppFailure.of(e);
       AppLogger.notifierStateChange('RoutineFlowNotifier', 'question', 'error', {
         'fault': failure.fault.name,
@@ -96,7 +96,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
       return;
     }
 
-    // 새 질문이다 — 옛 질문에 고른 답과 직접 적은 선택지를 비운다 (#393 S2).
+    // 새 질문이므로 이전 질문에 고른 답과 직접 적은 선택지를 비운다.
     state = RoutineFlowState(
       step: RoutineFlowStep.question,
       rawInput: state.rawInput,
@@ -113,7 +113,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     });
   }
 
-  /// 질문 받기가 실패한 뒤 다시 한다 (#393 S1). 카드를 만들지 않는다 —
+  /// 질문 받기가 실패한 뒤 다시 한다. 카드를 만들지 않는다 —
   /// 준비 로딩의 `다시 하기`가 카드 생성 재시도로 이어지면 질문을 건너뛴다.
   Future<void> retryQuestion() {
     state = state.copyWith(step: RoutineFlowStep.maskResult);
@@ -176,8 +176,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   ///
   /// **`POST /api/routines`는 AI 호출이라 한 번이 곧 비용이다.**
   /// 로딩 화면이 재생성되면(토큰 만료 리다이렉트, 화면 복귀 등) `initState`가
-  /// 다시 돌아 [generateCards]를 또 부른다. 실제로 한 번의 일과 생성에
-  /// 요청이 16번 나간 적이 있다.
+  /// 다시 돌아 [generateCards]를 또 부른다.
   ///
   /// 위젯이 아니라 여기서 막는 이유 — 위젯은 몇 번이든 다시 만들어지지만
   /// provider는 흐름이 끝날 때까지 살아 있다.
@@ -187,7 +186,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   /// 로그로 남겨야 재발을 눈치챌 수 있다 — 조용히 막기만 하면 원인이 묻힌다.
   var _blockedCalls = 0;
 
-  /// 화면에서 뺐지만 서버에는 아직 남아 있는 카드 (이슈 #405).
+  /// 화면에서 뺐지만 서버에는 아직 남아 있는 카드.
   ///
   /// [save]가 이것을 서버에 반영한다. **화면이 아니라 여기에 둔다** — 카드확인
   /// 화면은 저장 도중에도 다시 만들어질 수 있고, 목록에서 이미 사라진 카드는
@@ -197,13 +196,13 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   /// 없는 카드를 또 지우러 가면 안 된다.
   final _removedStepIds = <String>{};
 
-  /// 일과 하나의 최대 카드 수 — 서버 `RoutineService.STEP_MAX_COUNT` 와 같은 값이다(#444).
+  /// 일과 하나의 최대 카드 수 — 서버 `RoutineService.STEP_MAX_COUNT` 와 같은 값이다.
   ///
   /// 서버는 **자기가 가진 카드**를 센다. 보호자가 화면에서 뺀 카드는 저장하기 전까지 서버에
   /// 남아 있어서, 화면은 9장인데 서버는 10장이라 추가가 거절될 수 있다.
   static const _maxSteps = 10;
 
-  /// 화면에서 카드 순서를 바꿨지만 서버에는 아직 안 보낸 상태 (#444).
+  /// 화면에서 카드 순서를 바꿨지만 서버에는 아직 안 보낸 상태.
   ///
   /// 뺀 카드([_removedStepIds])와 같은 이유로 **저장하기가 보낸다.** 서버 순서 API 는
   /// 카드 전체를 요구하는데(개수가 다르면 400) 뺀 카드는 그때까지 서버에 남아 있어서,
@@ -215,14 +214,14 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   /// [RoutineFlowState.idempotencyKey]를 발급할 때의 요청 내용.
   ///
   /// 내용이 같으면 재시도라 같은 키, 다르면(되돌아가 입력·답·보상을 고쳤다) 새 요청이라
-  /// 새 키다. 고친 요청에 옛 키를 실으면 서버는 옛 요청으로 보고 옛 일과를 준다.
+  /// 새 키다. 고친 요청에 이전 키를 실으면 서버는 이전 요청으로 보고 이전 일과를 준다.
   String? _keyIssuedFor;
 
   Future<void> generateCards() {
     // 진행 중이거나 이미 끝난 생성이 있으면 그것을 그대로 돌려준다.
     //
     // **성공한 뒤에도 가드를 풀지 않는다.** 풀면 로딩 화면이 나중에 다시
-    // 만들어졌을 때 또 쏜다 — 16번 사고가 정확히 이 경로였다.
+    // 만들어졌을 때 또 쏜다.
     // 새 일과를 만들 때는 홈에서 [reset]을 부르므로 그때 풀린다.
     final running = _generating;
     if (running != null) {
@@ -248,7 +247,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     return generateCards();
   }
 
-  /// 보상을 정한다 (이슈 #239).
+  /// 보상을 정한다.
   ///
   /// [text]가 비면 **건너뛴 것**으로 본다 — 프리셋 키도 함께 비운다.
   /// 키만 남으면 이룸이 화면이 문구 없는 이모지를 띄운다.
@@ -260,7 +259,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     );
   }
 
-  /// 카드를 만든 **뒤에** 보상을 고친다 (검토 화면에서 · 이슈 #239).
+  /// 카드를 만든 **뒤에** 보상을 고친다 (검토 화면에서).
   ///
   /// 생성 전 [setReward]와 다르다 — 이미 일과가 서버에 있으므로 API를 탄다.
   /// 저장에 실패해도 로컬에는 반영한다. **보상은 선택 항목이라 실패가 흐름을
@@ -305,7 +304,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
         rawInputText: state.rawInput,
         goals: goals,
         answers: state.answers,
-        // 건너뛰었으면 빈 문자열이다. 서버가 보상 없음으로 저장한다 (이슈 #239).
+        // 건너뛰었으면 빈 문자열이다. 서버가 보상 없음으로 저장한다.
         rewardText: state.rewardText,
         rewardPresetKey: state.rewardPresetKey,
         idempotencyKey: state.idempotencyKey ?? '',
@@ -319,10 +318,10 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
         routine: routine,
         creditUsage: routine.creditUsage,
       );
-      // 잔액이 바뀌었다 — 설정 카드·직전 안내가 옛 숫자를 보이지 않게 한다.
+      // 잔액이 바뀌었다 — 설정 카드·직전 안내가 이전 숫자를 보이지 않게 한다.
       ref.invalidate(creditSummaryProvider);
       // 이 순간 서버에 임시저장(`PENDING_REVIEW`)으로 남았다. 목록을 다시 받지 않으면
-      // 앱을 다시 켜기 전까지 임시저장 화면에 안 보인다 (#387) — 전체 목록이
+      // 앱을 다시 켜기 전까지 임시저장 화면에 안 보인다 — 전체 목록이
       // keepAlive 라 한 번 받은 것을 계속 준다.
       ref.refreshRoutines();
     } catch (e) {
@@ -332,9 +331,9 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
       _generating = null;
 
       // **서버가 이유를 알려줬으면 그것을 그대로 쓴다.** 주간 한도·일과 개수 한도는
-      // 재시도로 풀리지 않는데, 뭉뚱그리면 사용자는 계속 다시 누른다 (#347).
+      // 재시도로 풀리지 않는데, 뭉뚱그리면 사용자는 계속 다시 누른다.
       // 판정은 전역 [AppFailure] 하나가 한다 — 여기서 본문을 다시 파싱하지 않고,
-      // 연결 실패·타임아웃도 같은 통로로 들어온다 (#352).
+      // 연결 실패·타임아웃도 같은 통로로 들어온다.
       final failure = AppFailure.of(e);
       state = state.copyWith(
         step: RoutineFlowStep.error,
@@ -361,7 +360,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     return newIdempotencyKey();
   }
 
-  /// 임시저장에서 이어서 만들기 (#349).
+  /// 임시저장에서 이어서 만들기.
   ///
   /// 목록이 이미 [Routine]을 들고 있으므로 다시 받아오지 않는다. 카드확인 화면은
   /// 이 상태만 있으면 그대로 선다.
@@ -373,7 +372,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     state = RoutineFlowState(step: RoutineFlowStep.review, routine: routine);
   }
 
-  /// 로딩 화면이 정한 시간 안에 결과가 오지 않았다 (#276).
+  /// 로딩 화면이 정한 시간 안에 결과가 오지 않았다.
   ///
   /// 요청 자체를 취소하지는 않는다 — 이미 나간 AI 요청은 되돌릴 수 없다.
   /// 다만 사용자를 더 붙잡지 않고 에러 코드와 재시도를 보여준다.
@@ -384,7 +383,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     state = state.copyWith(step: RoutineFlowStep.error, errorCode: 'E-1002');
   }
 
-  /// 카드확인에서 카드를 직접 추가한다 (#444 · 시안 1197:6044).
+  /// 카드확인에서 카드를 직접 추가한다 (시안 1197:6044).
   ///
   /// 서버에 **바로** 넣는다 — 새 카드의 id 는 서버가 준다. 성공하면 새 카드를 화면
   /// 목록 **맨 뒤**에 붙인다. 서버가 돌려준 전체 목록을 그대로 쓰지 않는다: 그 안에는
@@ -429,7 +428,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     ];
     if (added.isEmpty) return const AppFailure(fault: NetworkFault.app);
 
-    // 서버 응답에는 카드 제목이 없다(RoutineStep 에 title 컬럼이 없다, #77) —
+    // 서버 응답에는 카드 제목이 없다(RoutineStep 에 title 컬럼이 없다) —
     // 보호자가 쓴 제목을 되살린다.
     final withTitle = [
       for (final s in added) s.title.isEmpty ? s.copyWith(title: title) : s,
@@ -440,7 +439,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     return null;
   }
 
-  /// 카드 그림을 사진으로 바꾼 뒤 새 `imagePath` 를 반영한다 (#456).
+  /// 카드 그림을 사진으로 바꾼 뒤 새 `imagePath` 를 반영한다.
   ///
   /// 서버 응답 전체를 쓰지 않고 **`imagePath` 만** 바꾼다 — 응답에는 카드 제목이 없어
   /// 통째로 덮으면 로컬 제목이 지워진다([updateStep] 과 같은 사정). 그 사이 지워진 카드면
@@ -460,7 +459,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     ref.refreshRoutines();
   }
 
-  /// 순서 변경 모드에 들어가는 순간의 순서. `✕` 로 나올 때 되돌린다 (#444).
+  /// 순서 변경 모드에 들어가는 순간의 순서. `✕` 로 나올 때 되돌린다.
   ({List<ActionCard> steps, bool dirty}) snapshotOrder() => (
     steps: List.of(state.routine?.steps ?? const <ActionCard>[]),
     dirty: _orderDirty,
@@ -474,7 +473,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     state = state.copyWith(routine: routine.copyWith(steps: snapshot.steps));
   }
 
-  /// 카드 한 장을 옮긴다 (#444 · 시안 1197:5798 길게 눌러 순서 변경).
+  /// 카드 한 장을 옮긴다 (시안 1197:5798 길게 눌러 순서 변경).
   ///
   /// [newIndex] 는 `ReorderableListView.onReorder` 가 주는 값 그대로다 — 아래로
   /// 옮길 때 **제거 전** 위치를 주므로 여기서 하나 뺀다. 범위를 벗어나면 무시한다.
@@ -515,7 +514,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     if (routine == null || routine.steps.length <= 1) return;
     if (!routine.steps.any((s) => s.id == stepId)) return;
 
-    // 저장하기가 이 목록을 보고 서버에서 뺀다 (#405). 화면에서만 지우고 끝내면
+    // 저장하기가 이 목록을 보고 서버에서 뺀다. 화면에서만 지우고 끝내면
     // 나가기 팝업의 "저장하기를 눌러야 빠져요" 가 지켜지지 않는다.
     _removedStepIds.add(stepId);
 
@@ -529,9 +528,9 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   /// 카드 제목·설명 수정 (Figma 262:5124 `이 카드 수정하기`).
   ///
   /// 돌려주는 값이 null 이 아니면 서버 반영에 실패해 로컬에만 저장됐다 —
-  /// 그 안에 서버가 알려준 이유가 들어 있고, 화면이 그대로 안내한다 (#352).
+  /// 그 안에 서버가 알려준 이유가 들어 있고, 화면이 그대로 안내한다.
   ///
-  /// 제목·설명을 함께 서버에 보낸다. 응답 제목이 비어 오는 예전 카드는
+  /// 제목·설명을 함께 서버에 보낸다. 응답 제목이 비어 오는 카드는
   /// 로컬 제목을 되살려 합친다.
   Future<AppFailure?> updateStep({
     required String stepId,
@@ -576,7 +575,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     return result.failure;
   }
 
-  /// 화면에서 뺀 카드를 서버에서 지운다 (#405). [save] 와 [addStep] 이 함께 쓴다.
+  /// 화면에서 뺀 카드를 서버에서 지운다. [save] 와 [addStep] 이 함께 쓴다.
   ///
   /// null 이면 전부 지웠다. 하나라도 실패하면 이유를 돌려주고 **멈춘다** — 성공한 것은
   /// 기억에서 지워 다시 부를 때 남은 것만 보낸다.
@@ -599,7 +598,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     return null;
   }
 
-  /// 카드확인의 `저장하기` (이슈 #405).
+  /// 카드확인의 `저장하기`.
   ///
   /// 하는 일이 **일과의 상태에 따라 다르다.**
   ///
@@ -608,14 +607,14 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   /// | 만들기 흐름 | `PENDING_REVIEW` | 뺀 카드를 지우고 **승인**한다 |
   /// | 홈에서 편집 | 그 밖(`CONFIRMED`·`COMPLETED`) | 뺀 카드만 지운다 |
   ///
-  /// 전에는 어느 쪽이든 승인 API 를 불렀다. 서버는 임시저장만 승인할 수 있어서
-  /// 이미 저장한 일과를 편집하면 `ROUTINE_INVALID_STATUS` 로 거절했다.
+  /// 서버는 임시저장만 승인할 수 있어, 이미 저장한 일과에 승인 API 를 부르면
+  /// `ROUTINE_INVALID_STATUS` 로 거절한다.
   ///
   /// **지우기가 먼저다.** 승인하는 순간 이룸이 화면에 카드가 나가므로(docs 원칙
   /// 3번), 순서가 바뀌면 뺀 카드가 잠깐이라도 이룸이에게 보인다.
   ///
   /// null 이면 성공. 실패하면 이유가 담겨 오고 **화면은 그대로 둔다** — 홈으로
-  /// 보내면 저장된 것처럼 보이는데 이룸이 휴대폰에는 옛 카드가 그대로다.
+  /// 보내면 저장된 것처럼 보이는데 이룸이 휴대폰에는 이전 카드가 그대로다.
   Future<AppFailure?> save() async {
     AppLogger.notifierCall('RoutineFlowNotifier', 'save', {
       'removed': _removedStepIds.length,
@@ -660,7 +659,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     return null;
   }
 
-  /// 이미 만든 일과를 검토 화면에 올린다 (이슈 #258 — 홈에서 `수정`).
+  /// 이미 만든 일과를 검토 화면에 올린다 (홈에서 `수정`).
   ///
   /// 만들기 흐름을 거치지 않고 중간 화면부터 여는 유일한 입구라, 앞 단계에서
   /// 남은 값(원문·질문·답)을 함께 비운다. 남겨두면 이 일과와 상관없는 이전
@@ -669,7 +668,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     AppLogger.notifierCall('RoutineFlowNotifier', 'loadExisting', {
       'routineId': routine.id,
     });
-    // 앞서 다른 일과에서 뺀 카드가 남아 있으면 엉뚱한 카드를 지우러 간다 (#405).
+    // 앞서 다른 일과에서 뺀 카드가 남아 있으면 엉뚱한 카드를 지우러 간다.
     _removedStepIds.clear();
     _orderDirty = false;
     state = RoutineFlowState(

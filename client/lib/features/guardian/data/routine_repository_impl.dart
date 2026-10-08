@@ -105,16 +105,16 @@ class RoutineRepositoryImpl implements RoutineRepository {
       }
     } catch (e) {
       AppLogger.repositoryError('RoutineRepository', 'generateQuestion', e);
-      // 서버에 닿지 못했다 — 흐름이 연결 안내를 띄우게 넘긴다 (#393 S1).
+      // 서버에 닿지 못했다 — 흐름이 연결 안내를 띄우게 넘긴다.
       final failure = AppFailure.of(e);
       if (failure.isUnreachable) throw failure;
-      // 크레딧이 막았다 (#407). 질문 없이 넘기면 카드 만들기에서 같은 이유로 또
+      // 크레딧이 막았다. 질문 없이 넘기면 카드 만들기에서 같은 이유로 또
       // 막힌다 — 질문 단계에서 멈추고 `홈으로` 오류 화면을 띄우게 넘긴다.
       if (isCreditBlockingCode(failure.badgeOr(''))) throw failure;
     }
 
-    // 응답은 받았는데 실패했다(5xx·빈 본문 등). 예전에는 여기서 `비 오는 날
-    // 준비물` 대체 질문을 줬는데, 수영장 가기를 적어도 우산을 물었다 (#393 S1).
+    // 응답은 받았는데 실패했다(5xx·빈 본문 등). 입력과 무관한 대체 질문은
+    // 엉뚱한 질문(수영장 가기에 우산)이 되므로 주지 않는다.
     // 질문은 선택 단계라 없이 넘어가도 카드는 만들어진다.
     AppLogger.repositorySuccess(
       'RoutineRepository',
@@ -272,7 +272,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
     });
 
     // 서버로 보내려 했는데 왜 실패했는가 — **이유까지 들고 나간다.**
-    // `false` 로 납작하게 만들면 서버가 알려준 문구가 여기서 사라진다 (#352).
+    // `false` 로 납작하게 만들면 서버가 알려준 문구가 여기서 사라진다.
     AppFailure? failure;
 
     if (routine.id.isNotEmpty) {
@@ -333,8 +333,8 @@ class RoutineRepositoryImpl implements RoutineRepository {
           'getTodayRoutines',
           '${routines.length}개 오늘 일과 조회됨',
         );
-        // 성공한 응답을 캐시해 둔다 — 다음에 오프라인이면 이걸 보여준다 (이슈 #140).
-        // toJson 이 보호자 원문을 빼고 직렬화한다 (#358).
+        // 성공한 응답을 캐시해 둔다 — 다음에 오프라인이면 이걸 보여준다.
+        // toJson 이 보호자 원문을 빼고 직렬화한다.
         await _storage?.setCachedTodayRoutinesJson(
           jsonEncode(routines.map((r) => r.toJson()).toList()),
         );
@@ -356,7 +356,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
     }
 
     // 캐시도 없으면 전체 조회로 폴백. 전체에는 어제 것·승인 전 것이 섞여 있어 오늘 것만
-    // 남긴다 — 거르지 않으면 보호자 홈 오늘 일과에 그대로 뜬다 (#353, docs 원칙 3번).
+    // 남긴다 — 거르지 않으면 보호자 홈 오늘 일과에 그대로 뜬다 (docs 원칙 3번).
     AppLogger.repositorySuccess(
       'RoutineRepository',
       'getTodayRoutines (폴백)',
@@ -365,7 +365,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
     return _onlyToday(await getMyRoutines());
   }
 
-  // --- 보상(강화물) · 일과 정리 (이슈 #148~150) ---
+  // --- 보상(강화물) · 일과 정리 ---
 
   @override
   Future<({Routine routine, AppFailure? failure})> updateReward(
@@ -601,10 +601,10 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
   /// 캐시가 깨져 있으면 null — 폴백으로 넘긴다. 캐시 한 건 때문에 화면이 죽으면 안 된다.
   ///
-  /// 옛 빌드가 저장한 캐시에는 보호자 원문 키가 남아 있을 수 있다 (#358).
+  /// 이전 빌드가 저장한 캐시에는 보호자 원문 키가 남아 있을 수 있다.
   /// 읽을 때 그 키를 지워 다시 쓰므로, 오프라인으로만 열어도 원문이 오래 남지 않는다.
   /// 서버 `/today` 와 같은 규칙으로 거른다 — 어제 받아 둔 캐시나 전체 목록 폴백이
-  /// 오늘 일과로 나가지 않게 한다 (#353).
+  /// 오늘 일과로 나가지 않게 한다.
   List<Routine> _onlyToday(List<Routine> routines) {
     final now = DateTime.now();
     return routines.where((r) => r.isTodayOn(now)).toList();

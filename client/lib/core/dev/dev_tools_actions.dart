@@ -99,12 +99,12 @@ class _ConfirmResetView extends ConsumerWidget {
               Expanded(
                 child: FilledButton(
                   onPressed: () async {
-                    // 서버 계정까지 지운다. 실패하면 로컬도 그대로 남는다 (이슈 #187) —
+                    // 서버 계정까지 지운다. 실패하면 로컬도 그대로 남는다 —
                     // 개발 도구라 여기서는 결과를 따지지 않고 로그인으로 보낸다.
                     await ref.read(authRepositoryProvider).deleteAccount();
                     // 메모리 상태도 비운다 — 저장소만 지우면 화면이 이전 값을 들고 있다.
                     // routineFlow(방금 만든 일과)·myRoutines(서버 조회 캐시)를 함께 비우지
-                    // 않으면 재가입 후 홈에 이전 계정 일과가 그대로 노출된다 (이슈 #91).
+                    // 않으면 재가입 후 홈에 이전 계정 일과가 그대로 노출된다.
                     ref.read(routineFlowProvider.notifier).reset();
                     ref.refreshRoutines();
                     ref.invalidate(onboardingProvider);
@@ -124,7 +124,7 @@ class _ConfirmResetView extends ConsumerWidget {
   }
 }
 
-/// 로그아웃 확인 — 계정은 남기고 세션만 끊는다 (이슈 #219).
+/// 로그아웃 확인 — 계정은 남기고 세션만 끊는다.
 ///
 /// 회원삭제는 되돌릴 수 없어 테스트 중 계정을 계속 새로 만들어야 했다.
 /// 로그인 흐름만 다시 밟고 싶을 때 쓴다.
@@ -161,7 +161,7 @@ class _ConfirmLogoutView extends ConsumerWidget {
                 child: FilledButton(
                   onPressed: () async {
                     await ref.read(authRepositoryProvider).logout();
-                    // 메모리에 남은 이전 계정 값도 비운다 (회원삭제와 같은 이유, 이슈 #91)
+                    // 메모리에 남은 이전 계정 값도 비운다 (회원삭제와 같은 이유)
                     ref.read(routineFlowProvider.notifier).reset();
                     ref.refreshRoutines();
                     ref.invalidate(onboardingProvider);

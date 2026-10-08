@@ -6,7 +6,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/routine.dart';
 
-/// 이룸이 화면의 보상 칩 (이슈 #239 · 시안 #445).
+/// 이룸이 화면의 보상 칩.
 ///
 /// **같은 보상을 두 곳에서 보여준다** — 수행 중(일과 진행)과 완료(보상 화면).
 /// 두 곳이 따로 그리면 문구와 모양이 어긋나므로 한 위젯으로 묶었다.
@@ -62,7 +62,7 @@ class RewardBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // 직접 적은 보상에는 그림이 없다. 빈 글자를 그대로 두면 문구 앞에 빈칸만 남는다 (#275).
+    // 직접 적은 보상에는 그림이 없다. 빈 글자를 그대로 두면 문구 앞에 빈칸만 남는다.
     final display = emoji.isEmpty ? text : '$emoji $text';
 
     return Container(
@@ -77,7 +77,7 @@ class RewardBanner extends StatelessWidget {
       child: Text.rich(
         // 시안 PNG 실측: `다하면`과 보상 글자의 색이 다르다. 밝은 화면은 회색(#74757D)
         // 과 짙은 민트(#40BBA6), 어두운 화면은 흰색과 민트(#55CFBA)다.
-        // Figma 덤프는 글자 구간별 색을 주지 않아 한 색으로 보인다 (#445).
+        // Figma 덤프는 글자 구간별 색을 주지 않아 한 색으로 보인다.
         TextSpan(
           children: [
             TextSpan(

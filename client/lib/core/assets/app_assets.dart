@@ -11,7 +11,7 @@ import '../../shared/models/support_goal.dart';
 abstract final class AppAssets {
   static const _images = 'assets/images';
 
-  /// 카드 그림 자리의 무료 픽토그램 — Mulberry Symbols v3.6.1 (CC BY-SA 4.0, #469).
+  /// 카드 그림 자리의 무료 픽토그램 — Mulberry Symbols v3.6.1 (CC BY-SA 4.0).
   ///
   /// [id] 는 서버가 내려주는 `pictogramId` (SVG 파일명 stem, 예 `get_dressed_,_to`).
   /// **원본 SVG 를 고치거나 다시 칠하지 않는다** — 라이선스가 변형을 막는다. 크기와 배치만 바꾼다.
@@ -21,7 +21,7 @@ abstract final class AppAssets {
   /// 소셜 로그인 제공자 로고 (22×22). Figma `로그인`(238:1808)에서 받았다.
   ///
   /// **각 사의 브랜드 자산이다.** 색·비율을 바꾸면 제공자 검수·스토어 심사에서
-  /// 지적받는다. 파일을 열어 색을 고치지 않는다 (이슈 #230).
+  /// 지적받는다. 파일을 열어 색을 고치지 않는다.
   static const _loginIcons = 'assets/icon/login';
   static const loginKakao = '$_loginIcons/kakao.svg';
   static const loginNaver = '$_loginIcons/naver.svg';
@@ -39,16 +39,14 @@ abstract final class AppAssets {
   /// 주의·실패 팝업 — 붉은 원에 느낌표 (Figma `팝업` 1045:5212 · 1045:5098).
   ///
   /// 로그아웃·회원탈퇴·모든 실패가 같은 아이콘을 쓴다. 이룸이 화면도 같다 —
-  /// 시안에 노란 경고가 없어 #433 에서 #242 의 노란 아이콘을 없앴다.
+  /// 시안에 노란 경고가 없다.
   static const dialogAlert = 'assets/icon/dialog/alert_round.svg';
 
-  /// 도움 목표 아이콘 (40×40). Figma `온보딩_목표`(204:1002)의 Group 62~65,
-  /// 목표별로 서로 다른 아이콘이다 (2026-07-22 갱신, 이슈 #11 후속).
   /// 목표 칩 아이콘 (40×40).
   ///
   /// **고른 뒤에는 배경 원 색이 바뀐다** — 미선택 `#EEE9E6`, 선택 `#93DBCC`
   /// (Figma `204:1002` ↔ `204:1147`). 원이 그림 안에 들어 있어 코드로 덧칠할 수
-  /// 없으므로 두 벌을 따로 들여온다. 한 벌만 쓰면 고른 칩만 원이 허옇게 남는다 (#297).
+  /// 없으므로 두 벌을 따로 들여온다. 한 벌만 쓰면 고른 칩만 원이 허옇게 남는다.
   static String goalIcon(SupportGoal goal, {bool selected = false}) {
     final suffix = selected ? '_selected' : '';
     return switch (goal) {
@@ -61,7 +59,7 @@ abstract final class AppAssets {
 
   /// 역할 선택 카드 그림 (40×40) — ⚠️ **임시로 목표 아이콘을 빌려 쓴다.**
   ///
-  /// 전용 그림 2종은 아직 없다 (#198 D1 🎨 `역할 선택 그림 2`). 도형을 코드로
+  /// 전용 그림 2종이 아직 없다. 도형을 코드로
   /// 그리지 않기 위한 대타이므로, 에셋이 나오면 **이 두 줄만** 바꾸면 된다.
   static const roleGuardianMock = '$_images/goal_icon_step_by_step.svg';
   static const roleElumiMock = '$_images/goal_icon_independent.svg';
@@ -98,7 +96,7 @@ abstract final class AppAssets {
   static const iconVolume = '$_images/icon_volume.svg';
 
   /// 카드확인의 카드 삭제 버튼 (30×30 — 흐린 원 + X).
-  /// Figma 393:4010 (262:5124 이미지 우상단, 2026-07-22 덤프).
+  /// Figma 393:4010 (262:5124 이미지 우상단).
   static const iconCardDelete = '$_images/icon_card_delete.svg';
 
   /// 아이 홈의 체크 버튼 (88×88). 체크 전 빈 원.
@@ -142,7 +140,7 @@ abstract final class AppAssets {
   /// 보호자 홈 "새로운 일과 만들기" 카드 아이콘 (47×51). Figma 217:2675.
   ///
   /// 보호자가 고른 캐릭터(고양이/여우)와 무관하게 **AI 마스코트 "루미" 병아리로 고정**이다.
-  /// (이슈 #110 — 기존엔 [characterBadgeFramed]를 잘못 재사용하고 있었다)
+  /// [characterBadgeFramed]를 재사용하면 캐릭터에 따라 달라지므로 쓰지 않는다.
   static const homeNewRoutineChick = '$_images/home_new_routine_chick.svg';
 
   /// 완료 체크 (10×10). Figma `fi-br-check`.
@@ -178,7 +176,7 @@ abstract final class AppAssets {
   ///
   /// **PNG다.** 더듬이 끝 민트 구슬의 빛이 SVG `<filter>`라 렌더러가 통째로
   /// 버려 납작한 점만 남았고, 몸통 방사형 그라데이션 셋에도 `gradientTransform`
-  /// 행렬이 걸려 빛 자리가 어긋났다. 병아리 몸통·구슬과 같은 부류다 (#297).
+  /// 행렬이 걸려 빛 자리가 어긋났다. 병아리 몸통·구슬과 같은 부류다.
   static const lumiThinking = '$_images/lumi_thinking.png';
 
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
@@ -205,13 +203,13 @@ abstract final class AppAssets {
   ///
   /// **PNG다.** 방사형 그라데이션에 `gradientTransform` 행렬이 걸려 있어
   /// 렌더러가 그대로 그리지 못한다 — 아래쪽 민트가 훨씬 옅게 나와 몸이
-  /// 33 짧아 보였다 (#297). 필터를 버리는 것과 같은 부류다.
+  /// 33 짧아 보였다. 필터를 버리는 것과 같은 부류다.
   static const splashChickBody = '$_images/splash_chick_body.png';
 
   /// 병아리 몸통 — **안드로이드 시안 전용** (Figma `1022:4386` — 393×481.5).
   ///
   /// iOS 것(439)보다 **43 크다.** 같은 그림을 늘려 쓰면 방사형 그라데이션이
-  /// 세로로 늘어나 민트가 아래로 밀린다 — 그래서 따로 받았다 (#338).
+  /// 세로로 늘어나 민트가 아래로 밀린다 — 그래서 따로 받았다.
   static const splashChickBodyAos = '$_images/splash_chick_body_aos.png';
 
   /// 몸통 하단 페이드 (393×177)
@@ -223,7 +221,7 @@ abstract final class AppAssets {
   /// 새싹 줄기 — **안드로이드 시안 전용** (Figma `1022:4385` — 113×111).
   ///
   /// [splashHill]의 **거울상이다.** 병아리가 앞을 보는 배치라 줄기가 반대로
-  /// 휘고 구슬이 오른쪽 끝에 달린다. 좌우 반전으로는 만들 수 없어 따로 받았다 (#338).
+  /// 휘고 구슬이 오른쪽 끝에 달린다. 좌우 반전으로는 만들 수 없어 따로 받았다.
   static const splashHillAos = '$_images/splash_hill_aos.svg';
 
   /// 반짝이는 별 (36×34 영역)
@@ -231,7 +229,7 @@ abstract final class AppAssets {
   ///
   /// **PNG다.** 빛이 SVG `<filter>`라 렌더러가 통째로 버린다. 상자는 96×94이고
   /// 본체가 그 안 (30, 30)에 있다 — 본체를 시안 자리(67, 340)에 두려면
-  /// 상자를 (37, 310)에 놓는다 (#297).
+  /// 상자를 (37, 310)에 놓는다.
   static const splashOrb = '$_images/splash_orb.png';
 
   @Deprecated('빛이 빠진다. splashOrb(PNG)를 쓴다.')
@@ -244,7 +242,7 @@ abstract final class AppAssets {
   /// 안드로이드 시안(`1022:4333`)은 앞을 보고 얼굴이 있다.
   ///
   /// 파일은 두 시안이 **똑같다**(md5 일치). 자리만 다르다 — 안드로이드는 `y=530`
-  /// 이고 옛 시안은 573이었다. 그리는 조건과 자리는 `LoginSceneLayout`이 정한다 (#338).
+  /// 이고 이전 시안은 573이다. 그리는 조건과 자리는 `LoginSceneLayout`이 정한다.
   static const splashCharLeft = '$_images/splash_char_left.svg';
   static const splashCharRight = '$_images/splash_char_right.svg';
 
@@ -254,13 +252,13 @@ abstract final class AppAssets {
   /// 이룸이 카드의 **체크 표시** (Figma `993:4331` — 48×35.76).
   ///
   /// `Icons.check_rounded`를 쓰고 있었는데 획이 훨씬 가늘다. 시안과 나란히 놓고
-  /// 진한 픽셀을 세면 607 대 212였다. 색은 상태에 따라 바뀌므로 덧칠한다 (#297).
+  /// 진한 픽셀을 세면 607 대 212였다. 색은 상태에 따라 바뀌므로 덧칠한다.
   static const childCheckMark = '$_images/child_check_mark.svg';
 
   /// 일과 시트 행의 **순서 바꾸기 손잡이** (Figma `963:4240` 순서변경 — 18×18).
   ///
   /// `Icons.drag_handle`을 쓰고 있었는데 그건 **줄이 둘**이다. 시안은 셋이고
-  /// 색도 `#CACACA`로 더 진하다. 나란히 놓고 보기 전에는 안 드러났다 (#297).
+  /// 색도 `#CACACA`로 더 진하다. 나란히 놓고 보기 전에는 안 드러났다.
   static const sheetReorderHandle = '$_images/sheet_reorder_handle.svg';
 
   // --- 홈 일과 목록 (Figma 356:4688 / 356:5079 / 343:4543 / 364:8219) ---
@@ -270,7 +268,7 @@ abstract final class AppAssets {
   /// 아이 홈에서는 90° 돌려 `>`로 쓴다.
   static const iconAngleSmall = '$_images/icon_angle_small_up.svg';
 
-  // --- 코치마크 (시안 1291:10801, #505) ---
+  // --- 코치마크 (시안 1291:10801) ---
 
   /// 말풍선 위 점선 화살표 (12×31, 흰색). 시안 1291:10730 — 아래를 가리킨다.
   static const coachArrow = '$_images/coach_arrow.svg';
@@ -284,7 +282,7 @@ abstract final class AppAssets {
   /// 같은 자리의 수정 아이콘 (24×24, 흰색). Figma `fi-br-pencil`(931:4364).
   static const iconPencil = '$_images/icon_pencil.svg';
 
-  // --- 카드확인 도구 버튼·순서 변경 (시안 1173:5541 / 1197:5798, #444) ---
+  // --- 카드확인 도구 버튼·순서 변경 (시안 1173:5541 / 1197:5798) ---
 
   /// `카드 순서 변경` 버튼 아이콘 (16×16, 시안 1173:5577).
   static const iconInterlining = '$_images/icon_interlining.svg';
@@ -309,7 +307,7 @@ abstract final class AppAssets {
   ///
   /// **[iconClock]과 다른 파일이다.** 저쪽은 파랑(#9CADF1), 이쪽은 섹션
   /// 라벨과 같은 회색(#74757D)이다. 모양이 같아 재사용했다가 색이 어긋난 채
-  /// 배포됐다 — 시안과 픽셀로 맞대보고서야 드러났다 (이슈 #258).
+  /// 배포됐다 — 시안과 픽셀로 맞대보고서야 드러났다.
   static const iconTodayRoutine = '$_images/icon_today_routine.svg';
 
   /// 홈 우상단 설정 톱니 (24×24). Figma `설정`(781:5992).
@@ -337,7 +335,7 @@ abstract final class AppAssets {
   /// 세 겹이 전부 SVG `filter`다. **flutter_svg는 filter를 통째로 버린다**
   /// (`unhandled element <filter/>`). 그러면 맨 뒤의 후광용 반투명 별이 흐려지지
   /// 않고 그대로 깔려, 별 둘레에 탁한 올리브색 띠가 생긴다 — 시안의 흰빛 도는
-  /// 얇은 테두리와 전혀 다르게 보인다. 필터가 구워진 PNG를 쓴다 (#297).
+  /// 얇은 테두리와 전혀 다르게 보인다. 필터가 구워진 PNG를 쓴다.
   ///
   /// Figma가 알려주는 배치 크기(299×299)는 **필터까지 포함한 상자**라 실제
   /// 그림보다 크다. 에셋을 늘리지 말고 원본 크기 그대로 놓는다.
@@ -354,7 +352,7 @@ abstract final class AppAssets {
   /// 보상 화면 큰 별 옆에 뜨는 작은 별 둘 (Figma `334:4293` 초록 · `334:4294` 보라).
   ///
   /// **별 모으기 화면의 `starDeco`와 다른 노드다.** 그쪽 초록별은 40%만 불투명해
-  /// 어두운 보상 배경에 올리면 시커멓게 죽는다. 실제로 그걸 돌려 쓰고 있었다 (#297).
+  /// 어두운 보상 배경에 올리면 시커멓게 죽는다. 실제로 그걸 돌려 쓰고 있었다.
   /// 후광(`boxShadow 0 0 10px`)이 구워진 PNG라 렌더러가 버리지 않는다.
   static const rewardStarGreen = '$_images/reward_star_green.png';
   static const rewardStarPurple = '$_images/reward_star_purple.png';

@@ -8,7 +8,6 @@ import '../../../core/l10n/current_l10n.dart';
 /// (`icon` / `text` 두 필드. 서버가 50개 카탈로그에서 셔플해 돌려준다)
 ///
 /// **개수를 고정하지 않는다.** 서버가 몇 개를 주든 화면이 깨지지 않아야 한다.
-/// enum이었다가 클래스로 바꾼 이유가 이것이다. (이슈 #36)
 ///
 /// **색은 여기 없다.** 서버가 주지 않으므로 화면이 인덱스로 배정한다
 /// (`RecommendedRoutineStrip._palette`). 디자인 값을 서버가 알아야 하는
@@ -34,7 +33,7 @@ class RoutineSuggestion {
   /// 출처: server/.../dto/response/RoutineSuggestionResponse.java
   ///
   /// [text]를 그대로 입력창에 넣으면 명사구라 보호자가 직접 쓴 문장으로 보이지
-  /// 않고, AI에 전달되는 맥락도 얇다. 그래서 표시용과 입력용을 나눈다. (이슈 #39)
+  /// 않고, AI에 전달되는 맥락도 얇다. 그래서 표시용과 입력용을 나눈다.
   final String prompt;
 
   /// 서버 응답 파싱. 필드가 비거나 타입이 달라도 예외를 던지지 않는다.
@@ -42,7 +41,7 @@ class RoutineSuggestion {
     return RoutineSuggestion(
       icon: json['icon']?.toString() ?? '',
       text: json['text']?.toString() ?? '',
-      // 서버 필드명이 naturalLanguageExample이다. 옛 이름도 함께 읽어
+      // 서버 필드명이 naturalLanguageExample이다. 이전 이름도 함께 읽어
       // 서버가 어느 쪽을 주든 동작하게 둔다.
       prompt: (json['naturalLanguageExample'] ?? json['prompt'])?.toString() ??
           '',
@@ -63,8 +62,7 @@ class RoutineSuggestion {
   /// **API가 붙어도 지우지 않는다.** 추천이 비면 홈 화면 한 블록이 통째로
   /// 사라져 빈 화면처럼 보인다. 데모는 어떤 실패에서도 진행되어야 한다
   /// (docs 원칙 6번). 문구는 Figma `보호자_홈`(217:2655) 원본이다.
-  // 서버가 naturalLanguageExample을 내려주므로(#39 반영됨) 아래 문장들은
-  // 서버가 죽었을 때만 쓰인다.
+  /// 서버가 naturalLanguageExample을 내려주므로 아래 문장들은 서버가 죽었을 때만 쓰인다.
   /// 앱 언어의 문구로 **부를 때마다** 만든다.
   static List<RoutineSuggestion> get fallback => [
     RoutineSuggestion(
@@ -88,7 +86,7 @@ class RoutineSuggestion {
       prompt: appL10n.suggestionNewPlacePrompt,
     ),
     // 다섯 번째 — 시안(`238:1643`)이 그린 마지막 칩이다. 넷만 두면 칩이 두 줄에
-    // 그쳐 시안(세 줄)과 화면이 어긋난다 (#297).
+    // 그쳐 시안(세 줄)과 화면이 어긋난다.
     RoutineSuggestion(
       icon: '🎒',
       text: appL10n.suggestionAfterSchoolText,

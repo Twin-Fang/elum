@@ -30,17 +30,12 @@ import '../../member/application/member_providers.dart';
 import '../application/routine_providers.dart';
 import '../../../core/router/routes.dart';
 
-/// Figma `보호자_홈`(931:3896 기본 / 931:4179 밀림 / 931:4879 삭제 확인 · 이슈 #258).
+/// Figma `보호자_홈`(931:3896 기본 / 931:4179 밀림 / 931:4879 삭제 확인).
 ///
-/// 개편으로 홈이 **오늘 일과 · 지난 일과 두 칸**으로 정리됐다.
+/// 홈은 **오늘 일과 · 지난 일과 두 칸**이다. 섹션 순서는 상태에 따라 바뀌지 않는다 —
+/// 목록이 비었다고 자리가 뒤바뀌면 다음에 열었을 때 어디를 봐야 할지 다시 찾게 된다.
 ///
-/// - `추천 일과`가 빠졌다. 자리를 많이 쓰는 데 비해 눌리지 않았고, 그 자리에
-///   지난 일과가 들어와 "전에 하던 것을 또 한다"는 실제 쓰임을 받는다.
-/// - `새로운 일과 만들기`가 설명 붙은 카드에서 알약 버튼으로 줄었다.
-/// - 섹션 순서가 상태에 따라 바뀌지 않는다. 오늘이 늘 먼저다 — 목록이 비었다고
-///   자리가 뒤바뀌면 다음에 열었을 때 어디를 봐야 할지 다시 찾게 된다.
-///
-/// **처음 들어오면 코치마크가 뜬다** (시안 1291:10801 · 이슈 #505). 가리킬 위젯 셋의
+/// **처음 들어오면 코치마크가 뜬다** (시안 1291:10801). 가리킬 위젯 셋의
 /// [GlobalKey]를 여기서 들고 있고, 언제 띄울지는 [_maybeStartCoach] 가 정한다.
 class GuardianHomeScreen extends ConsumerStatefulWidget {
   const GuardianHomeScreen({super.key});
@@ -165,7 +160,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
     final colors = context.colors;
     final space = context.space;
 
-    // 연결된 이룸이가 하나도 없으면 이룸이 등록(온보딩)으로 보낸다 (다중 보호자 #362 · E29).
+    // 연결된 이룸이가 하나도 없으면 이룸이 등록(온보딩)으로 보낸다.
     // 마지막 보호자로 나갔거나 다른 휴대폰에서 이룸이가 지워진 경우다. 라우터 가드는 화면을
     // 옮길 때만 평가되므로 머무는 중에 알게 되면 여기서 직접 옮긴다.
     ref.listen<bool>(profileSessionProvider.select((s) => s.noProfile), (
@@ -255,7 +250,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
                 ),
               ),
             ),
-            // 하단 배너(#281). 로드 전·실패 시 높이 0이라 스크롤 영역이 원래 크기 그대로다.
+            // 하단 배너. 로드 전·실패 시 높이 0이라 스크롤 영역이 원래 크기 그대로다.
             const AdBannerSlot(placement: AdPlacement.bannerHome),
           ],
         ),
@@ -264,7 +259,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
 
     // 이룸이가 다른 휴대폰에서 단계를 끝내도 알려 줄 길이 없다(푸시·소켓 없음).
     // 받아 둔 목록을 계속 쥐고 있어 마지막 단계를 끝낸 일과가 직전 퍼센트에 머물렀다 —
-    // 완료 체크가 나오지 않아 "100% 가 안 뜬다"로 보였다 (#535). 이룸이 홈과 같은 주기로 다시 받는다.
+    // 완료 체크가 나오지 않아 "100% 가 안 뜬다"로 보였다. 이룸이 홈과 같은 주기로 다시 받는다.
     return RoutineAutoRefresh(
       child: Stack(
         children: [
@@ -309,7 +304,7 @@ class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton> {
 
   /// 일과 만들기 시작. 이전 입력이 남아 있으면 안 되므로 항상 초기화한다.
   ///
-  /// 이번 주 크레딧을 다 썼으면 들어가지 않고 알린다 (#407) — 입력·질문·보상까지
+  /// 이번 주 크레딧을 다 썼으면 들어가지 않고 알린다 — 입력·질문·보상까지
   /// 다 적은 뒤 마지막에 막히면 적은 것이 헛수고가 된다.
   Future<void> _startRoutine() async {
     if (_starting) return;
@@ -318,7 +313,7 @@ class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton> {
       final blocked = await creditBlocksRoutineStart(ref);
       if (!mounted) return;
       if (blocked != null) {
-        // 안내 + (서버가 켜 둔 경우에만) 광고 보고 더 만들기 (#464). 들어가지 않고 홈에 남는다.
+        // 안내 + (서버가 켜 둔 경우에만) 광고 보고 더 만들기. 들어가지 않고 홈에 남는다.
         await showCreditBlockedDialog(context, ref, blocked);
         return;
       }
@@ -395,7 +390,7 @@ class _Header extends StatelessWidget {
                     onTap: () => context.go(Routes.child),
                     scaleDown: AppPressable.scaleIcon,
                     // 이룸이 화면으로 가는 유일한 입구다. 그림뿐이라 이름을 주지
-                    // 않으면 화면 낭독기로는 이 길을 찾을 수 없다 (#339).
+                    // 않으면 화면 낭독기로는 이 길을 찾을 수 없다.
                     semanticLabel: context.l10n.guardianHomeGoChildScreen,
                     child: KeyedSubtree(
                       key: modeKey,
@@ -403,10 +398,10 @@ class _Header extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: _badgeToSettings.w),
-                  // 설정 진입점 (#181). 개편 시안에서 배지 오른쪽으로 옮겨졌다.
+                  // 설정 진입점. 개편 시안에서 배지 오른쪽으로 옮겨졌다.
                   AppPressable(
                     // push로 연다. go는 스택을 교체해 설정 화면의 뒤로가기가
-                    // 돌아갈 곳을 잃는다 — 화살표도 기기 뒤로가기도 먹통이 된다 (이슈 #194).
+                    // 돌아갈 곳을 잃는다 — 화살표도 기기 뒤로가기도 먹통이 된다.
                     onTap: () => context.push(Routes.guardianSettings),
                     scaleDown: AppPressable.scaleIcon,
                     semanticLabel: context.l10n.guardianHomeSettings,

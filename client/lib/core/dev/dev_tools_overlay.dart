@@ -34,7 +34,7 @@ part 'dev_tools_widgets.dart';
 /// `app.dart`의 `MaterialApp.router` builder에서 한 번 감싸므로
 /// **화면별 코드는 전혀 건드리지 않는다.**
 ///
-/// ⚠️ 정식 출시 전 제거 대상. (이슈 #13)
+/// ⚠️ 정식 출시 전 제거 대상.
 /// `.env`의 `ELUM_SHOW_DEV_TOOLS=false`로 끄거나,
 /// `core/dev/`를 통째로 지우고 `app.dart`의 builder 한 줄을 제거한다.
 class DevToolsOverlay extends StatefulWidget {
@@ -71,7 +71,7 @@ class _DevToolsOverlayState extends State<DevToolsOverlay> {
     if (!AppConfig.showDevTools) return widget.child;
 
     // 숨기기를 누르면 이번 실행 동안 버튼이 사라진다.
-    // 되살리려면 작업관리자에서 앱을 완전히 종료했다 켠다 (이슈 #219).
+    // 되살리려면 작업관리자에서 앱을 완전히 종료했다 켠다.
     return ValueListenableBuilder<bool>(
       valueListenable: DevToolsVisibility.hidden,
       builder: (context, hidden, _) =>
@@ -121,7 +121,7 @@ class _DevToolsOverlayState extends State<DevToolsOverlay> {
             // 직접 그리면 조상에 의존하지 않아 어느 위치에 놓여도 동작한다.
             if (_panelOpen)
               Positioned.fill(
-                // 패널이 자기 Overlay 를 갖는다 (#501). 이 위젯은 Navigator·Overlay 보다 위에
+                // 패널이 자기 Overlay 를 갖는다. 이 위젯은 Navigator·Overlay 보다 위에
                 // 있어서, 로그 글자(SelectableText)를 누르면 선택 손잡이를 그릴 Overlay 를 못 찾아
                 // `Null check operator used on a null value` 가 났다.
                 child: Overlay(
@@ -162,7 +162,7 @@ class _DraggableButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 테스트 빌드에서는 모든 화면에 떠 있다. 이름이 없으면 실기기 접근성
-    // 검사에서 화면마다 이름 없는 버튼이 하나씩 잡힌다 (#339).
+    // 검사에서 화면마다 이름 없는 버튼이 하나씩 잡힌다.
     return Semantics(
       container: true,
       button: true,

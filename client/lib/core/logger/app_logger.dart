@@ -45,10 +45,10 @@ abstract final class AppLogger {
   /// 카드 5장 + 이미지 경로가 들어가는 일과 응답이 대략 2~3천자라 넉넉히 잡았다.
   static const _maxExpandedLength = 8000;
 
-  /// 펼쳐서 찍을지. 개발자 도구를 켠 빌드에서만 전체를 남긴다 (이슈 #219).
+  /// 펼쳐서 찍을지. 개발자 도구를 켠 빌드에서만 전체를 남긴다.
   ///
-  /// 예전에는 컬렉션을 `{5 entries}`로만 줄여서, **백엔드가 무슨 값을 보냈는지
-  /// 로그만 봐서는 알 수 없었다.** 그 탓에 실패 원인을 매번 서버 로그에서 찾았다.
+  /// 컬렉션을 `{5 entries}`로만 줄이면 **백엔드가 무슨 값을 보냈는지
+  /// 로그만으로 알 수 없어** 실패 원인을 서버 로그에서 따로 찾아야 한다.
   static bool get _expand => kDebugMode || AppConfig.showDevTools;
 
   static String _formatValue(dynamic value) {
@@ -56,7 +56,7 @@ abstract final class AppLogger {
     if (value is num || value is bool) return value.toString();
 
     if (!_expand) {
-      // 개발자 도구가 꺼진 빌드 — 예전처럼 크기만 남긴다
+      // 개발자 도구가 꺼진 빌드 — 크기만 남긴다
       if (value is String) {
         return value.length > 100 ? '${value.substring(0, 100)}...' : value;
       }
@@ -67,7 +67,7 @@ abstract final class AppLogger {
 
     if (value is String) return _cap(value);
 
-    // 바이트 목록은 숫자를 펼치지 않는다 (#501). 카드 그림 응답(수 MB)이 `[137,80,...]`로
+    // 바이트 목록은 숫자를 펼치지 않는다. 카드 그림 응답(수 MB)이 `[137,80,...]`로
     // 한 줄에 수천 자씩 찍혀 로그를 내보내거나 읽을 수 없었다.
     final bytes = _asBytes(value);
     if (bytes != null) return _describeBytes(bytes);

@@ -38,7 +38,7 @@ abstract final class AppL10n {
 
   /// 휴대폰 언어 목록 → 앱 언어. 열린 언어 밖이면 en.
   /// MaterialApp 이 넘기는 지원 언어(ARB 5개)가 아니라 [openedAppLocales] 에서 고른다.
-  /// [allowUnopened] 는 개발자 도구가 강제한 언어를 QA 에서 볼 수 있게 ARB 가 있는 5개를 모두 허용한다.
+  /// [allowUnopened] 는 개발자 도구가 강제한 언어를 볼 수 있게 ARB 가 있는 5개를 모두 허용한다.
   static Locale? resolveLocales(
     List<Locale>? locales,
     Iterable<Locale> supported, {
@@ -83,7 +83,7 @@ abstract final class AppL10n {
       localeListResolutionCallback: (locales, supported) => resolveLocales(
         locales,
         supported,
-        // 강제 언어는 목록 하나로 이 콜백을 다시 거친다 — 열지 않은 언어도 QA 로 볼 수 있어야 한다
+        // 강제 언어는 목록 하나로 이 콜백을 다시 거친다 — 열지 않은 언어도 볼 수 있어야 한다
         allowUnopened: enabled && forcedLocale != null,
       ),
       // 앱 이름은 운영체제 앱 전환 화면에 보인다 — 언어마다 다를 수 있어 ARB 에서 읽는다

@@ -41,10 +41,6 @@ class _CardCompletionScreenState extends ConsumerState<CardCompletionScreen> {
 
     // 시안(425:4199)은 **일과 만들기 입력과 같은 배치**다 — 반짝임 225 ·
     // 제목 285 · 진행도 363. 배경도 같다(#F7F2EF 위에 오로라 한 덩이).
-    //
-    // 전에는 배경을 초록에서 파랑으로 가는 그라데이션으로 화면 전체에 깔고,
-    // 반짝임 자리에 별 글리프를 두고, 글자 크기를 직접 적어 두었다. 셋 다
-    // 시안과 달랐다 (#297).
     return Scaffold(
       backgroundColor: colors.background,
       body: Stack(

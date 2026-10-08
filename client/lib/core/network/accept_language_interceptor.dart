@@ -6,7 +6,7 @@ import '../l10n/region_code.dart';
 
 /// 요청마다 앱 언어를 `Accept-Language` 로 싣는다 (공통 계약 C1).
 ///
-/// 서버는 이 헤더로 에러 문구·폴백 질문·공지·약관의 언어를 고른다. 헤더가 없는 옛 앱은 서버가
+/// 서버는 이 헤더로 에러 문구·폴백 질문·공지·약관의 언어를 고른다. 헤더가 없는 구버전 앱은 서버가
 /// `ko` 로 응답하므로 이미 배포된 앱은 영향이 없고, 새 앱만 이 값을 보낸다.
 class AcceptLanguageInterceptor extends Interceptor {
   AcceptLanguageInterceptor({required this.locale, this.region});
@@ -33,7 +33,7 @@ class AcceptLanguageInterceptor extends Interceptor {
     // Dio 헤더는 대소문자를 가리지 않아 `accept-language` 로 넣은 값도 막아 준다.
     options.headers.putIfAbsent(headerName, () => headerValue(locale()));
 
-    // 지역 코드가 없거나 형식이 틀리면 헤더만 뺀다 — 서버는 헤더 없음을 옛 앱으로 본다.
+    // 지역 코드가 없거나 형식이 틀리면 헤더만 뺀다 — 서버는 헤더 없음을 구버전 앱으로 본다.
     // 여기서 다시 검사하는 이유: 주입된 함수가 정규화를 안 거친 값을 줘도 깨진 헤더가 나가지 않게.
     final code = normalizeRegionCode(region?.call());
     if (code != null) {

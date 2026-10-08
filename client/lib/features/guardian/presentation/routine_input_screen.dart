@@ -59,10 +59,10 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
     super.dispose();
   }
 
-  /// 보상 설정으로 넘긴다 (Figma 1082:4709 · #380 결정 1 — 입력 바로 다음).
+  /// 보상 설정으로 넘긴다 (Figma 1082:4709 — 입력 바로 다음).
   ///
   /// **여기서 DLP·질문 생성을 시작하지 않는다.** 보상 다음의 로딩 화면이 직접
-  /// 부른다 — 시작 지점이 둘이면 화면이 재생성될 때 요청이 겹쳐 나간다. (이슈 #41)
+  /// 부른다 — 시작 지점이 둘이면 화면이 재생성될 때 요청이 겹쳐 나간다.
   /// 두 번 눌러도 보상 화면이 두 장 쌓이지 않게 한 번만 넘긴다.
   Future<void> _next() => leaveOnce(() async {
     dismissKeyboard();
@@ -85,7 +85,7 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
     final space = context.space;
 
     return PopScope(
-      // 쓴 글이 있으면 시스템 뒤로가기도 잡는다 (#242).
+      // 쓴 글이 있으면 시스템 뒤로가기도 잡는다.
       canPop: !canSubmit,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
@@ -100,7 +100,7 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
   }
 
   Widget _scaffold(BuildContext context, bool canSubmit, AppSpacing space) {
-    // 흐름 배경(#380) 위라면 바탕도 오로라도 그리지 않는다 — 흐름이 하나를 함께 쓴다.
+    // 흐름 배경 위라면 바탕도 오로라도 그리지 않는다 — 흐름이 하나를 함께 쓴다.
     final onBackdrop = RoutineFlowBackdrop.isPresent(context);
 
     return Scaffold(
@@ -125,9 +125,9 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
                       children: [
                         // **간격을 시안 좌표에서 뽑는다.** 토큰(32·24)을 쓰던
                         // 동안 화면 전체가 시안보다 90~140 위로 떠 있었고,
-                        // 아래로 갈수록 벌어졌다 (#297).
+                        // 아래로 갈수록 벌어졌다.
                         //
-                        // 시안(238:1643, 2026-09-23 덤프) 절대 y — 뒤로가기 79 ·
+                        // 시안(238:1643) 절대 y — 뒤로가기 79 ·
                         // 반짝임 185 · 제목 245 · 부제 323 · 입력칸 389 · 칩 489.
                         SizedBox(height: _RoutineInputLayout.topToSparkles),
                         const _Headline(),
@@ -160,7 +160,7 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
 class _BackRow extends StatelessWidget {
   const _BackRow({required this.confirmExit});
 
-  /// 쓴 글이 있으면 나가기 전에 묻는다 (#242).
+  /// 쓴 글이 있으면 나가기 전에 묻는다.
   final bool confirmExit;
 
   @override
@@ -217,7 +217,7 @@ class _BackRow extends StatelessWidget {
 /// 그대로 쓰면 **쌓을수록 어긋나** 맨 아래 칩이 140이나 떠 버린다.
 /// 그래서 이 화면만큼은 **시안 좌표의 차**를 그대로 적어 둔다.
 class _RoutineInputLayout {
-  /// 안전영역(59) 안에서 뒤로가기 윗변까지 — 시안 67 (#436, 전에는 79).
+  /// 안전영역(59) 안에서 뒤로가기 윗변까지 — 시안 67.
   static double get backTop => 8.h;
 
   /// 뒤로가기 왼쪽 — 시안 16.
@@ -225,15 +225,11 @@ class _RoutineInputLayout {
 
   /// 뒤로가기 줄(8 + 40) 아래부터 반짝임(185)까지 — 시안 계산 그대로 78.
   ///
-  /// 뒤로가기가 12 올라갔지만(#436) 반짝임은 185 제자리라 여기서 12 를 되돌려 준다.
+  /// 뒤로가기가 12 올라갔지만 반짝임은 185 제자리라 여기서 12 를 되돌려 준다.
   ///
-  /// 2026-09-23 시안이 뒤로가기만 두고 **아래 전부를 40 올렸다**(반짝임 225 → 185).
-  /// 보상 설정(1082:4709)과 같은 높이가 됐다 — 두 화면 사이에서 제목이 제자리에
-  /// 선다 (#380 결정 5). 두 원(오로라)도 같이 올라갔다(`AuroraPalette.inputTop`).
-  ///
-  /// 한때 99였다. "반짝임 SVG가 시안보다 7 작게 그려진다"는 이유였는데
-  /// **다시 재 보니 양쪽 다 36으로 같았다** — 근거가 사라진 보정이라 걷어냈다.
-  /// 그 7 때문에 반짝임이 통째로 위에 떠 있었다 (#297).
+  /// 시안은 뒤로가기만 두고 **아래 전부를 40 올렸다**(반짝임 185). 보상 설정(1082:4709)과
+  /// 같은 높이라 두 화면 사이에서 제목이 제자리에 선다. 두 원(오로라)도 같이 올라간다
+  /// (`AuroraPalette.inputTop`). 반짝임 SVG 크기 보정은 두지 않는다 — 양쪽 다 36이다.
   static double get topToSparkles => 78.h;
 
   /// 반짝임 → 제목 — 시안 간격 24.
@@ -334,7 +330,7 @@ class _InputFieldState extends State<_InputField> {
           child: Container(
             constraints: BoxConstraints(minHeight: 52.h),
             // 위아래도 18이다 (시안 `238:1723`). `space.sm`(12)을 쓰고 있어
-            // 글자가 7 위에 붙어 있었다 (#297).
+            // 글자가 7 위에 붙어 있었다.
             // 글자 쪽은 18, 보내기 단추 쪽은 9다 — 시안 원이 오른쪽에서
             // 9 안쪽에 선다 (`262:4106`). 양쪽 18로 두면 단추가 9 안으로 들어간다.
             padding: EdgeInsets.fromLTRB(18.w, 18.h, 9.w, 18.h),
@@ -352,7 +348,7 @@ class _InputFieldState extends State<_InputField> {
             child: Row(
               // **아래 맞춤이다.** 시안(`262:4106`)은 글자가 위에서부터 쌓이고
               // 보내기 단추가 아래에 붙는다. 가운데로 두면 두 줄일 때 단추가
-              // 11 올라간다 (#297). 한 줄일 때는 둘 다 같은 높이라 차이가 없다.
+              // 11 올라간다. 한 줄일 때는 둘 다 같은 높이라 차이가 없다.
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
@@ -403,14 +399,14 @@ class _SendButton extends StatelessWidget {
       key: RoutineInputScreen.sendButtonKey,
       onTap: onTap,
       scaleDown: AppPressable.scaleIcon,
-      // 입력창 안 화살표뿐이라 무엇을 하는 버튼인지 이름으로 알린다 (#339)
+      // 입력창 안 화살표뿐이라 무엇을 하는 버튼인지 이름으로 알린다
       semanticLabel: context.l10n.routineInputSend,
       child: Container(
         // 원형 버튼이라 가로세로 모두 .w
         width: 32.w,
         height: 32.w,
         // **흰 원에 짙은 꺾쇠다** (Figma `262:4106`). 검은 원에 흰 위쪽 화살표로
-        // 그리고 있었는데 색이 반대였고 모양도 달랐다 (#297).
+        // 그리고 있었는데 색이 반대였고 모양도 달랐다.
         decoration: BoxDecoration(
           color: context.colors.surface,
           shape: BoxShape.circle,
@@ -440,7 +436,7 @@ class _SendButton extends StatelessWidget {
 /// `Wrap`으로 두면 글자 길이에 따라 줄이 밀린다. Figma 구조를 그대로 만든다.
 ///
 /// 목록은 서버에서 오고 **개수가 고정이 아니다.** 2개씩 채우고 남는 하나는
-/// 마지막 줄에 혼자 둔다(Figma 5개 = 2·2·1). 홀수·짝수 모두 대응된다. (이슈 #36)
+/// 마지막 줄에 혼자 둔다(Figma 5개 = 2·2·1). 홀수·짝수 모두 대응된다.
 class _SuggestionChips extends ConsumerWidget {
   const _SuggestionChips({required this.onTap});
 
@@ -459,7 +455,7 @@ class _SuggestionChips extends ConsumerWidget {
 
     if (items.isEmpty) return const SizedBox.shrink();
 
-    // 본문과 같은 좌우 여백 24 (#393 S3). 글꼴 2.0 에서 두 칩이 한 줄을 다 차지해
+    // 본문과 같은 좌우 여백 24. 글꼴 2.0 에서 두 칩이 한 줄을 다 차지해
     // 화면 끝에 붙었다. 글꼴 1.0 에서는 칩이 좁아 가운데 그대로라 시안 자리와 같다.
     //
     // 두 칩씩 묶는 것은 그대로 두되 **둘이 한 줄에 안 들어가면 한 줄에 하나씩** 둔다

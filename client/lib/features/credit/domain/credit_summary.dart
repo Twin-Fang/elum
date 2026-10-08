@@ -16,7 +16,7 @@ class CreditJob {
   final DateTime? startedAt;
 }
 
-/// 이번 주 AI 크레딧 — 서버 `GET /api/credits/me` (#407 스펙 §3).
+/// 이번 주 AI 크레딧 — 서버 `GET /api/credits/me`.
 ///
 /// **모르는 값을 0 으로 채우지 않는다.** 잔액·지급량·초기화 시각이 빠지면
 /// [FormatException] 을 던지고, 저장소가 실패로 바꿔 화면이 `다시 하기`를 띄운다.
@@ -78,8 +78,8 @@ class CreditSummary {
       used: _optionalInt(json['used'], 0),
       reserved: _optionalInt(json['reserved'], 0),
       periodStart: DateTime.tryParse(json['periodStart']?.toString() ?? ''),
-      // 시간대가 있는 값을 먼저 쓰고 기기 시간대로 바꾼다 (#421 ③). 옛 서버는 시간대 없는
-      // 값만 준다 — 그때는 예전처럼 읽는다(한국 기기에서는 맞고 해외에서만 어긋난다).
+      // 시간대가 있는 값을 먼저 쓰고 기기 시간대로 바꾼다. 시간대 없는 값만 오면
+      // 그대로 읽는다(한국 기기에서는 맞고 해외에서만 어긋난다).
       nextResetAt:
           DateTime.tryParse(
             json['nextResetAtOffset']?.toString() ?? '',

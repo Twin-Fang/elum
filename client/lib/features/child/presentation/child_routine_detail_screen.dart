@@ -67,7 +67,7 @@ class ChildRoutineDetailScreen extends ConsumerStatefulWidget {
 
 class _ChildRoutineDetailScreenState
     extends ConsumerState<ChildRoutineDetailScreen> {
-  /// 옆 카드가 가장자리에 걸치도록 한 장 폭(카드 + 간격)만큼 자른다 (#394).
+  /// 옆 카드가 가장자리에 걸치도록 한 장 폭(카드 + 간격)만큼 자른다.
   final _controller = PageController(
     viewportFraction: ChildCardPager.viewportFraction,
   );
@@ -79,7 +79,7 @@ class _ChildRoutineDetailScreenState
   /// 지금 읽고 있는 카드 id. null이면 아무것도 안 읽고 있다.
   String? _speakingId;
 
-  /// 지금 보고 있는 카드의 id (#517).
+  /// 지금 보고 있는 카드의 id.
   ///
   /// 목록이 주기적으로 갱신되므로 보호자가 카드 순서를 바꾸면 같은 자리(순번)에 다른
   /// 카드가 올 수 있다. 이룸이가 양말을 체크하려다 가방을 체크하게 되므로, 순번이 아니라
@@ -161,7 +161,7 @@ class _ChildRoutineDetailScreenState
 
   Routine get _routine => _resolveRoutine(ref.read(childRoutinesProvider));
 
-  /// 목록이 바뀌어도 이룸이가 보던 카드를 계속 보여준다 (#517).
+  /// 목록이 바뀌어도 이룸이가 보던 카드를 계속 보여준다.
   ///
   /// 보던 카드가 새 위치로 옮겨졌으면 그 위치로 따라간다. 카드가 없어졌으면 따라갈 곳이
   /// 없으므로 그 자리를 그대로 두고 지금 보이는 카드를 새 기준으로 삼는다.
@@ -212,7 +212,7 @@ class _ChildRoutineDetailScreenState
       _confetti.play();
     }
 
-    // 손에도 알린다 (#515). 컨페티와 같은 순간에 울리되, 동작 줄이기와는 별개다 — 움직임과 진동은
+    // 손에도 알린다. 컨페티와 같은 순간에 울리되, 동작 줄이기와는 별개다 — 움직임과 진동은
     // 다른 감각이다. 끄고 켜는 것은 설정의 스위치가 정한다. 기다리지 않는다.
     final haptics = ref.read(childHapticsProvider);
     haptics.play(
@@ -229,7 +229,7 @@ class _ChildRoutineDetailScreenState
         becameChecked ? AppMotion.slow + AppMotion.normal : AppMotion.normal,
       );
       if (!mounted) return;
-      // 카드를 하나 끝낼 때마다 별을 보여준다. 보호자가 정한 보상도 함께 뜬다 (이슈 #239).
+      // 카드를 하나 끝낼 때마다 별을 보여준다. 보호자가 정한 보상도 함께 뜬다.
       // 같은 카드를 다시 체크할 때는 뜨지 않는다 — 위 `shouldReward`가 걸러 준다.
       final routine = widget.routine;
       haptics.play(ChildHapticKind.star);
@@ -241,7 +241,7 @@ class _ChildRoutineDetailScreenState
       );
       if (!mounted) return;
 
-      // 마지막 카드까지 끝냈으면 일과완료 화면을 이어서 보여 준다 (이슈 #490).
+      // 마지막 카드까지 끝냈으면 일과완료 화면을 이어서 보여 준다.
       // 그 화면의 버튼이 홈으로 보내므로 여기서는 카드를 넘기지 않는다.
       if (_isRoutineDone) {
         haptics.play(ChildHapticKind.complete);
@@ -267,15 +267,14 @@ class _ChildRoutineDetailScreenState
         routine.steps.every((card) => progress.isChecked(routine.id, card));
   }
 
-  /// 별 화면을 닫은 뒤 **아직 안 한 카드 중 가장 앞**으로 넘어간다 (이슈 #293).
+  /// 별 화면을 닫은 뒤 **아직 안 한 카드 중 가장 앞**으로 넘어간다.
   ///
-  /// 전에는 별 화면을 닫으면 방금 끝낸 카드가 그대로 남아, 다음 카드를 보려면
-  /// 화면을 옆으로 밀어야 했다. 미는 동작은 누르기보다 어렵고, 끝낸 카드가 계속
-  /// 떠 있으면 **지금 할 일이 무엇인지** 흐려진다.
+  /// 끝낸 카드가 그대로 남으면 다음 카드를 보려고 옆으로 밀어야 하는데, 미는 동작은
+  /// 누르기보다 어렵고 **지금 할 일이 무엇인지** 흐려진다.
   ///
   /// **"다음"을 순서가 아니라 남은 일로 정의한다.** 중간을 건너뛰고 뒤를 체크했을 때
   /// 그저 앞으로만 가면 빠뜨린 카드가 영영 남는다. 남은 것이 없으면 움직이지 않는다 —
-  /// 일과를 다 끝낸 경우는 호출 전에 일과완료 화면(#490)이 가져간다.
+  /// 일과를 다 끝낸 경우는 호출 전에 일과완료 화면이 가져간다.
   ///
   /// 체크 해제와 재체크 때는 이 함수까지 오지 않는다. 별 화면이 뜨지 않기 때문인데,
   /// 연출 없이 화면만 바뀌면 이룸이가 무엇이 일어났는지 알 수 없다.
@@ -308,7 +307,7 @@ class _ChildRoutineDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    // 보던 일과가 사라졌다 — 그 일과를 만든 보호자가 이룸이에서 나갔다 (다중 보호자 #362 · E11).
+    // 보던 일과가 사라졌다 — 그 일과를 만든 보호자가 이룸이에서 나갔다 (다중 보호자 · E11).
     // 오류 화면을 띄우지 않고 홈으로 돌아간다. 홈은 같은 때 목록을 다시 받는다.
     ref.listen<bool>(
       childRoutineProvider.select((s) => s.gone.contains(widget.routine.id)),
@@ -334,11 +333,11 @@ class _ChildRoutineDetailScreenState
               language: routine.language,
             ),
             SizedBox(height: ChildRoutineDetailScreen._topBarToReward.h),
-            // 🔴 하는 동안 보상이 계속 보인다 (이슈 #239 · 2026-09-13 자문 핵심).
+            // 🔴 하는 동안 보상이 계속 보인다 (수행 중 보상 노출이 핵심 기능).
             // 완료 후에만 뜨는 별 연출과 다른 기능이다 — 끝까지 가는 힘이 여기서 나온다.
             //
             // **보상이 없어도 칩 자리는 비워 둔다.** 시안은 칩·카드·버튼이 모두 고정
-            // 자리라, 자리를 걷으면 일과마다 카드가 오르내려 보인다 (#445).
+            // 자리라, 자리를 걷으면 일과마다 카드가 오르내려 보인다.
             SizedBox(
               height: RewardBanner.height.h,
               child: RewardBanner.maybe(routine),
@@ -347,7 +346,7 @@ class _ChildRoutineDetailScreenState
             // **카드 자리를 시안 높이로 못 박는다.**
             //
             // `Expanded`로 남는 높이를 카드에 다 주면 그 아래 체크 버튼이 화면
-            // 바닥까지 밀려 시안보다 내려간다 (#297). 시안은 카드도 버튼도
+            // 바닥까지 밀려 시안보다 내려간다. 시안은 카드도 버튼도
             // 자리가 고정이다 — 카드 y=231 (333×410), 버튼 y=675 (88×88).
             //
             // `Flexible`로 감싸 두면 화면이 짧을 때 이 상자가 먼저 줄어들어
@@ -356,7 +355,7 @@ class _ChildRoutineDetailScreenState
               child: SizedBox(
                 height: ChildRoutineDetailScreen._cardBoxHeight.h,
                 // 가운데 카드는 시안 자리(333 @ x=30) 그대로, 옆 카드는 가장자리에
-                // 20 걸친다 (#394 — 승인된 시안 이탈, 시안도 옆 카드를 x373에 둔다).
+                // 20 걸친다 (시안 이탈 — 시안도 옆 카드를 x373에 둔다).
                 // 카드는 이 자리 높이를 채운다.
                 child: ChildCardPager(
                   controller: _controller,
@@ -370,13 +369,13 @@ class _ChildRoutineDetailScreenState
                   onSpeak: _speak,
                   // 카드를 넘기면 체크 버튼 대상도 바뀐다
                   onPageChanged: (index) => setState(() {
-                    // 이룸이가 직접 넘긴 것이므로 새 카드를 기준으로 삼는다 (#517)
+                    // 이룸이가 직접 넘긴 것이므로 새 카드를 기준으로 삼는다
                     if (index >= 0 && index < cards.length) {
                       _anchorId = cards[index].id;
                     }
                   }),
                   onSideTap: _goToPage,
-                  // 옆에 걸친 카드에도 한 것을 표시한다 (#394 P8)
+                  // 옆에 걸친 카드에도 한 것을 표시한다
                   isChecked: (card) => progress.isChecked(routine.id, card),
                 ),
               ),
@@ -511,7 +510,7 @@ class _CheckButton extends StatelessWidget {
           shouldLoop: false,
           colors: colors.confetti,
         ),
-        // 그림(체크 표시)뿐인 버튼이라 이름을 준다 (#339). 누를 때마다 켜고 끄므로
+        // 그림(체크 표시)뿐인 버튼이라 이름을 준다. 누를 때마다 켜고 끄므로
         // 이름만으로는 이미 했는지 모른다 — 켜짐 상태(checked)도 함께 알린다.
         // AppPressable 의 이름 자리는 상태를 못 담아 여기서 직접 감싼다.
         Semantics(
@@ -553,7 +552,7 @@ class _CheckButton extends StatelessWidget {
               ),
               // **`Icons.check_rounded`가 아니다.** 그건 획이 가늘어 시안과 나란히
               // 놓으면 진한 픽셀이 607 대 212로 벌어진다. 시안(`993:4331`)은
-              // 48×35.76이고 88 상자 한가운데에 온다 (#297).
+              // 48×35.76이고 88 상자 한가운데에 온다.
               child: Center(
                 child: SvgPicture.asset(
                   AppAssets.childCheckMark,

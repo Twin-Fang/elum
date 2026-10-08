@@ -56,7 +56,7 @@ abstract final class AppConfig {
 
   static Duration get receiveTimeout => _tuning.receiveTimeout;
 
-  /// 동의 화면이 약관을 기다리는 상한 (#278). 넘기면 캐시·앱 기본값으로 떨어진다.
+  /// 동의 화면이 약관을 기다리는 상한. 넘기면 캐시·앱 기본값으로 떨어진다.
   static Duration get consentFetchTimeout => _tuning.consentFetchTimeout;
 
   // --- TTS (카드 읽어주기) ---
@@ -73,7 +73,7 @@ abstract final class AppConfig {
   /// 비면 암호화를 건너뛴다(평문 전송 → 서버도 통과, 데모 안전).
   static String get aidlpSecret => _string('ELUM_AIDLP_SECRET', '');
 
-  /// 문의를 받는 주소. 설정 화면의 `문의하기`가 보여준다 (이슈 #289).
+  /// 문의를 받는 주소. 설정 화면의 `문의하기`가 보여준다.
   ///
   /// 게시된 도움말 페이지·개인정보처리방침의 보호책임자 주소와 **같은 값이어야 한다.**
   /// 두 곳에 다른 주소를 두면 사용자가 어디로 보내야 하는지 헷갈리고,
@@ -81,7 +81,7 @@ abstract final class AppConfig {
   static String get supportEmail =>
       _string('ELUM_SUPPORT_EMAIL', 'chan4760@gmail.com');
 
-  // --- 스토어 (강제 업데이트 화면이 보낸다 — #279) ---
+  // --- 스토어 (강제 업데이트 화면이 보낸다) ---
   // `.env` 에 두지 않는다. 환경마다 달라지는 값이 아니라 앱 자체의 식별자라서,
   // Secret 을 빠뜨려 빈 값이 배포돼도 증상이 없는 길을 만들 이유가 없다.
 
@@ -97,8 +97,8 @@ abstract final class AppConfig {
 
   /// 플랫폼별 스토어 상세 주소. 보낼 곳을 모르면 null 이다.
   ///
-  /// [serverUrl] 이 그 플랫폼의 공식 스토어 주소면 그것을 먼저 쓴다 (#416).
-  /// 강제 업데이트 화면은 옛 버전 앱에서 뜨므로, 서버에서 바꿀 수 있어야 이미 깔린 앱도
+  /// [serverUrl] 이 그 플랫폼의 공식 스토어 주소면 그것을 먼저 쓴다.
+  /// 강제 업데이트 화면은 구버전 앱에서 뜨므로, 서버에서 바꿀 수 있어야 이미 깔린 앱도
   /// 보낼 곳을 고칠 수 있다. 비었거나 스토어 주소가 아니면 앱에 넣어 둔 주소로 돌아간다 —
   /// 서버 설정이 잘못돼도 막힌 사용자를 엉뚱한 곳으로 보내지 않는다.
   static Uri? storeUrl(TargetPlatform platform, {String serverUrl = ''}) {
@@ -176,7 +176,7 @@ abstract final class AppConfig {
   /// 응답이 빨라도 보안 처리를 체감시키기 위해 유지한다.
   static Duration get dlpMinDelay => _tuning.dlpMinDelay;
 
-  /// 로딩 화면이 결과를 기다리는 최대 시간 (#276). 서버가 준다 ([ClientTuning]).
+  /// 로딩 화면이 결과를 기다리는 최대 시간. 서버가 준다 ([ClientTuning]).
   ///
   /// 이만큼 지나도 응답이 없으면 기다리기를 그만두고 에러 코드와 재시도를
   /// 보여준다. `receiveTimeout`(60초)보다 짧게 둔 것은, 네트워크가 끝까지
@@ -194,10 +194,10 @@ abstract final class AppConfig {
   ///
   /// **왜 `.env`가 아니라 dart-define인가** — 개발 플래그를 `.env`로 제어하면
   /// GitHub Secret에 잘못된 값이 들어가는 순간 mock 데이터로 도는 APK가 배포된다.
-  /// 심사위원이 설치했을 때 가짜 데이터가 나오는 사고를 코드로 막는다. (이슈 #130)
+  /// 심사위원이 설치했을 때 가짜 데이터가 나오는 일을 코드로 막는다.
   ///
   /// **왜 `APP_FLAVOR`인가** — 앱 이름이 안 들어가는 중립적인 이름이라 CI 템플릿이
-  /// 앱을 몰라도 된다. 전에는 `ELUM_BUILD`를 썼는데 레포마다 이름이 달랐다 (이슈 #220).
+  /// 앱을 몰라도 된다.
   ///
   /// Flutter 표준인 `FLUTTER_APP_FLAVOR`(SDK의 `appFlavor`)를 쓰려 했으나
   /// **CLI가 예약어로 막는다** — `--flavor`로만 설정되고, 그건 Gradle productFlavors와
@@ -234,9 +234,9 @@ abstract final class AppConfig {
 
   /// 네트워크 로깅.
   ///
-  /// **개발자 도구를 켰으면 함께 켜진다** (이슈 #219). 디버깅 도구를 열어 두고도
-  /// 백엔드가 무슨 값을 보냈는지 못 보면 도구를 쓸 이유가 없다. QA가 받는
-  /// 개발용 APK는 릴리스 빌드라, `kDebugMode`만 보면 늘 꺼져 있었다.
+  /// **개발자 도구를 켰으면 함께 켜진다**. 디버깅 도구를 열어 두고도
+  /// 백엔드가 무슨 값을 보냈는지 못 보면 도구를 쓸 이유가 없다. 개발용 APK는
+  /// 릴리스 빌드라 `kDebugMode`만 보면 늘 꺼져 있다.
   static bool get enableNetworkLog =>
       (kDebugMode || showDevTools) && _bool('ELUM_ENABLE_NETWORK_LOG', true);
 
@@ -248,18 +248,18 @@ abstract final class AppConfig {
   ///
   /// 🔴 **게이트가 둘이다.** `.env`의 이 값만 켜도 보이지 않는다 —
   /// 플레이버(`--dart-define=APP_FLAVOR=dev`)를 함께 넘겨야 한다.
-  /// `client/tool/apply_build_profile.sh`가 두 층을 한 번에 맞춰 준다 (이슈 #220).
+  /// `client/tool/apply_build_profile.sh`가 두 층을 한 번에 맞춰 준다.
   static bool get showDevTools =>
       (kDebugMode || isDevBuild) && _bool('ELUM_SHOW_DEV_TOOLS', false);
 
   /// 온보딩을 건너뛸지. 개발·시연용. SharedPreferences에서 런타임 토글 가능.
   ///
   /// ⚠️ 제출용 빌드에서는 항상 false다. 온보딩을 건너뛰면 PIN이 설정되지 않아
-  /// 아이가 보호자 모드로 들어갈 수 있다 (이슈 #61).
+  /// 아이가 보호자 모드로 들어갈 수 있다.
   static bool skipOnboarding =
       (kDebugMode || isDevBuild) && _bool('ELUM_SKIP_ONBOARDING', false);
 
-  /// QA 세션 주입 — **디버그 빌드에서만** 동작한다.
+  /// 검수용 세션 주입 — **디버그 빌드에서만** 동작한다.
   ///
   /// 로그인 뒤에 있는 화면(역할 선택·온보딩·보호자 홈)을 실기기로 확인하려면
   /// 소셜 로그인을 통과해야 하는데, 계정 입력은 사람 손을 탄다. 그래서 검수할 때

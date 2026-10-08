@@ -9,9 +9,9 @@ import 'app_failure.dart';
 /// 이 인터셉터는 받는 쪽에서 그 반대를 한다 — 응답 본문을 한 번 읽어
 /// [AppFailure] 로 바꾸고 `DioException.error` 에 실어 보낸다.
 ///
-/// **그래서 호출부는 JSON 을 만지지 않는다.** 전에는
-/// `(e.response!.data as Map)['errorCode']` 를 쓰는 곳마다 따로 적어, 본문이
-/// 비거나 형식이 다르면 그 자리에서 깨졌다 (#347 · #352).
+/// **그래서 호출부는 JSON 을 만지지 않는다.** 호출부마다
+/// `(e.response!.data as Map)['errorCode']` 를 적으면 본문이
+/// 비거나 형식이 다를 때 그 자리에서 깨진다.
 ///
 /// 로그도 여기서 한 줄로 남긴다. 화면마다 따로 남기면 실패 하나가 여러 줄로
 /// 흩어져 무엇이 먼저 터졌는지 못 읽는다.
@@ -31,9 +31,8 @@ class FailureInterceptor extends Interceptor {
 
     // 앱이 스스로 끊은 요청은 실패가 아니다 — 로그를 남기면 진짜 실패가 묻힌다.
     if (!failure.isSilent) {
-      // **없는 코드를 지어내지 않는다.** 전에는 `badgeOr('E-HTTP')` 를 썼는데,
-      // 인터셉터는 화면 코드를 모르므로 아무것도 모를 때 `E-HTTP` 가 찍혔다.
-      // 그 문자열은 코드베이스 어디에도 없어 제보를 받아도 찾을 수 없다 (#352).
+      // **없는 코드를 지어내지 않는다.** 인터셉터는 화면 코드를 모르므로
+      // 임의 문자열을 찍으면 코드베이스에 없어 제보를 받아도 추적할 수 없다.
       AppLogger.error('네트워크', failure, err.stackTrace, {
         'fault': failure.fault.name,
         if (failure.server != null && !failure.server!.isUnknownCode)

@@ -5,7 +5,7 @@ import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
 import 'settings_tile.dart';
 
-/// 설정 목록의 켜고 끄는 한 줄 (이슈 #515).
+/// 설정 목록의 켜고 끄는 한 줄.
 ///
 /// 줄 높이·안쪽 여백·글자는 [SettingsTile] 과 같다. 시안에 켜고 끄는 줄이 없어 **임시 시안**이다 —
 /// 디자인이 나오면 모양만 바꾼다. 줄 어디를 눌러도 바뀐다 (스위치만 눌러야 하면 작다).

@@ -18,7 +18,7 @@ class NoticeSession {
 
 final noticeSessionProvider = Provider<NoticeSession>((ref) => NoticeSession());
 
-/// 무엇을 띄울지 정한다 (이슈 #371 · #390).
+/// 무엇을 띄울지 정한다.
 class NoticePopupController {
   NoticePopupController({
     required NoticeRepository repository,
@@ -77,7 +77,7 @@ class NoticePopupController {
     return NoticeFeed(hideDays: feed.hideDays, notices: visible);
   }
 
-  /// [notice] 하나를 [days] 동안 숨긴다 — `보지 않기`는 공지마다 따로다 (#390).
+  /// [notice] 하나를 [days] 동안 숨긴다 — `보지 않기`는 공지마다 따로다.
   Future<void> hide(AppNotice notice, int days) =>
       _hideStore.hide(notice, days: days, now: _now());
 }

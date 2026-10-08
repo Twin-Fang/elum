@@ -13,7 +13,7 @@ import '../../../../core/widgets/elum_dialog.dart';
 import '../../../credit/domain/credit_summary.dart';
 import 'ai_credit_card.dart';
 
-/// 크레딧 카드 안의 내용 — 조회에 성공했을 때 (#407).
+/// 크레딧 카드 안의 내용 — 조회에 성공했을 때.
 ///
 /// 정상 · 보너스 · 적음 · 0 · 만드는 중이 **한 모양 안에서 줄만 달라진다.** 상태마다
 /// 다른 카드를 그리면 잔액이 줄 때 카드 높이와 모양이 뛰어 다른 화면처럼 보인다.
@@ -38,12 +38,12 @@ class AiCreditSummaryView extends StatelessWidget {
 
     final amount = context.l10n.creditAmountLeft(s.available, s.weeklyGrant);
     // 보너스는 따로 적지 않는다 — 큰 숫자(available)에 이미 들어 있어 `+ 추가 N` 은
-    // 합계를 부풀려 읽히게 했다 (2026-09-25 사용자 결정, #421).
+    // 합계를 부풀려 읽히게 한다.
     final lines = <(String, Color)>[
       if (s.isGeneratingRoutine)
         (context.l10n.creditGenerating, colors.textPrimary),
       // 적을 때 "끝까지 만들어지지만 0 이 될 수 있다"는 경고는 두지 않는다 — 숫자와
-      // 막대로 충분하고, 경고 문구는 이상하고 불편하다 (2026-09-25 사용자 결정, #421).
+      // 막대로 충분하고, 경고 문구는 이상하고 불편하다.
       if (s.isExhausted) ...[
         (context.l10n.creditExhausted, colors.textPrimary),
         (context.l10n.creditExhaustedStillOk, colors.textSecondary),
@@ -173,7 +173,7 @@ class CreditInfoButton extends StatelessWidget {
         title: title,
         message: message(summary),
         barrierDismissible: true,
-        // 팝업 폭에서 낱말 가운데서 꺾이지 않게 (#393 S4 보상 도움말과 같은 선택)
+        // 팝업 폭에서 낱말 가운데서 꺾이지 않게 한다 (보상 도움말과 같은 선택)
         keepWordsInMessage: true,
       ),
       child: SizedBox(

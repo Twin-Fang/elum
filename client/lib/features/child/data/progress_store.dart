@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/storage/local_storage.dart';
 import '../domain/routine_progress_record.dart';
 
-/// 아동 카드 진행 기록의 저장소 래퍼 (이슈 #140).
+/// 아동 카드 진행 기록의 저장소 래퍼.
 ///
 /// [LocalStorage]는 JSON 문자열만 다루므로 직렬화·역직렬화를 여기서 한다.
 /// notifier가 저장 형식을 몰라야 저장 방식을 바꿔도 화면 로직이 안 흔들린다.

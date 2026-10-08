@@ -23,7 +23,7 @@ import '../application/routine_providers.dart';
 import '../../../core/router/routes.dart';
 
 /// 임시저장 — 만들다 만 일과를 이어서 만든다 (Figma `설정_임시저장` 1045:4910 ·
-/// 밀어서 삭제 `설정_임시저장_삭제` 1274:9262, #496).
+/// 밀어서 삭제 `설정_임시저장_삭제` 1274:9262).
 ///
 /// 줄은 361×68 이고 제목 아래에 `완료 시 · 보상` 을 적는다. 오른쪽에 흰 `이어서`
 /// 알약이 서고, 줄을 왼쪽으로 밀면 삭제 하나가 나온다(수정은 없다 — 이어서 만들면
@@ -49,13 +49,13 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
   @override
   void initState() {
     super.initState();
-    // **들어올 때마다 새로 받는다** (#387). 전체 목록은 keepAlive 라 한 번 받은 것을
+    // **들어올 때마다 새로 받는다**. 전체 목록은 keepAlive 라 한 번 받은 것을
     // 계속 준다 — 다른 휴대폰에서 만들다 둔 것, 로딩 중에 나가 뒤늦게 생긴 것이
     // 안 보인다. 받는 동안에는 직전 목록을 그대로 보여주므로 깜빡이지 않는다.
     //
     // 서버 전용 `GET /api/routines/drafts` 는 쓰지 않는다. 목록이 하나 더 생기면
     // 셋(오늘·지난·전체)과 함께 무효화해야 하는 넷째가 되고, 한쪽만 갱신되는
-    // 일(#353)이 다시 생긴다. 전체 목록을 걸러도 한 보호자의 일과는 많지 않다.
+    // 일이 다시 생긴다. 전체 목록을 걸러도 한 보호자의 일과는 많지 않다.
     //
     // 첫 프레임 뒤로 미룬다 — initState 는 빌드 중이라 여기서 무효화하면 이미
     // 목록을 보고 있는 위 화면까지 빌드 도중에 다시 그리라는 요청이 된다.
@@ -75,7 +75,7 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
       title: context.l10n.draftRoutinesTitle,
       backTop: 67,
       horizontalPadding: 16,
-      // 하단 배너(#281). 로드 전·실패 시 높이 0이라 자리를 남기지 않는다.
+      // 하단 배너. 로드 전·실패 시 높이 0이라 자리를 남기지 않는다.
       bottomBanner: const AdBannerSlot(placement: AdPlacement.bannerDrafts),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -87,7 +87,7 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
               // 로딩과 0건을 **구분한다.** 같은 화면으로 두면 느린 연결에서
               // "없다"고 잘못 읽는다 (docs 예외처리 규칙).
               loading: () => const ElumStateBody.loading(),
-              // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다 (#352).
+              // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다.
               error: (e, _) => ElumStateBody(
                 child: ElumErrorView.failure(
                   e,
@@ -137,7 +137,7 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
     );
   }
 
-  /// 임시저장 지우기 — **먼저 묻고** 지운다 (#496).
+  /// 임시저장 지우기 — **먼저 묻고** 지운다.
   ///
   /// 바로 지우면 잘못 밀어도 되돌릴 길이 없다. 서버는 일과 삭제 API 로 지운다(임시저장도
   /// 일과다). 실패하면 줄을 그대로 두고 에러 코드를 보여준다.

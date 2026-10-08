@@ -7,7 +7,7 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../data/card_photo.dart';
 
-/// 사진을 어디서 가져올지 고르는 시트 (#456).
+/// 사진을 어디서 가져올지 고르는 시트.
 ///
 /// **임시 시안이다** — 디자이너 확정 전 제시용 목업(`sheet_pick`)을 그대로 옮겼다.
 /// 확정되면 문구·간격·아이콘을 시안에 맞춘다. 아이콘은 에셋이 나오기 전이라 Material

@@ -14,7 +14,7 @@ import '../../../core/logger/app_logger.dart';
 ///
 /// 팝업은 광고 요청이 아니라 **앱 시작 직후** [requestOnLaunch] 가 띄운다. 광고 요청에
 /// 묶어 두면 광고가 안 뜨는 경로(로그인 전·요금제 조회 중·광고 제거 요금제)로 쓰는 심사관은
-/// 팝업을 한 번도 못 본다(#519 심사 2.1 리젝). 광고 로더의 [useNonPersonalized] 는 이미
+/// 팝업을 한 번도 못 본다(심사 2.1 리젝). 광고 로더의 [useNonPersonalized] 는 이미
 /// 받은 답을 읽고, 아직 못 받았으면 안전망으로 한 번 더 묻는다.
 abstract final class AdConsent {
   /// 앱이 활성화된 뒤 팝업이 뜨기까지 두는 짧은 여유.

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// AI 일과 생성 한 번이 쓴 크레딧 — 서버 `RoutineResponse.credit` (#407).
+/// AI 일과 생성 한 번이 쓴 크레딧 — 서버 `RoutineResponse.credit`.
 ///
 /// 크레딧이 꺼져 있으면 서버가 null 을 준다. 그때는 카드 확인의 사용량 줄을
 /// 그리지 않는다. 일과 모델([Routine])에 실려 오지만 **생성 응답에만 있다** —

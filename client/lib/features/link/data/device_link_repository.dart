@@ -41,7 +41,7 @@ enum RedeemOutcome {
 /// 암호 넣기 한 번의 결과 — 갈래와 **그 실패가 무엇이었는지**를 함께 돌려준다.
 ///
 /// 갈래만으로는 서버가 알려준 문구를 화면에 전할 수 없다. 이유가 저장소 안에서
-/// 사라지면 화면은 자기가 지어낸 말밖에 못 한다 (#352).
+/// 사라지면 화면은 자기가 지어낸 말밖에 못 한다.
 class RedeemResult {
   const RedeemResult(this.outcome, {this.failure});
 
@@ -51,7 +51,7 @@ class RedeemResult {
   final AppFailure? failure;
 }
 
-/// 연결 하나를 끊은 결과 (#363).
+/// 연결 하나를 끊은 결과.
 ///
 /// 갈래가 셋인 이유 — `이미 끊겨 있었다`를 실패로 보이면 보호자는 끊겼는데 "못 끊었어요"를 본다.
 /// 끊으려던 결과(연결이 없다)는 이미 이뤄졌으므로 성공과 같이 다루되, 말은 다르게 한다.
@@ -66,7 +66,7 @@ enum RevokeOutcome {
   failed,
 }
 
-/// [DeviceLinkRepository.revoke] 의 결과 — 갈래와 **실패 이유**를 함께 돌려준다 (#352).
+/// [DeviceLinkRepository.revoke] 의 결과 — 갈래와 **실패 이유**를 함께 돌려준다.
 class RevokeResult {
   const RevokeResult(this.outcome, {this.failure});
 
@@ -99,12 +99,12 @@ class DeviceLinkRepository {
   final TokenStore _tokens;
   final LocalStorage _storage;
 
-  /// 이 이룸이 휴대폰의 연결이 **밖에서 끊겼다**(보호자가 끊었거나 세션이 끝났다) — 연결 화면이 말한다 (#363).
+  /// 이 이룸이 휴대폰의 연결이 **밖에서 끊겼다**(보호자가 끊었거나 세션이 끝났다) — 연결 화면이 말한다.
   bool get linkWasLost => _storage.isElumiLinkLost;
 
   /// 새 연결 암호를 만든다.
   ///
-  /// 실패하면 **이유까지 담아** 돌려준다 — 화면이 서버 문구를 그대로 띄운다 (#352).
+  /// 실패하면 **이유까지 담아** 돌려준다 — 화면이 서버 문구를 그대로 띄운다.
   Future<Attempt<IssuedLinkCode>> issue() {
     return guarded(_repo, 'issue', () async {
       final res = await _dio.post<Map<String, dynamic>>('/api/device-links');
@@ -120,7 +120,7 @@ class DeviceLinkRepository {
     });
   }
 
-  /// 연결 상태 — 실패하면 **이유와 함께** 돌려준다 (#363).
+  /// 연결 상태 — 실패하면 **이유와 함께** 돌려준다.
   ///
   /// 상태 화면이 빈 화면·무한 로딩 대신 `다시 시도`와 에러 코드를 보여줘야 한다.
   Future<Attempt<LinkStatus>> statusResult() {
@@ -156,16 +156,16 @@ class DeviceLinkRepository {
       e.response?.statusCode == 404 &&
       failure.server?.code == ServerErrorCode.deviceLinkNotConnected;
 
-  /// 이 휴대폰(이룸이)이 **스스로** 연결을 끊는다 — 설정의 로그아웃·회원탈퇴 (#363).
+  /// 이 휴대폰(이룸이)이 **스스로** 연결을 끊는다 — 설정의 로그아웃·회원탈퇴.
   ///
   /// 서버가 연결을 끊은 **뒤에만** 로컬을 정리한다. 서버가 안 끊겼는데 로컬만 비우면 보호자 화면에는
   /// 계속 `연결됨`이 남고 이 휴대폰은 연결 화면으로 가 버린다 — 되돌릴 수 없다고 안내한 동작은 됐는지
-  /// 안 됐는지를 말해야 한다 (#187). 그래서 실패하면 아무것도 지우지 않고 이유만 돌려준다.
+  /// 안 됐는지를 말해야 한다. 그래서 실패하면 아무것도 지우지 않고 이유만 돌려준다.
   ///
   /// 이미 끊겨 있으면(404 `DEVICE_LINK_NOT_CONNECTED`·401) 원하는 결과가 이미 됐으므로 정리하고 끝낸다.
   /// 401 은 토큰 갱신까지 실패했다는 뜻이라 서버가 이 연결을 더는 인정하지 않는 것이다.
   ///
-  /// **로컬은 보호자 로그아웃처럼 전부 비운다** — `이룸이 휴대폰` 표식과 역할까지 (#542). 스스로 나간
+  /// **로컬은 보호자 로그아웃처럼 전부 비운다** — `이룸이 휴대폰` 표식과 역할까지. 스스로 나간
   /// 사람은 로그인 화면으로 간다. 표식을 남기면 연결 화면에 갇히고, 역할(`이룸이`)을 남기면 다시
   /// 로그인해도 연결 화면으로 끌려간다. 밖에서 끊긴 경우([releaseThisPhone])와 다르다.
   ///
@@ -190,12 +190,12 @@ class DeviceLinkRepository {
     return null;
   }
 
-  /// 연결이 끊긴 이룸이 휴대폰의 로컬을 비운다 (#363).
+  /// 연결이 끊긴 이룸이 휴대폰의 로컬을 비운다.
   ///
   /// 지우는 것 — 토큰, 이룸이 정보(이름·캐릭터·그림 방식), 일과 캐시, 체크 기록. **남기는 것 — `이룸이 휴대폰`
   /// 표식**이다. 이 휴대폰은 스스로 나간 것이 아니라 밖에서 끊겼으므로, 다시 켜도 연결 화면에서 `연결이
-  /// 끊어졌어요`를 말하고 같은 이룸이에게 다시 붙을 수 있어야 한다(#206). 연결 화면의 뒤로가기는 로그인으로
-  /// 간다(#542). 로그인하면 표식이 내려간다([AuthRepository]).
+  /// 끊어졌어요`를 말하고 같은 이룸이에게 다시 붙을 수 있어야 한다. 연결 화면의 뒤로가기는 로그인으로
+  /// 간다. 로그인하면 표식이 내려간다([AuthRepository]).
   ///
   /// 스스로 로그아웃·탈퇴한 경우는 여기가 아니다 — [disconnectThisPhone] 이 표식까지 전부 지운다.
   ///
@@ -221,9 +221,9 @@ class DeviceLinkRepository {
       }
       await _tokens.save(accessToken: access, refreshToken: refresh);
       // 이 휴대폰이 이룸이 것임을 남긴다. 세션이 끊겼을 때 보호자 로그인 화면이 아니라
-      // 연결 화면으로 되돌리려면 토큰이 사라진 뒤에도 알 수 있어야 한다 (이슈 #206).
+      // 연결 화면으로 되돌리려면 토큰이 사라진 뒤에도 알 수 있어야 한다.
       await _storage.setElumiDevice(true);
-      // 새로 이어졌다 — 전에 끊겼다는 안내는 거둔다 (#363)
+      // 새로 이어졌다 — 전에 끊겼다는 안내는 거둔다
       await _storage.setElumiLinkLost(false);
       await _pullProfile();
       return const RedeemResult(RedeemOutcome.linked);
@@ -253,7 +253,7 @@ class DeviceLinkRepository {
       if (character != null && character.isNotEmpty) {
         await _storage.setCharacter(character);
       }
-      // 보호자가 정한 그림 방식 (#458). 없거나 모르는 값이면 담지 않는다 — 로컬이 비면
+      // 보호자가 정한 그림 방식. 없거나 모르는 값이면 담지 않는다 — 로컬이 비면
       // 읽는 쪽이 만화로 처리하므로 옛 서버·새 값이어도 연결은 그대로 성공한다.
       final imageStyle = res.data?['imageStyle'];
       if (imageStyle is String &&
@@ -301,7 +301,7 @@ final deviceLinkRepositoryProvider = Provider<DeviceLinkRepository>((ref) {
   );
 });
 
-/// 보호자 휴대폰의 이룸이 휴대폰 연결 상태. 설정 줄과 상태 화면이 함께 본다 (#363).
+/// 보호자 휴대폰의 이룸이 휴대폰 연결 상태. 설정 줄과 상태 화면이 함께 본다.
 ///
 /// 화면을 떠나면 버린다 — 연결은 다른 사람(이룸이 휴대폰·다른 보호자)이 언제든 바꾸므로 오래된 값을 두지 않는다.
 final linkStatusProvider = FutureProvider.autoDispose<Attempt<LinkStatus>>((ref) {

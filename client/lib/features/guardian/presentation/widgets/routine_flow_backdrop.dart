@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import 'aurora_background.dart';
 
-/// 일과 만들기 흐름 **전체가 함께 쓰는** 배경 (#380).
+/// 일과 만들기 흐름 **전체가 함께 쓰는** 배경.
 ///
-/// 전에는 화면마다 [AuroraBackground]를 따로 그렸다. 그러면 화면이 넘어갈 때
+/// 화면마다 [AuroraBackground]를 따로 그리면 화면이 넘어갈 때
 /// 새 화면이 **자기 배경째** 밀려 들어와, 색이 다른 보상 화면(분홍)에서는
 /// 색 경계선이 화면을 가로질렀다. 원의 움직임도 화면마다 처음부터 다시 돌아
 /// 넘어가는 순간 제자리로 튀었다.
@@ -15,7 +15,7 @@ import 'aurora_background.dart';
 /// [tone]이 가리키는 색으로 번진다.
 ///
 /// 화면은 [isPresent]로 이 배경 위에 있는지 보고, 없으면(단독 테스트·흐름 밖에서
-/// 연 화면) 예전처럼 자기 배경을 그린다.
+/// 연 화면) 자기 배경을 직접 그린다.
 class RoutineFlowBackdrop extends StatelessWidget {
   const RoutineFlowBackdrop({
     super.key,

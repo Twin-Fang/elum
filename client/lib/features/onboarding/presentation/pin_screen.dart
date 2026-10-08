@@ -78,7 +78,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       setState(() {});
     }
 
-    // 4자리를 채우면 자동으로 다음으로 넘긴다 (이슈 #101).
+    // 4자리를 채우면 자동으로 다음으로 넘긴다.
     // 1단계는 재입력 단계로 자동 전환, 2단계는 자동 검증한다.
     // 단, 2단계 일치 시엔 자동 저장하지 않고 CTA만 활성화해 확정할 틈을 남긴다.
     if (_current.length == OnboardingProfile.pinLength) {
@@ -145,7 +145,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     setState(() => _saving = true);
 
     // 이룸이가 없는 보호자(마지막 이룸이에서 나간 뒤)는 서버가 저장을 막으므로 이룸이부터 만든다.
-    // 못 만들었으면 저장을 이어 가지 않고 이 화면에 남는다 — 다시 누르면 다시 시도한다 (#362).
+    // 못 만들었으면 저장을 이어 가지 않고 이 화면에 남는다 — 다시 누르면 다시 시도한다.
     final ensured = await ref
         .read(profileSessionProvider.notifier)
         .ensureProfile();
@@ -169,7 +169,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
 
     // 로컬에는 저장돼 있어 앱은 그대로 쓸 수 있다. 다만 서버에 못 남겼다는 것을
     // 알려야 "재설치했더니 설정이 사라졌다"를 나중에 겪지 않는다.
-    // **서버가 왜 거절했는지 말해줬으면 그 문구를 그대로 쓴다** (#352).
+    // **서버가 왜 거절했는지 말해줬으면 그 문구를 그대로 쓴다**.
     // 팝업을 닫은 뒤에 넘어간다 — 먼저 넘어가면 팝업이 홈 위에 남는다.
     if (failure != null) {
       await showFailure(
@@ -195,18 +195,17 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   }
 
   /// 설명 하단(227) → 점(299). 시안 `238:1996` 실측.
-  /// 전에는 `space.xl`(32)을 썼는데 그러면 점이 40 위로 뜬다 (#297).
+  /// `space.xl`(32)을 쓰면 점이 40 위로 뜬다.
   static const _descriptionToDots = 72.0;
 
   @override
   Widget build(BuildContext context) {
     return ElumScaffold(
       onBack: context.popOrHome,
-      // 시안(238:2924)에는 **입력 중에 버튼이 아예 없다** (이슈 #231).
+      // 시안(238:2924)에는 **입력 중에 버튼이 아예 없다**.
       //
-      // 전에는 비활성 버튼을 깔아 뒀는데, 그러면 네 자리를 넣고도 "이걸 눌러야
-      // 하나" 하고 멈춘다. 눌리지 않는 버튼은 알려주는 게 없다. 두 번 맞춰
-      // 넣으면 그때 나타나므로, **나타나는 것 자체가 다 됐다는 신호**가 된다.
+      // 비활성 버튼을 깔면 네 자리를 넣고도 "이걸 눌러야 하나" 하고 멈춘다.
+      // 두 번 맞춰 넣으면 그때 나타나므로, **나타나는 것 자체가 다 됐다는 신호**가 된다.
       bottomButton: _canConfirm
           ? ElumButton(
               label: context.l10n.pinStartButton,
@@ -219,9 +218,8 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           ElumHeader(
             // Figma 238:2767 — 재입력 단계의 제목
             // 시안 문구 그대로 쓴다 (238:2767 · 238:2924).
-            // `보호자모드`는 #196에서 `보호자 화면`으로 한 번 바꿨던 말인데,
-            // **시안을 따르기로 합의했다** (이슈 #228 — 기기만 휴대폰으로 바꾸고
-            // 코드·모드는 시안대로). 자세한 근거는 루트 CLAUDE.md 용어 규칙.
+            // `보호자모드`·코드는 **시안 문구를 따른다** (기기만 휴대폰으로 바꾼다).
+            // 근거는 루트 CLAUDE.md 용어 규칙.
             title: _isConfirmStep
                 ? context.l10n.pinConfirmTitle
                 : context.l10n.pinCreateTitle,
@@ -233,7 +231,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           SizedBox(height: _descriptionToDots.h),
           // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)
           // 실제 입력칸은 투명(Opacity 0)이라 화면 낭독기에서 빠진다. 키보드를 여는
-          // 길은 이 점 자리뿐이라 이름을 준다 (#339). 넣은 숫자는 암호라 읽지 않는다.
+          // 길은 이 점 자리뿐이라 이름을 준다. 넣은 숫자는 암호라 읽지 않는다.
           Semantics(
             container: true,
             button: true,

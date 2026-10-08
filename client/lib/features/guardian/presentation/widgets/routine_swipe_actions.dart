@@ -37,7 +37,7 @@ class RoutineSwipeActions extends StatefulWidget {
 
   final VoidCallback onDelete;
 
-  /// null이면 **삭제 하나만** 나온다. 임시저장은 고칠 것이 없다 (#496, 시안 1274:9262).
+  /// null이면 **삭제 하나만** 나온다. 임시저장은 고칠 것이 없다 (시안 1274:9262).
   final VoidCallback? onEdit;
 
   /// 삭제 버튼 오른쪽 끝에서 목록 끝까지 남기는 거리. 일과 목록(931:4179)은 버튼이

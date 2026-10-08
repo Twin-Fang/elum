@@ -20,7 +20,7 @@ import 'widgets/issued_code_panel.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 
-/// 연결 암호 만들기 — **보호자 휴대폰** (이슈 #205 · 디자인 #232).
+/// 연결 암호 만들기 — **보호자 휴대폰**.
 ///
 /// 진입은 두 곳이고 **시안이 서로 다르다.**
 ///
@@ -33,7 +33,7 @@ import '../../../core/router/routes.dart';
 /// | 나중에 할게요 | 있음 | 없음 |
 ///
 /// 설정에서는 이미 앱 안이라 `시작하기`가 갈 곳이 없다 — 연결하면 팝업으로
-/// 알리고 뒤로가기로 돌아간다. 시안도 그렇게 그려져 있다 (#349).
+/// 알리고 뒤로가기로 돌아간다. 시안도 그렇게 그려져 있다.
 ///
 /// 이 화면의 주인공은 **여섯 글자**다. QR이 빠지면서 화면이 비었으므로 암호를 크게 키운다.
 ///
@@ -64,7 +64,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   // 언어가 바뀐 뒤에도 옛 언어로 남는다.
   AppFailure? _issueFailure;
 
-  /// 남은 시간을 1초마다 다시 그린다. 시안이 `09:59`를 초까지 보여준다 (#232).
+  /// 남은 시간을 1초마다 다시 그린다. 시안이 `09:59`를 초까지 보여준다.
   Timer? _ticker;
 
   /// 연결됐는지 주기적으로 확인한다. 보호자가 이 화면을 보고 있는 동안
@@ -94,7 +94,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     super.dispose();
   }
 
-  /// 이 화면이 열릴 때 이미 붙어 있던 휴대폰들. 새로 붙은 것만 `연결 성공`이다 (#363).
+  /// 이 화면이 열릴 때 이미 붙어 있던 휴대폰들. 새로 붙은 것만 `연결 성공`이다.
   /// 다시 만들기를 눌러도 처음 기준을 유지한다 — 그사이 붙은 것은 새로 붙은 것이다.
   Set<String>? _knownLinkIds;
 
@@ -145,8 +145,8 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
       // 못 물었으면 이번 박자는 건너뛴다 — 실패를 `연결 없음`으로 읽으면 안 된다.
       if (!attempt.isOk) return;
       final ids = attempt.value!.devices.map((d) => d.linkId).toSet();
-      // **이 화면이 열린 뒤 새로 붙은 휴대폰만** 성공으로 알린다 (#363). 이미 연결된 보호자가
-      // 새 암호를 만들러 들어오면 예전 연결을 방금 성공한 것처럼 팝업을 띄웠다. 열 때 기준을 못
+      // **이 화면이 열린 뒤 새로 붙은 휴대폰만** 성공으로 알린다. 이미 연결된 보호자가
+      // 새 암호를 만들러 들어오면 기존 연결을 방금 성공한 것처럼 팝업을 띄우게 된다. 열 때 기준을 못
       // 잡았으면(첫 조회 실패) 처음 성공한 응답을 기준으로 삼는다 — 틀리게 알리는 것보다 낫다.
       final known = _knownLinkIds ??= ids;
       if (ids.difference(known).isNotEmpty) {
@@ -158,7 +158,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     });
   }
 
-  /// 연결 성공 팝업. 화면 밖으로 넘어가지 않고 **이 자리에서** 알린다 (#232).
+  /// 연결 성공 팝업. 화면 밖으로 넘어가지 않고 **이 자리에서** 알린다.
   ///
   /// 팝업을 닫아도 화면에 머문다 — 연결됨 상태를 눈으로 확인하고 `시작하기`를
   /// 누르는 것이 시안의 흐름이다.
@@ -205,15 +205,11 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
       // `나중에 할게요`는 CTA 아래에 붙는다 (시안 y=765).
       //
       // **연결된 뒤에도 남는다** — 시안 `732:5850`이 그렇게 그려져 있다.
-      // 전에는 연결되면 숨겼는데, 누르면 `시작하기`와 같은 곳으로 가므로
-      // 숨겨서 얻는 것이 없고 화면만 시안과 달라졌다 (#297).
+      // 누르면 `시작하기`와 같은 곳으로 가므로 숨겨 봐야 얻는 것이 없다.
       //
-      // **높이를 못 박지 않는다** (#393 S6 · 보상 화면 #380 실기기 A 와 같은 원인).
-      // 전에는 자리를 글자 높이 16 으로 고정하고 OverflowBox 로 누름 영역만 넓혔다.
-      // 글꼴을 키우면 글자가 16 상자에 갇혀 아래가 잘렸고, 넘친 것이 아니라 잘린
-      // 것이라 경고도 안 났다. 이제 글자 높이가 곧 자리다 — 글꼴 1.0 에서는 16 그대로라
-      // 시안 자리(765)와 같다(#297 에서 맞춘 CTA 자리도 그대로). 누름 영역은 옆으로만
-      // 넓힌다 — 위아래로 넓히면 자리가 늘어 CTA 를 밀어 올린다.
+      // **높이를 못 박지 않는다.** 16 으로 고정하면 글꼴을 키울 때 글자 아래가 잘리고
+      // 경고도 안 난다. 글자 높이가 곧 자리이며 글꼴 1.0 에서는 시안 자리(765)와 같다.
+      // 누름 영역은 옆으로만 넓힌다 — 위아래로 넓히면 CTA 를 밀어 올린다.
       belowButton: widget.fromOnboarding
           ? Center(
               child: AppPressable(
@@ -234,7 +230,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
           : null,
       // 글꼴을 키우면(2.0) 제목 두 줄·설명·암호·타이머·칩이 한 화면을 넘는다.
       // 고정 높이 칸에 두면 아래가 넘쳐 잘리므로 스크롤로 끝까지 볼 수 있게 한다
-      // (#393 S6 에서 함께 드러남). 글꼴 1.0 에서는 다 들어와 움직이지 않는다.
+      // 글꼴 1.0 에서는 다 들어와 움직이지 않는다.
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

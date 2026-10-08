@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/storage/local_storage.dart';
 
-/// 보호자 홈 코치마크가 가리키는 순서 (Figma 코치마크 섹션 1291:10801 · 이슈 #505).
+/// 보호자 홈 코치마크가 가리키는 순서 (Figma 코치마크 섹션 1291:10801).
 enum HomeCoachStep {
   /// 새로운 일과 만들기 버튼 (코치마크_1)
   createRoutine,

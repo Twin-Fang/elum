@@ -13,9 +13,9 @@ import '../../onboarding/presentation/widgets/image_style_option_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
 
-/// 보호자 설정의 `그림 방식` 선택 화면 (이슈 #458).
+/// 보호자 설정의 `그림 방식` 선택 화면.
 ///
-/// 카드는 온보딩 시안(`1274:9883`)과 같은 모양이다. 설정 화면 자체의 시안은 아직 없다(#459).
+/// 카드는 온보딩 시안(`1274:9883`)과 같은 모양이다. 설정 화면 자체의 시안은 아직 없다.
 /// 카드를 누르면
 /// 바로 저장하고 설정으로 돌아간다 — 셋 중 하나를 고르는 화면에 `저장` 단추까지 두면
 /// 결정이 둘이 된다(원칙 ① 화면 하나에 결정 하나).
@@ -60,7 +60,7 @@ class _ImageStyleSettingsScreenState
 
     if (failure == null) {
       _unsynced = null;
-      // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다 (#433).
+      // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다.
       final messenger = ScaffoldMessenger.maybeOf(context);
       final changedText = context.l10n.imageStyleChangedSnack;
       context.popOrHome();

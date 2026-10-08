@@ -4,10 +4,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// 로그를 파일에 쌓는다 — 상한 2MB, 넘으면 오래된 쪽부터 버린다 (이슈 #219).
+/// 로그를 파일에 쌓는다 — 상한 2MB, 넘으면 오래된 쪽부터 버린다.
 ///
 /// 메모리 링버퍼([DevLogBuffer])만으로는 **앱이 죽으면 로그가 함께 사라진다.**
-/// QA가 "튕겼어요"라고 할 때 정작 볼 것이 없었다. 파일에 남겨 다음 실행에서도 읽는다.
+/// 튕겼다는 제보를 받아도 볼 로그가 없으므로, 파일에 남겨 다음 실행에서도 읽는다.
 ///
 /// ## 왜 앞부분을 버리나
 ///
@@ -19,7 +19,7 @@ import 'package:path_provider/path_provider.dart';
 /// 저장 공간이 없거나 권한이 없어도 **앱이 죽으면 안 된다.** 로그는 보조 수단이다.
 /// 파일 쓰기가 실패해도 메모리 버퍼는 계속 동작해 실시간 보기는 살아 있다.
 ///
-/// 정식 출시 전 제거 대상 (이슈 #13).
+/// 정식 출시 전 제거 대상.
 abstract final class DevLogFile {
   /// 파일 상한. 넘으면 앞에서부터 잘라낸다.
   static const maxBytes = 2 * 1024 * 1024; // 2MB

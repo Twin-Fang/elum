@@ -8,12 +8,12 @@ import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 
-/// 약관 전체 동의 버튼 (Figma `726:5062` · 이슈 #226).
+/// 약관 전체 동의 버튼 (Figma `726:5062`).
 ///
 /// **항목과 같은 무게로 두지 않는다.** 다섯 개 중 하나처럼 읽히면 "전부"라는 뜻이
 /// 흐려진다. 그래서 항목(50)보다 높고(68), 눌리면 통째로 색이 찬다.
 ///
-/// 누르면 **선택 항목까지 전부** 켜진다 (이슈 #235). 한때 필수만 켰는데,
+/// 누르면 **선택 항목까지 전부** 켜진다. 필수만 켜면
 /// `전체 동의`라고 써 놓고 일부만 켜면 다 켜진 줄 알고 넘어간다.
 class ConsentAllAgreeButton extends StatelessWidget {
   const ConsentAllAgreeButton({
@@ -29,7 +29,7 @@ class ConsentAllAgreeButton extends StatelessWidget {
   static const _checkToLabel = 8.0;
 
   /// 상자 왼쪽 → 체크 (Figma x=51). **가운데 정렬이 아니다** — 가운데로 두면
-  /// 글자 폭이 시안과 조금만 달라도 통째로 밀린다. 실제로 6이 밀려 있었다 (#297).
+  /// 글자 폭이 시안과 조금만 달라도 통째로 밀린다. 실제로 6이 밀려 있었다.
   static const _checkLeft = 51.0;
 
   /// 체크 상자와 그 안 획 (Figma `726:4843` Union 13.09×9.75)

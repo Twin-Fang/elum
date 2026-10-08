@@ -24,7 +24,7 @@ import '../../../core/router/routes.dart';
 /// 계정이 먼저 생기고 그 안에 당사자 프로필을 만드는 서버 구조와 순서를 맞췄다.
 /// 재설치한 사용자는 로그인만 하면 아이 정보가 서버에서 되살아난다.
 ///
-/// **화면 그림은 [LoginScene]이 그리고, 배치는 플랫폼마다 다르다** (이슈 #338).
+/// **화면 그림은 [LoginScene]이 그리고, 배치는 플랫폼마다 다르다**.
 /// 시안이 `로그인_iOS`(238:1808)와 `로그인_AOS`(1022:4333) 둘로 나와, 병아리가
 /// 서로 반대쪽을 보고 새싹도 화면 반대편에 있다.
 ///
@@ -32,11 +32,11 @@ import '../../../core/router/routes.dart';
 /// 스토어 심사나 제공자 검수에서 지적받는다.
 ///
 /// 문구가 `~로 로그인`인 이유 — 애플이 `Apple로 로그인`·`Apple로 계속하기`·
-/// `Apple로 가입` 셋만 허용한다 (이슈 #237). **셋 중 하나를 골라 카카오·네이버도
+/// `Apple로 가입` 셋만 허용한다. **셋 중 하나를 골라 카카오·네이버도
 /// 맞춘다.** 애플만 다르게 두면 세 버튼이 어긋나 목록으로 읽히지 않는다.
 ///
-/// 한때 `계속하기`를 골랐는데 **시안(`726:4924`·`726:4925`·`726:4926`)이 고른 것은
-/// `로그인`이다.** 셋 다 애플이 허용하는 말이라 시안을 따른다 (#297).
+/// **시안(`726:4924`·`726:4925`·`726:4926`)이 고른 문구는
+/// `로그인`이다.** `계속하기`도 허용되지만 셋 다 애플이 허용하는 말이라 시안을 따른다.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -44,11 +44,11 @@ class LoginScreen extends ConsumerStatefulWidget {
   ///
   /// 애플 로그인은 iOS에서만 뜨는데 위젯 시험은 macOS에서 돈다. 그대로 두면
   /// 버튼이 둘만 그려져 셋을 그린 시안과 자리가 통째로 어긋나, 정작 봐야 할
-  /// 것이 묻힌다 (#297). 실제 화면 동작은 바꾸지 않는다.
+  /// 것이 묻힌다. 실제 화면 동작은 바꾸지 않는다.
   ///
   /// **버튼 유무와 장면 배치를 한 값이 함께 정한다.** 둘을 따로 열어 두면
   /// 시안에 없는 조합(얼굴 + 버튼 셋)을 시험이 만들어 낸다 — 그 조합이 바로
-  /// 부리가 버튼 사이로 삐져나오던 화면이다 (#338).
+  /// 부리가 버튼 사이로 삐져나오던 화면이다.
   @visibleForTesting
   static bool? debugPretendIos;
 
@@ -94,7 +94,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (!mounted) return;
 
-    // 로그인에 성공했으면 이전 세션의 이룸이 상태를 버린다 (다중 보호자 #362). 회원 정보
+    // 로그인에 성공했으면 이전 세션의 이룸이 상태를 버린다. 회원 정보
     // 캐시가 남아 있으면 다른 계정의 이룸이 목록으로 고른 이룸이를 정해 버린다.
     if (const {
       AuthOutcome.consentRequired,
@@ -114,7 +114,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _forgetPreviousChild();
         // 약관은 마쳤지만 이룸이 정보가 없는 계정이다. 보호자로 가다 멈춘 사람만이 아니라 **이룸이를 골랐던
         // 사람**(연결한 뒤 로그아웃)도 여기 온다. 이름 입력으로 곧장 보내면 이룸이를 다시 고를 길이 없다.
-        // 약관 다음과 같은 자리(역할 선택)에서 다시 묻는다 (#542).
+        // 약관 다음과 같은 자리(역할 선택)에서 다시 묻는다.
         context.go(Routes.roleSelect);
       case AuthOutcome.home:
         // 이미 아이 정보를 채운 계정이다. 온보딩을 건너뛰고 홈으로 보낸다.
@@ -129,8 +129,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // 사용자가 스스로 닫았다. 아무것도 띄우지 않는다.
         break;
       // **서버 문구를 그대로 띄우는 것이 기본이다.** 서버 문구는 이미 사용자용으로
-      // 쓰여 있고, 앱이 다시 쓰면 서버에서 고쳐도 앱은 옛 문구를 보여준다 (#347).
-      // 아래 기본 문구는 서버가 아무 말도 주지 않았을 때만 나선다 (#352).
+      // 쓰여 있고, 앱이 다시 쓰면 서버에서 고쳐도 앱은 옛 문구를 보여준다.
+      // 아래 기본 문구는 서버가 아무 말도 주지 않았을 때만 나선다.
       case AuthOutcome.emailConflict:
         await _alert(
           result,
@@ -146,7 +146,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           fallbackCode: 'E-NET',
         );
       // 사용자에게는 넷 다 같은 말이다. **코드만 다르다** — 제보를 받았을 때
-      // 어디서 터졌는지 가릴 유일한 단서다 (#346).
+      // 어디서 터졌는지 가릴 유일한 단서다.
       case AuthOutcome.failedSdk:
         await _alert(
           result,
@@ -185,11 +185,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   /// **버튼 위 글자로 두지 않는다.** 배경이 그림이라 대비가 약해 눌린 버튼에
   /// 가려지고, 글자가 생기면서 버튼 묶음이 위로 밀려 누르려던 자리가 움직인다.
   /// 팝업은 앱 공통 [showElumDialog]를 그대로 쓴다 — 화면마다 새로 그리지
-  /// 않는다는 결정(#232)을 따른다 (#346).
+  /// 않는다는 결정을 따른다.
   ///
   /// **에러 코드는 그대로 노출한다.** 사용자에게는 뜻이 없지만, 제보를 받았을 때
   /// 어디서 터졌는지 가릴 유일한 단서다.
-  /// 실패를 팝업으로 알린다 — **앱 공통 통로 하나만 쓴다** (#352).
+  /// 실패를 팝업으로 알린다 — **앱 공통 통로 하나만 쓴다**.
   ///
   /// 문구도 식별자도 [showFailure] 가 정한다. 서버가 이유를 줬으면 그 문구가
   /// [fallback] 을 이기고, 아무것도 없을 때만 [fallbackCode] 가 붙는다.
@@ -211,7 +211,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   /// 이전 계정의 아이 정보를 화면에서도 잊는다.
   ///
   /// 저장소는 [AuthRepository]가 이미 비웠지만, provider는 앱이 켜질 때 읽어 둔 값을
-  /// 메모리에 들고 있다. 비우지 않으면 이름 입력칸에 남의 이름이 그대로 남는다 (이슈 #177).
+  /// 메모리에 들고 있다. 비우지 않으면 이름 입력칸에 남의 이름이 그대로 남는다.
   void _forgetPreviousChild() {
     ref.read(loginControllerProvider).forgetPreviousChild();
   }
@@ -227,7 +227,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       body: LoginScene(
         layout: _isIos ? LoginSceneLayout.ios : LoginSceneLayout.android,
-        // 버전은 버튼 묶음과 따로 얹는다 — 버튼 배치를 건드리지 않는다 (#418).
+        // 버전은 버튼 묶음과 따로 얹는다 — 버튼 배치를 건드리지 않는다.
         overlay: Stack(children: [_buttons(context), const _VersionCorner()]),
       ),
     );
@@ -236,7 +236,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   /// 제공자 버튼 묶음. 시작 화면의 CTA가 있던 자리(화면 하단)에 얹는다.
   ///
   /// 그림 위에 겹쳐 놓기 때문에 하단 페이드(`splashFade`, y=675~852) 위로 올라온다.
-  /// 셋으로 줄면서(이슈 #230) 페이드 영역 안에 거의 들어온다.
+  /// 셋으로 줄면서 페이드 영역 안에 거의 들어온다.
   Widget _buttons(BuildContext context) {
     final isBusy = _pending != null;
 
@@ -282,7 +282,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
 
-            // 구글 버튼은 시안에서 빠졌다 (이슈 #230). `OAuthProvider.google`은
+            // 구글 버튼은 시안에서 빠졌다. `OAuthProvider.google`은
             // **지우지 않았다** — 저장소에 남은 `lastLoginProvider`가 'google'일
             // 때 파싱이 깨지면 안 되고, 서버 행의 provider 값도 그대로 산다.
 
@@ -301,7 +301,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               //
               // 애플이 요구하는 것을 전부 지킨다 — **검정 배경 · 흰 사과 심볼 ·
               // 최소 높이 · 승인 문구**. 문구는 `Apple로 로그인`·`Apple로 계속하기`·
-              // `Apple로 가입` 셋만 허용되므로 **임의로 바꾸지 않는다** (이슈 #237).
+              // `Apple로 가입` 셋만 허용되므로 **임의로 바꾸지 않는다**.
               _LastUsedSlot(
                 show: _lastProvider == OAuthProvider.apple,
                 child: _ProviderButton(
@@ -322,7 +322,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-/// 우측 상단 구석의 앱 버전 (`v1.44.0`). **개발 쪽 임시안이다** (#418).
+/// 우측 상단 구석의 앱 버전 (`v1.44.0`). **개발 쪽 임시안이다**.
 ///
 /// 로그인하지 못한 사용자는 설정 화면에 갈 수 없어, 제보할 때 어느 빌드인지
 /// 확인할 방법이 여기뿐이다. 사용자가 의식할 필요는 없어 **거의 안 보일 만큼
@@ -367,13 +367,13 @@ class _VersionCorner extends ConsumerWidget {
 /// "지난번에 이걸로" 안내.
 ///
 /// 로그인 수단이 여럿이면 무엇을 썼는지 잊는다. 다른 것으로 들어오면 별개 계정이
-/// 생겨 아이 정보가 사라진 것처럼 보인다. 그 사고를 막는 장치다.
+/// 생겨 아이 정보가 사라진 것처럼 보인다. 그것을 막는 장치다.
 /// `지난번에 이걸로 로그인했어요` — 마지막으로 쓴 제공자 위에 붙는다.
 ///
 /// **글자 뒤에 옅은 알약을 깐다.** 이 문구는 병아리 그림 위에 얹히는데 회색
-/// 글자라 그냥 두면 묻힌다. 안드로이드에서는 얼굴을 그리므로(#297) 부리와
-/// 정확히 겹쳐 `이걸로` 가 읽히지 않았다 — 부리 y614~638, 문구 y623~633
-/// (이슈 #337). iOS 도 노란 몸통 위라 대비가 좋지 않아 **양쪽 다** 깐다.
+/// 글자라 그냥 두면 묻힌다. 안드로이드에서는 얼굴을 그리므로 부리와
+/// 정확히 겹쳐 `이걸로` 가 읽히지 않는다 — 부리 y614~638, 문구 y623~633.
+/// iOS 도 노란 몸통 위라 대비가 좋지 않아 **양쪽 다** 깐다.
 ///
 /// 반투명이라 뒤 그림이 비쳐 덧댄 것처럼 보이지 않는다.
 /// 제공자 버튼 위에 `최근 로그인` 알약을 얹는 자리.
@@ -384,7 +384,7 @@ class _VersionCorner extends ConsumerWidget {
 ///
 /// **줄을 따로 차지하지 않는다.** 이전 구현은 버튼 위에 한 줄을 깔아, 최근 로그인이
 /// 있을 때만 버튼 묶음이 통째로 밀렸다 — 누르려던 자리가 움직인다. 버튼 간격이
-/// 12라 위로 10 겹쳐도 레이아웃은 그대로다 (#346).
+/// 12라 위로 10 겹쳐도 레이아웃은 그대로다.
 ///
 /// [show]가 거짓이면 버튼만 그대로 내보낸다 — `Stack`을 세우지 않는다.
 class _LastUsedSlot extends StatelessWidget {
@@ -419,7 +419,7 @@ class _LastUsedSlot extends StatelessWidget {
           top: -_top.h,
           child: Container(
             // 시안 91×28 은 **최소 크기**다. 글꼴이 커져 글자가 들어가지 않으면
-            // 알약이 자란다 — 고정이면 글자가 줄바꿈돼 잘렸다 (#342).
+            // 알약이 자란다 — 고정이면 글자가 줄바꿈돼 잘렸다.
             constraints: BoxConstraints(
               minWidth: _pillWidth.w,
               minHeight: _pillHeight.h,
@@ -504,7 +504,7 @@ class _ProviderButton extends StatelessWidget {
           children: [
             // 문구는 로고 오른쪽부터 좌우 대칭 여백 안에 둔다. 글꼴 1.0 에서는 문구가 이 폭보다
             // 좁아 버튼 가운데 그대로다. 커지면 로고 쪽으로 자라 붙거나 낱말이 중간에서 끊기는
-            // 대신 **한 줄로 폭에 맞춰 줄인다** — 버튼 높이(66)는 시안 그대로 둔다 (#342).
+            // 대신 **한 줄로 폭에 맞춰 줄인다** — 버튼 높이(66)는 시안 그대로 둔다.
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: (_iconLeft + _iconSize + _labelGap).w,

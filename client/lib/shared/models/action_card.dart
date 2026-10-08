@@ -38,10 +38,10 @@ abstract class ActionCard with _$ActionCard {
     /// 수행 완료 여부. 서버 `completed`.
     @Default(false) bool completed,
 
-    /// 그림 자리에 보여줄 무료 픽토그램 id (Mulberry Symbols, #469 · 서버 #247).
+    /// 그림 자리에 보여줄 무료 픽토그램 id (Mulberry Symbols).
     ///
     /// **사진·AI 그림이 없을 때만** 쓰인다(우선순위: 사진/AI > 픽토그램 > 기본 카드).
-    /// 옛 카드는 null 이고, 서버가 카탈로그에 없는 값을 주면 [fromJson] 이 null 로 돌린다.
+    /// 값이 없는 카드는 null 이고, 서버가 카탈로그에 없는 값을 주면 [fromJson] 이 null 로 돌린다.
     String? pictogramId,
   }) = _ActionCard;
 

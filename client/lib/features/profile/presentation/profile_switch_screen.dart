@@ -16,7 +16,7 @@ import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../member/application/member_providers.dart';
 
-/// 이룸이 바꾸기 — 여러 이룸이를 돌보는 보호자(복지사 등)가 지금 볼 이룸이를 고른다 (다중 보호자 #362).
+/// 이룸이 바꾸기 — 여러 이룸이를 돌보는 보호자(복지사 등)가 지금 볼 이룸이를 고른다.
 ///
 /// > ⚠️ **임시 시안이다.** 시안이 없어 설정 화면의 줄 모양(`SettingsTile` 과 같은 높이·여백)을
 /// > 빌렸다. 연결된 이룸이가 둘 이상일 때만 설정에 이 화면으로 가는 줄이 보인다.

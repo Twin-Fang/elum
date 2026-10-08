@@ -2,7 +2,7 @@ import 'dart:io';
 
 import '../config/client_tuning.dart';
 
-/// 앱이 시작할 때 서버에 묻는 것 (이슈 #279).
+/// 앱이 시작할 때 서버에 묻는 것.
 ///
 /// 점검 중인지, 이 버전으로 계속 써도 되는지를 담는다.
 class AppStatus {
@@ -24,11 +24,11 @@ class AppStatus {
   /// 이 버전 미만이면 업데이트를 권한다. 건너뛸 수 있다.
   final String latestVersion;
 
-  /// 강제 업데이트 화면이 열 스토어 주소 (#416). 비어 있으면 앱에 넣어 둔 주소를 쓴다.
+  /// 강제 업데이트 화면이 열 스토어 주소. 비어 있으면 앱에 넣어 둔 주소를 쓴다.
   /// 스토어 주소인지는 여기서 보지 않는다 — 여는 쪽([AppConfig.storeUrl])이 거른다.
   final String storeUrl;
 
-  /// 서버가 준 대기·연출 시간값. 옛 서버라 없으면 null 이고, 그때는 지금 값을 그대로 쓴다.
+  /// 서버가 준 대기·연출 시간값. 구버전 서버라 없으면 null 이고, 그때는 지금 값을 그대로 쓴다.
   final ClientTuning? tuning;
 
   /// 서버가 못 오거나 형식이 다를 때 쓰는 값.

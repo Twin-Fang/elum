@@ -33,13 +33,13 @@ class Member {
   /// 선택한 도움 목표의 서버 enum 값
   final List<String> supportGoals;
 
-  /// 카드 그림 방식 (#458). 필드가 없거나 모르는 값이면 만화다 —
-  /// 옛 서버·새 값이 와도 화면이 죽지 않는다.
+  /// 카드 그림 방식. 필드가 없거나 모르는 값이면 만화다 —
+  /// 필드가 없거나 새 값이 와도 화면이 죽지 않는다.
   final ImageStyle imageStyle;
 
-  /// 연결된 이룸이 목록 — 먼저 연결된 차례 (다중 보호자 #360 · `MemberResponse.profiles`).
+  /// 연결된 이룸이 목록 — 먼저 연결된 차례 (`MemberResponse.profiles`).
   ///
-  /// 옛 서버(필드 없음)나 모양이 달라도 빈 목록이다. 위 [nickname] 등은 `X-Profile-Id` 로
+  /// 필드가 없거나 모양이 달라도 빈 목록이다. 위 [nickname] 등은 `X-Profile-Id` 로
   /// 짚은 이룸이(없으면 첫 이룸이)의 값이다.
   final List<ProfileSummary> profiles;
 
@@ -50,8 +50,8 @@ class Member {
 
   final bool? _profilesKnown;
 
-  /// 응답에 이룸이 목록이 **있었는가.** 옛 서버(다중 보호자 이전)는 필드가 없다 — 그때 빈
-  /// [profiles] 는 "이룸이가 없다"가 아니라 "모른다"다. 둘을 섞으면 옛 서버를 만난 앱이 이룸이
+  /// 응답에 이룸이 목록이 **있었는가.** 다중 보호자 이전 서버는 필드가 없다 — 그때 빈
+  /// [profiles] 는 "이룸이가 없다"가 아니라 "모른다"다. 둘을 섞으면 그런 서버를 만난 앱이 이룸이
   /// 정보를 비우고 온보딩으로 돌려보낸다.
   ///
   /// 직접 만들 때 정하지 않으면 **목록이 비어 있지 않을 때만** 안다고 본다 — 비어 있는 것을
@@ -137,7 +137,7 @@ class MemberRepository {
     }
   }
 
-  /// 내 몫의 새 이룸이를 만든다 (`POST /api/member/profile` · 서버 #361·#362).
+  /// 내 몫의 새 이룸이를 만든다 (`POST /api/member/profile` ).
   ///
   /// 마지막 이룸이에서 나간 보호자가 이룸이를 다시 등록하려면 저장 API 보다 먼저 불러야 한다 —
   /// 이룸이가 없으면 서버가 저장을 `404 PROFILE_NOT_FOUND` 로 막는다. 서버는 **멱등**이라 이미
@@ -217,7 +217,7 @@ class MemberRepository {
     return r.failure;
   }
 
-  /// 카드 그림 방식 저장 (#458).
+  /// 카드 그림 방식 저장.
   ///
   /// ⚠️ [imageStyle]은 서버 enum 값이어야 한다 (`CARTOON` / `REALISTIC` /
   /// `PHOTO_ONLY`). `ImageStyle.apiValue`를 그대로 넘긴다.

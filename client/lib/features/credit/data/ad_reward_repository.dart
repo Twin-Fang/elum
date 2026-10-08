@@ -6,7 +6,7 @@ import '../../../core/network/app_failure.dart';
 import '../domain/ad_reward.dart';
 import '../../../app/dio_provider.dart';
 
-/// 보호자가 광고를 보고 크레딧을 받는 서버 API (#463).
+/// 보호자가 광고를 보고 크레딧을 받는 서버 API.
 ///
 /// **"광고를 봤다"고 알리는 API 는 없다.** 지급은 Google 이 서버로 보내는 SSV 콜백이
 /// 정한다. 앱은 세션을 만들고(nonce 발급), 광고에 nonce 를 실어 보여 준 뒤, 서버가

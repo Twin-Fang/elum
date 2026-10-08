@@ -11,10 +11,10 @@ import '../../../../core/theme/theme_context_ext.dart';
 ///
 /// Figma `Group 46`(269×269) + 주변 작은 별 2개(38 / 30).
 ///
-/// **별은 에셋이다.** 예전에는 `Icon(Icons.star_rounded)`로 그렸는데,
-/// 그것은 Material 기본 글리프라 Figma의 그라데이션 별과 모양이 다르다.
-/// 게다가 위젯 테스트에서는 아이콘 폰트가 없어 **네모로 렌더**됐다
-/// (골든에서 발각 — client/CLAUDE.md §2 "일러스트를 코드로 그리지 않는다").
+/// **별은 에셋이다.** `Icon(Icons.star_rounded)`는
+/// Material 기본 글리프라 Figma의 그라데이션 별과 모양이 다르고,
+/// 위젯 테스트에서는 아이콘 폰트가 없어 **네모로 렌더**된다
+/// (client/CLAUDE.md §2 "일러스트를 코드로 그리지 않는다").
 ///
 /// 애니메이션은 에셋을 `Transform.scale`로 감싸 그대로 유지한다 —
 /// 등장 연출 때문에 코드로 그릴 이유는 없었다.
@@ -29,7 +29,7 @@ class RewardStar extends StatefulWidget {
   ///
   /// 시안(309:4055)이 알려주는 209는 후광을 뺀 별 본체 크기다. 에셋에는 후광이
   /// 함께 들어 있어 그 값을 그대로 주면 별이 시안보다 10% 작아진다. 시안 그림에서
-  /// 잰 본체 폭(177.5)에 에셋의 본체 비율을 맞춰 나온 값이다 (#297).
+  /// 잰 본체 폭(177.5)에 에셋의 본체 비율을 맞춰 나온 값이다.
   static const mainSize = 230.9;
 
   @override
@@ -133,7 +133,7 @@ class _RewardStarState extends State<RewardStar>
 
   /// 위쪽으로만 은은히 떠오르는 오프셋. sine 곡선이라 시작·끝이 매끄럽게
   /// 이어지되, 0~-amplitude 구간만 쓴다 — 아래로 내려가면 별 밑에 앉은
-  /// 캐릭터(_RewardHero._charFrame)와 겹치기 때문에 원래 자리보다
+  /// 캐릭터(_RewardHero._charFrame)와 겹치기 때문에 기준 자리보다
   /// 아래로는 절대 내려가지 않는다.
   Offset _floatOffset(double t, {required double amplitude, required double phase}) {
     final wave = (math.sin(t * 2 * math.pi + phase) - 1) / 2; // 0 ~ -1
@@ -151,7 +151,7 @@ class _Star extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // **높이를 주지 않는다** — 에셋이 264×255라 정사각형으로 묶으면 남는 쪽에
-    // 여백이 생겨 별이 가운데로 밀린다 (#297).
+    // 여백이 생겨 별이 가운데로 밀린다.
     return Image.asset(AppAssets.starBig, width: size);
   }
 }

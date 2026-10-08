@@ -19,7 +19,7 @@ class GuardianEdit {
   bool get isEmpty => displayName == null && kind == null;
 }
 
-/// 이 이룸이 안에서 **내가 불리는 이름**과 구분을 고치는 시트 (다중 보호자 #362).
+/// 이 이룸이 안에서 **내가 불리는 이름**과 구분을 고치는 시트.
 ///
 /// > ⚠️ **임시 시안이다.** 시안이 없어 이름 입력 필드(`ElumTextField`)와 버튼을 그대로 썼다.
 ///

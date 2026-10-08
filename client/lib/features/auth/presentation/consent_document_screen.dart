@@ -13,7 +13,7 @@ import '../domain/consent_documents.dart';
 /// 네트워크가 없으면 읽을 수조차 없다. 읽을 수 없는 상태에서 받은 동의는
 /// 고지로서 성립하지 않으므로 본문을 앱에 담아 보여준다.
 ///
-/// ## 🔴 글자 색을 반드시 준다 (이슈 #235)
+/// ## 🔴 글자 색을 반드시 준다
 ///
 /// `AppTypography.toTextTheme`이 `bodyMedium`에 **보조색(회색)** 을 넣는다.
 /// `Text`는 색 없는 스타일을 받으면 그 기본값과 합치므로, 색을 빼먹으면
@@ -25,10 +25,10 @@ import '../domain/consent_documents.dart';
 /// **12/w400 · 줄높이 120%** 로 쭉 흘린다. 그 셋은 그대로 맞췄다.
 ///
 /// 다만 시안 본문은 원문을 통째로 붙여 넣은 TEXT 한 덩이라 섹션도 불릿도
-/// 굵기가 같다. 그건 #235가 **일부러 고친 상태**다 — 글자 벽이라 무엇을 읽고
+/// 굵기가 같다. 그건 **일부러 고친 상태**다 — 글자 벽이라 무엇을 읽고
 /// 있는지 알 수 없었다. 게다가 시안이 쓴 원문은 지금 서버 문서와 다르다
 /// (`아이를 부르는 이름`이라 적혀 있고 OpenAI가 빠져 있다). 본문은 서버가
-/// 주는 것이 기준이므로(`figma-dump-vs-png`) 덩이 나누기는 유지했다 (#349).
+/// 주는 것이 기준이므로(`figma-dump-vs-png`) 덩이 나누기는 유지했다.
 class ConsentDocumentScreen extends StatelessWidget {
   const ConsentDocumentScreen({super.key, required this.item});
 
@@ -52,11 +52,11 @@ class ConsentDocumentScreen extends StatelessWidget {
   /// 불릿 점과 글 사이
   static const _bulletGap = 8.0;
 
-  /// 표 행의 이름 칸과 값 칸 사이 (#376). 불릿 점 간격보다 넓어야 이름과 값이
+  /// 표 행의 이름 칸과 값 칸 사이. 불릿 점 간격보다 넓어야 이름과 값이
   /// 한 문장으로 읽히지 않는다.
   static const _rowGap = 12.0;
 
-  /// 이름 칸이 본문 폭의 이만큼을 넘으면 값을 이름 아래로 내린다 (#376 L4).
+  /// 이름 칸이 본문 폭의 이만큼을 넘으면 값을 이름 아래로 내린다.
   /// 393 · 글꼴 1.3 에서 가장 긴 이름(`이전되는 국가`)이 약 1/3 이라 나란히 두고,
   /// 360 · 글꼴 2.0 에서는 절반을 넘어 값 칸이 한두 글자씩 꺾이므로 쌓는다.
   static const _stackRatio = 0.4;
@@ -116,7 +116,7 @@ class ConsentDocumentScreen extends StatelessWidget {
       ConsentBlockKind.section => _sectionTop,
       ConsentBlockKind.subsection => _subsectionTop,
       // 불릿끼리는 붙고, 다른 덩이 뒤에 처음 오는 불릿만 한 줄 띄운다 (시안 실측).
-      // 표 행도 원문에서 줄마다 이어 적은 목록이라 불릿과 같이 붙인다 (#376) —
+      // 표 행도 원문에서 줄마다 이어 적은 목록이라 불릿과 같이 붙인다 —
       // 개인정보처리방침 9조는 불릿과 표 행이 섞여 한 목록을 이룬다.
       ConsentBlockKind.bullet ||
       ConsentBlockKind.row => _isList(prev) ? 0.0 : _blockGap,
@@ -206,7 +206,7 @@ class ConsentDocumentScreen extends StatelessWidget {
     );
   }
 
-  /// 표 행 — 이름 칸과 값 칸을 나란히 둔다 (#376).
+  /// 표 행 — 이름 칸과 값 칸을 나란히 둔다.
   ///
   /// 이름이 본문 폭의 [_stackRatio] 를 넘으면(360 폭 · 글꼴 2.0) 값 칸이 좁아져
   /// 한두 글자씩 꺾이므로 **이름 아래로 값을 내린다** (L4). 어느 쪽이든 자르지 않는다.

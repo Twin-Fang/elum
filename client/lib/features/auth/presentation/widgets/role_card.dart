@@ -5,17 +5,16 @@ import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../domain/app_role.dart';
 
-/// 역할 선택 카드 (Figma `732:5176`·`732:5258` · 이슈 #229).
+/// 역할 선택 카드 (Figma `732:5176`·`732:5258`).
 ///
 /// ## 아이콘을 두지 않는다
 ///
-/// 전에는 왼쪽에 그림을 뒀다. 디자인에 없다 — **제목의 색이 그 역할을 한다.**
+/// 디자인에 그림이 없다 — **제목의 색이 그 역할을 한다.**
 /// `보호자`는 민트, `이룸이`는 주황이라 글을 빨리 읽지 못해도 구분된다.
 ///
-/// ## 선택 상태가 생겼다
+/// ## 선택 상태
 ///
-/// 전에는 탭하면 바로 넘어가 선택을 보여줄 시간이 없었다. 이제 `다음`으로 확정하므로
-/// **고른 카드가 남아 있어야** 무엇을 골랐는지 알 수 있다.
+/// `다음`으로 확정하므로 **고른 카드가 남아 있어야** 무엇을 골랐는지 알 수 있다.
 class RoleCard extends StatelessWidget {
   const RoleCard({super.key, required this.role, required this.selected});
 

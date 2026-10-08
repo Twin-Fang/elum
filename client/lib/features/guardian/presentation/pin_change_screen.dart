@@ -18,17 +18,17 @@ import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/router/routes.dart';
 
-/// 설정 → 비밀암호 변경하기 (#437).
+/// 설정 → 비밀암호 변경하기.
 ///
 /// **시안이 없다.** 설정 시안(`1022:4467`)에는 줄만 있어, 온보딩 비밀번호 화면
-/// (`238:1909` · `238:2767`)의 점·키패드·간격을 그대로 쓴다. 시안 요청은 #438.
+/// (`238:1909` · `238:2767`)의 점·키패드·간격을 그대로 쓴다.
 ///
 /// 지금 암호를 **먼저 묻는다.** 보호자 화면이 열린 휴대폰을 이룸이가 들고 있을 때
 /// 바로 바꿀 수 있으면 보호자 화면을 지키는 암호가 의미를 잃는다.
 class PinChangeScreen extends ConsumerStatefulWidget {
   const PinChangeScreen({super.key, this.createOnly = false});
 
-  /// 암호가 없는 휴대폰이 보호자 화면에 들어오려고 처음 만드는 경우 (#355).
+  /// 암호가 없는 휴대폰이 보호자 화면에 들어오려고 처음 만드는 경우.
   ///
   /// 문구가 "바꾸기"가 아니라 "만들기"가 되고, 저장하면 설정으로 돌아가는 대신
   /// 보호자 홈으로 들어간다. 입력 단계는 설정과 같다.
@@ -200,7 +200,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     }
     if (!mounted) return;
     setState(() => _saving = false);
-    // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다 (#433).
+    // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다.
     final messenger = ScaffoldMessenger.maybeOf(context);
     final l10n = context.l10n;
     if (widget.createOnly) {
@@ -253,7 +253,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
   @override
   Widget build(BuildContext context) {
     final (title, description) = _copy;
-    // 틀림 문구는 상태에 글자로 두지 않는다 — 언어가 바뀌면 옛 언어로 남는다.
+    // 틀림 문구는 상태에 글자로 두지 않는다 — 언어가 바뀌면 이전 언어로 남는다.
     final errorMessage = !_mismatched
         ? null
         : widget.createOnly
@@ -266,7 +266,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
       onBack: widget.createOnly ? () => context.go(Routes.login) : context.popOrHome,
       title: change ? context.l10n.pinChangeHeaderTitle : null,
       backTop: change ? _changeBackTop : null,
-      // 온보딩처럼 **다 맞았을 때만** 버튼이 나타난다 (#231). 나타나는 것이 신호다.
+      // 온보딩처럼 **다 맞았을 때만** 버튼이 나타난다. 나타나는 것이 신호다.
       bottomButton: _canSave
           ? ElumButton(
               label: context.l10n.pinChangeSave,
@@ -289,7 +289,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
             height: (change ? _changeDescriptionToDots : _descriptionToDots).h,
           ),
           // 실제 입력칸은 투명이라 낭독기에서 빠진다. 키패드를 여는 길은 이 점
-          // 자리뿐이라 이름을 준다 (#339). 넣은 숫자는 암호라 읽지 않는다.
+          // 자리뿐이라 이름을 준다. 넣은 숫자는 암호라 읽지 않는다.
           Semantics(
             container: true,
             button: true,

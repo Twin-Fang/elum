@@ -31,26 +31,18 @@ import '../application/routine_flow_state.dart';
 /// 입력 → 보상 → prepare(262:4569) → 추가질문 → generate(262:4703) → 카드확인
 /// ```
 ///
-/// 보상이 입력 바로 다음이다 (Figma 섹션 `1049:4654` · #380 결정 1).
+/// 보상이 입력 바로 다음이다 (Figma 섹션 `1049:4654`).
 ///
 /// 단순 스피너 대신 3단계를 하나씩 체크해 **무엇을 하고 있는지** 보여준다.
-/// 특히 개인정보를 가린다는 사실은 보호자가 봐야 의미가 있다.
-///
-/// ## 진행과 대기를 분리한다
-///
-/// 단계 전진(연출)과 실제 작업(서버 응답)은 별개로 돌아간다.
-///
-/// - 응답이 **빨리 오면** — 스텝별 [RoutineStage.hold]를 다 채울 때까지 기다린다.
-///   순식간에 스쳐 지나가면 연출이 없는 것과 같다.
-/// - 응답이 **늦으면** — 마지막 단계에 머문 채 계속 기다린다. 단계를 다
-///   소진했다고 넘기지 않는다. 아직 결과가 없기 때문이다. 가짜 100%도 없다.
+/// 단계 전진(연출)과 서버 응답은 별개다. 응답이 빠르면 [RoutineStage.hold]를 다 채울 때까지
+/// 기다리고, 늦으면 마지막 단계에 머문다. 결과가 없는데 넘기지 않고 가짜 100%도 없다.
 class RoutineLoadingScreen extends ConsumerStatefulWidget {
   const RoutineLoadingScreen({super.key, required this.kind});
 
   /// 어느 로딩 화면인가 — 문구·진행률·다음 목적지가 여기서 갈린다
   final RoutineLoadingKind kind;
 
-  /// 로딩 화면의 배경 색 — 시안이 둘을 다르게 칠했다 (#380 결정 4).
+  /// 로딩 화면의 배경 색 — 시안이 둘을 다르게 칠했다.
   ///
   /// 준비(262:4569)는 옅은 연보라, 생성(262:4703)은 연두·산호다. 같은 뼈대라도
   /// 색이 달라야 "지금 두 번째 기다림"이라는 것이 보인다.
@@ -81,7 +73,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
   /// 양쪽에서 각각 넘겨 화면이 두 번 쌓이는 것을 막는다.
   var _navigated = false;
 
-  /// 결과를 기다리는 상한 (#276). 무한 로딩을 두지 않는다.
+  /// 결과를 기다리는 상한. 무한 로딩을 두지 않는다.
   Timer? _deadline;
 
   /// 결과가 온 뒤에도 한 줄을 보여주는 최소 시간.
@@ -131,11 +123,9 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     _tryNavigate();
   }
 
-  /// 한 줄이 머무는 시간. **결과가 이미 왔으면 남은 시간을 채우지 않는다** (#276).
+  /// 한 줄이 머무는 시간. **결과가 이미 왔으면 남은 시간을 채우지 않는다**.
   ///
-  /// 예전에는 `await delayed(4초)`를 통째로 걸어, 서버가 1초 만에 답해도 3초를
-  /// 더 기다렸다. 화면 하나가 11초였으니 일과 하나에 22초가 들었다. 이미지 모델을
-  /// OpenAI로 옮겨 응답이 빨라졌는데(#261) 연출이 그만큼 붙잡고 있었다.
+  /// 고정 시간을 통째로 기다리면 서버가 빨리 답해도 연출이 사용자를 붙잡는다.
   ///
   /// 그렇다고 0으로 만들지는 않는다 — [_minVisible]만큼은 보여준다.
   Future<void> _hold(Duration full) async {
@@ -177,7 +167,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
 
   /// 실패 후 재시도 — 이 화면이 맡은 일을 다시 한다.
   ///
-  /// 준비 로딩은 **질문을 다시 받는다** (#393 S1). 카드 생성 재시도로 이으면 질문을
+  /// 준비 로딩은 **질문을 다시 받는다**. 카드 생성 재시도로 이으면 질문을
   /// 건너뛰고 카드를 만든다. 생성 로딩은 AI(`POST /api/routines`)를 다시 호출한다.
   /// 연출(스텝 노출)은 이미 끝났을 수 있으므로 다시 돌려 로딩감을 준다.
   Future<void> _retry() async {
@@ -205,7 +195,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
   /// 카드 생성. **`POST /api/routines`는 AI 호출이라 한 번이 곧 비용이다.**
   ///
   /// notifier에도 가드가 있지만 여기서 한 번 더 막는다 — 이 화면이 재생성되면
-  /// `initState`가 다시 돌아 요청이 겹쳐 나간 사고가 있었다. (이슈 #41)
+  /// `initState`가 다시 돌아 요청이 겹쳐 나간다.
   Future<void> _generateCards(RoutineFlowNotifier notifier) async {
     final flow = ref.read(routineFlowProvider);
 
@@ -230,7 +220,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
       RoutineLoadingKind.prepare => _hasQuestions
           ? Routes.routineQuestion
           // 물을 것이 없으면 질문 화면을 거치지 않고 바로 카드를 만든다.
-          // 보상은 이미 앞에서 정했다 (#380). 질문 화면을 한 프레임 띄웠다
+          // 보상은 이미 앞에서 정했다. 질문 화면을 한 프레임 띄웠다
           // 넘기면 배경이 파랑 쪽으로 번지다 되돌아와 색이 한 번 출렁인다.
           : Routes.routineGenerating,
       RoutineLoadingKind.generate => Routes.routineReview,
@@ -288,7 +278,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
                     RoutineLoadingKind.generate =>
                       context.l10n.routineLoadingGenerateFailed,
                   },
-            // 서버 문구가 있으면 그대로 띄운다 — 앱이 다시 쓰면 서버에서 고쳐도 옛 문구가 나온다.
+            // 서버 문구가 있으면 그대로 띄운다 — 앱이 다시 쓰면 서버에서 고쳐도 이전 문구가 나온다.
             // 서버에 닿지도 못했으면 인터넷을 확인하라고 한다.
             description: switch (flow.errorMessage?.trim()) {
               final message? when message.isNotEmpty => message,
@@ -322,13 +312,13 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
       aurora: RoutineLoadingScreen.auroraOf(widget.kind),
       // 홈으로 떠날 때만 묻는다 — 뒤로는 기다리기를 그만두고 흐름 안 한 칸 돌아가는
       // 것이라 잃을 것이 없다. 생성 중에 떠나면 요청은 서버에서 끝까지 가서
-      // 임시저장으로 남는다 (T4 · #387). 준비 중이면 아직 아무것도 없다.
+      // 임시저장으로 남는다. 준비 중이면 아직 아무것도 없다.
       leave: switch (widget.kind) {
         RoutineLoadingKind.prepare => RoutineLeave.discard,
         RoutineLoadingKind.generate => RoutineLeave.draftWhenReady,
       },
       // Figma 262:4575 · 262:4709 — 두 로딩 프레임 모두 뒤로가기를 둔다.
-      // 되돌릴 수 없다는 이유로 숨겼다가 시안과 어긋났다 (이슈 #63).
+      // 되돌릴 수 없다는 이유로 숨겼다가 시안과 어긋났다.
       // 오래 기다리는 화면이라 빠져나갈 길이 없으면 갇힌 느낌을 준다.
       onBack: _handleBack,
       child: Stack(
@@ -336,7 +326,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
           // 루미는 두 화면 모두 y=398에 있고 **좌우만 반대**다.
           // 준비(262:4569)는 왼쪽 밖으로 31, 생성(262:4703)은 오른쪽 밖으로 37
           // 걸친다. **덤프 좌표(y=383)가 아니라** 시안 export에 겹쳐 맞춘 값이다 —
-          // 그룹 상자에 그려지지 않는 여백이 붙어 있다 (#297).
+          // 그룹 상자에 그려지지 않는 여백이 붙어 있다.
           Positioned(
             top: (398 - topBarH).h,
             left: 0,
@@ -386,7 +376,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
           //
           // **오른쪽은 54로 묶지 않는다.** 시안 첫 줄이 x=353까지 가는데(폭 299)
           // 양쪽 54면 285밖에 안 남아 `…가려 / 요`로 꺾이고, 그 아래 두 줄까지
-          // 통째로 밀린다 (#297). 화면 밖으로 나가지 않을 만큼만 남긴다.
+          // 통째로 밀린다. 화면 밖으로 나가지 않을 만큼만 남긴다.
           Positioned(
             top: (569 - topBarH).h,
             left: 54.w,
@@ -442,7 +432,7 @@ class _LumiPeekState extends State<_LumiPeek>
   ///
   /// **덤프의 그룹 크기(122×123)를 쓰면 안 된다.** `Group 26` 상자에는 그려지지
   /// 않는 여백이 붙어 있어, 그 크기로 늘리면 몸이 시안보다 아홉 넓고 자리도
-  /// 어긋난다. 시안 export 위에 에셋을 겹쳐 맞춰 잰 값이다 (#297).
+  /// 어긋난다. 시안 export 위에 에셋을 겹쳐 맞춰 잰 값이다.
   static const _width = 113.0;
   static const _height = 99.0;
 
@@ -534,7 +524,7 @@ class _LumiPeekState extends State<_LumiPeek>
         // 뒤집지 않으면 얼굴이 화면 밖을 보게 된다.
         child: Transform.flip(
           flipX: !isLeft,
-          // **PNG다.** 더듬이 빛이 `<filter>`라 SVG로 두면 통째로 사라진다 (#297).
+          // **PNG다.** 더듬이 빛이 `<filter>`라 SVG로 두면 통째로 사라진다.
           child: Image.asset(
             AppAssets.lumiThinking,
             width: _width.w,

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../application/invite_link_intake.dart';
 import '../domain/invite_link.dart';
 
-/// 앱이 켜져 있을 때 OS 가 밀어 넣는 초대 링크를 받아 [InviteLinkIntake] 에 넘긴다 (#365).
+/// 앱이 켜져 있을 때 OS 가 밀어 넣는 초대 링크를 받아 [InviteLinkIntake] 에 넘긴다.
 ///
 /// ## 왜 라우터가 아니라 여기서 먼저 받나
 ///

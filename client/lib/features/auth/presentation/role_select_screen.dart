@@ -14,20 +14,19 @@ import '../../../core/router/pop_or_home.dart';
 import '../application/role_select_controller.dart';
 import '../../../core/router/routes.dart';
 
-/// 역할 선택 (Figma `732:5176`·`732:5258` · 이슈 #212 · #229).
+/// 역할 선택 (Figma `732:5176`·`732:5258`).
 ///
 /// 약관 동의 뒤, 보호자와 이룸이가 갈라지는 지점이다. 로그인·약관은 이룸이도
 /// 똑같이 거친다 — 약관 동의는 법적 요건이라 예외가 없다.
 ///
 /// ## 누르면 바로 넘어가지 않는다
 ///
-/// 전에는 카드를 누르는 순간 이동했다. 이제 **고르기와 확정이 나뉜다** —
-/// 카드를 누르면 선택만 되고 `다음`을 눌러야 이동한다. 한 번 고르면 온보딩 경로가
-/// 갈리는 화면이라, 잘못 눌렀을 때 되돌릴 여지를 둔다 (이슈 #229).
+/// **고르기와 확정이 나뉜다** — 카드를 누르면 선택만 되고 `다음`을 눌러야 이동한다.
+/// 한 번 고르면 온보딩 경로가 갈리는 화면이라, 잘못 눌렀을 때 되돌릴 여지를 둔다.
 ///
 /// ## `isElumiDevice`를 여기서 세우지 않는다
 ///
-/// 세션이 없을 때 이룸이 휴대폰을 연결 화면으로 보내는 라우터 가드(이슈 #206)가
+/// 세션이 없을 때 이룸이 휴대폰을 연결 화면으로 보내는 라우터 가드가
 /// 곧바로 다시 잡아가 **뒤로가기가 막힌다.** 그 값은 연결에 성공한 순간에만 선다.
 class RoleSelectScreen extends ConsumerStatefulWidget {
   const RoleSelectScreen({super.key});
@@ -59,7 +58,7 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
 
     switch (role) {
       // 양쪽 다 push다. 잘못 고른 사람이 **어느 쪽으로 갔든** 뒤로 돌아와야 한다.
-      // go로 갈아끼우면 스택이 없어 pop이 실패한다 (이슈 #194와 같은 함정).
+      // go로 갈아끼우면 스택이 없어 pop이 실패한다.
       case AppRole.guardian:
         context.push(Routes.onboardingName);
       case AppRole.elumi:
@@ -82,10 +81,10 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
           children: [
             ElumHeader(
               // 시안은 `이 기기는`이었다. `기기`만 `휴대폰`으로 바꾼다 —
-              // 50대 보호자가 실제로 못 알아듣는 말이라서다 (이슈 #228 합의).
+              // 50대 보호자가 실제로 못 알아듣는 말이라서다.
               title: context.l10n.roleSelectTitle,
               // `모드`는 시안 그대로 둔다. 널리 쓰이는 말이고, 시안을 고치면
-              // 디자이너와 화면이 어긋나 매번 대조해야 한다 (이슈 #228 합의).
+              // 디자이너와 화면이 어긋나 매번 대조해야 한다.
               description: context.l10n.roleSelectDescription,
               hasBackButton: context.canPop(),
             ),

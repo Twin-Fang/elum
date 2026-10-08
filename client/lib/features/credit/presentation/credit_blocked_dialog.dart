@@ -12,16 +12,16 @@ import '../application/ad_reward_flow.dart';
 import '../data/credit_repository.dart';
 import '../domain/credit_summary.dart';
 
-/// 홈 `새로운 일과 만들기`가 막혔을 때의 안내 (#407 · #433) + 광고 보고 더 만들기 (#464).
+/// 홈 `새로운 일과 만들기`가 막혔을 때의 안내 + 광고 보고 더 만들기.
 ///
 /// **광고를 제안하는 곳은 여기 하나다.** 일과 만들기 흐름 안·이룸이 화면·보상 연출에는
 /// 광고를 두지 않는다(설계 §2) — 이 안내는 흐름에 들어가기 **전**이라 허용된 자리다.
 ///
-/// ⚠️ 시안이 없는 임시 배치다(디자이너 협의 대상). 기존 팝업 컴포넌트로 만들었고, 시안이
+/// ⚠️ 시안이 없는 임시 배치다. 기존 팝업 컴포넌트로 만들었고, 시안이
 /// 나오면 시안을 따른다.
 ///
 /// 광고 버튼은 서버가 켜 두었고 오늘 횟수가 남았을 때만 보인다([AdRewardFlow.offer]).
-/// 지금 운영은 꺼져 있어 이 팝업은 예전과 똑같이 `확인` 하나다. 진행 중인 일과 때문에
+/// 지금 운영은 꺼져 있어 이 팝업은 `확인` 하나다. 진행 중인 일과 때문에
 /// 막힌 경우에도 광고를 제안하지 않는다 — 크레딧을 늘려도 끝나기 전에는 만들 수 없다.
 Future<void> showCreditBlockedDialog(
   BuildContext context,
@@ -37,7 +37,7 @@ Future<void> showCreditBlockedDialog(
 
   final wantsAd = await showElumDialog<bool>(
     context: context,
-    // 시안 `로그인실패` 변형 모양 — 느낌표 + 두 줄 문장 + 붉은 확인 (#433).
+    // 시안 `로그인실패` 변형 모양 — 느낌표 + 두 줄 문장 + 붉은 확인.
     icon: ElumDialogIcon.alert,
     title: generating
         ? l10n.creditBlockedBusy

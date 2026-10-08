@@ -14,7 +14,7 @@ import '../theme/theme_context_ext.dart';
 /// - 필드 344×68 / radius 20
 /// - 텍스트 20sp, 상하 여백 각 24 → **수직 중앙**이므로 패딩이 아니라 정렬로 맞춘다
 ///
-/// 왼쪽 아이콘(leadingIconAssetPath)은 있었으나 Figma 개정으로 제거됐다 (이슈 #83).
+/// 왼쪽 아이콘(leadingIconAssetPath)은 있었으나 Figma 개정으로 제거됐다.
 /// placeholder는 Figma상 필드 좌측 정렬이다(x=48, 필드는 x=24 시작 → 좌측 패딩 24).
 class ElumTextField extends StatelessWidget {
   const ElumTextField({

@@ -10,7 +10,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/character.dart';
 import '../../domain/image_style.dart';
 
-/// 그림 방식 선택 카드 한 장 — 온보딩과 보호자 설정이 같이 쓴다 (이슈 #458 · #494).
+/// 그림 방식 선택 카드 한 장 — 온보딩과 보호자 설정이 같이 쓴다.
 ///
 /// Figma `그림방식` 1274:9883(만화 선택)·1274:10129(직접 찍은 사진 선택). 카드는 344×94,
 /// 모서리 20이고 왼쪽에 70×70 예시, 오른쪽에 20×20 라디오가 선다. 고르면 민트 면(`#B5EAEC`)과
@@ -71,7 +71,7 @@ class ImageStyleOptionCard extends StatelessWidget {
     final space = context.space;
     final typo = context.typo;
 
-    // 선택하면 테두리가 두꺼워져 안쪽 내용이 밀렸다(통합 E2E 실측, #458).
+    // 선택하면 테두리가 두꺼워져 안쪽 내용이 밀리므로
     // 테두리 두께만큼 안쪽 여백을 줄여, 내용은 카드 바깥 끝에서 늘 12 떨어진다.
     final borderWidth =
         isSelected ? space.selectedBorderWidth : space.borderWidth;

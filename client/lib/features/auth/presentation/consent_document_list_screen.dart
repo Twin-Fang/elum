@@ -11,7 +11,7 @@ import '../domain/consent_bundle.dart';
 import '../domain/consent_documents.dart';
 import 'consent_document_screen.dart';
 
-/// 가입한 뒤에도 약관과 개인정보처리방침을 다시 읽는 화면 (이슈 #289).
+/// 가입한 뒤에도 약관과 개인정보처리방침을 다시 읽는 화면.
 ///
 /// 지금까지는 가입할 때 동의 화면에서만 볼 수 있었다. Apple은 앱 안에서도
 /// 쉽게 찾을 수 있어야 한다고 요구한다(가이드라인 5.1.1(i)).
@@ -28,7 +28,7 @@ class ConsentDocumentListScreen extends ConsumerWidget {
 
     return ElumScaffold(
       onBack: () => Navigator.of(context).pop(),
-      // 시안(`1027:4683`)은 제목이 뒤로가기와 같은 줄에 선다 (#349).
+      // 시안(`1027:4683`)은 제목이 뒤로가기와 같은 줄에 선다.
       title: context.l10n.consentListTitle,
       // 줄이 x=16 에서 시작한다.
       backTop: 67,

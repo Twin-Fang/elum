@@ -9,7 +9,7 @@ import '../../../core/storage/local_storage.dart';
 import '../domain/consent_bundle.dart';
 import '../../../app/dio_provider.dart';
 
-/// 약관 전문을 어디서 읽을지 고른다 (이슈 #278).
+/// 약관 전문을 어디서 읽을지 고른다.
 ///
 /// ## 왜 세 층인가
 ///
@@ -38,8 +38,8 @@ class ConsentDocumentRepository {
   /// 보인다. 짧게 끊고 캐시로 넘어가는 편이 낫다 — 캐시가 조금 낡는 것보다
   /// 화면이 멈춘 것이 나쁘다.
   ///
-  /// ⚠️ **연결 단계에도 준다.** 전에는 응답·전송에만 걸어 연결은 전역값(10초)을
-  /// 따랐고, 응답 없는 망에서 실제로 10초를 기다렸다 (#278 QA 실측 10,034ms).
+  /// ⚠️ **연결 단계에도 준다.** 응답·전송에만 걸면 연결은 전역값(10초)을 따라
+  /// 응답 없는 망에서 10초를 그대로 기다린다.
   static Options get _options {
     final limit = AppConfig.consentFetchTimeout;
     return Options(connectTimeout: limit, receiveTimeout: limit, sendTimeout: limit);

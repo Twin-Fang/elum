@@ -34,8 +34,8 @@ abstract class Routine with _$Routine {
     @Default('') String status,
     @Default(<ActionCard>[]) List<ActionCard> steps,
 
-    // --- 진행률 (이슈 #75, GET /api/routines/today) ---
-    // 서버가 미리 계산해 내려준다. 옛 엔드포인트 응답에는 없어 0이 기본이다.
+    // --- 진행률 (GET /api/routines/today) ---
+    // 서버가 미리 계산해 내려준다. 응답에 없을 수 있어 0이 기본이다.
 
     /// 완료한 단계 수. 서버 `completedStepCount`.
     @Default(0) int completedStepCount,
@@ -46,14 +46,14 @@ abstract class Routine with _$Routine {
     /// 진행률(정수 %). 서버 `progressPercent`.
     @Default(0) int progressPercent,
 
-    /// 일과를 수행하는 날/시각. 서버 `scheduledAt` (이슈 #258).
+    /// 일과를 수행하는 날/시각. 서버 `scheduledAt`.
     ///
     /// **`지난 일과`에서만 화면에 나온다.** 오늘 일과는 전부 오늘이라 날짜를
     /// 적을 이유가 없고, 지난 목록은 언제 것인지가 없으면 같은 제목이 여러 번
     /// 반복돼 구분되지 않는다.
     DateTime? scheduledAt,
 
-    // --- 보상(강화물) (이슈 #148, 2026-09-13 서울 ABA연구소 자문) ---
+    // --- 보상(강화물) ---
     // 보호자가 정하는 선택 항목이다. **비어 있으면 아동 화면에 보상 UI를 띄우지 않는다.**
     // 앱이 보상을 정하지도, 주지도 않는다 — 정하는 것도 주는 것도 보호자다.
 
@@ -63,13 +63,13 @@ abstract class Routine with _$Routine {
     /// 보상 프리셋 키(`SNACK`/`VIDEO`/`PLAY`/`WALK`/`CUSTOM`). 직접 입력이면 `CUSTOM` 또는 빈 값.
     @Default('') String rewardPresetKey,
 
-    /// 이번 생성이 쓴 크레딧 (#407). **생성 응답에만 있다** — 캐시([toJson])에
-    /// 넣지 않는다. 다시 읽은 일과에 옛 사용량이 붙어 있으면 거짓말이 된다.
+    /// 이번 생성이 쓴 크레딧. **생성 응답에만 있다** — 캐시([toJson])에
+    /// 넣지 않는다. 다시 읽은 일과에 이전 사용량이 붙어 있으면 거짓말이 된다.
     CreditUsage? creditUsage,
 
-    // --- 만든 사람 (다중 보호자 #362 · E30·E46) ---
+    // --- 만든 사람 (E30·E46) ---
     // 한 이룸이에 보호자가 여럿이면 일과는 모두가 보지만 승인·수정·삭제는 **만든 사람만** 한다.
-    // 서버 `RoutineResponse` 에 이 두 필드가 아직 없다(서버 #361 범위 밖) — 앱은 받을 준비만
+    // 서버 `RoutineResponse` 에 이 두 필드가 아직 없다 — 앱은 받을 준비만
     // 해 두고, 없으면 null(알 수 없음)이라 지금처럼 모든 버튼을 보인다. 서버가 최종 판단한다.
 
     /// 이 일과를 만든 사람이 나인가. null 이면 서버가 알려 주지 않았다.
@@ -81,7 +81,7 @@ abstract class Routine with _$Routine {
     /// 이 일과의 콘텐츠 언어(`ko` `en` `ja` `zh` `es`) — 서버 `RoutineResponse.language`.
     ///
     /// 일과를 만든 보호자 휴대폰의 화면 언어다. 이룸이 휴대폰은 카드 글과 음성을 화면 언어가 아니라
-    /// **이 값**으로 보여준다. 옛 서버·옛 캐시에는 없다 — 그때는 모두 한국어 일과였으므로 `ko`.
+    /// **이 값**으로 보여준다. 서버 응답·캐시에 없으면 — 모두 한국어 일과였으므로 `ko`.
     @Default('ko') String language,
   }) = _Routine;
 
@@ -106,10 +106,10 @@ abstract class Routine with _$Routine {
   bool get isConfirmed => status == 'CONFIRMED';
 
   /// 아동 화면에 보여도 되는가. `/today`가 CONFIRMED와 COMPLETED를 함께 주므로
-  /// isConfirmed만 걸면 다 끝낸 일과가 목록에서 사라진다 (이슈 #75).
+  /// isConfirmed만 걸면 다 끝낸 일과가 목록에서 사라진다.
   bool get isVisibleToChild => isConfirmed || status == 'COMPLETED';
 
-  /// [now] 날짜의 오늘 일과로 보여도 되는가 (#353).
+  /// [now] 날짜의 오늘 일과로 보여도 되는가.
   ///
   /// 서버 `/today` 와 같은 규칙이다 — 승인 전(`PENDING_REVIEW`)은 빼고,
   /// `scheduledAt` 이 오늘이어야 한다. 앱이 받아 둔 값(메모리·오프라인 캐시·폴백)은
@@ -135,10 +135,10 @@ abstract class Routine with _$Routine {
   /// 모든 카드를 마쳤는가. 아이 홈 타일의 완료 배경 판단에 쓴다.
   bool get isAllDone => steps.isNotEmpty && steps.every((s) => s.completed);
 
-  /// 이룸이가 다 끝냈는가 (#534). 서버 상태가 늦게 바뀐 응답도 있어 단계로도 본다.
+  /// 이룸이가 다 끝냈는가. 서버 상태가 늦게 바뀐 응답도 있어 단계로도 본다.
   bool get isFinished => status == 'COMPLETED' || isAllDone;
 
-  /// 이룸이가 한 단계라도 했는가 (#533). 시작한 일과는 서버가 지우지 않는다 —
+  /// 이룸이가 한 단계라도 했는가. 시작한 일과는 서버가 지우지 않는다 —
   /// 수행 기록이고 받은 별이 묶여 있다.
   bool get hasStarted =>
       isFinished || completedStepCount > 0 || steps.any((s) => s.completed);
@@ -152,7 +152,7 @@ abstract class Routine with _$Routine {
 
   /// 아동 화면 보상 바에 그대로 쓰는 문구. 보상이 없으면 빈 문자열이다.
   ///
-  /// **그림이 없으면 글자만 준다** (#275). 빈 그림을 그대로 이어붙이면 문구 앞에
+  /// **그림이 없으면 글자만 준다**. 빈 그림을 그대로 이어붙이면 문구 앞에
   /// 공백 한 칸이 남아 줄이 밀린다.
   String get rewardDisplay {
     if (!hasReward) return '';
@@ -169,9 +169,9 @@ abstract class Routine with _$Routine {
     return appL10n.yearMonthDay(at);
   }
 
-  /// 오프라인 캐시 저장용 — [fromJson]과 대칭이어야 한다 (이슈 #140).
+  /// 오프라인 캐시 저장용 — [fromJson]과 대칭이어야 한다.
   /// 원문(rawInputText)·마스킹본(sanitizedInputText)은 **일부러 넣지 않는다** —
-  /// 화면이 읽지 않는 값이고 로컬에 남기면 docs 원칙 5번을 어긴다 (#358).
+  /// 화면이 읽지 않는 값이고 로컬에 남기면 docs 원칙 5번을 어긴다.
   /// 그래서 왕복하면 두 필드는 빈 문자열이 된다.
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -184,7 +184,7 @@ abstract class Routine with _$Routine {
     'scheduledAt': scheduledAt?.toIso8601String(),
     'rewardText': rewardText,
     'rewardPresetKey': rewardPresetKey,
-    // 오프라인으로 목록을 열어도 남의 일과 버튼이 도로 생기지 않게 남긴다 (#362).
+    // 오프라인으로 목록을 열어도 남의 일과 버튼이 도로 생기지 않게 남긴다.
     if (createdByMe != null) 'createdByMe': createdByMe,
     if (creatorName != null) 'creatorName': creatorName,
     // 오프라인으로 이룸이 화면을 열어도 카드 글·음성이 일과 언어를 따르게 남긴다
@@ -274,7 +274,6 @@ class RecentReward {
 /// [isRequired]가 false면 질문 단계를 건너뛰고 바로 카드 생성으로 간다.
 ///
 /// ⚠️ 서버가 **질문 여러 개**를 준다. 선택한 도움 목표마다 하나씩 나온다.
-/// 예전에는 단일 질문이었으나 계약이 바뀌었다.
 /// 출처: server/.../dto/response/RoutineQuestionResponse.java
 @freezed
 abstract class RoutineQuestion with _$RoutineQuestion {

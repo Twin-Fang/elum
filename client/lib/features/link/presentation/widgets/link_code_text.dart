@@ -33,7 +33,7 @@ class LinkCodeText extends StatelessWidget {
     final half = letters.length ~/ 2;
 
     // 글꼴 2.0 이면 여섯 글자가 화면 폭을 100 넘는다. 폭에 맞춰 줄이기만 한다 —
-    // 들어갈 때(글꼴 1.0)는 그대로라 시안 크기가 바뀌지 않는다 (#393 S6).
+    // 들어갈 때(글꼴 1.0)는 그대로라 시안 크기가 바뀌지 않는다.
     return FittedBox(
       fit: BoxFit.scaleDown,
       child: Row(

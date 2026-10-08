@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'child_routine_notifier.dart';
 import '../../guardian/application/routine_providers.dart';
 
-/// 카드 진행 동기화를 언제 다시 시도할지 정하는 위젯 (이슈 #140).
+/// 카드 진행 동기화를 언제 다시 시도할지 정하는 위젯.
 ///
 /// 화면 트리 최상단에 한 번만 둔다. 세 시점에 [ChildRoutineNotifier.syncPending]을 부른다.
 /// 1. 앱 시작 — 저장된 기록을 복원([ChildRoutineNotifier.hydrate])하고 곧바로 전송
@@ -16,7 +16,7 @@ import '../../guardian/application/routine_providers.dart';
 ///
 /// 카드 조작 직후 전송은 notifier 안에서 하므로 여기서 다루지 않는다.
 ///
-/// 날짜가 바뀌면 일과 목록도 다시 받는다 (#353). 목록 provider 는 앱이 살아 있는 동안
+/// 날짜가 바뀌면 일과 목록도 다시 받는다. 목록 provider 는 앱이 살아 있는 동안
 /// 값을 들고 있어서, 자정을 넘기고도 다시 받지 않으면 어제 일과가 오늘 일과로 남는다.
 /// 백그라운드에서 돌아올 때와 켜 둔 채 자정이 지날 때 둘 다 본다.
 class SyncTriggers extends ConsumerStatefulWidget {

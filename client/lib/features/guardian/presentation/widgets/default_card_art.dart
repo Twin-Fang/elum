@@ -6,11 +6,10 @@ import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 
-/// 그림이 없는 카드의 **기본 카드** (이슈 #458).
+/// 그림이 없는 카드의 **기본 카드**.
 ///
-/// 예전에는 그림을 못 받으면 프로필과 상관없이 고양이가 고정으로 나왔다. "옷 입기"
-/// 카드에 고양이가 나오면 카드가 무엇을 하라는 것인지 흐려진다 — 그림이 없으면
-/// 없는 대로 보여준다. 만화 방식에서도 그림 생성이 실패하면 같은 카드가 나온다.
+/// 그림이 없는데 고정 일러스트(고양이)를 깔면 "옷 입기" 카드가 무엇을 하라는 것인지
+/// 흐려진다 — 그림이 없으면 없는 대로 보여준다. 만화 방식에서도 그림 생성이 실패하면 같은 카드가 나온다.
 ///
 /// ⚠️ **임시 시안이다** (디자이너 확정 전 제시용 — 목업: 대안 3-A). 확정되면 이 파일의
 /// 모양만 바뀐다. 두 화면이 따로 그린다.
@@ -19,7 +18,7 @@ import '../../../../core/widgets/app_pressable.dart';
 class DefaultCardPhotoSlot extends StatelessWidget {
   const DefaultCardPhotoSlot({super.key, this.onAddPhoto});
 
-  /// `사진 추가`를 눌렀을 때. **null 이면 누를 수 없다** — 사진 바꾸기(#456)가
+  /// `사진 추가`를 눌렀을 때. **null 이면 누를 수 없다** — 사진 바꾸기가
   /// 이 훅에 연결하기 전에는 눌러도 아무 일이 없어야 하고, 낭독기에도 버튼으로
   /// 잡히지 않아야 한다.
   final VoidCallback? onAddPhoto;

@@ -6,7 +6,7 @@ import '../theme/app_motion.dart';
 ///
 /// [delay]로 stagger를 만든다. delay는 Timer가 아니라 **컨트롤러 타임라인의
 /// 앞 구간을 Interval로 비우는 방식**이다 — dispose 후 타이머 콜백이 도는
-/// 사고가 원천적으로 없다.
+/// 일이 원천적으로 없다.
 class AppFadeSlideIn extends StatefulWidget {
   const AppFadeSlideIn({
     super.key,

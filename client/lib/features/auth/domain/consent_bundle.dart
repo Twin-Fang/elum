@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'consent_documents.dart';
 
-/// 화면에 보여줄 약관 한 벌 (이슈 #278).
+/// 화면에 보여줄 약관 한 벌.
 ///
 /// 어디서 왔는지([source])를 함께 들고 다닌다. 서버본인지 캐시인지 번들 기본값인지에
 /// 따라 **동의 기록에 남길 버전이 달라지기 때문**이다.
@@ -66,7 +66,7 @@ class ConsentBundle {
   /// 필수 항목만. 동의 완료 판정에 쓴다.
   Iterable<ConsentItem> get requiredItems => items.where((item) => item.required);
 
-  /// 빼도 되는 항목. 약관 목록이 필수와 나눠 보여준다 (#349).
+  /// 빼도 되는 항목. 약관 목록이 필수와 나눠 보여준다.
   Iterable<ConsentItem> get optionalItems =>
       items.where((item) => !item.required);
 }

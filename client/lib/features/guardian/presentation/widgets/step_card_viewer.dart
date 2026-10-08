@@ -12,7 +12,7 @@ import '../../../child/data/speech_service.dart';
 import 'action_card_view.dart';
 
 /// 일과 시트에서 카드를 눌러 **크게 보는** 화면 (Figma `보호자_홈_오늘일과_행동단계`
-/// 1274:8864, #495).
+/// 1274:8864).
 ///
 /// 뒤는 검정 70% 로 덮고(`Scrim` 1274:8926) 카드 한 장을 카드확인 화면의 카드와 같은
 /// 모양으로 세운다. 옆 카드가 좌우로 20 걸쳐 보여 넘겨 볼 수 있고, 오른쪽 위 `닫기`
@@ -52,7 +52,7 @@ class StepCardViewer extends ConsumerStatefulWidget {
     return showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
-      // 배경 막을 읽어 줄 이름 — 기본값은 영어 `Dismiss` 로 읽힌다 (#393 S7)
+      // 배경 막을 읽어 줄 이름 — 기본값은 영어 `Dismiss` 로 읽힌다
       barrierLabel: context.l10n.cardViewerBarrierLabel,
       // 시안 `Scrim` — 검정 70%
       barrierColor: Colors.black.withValues(alpha: 0.7),
@@ -69,7 +69,7 @@ class StepCardViewer extends ConsumerStatefulWidget {
   }
 
   /// 시안 실측 — 카드 333×410 @ (x30, y231) · 옆 카드 x=373 · `닫기` 40×40 @ (x328, y183).
-  /// 카드확인 화면과 같은 값이다(#401).
+  /// 카드확인 화면과 같은 값이다.
   static const cardWidth = 333.0;
   static const cardHeight = 410.0;
   static const cardGap = 10.0;

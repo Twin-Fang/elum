@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// 링크로 받은 초대 코드 하나 (#365).
+/// 링크로 받은 초대 코드 하나.
 @immutable
 class PendingInvite {
   const PendingInvite({required this.code, required this.receivedAt});
@@ -12,7 +12,7 @@ class PendingInvite {
   final DateTime receivedAt;
 }
 
-/// 링크로 받은 초대 코드를 **알맞은 때까지 들고 있는** 우편함 (#365).
+/// 링크로 받은 초대 코드를 **알맞은 때까지 들고 있는** 우편함.
 ///
 /// 링크는 아무 때나 열린다 — 앱이 꺼져 있을 때, 로그인 전, 온보딩 도중, 다른 일을 하던 중에도.
 /// 그때마다 화면을 바로 덮으면 하던 일이 날아가고, 그냥 버리면 받은 사람이 링크를 다시 눌러야 한다.

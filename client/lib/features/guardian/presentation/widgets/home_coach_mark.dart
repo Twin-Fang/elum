@@ -9,7 +9,7 @@ import '../../../../core/widgets/coach_mark_overlay.dart';
 import '../../application/home_coach_notifier.dart';
 import 'routine_swipe_actions.dart';
 
-/// 보호자 홈 코치마크 (Figma 코치마크 1291:10801 — 코치마크_1·2·3 · 이슈 #505).
+/// 보호자 홈 코치마크 (Figma 코치마크 1291:10801 — 코치마크_1·2·3).
 ///
 /// 어떤 단계를 보여줄지는 [homeCoachProvider] 가 정하고, 여기서는 그 단계를 홈의 어느
 /// 위젯에 어떤 글로 연결할지만 안다. 가리킬 위젯은 홈이 [GlobalKey] 로 넘겨준다.

@@ -10,13 +10,12 @@ import '../../../../core/widgets/inset_shadow.dart';
 
 /// `새로운 일과 만들기` (Figma 931:3830 — 361×68, r100).
 ///
-/// 개편 전에는 병아리 그림과 설명 두 줄이 붙은 94 높이 카드였다. 지금은
 /// 문장 하나짜리 알약이다 — 홈에서 할 일이 이것 하나뿐이라 설명이 필요 없고,
 /// 카드 모양이면 아래의 일과 목록과 같은 무게로 읽혀 무엇이 버튼인지 흐려진다.
 ///
 /// **효과가 네 겹이다.** 시안의 `effects` 문자열을 그대로 옮긴 것이며,
 /// 안쪽 세 줄이 이 버튼을 "빛나는 알약"으로 보이게 하는 주인공이다.
-/// 처음 옮길 때 바깥 한 줄만 구현해 밋밋하게 나갔다 (이슈 #258).
+/// 처음 옮길 때 바깥 한 줄만 구현해 밋밋하게 나갔다.
 class CreateRoutineButton extends StatelessWidget {
   const CreateRoutineButton({super.key, required this.onTap});
 

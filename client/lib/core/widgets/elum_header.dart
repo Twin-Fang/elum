@@ -38,8 +38,6 @@ class ElumHeader extends StatelessWidget {
   ///
   /// **[ElumScaffold] 안에서는 넘기지 않아도 된다** — 뼈대가
   /// [ElumScaffoldTopScope]로 직접 알려준다. 이 값은 뼈대 밖에서 쓸 때만 쓰인다.
-  /// (예전엔 화면마다 손으로 넘겼는데 비밀번호·연결암호가 빠뜨려 제목이
-  /// 40씩 내려가 있었다 — #297)
   final bool hasBackButton;
 
   /// 제목 y를 시안대로 덮어쓴다. 기본은 온보딩 계열의 131.

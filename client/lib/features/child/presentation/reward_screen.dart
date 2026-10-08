@@ -31,7 +31,7 @@ class RewardScreen extends ConsumerStatefulWidget {
   /// 테스트에서만 고정한다 — 골든이 실행마다 달라지면 회귀를 못 잡는다.
   final RewardCharacter? character;
 
-  /// 보호자가 정한 보상 (이슈 #239). 비면 그리지 않는다 — 건너뛸 수 있다.
+  /// 보호자가 정한 보상. 비면 그리지 않는다 — 건너뛸 수 있다.
   ///
   /// 별(⭐) 연출과 **함께** 보여준다. 별은 "해냈다"이고 보상은 "이제 받는다"라
   /// 서로를 대신하지 못한다.
@@ -75,7 +75,7 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
             children: [
               // **`Spacer`가 아니다.** 남는 공간을 나누면 화면 높이에 따라 별이
               // 오르내려 시안과 어긋난다. 실제로 별이 44, 글자가 26 아래에
-              // 있었다. 시안 좌표에서 뽑은 값을 그대로 둔다 (#297 · #445).
+              // 있었다. 시안 좌표에서 뽑은 값을 그대로 둔다.
               SizedBox(height: _RewardLayout.topToStar),
               _RewardHero(character: _character),
               SizedBox(height: _RewardLayout.starToTitle),
@@ -99,8 +99,8 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
                   ),
                 ),
               ),
-              // 보호자가 정한 보상 — 이제 받을 차례다 (이슈 #239).
-              // 시안: 문구(y548) 아래 32 → 칩(y580, 333×48). 어두운 배경 위 반투명 칩 (#445).
+              // 보호자가 정한 보상 — 이제 받을 차례다.
+              // 시안: 문구(y548) 아래 32 → 칩(y580, 333×48). 어두운 배경 위 반투명 칩.
               if (widget.reward != null) ...[
                 SizedBox(height: 32.h),
                 _FadeSlideIn(
@@ -149,7 +149,7 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
 /// 달라 **별과 글자가 함께 오르내린다.** 시안은 절대 좌표로 그려져 있으므로
 /// 위를 고정하고 아래만 남는 자리를 쓰게 한다.
 class _RewardLayout {
-  /// 안전영역 아래부터 별 에셋 윗변까지. 시안(`1197:6942`)이 별 묶음을 29 올렸다 (#445).
+  /// 안전영역 아래부터 별 에셋 윗변까지. 시안(`1197:6942`)이 별 묶음을 29 올렸다.
   static double get topToStar => 52.4.h;
 
   /// 별 묶음 → `축하해요!` — 시안 454.
@@ -178,21 +178,21 @@ class _RewardHero extends StatelessWidget {
   ///
   /// PNG는 Figma 별 상자(269)와 안쪽 여백이 달라, 상자 크기로 뽑은 `_scale`이
   /// 별에는 맞아도 캐릭터·그림자에는 맞지 않는다. 실제로 포포가 117이어야 할
-  /// 것이 100으로 줄고 아홉 오른쪽·여덟 아래에 놓여 있었다 (#297).
+  /// 것이 100으로 줄고 아홉 오른쪽·여덟 아래에 놓여 있었다.
   /// 그래서 캐릭터와 그림자는 **시안 절대좌표에서 이 원점만 빼서** 놓는다.
   static double get _heroLeftInFrame => (393 - RewardStar.mainSize) / 2;
   static const _heroTopInFrame = 133.75;
 
   /// 바닥 그림자 (Figma `Ellipse 23` — x162, 65×16). 시안(`1197:6942`)에서 별과 캐릭터가
-  /// 서로 가까워져 y 가 430 → 420 이 됐다 (#445, 시안 PNG 실측).
+  /// 서로 가까워져 y 가 430 → 420 이다 (시안 PNG 실측).
   static const _shadowFrame = (x: 162.0, y: 420.0, w: 65.0, h: 16.0);
 
   /// 별만 위로 끌어올리는 양. Figma는 별 하단이 캐릭터 머리에 거의 닿아
-  /// 겹쳐 보인다. 별만 이만큼 올려 간격을 확보한다 — 캐릭터는 그대로다
-  /// (이슈 #107). blur 후광까지 감안한 실측값이다.
+  /// 겹쳐 보인다. 별만 이만큼 올려 간격을 확보한다 — 캐릭터는 그대로다.
+  /// blur 후광까지 감안한 실측값이다.
   static const _starLift = 28.0;
 
-  /// 캐릭터 실측 배치 (시안 PNG 실측 — 2026-09-29 시안에서 별에 가까워져 y 가 올랐다 #445).
+  /// 캐릭터 실측 배치 (시안 PNG 실측 — 별에 가까워져 y 가 올라간 값).
   /// 포포는 레이아웃 박스(131.06, 321) 122.65×118의 중앙에 실측 117×104가 들어간다.
   ({double x, double y, double w, double h}) get _charFrame =>
       switch (character) {
@@ -211,7 +211,7 @@ class _RewardHero extends StatelessWidget {
     // 그림자 하단이 별 박스보다 아래로 나온 만큼 높이를 늘린다.
     // 여기에 별을 위로 올린 만큼(_starLift)을 더해 위 공간을 확보한다 —
     // 별은 Stack 최상단(top:0)에 두고, 그림자·캐릭터를 _starLift만큼 내려
-    // 화면상 제자리에 두면 결과적으로 별만 위로 올라간다 (이슈 #107).
+    // 화면상 제자리에 두면 결과적으로 별만 위로 올라간다.
     final height = (sy(_shadowFrame.y) + _shadowFrame.h * _scale + _starLift)
         .clamp(RewardStar.mainSize + _starLift, double.infinity);
 
@@ -249,7 +249,7 @@ class _RewardHero extends StatelessWidget {
                 AppAssets.rewardCharacter(character),
                 // **비례 환산을 걸지 않는다.** 별 그림(PNG)은 Figma 별 상자와
                 // 안쪽 여백이 달라 `_scale`이 별에는 맞아도 캐릭터에는 안 맞는다.
-                // 걸어 두니 포포가 117이어야 할 것이 100으로 줄어 있었다 (#297).
+                // 걸어 두니 포포가 117이어야 할 것이 100으로 줄어 있었다.
                 width: char.w.w,
                 height: char.h.w,
               ),

@@ -127,7 +127,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
   CoachHole? _from;
   CoachHole? _to;
 
-  /// [_to] 가 몇 번째 단계를 잰 것인가. 단계가 바뀐 직후 한 프레임은 옛 위치라 말풍선을 아직 안 그린다.
+  /// [_to] 가 몇 번째 단계를 잰 것인가. 단계가 바뀐 직후 한 프레임은 이전 위치라 말풍선을 아직 안 그린다.
   int? _measuredIndex;
   double _anchorX = 0;
 
@@ -231,7 +231,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
     final step = widget.steps[widget.index];
     final measured = _measure(step);
     if (measured == null) {
-      // 다시 잴 때(화면 크기 변화)는 옛 위치를 그대로 둔다 — 건너뛰는 것은 새 단계일 때만이다.
+      // 다시 잴 때(화면 크기 변화)는 이전 위치를 그대로 둔다 — 건너뛰는 것은 새 단계일 때만이다.
       if (animate) _skip();
       return;
     }

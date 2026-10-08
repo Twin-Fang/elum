@@ -2,7 +2,7 @@ import '../domain/invite_link.dart';
 import 'invite_inbox.dart';
 import '../../../core/router/routes.dart';
 
-/// 열린 초대 링크를 **알맞은 때에 입력 화면으로 이어 주는** 판단 (#365).
+/// 열린 초대 링크를 **알맞은 때에 입력 화면으로 이어 주는** 판단.
 ///
 /// 링크는 아무 때나 열린다. 이 클래스는 두 가지만 정한다.
 ///

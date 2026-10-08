@@ -20,10 +20,9 @@ import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/routes.dart';
 
-/// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경, #444).
+/// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경).
 ///
-/// 옛 시안(262:5124)은 하단이 `이 카드 수정하기` 칩 하나였다. 새 시안은 도구 버튼
-/// 3개(순서 변경 · 수정 · 추가)이고 순서 변경은 같은 화면이 모드로 바뀐다.
+/// 하단은 도구 버튼 3개(순서 변경 · 수정 · 추가)이고 순서 변경은 같은 화면이 모드로 바뀐다.
 ///
 /// AI가 만든 카드를 보호자가 확인하고 저장한다. **승인 전에는 아동에게
 /// 노출되지 않는다** (docs 원칙 3번).
@@ -33,14 +32,13 @@ import '../../../core/router/routes.dart';
 class CardReviewScreen extends ConsumerStatefulWidget {
   const CardReviewScreen({super.key});
 
-  /// Figma 262:5124의 배경은 단색 #F7F2EF뿐이다 — 글로우가 없다 (이슈 #79).
-  /// 흐름 배경(#380)이 이 값을 보고 오로라를 가라앉힌다.
+  /// Figma 262:5124의 배경은 단색 #F7F2EF뿐이다 — 글로우가 없다.
+  /// 흐름 배경이 이 값을 보고 오로라를 가라앉힌다.
   static const aurora = AuroraTone.none;
 
-  /// 카드 폭과 카드 사이 (시안 `262:5124` 카드 333 @ x=30 · 옆 카드 x=373 · #401).
+  /// 카드 폭과 카드 사이 (시안 `262:5124` 카드 333 @ x=30 · 옆 카드 x=373).
   ///
   /// 한 장 폭을 카드+사이로 잘라야 가운데 카드가 x=30 에 서고 옆 카드가 20 보인다.
-  /// 전에는 0.88 에 양옆 8 이라 카드가 329.8 @ 31.6, 사이가 16 이었다.
   static const _cardWidth = 333.0;
   static const _cardGap = 10.0;
 
@@ -54,8 +52,8 @@ class CardReviewScreen extends ConsumerStatefulWidget {
 class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
   late PageController _controller = _newController(0);
 
-  /// 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다. 옛 위치를 기억하면 카드
-  /// 순서가 바뀐 뒤 엉뚱한 카드에 서 있으므로, 나오는 쪽이 서 있을 카드를 정해 준다 (#471).
+  /// 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다. 이전 위치를 기억하면 카드
+  /// 순서가 바뀐 뒤 엉뚱한 카드에 서 있으므로, 나오는 쪽이 서 있을 카드를 정해 준다.
   static PageController _newController(int page) => PageController(
     initialPage: page,
     viewportFraction: CardReviewScreen._viewportFraction,
@@ -101,7 +99,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     super.dispose();
   }
 
-  /// 카드 지우기 — **묻고 나서** 뺀다 (#497).
+  /// 카드 지우기 — **묻고 나서** 뺀다.
   ///
   /// `✕` 가 곧바로 지우면 잘못 눌러도 되돌릴 길이 없다. 카드 그림은 AI 가 만든
   /// 것이라 다시 받으려면 크레딧이 든다. 일과 삭제 팝업과 같은 모양을 쓴다.
@@ -169,7 +167,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
   Future<void> _save() async {
     // 저장해야 이룸이 화면에 나간다. 뺀 카드를 서버에서 지우고, 만들기 흐름에서
-    // 온 일과만 승인한다 — 이미 저장한 일과에 승인을 부르면 서버가 거절한다 (#405).
+    // 온 일과만 승인한다 — 이미 저장한 일과에 승인을 부르면 서버가 거절한다.
     final failure = await ref.read(routineFlowProvider.notifier).save();
 
     if (!mounted) return;
@@ -194,13 +192,13 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
   Future<void> _edit(ActionCard card) async {
     final edited = await CardEditSheet.show(
       context,
-      // displayTitle이 아니라 실제 title을 넘긴다. 예전 카드는 title이 없어
+      // displayTitle이 아니라 실제 title을 넘긴다. title이 없는 카드는
       // displayTitle이 description을 대신 돌려주는데, 그 값이 제목칸에 채워지면
       // 사용자가 제목을 안 고쳤을 때 title=description으로 저장돼 제목·설명이
       // 똑같아진다. title이 비면 제목칸도 비워 사용자가 직접 채우게 한다.
       title: card.title,
       description: card.description,
-      // 서버 id 가 있는 카드만 사진으로 바꿀 수 있다 (#456). 아니면 칩이 없다.
+      // 서버 id 가 있는 카드만 사진으로 바꿀 수 있다. 아니면 칩이 없다.
       photo: CardPhotoTarget.of(
         routineId: ref.read(routineFlowProvider).routine?.id ?? '',
         stepId: card.id,
@@ -280,7 +278,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     setState(() {
       _speakingId = null;
       _orderSnapshot = ref.read(routineFlowProvider.notifier).snapshotOrder();
-      // 보던 카드에서 시작한다 — 예전에는 늘 1번으로 돌아가 있었다 (#471)
+      // 보던 카드에서 시작한다 — 아니면 늘 1번으로 돌아간다.
       _indexAtEnter = _currentIndex;
       _reorderFocus = _currentIndex;
       _reorderMode = true;
@@ -310,7 +308,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
       _currentIndex = page;
       _controller = _newController(page);
     });
-    // 옛 컨트롤러는 모드 동안 붙은 화면이 없다. 새 프레임이 그려진 뒤 치운다.
+    // 이전 컨트롤러는 모드 동안 붙은 화면이 없다. 새 프레임이 그려진 뒤 치운다.
     WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
   }
 
@@ -338,7 +336,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
 
     return RoutineFlowScaffold(
       // 순서 변경 중에는 나가도 잃을 것이 없다 — 뒤로는 모드만 닫는다(되돌림 포함).
-      // 그 밖에는 카드를 만든 순간 서버에 임시저장으로 남는다 — 나가도 날아가지 않는다 (#387).
+      // 그 밖에는 카드를 만든 순간 서버에 임시저장으로 남는다 — 나가도 날아가지 않는다.
       // 홈에서 편집하러 온 이미 저장한 일과는 뺀 카드만 저장하기를 기다린다.
       leave: _reorderMode
           ? null
@@ -347,14 +345,14 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
           : RoutineLeave.edit,
       // 뒤로도 흐름을 떠난다 — 홈과 같이 묻고, 나가면 흐름을 연 화면(홈·임시저장)으로
       // 간다. 카드를 만든 뒤 흐름 안으로 되돌아가면 앞 화면들이 `남지 않아요` 라고
-      // 사실과 다르게 말하고, 거기서 바꾼 보상·답은 다시 만들지 않아 버려진다 (#387 D1).
+      // 사실과 다르게 말하고, 거기서 바꾼 보상·답은 다시 만들지 않아 버려진다.
       backLeavesFlow: true,
       onBack: _reorderMode ? _cancelReorder : () => leaveRoutineFlow(context),
       topBar: _reorderMode
           ? CardReviewReorderTopBar(onClose: _cancelReorder)
           : null,
       showDraftAction: !_reorderMode,
-      // 저장 버튼은 시안 y=730~796 — 프레임 바닥에서 56 (#444)
+      // 저장 버튼은 시안 y=730~796 — 프레임 바닥에서 56
       bottomFigmaInset: 56,
       bottomButton: ElumButton(
         label: _reorderMode
@@ -427,7 +425,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
           CardReviewToolRow(
             reorderMode: _reorderMode,
             onReorder: _enterReorder,
-            // 눌린 버튼을 다시 누르면 `완료` 처럼 나온다 (#451)
+            // 눌린 버튼을 다시 누르면 `완료` 처럼 나온다
             onFinishReorder: _finishReorder,
             // 카드 삭제로 인덱스가 목록 밖을 가리킬 수 있어 clamp로 방어한다
             onEdit: () =>

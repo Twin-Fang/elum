@@ -10,7 +10,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/router/routes.dart';
 
-/// 이룸이가 일과를 **다 끝냈을 때** 한 번 뜨는 화면 (Figma `일과완료` 1274:9831, 이슈 #490).
+/// 이룸이가 일과를 **다 끝냈을 때** 한 번 뜨는 화면 (Figma `일과완료` 1274:9831).
 ///
 /// 카드 하나를 끝낼 때마다 뜨는 별 화면([RewardScreen])과 다르다. 마지막 카드의 별
 /// 화면을 닫으면 이어서 이 화면이 뜨고, 닫으면 이룸이 홈으로 돌아간다.

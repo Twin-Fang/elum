@@ -8,7 +8,7 @@ class LinkedDevice {
   final String linkId;
   final DateTime? linkedAt;
 
-  /// 상태 화면의 `9월 18일부터`. 시각을 모르면 null — 줄째 그리지 않는다 (#363).
+  /// 상태 화면의 `9월 18일부터`. 시각을 모르면 null — 줄째 그리지 않는다.
   String? get sinceLabel {
     final at = linkedAt;
     // context 가 없는 층이라 전역 통로를 쓴다 — 위젯 build 안에서만 부른다.
@@ -61,7 +61,7 @@ class LinkStatus {
 class IssuedLinkCode {
   const IssuedLinkCode({required this.code, required this.expiresAt});
 
-  /// 서버가 준 "몇 초 뒤"를 **내 시계**에 붙여 만든다 (이슈 #205).
+  /// 서버가 준 "몇 초 뒤"를 **내 시계**에 붙여 만든다.
   ///
   /// 서버의 `expiresAt`을 그대로 쓰면 두 시계 차이가 그대로 화면에 나온다 —
   /// 실제로 10분짜리 암호가 `11분 동안 쓸 수 있어요`로 보였다. 서버보다 길게 말하면

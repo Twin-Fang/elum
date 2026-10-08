@@ -22,7 +22,7 @@ List<RouteBase> entryRoutes() => [
   ),
 
   // --- 로그인 ---
-  // **fade를 쓴다. 슬라이드를 쓰면 글자가 두 번 보인다** (이슈 #207).
+  // **fade를 쓴다. 슬라이드를 쓰면 글자가 두 번 보인다**.
   //
   // 시작 화면과 로그인 화면은 같은 그림([SplashScene])을 그린다. 수평
   // 슬라이드는 나가는 화면과 들어오는 화면을 가로로 어긋나게 겹치므로,
@@ -60,7 +60,7 @@ List<RouteBase> entryRoutes() => [
     pageBuilder: (context, state) =>
         slidePage(state, const CharacterScreen()),
   ),
-  // 초대 코드 넣기 — 새로 가입한 보호자가 이룸이 등록 대신 들어온다 (#362 · E6).
+  // 초대 코드 넣기 — 새로 가입한 보호자가 이룸이 등록 대신 들어온다.
   GoRoute(
     path: Routes.inviteEnter,
     pageBuilder: (context, state) =>

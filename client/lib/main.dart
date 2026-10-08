@@ -25,9 +25,9 @@ Future<void> main() async {
   await AppConfig.load();
 
   // 실기기·릴리스 빌드에는 콘솔이 없다. 앱 안에서 로그를 보려면 미리 가로채야
-  // 하므로 초기화 직후에 건다. (이슈 #13)
+  // 하므로 초기화 직후에 건다.
   // 개발자 도구를 켠 빌드에서만 로그를 붙잡는다.
-  // 파일(2MB 상한)에도 남겨 앱이 죽어도 직전 로그가 남는다 (이슈 #219).
+  // 파일(2MB 상한)에도 남겨 앱이 죽어도 직전 로그가 남는다.
   // 파일 열기가 실패해도 앱 시작을 막지 않는다 — 로그는 보조 수단이다.
   if (AppConfig.showDevTools) {
     await DevLogFile.init();
@@ -72,7 +72,7 @@ Future<void> main() async {
     return;
   }
 
-  // QA 세션 주입 (디버그 빌드 전용). 로그인 뒤 화면을 실기기로 밟기 위한 통로다.
+  // 세션 주입 (디버그 빌드 전용). 로그인 뒤 화면을 실기기로 확인하기 위한 통로다.
   // 이미 세션이 있으면 건드리지 않는다 — 실제 로그인을 덮어쓰면 안 된다.
   if (!tokens.hasSession && AppConfig.devRefreshToken.isNotEmpty) {
     await tokens.save(
@@ -88,7 +88,7 @@ Future<void> main() async {
 
   runApp(
     ProviderScope(
-      // 실패한 provider 를 저절로 다시 부르지 않는다 — 실패를 40초 늦게 보여 줬다 (#429).
+      // 실패한 provider 를 저절로 다시 부르지 않는다 — 실패를 40초 늦게 보여 줬다.
       retry: elumProviderRetry,
       overrides: [
         localStorageProvider.overrideWithValue(storage),

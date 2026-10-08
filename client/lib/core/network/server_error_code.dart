@@ -6,7 +6,7 @@
 ///
 /// **문구는 여기에 두지 않는다.** 서버가 `errorMessage`로 함께 내려주고, 그 문구는
 /// 이미 사용자용으로 쓰여 있다. 앱이 다시 쓰면 두 곳이 어긋난다 — 서버에서 문구를
-/// 고쳐도 앱은 옛 문구를 보여주게 된다 (#347).
+/// 고쳐도 앱은 이전 문구를 보여주게 된다.
 enum ServerErrorCode {
   internalServerError('INTERNAL_SERVER_ERROR'),
   invalidInputValue('INVALID_INPUT_VALUE'),
@@ -16,7 +16,7 @@ enum ServerErrorCode {
   duplicateUsername('DUPLICATE_USERNAME'),
   memberNotFound('MEMBER_NOT_FOUND'),
   memberSuspended('MEMBER_SUSPENDED'),
-  // 탈퇴 계정 (#372). 관리자 화면에서만 난다 — 앱은 탈퇴한 계정으로 들어올 수 없다.
+  // 탈퇴 계정. 관리자 화면에서만 난다 — 앱은 탈퇴한 계정으로 들어올 수 없다.
   memberWithdrawn('MEMBER_WITHDRAWN'),
   memberNotWithdrawn('MEMBER_NOT_WITHDRAWN'),
 
@@ -39,7 +39,7 @@ enum ServerErrorCode {
   routineStepMinCount('ROUTINE_STEP_MIN_COUNT'),
   routineStepMaxCount('ROUTINE_STEP_MAX_COUNT'),
   routineStepImageNotFound('ROUTINE_STEP_IMAGE_NOT_FOUND'),
-  // 카드 그림을 사진으로 바꿀 때 (#455). 형식·크기·저장 실패를 서버가 문구와 함께 내려준다.
+  // 카드 그림을 사진으로 바꿀 때. 형식·크기·저장 실패를 서버가 문구와 함께 내려준다.
   routineStepImageInvalidType('ROUTINE_STEP_IMAGE_INVALID_TYPE'),
   routineStepImageTooLarge('ROUTINE_STEP_IMAGE_TOO_LARGE'),
   routineStepImageSaveFailed('ROUTINE_STEP_IMAGE_SAVE_FAILED'),
@@ -77,7 +77,7 @@ enum ServerErrorCode {
   // 이미 쓴 토큰이 다시 왔다 = 탈취 가능성. 해당 계정의 세션을 전부 끊는다.
   refreshTokenReused('REFRESH_TOKEN_REUSED'),
 
-  // 이룸이 휴대폰 연결 (이슈 #200).
+  // 이룸이 휴대폰 연결.
   // 없는 암호와 이미 쓴 암호는 **같은 문구**로 돌려준다 — 구분해 주면 어떤 암호가
   // 존재했는지가 새어 나가 추측에 단서가 된다.
   deviceLinkNotFound('DEVICE_LINK_NOT_FOUND'),
@@ -85,7 +85,7 @@ enum ServerErrorCode {
   deviceLinkTooManyAttempts('DEVICE_LINK_TOO_MANY_ATTEMPTS'),
   deviceLinkNotConnected('DEVICE_LINK_NOT_CONNECTED'),
   deviceLinkForbiddenForElumi('DEVICE_LINK_FORBIDDEN_FOR_ELUMI'),
-  // 자기 연결 끊기(DELETE /current)는 이룸이 휴대폰 전용이다 (#363). 보호자는 linkId 로 끊는다.
+  // 자기 연결 끊기(DELETE /current)는 이룸이 휴대폰 전용이다. 보호자는 linkId 로 끊는다.
   deviceLinkOnlyForElumi('DEVICE_LINK_ONLY_FOR_ELUMI'),
 
   // 이룸이 · 함께 돌보는 보호자 (다중 보호자 1단계).
@@ -94,10 +94,10 @@ enum ServerErrorCode {
   profileAccessDenied('PROFILE_ACCESS_DENIED'),
   // 일과는 연결된 보호자가 모두 보지만 승인·수정·삭제는 만든 사람만 한다 (명세 4-2).
   routineNotCreator('ROUTINE_NOT_CREATOR'),
-  // 두 사람(두 기기)이 동시에 순서를 바꿔 보낸 목록이 옛 목록이 됐다 (E24).
+  // 두 사람(두 기기)이 동시에 순서를 바꿔 보낸 목록이 낡은 목록이 됐다 (E24).
   routineOrderConflict('ROUTINE_ORDER_CONFLICT'),
 
-  // 초대 코드 (다중 보호자 2단계, #361). 없는 코드와 이미 쓴 코드는 같은 문구로 온다.
+  // 초대 코드. 없는 코드와 이미 쓴 코드는 같은 문구로 온다.
   profileInviteNotFound('PROFILE_INVITE_NOT_FOUND'),
   profileInviteExpired('PROFILE_INVITE_EXPIRED'),
   profileInviteTooManyAttempts('PROFILE_INVITE_TOO_MANY_ATTEMPTS'),
@@ -109,23 +109,23 @@ enum ServerErrorCode {
   // 요금제 한도.
   // 문구는 해요체·능동형으로 쓰고 "아이"라는 말을 쓰지 않는다 (docs 용어 규칙).
   routineCreateLimitExceeded('ROUTINE_CREATE_LIMIT_EXCEEDED'),
-  // 하루 한도 (#368). 주간과 코드를 나눈다 — 제보를 받았을 때 어느 한도인지 가려야 하고,
+  // 하루 한도. 주간과 코드를 나눈다 — 제보를 받았을 때 어느 한도인지 가려야 하고,
   // "내일 다시" 는 하루 한도에서만 맞는 말이다.
   routineCreateDailyLimitExceeded('ROUTINE_CREATE_DAILY_LIMIT_EXCEEDED'),
   routineCountLimitExceeded('ROUTINE_COUNT_LIMIT_EXCEEDED'),
   profileCountLimitExceeded('PROFILE_COUNT_LIMIT_EXCEEDED'),
 
-  // 서비스 전체 하루 AI 비용 상한 (#368). 계정 한도와 다른 코드로 둔다 — 이 사람이 많이
+  // 서비스 전체 하루 AI 비용 상한. 계정 한도와 다른 코드로 둔다 — 이 사람이 많이
   // 쓴 것이 아니라 서비스 전체가 닿은 것이라, 문구도 "다 썼어요" 가 아니다.
   aiDailyBudgetExceeded('AI_DAILY_BUDGET_EXCEEDED'),
 
-  // 주간 AI 크레딧 (#407). 부족·진행 중·동결은 다시 해도 같으니 "홈으로", 장부 오류만 다시 시도한다.
+  // 주간 AI 크레딧. 부족·진행 중·동결은 다시 해도 같으니 "홈으로", 장부 오류만 다시 시도한다.
   aiCreditInsufficient('AI_CREDIT_INSUFFICIENT'),
   aiCreditJobInProgress('AI_CREDIT_JOB_IN_PROGRESS'),
   aiCreditAccountFrozen('AI_CREDIT_ACCOUNT_FROZEN'),
   aiCreditUnavailable('AI_CREDIT_UNAVAILABLE'),
 
-  // 광고 보상 (#463). 꺼짐·오늘 상한·멈춘 계정이면 앱은 "광고 보고 더 만들기"를 숨기거나 안내로 바꾼다.
+  // 광고 보상. 꺼짐·오늘 상한·멈춘 계정이면 앱은 "광고 보고 더 만들기"를 숨기거나 안내로 바꾼다.
   // 장부 오류(UNAVAILABLE)만 잠시 뒤 다시 시도할 수 있다.
   adRewardDisabled('AD_REWARD_DISABLED'),
   adRewardDailyLimit('AD_REWARD_DAILY_LIMIT'),
@@ -144,10 +144,10 @@ enum ServerErrorCode {
   // 텍스트 생성 제공자.
   textProviderUnavailable('TEXT_PROVIDER_UNAVAILABLE'),
 
-  // 점검 모드 (이슈 #279). 점검 중에는 앱 상태 확인·약관 읽기·토큰 갱신을 뺀 API를 막는다.
+  // 점검 모드. 점검 중에는 앱 상태 확인·약관 읽기·토큰 갱신을 뺀 API를 막는다.
   maintenanceMode('MAINTENANCE_MODE'),
 
-  // 약관 문서 (이슈 #278).
+  // 약관 문서.
   consentDocumentNotFound('CONSENT_DOCUMENT_NOT_FOUND'),
   consentReasonRequired('CONSENT_REASON_REQUIRED'),
   consentFieldBlank('CONSENT_FIELD_BLANK'),
@@ -156,7 +156,7 @@ enum ServerErrorCode {
   consentVersionInvalid('CONSENT_VERSION_INVALID'),
   consentVersionNotNewer('CONSENT_VERSION_NOT_NEWER'),
 
-  // 앱 공지 (이슈 #370). 관리자 화면 저장 검증과 공지 조회에서 난다.
+  // 앱 공지. 관리자 화면 저장 검증과 공지 조회에서 난다.
   noticeNotFound('NOTICE_NOT_FOUND'),
   noticeImageNotFound('NOTICE_IMAGE_NOT_FOUND'),
   noticeTitleBlank('NOTICE_TITLE_BLANK'),
@@ -174,7 +174,7 @@ enum ServerErrorCode {
   noticeImageTooLarge('NOTICE_IMAGE_TOO_LARGE'),
   noticeImageSaveFailed('NOTICE_IMAGE_SAVE_FAILED'),
 
-  // 일과 생성 가능 언어 (다국어 #526). 서버 문구 파일이 빈 언어를 켜려 할 때 관리자 화면에서만 난다 — 앱 사용자는 거의 못 본다.
+  // 일과 생성 가능 언어. 서버 문구 파일이 빈 언어를 켜려 할 때 관리자 화면에서만 난다 — 앱 사용자는 거의 못 본다.
   contentLocaleNotReady('CONTENT_LOCALE_NOT_READY'),
 
   /// 앱이 모르는 코드. **서버가 새 코드를 먼저 배포하는 일은 반드시 생긴다.**

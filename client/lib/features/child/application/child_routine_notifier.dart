@@ -10,7 +10,7 @@ import '../data/step_progress_repository.dart';
 import '../domain/routine_progress_record.dart';
 import '../../guardian/application/routine_providers.dart';
 
-/// 아이 모드에서 보는 일과 진행 상태 (오프라인 퍼스트, 이슈 #140).
+/// 아이 모드에서 보는 일과 진행 상태 (오프라인 퍼스트).
 ///
 /// **기기가 진실이다.** [progress]에 기록이 있는 일과는 서버 `completed`를 무시하고
 /// 기록을 보여준다. 기록이 없는 일과만 서버 값을 쓴다. 서버 반영이 안 끝난 일과는

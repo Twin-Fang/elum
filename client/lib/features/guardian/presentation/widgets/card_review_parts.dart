@@ -10,13 +10,13 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_state_body.dart';
 
-/// 카드확인 화면의 부품 (#444 · 시안 `1173:5541` 기본 / `1197:5798` 순서 변경).
+/// 카드확인 화면의 부품 (시안 `1173:5541` 기본 / `1197:5798` 순서 변경).
 ///
 /// 화면 파일이 300줄을 넘지 않게 나눴다. 좌표는 시안(393×852) 그대로다.
 
 /// 머리 — 회색 반짝임 + `카드 N개를 만들었어요` (시안 1173:5592).
 ///
-/// 시안은 `카드 5개를 만들었어요`로 이미 능동형이다(옛 시안은 `생성되었어요`였다).
+/// 시안은 `카드 5개를 만들었어요`로 이미 능동형이다.
 class CardReviewHead extends StatelessWidget {
   const CardReviewHead({super.key, required this.count});
 
@@ -42,7 +42,7 @@ class CardReviewHead extends StatelessWidget {
 
 /// 보상 줄 — `완료 시 **젤리 4개 먹기** ✎` (시안 1173:5544, 333폭·라운드 8).
 ///
-/// 정한 보상을 다시 확인하고 고친다(#239). **건너뛴 사람에게는 정하라고 권한다** —
+/// 정한 보상을 다시 확인하고 고친다. **건너뛴 사람에게는 정하라고 권한다** —
 /// 카드를 다 보고 나서야 "무엇을 주지"가 떠오르는 경우가 있다. 시안에는 정한 모습만
 /// 있어, 안 정했을 때는 같은 상자에 `보상 정하기 +` 를 둔다.
 class CardReviewRewardRow extends StatelessWidget {
@@ -188,7 +188,7 @@ class CardReviewToolRow extends StatelessWidget {
             label: context.l10n.cardReviewToolReorder,
             pressed: reorderMode,
             // 켜고 끄는 버튼이다 — 눌린 상태에서 다시 누르면 나온다(옮긴 순서는 둔다).
-            // 전에는 여기가 막혀 `완료`·`✕` 로만 나올 수 있어 불편했다 (#451).
+            // 막아 두면 `완료`·`✕` 로만 나올 수 있어 불편하다.
             onTap: reorderMode ? onFinishReorder : onReorder,
           ),
           _ToolButton(

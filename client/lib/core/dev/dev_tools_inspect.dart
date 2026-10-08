@@ -1,8 +1,8 @@
 part of 'dev_tools_overlay.dart';
 
-/// 상태 덤프 — 내부 값을 전부 모아 보여주고, 복사·파일 내보내기를 준다 (이슈 #219).
+/// 상태 덤프 — 내부 값을 전부 모아 보여주고, 복사·파일 내보내기를 준다.
 ///
-/// QA가 문제를 만난 자리에서 그대로 넘길 수 있게 하는 것이 목적이다.
+/// 검수자가 문제를 만난 자리에서 그대로 넘길 수 있게 하는 것이 목적이다.
 /// 화면 캡처만으로는 어떤 값이 들어 있었는지 알 수 없다.
 class _DumpView extends StatefulWidget {
   const _DumpView();
@@ -240,8 +240,8 @@ class _NavigateView extends StatelessWidget {
 
   static const _destinations = <(String, String)>[
     ('시작', Routes.splash),
-    // 약관 (이슈 #226). 로그인 직후에만 지나가는 화면이라 QA가 다시 보려면
-    // 매번 로그아웃해야 했다. 상태가 둘(미동의·전체동의)이라 확인할 일이 잦다.
+    // 약관. 로그인 직후에만 지나가는 화면이라 다시 보려면
+    // 매번 로그아웃해야 한다. 상태가 둘(미동의·전체동의)이라 확인할 일이 잦다.
     ('약관 동의', Routes.consent),
     ('온보딩 · 이름', Routes.onboardingName),
     ('온보딩 · 목표', Routes.onboardingGoals),
@@ -250,15 +250,15 @@ class _NavigateView extends StatelessWidget {
     ('온보딩 · PIN', Routes.onboardingPin),
     ('일과 · 보상 정하기', Routes.routineReward),
     ('보호자 홈', Routes.guardian),
-    // 역할 선택 (이슈 #212). 정식 경로는 로그인 → 약관 → 여기다.
+    // 역할 선택. 정식 경로는 로그인 → 약관 → 여기다.
     // 실기기 검수에서 매번 소셜 로그인을 다시 하지 않도록 지름길을 둔다.
     ('역할 선택', Routes.roleSelect),
-    // 연결 암호 두 화면 (이슈 #205). 정식으로는 역할 선택에서 이룸이를 고르면
+    // 연결 암호 두 화면. 정식으로는 역할 선택에서 이룸이를 고르면
     // 열리지만, 두 화면을 따로 확인할 때가 있어 남겨 둔다.
     ('연결 · 암호 만들기(보호자)', Routes.linkCode),
     ('연결 · 암호 넣기(이룸이)', Routes.linkEnter),
-    // 아이 모드는 PIN을 거쳐야 들어갈 수 있어 심사·QA 때 확인이 번거롭다.
-    // 여기서는 PIN 없이 바로 띄운다 (이슈 #69 화면 검수용).
+    // 아이 모드는 PIN을 거쳐야 들어갈 수 있어 심사·검수 때 확인이 번거롭다.
+    // 여기서는 PIN 없이 바로 띄운다.
     ('이룸이 홈 · 일과 목록', Routes.child),
     ('이룸이 · 별 모으기', Routes.childStars),
     ('이룸이 · 보상', Routes.childReward),

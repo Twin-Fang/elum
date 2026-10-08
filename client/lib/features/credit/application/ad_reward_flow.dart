@@ -12,7 +12,7 @@ import '../data/ad_reward_repository.dart';
 import '../domain/ad_reward.dart';
 
 /// 제안을 기다리는 상한. 크레딧 소진 안내가 이 때문에 늦게 뜨지 않는다 —
-/// 넘기면 버튼 없이 원래 안내만 보인다.
+/// 넘기면 버튼 없이 기본 안내만 보인다.
 const adRewardOfferTimeout = Duration(seconds: 3);
 
 /// 흐름이 어디까지 왔나 — 화면이 대기 문구를 바꾼다.
@@ -45,7 +45,7 @@ class AdRewardResult {
   bool get granted => failure == null;
 }
 
-/// 크레딧 소진 안내의 "광고 보고 더 만들기" 흐름 (#464, 설계 §7).
+/// 크레딧 소진 안내의 "광고 보고 더 만들기" 흐름 (설계 §7).
 ///
 /// 1. [offer] — 서버가 켜 두었고 오늘 횟수가 남았을 때만 버튼을 보인다.
 /// 2. [run] — 세션 만들기 → 광고(nonce 를 customData 로) → **서버가 지급했는지 상태 조회**.
@@ -54,7 +54,7 @@ class AdRewardResult {
 /// 확인해 지급한 것만 [AdRewardResult.granted] 가 된다. 시청이 끝나도 서버 확인이 안 오면
 /// 지급으로 치지 않는다.
 ///
-/// 어떤 실패도 던지지 않고 [AdRewardFailure] 로 돌려준다 — 화면은 코드를 보이고 원래
+/// 어떤 실패도 던지지 않고 [AdRewardFailure] 로 돌려준다 — 화면은 코드를 보이고 이전
 /// 화면으로 돌아온다.
 class AdRewardFlow {
   AdRewardFlow({

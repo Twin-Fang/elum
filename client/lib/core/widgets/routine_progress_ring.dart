@@ -23,7 +23,7 @@ class RoutineProgressRing extends StatelessWidget {
   final double progress;
 
   /// 완료 체크를 이룸이 홈 시안(`1197:6810`)의 굵고 가로로 긴 벡터(21.82×16.26)로 그린다.
-  /// 보호자 홈 시안(`931:3896`)의 체크는 더 가늘고 작아 기본은 Material 체크다 (#445).
+  /// 보호자 홈 시안(`931:3896`)의 체크는 더 가늘고 작아 기본은 Material 체크다.
   final bool boldCheck;
 
   /// Figma 실측 — 링 지름 40, 두께 4

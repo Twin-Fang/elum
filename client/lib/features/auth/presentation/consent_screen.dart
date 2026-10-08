@@ -19,13 +19,13 @@ import '../../../core/router/routes.dart';
 
 /// 약관 동의 화면. 로그인 직후, 이룸이 정보를 받기 전에 선다.
 ///
-/// Figma `739:3747`(미동의) · `726:5056`(전체 동의) — 같은 화면의 두 상태다 (이슈 #226).
+/// Figma `739:3747`(미동의) · `726:5056`(전체 동의) — 같은 화면의 두 상태다.
 /// 전체 동의 버튼 344×68 y=223, 항목 344×50 y=308부터 58 간격, CTA y=675.
 ///
 /// **항목을 하나로 뭉치지 않는다.** 개인정보보호법은 필수와 선택을 나누어 받도록
 /// 하며, 뭉쳐 받은 동의는 무효가 될 수 있다.
 ///
-/// 문구는 서버에서 온다 (이슈 #278). 서버를 못 보면 캐시, 그것도 없으면 앱에 담긴
+/// 문구는 서버에서 온다. 서버를 못 보면 캐시, 그것도 없으면 앱에 담긴
 /// 기본값으로 떨어지므로 **이 화면이 비는 경우는 없다.**
 class ConsentScreen extends ConsumerStatefulWidget {
   const ConsentScreen({super.key});
@@ -56,15 +56,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   bool _allChecked(ConsentBundle bundle) =>
       bundle.items.every((item) => _checked.contains(item.key));
 
-  /// 일괄 동의는 **이름 그대로 전부** 켠다 (이슈 #235).
+  /// 일괄 동의는 **이름 그대로 전부** 켠다.
   ///
-  /// 전에는 필수만 켰다 (이슈 #189). 화면 아래로 밀린 선택 항목까지 켜면
-  /// "본 적 없는 것에 동의하게 된다"는 이유였는데, **해법이 틀렸다.**
-  /// `전체 동의`라고 써 놓고 일부만 켜면 사용자는 다 켜진 줄 알고 넘어간다.
-  /// 이름과 동작이 어긋나는 쪽이 모르고 동의하는 것보다 나쁘다.
-  ///
-  /// #189가 걱정한 것은 실은 **켜진 것을 볼 수 없던 것**이다. 항목마다 체크가
-  /// 보이고 스크롤하면 확인할 수 있으며, 선택 항목만 따로 끌 수도 있다.
+  /// 필수만 켜면 `전체 동의`라는 이름과 동작이 어긋나 사용자가 다 켜진 줄 알고 넘어간다.
+  /// 항목마다 체크가 보이고 선택 항목만 따로 끌 수도 있으므로 모르고 동의하는 일은 없다.
   void _toggleAll(ConsentBundle bundle) {
     setState(() {
       if (_allChecked(bundle)) {
@@ -82,7 +77,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
     });
 
     final failure = await ref.read(consentControllerProvider).agree(
-          // 켠 것만 동의로 보낸다. 고정값을 보내면 켜지 않은 항목이 동의로 남는다 (#278 QA).
+          // 켠 것만 동의로 보낸다. 고정값을 보내면 켜지 않은 항목이 동의로 남는다.
           agreedKeys: Set.of(_checked),
           // **화면에 보여준 것**의 버전이다. 캐시나 기본값을 보여줬다면 그 버전으로
           // 남아야 한다 — 보지 않은 문서에 동의한 것으로 기록하면 안 된다.
@@ -94,13 +89,13 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
     if (failure != null) {
       setState(() {
         _isSubmitting = false;
-        // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다 (#352).
+        // 서버가 이유를 알려줬으면 그 문구가 아래 기본 문구를 이긴다.
         _failure = failure;
       });
       return;
     }
 
-    // 동의를 마쳤으니 이제 누가 쓰는 휴대폰인지 묻는다 (이슈 #212).
+    // 동의를 마쳤으니 이제 누가 쓰는 휴대폰인지 묻는다.
     // 보호자인지 이룸이인지에 따라 다음 화면이 갈린다 — 여기서 바로 이름을
     // 물으면 이룸이 휴대폰이 보호자 온보딩으로 빨려 들어간다.
     context.go(Routes.roleSelect);

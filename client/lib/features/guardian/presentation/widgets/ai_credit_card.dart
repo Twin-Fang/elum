@@ -9,7 +9,7 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../credit/data/credit_repository.dart';
 import 'ai_credit_summary_view.dart';
 
-/// 보호자 설정의 `이번 주 AI 생성` 카드 (#407 스펙 §5).
+/// 보호자 설정의 `이번 주 AI 생성` 카드.
 ///
 /// 제목 아래·첫 줄 위에 선다. 상태는 여덟이다 — 로딩 / 정상 / 보너스 / 적음 / 0 /
 /// 만드는 중 / 조회 실패 / 꺼짐. 꺼져 있으면 **자리도 차지하지 않는다** — 정책을 끈

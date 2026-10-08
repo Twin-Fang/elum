@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 /// 일과 언어로 인정하는 코드 다섯.
 const _contentLanguages = {'ko', 'en', 'ja', 'zh', 'es'};
 
-/// 서버가 준 일과 언어 값을 정리한다. **다섯 코드 밖이거나 깨진 값은 `ko`** 다 — 옛 일과·옛 서버 응답이
+/// 서버가 준 일과 언어 값을 정리한다. **다섯 코드 밖이거나 깨진 값은 `ko`** 다 — 구버전 일과·서버 응답이
 /// 전부 한국어 일과였고, 모르는 값 하나로 카드가 안 그려지면 안 된다.
 String normalizeContentLanguage(Object? value) =>
     value is String && _contentLanguages.contains(value) ? value : 'ko';

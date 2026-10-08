@@ -19,8 +19,8 @@ import '../../../core/router/routes.dart';
 ///
 /// 그림은 [_SplashCanvas]가 그린다. 이 화면은 **언제 어디로 넘길지**만 맡는다.
 ///
-/// **로그인 화면과 그림을 나눠 가진다** (이슈 #338). 한때 둘이 같은 장면을
-/// 공유했는데(#207), 새 시안에서 시작 화면이 로고 한 장으로 줄면서 갈라졌다.
+/// **로그인 화면과 그림을 나눠 가진다**. 시작 화면은 로고 한 장이라 장면을
+/// 공유하지 않는다.
 ///
 /// 시작 화면을 건너뛸지 판단한다.
 ///
@@ -64,10 +64,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         _goTo(_destination());
         return;
       }
-      // 처음 오는 사람은 연출을 보고 **저절로** 다음 화면으로 넘어간다 (이슈 #207).
+      // 처음 오는 사람은 연출을 보고 **저절로** 다음 화면으로 넘어간다.
       //
-      // 예전에는 여기에 `시작하기` 버튼이 있었다. 누를 것이 하나뿐인 화면은
-      // 다음에 뭐가 나오는지 말해 주지 않으면서 한 번 더 누르게만 만든다.
+      // 누를 것이 하나뿐인 버튼은 다음에 뭐가 나오는지 말해 주지 않으면서
+      // 한 번 더 누르게만 만들므로 두지 않는다.
       _advance = Timer(_autoAdvanceAfter, () {
         if (!mounted) return;
         _goTo(_destination());
@@ -81,8 +81,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   void _goTo(String route) {
     try {
       final router = GoRouter.of(context);
-      // 연결 암호 넣기는 **뒤로 갈 수 있어야 한다** (이슈 #212). go로 바로 띄우면
-      // 스택이 비어 pop이 실패하므로, 돌아갈 화면을 깔고 그 위에 얹는다 (#542).
+      // 연결 암호 넣기는 **뒤로 갈 수 있어야 한다**. go로 바로 띄우면
+      // 스택이 비어 pop이 실패하므로, 돌아갈 화면을 깔고 그 위에 얹는다.
       if (route == Routes.linkEnter) {
         goToLinkEnter(
           router,
@@ -110,7 +110,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 /// Figma `스플래시`(1022:4415) — **단색 배경 위에 로고 하나뿐이다.**
 ///
 /// 병아리도 `오늘의 하루,`도 없다. 그 그림은 로그인 화면(`238:1808`·`1022:4333`)
-/// 것이고, 시작 화면은 1.7초 뒤 사라지므로 읽을 것을 얹지 않는다 (이슈 #338).
+/// 것이고, 시작 화면은 1.7초 뒤 사라지므로 읽을 것을 얹지 않는다.
 ///
 /// **등장 연출을 걸지 않는다.** 머무는 시간이 짧아 페이드를 넣으면 로고가 다 뜨기도
 /// 전에 화면이 넘어간다.
@@ -126,7 +126,7 @@ class _SplashCanvas extends StatelessWidget {
   ///
   /// 이 화면에는 **글자가 하나도 없다.** 이름을 안 주면 화면 낭독기에 아무것도
   /// 읽히지 않아 "빈 화면"으로 들린다. 실기기 E2E 도 이 이름으로 이 화면이
-  /// 떴는지 안다 — 없으면 앱이 뜨기 전에 셔터가 내려가 홈 화면이 찍힌다 (#338).
+  /// 떴는지 안다 — 없으면 앱이 뜨기 전에 셔터가 내려가 홈 화면이 찍힌다.
   @override
   Widget build(BuildContext context) {
     return ColoredBox(

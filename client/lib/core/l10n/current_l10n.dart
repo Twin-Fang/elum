@@ -11,7 +11,7 @@ AppLocalizations _current = lookupAppLocalizations(const Locale('ko'));
 /// 만 언어가 바뀔 때 위젯을 다시 그리게 한다.
 ///
 /// **이 값을 읽는 getter 는 `context.l10n` 을 읽는 위젯의 build 안에서만 부른다.** 그래야
-/// 언어가 바뀔 때 같이 다시 그려져 옛 언어 문구가 남지 않는다.
+/// 언어가 바뀔 때 같이 다시 그려져 이전 언어 문구가 남지 않는다.
 AppLocalizations get appL10n => _current;
 
 /// 현재 위젯 트리의 번역을 전역 통로에 맞춘다. 번역 delegate 가 없으면(일부 테스트) 건드리지 않는다.

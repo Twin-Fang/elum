@@ -25,7 +25,7 @@ import '../../../core/widgets/elum_toast.dart';
 import '../../member/application/member_providers.dart';
 import '../../../core/router/routes.dart';
 
-/// 지금 보는 이룸이를 함께 돌보는 사람 (다중 보호자 #362).
+/// 지금 보는 이룸이를 함께 돌보는 사람.
 ///
 /// 서버가 알려 주는 것은 이룸이 안에서 불리는 **이름·구분·합류 순서**뿐이다 — 계정 ID·아이디는
 /// 내려오지 않는다. 그래서 이 화면에도 나오지 않는다.
@@ -216,7 +216,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
       ),
       SizedBox(height: space.xs),
       // 둘 다 6자리 코드라 헷갈린다 — 이 화면은 "사람(보호자)"이고 이룸이가 쓰는 휴대폰은 따로
-      // 붙인다는 것을 먼저 말한다 (#506).
+      // 붙인다는 것을 먼저 말한다.
       _Caption(context.l10n.guardiansIntro),
       SizedBox(height: space.sm),
       // 이미 받은 목록이 있으면 주기 갱신 실패(오프라인 등)로 목록을 오류 화면으로 바꾸지 않는다.

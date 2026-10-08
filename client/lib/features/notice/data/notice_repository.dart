@@ -8,7 +8,7 @@ import '../../../core/network/guarded_call.dart';
 import '../domain/app_notice.dart';
 import '../../../app/dio_provider.dart';
 
-/// 공지를 받을 플랫폼. 값은 서버 `NoticePlatform` enum 과 같다 (#370).
+/// 공지를 받을 플랫폼. 값은 서버 `NoticePlatform` enum 과 같다.
 enum NoticePlatform {
   ios('IOS'),
   android('ANDROID');
@@ -23,10 +23,10 @@ enum NoticePlatform {
       defaultTargetPlatform == TargetPlatform.iOS ? ios : android;
 }
 
-/// 관리자가 올린 공지를 받는다 (이슈 #371 · 명세 3-1).
+/// 관리자가 올린 공지를 받는다 (명세 3-1).
 ///
 /// **못 받으면 빈 목록이다(N1).** 공지는 부가 기능이라 앱을 막지 않고 에러 화면도
-/// 띄우지 않는다 — 앱 상태 조회(#279)와 같은 판단이다. 서버가 아직 공지 API 를
+/// 띄우지 않는다 — 앱 상태 조회와 같은 판단이다. 서버가 아직 공지 API 를
 /// 배포하지 않아 404 가 와도 보호자 홈은 평소처럼 떠야 한다.
 ///
 /// 대신 **로그는 남긴다.** 조용히 삼키면 서버가 공지를 안 주는 건지, 앱이 못 받는

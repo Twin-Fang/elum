@@ -23,8 +23,8 @@ List<RouteBase> guardianRoutes() => [
   // 다른 경로에서 홈으로 올 때도 fade가 걸리는데, 즉시 교체보다 나으므로 허용.
   GoRoute(
     path: Routes.guardian,
-    // 공지 팝업은 **이 자리에서만** 뜬다 (이슈 #371). 이룸이 화면·일과 만들기에는
-    // 감싸지 않는다 — 이룸이 화면은 한 화면에 행동 하나다 (#281 과 같은 판단).
+    // 공지 팝업은 **이 자리에서만** 뜬다. 이룸이 화면·일과 만들기에는
+    // 감싸지 않는다 — 이룸이 화면은 한 화면에 행동 하나다.
     pageBuilder: (context, state) => fadePage(
       state,
       const GuardianNoticeLauncher(child: GuardianHomeScreen()),
@@ -59,7 +59,7 @@ List<RouteBase> guardianRoutes() => [
     pageBuilder: (context, state) =>
         slidePage(state, const ImageStyleSettingsScreen()),
   ),
-  // 다중 보호자 (#362) — 시안이 없는 임시 화면들이다.
+  // 다중 보호자 — 시안이 없는 임시 화면들이다.
   GoRoute(
     path: Routes.guardianPeople,
     pageBuilder: (context, state) =>
@@ -84,7 +84,7 @@ List<RouteBase> guardianRoutes() => [
     path: Routes.guardianPinChange,
     pageBuilder: (context, state) => slidePage(
       state,
-      // 암호가 없는 휴대폰이 보호자 화면에 들어올 때 거치는 길이다 (#355)
+      // 암호가 없는 휴대폰이 보호자 화면에 들어올 때 거치는 길이다
       PinChangeScreen(
         createOnly:
             state.uri.queryParameters['from'] == 'login',

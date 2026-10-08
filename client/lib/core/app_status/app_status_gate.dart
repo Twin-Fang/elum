@@ -12,14 +12,14 @@ import 'app_status_recheck.dart';
 import 'app_status_repository.dart';
 import 'store_launcher.dart';
 
-/// 앱이 시작할 때 서버 상태를 확인하고, 필요하면 화면을 대신 그린다 (이슈 #279).
+/// 앱이 시작할 때 서버 상태를 확인하고, 필요하면 화면을 대신 그린다.
 ///
 /// **확인하지 못하면 그냥 통과시킨다.** 서버를 못 봤다는 이유로 앱을 세우면
 /// 정작 서버가 죽었을 때 아무도 앱을 열지 못한다. 기다리는 동안도 마찬가지다 —
 /// 로딩 화면을 끼워 넣으면 매번 시작이 느려진다.
 ///
-/// **앱이 다시 앞으로 올라오면 다시 묻는다.** 전에는 시작할 때 한 번뿐이라, 점검을
-/// 켜기 전에 앱을 연 사람은 다시 켤 때까지 점검 사실을 몰랐다 (#279 QA).
+/// **앱이 다시 앞으로 올라오면 다시 묻는다.** 시작할 때 한 번만 물으면, 점검을
+/// 켜기 전에 앱을 연 사람은 점검 사실을 모른다.
 class AppStatusGate extends ConsumerStatefulWidget {
   const AppStatusGate({super.key, required this.child});
 
@@ -98,8 +98,8 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
           );
         }
         if (status.requiresUpdate(result.version)) {
-          // 서버가 준 주소 → 앱에 넣어 둔 주소 순서다 (#416).
-          // 둘 다 없으면 예전처럼 다시 확인 버튼을 둔다.
+          // 서버가 준 주소 → 앱에 넣어 둔 주소 순서다.
+          // 둘 다 없으면 다시 확인 버튼을 둔다.
           final storeUrl = AppConfig.storeUrl(
             defaultTargetPlatform,
             serverUrl: status.storeUrl,

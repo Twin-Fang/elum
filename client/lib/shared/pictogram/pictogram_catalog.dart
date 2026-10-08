@@ -1,6 +1,6 @@
 import 'pictogram_ids.dart';
 
-/// 서버가 카드마다 내려주는 `pictogramId` 의 허용 목록 (#469).
+/// 서버가 카드마다 내려주는 `pictogramId` 의 허용 목록.
 ///
 /// 서버 카탈로그(`server/src/main/resources/pictograms/catalog.json`)와 같은 811개다.
 /// 서버가 앞서 새 id 를 내려줘도(앱 업데이트 전) **없는 자산을 그리려다 깨지지 않게**

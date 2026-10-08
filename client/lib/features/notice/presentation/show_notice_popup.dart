@@ -20,7 +20,7 @@ Future<bool> openNoticeLink(Uri url) async {
   try {
     return await launchUrl(url, mode: LaunchMode.externalApplication);
   } catch (e, st) {
-    // 주소 전체를 남기지 않는다 — 공지 로그에는 원문을 두지 않는다 (#385 D)
+    // 주소 전체를 남기지 않는다 — 공지 로그에는 원문을 두지 않는다
     AppLogger.error('notice', e, st, {'step': 'openLink', 'host': url.host});
     return false;
   }
@@ -28,7 +28,7 @@ Future<bool> openNoticeLink(Uri url) async {
 
 ImageProvider _networkImage(String url) => NetworkImage(url);
 
-/// 공지 팝업이 어떻게 닫혔나 — 로그에 남긴다 (#385 D).
+/// 공지 팝업이 어떻게 닫혔나 — 로그에 남긴다.
 enum NoticeCloseHow {
   /// `닫기` 버튼
   close,
@@ -53,7 +53,7 @@ class NoticePopupResult {
 
 /// 공지 한 건을 띄우고, **닫히는 모습이 끝난 뒤에** 결과를 돌려준다.
 ///
-/// 끝날 때까지 기다리는 이유 — 다음 공지가 바로 이어서 뜬다(#390). 앞 팝업이 사라지는
+/// 끝날 때까지 기다리는 이유 — 다음 공지가 바로 이어서 뜬다. 앞 팝업이 사라지는
 /// 중에 다음 팝업을 올리면 어두운 막이 두 겹으로 겹쳐 한순간 더 어두워진다.
 Future<NoticePopupResult> showNoticePopup(
   BuildContext context,
@@ -72,7 +72,7 @@ Future<NoticePopupResult> showNoticePopup(
     barrierLabel: context.l10n.noticeCloseBarrier,
     // 공통 팝업과 같은 dim — 검정 50%
     barrierColor: Colors.black.withValues(alpha: 0.5),
-    // 공통 팝업처럼 화면 전체 가운데에 둔다 (#297). 안전영역은 카드가 스스로 피한다.
+    // 공통 팝업처럼 화면 전체 가운데에 둔다. 안전영역은 카드가 스스로 피한다.
     useSafeArea: false,
     themes: InheritedTheme.capture(from: context, to: navigator.context),
     builder: (dialogContext) => NoticePopupCard(

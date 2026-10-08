@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/assets/app_assets.dart';
 import 'svg_style_inliner.dart';
 
-/// 픽토그램 SVG 를 읽는 로더 (#469).
+/// 픽토그램 SVG 를 읽는 로더.
 ///
 /// 번들의 원본을 그대로 읽되, flutter_svg 가 못 읽는 `<style>` 클래스 색만 메모리에서
 /// 속성으로 풀어 넘긴다([inlineSvgClassStyles]). 풀이는 SVG 를 파싱하는 격리(isolate) 안에서

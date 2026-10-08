@@ -208,7 +208,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
   final TextStyle dialogTitle;
 
   /// 두 줄로 말하는 팝업 문장 (18/w500 · 줄 21.6). 시안 `팝업` 변형 `로그인실패`
-  /// (1045:5079). [dialogTitle] 과 크기·굵기가 같지만 두 줄이라 줄 간격이 120% 다 (#433).
+  /// (1045:5079). [dialogTitle] 과 크기·굵기가 같지만 두 줄이라 줄 간격이 120% 다.
   final TextStyle dialogSentence;
 
   /// 팝업 버튼 문구 (18/w600 Pretendard).
@@ -223,12 +223,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 소셜 로그인 버튼 문구 (18/w700 Pretendard).
   ///
   /// 앱 CTA(`button`, 22/w800 Tmoney)와 다르다 — 제공자 버튼은 카카오·네이버·Apple
-  /// 브랜드 가이드의 리듬을 따르므로 시안 그대로 둔다 (이슈 #230).
+  /// 브랜드 가이드의 리듬을 따르므로 시안 그대로 둔다.
   final TextStyle loginProvider;
 
   /// 약관 화면 전체 동의 버튼 문구 "서비스 이용약관 전체 동의" (20/w600 Pretendard).
   ///
-  /// 이 화면군만 Pretendard다 — 제목·CTA는 Tmoney RoundWind 그대로다 (이슈 #226).
+  /// 이 화면군만 Pretendard다 — 제목·CTA는 Tmoney RoundWind 그대로다.
   final TextStyle consentAllAgree;
 
   /// 약관 항목 앞 `필수`/`선택` 배지 (16/w600 Pretendard).
@@ -306,10 +306,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
   final TextStyle sheetStepBody;
   final TextStyle sheetActionLabel;
 
-  // --- 카드확인·아이 상세 (Figma 262:5124 / 309:3548, 2026-07-22 덤프) ---
+  // --- 카드확인·이룸이 상세 (Figma 262:5124 / 309:3548) ---
 
   /// 카드확인 도구 버튼 3개의 라벨 (14/w500 Pretendard, 시안 1173:5575).
-  /// 옛 `이 카드 수정하기` 칩(w600)이 이 자리로 바뀌었다 (#444).
   final TextStyle editChipLabel;
 
   /// 상단바 오른쪽 `임시저장` (16/w600, 시안 1173:5591).
@@ -341,7 +340,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 이룸이 화면 보상 칩 문구 (16/w600 Pretendard). Figma 1197:6775 · 1197:6942.
   final TextStyle rewardChipLabel;
 
-  // --- 일과 입력 (Figma 238:1846, 2026-07-22 덤프) ---
+  // --- 일과 입력 (Figma 238:1846) ---
 
   /// 일과 입력창 플레이스홀더 (16/w400 Pretendard, style_7YRXS7).
   /// promptBody(16/w500)와 굵기가 달라 별개 토큰이다.
@@ -356,7 +355,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 다른 쪽이 딸려 바뀌면 안 된다.
   final TextStyle lastLoginBadge;
 
-  /// 로그인 화면 구석의 앱 버전 `v1.44.0` (10/w400 Pretendard, #418).
+  /// 로그인 화면 구석의 앱 버전 `v1.44.0` (10/w400 Pretendard).
   /// **시안이 없는 개발 쪽 임시값이다.** 알고 찾아야 보일 만큼 작게 둔다 —
   /// caption(12)보다 작은 글자는 이것뿐이다.
   final TextStyle appVersionTag;
@@ -367,7 +366,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 회원탈퇴만 같은 크기에 w500 을 쓴다 — 굵기는 쓰는 쪽에서 얹는다.
   final TextStyle settingsTileLabel;
 
-  /// AI 크레딧 카드 제목 `이번 주 AI 생성` (17/w700 Pretendard, #407 시안).
+  /// AI 크레딧 카드 제목 `이번 주 AI 생성` (17/w700 Pretendard).
   final TextStyle creditTitle;
 
   /// AI 크레딧 남은 숫자 (32/w800 Pretendard). 시안은 37 이지만 설정 목록 폭(361)에 맞춰 줄였다.
@@ -396,17 +395,17 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// 순서 배지 숫자용 cardHeadline(30/w800)과 크기가 달라 별개 토큰이다.
   final TextStyle actionCardTitle;
 
-  /// 그림 없는 카드(이룸이 화면)의 그림 자리 제목 (44/w800 · #458 임시 시안).
+  /// 그림 없는 카드(이룸이 화면)의 그림 자리 제목 (44/w800 · 임시 시안).
   /// 글자가 곧 그림 노릇을 하므로 [actionCardTitle](25)보다 아주 크게 둔다.
   final TextStyle defaultCardTitle;
 
-  // --- 공지 팝업 (이슈 #390 · 시안 `팝업` 1090:4922 `방침`) ---
+  // --- 공지 팝업 (시안 `팝업` 1090:4922 `방침`) ---
   // 공통 팝업의 변형이다. 버튼 문구는 공통 팝업 `dialogAction` 을 그대로 쓴다.
   // 관리자 미리보기(`notice-preview.js` 맨 위 `APP`)가 같은 값으로 그리므로
-  // 여기를 바꾸면 그쪽도 바꾼다 — 어긋나면 미리보기와 앱의 줄바꿈이 달라진다 (#385 A).
+  // 여기를 바꾸면 그쪽도 바꾼다 — 어긋나면 미리보기와 앱의 줄바꿈이 달라진다.
   //
   // **자간 0 을 적어 둔다.** 안 적으면 테마 기본 글자(Material 3 bodyMedium)의 자간 0.25 를
-  // 물려받아 글이 시안보다 3% 넓어지고, 미리보기(자간 0)와 다른 자리에서 꺾인다 (#390 실측).
+  // 물려받아 글이 시안보다 3% 넓어지고, 미리보기(자간 0)와 다른 자리에서 꺾인다.
 
   /// 공지 제목 (18/w500 Pretendard · 줄 19.8). `dialogTitle` 과 크기·굵기가 같지만
   /// 줄 간격이 다르다 — 공지 제목은 두 줄이 기본이라 시안이 110% 로 벌렸다.

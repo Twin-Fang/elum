@@ -29,7 +29,7 @@ class CharacterCard extends StatelessWidget {
   static const _illustrationTop = 29.0;
 
   /// 발밑 그림자 (Figma `204:1037` 그림자 — 카드 기준 x=53, y=172, 64×16).
-  /// 없으면 캐릭터가 허공에 뜬다 — 실제로 빠져 있었다 (#297).
+  /// 없으면 캐릭터가 허공에 뜬다 — 실제로 빠져 있었다.
   static const _shadowWidth = 64.0;
   static const _shadowHeight = 16.0;
   static const _shadowTop = 172.0;

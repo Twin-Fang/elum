@@ -46,7 +46,7 @@ enum NetworkFault {
 /// 앱에는 그 대칭이 없었다. [ServerError] 를 만들어 두고도 **호출부가 각자
 /// 붙여야 해서** 두 군데밖에 안 붙었고, 나머지 21개 파일은 자기 문구를 지었다.
 /// 그래서 서버가 `MEMBER_SUSPENDED`("정지된 계정이에요")를 보내도 화면에는
-/// "잠시 후 다시 해주세요"가 떴다 (#352).
+/// "잠시 후 다시 해주세요"가 떴다.
 ///
 /// 이 클래스가 그 판정을 **한 곳으로** 모은다. 무엇이 던져지든 받는다 —
 /// `DioException`·타임아웃·소켓 오류·그 밖의 예외.
@@ -75,7 +75,7 @@ class AppFailure {
   /// 서버가 보낸 실패. 응답이 없었으면 null.
   final ServerError? server;
 
-  /// 원래 예외. 로그에만 쓴다 — 화면에 보여주지 않는다.
+  /// 발생한 원본 예외. 로그에만 쓴다 — 화면에 보여주지 않는다.
   final Object? cause;
 
   /// 사용자에게 스스로 알리지 않는 실패.
@@ -92,7 +92,7 @@ class AppFailure {
   /// 화면에 띄울 문구. **서버 것이 있으면 그것을 그대로 쓴다.**
   ///
   /// 서버 문구는 이미 사용자용으로 쓰여 있고 해요체·용어 규칙까지 맞춰져 있다.
-  /// 앱이 다시 쓰면 서버에서 고쳐도 앱은 옛 문구를 보여준다.
+  /// 앱이 다시 쓰면 서버에서 고쳐도 앱은 이전 문구를 보여준다.
   String messageOr(String fallback) => serverMessage ?? fallback;
 
   /// 다음에 무엇을 하면 되는지. **네트워크 쪽 사정은 서버가 말해 줄 수 없다.**
@@ -107,7 +107,7 @@ class AppFailure {
   /// 코드는 **개발자에게** 네트워크라고 말하는데 **사용자에게는** 아무 말도 안 한다.
   /// 인터넷을 확인하라는 말이 없으니 끊긴 채로 계속 다시 시도를 누른다.
   /// 세어 보니 인터넷을 언급하는 화면이 로그인·암호넣기 **둘뿐**이었다 — 화면마다
-  /// 따로 쓰게 두면 나머지는 영영 안 쓴다. 그래서 여기서 한 번만 말한다 (#352).
+  /// 따로 쓰게 두면 나머지는 영영 안 쓴다. 그래서 여기서 한 번만 말한다.
   String? get hint => switch (fault) {
     NetworkFault.offline => appL10n.failureHintOffline,
     NetworkFault.timeout => appL10n.failureHintTimeout,
@@ -157,11 +157,11 @@ class AppFailure {
   ///
   /// 안내를 붙일 때는 화면 문구의 **첫 문장만** 쓴다. 화면 문구가 할 일까지 말하면
   /// (`…못했어요. 다시 해주세요`) 할 일이 두 개가 된다 — 실기기에서 `인터넷을
-  /// 확인해주세요 · 인터넷 연결을 확인해주세요`로 같은 말이 두 번 나왔다 (#428 · #427).
+  /// 확인해주세요 · 인터넷 연결을 확인해주세요`로 같은 말이 두 번 나왔다.
   String describe(String fallback, String fallbackCode) =>
       '${bodyOr(fallback)} (${badgeOr(fallbackCode)})';
 
-  /// [describe] 에서 식별자를 뺀 문장. 팝업은 식별자를 문장과 따로 적는다 (#433).
+  /// [describe] 에서 식별자를 뺀 문장. 팝업은 식별자를 문장과 따로 적는다.
   String bodyOr(String fallback) =>
       serverMessage ??
       (hint == null ? fallback : '${_headline(fallback)} · $hint');
@@ -220,11 +220,9 @@ class AppFailure {
       case DioExceptionType.unknown:
         // **응답이 없으면 서버에 닿지 못한 것이다.**
         //
-        // 원래는 `e.error is SocketException` 으로만 갈랐는데, 실기기에서
-        // 요청이 나가는 도중에 비행기 모드를 켜면 dio 가 `error` 를 비운 채
-        // `DioException [unknown]: null` 을 준다 (2026-09-23 실측). 그러면
-        // 연결 실패가 `앱 오류` 로 떨어져 "다시 해주세요" 로 안내하게 된다 —
-        // 오프라인인 사용자는 될 때까지 계속 누른다 (#341 이 지적한 그 상황).
+        // `e.error is SocketException` 만 보면 안 된다 — 요청 도중 비행기 모드를 켜면
+        // dio 가 `error` 를 비운 채 `DioException [unknown]: null` 을 준다.
+        // 그러면 연결 실패가 `앱 오류` 로 떨어져 오프라인 사용자가 계속 재시도를 누른다.
         //
         // 타입이 아니라 **응답 유무**로 가른다. 응답을 못 받았다는 사실이
         // 원인을 모르는 것보다 확실하다.
@@ -250,7 +248,7 @@ class AppFailure {
 ///
 /// 이 앱의 저장소는 예외를 올리지 않는다(호출부마다 catch 가 흩어지고 화면이
 /// 죽는다). 그러다 보니 실패가 `null` 이나 `false` 로 납작해져 **서버가 알려준
-/// 이유가 저장소 안에서 사라졌다.** 그래서 값과 실패를 함께 돌려준다 (#352).
+/// 이유가 저장소 안에서 사라졌다.** 그래서 값과 실패를 함께 돌려준다.
 ///
 /// ```dart
 /// final r = await repo.issue();

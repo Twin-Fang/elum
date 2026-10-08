@@ -21,7 +21,7 @@ import 'default_card_art.dart';
 /// 333×410 / r20 / 2px 테두리, 안에 이미지·번호·제목·설명이 들어간다.
 ///
 /// 보호자용에는 삭제 X가 있고, 아이용에는 없다. [onDelete]로 가른다.
-/// 수정 진입점은 카드 밖(`이 카드 수정하기` 칩)으로 나갔다 — 2026-07-22 시안.
+/// 수정 진입점은 카드 밖(`이 카드 수정하기` 칩)에 있다.
 ///
 /// 카드 안 배치는 [layout]으로 가른다 — 두 시안이 여백·그림칸 비율부터 달라졌다.
 class ActionCardView extends StatefulWidget {
@@ -38,9 +38,9 @@ class ActionCardView extends StatefulWidget {
     this.onAddPhoto,
   });
 
-  /// 카드확인 시안 그림칸 비율 (`262:5124` — 313×230, 2026-09-24 덤프 · #401).
+  /// 카드확인 시안 그림칸 비율 (`262:5124` — 313×230).
   ///
-  /// 카드확인과 이룸이 상세(`1197:6775`, #445)가 같이 쓴다. 카드 자리가 410 이라
+  /// 카드확인과 이룸이 상세(`1197:6775`)가 같이 쓴다. 카드 자리가 410 이라
   /// 그림칸이 낮은 만큼 설명이 들어갈 자리가 남는다.
   static const reviewIllustrationAspect = 313 / 230;
 
@@ -69,12 +69,12 @@ class ActionCardView extends StatefulWidget {
   /// 카드 안 배치. 이룸이 일과 상세만 [ActionCardLayout.childDetail]을 쓴다.
   final ActionCardLayout layout;
 
-  /// 그림이 없는 카드의 `사진 추가`를 눌렀을 때 (보호자 화면만 쓴다 · #458).
+  /// 그림이 없는 카드의 `사진 추가`를 눌렀을 때 (보호자 화면만 쓴다).
   ///
-  /// **픽토그램이 그림 자리를 채우면(#469) 이 자리가 없어진다** — 사진은 카드 수정 시트의
-  /// `사진 바꾸기` 칩(#456)에서 넣는다. 카드마다 칩을 또 얹으면 카드확인이 어수선해진다.
+  /// **픽토그램이 그림 자리를 채우면 이 자리가 없어진다** — 사진은 카드 수정 시트의
+  /// `사진 바꾸기` 칩에서 넣는다. 카드마다 칩을 또 얹으면 카드확인이 어수선해진다.
   ///
-  /// **null 이면 누를 수 없다.** 사진 바꾸기(#456)가 이 훅에 연결한다 — 그 전에는
+  /// **null 이면 누를 수 없다.** 사진 바꾸기가 이 훅에 연결한다 — 그 전에는
   /// 자리만 보이고 눌러도 아무 일이 없다. 이룸이 화면([ActionCardLayout.childDetail])은
   /// 사진을 넣는 자리가 아니라 무시한다.
   final VoidCallback? onAddPhoto;
@@ -84,7 +84,7 @@ class ActionCardView extends StatefulWidget {
 }
 
 class _ActionCardViewState extends State<ActionCardView> {
-  /// 카드확인 — 테두리를 포함한 안쪽 여백 (시안 `262:5124` 카드 30 → 그림칸 40 · #401).
+  /// 카드확인 — 테두리를 포함한 안쪽 여백 (시안 `262:5124` 카드 30 → 그림칸 40).
   static const _reviewInset = 10.0;
 
   /// 카드확인 — 그림칸 아래 → 배지 (시안 그림칸 끝 443 → 배지 453).
@@ -135,11 +135,11 @@ class _ActionCardViewState extends State<ActionCardView> {
 
   @override
   Widget build(BuildContext context) {
-    // 자리가 바뀌면 이 색으로 **서서히** 옮겨 간다 (#451). 아래 빌더가 맡는다.
+    // 자리가 바뀌면 이 색으로 **서서히** 옮겨 간다. 아래 빌더가 맡는다.
     final target = CardPalette.at(widget.index);
     final space = context.space;
     final childLayout = widget.layout == ActionCardLayout.childDetail;
-    // 이룸이 상세 시안(`1197:6775`)이 카드확인과 같은 카드로 바뀌었다 (#445).
+    // 이룸이 상세 시안(`1197:6775`)이 카드확인과 같은 카드로 바뀌었다.
     // 여백·그림칸·간격이 같고 **그림자만 이룸이 상세에 있다.**
     final inset = _reviewInset.w;
     final illustrationAspect = ActionCardView.reviewIllustrationAspect;
@@ -149,7 +149,7 @@ class _ActionCardViewState extends State<ActionCardView> {
       onTap: widget.onSpeak,
       scaleDown: AppPressable.scaleIcon,
       // 읽는 중에 다시 누르면 멈춘다. 흐려지는 것만으로는
-      // 화면 낭독기에 닿지 않아 이름도 함께 바꾼다 (#339).
+      // 화면 낭독기에 닿지 않아 이름도 함께 바꾼다.
       semanticLabel: widget.isSpeaking
           ? context.l10n.cardSpeakStop
           : context.l10n.cardSpeak,
@@ -170,11 +170,11 @@ class _ActionCardViewState extends State<ActionCardView> {
 
     // 순서를 바꾸면 카드가 새 자리 색을 입는다. 그대로 두면 카드 한 장이 통째로 한
     // 프레임에 바뀌어 어지럽다 — 배경과 테두리·배지를 [AppMotion.normal] 동안 섞는다.
-    // 처음 그릴 때는 목적 색에서 시작하므로 등장 시에는 움직이지 않는다 (#451).
+    // 처음 그릴 때는 목적 색에서 시작하므로 등장 시에는 움직이지 않는다.
     return ContentLocale(
       language: widget.language,
       child: Consumer(
-      // 그림이 없다는 사실을 그림 자리와 제목 줄이 **같이** 알아야 한다 (#458).
+      // 그림이 없다는 사실을 그림 자리와 제목 줄이 **같이** 알아야 한다.
       builder: (context, ref, _) {
         final imageState = watchCardImageState(
           ref,
@@ -226,9 +226,9 @@ class _ActionCardViewState extends State<ActionCardView> {
     required Widget speaker,
     required CardImageState imageState,
   }) {
-    // 이룸이 화면은 그림이 없을 때 제목이 그림 자리로 올라간다 (#458). 줄에 또 두면
+    // 이룸이 화면은 그림이 없을 때 제목이 그림 자리로 올라간다. 줄에 또 두면
     // 같은 글이 두 번 나온다. 받는 중에는 그림이 올 수 있어 줄에 그대로 둔다.
-    // 픽토그램이 그림 자리를 채우면(#469) 제목은 줄에 그대로 둔다 — 그림이 뜻을 전하고
+    // 픽토그램이 그림 자리를 채우면 제목은 줄에 그대로 둔다 — 그림이 뜻을 전하고
     // 글자는 줄에서 읽는다.
     final titleInArt = childLayout &&
         imageState == CardImageState.none &&
@@ -239,7 +239,7 @@ class _ActionCardViewState extends State<ActionCardView> {
         borderRadius: BorderRadius.circular(space.cardRadius),
         border: Border.all(color: palette.border, width: _borderWidth.w),
         // 그림자는 이룸이 상세 시안(`309:3548` 0 2 5 · 5%)에만 있다. 카드확인
-        // 시안(`262:5124`)은 effects 가 비어 있다 (#401).
+        // 시안(`262:5124`)은 effects 가 비어 있다.
         boxShadow: childLayout
             ? [
                 BoxShadow(
@@ -259,8 +259,8 @@ class _ActionCardViewState extends State<ActionCardView> {
               // **테두리를 빼고 준다.** Container 는 테두리 두께만큼 안쪽을 이미
               // 띄운다. 시안 여백(이룸이 상세 16 · 카드확인 10)은 안쪽 선이라 테두리를
               // 포함한 값이다 — 그대로 주면 그림칸이 2 안쪽에 4 좁게 그려진다
-              // (#394). 카드확인은 여백 16(실제 18)을 쓰고 있어 설명이 제목과 줄이
-              // 안 맞았다 (#401).
+              //. 카드확인은 여백 16(실제 18)을 쓰고 있어 설명이 제목과 줄이
+              // 안 맞았다.
               padding: EdgeInsets.all(inset - _borderWidth.w),
               // 제목이 두 줄이 되면 카드 높이를 넘길 수 있다. 넘치면 스크롤한다 —
               // 노란 줄무늬 오버플로 경고가 뜨면 안 된다.
@@ -271,7 +271,7 @@ class _ActionCardViewState extends State<ActionCardView> {
                   children: [
                     // 그림칸은 **313×230**이다 — 시안(`262:5124`·`1197:6775`) 실측.
                     // 그림은 `BoxFit.cover`로 칸을 꽉 채운다(시안 objectFit cover) —
-                    // 칸과 비율이 다른 그림은 넘치는 쪽이 잘린다 (`CardImage`, #461).
+                    // 칸과 비율이 다른 그림은 넘치는 쪽이 잘린다 (`CardImage`).
                     //
                     // Expanded로 두면 남는 공간을 다 먹어 제목 길이에 따라 카드마다 이미지
                     // 크기와 텍스트 시작 높이가 달라진다.
@@ -301,7 +301,7 @@ class _ActionCardViewState extends State<ActionCardView> {
                       alignment: Alignment.topLeft,
                       child: Row(
                         // center로 두면 한 줄/두 줄 모두 별도 측정 없이 배지·제목이
-                        // Row 높이(둘 중 큰 쪽) 기준으로 세로 중앙 정렬된다 — 이슈 #105
+                        // Row 높이(둘 중 큰 쪽) 기준으로 세로 중앙 정렬된다
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           _NumberBadge(
@@ -339,7 +339,7 @@ class _ActionCardViewState extends State<ActionCardView> {
                       ),
                     ),
                     // 제목 아래 17 — 시안 제목 끝(509) → 설명(535). 토큰(12)을
-                    // 쓰면 설명이 5 올라간다 (#297).
+                    // 쓰면 설명이 5 올라간다.
                     SizedBox(height: titleToBody),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,7 +347,7 @@ class _ActionCardViewState extends State<ActionCardView> {
                         // **스피커를 배지 칸 한가운데에 둔다.** 두 시안 모두 스피커를
                         // 배지(40) 아래 가운데(x=48)에, 설명을 제목과 같은 x(88)에
                         // 그린다. 카드 왼끝에 붙이면 설명이 제목보다 왼쪽에서 시작해
-                        // 줄이 안 맞는다 (이룸이 상세 #394 · 카드확인 #401).
+                        // 줄이 안 맞는다.
                         SizedBox(
                           width: _NumberBadge.size.w,
                           child: Center(child: speaker),
@@ -399,7 +399,7 @@ class _ActionCardViewState extends State<ActionCardView> {
 
 /// 카드 이미지 자리.
 ///
-/// 서버가 만든 그림을 보여주고, 없으면 [emptyBuilder]의 기본 카드로 채운다 (#458).
+/// 서버가 만든 그림을 보여주고, 없으면 [emptyBuilder]의 기본 카드로 채운다.
 /// 자리를 비우면 카드 비율이 무너진다.
 class _Illustration extends StatelessWidget {
   const _Illustration({
@@ -446,8 +446,7 @@ class _Illustration extends StatelessWidget {
           ),
         ),
         // 지우기 원(30)은 그림칸 위·오른쪽에서 6 안쪽이다 (시안 `262:5124` 그림칸
-        // 40,213 · 원 317,219 · #401). 누름 영역(44)이 원보다 7씩 넓어 그만큼 뺀다 —
-        // 전에는 누름 영역을 8 안쪽에 둬 원이 15 안쪽에 있었다.
+        // 40,213 · 원 317,219). 누름 영역(44)이 원보다 7씩 넓어 그만큼 뺀다.
         if (onDelete != null)
           Positioned(
             top: _DeleteButton.designInset.w - _DeleteButton.touchPad.w,
@@ -536,13 +535,12 @@ class _NumberBadge extends StatelessWidget {
 
 /// 카드 안 배치. 두 화면의 시안이 따로 움직여 값이 다르다.
 enum ActionCardLayout {
-  /// 보호자 카드확인 (`262:5124`, 2026-09-24 덤프 · #401). 테두리 포함 여백 10·
+  /// 보호자 카드확인 (`262:5124`). 테두리 포함 여백 10·
   /// 그림칸 313×230·그림칸 → 배지 10·배지 → 제목 8·스피커는 배지 칸 가운데·
   /// 설명은 제목과 같은 x·배지 → 설명 18·그림자 없음.
   review,
 
-  /// 이룸이 일과 상세 (`1197:6775`, 2026-09-29 시안 · #445). 카드확인과 배치가 같고
+  /// 이룸이 일과 상세 (`1197:6775`). 카드확인과 배치가 같고
   /// (여백 10·그림칸 313×230·배지 → 설명 18) **그림자(0 2 5 · 5%)만 있다.**
-  /// 예전(`309:3548` 345×431, 여백 16·그림칸 313×264)은 카드가 더 컸다.
   childDetail,
 }

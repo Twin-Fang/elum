@@ -216,7 +216,7 @@ class SharedPrefsStorage implements LocalStorage {
 
   @override
   Future<void> setCachedTodayRoutinesJson(String json) {
-    // 호출부가 원문 계열 키를 뺀 JSON 만 넘긴다(#358). 그래도 값은 로그에 찍지 않는다.
+    // 호출부가 원문 계열 키를 뺀 JSON 만 넘긴다. 그래도 값은 로그에 찍지 않는다.
     AppLogger.storageWrite(_kCachedToday, '${json.length}B');
     return _prefs.setString(_kCachedToday, json);
   }
@@ -340,19 +340,19 @@ class SharedPrefsStorage implements LocalStorage {
     // 날려 원인 모를 오작동을 만든다.
     //
     // 토큰도 함께 지운다 — 이것이 곧 로그아웃이다. 온보딩 값만 지우고 토큰이
-    // 남으면 이전 계정의 일과가 새 이름과 섞여 보인다. (이슈 #13)
+    // 남으면 이전 계정의 일과가 새 이름과 섞여 보인다.
     await _guardianLock.clear();
     if (!await _prefs.remove(_kPin)) throw StateError('E-PIN: legacy cleanup failed');
     await clearChildProfile();
     // 역할도 지운다 — 이룸이 휴대폰에서의 로그아웃은 곧 연결 끊기다 (§8-5).
-    // 잘못 고른 사람이 로그아웃으로 빠져나올 수 있어야 한다 (이슈 #212).
+    // 잘못 고른 사람이 로그아웃으로 빠져나올 수 있어야 한다.
     for (final key in [
       _kAccountMemberId,
       _kAccessToken,
       _kElumiDevice,
       _kElumiLinkLost,
       _kSelectedRole,
-      // 다음에 로그인한 사람이 이룸이 화면에서 시작하면 안 된다 (#532)
+      // 다음에 로그인한 사람이 이룸이 화면에서 시작하면 안 된다
       _kResumeElumiScreen,
     ]) {
       await _prefs.remove(key);

@@ -32,7 +32,7 @@ abstract interface class CardRepository {
 class CardRepositoryImpl implements CardRepository {
   const CardRepositoryImpl({this.remote});
 
-  /// 서버 준비 전에는 null. 그러면 곧바로 2차로 떨어진다.
+  /// 서버가 없으면 null. 그러면 곧바로 2차로 떨어진다.
   final Future<List<ActionCard>> Function(RoutineRequest)? remote;
 
   @override

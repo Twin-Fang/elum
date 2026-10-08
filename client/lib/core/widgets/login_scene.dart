@@ -12,7 +12,7 @@ import 'app_fade_slide_in.dart';
 
 /// 로그인 장면의 배치값 한 벌. Figma 좌표(393×852)를 그대로 담는다.
 ///
-/// **시안이 플랫폼별로 따로 나왔다** (이슈 #338). 좌표를 코드에 두 벌 복사하면
+/// **시안이 플랫폼별로 따로 나왔다**. 좌표를 코드에 두 벌 복사하면
 /// 한쪽만 고쳐져 조용히 어긋나므로 값만 갈아끼운다.
 @immutable
 class LoginSceneLayout {
@@ -60,7 +60,7 @@ class LoginSceneLayout {
   ///
   /// 얼굴이 없고 새싹이 왼쪽으로 휜다. 애플 버튼이 있어 버튼이 셋이라
   /// 자리가 모자라고, 얼굴을 그리면 카카오·네이버 버튼 **사이로 부리가
-  /// 13 삐져나온다** (#297).
+  /// 13 삐져나온다**.
   static const ios = LoginSceneLayout(
     stemAsset: AppAssets.splashHill,
     stemLeft: 87,
@@ -131,10 +131,6 @@ class LoginSceneFace {
 ///
 /// 좌표·크기는 Figma 값(393×852 기준)을 그대로 쓰되 `.w`/`.h`/`.sp`로 감싼다.
 /// ScreenUtil이 실제 화면 크기에 맞춰 비례 변환하므로 기기가 달라져도 구도가 유지된다.
-///
-/// **한때 시작 화면과 이 그림을 공유했다** (이슈 #207). 새 시안에서 시작 화면이
-/// 로고 한 장으로 줄면서 갈라졌다 (이슈 #338) — 그래서 이름이 `SplashScene`에서
-/// 바뀌었다.
 ///
 /// ## 연출 (설계: docs/superpowers/specs/2026-07-22-onboarding-animation-design.md)
 ///
@@ -220,7 +216,7 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
     );
   }
 
-  /// 문구 한 줄이 화면 폭을 넘으면 줄을 바꾸지 않고 **그 폭에 맞춰 줄인다** (#342).
+  /// 문구 한 줄이 화면 폭을 넘으면 줄을 바꾸지 않고 **그 폭에 맞춰 줄인다**.
   ///
   /// 줄이 바뀌면 `함께해 / 요` 처럼 낱말이 중간에서 끊긴다. 슬로건이라 한 줄로 읽혀야
   /// 한다. **폭 안이면 손대지 않고 그대로 낸다** — 감싸기만 해도 글자가 반 픽셀 밀려
@@ -271,7 +267,7 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
           // 직접 그리면 사각형이 되므로 반드시 에셋을 쓴다. 고정한다.
           //
           // **크기를 둘 다 준다.** 폭만 주고 `fitWidth`로 두면 상자 높이가
-          // 그림 픽셀 높이로 잡혀 세로가 눌린다 — 몸이 33 짧아 보였다 (#297).
+          // 그림 픽셀 높이로 잡혀 세로가 눌린다 — 몸이 33 짧아 보였다.
           Positioned(
             left: layout.bodyLeft.w,
             top: layout.bodyTop.h,
@@ -298,9 +294,9 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
 
           // 청록 구슬 — 새싹 줄기 끝.
           //
-          // **그림 하나로 그린다.** 둘레 빛이 SVG `<filter>`라 렌더러가 버려
-          // 전에는 원만 남고 빛을 BoxShadow로 흉내 내고 있었다. 게다가 상자(96×94)에
-          // 본체 크기(36)를 줘서 **구슬이 13으로 쪼그라들어 있었다** (#297).
+          // **그림 하나로 그린다.** 둘레 빛이 SVG `<filter>`라 렌더러가 버리므로
+          // 빛을 BoxShadow로 흉내 내지 않는다. 상자(96×94)에 본체 크기(36)를
+          // 주면 **구슬이 13으로 쪼그라든다**.
           Positioned(
             left: layout.orbLeft.w,
             top: layout.orbTop.h,
@@ -316,7 +312,7 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
           // 병아리 얼굴 — 눈 둘(각 30×32)과 부리(45×25). 고정.
           //
           // **얼굴이 있는 배치에서만 그린다.** iOS 시안은 병아리가 뒤를 돌아봐
-          // 얼굴 자체가 없고, 그려 넣으면 버튼 사이로 부리가 삐져나온다 (#297).
+          // 얼굴 자체가 없고, 그려 넣으면 버튼 사이로 부리가 삐져나온다.
           if (face != null) ...[
             Positioned(
               left: face.eyeLeft.w,
@@ -335,7 +331,7 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
             ),
           ],
 
-          // 문구 둘 + 로고 — 한 줄기(Column)로 쌓는다 (#342).
+          // 문구 둘 + 로고 — 한 줄기(Column)로 쌓는다.
           //
           // 시안은 세 요소를 y 고정으로 놓았다(문구 간격 28 · 로고까지 46). 글꼴이
           // 커지면 글자 높이가 그 간격을 넘어 서로 물렸다. 칸마다 **시안 간격을 최소
@@ -396,9 +392,8 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
             ),
           ),
 
-          // **하단 페이드를 두지 않는다.** 전에는 버튼 아래를 크림색으로 덮어
-          // 부드럽게 이었는데, 시안 덤프에는 그런 사각형이 없다. 덮어 두니
-          // 병아리 아래쪽 민트가 크림빛으로 지워져 몸이 짧아 보였다 (#297).
+          // **하단 페이드를 두지 않는다.** 시안에 그런 사각형이 없고, 버튼 아래를
+          // 크림색으로 덮으면 병아리 아래쪽 민트가 지워져 몸이 짧아 보인다.
 
           // 화면별로 얹는 것 — 로그인 버튼 등. 항상 맨 위에 그린다.
           if (widget.overlay != null) Positioned.fill(child: widget.overlay!),

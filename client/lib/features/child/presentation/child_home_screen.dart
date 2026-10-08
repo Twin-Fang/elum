@@ -34,12 +34,12 @@ import '../../../core/router/routes.dart';
 
 /// 아이에게 보여줄 일과 목록.
 ///
-/// `GET /api/routines/today`(이슈 #75)가 오늘 + CONFIRMED/COMPLETED만 준다.
+/// `GET /api/routines/today`가 오늘 + CONFIRMED/COMPLETED만 준다.
 /// 폴백(전체 조회)으로 내려올 수도 있으므로 **승인 여부를 한 번 더 거른다**
 /// (docs 원칙 3번). 방금 만든 일과도 승인 전이면 목록에 없다.
 final childRoutinesProvider = Provider<List<Routine>>((ref) {
   final current = ref.watch(routineFlowProvider).routine;
-  // `.value`는 재조회 중에도 직전 목록을 유지한다 — 동기화 뒤 깜빡임 방지 (이슈 #140)
+  // `.value`는 재조회 중에도 직전 목록을 유지한다 — 동기화 뒤 깜빡임 방지
   final fetched = ref.watch(todayRoutinesProvider).value ?? const <Routine>[];
   // 보호자 화면에서 만들었던 옛 일과가 남아 있어도 서버의 최신 완료 상태를 가리지 않는다.
   final currentFetched = fetched.any((r) => r.id == current?.id);
@@ -56,7 +56,7 @@ final childRoutinesProvider = Provider<List<Routine>>((ref) {
 
 /// Figma `아이_홈_리스트`(356:5079) / `아이_홈_아무것도X`(343:4543).
 ///
-/// 일과 **목록**을 보여주고, 탭하면 카드 상세로 들어간다 (이슈 #69).
+/// 일과 **목록**을 보여주고, 탭하면 카드 상세로 들어간다.
 /// 카드 페이저는 [ChildRoutineDetailScreen]으로 내려갔다.
 class ChildHomeScreen extends ConsumerWidget {
   const ChildHomeScreen({super.key});
@@ -77,7 +77,7 @@ class ChildHomeScreen extends ConsumerWidget {
         ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
     final isElumiDevice = ref.watch(localStorageProvider).isElumiDevice;
 
-    // 보호자가 새 일과를 저장해도 앱을 껐다 켜야 보였다 — 떠 있는 동안 주기 갱신 (#517)
+    // 보호자가 새 일과를 저장해도 앱을 껐다 켜야 보였다 — 떠 있는 동안 주기 갱신
     return RoutineAutoRefresh(
       child: Scaffold(
         backgroundColor: context.colors.background,
@@ -94,7 +94,7 @@ class ChildHomeScreen extends ConsumerWidget {
                         // 조회가 실패했으면 제보 추적용 코드를 함께 보여준다.
                         // 아동 화면이라 빨강·경고 아이콘은 쓰지 않는다.
                         // 코드는 실제로 무엇이 터졌는지를 쓴다 — 연결이 끊긴 것과
-                        // 서버가 막은 것이 같은 코드로 보이면 제보를 못 가린다 (#352).
+                        // 서버가 막은 것이 같은 코드로 보이면 제보를 못 가린다.
                         errorCode: routinesAsync.hasError
                             ? AppFailure.of(
                                 routinesAsync.error,
@@ -121,7 +121,7 @@ class ChildHomeScreen extends ConsumerWidget {
                           //
                           // 조사를 '가'로 박아 두었더니 받침 있는 이름에서 **민준가**가
                           // 나왔다. 이름은 보호자가 직접 적으므로 받침을 보고 고른다.
-                          // 시안이 `할 일들이에요. 힘내봐요!`로 바뀌었다 (#445) — 해요체다.
+                          // 시안이 `할 일들이에요. 힘내봐요!`로 바뀌었다 — 해요체다.
                           context.l10n.childHomeGreeting(
                             childName,
                             batchimOf(childName),
@@ -147,7 +147,7 @@ class ChildHomeScreen extends ConsumerWidget {
   }
 }
 
-/// 이룸이 홈 상단 줄. **휴대폰 종류에 따라 시안이 둘이다** (#485).
+/// 이룸이 홈 상단 줄. **휴대폰 종류에 따라 시안이 둘이다**.
 ///
 /// | | 보호자 휴대폰 (`425:4392`) | 이룸이 휴대폰 (`1197:6774`) |
 /// | --- | --- | --- |
@@ -155,11 +155,11 @@ class ChildHomeScreen extends ConsumerWidget {
 /// | 오른쪽 끝 | **캐릭터 배지** 56×56 (x313, y70) | **설정 톱니** 24×24 (x345, y86) |
 /// | 누르면 | 비밀암호 → 보호자 화면 | 설정 페이지 (`약관` · `앱 정보` · `로그아웃` · `회원탈퇴`) |
 ///
-/// #445가 이룸이 화면을 새 시안(`1197:6774`)으로 맞출 때 이 시안이 **이룸이 휴대폰** 것이라는 것을 놓쳐
-/// 보호자 휴대폰까지 톱니로 만들었다. 보호자 휴대폰은 `425:4392` 그대로 캐릭터 배지를 쓴다.
+/// 새 시안(`1197:6774`)은 **이룸이 휴대폰** 것이므로 보호자 휴대폰까지 톱니로 만들면 안 된다.
+/// 보호자 휴대폰은 `425:4392` 그대로 캐릭터 배지를 쓴다.
 ///
 /// 이룸이 휴대폰은 보호자 화면에 갈 곳이 없다 — 암호를 맞춰도 라우터가 막는다. 그래서 그 길(비밀암호
-/// 화면)로 보내는 버튼 대신 설정을 둔다 (#363).
+/// 화면)로 보내는 버튼 대신 설정을 둔다.
 class _TopBar extends ConsumerWidget {
   const _TopBar();
 
@@ -190,7 +190,7 @@ class _TopBar extends ConsumerWidget {
       onTap: () => context.push(Routes.childStars),
       scaleDown: AppPressable.scaleIcon,
       // 배지 안 글자는 숫자뿐이라 그대로 두면 "10"만 읽힌다. 무엇이 10인지
-      // 붙여 읽힌다 — 이름이 안의 숫자를 덮으므로 두 번 읽히지 않는다 (#339).
+      // 붙여 읽힌다 — 이름이 안의 숫자를 덮으므로 두 번 읽히지 않는다.
       semanticLabel: context.l10n.childStarsSemantics(stars),
       child: _StarBadge(count: stars),
     );
@@ -222,7 +222,7 @@ class _TopBar extends ConsumerWidget {
               ),
               scaleDown: AppPressable.scaleIcon,
               semanticLabel: context.l10n.childHomeToGuardianLabel,
-              // 여우 배지 자르기(#311)가 보호자 홈과 같아야 해 공용 위젯을 쓴다
+              // 여우 배지 자르기가 보호자 홈과 같아야 해 공용 위젯을 쓴다
               child: CharacterBadge(character: character),
             ),
           ],
@@ -236,7 +236,7 @@ class _TopBar extends ConsumerWidget {
     const overhang = (_gearHit - _gearIcon) / 2;
 
     final gear = AppPressable(
-      // 보호자 설정처럼 설정 페이지로 간다 (#488 — 바텀시트가 아니다)
+      // 보호자 설정처럼 설정 페이지로 간다 (바텀시트가 아니다)
       onTap: () => context.push(Routes.childSettings),
       scaleDown: AppPressable.scaleIcon,
       semanticLabel: context.l10n.childHomeSettingsLabel,
@@ -353,7 +353,7 @@ class _RoutineTile extends StatelessWidget {
       onTap: () => context.push(Routes.childRoutineDetail, extra: routine),
       scaleDown: AppPressable.scaleCard,
       child: Container(
-        // 보상이 있으면 한 줄이 늘어 타일이 높아진다 (이슈 #239). 시안은 92 (#445).
+        // 보상이 있으면 한 줄이 늘어 타일이 높아진다. 시안은 92.
         height: (routine.hasReward ? 92 : 68).h,
         // Figma 실측 — 제목 좌 24, 화살표 우 16
         padding: EdgeInsets.only(left: 24.w, right: 16.w),
@@ -374,15 +374,15 @@ class _RoutineTile extends StatelessWidget {
                       routine.displayTitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      // 시안 제목은 18/800이다. 예전엔 w400이었다 (#445).
+                      // 시안 제목은 18/800이다.
                       style: context.typo.childDetailTitle.copyWith(
                         color: colors.chipLabel,
                       ),
                     ),
                   ),
-                  // 목록에서부터 "다 하면 뭘 받는지"가 보인다 (이슈 #239).
+                  // 목록에서부터 "다 하면 뭘 받는지"가 보인다.
                   // 들어가야 알 수 있으면 시작할 이유가 약해진다.
-                  // 시안: `다하면`은 회색(#74757D), 보상은 검정 70% — 둘 다 16 (#445).
+                  // 시안: `다하면`은 회색(#74757D), 보상은 검정 70% — 둘 다 16.
                   if (routine.hasReward) ...[
                     SizedBox(height: 10.h),
                     Row(
@@ -448,7 +448,7 @@ class _NoRoutine extends StatelessWidget {
 
   final String childName;
 
-  /// 이룸이 휴대폰인가. 두 휴대폰의 시안 문구가 다르다 (#491).
+  /// 이룸이 휴대폰인가. 두 휴대폰의 시안 문구가 다르다.
   ///
   /// 보호자 휴대폰 시안(`343:4543`)은 `보호자 화면에서`, 이룸이 휴대폰 시안(`1197:6846`)은
   /// `보호자 모드에서`다. 한 위젯을 같이 쓰므로 휴대폰별로 갈라 각자 시안대로 맞춘다.
@@ -477,7 +477,7 @@ class _NoRoutine extends StatelessWidget {
     //
     // **`Center`가 아니다.** 세로 가운데에 두면 화면 높이에 따라 글자가 오르내려
     // 시안과 어긋난다 — 실제로 81 아래에 있었다. 시안(343:4543)은 제목이 234 에서
-    // 시작하므로 위 여백을 고정한다 (#297).
+    // 시작하므로 위 여백을 고정한다.
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -502,7 +502,7 @@ class _NoRoutine extends StatelessWidget {
               style: context.typo.caption.copyWith(color: colors.textSecondary),
             ),
           ],
-          // 설명 → 시무룩한 그림. 48을 쓰면 그림이 15 내려간다 (#297).
+          // 설명 → 시무룩한 그림. 48을 쓰면 그림이 15 내려간다.
           SizedBox(height: 35.h),
           // 캐릭터 뒤 은은한 빛 — 단순 원이라 코드로 그린다
           // (Figma blur 100 ≈ sigma 50)

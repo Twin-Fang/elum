@@ -6,7 +6,7 @@ import '../application/notice_log.dart';
 import '../application/notice_popup_controller.dart';
 import 'notice_popup.dart';
 
-/// 보호자 홈을 감싸 공지 팝업을 띄운다 (이슈 #371 · #390).
+/// 보호자 홈을 감싸 공지 팝업을 띄운다.
 ///
 /// **라우터의 보호자 홈 자리에서만 감싼다.** 이룸이 화면·로그인 전·일과 만들기
 /// 흐름에는 이 위젯이 없으므로 공지가 뜰 길이 없다 (명세 2장 "어디에 뜨나").
@@ -15,9 +15,8 @@ import 'notice_popup.dart';
 ///
 /// 홈의 **첫 프레임 뒤에** 묻는다. 공지를 기다리느라 홈이 늦게 뜨면 안 된다.
 ///
-/// 공지가 여럿이면 **차례로** 띄운다 (#390). 하나를 닫으면(닫기·링크·바깥) 다음이
-/// 이어서 뜬다. 한 팝업 안에서 넘기던 슬라이드(#371)를 없앴다 — 앱의 다른 팝업과
-/// 같은 모양이 되면서 넘길 자리가 없어졌고, `보지 않기`도 공지마다 따로 고를 수 있다.
+/// 공지가 여럿이면 **차례로** 띄운다. 하나를 닫으면(닫기·링크·바깥) 다음이
+/// 이어서 뜬다. 한 팝업 안에서 넘기지 않으므로 `보지 않기`도 공지마다 따로 고른다.
 class GuardianNoticeLauncher extends ConsumerStatefulWidget {
   const GuardianNoticeLauncher({super.key, required this.child});
 

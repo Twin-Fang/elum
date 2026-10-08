@@ -43,15 +43,15 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     hasToken: () => ref.read(authRepositoryProvider).hasSession,
     requiresGuardianPinSetup: () =>
         ref.read(authRepositoryProvider).guardianPinSetupPending,
-    // 이룸이 휴대폰은 로그인이 아니라 연결로 붙는다 (이슈 #206)
+    // 이룸이 휴대폰은 로그인이 아니라 연결로 붙는다
     isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
-    // 역할을 고르기 전에는 보호자·이룸이 어느 쪽 화면도 열지 않는다 (이슈 #212)
+    // 역할을 고르기 전에는 보호자·이룸이 어느 쪽 화면도 열지 않는다
     hasRole: () => ref.read(localStorageProvider).selectedRole != null,
-    // 앱이 꺼져 있다 초대 링크로 열릴 때 (#365). 켜져 있을 때는 아래 InviteLinkHost 가 먼저 받는다.
+    // 앱이 꺼져 있다 초대 링크로 열릴 때. 켜져 있을 때는 아래 InviteLinkHost 가 먼저 받는다.
     onInviteLink: (link) => _inviteIntake.accept(link),
   );
 
-  // 초대 링크를 알맞은 때에 입력 화면으로 이어 준다 (#365).
+  // 초대 링크를 알맞은 때에 입력 화면으로 이어 준다.
   late final InviteLinkIntake _inviteIntake = InviteLinkIntake(
     inbox: ref.read(inviteInboxProvider),
     isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
@@ -77,7 +77,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
   /// 컨텍스트 없이 토스트를 띄우기 위한 키 — 초대 링크는 화면 밖에서 들어온다.
   final _messengerKey = GlobalKey<ScaffoldMessengerState>();
 
-  /// 보호자 휴대폰이 지금 어느 화면에 있는지 남긴다 (#532).
+  /// 보호자 휴대폰이 지금 어느 화면에 있는지 남긴다.
   ///
   /// 이룸이 화면으로 가는 길이 여럿이라(보호자 홈 버튼·일과 완료 뒤 등) 화면마다 저장하면
   /// 하나를 빠뜨리기 쉽다. 라우터가 옮길 때마다 여기 한 곳에서 본다.
@@ -107,7 +107,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     super.initState();
     _router.routerDelegate.addListener(_rememberScreen);
     // 추적 허용(ATT)은 광고 요청이 아니라 앱을 열자마자 묻는다. 광고가 안 뜨는 경로로 쓰는
-    // 사람도 팝업을 보게 하려는 것이다(#519 심사 2.1). 첫 프레임을 그린 뒤 불러야 팝업이 뜬다.
+    // 사람도 팝업을 보게 하려는 것이다. 첫 프레임을 그린 뒤 불러야 팝업이 뜬다.
     // 이룸이 전용 휴대폰은 광고를 보여 주지 않으므로 묻지 않는다.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || ref.read(localStorageProvider).isElumiDevice) return;
@@ -127,7 +127,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     //
     // 라우터 가드는 **화면을 옮길 때**만 평가된다. 홈에 머무는 중에 토큰이 만료되면
     // 가드가 다시 불리지 않아, 서버 요청은 전부 401인데 화면은 캐시로 정상처럼
-    // 남아 있었다 (이슈 #175). 그래서 신호를 듣고 여기서 직접 옮긴다.
+    // 남아 있었다. 그래서 신호를 듣고 여기서 직접 옮긴다.
     // 서버가 준 대기·연출 시간값을 받자마자 적용하고 다음 실행을 위해 저장한다.
     // 관리자 화면에서 고친 값이 앱을 다시 올리지 않아도 반영된다.
     ref.listen(appStatusProvider, (previous, next) {
@@ -161,9 +161,9 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     final l10n = AppL10n.routerArgs(
       forcedLocale: ref.watch(devLocaleOverrideProvider),
       inner: (context, child) => SyncTriggers(
-        // 동기화 트리거는 라우터·오버레이와 무관하므로 가장 바깥에 둔다 (이슈 #140)
+        // 동기화 트리거는 라우터·오버레이와 무관하므로 가장 바깥에 둔다
         child: AppStatusGate(
-          // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다 (이슈 #279).
+          // 점검 중이거나 너무 낮은 버전이면 여기서 화면을 대신 그린다.
           // 확인하지 못하면 그대로 통과시키므로 평소에는 비용이 없다.
           child: DevToolsOverlay(
             // 오버레이는 GoRouter보다 위에 있어 context로 라우터를 찾지 못한다.
@@ -190,7 +190,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
         routerConfig: _router,
         scaffoldMessengerKey: _messengerKey,
         debugShowCheckedModeBanner: false,
-        // 개발자 도구를 모든 화면 위에 얹는다. 화면별 코드는 건드리지 않는다. (이슈 #13)
+        // 개발자 도구를 모든 화면 위에 얹는다. 화면별 코드는 건드리지 않는다.
         builder: l10n.builder,
       ),
     );

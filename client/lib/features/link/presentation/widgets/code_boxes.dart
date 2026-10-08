@@ -13,11 +13,11 @@ class CodeBoxes extends StatelessWidget {
   const CodeBoxes({super.key, required this.value, this.hasError = false})
     : figma = false;
 
-  /// 이룸이 휴대폰 연결 코드 입력 시안(`1274:7909` · `1274:7988`, #493)의 모양.
+  /// 이룸이 휴대폰 연결 코드 입력 시안(`1274:7909` · `1274:7988`)의 모양.
   ///
   /// 칸 48×64 · 모서리 8 · 선 1px · 안쪽 글자 40/w800 이고, 세 칸씩 묶어 가운데만
   /// 16 벌어진다(칸 사이는 4). 쓴 칸을 따로 강조하지 않는다 — 시안은 여섯 칸의 선이
-  /// 모두 같다. 초대 코드 입력(`InviteEnterScreen`)은 시안이 없어 옛 모양을 쓴다(#479).
+  /// 모두 같다. 초대 코드 입력(`InviteEnterScreen`)은 시안이 없어 기존 모양을 쓴다.
   const CodeBoxes.figma({super.key, required this.value, this.hasError = false})
     : figma = true;
 
@@ -61,7 +61,7 @@ class CodeBoxes extends StatelessWidget {
               color: colors.surface,
               borderRadius: BorderRadius.circular(space.buttonRadius.r),
               // 틀려도 경고색을 쓰지 않는다 — 이룸이 휴대폰 화면이다. 틀림은 흔들림과
-              // 짧은 문구로 알린다 (docs/08-design-principles.md §6, #427).
+              // 짧은 문구로 알린다 (docs/08-design-principles.md §6).
               border: Border.all(
                 color: hasError
                     ? colors.textSecondary
@@ -99,7 +99,7 @@ class CodeBoxes extends StatelessWidget {
             decoration: BoxDecoration(
               color: colors.surface,
               borderRadius: BorderRadius.circular(_figmaRadius),
-              // 틀려도 경고색을 쓰지 않는다 — 이룸이 휴대폰 화면이다 (#427).
+              // 틀려도 경고색을 쓰지 않는다 — 이룸이 휴대폰 화면이다.
               // 틀림은 흔들림과 짧은 문구로 알리고 선만 한 단계 진하게 한다.
               border: Border.all(
                 color: hasError ? colors.textSecondary : colors.border,

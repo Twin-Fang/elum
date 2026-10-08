@@ -5,13 +5,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../shared/pictogram/pictogram_svg_loader.dart';
 
-/// 사진·AI 그림이 없는 카드의 그림 자리에 그리는 **무료 픽토그램** (#469).
+/// 사진·AI 그림이 없는 카드의 그림 자리에 그리는 **무료 픽토그램**.
 ///
 /// Mulberry Symbols(CC BY-SA 4.0)를 앱에 번들해 두고 서버가 준 `pictogramId` 로 고른다.
 /// 오프라인에서도 보이고 인증·캐시가 필요 없다.
 ///
 /// ⚠️ **심볼을 변형하지 않는다.** 색을 바꾸거나 다른 그림과 합성하지 않고, 흰 바탕 위에
-/// 크기(contain)와 배치만 정한다 — 라이선스가 변형을 막는다. 출처는 이용약관 제5조의3(그림 출처)에 있다 (#477).
+/// 크기(contain)와 배치만 정한다 — 라이선스가 변형을 막는다. 출처는 이용약관 제5조의3(그림 출처)에 있다.
 class PictogramArt extends StatefulWidget {
   const PictogramArt({
     super.key,
@@ -61,7 +61,7 @@ class _PictogramArtState extends State<PictogramArt> {
   Widget build(BuildContext context) {
     if (_failed) return widget.fallbackBuilder(context);
     // **칸을 꽉 채운다.** 부모(AnimatedSwitcher 의 Stack)가 느슨한 제약만 줘서, 안 그러면
-    // SVG 원래 크기(정사각)로 줄어 칸 가운데에 떠 버린다 (사진과 같은 사정, #461).
+    // SVG 원래 크기(정사각)로 줄어 칸 가운데에 떠 버린다 (사진과 같은 사정).
     return SizedBox.expand(
       child: Semantics(
         label: widget.label,

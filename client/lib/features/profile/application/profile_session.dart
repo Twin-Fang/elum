@@ -14,7 +14,7 @@ import '../domain/profile_summary.dart';
 import '../../member/application/member_providers.dart';
 import '../../guardian/application/routine_providers.dart';
 
-/// 보호자가 지금 보고 있는 이룸이 (다중 보호자 #362).
+/// 보호자가 지금 보고 있는 이룸이.
 @immutable
 class ProfileSession {
   const ProfileSession({this.selectedId, this.noProfile = false});
@@ -158,7 +158,7 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
   Future<Attempt<bool>>? _ensuring;
 
   /// 이룸이 등록(온보딩)을 마치기 전에 **이룸이가 있게 한다** — 마지막 이룸이에서 나간 보호자가
-  /// 다시 등록할 때, 서버는 이룸이 없이는 이름 저장을 `404 PROFILE_NOT_FOUND` 로 막는다 (#362).
+  /// 다시 등록할 때, 서버는 이룸이 없이는 이름 저장을 `404 PROFILE_NOT_FOUND` 로 막는다.
   ///
   /// 돌려주는 값: `ok(true)` 새로 만들었다 · `ok(false)` 할 일이 없었다 · `failed` 만들지 못했다
   /// (저장을 이어 가면 안 된다 — 같은 화면에서 다시 시도한다).

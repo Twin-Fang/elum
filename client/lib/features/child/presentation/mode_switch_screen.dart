@@ -46,7 +46,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   /// 문구가 아니라 상태만 들고 있어야 앱 언어가 바뀌어도 새 언어로 읽힌다.
   bool _mismatch = false;
 
-  /// 보호자 화면으로 갈 때 저장된 암호가 없는 이룸이 휴대폰이다 (#355).
+  /// 보호자 화면으로 갈 때 저장된 암호가 없는 이룸이 휴대폰이다.
   /// 이때는 입력창 대신 안내만 보인다.
   bool _blocked = false;
   bool _verifying = false;
@@ -80,11 +80,10 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
     }
   }
 
-  /// 보호자 화면 입구를 지킨다 (#355).
+  /// 보호자 화면 입구를 지킨다.
   ///
-  /// 암호가 없는 휴대폰은 **비교 없이 통과시키지 않는다.** 예전에는 "온보딩을 건너뛴
-  /// 개발 상태"를 위해 열어 줬는데, 연결 암호로 붙은 이룸이 휴대폰과 다시 로그인한
-  /// 보호자 휴대폰이 실제로 이 상태가 된다.
+  /// 암호가 없는 휴대폰은 **비교 없이 통과시키지 않는다.** 연결 암호로 붙은 이룸이 휴대폰과
+  /// 다시 로그인한 보호자 휴대폰이 실제로 이 상태가 되므로 열어 줄 수 없다.
   ///
   /// - 보호자 휴대폰: 암호를 새로 만들게 한다. 정한 사람만 아는 값이 생기므로 막은 것이다.
   /// - 이룸이 휴대폰: 암호를 만들게 하면 이룸이가 직접 정해 들어올 수 있다. 막고
@@ -164,9 +163,9 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       return;
     }
 
-    // 틀렸다 — 점을 흔들고 문구로 알린다 (#180).
-    // 종전에는 입력만 조용히 비웠다. 틀린 것인지, 입력이 안 먹은 것인지, 화면이 멈춘
-    // 것인지 구분할 수 없어 같은 암호를 다시 누르게 됐다.
+    // 틀렸다 — 점을 흔들고 문구로 알린다.
+    // 입력만 조용히 비우면 틀린 것인지, 입력이 안 먹은 것인지, 화면이 멈춘
+    // 것인지 구분할 수 없어 같은 암호를 다시 누르게 된다.
     //
     // 색 대신 [AppShake]로 알린다 — 아동도 보는 화면이라 경고색을 쓰지 않는다.
     // 온보딩 PIN 화면(pin_screen)과 같은 방식이다.
@@ -212,11 +211,11 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // 제목·설명을 손으로 쌓지 않는다 — 뼈대가 쓰는 간격과 어긋난다.
-          // 실제로 `space.xl`(32)을 쓰다 제목이 20 내려가 있었다 (#297).
+          // 실제로 `space.xl`(32)을 쓰다 제목이 20 내려가 있었다.
           ElumHeader(
             // 시안 `309:2837` 문구 그대로
             title: context.l10n.modeSwitchTitle,
-            // 틀렸을 때는 실패 안내로 바뀐다. 색은 그대로 둔다 (#180).
+            // 틀렸을 때는 실패 안내로 바뀐다. 색은 그대로 둔다.
             description: _mismatch
                 ? context.l10n.modeSwitchMismatch
                 : widget.target.description,
@@ -224,7 +223,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
           SizedBox(height: _descriptionToDots.h),
           // 점을 누르면 키패드가 다시 올라온다 (내려버렸을 때의 탈출구)
           // 실제 입력칸은 투명(Opacity 0)이라 화면 낭독기에서 빠진다. 키보드를 여는
-          // 길은 이 점 자리뿐이라 이름을 준다 (#339). 넣은 숫자는 암호라 읽지 않는다.
+          // 길은 이 점 자리뿐이라 이름을 준다. 넣은 숫자는 암호라 읽지 않는다.
           Semantics(
             container: true,
             button: true,

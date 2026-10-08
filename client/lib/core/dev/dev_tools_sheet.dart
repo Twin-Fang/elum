@@ -85,7 +85,7 @@ class _DevToolsSheetState extends State<_DevToolsSheet> {
           // 하위 화면에서는 메뉴로 돌아가는 버튼을 준다
           if (_view != _DevView.menu)
             IconButton(
-              // 아이콘만 있는 버튼이라 이름을 준다 (#339). tooltip 은 쓰지 않는다 —
+              // 아이콘만 있는 버튼이라 이름을 준다. tooltip 은 쓰지 않는다 —
               // 이 패널은 Navigator 바깥에 떠서 Tooltip 이 찾을 Overlay 가 없다.
               icon: const Icon(
                 Icons.arrow_back,
@@ -153,7 +153,7 @@ class _DevMenuState extends State<_DevMenu> {
     return ListView(
       shrinkWrap: true,
       children: [
-        // 스위치가 제목과 따로 떨어져 이름 없이 읽히지 않게 한 노드로 묶는다 (#339)
+        // 스위치가 제목과 따로 떨어져 이름 없이 읽히지 않게 한 노드로 묶는다
         MergeSemantics(
           child: ListTile(
             leading: const Icon(Icons.speed),

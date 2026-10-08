@@ -16,18 +16,13 @@ import 'card_photo_permission_screen.dart';
 import 'card_photo_source_sheet.dart';
 import 'default_card_art.dart';
 
-/// 카드 수정 시트 안의 그림 칸 — 그림 위 `사진 바꾸기` 칩과 그 뒤의 모든 상태 (#456).
+/// 카드 수정 시트 안의 그림 칸 — 그림 위 `사진 바꾸기` 칩과 그 뒤의 모든 상태.
 ///
 /// **임시 시안이다.** 디자이너 확정 전 제시용 목업(`opt2_A`)을 그대로 옮겼다.
 ///
 /// 흐름: 칩 → 고르기 시트 → (카메라·갤러리) → 올리는 중 → 성공(그림 갈아 끼움) / 실패.
-///
-/// | 상태 | 화면 |
-/// |---|---|
-/// | 취소 | 아무 일도 없다 |
-/// | 권한 거부 | 전체 화면 안내 + 다른 길(우회) |
-/// | 올리는 중 | 스피너 + 문구, 칩을 감춰 두 번 못 누른다 |
-/// | 실패 | 문구 + **에러 코드** + `다시 하기`(같은 사진으로 / 다른 사진 / 확인) |
+/// 취소는 아무 일도 없고, 권한 거부는 우회 안내, 올리는 중은 칩을 감춰 두 번 못 누르며,
+/// 실패는 문구 + **에러 코드** + `다시 하기`다.
 ///
 /// **서버 id 가 있는 카드에서만 쓴다.** 호출부가 [routineId]·[stepId] 가 서버 것일 때만
 /// 이 위젯을 놓는다 — 서버에 없는 카드는 올릴 곳이 없다.
@@ -47,7 +42,7 @@ class CardPhotoBlock extends ConsumerStatefulWidget {
   /// 그림 칸 높이 (목업 150).
   static const height = 150.0;
 
-  /// 미리보기 비율 — Figma 카드 그림 칸 313×230 (#461).
+  /// 미리보기 비율 — Figma 카드 그림 칸 313×230.
   static const previewAspect = 313 / 230;
 
   @override
@@ -218,8 +213,8 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
       width: double.infinity,
       child: Stack(
         children: [
-          // 카드 그림 칸과 **같은 비율**(313:230)의 미리보기를 가운데에 둔다. 전에는 시트 폭 전체(845×352,
-          // 약 2.4:1)의 띠라서 사진이 카드에서 어떻게 잘리는지 알 수 없었다 (통합 E2E 실측, #456).
+          // 카드 그림 칸과 **같은 비율**(313:230)의 미리보기를 가운데에 둔다. 시트 폭
+          // 전체 띠로 두면 사진이 카드에서 어떻게 잘리는지 알 수 없다.
           // 칩은 이 미리보기 안쪽 오른쪽 아래에 붙는다.
           Positioned.fill(
             child: Center(
@@ -239,11 +234,11 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
                             routineId: widget.routineId,
                             stepId: widget.stepId,
                             imagePath: step?.imagePath,
-                            // 사진·AI 그림이 없으면 무료 픽토그램이 자리를 채운다(#469). 사진 바꾸기 칩은 그대로다.
+                            // 사진·AI 그림이 없으면 무료 픽토그램이 자리를 채운다. 사진 바꾸기 칩은 그대로다.
                             pictogramId: step?.pictogramId,
                             pictogramLabel: step?.displayTitle ?? '',
-                            // 픽토그램도 없으면 기본 카드(#458)의 '사진 추가' 자리를 그대로 두고, 눌러도 같은 사진 흐름이
-                            // 시작되게 잇는다(#456). 올리는 중에는 누를 수 없다.
+                            // 픽토그램도 없으면 기본 카드의 '사진 추가' 자리를 그대로 두고, 눌러도 같은 사진 흐름이
+                            // 시작되게 잇는다. 올리는 중에는 누를 수 없다.
                             emptyBuilder: (_) => DefaultCardPhotoSlot(
                               onAddPhoto: _phase == _Phase.idle && !_busy
                                   ? _start

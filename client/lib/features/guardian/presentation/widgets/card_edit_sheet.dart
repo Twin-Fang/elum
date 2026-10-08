@@ -14,10 +14,10 @@ import 'routine_flow_scaffold.dart' show dismissKeyboard;
 /// 시트가 카드를 고치는지, 새로 넣는지.
 enum CardSheetMode { edit, add }
 
-/// 카드 제목·설명 시트 — 수정과 추가가 함께 쓴다 (#444).
+/// 카드 제목·설명 시트 — 수정과 추가가 함께 쓴다.
 ///
 /// 시안 `1197:5923`(수정) · `1197:6161`(수정 + 키보드) · `1197:6044`(추가).
-/// 이슈 #77 때는 시안이 없어 바텀시트로 정했고, 지금은 시안 좌표를 그대로 따른다.
+/// 바텀시트이며 시안 좌표를 그대로 따른다.
 ///
 /// **키보드가 올라오면 시트가 위로 커진다(y=82, 높이 770).** 입력칸을 키보드 위로
 /// 밀어 올리는 것이 아니라 시트 자체가 화면 위까지 자라고, 버튼은 시트 바닥(키보드
@@ -36,7 +36,7 @@ class CardEditSheet extends StatefulWidget {
 
   final CardSheetMode mode;
 
-  /// 그림을 사진으로 바꿀 카드 (#456). **서버 id 가 있는 수정 시트에서만** 준다 —
+  /// 그림을 사진으로 바꿀 카드. **서버 id 가 있는 수정 시트에서만** 준다 —
   /// null 이면 그림 칸도 `사진 바꾸기` 칩도 없다(추가 시트·서버에 없는 카드).
   final CardPhotoTarget? photo;
 
@@ -52,7 +52,7 @@ class CardEditSheet extends StatefulWidget {
   /// 시안 좌표 (393×852 기준).
   ///
   /// 시트 높이는 수정 450 · 추가 488 — 추가는 제목 위에 40 이 더 있다. 시안 추가 시트에
-  /// 그 자리에 `설명` 글자가 하나 더 있는데 복사하다 남은 잔재라 그리지 않는다(#444).
+  /// 그 자리에 `설명` 글자가 하나 더 있는데 복사하다 남은 잔재라 그리지 않는다.
   static const _heightEdit = 450.0;
   static const _heightAdd = 488.0;
 
@@ -67,7 +67,7 @@ class CardEditSheet extends StatefulWidget {
   static const _descFieldY = 218.0;
   static const _addOffset = 40.0;
 
-  /// 그림 칸이 들어오면 제목 줄부터 아래가 이만큼 밀린다 — 그림 150 + 사이 16 (#456).
+  /// 그림 칸이 들어오면 제목 줄부터 아래가 이만큼 밀린다 — 그림 150 + 사이 16.
   /// **임시 시안**(디자이너 확정 전) 값이다.
   static const _photoOffset = CardPhotoBlock.height + 16;
 

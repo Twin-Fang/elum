@@ -18,7 +18,7 @@ import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/router/routes.dart';
 
-/// 이룸이 휴대폰 — 연결 상태와 끊기 (명세 §8-5 · 이슈 #363).
+/// 이룸이 휴대폰 — 연결 상태와 끊기 (명세 §8-5).
 ///
 /// **시안이 없어 임시 배치다** (명세에 그림만 있고 Figma 프레임이 없다). 기존 설정 화면 뼈대
 /// (`ElumScaffold` 제목·뒤로가기 한 줄)와 카드·팝업 컴포넌트로 지었다 — 디자인 요청 대상이다.

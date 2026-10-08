@@ -5,7 +5,7 @@ import 'package:vibration/vibration.dart';
 import '../logger/app_logger.dart';
 import '../storage/local_storage.dart';
 
-/// 이룸이 화면에서 울리는 진동 네 가지 (이슈 #515).
+/// 이룸이 화면에서 울리는 진동 네 가지.
 ///
 /// 진동은 화면과 소리가 이미 알려준 것을 손으로 한 번 더 느끼게 하는 **보조 신호**다. 의미를
 /// 새로 만들지 않는다. 소리·진동에 예민한 이룸이가 있어 기본은 약하고 짧다.

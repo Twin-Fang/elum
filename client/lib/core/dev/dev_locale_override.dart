@@ -5,7 +5,7 @@ import '../config/app_config.dart';
 
 /// 개발자 도구의 언어 강제 값. null 이면 휴대폰 언어를 따른다.
 ///
-/// QA·시연이 휴대폰 언어를 바꾸지 않고 다른 언어 화면을 보게 한다 (스펙 4.1 ④).
+/// 검수·시연이 휴대폰 언어를 바꾸지 않고 다른 언어 화면을 보게 한다 (스펙 4.1 ④).
 /// **메모리에만 둔다**(결정 D7) — 앱을 다시 켜면 휴대폰 언어로 돌아가, 강제가 남은 줄
 /// 모르고 지나치는 일이 없다.
 class DevLocaleOverrideNotifier extends Notifier<Locale?> {

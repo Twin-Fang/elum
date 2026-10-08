@@ -31,24 +31,23 @@ import '../../../../core/router/routes.dart';
 /// 홈에 보여줄 일과 목록 — 방금 저장한 일과 + 서버 목록을 병합한다.
 ///
 /// 서버 목록에 아직 없는 새 일과만 먼저 둔다. 서버가 같은 일과를 돌려주면
-/// 최신 완료 상태를 쓴다 — 생성 직후의 옛 값이 다른 휴대폰의 체크를 가리지 않게 한다.
+/// 최신 완료 상태를 쓴다 — 생성 직후의 이전 값이 다른 휴대폰의 체크를 가리지 않게 한다.
 /// steps가 빈 일과는 보여줄 것이 없어 제외한다.
 ///
-/// **흐름에 남은 일과가 임시저장(`PENDING_REVIEW`)이면 붙이지 않는다** (#387 결함 C).
-/// 카드 확인에서 `나가기`로 끝내면 흐름에 그 일과가 남는데, 상태를 안 보고 붙여서
-/// 아직 이룸이에게 보내지 않은 것이 오늘 일과 맨 앞에 떴다 — 앱을 다시 켜야
-/// 사라졌다. 오늘 일과는 저장(승인)한 것만이다 (#353).
+/// **흐름에 남은 일과가 임시저장(`PENDING_REVIEW`)이면 붙이지 않는다**.
+/// 카드 확인에서 `나가기`로 끝내면 흐름에 그 일과가 남는데, 상태를 안 보고 붙이면
+/// 아직 이룸이에게 보내지 않은 것이 오늘 일과 맨 앞에 뜬다. 오늘 일과는 저장(승인)한 것만이다.
 final homeRoutinesProvider = Provider<List<Routine>>((ref) {
   final current = ref.watch(routineFlowProvider).routine;
   // `.value`는 재조회(invalidate) 중에도 직전 값을 준다. `asData`를 쓰면 동기화 뒤
-  // 목록을 다시 읽는 동안 화면이 순간 비어 보인다 (이슈 #140).
+  // 목록을 다시 읽는 동안 화면이 순간 비어 보인다.
   // **오늘 것만 본다.** 전체 목록(`myRoutinesProvider`)을 보고 있어서 어제 것도,
   // 아직 이룸이에게 보내지 않은 것도 오늘 할 일로 보였다. 이룸이 홈과 같은
-  // 목록을 봐야 보호자가 믿는 것과 이룸이 화면이 같아진다 (#353).
+  // 목록을 봐야 보호자가 믿는 것과 이룸이 화면이 같아진다.
   final fetched = ref.watch(todayRoutinesProvider).value ?? const <Routine>[];
 
   // 날짜를 한 번 더 본다 — 앱이 자정을 넘겨 켜져 있으면 받아 둔 값과 흐름에 남은
-  // 일과가 어제 것이 된다. 다시 받아 오기 전에도 어제 일과가 남지 않게 한다 (#353).
+  // 일과가 어제 것이 된다. 다시 받아 오기 전에도 어제 일과가 남지 않게 한다.
   final now = DateTime.now();
   final currentFetched = fetched.any((r) => r.id == current?.id);
 
@@ -84,24 +83,24 @@ double routineProgress(Routine routine, ChildRoutineState progress) {
 /// 카드 사이 간격 (Figma 931:4013 — gap 8)
 const _tileGap = 8.0;
 
-/// 지난 일과 사이 광고가 일과 카드와 떨어지는 만큼 더한 간격(오클릭 방지, #465).
+/// 지난 일과 사이 광고가 일과 카드와 떨어지는 만큼 더한 간격(오클릭 방지).
 /// 광고가 없으면 이 간격도 없다.
 const _adExtraGap = 8.0;
 
 /// 광고가 목록 끝에 붙을 때(지난 일과 1개) 아래로 더 띄우는 간격.
 ///
 /// 끝에 붙으면 바로 아래가 하단 고정 배너라 광고 둘이 가깝게 보인다. 오클릭을 줄이려고
-/// 사이 광고(아래 8)보다 넓게 띄운다 (#540).
+/// 사이 광고(아래 8)보다 넓게 띄운다.
 const _adTrailingGap = 24.0;
 
-/// 광고를 끼울 일과 순번(이 일과 다음). 지난 일과가 1개 이상일 때만 부른다 (#540).
+/// 광고를 끼울 일과 순번(이 일과 다음). 지난 일과가 1개 이상일 때만 부른다.
 ///
 /// 3개 이상이면 두 번째 다음, 2개면 첫 번째 다음이라 광고는 언제나 일과 **사이**에 든다
-/// (#465 의 오클릭 방지 의도). 1개만 사이가 없어 끝에 붙는다. 0개면 넣지 않는다 —
+/// (오클릭 방지 의도). 1개만 사이가 없어 끝에 붙는다. 0개면 넣지 않는다 —
 /// 빈 상태 아래에 두면 하단 배너와 함께 내용 없는 화면에 광고 둘이 붙어 AdMob 정책 위험이 있다.
 int _nativeAdAfterIndex(int count) => count >= 3 ? 1 : 0;
 
-/// 보호자 홈 `오늘 일과` (Figma 931:3896 / 931:4179 / 931:4879 · 이슈 #258).
+/// 보호자 홈 `오늘 일과` (Figma 931:3896 / 931:4179 / 931:4879).
 ///
 /// 개편으로 세 가지가 한꺼번에 들어왔다.
 ///
@@ -113,7 +112,7 @@ int _nativeAdAfterIndex(int count) => count >= 3 ? 1 : 0;
 class TodayRoutineSection extends ConsumerStatefulWidget {
   const TodayRoutineSection({super.key, this.coachKey});
 
-  /// 코치마크가 가리킬 줄(밀 수 있는 첫 줄)에 달 키 (#505).
+  /// 코치마크가 가리킬 줄(밀 수 있는 첫 줄)에 달 키.
   final GlobalKey? coachKey;
 
   @override
@@ -129,7 +128,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
   /// 들려서 자리를 옮기는 중인 일과.
   String? _draggingId;
 
-  /// 보호자가 방금 정한 순서(일과 id). 서버 목록이 아직 옛 순서로 오는 동안
+  /// 보호자가 방금 정한 순서(일과 id). 서버 목록이 아직 이전 순서로 오는 동안
   /// 화면이 되돌아가지 않게 덮어쓴다. 새 순서가 도착하면 자연히 같은 값이 되어
   /// 아무 일도 하지 않으므로 따로 치우지 않아도 된다.
   List<String>? _order;
@@ -175,7 +174,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     if (!mounted) return;
     if (failure != null) {
       // 서버가 받지 못했으면 화면만 바뀐 채로 두지 않는다 —
-      // 다음에 열면 옛 순서로 돌아와 보호자가 바꾼 적 없다고 여긴다.
+      // 다음에 열면 이전 순서로 돌아와 보호자가 바꾼 적 없다고 여긴다.
       setState(() => _order = null);
       showFailure(
         context,
@@ -189,7 +188,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     ref.refreshRoutines();
   }
 
-  /// 이룸이가 한 단계라도 한 일과인가 (#533). 같은 휴대폰에서 방금 체크한 것은 서버에
+  /// 이룸이가 한 단계라도 한 일과인가. 같은 휴대폰에서 방금 체크한 것은 서버에
   /// 아직 안 갔을 수 있어 기기 기록도 함께 본다.
   bool _hasStarted(Routine routine) =>
       routine.hasStarted ||
@@ -205,7 +204,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     actions: [ElumDialogAction(label: context.l10n.commonConfirm)],
   );
 
-  /// 이룸이가 다 끝낸 일과인가 (#534). 같은 휴대폰의 기기 기록도 본다 — 서버 반영 전에도
+  /// 이룸이가 다 끝낸 일과인가. 같은 휴대폰의 기기 기록도 본다 — 서버 반영 전에도
   /// 링이 체크로 바뀌는데 편집만 열려 있으면 둘이 어긋난다.
   bool _isFinished(Routine routine) =>
       routine.isFinished ||
@@ -214,7 +213,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
   Future<void> _delete(Routine routine) async {
     final l10n = context.l10n;
     // 시작한 일과는 서버가 지우지 않는다(수행 기록·별). 묻고 나서 실패 팝업을 띄우면
-    // 보호자는 "삭제가 고장났다"고 여긴다 (#533). 누르기 전에 이유를 먼저 알린다.
+    // 보호자는 "삭제가 고장났다"고 여긴다. 누르기 전에 이유를 먼저 알린다.
     if (_hasStarted(routine)) {
       setState(() => _openId = null);
       await _showStartedNotice();
@@ -245,7 +244,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
         .delete(routine.id);
     if (!mounted) return;
     if (failure != null) {
-      // 묻는 사이에 이룸이가 시작했다 — 서버가 상태로 거절한다 (#533).
+      // 묻는 사이에 이룸이가 시작했다 — 서버가 상태로 거절한다.
       // 새로 받아 와야 화면도 시작한 일과로 바뀐다.
       // showFailure 를 쓰지 않는다 — 서버 문구(`현재 상태에서는 처리할 수 없습니다`)가
       // 이 안내를 덮어 왜 안 되는지 알 수 없다.
@@ -282,7 +281,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
   }
 
   /// 일과를 눌렀을 때 — 먼저 시트로 보여주고, `편집하기`를 눌렀을 때만 편집 화면으로
-  /// 보낸다 (이슈 #266).
+  /// 보낸다.
   ///
   /// **편집 화면으로 갈 때는 시트를 먼저 닫는다.** 시트를 띄운 채 화면을 밀면 편집에서
   /// 뒤로 나올 때 시트를 한 번 더 지나야 한다. 편집 화면이 같은 일과를 보여주므로
@@ -304,8 +303,8 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
 
     if (routines.isEmpty) {
       final async = ref.watch(todayRoutinesProvider);
-      // 로딩·빈 상태·실패를 셋으로 나눈다. 예전에는 실패까지 빈 상태로 흡수해
-      // "아직 만든 일과가 없어요"를 띄웠는데, 그러면 보호자는 자기가 만든
+      // 로딩·빈 상태·실패를 셋으로 나눈다. 실패까지 빈 상태로 흡수해
+      // "아직 만든 일과가 없어요"를 띄우면 보호자는 자기가 만든
       // 일과가 사라진 줄 안다.
       if (async.hasError) {
         // 로딩·빈 상태와 같은 회색 칸 안에 둔다 — 지난 일과 실패와 같은 자리.
@@ -378,10 +377,10 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
             index: index,
             child: RoutineSwipeActions(
               // 남이 만든 일과는 밀어도 삭제·수정이 나오지 않는다 — 서버가 403 으로 막는 동작이다
-              // (다중 보호자 #362 · E46). 만든 사람을 모르면 지금처럼 민다.
+              //. 만든 사람을 모르면 지금처럼 민다.
               //
-              // 다 끝낸 일과도 밀리지 않는다 (#534) — 이룸이 화면은 끝낸 일과를 다시 그리지
-              // 않아 고쳐도 반영되지 않고, 삭제는 서버가 막는다(#533). 줄을 누르면 시트에서
+              // 다 끝낸 일과도 밀리지 않는다 — 이룸이 화면은 끝낸 일과를 다시 그리지
+              // 않아 고쳐도 반영되지 않고, 삭제는 서버가 막는다. 줄을 누르면 시트에서
               // `다 끝낸 일과예요`로 이유를 본다.
               enabled: routine.isEditableByMe && !_isFinished(routine),
               isOpen:
@@ -506,20 +505,20 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
             builder: (context) {
               // **날짜와 다시하기를 붙이지 않는다.** 시안(931:3896)에서 둘 다
               // 빠졌다 — 지난 일과도 오늘 일과와 같은 68 짜리 줄이다.
-              // 다시하기는 줄을 눌러 여는 시트 안에 있다 (#310).
+              // 다시하기는 줄을 눌러 여는 시트 안에 있다.
               return RoutineSummaryTile(
                 routine: routine,
                 // 지난 일과는 서버가 셈해 둔 값이 기준이다. 기기 기록은 오늘 것만 있다.
                 progress: routine.progressPercent / 100,
                 // 시안(980:4777)에는 지난 일과를 눌러 여는 시트가 있는데 화면이
-                // 없었다. #299 로 목록 자체가 안 보이던 동안 아무도 열어 보지
-                // 못해 빠진 것이 드러나지 않았다 (#310).
+                // 없었다. 로 목록 자체가 안 보이던 동안 아무도 열어 보지
+                // 못해 빠진 것이 드러나지 않았다.
                 onTap: () => _openPastSheet(routine),
                 highlighted: _rerunning == routine.id,
               );
             },
           ),
-          // 지난 일과 네이티브 광고 한 개 (#465 · #540). 로드에 실패하면 항목 자체가
+          // 지난 일과 네이티브 광고 한 개. 로드에 실패하면 항목 자체가
           // 없어 빈 자리가 남지 않는다. 오늘 일과에는 끼우지 않는다.
           if (index == _nativeAdAfterIndex(routines.length))
             AdNativeSlot(
@@ -626,7 +625,7 @@ class _GreyTileShell extends StatelessWidget {
   ///
   /// **실패를 담을 때는 늘린다.** 실패는 무엇이 안 됐는지·무엇을 하면 되는지·
   /// 추적 코드까지 세 줄이라 한 줄 높이에 들어가지 않는다 — 실기기에서
-  /// 11px 넘쳤다 (#352 QA). 늘어나는 것은 실패했을 때뿐이라 평소 리듬은 그대로다.
+  /// 11px 넘쳤다. 늘어나는 것은 실패했을 때뿐이라 평소 리듬은 그대로다.
   final double? height;
 
   @override

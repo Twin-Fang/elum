@@ -221,7 +221,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color buttonDisabledText;
 
   // 보조 버튼 — 누를 수 있지만 권하지는 않는 쪽(확인 시트의 '취소' 등).
-  // buttonDisabled를 쓰면 "못 누르는 버튼"으로 읽혀 취소가 막힌 것처럼 보인다 (이슈 #188).
+  // buttonDisabled를 쓰면 "못 누르는 버튼"으로 읽혀 취소가 막힌 것처럼 보인다.
   final Color buttonNeutral;
   final Color buttonNeutralText;
 
@@ -250,7 +250,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color dialogDanger;
 
   // 되돌릴 수 없는 동작. 흐리게가 아니라 이 색으로 알린다 —
-  // 흐린 색은 위험이 아니라 비활성으로 읽힌다 (이슈 #188).
+  // 흐린 색은 위험이 아니라 비활성으로 읽힌다.
   // 13sp 본문에도 쓰이므로 배경(#F7F2EF) 대비 4.5:1을 넘겨야 한다.
   final Color danger;
   final Color dangerText;
@@ -361,7 +361,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color auroraRewardRose;
 
   // 로딩·추가질문(Figma 262:4569 · 262:4766 · 262:4703) 배경 — 입력·보상과 같은 두 원을
-  // 색만 바꿔 그렸다 (2026-09-23 덤프 · #380). 자리는 위 셋과 같다
+  // 색만 바꿔 그렸다. 자리는 위 셋과 같다
   // (Eclipse 시작 · Eclipse 끝 · Planet 시작).
 
   /// 준비 로딩 배경 — 안개 (Eclipse 단색 #CED8FF — 시작·끝이 같다)
@@ -556,7 +556,7 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 아이_별 화면 숫자 그라데이션 시작 (#FFDD00 → 흰색)
   final Color starsNumberStart;
 
-  // 카드확인 (Figma 262:5124, 2026-07-22 덤프)
+  // 카드확인 (Figma 262:5124)
   /// `이 카드 수정하기` 칩 배경 (#EEE9E6). routineTileBg와 값만 같다 —
   /// 일과 타일이 바뀌어도 수정 칩은 따라가면 안 된다.
   final Color editChipBg;
@@ -590,7 +590,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color loginNaverBg;
   final Color loginNaverLabel;
 
-  /// 반투명 유리 면 — 배경 그라데이션 위에 얹는 입력칸·카드 (이슈 #239).
+  /// 반투명 유리 면 — 배경 그라데이션 위에 얹는 입력칸·카드.
   ///
   /// 불투명한 흰 상자를 올리면 뒤 배경이 잘려 화면이 두 조각으로 보인다.
   /// 반투명으로 두면 색이 비쳐 한 장면으로 이어진다.
@@ -599,7 +599,7 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 유리 면의 테두리. 면보다 밝아야 가장자리가 잡힌다.
   final Color glassBorder;
 
-  /// 이룸이 화면 보상 배너 배경 (이슈 #239).
+  /// 이룸이 화면 보상 배너 배경.
   ///
   /// 카드보다 물러나야 한다 — 보상이 주인공이 되면 지금 할 일을 가린다.
   final Color rewardBannerBg;
@@ -637,16 +637,16 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 설정 목록의 오른쪽 화살표 (실측 #CDCDCD).
   final Color settingsChevron;
 
-  // --- 그림 방식 · 기본 카드 (#458 · 임시 시안, 디자이너 확정 전) ---
+  // --- 그림 방식 · 기본 카드 (임시 시안) ---
   // 값이 다른 토큰과 같아도(#DADADA 등) 쓰임이 달라 따로 둔다 — 시안이 확정되면
   // 이 자리들만 따로 바뀐다.
 
   /// 그림 없는 카드(보호자)의 `사진 추가` 점선 자리 테두리.
   final Color cardPhotoSlotDash;
 
-  // --- AI 크레딧 (#407) ---
+  // --- AI 크레딧 ---
 
-  /// AI 크레딧 카드 면 (#407 이슈 시안 — 흰 카드).
+  /// AI 크레딧 카드 면 (흰 카드).
   final Color creditCardBg;
 
   /// 크레딧 막대의 빈 쪽.
@@ -700,13 +700,13 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color stepBadge3;
   final Color stepBadge4;
 
-  // --- 공지 팝업 (이슈 #390 · 시안 `팝업` 1090:4922 `방침`) ---
+  // --- 공지 팝업 (시안 `팝업` 1090:4922 `방침`) ---
   // 공통 팝업 컴포넌트의 변형이라 카드·버튼·제목·체크는 공통 팝업 토큰
   // (`surface`·`dialogNeutral`·`checkDone`·`dialogTitleText`·`checkIdleBorder`)을 그대로 쓴다.
   // 공통 팝업에 없는 자리 둘만 여기 둔다.
 
   /// 그림을 받는 동안의 그림 자리. 흰 카드 위 빈칸으로 보이지 않게 앱 배경색으로 채운다.
-  /// **시안 밖이다** — 그림 있는 공지 변형은 디자이너 시안 전이라 임시로 둔다 (#390).
+  /// **시안 밖이다** — 그림 있는 공지 변형은 디자이너 시안 전이라 임시로 둔다.
   /// `background`와 값만 같다 — 화면 배경이 바뀌어도 이 자리까지 따라갈 이유는 없다.
   final Color noticeImagePlaceholder;
 

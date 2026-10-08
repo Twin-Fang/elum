@@ -43,7 +43,7 @@ class RoutineFlowState {
   final List<String> detectedTypes;
   final RoutineQuestion? question;
 
-  /// [question] 을 받아 올 때 보낸 입력. [answers] 는 이 입력에 딸린다 (#393 S2).
+  /// [question] 을 받아 올 때 보낸 입력. [answers] 는 이 입력에 딸린다.
   ///
   /// 보상으로 되돌아갔다 오면 준비 로딩이 다시 묻는다. 입력이 그대로면 같은 질문을
   /// 다시 쓰고 답도 남기고, 바뀌었으면 새로 받고 답을 비운다 — 안 그러면 수영장
@@ -57,7 +57,7 @@ class RoutineFlowState {
   /// 화면에 보이지 않는다. 어느 질문에 추가했는지도 알아야 그 질문 아래에 그린다.
   final Map<String, List<String>> customOptions;
 
-  /// 보호자가 카드 생성 **전에** 정한 보상 (이슈 #239).
+  /// 보호자가 카드 생성 **전에** 정한 보상.
   ///
   /// 비어 있으면 건너뛴 것이다 — 이룸이 화면에 보상을 띄우지 않는다.
   /// **보상은 선택 항목이므로 비었다고 흐름을 막지 않는다.**
@@ -76,22 +76,22 @@ class RoutineFlowState {
   ///
   /// 주간 한도에 걸린 것과 AI 가 실패한 것은 **사용자가 할 일이 다르다.**
   /// 둘 다 "잠시 후 다시 해주세요"로 뭉개면 한도에 걸린 사람은 될 때까지
-  /// 다시 누른다 (#347).
+  /// 다시 누른다.
   final String? errorMessage;
 
   /// 실패의 네트워크 사정. 문구가 아니라 **원인**을 담는다 — 문구를 담으면 앱 언어가
-  /// 바뀐 뒤에도 옛 언어로 남는다. [errorHint] 가 읽을 때 현재 언어로 푼다.
+  /// 바뀐 뒤에도 이전 언어로 남는다. [errorHint] 가 읽을 때 현재 언어로 푼다.
   final NetworkFault? errorFault;
 
   /// 무엇을 하면 되는지 — 네트워크 사정이라 서버가 말해 줄 수 없을 때만 있다
   /// ([AppFailure.hint]). 오프라인인데 `잠시 후 다시 해주세요` 만 띄우면 끊긴 채로
-  /// 다시 하기만 누른다 (#352 규칙 · #387 D4). 화면의 `build` 안에서 읽는다.
+  /// 다시 하기만 누른다. 화면의 `build` 안에서 읽는다.
   String? get errorHint {
     final fault = errorFault;
     return fault == null ? null : AppFailure(fault: fault).hint;
   }
 
-  /// 카드 생성 요청의 멱등 키 (#407). 같은 요청의 재시도는 이 키를 다시 쓴다.
+  /// 카드 생성 요청의 멱등 키. 같은 요청의 재시도는 이 키를 다시 쓴다.
   final String? idempotencyKey;
 
   /// 이번 생성이 쓴 크레딧. 카드 확인 머리 아래 한 줄로 보인다. 크레딧이 꺼져 있거나

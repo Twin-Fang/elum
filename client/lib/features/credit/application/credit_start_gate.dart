@@ -8,7 +8,7 @@ import '../domain/credit_summary.dart';
 /// 멈춰 있지 않는다. 늦은 응답은 버린다 — 판정은 생성 요청에서 서버가 다시 한다.
 const creditStartCheckTimeout = Duration(seconds: 3);
 
-/// 홈 `일과 만들기` 전에 크레딧을 본다 (#407 스펙 §5).
+/// 홈 `일과 만들기` 전에 크레딧을 본다.
 ///
 /// 막아야 하면 요약을(팝업에 초기화 시각을 적으려고), 들여보내면 null 을 준다.
 ///
@@ -24,7 +24,7 @@ Future<CreditSummary?> creditBlocksRoutineStart(WidgetRef ref) async {
         .read(creditRepositoryProvider)
         .getMine()
         .timeout(creditStartCheckTimeout);
-    // 진행 중인 일과 만들기가 있으면 서버가 409 로 막는다 — 미리 막는다 (#421 ②).
+    // 진행 중인 일과 만들기가 있으면 서버가 409 로 막는다. 미리 막는다.
     // `canStartRoutine` 은 잔액·동결만 보고 진행 중 여부는 담지 않는다.
     if (summary.enabled &&
         (!summary.canStartRoutine || summary.isGeneratingRoutine)) {

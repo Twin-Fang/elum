@@ -29,7 +29,7 @@ List<RouteBase> childRoutes() => [
     },
   ),
   // 어두운 밤하늘 배경이라 옆에서 밀려드는 슬라이드가 부자연스럽다.
-  // fade로 쓱 나타나게 한다 (이슈 #107).
+  // fade로 쓱 나타나게 한다.
   GoRoute(
     path: Routes.childSettings,
     pageBuilder: (context, state) =>
@@ -42,7 +42,7 @@ List<RouteBase> childRoutes() => [
   ),
   GoRoute(
     path: Routes.childReward,
-    // 보상은 `extra`로 온다 (이슈 #239). 개발자 도구로 직접 들어오면 null이라
+    // 보상은 `extra`로 온다. 개발자 도구로 직접 들어오면 null이라
     // 별 연출만 돈다 — 그 자체가 보상 없이 끝낸 모습이라 맞다.
     pageBuilder: (context, state) => fadePage(
       state,

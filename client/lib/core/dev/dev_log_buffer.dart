@@ -11,7 +11,7 @@ import 'dev_log_file.dart';
 /// `debugPrint`로 나가지 않으므로 이 버퍼에도 담기지 않는다. 여기서 따로
 /// 거르지 않고, 원문을 로그에 남기지 않는 기존 구조를 그대로 신뢰한다.
 ///
-/// 정식 출시 전 제거 대상. (이슈 #13)
+/// 정식 출시 전 제거 대상.
 abstract final class DevLogBuffer {
   /// 메모리 상한. 실시간 보기용이라 화면에서 훑을 만큼만 둔다.
   ///
@@ -46,7 +46,7 @@ abstract final class DevLogBuffer {
 
   static void _add(String message) {
     _lines.add(message);
-    // 파일에도 남긴다 — 앱이 죽으면 메모리는 사라진다 (이슈 #219)
+    // 파일에도 남긴다 — 앱이 죽으면 메모리는 사라진다
     DevLogFile.append(message);
     // 상한을 넘으면 오래된 줄부터 버린다
     if (_lines.length > maxLines) {

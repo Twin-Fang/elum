@@ -5,8 +5,8 @@ import 'server_error_code.dart';
 /// 서버가 보낸 실패 한 건.
 ///
 /// 서버는 `{ "errorCode": ..., "errorMessage": ... }`를 내려준다. 이걸 꺼내는 일을
-/// **여기 한 곳에만** 둔다. 예전에는 `(e.response!.data as Map)['errorCode']`를
-/// 쓰는 곳마다 따로 적어, 본문이 비거나 형식이 다르면 그 자리에서 깨졌다 (#347).
+/// **여기 한 곳에만** 둔다. `(e.response!.data as Map)['errorCode']`를
+/// 쓰는 곳마다 따로 적으면, 본문이 비거나 형식이 다르면 그 자리에서 깨졌다.
 class ServerError {
   const ServerError({required this.code, this.message, this.statusCode});
 
@@ -15,7 +15,7 @@ class ServerError {
   /// 서버가 준 사용자용 문구. **이게 있으면 이걸 그대로 보여주는 것이 기본이다.**
   ///
   /// 서버 문구는 이미 사용자용으로 쓰여 있고 해요체·용어 규칙까지 맞춰져 있다.
-  /// 앱이 다시 쓰면 서버에서 고쳐도 앱은 옛 문구를 보여준다.
+  /// 앱이 다시 쓰면 서버에서 고쳐도 앱은 이전 문구를 보여준다.
   final String? message;
 
   final int? statusCode;

@@ -30,7 +30,7 @@ abstract final class AppTheme {
         surface: colors.surface,
       ),
       textTheme: typo.toTextTheme(colors.textPrimary, colors.textSecondary),
-      // 저장·변경 뒤 잠깐 뜨는 알림 (#543). **시안이 없는 임시 값이다.**
+      // 저장·변경 뒤 잠깐 뜨는 알림. **시안이 없는 임시 값이다.**
       //
       // 기본값은 colorScheme 에서 뽑힌 갈색 직사각형이 바닥에 붙어 앱과 따로 놀았다.
       // 띄우는 곳(7곳)이 문구만 넘기므로 여기 한 곳만 고치면 모두 바뀐다.

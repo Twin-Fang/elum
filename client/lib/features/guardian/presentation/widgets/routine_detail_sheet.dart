@@ -17,10 +17,10 @@ import '../../../../shared/models/routine.dart';
 import 'step_card_viewer.dart';
 import '../../application/guardian_home_controller.dart';
 
-/// 오늘 일과를 눌렀을 때 올라오는 시트 (Figma 956:4084, 이슈 #266).
+/// 오늘 일과를 눌렀을 때 올라오는 시트 (Figma 956:4084).
 ///
-/// **보는 것과 고치는 것을 나눈다.** 예전에는 일과를 누르면 곧바로 편집 화면으로
-/// 넘어갔다. 그런데 보호자가 훨씬 자주 하는 일은 "오늘 어디까지 했나"를 확인하는
+/// **보는 것과 고치는 것을 나눈다.** 일과를 누르면 곧바로 편집 화면으로
+/// 넘기지 않는다. 보호자가 훨씬 자주 하는 일은 "오늘 어디까지 했나"를 확인하는
 /// 것이지 문구를 고치는 것이 아니다. 그래서 확인은 시트에서 가볍게 하고, 고칠 때만
 /// 편집 화면으로 들어간다.
 ///
@@ -56,7 +56,7 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
   /// 손잡이도 그리지 않는다 — 그날의 결과를 그대로 보여 주는 화면이다.
   final bool isPast;
 
-  /// 이룸이가 다 끝낸 오늘 일과인가 (#534).
+  /// 이룸이가 다 끝낸 오늘 일과인가.
   ///
   /// **끝낸 일과는 고치지 않는다.** 이룸이 화면은 다 끝낸 일과를 다시 그리지 않아
   /// 보호자가 고쳐도 아무 데도 반영되지 않는다. 버튼을 숨기지 않고 눌리지 않게 두어
@@ -89,8 +89,8 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
 
   /// 시트 높이. 시안(956:4084) 기준 614/852 ≈ 0.72다.
   ///
-  /// **내용과 무관하게 이 높이를 지킨다** (#316). 전에는 최대치로만 두어 단계가
-  /// 적으면 시트가 오그라들었는데, 그러면 **열 때마다 시트 윗변이 달라져**
+  /// **내용과 무관하게 이 높이를 지킨다**. 최대치로만 두면 단계가
+  /// 적을 때 시트가 오그라들어 **열 때마다 시트 윗변이 달라지고**
   /// 보호자가 매번 다른 화면을 본다. 윗변이 밀리면 안의 모든 줄이 함께 밀린다.
   ///
   /// 단계가 많으면 지금처럼 목록이 안에서 스크롤된다.
@@ -98,14 +98,14 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
 
   /// 지금 끌고 있는 줄. 끌기가 시작되면 그 줄은 목록에서 빠지고 시트 위에 뜬
   /// 사본으로 다시 그려지는데, 들린 상태를 넘겨주지 않으면 잡았다 놓는 사이에
-  /// 그림자가 한 번 꺼졌다 켜진다 (#274).
+  /// 그림자가 한 번 꺼졌다 켜진다.
   int? _draggingIndex;
 
-  /// 오늘 일과인데 이룸이가 다 끝냈다 — 하단 버튼을 막는다 (#534).
+  /// 오늘 일과인데 이룸이가 다 끝냈다 — 하단 버튼을 막는다.
   bool get _finishedToday => !widget.isPast && widget.isFinished;
 
-  /// 이 시트에서 고칠 수 있는가 — 남이 만든 일과는 보기만 한다 (다중 보호자 #362 · E46).
-  /// 지난 일과는 원래 고치지 않는다([RoutineDetailSheet.isPast]). 다 끝낸 일과도 같다 (#534).
+  /// 이 시트에서 고칠 수 있는가 — 남이 만든 일과는 보기만 한다.
+  /// 지난 일과는 원래 고치지 않는다([RoutineDetailSheet.isPast]). 다 끝낸 일과도 같다.
   bool get _canEdit =>
       !widget.isPast && !widget.isFinished && widget.routine.isEditableByMe;
 
@@ -158,10 +158,10 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
       // **자식까지 둥근 모양으로 자른다.** `decoration`의 라운드는 배경만 둥글게
       // 칠할 뿐 자식을 자르지 않는다. 바로 아래 헤더가 배경색을 전체 폭에 깔기
       // 때문에, 자르지 않으면 그 사각형이 둥근 모서리를 덮어 상단이 각져 보인다.
-      // 시안(`980:4891`)은 헤더 배경 자체에 `[20,20,0,0]`을 준다 (#345).
+      // 시안(`980:4891`)은 헤더 배경 자체에 `[20,20,0,0]`을 준다.
       clipBehavior: Clip.antiAlias,
-      // **버튼은 목록 위에 떠 있다** (#434). 전에는 목록 아래에 버튼 칸을 따로
-      // 잘라 두어 목록이 버튼 위에서 끝났다. 시안은 버튼을 시트 바닥 위에 띄우고
+      // **버튼은 목록 위에 떠 있다**. 버튼 칸을 따로 자르면
+      // 목록이 버튼 위에서 끝난다. 시안은 버튼을 시트 바닥 위에 띄우고
       // 목록이 그 뒤로 지나가게 그렸다.
       child: Stack(
         children: [
@@ -184,10 +184,10 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                     SliverPadding(
                       // 시안(956:4084) 헤더가 68 에서 끝나고 첫 단계가 76 에서 시작한다.
                       padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
-                      // **번호 칸과 카드 칸을 나란히 따로 둔다** (#434).
+                      // **번호 칸과 카드 칸을 나란히 따로 둔다**.
                       //
-                      // 전에는 번호와 카드를 한 줄로 묶어, 오래 누르면 번호까지 들리고
-                      // 끄는 동안 번호가 카드를 따라 미끄러졌다. 번호는 몇 번째 자리인가를
+                      // 한 줄로 묶으면 오래 누를 때 번호까지 들리고
+                      // 끄는 동안 번호가 카드를 따라 미끄러진다. 번호는 몇 번째 자리인가를
                       // 뜻하므로 제자리에 두고 **카드만** 순서 바꾸기에 올린다. 시안도
                       // 번호(`1번`~`4번`, x=16)와 카드 묶음(`행동단계`, x=60)을 따로 그렸다.
                       //
@@ -211,7 +211,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                           ),
                           SliverReorderableList(
                             // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
-                            // 들어올림은 카드가 직접 그리므로 여기서는 자리만 잡아 준다 (#274).
+                            // 들어올림은 카드가 직접 그리므로 여기서는 자리만 잡아 준다.
                             proxyDecorator: (child, index, animation) =>
                                 Material(
                                   color: Colors.transparent,
@@ -245,7 +245,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                       dragging: _draggingIndex == index,
                                       // 손잡이를 아예 그리지 않는다 (시안 980:4777)
                                       reorderable: _canEdit,
-                                      // 카드를 눌러 크게 본다 (시안 1274:8864, #495)
+                                      // 카드를 눌러 크게 본다 (시안 1274:8864)
                                       onOpen: () => StepCardViewer.show(
                                         context,
                                         cards: _steps,
@@ -299,7 +299,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                     borderRadius: BorderRadius.circular(18.r),
                   ),
                 ),
-                // 다 끝낸 오늘 일과는 눌리지 않는다 (#534). 지난 일과의 `다시하기`는 그대로 둔다.
+                // 다 끝낸 오늘 일과는 눌리지 않는다. 지난 일과의 `다시하기`는 그대로 둔다.
                 onPressed: _finishedToday
                     ? null
                     : () => Navigator.of(context).pop(
@@ -367,7 +367,7 @@ class _Header extends StatelessWidget {
       // 시안(980:5146) 헤더는 68 높이다 — 손잡이 16 · 제목 40~60 · 아래 8.
       // 아래를 16 으로 두면 헤더가 76 이 되어 목록 전체가 8 씩 밀린다.
       //
-      // 위는 **12**다. 16 으로 두어 손잡이가 시안보다 4 내려가 있었다 (#297).
+      // 위는 **12**다. 16 으로 두어 손잡이가 시안보다 4 내려가 있었다.
       // 아래 제목까지의 간격에서 그 4 를 되돌려 주므로 목록은 제자리다.
       padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 8.h),
       child: Column(
@@ -398,9 +398,9 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// 단계 번호 뱃지. **순서를 바꿔도 움직이지 않는다** (#434).
+/// 단계 번호 뱃지. **순서를 바꿔도 움직이지 않는다**.
 ///
-/// 번호는 카드의 이름표가 아니라 몇 번째 자리인가를 뜻한다(#296). 그래서 카드
+/// 번호는 카드의 이름표가 아니라 몇 번째 자리인가를 뜻한다. 그래서 카드
 /// 목록과 떼어 왼쪽 칸에 세워 두고, 끌기에도 들어올림에도 끼지 않는다. 카드를
 /// 옮기면 왼쪽 줄은 1·2·3·4 그대로 서 있고 오른쪽 내용만 자리를 바꾼다.
 class _StepBadge extends StatelessWidget {
@@ -438,12 +438,12 @@ class _StepBadge extends StatelessWidget {
 
 /// 단계 카드 — 제목·설명 + 완료 표시 + 순서 손잡이. 순서 바꾸기는 이 카드만 옮긴다.
 ///
-/// **손잡이는 길게 눌러야 잡힌다** (#274). 닿는 즉시 끌리게 두면 목록을 스크롤하려던
+/// **손잡이는 길게 눌러야 잡힌다**. 닿는 즉시 끌리게 두면 목록을 스크롤하려던
 /// 손가락이 손잡이를 스치는 것만으로 순서가 바뀐다. 고칠 생각이 없었는데 일과가
 /// 바뀌고 서버로 전송까지 된다.
 ///
-/// 누르고 있는 동안 줄이 **점점 떠오른다.** 예전에는 움직여야 그림자가 나타나서
-/// 누르는 내내 아무 일도 없다가 갑자기 뜨는 것처럼 보였다. 다 떠오른 순간이 곧
+/// 누르고 있는 동안 줄이 **점점 떠오른다.** 움직여야 그림자가 나타나면
+/// 누르는 내내 아무 일도 없다가 갑자기 뜨는 것처럼 보인다. 다 떠오른 순간이 곧
 /// 잡힌 순간이므로 진동으로 함께 알리고, 도중에 손을 떼면 제자리로 내려앉는다.
 class _StepCard extends StatefulWidget {
   const _StepCard({
@@ -461,7 +461,7 @@ class _StepCard extends StatefulWidget {
   /// 카드 제목·설명의 언어(일과 언어).
   final String language;
 
-  /// 글 자리를 눌렀을 때 — 카드를 크게 연다 (#495). 손잡이와 체크는 따로 받는다.
+  /// 글 자리를 눌렀을 때 — 카드를 크게 연다. 손잡이와 체크는 따로 받는다.
   final VoidCallback? onOpen;
 
   /// 지금 끌려가는 중인가. 끌기가 시작되면 이 카드는 시트 위의 사본으로 다시
@@ -526,7 +526,7 @@ class _StepCardState extends State<_StepCard>
     if (t == 0) return const [];
     return [
       BoxShadow(
-        // 카드가 옅은 회색이라 예전 0.16 은 배경에 묻혔다 (#451)
+        // 카드가 옅은 회색이라 알파가 낮으면 배경에 묻힌다
         color: Colors.black.withValues(alpha: 0.26 * t),
         blurRadius: 22 * t,
         offset: Offset(0, 8 * t),
@@ -537,7 +537,7 @@ class _StepCardState extends State<_StepCard>
   /// 잡힌 카드의 테두리. 눌리지 않았으면 그리지 않는다.
   ///
   /// 손가락이 18px 손잡이를 가려도 카드 가장자리는 보인다. 그림자·크기와 달리
-  /// 색은 "지금 이 카드를 쥐고 있다"를 한눈에 알린다 (#451).
+  /// 색은 "지금 이 카드를 쥐고 있다"를 한눈에 알린다.
   /// 배경 테두리로 그리면 안쪽 여백이 밀려 글이 움직이므로 위에 덧그린다.
   BoxDecoration? _outline(double t, Color color) {
     if (t == 0) return null;
@@ -558,7 +558,7 @@ class _StepCardState extends State<_StepCard>
         final t = _lift.value;
         final shadow = _shadow(t);
 
-        // 번호 뱃지는 여기 없다 — 왼쪽 칸에 따로 서 있어 들리지 않는다 (#434).
+        // 번호 뱃지는 여기 없다 — 왼쪽 칸에 따로 서 있어 들리지 않는다.
         return Transform.scale(
           scale: 1 + _liftScale * t,
           child: Row(
@@ -651,7 +651,7 @@ class _StepCardState extends State<_StepCard>
                                   width: 18.w,
                                   height: 18.w,
                                 ),
-                                // 잡히는 만큼 브랜드색이 위에 짙어진다 (#451). 에셋 색을
+                                // 잡히는 만큼 브랜드색이 위에 짙어진다. 에셋 색을
                                 // 코드에 옮겨 적지 않으려고 값을 섞지 않고 겹친다.
                                 if (t > 0)
                                   Opacity(
@@ -727,17 +727,15 @@ class _CompletionMark extends StatelessWidget {
   }
 }
 
-/// 보상 줄. **정하지 않았어도 그린다** (#308).
+/// 보상 줄. **정하지 않았어도 그린다**.
 ///
-/// 전에는 없으면 줄째 숨겼다 — 빈 칸이 "덜 만들어졌다"로 보인다고 봤기 때문이다.
-/// 시안(980:5174)은 그 걱정을 다르게 푼다. 빈 칸을 두는 대신 **없다고 말하고**
+/// 없다고 줄째 숨기면 보상을 넣을 수 있다는 것조차 보이지 않는다.
+/// 시안(980:5174)은 빈 칸 대신 **없다고 말하고**
 /// 별을 흐리게 해 채울 수 있는 자리임을 보여준다. 줄째 없애면 보상을 넣을 수
 /// 있다는 것조차 보이지 않는다.
 ///
-/// **뱃지 + 카드로 둔다** (#295). 전에는 별 뱃지를 빼고 `다 하면 ○○`이라는 말로
-/// 대신했다 (#275) — 별이 이룸이가 일과를 끝냈을 때의 연출과 뜻이 겹친다고 봤다.
-/// 그 뒤에 나온 시안(956:4084)이 검은 뱃지에 별을 넣어 단계와 같은 짜임으로
-/// 그렸고, 시안이 나중 판단이라 그쪽을 따른다. 뱃지 색과 별이 이미 "이건 단계가
+/// **뱃지 + 카드로 둔다**. 시안(956:4084)이 검은 뱃지에 별을 넣어
+/// 단계와 같은 짜임으로 그렸다. 뱃지 색과 별이 이미 "이건 단계가
 /// 아니다"를 말해 주므로 `다 하면`이라는 말은 뺀다.
 class _RewardRow extends StatelessWidget {
   const _RewardRow({required this.routine});
@@ -748,7 +746,7 @@ class _RewardRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typo = context.typo;
-    // 보상을 아직 정하지 않았어도 줄은 그린다 (#308). 줄째 없애면 보상을 넣을 수
+    // 보상을 아직 정하지 않았어도 줄은 그린다. 줄째 없애면 보상을 넣을 수
     // 있다는 것조차 보이지 않는다. 시안(980:5174)은 **글자로** 알린다 —
     // 빈 칸이 아니라 "없어요"라고 말해 준다.
     final hasReward = routine.hasReward;
@@ -784,7 +782,7 @@ class _RewardRow extends StatelessWidget {
             ),
             // 정하지 않았으면 별을 흐리게 — 채울 수 있는 자리임을 보여준다.
             // **별은 흐리게 하지 않는다.** 시안(`980:5174`)의 별은 보상이 없을
-            // 때도 선명하다 — 흐리게 한 건 시안을 잘못 읽은 것이었다 (#297).
+            // 때도 선명하다 — 흐리게 한 건 시안을 잘못 읽은 것이었다.
             // 비었다는 것은 **글자가** 말해 준다.
             child: SvgPicture.asset(
               AppAssets.rewardBadgeStar,

@@ -68,14 +68,14 @@ class ElumScaffold extends StatelessWidget {
   ///
   /// 본문 맨 위에 큰 글씨로 두는 [ElumHeader]와 다르다. 시안(`1022:4467`)은
   /// 뒤로가기 상자(중심 y=87)와 제목(중심 y=87)이 한 줄에 선다. 본문 쪽에
-  /// 제목을 두면 뒤로가기 **아래**로 내려가 시안과 한 줄이 어긋난다 (#349).
+  /// 제목을 두면 뒤로가기 **아래**로 내려가 시안과 한 줄이 어긋난다.
   final String? title;
 
   /// 뒤로가기 상자의 Figma y. 기본은 79(온보딩 계열).
   ///
   /// 설정 묶음 시안(`1022:4467` 등)은 **67**이다. 기본값을 그대로 쓰면 머리가
   /// 12 내려가 제목과 뒤로가기가 통째로 밀린다 — 줄 위치는 맞는데 머리만
-  /// 어긋나 눈으로는 "대충 비슷해" 보인다 (#349).
+  /// 어긋나 눈으로는 "대충 비슷해" 보인다.
   final double? backTop;
 
   /// 본문 좌우 여백. 기본은 [AppSpacing.screenH](24).
@@ -87,9 +87,8 @@ class ElumScaffold extends StatelessWidget {
   /// Figma 뒤로가기 컴포넌트(`976:4549`) — **40×40 상자가 x=16, y=79** 에 놓인다.
   ///
   /// 상자 안에서 24×24 아이콘이 가운데에 오므로 획은 (24, 87)에서 시작한다.
-  /// 전에는 24×24 아이콘을 (24, 75)에 두고 누름 영역만 40으로 덮었는데,
-  /// 그러면 **획이 12 위로 뜬다** — 온보딩 다섯 화면에서 똑같이 어긋나 있었다
-  /// (#297). 상자를 시안대로 두고 아이콘을 가운데 놓으면 둘 다 맞는다.
+  /// 아이콘을 (24, 75)에 두고 누름 영역만 40으로 덮으면 **획이 12 위로 뜬다**.
+  /// 상자를 시안대로 두고 아이콘을 가운데 놓으면 둘 다 맞는다.
   static const _backBoxLeft = 16.0;
   static const _backBoxY = 79.0;
   static const _backBoxSize = 40.0;
@@ -147,7 +146,7 @@ class ElumScaffold extends StatelessWidget {
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => FocusScope.of(context).unfocus(),
-        // 화면 낭독기에는 드러내지 않는다 (#339). 드러내면 본문 전체가 하나의
+        // 화면 낭독기에는 드러내지 않는다. 드러내면 본문 전체가 하나의
         // "누를 수 있는 것"이 되어, 흩어진 글자(설정 제목·버전)가 그 이름으로
         // 뭉쳐 읽히고 글자가 없는 화면에서는 이름 없는 버튼으로 잡힌다.
         // 키보드를 내리는 건 눈으로 보는 사용자를 위한 편의라 탭은 그대로 둔다.
@@ -193,10 +192,10 @@ class ElumScaffold extends StatelessWidget {
                     padding: EdgeInsets.only(left: _backBoxLeft.w),
                     // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
                     // 상자 자체가 40×40이라 누름 영역과 자리가 한 값으로 맞는다
-                    // — 따로 덮을 필요가 없다 (#306의 OverflowBox를 걷어냈다).
+                    // — 따로 덮을 필요가 없다.
                     //
-                    // 앱 거의 모든 화면의 뒤로가기라 이름이 비면 전부 함께 빈다
-                    // (#339). 이름은 제스처 바깥에 두어야 누르는 노드에 붙는다.
+                    // 앱 거의 모든 화면의 뒤로가기라 이름이 비면 전부 함께 빈다.
+                    // 이름은 제스처 바깥에 두어야 누르는 노드에 붙는다.
                     child: Semantics(
                       container: true,
                       button: true,
@@ -269,10 +268,9 @@ class ElumScaffold extends StatelessWidget {
 
 /// 뼈대가 **상단에서 이미 써 버린 높이**를 본문에 알린다.
 ///
-/// [ElumHeader]가 제목 y(131)를 계산하려면 이 값이 필요하다. 예전에는 화면이
-/// `hasBackButton: true`를 손으로 넘겼는데, **빠뜨려도 아무 표시가 없었다** —
-/// 비밀번호·연결암호 화면이 그렇게 제목이 40씩 내려가 있었고 아무도 몰랐다
-/// (#297). 뼈대가 직접 알려주면 빠뜨릴 수가 없다.
+/// [ElumHeader]가 제목 y(131)를 계산하려면 이 값이 필요하다. 화면이
+/// `hasBackButton: true`를 손으로 넘기면 **빠뜨려도 아무 표시가 없어** 제목이 40씩
+/// 어긋난다. 뼈대가 직접 알려주면 빠뜨릴 수가 없다.
 class ElumScaffoldTopScope extends InheritedWidget {
   const ElumScaffoldTopScope({
     super.key,

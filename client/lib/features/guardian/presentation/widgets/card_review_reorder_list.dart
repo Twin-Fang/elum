@@ -13,7 +13,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
 import 'action_card_view.dart';
 
-/// 끌던 카드가 들어갈 자리 — 손가락이 가리키는 **사이**를 센다 (#471).
+/// 끌던 카드가 들어갈 자리 — 손가락이 가리키는 **사이**를 센다.
 ///
 /// [contentX] 는 스크롤 내용 안의 가로 좌표(줌아웃 전 크기 기준)다. 끌고 있는 카드를 뺀
 /// 나머지 [count]장이 [leading] 에서 시작해 [extent] 간격으로 서 있고, 지금 [gap] 번째
@@ -37,7 +37,7 @@ int reorderInsertionIndex({
   return k;
 }
 
-/// 순서 변경 모드의 카드 줄 — 길게 눌러 손가락을 따라 옮긴다 (시안 1197:5798 · #471).
+/// 순서 변경 모드의 카드 줄 — 길게 눌러 손가락을 따라 옮긴다 (시안 1197:5798).
 ///
 /// 평소에는 기본 화면과 같은 자리(카드 333 @ x=30, 사이 10)에 서서 한 장씩 정면에 붙는다.
 /// **길게 눌러 카드를 집으면** 화면 전체가 [_zoomScale] 로 줌아웃해 옆 카드 여럿이 보이고,
@@ -87,13 +87,13 @@ class CardReviewReorderList extends StatefulWidget {
 class _CardReviewReorderListState extends State<CardReviewReorderList>
     with TickerProviderStateMixin {
   /// 집었을 때 화면 전체가 줄어드는 비율. 5장 안팎의 순서를 한눈에 보려는 값이다.
-  /// **시안에 없는 값**이라 디자이너 확인 뒤 바뀔 수 있다 (#471).
+  /// **시안에 없는 값**이라 디자이너 확인 뒤 바뀔 수 있다.
   static const _zoomScale = 0.4;
 
   /// 집은 카드가 이웃보다 더 커 보이는 비율
   static const _liftScale = 0.04;
 
-  /// 가장자리 자동 스크롤의 최고 속도(px/s). 예전에는 카드가 두세 장씩 밀렸다.
+  /// 가장자리 자동 스크롤의 최고 속도(px/s). 더 빠르면 카드가 두세 장씩 밀린다.
   static const _edgeSpeed = 360.0;
 
   /// 자리가 벌어지고 닫히는 시간
@@ -113,7 +113,7 @@ class _CardReviewReorderListState extends State<CardReviewReorderList>
   late final Ticker _ticker = createTicker(_onTick);
 
   /// 카드 id → 색·번호를 정하는 자리. 안착한 **다음에** 새 자리로 갱신한다 — 옮겨지는
-  /// 도중에 색이 바뀌면 어지럽다 (#451).
+  /// 도중에 색이 바뀌면 어지럽다.
   late Map<String, int> _shown = _indexOf(widget.cards);
 
   double _viewW = 0;

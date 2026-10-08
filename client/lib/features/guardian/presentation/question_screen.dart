@@ -27,14 +27,10 @@ import '../application/routine_flow_state.dart';
 /// AI가 생활 맥락을 되묻는다. "가방을 챙겨요" 카드가 있어도 병원엔 진료카드,
 /// 학교엔 필통처럼 준비물이 상황마다 다르고 그 맥락은 보호자만 안다.
 ///
-/// **서버가 질문을 여러 개 준다** — 선택한 도움 목표마다 하나씩이다.
-/// Figma는 한 개만 그렸지만 실제로는 2개 이상 올 수 있어 세로로 이어 붙인다.
-///
-/// 두 프레임의 차이는 선택 여부다. 아무것도 고르지 않으면 CTA가 없고(262:4766),
-/// 하나라도 고르면 `카드 만들기`가 나타난다(262:4854).
-///
-/// 흐름 자리는 보상 **다음**, 카드 생성 앞이다 (#380 결정 1). 그래서 CTA 가 곧
-/// 카드 생성(AI)을 부른다 — 두 번 누르기를 막는다([LeaveOnceMixin]).
+/// 질문은 선택한 도움 목표마다 하나씩 와서 2개 이상일 수 있어 세로로 이어 붙인다.
+/// 아무것도 고르지 않으면 CTA가 없고(262:4766), 하나라도 고르면 `카드 만들기`가 나타난다(262:4854).
+/// 흐름 자리는 보상 **다음**, 카드 생성 앞이라 CTA 가 곧 카드 생성(AI)을 부른다 —
+/// 두 번 누르기를 막는다([LeaveOnceMixin]).
 class QuestionScreen extends ConsumerStatefulWidget {
   const QuestionScreen({super.key});
 
@@ -77,7 +73,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
     //
     // ⚠️ 이 화면은 routineFlowProvider를 watch하므로 생성 중 상태가 바뀔 때마다
     // 다시 빌드된다. 가드가 없으면 그때마다 로딩 화면을 또 밀어 넣어
-    // 카드 생성 요청이 겹쳐 나간다 — AI 호출이라 한 번이 곧 비용이다. (이슈 #41)
+    // 카드 생성 요청이 겹쳐 나간다 — AI 호출이라 한 번이 곧 비용이다.
     if (questions.isEmpty) {
       final alreadyStarted = state.step == RoutineFlowStep.generating ||
           state.routine != null;
@@ -86,7 +82,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (context.mounted) {
-            // 보상은 이미 앞에서 정했다 (#380 결정 1) — 곧장 카드를 만든다.
+            // 보상은 이미 앞에서 정했다 — 곧장 카드를 만든다.
             context.pushReplacement(Routes.routineGenerating);
           }
         });
@@ -99,19 +95,19 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
 
     return RoutineFlowScaffold(
       aurora: QuestionScreen.aurora,
-      // 홈으로 나갈 때만 묻는다. 뒤로는 보상으로 한 칸이라 고른 답이 남는다 (#387 D3).
+      // 홈으로 나갈 때만 묻는다. 뒤로는 보상으로 한 칸이라 고른 답이 남는다.
       leave: RoutineLeave.discard,
       onBack: context.popOrHome,
-      // 시안(`262:4854`)은 CTA를 y=675에 둔다 — 약관·목표와 같은 자리다 (#297).
+      // 시안(`262:4854`)은 CTA를 y=675에 둔다 — 약관·목표와 같은 자리다.
       pinCtaToFigmaY: true,
       // 답을 하나라도 골랐을 때만 CTA가 나타난다 (Figma 262:4854)
       bottomButton: state.answers.isEmpty
           ? null
           // 크레딧 경고 띠는 두지 않는다 — 만드는 흐름에서 잔액을 들이밀면 이상하고
-          // 불편하다(2026-09-25 사용자 결정, #421). 잔액은 설정 카드가 보여주고,
+          // 불편하다. 잔액은 설정 카드가 보여주고,
           // 모자라면 생성 실패 화면이 이유를 말한다.
           : ElumButton(
-              // 시안(262:4854) 그대로다. 보상이 앞으로 옮겨 오면서(#380) 이 버튼이
+              // 시안(262:4854) 그대로다. 보상이 앞으로 옮겨 오면서 이 버튼이
               // 여는 것이 정말로 카드 생성이 됐다 — 규칙(바로 다음 화면 이름)과도 맞는다.
               label: context.l10n.questionMakeCards,
               onPressed: _makeCards,
@@ -220,14 +216,14 @@ class _QuestionBlockState extends State<_QuestionBlock> {
       children: [
         // Figma 제목 상자는 307(x=43)이지만 **그 값을 그대로 쓰면 꺾인다.**
         // 시안에서 가장 긴 줄이 305인데 앱 글자 렌더가 그보다 조금 넓어,
-        // 307로 묶으면 `…챙겨야 하 / 는`으로 넷째 줄이 생긴다 (#297).
+        // 307로 묶으면 `…챙겨야 하 / 는`으로 넷째 줄이 생긴다.
         //
         // 줄바꿈 위치는 문구의 `\n`이 이미 정한다 — 폭은 **그 줄이 안 꺾일
         // 만큼**만 있으면 된다. 좌우 24를 남겨 345로 둔다.
         SizedBox(
           width: 345.w,
           // AI 가 주는 질문은 `\n` 없이 온다. 엔진이 글자 단위로 꺾어 `있나 / 요?`가
-          // 됐다 — 띄어쓰기에서만 꺾는다 (#393 S5). 낭독기에는 원문을 준다.
+          // 됐다 — 띄어쓰기에서만 꺾는다. 낭독기에는 원문을 준다.
           child: Text(
             keepWords(widget.item.question, locale: context.appLocale),
             semanticsLabel: widget.item.question,
@@ -273,7 +269,7 @@ class _QuestionBlockState extends State<_QuestionBlock> {
                   ),
                 if (!_isWriting)
                   _OptionChip(
-                    // 시안 `262:4854` 문구 그대로 — `직접 적기`로 줄여 두었었다 (#297)
+                    // 시안 `262:4854` 문구 그대로 — `직접 적기`로 줄여 두었었다
                     label: context.l10n.questionCustomAdd,
                     isSelected: false,
                     onTap: _open,
@@ -438,7 +434,7 @@ class _OptionChip extends StatelessWidget {
                 if (onRemove != null) ...[
                   SizedBox(width: 4.w),
                   // 칩 안의 X 는 칩과 따로 읽혀야 한다. 이름이 없으면 칩 이름만
-                  // 들려 누르면 고르는지 지우는지 알 수 없다 (#339).
+                  // 들려 누르면 고르는지 지우는지 알 수 없다.
                   Semantics(
                     container: true,
                     button: true,

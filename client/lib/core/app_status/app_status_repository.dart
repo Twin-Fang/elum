@@ -7,7 +7,7 @@ import 'app_status.dart';
 import 'app_status_recheck.dart';
 import '../../app/dio_provider.dart';
 
-/// 앱 상태를 서버에 묻는다 (이슈 #279).
+/// 앱 상태를 서버에 묻는다.
 ///
 /// **실패는 조용히 넘긴다.** 이 요청이 안 되면 그냥 평소처럼 진행한다 —
 /// 서버 상태를 확인하지 못했다는 이유로 앱을 막으면, 서버가 죽었을 때
@@ -45,7 +45,7 @@ final appStatusRepositoryProvider = Provider<AppStatusRepository>(
   (ref) => AppStatusRepository(ref.watch(dioProvider)),
 );
 
-/// 지금 앱 버전만 필요할 때 (설정 화면 맨 아래 — 이슈 #289).
+/// 지금 앱 버전만 필요할 때 (설정 화면 맨 아래).
 ///
 /// [appStatusProvider] 를 쓰지 않는 이유 — 그쪽은 서버에 앱 상태를 물으러 간다.
 /// 버전 한 줄을 보여주려고 네트워크를 타면 서버가 느릴 때 설정 화면이 같이 느려진다.

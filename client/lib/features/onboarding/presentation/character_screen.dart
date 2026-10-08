@@ -52,7 +52,7 @@ class CharacterScreen extends ConsumerWidget {
       },
       itemBuilder: (context, character, isSelected) =>
           CharacterCard(character: character, isSelected: isSelected),
-      // 카드 안은 그림뿐이라 이름을 준다 — 이름 글자는 카드 밖에 있다 (#339)
+      // 카드 안은 그림뿐이라 이름을 준다 — 이름 글자는 카드 밖에 있다
       semanticLabelOf: (character) => character.displayName,
     );
 
@@ -103,10 +103,10 @@ class CharacterScreen extends ConsumerWidget {
             //
             // **고른 쪽 이름은 그 캐릭터의 선택색이 된다** — 포포 `#EB9B73`,
             // 루루 `#9CADF1` (Figma `204:1121` · `204:1134`). 둘 다 회색으로
-            // 두면 무엇을 골랐는지 카드 테두리로만 알 수 있다 (#297).
+            // 두면 무엇을 골랐는지 카드 테두리로만 알 수 있다.
             //
             // 화면 낭독기에서는 뺀다. 이름은 이미 위 카드가 읽는다 — 여기서 한 번
-            // 더 읽으면 "루루, 버튼" 뒤에 "루루"가 또 들린다 (#339).
+            // 더 읽으면 "루루, 버튼" 뒤에 "루루"가 또 들린다.
             ExcludeSemantics(
               child: Row(
                 children: [

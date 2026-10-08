@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// 광고 보고 더 만들기를 보일지 — 서버 `GET /api/credits/ad-rewards/offer` (#463).
+/// 광고 보고 더 만들기를 보일지 — 서버 `GET /api/credits/ad-rewards/offer`.
 ///
 /// **모르는 값을 채우지 않는다.** 필드가 빠지면 [FormatException] 을 던지고, 호출한 쪽이
 /// 버튼을 숨긴다. 꺼짐으로 읽고 보이는 쪽이 잘못 보여 주는 쪽보다 안전하다.
