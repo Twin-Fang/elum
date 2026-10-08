@@ -108,6 +108,23 @@ void main() {
       expect(tts.engineSet, isNull);
     });
 
+    test('기기가 그 언어를 못 읽으면 실패로 돌려 서버로 넘긴다', () async {
+      final tts = _FakeTts(engines: [], languageAvailable: false);
+
+      final ok = await DeviceSpeech(tts: tts, isAndroid: true).speak('옷을 입어요');
+
+      expect(ok, isFalse);
+      expect(tts.spoken, isEmpty);
+    });
+
+    test('언어 확인이 예외여도 읽는다', () async {
+      final tts = _FakeTts(engines: [], languageThrows: true);
+
+      final ok = await DeviceSpeech(tts: tts, isAndroid: true).speak('옷을 입어요');
+
+      expect(ok, isTrue);
+    });
+
     test('엔진은 처음 한 번만 고른다', () async {
       final tts = _FakeTts(engines: [DeviceSpeech.googleEngine]);
       final speech = DeviceSpeech(tts: tts, isAndroid: true);
@@ -170,10 +187,17 @@ class _FakeSpeech implements SpeechService {
 
 /// 플랫폼 채널 없이 엔진 선택만 기록하는 가짜 TTS.
 class _FakeTts extends FlutterTts {
-  _FakeTts({required this.engines, this.enginesThrow = false});
+  _FakeTts({
+    required this.engines,
+    this.enginesThrow = false,
+    this.languageAvailable = true,
+    this.languageThrows = false,
+  });
 
   final List<String>? engines;
   final bool enginesThrow;
+  final bool languageAvailable;
+  final bool languageThrows;
   String? engineSet;
   var engineCalls = 0;
   final spoken = <String>[];
@@ -188,6 +212,12 @@ class _FakeTts extends FlutterTts {
   Future<dynamic> setEngine(String engine) async {
     engineCalls++;
     engineSet = engine;
+  }
+
+  @override
+  Future<dynamic> isLanguageAvailable(String language) async {
+    if (languageThrows) throw Exception('언어 확인 실패');
+    return languageAvailable;
   }
 
   @override

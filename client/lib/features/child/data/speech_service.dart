@@ -59,7 +59,9 @@ class DeviceSpeech implements SpeechService {
   @override
   Future<bool> speak(String text, {String language = 'ko'}) async {
     try {
-      await _ensureConfigured(language);
+      // 폰에 그 언어 음성이 없으면 기기 엔진이 엉뚱한 발음으로 읽어 소리가 깨진다.
+      // 못 읽는다고 알려 서버 음성으로 넘긴다.
+      if (!await _ensureConfigured(language)) return false;
 
       // 이전 재생이 남아 있으면 겹친다
       await _tts.stop();
@@ -74,16 +76,29 @@ class DeviceSpeech implements SpeechService {
   }
 
   /// 읽을 언어가 바뀐 때만 기기 음성을 다시 맞춘다 — 같은 기기에서 일과마다 언어가 다를 수 있다.
-  Future<void> _ensureConfigured(String language) async {
+  ///
+  /// 기기가 그 언어를 못 읽으면 false 다. 확인 자체가 실패하면(플랫폼이 답을 안 줌) 읽을 수 있다고 본다.
+  Future<bool> _ensureConfigured(String language) async {
     await _preferGoogleEngine();
     final tag = ttsLocaleOf(language);
     if (_configuredLanguage != tag) {
+      if (!await _isLanguageUsable(tag)) return false;
       await _tts.setLanguage(tag);
       _configuredLanguage = tag;
     }
     if (!_rateSet) {
       await _tts.setSpeechRate(_rate);
       _rateSet = true;
+    }
+    return true;
+  }
+
+  Future<bool> _isLanguageUsable(String tag) async {
+    try {
+      return await _tts.isLanguageAvailable(tag) != false;
+    } catch (e) {
+      AppLogger.error('tts', '기기 음성 언어 확인 실패 → 읽을 수 있다고 본다: $e');
+      return true;
     }
   }
 
