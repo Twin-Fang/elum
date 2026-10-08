@@ -8,13 +8,18 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>이룸 관리자 로그인</title>
+  <link rel="icon" type="image/svg+xml" th:href="@{/admin/vendor/logo_elum.svg}"/>
   <link rel="stylesheet" th:href="@{/admin/vendor/admin.css}"/>
   <script th:src="@{/admin/js/admin-ui.js}"></script>
 </head>
 <body class="flex min-h-screen items-center justify-center bg-base-200 p-4">
 <div class="card w-full max-w-sm bg-base-100 shadow-xl">
   <div class="card-body">
-    <h1 class="mb-4 text-center text-2xl font-bold">이룸 관리자 로그인</h1>
+    <!-- 로고가 브랜드를 말하므로 h1 은 화면 이름만 보조로 적는다. -->
+    <div class="flex flex-col items-center gap-2" style="margin-bottom:1.5rem">
+      <img th:src="@{/admin/vendor/logo_elum.svg}" alt="이룸" style="height:3.5rem;width:auto"/>
+      <h1 class="text-sm font-medium" style="opacity:.6">관리자 로그인</h1>
+    </div>
 
     <!-- 틀렸다는 말을 해 준다. 예전에는 실패해도 빈 화면만 다시 떴다. -->
     <div th:if="${param.error}" class="alert alert-error py-2 text-sm">

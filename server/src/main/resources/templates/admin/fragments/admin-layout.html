@@ -28,6 +28,7 @@
     <title th:text="'이룸 관리자 · ' + ${title}">이룸 관리자</title>
     <!-- CDN이 아니라 동봉한 파일이다. 개발용 CDN 빌드는 브라우저에서 컴파일해
          프로덕션 경고가 뜨고, 스타일 적용 전 화면이 한 번 깜빡인다. -->
+    <link rel="icon" type="image/svg+xml" th:href="@{/admin/vendor/logo_elum.svg}"/>
     <link rel="stylesheet" th:href="@{/admin/vendor/admin.css}"/>
     <!-- 화면이 그려지기 전에 테마를 정해야 밝은 화면이 번쩍이지 않는다. -->
     <script th:src="@{/admin/js/admin-ui.js}"></script>
@@ -96,9 +97,10 @@
 
 <aside th:fragment="sidebar(active)"
        class="flex min-h-screen w-64 flex-col border-r border-base-300 bg-base-200 p-4">
-  <div class="flex items-center gap-2 px-2 py-4">
-    <span class="text-xl font-bold">이룸 관리자</span>
-  </div>
+  <a th:href="@{/admin/dashboard}" class="flex flex-col gap-1 px-2 py-4" aria-label="이룸 관리자 대시보드">
+    <img th:src="@{/admin/vendor/logo_elum.svg}" alt="이룸" style="height:2.25rem;width:auto;align-self:flex-start"/>
+    <span class="text-xs font-medium" style="opacity:.6">관리자</span>
+  </a>
   <ul class="menu w-full flex-1">
     <li><a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'">대시보드</a></li>
     <li><a th:href="@{/admin/members}" th:classappend="${active == 'members'} ? 'active'">회원 관리</a></li>
