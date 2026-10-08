@@ -17,6 +17,8 @@
 
 - 모든 엔티티는 `BaseEntity` 상속, PK는 UUID 문자열
 - 예외는 `CustomException` + `ErrorCode` + `GlobalExceptionHandler`만 사용
+- `common`은 도메인 패키지를 import하지 않는다(필터 체인을 조립하는 `SecurityConfig`만 예외). 다른 도메인의 repository는 직접 쓰지 않고 그 도메인의 서비스를 거친다 — `ArchitectureRulesTest`가 막고, 이미 있는 사용은 `src/test/resources/architecture/cross-domain-repository-allowlist.txt`에 동결돼 있다
+- admin 컨트롤러가 JSON을 돌려주면 `@JsonErrorResponse`를 붙여 `GlobalExceptionHandler` 범위에 넣는다. 새 도메인 패키지는 `basePackages`에 더한다
 - 모든 REST 엔드포인트에 `@com.chuseok22.logging.annotation.LogMonitoring` 적용
 - 모든 REST 엔드포인트는 `*ControllerDocs` 인터페이스로 Swagger 문서화
 - REST API는 JWT(accessToken만, stateless), 관리자 페이지는 세션(formLogin)

@@ -124,6 +124,10 @@ curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines
 
 - **주석은 한국어**, WHY 중심으로 간결하게. 코드만 봐도 아는 내용은 쓰지 않는다.
   이슈 번호·과거 경위("예전엔…")는 주석에 쓰지 않는다 — 커밋과 이슈에 있다. 지금 로직에 필요한 것만 남긴다.
+- **계층 import 방향을 지킨다.** `core/`·`shared/`는 `features/`·`app/`을 import하지 않는다(화면을 엮는 `core/router`·`core/dev`만 예외).
+  기능은 다른 기능의 `data/`·`presentation/`을 직접 import하지 않고 `application/`·`domain/`을 거친다.
+  여러 기능을 엮는 provider(예: `dioProvider`)는 `lib/app/`에 둔다. `test/tool/check_layer_imports_test.dart`가 막고,
+  이미 있는 예외는 `tool/layer_imports_allowed.txt`에 동결돼 있다 — 줄을 지울 수는 있어도 더하지 않는다.
 - **디자인 토큰 하드코딩 금지.** 색·폰트·간격은 반드시 `core/theme/`의 `AppColors` / `AppTypography` / `AppSpacing`을 통해 쓴다.
   ```dart
   // ❌ Color(0xFF443E39), fontSize: 28
