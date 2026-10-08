@@ -11,8 +11,8 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_destination.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../auth/data/auth_repository.dart';
-import '../../../core/storage/local_storage.dart';
+import '../../auth/application/auth_session_controller.dart';
+import '../application/splash_controller.dart';
 import '../../../core/router/routes.dart';
 
 /// Figma `스플래시` (1022:4415) — 서비스 진입 화면.
@@ -54,11 +54,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     // build가 아니라 첫 프레임 뒤에 옮긴다 — 빌드 도중 라우팅하면 예외가 난다.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final storage = ref.read(localStorageProvider);
+      final splash = ref.read(splashControllerProvider);
       final skip = shouldSkipSplash(
-        hasSession: ref.read(authRepositoryProvider).hasSession,
-        onboardingCompleted: storage.isOnboardingCompleted,
-        isElumiDevice: storage.isElumiDevice,
+        hasSession: ref.read(authSessionControllerProvider).hasSession,
+        onboardingCompleted: splash.isOnboardingCompleted,
+        isElumiDevice: splash.isElumiDevice,
       );
       if (skip) {
         _goTo(_destination());
@@ -86,7 +86,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       if (route == Routes.linkEnter) {
         goToLinkEnter(
           router,
-          hasSession: ref.read(authRepositoryProvider).hasSession,
+          hasSession: ref.read(authSessionControllerProvider).hasSession,
         );
         return;
       }

@@ -10,12 +10,12 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
-import '../../auth/data/auth_repository.dart';
+import '../../auth/application/auth_session_controller.dart';
+import '../application/pin_change_controller.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
-import '../../../core/storage/local_storage.dart';
 import '../../../core/router/routes.dart';
 
 /// 설정 → 비밀암호 변경하기 (#437).
@@ -75,11 +75,11 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
 
   Future<void> _loadSaved() async {
     try {
-      final hasPin = await ref.read(localStorageProvider).hasPin();
+      final hasPin = await ref.read(pinChangeControllerProvider).hasPin();
       if (!mounted) return;
       if (widget.createOnly || !hasPin) {
         // URL·로컬 역할은 권한 증거가 아니다. 보호자 인증의 일회 허가만 소비한다.
-        if (hasPin || !ref.read(authRepositoryProvider).consumeGuardianPinSetupPermit()) {
+        if (hasPin || !ref.read(authSessionControllerProvider).consumeGuardianPinSetupPermit()) {
           context.go(Routes.login);
           return;
         }
@@ -107,7 +107,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     _verifying = true;
     final pin = _current;
     try {
-      final valid = await ref.read(localStorageProvider).verifyPin(pin);
+      final valid = await ref.read(pinChangeControllerProvider).verifyPin(pin);
       if (!mounted) return;
       valid ? _next(_Step.enter) : _mismatch();
     } catch (e) {
@@ -190,9 +190,8 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     if (_saving) return;
     final pin = _current;
     setState(() => _saving = true);
-    final storage = ref.read(localStorageProvider);
     try {
-      await storage.setPin(pin);
+      await ref.read(pinChangeControllerProvider).setPin(pin);
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
@@ -207,7 +206,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
     if (widget.createOnly) {
       // 방금 만든 암호가 곧 통과의 증거다. 암호 만들기 대기를 끄지 않으면
       // 경로 가드가 보호자 홈 진입을 다시 이 화면으로 돌려보낸다.
-      ref.read(authRepositoryProvider).finishGuardianPinSetup();
+      ref.read(authSessionControllerProvider).finishGuardianPinSetup();
       context.go(Routes.guardian);
     } else {
       context.popOrHome();

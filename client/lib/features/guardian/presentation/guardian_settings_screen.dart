@@ -14,7 +14,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/haptics/child_haptics.dart';
 import '../../../core/widgets/settings_switch_tile.dart';
 import '../../../core/widgets/settings_tile.dart';
-import '../../auth/data/auth_repository.dart';
+import '../../auth/application/auth_session_controller.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
 import '../../link/data/device_link_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
@@ -69,7 +69,7 @@ class _GuardianSettingsScreenState
     );
     if (ok != true) return;
     await _run(() async {
-      await ref.read(authRepositoryProvider).logout();
+      await ref.read(authSessionControllerProvider).logout();
       // 로그아웃은 이 기기에서 나가는 것이 본질이라 서버가 실패해도 목적은 달성된다.
       return null;
     });
@@ -100,7 +100,7 @@ class _GuardianSettingsScreenState
       ],
     );
     if (ok != true) return;
-    await _run(() => ref.read(authRepositoryProvider).deleteAccount());
+    await _run(() => ref.read(authSessionControllerProvider).deleteAccount());
   }
 
   /// 되돌릴 수 없다고 안내한 동작이 실패했을 때.

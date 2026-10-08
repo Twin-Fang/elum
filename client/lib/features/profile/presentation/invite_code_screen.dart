@@ -16,9 +16,9 @@ import '../../../core/widgets/show_failure.dart';
 import '../../link/domain/link_status.dart';
 import '../../link/presentation/widgets/issued_code_panel.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../application/invite_code_controller.dart';
 import '../application/invite_sharer.dart';
 import '../application/profile_session.dart';
-import '../data/profile_repository.dart';
 import '../domain/invite_link.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../member/application/member_providers.dart';
@@ -118,7 +118,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
         ? active.displayName
         : (local.isEmpty ? null : local);
 
-    final attempt = await ref.read(profileRepositoryProvider).issueInvite(active.id);
+    final attempt = await ref.read(inviteCodeControllerProvider).issueInvite(active.id);
     if (!mounted) return;
 
     if (!attempt.isOk) {

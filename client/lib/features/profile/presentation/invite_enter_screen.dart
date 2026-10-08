@@ -16,6 +16,7 @@ import '../../link/domain/link_code.dart';
 import '../../link/presentation/widgets/code_entry_field.dart';
 import '../application/invite_inbox.dart';
 import '../application/profile_session.dart';
+import '../application/invite_enter_controller.dart';
 import '../data/profile_repository.dart';
 import '../domain/invite_problem.dart';
 import '../../../core/router/pop_or_home.dart';
@@ -219,7 +220,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     });
     _focusNode.unfocus();
     final attempt = await ref
-        .read(profileRepositoryProvider)
+        .read(inviteEnterControllerProvider)
         .redeemInvite(code);
     if (!mounted) return;
     setState(() => _sending = false);

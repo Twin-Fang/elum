@@ -8,7 +8,7 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../application/routine_notifier.dart';
-import '../../data/card_image_repository.dart';
+import '../../application/card_photo_controller.dart';
 import '../../data/card_photo.dart';
 import '../../data/card_photo_picker.dart';
 import 'card_image.dart';
@@ -125,7 +125,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
   Future<void> _upload(PickedPhoto photo) async {
     // await 뒤 시트가 사라져도(내려서 닫음) 끝까지 반영할 수 있게 미리 잡아 둔다
     final notifier = ref.read(routineFlowProvider.notifier);
-    final repo = ref.read(cardImageRepositoryProvider);
+    final controller = ref.read(cardPhotoControllerProvider);
     // 시트가 사라진 뒤에도 남아 있는 자리 — 맨 위 Overlay 는 Navigator 아래라
     // 여기서 팝업을 띄울 수 있다(Navigator 자신의 context 는 안 된다).
     final rootContext = Overlay.of(context, rootOverlay: true).context;
@@ -135,7 +135,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
       _failure = null;
     });
 
-    final result = await repo.uploadPhoto(
+    final result = await controller.uploadPhoto(
       routineId: widget.routineId,
       stepId: widget.stepId,
       photo: photo,

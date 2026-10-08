@@ -10,6 +10,7 @@ import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
+import '../application/link_status_controller.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_status.dart';
 import '../../../core/router/pop_or_home.dart';
@@ -75,7 +76,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
 
     setState(() => _busy = true);
     final result = await ref
-        .read(deviceLinkRepositoryProvider)
+        .read(linkStatusControllerProvider)
         .revoke(device.linkId);
     if (!mounted) return;
     setState(() => _busy = false);

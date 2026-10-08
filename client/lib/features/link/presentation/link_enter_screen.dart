@@ -9,7 +9,8 @@ import '../../../core/router/app_router.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
-import '../../auth/data/auth_repository.dart';
+import '../../auth/application/auth_session_controller.dart';
+import '../application/link_enter_controller.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_code.dart';
 import 'widgets/code_entry_field.dart';
@@ -70,7 +71,7 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   ///
   /// 시안 §8-5 는 `다음에 열 때 연결이 끊어졌어요`를 말한다. 앱이 꺼져 있는 사이에 끊겨도 알 수 있게
   /// 저장된 표식을 읽는다 — 스스로 로그아웃한 사람에게는 서 있지 않다.
-  late final bool _linkLost = ref.read(deviceLinkRepositoryProvider).linkWasLost;
+  late final bool _linkLost = ref.read(linkEnterControllerProvider).linkWasLost;
 
   /// 틀린 횟수. 값이 바뀔 때마다 칸이 한 번 흔들린다.
   int _failCount = 0;
@@ -113,7 +114,7 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
 
     setState(() => _sending = true);
     _focusNode.unfocus();
-    final result = await ref.read(deviceLinkRepositoryProvider).redeem(code);
+    final result = await ref.read(linkEnterControllerProvider).redeem(code);
     if (!mounted) return;
     setState(() => _sending = false);
 
@@ -182,7 +183,7 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
     }
     context.go(
       linkEnterBackTarget(
-        hasSession: ref.read(authRepositoryProvider).hasSession,
+        hasSession: ref.read(authSessionControllerProvider).hasSession,
       ),
     );
   }

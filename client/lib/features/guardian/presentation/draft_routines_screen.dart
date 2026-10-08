@@ -18,6 +18,7 @@ import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
 import 'widgets/routine_swipe_actions.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../application/draft_routines_controller.dart';
 import '../application/routine_providers.dart';
 import '../../../core/router/routes.dart';
 
@@ -163,7 +164,7 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
     if (confirmed != true || !mounted) return;
 
     setState(() => _deletingId = routine.id);
-    final failure = await ref.read(routineRepositoryProvider).delete(routine.id);
+    final failure = await ref.read(draftRoutinesControllerProvider).delete(routine.id);
     if (!mounted) return;
     setState(() {
       _deletingId = null;

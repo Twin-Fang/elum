@@ -15,6 +15,7 @@ import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/periodic_refresh.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
+import '../application/guardians_controller.dart';
 import '../application/profile_session.dart';
 import '../data/profile_repository.dart';
 import '../domain/guardian_member.dart';
@@ -87,7 +88,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
     if (ok != true || !mounted) return;
 
     setState(() => _busy = true);
-    final failure = await ref.read(profileRepositoryProvider).leave(profileId);
+    final failure = await ref.read(guardiansControllerProvider).leave(profileId);
     if (!mounted) return;
 
     // 이미 지워진 이룸이(404)는 나가려던 목적이 이루어진 것이다 — 정리만 한다.
@@ -126,7 +127,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
     if (edit == null || edit.isEmpty || !mounted) return;
 
     setState(() => _busy = true);
-    final attempt = await ref.read(profileRepositoryProvider).updateMyGuardian(
+    final attempt = await ref.read(guardiansControllerProvider).updateMyGuardian(
       profileId,
       kind: edit.kind,
       displayName: edit.displayName,

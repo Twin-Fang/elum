@@ -14,7 +14,7 @@ import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
-import '../data/device_link_repository.dart';
+import '../application/link_code_controller.dart';
 import '../domain/link_status.dart';
 import 'widgets/issued_code_panel.dart';
 import '../../../core/router/pop_or_home.dart';
@@ -103,11 +103,10 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
       _loading = true;
       _issueFailure = null;
     });
-    final repo = ref.read(deviceLinkRepositoryProvider);
     // 기준은 암호를 만드는 것과 함께 잡는다 — 새 암호는 아직 쓰이지 않았으니 목록에 끼지 않는다.
-    final baseline = _knownLinkIds == null ? repo.statusResult() : null;
-    final attempt = await repo.issue();
-    final before = await baseline;
+    final (attempt, before) = await ref
+        .read(linkCodeControllerProvider)
+        .issue(withBaseline: _knownLinkIds == null);
     if (before != null && before.isOk) {
       _knownLinkIds ??= before.value!.devices.map((d) => d.linkId).toSet();
     }
@@ -141,7 +140,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     // 3초는 서버에 부담이 크지 않으면서 사람이 기다린다고 느끼지 않는 간격이다.
     _poller = Timer.periodic(const Duration(seconds: 3), (t) async {
       if (!mounted) return t.cancel();
-      final attempt = await ref.read(deviceLinkRepositoryProvider).statusResult();
+      final attempt = await ref.read(linkCodeControllerProvider).statusResult();
       if (!mounted) return;
       // 못 물었으면 이번 박자는 건너뛴다 — 실패를 `연결 없음`으로 읽으면 안 된다.
       if (!attempt.isOk) return;

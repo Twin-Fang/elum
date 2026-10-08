@@ -13,7 +13,7 @@ import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
 import '../application/link_reset.dart';
-import '../data/device_link_repository.dart';
+import '../application/elumi_settings_controller.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 
@@ -107,7 +107,7 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
 
     setState(() => _busy = true);
     final failure = await ref
-        .read(deviceLinkRepositoryProvider)
+        .read(elumiSettingsControllerProvider)
         .disconnectThisPhone();
     if (!mounted) return;
     setState(() => _busy = false);

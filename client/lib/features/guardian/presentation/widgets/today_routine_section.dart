@@ -22,6 +22,7 @@ import 'routine_summary_tile.dart';
 import 'routine_swipe_actions.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../../../core/widgets/elum_toast.dart';
+import '../../application/guardian_home_controller.dart';
 import '../../application/routine_providers.dart';
 import '../../../../core/router/routes.dart';
 
@@ -170,7 +171,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     final ids = [for (final r in next) r.id];
     setState(() => _order = ids);
 
-    final failure = await ref.read(routineRepositoryProvider).reorder(ids);
+    final failure = await ref.read(guardianHomeControllerProvider).reorder(ids);
     if (!mounted) return;
     if (failure != null) {
       // 서버가 받지 못했으면 화면만 바뀐 채로 두지 않는다 —
@@ -240,7 +241,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     if (confirmed != true || !mounted) return;
 
     final failure = await ref
-        .read(routineRepositoryProvider)
+        .read(guardianHomeControllerProvider)
         .delete(routine.id);
     if (!mounted) return;
     if (failure != null) {
@@ -454,7 +455,7 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
     setState(() => _rerunning = routine.id);
 
     final copy = await ref
-        .read(routineRepositoryProvider)
+        .read(guardianHomeControllerProvider)
         .duplicate(routine.id);
     if (!mounted) return;
     setState(() => _rerunning = null);

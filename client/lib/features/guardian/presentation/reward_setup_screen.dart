@@ -21,12 +21,12 @@ import 'widgets/aurora_background.dart';
 import 'widgets/reward_chip.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/pop_or_home.dart';
-import '../application/routine_providers.dart';
+import '../application/reward_setup_controller.dart';
 import '../../../core/router/routes.dart';
 
 /// 최근 보상. 실패하면 빈 목록이라 화면이 칩 자리를 비운다.
 final recentRewardsProvider = FutureProvider.autoDispose<List<RecentReward>>(
-  (ref) => ref.read(routineRepositoryProvider).getRecentRewards(),
+  (ref) => ref.read(rewardSetupControllerProvider).recentRewards(),
 );
 
 /// 보상 설정 — Figma `보호자_보상설정` `1082:4709`(비어 있음) · `1082:4801`(적은 뒤).

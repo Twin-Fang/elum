@@ -15,7 +15,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../../shared/models/routine.dart';
 import 'step_card_viewer.dart';
-import '../../application/routine_providers.dart';
+import '../../application/guardian_home_controller.dart';
 
 /// 오늘 일과를 눌렀을 때 올라오는 시트 (Figma 956:4084, 이슈 #266).
 ///
@@ -119,7 +119,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
       _steps.insert(to, moved);
     });
 
-    final failure = await ref.read(routineRepositoryProvider).reorderSteps(
+    final failure = await ref.read(guardianHomeControllerProvider).reorderSteps(
       widget.routine.id,
       [for (final s in _steps) s.id],
     );

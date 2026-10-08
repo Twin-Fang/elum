@@ -10,9 +10,9 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_text_field.dart';
+import '../application/name_controller.dart';
 import '../application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
-import '../../../core/storage/local_storage.dart';
 import '../../../core/router/routes.dart';
 
 /// Figma `온보딩_이름` — 아이 호칭을 받는다.
@@ -59,7 +59,7 @@ class _NameScreenState extends ConsumerState<NameScreen> {
     }
     final router = GoRouter.of(context);
     try {
-      await ref.read(localStorageProvider).clearSelectedRole();
+      await ref.read(nameControllerProvider).clearSelectedRole();
     } catch (e) {
       // 지우지 못해도 이동은 한다. 다음 시작 때 이 화면으로 돌아올 뿐이다.
       debugPrint('역할 삭제 실패: $e');
