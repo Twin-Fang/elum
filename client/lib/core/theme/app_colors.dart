@@ -456,8 +456,7 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 큰 별 주변 빛 (rgba(208,255,0,0.3))
   final Color rewardStarGlow;
 
-  /// 큰 별 뒤 넓게 번지는 blur 후광 — 노랑 (#FFDD00). Figma의 blur(20px)
-  /// 노란 별 레이어(node 364:8283 / 334:4282)를 GlowingSvg.haloBlur로 재현.
+  /// 큰 별 뒤 넓게 번지는 blur 후광 — 노랑 (#FFDD00). Figma의 blur(20px) 노란 별 레이어.
   final Color rewardStarHalo;
 
   /// 작은 별 — 초록
