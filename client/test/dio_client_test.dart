@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:elum/core/network/dio_client.dart';
+import 'package:elum/core/network/app_log_interceptor.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 로깅 인터셉터 회귀 테스트.
@@ -13,12 +13,12 @@ void main() {
   /// 요청을 그대로 200으로 돌려주는 어댑터.
   Dio buildDio() {
     final dio = Dio(BaseOptions(baseUrl: 'https://example.test'))
-      ..interceptors.add(SafeLogInterceptor())
+      ..interceptors.add(AppLogInterceptor())
       ..httpClientAdapter = _EchoAdapter();
     return dio;
   }
 
-  group('SafeLogInterceptor', () {
+  group('AppLogInterceptor', () {
     test('같은 인터셉터로 요청을 연속 두 번 보내도 실패하지 않는다', () async {
       final dio = buildDio();
 
@@ -45,7 +45,7 @@ void main() {
 
     test('에러 응답이 반복돼도 인터셉터가 죽지 않는다', () async {
       final dio = Dio(BaseOptions(baseUrl: 'https://example.test'))
-        ..interceptors.add(SafeLogInterceptor())
+        ..interceptors.add(AppLogInterceptor())
         ..httpClientAdapter = _FailingAdapter();
 
       // 실패 경로도 onRequest를 거친다. 여기서 죽으면 재시도 루프가 무한히 돈다.
