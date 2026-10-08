@@ -6,6 +6,7 @@ import 'core/config/app_config.dart';
 import 'core/config/client_tuning.dart';
 import 'core/dev/dev_log_buffer.dart';
 import 'core/dev/dev_log_file.dart';
+import 'core/logger/app_diagnostics.dart';
 import 'core/logger/app_logger.dart';
 import 'core/state/provider_retry.dart';
 import 'core/storage/local_storage.dart';
@@ -20,6 +21,9 @@ Future<void> main() async {
   AppLogger.appStarted();
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 처리하지 못한 오류·생명주기·연결 상태 기록. 가능한 한 일찍 건다.
+  AppDiagnostics.install();
 
   // 환경변수를 먼저 읽는다 — 저장소·네트워크가 설정값에 의존한다.
   await AppConfig.load();

@@ -28,7 +28,7 @@ public interface FeedbackControllerDocs {
       **검사**
       1. 글이 비었거나 공백뿐이면 400 `FEEDBACK_MESSAGE_EMPTY`.
       2. 글이 2000자를 넘으면 400 `FEEDBACK_MESSAGE_TOO_LONG`.
-      3. 앱 상태 기록이 64KB(UTF-8)를 넘으면 400 `FEEDBACK_LOG_TOO_LARGE`.
+      3. 앱 상태 기록이 256KB(UTF-8)를 넘으면 400 `FEEDBACK_LOG_TOO_LARGE`.
       4. 오늘(서버 시각 0시 시작) 이미 20건을 보냈으면 429 `FEEDBACK_RATE_LIMITED`.
 
       `appVersion`(32자)·`os`(64자)는 넘으면 거절하지 않고 잘라서 저장합니다.

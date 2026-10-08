@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FeedbackService {
 
   static final int MAX_MESSAGE_LENGTH = 2000;
-  static final int MAX_LOG_BYTES = 64 * 1024;
+  static final int MAX_LOG_BYTES = 256 * 1024;
   static final int MAX_VERSION_LENGTH = 32;
   static final int MAX_OS_LENGTH = 64;
   static final int DAILY_LIMIT = 20;

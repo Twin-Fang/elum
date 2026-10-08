@@ -8,6 +8,7 @@ import '../core/dev/dev_locale_override.dart';
 import '../core/l10n/effective_locale.dart';
 import '../core/l10n/region_code.dart';
 import '../core/network/accept_language_interceptor.dart';
+import '../core/network/app_log_interceptor.dart';
 import '../core/network/auth_interceptor.dart';
 import '../core/network/dio_client.dart';
 import '../core/network/failure_interceptor.dart';
@@ -24,7 +25,7 @@ import '../features/profile/application/profile_session.dart';
 /// repository는 이 provider를 통해서만 Dio를 받는다 — 각자 `DioClient.create()`를
 /// 부르면 인터셉터 없는 인스턴스가 생겨 401이 그대로 터진다.
 final dioProvider = Provider<Dio>((ref) {
-  final dio = DioClient.create();
+  final dio = DioClient.create(attachLog: false);
 
   // 앱 언어를 모든 요청에 싣는다. 요청마다 판정해 OS 언어가 바뀌어도 따라간다.
   // 맨 앞에 둔다 — 토큰 갱신 뒤 요청을 되살릴 때도 같은 헤더로 나간다.
@@ -92,6 +93,10 @@ final dioProvider = Provider<Dio>((ref) {
   // **맨 뒤에 붙인다.** 앞의 인증 인터셉터가 토큰을 갱신해 요청을 되살리면
   // 그건 실패가 아니다 — 먼저 붙이면 되살아날 401 까지 실패로 남는다.
   dio.interceptors.add(const FailureInterceptor());
+
+  // 기록은 그보다도 뒤에 둔다 — 다른 인터셉터가 붙인 헤더와 갱신·실패 해석을 거친
+  // 최종 결과를 본다.
+  dio.interceptors.add(AppLogInterceptor());
 
   return dio;
 });
