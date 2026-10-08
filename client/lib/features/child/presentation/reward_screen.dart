@@ -7,12 +7,12 @@ import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
-import '../../guardian/data/routine_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
-import '../domain/reward_character.dart';
+import '../../../shared/models/reward_character.dart';
 import 'widgets/reward_banner.dart';
 import 'widgets/reward_star.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../member/application/member_providers.dart';
 
 /// Figma `아이_보상_루미`(309:4055) / `_포포`(334:4320) / `_루루`(343:4434).
 ///

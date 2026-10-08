@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:elum/core/ads/ad_gate.dart';
-import 'package:elum/core/ads/ad_ids.dart';
-import 'package:elum/core/ads/ad_native_loader.dart';
-import 'package:elum/core/ads/ad_native_slot.dart';
+import 'package:elum/features/ads/application/ad_gate.dart';
+import 'package:elum/core/config/ad_ids.dart';
+import 'package:elum/features/ads/data/ad_native_loader.dart';
+import 'package:elum/features/ads/presentation/ad_native_slot.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/theme/theme_context_ext.dart';
 import 'package:flutter/material.dart';

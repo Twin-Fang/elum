@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:elum/core/app_status/app_status_repository.dart';
-import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_colors.dart';
@@ -11,7 +10,6 @@ import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/guardian/presentation/guardian_settings_screen.dart';
 import 'package:elum/features/guardian/presentation/image_style_settings_screen.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/features/onboarding/domain/image_style.dart';
 import 'package:elum/features/onboarding/presentation/widgets/image_style_option_card.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +22,7 @@ import 'helpers/svg_finder.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/semantics_audit.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 보호자 설정의 `그림 방식` 줄과 선택 화면 (이슈 #458 · 임시 시안 opt1_A).
 ///

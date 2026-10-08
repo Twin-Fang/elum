@@ -7,7 +7,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/reward_setup_screen.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

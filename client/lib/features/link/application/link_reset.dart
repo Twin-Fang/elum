@@ -7,6 +7,8 @@ import '../../guardian/application/routine_notifier.dart';
 import '../../guardian/data/routine_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/device_link_repository.dart';
+import '../../../core/storage/local_storage.dart';
+import '../../member/application/member_providers.dart';
 
 /// 연결이 끊긴 이룸이 휴대폰의 **메모리**를 비운다 (#363).
 ///

@@ -3,16 +3,15 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/data/oauth_sdk.dart';
-import 'package:elum/features/guardian/data/card_image_disk_cache.dart';
+import 'package:elum/core/storage/card_image_disk_cache.dart';
 import 'package:elum/features/guardian/data/card_image_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 카드 그림 디스크 캐시 (#462).
 ///

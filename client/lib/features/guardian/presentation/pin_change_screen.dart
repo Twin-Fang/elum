@@ -11,12 +11,12 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
-import '../../onboarding/application/onboarding_notifier.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
+import '../../../core/storage/local_storage.dart';
 
 /// 설정 → 비밀암호 변경하기 (#437).
 ///

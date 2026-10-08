@@ -3,17 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/logger/app_logger.dart';
-import '../../../core/network/dio_client.dart';
 import '../../../core/network/guarded_call.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
-import '../../guardian/data/card_image_disk_cache.dart';
+import '../../../core/storage/card_image_disk_cache.dart';
 import '../../onboarding/domain/image_style.dart';
 import '../../auth/data/auth_repository.dart';
-import '../../onboarding/application/onboarding_notifier.dart';
 import '../domain/link_status.dart';
 import '../../../core/storage/account_wipe.dart';
+import '../../../app/dio_provider.dart';
 
 /// 연결 암호를 넣었을 때의 결과.
 ///

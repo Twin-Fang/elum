@@ -6,12 +6,11 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/data/oauth_sdk.dart';
 import 'package:elum/features/auth/presentation/login_screen.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
-import 'package:elum/features/onboarding/domain/character.dart';
+import 'package:elum/shared/models/character.dart';
 import 'package:elum/features/onboarding/domain/image_style.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/features/profile/application/profile_session.dart';
 import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 다른 계정으로 로그인했을 때 이전 계정의 **이룸이 설정**이 메모리에 남지 않는다.
 ///

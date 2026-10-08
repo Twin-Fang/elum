@@ -1,4 +1,4 @@
-import 'package:elum/core/ads/ad_ids.dart';
+import 'package:elum/core/config/ad_ids.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

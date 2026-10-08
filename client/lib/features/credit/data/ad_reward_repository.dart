@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/guarded_call.dart';
 import '../../../core/network/app_failure.dart';
-import '../../../core/network/dio_client.dart';
 import '../domain/ad_reward.dart';
+import '../../../app/dio_provider.dart';
 
 /// 보호자가 광고를 보고 크레딧을 받는 서버 API (#463).
 ///

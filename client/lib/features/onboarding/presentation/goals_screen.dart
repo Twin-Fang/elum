@@ -10,7 +10,7 @@ import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/selectable_group.dart';
 import '../application/onboarding_notifier.dart';
-import '../domain/support_goal.dart';
+import '../../../shared/models/support_goal.dart';
 import 'widgets/goal_chip.dart';
 import '../../../core/router/pop_or_home.dart';
 

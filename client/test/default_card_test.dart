@@ -7,7 +7,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/card_image_repository.dart';
 import 'package:elum/features/guardian/presentation/widgets/action_card_view.dart';
 import 'package:elum/features/guardian/presentation/widgets/default_card_art.dart';
-import 'package:elum/features/onboarding/domain/character.dart';
+import 'package:elum/shared/models/character.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

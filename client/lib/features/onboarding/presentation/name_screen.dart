@@ -13,6 +13,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_text_field.dart';
 import '../application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/storage/local_storage.dart';
 
 /// Figma `온보딩_이름` — 아이 호칭을 받는다.
 class NameScreen extends ConsumerStatefulWidget {

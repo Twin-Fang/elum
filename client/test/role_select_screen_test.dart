@@ -4,7 +4,6 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/domain/app_role.dart';
 import 'package:elum/features/auth/presentation/widgets/role_card.dart';
 import 'package:elum/features/auth/presentation/role_select_screen.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

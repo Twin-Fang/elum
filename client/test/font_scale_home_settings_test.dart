@@ -9,7 +9,7 @@ import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/data/oauth_sdk.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
@@ -17,7 +17,7 @@ import 'package:elum/features/guardian/presentation/guardian_settings_screen.dar
 import 'package:elum/features/guardian/presentation/widgets/routine_summary_tile.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +30,7 @@ import 'helpers/device_viewport.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/core/storage/local_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 시스템 글자를 키운 보호자에게 홈·설정이 깨지지 않는다 (디자인 원칙 §7-2).
 ///

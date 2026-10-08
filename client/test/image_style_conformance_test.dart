@@ -2,11 +2,10 @@
 library;
 
 import 'package:dio/dio.dart';
-import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
-import 'package:elum/features/onboarding/domain/character.dart';
+import 'package:elum/shared/models/character.dart';
 import 'package:elum/features/onboarding/domain/image_style.dart';
 import 'package:elum/features/onboarding/presentation/image_style_screen.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +17,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/precache_images.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 온보딩 그림 방식의 **시안 대조용** 렌더 (#494).
 ///

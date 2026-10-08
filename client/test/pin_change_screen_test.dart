@@ -4,7 +4,6 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/features/guardian/presentation/pin_change_screen.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

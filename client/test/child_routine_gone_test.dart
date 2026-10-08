@@ -6,7 +6,6 @@ import 'package:elum/features/child/application/child_routine_notifier.dart';
 import 'package:elum/features/child/data/step_progress_repository.dart';
 import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +16,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 이룸이가 하던 일과가 **사라졌다** — 그 일과를 만든 보호자가 이룸이에서 나갔다 (#362 · E11).
 ///

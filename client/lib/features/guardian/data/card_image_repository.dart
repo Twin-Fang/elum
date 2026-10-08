@@ -9,8 +9,9 @@ import '../../../core/config/app_config.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../shared/models/action_card.dart';
-import 'card_image_disk_cache.dart';
+import '../../../core/storage/card_image_disk_cache.dart';
 import 'card_photo.dart';
+import '../../../app/dio_provider.dart';
 
 /// 카드 이미지를 받아오고, 보호자가 고른 사진으로 바꾼다.
 ///

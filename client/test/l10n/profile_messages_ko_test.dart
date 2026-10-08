@@ -7,8 +7,6 @@ import 'package:elum/core/network/server_error_code.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
 import 'package:elum/features/profile/domain/invite_link.dart';
@@ -29,6 +27,7 @@ import 'package:go_router/go_router.dart';
 import '../helpers/device_viewport.dart';
 import '../helpers/profile_fixtures.dart';
 import '../helpers/pump_with_locale.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 옮긴 profile 문구가 옛 한국어와 같다 — 기대값은 손으로 쓴 한국어이거나 변경 전 코드(`KoreanParticle`)의 출력이다.
 void main() {

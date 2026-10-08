@@ -1,4 +1,4 @@
-import 'package:elum/features/child/domain/reward_character.dart';
+import 'package:elum/shared/models/reward_character.dart';
 import 'package:elum/shared/utils/korean_particle.dart';
 import 'package:flutter_test/flutter_test.dart';
 

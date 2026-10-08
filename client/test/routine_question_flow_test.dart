@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
@@ -15,6 +14,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/fake_dio.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 추가 질문을 받아 오는 길 (#393 S1 · S2).
 ///

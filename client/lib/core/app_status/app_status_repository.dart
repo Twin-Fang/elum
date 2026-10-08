@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../network/dio_client.dart';
 import 'app_status.dart';
 import 'app_status_recheck.dart';
+import '../../app/dio_provider.dart';
 
 /// 앱 상태를 서버에 묻는다 (이슈 #279).
 ///

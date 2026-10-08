@@ -20,9 +20,9 @@ import '../../auth/presentation/consent_document_list_screen.dart';
 import '../../link/data/device_link_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../profile/application/profile_session.dart';
-import '../data/routine_repository.dart' show memberProvider;
 import 'widgets/ai_credit_card.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../member/application/member_providers.dart';
 
 /// 보호자 설정 화면 (이슈 #181).
 ///

@@ -8,7 +8,7 @@ import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/aurora_background.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';

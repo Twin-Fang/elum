@@ -1,4 +1,4 @@
-import '../../../core/l10n/current_l10n.dart';
+import '../../core/l10n/current_l10n.dart';
 
 /// 아이가 온보딩에서 고르는 "친구" — 생성된 행동 카드 속 주인공이 된다.
 ///

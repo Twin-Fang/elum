@@ -13,7 +13,6 @@ import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
-import '../../guardian/data/routine_repository.dart' show memberProvider;
 import '../../link/domain/link_status.dart';
 import '../../link/presentation/widgets/issued_code_panel.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
@@ -22,6 +21,7 @@ import '../application/profile_session.dart';
 import '../data/profile_repository.dart';
 import '../domain/invite_link.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../member/application/member_providers.dart';
 
 /// 초대 코드 만들기 — 연결된 보호자가 **함께 돌볼 보호자**를 부른다 (다중 보호자 #362).
 ///

@@ -3,8 +3,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/guardian/data/member_repository.dart';
-import '../../features/guardian/data/routine_repository.dart' show memberProvider;
+import '../../member/data/member_repository.dart';
+import '../../member/application/member_providers.dart';
 
 /// 광고를 띄울 수 있는 환경인가.
 ///

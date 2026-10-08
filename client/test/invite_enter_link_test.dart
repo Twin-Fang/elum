@@ -4,8 +4,6 @@ import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/features/profile/application/invite_inbox.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/presentation/invite_enter_screen.dart';
@@ -18,6 +16,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
 import 'helpers/semantics_audit.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 링크로 받은 초대 코드가 채워진 입력 화면 (#365).
 ///

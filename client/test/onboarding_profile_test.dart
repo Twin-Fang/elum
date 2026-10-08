@@ -1,6 +1,6 @@
-import 'package:elum/features/onboarding/domain/character.dart';
+import 'package:elum/shared/models/character.dart';
 import 'package:elum/features/onboarding/domain/onboarding_profile.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

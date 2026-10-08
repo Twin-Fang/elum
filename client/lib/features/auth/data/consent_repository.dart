@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/logger/app_logger.dart';
-import '../../../core/network/dio_client.dart';
+import '../../../app/dio_provider.dart';
 
 /// 약관 동의를 서버에 기록한다.
 ///

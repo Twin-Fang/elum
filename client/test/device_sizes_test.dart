@@ -1,7 +1,7 @@
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_stars_screen.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// **시안은 아이폰 한 기종으로만 그려져 있다.**
 ///

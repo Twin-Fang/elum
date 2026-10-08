@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:elum/core/ads/ad_gate.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/ads/application/ad_gate.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 
 /// Pro 요금제에서 광고가 꺼지는지. 서버 `entitlements.adsRemoved` 가 기준이다.
 void main() {

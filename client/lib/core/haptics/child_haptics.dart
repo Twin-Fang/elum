@@ -2,9 +2,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vibration/vibration.dart';
 
-import '../../features/onboarding/application/onboarding_notifier.dart'
-    show localStorageProvider;
 import '../logger/app_logger.dart';
+import '../storage/local_storage.dart';
 
 /// 이룸이 화면에서 울리는 진동 네 가지 (이슈 #515).
 ///

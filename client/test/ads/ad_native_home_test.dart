@@ -1,8 +1,8 @@
-import 'package:elum/core/ads/ad_banner_loader.dart';
-import 'package:elum/core/ads/ad_gate.dart';
-import 'package:elum/core/ads/ad_ids.dart';
-import 'package:elum/core/ads/ad_native_loader.dart';
-import 'package:elum/core/ads/ad_native_slot.dart';
+import 'package:elum/features/ads/data/ad_banner_loader.dart';
+import 'package:elum/features/ads/application/ad_gate.dart';
+import 'package:elum/core/config/ad_ids.dart';
+import 'package:elum/features/ads/data/ad_native_loader.dart';
+import 'package:elum/features/ads/presentation/ad_native_slot.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
@@ -17,6 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/device_viewport.dart';
 import '../helpers/fake_reward_api.dart';
 import '../helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 홈 '지난 일과' 목록 사이의 네이티브 광고 (#465).
 ///

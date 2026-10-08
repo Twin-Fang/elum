@@ -8,13 +8,13 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/settings_tile.dart';
-import '../../guardian/data/member_repository.dart';
-import '../../guardian/data/routine_repository.dart' show memberProvider;
+import '../../member/data/member_repository.dart';
 import '../application/profile_session.dart';
 import '../domain/profile_summary.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/elum_toast.dart';
+import '../../member/application/member_providers.dart';
 
 /// 이룸이 바꾸기 — 여러 이룸이를 돌보는 보호자(복지사 등)가 지금 볼 이룸이를 고른다 (다중 보호자 #362).
 ///

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../features/onboarding/domain/character.dart';
+import '../../shared/models/character.dart';
 
 /// 캐릭터 선택 상태의 배경·테두리 색 한 쌍.
 typedef SelectionColors = ({Color fill, Color border});

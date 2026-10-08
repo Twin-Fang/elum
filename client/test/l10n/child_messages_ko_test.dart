@@ -1,6 +1,6 @@
 import 'package:elum/core/l10n/batchim.dart';
 import 'package:elum/core/l10n/l10n_context.dart';
-import 'package:elum/features/child/domain/reward_character.dart';
+import 'package:elum/shared/models/reward_character.dart';
 import 'package:elum/features/child/presentation/mode_switch_screen.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';

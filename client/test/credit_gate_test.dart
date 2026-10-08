@@ -11,7 +11,7 @@ import 'package:elum/features/guardian/domain/routine_stage.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/guardian/presentation/routine_loading_screen.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +24,7 @@ import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 크레딧이 생성 흐름을 막는 자리 (#407 스펙 §5) — 홈 시작 전 · 생성 실패 화면.
 void main() {

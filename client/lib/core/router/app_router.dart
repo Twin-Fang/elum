@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../l10n/l10n_context.dart';
-import '../../core/config/app_config.dart';
+import '../config/app_config.dart';
 import '../../features/guardian/presentation/card_review_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/guardian/presentation/draft_routines_screen.dart';

@@ -13,7 +13,7 @@ import 'package:elum/features/guardian/presentation/reward_setup_screen.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/guardian/presentation/routine_loading_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/aurora_background.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +27,7 @@ import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 일과 만들기 **흐름 순서** (#380 결정 1 — Figma 섹션 `1049:4654` 대로).
 ///

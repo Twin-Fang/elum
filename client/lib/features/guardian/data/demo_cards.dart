@@ -1,5 +1,5 @@
 import '../../../shared/models/action_card.dart';
-import '../../onboarding/domain/support_goal.dart';
+import '../../../shared/models/support_goal.dart';
 
 /// fallback용 카드 세트.
 ///

@@ -1,7 +1,7 @@
 import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/character_badge.dart';
-import 'package:elum/features/onboarding/domain/character.dart';
+import 'package:elum/shared/models/character.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';

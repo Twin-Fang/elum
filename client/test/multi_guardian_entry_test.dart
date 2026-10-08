@@ -14,7 +14,6 @@ import 'package:elum/features/credit/data/credit_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_settings_screen.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/features/onboarding/presentation/name_screen.dart';
 import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:elum/features/credit/domain/credit_summary.dart';
@@ -27,6 +26,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/credit_fixtures.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 다중 보호자 화면으로 들어가는 길 (#362).
 ///

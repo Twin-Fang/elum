@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/guarded_call.dart';
 import '../../../core/network/app_failure.dart';
-import '../../../core/network/dio_client.dart';
 import '../domain/credit_summary.dart';
+import '../../../app/dio_provider.dart';
 
 /// AI 크레딧 조회 (#407).
 ///

@@ -15,13 +15,14 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/widgets/login_scene.dart';
-import '../../guardian/data/routine_repository.dart' show memberProvider;
 import '../application/account_reset.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../profile/application/profile_session.dart';
 import '../data/auth_repository.dart';
 import '../data/oauth_sdk.dart';
 import '../../child/application/child_routine_notifier.dart';
+import '../../../core/storage/local_storage.dart';
+import '../../member/application/member_providers.dart';
 
 /// 로그인 화면. 온보딩 맨 앞에 선다.
 ///

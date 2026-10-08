@@ -5,10 +5,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-import '../config/app_config.dart';
-import '../logger/app_logger.dart';
+import '../../../core/config/app_config.dart';
+import '../../../core/logger/app_logger.dart';
 import 'ad_consent.dart';
-import 'ad_ids.dart';
+import '../../../core/config/ad_ids.dart';
 import 'ad_sdk.dart';
 
 /// 로드가 끝난 네이티브 광고. 슬롯이 그리고 화면을 떠날 때 [dispose]로 해제한다.

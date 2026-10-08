@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import '../../../core/l10n/batchim.dart';
-import '../../../core/l10n/current_l10n.dart';
+import '../../core/l10n/batchim.dart';
+import '../../core/l10n/current_l10n.dart';
 
 /// 보상 화면에 등장하는 캐릭터.
 ///

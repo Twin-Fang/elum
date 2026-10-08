@@ -4,10 +4,10 @@ import 'dart:io' show Platform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-import '../config/app_config.dart';
-import '../logger/app_logger.dart';
+import '../../../core/config/app_config.dart';
+import '../../../core/logger/app_logger.dart';
 import 'ad_consent.dart';
-import 'ad_ids.dart';
+import '../../../core/config/ad_ids.dart';
 import 'ad_sdk.dart';
 
 /// 보상형 광고 한 번이 어떻게 끝났나.

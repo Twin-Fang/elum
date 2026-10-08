@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:elum/core/network/dio_client.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 위젯 테스트가 실제 네트워크를 타지 않게 막는다.
 ///

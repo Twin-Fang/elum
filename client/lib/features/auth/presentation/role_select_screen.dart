@@ -9,10 +9,10 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
-import '../../onboarding/application/onboarding_notifier.dart';
 import '../domain/app_role.dart';
 import 'widgets/role_card.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/storage/local_storage.dart';
 
 /// 역할 선택 (Figma `732:5176`·`732:5258` · 이슈 #212 · #229).
 ///

@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
-import '../../../core/network/dio_client.dart';
 import '../../link/domain/link_code.dart';
 import '../../link/domain/link_status.dart';
 import '../domain/guardian_member.dart';
 import '../domain/profile_summary.dart';
+import '../../../app/dio_provider.dart';
 
 /// 초대 코드로 합류한 결과 — 서버 `ProfileJoinResponse` (#361).
 @immutable

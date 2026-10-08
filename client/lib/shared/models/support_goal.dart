@@ -1,4 +1,4 @@
-import '../../../core/l10n/current_l10n.dart';
+import '../../core/l10n/current_l10n.dart';
 
 /// 보호자가 선택하는 "도움 목표".
 ///

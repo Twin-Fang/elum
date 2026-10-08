@@ -3,7 +3,7 @@ import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
-import 'package:elum/features/onboarding/domain/character.dart';
+import 'package:elum/shared/models/character.dart';
 import 'package:elum/features/onboarding/presentation/character_screen.dart';
 import 'package:elum/features/onboarding/presentation/widgets/character_card.dart';
 import 'package:flutter/material.dart';

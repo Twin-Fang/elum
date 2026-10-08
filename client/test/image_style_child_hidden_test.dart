@@ -1,7 +1,7 @@
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 그림 방식은 **보호자만** 바꾼다 (#458 E12).
 ///

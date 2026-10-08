@@ -1,16 +1,13 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/notice/data/notice_repository.dart';
 import 'package:elum/features/notice/domain/app_notice.dart';
 import 'package:elum/features/notice/presentation/guardian_notice_launcher.dart';
 import 'package:elum/features/notice/presentation/notice_popup.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -19,6 +16,8 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
+import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 보호자 홈에서만, 앱 실행 중 처음 한 번 (이슈 #371 · 명세 2장 · 3-2).
 /// 여러 개면 **차례로**, `보지 않기` 는 공지마다 (이슈 #390).

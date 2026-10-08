@@ -1,4 +1,4 @@
-import '../../guardian/data/member_repository.dart';
+import '../../member/data/member_repository.dart';
 
 /// 두 홈이 같은 이룸이를 부르도록 선택한 프로필의 이름을 함께 사용한다.
 String resolveProfileDisplayName(

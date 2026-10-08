@@ -5,10 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
-import '../../../core/network/dio_client.dart';
 import '../../../core/storage/local_storage.dart';
-import '../../onboarding/application/onboarding_notifier.dart';
 import '../domain/consent_bundle.dart';
+import '../../../app/dio_provider.dart';
 
 /// 약관 전문을 어디서 읽을지 고른다 (이슈 #278).
 ///

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:elum/core/ads/rewarded_ad_loader.dart';
+import 'package:elum/features/ads/data/rewarded_ad_loader.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error.dart';
 import 'package:elum/core/network/server_error_code.dart';

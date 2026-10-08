@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import '../ads/ad_ids.dart';
+import 'ad_ids.dart';
 import 'client_tuning.dart';
 
 /// 환경변수 접근 단일 창구.

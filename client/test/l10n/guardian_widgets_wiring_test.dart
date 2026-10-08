@@ -16,7 +16,7 @@ import 'package:elum/features/credit/domain/credit_summary.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/card_photo.dart';
 import 'package:elum/features/guardian/data/card_photo_picker.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
@@ -37,7 +37,6 @@ import 'package:elum/features/guardian/presentation/widgets/routine_summary_tile
 import 'package:elum/features/guardian/presentation/widgets/routine_swipe_actions.dart';
 import 'package:elum/features/guardian/presentation/widgets/step_card_viewer.dart';
 import 'package:elum/features/guardian/presentation/widgets/today_routine_section.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/l10n/app_localizations.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -58,6 +57,7 @@ import '../helpers/fake_reward_api.dart';
 import '../helpers/svg_finder.dart';
 import '../helpers/test_storage.dart';
 import '../photo/fake_photo_picker.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 모든 문구를 `⟦키⟧` 로 돌려주는 가짜 번역. 보간 인자는 괄호 안에 넣는다.
 ///

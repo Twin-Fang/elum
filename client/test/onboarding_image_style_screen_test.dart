@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
@@ -17,6 +16,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/semantics_audit.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 온보딩의 그림 방식 단계.
 ///

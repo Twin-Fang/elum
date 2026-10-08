@@ -4,12 +4,11 @@ library;
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_reward_api.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 보호자 홈 코치마크 3단계의 렌더 회귀 고정 (Figma 코치마크_1·2·3 · 이슈 #505).
 ///

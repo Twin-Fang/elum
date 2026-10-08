@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:elum/core/ads/ad_banner_loader.dart';
-import 'package:elum/core/ads/ad_banner_slot.dart';
-import 'package:elum/core/ads/ad_gate.dart';
-import 'package:elum/core/ads/ad_ids.dart';
+import 'package:elum/features/ads/data/ad_banner_loader.dart';
+import 'package:elum/features/ads/presentation/ad_banner_slot.dart';
+import 'package:elum/features/ads/application/ad_gate.dart';
+import 'package:elum/core/config/ad_ids.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -3,8 +3,6 @@ import 'package:elum/core/network/server_error_code.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
 import 'package:elum/features/profile/presentation/guardians_screen.dart';
@@ -17,6 +15,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
 import 'helpers/semantics_audit.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 함께하는 사람 · 이 이룸이에서 나가기 (#362 · E15·E19·E20·E29).
 ///

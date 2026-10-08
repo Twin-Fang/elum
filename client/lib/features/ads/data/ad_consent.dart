@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/widgets.dart';
 
-import '../logger/app_logger.dart';
+import '../../../core/logger/app_logger.dart';
 
 /// 광고를 개인화해서 요청할지 정한다.
 ///

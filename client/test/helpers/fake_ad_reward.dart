@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:elum/core/ads/rewarded_ad_loader.dart';
+import 'package:elum/features/ads/data/rewarded_ad_loader.dart';
 import 'package:elum/features/credit/data/ad_reward_repository.dart';
 import 'package:elum/features/credit/domain/ad_reward.dart';
 

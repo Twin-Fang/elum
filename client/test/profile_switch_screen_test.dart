@@ -2,9 +2,7 @@ import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:elum/features/profile/presentation/profile_switch_screen.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +14,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
 import 'helpers/semantics_audit.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 이룸이 바꾸기 (#362 · E44). 복지사처럼 이룸이를 여럿 돌보는 보호자가 쓴다.
 void main() {

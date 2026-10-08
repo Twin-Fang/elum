@@ -3,17 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/storage/local_storage.dart';
-import '../../guardian/data/member_repository.dart';
+import '../../member/data/member_repository.dart';
 import '../../profile/domain/profile_summary.dart';
-import '../domain/character.dart';
+import '../../../shared/models/character.dart';
 import '../domain/image_style.dart';
 import '../domain/onboarding_profile.dart';
-import '../domain/support_goal.dart';
-
-/// LocalStorage 주입 지점. main에서 초기화된 인스턴스로 override한다.
-final localStorageProvider = Provider<LocalStorage>(
-  (ref) => throw UnimplementedError('main에서 override해야 한다'),
-);
+import '../../../shared/models/support_goal.dart';
 
 final onboardingProvider =
     NotifierProvider<OnboardingNotifier, OnboardingProfile>(

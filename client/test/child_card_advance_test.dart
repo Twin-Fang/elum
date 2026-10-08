@@ -17,6 +17,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 카드를 체크하고 별 화면을 닫으면 다음 카드로 넘어간다 (이슈 #293).
 ///

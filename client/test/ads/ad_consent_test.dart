@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:elum/core/ads/ad_consent.dart';
+import 'package:elum/features/ads/data/ad_consent.dart';
 
 /// ATT 는 광고 요청이 아니라 앱 시작 직후 묻는다 (#519 심사 2.1 리젝).
 void main() {

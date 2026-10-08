@@ -5,15 +5,15 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/core/widgets/elum_error_view.dart';
 import 'package:elum/core/theme/app_colors.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/widgets/routine_detail_sheet.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/routine_summary_tile.dart';
 import 'package:elum/features/guardian/presentation/widgets/routine_swipe_actions.dart';
-import 'package:elum/features/onboarding/domain/character.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/character.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -28,6 +28,7 @@ import 'helpers/fake_reward_api.dart';
 import 'helpers/semantics_audit.dart';
 import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// Figma `보호자_홈` 개편(931:3896 기본 / 931:4179 밀림 / 931:4879 삭제) 정합 테스트.
 ///

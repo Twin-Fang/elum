@@ -2,7 +2,7 @@
 library;
 
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/child/domain/reward_character.dart';
+import 'package:elum/shared/models/reward_character.dart';
 import 'package:elum/features/child/presentation/reward_screen.dart';
 import 'package:elum/features/child/presentation/widgets/reward_banner.dart';
 import 'package:elum/shared/models/action_card.dart';

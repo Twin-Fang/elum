@@ -8,10 +8,10 @@ import '../../../core/network/server_error_code.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/storage/token_store.dart';
 import '../../../core/network/app_failure.dart';
-import '../../guardian/data/card_image_disk_cache.dart';
-import '../../onboarding/application/onboarding_notifier.dart';
+import '../../../core/storage/card_image_disk_cache.dart';
 import 'oauth_sdk.dart';
 import '../../../core/storage/account_wipe.dart';
+import '../../../app/dio_provider.dart';
 
 /// 로그인 결과. 화면이 다음 목적지를 정하는 데 쓴다.
 enum AuthOutcome {

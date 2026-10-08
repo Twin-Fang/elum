@@ -1,5 +1,5 @@
 import 'package:elum/features/guardian/data/card_repository.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:flutter_test/flutter_test.dart';
 

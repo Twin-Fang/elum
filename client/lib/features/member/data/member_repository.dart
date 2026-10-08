@@ -3,11 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
-import '../../../core/network/dio_client.dart';
 import '../../../core/network/guarded_call.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../onboarding/domain/image_style.dart';
 import '../../profile/domain/profile_summary.dart';
+import '../../../app/dio_provider.dart';
 
 /// 보호자 회원 정보 — 서버 `MemberResponse`에 대응한다.
 ///

@@ -5,8 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/ads/ad_ids.dart';
-import '../../../../core/ads/ad_native_slot.dart';
+import '../../../../core/config/ad_ids.dart';
+import '../../../ads/presentation/ad_native_slot.dart';
 import '../../../../core/network/server_error_code.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/router/app_router.dart';

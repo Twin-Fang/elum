@@ -3,7 +3,7 @@ import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/onboarding/presentation/pin_screen.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -16,6 +16,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 이룸이가 없는 보호자가 온보딩을 마칠 때 (#362) — 저장 전에 새 이룸이를 먼저 만든다.
 /// 서버는 이룸이 없이 이름을 저장하면 404 PROFILE_NOT_FOUND 로 막는다.

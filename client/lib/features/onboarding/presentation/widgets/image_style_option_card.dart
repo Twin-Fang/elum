@@ -7,7 +7,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/text/keep_words.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../domain/character.dart';
+import '../../../../shared/models/character.dart';
 import '../../domain/image_style.dart';
 
 /// 그림 방식 선택 카드 한 장 — 온보딩과 보호자 설정이 같이 쓴다 (이슈 #458 · #494).

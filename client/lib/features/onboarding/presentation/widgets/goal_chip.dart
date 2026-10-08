@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../domain/support_goal.dart';
+import '../../../../shared/models/support_goal.dart';
 
 /// 도움 목표 선택 항목. 아이콘 + 문구.
 ///

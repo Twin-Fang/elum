@@ -13,8 +13,8 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
-import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/storage/local_storage.dart';
 
 /// Figma `보호자_아이화면_전환`(309:2837).
 ///

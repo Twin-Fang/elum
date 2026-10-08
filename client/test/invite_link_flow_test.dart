@@ -2,7 +2,6 @@ import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/profile/application/invite_inbox.dart';
 import 'package:elum/features/profile/application/invite_link_intake.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
@@ -17,6 +16,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 링크가 열려서 코드가 채워진 입력 화면에 닿기까지 — **`ElumApp` 과 같은 배선**으로 끝에서 끝까지 (#365).
 ///

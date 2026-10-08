@@ -1,15 +1,14 @@
 import 'package:elum/core/dev/dev_locale_override.dart';
-import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/fake_dio.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 앱이 실제로 쓰는 Dio(`dioProvider`)에 언어 헤더가 붙어 있는가.
 ///

@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../../core/logger/app_logger.dart';
+import '../logger/app_logger.dart';
 
 /// 카드 그림을 기기 저장소에 보관한다 (#462).
 ///

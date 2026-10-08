@@ -16,13 +16,13 @@ import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
 import 'widgets/reward_banner.dart';
-import '../../guardian/data/routine_repository.dart';
 import 'widgets/child_card_pager.dart';
 import '../application/child_routine_notifier.dart';
 import '../../../core/haptics/child_haptics.dart';
 import '../data/speech_service.dart';
 import 'child_home_screen.dart' show childRoutinesProvider;
 import '../../../core/router/pop_or_home.dart';
+import '../../member/application/member_providers.dart';
 
 /// 일과 상세 — 카드를 넘기며 체크한다 (Figma 309:3548 체크 전 / 309:3648 체크 후).
 ///

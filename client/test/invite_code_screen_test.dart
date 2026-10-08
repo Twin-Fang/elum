@@ -2,7 +2,6 @@ import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error.dart';
 import 'package:elum/core/network/server_error_code.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
 import 'package:elum/features/profile/application/invite_sharer.dart';
 import 'package:elum/features/profile/domain/invite_link.dart';
@@ -17,6 +16,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
 import 'helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 초대 코드 만들기 — 연결된 보호자가 함께할 보호자를 부른다 (#362 · 서버 #361).
 ///

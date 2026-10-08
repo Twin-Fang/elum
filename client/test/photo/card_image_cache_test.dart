@@ -1,9 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/data/card_image_disk_cache.dart';
+import 'package:elum/core/storage/card_image_disk_cache.dart';
 import 'package:elum/features/guardian/data/card_image_repository.dart';
 import 'package:elum/features/guardian/presentation/widgets/action_card_view.dart';
 import 'package:elum/features/guardian/presentation/widgets/card_image.dart';
@@ -12,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 사진으로 바꾸면 이미지 캐시가 버려진다 (#456 · 이룸이 화면에도 새 그림이 간다).
 ///

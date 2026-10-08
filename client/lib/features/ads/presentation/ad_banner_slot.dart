@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'ad_banner_loader.dart';
-import 'ad_gate.dart';
-import 'ad_ids.dart';
+import '../data/ad_banner_loader.dart';
+import '../application/ad_gate.dart';
+import '../../../core/config/ad_ids.dart';
 
 /// 화면 하단에 놓는 배너 자리.
 ///

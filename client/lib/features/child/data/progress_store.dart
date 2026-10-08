@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/local_storage.dart';
-import '../../onboarding/application/onboarding_notifier.dart';
 import '../domain/routine_progress_record.dart';
 
 /// 아동 카드 진행 기록의 저장소 래퍼 (이슈 #140).

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/dio_client.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../../app/dio_provider.dart';
 
 /// 서버가 완료 집합을 받아들였는가.
 ///

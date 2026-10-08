@@ -1,8 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/storage/local_storage.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 
 /// ProviderScope에 넣을 저장소 override를 만든다.
 ///

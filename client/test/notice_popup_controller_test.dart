@@ -5,7 +5,6 @@ import 'package:elum/features/notice/application/notice_popup_controller.dart';
 import 'package:elum/features/notice/data/notice_hide_store.dart';
 import 'package:elum/features/notice/data/notice_repository.dart';
 import 'package:elum/features/notice/domain/app_notice.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

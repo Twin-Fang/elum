@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../l10n/l10n_context.dart';
-import '../theme/theme_context_ext.dart';
-import 'ad_gate.dart';
-import 'ad_ids.dart';
-import 'ad_native_loader.dart';
+import '../../../core/l10n/l10n_context.dart';
+import '../../../core/theme/theme_context_ext.dart';
+import '../application/ad_gate.dart';
+import '../../../core/config/ad_ids.dart';
+import '../data/ad_native_loader.dart';
 
 /// 목록 사이에 끼우는 네이티브 광고 한 칸 (#465).
 ///

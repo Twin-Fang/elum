@@ -6,12 +6,13 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/network/session_expiry.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../guardian/application/routine_notifier.dart';
-import '../../guardian/data/member_repository.dart';
+import '../../member/data/member_repository.dart';
 import '../../guardian/data/routine_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../auth/domain/app_role.dart';
 import '../data/profile_repository.dart';
 import '../domain/profile_summary.dart';
+import '../../member/application/member_providers.dart';
 
 /// 보호자가 지금 보고 있는 이룸이 (다중 보호자 #362).
 @immutable

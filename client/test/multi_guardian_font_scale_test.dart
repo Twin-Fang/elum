@@ -1,8 +1,6 @@
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
@@ -18,6 +16,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 시스템 글자를 가장 크게 키운 보호자에게도 새 화면이 깨지지 않는다 (#362 · 디자인 원칙 §7-2 #19).
 ///

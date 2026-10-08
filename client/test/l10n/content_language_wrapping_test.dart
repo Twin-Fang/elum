@@ -8,7 +8,7 @@ import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
 import 'package:elum/features/child/presentation/widgets/reward_banner.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
 import 'package:elum/features/guardian/presentation/draft_routines_screen.dart';
@@ -28,6 +28,7 @@ import '../helpers/fake_dio.dart';
 import '../helpers/fake_reward_api.dart';
 import '../helpers/pump_with_locale.dart';
 import '../helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 일과 글(카드 제목·설명·일과 제목·보상)은 **일과 언어**, 화면 문구는 **휴대폰 언어**다.
 /// 각 시험은 두 언어를 서로 다른 값으로 두고, 글자 스타일 locale 과 `Localizations` 를 값으로 맞댄다.

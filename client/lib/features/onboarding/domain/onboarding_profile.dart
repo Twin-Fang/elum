@@ -1,9 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../core/l10n/current_l10n.dart';
-import 'character.dart';
+import '../../../shared/models/character.dart';
 import 'image_style.dart';
-import 'support_goal.dart';
+import '../../../shared/models/support_goal.dart';
 
 part 'onboarding_profile.freezed.dart';
 

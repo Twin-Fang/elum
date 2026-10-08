@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/periodic_refresh.dart';
 import '../../guardian/data/routine_repository.dart';
+import '../../member/application/member_providers.dart';
 
 /// 이룸이·보호자 홈이 떠 있는 동안 오늘 일과와 회원 정보(누적 별)를 주기적으로 다시 받는다.
 ///

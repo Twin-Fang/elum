@@ -7,8 +7,8 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../guardian/data/routine_repository.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../member/application/member_providers.dart';
 
 /// Figma `아이_별`(364:8219) — 지금까지 모은 별을 보여준다.
 ///

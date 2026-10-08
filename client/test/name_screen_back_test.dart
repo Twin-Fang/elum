@@ -1,7 +1,6 @@
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';

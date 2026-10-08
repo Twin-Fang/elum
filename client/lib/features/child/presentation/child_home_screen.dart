@@ -25,10 +25,12 @@ import '../../guardian/presentation/widgets/today_routine_section.dart'
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../profile/application/profile_display_name.dart';
 import '../../profile/application/profile_session.dart';
-import '../../onboarding/domain/character.dart';
+import '../../../shared/models/character.dart';
 import '../application/child_routine_notifier.dart';
 import '../application/routine_auto_refresh.dart';
 import 'mode_switch_screen.dart';
+import '../../../core/storage/local_storage.dart';
+import '../../member/application/member_providers.dart';
 
 /// 아이에게 보여줄 일과 목록.
 ///

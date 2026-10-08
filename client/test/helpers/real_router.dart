@@ -1,11 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,6 +12,7 @@ import 'package:go_router/go_router.dart';
 
 import 'fake_dio.dart';
 import 'no_disk_cache.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 실제 앱 라우터(`createRouter`)를 저장소·토큰과 묶어 띄운다. 가드·뒤로가기·로그아웃 도착지 테스트는 이것으로 한다.
 /// 가드 없는 가짜 `GoRouter` 로는 가드와 화면 쌓기의 충돌이 보이지 않는다.

@@ -7,7 +7,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/selectable_group.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
-import '../../onboarding/domain/character.dart';
+import '../../../shared/models/character.dart';
 import '../../onboarding/domain/image_style.dart';
 import '../../onboarding/presentation/widgets/image_style_option_card.dart';
 import '../../../core/router/pop_or_home.dart';

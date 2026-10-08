@@ -14,7 +14,6 @@ import 'core/storage/installation_store.dart';
 import 'l10n/app_localizations.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/oauth_sdk.dart';
-import 'features/onboarding/application/onboarding_notifier.dart';
 
 Future<void> main() async {
   AppLogger.appStarted();

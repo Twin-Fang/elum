@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../features/onboarding/domain/character.dart';
+import '../../shared/models/character.dart';
 import '../assets/app_assets.dart';
 
 /// 홈 오른쪽 위 캐릭터 배지 — 보호자 홈과 이룸이 홈이 함께 쓴다.

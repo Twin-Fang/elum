@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
@@ -9,7 +8,6 @@ import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/domain/app_role.dart';
 import 'package:elum/features/link/application/link_reset.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -19,6 +17,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/no_disk_cache.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 이룸이 휴대폰에서 나가는 모든 길이 막다른 화면이 되지 않는다 (#542).
 ///

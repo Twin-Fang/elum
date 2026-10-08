@@ -8,12 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 /// 이룸이 화면·일과 만들기 흐름·보상 연출·온보딩에 광고가 생기면 되돌릴 방법을
 /// 모르는 사용자가 잘못 누른다. 실수로 import가 늘면 이 테스트가 실패한다.
 void main() {
+  // 상대 경로(../../ads/...)든 패키지 경로든 광고 모듈 import 를 잡는다
+  final adsImport = RegExp(r"import '[^']*\bads/(data|application|presentation)/");
+
   Iterable<File> dartFiles(String dir) => Directory(dir)
       .listSync(recursive: true)
       .whereType<File>()
       .where((f) => f.path.endsWith('.dart'));
 
-  test('core/ads를 쓰는 화면은 보호자 홈·임시저장뿐이다', () {
+  test('광고 모듈을 쓰는 화면은 보호자 홈·임시저장뿐이다', () {
     const allowed = {
       // 앱 시작 때 ATT 팝업을 묻는다(#519). 광고를 그리지 않고 AdConsent.requestOnLaunch 만 부른다.
       'lib/app.dart',
@@ -25,10 +28,10 @@ void main() {
       'lib/features/guardian/presentation/widgets/today_routine_section.dart',
     };
     final users = dartFiles('lib')
-        .where((f) => !f.path.startsWith('lib/core/ads/'))
+        .where((f) => !f.path.startsWith('lib/features/ads/'))
         // 설정값을 읽어 주는 AppConfig 는 화면이 아니다.
         .where((f) => f.path != 'lib/core/config/app_config.dart')
-        .where((f) => f.readAsStringSync().contains('core/ads/'))
+        .where((f) => adsImport.hasMatch(f.readAsStringSync()))
         .map((f) => f.path)
         .toSet();
     expect(users, allowed);
@@ -37,18 +40,18 @@ void main() {
   test('이룸이 화면 폴더는 광고를 전혀 모른다', () {
     final offenders = dartFiles('lib/features/child')
         .where(
-          (f) => f.readAsStringSync().contains(
-            RegExp(r'core/ads|google_mobile_ads'),
-          ),
+          (f) =>
+              adsImport.hasMatch(f.readAsStringSync()) ||
+              f.readAsStringSync().contains('google_mobile_ads'),
         )
         .map((f) => f.path)
         .toList();
     expect(offenders, isEmpty);
   });
 
-  test('google_mobile_ads는 core/ads 안에서만 쓴다', () {
+  test('google_mobile_ads는 광고 모듈 안에서만 쓴다', () {
     final offenders = dartFiles('lib')
-        .where((f) => !f.path.startsWith('lib/core/ads/'))
+        .where((f) => !f.path.startsWith('lib/features/ads/'))
         .where((f) => f.readAsStringSync().contains('google_mobile_ads'))
         .map((f) => f.path)
         .toList();
@@ -62,7 +65,7 @@ void main() {
       'rewarded_ad_loader.dart',
       'ad_native_loader.dart',
     ]) {
-      final src = File('lib/core/ads/$name').readAsStringSync();
+      final src = File('lib/features/ads/data/$name').readAsStringSync();
       expect(src, isNot(contains('keywords')), reason: name);
       expect(src, isNot(contains('contentUrl')), reason: name);
       expect(src, isNot(contains('customTargeting')), reason: name);
@@ -106,7 +109,7 @@ void main() {
   // 한 파일에 오늘·지난 일과 구역이 함께 있어, 파일 단위로는 오늘 일과에 끼었는지 못 가린다.
   test('네이티브 광고는 지난 일과 구역에서만 쓴다', () {
     final users = dartFiles('lib')
-        .where((f) => !f.path.startsWith('lib/core/ads/'))
+        .where((f) => !f.path.startsWith('lib/features/ads/'))
         .where((f) => f.readAsStringSync().contains('AdNativeSlot'))
         .map((f) => f.path)
         .toSet();

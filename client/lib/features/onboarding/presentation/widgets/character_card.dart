@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../domain/character.dart';
+import '../../../../shared/models/character.dart';
 
 /// 캐릭터 선택 카드. Figma 기준 176×202.
 ///

@@ -1,6 +1,6 @@
-import '../../features/child/domain/reward_character.dart';
-import '../../features/onboarding/domain/character.dart';
-import '../../features/onboarding/domain/support_goal.dart';
+import '../../shared/models/reward_character.dart';
+import '../../shared/models/character.dart';
+import '../../shared/models/support_goal.dart';
 
 /// 에셋 경로 상수.
 ///

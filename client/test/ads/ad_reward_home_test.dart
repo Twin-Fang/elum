@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:elum/core/ads/ad_banner_loader.dart';
-import 'package:elum/core/ads/ad_gate.dart';
-import 'package:elum/core/ads/ad_ids.dart';
-import 'package:elum/core/ads/rewarded_ad_loader.dart';
+import 'package:elum/features/ads/data/ad_banner_loader.dart';
+import 'package:elum/features/ads/application/ad_gate.dart';
+import 'package:elum/core/config/ad_ids.dart';
+import 'package:elum/features/ads/data/rewarded_ad_loader.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error.dart';
 import 'package:elum/core/network/server_error_code.dart';
@@ -17,7 +17,7 @@ import 'package:elum/features/credit/domain/credit_summary.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,6 +30,7 @@ import '../helpers/device_viewport.dart';
 import '../helpers/fake_ad_reward.dart';
 import '../helpers/fake_reward_api.dart';
 import '../helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 크레딧 소진 안내의 "광고 보고 더 만들기" (#464).
 ///

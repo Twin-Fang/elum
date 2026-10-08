@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../shared/models/action_card.dart';
-import '../../onboarding/domain/support_goal.dart';
+import '../../../shared/models/support_goal.dart';
 import 'demo_cards.dart';
 
 /// 카드 생성 요청. 보호자 입력 원문은 DLP를 거친 뒤에만 서버로 나간다.

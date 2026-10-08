@@ -1,18 +1,19 @@
 import 'package:elum/core/network/session_expiry.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
-import 'package:elum/features/onboarding/domain/character.dart';
+import 'package:elum/shared/models/character.dart';
 import 'package:elum/features/onboarding/domain/image_style.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/features/profile/application/profile_session.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 보호자가 이룸이를 고르는 상태 (#362 · E27·E29·E44).
 ///

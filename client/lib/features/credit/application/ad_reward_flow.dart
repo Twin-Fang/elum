@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/ads/ad_gate.dart';
-import '../../../core/ads/rewarded_ad_loader.dart';
+import '../../ads/application/ad_gate.dart';
+import '../../ads/data/rewarded_ad_loader.dart';
 import '../../../core/l10n/current_l10n.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';

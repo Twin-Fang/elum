@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/ads/ad_banner_slot.dart';
-import '../../../core/ads/ad_ids.dart';
+import '../../ads/presentation/ad_banner_slot.dart';
+import '../../../core/config/ad_ids.dart';
 import '../../../core/l10n/content_locale.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';

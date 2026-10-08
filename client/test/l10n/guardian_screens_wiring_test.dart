@@ -27,7 +27,6 @@ import 'package:elum/features/guardian/presentation/question_screen.dart';
 import 'package:elum/features/guardian/presentation/reward_setup_screen.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/features/link/domain/link_status.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -52,6 +51,7 @@ import '../helpers/fake_dio.dart';
 import '../helpers/profile_fixtures.dart';
 import '../helpers/pump_with_locale.dart';
 import '../helpers/test_storage.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 /// 화면이 **어느 ARB 키를 읽는지**를 키 이름 표식으로 가려내는 가짜 번역.
 ///

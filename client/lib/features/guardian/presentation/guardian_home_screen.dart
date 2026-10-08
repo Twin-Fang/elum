@@ -6,8 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/ads/ad_banner_slot.dart';
-import '../../../core/ads/ad_ids.dart';
+import '../../ads/presentation/ad_banner_slot.dart';
+import '../../../core/config/ad_ids.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_router.dart';
@@ -19,7 +19,7 @@ import '../../credit/presentation/credit_blocked_dialog.dart';
 import '../../child/application/routine_auto_refresh.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../profile/application/profile_display_name.dart';
-import '../../onboarding/domain/character.dart';
+import '../../../shared/models/character.dart';
 import '../../profile/application/profile_session.dart';
 import '../application/home_coach_notifier.dart';
 import '../application/routine_notifier.dart';
@@ -28,6 +28,7 @@ import 'widgets/create_routine_button.dart';
 import 'widgets/home_coach_mark.dart';
 import 'widgets/routine_summary_tile.dart';
 import 'widgets/today_routine_section.dart';
+import '../../member/application/member_providers.dart';
 
 /// Figma `보호자_홈`(931:3896 기본 / 931:4179 밀림 / 931:4879 삭제 확인 · 이슈 #258).
 ///

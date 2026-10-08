@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:elum/core/storage/local_storage.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:elum/features/profile/application/profile_display_name.dart';
 import 'package:elum/features/profile/application/profile_session.dart';
 import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:elum/features/member/application/member_providers.dart';
 
 void main() {
   const qa = ProfileSummary(id: 'qa', nickname: 'QA');

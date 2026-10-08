@@ -16,13 +16,13 @@ import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/periodic_refresh.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
-import '../../guardian/data/routine_repository.dart' show memberProvider;
 import '../application/profile_session.dart';
 import '../data/profile_repository.dart';
 import '../domain/guardian_member.dart';
 import 'guardian_edit_sheet.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
+import '../../member/application/member_providers.dart';
 
 /// 지금 보는 이룸이를 함께 돌보는 사람 (다중 보호자 #362).
 ///

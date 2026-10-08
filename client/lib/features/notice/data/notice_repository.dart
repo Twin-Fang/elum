@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
-import '../../../core/network/dio_client.dart';
 import '../../../core/network/guarded_call.dart';
 import '../domain/app_notice.dart';
+import '../../../app/dio_provider.dart';
 
 /// 공지를 받을 플랫폼. 값은 서버 `NoticePlatform` enum 과 같다 (#370).
 enum NoticePlatform {

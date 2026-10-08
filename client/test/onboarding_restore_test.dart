@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
-import 'package:elum/features/onboarding/domain/character.dart';
-import 'package:elum/features/onboarding/domain/support_goal.dart';
+import 'package:elum/shared/models/character.dart';
+import 'package:elum/shared/models/support_goal.dart';
 
 /// 앱을 껐다 켜면 온보딩 상태는 메모리에서 사라진다.
 /// 저장해 둔 값으로 되살리지 않으면 홈이 폴백을 그려, 고른 캐릭터가

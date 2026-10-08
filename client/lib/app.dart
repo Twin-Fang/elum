@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import 'core/ads/ad_consent.dart';
+import 'features/ads/data/ad_consent.dart';
 import 'core/app_status/app_status_gate.dart';
 import 'core/app_status/app_status_repository.dart';
 import 'core/config/client_tuning.dart';
@@ -11,7 +11,6 @@ import 'core/dev/dev_locale_override.dart';
 import 'core/dev/dev_tools_overlay.dart';
 import 'core/l10n/app_l10n.dart';
 import 'core/l10n/current_l10n.dart';
-import 'core/network/dio_client.dart';
 import 'core/network/session_expiry.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -19,10 +18,11 @@ import 'core/widgets/elum_toast.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/child/application/sync_triggers.dart';
 import 'features/link/application/link_reset.dart';
-import 'features/onboarding/application/onboarding_notifier.dart';
 import 'features/profile/application/invite_inbox.dart';
 import 'features/profile/application/invite_link_intake.dart';
 import 'features/profile/presentation/invite_link_host.dart';
+import 'core/storage/local_storage.dart';
+import 'app/dio_provider.dart';
 
 class ElumApp extends ConsumerStatefulWidget {
   const ElumApp({super.key});

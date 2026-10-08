@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:elum/core/network/dio_client.dart';
 import 'package:elum/core/router/app_router.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
@@ -9,7 +8,7 @@ import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/features/auth/presentation/consent_document_list_screen.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
-import 'package:elum/features/guardian/data/member_repository.dart';
+import 'package:elum/features/member/data/member_repository.dart';
 import 'package:elum/features/link/presentation/elumi_settings_screen.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
@@ -24,6 +23,8 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/no_disk_cache.dart';
+import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/app/dio_provider.dart';
 
 /// 이룸이 휴대폰의 상단 바와 설정 페이지 (이슈 #363 · #198 19번 · #488).
 ///

@@ -12,7 +12,7 @@ import '../../../core/router/app_destination.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../auth/data/auth_repository.dart';
-import '../application/onboarding_notifier.dart';
+import '../../../core/storage/local_storage.dart';
 
 /// Figma `스플래시` (1022:4415) — 서비스 진입 화면.
 ///
