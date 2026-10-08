@@ -1128,6 +1128,30 @@
   "guardianSettingsTerms": "약관 및 개인정보처리방침",
   "@guardianSettingsTerms": { "description": "설정 줄 — 약관 목록" },
 
+  "guardianSettingsFeedback": "의견 보내기",
+  "@guardianSettingsFeedback": { "description": "설정 줄 — 의견 보내기 화면으로 간다" },
+
+  "feedbackTitle": "의견 보내기",
+  "@feedbackTitle": { "description": "의견 보내기 화면 제목" },
+
+  "feedbackHint": "불편했던 점을 편하게 적어 주세요",
+  "@feedbackHint": { "description": "의견 입력창 안내 문구" },
+
+  "feedbackIncludeLog": "앱 상태 기록 보내기",
+  "@feedbackIncludeLog": { "description": "의견과 함께 최근 앱 상태 기록을 보낼지 고르는 체크 문구" },
+
+  "feedbackSend": "보내기",
+  "@feedbackSend": { "description": "의견 보내기 버튼" },
+
+  "feedbackSent": "의견을 보냈어요",
+  "@feedbackSent": { "description": "의견을 보낸 뒤 잠깐 뜨는 알림" },
+
+  "feedbackFailedTitle": "의견을 보내지 못했어요",
+  "@feedbackFailedTitle": { "description": "의견 보내기 실패 팝업의 제목" },
+
+  "feedbackFailedFallback": "적은 글은 그대로 있어요. 잠시 후 다시 보내 주세요",
+  "@feedbackFailedFallback": { "description": "의견 보내기 실패 팝업의 할 일 안내(서버가 이유를 주지 않았을 때)" },
+
   "guardianSettingsLogout": "로그아웃",
   "@guardianSettingsLogout": { "description": "설정 줄 — 로그아웃" },
 

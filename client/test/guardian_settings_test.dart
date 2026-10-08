@@ -246,6 +246,7 @@ void main() {
       // 이룸이 카드 진동 스위치(#515) — 시안에 없는 줄이라 그림 방식 바로 아래 둔다.
       '카드 체크 진동',
       '약관 및 개인정보처리방침',
+      '의견 보내기',
       // `앱 정보`(#418)는 약관과 로그아웃 사이에 새로 들어온 줄이다 — 시안에는 아직 없다.
       '앱 정보',
       '로그아웃',
@@ -299,6 +300,8 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('로그아웃'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('로그아웃'));
     await tester.pumpAndSettle();
 
@@ -310,6 +313,8 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('로그아웃'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('로그아웃'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('취소'));
@@ -323,6 +328,8 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('로그아웃'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('로그아웃'));
     await tester.pumpAndSettle();
     // 시안(`팝업` 1045:5194)의 확인 버튼 이름은 `확인`이다.
@@ -338,6 +345,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
 
@@ -376,6 +385,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
 
@@ -399,6 +410,8 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('로그아웃'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('로그아웃'));
     await tester.pumpAndSettle();
 
@@ -420,6 +433,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('확인'));
@@ -440,6 +455,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('확인'));
@@ -451,6 +468,8 @@ void main() {
     // 실패 후에도 버튼이 잠겨 있으면 그 자리에서 할 수 있는 일이 없어진다.
     auth.deleteSucceeds = true;
     await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('확인'));
@@ -465,6 +484,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.ensureVisible(find.text('회원탈퇴'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('회원탈퇴'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('취소'));

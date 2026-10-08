@@ -32,6 +32,9 @@ abstract final class Routes {
   /// 비밀암호 변경. 시안이 없어 온보딩 비밀번호 화면 모양을 쓴다.
   static const guardianPinChange = '/guardian/settings/pin';
 
+  /// 의견 보내기. 시안이 없어 임시 화면이다.
+  static const guardianFeedback = '/guardian/settings/feedback';
+
   /// 그림 방식 선택. 시안이 없어 임시 화면이다.
   static const guardianImageStyle = '/guardian/settings/image-style';
 

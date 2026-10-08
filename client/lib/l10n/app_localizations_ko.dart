@@ -1196,6 +1196,30 @@ class AppLocalizationsKo extends AppLocalizations {
   String get guardianSettingsTerms => '약관 및 개인정보처리방침';
 
   @override
+  String get guardianSettingsFeedback => '의견 보내기';
+
+  @override
+  String get feedbackTitle => '의견 보내기';
+
+  @override
+  String get feedbackHint => '불편했던 점을 편하게 적어 주세요';
+
+  @override
+  String get feedbackIncludeLog => '앱 상태 기록 보내기';
+
+  @override
+  String get feedbackSend => '보내기';
+
+  @override
+  String get feedbackSent => '의견을 보냈어요';
+
+  @override
+  String get feedbackFailedTitle => '의견을 보내지 못했어요';
+
+  @override
+  String get feedbackFailedFallback => '적은 글은 그대로 있어요. 잠시 후 다시 보내 주세요';
+
+  @override
   String get guardianSettingsLogout => '로그아웃';
 
   @override
