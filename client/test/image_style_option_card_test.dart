@@ -91,7 +91,7 @@ void main() {
       expect(svgWithAsset(AppAssets.imageStyleBasic), findsOneWidget);
     });
 
-    testWidgets('두 문장 설명은 문장 끝에서 줄이 나뉘고 낭독 이름은 원문이다', (tester) async {
+    testWidgets('한 문장 설명은 줄을 나누지 않고 낭독 이름은 원문이다', (tester) async {
       await pump(
         tester,
         const ImageStyleOptionCard(
@@ -107,7 +107,7 @@ void main() {
               w.semanticsLabel == ImageStyle.photoOnly.description,
         ),
       );
-      expect(text.data, contains('.\n'));
+      expect(text.data, isNot(contains('\n')));
       expect(text.semanticsLabel, ImageStyle.photoOnly.description);
     });
 

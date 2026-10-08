@@ -58,7 +58,7 @@ void main() {
       expect(ImageStyle.realistic.description, '실제 물건 사진처럼 보여요');
       expect(
         ImageStyle.photoOnly.description,
-        '간단한 그림 기호가 들어가요. 사진으로 바꿀 수 있어요',
+        '간단한 그림 기호가 들어가요',
       );
     });
   });

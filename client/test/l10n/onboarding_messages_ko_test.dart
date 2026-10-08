@@ -50,7 +50,7 @@ void main() {
       expect(ImageStyle.photoOnly.label, '기본 그림');
       expect(
         ImageStyle.photoOnly.description,
-        '간단한 그림 기호가 들어가요. 사진으로 바꿀 수 있어요',
+        '간단한 그림 기호가 들어가요',
       );
       expect(ImageStyle.values.map((s) => s.apiValue), [
         'PHOTO_ONLY',

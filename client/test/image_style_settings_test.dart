@@ -270,18 +270,18 @@ void main() {
       await openScreen(tester);
 
       expect(
-        tester.getSemantics(find.bySemanticsLabel('만화, 캐릭터가 나오는 그림이에요')),
+        tester.getSemantics(find.bySemanticsLabel('만화, 크레딧 사용, 캐릭터가 나오는 그림이에요')),
         containsSemantics(
-          label: '만화, 캐릭터가 나오는 그림이에요',
+          label: '만화, 크레딧 사용, 캐릭터가 나오는 그림이에요',
           isChecked: true,
           isInMutuallyExclusiveGroup: true,
           hasTapAction: true,
         ),
       );
       expect(
-        tester.getSemantics(find.bySemanticsLabel('실사, 실제 물건 사진처럼 보여요')),
+        tester.getSemantics(find.bySemanticsLabel('실사, 크레딧 사용, 실제 물건 사진처럼 보여요')),
         containsSemantics(
-          label: '실사, 실제 물건 사진처럼 보여요',
+          label: '실사, 크레딧 사용, 실제 물건 사진처럼 보여요',
           isChecked: false,
           isInMutuallyExclusiveGroup: true,
           hasTapAction: true,

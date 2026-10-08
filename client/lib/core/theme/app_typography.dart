@@ -32,6 +32,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.linkCode,
     required this.imageStyleOptionTitle,
     required this.imageStyleOptionBody,
+    required this.imageStyleOptionBadge,
     required this.linkTimer,
     required this.linkRetryChip,
     required this.dialogTitle,
@@ -194,6 +195,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 그림 방식 선택 카드의 설명 (14/w400 Tmoney, Figma `1274:9982`).
   final TextStyle imageStyleOptionBody;
+
+  /// 그림 방식 선택 카드의 이름 옆 배지 `크레딧 사용` · `무료` (12/w700). 시안에 없는 임시 모양이다.
+  final TextStyle imageStyleOptionBadge;
 
   /// 연결 암호 남은 시간 `09:59` (16/w500 Pretendard).
   final TextStyle linkTimer;
@@ -568,6 +572,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontFamily: fontFamily,
       fontSize: 14,
       fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
+    imageStyleOptionBadge: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
       height: 1.0,
     ),
     linkTimer: TextStyle(
@@ -950,6 +960,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? linkCode,
     TextStyle? imageStyleOptionTitle,
     TextStyle? imageStyleOptionBody,
+    TextStyle? imageStyleOptionBadge,
     TextStyle? linkTimer,
     TextStyle? linkRetryChip,
     TextStyle? dialogTitle,
@@ -1033,6 +1044,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       imageStyleOptionTitle:
           imageStyleOptionTitle ?? this.imageStyleOptionTitle,
       imageStyleOptionBody: imageStyleOptionBody ?? this.imageStyleOptionBody,
+      imageStyleOptionBadge: imageStyleOptionBadge ?? this.imageStyleOptionBadge,
       linkTimer: linkTimer ?? this.linkTimer,
       linkRetryChip: linkRetryChip ?? this.linkRetryChip,
       dialogTitle: dialogTitle ?? this.dialogTitle,
@@ -1126,6 +1138,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
       imageStyleOptionBody: TextStyle.lerp(
         imageStyleOptionBody,
         other.imageStyleOptionBody,
+        t,
+      )!,
+      imageStyleOptionBadge: TextStyle.lerp(
+        imageStyleOptionBadge,
+        other.imageStyleOptionBadge,
         t,
       )!,
       linkTimer: TextStyle.lerp(linkTimer, other.linkTimer, t)!,
