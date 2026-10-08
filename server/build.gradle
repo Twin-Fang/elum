@@ -71,3 +71,8 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// 관리자 로그 화면이 지금 응답하는 서버의 버전을 보여주려면 BuildProperties(META-INF/build-info.properties)가 필요하다.
+springBoot {
+    buildInfo()
+}

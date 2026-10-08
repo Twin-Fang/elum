@@ -232,9 +232,14 @@ jobs:
             fi
 
             echo "[main] 새로운 컨테이너 ${CONTAINER_NAME} 실행 중..."
+            # 두 컨테이너가 같은 NAS 폴더를 /app 으로 쓴다. 로그를 색(blue|green)별 폴더로 나누고
+            # 관리자 화면이 지금 응답 중인 서버를 알아보도록 색과 포트를 넘긴다 (logback-spring.xml).
+            INSTANCE_COLOR="${CONTAINER_NAME##*-}"
             echo "$PW" | sudo -S docker run -d -p ${PORT}:${APP_PORT} --name ${CONTAINER_NAME} \
               -e TZ=Asia/Seoul \
               -e "SPRING_PROFILES_ACTIVE=${PROFILE_MAIN}" \
+              -e "ELUM_INSTANCE=${INSTANCE_COLOR}" \
+              -e "ELUM_PORT=${PORT}" \
               -v /etc/localtime:/etc/localtime:ro \
               -v "${MOUNT_DIR}":/app \
               "${IMAGE}"

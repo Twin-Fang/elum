@@ -5,117 +5,758 @@
 <body>
 
 <main th:fragment="content" class="flex-1 p-4 lg:p-8">
-    <div class="max-w-6xl mx-auto space-y-4">
-      <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold">서버 로그</h1>
-        <div class="flex items-center gap-2">
-          <span id="status-badge" class="badge badge-ghost">연결 중...</span>
-          <label class="label cursor-pointer gap-2">
-            <span class="label-text text-sm">팔로우</span>
-            <input id="follow-toggle" type="checkbox" class="toggle toggle-primary toggle-sm" checked/>
-          </label>
-          <button id="clear-btn" type="button" class="btn btn-outline btn-sm">지우기</button>
+  <!-- 로그 줄 색. 레벨은 화면 스크립트가 줄마다 붙인다. -->
+  <style>
+    .log-line { white-space: pre-wrap; word-break: break-all; }
+    .log-line.lv-ERROR { color: #f87171; }
+    .log-line.lv-WARN { color: #facc15; }
+    .log-line.lv-DEBUG, .log-line.lv-TRACE { opacity: .7; }
+    .log-line mark { background: #fde047; color: #111; border-radius: 2px; }
+    #live-view.min-WARN .log-line:not(.lv-WARN):not(.lv-ERROR) { display: none; }
+    #live-view.min-ERROR .log-line:not(.lv-ERROR) { display: none; }
+  </style>
+
+  <div class="max-w-6xl mx-auto space-y-4">
+    <h1 class="text-2xl font-bold">서버 로그</h1>
+
+    <!-- 지금 응답 중인 서버 -->
+    <div class="card bg-base-200 shadow-sm">
+      <div class="card-body p-4 gap-3">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span class="text-sm text-base-content/60">지금 응답 중</span>
+          <span id="inst-badge" class="badge badge-lg badge-ghost">확인 중...</span>
+          <span id="inst-meta" class="text-sm"></span>
+          <span class="ml-auto flex items-center gap-2 text-sm">
+            최근 24시간 오류
+            <button id="err-count" type="button" class="badge badge-ghost">-</button>
+          </span>
+        </div>
+        <p id="inst-opposite" class="text-sm text-base-content/60"></p>
+        <div id="err-list" class="hidden">
+          <p id="err-since" class="text-xs text-base-content/60 mb-2"></p>
+          <ul id="err-items" class="space-y-1 text-sm max-h-64 overflow-y-auto"></ul>
         </div>
       </div>
-
-      <p class="text-sm text-base-content/60">
-        <code>logs/elum-server.log</code>를 2초 간격으로 이어 읽습니다. 위로 스크롤하면 자동 스크롤이 멈추고,
-        맨 아래로 내리거나 팔로우를 다시 켜면 재개됩니다.
-      </p>
-
-      <div id="empty-state" class="hidden card bg-base-200">
-        <div class="card-body items-center text-center text-base-content/60">
-          <p class="text-lg">로그 파일이 아직 없습니다</p>
-          <p class="text-sm">서버가 로그를 남기기 시작하면 자동으로 표시됩니다. 계속 확인 중...</p>
-        </div>
-      </div>
-
-      <pre id="log-view"
-           class="bg-neutral text-neutral-content rounded-lg p-4 text-xs leading-5 whitespace-pre-wrap break-all overflow-y-auto"
-           style="height: 70vh"></pre>
     </div>
 
-<script th:inline="javascript">
-  const POLL_INTERVAL_MS = 2000;
-  const MAX_BUFFER_CHARS = 2 * 1024 * 1024; // 화면 버퍼 상한 — 초과분은 앞에서 잘라낸다
+    <div role="tablist" class="tabs tabs-boxed w-fit flex-wrap">
+      <button type="button" role="tab" class="tab tab-active" data-tab="live">실시간</button>
+      <button type="button" role="tab" class="tab" data-tab="files">파일</button>
+      <button type="button" role="tab" class="tab" data-tab="search">검색</button>
+      <button type="button" role="tab" class="tab" data-tab="deploys">배포 이력</button>
+      <button type="button" role="tab" class="tab" data-tab="levels">레벨</button>
+    </div>
 
-  const logView = document.getElementById('log-view');
-  const statusBadge = document.getElementById('status-badge');
-  const followToggle = document.getElementById('follow-toggle');
-  const emptyState = document.getElementById('empty-state');
+    <!-- 실시간 -->
+    <section data-panel="live" class="space-y-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <select id="live-target" class="select select-bordered select-sm"></select>
+        <select id="live-level" class="select select-bordered select-sm">
+          <option value="ALL">전체 레벨</option>
+          <option value="WARN">WARN 이상</option>
+          <option value="ERROR">ERROR만</option>
+        </select>
+        <input id="live-keyword" type="text" placeholder="강조할 글자" class="input input-bordered input-sm w-40"/>
+        <label class="label cursor-pointer gap-2">
+          <span class="label-text text-sm">팔로우</span>
+          <input id="follow-toggle" type="checkbox" class="toggle toggle-primary toggle-sm" checked/>
+        </label>
+        <button id="clear-btn" type="button" class="btn btn-outline btn-sm">지우기</button>
+        <a id="live-download" class="btn btn-outline btn-sm" href="#">이 파일 받기</a>
+        <span id="status-badge" class="badge badge-ghost ml-auto">연결 중...</span>
+      </div>
+      <p class="text-sm text-base-content/60">
+        2초 간격으로 이어 읽습니다. 위로 스크롤하면 자동 스크롤이 멈추고, 맨 아래로 내리거나 팔로우를 다시 켜면 재개됩니다.
+      </p>
+      <div id="live-empty" class="hidden card bg-base-200">
+        <div class="card-body items-center text-center text-base-content/60">
+          <p class="text-lg">아직 기록이 없어요</p>
+          <p class="text-sm">서버가 이 파일에 로그를 남기기 시작하면 자동으로 표시됩니다.</p>
+        </div>
+      </div>
+      <div id="live-view"
+           class="bg-neutral text-neutral-content rounded-lg p-4 text-xs leading-5 font-mono overflow-y-auto"
+           style="height: 65vh"></div>
+    </section>
 
-  let nextOffset = null;
-  let bufferChars = 0;
-  let polling = false;
+    <!-- 파일 -->
+    <section data-panel="files" class="hidden space-y-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <span id="files-total" class="text-sm"></span>
+        <button id="files-refresh" type="button" class="btn btn-outline btn-sm ml-auto">새로고침</button>
+      </div>
+      <p class="text-sm text-base-content/60">
+        지금 기록 중인 <code>elum.log</code> · <code>elum-error.log</code>는 지울 수 없습니다.
+        하루가 지나거나 10MB를 넘으면 <code>.gz</code>로 넘어가고, 일반 로그는 7일 · 오류 로그는 30일 뒤 자동으로 지워집니다.
+      </p>
+      <div id="files-groups" class="space-y-4"></div>
+    </section>
 
-  function setStatus(text, badgeClass) {
-    statusBadge.textContent = text;
-    statusBadge.className = 'badge ' + badgeClass;
-  }
+    <!-- 검색 -->
+    <section data-panel="search" class="hidden space-y-3">
+      <form id="search-form" class="flex flex-wrap items-end gap-2">
+        <label class="form-control">
+          <span class="label-text text-xs">파일</span>
+          <select id="search-path" class="select select-bordered select-sm max-w-xs"></select>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-xs">레벨</span>
+          <select id="search-level" class="select select-bordered select-sm">
+            <option value="">전체</option>
+            <option value="INFO">INFO 이상</option>
+            <option value="WARN">WARN 이상</option>
+            <option value="ERROR">ERROR만</option>
+          </select>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-xs">키워드</span>
+          <input id="search-q" type="text" class="input input-bordered input-sm w-48" placeholder="예: Exception, 회원 ID"/>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-xs">이 시각 이후</span>
+          <input id="search-from" type="text" class="input input-bordered input-sm w-60" placeholder="2026-10-08T09:00:00+09:00"/>
+        </label>
+        <label class="form-control">
+          <span class="label-text text-xs">최대 건수</span>
+          <select id="search-limit" class="select select-bordered select-sm">
+            <option value="100">100</option>
+            <option value="200" selected>200</option>
+            <option value="500">500</option>
+          </select>
+        </label>
+        <button type="submit" class="btn btn-primary btn-sm">검색</button>
+      </form>
+      <p id="search-summary" class="text-sm text-base-content/60"></p>
+      <div id="search-loading" class="hidden flex items-center gap-2 text-sm">
+        <span class="loading loading-spinner loading-sm"></span> 파일을 읽는 중...
+      </div>
+      <div id="search-empty" class="hidden card bg-base-200">
+        <div class="card-body items-center text-center text-base-content/60">
+          <p class="text-lg">조건에 맞는 로그가 없어요</p>
+          <p class="text-sm">레벨이나 키워드를 바꿔 보세요. 지난 로그는 파일 목록에서 .gz 파일을 고르면 됩니다.</p>
+        </div>
+      </div>
+      <div id="search-results" class="space-y-1"></div>
+    </section>
 
-  function isScrolledToBottom() {
-    return logView.scrollHeight - logView.scrollTop - logView.clientHeight < 10;
-  }
+    <!-- 배포 이력 -->
+    <section data-panel="deploys" class="hidden space-y-3">
+      <p class="text-sm text-base-content/60">
+        서버가 뜰 때 · 준비될 때 · 내려갈 때 남긴 기록입니다. 준비 전에 끝난 배포는 <span class="badge badge-error badge-sm">실패</span>로 보입니다.
+        실패한 배포의 로그는 [로그 보기]로 그 시각부터 엽니다.
+      </p>
+      <div id="deploys-empty" class="hidden card bg-base-200">
+        <div class="card-body items-center text-center text-base-content/60">
+          <p class="text-lg">아직 배포 기록이 없어요</p>
+          <p class="text-sm">다음 배포부터 기록됩니다.</p>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="table table-sm table-zebra">
+          <thead>
+          <tr>
+            <th>시작</th><th>서버</th><th>버전</th><th>포트</th><th>준비</th><th>종료</th><th>상태</th><th></th>
+          </tr>
+          </thead>
+          <tbody id="deploys-body"></tbody>
+        </table>
+      </div>
+    </section>
 
-  // 사용자가 위로 스크롤하면 팔로우를 끄고, 바닥까지 내리면 다시 켠다.
-  logView.addEventListener('scroll', function () {
-    followToggle.checked = isScrolledToBottom();
-  });
+    <!-- 레벨 -->
+    <section data-panel="levels" class="hidden space-y-3">
+      <div class="alert alert-info text-sm">
+        지금 응답 중인 서버에만 적용되고, 재배포하면 원래 값으로 돌아가요.
+        DEBUG를 켜면 로그가 크게 늘어나니 확인이 끝나면 [원래대로]를 눌러 주세요.
+      </div>
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+          <tr><th>로거</th><th>설정값</th><th>실제 적용</th><th>바꾸기</th><th></th></tr>
+          </thead>
+          <tbody id="levels-body"></tbody>
+        </table>
+      </div>
+      <form id="level-add" class="flex flex-wrap items-end gap-2">
+        <label class="form-control">
+          <span class="label-text text-xs">다른 로거 (패키지 · 클래스 이름)</span>
+          <input id="level-add-name" type="text" class="input input-bordered input-sm w-80" placeholder="com.chuseok22.elumserver.routine"/>
+        </label>
+        <select id="level-add-level" class="select select-bordered select-sm">
+          <option>DEBUG</option><option>INFO</option><option>WARN</option><option>ERROR</option><option>TRACE</option><option>OFF</option>
+        </select>
+        <button type="submit" class="btn btn-outline btn-sm">적용</button>
+      </form>
+    </section>
+  </div>
 
-  document.getElementById('clear-btn').addEventListener('click', function () {
-    logView.replaceChildren();
-    bufferChars = 0;
-  });
+  <div id="toast" class="toast toast-end z-50"></div>
 
-  // 텍스트 노드 append — 전체 버퍼 재직렬화 없이 O(증분)로 쌓고, 상한 초과분은 앞 노드부터 버린다.
-  function appendContent(content) {
-    if (!content) return;
-    logView.appendChild(document.createTextNode(content));
-    bufferChars += content.length;
-    while (bufferChars > MAX_BUFFER_CHARS && logView.firstChild) {
-      bufferChars -= logView.firstChild.textContent.length;
-      logView.removeChild(logView.firstChild);
+<script>
+  (function () {
+    'use strict';
+
+    const POLL_INTERVAL_MS = 2000;
+    const MAX_LIVE_LINES = 5000; // 화면에 쌓는 줄 상한 — 넘으면 앞에서 버린다
+    const LEVEL_RE = /^\S+\s+(TRACE|DEBUG|INFO|WARN|ERROR)\s/;
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+    const $ = (id) => document.getElementById(id);
+    let instance = null;
+    let fileList = null;
+
+    // ── 공통 ─────────────────────────────────────────────
+
+    class ApiError extends Error {
+      constructor(code, message) {
+        super(message);
+        this.code = code;
+      }
     }
-    if (followToggle.checked) {
-      logView.scrollTop = logView.scrollHeight;
-    }
-  }
 
-  async function poll() {
-    if (polling) return; // 이전 폴링이 끝나기 전 중복 요청·중복 append 방지
-    polling = true;
-    try {
-      const params = nextOffset === null ? '?lines=200' : '?offset=' + nextOffset;
-      const response = await fetch('/admin/logs/api/tail' + params);
-      // 세션이 만료되면 fetch가 로그인 페이지(302→200 HTML)로 따라간다 — 네트워크 오류와 구분해서 안내한다.
-      if (response.redirected || !(response.headers.get('content-type') || '').includes('application/json')) {
-        setStatus('세션 만료 — 새로고침 후 다시 로그인', 'badge-warning');
-        return;
+    // 세션이 만료되면 fetch 가 로그인 페이지(302→200 HTML)로 따라간다 — 네트워크 오류와 구분한다.
+    async function api(url, options = {}) {
+      const headers = Object.assign({}, options.headers);
+      if (options.method && options.method !== 'GET' && csrfToken && csrfHeader) {
+        headers[csrfHeader] = csrfToken;
+      }
+      let response;
+      try {
+        response = await fetch(url, Object.assign({}, options, {headers}));
+      } catch (e) {
+        throw new ApiError('NETWORK', '연결이 끊겼어요. 잠시 뒤 다시 시도해 주세요.');
+      }
+      if (response.status === 204) return null;
+      const type = response.headers.get('content-type') || '';
+      if (response.redirected || !type.includes('application/json')) {
+        throw new ApiError('SESSION_EXPIRED', '로그인이 끝났어요. 새로고침 후 다시 로그인해 주세요.');
       }
       const data = await response.json();
       if (!response.ok) {
-        // GlobalExceptionHandler의 ErrorResponse(JSON) — 에러 코드가 메시지에 포함돼 있다.
-        setStatus(data.errorMessage || '오류 — 재시도 중', 'badge-error');
-        return;
+        throw new ApiError(data.errorCode || ('HTTP_' + response.status), data.errorMessage || '요청을 처리하지 못했어요.');
       }
-      if (!data.exists) {
-        emptyState.classList.remove('hidden');
-        setStatus('파일 없음 — 대기 중', 'badge-warning');
-        return;
-      }
-      emptyState.classList.add('hidden');
-      appendContent(data.content);
-      nextOffset = data.nextOffset;
-      setStatus('연결됨', 'badge-success');
-    } catch (e) {
-      setStatus('연결 끊김 — 재시도 중', 'badge-error');
-    } finally {
-      polling = false;
+      return data;
     }
-  }
 
-  poll();
-  setInterval(poll, POLL_INTERVAL_MS);
+    function toast(error) {
+      const box = document.createElement('div');
+      box.className = 'alert alert-error text-sm shadow';
+      const text = document.createElement('span');
+      text.textContent = error.message + (error.code ? ' [' + error.code + ']' : '');
+      box.appendChild(text);
+      $('toast').appendChild(box);
+      setTimeout(() => box.remove(), 6000);
+    }
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined && text !== null) node.textContent = text;
+      return node;
+    }
+
+    const timeFormat = new Intl.DateTimeFormat('ko-KR', {
+      timeZone: 'Asia/Seoul', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
+
+    function formatTime(iso) {
+      if (!iso) return '-';
+      const date = new Date(iso);
+      return isNaN(date) ? iso : timeFormat.format(date);
+    }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      if (bytes < 1024 * 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+      return (bytes / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+    }
+
+    function instanceBadgeClass(name) {
+      return name === 'blue' ? 'badge-info' : name === 'green' ? 'badge-success' : 'badge-ghost';
+    }
+
+    function downloadUrl(path) {
+      return '/admin/logs/api/download?path=' + encodeURIComponent(path);
+    }
+
+    // 키워드를 <mark> 로 감싼다. 로그에는 사용자 입력이 섞이므로 innerHTML 을 쓰지 않는다.
+    function appendHighlighted(parent, text, keyword) {
+      if (!keyword) {
+        parent.appendChild(document.createTextNode(text));
+        return;
+      }
+      const lower = text.toLowerCase();
+      const needle = keyword.toLowerCase();
+      let from = 0;
+      let at;
+      while ((at = lower.indexOf(needle, from)) !== -1) {
+        if (at > from) parent.appendChild(document.createTextNode(text.slice(from, at)));
+        parent.appendChild(el('mark', null, text.slice(at, at + needle.length)));
+        from = at + needle.length;
+      }
+      if (from < text.length) parent.appendChild(document.createTextNode(text.slice(from)));
+    }
+
+    // ── 탭 ──────────────────────────────────────────────
+
+    const loaders = {};
+
+    function showTab(name) {
+      document.querySelectorAll('[data-tab]').forEach(tab => tab.classList.toggle('tab-active', tab.dataset.tab === name));
+      document.querySelectorAll('[data-panel]').forEach(panel => panel.classList.toggle('hidden', panel.dataset.panel !== name));
+      if (loaders[name]) loaders[name]();
+    }
+
+    document.querySelectorAll('[data-tab]').forEach(tab => tab.addEventListener('click', () => showTab(tab.dataset.tab)));
+
+    // ── 상단 카드 ────────────────────────────────────────
+
+    async function loadInstance() {
+      try {
+        instance = await api('/admin/logs/api/instance');
+        const badge = $('inst-badge');
+        badge.textContent = instance.instance;
+        badge.className = 'badge badge-lg ' + instanceBadgeClass(instance.instance);
+        $('inst-meta').textContent = 'v' + instance.version + ' · ' + formatTime(instance.startedAt) + ' 시작 · 포트 ' + instance.port;
+        $('inst-opposite').textContent = instance.opposite
+          ? '직전 배포 ' + instance.opposite + ' · ' + (instance.oppositeLastWrite ? '마지막 기록 ' + formatTime(instance.oppositeLastWrite) : '아직 기록이 없어요')
+          : '';
+      } catch (e) {
+        $('inst-badge').textContent = '확인 실패';
+        toast(e);
+      }
+      fillLiveTargets();
+    }
+
+    async function loadErrors() {
+      try {
+        const data = await api('/admin/logs/api/errors');
+        const count = $('err-count');
+        count.textContent = data.last24h + '건';
+        count.className = 'badge ' + (data.last24h > 0 ? 'badge-error' : 'badge-ghost');
+        $('err-since').textContent = '집계 시작 ' + formatTime(data.since) + ' (서버가 다시 뜨면 0부터 셉니다. 전체 기록은 elum-error.log)';
+        const items = $('err-items');
+        items.replaceChildren();
+        if (data.recent.length === 0) {
+          items.appendChild(el('li', 'text-base-content/60', '최근 오류가 없어요'));
+        }
+        data.recent.forEach(item => {
+          const li = el('li', 'font-mono text-xs');
+          li.appendChild(el('span', 'text-base-content/60', formatTime(item.time) + ' '));
+          li.appendChild(el('span', 'font-semibold', item.logger + ' '));
+          li.appendChild(document.createTextNode(item.message + (item.exceptionClass ? ' (' + item.exceptionClass + ')' : '')));
+          items.appendChild(li);
+        });
+      } catch (e) {
+        $('err-count').textContent = '?';
+      }
+    }
+
+    $('err-count').addEventListener('click', () => $('err-list').classList.toggle('hidden'));
+
+    // ── 실시간 ──────────────────────────────────────────
+
+    const liveView = $('live-view');
+    const followToggle = $('follow-toggle');
+    let livePath = null;
+    let nextOffset = null;
+    let polling = false;
+    let lastLevel = null;
+
+    function setStatus(text, badgeClass) {
+      $('status-badge').textContent = text;
+      $('status-badge').className = 'badge ml-auto ' + badgeClass;
+    }
+
+    function fillLiveTargets() {
+      const select = $('live-target');
+      const me = instance ? instance.instance : null;
+      const options = [];
+      if (me) {
+        options.push([me + '/elum.log', me + ' · 전체 로그 (지금 응답 중)']);
+        options.push([me + '/elum-error.log', me + ' · 오류만 (WARN 이상)']);
+      }
+      if (instance && instance.opposite) {
+        options.push([instance.opposite + '/elum.log', instance.opposite + ' · 전체 로그 (직전 배포)']);
+        options.push([instance.opposite + '/elum-error.log', instance.opposite + ' · 오류만 (직전 배포)']);
+      }
+      select.replaceChildren();
+      options.forEach(([value, label]) => {
+        const option = el('option', null, label);
+        option.value = value;
+        select.appendChild(option);
+      });
+      if (!livePath && options.length) {
+        switchLive(options[0][0]);
+      }
+    }
+
+    function switchLive(path) {
+      livePath = path;
+      $('live-target').value = path;
+      $('live-download').href = downloadUrl(path);
+      nextOffset = null;
+      lastLevel = null;
+      liveView.replaceChildren();
+      poll();
+    }
+
+    $('live-target').addEventListener('change', e => switchLive(e.target.value));
+    $('live-level').addEventListener('change', e => {
+      liveView.classList.remove('min-WARN', 'min-ERROR');
+      if (e.target.value !== 'ALL') liveView.classList.add('min-' + e.target.value);
+    });
+    $('live-keyword').addEventListener('change', () => {
+      // 이미 그린 줄도 다시 강조한다.
+      const keyword = $('live-keyword').value.trim();
+      liveView.querySelectorAll('.log-line').forEach(line => {
+        const text = line.textContent;
+        line.replaceChildren();
+        appendHighlighted(line, text, keyword);
+      });
+    });
+    $('clear-btn').addEventListener('click', () => liveView.replaceChildren());
+
+    function isScrolledToBottom() {
+      return liveView.scrollHeight - liveView.scrollTop - liveView.clientHeight < 10;
+    }
+
+    liveView.addEventListener('scroll', () => {
+      followToggle.checked = isScrolledToBottom();
+    });
+
+    // 스택트레이스처럼 레벨이 없는 줄은 앞 줄의 레벨을 따른다 — 레벨 필터에서 함께 숨고 보인다.
+    function appendContent(content) {
+      if (!content) return;
+      const keyword = $('live-keyword').value.trim();
+      const fragment = document.createDocumentFragment();
+      const lines = content.endsWith('\n') ? content.slice(0, -1).split('\n') : content.split('\n');
+      lines.forEach(text => {
+        const match = LEVEL_RE.exec(text);
+        if (match) lastLevel = match[1];
+        const line = el('div', 'log-line' + (lastLevel ? ' lv-' + lastLevel : ''));
+        appendHighlighted(line, text, keyword);
+        fragment.appendChild(line);
+      });
+      liveView.appendChild(fragment);
+      while (liveView.childElementCount > MAX_LIVE_LINES) {
+        liveView.firstElementChild.remove();
+      }
+      if (followToggle.checked) {
+        liveView.scrollTop = liveView.scrollHeight;
+      }
+    }
+
+    async function poll() {
+      if (polling || !livePath) return; // 이전 폴링이 끝나기 전 중복 요청·중복 append 방지
+      // 실시간 탭이 안 보이거나 창이 뒤로 가 있으면 쉰다. 돌아오면 offset 부터 밀린 만큼 이어 받는다.
+      if (document.hidden || document.querySelector('[data-panel="live"]').classList.contains('hidden')) return;
+      polling = true;
+      const requested = livePath;
+      try {
+        const params = '?path=' + encodeURIComponent(requested) + (nextOffset === null ? '&lines=300' : '&offset=' + nextOffset);
+        const data = await api('/admin/logs/api/tail' + params);
+        if (requested !== livePath) return; // 기다리는 사이 다른 파일로 바뀌었다
+        if (!data.exists) {
+          $('live-empty').classList.remove('hidden');
+          setStatus('파일 없음 · 대기 중', 'badge-warning');
+          return;
+        }
+        $('live-empty').classList.add('hidden');
+        appendContent(data.content);
+        nextOffset = data.nextOffset;
+        setStatus('연결됨', 'badge-success');
+      } catch (e) {
+        setStatus(e.code === 'SESSION_EXPIRED' ? '로그인 만료 · 새로고침' : '연결 끊김 · 재시도 중 [' + e.code + ']',
+          e.code === 'SESSION_EXPIRED' ? 'badge-warning' : 'badge-error');
+      } finally {
+        polling = false;
+      }
+    }
+
+    setInterval(poll, POLL_INTERVAL_MS);
+
+    // ── 파일 ────────────────────────────────────────────
+
+    async function loadFiles() {
+      try {
+        fileList = await api('/admin/logs/api/files');
+      } catch (e) {
+        toast(e);
+        return;
+      }
+      $('files-total').textContent = '전체 ' + formatBytes(fileList.totalBytes);
+      const container = $('files-groups');
+      container.replaceChildren();
+      fileList.groups.forEach(group => container.appendChild(renderGroup(group)));
+      fillSearchFiles();
+    }
+
+    function renderGroup(group) {
+      const card = el('div', 'card bg-base-200');
+      const body = el('div', 'card-body p-4 gap-2');
+      const head = el('div', 'flex items-center gap-2');
+      head.appendChild(el('h2', 'font-semibold', group.label));
+      head.appendChild(el('span', 'text-sm text-base-content/60', formatBytes(group.totalBytes) + ' · ' + group.files.length + '개'));
+      body.appendChild(head);
+      if (group.files.length === 0) {
+        body.appendChild(el('p', 'text-sm text-base-content/60', '아직 기록이 없어요'));
+        card.appendChild(body);
+        return card;
+      }
+      const wrap = el('div', 'overflow-x-auto');
+      const table = el('table', 'table table-sm');
+      const tbody = el('tbody');
+      group.files.forEach(file => {
+        const tr = el('tr');
+        const name = el('td', 'font-mono text-xs wrap-anywhere', file.name);
+        if (file.active) name.appendChild(el('span', 'badge badge-sm badge-outline ml-2', '기록 중'));
+        tr.appendChild(name);
+        tr.appendChild(el('td', 'text-right', formatBytes(file.size)));
+        tr.appendChild(el('td', null, formatTime(file.lastModified)));
+        const actions = el('td', 'flex gap-1 justify-end');
+        const download = el('a', 'btn btn-xs btn-outline', '받기');
+        download.href = downloadUrl(file.path);
+        actions.appendChild(download);
+        if (file.path !== 'deploy-history.log') {
+          const open = el('button', 'btn btn-xs btn-outline', '열기');
+          open.type = 'button';
+          open.addEventListener('click', () => openSearch(file.path, null));
+          actions.appendChild(open);
+        }
+        if (file.deletable) {
+          const remove = el('button', 'btn btn-xs btn-error btn-outline', '지우기');
+          remove.type = 'button';
+          remove.addEventListener('click', () => deleteFile(file));
+          actions.appendChild(remove);
+        }
+        tr.appendChild(actions);
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      wrap.appendChild(table);
+      body.appendChild(wrap);
+      card.appendChild(body);
+      return card;
+    }
+
+    async function deleteFile(file) {
+      if (!confirm(file.path + ' (' + formatBytes(file.size) + ') 파일을 지울까요? 되돌릴 수 없어요.')) return;
+      try {
+        await api('/admin/logs/api/files?path=' + encodeURIComponent(file.path), {method: 'DELETE'});
+        loadFiles();
+      } catch (e) {
+        toast(e);
+      }
+    }
+
+    $('files-refresh').addEventListener('click', loadFiles);
+
+    // ── 검색 ────────────────────────────────────────────
+
+    function fillSearchFiles() {
+      const select = $('search-path');
+      const keep = select.value;
+      select.replaceChildren();
+      (fileList ? fileList.groups : []).forEach(group => {
+        const optgroup = el('optgroup');
+        optgroup.label = group.label;
+        group.files.filter(f => f.path !== 'deploy-history.log').forEach(file => {
+          const option = el('option', null, file.name + ' (' + formatBytes(file.size) + ')');
+          option.value = file.path;
+          optgroup.appendChild(option);
+        });
+        if (optgroup.childElementCount) select.appendChild(optgroup);
+      });
+      if (keep) select.value = keep;
+    }
+
+    async function openSearch(path, from) {
+      if (!fileList) await loadFiles();
+      fillSearchFiles();
+      $('search-path').value = path;
+      $('search-from').value = from || '';
+      showTab('search');
+      runSearch();
+    }
+
+    async function runSearch() {
+      const path = $('search-path').value;
+      if (!path) {
+        $('search-summary').textContent = '검색할 파일이 없어요.';
+        return;
+      }
+      const params = new URLSearchParams({path, limit: $('search-limit').value});
+      if ($('search-level').value) params.set('level', $('search-level').value);
+      if ($('search-q').value.trim()) params.set('q', $('search-q').value.trim());
+      if ($('search-from').value.trim()) params.set('from', $('search-from').value.trim());
+      $('search-loading').classList.remove('hidden');
+      $('search-empty').classList.add('hidden');
+      $('search-results').replaceChildren();
+      $('search-summary').textContent = '';
+      try {
+        const data = await api('/admin/logs/api/search?' + params);
+        renderSearch(data);
+      } catch (e) {
+        toast(e);
+      } finally {
+        $('search-loading').classList.add('hidden');
+      }
+    }
+
+    function renderSearch(data) {
+      $('search-summary').textContent = data.path + ' · ' + data.scanned + '건 중 ' + data.matched + '건 맞음'
+        + (data.matched > data.entries.length ? ' · 최신 ' + data.entries.length + '건 표시' : '');
+      if (data.entries.length === 0) {
+        $('search-empty').classList.remove('hidden');
+        return;
+      }
+      const keyword = $('search-q').value.trim();
+      const results = $('search-results');
+      data.entries.forEach(entry => {
+        const details = el('details', 'bg-base-200 rounded-box');
+        const summary = el('summary', 'cursor-pointer px-3 py-2 text-xs font-mono flex gap-2 items-start');
+        const level = el('span', 'badge badge-sm ' + ({ERROR: 'badge-error', WARN: 'badge-warning'}[entry.level] || 'badge-ghost'), entry.level || '-');
+        summary.appendChild(level);
+        const firstLine = entry.text.split('\n')[0];
+        const head = el('span', 'log-line');
+        appendHighlighted(head, firstLine, keyword);
+        summary.appendChild(head);
+        details.appendChild(summary);
+        const pre = el('pre', 'px-3 pb-3 text-xs whitespace-pre-wrap break-all font-mono');
+        appendHighlighted(pre, entry.text, keyword);
+        if (entry.truncated) pre.appendChild(el('div', 'text-warning mt-1', '… 너무 길어 잘렸어요. 전체는 파일을 받아 보세요.'));
+        details.appendChild(pre);
+        results.appendChild(details);
+      });
+    }
+
+    $('search-form').addEventListener('submit', e => {
+      e.preventDefault();
+      runSearch();
+    });
+
+    // ── 배포 이력 ───────────────────────────────────────
+
+    const STATUS = {
+      RUNNING: ['실행 중', 'badge-success'],
+      STOPPED: ['종료', 'badge-ghost'],
+      FAILED: ['실패', 'badge-error'],
+      STARTING: ['기동 중', 'badge-warning']
+    };
+
+    async function loadDeploys() {
+      let data;
+      try {
+        data = await api('/admin/logs/api/deploys');
+      } catch (e) {
+        toast(e);
+        return;
+      }
+      const body = $('deploys-body');
+      body.replaceChildren();
+      $('deploys-empty').classList.toggle('hidden', data.deployments.length > 0);
+      data.deployments.forEach(d => {
+        const tr = el('tr', d.current ? 'font-semibold' : null);
+        tr.appendChild(el('td', null, formatTime(d.startedAt)));
+        const inst = el('td');
+        inst.appendChild(el('span', 'badge badge-sm ' + instanceBadgeClass(d.instance), d.instance));
+        if (d.current) inst.appendChild(el('span', 'text-xs ml-1', '← 지금'));
+        tr.appendChild(inst);
+        tr.appendChild(el('td', null, 'v' + d.version));
+        tr.appendChild(el('td', null, d.port));
+        tr.appendChild(el('td', null, formatTime(d.readyAt)));
+        tr.appendChild(el('td', null, formatTime(d.stoppedAt)));
+        const [label, cls] = STATUS[d.status] || [d.status, 'badge-ghost'];
+        const status = el('td');
+        status.appendChild(el('span', 'badge badge-sm ' + cls, label));
+        tr.appendChild(status);
+        const action = el('td');
+        const open = el('button', 'btn btn-xs btn-outline', '로그 보기');
+        open.type = 'button';
+        open.addEventListener('click', () => openSearch(d.instance + '/elum.log', d.startedAt));
+        action.appendChild(open);
+        tr.appendChild(action);
+        body.appendChild(tr);
+      });
+    }
+
+    // ── 레벨 ────────────────────────────────────────────
+
+    const LEVELS = ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'OFF'];
+
+    async function loadLevels() {
+      let data;
+      try {
+        data = await api('/admin/logs/api/levels');
+      } catch (e) {
+        toast(e);
+        return;
+      }
+      const body = $('levels-body');
+      body.replaceChildren();
+      data.forEach(logger => {
+        const tr = el('tr');
+        tr.appendChild(el('td', 'font-mono text-xs wrap-anywhere', logger.name));
+        tr.appendChild(el('td', null, logger.configuredLevel || '(상위를 따름)'));
+        tr.appendChild(el('td', null, logger.effectiveLevel || '-'));
+        const cell = el('td');
+        const select = el('select', 'select select-bordered select-xs');
+        LEVELS.forEach(level => {
+          const option = el('option', null, level);
+          option.value = level;
+          if (level === logger.effectiveLevel) option.selected = true;
+          select.appendChild(option);
+        });
+        select.addEventListener('change', () => changeLevel(logger.name, select.value));
+        cell.appendChild(select);
+        tr.appendChild(cell);
+        const reset = el('td');
+        if (logger.changed) {
+          const button = el('button', 'btn btn-xs btn-outline', '원래대로');
+          button.type = 'button';
+          button.addEventListener('click', () => changeLevel(logger.name, null));
+          reset.appendChild(button);
+        }
+        tr.appendChild(reset);
+        body.appendChild(tr);
+      });
+    }
+
+    async function changeLevel(name, level) {
+      try {
+        await api('/admin/logs/api/levels', {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({logger: name, level})
+        });
+      } catch (e) {
+        toast(e);
+      }
+      loadLevels();
+    }
+
+    $('level-add').addEventListener('submit', e => {
+      e.preventDefault();
+      const name = $('level-add-name').value.trim();
+      if (!name) return;
+      changeLevel(name, $('level-add-level').value);
+      $('level-add-name').value = '';
+    });
+
+    loaders.live = poll;
+    loaders.files = loadFiles;
+    loaders.deploys = loadDeploys;
+    loaders.levels = loadLevels;
+    loaders.search = () => { if (!fileList) loadFiles(); };
+
+    loadInstance();
+    loadErrors();
+    setInterval(loadErrors, 60000);
+  })();
 </script>
 </main>
 </body>

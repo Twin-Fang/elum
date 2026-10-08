@@ -44,11 +44,31 @@ class ErrorMessageParityTest {
   @Test
   @DisplayName("원본 이후 더한 코드는 golden 밖에서 따로 단언한다 — golden 을 다시 만들면 원본 증명이 흐려진다")
   void codesAddedAfterOriginal_areAssertedSeparately() {
-    assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 1);
+    assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 1 + ADDED_LOG_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
       .isEqualTo("이 언어는 아직 켤 수 없어요. 서버 문구 파일이 비어 있어요.");
+  }
+
+  // 관리자 로그 관리 화면이 더한 코드. 문구 끝의 (E-LOG-00N) 이 화면에 찍히는 추적용 식별자다.
+  private static final Map<ErrorCode, String> ADDED_LOG_CODES = Map.of(
+    ErrorCode.INVALID_LOG_PATH, "BAD_REQUEST",
+    ErrorCode.LOG_FILE_NOT_FOUND, "NOT_FOUND",
+    ErrorCode.LOG_FILE_IN_USE, "CONFLICT",
+    ErrorCode.LOG_FILE_DELETE_FAILED, "INTERNAL_SERVER_ERROR",
+    ErrorCode.INVALID_LOG_LEVEL, "BAD_REQUEST"
+  );
+
+  @Test
+  @DisplayName("관리자 로그 코드는 golden 밖에서 상태와 식별자를 단언한다")
+  void adminLogCodes_areAssertedSeparately() {
+    ADDED_LOG_CODES.forEach((code, status) -> {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(code.getStatus().name()).as("상태 %s", code).isEqualTo(status);
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).as("ko %s", code).containsPattern("\\(E-LOG-00\\d\\)$");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).as("en %s", code).containsPattern("\\(E-LOG-00\\d\\)$");
+    });
   }
 
   @Test

@@ -43,6 +43,28 @@
         </div>
       </div>
     </div>
+    <!-- 서버 오류. 메모리 집계라 서버가 다시 뜨면 0부터 센다 — 전체 기록은 서버 로그 화면의 elum-error.log. -->
+    <div class="card bg-base-200 shadow">
+      <div class="card-body p-4 gap-2">
+        <div class="flex items-center gap-2">
+          <h2 class="font-semibold">최근 24시간 서버 오류</h2>
+          <span class="badge" th:classappend="${recentErrors.last24h() > 0} ? 'badge-error' : 'badge-ghost'"
+                th:text="${recentErrors.last24h()} + '건'">0건</span>
+          <a th:href="@{/admin/logs}" class="link link-hover text-sm ml-auto">서버 로그 보기</a>
+        </div>
+        <p class="text-xs text-base-content/60"
+           th:text="'집계 시작 ' + ${recentErrors.since()}">집계 시작</p>
+        <p th:if="${recentErrors.recent().isEmpty()}" class="text-sm text-base-content/60">최근 오류가 없어요</p>
+        <ul th:unless="${recentErrors.recent().isEmpty()}" class="space-y-1 text-xs font-mono">
+          <li th:each="error : ${recentErrors.recent()}">
+            <span class="text-base-content/60"
+                  th:text="${error.time()}">시각</span>
+            <span class="font-semibold" th:text="${error.logger()}">logger</span>
+            <span th:text="${error.message()}">message</span>
+          </li>
+        </ul>
+      </div>
+    </div>
   </main>
 </body>
 </html>

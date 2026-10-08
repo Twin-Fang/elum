@@ -51,3 +51,6 @@ project-design.md
 
 application-*.yml
 tmp/
+
+# 실행 중 생기는 로그 파일 (logback-spring.xml)
+logs/

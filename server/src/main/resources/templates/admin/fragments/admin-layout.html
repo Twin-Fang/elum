@@ -46,6 +46,28 @@
       <div th:replace="~{admin/fragments/admin-layout :: sidebar(${active})}"></div>
     </div>
   </div>
+  <script>
+    // 사이드바 "서버 로그" 옆 최근 24시간 오류 건수. 불러오지 못하면 배지만 숨긴 채 둔다.
+    (function () {
+      var badges = document.querySelectorAll('[data-log-error-badge]');
+      if (!badges.length || !window.fetch) return;
+      fetch('/admin/logs/api/errors').then(function (response) {
+        var type = response.headers.get('content-type') || '';
+        if (!response.ok || response.redirected || type.indexOf('application/json') < 0) {
+          throw new Error('HTTP ' + response.status);
+        }
+        return response.json();
+      }).then(function (data) {
+        if (!data || !(data.last24h > 0)) return;
+        badges.forEach(function (badge) {
+          badge.textContent = data.last24h > 99 ? '99+' : String(data.last24h);
+          badge.classList.remove('hidden');
+        });
+      }).catch(function (error) {
+        console.warn('[관리자] 최근 오류 건수를 불러오지 못했어요', error);
+      });
+    })();
+  </script>
   </body>
   </html>
 </th:block>
@@ -84,7 +106,8 @@
     <li><a th:href="@{/admin/prompts}" th:classappend="${active == 'prompts'} ? 'active'">프롬프트 관리</a></li>
     <li><a th:href="@{/admin/monitoring}" th:classappend="${active == 'monitoring'} ? 'active'">AI 모니터링</a></li>
     <li><a th:href="@{/admin/credits}" th:classappend="${active == 'credits'} ? 'active'">AI 크레딧</a></li>
-    <li><a th:href="@{/admin/logs}" th:classappend="${active == 'logs'} ? 'active'">서버 로그</a></li>
+    <li><a th:href="@{/admin/logs}" th:classappend="${active == 'logs'} ? 'active'">서버 로그
+      <span data-log-error-badge class="badge badge-error badge-sm hidden" title="최근 24시간 오류"></span></a></li>
     <li><a th:href="@{/admin/consents}" th:classappend="${active == 'consents'} ? 'active'">약관 관리</a></li>
     <li><a th:href="@{/admin/notices}" th:classappend="${active == 'notices'} ? 'active'">공지 관리</a></li>
     <li><a th:href="@{/admin/settings}" th:classappend="${active == 'settings'} ? 'active'">시스템 설정</a></li>

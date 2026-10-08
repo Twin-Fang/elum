@@ -1,31 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  콘솔 출력(docker logs·외부 로그 엔드포인트)은 그대로 유지하면서, 로그를 파일로도 남긴다.
-  배포 컨테이너는 WORKDIR(/app)에 NAS(/volume1/project/elum/server)가 마운트돼 있어
-  상대경로 logs/ 가 그대로 영구 저장소가 된다. 경로를 바꿔야 하면 -DELUM_LOG_DIR 로 재정의한다.
+  콘솔(docker logs)과 파일에 함께 남긴다.
+  배포 컨테이너는 WORKDIR(/app)에 NAS 폴더가 마운트돼 있어 상대경로 logs/ 가 영구 저장소가 된다.
+
+  Blue/Green 배포 중에는 두 JVM이 같은 NAS 폴더를 본다. 한 파일을 함께 쓰면 각자 롤링하며 줄이 섞이거나
+  사라지므로 인스턴스(ELUM_INSTANCE = blue|green, 없으면 local)마다 폴더를 나눈다.
+  관리자 로그 화면(LogFileLocator)이 같은 ELUM_LOG_DIR · ELUM_INSTANCE 로 이 경로를 읽는다.
 -->
 <configuration>
+  <property name="LOG_DIR" value="${ELUM_LOG_DIR:-logs}"/>
+  <property name="INSTANCE" value="${ELUM_INSTANCE:-local}"/>
+
+  <!-- 컨테이너 안 PID는 늘 1이라 어느 인스턴스 줄인지 알 수 없다. 줄마다 [blue]/[green]을 박는다.
+       시각·레벨이 맨 앞이어야 관리자 검색(AdminLogSearchService)이 항목 시작을 알아본다. -->
+  <property name="FILE_LOG_PATTERN"
+            value="%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p ${PID:-} --- [${INSTANCE}] [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+  <property name="CONSOLE_LOG_PATTERN"
+            value="%clr(%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}){faint} %clr(%5p) %clr(${PID:-}){magenta} %clr(--- [${INSTANCE}] [%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+  <!-- 관리자 로그 화면의 조회 요청(2초 폴링)이 남기는 DEBUG·INFO 를 버린다. 오류는 남는다. -->
+  <turboFilter class="com.chuseok22.elumserver.common.infrastructure.logging.QuietLogTurboFilter"/>
+
   <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
   <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
-  <property name="LOG_DIR" value="${ELUM_LOG_DIR:-logs}"/>
-
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${LOG_DIR}/elum-server.log</file>
+    <file>${LOG_DIR}/${INSTANCE}/elum.log</file>
     <encoder>
       <charset>UTF-8</charset>
       <pattern>${FILE_LOG_PATTERN}</pattern>
     </encoder>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_DIR}/elum-server.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+      <fileNamePattern>${LOG_DIR}/${INSTANCE}/elum.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
       <maxFileSize>10MB</maxFileSize>
       <maxHistory>7</maxHistory>
       <totalSizeCap>1GB</totalSizeCap>
     </rollingPolicy>
   </appender>
 
+  <!-- 장애 대응용. 요청 덤프(DEBUG·INFO)에 묻히지 않게 WARN 이상만 따로, 더 오래 둔다. -->
+  <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/${INSTANCE}/elum-error.log</file>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>${FILE_LOG_PATTERN}</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/${INSTANCE}/elum-error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+      <maxFileSize>10MB</maxFileSize>
+      <maxHistory>30</maxHistory>
+      <totalSizeCap>200MB</totalSizeCap>
+    </rollingPolicy>
+  </appender>
+
+  <!-- 관리자 사이드바·대시보드의 최근 오류 건수. 메모리라 재시작하면 0부터 다시 센다. -->
+  <appender name="RECENT_ERRORS" class="com.chuseok22.elumserver.common.infrastructure.logging.RecentErrorAppender"/>
+
   <root level="INFO">
     <appender-ref ref="CONSOLE"/>
     <appender-ref ref="FILE"/>
+    <appender-ref ref="ERROR_FILE"/>
+    <appender-ref ref="RECENT_ERRORS"/>
   </root>
 </configuration>

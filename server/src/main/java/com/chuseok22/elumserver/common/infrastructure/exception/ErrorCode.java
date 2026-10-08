@@ -56,6 +56,12 @@ public enum ErrorCode {
 
   // ADMIN LOG
   LOG_FILE_READ_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
+  INVALID_LOG_PATH(HttpStatus.BAD_REQUEST),
+  LOG_FILE_NOT_FOUND(HttpStatus.NOT_FOUND),
+  // 배포 중에는 반대 색 JVM이 아직 그 파일에 쓰고 있을 수 있다. 지우면 그 JVM의 이후 로그가 사라진다.
+  LOG_FILE_IN_USE(HttpStatus.CONFLICT),
+  LOG_FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
+  INVALID_LOG_LEVEL(HttpStatus.BAD_REQUEST),
 
   // SYSTEM CONFIG
   SYSTEM_CONFIG_INVALID_VALUE(HttpStatus.BAD_REQUEST),
