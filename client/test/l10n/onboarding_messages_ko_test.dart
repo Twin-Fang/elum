@@ -119,7 +119,7 @@ void main() {
           ProviderScope(overrides: [testStorageOverride()], child: app),
     );
 
-    for (final locale in const [Locale('ko'), Locale('en')]) {
+    for (final locale in const [Locale('ko'), Locale('ja')]) {
       testWidgets('캐릭터 화면 (${locale.languageCode})', (tester) async {
         await pumpScreen(tester, const CharacterScreen(), locale: locale);
         expect(find.text('다음'), findsOneWidget);

@@ -163,7 +163,7 @@ void main() {
         tester,
         const ChildHomeScreen(),
         member: const Member(nickname: '민준'),
-        locale: const Locale('en'),
+        locale: const Locale('ja'),
       );
       expect(find.text('아직 민준의\n일과가 없어요'), findsOneWidget);
     });

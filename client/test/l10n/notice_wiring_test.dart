@@ -83,7 +83,7 @@ void main() {
     await pumpWithLocale(
       tester,
       card(plain, hideDays: 3),
-      locale: const Locale('en'),
+      locale: const Locale('ja'),
     );
     expect(find.bySemanticsLabel('3일간 보지 않기'), findsOneWidget);
     expect(find.text('닫기'), findsOneWidget);

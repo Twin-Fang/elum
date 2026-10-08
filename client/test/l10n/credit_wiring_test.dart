@@ -288,7 +288,7 @@ void main() {
             ),
           ),
         ),
-        locale: const Locale('en'),
+        locale: const Locale('ja'),
         wrap: (app) => ProviderScope(
           overrides: [adRewardFlowProvider.overrideWithValue(flow)],
           child: app,

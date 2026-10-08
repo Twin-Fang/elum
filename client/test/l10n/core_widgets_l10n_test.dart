@@ -69,7 +69,7 @@ void main() {
     expect(find.text('확인'), findsOneWidget);
   });
 
-  testWidgets('번역이 비어 있는 언어(en)는 ko 문구로 떨어진다', (tester) async {
+  testWidgets('번역이 비어 있는 언어(ja)는 ko 문구로 떨어진다', (tester) async {
     await pumpWithLocale(
       tester,
       Scaffold(
@@ -80,7 +80,7 @@ void main() {
           compact: true,
         ),
       ),
-      locale: const Locale('en'),
+      locale: const Locale('ja'),
     );
     expect(find.text('다시 시도 (E-1)'), findsOneWidget);
   });

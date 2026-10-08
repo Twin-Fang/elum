@@ -79,8 +79,13 @@ void main() {
     );
   });
 
-  testWidgets('앱 이름은 onGenerateTitle 로 ARB 에서 읽는다(en 에 키가 없으면 ko)', (t) async {
+  testWidgets('앱 이름은 onGenerateTitle 로 ARB 에서 읽는다', (t) async {
     await t.pumpWidget(app(forced: const Locale('en')));
+    expect(t.widget<Title>(find.byType(Title)).title, 'elum');
+  });
+
+  testWidgets('번역에 키가 없는 언어(ja)는 앱 이름도 ko 로 떨어진다', (t) async {
+    await t.pumpWidget(app(forced: const Locale('ja')));
     expect(t.widget<Title>(find.byType(Title)).title, '이룸');
   });
 

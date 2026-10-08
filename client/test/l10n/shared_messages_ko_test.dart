@@ -63,7 +63,7 @@ void main() {
   });
 
   test('비-ko 로케일은 번역 전이라 ko 문구로 떨어진다', () {
-    setAppL10nForTest(lookupAppLocalizations(const Locale('en')));
+    setAppL10nForTest(lookupAppLocalizations(const Locale('ja')));
     expect(RewardPreset.walk.label, '산책');
     expect(const Routine(id: 'r2').displayTitle, '오늘의 일과');
     const base = Routine(id: 'r1', createdByMe: false);

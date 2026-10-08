@@ -333,7 +333,7 @@ void main() {
     await pumpWithLocale(
       tester,
       const InviteEnterScreen(),
-      locale: const Locale('en'),
+      locale: const Locale('ja'),
       wrap: (child) => ProviderScope(
         overrides: [
           profileRepositoryProvider.overrideWithValue(repo),

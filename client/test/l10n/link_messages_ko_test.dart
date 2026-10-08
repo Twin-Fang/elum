@@ -133,7 +133,7 @@ void main() {
     await pumpWithLocale(
       tester,
       Scaffold(body: LinkRetryChip(onTap: () {})),
-      locale: const Locale('en'),
+      locale: const Locale('ja'),
     );
     expect(find.text('코드 다시 만들기'), findsOneWidget);
   });
