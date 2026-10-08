@@ -13,7 +13,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../onboarding/domain/onboarding_profile.dart';
 import '../../onboarding/presentation/widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
-import '../../../core/storage/local_storage.dart';
+import '../application/mode_switch_controller.dart';
 import '../../../core/router/routes.dart';
 
 /// Figma `보호자_아이화면_전환`(309:2837).
@@ -65,7 +65,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   /// `ok=false` 로 알린다 — 읽지 못한 것을 "암호 없음"으로 보면 그대로 열어 주게 된다.
   Future<({bool ok, bool hasPin})> _readPin() async {
     try {
-      return (ok: true, hasPin: await ref.read(localStorageProvider).hasPin());
+      return (ok: true, hasPin: await ref.read(modeSwitchControllerProvider).hasPin());
     } catch (e) {
       debugPrint('[mode-switch] 암호 읽기 실패: $e');
       if (!mounted) return (ok: false, hasPin: false);
@@ -102,7 +102,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       return;
     }
 
-    if (ref.read(localStorageProvider).isElumiDevice) {
+    if (ref.read(modeSwitchControllerProvider).isElumiDevice) {
       setState(() => _blocked = true);
       return;
     }
@@ -135,15 +135,15 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
     final entered = _controller.text;
     bool isValid;
     try {
-      final storage = ref.read(localStorageProvider);
-      final hasPin = await storage.hasPin();
+      final controller = ref.read(modeSwitchControllerProvider);
+      final hasPin = await controller.hasPin();
       if (!mounted) return;
       if (!hasPin && widget.target == ModeSwitchTarget.guardian) {
         _ready = false;
         await _guardGuardianEntry();
         return;
       }
-      isValid = !hasPin || await storage.verifyPin(entered);
+      isValid = !hasPin || await controller.verifyPin(entered);
     } catch (e) {
       if (mounted) {
         _controller.clear();

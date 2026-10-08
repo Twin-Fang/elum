@@ -25,3 +25,12 @@ extension AccountScopedReset on WidgetRef {
     invalidate(routineFlowProvider);
   }
 }
+
+/// 컨트롤러처럼 위젯 밖에서 [Ref]로 부를 때 쓰는 같은 것.
+extension AccountScopedResetRef on Ref {
+  void forgetPreviousAccountRoutines() {
+    refreshRoutines();
+    invalidate(routineSuggestionsProvider);
+    invalidate(routineFlowProvider);
+  }
+}

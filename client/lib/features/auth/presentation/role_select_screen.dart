@@ -11,7 +11,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../domain/app_role.dart';
 import 'widgets/role_card.dart';
 import '../../../core/router/pop_or_home.dart';
-import '../../../core/storage/local_storage.dart';
+import '../application/role_select_controller.dart';
 import '../../../core/router/routes.dart';
 
 /// 역할 선택 (Figma `732:5176`·`732:5258` · 이슈 #212 · #229).
@@ -51,7 +51,7 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
 
     // 저장이 실패해도 화면을 멈추지 않는다. 다음에 다시 물으면 될 뿐이다.
     try {
-      await ref.read(localStorageProvider).setSelectedRole(role.storageValue);
+      await ref.read(roleSelectControllerProvider).selectRole(role.storageValue);
     } catch (e) {
       debugPrint('역할 저장 실패: $e');
     }

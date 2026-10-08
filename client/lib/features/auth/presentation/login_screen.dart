@@ -14,14 +14,9 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/widgets/login_scene.dart';
-import '../application/account_reset.dart';
-import '../../onboarding/application/onboarding_notifier.dart';
-import '../../profile/application/profile_session.dart';
+import '../application/login_controller.dart';
 import '../data/auth_repository.dart';
 import '../data/oauth_sdk.dart';
-import '../../child/application/child_routine_notifier.dart';
-import '../../../core/storage/local_storage.dart';
-import '../../member/application/member_providers.dart';
 import '../../../core/router/routes.dart';
 
 /// 로그인 화면. 온보딩 맨 앞에 선다.
@@ -82,7 +77,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    final saved = ref.read(localStorageProvider).lastLoginProvider;
+    final saved = ref.read(loginControllerProvider).lastLoginProviderName();
     if (saved != null) {
       _lastProvider = OAuthProvider.values
           .where((p) => p.name == saved)
@@ -95,8 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final l10n = context.l10n;
     setState(() => _pending = provider);
 
-    final repo = ref.read(authRepositoryProvider);
-    final result = await repo.signInWith(provider);
+    final result = await ref.read(loginControllerProvider).signIn(provider);
 
     if (!mounted) return;
 
@@ -107,17 +101,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       AuthOutcome.onboarding,
       AuthOutcome.home,
     }.contains(result.outcome)) {
-      ref.invalidate(memberProvider);
-      ref.invalidate(profileSessionProvider);
-      // 이룸이 설정(캐릭터·도움 목표·그림 방식·PIN)도 이전 계정 것이다. 온보딩 경로만 비우면 이미 가입한
-      // 계정(home)으로 들어올 때 서버 값이 없는 항목이 이전 계정 값으로 남는다 (#503).
-      // 저장소는 로그아웃·탈퇴에서 이미 비워졌고 provider 는 그 저장소 값으로 다시 만들어진다.
-      ref.invalidate(onboardingProvider);
-      // 일과 목록도 이전 계정 것이다 — 비우지 않으면 새 계정 홈이 앱을 껐다 켤 때까지 옛 일과를 그린다 (#482).
-      ref.forgetPreviousAccountRoutines();
-      // 메모리 큐까지 다른 계정에 상속하지 않는다. 같은 계정은 로컬 큐에서 다시 복원한다.
-      ref.invalidate(childRoutineProvider);
-      await ref.read(childRoutineProvider.notifier).hydrate();
+      await ref.read(loginControllerProvider).resetPreviousAccount();
       if (!mounted) return;
     }
 
@@ -135,7 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       case AuthOutcome.home:
         // 이미 아이 정보를 채운 계정이다. 온보딩을 건너뛰고 홈으로 보낸다.
         if (!mounted) return;
-        final hasPin = await ref.read(localStorageProvider).hasPin();
+        final hasPin = await ref.read(loginControllerProvider).hasPin();
         if (!mounted) return;
         // 방금 인증한 보호자만 이 휴대폰 잠금을 새로 만들 수 있다.
         context.go(
@@ -229,7 +213,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   /// 저장소는 [AuthRepository]가 이미 비웠지만, provider는 앱이 켜질 때 읽어 둔 값을
   /// 메모리에 들고 있다. 비우지 않으면 이름 입력칸에 남의 이름이 그대로 남는다 (이슈 #177).
   void _forgetPreviousChild() {
-    ref.invalidate(onboardingProvider);
+    ref.read(loginControllerProvider).forgetPreviousChild();
   }
 
   /// 이 기기가 iOS인가 — **애플 버튼과 장면 배치가 같이 갈린다.**

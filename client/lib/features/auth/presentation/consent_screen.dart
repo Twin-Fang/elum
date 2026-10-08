@@ -9,9 +9,8 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
-import '../data/auth_repository.dart';
+import '../application/consent_controller.dart';
 import '../data/consent_document_repository.dart';
-import '../data/consent_repository.dart';
 import '../domain/consent_bundle.dart';
 import 'consent_document_screen.dart';
 import 'widgets/consent_all_agree_button.dart';
@@ -82,7 +81,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       _failure = null;
     });
 
-    final failure = await ref.read(consentRepositoryProvider).agree(
+    final failure = await ref.read(consentControllerProvider).agree(
           // 켠 것만 동의로 보낸다. 고정값을 보내면 켜지 않은 항목이 동의로 남는다 (#278 QA).
           agreedKeys: Set.of(_checked),
           // **화면에 보여준 것**의 버전이다. 캐시나 기본값을 보여줬다면 그 버전으로
@@ -112,7 +111,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   /// 토큰만 남겨두면 다음 실행에서 동의 화면을 건너뛰고 들어올 수 있어
   /// 동의 없이 서비스가 열린다.
   Future<void> _leave() async {
-    await ref.read(authRepositoryProvider).logout();
+    await ref.read(consentControllerProvider).logout();
     if (!mounted) return;
     context.go(Routes.login);
   }
