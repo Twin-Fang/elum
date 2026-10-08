@@ -28,17 +28,17 @@ public class FeedbackService {
   static final int DAILY_LIMIT = 20;
   public static final int ADMIN_PAGE_SIZE = 20;
 
-  private final FeedbackRepository repository;
+  private final FeedbackRepository feedbackRepository;
   private final Clock clock;
 
   // 생성자가 둘이라 스프링이 쓸 것을 명시한다. 이 앱에는 Clock 빈이 없다.
   @Autowired
-  public FeedbackService(FeedbackRepository repository) {
-    this(repository, Clock.systemDefaultZone());
+  public FeedbackService(FeedbackRepository feedbackRepository) {
+    this(feedbackRepository, Clock.systemDefaultZone());
   }
 
-  FeedbackService(FeedbackRepository repository, Clock clock) {
-    this.repository = repository;
+  FeedbackService(FeedbackRepository feedbackRepository, Clock clock) {
+    this.feedbackRepository = feedbackRepository;
     this.clock = clock;
   }
 
@@ -59,7 +59,7 @@ public class FeedbackService {
 
     // 하루는 서버 기본 시간대의 0시부터다. 다른 기능의 일일 상한(광고 보상)과 같은 기준이다.
     LocalDateTime todayStart = LocalDateTime.now(clock).toLocalDate().atStartOfDay();
-    if (repository.countByMemberIdAndCreatedAtGreaterThanEqual(memberId, todayStart) >= DAILY_LIMIT) {
+    if (feedbackRepository.countByMemberIdAndCreatedAtGreaterThanEqual(memberId, todayStart) >= DAILY_LIMIT) {
       throw new CustomException(ErrorCode.FEEDBACK_RATE_LIMITED);
     }
 
@@ -70,24 +70,30 @@ public class FeedbackService {
     feedback.setAppLog(appLog == null || appLog.isBlank() ? null : appLog);
     feedback.setAppVersion(truncate(request.appVersion(), MAX_VERSION_LENGTH));
     feedback.setOs(truncate(request.os(), MAX_OS_LENGTH));
-    return repository.save(feedback).getId();
+    return feedbackRepository.save(feedback).getId();
   }
 
   /// 관리자 목록. 최신순.
   @Transactional(readOnly = true)
   public Page<Feedback> list(int page) {
-    return repository.findAll(
+    return feedbackRepository.findAll(
       PageRequest.of(Math.max(page, 0), ADMIN_PAGE_SIZE, Sort.by(Sort.Direction.DESC, "createdAt")));
   }
 
   @Transactional(readOnly = true)
   public Feedback get(String id) {
-    return repository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.FEEDBACK_NOT_FOUND));
+    return feedbackRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.FEEDBACK_NOT_FOUND));
+  }
+
+  /// 계정을 탈퇴할 때 그 회원의 의견과 앱 상태 기록을 모두 지운다. 개인 정보가 섞여 있을 수 있어 남기지 않는다.
+  @Transactional
+  public void deleteAllOf(String memberId) {
+    feedbackRepository.deleteAllByMemberId(memberId);
   }
 
   @Transactional
   public void delete(String id) {
-    repository.delete(get(id));
+    feedbackRepository.delete(get(id));
   }
 
   private static String truncate(String value, int max) {

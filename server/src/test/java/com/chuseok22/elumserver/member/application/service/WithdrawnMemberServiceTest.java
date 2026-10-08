@@ -59,6 +59,9 @@ class WithdrawnMemberServiceTest {
   private AdRewardSessionRepository adRewardSessionRepository;
 
   @Mock
+  private com.chuseok22.elumserver.feedback.application.service.FeedbackService feedbackService;
+
+  @Mock
   private AiCallLogRepository aiCallLogRepository;
 
   @Mock
@@ -237,6 +240,7 @@ class WithdrawnMemberServiceTest {
     leaveFirst.verify(memberRepository).delete(member);
     verify(subscriptionRepository).deleteByMemberId("m1");
     verify(adRewardSessionRepository).deleteAllByMemberId("m1");
+    verify(feedbackService).deleteAllOf("m1");
     verify(refreshTokenRepository).deleteAllByMemberId("m1");
     verify(deviceLinkRepository).deleteAllByMemberId("m1");
 

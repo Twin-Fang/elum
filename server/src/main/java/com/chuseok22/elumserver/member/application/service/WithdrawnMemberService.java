@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.auth.infrastructure.repository.RefreshTokenRepos
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditAccountRepository;
+import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
@@ -53,6 +54,7 @@ public class WithdrawnMemberService {
   private final GuardianshipService guardianshipService;
   private final AiCreditAccountRepository aiCreditAccountRepository;
   private final AdRewardSessionRepository adRewardSessionRepository;
+  private final FeedbackService feedbackService;
 
   /** 탈퇴 뒤 남겨 두는 일수. 관리자 설정값이다 (기본 365 — 개인정보처리방침 4조의 1년과 같다). */
   public int retentionDays() {
@@ -131,6 +133,7 @@ public class WithdrawnMemberService {
     guardianshipService.leaveAll(memberId);
     subscriptionRepository.deleteByMemberId(memberId);
     adRewardSessionRepository.deleteAllByMemberId(memberId);
+    feedbackService.deleteAllOf(memberId);
     refreshTokenRepository.deleteAllByMemberId(memberId);
     deviceLinkRepository.deleteAllByMemberId(memberId);
 
