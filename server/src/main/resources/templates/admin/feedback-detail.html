@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/fragments/admin-layout :: page('의견 상세', 'feedback', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+  <div class="flex flex-wrap items-center gap-2">
+    <a th:href="@{/admin/feedback}" class="btn btn-ghost btn-sm">← 목록</a>
+    <h1 class="text-2xl font-bold">의견 상세</h1>
+  </div>
+
+  <!-- 의견과 기록은 사용자 입력이다. 반드시 th:text 로 이스케이프한다. -->
+  <dl class="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-2 text-sm">
+    <dt class="text-base-content/60">보낸 때</dt>
+    <dd th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'yyyy-MM-dd HH:mm:ss') : '-'}">2026-10-08 10:00:00</dd>
+    <dt class="text-base-content/60">회원 id</dt>
+    <dd class="font-mono break-all" th:text="${feedback.memberId}">member-id</dd>
+    <dt class="text-base-content/60">앱 버전</dt>
+    <dd th:text="${feedback.appVersion != null ? feedback.appVersion : '-'}">1.0.40</dd>
+    <dt class="text-base-content/60">OS</dt>
+    <dd th:text="${feedback.os != null ? feedback.os : '-'}">iOS 18.1</dd>
+  </dl>
+
+  <section class="space-y-2">
+    <h2 class="font-semibold">의견</h2>
+    <div class="rounded-box bg-base-200 p-4 whitespace-pre-wrap wrap-anywhere" th:text="${feedback.message}">의견 전체</div>
+  </section>
+
+  <section class="space-y-2">
+    <h2 class="font-semibold">앱 상태 기록</h2>
+    <p th:unless="${feedback.hasAppLog()}" class="text-sm text-base-content/60">보내지 않았어요.</p>
+    <details th:if="${feedback.hasAppLog()}" class="collapse collapse-arrow bg-base-200">
+      <summary class="collapse-title text-sm">펼쳐서 보기</summary>
+      <div class="collapse-content">
+        <pre class="text-xs overflow-x-auto whitespace-pre-wrap wrap-anywhere" th:text="${feedback.appLog}">기록</pre>
+      </div>
+    </details>
+  </section>
+
+  <form th:action="@{/admin/feedback/{id}/delete(id=${feedback.id})}" method="post"
+        onsubmit="return confirm('이 의견을 지울까요? 되돌릴 수 없어요.');">
+    <button type="submit" class="btn btn-error btn-sm">지우기</button>
+  </form>
+</main>
+</body>
+</html>

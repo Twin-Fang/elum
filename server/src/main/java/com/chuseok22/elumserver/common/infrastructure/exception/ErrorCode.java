@@ -187,6 +187,13 @@ public enum ErrorCode {
   NOTICE_IMAGE_TOO_LARGE(HttpStatus.BAD_REQUEST),
   NOTICE_IMAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
 
+  // 의견 보내기. 입력 검증은 400, 하루 상한은 429 다. 상한은 앱이 글을 지우지 않고 안내만 하는 신호다.
+  FEEDBACK_MESSAGE_EMPTY(HttpStatus.BAD_REQUEST),
+  FEEDBACK_MESSAGE_TOO_LONG(HttpStatus.BAD_REQUEST),
+  FEEDBACK_LOG_TOO_LARGE(HttpStatus.BAD_REQUEST),
+  FEEDBACK_RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),
+  FEEDBACK_NOT_FOUND(HttpStatus.NOT_FOUND),
+
   // 일과 생성 가능 언어. 서버 문구 파일(폴백 질문·추천)이 비어 있는 언어는 켤 수 없다 —
   // 켜 두면 다음 기동의 시작 검사가 서버를 세우지 않는다. 관리자 화면은 E-CFG-004 를 함께 보여준다.
   CONTENT_LOCALE_NOT_READY(HttpStatus.BAD_REQUEST),

@@ -31,6 +31,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
     "com.chuseok22.elumserver.common",
     "com.chuseok22.elumserver.consent",
     "com.chuseok22.elumserver.credit",
+    "com.chuseok22.elumserver.feedback",
     "com.chuseok22.elumserver.link",
     "com.chuseok22.elumserver.notice",
     "com.chuseok22.elumserver.routine",
