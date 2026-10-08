@@ -10,13 +10,10 @@ import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
-import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -39,7 +36,6 @@ import org.springframework.web.client.RestClient;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class FluxImageClient implements ImageGenerationClient {
 
   private static final String BASE_URL = "https://fal.run";
@@ -56,9 +52,20 @@ public class FluxImageClient implements ImageGenerationClient {
   private final SystemConfigService systemConfigService;
   private final AiCallLogService aiCallLogService;
 
-  private final RestClient restClient = buildRestClient(BASE_URL);
+  private final RestClient restClient;
   /// 결과 이미지를 받아오는 용도. 주소가 fal.ai 바깥일 수 있어 baseUrl을 두지 않는다.
-  private final RestClient downloadClient = buildRestClient(null);
+  private final RestClient downloadClient;
+
+  public FluxImageClient(PromptTemplateService promptTemplateService, FluxPromptBuilder fluxPromptBuilder,
+    SystemConfigService systemConfigService, AiCallLogService aiCallLogService,
+    AiRestClientFactory restClientFactory) {
+    this.promptTemplateService = promptTemplateService;
+    this.fluxPromptBuilder = fluxPromptBuilder;
+    this.systemConfigService = systemConfigService;
+    this.aiCallLogService = aiCallLogService;
+    this.restClient = restClientFactory.create(BASE_URL);
+    this.downloadClient = restClientFactory.create(null);
+  }
 
   @Override
   public ImageProvider provider() {
@@ -180,14 +187,6 @@ public class FluxImageClient implements ImageGenerationClient {
       case "image/webp" -> "webp";
       default -> "png";
     };
-  }
-
-  private static RestClient buildRestClient(String baseUrl) {
-    SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-    factory.setConnectTimeout(Duration.ofSeconds(10));
-    factory.setReadTimeout(Duration.ofSeconds(120));
-    RestClient.Builder builder = RestClient.builder().requestFactory(factory);
-    return baseUrl == null ? builder.build() : builder.baseUrl(baseUrl).build();
   }
 
   record FluxImageResponse(List<FluxImage> images) {

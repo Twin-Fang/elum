@@ -10,15 +10,12 @@ import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigSer
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -40,7 +37,6 @@ import org.springframework.web.client.RestClient;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class OpenAiTextClient implements TextGenerationClient {
 
   private static final String BASE_URL = "https://api.openai.com";
@@ -50,7 +46,17 @@ public class OpenAiTextClient implements TextGenerationClient {
   private final SystemConfigService systemConfigService;
   private final AiCallLogService aiCallLogService;
 
-  private final RestClient restClient = buildRestClient();
+  private final RestClient restClient;
+
+  public OpenAiTextClient(GeminiTextClient geminiTextClient, PromptTemplateService promptTemplateService,
+    SystemConfigService systemConfigService, AiCallLogService aiCallLogService,
+    AiRestClientFactory restClientFactory) {
+    this.geminiTextClient = geminiTextClient;
+    this.promptTemplateService = promptTemplateService;
+    this.systemConfigService = systemConfigService;
+    this.aiCallLogService = aiCallLogService;
+    this.restClient = restClientFactory.create(BASE_URL);
+  }
 
   @Override
   public TextProvider provider() {
@@ -257,14 +263,6 @@ public class OpenAiTextClient implements TextGenerationClient {
   /// strict 모드가 받지 않는 키워드. 남겨 두면 400으로 호출 자체가 실패한다.
   private static final Set<String> UNSUPPORTED_KEYWORDS =
     Set.of("minItems", "maxItems", "minLength", "maxLength");
-
-  // 텍스트 생성은 길어야 수십 초다. 읽기 제한을 넉넉히 두되 무한 대기는 막는다.
-  private static RestClient buildRestClient() {
-    SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-    factory.setConnectTimeout(Duration.ofSeconds(10));
-    factory.setReadTimeout(Duration.ofSeconds(120));
-    return RestClient.builder().baseUrl(BASE_URL).requestFactory(factory).build();
-  }
 
   /// 응답에서 쓰는 것만 담는다. 모르는 필드는 무시된다.
   @JsonIgnoreProperties(ignoreUnknown = true)

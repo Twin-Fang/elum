@@ -8,13 +8,10 @@ import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
-import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -30,7 +27,6 @@ import org.springframework.web.client.RestClient;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class OpenAiImageClient implements ImageGenerationClient {
 
   private static final String BASE_URL = "https://api.openai.com";
@@ -45,7 +41,17 @@ public class OpenAiImageClient implements ImageGenerationClient {
   private final SystemConfigService systemConfigService;
   private final AiCallLogService aiCallLogService;
 
-  private final RestClient restClient = buildRestClient();
+  private final RestClient restClient;
+
+  public OpenAiImageClient(RoutineImagePromptComposer promptComposer,
+    GeminiRoutineImagePromptBuilder imagePromptBuilder, SystemConfigService systemConfigService,
+    AiCallLogService aiCallLogService, AiRestClientFactory restClientFactory) {
+    this.promptComposer = promptComposer;
+    this.imagePromptBuilder = imagePromptBuilder;
+    this.systemConfigService = systemConfigService;
+    this.aiCallLogService = aiCallLogService;
+    this.restClient = restClientFactory.create(BASE_URL);
+  }
 
   @Override
   public ImageProvider provider() {
@@ -147,14 +153,6 @@ public class OpenAiImageClient implements ImageGenerationClient {
       throw new IllegalStateException("OpenAI 응답에 이미지 데이터가 없음");
     }
     return new GeneratedImage(Base64.getDecoder().decode(base64), "png");
-  }
-
-  // 이미지 생성은 수십 초가 걸린다. 읽기 제한을 넉넉히 두되 무한 대기는 막는다.
-  private static RestClient buildRestClient() {
-    SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-    factory.setConnectTimeout(Duration.ofSeconds(10));
-    factory.setReadTimeout(Duration.ofSeconds(120));
-    return RestClient.builder().baseUrl(BASE_URL).requestFactory(factory).build();
   }
 
   /// 응답에서 쓰는 것만 담는다. 모르는 필드는 무시된다.

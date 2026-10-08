@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
+import com.chuseok22.elumserver.common.infrastructure.properties.AiHttpProperties;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,8 @@ class FluxImageClientTest {
 
   private final FluxImageClient client = new FluxImageClient(
     mock(PromptTemplateService.class), new FluxPromptBuilder(),
-    mock(SystemConfigService.class), mock(AiCallLogService.class));
+    mock(SystemConfigService.class), mock(AiCallLogService.class),
+    new AiRestClientFactory(new AiHttpProperties(null, null)));
 
   @Test
   @DisplayName("1152×848 · 4 steps · 한 장 — fal 은 1MP 미만도 1MP 로 받으니 1MP 안에서 카드 비율(1.361:1)로 크게")
