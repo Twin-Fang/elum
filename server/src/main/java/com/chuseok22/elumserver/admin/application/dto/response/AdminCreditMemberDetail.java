@@ -11,7 +11,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 /**
- * 관리자 크레딧 회원 상세 (#407).
+ * 관리자 크레딧 회원 상세.
  *
  * @param account 크레딧 계정. 아직 없으면 null — 첫 요청이나 관리자 지급 때 만들어진다
  * @param balance 지금 잔액(읽기만 — 이번 주 지급·멈춘 예약 정리는 하지 않는다). 계정이 없으면 null

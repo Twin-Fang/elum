@@ -52,12 +52,11 @@ public class AidlpDecryptionFilter extends OncePerRequestFilter {
   protected boolean shouldNotFilter(HttpServletRequest request) {
     // 정확 경로 매칭 + POST 만 대상.
     //
-    // ⚠️ 예전에는 secret이 비면 여기서 통째로 건너뛰었다("데모 안전 — 로컬 fallback 유도").
-    // 그런데 클라이언트는 로컬 폴백을 이미 제거한 상태였다. 그래서 암호문 봉투가 복호화 없이
-    // 컨트롤러까지 흘러가 모든 필드가 null인 DTO가 됐고, 저장 단계의 not-null 제약에 걸려
-    // 500이 났다. 화면에는 E-1001만 떠 원인을 알 수 없었다 (이슈 #182).
+    // ⚠️ secret이 비어도 건너뛰지 않는다. 클라이언트에 로컬 폴백이 없어 암호문 봉투가 복호화 없이
+    // 컨트롤러까지 흘러가면 모든 필드가 null인 DTO가 되어 저장 단계의 not-null 제약에 걸려 500이 나고,
+    // 화면에는 E-1001만 떠 원인을 알 수 없다.
     //
-    // 이제는 대상 경로면 항상 필터를 타고, 봉투 유무·secret 유무를 아래에서 명시적으로 판정한다.
+    // 대상 경로면 항상 필터를 타고, 봉투 유무·secret 유무를 아래에서 명시적으로 판정한다.
     return !(HttpMethod.POST.matches(request.getMethod())
       && TARGET_PATHS.contains(request.getRequestURI()));
   }
@@ -81,14 +80,14 @@ public class AidlpDecryptionFilter extends OncePerRequestFilter {
     }
 
     // 2) 암호화하지 않은 요청은 그대로 통과시킨다.
-    //    클라이언트가 암호화를 끈 빌드와 켠 빌드가 한동안 공존하므로 양쪽을 다 받아야 한다 (#182).
+    //    클라이언트가 암호화를 끈 빌드와 켠 빌드가 한동안 공존하므로 양쪽을 다 받아야 한다.
     if (enc == null) {
       chain.doFilter(new CachedBodyRequest(request, raw), response);
       return;
     }
 
     // 3) 암호문이 왔는데 서버에 시크릿이 없으면 복호화할 방법이 없다.
-    //    조용히 통과시키면 null 투성이 DTO가 저장까지 내려가 원인 모를 500이 된다 — 그게 #182였다.
+    //    조용히 통과시키면 null 투성이 DTO가 저장까지 내려가 원인 모를 500이 된다.
     if (properties.getSecret().isBlank()) {
       writeError(response, ErrorCode.DLP_SECRET_NOT_CONFIGURED);
       return;

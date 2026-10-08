@@ -3,11 +3,10 @@ package com.chuseok22.elumserver.admin.application.dto.request;
 import com.chuseok22.elumserver.consent.infrastructure.entity.ConsentDocument;
 
 /**
- * 약관 편집 화면의 입력값 (이슈 #278).
+ * 약관 편집 화면의 입력값.
  *
  * <p>검증에 걸렸을 때 <b>관리자가 입력한 값을 그대로 다시 그리기</b> 위해 둔다.
- * 전에는 오류가 나면 편집 화면으로 리다이렉트해 DB 값을 다시 읽었고, 몇 분 걸려 고친
- * 전문이 통째로 사라졌다.
+ * 오류가 나면 편집 화면으로 리다이렉트해 DB 값을 다시 읽으면 고치던 전문이 통째로 사라지기 때문이다.
  */
 public record ConsentEditForm(
   String label,

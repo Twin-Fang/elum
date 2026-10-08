@@ -142,11 +142,11 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.POST, SecurityPaths.API_DEVICE_LINK_REDEEM).permitAll()
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_APP_STATUS).permitAll()
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_CONSENT_DOCUMENTS).permitAll()
-        // Google 보상형 광고 콜백 — 인증은 서명이다 (이슈 #463)
+        // Google 보상형 광고 콜백 — 인증은 서명이다
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_ADS_SSV).permitAll()
-        // 공지 팝업 — 읽기 전용, 인증 없음 (이슈 #370)
+        // 공지 팝업 — 읽기 전용, 인증 없음
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_APP_NOTICES, SecurityPaths.API_APP_NOTICE_IMAGE).permitAll()
-        // ── 이룸이 휴대폰이 할 수 있는 것 (이슈 #200) ──
+        // ── 이룸이 휴대폰이 할 수 있는 것 ──
         // 두 휴대폰은 같은 계정이라 memberId가 같다. 나누지 않으면 이룸이 휴대폰에서
         // 일과 삭제·회원 탈퇴가 그대로 된다. **허용할 것만 적고 나머지는 막는다** —
         // 반대로 하면 엔드포인트가 늘 때마다 막는 걸 잊는다.
@@ -155,16 +155,16 @@ public class SecurityConfig {
           "/api/routines/*/steps/*/complete",
           "/api/routines/*/steps/*/cancel").hasAnyAuthority(ELUMI, GUARDIAN)
         .requestMatchers(HttpMethod.PUT, "/api/routines/*/progress").hasAnyAuthority(ELUMI, GUARDIAN)
-        // 이룸이 휴대폰이 자기 연결을 끊는다 (#363). 보호자 토큰도 컨트롤러까지 보내 코드가 있는 403 으로 답하게 한다.
+        // 이룸이 휴대폰이 자기 연결을 끊는다. 보호자 토큰도 컨트롤러까지 보내 코드가 있는 403 으로 답하게 한다.
         .requestMatchers(HttpMethod.DELETE, "/api/device-links/current").hasAnyAuthority(ELUMI, GUARDIAN)
-        // 해커톤 시험용 창구는 아무도 못 부른다 (이슈 #382). anyRequest 보다 앞에 둬야 한다 —
+        // 수동 검증용 창구는 아무도 못 부른다. anyRequest 보다 앞에 둬야 한다 —
         // 뒤에 두면 보호자 권한 규칙에 먼저 걸려 가입한 누구나 로컬 LLM 을 돌릴 수 있다.
         .requestMatchers(SecurityPaths.API_INTERNAL_MATCHER).denyAll()
         .anyRequest().hasAuthority(GUARDIAN)
       )
       .exceptionHandling(handling -> handling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
       .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-      // 점검 중이면 인증보다 먼저 503 — 만료 토큰이 401을 받고 갱신에 나서지 않게 한다 (이슈 #279).
+      // 점검 중이면 인증보다 먼저 503 — 만료 토큰이 401을 받고 갱신에 나서지 않게 한다.
       .addFilterBefore(maintenanceModeFilter, JwtAuthenticationFilter.class)
       // JWT 인증 이후 실행 — 인증된 요청의 암호화 본문을 복호화해 컨트롤러에 평문 DTO로 넘긴다.
       .addFilterAfter(aidlpDecryptionFilter, JwtAuthenticationFilter.class);

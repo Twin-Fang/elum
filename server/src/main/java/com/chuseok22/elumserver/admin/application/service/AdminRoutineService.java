@@ -37,11 +37,10 @@ public class AdminRoutineService {
   private static final int PAGE_SIZE = 20;
 
   /**
-   * 일과 목록. <b>전건을 그리지 않는다</b> (이슈 #248).
+   * 일과 목록. <b>전건을 그리지 않는다</b>.
    *
-   * <p>예전에는 {@code findAll()} 로 전부 가져와 화면에 그렸다. 회원 목록과 AI 모니터링에는
-   * 페이지 나누기가 있는데 여기만 없었고, 운영에서 일과가 쌓이면 그 수만큼 줄을 그리다
-   * 화면이 멈춘다.
+   * <p>{@code findAll()} 로 전부 가져와 그리면 운영에서 일과가 쌓일수록 그 수만큼 줄을 그리다 화면이 멈춘다.
+   * 회원 목록·AI 모니터링처럼 페이지를 나눈다.
    */
   public Page<AdminRoutineResponse> search(String keyword, int page) {
     Pageable pageable = PageRequest.of(Math.max(page, 0), PAGE_SIZE,

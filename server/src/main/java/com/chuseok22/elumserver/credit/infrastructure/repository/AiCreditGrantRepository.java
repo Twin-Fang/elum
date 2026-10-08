@@ -23,14 +23,14 @@ public interface AiCreditGrantRepository extends JpaRepository<AiCreditGrant, St
   List<AiCreditGrant> findByAccountIdAndRemainingGreaterThan(String accountId, int remaining);
 
   /**
-   * 이 출처의 묶음이 이 시각 이후 시작된 개수. 광고 보상의 하루 상한을 센다 (#463).
+   * 이 출처의 묶음이 이 시각 이후 시작된 개수. 광고 보상의 하루 상한을 센다.
    *
    * <p>**회원이 아니라 계정으로 센다.** 크레딧 계정은 소셜 신원으로 재가입 뒤에도 이어지므로, 탈퇴하고 다시 가입해
    * 새 회원 ID 를 받아도 오늘 받은 횟수가 그대로 남는다(회원 ID 로 세면 재가입으로 상한이 리셋된다).
    */
   long countByAccountIdAndSourceAndValidFromGreaterThanEqual(String accountId, CreditGrantSource source, LocalDateTime from);
 
-  /// 한 주기의 주간 지급 전부 (관리자 크레딧 — 주 단위 집계·IMMEDIATE 정책 조정, #407).
+  /// 한 주기의 주간 지급 전부 (관리자 크레딧 — 주 단위 집계·IMMEDIATE 정책 조정).
   List<AiCreditGrant> findByPeriodKey(String periodKey);
 
   /**
@@ -45,7 +45,7 @@ public interface AiCreditGrantRepository extends JpaRepository<AiCreditGrant, St
   );
 
   /**
-   * 기간 [from, to) 에 시작한 주간 외 지급(관리자 보너스 등)의 계정별 합 (#407).
+   * 기간 [from, to) 에 시작한 주간 외 지급(관리자 보너스 등)의 계정별 합.
    *
    * <p>주간 지급을 빼려고 source 를 인자로 받는다 — JPQL 에 enum 전체 경로를 적으면 오타를 잡기 어렵다.
    */
@@ -59,7 +59,7 @@ public interface AiCreditGrantRepository extends JpaRepository<AiCreditGrant, St
     @Param("weekly") CreditGrantSource weekly, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to
   );
 
-  /// 지금 쓸 수 있는 주간 외 묶음의 계정별 남은 양 (#407).
+  /// 지금 쓸 수 있는 주간 외 묶음의 계정별 남은 양.
   @Query("""
     select g.accountId as accountId, coalesce(sum(g.remaining), 0) as total
     from AiCreditGrant g

@@ -82,7 +82,7 @@ public class GeminiTextClient implements TextGenerationClient {
     return firstText(generateQuestionForTest(systemPrompt, sampleInput));
   }
 
-  /// 직접 추가한 카드 한 장의 픽토그램 id 를 고른다 (#247). 지시문은 운영 DB 가 아니라 코드에 둔다 —
+  /// 직접 추가한 카드 한 장의 픽토그램 id 를 고른다. 지시문은 운영 DB 가 아니라 코드에 둔다 —
   /// 배포로 바로 바뀌고, 관리자 화면에서 실수로 지울 수 없다.
   @Override
   public String pickPictogramJson(String stepTitle, String stepDescription) {
@@ -107,7 +107,7 @@ public class GeminiTextClient implements TextGenerationClient {
       + "pictogramCatalog 안에서 하나만 고르세요. "
       + "알맞은 것이 없거나 확신이 없으면 null 을 주세요. 억지로 고르지 마세요(비슷하지만 뜻이 다른 것은 금지).";
 
-  /// 카드 그림 id 의 설명. 지시는 여기(코드)에 둔다 — 프롬프트는 운영 DB 값이라 배포로 안 바뀐다 (#247).
+  /// 카드 그림 id 의 설명. 지시는 여기(코드)에 둔다 — 프롬프트는 운영 DB 값이라 배포로 안 바뀐다.
   static final String PICTOGRAM_ID_DESCRIPTION =
     "pictogramCatalog 안에서 이 단계의 행동이나 사물을 가장 잘 나타내는 id 하나. "
       + "알맞은 것이 없거나 확신이 없으면 null. 억지로 고르지 마세요(비슷하지만 뜻이 다른 것 금지)";
@@ -130,9 +130,9 @@ public class GeminiTextClient implements TextGenerationClient {
   /**
    * 응답에서 JSON 본문 한 덩어리를 꺼낸다.
    *
-   * <p>예전에는 호출부마다 {@code candidates.get(0)...parts.get(0)}을 직접 훑었다.
-   * 응답이 비어 오면 그 자리에서 인덱스 예외가 나 무엇이 없었는지 알 수 없었으므로,
-   * 한 곳으로 모으면서 단계마다 무엇이 비었는지 말하게 했다.
+   * <p>호출부마다 {@code candidates.get(0)...parts.get(0)}을 직접 훑으면
+   * 응답이 비어 올 때 그 자리에서 인덱스 예외가 나 무엇이 없는지 알 수 없다.
+   * 한 곳으로 모아 단계마다 무엇이 비었는지 말한다.
    */
   private String firstText(GeminiGenerateContentResponse response) {
     if (response == null || response.candidates() == null || response.candidates().isEmpty()) {
@@ -160,7 +160,7 @@ public class GeminiTextClient implements TextGenerationClient {
   }
 
   /**
-   * 카드 설명 한 줄을 FLUX 용 영어 장면으로 옮긴다 (#373).
+   * 카드 설명 한 줄을 FLUX 용 영어 장면으로 옮긴다.
    *
    * <p>일과 만들기 때는 같은 호출에서 영어 장면을 받으므로 이 호출이 없다. 보호자가 직접 추가한
    * 카드처럼 영어가 없는 카드만 탄다. 실패하면 던진다 — 부르는 쪽이 그 카드만 OpenAI 로 그린다.
@@ -169,7 +169,7 @@ public class GeminiTextClient implements TextGenerationClient {
     return translate(promptTemplateService.getContent(PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE), stepDescription);
   }
 
-  /// 실사(#457): 캐릭터 없이 물건·장소 중심 한 줄로 옮긴다. 만화용과 달리 "The character" 로 시작하지 않는다.
+  /// 실사: 캐릭터 없이 물건·장소 중심 한 줄로 옮긴다. 만화용과 달리 "The character" 로 시작하지 않는다.
   public String translateRealisticImagePrompt(String stepDescription) {
     return translate(
       promptTemplateService.getContent(PromptKey.REALISTIC_IMAGE_PROMPT_TRANSLATE), stepDescription);
@@ -212,13 +212,13 @@ public class GeminiTextClient implements TextGenerationClient {
   );
 
   /// 카드 설명(description) 스키마 설명. 지시문(운영 DB)과 별개로 스키마는 코드라 배포로 바로 바뀐다.
-  /// 길이 기준이 예시에 끌려가므로 예시도 짧게 둔다 (#453).
+  /// 길이 기준이 예시에 끌려가므로 예시도 짧게 둔다.
   static final String STEP_DESCRIPTION_HINT =
     "소리 내어 읽어줄 아주 짧은 한 문장. 공백 포함 12자 안팎, 행동 하나만. "
       + "title을 되풀이하지 않고 쉬운 말로 (예: '학교 갈 옷을 입어요')";
 
   /// 카드마다 받는 영어 장면 한 줄의 설명. 지시문(운영 DB)이 아니라 스키마에 둔다 — 스키마는 코드라
-  /// 배포로 바로 바뀌고, FLUX 를 고르지 않으면 통째로 빠져 토큰도 들지 않는다 (#373).
+  /// 배포로 바로 바뀌고, FLUX 를 고르지 않으면 통째로 빠져 토큰도 들지 않는다.
   private static final String IMAGE_PROMPT_EN_DESCRIPTION =
     "One English sentence (under 30 words) describing this step's picture for an illustrator. "
       + "Start with 'The character'. Show the one action and name the concrete objects and their state "
@@ -228,7 +228,7 @@ public class GeminiTextClient implements TextGenerationClient {
   // 실제 호출과 관리자 preview가 같은 조립 결과를 쓰도록 조립 로직만 따로 뗀 메서드.
   // Gemini를 호출하지 않으므로 AdminPromptService.preview()에서도 그대로 재사용한다.
   //
-  // 이룸이 이름은 AI(Gemini·OpenAI 모두 이 조립기를 쓴다)에 나가지 않는다 (#374). nickname 은 자리표시로
+  // 이룸이 이름은 AI(Gemini·OpenAI 모두 이 조립기를 쓴다)에 나가지 않는다. nickname 은 자리표시로
   // 바꿔 싣고, 보호자가 글·답변에 적은 이름도 자리표시로 바꾼다. 응답의 자리표시는 RoutineAiPipeline 이 되돌린다.
   public String buildCreateRoutineUserContent(
     String routineText, String nickname, Set<SupportGoal> supportGoals, List<String> answers
@@ -365,7 +365,7 @@ public class GeminiTextClient implements TextGenerationClient {
     return responseSchema(false);
   }
 
-  /// @param includeImagePromptEn 카드마다 FLUX 용 영어 장면(imagePromptEn)을 필수로 받는다 (#373)
+  /// @param includeImagePromptEn 카드마다 FLUX 용 영어 장면(imagePromptEn)을 필수로 받는다
   public Map<String, Object> responseSchema(boolean includeImagePromptEn) {
     return Map.of(
       "type", "object",
@@ -399,7 +399,7 @@ public class GeminiTextClient implements TextGenerationClient {
               )
     ));
     List<String> required = new java.util.ArrayList<>(List.of("order", "title", "description"));
-    // 선택 필드다 — Gemini 는 required 에 넣지 않아 모델이 빠뜨려도 카드 생성이 실패하지 않는다(#247).
+    // 선택 필드다 — Gemini 는 required 에 넣지 않아 모델이 빠뜨려도 카드 생성이 실패하지 않는다.
     // 카탈로그를 못 읽은 서버는 요청·스키마 어디에도 싣지 않는다.
     if (!pictogramCatalog.isEmpty()) {
       properties.put("pictogramId", pictogramIdSchema());
@@ -464,7 +464,7 @@ public class GeminiTextClient implements TextGenerationClient {
     );
   }
 
-  /// 로그에서 픽토그램 카탈로그(811개 id, 약 10KB)를 접는다 — 한 줄이 너무 길어져 로그를 읽기 어렵고 값도 고정이라 남길 이유가 없다 (#247).
+  /// 로그에서 픽토그램 카탈로그(811개 id, 약 10KB)를 접는다 — 한 줄이 너무 길어져 로그를 읽기 어렵고 값도 고정이라 남길 이유가 없다.
   static String foldPictogramCatalog(String userContent) {
     return userContent == null ? null
       : userContent.replaceAll("\"pictogramCatalog\"\\s*:\\s*\\[[^\\]]*\\]", "\"pictogramCatalog\":\"[생략]\"");

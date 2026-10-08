@@ -1,6 +1,6 @@
 package com.chuseok22.elumserver.adreward.core;
 
-/// 광고 보상 세션의 상태 (#463). `PENDING` 만 지급할 수 있고, 나머지는 끝난 상태다.
+/// 광고 보상 세션의 상태. `PENDING` 만 지급할 수 있고, 나머지는 끝난 상태다.
 public enum AdRewardStatus {
   /// 세션을 만들었고 Google 콜백을 기다린다.
   PENDING,

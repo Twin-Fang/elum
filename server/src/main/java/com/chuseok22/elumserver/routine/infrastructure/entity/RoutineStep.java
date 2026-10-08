@@ -16,7 +16,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 // description 단독 수정(PATCH .../steps/{stepId})과 completed 단독 수정(complete/cancel)이
 // 동시에 들어올 때, DynamicUpdate 없이는 Hibernate가 전체 컬럼을 UPDATE해서 한쪽이 다른
-// 쪽의 변경을 덮어쓸 수 있다(fable5 검토에서 발견). 변경된 컬럼만 UPDATE하도록 강제한다.
+// 쪽의 변경을 덮어쓸 수 있다. 변경된 컬럼만 UPDATE하도록 강제한다.
 @DynamicUpdate
 @Entity
 @Getter
@@ -50,7 +50,7 @@ public class RoutineStep extends BaseEntity {
   // 조회 시 클라이언트가 null이면 이미지 자리를 비워 렌더링한다.
   private String imagePath;
 
-  // 무료 픽토그램 id(Mulberry SVG 파일명 stem, #247). SVG 는 앱이 번들하고 서버는 id 만 저장한다.
+  // 무료 픽토그램 id(Mulberry SVG 파일명 stem). SVG 는 앱이 번들하고 서버는 id 만 저장한다.
   // nullable — V29 가 NOT NULL 없이 더한다(옛 서버로 롤백해도 INSERT 가 깨지지 않게). 이 변경 이전 카드,
   // 카탈로그를 못 읽은 서버에서 만든 카드는 null 이다. 앱 표시 우선순위는 사진 > AI 그림 > 픽토그램.
   @Column(length = 100)

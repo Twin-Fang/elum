@@ -70,7 +70,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 관리자 크레딧 화면의 읽기 — 개요·회원별 표·회원 상세·작업 탐색 (#407).
+ * 관리자 크레딧 화면의 읽기 — 개요·회원별 표·회원 상세·작업 탐색.
  *
  * <p>회원 수만큼 쿼리를 내지 않는다. 한 주의 계정별 값은 group by 몇 번으로 받아 메모리에서 합친다
  * ({@link #weekRows}). 정렬이 계산값(사용·초과·남음)이라 페이지 자르기도 메모리에서 한다 — 계정 수가 수천을

@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 공지를 받을 플랫폼 (이슈 #370). 스토어별 안내가 있을 수 있어 나눈다.
+ * 공지를 받을 플랫폼. 스토어별 안내가 있을 수 있어 나눈다.
  */
 @Getter
 @AllArgsConstructor

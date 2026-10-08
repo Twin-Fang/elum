@@ -52,8 +52,8 @@ public class RoutineAiPipeline {
   private final PictogramCatalog pictogramCatalog;
 
   /**
-   * @param profileId FLUX seed 를 이 이룸이 + 일과 제목으로 정한다. 일과 id 는 저장 전이라 아직 없다 (#373)
-   * @param imageStyle 이룸이의 그림 방식(#457). PHOTO_ONLY 면 그림 호출을 건너뛰고 imagePath 를 null 로 둔다
+   * @param profileId FLUX seed 를 이 이룸이 + 일과 제목으로 정한다. 일과 id 는 저장 전이라 아직 없다
+   * @param imageStyle 이룸이의 그림 방식. PHOTO_ONLY 면 그림 호출을 건너뛰고 imagePath 를 null 로 둔다
    */
   public RoutineGenerationResult generateForCreate(
     String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> maskedAnswers,
@@ -67,7 +67,7 @@ public class RoutineAiPipeline {
       () -> textClientRouter.current()
         .generateRoutineJson(sanitizedInputText, nickname, supportGoals, maskedAnswers, includeImagePromptEn)
     );
-    // AI 는 이름 대신 자리표시 '이룸이' 로 쓴다(#374). 그림은 그 문장 그대로 그려 이름이 그림 AI 에도 가지 않게
+    // AI 는 이름 대신 자리표시 '이룸이' 로 쓴다. 그림은 그 문장 그대로 그려 이름이 그림 AI 에도 가지 않게
     // 하고, 결과를 돌려주기 직전에 실제 이름으로 바꾼다. seed 는 저장될 제목(이름 복원본)으로 정한다 —
     // 카드 추가가 저장된 제목으로 같은 seed 를 만들어 같은 캐릭터를 그리기 때문이다(seed 는 해시값이라 이름이 나가지 않는다).
     RoutineGenerationResult result = buildResult(
@@ -133,7 +133,7 @@ public class RoutineAiPipeline {
         .collect(Collectors.toMap(
           RoutineQuestionDraft.QuestionItem::supportGoal,
           item -> new RoutineQuestionResult.QuestionResultItem(
-            // AI 가 자리표시로 쓴 이름을 질문·선택지에서 되돌린다 (#374)
+            // AI 가 자리표시로 쓴 이름을 질문·선택지에서 되돌린다
             NicknamePlaceholder.restore(item.question(), nickname), toOptionResults(item.options(), nickname)),
           (first, second) -> first // 같은 supportGoal이 중복되면 먼저 나온 것만 채택한다.
         ));
@@ -169,7 +169,7 @@ public class RoutineAiPipeline {
 
   // 목표 하나에 대한 고정 대체 질문. "직접 입력"은 보호자가 자유 텍스트를 입력하도록
   // 유도하는 항목이라 추천 답변 목록에 절대 포함하지 않는다(서비스 정책).
-  // 문구는 요청 언어의 문구 파일에서 온다(다국어 #526). 헤더 없는 옛 앱은 KO 라 지금과 같다.
+  // 문구는 요청 언어의 문구 파일에서 온다. 헤더 없는 옛 앱은 KO 라 지금과 같다.
   // 요청 스레드에서 불리므로 CurrentLocale 을 읽는다 — 다른 스레드로 옮기면 언어를 인자로 받게 바꾼다.
   private RoutineQuestionResult.QuestionResultItem fallbackQuestionItem(SupportGoal goal) {
     RoutinePhrases.FallbackQuestion fallback = RoutinePhrases.standard().fallbackQuestion(goal, CurrentLocale.get());
@@ -184,14 +184,14 @@ public class RoutineAiPipeline {
   // AI 호출 자체(RestClient의 RestClientResponseException/ResourceAccessException 등)와
   // 응답 파싱을 하나의 try 블록에서 함께 처리한다. 호출과 파싱을 분리해두면 호출 실패가
   // 이 메서드 밖으로 그대로 전파돼 GlobalExceptionHandler의 범용 500 처리로 새어나가
-  // ROUTINE_AI_GENERATION_FAILED(502)로 변환되지 않는 문제가 있었다(fable5 검토에서 발견).
+  // ROUTINE_AI_GENERATION_FAILED(502)로 변환되지 않는다.
   private RoutineStepDraft parseDraft(Supplier<String> call) {
     String json = null;
     try {
       json = call.get();
       RoutineStepDraft draft = objectMapper.readValue(json, RoutineStepDraft.class);
       // title은 Routine.title이 NOT NULL이라, 스키마 위반으로 누락되면 DB 제약 위반(500)이
-      // 아니라 여기서 먼저 502로 처리한다(fable5 검토에서 발견).
+      // 아니라 여기서 먼저 502로 처리한다.
       if (draft.title() == null || draft.title().isBlank()) {
         log.warn("AI가 title 없이 응답함: response={}", json);
         throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
@@ -215,9 +215,9 @@ public class RoutineAiPipeline {
   }
 
   // 모델이 order를 중복/누락되게 반환해도(예: 1,1,2) 이미지 파일 경로가 충돌하지 않도록,
-  // 배열 순서를 유일한 기준으로 삼아 order를 1부터 다시 채번한다(fable5 검토에서 발견).
+  // 배열 순서를 유일한 기준으로 삼아 order를 1부터 다시 채번한다.
   //
-  // pictogramId 도 여기서 확정한다(#247). 카탈로그에 없거나 비었거나 null 이면(모델이 못 골랐거나 옛 프롬프트라 필드를
+  // pictogramId 도 여기서 확정한다. 카탈로그에 없거나 비었거나 null 이면(모델이 못 골랐거나 옛 프롬프트라 필드를
   // 빠뜨렸거나 환각) 폴백 id 로 바꾼다 — 카드에는 항상 그림이 있어야 하고, 이 때문에 카드 생성이 실패하면 안 된다.
   private RoutineStepDraft normalizeOrder(RoutineStepDraft draft) {
     List<RoutineStepDraft.StepDraft> normalized = new ArrayList<>();
@@ -254,7 +254,7 @@ public class RoutineAiPipeline {
 
       // 이미지 생성(HTTP 호출)까지만 병렬로 완료시키고, 파일 저장은 전부 성공한 뒤에만
       // 수행한다 — 일부 단계만 실패해도 이미 디스크에 쓰인 고아 이미지가 남지 않도록
-      // 하기 위함(스펙: "모든 단계가 성공적으로 생성된 뒤에만 저장", fable5 검토에서 발견).
+      // 하기 위함(스펙: "모든 단계가 성공적으로 생성된 뒤에만 저장").
       // futures는 draft.steps() 순서 그대로이고 normalizeOrder가 이미 1..N으로 정렬해뒀으므로
       // 별도 정렬 없이도 steps는 순서대로 나온다.
       List<StepResult> stepResults = futures.stream().map(CompletableFuture::join).toList();
@@ -315,7 +315,7 @@ public class RoutineAiPipeline {
   // 단계만 1회 재시도한다(루트 CLAUDE.md 서비스 원칙 6 — "AI 실패 시 fallback 필수" — 반영).
   // 재시도까지 실패하면 예외를 던지지 않고 null을 반환한다 — 이 단계만 이미지 없이(imagePath=null)
   // 저장하고 나머지 단계와 일과 자체는 살린다. 예외를 던지면 buildResult()에서 일과 전체가
-  // ROUTINE_AI_GENERATION_FAILED로 죽어 서버에 저장조차 되지 않는다(이 버그의 근본 원인).
+  // ROUTINE_AI_GENERATION_FAILED로 죽어 서버에 저장조차 되지 않는다.
   // FLUX 실패의 OpenAI fallback 은 CardImageGenerator 안에서 이미 한 번 일어난다. 여기 재시도는 그
   // 둘이 다 실패했을 때의 것이다.
   private GeneratedImage generateImageWithRetry(CardImageGenerator.CardImageRequest request) {
@@ -342,14 +342,14 @@ public class RoutineAiPipeline {
 
   /**
    * @param batchId 이번 생성에서 만든 이미지가 들어간 폴더. 저장이 실패하면 서비스가
-   *                이 폴더를 지워 고아 파일을 남기지 않는다 (이슈 #215).
+   *                이 폴더를 지워 고아 파일을 남기지 않는다.
    *                재사용 이미지(revise)는 다른 batchId에 있으므로 함께 지워지지 않는다.
    */
   public record RoutineGenerationResult(String title, List<GeneratedStep> steps, String batchId) {
 
   }
 
-  /// @param pictogramId 무료 픽토그램 id(#247). 검증·폴백을 마친 값이라 카탈로그가 있으면 항상 채워져 있다.
+  /// @param pictogramId 무료 픽토그램 id. 검증·폴백을 마친 값이라 카탈로그가 있으면 항상 채워져 있다.
   ///                    그림 방식·이미지 성공 여부와 무관하게 저장한다(앱이 사진 > AI 그림 > 픽토그램 순으로 고른다).
   public record GeneratedStep(
     Integer order, String title, String description, String imagePath, String pictogramId

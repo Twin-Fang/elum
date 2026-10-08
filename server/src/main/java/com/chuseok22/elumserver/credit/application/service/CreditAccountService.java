@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 크레딧 계정·적립 묶음·잔액 (#407).
+ * 크레딧 계정·적립 묶음·잔액.
  *
  * <p>잠금·지급·만료는 호출자 트랜잭션 안에서만 뜻이 있다(MANDATORY) — 잠근 채로 이어서 예약·정산해야
  * 그 사이 다른 요청이 끼지 않는다.

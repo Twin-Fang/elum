@@ -31,7 +31,7 @@ public interface ProfileGuardianRepository extends JpaRepository<ProfileGuardian
   }
 
   /**
-   * 일과 응답에 만든 사람 이름을 싣는다 (#361). 목록의 만든 사람들을 한 번에 묻는다 — 일과마다 묻지 않는다.
+   * 일과 응답에 만든 사람 이름을 싣는다. 목록의 만든 사람들을 한 번에 묻는다 — 일과마다 묻지 않는다.
    * {@code g.member.id} 는 외래키 값이라 조인하지 않는다.
    */
   @Query("select g.member.id as memberId, g.displayName as displayName "

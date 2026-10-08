@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 /**
- * Google 의 보상 검증 공개키 목록을 받아 캐시한다 (#463).
+ * Google 의 보상 검증 공개키 목록을 받아 캐시한다.
  *
  * <ul>
  *   <li>**캐시한다(24시간).** 콜백마다 받으면 Google 장애가 곧 보상 장애가 된다.</li>

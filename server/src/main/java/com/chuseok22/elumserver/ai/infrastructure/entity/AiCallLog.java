@@ -57,7 +57,7 @@ public class AiCallLog extends BaseEntity {
   // 기록 시점의 요금 단가(시스템 설정)로 계산한 추정 비용. 단가가 바뀌어도 과거 기록은 불변.
   private Double estimatedCostUsd;
 
-  // 이 호출이 속한 크레딧 작업(#407). 작업 하나에 실제로 든 USD 를 대조한다. 크레딧 밖 호출(질문·관리자 테스트)은 null.
+  // 이 호출이 속한 크레딧 작업. 작업 하나에 실제로 든 USD 를 대조한다. 크레딧 밖 호출(질문·관리자 테스트)은 null.
   @Column(name = "credit_job_id")
   private String creditJobId;
 }

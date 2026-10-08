@@ -67,7 +67,7 @@ public class RoutineCreateService {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public RoutineQuestionResponse generateQuestion(Caller caller, RoutineQuestionRequest request) {
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
-    // 질문은 차감이 없지만 곧 일과 생성으로 이어진다. 잔액이 모자라면 여기서 막는다(스펙 §3) — 아래 AI 실패
+    // 질문은 차감이 없지만 곧 일과 생성으로 이어진다. 잔액이 모자라면 여기서 막는다 — 아래 AI 실패
     // 대체(fail-open)와 달리 이 거절은 403 으로 그대로 나간다. 목표와 무관하게 본다: 질문을 건너뛰는 목표여도
     // 다음 단계인 카드 만들기에서 같은 이유로 막힌다.
     creditQueryService.requireCanStartRoutine(caller.memberId());
@@ -82,7 +82,7 @@ public class RoutineCreateService {
     // 다른 회원에게 새어 들어가지 않게 한다.
     AiCallContext.setMemberId(caller.memberId());
     try {
-      // 입력 글을 가공하지 않고 넘긴다 — AI DLP(로컬 LLM 마스킹)는 해커톤 POC 라 쓰지 않는다 (#377).
+      // 입력 글을 가공하지 않고 넘긴다 — 로컬 마스킹은 쓰지 않는다.
       RoutineAiPipeline.RoutineQuestionResult result =
         routineAiPipeline.generateQuestion(profile.getNickname(), goals, request.rawInputText());
       List<RoutineQuestionResponse.QuestionItem> questions = result.questions().stream()
@@ -106,7 +106,7 @@ public class RoutineCreateService {
   // readOnly 트랜잭션을 이 메서드에서만 명시적으로 중단시킨다. routine은 신규 엔티티라
   // 지연 로딩 걱정이 없으므로 안전하다.
   //
-  // 크레딧 (#407): 프로필 확인 뒤 예약 → AI → 저장 트랜잭션에서 정산, 실패하면 반환.
+  // 크레딧: 프로필 확인 뒤 예약 → AI → 저장 트랜잭션에서 정산, 실패하면 반환.
   // 비용 상한까지 모든 거절을 예약 앞에 둔다 — 거절될 요청이 예약·원장을 남기지 않게.
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public RoutineResponse create(Caller caller, RoutineCreateRequest request, String idempotencyKey) {
@@ -126,7 +126,7 @@ public class RoutineCreateService {
     routineRequestCooldownGuard.guard(caller.memberId());
     // 쿨다운이 몰아치기를 막고, 여기서 오늘·이번 주에 얼마나 썼는지를 본다(크레딧이 켜져 있으면 보유 수만).
     routineQuotaGuard.guard(caller.memberId());
-    // 계정과 무관하게 서비스 전체가 오늘 쓴 비용을 본다 (#368). 셋 다 AI 를 부르기 전이라
+    // 계정과 무관하게 서비스 전체가 오늘 쓴 비용을 본다. 셋 다 AI 를 부르기 전이라
     // 거절해도 비용이 0 이다.
     aiDailyBudgetGuard.guard();
 
@@ -145,8 +145,7 @@ public class RoutineCreateService {
     String creditJobId = reservation.isReserved() ? reservation.jobId() : null;
 
     // AI 호출 로그에 요청 회원을 연결한다 (텍스트·이미지 병렬 생성까지 전파).
-    // 입력 글과 답변은 가공하지 않고 넘긴다. 예전의 AI DLP(로컬 LLM 마스킹)는 해커톤 POC 였고
-    // 실패하면 원문을 그대로 넘기는 fail-open 이라 보장도 아니면서 호출마다 수 초가 걸렸다 (#377).
+    // 입력 글과 답변은 가공하지 않고 넘긴다 — 로컬 마스킹은 실패 시 원문을 넘기는 fail-open 이라 보장이 못 되고 호출마다 수 초가 걸린다.
     List<String> answers = request.answers() == null ? List.of() : request.answers();
     RoutineAiPipeline.RoutineGenerationResult generation;
     AiCallContext.setMemberId(caller.memberId());
@@ -167,16 +166,16 @@ public class RoutineCreateService {
 
     // 이룸이·만든 사람·순서 번호는 저장기가 이룸이 행을 잠근 뒤 채운다 (E17).
     Routine routine = new Routine();
-    // 일과의 콘텐츠 언어 - 만든 요청의 화면 언어를 켜진 언어 목록에 비춰 정한다 (다국어 #526). 보호자가 고르지 않는다.
+    // 일과의 콘텐츠 언어 - 만든 요청의 화면 언어를 켜진 언어 목록에 비춰 정한다. 보호자가 고르지 않는다.
     // 헤더가 없는 옛 앱은 KO 라 지금과 같다. 필터가 심은 값이라 요청 스레드에서만 읽는다.
     routine.setLanguage(enabledLocales.resolveContentLocale(CurrentLocale.get()));
     routine.setRawInputText(request.rawInputText());
-    // 가공하지 않으므로 원문과 같다. 컬럼을 없애는 것은 마이그레이션이 필요해 따로 한다 (#377).
+    // 가공하지 않으므로 원문과 같다. 컬럼을 없애는 것은 마이그레이션이 필요해 따로 한다.
     routine.setSanitizedInputText(request.rawInputText());
     routine.setTitle(generation.title());
     // scheduledAt은 비워서 보낼 수 있다. DB는 NOT NULL이므로 **서버가 채운다** —
     // 클라이언트도 지금 시각을 그대로 넣고 있었다(오늘 목록에 떠야 하므로). 값을 요구하면
-    // 빠뜨린 호출 하나가 AI를 다 태운 뒤 DB에서 터진다 (이슈 #215).
+    // 빠뜨린 호출 하나가 AI를 다 태운 뒤 DB에서 터진다.
     routine.setScheduledAt(
       request.scheduledAt() != null ? request.scheduledAt() : LocalDateTime.now()
     );
@@ -190,7 +189,7 @@ public class RoutineCreateService {
     int imageCount = (int) routine.getSteps().stream().filter(step -> step.getImagePath() != null).count();
 
     // 이미지는 여기 오기 전에 이미 디스크에 쓰였다. 저장이 실패하면 — 그사이 이 보호자가 나가 거절된
-    // 경우(E17)를 포함해 — 아무도 참조하지 않는 파일이 남으므로 방금 만든 것만 되돌린다 (이슈 #215).
+    // 경우(E17)를 포함해 — 아무도 참조하지 않는 파일이 남으므로 방금 만든 것만 되돌린다.
     // 정산은 저장과 같은 트랜잭션이라 함께 되돌아간다. 예약은 따로 돌려준다.
     RoutineCreationWriter.SavedRoutine saved;
     try {

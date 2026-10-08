@@ -126,7 +126,7 @@ public class OAuthLoginService {
   }
 
   /**
-   * 탈퇴 계정이면 보관 기간에 따라 되살리거나 지운다 (이슈 #372). 탈퇴 계정이 아니면 그대로 돌려준다.
+   * 탈퇴 계정이면 보관 기간에 따라 되살리거나 지운다. 탈퇴 계정이 아니면 그대로 돌려준다.
    *
    * @return 로그인할 계정. 보관 기간이 지나 지웠으면 null — 호출부가 새로 가입시킨다
    */
@@ -191,7 +191,7 @@ public class OAuthLoginService {
     identity.setEmailVerified(oAuthUser.emailVerified());
     authIdentityRepository.save(identity);
 
-    // 크레딧 계정을 소셜 신원으로 잇는다 (#407) — 완전 삭제 뒤 같은 소셜 계정으로 다시 오면 떼어 둔 장부를 되붙인다.
+    // 크레딧 계정을 소셜 신원으로 잇는다 — 완전 삭제 뒤 같은 소셜 계정으로 다시 오면 떼어 둔 장부를 되붙인다.
     linkCreditAccount(member.getId(), provider, oAuthUser.providerUserId());
 
     // 가입 즉시 당사자 프로필을 관계와 함께 만든다. 이후 조회가 "프로필 없음"을 분기하지 않아도 된다.

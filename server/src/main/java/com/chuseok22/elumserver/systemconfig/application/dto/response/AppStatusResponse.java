@@ -3,7 +3,7 @@ package com.chuseok22.elumserver.systemconfig.application.dto.response;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * 앱이 시작할 때 서버에 묻는 것 (이슈 #279).
+ * 앱이 시작할 때 서버에 묻는 것.
  *
  * <p>지금 서버가 점검 중인지, 이 앱 버전으로 계속 써도 되는지를 한 번에 돌려준다.
  */
@@ -28,7 +28,7 @@ public record AppStatusResponse(
   /**
    * 앱의 대기·연출 시간값 (밀리초).
    *
-   * <p>전에는 앱의 {@code .env} 에 있어 바꾸려면 앱을 다시 빌드해야 했다. 이제 서버가 주고,
+   * <p>서버가 주는 값이라 바꿔도 앱을 다시 빌드하지 않는다.
    * 앱은 받은 값을 저장해 두었다가 다음 실행에도 쓴다. 못 받으면 앱 코드의 기본값을 쓴다.
    */
   @Schema(description = "앱 대기·연출 시간값 (ms)")

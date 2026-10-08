@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Google 보상형 광고 서버 콜백(SSV)의 서명을 검증한다 (#463).
+ * Google 보상형 광고 서버 콜백(SSV)의 서명을 검증한다.
  *
  * <p>규칙은 Google 문서 그대로다.
  * <ul>

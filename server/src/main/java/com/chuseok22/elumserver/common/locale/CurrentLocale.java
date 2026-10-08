@@ -3,7 +3,7 @@ package com.chuseok22.elumserver.common.locale;
 import java.util.function.Supplier;
 
 /**
- * 지금 처리 중인 요청의 언어 (다국어 #526).
+ * 지금 처리 중인 요청의 언어.
  *
  * <p>{@link AcceptLanguageFilter} 가 요청 앞에서 심고 뒤에서 비운다. 요청 밖(스케줄러·기동·테스트)은 KO 다.
  * {@code AiCallContext} 와 같은 이유로 InheritableThreadLocal 을 쓴다 — 이미지 생성이 가상 스레드로 병렬 실행되어도

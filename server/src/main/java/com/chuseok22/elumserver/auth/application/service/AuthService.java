@@ -73,7 +73,7 @@ public class AuthService {
     Member member = memberRepository.findByUsername(request.username())
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-    // 탈퇴 계정 (이슈 #372). 비밀번호가 맞았을 때만 여기까지 온다.
+    // 탈퇴 계정. 비밀번호가 맞았을 때만 여기까지 온다.
     // 보관 중이면 새 계정 대신 이전 계정을 빈 상태로 되살린다 — 사용량이 이어진다 (S1).
     // 보관 기간이 지났으면 없는 계정으로 본다 — 곧 스케줄러가 지운다 (S2).
     if (member.getStatus() == MemberStatus.WITHDRAWN) {
@@ -127,7 +127,7 @@ public class AuthService {
 
     member.setLastActivityAt(LocalDateTime.now());
 
-    // 이룸이 휴대폰 세션이면 역할과 연결을 그대로 이어 준다 (이슈 #359).
+    // 이룸이 휴대폰 세션이면 역할과 연결을 그대로 이어 준다.
     // 역할 없는 발급은 보호자 토큰이라, 그대로 쓰면 갱신 한 번에 이룸이 휴대폰이 보호자 권한을 얻고
     // linkId 도 빠져 연결을 끊어도 막히지 않는다.
     String accessToken = rotation.linkId() != null
@@ -140,7 +140,7 @@ public class AuthService {
    * 로그아웃. <b>그 기기의 세션만</b> 끊는다 (다중 보호자 E33).
    *
    * <p>같은 보호자의 다른 휴대폰과 그가 붙인 이룸이 휴대폰은 그대로다. 이룸이 휴대폰이 로그아웃해도
-   * 보호자 휴대폰 세션을 끊지 않는다 — 두 토큰의 주인이 같은 보호자라 예전에는 함께 끊겼다.
+   * 보호자 휴대폰 세션을 끊지 않는다 — 두 토큰의 주인이 같은 보호자라 계정 단위로 끊으면 함께 끊긴다.
    *
    * <p>액세스 토큰은 만료 전까지 살아 있다. 무효화하려면 서버가 모든 요청마다 DB를
    * 확인해야 해서 stateless의 이점이 사라진다. 그 대신 액세스를 짧게 두고,

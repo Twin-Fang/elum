@@ -65,7 +65,7 @@ public class ConsentDocumentService {
    * 전원을 다시 막아 세우게 된다.
    *
    * <p>버전은 {@link #VERSION_FORMAT} 날짜만 받으므로 문자열 순서가 곧 시간 순서다.
-   * 전에는 형식을 보지 않아 {@code v2} 한 번에 묶음 버전이 영영 고정됐다 (#278 QA).
+   * 형식을 보지 않으면 {@code v2} 한 번에 묶음 버전이 영영 고정된다.
    *
    * <p>⚠️ 지금은 기록에만 쓴다. 재동의 판정({@code Member#hasRequiredConsents})은
    * 아직 버전을 보지 않는다.
@@ -114,7 +114,7 @@ public class ConsentDocumentService {
 
     // 공백만 있는 값은 비어 있는 것이다. 브라우저의 required 는 공백을 통과시킨다.
     // 한 항목이라도 비면 앱이 서버 약관 전체를 버리고 기본값으로 떨어지는데, 관리자는
-    // "저장했습니다"를 보고 반영된 줄 안다 (#278 QA).
+    // "저장했습니다"를 보고 반영된 줄 안다.
     if (normalizedBody.isEmpty() || normalizedLabel.isEmpty() || normalizedSummary.isEmpty()) {
       throw new CustomException(ErrorCode.CONSENT_FIELD_BLANK);
     }
@@ -151,8 +151,8 @@ public class ConsentDocumentService {
   /**
    * 버전을 올리기로 했을 때의 새 값을 검사한다.
    *
-   * <p>전에는 칸을 비워도, 지금과 같아도, 날짜가 아니어도 받았다. 그러고는 체크박스만 보고
-   * "버전을 올렸습니다"라고 안내했다 (#278 QA).
+   * <p>칸이 비었거나 지금과 같거나 날짜가 아니면 받지 않는다 — 체크박스만 보고
+   * "버전을 올렸습니다"라고 안내하지 않게.
    */
   private String validateNewVersion(String current, String newVersion) {
     String candidate = newVersion == null ? "" : newVersion.strip();

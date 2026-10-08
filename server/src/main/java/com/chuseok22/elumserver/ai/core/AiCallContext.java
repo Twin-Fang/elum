@@ -11,7 +11,7 @@ package com.chuseok22.elumserver.ai.core;
 public final class AiCallContext {
 
   private static final InheritableThreadLocal<String> MEMBER_ID = new InheritableThreadLocal<>();
-  /// 크레딧 작업 id (#407). 작업 하나에 딸린 호출의 실제 USD 를 모아 대조하려고 호출 기록에 단다.
+  /// 크레딧 작업 id. 작업 하나에 딸린 호출의 실제 USD 를 모아 대조하려고 호출 기록에 단다.
   private static final InheritableThreadLocal<String> CREDIT_JOB_ID = new InheritableThreadLocal<>();
 
   private AiCallContext() {

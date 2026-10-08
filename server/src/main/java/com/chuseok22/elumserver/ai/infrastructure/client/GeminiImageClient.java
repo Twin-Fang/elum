@@ -55,12 +55,12 @@ public class GeminiImageClient implements ImageGenerationClient {
 
   @Override
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
-    // 참조 이미지는 캐릭터가 있을 때만 보낸다 — 프롬프트에도 사실대로 적는다 (#269).
+    // 참조 이미지는 캐릭터가 있을 때만 보낸다 — 프롬프트에도 사실대로 적는다.
     String promptText = promptComposer.compose(stepDescription, characterType, characterType != null);
     return callGenerateImage(promptText, characterType);
   }
 
-  /// 실사(#457): 캐릭터가 없으니 참조 이미지도 붙이지 않는다. 지시문은 실사 전용 키 하나(영어 단일).
+  /// 실사: 캐릭터가 없으니 참조 이미지도 붙이지 않는다. 지시문은 실사 전용 키 하나(영어 단일).
   @Override
   public GeneratedImage generateRealisticImage(String stepDescription) {
     return callGenerateImage(promptComposer.composeRealistic(stepDescription), null);
@@ -92,7 +92,7 @@ public class GeminiImageClient implements ImageGenerationClient {
     // 응답하고 이미지 데이터(inlineData)를 아예 포함하지 않는 경우가 있어(운영 로그에서
     // "Gemini 응답에 이미지 데이터가 없음" 실패로 확인됨), TEXT/IMAGE 모달리티를 모두
     // 요청해 이미지 출력을 강제한다.
-    // aspectRatio 기본값은 4:3 — 클라이언트 카드 이미지 영역(Figma 313×230, 1.361:1 — #460 에서 재확인)이
+    // aspectRatio 기본값은 4:3 — 클라이언트 카드 이미지 영역(Figma 313×230, 1.361:1)이
     // 정사각형이 아니라서 1:1로 받으면 크게 크롭돼야 한다. 관리자가 시스템 설정에서
     // 다른 비율로 바꿀 수 있다.
     GeminiGenerateContentRequest request = new GeminiGenerateContentRequest(
@@ -109,7 +109,7 @@ public class GeminiImageClient implements ImageGenerationClient {
     // 모델명은 호출 시점마다 시스템 설정에서 읽는다 — 관리자가 바꾸면 재배포 없이 반영된다.
     String model = systemConfigService.getString(ConfigKey.GEMINI_IMAGE_MODEL);
     long startedAt = System.currentTimeMillis();
-    // API 키는 로그에 남기지 않는다 — 예전에는 원문을 찍어 운영 로그와 관리자 로그 화면에 드러났다 (#397).
+    // API 키는 로그에 남기지 않는다 — 원문을 찍으면 운영 로그와 관리자 로그 화면에 드러난다.
     log.info(
       "Gemini 이미지 생성 호출 시작: model={}, characterType={}, prompt={}",
       model, characterType, promptText

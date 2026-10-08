@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 이룸이를 함께 돌보는 보호자 (다중 보호자 2단계, 이슈 #361).
+ * 이룸이를 함께 돌보는 보호자 (다중 보호자 2단계).
  *
  * <p>이룸이는 <b>경로의 {@code profileId}</b> 로 정한다 — {@code X-Profile-Id} 헤더는 보지 않는다. 헤더가 "이룸이를
  * 고르는" 값이라면 여기서는 이룸이 자체가 대상이라 경로에 두는 편이 맞다. 이룸이 휴대폰 토큰은 URL 규칙

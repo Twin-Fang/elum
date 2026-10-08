@@ -1,7 +1,7 @@
 package com.chuseok22.elumserver.link.core;
 
 /**
- * 이룸이 휴대폰 세션을 가리키는 기기 값 {@code elumi-{연결 ID}} (이슈 #200, #359).
+ * 이룸이 휴대폰 세션을 가리키는 기기 값 {@code elumi-{연결 ID}}.
  *
  * <p><b>서버가 만든다.</b> 앱은 기기 값을 보내지 않아 {@code refresh_token.device_id}가 비어
  * 있기 쉽고, 비어 있으면 연결을 끊어도 짚을 대상이 없다. 연결할 때 서버가 이 값을 리프레시

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
  * 요금제 한도를 일과 생성 길목에서 확인한다. {@code RoutineRequestCooldownGuard} 옆에 선다.
  *
  * <p>쿨다운이 "짧은 시간에 몰아치는 것"을 막는다면 여기는 "오늘·이번 주에 얼마나 썼는가"를
- * 본다. 하루 한도는 하루에 터지는 비용을, 주간 한도는 한 주 총량을 묶는다 (#368).
+ * 본다. 하루 한도는 하루에 터지는 비용을, 주간 한도는 한 주 총량을 묶는다.
  * 둘 다 -1 이면 꺼진다.
  *
  * <p><b>집계가 실패하면 통과시킨다.</b> 우리 DB 문제로 사용자가 앱을 못 쓰면 안 된다.
@@ -35,7 +35,7 @@ public class RoutineQuotaGuard {
   private final EntitlementService entitlementService;
   private final AiCallLogRepository aiCallLogRepository;
   private final RoutineRepository routineRepository;
-  /// 크레딧이 켜져 있으면 하루·주간 횟수 대신 크레딧이 사용량을 묶는다 (#407).
+  /// 크레딧이 켜져 있으면 하루·주간 횟수 대신 크레딧이 사용량을 묶는다.
   private final CreditPolicyService creditPolicyService;
   /// 하루·주 경계를 정하는 시계. 테스트가 요일을 고정할 수 있게 밖에서 받는다.
   private final Clock clock;
@@ -64,7 +64,7 @@ public class RoutineQuotaGuard {
     // 플랜을 한 번만 읽어 모든 검사가 함께 쓴다. 검사마다 구독을 다시 조회하면
     // 일과 생성 한 번에 쿼리가 검사 수만큼 늘어난다.
     PlanType plan = entitlementService.planOf(memberId);
-    // 크레딧이 켜져 있으면 하루·주간 횟수는 보지 않는다 — 크레딧 예약이 대신 막는다(스펙 §1).
+    // 크레딧이 켜져 있으면 하루·주간 횟수는 보지 않는다 — 크레딧 예약이 대신 막는다.
     // 보유 일과 최대 수는 저장 공간 한도라 크레딧과 무관하게 남긴다.
     if (!creditEnabled()) {
       // 주간을 먼저 본다. 주간이 다 찼는데 하루 한도로 거절하면 "내일 다시" 라고 안내하게
@@ -98,7 +98,7 @@ public class RoutineQuotaGuard {
    * 나간다. 호출 기록은 지워지지 않으므로 실제로 쓴 것을 센다.
    *
    * <p><b>제공자를 가리지 않고 센다.</b> 텍스트 제공자는 관리자 화면에서 바뀐다. 한 제공자
-   * 유형만 세면 바꾸는 순간 사용량이 0 이 되어 한도가 풀린다 (#367).
+   * 유형만 세면 바꾸는 순간 사용량이 0 이 되어 한도가 풀린다.
    */
   private void guardCreateCount(
     String memberId, PlanType plan, Entitlement limit, LocalDateTime from, ErrorCode onExceeded

@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 서버 로컬 디스크에 담는 구현 (이슈 #370).
+ * 서버 로컬 디스크에 담는 구현.
  *
  * <p>일과 이미지 저장소와 같은 한계를 가진다 — <b>서버가 한 대일 때만 온전하다.</b>
  * 여러 대가 되면 공유 저장소 구현으로 바꾼다. 이 인터페이스를 쓰는 쪽은 바뀌지 않는다.

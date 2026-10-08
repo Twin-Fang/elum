@@ -5,7 +5,7 @@ import jakarta.persistence.Converter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * {@link AppLocale} 을 DB 에 소문자 코드({@code ko})로 저장한다 (다국어 #526).
+ * {@link AppLocale} 을 DB 에 소문자 코드({@code ko})로 저장한다.
  *
  * <p>{@code @Enumerated(STRING)} 은 상수 이름({@code KO})을 쓰므로 마이그레이션의 {@code DEFAULT 'ko'} 와 어긋난다.
  * 읽을 때 손상된 값은 ko 로 읽는다 — 한 행 때문에 일과 목록 전체가 죽으면 안 된다.

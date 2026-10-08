@@ -84,7 +84,7 @@ public record RoutineResponse(
 ) {
 
   /**
-   * 생성 한 번의 크레딧 사용 (#407). 카드 확인 화면 머리의 "AI 그림 N장 · M크레딧 사용 · K 남음" 한 줄.
+   * 생성 한 번의 크레딧 사용. 카드 확인 화면 머리의 "AI 그림 N장 · M크레딧 사용 · K 남음" 한 줄.
    *
    * @param charged      실제 차감량. 잔액이 모자랐으면 청구보다 작다(모자란 몫은 빚으로 남기지 않는다)
    * @param balanceAfter 정산 뒤 사용 가능량
@@ -113,7 +113,7 @@ public record RoutineResponse(
       credit, reason, createdBy, createdByMe, creatorName, profileId, language);
   }
 
-  /// 보호자가 쓴 말(원문·마스킹본·재생성 피드백)을 뺀 응답 (#357). 이룸이 휴대폰은 화면에 쓰지 않는 값이라
+  /// 보호자가 쓴 말(원문·마스킹본·재생성 피드백)을 뺀 응답. 이룸이 휴대폰은 화면에 쓰지 않는 값이라
   /// 보낼 이유가 없다. 보내지 않으면 휴대폰 캐시·네트워크 로그에도 남을 수 없다.
   public RoutineResponse withoutSourceText() {
     return new RoutineResponse(id, title, null, null, scheduledAt, status, null,
@@ -122,7 +122,7 @@ public record RoutineResponse(
   }
 
   /// 보호자 원문을 가려야 하는 호출자인가.
-  /// - 이룸이 휴대폰: 화면에 쓰지 않는다 (#357).
+  /// - 이룸이 휴대폰: 화면에 쓰지 않는다.
   /// - 같은 이룸이에 합류한 다른 보호자: 남이 쓴 원문·피드백을 볼 이유가 없다 (서비스 원칙 5). 제목·카드·상태는 그대로 본다.
   /// - 만든 사람이 비어 있는 옛 일과(V25 이전·롤백 중 생성)는 가리지 않는다. 그 시절엔 대표 보호자 한 명뿐이었고
   ///   부팅 때 created_by 가 채워지는 일시 상태라, 가리면 오히려 만든 본인의 원문이 사라질 수 있다.
@@ -134,7 +134,7 @@ public record RoutineResponse(
     return createdBy != null && !createdBy.equals(caller.memberId());
   }
 
-  /// 이 일과를 만든 사람이 호출자 본인인가 (#361).
+  /// 이 일과를 만든 사람이 호출자 본인인가.
   /// - 이룸이 휴대폰: false. 일과를 만들지도 고치지도 못한다.
   /// - 만든 사람이 비어 있는 옛 일과: null(모름). 서버는 EDIT 에서 createdBy 가 호출자와 같아야 허락하므로
   ///   (ProfileAccessGuard.checkRoutine) 비어 있으면 아무도 못 고친다 — true 는 서버가 거절할 약속이고, false 는

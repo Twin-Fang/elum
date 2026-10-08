@@ -29,7 +29,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
   Page<Member> findByStatus(MemberStatus status, Pageable pageable);
 
-  // 이룸이 호칭은 Member가 아니라 Profile에 있고, 둘은 관계 표로 잇는다 (다중 보호자 #360).
+  // 이룸이 호칭은 Member가 아니라 Profile에 있고, 둘은 관계 표로 잇는다.
   // 한 보호자에 이룸이가 여럿이어도 결과가 중복되지 않도록 join 대신 exists를 쓴다.
   //
   // 별명이 null인 프로필은 like가 null(불일치)로 평가돼 자연스럽게 제외된다.
@@ -60,7 +60,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
   long countByStatus(MemberStatus status);
 
-  // --- 탈퇴 계정 (이슈 #372) ---
+  // --- 탈퇴 계정 ---
   // 탈퇴해도 행이 남으므로, 탈퇴 전처럼 "회원"을 세고 보여주려면 WITHDRAWN 을 빼야 한다.
 
   Page<Member> findByStatusNot(MemberStatus status, Pageable pageable);
@@ -99,7 +99,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
   );
 
   /**
-   * 관리자 크레딧 회원 검색 — 회원 id 그대로 · 아이디 · 이룸이 호칭 일부로 찾는다 (#407).
+   * 관리자 크레딧 회원 검색 — 회원 id 그대로 · 아이디 · 이룸이 호칭 일부로 찾는다.
    *
    * <p>크레딧 표는 계정 단위라 회원 목록처럼 Member 를 페이지로 받지 않는다. 맞는 id 만 받아 계정 쪽에서 거른다.
    */

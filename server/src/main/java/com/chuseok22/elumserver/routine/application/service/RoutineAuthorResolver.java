@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * 일과 응답을 호출자에게 맞춘다 — 보호자 원문을 가리고(#357), 만든 사람 정보를 싣는다 (#361).
+ * 일과 응답을 호출자에게 맞춘다 — 보호자 원문을 가리고, 만든 사람 정보를 싣는다.
  *
  * <p>둘 다 "누가 이 일과를 만들었고 누가 부르는가"에서 나오는 판단이라 한 곳에서 한다.
  * 만든 사람 이름은 {@code profile_guardian.display_name} 이다 — 계정 ID·아이디·이메일은 싣지 않는다
@@ -35,7 +35,7 @@ public class RoutineAuthorResolver {
 
   public List<RoutineResponse> forCaller(Caller caller, List<RoutineResponse> responses) {
     List<RoutineResponse> adapted = responses.stream().map(r -> r.forCaller(caller)).toList();
-    // 이룸이 휴대폰에는 보호자 이름을 주지 않는다 — 화면에 쓰지 않는 값이고, 보내지 않으면 남지 않는다 (#357 과 같은 이유).
+    // 이룸이 휴대폰에는 보호자 이름을 주지 않는다 — 화면에 쓰지 않는 값이고, 보내지 않으면 남지 않는다.
     if (caller.isElumi()) {
       return adapted;
     }

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 보호자 홈 공지 팝업 (이슈 #370). 인증 없이 연다 — {@code SecurityConfig} 참고.
+ * 보호자 홈 공지 팝업. 인증 없이 연다 — {@code SecurityConfig} 참고.
  *
  * <p>쓰기 경로가 없고 응답이 작다. 60초 캐시를 붙여 누가 마구 불러도 가볍게 한다(N22).
  * 관리자가 끄거나 지운 공지는 길어도 60초 안에 빠진다.

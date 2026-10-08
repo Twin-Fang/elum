@@ -76,7 +76,7 @@ public class AdminPromptService {
       case GEMINI_ROUTINE_QUESTION_PREFIX -> "[System]\n" + content + "\n\n[User]\n"
         + geminiTextClient.buildQuestionUserContent(sampleInput, null, Set.of());
       // 미리보기도 지금 고른 제공자 기준으로 만든다 — 참조 이미지를 보내는지에 따라
-      // 실제 프롬프트가 달라지는데, 여기서 다르게 보이면 미리보기를 믿을 수 없다 (#269).
+      // 실제 프롬프트가 달라지는데, 여기서 다르게 보이면 미리보기를 믿을 수 없다.
       case GEMINI_ROUTINE_IMAGE_PREFIX -> imagePromptBuilder.build(
         content, sampleInput, character,
         character != null && imageClientRouter.current().supportsCharacterReference(),
@@ -87,11 +87,11 @@ public class AdminPromptService {
         character != null && imageClientRouter.current().supportsCharacterReference(),
         ImagePromptLanguage.EN
       );
-      // FLUX 는 JSON 장면 정보 없이 짧은 영어 한 덩어리다. 샘플 입력은 영어 장면 한 줄로 받는다 (#373).
+      // FLUX 는 JSON 장면 정보 없이 짧은 영어 한 덩어리다. 샘플 입력은 영어 장면 한 줄로 받는다.
       case FLUX_ROUTINE_IMAGE_PREFIX -> fluxPromptBuilder.build(content, sampleInput, character);
       case FLUX_IMAGE_PROMPT_TRANSLATE -> "[System]\n" + content + "\n\n[User]\n"
         + geminiTextClient.buildTranslateUserContent(sampleInput);
-      // 실사(#457)는 캐릭터가 없다 — 선택한 캐릭터가 있어도 무시하고 캐릭터 블록·참조 이미지 없이 만든다.
+      // 실사는 캐릭터가 없다 — 선택한 캐릭터가 있어도 무시하고 캐릭터 블록·참조 이미지 없이 만든다.
       case REALISTIC_ROUTINE_IMAGE_PREFIX -> imagePromptBuilder.build(
         content, sampleInput, null, false, ImagePromptLanguage.EN);
       case REALISTIC_IMAGE_PROMPT_TRANSLATE -> "[System]\n" + content + "\n\n[User]\n"
@@ -117,13 +117,13 @@ public class AdminPromptService {
         String dataUri = testGeminiImage(content, ImagePromptLanguage.KO, sampleInput, characterType);
         yield new PromptTestResponse(null, dataUri);
       }
-      // 저장하기 전에 영어 지시문을 지금 제공자로 그려 볼 수 있어야 언어를 바꿀지 정할 수 있다 (#375).
+      // 저장하기 전에 영어 지시문을 지금 제공자로 그려 볼 수 있어야 언어를 바꿀지 정할 수 있다.
       case ROUTINE_IMAGE_PREFIX_EN -> {
         String dataUri = testGeminiImage(content, ImagePromptLanguage.EN, sampleInput, characterType);
         yield new PromptTestResponse(null, dataUri);
       }
       // 지금 고른 제공자와 무관하게 FLUX 로 그린다 — 운영을 OPENAI 로 둔 채 지시문을 다듬을 수 있어야
-      // 전환 여부를 정할 수 있다. 한 번에 $0.003 (#373).
+      // 전환 여부를 정할 수 있다. 한 번에 $0.003.
       case FLUX_ROUTINE_IMAGE_PREFIX -> {
         String dataUri = testFluxImage(content, sampleInput, characterType);
         yield new PromptTestResponse(null, dataUri);
@@ -132,7 +132,7 @@ public class AdminPromptService {
         String line = testTranslate(content, sampleInput);
         yield new PromptTestResponse(Map.of("imagePromptEn", line), null);
       }
-      // 실사 지시문은 언어와 무관하게 영어 단일이고 캐릭터가 없다(#457). 지금 제공자(FLUX 면 OpenAI)로 그려 본다.
+      // 실사 지시문은 언어와 무관하게 영어 단일이고 캐릭터가 없다. 지금 제공자(FLUX 면 OpenAI)로 그려 본다.
       case REALISTIC_ROUTINE_IMAGE_PREFIX -> {
         String dataUri = testGeminiImage(content, ImagePromptLanguage.EN, sampleInput, null);
         yield new PromptTestResponse(null, dataUri);
@@ -190,7 +190,7 @@ public class AdminPromptService {
    * 한국어·영어 그림 지시문을 시험할 제공자.
    *
    * <p>FLUX 를 골라 두었으면 이 지시문들은 FLUX 가 아니라 <b>OpenAI fallback</b> 이 쓴다. FLUX 로
-   * 그리면 한국어 지시문을 받아 사람을 그린다(#373). 그래서 그때는 OpenAI 로 시험한다.
+   * 그리면 한국어 지시문을 받아 사람을 그린다. 그래서 그때는 OpenAI 로 시험한다.
    */
   private ImageGenerationClient promptTestImageClient() {
     ImageGenerationClient current = imageClientRouter.current();

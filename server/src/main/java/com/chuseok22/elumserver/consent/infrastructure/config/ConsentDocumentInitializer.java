@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
 
 /**
- * 없는 약관 문서를 앱 번들과 <b>같은 본문</b>으로 채운다 (이슈 #278).
+ * 없는 약관 문서를 앱 번들과 <b>같은 본문</b>으로 채운다.
  *
  * <p>본문은 {@code resources/consent/*.txt} 에 있고, 그 파일은 앱의
  * {@code consent_documents.dart} 에서 기계로 떠낸 것이다. 손으로 옮겨 적으면
@@ -66,7 +66,7 @@ public class ConsentDocumentInitializer implements ApplicationRunner {
 
   /**
    * 필수 여부만은 코드를 따른다. 본문은 관리자가 고친 것을 존중하지만, 필수 여부는 법이 정한
-   * 값이라 DB에 다른 값이 남아 있으면 그게 사고다 (예전 화면에서 끈 흔적).
+   * 값이라 DB에 다른 값(관리자 화면에서 끈 흔적)이 남아 있으면 안 된다.
    */
   private void syncRequired(ConsentDocument document) {
     boolean lawful = document.getConsentKey().isRequired();

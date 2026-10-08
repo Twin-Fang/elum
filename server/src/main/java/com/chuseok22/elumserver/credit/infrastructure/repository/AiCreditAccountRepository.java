@@ -18,7 +18,7 @@ public interface AiCreditAccountRepository extends JpaRepository<AiCreditAccount
 
   Optional<AiCreditAccount> findByIdentityKey(String identityKey);
 
-  /// 회원에 붙은 계정 수. 관리자 정책 미리보기의 대상 회원 수 (#407).
+  /// 회원에 붙은 계정 수. 관리자 정책 미리보기의 대상 회원 수.
   long countByMemberIdIsNotNull();
 
   List<AiCreditAccount> findByStatus(CreditAccountStatus status);

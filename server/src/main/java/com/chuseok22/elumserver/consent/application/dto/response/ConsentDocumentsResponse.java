@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 /**
- * 앱이 동의 화면을 그릴 때 받는 것 (이슈 #278).
+ * 앱이 동의 화면을 그릴 때 받는 것.
  */
 @Schema(description = "약관 전체")
 public record ConsentDocumentsResponse(

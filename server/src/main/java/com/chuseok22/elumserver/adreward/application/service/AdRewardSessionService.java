@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 광고 보상 세션을 만들고 조회한다 (#463).
+ * 광고 보상 세션을 만들고 조회한다.
  *
  * <p>세션은 광고 한 번을 회원에 묶는 **유일한 끈**이다. 그래서 (1) nonce 는 추측할 수 없게 만들고, (2) 남의 세션은 없는
  * 것처럼 답하고, (3) 꺼짐·상한·동결이면 만들지 않는다. 회원마다 기다리는 세션 하나를 다시 쓴다 — 세션을 계속 만들어

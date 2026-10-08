@@ -3,7 +3,7 @@ package com.chuseok22.elumserver.notice.infrastructure.storage;
 import com.chuseok22.elumserver.notice.core.NoticeImageType;
 
 /**
- * 공지 이미지를 담아 두는 곳 (이슈 #370).
+ * 공지 이미지를 담아 두는 곳.
  *
  * <p>일과 이미지({@code RoutineImageStorage})와 같은 관례로 <b>경로가 아니라 열쇠</b>를
  * 돌려준다. 저장 위치를 옮겨도 DB 값은 그대로 쓴다.

@@ -22,7 +22,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 보호자가 카드 그림을 직접 찍은 사진으로 바꾼다 (이슈 #455).
+ * 보호자가 카드 그림을 직접 찍은 사진으로 바꾼다.
  *
  * <p><b>AI 를 부르지 않고 크레딧도 쓰지 않는다.</b> 그래서 크레딧 서비스를 주입받지 않는다 — 쓸 수 없게
  * 두는 것이 "타지 않는다"를 가장 확실하게 지킨다.

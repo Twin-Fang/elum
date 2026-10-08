@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 초대 코드로 보호자가 이룸이에 합류한다 (다중 보호자 명세 4-6, 이슈 #361).
+ * 초대 코드로 보호자가 이룸이에 합류한다 (다중 보호자 명세 4-6).
  *
  * <p>연결된 보호자가 여섯 글자를 발급해 불러주면, 다른 보호자가 그것을 넣어 같은 이룸이에 붙는다. 코드의
  * 모양·해시·유효 시간·실패 횟수는 연결 암호와 한 부품({@link LinkCode}, {@link CodeDigest})을 쓴다.

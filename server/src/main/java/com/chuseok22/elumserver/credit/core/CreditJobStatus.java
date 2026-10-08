@@ -1,7 +1,7 @@
 package com.chuseok22.elumserver.credit.core;
 
 /**
- * 생성 작업의 상태 (#407).
+ * 생성 작업의 상태.
  *
  * <pre>
  *   RESERVED ──┬── 저장 성공 ──▶ SETTLED  (청구 확정)

@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 공지가 지금 어떤 상태인지 (이슈 #370).
+ * 공지가 지금 어떤 상태인지.
  *
  * <p>관리자 목록의 배지와 앱 API 가 <b>이 한 곳의 판단</b>을 쓴다. 따로 계산하면
  * 목록에는 "게시 중"인데 앱에는 안 뜨는 공지가 생긴다.

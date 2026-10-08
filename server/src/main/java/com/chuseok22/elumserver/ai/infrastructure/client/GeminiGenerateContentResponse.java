@@ -22,7 +22,7 @@ public record GeminiGenerateContentResponse(List<Candidate> candidates, UsageMet
   // 역직렬화가 깨지지 않도록 박싱 타입을 쓴다.
   //
   // thoughtsTokenCount — 2.5 계열은 답하기 전에 "생각"하고 그 토큰을 출력 단가로 청구한다.
-  // candidatesTokenCount 에는 들어 있지 않아, 예전에는 기록과 비용 추정에서 통째로 빠졌다 (#375).
+  // candidatesTokenCount 에는 들어 있지 않아 따로 읽지 않으면 기록과 비용 추정에서 빠진다.
   // 생각하지 않은 호출·다른 제공자는 null 이다.
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record UsageMetadata(

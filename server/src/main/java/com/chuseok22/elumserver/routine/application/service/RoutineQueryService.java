@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RoutineQueryService {
 
   /// 보상 설정 화면 입력칸 아래에 띄울 "최근에 정한 보상" 개수.
-  /// 시안(1082:4801)이 칩을 2·2 넷으로 그린다 — 셋이면 둘째 줄이 한 칸만 차 2·1 로 선다 (#380).
+  /// 시안(1082:4801)이 칩을 2·2 넷으로 그린다 — 셋이면 둘째 줄이 한 칸만 차 2·1 로 선다.
   /// 그 이상은 고르는 부담만 늘어난다.
   private static final int RECENT_REWARD_LIMIT = 4;
 
@@ -72,8 +72,8 @@ public class RoutineQueryService {
   /// 모든 보호자에게 지난 일과가 빈 칸으로 보였다. 같은 실수를 오늘 일과에서
   /// 한 번 고쳤는데(getTodayRoutines) 이곳이 함께 고쳐지지 않았다.
   ///
-  /// 보낸 일과(CONFIRMED·COMPLETED)만 준다 — 오늘 일과와 같은 기준이다 (#353).
-  /// 상태를 거르지 않으면 오늘 만들다 둔 임시저장이 내일 지난 일과에 뜬다 (#387).
+  /// 보낸 일과(CONFIRMED·COMPLETED)만 준다 — 오늘 일과와 같은 기준이다.
+  /// 상태를 거르지 않으면 오늘 만들다 둔 임시저장이 내일 지난 일과에 뜬다.
   public List<RoutineResponse> getPastRoutines(Caller caller) {
     return routineRepository
       .findAllByProfileIdAndStatusInAndScheduledAtBeforeOrderByScheduledAtDesc(
@@ -88,7 +88,7 @@ public class RoutineQueryService {
 
   /// 보호자 홈 "임시저장" — 카드는 만들었지만 아직 아이에게 보내지 않은 일과.
   public List<RoutineResponse> getDraftRoutines(Caller caller) {
-    // 임시저장은 전부 승인 전이라 이룸이 토큰에는 줄 것이 없다 (#356).
+    // 임시저장은 전부 승인 전이라 이룸이 토큰에는 줄 것이 없다.
     if (caller.isElumi()) {
       return List.of();
     }
@@ -105,7 +105,7 @@ public class RoutineQueryService {
 
   public List<RoutineResponse> getMyRoutines(Caller caller) {
     return routineRepository.findAllByProfileId(profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId()).stream()
-      // 이룸이 토큰은 승인 전 일과를 받지 않는다 — 보호자 승인 후에만 이룸이에게 노출한다 (#356).
+      // 이룸이 토큰은 승인 전 일과를 받지 않는다 — 보호자 승인 후에만 이룸이에게 노출한다.
       // 임시저장·설정이 쓰는 보호자 호출은 전체를 그대로 받는다.
       .filter(r -> !caller.isElumi() || r.getStatus() != RoutineStatus.PENDING_REVIEW)
       .map(RoutineResponse::from)
@@ -131,7 +131,7 @@ public class RoutineQueryService {
   // count는 프론트가 요청한 반환 개수다. 1 미만이거나 카탈로그 전체 개수를 초과하면
   // 항상 이 범위 안에서만 뽑을 수 있으므로 잘못된 요청으로 간주해 거부한다.
   public List<RoutineSuggestionResponse> getSuggestions(int count) {
-    // 요청 언어의 목록(다국어 #526). 한 벌이 갖춰지지 않은 언어는 en → ko 로 대체된다. 헤더 없으면 ALL(ko) 그대로다.
+    // 요청 언어의 목록. 한 벌이 갖춰지지 않은 언어는 en → ko 로 대체된다. 헤더 없으면 ALL(ko) 그대로다.
     List<RoutineSuggestionResponse> catalog = RoutineSuggestionCatalog.forLocale(CurrentLocale.get());
     if (count < 1 || count > catalog.size()) {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);

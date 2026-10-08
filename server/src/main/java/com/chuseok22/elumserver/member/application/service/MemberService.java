@@ -61,9 +61,9 @@ public class MemberService {
   }
 
   /**
-   * 내 몫의 새 이룸이를 만든다 — 연결된 이룸이가 하나도 없는 보호자가 부른다 (#361·#362).
+   * 내 몫의 새 이룸이를 만든다 — 연결된 이룸이가 하나도 없는 보호자가 부른다.
    *
-   * <p>이룸이는 가입 때만 생겼다. 마지막 이룸이에서 나간 보호자가 이름을 저장하면 PROFILE_NOT_FOUND 로 막혔다.
+   * <p>이룸이는 가입 때만 생기므로, 마지막 이룸이에서 나간 보호자가 이름을 저장하면 PROFILE_NOT_FOUND 로 막힌다.
    * 가입과 같은 {@link GuardianshipService#createOwnProfile}을 쓴다 — 이름·캐릭터는 비어 있고 그다음에
    * 기존 저장 API(닉네임·캐릭터·도움 목표)가 채운다.
    *
@@ -120,7 +120,7 @@ public class MemberService {
   }
 
   /**
-   * 카드 그림 방식을 바꾼다 (#457). 캐릭터 설정과 같은 흐름·권한(MANAGE)이다 — 이룸이 휴대폰은 거절된다.
+   * 카드 그림 방식을 바꾼다. 캐릭터 설정과 같은 흐름·권한(MANAGE)이다 — 이룸이 휴대폰은 거절된다.
    *
    * <p>request DTO 에 검증 어노테이션을 달지 않는 규칙이라 null 은 여기서 막는다. 비워 저장하면
    * 그림 방식이 조용히 만화로 돌아가 보호자가 고른 것과 어긋난다.
@@ -167,7 +167,7 @@ public class MemberService {
   }
 
   /**
-   * 탈퇴. 계정을 지우지 않고 WITHDRAWN 으로 남긴다 (이슈 #372).
+   * 탈퇴. 계정을 지우지 않고 WITHDRAWN 으로 남긴다.
    *
    * <p>완전히 지우면 같은 소셜 계정으로 다시 가입해 무료 사용량을 0 부터 새로 받을 수 있다.
    * 그래서 재가입을 알아볼 최소한만 보관 기간 동안 남기고, 나머지는 지금처럼 즉시 지운다.
@@ -180,17 +180,17 @@ public class MemberService {
     Member member = requireMember(memberId);
 
     // ── 지운다 ──
-    // 연결된 이룸이마다 "나가기"를 한다 (다중 보호자 명세 4-3, #360). 내가 만든 일과·내가 붙인 이룸이 휴대폰·
+    // 연결된 이룸이마다 "나가기"를 한다 (다중 보호자 명세 4-3). 내가 만든 일과·내가 붙인 이룸이 휴대폰·
     // 관계를 지우고, 혼자 돌보던 이룸이는 이룸이 정보까지 지운다 — 발달장애 당사자에 대한 서술이라 오래 둘수록
     // 위험하고, 악용 방지에는 필요 없다. 다른 보호자와 함께 돌보던 이룸이와 그들의 일과는 남는다.
     guardianshipService.leaveAll(memberId);
     // 세션. member를 외래키로 참조하지 않아 DB가 대신 지워 주지 않는다.
     refreshTokenRepository.deleteAllByMemberId(memberId);
-    // 이룸이 휴대폰 연결 (이슈 #200). 되살아나도 예전 휴대폰은 새 연결 암호로만 붙는다 (S8).
+    // 이룸이 휴대폰 연결. 되살아나도 이전 휴대폰은 새 연결 암호로만 붙는다 (S8).
     deviceLinkRepository.deleteAllByMemberId(memberId);
     // 구독. 되살릴 때 가입처럼 Free 로 새로 만든다.
     subscriptionRepository.deleteByMemberId(memberId);
-    // 광고 보상 세션(nonce·transaction_id)은 회원을 가리키는 운영 기록이라 탈퇴에서 지운다. 받은 크레딧은 묶음·원장에 남는다 (#463).
+    // 광고 보상 세션(nonce·transaction_id)은 회원을 가리키는 운영 기록이라 탈퇴에서 지운다. 받은 크레딧은 묶음·원장에 남는다.
     adRewardSessionRepository.deleteAllByMemberId(memberId);
 
     // ── 남긴다 (보관 기간 동안) ──

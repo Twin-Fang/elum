@@ -1,7 +1,7 @@
 package com.chuseok22.elumserver.notice.core;
 
 /**
- * 제목 강조 표기 {@code **…**} (이슈 #370).
+ * 제목 강조 표기 {@code **…**}.
  *
  * <p>표기는 이것 한 가지뿐이다. 왼쪽부터 {@code **} 로 나눈 조각 중 홀수 번째(1, 3, …)가
  * 강조다. 앱과 관리자 미리보기({@code notice-preview.js})도 같은 규칙으로 그린다 —

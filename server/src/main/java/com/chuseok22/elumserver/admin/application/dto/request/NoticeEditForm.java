@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * 공지 편집 화면의 입력값 (이슈 #370).
+ * 공지 편집 화면의 입력값.
  *
  * <p>검증에 걸렸을 때 <b>관리자가 입력한 값을 그대로 다시 그리기</b> 위해 둔다(약관 편집과 같은
  * 이유 — 리다이렉트하면 DB 값을 다시 읽어 쓰던 본문이 사라진다). 그래서 숫자·날짜도 문자열이다.

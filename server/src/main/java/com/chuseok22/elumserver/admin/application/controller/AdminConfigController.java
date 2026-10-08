@@ -49,19 +49,19 @@ public class AdminConfigController {
     model.addAttribute("groups", grouped);
     model.addAttribute("imageProviders", imageProviderViews());
     model.addAttribute("textProviders", textProviderViews());
-    // 누가 언제 무엇을 바꿨는지 (#407) — 크레딧을 끄고 켠 기록도 여기 보인다.
+    // 누가 언제 무엇을 바꿨는지 — 크레딧을 끄고 켠 기록도 여기 보인다.
     model.addAttribute("history", systemConfigService.recentHistory());
     return "admin/settings";
   }
 
   /**
-   * 리로드 없이 저장한다 (이슈 #248).
+   * 리로드 없이 저장한다.
    *
    * <p>설정이 서른 개가 넘어 화면이 길다. 하나 고칠 때마다 페이지가 다시 그려지면
    * <b>스크롤이 맨 위로 튀어</b> 고치던 자리를 다시 찾아 내려가야 한다.
    *
    * <p>같은 경로를 쓰되 {@code X-Requested-With: fetch} 가 붙었을 때만 JSON을 준다.
-   * 스크립트가 막힌 환경에서는 평범한 폼 제출로 떨어져 예전처럼 동작한다 —
+   * 스크립트가 막힌 환경에서는 평범한 폼 제출로 떨어져 기존 폼 제출대로 동작한다 —
    * 저장 자체가 안 되는 것보다 낫다.
    */
   @PostMapping(value = "/admin/settings/{key}", headers = "X-Requested-With=fetch")
@@ -129,7 +129,7 @@ public class AdminConfigController {
   }
 
   /**
-   * 서버 문구 파일(폴백 질문·추천)이 비어 있는 언어는 켤 수 없다 (다국어 #526).
+   * 서버 문구 파일(폴백 질문·추천)이 비어 있는 언어는 켤 수 없다.
    * 켜 두면 다음 기동의 시작 검사(RoutinePhrasesStartupGuard)가 서버를 세우지 않으므로 화면에서 먼저 막는다.
    * 모르는 코드는 normalize 가 SYSTEM_CONFIG_INVALID_VALUE 로 거절한다.
    */

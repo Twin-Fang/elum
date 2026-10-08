@@ -13,7 +13,7 @@ public record GeminiImageAiInput(String task, Scene scene, Character character) 
   }
 
   /**
-   * @param appearance 그려야 할 생김새. 참조 이미지를 못 보내는 제공자는 이것만 보고 그린다 (#269)
+   * @param appearance 그려야 할 생김새. 참조 이미지를 못 보내는 제공자는 이것만 보고 그린다
    */
   public record Character(
     CharacterType type, String appearance, boolean referenceImageProvided

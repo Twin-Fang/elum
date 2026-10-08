@@ -119,7 +119,7 @@ public class AdminMemberService {
     subscriptionService.revokePro(memberId, "관리자 회수");
   }
 
-  // 탈퇴해도 행이 남는다 (#372). 전에는 탈퇴하면 행이 사라져 세지 않았으므로 빼야 숫자가 전과 같다.
+  // 탈퇴해도 행이 남는다. 탈퇴 회원은 세지 않으므로 뺀다.
   public long count() {
     return memberRepository.countByStatusNot(MemberStatus.WITHDRAWN);
   }
@@ -160,7 +160,7 @@ public class AdminMemberService {
   }
 
   /**
-   * 탈퇴 계정을 보관 기간을 기다리지 않고 바로 완전히 지운다 (#372 S9).
+   * 탈퇴 계정을 보관 기간을 기다리지 않고 바로 완전히 지운다.
    *
    * <p>정보주체가 삭제를 요구하면(개인정보보호법 제36조) 부정 이용 방지를 이유로 계속 남겨 둘지는
    * 운영자가 판단한다. 그 판단 뒤에 누르는 버튼이다. 누가 언제 지웠는지 로그로 남긴다.
@@ -177,7 +177,7 @@ public class AdminMemberService {
     log.info("관리자가 탈퇴 계정을 즉시 완전 삭제했습니다: memberId={}, admin={}", memberId, adminUsername);
   }
 
-  // 상태 필터가 없으면 탈퇴 계정을 뺀다 (#372 S6). 탈퇴 계정은 "탈퇴" 필터로만 본다.
+  // 상태 필터가 없으면 탈퇴 계정을 뺀다. 탈퇴 계정은 "탈퇴" 필터로만 본다.
   private Page<Member> findMembers(String keyword, MemberStatus status, Pageable pageable) {
     if (keyword.isEmpty() && status == null) {
       return memberRepository.findByStatusNot(MemberStatus.WITHDRAWN, pageable);

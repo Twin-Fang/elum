@@ -1,7 +1,7 @@
 package com.chuseok22.elumserver.admin.application.dto.request;
 
 /**
- * 관리자 크레딧 조정 폼 (#407). 미리보기와 확정이 같은 값을 주고받는다.
+ * 관리자 크레딧 조정 폼. 미리보기와 확정이 같은 값을 주고받는다.
  *
  * <p>모두 문자열로 받는다 — 숫자 칸에 글자가 오면 스프링 바인딩이 400 을 내 폼 오류로 보여 줄 수 없다.
  * 해석은 {@link #parsedType()} · {@link #parsedAmount()} 가 하고, 틀리면 IllegalArgumentException(폼 오류 문구)이다.

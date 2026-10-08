@@ -34,13 +34,13 @@ public class RefreshTokenRevoker {
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public int revokeGuardianSessionsInNewTransaction(String memberId, LocalDateTime now) {
-    // 회전이 아닌 사유로 남긴다 — 이렇게 끊긴 토큰이 또 와도 다시 전부 끊지 않는다 (#360 D1).
+    // 회전이 아닌 사유로 남긴다 — 이렇게 끊긴 토큰이 또 와도 다시 전부 끊지 않는다.
     return refreshTokenRepository.revokeGuardianSessions(
       memberId, ElumiDeviceId.LIKE_PATTERN, now, RevokeReason.REUSE_DETECTED);
   }
 
   /**
-   * 한 기기의 세션만 새 트랜잭션에서 끊는다 (이슈 #359).
+   * 한 기기의 세션만 새 트랜잭션에서 끊는다.
    *
    * <p>끊긴 연결의 이룸이 휴대폰이 갱신하러 왔을 때 쓴다. 계정 전체를 끊으면 보호자까지
    * 로그아웃된다.

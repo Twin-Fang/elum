@@ -17,11 +17,11 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "elum.aidlp")
 public class AidlpProperties {
 
-  // 미설정 시 빈 문자열. 이때 암호화된 요청이 오면 필터가 명시적으로 거절한다(조용한 통과 금지 — #182).
+  // 미설정 시 빈 문자열. 이때 암호화된 요청이 오면 필터가 명시적으로 거절한다(조용한 통과 금지).
   private String secret = "";
 
   // 설정 누락은 요청이 들어온 뒤가 아니라 기동 시점에 드러나야 한다.
-  // #182는 이 경고가 없어 "AI가 느린 건가" 하고 18초를 기다리다 E-1001만 보게 된 사고였다.
+  // 경고가 없으면 "AI가 느린 건가" 하고 18초를 기다리다 E-1001만 보게 된다.
   @PostConstruct
   void warnIfNotConfigured() {
     if (secret.isBlank()) {

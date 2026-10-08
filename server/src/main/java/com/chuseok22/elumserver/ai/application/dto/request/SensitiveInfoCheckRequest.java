@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 /**
  * 민감정보 사전 검토 요청.
  *
- * <p>로컬 LLM을 부르는 입구다. 빈 텍스트를 검사할 이유가 없다 (이슈 #215).
+ * <p>로컬 LLM을 부르는 입구다. 빈 텍스트를 검사할 이유가 없다.
  */
 @Schema(description = "민감정보 사전 검토 요청")
 public record SensitiveInfoCheckRequest(

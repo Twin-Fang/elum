@@ -31,7 +31,7 @@ import org.hibernate.annotations.DynamicUpdate;
  *
  * <p>보호자는 여럿일 수 있다 — 관계는 {@link ProfileGuardian} 표가 들고 있다 (다중 보호자 명세 4-1).
  * 형제가 있거나 기관에서 여러 이용자를 지원하는 경우가 이 구조 위에서 그대로 돌아간다.
- * 옛 대표 보호자 컬럼(profile.member_id)은 V32(#364)에서 지웠다 — 이룸이의 보호자는 관계 표만 안다.
+ * 옛 대표 보호자 컬럼(profile.member_id)은 V32에서 지웠다 — 이룸이의 보호자는 관계 표만 안다.
  */
 // 바뀐 컬럼만 UPDATE 한다. 전체 컬럼을 쓰면 이름·캐릭터를 고치는 트랜잭션이 그사이 쿼리로 더한 별을
 // 옛 값으로 덮어쓴다 (다중 보호자 E23·E25 — 두 보호자·두 기기가 동시에 쓴다).
@@ -53,7 +53,7 @@ public class Profile extends BaseEntity {
   private CharacterType character;
 
   /**
-   * 카드 그림 방식 (#457). 캐릭터를 쓰는 만화(기본)·실사·직접 사진(AI 그림 생략).
+   * 카드 그림 방식. 캐릭터를 쓰는 만화(기본)·실사·직접 사진(AI 그림 생략).
    *
    * <p>운영은 ddl-auto: validate 라 컬럼이 V28 마이그레이션에 있어야 서버가 뜬다. 옛 행·옛 서버가 넣은 행은
    * DEFAULT 'CARTOON' 이 채우고, 그래도 null 이 읽히면 getter 가 만화로 돌려 기존 동작을 지킨다.

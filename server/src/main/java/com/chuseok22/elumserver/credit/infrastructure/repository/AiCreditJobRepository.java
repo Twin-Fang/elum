@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-/// 관리자 작업 탐색은 필터 조합이 많아 Specification 으로 조건을 붙인다 (#407).
+/// 관리자 작업 탐색은 필터 조합이 많아 Specification 으로 조건을 붙인다.
 public interface AiCreditJobRepository extends JpaRepository<AiCreditJob, String>, JpaSpecificationExecutor<AiCreditJob> {
 
   Optional<AiCreditJob> findByAccountIdAndRequestKey(String accountId, String requestKey);
@@ -31,7 +31,7 @@ public interface AiCreditJobRepository extends JpaRepository<AiCreditJob, String
   @Query("select j.accountId from AiCreditJob j where j.id = :id")
   Optional<String> findAccountIdById(@Param("id") String id);
 
-  // --- 관리자 크레딧 화면 (#407) ---
+  // --- 관리자 크레딧 화면 ---
 
   Page<AiCreditJob> findByAccountIdOrderByStartedAtDesc(String accountId, Pageable pageable);
 
@@ -71,9 +71,9 @@ public interface AiCreditJobRepository extends JpaRepository<AiCreditJob, String
   long countByStatusAndStartedAtBefore(CreditJobStatus status, LocalDateTime threshold);
 
   /**
-   * 대조 불일치 — 청구(차감 또는 초과)가 있었는데 연결된 AI 호출 기록이 0건인 정산 작업 (#407).
+   * 대조 불일치 — 청구(차감 또는 초과)가 있었는데 연결된 AI 호출 기록이 0건인 정산 작업.
    *
-   * <p>호출 기록이 실패해도 크레딧은 정상으로 돈다(스펙 §3 실패 경로). 그 틈을 여기서 찾는다.
+   * <p>호출 기록이 실패해도 크레딧은 정상으로 돈다. 그 틈을 여기서 찾는다.
    */
   @Query("""
     select count(j) from AiCreditJob j

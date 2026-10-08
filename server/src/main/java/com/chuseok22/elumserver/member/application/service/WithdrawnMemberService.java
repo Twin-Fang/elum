@@ -23,11 +23,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 탈퇴한 계정의 보관·되살리기·완전 삭제 (이슈 #372).
+ * 탈퇴한 계정의 보관·되살리기·완전 삭제.
  *
  * <p>탈퇴({@link MemberService#withdraw})는 계정을 지우지 않고 WITHDRAWN 으로 남긴다. 완전히 지우면
  * 같은 소셜 계정으로 다시 가입해 무료 사용량을 0 부터 새로 받을 수 있어서다. 남기는 것은 재가입을
- * 알아볼 최소한 — 계정 행, 소셜 신원(이메일은 비움), AI 호출 기록의 회원 식별자, AI 크레딧 계정(#407)뿐이다.
+ * 알아볼 최소한 — 계정 행, 소셜 신원(이메일은 비움), AI 호출 기록의 회원 식별자, AI 크레딧 계정뿐이다.
  *
  * <pre>
  *   탈퇴 ──▶ WITHDRAWN (보관) ──┬── 보관 기간 안에 같은 소셜 계정으로 로그인 ──▶ {@link #revive} (빈 상태, 한도 이어짐)
@@ -134,10 +134,10 @@ public class WithdrawnMemberService {
     refreshTokenRepository.deleteAllByMemberId(memberId);
     deviceLinkRepository.deleteAllByMemberId(memberId);
 
-    // 보관하던 것. 소셜 신원은 지우고, AI 호출 기록은 운영 지표라 행을 남기되 누가 썼는지를 뗀다 (#191).
+    // 보관하던 것. 소셜 신원은 지우고, AI 호출 기록은 운영 지표라 행을 남기되 누가 썼는지를 뗀다.
     authIdentityRepository.deleteAllByMemberId(memberId);
     aiCallLogRepository.detachMember(memberId);
-    // 크레딧 계정도 행·원장은 운영 지표로 남기고 회원과 소셜 신원 해시를 뗀다 (#407). 1년 안의 재가입은
+    // 크레딧 계정도 행·원장은 운영 지표로 남기고 회원과 소셜 신원 해시를 뗀다. 1년 안의 재가입은
     // 같은 계정이 복원돼 사용량이 이어지고, 보관 기간이 지난 뒤에는 방침대로 식별값을 파기한다.
     aiCreditAccountRepository.detachMember(memberId);
 

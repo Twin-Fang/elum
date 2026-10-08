@@ -48,7 +48,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 관리자 크레딧 쓰기 — 조정·수동 반환·정책 발행과 그 미리보기 (#407).
+ * 관리자 크레딧 쓰기 — 조정·수동 반환·정책 발행과 그 미리보기.
  *
  * <p>모든 쓰기는 계정 행을 잠근 안에서 하고 원장에 관리자 아이디(actor)와 사유를 남긴다. 미리보기와 반영은 같은
  * 잔액 계산({@link CreditAccountService#balance})을 거쳐 "미리보기에서 본 숫자 = 반영 뒤 숫자"가 된다.

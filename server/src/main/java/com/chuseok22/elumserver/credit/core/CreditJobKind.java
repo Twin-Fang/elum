@@ -1,6 +1,6 @@
 package com.chuseok22.elumserver.credit.core;
 
-/** 크레딧을 쓰는 생성 작업의 종류 (#407). 종류마다 예약량·청구 산식이 다르다. */
+/** 크레딧을 쓰는 생성 작업의 종류. 종류마다 예약량·청구 산식이 다르다. */
 public enum CreditJobKind {
 
   /// AI 일과 생성 — 글 1 + 붙은 그림 수만큼 청구한다.

@@ -8,7 +8,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.validation.FieldError;
 
 /**
- * 에러 응답 문구를 요청 언어로 고른다 (다국어 #526).
+ * 에러 응답 문구를 요청 언어로 고른다.
  *
  * <p>원본은 {@code i18n/messages_{언어}.properties} 이고 키는 {@link ErrorCode} 이름이다. 대체 순서는
  * {@link AppLocale#fallbackChain()} 을 따른다 (ko 는 ko 만, 그 외는 요청 언어 → en → ko).

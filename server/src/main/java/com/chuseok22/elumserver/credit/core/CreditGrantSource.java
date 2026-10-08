@@ -1,7 +1,7 @@
 package com.chuseok22.elumserver.credit.core;
 
 /**
- * 적립 묶음이 어디서 왔는가 (#407).
+ * 적립 묶음이 어디서 왔는가.
  *
  * <p>PROMO·PURCHASE 는 아직 쓰지 않는다. 결제·이벤트를 붙일 때 표를 바꾸지 않으려고 자리만 둔다.
  */
@@ -11,7 +11,7 @@ public enum CreditGrantSource {
   WEEKLY,
   /// 관리자가 손으로 준 보너스. 만료는 지급 때 고른다(기본 이번 주 말, 무기한 가능).
   ADMIN_BONUS,
-  /// 보상형 광고를 끝까지 보고 받은 크레딧 (#463). 이번 주 끝에 만료된다.
+  /// 보상형 광고를 끝까지 보고 받은 크레딧. 이번 주 끝에 만료된다.
   AD_REWARD,
   PROMO,
   PURCHASE,

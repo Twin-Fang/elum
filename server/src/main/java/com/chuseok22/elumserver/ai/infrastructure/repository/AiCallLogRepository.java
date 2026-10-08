@@ -32,7 +32,7 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String> {
    * <p>성공한 호출만 센다 — 실패는 결과물이 없으므로 한도를 깎지 않는다.
    *
    * <p>유형을 목록으로 받는다. 같은 일을 하는 호출이 제공자마다 다른 유형으로 남기 때문이다 —
-   * 하나만 받으면 제공자를 바꾸는 순간 사용량이 끊긴다 (#367).
+   * 하나만 받으면 제공자를 바꾸는 순간 사용량이 끊긴다.
    *
    * <p>{@code idx_ai_call_log_member_created}(member_id, created_at)를 그대로 탄다.
    */
@@ -90,14 +90,14 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String> {
     """)
   List<MemberAiUsage> aggregateUsageByMemberIds(@Param("memberIds") List<String> memberIds);
 
-  /// 기간 [from, to) 의 추정 비용 합. 0건이면 0 (#407 관리자 크레딧 — 크레딧당 원가의 분자).
+  /// 기간 [from, to) 의 추정 비용 합. 0건이면 0.
   @Query("""
     select coalesce(sum(l.estimatedCostUsd), 0) from AiCallLog l
     where l.createdAt >= :from and l.createdAt < :to
     """)
   double sumCostBetween(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
-  /// 기간 [from, to) 의 모델별 호출 수·비용 (#407). 모델이 비어 있는 호출도 한 줄로 모인다.
+  /// 기간 [from, to) 의 모델별 호출 수·비용. 모델이 비어 있는 호출도 한 줄로 모인다.
   @Query("""
     select l.model as model, count(l) as callCount, coalesce(sum(l.estimatedCostUsd), 0) as totalCostUsd
     from AiCallLog l
@@ -115,7 +115,7 @@ public interface AiCallLogRepository extends JpaRepository<AiCallLog, String> {
     double getTotalCostUsd();
   }
 
-  /// 크레딧 작업별로 연결된 호출 수·비용 (#407). 작업 목록 한 페이지를 한 번에 대조한다.
+  /// 크레딧 작업별로 연결된 호출 수·비용. 작업 목록 한 페이지를 한 번에 대조한다.
   @Query("""
     select l.creditJobId as creditJobId, count(l) as callCount, coalesce(sum(l.estimatedCostUsd), 0) as totalCostUsd
     from AiCallLog l

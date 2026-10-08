@@ -6,7 +6,7 @@ import java.time.temporal.IsoFields;
 import java.time.temporal.TemporalAdjusters;
 
 /**
- * 주간 지급 주기 하나 (#407). 월요일 0시에 시작해 다음 월요일 0시에 끝난다(끝은 포함하지 않는다).
+ * 주간 지급 주기 하나. 월요일 0시에 시작해 다음 월요일 0시에 끝난다(끝은 포함하지 않는다).
  *
  * <p>key 는 ISO 주({@code 2026-W39})다. V26 이 Postgres {@code to_char(..., 'IYYY-"W"IW')} 로 같은 값을
  * 만든다 — 둘이 어긋나면 마이그레이션이 준 이번 주 지급을 코드가 못 찾아 한 번 더 준다.

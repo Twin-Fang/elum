@@ -4,7 +4,7 @@ import com.chuseok22.elumserver.license.core.PlanType;
 import java.time.LocalDateTime;
 
 /**
- * 크레딧 계정 한 개의 한 주 요약 (#407 관리자 회원별 표 · 개요 합계의 재료).
+ * 크레딧 계정 한 개의 한 주 요약.
  *
  * @param weeklyGrant 그 주 주간 지급량. 그 주에 지급받지 않았으면 null
  * @param bonus       그 주에 시작한 주간 외 지급(관리자 보너스 등) 합

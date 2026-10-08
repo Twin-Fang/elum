@@ -6,7 +6,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
- * 보호자 설정 화면의 이번 주 AI 크레딧 (#407 스펙 §3). 필드 이름은 앱 {@code CreditSummary} 가 그대로 읽는다.
+ * 보호자 설정 화면의 이번 주 AI 크레딧. 필드 이름은 앱 {@code CreditSummary} 가 그대로 읽는다.
  */
 @Schema(description = "내 AI 크레딧 요약")
 public record CreditSummaryResponse(
@@ -26,7 +26,7 @@ public record CreditSummaryResponse(
   LocalDateTime periodStart,
   @Schema(description = "다음 초기화(다음 월요일 0시)", example = "2026-09-28T00:00:00", nullable = true)
   LocalDateTime nextResetAt,
-  // 시간대가 붙은 같은 순간 (#421 ③). nextResetAt 은 시간대가 없어 해외 시간대 기기가 자기 시각으로
+  // 시간대가 붙은 같은 순간. nextResetAt 은 시간대가 없어 해외 시간대 기기가 자기 시각으로
   // 읽었다. 기존 필드를 바꾸면 이미 깔린 앱이 시각을 틀리게 보이므로 새 필드로 더한다.
   @Schema(description = "다음 초기화 — 서버 시간대 오프셋 포함. 앱은 이 값을 기기 시간대로 바꿔 보여준다",
     example = "2026-09-28T00:00:00+09:00", nullable = true)

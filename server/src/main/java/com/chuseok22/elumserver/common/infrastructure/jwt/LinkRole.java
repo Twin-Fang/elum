@@ -5,7 +5,7 @@ package com.chuseok22.elumserver.common.infrastructure.jwt;
  *
  * <p>로그인 계정은 보호자 하나뿐이고 이룸이 휴대폰은 연결 암호로 그 계정에 붙는다.
  * 토큰만 보면 둘이 똑같아서, 구분하지 않으면 이룸이 휴대폰에서 일과 삭제나 회원 탈퇴가
- * 그대로 된다 (이슈 #200).
+ * 그대로 된다.
  */
 public enum LinkRole {
 

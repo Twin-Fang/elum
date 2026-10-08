@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/// 보호자가 광고를 보고 크레딧을 받는 흐름 (#463). 보호자 권한은 SecurityConfig 의 /api/** 기본 규칙(GUARDIAN)이 건다.
+/// 보호자가 광고를 보고 크레딧을 받는 흐름. 보호자 권한은 SecurityConfig 의 /api/** 기본 규칙(GUARDIAN)이 건다.
 @RequestMapping("/api/credits/ad-rewards")
 @RestController
 @RequiredArgsConstructor

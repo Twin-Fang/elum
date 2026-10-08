@@ -62,7 +62,7 @@ public class RefreshToken extends BaseEntity {
   private LocalDateTime revokedAt;
 
   /**
-   * 끊긴 이유 (이슈 #360 D1). 재사용 감지는 {@link RevokeReason#ROTATED} 인 토큰에만 한다.
+   * 끊긴 이유. 재사용 감지는 {@link RevokeReason#ROTATED} 인 토큰에만 한다.
    * V27 이전에 끊긴 행은 비어 있다 — 사유를 모르므로 탈취로 보지 않는다.
    */
   @Enumerated(EnumType.STRING)

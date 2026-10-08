@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * 서버가 다루는 언어 다섯 (다국어 #526, 마스터 계획 C1·C2).
+ * 서버가 다루는 언어 다섯.
  *
  * <p>내부 코드는 소문자 두 글자다. HTTP {@code Accept-Language} 로는 {@code zh-Hans} 가 오지만 서버는 {@code zh} 로 본다.
  */

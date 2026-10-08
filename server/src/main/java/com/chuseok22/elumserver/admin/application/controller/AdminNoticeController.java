@@ -34,7 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * 보호자 홈 공지 팝업을 관리자 화면에서 올린다 (이슈 #370). 약관 관리와 같은 모양이다.
+ * 보호자 홈 공지 팝업을 관리자 화면에서 올린다. 약관 관리와 같은 모양이다.
  *
  * <p>편집 화면 오른쪽에 휴대폰 틀 미리보기가 있다. 그리는 것은 {@code notice-preview.js} 이고,
  * 이 컨트롤러는 "지금 게시 중인 다른 공지"를 JSON 으로 넘겨 함께 넘겨 보게 한다.
@@ -198,7 +198,7 @@ public class AdminNoticeController {
     data.put("hideDays", hideDays);
     data.put("notices", slides);
     // 편집 화면이 "저장하면 바로 나가요 / 시작 시각부터 나가요"를 말할 때 쓰는 서버 시각(밀리초).
-    // 관리자 PC 시계로 판단하면 앱 API(서버 시계)와 다른 말을 한다 (#385 E).
+    // 관리자 PC 시계로 판단하면 앱 API(서버 시계)와 다른 말을 한다.
     data.put("serverNow", noticeService.now().atZone(NoticeService.ZONE).toInstant().toEpochMilli());
     model.addAttribute("hideDays", hideDays);
     model.addAttribute("previewJson", toJson(data));

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 약관 전문을 준다 (이슈 #278).
+ * 약관 전문을 준다.
  *
  * <p><b>인증이 없다.</b> 가입하기 전에 읽는 문서라 로그인을 요구할 수 없다.
  */

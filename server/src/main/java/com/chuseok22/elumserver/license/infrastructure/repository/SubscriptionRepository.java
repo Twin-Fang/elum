@@ -22,7 +22,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Stri
   /**
    * 지금 이 플랜으로 동작하는 회원 id. {@code Subscription.effectivePlan} 과 같은 조건이다(ACTIVE · 만료 전).
    *
-   * <p>관리자 크레딧 화면이 플랜별 주간 지급 총량을 셀 때 쓴다 — 회원마다 planOf 를 부르지 않으려고 (#407).
+   * <p>관리자 크레딧 화면이 플랜별 주간 지급 총량을 셀 때 쓴다 — 회원마다 planOf 를 부르지 않으려고.
    */
   @Query("""
     select s.member.id from Subscription s

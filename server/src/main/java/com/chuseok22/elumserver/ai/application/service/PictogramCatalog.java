@@ -13,7 +13,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 /**
- * 무료 픽토그램(Mulberry Symbols, CC BY-SA 4.0) 카탈로그 (#247).
+ * 무료 픽토그램(Mulberry Symbols, CC BY-SA 4.0) 카탈로그.
  *
  * <p>서버는 SVG 를 서빙하지 않는다. SVG 는 앱에 번들되고, 서버는 카드에 {@code pictogramId}(SVG 파일명 stem)만
  * 저장한다. 이 카탈로그는 (1) AI 에게 "이 목록에서만 고르라"고 보여 줄 id 목록, (2) AI 가 돌려준 id 가

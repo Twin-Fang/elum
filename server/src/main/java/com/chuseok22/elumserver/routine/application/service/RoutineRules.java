@@ -43,8 +43,8 @@ final class RoutineRules {
   /**
    * 일과 하나를 꺼내며 이 요청자가 이 동작을 해도 되는지 묻는다 (다중 보호자 명세 4-2).
    *
-   * <p>판단은 {@link ProfileAccessGuard} 한 곳에서 한다. 예전에는 "프로필의 주인 = 요청자"를 여기서 직접
-   * 비교했는데, 보호자가 여럿이 되면 주인이 하나가 아니고 이룸이 휴대폰은 연결로 이룸이가 정해진다.
+   * <p>판단은 {@link ProfileAccessGuard} 한 곳에서 한다. 보호자가 여럿이면 주인이 하나가 아니고 이룸이 휴대폰은
+   * 연결로 이룸이가 정해지므로 "프로필의 주인 = 요청자"를 직접 비교하지 않는다.
    * 어떤 상태 검사보다 먼저 부른다 — 거절될 요청이 무엇도 바꾸지 않게.
    */
   static Routine routineFor(RoutineRepository routineRepository, ProfileAccessGuard profileAccessGuard,
@@ -52,7 +52,7 @@ final class RoutineRules {
     Routine routine = routineRepository.findById(routineId)
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_NOT_FOUND));
     profileAccessGuard.checkRoutine(caller, routine.getProfile().getId(), routine.getCreatedBy(), action);
-    // 이룸이 토큰에는 승인 전 일과가 없는 것과 같다 — 존재 여부도 알리지 않는다 (#356).
+    // 이룸이 토큰에는 승인 전 일과가 없는 것과 같다 — 존재 여부도 알리지 않는다.
     if (caller.isElumi() && routine.getStatus() == RoutineStatus.PENDING_REVIEW) {
       throw new CustomException(ErrorCode.ROUTINE_NOT_FOUND);
     }

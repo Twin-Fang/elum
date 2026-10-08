@@ -4,7 +4,7 @@ import com.chuseok22.elumserver.admin.application.dto.request.CreditAdjustType;
 import java.time.LocalDateTime;
 
 /**
- * 관리자 크레딧 조정의 미리보기이자 반영 결과 (#407). 미리보기와 반영이 같은 계산을 거친다.
+ * 관리자 크레딧 조정의 미리보기이자 반영 결과. 미리보기와 반영이 같은 계산을 거친다.
  *
  * @param expiresAt 지급 묶음의 만료. null 이면 무기한(지급이 아니면 뜻 없음)
  */

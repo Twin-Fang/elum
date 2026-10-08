@@ -1,6 +1,6 @@
 package com.chuseok22.elumserver.adreward.core;
 
-/// 서명이 맞는 콜백을 왜 지급하지 않았나 (#463). 세션에 남겨 "왜 안 들어왔나"를 나중에 대조한다.
+/// 서명이 맞는 콜백을 왜 지급하지 않았나. 세션에 남겨 "왜 안 들어왔나"를 나중에 대조한다.
 public enum AdRewardRejectReason {
   /// 기능이 꺼져 있다(관리자가 껐다).
   DISABLED,

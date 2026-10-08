@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
  * AI 추가 질문 생성 요청.
  *
  * <p>일과 생성과 마찬가지로 AI를 부르는 입구다. 제약이 없으면 빈 요청이 그대로
- * Gemini까지 간다 (이슈 #215).
+ * Gemini까지 간다.
  */
 @Schema(description = "AI 추가 질문 생성 요청")
 public record RoutineQuestionRequest(

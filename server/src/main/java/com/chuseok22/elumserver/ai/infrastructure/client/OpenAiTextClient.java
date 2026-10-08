@@ -29,7 +29,7 @@ import org.springframework.web.client.RestClient;
  *
  * <p><b>모델을 고를 때 주의한다.</b> 실측에서 nano급은 한국어 문장이 깨졌다
  * (gpt-4o-mini가 "가출하기 전에 인사해요"를 생성). 카드 문장은 당사자가 소리 내어
- * 듣는 말이라 품질 저하가 곧 사고다. 기본값을 mini급으로 두는 이유다.
+ * 듣는 말이라 품질 저하가 곧 사용자 피해다. 기본값을 mini급으로 두는 이유다.
  *
  * <p>프롬프트와 사용자 입력 조립은 {@link GeminiTextClient}의 것을 그대로 쓴다.
  * 제공자를 바꿨다고 지시문이 달라지면 두 제공자를 비교할 수 없다 —
@@ -180,7 +180,7 @@ public class OpenAiTextClient implements TextGenerationClient {
         "type", "json_schema",
         "json_schema", Map.of("name", schemaName, "strict", true, "schema", toStrictSchema(geminiSchema))
       ),
-      // Chat Completions 는 store 를 보내야만 대시보드 Logs(Completions 탭)에 남는다 (#411).
+      // Chat Completions 는 store 를 보내야만 대시보드 Logs(Completions 탭)에 남는다.
       // 추가 요금은 없고, 보관은 처리방침 9항 "업체 정책에 따름"에 든다.
       "store", true,
       // Logs 에서 일과 만들기와 추가 질문을 갈라 보려고 호출 종류를 붙인다.
@@ -234,7 +234,7 @@ public class OpenAiTextClient implements TextGenerationClient {
       }
       converted.put(key, convertValue(entry.getValue()));
     }
-    // Gemini 의 nullable:true 는 strict 스키마에 없는 키워드다 — 그대로 두면 400. type 을 [원래, "null"] 로 바꾼다.
+    // Gemini 의 nullable:true 는 strict 스키마에 없는 키워드다 — 그대로 두면 400. type 을 [기존 type, "null"] 로 바꾼다.
     // (pictogramId 처럼 선택 필드도 strict 는 required 에 넣어야 하므로 null 을 허용하는 것이 유일한 "비워 둠"이다.)
     if (Boolean.TRUE.equals(converted.remove("nullable")) && converted.get("type") instanceof String type) {
       converted.put("type", List.of(type, "null"));

@@ -5,10 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * 보호자가 카드를 직접 한 장 추가할 때의 요청 (이슈 #199).
+ * 보호자가 카드를 직접 한 장 추가할 때의 요청.
  *
  * <p>제약 애너테이션이 없으면 컨트롤러의 {@code @Valid}는 아무 일도 하지 않는다.
- * 실제로 그래서 잘못된 입력이 AI를 18.7초 태운 뒤 500으로 끝난 적이 있다 (이슈 #215).
+ * 실제로 그래서 잘못된 입력이 AI를 18.7초 태운 뒤 500으로 끝난 적이 있다.
  */
 @Schema(description = "일과 카드 추가 요청")
 public record RoutineStepCreateRequest(
@@ -23,7 +23,7 @@ public record RoutineStepCreateRequest(
   @Schema(description = "카드 설명 (이룸이 화면에서 소리로 읽어 준다)", example = "현관에서 우산을 챙겨요.")
   String description,
 
-  // 그림은 돈이라 명시적으로 고를 때만 만든다 (#407). 빼면 false — 예전처럼 자동으로 그리지 않는다.
+  // 그림은 돈이라 명시적으로 고를 때만 만든다. 빼면 false — 자동으로 그리지 않는다.
   @Schema(description = "AI 그림을 만들지 여부(기본 false). true 면 크레딧 1(그림 단가)을 쓰고, 모자라면 카드만 저장하고 "
     + "응답 imageSkippedReason 에 AI_CREDIT_INSUFFICIENT 를 담는다. 설명이 비어 있으면 그리지 않는다",
     example = "false", nullable = true)

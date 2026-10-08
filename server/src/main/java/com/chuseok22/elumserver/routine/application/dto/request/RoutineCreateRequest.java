@@ -12,7 +12,7 @@ import java.util.List;
  * <p>⚠️ <b>제약을 지우지 않는다.</b> 컨트롤러가 {@code @Valid}로 이 기록을 검사하고,
  * 검사에 걸리면 AI를 <b>한 번도 부르지 않고</b> 400으로 끝낸다. 제약이 없던 시절에는
  * 빈 요청 하나가 DLP·텍스트·이미지 생성을 18.7초 동안 다 돌린 뒤 DB 제약에서 터졌다
- * (이슈 #215). 돈은 나가고 사용자는 500만 본다.
+ *. 돈은 나가고 사용자는 500만 본다.
  */
 @Schema(description = "일과 생성 요청")
 public record RoutineCreateRequest(

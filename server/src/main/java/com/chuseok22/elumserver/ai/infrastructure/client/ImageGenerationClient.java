@@ -19,7 +19,7 @@ public interface ImageGenerationClient {
    * 지금 쓸 수 있는 상태인가. API 키가 없으면 false.
    *
    * <p>관리자 화면이 이 값으로 전환 버튼을 막는다. <b>키 없는 제공자로 바꿔 놓고
-   * 카드 생성이 전부 실패하는 사고</b>를 저장 단계에서 끊기 위해서다.
+   * 카드 생성이 전부 실패하는 상황</b>을 저장 단계에서 끊기 위해서다.
    */
   boolean available();
 
@@ -35,7 +35,7 @@ public interface ImageGenerationClient {
   GeneratedImage generateImage(String stepDescription, CharacterType characterType);
 
   /**
-   * 실사 방식(#457) — 캐릭터 없이 물건·장소를 사진처럼 그린다. 참조 이미지도 캐릭터 묘사도 쓰지 않는다.
+   * 실사 방식 — 캐릭터 없이 물건·장소를 사진처럼 그린다. 참조 이미지도 캐릭터 묘사도 쓰지 않는다.
    *
    * <p>기본 구현은 던진다. FLUX 는 영어 장면이 있어야 하므로 이 메서드가 아니라
    * {@code CardImageGenerator} 가 준비한 영어 장면으로 따로 부른다.
@@ -45,7 +45,7 @@ public interface ImageGenerationClient {
   }
 
   /// 관리자 테스트 전용: 저장된 프롬프트 대신 전달받은 prefix를 그대로 쓴다.
-  /// language 는 그 prefix 가 어느 언어 키의 것인지 — 장면 머리말·생김새를 맞춰 싣는다 (#375).
+  /// language 는 그 prefix 가 어느 언어 키의 것인지 — 장면 머리말·생김새를 맞춰 싣는다.
   GeneratedImage generateImageForTest(
     String prefix, ImagePromptLanguage language, String sampleInput, CharacterType characterType);
 }

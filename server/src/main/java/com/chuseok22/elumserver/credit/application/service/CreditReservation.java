@@ -1,7 +1,7 @@
 package com.chuseok22.elumserver.credit.application.service;
 
 /**
- * 예약 결과 (#407).
+ * 예약 결과.
  *
  * @param jobId     작업 id. DISABLED 면 null — 정산·반환을 부르지 않는다
  * @param routineId ALREADY_SETTLED 일 때 저장된 일과 id. 호출자는 AI 를 다시 부르지 않고 이 일과를 돌려준다

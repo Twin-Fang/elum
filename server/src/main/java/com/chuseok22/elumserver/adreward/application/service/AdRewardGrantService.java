@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 서명이 확인된 Google 콜백으로 크레딧을 준다 (#463).
+ * 서명이 확인된 Google 콜백으로 크레딧을 준다.
  *
  * <p>**지켜야 하는 것**
  * <ul>

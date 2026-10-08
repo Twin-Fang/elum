@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 /**
- * FLUX 프롬프트 조립 — 짧은 영어 한 덩어리 (#373).
+ * FLUX 프롬프트 조립 — 짧은 영어 한 덩어리.
  *
  * <p>OpenAI·Gemini 와 달리 JSON 장면 정보를 붙이지 않는다. schnell 은 긴 지시문과 JSON 을 그림 속
  * 글자로 찍었다. 2차 시험과 같은 모양 — 화풍 지시문 + "Only one character: {생김새}." + 장면 한 줄.
@@ -24,7 +24,7 @@ public class FluxPromptBuilder {
   private static final String NO_CHARACTER_SUBJECT = "figure";
 
   /**
-   * 실사 방식(#457) — 지시문 + 장면 한 줄. 캐릭터가 없으니 "Only one character:" 도 "The character" 치환도 없다.
+   * 실사 방식 — 지시문 + 장면 한 줄. 캐릭터가 없으니 "Only one character:" 도 "The character" 치환도 없다.
    * 장면은 항상 실사용 번역으로 만든 물건·장소 문장이라 치환할 주어가 없다.
    */
   public String buildRealistic(String prefix, String sceneEn) {

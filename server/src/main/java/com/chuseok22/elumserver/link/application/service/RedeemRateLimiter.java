@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 연결 암호 넣기의 호출자별 속도 제한 (이슈 #200).
+ * 연결 암호 넣기의 호출자별 속도 제한.
  *
  * <p><b>암호별 실패 횟수만으로는 막히지 않는다.</b> 그 카운터는 이미 존재하는 암호를
  * 두드릴 때만 올라간다. 무작위로 찍는 쪽은 매번 없는 값에 걸려 아무 흔적도 남기지 않고

@@ -20,7 +20,7 @@ public enum ConfigKey {
     "텍스트 생성 무작위성 (0=결정적, 최대 2)",
     ConfigValueType.DECIMAL, List.of(), "0"
   ),
-  // Gemini 2.5 계열은 답하기 전에 "생각"하고 그 토큰을 출력 단가로 청구한다 (#375).
+  // Gemini 2.5 계열은 답하기 전에 "생각"하고 그 토큰을 출력 단가로 청구한다.
   // 기본값 UNSET 은 요청에 thinkingConfig 를 싣지 않는다 — 배포만으로는 지금 동작 그대로다.
   // 값이 모델에 맞지 않아 400 이 나도 다시 부르지 않는다(호출이 두 배가 된다). 일과 만들기 실패로
   // 안내되므로 관리자가 되돌린다. 선택지로만 두는 이유 — 자유 입력이면 모델마다 다른 허용 범위를
@@ -101,7 +101,7 @@ public enum ConfigKey {
     "fal.ai 모델 경로. 예: fal-ai/flux/schnell",
     ConfigValueType.STRING, List.of(), "fal-ai/flux/schnell"
   ),
-  // OpenAI·Gemini 그림 지시문 언어 (#375). 운영 DB 프롬프트는 배포로 바뀌지 않으므로 전환도
+  // OpenAI·Gemini 그림 지시문 언어. 운영 DB 프롬프트는 배포로 바뀌지 않으므로 전환도
   // 관리자 화면에서 한다. 기본값 KO 는 지금 동작 그대로다.
   IMAGE_PROMPT_LANGUAGE(
     ConfigGroup.IMAGE_PROVIDER, "그림 지시문 언어",
@@ -159,7 +159,7 @@ public enum ConfigKey {
     "생성 이미지 토큰 요금. 0이면 장당 고정 단가를 쓴다",
     ConfigValueType.DECIMAL, List.of(), "0"
   ),
-  // fal 은 한 장을 최소 1MP 로 청구한다 — 640×544 도 1MP 값이었다(#373 대시보드 실측).
+  // fal 은 한 장을 최소 1MP 로 청구한다 — 640×544 도 1MP 값이었다.
   // 서버는 1MP 안(1024×864)으로 그리므로 장당 schnell 1MP 단가 그대로다. 운영 값은 이미 0.003.
   PRICE_FLUX_IMAGE_PER_IMAGE(
     ConfigGroup.PRICING, "FLUX 이미지 단가 (USD/장)",
@@ -167,12 +167,12 @@ public enum ConfigKey {
     ConfigValueType.DECIMAL, List.of(), "0.003"
   ),
 
-  // 탈퇴 계정 보관 기간 (이슈 #372).
+  // 탈퇴 계정 보관 기간.
   //
   // 탈퇴해도 방침 4조의 보관 항목(계정 식별값·AI 이용 기록·비밀번호 변환값·약관 동의 기록)을 이 기간만큼
   // 남긴다. 같은 계정으로 다시 가입해 무료 사용량을 0 부터 새로 받는 것을 막기 위해서다. 지나면 스케줄러가
-  // 완전히 지운다. 설명 문구도 방침과 같은 항목을 말해야 한다 (#372 D3 — 전에는 소셜 식별값과 AI 기록만 적었다).
-  // 365(1년)는 2026-09-24 사용자 결정이다. 개인정보처리방침 4조가 "탈퇴일로부터 1년간 보관"이라고 약속하므로
+  // 완전히 지운다. 설명 문구도 방침과 같은 항목을 말해야 한다.
+  // 365(1년)로 둔다. 개인정보처리방침 4조가 "탈퇴일로부터 1년간 보관"이라고 약속하므로
   // 이 값을 바꾸려면 방침을 먼저 개정·고지해야 한다. WithdrawnRetentionMatchesPrivacyPolicyTest 가 둘을 묶는다.
   MEMBER_WITHDRAWN_RETENTION_DAYS(
     ConfigGroup.MEMBER, "탈퇴 계정 보관 일수",
@@ -200,7 +200,7 @@ public enum ConfigKey {
     "Free에서 광고를 숨길지. 꺼두면 광고가 보인다",
     ConfigValueType.BOOLEAN, List.of(), "false"
   ),
-  // 하루 한도와 주간 한도는 둘 다 걸 수 있고, 먼저 닿는 쪽이 막는다 (#368).
+  // 하루 한도와 주간 한도는 둘 다 걸 수 있고, 먼저 닿는 쪽이 막는다.
   // 기간을 고르는 설정을 따로 두지 않는다 — 한쪽을 -1 로 두면 "하루만" / "주만" 이 된다.
   FREE_ROUTINE_CREATE_PER_DAY(
     ConfigGroup.PLAN_FREE, "하루 일과 생성 횟수",
@@ -264,7 +264,7 @@ public enum ConfigKey {
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
 
-  // 서비스 전체 하루 AI 비용 상한 (#368).
+  // 서비스 전체 하루 AI 비용 상한.
   //
   // 계정별 한도는 계정을 여러 개 만드는 악용과 회원 없이 남는 호출(관리자 시험 등)을
   // 못 본다. 이 값은 누가 썼든 오늘 전체 합계를 본다. 기본값 -1 은 꺼짐이라 배포만으로는
@@ -275,7 +275,7 @@ public enum ConfigKey {
     ConfigValueType.DECIMAL, List.of(), "-1"
   ),
 
-  // 앱을 세우거나 업데이트를 요구하는 값들 (이슈 #279).
+  // 앱을 세우거나 업데이트를 요구하는 값들.
   //
   // ⚠️ 심사 기간에는 점검 모드를 켜지 않는다. 리뷰어가 점검 화면만 보고
   //    "앱이 동작하지 않는다"(App Store 2.1)로 돌려보낸다.
@@ -310,7 +310,7 @@ public enum ConfigKey {
     "이 버전보다 낮으면 업데이트를 권한다. 건너뛸 수 있다",
     ConfigValueType.STRING, List.of(), ""
   ),
-  // 강제 업데이트 화면이 보내는 곳 (#416). 그 화면은 옛 버전 앱에서 뜨므로, 앱에 박힌 주소는
+  // 강제 업데이트 화면이 보내는 곳. 그 화면은 옛 버전 앱에서 뜨므로, 앱에 박힌 주소는
   // 앱을 다시 내지 않으면 못 고친다. 비워 두면 앱에 넣어 둔 주소를 쓴다(기본값으로 되돌리기).
   // 공식 스토어 주소만 받는다 — StoreUrlPolicy.
   IOS_STORE_URL(
@@ -353,7 +353,7 @@ public enum ConfigKey {
     "검사 결과가 빨리 와도 이만큼은 검사 화면을 보여준다(ms). 0이면 연출하지 않는다. 0~10000",
     ConfigValueType.INTEGER, List.of(), "1500", 0, 10_000
   ),
-  // 보호자 홈 공지 팝업의 "보지 않기" 일수 (이슈 #370).
+  // 보호자 홈 공지 팝업의 "보지 않기" 일수.
   // 공지마다 두지 않는다 — 팝업 하나에 체크박스가 하나라 공지마다 다르면 설명할 수 없다.
   // 7 이면 앱이 "일주일간 보지 않기", 아니면 "N일간 보지 않기"로 쓴다.
   NOTICE_HIDE_DAYS(
@@ -362,7 +362,7 @@ public enum ConfigKey {
     ConfigValueType.INTEGER, List.of(), "7", 1, 30
   ),
 
-  // --- 광고 보상 (이슈 #463) ---
+  // --- 광고 보상 ---
   //
   // 보상형 광고를 끝까지 보면 AI 생성 크레딧을 준다. 크레딧은 곧 AI 비용이라 **기본값은 꺼짐**이다 —
   // 배포만으로는 동작이 바뀌지 않는다. 지급량·상한은 운영 eCPM 을 보고 관리자 화면에서 조절한다.
@@ -395,7 +395,7 @@ public enum ConfigKey {
     ConfigValueType.STRING, List.of(), "8857966475,6517734434"
   ),
 
-  // --- 언어 (다국어 #526) ---
+  // --- 언어 ---
   //
   // 일과를 만들 수 있는 언어 목록. 앱에 번역이 들어 있어도 이 목록에 없는 언어의 휴대폰에서 만든 일과는 en(켜져 있을 때)
   // 아니면 ko 로 처리한다. 새 언어를 열 때 앱 업데이트 없이 여기서 켠다. 기본값 ko 는 배포만으로 동작이 바뀌지 않는다.

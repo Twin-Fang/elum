@@ -28,7 +28,7 @@ public record AdminMemberResponse(
   LocalDateTime retentionExpiresAt
 ) {
 
-  /// @param retentionExpiresAt 탈퇴 계정의 보관 만료 예정일. 탈퇴하지 않았으면 null (#372)
+  /// @param retentionExpiresAt 탈퇴 계정의 보관 만료 예정일. 탈퇴하지 않았으면 null
   public static AdminMemberResponse of(
     Member member, Profile profile, long routineCount, MemberAiUsage aiUsage,
     LocalDateTime retentionExpiresAt

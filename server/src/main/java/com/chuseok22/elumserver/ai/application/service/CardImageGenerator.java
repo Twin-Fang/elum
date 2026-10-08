@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * 카드 그림 한 장을 그린다 — 어느 제공자로, 실패하면 어디로 (#373).
+ * 카드 그림 한 장을 그린다 — 어느 제공자로, 실패하면 어디로.
  *
  * <p>일과 만들기({@code RoutineAiPipeline})와 카드 추가({@code RoutineStepImageFiller})가 같은 규칙을
  * 타도록 한 곳에 둔다.
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
  * </ul>
  *
  * <p><b>품질 실패는 여기서 잡지 못한다.</b> schnell 이 동작을 못 그리거나 글자를 찍어도 API 는
- * 성공으로 끝난다(#373 원인 분석). 그런 카드를 OpenAI 로 돌릴 신호가 없다.
+ * 성공으로 끝난다. 그런 카드를 OpenAI 로 돌릴 신호가 없다.
  */
 @Slf4j
 @Service
@@ -49,7 +49,7 @@ public class CardImageGenerator {
    * @param description   카드 설명(한국어). FLUX 가 아니거나 OpenAI 로 돌릴 때 그대로 쓴다
    * @param imagePromptEn 글 AI 가 같은 호출에서 준 영어 장면. 없으면 null
    * @param seedKey       {@link FluxSeed#routineKey} — 한 일과의 카드들이 같은 캐릭터로 나오게
-   * @param imageStyle    이룸이의 그림 방식(#457). null 이면 만화 — 기존 동작
+   * @param imageStyle    이룸이의 그림 방식. null 이면 만화 — 기존 동작
    */
   public record CardImageRequest(
     String description, String imagePromptEn, CharacterType characterType, String seedKey, ImageStyle imageStyle
@@ -100,7 +100,7 @@ public class CardImageGenerator {
   }
 
   /**
-   * 실사 방식(#457) — 캐릭터를 아예 쓰지 않는다(참조 이미지·생김새·"The character" 관례 없음).
+   * 실사 방식 — 캐릭터를 아예 쓰지 않는다(참조 이미지·생김새·"The character" 관례 없음).
    *
    * <p>FLUX 는 글 AI 가 준 {@code imagePromptEn} 을 쓰지 않는다. 그 문장은 "The character …" 관례라 실사에
    * 캐릭터를 부른다. 그래서 카드마다 실사용 번역 지시문으로 물건·장소 문장을 새로 만든다. 실패하면 그 카드만
@@ -135,7 +135,7 @@ public class CardImageGenerator {
     }
   }
 
-  /// FLUX 에 넣을 수 있는 한 줄인가. 한국어가 섞이면 schnell 이 사람을 그렸다(#373 1차).
+  /// FLUX 에 넣을 수 있는 한 줄인가. 한국어가 섞이면 schnell 이 사람을 그렸다.
   private String usableScene(String raw) {
     if (raw == null) {
       return null;

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 /**
- * multipart 전체 한도(200MB)를 넘긴 요청 (이슈 #455).
+ * multipart 전체 한도(200MB)를 넘긴 요청.
  *
  * <p>이 예외는 <b>컨트롤러가 정해지기 전</b>, 요청 본문을 해석하는 단계에서 터진다.
  * {@link GlobalExceptionHandler} 는 {@code basePackages} 로 범위를 좁혀 놓아서 이 시점에는 적용되지 않고,
@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
  * 직접 불러서 통과했다).
  *
  * <p>범위를 좁히지 않은 별도 어드바이스로 받되, 관리자 화면(Thymeleaf SSR)은 JSON 대신 기본 응답을 받아야 하므로
- * {@code /api/} 경로에만 JSON 을 준다. 그 밖은 원래 동작대로 413 만 돌려준다.
+ * {@code /api/} 경로에만 JSON 을 준다. 그 밖은 기본 동작대로 413 만 돌려준다.
  */
 @Slf4j
 @RestControllerAdvice

@@ -20,31 +20,26 @@ import org.springframework.web.client.RestClient;
 /**
  * FLUX 이미지 생성 (fal.ai).
  *
- * <p>Gemini보다 훨씬 싸다. <b>참조 그림을 받지 못한다</b> — 글만 보고 그린다. 그래서 한 일과의
- * 카드들을 같은 seed 로 그려 캐릭터를 맞춘다 (#373 2차 시험에서 확인).
+ * <p>Gemini보다 훨씬 싸지만 <b>참조 그림을 받지 못한다</b>(글만 보고 그린다). 그래서 한 일과의 카드들을 같은 seed 로 그려 캐릭터를 맞춘다.
  *
- * <p><b>영어 장면이 있어야 부를 수 있다.</b> schnell 은 한국어를 거의 못 알아들어 사람을 그렸고,
- * 긴 지시문은 그림 속 글자로 찍었다. 그래서 다른 제공자와 달리 한국어 카드 설명을 받는
- * {@link #generateImage}는 쓰지 않고, {@code CardImageGenerator} 가 영어 장면을 마련해
+ * <p><b>영어 장면이 있어야 부를 수 있다.</b> schnell 은 한국어를 거의 못 알아듣고 긴 지시문을 그림 속 글자로 찍는다.
+ * 그래서 한국어 카드 설명을 받는 {@link #generateImage}는 쓰지 않고, {@code CardImageGenerator} 가 영어 장면을 마련해
  * {@link #generate} 를 부른다. 실패하면 그 카드만 OpenAI 로 돌리는 것도 그쪽이 한다.
  *
- * <p>다른 제공자와 달리 <b>이미지를 바로 주지 않고 주소를 준다.</b> 그래서 한 번 더
- * 받아와야 한다. 그 사이에 주소가 죽거나 느리면 생성 자체가 실패로 떨어진다.
- *
- * <p><b>품질 실패는 잡지 못한다.</b> 동작이 안 그려지거나 글자가 찍혀도 API 는 성공으로 끝난다
- * (#373 원인 분석). 에러·타임아웃·잔액 소진만 실패로 떨어진다.
+ * <p>이미지를 바로 주지 않고 <b>주소를 줘서</b> 한 번 더 받아와야 하며, 그 사이 주소가 죽거나 느리면 생성이 실패한다.
+ * <b>품질 실패는 잡지 못한다</b> — 동작이 안 그려지거나 글자가 찍혀도 API 는 성공이다. 에러·타임아웃·잔액 소진만 실패다.
  */
 @Slf4j
 @Component
 public class FluxImageClient implements ImageGenerationClient {
 
   private static final String BASE_URL = "https://fal.run";
-  // fal 은 한 장을 최소 1MP 로 청구한다 — 작게 그려도 싸지지 않는다(#373 대시보드 실측).
-  // 1MP 안에서 카드 그림칸(Figma 313×230, 1.361:1, #460) 비율로 가장 크게: 1152×848 = 0.977MP(1.358:1).
-  // 1MP 를 넘기면 2MP 로 청구되므로 넘기지 않는다. 옛 1024×864(1.185:1)는 칸에 채울 때 위·아래가 12.9% 잘렸다.
+  // fal 은 한 장을 최소 1MP 로 청구한다 — 작게 그려도 싸지지 않는다.
+  // 1MP 안에서 카드 그림칸(Figma 313×230, 1.361:1) 비율로 가장 크게: 1152×848 = 0.977MP(1.358:1).
+  // 1MP 를 넘기면 2MP 로 청구되므로 넘기지 않는다. 1024×864(1.185:1)는 칸에 채울 때 위·아래가 12.9% 잘린다.
   static final int IMAGE_WIDTH = 1152;
   static final int IMAGE_HEIGHT = 848;
-  // schnell 은 4단계로 줄인 모델이다. 8단계로 올려도 동작이 나아지지 않았다(#373 3차).
+  // schnell 은 4단계로 줄인 모델이다. 8단계로 올려도 동작이 나아지지 않았다.
   private static final int INFERENCE_STEPS = 4;
 
   private final PromptTemplateService promptTemplateService;
@@ -85,7 +80,7 @@ public class FluxImageClient implements ImageGenerationClient {
   /**
    * 한국어 카드 설명으로는 그리지 않는다.
    *
-   * <p>그대로 보내면 카드에 사람이 그려진다(#373 1차). 조용히 틀린 그림을 내느니 실패시켜
+   * <p>그대로 보내면 카드에 사람이 그려진다. 조용히 틀린 그림을 내느니 실패시켜
    * 부르는 쪽이 기본 그림으로 덮게 한다. 정상 경로는 {@link #generate} 다.
    */
   @Override
@@ -110,7 +105,7 @@ public class FluxImageClient implements ImageGenerationClient {
     return call(fluxPromptBuilder.build(prefix, sceneEn, characterType), seed);
   }
 
-  /// 실사(#457): 실사 지시문 + 영어 장면. seed 규칙은 만화와 같다(일과마다 고정).
+  /// 실사: 실사 지시문 + 영어 장면. seed 규칙은 만화와 같다(일과마다 고정).
   public GeneratedImage generateRealistic(String sceneEn, Integer seed) {
     String prefix = promptTemplateService.getContent(PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX);
     return call(fluxPromptBuilder.buildRealistic(prefix, sceneEn), seed);

@@ -1,7 +1,7 @@
 package com.chuseok22.elumserver.adreward.application.service;
 
 /**
- * 서명이 확인된 Google 콜백에서 우리가 쓰는 값만 (#463).
+ * 서명이 확인된 Google 콜백에서 우리가 쓰는 값만.
  *
  * <p>`reward_amount`·`reward_item` 은 일부러 싣지 않는다 — 지급량은 서버 설정이 정한다(클라이언트가 광고를 요청할 때 넣는
  * 값이라 믿을 수 없다).

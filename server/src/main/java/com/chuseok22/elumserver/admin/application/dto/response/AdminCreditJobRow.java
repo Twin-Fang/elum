@@ -4,7 +4,7 @@ import com.chuseok22.elumserver.credit.core.CreditJobStatus;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditJob;
 
 /**
- * 크레딧 작업 한 줄과 연결된 AI 호출 대조 (#407).
+ * 크레딧 작업 한 줄과 연결된 AI 호출 대조.
  *
  * @param callCount 이 작업에 연결된 ai_call_log 건수
  * @param costUsd   연결된 호출의 추정 비용 합

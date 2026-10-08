@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/// 보호자 설정 화면의 AI 크레딧 (#407). 보호자 권한은 SecurityConfig 의 /api/** 기본 규칙(GUARDIAN)이 건다.
+/// 보호자 설정 화면의 AI 크레딧. 보호자 권한은 SecurityConfig 의 /api/** 기본 규칙(GUARDIAN)이 건다.
 @RequestMapping("/api/credits")
 @RestController
 @RequiredArgsConstructor

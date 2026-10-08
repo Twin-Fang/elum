@@ -15,7 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 회원 한 명의 크레딧 계정 (#407). <b>모든 증감은 이 행을 {@code FOR UPDATE} 로 잡은 안에서 일어난다</b> —
+ * 회원 한 명의 크레딧 계정. <b>모든 증감은 이 행을 {@code FOR UPDATE} 로 잡은 안에서 일어난다</b> —
  * 서버가 여러 대여도 같은 회원의 예약·정산이 한 줄로 선다.
  *
  * <p>member_id 는 완전 삭제(purge) 때 떼어낸다. 행과 원장은 남기고, 같은 소셜 신원(identity_key)으로

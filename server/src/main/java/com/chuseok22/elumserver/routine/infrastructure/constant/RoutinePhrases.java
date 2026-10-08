@@ -20,7 +20,7 @@ import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 서버가 만들어 내려보내는 일과 문구 — AI 추가 질문 폴백, 홈 추천 일과 (다국어 #526).
+ * 서버가 만들어 내려보내는 일과 문구 — AI 추가 질문 폴백, 홈 추천 일과.
  *
  * <p>원본은 {@code i18n/routine-phrases_{언어}.properties} 다. <b>한 파일이 "한 벌"</b>이다: ko 파일의 키가 기준이고
  * 한 언어의 파일이 그 키를 모두 채워야 완성이다. 미완성인 언어는 요청이 와도 건너뛰고 요청 언어 → en → ko 중 완성된

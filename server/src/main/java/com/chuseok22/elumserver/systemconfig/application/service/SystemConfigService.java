@@ -163,7 +163,7 @@ public class SystemConfigService {
   }
 
   /**
-   * 설정을 바꾸고 이력을 남긴다 (#407). 값이 그대로면 이력을 남기지 않는다.
+   * 설정을 바꾸고 이력을 남긴다. 값이 그대로면 이력을 남기지 않는다.
    *
    * @param actor  바꾼 관리자 로그인 아이디. 비면 system
    * @param reason 사유(선택)
@@ -184,7 +184,7 @@ public class SystemConfigService {
     // 비교는 사람이 보는 값으로 한다 — 저장값이 없으면 기본값이 지금 값이다. 비밀값은 풀어서 비교한다.
     String before = secret ? currentSecret(config) : effectiveValue(key, config);
     config.setConfigValue(secret ? encryptSecret(value) : value);
-    // 저장은 예전처럼 늘 한다(기본값과 같은 값도 행으로 고정된다). 이력만 실제로 바뀐 것을 남긴다.
+    // 저장은 늘 한다(기본값과 같은 값도 행으로 고정된다). 이력만 실제로 바뀐 것을 남긴다.
     systemConfigRepository.save(config);
     if (!Objects.equals(before, value)) {
       recordHistory(key, secret, before, value, actor, reason);
@@ -291,7 +291,7 @@ public class SystemConfigService {
     String value = rawValue.trim();
     try {
       if (key == ConfigKey.ENABLED_CONTENT_LOCALES) {
-        // 모르는 코드는 저장하지 않는다. ko 는 늘 켜 두므로 앞에 붙여 정규화한다 (다국어 #526).
+        // 모르는 코드는 저장하지 않는다. ko 는 늘 켜 두므로 앞에 붙여 정규화한다.
         return EnabledLocales.normalize(value);
       }
       if (key.getValueType() == ConfigValueType.INTEGER) {
@@ -309,7 +309,7 @@ public class SystemConfigService {
         && !"true".equalsIgnoreCase(value) && !"false".equalsIgnoreCase(value)) {
         throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
       } else if (StoreUrlPolicy.appliesTo(key) && !StoreUrlPolicy.isAllowed(key, value)) {
-        // 막힌 사용자를 엉뚱한 곳으로 보내지 않도록 공식 스토어 주소만 받는다 (#416)
+        // 막힌 사용자를 엉뚱한 곳으로 보내지 않도록 공식 스토어 주소만 받는다
         throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
       }
     } catch (NumberFormatException e) {

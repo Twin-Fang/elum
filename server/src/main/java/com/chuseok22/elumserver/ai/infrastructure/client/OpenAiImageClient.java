@@ -30,7 +30,7 @@ import org.springframework.web.client.RestClient;
 public class OpenAiImageClient implements ImageGenerationClient {
 
   private static final String BASE_URL = "https://api.openai.com";
-  // 카드 그림 칸은 Figma 313×230(1.361:1)이다 (#460, 2026-09-30 재확인). 정사각(1024x1024)은 칸에 채울 때
+  // 카드 그림 칸은 Figma 313×230(1.361:1)이다. 정사각(1024x1024)은 칸에 채울 때
   // 위·아래가 26.5% 잘리고, 공식 지원 크기 중 가장 가까운 가로형(1536x1024, 1.5:1)은 좌·우 9.3% 만 잘린다.
   // 픽셀이 1.5배라 같은 품질(low)에서도 더 선명하다. 가격은 크기가 클수록 조금 오른다(low 기준 약 $0.005→0.006
   // 으로 추정, 크기별 공식 가격표는 확인하지 못했다).
@@ -69,13 +69,13 @@ public class OpenAiImageClient implements ImageGenerationClient {
   }
 
   // 프롬프트는 Gemini와 같은 것을 쓴다. 제공자를 바꿨다고 그림의 결이 달라지면
-  // 비교가 성립하지 않는다. 언어(KO/EN)도 조립기가 한 곳에서 고른다 (#375).
+  // 비교가 성립하지 않는다. 언어(KO/EN)도 조립기가 한 곳에서 고른다.
   @Override
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
     return call(promptComposer.compose(stepDescription, characterType, false), characterType);
   }
 
-  /// 실사(#457): Gemini 와 같은 실사 지시문을 쓴다 — 제공자를 바꿨다고 그림의 결이 달라지면 안 된다.
+  /// 실사: Gemini 와 같은 실사 지시문을 쓴다 — 제공자를 바꿨다고 그림의 결이 달라지면 안 된다.
   @Override
   public GeneratedImage generateRealisticImage(String stepDescription) {
     return call(promptComposer.composeRealistic(stepDescription), null);
@@ -108,7 +108,7 @@ public class OpenAiImageClient implements ImageGenerationClient {
           // **배경을 반드시 불투명으로 받는다.** 기본값(auto)에서는 모델이 투명 배경을
           // 골라 버리는데, 그때 배경만 비는 것이 아니라 **캐릭터 몸통 안쪽까지 투명하게
           // 나온다.** 윤곽선만 남아 색이 빠진 그림이 되어, 카드에 얹으면 선화처럼 보인다
-          // (이슈 #269에서 실측으로 확인).
+          //.
           "background", "opaque",
           "n", 1
         ))
@@ -157,9 +157,8 @@ public class OpenAiImageClient implements ImageGenerationClient {
 
   /// 응답에서 쓰는 것만 담는다. 모르는 필드는 무시된다.
   ///
-  /// <p><b>usage를 함께 받는다.</b> 예전에는 이것을 버리고 장당 고정 단가만 기록했다.
-  /// 그러면 품질을 바꿔 출력 토큰이 네 배가 되어도(low 272 → medium 1056) 비용은
-  /// 그대로 찍혀, 관리자 화면의 숫자가 실제 청구액과 멀어진다 (이슈 #269 후속).
+  /// <p><b>usage를 함께 받는다.</b> 장당 고정 단가만 기록하면 품질을 바꿔 출력 토큰이 네 배가 되어도(low 272 → medium 1056) 비용은
+  /// 그대로 찍혀 관리자 화면의 숫자가 실제 청구액과 멀어진다.
   record OpenAiImageResponse(List<OpenAiImageData> data, OpenAiImageUsage usage) {
 
     record OpenAiImageData(

@@ -3,7 +3,7 @@ package com.chuseok22.elumserver.admin.application.dto.request;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-/** 관리자 크레딧 조정 종류 (#407). */
+/** 관리자 크레딧 조정 종류. */
 @Getter
 @RequiredArgsConstructor
 public enum CreditAdjustType {

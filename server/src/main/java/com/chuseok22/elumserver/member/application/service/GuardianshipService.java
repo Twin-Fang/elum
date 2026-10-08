@@ -98,7 +98,7 @@ public class GuardianshipService {
     }
 
     // 관계 밖에 남은 내 일과는 있어서는 안 된다. 그래도 남아 있으면 created_by 외래키가 보관 기간 뒤
-    // 완전 삭제(#372)의 계정 삭제를 막는다 — 구독 표 때 탈퇴가 그렇게 통째로 실패한 채 배포됐다. 치우고 흔적을 남긴다.
+    // 완전 삭제의 계정 삭제를 막는다 — 구독 표 때 탈퇴가 그렇게 통째로 실패한 채 배포됐다. 치우고 흔적을 남긴다.
     List<Routine> stray = routineRepository.findAllByCreatedBy(memberId);
     if (!stray.isEmpty()) {
       log.warn("관계 밖에 남은 일과를 지웁니다: memberId={}, count={}", memberId, stray.size());

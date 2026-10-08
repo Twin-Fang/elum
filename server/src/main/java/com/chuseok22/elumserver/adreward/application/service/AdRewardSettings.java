@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * 광고 보상 설정을 안전한 쪽으로 읽는다 (#463).
+ * 광고 보상 설정을 안전한 쪽으로 읽는다.
  *
  * <p>값이 이상하면(0 이하·비정수) **주지 않는 쪽**으로 읽는다. 관리자 화면이 범위를 막지만, DB 를 직접 만졌거나
  * 저장된 값이 손상돼도 크레딧이 새지 않게 한 번 더 막는다.

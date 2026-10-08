@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 공지 이미지로 받는 형식 (이슈 #370).
+ * 공지 이미지로 받는 형식.
  *
  * <p><b>파일 이름과 브라우저가 붙인 Content-Type 은 믿지 않는다.</b> 이름만 {@code .png} 로
  * 바꾼 SVG 는 스크립트를 담을 수 있고, 그 파일을 공개 API 로 그대로 내보내게 된다.

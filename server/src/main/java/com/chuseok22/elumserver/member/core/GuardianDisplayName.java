@@ -4,7 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 
 /**
- * 함께하는 사람을 부르는 이름의 규칙 (#361).
+ * 함께하는 사람을 부르는 이름의 규칙.
  *
  * <p>request DTO 에 검증 어노테이션을 달지 않는 저장소 규칙이라 길이·문자를 여기서 막는다. 다른 보호자와 이룸이 폰
  * 화면에 그대로 나가는 값이므로 줄바꿈·제어 문자는 받지 않는다.

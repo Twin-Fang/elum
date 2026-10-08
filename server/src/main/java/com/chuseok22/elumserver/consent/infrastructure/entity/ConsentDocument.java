@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 지금 앱에 나가는 약관 한 편 (이슈 #278).
+ * 지금 앱에 나가는 약관 한 편.
  *
  * <p>고칠 때마다 직전 내용이 {@link ConsentDocumentHistory} 로 남는다. 법적 문구라
  * "언제 무엇이 어떻게 바뀌었나"를 답할 수 있어야 한다.

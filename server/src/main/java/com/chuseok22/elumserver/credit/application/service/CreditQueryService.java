@@ -21,7 +21,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * 보호자에게 보여 줄 크레딧 요약과 "지금 시작할 수 있는가" 판정 (#407).
+ * 보호자에게 보여 줄 크레딧 요약과 "지금 시작할 수 있는가" 판정.
  *
  * <p>조회도 쓰기가 있다 — 이번 주 지급을 만들고 멈춘 예약을 푼다. 그래서 계정을 잠근 트랜잭션 안에서 한다.
  * 장부를 못 읽으면 막는다(fail-closed, AI_CREDIT_UNAVAILABLE) — 0 을 돌려주면 보호자는 다 썼다고 믿는다.
@@ -105,7 +105,7 @@ public class CreditQueryService {
 
   /**
    * AI 일과를 시작할 수 있는지 본다. 추가 질문처럼 차감은 없지만 곧 일과 생성으로 이어지는 호출이 앞에서 부른다
-   * — 잔액 0 에서 질문을 만들어 주고 카드 만들기에서 막으면 보호자가 입력만 두 번 한다(스펙 §3).
+   * — 잔액 0 에서 질문을 만들어 주고 카드 만들기에서 막으면 보호자가 입력만 두 번 한다.
    *
    * @throws CustomException AI_CREDIT_ACCOUNT_FROZEN · AI_CREDIT_INSUFFICIENT · AI_CREDIT_UNAVAILABLE
    */

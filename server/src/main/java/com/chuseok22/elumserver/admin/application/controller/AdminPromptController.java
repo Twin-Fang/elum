@@ -42,7 +42,7 @@ public class AdminPromptController {
     RedirectAttributes redirectAttributes
   ) {
     // 요청 DTO에 검증 어노테이션이 없어 bindingResult 는 공백을 잡지 못한다. 실제 검사는
-    // 서비스가 하고, 여기서는 거절을 화면에 알린다. 전에는 공백이 "저장했습니다"로 통과했다.
+    // 서비스가 하고, 여기서는 거절을 화면에 알린다.
     if (bindingResult.hasErrors()) {
       redirectAttributes.addFlashAttribute("errorMessage", "프롬프트 내용을 입력해주세요. (E-PRM-001)");
       return "redirect:/admin/prompts";

@@ -48,7 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class RoutineService {
 
-  /// 한 일과에 담을 수 있는 카드 수 상한 (이슈 #199).
+  /// 한 일과에 담을 수 있는 카드 수 상한.
   ///
   /// AI 생성 경로가 이미 같은 값으로 막혀 있다(`RoutineAiPipeline.MAX_STEPS`, 프롬프트도
   /// "1개 이상 10개 이하"). 같은 값으로 맞춰야 **기존 일과 중 상한을 넘는 것이 없다** —
@@ -56,10 +56,10 @@ public class RoutineService {
   ///
   /// 카드 1장을 추가할 때마다 AI 이미지가 1회 생성된다. 다만 이 상한은 비용의 천장이
   /// 아니다 — 지우면 자리가 다시 나서 추가·삭제를 되풀이할 수 있다. 그림 횟수는
-  /// {@link RoutineStepImageFiller}가 따로 묶는다 (#368).
+  /// {@link RoutineStepImageFiller}가 따로 묶는다.
   private static final int STEP_MAX_COUNT = 10;
 
-  /// 카드 추가 응답 imageSkippedReason — 이룸이의 그림 방식이 직접 사진이라 AI 그림을 만들지 않았다(#457).
+  /// 카드 추가 응답 imageSkippedReason — 이룸이의 그림 방식이 직접 사진이라 AI 그림을 만들지 않았다.
   static final String IMAGE_SKIPPED_PHOTO_ONLY = "IMAGE_STYLE_PHOTO_ONLY";
 
   private final RoutineRepository routineRepository;
@@ -85,7 +85,7 @@ public class RoutineService {
   }
 
   /// 보상만 수정한다. 일과를 만든 뒤에도 보호자가 바꿀 수 있어야
-  /// "보호자가 관리한다"가 성립한다 (2026-09-13 자문).
+  /// "보호자가 관리한다"가 성립한다.
   @Transactional
   public RoutineResponse updateReward(Caller caller, String routineId, RewardUpdateRequest request) {
     Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
@@ -137,11 +137,10 @@ public class RoutineService {
     return RoutineResponse.from(routineRepository.save(copy));
   }
 
-  /// 이룸이가 **아직 시작하지 않은** 일과만 삭제한다 (#533).
+  /// 이룸이가 **아직 시작하지 않은** 일과만 삭제한다.
   ///
   /// 임시저장(`PENDING_REVIEW`)과, 보냈지만 한 단계도 하지 않은 `CONFIRMED` 가 대상이다.
-  /// 예전에는 임시저장만 지울 수 있었는데, 보호자 홈 `오늘 일과`에 삭제 버튼이 있어
-  /// 누를 때마다 409 만 받았다. 잘못 보낸 일과를 거둘 길이 없었다.
+  /// 보호자 홈 `오늘 일과`의 삭제 버튼이 보낸 일과에도 동작해야 해서 임시저장 밖도 허용한다.
   ///
   /// 한 단계라도 한 일과는 지우지 않는다 — 수행률 추이의 원본 데이터이고,
   /// 보호자가 "이 날은 왜 못 했지"를 확인하는 근거다. 받은 별도 그 기록에 묶여 있다.
@@ -175,8 +174,7 @@ public class RoutineService {
       .findFirst()
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
 
-    // 보낸 필드만 반영한다. 예전에는 넘어온 값을 그대로 덮어써서, 순서만 보내면
-    // 제목·설명이 null로 지워졌다.
+    // 보낸 필드만 반영한다 — 넘어온 값을 그대로 덮어쓰면 순서만 보낼 때 제목·설명이 null로 지워진다.
     if (request.title() != null) {
       targetStep.setTitle(request.title());
     }
@@ -191,7 +189,7 @@ public class RoutineService {
   }
 
   /**
-   * 카드를 원하는 자리로 옮기고 나머지를 1..N으로 다시 채운다 (이슈 #199).
+   * 카드를 원하는 자리로 옮기고 나머지를 1..N으로 다시 채운다.
    *
    * <p>화면은 화살표로 한 칸씩 민다. 클라가 낙관적으로 먼저 반영하고 실패하면 되돌리므로,
    * 서버는 <b>항상 연속된 값</b>으로 정규화해 응답한다 — 값이 겹치거나 비면 다음 이동에서
@@ -214,11 +212,10 @@ public class RoutineService {
   }
 
   /**
-   * 카드를 고칠 수 있는 상태인지 본다 (이슈 #199).
+   * 카드를 고칠 수 있는 상태인지 본다.
    *
-   * <p>예전에는 {@code PENDING_REVIEW}만 허용했다. 전문가 자문의 필수 요구가
-   * <i>"생성된 카드를 수정·순서 변경·삭제할 수 있어야 한다. 쉽게."</i> 라서,
-   * <b>이룸이에게 보낸 뒤에도</b> 고칠 수 있어야 한다.
+   * <p>{@code PENDING_REVIEW}뿐 아니라 <b>이룸이에게 보낸 뒤에도</b> 고칠 수 있어야 한다. 전문가 자문의 필수 요구가
+   * <i>"생성된 카드를 수정·순서 변경·삭제할 수 있어야 한다. 쉽게."</i> 이다.
    *
    * <p>지금은 모든 상태를 허용하므로 막는 경우가 없다. 그래도 메서드를 두는 이유는
    * 다시 조일 자리를 한 곳으로 모아 두기 위함이다 — 호출부 네 곳에 흩어지면
@@ -243,7 +240,7 @@ public class RoutineService {
       .findFirst()
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
 
-    // 이미 별을 받은 카드를 지우면 그 별도 함께 거둔다 (이슈 #199).
+    // 이미 별을 받은 카드를 지우면 그 별도 함께 거둔다.
     // 별은 "완료한 카드 수"를 따라간다 — completeStep(+1) · cancelStep(-1) ·
     // syncProgress(증감분)가 모두 그 규칙이다. 카드가 사라졌는데 별만 남으면
     // 이룸이 화면의 별 개수가 무엇을 센 것인지 설명할 수 없게 된다.
@@ -260,19 +257,19 @@ public class RoutineService {
   }
 
   /**
-   * 보호자가 카드를 한 장 직접 추가한다 (이슈 #199).
+   * 보호자가 카드를 한 장 직접 추가한다.
    *
    * <p><b>그림을 기다리지 않는다.</b> 이미지 생성은 몇 초 걸리는데 응답을 그때까지
    * 붙잡으면 화면이 멈춘다. 카드를 먼저 만들어 응답하고, 그림은 커밋 뒤에 채운다.
-   * 클라는 {@code imagePath}가 빌 동안 "그림 만드는 중"을 띄운다 (#198 §9).
+   * 클라는 {@code imagePath}가 빌 동안 "그림 만드는 중"을 띄운다.
    *
    * <p><b>그림이 실패해도 카드 추가는 성공한다.</b> {@code imagePath}를 {@code null}로
    * 두고 끝낸다 — 클라가 기본 그림으로 채운다 (서비스 원칙 6).
    *
    * <p>하루 비용 상한이나 회원별 그림 횟수에 걸려도 같다 — 카드는 추가하고 그림만
-   * 건너뛴다 (#368). 그래서 여기에는 일과 만들기의 쿨다운·한도를 걸지 않는다.
+   * 건너뛴다. 그래서 여기에는 일과 만들기의 쿨다운·한도를 걸지 않는다.
    *
-   * <p><b>그림은 {@code generateImage=true} 일 때만 만든다 (#407).</b> 크레딧이 켜져 있으면 이 트랜잭션 안에서
+   * <p><b>그림은 {@code generateImage=true} 일 때만 만든다.</b> 크레딧이 켜져 있으면 이 트랜잭션 안에서
    * 그림 1장을 예약한다(초과 허용 없음). 모자라거나 계정이 멈춰 있으면 카드는 저장하고 그림만 건너뛰며 응답에
    * 까닭을 싣는다. 예약 거절은 예약 트랜잭션이 정상으로 끝난 뒤 던져지므로 이 트랜잭션은 롤백 전용이 되지 않는다.
    * 장부 오류(AI_CREDIT_UNAVAILABLE)는 카드까지 실패시킨다 — 그 경우 예약 안에서 난 예외가 이 트랜잭션을
@@ -294,9 +291,9 @@ public class RoutineService {
     step.setRoutine(routine);
     step.setTitle(request.title().trim());
     step.setDescription(request.descriptionOrEmpty());
-    // 그림이 없어도(직접 사진·AI 그림 실패·요금제) 카드에는 무료 픽토그램이 붙는다(#247). 고르기는 절대 던지지 않는다.
+    // 그림이 없어도(직접 사진·AI 그림 실패·요금제) 카드에는 무료 픽토그램이 붙는다. 고르기는 절대 던지지 않는다.
     // 글 호출 단가 수준이라 크레딧을 잡지 않고, 그림 예약·건너뜀 판정(imageSkippedReason)과도 무관하다.
-    // 보호자가 카드에 이룸이 이름을 적었을 수 있다 — 글 AI·그림 AI 로 나가는 값만 자리표시로 바꾸고 저장값은 그대로 둔다 (#374).
+    // 보호자가 카드에 이룸이 이름을 적었을 수 있다 — 글 AI·그림 AI 로 나가는 값만 자리표시로 바꾸고 저장값은 그대로 둔다.
     String nickname = routine.getProfile().getNickname();
     step.setPictogramId(pictogramPicker.pick(
       caller.memberId(), NicknamePlaceholder.mask(step.getTitle(), nickname),
@@ -312,10 +309,10 @@ public class RoutineService {
     refreshCompletionStatus(routine);
 
     // 지금 저장해 id 를 받는다. 목록에만 넣으면 커밋 때에야 id 가 매겨져, 그림 예약·정산에 넘길 카드 id 가
-    // 비어 있다 — 예전에는 그래서 그림 채우기가 "카드 없음"으로 끝났다.
+    // 비어 있어 그림 채우기가 "카드 없음"으로 끝난다.
     routineStepRepository.save(step);
 
-    // 직접 사진 방식(#457): 그림 요청 여부와 무관하게 예약도 채우기 예약도 하지 않는다. 그림 몫 크레딧을
+    // 직접 사진 방식: 그림 요청 여부와 무관하게 예약도 채우기 예약도 하지 않는다. 그림 몫 크레딧을
     // 잡지 않으니 청구도 없다. 그림을 원했는데 안 나온 까닭을 클라가 알 수 있게 사유를 싣는다.
     if (routine.getProfile().getImageStyle() == ImageStyle.PHOTO_ONLY) {
       RoutineResponse response = RoutineResponse.from(routine);
@@ -354,7 +351,7 @@ public class RoutineService {
   }
 
   /**
-   * 카드가 늘거나 줄었을 때 일과의 완료 상태를 다시 계산한다 (이슈 #199).
+   * 카드가 늘거나 줄었을 때 일과의 완료 상태를 다시 계산한다.
    *
    * <p>{@code syncProgress}가 쓰는 규칙과 같다 — 전부 완료면 COMPLETED, 아니면 CONFIRMED.
    * 검토 중(PENDING_REVIEW)인 일과는 아직 이룸이에게 가지 않았으므로 건드리지 않는다.

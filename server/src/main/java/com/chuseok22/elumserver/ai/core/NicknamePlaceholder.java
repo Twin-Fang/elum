@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 이룸이 이름을 AI 에 보내지 않기 위한 자리표시 처리 (#374).
+ * 이룸이 이름을 AI 에 보내지 않기 위한 자리표시 처리.
  *
  * <p>AI 에는 이름 대신 {@link #PLACEHOLDER}({@code 이룸이})를 보내고, 응답에 나온 {@code 이룸이}를
  * 서버가 실제 이름으로 되돌린다({@link #restore}). 개인화(제목·질문에 이름이 들어감)는 그대로 둔 채

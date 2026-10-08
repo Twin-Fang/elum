@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 크레딧 정책 버전 조회·발행 (#407).
+ * 크레딧 정책 버전 조회·발행.
  *
  * <p>일과 생성마다 정책을 묻는다. 30초 캐시로 요청마다 DB 를 두드리지 않고, 서버가 여러 대여도 발행 뒤
  * 30초 안에 수렴한다(SystemConfigService 와 같은 절충).

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 앱 시작 시 서버 상태를 알려준다 (이슈 #279).
+ * 앱 시작 시 서버 상태를 알려준다.
  *
  * <p><b>이 엔드포인트는 점검 중에도 살아 있어야 한다.</b> 여기까지 막으면 앱이 점검
  * 사실을 받을 방법이 없어 무한 로딩이나 알 수 없는 오류로 보인다.

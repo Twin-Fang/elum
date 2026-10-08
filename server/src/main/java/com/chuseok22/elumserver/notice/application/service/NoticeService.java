@@ -33,7 +33,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 보호자 홈 공지 팝업 (이슈 #370).
+ * 보호자 홈 공지 팝업.
  *
  * <p>게시 판단(켜짐·기간·플랫폼·순서)과 저장 검증을 전부 여기서 한다. 관리자 목록 배지와
  * 앱 API 가 같은 판단을 써야 둘이 어긋나지 않는다.

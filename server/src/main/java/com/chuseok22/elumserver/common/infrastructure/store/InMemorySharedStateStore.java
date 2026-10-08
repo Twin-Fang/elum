@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
  * <p><b>구현체는 설정으로 고른다.</b> {@code elum.store.shared-state} 값이 없거나
  * {@code memory}면 이것이 쓰인다. 공유 저장소 구현체를 추가할 때는 같은 자리에 다른
  * 값을 조건으로 달면 되고, 그러면 <b>등록되는 것은 언제나 하나</b>라 서버가 뜨지 않는
- * 사고가 나지 않는다.
+ * 일이 없다.
  */
 @Component
 @ConditionalOnProperty(name = "elum.store.shared-state", havingValue = "memory", matchIfMissing = true)

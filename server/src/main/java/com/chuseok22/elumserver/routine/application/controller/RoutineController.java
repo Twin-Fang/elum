@@ -52,7 +52,7 @@ public class RoutineController implements RoutineControllerDocs {
   private final RoutineQueryService routineQueryService;
   private final RoutineProgressService routineProgressService;
   private final RoutineStepPhotoService routineStepPhotoService;
-  // 원문 가리기(#357)와 만든 사람 정보(#361)를 모든 일과 응답에 같은 방식으로 입힌다.
+  // 원문 가리기와 만든 사람 정보를 모든 일과 응답에 같은 방식으로 입힌다.
   private final RoutineAuthorResolver routineAuthorResolver;
 
   // rawInputText에 민감정보 원문이 포함될 수 있으므로 logParameters/logResult를 false로 둔다.
@@ -61,7 +61,7 @@ public class RoutineController implements RoutineControllerDocs {
   public ResponseEntity<RoutineResponse> create(
     Authentication authentication,
     @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
-    // 크레딧 멱등 키(#407). 구버전 앱은 보내지 않는다 — 서비스가 새로 만든다.
+    // 크레딧 멱등 키. 구버전 앱은 보내지 않는다 — 서비스가 새로 만든다.
     @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
     @RequestBody @Valid RoutineCreateRequest request
   ) {
@@ -71,7 +71,7 @@ public class RoutineController implements RoutineControllerDocs {
   }
 
   // rawInputText에 민감정보 원문이 포함될 수 있으므로 logParameters를 false로 둔다.
-  // AI 가 실패해도 200을 반환한다(RoutineCreateService.generateQuestion 참고). 크레딧 부족만 403 이다 (#407).
+  // AI 가 실패해도 200을 반환한다(RoutineCreateService.generateQuestion 참고). 크레딧 부족만 403 이다.
   @LogMonitoring(logParameters = false, logResult = true, logExecutionTime = true)
   @PostMapping("/questions")
   public ResponseEntity<RoutineQuestionResponse> generateQuestion(
@@ -252,7 +252,7 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineProgressService.cancelStep(caller, routineId, stepId)));
   }
 
-  // 오프라인 퍼스트 동기화 — 완료 집합을 통째로 받아 멱등 반영한다 (이슈 #140).
+  // 오프라인 퍼스트 동기화 — 완료 집합을 통째로 받아 멱등 반영한다.
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
   @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
   @PutMapping("/{routineId}/progress")
@@ -266,7 +266,7 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
   }
 
-  // 보호자가 카드를 한 장 직접 추가한다 (이슈 #199).
+  // 보호자가 카드를 한 장 직접 추가한다.
   // title/description이 자유 텍스트라 민감정보가 섞일 수 있고, RoutineResponse에도
   // rawInputText(마스킹 전 원문)가 들어가므로 파라미터·결과 모두 로그에서 뺀다.
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
@@ -283,7 +283,7 @@ public class RoutineController implements RoutineControllerDocs {
 
   // title/description은 보호자가 직접 입력하는 자유 텍스트라 민감정보가 포함될 수 있고,
   // RoutineResponse에도 rawInputText(마스킹 전 원문)가 포함되므로 logParameters/logResult를
-  // 모두 false로 둔다(fable5 검토에서 발견).
+  // 모두 false로 둔다.
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/{routineId}/steps/{stepId}")
   public ResponseEntity<RoutineResponse> updateStep(
@@ -297,7 +297,7 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
   }
 
-  // 카드 그림을 보호자가 찍은 사진으로 바꾼다 (이슈 #455). AI·크레딧을 쓰지 않는다.
+  // 카드 그림을 보호자가 찍은 사진으로 바꾼다. AI·크레딧을 쓰지 않는다.
   // 파일 바이트를 로그에 남기지 않도록 파라미터·결과 모두 뺀다.
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PutMapping(value = "/{routineId}/steps/{stepId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

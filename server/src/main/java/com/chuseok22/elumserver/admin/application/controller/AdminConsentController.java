@@ -19,9 +19,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * 약관을 관리자 화면에서 고친다 (이슈 #278).
+ * 약관을 관리자 화면에서 고친다.
  *
- * <p>전에는 문구 한 줄을 고치려 해도 앱을 다시 빌드해 심사를 받아야 했다.
+ * <p>문구 한 줄을 고치려고 앱을 다시 빌드해 심사받지 않아도 되게 한다.
  */
 @Controller
 @RequiredArgsConstructor

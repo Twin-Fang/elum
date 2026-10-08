@@ -35,7 +35,7 @@ public interface ProfileRepository extends JpaRepository<Profile, String> {
    * 별을 더하거나 뺀다. <b>별은 이 쿼리로만 바꾼다</b> (다중 보호자 E25).
    *
    * <p>엔티티 값을 읽어 더해 저장하면 두 기기(보호자 폰의 이룸이 화면과 이룸이 폰)가 동시에 체크할 때
-   * 하나가 사라진다. 한 문장으로 더하면 DB 가 차례를 맞춘다. 0 아래로는 내려가지 않는다 — 예전
+   * 하나가 사라진다. 한 문장으로 더하면 DB 가 차례를 맞춘다. 0 아래로는 내려가지 않는다 —
    * {@code Math.max(0, …)} 와 같은 규칙이다.
    *
    * <p>flush·clear 를 켜지 않는다. 이 UPDATE 가 이룸이 행을 먼저 잠그고 단계 변경은 커밋 때 나가야

@@ -3,7 +3,7 @@ package com.chuseok22.elumserver.adreward.application.service;
 import java.security.PublicKey;
 import java.util.Optional;
 
-/// Google AdMob 보상 검증용 공개키를 `key_id` 로 찾아 준다 (#463).
+/// Google AdMob 보상 검증용 공개키를 `key_id` 로 찾아 준다.
 public interface SsvKeyProvider {
 
   /**

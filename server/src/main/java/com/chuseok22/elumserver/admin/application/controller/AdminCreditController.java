@@ -32,7 +32,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * 관리자 AI 크레딧 화면 (#407) — 개요 · 회원별 · 회원 상세(조정·수동 반환) · 정책 · 작업 탐색.
+ * 관리자 AI 크레딧 화면 — 개요 · 회원별 · 회원 상세(조정·수동 반환) · 정책 · 작업 탐색.
  *
  * <p>쓰기(조정·정책)는 두 단계다. 미리보기 POST 가 같은 화면에 "남음 12 → 42, 즉시 적용" 같은 확인을 그리고,
  * 확인 버튼이 같은 값을 다시 보내 반영한다. 입력 오류는 폼 오류(flash·화면 경고)로 보이고 500 이 되지 않는다.

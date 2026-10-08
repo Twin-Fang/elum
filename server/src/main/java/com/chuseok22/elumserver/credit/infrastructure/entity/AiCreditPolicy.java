@@ -19,7 +19,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 크레딧 정책 한 버전 (#407). 추가 전용 — 바꿀 때는 version+1 새 행을 발행한다.
+ * 크레딧 정책 한 버전. 추가 전용 — 바꿀 때는 version+1 새 행을 발행한다.
  *
  * <p>플랜별 지급량·행동별 단가를 JSON 으로 둔다. 플랜·행동이 늘어도 표를 바꾸지 않는다.
  */

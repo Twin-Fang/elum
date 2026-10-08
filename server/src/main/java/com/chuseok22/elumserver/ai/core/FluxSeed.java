@@ -5,7 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * FLUX seed — 한 일과의 카드들을 같은 seed 로 그린다 (#373).
+ * FLUX seed — 한 일과의 카드들을 같은 seed 로 그린다.
  *
  * <p>schnell 은 참조 그림을 받지 못해 카드마다 캐릭터가 달라진다. 2차 시험에서 일과마다 seed 를
  * 고정하니 카드끼리 같은 캐릭터가 나왔다.

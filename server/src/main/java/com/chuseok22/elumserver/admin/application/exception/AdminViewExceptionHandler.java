@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
- * 관리자 <b>화면</b>에서 난 예외를 오류 화면으로 바꾼다 (이슈 #248).
+ * 관리자 <b>화면</b>에서 난 예외를 오류 화면으로 바꾼다.
  *
  * <p>여태 화면 컨트롤러에는 예외 처리가 없었다. {@code GlobalExceptionHandler} 는
  * JSON을 돌려주는 곳({@code AdminPromptTestController} · {@code AdminLogApiController})만
@@ -68,8 +68,8 @@ public class AdminViewExceptionHandler {
   /**
    * 주소의 키가 enum 에 없을 때 ({@code /admin/consents/NOPE}).
    *
-   * <p>전에는 여기로 오지 않아 Spring 기본 처리로 400 {@code Bad Request}(영문)가 떴다.
-   * 같은 "없는 대상"인데 회원은 404 한국어, 약관·프롬프트는 400 영문으로 갈렸다 (#278 QA).
+   * <p>처리하지 않으면 Spring 기본 처리로 400 {@code Bad Request}(영문)가 뜬다.
+   * 같은 "없는 대상"인데 회원은 404 한국어, 약관·프롬프트는 400 영문으로 갈리므로 따로 받는다.
    */
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public String handleUnknownKey(

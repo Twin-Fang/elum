@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * {@code X-Elum-Region} 을 읽어 요청 범위의 {@link CurrentRegion} 에 담는다 (다국어 #526).
+ * {@code X-Elum-Region} 을 읽어 요청 범위의 {@link CurrentRegion} 에 담는다.
  *
  * <p>{@link AcceptLanguageFilter} 와 같은 패턴이다. 보안 체인(기본 -100)보다 앞에 두어 보안 필터가 쓰는 응답에서도 국가를 알 수 있고,
  * 요청이 끝나면 예외가 나도 비워 스레드 재사용으로 다음 요청에 국가가 새지 않게 한다.
  *
  * <p>참고: OncePerRequestFilter 는 기본적으로 에러 디스패치(/error)를 건너뛴다. /error 본문은 기본 BasicErrorController 가
- * 만들어 ErrorMessages 와 무관하므로 그대로 둔다(#526 확인, 근거는 AcceptLanguageFilter 참고).
+ * 만들어 ErrorMessages 와 무관하므로 그대로 둔다.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 11)

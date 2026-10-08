@@ -46,8 +46,7 @@ public class PromptTemplateService {
   @Transactional
   public void update(PromptKey key, String content) {
     // 공백만 있는 프롬프트는 받지 않는다. 받아 주면 그 프롬프트를 쓰는 AI 호출이 지시 없이
-    // 나가는데, 민감정보 검사 프롬프트라면 무엇을 가려야 하는지도 모른 채 돈다 (#278 QA에서
-    // 로컬 민감정보 검사 프롬프트가 공백 3칸으로 저장됐다). 요청 DTO에는 검증 어노테이션을
+    // 나가는데, 민감정보 검사 프롬프트라면 무엇을 가려야 하는지도 모른 채 돈다. 요청 DTO에는 검증 어노테이션을
     // 달지 않는 규칙이라 여기서 막는다.
     if (content == null || content.isBlank()) {
       throw new CustomException(ErrorCode.PROMPT_TEMPLATE_BLANK);

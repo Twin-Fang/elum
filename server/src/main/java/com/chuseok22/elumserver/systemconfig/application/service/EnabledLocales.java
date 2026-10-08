@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 일과를 만들 수 있는 언어 (다국어 #526, 시스템 설정 {@code ENABLED_CONTENT_LOCALES}).
+ * 일과를 만들 수 있는 언어.
  *
  * <p>ko 는 늘 켜져 있다 — 설정이 깨져도 일과 생성이 멈추지 않는다. 읽기는 관대하고(알 수 없는 코드는 건너뛴다)
  * 저장은 엄격하다({@link #normalize}).

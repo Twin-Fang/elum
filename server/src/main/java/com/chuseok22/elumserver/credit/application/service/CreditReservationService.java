@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * 크레딧 예약 → 정산 / 반환 / 만료 (#407).
+ * 크레딧 예약 → 정산 / 반환 / 만료.
  *
  * <pre>
  *   reserve ──(계정 잠금)── 사용 가능 ≥ 예약량? ──▶ RESERVED ──┬── 저장 성공 ─▶ settle  (차감 = min(청구, 사용 가능+예약), 나머지는 초과)

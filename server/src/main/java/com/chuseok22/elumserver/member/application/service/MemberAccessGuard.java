@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * JWT 서명이 유효한 요청에 대해 계정 상태 기반 접근을 판단한다.
  * - SUSPENDED 회원 → 거부 (관리자 정지 즉시 기존 토큰도 무력화)
- * - WITHDRAWN 회원 → 거부 (탈퇴해도 행이 남으므로 "없는 회원"으로 걸러지지 않는다, 이슈 #372)
+ * - WITHDRAWN 회원 → 거부 (탈퇴해도 행이 남으므로 "없는 회원"으로 걸러지지 않는다)
  * - tokenInvalidBefore 이전에 발급된 토큰 → 거부 (강제 로그아웃)
  * - 통과 시 lastActivityAt을 60초 스로틀로 갱신 (요청마다 UPDATE가 나가지 않게)
  * DB 장애 시에는 가용성을 우선해 통과시키고 경고 로그만 남긴다 — 상태 확인 실패로
@@ -41,7 +41,7 @@ public class MemberAccessGuard implements TokenAccessValidator {
       if (member.getStatus() == MemberStatus.SUSPENDED) {
         return false;
       }
-      // 탈퇴 전에는 행이 지워져 위의 null 에서 걸렸다. 행을 남기게 됐으니 상태로 막는다 (S4).
+      // 탈퇴해도 행이 남아 위의 null 에서 걸리지 않으므로 상태로 막는다 (S4).
       if (member.getStatus() == MemberStatus.WITHDRAWN) {
         return false;
       }
@@ -57,7 +57,7 @@ public class MemberAccessGuard implements TokenAccessValidator {
   }
 
   // tokenIssuedAt 은 필터가 밀리초로 넘긴다(JwtProvider#issuedAt). 초 단위 iat 로 견주면
-  // 탈퇴·강제 로그아웃한 같은 초에 다시 받은 토큰까지 막힌다 (#372 D2).
+  // 탈퇴·강제 로그아웃한 같은 초에 다시 받은 토큰까지 막힌다.
   private boolean isIssuedBeforeInvalidation(Date tokenIssuedAt, LocalDateTime tokenInvalidBefore) {
     if (tokenIssuedAt == null || tokenInvalidBefore == null) {
       return false;

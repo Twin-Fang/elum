@@ -25,7 +25,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Stri
                           @Param("reason") RevokeReason reason);
 
   /**
-   * 한 기기의 세션만 끊는다 (이슈 #200).
+   * 한 기기의 세션만 끊는다.
    *
    * <p>이룸이 휴대폰 연결을 끊을 때 쓴다. 계정 전체를 끊으면 보호자까지 로그아웃되므로
    * 기기를 짚어서 끊어야 한다.

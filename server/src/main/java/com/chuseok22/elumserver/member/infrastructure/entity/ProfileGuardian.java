@@ -55,7 +55,7 @@ public class ProfileGuardian extends BaseEntity {
   private GuardianKind kind = GuardianKind.GUARDIAN;
 
   /**
-   * 이 이룸이 안에서 부르는 이름 — "엄마", "센터 선생님" (#361). 본인만 정하고 바꾼다.
+   * 이 이룸이 안에서 부르는 이름 — "엄마", "센터 선생님". 본인만 정하고 바꾼다.
    *
    * <p>member 에는 표시 이름이 없고 소셜 가입자의 username 은 내부 식별자라 다른 보호자에게 보일 수 없다.
    * 비어 있으면 앱이 "보호자"로 부른다.

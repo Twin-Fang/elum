@@ -49,7 +49,7 @@ public class AiCallLogService {
     try {
       AiCallLog callLog = new AiCallLog();
       callLog.setMemberId(AiCallContext.currentMemberId());
-      // 크레딧 작업에 딸린 호출이면 작업 id 를 단다 — 관리자가 작업 하나의 실제 USD 를 대조한다 (#407).
+      // 크레딧 작업에 딸린 호출이면 작업 id 를 단다 — 관리자가 작업 하나의 실제 USD 를 대조한다.
       callLog.setCreditJobId(AiCallContext.currentCreditJobId());
       callLog.setCallType(callType);
       callLog.setModel(model);
@@ -58,7 +58,7 @@ public class AiCallLogService {
       callLog.setLatencyMs(latencyMs);
       if (usage != null) {
         callLog.setPromptTokens(usage.promptTokenCount());
-        // 생각 토큰까지 출력으로 센다 — 청구가 그렇게 된다 (#375).
+        // 생각 토큰까지 출력으로 센다 — 청구가 그렇게 된다.
         callLog.setOutputTokens(usage.billableOutputTokens());
         callLog.setTotalTokens(usage.totalTokenCount());
       }

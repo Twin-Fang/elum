@@ -64,7 +64,7 @@ public class DeviceLinkController implements DeviceLinkControllerDocs {
   }
 
   /**
-   * 이룸이 휴대폰이 자기 연결을 끊는다 (#363). 이룸이 휴대폰의 설정(로그아웃·회원 탈퇴)이 부른다.
+   * 이룸이 휴대폰이 자기 연결을 끊는다. 이룸이 휴대폰의 설정(로그아웃·회원 탈퇴)이 부른다.
    *
    * <p>{@code /{linkId}} 보다 앞에 있어도 되는 리터럴 경로다 — Spring 은 변수 경로보다 리터럴을 먼저 고른다.
    * 어느 연결인지는 토큰의 연결 ID 가 정하므로 요청에는 아무것도 싣지 않는다.

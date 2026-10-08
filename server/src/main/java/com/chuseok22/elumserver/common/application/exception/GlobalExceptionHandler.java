@@ -41,7 +41,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 @Slf4j
 public class GlobalExceptionHandler {
 
-  // 문구는 요청 언어로 고른다(다국어 #526). 헤더가 없으면 KO 라 이전 응답과 같다.
+  // 문구는 요청 언어로 고른다. 헤더가 없으면 KO 라 이전 응답과 같다.
   private final ErrorMessages messages = ErrorMessages.standard();
 
   @ExceptionHandler(CustomException.class)
@@ -99,7 +99,7 @@ public class GlobalExceptionHandler {
       .body(new ErrorResponse(errorCode, messages.of(errorCode)));
   }
 
-  // 사진 업로드가 스프링 multipart 한도를 넘거나 multipart 형식이 아닐 때 (이슈 #455).
+  // 사진 업로드가 스프링 multipart 한도를 넘거나 multipart 형식이 아닐 때.
   // 처리하지 않으면 하위 Exception.class 로 흘러 500 이 된다. 한도(현재 200MB)는 공지 업로드와 공유라 그대로 두고,
   // 카드 사진 5MB 는 서비스에서 따로 막는다.
   @ExceptionHandler(MaxUploadSizeExceededException.class)

@@ -39,15 +39,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
       // 서명이 유효해도 정지 계정·강제 로그아웃(tokenInvalidBefore 이전 발급) 토큰은
       // 인증을 세팅하지 않는다 → JwtAuthenticationEntryPoint가 401을 반환한다.
-      // 발급 시각은 밀리초로 본다 — 초 단위 iat 로는 탈퇴한 같은 초에 다시 받은 토큰이 막힌다 (#372 D2).
+      // 발급 시각은 밀리초로 본다 — 초 단위 iat 로는 탈퇴한 같은 초에 다시 받은 토큰이 막힌다.
       if (tokenAccessValidator.isAllowed(memberId, jwtProvider.issuedAt(claims))) {
         // ROLE_MEMBER는 그대로 둔다 — 기존 설정이 이 권한을 본다.
-        // role 클레임은 "어느 휴대폰인가"를 더한 것이다 (이슈 #200).
+        // role 클레임은 "어느 휴대폰인가"를 더한 것이다.
         // 클레임이 없던 시절 토큰은 보호자로 본다. 없다고 막으면 기존 세션이 전부 끊긴다.
         LinkRole role = LinkRole.fromClaim(claims.get("role"));
 
         // 이룸이 휴대폰은 연결이 끊기면 그 즉시 막혀야 한다. 리프레시만 폐기하면
-        // 이미 받아 둔 액세스 토큰으로 만료(하루)까지 계속 본다 (이슈 #200).
+        // 이미 받아 둔 액세스 토큰으로 만료(하루)까지 계속 본다.
         if (role == LinkRole.ELUMI
           && !linkAccessValidator.isLinkActive(asString(claims.get("linkId")))) {
           filterChain.doFilter(request, response);
@@ -60,7 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           List.of(new SimpleGrantedAuthority("ROLE_MEMBER"),
                   new SimpleGrantedAuthority(role.authority()))
         );
-        // 이룸이 휴대폰이 어느 이룸이를 보는지는 연결이 정한다 — 서비스까지 연결 ID 를 가져간다 (#360).
+        // 이룸이 휴대폰이 어느 이룸이를 보는지는 연결이 정한다 — 서비스까지 연결 ID 를 가져간다.
         authentication.setDetails(new AccessTokenDetails(
           role == LinkRole.ELUMI ? asString(claims.get("linkId")) : null));
         SecurityContextHolder.getContext().setAuthentication(authentication);

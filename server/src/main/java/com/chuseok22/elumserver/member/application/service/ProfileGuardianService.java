@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 이룸이를 함께 돌보는 사람 — 목록 · 내 이름 고치기 · 나가기 (다중 보호자 명세 4-3, 이슈 #361).
+ * 이룸이를 함께 돌보는 사람 — 목록 · 내 이름 고치기 · 나가기 (다중 보호자 명세 4-3).
  *
  * <p>모두 <b>연결된 보호자만</b> 부른다. 이룸이 휴대폰은 보지도 나가지도 못한다. 연결되지 않은 이룸이와
  * 없는 이룸이는 같은 403 으로 답한다 — 존재 여부를 흘리지 않는다.

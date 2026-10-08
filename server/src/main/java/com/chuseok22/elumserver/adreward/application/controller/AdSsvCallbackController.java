@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Google AdMob 이 광고 시청이 끝날 때 부르는 서버 콜백 (#463). 인증이 없고 **서명이 인증**이다.
+ * Google AdMob 이 광고 시청이 끝날 때 부르는 서버 콜백. 인증이 없고 **서명이 인증**이다.
  *
  * <p>응답 코드 규칙: 서명이 틀리면 400, 키를 못 구하면 503(Google 이 다시 보내게), 서명이 맞으면 결과와 무관하게 200 —
  * 이미 준 시청이나 규칙에 걸린 경우에도 200 이라 Google 이 의미 없이 다시 보내지 않는다. 지급 중 DB 오류는 예외로 올라가

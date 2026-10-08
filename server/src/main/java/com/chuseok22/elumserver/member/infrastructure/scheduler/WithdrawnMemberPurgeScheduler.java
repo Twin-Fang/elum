@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * 보관 기간이 지난 탈퇴 계정을 매일 완전히 지운다 (이슈 #372).
+ * 보관 기간이 지난 탈퇴 계정을 매일 완전히 지운다.
  *
  * <p>계정마다 따로 지운다({@link WithdrawnMemberService#purge} 가 계정 하나씩 트랜잭션을 연다).
  * 한 계정이 실패해도 나머지는 지우고, 실패한 계정은 행이 그대로 남아 다음 정리 때 다시 대상이 된다 (S7).

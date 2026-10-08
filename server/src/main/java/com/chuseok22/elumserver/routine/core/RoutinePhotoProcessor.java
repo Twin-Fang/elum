@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 보호자가 올린 카드 사진을 앱이 쓰기 좋게 다시 만든다 (이슈 #455).
+ * 보호자가 올린 카드 사진을 앱이 쓰기 좋게 다시 만든다.
  *
  * <p>새 의존성 없이 {@code javax.imageio} 만 쓴다. 처리 순서:
  * <ol>

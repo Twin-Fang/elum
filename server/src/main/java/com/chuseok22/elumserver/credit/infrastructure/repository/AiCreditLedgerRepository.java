@@ -24,7 +24,7 @@ public interface AiCreditLedgerRepository extends JpaRepository<AiCreditLedger, 
     @Param("from") LocalDateTime from, @Param("to") LocalDateTime to
   );
 
-  // --- 관리자 크레딧 화면 (#407) ---
+  // --- 관리자 크레딧 화면 ---
 
   Page<AiCreditLedger> findByAccountIdOrderByCreatedAtDesc(String accountId, Pageable pageable);
 

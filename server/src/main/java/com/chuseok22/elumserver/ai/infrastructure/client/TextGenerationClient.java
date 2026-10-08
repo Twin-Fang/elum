@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * 일과·추가 질문 텍스트를 만드는 곳. 부르는 쪽은 어느 제공자인지 모른다.
  *
- * <p><b>왜 JSON 문자열을 돌려주나.</b> 호출부는 예전부터 제공자 응답 객체에서
+ * <p><b>왜 JSON 문자열을 돌려주나.</b> 호출부는 제공자 응답 객체에서
  * {@code candidates[0].content.parts[0].text}를 꺼내 곧바로 {@code ObjectMapper}에
  * 넘기고 있었다. 즉 실제로 필요한 것은 언제나 JSON 한 덩어리였다. 그 지점에서 잘라야
  * 제공자별 응답 타입이 호출부에서 사라진다 — 응답 객체를 인터페이스로 끌어올리면
@@ -32,7 +32,7 @@ public interface TextGenerationClient {
   /// 일과 생성. 반환값은 일과 제목·단계 배열이 담긴 JSON 문자열.
   ///
   /// @param includeImagePromptEn 카드마다 FLUX 용 영어 장면 한 줄(imagePromptEn)도 받을지. 같은 호출이라
-  ///                             호출 수는 그대로지만 출력 토큰이 늘어, FLUX 를 고른 때만 켠다 (#373).
+  ///                             호출 수는 그대로지만 출력 토큰이 늘어, FLUX 를 고른 때만 켠다.
   String generateRoutineJson(
     String sanitizedInputText, String nickname, Set<SupportGoal> supportGoals, List<String> answers,
     boolean includeImagePromptEn
@@ -46,7 +46,7 @@ public interface TextGenerationClient {
 
   String generateQuestionJsonForTest(String systemPrompt, String sampleInput);
 
-  /// 직접 추가한 카드에 붙일 무료 픽토그램 고르기 (#247). 반환값은 {"pictogramId": "..."|null} JSON 문자열.
+  /// 직접 추가한 카드에 붙일 무료 픽토그램 고르기. 반환값은 {"pictogramId": "..."|null} JSON 문자열.
   /// 카탈로그(id 목록)는 구현체가 요청에 싣는다. 검증·폴백은 부르는 쪽(PictogramPicker) 몫이다.
   String pickPictogramJson(String stepTitle, String stepDescription);
 }

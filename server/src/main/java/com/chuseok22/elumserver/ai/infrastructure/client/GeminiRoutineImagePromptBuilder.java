@@ -20,7 +20,7 @@ public class GeminiRoutineImagePromptBuilder {
   /**
    * @param referenceImageProvided 참조 이미지를 함께 보내는가. <b>사실대로 적는다</b> —
    *                               보내지 않으면서 보낸다고 하면 모델이 그림을 믿고
-   *                               생김새를 덜 신경 쓴다 (이슈 #269)
+   *                               생김새를 덜 신경 쓴다
    */
   public String build(
     String prefix, String stepDescription, CharacterType characterType,
@@ -31,7 +31,7 @@ public class GeminiRoutineImagePromptBuilder {
 
   /**
    * @param language 지시문 언어. EN 이면 장면 머리말과 생김새도 영어로 싣는다 — 지시문만 영어이고
-   *                 생김새가 한국어면 줄인 토큰이 다시 는다 (#375). 카드 설명은 언어와 무관하게
+   *                 생김새가 한국어면 줄인 토큰이 다시 는다. 카드 설명은 언어와 무관하게
    *                 그대로 싣는다(보호자가 쓴 한국어, 짧다).
    */
   public String build(

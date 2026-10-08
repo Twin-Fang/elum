@@ -10,7 +10,7 @@ public record RoutineCreateAiInput(
   String routineText,
   ChildProfileInput childProfile,
   List<String> additionalAnswers,
-  // 카드마다 고를 수 있는 무료 픽토그램 id 목록(#247). 고르는 지시는 프롬프트(운영 DB 값이라 배포로 안 바뀐다)가
+  // 카드마다 고를 수 있는 무료 픽토그램 id 목록. 고르는 지시는 프롬프트(운영 DB 값이라 배포로 안 바뀐다)가
   // 아니라 스키마의 pictogramId description 에 있다. 카탈로그가 비었으면 필드째 빠진다.
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
   List<String> pictogramCatalog

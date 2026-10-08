@@ -18,7 +18,7 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
   boolean existsByProfileId(String profileId);
 
   /**
-   * 관리자 목록 검색 (이슈 #248). 제목과 이룸이 호칭으로 찾는다.
+   * 관리자 목록 검색. 제목과 이룸이 호칭으로 찾는다.
    *
    * <p><b>원문({@code rawInputText})은 찾지 않는다.</b> 보호자가 적은 말 그대로라
    * 관리자가 그것으로 검색할 수 있으면 원문을 들여다보는 통로가 된다 (서비스 원칙 5번).
