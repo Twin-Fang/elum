@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/haptics/child_haptics.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/app_motion.dart';
@@ -98,7 +99,10 @@ class RoutineDoneScreen extends StatelessWidget {
                         backgroundColor: colors.rewardButton,
                         labelColor: colors.textPrimary,
                         // 일과를 다 끝냈으니 상세로 돌아갈 곳이 없다 — 홈으로 간다.
-                        onPressed: () => context.go(Routes.child),
+                        onPressed: () {
+                          playChildHaptic(context, ChildHapticKind.tap);
+                          context.go(Routes.child);
+                        },
                       ),
                     ),
                   ),

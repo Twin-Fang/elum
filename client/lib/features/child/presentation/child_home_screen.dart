@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/haptics/child_haptics.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -187,7 +188,10 @@ class _TopBar extends ConsumerWidget {
 
     // 별 배지 — 탭하면 누적 별 화면으로 (Figma 364:8219)
     final star = AppPressable(
-      onTap: () => context.push(Routes.childStars),
+      onTap: () {
+        playChildHaptic(context, ChildHapticKind.tap);
+        context.push(Routes.childStars);
+      },
       scaleDown: AppPressable.scaleIcon,
       // 배지 안 글자는 숫자뿐이라 그대로 두면 "10"만 읽힌다. 무엇이 10인지
       // 붙여 읽힌다 — 이름이 안의 숫자를 덮으므로 두 번 읽히지 않는다.
@@ -217,9 +221,12 @@ class _TopBar extends ConsumerWidget {
             SizedBox(width: _starToBadgeGap.w),
             // 보호자로 돌아가려면 암호가 필요하다
             AppPressable(
-              onTap: () => context.push(
-                '${Routes.modeSwitch}?to=${ModeSwitchTarget.guardian.name}',
-              ),
+              onTap: () {
+                playChildHaptic(context, ChildHapticKind.tap);
+                context.push(
+                  '${Routes.modeSwitch}?to=${ModeSwitchTarget.guardian.name}',
+                );
+              },
               scaleDown: AppPressable.scaleIcon,
               semanticLabel: context.l10n.childHomeToGuardianLabel,
               // 여우 배지 자르기가 보호자 홈과 같아야 해 공용 위젯을 쓴다
@@ -237,7 +244,10 @@ class _TopBar extends ConsumerWidget {
 
     final gear = AppPressable(
       // 보호자 설정처럼 설정 페이지로 간다 (바텀시트가 아니다)
-      onTap: () => context.push(Routes.childSettings),
+      onTap: () {
+        playChildHaptic(context, ChildHapticKind.tap);
+        context.push(Routes.childSettings);
+      },
       scaleDown: AppPressable.scaleIcon,
       semanticLabel: context.l10n.childHomeSettingsLabel,
       child: SizedBox(
@@ -350,7 +360,10 @@ class _RoutineTile extends StatelessWidget {
     final isDone = progress >= 1.0;
 
     return AppPressable(
-      onTap: () => context.push(Routes.childRoutineDetail, extra: routine),
+      onTap: () {
+        playChildHaptic(context, ChildHapticKind.tap);
+        context.push(Routes.childRoutineDetail, extra: routine);
+      },
       scaleDown: AppPressable.scaleCard,
       child: Container(
         // 보상이 있으면 한 줄이 늘어 타일이 높아진다. 시안은 92.

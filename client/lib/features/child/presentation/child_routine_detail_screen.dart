@@ -380,12 +380,16 @@ class _ChildRoutineDetailScreenState
                   speakingId: _speakingId,
                   onSpeak: _speak,
                   // 카드를 넘기면 체크 버튼 대상도 바뀐다
-                  onPageChanged: (index) => setState(() {
-                    // 이룸이가 직접 넘긴 것이므로 새 카드를 기준으로 삼는다
-                    if (index >= 0 && index < cards.length) {
-                      _anchorId = cards[index].id;
-                    }
-                  }),
+                  onPageChanged: (index) {
+                    // 넘길 때마다 가볍게 — 옆 카드를 눌러 넘어갈 때도 같다
+                    playChildHaptic(context, ChildHapticKind.select);
+                    setState(() {
+                      // 이룸이가 직접 넘긴 것이므로 새 카드를 기준으로 삼는다
+                      if (index >= 0 && index < cards.length) {
+                        _anchorId = cards[index].id;
+                      }
+                    });
+                  },
                   onSideTap: _goToPage,
                   // 옆에 걸친 카드에도 한 것을 표시한다
                   isChecked: (card) => progress.isChecked(routine.id, card),
@@ -442,7 +446,10 @@ class _TopBar extends StatelessWidget {
       child: Row(
         children: [
           AppPressable(
-            onTap: onBack,
+            onTap: () {
+              playChildHaptic(context, ChildHapticKind.tap);
+              onBack();
+            },
             scaleDown: AppPressable.scaleIcon,
             semanticLabel: context.l10n.commonBack,
             child: SizedBox(

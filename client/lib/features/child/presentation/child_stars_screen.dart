@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/haptics/child_haptics.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -102,8 +103,9 @@ class ChildStarsScreen extends ConsumerWidget {
                   ).createShader(bounds),
                   child: Text(
                     '$stars',
-                    style:
-                        context.typo.starsCount.copyWith(color: colors.surface),
+                    style: context.typo.starsCount.copyWith(
+                      color: colors.surface,
+                    ),
                   ),
                 ),
               ),
@@ -116,8 +118,9 @@ class ChildStarsScreen extends ConsumerWidget {
               child: Text(
                 context.l10n.childStarsEarned(stars),
                 textAlign: TextAlign.center,
-                style: context.typo.cardDescription
-                    .copyWith(color: colors.surface),
+                style: context.typo.cardDescription.copyWith(
+                  color: colors.surface,
+                ),
               ),
             ),
             // 뒤로가기 (Figma x=24 · y=87)
@@ -131,7 +134,10 @@ class ChildStarsScreen extends ConsumerWidget {
                   maxWidth: _backTouch.w,
                   maxHeight: _backTouch.w,
                   child: AppPressable(
-                    onTap: context.popOrHome,
+                    onTap: () {
+                      playChildHaptic(context, ChildHapticKind.tap);
+                      context.popOrHome();
+                    },
                     scaleDown: AppPressable.scaleIcon,
                     semanticLabel: context.l10n.commonBack,
                     child: SizedBox(

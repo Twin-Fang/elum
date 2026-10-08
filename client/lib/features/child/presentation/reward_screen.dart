@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/haptics/child_haptics.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -126,7 +127,10 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
                     label: _character.buttonLabel,
                     backgroundColor: colors.rewardButton,
                     labelColor: colors.textPrimary,
-                    onPressed: context.popOrHome,
+                    onPressed: () {
+                      playChildHaptic(context, ChildHapticKind.tap);
+                      context.popOrHome();
+                    },
                   ),
                 ),
               ),

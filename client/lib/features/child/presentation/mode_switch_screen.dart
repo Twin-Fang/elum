@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/haptics/child_haptics.dart';
 import '../../../core/l10n/current_l10n.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/widgets/app_shake.dart';
@@ -159,6 +160,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
     if (!mounted) return;
 
     if (isValid) {
+      playChildHaptic(context, ChildHapticKind.unlock);
       context.go(widget.target.route);
       return;
     }
@@ -176,6 +178,8 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
       if (!mounted) return;
       _controller.clear();
       _focusNode.requestFocus();
+      // 진동은 이룸이 스위치를 따른다 — AppShake 의 기본 진동은 스위치를 보지 않는다
+      playChildHaptic(context, ChildHapticKind.error);
       setState(() {
         _mismatch = true;
         _mismatchCount++;
@@ -197,7 +201,10 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
         onBack: context.popOrHome,
         bottomButton: ElumButton(
           label: context.l10n.modeSwitchBlockedBack,
-          onPressed: context.popOrHome,
+          onPressed: () {
+            playChildHaptic(context, ChildHapticKind.tap);
+            context.popOrHome();
+          },
         ),
         child: ElumHeader(
           title: context.l10n.modeSwitchBlockedTitle,
@@ -233,6 +240,7 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
               behavior: HitTestBehavior.opaque,
               child: AppShake(
                 trigger: _mismatchCount,
+                haptic: false,
                 child: PinDots(
                   length: OnboardingProfile.pinLength,
                   filled: _controller.text.length,

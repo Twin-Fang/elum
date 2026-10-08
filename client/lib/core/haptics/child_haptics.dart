@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vibration/vibration.dart';
@@ -5,37 +6,67 @@ import 'package:vibration/vibration.dart';
 import '../logger/app_logger.dart';
 import '../storage/local_storage.dart';
 
-/// 이룸이 화면에서 울리는 진동 네 가지.
+/// 이룸이 화면의 진동 일곱 가지. 명세는 `client/docs/haptics.md`.
 ///
 /// 진동은 화면과 소리가 이미 알려준 것을 손으로 한 번 더 느끼게 하는 **보조 신호**다. 의미를
-/// 새로 만들지 않는다. 소리·진동에 예민한 이룸이가 있어 기본은 약하고 짧다.
+/// 새로 만들지 않는다. 길이로 중요도를 나눈다 — 자주 일어나는 것은 짧고 약하게, 하루에 몇 번뿐인
+/// 순간은 길고 세게 울려 "오늘 해냈다"를 손에 남긴다. 켜고 끄는 스위치가 있어 예민한 이룸이는 끌 수 있다.
 enum ChildHapticKind {
-  /// 카드를 체크한 순간 — "톡".
+  /// 카드를 체크한 순간 — "쿵-톡". 센 한 번 뒤에 잔향이 따라온다. 컨페티가 터지는 순간이다.
   check(
-    pattern: [0, 20],
-    intensities: [0, 128],
+    pattern: [0, 35, 45, 20],
+    intensities: [0, 220, 0, 110],
     fallback: HapticFeedback.mediumImpact,
   ),
 
-  /// 별 화면이 뜰 때 — "반짝". 약하게 두 번.
+  /// 별 화면이 뜰 때 — "반짝반짝". 점점 세지는 세 번으로 별이 차오르는 느낌을 준다.
   star(
-    pattern: [0, 15, 60, 15],
-    intensities: [0, 80, 0, 80],
-    fallback: HapticFeedback.lightImpact,
+    pattern: [0, 15, 50, 20, 50, 30],
+    intensities: [0, 80, 0, 130, 0, 190],
+    fallback: _sparkleFallback,
   ),
 
-  /// 일과를 모두 끝냈을 때 — "축하". 점점 세지는 세 번, 강하게 끝난다. 하루에 한 번뿐인 순간이다.
+  /// 일과를 모두 끝냈을 때 — "빵·빠·바·빠아앙" 팡파르. 짧게 세 번 올라가다 길게 터지며 사라진다.
+  /// 하루에 한 번뿐인 순간이라 가장 길고 세다.
   complete(
-    pattern: [0, 15, 70, 25, 70, 40],
-    intensities: [0, 60, 0, 140, 0, 255],
-    fallback: HapticFeedback.heavyImpact,
+    pattern: [0, 40, 60, 40, 60, 40, 90, 280],
+    intensities: [0, 120, 0, 160, 0, 200, 0, 255],
+    fallback: _fanfareFallback,
   ),
 
   /// 체크를 해제했을 때 — "스윽". 가장 약하다.
   uncheck(
-    pattern: [0, 10],
+    pattern: [0, 12],
     intensities: [0, 50],
     fallback: HapticFeedback.selectionClick,
+  ),
+
+  /// 버튼·배지·뒤로가기를 눌렀을 때 — "톡". 체크보다 가볍다.
+  tap(
+    pattern: [0, 14],
+    intensities: [0, 80],
+    fallback: HapticFeedback.lightImpact,
+  ),
+
+  /// 카드를 옆으로 넘겼을 때 — "사락". 넘길 때마다 울려 가장 짧다.
+  select(
+    pattern: [0, 8],
+    intensities: [0, 45],
+    fallback: HapticFeedback.selectionClick,
+  ),
+
+  /// 암호가 틀렸을 때 — "툭툭툭". 부드럽게 세 번. 질책처럼 느껴지면 안 되어 세게 울리지 않는다.
+  error(
+    pattern: [0, 25, 60, 25, 60, 25],
+    intensities: [0, 90, 0, 90, 0, 90],
+    fallback: HapticFeedback.lightImpact,
+  ),
+
+  /// 암호가 맞아 화면이 바뀔 때 — "딸깍-둥". 잠금이 풀리는 느낌.
+  unlock(
+    pattern: [0, 15, 50, 45],
+    intensities: [0, 100, 0, 190],
+    fallback: HapticFeedback.mediumImpact,
   );
 
   const ChildHapticKind({
@@ -44,7 +75,7 @@ enum ChildHapticKind {
     required this.fallback,
   });
 
-  /// `[쉬는 ms, 울리는 ms, 쉬는 ms, 울리는 ms, …]` — 가장 긴 패턴도 약 0.3초 안에 끝난다.
+  /// `[쉬는 ms, 울리는 ms, 쉬는 ms, 울리는 ms, …]` — 팡파르(complete)만 0.6초대, 나머지는 0.25초 안이다.
   final List<int> pattern;
 
   /// [pattern] 과 같은 길이. 쉬는 자리는 0, 울리는 자리는 1~255 (세기).
@@ -80,6 +111,24 @@ class VibrationHapticDriver implements HapticDriver {
   }
 }
 
+/// 패턴·세기를 못 쓰는 휴대폰의 별 진동 — 가볍게 세 번.
+Future<void> _sparkleFallback() => _repeat(HapticFeedback.lightImpact, 3, 70);
+
+/// 패턴·세기를 못 쓰는 휴대폰의 팡파르 — 세 번 올라가다 세게 한 번.
+Future<void> _fanfareFallback() async {
+  await _repeat(HapticFeedback.mediumImpact, 3, 100);
+  await HapticFeedback.heavyImpact();
+}
+
+Future<void> _repeat(Future<void> Function() once, int times, int gapMs) async {
+  for (var i = 0; i < times; i++) {
+    await once();
+    if (i < times - 1) {
+      await Future<void>.delayed(Duration(milliseconds: gapMs));
+    }
+  }
+}
+
 /// 이룸이 화면의 진동 창구. 스위치가 꺼져 있으면 울리지 않는다.
 ///
 /// **진동 때문에 화면 흐름이 멈추면 안 된다.** 호출이 실패해도 삼키지 않고 로그로 남기되 밖으로
@@ -101,6 +150,16 @@ class ChildHaptics {
       AppLogger.error('ChildHaptics.play(${kind.name})', e, st);
     }
   }
+}
+
+/// 위젯에서 진동 한 번을 울린다. 스위치가 꺼져 있으면 아무 일도 하지 않는다.
+///
+/// Stateless 위젯과 콜백 안에서도 쓰려고 [BuildContext] 로 받는다. 기다리지 않는다.
+void playChildHaptic(BuildContext context, ChildHapticKind kind) {
+  ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(childHapticsProvider).play(kind);
 }
 
 final hapticDriverProvider = Provider<HapticDriver>(

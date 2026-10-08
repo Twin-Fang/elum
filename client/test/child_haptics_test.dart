@@ -1,11 +1,13 @@
 import 'package:elum/core/haptics/child_haptics.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
 import 'package:elum/features/child/presentation/reward_screen.dart';
 import 'package:elum/features/child/presentation/routine_done_screen.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
+import 'package:elum/features/link/presentation/elumi_settings_screen.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -43,8 +45,59 @@ class _RecordingDriver implements HapticDriver {
 void main() {
   useFigmaViewport();
 
+  group('진동 패턴 규격', () {
+    test('패턴과 세기 길이가 같고, 쉬는 자리는 세기 0 이다', () {
+      for (final kind in ChildHapticKind.values) {
+        expect(kind.intensities.length, kind.pattern.length, reason: kind.name);
+        for (var i = 0; i < kind.pattern.length; i++) {
+          final resting = i.isEven; // 짝수 자리는 쉬는 시간
+          expect(kind.intensities[i] == 0, resting, reason: '${kind.name}[$i]');
+          expect(kind.intensities[i], inInclusiveRange(0, 255));
+        }
+      }
+    });
+
+    test('팡파르만 길고, 나머지는 0.25초 안에 끝난다', () {
+      int total(ChildHapticKind k) => k.pattern.fold<int>(0, (a, b) => a + b);
+      for (final kind in ChildHapticKind.values) {
+        if (kind == ChildHapticKind.complete) continue;
+        expect(total(kind), lessThanOrEqualTo(250), reason: kind.name);
+        expect(total(ChildHapticKind.complete), greaterThan(total(kind)));
+      }
+      expect(total(ChildHapticKind.complete), lessThanOrEqualTo(700));
+    });
+
+    test('별은 점점 세진다', () {
+      final loud = ChildHapticKind.star.intensities.where((v) => v > 0);
+      expect(loud.toList(), [...loud]..sort());
+    });
+
+    test('완료는 점점 세지고 강하게 끝난다', () {
+      final loud = ChildHapticKind.complete.intensities.where((v) => v > 0);
+      expect(loud.toList(), [...loud]..sort());
+      expect(loud.last, 255);
+    });
+
+    test('체크 해제가 가장 약하다', () {
+      int peak(ChildHapticKind k) =>
+          k.intensities.reduce((a, b) => a > b ? a : b);
+      for (final other in ChildHapticKind.values) {
+        if (other == ChildHapticKind.uncheck ||
+            other == ChildHapticKind.select) {
+          continue;
+        }
+        expect(peak(ChildHapticKind.uncheck), lessThan(peak(other)));
+      }
+    });
+  });
 
   group('ChildHaptics', () {
+    test('꺼져 있으면 울리지 않는다', () async {
+      final driver = _RecordingDriver();
+      final haptics = ChildHaptics(driver: driver, isOn: () => false);
+      await haptics.play(ChildHapticKind.check);
+      expect(driver.played, isEmpty);
+    });
 
     test('진동기가 실패해도 밖으로 던지지 않는다', () async {
       final haptics = ChildHaptics(
@@ -55,6 +108,18 @@ void main() {
     });
   });
 
+  group('저장 값', () {
+    test('저장된 적이 없으면 켜짐이다', () {
+      expect(InMemoryStorage().isChildHapticOn, isTrue);
+    });
+
+    test('clearAll 이 지우지 않는다 — 계정이 아니라 휴대폰에 속한다', () async {
+      final storage = InMemoryStorage();
+      await storage.setChildHapticOn(false);
+      await storage.clearAll();
+      expect(storage.isChildHapticOn, isFalse);
+    });
+  });
 
   group('카드 진행 화면', () {
     const cards = [
@@ -137,6 +202,8 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('비 오는 날 학교에 가요'));
       await tester.pumpAndSettle();
+      // 들어오며 울린 누름 진동은 이 시험이 보는 것이 아니다
+      driver.played.clear();
     }
 
     Future<void> tapCheck(WidgetTester tester) async {
@@ -144,9 +211,73 @@ void main() {
       await settle(tester);
     }
 
+    Future<void> closeReward(WidgetTester tester) async {
+      await tester.tap(find.byType(ElumButton));
+      await settle(tester);
+    }
+
     setUp(() {
       driver = _RecordingDriver();
       storage = InMemoryStorage(onboardingCompleted: true, elumiDevice: true);
+    });
+
+    testWidgets('카드를 체크하면 체크, 별 순서로 울린다', (tester) async {
+      await pumpDetail(tester);
+      expect(driver.played, isEmpty, reason: '들어오기만 해서는 울리지 않는다');
+
+      await tapCheck(tester);
+
+      expect(driver.played, [ChildHapticKind.check, ChildHapticKind.star]);
+    });
+
+    testWidgets('체크를 해제하면 해제 진동만 울린다', (tester) async {
+      await pumpDetail(tester);
+      await tapCheck(tester);
+      await closeReward(tester);
+
+      final pager = tester.widget<PageView>(find.byType(PageView));
+      pager.controller!.jumpToPage(0);
+      await tester.pump();
+      driver.played.clear();
+      await tapCheck(tester);
+
+      expect(driver.played, [ChildHapticKind.uncheck]);
+    });
+
+    testWidgets('마지막 카드를 끝내면 체크, 별, 닫기, 완료 순서로 울린다', (tester) async {
+      await pumpDetail(tester);
+      await tapCheck(tester);
+      await closeReward(tester);
+      driver.played.clear();
+
+      await tapCheck(tester);
+      // 완료 진동은 별 화면을 닫고 일과완료 화면으로 넘어가는 순간에 울린다
+      await closeReward(tester);
+
+      expect(driver.played, [
+        ChildHapticKind.check,
+        ChildHapticKind.star,
+        ChildHapticKind.tap, // 별 화면을 닫는 버튼
+        ChildHapticKind.complete,
+      ]);
+    });
+
+    testWidgets('스위치를 끄면 체크해도 울리지 않고 화면은 그대로 진행된다', (tester) async {
+      storage = InMemoryStorage(
+        onboardingCompleted: true,
+        elumiDevice: true,
+        childHapticOn: false,
+      );
+      await pumpDetail(tester);
+
+      await tapCheck(tester);
+
+      expect(driver.played, isEmpty);
+      expect(
+        find.byType(RewardScreen),
+        findsOneWidget,
+        reason: '진동과 상관없이 별 화면이 뜬다',
+      );
     });
 
     testWidgets('진동기가 실패해도 별 화면까지 진행된다', (tester) async {
@@ -159,4 +290,48 @@ void main() {
     });
   });
 
+  group('이룸이 설정의 스위치', () {
+    testWidgets('누르면 꺼지고 저장되며, 다시 누르면 켜지며 한 번 울린다', (tester) async {
+      final driver = _RecordingDriver();
+      final storage = InMemoryStorage(elumiDevice: true);
+      final router = GoRouter(
+        initialLocation: Routes.childSettings,
+        routes: [
+          GoRoute(
+            path: Routes.childSettings,
+            builder: (context, state) => const ElumiSettingsScreen(),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localStorageProvider.overrideWithValue(storage),
+            hapticDriverProvider.overrideWithValue(driver),
+          ],
+          child: ScreenUtilInit(
+            designSize: const Size(393, 852),
+            builder: (context, _) =>
+                MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
+
+      await tester.tap(find.text('카드 체크 진동'));
+      await tester.pumpAndSettle();
+      expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+      expect(storage.isChildHapticOn, isFalse);
+      expect(driver.played, isEmpty, reason: '끌 때는 울리지 않는다');
+
+      await tester.tap(find.text('카드 체크 진동'));
+      await tester.pumpAndSettle();
+      expect(storage.isChildHapticOn, isTrue);
+      expect(driver.played, [
+        ChildHapticKind.check,
+      ], reason: '켤 때 느낌을 한 번 알려준다');
+    });
+  });
 }
