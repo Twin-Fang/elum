@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-08T09:34:24Z",
-    "currentVersion": "2.24.0",
+    "lastUpdated": "2026-10-08T09:43:20Z",
+    "currentVersion": "2.25.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 225
+    "totalReleases": 226
   },
   "releases": [
+    {
+      "version": "2.25.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-08",
+      "pr_number": 616,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 안드로이드에서 카드를 읽어 주는 목소리가 더 또렷해졌어요\n  * 스피커를 누르면 진동이 울리고, 읽는 중에는 스피커가 반짝여요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "안드로이드에서 카드를 읽어 주는 목소리가 더 또렷해졌어요",
+            "스피커를 누르면 진동이 울리고, 읽는 중에는 스피커가 반짝여요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.24.0",
       "project_type": "flutter",
