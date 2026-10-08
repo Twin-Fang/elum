@@ -174,6 +174,13 @@ enum ServerErrorCode {
   noticeImageTooLarge('NOTICE_IMAGE_TOO_LARGE'),
   noticeImageSaveFailed('NOTICE_IMAGE_SAVE_FAILED'),
 
+  // 의견 보내기. 저장 검증과 하루 전송 한도에서 난다.
+  feedbackMessageEmpty('FEEDBACK_MESSAGE_EMPTY'),
+  feedbackMessageTooLong('FEEDBACK_MESSAGE_TOO_LONG'),
+  feedbackLogTooLarge('FEEDBACK_LOG_TOO_LARGE'),
+  feedbackRateLimited('FEEDBACK_RATE_LIMITED'),
+  feedbackNotFound('FEEDBACK_NOT_FOUND'),
+
   // 일과 생성 가능 언어. 서버 문구 파일이 빈 언어를 켜려 할 때 관리자 화면에서만 난다 — 앱 사용자는 거의 못 본다.
   contentLocaleNotReady('CONTENT_LOCALE_NOT_READY'),
 

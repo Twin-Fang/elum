@@ -206,6 +206,11 @@ class _GuardianSettingsScreenState
                   ),
                 ),
         ),
+        // 임시 시안(이슈 #604 디자인 요청 중) — 약관과 앱 버전 사이에 둔다.
+        SettingsTile(
+          label: context.l10n.guardianSettingsFeedback,
+          onTap: _busy ? null : () => context.push(Routes.guardianFeedback),
+        ),
         // 앱 버전은 목록의 한 줄로 둔다 — 떨어져 있으면 "앱 정보"로 찾기 어렵다.
         // 제보를 받았을 때 어느 빌드인지 알아야 재현할 수 있다.
         const AppInfoTile(),

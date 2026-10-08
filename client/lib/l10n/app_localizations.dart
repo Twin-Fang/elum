@@ -2258,6 +2258,54 @@ abstract class AppLocalizations {
   /// **'약관 및 개인정보처리방침'**
   String get guardianSettingsTerms;
 
+  /// 설정 줄 — 의견 보내기 화면으로 간다
+  ///
+  /// In ko, this message translates to:
+  /// **'의견 보내기'**
+  String get guardianSettingsFeedback;
+
+  /// 의견 보내기 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'의견 보내기'**
+  String get feedbackTitle;
+
+  /// 의견 입력창 안내 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'불편했던 점을 편하게 적어 주세요'**
+  String get feedbackHint;
+
+  /// 의견과 함께 최근 앱 상태 기록을 보낼지 고르는 체크 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'앱 상태 기록 보내기'**
+  String get feedbackIncludeLog;
+
+  /// 의견 보내기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'보내기'**
+  String get feedbackSend;
+
+  /// 의견을 보낸 뒤 잠깐 뜨는 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'의견을 보냈어요'**
+  String get feedbackSent;
+
+  /// 의견 보내기 실패 팝업의 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'의견을 보내지 못했어요'**
+  String get feedbackFailedTitle;
+
+  /// 의견 보내기 실패 팝업의 할 일 안내(서버가 이유를 주지 않았을 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'적은 글은 그대로 있어요. 잠시 후 다시 보내 주세요'**
+  String get feedbackFailedFallback;
+
   /// 설정 줄 — 로그아웃
   ///
   /// In ko, this message translates to:

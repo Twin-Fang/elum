@@ -1251,6 +1251,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianSettingsTerms => 'Terms and Privacy Policy';
 
   @override
+  String get guardianSettingsFeedback => 'Send feedback';
+
+  @override
+  String get feedbackTitle => 'Send feedback';
+
+  @override
+  String get feedbackHint => 'Tell us what was hard to use';
+
+  @override
+  String get feedbackIncludeLog => 'Send app status log';
+
+  @override
+  String get feedbackSend => 'Send';
+
+  @override
+  String get feedbackSent => 'Feedback sent';
+
+  @override
+  String get feedbackFailedTitle => 'Couldn\'t send your feedback';
+
+  @override
+  String get feedbackFailedFallback =>
+      'Your message is still here. Please try again in a moment';
+
+  @override
   String get guardianSettingsLogout => 'Log out';
 
   @override

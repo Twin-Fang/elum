@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../../features/feedback/presentation/feedback_screen.dart';
 import '../../features/guardian/presentation/draft_routines_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
@@ -58,6 +59,11 @@ List<RouteBase> guardianRoutes() => [
     path: Routes.guardianImageStyle,
     pageBuilder: (context, state) =>
         slidePage(state, const ImageStyleSettingsScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianFeedback,
+    pageBuilder: (context, state) =>
+        slidePage(state, const FeedbackScreen()),
   ),
   // 다중 보호자 — 시안이 없는 임시 화면들이다.
   GoRoute(

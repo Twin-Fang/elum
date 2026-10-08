@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../config/app_config.dart';
+import 'app_log_buffer.dart';
 
 /// 애플리케이션 전체에서 사용하는 로거.
 /// 타임스탐프, 카테고리, 구조화된 데이터를 자동으로 포함한다.
@@ -25,12 +26,15 @@ abstract final class AppLogger {
         '${now.second.toString().padLeft(2, '0')}.'
         '${(now.millisecond).toString().padLeft(3, '0')}';
 
+    final String line;
     if (data == null || data.isEmpty) {
-      debugPrint('[$timeStr] $tag $message');
+      line = '[$timeStr] $tag $message';
     } else {
-      final dataStr = _formatData(data);
-      debugPrint('[$timeStr] $tag $message\n  $dataStr');
+      line = '[$timeStr] $tag $message\n  ${_formatData(data)}';
     }
+    // 의견 보내기 첨부용. 출력 여부와 무관하게 항상 쌓는다.
+    AppLogBuffer.add(line);
+    debugPrint(line);
   }
 
   /// 데이터를 보기 좋게 포맷팅

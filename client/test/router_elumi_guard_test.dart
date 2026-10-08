@@ -32,6 +32,7 @@ void main() {
       Routes.guardianDrafts,
       Routes.guardianPinChange,
       Routes.guardianImageStyle,
+      Routes.guardianFeedback,
       Routes.guardianLinkStatus,
       Routes.routineInput,
       Routes.routineReview,
