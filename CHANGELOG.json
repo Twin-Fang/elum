@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-08T09:25:15Z",
-    "currentVersion": "2.23.0",
+    "lastUpdated": "2026-10-08T09:34:24Z",
+    "currentVersion": "2.24.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 224
+    "totalReleases": 225
   },
   "releases": [
+    {
+      "version": "2.24.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-08",
+      "pr_number": 613,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 의견을 보낼 때 함께 보내는 앱 상태 기록이 더 자세해졌어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "의견을 보낼 때 함께 보내는 앱 상태 기록이 더 자세해졌어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.23.0",
       "project_type": "flutter",

@@ -5,7 +5,7 @@
 ## 릴리스 노트
 
 * **개선**
-  * 서비스 운영 화면이 밝은 화면으로 시작해요
+  * 의견을 보낼 때 함께 보내는 앱 상태 기록이 더 자세해졌어요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
