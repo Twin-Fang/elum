@@ -4,8 +4,8 @@
 
 ## 릴리스 노트
 
-* **버그 수정**
-  * 앱이 정상적으로 빌드되지 않던 문제를 해결했어요
+* **개선**
+  * 의견을 보낼 때 함께 가는 앱 상태 기록에서 어느 화면을 거쳤는지 더 잘 알 수 있어요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
