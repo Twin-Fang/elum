@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-08T03:08:52Z",
-    "currentVersion": "2.20.0",
+    "lastUpdated": "2026-10-08T08:09:42Z",
+    "currentVersion": "2.21.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 221
+    "totalReleases": 222
   },
   "releases": [
+    {
+      "version": "2.21.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-08",
+      "pr_number": 607,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 설정에서 의견을 보낼 수 있어요\n  * 의견과 함께 앱 상태 기록을 보내 문제를 빨리 해결할 수 있어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "설정에서 의견을 보낼 수 있어요",
+            "의견과 함께 앱 상태 기록을 보내 문제를 빨리 해결할 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.20.0",
       "project_type": "flutter",
