@@ -17,7 +17,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_status.dart';
-import 'widgets/link_code_text.dart';
+import 'widgets/issued_code_panel.dart';
 import '../../../core/router/pop_or_home.dart';
 
 /// 연결 암호 만들기 — **보호자 휴대폰** (이슈 #205 · 디자인 #232).
@@ -75,19 +75,6 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
 
   /// 성공 팝업을 두 번 띄우지 않는다. 폴링이 한 박자 늦게 또 돌 수 있다.
   bool _celebrated = false;
-
-  /// 암호 여섯 글자 사이 간격. 시안은 3-3으로 묶고 가운데를 더 벌린다
-  /// (글자 좌표 0·47·100 | 164·211·258).
-  static const _codeLetterGap = 20.0;
-  static const _codeGroupGap = 40.0;
-
-  /// 암호 묶음(y=299) ↔ 타이머(y=363) ↔ 다시 만들기 칩(y=395)
-  /// 설명 하단(227) → 코드 상단(299). 시안 `732:5656` 실측.
-  /// `space.xl * 2`(64)를 쓰고 있었는데 그러면 코드 블록이 통째로 8 뜬다 (#297).
-  static const _descriptionToCode = 72.0;
-
-  static const _codeToTimer = 24.0;
-  static const _timerToRetry = 16.0;
 
   /// 설정 진입 시안(`1027:4617`)의 뒤로가기 y와 제목 y.
   /// 설정 묶음은 전부 67/147 이다 — 온보딩 계열(79/131)과 12·16씩 다르다.
@@ -200,7 +187,6 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     final space = context.space;
     final colors = context.colors;
     final issued = _issued;
-    final expired = issued?.isExpired ?? false;
     // 설정에서 들어온 화면은 머리와 하단이 통째로 다르다 (클래스 주석의 표).
     final fromSettings = !widget.fromOnboarding;
 
@@ -268,47 +254,17 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
                   ) ??
                   context.l10n.linkCodeEnterHint(_elumiName),
             ),
-            SizedBox(height: _descriptionToCode.h),
-            if (_loading)
-              const Center(child: CircularProgressIndicator())
-            else if (issued != null) ...[
-              LinkCodeText(
-                code: issued.code,
-                dimmed: expired,
-                letterGap: _codeLetterGap,
-                groupGap: _codeGroupGap,
-              ),
+            IssuedCodePanel(
+              loading: _loading,
+              issued: issued,
+              expiredLabel: context.l10n.linkCodeExpired,
               // 연결되면 타이머도 `다시 만들기`도 사라진다 — 더 기다릴 이유가 없다.
-              if (!_linked) ...[
-                SizedBox(height: _codeToTimer.h),
-                Text(
-                  _remainingLabel(issued, expired),
-                  textAlign: TextAlign.center,
-                  style: context.typo.linkTimer.copyWith(color: colors.linkTimer),
-                ),
-                SizedBox(height: _timerToRetry.h),
-                Center(
-                  child: LinkRetryChip(
-                    onTap: _loading ? null : _issue,
-                  ),
-                ),
-              ],
-            ],
+              showStatus: !_linked,
+              onRetry: _issue,
+            ),
           ],
         ),
       ),
     );
-  }
-
-  /// 남은 시간 `MM:SS`. 시안이 초까지 보여준다 (#232 — 전에는 분만 말했다).
-  ///
-  /// 올림이 아니라 **내림**이다. 남은 시간을 실제보다 길게 말하면 믿고 기다리다
-  /// 만료된다.
-  String _remainingLabel(IssuedLinkCode issued, bool expired) {
-    if (expired) return context.l10n.linkCodeExpired;
-    final total = issued.remaining().inSeconds;
-    final mm = (total ~/ 60).toString().padLeft(2, '0');
-    final ss = (total % 60).toString().padLeft(2, '0');
-    return '$mm:$ss';
   }
 }

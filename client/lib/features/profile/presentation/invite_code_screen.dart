@@ -15,7 +15,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../guardian/data/routine_repository.dart' show memberProvider;
 import '../../link/domain/link_status.dart';
-import '../../link/presentation/widgets/link_code_text.dart';
+import '../../link/presentation/widgets/issued_code_panel.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../application/invite_sharer.dart';
 import '../application/profile_session.dart';
@@ -79,12 +79,6 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   /// 설정 진입 시안(`1027:4617`)과 같은 머리 — 뒤로가기 y=67, 제목 y=147.
   static const _settingsBackTop = 67.0;
   static const _settingsTitleY = 147.0;
-
-  static const _descriptionToCode = 72.0;
-  static const _codeToTimer = 24.0;
-  static const _timerToRetry = 16.0;
-  static const _codeLetterGap = 20.0;
-  static const _codeGroupGap = 40.0;
 
   @override
   void initState() {
@@ -173,15 +167,6 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
     }
   }
 
-  /// 남은 시간 `MM:SS` — 올림이 아니라 **내림**이다. 실제보다 길게 말하면 믿고 기다리다 만료된다.
-  String _remainingLabel(IssuedLinkCode issued) {
-    if (issued.isExpired) return context.l10n.inviteCodeExpired;
-    final total = issued.remaining().inSeconds;
-    final mm = (total ~/ 60).toString().padLeft(2, '0');
-    final ss = (total % 60).toString().padLeft(2, '0');
-    return '$mm:$ss';
-  }
-
   /// 다시 해도 같은 이유로 막히는 실패인가. 그때는 다시 시도 버튼을 두지 않는다.
   bool get _retryable {
     final f = _failure;
@@ -219,58 +204,44 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
               title: context.l10n.inviteCodeHeaderTitle,
               description: context.l10n.inviteCodeAsk(name, batchimOf(name)),
             ),
-            SizedBox(height: _descriptionToCode.h),
-            if (_loading)
-              const Center(child: CircularProgressIndicator())
-            else if (_noProfile)
-              // 이룸이가 없으면 다시 해도 같다 — 버튼 없이 이유와 코드만 보여 준다.
-              ElumErrorView(
-                message: context.l10n.inviteCodeNoProfileMessage,
-                description: context.l10n.inviteCodeNoProfileDescription,
-                errorCode: 'E-INV-NONE',
-              )
-            else if (failure != null)
-              ElumErrorView.failure(
-                failure,
-                fallback: context.l10n.inviteCodeIssueFailedFallback,
-                fallbackCode: 'E-INV-NEW',
-                onRetry: _retryable ? _issue : null,
-              )
-            else if (issued != null) ...[
-              LinkCodeText(
-                code: issued.code,
-                dimmed: issued.isExpired,
-                letterGap: _codeLetterGap,
-                groupGap: _codeGroupGap,
-              ),
-              SizedBox(height: _codeToTimer.h),
-              Text(
-                _remainingLabel(issued),
-                textAlign: TextAlign.center,
-                style: context.typo.linkTimer.copyWith(color: colors.linkTimer),
-              ),
-              SizedBox(height: _timerToRetry.h),
-              Center(
-                child: LinkRetryChip(
-                  label: context.l10n.inviteCodeRetryChip,
-                  onTap: _loading ? null : _issue,
+            IssuedCodePanel(
+              loading: _loading,
+              issued: issued,
+              expiredLabel: context.l10n.inviteCodeExpired,
+              retryLabel: context.l10n.inviteCodeRetryChip,
+              onRetry: _issue,
+              replacement: _noProfile
+                  // 이룸이가 없으면 다시 해도 같다 — 버튼 없이 이유와 코드만 보여 준다.
+                  ? ElumErrorView(
+                      message: context.l10n.inviteCodeNoProfileMessage,
+                      description: context.l10n.inviteCodeNoProfileDescription,
+                      errorCode: 'E-INV-NONE',
+                    )
+                  : failure != null
+                  ? ElumErrorView.failure(
+                      failure,
+                      fallback: context.l10n.inviteCodeIssueFailedFallback,
+                      fallbackCode: 'E-INV-NEW',
+                      onRetry: _retryable ? _issue : null,
+                    )
+                  : null,
+              footer: [
+                SizedBox(height: IssuedCodePanel.timerToRetry.h),
+                // 되돌릴 수 없는 일(앞 코드가 쓸 수 없게 된다)을 먼저 말한다. 한 줄이다.
+                Text(
+                  context.l10n.inviteCodeRetryNote,
+                  textAlign: TextAlign.center,
+                  style: context.typo.body.copyWith(color: colors.textSecondary),
                 ),
-              ),
-              SizedBox(height: _timerToRetry.h),
-              // 되돌릴 수 없는 일(앞 코드가 쓸 수 없게 된다)을 먼저 말한다. 한 줄이다.
-              Text(
-                context.l10n.inviteCodeRetryNote,
-                textAlign: TextAlign.center,
-                style: context.typo.body.copyWith(color: colors.textSecondary),
-              ),
-              SizedBox(height: _timerToRetry.h),
-              // 초대 코드는 보호자용이다. 이룸이가 쓰는 휴대폰은 따로 붙인다 (#506).
-              Text(
-                context.l10n.inviteCodeElumiPhoneNote,
-                textAlign: TextAlign.center,
-                style: context.typo.bodySmall.copyWith(color: colors.textSecondary),
-              ),
-            ],
+                SizedBox(height: IssuedCodePanel.timerToRetry.h),
+                // 초대 코드는 보호자용이다. 이룸이가 쓰는 휴대폰은 따로 붙인다.
+                Text(
+                  context.l10n.inviteCodeElumiPhoneNote,
+                  textAlign: TextAlign.center,
+                  style: context.typo.bodySmall.copyWith(color: colors.textSecondary),
+                ),
+              ],
+            ),
           ],
         ),
       ),

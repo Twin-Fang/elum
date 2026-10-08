@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -7,15 +6,13 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/router/app_router.dart';
-import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../auth/data/auth_repository.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_code.dart';
-import 'widgets/code_boxes.dart';
+import 'widgets/code_entry_field.dart';
 import '../../../core/router/pop_or_home.dart';
 
 /// 연결 실패의 종류. 문구가 아니라 종류를 들고 있다가 그릴 때 푼다 — 실패 순간에 문구로
@@ -191,7 +188,6 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final space = context.space;
     final l10n = context.l10n;
     final error = _error;
 
@@ -221,55 +217,16 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
                   : null,
             ),
           ),
-          // 실제 입력칸은 투명이라 화면 낭독기에서 빠진다. 키보드를 여는 길은 이
-          // 여섯 칸뿐이라 이름을 주고, 칸에 보이는 글자는 값으로 함께 읽힌다 (#339).
-          Semantics(
-            container: true,
-            button: true,
-            label: l10n.linkEnterInputLabel,
+          CodeEntryField(
+            controller: _controller,
+            focusNode: _focusNode,
             value: _typed,
-            child: GestureDetector(
-              onTap: _openKeyboard,
-              behavior: HitTestBehavior.opaque,
-              child: AppShake(
-                trigger: _failCount,
-                // 칸마다 글자를 따로 읽으면 한 글자씩 끊겨 들린다 — 위 값 하나로
-                // 읽힌다. 바깥에서 빼면 누름 동작까지 함께 빠져 안쪽에서 뺀다.
-                child: ExcludeSemantics(
-                  child: CodeBoxes.figma(
-                    value: _typed,
-                    hasError: error != null,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          if (_sending) ...[
-            SizedBox(height: space.lg),
-            Center(child: SizedBox(
-              width: space.lg.w, height: space.lg.w,
-              child: const CircularProgressIndicator(strokeWidth: 2),
-            )),
-          ],
-          // 화면에 보이지 않는 실제 입력칸. 시스템 키보드를 쓰되 자동완성·자동수정을 끈다 —
-          // 켜 두면 영문 여섯 자를 단어로 고쳐 버린다.
-          SizedBox(
-            height: 0,
-            child: Opacity(
-              opacity: 0,
-              child: TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                autocorrect: false,
-                enableSuggestions: false,
-                textCapitalization: TextCapitalization.characters,
-                keyboardType: TextInputType.visiblePassword,
-                maxLength: LinkCode.length + 2, // 공백을 끼워 쳐도 받아준다
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9 \-]')),
-                ],
-              ),
-            ),
+            semanticsLabel: l10n.linkEnterInputLabel,
+            onTap: _openKeyboard,
+            failCount: _failCount,
+            hasError: error != null,
+            sending: _sending,
+            figma: true,
           ),
         ],
       ),

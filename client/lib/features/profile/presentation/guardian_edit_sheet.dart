@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_text_field.dart';
 import '../domain/guardian_member.dart';
@@ -29,10 +30,8 @@ Future<GuardianEdit?> showGuardianEditSheet(
   BuildContext context, {
   required Guardian me,
 }) {
-  return showModalBottomSheet<GuardianEdit>(
+  return showElumSheet<GuardianEdit>(
     context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
     builder: (_) => _GuardianEditSheet(me: me),
   );
 }
@@ -79,12 +78,9 @@ class _GuardianEditSheetState extends State<_GuardianEditSheet> {
     return Padding(
       // 키보드가 올라오면 시트가 그 위로 올라온다.
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Container(
+      child: ElumSheetSurface(
+        showHandle: false,
         padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 32.h),
-        decoration: BoxDecoration(
-          color: colors.background,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,

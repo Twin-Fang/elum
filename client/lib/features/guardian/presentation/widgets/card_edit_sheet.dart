@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../data/card_photo.dart';
 import 'card_photo_block.dart';
@@ -103,11 +104,8 @@ class CardEditSheet extends StatefulWidget {
     BuildContext context,
     CardEditSheet sheet,
   ) {
-    return showModalBottomSheet<({String title, String description})>(
+    return showElumSheet<({String title, String description})>(
       context: context,
-      // 시트가 키보드 때문에 화면 위까지 자란다
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       barrierColor: context.colors.sheetScrim,
       builder: (_) => sheet,
     );
@@ -185,33 +183,13 @@ class _CardEditSheetState extends State<CardEditSheet> {
       // 빈 곳을 누르면 키보드가 내려간다 — 버튼이 키보드 뒤에 있어 내려야 누를 수 있다
       behavior: HitTestBehavior.opaque,
       onTap: dismissKeyboard,
-      child: AnimatedContainer(
-        duration: AppMotion.fast,
-        curve: Curves.easeOut,
+      // 손잡이는 시트 면이 그린다 — 시안은 굵기 4 선의 **가운데**가 y=16 이라 윗변은 14 다
+      child: ElumSheetSurface(
+        animationDuration: AppMotion.fast,
+        animationCurve: Curves.easeOut,
         height: height,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: colors.background,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-        ),
         child: Stack(
           children: [
-            // 손잡이 — 시안은 굵기 4 선의 **가운데**가 y=16 이라 윗변은 14 다 (x=177, 폭 40)
-            Positioned(
-              top: 14.h,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  width: 40.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: colors.sheetHandle,
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-              ),
-            ),
             Positioned(
               left: 24.w,
               top: CardEditSheet._titleY.h,

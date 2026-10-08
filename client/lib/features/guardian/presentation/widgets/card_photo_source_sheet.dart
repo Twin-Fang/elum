@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../data/card_photo.dart';
 
 /// 사진을 어디서 가져올지 고르는 시트 (#456).
@@ -19,10 +20,8 @@ class CardPhotoSourceSheet extends StatelessWidget {
   const CardPhotoSourceSheet({super.key});
 
   static Future<PhotoSource?> show(BuildContext context) {
-    return showModalBottomSheet<PhotoSource>(
+    return showElumSheet<PhotoSource>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       barrierColor: context.colors.sheetScrim,
       builder: (_) => const CardPhotoSourceSheet(),
     );
@@ -33,12 +32,9 @@ class CardPhotoSourceSheet extends StatelessWidget {
     final colors = context.colors;
     final typo = context.typo;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: colors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
+    // 손잡이가 내용과 함께 스크롤되므로 시트 면의 겹침 손잡이는 끄고 직접 놓는다
+    return ElumSheetSurface(
+      showHandle: false,
       // 글자를 키우면 시트가 화면을 넘을 수 있어 스크롤로 받는다
       child: SafeArea(
         top: false,
@@ -48,17 +44,7 @@ class CardPhotoSourceSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 14.h),
-              // 손잡이는 카드 수정 시트와 같다
-              Center(
-                child: Container(
-                  width: 40.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: colors.sheetHandle,
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-              ),
+              const Center(child: ElumSheetHandle()),
               SizedBox(height: 12.h),
               _Row(
                 icon: Icons.photo_camera_outlined,

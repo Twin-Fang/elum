@@ -22,6 +22,7 @@ import '../../data/routine_repository.dart';
 import '../../../../shared/models/routine.dart';
 import 'routine_summary_tile.dart';
 import 'routine_swipe_actions.dart';
+import '../../../../core/widgets/elum_spinner.dart';
 import '../../../../core/widgets/elum_toast.dart';
 
 // (참고) 제목 fallback은 Routine.displayTitle이 처리한다.
@@ -605,11 +606,7 @@ class _LoadingTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return _GreyTileShell(
       child: Center(
-        child: SizedBox(
-          width: 20.w,
-          height: 20.w,
-          child: CircularProgressIndicator(strokeWidth: 2.w),
-        ),
+        child: ElumSpinner(size: 20.w, strokeWidth: 2.w),
       ),
     );
   }

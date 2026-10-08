@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -10,13 +9,12 @@ import '../../../core/network/app_failure.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
-import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../link/domain/link_code.dart';
-import '../../link/presentation/widgets/code_boxes.dart';
+import '../../link/presentation/widgets/code_entry_field.dart';
 import '../application/invite_inbox.dart';
 import '../application/profile_session.dart';
 import '../data/profile_repository.dart';
@@ -413,40 +411,20 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
                 ),
               ),
             if (!_fromLink) SizedBox(height: space.xl),
-            // 실제 입력칸은 투명이라 화면 낭독기에서 빠진다. 키보드를 여는 길은 이 여섯 칸뿐이라
-            // 이름을 주고, 칸에 보이는 글자는 값으로 함께 읽힌다 (연결 암호 #339 와 같다).
-            Semantics(
-              container: true,
-              button: true,
-              label: _fromLink
+            CodeEntryField(
+              controller: _controller,
+              focusNode: _focusNode,
+              value: _typed,
+              semanticsLabel: _fromLink
                   ? context.l10n.inviteEnterSemanticsFromLink
                   : context.l10n.inviteEnterSemanticsInput,
-              value: _typed,
-              child: GestureDetector(
-                // 링크로 받은 코드는 칸을 눌러도 고쳐지지 않는다 — `다른 코드 넣기` 로 바꾼다
-                onTap: _fromLink ? null : _openKeyboard,
-                behavior: HitTestBehavior.opaque,
-                child: AppShake(
-                  trigger: _failCount,
-                  child: ExcludeSemantics(
-                    child: CodeBoxes(
-                      value: _typed,
-                      hasError: _error != null,
-                    ),
-                  ),
-                ),
-              ),
+              // 링크로 받은 코드는 칸을 눌러도 고쳐지지 않는다 — `다른 코드 넣기` 로 바꾼다
+              onTap: _fromLink ? null : _openKeyboard,
+              failCount: _failCount,
+              hasError: _error != null,
+              sending: _sending,
+              enabled: !_locked && !_fromLink,
             ),
-            if (_sending) ...[
-              SizedBox(height: space.lg),
-              Center(
-                child: SizedBox(
-                  width: space.lg.w,
-                  height: space.lg.w,
-                  child: const CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            ],
             // 링크로 받은 코드는 `함께하기` 가 다시 시도다 — 같은 일을 하는 버튼을 둘 두지 않는다
             if (_offline && !_sending && !_fromLink) ...[
               SizedBox(height: space.lg),
@@ -469,30 +447,6 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
                 ),
               ),
             ],
-            // 화면에 보이지 않는 실제 입력칸. 시스템 키보드를 쓰되 자동완성·자동수정을 끈다 —
-            // 켜 두면 영문 여섯 자를 단어로 고쳐 버린다.
-            SizedBox(
-              height: 0,
-              child: Opacity(
-                opacity: 0,
-                child: TextField(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  enabled: !_locked && !_fromLink,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  textCapitalization: TextCapitalization.characters,
-                  keyboardType: TextInputType.visiblePassword,
-                  // 공백·하이픈을 끼워 쳐도 받아준다 (서버도 받는다)
-                  maxLength: LinkCode.length + 2,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      RegExp(r'[A-Za-z0-9 \-]'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
       ),

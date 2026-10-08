@@ -12,6 +12,7 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/periodic_refresh.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
@@ -298,7 +299,7 @@ class _Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      const _StateSlot(child: Center(child: CircularProgressIndicator()));
+      const _StateSlot(child: ElumStateBody.loading());
 }
 
 /// 목록 자리의 로딩·실패·빈 상태가 함께 쓰는 여백 — 바뀔 때 시작 위치가 같다.

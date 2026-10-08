@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
@@ -69,10 +70,8 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
     bool isPast = false,
     bool isFinished = false,
   }) {
-    return showModalBottomSheet<RoutineSheetAction>(
+    return showElumSheet<RoutineSheetAction>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (_) => RoutineDetailSheet(
         routine: routine,
         isPast: isPast,
@@ -152,17 +151,15 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
     final buttonBottom = 56.h;
     final buttonHeight = 66.h;
 
-    return Container(
+    return ElumSheetSurface(
       height: height,
+      // 손잡이는 헤더 흐름 안에 둔다 — 헤더 배경이 손잡이 아래로 깔려야 한다
+      showHandle: false,
       // **자식까지 둥근 모양으로 자른다.** `decoration`의 라운드는 배경만 둥글게
       // 칠할 뿐 자식을 자르지 않는다. 바로 아래 헤더가 배경색을 전체 폭에 깔기
       // 때문에, 자르지 않으면 그 사각형이 둥근 모서리를 덮어 상단이 각져 보인다.
       // 시안(`980:4891`)은 헤더 배경 자체에 `[20,20,0,0]`을 준다 (#345).
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: colors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
       // **버튼은 목록 위에 떠 있다** (#434). 전에는 목록 아래에 버튼 칸을 따로
       // 잘라 두어 목록이 버튼 위에서 끝났다. 시안은 버튼을 시트 바닥 위에 띄우고
       // 목록이 그 뒤로 지나가게 그렸다.
@@ -376,18 +373,8 @@ class _Header extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 40.w,
-              height: 4.h,
-              decoration: BoxDecoration(
-                color: colors.sheetHandle,
-                borderRadius: BorderRadius.circular(2.r),
-              ),
-            ),
-          ),
-          // 위 여백에서 줄인 4 를 여기서 되돌린다 — 손잡이만 올라가고
-          // 제목·목록은 시안 자리에 그대로 있어야 한다 (#297).
+          const Center(child: ElumSheetHandle()),
+          // 위 여백에서 줄인 4 를 여기서 되돌린다 — 손잡이만 올라가고 제목·목록은 시안 자리에 그대로 있다
           SizedBox(height: 24.h),
           ContentLocale(
             language: language,
