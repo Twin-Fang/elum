@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-08T09:43:20Z",
-    "currentVersion": "2.25.0",
+    "lastUpdated": "2026-10-08T09:44:55Z",
+    "currentVersion": "2.26.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 226
+    "totalReleases": 227
   },
   "releases": [
+    {
+      "version": "2.26.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-08",
+      "pr_number": 617,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 그림 방식을 고를 때 크레딧이 드는 방식과 무료 방식이 한눈에 보여요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "그림 방식을 고를 때 크레딧이 드는 방식과 무료 방식이 한눈에 보여요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.25.0",
       "project_type": "flutter",
