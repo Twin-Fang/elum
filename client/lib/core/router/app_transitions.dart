@@ -15,6 +15,8 @@ const kPageTransitionDuration = AppMotion.slow;
 CustomTransitionPage<void> slidePage(GoRouterState state, Widget child) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
+    // 이름이 있어야 화면 이동 기록과 개발자 도구가 어느 화면인지 경로로 남긴다.
+    name: state.uri.path,
     child: child,
     transitionDuration: kPageTransitionDuration,
     reverseTransitionDuration: kPageTransitionDuration,
@@ -38,6 +40,8 @@ CustomTransitionPage<void> slidePage(GoRouterState state, Widget child) {
 CustomTransitionPage<void> fadePage(GoRouterState state, Widget child) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
+    // 이름이 있어야 화면 이동 기록과 개발자 도구가 어느 화면인지 경로로 남긴다.
+    name: state.uri.path,
     child: child,
     transitionDuration: kPageTransitionDuration,
     reverseTransitionDuration: kPageTransitionDuration,
@@ -69,6 +73,8 @@ CustomTransitionPage<void> fadePage(GoRouterState state, Widget child) {
 CustomTransitionPage<void> flowPage(GoRouterState state, Widget child) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
+    // 이름이 있어야 화면 이동 기록과 개발자 도구가 어느 화면인지 경로로 남긴다.
+    name: state.uri.path,
     child: child,
     transitionDuration: kPageTransitionDuration,
     reverseTransitionDuration: kPageTransitionDuration,
