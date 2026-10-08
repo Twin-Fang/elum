@@ -3,7 +3,7 @@ package com.chuseok22.elumserver.common.infrastructure.config;
 import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationFilter;
-import com.chuseok22.elumserver.common.infrastructure.security.MaintenanceModeFilter;
+import com.chuseok22.elumserver.systemconfig.infrastructure.security.MaintenanceModeFilter;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;

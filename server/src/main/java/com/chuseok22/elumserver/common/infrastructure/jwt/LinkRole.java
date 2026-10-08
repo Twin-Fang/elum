@@ -1,4 +1,4 @@
-package com.chuseok22.elumserver.link.core;
+package com.chuseok22.elumserver.common.infrastructure.jwt;
 
 /**
  * 같은 계정을 쓰는 두 휴대폰을 구분한다.

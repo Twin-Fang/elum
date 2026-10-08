@@ -15,7 +15,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
-import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.common.infrastructure.jwt.LinkRole;
 import com.chuseok22.elumserver.member.application.service.GuardianshipService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;

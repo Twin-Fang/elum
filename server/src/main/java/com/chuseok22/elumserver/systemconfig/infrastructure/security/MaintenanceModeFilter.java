@@ -1,4 +1,4 @@
-package com.chuseok22.elumserver.common.infrastructure.security;
+package com.chuseok22.elumserver.systemconfig.infrastructure.security;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;

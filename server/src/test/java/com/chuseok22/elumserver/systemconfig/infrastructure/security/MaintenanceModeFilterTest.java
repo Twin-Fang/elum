@@ -1,4 +1,4 @@
-package com.chuseok22.elumserver.common.infrastructure.security;
+package com.chuseok22.elumserver.systemconfig.infrastructure.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;

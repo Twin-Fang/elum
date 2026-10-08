@@ -2,8 +2,11 @@ package com.chuseok22.elumserver.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.chuseok22.elumserver.admin.application.controller.AdminLogApiController;
+import com.chuseok22.elumserver.admin.application.controller.AdminPromptTestController;
 import com.chuseok22.elumserver.admin.application.exception.AdminViewExceptionHandler;
 import com.chuseok22.elumserver.common.application.exception.GlobalExceptionHandler;
+import com.chuseok22.elumserver.common.application.exception.JsonErrorResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,13 +40,15 @@ class ExceptionHandlerCoverageTest {
     RestControllerAdvice advice = GlobalExceptionHandler.class.getAnnotation(RestControllerAdvice.class);
     List<String> packages = Arrays.asList(advice.basePackages());
     List<Class<?>> types = Arrays.asList(advice.assignableTypes());
+    List<Class<? extends java.lang.annotation.Annotation>> markers = Arrays.asList(advice.annotations());
 
     List<String> missing = new ArrayList<>();
     for (Class<?> controller : scan(RestController.class)) {
       boolean coveredByPackage = packages.stream()
         .anyMatch(pkg -> controller.getPackageName().equals(pkg) || controller.getPackageName().startsWith(pkg + "."));
       boolean coveredByType = types.stream().anyMatch(type -> type.isAssignableFrom(controller));
-      if (!coveredByPackage && !coveredByType) {
+      boolean coveredByMarker = markers.stream().anyMatch(controller::isAnnotationPresent);
+      if (!coveredByPackage && !coveredByType && !coveredByMarker) {
         missing.add(controller.getName());
       }
     }
@@ -51,6 +56,15 @@ class ExceptionHandlerCoverageTest {
     assertThat(missing)
       .as("GlobalExceptionHandler basePackages 에 이 패키지를 더한다. 빠뜨리면 400 이 500 으로 나간다")
       .isEmpty();
+  }
+
+  @Test
+  @DisplayName("JSON 을 돌려주는 관리자 컨트롤러는 GlobalExceptionHandler 가 맡는다")
+  void adminJsonControllersAreCovered() {
+    RestControllerAdvice advice = GlobalExceptionHandler.class.getAnnotation(RestControllerAdvice.class);
+    assertThat(advice.annotations()).containsExactly(JsonErrorResponse.class);
+    assertThat(AdminPromptTestController.class.isAnnotationPresent(JsonErrorResponse.class)).isTrue();
+    assertThat(AdminLogApiController.class.isAnnotationPresent(JsonErrorResponse.class)).isTrue();
   }
 
   @Test

@@ -8,7 +8,7 @@ import com.chuseok22.elumserver.link.application.dto.response.LinkCodeResponse;
 import com.chuseok22.elumserver.link.application.dto.response.LinkStatusResponse;
 import com.chuseok22.elumserver.link.application.service.DeviceLinkService;
 import com.chuseok22.elumserver.link.application.service.RedeemRateLimiter;
-import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.common.infrastructure.jwt.LinkRole;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.logging.annotation.LogMonitoring;
 import jakarta.servlet.http.HttpServletRequest;

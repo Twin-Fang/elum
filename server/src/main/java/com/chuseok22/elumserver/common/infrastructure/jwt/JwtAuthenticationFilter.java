@@ -1,6 +1,6 @@
 package com.chuseok22.elumserver.common.infrastructure.jwt;
 
-import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.common.infrastructure.jwt.LinkRole;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

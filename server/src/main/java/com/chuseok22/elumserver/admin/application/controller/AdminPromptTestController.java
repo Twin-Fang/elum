@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
+import com.chuseok22.elumserver.common.application.exception.JsonErrorResponse;
 import com.chuseok22.elumserver.admin.application.dto.request.PromptSampleRequest;
 import com.chuseok22.elumserver.admin.application.dto.response.PromptPreviewResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.PromptTestResponse;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 // 스코핑은 "메서드"가 아니라 "클래스" 단위로 적용된다(fable5 검토에서 spring-web 7.0.8
 // 바이트코드로 실측 확인). JSON 에러 응답이 필요한 이 두 엔드포인트만 별도 컨트롤러로
 // 분리해야, 목록 조회/저장(SSR) 엔드포인트가 의도치 않게 JSON 에러를 반환하는 것을 막을 수 있다.
+@JsonErrorResponse
 @RestController
 @RequiredArgsConstructor
 public class AdminPromptTestController {

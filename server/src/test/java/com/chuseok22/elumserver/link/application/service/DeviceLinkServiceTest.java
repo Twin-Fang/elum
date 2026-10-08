@@ -20,7 +20,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.link.application.dto.response.LinkCodeResponse;
 import com.chuseok22.elumserver.link.application.dto.response.LinkStatusResponse;
 import com.chuseok22.elumserver.link.core.LinkCode;
-import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.common.infrastructure.jwt.LinkRole;
 import com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.service.Caller;

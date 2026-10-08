@@ -1,5 +1,6 @@
-package com.chuseok22.elumserver.common.locale;
+package com.chuseok22.elumserver.systemconfig.application.service;
 
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;

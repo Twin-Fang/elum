@@ -1,4 +1,4 @@
-package com.chuseok22.elumserver.link.core;
+package com.chuseok22.elumserver.common.infrastructure.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

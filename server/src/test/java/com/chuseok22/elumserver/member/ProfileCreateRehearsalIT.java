@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.link.core.CodeDigest;
 import com.chuseok22.elumserver.link.core.ElumiDeviceId;
-import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.common.infrastructure.jwt.LinkRole;
 import com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.service.GuardianshipService;

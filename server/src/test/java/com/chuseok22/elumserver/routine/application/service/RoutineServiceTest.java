@@ -22,7 +22,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
-import com.chuseok22.elumserver.common.locale.EnabledLocales;
+import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
 import com.chuseok22.elumserver.credit.application.service.CreditReservation;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;

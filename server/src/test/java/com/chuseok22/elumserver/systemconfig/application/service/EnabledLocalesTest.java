@@ -1,5 +1,6 @@
-package com.chuseok22.elumserver.common.locale;
+package com.chuseok22.elumserver.systemconfig.application.service;
 
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;

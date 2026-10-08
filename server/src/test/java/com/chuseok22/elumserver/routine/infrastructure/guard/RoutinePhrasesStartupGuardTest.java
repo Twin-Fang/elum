@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
-import com.chuseok22.elumserver.common.locale.EnabledLocales;
+import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;

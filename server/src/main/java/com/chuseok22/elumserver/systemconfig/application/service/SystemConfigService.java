@@ -5,7 +5,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmProperties;
 import com.chuseok22.elumserver.common.infrastructure.security.SecretCipher;
-import com.chuseok22.elumserver.common.locale.EnabledLocales;
+import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.elumserver.systemconfig.core.ConfigValueType;
 import com.chuseok22.elumserver.systemconfig.core.StoreUrlPolicy;

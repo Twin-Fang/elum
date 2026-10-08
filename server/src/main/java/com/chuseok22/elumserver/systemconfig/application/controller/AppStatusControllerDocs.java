@@ -1,6 +1,6 @@
-package com.chuseok22.elumserver.common.application.controller;
+package com.chuseok22.elumserver.systemconfig.application.controller;
 
-import com.chuseok22.elumserver.common.application.dto.response.AppStatusResponse;
+import com.chuseok22.elumserver.systemconfig.application.dto.response.AppStatusResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;

@@ -1,4 +1,4 @@
-package com.chuseok22.elumserver.common.application.dto.response;
+package com.chuseok22.elumserver.systemconfig.application.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

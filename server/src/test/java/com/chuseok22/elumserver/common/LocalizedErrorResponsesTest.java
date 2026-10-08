@@ -14,7 +14,7 @@ import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntry
 import com.chuseok22.elumserver.common.infrastructure.properties.AidlpProperties;
 import com.chuseok22.elumserver.common.infrastructure.security.AidlpCryptoService;
 import com.chuseok22.elumserver.common.infrastructure.security.AidlpDecryptionFilter;
-import com.chuseok22.elumserver.common.infrastructure.security.MaintenanceModeFilter;
+import com.chuseok22.elumserver.systemconfig.infrastructure.security.MaintenanceModeFilter;
 import com.chuseok22.elumserver.common.infrastructure.security.NonceStore;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;

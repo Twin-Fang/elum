@@ -9,7 +9,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
-import com.chuseok22.elumserver.common.locale.EnabledLocales;
+import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigView;

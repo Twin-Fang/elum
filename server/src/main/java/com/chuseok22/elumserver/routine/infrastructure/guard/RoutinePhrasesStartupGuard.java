@@ -1,7 +1,7 @@
 package com.chuseok22.elumserver.routine.infrastructure.guard;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
-import com.chuseok22.elumserver.common.locale.EnabledLocales;
+import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import java.util.LinkedHashSet;
 import java.util.List;

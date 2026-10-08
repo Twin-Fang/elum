@@ -1,7 +1,7 @@
 package com.chuseok22.elumserver.common.infrastructure.jwt;
 
 import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
-import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.common.infrastructure.jwt.LinkRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

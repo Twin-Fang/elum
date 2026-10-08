@@ -1,8 +1,8 @@
-package com.chuseok22.elumserver.common.application.controller;
+package com.chuseok22.elumserver.systemconfig.application.controller;
 
-import com.chuseok22.elumserver.common.application.dto.response.AppStatusResponse;
-import com.chuseok22.elumserver.common.application.dto.response.AppStatusResponse.ClientTuning;
-import com.chuseok22.elumserver.common.application.dto.response.AppStatusResponse.VersionRequirement;
+import com.chuseok22.elumserver.systemconfig.application.dto.response.AppStatusResponse;
+import com.chuseok22.elumserver.systemconfig.application.dto.response.AppStatusResponse.ClientTuning;
+import com.chuseok22.elumserver.systemconfig.application.dto.response.AppStatusResponse.VersionRequirement;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.chuseok22.logging.annotation.LogMonitoring;

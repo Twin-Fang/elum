@@ -1,11 +1,11 @@
-package com.chuseok22.elumserver.common.application.controller;
+package com.chuseok22.elumserver.systemconfig.application.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import com.chuseok22.elumserver.common.application.dto.response.AppStatusResponse;
+import com.chuseok22.elumserver.systemconfig.application.dto.response.AppStatusResponse;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import org.junit.jupiter.api.BeforeEach;

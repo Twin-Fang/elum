@@ -14,7 +14,7 @@ import com.chuseok22.elumserver.link.application.dto.response.LinkedDeviceRespon
 import com.chuseok22.elumserver.link.core.CodeDigest;
 import com.chuseok22.elumserver.link.core.ElumiDeviceId;
 import com.chuseok22.elumserver.link.core.LinkCode;
-import com.chuseok22.elumserver.link.core.LinkRole;
+import com.chuseok22.elumserver.common.infrastructure.jwt.LinkRole;
 import com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.service.Caller;
