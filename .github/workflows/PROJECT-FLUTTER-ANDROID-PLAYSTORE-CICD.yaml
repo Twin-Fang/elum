@@ -43,6 +43,11 @@ on:
           - store_only
           - store_prepare
           - store_submit
+      promote_closed_testing:
+        description: "비공개 테스트(Alpha)로 승급 — 승급도 Google 검토 제출이라 진행 중인 검토를 취소한다 (#621)"
+        required: false
+        default: false
+        type: boolean
 
 # ============================================
 # 🔧 프로젝트별 설정 (아래 값들을 수정하세요)
@@ -59,7 +64,7 @@ env:
   # FLUTTER_ROOT는 Flutter SDK 경로용 공식 변수라 충돌 — APP_ROOT로 분리
   APP_ROOT: "client"
   # 배포 모드 — main 배포 시 Play 어디까지 올릴지
-  #   store_only    : 내부 테스트 업로드 + 비공개 테스트(Alpha) 승급까지 (기본)
+  #   store_only    : 내부 테스트 업로드까지 (기본). 비공개 테스트(Alpha) 승급은 수동 실행에서 따로 켠다 (#621)
   #   store_prepare : + 프로덕션에 draft 로 올림 (Play Console 에서 '출시 시작'은 사람이 누른다)
   #   store_submit  : + 프로덕션 심사 자동 등록
   # 값은 레포 변수 ANDROID_DEPLOY_MODE 에서 읽는다. 프로덕션 액세스가 없는 동안은 비워 둔다(store_only) —
@@ -629,9 +634,11 @@ jobs:
       - name: Upload to Play Store Internal Testing
         env:
           DEPLOY_MODE: ${{ env.DEPLOY_MODE }}
-          # 비공개 테스트(Alpha) 자동 승급. 프로덕션 액세스 조건(테스터 12명·14일)이 도는 동안은
-          # 켜 둔다 (#333). 끄려면 저장소 변수 PROMOTE_TO_CLOSED_TESTING 을 false 로 둔다.
-          PROMOTE_TO_CLOSED_TESTING: ${{ vars.PROMOTE_TO_CLOSED_TESTING || 'true' }}
+          # 비공개 테스트(Alpha) 승급 — **기본은 하지 않는다** (#621).
+          # 승급도 Google 검토 제출이라, 배포마다 돌면 진행 중이던 검토(프로덕션 포함)가 취소된다.
+          # 승급하려면 수동 실행에서 promote_closed_testing 을 켠다. 저장소 변수
+          # PROMOTE_TO_CLOSED_TESTING 이 있으면 그 값이 기본값을 대신한다 (#333 의 상시 승급은 프로덕션 액세스를 받아 끝났다)
+          PROMOTE_TO_CLOSED_TESTING: ${{ github.event.inputs.promote_closed_testing || vars.PROMOTE_TO_CLOSED_TESTING || 'false' }}
         run: |
           echo "=========================================="
           echo "🚀 Play Store 배포 시작"
