@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-10T08:04:34Z",
-    "currentVersion": "2.26.5",
+    "lastUpdated": "2026-10-10T16:31:57Z",
+    "currentVersion": "2.27.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 232
+    "totalReleases": 233
   },
   "releases": [
+    {
+      "version": "2.27.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-10",
+      "pr_number": 626,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 일과 저장 시 오류 창이 잘못 뜨던 문제 해결\n* **개선**\n  * 저장·삭제 등 처리 중일 때 진행 표시 추가\n  * 처리 중에는 버튼이 두 번 눌리지 않도록 개선",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "일과 저장 시 오류 창이 잘못 뜨던 문제 해결"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "저장·삭제 등 처리 중일 때 진행 표시 추가",
+            "처리 중에는 버튼이 두 번 눌리지 않도록 개선"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.26.5",
       "project_type": "flutter",
