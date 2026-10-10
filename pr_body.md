@@ -5,7 +5,7 @@
 ## 릴리스 노트
 
 * **기타**
-  * 배포 과정 안정화
+  * 앱 안정성을 위한 내부 품질 점검을 정비했습니다
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
