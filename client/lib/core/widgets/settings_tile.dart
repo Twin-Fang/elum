@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
+import 'elum_spinner.dart';
 
 /// 설정 목록의 한 줄. 항목이 늘어도 이 위젯만 반복하면 된다.
 ///
@@ -17,6 +18,7 @@ class SettingsTile extends StatelessWidget {
     this.destructive = false,
     this.valueText,
     this.showChevronWithValue = false,
+    this.loading = false,
   });
 
   final String label;
@@ -34,6 +36,9 @@ class SettingsTile extends StatelessWidget {
 
   /// 되돌릴 수 없는 항목. 색으로 구분해 실수로 누르는 것을 줄인다.
   final bool destructive;
+
+  /// 이 줄이 부른 작업(로그아웃 등)을 기다리는 중. 오른쪽에 스피너가 돌고 누를 수 없다.
+  final bool loading;
 
   /// 시안(`1022:4467`) 실측 — 줄 높이 60, 좌우 안쪽 여백 16.
   static const _height = 60.0;
@@ -84,8 +89,11 @@ class SettingsTile extends StatelessWidget {
                 ),
               ),
             ),
-            if (value != null)
-              // 값이 길어도 제목을 0 폭으로 밀어내지 않게 폭 상한을 둔다.
+            if (loading)
+              ElumSpinner(size: 20.w, color: colors.settingsChevron)
+            else ...[
+              if (value != null)
+                // 값이 길어도 제목을 0 폭으로 밀어내지 않게 폭 상한을 둔다.
               ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: 140.w),
                 child: Text(
@@ -97,7 +105,8 @@ class SettingsTile extends StatelessWidget {
               ),
             if (value == null || showChevronWithValue) ...[
               if (value != null) SizedBox(width: 4.w),
-              chevron,
+                chevron,
+              ],
             ],
           ],
         ),
@@ -110,6 +119,6 @@ class SettingsTile extends StatelessWidget {
       // 읽기 프로그램이 "앱 정보, v1.24.1" 한 덩어리로 읽게 묶는다.
       return MergeSemantics(child: row);
     }
-    return AppPressable(onTap: onTap, child: row);
+    return AppPressable(onTap: loading ? null : onTap, child: row);
   }
 }

@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/state/busy_state_mixin.dart';
+import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/selectable_group.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
@@ -31,10 +34,8 @@ class ImageStyleSettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _ImageStyleSettingsScreenState
-    extends ConsumerState<ImageStyleSettingsScreen> {
-  /// 저장 중 중복 탭 방지. 서버 요청이 섞여 있어 즉시 끝나지 않는다.
-  bool _busy = false;
-
+    extends ConsumerState<ImageStyleSettingsScreen>
+    with BusyStateMixin<ImageStyleSettingsScreen> {
   /// 서버 저장에 실패한 방식. **로컬에는 남았지만 서버는 아직 모른다.**
   ///
   /// 실패 팝업이 "다시 시도"를 말하는데 같은 방식을 다시 눌러도 아무 일이 없으면
@@ -42,7 +43,7 @@ class _ImageStyleSettingsScreenState
   ImageStyle? _unsynced;
 
   Future<void> _choose(ImageStyle picked) async {
-    if (_busy) return;
+    if (busy) return;
 
     final current = ref.read(onboardingProvider).imageStyle;
     // 이미 고른 방식을 다시 누르면 바뀔 것이 없다 — 요청도 알림도 없이 돌아간다.
@@ -51,12 +52,14 @@ class _ImageStyleSettingsScreenState
       return;
     }
 
-    setState(() => _busy = true);
-    final failure = await ref
-        .read(onboardingProvider.notifier)
-        .changeImageStyle(picked);
-    if (!mounted) return;
-    setState(() => _busy = false);
+    // 결과가 null(성공)과 구분되도록 레코드로 감싼다. 바깥이 null 이면 진행 중이라 실행하지 않은 것.
+    final result = await runBusy(
+      () async =>
+          (await ref.read(onboardingProvider.notifier).changeImageStyle(picked),),
+      key: picked,
+    );
+    if (result == null || !mounted) return;
+    final failure = result.$1;
 
     if (failure == null) {
       _unsynced = null;
@@ -94,16 +97,43 @@ class _ImageStyleSettingsScreenState
       asRadio: true,
       onChanged: (next) =>
           _choose(next.isEmpty ? profile.imageStyle : next.first),
-      itemBuilder: (context, style, isSelected) => ImageStyleOptionCard(
-        style: style,
-        isSelected: isSelected,
-        character: character,
-      ),
+      itemBuilder: (context, style, isSelected) {
+        final card = ImageStyleOptionCard(
+          style: style,
+          isSelected: isSelected,
+          character: character,
+        );
+        if (!isBusy(style)) return card;
+        // 저장 중인 카드는 라디오 자리에 스피너를 얹는다.
+        return Stack(
+          children: [
+            card,
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 14.w),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: context.colors.surface,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(2.w),
+                      child: ElumSpinner(size: 20.w),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
       semanticLabelOf: ImageStyleOptionCard.semanticLabel,
     );
 
     return ElumScaffold(
-      onBack: _busy ? null : context.popOrHome,
+      onBack: busy ? null : context.popOrHome,
       title: context.l10n.imageStyleTitle,
       // 설정 묶음 시안(1022:4467)과 같은 머리 — 뒤로가기 y=67, 좌우 16
       backTop: 67,

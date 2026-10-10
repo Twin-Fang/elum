@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/network/app_failure.dart';
+import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -27,7 +29,8 @@ class PinScreen extends ConsumerStatefulWidget {
   ConsumerState<PinScreen> createState() => _PinScreenState();
 }
 
-class _PinScreenState extends ConsumerState<PinScreen> {
+class _PinScreenState extends ConsumerState<PinScreen>
+    with BusyStateMixin<PinScreen> {
   /// 1단계에서 입력한 PIN. null이면 아직 1단계다.
   String? _firstEntry;
   bool _showMismatch = false;
@@ -134,23 +137,19 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     });
   }
 
-  /// 저장 중이다 — 두 번 눌러도 이룸이 만들기·저장이 한 번만 나가게 한다.
-  bool _saving = false;
-
   /// 최종 확정 — 2단계 일치 상태에서 CTA를 눌렀을 때만 호출된다.
-  void _onComplete() async {
-    if (_saving) return;
+  ///
+  /// 서버 요청 동안만 잠근다(버튼 스피너). 실패 팝업은 잠금을 푼 뒤에 띄운다 —
+  /// 팝업 뒤에서 스피너가 돌면 아직 저장 중인 것처럼 보인다.
+  Future<void> _onComplete() async {
     // await 뒤에서 context 를 읽지 않도록 문구를 먼저 잡는다
     final l10n = context.l10n;
-    setState(() => _saving = true);
 
-    // 이룸이가 없는 보호자(마지막 이룸이에서 나간 뒤)는 서버가 저장을 막으므로 이룸이부터 만든다.
-    // 못 만들었으면 저장을 이어 가지 않고 이 화면에 남는다 — 다시 누르면 다시 시도한다.
-    final ensured = await ref
-        .read(profileSessionProvider.notifier)
-        .ensureProfile();
-    if (!mounted) return;
-    final createFailure = ensured.failure;
+    final result = await runBusy(_save);
+    // 이미 진행 중이라 실행하지 않았다.
+    if (result == null || !mounted) return;
+
+    final createFailure = result.createFailure;
     if (createFailure != null) {
       await showFailure(
         context,
@@ -159,18 +158,14 @@ class _PinScreenState extends ConsumerState<PinScreen> {
         fallback: l10n.pinProfileCreateFailedFallback,
         fallbackCode: 'E-PROFILE-NEW',
       );
-      if (mounted) setState(() => _saving = false);
       return;
     }
-
-    ref.read(onboardingProvider.notifier).setPin(_current);
-    final failure = await ref.read(onboardingProvider.notifier).complete();
-    if (!mounted) return;
 
     // 로컬에는 저장돼 있어 앱은 그대로 쓸 수 있다. 다만 서버에 못 남겼다는 것을
     // 알려야 "재설치했더니 설정이 사라졌다"를 나중에 겪지 않는다.
     // **서버가 왜 거절했는지 말해줬으면 그 문구를 그대로 쓴다**.
     // 팝업을 닫은 뒤에 넘어간다 — 먼저 넘어가면 팝업이 홈 위에 남는다.
+    final failure = result.saveFailure;
     if (failure != null) {
       await showFailure(
         context,
@@ -180,12 +175,30 @@ class _PinScreenState extends ConsumerState<PinScreen> {
         fallbackCode: 'E-PROFILE',
       );
       if (!mounted) return;
-    } else if (ensured.value == true) {
+    }
+    context.go(Routes.guardian);
+  }
+
+  /// 이룸이를 (없으면) 만들고 온보딩을 서버에 저장한다.
+  Future<({AppFailure? createFailure, AppFailure? saveFailure})> _save() async {
+    // 이룸이가 없는 보호자(마지막 이룸이에서 나간 뒤)는 서버가 저장을 막으므로 이룸이부터 만든다.
+    // 못 만들었으면 저장을 이어 가지 않고 이 화면에 남는다 — 다시 누르면 다시 시도한다.
+    final ensured = await ref
+        .read(profileSessionProvider.notifier)
+        .ensureProfile();
+    final createFailure = ensured.failure;
+    if (createFailure != null || !mounted) {
+      return (createFailure: createFailure, saveFailure: null);
+    }
+
+    ref.read(onboardingProvider.notifier).setPin(_current);
+    final failure = await ref.read(onboardingProvider.notifier).complete();
+    if (failure == null && ensured.value == true) {
       // 방금 만든 이룸이의 이름·캐릭터까지 저장됐다 — 비어 있던 회원 정보를 새로 받는다.
       // 저장이 실패했으면 받지 않는다: 서버의 빈 값이 로컬 입력을 덮는다.
       ref.invalidate(memberProvider);
     }
-    context.go(Routes.guardian);
+    return (createFailure: null, saveFailure: failure);
   }
 
   /// 입력을 비우고 키패드는 계속 올라와 있게 둔다
@@ -210,6 +223,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           ? ElumButton(
               label: context.l10n.pinStartButton,
               onPressed: _onComplete,
+              loading: busy,
             )
           : null,
       child: Column(

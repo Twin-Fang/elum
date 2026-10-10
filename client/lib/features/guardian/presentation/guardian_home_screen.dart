@@ -29,6 +29,7 @@ import 'widgets/today_routine_section.dart';
 import '../../member/application/member_providers.dart';
 import '../application/routine_providers.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/state/busy_state_mixin.dart';
 
 /// Figma `보호자_홈`(931:3896 기본 / 931:4179 밀림 / 931:4879 삭제 확인).
 ///
@@ -294,36 +295,32 @@ class _StartRoutineButton extends ConsumerStatefulWidget {
       _StartRoutineButtonState();
 }
 
-class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton> {
-  /// 크레딧을 확인하는 중인가. 화면을 다시 그릴 일이 없어 setState 없이 둔다.
-  var _starting = false;
-
+class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton>
+    with BusyStateMixin<_StartRoutineButton> {
   @override
   Widget build(BuildContext context) =>
-      CreateRoutineButton(onTap: _startRoutine);
+      CreateRoutineButton(onTap: _startRoutine, loading: busy);
 
   /// 일과 만들기 시작. 이전 입력이 남아 있으면 안 되므로 항상 초기화한다.
   ///
   /// 이번 주 크레딧을 다 썼으면 들어가지 않고 알린다 — 입력·질문·보상까지
   /// 다 적은 뒤 마지막에 막히면 적은 것이 헛수고가 된다.
   Future<void> _startRoutine() async {
-    if (_starting) return;
-    _starting = true;
-    try {
-      final blocked = await creditBlocksRoutineStart(ref);
-      if (!mounted) return;
-      if (blocked != null) {
-        // 안내 + (서버가 켜 둔 경우에만) 광고 보고 더 만들기. 들어가지 않고 홈에 남는다.
-        await showCreditBlockedDialog(context, ref, blocked);
-        return;
-      }
-      ref.read(routineFlowProvider.notifier).reset();
-      // push 가 끝나기를 기다리지 않는다 — 흐름이 `go` 로 홈에 돌아오면 그 Future 가
-      // 끝나지 않을 수 있고, 그러면 버튼이 영영 눌리지 않는다.
-      context.push(Routes.routineInput);
-    } finally {
-      _starting = false;
+    // 확인하는 동안만 잠근다. 결과가 null 일 수 있어 기록으로 감싸 건너뛴 경우와 가른다.
+    final check = await runBusy(
+      () async => (blocked: await creditBlocksRoutineStart(ref)),
+    );
+    if (check == null || !mounted) return;
+    final blocked = check.blocked;
+    if (blocked != null) {
+      // 안내 + (서버가 켜 둔 경우에만) 광고 보고 더 만들기. 들어가지 않고 홈에 남는다.
+      await showCreditBlockedDialog(context, ref, blocked);
+      return;
     }
+    ref.read(routineFlowProvider.notifier).reset();
+    // push 가 끝나기를 기다리지 않는다 — 흐름이 `go` 로 홈에 돌아오면 그 Future 가
+    // 끝나지 않을 수 있고, 그러면 버튼이 영영 눌리지 않는다.
+    context.push(Routes.routineInput);
   }
 }
 

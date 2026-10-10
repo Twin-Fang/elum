@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -49,7 +50,8 @@ class CardReviewScreen extends ConsumerStatefulWidget {
   ConsumerState<CardReviewScreen> createState() => _CardReviewScreenState();
 }
 
-class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
+class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
+    with BusyStateMixin<CardReviewScreen> {
   late PageController _controller = _newController(0);
 
   /// 순서 변경 모드를 나오면 페이지 뷰가 새로 만들어진다. 이전 위치를 기억하면 카드
@@ -165,7 +167,9 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
     );
   }
 
-  Future<void> _save() async {
+  Future<void> _save() => runBusy(_saveNow);
+
+  Future<void> _saveNow() async {
     // 저장해야 이룸이 화면에 나간다. 뺀 카드를 서버에서 지우고, 만들기 흐름에서
     // 온 일과만 승인한다 — 이미 저장한 일과에 승인을 부르면 서버가 거절한다.
     final failure = await ref.read(routineFlowProvider.notifier).save();
@@ -359,6 +363,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen> {
             ? context.l10n.cardReviewReorderDone
             : context.l10n.cardReviewSave,
         onPressed: _reorderMode ? _finishReorder : _save,
+        loading: busy,
       ),
       aurora: CardReviewScreen.aurora,
       child: Column(

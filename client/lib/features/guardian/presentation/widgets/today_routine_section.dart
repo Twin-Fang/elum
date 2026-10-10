@@ -20,6 +20,7 @@ import '../../application/routine_notifier.dart';
 import '../../../../shared/models/routine.dart';
 import 'routine_summary_tile.dart';
 import 'routine_swipe_actions.dart';
+import '../../../../core/state/busy_state_mixin.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../../../core/widgets/elum_toast.dart';
 import '../../application/guardian_home_controller.dart';
@@ -120,7 +121,8 @@ class TodayRoutineSection extends ConsumerStatefulWidget {
       _TodayRoutineSectionState();
 }
 
-class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
+class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
+    with BusyStateMixin<TodayRoutineSection> {
   /// 지금 밀려서 열려 있는 일과. **한 번에 하나만 연다** —
   /// 둘이 열리면 어느 버튼이 누구 것인지 알 수 없다.
   String? _openId;
@@ -239,10 +241,18 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
     );
     if (confirmed != true || !mounted) return;
 
-    final failure = await ref
-        .read(guardianHomeControllerProvider)
-        .delete(routine.id);
-    if (!mounted) return;
+    // 같은 일과를 두 번 지우면 서버가 거절해 실패 팝업이 뜬다 — 일과 단위로 잠근다.
+    // 성공도 null 이라 기록으로 감싸 진행 중이라 건너뛴 경우(result == null)와 가른다.
+    final result = await runBusy(
+      () async => (
+        failure: await ref
+            .read(guardianHomeControllerProvider)
+            .delete(routine.id),
+      ),
+      key: routine.id,
+    );
+    if (result == null || !mounted) return;
+    final failure = result.failure;
     if (failure != null) {
       // 묻는 사이에 이룸이가 시작했다 — 서버가 상태로 거절한다.
       // 새로 받아 와야 화면도 시작한 일과로 바뀐다.
@@ -382,7 +392,10 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
               // 다 끝낸 일과도 밀리지 않는다 — 이룸이 화면은 끝낸 일과를 다시 그리지
               // 않아 고쳐도 반영되지 않고, 삭제는 서버가 막는다. 줄을 누르면 시트에서
               // `다 끝낸 일과예요`로 이유를 본다.
-              enabled: routine.isEditableByMe && !_isFinished(routine),
+              enabled:
+                  routine.isEditableByMe &&
+                  !_isFinished(routine) &&
+                  !isBusy(routine.id),
               isOpen:
                   _openId == routine.id || (demoOpen && routine.id == coachId),
               onOpenChanged: (open) =>
@@ -402,11 +415,16 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection> {
                 //
                 // 길게 눌러 끄는 길은 남겨 둔다 — 목록이 `ReorderableListView` 라
                 // 아래 `ReorderableDelayedDragStartListener` 가 그 역할을 한다.
-                dragHandle: null,
+                // 지우는 중인 줄만 오른쪽 끝에 스피너를 둔다.
+                dragHandle: isBusy(routine.id)
+                    ? ElumSpinner(size: 18.w, strokeWidth: 2.w)
+                    : null,
                 // 밀려 있을 때 탭하면 닫기만 한다 — 열어놓고 실수로 누르는 자리다.
-                onTap: () => _openId == routine.id
-                    ? setState(() => _openId = null)
-                    : _openSheet(routine),
+                onTap: isBusy(routine.id)
+                    ? null
+                    : () => _openId == routine.id
+                          ? setState(() => _openId = null)
+                          : _openSheet(routine),
               ),
             ),
           ),

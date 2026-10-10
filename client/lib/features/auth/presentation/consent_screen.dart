@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
+import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -34,7 +35,8 @@ class ConsentScreen extends ConsumerStatefulWidget {
   ConsumerState<ConsentScreen> createState() => _ConsentScreenState();
 }
 
-class _ConsentScreenState extends ConsumerState<ConsentScreen> {
+class _ConsentScreenState extends ConsumerState<ConsentScreen>
+    with BusyStateMixin<ConsentScreen> {
   /// 부제 하단(193) → 전체 동의 버튼(223). ElumHeader가 제목·부제를 y=131·177에
   /// 세우므로 여기서 남은 30만 띄운다. `headerToContent`(52)를 쓰면 22가 밀린다.
   static const _headerToAllAgree = 30.0;
@@ -71,6 +73,8 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   }
 
   Future<void> _submit(ConsentBundle bundle) async {
+    // 나가는 중(로그아웃)이거나 이미 제출 중이면 새로 보내지 않는다.
+    if (busy || _isSubmitting) return;
     setState(() {
       _isSubmitting = true;
       _failure = null;
@@ -106,8 +110,14 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   /// 토큰만 남겨두면 다음 실행에서 동의 화면을 건너뛰고 들어올 수 있어
   /// 동의 없이 서비스가 열린다.
   Future<void> _leave() async {
-    await ref.read(consentControllerProvider).logout();
-    if (!mounted) return;
+    // 제출 중에는 나가지 않는다 — 동의 저장과 로그아웃이 엇갈린다.
+    if (_isSubmitting) return;
+    // null 이면 이미 나가는 중이라 실행하지 않은 것.
+    final done = await runBusy(() async {
+      await ref.read(consentControllerProvider).logout();
+      return true;
+    });
+    if (done == null || !mounted) return;
     context.go(Routes.login);
   }
 
@@ -160,7 +170,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       bottomButton: ElumButton(
         label: _isSubmitting ? context.l10n.consentSaving : context.l10n.commonNext,
         onPressed:
-            allRequired && !_isSubmitting ? () => _submit(bundle) : null,
+            allRequired && !_isSubmitting && !busy
+            ? () => _submit(bundle)
+            : null,
       ),
       child: SingleChildScrollView(
         child: Column(

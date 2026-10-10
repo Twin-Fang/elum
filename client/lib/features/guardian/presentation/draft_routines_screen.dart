@@ -18,6 +18,8 @@ import '../../../shared/models/routine.dart';
 import '../application/routine_notifier.dart';
 import 'widgets/routine_swipe_actions.dart';
 import '../../../core/router/pop_or_home.dart';
+import '../../../core/state/busy_state_mixin.dart';
+import '../../../core/widgets/elum_spinner.dart';
 import '../application/draft_routines_controller.dart';
 import '../application/routine_providers.dart';
 import '../../../core/router/routes.dart';
@@ -39,12 +41,10 @@ class DraftRoutinesScreen extends ConsumerStatefulWidget {
       _DraftRoutinesScreenState();
 }
 
-class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
+class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen>
+    with BusyStateMixin<DraftRoutinesScreen> {
   /// 지금 밀려 열려 있는 줄. 둘이 동시에 열리면 어느 버튼이 누구 것인지 모른다.
   String? _openId;
-
-  /// 지우는 중인 줄. 두 번 눌러 같은 일과를 두 번 지우지 않게 잠근다.
-  String? _deletingId;
 
   @override
   void initState() {
@@ -117,11 +117,12 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
                           // 시안(1274:9262) — 버튼 끝이 줄 끝(377)보다 2 안쪽이다
                           endInset: 2,
                           deleteLabel: context.l10n.draftRoutinesDeleteLabel,
-                          // 지우는 중에는 밀리지 않는다
-                          enabled: _deletingId == null,
+                          // 지우는 중인 줄은 밀리지 않는다
+                          enabled: !isBusy(routine.id),
                           child: _DraftTile(
                             routine: routine,
                             highlighted: _openId == routine.id,
+                            deleting: isBusy(routine.id),
                             // 열려 있을 때 누르면 이어서가 아니라 닫는다
                             onTap: () => _openId == routine.id
                                 ? setState(() => _openId = null)
@@ -142,7 +143,6 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
   /// 바로 지우면 잘못 밀어도 되돌릴 길이 없다. 서버는 일과 삭제 API 로 지운다(임시저장도
   /// 일과다). 실패하면 줄을 그대로 두고 에러 코드를 보여준다.
   Future<void> _delete(Routine routine) async {
-    if (_deletingId != null) return;
     final confirmed = await showElumDialog<bool>(
       context: context,
       title: context.l10n.draftRoutinesDeleteConfirmTitle,
@@ -163,13 +163,19 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen> {
     // 바깥을 눌러 닫으면 null — 취소로 다룬다
     if (confirmed != true || !mounted) return;
 
-    setState(() => _deletingId = routine.id);
-    final failure = await ref.read(draftRoutinesControllerProvider).delete(routine.id);
-    if (!mounted) return;
-    setState(() {
-      _deletingId = null;
-      if (failure == null) _openId = null;
-    });
+    // 같은 줄을 두 번 지우지 않게 줄 단위로 잠근다. 성공도 null 이라 기록으로 감싸
+    // 진행 중이라 건너뛴 경우(result == null)와 가른다.
+    final result = await runBusy(
+      () async => (
+        failure: await ref
+            .read(draftRoutinesControllerProvider)
+            .delete(routine.id),
+      ),
+      key: routine.id,
+    );
+    if (result == null || !mounted) return;
+    final failure = result.failure;
+    if (failure == null) setState(() => _openId = null);
     if (failure != null) {
       await showFailure(
         context,
@@ -207,10 +213,14 @@ class _DraftTile extends StatelessWidget {
     required this.routine,
     required this.onTap,
     this.highlighted = false,
+    this.deleting = false,
   });
 
   final Routine routine;
   final VoidCallback onTap;
+
+  /// 서버에서 지우는 중이다. 누를 수 없고 `이어서` 자리에 스피너가 선다.
+  final bool deleting;
 
   /// 밀려 열려 있다. 줄이 한 단계 어두워진다 (`#D7D3D1`).
   final bool highlighted;
@@ -245,7 +255,7 @@ class _DraftTile extends StatelessWidget {
     );
 
     return AppPressable(
-      onTap: onTap,
+      onTap: deleting ? null : onTap,
       scaleDown: AppPressable.scaleCard,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -297,20 +307,27 @@ class _DraftTile extends StatelessWidget {
                 ],
               ),
             ),
-            // 누르면 무엇이 되는지 말로 적는다 — 줄 전체가 눌린다
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                context.l10n.draftRoutinesResume,
-                style: typo.routineSectionLabel.copyWith(
-                  color: colors.chipLabel,
+            // 지우는 중에는 알약 대신 스피너 — 이어서를 눌러도 되는 줄로 읽히지 않게 한다
+            if (deleting)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: ElumSpinner(size: 20.w, strokeWidth: 2.w),
+              )
+            else
+              // 누르면 무엇이 되는지 말로 적는다 — 줄 전체가 눌린다
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  context.l10n.draftRoutinesResume,
+                  style: typo.routineSectionLabel.copyWith(
+                    color: colors.chipLabel,
+                  ),
                 ),
               ),
-            ),
             SizedBox(width: _padRight.w),
           ],
         ),

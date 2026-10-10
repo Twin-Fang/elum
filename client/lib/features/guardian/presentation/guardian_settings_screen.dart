@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/app_info_tile.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/network/app_failure.dart';
@@ -39,9 +40,11 @@ class GuardianSettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _GuardianSettingsScreenState
-    extends ConsumerState<GuardianSettingsScreen> {
-  /// 처리 중 중복 탭 방지. 로그아웃은 서버 요청이 섞여 있어 즉시 끝나지 않는다.
-  bool _busy = false;
+    extends ConsumerState<GuardianSettingsScreen>
+    with BusyStateMixin<GuardianSettingsScreen> {
+  /// 진행 중인 동작을 타일에 구분해 보여주는 key.
+  static const _logoutKey = 'logout';
+  static const _withdrawKey = 'withdraw';
 
   Future<void> _logout() async {
     // 시안(`팝업` 1045:5194 `로그아웃/회원탈퇴`)은 **가운데 팝업**이다.
@@ -67,7 +70,7 @@ class _GuardianSettingsScreenState
       ],
     );
     if (ok != true) return;
-    await _run(() async {
+    await _run(_logoutKey, () async {
       await ref.read(authSessionControllerProvider).logout();
       // 로그아웃은 이 기기에서 나가는 것이 본질이라 서버가 실패해도 목적은 달성된다.
       return null;
@@ -99,7 +102,10 @@ class _GuardianSettingsScreenState
       ],
     );
     if (ok != true) return;
-    await _run(() => ref.read(authSessionControllerProvider).deleteAccount());
+    await _run(
+      _withdrawKey,
+      () => ref.read(authSessionControllerProvider).deleteAccount(),
+    );
   }
 
   /// 되돌릴 수 없다고 안내한 동작이 실패했을 때.
@@ -123,15 +129,11 @@ class _GuardianSettingsScreenState
   /// 동작이 **실제로 됐는지**를 받아 분기한다. 됐으면 로컬이 비었으니 이 화면에
   /// 남을 수 없어 로그인으로 보내고, 안 됐으면 바뀐 것이 없으니 이 자리에 머문
   /// 채로 알린다.
-  Future<void> _run(Future<AppFailure?> Function() action) async {
-    setState(() => _busy = true);
-    AppFailure? failure;
-    try {
-      failure = await action();
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-    if (!mounted) return;
+  Future<void> _run(String key, Future<AppFailure?> Function() action) async {
+    // 결과가 null(성공)과 구분되도록 레코드로 감싼다. 바깥이 null 이면 진행 중이라 실행하지 않은 것.
+    final result = await runBusy(() async => (await action(),), key: key);
+    if (result == null || !mounted) return;
+    final failure = result.$1;
     if (failure == null) {
       // 고른 이룸이(저장소)는 로그아웃·탈퇴의 clearAll 이 이미 지웠다. 메모리의 이룸이 상태와
       // 회원 정보 캐시는 **다음 로그인에서** 버린다 (LoginScreen). 여기서 버리면
@@ -147,7 +149,7 @@ class _GuardianSettingsScreenState
     final space = context.space;
 
     return ElumScaffold(
-      onBack: _busy ? null : context.popOrHome,
+      onBack: busy ? null : context.popOrHome,
       // 시안(`1022:4467`)은 제목이 뒤로가기와 **같은 줄**에 선다. 본문에 두면
       // 뒤로가기 아래로 내려간다.
       title: context.l10n.guardianSettingsTitle,
@@ -170,35 +172,35 @@ class _GuardianSettingsScreenState
         SizedBox(height: 40.h),
         // 이번 주 AI 생성. 제목 아래·첫 줄 위 — 꺼져 있으면 자리도 없다.
         const AiCreditCard(),
-        _LinkTile(busy: _busy),
+        _LinkTile(busy: busy),
         // 다중 보호자. 시안(`1022:4467`)에 없는 줄이라 **임시 시안**이다 — 이룸이 휴대폰
         // 연결 바로 아래에 둔다. 둘 다 "누구와 누구를 잇는가"를 다루는 줄이다.
-        _ProfileSwitchTile(busy: _busy),
+        _ProfileSwitchTile(busy: busy),
         SettingsTile(
           label: context.l10n.guardianSettingsPeople,
-          onTap: _busy ? null : () => context.push(Routes.guardianPeople),
+          onTap: busy ? null : () => context.push(Routes.guardianPeople),
         ),
         // 계정을 정리하는 항목(로그아웃·탈퇴) 위에 둔다. 읽을거리와 되돌릴 수 없는
         // 동작이 섞이면 실수로 누르기 쉽다.
         SettingsTile(
           label: context.l10n.guardianSettingsDrafts,
-          onTap: _busy ? null : () => context.push(Routes.guardianDrafts),
+          onTap: busy ? null : () => context.push(Routes.guardianDrafts),
         ),
         // 시안(`1022:4467`) 자리 그대로 — 임시저장과 약관 사이.
         SettingsTile(
           label: context.l10n.guardianSettingsPinChange,
-          onTap: _busy ? null : () => context.push(Routes.guardianPinChange),
+          onTap: busy ? null : () => context.push(Routes.guardianPinChange),
         ),
         // 카드 그림을 어떤 방식으로 만들지. 시안(`1022:4467`)에 없는 줄이라
         // **임시 시안**이다 — 시안 줄 순서(연결·임시저장·비밀암호·약관)를 깨지 않게
         // 비밀암호와 약관 사이에 둔다. 오른쪽에 지금 값과 화살표를 함께 보여준다.
-        _ImageStyleTile(busy: _busy),
+        _ImageStyleTile(busy: busy),
         // 이룸이가 카드를 체크할 때 진동으로 알려줄지. 시안에 없는 줄이라 **임시 시안**이다.
         // 이룸이 휴대폰 설정에도 같은 줄이 있고, 한 휴대폰에 값 하나를 함께 본다.
         const _HapticTile(),
         SettingsTile(
           label: context.l10n.guardianSettingsTerms,
-          onTap: _busy
+          onTap: busy
               ? null
               : () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -209,7 +211,7 @@ class _GuardianSettingsScreenState
         // 임시 시안(이슈 #604 디자인 요청 중) — 약관과 앱 버전 사이에 둔다.
         SettingsTile(
           label: context.l10n.guardianSettingsFeedback,
-          onTap: _busy ? null : () => context.push(Routes.guardianFeedback),
+          onTap: busy ? null : () => context.push(Routes.guardianFeedback),
         ),
         // 앱 버전은 목록의 한 줄로 둔다 — 떨어져 있으면 "앱 정보"로 찾기 어렵다.
         // 제보를 받았을 때 어느 빌드인지 알아야 재현할 수 있다.
@@ -220,11 +222,13 @@ class _GuardianSettingsScreenState
         // 글자 토큰(`contactSheetTitle`·`contactSheetEmail`)은 남겨 두었다.
         SettingsTile(
           label: context.l10n.guardianSettingsLogout,
-          onTap: _busy ? null : _logout,
+          loading: isBusy(_logoutKey),
+          onTap: busy ? null : _logout,
         ),
         SettingsTile(
           label: context.l10n.guardianSettingsWithdraw,
-          onTap: _busy ? null : _deleteAccount,
+          loading: isBusy(_withdrawKey),
+          onTap: busy ? null : _deleteAccount,
           destructive: true,
         ),
         SizedBox(height: space.lg),

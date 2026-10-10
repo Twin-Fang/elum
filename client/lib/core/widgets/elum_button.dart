@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
+import 'elum_spinner.dart';
 
 /// 하단 CTA 버튼. Figma 컴포넌트셋 `일반 버튼`(187:299)에 대응한다.
 ///
@@ -15,6 +16,7 @@ class ElumButton extends StatelessWidget {
     this.onPressed,
     this.backgroundColor,
     this.labelColor,
+    this.loading = false,
   });
 
   final String label;
@@ -29,16 +31,21 @@ class ElumButton extends StatelessWidget {
   /// 문구색 재정의. [backgroundColor]와 짝으로 쓴다.
   final Color? labelColor;
 
+  /// 서버 응답을 기다리는 중. 누를 수 없고 오른쪽에 스피너가 돈다.
+  ///
+  /// 그대로 두면 보호자는 반응이 없는 줄 알고 다시 눌러 같은 요청이 두 번 간다.
+  final bool loading;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final space = context.space;
-    final isEnabled = onPressed != null;
+    final isEnabled = onPressed != null && !loading;
 
     // 눌림 반응은 AppPressable이 담당한다 (docs/motion.md).
     // ripple 대신 scale로 통일해 앱 전체 터치 피드백을 맞춘다.
-    return AppPressable(
-      onTap: onPressed,
+    final button = AppPressable(
+      onTap: loading ? null : onPressed,
       child: Container(
         width: double.infinity,
         height: space.buttonH.h,
@@ -58,6 +65,22 @@ class ElumButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+    if (!loading) return button;
+
+    // 문구는 그대로 두고 오른쪽에 스피너만 얹는다 — 무엇을 하는 중인지 문구가 말해 준다.
+    return Stack(
+      alignment: Alignment.centerRight,
+      children: [
+        button,
+        Padding(
+          padding: EdgeInsets.only(right: 24.w),
+          child: ElumSpinner(
+            size: 22.w,
+            color: labelColor ?? colors.buttonDisabledText,
+          ),
+        ),
+      ],
     );
   }
 }

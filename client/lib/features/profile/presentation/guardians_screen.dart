@@ -5,12 +5,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/server_error_code.dart';
+import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/periodic_refresh.dart';
 import '../../../core/widgets/settings_tile.dart';
@@ -57,12 +59,14 @@ class GuardiansScreen extends ConsumerStatefulWidget {
   ConsumerState<GuardiansScreen> createState() => _GuardiansScreenState();
 }
 
-class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
-  /// 나가기·이름 저장 중. 같은 요청을 두 번 보내지 않는다.
-  bool _busy = false;
+class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
+    with BusyStateMixin<GuardiansScreen> {
+  /// 나가기·이름 저장 중 어느 줄이 돌고 있는지 가르는 키. 진행 중엔 다른 동작도 막는다.
+  static const _leaveKey = 'leave';
+  static const _editKey = 'edit';
 
   Future<void> _leave(String profileId, String profileName, List<Guardian> guardians) async {
-    if (_busy) return;
+    if (busy) return;
     // await 뒤에서 context 를 읽지 않도록 문구는 먼저 잡아 둔다.
     final l10n = context.l10n;
     // 목록에서 "나" 외에 다른 사람이 없으면 마지막 보호자다.
@@ -87,14 +91,21 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
     );
     if (ok != true || !mounted) return;
 
-    setState(() => _busy = true);
-    final failure = await ref.read(guardiansControllerProvider).leave(profileId);
-    if (!mounted) return;
+    // 나가기 요청과 뒤이은 세션 정리를 한 덩어리로 잠가, 화면을 떠나기 전까지 스피너가 돈다.
+    final done = await runBusy(() async {
+      final failure = await ref.read(guardiansControllerProvider).leave(profileId);
+      // 이미 지워진 이룸이(404)는 나가려던 목적이 이루어진 것이다 — 정리만 한다.
+      final alreadyGone = failure?.server?.code == ServerErrorCode.profileNotFound;
+      if (failure != null && !alreadyGone) return (failure: failure, outcome: null);
+      if (!mounted) return (failure: null, outcome: null);
+      final outcome = await ref.read(profileSessionProvider.notifier).left(profileId);
+      return (failure: null, outcome: outcome);
+    }, key: _leaveKey);
+    // 이미 진행 중이라 실행하지 않았다.
+    if (done == null || !mounted) return;
 
-    // 이미 지워진 이룸이(404)는 나가려던 목적이 이루어진 것이다 — 정리만 한다.
-    final alreadyGone = failure?.server?.code == ServerErrorCode.profileNotFound;
-    if (failure != null && !alreadyGone) {
-      setState(() => _busy = false);
+    final failure = done.failure;
+    if (failure != null) {
       await showFailure(
         context,
         failure,
@@ -107,8 +118,8 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
       return;
     }
 
-    final outcome = await ref.read(profileSessionProvider.notifier).left(profileId);
-    if (!mounted) return;
+    final outcome = done.outcome;
+    if (outcome == null) return;
     // 화면을 옮기기 전에 잡아 둔다 — 옮긴 뒤에는 이 화면의 context 가 없다.
     final messenger = ScaffoldMessenger.maybeOf(context);
     switch (outcome) {
@@ -122,18 +133,19 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
   }
 
   Future<void> _editMe(String profileId, Guardian me) async {
-    if (_busy) return;
+    if (busy) return;
     final edit = await showGuardianEditSheet(context, me: me);
     if (edit == null || edit.isEmpty || !mounted) return;
 
-    setState(() => _busy = true);
-    final attempt = await ref.read(guardiansControllerProvider).updateMyGuardian(
-      profileId,
-      kind: edit.kind,
-      displayName: edit.displayName,
+    final attempt = await runBusy(
+      () => ref.read(guardiansControllerProvider).updateMyGuardian(
+        profileId,
+        kind: edit.kind,
+        displayName: edit.displayName,
+      ),
+      key: _editKey,
     );
-    if (!mounted) return;
-    setState(() => _busy = false);
+    if (attempt == null || !mounted) return;
 
     if (!attempt.isOk) {
       await showFailure(
@@ -158,7 +170,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
     return PeriodicRefresh(
       onRefresh: _refreshGuardians,
       child: ElumScaffold(
-        onBack: _busy ? null : context.popOrHome,
+        onBack: busy ? null : context.popOrHome,
         title: context.l10n.guardiansTitle,
         backTop: 67,
         horizontalPadding: 16,
@@ -193,7 +205,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
   /// 이미 떠난 이룸이를 조회해 404 를 받거나 요청이 겹치지 않게 한다.
   void _refreshGuardians() {
     final active = ref.read(activeProfileProvider);
-    if (_busy || active == null) return;
+    if (busy || active == null) return;
     final provider = guardiansProvider(active.id);
     if (ref.read(provider).isLoading) return;
     ref.invalidate(provider);
@@ -245,25 +257,27 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen> {
         for (final g in guardians)
           _GuardianTile(
             guardian: g,
-            onTap: g.me && !_busy ? () => _editMe(profileId, g) : null,
+            onTap: g.me && !busy ? () => _editMe(profileId, g) : null,
+            loading: g.me && isBusy(_editKey),
           ),
       // 목록에 내 줄만 있으면 비어 보인다 — 무엇을 하면 되는지 알려 준다.
       if (isAlone) _Caption(context.l10n.guardiansAloneHint),
       SizedBox(height: space.md),
       SettingsTile(
         label: context.l10n.guardiansInviteAction,
-        onTap: _busy ? null : () => context.push(Routes.guardianInvite),
+        onTap: busy ? null : () => context.push(Routes.guardianInvite),
       ),
       SettingsTile(
         label: context.l10n.guardiansEnterCodeAction,
-        onTap: _busy ? null : () => context.push(Routes.inviteEnter),
+        onTap: busy ? null : () => context.push(Routes.inviteEnter),
       ),
       // 되돌릴 수 없는 줄은 맨 아래에 두고 위험색으로 칠한다. 목록을 못 받았으면 몇 명인지
       // 모르므로 누를 수 없다.
       SettingsTile(
         label: context.l10n.guardiansLeaveAction,
         destructive: true,
-        onTap: (_busy || guardians == null || guardians.isEmpty)
+        loading: isBusy(_leaveKey),
+        onTap: (busy || guardians == null || guardians.isEmpty)
             ? null
             : () => _leave(profileId, profileName, guardians),
       ),
@@ -318,10 +332,13 @@ class _StateSlot extends StatelessWidget {
 
 /// 함께하는 사람 한 줄. 이름 · (나) · 구분. **내 줄만 누를 수 있다** — 남의 표시는 못 고친다.
 class _GuardianTile extends StatelessWidget {
-  const _GuardianTile({required this.guardian, required this.onTap});
+  const _GuardianTile({required this.guardian, required this.onTap, this.loading = false});
 
   final Guardian guardian;
   final VoidCallback? onTap;
+
+  /// 이름·구분 저장을 기다리는 중 — 화살표 자리에 스피너를 돌린다.
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -358,7 +375,10 @@ class _GuardianTile extends StatelessWidget {
               guardian.kind.label,
               style: typo.settingsTileLabel.copyWith(color: colors.textPlaceholder),
             ),
-            if (onTap != null) ...[
+            if (loading) ...[
+              SizedBox(width: 8.w),
+              ElumSpinner(size: 20.w, color: colors.settingsChevron),
+            ] else if (onTap != null) ...[
               SizedBox(width: 4.w),
               Icon(Icons.chevron_right_rounded, size: 20.w, color: colors.settingsChevron),
             ],

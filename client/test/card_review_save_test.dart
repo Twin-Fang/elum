@@ -209,6 +209,20 @@ void main() {
 
     expect(f.repo.deletedStepIds, isEmpty);
   });
+
+  // 운영에서 응답을 기다리던 1초 사이 다시 눌려, 두 번째 승인이 409 로 거절돼
+  // 저장은 됐는데 실패 팝업이 떴다.
+  test('저장 중에 다시 불러도 서버로는 한 번만 간다', () async {
+    final f = setUpFlow('PENDING_REVIEW');
+    final notifier = f.container.read(routineFlowProvider.notifier);
+
+    notifier.removeStep('c2');
+    final results = await Future.wait([notifier.save(), notifier.save()]);
+
+    expect(results, [isNull, isNull]);
+    expect(f.repo.confirmCalls, 1);
+    expect(f.repo.deletedStepIds, ['c2']);
+  });
 }
 
 /// 무엇을 어떤 차례로 불렀는지 센다.

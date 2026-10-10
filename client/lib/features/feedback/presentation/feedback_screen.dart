@@ -7,7 +7,6 @@ import '../../../core/router/pop_or_home.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_scaffold.dart';
-import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../application/feedback_sender.dart';
@@ -112,45 +111,14 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
             ),
           ),
           SizedBox(height: context.space.md.h),
-          _SendButton(
+          ElumButton(
             label: l10n.feedbackSend,
-            sending: _sending,
+            loading: _sending,
             onPressed: _canSend ? _send : null,
           ),
           SizedBox(height: lift > 0 ? lift + 12.h : 24.h),
         ],
       ),
-    );
-  }
-}
-
-/// 보내기 버튼. 전송 중에는 비활성이 되고 오른쪽에 스피너가 돈다.
-class _SendButton extends StatelessWidget {
-  const _SendButton({
-    required this.label,
-    required this.sending,
-    required this.onPressed,
-  });
-
-  final String label;
-  final bool sending;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.centerRight,
-      children: [
-        ElumButton(label: label, onPressed: sending ? null : onPressed),
-        if (sending)
-          Padding(
-            padding: EdgeInsets.only(right: 24.w),
-            child: ElumSpinner(
-              size: 22.w,
-              color: context.colors.buttonDisabledText,
-            ),
-          ),
-      ],
     );
   }
 }

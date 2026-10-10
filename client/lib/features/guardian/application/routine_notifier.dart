@@ -6,6 +6,7 @@ import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/idempotency_key.dart';
 import '../../../core/network/server_error_code.dart';
+import '../../../core/state/single_flight.dart';
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
 import '../../credit/data/credit_repository.dart';
@@ -615,7 +616,14 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   ///
   /// null 이면 성공. 실패하면 이유가 담겨 오고 **화면은 그대로 둔다** — 홈으로
   /// 보내면 저장된 것처럼 보이는데 이룸이 휴대폰에는 이전 카드가 그대로다.
-  Future<AppFailure?> save() async {
+  ///
+  /// 진행 중에 다시 불리면 새로 보내지 않고 진행 중인 결과를 함께 받는다 — 두 번째 승인은
+  /// 서버가 이미 끝난 일로 거절해, 저장은 됐는데 실패 팝업이 뜬다.
+  Future<AppFailure?> save() => _saving.run(_save);
+
+  final _saving = SingleFlight<AppFailure?>();
+
+  Future<AppFailure?> _save() async {
     AppLogger.notifierCall('RoutineFlowNotifier', 'save', {
       'removed': _removedStepIds.length,
     });

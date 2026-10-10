@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/widgets/app_info_tile.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_scaffold.dart';
@@ -74,10 +75,9 @@ enum _Exit {
   };
 }
 
-class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
-  /// 처리 중 중복 탭 방지 — 같은 요청이 두 번 나가면 두 번째는 404 로 돌아온다.
-  bool _busy = false;
-
+// 같은 요청이 두 번 나가면 두 번째는 404 로 돌아오므로 진행 중엔 잠근다.
+class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen>
+    with BusyStateMixin<ElumiSettingsScreen> {
   Future<void> _exit(_Exit kind) async {
     // await 뒤에서 context 를 쓰지 않으려고 미리 잡는다
     final l10n = context.l10n;
@@ -105,12 +105,14 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
     final router = GoRouter.of(context);
     final container = ProviderScope.containerOf(context);
 
-    setState(() => _busy = true);
-    final failure = await ref
-        .read(elumiSettingsControllerProvider)
-        .disconnectThisPhone();
-    if (!mounted) return;
-    setState(() => _busy = false);
+    // 결과가 null(성공)과 구분되도록 레코드로 감싼다. 바깥이 null 이면 진행 중이라 실행하지 않은 것.
+    final result = await runBusy(
+      () async =>
+          (await ref.read(elumiSettingsControllerProvider).disconnectThisPhone(),),
+      key: kind,
+    );
+    if (result == null || !mounted) return;
+    final failure = result.$1;
 
     if (failure != null) {
       // 연결은 그대로다 — 이 페이지에 머물고 이유와 에러 코드를 보여준다.
@@ -135,7 +137,7 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
   Widget build(BuildContext context) {
     return ElumScaffold(
       // 끊는 중에는 뒤로 갈 수 없다 — 결과를 알릴 곳이 없어진다
-      onBack: _busy ? null : context.popOrHome,
+      onBack: busy ? null : context.popOrHome,
       // 보호자 설정과 같다: 제목이 뒤로가기와 **같은 줄**에 서고 줄은 x=16 에서 시작한다.
       title: context.l10n.elumiSettingsTitle,
       backTop: 67,
@@ -159,7 +161,7 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
             ),
             SettingsTile(
               label: context.l10n.elumiSettingsTermsLabel,
-              onTap: _busy
+              onTap: busy
                   ? null
                   : () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -170,13 +172,15 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen> {
             const AppInfoTile(),
             SettingsTile(
               label: context.l10n.elumiSettingsLogoutLabel,
-              onTap: _busy ? null : () => _exit(_Exit.logout),
+              loading: isBusy(_Exit.logout),
+              onTap: busy ? null : () => _exit(_Exit.logout),
             ),
             // 위험색이되 가장 약하게 (docs 5-3). 위 줄과 간격으로 떨어뜨린다.
             SettingsTile(
               label: context.l10n.elumiSettingsWithdrawLabel,
               destructive: true,
-              onTap: _busy ? null : () => _exit(_Exit.withdraw),
+              loading: isBusy(_Exit.withdraw),
+              onTap: busy ? null : () => _exit(_Exit.withdraw),
             ),
             SizedBox(height: 24.h),
           ],

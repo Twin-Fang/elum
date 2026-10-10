@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/state/busy_state_mixin.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
@@ -115,7 +116,8 @@ class CardEditSheet extends StatefulWidget {
   State<CardEditSheet> createState() => _CardEditSheetState();
 }
 
-class _CardEditSheetState extends State<CardEditSheet> {
+class _CardEditSheetState extends State<CardEditSheet>
+    with BusyStateMixin<CardEditSheet> {
   late final _titleController = TextEditingController(
     text: widget.initialTitle,
   );
@@ -138,20 +140,15 @@ class _CardEditSheetState extends State<CardEditSheet> {
       _titleController.text.trim().isNotEmpty &&
       _descriptionController.text.trim().isNotEmpty;
 
-  /// 서버에 넣는 동안 다시 눌러도 두 번 가지 않게 막는다.
-  var _busy = false;
-
   Future<void> _save() async {
-    if (_busy) return;
     final title = _titleController.text.trim();
     final description = _descriptionController.text.trim();
     final submit = widget.onSubmit;
 
     if (submit != null) {
-      setState(() => _busy = true);
-      final ok = await submit(title, description);
-      if (!mounted) return;
-      setState(() => _busy = false);
+      // 서버에 넣는 동안 다시 눌러도 두 번 가지 않게 잠근다. 진행 중이면 null 이다.
+      final ok = await runBusy(() => submit(title, description));
+      if (ok == null || !mounted) return;
       // 실패하면 열어 둔다 — 쓴 글이 남아 있어야 다시 누를 수 있다
       if (!ok) return;
     }
@@ -268,7 +265,8 @@ class _CardEditSheetState extends State<CardEditSheet> {
                 label: _isAdd
                     ? context.l10n.cardEditAddAction
                     : context.l10n.cardEditDoneAction,
-                onPressed: _canSave && !_busy ? _save : null,
+                onPressed: _canSave ? _save : null,
+                loading: busy,
               ),
             ),
           ],

@@ -4,11 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../application/link_status_controller.dart';
 import '../data/device_link_repository.dart';
@@ -45,10 +47,9 @@ class LinkStatusScreen extends ConsumerStatefulWidget {
   ConsumerState<LinkStatusScreen> createState() => _LinkStatusScreenState();
 }
 
-class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
-  /// 끊는 중 중복 탭 방지 — 같은 요청이 두 번 나가면 두 번째는 404 로 돌아온다.
-  bool _busy = false;
-
+class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen>
+    with BusyStateMixin<LinkStatusScreen> {
+  /// 확인을 받은 뒤의 끊기 요청은 한 번만 나간다 — 같은 요청이 두 번 나가면 두 번째는 404 로 돌아온다.
   Future<void> _confirmAndRevoke(LinkedDevice device) async {
     // await 뒤에서 context 를 쓰지 않으려고 미리 잡는다
     final l10n = context.l10n;
@@ -74,12 +75,12 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
     );
     if (ok != true || !mounted) return;
 
-    setState(() => _busy = true);
-    final result = await ref
-        .read(linkStatusControllerProvider)
-        .revoke(device.linkId);
-    if (!mounted) return;
-    setState(() => _busy = false);
+    final result = await runBusy(
+      () => ref.read(linkStatusControllerProvider).revoke(device.linkId),
+      key: device.linkId,
+    );
+    // 이미 끊는 중이라 실행하지 않았다.
+    if (result == null || !mounted) return;
 
     if (!result.isGone) {
       // 연결은 그대로다 — 화면에 머물고 이유와 에러 코드를 보여준다.
@@ -115,7 +116,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
     final status = ref.watch(linkStatusProvider);
 
     return ElumScaffold(
-      onBack: _busy ? null : context.popOrHome,
+      onBack: busy ? null : context.popOrHome,
       // 설정 묶음 시안과 같은 머리(제목이 뒤로가기와 한 줄, 뒤로가기 y=67)
       title: context.l10n.linkStatusTitle,
       backTop: 67,
@@ -161,7 +162,8 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen> {
               device: device,
               // 여러 대면 구분할 이름을 붙인다. 한 대면 시안 그대로 `연결됨`이다.
               title: many ? context.l10n.linkDeviceNumbered(i + 1) : null,
-              onDisconnect: _busy ? null : () => _confirmAndRevoke(device),
+              onDisconnect: busy ? null : () => _confirmAndRevoke(device),
+              loading: isBusy(device.linkId),
             ),
           ],
           SizedBox(height: 16.h),
@@ -218,6 +220,7 @@ class _DeviceBlock extends StatelessWidget {
     required this.device,
     required this.onDisconnect,
     this.title,
+    this.loading = false,
   });
 
   final LinkedDevice device;
@@ -225,6 +228,9 @@ class _DeviceBlock extends StatelessWidget {
 
   /// null 이면 끊는 중이라 누를 수 없다.
   final VoidCallback? onDisconnect;
+
+  /// 이 휴대폰을 끊는 요청을 기다리는 중 — 글자 옆에 스피너를 돌린다.
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -277,14 +283,23 @@ class _DeviceBlock extends StatelessWidget {
                 width: 1.5,
               ),
             ),
-            child: Text(
-              context.l10n.linkStatusRevokeButton,
-              style: typo.settingsTileLabel.copyWith(
-                color: onDisconnect == null
-                    ? colors.settingsChevron
-                    : colors.settingsDestructive,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  context.l10n.linkStatusRevokeButton,
+                  style: typo.settingsTileLabel.copyWith(
+                    color: onDisconnect == null
+                        ? colors.settingsChevron
+                        : colors.settingsDestructive,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (loading) ...[
+                  SizedBox(width: 8.w),
+                  ElumSpinner(size: 18.w, color: colors.settingsChevron),
+                ],
+              ],
             ),
           ),
         ),

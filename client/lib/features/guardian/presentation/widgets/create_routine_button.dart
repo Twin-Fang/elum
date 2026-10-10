@@ -6,6 +6,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
+import '../../../../core/widgets/elum_spinner.dart';
 import '../../../../core/widgets/inset_shadow.dart';
 
 /// `새로운 일과 만들기` (Figma 931:3830 — 361×68, r100).
@@ -17,9 +18,16 @@ import '../../../../core/widgets/inset_shadow.dart';
 /// 안쪽 세 줄이 이 버튼을 "빛나는 알약"으로 보이게 하는 주인공이다.
 /// 처음 옮길 때 바깥 한 줄만 구현해 밋밋하게 나갔다.
 class CreateRoutineButton extends StatelessWidget {
-  const CreateRoutineButton({super.key, required this.onTap});
+  const CreateRoutineButton({
+    super.key,
+    required this.onTap,
+    this.loading = false,
+  });
 
   final VoidCallback onTap;
+
+  /// 진행 중이다. 누를 수 없고 문구 오른쪽에 스피너가 선다.
+  final bool loading;
 
   static const _height = 68.0;
   static const _radius = 100.0;
@@ -38,6 +46,7 @@ class CreateRoutineButton extends StatelessWidget {
   static const _sparkleW = 15.0;
   static const _sparkleH = 18.0;
   static const _sparkleGap = 6.0;
+  static const _spinnerSize = 18.0;
 
   /// 줄바꿈으로 높이가 늘었을 때 글이 가장자리에 붙지 않게 하는 여백. 기본 크기에서는 최소 높이 안에 들어간다.
   static const _padH = 16.0;
@@ -50,7 +59,7 @@ class CreateRoutineButton extends StatelessWidget {
     final white = colors.surface;
 
     return AppPressable(
-      onTap: onTap,
+      onTap: loading ? null : onTap,
       scaleDown: AppPressable.scaleCard,
       child: Container(
         // 시안 높이는 최소값이다. 글자가 커져 문구가 줄바꿈되면 늘어난다.
@@ -149,6 +158,14 @@ class CreateRoutineButton extends StatelessWidget {
                               ),
                             ),
                           ),
+                          if (loading) ...[
+                            SizedBox(width: _sparkleGap.w),
+                            ElumSpinner(
+                              size: _spinnerSize.w,
+                              strokeWidth: 2.w,
+                              color: white,
+                            ),
+                          ],
                         ],
                       ),
                     ),

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_shake.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -40,12 +41,14 @@ class PinChangeScreen extends ConsumerStatefulWidget {
 
 enum _Step { verify, enter, confirm }
 
-class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
+// 현재 암호 확인(verify 단계)과 저장(confirm 단계)은 단계가 달라 동시에 일어날 수 없다 —
+// 잠금 하나를 같이 쓴다.
+class _PinChangeScreenState extends ConsumerState<PinChangeScreen>
+    with BusyStateMixin<PinChangeScreen> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
 
   /// 저장된 암호. 읽기 전에는 null — 그동안 점만 보여준다.
-  bool _verifying = false;
   bool _loaded = false;
 
   _Step _step = _Step.verify;
@@ -58,7 +61,6 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
 
   /// 틀린 횟수. 값이 바뀔 때마다 점이 한 번 흔들린다.
   int _mismatchCount = 0;
-  bool _saving = false;
 
   String get _current => _controller.text;
   static const _len = OnboardingProfile.pinLength;
@@ -103,20 +105,19 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
   );
 
   Future<void> _verifyCurrent() async {
-    if (_verifying) return;
-    _verifying = true;
     final pin = _current;
     try {
-      final valid = await ref.read(pinChangeControllerProvider).verifyPin(pin);
-      if (!mounted) return;
+      // null 이면 이미 확인 중이라 실행하지 않은 것.
+      final valid = await runBusy(
+        () => ref.read(pinChangeControllerProvider).verifyPin(pin),
+      );
+      if (valid == null || !mounted) return;
       valid ? _next(_Step.enter) : _mismatch();
     } catch (e) {
       if (mounted) {
         _mismatch();
         await _showPinFailure(e);
       }
-    } finally {
-      _verifying = false;
     }
   }
 
@@ -187,19 +188,20 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
   }
 
   Future<void> _save() async {
-    if (_saving) return;
     final pin = _current;
-    setState(() => _saving = true);
     try {
-      await ref.read(pinChangeControllerProvider).setPin(pin);
+      // null 이면 이미 저장 중이라 실행하지 않은 것.
+      final saved = await runBusy(() async {
+        await ref.read(pinChangeControllerProvider).setPin(pin);
+        return true;
+      });
+      if (saved == null) return;
     } catch (e) {
       if (!mounted) return;
-      setState(() => _saving = false);
       await _showPinFailure(e);
       return;
     }
     if (!mounted) return;
-    setState(() => _saving = false);
     // 성공 알림은 스낵바다 — 실패만 팝업으로 막는다.
     final messenger = ScaffoldMessenger.maybeOf(context);
     final l10n = context.l10n;
@@ -270,7 +272,8 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen> {
       bottomButton: _canSave
           ? ElumButton(
               label: context.l10n.pinChangeSave,
-              onPressed: _saving ? null : _save,
+              loading: busy,
+              onPressed: busy ? null : _save,
             )
           : null,
       child: Column(

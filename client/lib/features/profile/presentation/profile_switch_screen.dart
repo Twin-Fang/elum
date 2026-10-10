@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_scaffold.dart';
+import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../member/data/member_repository.dart';
 import '../application/profile_session.dart';
@@ -30,19 +32,24 @@ class ProfileSwitchScreen extends ConsumerStatefulWidget {
   ConsumerState<ProfileSwitchScreen> createState() => _ProfileSwitchScreenState();
 }
 
-class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
-  /// 바꾸는 중. 같은 이룸이를 두 번 고르거나 바꾸는 동안 다른 이룸이를 고르지 못하게 한다.
-  bool _busy = false;
-
+class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen>
+    with BusyStateMixin<ProfileSwitchScreen> {
+  /// 바꾸는 동안 같은 이룸이를 두 번 고르거나 다른 이룸이를 고르지 못하게 한다.
   Future<void> _pick(ProfileSummary profile, ProfileSummary? active) async {
-    if (_busy) return;
+    if (busy) return;
     if (profile.id == active?.id) {
       context.popOrHome();
       return;
     }
-    setState(() => _busy = true);
-    await ref.read(profileSessionProvider.notifier).select(profile);
-    if (!mounted) return;
+    final picked = await runBusy(
+      () async {
+        await ref.read(profileSessionProvider.notifier).select(profile);
+        return true;
+      },
+      key: profile.id,
+    );
+    // 이미 진행 중이라 실행하지 않았다.
+    if (picked == null || !mounted) return;
     // 화면을 닫기 전에 잡아 둔다.
     final messenger = ScaffoldMessenger.maybeOf(context);
     final changed = context.l10n.profileSwitchChanged;
@@ -56,7 +63,7 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
     final active = ref.watch(activeProfileProvider);
 
     return ElumScaffold(
-      onBack: _busy ? null : context.popOrHome,
+      onBack: busy ? null : context.popOrHome,
       title: context.l10n.profileSwitchTitle,
       backTop: 67,
       horizontalPadding: 16,
@@ -101,7 +108,8 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen> {
             _ProfileTile(
               profile: p,
               selected: p.id == active?.id,
-              onTap: _busy ? null : () => _pick(p, active),
+              onTap: busy ? null : () => _pick(p, active),
+              loading: isBusy(p.id),
             ),
         ],
       ),
@@ -115,11 +123,15 @@ class _ProfileTile extends StatelessWidget {
     required this.profile,
     required this.selected,
     required this.onTap,
+    this.loading = false,
   });
 
   final ProfileSummary profile;
   final bool selected;
   final VoidCallback? onTap;
+
+  /// 이 이룸이로 바꾸는 중 — 체크 자리에 스피너를 돌린다.
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +157,9 @@ class _ProfileTile extends StatelessWidget {
                   ),
                 ),
               ),
-              if (selected)
+              if (loading)
+                ElumSpinner(size: 24.w, color: colors.settingsChevron)
+              else if (selected)
                 Icon(Icons.check_rounded, size: 24.w, color: colors.textPrimary),
             ],
           ),
