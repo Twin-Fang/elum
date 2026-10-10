@@ -52,8 +52,13 @@ enum ServerErrorCode {
   promptTestGeminiTextFailed('PROMPT_TEST_GEMINI_TEXT_FAILED'),
   promptTestGeminiImageFailed('PROMPT_TEST_GEMINI_IMAGE_FAILED'),
 
-  // ADMIN LOG
+  // ADMIN LOG — 관리자 화면에서만 난다. 앱 사용자는 보지 못한다.
   logFileReadFailed('LOG_FILE_READ_FAILED'),
+  invalidLogPath('INVALID_LOG_PATH'),
+  logFileNotFound('LOG_FILE_NOT_FOUND'),
+  logFileInUse('LOG_FILE_IN_USE'),
+  logFileDeleteFailed('LOG_FILE_DELETE_FAILED'),
+  invalidLogLevel('INVALID_LOG_LEVEL'),
 
   // SYSTEM CONFIG
   systemConfigInvalidValue('SYSTEM_CONFIG_INVALID_VALUE'),
