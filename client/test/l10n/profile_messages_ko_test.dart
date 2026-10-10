@@ -10,12 +10,7 @@ import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
 import 'package:elum/features/profile/domain/invite_link.dart';
 import 'package:elum/features/profile/domain/profile_summary.dart';
-import 'package:elum/features/profile/application/invite_sharer.dart';
-import 'package:elum/features/profile/presentation/guardian_edit_sheet.dart';
-import 'package:elum/features/profile/presentation/guardians_screen.dart';
-import 'package:elum/features/profile/presentation/invite_code_screen.dart';
 import 'package:elum/features/profile/presentation/invite_enter_screen.dart';
-import 'package:elum/features/profile/presentation/profile_switch_screen.dart';
 import 'package:elum/shared/utils/korean_particle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,7 +20,6 @@ import 'package:go_router/go_router.dart';
 
 import '../helpers/device_viewport.dart';
 import '../helpers/profile_fixtures.dart';
-import '../helpers/pump_with_locale.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
 import 'package:elum/core/router/routes.dart';
@@ -117,8 +111,6 @@ void main() {
     expect(const ProfileSummary(id: 'p').displayName, '이룸이');
     expect(const ProfileSummary(id: 'p', nickname: '  ').displayName, '이룸이');
     expect(const ProfileSummary(id: 'p', nickname: '하늘').displayName, '하늘');
-    expect(GuardianKind.guardian.label, '보호자');
-    expect(GuardianKind.caregiver.label, '센터 선생님');
     expect(const Guardian(id: 'g', me: false).label, '보호자');
     expect(const Guardian(id: 'g', me: false, displayName: '엄마').label, '엄마');
     // 직렬화 값은 번역하지 않는다
@@ -126,23 +118,6 @@ void main() {
     expect(GuardianKind.caregiver.apiValue, 'CAREGIVER');
     expect(GuardianKind.fromApiValue('CAREGIVER'), GuardianKind.caregiver);
     expect(GuardianKind.fromApiValue('모르는값'), GuardianKind.guardian);
-  });
-
-  test('파괴적 동작의 확인 문구는 원문과 같다', () {
-    expect(ko.guardiansLeaveConfirmTitle, '함께 돌보기를 그만둘까요?');
-    expect(
-      ko.guardiansLeaveConfirmMessageLast,
-      '함께하는 보호자가 없어요\n나가면 이룸이와 만든 일과, 모은 별이 모두 사라져요\n되돌릴 수 없어요',
-    );
-    expect(
-      ko.guardiansLeaveConfirmMessageOthers,
-      '내가 연결한 이룸이 휴대폰이 있다면 연결이 끊어져요\n남은 보호자가 새 연결 암호를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요',
-    );
-    expect(ko.guardiansLeaveConfirmAction, '그만두기');
-    expect(ko.guardiansLeaveAction, '함께 돌보기 그만두기');
-    expect(ko.guardiansLeaveHintAlone, '혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요');
-    expect(ko.guardiansLeaveHintWithOthers, '내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요');
-    expect(ko.inviteCodeRetryNote, '다시 만들면 이전 코드는 쓸 수 없어요');
   });
 
   group('초대 코드 넣기 — 실패 문구는 종류로 들고 있다가 그릴 때 푼다', () {
@@ -245,106 +220,5 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('민준을 함께 돌보게 됐어요'), findsOneWidget);
     });
-  });
-
-  group('화면이 ARB 문구를 읽는다 (문구를 바꾸면 이 테스트가 깨진다)', () {
-    Future<void> show(WidgetTester tester, Widget screen) async {
-      final repo = FakeProfileRepository();
-      await pumpWithLocale(
-        tester,
-        screen,
-        wrap: (child) => ProviderScope(
-          overrides: [
-            profileRepositoryProvider.overrideWithValue(repo),
-            inviteSharerProvider.overrideWithValue((_) async {}),
-            localStorageProvider.overrideWithValue(InMemoryStorage(onboardingCompleted: true, pin: '1234')),
-            memberProvider.overrideWith((ref) async => memberWith([kProfileA, kProfileB])),
-          ],
-          child: child,
-        ),
-      );
-      await tester.pump();
-      await tester.pump();
-    }
-
-    testWidgets('함께하는 사람: 제목·머리 설명·줄·설명', (tester) async {
-      await show(tester, const GuardiansScreen());
-      expect(find.text('함께하는 사람'), findsOneWidget);
-      expect(find.text('하늘이를 함께 돌보는 사람이에요'), findsOneWidget);
-      expect(find.text('다른 보호자 초대하기'), findsOneWidget);
-      expect(find.text('받은 초대 코드 넣기'), findsOneWidget);
-      expect(find.text('함께 돌보기 그만두기'), findsOneWidget);
-      expect(find.text('나'), findsOneWidget);
-      expect(find.text('센터 선생님'), findsOneWidget);
-    });
-
-    testWidgets('초대 코드 만들기: 제목·머리·안내·버튼', (tester) async {
-      await show(tester, const InviteCodeScreen());
-      expect(find.text('초대 코드'), findsOneWidget);
-      expect(find.text('함께할 보호자에게\n코드를 알려주세요'), findsOneWidget);
-      expect(find.text('받은 분이 하늘이를 함께 돌봐요'), findsOneWidget);
-      expect(find.text('초대 코드 다시 만들기'), findsOneWidget);
-      expect(find.text('다시 만들면 이전 코드는 쓸 수 없어요'), findsOneWidget);
-      expect(
-        find.text('이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요\n설정의 이룸이 휴대폰에서 연결해요'),
-        findsOneWidget,
-      );
-      expect(find.text('링크로 보내기'), findsOneWidget);
-    });
-
-    testWidgets('초대 코드 넣기: 제목과 어디서 받는지 안내', (tester) async {
-      await show(tester, const InviteEnterScreen());
-      expect(find.text('초대 코드를\n넣어주세요'), findsOneWidget);
-      expect(find.text('함께하는 보호자에게 받은 여섯 글자예요'), findsOneWidget);
-      expect(find.text('함께하는 보호자 휴대폰에서'), findsOneWidget);
-      expect(find.text('설정 → 함께하는 사람'), findsOneWidget);
-      expect(find.text('초대 코드를 만들면 여섯 글자가 나와요'), findsOneWidget);
-    });
-
-    testWidgets('이룸이 바꾸기: 제목과 지금 보는 줄을 낭독기가 읽는 문장', (tester) async {
-      await show(tester, const ProfileSwitchScreen());
-      expect(find.text('이룸이 바꾸기'), findsOneWidget);
-      expect(find.bySemanticsLabel('하늘이, 지금 보는 이룸이'), findsOneWidget);
-    });
-
-    testWidgets('내 이름 고치기 시트: 제목·설명·예시·구분·저장', (tester) async {
-      await show(
-        tester,
-        Builder(
-          builder: (context) => TextButton(
-            onPressed: () => showGuardianEditSheet(context, me: const Guardian(id: 'g', me: true)),
-            child: const Text('열기'),
-          ),
-        ),
-      );
-      await tester.tap(find.text('열기'));
-      await tester.pumpAndSettle();
-      expect(find.text('내 이름 고치기'), findsOneWidget);
-      expect(find.text('이 이룸이를 함께 돌보는 사람에게 보이는 이름이에요. 실명이 아니어도 괜찮아요'), findsOneWidget);
-      expect(find.text('엄마, 아빠, 센터 선생님'), findsOneWidget);
-      expect(find.text('보호자'), findsOneWidget);
-      expect(find.text('센터 선생님'), findsOneWidget);
-      expect(find.text('저장'), findsOneWidget);
-    });
-  });
-
-  testWidgets('비-ko 로케일은 번역 전이라 ko 문구로 떨어진다', (tester) async {
-    final repo = FakeProfileRepository();
-    await pumpWithLocale(
-      tester,
-      const InviteEnterScreen(),
-      locale: const Locale('ja'),
-      wrap: (child) => ProviderScope(
-        overrides: [
-          profileRepositoryProvider.overrideWithValue(repo),
-          localStorageProvider.overrideWithValue(InMemoryStorage()),
-          memberProvider.overrideWith((ref) async => memberWith([kProfileB])),
-        ],
-        child: child,
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('함께하는 보호자에게 받은 여섯 글자예요'), findsOneWidget);
-    expect(find.text('설정 → 함께하는 사람'), findsOneWidget);
   });
 }

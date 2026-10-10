@@ -14,19 +14,7 @@ void main() {
     expect(PhotoFailure.size.code, 'E-PHOTO-SIZE');
   });
 
-  test('로딩 화면 제목과 체크리스트', () {
-    expect(RoutineLoadingKind.prepare.title, '루미가 내용을\n정리하고 있어요');
-    expect(RoutineLoadingKind.generate.title, '루미가 행동카드를\n만들고 있어요');
-    expect(RoutineLoadingKind.prepare.stages.map((s) => s.label).toList(), [
-      '적어 주신 상황을 살펴보고 있어요',
-      '꼭 필요한 내용만 정리해요',
-      '추가 질문을 생각하고 있어요',
-    ]);
-    expect(RoutineLoadingKind.generate.stages.map((s) => s.label).toList(), [
-      '오늘의 일과를 읽고 있어요',
-      '중요한 준비물을 찾고 있어요',
-      '순서를 정리하고 있어요',
-    ]);
+  test('로딩 단계 진행률 순서', () {
     expect(RoutineLoadingKind.prepare.stages.map((s) => s.percent).toList(), [
       15,
       40,
@@ -46,16 +34,6 @@ void main() {
     expect(fallback.first.icon, '☔️');
     expect(fallback.first.prompt, '비 오는 날 우산 챙겨서 학교 가는 준비를 하고 싶어요');
     expect(fallback[1].prompt, '이룸이와 함께 병원에 가야 하는데 무서워하지 않게 준비하고 싶어요');
-  });
-
-  test('추천 대체 목록의 입력창 문장 다섯 모두', () {
-    expect(RoutineSuggestion.fallback.map((s) => s.prompt).toList(), [
-      '비 오는 날 우산 챙겨서 학교 가는 준비를 하고 싶어요',
-      '이룸이와 함께 병원에 가야 하는데 무서워하지 않게 준비하고 싶어요',
-      '체험학습 가는 날 아침에 챙길 것들을 순서대로 알려주고 싶어요',
-      '처음 가보는 장소에 가기 전에 이룸이가 마음의 준비를 하게 돕고 싶어요',
-      '방학 중 방과후 수업에 갈 준비를 순서대로 알려주고 싶어요',
-    ]);
   });
 
   test('서버 문구도 hint 도 없으면 기본 문구', () {

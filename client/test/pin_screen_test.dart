@@ -224,6 +224,23 @@ void main() {
       }
     });
 
+    testWidgets('불일치 안내는 설명 자리에 떴다가 다시 입력하면 걷힌다', (tester) async {
+      // 안내가 남아 있으면 맞게 넣는 중에도 틀렸다고 읽힌다
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+
+      await enterPin(tester, '1234');
+      await enterPin(tester, '1235'); // 불일치
+
+      expect(find.text('암호가 달라요. 다시 넣어주세요'), findsOneWidget);
+      expect(find.text('보호자모드로 변경할 때 사용하는 암호예요'), findsNothing);
+
+      await enterPin(tester, '1');
+
+      expect(find.text('암호가 달라요. 다시 넣어주세요'), findsNothing);
+      expect(find.text('보호자모드로 변경할 때 사용하는 암호예요'), findsOneWidget);
+    });
+
     testWidgets('살아있는 첫 입력으로 다시 맞추면 그대로 완료된다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();

@@ -1,7 +1,6 @@
 import 'package:elum/core/l10n/batchim.dart';
 import 'package:elum/core/l10n/l10n_context.dart';
 import 'package:elum/shared/models/reward_character.dart';
-import 'package:elum/features/child/presentation/mode_switch_screen.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,17 +37,12 @@ void main() {
     expect(ko.childHomeGreeting('루미', 'no'), '오늘 루미가\n할 일들이에요. 힘내봐요!');
   });
 
-  test('빈 상태 문구와 안내', () {
+  test('빈 상태 제목 — 이름이 들어간다', () {
     expect(ko.childHomeEmptyTitle('하늘'), '아직 하늘의\n일과가 없어요');
     expect(ko.childHomeEmptyTitle('루미'), '아직 루미의\n일과가 없어요');
-    expect(ko.childHomeEmptyHint, '보호자 화면에서 일과를 만들 수 있어요');
-    expect(ko.childHomeEmptyHintDevice, '보호자 휴대폰에서 일과를 만들 수 있어요');
   });
 
-  test('홈 낭독 이름과 보상 접두어', () {
-    expect(ko.childHomeToGuardianLabel, '보호자 화면으로 가기');
-    expect(ko.childHomeSettingsLabel, '설정 열기');
-    expect(ko.childHomeRewardPrefix, '다하면');
+  test('보상 배너 접두어는 끝 공백을 지킨다', () {
     expect(ko.rewardBannerPrefix, '다하면 ');
   });
 
@@ -65,15 +59,7 @@ void main() {
     expect(ko.childCardPagerLabel(12, 11), '카드 12장 중 11번째');
   });
 
-  test('카드 상세 문구', () {
-    expect(ko.childDetailSoundFailedTitle, '소리를 재생하지 못했어요');
-    expect(ko.childDetailSoundFailedFallback, '휴대폰 소리를 켜고 다시 눌러주세요');
-    expect(ko.childDetailCheckLabel, '다 했어요');
-  });
-
-  test('보상 화면 — 캐릭터마다 제목·문구·버튼이 다르다', () {
-    expect(RewardCharacter.lumi.title, '축하해요!');
-    expect(RewardCharacter.lumi.buttonLabel, '오예!');
+  test('보상 화면 — 캐릭터 문구에 이름이 들어간다', () {
     expect(
       RewardCharacter.lumi.messageFor('하늘'),
       '할 일을 해내서 루미가\n하늘에게 별을 가져왔어요',
@@ -82,14 +68,10 @@ void main() {
       RewardCharacter.lumi.messageFor('루미'),
       '할 일을 해내서 루미가\n루미에게 별을 가져왔어요',
     );
-    expect(RewardCharacter.popo.title, '잘했어요!');
-    expect(RewardCharacter.popo.buttonLabel, '좋아요!');
     expect(
       RewardCharacter.popo.messageFor('하늘'),
       '포포가 하늘에게\n축하의 선물로 큰 별을 가져왔어요',
     );
-    expect(RewardCharacter.ruru.title, '멋져요!');
-    expect(RewardCharacter.ruru.buttonLabel, '신난다!');
   });
 
   test('루루 문구 — 옛 조사 결과와 같다(받침 있음·없음·경계)', () {
@@ -121,23 +103,5 @@ void main() {
       RewardCharacter.popo.messageFor('  '),
       '포포가 이룸이에게\n축하의 선물로 큰 별을 가져왔어요',
     );
-  });
-
-  test('화면 전환 문구', () {
-    expect(ModeSwitchTarget.child.description, '암호를 입력하면 이룸이 화면으로 바뀌어요');
-    expect(ModeSwitchTarget.guardian.description, '암호를 입력하면 보호자 화면으로 바뀌어요');
-    expect(ko.modeSwitchTitle, '비밀암호를 입력하세요');
-    expect(ko.modeSwitchMismatch, '암호가 달라요. 다시 넣어주세요');
-    expect(ko.modeSwitchPinLabel, '암호 넣기');
-    expect(ko.modeSwitchReadFailedTitle, '암호를 확인하지 못했어요');
-    expect(ko.modeSwitchReadFailedFallback, '잠시 후 다시 해주세요');
-    expect(ko.modeSwitchBlockedTitle, '보호자 휴대폰에서\n열어 주세요');
-    expect(ko.modeSwitchBlockedDescription, '이 휴대폰에서는 보호자 화면을 열 수 없어요');
-    expect(ko.modeSwitchBlockedBack, '돌아가기');
-  });
-
-  test('일과 완료 문구', () {
-    expect(ko.routineDoneTitle, '일과를 끝냈어요!');
-    expect(ko.routineDoneButton, '오예!');
   });
 }

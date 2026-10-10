@@ -58,5 +58,8 @@ curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back-gr
 - `.claude/rules/00-project-overview.md` — 프로젝트 목적/스택/명령어
 - `.claude/rules/10-architecture-and-boundaries.md` — 아키텍처/모듈 경계
 - `.claude/rules/20-team-conventions.md` — 네이밍/코드 스타일/책임 분리
-- `.claude/rules/30-testing-and-verification.md` — 검증 전략
+- [`../docs/testing-guidelines.md`](../docs/testing-guidelines.md) — 테스트 설계 가이드라인 (무엇을 단언하는가·층 고르기·퇴역 규칙)
+  - 운영 중인 서비스라 API 계약(JSON 필드·상태 코드·에러 코드)·인증·트랜잭션·AI 실패 대체는 반드시 테스트로 고정한다
+  - 가짜(mock)가 돌려준 값을 그대로 단언하거나 `verify` 만 있고 결과 단언이 없는 테스트는 쓰지 않는다
+  - `@WebMvcTest` 는 `@MockitoBean` 조합이 다르면 Spring 컨텍스트를 새로 띄운다. 같은 조합을 쓰는 클래스는 묶는다
 - `.claude/rules/40-delivery-and-review.md` — 보고서/PR 규칙

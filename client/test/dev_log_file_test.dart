@@ -44,9 +44,10 @@ void main() {
   });
 
   test('2MB를 넘으면 오래된 쪽부터 버린다 (이슈 #219)', () async {
-    // 상한을 넘기도록 채운다. 한 줄 1KB × 2500줄 ≈ 2.5MB
-    final line = 'x' * 1024;
-    for (var i = 0; i < 2500; i++) {
+    // 상한을 넘기도록 채운다. 한 줄 50KB × 50줄 ≈ 2.5MB
+    // append 마다 파일을 열고 닫으므로 줄 수가 곧 실행 시간이다 — 줄을 키우고 횟수를 줄인다
+    final line = 'x' * (50 * 1024);
+    for (var i = 0; i < 50; i++) {
       DevLogFile.append('$i $line');
     }
     await DevLogFile.flushForTest();
@@ -57,13 +58,14 @@ void main() {
 
     final content = await DevLogFile.readAll();
     // 문제는 보통 마지막에 일어난다 — 최근 것이 남아야 한다
-    expect(content, contains('2499 '), reason: '가장 최근 줄이 사라졌다');
-    expect(content.contains('\n0 $line'), isFalse, reason: '오래된 줄이 남아 있다');
+    expect(content, contains('49 '), reason: '가장 최근 줄이 사라졌다');
+    expect(content.startsWith('0 '), isFalse, reason: '오래된 줄이 남아 있다');
   });
 
   test('잘라낸 뒤에도 첫 줄이 깨지지 않는다', () async {
-    final line = 'y' * 1024;
-    for (var i = 0; i < 2500; i++) {
+    // 줄이 길수록 자르는 지점이 줄 중간에 떨어진다 — 깨진 첫 줄을 버리는지 보기 좋다
+    final line = 'y' * (50 * 1024);
+    for (var i = 0; i < 50; i++) {
       DevLogFile.append('LINE$i $line');
     }
     await DevLogFile.flushForTest();

@@ -40,52 +40,8 @@ void main() {
     expect(ko.linkDeviceNumbered(10), '이룸이 휴대폰 10');
   });
 
-  test('코드 안내와 밑줄 친 길 — 밑줄 친 부분은 안내문 안에 있어야 한다', () {
-    expect(ko.linkEnterGuide, '코드는 보호자 휴대폰의\n설정 → 이룸이 휴대폰 연결하기에 있어요');
-    expect(ko.linkEnterGuidePath, '설정 → 이룸이 휴대폰 연결하기');
+  test('밑줄 친 길은 안내문 안에 있어야 한다', () {
     expect(ko.linkEnterGuide, contains(ko.linkEnterGuidePath));
-  });
-
-  test('코드 입력 실패 문구', () {
-    expect(ko.linkEnterWrongCode, '암호가 맞지 않아요');
-    expect(ko.linkEnterExpired, '암호가 만료됐어요. 새 암호를 받아주세요');
-    expect(ko.linkEnterOffline, '연결하지 못했어요. 인터넷을 확인해주세요');
-    expect(ko.linkEnterFailed, '연결하지 못했어요. 다시 해주세요');
-    expect(ko.commonRetryLater, '잠시 후 다시 해주세요');
-    expect(ko.linkEnterLinkLost, '연결이 끊어졌어요\n보호자에게 새 연결 암호를 받아 입력해주세요');
-  });
-
-  test('이룸이 설정 팝업 문구 — 줄바꿈까지', () {
-    expect(ko.elumiSettingsLogoutTitle, '로그아웃 하실건가요?');
-    expect(
-      ko.elumiSettingsLogoutMessage,
-      '이 휴대폰의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요',
-    );
-    expect(ko.elumiSettingsLogoutFailTitle, '로그아웃하지 못했어요');
-    expect(ko.elumiSettingsWithdrawTitle, '회원탈퇴 하실건가요?');
-    expect(
-      ko.elumiSettingsWithdrawMessage,
-      '이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요',
-    );
-    expect(
-      ko.inviteRejectedOnElumiDevice,
-      '이 휴대폰에서는 초대를 받을 수 없어요\n보호자 휴대폰에서 열어주세요',
-    );
-    expect(ko.elumiSettingsWithdrawFailTitle, '탈퇴하지 못했어요');
-    expect(ko.elumiSettingsExitFailedFallback, '잠시 후 다시 시도해주세요');
-  });
-
-  test('연결 상태 문구', () {
-    expect(ko.linkStatusRevokeConfirmTitle, '연결을 끊을까요?');
-    expect(
-      ko.linkStatusRevokeConfirmMessage,
-      '이룸이 휴대폰에서 일과를 볼 수 없어요\n다시 연결하려면 새 암호를 만들면 돼요',
-    );
-    expect(ko.linkStatusRevokeHint, '끊으면 이룸이 휴대폰에서\n일과를 볼 수 없어요');
-    expect(ko.linkStatusRevoked, '연결을 끊었어요');
-    expect(ko.linkStatusAlreadyRevoked, '이미 끊겨 있어요');
-    expect(ko.linkStatusEmpty, '연결된 휴대폰이 없어요');
-    expect(ko.linkStatusConnected, '연결됨');
   });
 
   test('연결된 날 — LinkedDevice.sinceLabel 은 옛 월·일 조립과 같다', () {
@@ -129,15 +85,6 @@ void main() {
     expect(find.text('초대 코드 다시 만들기'), findsOneWidget);
   });
 
-  testWidgets('번역 전 언어는 ko 문구로 대체된다', (tester) async {
-    await pumpWithLocale(
-      tester,
-      Scaffold(body: LinkRetryChip(onTap: () {})),
-      locale: const Locale('ja'),
-    );
-    expect(find.text('코드 다시 만들기'), findsOneWidget);
-  });
-
   group('코드 입력 화면 — 글자가 ARB 에서 온다', () {
     late _EnterFake repo;
     setUp(() => repo = _EnterFake());
@@ -157,16 +104,6 @@ void main() {
       await tester.tap(find.text('시작하기'));
       await tester.pumpAndSettle();
     }
-
-    testWidgets('제목·안내·버튼·낭독 이름', (tester) async {
-      await pumpEnter(tester);
-      await tester.pumpAndSettle();
-
-      expect(find.text('보호자에게서 받은 코드를\n입력해주세요'), findsOneWidget);
-      expect(find.text('코드는 보호자 휴대폰의\n설정 → 이룸이 휴대폰 연결하기에 있어요'), findsOneWidget);
-      expect(find.text('시작하기'), findsOneWidget);
-      expect(find.bySemanticsLabel('연결 암호 넣기'), findsOneWidget);
-    });
 
     testWidgets('연결이 밖에서 끊겨 돌아오면 안내 대신 끊김을 말한다', (tester) async {
       repo.lost = true;

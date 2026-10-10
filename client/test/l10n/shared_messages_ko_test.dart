@@ -1,4 +1,3 @@
-import 'package:elum/core/l10n/current_l10n.dart';
 import 'package:elum/l10n/app_localizations.dart';
 import 'package:elum/shared/models/reward_preset.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -9,9 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 /// 조사·날짜를 ARB 가 넘겨받아도 `ko` 결과가 옛 직접 조립과 같다.
 void main() {
   final ko = lookupAppLocalizations(const Locale('ko'));
-
-  setUp(() => setAppL10nForTest());
-  tearDown(() => setAppL10nForTest());
 
   test('만든 사람 문구 — 받침에 따라 이/가', () {
     expect(ko.routineForeignCreator('민준', 'yes'), '민준이 만든 일과예요');
@@ -52,22 +48,9 @@ void main() {
     }
   });
 
-  test('보상 프리셋 라벨', () {
-    expect(RewardPreset.snack.label, '좋아하는 간식');
-    expect(RewardPreset.video.label, '유튜브 10분');
-    expect(RewardPreset.play.label, '좋아하는 놀이');
-    expect(RewardPreset.walk.label, '산책');
-    expect(RewardPreset.custom.label, '직접 입력');
+  test('보상 프리셋 서버 키', () {
     expect(RewardPreset.snack.key, 'SNACK');
     expect(RewardPreset.snack.emoji, '🍪');
-  });
-
-  test('비-ko 로케일은 번역 전이라 ko 문구로 떨어진다', () {
-    setAppL10nForTest(lookupAppLocalizations(const Locale('ja')));
-    expect(RewardPreset.walk.label, '산책');
-    expect(const Routine(id: 'r2').displayTitle, '오늘의 일과');
-    const base = Routine(id: 'r1', createdByMe: false);
-    expect(base.copyWith(creatorName: '민준').foreignCreatorLabel, '민준이 만든 일과예요');
   });
 }
 

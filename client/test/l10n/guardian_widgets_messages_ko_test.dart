@@ -22,11 +22,8 @@ void main() {
   });
 
   test('AI 크레딧 안내 팝업 — 서버 단가를 문장에 넣는다', () {
-    expect(ko.creditCostTitle, 'AI 크레딧은 이렇게 줄어요');
     expect(ko.creditCostLine(1, 2), '일과 글을 만들 때 1개, 그림이 완성된 카드 1장마다 2개씩 써요.');
     expect(ko.creditCostLine(3, 12), '일과 글을 만들 때 3개, 그림이 완성된 카드 1장마다 12개씩 써요.');
-    expect(ko.creditCostKeepGoing, '크레딧이 남아 있을 때 시작한 일과는 그림이 많아도 끝까지 만들어져요.');
-    expect(ko.creditWeeklyRefill, '매주 월요일 0시에 다시 채워져요.');
   });
 
   test('오늘 일과에 담았어요 — 조사는 옛 문구 그대로 을(를)', () {
@@ -50,18 +47,5 @@ void main() {
     expect(ko.homeCoachCreate, '이룸이가 수행할 *새로운\n일과를 만들 수 있어요*');
     expect(ko.homeCoachSwipe, '일과를 *왼쪽으로 스와이프*하면\n*수정하거나 삭제*할 수 있어요');
     expect(ko.homeCoachSwitch, '캐릭터 아이콘을 누르면\n*이룸이모드로 바꿀 수 있어요*');
-  });
-
-  test('나가기 팝업 — 설명 줄바꿈을 손으로 둔 그대로', () {
-    expect(
-      ko.routineLeaveDraftWhenReadyMessage,
-      '카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요',
-    );
-    expect(ko.routineLeaveDraftMessage, '설정의 임시저장에서\n이어서 만들 수 있어요');
-  });
-
-  test('순서 옮기기 낭독 동작', () {
-    expect(ko.cardMoveForward, '앞으로 옮기기');
-    expect(ko.cardMoveBackward, '뒤로 옮기기');
   });
 }

@@ -288,22 +288,19 @@ void main() {
       }
     });
 
-    testWidgets('E12 가장 큰 SVG(rug, 107KB)를 그리는 데 걸리는 시간을 기록한다', (tester) async {
+    testWidgets('E12 가장 큰 SVG(rug, 107KB)도 3초 안에 그린다', (tester) async {
       final sw = Stopwatch()..start();
       await tester.pumpWidget(
         wrap(target: const ActionCard(id: 's', title: title, description: 'd', pictogramId: 'rug')),
       );
       await settle(tester);
       sw.stop();
-      // ignore: avoid_print
-      print('rug.svg(107KB) 첫 렌더까지 ${sw.elapsedMilliseconds}ms (위젯 테스트 벽시계)');
       expect(pictogramSvg('rug'), findsOneWidget);
       expect(sw.elapsedMilliseconds, lessThan(3000));
     });
 
     testWidgets('E13 목록에서 여러 카드가 동시에 픽토그램을 그린다', (tester) async {
       const ids = ['get_dressed_,_to', 'brush_teeth_,_to', 'umbrella', 'milk', 'wash_hands_,_to', 'go_,_to'];
-      final sw = Stopwatch()..start();
       await tester.pumpWidget(
         wrap(
           child: ListView(
@@ -323,9 +320,6 @@ void main() {
         ),
       );
       await settle(tester);
-      sw.stop();
-      // ignore: avoid_print
-      print('카드 화면에 보이는 만큼 동시 렌더 ${sw.elapsedMilliseconds}ms');
       expect(tester.takeException(), isNull);
       expect(find.byType(PictogramArt), findsAtLeastNWidgets(1));
     });
