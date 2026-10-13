@@ -54,6 +54,7 @@ Future<void> main() async {
   // 토큰은 보안 저장소에 있어 읽기가 비동기다. 첫 화면이 세션 유무를 바로
   // 판단할 수 있도록 여기서 미리 읽어 메모리에 올린다.
   late final SecureTokenStore tokens;
+  var lockMissing = false;
   try {
     final installationId = await const InstallationStore().load();
     tokens = SecureTokenStore(
@@ -62,6 +63,12 @@ Future<void> main() async {
     );
     await tokens.load();
     await storage.configureLock(installationId, reset: tokens.installationChanged);
+    try {
+      lockMissing = !await storage.hasPin();
+    } catch (error) {
+      // 잠금 기록이 깨졌으면 새로 만들 수 없다 — 기존 동작대로 둔다.
+      AppLogger.error('잠금 확인', error);
+    }
     if (tokens.installationChanged) {
       // 큐와 프로필은 회원 대조까지 보존하되 연결 상태로 로그인을 우회하지 못하게 한다.
       await storage.setElumiDevice(false);
@@ -97,6 +104,7 @@ Future<void> main() async {
       overrides: [
         localStorageProvider.overrideWithValue(storage),
         tokenStoreProvider.overrideWithValue(tokens),
+        startupLockMissingProvider.overrideWithValue(lockMissing),
       ],
       child: const ElumApp(),
     ),
