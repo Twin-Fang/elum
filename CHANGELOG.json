@@ -1,15 +1,50 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-13T15:11:44Z",
-    "currentVersion": "2.28.0",
+    "lastUpdated": "2026-10-13T15:55:51Z",
+    "currentVersion": "2.29.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 235
+    "totalReleases": 236
   },
   "releases": [
+    {
+      "version": "2.29.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-13",
+      "pr_number": 638,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 초대 코드와 연결 암호를 복사할 수 있어요\n  * 연결 암호도 링크로 보낼 수 있어요\n  * 화면을 나갔다 들어와도 코드가 그대로예요\n\n* **버그 수정**\n  * 연결 암호를 다 넣으면 시작하기 버튼이 바로 보여요\n\n* **개선**\n  * 초대 코드와 연결 암호 화면을 같은 모양으로 맞췄어요\n  * 여러 줄 안내 문구를 더 읽기 편하게 띄웠어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "초대 코드와 연결 암호를 복사할 수 있어요",
+            "연결 암호도 링크로 보낼 수 있어요",
+            "화면을 나갔다 들어와도 코드가 그대로예요"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "연결 암호를 다 넣으면 시작하기 버튼이 바로 보여요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "초대 코드와 연결 암호 화면을 같은 모양으로 맞췄어요",
+            "여러 줄 안내 문구를 더 읽기 편하게 띄웠어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.28.0",
       "project_type": "flutter",
