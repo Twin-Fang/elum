@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/kept_text_finder.dart';
 import 'helpers/profile_fixtures.dart';
 import 'helpers/semantics_audit.dart';
 import 'package:elum/features/member/application/member_providers.dart';
@@ -73,8 +74,8 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('함께하는 보호자 휴대폰에서'), findsOneWidget);
-    expect(find.textContaining('설정 → 함께하는 사람'), findsOneWidget);
+    expect(findKept('함께하는 보호자 휴대폰에서'), findsOneWidget);
+    expect(findKept('설정 → 함께하는 사람'), findsOneWidget);
     // 이룸이 휴대폰의 연결 암호와 말을 섞지 않는다
     expect(find.textContaining('연결 암호'), findsNothing);
     expect(find.textContaining('초대 코드'), findsWidgets);
@@ -138,8 +139,8 @@ void main() {
     testWidgets('없는 코드(404): 서버 문구와 에러 코드를 보이고 입력을 비운다 (E8)', (tester) async {
       await failWith(tester, serverFailure(404, ServerErrorCode.profileInviteNotFound, '초대 코드가 맞지 않아요.'));
 
-      expect(find.textContaining('초대 코드가 맞지 않아요.'), findsOneWidget);
-      expect(find.textContaining('PROFILE_INVITE_NOT_FOUND'), findsOneWidget);
+      expect(find.textContaining('초대 코드가 맞지 않아요 (E-INV'), findsOneWidget);
+      expect(find.textContaining('E-INV-404'), findsOneWidget);
       expect(input(tester).text, isEmpty);
       expect(find.text('보호자 홈'), findsNothing);
     });
@@ -148,15 +149,15 @@ void main() {
       await failWith(tester, serverFailure(410, ServerErrorCode.profileInviteExpired, '초대 코드가 만료됐어요. 새 코드를 받아주세요.'));
 
       expect(find.textContaining('새 코드를 받아주세요'), findsOneWidget);
-      expect(find.textContaining('PROFILE_INVITE_EXPIRED'), findsOneWidget);
+      expect(find.textContaining('E-INV-410'), findsOneWidget);
       expect(input(tester).text, isEmpty);
     });
 
     testWidgets('이미 함께하는 이룸이(409, 자기 코드 포함): 이유와 코드를 보인다 (E1·E2)', (tester) async {
       await failWith(tester, serverFailure(409, ServerErrorCode.profileAlreadyGuardian, '이미 함께하고 있는 이룸이예요.'));
 
-      expect(find.textContaining('이미 함께하고 있는 이룸이예요.'), findsOneWidget);
-      expect(find.textContaining('PROFILE_ALREADY_GUARDIAN'), findsOneWidget);
+      expect(find.textContaining('이미 함께하고 있는 이룸이예요 (E-INV'), findsOneWidget);
+      expect(find.textContaining('E-INV-409'), findsOneWidget);
       expect(find.text('보호자 홈'), findsNothing);
     });
 
@@ -164,7 +165,7 @@ void main() {
       await failWith(tester, serverFailure(429, ServerErrorCode.profileInviteTooManyAttempts, '여러 번 잘못 입력했어요. 잠시 뒤에 다시 하거나 새 코드를 받아주세요.'));
 
       expect(find.textContaining('여러 번 잘못 입력했어요'), findsOneWidget);
-      expect(find.textContaining('PROFILE_INVITE_TOO_MANY_ATTEMPTS'), findsOneWidget);
+      expect(find.textContaining('E-INV-429'), findsOneWidget);
       expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
 
       // 잠긴 뒤 칸을 눌러도 다시 보내지 않는다
@@ -173,11 +174,11 @@ void main() {
       expect(repo.sentCodes.length, 1);
     });
 
-    testWidgets('이룸이 휴대폰(403): 이유를 보이고 잠근다 — 서버 코드 DEVICE_LINK_FORBIDDEN_FOR_ELUMI', (tester) async {
+    testWidgets('이룸이 휴대폰(403): 이유를 보이고 잠근다 — 에러 코드 E-INV-403', (tester) async {
       await failWith(tester, serverFailure(403, ServerErrorCode.deviceLinkForbiddenForElumi, '이룸이 휴대폰에서는 할 수 없어요.'));
 
-      expect(find.textContaining('이룸이 휴대폰에서는 할 수 없어요.'), findsOneWidget);
-      expect(find.textContaining('DEVICE_LINK_FORBIDDEN_FOR_ELUMI'), findsOneWidget);
+      expect(find.textContaining('이룸이 휴대폰에서는 할 수 없어요 (E-INV'), findsOneWidget);
+      expect(find.textContaining('E-INV-403'), findsOneWidget);
       expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
     });
 
@@ -219,8 +220,9 @@ void main() {
     testWidgets('예상 못 한 실패도 화면을 덮지 않고 코드를 보인다', (tester) async {
       await failWith(tester, serverFailure(500, ServerErrorCode.internalServerError, '잠시 후 다시 시도해주세요.'));
 
-      expect(find.textContaining('E-INV'), findsNothing); // 서버 코드가 이긴다
-      expect(find.textContaining('INTERNAL_SERVER_ERROR'), findsOneWidget);
+      // 서버 enum 이 아니라 앱 에러 코드(상태 코드 포함)를 보인다
+      expect(find.textContaining('E-INV/500'), findsOneWidget);
+      expect(find.textContaining('INTERNAL_SERVER_ERROR'), findsNothing);
       expect(find.text('보호자 홈'), findsNothing);
     });
 

@@ -1364,11 +1364,11 @@ abstract class AppLocalizations {
   /// **'이룸이를 먼저 등록해주세요'**
   String get guardiansNoProfileDescription;
 
-  /// 함께하는 사람 목록의 머리 설명. name 은 이룸이 호칭(한국어는 조사를 `를` 로 고정해 둔 현행 문구)
+  /// 함께하는 사람 목록의 머리 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'{name}를 함께 돌보는 사람이에요'**
-  String guardiansCaption(String name);
+  /// **'{name}{batchim, select, yes{을} other{를}} 함께 돌보는 사람이에요'**
+  String guardiansCaption(String name, String batchim);
 
   /// 함께하는 사람 화면의 보조 설명(보호자와 이룸이 휴대폰 연결을 구분)
   ///
@@ -1423,6 +1423,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요'**
   String get guardiansLeaveHintWithOthers;
+
+  /// 이름을 아직 안 정한 내 줄 오른쪽에 보이는 가벼운 안내. 누르면 이름 고치기 시트가 열린다
+  ///
+  /// In ko, this message translates to:
+  /// **'이름을 넣어보세요'**
+  String get guardiansNameHint;
+
+  /// 내가 만든 초대 코드로 다른 보호자가 합류했을 때 팝업 제목. name 은 합류한 사람 이름(없으면 기본 호칭)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}님이 함께하게 됐어요'**
+  String inviteCodeGuestJoinedTitle(String name);
 
   /// 목록에서 내 줄에 붙는 작은 표시
   ///

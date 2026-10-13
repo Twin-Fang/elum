@@ -44,10 +44,10 @@ void main() {
     expect(ko.inviteJoined('루미', batchimOf('루미')), '루미를 함께 돌보게 됐어요');
   });
 
-  test('이름이 들어가는 문구 — 조사는 현재 동작 그대로 고정이다', () {
-    // 함께하는 사람 머리 설명은 받침과 무관하게 `를` 이다(현행 문구를 그대로 둔다)
-    expect(ko.guardiansCaption('하늘'), '하늘를 함께 돌보는 사람이에요');
-    expect(ko.guardiansCaption('루미'), '루미를 함께 돌보는 사람이에요');
+  test('이름이 들어가는 문구 — 조사', () {
+    // 함께하는 사람 머리 설명은 받침에 따라 `을/를` 을 고른다
+    expect(ko.guardiansCaption('하늘', batchimOf('하늘')), '하늘을 함께 돌보는 사람이에요');
+    expect(ko.guardiansCaption('루미', batchimOf('루미')), '루미를 함께 돌보는 사람이에요');
     expect(ko.guardiansLeft('하늘이'), '하늘이에서 나왔어요');
     expect(ko.guardiansLeft('바다'), '바다에서 나왔어요');
     expect(ko.profileSwitchSelected('하늘'), '하늘, 지금 보는 이룸이');
@@ -161,14 +161,14 @@ void main() {
     );
 
     final cases = <String, (AppFailure, String)>{
-      '없는 코드': (bare(404), '초대 코드가 맞지 않아요 (E-INV-404/404)'),
-      '만료': (bare(410), '초대 코드가 만료됐어요. 새 코드를 받아주세요 (E-INV-410/410)'),
-      '시도 한도': (bare(429), '잠시 뒤에 다시 해주세요 (E-INV-429/429)'),
-      '이미 함께함': (bare(409), '이미 함께하고 있는 이룸이예요 (E-INV-409/409)'),
+      '없는 코드': (bare(404), '초대 코드가 맞지 않아요 (E-INV-404)'),
+      '만료': (bare(410), '초대 코드가 만료됐어요. 새 코드를 받아주세요 (E-INV-410)'),
+      '시도 한도': (bare(429), '잠시 뒤에 다시 해주세요 (E-INV-429)'),
+      '이미 함께함': (bare(409), '이미 함께하고 있는 이룸이예요 (E-INV-409)'),
       '그 밖의 실패': (const AppFailure(fault: NetworkFault.none), '연결하지 못했어요. 다시 해주세요 (E-INV)'),
     };
     for (final entry in cases.entries) {
-      testWidgets('${entry.key}: 기본 문구와 식별자가 옛 문구와 같다', (tester) async {
+      testWidgets('${entry.key}: 기본 문구에 앱 에러 코드가 붙는다', (tester) async {
         await submit(tester, entry.value.$1);
         expect(find.text(entry.value.$2), findsOneWidget);
       });
@@ -176,7 +176,7 @@ void main() {
 
     testWidgets('서버 문구가 있으면 그것이 기본 문구를 이긴다', (tester) async {
       await submit(tester, serverFailure(404, ServerErrorCode.profileInviteNotFound, '서버가 준 문구'));
-      expect(find.text('서버가 준 문구 (PROFILE_INVITE_NOT_FOUND)'), findsOneWidget);
+      expect(find.text('서버가 준 문구 (E-INV-404)'), findsOneWidget);
     });
 
     testWidgets('오프라인: 옛 describe 결과와 같고 입력은 남는다', (tester) async {

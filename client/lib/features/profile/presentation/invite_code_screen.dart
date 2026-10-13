@@ -8,6 +8,7 @@ import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -16,6 +17,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../link/domain/link_status.dart';
 import '../../link/presentation/widgets/issued_code_panel.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../application/guardians_controller.dart';
 import '../application/invite_code_controller.dart';
 import '../application/invite_sharer.dart';
 import '../application/profile_session.dart';
@@ -76,6 +78,19 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
 
   Timer? _ticker;
 
+  /// 코드를 받은 사람이 합류했는지 주기적으로 묻는다. 보낸 사람은 이 화면을 보고 있어야 바로 안다.
+  Timer? _poller;
+
+  /// 이 화면을 연 뒤 이미 함께하던 사람들. 여기에 없는 사람이 생기면 새로 합류한 것이다.
+  /// 처음 조회가 실패하면 null 이고, 처음 성공한 응답이 기준이 된다.
+  Set<String>? _knownGuardianIds;
+
+  /// 합류 팝업을 두 번 띄우지 않는다. 폴링이 한 박자 늦게 또 돌 수 있다.
+  bool _celebrated = false;
+
+  /// 폴링 요청이 아직 돌고 있다. 응답이 3초보다 늦을 때 요청이 쌓이지 않게 한다.
+  bool _polling = false;
+
   /// 설정 진입 시안(`1027:4617`)과 같은 머리 — 뒤로가기 y=67, 제목 y=147.
   static const _settingsBackTop = 67.0;
   static const _settingsTitleY = 147.0;
@@ -89,6 +104,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   @override
   void dispose() {
     _ticker?.cancel();
+    _poller?.cancel();
     super.dispose();
   }
 
@@ -133,6 +149,62 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       _loading = false;
     });
     _startTicker();
+    _startPoller(active.id);
+  }
+
+  /// 3초마다 함께하는 사람을 받아 새로 생긴 사람이 있으면 합류를 알린다. 못 받은 박자는 건너뛴다 —
+  /// 실패를 `아무도 없음`으로 읽지 않는다. 코드가 만료되면 더 기다릴 이유가 없어 멈춘다.
+  void _startPoller(String profileId) {
+    _poller?.cancel();
+    _poller = Timer.periodic(const Duration(seconds: 3), (t) async {
+      if (!mounted || (_issued?.isExpired ?? true)) return t.cancel();
+      if (_polling || _celebrated) return;
+      _polling = true;
+      try {
+        final attempt = await ref.read(guardiansControllerProvider).listGuardians(profileId);
+        if (!mounted || !attempt.isOk) return;
+        final guardians = attempt.value ?? const [];
+        // 열 때 기준을 못 잡았으면 처음 성공한 응답을 기준으로 삼는다 — 틀리게 알리는 것보다 낫다.
+        final known = _knownGuardianIds;
+        if (known == null) {
+          _knownGuardianIds = guardians.map((g) => g.id).toSet();
+          return;
+        }
+        final joined = guardians.where((g) => !known.contains(g.id)).toList();
+        if (joined.isEmpty) return;
+        t.cancel();
+        _ticker?.cancel();
+        await _celebrate(joined.first.label);
+      } catch (_) {
+        // 폴링 실패는 화면을 깨지 않는다 — 다음 박자에 다시 묻는다.
+      } finally {
+        _polling = false;
+      }
+    });
+    // 기준은 코드를 만들 때 잡는다 — 코드를 쓰기 전이라 합류자가 목록에 끼지 않는다.
+    unawaited(_captureBaseline(profileId));
+  }
+
+  Future<void> _captureBaseline(String profileId) async {
+    try {
+      final attempt = await ref.read(guardiansControllerProvider).listGuardians(profileId);
+      if (!mounted || !attempt.isOk) return;
+      _knownGuardianIds ??= (attempt.value ?? const []).map((g) => g.id).toSet();
+    } catch (_) {
+      // 기준을 못 잡으면 첫 폴링 응답이 대신한다.
+    }
+  }
+
+  /// 합류 팝업. 코드는 이미 쓰였으므로 확인하면 이전 화면으로 돌아간다.
+  Future<void> _celebrate(String guestName) async {
+    if (_celebrated || !mounted) return;
+    _celebrated = true;
+    await showElumDialog<void>(
+      context: context,
+      icon: ElumDialogIcon.success,
+      title: context.l10n.inviteCodeGuestJoinedTitle(guestName),
+    );
+    if (mounted) context.popOrHome();
   }
 
   /// 남은 시간을 초까지 보여 주므로 1초마다 다시 그린다. 만료되면 멈춘다.

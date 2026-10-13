@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/kept_text_finder.dart';
 import 'helpers/profile_fixtures.dart';
 import 'helpers/semantics_audit.dart';
 import 'package:elum/features/member/application/member_providers.dart';
@@ -79,7 +80,7 @@ void main() {
       for (final ch in 'A7K3M9'.split('')) {
         expect(find.text(ch), findsOneWidget);
       }
-      expect(find.textContaining('링크로 받은 초대 코드'), findsOneWidget);
+      expect(findKept('링크로 받은 초대 코드'), findsOneWidget);
       // 이룸이 휴대폰의 연결 암호와 말을 섞지 않는다
       expect(find.textContaining('연결 암호'), findsNothing);
     });
@@ -138,7 +139,7 @@ void main() {
 
     testWidgets('직접 입력 안내 카드는 숨긴다 — 받은 코드가 이미 채워져 있다', (tester) async {
       await open(tester);
-      expect(find.textContaining('설정 → 함께하는 사람'), findsNothing);
+      expect(findKept('설정 → 함께하는 사람'), findsNothing);
     });
   });
 
@@ -148,7 +149,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('함께하기'), findsNothing);
-      expect(find.textContaining('설정 → 함께하는 사람'), findsOneWidget);
+      expect(findKept('설정 → 함께하는 사람'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), 'A7K3M9');
       await tester.pumpAndSettle();
@@ -196,8 +197,8 @@ void main() {
     testWidgets('없는·쓴 코드(404): 서버 문구와 에러 코드를 보이고 확인 상태를 거둔다', (tester) async {
       await failWith(tester, serverFailure(404, ServerErrorCode.profileInviteNotFound, '초대 코드가 맞지 않아요.'));
 
-      expect(find.textContaining('초대 코드가 맞지 않아요.'), findsOneWidget);
-      expect(find.textContaining('PROFILE_INVITE_NOT_FOUND'), findsOneWidget);
+      expect(find.textContaining('초대 코드가 맞지 않아요 (E-INV'), findsOneWidget);
+      expect(find.textContaining('E-INV-404'), findsOneWidget);
       expect(find.text('함께하기'), findsNothing);
       expect(input(tester).text, isEmpty);
     });
@@ -206,15 +207,15 @@ void main() {
       await failWith(tester, serverFailure(410, ServerErrorCode.profileInviteExpired, '초대 코드가 만료됐어요. 새 코드를 받아주세요.'));
 
       expect(find.textContaining('새 코드를 받아주세요'), findsOneWidget);
-      expect(find.textContaining('PROFILE_INVITE_EXPIRED'), findsOneWidget);
+      expect(find.textContaining('E-INV-410'), findsOneWidget);
       expect(find.text('함께하기'), findsNothing);
     });
 
     testWidgets('이미 함께하는 이룸이(409): 이유와 코드를 보인다', (tester) async {
       await failWith(tester, serverFailure(409, ServerErrorCode.profileAlreadyGuardian, '이미 함께하고 있는 이룸이예요.'));
 
-      expect(find.textContaining('이미 함께하고 있는 이룸이예요.'), findsOneWidget);
-      expect(find.textContaining('PROFILE_ALREADY_GUARDIAN'), findsOneWidget);
+      expect(find.textContaining('이미 함께하고 있는 이룸이예요 (E-INV'), findsOneWidget);
+      expect(find.textContaining('E-INV-409'), findsOneWidget);
     });
 
     testWidgets('시도 한도(429): 안내하고 입력을 잠가 더 보내지 않는다', (tester) async {

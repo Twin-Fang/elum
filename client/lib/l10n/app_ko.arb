@@ -688,8 +688,8 @@
   "guardiansNoProfileDescription": "이룸이를 먼저 등록해주세요",
   "@guardiansNoProfileDescription": {"description": "이룸이가 없을 때의 안내 설명"},
 
-  "guardiansCaption": "{name}를 함께 돌보는 사람이에요",
-  "@guardiansCaption": {"description": "함께하는 사람 목록의 머리 설명. name 은 이룸이 호칭(한국어는 조사를 `를` 로 고정해 둔 현행 문구)", "placeholders": {"name": {"type": "String"}}},
+  "guardiansCaption": "{name}{batchim, select, yes{을} other{를}} 함께 돌보는 사람이에요",
+  "@guardiansCaption": {"description": "함께하는 사람 목록의 머리 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다", "placeholders": {"name": {"type": "String"}, "batchim": {"type": "String"}}},
 
   "guardiansIntro": "일과를 같이 만드는 가족이나 선생님이에요. 이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요",
   "@guardiansIntro": {"description": "함께하는 사람 화면의 보조 설명(보호자와 이룸이 휴대폰 연결을 구분)"},
@@ -717,6 +717,12 @@
 
   "guardiansLeaveHintWithOthers": "내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요",
   "@guardiansLeaveHintWithOthers": {"description": "그만두기 줄 아래 설명(다른 보호자가 있을 때)"},
+
+  "guardiansNameHint": "이름을 넣어보세요",
+  "@guardiansNameHint": {"description": "이름을 아직 안 정한 내 줄 오른쪽에 보이는 가벼운 안내. 누르면 이름 고치기 시트가 열린다"},
+
+  "inviteCodeGuestJoinedTitle": "{name}님이 함께하게 됐어요",
+  "@inviteCodeGuestJoinedTitle": {"description": "내가 만든 초대 코드로 다른 보호자가 합류했을 때 팝업 제목. name 은 합류한 사람 이름(없으면 기본 호칭)", "placeholders": {"name": {"type": "String"}}},
 
   "guardiansMeBadge": "나",
   "@guardiansMeBadge": {"description": "목록에서 내 줄에 붙는 작은 표시"},
