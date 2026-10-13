@@ -60,6 +60,10 @@ public class DeviceLink extends BaseEntity {
   @Column(name = "linked_device_id")
   private String linkedDeviceId;
 
+  /** 이룸이 휴대폰의 기기 이름(모델명만). 옛 앱이 연결한 행은 null 이다. */
+  @Column(name = "device_name", length = 60)
+  private String deviceName;
+
   /** 연결이 끊긴 시각. 보호자가 끊었거나, 새 암호를 만들어 이전 연결을 갈아치웠을 때. */
   @Column(name = "revoked_at")
   private LocalDateTime revokedAt;

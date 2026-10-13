@@ -8,7 +8,10 @@ import com.chuseok22.elumserver.member.application.dto.response.GuardianResponse
 import com.chuseok22.elumserver.member.core.GuardianDisplayName;
 import com.chuseok22.elumserver.member.infrastructure.entity.ProfileGuardian;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,26 @@ public class ProfileGuardianService {
   private final ProfileGuardianRepository profileGuardianRepository;
   private final ProfileAccessGuard profileAccessGuard;
   private final GuardianshipService guardianshipService;
+
+  /**
+   * 이 이룸이 안에서 보호자들이 불리는 이름을 한 번에 묻는다. 이름이 없는 사람은 담지 않는다.
+   * 다른 도메인(연결)이 repository 를 직접 쓰지 않고 이 메서드로 묻는다.
+   */
+  @Transactional(readOnly = true)
+  public Map<String, String> displayNamesOf(String profileId, Collection<String> memberIds) {
+    Map<String, String> names = new HashMap<>();
+    if (profileId == null || memberIds == null || memberIds.isEmpty()) {
+      return names;
+    }
+    for (ProfileGuardianRepository.GuardianName g
+      : profileGuardianRepository.findNamesByProfileIdAndMemberIdIn(profileId, memberIds)) {
+      String name = g.getDisplayName();
+      if (name != null && !name.isBlank()) {
+        names.put(g.getMemberId(), name.strip());
+      }
+    }
+    return names;
+  }
 
   /** 함께하는 사람 목록, 먼저 합류한 차례. */
   @Transactional(readOnly = true)

@@ -105,7 +105,8 @@ void main() {
 
       expect(find.text('이룸이 휴대폰'), findsOneWidget, reason: '제목');
       expect(find.text('연결됨'), findsOneWidget);
-      expect(find.text('9월 18일부터'), findsOneWidget);
+      // 옛 응답(연결한 사람 정보 없음)은 '보호자'로 부른다
+      expect(find.text('보호자가 연결 · 9월 18일부터'), findsOneWidget);
       expect(find.text('연결 끊기'), findsOneWidget);
       expect(find.textContaining('끊으면 이룸이 휴대폰에서'), findsOneWidget);
     });
@@ -122,7 +123,40 @@ void main() {
       expect(find.text('이룸이 휴대폰 1'), findsOneWidget);
       expect(find.text('이룸이 휴대폰 2'), findsOneWidget);
       expect(find.text('연결 끊기'), findsNWidgets(2));
-      expect(find.text('9월 20일부터'), findsOneWidget);
+      expect(find.text('보호자가 연결 · 9월 20일부터'), findsOneWidget);
+    });
+
+    testWidgets('기기 이름·연결한 사람·연결 날짜를 보이고, 목록 아래에서 다른 휴대폰을 더 연결한다', (tester) async {
+      routes['GET /api/device-links'] = const {
+        'devices': [
+          {
+            'linkId': 'l2',
+            'linkedAt': '2026-10-13T09:00:00',
+            'deviceName': 'iPhone 16',
+            'linkedByName': '김선생님',
+            'linkedByMe': false,
+          },
+          {
+            'linkId': 'l1',
+            'linkedAt': '2026-09-18T10:31:00',
+            'deviceName': 'Samsung SM-S921N',
+            'linkedByMe': true,
+          },
+        ],
+      };
+      await open(tester);
+
+      expect(find.text('iPhone 16'), findsOneWidget);
+      expect(find.text('김선생님이 연결 · 10월 13일부터'), findsOneWidget);
+      expect(find.text('Samsung SM-S921N'), findsOneWidget);
+      expect(find.text('내가 연결 · 9월 18일부터'), findsOneWidget);
+      // 이름이 있으면 번호 제목 대신 기기 이름이 제목이다
+      expect(find.text('이룸이 휴대폰 1'), findsNothing);
+
+      await tester.ensureVisible(find.text('+ 다른 휴대폰 연결하기'));
+      await tester.tap(find.text('+ 다른 휴대폰 연결하기'));
+      await tester.pumpAndSettle();
+      expect(find.text('연결 암호 화면'), findsOneWidget);
     });
 
     testWidgets('연결된 휴대폰이 없으면(다른 사람이 먼저 끊음) 연결하기로 이어 준다', (tester) async {

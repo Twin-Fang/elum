@@ -541,6 +541,24 @@
   "linkStatusEmpty": "연결된 휴대폰이 없어요",
   "@linkStatusEmpty": { "description": "연결된 휴대폰이 하나도 없을 때" },
 
+  "linkStatusConnectedBy": "{name}{batchim, select, yes{이} other{가}} 연결",
+  "@linkStatusConnectedBy": {
+    "description": "연결된 휴대폰을 누가 연결했는지. name 은 연결 암호를 만든 보호자가 이 이룸이 안에서 불리는 이름(없으면 '보호자'). batchim 은 한국어 조사 선택용이라 다른 언어는 쓰지 않는다",
+    "placeholders": { "name": { "type": "String" }, "batchim": { "type": "String" } }
+  },
+
+  "linkStatusConnectedByMe": "내가 연결",
+  "@linkStatusConnectedByMe": { "description": "내가 만든 연결 암호로 붙은 휴대폰" },
+
+  "linkStatusConnectedByAndSince": "{by} · {since}",
+  "@linkStatusConnectedByAndSince": {
+    "description": "연결한 사람과 연결 날짜를 한 줄로 잇는다. 예: 김선생님이 연결 · 10월 13일부터",
+    "placeholders": { "by": { "type": "String" }, "since": { "type": "String" } }
+  },
+
+  "linkStatusAddAction": "+ 다른 휴대폰 연결하기",
+  "@linkStatusAddAction": { "description": "연결된 휴대폰이 있어도 목록 아래에서 연결 암호 만들기로 가는 버튼" },
+
   "linkStatusConnectAction": "이룸이 휴대폰 연결하기",
   "@linkStatusConnectAction": { "description": "연결 없음 상태에서 연결 암호 만들기로 가는 버튼" },
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
@@ -36,10 +37,10 @@ import '../../../core/router/routes.dart';
 /// | 불러오는 중 | 돌아가는 표시 |
 /// | 못 불러옴 | 이유 + `다시 시도` + 에러 코드 (빈 화면·무한 로딩 금지) |
 /// | 연결 없음 | `연결된 휴대폰이 없어요` + 연결하기 (다른 사람이 먼저 끊은 경우) |
-/// | 연결됨 | `연결됨` + `9월 18일부터` + `연결 끊기` |
+/// | 연결됨 | 기기 이름 + `연결됨` + `누가 연결 · 9월 18일부터` + `연결 끊기`, 목록 아래 `다른 휴대폰 연결하기` |
 ///
 /// 함께 돌보는 보호자가 붙인 휴대폰도 보인다 (다중 보호자 명세 4-2) — 연결된 보호자는 모두 동등하다.
-/// 누가 붙였는지는 보여주지 않는다 (서버가 계정 식별자를 내리지 않는다).
+/// 누가 붙였는지는 이 이룸이 안에서 불리는 이름으로만 보인다 (서버가 계정 식별자·이메일을 내리지 않는다).
 class LinkStatusScreen extends ConsumerStatefulWidget {
   const LinkStatusScreen({super.key});
 
@@ -175,6 +176,15 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen>
               color: context.colors.textSecondary,
             ),
           ),
+          // 연결된 휴대폰이 있어도 태블릿 등을 더 붙일 수 있다. 돌아오면 이 화면이 그대로 남는다.
+          SizedBox(height: 32.h),
+          Center(
+            child: _ConnectChip(
+              label: context.l10n.linkStatusAddAction,
+              onTap: busy ? null : () => context.push(Routes.linkCode),
+            ),
+          ),
+          SizedBox(height: 24.h),
         ],
       ),
     );
@@ -193,28 +203,46 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen>
           ),
         ),
         SizedBox(height: 24.h),
-        AppPressable(
+        _ConnectChip(
+          label: context.l10n.linkStatusConnectAction,
           onTap: () => context.pushReplacement(Routes.linkCode),
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 24.w),
-            decoration: BoxDecoration(
-              color: context.colors.linkRetryChipBg,
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            child: Text(
-              context.l10n.linkStatusConnectAction,
-              style: context.typo.settingsTileLabel.copyWith(
-                color: context.colors.textPrimary,
-              ),
-            ),
-          ),
         ),
       ],
     );
   }
 }
 
-/// 연결된 휴대폰 한 대 — 상태·언제부터·`연결 끊기`.
+/// 연결 암호 만들기로 가는 칩 버튼 — 연결 없음 상태와 목록 아래 입구가 함께 쓴다.
+class _ConnectChip extends StatelessWidget {
+  const _ConnectChip({required this.label, required this.onTap});
+
+  final String label;
+
+  /// null 이면 다른 요청을 기다리는 중이라 누를 수 없다.
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPressable(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 24.w),
+        decoration: BoxDecoration(
+          color: context.colors.linkRetryChipBg,
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        child: Text(
+          label,
+          style: context.typo.settingsTileLabel.copyWith(
+            color: context.colors.textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 연결된 휴대폰 한 대 — 기기 이름·상태·누가 언제부터·`연결 끊기`.
 class _DeviceBlock extends StatelessWidget {
   const _DeviceBlock({
     required this.device,
@@ -236,7 +264,19 @@ class _DeviceBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typo = context.typo;
-    final since = device.sinceLabel;
+    final l10n = context.l10n;
+    final deviceName = device.deviceName;
+    // 연결한 사람 + 날짜를 한 줄로. 날짜를 모르면 사람만, 이름이 없으면 '보호자'로 부른다.
+    final by = device.linkedByMe
+        ? l10n.linkStatusConnectedByMe
+        : () {
+            final name = device.linkedByName ?? l10n.commonGuardianName;
+            return l10n.linkStatusConnectedBy(name, batchimOf(name));
+          }();
+    final sinceLabel = device.sinceLabel;
+    final since = sinceLabel == null
+        ? by
+        : l10n.linkStatusConnectedByAndSince(by, sinceLabel);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -246,24 +286,49 @@ class _DeviceBlock extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (title != null) ...[
+              if (deviceName != null)
+                // 기기 이름이 있으면 이름과 상태를 한 줄에 둔다 (이름 · 연결됨)
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        deviceName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: typo.subtitle.copyWith(
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Text(
+                      l10n.linkStatusConnected,
+                      style: typo.promptBody.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                )
+              else ...[
+                // 이름을 모르면(옛 앱이 연결) 기존처럼 `이룸이 휴대폰` 번호 제목과 `연결됨`
+                if (title != null) ...[
+                  Text(
+                    title!,
+                    style:
+                        typo.promptBody.copyWith(color: colors.textSecondary),
+                  ),
+                  SizedBox(height: 8.h),
+                ],
                 Text(
-                  title!,
-                  style: typo.promptBody.copyWith(color: colors.textSecondary),
+                  l10n.linkStatusConnected,
+                  style: typo.subtitle.copyWith(color: colors.textPrimary),
                 ),
-                SizedBox(height: 8.h),
               ],
+              SizedBox(height: 8.h),
               Text(
-                context.l10n.linkStatusConnected,
-                style: typo.subtitle.copyWith(color: colors.textPrimary),
+                since,
+                style: typo.promptBody.copyWith(color: colors.textSecondary),
               ),
-              if (since != null) ...[
-                SizedBox(height: 8.h),
-                Text(
-                  since,
-                  style: typo.promptBody.copyWith(color: colors.textSecondary),
-                ),
-              ],
             ],
           ),
         ),
@@ -287,7 +352,7 @@ class _DeviceBlock extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  context.l10n.linkStatusRevokeButton,
+                  l10n.linkStatusRevokeButton,
                   style: typo.settingsTileLabel.copyWith(
                     color: onDisconnect == null
                         ? colors.settingsChevron

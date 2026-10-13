@@ -1094,6 +1094,30 @@ abstract class AppLocalizations {
   /// **'연결된 휴대폰이 없어요'**
   String get linkStatusEmpty;
 
+  /// 연결된 휴대폰을 누가 연결했는지. name 은 연결 암호를 만든 보호자가 이 이룸이 안에서 불리는 이름(없으면 '보호자'). batchim 은 한국어 조사 선택용이라 다른 언어는 쓰지 않는다
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}{batchim, select, yes{이} other{가}} 연결'**
+  String linkStatusConnectedBy(String name, String batchim);
+
+  /// 내가 만든 연결 암호로 붙은 휴대폰
+  ///
+  /// In ko, this message translates to:
+  /// **'내가 연결'**
+  String get linkStatusConnectedByMe;
+
+  /// 연결한 사람과 연결 날짜를 한 줄로 잇는다. 예: 김선생님이 연결 · 10월 13일부터
+  ///
+  /// In ko, this message translates to:
+  /// **'{by} · {since}'**
+  String linkStatusConnectedByAndSince(String by, String since);
+
+  /// 연결된 휴대폰이 있어도 목록 아래에서 연결 암호 만들기로 가는 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'+ 다른 휴대폰 연결하기'**
+  String get linkStatusAddAction;
+
   /// 연결 없음 상태에서 연결 암호 만들기로 가는 버튼
   ///
   /// In ko, this message translates to:

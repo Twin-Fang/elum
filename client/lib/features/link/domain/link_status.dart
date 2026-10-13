@@ -3,10 +3,25 @@ import '../../../core/l10n/date_labels.dart';
 
 /// 연결된 이룸이 휴대폰 하나.
 class LinkedDevice {
-  const LinkedDevice({required this.linkId, required this.linkedAt});
+  const LinkedDevice({
+    required this.linkId,
+    required this.linkedAt,
+    this.deviceName,
+    this.linkedByName,
+    this.linkedByMe = false,
+  });
 
   final String linkId;
   final DateTime? linkedAt;
+
+  /// 기기 모델명(`iPhone 16`). 옛 앱이 연결했거나 못 읽었으면 null.
+  final String? deviceName;
+
+  /// 이 연결 암호를 만든 보호자가 이 이룸이 안에서 불리는 이름. 모르면 null — 화면이 `보호자`로 부른다.
+  final String? linkedByName;
+
+  /// 내가 만든 연결 암호로 붙은 휴대폰인가.
+  final bool linkedByMe;
 
   /// 상태 화면의 `9월 18일부터`. 시각을 모르면 null — 줄째 그리지 않는다.
   String? get sinceLabel {
@@ -21,8 +36,18 @@ class LinkedDevice {
     return LinkedDevice(
       linkId: id,
       linkedAt: DateTime.tryParse(json['linkedAt']?.toString() ?? ''),
+      deviceName: _text(json['deviceName']),
+      linkedByName: _text(json['linkedByName']),
+      linkedByMe: json['linkedByMe'] == true,
     );
   }
+}
+
+/// 비었거나 문자열이 아니면 null — 옛 서버 응답에는 이 필드들이 없다.
+String? _text(Object? raw) {
+  if (raw is! String) return null;
+  final t = raw.trim();
+  return t.isEmpty ? null : t;
 }
 
 /// 보호자 화면이 보여줄 연결 상태.

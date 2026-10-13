@@ -25,6 +25,7 @@ import com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
+import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -34,6 +35,7 @@ import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,6 +62,7 @@ class DeviceLinkServiceTest {
   @Mock private DeviceLinkRepository deviceLinkRepository;
   @Mock private MemberRepository memberRepository;
   @Mock private ProfileAccessGuard profileAccessGuard;
+  @Mock private ProfileGuardianService profileGuardianService;
   @Mock private RefreshTokenRepository refreshTokenRepository;
   @Mock private RefreshTokenService refreshTokenService;
   @Mock private JwtProvider jwtProvider;
@@ -141,7 +144,7 @@ class DeviceLinkServiceTest {
     DeviceLink l = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
     when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
 
-    TokenResponse res = service.redeem("a7k3m9");
+    TokenResponse res = service.redeem("a7k3m9", null);
 
     assertThat(res.accessToken()).isEqualTo("elumi-access");
     assertThat(l.getRedeemedAt()).isNotNull();
@@ -160,7 +163,7 @@ class DeviceLinkServiceTest {
     DeviceLink l = link("A7K3M9", LocalDateTime.now().minusSeconds(1));
     when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
 
-    assertThatThrownBy(() -> service.redeem("A7K3M9"))
+    assertThatThrownBy(() -> service.redeem(("A7K3M9"), null))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.DEVICE_LINK_EXPIRED));
@@ -173,7 +176,7 @@ class DeviceLinkServiceTest {
     l.setRedeemedAt(LocalDateTime.now().minusMinutes(1));
     when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
 
-    assertThatThrownBy(() -> service.redeem("A7K3M9"))
+    assertThatThrownBy(() -> service.redeem(("A7K3M9"), null))
       .isInstanceOf(CustomException.class)
       // 이미 썼다는 사실을 알려주지 않는다 — 존재 여부가 새면 추측의 단서가 된다.
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
@@ -187,7 +190,7 @@ class DeviceLinkServiceTest {
     l.setFailedAttempts(DeviceLinkService.MAX_FAILED_ATTEMPTS);
     when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
 
-    assertThatThrownBy(() -> service.redeem("A7K3M9"))
+    assertThatThrownBy(() -> service.redeem(("A7K3M9"), null))
       .isInstanceOf(CustomException.class)
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.DEVICE_LINK_TOO_MANY_ATTEMPTS));
@@ -227,7 +230,7 @@ class DeviceLinkServiceTest {
   @Test
   @DisplayName("모양부터 틀린 값은 저장소를 뒤지지 않는다")
   void redeem_badShapeDoesNotQuery() {
-    assertThatThrownBy(() -> service.redeem("!!!"))
+    assertThatThrownBy(() -> service.redeem(("!!!"), null))
       .isInstanceOf(CustomException.class);
 
     verify(deviceLinkRepository, never()).findByCodeHash(anyString());
@@ -290,6 +293,52 @@ class DeviceLinkServiceTest {
     assertThat(linked.devices()).hasSize(1);
     assertThat(linked.devices().get(0).linkedAt()).isNotNull();
     assertThat(linked.pendingExpiresAt()).isNull();
+  }
+
+  @Test
+  @DisplayName("연결하면 기기 이름이 정리되어 저장된다 — 제어 문자는 빠지고 앞뒤 공백은 잘린다")
+  void redeem_savesSanitizedDeviceName() throws Exception {
+    DeviceLink l = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
+    when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
+
+    service.redeem("A7K3M9", "  iPhone\n 16\u0007 ");
+
+    assertThat(l.getDeviceName()).isEqualTo("iPhone 16");
+  }
+
+  @Test
+  @DisplayName("상태 — 기기 이름·연결한 보호자 이름·내가 연결했는지를 싣고, 보호자 이름은 이룸이당 한 번만 묻는다")
+  void status_carriesDeviceAndLinkedBy() throws Exception {
+    Profile profile = new Profile();
+    profile.setId("p1");
+    when(profileAccessGuard.profilesOf(GUARDIAN)).thenReturn(List.of(profile));
+    DeviceLink mine = link("A7K3M9", LocalDateTime.now().minusHours(2));
+    mine.setId("l1");
+    mine.setProfileId("p1");
+    mine.setDeviceName("iPhone 16");
+    mine.setRedeemedAt(LocalDateTime.now().minusHours(2));
+    DeviceLink theirs = link("B8L4N2", LocalDateTime.now().minusHours(1));
+    theirs.setId("l2");
+    theirs.setMemberId("m2");
+    theirs.setProfileId("p1");
+    theirs.setRedeemedAt(LocalDateTime.now().minusHours(1));
+    when(deviceLinkRepository.findByProfileIdAndRevokedAtIsNullOrderByCreatedAtDesc("p1"))
+      .thenReturn(List.of(theirs, mine));
+    when(profileGuardianService.displayNamesOf(eq("p1"), any()))
+      .thenReturn(Map.of("m2", "김선생님"));
+
+    var devices = service.status(GUARDIAN).devices();
+
+    assertThat(devices).hasSize(2);
+    var other = devices.stream().filter(d -> d.linkId().equals("l2")).findFirst().orElseThrow();
+    assertThat(other.linkedByMe()).isFalse();
+    assertThat(other.linkedByName()).isEqualTo("김선생님");
+    assertThat(other.deviceName()).isNull();
+    var own = devices.stream().filter(d -> d.linkId().equals("l1")).findFirst().orElseThrow();
+    assertThat(own.linkedByMe()).isTrue();
+    assertThat(own.linkedByName()).isNull();
+    assertThat(own.deviceName()).isEqualTo("iPhone 16");
+    verify(profileGuardianService, org.mockito.Mockito.times(1)).displayNamesOf(eq("p1"), any());
   }
 
   @Test
