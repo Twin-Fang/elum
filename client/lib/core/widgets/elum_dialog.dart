@@ -9,6 +9,7 @@ import '../l10n/l10n_context.dart';
 import '../text/keep_words.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
+import '../theme/app_typography.dart';
 
 /// 팝업 위쪽에 놓이는 원형 아이콘.
 ///
@@ -196,7 +197,7 @@ class ElumDialogCard<T> extends StatelessWidget {
                 // 끊지 말라는 표시가 낭독기에 섞이지 않게 원문을 준다
                 semanticsLabel: keepWordsInMessage ? message : null,
                 textAlign: TextAlign.center,
-                style: context.typo.body.copyWith(color: colors.textSecondary),
+                style: context.typo.body.paragraph.copyWith(color: colors.textSecondary),
               ),
             ],
             if (code != null) ...[
@@ -204,7 +205,7 @@ class ElumDialogCard<T> extends StatelessWidget {
               Text(
                 code!,
                 textAlign: TextAlign.center,
-                style: context.typo.bodySmall.copyWith(
+                style: context.typo.bodySmall.paragraph.copyWith(
                   color: colors.textSecondary,
                 ),
               ),

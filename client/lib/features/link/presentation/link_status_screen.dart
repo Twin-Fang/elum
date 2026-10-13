@@ -20,6 +20,7 @@ import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// 이룸이 휴대폰 — 연결 상태와 끊기 (명세 §8-5).
 ///
@@ -182,7 +183,7 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen>
           Text(
             context.l10n.linkStatusRevokeHint,
             textAlign: TextAlign.center,
-            style: context.typo.promptBody.copyWith(
+            style: context.typo.promptBody.paragraph.copyWith(
               color: context.colors.textSecondary,
             ),
           ),

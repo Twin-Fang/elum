@@ -1219,3 +1219,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
     );
   }
 }
+
+/// 두 줄 이상 흐르는 안내 문단의 줄 높이.
+///
+/// 토큰은 시안의 한 줄 자리에 맞춘 값(height 1.0)이라, 여러 줄로 흐르면 위아래 줄이 붙어 답답하게 읽힌다.
+/// 문단에만 붙이고 한 줄 라벨에는 쓰지 않는다 — 고정 높이로 놓인 줄의 자리가 바뀐다.
+extension ParagraphTextStyle on TextStyle {
+  TextStyle get paragraph => copyWith(height: 1.45);
+}

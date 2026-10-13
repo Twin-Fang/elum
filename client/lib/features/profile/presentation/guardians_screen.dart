@@ -28,6 +28,7 @@ import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../member/application/member_providers.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// 지금 보는 이룸이를 함께 돌보는 사람.
 ///
@@ -227,7 +228,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: _KeptText(
           context.l10n.guardiansCaption(profileName, batchimOf(profileName)),
-          style: context.typo.body.copyWith(color: context.colors.textSecondary),
+          style: context.typo.body.paragraph.copyWith(color: context.colors.textSecondary),
         ),
       ),
       SizedBox(height: space.xs),
@@ -308,7 +309,7 @@ class _Caption extends StatelessWidget {
     padding: EdgeInsets.fromLTRB(SettingsTile.padH.w, 4.h, SettingsTile.padH.w, 0),
     child: _KeptText(
       text,
-      style: context.typo.bodySmall.copyWith(color: context.colors.textSecondary),
+      style: context.typo.bodySmall.paragraph.copyWith(color: context.colors.textSecondary),
     ),
   );
 }

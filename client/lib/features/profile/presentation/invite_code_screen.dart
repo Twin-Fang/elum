@@ -24,6 +24,7 @@ import '../application/profile_session.dart';
 import '../domain/invite_link.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../member/application/member_providers.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// 초대 코드 만들기 — 연결된 보호자가 **함께 돌볼 보호자**를 부른다.
 ///
@@ -303,14 +304,14 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
                 Text(
                   context.l10n.inviteCodeRetryNote,
                   textAlign: TextAlign.center,
-                  style: context.typo.body.copyWith(color: colors.textSecondary),
+                  style: context.typo.body.paragraph.copyWith(color: colors.textSecondary),
                 ),
                 SizedBox(height: IssuedCodePanel.timerToRetry.h),
                 // 초대 코드는 보호자용이다. 이룸이가 쓰는 휴대폰은 따로 붙인다.
                 Text(
                   context.l10n.inviteCodeElumiPhoneNote,
                   textAlign: TextAlign.center,
-                  style: context.typo.bodySmall.copyWith(color: colors.textSecondary),
+                  style: context.typo.bodySmall.paragraph.copyWith(color: colors.textSecondary),
                 ),
               ],
             ),
