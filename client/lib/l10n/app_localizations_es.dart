@@ -284,6 +284,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loginLastUsed => '최근 로그인';
 
   @override
+  String get loginElumiLink => '이룸이 휴대폰이에요 · 연결 암호 넣기';
+
+  @override
   String get loginDuplicateTitle => '이미 가입된 계정이에요';
 
   @override

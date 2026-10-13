@@ -298,6 +298,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginLastUsed => 'Last used';
 
   @override
+  String get loginElumiLink => 'This is an Elumi phone · Enter link code';
+
+  @override
   String get loginDuplicateTitle => 'This account already exists';
 
   @override
