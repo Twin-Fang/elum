@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/link/domain/link_code_link.dart';
 import '../../features/profile/domain/invite_link.dart';
 import '../config/app_config.dart';
 import '../logger/app_log_route_observer.dart';
@@ -50,6 +51,9 @@ String resolveInviteLinkLocation({String? currentLocation}) =>
 ///
 /// [onInviteLink] — 초대 링크(`InviteLink`)가 열렸을 때 불린다. 이룸이 휴대폰에서 열린 링크는
 /// 부르지 않고 무시한다 (이룸이 휴대폰은 초대를 받을 수 없다). 코드는 로그에 남기지 않는다.
+///
+/// [onLinkCodeLink] — 이룸이 휴대폰 연결 암호 링크(`elum://link`)가 열렸을 때 불린다.
+/// 받을 수 있는 휴대폰인지는 부른 쪽([LinkCodeIntake])이 판단한다.
 GoRouter createRouter({
   bool Function()? isOnboardingCompleted,
   bool Function()? hasToken,
@@ -57,6 +61,7 @@ GoRouter createRouter({
   bool Function()? hasRole,
   bool Function()? requiresGuardianPinSetup,
   void Function(InviteLink link)? onInviteLink,
+  void Function(InviteLink link)? onLinkCodeLink,
 }) {
   // 리다이렉트가 라우터 자신의 현재 위치를 알아야 한다 — 만들어진 뒤에 채운다.
   late final GoRouter router;
@@ -67,6 +72,14 @@ GoRouter createRouter({
     redirect: (context, state) {
       // 초대 링크는 다른 가드보다 먼저 본다. 주소가 우리 라우트가 아니라 아래 규칙이 그대로 두면
       // 오류 화면이 된다.
+      // 이룸이 휴대폰 연결 암호 링크도 같은 방식이다 — 우편함에 맡기고 자리를 바꾸지 않는다.
+      final codeLink = LinkCodeLink.parse(state.uri);
+      if (codeLink != null) {
+        onLinkCodeLink?.call(codeLink);
+        return resolveInviteLinkLocation(
+          currentLocation: router.routerDelegate.currentConfiguration.uri.toString(),
+        );
+      }
       final link = InviteLink.parse(state.uri);
       if (link != null) {
         if (!(isElumiDevice?.call() ?? false)) onInviteLink?.call(link);

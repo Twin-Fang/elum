@@ -9,17 +9,16 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
-import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
-import '../../../core/widgets/show_failure.dart';
 import '../../link/domain/link_status.dart';
+import '../../link/application/issued_code_memory.dart';
+import '../../link/presentation/widgets/issued_code_actions.dart';
 import '../../link/presentation/widgets/issued_code_panel.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../application/guardians_controller.dart';
 import '../application/invite_code_controller.dart';
-import '../application/invite_sharer.dart';
 import '../application/profile_session.dart';
 import '../domain/invite_link.dart';
 import '../../../core/router/pop_or_home.dart';
@@ -57,7 +56,13 @@ import '../../../core/theme/app_typography.dart';
 /// 화면의 `다음` 버튼을 빌렸다.
 ///
 /// 만료된 코드는 보내지 않는다 (버튼이 꺼진다). 다시 만들면 앞 코드가 폐기되므로 **보낼 때마다 지금 화면에
-/// 보이는 코드**로 링크를 만든다.
+/// 보이는 코드**로 링크를 만든다. 하단에는 `코드 복사하기`가 함께 있다 (연결 암호 화면과 같은 부품).
+///
+/// ## 다시 들어와도 같은 코드
+///
+/// 서버는 코드 원문을 모른다. 그래서 받은 코드와 만료를 앱이 메모리([IssuedCodeMemory])에 기억해 두었다가,
+/// 다시 들어오면 서버에 아직 살아 있는지만 묻고 그대로 보여 준다. 확인에 실패하거나 어긋나면 새로 발급한다.
+/// 새로 만드는 것은 `코드 다시 만들기`를 눌렀을 때뿐이다.
 class InviteCodeScreen extends ConsumerStatefulWidget {
   const InviteCodeScreen({super.key});
 
@@ -109,7 +114,11 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
     super.dispose();
   }
 
-  Future<void> _issue() async {
+  /// 지금 화면이 보여 주는 코드의 기억 열쇠. 이룸이를 정한 뒤에만 있다.
+  String? _memoryKey;
+
+  /// [force] 가 true 면 기억한 코드를 쓰지 않고 새로 발급한다 (`코드 다시 만들기`).
+  Future<void> _issue({bool force = false}) async {
     setState(() {
       _loading = true;
       _failure = null;
@@ -135,7 +144,30 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
         ? active.displayName
         : (local.isEmpty ? null : local);
 
-    final attempt = await ref.read(inviteCodeControllerProvider).issueInvite(active.id);
+    final memory = ref.read(issuedCodeMemoryProvider);
+    final key = _memoryKey = IssuedCodeMemory.inviteKey(active.id);
+    final controller = ref.read(inviteCodeControllerProvider);
+
+    // 나갔다 들어와도 코드를 유지한다 — 서버에 아직 살아 있는지만 확인한다.
+    final reused = force
+        ? null
+        : await memory.recallLive(key, () async {
+            final pending = await controller.pendingExpiry(active.id);
+            if (!pending.isOk) throw pending.failure!;
+            return pending.value;
+          });
+    if (!mounted) return;
+    if (reused != null) {
+      setState(() {
+        _issued = reused;
+        _loading = false;
+      });
+      _startTicker();
+      _startPoller(active.id);
+      return;
+    }
+
+    final attempt = await controller.issueInvite(active.id);
     if (!mounted) return;
 
     if (!attempt.isOk) {
@@ -145,6 +177,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       });
       return;
     }
+    memory.remember(key, attempt.value!);
     setState(() {
       _issued = attempt.value;
       _loading = false;
@@ -200,6 +233,9 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   Future<void> _celebrate(String guestName) async {
     if (_celebrated || !mounted) return;
     _celebrated = true;
+    // 코드가 쓰였다 — 기억해 둔 코드는 더 보여 줄 수 없다.
+    final key = _memoryKey;
+    if (key != null) ref.read(issuedCodeMemoryProvider).forget(key);
     await showElumDialog<void>(
       context: context,
       icon: ElumDialogIcon.success,
@@ -216,28 +252,6 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       if (_issued?.isExpired ?? true) t.cancel();
       setState(() {});
     });
-  }
-
-  /// 공유 시트로 링크를 보낸다. 시트를 못 열면 팝업으로 알린다 — 코드는 화면에 그대로 있어 불러줄 수 있다.
-  Future<void> _share() async {
-    final issued = _issued;
-    // 만료됐거나 아직 없다면 보내지 않는다 — 받은 사람이 못 쓰는 코드를 눌러 서버에서 되돌려 받게 된다
-    if (issued == null || issued.isExpired) return;
-    try {
-      await ref.read(inviteSharerProvider)(
-        InviteLink.shareMessage(issued.code, validFor: issued.remaining()),
-      );
-    } catch (e) {
-      // 코드는 로그에 남기지 않는다 — 예외만 넘긴다
-      if (!mounted) return;
-      await showFailure(
-        context,
-        e,
-        title: context.l10n.inviteCodeShareFailTitle,
-        fallback: context.l10n.inviteCodeShareFailFallback,
-        fallbackCode: 'E-INV-SHARE',
-      );
-    }
   }
 
   /// 다시 해도 같은 이유로 막히는 실패인가. 그때는 다시 시도 버튼을 두지 않는다.
@@ -263,9 +277,11 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       backTop: _settingsBackTop,
       // 코드가 있을 때만 — 만들지 못했거나 이룸이가 없으면 보낼 것이 없다 (임시 시안)
       bottomButton: issued != null && failure == null && !_loading && !_noProfile
-          ? ElumButton(
-              label: context.l10n.inviteCodeShareButton,
-              onPressed: issued.isExpired ? null : _share,
+          ? IssuedCodeActions(
+              issued: issued,
+              shareMessage: (i) =>
+                  InviteLink.shareMessage(i.code, validFor: i.remaining()),
+              shareFailCode: 'E-INV-SHARE',
             )
           : null,
       child: SingleChildScrollView(
@@ -281,8 +297,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
               loading: _loading,
               issued: issued,
               expiredLabel: context.l10n.inviteCodeExpired,
-              retryLabel: context.l10n.inviteCodeRetryChip,
-              onRetry: _issue,
+              onRetry: () => _issue(force: true),
               replacement: _noProfile
                   // 이룸이가 없으면 다시 해도 같다 — 버튼 없이 이유와 코드만 보여 준다.
                   ? ElumErrorView(

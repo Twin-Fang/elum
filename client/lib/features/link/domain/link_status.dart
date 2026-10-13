@@ -84,7 +84,11 @@ class LinkStatus {
 
 /// 발급 결과. 원문 암호는 이 응답에만 있고 다시 물어볼 수 없다.
 class IssuedLinkCode {
-  const IssuedLinkCode({required this.code, required this.expiresAt});
+  const IssuedLinkCode({
+    required this.code,
+    required this.expiresAt,
+    this.serverExpiresAt,
+  });
 
   /// 서버가 준 "몇 초 뒤"를 **내 시계**에 붙여 만든다.
   ///
@@ -94,15 +98,21 @@ class IssuedLinkCode {
   factory IssuedLinkCode.fromNow({
     required String code,
     required int expiresInSeconds,
+    DateTime? serverExpiresAt,
   }) {
     return IssuedLinkCode(
       code: code,
       expiresAt: DateTime.now().add(Duration(seconds: expiresInSeconds)),
+      serverExpiresAt: serverExpiresAt,
     );
   }
 
   final String code;
   final DateTime expiresAt;
+
+  /// 서버가 발급 응답에 준 만료 시각. 화면에는 쓰지 않는다 — 다시 들어왔을 때 서버가 아는 미사용 코드와
+  /// 같은 코드인지 가리는 데만 쓴다. 옛 응답에 없으면 null.
+  final DateTime? serverExpiresAt;
 
   Duration remaining() {
     final left = expiresAt.difference(DateTime.now());

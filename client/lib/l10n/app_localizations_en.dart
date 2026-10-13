@@ -801,8 +801,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteCodeShareFailTitle => 'Couldn\'t send the link';
 
   @override
-  String get inviteCodeShareFailFallback =>
-      'Tell them the invite code yourself';
+  String get inviteCodeShareFailFallback => 'Tell them the code yourself';
 
   @override
   String get inviteCodeExpired => 'The invite code has expired';
@@ -1861,4 +1860,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get installationRetryButton => 'Try again';
+
+  @override
+  String get issuedCodeCopyButton => 'Copy code';
+
+  @override
+  String get issuedCodeCopied => 'Code copied';
+
+  @override
+  String get issuedCodeCopyFailed => 'Couldn\'t copy (E-CODE-COPY)';
+
+  @override
+  String linkShareMessage(int minutes, String url, String code) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes minutes',
+      one: '$minutes minute',
+    );
+    return 'Let\'s connect Elumi\'s phone. Tap the link below on that phone to open the elum app with the connection code filled in.\nThe connection code works for $_temp0.\n\n$url\n\nIf the link doesn\'t open, enter it in the app.\nConnection code $code';
+  }
+
+  @override
+  String get linkCodePhoneNote =>
+      'Open the link on Elumi\'s phone\nor type the code in yourself';
+
+  @override
+  String get linkRejectedAlreadyLinked => 'This phone is already connected';
+
+  @override
+  String get linkRejectedOnGuardianPhone => 'Open this on Elumi\'s phone';
 }

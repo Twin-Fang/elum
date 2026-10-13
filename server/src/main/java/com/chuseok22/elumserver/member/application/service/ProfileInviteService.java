@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.link.core.CodeDigest;
 import com.chuseok22.elumserver.link.core.LinkCode;
+import com.chuseok22.elumserver.member.application.dto.response.ProfileInvitePendingResponse;
 import com.chuseok22.elumserver.member.application.dto.response.ProfileInviteResponse;
 import com.chuseok22.elumserver.member.application.dto.response.ProfileJoinResponse;
 import com.chuseok22.elumserver.member.application.dto.response.ProfileSummaryResponse;
@@ -97,6 +98,29 @@ public class ProfileInviteService {
     // 코드 원문은 찍지 않는다. 이 값은 그대로 이룸이 일과를 여는 자격증명이다.
     log.info("초대 코드 발급: memberId={}, profileId={}, expiresAt={}", memberId, profileId, invite.getExpiresAt());
     return new ProfileInviteResponse(code, invite.getExpiresAt(), CodeDigest.CODE_TTL.toSeconds());
+  }
+
+  /**
+   * 내가 이 이룸이에 낸 초대 코드가 아직 살아 있는지 만료 시각만 알려 준다 (코드 원문은 서버에 없다).
+   *
+   * <p>앱이 화면을 다시 열 때 기억해 둔 코드를 그대로 보여 줘도 되는지 묻는 데 쓴다. 쓰였거나 폐기됐거나 만료됐으면
+   * 만료 시각이 null 이다. 발급과 같은 권한을 요구하고 아무것도 쓰지 않는다.
+   *
+   * @throws CustomException 이룸이 휴대폰이면 DEVICE_LINK_FORBIDDEN_FOR_ELUMI, 연결되지 않은 이룸이면 PROFILE_ACCESS_DENIED
+   */
+  @Transactional(readOnly = true)
+  public ProfileInvitePendingResponse pending(Caller caller, String profileId) {
+    if (caller.isElumi()) {
+      throw new CustomException(ErrorCode.DEVICE_LINK_FORBIDDEN_FOR_ELUMI);
+    }
+    String memberId = caller.memberId();
+    profileAccessGuard.requireGuardianOf(memberId, profileId);
+    LocalDateTime expiresAt = profileInviteRepository
+      .findFirstByProfileIdAndIssuedByAndRedeemedAtIsNullAndRevokedAtIsNullAndExpiresAtAfterOrderByExpiresAtDesc(
+        profileId, memberId, LocalDateTime.now())
+      .map(ProfileInvite::getExpiresAt)
+      .orElse(null);
+    return new ProfileInvitePendingResponse(expiresAt);
   }
 
   /**

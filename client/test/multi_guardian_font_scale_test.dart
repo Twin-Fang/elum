@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'helpers/kept_text_finder.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
@@ -93,7 +95,7 @@ void main() {
     await tester.tap(find.text('함께 돌보기 그만두기'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('되돌릴 수 없어요'), findsOneWidget);
+    expect(findKept('되돌릴 수 없어요'), findsOneWidget);
     expect(find.text('그만두기'), findsOneWidget);
     expect(find.text('취소'), findsOneWidget);
   });

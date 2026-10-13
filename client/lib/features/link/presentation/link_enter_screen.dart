@@ -10,6 +10,8 @@ import '../../../core/widgets/elum_button.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../auth/application/auth_session_controller.dart';
+import '../../profile/application/invite_inbox.dart';
+import '../application/link_code_intake.dart';
 import '../application/link_enter_controller.dart';
 import '../data/device_link_repository.dart';
 import '../domain/link_code.dart';
@@ -56,6 +58,12 @@ class _EnterError {
 ///
 /// PIN 화면과 달리 **시스템 키보드**를 쓴다 — 암호에 영문이 섞여 숫자패드로는 칠 수 없다.
 /// 6칸 모양은 PIN과 맞추되 글자를 드러낸다(가리면 받아적을 수 없다).
+///
+/// ## 링크로 열렸을 때
+///
+/// 보호자가 보낸 연결 링크를 누르면 [linkCodeInboxProvider] 에 코드가 맡겨지고, 이 화면이 열리면서 꺼내
+/// **칸에 채운다.** 자동으로 보내지 않는다 — `시작하기`는 사람이 누른다. 링크는 맞는데 코드를 못 쓰는 모양이면
+/// 빈 칸으로 열고 안내만 띄운다. 이 화면이 이미 열려 있을 때 새 링크가 오면 우편함을 듣고 있다가 바로 채운다.
 class LinkEnterScreen extends ConsumerStatefulWidget {
   const LinkEnterScreen({super.key});
 
@@ -75,6 +83,15 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   /// 저장된 표식을 읽는다 — 스스로 로그아웃한 사람에게는 서 있지 않다.
   late final bool _linkLost = ref.read(linkEnterControllerProvider).linkWasLost;
 
+  /// 링크로 받은 연결 코드를 맡겨 두는 곳.
+  late final InviteInbox _inbox = ref.read(linkCodeInboxProvider);
+
+  /// 링크로 받은 코드가 채워져 있다 — 키보드를 올리지 않는다.
+  bool _fromLink = false;
+
+  /// 프로그램이 칸을 채우는 중. 사용자가 친 것이 아니다.
+  bool _filling = false;
+
   /// 틀린 횟수. 값이 바뀔 때마다 칸이 한 번 흔들린다.
   int _failCount = 0;
 
@@ -89,14 +106,39 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   @override
   void initState() {
     super.initState();
+    // 링크로 열렸다면 맡겨 둔 코드를 먼저 채운다 (첫 프레임 전이라 값만 정한다).
+    final pending = _inbox.take();
+    if (pending != null) _apply(pending);
     _controller.addListener(_onChanged);
+    _inbox.addListener(_onInbox);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _focusNode.requestFocus();
+      if (mounted && !_fromLink) _focusNode.requestFocus();
     });
+  }
+
+  /// 이 화면이 열려 있는 동안 새 링크가 왔다. 보내는 중이거나 잠겼으면 우편함에 그대로 둔다.
+  void _onInbox() {
+    if (!mounted || _sending || _locked) return;
+    final pending = _inbox.take();
+    if (pending == null) return;
+    setState(() => _apply(pending));
+  }
+
+  /// 링크로 받은 코드를 칸에 채운다. 못 쓰는 모양이면 칸을 비우고 안내만 띄운다.
+  void _apply(PendingInvite pending) {
+    final code = pending.code;
+    _filling = true;
+    _controller.text = code ?? '';
+    _filling = false;
+    _fromLink = code != null;
+    _error = code == null ? const _EnterError(_EnterFault.formInvalid) : null;
+    // 채워진 칸을 키보드가 가리지 않게 한다
+    if (code != null && mounted) _focusNode.unfocus();
   }
 
   @override
   void dispose() {
+    _inbox.removeListener(_onInbox);
     _controller.removeListener(_onChanged);
     _controller.dispose();
     _focusNode.dispose();
@@ -104,7 +146,9 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   }
 
   void _onChanged() {
-    if (_sending || _locked) return;
+    if (_sending || _locked || _filling) return;
+    // 사용자가 손대면 링크로 채운 상태가 아니다
+    _fromLink = false;
     // 칸과 시작하기(여섯 자일 때만 켜짐)를 다시 그린다
     setState(() {});
     // 다 채우면 키보드를 내린다 — 시작하기가 키보드에 가려져 있으면 누를 곳을 찾지 못한다.

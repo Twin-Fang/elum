@@ -14,9 +14,14 @@ import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_header.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../profile/application/profile_session.dart';
+import '../application/issued_code_memory.dart';
 import '../application/link_code_controller.dart';
+import '../domain/link_code_link.dart';
 import '../domain/link_status.dart';
+import 'widgets/issued_code_actions.dart';
 import 'widgets/issued_code_panel.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 
@@ -47,6 +52,13 @@ import '../../../core/router/routes.dart';
 ///
 /// 연결되면 타이머와 다시 만들기가 사라진다 — **더 기다릴 이유가 없어서다.**
 /// `나중에 할게요`는 세 상태 모두에 남는다 (시안 `732:5850`).
+///
+/// ## 설정 진입의 전하기 · 다시 들어오기
+///
+/// 설정에서 들어온 화면에는 초대 코드 화면과 같은 하단 버튼(`링크로 보내기` · `코드 복사하기`)과 안내가 있다.
+/// 온보딩 시안(`732:5334`)은 하단이 `시작하기`·`나중에 할게요`로 가득 차 있어 건드리지 않는다.
+/// 나갔다 들어와도 서버에 아직 살아 있는 코드면 같은 코드를 보여 준다 ([IssuedCodeMemory]) —
+/// 새로 만드는 것은 `코드 다시 만들기`를 눌렀을 때와 기억한 코드를 못 쓸 때뿐이다.
 class LinkCodeScreen extends ConsumerStatefulWidget {
   const LinkCodeScreen({super.key, this.fromOnboarding = false});
 
@@ -98,11 +110,39 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   /// 다시 만들기를 눌러도 처음 기준을 유지한다 — 그사이 붙은 것은 새로 붙은 것이다.
   Set<String>? _knownLinkIds;
 
-  Future<void> _issue() async {
+  /// 기억한 코드의 열쇠. 이룸이마다 따로 둔다.
+  late final String _memoryKey = IssuedCodeMemory.linkKey(
+    ref.read(profileSessionProvider).selectedId,
+  );
+
+  /// [force] 가 true 면 기억한 코드를 쓰지 않고 새로 발급한다 (`코드 다시 만들기`).
+  Future<void> _issue({bool force = false}) async {
     setState(() {
       _loading = true;
       _issueFailure = null;
     });
+    final memory = ref.read(issuedCodeMemoryProvider);
+
+    if (!force) {
+      LinkStatus? status;
+      // 서버가 아는 내 미사용 암호의 만료와 같으면 같은 암호다. 이때 받은 목록이 곧 연결 기준이 된다.
+      final reused = await memory.recallLive(_memoryKey, () async {
+        final r = await ref.read(linkCodeControllerProvider).statusResult();
+        if (!r.isOk) throw r.failure!;
+        status = r.value;
+        return r.value!.pendingExpiresAt;
+      });
+      if (!mounted) return;
+      if (reused != null) {
+        _knownLinkIds ??= status?.devices.map((d) => d.linkId).toSet();
+        setState(() {
+          _issued = reused;
+          _loading = false;
+        });
+        _startTimers();
+        return;
+      }
+    }
     // 기준은 암호를 만드는 것과 함께 잡는다 — 새 암호는 아직 쓰이지 않았으니 목록에 끼지 않는다.
     final (attempt, before) = await ref
         .read(linkCodeControllerProvider)
@@ -121,6 +161,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
       return;
     }
 
+    memory.remember(_memoryKey, attempt.value!);
     setState(() {
       _issued = attempt.value;
       _loading = false;
@@ -165,6 +206,8 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   Future<void> _celebrate() async {
     if (_celebrated) return;
     _celebrated = true;
+    // 암호가 쓰였다 — 기억해 둔 암호는 더 보여 줄 수 없다.
+    ref.read(issuedCodeMemoryProvider).forget(_memoryKey);
     await showElumDialog<void>(
       context: context,
       icon: ElumDialogIcon.success,
@@ -197,7 +240,14 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
       // (732:5334) — 다음 할 일을 알려주는 이정표라 자리를 비우지 않는다.
       // 설정 시안(`1027:4617`)에는 버튼 자체가 없다.
       bottomButton: fromSettings
-          ? null
+          ? (issued != null && _issueFailure == null && !_loading && !_linked
+                ? IssuedCodeActions(
+                    issued: issued,
+                    shareMessage: (i) =>
+                        LinkCodeLink.shareMessage(i.code, validFor: i.remaining()),
+                    shareFailCode: 'E-LINK-SHARE',
+                  )
+                : null)
           : ElumButton(
               label: context.l10n.linkCodeStartButton,
               onPressed: _linked ? _goHome : null,
@@ -255,7 +305,28 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
               expiredLabel: context.l10n.linkCodeExpired,
               // 연결되면 타이머도 `다시 만들기`도 사라진다 — 더 기다릴 이유가 없다.
               showStatus: !_linked,
-              onRetry: _issue,
+              onRetry: () => _issue(force: true),
+              footer: fromSettings
+                  ? [
+                      SizedBox(height: IssuedCodePanel.timerToRetry.h),
+                      // 되돌릴 수 없는 일(앞 암호가 쓸 수 없게 된다)을 먼저 말한다.
+                      Text(
+                        context.l10n.inviteCodeRetryNote,
+                        textAlign: TextAlign.center,
+                        style: context.typo.body.paragraph.copyWith(
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                      SizedBox(height: IssuedCodePanel.timerToRetry.h),
+                      Text(
+                        context.l10n.linkCodePhoneNote,
+                        textAlign: TextAlign.center,
+                        style: context.typo.bodySmall.paragraph.copyWith(
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ]
+                  : const [],
             ),
           ],
         ),

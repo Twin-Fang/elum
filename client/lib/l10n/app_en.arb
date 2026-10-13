@@ -223,7 +223,7 @@
   "inviteCodeGuestJoinedTitle": "{name} has joined you",
   "guardiansMeBadge": "Me",
   "inviteCodeShareFailTitle": "Couldn't send the link",
-  "inviteCodeShareFailFallback": "Tell them the invite code yourself",
+  "inviteCodeShareFailFallback": "Tell them the code yourself",
   "inviteCodeExpired": "The invite code has expired",
   "inviteCodeTitle": "Invite code",
   "inviteCodeShareButton": "Send as a link",
@@ -531,5 +531,12 @@
   "modeSwitchBlockedDescription": "Guardian mode can't be opened on this phone",
   "modeSwitchBlockedBack": "Go back",
   "installationRetryMessage": "Could not check sign-in information on this phone. Please try again.",
-  "installationRetryButton": "Try again"
+  "installationRetryButton": "Try again",
+  "issuedCodeCopyButton": "Copy code",
+  "issuedCodeCopied": "Code copied",
+  "issuedCodeCopyFailed": "Couldn't copy (E-CODE-COPY)",
+  "linkShareMessage": "Let's connect Elumi's phone. Tap the link below on that phone to open the elum app with the connection code filled in.\nThe connection code works for {minutes, plural, one{{minutes} minute} other{{minutes} minutes}}.\n\n{url}\n\nIf the link doesn't open, enter it in the app.\nConnection code {code}",
+  "linkCodePhoneNote": "Open the link on Elumi's phone\nor type the code in yourself",
+  "linkRejectedAlreadyLinked": "This phone is already connected",
+  "linkRejectedOnGuardianPhone": "Open this on Elumi's phone"
 }

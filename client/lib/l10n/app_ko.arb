@@ -730,7 +730,7 @@
   "inviteCodeShareFailTitle": "링크를 보내지 못했어요",
   "@inviteCodeShareFailTitle": {"description": "초대 링크 공유 실패 팝업 제목"},
 
-  "inviteCodeShareFailFallback": "초대 코드를 직접 알려주세요",
+  "inviteCodeShareFailFallback": "코드를 직접 알려주세요",
   "@inviteCodeShareFailFallback": {"description": "초대 링크 공유 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
 
   "inviteCodeExpired": "초대 코드가 만료됐어요",
@@ -1650,5 +1650,19 @@
   "modeSwitchBlockedBack": "돌아가기",
   "@modeSwitchBlockedBack": { "description": "보호자 화면을 열 수 없다는 안내의 하단 버튼" },
   "installationRetryMessage": "휴대폰의 로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.",
-  "installationRetryButton": "다시 시도"
+  "installationRetryButton": "다시 시도",
+  "issuedCodeCopyButton": "코드 복사하기",
+  "@issuedCodeCopyButton": {"description": "발급된 코드를 클립보드에 복사하는 하단 보조 버튼(초대 코드·연결 코드 화면 공통)"},
+  "issuedCodeCopied": "코드를 복사했어요",
+  "@issuedCodeCopied": {"description": "코드를 클립보드에 복사한 뒤 토스트"},
+  "issuedCodeCopyFailed": "복사하지 못했어요 (E-CODE-COPY)",
+  "@issuedCodeCopyFailed": {"description": "클립보드 복사 실패 토스트. 에러 코드를 문구에 함께 둔다"},
+  "linkShareMessage": "이룸이가 쓸 휴대폰을 연결해요. 그 휴대폰에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 {code}",
+  "@linkShareMessage": {"description": "연결 코드 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 연결 코드", "placeholders": {"minutes": {"type": "int"}, "url": {"type": "String"}, "code": {"type": "String"}}},
+  "linkCodePhoneNote": "이룸이 휴대폰에서 링크를 열거나\n코드를 직접 넣어요",
+  "@linkCodePhoneNote": {"description": "연결 코드 화면의 안내(초대 코드 화면의 inviteCodeElumiPhoneNote 와 같은 자리)"},
+  "linkRejectedAlreadyLinked": "이미 연결된 휴대폰이에요",
+  "@linkRejectedAlreadyLinked": {"description": "이미 연결된 이룸이 휴대폰에서 연결 링크를 열었을 때 토스트"},
+  "linkRejectedOnGuardianPhone": "이룸이 휴대폰에서 열어주세요",
+  "@linkRejectedOnGuardianPhone": {"description": "보호자 휴대폰에서 이룸이 휴대폰 연결 링크를 열었을 때 토스트"}
 }

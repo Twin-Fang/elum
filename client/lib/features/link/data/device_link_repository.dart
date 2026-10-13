@@ -122,7 +122,11 @@ class DeviceLinkRepository {
         // 암호를 못 읽으면 보여줄 것이 없어 앱 오류로 본다
         throw const AppFailure(fault: NetworkFault.app);
       }
-      return IssuedLinkCode.fromNow(code: code, expiresInSeconds: seconds);
+      return IssuedLinkCode.fromNow(
+        code: code,
+        expiresInSeconds: seconds,
+        serverExpiresAt: DateTime.tryParse(res.data?['expiresAt']?.toString() ?? ''),
+      );
     });
   }
 

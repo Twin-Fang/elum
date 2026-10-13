@@ -17,6 +17,7 @@ import 'core/theme/app_theme.dart';
 import 'core/widgets/elum_toast.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/child/application/sync_triggers.dart';
+import 'features/link/application/link_code_intake.dart';
 import 'features/link/application/link_reset.dart';
 import 'features/profile/application/invite_inbox.dart';
 import 'features/profile/application/invite_link_intake.dart';
@@ -49,6 +50,32 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     hasRole: () => ref.read(localStorageProvider).selectedRole != null,
     // 앱이 꺼져 있다 초대 링크로 열릴 때. 켜져 있을 때는 아래 InviteLinkHost 가 먼저 받는다.
     onInviteLink: (link) => _inviteIntake.accept(link),
+    // 같은 경우의 이룸이 휴대폰 연결 암호 링크
+    onLinkCodeLink: (link) => _linkCodeIntake.accept(link),
+  );
+
+  // 연결 암호 링크를 로그인 없이 암호 넣기 화면으로 이어 준다.
+  late final LinkCodeIntake _linkCodeIntake = LinkCodeIntake(
+    inbox: ref.read(linkCodeInboxProvider),
+    hasSession: () => ref.read(authRepositoryProvider).hasSession,
+    isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
+    topLocation: () =>
+        _router.routerDelegate.currentConfiguration.lastOrNull?.matchedLocation,
+    open: () => _router.push(Routes.linkEnter),
+    // 첫 화면이 그려지기 전일 수 있어 다음 프레임에 띄운다 (초대 링크 안내와 같은 이유).
+    onNotice: (notice) {
+      WidgetsBinding.instance
+        ..addPostFrameCallback(
+          (_) => showElumToastOn(
+            _messengerKey.currentState,
+            switch (notice) {
+              LinkCodeNotice.alreadyLinked => appL10n.linkRejectedAlreadyLinked,
+              LinkCodeNotice.openOnElumiPhone => appL10n.linkRejectedOnGuardianPhone,
+            },
+          ),
+        )
+        ..ensureVisualUpdate();
+    },
   );
 
   // 초대 링크를 알맞은 때에 입력 화면으로 이어 준다.
@@ -152,6 +179,7 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     return InviteLinkHost(
       router: _router,
       intake: _inviteIntake,
+      linkIntake: _linkCodeIntake,
       child: _buildApp(),
     );
   }

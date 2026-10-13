@@ -772,7 +772,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get inviteCodeShareFailTitle => '링크를 보내지 못했어요';
 
   @override
-  String get inviteCodeShareFailFallback => '초대 코드를 직접 알려주세요';
+  String get inviteCodeShareFailFallback => '코드를 직접 알려주세요';
 
   @override
   String get inviteCodeExpired => '초대 코드가 만료됐어요';
@@ -1785,4 +1785,32 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get installationRetryButton => 'Reintentar';
+
+  @override
+  String get issuedCodeCopyButton => '코드 복사하기';
+
+  @override
+  String get issuedCodeCopied => '코드를 복사했어요';
+
+  @override
+  String get issuedCodeCopyFailed => '복사하지 못했어요 (E-CODE-COPY)';
+
+  @override
+  String linkShareMessage(int minutes, String url, String code) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes분',
+    );
+    return '이룸이가 쓸 휴대폰을 연결해요. 그 휴대폰에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 $_temp0 동안만 쓸 수 있어요.\n\n$url\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 $code';
+  }
+
+  @override
+  String get linkCodePhoneNote => '이룸이 휴대폰에서 링크를 열거나\n코드를 직접 넣어요';
+
+  @override
+  String get linkRejectedAlreadyLinked => '이미 연결된 휴대폰이에요';
+
+  @override
+  String get linkRejectedOnGuardianPhone => '이룸이 휴대폰에서 열어주세요';
 }

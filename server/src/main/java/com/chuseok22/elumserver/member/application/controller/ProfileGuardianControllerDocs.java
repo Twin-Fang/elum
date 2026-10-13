@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.member.application.dto.request.GuardianUpdateReq
 import com.chuseok22.elumserver.member.application.dto.request.RedeemProfileInviteRequest;
 import com.chuseok22.elumserver.member.application.dto.response.GuardianListResponse;
 import com.chuseok22.elumserver.member.application.dto.response.GuardianResponse;
+import com.chuseok22.elumserver.member.application.dto.response.ProfileInvitePendingResponse;
 import com.chuseok22.elumserver.member.application.dto.response.ProfileInviteResponse;
 import com.chuseok22.elumserver.member.application.dto.response.ProfileJoinResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,6 +44,21 @@ public interface ProfileGuardianControllerDocs {
       content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
   })
   ResponseEntity<ProfileInviteResponse> issueInvite(Authentication authentication, String profileId);
+
+  @Operation(
+    summary = "내가 낸 미사용 초대 코드 확인 (연결된 보호자)",
+    description = "내가 이 이룸이에 낸 초대 코드 중 지금 넣을 수 있는 것의 만료 시각을 줍니다. 코드 원문은 서버에 없어 돌려주지 않습니다.\n\n"
+      + "- 앱이 화면을 다시 열 때, 기억해 둔 코드가 아직 살아 있는지 확인하는 용도입니다.\n"
+      + "- 쓰였거나 폐기됐거나 만료됐으면 `expiresAt` 이 null 입니다.\n"
+      + "- 아무것도 바꾸지 않으며 발급 횟수 제한에도 들지 않습니다.",
+    security = @SecurityRequirement(name = "bearerAuth")
+  )
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "조회 성공 (살아 있는 코드가 없으면 expiresAt=null)"),
+    @ApiResponse(responseCode = "403", description = "이룸이 휴대폰이거나(DEVICE_LINK_FORBIDDEN_FOR_ELUMI) 이 이룸이에 연결돼 있지 않음(PROFILE_ACCESS_DENIED)",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+  })
+  ResponseEntity<ProfileInvitePendingResponse> pendingInvite(Authentication authentication, String profileId);
 
   @Operation(
     summary = "초대 코드 넣기 — 이룸이에 합류 (로그인한 보호자)",

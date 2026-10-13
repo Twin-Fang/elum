@@ -1451,7 +1451,7 @@ abstract class AppLocalizations {
   /// 초대 링크 공유 실패 시 서버가 문구를 못 줄 때의 기본 안내
   ///
   /// In ko, this message translates to:
-  /// **'초대 코드를 직접 알려주세요'**
+  /// **'코드를 직접 알려주세요'**
   String get inviteCodeShareFailFallback;
 
   /// 초대 코드 화면의 남은 시간 자리에 보이는 만료 안내
@@ -3301,6 +3301,48 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'다시 시도'**
   String get installationRetryButton;
+
+  /// 발급된 코드를 클립보드에 복사하는 하단 보조 버튼(초대 코드·연결 코드 화면 공통)
+  ///
+  /// In ko, this message translates to:
+  /// **'코드 복사하기'**
+  String get issuedCodeCopyButton;
+
+  /// 코드를 클립보드에 복사한 뒤 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'코드를 복사했어요'**
+  String get issuedCodeCopied;
+
+  /// 클립보드 복사 실패 토스트. 에러 코드를 문구에 함께 둔다
+  ///
+  /// In ko, this message translates to:
+  /// **'복사하지 못했어요 (E-CODE-COPY)'**
+  String get issuedCodeCopyFailed;
+
+  /// 연결 코드 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 연결 코드
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 쓸 휴대폰을 연결해요. 그 휴대폰에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 {code}'**
+  String linkShareMessage(int minutes, String url, String code);
+
+  /// 연결 코드 화면의 안내(초대 코드 화면의 inviteCodeElumiPhoneNote 와 같은 자리)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 휴대폰에서 링크를 열거나\n코드를 직접 넣어요'**
+  String get linkCodePhoneNote;
+
+  /// 이미 연결된 이룸이 휴대폰에서 연결 링크를 열었을 때 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 연결된 휴대폰이에요'**
+  String get linkRejectedAlreadyLinked;
+
+  /// 보호자 휴대폰에서 이룸이 휴대폰 연결 링크를 열었을 때 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 휴대폰에서 열어주세요'**
+  String get linkRejectedOnGuardianPhone;
 }
 
 class _AppLocalizationsDelegate

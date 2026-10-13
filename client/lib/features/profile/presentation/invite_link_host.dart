@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../link/application/link_code_intake.dart';
+import '../../link/domain/link_code_link.dart';
 import '../application/invite_link_intake.dart';
 import '../domain/invite_link.dart';
 
@@ -27,10 +29,14 @@ class InviteLinkHost extends StatefulWidget {
     required this.router,
     required this.intake,
     required this.child,
+    this.linkIntake,
   });
 
   final GoRouter router;
   final InviteLinkIntake intake;
+
+  /// 이룸이 휴대폰 연결 암호 링크(`elum://link`)를 받는 쪽. 없으면 그 링크는 라우터로 넘어간다.
+  final LinkCodeIntake? linkIntake;
   final Widget child;
 
   @override
@@ -57,6 +63,12 @@ class _InviteLinkHostState extends State<InviteLinkHost> with WidgetsBindingObse
 
   @override
   Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+    final codeLink = LinkCodeLink.parse(routeInformation.uri);
+    final codeIntake = widget.linkIntake;
+    if (codeLink != null && codeIntake != null) {
+      codeIntake.accept(codeLink);
+      return true;
+    }
     final link = InviteLink.parse(routeInformation.uri);
     // 초대 링크가 아니면 건드리지 않는다 — 소셜 로그인 콜백·다른 라우트는 라우터가 받는다.
     if (link == null) return false;
@@ -72,6 +84,7 @@ class _InviteLinkHostState extends State<InviteLinkHost> with WidgetsBindingObse
       _scheduled = false;
       if (!mounted) return;
       widget.intake.tryOpen();
+      widget.linkIntake?.tryOpen();
     });
   }
 

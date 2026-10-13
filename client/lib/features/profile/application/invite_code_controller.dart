@@ -15,4 +15,7 @@ class InviteCodeController {
 
   Future<Attempt<IssuedLinkCode>> issueInvite(String profileId) =>
       _ref.read(profileRepositoryProvider).issueInvite(profileId);
+
+  Future<Attempt<DateTime?>> pendingExpiry(String profileId) =>
+      _ref.read(profileRepositoryProvider).pendingInviteExpiry(profileId);
 }

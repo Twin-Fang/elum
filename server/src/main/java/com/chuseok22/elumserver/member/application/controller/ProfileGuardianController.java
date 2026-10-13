@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.member.application.dto.request.GuardianUpdateReq
 import com.chuseok22.elumserver.member.application.dto.request.RedeemProfileInviteRequest;
 import com.chuseok22.elumserver.member.application.dto.response.GuardianListResponse;
 import com.chuseok22.elumserver.member.application.dto.response.GuardianResponse;
+import com.chuseok22.elumserver.member.application.dto.response.ProfileInvitePendingResponse;
 import com.chuseok22.elumserver.member.application.dto.response.ProfileInviteResponse;
 import com.chuseok22.elumserver.member.application.dto.response.ProfileJoinResponse;
 import com.chuseok22.elumserver.member.application.service.Caller;
@@ -44,6 +45,15 @@ public class ProfileGuardianController implements ProfileGuardianControllerDocs 
     Authentication authentication, @PathVariable String profileId
   ) {
     return ResponseEntity.ok(profileInviteService.issue(Caller.from(authentication), profileId));
+  }
+
+  @Override
+  @LogMonitoring(logExecutionTime = true)
+  @GetMapping("/api/profiles/{profileId}/invites/pending")
+  public ResponseEntity<ProfileInvitePendingResponse> pendingInvite(
+    Authentication authentication, @PathVariable String profileId
+  ) {
+    return ResponseEntity.ok(profileInviteService.pending(Caller.from(authentication), profileId));
   }
 
   /** 입력한 코드는 자격증명이다 — {@code logParameters} 를 켜지 않는다. */

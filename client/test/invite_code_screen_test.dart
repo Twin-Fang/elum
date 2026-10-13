@@ -109,7 +109,7 @@ void main() {
     await open(tester);
     expect(find.textContaining('이전 코드'), findsOneWidget);
 
-    await tester.tap(find.text('초대 코드 다시 만들기'));
+    await tester.tap(find.text('코드 다시 만들기'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -125,7 +125,7 @@ void main() {
     expect(find.text('초대 코드가 만료됐어요'), findsOneWidget);
     expect(find.textContaining(RegExp(r'^\d{2}:\d{2}$')), findsNothing);
     // 새로 만드는 길은 남는다
-    expect(find.text('초대 코드 다시 만들기'), findsOneWidget);
+    expect(find.text('코드 다시 만들기'), findsOneWidget);
   });
 
   group('받은 사람이 합류하면', () {
@@ -259,7 +259,7 @@ void main() {
       repo.issueResult = Attempt.ok(
         IssuedLinkCode.fromNow(code: 'B2C3D4', expiresInSeconds: 600),
       );
-      await tester.tap(find.text('초대 코드 다시 만들기'));
+      await tester.tap(find.text('코드 다시 만들기'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 

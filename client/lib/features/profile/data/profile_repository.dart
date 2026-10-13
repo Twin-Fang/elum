@@ -49,10 +49,28 @@ class ProfileRepository {
         return const Attempt.failed(AppFailure(fault: NetworkFault.app));
       }
       return Attempt.ok(
-        IssuedLinkCode.fromNow(code: code, expiresInSeconds: seconds),
+        IssuedLinkCode.fromNow(
+          code: code,
+          expiresInSeconds: seconds,
+          serverExpiresAt: DateTime.tryParse(res.data?['expiresAt']?.toString() ?? ''),
+        ),
       );
     } catch (e) {
       AppLogger.error('초대 코드 발급', e);
+      return Attempt.failed(AppFailure.of(e));
+    }
+  }
+
+  /// 내가 이 이룸이에 낸 미사용 초대 코드의 서버 만료 시각. 살아 있는 코드가 없으면 값이 null 이다.
+  /// 코드 원문은 서버에 없어 만료 시각만 돌려받는다 — 기억해 둔 코드와 같은 코드인지 가리는 데 쓴다.
+  Future<Attempt<DateTime?>> pendingInviteExpiry(String profileId) async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>(
+        '/api/profiles/$profileId/invites/pending',
+      );
+      return Attempt.ok(DateTime.tryParse(res.data?['expiresAt']?.toString() ?? ''));
+    } catch (e) {
+      AppLogger.error('초대 코드 확인', e);
       return Attempt.failed(AppFailure.of(e));
     }
   }

@@ -58,7 +58,10 @@ class InviteLink {
   static const _maxRawValue = 64;
 
   /// [raw] 가 초대 링크인지 해석한다. [raw] 는 문자열 또는 [Uri] 다. 어떤 입력에도 던지지 않는다.
-  static InviteLink? parse(Object? raw) {
+  ///
+  /// [segment] 는 가리키는 자리다. 기본은 초대(`invite`)이고, 이룸이 휴대폰 연결 암호 링크는 같은 모양의
+  /// 다른 자리(`link`)를 쓴다 — 해석 규칙을 한 곳에 두려고 파라미터로 열어 두었다.
+  static InviteLink? parse(Object? raw, {String segment = _segment}) {
     final Uri uri;
     if (raw is Uri) {
       uri = raw;
@@ -72,7 +75,7 @@ class InviteLink {
       return null;
     }
 
-    if (!_isInviteAddress(uri)) return null;
+    if (!_isInviteAddress(uri, segment)) return null;
 
     // 쿼리가 먼저, 없으면 조각. 쿼리에 코드 이름이 있으면 그 값이 이긴다 (못 쓸 모양이어도 조각으로 넘어가지 않는다).
     final found = _findCodeParam(uri.query) ?? _findCodeParam(uri.fragment);
@@ -80,7 +83,7 @@ class InviteLink {
   }
 
   /// 이 주소가 초대 링크가 가리키는 자리인가 — 앱 주소·웹 링크·플랫폼이 호스트를 뗀 경로 셋을 본다.
-  static bool _isInviteAddress(Uri uri) {
+  static bool _isInviteAddress(Uri uri, String target) {
     final scheme = uri.scheme.toLowerCase();
     // 호스트가 있으면 호스트도 한 조각으로 센다 (`elum://invite` 는 호스트가 invite 다).
     final segments = [
@@ -90,23 +93,24 @@ class InviteLink {
 
     switch (scheme) {
       case appScheme:
-        return segments.length == 1 && segments.first == _segment;
+        return segments.length == 1 && segments.first == target;
       case 'https':
-        return uri.host.toLowerCase() == webHost && _isWebPath(segments);
+        return uri.host.toLowerCase() == webHost && _isWebPath(segments, target);
       case '':
         // 플랫폼이 호스트를 떼고 경로만 넘기는 경우 (안드로이드 초기 라우트 등)
-        return uri.host.isEmpty && (_isWebPath(segments) || _isOnlySegment(segments));
+        return uri.host.isEmpty &&
+            (_isWebPath(segments, target) || _isOnlySegment(segments, target));
       default:
         // http, 소셜 로그인 콜백 스킴 등은 건드리지 않는다
         return false;
     }
   }
 
-  static bool _isWebPath(List<String> segments) =>
-      segments.length == 2 && segments[0] == 'elum' && segments[1] == _segment;
+  static bool _isWebPath(List<String> segments, String target) =>
+      segments.length == 2 && segments[0] == 'elum' && segments[1] == target;
 
-  static bool _isOnlySegment(List<String> segments) =>
-      segments.length == 1 && segments.first == _segment;
+  static bool _isOnlySegment(List<String> segments, String target) =>
+      segments.length == 1 && segments.first == target;
 
   /// `a=1&code=X` 에서 코드 파라미터의 **인코딩된 원문** 값. 이름이 없으면 null (코드가 없는 것과 다르다).
   ///
@@ -154,15 +158,23 @@ class InviteLink {
   /// 공유 시트로 보낼 웹 링크. 코드는 조각에 둔다 (위 설명).
   ///
   /// @throws ArgumentError 코드가 우리가 만들 수 없는 모양일 때. 코드는 메시지에 싣지 않는다.
-  static String shareUrl(String code) => '$webBase#code=${_checked(code)}';
+  static String shareUrl(String code) => shareUrlFor(_segment, code);
+
+  /// [shareUrl] 의 자리 지정판 — 연결 암호 링크가 쓴다.
+  static String shareUrlFor(String segment, String code) =>
+      'https://$webHost/elum/$segment/#code=${_checked(code)}';
 
   /// 안내 페이지의 `앱에서 열기` 가 부르는 앱 주소 (페이지 쪽 문자열과 같은 모양이어야 한다).
-  static String appUrl(String code) => '$appScheme://$_segment?code=${_checked(code)}';
+  static String appUrl(String code) => appUrlFor(_segment, code);
+
+  /// [appUrl] 의 자리 지정판 — 연결 암호 링크가 쓴다.
+  static String appUrlFor(String segment, String code) =>
+      '$appScheme://$segment?code=${_checked(code)}';
 
   static String _checked(String code) {
     final normalized = LinkCode.normalize(code);
     if (!LinkCode.hasValidShape(normalized)) {
-      throw ArgumentError('초대 코드 모양이 맞지 않습니다');
+      throw ArgumentError('코드 모양이 맞지 않습니다');
     }
     return normalized;
   }
