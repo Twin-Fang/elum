@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/logger/app_logger.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_shake.dart';
@@ -187,6 +188,19 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen>
     _focusNode.requestFocus();
   }
 
+  /// 만들기를 그만두면 로그인도 함께 끝낸다. 화면만 로그인으로 가고 세션이 남으면
+  /// 앱을 다시 켤 때 잠금 없이 보호자 홈이 열린다.
+  Future<void> _leaveCreate() async {
+    final auth = ref.read(authSessionControllerProvider);
+    try {
+      await auth.logout();
+    } catch (e) {
+      // 정리에 실패해도 로그인으로는 나간다. 남은 세션은 다음 시작에 암호 만들기로 돌아온다.
+      AppLogger.error('암호 만들기 이탈 로그아웃', e);
+    }
+    if (mounted) context.go(Routes.login);
+  }
+
   Future<void> _save() async {
     final pin = _current;
     try {
@@ -265,7 +279,7 @@ class _PinChangeScreenState extends ConsumerState<PinChangeScreen>
     final change = !widget.createOnly;
     return ElumScaffold(
       // 저장 전 나가기는 잠금 없이 보호자 홈을 여는 통로가 될 수 없다.
-      onBack: widget.createOnly ? () => context.go(Routes.login) : context.popOrHome,
+      onBack: widget.createOnly ? _leaveCreate : context.popOrHome,
       title: change ? context.l10n.pinChangeHeaderTitle : null,
       backTop: change ? _changeBackTop : null,
       // 온보딩처럼 **다 맞았을 때만** 버튼이 나타난다. 나타나는 것이 신호다.

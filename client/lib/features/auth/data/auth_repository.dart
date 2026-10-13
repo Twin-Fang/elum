@@ -123,6 +123,18 @@ class AuthRepository {
   bool _guardianPinSetupAllowed = false;
   bool guardianPinSetupPending = false;
 
+  /// 앱 시작 때 세션은 있는데 이 휴대폰에 잠금이 없으면 암호 만들기를 다시 세운다.
+  ///
+  /// 로그인 직후 메모리에만 있던 대기 표시는 앱을 끄면 사라져, 만들기를 건너뛴 채
+  /// 재시작하면 잠금 없이 보호자 홈이 열린다. 이룸이 휴대폰·역할 미정은 대상이 아니다.
+  void restoreGuardianPinRequirement({required bool lockMissing}) {
+    if (!lockMissing || !hasSession) return;
+    if (_storage.isElumiDevice || !_storage.isOnboardingCompleted) return;
+    if (_storage.selectedRole == 'elumi') return;
+    guardianPinSetupPending = true;
+    _guardianPinSetupAllowed = true;
+  }
+
   void finishGuardianPinSetup() {
     guardianPinSetupPending = false;
     _guardianPinSetupAllowed = false;
@@ -474,5 +486,8 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
     tokens: ref.watch(tokenStoreProvider),
     sdk: ref.watch(oAuthSdkProvider),
     imageCache: ref.watch(cardImageDiskCacheProvider),
-  );
+  )..restoreGuardianPinRequirement(lockMissing: ref.watch(startupLockMissingProvider));
 });
+
+/// 앱 시작 시점에 이 휴대폰 잠금이 없었는가. main 이 읽어 주입한다(비동기 읽기라 provider 안에서 못 함).
+final startupLockMissingProvider = Provider<bool>((ref) => false);
