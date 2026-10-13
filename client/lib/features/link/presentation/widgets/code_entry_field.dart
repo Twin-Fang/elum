@@ -25,6 +25,7 @@ class CodeEntryField extends StatelessWidget {
     this.sending = false,
     this.enabled = true,
     this.figma = false,
+    this.onSubmitted,
   });
 
   final TextEditingController controller;
@@ -52,6 +53,9 @@ class CodeEntryField extends StatelessWidget {
 
   /// 시안(`CodeBoxes.figma`) 모양의 칸을 쓸지.
   final bool figma;
+
+  /// 키보드의 완료·엔터. null 이면 아무 일도 하지 않는다(기존 동작).
+  final VoidCallback? onSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -99,15 +103,47 @@ class CodeEntryField extends StatelessWidget {
               enableSuggestions: false,
               textCapitalization: TextCapitalization.characters,
               keyboardType: TextInputType.visiblePassword,
-              // 공백·하이픈을 끼워 쳐도 받아준다 (서버도 받는다)
-              maxLength: LinkCode.length + 2,
+              textInputAction: onSubmitted == null ? null : TextInputAction.done,
+              onSubmitted: onSubmitted == null ? null : (_) => onSubmitted!(),
+              // 공백·하이픈을 끼워 쳐도 받아준다 (서버도 받는다). 글자는 여섯 개까지만 들어간다
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9 \-]')),
+                const _CodeLengthFormatter(),
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// 공백·하이픈을 뺀 글자가 [LinkCode.length] 를 넘으면 넘는 입력을 버린다.
+///
+/// 칸에는 여섯 글자만 보이는데 숨은 입력칸이 더 받으면 보이는 값과 보내는 값이 어긋난다.
+class _CodeLengthFormatter extends TextInputFormatter {
+  const _CodeLengthFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final kept = StringBuffer();
+    var letters = 0;
+    for (final ch in newValue.text.split('')) {
+      final separator = ch == ' ' || ch == '-';
+      if (!separator) {
+        if (letters == LinkCode.length) continue;
+        letters++;
+      }
+      kept.write(ch);
+    }
+    final text = kept.toString();
+    if (text == newValue.text) return newValue;
+    return TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
     );
   }
 }

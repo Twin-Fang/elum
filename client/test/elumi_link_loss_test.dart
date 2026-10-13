@@ -184,11 +184,10 @@ void main() {
 
       await tester.enterText(find.byType(TextField), 'A0K3M9');
       await tester.pumpAndSettle();
-      // 시작하기를 눌러야 보낸다 (시안 1274:7988, #493)
       await tester.tap(find.text('시작하기'));
       await tester.pumpAndSettle();
 
-      expect(find.text('암호가 맞지 않아요'), findsOneWidget);
+      expect(find.textContaining('암호가 맞지 않아요'), findsOneWidget);
       expect(find.textContaining('연결이 끊어졌어요'), findsNothing);
     });
   });
