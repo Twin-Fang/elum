@@ -12,6 +12,7 @@ import com.chuseok22.elumserver.link.application.dto.response.LinkCodeResponse;
 import com.chuseok22.elumserver.link.application.dto.response.LinkStatusResponse;
 import com.chuseok22.elumserver.link.application.dto.response.LinkedDeviceResponse;
 import com.chuseok22.elumserver.link.core.CodeDigest;
+import com.chuseok22.elumserver.link.core.DeviceName;
 import com.chuseok22.elumserver.link.core.ElumiDeviceId;
 import com.chuseok22.elumserver.link.core.LinkCode;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkRole;
@@ -19,6 +20,7 @@ import com.chuseok22.elumserver.link.infrastructure.entity.DeviceLink;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
+import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
@@ -26,6 +28,10 @@ import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepositor
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -60,6 +66,7 @@ public class DeviceLinkService {
   private final DeviceLinkRepository deviceLinkRepository;
   private final MemberRepository memberRepository;
   private final ProfileAccessGuard profileAccessGuard;
+  private final ProfileGuardianService profileGuardianService;
   private final RefreshTokenRepository refreshTokenRepository;
   private final RefreshTokenService refreshTokenService;
   private final JwtProvider jwtProvider;
@@ -116,9 +123,16 @@ public class DeviceLinkService {
     LocalDateTime now = LocalDateTime.now();
     List<DeviceLink> alive = aliveLinksVisibleTo(caller);
 
-    List<LinkedDeviceResponse> devices = alive.stream()
-      .filter(DeviceLink::isLinked)
-      .map(l -> new LinkedDeviceResponse(l.getId(), l.getRedeemedAt()))
+    List<DeviceLink> linked = alive.stream().filter(DeviceLink::isLinked).toList();
+    Map<String, Map<String, String>> names = guardianNames(linked);
+    List<LinkedDeviceResponse> devices = linked.stream()
+      .map(l -> new LinkedDeviceResponse(
+        l.getId(),
+        l.getRedeemedAt(),
+        l.getDeviceName(),
+        // 이룸이가 비어 있는 옛 행은 이름을 찾을 이룸이가 없다 — null 이면 앱이 '보호자'로 부른다.
+        l.getProfileId() == null ? null : names.getOrDefault(l.getProfileId(), Map.of()).get(l.getMemberId()),
+        l.getMemberId().equals(caller.memberId())))
       .toList();
 
     LocalDateTime pending = alive.stream()
@@ -129,6 +143,20 @@ public class DeviceLinkService {
       .orElse(null);
 
     return new LinkStatusResponse(devices, pending);
+  }
+
+  /** 이룸이별로 한 번씩만 묻는다 — 연결마다 묻지 않는다(N+1 방지). */
+  private Map<String, Map<String, String>> guardianNames(List<DeviceLink> links) {
+    Map<String, Set<String>> membersByProfile = new HashMap<>();
+    for (DeviceLink l : links) {
+      if (l.getProfileId() != null) {
+        membersByProfile.computeIfAbsent(l.getProfileId(), k -> new HashSet<>()).add(l.getMemberId());
+      }
+    }
+    Map<String, Map<String, String>> names = new HashMap<>();
+    membersByProfile.forEach((profileId, memberIds) ->
+      names.put(profileId, profileGuardianService.displayNamesOf(profileId, memberIds)));
+    return names;
   }
 
   /** 이 보호자가 보는 살아 있는 연결 — 이룸이의 것 + 이룸이가 비어 있는 옛 행 중 내 것. 최신이 앞에 온다. */
@@ -157,7 +185,7 @@ public class DeviceLinkService {
    * 어떤 값이 존재했는지가 새어 나가 추측에 단서가 된다.
    */
   @Transactional
-  public TokenResponse redeem(String rawCode) {
+  public TokenResponse redeem(String rawCode, String rawDeviceName) {
     String code = LinkCode.normalize(rawCode);
     if (!LinkCode.hasValidShape(code)) {
       // 모양부터 틀리면 저장소를 뒤지지 않는다 — 없는 값으로 시도 횟수를 늘릴 이유가 없다.
@@ -185,6 +213,8 @@ public class DeviceLinkService {
     String deviceId = ElumiDeviceId.of(link.getId());
     link.setRedeemedAt(now);
     link.setLinkedDeviceId(deviceId);
+    // 기기 이름은 부가 정보다 — 이상한 값이 와도 연결 자체를 막지 않고 버린다.
+    link.setDeviceName(DeviceName.sanitize(rawDeviceName));
 
     String accessToken = jwtProvider.createAccessToken(
       member.getId(), member.getUsername(), LinkRole.ELUMI, link.getId());

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
+import '../../../core/device/device_name_reader.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/guarded_call.dart';
 import '../../../core/network/server_error_code.dart';
@@ -85,7 +86,9 @@ class DeviceLinkRepository {
     required TokenStore tokens,
     required LocalStorage storage,
     CardImageDiskCache? imageCache,
-  })  : _dio = dio,
+    DeviceNameReader deviceNameReader = readDeviceName,
+  })  : _deviceNameReader = deviceNameReader,
+        _dio = dio,
         _tokens = tokens,
         _storage = storage,
         _imageCache = imageCache;
@@ -93,6 +96,9 @@ class DeviceLinkRepository {
   static const _repo = 'DeviceLinkRepository';
 
   final Dio _dio;
+
+  /// 연결할 때 서버로 보낼 이 휴대폰의 모델명을 읽는다. 시험에서는 가짜로 바꾼다.
+  final DeviceNameReader _deviceNameReader;
 
   /// 받아 둔 카드 그림. 스스로 로그아웃할 때 함께 비운다 — 보호자 로그아웃과 같다.
   final CardImageDiskCache? _imageCache;
@@ -209,9 +215,15 @@ class DeviceLinkRepository {
   /// 이룸이 휴대폰이 암호를 넣는다. **로그인 전이라 토큰 없이 부른다.**
   Future<RedeemResult> redeem(String code) async {
     try {
+      // 이름은 부가 정보다 — 못 읽으면 보내지 않고 연결만 한다. 옛 서버는 모르는 필드를 무시한다.
+      final deviceName = await _deviceNameReader();
       final res = await _dio.post<Map<String, dynamic>>(
         '/api/device-links/redeem',
-        data: {'code': code},
+        data: {
+          'code': code,
+          if (deviceName != null && deviceName.isNotEmpty)
+            'deviceName': deviceName,
+        },
       );
       final access = res.data?['accessToken']?.toString();
       final refresh = res.data?['refreshToken']?.toString();

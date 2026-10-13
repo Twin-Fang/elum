@@ -567,6 +567,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String get linkStatusEmpty => '연결된 휴대폰이 없어요';
 
   @override
+  String linkStatusConnectedBy(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '이', 'other': '가'});
+    return '$name$_temp0 연결';
+  }
+
+  @override
+  String get linkStatusConnectedByMe => '내가 연결';
+
+  @override
+  String linkStatusConnectedByAndSince(String by, String since) {
+    return '$by · $since';
+  }
+
+  @override
+  String get linkStatusAddAction => '+ 다른 휴대폰 연결하기';
+
+  @override
   String get linkStatusConnectAction => '이룸이 휴대폰 연결하기';
 
   @override

@@ -591,6 +591,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linkStatusEmpty => 'No phone is connected';
 
   @override
+  String linkStatusConnectedBy(String name, String batchim) {
+    return 'Connected by $name';
+  }
+
+  @override
+  String get linkStatusConnectedByMe => 'Connected by you';
+
+  @override
+  String linkStatusConnectedByAndSince(String by, String since) {
+    return '$by · $since';
+  }
+
+  @override
+  String get linkStatusAddAction => '+ Connect another phone';
+
+  @override
   String get linkStatusConnectAction => 'Connect Elumi\'s phone';
 
   @override

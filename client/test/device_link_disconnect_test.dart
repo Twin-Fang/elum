@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:elum/core/device/device_name_reader.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error_code.dart';
 import 'package:elum/core/storage/token_store.dart';
@@ -12,18 +13,26 @@ import 'package:elum/core/storage/in_memory_storage.dart';
 ///
 /// - 보호자가 끊는다([DeviceLinkRepository.revoke]) — 이미 끊겨 있으면 실패가 아니다.
 /// - 이룸이 휴대폰이 스스로 끊는다([DeviceLinkRepository.disconnectThisPhone]) — **서버가 끊긴 뒤에만** 로컬을 비운다.
+Future<String?> _noDeviceName() async => null;
+
 void main() {
   late InMemoryStorage storage;
   late InMemoryTokenStore tokens;
 
   ({DeviceLinkRepository repo, FakeAdapter adapter}) build(
-    Map<String, Object?> routes,
-  ) {
+    Map<String, Object?> routes, {
+    DeviceNameReader deviceNameReader = _noDeviceName,
+  }) {
     final adapter = FakeAdapter(routes);
     final dio = Dio(BaseOptions(baseUrl: 'https://test.local'))
       ..httpClientAdapter = adapter;
     return (
-      repo: DeviceLinkRepository(dio: dio, tokens: tokens, storage: storage),
+      repo: DeviceLinkRepository(
+        dio: dio,
+        tokens: tokens,
+        storage: storage,
+        deviceNameReader: deviceNameReader,
+      ),
       adapter: adapter,
     );
   }
@@ -222,6 +231,40 @@ void main() {
 
       expect(result.outcome, RedeemOutcome.linked);
       expect(storage.isElumiLinkLost, isFalse);
+    });
+  });
+
+  group('연결할 때 기기 이름 — redeem', () {
+    const ok = {
+      'accessToken': 'a2',
+      'refreshToken': 'r2',
+    };
+    const me = {'nickname': '하늘이', 'character': 'FOX'};
+
+    test('읽은 기기 이름을 함께 보낸다', () async {
+      final t = build(
+        {'POST /api/device-links/redeem': ok, 'GET /api/member/me': me},
+        deviceNameReader: () async => 'iPhone 16',
+      );
+
+      final result = await t.repo.redeem('A7K3M9');
+
+      expect(result.outcome, RedeemOutcome.linked);
+      expect(t.adapter.sentBodies['POST /api/device-links/redeem'],
+          {'code': 'A7K3M9', 'deviceName': 'iPhone 16'});
+    });
+
+    test('이름을 못 읽으면 보내지 않고 연결만 한다', () async {
+      final t = build({
+        'POST /api/device-links/redeem': ok,
+        'GET /api/member/me': me,
+      });
+
+      final result = await t.repo.redeem('A7K3M9');
+
+      expect(result.outcome, RedeemOutcome.linked);
+      expect(t.adapter.sentBodies['POST /api/device-links/redeem'],
+          {'code': 'A7K3M9'});
     });
   });
 

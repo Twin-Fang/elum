@@ -37,6 +37,37 @@ void main() {
       expect(s.devices.map((d) => d.linkId), ['l2']);
     });
 
+    test('기기 이름·연결한 사람·내가 연결했는지를 담는다', () {
+      final s = LinkStatus.fromJson({
+        'devices': [
+          {
+            'linkId': 'l1',
+            'deviceName': ' iPhone 16 ',
+            'linkedByName': '김선생님',
+            'linkedByMe': true,
+          },
+        ],
+      });
+      final d = s.devices.single;
+      expect(d.deviceName, 'iPhone 16');
+      expect(d.linkedByName, '김선생님');
+      expect(d.linkedByMe, isTrue);
+    });
+
+    test('옛 서버 응답(새 필드 없음)·형식이 다른 값에도 죽지 않는다', () {
+      final s = LinkStatus.fromJson({
+        'devices': [
+          {'linkId': 'l1'},
+          {'linkId': 'l2', 'deviceName': 7, 'linkedByName': '  ', 'linkedByMe': 'yes'},
+        ],
+      });
+      for (final d in s.devices) {
+        expect(d.deviceName, isNull);
+        expect(d.linkedByName, isNull);
+        expect(d.linkedByMe, isFalse);
+      }
+    });
+
     test('날짜가 깨져 있어도 항목은 남긴다', () {
       final s = LinkStatus.fromJson({
         'devices': [

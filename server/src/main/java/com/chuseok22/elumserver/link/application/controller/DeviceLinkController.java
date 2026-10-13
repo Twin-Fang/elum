@@ -94,7 +94,7 @@ public class DeviceLinkController implements DeviceLinkControllerDocs {
     if (!rateLimiter.tryAcquire(callerKey(http))) {
       throw new CustomException(ErrorCode.DEVICE_LINK_TOO_MANY_ATTEMPTS);
     }
-    return ResponseEntity.ok(deviceLinkService.redeem(request.code()));
+    return ResponseEntity.ok(deviceLinkService.redeem(request.code(), request.deviceName()));
   }
 
   /**
