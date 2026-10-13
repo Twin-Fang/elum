@@ -155,8 +155,13 @@ public class DeviceLinkService {
    *
    * <p>실패 사유를 잘게 구분해 주지 않는다 — 없는 암호와 이미 쓴 암호를 구분해 주면
    * 어떤 값이 존재했는지가 새어 나가 추측에 단서가 된다.
+   *
+   * <p>CustomException 이 나도 롤백하지 않는다 — 롤백하면 {@link #countFailure} 의 실패 횟수가
+   * 함께 사라져 추측 횟수 제한이 동작하지 않는다. 대신 <b>예외를 던지는 지점 앞에서는 실패 횟수 외에
+   * 쓰는 것이 없어야 한다</b>. 성공 경로의 쓰기(redeemedAt·토큰 발급)는 모든 검사를 지난 뒤에만 하고,
+   * 그 뒤에서 나는 예외는 CustomException 이 아니라 그대로 롤백된다.
    */
-  @Transactional
+  @Transactional(noRollbackFor = CustomException.class)
   public TokenResponse redeem(String rawCode) {
     String code = LinkCode.normalize(rawCode);
     if (!LinkCode.hasValidShape(code)) {
