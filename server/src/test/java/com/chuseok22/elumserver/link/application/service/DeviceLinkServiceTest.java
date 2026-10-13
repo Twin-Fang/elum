@@ -204,13 +204,13 @@ class DeviceLinkServiceTest {
     when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
 
     for (int i = 1; i <= DeviceLinkService.MAX_FAILED_ATTEMPTS; i++) {
-      assertThatThrownBy(() -> service.redeem("A7K3M9")).isInstanceOf(CustomException.class);
+      assertThatThrownBy(() -> service.redeem("A7K3M9", null)).isInstanceOf(CustomException.class);
       assertThat(l.getFailedAttempts()).isEqualTo(i);
     }
     assertThat(l.getRevokedAt()).isNotNull();
 
     // 한도를 넘으면 429 계열로 바뀌고 더는 세지 않는다.
-    assertThatThrownBy(() -> service.redeem("A7K3M9"))
+    assertThatThrownBy(() -> service.redeem("A7K3M9", null))
       .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
         .isEqualTo(ErrorCode.DEVICE_LINK_TOO_MANY_ATTEMPTS));
     assertThat(l.getFailedAttempts()).isEqualTo(DeviceLinkService.MAX_FAILED_ATTEMPTS);
@@ -222,7 +222,7 @@ class DeviceLinkServiceTest {
     DeviceLink l = link("A7K3M9", LocalDateTime.now().minusMinutes(1));
     when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
 
-    assertThatThrownBy(() -> service.redeem("A7K3M9")).isInstanceOf(CustomException.class);
+    assertThatThrownBy(() -> service.redeem("A7K3M9", null)).isInstanceOf(CustomException.class);
 
     assertThat(l.getFailedAttempts()).isZero();
   }
