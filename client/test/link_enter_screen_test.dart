@@ -113,20 +113,6 @@ void main() {
     expect(find.text('이룸이 홈'), findsOneWidget);
   });
 
-  testWidgets('키보드 완료로도 여섯 자일 때 보낸다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-    await type(tester, 'A7K3M');
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pumpAndSettle();
-    expect(repo.sent, isEmpty, reason: '다섯 자는 보내지 않는다');
-
-    await type(tester, 'A7K3M9');
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pumpAndSettle();
-    expect(repo.sent, ['A7K3M9']);
-  });
-
   testWidgets('일곱 번째 글자는 칸에 들어가지 않는다', (tester) async {
     repo.outcome = RedeemOutcome.offline;
     await tester.pumpWidget(wrap());
@@ -157,20 +143,18 @@ void main() {
     expect(find.text('이룸이 홈'), findsOneWidget);
   });
 
-  testWidgets('키보드가 올라오면 시작하기가 키보드 위로 올라온다', (tester) async {
+  testWidgets('여섯 자를 채우면 키보드를 내려 시작하기를 누를 수 있다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
-    final before = tester.getBottomLeft(find.widgetWithText(ElumButton, '시작하기')).dy;
 
-    tester.view.viewInsets = const FakeViewPadding(bottom: 600);
-    addTearDown(tester.view.resetViewInsets);
+    await type(tester, 'A7K3M9');
+    // 키보드에 가려진 채 남으면 이룸이가 누를 곳을 찾지 못한다
+    expect(tester.testTextInput.isVisible, isFalse);
+    expect(repo.sent, isEmpty);
+
+    await tester.tap(find.widgetWithText(ElumButton, '시작하기'));
     await tester.pumpAndSettle();
-
-    final screenH = tester.view.physicalSize.height / tester.view.devicePixelRatio;
-    final keyboardTop = screenH - 600 / tester.view.devicePixelRatio;
-    final after = tester.getBottomLeft(find.widgetWithText(ElumButton, '시작하기')).dy;
-    expect(after, lessThan(before));
-    expect(after, lessThanOrEqualTo(keyboardTop));
+    expect(repo.sent, ['A7K3M9']);
   });
 
   testWidgets('여섯 자가 안 되면 시작하기가 꺼져 있다', (tester) async {
