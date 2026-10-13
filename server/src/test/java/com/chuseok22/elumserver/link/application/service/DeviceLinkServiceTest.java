@@ -194,6 +194,37 @@ class DeviceLinkServiceTest {
   }
 
   @Test
+  @DisplayName("이미 쓴 암호를 넣을 때마다 실패 횟수가 쌓이고 5회째에 폐기된다")
+  void redeem_failureCountAccumulatesAndRevokes() throws Exception {
+    DeviceLink l = link("A7K3M9", LocalDateTime.now().plusMinutes(5));
+    l.setRedeemedAt(LocalDateTime.now().minusMinutes(1));
+    when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
+
+    for (int i = 1; i <= DeviceLinkService.MAX_FAILED_ATTEMPTS; i++) {
+      assertThatThrownBy(() -> service.redeem("A7K3M9")).isInstanceOf(CustomException.class);
+      assertThat(l.getFailedAttempts()).isEqualTo(i);
+    }
+    assertThat(l.getRevokedAt()).isNotNull();
+
+    // 한도를 넘으면 429 계열로 바뀌고 더는 세지 않는다.
+    assertThatThrownBy(() -> service.redeem("A7K3M9"))
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.DEVICE_LINK_TOO_MANY_ATTEMPTS));
+    assertThat(l.getFailedAttempts()).isEqualTo(DeviceLinkService.MAX_FAILED_ATTEMPTS);
+  }
+
+  @Test
+  @DisplayName("만료된 암호는 실패 횟수를 세지 않는다")
+  void redeem_expiredDoesNotCount() throws Exception {
+    DeviceLink l = link("A7K3M9", LocalDateTime.now().minusMinutes(1));
+    when(deviceLinkRepository.findByCodeHash(hash("A7K3M9"))).thenReturn(Optional.of(l));
+
+    assertThatThrownBy(() -> service.redeem("A7K3M9")).isInstanceOf(CustomException.class);
+
+    assertThat(l.getFailedAttempts()).isZero();
+  }
+
+  @Test
   @DisplayName("모양부터 틀린 값은 저장소를 뒤지지 않는다")
   void redeem_badShapeDoesNotQuery() {
     assertThatThrownBy(() -> service.redeem("!!!"))
