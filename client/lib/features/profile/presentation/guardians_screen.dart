@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/state/busy_state_mixin.dart';
+import '../../../core/text/keep_words.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
@@ -80,6 +82,8 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
       message: isLast
           ? l10n.guardiansLeaveConfirmMessageLast
           : l10n.guardiansLeaveConfirmMessageOthers,
+      // 긴 안내가 단어 중간에서 꺾이지 않게 어절 단위로 줄바꿈한다.
+      keepWordsInMessage: true,
       actions: [
         ElumDialogAction(label: l10n.commonCancel, value: false, tone: ElumDialogTone.neutral),
         ElumDialogAction(
@@ -221,8 +225,8 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
       // 한 줄 설명. 이름을 알면 이름을 쓴다.
       Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w),
-        child: Text(
-          context.l10n.guardiansCaption(profileName),
+        child: _KeptText(
+          context.l10n.guardiansCaption(profileName, batchimOf(profileName)),
           style: context.typo.body.copyWith(color: context.colors.textSecondary),
         ),
       ),
@@ -302,10 +306,25 @@ class _Caption extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: EdgeInsets.fromLTRB(SettingsTile.padH.w, 4.h, SettingsTile.padH.w, 0),
-    child: Text(
+    child: _KeptText(
       text,
       style: context.typo.bodySmall.copyWith(color: context.colors.textSecondary),
     ),
+  );
+}
+
+/// 어절 단위로 줄바꿈하는 글. 낭독기에는 표시가 섞이지 않은 원문을 읽게 한다.
+class _KeptText extends StatelessWidget {
+  const _KeptText(this.text, {required this.style});
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    keepWords(text, locale: context.appLocale),
+    semanticsLabel: text,
+    style: style,
   );
 }
 
@@ -340,10 +359,20 @@ class _GuardianTile extends StatelessWidget {
   /// 이름·구분 저장을 기다리는 중 — 화살표 자리에 스피너를 돌린다.
   final bool loading;
 
+  /// 글자와 꺾쇠 사이 간격, 꺾쇠(스피너) 자리 폭.
+  static const _trailingGap = 4.0;
+  static const _trailingSlot = 20.0;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typo = context.typo;
+
+    // 이름이 없으면 구분 이름이 왼쪽에 이미 보인다 — 오른쪽에 같은 말을 또 적지 않는다.
+    // 내 줄이면 이름을 넣으라고 가볍게 안내하고(누르면 이름 고치기), 남의 줄은 비워 둔다.
+    final String? trailingText = guardian.hasName
+        ? guardian.kind.label
+        : (guardian.me ? context.l10n.guardiansNameHint : null);
 
     final row = SizedBox(
       height: SettingsTile.height.h,
@@ -353,7 +382,7 @@ class _GuardianTile extends StatelessWidget {
           children: [
             Flexible(
               child: Text(
-                guardian.label,
+                guardian.hasName ? guardian.label : guardian.kind.label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: typo.settingsTileLabel.copyWith(color: colors.textPrimary),
@@ -371,17 +400,24 @@ class _GuardianTile extends StatelessWidget {
               ),
             ],
             const Spacer(),
-            Text(
-              guardian.kind.label,
-              style: typo.settingsTileLabel.copyWith(color: colors.textPlaceholder),
+            if (trailingText != null)
+              Text(
+                trailingText,
+                style: typo.settingsTileLabel.copyWith(color: colors.textSecondary),
+              ),
+            SizedBox(width: _trailingGap.w),
+            // 꺾쇠가 있는 줄과 없는 줄의 글자 끝이 어긋나지 않게 꺾쇠 자리를 항상 남긴다.
+            SizedBox(
+              width: _trailingSlot.w,
+              child: loading
+                  ? Align(
+                      alignment: Alignment.centerRight,
+                      child: ElumSpinner(size: 20.w, color: colors.settingsChevron),
+                    )
+                  : (onTap != null
+                        ? Icon(Icons.chevron_right_rounded, size: 20.w, color: colors.settingsChevron)
+                        : null),
             ),
-            if (loading) ...[
-              SizedBox(width: 8.w),
-              ElumSpinner(size: 20.w, color: colors.settingsChevron),
-            ] else if (onTap != null) ...[
-              SizedBox(width: 4.w),
-              Icon(Icons.chevron_right_rounded, size: 20.w, color: colors.settingsChevron),
-            ],
           ],
         ),
       ),

@@ -17,6 +17,10 @@ class GuardiansController {
   Future<AppFailure?> leave(String profileId) =>
       _ref.read(profileRepositoryProvider).leave(profileId);
 
+  /// 함께하는 사람 목록. 초대 코드 화면이 새로 합류한 사람을 알아채는 데 쓴다.
+  Future<Attempt<List<Guardian>>> listGuardians(String profileId) =>
+      _ref.read(profileRepositoryProvider).listGuardians(profileId);
+
   Future<Attempt<Guardian>> updateMyGuardian(
     String profileId, {
     GuardianKind? kind,

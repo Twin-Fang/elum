@@ -703,8 +703,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get guardiansNoProfileDescription => '이룸이를 먼저 등록해주세요';
 
   @override
-  String guardiansCaption(String name) {
-    return '$name를 함께 돌보는 사람이에요';
+  String guardiansCaption(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
+    return '$name$_temp0 함께 돌보는 사람이에요';
   }
 
   @override
@@ -735,6 +736,14 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get guardiansLeaveHintWithOthers =>
       '내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요';
+
+  @override
+  String get guardiansNameHint => '이름을 넣어보세요';
+
+  @override
+  String inviteCodeGuestJoinedTitle(String name) {
+    return '$name님이 함께하게 됐어요';
+  }
 
   @override
   String get guardiansMeBadge => '나';

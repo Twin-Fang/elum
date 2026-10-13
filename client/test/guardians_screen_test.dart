@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
+import 'helpers/kept_text_finder.dart';
 import 'helpers/profile_fixtures.dart';
 import 'helpers/semantics_audit.dart';
 import 'package:elum/features/member/application/member_providers.dart';
@@ -115,9 +116,16 @@ void main() {
       expect(repo.calls, contains('list:p-a'));
       expect(find.text('엄마'), findsOneWidget);
       expect(find.text('나'), findsOneWidget);
-      // 이름이 없으면 앱이 "보호자"로 부른다
-      expect(find.text('보호자'), findsWidgets);
+      // 이름이 없는 사람은 구분 이름만 한 번 보인다 (`센터 선생님 · 센터 선생님` 으로 겹치지 않는다)
       expect(find.text('센터 선생님'), findsOneWidget);
+    });
+
+    testWidgets('이름이 없는 내 줄은 구분을 한 번만 보이고 이름을 넣도록 안내한다', (tester) async {
+      repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
+      await open(tester);
+
+      expect(find.text('보호자'), findsOneWidget);
+      expect(find.text('이름을 넣어보세요'), findsOneWidget);
     });
 
     testWidgets('계정 ID·아이디는 어디에도 나오지 않는다 — 서버가 내려주지 않는다', (tester) async {
@@ -155,23 +163,23 @@ void main() {
     testWidgets('#506 이룸이 휴대폰과 헷갈리지 않게, 사람을 위한 화면이라는 설명이 늘 나온다', (tester) async {
       await open(tester);
 
-      expect(find.textContaining('이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요'), findsOneWidget);
+      expect(findKept('이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요'), findsOneWidget);
     });
 
     testWidgets('#506 혼자 돌보면 혼자라는 안내와, 그만두면 이룸이까지 사라진다는 설명이 나온다', (tester) async {
       repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
       await open(tester);
 
-      expect(find.text('아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요'), findsOneWidget);
-      expect(find.text('혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요'), findsOneWidget);
-      expect(find.text('내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요'), findsNothing);
+      expect(findKept('아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요', exact: true), findsOneWidget);
+      expect(findKept('혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요', exact: true), findsOneWidget);
+      expect(findKept('내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요', exact: true), findsNothing);
     });
 
     testWidgets('#506 다른 보호자가 있으면 내가 만든 일과만 사라진다고 말하고 혼자라는 안내는 없다', (tester) async {
       await open(tester);
 
-      expect(find.text('내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요'), findsOneWidget);
-      expect(find.textContaining('혼자 돌보고 있어'), findsNothing);
+      expect(findKept('내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요', exact: true), findsOneWidget);
+      expect(findKept('혼자 돌보고 있어'), findsNothing);
     });
 
     testWidgets('#506 목록을 못 받으면 혼자인지 모르므로 그만두기 설명을 말하지 않는다', (tester) async {
@@ -179,7 +187,7 @@ void main() {
       await open(tester);
 
       expect(find.textContaining('그만두면'), findsNothing);
-      expect(find.textContaining('내가 만든 일과만'), findsNothing);
+      expect(findKept('내가 만든 일과만'), findsNothing);
     });
 
     testWidgets('이름 없는 누름 자리가 없다', (tester) async {
@@ -214,10 +222,10 @@ void main() {
 
       expect(find.text('함께 돌보기를 그만둘까요?'), findsOneWidget);
       // 이룸이 휴대폰 연결이 끊어지는 것을 일과보다 먼저 말한다.
-      expect(find.textContaining('내가 연결한 이룸이 휴대폰이 있다면 연결이 끊어져요'), findsOneWidget);
+      expect(findKept('내가 연결한 이룸이 휴대폰이 있다면 연결이 끊어져요'), findsOneWidget);
       expect(find.textContaining('새 연결 암호를 만들어야 다시 쓸 수 있어요'), findsOneWidget);
-      expect(find.textContaining('내가 만든 일과는 사라져요'), findsOneWidget);
-      expect(find.textContaining('다른 보호자의 일과·별은 그대로예요'), findsOneWidget);
+      expect(findKept('내가 만든 일과는 사라져요'), findsOneWidget);
+      expect(findKept('다른 보호자의 일과·별은 그대로예요'), findsOneWidget);
       expect(repo.calls.where((c) => c.startsWith('leave')), isEmpty);
     });
 
@@ -242,9 +250,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('함께하는 보호자가 없어요'), findsOneWidget);
-      expect(find.textContaining('이룸이와 만든 일과, 모은 별이 모두 사라져요'), findsOneWidget);
-      expect(find.textContaining('다른 보호자의 일과·별은 그대로예요'), findsNothing);
-      expect(find.textContaining('이룸이 휴대폰이 있다면 연결이 끊어져요'), findsNothing);
+      expect(findKept('이룸이와 만든 일과, 모은 별이 모두 사라져요'), findsOneWidget);
+      expect(findKept('다른 보호자의 일과·별은 그대로예요'), findsNothing);
+      expect(findKept('이룸이 휴대폰이 있다면 연결이 끊어져요'), findsNothing);
       expect(repo.calls.where((c) => c.startsWith('leave')), isEmpty);
     });
 

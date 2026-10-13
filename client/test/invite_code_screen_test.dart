@@ -4,6 +4,7 @@ import 'package:elum/core/network/server_error_code.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/link/domain/link_status.dart';
 import 'package:elum/features/profile/application/invite_sharer.dart';
+import 'package:elum/features/profile/domain/guardian_member.dart';
 import 'package:elum/features/profile/domain/invite_link.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/presentation/invite_code_screen.dart';
@@ -125,6 +126,29 @@ void main() {
     expect(find.textContaining(RegExp(r'^\d{2}:\d{2}$')), findsNothing);
     // 새로 만드는 길은 남는다
     expect(find.text('초대 코드 다시 만들기'), findsOneWidget);
+  });
+
+  group('받은 사람이 합류하면', () {
+    testWidgets('보낸 사람 화면이 합류 팝업을 띄우고 확인하면 이전 화면으로 돌아간다', (tester) async {
+      repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true, displayName: '엄마')]);
+      await open(tester);
+      await tester.pump(const Duration(seconds: 3));
+
+      // 새 보호자가 생겼다
+      repo.guardiansResult = const Attempt.ok([
+        Guardian(id: 'g-1', me: true, displayName: '엄마'),
+        Guardian(id: 'g-2', me: false, displayName: '이모'),
+      ]);
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('이모님이 함께하게 됐어요'), findsOneWidget);
+
+      await tester.tap(find.text('확인'));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('이전 화면'), findsOneWidget);
+    });
   });
 
   group('실패해도 화면이 산다', () {

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
+import '../../../core/text/keep_words.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_button.dart';
@@ -50,8 +51,17 @@ class _InviteError {
   final AppFailure? failure;
 
   String message(AppLocalizations l10n) {
-    String say(String fallback, String code) =>
-        failure?.describe(fallback, code) ?? '$fallback ($code)';
+    // 서버 enum(`PROFILE_INVITE_NOT_FOUND`)이 아니라 앱 에러 코드를 붙인다. 서버 문구 끝의 마침표는
+    // 다른 화면과 같게 뗀다. 인터넷 쪽 실패만 연결 실패 코드(`E-NET-…`)를 그대로 쓴다.
+    String say(String fallback, String code) {
+      final f = failure;
+      final body = (f?.bodyOr(fallback) ?? fallback).trimRight().replaceFirst(
+        RegExp(r'[.。]$'),
+        '',
+      );
+      final badge = (f != null && f.isUnreachable) ? f.badgeOr(code) : code;
+      return '$body ($badge)';
+    }
 
     return switch (fault) {
       _InviteFault.linkInvalid => l10n.inviteEnterLinkInvalid,
@@ -63,7 +73,11 @@ class _InviteError {
       _InviteFault.forbiddenForElumi => say(l10n.inviteEnterForbiddenForElumi, 'E-INV-403'),
       _InviteFault.invalidInput => say(l10n.inviteEnterInvalidInput, 'E-INV-400'),
       _InviteFault.offline => say(l10n.inviteEnterOffline, 'E-NET'),
-      _InviteFault.other => say(l10n.inviteEnterOther, 'E-INV'),
+      _InviteFault.other => say(
+        l10n.inviteEnterOther,
+        // 상태 코드를 함께 남겨 어디서 막혔는지 추적한다.
+        failure?.server?.statusCode == null ? 'E-INV' : 'E-INV/${failure!.server!.statusCode}',
+      ),
     };
   }
 }
@@ -369,11 +383,15 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
           children: [
             ElumHeader(
               title: context.l10n.inviteEnterTitle,
+              // 안내 문구는 어절 단위로 줄바꿈한다. 에러 코드가 붙는 오류 문구는 코드를 그대로 두려고 제외한다.
               description:
                   _error?.message(context.l10n) ??
-                  (_fromLink
-                      ? context.l10n.inviteEnterDescriptionFromLink
-                      : context.l10n.inviteEnterDescriptionManual),
+                  keepWords(
+                    _fromLink
+                        ? context.l10n.inviteEnterDescriptionFromLink
+                        : context.l10n.inviteEnterDescriptionManual,
+                    locale: context.appLocale,
+                  ),
             ),
             SizedBox(height: space.lg),
             // 어디서 받는지 적어 준다. 받는 사람은 처음 보는 화면이다. 링크로 받았다면 이미 안다.
@@ -389,21 +407,30 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.l10n.inviteEnterWhereFrom,
+                      keepWords(
+                        context.l10n.inviteEnterWhereFrom,
+                        locale: context.appLocale,
+                      ),
                       style: context.typo.body.copyWith(
                         color: colors.textSecondary,
                       ),
                     ),
                     SizedBox(height: space.sm),
                     Text(
-                      context.l10n.inviteEnterWherePath,
+                      keepWords(
+                        context.l10n.inviteEnterWherePath,
+                        locale: context.appLocale,
+                      ),
                       style: context.typo.subtitle.copyWith(
                         color: colors.textPrimary,
                       ),
                     ),
                     SizedBox(height: space.sm),
                     Text(
-                      context.l10n.inviteEnterWhereHow,
+                      keepWords(
+                        context.l10n.inviteEnterWhereHow,
+                        locale: context.appLocale,
+                      ),
                       style: context.typo.body.copyWith(
                         color: colors.textSecondary,
                       ),
@@ -424,6 +451,8 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
               failCount: _failCount,
               hasError: _error != null,
               sending: _sending,
+              // 연결 암호 넣기와 같은 칸 모양 — 기존 칸은 글자가 칸에 비해 작았다.
+              figma: true,
               enabled: !_locked && !_fromLink,
             ),
             // 링크로 받은 코드는 `함께하기` 가 다시 시도다 — 같은 일을 하는 버튼을 둘 두지 않는다

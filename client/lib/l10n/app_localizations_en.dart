@@ -732,7 +732,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardiansNoProfileDescription => 'Add Elumi first';
 
   @override
-  String guardiansCaption(String name) {
+  String guardiansCaption(String name, String batchim) {
     return 'People looking after $name together';
   }
 
@@ -766,6 +766,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get guardiansLeaveHintWithOthers =>
       'Only routines you made are removed. Other guardians\' routines stay.';
+
+  @override
+  String get guardiansNameHint => 'Add your name';
+
+  @override
+  String inviteCodeGuestJoinedTitle(String name) {
+    return '$name has joined you';
+  }
 
   @override
   String get guardiansMeBadge => 'Me';
