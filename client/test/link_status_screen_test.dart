@@ -5,6 +5,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/core/widgets/elum_error_view.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
+import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/presentation/link_status_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,7 +42,7 @@ void main() {
     adapter = FakeAdapter(routes);
   });
 
-  Widget wrap() {
+  Widget wrap({bool holdCache = false}) {
     final dio = Dio(BaseOptions(baseUrl: 'https://test.local'))
       ..httpClientAdapter = adapter;
     final router = GoRouter(
@@ -51,9 +52,16 @@ void main() {
           path: Routes.guardianSettings,
           builder: (context, state) => Scaffold(
             body: Center(
-              child: TextButton(
-                onPressed: () => context.push(Routes.guardianLinkStatus),
-                child: const Text('설정 화면'),
+              // 설정 줄처럼 같은 조회를 계속 들고 있어 캐시를 살려 둔다
+              child: Consumer(
+                builder: (context, ref, child) {
+                  if (holdCache) ref.watch(linkStatusProvider);
+                  return child!;
+                },
+                child: TextButton(
+                  onPressed: () => context.push(Routes.guardianLinkStatus),
+                  child: const Text('설정 화면'),
+                ),
               ),
             ),
           ),
@@ -100,6 +108,19 @@ void main() {
   }
 
   group('보여주는 것', () {
+    testWidgets('설정이 캐시를 들고 있어도 들어올 때 최신 값을 보여준다', (tester) async {
+      await tester.pumpWidget(wrap(holdCache: true));
+      await tester.pumpAndSettle();
+      // 그사이 다른 휴대폰에서 연결이 끊겼다
+      routes['GET /api/device-links'] = noDevice;
+
+      await tester.tap(find.text('설정 화면'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('연결됨'), findsNothing);
+      expect(find.text('연결된 휴대폰이 없어요'), findsOneWidget);
+    });
+
     testWidgets('연결됨 · 언제부터 · 연결 끊기 · 끊으면 어떻게 되는지 한 줄', (tester) async {
       await open(tester);
 

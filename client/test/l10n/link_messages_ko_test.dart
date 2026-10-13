@@ -116,14 +116,16 @@ void main() {
 
     testWidgets('실패 종류별 문구 — 서버 문구가 없으면 기본 문구와 에러 코드', (tester) async {
       final cases = <RedeemOutcome, String>{
-        RedeemOutcome.notFound: '암호가 맞지 않아요',
-        RedeemOutcome.expired: '암호가 만료됐어요. 새 암호를 받아주세요',
+        RedeemOutcome.notFound: '암호가 맞지 않아요 (E-LINK-404)',
+        RedeemOutcome.expired: '암호가 만료됐어요. 새 암호를 받아주세요 (E-LINK-410)',
         RedeemOutcome.tooManyAttempts: '잠시 후 다시 해주세요 (E-LINK-429)',
         RedeemOutcome.offline: '연결하지 못했어요. 인터넷을 확인해주세요 (E-NET)',
         RedeemOutcome.failed: '연결하지 못했어요. 다시 해주세요 (E-LINK)',
       };
       for (final entry in cases.entries) {
         repo.outcome = entry.key;
+        // 화면마다 새로 연다 — 인터넷 끊김은 입력을, 시도 한도는 잠금을 남긴다
+        await tester.pumpWidget(const SizedBox());
         await pumpEnter(tester);
         await tester.pumpAndSettle();
         await submit(tester, 'A7K3M9');

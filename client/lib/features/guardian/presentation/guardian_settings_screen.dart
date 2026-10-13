@@ -265,6 +265,8 @@ class _LinkTile extends ConsumerWidget {
       onTap: busy
           ? null
           : () async {
+              // 열려 있는 동안 캐시가 남아 옛 값이 보인다 — 들어가기 전에 비워 새 값을 받게 한다
+              ref.invalidate(linkStatusProvider);
               await context.push(
                 connected ? Routes.guardianLinkStatus : Routes.linkCode,
               );

@@ -60,7 +60,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// 칸을 채우고 `시작하기`를 누른다 — 시안(1274:7988)은 버튼을 눌러 보낸다 (#493).
+  /// 칸을 채우고 `시작하기`를 누른다 — 시안(1274:7988)은 버튼을 눌러 보낸다.
   Future<void> typeAndStart(WidgetTester tester, String code) async {
     await type(tester, code);
     await tester.tap(find.text('시작하기'));
@@ -93,18 +93,16 @@ void main() {
     );
   });
 
-  testWidgets('여섯 자를 채우면 시작하기가 켜지고, 누르면 보낸다 (#493)', (tester) async {
+  testWidgets('여섯 자를 채워도 스스로 보내지 않고 시작하기로 보낸다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    // 채우기 전에는 꺼져 있다 (시안 1274:7909)
     ElumButton startButton() =>
         tester.widget<ElumButton>(find.widgetWithText(ElumButton, '시작하기'));
     expect(startButton().onPressed, isNull);
 
     await type(tester, 'A7K3M9');
 
-    // 다 채워도 버튼을 누르기 전에는 보내지 않는다 (시안 1274:7988)
     expect(repo.sent, isEmpty);
     expect(startButton().onPressed, isNotNull);
 
@@ -113,6 +111,66 @@ void main() {
 
     expect(repo.sent, ['A7K3M9']);
     expect(find.text('이룸이 홈'), findsOneWidget);
+  });
+
+  testWidgets('키보드 완료로도 여섯 자일 때 보낸다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+    await type(tester, 'A7K3M');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(repo.sent, isEmpty, reason: '다섯 자는 보내지 않는다');
+
+    await type(tester, 'A7K3M9');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(repo.sent, ['A7K3M9']);
+  });
+
+  testWidgets('일곱 번째 글자는 칸에 들어가지 않는다', (tester) async {
+    repo.outcome = RedeemOutcome.offline;
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await type(tester, 'A7K3M9Z');
+    await tester.tap(find.text('시작하기'));
+    await tester.pumpAndSettle();
+
+    // 칸에 보이는 값과 보내는 값이 같아야 한다
+    expect(repo.sent, ['A7K3M9']);
+    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'A7K3M9');
+  });
+
+  testWidgets('인터넷이 끊기면 입력을 남기고 시작하기로 다시 보낸다', (tester) async {
+    repo.outcome = RedeemOutcome.offline;
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+    await typeAndStart(tester, 'A7K3M9');
+
+    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'A7K3M9');
+
+    repo.outcome = RedeemOutcome.linked;
+    await tester.tap(find.text('시작하기'));
+    await tester.pumpAndSettle();
+
+    expect(repo.sent, ['A7K3M9', 'A7K3M9']);
+    expect(find.text('이룸이 홈'), findsOneWidget);
+  });
+
+  testWidgets('키보드가 올라오면 시작하기가 키보드 위로 올라온다', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+    final before = tester.getBottomLeft(find.widgetWithText(ElumButton, '시작하기')).dy;
+
+    tester.view.viewInsets = const FakeViewPadding(bottom: 600);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.pumpAndSettle();
+
+    final screenH = tester.view.physicalSize.height / tester.view.devicePixelRatio;
+    final keyboardTop = screenH - 600 / tester.view.devicePixelRatio;
+    final after = tester.getBottomLeft(find.widgetWithText(ElumButton, '시작하기')).dy;
+    expect(after, lessThan(before));
+    expect(after, lessThanOrEqualTo(keyboardTop));
   });
 
   testWidgets('여섯 자가 안 되면 시작하기가 꺼져 있다', (tester) async {
@@ -146,7 +204,7 @@ void main() {
 
     await typeAndStart(tester, 'A7K3M9');
 
-    expect(find.text('암호가 맞지 않아요'), findsOneWidget);
+    expect(find.textContaining('암호가 맞지 않아요'), findsOneWidget);
     expect(find.text('이룸이 홈'), findsNothing);
     // 비우지 않으면 다시 치려고 지우는 것부터 해야 한다.
     expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, isEmpty);
@@ -160,7 +218,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
     await typeAndStart(tester, 'A7K3M9');
-    expect(find.text('암호가 맞지 않아요'), findsOneWidget);
+    expect(find.textContaining('암호가 맞지 않아요'), findsOneWidget);
 
     tester.testTextInput.log.clear();
     await tester.tap(find.bySemanticsLabel('연결 암호 넣기'));
@@ -225,7 +283,7 @@ void main() {
     await typeAndStart(tester, 'A0K3M9');
 
     expect(repo.sent, isEmpty);
-    expect(find.text('암호가 맞지 않아요'), findsOneWidget);
+    expect(find.textContaining('암호가 맞지 않아요'), findsOneWidget);
   });
 }
 

@@ -49,6 +49,16 @@ class LinkStatusScreen extends ConsumerStatefulWidget {
 
 class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen>
     with BusyStateMixin<LinkStatusScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // 설정 줄이 같은 조회를 들고 있어 캐시가 살아 있다 — 들어올 때마다 서버 값으로 새로 받는다.
+    // 다른 휴대폰에서 끊긴 연결이 '연결됨'으로 남아 보이지 않게 한다.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.invalidate(linkStatusProvider);
+    });
+  }
+
   /// 확인을 받은 뒤의 끊기 요청은 한 번만 나간다 — 같은 요청이 두 번 나가면 두 번째는 404 로 돌아온다.
   Future<void> _confirmAndRevoke(LinkedDevice device) async {
     // await 뒤에서 context 를 쓰지 않으려고 미리 잡는다

@@ -19,7 +19,7 @@ import '../../../core/router/routes.dart';
 
 /// 연결 실패의 종류. 문구가 아니라 종류를 들고 있다가 그릴 때 푼다 — 실패 순간에 문구로
 /// 굳히면 언어가 바뀐 뒤에도 옛 언어로 남는다.
-enum _EnterFault { wrongCode, expired, tooManyAttempts, offline, failed }
+enum _EnterFault { formInvalid, wrongCode, expired, tooManyAttempts, offline, failed }
 
 class _EnterError {
   const _EnterError(this.fault, [this.failure]);
@@ -35,8 +35,10 @@ class _EnterError {
         failure?.describe(fallback, code) ?? '$fallback ($code)';
 
     return switch (fault) {
-      _EnterFault.wrongCode => l10n.linkEnterWrongCode,
-      _EnterFault.expired => l10n.linkEnterExpired,
+      // 서버를 거치지 않은 모양 오류는 서버 404 와 코드를 나눠 제보에서 갈래를 안다
+      _EnterFault.formInvalid => '${l10n.linkEnterWrongCode} (E-LINK-FORM)',
+      _EnterFault.wrongCode => say(l10n.linkEnterWrongCode, 'E-LINK-404'),
+      _EnterFault.expired => say(l10n.linkEnterExpired, 'E-LINK-410'),
       _EnterFault.tooManyAttempts => say(l10n.commonRetryLater, 'E-LINK-429'),
       _EnterFault.offline => say(l10n.linkEnterOffline, 'E-NET'),
       _EnterFault.failed => say(l10n.linkEnterFailed, 'E-LINK'),
@@ -49,7 +51,8 @@ class _EnterError {
 /// 로그인 전에 서는 화면이다. 여섯 칸을 채우면 `시작하기`가 켜지고, 누르면 계정에 붙어
 /// 이룸이 홈으로 간다 (Figma `코드연결` 1274:7909 · `코드연결_입력` 1274:7988).
 ///
-/// 시안이 버튼을 그려서 **다 채워도 자동으로 보내지 않고 버튼으로 보낸다.**
+/// 시안이 버튼을 그려서 **다 채워도 자동으로 보내지 않고 버튼으로 보낸다.** 버튼은 키보드가
+/// 올라와도 그 위에서 보인다.
 ///
 /// PIN 화면과 달리 **시스템 키보드**를 쓴다 — 암호에 영문이 섞여 숫자패드로는 칠 수 없다.
 /// 6칸 모양은 PIN과 맞추되 글자를 드러낸다(가리면 받아적을 수 없다).
@@ -78,6 +81,9 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   /// 서버에 보내는 중. 같은 암호를 두 번 보내지 않는다 — 1회용이라 두 번째는 반드시 실패한다.
   bool _sending = false;
 
+  /// 시도 한도(429)에 걸렸다. 더 쳐도 시도만 늘고 막히므로 입력을 잠근다.
+  bool _locked = false;
+
   String get _typed => LinkCode.normalize(_controller.text);
 
   @override
@@ -98,16 +104,17 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   }
 
   void _onChanged() {
-    if (_sending) return;
+    if (_sending || _locked) return;
     // 칸과 시작하기(여섯 자일 때만 켜짐)를 다시 그린다
     setState(() {});
   }
 
   Future<void> _submit() async {
+    if (_sending || _locked) return;
     final code = _typed;
     if (!LinkCode.hasValidShape(code)) {
       // 우리가 만들 수 없는 모양은 서버에 보내지 않는다 — 시도 횟수만 축낸다.
-      _fail(const _EnterError(_EnterFault.wrongCode));
+      _fail(const _EnterError(_EnterFault.formInvalid));
       return;
     }
 
@@ -125,21 +132,24 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
       case RedeemOutcome.expired:
         _fail(const _EnterError(_EnterFault.expired));
       case RedeemOutcome.tooManyAttempts:
-        _fail(_EnterError(_EnterFault.tooManyAttempts, result.failure));
+        _fail(_EnterError(_EnterFault.tooManyAttempts, result.failure), lock: true);
       case RedeemOutcome.offline:
-        _fail(_EnterError(_EnterFault.offline, result.failure));
+        // 입력을 남긴다 — 인터넷이 돌아오면 다시 칠 필요 없이 시작하기만 누르면 된다
+        setState(() => _error = _EnterError(_EnterFault.offline, result.failure));
       case RedeemOutcome.failed:
         _fail(_EnterError(_EnterFault.failed, result.failure));
     }
   }
 
   /// 실패 — 입력을 비우고 흔들어 알린다. 붉은 경고를 크게 쓰지 않는다 (§5-2).
-  void _fail(_EnterError error) {
+  void _fail(_EnterError error, {bool lock = false}) {
     _controller.clear();
     setState(() {
       _error = error;
       _failCount++;
+      _locked = lock;
     });
+    if (lock) return;
     // 다음 프레임에 연다 — 화면에 처음 들어올 때와 같은 방식이다. 같은 프레임에서
     // 포커스를 잡으면 Android 가 키보드를 올리지 않았다 (실측).
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -156,6 +166,7 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   /// 입력 연결은 끊긴 채다 (Android). 그래서 포커스를
   /// 한 번 풀고 다음 프레임에 다시 잡아 연결부터 새로 만든다.
   void _openKeyboard() {
+    if (_locked) return;
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
       return;
@@ -169,6 +180,9 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   /// 시안 `1274:7909` — 뒤로가기 하단(119)에서 코드 칸 윗변(339)까지.
   /// 머리 글(제목 + 설명)이 한 줄이든 두 줄이든 칸이 이 자리에 선다.
   static const _headerRegionHeight = 220.0;
+
+  /// 키보드가 없을 때 버튼 아래변이 화면 아래에서 떠 있는 높이(시안 버튼 하단 741 → 프레임 852).
+  static const _ctaRestingBottom = 111.0;
 
   /// 뒤로가기. **어떤 길로 들어왔든 막다른 화면이 되지 않게 한다**.
   ///
@@ -190,15 +204,23 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final error = _error;
+    // 키보드가 올라온 만큼 버튼을 키보드 위로 올린다. 뼈대는 키보드에 높이를 맞추지 않아 그대로 두면 가려진다.
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    final lift = keyboard > 0
+        ? (keyboard + 12.h - _ctaRestingBottom.h).clamp(0.0, double.infinity)
+        : 0.0;
 
     return ElumScaffold(
       onBack: _sending ? null : _back,
       // 여섯 칸을 다 채워야 켜진다. 보내는 중에는 다시 누를 수 없다 — 1회용 암호다.
-      bottomButton: ElumButton(
-        label: l10n.linkEnterStartButton,
-        onPressed: _typed.length == LinkCode.length && !_sending
-            ? _submit
-            : null,
+      bottomButton: Transform.translate(
+        offset: Offset(0, -lift),
+        child: ElumButton(
+          label: l10n.linkEnterStartButton,
+          onPressed: _typed.length == LinkCode.length && !_sending && !_locked
+              ? _submit
+              : null,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -226,7 +248,12 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
             failCount: _failCount,
             hasError: error != null,
             sending: _sending,
+            enabled: !_locked,
             figma: true,
+            // 키보드 완료도 시작하기와 같다 — 여섯 글자일 때만
+            onSubmitted: () {
+              if (_typed.length == LinkCode.length) _submit();
+            },
           ),
         ],
       ),
