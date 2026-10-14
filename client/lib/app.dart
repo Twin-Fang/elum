@@ -54,14 +54,13 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     onLinkCodeLink: (link) => _linkCodeIntake.accept(link),
   );
 
-  // 연결 암호 링크를 로그인 없이 암호 넣기 화면으로 이어 준다.
+  // 연결 암호 링크의 코드를 로그인·역할 선택 뒤 암호 넣기 화면까지 맡겨 둔다.
   late final LinkCodeIntake _linkCodeIntake = LinkCodeIntake(
     inbox: ref.read(linkCodeInboxProvider),
     hasSession: () => ref.read(authRepositoryProvider).hasSession,
     isElumiDevice: () => ref.read(localStorageProvider).isElumiDevice,
     topLocation: () =>
         _router.routerDelegate.currentConfiguration.lastOrNull?.matchedLocation,
-    open: () => _router.push(Routes.linkEnter),
     // 첫 화면이 그려지기 전일 수 있어 다음 프레임에 띄운다 (초대 링크 안내와 같은 이유).
     onNotice: (notice) {
       WidgetsBinding.instance

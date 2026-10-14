@@ -151,7 +151,7 @@ void main() {
   }
 
   group('보호자가 연결을 끊어 세션이 끝났을 때', () {
-    testWidgets('연결 화면에서 끊겼다고 말하고, 뒤로가기는 로그인 화면으로 간다', (tester) async {
+    testWidgets('로그인 화면으로 간다 — 로그인 없이 연결 화면을 열지 않는다', (tester) async {
       final app = await pumpApp(tester, start: Routes.childSettings);
 
       await endElumiLinkAfterSessionLoss(
@@ -161,12 +161,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(where(app.router), Routes.linkEnter);
-      expect(find.textContaining('연결이 끊어졌어요'), findsOneWidget);
-
-      await tapBack(tester);
-
-      expect(where(app.router), Routes.login, reason: '같은 연결 화면이 다시 나오면 갇힌 것이다');
+      expect(where(app.router), Routes.login);
     });
   });
 
@@ -176,29 +171,15 @@ void main() {
       await storage.setElumiLinkLost(true);
     });
 
-    testWidgets('시작 화면이 연결 화면으로 보내고, 뒤로가기는 로그인 화면으로 간다', (tester) async {
+    testWidgets('시작 화면이 로그인 화면으로 보낸다', (tester) async {
       // 시작 화면이 연출 대기(1.7초) 뒤 스스로 옮긴다 — pumpApp 이 그만큼 기다린다
       final app = await pumpApp(tester, start: Routes.splash);
-
-      expect(where(app.router), Routes.linkEnter);
-
-      await tapBack(tester);
 
       expect(where(app.router), Routes.login);
     });
   });
 
   group('연결 화면 아래에 아무것도 없을 때', () {
-    testWidgets('세션이 없으면 뒤로가기가 로그인 화면으로 간다', (tester) async {
-      await tokens.clear();
-      final app = await pumpApp(tester, start: Routes.linkEnter);
-      expect(app.router.canPop(), isFalse, reason: '전제: 돌아갈 화면이 없다');
-
-      await tapBack(tester);
-
-      expect(where(app.router), Routes.login);
-    });
-
     testWidgets('세션이 있으면(역할만 고르고 연결 전) 역할 선택으로 간다', (tester) async {
       await storage.setElumiDevice(false);
       final app = await pumpApp(tester, start: Routes.linkEnter);

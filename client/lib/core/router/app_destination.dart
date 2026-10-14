@@ -31,10 +31,8 @@ String resolveDestination({
   /// 보호자 휴대폰이 마지막에 이룸이 화면에 있었는가.
   bool resumeOnElumiScreen = false,
 }) {
-  if (!hasSession) {
-    // 연결로 붙는 이룸이 휴대폰은 연결 화면에서 다시 시작한다
-    return isElumiDevice ? Routes.linkEnter : Routes.login;
-  }
+  // 이룸이 휴대폰도 로그인한 뒤에 연결한다
+  if (!hasSession) return Routes.login;
   if (isElumiDevice) return Routes.child;
 
   // 보호자가 이룸이 화면으로 넘겨 준 채 앱이 꺼졌다. 보호자 홈을 열면 이룸이가 암호 없이

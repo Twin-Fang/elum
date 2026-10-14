@@ -104,7 +104,11 @@ void main() {
           isNull,
           reason: '깔아 둔 $base 가 가드에 걸려 바뀌면 뒤로가기가 같은 화면만 보여 준다',
         );
-        expect(redirect(Routes.linkEnter), isNull, reason: '연결 화면 자체도 열려야 한다');
+        // 연결 화면은 로그인한 뒤에만 열린다
+        expect(
+          redirect(Routes.linkEnter),
+          s.hasSession ? isNull : Routes.login,
+        );
       });
     });
   }

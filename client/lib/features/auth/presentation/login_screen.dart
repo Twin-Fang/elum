@@ -228,44 +228,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: LoginScene(
         layout: _isIos ? LoginSceneLayout.ios : LoginSceneLayout.android,
         // 버전은 버튼 묶음과 따로 얹는다 — 버튼 배치를 건드리지 않는다.
-        overlay: Stack(
-          children: [
-            _buttons(context),
-            _elumiEntryLink(context),
-            const _VersionCorner(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 이룸이 휴대폰 입구. 로그인 없이 연결 암호 화면으로 간다.
-  ///
-  /// 버튼 묶음 아래 여백(85) 안에 따로 얹는다 — 버튼 자리를 밀지 않는다.
-  /// push 로 열어 연결 화면의 뒤로가기가 이 화면으로 돌아오게 한다.
-  Widget _elumiEntryLink(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: (_bottomInset / 4).h),
-        child: AppPressable(
-          // 로그인 진행 중에는 화면을 떠나지 않는다
-          onTap: _pending != null ? null : () => context.push(Routes.linkEnter),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: context.space.xs.h,
-              vertical: context.space.xs.h,
-            ),
-            child: Text(
-              context.l10n.loginElumiLink,
-              textAlign: TextAlign.center,
-              style: context.typo.linkLater.copyWith(
-                color: context.colors.linkLaterLabel,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ),
+        overlay: Stack(children: [_buttons(context), const _VersionCorner()]),
       ),
     );
   }

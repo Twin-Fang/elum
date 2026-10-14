@@ -329,7 +329,8 @@ class AuthRepository {
     }
     await _storage.setAccountMemberId(memberId);
     await _storage.setElumiDevice(false);
-    await _storage.setElumiLinkLost(false);
+    // `연결이 끊어졌어요` 표식은 남긴다 — 끊긴 이룸이 휴대폰은 로그인한 뒤 연결 화면에서 그 말을 듣는다.
+    // 다시 연결하면 내려간다.
     await _storage.setResumeOnElumiScreen(false);
     await _storage.setSelectedRole('guardian');
     if (body['requiredConsentsCompleted'] != true) {

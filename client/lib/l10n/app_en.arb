@@ -75,7 +75,6 @@
   "loginAppleButton": "Log in with Apple",
   "loginConnecting": "Connecting",
   "loginLastUsed": "Last used",
-  "loginElumiLink": "This is an Elumi phone · Enter link code",
   "loginDuplicateTitle": "This account already exists",
   "loginDuplicateFallback": "Log in with the method you first used",
   "loginOfflineTitle": "Check your internet connection",

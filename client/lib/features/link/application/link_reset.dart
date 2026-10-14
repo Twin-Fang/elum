@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/router/app_router.dart';
 import '../../child/application/child_routine_notifier.dart';
 import '../../guardian/application/routine_notifier.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
@@ -33,10 +32,9 @@ extension LinkedProfileReset on ProviderContainer {
 /// 서버가 이 연결을 더는 인정하지 않는다 — 보호자가 끊었거나(리프레시 토큰 폐기) 연결이 지워졌다. 이 휴대폰은
 /// 스스로 연결 해제 상태가 된다.
 ///
-/// 1. 로컬을 비운다 — 토큰·이룸이 정보·일과 캐시·체크 기록. **`이룸이 휴대폰` 표식은 남긴다**(로그인 화면이
-///    아니라 연결 화면으로 가야 한다). 카드 그림 캐시는 세션 종료 때 이미 비워졌다(`dioProvider`).
-/// 2. `연결이 끊어졌어요` 표식을 세운다 — 앱을 껐다 켜도 연결 화면이 그 말을 한다.
-/// 3. 연결 암호 넣기로 보낸다. 메모리는 이동 뒤에 비운다 — 이동 전에 비우면 아직 보이는 이룸이 홈이 빈 값으로
+/// 1. 로컬을 비운다 — 토큰·이룸이 정보·일과 캐시·체크 기록. `이룸이 휴대폰` 표식은 로그인할 때 내려간다.
+///    카드 그림 캐시는 세션 종료 때 이미 비워졌다(`dioProvider`).
+/// 2. 로그인으로 보낸다. 메모리는 이동 뒤에 비운다 — 이동 전에 비우면 아직 보이는 이룸이 홈이 빈 값으로
 ///    다시 그려진다.
 Future<void> endElumiLinkAfterSessionLoss({
   required DeviceLinkRepository repo,
@@ -44,8 +42,8 @@ Future<void> endElumiLinkAfterSessionLoss({
   required ProviderContainer container,
 }) async {
   await repo.releaseThisPhone(lost: true);
-  // 토큰을 방금 지웠다 — 뒤로가기는 로그인 화면으로 간다
-  goToLinkEnter(router, hasSession: false);
+  // 토큰을 방금 지웠다 — 이룸이 휴대폰도 로그인부터 다시 한다
+  router.go(Routes.login);
   container.forgetLinkedProfile();
 }
 

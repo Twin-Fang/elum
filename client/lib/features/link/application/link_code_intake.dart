@@ -21,16 +21,17 @@ enum LinkCodeNotice {
   openOnElumiPhone,
 }
 
-/// 열린 연결 암호 링크를 **알맞은 때에 암호 넣기 화면으로 이어 주는** 판단 ([InviteLinkIntake] 의 짝).
+/// 열린 연결 암호 링크의 코드를 **암호 넣기 화면이 꺼내 갈 때까지 맡겨 두는** 판단 ([InviteLinkIntake] 의 짝).
 ///
 /// | 상황 | 동작 |
 /// | --- | --- |
 /// | 로그인된 이룸이 휴대폰 | 안내만 한다 (이미 연결됨) |
-/// | 로그인된 보호자 휴대폰 | 안내만 한다 (이룸이 휴대폰에서 열기) |
-/// | 로그인 전 | 우편함에 두고 로그인 화면에 닿으면 암호 넣기 화면을 연다 |
-/// | 암호 넣기 화면이 이미 열려 있음 | 화면이 우편함을 듣고 있다가 바로 채운다 |
+/// | 가입 중(동의·역할 선택·암호 넣기) | 우편함에 둔다 |
+/// | 그 밖의 로그인된 휴대폰 | 안내만 한다 (이룸이 휴대폰에서 열기) |
+/// | 로그인 전 | 우편함에 두기만 한다 |
 ///
-/// 연결 암호는 로그인 없이 넣는 코드라 로그인을 거치지 않는다. 채우기만 하고 **보내지 않는다** —
+/// 암호 넣기 화면을 **여기서 열지 않는다.** 이룸이 휴대폰도 로그인하고 역할 선택에서 이룸이를 고른 뒤에
+/// 그 화면에 닿고, 화면이 열리면서(또는 열려 있다가) 우편함의 코드를 채운다. 채우기만 하고 **보내지 않는다** —
 /// `시작하기`는 사람이 누른다.
 class LinkCodeIntake {
   LinkCodeIntake({
@@ -38,7 +39,6 @@ class LinkCodeIntake {
     required this.hasSession,
     required this.isElumiDevice,
     required this.topLocation,
-    required this.open,
     required this.onNotice,
   });
 
@@ -49,33 +49,32 @@ class LinkCodeIntake {
   /// 지금 **맨 위에 보이는** 화면의 경로. 모르면 null.
   final String? Function() topLocation;
 
-  /// 암호 넣기 화면을 연다 (로그인 화면 위에 얹는다).
-  final void Function() open;
-
   final void Function(LinkCodeNotice notice) onNotice;
 
-  /// 암호 넣기 화면을 열어도 되는 자리 — 세션이 없는 휴대폰이 서는 곳.
-  static const readyLocations = {Routes.login};
+  /// 로그인한 뒤 이룸이 휴대폰 연결로 가는 가입 단계 — 여기 서 있으면 링크를 맡아 둔다.
+  static const signUpLocations = {
+    Routes.consent,
+    Routes.roleSelect,
+    Routes.linkEnter,
+  };
 
   void accept(InviteLink link) {
     if (hasSession()) {
-      onNotice(isElumiDevice() ? LinkCodeNotice.alreadyLinked : LinkCodeNotice.openOnElumiPhone);
-      return;
+      if (isElumiDevice()) {
+        onNotice(LinkCodeNotice.alreadyLinked);
+        return;
+      }
+      if (!signUpLocations.contains(topLocation())) {
+        onNotice(LinkCodeNotice.openOnElumiPhone);
+        return;
+      }
     }
     inbox.receive(link.code);
-    tryOpen();
   }
 
-  /// 맡겨 둔 링크가 있고 열어도 되는 자리라면 암호 넣기 화면을 연다. 열었으면 true.
+  /// 화면을 옮길 때마다 불린다. 연결을 마친 휴대폰에 남은 코드는 버린다. 화면은 열지 않는다.
   bool tryOpen() {
-    if (!inbox.hasPending) return false;
-    // 링크를 받은 뒤 로그인했다면 더 이어 줄 이유가 없다
-    if (hasSession()) {
-      inbox.clear();
-      return false;
-    }
-    if (!readyLocations.contains(topLocation())) return false;
-    open();
-    return true;
+    if (inbox.hasPending && hasSession() && isElumiDevice()) inbox.clear();
+    return false;
   }
 }

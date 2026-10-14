@@ -86,7 +86,7 @@ void main() {
       );
     }
 
-    testWidgets('로컬을 비우고 연결 화면에서 `연결이 끊어졌어요`를 말한다', (tester) async {
+    testWidgets('로컬을 비우고 로그인 화면으로 간다 — 로그인 없이 다시 연결하지 않는다', (tester) async {
       final app = await pumpApp(tester);
 
       await endElumiLinkAfterSessionLoss(
@@ -96,32 +96,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('보호자에게서 받은 코드를'), findsOneWidget);
-      expect(find.textContaining('연결이 끊어졌어요'), findsOneWidget);
-      expect(find.textContaining('보호자에게 새 연결 암호를 받아 입력해주세요'), findsOneWidget);
+      expect(find.text('로그인'), findsOneWidget);
       expect(storage.nickname, isNull);
       expect(storage.character, isNull);
       expect(storage.cachedTodayRoutinesJson, isNull);
       expect(storage.getRoutineProgressJson('r1'), isNull);
-      expect(
-        storage.isElumiDevice,
-        isTrue,
-        reason: '로그인 화면이 아니라 연결 화면으로 가야 한다 (#206)',
-      );
+      // 로그인 뒤 연결 화면이 `연결이 끊어졌어요`를 말한다
       expect(storage.isElumiLinkLost, isTrue);
-    });
-
-    testWidgets('연결 화면에서 뒤로 갈 수 있다 — 스택이 비지 않는다', (tester) async {
-      final app = await pumpApp(tester);
-
-      await endElumiLinkAfterSessionLoss(
-        repo: repo,
-        router: app.router,
-        container: app.container,
-      );
-      await tester.pumpAndSettle();
-
-      expect(app.router.canPop(), isTrue);
     });
 
     testWidgets('메모리에 남은 이전 이룸이 이름도 비운다', (tester) async {

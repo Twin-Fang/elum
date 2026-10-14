@@ -74,12 +74,9 @@ void main() {
     });
   });
 
-  group('이룸이 휴대폰 + 세션 없음 → 막은 뒤에는 연결 화면이다 (로그인이 아니다)', () {
+  group('이룸이 휴대폰 + 세션 없음 → 로그인이다', () {
     test('보호자 홈', () {
-      expect(go(Routes.guardian, hasSession: false), Routes.linkEnter);
-    });
-    test('보호자 설정', () {
-      expect(go(Routes.guardianSettings, hasSession: false), Routes.linkEnter);
+      expect(go(Routes.guardian, hasSession: false), Routes.login);
     });
   });
 

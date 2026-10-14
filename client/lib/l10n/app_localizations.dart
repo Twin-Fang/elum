@@ -560,12 +560,6 @@ abstract class AppLocalizations {
   /// **'최근 로그인'**
   String get loginLastUsed;
 
-  /// 로그인 화면 하단 링크 — 로그인 없이 이룸이 휴대폰의 연결 암호 화면으로 간다
-  ///
-  /// In ko, this message translates to:
-  /// **'이룸이 휴대폰이에요 · 연결 암호 넣기'**
-  String get loginElumiLink;
-
   /// 같은 이메일로 다른 수단으로 가입돼 있을 때의 제목
   ///
   /// In ko, this message translates to:

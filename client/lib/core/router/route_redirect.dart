@@ -54,24 +54,24 @@ String? resolveRedirect(
   //
   // 가장 먼저 본다 — 아래 규칙은 "세션이 있으면 열어 준다"라, 이룸이 휴대폰이 계정의 토큰을 들고
   // 있다는 이유로 보호자 홈이 열린다. 동물(톱니) 버튼을 숨기는 것과 별개로 여기서 최종으로 막는다.
-  // 세션이 없으면 로그인이 아니라 연결 화면이다.
   if (isElumiDevice && _isGuardianOnly(path, modeSwitchTo)) {
-    return hasSession ? Routes.child : Routes.linkEnter;
+    return hasSession ? Routes.child : Routes.login;
   }
 
   // 이룸이 휴대폰에서는 다중 보호자 기능(함께하는 사람·초대·이룸이 바꾸기)이 열리지 않는다.
   // 설정에 줄이 없어 화면으로 들어갈 길은 없지만, 딥링크나 구경로로 열려도 막는다 —
   // 이룸이 휴대폰 토큰은 서버도 403 으로 막으므로 열어 봐야 실패 화면만 본다.
   if (isElumiDevice && _guardianOnlyPaths.any(path.startsWith)) {
-    // 세션이 없으면 이룸이 홈도 막히므로 한 번에 연결 화면으로
-    return hasSession ? Routes.child : Routes.linkEnter;
+    return hasSession ? Routes.child : Routes.login;
   }
 
   // 가입 절차도 로그인이 있어야 한다. 계정이 없으면 동의를 기록할 곳도,
-  // 아이 정보를 저장할 곳도 없다.
+  // 아이 정보를 저장할 곳도 없다. 이룸이 휴대폰 연결도 가입 절차다 — 로그인 없이 연결 암호만으로
+  // 이룸이 화면에 들어가는 길을 두지 않는다.
   final isSignUpFlow =
       path.startsWith(Routes.consent) ||
       path.startsWith(Routes.roleSelect) ||
+      path.startsWith(Routes.linkEnter) ||
       path.startsWith('/onboarding');
   final needsSession =
       isSignUpFlow ||
@@ -79,11 +79,8 @@ String? resolveRedirect(
       path.startsWith(Routes.child);
   if (!needsSession) return null;
 
-  // 세션이 없으면 아무것도 조회할 수 없다. 다시 시작할 자리로 보낸다.
-  //
-  // 이룸이 휴대폰은 **로그인이 아니라 연결**로 붙는다. 로그인 화면으로 보내면
-  // 소셜 버튼 세 개만 보이고 이룸이는 누를 것이 없다.
-  if (!hasSession) return isElumiDevice ? Routes.linkEnter : Routes.login;
+  // 세션이 없으면 아무것도 조회할 수 없다. 이룸이 휴대폰도 로그인부터 다시 한다.
+  if (!hasSession) return Routes.login;
 
   // 가입 절차 안에서는 단계 이동을 막지 않는다.
   if (isSignUpFlow) return null;

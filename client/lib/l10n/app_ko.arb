@@ -261,9 +261,6 @@
   "loginLastUsed": "최근 로그인",
   "@loginLastUsed": { "description": "마지막으로 쓴 로그인 수단 표시" },
 
-  "loginElumiLink": "이룸이 휴대폰이에요 · 연결 암호 넣기",
-  "@loginElumiLink": { "description": "로그인 화면 하단 링크 — 로그인 없이 이룸이 휴대폰의 연결 암호 화면으로 간다" },
-
   "loginDuplicateTitle": "이미 가입된 계정이에요",
   "@loginDuplicateTitle": { "description": "같은 이메일로 다른 수단으로 가입돼 있을 때의 제목" },
 
