@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-14T00:33:28Z",
-    "currentVersion": "2.29.1",
+    "lastUpdated": "2026-10-14T01:50:09Z",
+    "currentVersion": "2.29.2",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 237
+    "totalReleases": 238
   },
   "releases": [
+    {
+      "version": "2.29.2",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-14",
+      "pr_number": 641,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 이룸이 화면에서 보호자 화면으로 갈 때 비밀암호를 넣으면 약 4초 동안 화면이 멈춘 것처럼 보이던 문제를 고쳤습니다. 이제 바로 열립니다. 이미 만든 비밀암호는 그대로 쓸 수 있습니다.",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "이룸이 화면에서 보호자 화면으로 갈 때 비밀암호를 넣으면 약 4초 동안 화면이 멈춘 것처럼 보이던 문제를 고쳤습니다. 이제 바로 열립니다. 이미 만든 비밀암호는 그대로 쓸 수 있습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.29.1",
       "project_type": "flutter",
