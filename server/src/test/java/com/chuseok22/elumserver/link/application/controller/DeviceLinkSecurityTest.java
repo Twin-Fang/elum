@@ -4,8 +4,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -122,6 +125,17 @@ class DeviceLinkSecurityTest {
     mockMvc.perform(delete("/api/device-links/current")).andExpect(status().isUnauthorized());
 
     verify(deviceLinkService, never()).revokeCurrent(any());
+  }
+
+  @Test
+  @DisplayName("로그인하지 않은 휴대폰은 연결 암호를 넣지 못한다 — 401 이고 서비스는 불리지 않는다")
+  void redeemRequiresLogin() throws Exception {
+    mockMvc.perform(post("/api/device-links/redeem")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("{\"code\":\"A7K3M9\"}"))
+      .andExpect(status().isUnauthorized());
+
+    verifyNoInteractions(deviceLinkService);
   }
 
   @Test

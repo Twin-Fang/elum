@@ -216,7 +216,7 @@ class DeviceLinkRepository {
     await _storage.setElumiLinkLost(lost);
   }
 
-  /// 이룸이 휴대폰이 암호를 넣는다. **로그인 전이라 토큰 없이 부른다.**
+  /// 이룸이 휴대폰이 암호를 넣는다. 로그인한 토큰이 실려 간다 — 서버는 로그인 없이는 받지 않는다.
   Future<RedeemResult> redeem(String code) async {
     try {
       // 이름은 부가 정보다 — 못 읽으면 보내지 않고 연결만 한다. 옛 서버는 모르는 필드를 무시한다.

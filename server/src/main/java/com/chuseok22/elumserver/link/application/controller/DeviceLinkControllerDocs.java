@@ -96,9 +96,10 @@ public interface DeviceLinkControllerDocs {
   ResponseEntity<Void> revokeCurrent(Authentication authentication);
 
   @Operation(
-    summary = "연결 암호 넣기 (이룸이 휴대폰) — 인증 불필요",
-    description = "받은 여섯 글자를 넣어 계정에 붙습니다. 성공하면 **이룸이용 토큰**을 받습니다 "
+    summary = "연결 암호 넣기 (이룸이 휴대폰) — 로그인 필요",
+    description = "로그인한 휴대폰이 받은 여섯 글자를 넣어 계정에 붙습니다. 성공하면 **이룸이용 토큰**을 받습니다 "
       + "(일과 조회·완료 표시만 가능).\n\n"
+      + "- 로그인 토큰 없이 부르면 401, 이미 연결된 이룸이 토큰으로 부르면 403입니다.\n"
       + "- 소문자로 보내도 되고 사이 공백이 있어도 됩니다 (`a7k 3m9` → `A7K3M9`).\n"
       + "- 한 암호에 5회 틀리면 그 암호는 폐기됩니다.\n"
       + "- 호출자당 분당 10회를 넘으면 429를 돌려줍니다.\n"
@@ -106,6 +107,8 @@ public interface DeviceLinkControllerDocs {
   )
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "연결 성공 (토큰 발급)"),
+    @ApiResponse(responseCode = "401", description = "로그인하지 않음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     @ApiResponse(responseCode = "404", description = "암호가 맞지 않음",
       content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     @ApiResponse(responseCode = "410", description = "암호 만료",

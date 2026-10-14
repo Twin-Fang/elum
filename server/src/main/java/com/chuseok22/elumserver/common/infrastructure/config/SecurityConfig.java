@@ -138,8 +138,6 @@ public class SecurityConfig {
       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .authorizeHttpRequests(auth -> auth
         .requestMatchers(SecurityPaths.API_AUTH_MATCHER).permitAll()
-        // 이룸이 휴대폰은 아직 토큰이 없는 상태로 이 경로를 부른다.
-        .requestMatchers(HttpMethod.POST, SecurityPaths.API_DEVICE_LINK_REDEEM).permitAll()
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_APP_STATUS).permitAll()
         .requestMatchers(HttpMethod.GET, SecurityPaths.API_CONSENT_DOCUMENTS).permitAll()
         // Google 보상형 광고 콜백 — 인증은 서명이다
@@ -160,6 +158,7 @@ public class SecurityConfig {
         // 수동 검증용 창구는 아무도 못 부른다. anyRequest 보다 앞에 둬야 한다 —
         // 뒤에 두면 보호자 권한 규칙에 먼저 걸려 가입한 누구나 로컬 LLM 을 돌릴 수 있다.
         .requestMatchers(SecurityPaths.API_INTERNAL_MATCHER).denyAll()
+        // 연결 암호 넣기(/api/device-links/redeem)도 여기 걸린다 — 이룸이 휴대폰도 로그인한 뒤에만 연결한다.
         .anyRequest().hasAuthority(GUARDIAN)
       )
       .exceptionHandling(handling -> handling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
