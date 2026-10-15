@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:elum/core/app_status/app_status_repository.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
 import 'package:elum/features/guardian/presentation/guardian_settings_screen.dart';
@@ -105,15 +106,31 @@ void main() {
 
 
   group('선택 화면', () {
+    /// 화면 아래 확인 버튼 (실패 팝업의 확인과 구분)
+    Finder confirmButton() => find.widgetWithText(ElumButton, '확인');
 
-
-
-    testWidgets('실사를 고르면 서버·로컬에 저장하고 설정으로 돌아가 알린다', (tester) async {
+    // 누르자마자 저장되고 닫히면 보호자가 크레딧 비용을 보지 못한다.
+    testWidgets('카드를 누르면 저장하지 않고 화면에 남는다', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
       await openScreen(tester);
 
       await tester.tap(find.text('실사'));
+      await tester.pumpAndSettle();
+
+      expect(adapter.calls, isNot(contains(patch)));
+      expect(storage.imageStyle, isNot('REALISTIC'));
+      expect(find.byType(ImageStyleSettingsScreen), findsOneWidget);
+    });
+
+    testWidgets('실사를 고르고 확인하면 서버·로컬에 저장하고 설정으로 돌아가 알린다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+      await openScreen(tester);
+
+      await tester.tap(find.text('실사'));
+      await tester.pumpAndSettle();
+      await tester.tap(confirmButton());
       await tester.pumpAndSettle();
 
       expect(adapter.sentBodies[patch], {'imageStyle': 'REALISTIC'});
@@ -125,15 +142,30 @@ void main() {
       expect(find.text('그림 방식을 바꿨어요'), findsOneWidget);
     });
 
+    testWidgets('고르다가 뒤로 가면 저장하지 않는다', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+      await openScreen(tester);
 
+      await tester.tap(find.text('실사'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('뒤로 가기'));
+      await tester.pumpAndSettle();
+
+      expect(adapter.calls, isNot(contains(patch)));
+      expect(find.byType(ImageStyleSettingsScreen), findsNothing);
+      expect(find.text('만화'), findsOneWidget);
+    });
 
     // E3 — 서버가 거절해도 화면은 살아 있고, 이전 값으로 되돌아가고, 에러 코드가 보인다.
-    testWidgets('E3 서버가 실패하면 팝업(에러 코드)을 띄우고 이전 값으로 되돌린다', (tester) async {
+    testWidgets('E3 서버가 실패하면 팝업(에러 코드)을 띄우고 확인으로 다시 시도할 수 있다', (tester) async {
       await tester.pumpWidget(wrap(patchResponse: const FakeHttpError(500)));
       await tester.pumpAndSettle();
       await openScreen(tester);
 
       await tester.tap(find.text('실사'));
+      await tester.pumpAndSettle();
+      await tester.tap(confirmButton());
       await tester.pumpAndSettle();
 
       // 서버가 코드를 주지 않으면 화면 코드에 상태가 붙는다 (E-STYLE/500)
@@ -143,19 +175,16 @@ void main() {
       // 스낵바는 성공에만 쓴다
       expect(find.text('그림 방식을 바꿨어요'), findsNothing);
 
-      await tester.tap(find.text('확인'));
+      await tester.tap(
+        find.descendant(of: find.byType(Dialog), matching: find.text('확인')),
+      );
       await tester.pumpAndSettle();
-      // 선택 화면에 그대로 있고 고른 값이 표시된다
+      // 선택 화면에 그대로 있고, 확인을 다시 누르면 다시 저장을 시도한다
       expect(find.byType(ImageStyleSettingsScreen), findsOneWidget);
+      await tester.tap(confirmButton());
+      await tester.pumpAndSettle();
+      expect(adapter.calls.where((call) => call == patch).length, 2);
       expect(tester.takeException(), isNull);
     });
-
-
-
-    // 실패 팝업이 "다시 시도해주세요"라고 하는데 같은 방식을 다시 누르면 아무 일도
-    // 없으면 막다른 길이다.
-
-
-
   });
 }
