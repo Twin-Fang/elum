@@ -1,15 +1,43 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-14T01:50:09Z",
-    "currentVersion": "2.29.2",
+    "lastUpdated": "2026-10-15T07:46:51Z",
+    "currentVersion": "2.30.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 238
+    "totalReleases": 239
   },
   "releases": [
+    {
+      "version": "2.30.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-15",
+      "pr_number": 664,
+      "raw_summary": "## Summary by CodeRabbit\n\n* 새 기능\n  * 그림 방식을 고를 때 쓰이는 크레딧을 미리 보여줘요\n* 개선\n  * 함께하는 사람 화면에서 누가 누구인지 한눈에 보이고, 내 이름을 바로 바꿀 수 있어요\n  * 일과 목록이 길어도 아래 버튼이 또렷하게 보여요\n  * 임시저장 목록의 이어서 버튼 자리를 다듬었어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "그림 방식을 고를 때 쓰이는 크레딧을 미리 보여줘요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "함께하는 사람 화면에서 누가 누구인지 한눈에 보이고, 내 이름을 바로 바꿀 수 있어요",
+            "일과 목록이 길어도 아래 버튼이 또렷하게 보여요",
+            "임시저장 목록의 이어서 버튼 자리를 다듬었어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.29.2",
       "project_type": "flutter",
