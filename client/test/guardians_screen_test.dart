@@ -120,12 +120,24 @@ void main() {
       expect(find.text('센터 선생님'), findsOneWidget);
     });
 
-    testWidgets('이름이 없는 내 줄은 구분을 한 번만 보이고 이름을 넣도록 안내한다', (tester) async {
+    testWidgets('이름이 없으면 이름 자리에 이름 없음을 적고 구분은 칩으로 따로 보인다', (tester) async {
       repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
       await open(tester);
 
+      expect(find.text('이름 없음'), findsOneWidget);
       expect(find.text('보호자'), findsOneWidget);
-      expect(find.text('이름을 넣어보세요'), findsOneWidget);
+    });
+
+    testWidgets('이름 바꾸기 버튼은 내 줄에만 있다', (tester) async {
+      repo.guardiansResult = const Attempt.ok([
+        Guardian(id: 'g-1', me: true, displayName: '엄마'),
+        Guardian(id: 'g-2', me: false, displayName: '아빠'),
+        Guardian(id: 'g-3', me: false, kind: GuardianKind.caregiver),
+      ]);
+      await open(tester);
+
+      expect(find.text('함께 돌보는 사람 3명'), findsOneWidget);
+      expect(find.text('이름 바꾸기'), findsOneWidget);
     });
 
     testWidgets('계정 ID·아이디는 어디에도 나오지 않는다 — 서버가 내려주지 않는다', (tester) async {
@@ -346,10 +358,10 @@ void main() {
   });
 
   group('내 이름 고치기', () {
-    testWidgets('내 줄을 누르면 이름을 바꿔 저장한다 — 바뀐 항목만 보낸다', (tester) async {
+    testWidgets('이름 바꾸기를 누르면 이름을 바꿔 저장한다 — 바뀐 항목만 보낸다', (tester) async {
       await open(tester);
 
-      await tester.tap(find.text('엄마'));
+      await tester.tap(find.text('이름 바꾸기'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), '아빠');
       await tester.tap(find.text('저장'));
@@ -361,7 +373,7 @@ void main() {
       expect(repo.calls.where((c) => c.startsWith('list')).length, 2);
     });
 
-    testWidgets('남의 줄은 눌러도 고칠 수 없다', (tester) async {
+    testWidgets('남의 줄은 눌러도 고칠 수 없다 — 줄 자체는 누르는 곳이 아니다', (tester) async {
       await open(tester);
 
       await tester.tap(find.text('센터 선생님'));
@@ -373,7 +385,7 @@ void main() {
     testWidgets('구분을 센터 선생님으로 바꾸면 구분만 보낸다', (tester) async {
       await open(tester);
 
-      await tester.tap(find.text('엄마'));
+      await tester.tap(find.text('이름 바꾸기'));
       await tester.pumpAndSettle();
       await tester.tap(find.descendant(of: find.byType(BottomSheet), matching: find.text('센터 선생님')));
       await tester.tap(find.text('저장'));
@@ -386,7 +398,7 @@ void main() {
       repo.updateResult = Attempt.failed(serverFailure(400, ServerErrorCode.invalidInputValue, '입력값이 올바르지 않아요.'));
       await open(tester);
 
-      await tester.tap(find.text('엄마'));
+      await tester.tap(find.text('이름 바꾸기'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), '아빠');
       await tester.tap(find.text('저장'));

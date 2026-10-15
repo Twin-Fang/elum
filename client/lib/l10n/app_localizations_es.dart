@@ -772,15 +772,26 @@ class AppLocalizationsEs extends AppLocalizations {
       '내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요';
 
   @override
-  String get guardiansNameHint => '이름을 넣어보세요';
-
-  @override
   String inviteCodeGuestJoinedTitle(String name) {
     return '$name님이 함께하게 됐어요';
   }
 
   @override
   String get guardiansMeBadge => '나';
+
+  @override
+  String guardiansPeopleHeader(int count) {
+    return '함께 돌보는 사람 $count명';
+  }
+
+  @override
+  String get guardiansInviteHeader => '초대';
+
+  @override
+  String get guardiansRenameAction => '이름 바꾸기';
+
+  @override
+  String get guardiansNoName => '이름 없음';
 
   @override
   String get inviteCodeShareFailTitle => '링크를 보내지 못했어요';

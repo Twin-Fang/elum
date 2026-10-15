@@ -1424,12 +1424,6 @@ abstract class AppLocalizations {
   /// **'내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요'**
   String get guardiansLeaveHintWithOthers;
 
-  /// 이름을 아직 안 정한 내 줄 오른쪽에 보이는 가벼운 안내. 누르면 이름 고치기 시트가 열린다
-  ///
-  /// In ko, this message translates to:
-  /// **'이름을 넣어보세요'**
-  String get guardiansNameHint;
-
   /// 내가 만든 초대 코드로 다른 보호자가 합류했을 때 팝업 제목. name 은 합류한 사람 이름(없으면 기본 호칭)
   ///
   /// In ko, this message translates to:
@@ -1441,6 +1435,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'나'**
   String get guardiansMeBadge;
+
+  /// 함께하는 사람 목록 묶음 위 제목. count 는 나를 포함한 사람 수
+  ///
+  /// In ko, this message translates to:
+  /// **'함께 돌보는 사람 {count}명'**
+  String guardiansPeopleHeader(int count);
+
+  /// 초대하기·초대 코드 넣기 묶음 위 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'초대'**
+  String get guardiansInviteHeader;
+
+  /// 내 줄 오른쪽 버튼. 누르면 내 이름·구분을 고치는 시트가 열린다
+  ///
+  /// In ko, this message translates to:
+  /// **'이름 바꾸기'**
+  String get guardiansRenameAction;
+
+  /// 이름을 정하지 않은 사람의 이름 자리
+  ///
+  /// In ko, this message translates to:
+  /// **'이름 없음'**
+  String get guardiansNoName;
 
   /// 초대 링크 공유 실패 팝업 제목
   ///

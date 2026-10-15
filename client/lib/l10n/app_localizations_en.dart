@@ -801,15 +801,32 @@ class AppLocalizationsEn extends AppLocalizations {
       'Only routines you made are removed. Other guardians\' routines stay.';
 
   @override
-  String get guardiansNameHint => 'Add your name';
-
-  @override
   String inviteCodeGuestJoinedTitle(String name) {
     return '$name has joined you';
   }
 
   @override
   String get guardiansMeBadge => 'Me';
+
+  @override
+  String guardiansPeopleHeader(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people caring together',
+      one: '1 person caring together',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get guardiansInviteHeader => 'Invite';
+
+  @override
+  String get guardiansRenameAction => 'Rename';
+
+  @override
+  String get guardiansNoName => 'No name';
 
   @override
   String get inviteCodeShareFailTitle => 'Couldn\'t send the link';

@@ -170,6 +170,14 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginLastUsedBg,
     required this.settingsDestructive,
     required this.settingsChevron,
+    required this.settingsGroupBg,
+    required this.settingsGroupDivider,
+    required this.peopleMeBadgeBg,
+    required this.peopleMeBadgeText,
+    required this.peopleGuardianChipBg,
+    required this.peopleGuardianChipText,
+    required this.peopleCaregiverChipBg,
+    required this.peopleCaregiverChipText,
     required this.cardPhotoSlotDash,
     required this.creditCardBg,
     required this.creditBarTrack,
@@ -637,6 +645,29 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 설정 목록의 오른쪽 화살표 (실측 #CDCDCD).
   final Color settingsChevron;
 
+  // --- 설정 묶음 카드 (iOS inset grouped, 임시 시안 #645) ---
+
+  /// 설정 줄을 묶는 흰 카드 바탕.
+  final Color settingsGroupBg;
+
+  /// 묶음 카드 안 줄 사이 가는 선.
+  final Color settingsGroupDivider;
+
+  // --- 함께하는 사람 칩 (임시 시안 #645) ---
+  // 글자색은 칩 바탕 위 대비 4.5 이상으로 바탕보다 짙게 둔다.
+
+  /// `나` 배지.
+  final Color peopleMeBadgeBg;
+  final Color peopleMeBadgeText;
+
+  /// 구분 칩 `보호자`.
+  final Color peopleGuardianChipBg;
+  final Color peopleGuardianChipText;
+
+  /// 구분 칩 `센터 선생님`.
+  final Color peopleCaregiverChipBg;
+  final Color peopleCaregiverChipText;
+
   // --- 그림 방식 · 기본 카드 (임시 시안) ---
   // 값이 다른 토큰과 같아도(#DADADA 등) 쓰임이 달라 따로 둔다 — 시안이 확정되면
   // 이 자리들만 따로 바뀐다.
@@ -853,6 +884,14 @@ class AppColors extends ThemeExtension<AppColors> {
     loginLastUsedBg: Color(0x80FFFADC),
     settingsDestructive: Color(0xFFDA5050),
     settingsChevron: Color(0xFFCDCDCD),
+    settingsGroupBg: Color(0xFFFFFFFF),
+    settingsGroupDivider: Color(0xFFEFEFEF),
+    peopleMeBadgeBg: Color(0xFFFFDAC7),
+    peopleMeBadgeText: Color(0xFFA8431C),
+    peopleGuardianChipBg: Color(0xFFB5EAEC),
+    peopleGuardianChipText: Color(0xFF1F6661),
+    peopleCaregiverChipBg: Color(0xFFCED8FF),
+    peopleCaregiverChipText: Color(0xFF3D4E9A),
     cardPhotoSlotDash: Color(0xFFDADADA),
     creditCardBg: Color(0xFFFFFFFF),
     creditBarTrack: Color(0xFFEFEFEF),
@@ -1009,6 +1048,14 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? loginLastUsedBg,
     Color? settingsDestructive,
     Color? settingsChevron,
+    Color? settingsGroupBg,
+    Color? settingsGroupDivider,
+    Color? peopleMeBadgeBg,
+    Color? peopleMeBadgeText,
+    Color? peopleGuardianChipBg,
+    Color? peopleGuardianChipText,
+    Color? peopleCaregiverChipBg,
+    Color? peopleCaregiverChipText,
     Color? cardPhotoSlotDash,
     Color? creditCardBg,
     Color? creditBarTrack,
@@ -1169,6 +1216,14 @@ class AppColors extends ThemeExtension<AppColors> {
       loginLastUsedBg: loginLastUsedBg ?? this.loginLastUsedBg,
       settingsDestructive: settingsDestructive ?? this.settingsDestructive,
       settingsChevron: settingsChevron ?? this.settingsChevron,
+      settingsGroupBg: settingsGroupBg ?? this.settingsGroupBg,
+      settingsGroupDivider: settingsGroupDivider ?? this.settingsGroupDivider,
+      peopleMeBadgeBg: peopleMeBadgeBg ?? this.peopleMeBadgeBg,
+      peopleMeBadgeText: peopleMeBadgeText ?? this.peopleMeBadgeText,
+      peopleGuardianChipBg: peopleGuardianChipBg ?? this.peopleGuardianChipBg,
+      peopleGuardianChipText: peopleGuardianChipText ?? this.peopleGuardianChipText,
+      peopleCaregiverChipBg: peopleCaregiverChipBg ?? this.peopleCaregiverChipBg,
+      peopleCaregiverChipText: peopleCaregiverChipText ?? this.peopleCaregiverChipText,
       cardPhotoSlotDash: cardPhotoSlotDash ?? this.cardPhotoSlotDash,
       creditCardBg: creditCardBg ?? this.creditCardBg,
       creditBarTrack: creditBarTrack ?? this.creditBarTrack,
@@ -1491,6 +1546,14 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsDestructive:
           Color.lerp(settingsDestructive, other.settingsDestructive, t)!,
       settingsChevron: Color.lerp(settingsChevron, other.settingsChevron, t)!,
+      settingsGroupBg: Color.lerp(settingsGroupBg, other.settingsGroupBg, t)!,
+      settingsGroupDivider: Color.lerp(settingsGroupDivider, other.settingsGroupDivider, t)!,
+      peopleMeBadgeBg: Color.lerp(peopleMeBadgeBg, other.peopleMeBadgeBg, t)!,
+      peopleMeBadgeText: Color.lerp(peopleMeBadgeText, other.peopleMeBadgeText, t)!,
+      peopleGuardianChipBg: Color.lerp(peopleGuardianChipBg, other.peopleGuardianChipBg, t)!,
+      peopleGuardianChipText: Color.lerp(peopleGuardianChipText, other.peopleGuardianChipText, t)!,
+      peopleCaregiverChipBg: Color.lerp(peopleCaregiverChipBg, other.peopleCaregiverChipBg, t)!,
+      peopleCaregiverChipText: Color.lerp(peopleCaregiverChipText, other.peopleCaregiverChipText, t)!,
       cardPhotoSlotDash:
           Color.lerp(cardPhotoSlotDash, other.cardPhotoSlotDash, t)!,
       creditCardBg: Color.lerp(creditCardBg, other.creditCardBg, t)!,

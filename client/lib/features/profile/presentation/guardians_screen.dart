@@ -17,6 +17,7 @@ import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_spinner.dart';
 import '../../../core/widgets/elum_state_body.dart';
 import '../../../core/widgets/periodic_refresh.dart';
+import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../application/guardians_controller.dart';
@@ -235,7 +236,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
       // 둘 다 6자리 코드라 헷갈린다 — 이 화면은 "사람(보호자)"이고 이룸이가 쓰는 휴대폰은 따로
       // 붙인다는 것을 먼저 말한다.
       _Caption(context.l10n.guardiansIntro),
-      SizedBox(height: space.sm),
+      SizedBox(height: space.lg),
       // 이미 받은 목록이 있으면 주기 갱신 실패(오프라인 등)로 목록을 오류 화면으로 바꾸지 않는다.
       if (async.hasError && guardians == null)
         _StateSlot(
@@ -259,41 +260,53 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
           ),
         )
       else
-        for (final g in guardians)
-          _GuardianTile(
-            guardian: g,
-            onTap: g.me && !busy ? () => _editMe(profileId, g) : null,
-            loading: g.me && isBusy(_editKey),
-          ),
-      // 목록에 내 줄만 있으면 비어 보인다 — 무엇을 하면 되는지 알려 준다.
-      if (isAlone) _Caption(context.l10n.guardiansAloneHint),
-      SizedBox(height: space.md),
-      SettingsTile(
-        label: context.l10n.guardiansInviteAction,
-        onTap: busy ? null : () => context.push(Routes.guardianInvite),
-      ),
-      SettingsTile(
-        label: context.l10n.guardiansEnterCodeAction,
-        onTap: busy ? null : () => context.push(Routes.inviteEnter),
-      ),
-      // 되돌릴 수 없는 줄은 맨 아래에 두고 위험색으로 칠한다. 목록을 못 받았으면 몇 명인지
-      // 모르므로 누를 수 없다.
-      SettingsTile(
-        label: context.l10n.guardiansLeaveAction,
-        destructive: true,
-        loading: isBusy(_leaveKey),
-        onTap: (busy || guardians == null || guardians.isEmpty)
-            ? null
-            : () => _leave(profileId, profileName, guardians),
-      ),
-      // 줄만 봐서는 무슨 일이 일어나는지 모른다 — 누르기 전에 읽히게 둔다. 목록을 못 받았으면
-      // 혼자인지 모르므로 말하지 않는다.
-      if (guardians != null && guardians.isNotEmpty)
-        _Caption(
-          isAlone
-              ? context.l10n.guardiansLeaveHintAlone
-              : context.l10n.guardiansLeaveHintWithOthers,
+        // 사람 묶음. 목록에 내 줄만 있으면 비어 보인다 — 무엇을 하면 되는지 아래에 알려 준다.
+        SettingsGroup(
+          header: context.l10n.guardiansPeopleHeader(guardians.length),
+          footer: isAlone ? context.l10n.guardiansAloneHint : null,
+          children: [
+            for (final g in guardians)
+              _GuardianTile(
+                guardian: g,
+                onRename: g.me && !busy ? () => _editMe(profileId, g) : null,
+                loading: g.me && isBusy(_editKey),
+              ),
+          ],
         ),
+      SizedBox(height: space.lg),
+      SettingsGroup(
+        header: context.l10n.guardiansInviteHeader,
+        children: [
+          SettingsTile(
+            label: context.l10n.guardiansInviteAction,
+            onTap: busy ? null : () => context.push(Routes.guardianInvite),
+          ),
+          SettingsTile(
+            label: context.l10n.guardiansEnterCodeAction,
+            onTap: busy ? null : () => context.push(Routes.inviteEnter),
+          ),
+        ],
+      ),
+      SizedBox(height: space.lg),
+      // 되돌릴 수 없는 줄은 맨 아래 따로 묶고 위험색으로 칠한다. 목록을 못 받았으면 몇 명인지
+      // 모르므로 누를 수 없고, 혼자인지 모르므로 무엇이 사라지는지도 말하지 않는다.
+      SettingsGroup(
+        footer: (guardians != null && guardians.isNotEmpty)
+            ? (isAlone
+                  ? context.l10n.guardiansLeaveHintAlone
+                  : context.l10n.guardiansLeaveHintWithOthers)
+            : null,
+        children: [
+          SettingsTile(
+            label: context.l10n.guardiansLeaveAction,
+            destructive: true,
+            loading: isBusy(_leaveKey),
+            onTap: (busy || guardians == null || guardians.isEmpty)
+                ? null
+                : () => _leave(profileId, profileName, guardians),
+          ),
+        ],
+      ),
     ];
   }
 }
@@ -350,82 +363,153 @@ class _StateSlot extends StatelessWidget {
   );
 }
 
-/// 함께하는 사람 한 줄. 이름 · (나) · 구분. **내 줄만 누를 수 있다** — 남의 표시는 못 고친다.
+/// 함께하는 사람 한 줄: 이름 · 나 배지 · 구분 칩 · (내 줄만) 이름 바꾸기 버튼.
+/// 줄 자체는 누르지 않는다 — 할 수 있는 일은 버튼으로만 보인다.
 class _GuardianTile extends StatelessWidget {
-  const _GuardianTile({required this.guardian, required this.onTap, this.loading = false});
+  const _GuardianTile({required this.guardian, required this.onRename, this.loading = false});
 
   final Guardian guardian;
-  final VoidCallback? onTap;
 
-  /// 이름·구분 저장을 기다리는 중 — 화살표 자리에 스피너를 돌린다.
+  /// 내 줄이고 다른 작업 중이 아닐 때만 있다. null 이면 버튼이 흐려진다(남의 줄은 버튼 자체가 없다).
+  final VoidCallback? onRename;
+
+  /// 이름·구분 저장을 기다리는 중 — 버튼 자리에 스피너를 돌린다.
   final bool loading;
 
-  /// 글자와 꺾쇠 사이 간격, 꺾쇠(스피너) 자리 폭.
-  static const _trailingGap = 4.0;
-  static const _trailingSlot = 20.0;
+  /// 이름·배지·칩 사이 간격.
+  static const _chipGap = 6.0;
+
+  /// 글자가 커져 줄이 늘어났을 때 위아래가 붙지 않게 하는 여백 (SettingsTile 과 같다).
+  static const _padV = 8.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typo = context.typo;
+    final isKindCaregiver = guardian.kind == GuardianKind.caregiver;
 
-    // 이름이 없으면 구분 이름이 왼쪽에 이미 보인다 — 오른쪽에 같은 말을 또 적지 않는다.
-    // 내 줄이면 이름을 넣으라고 가볍게 안내하고(누르면 이름 고치기), 남의 줄은 비워 둔다.
-    final String? trailingText = guardian.hasName
-        ? guardian.kind.label
-        : (guardian.me ? context.l10n.guardiansNameHint : null);
-
-    final row = SizedBox(
-      height: SettingsTile.height.h,
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: SettingsTile.height.h),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: SettingsTile.padH.w),
+        padding: EdgeInsets.symmetric(horizontal: SettingsTile.padH.w, vertical: _padV.h),
         child: Row(
           children: [
-            Flexible(
-              child: Text(
-                guardian.hasName ? guardian.label : guardian.kind.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: typo.settingsTileLabel.copyWith(color: colors.textPrimary),
+            // 이름이 길면 이름만 줄이고 배지·칩은 지킨다. 읽기 순서: 이름 > 나 > 구분.
+            Expanded(
+              child: MergeSemantics(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        guardian.hasName ? guardian.label : context.l10n.guardiansNoName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: typo.settingsTileLabel.copyWith(
+                          color: guardian.hasName ? colors.textPrimary : colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    if (guardian.me) ...[
+                      SizedBox(width: _chipGap.w),
+                      _Chip(
+                        label: context.l10n.guardiansMeBadge,
+                        background: colors.peopleMeBadgeBg,
+                        foreground: colors.peopleMeBadgeText,
+                      ),
+                    ],
+                    SizedBox(width: _chipGap.w),
+                    _Chip(
+                      label: guardian.kind.label,
+                      background: isKindCaregiver
+                          ? colors.peopleCaregiverChipBg
+                          : colors.peopleGuardianChipBg,
+                      foreground: isKindCaregiver
+                          ? colors.peopleCaregiverChipText
+                          : colors.peopleGuardianChipText,
+                    ),
+                  ],
+                ),
               ),
             ),
             if (guardian.me) ...[
-              SizedBox(width: 8.w),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                decoration: BoxDecoration(
-                  color: colors.border,
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Text(context.l10n.guardiansMeBadge, style: typo.bodySmall.copyWith(color: colors.textSecondary)),
-              ),
+              SizedBox(width: _chipGap.w),
+              loading
+                  ? ElumSpinner(size: 20.w, color: colors.settingsChevron)
+                  : _RenameButton(onTap: onRename),
             ],
-            const Spacer(),
-            if (trailingText != null)
-              Text(
-                trailingText,
-                style: typo.settingsTileLabel.copyWith(color: colors.textSecondary),
-              ),
-            SizedBox(width: _trailingGap.w),
-            // 꺾쇠가 있는 줄과 없는 줄의 글자 끝이 어긋나지 않게 꺾쇠 자리를 항상 남긴다.
-            SizedBox(
-              width: _trailingSlot.w,
-              child: loading
-                  ? Align(
-                      alignment: Alignment.centerRight,
-                      child: ElumSpinner(size: 20.w, color: colors.settingsChevron),
-                    )
-                  : (onTap != null
-                        ? Icon(Icons.chevron_right_rounded, size: 20.w, color: colors.settingsChevron)
-                        : null),
-            ),
           ],
         ),
       ),
     );
+  }
+}
 
-    // 값만 보여 주는 줄은 눌림 반응을 주지 않는다 (설정의 앱 정보와 같다).
-    if (onTap == null) return MergeSemantics(child: row);
-    return AppPressable(onTap: onTap, child: row);
+/// 이름 옆 작은 알약 표시 (나 · 보호자 · 센터 선생님).
+class _Chip extends StatelessWidget {
+  const _Chip({required this.label, required this.background, required this.foreground});
+
+  final String label;
+  final Color background;
+  final Color foreground;
+
+  static const _padH = 8.0;
+  static const _padV = 3.0;
+  static const _radius = 10.0;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: EdgeInsets.symmetric(horizontal: _padH.w, vertical: _padV.h),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(_radius.r),
+    ),
+    child: Text(label, maxLines: 1, style: context.typo.caption.copyWith(color: foreground)),
+  );
+}
+
+/// 내 줄의 `이름 바꾸기` 버튼. 누르면 이름·구분을 고치는 시트가 열린다.
+class _RenameButton extends StatelessWidget {
+  const _RenameButton({required this.onTap});
+
+  final VoidCallback? onTap;
+
+  static const _padH = 12.0;
+  static const _padV = 7.0;
+  static const _radius = 10.0;
+
+  /// 손가락이 닿는 최소 높이 — 보이는 알약보다 크게 잡는다.
+  static const _minTouchHeight = 44.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Semantics(
+      button: true,
+      enabled: onTap != null,
+      child: AppPressable(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: _minTouchHeight.h),
+          child: Center(
+            widthFactor: 1,
+            child: Opacity(
+              opacity: onTap == null ? 0.5 : 1,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: _padH.w, vertical: _padV.h),
+                decoration: BoxDecoration(
+                  color: colors.buttonNeutral,
+                  borderRadius: BorderRadius.circular(_radius.r),
+                ),
+                child: Text(
+                  context.l10n.guardiansRenameAction,
+                  maxLines: 1,
+                  style: context.typo.bodySmall.copyWith(color: colors.buttonNeutralText),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
