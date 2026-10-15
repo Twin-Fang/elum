@@ -96,6 +96,9 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
   /// 단계가 많으면 지금처럼 목록이 안에서 스크롤된다.
   static const _heightRatio = 0.72;
 
+  /// 떠 있는 버튼 뒤 그라데이션 높이 (시안 1274:8309, 시트 바닥에서 위로)
+  static const _buttonFadeHeight = 138.0;
+
   /// 지금 끌고 있는 줄. 끌기가 시작되면 그 줄은 목록에서 빠지고 시트 위에 뜬
   /// 사본으로 다시 그려지는데, 들린 상태를 넘겨주지 않으면 잡았다 놓는 사이에
   /// 그림자가 한 번 꺼졌다 켜진다.
@@ -283,9 +286,30 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
           ),
 
           // --- 떠 있는: 편집하기 · 다시하기 (목록이 길어져도 밀려나지 않는다) ---
-          // 뒤로 지나가는 목록을 흐리게 가리는 처리는 넣지 않는다 — 시안에 없다.
           // 남이 만든 일과는 버튼이 없다 — 편집하기를 눌러도 서버가 403 으로 막는다.
-          if (widget.isPast || widget.routine.isEditableByMe)
+          if (widget.isPast || widget.routine.isEditableByMe) ...[
+            // 버튼 뒤 배경 (시안 1274:8309): 시트 바닥 138, 투명 > 시트 배경색.
+            // 버튼 뒤로 지나가는 목록 글자가 버튼과 겹쳐 읽히지 않게 흐린다. 터치는 목록으로 통과
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: _buttonFadeHeight.h,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        colors.background.withValues(alpha: 0),
+                        colors.background,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
             Positioned(
               left: 16.w,
               right: 16.w,
@@ -321,6 +345,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                 ),
               ),
             ),
+          ],
         ],
       ),
     );

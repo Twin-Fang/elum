@@ -641,6 +641,23 @@ void main() {
     );
   });
 
+  // 단계가 많아 편집하기 버튼 뒤로 목록이 지나가는 오늘 일과 시트.
+  // 버튼 뒤 그라데이션(1274:8309)이 빠지면 버튼 위아래로 단계 글자가 겹쳐 보인다.
+  testWidgets('일과 시트 — 긴 목록 (Figma 1274:8038)', (tester) async {
+    await tester.pumpWidget(
+      wrap(routines: [pastSheetRoutine()], past: const []),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('밥 먹기 전에 손을 씻어요'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/sheet_long_1274-8038.png'),
+    );
+  });
+
   // 역할 선택 (#297).
   testWidgets('역할 선택 (Figma 732:5176)', (tester) async {
     await pumpOnboarding(
