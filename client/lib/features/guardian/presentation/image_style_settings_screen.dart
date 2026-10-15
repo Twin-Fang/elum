@@ -12,6 +12,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../shared/models/character.dart';
 import '../../onboarding/domain/image_style.dart';
+import '../../onboarding/presentation/widgets/image_style_credit_bar.dart';
 import '../../onboarding/presentation/widgets/image_style_option_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
@@ -143,7 +144,14 @@ class _ImageStyleSettingsScreenState
         child: Padding(
           // 설정 첫 줄과 같은 자리(y=147)에서 시작한다
           padding: EdgeInsets.only(top: 40.h, bottom: 24.h),
-          child: group,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ImageStyleCreditBar(style: profile.imageStyle),
+              SizedBox(height: 12.h),
+              group,
+            ],
+          ),
         ),
       ),
     );

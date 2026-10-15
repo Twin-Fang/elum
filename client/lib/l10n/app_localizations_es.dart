@@ -389,10 +389,27 @@ class AppLocalizationsEs extends AppLocalizations {
   String get imageStylePhotoOnlyDescription => '간단한 그림 기호가 들어가요';
 
   @override
-  String get imageStyleBadgeCredit => '크레딧 사용';
+  String get imageStyleCreditLabel => '크레딧';
 
   @override
-  String get imageStyleBadgeFree => '무료';
+  String imageStyleCreditRoutine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '일과 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String imageStyleCreditImage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '그림 한 장 $count개',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get goalStepByStep => '해야 할 일을 순서대로 이해해요';

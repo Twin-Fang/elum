@@ -43,12 +43,9 @@ enum ImageStyle {
     ImageStyle.photoOnly => appL10n.imageStylePhotoOnlyDescription,
   };
 
-  /// 이름 옆 배지 문구 — 카드 한 장마다 AI 그림을 그리는 방식은 크레딧이 들고,
-  /// 기본 그림은 들지 않는다.
-  String get badge => switch (this) {
-    ImageStyle.cartoon || ImageStyle.realistic => appL10n.imageStyleBadgeCredit,
-    ImageStyle.photoOnly => appL10n.imageStyleBadgeFree,
-  };
+  /// 카드 한 장마다 AI 그림을 그리는 방식인가. 그리면 그림 한 장마다 크레딧이 더 든다 —
+  /// 기본 그림은 그림 기호를 넣어 일과 만들기 크레딧만 쓴다.
+  bool get drawsCardImages => this != ImageStyle.photoOnly;
 
   /// 저장소·서버에 남은 문자열을 되돌린다.
   ///

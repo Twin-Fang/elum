@@ -87,6 +87,10 @@ void main() {
     );
   }
 
+  /// 서버에 무언가를 쓰는 요청만 센다.
+  List<String> writeCalls() =>
+      adapter.calls.where((c) => !c.startsWith('GET ')).toList();
+
   Future<void> open(WidgetTester tester) async {
     await tester.pumpAndSettle();
     await tester.tap(find.text('캐릭터 화면'));
@@ -132,8 +136,9 @@ void main() {
     await tester.tap(find.text('실사'));
     await tester.pumpAndSettle();
     expect(container.read(onboardingProvider).imageStyle, ImageStyle.realistic);
-    // 온보딩에서는 서버·로컬에 바로 쓰지 않는다 — 끝날 때 한꺼번에 저장한다
-    expect(adapter.calls, isEmpty);
+    // 온보딩에서는 서버·로컬에 바로 쓰지 않는다 — 끝날 때 한꺼번에 저장한다.
+    // 크레딧 띠의 단가 조회(GET)는 쓰기가 아니다.
+    expect(writeCalls(), isEmpty);
     expect(storage.imageStyle, isNull);
 
     await tester.tap(find.text('다음'));
@@ -152,7 +157,7 @@ void main() {
     await tester.tap(find.bySemanticsLabel('뒤로 가기'));
     await tester.pumpAndSettle();
     expect(find.text('캐릭터 화면'), findsOneWidget);
-    expect(adapter.calls, isEmpty);
+    expect(writeCalls(), isEmpty);
 
     await tester.tap(find.text('캐릭터 화면'));
     await tester.pumpAndSettle();
@@ -169,7 +174,7 @@ void main() {
 
     expect(
       tester.getSemantics(
-        find.bySemanticsLabel('기본 그림, 무료, 간단한 그림 기호가 들어가요'),
+        find.bySemanticsLabel('기본 그림, 간단한 그림 기호가 들어가요'),
       ),
       containsSemantics(isChecked: true, isInMutuallyExclusiveGroup: true),
     );

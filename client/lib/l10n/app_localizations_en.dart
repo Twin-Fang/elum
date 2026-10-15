@@ -406,10 +406,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Simple picture symbols are used';
 
   @override
-  String get imageStyleBadgeCredit => 'Uses credits';
+  String get imageStyleCreditLabel => 'Credits';
 
   @override
-  String get imageStyleBadgeFree => 'Free';
+  String imageStyleCreditRoutine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Routine $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String imageStyleCreditImage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Each picture $count',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get goalStepByStep => 'Understand what to do, step by step';

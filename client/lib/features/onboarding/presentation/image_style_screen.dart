@@ -12,6 +12,7 @@ import '../../../core/widgets/selectable_group.dart';
 import '../application/onboarding_notifier.dart';
 import '../../../shared/models/character.dart';
 import '../domain/image_style.dart';
+import 'widgets/image_style_credit_bar.dart';
 import 'widgets/image_style_option_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
@@ -23,7 +24,7 @@ import '../../../core/router/routes.dart';
 ///
 /// 원칙 ④ — 되돌릴 수 있다고 먼저 말한다(`나중에 설정에서 바꿀 수 있어요`).
 /// 기본 그림이 처음부터 골라져 있어 `다음`만 누르면 되므로 건너뛰기는 두지 않는다.
-/// 크레딧(비용)은 여기서 말하지 않는다 — 처음 보는 보호자는 크레딧을 모른다.
+/// 목록 위 크레딧 띠가 고른 방식이 쓰는 크레딧을 보인다(설정 화면과 같다).
 ///
 /// 선택은 여기서 저장하지 않는다. 온보딩이 끝날 때 [OnboardingNotifier.complete]가
 /// 호칭·목표·캐릭터와 함께 한꺼번에 남긴다 — 뒤로가기로 돌아와도 고른 값이 살아 있다.
@@ -80,6 +81,8 @@ class ImageStyleScreen extends ConsumerWidget {
               hasBackButton: true,
             ),
             SizedBox(height: space.headerToContent),
+            ImageStyleCreditBar(style: profile.imageStyle),
+            SizedBox(height: _cardGap.h),
             group,
             SizedBox(height: 24.h),
           ],

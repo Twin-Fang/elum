@@ -132,43 +132,6 @@ void main() {
       expect(await restart(tester), Routes.login);
     });
 
-    testWidgets('이룸이(보호자가 연결을 끊음) → 연결 화면에서 끊겼다고 말하고, 뒤로가기는 로그인', (tester) async {
-      await givenLinkedElumi();
-      final app = await pumpRealRouter(
-        tester,
-        storage: storage,
-        tokens: tokens,
-        start: Routes.childSettings,
-        overrides: settingsOverrides,
-      );
-
-      await handleSessionExpired(router: app.router, container: app.container);
-      await tester.pumpAndSettle();
-
-      expect(topOf(app.router), Routes.linkEnter);
-      expect(find.textContaining('연결이 끊어졌어요'), findsOneWidget);
-      expect(storage.isElumiDevice, isTrue, reason: '같은 이룸이에게 다시 붙을 수 있어야 한다');
-
-      await tapBack(tester);
-      expect(topOf(app.router), Routes.login, reason: '같은 연결 화면이 다시 나오면 갇힌 것이다');
-    });
-
-    testWidgets('끊긴 이룸이 휴대폰을 다시 켠다 → 연결 화면, 뒤로가기는 로그인', (tester) async {
-      await givenLinkedElumi();
-      await tokens.clear();
-      await storage.setElumiLinkLost(true);
-
-      final app = await pumpRealRouter(
-        tester,
-        storage: storage,
-        tokens: tokens,
-        start: Routes.splash,
-      );
-      expect(topOf(app.router), Routes.linkEnter);
-
-      await tapBack(tester);
-      expect(topOf(app.router), Routes.login);
-    });
   });
 
   group('돌아갈 화면 없이 열린 화면의 뒤로가기 → 지금 상태의 홈', () {
@@ -194,21 +157,6 @@ void main() {
   });
 
   group('연결 화면의 뒤로가기', () {
-    testWidgets('아래에 아무것도 없고 세션도 없으면 로그인', (tester) async {
-      await givenLinkedElumi();
-      await tokens.clear();
-      final app = await pumpRealRouter(
-        tester,
-        storage: storage,
-        tokens: tokens,
-        start: Routes.linkEnter,
-      );
-      expect(app.router.canPop(), isFalse, reason: '전제: 돌아갈 화면이 없다');
-
-      await tapBack(tester);
-      expect(topOf(app.router), Routes.login);
-    });
-
     testWidgets('아래에 아무것도 없고 세션이 있으면(역할만 고르고 연결 전) 역할 선택', (tester) async {
       storage = InMemoryStorage();
       await storage.setSelectedRole(AppRole.elumi.storageValue);

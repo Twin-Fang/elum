@@ -758,17 +758,23 @@ abstract class AppLocalizations {
   /// **'간단한 그림 기호가 들어가요'**
   String get imageStylePhotoOnlyDescription;
 
-  /// 그림 방식 카드 이름 옆 배지 — 카드 그림을 그릴 때 크레딧이 드는 방식(만화·실사)
+  /// 그림 방식 목록 위 크레딧 띠의 왼쪽 이름
   ///
   /// In ko, this message translates to:
-  /// **'크레딧 사용'**
-  String get imageStyleBadgeCredit;
+  /// **'크레딧'**
+  String get imageStyleCreditLabel;
 
-  /// 그림 방식 카드 이름 옆 배지 — 크레딧이 들지 않는 기본 그림
+  /// 크레딧 띠 — 일과 하나를 만들 때 드는 크레딧. count 는 서버 단가
   ///
   /// In ko, this message translates to:
-  /// **'무료'**
-  String get imageStyleBadgeFree;
+  /// **'{count, plural, other{일과 {count}개}}'**
+  String imageStyleCreditRoutine(int count);
+
+  /// 크레딧 띠 — 만화·실사에서 카드 그림 한 장마다 더 드는 크레딧. count 는 서버 단가
+  ///
+  /// In ko, this message translates to:
+  /// **'{count, plural, other{그림 한 장 {count}개}}'**
+  String imageStyleCreditImage(int count);
 
   /// 도움 목표 선택지
   ///
