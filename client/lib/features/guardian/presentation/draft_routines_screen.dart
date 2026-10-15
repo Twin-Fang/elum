@@ -234,8 +234,8 @@ class _DraftTile extends StatelessWidget {
   /// `완료 시`(18~55)와 보상(61~) 사이
   static const _labelGap = 6.0;
 
-  /// `이어서` 알약의 오른쪽 여백. 시안은 x=268 에서 시작해 글자 폭만큼 선다.
-  static const _padRight = 11.0;
+  /// `이어서` 알약의 오른쪽 여백. 시안은 알약 끝 345, 줄 끝 361.
+  static const _padRight = 16.0;
 
   @override
   Widget build(BuildContext context) {
