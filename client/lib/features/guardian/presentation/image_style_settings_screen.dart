@@ -103,10 +103,8 @@ class _ImageStyleSettingsScreenState
     );
 
     return ElumScaffold(
-      // onBack 이 null 이면 머리(제목)가 사라져 내용이 위로 튄다 — 저장 중엔 눌러도 무시
-      onBack: () {
-        if (!busy) context.popOrHome();
-      },
+      onBack: context.popOrHome,
+      isBackEnabled: !busy,
       title: context.l10n.imageStyleTitle,
       // 설정 묶음 시안(1022:4467)과 같은 머리 — 뒤로가기 y=67, 좌우 16
       backTop: 67,

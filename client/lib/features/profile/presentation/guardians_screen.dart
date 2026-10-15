@@ -176,7 +176,8 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
     return PeriodicRefresh(
       onRefresh: _refreshGuardians,
       child: ElumScaffold(
-        onBack: busy ? null : context.popOrHome,
+        onBack: context.popOrHome,
+        isBackEnabled: !busy,
         title: context.l10n.guardiansTitle,
         backTop: 67,
         horizontalPadding: 16,

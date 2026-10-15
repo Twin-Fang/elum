@@ -63,7 +63,8 @@ class _ProfileSwitchScreenState extends ConsumerState<ProfileSwitchScreen>
     final active = ref.watch(activeProfileProvider);
 
     return ElumScaffold(
-      onBack: busy ? null : context.popOrHome,
+      onBack: context.popOrHome,
+      isBackEnabled: !busy,
       title: context.l10n.profileSwitchTitle,
       backTop: 67,
       horizontalPadding: 16,

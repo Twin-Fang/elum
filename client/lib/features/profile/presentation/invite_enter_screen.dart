@@ -355,7 +355,8 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     final colors = context.colors;
 
     return ElumScaffold(
-      onBack: _sending ? null : context.popOrHome,
+      onBack: context.popOrHome,
+      isBackEnabled: !_sending,
       // 링크로 받은 코드는 사람이 눌러야 보낸다. **임시 시안** — 하단 버튼·보조 링크는 다른 입력
       // 화면(이름 입력 `다음` · `초대 코드가 있어요`)의 배치를 그대로 빌렸다.
       bottomButton: _fromLink

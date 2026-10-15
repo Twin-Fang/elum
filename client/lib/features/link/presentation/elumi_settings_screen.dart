@@ -137,7 +137,8 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen>
   Widget build(BuildContext context) {
     return ElumScaffold(
       // 끊는 중에는 뒤로 갈 수 없다 — 결과를 알릴 곳이 없어진다
-      onBack: busy ? null : context.popOrHome,
+      onBack: context.popOrHome,
+      isBackEnabled: !busy,
       // 보호자 설정과 같다: 제목이 뒤로가기와 **같은 줄**에 서고 줄은 x=16 에서 시작한다.
       title: context.l10n.elumiSettingsTitle,
       backTop: 67,

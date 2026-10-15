@@ -149,7 +149,8 @@ class _GuardianSettingsScreenState
     final space = context.space;
 
     return ElumScaffold(
-      onBack: busy ? null : context.popOrHome,
+      onBack: context.popOrHome,
+      isBackEnabled: !busy,
       // 시안(`1022:4467`)은 제목이 뒤로가기와 **같은 줄**에 선다. 본문에 두면
       // 뒤로가기 아래로 내려간다.
       title: context.l10n.guardianSettingsTitle,

@@ -77,7 +77,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     final lift = (keyboard - safeBottom).clamp(0.0, double.infinity);
 
     return ElumScaffold(
-      onBack: _sending ? null : context.popOrHome,
+      onBack: context.popOrHome,
+      isBackEnabled: !_sending,
       title: l10n.feedbackTitle,
       backTop: 67,
       horizontalPadding: 16,

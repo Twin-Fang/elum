@@ -35,6 +35,7 @@ class ElumScaffold extends StatelessWidget {
     this.belowButton,
     this.bottomBanner,
     this.onBack,
+    this.isBackEnabled = true,
     this.title,
     this.backTop,
     this.horizontalPadding,
@@ -63,6 +64,11 @@ class ElumScaffold extends StatelessWidget {
 
   /// 뒤로가기. null이면 버튼을 그리지 않는다 (첫 화면).
   final VoidCallback? onBack;
+
+  /// 뒤로가기를 누를 수 있는가. false 면 제목줄은 그대로 두고 누름만 막는다 (서버 요청 중).
+  ///
+  /// [onBack] 을 null 로 넘기면 제목줄이 통째로 빠져 본문이 위로 튄다.
+  final bool isBackEnabled;
 
   /// 뒤로가기와 **같은 줄**에 놓이는 가운데 제목 (설정·약관·임시저장).
   ///
@@ -199,9 +205,10 @@ class ElumScaffold extends StatelessWidget {
                     child: Semantics(
                       container: true,
                       button: true,
+                      enabled: isBackEnabled,
                         label: context.l10n.commonBack,
                       child: GestureDetector(
-                        onTap: onBack,
+                        onTap: isBackEnabled ? onBack : null,
                         behavior: HitTestBehavior.opaque,
                         child: SizedBox(
                           width: _backBoxSize.w,

@@ -128,7 +128,8 @@ class _LinkStatusScreenState extends ConsumerState<LinkStatusScreen>
     final status = ref.watch(linkStatusProvider);
 
     return ElumScaffold(
-      onBack: busy ? null : context.popOrHome,
+      onBack: context.popOrHome,
+      isBackEnabled: !busy,
       // 설정 묶음 시안과 같은 머리(제목이 뒤로가기와 한 줄, 뒤로가기 y=67)
       title: context.l10n.linkStatusTitle,
       backTop: 67,

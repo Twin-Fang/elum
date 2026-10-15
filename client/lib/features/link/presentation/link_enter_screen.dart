@@ -251,7 +251,8 @@ class _LinkEnterScreenState extends ConsumerState<LinkEnterScreen> {
     final error = _error;
 
     return ElumScaffold(
-      onBack: _sending ? null : _back,
+      onBack: _back,
+      isBackEnabled: !_sending,
       // 여섯 칸을 다 채워야 켜진다. 보내는 중에는 다시 누를 수 없다 — 1회용 암호다.
       bottomButton: ElumButton(
         label: l10n.linkEnterStartButton,
