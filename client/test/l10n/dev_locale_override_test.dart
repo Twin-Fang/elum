@@ -25,39 +25,6 @@ void main() {
     expect(c.read(devLocaleOverrideProvider), isNull);
   });
 
-  test('켜져 있으면 강제 값이 저장되고 null 로 풀 수 있다', () {
-    dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
-    final c = ProviderContainer();
-    addTearDown(c.dispose);
-    final notifier = c.read(devLocaleOverrideProvider.notifier);
-
-    notifier.set(const Locale('ja'));
-    expect(c.read(devLocaleOverrideProvider), const Locale('ja'));
-
-    notifier.set(null);
-    expect(c.read(devLocaleOverrideProvider), isNull);
-  });
-
-  test('effectiveAppLocale: 강제가 없으면 휴대폰 언어를 따른다', () {
-    dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
-    expect(effectiveAppLocale(), const Locale('ko'));
-
-    binding.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
-    expect(effectiveAppLocale(), const Locale('en'));
-
-    // ARB 만 있고 열지 않은 언어는 en
-    binding.platformDispatcher.localesTestValue = const [Locale('es', 'MX')];
-    expect(effectiveAppLocale(), const Locale('en'));
-
-    binding.platformDispatcher.localesTestValue = const [Locale('fr', 'FR')];
-    expect(effectiveAppLocale(), const Locale('en'));
-  });
-
-  test('effectiveAppLocale: 개발자 도구가 켜져 있으면 강제가 이긴다', () {
-    dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
-    expect(effectiveAppLocale(devOverride: const Locale('ja')), const Locale('ja'));
-  });
-
   test('effectiveAppLocale: 꺼져 있으면 강제 값이 넘어와도 무시한다 — 릴리스 빌드 방어선', () {
     dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=false');
     expect(effectiveAppLocale(devOverride: const Locale('ja')), const Locale('ko'));

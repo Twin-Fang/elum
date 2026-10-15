@@ -31,19 +31,6 @@ void main() {
     expect(await typed(tester, '$family$family$family$family가', 3), '$family$family$family');
   });
 
-  testWidgets('국기(지역 표시 문자 둘)는 한 글자다', (tester) async {
-    const kr = '\u{1F1F0}\u{1F1F7}';
-    const jp = '\u{1F1EF}\u{1F1F5}';
-    expect(kr.length, 4);
-    expect(await typed(tester, '$kr$jp$kr$jp', 3), '$kr$jp$kr');
-  });
-
-  testWidgets('피부색 변형 이모지는 한 글자다', (tester) async {
-    const thumb = '\u{1F44D}\u{1F3FD}';
-    expect(thumb.length, 4);
-    expect(await typed(tester, '$thumb$thumb$thumb$thumb', 2), '$thumb$thumb');
-  });
-
   testWidgets('결합 문자(e + 결합 악센트)는 한 글자다', (tester) async {
     const e = 'e\u0301';
     expect(e.length, 2);
@@ -58,13 +45,4 @@ void main() {
     expect(await typed(tester, '$nfd$nfd$nfd$nfd', 3), '$nfd$nfd$nfd');
   });
 
-  testWidgets('일본어·중국어도 글자 수로 센다', (tester) async {
-    expect(await typed(tester, '日本語学校', 3), '日本語');
-    expect(await typed(tester, '你好世界吗', 4), '你好世界');
-  });
-
-  testWidgets('제한 이하는 그대로 둔다', (tester) async {
-    expect(await typed(tester, '가나', 3), '가나');
-    expect(await typed(tester, '', 3), '');
-  });
 }

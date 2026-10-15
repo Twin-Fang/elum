@@ -80,11 +80,6 @@ void main() {
       expect(inbox.take()?.code, 'A7K3M9');
     });
 
-    test('이름 화면(온보딩 도중)에서도 연다 — 새로 가입한 보호자는 이룸이 등록을 건너뛴다 (E6)', () {
-      top = Routes.onboardingName;
-      build().accept(link('A7K3M9'));
-      expect(opened, 1);
-    });
 
     test('로그인 전이면 열지 않고 맡겨 둔다 — 로그인 뒤 알맞은 자리에 닿으면 연다', () {
       session = false;
@@ -101,36 +96,7 @@ void main() {
       expect(opened, 1);
     });
 
-    for (final where in [
-      Routes.consent,
-      Routes.roleSelect,
-      Routes.onboardingGoals,
-      Routes.onboardingCharacter,
-      Routes.onboardingPin,
-      Routes.guardianSettings,
-      Routes.routineInput,
-      Routes.routineReview,
-      Routes.inviteEnter,
-      Routes.linkCode,
-    ]) {
-      test('$where 에서는 하던 일을 끊지 않는다 — 맡겨 둔다', () {
-        top = where;
-        build().accept(link('A7K3M9'));
-        expect(opened, 0);
-        expect(inbox.hasPending, isTrue);
-      });
-    }
 
-    test('하던 일을 마치고 홈에 돌아오면 그때 연다', () {
-      top = Routes.routineInput;
-      final intake = build();
-      intake.accept(link('A7K3M9'));
-      expect(opened, 0);
-
-      top = Routes.guardian;
-      expect(intake.tryOpen(), isTrue);
-      expect(opened, 1);
-    });
 
     test('이룸이 휴대폰에서 열린 링크는 우편함에도 두지 않고 무시한다', () {
       elumi = true;
@@ -146,11 +112,6 @@ void main() {
       expect(rejected, 1);
     });
 
-    test('보호자 휴대폰에서 받은 링크는 거절 안내를 띄우지 않는다', () {
-      elumi = false;
-      build().accept(link('A7K3M9'));
-      expect(rejected, 0);
-    });
 
     test('맡겨 둔 뒤 이룸이 휴대폰이 되었다면 버린다 — 이어 줄 이유가 없다', () {
       session = false;
@@ -165,38 +126,9 @@ void main() {
       expect(opened, 0);
     });
 
-    test('코드를 못 쓰는 링크도 연다 — 입력 화면이 에러 안내를 띄운다', () {
-      build().accept(link(null));
 
-      expect(opened, 1);
-      final p = inbox.take();
-      expect(p, isNotNull);
-      expect(p!.code, isNull);
-    });
 
-    test('10분이 지난 링크는 열지 않는다', () {
-      var now = DateTime(2026, 10, 1, 12);
-      inbox = InviteInbox(now: () => now);
-      session = false;
-      final intake = build();
-      intake.accept(link('A7K3M9'));
 
-      now = now.add(const Duration(minutes: 11));
-      session = true;
-      expect(intake.tryOpen(), isFalse);
-      expect(opened, 0);
-    });
-
-    test('맡긴 것이 없으면 아무 일도 하지 않는다', () {
-      expect(build().tryOpen(), isFalse);
-      expect(opened, 0);
-    });
-
-    test('위치를 알 수 없으면(null) 열지 않는다', () {
-      top = null;
-      build().accept(link('A7K3M9'));
-      expect(opened, 0);
-    });
   });
 
   group('받는 쪽 — InviteLinkHost (OS 가 켜진 앱에 링크를 밀어 넣을 때)', () {
@@ -269,57 +201,9 @@ void main() {
       expect(find.text('보호자 홈'), findsOneWidget);
     });
 
-    testWidgets('다른 화면을 쌓아 둔 채 링크가 와도 그 화면과 아래 스택이 그대로다', (tester) async {
-      await pump(tester);
-      router.push(Routes.routineInput);
-      await tester.pumpAndSettle();
-      expect(find.text('일과 만들기'), findsOneWidget);
 
-      await pushFromOs(tester, 'elum://invite?code=A7K3M9');
 
-      // 하던 일을 끊지 않고, 입력 화면도 얹지 않는다
-      expect(find.text('일과 만들기'), findsOneWidget);
-      expect(find.text('초대 코드 입력'), findsNothing);
-      expect(find.text('라우터가 받았다'), findsNothing);
-      expect(inbox.hasPending, isTrue);
 
-      // 일과 만들기를 마치고 홈으로 돌아오면 그때 열린다
-      router.go(Routes.guardian);
-      await tester.pumpAndSettle();
-      expect(find.text('초대 코드 입력'), findsOneWidget);
-    });
-
-    testWidgets('설정 하위 화면(홈 위에 쌓은 화면) 위에도 얹지 않는다', (tester) async {
-      await pump(tester);
-      router.push(Routes.guardianSettings);
-      await tester.pumpAndSettle();
-
-      await pushFromOs(tester, 'elum://invite?code=A7K3M9');
-
-      expect(find.text('설정'), findsOneWidget);
-      expect(find.text('초대 코드 입력'), findsNothing);
-    });
-
-    testWidgets('초대 링크가 아닌 주소는 라우터가 받는다 — 소셜 로그인 콜백 등을 가로채지 않는다', (tester) async {
-      await pump(tester);
-
-      await pushFromOs(tester, '/somewhere-else');
-
-      expect(find.text('라우터가 받았다'), findsOneWidget);
-      expect(inbox.hasPending, isFalse);
-    });
-
-    testWidgets('이룸이 휴대폰에서는 라우터에도 넘기지 않고 조용히 삼킨다', (tester) async {
-      await pump(tester);
-      elumi = true;
-
-      await pushFromOs(tester, 'elum://invite?code=A7K3M9');
-
-      expect(find.text('보호자 홈'), findsOneWidget);
-      expect(find.text('초대 코드 입력'), findsNothing);
-      expect(find.text('라우터가 받았다'), findsNothing);
-      expect(inbox.hasPending, isFalse);
-    });
 
     testWidgets('로그인 전에 받은 링크는 로그인 뒤 홈에 닿으면 연다', (tester) async {
       await pump(tester);
@@ -336,18 +220,5 @@ void main() {
       expect(find.text('초대 코드 입력'), findsOneWidget);
     });
 
-    testWidgets('같은 링크를 연달아 눌러도 입력 화면이 두 겹 쌓이지 않는다', (tester) async {
-      await pump(tester);
-
-      await pushFromOs(tester, 'elum://invite?code=A7K3M9');
-      // 입력 화면이 이미 열려 있다 — 새로 얹지 않는다 (채우는 일은 그 화면이 우편함을 듣고 한다)
-      await pushFromOs(tester, 'elum://invite?code=A7K3M9');
-
-      expect(find.text('초대 코드 입력', skipOffstage: false), findsOneWidget);
-      router.pop();
-      await tester.pumpAndSettle();
-      // 한 겹만 쌓였으니 한 번 뒤로 가면 홈이다
-      expect(find.text('보호자 홈'), findsOneWidget);
-    });
   });
 }

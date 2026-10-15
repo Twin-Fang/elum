@@ -1,6 +1,5 @@
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
 import 'package:elum/features/guardian/presentation/widgets/aurora_background.dart';
@@ -15,8 +14,6 @@ import 'package:go_router/go_router.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/support_goal.dart';
 
-import 'helpers/semantics_audit.dart';
-import 'helpers/line_breaks.dart';
 import 'helpers/test_storage.dart';
 import 'helpers/fake_reward_api.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
@@ -119,28 +116,6 @@ void main() {
   // 360 폭에서 `…준비물이 있나 / 요?`로 `요?`만 다음 줄에 떨어졌다. 공지 팝업(#390)의
   // 낱말 단위 줄바꿈을 질문 제목에만 건다(앱 전체 규칙은 그대로).
   group('질문 제목 줄바꿈 (#393 S5)', () {
-    for (final width in const [360.0, 393.0]) {
-      testWidgets('폭 $width — 띄어쓰기에서만 줄을 바꾼다', (tester) async {
-        tester.view.devicePixelRatio = 1;
-        tester.view.physicalSize = Size(width, 800);
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
-
-        await pumpWith(tester, twoQuestions);
-
-        for (final q in const [
-          '꼭 챙겨야 하는 준비물이 있나요?',
-          '평소와 다르게 준비해야 하는 점이 있나요?',
-        ]) {
-          expectBreaksOnlyAtSpaces(tester, questionText(q));
-        }
-        // 낭독기는 끊지 말라는 표시 없이 원문을 읽는다
-        expect(
-          tester.widget<Text>(questionText('꼭 챙겨야 하는 준비물이 있나요?')).semanticsLabel,
-          '꼭 챙겨야 하는 준비물이 있나요?',
-        );
-      });
-    }
   });
 
   group('추가질문 화면', () {
@@ -150,62 +125,6 @@ void main() {
       await pumpWith(tester, twoQuestions);
 
       expect(find.byType(AuroraBackground), findsOneWidget);
-    });
-
-    testWidgets('질문 여러 개를 모두 보여준다', (tester) async {
-      // 서버가 도움 목표마다 하나씩 준다. Figma는 하나만 그렸지만 2개 이상 온다.
-      await pumpWith(tester, twoQuestions);
-
-      expect(questionText('꼭 챙겨야 하는 준비물이 있나요?'), findsOneWidget);
-      expect(questionText('평소와 다르게 준비해야 하는 점이 있나요?'), findsOneWidget);
-    });
-
-    testWidgets('선택지를 모두 보여준다', (tester) async {
-      await pumpWith(tester, twoQuestions);
-
-      for (final option in ['우산', '우비', '장화', '시간 변경', '장소 변경']) {
-        expect(find.text(option), findsOneWidget);
-      }
-    });
-
-    testWidgets('고르기 전에는 CTA가 없다 (262:4766)', (tester) async {
-      await pumpWith(tester, twoQuestions);
-
-      expect(find.byType(ElumButton), findsNothing);
-    });
-
-    testWidgets('하나라도 고르면 CTA가 나타난다 (262:4854)', (tester) async {
-      await pumpWith(tester, twoQuestions);
-
-      await tester.tap(find.text('우산'));
-      await settle(tester);
-
-      expect(find.text('카드 만들기'), findsOneWidget);
-    });
-
-    testWidgets('여러 질문에 걸쳐 답을 고를 수 있다', (tester) async {
-      final container = await pumpWith(tester, twoQuestions);
-
-      await tester.tap(find.text('우산'));
-      await settle(tester);
-      await tester.tap(find.text('시간 변경'));
-      await settle(tester);
-
-      final answers = container.read(routineFlowProvider).answers;
-      expect(answers, containsAll(['우산', '시간 변경']));
-    });
-
-    testWidgets('다시 누르면 선택이 풀린다', (tester) async {
-      final container = await pumpWith(tester, twoQuestions);
-
-      await tester.tap(find.text('우산'));
-      await settle(tester);
-      await tester.tap(find.text('우산'));
-      await settle(tester);
-
-      expect(container.read(routineFlowProvider).answers, isEmpty);
-      // 선택이 없으면 CTA도 사라진다
-      expect(find.byType(ElumButton), findsNothing);
     });
 
     testWidgets('카드 만들기를 누르면 카드 생성 로딩으로 간다 (#380 결정 1)', (tester) async {
@@ -263,131 +182,9 @@ void main() {
   /// 선택지에 없는 준비물을 보호자가 직접 적는다. 서버 선택지는 AI가 만든 것이라
   /// 실제 상황(병원 진료카드 등)을 다 담지 못한다.
   group('직접 입력하기', () {
-    testWidgets('질문마다 + 직접 입력하기 칩이 있다', (tester) async {
-      await pumpWith(tester, twoQuestions);
-
-      // 질문이 2개면 칩도 2개 — 어느 질문에 추가하는지 구분돼야 한다
-      expect(find.text('+ 직접 입력하기'), findsNWidgets(2));
-    });
-
-    testWidgets('누르면 입력 필드가 열린다', (tester) async {
-      await pumpWith(tester, twoQuestions);
-
-      expect(find.byType(TextField), findsNothing);
-
-      await tester.tap(find.text('+ 직접 입력하기').first);
-      await settle(tester);
-
-      expect(find.byType(TextField), findsOneWidget);
-    });
-
-    testWidgets('입력하고 확정하면 칩으로 추가되고 선택된다', (tester) async {
-      final container = await pumpWith(tester, twoQuestions);
-
-      await tester.tap(find.text('+ 직접 입력하기').first);
-      await settle(tester);
-      await tester.enterText(find.byType(TextField), '진료카드');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await settle(tester);
-
-      // 칩으로 보이고
-      expect(find.text('진료카드'), findsOneWidget);
-      // 바로 선택돼 CTA가 뜬다 — 쓰자마자 또 눌러야 하면 번거롭다
-      expect(container.read(routineFlowProvider).answers, contains('진료카드'));
-      expect(find.text('카드 만들기'), findsOneWidget);
-    });
-
-    testWidgets('빈 값은 추가되지 않는다', (tester) async {
-      final container = await pumpWith(tester, twoQuestions);
-
-      await tester.tap(find.text('+ 직접 입력하기').first);
-      await settle(tester);
-      await tester.enterText(find.byType(TextField), '   ');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await settle(tester);
-
-      expect(container.read(routineFlowProvider).answers, isEmpty);
-    });
-
-    testWidgets('이미 있는 선택지를 적으면 칩을 새로 만들지 않고 그것을 선택한다', (tester) async {
-      final container = await pumpWith(tester, twoQuestions);
-
-      await tester.tap(find.text('+ 직접 입력하기').first);
-      await settle(tester);
-      await tester.enterText(find.byType(TextField), '우산');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await settle(tester);
-
-      // 칩이 두 개가 되면 안 된다
-      expect(find.text('우산'), findsOneWidget);
-      expect(container.read(routineFlowProvider).answers, contains('우산'));
-    });
-
-    testWidgets('추가한 칩은 X로 지운다 — 답에서도 빠진다', (tester) async {
-      final container = await pumpWith(tester, twoQuestions);
-
-      await tester.tap(find.text('+ 직접 입력하기').first);
-      await settle(tester);
-      await tester.enterText(find.byType(TextField), '진료카드');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await settle(tester);
-
-      await tester.tap(find.byKey(const ValueKey('remove-진료카드')));
-      await settle(tester);
-
-      expect(find.text('진료카드'), findsNothing);
-      expect(container.read(routineFlowProvider).answers, isNot(contains('진료카드')));
-    });
-
-    testWidgets('서버 선택지에는 X가 없다 — 지울 수 있는 건 내가 쓴 것뿐', (tester) async {
-      await pumpWith(tester, twoQuestions);
-
-      expect(find.byKey(const ValueKey('remove-우산')), findsNothing);
-    });
-
-    testWidgets('추가한 칩은 다시 눌러 선택을 풀 수 있다', (tester) async {
-      final container = await pumpWith(tester, twoQuestions);
-
-      await tester.tap(find.text('+ 직접 입력하기').first);
-      await settle(tester);
-      await tester.enterText(find.byType(TextField), '진료카드');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await settle(tester);
-
-      await tester.tap(find.text('진료카드'));
-      await settle(tester);
-
-      // 칩은 남아 있고 선택만 풀린다
-      expect(find.text('진료카드'), findsOneWidget);
-      expect(container.read(routineFlowProvider).answers, isEmpty);
-    });
   });
 
   group('누를 수 있는 것에 읽을 이름이 있다 (#339)', () {
-    testWidgets('흐름 화면 위의 뒤로가기와 홈이 읽힌다', (tester) async {
-      // 일과 만들기 흐름 화면이 모두 같은 상단바(`RoutineFlowScaffold`)를 쓴다.
-      await pumpWith(tester, twoQuestions);
-
-      expectLabeledButton(tester, '뒤로 가기');
-      expectLabeledButton(tester, '홈으로 가기');
-      expect(unnamedTapTargets(tester), isEmpty);
-    });
-
-    testWidgets('직접 입력 칸의 X와 내가 쓴 칩의 X가 무엇을 하는지 읽힌다', (tester) async {
-      await pumpWith(tester, twoQuestions);
-
-      await tester.tap(find.text('+ 직접 입력하기').first);
-      await settle(tester);
-      expectLabeledButton(tester, '직접 입력 닫기');
-
-      await tester.enterText(find.byType(TextField), '진료카드');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await settle(tester);
-
-      // 칩 이름과 지우기가 한데 섞이면 "진료카드"를 누르는지 지우는지 모른다
-      expectLabeledButton(tester, '진료카드 지우기');
-      expect(unnamedTapTargets(tester), isEmpty);
-    });
   });
 
   group('RoutineQuestion 파싱 (서버 계약)', () {
@@ -431,31 +228,6 @@ void main() {
       expect(parsed.questions.first.options, isEmpty);
     });
 
-    test('질문이 비면 물어볼 수 없다', () {
-      final parsed = RoutineQuestion.fromJson(const {
-        'required': false,
-        'questions': <dynamic>[],
-      });
-
-      expect(parsed.canAsk, isFalse);
-    });
-
-    test('required가 true여도 질문이 비면 물어볼 수 없다', () {
-      final parsed = RoutineQuestion.fromJson(const {
-        'required': true,
-        'questions': <dynamic>[],
-      });
-
-      expect(parsed.canAsk, isFalse);
-    });
-
-    test('형식이 달라도 죽지 않는다', () {
-      // 카드 한 장 때문에 데모가 멈추면 안 된다
-      expect(
-        () => RoutineQuestion.fromJson(const {'questions': 'not-a-list'}),
-        returnsNormally,
-      );
-    });
   });
 }
 

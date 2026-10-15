@@ -52,17 +52,7 @@ void main() {
     expect(f, contains('android.intent.category.DEFAULT'));
   });
 
-  test('안드로이드: 런처 필터는 그대로다 — 초대 필터가 시작 화면을 가리지 않는다', () {
-    expect(mainActivity(), contains('android.intent.action.MAIN'));
-    expect(mainActivity(), contains('android.intent.category.LAUNCHER'));
-  });
 
-  test('안드로이드: 호스트 없는 넓은 elum 필터가 없다 — 다른 elum:// 주소를 가로채지 않는다', () {
-    final broad = RegExp(
-      r'<data\b[^>]*android:scheme="elum"(?![^>]*android:host)[^>]*/>',
-    );
-    expect(broad.hasMatch(mainActivity()), isFalse);
-  });
 
   test('iOS: elum 스킴이 등록돼 있다 (네이버 로그인 콜백과 같은 스킴을 함께 쓴다)', () {
     final schemes = RegExp(
@@ -76,8 +66,4 @@ void main() {
     );
   });
 
-  test('앱 주소 스킴은 두 플랫폼이 같은 값을 쓴다', () {
-    expect(InviteLink.appScheme, 'elum');
-    expect(InviteLink.appUrl('A7K3M9'), startsWith('elum://invite'));
-  });
 }

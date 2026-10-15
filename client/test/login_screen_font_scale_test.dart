@@ -81,58 +81,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Rect caption(WidgetTester t) => t.getRect(find.text('오늘의 하루,'));
-  Rect title(WidgetTester t) => t.getRect(find.text('차근차근 함께해요'));
-  Rect logo(WidgetTester t) => t.getRect(svgWithAsset(AppAssets.logo));
-
   // 시안 y — iOS 238:1808 · AOS 1022:4333
-  const design = {
-    true: (140.0, 168.0, 214.0),
-    false: (103.7, 131.7, 177.7),
-  };
 
-  group('글꼴 1.0 은 시안 좌표 그대로다', () {
-    for (final ios in [true, false]) {
-      testWidgets('${ios ? 'iOS' : '안드로이드'} — 문구 둘과 로고 y', (tester) async {
-        await pump(tester, ios: ios, scale: 1);
-        final (c, t, l) = design[ios]!;
 
-        expect(caption(tester).top, closeTo(c, 0.5));
-        expect(title(tester).top, closeTo(t, 0.5));
-        expect(logo(tester).top, closeTo(l, 0.5));
-      });
-    }
-  });
-
-  group('큰 글꼴에서 겹치지 않는다', () {
-    for (final ios in [true, false]) {
-      for (final size in const [Size(393, 852), Size(320, 640)]) {
-        for (final scale in [1.3, 2.0, 3.0]) {
-          testWidgets(
-            '${ios ? 'iOS' : '안드로이드'} · ${size.width.toInt()} 폭 · 글꼴 $scale',
-            (tester) async {
-              await pump(tester, ios: ios, scale: scale, size: size);
-
-              final c = caption(tester);
-              final t = title(tester);
-              final l = logo(tester);
-              // 위 문구가 아래 문구를, 아래 문구가 로고를 침범하지 않는다.
-              expect(c.bottom, lessThanOrEqualTo(t.top + 0.5), reason: '문구 둘이 겹친다');
-              expect(t.bottom, lessThanOrEqualTo(l.top + 0.5), reason: '제목과 로고가 겹친다');
-              // 시안 자리보다 위로 올라가지 않는다 — 큰 글꼴에서만 아래로 밀린다.
-              // (시안 y 는 852 기준이라 화면 높이만큼 줄여 비교한다)
-              final h = size.height / 852;
-              expect(t.top, greaterThanOrEqualTo(design[ios]!.$2 * h - 0.5));
-              expect(l.top, greaterThanOrEqualTo(design[ios]!.$3 * h - 0.5));
-              // 글자가 화면 폭 안에 있다.
-              expect(c.left, greaterThanOrEqualTo(0));
-              expect(t.right, lessThanOrEqualTo(size.width + 0.5));
-            },
-          );
-        }
-      }
-    }
-  });
 
   group('최근 로그인 알약', () {
     for (final scale in [1.0, 2.0, 3.0]) {

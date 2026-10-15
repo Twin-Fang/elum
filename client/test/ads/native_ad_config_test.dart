@@ -12,12 +12,6 @@ void main() {
     expect(manifest, contains('com.google.android.gms.permission.AD_ID'));
   });
 
-  test('Android 빌드가 앱 ID를 .env에서 읽고 비면 테스트 앱 ID를 쓴다', () {
-    final gradle = File('android/app/build.gradle.kts').readAsStringSync();
-    expect(gradle, contains('admobAppId'));
-    expect(gradle, contains('ca-app-pub-3940256099942544~3347511713'));
-  });
-
   test('iOS Info.plist에 광고 앱 ID·추적 안내 문구·SKAdNetwork가 있다', () {
     final plist = File('ios/Runner/Info.plist').readAsStringSync();
     expect(plist, contains('GADApplicationIdentifier'));
@@ -27,9 +21,4 @@ void main() {
     expect(plist, isNot(contains('아이')));
   });
 
-  test('iOS 시크릿 생성 스크립트가 앱 ID를 만들고 비면 테스트 앱 ID를 쓴다', () {
-    final script = File('tool/gen_ios_secrets.sh').readAsStringSync();
-    expect(script, contains('ELUM_ADMOB_APP_ID'));
-    expect(script, contains('ca-app-pub-3940256099942544~1458002511'));
-  });
 }

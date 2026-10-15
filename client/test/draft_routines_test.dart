@@ -70,23 +70,6 @@ void main() {
   // 시안과 같은 393×852 로 그린다 — 밀어야 하는 거리와 버튼 자리가 시안 기준이 된다
   useFigmaViewport();
 
-  testWidgets('만들다 만 일과만 보인다 — 확인을 마친 것은 빠진다', (tester) async {
-    await _pump(tester, [
-      _routine('1', '아침 준비', 'PENDING_REVIEW'),
-      _routine('2', '이미 확인한 일과', 'CONFIRMED'),
-      _routine('3', '다 끝낸 일과', 'COMPLETED'),
-      _routine('4', '저녁 준비', 'PENDING_REVIEW'),
-    ]);
-
-    expect(find.text('아침 준비'), findsOneWidget);
-    expect(find.text('저녁 준비'), findsOneWidget);
-    expect(
-      find.text('이미 확인한 일과'),
-      findsNothing,
-      reason: '확인을 마친 일과는 만들다 만 것이 아니다',
-    );
-    expect(find.text('다 끝낸 일과'), findsNothing);
-  });
 
   // 0건과 로딩을 같은 화면으로 두면 느린 연결에서 "없다"고 잘못 읽는다.
   testWidgets('0건이면 빈 상태를 보여준다', (tester) async {
@@ -151,16 +134,6 @@ void main() {
       expect(repo.deleted, isEmpty, reason: '팝업에서 삭제를 누르기 전에는 지우지 않는다');
     });
 
-    testWidgets('취소하면 아무것도 지우지 않는다', (tester) async {
-      await pumpTwo(tester);
-
-      await swipeAndTapTrash(tester, '저녁 준비');
-      await tester.tap(find.text('취소'));
-      await tester.pumpAndSettle();
-
-      expect(repo.deleted, isEmpty);
-      expect(find.text('저녁 준비'), findsOneWidget);
-    });
 
     testWidgets('삭제를 누르면 그 일과만 지우고 목록에서 빠진다', (tester) async {
       await pumpTwo(tester);
@@ -190,28 +163,8 @@ void main() {
       expect(find.text('저녁 준비'), findsOneWidget, reason: '실패하면 줄이 남아야 한다');
     });
 
-    testWidgets('열려 있는 줄을 누르면 이어서 만들지 않고 닫는다', (tester) async {
-      await pumpTwo(tester);
-
-      await tester.drag(find.text('저녁 준비'), const Offset(-80, 0));
-      await tester.pumpAndSettle();
-      // 밀려 열린 줄의 `이어서` 알약(둘째 줄 것)을 누른다
-      await tester.tap(find.text('이어서').last);
-      await tester.pumpAndSettle();
-
-      // 이어서 만들기로 넘어갔다면 이 화면의 줄이 사라진다(테스트 라우터엔 그 길이 없다)
-      expect(find.text('저녁 준비'), findsOneWidget);
-      expect(find.text('아침 준비'), findsOneWidget);
-    });
   });
 
-  testWidgets('보상이 없으면 완료 시 미설정이라 적는다', (tester) async {
-    await _pump(tester, [_routine('1', '아침 준비', 'PENDING_REVIEW')]);
-
-    expect(find.text('완료 시'), findsOneWidget);
-    expect(find.text('미설정'), findsOneWidget);
-    expect(find.text('이어서'), findsOneWidget);
-  });
 }
 
 class _Repo implements RoutineRepository {

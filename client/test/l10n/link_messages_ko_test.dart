@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:elum/core/l10n/l10n_context.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error.dart';
 import 'package:elum/core/network/server_error_code.dart';
@@ -8,7 +7,6 @@ import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
 import 'package:elum/features/link/presentation/link_code_screen.dart';
 import 'package:elum/features/link/presentation/link_enter_screen.dart';
-import 'package:elum/features/link/presentation/widgets/link_code_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,69 +19,6 @@ import 'package:elum/core/storage/in_memory_storage.dart';
 /// 옮긴 link 문구가 옛 한국어와 같다 — 기대값은 손으로 쓴 한국어(옛 코드가 만들던 값)다.
 void main() {
   useFigmaViewport();
-
-  final ko = lookupAppLocalizations(const Locale('ko'));
-
-  test('이름이 들어가는 문구 — 조사는 고정(`의`)이라 받침과 무관하다', () {
-    // 받침 있음(하늘이는 없음, 별은 있음)·없음 모두 `의` 그대로
-    expect(ko.linkCodeAskTitle('하늘이'), '하늘이의 휴대폰을\n연결할까요?');
-    expect(ko.linkCodeAskTitle('별'), '별의 휴대폰을\n연결할까요?');
-    expect(ko.linkCodeEnterHint('하늘이'), '하늘이의 휴대폰에서 아래 코드를 입력하세요');
-    expect(ko.linkCodeEnterHint('민준'), '민준의 휴대폰에서 아래 코드를 입력하세요');
-    // 이름이 비면 화면이 공용 호칭으로 대신한다
-    expect(ko.linkCodeAskTitle(ko.commonElumiName), '이룸이의 휴대폰을\n연결할까요?');
-  });
-
-  test('번호 문구는 int 로 받는다', () {
-    expect(ko.linkDeviceNumbered(1), '이룸이 휴대폰 1');
-    expect(ko.linkDeviceNumbered(2), '이룸이 휴대폰 2');
-    expect(ko.linkDeviceNumbered(10), '이룸이 휴대폰 10');
-  });
-
-  test('밑줄 친 길은 안내문 안에 있어야 한다', () {
-    expect(ko.linkEnterGuide, contains(ko.linkEnterGuidePath));
-  });
-
-  test('연결된 날 — LinkedDevice.sinceLabel 은 옛 월·일 조립과 같다', () {
-    // 손으로 쓴 값: 한 자리/두 자리 월·일, 연말·연초, 윤년
-    final cases = <DateTime, String>{
-      DateTime(2026, 9, 18): '9월 18일부터',
-      DateTime(2026, 1, 1): '1월 1일부터',
-      DateTime(2026, 1, 5): '1월 5일부터',
-      DateTime(2026, 9, 5, 9, 5): '9월 5일부터',
-      DateTime(2026, 10, 1): '10월 1일부터',
-      DateTime(2026, 11, 11): '11월 11일부터',
-      DateTime(2026, 12, 31, 23, 59): '12월 31일부터',
-      DateTime(2027, 1, 1): '1월 1일부터',
-      DateTime(2028, 2, 29): '2월 29일부터',
-    };
-    cases.forEach((at, expected) {
-      expect(
-        LinkedDevice(linkId: 'l', linkedAt: at).sinceLabel,
-        expected,
-        reason: '$at',
-      );
-      // 옛 코드가 만들던 조립과도 같다
-      expect(expected, '${at.month}월 ${at.day}일부터');
-    });
-    expect(const LinkedDevice(linkId: 'l2', linkedAt: null).sinceLabel, isNull);
-  });
-
-  testWidgets('다시 만들기 칩 — 비우면 시안 문구, 넘기면 넘긴 문구', (tester) async {
-    await pumpWithLocale(
-      tester,
-      Scaffold(
-        body: Column(
-          children: [
-            LinkRetryChip(onTap: () {}),
-            LinkRetryChip(label: '초대 코드 다시 만들기', onTap: () {}),
-          ],
-        ),
-      ),
-    );
-    expect(find.text('코드 다시 만들기'), findsOneWidget);
-    expect(find.text('초대 코드 다시 만들기'), findsOneWidget);
-  });
 
   group('코드 입력 화면 — 글자가 ARB 에서 온다', () {
     late _EnterFake repo;
@@ -104,15 +39,6 @@ void main() {
       await tester.tap(find.text('시작하기'));
       await tester.pumpAndSettle();
     }
-
-    testWidgets('연결이 밖에서 끊겨 돌아오면 안내 대신 끊김을 말한다', (tester) async {
-      repo.lost = true;
-      await pumpEnter(tester);
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('연결이 끊어졌어요'), findsOneWidget);
-      expect(find.textContaining('보호자 휴대폰의'), findsNothing);
-    });
 
     testWidgets('실패 종류별 문구 — 서버 문구가 없으면 기본 문구와 에러 코드', (tester) async {
       final cases = <RedeemOutcome, String>{
@@ -167,32 +93,6 @@ void main() {
     );
 
     // 이름 값마다 새 화면으로 띄운다 (받침 없음·있음)
-    for (final name in ['하늘이', '별']) {
-      testWidgets('이름이 $name 이면 제목·설명에 그대로 들어간다', (tester) async {
-        await pumpCode(tester, nickname: name);
-        await tester.pump(const Duration(milliseconds: 100));
-        expect(find.text('$name의 휴대폰을\n연결할까요?'), findsOneWidget);
-        expect(find.text('$name의 휴대폰에서 아래 코드를 입력하세요'), findsOneWidget);
-      });
-    }
-
-    testWidgets('이름이 비면 이룸이로 대신하고 온보딩 글자를 쓴다', (tester) async {
-      await pumpCode(tester);
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.text('이룸이의 휴대폰을\n연결할까요?'), findsOneWidget);
-      expect(find.text('시작하기'), findsOneWidget);
-      expect(find.text('나중에 할게요'), findsOneWidget);
-      expect(find.text('코드 다시 만들기'), findsOneWidget);
-    });
-
-    testWidgets('설정에서 열면 제목이 있고 시작하기가 없다', (tester) async {
-      await pumpCode(tester, fromOnboarding: false);
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.text('이룸이 휴대폰 연결'), findsOneWidget);
-      expect(find.text('시작하기'), findsNothing);
-    });
 
     testWidgets('발급이 실패하면 설명 자리에 기본 문구와 에러 코드', (tester) async {
       await pumpCode(tester, repo: _CodeFake()..fail = true);

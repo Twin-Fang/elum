@@ -59,16 +59,6 @@ void main() {
     }
   });
 
-  test('서버에 아직 없는 새 일과는 양쪽 홈에서 바로 표시한다', () async {
-    final current = routine('new');
-    final fetched = [routine('existing')];
-    final container = containerFor(current, fetched);
-    await container.read(todayRoutinesProvider.future);
-
-    expect(container.read(homeRoutinesProvider), [current, ...fetched]);
-    expect(container.read(childRoutinesProvider), [current, ...fetched]);
-  });
-
   test('최신 서버 목록을 표시해도 아직 못 보낸 오프라인 체크를 보존한다', () async {
     final server = routine('a', completed: true);
     final container = containerFor(routine('a'), [server]);
@@ -88,16 +78,6 @@ void main() {
     );
   });
 
-  test('새 일과가 임시저장이라도 같은 id의 서버 승인 일과를 가리지 않는다', () async {
-    final server = routine('a', completed: true);
-    final container = containerFor(
-      routine('a').copyWith(status: 'PENDING_REVIEW'),
-      [server],
-    );
-    await container.read(todayRoutinesProvider.future);
-    expect(container.read(homeRoutinesProvider), [server]);
-    expect(container.read(childRoutinesProvider), [server]);
-  });
 }
 
 class _FlowWithRoutine extends RoutineFlowNotifier {

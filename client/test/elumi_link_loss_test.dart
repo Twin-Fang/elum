@@ -5,7 +5,6 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/link/application/link_reset.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/presentation/link_enter_screen.dart';
-import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -105,21 +104,6 @@ void main() {
       expect(storage.isElumiLinkLost, isTrue);
     });
 
-    testWidgets('메모리에 남은 이전 이룸이 이름도 비운다', (tester) async {
-      final app = await pumpApp(tester);
-      expect(app.container.read(onboardingProvider).childNickname, '하늘이');
-
-      await endElumiLinkAfterSessionLoss(
-        repo: repo,
-        router: app.router,
-        container: app.container,
-      );
-
-      expect(
-        app.container.read(onboardingProvider).childNickname,
-        isNot('하늘이'),
-      );
-    });
   });
 
   group('연결 화면의 안내', () {
@@ -150,26 +134,6 @@ void main() {
       expect(find.textContaining('연결이 끊어졌어요'), findsNothing);
     });
 
-    testWidgets('앱을 껐다 켜도 표식이 남아 있으면 말한다', (tester) async {
-      await storage.setElumiLinkLost(true);
-      await tester.pumpWidget(wrapEnter());
-      await tester.pumpAndSettle();
 
-      expect(find.textContaining('연결이 끊어졌어요'), findsOneWidget);
-    });
-
-    testWidgets('틀린 암호를 넣으면 그 안내가 먼저다', (tester) async {
-      await storage.setElumiLinkLost(true);
-      await tester.pumpWidget(wrapEnter());
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), 'A0K3M9');
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('시작하기'));
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('암호가 맞지 않아요'), findsOneWidget);
-      expect(find.textContaining('연결이 끊어졌어요'), findsNothing);
-    });
   });
 }

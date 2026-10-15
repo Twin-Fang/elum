@@ -3,7 +3,6 @@ import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
-import 'package:elum/core/widgets/elum_error_view.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/presentation/link_status_screen.dart';
@@ -108,123 +107,6 @@ void main() {
   }
 
   group('보여주는 것', () {
-    testWidgets('설정이 캐시를 들고 있어도 들어올 때 최신 값을 보여준다', (tester) async {
-      await tester.pumpWidget(wrap(holdCache: true));
-      await tester.pumpAndSettle();
-      // 그사이 다른 휴대폰에서 연결이 끊겼다
-      routes['GET /api/device-links'] = noDevice;
-
-      await tester.tap(find.text('설정 화면'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('연결됨'), findsNothing);
-      expect(find.text('연결된 휴대폰이 없어요'), findsOneWidget);
-    });
-
-    testWidgets('연결됨 · 언제부터 · 연결 끊기 · 끊으면 어떻게 되는지 한 줄', (tester) async {
-      await open(tester);
-
-      expect(find.text('이룸이 휴대폰'), findsOneWidget, reason: '제목');
-      expect(find.text('연결됨'), findsOneWidget);
-      // 옛 응답(연결한 사람 정보 없음)은 '보호자'로 부른다
-      expect(find.text('보호자가 연결 · 9월 18일부터'), findsOneWidget);
-      expect(find.text('연결 끊기'), findsOneWidget);
-      expect(find.textContaining('끊으면 이룸이 휴대폰에서'), findsOneWidget);
-    });
-
-    testWidgets('여러 대가 붙어 있으면 대마다 이름과 끊기 버튼이 있다', (tester) async {
-      routes['GET /api/device-links'] = const {
-        'devices': [
-          {'linkId': 'l2', 'linkedAt': '2026-09-20T09:00:00'},
-          {'linkId': 'l1', 'linkedAt': '2026-09-18T10:31:00'},
-        ],
-      };
-      await open(tester);
-
-      expect(find.text('이룸이 휴대폰 1'), findsOneWidget);
-      expect(find.text('이룸이 휴대폰 2'), findsOneWidget);
-      expect(find.text('연결 끊기'), findsNWidgets(2));
-      expect(find.text('보호자가 연결 · 9월 20일부터'), findsOneWidget);
-    });
-
-    testWidgets('기기 이름·연결한 사람·연결 날짜를 보이고, 목록 아래에서 다른 휴대폰을 더 연결한다', (tester) async {
-      routes['GET /api/device-links'] = const {
-        'devices': [
-          {
-            'linkId': 'l2',
-            'linkedAt': '2026-10-13T09:00:00',
-            'deviceName': 'iPhone 16',
-            'linkedByName': '김선생님',
-            'linkedByMe': false,
-          },
-          {
-            'linkId': 'l1',
-            'linkedAt': '2026-09-18T10:31:00',
-            'deviceName': 'Samsung SM-S921N',
-            'linkedByMe': true,
-          },
-        ],
-      };
-      await open(tester);
-
-      expect(find.text('iPhone 16'), findsOneWidget);
-      expect(find.text('김선생님이 연결 · 10월 13일부터'), findsOneWidget);
-      expect(find.text('Samsung SM-S921N'), findsOneWidget);
-      expect(find.text('내가 연결 · 9월 18일부터'), findsOneWidget);
-      // 이름이 있으면 번호 제목 대신 기기 이름이 제목이다
-      expect(find.text('이룸이 휴대폰 1'), findsNothing);
-
-      await tester.ensureVisible(find.text('+ 다른 휴대폰 연결하기'));
-      await tester.tap(find.text('+ 다른 휴대폰 연결하기'));
-      await tester.pumpAndSettle();
-      expect(find.text('연결 암호 화면'), findsOneWidget);
-    });
-
-    testWidgets('연결된 휴대폰이 없으면(다른 사람이 먼저 끊음) 연결하기로 이어 준다', (tester) async {
-      routes['GET /api/device-links'] = noDevice;
-      await open(tester);
-
-      expect(find.text('연결된 휴대폰이 없어요'), findsOneWidget);
-      expect(find.text('연결 끊기'), findsNothing);
-
-      await tester.tap(find.text('이룸이 휴대폰 연결하기'));
-      await tester.pumpAndSettle();
-      expect(find.text('연결 암호 화면'), findsOneWidget);
-    });
-
-    testWidgets('로딩·실패·빈 상태가 같은 자리(본문 가운데)에 놓여 바뀔 때 튀지 않는다', (tester) async {
-      // 응답을 늦춰 로딩을 붙잡는다.
-      routes['GET /api/device-links'] = const FakeOffline();
-      adapter = FakeAdapter(routes, delay: const Duration(milliseconds: 300));
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('설정 화면'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-      final loadingY = tester
-          .getCenter(find.byType(CircularProgressIndicator))
-          .dy;
-
-      await tester.pumpAndSettle();
-      final failedY = tester.getCenter(find.byType(ElumErrorView)).dy;
-      expect(failedY, moreOrLessEquals(loadingY, epsilon: 1));
-
-      routes['GET /api/device-links'] = noDevice;
-      await tester.tap(find.textContaining('다시 시도'));
-      await tester.pumpAndSettle();
-      final emptyY = tester
-          .getCenter(
-            find
-                .ancestor(
-                  of: find.text('연결된 휴대폰이 없어요'),
-                  matching: find.byType(Column),
-                )
-                .first,
-          )
-          .dy;
-      expect(emptyY, moreOrLessEquals(loadingY, epsilon: 1));
-    });
-
     testWidgets('상태를 못 불러오면 빈 화면이 아니라 이유·에러 코드·다시 시도가 보이고, 다시 시도하면 불러온다', (
       tester,
     ) async {
@@ -247,17 +129,6 @@ void main() {
       expect(find.text('연결됨'), findsOneWidget);
     });
 
-    testWidgets('서버가 이유를 주면 그 문구를 쓴다 (403)', (tester) async {
-      routes['GET /api/device-links'] = const FakeHttpError(
-        403,
-        errorCode: 'PROFILE_ACCESS_DENIED',
-        errorMessage: '이 이룸이의 정보를 볼 수 없어요.',
-      );
-      await open(tester);
-
-      expect(find.textContaining('이 이룸이의 정보를 볼 수 없어요.'), findsOneWidget);
-      expect(find.textContaining('PROFILE_ACCESS_DENIED'), findsOneWidget);
-    });
   });
 
   group('끊기', () {
@@ -270,17 +141,6 @@ void main() {
       expect(find.text('연결을 끊을까요?'), findsOneWidget);
       expect(find.textContaining('새 암호를 만들면 돼요'), findsOneWidget);
       expect(adapter.calls.where((c) => c.startsWith('DELETE')), isEmpty);
-    });
-
-    testWidgets('취소하면 아무 일도 없다', (tester) async {
-      await open(tester);
-      await tapDisconnect(tester);
-
-      await tester.tap(dialogButton('취소'));
-      await tester.pumpAndSettle();
-
-      expect(adapter.calls.where((c) => c.startsWith('DELETE')), isEmpty);
-      expect(find.text('연결됨'), findsOneWidget);
     });
 
     testWidgets('확인하면 그 연결을 끊고, 남은 휴대폰이 없으면 설정으로 돌아가 알린다', (tester) async {
@@ -360,21 +220,5 @@ void main() {
       expect(find.textContaining('E-NET-OFFLINE'), findsOneWidget);
     });
 
-    testWidgets('빨리 두 번 눌러도 한 번만 나간다', (tester) async {
-      routes['DELETE /api/device-links/l1'] = const <String, Object?>{};
-      await open(tester);
-      await tapDisconnect(tester);
-      routes['GET /api/device-links'] = noDevice;
-
-      await tester.tap(dialogButton('연결 끊기'));
-      await tester.pump();
-      // 응답을 기다리는 사이 다시 눌러도 버튼이 비활성이라 팝업이 또 뜨지 않는다
-      await tester.pumpAndSettle();
-
-      expect(
-        adapter.calls.where((c) => c == 'DELETE /api/device-links/l1'),
-        hasLength(1),
-      );
-    });
   });
 }

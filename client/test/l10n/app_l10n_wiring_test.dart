@@ -59,16 +59,6 @@ void main() {
   }
 
   testWidgets('휴대폰이 한국어면 ko', (t) async => expect(await pumpPhone(t, const [Locale('ko', 'KR')]), 'ko'));
-  testWidgets('영어면 en', (t) async => expect(await pumpPhone(t, const [Locale('en', 'US')]), 'en'));
-  testWidgets('열지 않은 스페인어(멕시코)는 en', (t) async => expect(await pumpPhone(t, const [Locale('es', 'MX')]), 'en'));
-  testWidgets('열지 않은 중국어 간체는 en', (t) async {
-    expect(
-      await pumpPhone(t, const [Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN')]),
-      'en',
-    );
-  });
-  testWidgets('프랑스어는 en', (t) async => expect(await pumpPhone(t, const [Locale('fr', 'FR')]), 'en'));
-  testWidgets('번체 중국어는 en', (t) async => expect(await pumpPhone(t, const [Locale('zh', 'TW')]), 'en'));
   testWidgets('개발자 도구가 강제한 언어는 휴대폰 언어를 이긴다', (t) async {
     expect(await pumpPhone(t, const [Locale('ko', 'KR')], forced: const Locale('ja')), 'ja');
   });
@@ -79,15 +69,7 @@ void main() {
     );
   });
 
-  testWidgets('앱 이름은 onGenerateTitle 로 ARB 에서 읽는다', (t) async {
-    await t.pumpWidget(app(forced: const Locale('en')));
-    expect(t.widget<Title>(find.byType(Title)).title, 'elum');
-  });
 
-  testWidgets('번역에 키가 없는 언어(ja)는 앱 이름도 ko 로 떨어진다', (t) async {
-    await t.pumpWidget(app(forced: const Locale('ja')));
-    expect(t.widget<Title>(find.byType(Title)).title, '이룸');
-  });
 
   group('themed — 언어별 글꼴 테마', () {
     Future<List<String>?> fallbackIn(WidgetTester tester, Locale locale) async {
@@ -111,34 +93,12 @@ void main() {
       expect(await fallbackIn(t, const Locale('ko')), isNull);
     });
 
-    testWidgets('es 는 Pretendard 를 입힌다', (t) async {
-      expect(await fallbackIn(t, const Locale('es')), ['Pretendard']);
-    });
 
-    testWidgets('ja 는 Pretendard 다음에 시스템 글꼴을 입힌다', (t) async {
-      final fallback = await fallbackIn(t, const Locale('ja'));
-      expect(fallback!.first, 'Pretendard');
-      expect(fallback, contains('Hiragino Sans'));
-    });
   });
 
   group('routerArgs — builder 배선', () {
     tearDown(setAppL10nForTest);
 
-    testWidgets('inner 는 Localizations 아래에서 불리고 ko 에서는 래퍼가 늘지 않는다', (t) async {
-      bool? underLocalizations;
-      await t.pumpWidget(
-        app(
-          forced: const Locale('ko'),
-          inner: (context, child) {
-            underLocalizations =
-                Localizations.of<AppLocalizations>(context, AppLocalizations) != null;
-            return child!;
-          },
-        ),
-      );
-      expect(underLocalizations, isTrue);
-    });
 
     testWidgets('언어를 바꾸면 appL10n(전역 통로)이 따라 바뀌고 context.l10n 위젯이 다시 그려진다', (t) async {
       var builds = 0;

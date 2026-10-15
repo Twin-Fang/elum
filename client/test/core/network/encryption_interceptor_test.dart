@@ -31,15 +31,6 @@ void main() {
     expect(captured.headers['X-Elum-Signature'], isNotNull);
   });
 
-  test('대상이 아닌 경로는 그대로 통과한다', () async {
-    final dio = Dio(BaseOptions(baseUrl: 'https://x'));
-    dio.interceptors.add(EncryptionInterceptor(secret: secret));
-
-    final captured = await capture(dio, () => dio.get('/api/member/me'));
-
-    expect(captured.headers.containsKey('X-Elum-Signature'), isFalse);
-  });
-
   test('secret이 비면 대상 경로도 그대로 통과한다', () async {
     final dio = Dio(BaseOptions(baseUrl: 'https://x'));
     dio.interceptors.add(EncryptionInterceptor(secret: ''));

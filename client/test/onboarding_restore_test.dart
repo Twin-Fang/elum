@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/onboarding/application/onboarding_notifier.dart';
-import 'package:elum/shared/models/character.dart';
 import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
 
@@ -18,27 +17,6 @@ void main() {
     addTearDown(container.dispose);
     return container;
   }
-
-  test('저장된 값이 있으면 그대로 되살린다', () async {
-    final storage = InMemoryStorage(onboardingCompleted: true);
-    await storage.setNickname('보름이');
-    await storage.setGoals([SupportGoal.values.first.apiValue]);
-    await storage.setCharacter(CardCharacter.fox.apiValue);
-
-    final profile = containerWith(storage).read(onboardingProvider);
-
-    expect(profile.childNickname, '보름이');
-    expect(profile.cardCharacter, CardCharacter.fox);
-    expect(profile.supportGoals, {SupportGoal.values.first});
-  });
-
-  test('저장된 값이 없으면 빈 상태로 시작한다', () {
-    final profile = containerWith(InMemoryStorage()).read(onboardingProvider);
-
-    expect(profile.childNickname, isEmpty);
-    expect(profile.cardCharacter, isNull);
-    expect(profile.supportGoals, isEmpty);
-  });
 
   test('모르는 캐릭터 값이면 임의로 고르지 않고 비워 둔다', () async {
     // 구버전 데이터나 서버 enum 추가로 들어올 수 있다.

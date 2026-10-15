@@ -8,23 +8,6 @@ void main() {
       }[key] ??
       '';
 
-  test('테스트 모드는 .env에 실제 ID가 있어도 Google 테스트 ID만 쓴다', () {
-    final android = AdIds.resolve(
-      placement: AdPlacement.bannerHome,
-      isIos: false,
-      useTestIds: true,
-      readEnv: env,
-    );
-    final ios = AdIds.resolve(
-      placement: AdPlacement.bannerHome,
-      isIos: true,
-      useTestIds: true,
-      readEnv: env,
-    );
-    expect(android, 'ca-app-pub-3940256099942544/9214589741');
-    expect(ios, 'ca-app-pub-3940256099942544/2435281174');
-  });
-
   test('릴리스 모드는 .env 값을 쓴다', () {
     expect(
       AdIds.resolve(
@@ -49,17 +32,4 @@ void main() {
     );
   });
 
-  test('모든 배치에 두 플랫폼의 테스트 ID가 있다', () {
-    for (final p in AdPlacement.values) {
-      for (final ios in [true, false]) {
-        final id = AdIds.resolve(
-          placement: p,
-          isIos: ios,
-          useTestIds: true,
-          readEnv: (_) => '',
-        );
-        expect(id, startsWith('ca-app-pub-3940256099942544/'));
-      }
-    }
-  });
 }

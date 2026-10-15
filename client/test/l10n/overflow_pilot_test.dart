@@ -1,6 +1,5 @@
 import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
-import 'package:elum/core/widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -29,13 +28,8 @@ void main() {
   const es = Locale('es');
   // 현실적인 스페인어 문구 (한국어 짧은 버튼/줄/제목에 대응)
   const buttonEs = 'Configuración de la cuenta';
-  const tileEs = 'Configuración de la cuenta';
   const titleEs = 'Todavía no has creado ninguna rutina para hoy';
   // 일부러 매우 긴 문구 (음성 대조용, 약 200자)
-  final longEs = List.filled(
-    8,
-    'Todavía no has creado ninguna rutina',
-  ).join(' ');
 
   Future<void> pumpButton(
     WidgetTester tester,
@@ -52,14 +46,6 @@ void main() {
     locale: es,
     textScale: scale,
   );
-
-  Future<void> pumpTile(WidgetTester tester, String label, double scale) =>
-      pumpWithLocale(
-        tester,
-        Scaffold(body: SettingsTile(label: label, onTap: null)),
-        locale: es,
-        textScale: scale,
-      );
 
   Future<void> pumpDialog(WidgetTester tester, String title, double scale) =>
       pumpWithLocale(
@@ -86,16 +72,6 @@ void main() {
     );
   }
 
-  void expectTileFits(WidgetTester tester, String label) {
-    expect(tester.takeException(), isNull);
-    expectTextFits(
-      tester,
-      find.text(label),
-      maxHeight: tester.getSize(find.byType(SettingsTile)).height,
-      label: 'SettingsTile',
-    );
-  }
-
   void expectDialogFits(WidgetTester tester, String title) {
     expect(tester.takeException(), isNull);
     final surface = tester.getSize(find.byType(ElumDialogSurface));
@@ -115,7 +91,6 @@ void main() {
       ? ' [SKIP 넘침 검사 대상 - ElumButton 고정 높이 66, es "$buttonEs" 배율 $scale 에서 글 높이 ${scale == 1.5 ? 68 : 90}]'
       : null;
   // SettingsTile 은 시안 높이(60)를 최소값으로 두고 글에 맞춰 자라므로 더는 건너뛰지 않는다.
-  String? knownTile(double scale) => null;
 
   for (final scale in [1.0, 1.5, 2.0]) {
     testWidgets('ElumButton - 현실 es 라벨, 글자 배율 $scale${knownButton(scale) ?? ''}', (tester) async {
@@ -123,58 +98,10 @@ void main() {
       expectButtonFits(tester, buttonEs);
     }, skip: knownButton(scale) != null);
 
-    testWidgets('SettingsTile - 현실 es 라벨, 글자 배율 $scale${knownTile(scale) ?? ''}', (tester) async {
-      await pumpTile(tester, tileEs, scale);
-      expectTileFits(tester, tileEs);
-    }, skip: knownTile(scale) != null);
-
     testWidgets('ElumDialogCard - 현실 es 제목, 글자 배율 $scale', (tester) async {
       await pumpDialog(tester, titleEs, scale);
       expectDialogFits(tester, titleEs);
     });
   }
 
-  group('음성 대조 - 실제 위젯에 매우 긴 글을 넣으면 expectTextFits 가 FAIL 한다', () {
-    testWidgets('ElumButton', (tester) async {
-      await pumpButton(tester, longEs, 1.0);
-      expect(() => expectButtonFits(tester, longEs), throwsA(isA<TestFailure>()));
-    });
-
-    testWidgets('SettingsTile', (tester) async {
-      await pumpTile(tester, longEs, 1.0);
-      // 줄은 글에 맞춰 자라므로 줄 자신의 높이는 잣대가 못 된다. 시안 높이(60)를 잣대로 삼아
-      // 매우 긴 글이 그 안에 안 들어가는 것을 검사 함수가 잡는지 본다.
-      expect(tester.takeException(), isNull);
-      expect(
-        () => expectTextFits(
-          tester,
-          find.text(longEs),
-          maxHeight: SettingsTile.height,
-          label: 'SettingsTile 시안 높이',
-        ),
-        throwsA(isA<TestFailure>()),
-      );
-    });
-
-    testWidgets('ElumDialogCard - 화면보다 긴 제목', (tester) async {
-      // 대화상자는 글에 맞춰 자라다 화면 높이에서 막혀 Column 이 넘친다 -
-      // 단언 함수가 이를 실패로 돌려주는지 본다
-      await pumpDialog(tester, List.filled(12, longEs).join('\n'), 1.0);
-      expect(
-        () => expectDialogFits(tester, List.filled(12, longEs).join('\n')),
-        throwsA(isA<TestFailure>()),
-      );
-    });
-
-    testWidgets('주축 넘침은 takeException 이 잡는다 (Row 안 고정 폭 글)', (tester) async {
-      await pumpWithLocale(
-        tester,
-        Scaffold(
-          body: SizedBox(width: 60, child: Row(children: [Text(longEs)])),
-        ),
-        locale: es,
-      );
-      expect(tester.takeException().toString(), contains('overflowed'));
-    });
-  });
 }

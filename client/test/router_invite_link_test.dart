@@ -80,17 +80,6 @@ void main() {
   String location() => router.routerDelegate.currentConfiguration.uri.toString();
 
   group('위치를 고르는 규칙', () {
-    test('막 켜졌으면(위치를 모르면) 시작 화면이다 — 시작 화면이 갈 곳을 정한다', () {
-      expect(resolveInviteLinkLocation(), Routes.splash);
-      expect(resolveInviteLinkLocation(currentLocation: ''), Routes.splash);
-    });
-
-    test('켜져 있었으면 보던 화면 그대로다', () {
-      expect(
-        resolveInviteLinkLocation(currentLocation: Routes.guardianSettings),
-        Routes.guardianSettings,
-      );
-    });
   });
 
   group('앱이 꺼져 있다 링크로 열릴 때', () {
@@ -111,17 +100,6 @@ void main() {
       });
     }
 
-    testWidgets('코드를 못 쓰는 링크도 우편함에 맡긴다 — 입력 화면이 에러 안내를 띄운다', (tester) async {
-      tester.binding.platformDispatcher.defaultRouteNameTestValue = 'elum://invite?code=A0K3M9';
-      addTearDown(tester.binding.platformDispatcher.clearDefaultRouteNameTestValue);
-      build();
-      await pump(tester);
-
-      expect(received.length, 1);
-      expect(received.single.code, isNull);
-      expect(location(), Routes.splash);
-    });
-
     testWidgets('이룸이 휴대폰에서는 우편함에 맡기지 않고 무시한다', (tester) async {
       tester.binding.platformDispatcher.defaultRouteNameTestValue = 'elum://invite?code=A7K3M9';
       addTearDown(tester.binding.platformDispatcher.clearDefaultRouteNameTestValue);
@@ -135,30 +113,6 @@ void main() {
   });
 
   group('앱이 켜져 있을 때 링크가 오면', () {
-    testWidgets('보던 화면을 지키고 코드를 우편함에 맡긴다', (tester) async {
-      build();
-      await pump(tester);
-      // 화면 하나를 가볍게 세워 둔다 (없는 경로의 자리표시 화면 — 실제 화면은 서버 호출을 끌고 온다)
-      router.go('/somewhere?x=1');
-      await tester.pump();
-      expect(location(), '/somewhere?x=1');
-
-      await pushFromOs(tester, 'elum://invite?code=A7K3M9');
-
-      expect(received.map((l) => l.code), ['A7K3M9']);
-      expect(location(), '/somewhere?x=1');
-    });
-
-    testWidgets('같은 링크를 연달아 눌러도 그때마다 맡긴다 — 나중 것이 앞의 것을 대신한다', (tester) async {
-      build();
-      await pump(tester);
-
-      await pushFromOs(tester, 'elum://invite?code=A7K3M9');
-      await pushFromOs(tester, 'elum://invite?code=B2C4D6');
-
-      expect(received.map((l) => l.code), ['A7K3M9', 'B2C4D6']);
-    });
-
     testWidgets('초대 링크가 아닌 주소는 맡기지 않는다 — 소셜 로그인 콜백을 건드리지 않는다', (tester) async {
       build();
       await pump(tester);

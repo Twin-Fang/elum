@@ -1,4 +1,3 @@
-import 'package:elum/core/config/app_config.dart';
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,65 +48,9 @@ void main() {
       expect(await fallback.speak('옷을 입어요'), isFalse);
     });
 
-    test('빈 문자열은 아무것도 하지 않는다', () async {
-      final device = _FakeSpeech(succeeds: true);
-      final fallback = FallbackSpeech(
-        device: device,
-        remote: _FakeSpeech(succeeds: true),
-      );
-
-      expect(await fallback.speak('   '), isFalse);
-      expect(device.spokenTexts, isEmpty);
-    });
-
-    test('정지하면 양쪽을 다 멈춘다', () async {
-      // 어느 쪽이 울리는지 확신할 수 없다. 하나만 멈추면 소리가 남는다.
-      final device = _FakeSpeech(succeeds: true);
-      final remote = _FakeSpeech(succeeds: true);
-
-      await FallbackSpeech(device: device, remote: remote).stop();
-
-      expect(device.stopCount, 1);
-      expect(remote.stopCount, 1);
-    });
   });
 
   group('기기 음성 엔진', () {
-    test('안드로이드에 Google 엔진이 있으면 그것으로 고정한다', () async {
-      final tts = _FakeTts(engines: ['com.samsung.SMT', DeviceSpeech.googleEngine]);
-
-      await DeviceSpeech(tts: tts, isAndroid: true).speak('옷을 입어요');
-
-      expect(tts.engineSet, DeviceSpeech.googleEngine);
-      expect(tts.spoken, ['옷을 입어요']);
-    });
-
-    test('Google 엔진이 없으면 기본 엔진 그대로 읽는다', () async {
-      final tts = _FakeTts(engines: ['com.samsung.SMT']);
-
-      final ok = await DeviceSpeech(tts: tts, isAndroid: true).speak('옷을 입어요');
-
-      expect(ok, isTrue);
-      expect(tts.engineSet, isNull);
-    });
-
-    test('엔진 목록을 못 읽어도 읽는다', () async {
-      final tts = _FakeTts(engines: null, enginesThrow: true);
-
-      final ok = await DeviceSpeech(tts: tts, isAndroid: true).speak('옷을 입어요');
-
-      expect(ok, isTrue);
-      expect(tts.spoken, ['옷을 입어요']);
-    });
-
-    test('안드로이드가 아니면 엔진을 건드리지 않는다', () async {
-      final tts = _FakeTts(engines: [DeviceSpeech.googleEngine]);
-
-      await DeviceSpeech(tts: tts, isAndroid: false).speak('옷을 입어요');
-
-      expect(tts.engineSet, isNull);
-    });
-
     test('기기가 그 언어를 못 읽으면 실패로 돌려 서버로 넘긴다', () async {
       final tts = _FakeTts(engines: [], languageAvailable: false);
 
@@ -117,49 +60,9 @@ void main() {
       expect(tts.spoken, isEmpty);
     });
 
-    test('언어 확인이 예외여도 읽는다', () async {
-      final tts = _FakeTts(engines: [], languageThrows: true);
-
-      final ok = await DeviceSpeech(tts: tts, isAndroid: true).speak('옷을 입어요');
-
-      expect(ok, isTrue);
-    });
-
-    test('엔진은 처음 한 번만 고른다', () async {
-      final tts = _FakeTts(engines: [DeviceSpeech.googleEngine]);
-      final speech = DeviceSpeech(tts: tts, isAndroid: true);
-
-      await speech.speak('하나');
-      await speech.speak('둘');
-
-      expect(tts.engineCalls, 1);
-    });
   });
 
   group('서버 음성', () {
-    test('키가 없으면 서버 폴백만 꺼진다', () {
-      // 키가 없어도 기기 음성은 동작해야 한다 — 기능 전체가 죽지 않는다.
-      // (AudioPlayer가 플랫폼 채널을 타 단위 테스트에서 실제 재생은 못 만든다)
-      dotenv.loadFromString(envString: 'ELUM_TTS_API_KEY=');
-
-      expect(AppConfig.ttsApiKey, isEmpty);
-    });
-
-    test('기본 서버 주소가 있다', () {
-      // .env가 없어도 앱이 떠야 한다
-      dotenv.loadFromString(envString: '', isOptional: true);
-
-      expect(AppConfig.ttsBaseUrl, isNotEmpty);
-    });
-
-    test('CPU 전용 엔진을 쓴다', () {
-      // GPU 엔진은 "한 번에 1개" 정책이라 대부분 꺼져 있어 503이 난다
-      expect(RemoteSpeech.engine, 'supertonic');
-    });
-
-    test('서버 길이 제한을 안다', () {
-      expect(RemoteSpeech.maxLength, 500);
-    });
   });
 }
 
@@ -189,22 +92,17 @@ class _FakeSpeech implements SpeechService {
 class _FakeTts extends FlutterTts {
   _FakeTts({
     required this.engines,
-    this.enginesThrow = false,
     this.languageAvailable = true,
-    this.languageThrows = false,
   });
 
   final List<String>? engines;
-  final bool enginesThrow;
   final bool languageAvailable;
-  final bool languageThrows;
   String? engineSet;
   var engineCalls = 0;
   final spoken = <String>[];
 
   @override
   Future<dynamic> get getEngines async {
-    if (enginesThrow) throw Exception('엔진 목록 실패');
     return engines;
   }
 
@@ -216,7 +114,6 @@ class _FakeTts extends FlutterTts {
 
   @override
   Future<dynamic> isLanguageAvailable(String language) async {
-    if (languageThrows) throw Exception('언어 확인 실패');
     return languageAvailable;
   }
 

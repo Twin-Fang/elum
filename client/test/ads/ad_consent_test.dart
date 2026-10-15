@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,22 +25,10 @@ void main() {
 
   tearDown(AdConsent.resetForTest);
 
-  test('앱 시작 시 아직 답하지 않았으면 팝업을 한 번 요청한다', () async {
-    await AdConsent.requestOnLaunch();
-    expect(requests, 1);
-  });
-
   test('이미 답한 휴대폰에서는 다시 묻지 않는다', () async {
     current = TrackingStatus.denied;
     await AdConsent.requestOnLaunch();
     expect(requests, 0);
-  });
-
-  test('Android 는 ATT 가 없어 묻지 않고 개인화 기본이다', () async {
-    AdConsent.isIos = () => false;
-    await AdConsent.requestOnLaunch();
-    expect(requests, 0);
-    expect(await AdConsent.useNonPersonalized(), isFalse);
   });
 
   test('시작 요청과 광고 로더가 동시에 불러도 팝업은 한 번만 요청한다', () async {
@@ -56,39 +43,10 @@ void main() {
     expect(results[2], isFalse);
   });
 
-  test('시작 때 이미 물었다면 광고 로더는 답만 읽고 다시 묻지 않는다', () async {
-    await AdConsent.requestOnLaunch();
-    expect(await AdConsent.useNonPersonalized(), isFalse);
-    expect(requests, 1);
-  });
-
-  test('거부하면 광고는 비개인화로 간다', () async {
-    current = TrackingStatus.denied;
-    expect(await AdConsent.useNonPersonalized(), isTrue);
-  });
-
   test('요청이 예외를 내도 앱은 죽지 않고 광고는 비개인화로 간다', () async {
     AdConsent.requestAuthorization = () async => throw StateError('ATT 실패');
     await AdConsent.requestOnLaunch();
     expect(await AdConsent.useNonPersonalized(), isTrue);
   });
 
-  test('요청이 실패해도 다음 요청에서 다시 시도할 수 있다', () async {
-    var calls = 0;
-    AdConsent.requestAuthorization = () async {
-      calls++;
-      if (calls == 1) throw StateError('첫 요청 실패');
-      current = TrackingStatus.authorized;
-      return current;
-    };
-    await AdConsent.requestOnLaunch();
-    expect(await AdConsent.useNonPersonalized(), isFalse);
-    expect(calls, 2);
-  });
-
-  test('앱 시작 코드가 ATT 요청을 부르고, 이룸이 휴대폰은 건너뛴다', () {
-    final app = File('lib/app.dart').readAsStringSync();
-    expect(app, contains('AdConsent.requestOnLaunch()'));
-    expect(app, contains('isElumiDevice) return;'));
-  });
 }

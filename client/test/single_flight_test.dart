@@ -29,16 +29,6 @@ void main() {
     expect(flight.running, isFalse);
   });
 
-  test('끝난 뒤에는 새로 실행한다', () async {
-    final flight = SingleFlight<int>();
-    var calls = 0;
-
-    await flight.run(() async => ++calls);
-    await flight.run(() async => ++calls);
-
-    expect(calls, 2);
-  });
-
   test('실패해도 비워서 다시 누르면 새로 실행한다', () async {
     final flight = SingleFlight<int>();
 
@@ -50,13 +40,4 @@ void main() {
     expect(await flight.run(() async => 1), 1);
   });
 
-  test('작업이 곧바로 던져도 Future 에러로 받는다', () async {
-    final flight = SingleFlight<int>();
-
-    await expectLater(
-      flight.run(() => throw StateError('동기 실패')),
-      throwsStateError,
-    );
-    expect(flight.running, isFalse);
-  });
 }

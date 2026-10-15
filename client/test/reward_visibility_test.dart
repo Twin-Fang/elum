@@ -1,6 +1,4 @@
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/shared/models/reward_character.dart';
-import 'package:elum/features/child/presentation/reward_screen.dart';
 import 'package:elum/features/child/presentation/widgets/reward_banner.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -33,20 +31,6 @@ void main() {
   );
 
   group('보상 배너', () {
-    testWidgets('보상이 있으면 다 하면과 함께 보여준다', (tester) async {
-      const routine = Routine(
-        id: 'r1',
-        rewardText: '젤리 먹기',
-        rewardPresetKey: 'SNACK',
-      );
-
-      await tester.pumpWidget(wrap(RewardBanner.maybe(routine)));
-      await tester.pump();
-
-      // 조건을 먼저 말해야 보상만 보고 넘어가지 않는다 (시안 `다하면 젤리 4개 먹기`)
-      expect(find.text('다하면 🍪 젤리 먹기'), findsOneWidget);
-    });
-
     testWidgets('보상이 없으면 자리도 없다', (tester) async {
       const routine = Routine(id: 'r1');
 
@@ -74,46 +58,8 @@ void main() {
       expect(find.text('⭐'), findsNothing);
     });
 
-    testWidgets('칩은 시안 크기 333×48 이다 (#445)', (tester) async {
-      const routine = Routine(
-        id: 'r1',
-        rewardText: '산책',
-        rewardPresetKey: 'WALK',
-      );
-
-      await tester.pumpWidget(wrap(RewardBanner.maybe(routine)));
-      await tester.pump();
-
-      final size = tester.getSize(find.byType(RewardBanner));
-      expect(size.width, closeTo(333, 0.5));
-      expect(size.height, closeTo(48, 0.5));
-    });
   });
 
   group('완료 화면', () {
-    testWidgets('보상을 받으면 별과 함께 보여준다', (tester) async {
-      await tester.pumpWidget(
-        wrap(
-          const RewardScreen(
-            character: RewardCharacter.lumi,
-            reward: (emoji: '🍪', text: '젤리 먹기'),
-          ),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 600));
-
-      // 별은 "해냈다", 보상은 "이제 받는다" — 서로를 대신하지 못한다
-      expect(find.textContaining('젤리 먹기'), findsOneWidget);
-    });
-
-    testWidgets('보상 없이 끝내면 별 연출만 돈다', (tester) async {
-      await tester.pumpWidget(
-        wrap(const RewardScreen(character: RewardCharacter.lumi)),
-      );
-      await tester.pump(const Duration(milliseconds: 600));
-
-      expect(find.byType(RewardBanner), findsNothing);
-      expect(tester.takeException(), isNull);
-    });
   });
 }

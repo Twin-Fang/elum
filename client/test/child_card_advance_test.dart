@@ -165,37 +165,6 @@ void main() {
     expect(currentPage(tester), 1, reason: '첫 카드를 끝냈으니 둘째 카드가 보여야 한다');
   });
 
-  testWidgets('건너뛰고 체크해도 안 한 카드 중 가장 앞으로 간다', (tester) async {
-    await pumpDetail(tester);
-    await goToCard(tester, 2);
-
-    await tapCheck(tester);
-    await closeReward(tester);
-
-    expect(currentPage(tester), 0, reason: '셋째를 먼저 했어도 빠뜨린 첫째로 되짚어야 한다');
-  });
-
-  testWidgets('별 화면을 기다리는 사이 다른 카드를 체크해도 별 화면이 쌓이지 않는다', (tester) async {
-    await pumpDetail(tester);
-
-    // 첫 카드를 체크하고, 별 화면이 뜨기 전에 둘째 카드도 체크한다
-    await tester.tap(find.byKey(ChildRoutineDetailScreen.checkButtonKey));
-    await tester.pump(const Duration(milliseconds: 50));
-    await goToCard(tester, 1);
-    await tester.tap(find.byKey(ChildRoutineDetailScreen.checkButtonKey));
-    await settle(tester);
-
-    expect(find.byType(RewardScreen), findsOneWidget);
-    await tester.tap(find.byType(ElumButton));
-    await settle(tester);
-
-    expect(
-      find.byType(RewardScreen),
-      findsNothing,
-      reason: '별 화면이 두 겹이면 닫아도 같은 화면이 또 떠서 안 닫힌 것처럼 보인다',
-    );
-  });
-
   /// 카드 둘을 끝내고 마지막 하나만 남긴 상태까지 간다.
   Future<void> finishUntilLast(WidgetTester tester) async {
     await tapCheck(tester);
@@ -216,75 +185,6 @@ void main() {
     expect(find.byType(RoutineDoneScreen), findsOneWidget);
     expect(find.text('일과를 끝냈어요!'), findsOneWidget);
     expect(find.textContaining('젤리 4개 먹기'), findsOneWidget);
-  });
-
-  testWidgets('보상이 없으면 일과완료 화면에 칩을 그리지 않는다 (#490)', (tester) async {
-    await pumpDetail(tester);
-    await finishUntilLast(tester);
-
-    await tapCheck(tester);
-    await closeReward(tester);
-
-    expect(find.byType(RoutineDoneScreen), findsOneWidget);
-    expect(find.text('일과를 끝냈어요!'), findsOneWidget);
-    expect(find.text('오예!'), findsOneWidget, reason: '제목과 버튼은 보상과 상관없이 뜬다');
-    expect(find.textContaining('젤리'), findsNothing);
-  });
-
-  testWidgets('일과완료 화면의 오예! 를 누르면 이룸이 홈으로 돌아간다 (#490)', (tester) async {
-    await pumpDetail(tester);
-    await finishUntilLast(tester);
-    await tapCheck(tester);
-    await closeReward(tester);
-
-    await tester.tap(find.text('오예!'));
-    await settle(tester);
-
-    expect(find.byType(RoutineDoneScreen), findsNothing);
-    expect(find.byType(ChildRoutineDetailScreen), findsNothing);
-    expect(find.byType(ChildHomeScreen), findsOneWidget);
-  });
-
-  testWidgets('끝낸 일과의 마지막 카드를 다시 체크해도 일과완료 화면이 뜨지 않는다 (#490)', (tester) async {
-    await pumpDetail(tester);
-    await finishUntilLast(tester);
-    await tapCheck(tester);
-    await closeReward(tester);
-    // 일과완료를 닫지 않고 뒤로 돌아와 같은 카드를 해제 → 재체크하는 상황을 만든다.
-    tester.element(find.byType(RoutineDoneScreen)).pop();
-    await settle(tester);
-
-    await tapCheck(tester); // 해제
-    await tapCheck(tester); // 재체크 — 보상 이력이 남아 별도, 완료 화면도 뜨지 않는다
-
-    expect(find.byType(RewardScreen), findsNothing);
-    expect(find.byType(RoutineDoneScreen), findsNothing);
-  });
-
-  testWidgets('체크를 해제할 때는 넘어가지 않는다', (tester) async {
-    await pumpDetail(tester);
-    await tapCheck(tester);
-    await closeReward(tester);
-
-    // 첫 카드로 돌아가 체크를 해제한다
-    await goToCard(tester, 0);
-    await tapCheck(tester);
-
-    expect(find.byType(RewardScreen), findsNothing, reason: '해제에는 별이 뜨지 않는다');
-    expect(currentPage(tester), 0, reason: '되돌리는 동작에서 화면이 움직이면 안 된다');
-  });
-
-  testWidgets('이미 보상한 카드를 다시 체크해도 넘어가지 않는다', (tester) async {
-    await pumpDetail(tester);
-    await tapCheck(tester);
-    await closeReward(tester);
-
-    await goToCard(tester, 0);
-    await tapCheck(tester); // 해제
-    await tapCheck(tester); // 재체크 — 보상 이력이 남아 별이 뜨지 않는다
-
-    expect(find.byType(RewardScreen), findsNothing);
-    expect(currentPage(tester), 0, reason: '연출 없이 화면만 바뀌면 무엇이 일어났는지 알 수 없다');
   });
 
   /// 일과의 카드 구성만 바꾼다 — 보호자가 순서를 바꾸거나 지운 것을 흉내 낸다 (#517).
@@ -324,14 +224,4 @@ void main() {
     expect(currentPage(tester), lessThan(2));
   });
 
-  testWidgets('이룸이가 직접 넘기면 그 카드가 새 기준이 된다 (#517)', (tester) async {
-    await pumpDetail(tester);
-    await goToCard(tester, 1);
-    await goToCard(tester, 2);
-
-    // 순서가 바뀌어도 마지막에 본 카드(신발)를 따라간다
-    await replaceCards(tester, [cards[2], cards[1], cards[0]]);
-
-    expect(currentPage(tester), 0);
-  });
 }

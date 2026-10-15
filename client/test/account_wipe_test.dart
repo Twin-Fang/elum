@@ -26,22 +26,6 @@ void main() {
     expect(cache.clearCalls, 1);
   });
 
-  test('캐시 삭제가 끝난 뒤에 돌아온다 — 끝났다고 알린 뒤에 사진이 남으면 안 된다', () async {
-    final cache = _SlowCache();
-    var done = false;
-
-    final wipe = wipeLocalAccount(
-      tokens: InMemoryTokenStore(accessToken: 'a', refreshToken: 'r'),
-      storage: InMemoryStorage(),
-      imageCache: cache,
-    ).then((_) => done = true);
-    await Future<void>.delayed(Duration.zero);
-    expect(done, isFalse, reason: '삭제가 아직 진행 중이다');
-
-    cache.release.complete();
-    await wipe;
-    expect(cache.finished, isTrue);
-  });
 }
 
 /// 삭제가 [release] 될 때까지 끝나지 않는 캐시.

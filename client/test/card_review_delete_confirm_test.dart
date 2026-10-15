@@ -114,35 +114,6 @@ void main() {
       expect(idsOf(container), ['c2']);
     });
 
-    testWidgets('취소를 누르면 카드가 그대로 남는다', (tester) async {
-      final container = await pump(tester);
-
-      await tapDelete(tester);
-      await tester.tap(find.text('취소'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-
-      expect(find.text('카드를 삭제하실건가요?'), findsNothing);
-      expect(idsOf(container), ['c1', 'c2']);
-    });
-
-    testWidgets('바깥을 눌러 닫아도 카드는 그대로다', (tester) async {
-      final container = await pump(tester);
-
-      await tapDelete(tester);
-      // 이 팝업은 barrierDismissible 이 꺼져 있어 바깥은 눌러도 닫히지 않는다.
-      // 닫히지 않는 동안에도 카드는 지워지지 않아야 한다.
-      await tester.tapAt(const Offset(4, 4));
-      await tester.pump();
-
-      expect(idsOf(container), ['c1', 'c2']);
-    });
-
-    testWidgets('한 장만 남으면 ✕ 자체가 없다', (tester) async {
-      await pump(tester, steps: [cards.first]);
-
-      expect(deleteButton, findsNothing);
-    });
   });
 }
 

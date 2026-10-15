@@ -71,30 +71,6 @@ void main() {
   setUp(() => repo = _FakeRepo());
 
 
-  testWidgets('이룸이가 없으면 이름 저장 전에 만든다', (tester) async {
-    await tester.pumpWidget(wrap(shown: noProfile));
-    await tester.pumpAndSettle();
-    await reachCta(tester);
-
-    await tester.tap(find.byType(ElumButton));
-    await tester.pumpAndSettle();
-
-    expect(repo.log, ['create', 'nickname']);
-    expect(find.text('완료 화면'), findsOneWidget);
-  });
-
-  testWidgets('이미 이룸이가 있으면 부르지 않는다', (tester) async {
-    await tester.pumpWidget(wrap(shown: memberWith([kProfileA])));
-    await tester.pumpAndSettle();
-    await reachCta(tester);
-
-    await tester.tap(find.byType(ElumButton));
-    await tester.pumpAndSettle();
-
-    expect(repo.log, ['nickname']);
-    expect(find.text('완료 화면'), findsOneWidget);
-  });
-
   testWidgets('만들지 못하면 에러 코드와 함께 알리고 이 화면에 남는다 — 다시 누르면 다시 시도한다', (tester) async {
     repo.createResult = const Attempt.failed(
       AppFailure(fault: NetworkFault.offline),

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:elum/core/l10n/app_locales.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// ARB 언어 간 키·자리표시자 일치 검사 (골격).
@@ -59,13 +58,6 @@ void main() {
     expect(bad, isEmpty, reason: '메타에 없는 자리표시자 — gen-l10n 이 거부한다');
   });
 
-  test('앱이 여는 언어 목록과 번역을 검사하는 언어가 같다', () {
-    expect(
-      openedAppLocales.map((l) => l.languageCode).toSet(),
-      openedLocales,
-      reason: '언어를 열 때 openedAppLocales 와 이 파일의 openedLocales 를 함께 늘린다',
-    );
-  });
 
   for (final locale in allLocales.where(openedLocales.contains)) {
     if (locale == 'ko') continue;

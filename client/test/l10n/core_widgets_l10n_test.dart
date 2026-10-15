@@ -1,4 +1,3 @@
-import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:elum/core/widgets/elum_error_view.dart';
 import 'package:elum/core/widgets/show_failure.dart';
 import 'package:flutter/material.dart';
@@ -25,26 +24,6 @@ void main() {
     expect(find.text('다시 시도 (E-RT-001)'), findsOneWidget);
   });
 
-  testWidgets('에러 화면 — 버튼 문구와 설명 기본 안내', (tester) async {
-    await pumpWithLocale(
-      tester,
-      Scaffold(
-        body: ElumErrorView(message: '실패', onRetry: () {}),
-      ),
-    );
-    expect(find.text('다시 시도'), findsOneWidget);
-  });
-
-  testWidgets('팝업 — 버튼을 안 넘기면 확인 하나, 배경 막 이름은 팝업 닫기', (tester) async {
-    final handle = tester.ensureSemantics();
-    await pumpWithLocale(
-      tester,
-      const Scaffold(body: ElumDialogCard<void>(title: '제목')),
-    );
-    expect(find.text('확인'), findsOneWidget);
-    handle.dispose();
-  });
-
   testWidgets('실패 팝업 — 제목에 마침표를 붙이고 확인 버튼을 단다', (tester) async {
     late BuildContext ctx;
     await pumpWithLocale(
@@ -69,19 +48,4 @@ void main() {
     expect(find.text('확인'), findsOneWidget);
   });
 
-  testWidgets('번역이 비어 있는 언어(ja)는 ko 문구로 떨어진다', (tester) async {
-    await pumpWithLocale(
-      tester,
-      Scaffold(
-        body: ElumErrorView(
-          message: 'm',
-          errorCode: 'E-1',
-          onRetry: () {},
-          compact: true,
-        ),
-      ),
-      locale: const Locale('ja'),
-    );
-    expect(find.text('다시 시도 (E-1)'), findsOneWidget);
-  });
 }

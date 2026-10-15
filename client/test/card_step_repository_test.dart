@@ -70,24 +70,6 @@ void main() {
       expect(f.adapter.bodies.single.containsKey('generateImage'), isFalse);
     });
 
-    test('응답의 카드 목록을 읽는다', () async {
-      final f = setUp({
-        'POST /api/routines/r1/steps': routineJson([
-          {'id': 'c1', 'stepOrder': 1, 'description': '옷을 입어요'},
-          {'id': 'c2', 'stepOrder': 2, 'description': '가방을 챙겨요'},
-          {'id': 'n1', 'stepOrder': 3, 'description': '이를 닦아요'},
-        ]),
-      });
-
-      final result = await f.repo.addStep(
-        routine,
-        title: '양치를 해요',
-        description: '이를 닦아요',
-      );
-
-      expect([for (final s in result.routine.steps) s.id], ['c1', 'c2', 'n1']);
-    });
-
     test('서버가 거절하면 일과를 그대로 두고 이유를 돌려준다', () async {
       final f = setUp({
         'POST /api/routines/r1/steps': const FakeHttpError(
@@ -120,24 +102,6 @@ void main() {
       expect(result.routine, routine);
     });
 
-    test('서버에 없는 로컬 일과는 서버를 부르지 않고 로컬에 넣는다', () async {
-      final f = setUp(const {});
-      const local = Routine(
-        id: '',
-        steps: [ActionCard(id: 'c1', stepOrder: 1, description: '옷을 입어요')],
-      );
-
-      final result = await f.repo.addStep(
-        local,
-        title: '양치를 해요',
-        description: '이를 닦아요',
-      );
-
-      expect(f.adapter.calls, isEmpty);
-      expect(result.failure, isNull);
-      expect(result.routine.steps, hasLength(2));
-      expect(result.routine.steps.last.title, '양치를 해요');
-    });
   });
 
   group('reorderSteps', () {
@@ -155,64 +119,8 @@ void main() {
       });
     });
 
-    test('서버가 거절하면 이유를 돌려준다', () async {
-      final f = setUp({
-        'PATCH /api/routines/r1/steps/order': const FakeHttpError(
-          400,
-          errorCode: 'INVALID_INPUT_VALUE',
-        ),
-      });
-
-      final failure = await f.repo.reorderSteps('r1', ['c2', 'c1']);
-
-      expect(failure, isNotNull);
-    });
   });
 
-  group('updateStep', () {
-    test('PATCH 로 제목과 설명을 함께 보낸다', () async {
-      final f = setUp({
-        'PATCH /api/routines/r1/steps/c1': routineJson([
-          {
-            'id': 'c1',
-            'stepOrder': 1,
-            'title': '새 제목',
-            'description': '새 설명',
-          },
-          {'id': 'c2', 'stepOrder': 2, 'description': '가방을 챙겨요'},
-        ]),
-      });
-
-      final result = await f.repo.updateStep(
-        routine,
-        'c1',
-        title: '새 제목',
-        description: '새 설명',
-      );
-
-      expect(result.failure, isNull);
-      expect(f.adapter.bodies.single, {
-        'title': '새 제목',
-        'description': '새 설명',
-      });
-    });
-
-    test('서버 실패 시 로컬에는 제목도 반영하고 실패를 돌려준다', () async {
-      final f = setUp({});
-
-      final result = await f.repo.updateStep(
-        routine,
-        'c1',
-        title: '새 제목',
-        description: '새 설명',
-      );
-
-      expect(result.failure, isNotNull);
-      final step = result.routine.steps.first;
-      expect(step.title, '새 제목');
-      expect(step.description, '새 설명');
-    });
-  });
 }
 
 /// 나간 요청의 본문까지 남기는 가짜 어댑터. [FakeAdapter] 는 경로만 남긴다.

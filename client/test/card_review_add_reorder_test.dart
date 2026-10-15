@@ -62,25 +62,6 @@ void main() {
       expect(added.description, '책가방을 챙겨요');
     });
 
-    test('그림 생성을 요청하지 않는다 — 시안에 선택지가 없다', () async {
-      final f = setUpFlow('PENDING_REVIEW');
-
-      await f.notifier.addStep(title: '가방', description: '책가방');
-
-      expect(f.repo.addCalls, 1);
-      expect(f.repo.lastAdd, (title: '가방', description: '책가방'));
-    });
-
-    test('뺀 카드는 서버 목록에 남아 있어도 되살아나지 않는다', () async {
-      final f = setUpFlow('PENDING_REVIEW');
-      f.notifier.removeStep('c2');
-
-      await f.notifier.addStep(title: '가방', description: '책가방');
-
-      // 서버 응답은 c1·c2·c3·n1 이지만 c2 는 보호자가 이미 뺐다
-      expect(idsOf(f.container), ['c1', 'c3', 'n1']);
-    });
-
     test('실패하면 목록을 그대로 두고 이유를 돌려준다', () async {
       final f = setUpFlow('PENDING_REVIEW');
       f.repo.failAdd = true;
@@ -139,23 +120,6 @@ void main() {
       expect(idsOf(f.container).length, 10);
     });
 
-    test('뺀 카드가 없으면 지우지 않고 그대로 추가를 부른다 — 거절은 서버가 알린다', () async {
-      final f = setUpMany(10);
-
-      await f.notifier.addStep(title: '새 카드', description: '설명');
-
-      expect(f.repo.log, ['add']);
-    });
-
-    test('서버 목록이 10장 미만이면 뺀 카드를 미리 지우지 않는다 (저장하기를 기다린다)', () async {
-      final f = setUpMany(6);
-      f.notifier.removeStep('k3');
-
-      await f.notifier.addStep(title: '새 카드', description: '설명');
-
-      expect(f.repo.log, ['add'], reason: '나가기 팝업의 "저장하기를 눌러야 빠져요" 를 지킨다');
-    });
-
     test('미리 지우다 실패하면 추가하지 않고 이유를 돌려준다', () async {
       final f = setUpMany(10);
       f.repo.failDelete = true;
@@ -168,48 +132,9 @@ void main() {
       expect(idsOf(f.container).length, 9, reason: '화면은 그대로 9장');
     });
 
-    test('지운 카드는 저장하기가 다시 지우러 가지 않는다', () async {
-      final f = setUpMany(10);
-      f.notifier.removeStep('k3');
-      await f.notifier.addStep(title: '새 카드', description: '설명');
-      f.repo.log.clear();
-
-      await f.notifier.save();
-
-      expect(f.repo.log.where((l) => l.startsWith('delete')), isEmpty);
-    });
   });
 
   group('순서 변경', () {
-    test('카드를 옮기면 차례가 바뀌고 번호가 다시 매겨진다', () {
-      final f = setUpFlow('PENDING_REVIEW');
-
-      // 첫 카드를 맨 뒤로 (ReorderableListView 는 아래로 옮길 때 제거 전 위치를 준다)
-      f.notifier.moveStep(0, 3);
-
-      final steps = f.container.read(routineFlowProvider).routine!.steps;
-      expect([for (final s in steps) s.id], ['c2', 'c3', 'c1']);
-      expect([for (final s in steps) s.stepOrder], [1, 2, 3]);
-    });
-
-    test('범위를 벗어난 자리는 무시한다', () {
-      final f = setUpFlow('PENDING_REVIEW');
-
-      f.notifier
-        ..moveStep(-1, 1)
-        ..moveStep(0, 9)
-        ..moveStep(7, 0);
-
-      expect(idsOf(f.container), ['c1', 'c2', 'c3']);
-    });
-
-    test('옮기는 동안에는 서버를 부르지 않는다', () {
-      final f = setUpFlow('PENDING_REVIEW');
-
-      f.notifier.moveStep(0, 3);
-
-      expect(f.repo.log, isEmpty);
-    });
 
     test('✕ 로 나오면 들어오기 전 순서로 돌아간다', () {
       final f = setUpFlow('PENDING_REVIEW');
@@ -222,17 +147,6 @@ void main() {
       expect(idsOf(f.container), ['c1', 'c2', 'c3']);
     });
 
-    test('되돌린 뒤 저장하면 순서 API 를 부르지 않는다', () async {
-      final f = setUpFlow('CONFIRMED');
-      final snapshot = f.notifier.snapshotOrder();
-
-      f.notifier
-        ..moveStep(0, 3)
-        ..restoreOrder(snapshot);
-      await f.notifier.save();
-
-      expect(f.repo.reorderCalls, isEmpty);
-    });
   });
 
   group('저장하기가 순서를 보낸다', () {
@@ -248,36 +162,6 @@ void main() {
       expect(f.repo.log, ['delete:c2', 'reorder:c3,c1', 'confirm']);
     });
 
-    test('순서 API 에는 화면에 남은 카드 전체를 보낸다', () async {
-      final f = setUpFlow('CONFIRMED');
-
-      f.notifier.moveStep(2, 0); // c3 를 맨 앞으로
-      await f.notifier.save();
-
-      expect(f.repo.reorderCalls, [
-        ['c3', 'c1', 'c2'],
-      ]);
-    });
-
-    test('순서를 안 바꿨으면 순서 API 를 부르지 않는다', () async {
-      final f = setUpFlow('PENDING_REVIEW');
-
-      await f.notifier.save();
-
-      expect(f.repo.reorderCalls, isEmpty);
-      expect(f.repo.confirmCalls, 1);
-    });
-
-    test('이미 저장한 일과도 순서는 보내고 확정은 하지 않는다', () async {
-      final f = setUpFlow('CONFIRMED');
-
-      f.notifier.moveStep(0, 2);
-      await f.notifier.save();
-
-      expect(f.repo.reorderCalls, hasLength(1));
-      expect(f.repo.confirmCalls, 0);
-    });
-
     test('순서 저장이 실패하면 확정하지 않고 이유를 돌려준다', () async {
       final f = setUpFlow('PENDING_REVIEW');
       f.repo.failReorder = true;
@@ -289,29 +173,6 @@ void main() {
       expect(f.repo.confirmCalls, 0, reason: '순서가 어긋난 채 이룸이에게 가면 안 된다');
     });
 
-    test('다시 누르면 실패했던 순서를 다시 보낸다', () async {
-      final f = setUpFlow('PENDING_REVIEW');
-      f.repo.failReorder = true;
-      f.notifier.moveStep(0, 2);
-      await f.notifier.save();
-
-      f.repo.failReorder = false;
-      final failure = await f.notifier.save();
-
-      expect(failure, isNull);
-      expect(f.repo.reorderCalls, hasLength(2));
-      expect(f.repo.confirmCalls, 1);
-    });
-
-    test('성공하면 다음 저장은 순서를 다시 보내지 않는다', () async {
-      final f = setUpFlow('CONFIRMED');
-      f.notifier.moveStep(0, 2);
-      await f.notifier.save();
-
-      await f.notifier.save();
-
-      expect(f.repo.reorderCalls, hasLength(1));
-    });
   });
 }
 

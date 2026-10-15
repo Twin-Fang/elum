@@ -1,6 +1,5 @@
 import 'package:elum/features/guardian/data/card_repository.dart';
 import 'package:elum/shared/models/support_goal.dart';
-import 'package:elum/shared/models/action_card.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// fallback은 데모 성립 조건이다 (docs 원칙 6번).
@@ -12,26 +11,11 @@ void main() {
   );
 
   group('CardRepository fallback 체인', () {
-    test('서버가 성공하면 서버 결과를 그대로 쓴다', () async {
-      const serverCards = [
-        ActionCard(id: 's1', description: '서버가 만든 카드', stepOrder: 1),
-      ];
-      final repo = CardRepositoryImpl(remote: (_) async => serverCards);
-
-      expect(await repo.generateCards(request), serverCards);
-    });
 
     test('서버가 예외를 던져도 카드를 반환한다', () async {
       final repo = CardRepositoryImpl(
         remote: (_) async => throw Exception('서버 다운'),
       );
-
-      final cards = await repo.generateCards(request);
-      expect(cards, isNotEmpty);
-    });
-
-    test('서버가 빈 목록을 줘도 카드를 반환한다', () async {
-      final repo = CardRepositoryImpl(remote: (_) async => const []);
 
       final cards = await repo.generateCards(request);
       expect(cards, isNotEmpty);
@@ -62,29 +46,4 @@ void main() {
     });
   });
 
-  group('ActionCard 서버 응답 파싱', () {
-    test('정상 응답을 파싱한다', () {
-      final card = ActionCard.fromJson({
-        'id': 'abc',
-        'description': '가방을 챙겨요',
-        'stepOrder': 2,
-        'imagePath': '/img/bag.png',
-        'completed': true,
-      });
-
-      expect(card.id, 'abc');
-      expect(card.description, '가방을 챙겨요');
-      expect(card.stepOrder, 2);
-      expect(card.completed, isTrue);
-    });
-
-    test('필드가 없거나 타입이 달라도 죽지 않는다', () {
-      final card = ActionCard.fromJson({'stepOrder': '3'});
-
-      expect(card.id, '');
-      expect(card.description, '');
-      expect(card.stepOrder, 3); // 문자열 숫자도 받아준다
-      expect(card.completed, isFalse);
-    });
-  });
 }

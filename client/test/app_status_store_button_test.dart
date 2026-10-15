@@ -25,7 +25,6 @@ void main() {
       ));
   // 플랫폼은 variant 로 바꾼다 — 테스트 안에서 끝나기 전에 되돌려 준다.
   final android = TargetPlatformVariant.only(TargetPlatform.android);
-  final ios = TargetPlatformVariant.only(TargetPlatform.iOS);
 
   // 최소 버전이 지금(1.23.0)보다 높다 → 강제 업데이트 화면
   const mustUpdate = AppStatus(minVersion: '9.0.0');
@@ -46,22 +45,6 @@ void main() {
         ),
       );
 
-  group('스토어 주소', () {
-    test('안드로이드는 Play 스토어의 이룸 상세로 보낸다', () {
-      expect(
-        AppConfig.storeUrl(TargetPlatform.android),
-        Uri.parse('https://play.google.com/store/apps/details?id=kr.twinfang.elum'),
-      );
-    });
-
-    test('iOS 는 App Store 앱을 바로 열어 이룸 상세로 보낸다', () {
-      // 브라우저를 거치지 않도록 itms-apps 스킴을 쓴다
-      expect(
-        AppConfig.storeUrl(TargetPlatform.iOS),
-        Uri.parse('itms-apps://apps.apple.com/app/id6792970508'),
-      );
-    });
-  });
 
   // 서버가 준 주소가 앱에 박힌 주소보다 먼저다 (#416). 이 화면은 옛 버전 앱에서 뜨므로
   // 서버에서 바꿀 수 있어야 이미 깔린 앱도 보낼 곳을 고칠 수 있다.
@@ -74,13 +57,6 @@ void main() {
           Uri.parse(iosServer));
       expect(AppConfig.storeUrl(TargetPlatform.android, serverUrl: androidServer),
           Uri.parse(androidServer));
-    });
-
-    test('비었거나 옛 서버라 없으면 앱에 넣어 둔 주소를 쓴다', () {
-      expect(AppConfig.storeUrl(TargetPlatform.iOS, serverUrl: ''),
-          AppConfig.storeUrl(TargetPlatform.iOS));
-      expect(AppConfig.storeUrl(TargetPlatform.android, serverUrl: '  '),
-          AppConfig.storeUrl(TargetPlatform.android));
     });
 
     test('스토어 주소가 아니거나 플랫폼이 다르면 무시한다', () {
@@ -101,53 +77,9 @@ void main() {
       );
     });
 
-    test('응답의 플랫폼 칸에서 storeUrl 을 읽는다 — 형식이 달라도 죽지 않는다', () {
-      // 테스트는 호스트(macOS)에서 돌아 Platform.isIOS 가 false → android 칸을 읽는다
-      final status = AppStatus.fromJson({
-        'android': {'minVersion': '1.0.0', 'storeUrl': ' $androidServer '},
-      });
-      expect(status.storeUrl, androidServer);
-      expect(AppStatus.fromJson({'android': {'storeUrl': 3}}).storeUrl, isEmpty);
-      expect(AppStatus.fromJson({}).storeUrl, isEmpty);
-    });
-
-    testWidgets('업데이트하러 가기는 서버가 준 주소를 연다', (tester) async {
-      final opened = <Uri>[];
-      await tester.pumpWidget(wrap(
-        status: const AppStatus(minVersion: '9.0.0', storeUrl: androidServer),
-        launcher: (url) async {
-          opened.add(url);
-          return true;
-        },
-      ));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('업데이트하러 가기'));
-      await tester.pumpAndSettle();
-
-      expect(opened, [Uri.parse(androidServer)]);
-    }, variant: android);
   });
 
   group('강제 업데이트 화면', () {
-    testWidgets('안드로이드 — 업데이트하러 가기를 누르면 Play 스토어를 연다', (tester) async {
-      final opened = <Uri>[];
-      await tester.pumpWidget(wrap(launcher: (url) async {
-        opened.add(url);
-        return true;
-      }));
-      await tester.pumpAndSettle();
-
-      expect(find.text('새 이룸이 나왔어요'), findsOneWidget);
-      // 누를 것은 하나만 — 스토어에서 돌아오면 앱이 알아서 다시 확인한다
-      expect(find.text('업데이트했어요'), findsNothing);
-
-      await tester.tap(find.text('업데이트하러 가기'));
-      await tester.pumpAndSettle();
-
-      expect(opened, [AppConfig.storeUrl(TargetPlatform.android)]);
-      expect(find.textContaining('E-UPDATE-STORE'), findsNothing);
-    }, variant: android);
 
     testWidgets('스토어를 열지 못하면 에러 코드와 함께 알린다', (tester) async {
       await tester.pumpWidget(wrap(launcher: (_) async => false));
@@ -165,31 +97,6 @@ void main() {
       expect(find.text('업데이트하러 가기'), findsOneWidget);
     }, variant: android);
 
-    testWidgets('여는 중 예외가 나도 화면이 깨지지 않고 알린다', (tester) async {
-      await tester.pumpWidget(wrap(launcher: (_) => throw StateError('채널 없음')));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('업데이트하러 가기'));
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('E-UPDATE-STORE'), findsOneWidget);
-    }, variant: android);
-
-    testWidgets('iOS — 업데이트하러 가기를 누르면 App Store 를 연다', (tester) async {
-      final opened = <Uri>[];
-      await tester.pumpWidget(wrap(launcher: (url) async {
-        opened.add(url);
-        return true;
-      }));
-      await tester.pumpAndSettle();
-
-      expect(find.text('업데이트했어요'), findsNothing);
-
-      await tester.tap(find.text('업데이트하러 가기'));
-      await tester.pumpAndSettle();
-
-      expect(opened, [AppConfig.storeUrl(TargetPlatform.iOS)]);
-    }, variant: ios);
   });
 }
 

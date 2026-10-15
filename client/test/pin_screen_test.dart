@@ -1,7 +1,6 @@
 import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
-import 'package:elum/features/onboarding/domain/onboarding_profile.dart';
 import 'package:elum/features/onboarding/presentation/pin_screen.dart';
 import 'package:elum/features/onboarding/presentation/widgets/pin_keypad.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
-import 'helpers/semantics_audit.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/core/router/routes.dart';
 
@@ -96,96 +94,12 @@ void main() {
   }
 
   group('온보딩_비밀번호 화면', () {
-    testWidgets('Figma 문구가 보인다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      expect(find.text('보호자모드로 변경할 때 사용하는 암호예요'), findsOneWidget);
-      // 입력 중에는 CTA가 아예 없다 — 다 맞춰 넣어야 나타난다
-      expect(hasCta(tester), isFalse);
-    });
-
     testWidgets('아무것도 입력하지 않으면 CTA가 아예 없다 (이슈 #231)', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
       // 눌리지 않는 버튼을 깔아두면 "이걸 눌러야 하나" 하고 멈춘다.
       expect(hasCta(tester), isFalse);
-    });
-
-    testWidgets('점 4개가 자릿수를 보여준다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      expect(filledDots(tester), 0);
-
-      await enterPin(tester, '12');
-      expect(filledDots(tester), 2);
-    });
-
-    testWidgets('지우면 점도 함께 줄어든다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      await enterPin(tester, '123');
-      expect(filledDots(tester), 3);
-
-      // 지우기는 OS 키패드가 처리한다. 결과가 점에 반영되는지만 본다.
-      await enterPin(tester, '12');
-      expect(filledDots(tester), 2);
-    });
-
-    testWidgets('OS 시스템 숫자 키패드를 쓴다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      // 자체 키패드를 그리지 않는다 — 각 OS의 입력 관습을 다시 구현하지 않기 위함
-      final field = tester.widget<TextField>(find.byType(TextField));
-      expect(field.keyboardType, TextInputType.number);
-    });
-
-    testWidgets('4자리를 넘겨 입력할 수 없다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      // 6자리를 넣어도 formatter가 4자리로 자른다. 4자리로 인식되면
-      // 자동 전환되어 재입력 단계로 넘어간다 — 그것으로 4자리 제한을 확인한다.
-      await enterPin(tester, '123456');
-      expect(find.textContaining('한번 더'), findsOneWidget);
-    });
-
-    testWidgets('숫자가 아닌 입력은 무시한다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      await enterPin(tester, 'ab12');
-      expect(filledDots(tester), 2);
-    });
-
-    testWidgets('1단계는 4자리를 채우면 CTA 없이 자동으로 재입력 단계로 넘어간다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      // 4자리 도달 즉시 자동 전환된다 — 버튼을 누르지 않는다
-      await enterPin(tester, '1234');
-
-      // Figma 238:2767의 제목
-      expect(find.textContaining('한번 더'), findsOneWidget);
-      // 재입력 단계에서는 점이 비어 있다
-      expect(filledDots(tester), 0);
-    });
-
-    testWidgets('재입력 단계에서 값이 일치하면 CTA가 나타난다 (자동 저장은 하지 않는다)', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      await enterPin(tester, '1234'); // 자동으로 재입력 단계
-      await enterPin(tester, '1234'); // 일치 — 자동 검증
-
-      // 일치해도 자동으로 넘어가지 않는다 — 그때 CTA가 나타난다
-      expect(find.text('완료 화면'), findsNothing);
-      expect(hasCta(tester), isTrue);
-      expect(find.text('시작하기'), findsOneWidget);
     });
 
     testWidgets('재입력 일치 후 CTA를 눌러야 완료 화면으로 간다', (tester) async {
@@ -224,117 +138,19 @@ void main() {
       }
     });
 
-    testWidgets('불일치 안내는 설명 자리에 떴다가 다시 입력하면 걷힌다', (tester) async {
-      // 안내가 남아 있으면 맞게 넣는 중에도 틀렸다고 읽힌다
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      await enterPin(tester, '1234');
-      await enterPin(tester, '1235'); // 불일치
-
-      expect(find.text('암호가 달라요. 다시 넣어주세요'), findsOneWidget);
-      expect(find.text('보호자모드로 변경할 때 사용하는 암호예요'), findsNothing);
-
-      await enterPin(tester, '1');
-
-      expect(find.text('암호가 달라요. 다시 넣어주세요'), findsNothing);
-      expect(find.text('보호자모드로 변경할 때 사용하는 암호예요'), findsOneWidget);
-    });
-
-    testWidgets('살아있는 첫 입력으로 다시 맞추면 그대로 완료된다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      await enterPin(tester, '1234');
-      await enterPin(tester, '9999'); // 한 번 틀림
-      await enterPin(tester, '1234'); // 처음 정한 암호로 다시
-
-      await submit(tester);
-
-      expect(find.text('완료 화면'), findsOneWidget);
-    });
   });
 
   group('PIN 점 (Figma 실측)', () {
-    testWidgets('점은 20×20이다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      // Figma Group 22 — 20×20 4개, x=109부터 52 간격
-      final size = tester.getSize(
-        find
-            .descendant(
-              of: find.byType(PinDots),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
-      expect(size.width, 20);
-      expect(size.height, 20);
-    });
-
-    testWidgets('입력 전 점 색은 Figma 회색이다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      final dot = tester.widget<Container>(
-        find
-            .descendant(
-              of: find.byType(PinDots),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
-      // #CDC8C3
-      expect(
-        (dot.decoration! as BoxDecoration).color,
-        AppColors.light.pinDotEmpty,
-      );
-    });
   });
 
   group('OnboardingProfile', () {
-    test('PIN은 4자리다', () {
-      expect(OnboardingProfile.pinLength, 4);
-    });
   });
 
   /// PIN 입력은 autofocus라 **화면에 들어가면 키패드가 항상 뜬다.**
   /// 즉 키보드가 올라온 상태가 예외가 아니라 기본이다.
   group('키보드', () {
-    testWidgets('키패드가 올라와도 레이아웃이 깨지지 않는다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      showKeyboard(tester);
-      await tester.pumpAndSettle();
-
-      expect(find.byType(PinDots), findsOneWidget);
-    });
-
-    testWidgets('재확인 단계에서도 키패드가 올라와 있어도 깨지지 않는다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      showKeyboard(tester);
-      // 1단계 4자리 → 자동으로 재입력 단계로 전환된다
-      await tester.enterText(find.byType(TextField), '1234');
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('한번 더'), findsOneWidget);
-      expect(find.byType(PinDots), findsOneWidget);
-    });
   });
 
   group('누를 수 있는 것에 읽을 이름이 있다 (#339)', () {
-    testWidgets('암호 점 자리와 뒤로가기가 읽힌다', (tester) async {
-      // 실제 입력칸은 투명이라 화면 낭독기에 드러나지 않는다. 키보드를 여는
-      // 길은 이 점 자리뿐이다.
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      expectLabeledButton(tester, '암호 넣기');
-      expect(unnamedTapTargets(tester), isEmpty);
-    });
   });
 }

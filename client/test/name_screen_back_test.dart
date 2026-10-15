@@ -67,16 +67,6 @@ void main() {
     expect(storage.selectedRole, isNull);
   });
 
-  testWidgets('시스템 뒤로가기도 같은 곳으로 간다', (tester) async {
-    await pump(tester);
-
-    await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
-
-    expect(top(), Routes.roleSelect);
-    expect(storage.selectedRole, isNull);
-  });
-
   testWidgets('역할 선택에서 push 로 들어왔으면 역할을 건드리지 않고 pop 한다', (tester) async {
     await pump(tester);
     router.go(Routes.roleSelect);

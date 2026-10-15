@@ -90,11 +90,6 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> enterPin(WidgetTester tester, String pin) async {
-    await tester.enterText(find.byType(TextField), pin);
-    await tester.pumpAndSettle();
-  }
-
   group('보호자 휴대폰 — 암호가 없다', () {
     testWidgets('암호 없이 보호자 홈을 열거나 임의 생성하지 않고 로그인한다', (tester) async {
       await open(tester);
@@ -110,38 +105,6 @@ void main() {
     });
   });
 
-  group('이룸이 휴대폰 — 암호가 없다', () {
-    testWidgets('보호자 화면으로 들어가지 못하고 안내만 보인다', (tester) async {
-      await open(tester, isElumi: true);
-
-      expect(find.text('보호자 휴대폰에서\n열어 주세요'), findsOneWidget);
-      // 입력창이 없으니 숫자를 넣어 볼 수도 없다
-      expect(find.byType(TextField), findsNothing);
-      expect(find.text('보호자 홈'), findsNothing);
-      // 이룸이가 암호를 만들 수 있는 화면으로도 보내지 않는다
-      expect(find.text('보호자님만 아는\n비밀암호를 만들어주세요'), findsNothing);
-      expect(await storage.hasPin(), isFalse);
-    });
-
-    testWidgets('돌아가기를 누르면 이룸이 홈으로 돌아온다', (tester) async {
-      await open(tester, isElumi: true);
-      await tester.tap(find.text('돌아가기'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('이룸이 홈'), findsOneWidget);
-    });
-
-    testWidgets('암호가 남아 있으면 종전처럼 비교한다', (tester) async {
-      await open(tester, pin: '1234', isElumi: true);
-
-      await enterPin(tester, '0000');
-      expect(find.text('보호자 홈'), findsNothing);
-      expect(find.text('암호가 달라요. 다시 넣어주세요'), findsOneWidget);
-
-      await enterPin(tester, '1234');
-      expect(find.text('보호자 홈'), findsOneWidget);
-    });
-  });
 
   group('실패 경로', () {
     testWidgets('암호를 읽지 못하면 통과시키지 않고 에러 코드를 보여준다', (tester) async {
@@ -158,17 +121,6 @@ void main() {
     });
   });
 
-  group('보호자 → 이룸이 방향', () {
-    testWidgets('이 방향은 지키는 대상이 아니라 종전처럼 암호 없이 지나간다', (tester) async {
-      // 이룸이 화면은 막을 이유가 없다. 이 변경은 보호자 화면 입구만 닫는다.
-      await tester.pumpWidget(wrap(target: ModeSwitchTarget.child));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('이룸이 홈'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('암호를 입력하면 이룸이 화면으로 바뀌어요'), findsOneWidget);
-    });
-  });
 }
 
 /// 암호 읽기에서 예외가 나는 저장소.

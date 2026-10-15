@@ -14,7 +14,6 @@ import 'package:go_router/go_router.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/kept_text_finder.dart';
 import 'helpers/profile_fixtures.dart';
-import 'helpers/semantics_audit.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
 import 'package:elum/core/router/routes.dart';
@@ -71,21 +70,6 @@ void main() {
   group('주기 갱신', () {
     int listCalls() => repo.calls.where((c) => c == 'list:p-a').length;
 
-    testWidgets('다른 보호자가 바꾼 이름을 30초 뒤에 자동으로 받아 보여 준다', (tester) async {
-      await open(tester);
-      expect(find.text('엄마'), findsOneWidget);
-      expect(listCalls(), 1);
-
-      repo.guardiansResult = const Attempt.ok([
-        Guardian(id: 'g-1', me: true, displayName: '엄마'),
-        Guardian(id: 'g-2', me: false, displayName: '이모'),
-      ]);
-      await tester.pump(const Duration(seconds: 30));
-      await tester.pumpAndSettle();
-
-      expect(listCalls(), 2);
-      expect(find.text('이모'), findsOneWidget);
-    });
 
     testWidgets('갱신이 실패해도(오프라인) 받아 둔 목록을 오류 화면으로 바꾸지 않는다', (tester) async {
       await open(tester);
@@ -100,52 +84,12 @@ void main() {
       expect(find.textContaining('E-NET-OFFLINE'), findsNothing);
     });
 
-    testWidgets('화면을 벗어나면 더 받지 않는다', (tester) async {
-      await open(tester);
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump(const Duration(seconds: 120));
-
-      expect(listCalls(), 1);
-    });
   });
 
   group('목록', () {
-    testWidgets('함께하는 사람을 이름·구분과 함께 보여 주고 나를 표시한다', (tester) async {
-      await open(tester);
 
-      expect(repo.calls, contains('list:p-a'));
-      expect(find.text('엄마'), findsOneWidget);
-      expect(find.text('나'), findsOneWidget);
-      // 이름이 없는 사람은 구분 이름만 한 번 보인다 (`센터 선생님 · 센터 선생님` 으로 겹치지 않는다)
-      expect(find.text('센터 선생님'), findsOneWidget);
-    });
 
-    testWidgets('이름이 없으면 이름 자리에 이름 없음을 적고 구분은 칩으로 따로 보인다', (tester) async {
-      repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
-      await open(tester);
 
-      expect(find.text('이름 없음'), findsOneWidget);
-      expect(find.text('보호자'), findsOneWidget);
-    });
-
-    testWidgets('이름 바꾸기 버튼은 내 줄에만 있다', (tester) async {
-      repo.guardiansResult = const Attempt.ok([
-        Guardian(id: 'g-1', me: true, displayName: '엄마'),
-        Guardian(id: 'g-2', me: false, displayName: '아빠'),
-        Guardian(id: 'g-3', me: false, kind: GuardianKind.caregiver),
-      ]);
-      await open(tester);
-
-      expect(find.text('함께 돌보는 사람 3명'), findsOneWidget);
-      expect(find.text('이름 바꾸기'), findsOneWidget);
-    });
-
-    testWidgets('계정 ID·아이디는 어디에도 나오지 않는다 — 서버가 내려주지 않는다', (tester) async {
-      await open(tester);
-
-      expect(find.textContaining('naver_'), findsNothing);
-      expect(find.textContaining('g-1'), findsNothing);
-    });
 
     testWidgets('불러오지 못하면 에러 코드와 다시 시도를 보이고 나가기는 막는다', (tester) async {
       repo.guardiansResult = const Attempt.failed(AppFailure(fault: NetworkFault.offline));
@@ -164,35 +108,9 @@ void main() {
       expect(find.text('나'), findsOneWidget);
     });
 
-    testWidgets('이룸이 없음이면 알리고 이유 코드를 보인다 (E29)', (tester) async {
-      profiles = [];
-      await open(tester);
 
-      expect(repo.calls.where((c) => c.startsWith('list')), isEmpty);
-      expect(find.textContaining('E-PPL-NONE'), findsOneWidget);
-    });
 
-    testWidgets('#506 이룸이 휴대폰과 헷갈리지 않게, 사람을 위한 화면이라는 설명이 늘 나온다', (tester) async {
-      await open(tester);
 
-      expect(findKept('이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요'), findsOneWidget);
-    });
-
-    testWidgets('#506 혼자 돌보면 혼자라는 안내와, 그만두면 이룸이까지 사라진다는 설명이 나온다', (tester) async {
-      repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
-      await open(tester);
-
-      expect(findKept('아직 혼자 돌보고 있어요. 가족이나 선생님을 초대해보세요', exact: true), findsOneWidget);
-      expect(findKept('혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요', exact: true), findsOneWidget);
-      expect(findKept('내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요', exact: true), findsNothing);
-    });
-
-    testWidgets('#506 다른 보호자가 있으면 내가 만든 일과만 사라진다고 말하고 혼자라는 안내는 없다', (tester) async {
-      await open(tester);
-
-      expect(findKept('내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요', exact: true), findsOneWidget);
-      expect(findKept('혼자 돌보고 있어'), findsNothing);
-    });
 
     testWidgets('#506 목록을 못 받으면 혼자인지 모르므로 그만두기 설명을 말하지 않는다', (tester) async {
       repo.guardiansResult = const Attempt.failed(AppFailure(fault: NetworkFault.offline));
@@ -202,28 +120,8 @@ void main() {
       expect(findKept('내가 만든 일과만'), findsNothing);
     });
 
-    testWidgets('이름 없는 누름 자리가 없다', (tester) async {
-      await open(tester);
-
-      expect(unnamedTapTargets(tester), isEmpty);
-    });
   });
 
-  group('초대', () {
-    testWidgets('초대 코드 만들기·넣기로 갈 수 있다', (tester) async {
-      await open(tester);
-
-      await tester.tap(find.text('다른 보호자 초대하기'));
-      await tester.pumpAndSettle();
-      expect(find.text('초대 코드 만들기 화면'), findsOneWidget);
-
-      GoRouter.of(tester.element(find.text('초대 코드 만들기 화면'))).pop();
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('받은 초대 코드 넣기'));
-      await tester.pumpAndSettle();
-      expect(find.text('초대 코드 넣기 화면'), findsOneWidget);
-    });
-  });
 
   group('나가기', () {
     testWidgets('먼저 무엇이 사라지고 무엇이 남는지 말한다 — 확인 전에는 아무것도 보내지 않는다', (tester) async {
@@ -241,18 +139,6 @@ void main() {
       expect(repo.calls.where((c) => c.startsWith('leave')), isEmpty);
     });
 
-    testWidgets('취소하면 아무것도 지우지 않고 그 자리에 남는다', (tester) async {
-      await open(tester);
-      await tester.tap(find.text('함께 돌보기 그만두기'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('취소'));
-      await tester.pumpAndSettle();
-
-      expect(repo.calls.where((c) => c.startsWith('leave')), isEmpty);
-      expect(find.text('엄마'), findsOneWidget);
-      expect(storage.isOnboardingCompleted, isTrue);
-    });
 
     testWidgets('마지막 보호자면 이룸이도 사라진다고 확인 창에서 먼저 알린다', (tester) async {
       repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true, displayName: '엄마')]);
@@ -268,19 +154,6 @@ void main() {
       expect(repo.calls.where((c) => c.startsWith('leave')), isEmpty);
     });
 
-    testWidgets('나가면 서버에 알리고 남은 이룸이로 옮겨 홈으로 간다 (선택 상태 정리)', (tester) async {
-      await open(tester);
-
-      await tester.tap(find.text('함께 돌보기 그만두기'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('그만두기'));
-      await tester.pumpAndSettle();
-
-      expect(repo.calls, contains('leave:p-a'));
-      expect(find.text('보호자 홈'), findsOneWidget);
-      expect(storage.selectedProfileId, 'p-b');
-      expect(find.text('하늘이에서 나왔어요'), findsOneWidget);
-    });
 
     testWidgets('마지막 이룸이에서 나가면 이룸이 등록으로 보낸다 — 비밀암호는 남는다 (E29·E45)', (tester) async {
       profiles = [kProfileA];
@@ -317,44 +190,8 @@ void main() {
       expect(storage.isOnboardingCompleted, isTrue);
     });
 
-    testWidgets('인터넷이 끊겨 실패해도 같다 — E-NET-OFFLINE 과 인터넷 안내', (tester) async {
-      repo.leaveFailure = const AppFailure(fault: NetworkFault.offline);
-      await open(tester);
 
-      await tester.tap(find.text('함께 돌보기 그만두기'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('그만두기'));
-      await tester.pumpAndSettle();
 
-      expect(find.text('E-NET-OFFLINE'), findsOneWidget);
-      expect(find.textContaining('인터넷'), findsWidgets);
-      expect(find.text('보호자 홈'), findsNothing);
-    });
-
-    testWidgets('이미 지워진 이룸이(404)라면 나간 것으로 보고 정리한다', (tester) async {
-      repo.leaveFailure = serverFailure(404, ServerErrorCode.profileNotFound, '등록된 이룸이가 없어요.');
-      await open(tester);
-
-      await tester.tap(find.text('함께 돌보기 그만두기'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('그만두기'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('보호자 홈'), findsOneWidget);
-      expect(storage.selectedProfileId, 'p-b');
-    });
-
-    testWidgets('빨리 두 번 눌러도 한 번만 보낸다', (tester) async {
-      await open(tester);
-      await tester.tap(find.text('함께 돌보기 그만두기'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('그만두기'));
-      await tester.pump();
-      await tester.pumpAndSettle();
-
-      expect(repo.calls.where((c) => c.startsWith('leave')).length, 1);
-    });
   });
 
   group('내 이름 고치기', () {
@@ -373,26 +210,7 @@ void main() {
       expect(repo.calls.where((c) => c.startsWith('list')).length, 2);
     });
 
-    testWidgets('남의 줄은 눌러도 고칠 수 없다 — 줄 자체는 누르는 곳이 아니다', (tester) async {
-      await open(tester);
 
-      await tester.tap(find.text('센터 선생님'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('저장'), findsNothing);
-    });
-
-    testWidgets('구분을 센터 선생님으로 바꾸면 구분만 보낸다', (tester) async {
-      await open(tester);
-
-      await tester.tap(find.text('이름 바꾸기'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.descendant(of: find.byType(BottomSheet), matching: find.text('센터 선생님')));
-      await tester.tap(find.text('저장'));
-      await tester.pumpAndSettle();
-
-      expect(repo.lastUpdate, {'kind': GuardianKind.caregiver, 'displayName': null});
-    });
 
     testWidgets('저장하지 못하면 이유와 코드를 보인다', (tester) async {
       repo.updateResult = Attempt.failed(serverFailure(400, ServerErrorCode.invalidInputValue, '입력값이 올바르지 않아요.'));

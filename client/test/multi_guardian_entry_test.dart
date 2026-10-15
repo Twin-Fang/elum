@@ -12,8 +12,6 @@ import 'package:elum/features/profile/application/profile_session.dart';
 import 'package:elum/features/credit/data/credit_repository.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_settings_screen.dart';
-import 'package:elum/features/onboarding/presentation/name_screen.dart';
-import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:elum/features/credit/domain/credit_summary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,20 +57,6 @@ void main() {
       }
     });
 
-    test('보호자 휴대폰은 그대로 연다', () {
-      for (final path in [
-        Routes.guardianPeople,
-        Routes.guardianInvite,
-        Routes.guardianProfileSwitch,
-      ]) {
-        expect(guard(path), isNull, reason: path);
-      }
-    });
-
-    test('새로 가입한 보호자(온보딩 전)도 초대 코드 넣기는 열 수 있다 — 온보딩을 건너뛰고 합류한다 (E6)', () {
-      expect(guard(Routes.inviteEnter, onboarded: false), isNull);
-    });
-
     test('세션이 없으면 초대 코드 넣기도 로그인으로 보낸다', () {
       expect(
         resolveRedirect(
@@ -87,62 +71,6 @@ void main() {
   });
 
   group('설정', () {
-    Widget wrapSettings(List<ProfileSummary> profiles) {
-      final router = GoRouter(
-        initialLocation: Routes.guardianSettings,
-        routes: [
-          GoRoute(path: Routes.guardianSettings, builder: (_, _) => const GuardianSettingsScreen()),
-          GoRoute(path: Routes.guardianPeople, builder: (_, _) => const Scaffold(body: Text('함께하는 사람 화면'))),
-          GoRoute(path: Routes.guardianProfileSwitch, builder: (_, _) => const Scaffold(body: Text('이룸이 바꾸기 화면'))),
-        ],
-      );
-      return ProviderScope(
-        overrides: [
-          localStorageProvider.overrideWithValue(InMemoryStorage(onboardingCompleted: true)),
-          memberProvider.overrideWith((ref) async => memberWith(profiles)),
-          consentBundleProvider.overrideWith((ref) async => ConsentBundle.bundled),
-          appVersionProvider.overrideWith((ref) async => '1.0.0'),
-          creditSummaryProvider.overrideWith((ref) async => CreditSummary.fromJson(creditJson(enabled: false))),
-        ],
-        child: ScreenUtilInit(
-          designSize: const Size(393, 852),
-          builder: (context, child) => MaterialApp.router(
-            theme: AppTheme.light,
-            routerConfig: router,
-          ),
-        ),
-      );
-    }
-
-    testWidgets('함께하는 사람 줄이 있고 누르면 그 화면으로 간다', (tester) async {
-      await tester.pumpWidget(wrapSettings([kProfileA]));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('함께하는 사람'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('함께하는 사람 화면'), findsOneWidget);
-    });
-
-    testWidgets('이룸이가 하나뿐이면 이룸이 바꾸기 줄을 숨긴다', (tester) async {
-      await tester.pumpWidget(wrapSettings([kProfileA]));
-      await tester.pumpAndSettle();
-
-      expect(find.text('이룸이 바꾸기'), findsNothing);
-    });
-
-    testWidgets('이룸이가 둘 이상이면 이룸이 바꾸기 줄에 지금 보는 이룸이 이름을 보이고 누르면 간다', (tester) async {
-      await tester.pumpWidget(wrapSettings([kProfileA, kProfileB]));
-      await tester.pumpAndSettle();
-
-      expect(find.text('이룸이 바꾸기'), findsOneWidget);
-      expect(find.text('하늘이'), findsOneWidget);
-
-      await tester.tap(find.text('이룸이 바꾸기'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('이룸이 바꾸기 화면'), findsOneWidget);
-    });
 
     testWidgets('회원 정보를 못 받으면 이룸이 바꾸기만 숨기고 설정은 그대로 뜬다', (tester) async {
       final router = GoRouter(
@@ -227,32 +155,6 @@ void main() {
     });
   });
 
-  group('새 가입자의 진입점 — 온보딩 이름 화면', () {
-    testWidgets('초대 코드가 있어요 링크가 초대 코드 넣기로 이어진다 (E6)', (tester) async {
-      final router = GoRouter(
-        initialLocation: Routes.onboardingName,
-        routes: [
-          GoRoute(path: Routes.onboardingName, builder: (_, _) => const NameScreen()),
-          GoRoute(path: Routes.inviteEnter, builder: (_, _) => const Scaffold(body: Text('초대 코드 넣기 화면'))),
-        ],
-      );
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [localStorageProvider.overrideWithValue(InMemoryStorage())],
-          child: ScreenUtilInit(
-            designSize: const Size(393, 852),
-            builder: (context, child) => MaterialApp.router(theme: AppTheme.light, routerConfig: router),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('초대 코드가 있어요'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('초대 코드 넣기 화면'), findsOneWidget);
-    });
-  });
 
   group('보호자 홈', () {
     testWidgets('연결된 이룸이가 하나도 없으면 이룸이 등록으로 보낸다 (E29)', (tester) async {

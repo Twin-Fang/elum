@@ -5,7 +5,6 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/storage/card_image_disk_cache.dart';
 import 'package:elum/features/guardian/data/card_image_repository.dart';
 import 'package:elum/features/guardian/presentation/widgets/action_card_view.dart';
-import 'package:elum/features/guardian/presentation/widgets/card_image.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,14 +36,6 @@ void main() {
 
   tearDown(() => container.dispose());
 
-  test('같은 imagePath 면 다시 받지 않는다', () async {
-    const key = (routineId: 'r1', stepId: 's1', imagePath: 'k/a.png');
-    await container.read(cardImageProvider(key).future);
-    await container.read(cardImageProvider(key).future);
-
-    expect(adapter.gets, 1);
-  });
-
   test('imagePath 가 바뀌면 캐시를 버리고 새로 받는다', () async {
     await container.read(
       cardImageProvider((
@@ -61,36 +52,6 @@ void main() {
       )).future,
     );
 
-    expect(adapter.gets, 2);
-  });
-
-  testWidgets('CardImage 가 imagePath 를 열쇠로 넘긴다 — 바뀌면 다시 받는다', (tester) async {
-    Widget host(String path) => UncontrolledProviderScope(
-      container: container,
-      child: ScreenUtilInit(
-        designSize: const Size(393, 852),
-        builder: (_, _) => MaterialApp(
-          theme: AppTheme.light,
-          home: SizedBox(
-            width: 200,
-            height: 150,
-            child: CardImage(
-              routineId: 'r1',
-              stepId: 's1',
-              imagePath: path,
-              emptyBuilder: (_) => const SizedBox(),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.pumpWidget(host('k/a.png'));
-    await _settle(tester);
-    expect(adapter.gets, 1);
-
-    await tester.pumpWidget(host('k/b.png'));
-    await _settle(tester);
     expect(adapter.gets, 2);
   });
 

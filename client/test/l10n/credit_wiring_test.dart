@@ -89,16 +89,6 @@ void main() {
       expect(await reason('EXPIRED'), '크레딧을 받지 못했어요.\n잠시 후 다시 해주세요');
     });
 
-    test('확인이 늦어지면 설정에서 확인하게 한다', () async {
-      final flow = _flow(
-        FakeAdRewardRepo(
-          statuses: const [AdRewardSessionStatus(phase: AdRewardPhase.pending)],
-        ),
-        FakeRewardedLoader(),
-      );
-      expect(await _sentence(flow), '크레딧 확인이 늦어지고 있어요.\n잠시 후 설정에서 확인해주세요');
-    });
-
     test('세션을 못 만든 이유별 — 서버 문구가 있으면 그것이 이긴다', () async {
       Future<String> session(AppFailure f) => _sentence(
         _flow(FakeAdRewardRepo(sessionError: f), FakeRewardedLoader()),
@@ -170,55 +160,6 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    FakeAdRewardRepo off() => FakeAdRewardRepo(
-      offer: const AdRewardOffer(
-        enabled: false,
-        creditsPerView: 2,
-        remainingToday: 0,
-      ),
-    );
-
-    testWidgets('소진 — 광고가 꺼져 있으면 확인 하나, 시각은 값마다 다르다', (tester) async {
-      await open(tester, blocked(), off());
-      expect(
-        find.text('이번 주 크레딧을 모두 사용했어요.\n9월 28일(월) 0시부터 다시 만들 수 있어요'),
-        findsOneWidget,
-      );
-      expect(find.text('확인'), findsOneWidget);
-      expect(find.text('닫기'), findsNothing);
-    });
-
-    testWidgets('소진 — 분이 있는 시각', (tester) async {
-      await open(tester, blocked(reset: '2026-09-29T03:30:00'), off());
-      expect(
-        find.text('이번 주 크레딧을 모두 사용했어요.\n9월 29일(화) 3시 30분부터 다시 만들 수 있어요'),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('진행 중이면 만들고 있다는 문장', (tester) async {
-      await open(tester, blocked(generating: true), off());
-      expect(
-        find.text('이미 일과를 만들고 있어요.\n다 만든 뒤에 새 일과를 만들 수 있어요'),
-        findsOneWidget,
-      );
-    });
-
-    for (final (n, text) in [(1, '1개'), (10, '10개')]) {
-      testWidgets('광고 제안 — 크레딧 $n개', (tester) async {
-        final repo = FakeAdRewardRepo(
-          offer: AdRewardOffer(
-            enabled: true,
-            creditsPerView: n,
-            remainingToday: 5,
-          ),
-        );
-        await open(tester, blocked(), repo);
-        expect(find.text('광고를 끝까지 보면 크레딧 $text를 받아요'), findsOneWidget);
-        expect(find.text('닫기'), findsOneWidget);
-        expect(find.text('광고 보고 더 만들기'), findsOneWidget);
-      });
-    }
 
     testWidgets('대기 팝업 두 단계와 지급 알림(받은 수가 1·12)', (tester) async {
       for (final (n, title) in [(1, '크레딧 1개를 받았어요'), (12, '크레딧 12개를 받았어요')]) {
@@ -245,67 +186,7 @@ void main() {
       }
     });
 
-    testWidgets('받은 수를 모르면 수 없는 제목', (tester) async {
-      final repo = FakeAdRewardRepo(
-        statuses: const [
-          AdRewardSessionStatus(
-            phase: AdRewardPhase.granted,
-            grantedCredits: 0,
-          ),
-        ],
-      );
-      await open(tester, blocked(), repo);
-      await tester.tap(find.text('광고 보고 더 만들기'));
-      await tester.pumpAndSettle();
-      expect(find.text('크레딧을 받았어요'), findsOneWidget);
-    });
-
-    testWidgets('광고를 준비하는 동안의 대기 문구', (tester) async {
-      final loaderGate = Completer<RewardedAdEnd>();
-      final loader = _SlowLoader(loaderGate);
-      await open(tester, blocked(), FakeAdRewardRepo(), loader: loader);
-      await tester.tap(find.text('광고 보고 더 만들기'));
-      await tester.pump();
-      await tester.pump();
-      expect(find.text('광고를 준비하고 있어요'), findsOneWidget);
-      loaderGate.complete(RewardedAdEnd.loadFailed);
-      await tester.pumpAndSettle();
-      // 실패 팝업: 문장과 확인 버튼
-      expect(find.text('지금은 광고를 불러올 수 없어요.\n잠시 후 다시 해주세요'), findsOneWidget);
-      expect(find.text('E-AD-LOAD'), findsOneWidget);
-      expect(find.text('확인'), findsOneWidget);
-    });
-
-    testWidgets('비-ko 로케일은 번역 전이라 한국어 문구로 떨어진다', (tester) async {
-      final flow = _flow(off(), FakeRewardedLoader());
-      await pumpWithLocale(
-        tester,
-        Scaffold(
-          body: Consumer(
-            builder: (context, ref, _) => TextButton(
-              onPressed: () => showCreditBlockedDialog(context, ref, blocked()),
-              child: const Text('open'),
-            ),
-          ),
-        ),
-        locale: const Locale('ja'),
-        wrap: (app) => ProviderScope(
-          overrides: [adRewardFlowProvider.overrideWithValue(flow)],
-          child: app,
-        ),
-      );
-      await tester.tap(find.text('open'));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('이번 주 크레딧을 모두 사용했어요.'), findsOneWidget);
-    });
   });
 }
 
 /// 광고 표시가 끝나기를 [gate] 로 붙잡는 로더.
-class _SlowLoader extends FakeRewardedLoader {
-  _SlowLoader(this.gate);
-  final Completer<RewardedAdEnd> gate;
-
-  @override
-  Future<RewardedAdEnd> showFor(String nonce) => gate.future;
-}

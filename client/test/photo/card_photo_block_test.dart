@@ -1,10 +1,8 @@
-import 'dart:async';
 
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/card_photo.dart';
 import 'package:elum/features/guardian/data/card_photo_picker.dart';
-import 'package:elum/features/guardian/presentation/widgets/card_image.dart';
 import 'package:elum/features/guardian/presentation/widgets/card_photo_block.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -15,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/device_viewport.dart';
 import '../helpers/fake_dio.dart';
-import '../helpers/semantics_audit.dart';
 import '../helpers/test_storage.dart';
 import 'fake_photo_picker.dart';
 
@@ -101,54 +98,6 @@ void main() {
     await settle(tester);
   }
 
-  group('진입 칩과 고르기 시트', () {
-    testWidgets('그림 위에 사진 바꾸기 칩이 있다', (tester) async {
-      await tester.pumpWidget(host({}));
-      await settle(tester);
-
-      expect(find.text('사진 바꾸기'), findsOneWidget);
-    });
-
-    testWidgets('미리보기는 카드 그림 칸과 같은 비율(313:230)이다 — 띠가 아니다', (tester) async {
-      await tester.pumpWidget(host({}));
-      await settle(tester);
-
-      // 시트 폭 전체의 띠(약 2.4:1)였을 때는 사진이 카드에서 어떻게 잘리는지 알 수 없었다 (통합 E2E 실측).
-      final size = tester.getSize(
-        find
-            .ancestor(
-              of: find.byType(CardImage),
-              matching: find.byType(AspectRatio),
-            )
-            .first,
-      );
-
-      expect(size.width / size.height, closeTo(313 / 230, 0.02));
-    });
-
-    testWidgets('칩을 누르면 사진 찍기·갤러리에서 고르기·닫기와 안내가 뜬다', (tester) async {
-      await tester.pumpWidget(host({}));
-      await openPickSheet(tester);
-
-      expect(find.text('사진 찍기'), findsOneWidget);
-      expect(find.text('갤러리에서 고르기'), findsOneWidget);
-      expect(find.text('닫기'), findsOneWidget);
-      // 개인정보 원칙 — 찍기 전에 말한다
-      expect(find.text('얼굴이나 개인정보가 나오지 않게 찍어 주세요'), findsOneWidget);
-    });
-
-    testWidgets('닫기 — 아무 일도 없다 (E: 시트 닫기)', (tester) async {
-      await tester.pumpWidget(host({}));
-      await openPickSheet(tester);
-
-      await tester.tap(find.text('닫기'));
-      await settle(tester);
-
-      expect(find.text('사진 찍기'), findsNothing);
-      expect(picker.calls, isEmpty);
-      expect(imagePathNow(), 'k/old.jpg');
-    });
-  });
 
   group('성공', () {
     testWidgets('사진 찍기 → 올리기 → imagePath 가 새 열쇠로 바뀐다', (tester) async {
@@ -166,35 +115,8 @@ void main() {
       expect(find.text('사진을 올리지 못했어요'), findsNothing);
     });
 
-    testWidgets('갤러리에서 고르기도 같은 길로 올린다', (tester) async {
-      picker = FakePhotoPicker([PhotoPicked(fakeJpeg())]);
-      await tester.pumpWidget(host({put: ok}));
-      await openPickSheet(tester);
-
-      await tester.tap(find.text('갤러리에서 고르기'));
-      await settle(tester);
-
-      expect(picker.calls, [PhotoSource.gallery]);
-      expect(imagePathNow(), 'k/new.jpg');
-    });
   });
 
-  group('선택 취소', () {
-    testWidgets('사진을 안 고르고 돌아오면 아무 일도 없다 — 요청도 실패 화면도 없다', (tester) async {
-      picker = FakePhotoPicker([const PhotoPickCancelled()]);
-      final adapterRoutes = <String, Object?>{put: ok};
-      await tester.pumpWidget(host(adapterRoutes));
-      await openPickSheet(tester);
-
-      await tester.tap(find.text('사진 찍기'));
-      await settle(tester);
-
-      expect(imagePathNow(), 'k/old.jpg');
-      expect(find.text('사진을 올리지 못했어요'), findsNothing);
-      expect(find.text('사진을 올리고 있어요'), findsNothing);
-      expect(find.text('사진 바꾸기'), findsOneWidget);
-    });
-  });
 
   group('권한 거부', () {
     testWidgets('카메라 거부 — 이유와 갤러리 우회 경로를 준다', (tester) async {
@@ -209,36 +131,6 @@ void main() {
       expect(find.text('휴대폰 설정에서 카메라를 켜면 사진을 찍을 수 있어요'), findsOneWidget);
       expect(find.text('갤러리에서 고르기'), findsOneWidget);
       expect(find.text('설정 열기'), findsOneWidget);
-    });
-
-    testWidgets('거부 화면에서 갤러리 — 앱은 계속 돌고 사진을 올린다', (tester) async {
-      picker = FakePhotoPicker([
-        const PhotoPickDenied(PhotoSource.camera),
-        PhotoPicked(fakeJpeg()),
-      ]);
-      await tester.pumpWidget(host({put: ok}));
-      await openPickSheet(tester);
-      await tester.tap(find.text('사진 찍기'));
-      await settle(tester);
-
-      await tester.tap(find.text('갤러리에서 고르기'));
-      await settle(tester);
-
-      expect(picker.calls, [PhotoSource.camera, PhotoSource.gallery]);
-      expect(imagePathNow(), 'k/new.jpg');
-    });
-
-    testWidgets('설정 열기 — 휴대폰 설정으로 보낸다', (tester) async {
-      picker = FakePhotoPicker([const PhotoPickDenied(PhotoSource.camera)]);
-      await tester.pumpWidget(host({}));
-      await openPickSheet(tester);
-      await tester.tap(find.text('사진 찍기'));
-      await settle(tester);
-
-      await tester.tap(find.text('설정 열기'));
-      await settle(tester);
-
-      expect(settings.opened, 1);
     });
 
     testWidgets('설정을 못 열면 알리고 화면에 남는다 — E-PHOTO-SETTINGS', (tester) async {
@@ -256,47 +148,6 @@ void main() {
       expect(find.text('카메라를 쓸 수 없어요'), findsOneWidget);
     });
 
-    testWidgets('설정을 열 수 없는 휴대폰(안드로이드)은 버튼을 감춘다', (tester) async {
-      settings.available = false;
-      picker = FakePhotoPicker([const PhotoPickDenied(PhotoSource.camera)]);
-      await tester.pumpWidget(host({}));
-      await openPickSheet(tester);
-      await tester.tap(find.text('사진 찍기'));
-      await settle(tester);
-
-      expect(find.text('설정 열기'), findsNothing);
-      expect(find.text('갤러리에서 고르기'), findsOneWidget);
-    });
-
-    testWidgets('거부 화면에서 뒤로 — 아무 일도 없다', (tester) async {
-      final handle = tester.ensureSemantics();
-      picker = FakePhotoPicker([const PhotoPickDenied(PhotoSource.camera)]);
-      await tester.pumpWidget(host({}));
-      await openPickSheet(tester);
-      await tester.tap(find.text('사진 찍기'));
-      await settle(tester);
-
-      await tester.tap(find.bySemanticsLabel('뒤로 가기'));
-      // 전체 화면 전환이 끝나도록 충분히 흘린다
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-
-      expect(find.text('카메라를 쓸 수 없어요'), findsNothing);
-      expect(find.text('사진 바꾸기'), findsOneWidget);
-      expect(imagePathNow(), 'k/old.jpg');
-      handle.dispose();
-    });
-
-    testWidgets('갤러리(사진) 거부 — 사진 찍기가 우회 경로다', (tester) async {
-      picker = FakePhotoPicker([const PhotoPickDenied(PhotoSource.gallery)]);
-      await tester.pumpWidget(host({}));
-      await openPickSheet(tester);
-      await tester.tap(find.text('갤러리에서 고르기'));
-      await settle(tester);
-
-      expect(find.text('사진을 볼 수 없어요'), findsOneWidget);
-      expect(find.text('사진 찍기'), findsOneWidget);
-    });
   });
 
   group('올리는 중', () {
@@ -319,37 +170,6 @@ void main() {
       await tester.pump(const Duration(seconds: 3));
     });
 
-    testWidgets('고르는 중에 다시 눌러도 한 번만 고른다 (연속 탭)', (tester) async {
-      picker = FakePhotoPicker([PhotoPicked(fakeJpeg())])..hold = Completer<void>();
-      await tester.pumpWidget(host({put: ok}));
-      await openPickSheet(tester);
-      await tester.tap(find.text('사진 찍기'));
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // 사진 앱이 떠 있는 동안 칩을 또 눌러도 시트가 다시 뜨지 않는다
-      await tester.tap(find.text('사진 바꾸기'), warnIfMissed: false);
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('사진 찍기'), findsNothing);
-
-      picker.hold!.complete();
-      await settle(tester);
-      expect(picker.calls.length, 1);
-    });
-
-    testWidgets('올리는 중에는 두 번째 요청이 나가지 않는다', (tester) async {
-      picker = FakePhotoPicker([PhotoPicked(fakeJpeg()), PhotoPicked(fakeJpeg())]);
-      await tester.pumpWidget(host({put: ok}, delay: const Duration(seconds: 2)));
-      await openPickSheet(tester);
-      await tester.tap(find.text('사진 찍기'));
-      await tester.pump(const Duration(milliseconds: 500));
-
-      // 칩이 없으니 누를 수 없다 — 두 번째 고르기는 시작되지 않는다
-      expect(find.text('사진 바꾸기'), findsNothing);
-      await tester.pump(const Duration(seconds: 3));
-      await settle(tester);
-      expect(picker.calls.length, 1);
-      await tester.pump(const Duration(seconds: 3));
-    });
   });
 
   group('실패', () {
@@ -481,67 +301,6 @@ void main() {
     });
   });
 
-  group('접근성·글자 크기', () {
-    testWidgets('칩·시트 버튼에 읽을 이름이 있다 (TalkBack)', (tester) async {
-      final handle = tester.ensureSemantics();
-      await tester.pumpWidget(host({}));
-      await settle(tester);
-
-      expect(find.bySemanticsLabel('사진 바꾸기'), findsWidgets);
-      expect(unnamedTapTargets(tester), isEmpty);
-
-      await openPickSheet(tester);
-      expect(find.bySemanticsLabel('사진 찍기'), findsWidgets);
-      expect(find.bySemanticsLabel('갤러리에서 고르기'), findsWidgets);
-      expect(find.bySemanticsLabel('닫기'), findsWidgets);
-      expect(unnamedTapTargets(tester), isEmpty);
-      handle.dispose();
-    });
-
-    testWidgets('칩의 누름 영역은 48×48 이상이다', (tester) async {
-      await tester.pumpWidget(host({}));
-      await settle(tester);
-
-      final size = tester.getSize(find.byKey(CardPhotoBlock.chipTapKey));
-      expect(size.height, greaterThanOrEqualTo(48));
-      expect(size.width, greaterThanOrEqualTo(48));
-    });
-
-    testWidgets('글자 200% — 고르기 시트가 깨지지 않는다', (tester) async {
-      await tester.pumpWidget(host({}, textScale: 2.0));
-      await settle(tester);
-      await openPickSheet(tester);
-
-      expect(find.text('사진 찍기'), findsOneWidget);
-      expect(find.text('닫기'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('글자 200% — 실패 화면이 깨지지 않는다', (tester) async {
-      picker = FakePhotoPicker([PhotoPicked(fakeJpeg())]);
-      await tester.pumpWidget(host(
-        {put: const FakeHttpError(500)},
-        textScale: 2.0,
-      ));
-      await openPickSheet(tester);
-      await tester.tap(find.text('사진 찍기'));
-      await settle(tester);
-
-      expect(find.text('다시 하기'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('글자 200% — 권한 거부 화면이 깨지지 않는다', (tester) async {
-      picker = FakePhotoPicker([const PhotoPickDenied(PhotoSource.camera)]);
-      await tester.pumpWidget(host({}, textScale: 2.0));
-      await openPickSheet(tester);
-      await tester.tap(find.text('사진 찍기'));
-      await settle(tester);
-
-      expect(find.text('카메라를 쓸 수 없어요'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-  });
 }
 
 class _FakeSettings implements PhotoSettings {

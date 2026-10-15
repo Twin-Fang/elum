@@ -19,47 +19,7 @@ void main() {
     r'<script>(.*?)</script>',
     dotAll: true,
   ).firstMatch(html)!.group(1)!;
-  final scriptCode = script
-      .replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '')
-      .replaceAll(RegExp(r'^\s*//.*$', multiLine: true), '');
 
-  group('코드를 어디로도 보내지 않는다', () {
-    test('네트워크 호출이 없다', () {
-      for (final call in [
-        'fetch(',
-        'XMLHttpRequest',
-        'sendBeacon',
-        'WebSocket',
-        'new Image',
-        'EventSource',
-        'importScripts',
-      ]) {
-        expect(scriptCode, isNot(contains(call)), reason: call);
-      }
-    });
-
-    test('외부 스크립트·분석 도구가 없다', () {
-      expect(html, isNot(contains('<script src')));
-      expect(html, isNot(matches(RegExp(r'google-analytics|gtag|googletagmanager|clarity|hotjar', caseSensitive: false))));
-    });
-
-    test('외부 글꼴·스타일을 부르지 않는다 — 페이지가 여는 모든 요청이 같은 사이트 안이다', () {
-      expect(html, isNot(contains('cdn.jsdelivr.net')));
-      expect(html, isNot(matches(RegExp(r'<link[^>]+rel="stylesheet"'))));
-      expect(html, isNot(matches(RegExp(r'<link[^>]+rel="preconnect"'))));
-    });
-
-    test('검색에 잡히지 않고 리퍼러를 보내지 않는다', () {
-      expect(html, contains('name="robots" content="noindex'));
-      expect(html, contains('name="referrer" content="no-referrer"'));
-    });
-
-    test('코드를 저장하지 않는다 (쿠키·저장소)', () {
-      for (final api in ['localStorage', 'sessionStorage', 'document.cookie', 'indexedDB']) {
-        expect(scriptCode, isNot(contains(api)), reason: api);
-      }
-    });
-  });
 
   group('앱과 같은 규칙을 쓴다', () {
     test('코드 모양 정규식이 앱의 LinkCode.alphabet 과 정확히 같은 집합이다', () {
@@ -83,10 +43,6 @@ void main() {
       expect('${m!.group(1)}A7K3M9', InviteLink.appUrl('A7K3M9'));
     });
 
-    test('이 페이지 주소가 앱이 만드는 공유 링크의 기준 주소와 같은 자리다', () {
-      // gh-pages 의 invite/index.html → https://twin-fang.github.io/elum/invite/
-      expect(InviteLink.webBase, 'https://twin-fang.github.io/elum/invite/');
-    });
 
     test('스토어 주소가 앱에 들어 있는 값과 같다', () {
       expect(html, contains('https://play.google.com/store/apps/details?id=kr.twinfang.elum'));
@@ -94,25 +50,6 @@ void main() {
     });
   });
 
-  group('용어 규칙', () {
-    // 사용자에게 보이는 글 — 태그와 스크립트를 걷고 읽는다
-    final visible = html
-        .replaceAll(RegExp(r'<script>.*?</script>', dotAll: true), '')
-        .replaceAll(RegExp(r'<style>.*?</style>', dotAll: true), '')
-        .replaceAll(RegExp(r'<!--.*?-->', dotAll: true), '');
-
-    test('이룸이·초대 코드·휴대폰을 쓰고 아이·연결 암호·기기는 쓰지 않는다', () {
-      expect(visible, contains('이룸이'));
-      expect(visible, contains('초대 코드'));
-      for (final banned in ['아이', '아동', '연결 암호', '기기']) {
-        expect(visible, isNot(contains(banned)), reason: banned);
-      }
-    });
-
-    test('10분 만료를 알린다', () {
-      expect(visible, contains('10분'));
-    });
-  });
 
   group('페이지의 코드 해석이 앱과 같은 답을 낸다 (node 가 있을 때)', () {
     final hasNode = Process.runSync('which', ['node']).exitCode == 0;

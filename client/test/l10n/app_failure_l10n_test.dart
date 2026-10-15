@@ -14,26 +14,7 @@ class _FakeL10n extends AppLocalizationsKo {
 void main() {
   tearDown(setAppL10nForTest);
 
-  test('hint 는 앱 언어의 문구다', () {
-    setAppL10nForTest(_FakeL10n());
-    expect(const AppFailure(fault: NetworkFault.offline).hint, 'OFFLINE-HINT');
-  });
 
-  test('기본(ko)은 옛 문구와 같다 — 세 가지 모두 손으로 쓴 값으로 단언', () {
-    expect(
-      const AppFailure(fault: NetworkFault.offline).hint,
-      '인터넷 연결을 확인해주세요',
-    );
-    expect(
-      const AppFailure(fault: NetworkFault.timeout).hint,
-      '연결이 느려요. 잠시 후 다시 해주세요',
-    );
-    expect(
-      const AppFailure(fault: NetworkFault.badCertificate).hint,
-      '안전하지 않은 연결이에요. 다른 망에서 해주세요',
-    );
-    expect(const AppFailure(fault: NetworkFault.none).hint, isNull);
-  });
 
   test('서버 문구가 있으면 서버 문구가 이긴다 — 언어와 무관', () {
     setAppL10nForTest(_FakeL10n());

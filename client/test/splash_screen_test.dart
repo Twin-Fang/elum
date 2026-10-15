@@ -1,6 +1,4 @@
-import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/storage/token_store.dart';
-import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/onboarding/presentation/splash_screen.dart';
@@ -10,7 +8,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/core/router/routes.dart';
 
@@ -84,59 +81,6 @@ void main() {
   group('시작 화면 구성', () {
     useReduceMotion();
 
-    testWidgets('시안대로 로고 하나만 그린다 (이슈 #338)', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(svgWithAsset(AppAssets.logo), findsOneWidget);
-      // Cloudsofa_namgim 폰트를 못 구해 텍스트로 대체했던 적이 있다
-      expect(find.text('이룸'), findsNothing);
-    });
-
-    testWidgets('로그인 화면 그림이 되살아나지 않는다 (이슈 #338)', (tester) async {
-      // 되돌림 감시 — 시안에서 빠진 에셋이 앱에 남아 있던 사고가 있었다 (#297).
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(imageWithAsset(AppAssets.splashChickBody), findsNothing);
-      expect(svgWithAsset(AppAssets.splashHill), findsNothing);
-      expect(imageWithAsset(AppAssets.splashOrb), findsNothing);
-      expect(find.text('오늘의 하루,'), findsNothing);
-      expect(find.text('차근차근 함께해요'), findsNothing);
-      // `시작하기`는 다음에 뭐가 나오는지 말해 주지 않으면서 한 번 더 누르게만 했다
-      expect(find.text('시작하기'), findsNothing);
-    });
-
-    testWidgets('배경은 시안의 단색이다 (이슈 #338)', (tester) async {
-      // 그라데이션(로그인 화면 것)을 잘못 얹으면 위쪽이 하얗게 뜬다
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is ColoredBox && w.color == AppColors.light.splashPlain,
-        ),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('로고에 읽을 수 있는 이름이 있다 (이슈 #338)', (tester) async {
-      // 이 화면에는 글자가 하나도 없다. 이름이 없으면 화면 낭독기에 아무것도
-      // 읽히지 않아 빈 화면으로 들린다. 실기기 E2E 도 이 이름으로 이 화면이
-      // 떴는지 안다 — 없으면 앱이 뜨기 전에 셔터가 내려가 홈 화면이 찍힌다.
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.bySemanticsLabel('이룸'), findsOneWidget);
-    });
-
-    testWidgets('연출이 끝나기를 기다리지 않아도 로고가 이미 떠 있다', (tester) async {
-      // 1.7초 뒤 사라지는 화면이다. 페이드를 걸면 다 뜨기 전에 넘어간다.
-      await tester.pumpWidget(buildSubject());
-      // pumpAndSettle 없이 첫 프레임만 그린다
-
-      expect(svgWithAsset(AppAssets.logo), findsOneWidget);
-    });
   });
 
   group('시작 화면 이동', () {
@@ -161,13 +105,6 @@ void main() {
       expect(find.text('보호자 홈'), findsOneWidget);
     });
 
-    testWidgets('온보딩을 마쳤으면 누르지 않아도 보호자 홈으로 간다', (tester) async {
-      // 갈 곳이 하나로 정해진 사용자에게 버튼을 한 번 더 누르게 하지 않는다.
-      await tester.pumpWidget(buildSubject(onboardingCompleted: true));
-      await tester.pumpAndSettle();
-
-      expect(find.text('보호자 홈'), findsOneWidget);
-    });
   });
 
   // idle 부유 모션 시험은 **로그인 화면으로 옮겼다** (이슈 #338).

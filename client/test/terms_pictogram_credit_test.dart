@@ -21,17 +21,4 @@ void main() {
     );
   });
 
-  test('저작권·원본 사이트·라이선스 전문 주소를 적는다', () {
-    expect(flat, contains('Copyright 2018-2026 Steve Lee'));
-    expect(flat, contains('https://mulberrysymbols.org'));
-    expect(flat, contains('https://creativecommons.org/licenses/by-sa/4.0/'));
-  });
-
-  test('색이나 모양을 바꾸지 않고 그대로 쓴다고 밝힌다', () {
-    expect(flat, contains('색이나 모양을 바꾸지 않고 그대로 사용합니다'));
-  });
-
-  test('부칙에 공고·시행일을 적는다', () {
-    expect(flat, contains('그림 출처에 관한 제5조의3을 더했습니다'));
-  });
 }

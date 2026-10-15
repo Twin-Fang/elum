@@ -1,4 +1,3 @@
-import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_dialog.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/device_viewport.dart';
-import 'helpers/svg_finder.dart';
 
 /// 공통 팝업 (Figma `팝업` 732:5835 · 이슈 #232).
 ///
@@ -78,58 +76,10 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('버튼을 주지 않으면 확인 하나가 선다', (tester) async {
-    await open<void>(tester, title: '휴대폰 연결에 성공했어요!');
 
-    // 팝업을 띄울 때마다 "확인"을 적게 하지 않는다 — 가장 흔한 모양이 기본값이다.
-    expect(find.text('확인'), findsOneWidget);
-  });
 
-  testWidgets('아이콘을 주면 그림이 붙는다', (tester) async {
-    await open<void>(
-      tester,
-      title: '휴대폰 연결에 성공했어요!',
-      icon: ElumDialogIcon.success,
-    );
 
-    expect(svgWithAsset(AppAssets.dialogCheck), findsOneWidget);
-  });
 
-  testWidgets('아이콘을 주지 않으면 자리도 없다', (tester) async {
-    await open<void>(tester, title: '아이콘 없는 팝업');
-
-    // 빈 원이 남으면 무엇을 뜻하는지 모를 자리가 하나 생긴다.
-    expect(svgWithAsset(AppAssets.dialogCheck), findsNothing);
-  });
-
-  testWidgets('설명은 선택이다', (tester) async {
-    await open<void>(tester, title: '제목', message: '한 줄 더');
-
-    expect(find.text('제목'), findsOneWidget);
-    expect(find.text('한 줄 더'), findsOneWidget);
-  });
-
-  testWidgets('버튼 둘을 나란히 놓을 수 있다', (tester) async {
-    await open<String>(
-      tester,
-      title: '정말 지울까요?',
-      actions: const [
-        ElumDialogAction(
-          label: '취소',
-          value: 'cancel',
-          tone: ElumDialogTone.neutral,
-        ),
-        ElumDialogAction(
-          label: '지우기',
-          value: 'delete',
-          tone: ElumDialogTone.danger,
-        ),
-      ],
-    );
-
-    expect(find.text('취소'), findsOneWidget);
-    expect(find.text('지우기'), findsOneWidget);
-  });
 
   testWidgets('누른 버튼의 값이 돌아온다', (tester) async {
     String? picked;

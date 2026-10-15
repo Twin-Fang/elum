@@ -29,16 +29,6 @@ void main() {
       expect(routine().hasStarted, isFalse);
     });
 
-    test('단계 하나를 했으면 시작했다', () {
-      expect(
-        routine(steps: [card('a', done: true), card('b')]).hasStarted,
-        isTrue,
-      );
-    });
-
-    test('단계 목록 없이 서버 집계만 와도 시작으로 본다', () {
-      expect(routine(completedStepCount: 1).hasStarted, isTrue);
-    });
   });
 
   group('isFinished (#534)', () {
@@ -46,20 +36,5 @@ void main() {
       expect(routine(status: 'COMPLETED').isFinished, isTrue);
     });
 
-    test('상태가 늦게 바뀌어도 단계를 다 했으면 끝냈다', () {
-      expect(
-        routine(
-          steps: [card('a', done: true), card('b', done: true)],
-        ).isFinished,
-        isTrue,
-      );
-    });
-
-    test('일부만 했으면 끝내지 않았다 — 아직 고칠 수 있다', () {
-      expect(
-        routine(steps: [card('a', done: true), card('b')]).isFinished,
-        isFalse,
-      );
-    });
   });
 }

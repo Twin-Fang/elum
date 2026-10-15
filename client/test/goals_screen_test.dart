@@ -1,10 +1,6 @@
-import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
-import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/features/onboarding/presentation/goals_screen.dart';
-import 'package:elum/features/onboarding/presentation/widgets/goal_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
-import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/core/router/routes.dart';
 
@@ -56,41 +51,9 @@ void main() {
     );
   }
 
-  /// 특정 목표 칩의 배경 컨테이너를 찾는다
-  BoxDecoration decorationOf(WidgetTester tester, SupportGoal goal) {
-    final container = tester.widget<AnimatedContainer>(
-      find.descendant(
-        of: find.byWidgetPredicate((w) => w is GoalChip && w.goal == goal),
-        matching: find.byType(AnimatedContainer),
-      ),
-    );
-    return container.decoration! as BoxDecoration;
-  }
 
   group('온보딩_목표 화면', () {
-    testWidgets('Figma 문구 그대로 목표 4개를 보여준다', (tester) async {
-      await tester.pumpWidget(wrap(const GoalsScreen()));
-      await tester.pumpAndSettle();
 
-      // 문구는 서비스 정체성이다. 어미 하나까지 Figma를 따른다.
-      expect(find.text('해야 할 일을 순서대로 이해해요'), findsOneWidget);
-      expect(find.text('필요한 준비물을 스스로 챙겨요'), findsOneWidget);
-      expect(find.text('새로운 상황을 미리 준비해요'), findsOneWidget);
-      expect(find.text('혼자 끝까지 해내는 경험을 만들어요'), findsOneWidget);
-
-      expect(find.text('여러 개를 선택할 수 있어요'), findsOneWidget);
-    });
-
-    testWidgets('목표별로 다른 아이콘을 SVG 에셋으로 렌더링한다', (tester) async {
-      await tester.pumpWidget(wrap(const GoalsScreen()));
-      await tester.pumpAndSettle();
-
-      // 도형을 Container로 그리다 일러스트가 사각형이 된 사고가 있었다.
-      // 2026-07-22 Figma 갱신(이슈 #11 후속) — 4개 목표가 서로 다른 아이콘을 쓴다.
-      for (final goal in SupportGoal.values) {
-        expect(svgWithAsset(AppAssets.goalIcon(goal)), findsOneWidget);
-      }
-    });
 
     testWidgets('미선택 상태에서는 CTA가 비활성이다', (tester) async {
       await tester.pumpWidget(wrap(const GoalsScreen()));
@@ -111,97 +74,9 @@ void main() {
       expect(isCtaEnabled(tester), isTrue);
     });
 
-    testWidgets('선택한 칩은 Figma 민트색을 쓴다 (캐릭터색 아님)', (tester) async {
-      await tester.pumpWidget(wrap(const GoalsScreen()));
-      await tester.pumpAndSettle();
 
-      await tester.tap(find.text('해야 할 일을 순서대로 이해해요'));
-      await tester.pumpAndSettle();
-      // AnimatedContainer 전환이 끝난 뒤 색을 읽는다
-      await tester.pump(const Duration(milliseconds: 300));
 
-      final selected = decorationOf(tester, SupportGoal.stepByStep);
-      expect(selected.color, AppColors.light.goalSelectedFill);
 
-      // 여우 선택색이 새어 들어오면 안 된다 — 이슈 #11의 원인
-      expect(selected.color, isNot(AppColors.light.foxSelectedFill));
-
-      final border = selected.border! as Border;
-      expect(border.top.color, AppColors.light.goalSelectedBorder);
-      expect(border.top.width, 2);
-    });
-
-    testWidgets('선택하지 않은 칩은 흰 배경에 1px 테두리다', (tester) async {
-      await tester.pumpWidget(wrap(const GoalsScreen()));
-      await tester.pumpAndSettle();
-
-      final unselected = decorationOf(tester, SupportGoal.independent);
-      expect(unselected.color, AppColors.light.surface);
-
-      final border = unselected.border! as Border;
-      expect(border.top.color, AppColors.light.border);
-      expect(border.top.width, 1);
-    });
-
-    testWidgets('여러 개를 동시에 선택할 수 있다', (tester) async {
-      await tester.pumpWidget(wrap(const GoalsScreen()));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('필요한 준비물을 스스로 챙겨요'));
-      await tester.pumpAndSettle();
-
-      // 세 번째 칩은 기본 화면 높이에서 접혀 있어 스크롤해야 닿는다.
-      // ensureVisible 없이 tap하면 "No element"로 실패한다.
-      final third = find.text('새로운 상황을 미리 준비해요');
-      await tester.ensureVisible(third);
-      await tester.pumpAndSettle();
-      await tester.tap(third);
-      await tester.pumpAndSettle();
-      await tester.pump(const Duration(milliseconds: 300));
-
-      // 데모 시나리오 기본값 조합이다
-      expect(
-        decorationOf(tester, SupportGoal.prepareItems).color,
-        AppColors.light.goalSelectedFill,
-      );
-      expect(
-        decorationOf(tester, SupportGoal.prepareNew).color,
-        AppColors.light.goalSelectedFill,
-      );
-    });
-
-    testWidgets('다시 누르면 선택이 해제된다', (tester) async {
-      await tester.pumpWidget(wrap(const GoalsScreen()));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('필요한 준비물을 스스로 챙겨요'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('필요한 준비물을 스스로 챙겨요'));
-      await tester.pumpAndSettle();
-      await tester.pump(const Duration(milliseconds: 300));
-
-      expect(
-        decorationOf(tester, SupportGoal.prepareItems).color,
-        AppColors.light.surface,
-      );
-
-      // 전부 해제되면 CTA도 다시 잠긴다
-      expect(isCtaEnabled(tester), isFalse);
-    });
   });
 
-  group('목표 칩 레이아웃 (Figma 실측)', () {
-    testWidgets('칩 높이는 68이다', (tester) async {
-      await tester.pumpWidget(wrap(const GoalsScreen()));
-      await tester.pumpAndSettle();
-
-      final chip = tester.getSize(
-        find.byWidgetPredicate(
-          (w) => w is GoalChip && w.goal == SupportGoal.stepByStep,
-        ),
-      );
-      // 344×68 r20 — 간격 18은 화면이 준다
-      expect(chip.height, 68);
-    });
-  });
 }

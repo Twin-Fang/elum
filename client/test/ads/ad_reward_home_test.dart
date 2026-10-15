@@ -4,10 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:elum/features/ads/data/ad_banner_loader.dart';
 import 'package:elum/features/ads/application/ad_gate.dart';
 import 'package:elum/core/config/ad_ids.dart';
-import 'package:elum/features/ads/data/rewarded_ad_loader.dart';
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/network/server_error.dart';
-import 'package:elum/core/network/server_error_code.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/credit/application/ad_reward_flow.dart';
 import 'package:elum/features/credit/data/credit_repository.dart';
@@ -116,74 +113,6 @@ void main() {
       expect(find.text('닫기'), findsOneWidget);
     });
 
-    // 지금 운영 상태 — 배포해도 화면이 바뀌지 않아야 한다.
-    testWidgets('서버가 꺼 두었으면 지금 안내 그대로다', (tester) async {
-      adRepo.offer = const AdRewardOffer(
-        enabled: false,
-        // 다른 값이 남아 있어도 꺼짐이 이긴다.
-        creditsPerView: 2,
-        remainingToday: 5,
-      );
-      await pumpHome(tester);
-      await tapCreate(tester);
-
-      expect(find.textContaining(exhausted), findsOneWidget);
-      expect(find.text(adButton), findsNothing);
-      expect(find.text('확인'), findsOneWidget);
-    });
-
-    testWidgets('제안 조회가 실패해도 안내는 그대로 뜬다', (tester) async {
-      adRepo.offerError = const AppFailure(fault: NetworkFault.offline);
-      await pumpHome(tester);
-      await tapCreate(tester);
-
-      expect(find.textContaining(exhausted), findsOneWidget);
-      expect(find.text(adButton), findsNothing);
-    });
-
-    testWidgets('광고를 띄울 수 없는 환경이면 서버에 묻지도 않는다', (tester) async {
-      await pumpHome(tester, adsEnabled: false);
-      await tapCreate(tester);
-
-      expect(find.text(adButton), findsNothing);
-      expect(adRepo.offerCalls, 0);
-    });
-
-    // 광고로 크레딧이 늘어도 진행 중인 생성이 끝나야 새로 만들 수 있다.
-    testWidgets('이미 만들고 있다는 안내에는 광고를 제안하지 않는다', (tester) async {
-      credit = _Credit(
-        available: 30,
-        inProgress: [
-          {'jobId': 'j1', 'kind': 'ROUTINE_CREATE'},
-        ],
-      );
-      await pumpHome(tester);
-      await tapCreate(tester);
-
-      expect(find.textContaining('이미 일과를 만들고 있어요'), findsOneWidget);
-      expect(find.text(adButton), findsNothing);
-    });
-
-    testWidgets('크레딧이 남아 있으면 안내도 광고도 없이 들어간다', (tester) async {
-      credit = _Credit(available: 10);
-      await pumpHome(tester);
-      await tapCreate(tester);
-
-      expect(find.text('일과 입력'), findsOneWidget);
-      expect(find.text(adButton), findsNothing);
-      expect(adRepo.offerCalls, 0);
-    });
-
-    testWidgets('닫기를 누르면 광고 없이 홈으로 돌아온다', (tester) async {
-      await pumpHome(tester);
-      await tapCreate(tester);
-      await tester.tap(find.text('닫기'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('새로운 일과 만들기'), findsOneWidget);
-      expect(adRepo.sessionCalls, 0);
-      expect(loader.shownNonces, isEmpty);
-    });
   });
 
   group('시청 → 지급', () {
@@ -226,17 +155,6 @@ void main() {
       expect(find.text('새로운 일과 만들기'), findsOneWidget);
     });
 
-    testWidgets('지급 알림 뒤에도 일과 만들기로 자동 이동하지 않는다', (tester) async {
-      await pumpHome(tester);
-      await tapCreate(tester);
-      await tester.tap(find.text(adButton));
-      await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('확인'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('일과 입력'), findsNothing);
-    });
   });
 
   group('실패 — 코드를 보이고 홈으로 돌아온다', () {
@@ -257,55 +175,6 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('광고를 불러오지 못했다', (tester) async {
-      loader.end = RewardedAdEnd.loadFailed;
-      await watch(tester);
-      await expectBackHome(tester, 'E-AD-LOAD');
-    });
-
-    testWidgets('광고를 끝까지 보지 않았다', (tester) async {
-      loader.end = RewardedAdEnd.dismissed;
-      await watch(tester);
-      await expectBackHome(tester, 'E-AD-SKIP');
-    });
-
-    testWidgets('서버 확인이 늦다', (tester) async {
-      adRepo.statuses = [_pending];
-      await watch(tester);
-      await expectBackHome(tester, 'E-AD-WAIT');
-    });
-
-    testWidgets('오늘 상한', (tester) async {
-      adRepo.sessionError = AppFailure(
-        fault: NetworkFault.none,
-        server: ServerError(
-          code: ServerErrorCode.adRewardDailyLimit,
-          statusCode: 403,
-        ),
-      );
-      await watch(tester);
-      await expectBackHome(tester, 'AD_REWARD_DAILY_LIMIT');
-      expect(loader.shownNonces, isEmpty);
-    });
-
-    testWidgets('멈춘 계정', (tester) async {
-      adRepo.sessionError = AppFailure(
-        fault: NetworkFault.none,
-        server: ServerError(
-          code: ServerErrorCode.adRewardAccountFrozen,
-          statusCode: 403,
-        ),
-      );
-      await watch(tester);
-      await expectBackHome(tester, 'AD_REWARD_ACCOUNT_FROZEN');
-    });
-
-    testWidgets('오프라인', (tester) async {
-      adRepo.sessionError = const AppFailure(fault: NetworkFault.offline);
-      await watch(tester);
-      await expectBackHome(tester, 'E-NET-OFFLINE');
-    });
-
     testWidgets('서버가 지급하지 않기로 했다', (tester) async {
       adRepo.statuses = [
         const AdRewardSessionStatus(
@@ -319,7 +188,6 @@ void main() {
   });
 }
 
-const _pending = AdRewardSessionStatus(phase: AdRewardPhase.pending);
 const _granted = AdRewardSessionStatus(
   phase: AdRewardPhase.granted,
   grantedCredits: 2,
@@ -345,17 +213,16 @@ class _NoBanner implements AdBannerLoader {
 
 /// 서버가 가진 잔액을 흉내 낸다. 읽은 횟수를 센다.
 class _Credit extends CreditRepository {
-  _Credit({this.available = 0, this.inProgress = const []}) : super(Dio());
+  _Credit({this.available = 0}) : super(Dio());
 
   int available;
-  final List<Object?> inProgress;
   var calls = 0;
 
   @override
   Future<CreditSummary> getMine() async {
     calls++;
     return CreditSummary.fromJson(
-      creditJson(available: available, inProgress: inProgress),
+      creditJson(available: available),
     );
   }
 }

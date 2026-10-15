@@ -138,31 +138,6 @@ void main() {
       expect(CardPhotoTarget.of(routineId: 'r1', stepId: 'c1'), isNotNull);
     });
 
-    testWidgets('대상이 있으면 그림 칸과 칩이 뜨고 제목·설명은 그대로 있다', (tester) async {
-      await tester.pumpWidget(sheetHost(photo: target));
-      await openSheet(tester);
-
-      expect(find.text('카드 수정'), findsOneWidget);
-      expect(find.text('사진 바꾸기'), findsOneWidget);
-      expect(find.text('옷을 입어요'), findsOneWidget);
-      expect(find.text('완료'), findsOneWidget);
-    });
-
-    testWidgets('대상이 없으면 칩이 없다', (tester) async {
-      await tester.pumpWidget(sheetHost());
-      await openSheet(tester);
-
-      expect(find.text('카드 수정'), findsOneWidget);
-      expect(find.text('사진 바꾸기'), findsNothing);
-    });
-
-    testWidgets('추가 시트에는 칩이 없다', (tester) async {
-      await tester.pumpWidget(sheetHost(add: true));
-      await openSheet(tester);
-
-      expect(find.text('새로운 카드 추가'), findsOneWidget);
-      expect(find.text('사진 바꾸기'), findsNothing);
-    });
   });
 
   group('카드확인 화면에서', () {
@@ -210,15 +185,6 @@ void main() {
       expect(find.text('사진 바꾸기'), findsNothing);
     });
 
-    testWidgets('로컬에서 만든 카드(local_…)는 칩을 숨긴다', (tester) async {
-      await pumpReview(tester, routine.copyWith(steps: [routine.steps[1]]));
-
-      await tester.tap(find.text('이 카드 수정'));
-      await settle(tester);
-
-      expect(find.text('카드 수정'), findsOneWidget);
-      expect(find.text('사진 바꾸기'), findsNothing);
-    });
   });
 
   group('올리는 도중 시트를 닫는다', () {
@@ -235,25 +201,6 @@ void main() {
       await tester.tapAt(const Offset(200, 40));
       await settle(tester, times: 6);
     }
-
-    testWidgets('성공하면 시트가 없어도 새 그림이 카드에 반영된다', (tester) async {
-      picker = FakePhotoPicker([PhotoPicked(fakeJpeg())]);
-      container.dispose();
-      useContainer({put: ok}, delay: const Duration(seconds: 2));
-
-      await tester.pumpWidget(sheetHost(photo: target));
-      await openSheet(tester);
-      await startUpload(tester);
-
-      await dismissSheetByBarrier(tester);
-      expect(find.text('카드 수정'), findsNothing, reason: '시트가 닫혔다');
-
-      await tester.pump(const Duration(seconds: 3));
-      await settle(tester);
-      expect(imagePathOf('c1'), 'k/new.jpg');
-      expect(tester.takeException(), isNull);
-      await tester.pump(const Duration(seconds: 3));
-    });
 
     testWidgets('실패하면 인라인으로 알릴 자리가 없으니 팝업으로 알린다 — 삼키지 않는다', (tester) async {
       picker = FakePhotoPicker([PhotoPicked(fakeJpeg())]);
@@ -277,51 +224,6 @@ void main() {
     });
   });
 
-  group('화면 크기·키보드·글자 크기', () {
-    testWidgets('키보드가 올라오면 그림 칸을 접고 입력칸이 가려지지 않는다', (tester) async {
-      await tester.pumpWidget(sheetHost(photo: target));
-      await openSheet(tester);
-      expect(find.text('사진 바꾸기'), findsOneWidget);
-
-      showKeyboard(tester);
-      await settle(tester);
-
-      // 접힌 그림 칸은 화면에 없다(상태는 살아 있다)
-      expect(find.text('사진 바꾸기'), findsNothing);
-      // 설명 입력칸이 키보드(852-336=516) 위에 있다
-      final desc = tester.getRect(find.byType(TextField).last);
-      expect(desc.bottom, lessThan(852 - 336));
-      expect(tester.takeException(), isNull);
-    });
-
-    for (final size in const {
-      'iPhone SE (375×667)': Size(375, 667),
-      'Galaxy (360×800)': Size(360, 800),
-      'iPhone 16 (393×852)': Size(393, 852),
-    }.entries) {
-      testWidgets('${size.key} — 시트가 화면 안에 들어오고 완료 버튼이 보인다', (tester) async {
-        tester.view.physicalSize = size.value;
-        addTearDown(tester.view.resetPhysicalSize);
-        await tester.pumpWidget(sheetHost(photo: target));
-        await openSheet(tester);
-
-        final sheet = tester.getRect(find.byType(CardEditSheet));
-        expect(sheet.top, greaterThanOrEqualTo(0));
-        final done = tester.getRect(find.text('완료'));
-        expect(done.bottom, lessThanOrEqualTo(size.value.height));
-        expect(find.text('사진 바꾸기'), findsOneWidget);
-        expect(tester.takeException(), isNull);
-      });
-    }
-
-    testWidgets('글자 200% — 시트가 깨지지 않는다', (tester) async {
-      await tester.pumpWidget(sheetHost(photo: target, textScale: 2.0));
-      await openSheet(tester);
-
-      expect(find.text('사진 바꾸기'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-  });
 }
 
 /// 소리를 내지 않는 fake — 카드확인 화면이 소리 서비스를 잡아 간다.

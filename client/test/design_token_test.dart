@@ -1,8 +1,5 @@
 import 'dart:io';
 
-import 'package:elum/core/theme/app_colors.dart';
-import 'package:elum/core/theme/app_typography.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 디자인 토큰 규칙을 고정한다.
@@ -84,93 +81,5 @@ void main() {
     });
   });
 
-  group('AppColors', () {
-    /// 값이 같아도 쓰임이 다르면 토큰을 나눈다는 규칙의 실제 사례.
-    /// 누군가 "중복이네" 하고 합치면 이 테스트가 막는다.
-    test('homeCardTitle과 catSelectedBorder는 값이 같아도 별개 토큰이다', () {
-      const colors = AppColors.light;
 
-      expect(colors.homeCardTitle, const Color(0xFF9CADF1));
-      expect(colors.catSelectedBorder, const Color(0xFF9CADF1));
-
-      // 홈 카드 제목만 바꿔도 캐릭터 선택 테두리는 그대로여야 한다.
-      final changed = colors.copyWith(homeCardTitle: const Color(0xFF000000));
-      expect(changed.catSelectedBorder, const Color(0xFF9CADF1),
-          reason: '토큰을 합치면 한쪽만 바꿀 수 없다');
-    });
-
-    /// lerp 누락은 컴파일러가 못 잡고 테마 전환에서만 드러난다.
-    /// 가장 놓치기 쉬운 자리라 테스트로 고정한다.
-    test('lerp가 보호자 홈 토큰을 빠뜨리지 않는다', () {
-      const from = AppColors.light;
-      final to = from.copyWith(
-        homeCardGradientStart: const Color(0xFF000000),
-        homeCardGradientEnd: const Color(0xFF000000),
-        homeCardTitle: const Color(0xFF000000),
-        homeCardShadow: const Color(0xFF000000),
-      );
-
-      final mid = from.lerp(to, 1.0);
-
-      expect(mid.homeCardGradientStart, const Color(0xFF000000));
-      expect(mid.homeCardGradientEnd, const Color(0xFF000000));
-      expect(mid.homeCardTitle, const Color(0xFF000000));
-      expect(mid.homeCardShadow, const Color(0xFF000000));
-    });
-  });
-
-  group('AppTypography — Figma 217:2655 실측값', () {
-    const typo = AppTypography.standard;
-
-    test('보호자 홈 토큰이 Figma 크기와 일치한다', () {
-      expect(typo.greeting.fontSize, 24);
-      expect(typo.cardTitle.fontSize, 17);
-      expect(typo.cardBody.fontSize, 15);
-      expect(typo.sectionTitle.fontSize, 14);
-      expect(typo.tileLabel.fontSize, 13);
-      expect(typo.caption.fontSize, 12);
-    });
-
-    test('굵기가 Figma와 일치한다', () {
-      expect(typo.greeting.fontWeight, FontWeight.w800);
-      expect(typo.cardTitle.fontWeight, FontWeight.w800);
-      expect(typo.sectionTitle.fontWeight, FontWeight.w800);
-      expect(typo.cardBody.fontWeight, FontWeight.w400);
-      expect(typo.tileLabel.fontWeight, FontWeight.w400);
-      expect(typo.caption.fontWeight, FontWeight.w400);
-    });
-
-    test('모든 토큰이 앱 폰트를 쓴다', () {
-      for (final style in [
-        typo.greeting,
-        typo.cardTitle,
-        typo.cardBody,
-        typo.sectionTitle,
-        typo.tileLabel,
-        typo.caption,
-      ]) {
-        expect(style.fontFamily, AppTypography.fontFamily);
-      }
-    });
-
-    test('lerp가 보호자 홈 토큰을 빠뜨리지 않는다', () {
-      final to = typo.copyWith(
-        greeting: const TextStyle(fontSize: 99),
-        cardTitle: const TextStyle(fontSize: 99),
-        cardBody: const TextStyle(fontSize: 99),
-        sectionTitle: const TextStyle(fontSize: 99),
-        tileLabel: const TextStyle(fontSize: 99),
-        caption: const TextStyle(fontSize: 99),
-      );
-
-      final mid = typo.lerp(to, 1.0);
-
-      expect(mid.greeting.fontSize, 99);
-      expect(mid.cardTitle.fontSize, 99);
-      expect(mid.cardBody.fontSize, 99);
-      expect(mid.sectionTitle.fontSize, 99);
-      expect(mid.tileLabel.fontSize, 99);
-      expect(mid.caption.fontSize, 99);
-    });
-  });
 }

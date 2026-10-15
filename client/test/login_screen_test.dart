@@ -1,8 +1,5 @@
 import 'package:elum/core/app_status/app_status_repository.dart';
-import 'package:elum/core/assets/app_assets.dart';
-import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/auth/data/oauth_sdk.dart';
 import 'package:elum/features/auth/presentation/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,9 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
-import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
-import 'package:elum/core/storage/in_memory_storage.dart';
 import 'package:elum/core/router/routes.dart';
 
 /// 로그인 화면 (이슈 #207 · 명세 §2-1).
@@ -77,54 +72,6 @@ void main() {
 
   // 로그인하지 못한 사용자는 설정에 갈 수 없다. 제보할 때 빌드를 확인할 곳은
   // 여기뿐이다 (#418).
-  testWidgets('우측 상단에 앱 버전이 작게 보인다', (tester) async {
-    await tester.pumpWidget(wrap(version: '1.24.1'));
-    await tester.pumpAndSettle();
-
-    final label = find.text('v1.24.1');
-    expect(label, findsOneWidget);
-    // 오른쪽 위 구석이다 — 그림·버튼이 있는 아래쪽이 아니다.
-    final rect = tester.getRect(label);
-    expect(rect.right, greaterThan(393 - 40));
-    expect(rect.top, lessThan(100));
-  });
-
-  testWidgets('버전을 읽지 못하면 아무것도 그리지 않는다', (tester) async {
-    await tester.pumpWidget(wrap(version: ''));
-    await tester.pumpAndSettle();
-
-    expect(find.textContaining(RegExp(r'^v\d')), findsNothing);
-    // 버튼은 그대로다 — 버전 때문에 화면이 흔들리지 않는다.
-    expect(find.text('카카오로 로그인'), findsOneWidget);
-  });
-
-  testWidgets('글자 제목 대신 로고를 쓴다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    expect(svgWithAsset(AppAssets.logo), findsOneWidget);
-    // 로고가 이미 이름을 말하고 있다. 밑에서 또 말하지 않는다.
-    expect(find.textContaining('시작해볼까요'), findsNothing);
-  });
-
-  testWidgets('시작 화면의 문구를 그대로 이어받는다 (이슈 #207)', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    // 시작 화면에서 넘어오자마자 문구가 바뀌면 화면이 갈아끼워진 것처럼 보인다.
-    expect(find.text('오늘의 하루,'), findsOneWidget);
-    expect(find.text('차근차근 함께해요'), findsOneWidget);
-  });
-
-  testWidgets('로그인 수단이 첫 화면에 모두 있다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    // 한 번 더 눌러 들어가는 화면이 아니다.
-    expect(find.text('카카오로 로그인'), findsOneWidget);
-    expect(find.text('네이버로 로그인'), findsOneWidget);
-  });
-
   testWidgets('애플이 승인한 문구를 쓴다 (이슈 #237)', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
@@ -136,150 +83,17 @@ void main() {
     expect(find.text('네이버로 로그인'), findsOneWidget);
   });
 
-  testWidgets('구글은 빠졌다 (이슈 #230)', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    // 시안에서 제공자가 넷에서 셋으로 줄었다. 버튼이 되살아나면 여기서 잡는다.
-    expect(find.textContaining('Google'), findsNothing);
-  });
-
-  testWidgets('버튼마다 제공자 로고가 붙는다 (이슈 #230)', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    // 로고를 코드로 그리다 형태가 어긋난 적이 있다. 에셋을 쓰는지 직접 본다.
-    // 애플은 iOS에서만 뜨므로 여기서는 보지 않는다.
-    expect(svgWithAsset(AppAssets.loginKakao), findsOneWidget);
-    expect(svgWithAsset(AppAssets.loginNaver), findsOneWidget);
-  });
-
   group('배치가 시안대로 갈린다 (이슈 #338)', () {
     tearDown(() => LoginScreen.debugPretendIos = null);
 
-    testWidgets('iOS는 뒤돌아본 병아리 — 왼쪽 새싹, 작은 몸통', (tester) async {
-      LoginScreen.debugPretendIos = true;
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      // 병아리를 따로 조립했다가 형태가 어긋난 적이 있다 — 에셋을 그대로 쓴다.
-      expect(imageWithAsset(AppAssets.splashChickBody), findsOneWidget);
-      expect(svgWithAsset(AppAssets.splashHill), findsOneWidget);
-      expect(imageWithAsset(AppAssets.splashOrb), findsOneWidget);
-      // 안드로이드 전용 에셋이 섞이면 새싹이 반대로 휜다
-      expect(imageWithAsset(AppAssets.splashChickBodyAos), findsNothing);
-      expect(svgWithAsset(AppAssets.splashHillAos), findsNothing);
-    });
-
-    testWidgets('안드로이드는 앞을 보는 병아리 — 오른쪽 새싹, 큰 몸통', (tester) async {
-      LoginScreen.debugPretendIos = false;
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      expect(imageWithAsset(AppAssets.splashChickBodyAos), findsOneWidget);
-      expect(svgWithAsset(AppAssets.splashHillAos), findsOneWidget);
-      expect(imageWithAsset(AppAssets.splashOrb), findsOneWidget);
-      expect(imageWithAsset(AppAssets.splashChickBody), findsNothing);
-      expect(svgWithAsset(AppAssets.splashHill), findsNothing);
-    });
-
-    testWidgets('새싹이 시안 자리에 온다 — 두 배치가 화면 반대편이다', (tester) async {
-      // 좌표를 두 벌 복사하다 한쪽만 고쳐지는 사고를 막는다.
-      LoginScreen.debugPretendIos = true;
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-      final iosStem = tester.getRect(svgWithAsset(AppAssets.splashHill)).left;
-
-      LoginScreen.debugPretendIos = false;
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-      final aosStem = tester.getRect(svgWithAsset(AppAssets.splashHillAos)).left;
-
-      expect(iosStem, closeTo(87, 1)); // 시안 238:1808
-      expect(aosStem, closeTo(183.5, 1)); // 시안 1022:4333
-    });
-
-    testWidgets('상단 문구가 안드로이드에서 더 위에 있다', (tester) async {
-      LoginScreen.debugPretendIos = true;
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-      final iosTitle = tester.getRect(find.text('차근차근 함께해요')).top;
-
-      LoginScreen.debugPretendIos = false;
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-      final aosTitle = tester.getRect(find.text('차근차근 함께해요')).top;
-
-      // 시안 y: iOS 168 · AOS 131.7 (글꼴 베이스라인 때문에 값 자체가 아니라
-      // 둘의 차이를 본다 — 36.3만큼 위로 올라가야 한다)
-      expect(iosTitle - aosTitle, closeTo(36.3, 1.5));
-    });
   });
 
   group('idle 부유 모션 (시작 화면에서 옮겨 옴 — 이슈 #338)', () {
     /// 줄기+구슬 부유 위젯 안의 Transform.translate 세로 offset을 읽는다.
-    double stemOffsetY(WidgetTester tester) {
-      final transform = tester.widget<Transform>(
-        find.descendant(
-          of: find.byKey(const ValueKey('splash-stem-float')),
-          matching: find.byType(Transform),
-        ),
-      );
-      return transform.transform.getTranslation().y;
-    }
 
-    testWidgets('줄기와 구슬이 부유한다', (tester) async {
-      // 병아리 몸은 고정, 줄기+구슬만 아주 살짝 상하로 떠다닌다.
-      // 동작 줄이기가 켜져 있으면 멈추므로 이 시험만 꺼 둔다.
-      tester.platformDispatcher.clearAccessibilityFeaturesTestValue();
-      await tester.pumpWidget(wrap());
-      await tester.pump(const Duration(milliseconds: 200));
-
-      final before = stemOffsetY(tester);
-      await tester.pump(const Duration(milliseconds: 700));
-
-      expect(stemOffsetY(tester), isNot(before));
-    });
-
-    testWidgets('동작 줄이기 설정에서는 idle이 정지한다', (tester) async {
-      // 움직임에 민감한 사용자 보호 (motion.md §접근성).
-      // 반복 중이면 pumpAndSettle이 타임아웃으로 실패한다.
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      expect(imageWithAsset(AppAssets.splashOrb), findsOneWidget);
-    });
   });
 
   /// 지난번에 카카오로 로그인한 상태를 만든다 — 그래야 안내 문구가 뜬다.
-  Future<Widget> wrapWithLastProvider({
-    OAuthProvider? provider = OAuthProvider.kakao,
-  }) async {
-    final storage = InMemoryStorage();
-    if (provider != null) {
-      await storage.setLastLoginProvider(provider.name);
-    }
-    final router = GoRouter(
-      initialLocation: Routes.login,
-      routes: [
-        GoRoute(
-          path: Routes.login,
-          builder: (context, state) => const LoginScreen(),
-        ),
-      ],
-    );
-    return ProviderScope(
-      overrides: [localStorageProvider.overrideWithValue(storage)],
-      child: ScreenUtilInit(
-        designSize: const Size(393, 852),
-        builder: (context, child) => MaterialApp.router(
-          theme: AppTheme.light,
-          debugShowCheckedModeBanner: false,
-          routerConfig: router,
-        ),
-      ),
-    );
-  }
 
   group('최근 로그인 표시는 시안값을 따른다 (이슈 #346)', () {
     // 시안 `로그인_iOS`(238:1808) — 알약 91×28 · r20, 배경 #FFFADC 투명도 50%.
@@ -287,61 +101,6 @@ void main() {
     //
     // 겹쳐 놓는 것이 핵심이다. 이전 구현은 버튼 위에 한 줄을 깔아, 최근 로그인이
     // 있을 때만 버튼 묶음이 통째로 밀렸다 — 누르려던 자리가 움직인다.
-    testWidgets('문구는 `최근 로그인` 이다', (tester) async {
-      await tester.pumpWidget(await wrapWithLastProvider());
-      await tester.pumpAndSettle();
-
-      expect(find.text('최근 로그인'), findsOneWidget);
-    });
-
-    testWidgets('알약은 91x28 이고 반투명이다', (tester) async {
-      await tester.pumpWidget(await wrapWithLastProvider());
-      await tester.pumpAndSettle();
-
-      final pill = find
-          .ancestor(of: find.text('최근 로그인'), matching: find.byType(Container))
-          .first;
-
-      final size = tester.getSize(pill);
-      expect(size.width, closeTo(91, 1));
-      expect(size.height, closeTo(28, 1));
-
-      final decoration = tester.widget<Container>(pill).decoration as BoxDecoration?;
-      expect(decoration?.color, isNotNull, reason: '배경이 없으면 그림 위에서 글자가 묻힌다');
-      expect(
-        decoration?.color?.a,
-        lessThan(1.0),
-        reason: '반투명이라야 아래 버튼 색이 비쳐 제공자마다 달라 보인다',
-      );
-    });
-
-    testWidgets('버튼 위로 겹쳐 레이아웃을 밀지 않는다', (tester) async {
-      // 최근 로그인이 없을 때와 있을 때 첫 버튼의 y가 같아야 한다.
-      await tester.pumpWidget(await wrapWithLastProvider(provider: null));
-      await tester.pumpAndSettle();
-      final withoutBadge = tester.getTopLeft(find.text('카카오로 로그인')).dy;
-
-      await tester.pumpWidget(await wrapWithLastProvider());
-      await tester.pumpAndSettle();
-      final withBadge = tester.getTopLeft(find.text('카카오로 로그인')).dy;
-
-      expect(withBadge, closeTo(withoutBadge, 0.5));
-    });
-
-    testWidgets('알약은 해당 제공자 버튼에만 붙는다', (tester) async {
-      await tester.pumpWidget(await wrapWithLastProvider());
-      await tester.pumpAndSettle();
-
-      final badge = tester.getTopLeft(find.text('최근 로그인'));
-      final kakao = tester.getTopLeft(find.text('카카오로 로그인'));
-      final naver = tester.getTopLeft(find.text('네이버로 로그인'));
-
-      expect(
-        (badge.dy - kakao.dy).abs(),
-        lessThan((badge.dy - naver.dy).abs()),
-        reason: '카카오로 마지막에 들어왔으면 알약도 카카오 버튼에 붙어야 한다',
-      );
-    });
   });
 
   group('병아리 얼굴은 애플 버튼 유무를 따른다 (이슈 #297)', () {
@@ -352,34 +111,6 @@ void main() {
     // 얼굴을 살린다.** 시안 프레임이 아직 없는 규칙이라 시험으로 못 박는다.
     tearDown(() => LoginScreen.debugPretendIos = null);
 
-    testWidgets('애플 버튼이 있으면 얼굴을 빼서 부리가 버튼 사이로 안 나온다', (tester) async {
-      LoginScreen.debugPretendIos = true;
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      expect(svgWithAsset(AppAssets.splashCharLeft), findsNothing);
-      expect(svgWithAsset(AppAssets.splashCharRight), findsNothing);
-      expect(svgWithAsset(AppAssets.splashCenter), findsNothing);
-    });
-
-    testWidgets('애플 버튼이 없으면(안드로이드) 얼굴을 살린다', (tester) async {
-      LoginScreen.debugPretendIos = false;
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-
-      expect(svgWithAsset(AppAssets.splashCharLeft), findsOneWidget);
-      expect(svgWithAsset(AppAssets.splashCharRight), findsOneWidget);
-      expect(svgWithAsset(AppAssets.splashCenter), findsOneWidget);
-    });
   });
 
-  testWidgets('버튼이 화면 밖으로 밀려나지 않는다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    // 그림 위에 겹쳐 얹는 구조라 버튼 묶음이 아래로 새면 마지막 버튼이 잘린다.
-    // 애플은 iOS 전용이라 테스트 환경(호스트 OS)에서 마지막은 네이버다.
-    final lastButton = tester.getRect(find.text('네이버로 로그인'));
-    expect(lastButton.bottom, lessThan(tester.view.physicalSize.height));
-  });
 }

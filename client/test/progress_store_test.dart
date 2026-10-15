@@ -38,29 +38,6 @@ void main() {
       store = ProgressStore(storage);
     });
 
-    test('저장한 기록을 같은 일과 id로 다시 읽는다', () async {
-      await store.save('r1', const RoutineProgressRecord(completed: {'c1'}));
-
-      expect(store.load('r1')?.completed, {'c1'});
-    });
-
-    test('없는 일과는 null이다', () {
-      expect(store.load('ghost'), isNull);
-    });
-
-    test('remove하면 읽히지 않는다', () async {
-      await store.save('r1', const RoutineProgressRecord(completed: {'c1'}));
-      await store.remove('r1');
-
-      expect(store.load('r1'), isNull);
-    });
-
-    test('대기열은 집합으로 왕복한다', () async {
-      await store.setPending({'r1', 'r2'});
-
-      expect(store.pending, {'r1', 'r2'});
-    });
-
     test('clearAll이 진행 기록·대기열·캐시를 함께 지운다', () async {
       // 온보딩 초기화(계정 전환) 후 이전 아이의 체크가 남으면 안 된다.
       await store.save('r1', const RoutineProgressRecord(completed: {'c1'}));

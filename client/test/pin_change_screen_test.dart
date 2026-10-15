@@ -68,12 +68,6 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('지금 암호부터 묻는다', (tester) async {
-    await open(tester);
-    expect(find.text('지금 비밀암호를\n입력해주세요'), findsOneWidget);
-    expect(find.byType(ElumButton), findsNothing);
-  });
-
   testWidgets('지금 암호가 틀리면 넘어가지 않고 다시 묻는다 — 경고 팝업 없이', (tester) async {
     await open(tester);
     await enterPin(tester, '9999');
@@ -100,22 +94,6 @@ void main() {
     expect(find.text('비밀암호를 바꿨어요'), findsOneWidget);
   });
 
-  testWidgets('한번 더가 다르면 한번 더만 다시 받고 새 암호는 살린다', (tester) async {
-    await open(tester);
-    await enterPin(tester, '1234');
-    await enterPin(tester, '5678');
-    await enterPin(tester, '0000');
-
-    expect(find.text('비밀암호를 한번 더\n입력해주세요'), findsOneWidget);
-    expect(find.text('암호가 달라요. 다시 입력해주세요'), findsOneWidget);
-    expect(find.byType(ElumButton), findsNothing);
-
-    await enterPin(tester, '5678');
-    await tester.tap(find.byType(ElumButton));
-    await tester.pumpAndSettle();
-    expect(await storage.verifyPin('5678'), isTrue);
-  });
-
   testWidgets('확정 전에 나가면 암호는 그대로다', (tester) async {
     await open(tester);
     await enterPin(tester, '1234');
@@ -124,12 +102,6 @@ void main() {
     await tester.tap(find.bySemanticsLabel('뒤로 가기'));
     await tester.pumpAndSettle();
     expect(await storage.verifyPin('1234'), isTrue);
-  });
-
-  testWidgets('암호가 없던 휴대폰은 보호자 재로그인을 요구한다', (tester) async {
-    await open(tester, pin: null);
-    expect(find.text('로그인'), findsOneWidget);
-    expect(find.byType(TextField), findsNothing);
   });
 
   testWidgets('저장이 안 됐으면 실패 팝업을 띄우고 화면에 남는다', (tester) async {

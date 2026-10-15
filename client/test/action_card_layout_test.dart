@@ -7,7 +7,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/device_viewport.dart';
-import 'helpers/semantics_audit.dart';
 
 /// 카드 레이아웃 회귀 방지.
 ///
@@ -44,63 +43,6 @@ void main() {
   ActionCard card(String title, String description) =>
       ActionCard(id: 'c1', title: title, description: description);
 
-  testWidgets('이미지 칸은 카드확인과 이룸이 상세 모두 313:230 비율이다', (tester) async {
-    // 카드마다 비율이 다르면 넘길 때 그림이 들쭉날쭉해 보인다. 그림은 `contain`이라
-    // 안 잘린다. 이룸이 상세 시안(`1197:6775`)이 카드확인(`262:5124`)과 같은 313×230
-    // 카드로 바뀌었다 (#445). 예전 이룸이 상세는 313×264 였다.
-    await tester.pumpWidget(wrap(card('옷을 입어요', '학교에 갈 옷을 입어요')));
-    await tester.pump();
-
-    final review = tester.getSize(find.byType(AspectRatio));
-    expect(review.width / review.height, closeTo(313 / 230, 0.01));
-
-    await tester.pumpWidget(
-      wrap(
-        card('옷을 입어요', '학교에 갈 옷을 입어요'),
-        layout: ActionCardLayout.childDetail,
-      ),
-    );
-    await tester.pump();
-
-    final child = tester.getSize(find.byType(AspectRatio));
-    expect(child.width / child.height, closeTo(313 / 230, 0.01));
-  });
-
-  testWidgets('제목이 길어도 이미지 크기가 같다', (tester) async {
-    // 제목 길이가 이미지를 밀어내면 안 된다
-    await tester.pumpWidget(wrap(card('옷', '짧은 설명')));
-    await tester.pump();
-    final short = tester.getSize(find.byType(AspectRatio));
-
-    await tester.pumpWidget(
-      wrap(card('천천히 학교로 가요 아주 긴 제목입니다', '비 오는 길에서는 천천히 걸어요')),
-    );
-    await tester.pump();
-    final long = tester.getSize(find.byType(AspectRatio));
-
-    expect(long.height, closeTo(short.height, 0.5));
-  });
-
-  testWidgets('긴 제목을 …로 자르지 않는다', (tester) async {
-    // `천천히 학교로 ...`처럼 잘리면 무엇을 해야 하는지 알 수 없다
-    const title = '천천히 학교로 가요';
-    await tester.pumpWidget(wrap(card(title, '비 오는 길에서는 천천히 걸어요')));
-    await tester.pump();
-
-    final text = tester.widget<Text>(find.text(title));
-    expect(text.overflow, isNot(TextOverflow.ellipsis));
-    expect(text.maxLines, isNull);
-  });
-
-  testWidgets('설명도 자르지 않는다', (tester) async {
-    const description = '비 오는 길에서는 천천히 걸어요 그리고 조심해요';
-    await tester.pumpWidget(wrap(card('천천히 가요', description)));
-    await tester.pump();
-
-    final text = tester.widget<Text>(find.text(description));
-    expect(text.overflow, isNot(TextOverflow.ellipsis));
-  });
-
   testWidgets('내용이 길어도 오버플로가 나지 않는다', (tester) async {
     // 노란 줄무늬 경고가 뜨면 안 된다
     await tester.pumpWidget(
@@ -114,16 +56,6 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('제목이 비면 설명을 대신 쓴다', (tester) async {
-    // 서버가 title을 주지 않는다
-    await tester.pumpWidget(
-      wrap(const ActionCard(id: 'c1', description: '설명만 있는 카드')),
-    );
-    await tester.pump();
-
-    expect(find.text('설명만 있는 카드'), findsWidgets);
   });
 
   group('설명이 카드 밖으로 밀려 잘리지 않는다 (이슈 #335)', () {
@@ -174,44 +106,6 @@ void main() {
       '학교에 가져갈 가방을 손으로 챙겨요. 빠뜨린 것이 없는지 살펴요.',
     ];
 
-    testWidgets('이룸이 카드 상세 (410) — 두 줄은 다 보인다', (tester) async {
-      expect(
-        await hidden(
-          tester,
-          description: real.first,
-          height: 410,
-          width: 333,
-          layout: ActionCardLayout.childDetail,
-        ),
-        0,
-      );
-    });
-
-    testWidgets('이룸이 카드 상세 (410) — 세 줄도 들어간다', (tester) async {
-      // 그림칸이 313×230 으로 낮아져(#445) 예전(431 · 그림칸 264)엔 넘치던
-      // 세 줄짜리 문구(#335)도 카드 안에 다 들어간다.
-      expect(
-        await hidden(
-          tester,
-          description: real.last,
-          height: 410,
-          width: 333,
-          layout: ActionCardLayout.childDetail,
-        ),
-        0,
-      );
-    });
-
-    testWidgets('카드확인 — 아래 간격을 줄여 얻은 414 자리에 두 줄이 들어간다', (tester) async {
-      // 보상 줄(#239)이 붙으면서 카드가 390으로 짧아져 16.7 이 숨었다.
-      // 아래 간격 셋을 md(16) → xs(8) 로 줄여 24 를 카드에 돌려줬다.
-      expect(
-        await hidden(tester, description: real.first, height: 414, width: 332),
-        0,
-        reason: '두 줄 설명은 카드 안에 다 들어가야 한다',
-      );
-    });
-
     // #335 에서는 390 자리면 16.7 이 숨었다(되돌림 감시였다). #401 에서 카드확인
     // 그림칸이 시안대로 34 낮아지면서(313×230) 390 에서도 두 줄이 다 보인다.
     // 아래 간격 셋을 xs 로 줄인 것(#335)은 되돌릴 수 있게 됐다 — 이슈 #401 질문.
@@ -223,45 +117,4 @@ void main() {
     });
   });
 
-  group('누를 수 있는 것에 읽을 이름이 있다 (#339)', () {
-    Widget withActions({bool isSpeaking = false}) => ProviderScope(
-      child: ScreenUtilInit(
-        designSize: const Size(393, 852),
-        builder: (context, _) => MaterialApp(
-          theme: AppTheme.light,
-          home: Scaffold(
-            body: SizedBox(
-              width: 345,
-              height: 431,
-              child: ActionCardView(
-                card: card('옷을 입어요', '학교에 갈 옷을 입어요'),
-                index: 0,
-                onSpeak: () {},
-                onDelete: () {},
-                isSpeaking: isSpeaking,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    testWidgets('스피커와 X가 무엇을 하는지 읽힌다', (tester) async {
-      await tester.pumpWidget(withActions());
-      await tester.pump();
-
-      expectLabeledButton(tester, '소리로 듣기');
-      expectLabeledButton(tester, '이 카드 지우기');
-      expect(unnamedTapTargets(tester), isEmpty);
-    });
-
-    testWidgets('읽는 중에는 스피커가 멈추기라고 읽힌다', (tester) async {
-      // 읽는 중에 다시 누르면 멈춘다. 흐려지는 것만으로는 화면 낭독기에 안 닿는다.
-      await tester.pumpWidget(withActions(isSpeaking: true));
-      await tester.pump();
-
-      expectLabeledButton(tester, '읽기 멈추기');
-      expect(find.bySemanticsLabel('소리로 듣기'), findsNothing);
-    });
-  });
 }

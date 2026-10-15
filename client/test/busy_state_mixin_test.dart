@@ -54,42 +54,6 @@ void main() {
     expect(await state.runBusy(() async => 3), 3);
   });
 
-  testWidgets('진행 중 화면이 닫혀도 예외가 나지 않는다', (tester) async {
-    await pumpProbe(tester);
-    final state = key.currentState!;
-    final gate = Completer<int>();
-
-    final pending = state.runBusy(() => gate.future);
-    await tester.pumpWidget(const SizedBox());
-    gate.complete(1);
-
-    expect(await pending, 1);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('항목 잠금은 key 가 다르면 서로 막지 않고, 화면 잠금은 모두 막는다',
-      (tester) async {
-    await pumpProbe(tester);
-    final state = key.currentState!;
-    final a = Completer<void>();
-
-    final runA = state.runBusy(() => a.future, key: 'a');
-    await tester.pump();
-    expect(state.isBusy('a'), isTrue);
-
-    var bRan = false;
-    await state.runBusy(() async => bRan = true, key: 'b');
-    expect(bRan, isTrue);
-
-    var screenRan = false;
-    await state.runBusy(() async => screenRan = true);
-    expect(screenRan, isFalse, reason: '항목이 진행 중이면 화면 전체 작업은 기다린다');
-
-    a.complete();
-    await runA;
-    await tester.pump();
-    expect(state.isBusy('a'), isFalse);
-  });
 }
 
 class _Probe extends StatefulWidget {

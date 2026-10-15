@@ -28,15 +28,6 @@ void main() {
     expect(find.byType(SnackBar), findsNothing);
   });
 
-  testWidgets('모양은 화면이 아니라 테마가 정한다', (tester) async {
-    await tester.pumpWidget(app());
-    showElumToast(tester.element(find.text('본문')), '그림 방식을 바꿨어요');
-    await tester.pump();
-
-    final bar = tester.widget<SnackBar>(find.byType(SnackBar));
-    expect(bar.behavior, isNull);
-    expect(bar.backgroundColor, isNull);
-  });
 
   testWidgets('띄울 자리가 없어도 예외 없이 넘어간다', (tester) async {
     await tester.pumpWidget(

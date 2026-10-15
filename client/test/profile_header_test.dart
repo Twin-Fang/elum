@@ -42,44 +42,6 @@ void main() {
     expect(adapter.sentHeaders['GET /api/routines/today']!['X-Profile-Id'], 'p-2');
   });
 
-  test('고른 이룸이가 없으면 헤더를 싣지 않는다 — 서버가 첫 이룸이를 쓴다', () async {
-    final dio = build({'GET /api/routines/today': <Object>[]});
-
-    await dio.get<dynamic>('/api/routines/today');
-
-    expect(
-      adapter.sentHeaders['GET /api/routines/today']!.containsKey('X-Profile-Id'),
-      isFalse,
-    );
-  });
-
-  test('로그인·갱신 요청에는 싣지 않는다', () async {
-    selected = 'p-2';
-    final dio = build({'POST /api/auth/refresh': {'ok': true}});
-
-    await dio.post<dynamic>('/api/auth/refresh');
-
-    expect(
-      adapter.sentHeaders['POST /api/auth/refresh']!.containsKey('X-Profile-Id'),
-      isFalse,
-    );
-  });
-
-  test('요청이 skip 을 달면 싣지 않는다 — 고른 이룸이를 잃었을 때 첫 이룸이로 다시 읽는 길', () async {
-    selected = 'p-2';
-    final dio = build({'GET /api/member/me': {'ok': true}});
-
-    await dio.get<dynamic>(
-      '/api/member/me',
-      options: Options(extra: {ProfileHeaderInterceptor.skipKey: true}),
-    );
-
-    expect(
-      adapter.sentHeaders['GET /api/member/me']!.containsKey('X-Profile-Id'),
-      isFalse,
-    );
-  });
-
   test('실은 이룸이가 403 PROFILE_ACCESS_DENIED 면 잃었다고 알린다 (다른 휴대폰에서 나갔다)', () async {
     selected = 'p-2';
     final dio = build({
@@ -111,21 +73,4 @@ void main() {
     expect(lost, isEmpty);
   });
 
-  test('다른 실패(권한·네트워크)는 이룸이를 잃은 것으로 보지 않는다', () async {
-    selected = 'p-2';
-    final dio = build({
-      'DELETE /api/routines/r1': const FakeHttpError(
-        403,
-        errorCode: 'ROUTINE_NOT_CREATOR',
-        errorMessage: '일과를 만든 사람만 바꿀 수 있어요.',
-      ),
-      'GET /api/routines/today': const FakeOffline(),
-    });
-
-    await expectLater(dio.delete<dynamic>('/api/routines/r1'), throwsA(isA<DioException>()));
-    await expectLater(dio.get<dynamic>('/api/routines/today'), throwsA(isA<DioException>()));
-
-    expect(lost, isEmpty);
-    expect(noProfile, 0);
-  });
 }

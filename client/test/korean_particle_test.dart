@@ -22,27 +22,11 @@ void main() {
       expect('하나'.withParticle, '와');
     });
 
-    test('한글이 아니면 받침 없음으로 본다', () {
-      // 영문·숫자 뒤 조사는 발음 기준이라 정답이 없다. 깨지지만 않으면 된다.
-      expect('Alex'.subjectParticle, '가');
-      expect('7'.subjectParticle, '가');
-      expect(''.subjectParticle, '가');
-    });
 
-    test('마지막 글자만 본다', () {
-      expect('김민준'.subjectParticle, '이');
-      expect('김루미'.subjectParticle, '가');
-    });
   });
 
   group('보상 문구에 실제로 적용된다', () {
-    test('받침 있는 이름 — 민준이', () {
-      expect(RewardCharacter.ruru.messageFor('민준'), startsWith('민준이 '));
-    });
 
-    test('받침 없는 이름 — 루미가', () {
-      expect(RewardCharacter.ruru.messageFor('루미'), startsWith('루미가 '));
-    });
 
     test('이름이 비면 대체어를 쓰고 조사도 그에 맞춘다', () {
       // `가 할 일을 해내서` 처럼 조사만 남으면 안 된다

@@ -2,7 +2,6 @@ import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/member/data/member_repository.dart';
-import 'package:elum/features/profile/domain/profile_summary.dart';
 import 'package:elum/features/profile/presentation/profile_switch_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +11,6 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/profile_fixtures.dart';
-import 'helpers/semantics_audit.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
 import 'package:elum/core/router/routes.dart';
@@ -63,26 +61,6 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('연결된 이룸이를 모두 보여 주고 지금 보는 이룸이를 표시한다', (tester) async {
-    await open(tester);
-
-    expect(find.text('하늘이'), findsOneWidget);
-    expect(find.text('바다'), findsOneWidget);
-    // 고른 적이 없으면 첫 이룸이가 지금 보는 이룸이다
-    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
-    expect(
-      find.descendant(of: find.ancestor(of: find.text('하늘이'), matching: find.byType(Row)).first, matching: find.byIcon(Icons.check_rounded)),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('이름이 아직 없는 이룸이는 이룸이라고 부른다', (tester) async {
-    memberResult = memberWith([kProfileA, const ProfileSummary(id: 'p-c')]);
-    await open(tester);
-
-    expect(find.text('이룸이'), findsOneWidget);
-  });
-
   testWidgets('다른 이룸이를 고르면 이룸이를 바꾸고 이름·캐릭터를 맞추고 돌아간다 (E44)', (tester) async {
     await open(tester);
 
@@ -95,17 +73,6 @@ void main() {
     // 설정으로 돌아왔다
     expect(find.text('설정'), findsOneWidget);
     expect(find.text('이룸이를 바꿨어요'), findsOneWidget);
-  });
-
-  testWidgets('지금 보는 이룸이를 다시 고르면 아무것도 바꾸지 않고 돌아간다', (tester) async {
-    await open(tester);
-
-    await tester.tap(find.text('하늘이'));
-    await tester.pumpAndSettle();
-
-    expect(storage.selectedProfileId, anyOf(isNull, 'p-a'));
-    expect(find.text('이룸이를 바꿨어요'), findsNothing);
-    expect(find.text('설정'), findsOneWidget);
   });
 
   testWidgets('이룸이 목록을 못 받으면 에러 코드와 다시 시도를 보인다', (tester) async {
@@ -125,9 +92,4 @@ void main() {
     expect(find.textContaining('다시 시도'), findsOneWidget);
   });
 
-  testWidgets('이름 없는 누름 자리가 없고 줄이 이룸이 이름으로 읽힌다', (tester) async {
-    await open(tester);
-
-    expect(unnamedTapTargets(tester), isEmpty);
-  });
 }

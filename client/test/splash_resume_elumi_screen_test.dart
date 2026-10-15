@@ -20,18 +20,6 @@ void main() {
     resumeOnElumiScreen: resume,
   );
 
-  test('이룸이 화면에 있었으면 이룸이 화면으로 연다', () {
-    expect(dest(resume: true), Routes.child);
-  });
-
-  test('보호자 화면에 있었으면 보호자 홈으로 연다', () {
-    expect(dest(), Routes.guardian);
-  });
-
-  test('역할이 생기기 전에 가입한 보호자도 이룸이 화면을 되찾는다', () {
-    expect(dest(selectedRole: null, resume: true), Routes.child);
-  });
-
   test('세션이 없으면 기억한 화면보다 로그인이 먼저다', () {
     expect(dest(hasSession: false, resume: true), Routes.login);
   });

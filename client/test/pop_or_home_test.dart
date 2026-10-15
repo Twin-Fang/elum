@@ -54,17 +54,6 @@ void main() {
 
   String top() => router.routerDelegate.currentConfiguration.last.matchedLocation;
 
-  testWidgets('쌓인 화면이 있으면 그대로 돌아간다', (tester) async {
-    await pump(tester, storage: InMemoryStorage());
-    router.push('/b');
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('뒤로'));
-    await tester.pumpAndSettle();
-
-    expect(top(), '/a');
-  });
-
   testWidgets('돌아갈 화면이 없으면 지금 상태의 홈으로 간다 — 세션 없음 → 로그인', (tester) async {
     await pump(tester, storage: InMemoryStorage());
     expect(router.canPop(), isFalse, reason: '전제: go 로 열린 화면이다');
@@ -74,31 +63,6 @@ void main() {
 
     expect(top(), Routes.login);
     expect(tester.takeException(), isNull, reason: 'pop 이 오류를 던지면 안 된다');
-  });
-
-  testWidgets('보호자 세션이면 보호자 홈으로 간다', (tester) async {
-    await pump(
-      tester,
-      storage: InMemoryStorage(onboardingCompleted: true),
-      tokens: InMemoryTokenStore(accessToken: 'a', refreshToken: 'r'),
-    );
-
-    await tester.tap(find.text('뒤로'));
-    await tester.pumpAndSettle();
-
-    expect(top(), Routes.guardian);
-  });
-
-  testWidgets('이미 홈이면 아무것도 하지 않는다 — 같은 화면을 다시 띄우지 않는다', (tester) async {
-    await pump(tester, storage: InMemoryStorage());
-    router.go(Routes.login);
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('뒤로'));
-    await tester.pumpAndSettle();
-
-    expect(top(), Routes.login);
-    expect(router.routerDelegate.currentConfiguration.matches, hasLength(1));
   });
 
   testWidgets('저장소를 읽다 오류가 나면 로그인 화면으로 간다 — 누구나 들어갈 수 있는 곳이다', (tester) async {

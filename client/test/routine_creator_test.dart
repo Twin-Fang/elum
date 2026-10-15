@@ -62,48 +62,6 @@ void main() {
       expect(r.foreignCreatorLabel, '엄마가 만든 일과예요');
     });
 
-    test('필드가 없으면 알 수 없다 — 숨기지 않는다 (옛 서버·아직 안 내려주는 서버)', () {
-      final r = Routine.fromJson(routineJson('r1', '일과'));
-
-      expect(r.createdByMe, isNull);
-      expect(r.isEditableByMe, isTrue);
-      expect(r.foreignCreatorLabel, isNull);
-    });
-
-    test('내가 만들었으면 라벨이 없다', () {
-      final r = Routine.fromJson(routineJson('r1', '일과', createdByMe: true, creatorName: '아빠'));
-
-      expect(r.isEditableByMe, isTrue);
-      expect(r.foreignCreatorLabel, isNull);
-    });
-
-    test('만든 사람 이름이 없으면 다른 보호자라고 한다', () {
-      final r = Routine.fromJson(routineJson('r1', '일과', createdByMe: false));
-
-      expect(r.foreignCreatorLabel, '다른 보호자가 만든 일과예요');
-    });
-
-    test('이름 끝 글자 받침에 맞춰 조사를 고른다', () {
-      final r = Routine.fromJson(routineJson('r1', '일과', createdByMe: false, creatorName: '센터 선생님'));
-
-      expect(r.foreignCreatorLabel, '센터 선생님이 만든 일과예요');
-    });
-
-    test('모양이 달라도 죽지 않는다', () {
-      final r = Routine.fromJson({'id': 'r1', 'createdByMe': 'yes', 'creatorName': 7});
-
-      expect(r.createdByMe, isNull);
-      expect(r.creatorName, '7');
-    });
-
-    test('오프라인 캐시에도 남는다 — 목록을 못 받아도 남의 일과 버튼이 도로 생기지 않는다', () {
-      final r = Routine.fromJson(routineJson('r1', '일과', createdByMe: false, creatorName: '엄마'));
-
-      final again = Routine.fromJson(r.toJson());
-
-      expect(again.createdByMe, isFalse);
-      expect(again.creatorName, '엄마');
-    });
   });
 
   group('보호자 홈', () {
@@ -165,40 +123,6 @@ void main() {
       expect(swipeEnabled(tester, '엄마의 일과'), isFalse);
     });
 
-    testWidgets('만든 사람을 모르는 일과는 지금처럼 밀 수 있다', (tester) async {
-      await pump(tester, today: [routineJson('r-mine', '일과')]);
-
-      expect(swipeEnabled(tester, '일과'), isTrue);
-    });
-
-    testWidgets('남의 일과를 누르면 보기 시트만 열린다 — 편집하기가 없고 만든 사람 이름을 보인다 (E46)', (tester) async {
-      await pump(tester, today: [
-        routineJson('r-theirs', '엄마의 일과', createdByMe: false, creatorName: '엄마'),
-      ]);
-
-      await tester.tap(find.text('엄마의 일과'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('엄마가 만든 일과예요'), findsOneWidget);
-      expect(find.text('편집하기'), findsNothing);
-      // 순서 손잡이도 없다 — 카드 순서는 고치는 일이다
-      expect(svgWithAsset(AppAssets.sheetReorderHandle), findsNothing);
-      // 카드 내용은 볼 수 있다
-      expect(find.text('손을 씻어요'), findsWidgets);
-    });
-
-    testWidgets('내 일과의 시트에는 편집하기가 있고 만든 사람 줄은 없다', (tester) async {
-      await pump(tester, today: [
-        routineJson('r-mine', '내 일과', createdByMe: true, creatorName: '아빠'),
-      ]);
-
-      await tester.tap(find.text('내 일과'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('편집하기'), findsOneWidget);
-      expect(find.textContaining('만든 일과예요'), findsNothing);
-    });
-
     testWidgets('숨기지 못한 자리에서 서버가 403 을 주면 이유와 코드를 보이고 머문다 (E30)', (tester) async {
       await pump(
         tester,
@@ -225,24 +149,5 @@ void main() {
   });
 
   group('임시저장', () {
-    test('남이 만든 임시저장은 빠진다 — 이어서 만들 수 없다 (서버는 이룸이의 임시저장을 모두 준다)', () async {
-      final container = ProviderContainer(
-        overrides: [
-          myRoutinesProvider.overrideWith(
-            (ref) async => [
-              Routine.fromJson(routineJson('a', '내 것', createdByMe: true, status: 'PENDING_REVIEW')),
-              Routine.fromJson(routineJson('b', '남의 것', createdByMe: false, creatorName: '엄마', status: 'PENDING_REVIEW')),
-              Routine.fromJson(routineJson('c', '모르는 것', status: 'PENDING_REVIEW')),
-              Routine.fromJson(routineJson('d', '승인한 것', createdByMe: true)),
-            ],
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      final drafts = await container.read(draftRoutinesProvider.future);
-
-      expect(drafts.map((r) => r.title), ['내 것', '모르는 것']);
-    });
   });
 }

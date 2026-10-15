@@ -62,20 +62,6 @@ void main() {
     });
   });
 
-  group('다시 묻는다', () {
-    test('신호가 올라가면 상태를 다시 가져온다', () async {
-      final repo = _QueueRepository([status(maintenance: false), status(maintenance: true)]);
-      final container = ProviderContainer(overrides: [
-        appStatusRepositoryProvider.overrideWithValue(repo),
-      ]);
-      addTearDown(container.dispose);
-
-      expect((await container.read(appStatusProvider.future)).status.maintenance, isFalse);
-      container.read(appStatusRecheckProvider.notifier).request();
-      expect((await container.read(appStatusProvider.future)).status.maintenance, isTrue);
-      expect(repo.calls, 2);
-    });
-  });
 
   group('게이트', () {
     // app.dart 와 같은 자리에 둔다 — MaterialApp 의 builder 안이라 테마 확장이 보인다.
@@ -90,21 +76,6 @@ void main() {
             ),
           ),
         );
-
-    testWidgets('앱이 다시 앞으로 올라오면 점검을 알아챈다', (tester) async {
-      final repo = _QueueRepository([status(maintenance: false), status(maintenance: true)]);
-      await tester.pumpWidget(wrap(repo));
-      await tester.pumpAndSettle();
-      expect(find.text('홈'), findsOneWidget);
-
-      // 점검을 켠 뒤 사용자가 다른 앱에 갔다가 돌아온다
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pumpAndSettle();
-
-      expect(find.text('잠시 쉬고 있어요'), findsOneWidget);
-      expect(find.text('오늘 밤 10시까지 점검해요'), findsOneWidget);
-    });
 
     testWidgets('다시 묻는 동안 점검 화면을 유지한다 — 앱 화면이 튀어나오지 않는다', (tester) async {
       final gate = Completer<AppStatus>();

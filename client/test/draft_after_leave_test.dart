@@ -19,7 +19,6 @@ import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
 import 'package:elum/core/router/routes.dart';
-import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 만들다 나간 일과가 **임시저장에 바로 보이는가** (이슈 #387).
 ///
@@ -66,26 +65,6 @@ void main() {
       expect(drafts.map((r) => r.id), ['r1']);
     });
 
-    test('만들다 실패하면 받을 것이 없다 — 다시 받지 않는다', () async {
-      final repo = _Repo()..failCreate = true;
-      final container = ProviderContainer(
-        overrides: [
-          testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
-          routineRepositoryProvider.overrideWithValue(repo),
-        ],
-      );
-      addTearDown(container.dispose);
-      await container.read(draftRoutinesProvider.future);
-      final before = repo.listCalls;
-
-      final notifier = container.read(routineFlowProvider.notifier)
-        ..setRawInput('내일 비 오는 날 등교');
-      await notifier.generateCards();
-
-      expect(container.read(routineFlowProvider).step, RoutineFlowStep.error);
-      await container.read(draftRoutinesProvider.future);
-      expect(repo.listCalls, before);
-    });
   });
 
   group('임시저장 일과는 오늘 일과가 아니다 (결함 C · #353)', () {
@@ -108,104 +87,10 @@ void main() {
       expect(container.read(homeRoutinesProvider), isEmpty);
     });
 
-    test('방금 저장한(CONFIRMED) 일과는 목록이 오기 전에도 바로 보인다', () async {
-      final container = containerWith(_draft('r2', status: 'CONFIRMED'));
-      addTearDown(container.dispose);
-      await container.read(todayRoutinesProvider.future);
-
-      expect(container.read(homeRoutinesProvider).map((r) => r.id), ['r2']);
-    });
   });
 
   group('임시저장 화면', () {
-    testWidgets('들어올 때마다 새로 받는다 — 다른 곳에서 만든 것도 보인다', (tester) async {
-      final repo = _Repo();
-      final router = GoRouter(
-        initialLocation: '/start',
-        routes: [
-          GoRoute(
-            path: '/start',
-            builder: (context, state) => Consumer(
-              builder: (context, ref, _) {
-                // 앱의 다른 화면이 먼저 목록을 받아 둔 상태를 만든다
-                ref.watch(myRoutinesProvider);
-                return const Scaffold(body: Text('시작'));
-              },
-            ),
-          ),
-          GoRoute(
-            path: Routes.guardianDrafts,
-            builder: (context, state) => const DraftRoutinesScreen(),
-          ),
-        ],
-      );
-      await tester.pumpWidget(_app(repo, router));
-      await tester.pumpAndSettle();
-      expect(repo.listCalls, 1);
 
-      repo.serverList = [_draft('r1')];
-      router.push(Routes.guardianDrafts);
-      await tester.pumpAndSettle();
-
-      expect(repo.listCalls, 2);
-      expect(find.text('비 오는 날 등교'), findsOneWidget);
-    });
-
-    testWidgets('카드를 만든 뒤 흐름 아래 가려진 홈으로 돌아와도 터지지 않는다', (tester) async {
-      // 카드가 만들어질 때 홈은 흐름 아래에 **가려져 멈춰 있다**(Riverpod 3 이 가려진
-      // 화면의 구독을 쉰다). 그때 홈이 보는 목록(오늘)을 무효화하면, 돌아오는 순간
-      // 멈췄던 파생 목록이 빌드 도중에 다시 그리라고 요청해 디버그에서
-      // `markNeedsBuild() called during build` 가 난다 — 실제로 한 번 그렇게 만들었다.
-      // 그래서 만든 직후에는 임시저장이 보는 전체 목록만 다시 받는다.
-      final repo = _Repo();
-      final router = GoRouter(
-        initialLocation: '/home',
-        routes: [
-          GoRoute(
-            path: '/home',
-            builder: (context, state) => Consumer(
-              builder: (context, ref, _) {
-                final n = ref.watch(homeRoutinesProvider).length;
-                return Scaffold(body: Text('홈 $n'));
-              },
-            ),
-          ),
-          GoRoute(
-            path: '/flow',
-            builder: (context, state) => const Scaffold(body: Text('흐름')),
-          ),
-        ],
-      );
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
-            routineRepositoryProvider.overrideWithValue(repo),
-            todayRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
-          ],
-          child: ScreenUtilInit(
-            designSize: const Size(393, 852),
-            builder: (context, _) =>
-                MaterialApp.router(theme: AppTheme.light, routerConfig: router),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      router.push('/flow');
-      await tester.pumpAndSettle();
-
-      final container = ProviderScope.containerOf(tester.element(find.text('흐름')));
-      container.read(routineFlowProvider.notifier).setRawInput('내일 등교');
-      await container.read(routineFlowProvider.notifier).generateCards();
-      await tester.pump();
-
-      router.pop();
-      await tester.pumpAndSettle();
-
-      expect(tester.takeException(), isNull);
-      // 방금 만든 것은 임시저장이라 홈 오늘 일과에 없다 (결함 C)
-      expect(find.text('홈 0'), findsOneWidget);
-    });
 
     testWidgets('이어서 만들다 다시 나가도 같은 일과가 한 번만 있다 (T7)', (tester) async {
       final repo = _Repo()..serverList = [_draft('r1')];

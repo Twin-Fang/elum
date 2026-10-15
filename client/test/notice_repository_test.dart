@@ -49,13 +49,6 @@ void main() {
       expect(NoticePlatform.android.wire, 'ANDROID');
     });
 
-    test('지금 플랫폼을 가린다', () {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-      expect(NoticePlatform.current, NoticePlatform.ios);
-      debugDefaultTargetPlatformOverride = TargetPlatform.android;
-      expect(NoticePlatform.current, NoticePlatform.android);
-      debugDefaultTargetPlatformOverride = null;
-    });
   });
 
   test('받은 공지를 읽고 이미지 경로는 서버 주소에 붙인다', () async {

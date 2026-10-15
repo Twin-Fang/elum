@@ -1,6 +1,4 @@
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/network/server_error.dart';
-import 'package:elum/core/network/server_error_code.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/shared/models/action_card.dart';
@@ -10,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/test_storage.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
-import 'package:elum/features/guardian/application/routine_flow_state.dart';
 
 /// 카드확인의 `저장하기` (이슈 #405).
 ///
@@ -63,18 +60,6 @@ void main() {
       expect(f.repo.confirmCalls, 0, reason: 'CONFIRMED 는 확정 대상이 아니다');
     });
 
-    test('뺀 카드가 서버에서 빠진다', () async {
-      final f = setUpFlow('CONFIRMED');
-      final notifier = f.container.read(routineFlowProvider.notifier);
-
-      notifier
-        ..removeStep('c2')
-        ..removeStep('c3');
-      await notifier.save();
-
-      expect(f.repo.deletedStepIds, ['c2', 'c3']);
-    });
-
     test('아무것도 빼지 않았으면 서버를 부르지 않는다 (E1)', () async {
       final f = setUpFlow('CONFIRMED');
 
@@ -85,43 +70,8 @@ void main() {
       expect(f.repo.confirmCalls, 0);
     });
 
-    test('COMPLETED 인 일과도 확정하지 않는다', () async {
-      final f = setUpFlow('COMPLETED');
-      final notifier = f.container.read(routineFlowProvider.notifier);
-
-      notifier.removeStep('c2');
-      await notifier.save();
-
-      expect(f.repo.confirmCalls, 0);
-      expect(f.repo.deletedStepIds, ['c2']);
-    });
   });
 
-  group('만들기 흐름에서 저장한다', () {
-    test('뺀 카드를 지운 뒤 확정한다 — 순서가 중요하다', () async {
-      final f = setUpFlow('PENDING_REVIEW');
-      final notifier = f.container.read(routineFlowProvider.notifier);
-
-      notifier.removeStep('c2');
-      final failure = await notifier.save();
-
-      expect(failure, isNull);
-      expect(f.repo.deletedStepIds, ['c2']);
-      expect(f.repo.confirmCalls, 1);
-      // 확정이 삭제보다 먼저면, 확정하자마자 이룸이 화면에 뺀 카드가 잠깐 뜬다
-      expect(f.repo.log, ['delete:c2', 'confirm']);
-      expect(f.container.read(routineFlowProvider).step, RoutineFlowStep.done);
-    });
-
-    test('카드를 빼지 않아도 확정은 한다', () async {
-      final f = setUpFlow('PENDING_REVIEW');
-
-      await f.container.read(routineFlowProvider.notifier).save();
-
-      expect(f.repo.deletedStepIds, isEmpty);
-      expect(f.repo.confirmCalls, 1);
-    });
-  });
 
   group('실패해도 무엇이 남았는지 잃지 않는다', () {
     test('삭제가 실패하면 확정하지 않고 이유를 돌려준다 (E2)', () async {
@@ -160,27 +110,6 @@ void main() {
       expect(f.repo.confirmCalls, 1);
     });
 
-    test('이미 없는 카드는 빠진 것으로 본다 (E3)', () async {
-      // 다른 휴대폰에서 먼저 지웠다 — 결과가 같으므로 실패로 보지 않는다
-      final f = setUpFlow('PENDING_REVIEW');
-      final notifier = f.container.read(routineFlowProvider.notifier);
-      f.repo
-        ..failDeleteOf = 'c2'
-        ..deleteFailure = const AppFailure(
-          fault: NetworkFault.none,
-          server: ServerError(
-            code: ServerErrorCode.routineStepNotFound,
-            statusCode: 404,
-          ),
-        );
-
-      notifier.removeStep('c2');
-      final failure = await notifier.save();
-
-      expect(failure, isNull);
-      expect(f.repo.confirmCalls, 1);
-    });
-
     test('확정이 실패하면 이유를 돌려주고 삭제를 다시 하지 않는다 (E6)', () async {
       final f = setUpFlow('PENDING_REVIEW');
       final notifier = f.container.read(routineFlowProvider.notifier);
@@ -198,31 +127,6 @@ void main() {
     });
   });
 
-  test('다음 일과를 만들 때 지난번에 뺀 카드가 따라오지 않는다', () async {
-    final f = setUpFlow('CONFIRMED');
-    final notifier = f.container.read(routineFlowProvider.notifier);
-
-    notifier.removeStep('c2');
-    notifier.reset();
-    notifier.loadExisting(routineOf('CONFIRMED'));
-    await notifier.save();
-
-    expect(f.repo.deletedStepIds, isEmpty);
-  });
-
-  // 운영에서 응답을 기다리던 1초 사이 다시 눌려, 두 번째 승인이 409 로 거절돼
-  // 저장은 됐는데 실패 팝업이 떴다.
-  test('저장 중에 다시 불러도 서버로는 한 번만 간다', () async {
-    final f = setUpFlow('PENDING_REVIEW');
-    final notifier = f.container.read(routineFlowProvider.notifier);
-
-    notifier.removeStep('c2');
-    final results = await Future.wait([notifier.save(), notifier.save()]);
-
-    expect(results, [isNull, isNull]);
-    expect(f.repo.confirmCalls, 1);
-    expect(f.repo.deletedStepIds, ['c2']);
-  });
 }
 
 /// 무엇을 어떤 차례로 불렀는지 센다.

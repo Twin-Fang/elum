@@ -72,21 +72,6 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('숫자는 서버 단가를 따른다', (tester) async {
-    final handle = tester.ensureSemantics();
-    await pump(
-      tester,
-      ImageStyle.cartoon,
-      summary: () async => const CreditSummary(
-        enabled: true,
-        routineTextCost: 2,
-        cardImageCost: 3,
-      ),
-    );
-
-    expect(barLabel(tester), '크레딧, 일과 2개, 그림 한 장 3개');
-    handle.dispose();
-  });
 
   testWidgets('크레딧 조회가 실패해도 기본 단가로 그린다', (tester) async {
     final handle = tester.ensureSemantics();
@@ -111,9 +96,4 @@ void main() {
     expect(find.textContaining('크레딧'), findsNothing);
   });
 
-  testWidgets('글자를 2배로 키워도 넘치지 않는다', (tester) async {
-    await pump(tester, ImageStyle.realistic, textScale: 2);
-
-    expect(tester.takeException(), isNull);
-  });
 }

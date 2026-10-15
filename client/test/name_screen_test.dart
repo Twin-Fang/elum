@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
-import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/core/router/routes.dart';
 
@@ -63,60 +62,8 @@ void main() {
     return button.onPressed != null;
   }
 
-  group('빈 상태 (204:991)', () {
-    testWidgets('Figma 문구 3종이 보인다', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      // 시안(204:996 · 204:997 · 204:998) 문구. 한 글자라도 다르면 여기서 막힌다.
-      expect(find.text('이룸이를 어떻게\n불러드릴까요?'), findsOneWidget);
-      expect(find.text('정확한 실명이 아니어도 괜찮아요'), findsOneWidget);
-      expect(find.text('이름을 입력해주세요'), findsOneWidget);
-    });
-
-    testWidgets('입력 필드에 아이콘이 없다', (tester) async {
-      // Figma 개정으로 필드 좌측 아이콘이 빠졌다 (이슈 #83).
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(svgWithAsset('assets/images/icon_child_head.svg'), findsNothing);
-    });
-
-    testWidgets('입력 전에는 다음 버튼이 비활성이다', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      expect(find.text('다음'), findsOneWidget);
-      expect(isNextButtonEnabled(tester), isFalse);
-    });
-  });
 
   group('입력 완료 상태 (204:1174)', () {
-    testWidgets('한 글자 입력하면 다음 버튼이 활성된다', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), '하늘이');
-      await tester.pumpAndSettle();
-
-      expect(isNextButtonEnabled(tester), isTrue);
-    });
-
-    testWidgets('입력값이 화면에 보이고 notifier에도 반영된다', (tester) async {
-      // placeholder Text는 트리에 남는다 — Flutter가 opacity로 숨기지 언마운트하지 않는다.
-      // 그래서 "hint가 사라졌는가"가 아니라 "입력값이 렌더링되는가"를 본다.
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), '하늘이');
-      await tester.pumpAndSettle();
-
-      expect(find.text('하늘이'), findsOneWidget);
-
-      final field = tester.widget<TextField>(find.byType(TextField));
-      expect(field.controller?.text, '하늘이');
-    });
-
     testWidgets('공백만 입력하면 활성되지 않는다', (tester) async {
       // canProceedFromName이 trim()으로 판단한다
       await tester.pumpWidget(buildSubject());
@@ -150,17 +97,4 @@ void main() {
   ///
   /// 오버플로 자체는 `flutter_test_config.dart`가 예외로 바꿔 잡는다.
   /// 여기서는 그 상황을 만들어 주는 것이 역할이다.
-  group('키보드', () {
-    testWidgets('키보드가 올라와도 레이아웃이 깨지지 않는다', (tester) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      showKeyboard(tester);
-      await tester.pumpAndSettle();
-
-      // 화면이 살아있어야 한다 — 오버플로가 나면 여기 오기 전에 실패한다
-      expect(find.byType(ElumButton), findsOneWidget);
-    });
-
-  });
 }

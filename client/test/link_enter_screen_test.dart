@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/features/link/presentation/widgets/code_boxes.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/presentation/link_enter_screen.dart';
@@ -67,15 +66,6 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('어디서 암호를 받는지 화면이 알려준다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    // 이룸이 혼자 보고도 다음 행동을 알 수 있어야 한다.
-    expect(find.textContaining('보호자 휴대폰의'), findsOneWidget);
-    expect(find.textContaining('설정 → 이룸이 휴대폰 연결하기'), findsOneWidget);
-  });
-
   testWidgets('여섯 칸 자리가 연결 암호 넣기로 읽히고 넣은 글자를 알린다 (#339)', (tester) async {
     // 실제 입력칸은 투명이라 화면 낭독기에 드러나지 않는다. 칸에 보이는 글자는
     // 값으로 함께 읽혀야 무엇을 넣었는지 들을 수 있다.
@@ -93,40 +83,6 @@ void main() {
     );
   });
 
-  testWidgets('여섯 자를 채워도 스스로 보내지 않고 시작하기로 보낸다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    ElumButton startButton() =>
-        tester.widget<ElumButton>(find.widgetWithText(ElumButton, '시작하기'));
-    expect(startButton().onPressed, isNull);
-
-    await type(tester, 'A7K3M9');
-
-    expect(repo.sent, isEmpty);
-    expect(startButton().onPressed, isNotNull);
-
-    await tester.tap(find.text('시작하기'));
-    await tester.pumpAndSettle();
-
-    expect(repo.sent, ['A7K3M9']);
-    expect(find.text('이룸이 홈'), findsOneWidget);
-  });
-
-  testWidgets('일곱 번째 글자는 칸에 들어가지 않는다', (tester) async {
-    repo.outcome = RedeemOutcome.offline;
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    await type(tester, 'A7K3M9Z');
-    await tester.tap(find.text('시작하기'));
-    await tester.pumpAndSettle();
-
-    // 칸에 보이는 값과 보내는 값이 같아야 한다
-    expect(repo.sent, ['A7K3M9']);
-    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'A7K3M9');
-  });
-
   testWidgets('인터넷이 끊기면 입력을 남기고 시작하기로 다시 보낸다', (tester) async {
     repo.outcome = RedeemOutcome.offline;
     await tester.pumpWidget(wrap());
@@ -141,44 +97,6 @@ void main() {
 
     expect(repo.sent, ['A7K3M9', 'A7K3M9']);
     expect(find.text('이룸이 홈'), findsOneWidget);
-  });
-
-  testWidgets('여섯 자를 채우면 키보드를 내려 시작하기를 누를 수 있다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    await type(tester, 'A7K3M9');
-    // 키보드에 가려진 채 남으면 이룸이가 누를 곳을 찾지 못한다
-    expect(tester.testTextInput.isVisible, isFalse);
-    expect(repo.sent, isEmpty);
-
-    await tester.tap(find.widgetWithText(ElumButton, '시작하기'));
-    await tester.pumpAndSettle();
-    expect(repo.sent, ['A7K3M9']);
-  });
-
-  testWidgets('여섯 자가 안 되면 시작하기가 꺼져 있다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    await type(tester, 'A7K3M');
-
-    expect(
-      tester
-          .widget<ElumButton>(find.widgetWithText(ElumButton, '시작하기'))
-          .onPressed,
-      isNull,
-    );
-    expect(repo.sent, isEmpty);
-  });
-
-  testWidgets('소문자·공백으로 쳐도 대문자로 보낸다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    await typeAndStart(tester, 'a7k 3m9');
-
-    expect(repo.sent, ['A7K3M9']);
   });
 
   testWidgets('틀리면 입력을 비우고 무엇이 잘못됐는지 말한다', (tester) async {

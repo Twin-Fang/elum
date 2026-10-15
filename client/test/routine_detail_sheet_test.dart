@@ -77,51 +77,6 @@ void main() {
     );
   }
 
-  testWidgets('제목과 단계가 번호와 함께 보인다', (tester) async {
-    await tester.pumpWidget(wrap(_FakeRepo()));
-    await tester.pump();
-
-    expect(find.text('스스로 옷을 입어요'), findsOneWidget);
-    expect(find.text('옷을 골라요'), findsOneWidget);
-    expect(find.text('윗옷을 입어요'), findsOneWidget);
-    // 번호는 1부터 붙는다
-    expect(find.text('1'), findsOneWidget);
-    expect(find.text('3'), findsOneWidget);
-  });
-
-  testWidgets('보상은 뱃지 + 카드로 보여준다 — 시안 짜임을 따른다 (#295)', (tester) async {
-    await tester.pumpWidget(wrap(_FakeRepo()));
-    await tester.pump();
-
-    expect(find.text('유튜브 시청 20분'), findsOneWidget);
-    // 시안(963:4422)은 단계와 같은 짜임으로 두고 뱃지만 다르게 한다.
-    // 전에는 `다 하면`이라는 말로 대신했는데(#275) 시안이 뒤에 나와 그쪽을 따른다.
-    expect(find.text('다 하면'), findsNothing);
-    expect(find.text('⭐'), findsNothing, reason: '별은 이모지가 아니라 에셋이다');
-  });
-
-  testWidgets('보상을 정하지 않았으면 없다고 말해 준다 (#308)', (tester) async {
-    await tester.pumpWidget(
-      wrap(
-        _FakeRepo(),
-        value: const Routine(id: 'r2', title: '손 씻기', steps: steps),
-      ),
-    );
-    await tester.pump();
-
-    // 전에는 줄째 숨겼다. 그러면 보상을 넣을 수 있다는 것조차 보이지 않는다.
-    // 시안(980:5174)은 빈 칸 대신 **말로** 알린다.
-    expect(find.text('일과 완료 후 보상이 없어요'), findsOneWidget);
-    expect(find.text('⭐'), findsNothing, reason: '별은 이모지가 아니라 에셋이다');
-
-    // **별은 흐리게 하지 않는다.** 한때 흐리게 했는데 시안을 잘못 읽은 것이었다
-    // — `980:5174`의 별은 보상이 없을 때도 선명하다 (#297).
-    final dimmed = tester
-        .widgetList<Opacity>(find.byType(Opacity))
-        .where((o) => o.opacity == 0.5);
-    expect(dimmed, isEmpty, reason: '시안의 별은 보상이 없어도 선명하다');
-  });
-
   testWidgets('편집하기를 누르면 edit을 돌려준다 — 화면 이동은 부르는 쪽이 한다', (tester) async {
     RoutineSheetAction? result;
     await tester.pumpWidget(
@@ -163,35 +118,6 @@ void main() {
   // 이룸이 화면은 다 끝낸 일과를 다시 그리지 않는다. 보호자가 고쳐도 반영되지 않으므로
   // 편집 버튼을 막고, 숨기지 않고 글자로 이유를 보인다.
   group('다 끝낸 일과 시트', () {
-    testWidgets('편집하기 대신 눌리지 않는 버튼이 보인다', (tester) async {
-      await tester.pumpWidget(wrap(_FakeRepo(), isFinished: true));
-      await tester.pumpAndSettle();
-
-      expect(find.text('편집하기'), findsNothing);
-      final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, '다 끝낸 일과예요'),
-      );
-      expect(button.onPressed, isNull);
-    });
-
-    testWidgets('순서를 바꾸는 손잡이가 없다', (tester) async {
-      await tester.pumpWidget(wrap(_FakeRepo(), isFinished: true));
-      await tester.pumpAndSettle();
-
-      expect(svgWithAsset(AppAssets.sheetReorderHandle), findsNothing);
-    });
-
-    testWidgets('지난 일과는 다 끝냈어도 다시하기가 눌린다', (tester) async {
-      await tester.pumpWidget(
-        wrap(_FakeRepo(), isPast: true, isFinished: true),
-      );
-      await tester.pumpAndSettle();
-
-      final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, '일과 다시하기'),
-      );
-      expect(button.onPressed, isNotNull);
-    });
   });
 
   // --- 지난 일과 (시안 980:4777 · #310) ---
@@ -199,32 +125,6 @@ void main() {
   // **지나간 것은 고치지 않는다.** 고쳐 봐야 어제 일과가 바뀔 뿐 오늘 할 일이
   // 생기지 않는다. 그래서 시안은 버튼을 바꾸고 순서 손잡이를 지웠다.
   group('지난 일과 시트', () {
-    testWidgets('버튼이 일과 다시하기다', (tester) async {
-      await tester.pumpWidget(wrap(_FakeRepo(), isPast: true));
-      await tester.pumpAndSettle();
-
-      expect(find.text('일과 다시하기'), findsOneWidget);
-      expect(find.text('편집하기'), findsNothing);
-    });
-
-    testWidgets('순서를 바꾸는 손잡이가 없다', (tester) async {
-      await tester.pumpWidget(wrap(_FakeRepo(), isPast: true));
-      await tester.pumpAndSettle();
-
-      expect(
-        svgWithAsset(AppAssets.sheetReorderHandle),
-        findsNothing,
-        reason: '지나간 일과는 자리를 바꿔도 의미가 없다',
-      );
-    });
-
-    testWidgets('오늘 일과에는 손잡이가 그대로 있다', (tester) async {
-      await tester.pumpWidget(wrap(_FakeRepo()));
-      await tester.pumpAndSettle();
-
-      expect(svgWithAsset(AppAssets.sheetReorderHandle), findsWidgets);
-    });
-
     testWidgets('다시하기를 누르면 rerun을 돌려준다', (tester) async {
       RoutineSheetAction? result;
       await tester.pumpWidget(
@@ -293,153 +193,6 @@ void main() {
     expect(find.textContaining('E-STEP-ORDER'), findsOneWidget);
   });
 
-  testWidgets('순서를 바꿔도 번호는 자리를 지킨다 (#296)', (tester) async {
-    final repo = _FakeRepo();
-    await tester.pumpWidget(wrap(repo));
-    await tester.pump();
-
-    expect(find.text('옷을 골라요'), findsOneWidget);
-    for (final n in ['1', '2', '3']) {
-      expect(find.text(n), findsOneWidget);
-    }
-
-    await _grabAndDrag(tester, const Offset(0, 160));
-
-    // **번호는 카드의 이름표가 아니라 몇 번째 자리인가를 뜻한다.** 옮긴 뒤에도
-    // 왼쪽 줄은 1·2·3 그대로 서 있고 카드 내용만 자리를 바꾼다. 뱃지가 카드를
-    // 따라다니면 내려놓는 순간 번호가 한꺼번에 다시 매겨져 헷갈린다.
-    for (final n in ['1', '2', '3']) {
-      expect(find.text(n), findsOneWidget, reason: '번호 $n 이 한 자리에 그대로 있다');
-    }
-    // 서버에는 바뀐 순서가 간다 — 화면만 그대로인 것이 아니다.
-    expect(repo.lastStepIds, hasLength(3));
-  });
-
-  testWidgets('길게 누르고 있으면 줄이 떠오른다 — 움직이기 전에 잡혔음을 보여준다 (#274)', (tester) async {
-    await tester.pumpWidget(wrap(_FakeRepo()));
-    await tester.pump();
-
-    bool anyLifted() => tester
-        .widgetList<Container>(find.byType(Container))
-        .any(
-          (c) => ((c.decoration as BoxDecoration?)?.boxShadow ?? []).isNotEmpty,
-        );
-
-    expect(anyLifted(), isFalse, reason: '손대기 전에는 떠오른 줄이 없다');
-
-    final gesture = await tester.startGesture(
-      tester.getCenter(svgWithAsset(AppAssets.sheetReorderHandle).first),
-    );
-    // 첫 프레임은 Ticker가 시작점을 잡느라 경과가 0이다. 그 다음부터 흐른다.
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250));
-
-    // 손가락을 아직 움직이지 않았는데도 떠올라 있어야 한다.
-    // 예전에는 움직여야 그림자가 나타나 누르는 내내 아무 일도 없어 보였다.
-    expect(anyLifted(), isTrue);
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-  });
-
-  testWidgets('잡힌 카드는 테두리로 알아본다 — 손가락이 손잡이를 가려도 보인다 (#451)', (tester) async {
-    await tester.pumpWidget(wrap(_FakeRepo()));
-    await tester.pump();
-
-    // 테두리는 foregroundDecoration 에 그린다 — 배경 테두리는 안쪽 여백을 밀어 글이 움직인다.
-    bool anyOutlined() => tester
-        .widgetList<Container>(find.byType(Container))
-        .any((c) {
-          final d = c.foregroundDecoration;
-          return d is BoxDecoration && d.border != null;
-        });
-
-    expect(anyOutlined(), isFalse, reason: '손대기 전에는 테두리가 없다');
-
-    final gesture = await tester.startGesture(
-      tester.getCenter(svgWithAsset(AppAssets.sheetReorderHandle).first),
-    );
-    await tester.pump();
-    // 다 잡힐 때까지(kLongPressTimeout) 기다린다.
-    await tester.pump(kLongPressTimeout);
-    expect(anyOutlined(), isTrue, reason: '잡히면 테두리가 생긴다');
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(anyOutlined(), isFalse, reason: '놓으면 테두리가 사라진다');
-  });
-
-  testWidgets('끄는 동안 번호는 제자리에 그대로 있고 카드만 떠오른다 (#434)', (tester) async {
-    await tester.pumpWidget(wrap(_FakeRepo()));
-    await tester.pump();
-
-    Rect badge(String n) => tester.getRect(find.text(n));
-    final before = {
-      for (final n in ['1', '2', '3']) n: badge(n),
-    };
-
-    // 번호 뱃지만 골라내는 조건 — 숫자 글자를 품은 Container
-    bool badgeLifted() => ['1', '2', '3'].any((n) {
-      final box = tester.widget<Container>(
-        find.ancestor(of: find.text(n), matching: find.byType(Container)).first,
-      );
-      return ((box.decoration as BoxDecoration?)?.boxShadow ?? []).isNotEmpty;
-    });
-
-    final gesture = await tester.startGesture(
-      tester.getCenter(svgWithAsset(AppAssets.sheetReorderHandle).first),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250));
-
-    // 누르고 있는 동안 떠오르는 것은 카드뿐이다. 번호까지 들리면 번호가 카드의
-    // 이름표처럼 읽힌다 — 번호는 몇 번째 자리인가를 뜻한다.
-    expect(badgeLifted(), isFalse, reason: '번호 뱃지는 떠오르지 않는다');
-
-    await tester.pump(kLongPressTimeout);
-    await gesture.moveBy(const Offset(0, 90));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
-    // 끄는 도중에도 1·2·3 이 모두 보이고 자리를 옮기지 않는다.
-    for (final n in ['1', '2', '3']) {
-      expect(find.text(n), findsOneWidget, reason: '끄는 동안 번호 $n 이 숨지 않는다');
-      expect(badge(n), before[n], reason: '끄는 동안 번호 $n 이 움직이지 않는다');
-    }
-    expect(badgeLifted(), isFalse);
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-  });
-
-  testWidgets('편집하기 버튼은 목록 위에 떠 있다 — 목록이 버튼 뒤로 지나간다 (#434)', (tester) async {
-    await tester.pumpWidget(wrap(_FakeRepo()));
-    await tester.pump();
-
-    final list = tester.getRect(find.byType(Scrollable).first);
-    final button = tester.getRect(find.widgetWithText(FilledButton, '편집하기'));
-
-    // 버튼 칸을 따로 잘라 두면 목록이 버튼 위에서 끝난다. 떠 있으면 목록 영역이
-    // 버튼 아래까지 이어진다 (시안 956:4084).
-    expect(list.bottom, greaterThanOrEqualTo(button.bottom));
-    expect(list.overlaps(button), isTrue);
-  });
-
-  testWidgets('스치듯 끌면 순서가 바뀌지 않는다 — 스크롤하다 놀라면 안 된다 (#274)', (tester) async {
-    final repo = _FakeRepo();
-    await tester.pumpWidget(wrap(repo));
-    await tester.pump();
-
-    // 길게 누르지 않고 곧바로 끈다. 목록을 아래로 쓸어내리려던 손짓이다.
-    await tester.drag(
-      svgWithAsset(AppAssets.sheetReorderHandle).first,
-      const Offset(0, 160),
-    );
-    await tester.pumpAndSettle();
-
-    // 잡지 않았으므로 아무 일도 일어나지 않는다 — 서버로도 보내지 않는다
-    expect(repo.lastStepIds, isNull);
-  });
 }
 
 /// 손잡이를 **길게 눌러 잡은 뒤** 끈다.

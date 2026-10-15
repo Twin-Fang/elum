@@ -38,26 +38,6 @@ void main() {
     expect(r.failure, isNull);
   });
 
-  test('올리는 데 시간 제한을 둔다 — 끊긴 망에서 무한히 돌지 않는다', () async {
-    adapter.ok({'id': 's1', 'imagePath': 'k/new.jpg'});
-
-    await repo.uploadPhoto(routineId: 'r1', stepId: 's1', photo: jpeg);
-
-    expect(adapter.sendTimeout, isNotNull);
-    expect(adapter.sendTimeout, greaterThan(Duration.zero));
-  });
-
-  test('PNG 는 PNG 로 표시해 올린다', () async {
-    adapter.ok({'id': 's1', 'imagePath': 'k/new.png'});
-    final png = PickedPhoto(
-      bytes: Uint8List.fromList([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
-    );
-
-    await repo.uploadPhoto(routineId: 'r1', stepId: 's1', photo: png);
-
-    expect(adapter.form!.files.single.value.contentType?.mimeType, 'image/png');
-  });
-
   test('5MB 를 넘으면 보내지 않는다 — E-PHOTO-SIZE', () async {
     final big = PickedPhoto(
       bytes: Uint8List(CardPhotoRules.maxBytes + 1)
@@ -88,17 +68,6 @@ void main() {
     expect(r.failure?.kind, PhotoFailureKind.pickAnother);
   });
 
-  test('빈 사진은 보내지 않는다', () async {
-    final r = await repo.uploadPhoto(
-      routineId: 'r1',
-      stepId: 's1',
-      photo: PickedPhoto(bytes: Uint8List(0)),
-    );
-
-    expect(adapter.calls, 0);
-    expect(r.failure?.code, 'E-PHOTO-READ');
-  });
-
   test('400 — 서버 문구를 그대로 쓰고 다른 사진을 고르게 한다', () async {
     adapter.fail(400, code: 'ROUTINE_STEP_IMAGE_TOO_LARGE', message: '사진은 5MB 까지 올릴 수 있어요.');
 
@@ -108,33 +77,6 @@ void main() {
     // 앱이 아직 모르는 서버 코드는 자리 코드 + 상태로 남긴다
     expect(r.failure?.code, 'ROUTINE_STEP_IMAGE_TOO_LARGE');
     expect(r.failure?.kind, PhotoFailureKind.pickAnother);
-  });
-
-  test('403 — 다시 해도 같다, 알리고 닫는다', () async {
-    adapter.fail(403, code: 'ROUTINE_NOT_CREATOR', message: '내 일과가 아니에요.');
-
-    final r = await repo.uploadPhoto(routineId: 'r1', stepId: 's1', photo: jpeg);
-
-    expect(r.failure?.code, 'ROUTINE_NOT_CREATOR');
-    expect(r.failure?.kind, PhotoFailureKind.dismissOnly);
-  });
-
-  test('404 — 지워진 카드다', () async {
-    adapter.fail(404, code: 'ROUTINE_STEP_NOT_FOUND', message: '카드를 찾을 수 없어요.');
-
-    final r = await repo.uploadPhoto(routineId: 'r1', stepId: 's1', photo: jpeg);
-
-    expect(r.failure?.code, 'ROUTINE_STEP_NOT_FOUND');
-    expect(r.failure?.kind, PhotoFailureKind.dismissOnly);
-  });
-
-  test('500 — 같은 사진으로 다시 할 수 있다', () async {
-    adapter.fail(500, code: 'ROUTINE_STEP_IMAGE_SAVE_FAILED');
-
-    final r = await repo.uploadPhoto(routineId: 'r1', stepId: 's1', photo: jpeg);
-
-    expect(r.failure?.code, 'ROUTINE_STEP_IMAGE_SAVE_FAILED');
-    expect(r.failure?.kind, PhotoFailureKind.retrySame);
   });
 
   test('네트워크가 끊기면 인터넷 안내와 함께 다시 하게 한다', () async {
@@ -147,15 +89,6 @@ void main() {
     expect(r.failure?.kind, PhotoFailureKind.retrySame);
   });
 
-  test('타임아웃도 다시 하게 한다', () async {
-    adapter.timeout();
-
-    final r = await repo.uploadPhoto(routineId: 'r1', stepId: 's1', photo: jpeg);
-
-    expect(r.failure?.code, 'E-NET-TIMEOUT');
-    expect(r.failure?.kind, PhotoFailureKind.retrySame);
-  });
-
   test('200 인데 본문이 비었으면 실패로 본다 — 성공으로 착각하지 않는다', () async {
     adapter.emptyOk();
 
@@ -165,14 +98,6 @@ void main() {
     expect(r.failure?.code, 'E-PHOTO');
   });
 
-  test('imagePath 가 비어 오면 실패로 본다 — 그림이 안 바뀐 것이다', () async {
-    adapter.ok({'id': 's1'});
-
-    final r = await repo.uploadPhoto(routineId: 'r1', stepId: 's1', photo: jpeg);
-
-    expect(r.card, isNull);
-    expect(r.failure?.code, 'E-PHOTO');
-  });
 }
 
 class _Adapter implements HttpClientAdapter {

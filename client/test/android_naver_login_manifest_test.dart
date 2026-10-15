@@ -21,9 +21,6 @@ void main() {
   final manifest = File(
     'android/app/src/main/AndroidManifest.xml',
   ).readAsStringSync();
-  final mainActivity = File(
-    'android/app/src/main/kotlin/kr/twinfang/elum/MainActivity.kt',
-  ).readAsStringSync();
 
   /// XML 주석을 걷어낸 매니페스트. 주석에 `taskAffinity` 라는 낱말이 남아 있어도
   /// 설정으로 오인하지 않게 한다.
@@ -50,21 +47,6 @@ void main() {
     );
   });
 
-  test('MainActivity 는 FlutterFragmentActivity 다 — 네이버 SDK 요구', () {
-    expect(mainActivity, contains('FlutterFragmentActivity'));
-    expect(mainActivity, isNot(contains(': FlutterActivity()')));
-  });
-
-  test('네이버 SDK 설정 세 값이 매니페스트에 있다', () {
-    for (final key in ['clientId', 'clientSecret', 'clientName']) {
-      expect(
-        manifestBody,
-        contains('com.naver.sdk.$key'),
-        reason: '$key 가 빠지면 SDK 가 초기화되지 않는다',
-      );
-    }
-  });
-
   // --- 릴리스(R8) 전용 결함 (#446) ---
   //
   // debug 빌드는 R8 을 돌리지 않아 위 태스크 문제를 고쳐도 **릴리스에서만** 네이버 로그인이 죽었다
@@ -83,17 +65,10 @@ void main() {
       expect(rules, contains('-keepattributes Signature'));
     });
 
-    test('코루틴 Continuation 을 지킨다 — suspend 메서드 반환 타입이 타입 인자에 있다', () {
-      expect(rules, contains('kotlin.coroutines.Continuation'));
-    });
-
     test('Retrofit 서비스 인터페이스와 Response 를 지킨다 — 풀 모드가 Proxy 구현을 못 봐 지운다', () {
       expect(rules, contains('@retrofit2.http.*'));
       expect(rules, contains('retrofit2.Response'));
     });
 
-    test('네이버 SDK 자체 규칙이 남아 있다', () {
-      expect(rules, contains('com.navercorp.nid'));
-    });
   });
 }

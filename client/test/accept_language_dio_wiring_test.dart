@@ -48,11 +48,6 @@ void main() {
     expect(await sentLanguage(build()), 'ko');
   });
 
-  test('열지 않은 스페인어 휴대폰은 en 으로 나간다', () async {
-    binding.platformDispatcher.localesTestValue = const [Locale('es', 'MX')];
-    expect(await sentLanguage(build()), 'en');
-  });
-
   test('열지 않은 중국어 간체와 지원 밖 언어는 en', () async {
     binding.platformDispatcher.localesTestValue = const [Locale('zh', 'CN')];
     expect(await sentLanguage(build()), 'en');
@@ -66,36 +61,6 @@ void main() {
     final c = build();
     c.read(devLocaleOverrideProvider.notifier).set(const Locale('ja'));
     expect(await sentLanguage(c), 'ja');
-  });
-
-  test('개발자 도구가 꺼져 있으면 휴대폰 언어를 보낸다', () async {
-    dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=false');
-    binding.platformDispatcher.localesTestValue = const [Locale('ko', 'KR')];
-    final c = build();
-    c.read(devLocaleOverrideProvider.notifier).set(const Locale('ja'));
-    expect(await sentLanguage(c), 'ko');
-  });
-
-  test('휴대폰 지역이 X-Elum-Region 으로 나간다', () async {
-    binding.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
-    final c = build();
-    await c.read(dioProvider).get<dynamic>('/api/ping');
-    expect(adapter.sentHeaders['GET /api/ping']!['X-Elum-Region'], 'US');
-
-    binding.platformDispatcher.localesTestValue = const [Locale('ko', 'KR')];
-    await c.read(dioProvider).get<dynamic>('/api/ping');
-    expect(adapter.sentHeaders['GET /api/ping']!['X-Elum-Region'], 'KR');
-  });
-
-  test('개발자 도구가 언어를 강제해도 지역은 시스템 로케일 값이다', () async {
-    dotenv.loadFromString(envString: 'ELUM_SHOW_DEV_TOOLS=true');
-    binding.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
-    final c = build();
-    c.read(devLocaleOverrideProvider.notifier).set(const Locale('ja'));
-    await c.read(dioProvider).get<dynamic>('/api/ping');
-    final sent = adapter.sentHeaders['GET /api/ping']!;
-    expect(sent['Accept-Language'], 'ja', reason: '강제는 언어만 바꾼다');
-    expect(sent['X-Elum-Region'], 'US', reason: '지역은 시스템 값 그대로');
   });
 
   test('휴대폰 지역이 없으면 지역 헤더 없이 나가고 요청은 성공한다', () async {

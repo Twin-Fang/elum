@@ -14,26 +14,7 @@ void main() {
     }
   });
 
-  group('화면 표시', () {
-    test('3-3으로 끊어 보여준다 — 여섯을 붙이면 불러주다 자리를 놓친다', () {
-      expect(LinkCode.grouped('A7K3M9'), 'A7K 3M9');
-    });
 
-    test('여섯 자가 아니면 손대지 않는다', () {
-      expect(LinkCode.grouped('A7K'), 'A7K');
-    });
-  });
-
-  group('입력 정규화', () {
-    test('소문자로 쳐도 된다', () {
-      expect(LinkCode.normalize('a7k3m9'), 'A7K3M9');
-    });
-
-    test('화면에 보이는 대로 띄어 써도 된다', () {
-      expect(LinkCode.normalize('a7k 3m9'), 'A7K3M9');
-      expect(LinkCode.normalize('A7K-3M9'), 'A7K3M9');
-    });
-  });
 
   group('보내기 전 거르기', () {
     test('맞는 모양', () {

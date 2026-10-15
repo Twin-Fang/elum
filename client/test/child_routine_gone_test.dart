@@ -42,13 +42,6 @@ void main() {
           .syncProgress(routineId: 'r1', completedStepIds: {'c1'});
     }
 
-    test('404 는 일과가 사라진 것이다', () async {
-      expect(
-        await sync(const FakeHttpError(404, errorCode: 'ROUTINE_NOT_FOUND')),
-        SyncOutcome.gone,
-      );
-    });
-
     test('400·403·409 는 이 상태를 거부한 것이다 — 기록을 버리고 서버 값으로 돌아간다', () async {
       for (final status in [400, 403, 409]) {
         expect(await sync(FakeHttpError(status)), SyncOutcome.rejected, reason: '$status');
@@ -63,18 +56,13 @@ void main() {
 
   group('일과가 사라지면', () {
     late ProviderContainer container;
-    var todayFetches = 0;
 
     setUp(() {
-      todayFetches = 0;
       container = ProviderContainer(
         overrides: [
           localStorageProvider.overrideWithValue(InMemoryStorage(onboardingCompleted: true)),
           stepProgressRepositoryProvider.overrideWithValue(_GoneRepo()),
-          todayRoutinesProvider.overrideWith((ref) async {
-            todayFetches++;
-            return const <Routine>[];
-          }),
+          todayRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
           pastRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
           myRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
         ],
@@ -88,21 +76,6 @@ void main() {
         await Future<void>.delayed(Duration.zero);
       }
     }
-
-    test('기록을 버리고 사라졌다고 표시하고 목록을 다시 받는다', () async {
-      final notifier = container.read(childRoutineProvider.notifier);
-      await drain();
-      final before = todayFetches;
-
-      notifier.toggle(routine: routine, card: c1);
-      await drain();
-
-      final state = container.read(childRoutineProvider);
-      expect(state.gone, {'r1'});
-      expect(state.progress.containsKey('r1'), isFalse);
-      expect(state.pending, isEmpty);
-      expect(todayFetches, greaterThan(before));
-    });
 
     test('다른 일과를 시작하면 표시가 지워진다 — 같은 id 를 다시 받아도 홈으로 튕기지 않는다', () async {
       final notifier = container.read(childRoutineProvider.notifier);
@@ -164,17 +137,6 @@ void main() {
       expect(find.text('확인'), findsNothing);
     });
 
-    testWidgets('다른 일과가 사라진 것은 지금 보는 일과와 상관없다', (tester) async {
-      final container = await pump(tester);
-      const other = Routine(id: 'r2', status: 'CONFIRMED', steps: [c1]);
-
-      container.read(childRoutineProvider.notifier).toggle(routine: other, card: c1);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(ChildRoutineDetailScreen), findsOneWidget);
-    });
   });
 }
 

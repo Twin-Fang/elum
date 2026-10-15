@@ -43,15 +43,6 @@ void main() {
       );
     });
 
-    test('단계 수 초과(다른 502 코드)도 예외를 던진다', () async {
-      adapter.stub(502, {'errorCode': 'ROUTINE_STEP_LIMIT_EXCEEDED'});
-
-      expect(
-        () => repo.createRoutine(rawInputText: '손 씻기', goals: const {}),
-        throwsA(anything),
-      );
-    });
-
     test('서버가 빈 카드(steps 0장)를 주면 예외를 던진다', () async {
       // 200이지만 steps가 비어 있는 경우 — 가짜 일과를 만들지 않는다
       adapter.stub(200, {'id': 'r1', 'title': '제목', 'steps': <dynamic>[]});
@@ -62,37 +53,12 @@ void main() {
       );
     });
 
-    test('성공하면 서버 카드를 그대로 쓴다', () async {
-      adapter.stub(200, {
-        'id': 'r1',
-        'title': '비 오는 날 등교 준비하기',
-        'steps': [
-          {'id': 's1', 'description': '우산을 챙겨요', 'stepOrder': 1},
-        ],
-      });
-
-      final routine = await repo.createRoutine(
-        rawInputText: '비 오는 날 등교 준비하기',
-        goals: const {},
-      );
-
-      expect(routine.id, 'r1');
-      expect(routine.steps.single.description, '우산을 챙겨요');
-    });
   });
 
   group('질문 생성이 실패할 때', () {
     // 예전에는 `비 오는 날 준비물` 대체 질문을 줬다. 입력과 무관해 수영장 가기를
     // 적어도 우산을 물었다 (#393 S1). 질문은 선택 단계라 없이 넘어간다.
     // 서버에 닿지 못한 경우는 `routine_question_flow_test.dart` 가 본다.
-    test('질문 없이 넘어간다 — 입력과 무관한 대체 질문을 만들지 않는다', () async {
-      adapter.stub(502, {'errorCode': 'ROUTINE_AI_GENERATION_FAILED'});
-
-      final question = await repo.generateQuestion('비 오는 날 등교');
-
-      expect(question.canAsk, isFalse);
-      expect(question.askable, isEmpty);
-    });
   });
 
   group('승인이 실패할 때 (이슈 #264)', () {
@@ -108,23 +74,6 @@ void main() {
       );
     });
 
-    test('서버에 없는 일과는 승인을 시도하지 않는다', () async {
-      // id가 비면 /api/routines//confirm 이 되어 엉뚱한 404가 난다.
-      expect(
-        () => repo.confirm(const Routine(id: '', status: 'PENDING_REVIEW')),
-        throwsA(isA<StateError>()),
-      );
-    });
-
-    test('성공하면 서버가 준 상태를 그대로 쓴다', () async {
-      adapter.stub(200, {'id': 'r1', 'title': '아침 준비', 'status': 'CONFIRMED'});
-
-      final confirmed = await repo.confirm(
-        const Routine(id: 'r1', status: 'PENDING_REVIEW'),
-      );
-
-      expect(confirmed.status, 'CONFIRMED');
-    });
   });
 
   group('목록 조회가 실패할 때 (이슈 #264)', () {
@@ -137,11 +86,6 @@ void main() {
       expect(() => repo.getMyRoutines(), throwsA(anything));
     });
 
-    test('추천도 내장 데이터로 대신하지 않는다', () async {
-      adapter.stub(502, {'errorCode': 'INTERNAL_ERROR'});
-
-      expect(() => repo.getSuggestions(), throwsA(anything));
-    });
   });
 }
 

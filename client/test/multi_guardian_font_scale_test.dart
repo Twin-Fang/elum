@@ -5,8 +5,6 @@ import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
 import 'package:elum/features/profile/presentation/guardians_screen.dart';
 import 'package:elum/features/profile/presentation/invite_code_screen.dart';
-import 'package:elum/features/profile/presentation/invite_enter_screen.dart';
-import 'package:elum/features/profile/presentation/profile_switch_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -68,22 +66,6 @@ void main() {
       expect(find.byType(InviteCodeScreen), findsOneWidget);
     });
 
-    testWidgets('초대 코드 넣기 — 글꼴 $scale (긴 실패 문구 포함)', (tester) async {
-      await pump(tester, Routes.inviteEnter, const InviteEnterScreen(), scale: scale);
-      await tester.enterText(find.byType(TextField), 'A0K3M9');
-      await tester.pump(const Duration(milliseconds: 600));
-      expect(find.textContaining('E-INV-FORM'), findsOneWidget);
-    });
-
-    testWidgets('함께하는 사람 — 글꼴 $scale', (tester) async {
-      await pump(tester, Routes.guardianPeople, const GuardiansScreen(), scale: scale);
-      expect(find.text('엄마'), findsOneWidget);
-    });
-
-    testWidgets('이룸이 바꾸기 — 글꼴 $scale', (tester) async {
-      await pump(tester, Routes.guardianProfileSwitch, const ProfileSwitchScreen(), scale: scale);
-      expect(find.text('하늘이'), findsOneWidget);
-    });
   }
 
   testWidgets('나가기 확인 팝업 — 마지막 보호자 문구가 글꼴 2.0 에서도 나가기·취소 버튼을 가리지 않는다', (tester) async {

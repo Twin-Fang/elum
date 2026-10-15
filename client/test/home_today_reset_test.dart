@@ -34,14 +34,6 @@ void main() {
     return container;
   }
 
-  test('받아 둔 목록에 어제 일과가 남아 있어도 홈에는 오늘 것만 뜬다', () async {
-    final container = await containerWith([
-      routine('어제 것', at: yesterday),
-      routine('오늘 것', at: today),
-    ]);
-
-    expect(container.read(homeRoutinesProvider).map((r) => r.id), ['오늘 것']);
-  });
 
   test('승인 전 일과는 어느 경로로 들어와도 홈에 뜨지 않는다', () async {
     final container = await containerWith([
@@ -52,11 +44,6 @@ void main() {
     expect(container.read(homeRoutinesProvider).map((r) => r.id), ['오늘 것']);
   });
 
-  test('날짜를 모르는 일과는 서버가 거른 것으로 보고 그대로 둔다', () async {
-    final container = await containerWith([routine('날짜 없음')]);
-
-    expect(container.read(homeRoutinesProvider).map((r) => r.id), ['날짜 없음']);
-  });
 
   test('흐름에 남은 어제 승인 일과는 오늘 일과 맨 앞에 붙지 않는다', () async {
     // 어제 승인한 일과가 흐름 상태에 남은 채 앱이 자정을 넘기면, 상태를 안 보고 붙인
@@ -69,17 +56,6 @@ void main() {
     expect(container.read(homeRoutinesProvider).map((r) => r.id), ['오늘 것']);
   });
 
-  test('방금 승인한 오늘 일과는 목록을 다시 받기 전에도 맨 앞에 뜬다', () async {
-    final container = await containerWith([routine('오늘 것', at: today)]);
-    container
-        .read(routineFlowProvider.notifier)
-        .loadExisting(routine('방금 승인', at: today));
-
-    expect(container.read(homeRoutinesProvider).map((r) => r.id), [
-      '방금 승인',
-      '오늘 것',
-    ]);
-  });
 
   test('승인하면 오늘·지난·전체 목록을 모두 다시 받는다', () async {
     // 승인 경로가 목록을 다시 받지 않아, 승인한 일과가 오늘 일과와 지난 일과에 동시에

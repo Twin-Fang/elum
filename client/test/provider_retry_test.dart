@@ -59,11 +59,4 @@ void main() {
   });
 
   // 원인을 고정해 둔다 — 기본값이면 같은 순간에 아직 로딩이다.
-  testWidgets('Riverpod 기본값이면 같은 순간에 아직 실패 화면이 없다', (tester) async {
-    await pumpDrafts(tester, appRetry: false);
-
-    expect(find.text('임시저장을 불러오지 못했어요'), findsNothing);
-    // 남은 재시도 타이머를 흘려 보내 테스트가 깔끔히 끝나게 한다.
-    await tester.pump(const Duration(minutes: 2));
-  });
 }

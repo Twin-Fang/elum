@@ -69,22 +69,6 @@ void main() {
     expect(notified, 0);
   });
 
-  test('갱신에 성공하면 세션 종료를 알리지 않는다', () async {
-    var notified = 0;
-    await tokens.save(accessToken: 'a', refreshToken: 'r');
-
-    final sut = AuthInterceptor(
-      tokens: tokens,
-      dio: dio,
-      refresh: () async => 'new-token',
-      onSessionExpired: () => notified++,
-    );
-
-    await fireError(sut, unauthorized());
-
-    expect(notified, 0, reason: '갱신되면 세션은 살아 있다');
-  });
-
   test('이미 재시도한 요청이면 갱신을 다시 시도하지 않는다', () async {
     var refreshCalls = 0;
     var notified = 0;

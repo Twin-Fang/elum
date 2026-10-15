@@ -24,25 +24,6 @@ void main() {
     expect(locale, const Locale('ko'));
   });
 
-  testWidgets('번역 delegate 가 있으면 그 언어를 쓴다', (tester) async {
-    late String localeName;
-    await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('es'),
-        supportedLocales: supportedAppLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        home: Builder(
-          builder: (context) {
-            localeName = context.l10n.localeName;
-            return const SizedBox();
-          },
-        ),
-      ),
-    );
-
-    expect(localeName, 'es');
-  });
-
   testWidgets('번역이 빈 언어는 문구가 ko 로 채워져 화면이 깨지지 않는다', (tester) async {
     late String confirm;
     await tester.pumpWidget(

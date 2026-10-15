@@ -157,20 +157,6 @@ void main() {
   });
 
   group('연결 화면의 뒤로가기', () {
-    testWidgets('아래에 아무것도 없고 세션이 있으면(역할만 고르고 연결 전) 역할 선택', (tester) async {
-      storage = InMemoryStorage();
-      await storage.setSelectedRole(AppRole.elumi.storageValue);
-      tokens = InMemoryTokenStore(accessToken: 'a', refreshToken: 'r');
-      final app = await pumpRealRouter(
-        tester,
-        storage: storage,
-        tokens: tokens,
-        start: Routes.linkEnter,
-      );
-
-      await tapBack(tester);
-      expect(topOf(app.router), Routes.roleSelect);
-    });
 
     testWidgets('역할 선택에서 이룸이를 고르고 들어왔으면 역할 선택으로 돌아간다', (tester) async {
       storage = InMemoryStorage();

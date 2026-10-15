@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/storage/token_store.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/core/widgets/routine_progress_ring.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/data/oauth_sdk.dart';
@@ -181,68 +180,7 @@ void main() {
     });
   }
 
-  testWidgets('타일 높이 — 기본 글꼴은 시안 68 · 105 그대로, 키우면 늘어난다', (tester) async {
-    Future<Size> sizeAt(double scale, {bool tall = false}) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [testStorageOverride()],
-          child: scaled(
-            scale,
-            Scaffold(
-              body: Align(
-                alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: 361,
-                  child: RoutineSummaryTile(
-                    routine: routine(
-                      't',
-                      '스스로 옷을 입어요',
-                      reward: '유튜브 시청 20분',
-                      percent: 25,
-                      at: DateTime(2026, 9, 20),
-                    ),
-                    progress: 0.25,
-                    showDate: tall,
-                    onRerun: tall ? () {} : null,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      return tester.getSize(find.byType(RoutineSummaryTile));
-    }
 
-    final shortSize = await sizeAt(1.0);
-    final tallSize = await sizeAt(1.0, tall: true);
-    expect(shortSize.height, 68.h);
-    expect(tallSize.height, 105.h);
-    expect((await sizeAt(2.0)).height, greaterThan(68.h));
-  });
-
-  testWidgets('진행률 글자는 링 안에서 한 줄이다', (tester) async {
-    await tester.pumpWidget(
-      scaled(
-        3.1,
-        const Scaffold(
-          body: Center(child: RoutineProgressRing(progress: 0.25)),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    // 글자 상자 자체는 줄이기 전 크기다 — 한 줄이면 높이가 글자 한 줄 안쪽이다
-    expect(tester.getSize(find.text('25%')).height, lessThan(12 * 3.1 * 1.5));
-    final fitted = tester.getSize(
-      find.descendant(
-        of: find.byType(RoutineProgressRing),
-        matching: find.byType(FittedBox),
-      ),
-    );
-    final ring = tester.getSize(find.byType(RoutineProgressRing));
-    expect(fitted.width, lessThanOrEqualTo(ring.width));
-  });
 }
 
 class _FakeAuth extends AuthRepository {

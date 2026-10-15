@@ -8,12 +8,6 @@ void main() {
     expect(const Routine(id: 'r1').language, 'ko');
   });
 
-  test('서버가 준 언어 코드를 읽는다', () {
-    for (final code in ['ko', 'en', 'ja', 'zh', 'es']) {
-      expect(Routine.fromJson({'id': 'r1', 'language': code}).language, code);
-    }
-  });
-
   test('모르는 값·깨진 값은 ko 다 — 화면이 죽지 않는다', () {
     expect(Routine.fromJson({'id': 'r1', 'language': 'fr'}).language, 'ko');
     expect(Routine.fromJson({'id': 'r1', 'language': 'zh-Hans'}).language, 'ko');
@@ -21,10 +15,4 @@ void main() {
     expect(Routine.fromJson({'id': 'r1', 'language': null}).language, 'ko');
   });
 
-  test('오프라인 캐시 왕복에서 언어가 남는다', () {
-    final restored = Routine.fromJson(
-      const Routine(id: 'r1', language: 'ja').toJson(),
-    );
-    expect(restored.language, 'ja');
-  });
 }

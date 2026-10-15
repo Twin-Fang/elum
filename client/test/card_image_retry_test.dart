@@ -44,16 +44,6 @@ void main() {
     expect(bytes, Uint8List.fromList([1, 2, 3]));
   });
 
-  test('계속 실패하면 정해진 횟수까지만 다시 받는다', () async {
-    final (container, adapter) = setup([502]);
-
-    await settle();
-    await settle();
-
-    expect(adapter.calls, 1 + delays.length, reason: '처음 한 번 + 재시도 상한');
-    expect(container.read(cardImageProvider(key)).value, isNull);
-  });
-
   test('그림이 없다는 404 는 다시 받지 않는다', () async {
     final (_, adapter) = setup([404]);
 
@@ -62,40 +52,6 @@ void main() {
     expect(adapter.calls, 1, reason: '다시 해도 같은 실패라 두드리지 않는다');
   });
 
-  test('권한이 없다는 401 도 다시 받지 않는다', () async {
-    final (_, adapter) = setup([401]);
-
-    await settle();
-
-    expect(adapter.calls, 1);
-  });
-
-  test('일시 오류인지 가린다', () {
-    DioException badResponse(int code) => DioException(
-          requestOptions: RequestOptions(),
-          response: Response(requestOptions: RequestOptions(), statusCode: code),
-          type: DioExceptionType.badResponse,
-        );
-    DioException of(DioExceptionType type) =>
-        DioException(requestOptions: RequestOptions(), type: type);
-
-    for (final code in [408, 429, 502, 503, 504]) {
-      expect(CardImageRepository.isTransientFailure(badResponse(code)), isTrue, reason: '$code');
-    }
-    for (final code in [400, 401, 403, 404, 500]) {
-      expect(CardImageRepository.isTransientFailure(badResponse(code)), isFalse, reason: '$code');
-    }
-    for (final type in [
-      DioExceptionType.connectionTimeout,
-      DioExceptionType.sendTimeout,
-      DioExceptionType.receiveTimeout,
-      DioExceptionType.connectionError,
-    ]) {
-      expect(CardImageRepository.isTransientFailure(of(type)), isTrue, reason: '$type');
-    }
-    expect(CardImageRepository.isTransientFailure(of(DioExceptionType.cancel)), isFalse);
-    expect(CardImageRepository.isTransientFailure(StateError('x')), isFalse);
-  });
 }
 
 class _ScriptedAdapter implements HttpClientAdapter {

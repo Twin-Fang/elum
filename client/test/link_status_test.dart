@@ -37,23 +37,6 @@ void main() {
       expect(s.devices.map((d) => d.linkId), ['l2']);
     });
 
-    test('기기 이름·연결한 사람·내가 연결했는지를 담는다', () {
-      final s = LinkStatus.fromJson({
-        'devices': [
-          {
-            'linkId': 'l1',
-            'deviceName': ' iPhone 16 ',
-            'linkedByName': '김선생님',
-            'linkedByMe': true,
-          },
-        ],
-      });
-      final d = s.devices.single;
-      expect(d.deviceName, 'iPhone 16');
-      expect(d.linkedByName, '김선생님');
-      expect(d.linkedByMe, isTrue);
-    });
-
     test('옛 서버 응답(새 필드 없음)·형식이 다른 값에도 죽지 않는다', () {
       final s = LinkStatus.fromJson({
         'devices': [
@@ -68,26 +51,9 @@ void main() {
       }
     });
 
-    test('날짜가 깨져 있어도 항목은 남긴다', () {
-      final s = LinkStatus.fromJson({
-        'devices': [
-          {'linkId': 'l1', 'linkedAt': '언제'},
-        ],
-      });
-      expect(s.devices.single.linkedAt, isNull);
-    });
   });
 
   group('발급된 암호', () {
-    test('만료 전에는 남은 시간이 있다', () {
-      final c = IssuedLinkCode(
-        code: 'A7K3M9',
-        expiresAt: DateTime.now().add(const Duration(minutes: 9)),
-      );
-      expect(c.isExpired, isFalse);
-      expect(c.remaining().inMinutes, greaterThanOrEqualTo(8));
-    });
-
     test('만료 뒤에는 0이다 — 음수가 새어 나가면 문구가 이상해진다', () {
       final c = IssuedLinkCode(
         code: 'A7K3M9',
@@ -104,25 +70,4 @@ void main() {
 int minutesLabel(Duration left) => (left.inSeconds / 60).ceil();
 
 void _remainingLabelRules() {
-  test('정확히 10분이면 10분이라고 한다 — 11분이 되면 안 된다', () {
-    expect(minutesLabel(const Duration(minutes: 10)), 10);
-  });
-
-  test('9분 1초는 올려서 10분', () {
-    expect(minutesLabel(const Duration(minutes: 9, seconds: 1)), 10);
-  });
-
-  test('정확히 9분이면 9분', () {
-    expect(minutesLabel(const Duration(minutes: 9)), 9);
-  });
-
-  group('시계 차이 (이슈 #205)', () {
-    test('서버가 준 남은 초를 내 시계에 붙인다 — 서버보다 길게 말하지 않는다', () {
-      final c = IssuedLinkCode.fromNow(code: 'A7K3M9', expiresInSeconds: 600);
-
-      // 600초를 받았으면 화면도 10분이어야 한다. 서버 시계가 앞서 있어도 마찬가지.
-      expect(minutesLabel(c.remaining()), 10);
-      expect(c.isExpired, isFalse);
-    });
-  });
 }

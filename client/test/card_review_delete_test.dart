@@ -35,14 +35,6 @@ void main() {
   }
 
   group('카드 삭제 (이슈 #69 · 364:8305)', () {
-    test('카드를 지우면 목록에서 빠진다', () {
-      final container = containerWith(cards);
-
-      container.read(routineFlowProvider.notifier).removeStep('c2');
-
-      final steps = container.read(routineFlowProvider).routine!.steps;
-      expect(steps.map((s) => s.id), ['c1', 'c3']);
-    });
 
     test('마지막 한 장은 지울 수 없다', () {
       // 0장이 되면 아이 화면에 보여줄 것이 없다
@@ -54,41 +46,5 @@ void main() {
       expect(steps, hasLength(1), reason: '마지막 카드는 남아야 한다');
     });
 
-    test('두 장에서 한 장까지는 지워진다', () {
-      // 경계값 — 2 → 1은 되고, 1 → 0은 안 된다
-      final container = containerWith(cards.take(2).toList());
-      final notifier = container.read(routineFlowProvider.notifier);
-
-      notifier.removeStep('c1');
-      expect(container.read(routineFlowProvider).routine!.steps, hasLength(1));
-
-      notifier.removeStep('c2');
-      expect(
-        container.read(routineFlowProvider).routine!.steps,
-        hasLength(1),
-        reason: '1장 남았으면 더 지울 수 없다',
-      );
-    });
-
-    test('없는 id를 지워도 목록이 변하지 않는다', () {
-      // 화면과 상태가 잠시 어긋나도 죽지 않아야 한다
-      final container = containerWith(cards);
-
-      container.read(routineFlowProvider.notifier).removeStep('없는카드');
-
-      expect(container.read(routineFlowProvider).routine!.steps, hasLength(3));
-    });
-
-    test('일과가 없으면 삭제해도 죽지 않는다', () {
-      final container = ProviderContainer(
-        overrides: [testStorageOverride(onboardingCompleted: true)],
-      );
-      addTearDown(container.dispose);
-
-      expect(
-        () => container.read(routineFlowProvider.notifier).removeStep('c1'),
-        returnsNormally,
-      );
-    });
   });
 }

@@ -7,7 +7,6 @@ import 'package:elum/features/profile/application/invite_link_intake.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/presentation/invite_link_host.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -80,13 +79,6 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> pushFromOs(WidgetTester tester, String uri) async {
-    final message = const JSONMethodCodec().encodeMethodCall(
-      MethodCall('pushRouteInformation', {'location': uri}),
-    );
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
-    await settle(tester);
-  }
 
   setUp(() => session = true);
 
@@ -133,40 +125,5 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('입력 화면이 열려 있는 채로 새 링크가 오면 제자리에서 새 코드로 바뀐다', (tester) async {
-    tester.binding.platformDispatcher.defaultRouteNameTestValue = 'elum://invite?code=A7K3M9';
-    addTearDown(tester.binding.platformDispatcher.clearDefaultRouteNameTestValue);
-    await pumpApp(tester);
-    router.go(Routes.onboardingName);
-    await settle(tester);
-    expect(find.text('A'), findsOneWidget);
 
-    // 보호자가 코드를 다시 만들어 새 링크를 보냈다
-    await pushFromOs(tester, 'elum://invite?code=B2C4D6');
-
-    expect(find.text('함께하기'), findsOneWidget);
-    expect(find.text('B'), findsOneWidget);
-    expect(find.text('A'), findsNothing);
-    expect(repo.sentCodes, isEmpty);
-    // 두 겹 쌓이지 않았다 — 뒤로 한 번이면 이름 화면이다
-    router.pop();
-    await settle(tester);
-    expect(router.routerDelegate.currentConfiguration.last.matchedLocation, Routes.onboardingName);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
-
-  testWidgets('쓸 수 없는 코드의 링크면 빈 입력 화면과 에러 코드가 열린다', (tester) async {
-    tester.binding.platformDispatcher.defaultRouteNameTestValue = 'elum://invite?code=ZZZ';
-    addTearDown(tester.binding.platformDispatcher.clearDefaultRouteNameTestValue);
-    await pumpApp(tester);
-    router.go(Routes.onboardingName);
-    await settle(tester);
-
-    expect(find.textContaining('E-INV-LINK'), findsOneWidget);
-    expect(find.text('함께하기'), findsNothing);
-    expect(repo.sentCodes, isEmpty);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
 }

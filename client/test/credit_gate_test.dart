@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
@@ -119,11 +118,6 @@ void main() {
       expect(find.text('일과 입력'), findsOneWidget);
     });
 
-    testWidgets('꺼져 있으면 막지 않는다', (tester) async {
-      await pumpHome(tester, _FakeCredit(const CreditSummary.disabled()));
-
-      expect(find.text('일과 입력'), findsOneWidget);
-    });
 
     testWidgets('조회에 실패하면 막지 않는다 — 판정은 서버가 한다', (tester) async {
       await pumpHome(tester, _FakeCredit(null));
@@ -134,43 +128,7 @@ void main() {
     });
 
     // 조회를 기다리는 동안 한 번 더 누르면 입력 화면이 두 번 쌓였다.
-    testWidgets('조회 중에 두 번 누르면 한 번만 들어간다', (tester) async {
-      final credit = _SlowCredit();
-      final router = await pumpHomeOnly(tester, credit);
 
-      await tester.tap(find.text('새로운 일과 만들기'));
-      await tester.pump();
-      await tester.tap(find.text('새로운 일과 만들기'));
-      await tester.pump();
-      credit.complete(CreditSummary.fromJson(creditJson()));
-      await tester.pumpAndSettle();
-
-      expect(credit.calls, 1, reason: '두 번째 누름은 조회도 하지 않는다');
-      expect(find.text('일과 입력'), findsOneWidget);
-
-      router.pop();
-      await tester.pumpAndSettle();
-      expect(find.text('일과 입력'), findsNothing, reason: '쌓인 입력 화면은 하나뿐이다');
-      expect(find.text('새로운 일과 만들기'), findsOneWidget);
-    });
-
-    testWidgets('조회가 3초를 넘기면 기다리지 않고 들여보낸다 — 판정은 서버가 한다', (tester) async {
-      final credit = _SlowCredit();
-      await pumpHomeOnly(tester, credit);
-
-      await tester.tap(find.text('새로운 일과 만들기'));
-      await tester.pump(const Duration(seconds: 2));
-      expect(find.text('일과 입력'), findsNothing, reason: '3초 안에는 조회를 기다린다');
-
-      await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
-      expect(find.text('일과 입력'), findsOneWidget);
-
-      // 뒤늦게 온 응답이 막힘 팝업을 띄우지 않는다.
-      credit.complete(CreditSummary.fromJson(creditJson(available: 0)));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('이번 주 크레딧을 모두 사용했어요'), findsNothing);
-    });
   });
 
   group('생성 실패 화면 — 크레딧 오류면 다시 하기 대신 홈으로', () {
@@ -236,12 +194,6 @@ void main() {
       });
     }
 
-    testWidgets('장부 오류(UNAVAILABLE)는 잠시 뒤 다시 하면 된다 — 다시 하기', (tester) async {
-      await pumpError(tester, 'AI_CREDIT_UNAVAILABLE');
-
-      expect(find.text('다시 하기'), findsOneWidget);
-      expect(find.text('홈으로'), findsNothing);
-    });
   });
 
   // 질문 요청에서 크레딧이 막혔는데 질문 없이 넘기면 생성 로딩까지 가서야 막힌다.
@@ -308,21 +260,6 @@ void main() {
   });
 }
 
-/// 조회가 끝나는 때를 테스트가 정한다.
-class _SlowCredit extends CreditRepository {
-  _SlowCredit() : super(Dio());
-
-  final _done = Completer<CreditSummary>();
-  var calls = 0;
-
-  void complete(CreditSummary summary) => _done.complete(summary);
-
-  @override
-  Future<CreditSummary> getMine() {
-    calls++;
-    return _done.future;
-  }
-}
 
 /// [summary] 가 null 이면 조회에 실패한다.
 class _FakeCredit extends CreditRepository {

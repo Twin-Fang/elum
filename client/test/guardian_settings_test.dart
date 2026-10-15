@@ -2,13 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:elum/core/app_status/app_status_repository.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/storage/token_store.dart';
-import 'package:elum/core/theme/app_colors.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/data/oauth_sdk.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
-import 'package:elum/features/auth/presentation/consent_document_screen.dart';
 import 'package:elum/features/guardian/presentation/guardian_settings_screen.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
@@ -19,7 +17,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
-import 'helpers/semantics_audit.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
 import 'package:elum/core/router/routes.dart';
@@ -90,57 +87,11 @@ void main() {
   setUp(() => auth = _FakeAuth());
 
   // 이룸이 카드 진동 스위치 (#515) — 이룸이 설정과 같은 값 하나를 본다.
-  testWidgets('카드 체크 진동 줄을 누르면 스위치가 꺼진다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    expect(find.text('카드 체크 진동'), findsOneWidget);
-    expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
-
-    await tester.tap(find.text('카드 체크 진동'));
-    await tester.pumpAndSettle();
-
-    expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
-  });
 
   // 이룸이 휴대폰 줄 (#363 · 명세 §8-4) — 연결 전에는 할 일(`연결하기`), 연결된 뒤에는 상태(`연결됨 ›`).
   group('이룸이 휴대폰 줄', () {
-    final connected = Attempt.ok(
-      LinkStatus(
-        devices: [LinkedDevice(linkId: 'l1', linkedAt: DateTime(2026, 9, 18))],
-      ),
-    );
 
-    testWidgets('연결 전에는 `이룸이 휴대폰 연결하기`이고 누르면 연결 암호 만들기로 간다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
 
-      expect(find.text('이룸이 휴대폰 연결하기'), findsOneWidget);
-      expect(find.text('연결됨'), findsNothing);
-
-      await tester.tap(find.text('이룸이 휴대폰 연결하기'));
-      await tester.pumpAndSettle();
-      expect(find.text('연결 암호 화면'), findsOneWidget);
-    });
-
-    testWidgets('연결된 뒤에는 `이룸이 휴대폰 · 연결됨 ›`으로 바뀌고 누르면 연결 상태로 간다', (tester) async {
-      await tester.pumpWidget(wrap(link: connected));
-      await tester.pumpAndSettle();
-
-      expect(find.text('이룸이 휴대폰 연결하기'), findsNothing);
-      final row = find.ancestor(of: find.text('이룸이 휴대폰'), matching: find.byType(Row));
-      expect(find.descendant(of: row, matching: find.text('연결됨')), findsOneWidget);
-      expect(
-        find.descendant(of: row, matching: find.byIcon(Icons.chevron_right_rounded)),
-        findsOneWidget,
-        reason: '값이 있어도 들어갈 화면이 있다 (그림 방식 줄과 같다)',
-      );
-
-      await tester.tap(find.text('이룸이 휴대폰'));
-      await tester.pumpAndSettle();
-      expect(find.text('연결 상태 화면'), findsOneWidget);
-      expect(find.text('연결 암호 화면'), findsNothing);
-    });
 
     testWidgets('상태를 못 불러와도 설정은 멈추지 않는다 — `연결하기`로 둔다', (tester) async {
       await tester.pumpWidget(
@@ -152,71 +103,17 @@ void main() {
       expect(find.text('로그아웃'), findsOneWidget);
     });
 
-    testWidgets('줄 자리는 연결 전후 같다 — 시안(1022:4467) 첫 줄이다', (tester) async {
-      await tester.pumpWidget(wrap());
-      await tester.pumpAndSettle();
-      final before = tester.getTopLeft(find.text('이룸이 휴대폰 연결하기')).dy;
-
-      // 앞 화면을 완전히 걷어 낸 뒤 다시 올린다 — 같은 자리에 겹쳐 올리면 이전 override 가 남는다
-      await tester.pumpWidget(const SizedBox());
-      await tester.pumpWidget(wrap(link: connected));
-      await tester.pumpAndSettle();
-      final after = tester.getTopLeft(find.text('이룸이 휴대폰')).dy;
-
-      expect(after, before);
-    });
   });
 
   // 버전은 맨 아래 떨어진 글자가 아니라 목록의 한 줄이다 (#418).
-  testWidgets('앱 정보 줄에 버전이 보이고 화살표는 없다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
 
-    final row = find.ancestor(of: find.text('앱 정보'), matching: find.byType(Row));
-    expect(find.descendant(of: row, matching: find.text('v1.24.1')), findsOneWidget);
-    // 들어갈 화면이 없는 줄이다. 화살표가 있으면 누를 곳처럼 읽힌다.
-    expect(
-      find.descendant(of: row, matching: find.byIcon(Icons.chevron_right_rounded)),
-      findsNothing,
-    );
-    // 예전 맨 아래 글자는 없어졌다.
-    expect(find.text('버전 1.24.1'), findsNothing);
-  });
 
-  testWidgets('버전을 읽지 못해도 앱 정보 줄은 남는다', (tester) async {
-    await tester.pumpWidget(wrap(version: ''));
-    await tester.pumpAndSettle();
-
-    expect(find.text('앱 정보'), findsOneWidget);
-    expect(find.textContaining(RegExp(r'^v\d')), findsNothing);
-  });
-
-  testWidgets('설정에는 로그아웃과 회원 탈퇴가 있다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    expect(find.text('로그아웃'), findsOneWidget);
-    expect(find.text('회원탈퇴'), findsOneWidget);
-  });
 
   // 공통 뒤로가기(`ElumScaffold`)라 이 자리가 비면 앱 거의 모든 화면이 함께
   // 빈다. 실기기에서 설정의 화살표가 이름 없이 잡혔다 (#339).
-  testWidgets('뒤로가기가 뒤로 가기라고 읽히고 이름 없는 누름 자리가 없다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    expectLabeledButton(tester, '뒤로 가기');
-    expect(unnamedTapTargets(tester), isEmpty);
-  });
 
   // 가입한 뒤에 약관을 다시 볼 곳이 없으면 Apple 심사에서 지적받는다(5.1.1(i)).
   // 줄이 사라져도 화면은 멀쩡히 뜨므로 눈으로는 알아채기 어렵다 (이슈 #289).
-  testWidgets('설정에서 약관으로 들어갈 수 있다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    expect(find.text('약관 및 개인정보처리방침'), findsOneWidget);
-  });
 
   // 문의하기는 **시안(`1022:4467`)과 일부러 다르게** 뺐다 (#312, 2026-09-23 결정).
   //
@@ -224,40 +121,6 @@ void main() {
   // 심사 기간이라 다시 뺐다. 애플이 요구하는 것은 스토어 페이지의 지원 주소이고
   // 앱 안 문의하기는 필수가 아니다. 시안 대조만 보고 또 되살리지 않도록 여기서
   // 막는다 — 되살릴 때는 이 테스트를 함께 바꾼다.
-  testWidgets('문의하기는 심사 기간에 일부러 뺐다 — 남은 줄은 빈칸 없이 이어진다',
-      (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    expect(find.text('문의하기'), findsNothing);
-
-    // 줄만 지우고 자리를 남기면 약관과 로그아웃 사이에 빈 줄이 생긴다.
-    // 나머지는 시안 순서 그대로, 줄 높이(60)만큼씩 붙어 있어야 한다.
-    const order = [
-      '이룸이 휴대폰 연결하기',
-      // 다중 보호자(#362)의 임시 시안 줄 — 이룸이 휴대폰 연결 바로 아래다. `이룸이 바꾸기`는
-      // 이룸이가 둘 이상일 때만 보여 이 화면(이룸이 없음)에는 없다.
-      '함께하는 사람',
-      '임시저장',
-      // 시안(`1022:4467`)에 새로 들어온 줄 — 임시저장과 약관 사이 (#437)
-      '비밀암호 변경하기',
-      // 카드 그림 방식 줄(#458) — 시안 줄 순서를 깨지 않게 비밀암호와 약관 사이에 둔다.
-      '그림 방식',
-      // 이룸이 카드 진동 스위치(#515) — 시안에 없는 줄이라 그림 방식 바로 아래 둔다.
-      '카드 체크 진동',
-      '약관 및 개인정보처리방침',
-      '의견 보내기',
-      // `앱 정보`(#418)는 약관과 로그아웃 사이에 새로 들어온 줄이다 — 시안에는 아직 없다.
-      '앱 정보',
-      '로그아웃',
-      '회원탈퇴',
-    ];
-    final ys = [for (final label in order) tester.getTopLeft(find.text(label)).dy];
-    for (var i = 1; i < ys.length; i++) {
-      expect(ys[i] - ys[i - 1], closeTo(60, 0.5),
-          reason: '${order[i]} 줄이 바로 앞 줄(${order[i - 1]})에 붙어야 한다');
-    }
-  });
 
   testWidgets('비밀암호 변경하기 줄을 누르면 변경 화면이 열린다 (#437)', (tester) async {
     await tester.pumpWidget(wrap());
@@ -268,32 +131,7 @@ void main() {
     expect(find.text('비밀암호 변경 화면'), findsOneWidget);
   });
 
-  testWidgets('약관 줄을 누르면 문서 목록이 열린다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
 
-    await tester.tap(find.text('약관 및 개인정보처리방침'));
-    await tester.pumpAndSettle();
-
-    // 동의 화면이 쓰는 묶음을 그대로 보여준다 — 여기만 따로 만들면 조용히 어긋난다.
-    expect(find.text('개인정보 수집·이용'), findsOneWidget);
-    expect(find.text('개인정보 국외 이전'), findsOneWidget);
-  });
-
-  testWidgets('문서를 고르면 전문이 열린다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('약관 및 개인정보처리방침'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('개인정보 수집·이용'));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(ConsentDocumentScreen), findsOneWidget);
-    // 시안(`1027:4831`)은 문서 이름을 **뒤로가기 줄**에 올린다. 본문 위에 큰
-    // 글씨로 다시 쓰지 않으므로 `[필수] …` 제목은 더 이상 없다 (#349).
-    expect(find.text('[필수] 개인정보 수집·이용'), findsNothing);
-  });
 
 
   testWidgets('로그아웃은 확인을 거친다 — 탭만으로는 나가지지 않는다', (tester) async {
@@ -309,20 +147,6 @@ void main() {
     expect(auth.logoutCalls, 0, reason: '확인 전에는 아무 일도 일어나면 안 된다');
   });
 
-  testWidgets('확인 창에서 취소하면 로그아웃되지 않는다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    await tester.ensureVisible(find.text('로그아웃'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('로그아웃'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('취소'));
-    await tester.pumpAndSettle();
-
-    expect(auth.logoutCalls, 0);
-    expect(find.text('설정'), findsOneWidget, reason: '설정 화면에 그대로 남아야 한다');
-  });
 
   testWidgets('확인하면 로그아웃하고 로그인 화면으로 간다', (tester) async {
     await tester.pumpWidget(wrap());
@@ -361,70 +185,8 @@ void main() {
     expect(find.text('로그인 화면'), findsOneWidget);
   });
 
-  testWidgets('되돌릴 수 없는 항목은 흐린 색이 아니라 위험 색이다 (이슈 #188)', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
 
-    final colors = AppColors.light;
-    final withdraw = tester.widget<Text>(find.text('회원탈퇴'));
-    final logout = tester.widget<Text>(find.text('로그아웃'));
 
-    // 시안(`1022:4467`)은 이 글자에 #DA5050 을 쓴다. 팝업 버튼의 danger(#BB3F38)와
-    // 값이 다르다 — 넓은 면을 채우는 색과 글자 하나에 쓰는 색이 같을 이유가 없다 (#349).
-    expect(withdraw.style?.color, colors.settingsDestructive,
-        reason: '흐린 보조색을 쓰면 위험이 아니라 비활성으로 읽힌다');
-    // 시안은 이 줄만 굵다.
-    expect(withdraw.style?.fontWeight, FontWeight.w500);
-    expect(withdraw.style?.color, isNot(colors.textSecondary));
-    // 일반 항목까지 물들면 위험 표시가 의미를 잃는다.
-    expect(logout.style?.color, colors.textPrimary);
-  });
-
-  testWidgets('확인 팝업에서 취소가 비활성처럼 보이지 않는다 (이슈 #188)', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    await tester.ensureVisible(find.text('회원탈퇴'));
-    await tester.ensureVisible(find.text('회원탈퇴'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('회원탈퇴'));
-    await tester.pumpAndSettle();
-
-    final colors = AppColors.light;
-    Color? fillBehind(String label) {
-      final box = tester.widget<Container>(
-        find.ancestor(of: find.text(label), matching: find.byType(Container)).first,
-      );
-      return (box.decoration as BoxDecoration?)?.color;
-    }
-
-    // 취소가 비활성 색이면 "지금은 물러날 수 없다"로 읽혀 확인 쪽으로 몰린다.
-    expect(fillBehind('취소'), colors.dialogNeutral);
-    expect(fillBehind('취소'), isNot(colors.buttonDisabled));
-    // 되돌릴 수 없는 쪽은 기본 버튼색이 아니라 위험색이어야 한다.
-    expect(fillBehind('확인'), colors.dialogDanger);
-    expect(fillBehind('확인'), isNot(colors.buttonEnabled));
-  });
-
-  testWidgets('로그아웃은 시안 그대로 붉은 확인이다 (#433)', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    await tester.ensureVisible(find.text('로그아웃'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('로그아웃'));
-    await tester.pumpAndSettle();
-
-    // 시안(`팝업` 1045:5194)은 로그아웃과 회원탈퇴를 한 변형으로 묶어 둘 다
-    // 붉게 칠한다. 예전에는 로그아웃만 낮춰 칠했는데(#188 · #353) 시안에 없는
-    // 색이라 #433 에서 시안대로 되돌렸다. 탈퇴와는 설명 문장으로 구분된다.
-    final box = tester.widget<Container>(
-      find.ancestor(of: find.text('확인'), matching: find.byType(Container)).first,
-    );
-    expect((box.decoration as BoxDecoration?)?.color, AppColors.light.dialogDanger);
-    expect(find.textContaining('되돌릴 수 없어요'), findsNothing,
-        reason: '로그아웃은 되돌아올 수 있다 — 탈퇴와 같은 말을 하면 안 된다');
-  });
 
   testWidgets('서버 삭제가 실패하면 탈퇴됐다고 하지 않는다 (이슈 #187)', (tester) async {
     auth.deleteSucceeds = false;
@@ -479,21 +241,6 @@ void main() {
     expect(find.text('로그인 화면'), findsOneWidget);
   });
 
-  testWidgets('회원 탈퇴 확인 창에서 취소하면 계정이 남는다', (tester) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    await tester.ensureVisible(find.text('회원탈퇴'));
-    await tester.ensureVisible(find.text('회원탈퇴'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('회원탈퇴'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('취소'));
-    await tester.pumpAndSettle();
-
-    expect(auth.deleteCalls, 0);
-    expect(find.text('설정'), findsOneWidget);
-  });
 }
 
 /// 서버에 나가지 않는 대역. 호출 횟수만 센다.

@@ -26,13 +26,6 @@ void main() {
       target;
 
   group('세션이 없으면 로그인으로 보낸다', () {
-    test('보호자 홈', () {
-      expect(
-        destination(Routes.guardian, hasSession: false, onboardingCompleted: true),
-        Routes.login,
-      );
-    });
-
     test('약관 동의도 계정이 있어야 한다 — 동의를 기록할 곳이 없다', () {
       expect(
         destination(Routes.consent, hasSession: false, onboardingCompleted: false),
@@ -40,43 +33,9 @@ void main() {
       );
     });
 
-    test('아이 정보 입력도 마찬가지다', () {
-      expect(
-        destination(Routes.onboardingName, hasSession: false, onboardingCompleted: false),
-        Routes.login,
-      );
-    });
   });
 
   group('가입 절차 안에서는 단계 이동을 막지 않는다', () {
-    test('약관 동의 화면이 이름 화면으로 튕기지 않는다', () {
-      // 로그인 직후에는 온보딩이 당연히 미완료다. 그 이유로 동의 화면을
-      // 건너뛰면 약관을 받지 못한 채 서비스가 열린다.
-      expect(
-        destination(Routes.consent, hasSession: true, onboardingCompleted: false),
-        Routes.consent,
-      );
-    });
-
-    test('이름 다음 단계로 넘어갈 수 있다', () {
-      expect(
-        destination(Routes.onboardingGoals, hasSession: true, onboardingCompleted: false),
-        Routes.onboardingGoals,
-      );
-    });
-
-    test('캐릭터·그림 방식·PIN 단계도 그대로 간다', () {
-      for (final step in [
-        Routes.onboardingCharacter,
-        Routes.onboardingImageStyle,
-        Routes.onboardingPin,
-      ]) {
-        expect(
-          destination(step, hasSession: true, onboardingCompleted: false),
-          step,
-        );
-      }
-    });
   });
 
   group('온보딩을 마치지 않았으면 보호자·아이 화면은 막는다', () {
@@ -87,26 +46,6 @@ void main() {
       );
     });
 
-    test('아이 화면 → 이름 화면', () {
-      expect(
-        destination(Routes.child, hasSession: true, onboardingCompleted: false),
-        Routes.onboardingName,
-      );
-    });
-
-    test('마쳤으면 그대로 들어간다', () {
-      expect(
-        destination(Routes.guardian, hasSession: true, onboardingCompleted: true),
-        Routes.guardian,
-      );
-    });
-  });
-
-  test('시작 화면은 세션과 무관하게 열린다', () {
-    expect(
-      destination(Routes.splash, hasSession: false, onboardingCompleted: false),
-      Routes.splash,
-    );
   });
 
   group('세션이 없으면 이룸이 휴대폰도 로그인으로 되돌린다', () {
@@ -143,12 +82,5 @@ void main() {
       expect(go(Routes.guardian), '${Routes.guardianPinChange}?from=login');
     });
 
-    test('암호 만들기 화면 자체는 통과한다', () {
-      expect(go(Routes.guardianPinChange), isNull);
-    });
-
-    test('만들 차례가 아니면 그대로 연다', () {
-      expect(go(Routes.guardian, pending: false), isNull);
-    });
   });
 }

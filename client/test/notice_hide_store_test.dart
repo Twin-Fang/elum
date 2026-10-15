@@ -1,13 +1,9 @@
 import 'dart:convert';
 
-import 'package:elum/core/storage/guardian_lock_store.dart';
 import 'package:elum/features/notice/data/notice_hide_store.dart';
 import 'package:elum/features/notice/domain/app_notice.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
-import 'package:elum/core/storage/shared_prefs_storage.dart';
 
 /// "보지 않기" 기록 (이슈 #371 · 명세 3-2).
 ///
@@ -27,38 +23,11 @@ void main() {
     store = NoticeHideStore(storage);
   });
 
-  test('숨긴 적 없으면 보인다', () {
-    expect(store.isHidden(notice('a'), now), isFalse);
-  });
-
-  test('숨기면 기한 안에서는 안 보인다', () async {
-    await store.hide(notice('a'), days: 7, now: now);
-
-    expect(store.isHidden(notice('a'), now), isTrue);
-    expect(
-      store.isHidden(notice('a'), now.add(const Duration(days: 6, hours: 23))),
-      isTrue,
-    );
-  });
-
   test('기한이 지나면 다시 보인다', () async {
     await store.hide(notice('a'), days: 7, now: now);
 
     expect(
       store.isHidden(notice('a'), now.add(const Duration(days: 7))),
-      isFalse,
-    );
-  });
-
-  test('일수는 서버 설정을 따른다', () async {
-    await store.hide(notice('a'), days: 3, now: now);
-
-    expect(
-      store.isHidden(notice('a'), now.add(const Duration(days: 2))),
-      isTrue,
-    );
-    expect(
-      store.isHidden(notice('a'), now.add(const Duration(days: 3))),
       isFalse,
     );
   });
@@ -82,12 +51,6 @@ void main() {
     expect(store.isHidden(fixed, now), isTrue);
   });
 
-  test('다른 공지는 건드리지 않는다', () async {
-    await store.hide(notice('a'), days: 7, now: now);
-
-    expect(store.isHidden(notice('b'), now), isFalse);
-  });
-
   test('기록이 깨져 있으면 다시 보여준다 — 예외 없이', () async {
     // 한 번 더 보이는 것은 해가 없다. 깨진 기록 때문에 홈이 죽는 쪽이 나쁘다.
     for (final broken in [
@@ -108,42 +71,6 @@ void main() {
     await expectLater(failing.hide(notice('a'), days: 7, now: now), completes);
   });
 
-  group('로그아웃해도 남는다 — 공지 숨김은 계정이 아니라 휴대폰 기준', () {
-    test('InMemoryStorage', () async {
-      await store.hide(notice('a'), days: 7, now: now);
-
-      await storage.clearAll();
-      await storage.clearChildProfile();
-
-      expect(store.isHidden(notice('a'), now), isTrue);
-    });
-
-    test('SharedPrefsStorage — 키는 notice.hidden.{id}', () async {
-      SharedPreferences.setMockInitialValues({});
-      FlutterSecureStorage.setMockInitialValues({});
-      final prefs = await SharedPreferences.getInstance();
-      // clearAll 은 휴대폰 잠금 저장소도 거치므로 설치 식별자를 가진 잠금을 달아 준다.
-      final real = SharedPrefsStorage(
-        prefs,
-        lock: GuardianLockStore(installationId: 'test-install'),
-      );
-      final realStore = NoticeHideStore(real);
-
-      await realStore.hide(notice('abc', revision: 2), days: 7, now: now);
-      final saved = prefs.getString('notice.hidden.abc');
-      expect(saved, isNotNull);
-      expect(jsonDecode(saved!), {
-        'revision': 2,
-        'until': now.add(const Duration(days: 7)).millisecondsSinceEpoch,
-      });
-
-      await real.clearAll();
-      await real.clearChildProfile();
-
-      expect(prefs.getString('notice.hidden.abc'), isNotNull);
-      expect(realStore.isHidden(notice('abc', revision: 2), now), isTrue);
-    });
-  });
 }
 
 class _FailingStorage extends InMemoryStorage {

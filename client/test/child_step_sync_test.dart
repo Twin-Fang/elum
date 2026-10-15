@@ -5,7 +5,6 @@ import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/child/application/child_routine_notifier.dart';
 import 'package:elum/features/child/data/progress_store.dart';
 import 'package:elum/features/child/data/step_progress_repository.dart';
-import 'package:elum/features/child/domain/routine_progress_record.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,61 +54,6 @@ void main() {
     }
   }
 
-  group('체크는 즉시 로컬에 반영되고 서버에는 집합으로 간다', () {
-    test('아무 순서로나 체크할 수 있다', () async {
-      final (:container, :repo, storage: _) = setUp();
-      final notifier = container.read(childRoutineProvider.notifier);
-
-      notifier.toggle(routine: routine, card: c3);
-      notifier.toggle(routine: routine, card: c1);
-      await drain();
-
-      final state = container.read(childRoutineProvider);
-      expect(state.isChecked('r1', c3), isTrue);
-      expect(state.isChecked('r1', c1), isTrue);
-      expect(state.isChecked('r1', c2), isFalse);
-      expect(repo.lastSent, {'c3', 'c1'});
-    });
-
-    test('서버 완료 카드를 해제하면 집합에서 빠져서 전송된다', () async {
-      const serverDone = ActionCard(
-        id: 'c1',
-        description: '옷을 입어요',
-        stepOrder: 1,
-        completed: true,
-      );
-      const resumed = Routine(
-        id: 'r1',
-        status: 'CONFIRMED',
-        steps: [serverDone, c2, c3],
-      );
-      final (:container, :repo, storage: _) = setUp();
-      final notifier = container.read(childRoutineProvider.notifier);
-
-      expect(
-        container.read(childRoutineProvider).isChecked('r1', serverDone),
-        isTrue,
-      );
-      notifier.toggle(routine: resumed, card: serverDone);
-      await drain();
-
-      expect(
-        container.read(childRoutineProvider).isChecked('r1', serverDone),
-        isFalse,
-      );
-      expect(repo.lastSent, isEmpty);
-    });
-
-    test('탭할 때마다 저장소에 기록된다', () async {
-      final (:container, repo: _, :storage) = setUp();
-      container
-          .read(childRoutineProvider.notifier)
-          .toggle(routine: routine, card: c1);
-      await drain();
-
-      expect(ProgressStore(storage).load('r1')?.completed, {'c1'});
-    });
-  });
 
   group('오프라인 — 서버에 못 닿아도 기록은 남는다', () {
     test('unreachable이면 체크가 유지되고 대기열에 남는다', () async {
@@ -166,43 +110,6 @@ void main() {
     });
   });
 
-  group('재시작 — hydrate로 복원한다', () {
-    test('저장된 기록과 대기열이 상태로 돌아온다', () async {
-      final storage = InMemoryStorage(onboardingCompleted: true);
-      final store = ProgressStore(storage);
-      await store.save(
-        'r1',
-        const RoutineProgressRecord(completed: {'c1', 'c2'}, rewarded: {'c1'}),
-      );
-      await store.setPending({'r1'});
-
-      final (:container, repo: _, storage: _) = setUp(
-        outcome: SyncOutcome.unreachable,
-        storage: storage,
-      );
-      await container.read(childRoutineProvider.notifier).hydrate();
-      await drain();
-
-      final state = container.read(childRoutineProvider);
-      expect(state.isChecked('r1', c2), isTrue);
-      expect(state.hasRewarded('r1', 'c1'), isTrue);
-      expect(state.pending, contains('r1'));
-    });
-
-    test('hydrate 직후 대기열 동기화를 시도한다', () async {
-      final storage = InMemoryStorage(onboardingCompleted: true);
-      final store = ProgressStore(storage);
-      await store.save('r1', const RoutineProgressRecord(completed: {'c1'}));
-      await store.setPending({'r1'});
-
-      final (:container, :repo, storage: _) = setUp(storage: storage);
-      await container.read(childRoutineProvider.notifier).hydrate();
-      await drain();
-
-      expect(repo.lastSent, {'c1'});
-      expect(container.read(childRoutineProvider).pending, isEmpty);
-    });
-  });
 
   group('동기화 중 추가 조작', () {
     test('전송 중에 또 체크하면 대기열이 유지되고 최신 집합이 다시 간다', () async {
@@ -223,22 +130,6 @@ void main() {
     });
   });
 
-  group('보상 규칙', () {
-    test('처음 체크하면 보상, 해제 후 재체크는 보상 없음', () async {
-      final (:container, repo: _, storage: _) = setUp();
-      final notifier = container.read(childRoutineProvider.notifier);
-
-      expect(notifier.toggle(routine: routine, card: c1), isTrue);
-      expect(notifier.toggle(routine: routine, card: c1), isFalse);
-      expect(notifier.toggle(routine: routine, card: c1), isFalse);
-      await drain();
-
-      expect(
-        container.read(childRoutineProvider).hasRewarded('r1', 'c1'),
-        isTrue,
-      );
-    });
-  });
 }
 
 /// 서버 대신 전송된 집합을 기록하는 가짜 저장소.

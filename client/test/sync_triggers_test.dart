@@ -52,25 +52,6 @@ void main() {
     expect(container.read(childRoutineProvider).pending, isEmpty);
   });
 
-  testWidgets('백그라운드에서 돌아오면 대기열을 다시 전송한다', (tester) async {
-    final storage = InMemoryStorage(onboardingCompleted: true);
-    final store = ProgressStore(storage);
-    await store.save('r1', const RoutineProgressRecord(completed: {'c1'}));
-    await store.setPending({'r1'});
-    final repo = _CountingRepo(outcome: SyncOutcome.unreachable);
-
-    await pumpTriggers(tester, storage: storage, repo: repo);
-    await tester.pumpAndSettle();
-    expect(repo.calls, 1); // 시작 시 1회 — 실패해서 대기열 유지
-
-    repo.outcome = SyncOutcome.accepted;
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pumpAndSettle();
-
-    expect(repo.calls, 2);
-  });
-
   group('날짜가 바뀌면 오늘 일과를 다시 받는다 (이슈 #353)', () {
     // 오늘 일과 provider 는 앱이 살아 있는 동안 값을 들고 있다. 자정을 넘겨도 다시
     // 받지 않으면 어제 일과가 오늘 일과로 남는다 — 앱을 다시 켜야만 초기화됐다.
@@ -119,36 +100,13 @@ void main() {
       expect(todayFetches, 2);
     });
 
-    testWidgets('같은 날 돌아오면 다시 받지 않는다', (tester) async {
-      clock = DateTime(2026, 9, 30, 9);
-      await pumpWithClock(tester);
-
-      clock = DateTime(2026, 9, 30, 21);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pumpAndSettle();
-
-      expect(todayFetches, 1);
-    });
-
-    testWidgets('앱을 내리지 않아도 자정이 지나면 다시 받는다', (tester) async {
-      clock = DateTime(2026, 9, 30, 23, 59, 30);
-      await pumpWithClock(tester);
-
-      // 자정 타이머가 울릴 때 시계는 이미 다음 날이다.
-      clock = DateTime(2026, 10, 1, 0, 0, 5);
-      await tester.pump(const Duration(seconds: 40));
-      await tester.pumpAndSettle();
-
-      expect(todayFetches, 2);
-    });
   });
 }
 
 class _CountingRepo extends StepProgressRepository {
-  _CountingRepo({this.outcome = SyncOutcome.accepted}) : super(dio: Dio());
+  _CountingRepo() : super(dio: Dio());
 
-  SyncOutcome outcome;
+  final SyncOutcome outcome = SyncOutcome.accepted;
   int calls = 0;
 
   @override

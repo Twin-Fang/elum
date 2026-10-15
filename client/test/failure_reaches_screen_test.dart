@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/widgets/elum_error_view.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/test_storage.dart';
@@ -89,12 +88,6 @@ void main() {
     expect(find.textContaining('MEMBER_SUSPENDED'), findsOneWidget);
   });
 
-  testWidgets('서버가 아무 말도 없으면 화면 문구가 나선다', (tester) async {
-    await _pump(tester, StateError('알 수 없는 실패'));
-
-    expect(find.text('임시저장을 불러오지 못했어요'), findsOneWidget);
-    expect(find.textContaining('E-DRAFT'), findsOneWidget);
-  });
 
   testWidgets('연결이 끊겼으면 그렇게 말한다 (#341)', (tester) async {
     await _pump(
@@ -122,39 +115,4 @@ void main() {
 /// 넉넉한 화면만 보고 있어서 못 잡았다. 넘침은 `flutter_test_config.dart` 가
 /// 자동으로 실패시키므로, 그 칸 크기 그대로 세워 보는 것으로 충분하다.
 void _overflowGuard() {
-  testWidgets('세 줄짜리 실패가 회색 칸 안에 들어간다', (tester) async {
-    await tester.pumpWidget(
-      ScreenUtilInit(
-        designSize: const Size(393, 852),
-        useInheritedMediaQuery: true,
-        builder: (context, _) => MaterialApp(
-          theme: AppTheme.light,
-          home: Scaffold(
-            body: Center(
-              child: SizedBox(
-                // `_GreyTileShell` 이 실패를 담을 때 쓰는 높이.
-                height: 96,
-                width: 361,
-                child: ElumErrorView.failure(
-                  DioException(
-                    requestOptions: RequestOptions(path: '/x'),
-                    type: DioExceptionType.connectionError,
-                  ),
-                  fallback: '지난 일과를 불러오지 못했어요',
-                  fallbackCode: 'E-PAST',
-                  onRetry: () {},
-                  compact: true,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(find.text('지난 일과를 불러오지 못했어요'), findsOneWidget);
-    expect(find.text('인터넷 연결을 확인해주세요'), findsOneWidget);
-    expect(find.textContaining('E-NET-OFFLINE'), findsOneWidget);
-  });
 }

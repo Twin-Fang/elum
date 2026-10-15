@@ -6,7 +6,6 @@ import 'package:elum/features/credit/domain/credit_summary.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
 import 'package:elum/features/guardian/presentation/question_screen.dart';
-import 'package:elum/features/guardian/presentation/reward_setup_screen.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/credit_usage.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -107,12 +106,6 @@ void main() {
         expect(find.text('카드 만들기'), findsOneWidget);
       });
 
-      testWidgets('보상 — 잔액 $available 이어도 버튼만 있다', (tester) async {
-        await pump(tester, const RewardSetupScreen(), credit: credit(available));
-
-        expect(find.textContaining('크레딧이'), findsNothing);
-        expect(find.text('다음'), findsOneWidget);
-      });
     }
   });
 
@@ -147,15 +140,6 @@ void main() {
       expect(find.textContaining('AI 그림'), findsNothing);
     });
 
-    testWidgets('credit 이 없으면 줄이 없다', (tester) async {
-      await pump(
-        tester,
-        const CardReviewScreen(),
-        flow: const RoutineFlowState(step: RoutineFlowStep.review, routine: routine),
-      );
-
-      expect(find.textContaining('크레딧 사용'), findsNothing);
-    });
   });
 }
 

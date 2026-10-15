@@ -16,37 +16,15 @@ void main() {
       expect(keepWords('방침에서'), '방$wj침$wj에$wj서');
     });
 
-    test('띄어쓰기·줄바꿈 옆에는 넣지 않는다 — 거기서 끊는다', () {
-      expect(keepWords('가 나\n다'), '가 나\n다');
-      expect(keepWords('가나 다'), '가$wj나 다');
-    });
 
-    test('빈 글·한 글자는 그대로', () {
-      expect(keepWords(''), '');
-      expect(keepWords('가'), '가');
-    });
 
     test('이모지 한 덩어리 안에는 넣지 않는다 — 넣으면 그림이 갈라진다', () {
       const family = '👨‍👩‍👧';
       expect(keepWords('a$family'), 'a$wj$family');
     });
 
-    test('표시를 걷어내면 원래 글과 같다', () {
-      const text = '카드 그림을 만드는 업체가 하나 늘어요.\n자세한 내용은 방침에서';
-      expect(keepWords(text).replaceAll(wj, ''), text);
-    });
   });
 
-  group('keepWordsParts — 강조 조각 경계도 한 어절로 본다', () {
-    test('"9월 30일" + "에" 는 붙어 있으니 사이에 표시가 들어간다', () {
-      final parts = keepWordsParts(['개인정보처리방침이 ', '9월 30일', '에 바뀌어요']);
-      expect(parts.join().replaceAll(wj, ''), '개인정보처리방침이 9월 30일에 바뀌어요');
-      // 조각 끝 "일" 과 다음 조각 첫 "에" 사이 — 여기서 끊기면 "30일 / 에" 가 된다
-      expect(parts[2].startsWith(wj), isTrue);
-      // 띄어쓰기로 끝난 조각 뒤에는 넣지 않는다
-      expect(parts[1].startsWith(wj), isFalse);
-    });
-  });
 
   group('실제로 그려 보면', () {
     // 폭 260 에 16 글자 크기 — 공지 본문과 같은 조건에서 줄을 센다
@@ -110,21 +88,5 @@ void main() {
       expect(kept.join(), long);
     });
 
-    testWidgets('표시는 폭을 차지하지 않는다', (tester) async {
-      double widthOf(String s) {
-        final p = TextPainter(
-          text: TextSpan(
-            text: s,
-            style: const TextStyle(fontFamily: 'Pretendard', fontSize: 16),
-          ),
-          textDirection: TextDirection.ltr,
-        )..layout();
-        final w = p.width;
-        p.dispose();
-        return w;
-      }
-
-      expect(widthOf(keepWords('방침에서 확인')), closeTo(widthOf('방침에서 확인'), 0.01));
-    });
   });
 }

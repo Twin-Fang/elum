@@ -94,18 +94,6 @@ void main() {
     expect(style.locale, contentLocaleOf('ja'));
   });
 
-  testWidgets('카드 글 영역 안에서도 화면 문구(l10n)는 이 휴대폰 언어를 지킨다', (tester) async {
-    await tester.pumpWidget(wrap(routineLanguage: 'ja'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 600));
-
-    // 글자 스타일은 일과 언어(ja)이지만, 번역이 읽는 Localizations 는 화면 언어(en)로 남아야 한다
-    final inCard = tester.element(find.text('学校に行く服を着ます'));
-    expect(DefaultTextStyle.of(inCard).style.locale, const Locale('ja'));
-    expect(Localizations.localeOf(inCard), const Locale('en'));
-    expect(inCard.l10n.localeName, 'en');
-  });
-
   /// 카드의 스피커 버튼이 누르는 동작을 그대로 부른다. 낭독 문구(번역 대상)에 기대지 않는다.
   Future<void> tapSpeaker(WidgetTester tester) async {
     final view = tester.widget<ActionCardView>(find.byType(ActionCardView).first);

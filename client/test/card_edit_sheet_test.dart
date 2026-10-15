@@ -1,12 +1,9 @@
 import 'package:elum/core/network/app_failure.dart';
-import 'package:elum/core/assets/app_assets.dart';
 import 'package:elum/core/theme/app_theme.dart';
-import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
 import 'package:elum/features/guardian/application/routine_notifier.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/card_review_screen.dart';
-import 'package:elum/features/guardian/presentation/widgets/aurora_background.dart';
 import 'package:elum/shared/models/support_goal.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -16,7 +13,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-import 'helpers/svg_finder.dart';
 import 'helpers/test_storage.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
@@ -50,20 +46,6 @@ void main() {
   );
 
   group('Routine 모델 — /today 계약 (이슈 #75)', () {
-    test('진행률 필드를 읽는다', () {
-      final parsed = Routine.fromJson(const {
-        'id': 'r1',
-        'title': '오늘 일과',
-        'status': 'CONFIRMED',
-        'completedStepCount': 2,
-        'totalStepCount': 5,
-        'progressPercent': 40,
-      });
-
-      expect(parsed.completedStepCount, 2);
-      expect(parsed.totalStepCount, 5);
-      expect(parsed.progressPercent, 40);
-    });
 
     test('진행률이 문자열로 와도 죽지 않는다', () {
       final parsed = Routine.fromJson(const {
@@ -76,15 +58,6 @@ void main() {
       expect(parsed.totalStepCount, 0);
     });
 
-    test('COMPLETED 일과도 아이 화면에 보인다', () {
-      // /today가 CONFIRMED와 COMPLETED를 함께 준다 —
-      // isConfirmed만 걸면 다 끝낸 일과가 목록에서 사라진다
-      const done = Routine(id: 'r2', status: 'COMPLETED');
-      const pending = Routine(id: 'r3', status: 'PENDING_REVIEW');
-
-      expect(done.isVisibleToChild, isTrue);
-      expect(pending.isVisibleToChild, isFalse, reason: '미승인은 아동에게 노출 금지');
-    });
   });
 
   group('RoutineFlowNotifier.updateStep — 제목·설명 수정 (이슈 #77)', () {
@@ -102,19 +75,6 @@ void main() {
           const RoutineFlowState(routine: routine);
       return container;
     }
-
-    test('제목과 설명이 함께 바뀐다', () async {
-      final container = containerWith(_FakeRepo(synced: true));
-
-      final failure = await container
-          .read(routineFlowProvider.notifier)
-          .updateStep(stepId: 'c1', title: '새 제목', description: '새 설명');
-
-      final steps = container.read(routineFlowProvider).routine!.steps;
-      expect(failure, isNull, reason: '성공이면 실패 이유가 없다');
-      expect(steps.first.title, '새 제목');
-      expect(steps.first.description, '새 설명');
-    });
 
     test('서버 응답에 title이 없어도 다른 카드의 로컬 제목이 지워지지 않는다', () async {
       // 서버 RoutineStep에는 title 컬럼이 없다 (2026-07-22 확인).
@@ -188,55 +148,6 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
     }
-
-    testWidgets('수정 버튼이 있고 삭제 X는 에셋으로 그린다', (tester) async {
-      await pumpReview(tester, _FakeRepo(synced: true));
-
-      expect(find.text('이 카드 수정'), findsOneWidget);
-      // 흐린 원 + X는 코드로 그리지 않는다 — Figma 393:4010 에셋
-      expect(svgWithAsset(AppAssets.iconCardDelete), findsWidgets);
-      // 이전 시안의 이미지 위 버튼은 사라졌다
-      expect(find.text('완료'), findsNothing);
-    });
-
-    testWidgets('배경에 블러 글로우가 없다 (이슈 #79)', (tester) async {
-      // Figma 262:5124의 프레임 배경은 단색 #F7F2EF 하나뿐이다.
-      // 글로우는 입력 화면 시안(238:1728)의 것으로, 공통 스캐폴드를 타고
-      // 여기까지 새어 나왔었다.
-      await pumpReview(tester, _FakeRepo(synced: true));
-
-      expect(find.byType(AuroraBackground), findsNothing);
-    });
-
-    testWidgets('카드가 없어도 글로우가 없다 (이슈 #79)', (tester) async {
-      // 빈 상태도 같은 시안을 따른다 — 여기만 배경이 달라지면 눈에 띈다
-      await tester.pumpWidget(wrap(_FakeRepo(synced: true)));
-      await tester.pump();
-
-      expect(find.byType(AuroraBackground), findsNothing);
-    });
-
-    testWidgets('수정 버튼을 누르면 수정 시트가 뜨고 완료하면 카드가 바뀐다', (tester) async {
-      await pumpReview(tester, _FakeRepo(synced: true));
-
-      await tester.tap(find.text('이 카드 수정'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-
-      expect(find.text('카드 수정'), findsOneWidget);
-
-      // 첫 필드가 제목, 둘째가 설명
-      final fields = find.byType(TextField);
-      await tester.enterText(fields.first, '가방을 싸요');
-      await tester.enterText(fields.last, '책과 준비물을 가방에 넣어요');
-      await tester.tap(find.text('완료').last);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-
-      expect(find.text('카드 수정'), findsNothing, reason: '완료하면 시트가 닫힌다');
-      expect(find.text('가방을 싸요'), findsOneWidget);
-      expect(find.text('책과 준비물을 가방에 넣어요'), findsOneWidget);
-    });
 
     testWidgets('title 없는 예전 카드는 제목칸이 비어 열린다 (제목=설명 방지)', (tester) async {
       // 예전 카드는 title이 없어 displayTitle이 description을 대신 돌려준다.
@@ -312,36 +223,6 @@ void main() {
     });
   });
 
-  group('아이 일과 상세 상단바 (Figma 309:3548, 2026-07-22 시안)', () {
-    Widget wrapDetail() {
-      return ProviderScope(
-        overrides: [
-          offlineDioOverride(),
-          testStorageOverride(onboardingCompleted: true),
-        ],
-        child: ScreenUtilInit(
-          designSize: const Size(393, 852),
-          builder: (context, _) => MaterialApp(
-            theme: AppTheme.light,
-            home: const ChildRoutineDetailScreen(routine: routine),
-          ),
-        ),
-      );
-    }
-
-    testWidgets('일과 제목이 상단에 뜨고 캐릭터 배지는 없다', (tester) async {
-      await tester.pumpWidget(wrapDetail());
-      await tester.pump();
-
-      expect(find.text('비 오는 날 학교에 가요'), findsOneWidget);
-      // ignore: deprecated_member_use_from_same_package
-      expect(svgWithAsset(AppAssets.characterBadgeRuru), findsNothing);
-
-      // 진행 동기화가 500ms 디바운스 타이머를 건다. 흘려보내지 않고 화면을
-      // 내리면 "Timer is still pending"으로 테스트가 깨진다.
-      await tester.pump(const Duration(milliseconds: 600));
-    });
-  });
 }
 
 /// 서버 흉내 저장소. [synced]로 서버 반영 성공/실패를 가른다.

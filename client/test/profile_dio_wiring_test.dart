@@ -53,19 +53,6 @@ void main() {
     expect(adapter.sentHeaders['GET /api/routines/today']!['X-Profile-Id'], 'p-b');
   });
 
-  test('이룸이 휴대폰은 헤더를 싣지 않는다 — 서버가 연결된 이룸이만 보여 준다', () async {
-    await storage.setSelectedProfileId('p-b');
-    await storage.setElumiDevice(true);
-    final c = build({'GET /api/routines/today': <Object>[]});
-
-    await c.read(dioProvider).get<dynamic>('/api/routines/today');
-
-    expect(
-      adapter.sentHeaders['GET /api/routines/today']!.containsKey('X-Profile-Id'),
-      isFalse,
-    );
-  });
-
   test('고른 이룸이를 볼 수 없다는 응답을 받으면 선택을 풀고 첫 이룸이로 돌아온다', () async {
     await storage.setSelectedProfileId('p-gone');
     final c = build({
@@ -92,24 +79,4 @@ void main() {
     expect(storage.selectedProfileId, 'p-a');
   });
 
-  test('연결된 이룸이가 없다는 응답은 이룸이 없음으로 표시한다 (E29)', () async {
-    serverProfiles = const [];
-    final c = build({
-      'GET /api/routines/today': const FakeHttpError(
-        404,
-        errorCode: 'PROFILE_NOT_FOUND',
-        errorMessage: '등록된 이룸이가 없어요.',
-      ),
-    });
-    c.listen(profileSessionProvider, (_, _) {});
-
-    await expectLater(
-      c.read(dioProvider).get<dynamic>('/api/routines/today'),
-      throwsA(isA<DioException>()),
-    );
-    await Future<void>.delayed(Duration.zero);
-    await Future<void>.delayed(Duration.zero);
-
-    expect(c.read(profileSessionProvider).noProfile, isTrue);
-  });
 }

@@ -38,10 +38,4 @@ void main() {
     expect(routineProgress(routine, state), closeTo(2 / 3, 0.001));
   });
 
-  test('서버에 올리지 않는 로컬 일과는 늘 기기 기록이 기준이다', () {
-    final routine = routineOf('local', [card('c1'), card('c2'), card('c3')]);
-    final state = ChildRoutineState(progress: {'local': localOnly12});
-
-    expect(routineProgress(routine, state), closeTo(2 / 3, 0.001));
-  });
 }

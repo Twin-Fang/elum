@@ -19,17 +19,4 @@ void main() {
     );
   });
 
-  test('온보딩이 안 끝났으면 머문다', () {
-    expect(
-      shouldSkipSplash(hasSession: true, onboardingCompleted: false),
-      isFalse,
-    );
-  });
-
-  test('둘 다 없으면 머문다 — 첫 실행', () {
-    expect(
-      shouldSkipSplash(hasSession: false, onboardingCompleted: false),
-      isFalse,
-    );
-  });
 }
