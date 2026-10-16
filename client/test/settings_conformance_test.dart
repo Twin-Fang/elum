@@ -18,6 +18,10 @@ import 'package:elum/features/guardian/presentation/guardian_settings_screen.dar
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
 import 'package:elum/features/link/presentation/link_code_screen.dart';
+import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/features/profile/data/profile_repository.dart';
+import 'package:elum/features/profile/domain/guardian_member.dart';
+import 'package:elum/features/profile/presentation/guardians_screen.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +32,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/credit_fixtures.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/precache_images.dart';
+import 'helpers/profile_fixtures.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
@@ -171,6 +176,69 @@ void main() {
     await expectLater(
       find.byType(LinkCodeScreen),
       matchesGoldenFile('figma/settings_link_1027-4617.png'),
+    );
+  });
+
+  // 함께하는 사람 세 프레임 (Figma 1027:4617 · 1532:6877 · 1532:7013). 시안이 그린 세 사람 그대로 채운다.
+  //
+  // **알려진 차이 — 시트 프레임의 `이름없음`.** 시안 1532:6877·7013 은 스크림 뒤 내 줄 이름이
+  // `이름없음`(검정 30%)인데 목록 시안 1027:4617 은 `보호자`다. 목록 시안을 따르므로 시트 두 프레임의
+  // 그 글자만 붉게 남는다.
+  final people = [
+    const Guardian(id: 'g-1', me: true),
+    const Guardian(id: 'g-2', me: false, displayName: '다른보호자이름'),
+    const Guardian(
+      id: 'g-3',
+      me: false,
+      displayName: '다른보호자이름',
+      kind: GuardianKind.caregiver,
+    ),
+  ];
+
+  Future<void> pumpPeople(WidgetTester tester) async {
+    final repo = FakeProfileRepository()..guardiansResult = Attempt.ok(people);
+    await _pump(
+      tester,
+      const GuardiansScreen(),
+      extra: [
+        profileRepositoryProvider.overrideWithValue(repo),
+        memberProvider.overrideWith((ref) async => memberWith([kProfileA])),
+      ],
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('설정 — 함께하는 사람 (Figma 1027:4617)', (tester) async {
+    await pumpPeople(tester);
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/people_1027-4617.png'),
+    );
+  });
+
+  testWidgets('설정 — 함께하는 사람 이름 변경, 비어 있음 (Figma 1532:6877)', (tester) async {
+    await pumpPeople(tester);
+    await tester.tap(find.text('이름 변경'));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/people_sheet_1532-6877.png'),
+    );
+  });
+
+  testWidgets('설정 — 함께하는 사람 이름 변경, 선생님 (Figma 1532:7013)', (tester) async {
+    await pumpPeople(tester);
+    await tester.tap(find.text('이름 변경'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '2반 선생님');
+    // 시트 안 구분 칩 (뒷 화면의 목록 칩과 겹치지 않게 시트 안에서 찾는다)
+    await tester.tap(find.descendant(of: find.byType(BottomSheet), matching: find.text('선생님')));
+    // 시안은 입력칸이 포커스를 받지 않은 모습
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/people_sheet_teacher_1532-7013.png'),
     );
   });
 

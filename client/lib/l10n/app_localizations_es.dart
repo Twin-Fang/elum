@@ -674,7 +674,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guardianKindGuardian => '보호자';
 
   @override
-  String get guardianKindCaregiver => '센터 선생님';
+  String get guardianKindCaregiver => '선생님';
 
   @override
   String inviteShareMessage(int minutes, String url, String code) {
@@ -687,17 +687,17 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get guardiansEditTitle => '내 이름 고치기';
+  String get guardiansEditTitle => '내 이름 변경하기';
 
   @override
   String get guardiansEditDescription =>
-      '이 이룸이를 함께 돌보는 사람에게 보이는 이름이에요. 실명이 아니어도 괜찮아요';
+      '이룸이를 함께 돌보는 사람에게 보이는 이름이에요.\n실명이 아니어도 괜찮아요';
 
   @override
-  String get guardiansEditNameHint => '엄마, 아빠, 센터 선생님';
+  String get guardiansEditNameHint => '엄마, 아빠, 선생님';
 
   @override
-  String get guardiansEditSave => '저장';
+  String get guardiansEditSave => '저장하기';
 
   @override
   String get guardiansLeaveConfirmTitle => '함께 돌보기를 그만둘까요?';
@@ -740,14 +740,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guardiansNoProfileDescription => '이룸이를 먼저 등록해주세요';
 
   @override
-  String guardiansCaption(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
-    return '$name$_temp0 함께 돌보는 사람이에요';
-  }
-
-  @override
-  String get guardiansIntro =>
-      '일과를 같이 만드는 가족이나 선생님이에요. 이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요';
+  String get guardiansIntro => '일과를 같이 만드는 가족이나 선생님이에요';
 
   @override
   String get guardiansLoadFailedFallback => '함께하는 사람을 불러오지 못했어요';
@@ -771,8 +764,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guardiansLeaveHintAlone => '혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요';
 
   @override
-  String get guardiansLeaveHintWithOthers =>
-      '내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요';
+  String get guardiansLeaveHintWithOthers => '내가 만든 일과만 사라져요';
 
   @override
   String inviteCodeGuestJoinedTitle(String name) {
@@ -791,10 +783,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guardiansInviteHeader => '초대';
 
   @override
-  String get guardiansRenameAction => '이름 바꾸기';
-
-  @override
-  String get guardiansNoName => '이름 없음';
+  String get guardiansRenameAction => '이름 변경';
 
   @override
   String get inviteCodeShareFailTitle => '링크를 보내지 못했어요';

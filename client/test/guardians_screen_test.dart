@@ -2,9 +2,12 @@ import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error_code.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/elum_bottom_sheet.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
+import 'package:elum/features/profile/presentation/guardian_edit_sheet.dart';
 import 'package:elum/features/profile/presentation/guardians_screen.dart';
+import 'package:elum/features/profile/presentation/widgets/guardian_person_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -35,7 +38,7 @@ void main() {
     profiles = [kProfileA, kProfileB];
   });
 
-  Widget wrap() {
+  Widget wrap({double? bottomInset}) {
     final router = GoRouter(
       initialLocation: Routes.guardianPeople,
       routes: [
@@ -54,16 +57,25 @@ void main() {
       ],
       child: ScreenUtilInit(
         designSize: const Size(393, 852),
+        useInheritedMediaQuery: true,
         builder: (context, child) => MaterialApp.router(
           theme: AppTheme.light,
           routerConfig: router,
+          builder: bottomInset == null
+              ? null
+              : (context, child) => MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    padding: EdgeInsets.only(top: 59, bottom: bottomInset),
+                  ),
+                  child: child!,
+                ),
         ),
       ),
     );
   }
 
-  Future<void> open(WidgetTester tester) async {
-    await tester.pumpWidget(wrap());
+  Future<void> open(WidgetTester tester, {double? bottomInset}) async {
+    await tester.pumpWidget(wrap(bottomInset: bottomInset));
     await tester.pumpAndSettle();
   }
 
@@ -87,10 +99,6 @@ void main() {
   });
 
   group('목록', () {
-
-
-
-
     testWidgets('불러오지 못하면 에러 코드와 다시 시도를 보이고 나가기는 막는다', (tester) async {
       repo.guardiansResult = const Attempt.failed(AppFailure(fault: NetworkFault.offline));
       await open(tester);
@@ -98,7 +106,7 @@ void main() {
       expect(find.textContaining('E-NET-OFFLINE'), findsOneWidget);
       expect(find.textContaining('다시 시도'), findsOneWidget);
       // 몇 명인지 모르면 "마지막 보호자"인지 말할 수 없다 — 누르게 두지 않는다
-      await tester.tap(find.text('함께 돌보기 그만두기'));
+      await tester.tap(findKept('함께 돌보기 그만두기', exact: true));
       await tester.pumpAndSettle();
       expect(find.text('함께 돌보기를 그만둘까요?'), findsNothing);
 
@@ -127,7 +135,7 @@ void main() {
     testWidgets('먼저 무엇이 사라지고 무엇이 남는지 말한다 — 확인 전에는 아무것도 보내지 않는다', (tester) async {
       await open(tester);
 
-      await tester.tap(find.text('함께 돌보기 그만두기'));
+      await tester.tap(findKept('함께 돌보기 그만두기', exact: true));
       await tester.pumpAndSettle();
 
       expect(find.text('함께 돌보기를 그만둘까요?'), findsOneWidget);
@@ -144,7 +152,7 @@ void main() {
       repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true, displayName: '엄마')]);
       await open(tester);
 
-      await tester.tap(find.text('함께 돌보기 그만두기'));
+      await tester.tap(findKept('함께 돌보기 그만두기', exact: true));
       await tester.pumpAndSettle();
 
       expect(findKept('함께하는 보호자가 없어요'), findsOneWidget);
@@ -160,7 +168,7 @@ void main() {
       repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
       await open(tester);
 
-      await tester.tap(find.text('함께 돌보기 그만두기'));
+      await tester.tap(findKept('함께 돌보기 그만두기', exact: true));
       await tester.pumpAndSettle();
       await tester.tap(find.text('그만두기'));
       await tester.pumpAndSettle();
@@ -174,7 +182,7 @@ void main() {
       repo.leaveFailure = serverFailure(500, ServerErrorCode.internalServerError, '잠시 후 다시 시도해주세요.');
       await open(tester);
 
-      await tester.tap(find.text('함께 돌보기 그만두기'));
+      await tester.tap(findKept('함께 돌보기 그만두기', exact: true));
       await tester.pumpAndSettle();
       await tester.tap(find.text('그만두기'));
       await tester.pumpAndSettle();
@@ -194,14 +202,14 @@ void main() {
 
   });
 
-  group('내 이름 고치기', () {
-    testWidgets('이름 바꾸기를 누르면 이름을 바꿔 저장한다 — 바뀐 항목만 보낸다', (tester) async {
+  group('내 이름 변경', () {
+    testWidgets('이름 변경을 누르면 이름을 바꿔 저장한다 — 바뀐 항목만 보낸다', (tester) async {
       await open(tester);
 
-      await tester.tap(find.text('이름 바꾸기'));
+      await tester.tap(find.byKey(guardianRenameButtonKey));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), '아빠');
-      await tester.tap(find.text('저장'));
+      await tester.tap(find.byKey(guardianEditSaveButtonKey));
       await tester.pumpAndSettle();
 
       expect(repo.calls, contains('update:p-a'));
@@ -212,14 +220,68 @@ void main() {
 
 
 
+    Future<void> openSheet(WidgetTester tester) async {
+      await tester.tap(find.byKey(guardianRenameButtonKey));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('바뀐 항목만 보낸다 — 그대로 저장하면 안 보내고 구분만 바꾸면 구분만 보낸다', (tester) async {
+      await open(tester);
+
+      // 그대로 저장: 서버에 아무것도 보내지 않는다 (옛 값을 다시 보내 덮어쓰는 일 방지)
+      await openSheet(tester);
+      await tester.tap(find.byKey(guardianEditSaveButtonKey));
+      await tester.pumpAndSettle();
+      expect(repo.calls.where((c) => c.startsWith('update')), isEmpty);
+
+      // 구분 칩만 바꿈: 이름은 null
+      await openSheet(tester);
+      await tester.tap(find.byKey(guardianEditKindChipKey(GuardianKind.caregiver)));
+      await tester.tap(find.byKey(guardianEditSaveButtonKey));
+      await tester.pumpAndSettle();
+      expect(repo.lastUpdate, {'kind': GuardianKind.caregiver, 'displayName': null});
+    });
+
+    testWidgets('이름을 비우고 저장하면 빈 문자열을 보내고 내 줄이 보호자로, 구분 칩이 선생님으로 보인다', (tester) async {
+      await open(tester);
+      await openSheet(tester);
+
+      await tester.enterText(find.byKey(guardianEditNameFieldKey), '');
+      // 서버가 이름을 지운 뒤의 목록
+      repo.guardiansResult = const Attempt.ok([
+        Guardian(id: 'g-1', me: true),
+        Guardian(id: 'g-2', me: false, displayName: '2반', kind: GuardianKind.caregiver),
+      ]);
+      await tester.tap(find.byKey(guardianEditSaveButtonKey));
+      await tester.pumpAndSettle();
+
+      expect(repo.lastUpdate, {'kind': null, 'displayName': ''});
+      expect(find.text('엄마'), findsNothing);
+      // 내 줄은 이름 자리와 구분 칩이 모두 보호자
+      expect(find.text('보호자'), findsNWidgets(2));
+      expect(find.text('선생님'), findsOneWidget);
+    });
+
+    testWidgets('하단 안전영역이 34 여도 시트 윗변·저장 버튼·입력 글자가 시안(1532:6877) 자리에 선다', (tester) async {
+      await open(tester, bottomInset: 34);
+      await openSheet(tester);
+
+      // 시트 높이에 기기 안전영역을 더하면 윗변이 394 로 올라간다
+      expect(tester.getTopLeft(find.byType(ElumSheetSurface)).dy, closeTo(407, 1));
+      expect(tester.getTopLeft(find.byKey(guardianEditSaveButtonKey)).dy, closeTo(730, 1));
+      // 입력 글자는 칸 왼쪽에서 24 (시안 글자 x 40 - 칸 x 16). 입력 위젯이 4를 더 들이므로 28 로 밀리기 쉽다
+      final fieldLeft = tester.getTopLeft(find.byKey(guardianEditNameFieldKey)).dx;
+      expect(tester.getTopLeft(find.byType(EditableText)).dx - fieldLeft, closeTo(24, 0.5));
+    });
+
     testWidgets('저장하지 못하면 이유와 코드를 보인다', (tester) async {
       repo.updateResult = Attempt.failed(serverFailure(400, ServerErrorCode.invalidInputValue, '입력값이 올바르지 않아요.'));
       await open(tester);
 
-      await tester.tap(find.text('이름 바꾸기'));
+      await tester.tap(find.byKey(guardianRenameButtonKey));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), '아빠');
-      await tester.tap(find.text('저장'));
+      await tester.tap(find.byKey(guardianEditSaveButtonKey));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('입력값이 올바르지 않아요.'), findsOneWidget);

@@ -643,23 +643,23 @@
   "guardianKindGuardian": "보호자",
   "@guardianKindGuardian": {"description": "함께하는 사람의 구분 이름(가족·보호자). 표시용이며 서버로 가는 값이 아니다"},
 
-  "guardianKindCaregiver": "센터 선생님",
+  "guardianKindCaregiver": "선생님",
   "@guardianKindCaregiver": {"description": "함께하는 사람의 구분 이름(센터·기관 선생님). 표시용이며 서버로 가는 값이 아니다"},
 
   "inviteShareMessage": "이룸이를 함께 돌봐요. 아래 링크를 누르면 이룸 앱에 초대 코드가 채워져요.\n초대 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n초대 코드 {code}",
   "@inviteShareMessage": {"description": "초대 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 초대 코드", "placeholders": {"minutes": {"type": "int"}, "url": {"type": "String"}, "code": {"type": "String"}}},
 
-  "guardiansEditTitle": "내 이름 고치기",
-  "@guardiansEditTitle": {"description": "내 이름·구분 고치기 시트의 제목"},
+  "guardiansEditTitle": "내 이름 변경하기",
+  "@guardiansEditTitle": {"description": "내 이름·구분 변경 시트의 제목"},
 
-  "guardiansEditDescription": "이 이룸이를 함께 돌보는 사람에게 보이는 이름이에요. 실명이 아니어도 괜찮아요",
-  "@guardiansEditDescription": {"description": "내 이름 고치기 시트의 설명"},
+  "guardiansEditDescription": "이룸이를 함께 돌보는 사람에게 보이는 이름이에요.\n실명이 아니어도 괜찮아요",
+  "@guardiansEditDescription": {"description": "내 이름 변경 시트의 설명"},
 
-  "guardiansEditNameHint": "엄마, 아빠, 센터 선생님",
+  "guardiansEditNameHint": "엄마, 아빠, 선생님",
   "@guardiansEditNameHint": {"description": "내 이름 입력칸의 예시 글"},
 
-  "guardiansEditSave": "저장",
-  "@guardiansEditSave": {"description": "내 이름 고치기 시트의 저장 버튼"},
+  "guardiansEditSave": "저장하기",
+  "@guardiansEditSave": {"description": "내 이름 변경 시트의 저장 버튼"},
 
   "guardiansLeaveConfirmTitle": "함께 돌보기를 그만둘까요?",
   "@guardiansLeaveConfirmTitle": {"description": "함께 돌보기 그만두기 확인 팝업 제목(되돌릴 수 없는 일)"},
@@ -697,11 +697,9 @@
   "guardiansNoProfileDescription": "이룸이를 먼저 등록해주세요",
   "@guardiansNoProfileDescription": {"description": "이룸이가 없을 때의 안내 설명"},
 
-  "guardiansCaption": "{name}{batchim, select, yes{을} other{를}} 함께 돌보는 사람이에요",
-  "@guardiansCaption": {"description": "함께하는 사람 목록의 머리 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다", "placeholders": {"name": {"type": "String"}, "batchim": {"type": "String"}}},
 
-  "guardiansIntro": "일과를 같이 만드는 가족이나 선생님이에요. 이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요",
-  "@guardiansIntro": {"description": "함께하는 사람 화면의 보조 설명(보호자와 이룸이 휴대폰 연결을 구분)"},
+  "guardiansIntro": "일과를 같이 만드는 가족이나 선생님이에요",
+  "@guardiansIntro": {"description": "함께하는 사람 목록 머리 설명"},
 
   "guardiansLoadFailedFallback": "함께하는 사람을 불러오지 못했어요",
   "@guardiansLoadFailedFallback": {"description": "목록 조회 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
@@ -724,7 +722,7 @@
   "guardiansLeaveHintAlone": "혼자 돌보고 있어서 그만두면 이룸이와 일과, 별이 모두 사라져요",
   "@guardiansLeaveHintAlone": {"description": "그만두기 줄 아래 설명(혼자 돌볼 때)"},
 
-  "guardiansLeaveHintWithOthers": "내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요",
+  "guardiansLeaveHintWithOthers": "내가 만든 일과만 사라져요",
   "@guardiansLeaveHintWithOthers": {"description": "그만두기 줄 아래 설명(다른 보호자가 있을 때)"},
 
 
@@ -740,11 +738,9 @@
   "guardiansInviteHeader": "초대",
   "@guardiansInviteHeader": {"description": "초대하기·초대 코드 넣기 묶음 위 제목"},
 
-  "guardiansRenameAction": "이름 바꾸기",
-  "@guardiansRenameAction": {"description": "내 줄 오른쪽 버튼. 누르면 내 이름·구분을 고치는 시트가 열린다"},
+  "guardiansRenameAction": "이름 변경",
+  "@guardiansRenameAction": {"description": "내 줄 오른쪽 버튼. 누르면 내 이름·구분을 변경하는 시트가 열린다"},
 
-  "guardiansNoName": "이름 없음",
-  "@guardiansNoName": {"description": "이름을 정하지 않은 사람의 이름 자리"},
 
   "inviteCodeShareFailTitle": "링크를 보내지 못했어요",
   "@inviteCodeShareFailTitle": {"description": "초대 링크 공유 실패 팝업 제목"},

@@ -181,6 +181,14 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.peopleGuardianChipText,
     required this.peopleCaregiverChipBg,
     required this.peopleCaregiverChipText,
+    required this.peopleRowBg,
+    required this.peopleTextPrimary,
+    required this.peopleTextSecondary,
+    required this.peopleGuardianChipBorder,
+    required this.peopleCaregiverChipBorder,
+    required this.peopleChevron,
+    required this.peopleEditPlaceholder,
+    required this.peopleEditChipIdleText,
     required this.cardPhotoSlotDash,
     required this.creditCardBg,
     required this.creditBarTrack,
@@ -667,8 +675,7 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 묶음 카드 안 줄 사이 가는 선.
   final Color settingsGroupDivider;
 
-  // --- 함께하는 사람 칩 (임시 시안 #645) ---
-  // 글자색은 칩 바탕 위 대비 4.5 이상으로 바탕보다 짙게 둔다.
+  // --- 함께하는 사람 (시안 1027:4617 · 1532:6877 · 1532:7013) ---
 
   /// `나` 배지.
   final Color peopleMeBadgeBg;
@@ -678,9 +685,33 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color peopleGuardianChipBg;
   final Color peopleGuardianChipText;
 
-  /// 구분 칩 `센터 선생님`.
+  /// 구분 칩 `선생님`.
   final Color peopleCaregiverChipBg;
   final Color peopleCaregiverChipText;
+
+  /// 사람 한 줄 카드 바탕.
+  final Color peopleRowBg;
+
+  /// 이름·초대 줄·시트 설명 글자.
+  final Color peopleTextPrimary;
+
+  /// 머리 설명·그만두기 보조 글자.
+  final Color peopleTextSecondary;
+
+  /// 구분 칩 `보호자` 테두리 (시트에서 고른 칩과 같다).
+  final Color peopleGuardianChipBorder;
+
+  /// 구분 칩 `선생님` 테두리 (시트에서 고른 칩과 같다).
+  final Color peopleCaregiverChipBorder;
+
+  /// 초대·그만두기 카드 오른쪽 꺾쇠.
+  final Color peopleChevron;
+
+  /// 이름 변경 시트 입력칸 예시 글 (검정 20%).
+  final Color peopleEditPlaceholder;
+
+  /// 이름 변경 시트에서 고르지 않은 구분 칩 글자 (검정 30%).
+  final Color peopleEditChipIdleText;
 
   // --- 그림 방식 · 기본 카드 (임시 시안) ---
   // 값이 다른 토큰과 같아도(#DADADA 등) 쓰임이 달라 따로 둔다 — 시안이 확정되면
@@ -909,12 +940,20 @@ class AppColors extends ThemeExtension<AppColors> {
     settingsToggleOn: Color(0xFF55CFBA),
     settingsGroupBg: Color(0xFFFFFFFF),
     settingsGroupDivider: Color(0xFFEFEFEF),
-    peopleMeBadgeBg: Color(0xFFFFDAC7),
-    peopleMeBadgeText: Color(0xFFA8431C),
+    peopleMeBadgeBg: Color(0xFFD7D3D1),
+    peopleMeBadgeText: Color(0xFFFFFFFF),
     peopleGuardianChipBg: Color(0xFFB5EAEC),
-    peopleGuardianChipText: Color(0xFF1F6661),
-    peopleCaregiverChipBg: Color(0xFFCED8FF),
-    peopleCaregiverChipText: Color(0xFF3D4E9A),
+    peopleGuardianChipText: Color(0xFF388E7C),
+    peopleCaregiverChipBg: Color(0xFFFFDAC7),
+    peopleCaregiverChipText: Color(0xFFAC6744),
+    peopleRowBg: Color(0xFFEEE9E6),
+    peopleTextPrimary: Color(0xFF000000),
+    peopleTextSecondary: Color(0xFF74757D),
+    peopleGuardianChipBorder: Color(0xFF93DBCC),
+    peopleCaregiverChipBorder: Color(0xFFF9C6AD),
+    peopleChevron: Color(0xFFCACACA),
+    peopleEditPlaceholder: Color(0x33000000),
+    peopleEditChipIdleText: Color(0x4D000000),
     cardPhotoSlotDash: Color(0xFFDADADA),
     creditCardBg: Color(0xFFFFFFFF),
     creditBarTrack: Color(0xFFEEE9E6),
@@ -1084,6 +1123,14 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? peopleGuardianChipText,
     Color? peopleCaregiverChipBg,
     Color? peopleCaregiverChipText,
+    Color? peopleRowBg,
+    Color? peopleTextPrimary,
+    Color? peopleTextSecondary,
+    Color? peopleGuardianChipBorder,
+    Color? peopleCaregiverChipBorder,
+    Color? peopleChevron,
+    Color? peopleEditPlaceholder,
+    Color? peopleEditChipIdleText,
     Color? cardPhotoSlotDash,
     Color? creditCardBg,
     Color? creditBarTrack,
@@ -1257,6 +1304,14 @@ class AppColors extends ThemeExtension<AppColors> {
       peopleGuardianChipText: peopleGuardianChipText ?? this.peopleGuardianChipText,
       peopleCaregiverChipBg: peopleCaregiverChipBg ?? this.peopleCaregiverChipBg,
       peopleCaregiverChipText: peopleCaregiverChipText ?? this.peopleCaregiverChipText,
+      peopleRowBg: peopleRowBg ?? this.peopleRowBg,
+      peopleTextPrimary: peopleTextPrimary ?? this.peopleTextPrimary,
+      peopleTextSecondary: peopleTextSecondary ?? this.peopleTextSecondary,
+      peopleGuardianChipBorder: peopleGuardianChipBorder ?? this.peopleGuardianChipBorder,
+      peopleCaregiverChipBorder: peopleCaregiverChipBorder ?? this.peopleCaregiverChipBorder,
+      peopleChevron: peopleChevron ?? this.peopleChevron,
+      peopleEditPlaceholder: peopleEditPlaceholder ?? this.peopleEditPlaceholder,
+      peopleEditChipIdleText: peopleEditChipIdleText ?? this.peopleEditChipIdleText,
       cardPhotoSlotDash: cardPhotoSlotDash ?? this.cardPhotoSlotDash,
       creditCardBg: creditCardBg ?? this.creditCardBg,
       creditBarTrack: creditBarTrack ?? this.creditBarTrack,
@@ -1592,6 +1647,14 @@ class AppColors extends ThemeExtension<AppColors> {
       peopleGuardianChipText: Color.lerp(peopleGuardianChipText, other.peopleGuardianChipText, t)!,
       peopleCaregiverChipBg: Color.lerp(peopleCaregiverChipBg, other.peopleCaregiverChipBg, t)!,
       peopleCaregiverChipText: Color.lerp(peopleCaregiverChipText, other.peopleCaregiverChipText, t)!,
+      peopleRowBg: Color.lerp(peopleRowBg, other.peopleRowBg, t)!,
+      peopleTextPrimary: Color.lerp(peopleTextPrimary, other.peopleTextPrimary, t)!,
+      peopleTextSecondary: Color.lerp(peopleTextSecondary, other.peopleTextSecondary, t)!,
+      peopleGuardianChipBorder: Color.lerp(peopleGuardianChipBorder, other.peopleGuardianChipBorder, t)!,
+      peopleCaregiverChipBorder: Color.lerp(peopleCaregiverChipBorder, other.peopleCaregiverChipBorder, t)!,
+      peopleChevron: Color.lerp(peopleChevron, other.peopleChevron, t)!,
+      peopleEditPlaceholder: Color.lerp(peopleEditPlaceholder, other.peopleEditPlaceholder, t)!,
+      peopleEditChipIdleText: Color.lerp(peopleEditChipIdleText, other.peopleEditChipIdleText, t)!,
       cardPhotoSlotDash:
           Color.lerp(cardPhotoSlotDash, other.cardPhotoSlotDash, t)!,
       creditCardBg: Color.lerp(creditCardBg, other.creditCardBg, t)!,

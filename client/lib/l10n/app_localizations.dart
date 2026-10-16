@@ -1265,7 +1265,7 @@ abstract class AppLocalizations {
   /// 함께하는 사람의 구분 이름(센터·기관 선생님). 표시용이며 서버로 가는 값이 아니다
   ///
   /// In ko, this message translates to:
-  /// **'센터 선생님'**
+  /// **'선생님'**
   String get guardianKindCaregiver;
 
   /// 초대 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 초대 코드
@@ -1274,28 +1274,28 @@ abstract class AppLocalizations {
   /// **'이룸이를 함께 돌봐요. 아래 링크를 누르면 이룸 앱에 초대 코드가 채워져요.\n초대 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n초대 코드 {code}'**
   String inviteShareMessage(int minutes, String url, String code);
 
-  /// 내 이름·구분 고치기 시트의 제목
+  /// 내 이름·구분 변경 시트의 제목
   ///
   /// In ko, this message translates to:
-  /// **'내 이름 고치기'**
+  /// **'내 이름 변경하기'**
   String get guardiansEditTitle;
 
-  /// 내 이름 고치기 시트의 설명
+  /// 내 이름 변경 시트의 설명
   ///
   /// In ko, this message translates to:
-  /// **'이 이룸이를 함께 돌보는 사람에게 보이는 이름이에요. 실명이 아니어도 괜찮아요'**
+  /// **'이룸이를 함께 돌보는 사람에게 보이는 이름이에요.\n실명이 아니어도 괜찮아요'**
   String get guardiansEditDescription;
 
   /// 내 이름 입력칸의 예시 글
   ///
   /// In ko, this message translates to:
-  /// **'엄마, 아빠, 센터 선생님'**
+  /// **'엄마, 아빠, 선생님'**
   String get guardiansEditNameHint;
 
-  /// 내 이름 고치기 시트의 저장 버튼
+  /// 내 이름 변경 시트의 저장 버튼
   ///
   /// In ko, this message translates to:
-  /// **'저장'**
+  /// **'저장하기'**
   String get guardiansEditSave;
 
   /// 함께 돌보기 그만두기 확인 팝업 제목(되돌릴 수 없는 일)
@@ -1370,16 +1370,10 @@ abstract class AppLocalizations {
   /// **'이룸이를 먼저 등록해주세요'**
   String get guardiansNoProfileDescription;
 
-  /// 함께하는 사람 목록의 머리 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  /// 함께하는 사람 목록 머리 설명
   ///
   /// In ko, this message translates to:
-  /// **'{name}{batchim, select, yes{을} other{를}} 함께 돌보는 사람이에요'**
-  String guardiansCaption(String name, String batchim);
-
-  /// 함께하는 사람 화면의 보조 설명(보호자와 이룸이 휴대폰 연결을 구분)
-  ///
-  /// In ko, this message translates to:
-  /// **'일과를 같이 만드는 가족이나 선생님이에요. 이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요'**
+  /// **'일과를 같이 만드는 가족이나 선생님이에요'**
   String get guardiansIntro;
 
   /// 목록 조회 실패 시 서버가 문구를 못 줄 때의 기본 안내
@@ -1427,7 +1421,7 @@ abstract class AppLocalizations {
   /// 그만두기 줄 아래 설명(다른 보호자가 있을 때)
   ///
   /// In ko, this message translates to:
-  /// **'내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요'**
+  /// **'내가 만든 일과만 사라져요'**
   String get guardiansLeaveHintWithOthers;
 
   /// 내가 만든 초대 코드로 다른 보호자가 합류했을 때 팝업 제목. name 은 합류한 사람 이름(없으면 기본 호칭)
@@ -1454,17 +1448,11 @@ abstract class AppLocalizations {
   /// **'초대'**
   String get guardiansInviteHeader;
 
-  /// 내 줄 오른쪽 버튼. 누르면 내 이름·구분을 고치는 시트가 열린다
+  /// 내 줄 오른쪽 버튼. 누르면 내 이름·구분을 변경하는 시트가 열린다
   ///
   /// In ko, this message translates to:
-  /// **'이름 바꾸기'**
+  /// **'이름 변경'**
   String get guardiansRenameAction;
-
-  /// 이름을 정하지 않은 사람의 이름 자리
-  ///
-  /// In ko, this message translates to:
-  /// **'이름 없음'**
-  String get guardiansNoName;
 
   /// 초대 링크 공유 실패 팝업 제목
   ///
