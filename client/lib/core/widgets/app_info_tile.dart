@@ -13,7 +13,10 @@ import 'settings_tile.dart';
 /// 버전을 못 읽으면(플러그인 미등록·테스트 환경) 값 자리만 비운다. 사용자가 할 수
 /// 있는 일이 없으므로 오류로 보여줄 이유가 없고, 줄은 남겨 자리가 흔들리지 않게 한다.
 class AppInfoTile extends ConsumerWidget {
-  const AppInfoTile({super.key});
+  const AppInfoTile({super.key, this.isInCard = false});
+
+  /// 흰 묶음 카드 안의 줄이다 ([SettingsTile.isInCard]).
+  final bool isInCard;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,6 +25,7 @@ class AppInfoTile extends ConsumerWidget {
         .maybeWhen(data: (value) => value, orElse: () => '');
 
     return SettingsTile(
+      isInCard: isInCard,
       label: context.l10n.commonAppInfo,
       onTap: null,
       valueText: version.isEmpty ? '' : 'v$version',

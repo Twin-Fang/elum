@@ -28,7 +28,13 @@ class AiCreditSummaryView extends StatelessWidget {
 
   final CreditSummary summary;
 
-  static const _dividerGap = 14.0;
+  /// 막대 > 알릴 줄 > 다시 채워지는 날 사이 (Figma `1579:8122` gap 16)
+  static const _sectionGap = 16.0;
+
+  /// 큰 숫자 옆 반짝임 (Figma `1579:8119` 20×24)와 숫자·단위 사이 (gap 4)
+  static const _sparkleWidth = 20.0;
+  static const _sparkleHeight = 24.0;
+  static const _inlineGap = 4.0;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +42,8 @@ class AiCreditSummaryView extends StatelessWidget {
     final space = context.space;
     final s = summary;
 
+    // 단위 문구는 앞 공백 없이 쓴다 (`/ 100 크레딧 남음`)
+    final unit = context.l10n.creditAmountRest(s.weeklyGrant).trim();
     final amount = context.l10n.creditAmountLeft(s.available, s.weeklyGrant);
     // 보너스는 따로 적지 않는다 — 큰 숫자(available)에 이미 들어 있어 `+ 추가 N` 은
     // 합계를 부풀려 읽히게 한다.
@@ -51,6 +59,7 @@ class AiCreditSummaryView extends StatelessWidget {
     ];
     final reset = context.l10n.aiCreditResetLine(s.resetLabel);
 
+    // 낭독기는 한 덩어리로 읽는다. 안내 버튼은 덩어리 밖에 둬야 따로 잡힌다.
     final body = Semantics(
       key: AiCreditCard.contentKey,
       container: true,
@@ -64,43 +73,52 @@ class AiCreditSummaryView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 오른쪽은 안내 버튼 자리 — 큰 글꼴에서도 제목이 버튼 밑으로 흐르지 않는다
-          Padding(
-            padding: EdgeInsets.only(right: CreditInfoButton.box),
-            child: Text(
-              context.l10n.creditCardTitle,
-              style: context.typo.creditTitle.copyWith(
-                color: colors.textPrimary,
+          // 제목 줄의 안내 버튼 자리 (누름 영역이 제목 줄보다 높아 위로 겹쳐 둔다)
+          SizedBox(height: CreditInfoButton.titleRowHeight(context)),
+          SizedBox(height: space.xs),
+          // 반짝임 + 큰 숫자, 오른쪽에 단위 (글꼴이 커지면 단위가 다음 줄로 흐른다)
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.end,
+            spacing: _inlineGap.w,
+            runSpacing: _inlineGap.h,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    AppAssets.iconSparkles,
+                    width: _sparkleWidth.w,
+                    height: _sparkleHeight.h,
+                    colorFilter: ColorFilter.mode(
+                      colors.creditNumberText,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  SizedBox(width: _inlineGap.w),
+                  Text(
+                    '${s.available}',
+                    style: context.typo.creditNumber.copyWith(
+                      color: colors.creditNumberText,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ),
-          SizedBox(height: space.sm),
-          // 숫자와 단위를 한 문단으로 둔다 — 글꼴이 커지면 단위가 다음 줄로 흐른다.
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: '${s.available}',
-                  style: context.typo.creditNumber.copyWith(
-                    color: colors.textPrimary,
-                  ),
+              Text(
+                unit,
+                style: context.typo.creditUnit.copyWith(
+                  color: colors.creditMutedText,
                 ),
-                TextSpan(
-                  text: context.l10n.creditAmountRest(s.weeklyGrant),
-                  style: context.typo.creditBody.copyWith(
-                    color: colors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          SizedBox(height: space.sm),
+          SizedBox(height: space.xs),
           AiCreditBar(
             key: AiCreditCard.barKey,
             ratio: s.remainingRatio,
             color: colors.creditBarFill,
           ),
-          // 알릴 줄이 없는 정상 상태면 막대 → 구분선을 바로 잇는다 (빈 간격이 겹치지 않게)
+          // 알릴 줄이 없는 정상 상태면 막대 아래에 바로 다시 채워지는 날이 온다
           if (lines.isNotEmpty) ...[
             SizedBox(height: space.md),
             for (final (i, (text, color)) in lines.indexed) ...[
@@ -108,41 +126,40 @@ class AiCreditSummaryView extends StatelessWidget {
               Text(text, style: context.typo.creditBody.copyWith(color: color)),
             ],
           ],
-          SizedBox(height: _dividerGap.h),
-          Divider(height: 1, thickness: 1, color: colors.creditDivider),
-          SizedBox(height: _dividerGap.h),
+          SizedBox(height: _sectionGap.h),
           Text(
             reset,
-            style: context.typo.creditBody.copyWith(
-              color: colors.textSecondary,
+            style: context.typo.creditReset.copyWith(
+              color: colors.creditMutedText,
             ),
           ),
         ],
       ),
     );
 
-    // 버튼을 내용 덩어리(excludeSemantics) 밖에 둬야 낭독기가 따로 잡는다.
-    // 누름 영역(44)이 제목 줄보다 높아 줄 안에 두면 아래가 밀린다 — 겹쳐 올린다.
     return Stack(
       children: [
         body,
-        Positioned(top: 0, right: 0, child: CreditInfoButton(summary: s)),
+        Positioned(top: 0, left: 0, right: 0, child: CreditInfoButton(summary: s)),
       ],
     );
   }
 }
 
-/// 제목 오른쪽 안내 버튼 — 크레딧이 어떻게 줄어드는지 팝업으로 알린다.
+/// 제목 줄(`이번 주 AI 생성 ⓘ`): 제목 옆 물음표를 누르면 크레딧이 어떻게 줄어드는지 팝업으로 알린다.
 ///
-/// 그림은 보상 도움말(`보상이 왜 필요한가요?`)의 물음표 원을 그대로 쓴다.
+/// 제목 줄 전체가 누름 영역이다 — 물음표 16 만으로는 작다. 그림은 보상 도움말의 물음표 원을 그대로 쓴다.
 class CreditInfoButton extends StatelessWidget {
   const CreditInfoButton({super.key, required this.summary});
 
   final CreditSummary summary;
 
-  /// 누름 영역 — 일반 터치 최소치.
+  /// 누름 영역 높이 — 일반 터치 최소치.
   static const box = 44.0;
-  static const _icon = 18.0;
+
+  /// 제목과 물음표 사이 (Figma `1579:8114` gap 6) 와 물음표 크기 (16)
+  static const _gap = 6.0;
+  static const _icon = 16.0;
 
   /// 안내 팝업을 띄울 때 읽는다 — 값을 들고 있지 말고 부를 때마다 앱 언어로 푼다.
   static String get title => appL10n.creditCostTitle;
@@ -154,39 +171,60 @@ class CreditInfoButton extends StatelessWidget {
     appL10n.creditWeeklyRefill,
   ].join('\n');
 
+  /// 제목 한 줄 높이 (글꼴 배율 반영). 본문이 이 아래에서 시작한다.
+  static double titleRowHeight(BuildContext context) {
+    final style = context.typo.creditTitle;
+    return MediaQuery.textScalerOf(context).scale(style.fontSize ?? _icon) *
+        (style.height ?? 1);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 그림을 제목 첫 줄 가운데에 맞춘다. 글꼴 크기를 키우면 줄이 높아지므로
-    // 고정 값 대신 지금 배율로 줄 높이를 잰다.
-    final style = context.typo.creditTitle;
-    final line =
-        MediaQuery.textScalerOf(context).scale(style.fontSize ?? _icon) *
-        (style.height ?? 1);
-    final icon = _icon.w;
+    final colors = context.colors;
+    final line = titleRowHeight(context);
+    // 누름 영역이 제목 줄보다 높으므로 위로 겹쳐 올린다 (카드 위 안쪽 여백 안에서)
+    final overhang = math.max(0.0, (box - line) / 2);
 
-    return AppPressable(
-      key: AiCreditCard.infoKey,
-      scaleDown: AppPressable.scaleIcon,
-      semanticLabel: context.l10n.creditInfoLabel,
-      onTap: () => showElumDialog<void>(
-        context: context,
-        title: title,
-        message: message(summary),
-        barrierDismissible: true,
-        // 팝업 폭에서 낱말 가운데서 꺾이지 않게 한다 (보상 도움말과 같은 선택)
-        keepWordsInMessage: true,
-      ),
-      child: SizedBox(
-        width: box,
-        height: math.max(box, line),
-        child: Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-            padding: EdgeInsets.only(top: math.max(0, (line - icon) / 2)),
-            child: SvgPicture.asset(
-              AppAssets.iconQuestionCircle,
-              width: icon,
-              height: icon,
+    return Transform.translate(
+      offset: Offset(0, -overhang),
+      child: AppPressable(
+        key: AiCreditCard.infoKey,
+        scaleDown: AppPressable.scaleIcon,
+        semanticLabel: context.l10n.creditInfoLabel,
+        onTap: () => showElumDialog<void>(
+          context: context,
+          title: title,
+          message: message(summary),
+          barrierDismissible: true,
+          // 팝업 폭에서 낱말 가운데서 꺾이지 않게 한다 (보상 도움말과 같은 선택)
+          keepWordsInMessage: true,
+        ),
+        child: SizedBox(
+          height: math.max(box, line),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    context.l10n.creditCardTitle,
+                    style: context.typo.creditTitle.copyWith(
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                ),
+                SizedBox(width: _gap.w),
+                SvgPicture.asset(
+                  AppAssets.iconQuestionCircle,
+                  width: _icon.w,
+                  height: _icon.w,
+                  colorFilter: ColorFilter.mode(
+                    colors.creditMutedText,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

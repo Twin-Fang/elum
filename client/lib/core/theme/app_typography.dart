@@ -80,6 +80,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.creditNumber,
     required this.creditBody,
     required this.creditCaption,
+    required this.creditUnit,
+    required this.creditReset,
     required this.navTitle,
     required this.contactSheetTitle,
     required this.contactSheetEmail,
@@ -381,6 +383,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// AI 크레딧 작은 안내 (12/w400 Pretendard).
   final TextStyle creditCaption;
+
+  /// 크레딧 단위 `/ 100 크레딧 남음` (14/w600, Figma `1532:7501`).
+  final TextStyle creditUnit;
+
+  /// 크레딧 `10월 19일(월) 0시에 다시 채워져요` (12/w500).
+  final TextStyle creditReset;
 
   /// 뒤로가기와 같은 줄에 서는 가운데 제목 (18/w600 Pretendard, Figma `1022:4467`).
   ///
@@ -847,21 +855,34 @@ class AppTypography extends ThemeExtension<AppTypography> {
     ),
     creditTitle: TextStyle(
       fontFamily: promptFontFamily,
-      fontSize: 17,
-      fontWeight: FontWeight.w700,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
       height: 1.2,
     ),
     creditNumber: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 32,
-      fontWeight: FontWeight.w800,
-      height: 1.1,
+      fontWeight: FontWeight.w700,
+      height: 1.0,
     ),
     creditBody: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 14,
       fontWeight: FontWeight.w400,
       height: 1.4,
+    ),
+    creditReset: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
+    creditUnit: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      // 시안 글자 상자 높이 17 (`1579:8121`)
+      height: 17 / 14,
     ),
     creditCaption: TextStyle(
       fontFamily: promptFontFamily,
@@ -1008,6 +1029,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? creditNumber,
     TextStyle? creditBody,
     TextStyle? creditCaption,
+    TextStyle? creditUnit,
+    TextStyle? creditReset,
     TextStyle? navTitle,
     TextStyle? contactSheetTitle,
     TextStyle? contactSheetEmail,
@@ -1092,6 +1115,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       creditNumber: creditNumber ?? this.creditNumber,
       creditBody: creditBody ?? this.creditBody,
       creditCaption: creditCaption ?? this.creditCaption,
+      creditUnit: creditUnit ?? this.creditUnit,
+      creditReset: creditReset ?? this.creditReset,
       navTitle: navTitle ?? this.navTitle,
       contactSheetTitle: contactSheetTitle ?? this.contactSheetTitle,
       contactSheetEmail: contactSheetEmail ?? this.contactSheetEmail,
@@ -1203,6 +1228,8 @@ class AppTypography extends ThemeExtension<AppTypography> {
       creditNumber: TextStyle.lerp(creditNumber, other.creditNumber, t)!,
       creditBody: TextStyle.lerp(creditBody, other.creditBody, t)!,
       creditCaption: TextStyle.lerp(creditCaption, other.creditCaption, t)!,
+      creditUnit: TextStyle.lerp(creditUnit, other.creditUnit, t)!,
+      creditReset: TextStyle.lerp(creditReset, other.creditReset, t)!,
       navTitle: TextStyle.lerp(navTitle, other.navTitle, t)!,
       contactSheetTitle:
           TextStyle.lerp(contactSheetTitle, other.contactSheetTitle, t)!,
