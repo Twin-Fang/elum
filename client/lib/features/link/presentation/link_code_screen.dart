@@ -21,50 +21,39 @@ import '../domain/link_code_link.dart';
 import '../domain/link_status.dart';
 import 'widgets/issued_code_actions.dart';
 import 'widgets/issued_code_panel.dart';
-import '../../../core/theme/app_typography.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 
-/// 연결 암호 만들기 — **보호자 휴대폰**.
+/// 연결 암호 만들기: 보호자 휴대폰이 이룸이 휴대폰에 알려 줄 6글자 암호를 만든다.
 ///
-/// 진입은 두 곳이고 **시안이 서로 다르다.**
+/// 진입이 둘이고 시안이 다르다.
 ///
-/// | | 온보딩 (`732:5334`) | 설정 (`1027:4617`) |
+/// | | 온보딩 (`732:5334`) | 설정 (`1532:6671`) |
 /// | --- | --- | --- |
 /// | 네비게이션 제목 | 없음 | `이룸이 휴대폰 연결` |
-/// | 뒤로가기 y | 79 | **67** |
-/// | 제목 y | 131 | **147** |
-/// | 시작하기 | 있음 | **없음** |
-/// | 나중에 할게요 | 있음 | 없음 |
-/// | 링크로 보내기 | 있음(`시작하기` 위 보조 버튼) | 하단 버튼 |
-/// | 코드 아래 | 복사하기 > `09:59 뒤에 코드가 바껴요` | `09:59` > 다시 만들기 |
+/// | 뒤로가기 y · 제목 y | 79 · 131 | 67 · 147 |
+/// | 하단 | `링크로 보내기`(보조) > `시작하기` > `나중에 할게요` | `링크로 보내기` 하나 |
 ///
-/// 설정에서는 이미 앱 안이라 `시작하기`가 갈 곳이 없다 — 연결하면 팝업으로
-/// 알리고 뒤로가기로 돌아간다. 시안도 그렇게 그려져 있다.
-///
-/// 이 화면의 주인공은 **여섯 글자**다. QR이 빠지면서 화면이 비었으므로 암호를 크게 키운다.
+/// 코드 아래는 둘 다 `코드 복사하기` > `09:59 뒤에 코드가 바껴요`다.
+/// 설정에서는 이미 앱 안이라 `시작하기`가 갈 곳이 없다: 연결하면 팝업으로 알리고 뒤로가기로 돌아간다.
 ///
 /// ## 상태 셋 (Figma 732:5334 · 732:5702 · 732:5850)
 ///
-/// | | 암호 | 타이머 | 다시 만들기 | CTA |
-/// | --- | --- | --- | --- | --- |
-/// | 대기 | 보임 | `09:59` 빨강 | 있음 | 비활성 |
-/// | 연결 성공 | 보임 | — | — | 팝업이 덮는다 |
-/// | 연결됨 | 보임 | **없음** | **없음** | **활성** |
+/// | | 암호 | 복사하기 · 타이머 | CTA |
+/// | --- | --- | --- | --- |
+/// | 대기 | 보임 | 있음 | 비활성 |
+/// | 연결 성공 | 보임 | — | 팝업이 덮는다 |
+/// | 연결됨 | 보임 | **없음** | **활성** |
 ///
-/// 연결되면 타이머와 다시 만들기가 사라진다 — **더 기다릴 이유가 없어서다.**
-/// `나중에 할게요`는 세 상태 모두에 남는다 (시안 `732:5850`).
+/// ## 시간이 다 되면
 ///
-/// ## 온보딩 진입의 코드 갱신
+/// `만료`라 말하지 않는다. 아무것도 누르지 않아도 새 코드를 조용히 받아 타이머를 다시 돌린다.
+/// 새로 받지 못하면(실패) 복사하기 자리에 `다시 만들기` 칩과 에러 코드가 선다.
 ///
-/// 온보딩 시안은 `다시 만들기` 칩이 없고 `뒤에 코드가 바껴요`라고 말한다. 만료되면 **자동으로 새 코드**를 받아
-/// 타이머를 다시 돌린다. 새로 받지 못하면(실패) 다시 만들기 칩이 대신 나온다.
+/// ## 다시 들어오기
 ///
-/// ## 설정 진입의 전하기 · 다시 들어오기
-///
-/// 설정에서 들어온 화면에는 초대 코드 화면과 같은 하단 버튼(`링크로 보내기` · `코드 복사하기`)과 안내가 있다.
-/// 나갔다 들어와도 서버에 아직 살아 있는 코드면 같은 코드를 보여 준다 ([IssuedCodeMemory]) —
-/// 새로 만드는 것은 `코드 다시 만들기`를 눌렀을 때와 기억한 코드를 못 쓸 때뿐이다.
+/// 나갔다 들어와도 서버에 아직 살아 있는 코드면 같은 코드를 보여 준다 ([IssuedCodeMemory]).
+/// 새로 만드는 것은 `다시 만들기`를 눌렀을 때와 기억한 코드를 못 쓸 때뿐이다.
 class LinkCodeScreen extends ConsumerStatefulWidget {
   const LinkCodeScreen({super.key, this.fromOnboarding = false});
 
@@ -77,6 +66,9 @@ class LinkCodeScreen extends ConsumerStatefulWidget {
 class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   IssuedLinkCode? _issued;
   bool _loading = true;
+
+  /// 시간이 다 된 코드를 새 코드로 바꾸는 중. 스피너 없이 옛 코드를 그대로 둔다.
+  bool _isRenewing = false;
 
   // 문구가 아니라 실패 자체를 들고 있다가 그릴 때 푼다 — 실패 순간에 문구로 굳히면
   // 언어가 바뀐 뒤에도 옛 언어로 남는다.
@@ -125,10 +117,11 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   );
 
   /// [force] 가 true 면 기억한 코드를 쓰지 않고 새로 발급한다 (`코드 다시 만들기`).
-  /// [isSilent] 가 true 면 스피너를 띄우지 않는다 (만료 자동 갱신 - 화면이 깜빡이지 않게).
+  /// [isSilent] 가 true 면 스피너를 띄우지 않는다 (시간이 다 된 코드의 자동 교체 - 화면이 깜빡이지 않게).
   Future<void> _issue({bool force = false, bool isSilent = false}) async {
     setState(() {
       _loading = !isSilent;
+      _isRenewing = isSilent;
       _issueFailure = null;
     });
     final memory = ref.read(issuedCodeMemoryProvider);
@@ -148,6 +141,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
         setState(() {
           _issued = reused;
           _loading = false;
+          _isRenewing = false;
         });
         _startTimers();
         return;
@@ -165,6 +159,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     if (!attempt.isOk) {
       setState(() {
         _loading = false;
+        _isRenewing = false;
         // 서버가 이유를 알려줬으면 그 문구를 그대로 쓴다 — 그릴 때 푼다.
         _issueFailure = attempt.failure;
       });
@@ -175,6 +170,7 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     setState(() {
       _issued = attempt.value;
       _loading = false;
+      _isRenewing = false;
     });
     _startTimers();
   }
@@ -182,14 +178,14 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   void _startTimers() {
     _ticker?.cancel();
     _poller?.cancel();
-    // 남은 시간을 초까지 보여주므로 1초마다 다시 그린다. 만료되면 멈춘다.
+    // 남은 시간을 초까지 보여주므로 1초마다 다시 그린다. 시간이 다 되면 멈추고 새 코드로 바꾼다.
     _ticker = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) return t.cancel();
       final isExpired = _issued?.isExpired ?? true;
       if (isExpired) t.cancel();
       setState(() {});
-      // 온보딩은 만료되면 새 코드를 자동으로 받는다 (실패하면 다시 만들기 칩이 대신 나온다)
-      if (isExpired && widget.fromOnboarding && !_linked) _issue(force: true, isSilent: true);
+      // 새 코드를 조용히 받는다 (실패하면 다시 만들기 칩이 대신 나온다)
+      if (isExpired && !_linked) _issue(force: true, isSilent: true);
     });
     // 3초는 서버에 부담이 크지 않으면서 사람이 기다린다고 느끼지 않는 간격이다.
     _poller = Timer.periodic(const Duration(seconds: 3), (t) async {
@@ -228,6 +224,12 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     );
   }
 
+  /// 연결되면 코드는 이미 쓰였다. 만드는 중이거나 실패한 때도 보낼 코드가 없다.
+  bool get _isShareable => !_linked && !_loading && _issueFailure == null;
+
+  String _shareMessage(IssuedLinkCode issued) =>
+      LinkCodeLink.shareMessage(issued.code, validFor: issued.remaining());
+
   void _goHome() => context.go(Routes.guardian);
 
   /// 이룸이 이름. 비어 있으면 `이룸이`로 대신한다 — 온보딩을 건너뛰고 설정에서
@@ -250,26 +252,21 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
       title: fromSettings ? context.l10n.linkCodeSettingsTitle : null,
       backTop: fromSettings ? _settingsBackTop : null,
       // 온보딩 시안은 연결되기 전에도 버튼을 **보여주되 누를 수 없게** 둔다
-      // (732:5334) — 다음 할 일을 알려주는 이정표라 자리를 비우지 않는다.
-      // 설정 시안(`1027:4617`)에는 버튼 자체가 없다.
+      // (732:5334): 다음 할 일을 알려주는 이정표라 자리를 비우지 않는다.
+      // 설정 시안(`1532:6671`)은 `링크로 보내기` 하나가 하단 버튼이다.
       bottomButton: fromSettings
-          ? (issued != null && _issueFailure == null && !_loading && !_linked
-                ? IssuedCodeActions(
-                    issued: issued,
-                    shareMessage: (i) =>
-                        LinkCodeLink.shareMessage(i.code, validFor: i.remaining()),
-                    shareFailCode: 'E-LINK-SHARE',
-                  )
-                : null)
+          ? IssuedCodeShareButton(
+              issued: _isShareable ? issued : null,
+              shareMessage: _shareMessage,
+              shareFailCode: 'E-LINK-SHARE',
+            )
           : Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // 연결되면 코드는 이미 쓰였다 - 더 보낼 수 없다
                 IssuedCodeShareButton(
-                  issued: _linked || _loading || _issueFailure != null ? null : issued,
-                  shareMessage: (i) =>
-                      LinkCodeLink.shareMessage(i.code, validFor: i.remaining()),
+                  issued: _isShareable ? issued : null,
+                  shareMessage: _shareMessage,
                   shareFailCode: 'E-LINK-SHARE',
                   isSecondary: true,
                 ),
@@ -330,38 +327,11 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
             IssuedCodePanel(
               loading: _loading,
               issued: issued,
-              expiredLabel: context.l10n.linkCodeExpired,
-              // 연결되면 타이머도 `다시 만들기`도 사라진다 — 더 기다릴 이유가 없다.
+              isRenewing: _isRenewing,
+              // 연결되면 복사하기도 타이머도 사라진다: 더 기다릴 이유가 없다.
               showStatus: !_linked,
               onRetry: () => _issue(force: true),
-              // 온보딩 시안: 복사하기 > `09:59 뒤에 코드가 바껴요` (다시 만들기는 만료 뒤 실패했을 때만)
-              onCopy: widget.fromOnboarding
-                  ? () => copyIssuedCode(context, issued)
-                  : null,
-              timerSuffix: widget.fromOnboarding
-                  ? context.l10n.linkCodeChangesAfter
-                  : null,
-              footer: fromSettings
-                  ? [
-                      SizedBox(height: IssuedCodePanel.timerToRetry.h),
-                      // 되돌릴 수 없는 일(앞 암호가 쓸 수 없게 된다)을 먼저 말한다.
-                      Text(
-                        context.l10n.inviteCodeRetryNote,
-                        textAlign: TextAlign.center,
-                        style: context.typo.body.paragraph.copyWith(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                      SizedBox(height: IssuedCodePanel.timerToRetry.h),
-                      Text(
-                        context.l10n.linkCodePhoneNote,
-                        textAlign: TextAlign.center,
-                        style: context.typo.bodySmall.paragraph.copyWith(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ]
-                  : const [],
+              onCopy: () => copyIssuedCode(context, issued),
             ),
           ],
         ),

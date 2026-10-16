@@ -28,14 +28,14 @@ void main() {
 
   setUp(() => repo = _FakeLink());
 
-  Widget wrap({String nickname = '', double textScale = 1}) {
+  Widget wrap({String nickname = '', double textScale = 1, bool fromOnboarding = true}) {
     final router = GoRouter(
       initialLocation: Routes.linkCode,
       routes: [
         GoRoute(
           path: Routes.linkCode,
           builder: (context, state) =>
-              const LinkCodeScreen(fromOnboarding: true),
+              LinkCodeScreen(fromOnboarding: fromOnboarding),
         ),
         GoRoute(
           path: Routes.guardian,
@@ -130,6 +130,48 @@ void main() {
       expect(find.text('코드 복사하기'), findsNothing);
       // 실패를 삼키지 않는다: 에러 코드가 보인다
       expect(find.textContaining('E-LINK-NEW'), findsOneWidget);
+    });
+  });
+
+  // 설정 진입 (Figma 1532:6671): 시안에 `다시 만들기` 칩·안내 문구·`만료`가 없다.
+  group('설정 진입 (1532:6671)', () {
+    testWidgets('복사하기 알약과 링크로 보내기 하나만 있고 안내 문구는 없다', (tester) async {
+      await tester.pumpWidget(wrap(fromOnboarding: false));
+      await settleIssue(tester);
+
+      expect(find.text('코드 복사하기'), findsOneWidget);
+      expect(find.text('링크로 보내기'), findsOneWidget);
+      expect(find.text('뒤에 코드가 바껴요'), findsOneWidget);
+      expect(find.text('코드 다시 만들기'), findsNothing);
+      expect(find.text('시작하기'), findsNothing);
+    });
+
+    // 시간이 다 된 코드를 흐리게 두고 `만료됐어요`라 말하면 사용자가 직접 다시 만들어야 한다
+    testWidgets('시간이 다 되면 만료 문구 없이 새 코드로 바뀐다', (tester) async {
+      repo.firstExpiresInSeconds = 1;
+      await tester.pumpWidget(wrap(fromOnboarding: false));
+      await settleIssue(tester);
+
+      await expireFirstCode(tester);
+
+      expect(repo.issueCount, 2);
+      expect(find.textContaining('만료'), findsNothing);
+      expect(find.text('코드 다시 만들기'), findsNothing);
+      expect(find.text('코드 복사하기'), findsOneWidget);
+      expect(find.textContaining('09:5'), findsOneWidget);
+    });
+
+    testWidgets('새 코드를 못 받으면 다시 만들기 칩과 에러 코드를 보인다', (tester) async {
+      repo.firstExpiresInSeconds = 1;
+      await tester.pumpWidget(wrap(fromOnboarding: false));
+      await settleIssue(tester);
+
+      repo.isIssueFailing = true;
+      await expireFirstCode(tester);
+
+      expect(find.text('코드 다시 만들기'), findsOneWidget);
+      expect(find.textContaining('E-LINK-NEW'), findsOneWidget);
+      expect(find.textContaining('만료'), findsNothing);
     });
   });
 

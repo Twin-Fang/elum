@@ -620,9 +620,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get linkCodeIssueFailedFallback => '암호를 만들지 못했어요. 다시 해주세요';
 
   @override
-  String get linkCodeExpired => '암호가 만료됐어요';
-
-  @override
   String get linkCodeSuccessTitle => '휴대폰 연결에 성공했어요!';
 
   @override
@@ -792,9 +789,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get inviteCodeShareFailFallback => '코드를 직접 알려주세요';
 
   @override
-  String get inviteCodeExpired => '초대 코드가 만료됐어요';
-
-  @override
   String get inviteCodeTitle => '초대 코드';
 
   @override
@@ -806,7 +800,7 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String inviteCodeAsk(String name, String batchim) {
     String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '을', 'other': '를'});
-    return '받은 분이 $name$_temp0 함께 돌봐요';
+    return '코드를 받은 분이 $name$_temp0 함께 돌봐요';
   }
 
   @override
@@ -820,13 +814,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get inviteCodeRetryChip => '초대 코드 다시 만들기';
-
-  @override
-  String get inviteCodeRetryNote => '다시 만들면 이전 코드는 쓸 수 없어요';
-
-  @override
-  String get inviteCodeElumiPhoneNote =>
-      '이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요\n설정의 이룸이 휴대폰에서 연결해요';
 
   @override
   String get inviteEnterLinkInvalid =>
@@ -1816,9 +1803,6 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '이룸이가 쓸 휴대폰을 연결해요. 그 휴대폰에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 $_temp0 동안만 쓸 수 있어요.\n\n$url\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 $code';
   }
-
-  @override
-  String get linkCodePhoneNote => '이룸이 휴대폰에서 링크를 열거나\n코드를 직접 넣어요';
 
   @override
   String get linkRejectedAlreadyLinked => '이미 연결된 휴대폰이에요';
