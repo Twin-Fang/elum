@@ -49,9 +49,9 @@ class LinkCodeText extends StatelessWidget {
   }
 }
 
-/// `코드 다시 만들기` 칩 (Figma 732:5718 — padding 10/20, r20).
-class LinkRetryChip extends StatelessWidget {
-  const LinkRetryChip({super.key, required this.onTap, this.label});
+/// 코드 아래 알약 버튼: `코드 다시 만들기`, `코드 복사하기` (Figma 732:5718, 1532:6798 — padding 10/20, r20)
+class LinkActionChip extends StatelessWidget {
+  const LinkActionChip({super.key, required this.onTap, this.label});
 
   final VoidCallback? onTap;
 

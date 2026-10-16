@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_state_body.dart';
 import '../../domain/link_status.dart';
@@ -20,6 +21,8 @@ class IssuedCodePanel extends StatelessWidget {
     required this.expiredLabel,
     required this.onRetry,
     this.retryLabel,
+    this.onCopy,
+    this.timerSuffix,
     this.showStatus = true,
     this.replacement,
     this.footer = const [],
@@ -39,6 +42,13 @@ class IssuedCodePanel extends StatelessWidget {
 
   final VoidCallback? onRetry;
 
+  /// 있으면 코드 아래에 `코드 복사하기` 알약이 먼저 오고 남은 시간이 그 뒤에 온다 (Figma 1532:6798).
+  /// 만료되면 복사 대신 다시 만들기 알약을 보인다. null 이면 남은 시간 > 다시 만들기 순서다.
+  final VoidCallback? onCopy;
+
+  /// 남은 시간 오른쪽에 붙는 안내 (`09:59` + `뒤에 코드가 바껴요`).
+  final String? timerSuffix;
+
   /// 남은 시간과 다시 만들기 칩을 보일지. 연결되면 더 기다릴 이유가 없어 끈다.
   final bool showStatus;
 
@@ -52,6 +62,9 @@ class IssuedCodePanel extends StatelessWidget {
   static const descriptionToCode = 72.0;
   static const codeToTimer = 24.0;
   static const timerToRetry = 16.0;
+
+  /// 남은 시간 `09:59` 와 안내 글 사이 (Figma 1532:6795 gap 4).
+  static const timerToSuffix = 4.0;
 
   /// 암호 여섯 글자 사이 간격. 시안은 3-3으로 묶고 가운데를 더 벌린다
   /// (글자 좌표 0·47·100 | 164·211·258).
@@ -67,9 +80,27 @@ class IssuedCodePanel extends StatelessWidget {
     return '$mm:$ss';
   }
 
+  /// 남은 시간 한 줄: `09:59`(빨강) + 안내(회색). 만료되면 안내 없이 만료 문구만.
+  Widget _remainingRow(BuildContext context, IssuedLinkCode issued) {
+    final colors = context.colors;
+    final timerStyle = context.typo.linkTimer.copyWith(color: colors.linkTimer);
+    final label = remainingLabel(issued, expiredLabel);
+    final suffix = timerSuffix;
+    if (suffix == null || issued.isExpired) {
+      return Text(label, textAlign: TextAlign.center, style: timerStyle);
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(label, style: timerStyle),
+        SizedBox(width: timerToSuffix.w),
+        Text(suffix, style: context.typo.linkTimer.copyWith(color: colors.textSecondary)),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final issued = this.issued;
     final replacement = this.replacement;
 
@@ -89,15 +120,21 @@ class IssuedCodePanel extends StatelessWidget {
             letterGap: codeLetterGap,
             groupGap: codeGroupGap,
           ),
-          if (showStatus) ...[
+          if (showStatus && onCopy != null) ...[
             SizedBox(height: codeToTimer.h),
-            Text(
-              remainingLabel(issued, expiredLabel),
-              textAlign: TextAlign.center,
-              style: context.typo.linkTimer.copyWith(color: colors.linkTimer),
+            Center(
+              child: issued.isExpired
+                  ? LinkActionChip(label: retryLabel, onTap: onRetry)
+                  : LinkActionChip(label: context.l10n.issuedCodeCopyButton, onTap: onCopy),
             ),
             SizedBox(height: timerToRetry.h),
-            Center(child: LinkRetryChip(label: retryLabel, onTap: onRetry)),
+            _remainingRow(context, issued),
+            ...footer,
+          ] else if (showStatus) ...[
+            SizedBox(height: codeToTimer.h),
+            _remainingRow(context, issued),
+            SizedBox(height: timerToRetry.h),
+            Center(child: LinkActionChip(label: retryLabel, onTap: onRetry)),
             ...footer,
           ],
         ],
