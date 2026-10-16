@@ -1,0 +1,143 @@
+/* 소개 페이지 스타일 (build_site.py 가 gh-pages assets/promo/site.css 로 복사) */
+:root{
+  --bg:#F7F2EF; --ink:#242634; --muted:#6B6C78; --faint:rgba(36,38,52,.45);
+  --line:rgba(36,38,52,.09); --card:#fff; --accent:#FF8B26;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --r:26px;
+  /* 기능 배경 테마 6개: copy.*.json slides[].theme 와 이름 맞춤 */
+  --theme-peach:linear-gradient(160deg,#FFF4EC,#FFD9C4);
+  --theme-butter:linear-gradient(160deg,#FFFBEA,#FFEFA8);
+  --theme-mint:linear-gradient(160deg,#F1FFFB,#BFF5E6);
+  --theme-lavender:linear-gradient(160deg,#F6F4FF,#D9D4FF);
+  --theme-sky:linear-gradient(160deg,#F2F9FF,#CDE7FF);
+  --theme-cream:linear-gradient(160deg,#FBF8F5,#EFE7DF);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.62;overflow-x:hidden;
+  font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;word-break:keep-all}
+img,video{max-width:100%}
+.wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+a{color:inherit}
+
+/* 헤더 (로고, 메뉴, 언어 전환) */
+header{position:sticky;top:0;z-index:20;background:rgba(247,242,239,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;height:68px;gap:18px}
+.brand{display:flex;align-items:center;text-decoration:none}
+.brand img{height:26px;display:block}
+nav{margin-left:auto;display:flex;gap:26px}
+nav a{font-size:14px;color:var(--muted);text-decoration:none}
+nav a:hover{color:var(--ink)}
+.lang{font-size:13px;font-weight:700;text-decoration:none;border:1px solid var(--line);background:#fff;
+  border-radius:999px;padding:7px 14px}
+.lang:hover{border-color:var(--ink)}
+
+/* 첫 화면 (문구 + 그림 위 휴대폰) */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;padding:72px 28px 56px}
+h1{margin:14px 0 0;font-size:clamp(36px,5.4vw,64px);line-height:1.08;letter-spacing:-.035em;font-weight:800}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{margin:20px 0 0;color:var(--muted);font-size:17px;max-width:30em}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.store{display:inline-flex;align-items:center;gap:10px;border-radius:14px;padding:12px 20px;
+  background:var(--ink);color:#fff;font-weight:700;font-size:15px;text-decoration:none;
+  box-shadow:0 10px 22px rgba(36,38,52,.18);transition:transform .16s ease}
+.store:hover{transform:translateY(-2px)}
+.store svg{width:22px;height:22px;flex:none}
+.hint{margin-top:14px;color:var(--faint);font-size:13px}
+.hero-visual{position:relative;display:flex;justify-content:center;align-items:flex-end;min-height:520px}
+.hero-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:36px}
+.hero-visual .phone{position:relative;width:min(250px,62%);margin:40px 0 -24px;z-index:2}
+
+/* 휴대폰 틀 (실측 화면·영상) */
+.phone{background:#15161d;border-radius:44px;padding:9px;box-shadow:0 24px 48px rgba(36,38,52,.22)}
+.screen{position:relative;border-radius:36px;overflow:hidden;background:#000;aspect-ratio:1320/2868}
+.screen img,.screen video{display:block;width:100%;height:100%;object-fit:cover}
+.island{position:absolute;top:2.2%;left:50%;width:30%;height:3.6%;transform:translateX(-50%);
+  background:#000;border-radius:999px}
+
+/* 세 단계 */
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:40px 0 12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+.tile .num{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--faint);margin-bottom:10px}
+.tile .rule{width:26px;height:3px;border-radius:2px;margin-bottom:14px}
+.tile h3{margin:0 0 6px;font-size:16px;font-weight:800;letter-spacing:-.01em}
+.tile p{margin:0;color:var(--muted);font-size:14px}
+
+section{padding:78px 0;border-top:1px solid var(--line);margin-top:56px}
+h2{margin:12px 0 0;font-size:clamp(28px,3.6vw,42px);line-height:1.15;letter-spacing:-.03em;font-weight:800}
+.sub{margin:14px 0 0;color:var(--muted);max-width:36em}
+
+/* 기능 6개 (좌우 번갈아) */
+.features{display:flex;flex-direction:column;gap:28px;margin-top:40px}
+.feature{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.feature.rev .feature-text{order:2}
+.eyebrow{display:inline-block;font-size:13px;font-weight:700;color:var(--accent)}
+.feature h3{margin:8px 0 0;font-size:clamp(24px,2.8vw,32px);line-height:1.25;letter-spacing:-.025em;font-weight:800}
+.feature p{margin:14px 0 0;color:var(--muted);font-size:16px;max-width:28em}
+.feature-visual{position:relative;display:flex;justify-content:center;border-radius:36px;
+  padding:40px 24px 0;overflow:hidden;min-height:420px}
+.feature-visual .phone{width:min(230px,58%);margin-bottom:-120px;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.feature-visual .scene{position:absolute;right:-4%;bottom:-2%;width:46%;z-index:2;
+  filter:drop-shadow(0 12px 22px rgba(36,38,52,.16))}
+/* 실측 화면 없음(영어 일과 생성 전) > 그림만 가운데 크게 */
+.feature-visual:not(:has(.phone)){align-items:center;padding:24px}
+.feature-visual:not(:has(.phone)) .scene{position:static;width:min(320px,70%)}
+.theme-peach{background:var(--theme-peach)}
+.theme-butter{background:var(--theme-butter)}
+.theme-mint{background:var(--theme-mint)}
+.theme-lavender{background:var(--theme-lavender)}
+.theme-sky{background:var(--theme-sky)}
+.theme-cream{background:var(--theme-cream)}
+
+/* 받기 띠 */
+.download-box{display:grid;grid-template-columns:220px 1fr;gap:32px;align-items:center;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:32px}
+.download-box img{width:100%}
+
+/* 자주 묻는 질문 */
+.faq{margin-top:34px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+details{border-bottom:1px solid var(--line)}
+details:last-child{border-bottom:0}
+summary{cursor:pointer;list-style:none;padding:20px 56px 20px 24px;font-weight:700;font-size:16px;position:relative}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";position:absolute;right:24px;top:50%;width:9px;height:9px;
+  border-right:2px solid var(--faint);border-bottom:2px solid var(--faint);
+  transform:translateY(-70%) rotate(45deg);transition:transform .18s}
+details[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+details .body{padding:0 24px 22px;color:var(--muted);max-width:46em}
+details .body b{color:var(--ink)}
+code{font-family:var(--mono);font-size:.92em;background:rgba(36,38,52,.06);padding:2px 6px;border-radius:6px}
+
+/* 문의 */
+.contact{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:34px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:30px}
+.card.mailcard{background:linear-gradient(140deg,#fff 0%,#FFF7EE 100%)}
+.mail{display:inline-block;margin-top:12px;font-size:clamp(20px,2.8vw,30px);font-weight:800;
+  letter-spacing:-.02em;text-decoration:none;word-break:break-all}
+.mail:hover{color:var(--accent)}
+.check{margin:16px 0 0;padding:0;list-style:none;color:var(--muted);font-size:14px}
+.check li{position:relative;padding-left:24px;margin:9px 0}
+.check li::before{content:"";position:absolute;left:4px;top:8px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+
+footer{border-top:1px solid var(--line);padding:32px 0 60px;color:var(--faint);font-size:13px}
+.fl{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+.fl img{height:18px;opacity:.85}
+
+/* 좁은 화면: 한 줄 배치, 좌우 여백 16 */
+@media (max-width:880px){
+  .wrap{padding:0 16px}
+  .hero{grid-template-columns:1fr;padding:40px 16px 32px;gap:28px}
+  .hero-visual{min-height:440px}
+  .trio,.contact{grid-template-columns:1fr}
+  .feature{grid-template-columns:1fr;gap:20px}
+  .feature.rev .feature-text{order:0}
+  .feature-visual{min-height:360px}
+  .download-box{grid-template-columns:1fr;text-align:center;padding:24px}
+  .download-box img{max-width:200px;margin:0 auto}
+  .download-box .cta{justify-content:center}
+  nav{display:none}
+  .lang{margin-left:auto}
+  section{padding:56px 0;margin-top:36px}
+}

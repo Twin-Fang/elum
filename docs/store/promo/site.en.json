@@ -1,0 +1,51 @@
+{
+  "language": "en",
+  "locale": "en_US",
+  "path": "en/",
+  "title": "ELUM — Visual routine app with action cards for autism, ADHD and developmental disabilities",
+  "description": "ELUM turns the daily routine a guardian writes into easy, step-by-step picture cards. A visual schedule made with people with developmental disabilities, autism, ADHD and learning disabilities — and their guardians — in mind.",
+  "ogTitle": "ELUM — Daily routines, one action card at a time",
+  "ogDescription": "Guardians make the routine, Elumi follows along card by card. Free on iOS and Android.",
+  "ogImage": "assets/og_en.png",
+  "schemaDescription": "A daily-life helper with action cards. Shows the day's routine as picture cards in order — a visual schedule.",
+  "nav": {"features": "Features", "faq": "FAQ", "contact": "Contact", "privacy": "Privacy (Korean)", "delete": "Delete account (Korean)", "otherLanguage": "한국어", "otherLanguageHref": "../"},
+  "hero": {
+    "tag": "ELUM",
+    "titleHtml": "Daily routines,<br/><em>one action card at a time.</em>",
+    "lede": "Write one line the way you'd say it, and ELUM turns it into easy picture cards in order. Cards only appear on Elumi's phone after the guardian checks them.",
+    "appStore": "Download on the App Store",
+    "googlePlay": "Get it on Google Play",
+    "hintHtml": "Stuck? See the <a href=\"#faq\">FAQ</a> or <a href=\"#contact\">contact us</a>.",
+    "videoLabel": "Elumi swiping through action cards and finishing a routine"
+  },
+  "steps": [
+    {"title": "The guardian writes", "body": "Describe the situation the way you'd say it, like “Get ready for school on a rainy day”.", "color": "#9CADF1"},
+    {"title": "It becomes cards", "body": "It's split into small steps with a picture and a short sentence. The guardian edits and checks them.", "color": "#FF8B26"},
+    {"title": "Elumi follows along", "body": "One card at a time, with a check for each. Stars and the promised reward wait at the end.", "color": "#5BD6B0"}
+  ],
+  "featuresTag": "Features",
+  "featuresTitle": "How ELUM helps every day",
+  "featuresSub": "Getting ready for school, morning routines, washing and brushing teeth, going out, bedtime — the things you do every day, as a visual schedule.",
+  "faqTitle": "Frequently asked questions",
+  "faqSub": "Can't find your answer? Email us below.",
+  "faq": [
+    {"q": "Who is ELUM for?", "a": "We made it with people who understand pictures and order more easily than text in mind — people with developmental disabilities or on the autism spectrum, people with ADHD or learning disabilities who like to see their steps at a glance — and the guardians and teachers who look after the day with them. We don't divide users by age."},
+    {"q": "Does it work on both iPhone and Android?", "a": "Yes. Get it on the App Store or Google Play. The guardian's phone and Elumi's phone can be different kinds and still link."},
+    {"q": "Where do I get the link code?", "a": "Make a link code on the guardian screen, then enter it on Elumi's phone to connect the two. Forgot it? Make a new one on the guardian screen — the old code stops working from then on."},
+    {"q": "How do I go back to the guardian screen?", "a": "Switching from Elumi's screen needs the passcode you set at the start, so settings can't be changed by accident."},
+    {"q": "Cards aren't being made", "a": "Check your internet connection first. If it still fails, email us the <b>error code</b> shown on screen (for example <code>E-1001</code>) so we can find where it stopped."},
+    {"q": "The cards read a little odd", "a": "Cards are made by AI and only reach Elumi <b>after the guardian checks them</b>. Edit the wording or make them again on the guardian screen."},
+    {"q": "Where does what I write go?", "a": "The situation and answers you write are sent <b>as written</b> to an AI provider to make the cards, so please <b>don't include</b> names, phone numbers, addresses or anything that identifies a person. The text is also kept on the ELUM server so you can review and edit it, and it's deleted when you delete your account. Details are in the <a href=\"{root}privacy.html\">privacy policy</a> (Korean)."},
+    {"q": "How do I delete my account?", "a": "Tap <b>Delete account</b> in the guardian screen's settings. Routines, Elumi's information and stars are deleted right away and can't be restored. To stop free usage limits from being claimed again, minimal data such as the login identifier and AI usage count is <b>kept for one year</b> and then deleted. To have it deleted sooner, email <a href=\"mailto:chan4760@gmail.com\">chan4760@gmail.com</a>. See the <a href=\"{root}delete.html\">account deletion guide</a> (Korean)."},
+    {"q": "Elumi got a new phone", "a": "Install the app on the new phone, make a new link code on the guardian screen and enter it."}
+  ],
+  "contactTitle": "Contact",
+  "contactSub": "We reply within 2–3 business days.",
+  "contactMailTag": "Email",
+  "contactMailSubject": "%5BELUM%5D%20Question",
+  "contactMailHint": "Tap to write an email.",
+  "contactChecklistTag": "Please include",
+  "contactChecklistHtml": ["Your phone (iPhone / Android)", "App version — the ‘App info’ row in settings", "Which screen it happened on", "The <b>error code</b> shown on screen"],
+  "downloadTitle": "Start today's routine with action cards",
+  "downloadSub": "Available on the App Store and Google Play."
+}
