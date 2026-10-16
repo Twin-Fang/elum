@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-16T11:21:07Z",
-    "currentVersion": "2.33.4",
+    "lastUpdated": "2026-10-16T11:32:12Z",
+    "currentVersion": "2.34.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 246
+    "totalReleases": 247
   },
   "releases": [
+    {
+      "version": "2.34.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-16",
+      "pr_number": 697,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 설정에서 크레딧 사용 내역을 볼 수 있어요\n\n* **개선**\n  * 일과를 끝냈을 때 화면이 새로워지고 캐릭터가 움직여요\n  * 이룸이 휴대폰 연결과 보호자 초대 화면이 새로워졌어요\n  * 연결 코드가 시간이 지나면 저절로 새 코드로 바뀌어요\n  * 약관 및 개인정보처리방침 목록이 새로워졌어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "설정에서 크레딧 사용 내역을 볼 수 있어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과를 끝냈을 때 화면이 새로워지고 캐릭터가 움직여요",
+            "이룸이 휴대폰 연결과 보호자 초대 화면이 새로워졌어요",
+            "연결 코드가 시간이 지나면 저절로 새 코드로 바뀌어요",
+            "약관 및 개인정보처리방침 목록이 새로워졌어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.33.4",
       "project_type": "flutter",
