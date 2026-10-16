@@ -95,7 +95,11 @@ class _ChildRoutineDetailScreenState
     super.initState();
     // 첫 프레임 뒤에 잡는다. initState에서 읽어도 되지만 일관되게 둔다.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _speech = ref.read(speechServiceProvider);
+      if (!mounted) return;
+      _speech = ref.read(speechServiceProvider);
+      // 카드 음성 미리 받기 (누를 때 기다리지 않게)
+      final routine = _routine;
+      prefetchStoredSpeech(ref, routine.id, routine.steps);
     });
   }
 
@@ -106,6 +110,13 @@ class _ChildRoutineDetailScreenState
     _confetti.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  /// 미리 만든 단계 음성 위치 (#675). 일과 id 가 없으면(저장 전) 기기 음성만
+  StoredSpeechSource? _storedSpeechOf(ActionCard card) {
+    final routineId = _routine.id;
+    if (routineId.isEmpty) return null;
+    return (routineId: routineId, stepId: card.id, speechPath: card.speechPath);
   }
 
   /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다.
@@ -127,6 +138,7 @@ class _ChildRoutineDetailScreenState
     final ok = await speech.speak(
       '${card.displayTitle}. ${card.description}',
       language: _routine.language,
+      stored: _storedSpeechOf(card),
     );
 
     if (!mounted) return;

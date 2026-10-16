@@ -1,6 +1,10 @@
 package com.chuseok22.elumserver.routine.infrastructure.repository;
 
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -37,4 +41,37 @@ public interface RoutineStepRepository extends JpaRepository<RoutineStep, String
    * 확인하지 않으면 복제본의 그림이 깨진다.
    */
   boolean existsByImagePathAndIdNot(String imagePath, String id);
+
+  /**
+   * 음성 열쇠 저장 (트랜잭션 없는 대기열 스레드용 한 줄 UPDATE). 0 이면 그새 단계가 지워짐
+   */
+  @Transactional
+  @Modifying
+  @Query("update RoutineStep s set s.speechPath = :speechPath where s.id = :stepId")
+  int updateSpeechPath(@Param("stepId") String stepId, @Param("speechPath") String speechPath);
+
+  /**
+   * 음성을 만들 문장 재료: 제목, 설명, 일과 언어 (지연 로딩 없이 한 번에)
+   */
+  @Query("select s.title as title, s.description as description, r.language as language "
+    + "from RoutineStep s join s.routine r where s.id = :stepId")
+  Optional<SpeechTextSource> findSpeechTextSource(@Param("stepId") String stepId);
+
+  /**
+   * 음성이 빠진 단계 id (주기 작업용, 최근 단계 먼저)
+   */
+  @Query("select s.id from RoutineStep s join s.routine r "
+    + "where s.speechPath is null and s.description <> '' and r.language = :language "
+    + "order by s.createdAt desc")
+  List<String> findIdsMissingSpeech(@Param("language") AppLocale language, Pageable pageable);
+
+  /// 음성 문장 재료 projection
+  interface SpeechTextSource {
+
+    String getTitle();
+
+    String getDescription();
+
+    AppLocale getLanguage();
+  }
 }

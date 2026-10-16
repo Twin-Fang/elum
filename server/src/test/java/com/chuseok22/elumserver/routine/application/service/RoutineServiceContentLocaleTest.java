@@ -49,6 +49,11 @@ class RoutineServiceContentLocaleTest {
   @Mock private CreditReservationService creditReservationService;
   @Mock private PictogramPicker pictogramPicker;
 
+  // 단계 음성 대기열 (#675) — 예약만 확인, 실제 합성 없음
+
+  @Mock private RoutineStepSpeechQueue routineStepSpeechQueue;
+
+
   @InjectMocks private RoutineService routineService;
 
   @AfterEach

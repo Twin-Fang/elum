@@ -56,6 +56,9 @@ public class RoutineStep extends BaseEntity {
   @Column(length = 100)
   private String pictogramId;
 
+  // 단계 음성 저장 열쇠 {stepId}/{문장 해시}.wav (#675). 아직 없거나 실패, 한국어 아닌 일과는 null
+  private String speechPath;
+
   @Column(nullable = false, columnDefinition = "boolean not null default false")
   private Boolean completed = false;
 

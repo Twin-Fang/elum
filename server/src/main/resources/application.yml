@@ -42,6 +42,12 @@ server:
   # Blue/Green 전환 때 옛 컨테이너가 처리 중이던 요청을 끝내고 내려가게 한다. 없으면 SIGTERM 즉시 끊긴다.
   shutdown: graceful
 
+# 단계 음성 미리 만들기 (#675). AI 서버 주소·키는 local-llm 설정을 그대로 쓴다
+tts:
+  enabled: ${ELUM_TTS_ENABLED:true}
+  # /app 마운트 아래 (그림 data/routine-images 와 같은 볼륨)
+  speech-storage-path: data/routine-speech
+
 elum:
   auth:
     legacy-password:

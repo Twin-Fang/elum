@@ -68,14 +68,11 @@ flowchart LR
 
 ```yaml
 tts:
-  enabled: true             # false 면 예약·주기 작업 모두 끔
-  base-url: https://ai.suhsaechan.kr
-  api-key: ${TTS_API_KEY}   # 앱의 ELUM_TTS_API_KEY 와 같은 키
-routine:
-  speech-storage-path: data/routine-speech
+  enabled: ${ELUM_TTS_ENABLED:true}         # false 면 예약·주기 작업 모두 끔
+  speech-storage-path: data/routine-speech  # /app 마운트 아래 (그림과 같은 볼륨)
 ```
 
-`tts.api-key`가 비어 있으면 기능을 끄고 경고 로그를 한 번 남긴다. 그러면 앱은 지금처럼 기기 음성으로 읽는다. 운영 반영 시 서버 배포 Secret(`application-prod.yml`)에 키를 넣어야 한다.
+AI 서버 주소와 키는 `local-llm.base-url`·`local-llm.api-key`를 그대로 쓴다. 실측해 보니 앱의 `ELUM_TTS_API_KEY`와 같은 값이어서, 배포 Secret은 바꾸지 않는다. 키가 비어 있으면 기능이 꺼지고, 앱은 지금처럼 기기 음성으로 읽는다.
 
 ### 예약 지점
 
@@ -85,11 +82,13 @@ routine:
 | 단계 글 수정(`RoutineService.updateStep`) | 문장이 바뀌었을 때만 `speech_path=null` 후 예약 |
 | 단계 추가(`addStep`) | 예약 |
 | 일과 복제(`duplicate`) | 원본 `speech_path`를 그대로 복사하지 않고 예약한다. 열쇠가 stepId 폴더에 묶여 있어서다 |
-| 단계·일과 삭제 | 그림을 지우는 자리에서 음성도 지운다 |
+| 단계·일과 삭제 | 커밋 뒤 단계 음성 폴더를 지운다 |
+| 글 수정 | 커밋 뒤 옛 음성 파일을 지운다 |
 
 ### 내려받기 API
 
 - `GET /api/routines/{routineId}/steps/{stepId}/speech` → `audio/wav`. 인증과 권한은 그림 GET과 같다. `speech_path`가 `null`이면 `404`.
+- `ETag`는 음성 열쇠다. 앱이 `If-None-Match`로 가진 열쇠를 보내 같으면 `304`(본문 없음)를 받는다. 목록에 열쇠가 아직 없는 카드(방금 만든 일과)도 다시 누를 때 받지 않고, 고친 글의 옛 음성이 나오지도 않는다.
 - 단계 응답(`RoutineStepResponse`와 이룸이 쪽 응답)에 `speechPath`(nullable)를 추가한다.
 
 ### DB
@@ -104,7 +103,8 @@ routine:
 | 키 없음 | 기능 꺼짐. 앱은 기기 음성 |
 | 생성 중 단계 삭제 | 저장하지 않는다. 이미 저장했으면 파일을 지운다 |
 | 생성 중 글 수정 | 해시가 다르면 파일을 버린다. 새 예약이 처리한다 |
-| 대기열 적체 | 같은 stepId는 한 번만 들어간다. 주기 작업은 한 번에 최대 20건 |
+| 대기열 적체 | 같은 stepId는 한 번만 들어간다. 주기 작업은 대기열이 비었을 때만, 한 번에 최대 20건 |
+| 같은 단계가 계속 실패 | 30분 동안 주기 작업이 건너뛴다. 실패한 단계가 매번 20건 자리를 차지하지 않게 하려는 것이다 |
 
 로그 접두사는 `[routine speech]`로 고정한다. 실패 로그에는 상태 코드와 원인을 남긴다.
 
@@ -125,10 +125,10 @@ routine:
 | 이름 | 하는 일 |
 |---|---|
 | `ActionCard.speechPath` | 서버 응답의 `speechPath` |
-| `CardSpeechRepository` | GET으로 WAV를 받는다. 같은 열쇠의 동시 요청은 하나로 합친다. 디스크 캐시 이름은 열쇠 해시이고, 로그아웃 때 지운다. `card_image_repository`·`card_image_disk_cache`와 같은 구조 |
+| `CardSpeechRepository` | GET으로 WAV를 받는다. 같은 열쇠의 동시 요청은 하나로 합친다. 위치는 `card_images/speech/{stepId 해시}/{열쇠 해시}.wav`. 카드 그림 캐시 폴더 아래라 로그아웃·탈퇴·세션 만료 때 함께 지워진다. 새 열쇠를 저장하면 같은 단계의 옛 파일을 지운다. 전체 상한은 60MB이고, 오래 쓰지 않은 것부터 지운다 |
 | `StoredSpeech` | 캐시 파일을 `AudioPlayer`(`DeviceFileSource`)로 재생 |
 | `SpeechService.speak(text, {language, stored})` | `stored`는 `StoredSpeechSource(routineId, stepId, speechPath)`이고 nullable. 호출부 3곳(카드확인, 단계 뷰어, 이룸이 일과)이 넘긴다 |
-| 미리 받기 | 이룸이 일과 화면과 카드확인 화면에 들어가면 `speechPath`가 있는 카드를 차례로 받아 둔다(동시 1건). 실패해도 조용히 기록만 남긴다 |
+| 미리 받기 | 안드로이드에서 이룸이 일과 화면에 들어가면 `speechPath`가 있는 카드를 차례로 받아 둔다(동시 1건). 열쇠가 빈 카드의 옛 음성은 지운다. 실패하면 기록만 남긴다. 카드확인은 방금 만든 일과라 열쇠가 아직 없어서, 누를 때 받는다 |
 
 ### 실패 경로
 
@@ -152,6 +152,6 @@ routine:
 
 ## 배포 시 확인
 
-- 서버 배포 Secret에 `TTS_API_KEY`
-- 운영 서버에서 `routine.speech-storage-path`가 볼륨에 마운트돼 있는지(그림 경로와 같은 볼륨인지)
-- AI 서버 Docker Desktop 자동 시작. 지금은 시작 스크립트에 없다
+- 배포 Secret 변경은 없다(`local-llm` 키를 함께 쓴다).
+- 운영 저장 경로 `data/routine-speech`는 `/app` 마운트 아래라 재배포해도 남는다.
+- AI 서버 Docker Desktop 자동 시작. 지금은 시작 스크립트에 없다.

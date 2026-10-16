@@ -130,7 +130,7 @@ class _RecordingSpeech implements SpeechService {
   final List<String> languages;
 
   @override
-  Future<bool> speak(String text, {String language = 'ko'}) async {
+  Future<bool> speak(String text, {String language = 'ko', StoredSpeechSource? stored}) async {
     spoken.add(text);
     languages.add(language);
     return true;

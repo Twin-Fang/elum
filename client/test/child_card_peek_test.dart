@@ -182,7 +182,7 @@ class _CountingSpeech implements SpeechService {
   final spoken = <String>[];
 
   @override
-  Future<bool> speak(String text, {String language = 'ko'}) async {
+  Future<bool> speak(String text, {String language = 'ko', StoredSpeechSource? stored}) async {
     spoken.add(text);
     return true;
   }

@@ -43,6 +43,9 @@ abstract class ActionCard with _$ActionCard {
     /// **사진·AI 그림이 없을 때만** 쓰인다(우선순위: 사진/AI > 픽토그램 > 기본 카드).
     /// 값이 없는 카드는 null 이고, 서버가 카탈로그에 없는 값을 주면 [fromJson] 이 null 로 돌린다.
     String? pictogramId,
+
+    /// 서버가 미리 만든 음성 열쇠 (#675). 아직 없으면 null. 글이 바뀌면 값도 바뀐다.
+    String? speechPath,
   }) = _ActionCard;
 
   const ActionCard._();
@@ -67,6 +70,11 @@ abstract class ActionCard with _$ActionCard {
       completed: json['completed'] == true,
       // 모르는 id 는 버린다 — 번들에 없는 자산을 그리려다 그림 자리가 깨지지 않게
       pictogramId: PictogramCatalog.parse(json['pictogramId']),
+      // 빈 문자열은 없음과 같다 — 받을 수 없는 열쇠로 요청하지 않게
+      speechPath: switch (json['speechPath']) {
+        final String v when v.isNotEmpty => v,
+        _ => null,
+      },
     );
   }
 
@@ -78,5 +86,6 @@ abstract class ActionCard with _$ActionCard {
         'imagePath': imagePath,
         'completed': completed,
         'pictogramId': pictogramId,
+        'speechPath': speechPath,
       };
 }

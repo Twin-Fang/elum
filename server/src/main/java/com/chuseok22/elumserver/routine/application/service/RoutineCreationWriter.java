@@ -11,7 +11,9 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
+import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +39,7 @@ public class RoutineCreationWriter {
   private final ProfileAccessGuard profileAccessGuard;
   private final RoutineRepository routineRepository;
   private final CreditReservationService creditReservationService;
+  private final RoutineStepSpeechQueue routineStepSpeechQueue;
 
   /**
    * @param creditJobId 예약한 크레딧 작업. null 이면(크레딧 꺼짐) 정산하지 않는다
@@ -55,6 +58,8 @@ public class RoutineCreationWriter {
     // 잠근 뒤에 세야 두 사람이 동시에 만들어도 번호가 겹치지 않는다.
     routine.setDisplayOrder(routineRepository.maxDisplayOrder(profileId) + 1);
     Routine saved = routineRepository.save(routine);
+    // 단계 음성은 커밋 뒤 대기열이 만듦 (#675)
+    routineStepSpeechQueue.enqueueAfterCommit(stepIdsOf(saved));
 
     if (creditJobId == null) {
       return new SavedRoutine(saved, null);
@@ -64,6 +69,10 @@ public class RoutineCreationWriter {
     CreditSettlement settlement =
       creditReservationService.settle(creditJobId, cardCount, imageCount, saved.getId(), null);
     return new SavedRoutine(saved, settlement);
+  }
+
+  private static List<String> stepIdsOf(Routine routine) {
+    return routine.getSteps() == null ? List.of() : routine.getSteps().stream().map(RoutineStep::getId).toList();
   }
 
   /**

@@ -35,7 +35,9 @@ class CardImageDiskCache {
   /// 한 장이 상한을 통째로 차지해 나머지를 다 밀어내는 것을 막는다.
   static const defaultMaxEntryBytes = 20 * 1024 * 1024;
 
-  static const _dirName = 'card_images';
+  /// 카드 미디어 폴더 이름. 단계 음성 캐시(`CardSpeechRepository`)도 이 아래 `speech/` 에 둬
+  /// [clear] 한 번에 함께 지운다 (#675)
+  static const directoryName = 'card_images';
   static const _tmpSuffix = '.tmp';
 
   final Future<Directory> Function() _rootProvider;
@@ -58,7 +60,7 @@ class CardImageDiskCache {
     if (cached != null) return cached;
     try {
       final root = await _rootProvider();
-      return _dirCache = Directory('${root.path}${Platform.pathSeparator}$_dirName');
+      return _dirCache = Directory('${root.path}${Platform.pathSeparator}$directoryName');
     } catch (e) {
       // 저장소 폴더를 못 찾으면 캐시 없이 동작한다(매번 다시 시도)
       AppLogger.error('card-cache', '저장 폴더를 찾지 못했다 → 디스크 캐시 없이 동작: $e');

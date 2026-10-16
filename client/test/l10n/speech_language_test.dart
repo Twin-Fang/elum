@@ -34,7 +34,7 @@ void main() {
       final device = _LangSpeech(succeeds: false);
       final remote = _LangSpeech(succeeds: true);
 
-      await FallbackSpeech(device: device, remote: remote).speak('x', language: 'ja');
+      await FallbackSpeech([device, remote]).speak('x', language: 'ja');
 
       expect(device.languages, ['ja']);
       expect(remote.languages, ['ja']);
@@ -76,7 +76,7 @@ class _LangSpeech implements SpeechService {
   final languages = <String>[];
 
   @override
-  Future<bool> speak(String text, {String language = 'ko'}) async {
+  Future<bool> speak(String text, {String language = 'ko', StoredSpeechSource? stored}) async {
     languages.add(language);
     return succeeds;
   }

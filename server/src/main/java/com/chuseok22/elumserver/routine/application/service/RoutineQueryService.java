@@ -16,6 +16,7 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
+import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineStepSpeechStorage;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,7 @@ public class RoutineQueryService {
 
   private final RoutineRepository routineRepository;
   private final RoutineImageStorage routineImageStorage;
+  private final RoutineStepSpeechStorage routineStepSpeechStorage;
   private final ProfileAccessGuard profileAccessGuard;
 
   /// 최근에 사용한 보상 최대 4개. 보상 설정 화면 입력칸 아래에 띄워 두 번째 일과부터는
@@ -153,6 +156,27 @@ public class RoutineQueryService {
       throw new CustomException(ErrorCode.ROUTINE_STEP_IMAGE_NOT_FOUND);
     }
     return routineImageStorage.read(targetStep.getImagePath());
+  }
+
+  /**
+   * 단계 음성 조회: 권한 확인 > 열쇠 > WAV. 아직 없으면 빈 값 (#675)
+   */
+  public Optional<StepSpeech> getStepSpeech(Caller caller, String routineId, String stepId) {
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.VIEW);
+    RoutineStep targetStep = routine.getSteps().stream()
+      .filter(step -> step.getId().equals(stepId))
+      .findFirst()
+      .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
+    String speechKey = targetStep.getSpeechPath();
+    if (speechKey == null) {
+      return Optional.empty();
+    }
+    return routineStepSpeechStorage.read(speechKey).map(wav -> new StepSpeech(speechKey, wav));
+  }
+
+  /// 단계 음성: 열쇠(앱 캐시 이름·ETag), WAV
+  public record StepSpeech(String speechKey, byte[] wav) {
+
   }
 
   private Routine getRoutineFor(Caller caller, String routineId, RoutineAction action) {

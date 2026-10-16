@@ -31,7 +31,11 @@ public record RoutineStepResponse(
   @Schema(
     description = "무료 픽토그램 id(SVG 파일명, 앱에 번들). 사진·AI 그림이 없을 때 앱이 보여준다. "
       + "null 이면 이 카드는 픽토그램이 없다(이 기능 이전 카드 등) — 앱이 기본 그림으로 대체", example = "get_dressed_,_to")
-  String pictogramId
+  String pictogramId,
+
+  @Schema(description = "미리 만든 단계 음성 열쇠. 아직 없으면 null — 앱은 기기 음성으로 읽는다. "
+    + "글이 바뀌면 값이 바뀐다", example = "step-1/3f2a9c0d1b2e4f60.wav")
+  String speechPath
 ) {
 
   public static RoutineStepResponse from(RoutineStep step) {
@@ -43,7 +47,8 @@ public record RoutineStepResponse(
       step.getImagePath(),
       step.getCompleted(),
       step.getCompletedAt(),
-      step.getPictogramId()
+      step.getPictogramId(),
+      step.getSpeechPath()
     );
   }
 }

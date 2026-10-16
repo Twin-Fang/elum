@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -6,6 +8,10 @@ import 'package:flutter_tts/flutter_tts.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/config/app_config.dart';
+import '../../../shared/models/action_card.dart';
+import 'card_speech_repository.dart';
+
+export 'card_speech_repository.dart' show StoredSpeechSource;
 
 /// 카드 문장을 소리로 읽어준다.
 ///
@@ -15,7 +21,8 @@ abstract interface class SpeechService {
   /// 읽어준다. **절대 throw하지 않는다** — 실패하면 false.
   ///
   /// [language] 는 읽을 글의 언어 — 일과 언어 코드(`ko` `en` `ja` `zh` `es`)다. 화면 언어가 아니다.
-  Future<bool> speak(String text, {String language = 'ko'});
+  /// [stored] 는 서버가 미리 만든 단계 음성 위치(#675). 없으면 기기·실시간 음성만 쓴다.
+  Future<bool> speak(String text, {String language = 'ko', StoredSpeechSource? stored});
 
   /// 재생 중이면 멈춘다. 화면을 벗어날 때도 부른다.
   Future<void> stop();
@@ -57,7 +64,7 @@ class DeviceSpeech implements SpeechService {
   static const _rate = 0.45;
 
   @override
-  Future<bool> speak(String text, {String language = 'ko'}) async {
+  Future<bool> speak(String text, {String language = 'ko', StoredSpeechSource? stored}) async {
     try {
       // 폰에 그 언어 음성이 없으면 기기 엔진이 엉뚱한 발음으로 읽어 소리가 깨진다.
       // 못 읽는다고 알려 서버 음성으로 넘긴다.
@@ -160,7 +167,7 @@ class RemoteSpeech implements SpeechService {
   static const supportedLanguages = <String>{'ko'};
 
   @override
-  Future<bool> speak(String text, {String language = 'ko'}) async {
+  Future<bool> speak(String text, {String language = 'ko', StoredSpeechSource? stored}) async {
     // 서버 음성은 한국어 `F1` 뿐 — 다른 언어는 요청하지 않고 실패해 글만 보여준다
     if (!supportedLanguages.contains(language)) {
       AppLogger.error('tts', '서버 음성이 $language 를 읽지 않아 건너뛴다');
@@ -213,43 +220,103 @@ class RemoteSpeech implements SpeechService {
   void dispose() => _player.dispose();
 }
 
-/// 기기 → 서버 순으로 시도한다.
+/// 미리 만든 단계 음성 재생 (#675): 캐시 파일 > 없으면 받아서 재생
 ///
-/// 어느 쪽이 성공했는지 기억해 **정지할 때 양쪽을 다 멈춘다** — 어느 하나만
-/// 멈추면 소리가 남는다.
-class FallbackSpeech implements SpeechService {
-  FallbackSpeech({required this.device, required this.remote});
+/// 한국어 일과만 (서버 음성이 한국어 목소리). 위치가 없거나 받지 못하면 false > 다음 순서로.
+class StoredSpeech implements SpeechService {
+  StoredSpeech({required CardSpeechRepository repository, AudioPlayer? player})
+      : _repository = repository,
+        _player = player ?? AudioPlayer();
 
-  final SpeechService device;
-  final SpeechService remote;
+  final CardSpeechRepository _repository;
+  final AudioPlayer _player;
 
   @override
-  Future<bool> speak(String text, {String language = 'ko'}) async {
-    if (text.trim().isEmpty) return false;
-
-    if (await device.speak(text, language: language)) return true;
-    return remote.speak(text, language: language);
+  Future<bool> speak(String text, {String language = 'ko', StoredSpeechSource? stored}) async {
+    if (stored == null || !RemoteSpeech.supportedLanguages.contains(language)) return false;
+    try {
+      final file = await _repository.fileFor(stored);
+      if (file == null) return false;
+      await _player.stop();
+      await _player.play(DeviceFileSource(file.path));
+      return true;
+    } catch (e) {
+      AppLogger.error('tts', '저장 음성 재생 실패 → 기기 음성: $e');
+      return false;
+    }
   }
 
   @override
   Future<void> stop() async {
-    // 둘 다 멈춘다. 어느 쪽이 울리는지 확신할 수 없다.
-    await device.stop();
-    await remote.stop();
+    try {
+      await _player.stop();
+    } catch (e) {
+      AppLogger.error('tts', '저장 음성 정지 실패: $e');
+    }
+  }
+
+  @override
+  void dispose() => _player.dispose();
+}
+
+/// 순서대로 시도: 앞이 실패하면 다음 (안드로이드 저장 > 기기 > 실시간, 아이폰 기기 > 실시간)
+///
+/// 어느 쪽이 울리는지 확신할 수 없어 **정지할 때 전부 멈춘다** — 하나만 멈추면 소리가 남는다.
+class FallbackSpeech implements SpeechService {
+  FallbackSpeech(this.engines);
+
+  final List<SpeechService> engines;
+
+  @override
+  Future<bool> speak(String text, {String language = 'ko', StoredSpeechSource? stored}) async {
+    if (text.trim().isEmpty) return false;
+    for (final engine in engines) {
+      if (await engine.speak(text, language: language, stored: stored)) return true;
+    }
+    return false;
+  }
+
+  @override
+  Future<void> stop() async {
+    for (final engine in engines) {
+      await engine.stop();
+    }
   }
 
   @override
   void dispose() {
-    device.dispose();
-    remote.dispose();
+    for (final engine in engines) {
+      engine.dispose();
+    }
   }
 }
 
+/// 플랫폼별 재생 순서
+///
+/// 안드로이드: 기기 목소리가 기종마다 쉬고 흔들려(#675) 미리 만든 음성 먼저.
+/// 아이폰: 기기 목소리가 좋아 그대로 (저장 음성은 만들지도 않음).
+@visibleForTesting
+List<SpeechService> speechEnginesFor({
+  required bool isAndroid,
+  required SpeechService Function() createStored,
+  required SpeechService device,
+  required SpeechService remote,
+}) =>
+    isAndroid ? [createStored(), device, remote] : [device, remote];
+
+/// 일과 화면 진입 시 저장 음성 정리·미리 받기 (#675). 저장 음성을 쓰는 안드로이드만, 던지지 않음
+void prefetchStoredSpeech(WidgetRef ref, String routineId, List<ActionCard> cards) {
+  if (defaultTargetPlatform != TargetPlatform.android || routineId.isEmpty) return;
+  unawaited(ref.read(cardSpeechRepositoryProvider).syncRoutine(routineId, cards));
+}
+
 final speechServiceProvider = Provider<SpeechService>((ref) {
-  final service = FallbackSpeech(
+  final service = FallbackSpeech(speechEnginesFor(
+    isAndroid: defaultTargetPlatform == TargetPlatform.android,
+    createStored: () => StoredSpeech(repository: ref.watch(cardSpeechRepositoryProvider)),
     device: DeviceSpeech(),
     remote: RemoteSpeech(),
-  );
+  ));
   ref.onDispose(service.dispose);
   return service;
 });
