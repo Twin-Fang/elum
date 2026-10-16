@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.ai.infrastructure.config;
 import com.chuseok22.elumserver.ai.core.PromptDefaults;
 import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplate;
 import com.chuseok22.elumserver.ai.infrastructure.repository.PromptTemplateRepository;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -19,7 +20,7 @@ public class PromptTemplateInitializer implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) {
     PromptDefaults.DEFAULTS.forEach((key, defaultContent) -> {
-      if (promptTemplateRepository.findByPromptKey(key).isPresent()) {
+      if (promptTemplateRepository.findByPromptKeyAndLocale(key, AppLocale.KO.code()).isPresent()) {
         log.info("[PromptTemplateInitializer] 이미 존재하는 프롬프트 스킵: {}", key);
         return;
       }

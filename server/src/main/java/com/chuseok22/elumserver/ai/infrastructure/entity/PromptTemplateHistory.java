@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.ai.infrastructure.entity;
 
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,7 +24,7 @@ import lombok.Setter;
 @Setter
 @Table(
   name = "prompt_template_history",
-  indexes = @Index(name = "idx_prompt_template_history_key_created", columnList = "prompt_key, created_at")
+  indexes = @Index(name = "idx_prompt_template_history_key_locale_created", columnList = "prompt_key, locale, created_at")
 )
 public class PromptTemplateHistory extends BaseEntity {
 
@@ -34,6 +35,10 @@ public class PromptTemplateHistory extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private PromptKey promptKey;
+
+  // 교체되기 직전 내용이 속한 언어 코드
+  @Column(nullable = false, length = 8)
+  private String locale = AppLocale.KO.code();
 
   @Column(nullable = false, columnDefinition = "TEXT")
   private String content;

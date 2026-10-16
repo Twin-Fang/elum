@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.ai.infrastructure.repository.PromptTemplateHisto
 import com.chuseok22.elumserver.ai.infrastructure.repository.PromptTemplateRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -31,7 +32,7 @@ public class PromptTemplateService {
   }
 
   public List<PromptTemplateHistory> getHistory(PromptKey key) {
-    return promptTemplateHistoryRepository.findTop50ByPromptKeyOrderByCreatedAtDesc(key);
+    return promptTemplateHistoryRepository.findTop50ByPromptKeyAndLocaleOrderByCreatedAtDesc(key, AppLocale.KO.code());
   }
 
   // PromptKey 선언 순서(로컬 LLM -> 텍스트 -> 이미지)대로 관리자 화면에 고정 표시하기 위해 정렬한다.
@@ -60,13 +61,14 @@ public class PromptTemplateService {
     }
     PromptTemplateHistory history = new PromptTemplateHistory();
     history.setPromptKey(key);
+    history.setLocale(template.getLocale());
     history.setContent(template.getContent());
     promptTemplateHistoryRepository.save(history);
     template.setContent(content);
   }
 
   private PromptTemplate findOrThrow(PromptKey key) {
-    return promptTemplateRepository.findByPromptKey(key)
+    return promptTemplateRepository.findByPromptKeyAndLocale(key, AppLocale.KO.code())
       .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_TEMPLATE_NOT_FOUND));
   }
 }

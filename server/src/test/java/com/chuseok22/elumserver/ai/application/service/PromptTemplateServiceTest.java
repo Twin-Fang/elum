@@ -42,7 +42,7 @@ class PromptTemplateServiceTest {
     PromptTemplate template = new PromptTemplate();
     template.setPromptKey(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
     template.setContent("텍스트 생성 프롬프트");
-    when(promptTemplateRepository.findByPromptKey(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX))
+    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "ko"))
       .thenReturn(Optional.of(template));
 
     String content = promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
@@ -53,7 +53,7 @@ class PromptTemplateServiceTest {
   @Test
   @DisplayName("getContent는 저장된 키가 없으면 PROMPT_TEMPLATE_NOT_FOUND를 던진다")
   void getContent_missingKey_throwsCustomException() {
-    when(promptTemplateRepository.findByPromptKey(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX))
+    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX, "ko"))
       .thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> promptTemplateService.getContent(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX))
@@ -68,7 +68,7 @@ class PromptTemplateServiceTest {
     PromptTemplate template = new PromptTemplate();
     template.setPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
     template.setContent("이전 내용");
-    when(promptTemplateRepository.findByPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK))
+    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "ko"))
       .thenReturn(Optional.of(template));
 
     promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "새 내용");
@@ -86,7 +86,7 @@ class PromptTemplateServiceTest {
     PromptTemplate template = new PromptTemplate();
     template.setPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
     template.setContent("같은 내용");
-    when(promptTemplateRepository.findByPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK))
+    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "ko"))
       .thenReturn(Optional.of(template));
 
     promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "같은 내용");
@@ -101,7 +101,7 @@ class PromptTemplateServiceTest {
     PromptTemplate template = new PromptTemplate();
     template.setPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
     template.setContent("첫 줄\n둘째 줄");
-    when(promptTemplateRepository.findByPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK))
+    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "ko"))
       .thenReturn(Optional.of(template));
 
     promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "첫 줄\r\n둘째 줄");
@@ -132,7 +132,7 @@ class PromptTemplateServiceTest {
     PromptTemplateHistory history = new PromptTemplateHistory();
     history.setPromptKey(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
     history.setContent("과거 내용");
-    when(promptTemplateHistoryRepository.findTop50ByPromptKeyOrderByCreatedAtDesc(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX))
+    when(promptTemplateHistoryRepository.findTop50ByPromptKeyAndLocaleOrderByCreatedAtDesc(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "ko"))
       .thenReturn(List.of(history));
 
     List<PromptTemplateHistory> result = promptTemplateService.getHistory(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);

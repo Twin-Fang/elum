@@ -28,7 +28,7 @@ class PromptTemplateInitializerTest {
   @DisplayName("키 하나의 시딩이 실패해도 나머지를 넣고 기동을 막지 않는다")
   void oneKeyFails_othersStillSeeded() {
     PromptTemplateRepository repository = mock(PromptTemplateRepository.class);
-    when(repository.findByPromptKey(any())).thenReturn(Optional.empty());
+    when(repository.findByPromptKeyAndLocale(any(), any())).thenReturn(Optional.empty());
     when(repository.save(argThat(t -> t != null && t.getPromptKey() == PromptKey.ROUTINE_IMAGE_PREFIX_EN)))
       .thenThrow(new RuntimeException("violates check constraint prompt_template_prompt_key_check"));
 
