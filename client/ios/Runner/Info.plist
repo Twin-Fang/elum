@@ -44,9 +44,9 @@
 	<!-- 카드 그림을 카메라·갤러리 사진으로 바꾼다 (이슈 #456). 없으면 iOS 가 앱을 강제 종료한다.
 	     문구는 사용자에게 그대로 보이므로 해요체로 쓴다. -->
 	<key>NSCameraUsageDescription</key>
-	<string>카드 그림으로 쓸 사진을 찍으려고 카메라를 사용해요</string>
+	<string>Elum uses the camera to take a photo to use as a card picture.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>카드 그림으로 쓸 사진을 고르려고 사진 보관함을 사용해요</string>
+	<string>Elum uses your photo library to choose a photo to use as a card picture.</string>
 	<!-- 소셜 로그인. 값은 ios/Flutter/Secrets.xcconfig가 채운다
 	     (tool/gen_ios_secrets.sh가 .env로 생성, 커밋 제외). -->
 	<key>CFBundleURLTypes</key>
@@ -87,7 +87,7 @@
 	<string>$(ELUM_ADMOB_APP_ID)</string>
 	<!-- 추적 허용 팝업에 뜨는 안내. 이룸이 정보는 쓰지 않는다는 점을 함께 알린다. -->
 	<key>NSUserTrackingUsageDescription</key>
-	<string>보호자 화면에 알맞은 광고를 보여드리는 데 사용해요. 이룸이의 정보는 사용하지 않아요.</string>
+	<string>This is used to show ads that fit the guardian screen. Elumi's information is not used.</string>
 	<!-- Google 권장 SKAdNetwork 식별자. 광고 성과 측정에 쓰여 단가에 영향을 준다. -->
 	<key>SKAdNetworkItems</key>
 	<array>
