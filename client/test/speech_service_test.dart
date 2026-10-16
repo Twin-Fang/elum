@@ -1,4 +1,7 @@
+import 'package:audioplayers/audioplayers.dart';
+import 'package:dio/dio.dart';
 import 'package:elum/features/child/data/speech_service.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -63,6 +66,41 @@ void main() {
   });
 
   group('서버 음성', () {
+    late _RecordingAdapter adapter;
+    late _SilentPlayer player;
+    late RemoteSpeech remote;
+
+    setUp(() {
+      // 플레이어 생성 시 부르는 플랫폼 채널을 비워 둔다
+      for (final channel in ['xyz.luan/audioplayers.global', 'xyz.luan/audioplayers']) {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(MethodChannel(channel), (_) async => null);
+      }
+      dotenv.loadFromString(envString: 'ELUM_TTS_API_KEY=test-key');
+      adapter = _RecordingAdapter();
+      player = _SilentPlayer();
+      remote = RemoteSpeech(dio: Dio()..httpClientAdapter = adapter, player: player);
+    });
+
+    test('ko 는 supertonic F1 요청을 그대로 보낸다', () async {
+      final ok = await remote.speak('옷을 입어요');
+
+      expect(ok, isTrue);
+      expect(adapter.bodies, [
+        {'text': '옷을 입어요', 'engine': 'supertonic', 'voice': 'F1'},
+      ]);
+      expect(adapter.headers.single['X-API-Key'], 'test-key');
+      expect(adapter.paths.single, endsWith('/tts'));
+      expect(player.playCount, 1);
+    });
+
+    test('ko 가 아닌 언어는 서버를 부르지 않고 false 다 — 한국어 음성이 읽지 않게', () async {
+      for (final language in ['en', 'ja', 'zh', 'es']) {
+        expect(await remote.speak('Put on your clothes', language: language), isFalse);
+      }
+      expect(adapter.bodies, isEmpty);
+      expect(player.playCount, 0);
+    });
   });
 }
 
@@ -131,4 +169,33 @@ class _FakeTts extends FlutterTts {
     spoken.add(text);
     return 1;
   }
+}
+
+/// 요청만 기록하고 가짜 음성 바이트를 돌려주는 어댑터.
+class _RecordingAdapter implements HttpClientAdapter {
+  final bodies = <Object?>[];
+  final headers = <Map<String, dynamic>>[];
+  final paths = <String>[];
+
+  @override
+  Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
+    bodies.add(options.data);
+    headers.add(options.headers);
+    paths.add(options.path);
+    return ResponseBody.fromBytes([1, 2, 3], 200);
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+/// 소리를 내지 않고 재생 횟수만 센다.
+class _SilentPlayer extends AudioPlayer {
+  var playCount = 0;
+
+  @override
+  Future<void> play(Source source, {double? volume, double? balance, AudioContext? ctx, Duration? position, PlayerMode? mode}) async => playCount++;
+
+  @override
+  Future<void> stop() async {}
 }

@@ -155,9 +155,17 @@ class RemoteSpeech implements SpeechService {
   /// 서버 제한. 넘기면 400이 온다.
   static const maxLength = 500;
 
+  /// 서버 음성이 읽는 일과 언어 코드
+  @visibleForTesting
+  static const supportedLanguages = <String>{'ko'};
+
   @override
   Future<bool> speak(String text, {String language = 'ko'}) async {
-    // 서버 음성은 한국어 `F1` 고정이라 [language] 를 아직 쓰지 않는다. 언어별 음성은 서버가 준비된 뒤에 붙인다.
+    // 서버 음성은 한국어 `F1` 뿐 — 다른 언어는 요청하지 않고 실패해 글만 보여준다
+    if (!supportedLanguages.contains(language)) {
+      AppLogger.error('tts', '서버 음성이 $language 를 읽지 않아 건너뛴다');
+      return false;
+    }
     final apiKey = AppConfig.ttsApiKey;
     // 키가 없으면 서버를 부를 수 없다. 기기 음성만으로도 대개 동작한다.
     if (apiKey.isEmpty) {
