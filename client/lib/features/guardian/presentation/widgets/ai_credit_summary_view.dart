@@ -12,6 +12,7 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_dialog.dart';
 import '../../../credit/domain/credit_summary.dart';
 import 'ai_credit_card.dart';
+import 'credit_history_link.dart';
 
 /// 크레딧 카드 안의 내용 — 조회에 성공했을 때.
 ///
@@ -137,10 +138,18 @@ class AiCreditSummaryView extends StatelessWidget {
       ),
     );
 
-    return Stack(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        body,
-        Positioned(top: 0, left: 0, right: 0, child: CreditInfoButton(summary: s)),
+        Stack(
+          children: [
+            body,
+            Positioned(top: 0, left: 0, right: 0, child: CreditInfoButton(summary: s)),
+          ],
+        ),
+        // 다시 채워지는 날 > 사용 내역 보기: 시안 간격 16 에서 누름 영역이 12 를 가져간다
+        SizedBox(height: (_sectionGap - CreditHistoryLink.tapExtraVertical).h),
+        const CreditHistoryLink(),
       ],
     );
   }

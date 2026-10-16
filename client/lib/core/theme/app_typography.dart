@@ -82,6 +82,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.creditCaption,
     required this.creditUnit,
     required this.creditReset,
+    required this.creditHistoryDate,
+    required this.creditHistoryRowTitle,
+    required this.creditHistoryRowDetail,
     required this.peopleHeading,
     required this.peopleCaption,
     required this.peopleSectionLabel,
@@ -397,6 +400,15 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 크레딧 `10월 19일(월) 0시에 다시 채워져요` (12/w500).
   final TextStyle creditReset;
+
+  /// 크레딧 사용 내역의 날짜 머리글 `10월 1일` (14/w600, Figma `1589:8359`).
+  final TextStyle creditHistoryDate;
+
+  /// 크레딧 사용 내역 줄의 제목과 증감 값 (16/w600).
+  final TextStyle creditHistoryRowTitle;
+
+  /// 크레딧 사용 내역 줄의 부제 `카드 그림 4장・오전 11:23` (13/w400).
+  final TextStyle creditHistoryRowDetail;
   /// 함께하는 사람 머리 제목 `함께 돌보는 사람 N명` (18/w600 Pretendard, 시안 1027:4617 · 1532:6877).
   final TextStyle peopleHeading;
 
@@ -908,6 +920,24 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.0,
     ),
+    creditHistoryDate: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    creditHistoryRowTitle: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    ),
+    creditHistoryRowDetail: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      height: 1.0,
+    ),
     creditUnit: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 14,
@@ -1126,6 +1156,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? creditCaption,
     TextStyle? creditUnit,
     TextStyle? creditReset,
+    TextStyle? creditHistoryDate,
+    TextStyle? creditHistoryRowTitle,
+    TextStyle? creditHistoryRowDetail,
     TextStyle? peopleHeading,
     TextStyle? peopleCaption,
     TextStyle? peopleSectionLabel,
@@ -1220,6 +1253,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       creditCaption: creditCaption ?? this.creditCaption,
       creditUnit: creditUnit ?? this.creditUnit,
       creditReset: creditReset ?? this.creditReset,
+      creditHistoryDate: creditHistoryDate ?? this.creditHistoryDate,
+      creditHistoryRowTitle: creditHistoryRowTitle ?? this.creditHistoryRowTitle,
+      creditHistoryRowDetail: creditHistoryRowDetail ?? this.creditHistoryRowDetail,
       peopleHeading: peopleHeading ?? this.peopleHeading,
       peopleCaption: peopleCaption ?? this.peopleCaption,
       peopleSectionLabel: peopleSectionLabel ?? this.peopleSectionLabel,
@@ -1341,6 +1377,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
       creditCaption: TextStyle.lerp(creditCaption, other.creditCaption, t)!,
       creditUnit: TextStyle.lerp(creditUnit, other.creditUnit, t)!,
       creditReset: TextStyle.lerp(creditReset, other.creditReset, t)!,
+      creditHistoryDate: TextStyle.lerp(creditHistoryDate, other.creditHistoryDate, t)!,
+      creditHistoryRowTitle: TextStyle.lerp(creditHistoryRowTitle, other.creditHistoryRowTitle, t)!,
+      creditHistoryRowDetail: TextStyle.lerp(creditHistoryRowDetail, other.creditHistoryRowDetail, t)!,
       peopleHeading: TextStyle.lerp(peopleHeading, other.peopleHeading, t)!,
       peopleCaption: TextStyle.lerp(peopleCaption, other.peopleCaption, t)!,
       peopleSectionLabel: TextStyle.lerp(peopleSectionLabel, other.peopleSectionLabel, t)!,

@@ -25,6 +25,9 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +50,16 @@ public class RoutineQueryService {
   private final RoutineImageStorage routineImageStorage;
   private final RoutineStepSpeechStorage routineStepSpeechStorage;
   private final ProfileAccessGuard profileAccessGuard;
+
+  /// 일과 제목 묶음 조회 (id > 제목). 크레딧 사용 내역이 일과 제목을 붙일 때 쓴다.
+  /// 지워졌거나 없는 id 는 결과에 없다.
+  public Map<String, String> findTitlesByIds(Collection<String> routineIds) {
+    if (routineIds.isEmpty()) {
+      return Map.of();
+    }
+    return routineRepository.findAllById(routineIds).stream()
+      .collect(Collectors.toMap(Routine::getId, Routine::getTitle));
+  }
 
   /// 최근에 사용한 보상 최대 4개. 보상 설정 화면 입력칸 아래에 띄워 두 번째 일과부터는
   /// 탭 한 번으로 끝나게 한다 — 온보딩을 늘리지 않고 입력 부담을 줄이는 방법이다.

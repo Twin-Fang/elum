@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.credit.application.controller;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
+import com.chuseok22.elumserver.credit.application.dto.response.CreditHistoryResponse;
 import com.chuseok22.elumserver.credit.application.dto.response.CreditSummaryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -64,4 +65,37 @@ public interface CreditControllerDocs {
     )
   })
   ResponseEntity<CreditSummaryResponse> getMine(Authentication authentication);
+
+  @Operation(
+    summary = "내 AI 크레딧 사용 내역 조회",
+    description = """
+      설정의 "크레딧 사용 내역" 화면이 쓰는 내역을 최근 것부터 한 쪽씩 돌려줍니다 (#658).
+
+      **처리 로직**
+      1. 본인 계정의 원장 중 사용 · 지급 · 만료 · 조정 줄만 보입니다. 예약 · 반환 · 초과는 숨깁니다.
+      2. 일과 만들기는 글 몫(`ROUTINE_TEXT`)과 그림 몫(`CARD_IMAGES`, `cardCount` = 붙은 그림 수) 두 줄로 나뉩니다.
+         잔액이 모자라 덜 차감됐으면 글 몫을 먼저 채웁니다.
+      3. 지급은 출처로 종류가 나뉩니다: `WEEKLY_GRANT` · `AD_REWARD` · `ADMIN_BONUS` · `OTHER_GRANT`.
+      4. 운영이 쓴 내부 사유 글은 내려주지 않습니다. 앱이 `kind`로 문구를 정합니다. 모르는 `kind`는 증감 부호로 일반 문구를 씁니다.
+      5. `routineTitle`은 사용 줄에만 있고, 일과가 지워졌으면 null 입니다.
+      6. `delta`는 사용이 음수, 지급이 양수입니다. `occurredAtOffset`을 기기 시간대로 바꿔 보여줍니다.
+
+      `page`는 0부터, `size`는 1~50 (기본 30)이며 범위를 벗어나면 가까운 값으로 맞춥니다.
+      `hasNext`가 true 면 다음 쪽이 있습니다. 계정이 아직 없으면 빈 쪽입니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "조회 성공",
+      content = @Content(schema = @Schema(implementation = CreditHistoryResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "accessToken이 없거나 유효하지 않음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    )
+  })
+  ResponseEntity<CreditHistoryResponse> getHistory(Authentication authentication, int page, int size);
 }

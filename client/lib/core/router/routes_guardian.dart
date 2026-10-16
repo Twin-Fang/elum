@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../../features/credit/presentation/credit_history_screen.dart';
 import '../../features/feedback/presentation/feedback_screen.dart';
 import '../../features/guardian/presentation/draft_routines_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
@@ -64,6 +65,11 @@ List<RouteBase> guardianRoutes() => [
     path: Routes.guardianFeedback,
     pageBuilder: (context, state) =>
         slidePage(state, const FeedbackScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianCreditHistory,
+    pageBuilder: (context, state) =>
+        slidePage(state, const CreditHistoryScreen()),
   ),
   // 다중 보호자 — 시안이 없는 임시 화면들이다.
   GoRoute(
