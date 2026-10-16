@@ -18,7 +18,7 @@ class RoutinePhrasesEnglishTest {
 
   private static final Pattern HANGUL = Pattern.compile("[\\u1100-\\u11FF\\u3130-\\u318F\\uAC00-\\uD7AF]");
   private static final Pattern FORBIDDEN_WORDS = Pattern.compile(
-    "(?i)\\b(child|children|kid|kids|therapy|treatment|training|diagnos\\w*|symptoms?)\\b");
+    "(?i)\\b(child|children|kid|kids|practice|practicing|therapy|treatment|training|diagnos\\w*|symptoms?)\\b");
   // 칩에 한 줄로 보이는 길이 상한
   private static final int MAX_CHIP_TEXT_LENGTH = 40;
 
