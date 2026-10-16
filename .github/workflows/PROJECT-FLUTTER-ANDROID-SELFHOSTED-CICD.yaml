@@ -100,6 +100,8 @@ jobs:
       # 워크플로 6개에 sed를 흩뿌리면 개발 키가 새로 생길 때 한 군데를 빠뜨리고,
       # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
       - name: 빌드 프로파일 적용 (release)
+        env:
+          CLIENT_ADMOB_ENV: ${{ secrets.CLIENT_ADMOB_ENV }}
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" release .env
       # Keystore와 key.properties 설정
       - name: Setup Keystore and key.properties
