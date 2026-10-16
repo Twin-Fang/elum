@@ -59,13 +59,13 @@ public class AdminPromptController {
   @PostMapping("/admin/prompts/{key}")
   public String update(
     @PathVariable PromptKey key,
-    @RequestParam(value = "locale", defaultValue = "ko") String locale,
+    @RequestParam(value = "locale", required = false) String locale,
     @Valid @ModelAttribute PromptUpdateRequest request,
     BindingResult bindingResult,
     RedirectAttributes redirectAttributes
   ) {
-    // 쓰기 경로: 모르는 코드는 ko 로 돌리지 않고 거절 (다른 언어 내용이 ko 행을 덮어쓰지 않도록)
-    Optional<AppLocale> parsed = parseLocaleStrict(locale);
+    // 쓰기 경로: 파라미터가 아예 없을 때만 ko, 빈 값·모르는 코드는 거절 (다른 언어 내용이 ko 행을 덮어쓰지 않도록)
+    Optional<AppLocale> parsed = locale == null ? Optional.of(AppLocale.KO) : parseLocaleStrict(locale);
     if (parsed.isEmpty()) {
       redirectAttributes.addFlashAttribute("errorMessage", unknownLocaleMessage(locale));
       return BACK_TO_KO;
