@@ -650,16 +650,16 @@
   "@inviteShareMessage": {"description": "초대 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 초대 코드", "placeholders": {"minutes": {"type": "int"}, "url": {"type": "String"}, "code": {"type": "String"}}},
 
   "guardiansEditTitle": "내 이름 변경하기",
-  "@guardiansEditTitle": {"description": "내 이름·구분 고치기 시트의 제목"},
+  "@guardiansEditTitle": {"description": "내 이름·구분 변경 시트의 제목"},
 
   "guardiansEditDescription": "이룸이를 함께 돌보는 사람에게 보이는 이름이에요.\n실명이 아니어도 괜찮아요",
-  "@guardiansEditDescription": {"description": "내 이름 고치기 시트의 설명"},
+  "@guardiansEditDescription": {"description": "내 이름 변경 시트의 설명"},
 
   "guardiansEditNameHint": "엄마, 아빠, 선생님",
   "@guardiansEditNameHint": {"description": "내 이름 입력칸의 예시 글"},
 
   "guardiansEditSave": "저장하기",
-  "@guardiansEditSave": {"description": "내 이름 고치기 시트의 저장 버튼"},
+  "@guardiansEditSave": {"description": "내 이름 변경 시트의 저장 버튼"},
 
   "guardiansLeaveConfirmTitle": "함께 돌보기를 그만둘까요?",
   "@guardiansLeaveConfirmTitle": {"description": "함께 돌보기 그만두기 확인 팝업 제목(되돌릴 수 없는 일)"},
@@ -739,7 +739,7 @@
   "@guardiansInviteHeader": {"description": "초대하기·초대 코드 넣기 묶음 위 제목"},
 
   "guardiansRenameAction": "이름 변경",
-  "@guardiansRenameAction": {"description": "내 줄 오른쪽 버튼. 누르면 내 이름·구분을 고치는 시트가 열린다"},
+  "@guardiansRenameAction": {"description": "내 줄 오른쪽 버튼. 누르면 내 이름·구분을 변경하는 시트가 열린다"},
 
 
   "inviteCodeShareFailTitle": "링크를 보내지 못했어요",

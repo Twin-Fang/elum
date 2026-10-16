@@ -1274,13 +1274,13 @@ abstract class AppLocalizations {
   /// **'이룸이를 함께 돌봐요. 아래 링크를 누르면 이룸 앱에 초대 코드가 채워져요.\n초대 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n초대 코드 {code}'**
   String inviteShareMessage(int minutes, String url, String code);
 
-  /// 내 이름·구분 고치기 시트의 제목
+  /// 내 이름·구분 변경 시트의 제목
   ///
   /// In ko, this message translates to:
   /// **'내 이름 변경하기'**
   String get guardiansEditTitle;
 
-  /// 내 이름 고치기 시트의 설명
+  /// 내 이름 변경 시트의 설명
   ///
   /// In ko, this message translates to:
   /// **'이룸이를 함께 돌보는 사람에게 보이는 이름이에요.\n실명이 아니어도 괜찮아요'**
@@ -1292,7 +1292,7 @@ abstract class AppLocalizations {
   /// **'엄마, 아빠, 선생님'**
   String get guardiansEditNameHint;
 
-  /// 내 이름 고치기 시트의 저장 버튼
+  /// 내 이름 변경 시트의 저장 버튼
   ///
   /// In ko, this message translates to:
   /// **'저장하기'**
@@ -1448,7 +1448,7 @@ abstract class AppLocalizations {
   /// **'초대'**
   String get guardiansInviteHeader;
 
-  /// 내 줄 오른쪽 버튼. 누르면 내 이름·구분을 고치는 시트가 열린다
+  /// 내 줄 오른쪽 버튼. 누르면 내 이름·구분을 변경하는 시트가 열린다
   ///
   /// In ko, this message translates to:
   /// **'이름 변경'**

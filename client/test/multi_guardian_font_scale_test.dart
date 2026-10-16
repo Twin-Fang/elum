@@ -5,6 +5,7 @@ import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
 import 'package:elum/features/profile/presentation/guardians_screen.dart';
 import 'package:elum/features/profile/presentation/invite_code_screen.dart';
+import 'package:elum/features/profile/presentation/guardian_edit_sheet.dart';
 import 'package:elum/features/profile/presentation/widgets/guardian_person_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -77,19 +78,24 @@ void main() {
 
     // 넘침은 flutter_test_config 가 실패시킨다 — 높이가 늘어난 줄도 이름과 버튼이 모두 보여야 한다
     expect(tester.getSize(find.byType(GuardianPersonRow)).height, greaterThan(68));
-    expect(find.text('이름 변경'), findsOneWidget);
+    expect(find.byKey(guardianRenameButtonKey), findsOneWidget);
     expect(find.text('나'), findsOneWidget);
   });
 
-  testWidgets('이름 변경 시트는 글꼴 2.0 에서도 저장하기까지 닿는다', (tester) async {
+  testWidgets('이름 변경 시트는 글꼴 2.0 에서 넘침 없이 저장 버튼이 화면 안에 닿는다', (tester) async {
     await pump(tester, Routes.guardianPeople, const GuardiansScreen());
 
-    await tester.tap(find.text('이름 변경'));
+    await tester.tap(find.byKey(guardianRenameButtonKey));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('저장하기'));
+    final save = find.byKey(guardianEditSaveButtonKey);
+    await tester.ensureVisible(save);
     await tester.pump();
 
-    expect(find.text('저장하기'), findsOneWidget);
+    // 시트가 스크롤되어 버튼이 화면(852) 안에 들어온다
+    final rect = tester.getRect(save);
+    expect(rect.top, greaterThanOrEqualTo(0));
+    expect(rect.bottom, lessThanOrEqualTo(852));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('나가기 확인 팝업 — 마지막 보호자 문구가 글꼴 2.0 에서도 나가기·취소 버튼을 가리지 않는다', (tester) async {

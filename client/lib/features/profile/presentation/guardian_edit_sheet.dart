@@ -9,6 +9,12 @@ import '../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../domain/guardian_member.dart';
 
+/// 시트 안 위젯을 찾는 키 (테스트 · 문구와 무관하게 찾기 위함)
+const guardianEditNameFieldKey = ValueKey('guardianEditNameField');
+const guardianEditSaveButtonKey = ValueKey('guardianEditSaveButton');
+ValueKey<String> guardianEditKindChipKey(GuardianKind kind) =>
+    ValueKey('guardianEditKindChip-${kind.apiValue}');
+
 /// 내 이름·구분 변경에서 돌려주는 값. 바뀐 항목만 값이 있다.
 class GuardianEdit {
   const GuardianEdit({this.displayName, this.kind});
@@ -121,6 +127,7 @@ class _GuardianEditSheetState extends State<_GuardianEditSheet> {
               ),
               SizedBox(height: _descriptionToFieldGap.h),
               _NameField(
+                key: guardianEditNameFieldKey,
                 controller: _nameController,
                 hintText: context.l10n.guardiansEditNameHint,
                 maxLength: _maxNameLength,
@@ -132,6 +139,7 @@ class _GuardianEditSheetState extends State<_GuardianEditSheet> {
                   for (final (index, kind) in GuardianKind.values.indexed) ...[
                     if (index > 0) SizedBox(width: space.sm.w),
                     _KindChip(
+                      key: guardianEditKindChipKey(kind),
                       kind: kind,
                       isSelected: _selectedKind == kind,
                       onTap: () => setState(() => _selectedKind = kind),
@@ -141,6 +149,7 @@ class _GuardianEditSheetState extends State<_GuardianEditSheet> {
               ),
               SizedBox(height: _chipsToButtonGap.h),
               ElumButton(
+                key: guardianEditSaveButtonKey,
                 label: context.l10n.guardiansEditSave,
                 labelStyle: typo.sheetActionLabel.copyWith(letterSpacing: 0),
                 onPressed: _save,
@@ -155,7 +164,7 @@ class _GuardianEditSheetState extends State<_GuardianEditSheet> {
 
 /// 이름 입력칸: 흰 바탕, 1px 테두리, 한 줄 전용
 class _NameField extends StatelessWidget {
-  const _NameField({required this.controller, required this.hintText, required this.maxLength});
+  const _NameField({super.key, required this.controller, required this.hintText, required this.maxLength});
 
   final TextEditingController controller;
   final String hintText;
@@ -214,7 +223,7 @@ class _NameField extends StatelessWidget {
 
 /// 구분 칩 (보호자 · 선생님). 고르면 그 구분의 칩 색으로 바뀜
 class _KindChip extends StatelessWidget {
-  const _KindChip({required this.kind, required this.isSelected, required this.onTap});
+  const _KindChip({super.key, required this.kind, required this.isSelected, required this.onTap});
 
   final GuardianKind kind;
   final bool isSelected;
@@ -240,16 +249,15 @@ class _KindChip extends StatelessWidget {
         onTap: onTap,
         child: Container(
           constraints: BoxConstraints(minHeight: _minHeight.h),
-          // 고르지 않은 칩도 같은 두께의 투명 테두리를 둬 크기가 변하지 않게 함
-          padding: EdgeInsets.symmetric(horizontal: (_padH - _borderWidth).w),
+          // 테두리는 칩 크기 안쪽이라 고른 칩만 두께만큼 여백을 덜어 두 칩의 크기를 맞춤
+          padding: EdgeInsets.symmetric(
+            horizontal: (isSelected ? _padH - _borderWidth : _padH).w,
+          ),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: isSelected ? selectedBackground : colors.surface,
             borderRadius: BorderRadius.circular(_minHeight.r),
-            border: Border.all(
-              color: isSelected ? selectedBorder : Colors.transparent,
-              width: _borderWidth,
-            ),
+            border: isSelected ? Border.all(color: selectedBorder, width: _borderWidth) : null,
           ),
           child: Text(
             kind.label,

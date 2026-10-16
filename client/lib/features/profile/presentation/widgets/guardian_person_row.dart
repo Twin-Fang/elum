@@ -7,6 +7,9 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_spinner.dart';
 import '../../domain/guardian_member.dart';
 
+/// 내 줄의 이름 변경 버튼 키 (테스트 · 문구와 무관하게 찾기 위함)
+const guardianRenameButtonKey = ValueKey('guardianRenameButton');
+
 /// 함께하는 사람 한 줄: 이름, 나 배지, 구분 칩, (내 줄만) 이름 변경 버튼.
 /// 줄 자체는 누르지 않음 (할 수 있는 일은 버튼으로만 보임)
 class GuardianPersonRow extends StatelessWidget {
@@ -96,7 +99,7 @@ class GuardianPersonRow extends StatelessWidget {
             SizedBox(width: _nameToChipGap.w),
             isRenameLoading
                 ? ElumSpinner(size: 20.w, color: colors.peopleChevron)
-                : _RenameButton(onTap: onRename),
+                : _RenameButton(key: guardianRenameButtonKey, onTap: onRename),
           ],
         ],
       ),
@@ -144,7 +147,7 @@ class _PersonChip extends StatelessWidget {
 
 /// 내 줄의 `이름 변경` 버튼. 누르면 이름·구분을 고치는 시트가 열림
 class _RenameButton extends StatelessWidget {
-  const _RenameButton({required this.onTap});
+  const _RenameButton({super.key, required this.onTap});
 
   final VoidCallback? onTap;
 

@@ -4,7 +4,9 @@ import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
+import 'package:elum/features/profile/presentation/guardian_edit_sheet.dart';
 import 'package:elum/features/profile/presentation/guardians_screen.dart';
+import 'package:elum/features/profile/presentation/widgets/guardian_person_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -96,9 +98,7 @@ void main() {
 
       // 내 줄: 이름 자리 + 구분 칩이 모두 보호자
       expect(find.text('보호자'), findsNWidgets(2));
-      expect(find.text('이름 없음'), findsNothing);
       expect(find.text('선생님'), findsOneWidget);
-      expect(find.text('센터 선생님'), findsNothing);
     });
 
 
@@ -212,10 +212,10 @@ void main() {
     testWidgets('이름 변경을 누르면 이름을 바꿔 저장한다 — 바뀐 항목만 보낸다', (tester) async {
       await open(tester);
 
-      await tester.tap(find.text('이름 변경'));
+      await tester.tap(find.byKey(guardianRenameButtonKey));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), '아빠');
-      await tester.tap(find.text('저장하기'));
+      await tester.tap(find.byKey(guardianEditSaveButtonKey));
       await tester.pumpAndSettle();
 
       expect(repo.calls, contains('update:p-a'));
@@ -226,37 +226,54 @@ void main() {
 
 
 
-    testWidgets('구분 칩만 바꾸면 구분만 보낸다', (tester) async {
+    Future<void> openSheet(WidgetTester tester) async {
       await open(tester);
-
-      await tester.tap(find.text('이름 변경'));
+      await tester.tap(find.byKey(guardianRenameButtonKey));
       await tester.pumpAndSettle();
-      await tester.tap(find.descendant(of: find.byType(BottomSheet), matching: find.text('선생님')));
-      await tester.tap(find.text('저장하기'));
+    }
+
+    testWidgets('구분 칩만 바꾸면 구분만 보낸다', (tester) async {
+      await openSheet(tester);
+
+      await tester.tap(find.byKey(guardianEditKindChipKey(GuardianKind.caregiver)));
+      await tester.tap(find.byKey(guardianEditSaveButtonKey));
       await tester.pumpAndSettle();
 
       expect(repo.lastUpdate, {'kind': GuardianKind.caregiver, 'displayName': null});
     });
 
     testWidgets('이름도 구분도 그대로 저장하면 서버에 보내지 않는다', (tester) async {
-      await open(tester);
+      await openSheet(tester);
 
-      await tester.tap(find.text('이름 변경'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('저장하기'));
+      await tester.tap(find.byKey(guardianEditSaveButtonKey));
       await tester.pumpAndSettle();
 
       expect(repo.calls.where((c) => c.startsWith('update')), isEmpty);
+    });
+
+    testWidgets('이름을 비우고 저장하면 빈 문자열을 보내고 내 줄이 보호자로 보인다', (tester) async {
+      await openSheet(tester);
+
+      await tester.enterText(find.byKey(guardianEditNameFieldKey), '');
+      // 서버가 이름을 지운 뒤의 목록
+      repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
+      await tester.tap(find.byKey(guardianEditSaveButtonKey));
+      await tester.pumpAndSettle();
+
+      expect(repo.lastUpdate, {'kind': null, 'displayName': ''});
+      expect(find.text('엄마'), findsNothing);
+      // 이름 자리와 구분 칩이 모두 보호자
+      expect(find.text('보호자'), findsNWidgets(2));
     });
 
     testWidgets('저장하지 못하면 이유와 코드를 보인다', (tester) async {
       repo.updateResult = Attempt.failed(serverFailure(400, ServerErrorCode.invalidInputValue, '입력값이 올바르지 않아요.'));
       await open(tester);
 
-      await tester.tap(find.text('이름 변경'));
+      await tester.tap(find.byKey(guardianRenameButtonKey));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), '아빠');
-      await tester.tap(find.text('저장하기'));
+      await tester.tap(find.byKey(guardianEditSaveButtonKey));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('입력값이 올바르지 않아요.'), findsOneWidget);
