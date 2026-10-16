@@ -1,15 +1,39 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-16T08:10:09Z",
-    "currentVersion": "2.33.2",
+    "lastUpdated": "2026-10-16T09:35:51Z",
+    "currentVersion": "2.33.3",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 244
+    "totalReleases": 245
   },
   "releases": [
+    {
+      "version": "2.33.3",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-16",
+      "pr_number": 688,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 함께하는 사람 화면을 새 디자인으로 바꿨어요\n  * 이름 변경 화면을 새 디자인으로 바꿨어요\n  * 이름을 정하지 않은 사람이 보호자로 보여요\n  * 구분 이름이 센터 선생님에서 선생님으로 바뀌었어요\n  * 글자를 크게 키워도 줄이 잘리지 않아요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "함께하는 사람 화면을 새 디자인으로 바꿨어요",
+            "이름 변경 화면을 새 디자인으로 바꿨어요",
+            "이름을 정하지 않은 사람이 보호자로 보여요",
+            "구분 이름이 센터 선생님에서 선생님으로 바뀌었어요",
+            "글자를 크게 키워도 줄이 잘리지 않아요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.33.2",
       "project_type": "flutter",
