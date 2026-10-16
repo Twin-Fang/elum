@@ -81,9 +81,10 @@ public class RoutineCreateService {
 
     // AI 호출 로그에 요청 회원을 연결한다. finally에서 반드시 비워 스레드 재사용 시
     // 다른 회원에게 새어 들어가지 않게 한다.
+    // 질문도 일과가 될 언어로 묻는다 (create 와 같은 값). 계산이 던져도 맥락이 남지 않게 set 앞에서 한다.
+    AppLocale contentLocale = contentLocaleForRequest();
     AiCallContext.setMemberId(caller.memberId());
-    // 질문도 일과가 될 언어로 묻는다 (create 와 같은 값)
-    AiCallContext.setContentLocale(contentLocaleForRequest());
+    AiCallContext.setContentLocale(contentLocale);
     try {
       // 입력 글을 가공하지 않고 넘긴다 — 로컬 마스킹은 쓰지 않는다.
       RoutineAiPipeline.RoutineQuestionResult result =
@@ -212,8 +213,7 @@ public class RoutineCreateService {
       saved.routine().getSteps().size(), imageCount, settlement.charged(), settlement.balanceAfter()));
   }
 
-  /// 이번 요청이 만드는 일과의 콘텐츠 언어: 요청의 화면 언어 > 켜진 언어 목록에 비춰 결정 (보호자가 고르지 않음)
-  /// 헤더가 없는 옛 앱은 KO. 필터가 심은 값이라 요청 스레드에서만 읽는다.
+  /// 이번 요청이 만드는 일과의 콘텐츠 언어: 화면 언어 > 켜진 언어 목록에 비춰 결정 (요청 스레드 전용)
   AppLocale contentLocaleForRequest() {
     return enabledLocales.resolveContentLocale(CurrentLocale.get());
   }

@@ -128,4 +128,17 @@ class RoutineCreateServiceContentLocaleTest {
     assertThat(seenByAi.get()).isEqualTo(AppLocale.JA);
     assertThat(AiCallContext.currentContentLocale()).isEqualTo(AppLocale.KO);
   }
+
+  @Test
+  @DisplayName("추가 질문: 일과 언어 계산이 던져도 회원 맥락이 스레드에 남지 않는다")
+  void generateQuestion_localeFailureLeavesNoMemberContext() {
+    when(enabledLocales.resolveContentLocale(any())).thenThrow(new IllegalStateException("locale config down"));
+    givenProfile(Set.of(SupportGoal.PREPARE_ITEMS));
+
+    assertThatThrownBy(() -> routineCreateService.generateQuestion(GUARDIAN, new RoutineQuestionRequest("明日")))
+      .isInstanceOf(IllegalStateException.class);
+
+    assertThat(AiCallContext.currentMemberId()).isNull();
+    assertThat(AiCallContext.currentContentLocale()).isEqualTo(AppLocale.KO);
+  }
 }

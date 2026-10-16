@@ -54,4 +54,15 @@ class AiCallContextTest {
 
     assertThat(seen.get()).isEqualTo(AppLocale.ZH);
   }
+
+  @Test
+  @DisplayName("callWithContentLocale 은 끝나면 이전 언어로 되돌린다 - 중첩해도 바깥 언어가 지워지지 않는다")
+  void callWithContentLocaleRestoresPrevious() {
+    AiCallContext.setContentLocale(AppLocale.JA);
+
+    AppLocale inside = AiCallContext.callWithContentLocale(AppLocale.ES, AiCallContext::currentContentLocale);
+
+    assertThat(inside).isEqualTo(AppLocale.ES);
+    assertThat(AiCallContext.currentContentLocale()).isEqualTo(AppLocale.JA);
+  }
 }

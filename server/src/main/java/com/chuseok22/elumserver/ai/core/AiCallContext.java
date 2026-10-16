@@ -53,13 +53,14 @@ public final class AiCallContext {
     return locale == null ? AppLocale.KO : locale;
   }
 
-  /// 일과 언어를 세우고 action 을 실행한 뒤 반드시 비운다(예외 포함). 헤더가 아닌 일과 언어로 AI 를 부를 때 쓴다.
+  /// 일과 언어를 세우고 action 을 실행한 뒤 이전 값으로 되돌린다(예외 포함). 헤더가 아닌 일과 언어로 AI 를 부를 때 쓴다.
   public static <T> T callWithContentLocale(AppLocale locale, Supplier<T> action) {
+    AppLocale previous = CONTENT_LOCALE.get();
     setContentLocale(locale);
     try {
       return action.get();
     } finally {
-      setContentLocale(null);
+      setContentLocale(previous);
     }
   }
 
