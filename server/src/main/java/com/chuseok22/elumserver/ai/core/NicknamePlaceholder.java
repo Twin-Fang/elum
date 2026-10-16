@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.ai.core;
 
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,6 +23,14 @@ public final class NicknamePlaceholder {
 
   /// AI 에 보내는 호칭. 서비스가 당사자를 부르는 말이라 AI 가 문장에 자연스럽게 넣는다.
   public static final String PLACEHOLDER = "이룸이";
+
+  /// ko 외 언어의 호칭 (조사가 없어 이름을 그대로 꽂음, ASCII 라 어떤 문자 체계에서도 보존됨)
+  public static final String GLOBAL_PLACEHOLDER = "Elumi";
+
+  /// 이 언어의 AI 가 이름 자리에 쓰는 토큰
+  public static String placeholderFor(AppLocale locale) {
+    return locale == AppLocale.KO ? PLACEHOLDER : GLOBAL_PLACEHOLDER;
+  }
 
   /// 받침에 따라 모양이 바뀌는 조사. 긴 것부터 맞춘다(이에요 가 에요 보다 먼저).
   /// withJong = 받침 있을 때, withoutJong = 없을 때, withRieul = ㄹ받침일 때(null 이면 withJong 과 같다).

@@ -68,7 +68,7 @@ public record ContentLanguageSpec(
     "One very short sentence to be read aloud, about 12 characters and never more than 18, one action only, in Japanese です・ます form. "
       + "Do not repeat the title; use plain words (e.g. '学校に行く服を着ます')",
     "- Use the polite です・ます form in plain, kind wording, such as \"服を着ます\".\n"
-      + "- Use ordinary Japanese spelling with common kanji only; no rare kanji, no furigana, and no all-hiragana child-style spelling.\n"
+      + "- Use ordinary Japanese spelling with common kanji only; no rare kanji, no furigana, and no all-hiragana spelling meant for young readers.\n"
       + "- Do not use the plain form (だ・である), keigo (honorific or humble speech), baby talk, or childish sentence-ending particles.\n"
       + "- One action per sentence.",
     "a short phrase of about 10 characters at most",
