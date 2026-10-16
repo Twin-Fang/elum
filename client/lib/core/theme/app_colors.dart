@@ -170,6 +170,9 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.loginLastUsedBg,
     required this.settingsDestructive,
     required this.settingsChevron,
+    required this.settingsCardLabel,
+    required this.settingsCardValue,
+    required this.settingsToggleOn,
     required this.settingsGroupBg,
     required this.settingsGroupDivider,
     required this.peopleMeBadgeBg,
@@ -185,6 +188,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.creditDivider,
     required this.creditAccentText,
     required this.creditNoticeBg,
+    required this.creditNumberText,
+    required this.creditMutedText,
     required this.loginAppleLabel,
     required this.consentSelectedFill,
     required this.consentSelectedBorder,
@@ -645,6 +650,15 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 설정 목록의 오른쪽 화살표 (실측 #CDCDCD).
   final Color settingsChevron;
 
+  /// 묶음 카드 설정 줄 글자 (Figma `1532:7501` — #000000). 본문색(`textPrimary`)과 값이 달라 나눈다.
+  final Color settingsCardLabel;
+
+  /// 묶음 카드 설정 줄 오른쪽 값 글자 (`그림 방식  실사`, `앱 정보  버전`).
+  final Color settingsCardValue;
+
+  /// 묶음 카드 설정 줄의 켜짐 토글 바탕.
+  final Color settingsToggleOn;
+
   // --- 설정 묶음 카드 (iOS inset grouped, 임시 시안 #645) ---
 
   /// 설정 줄을 묶는 흰 카드 바탕.
@@ -683,7 +697,7 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 크레딧 막대의 빈 쪽.
   final Color creditBarTrack;
 
-  /// 크레딧 막대의 남은 쪽 — 이슈 강조색 #FF8B22.
+  /// 크레딧 막대의 남은 쪽 (Figma `1532:7501` — #BAA0F9).
   final Color creditBarFill;
 
   /// 크레딧 카드 안 구분선. 막대 빈 쪽과 값이 같지만 쓰임이 달라 나눈다.
@@ -694,6 +708,12 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 생성 직전 크레딧 안내 띠의 면.
   final Color creditNoticeBg;
+
+  /// 크레딧 큰 숫자와 반짝임 (Figma `1532:7501` — #BAA0F9).
+  final Color creditNumberText;
+
+  /// 크레딧 카드의 보조 글자: 단위, 안내 아이콘, 다시 채워지는 날 (#9B97A4).
+  final Color creditMutedText;
 
   // --- 약관 동의 선택 상태 ---
   //
@@ -884,6 +904,9 @@ class AppColors extends ThemeExtension<AppColors> {
     loginLastUsedBg: Color(0x80FFFADC),
     settingsDestructive: Color(0xFFDA5050),
     settingsChevron: Color(0xFFCDCDCD),
+    settingsCardLabel: Color(0xFF000000),
+    settingsCardValue: Color(0xFF74757D),
+    settingsToggleOn: Color(0xFF55CFBA),
     settingsGroupBg: Color(0xFFFFFFFF),
     settingsGroupDivider: Color(0xFFEFEFEF),
     peopleMeBadgeBg: Color(0xFFFFDAC7),
@@ -894,11 +917,13 @@ class AppColors extends ThemeExtension<AppColors> {
     peopleCaregiverChipText: Color(0xFF3D4E9A),
     cardPhotoSlotDash: Color(0xFFDADADA),
     creditCardBg: Color(0xFFFFFFFF),
-    creditBarTrack: Color(0xFFEFEFEF),
-    creditBarFill: Color(0xFFFF8B22),
+    creditBarTrack: Color(0xFFEEE9E6),
+    creditBarFill: Color(0xFFBAA0F9),
     creditDivider: Color(0xFFEFEFEF),
     creditAccentText: Color(0xFFB85A0B),
     creditNoticeBg: Color(0xFFFFF0E2),
+    creditNumberText: Color(0xFFBAA0F9),
+    creditMutedText: Color(0xFF9B97A4),
     consentSelectedFill: Color(0xFFB5EAEC),
     consentSelectedBorder: Color(0xFF93DBCC),
     dlpBadgeText: Color(0xFF74757D),
@@ -1048,6 +1073,9 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? loginLastUsedBg,
     Color? settingsDestructive,
     Color? settingsChevron,
+    Color? settingsCardLabel,
+    Color? settingsCardValue,
+    Color? settingsToggleOn,
     Color? settingsGroupBg,
     Color? settingsGroupDivider,
     Color? peopleMeBadgeBg,
@@ -1063,6 +1091,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? creditDivider,
     Color? creditAccentText,
     Color? creditNoticeBg,
+    Color? creditNumberText,
+    Color? creditMutedText,
     Color? loginKakaoBg,
     Color? loginKakaoLabel,
     Color? loginNaverBg,
@@ -1216,6 +1246,9 @@ class AppColors extends ThemeExtension<AppColors> {
       loginLastUsedBg: loginLastUsedBg ?? this.loginLastUsedBg,
       settingsDestructive: settingsDestructive ?? this.settingsDestructive,
       settingsChevron: settingsChevron ?? this.settingsChevron,
+      settingsCardLabel: settingsCardLabel ?? this.settingsCardLabel,
+      settingsCardValue: settingsCardValue ?? this.settingsCardValue,
+      settingsToggleOn: settingsToggleOn ?? this.settingsToggleOn,
       settingsGroupBg: settingsGroupBg ?? this.settingsGroupBg,
       settingsGroupDivider: settingsGroupDivider ?? this.settingsGroupDivider,
       peopleMeBadgeBg: peopleMeBadgeBg ?? this.peopleMeBadgeBg,
@@ -1231,6 +1264,8 @@ class AppColors extends ThemeExtension<AppColors> {
       creditDivider: creditDivider ?? this.creditDivider,
       creditAccentText: creditAccentText ?? this.creditAccentText,
       creditNoticeBg: creditNoticeBg ?? this.creditNoticeBg,
+      creditNumberText: creditNumberText ?? this.creditNumberText,
+      creditMutedText: creditMutedText ?? this.creditMutedText,
       loginKakaoBg: loginKakaoBg ?? this.loginKakaoBg,
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
@@ -1546,6 +1581,9 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsDestructive:
           Color.lerp(settingsDestructive, other.settingsDestructive, t)!,
       settingsChevron: Color.lerp(settingsChevron, other.settingsChevron, t)!,
+      settingsCardLabel: Color.lerp(settingsCardLabel, other.settingsCardLabel, t)!,
+      settingsCardValue: Color.lerp(settingsCardValue, other.settingsCardValue, t)!,
+      settingsToggleOn: Color.lerp(settingsToggleOn, other.settingsToggleOn, t)!,
       settingsGroupBg: Color.lerp(settingsGroupBg, other.settingsGroupBg, t)!,
       settingsGroupDivider: Color.lerp(settingsGroupDivider, other.settingsGroupDivider, t)!,
       peopleMeBadgeBg: Color.lerp(peopleMeBadgeBg, other.peopleMeBadgeBg, t)!,
@@ -1562,6 +1600,8 @@ class AppColors extends ThemeExtension<AppColors> {
       creditDivider: Color.lerp(creditDivider, other.creditDivider, t)!,
       creditAccentText: Color.lerp(creditAccentText, other.creditAccentText, t)!,
       creditNoticeBg: Color.lerp(creditNoticeBg, other.creditNoticeBg, t)!,
+      creditNumberText: Color.lerp(creditNumberText, other.creditNumberText, t)!,
+      creditMutedText: Color.lerp(creditMutedText, other.creditMutedText, t)!,
       loginKakaoBg: Color.lerp(loginKakaoBg, other.loginKakaoBg, t)!,
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,

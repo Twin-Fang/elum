@@ -68,7 +68,9 @@ void main() {
     await pump(tester, () async => summary());
 
     expect(find.text('이번 주 AI 생성'), findsOneWidget);
-    expect(find.text('72 / 100 크레딧 남음', findRichText: true), findsOneWidget);
+    // 큰 숫자와 단위는 따로 그린다 (Figma `1579:8115` 숫자 + `/ 100 크레딧 남음`)
+    expect(find.text('72'), findsOneWidget);
+    expect(find.text('/ 100 크레딧 남음'), findsOneWidget);
     expect(find.text('9월 28일(월) 0시에 다시 채워져요'), findsOneWidget);
     expect(find.byKey(AiCreditCard.barKey), findsOneWidget);
     // 구매·플랜 표시는 없다 (이슈).
@@ -79,7 +81,8 @@ void main() {
   testWidgets('0 — 다 썼다·초기화 시각·계속 할 수 있는 것을 알린다', (tester) async {
     await pump(tester, () async => summary(available: 0));
 
-    expect(find.text('0 / 100 크레딧 남음', findRichText: true), findsOneWidget);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('/ 100 크레딧 남음'), findsOneWidget);
     expect(find.text('이번 주 크레딧을 모두 사용했어요'), findsOneWidget);
     expect(find.text('9월 28일(월) 0시에 다시 채워져요'), findsOneWidget);
     expect(find.text('만든 일과 보기와 직접 고치기는 계속 할 수 있어요'), findsOneWidget);
