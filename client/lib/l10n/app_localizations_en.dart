@@ -644,9 +644,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t make the code. Try again.';
 
   @override
-  String get linkCodeExpired => 'The code has expired';
-
-  @override
   String get linkCodeSuccessTitle => 'The phone is connected!';
 
   @override
@@ -829,9 +826,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteCodeShareFailFallback => 'Tell them the code yourself';
 
   @override
-  String get inviteCodeExpired => 'The invite code has expired';
-
-  @override
   String get inviteCodeTitle => 'Invite code';
 
   @override
@@ -858,14 +852,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteCodeRetryChip => 'Make a new invite code';
-
-  @override
-  String get inviteCodeRetryNote =>
-      'The old code stops working when you make a new one';
-
-  @override
-  String get inviteCodeElumiPhoneNote =>
-      'Elumi\'s phone isn\'t added here\nConnect it from Elumi\'s phone in settings';
 
   @override
   String get inviteEnterLinkInvalid =>
@@ -1898,10 +1884,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return 'Let\'s connect Elumi\'s phone. Tap the link below on that phone to open the elum app with the connection code filled in.\nThe connection code works for $_temp0.\n\n$url\n\nIf the link doesn\'t open, enter it in the app.\nConnection code $code';
   }
-
-  @override
-  String get linkCodePhoneNote =>
-      'Open the link on Elumi\'s phone\nor type the code in yourself';
 
   @override
   String get linkRejectedAlreadyLinked => 'This phone is already connected';

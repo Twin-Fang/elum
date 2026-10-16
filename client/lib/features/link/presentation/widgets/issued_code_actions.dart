@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
@@ -81,49 +80,6 @@ class IssuedCodeShareButton extends ConsumerWidget {
       // 켜졌을 때만 보조 색이다 - 꺼진 버튼은 공용 비활성 색을 그대로 쓴다.
       backgroundColor: isSecondary && isUsable ? colors.linkRetryChipBg : null,
       labelColor: isSecondary && isUsable ? colors.textPrimary : null,
-    );
-  }
-}
-
-/// 발급된 코드를 다른 휴대폰에 전하는 하단 버튼 둘 - 주 `링크로 보내기`, 보조 `코드 복사하기`
-///
-/// 초대 코드 화면과 설정의 연결 암호 화면이 같은 부품을 쓴다.
-class IssuedCodeActions extends StatelessWidget {
-  const IssuedCodeActions({
-    super.key,
-    required this.issued,
-    required this.shareMessage,
-    required this.shareFailCode,
-  });
-
-  final IssuedLinkCode? issued;
-  final String Function(IssuedLinkCode issued) shareMessage;
-  final String shareFailCode;
-
-  /// 두 버튼 사이 간격.
-  static const _gap = 12.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final isUsable = issued != null && !issued!.isExpired;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        IssuedCodeShareButton(
-          issued: issued,
-          shareMessage: shareMessage,
-          shareFailCode: shareFailCode,
-        ),
-        SizedBox(height: _gap.h),
-        ElumButton(
-          label: context.l10n.issuedCodeCopyButton,
-          onPressed: isUsable ? () => copyIssuedCode(context, issued) : null,
-          backgroundColor: isUsable ? colors.linkRetryChipBg : null,
-          labelColor: isUsable ? colors.textPrimary : null,
-        ),
-      ],
     );
   }
 }

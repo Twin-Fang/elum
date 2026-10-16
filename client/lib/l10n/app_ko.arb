@@ -589,8 +589,6 @@
   "linkCodeIssueFailedFallback": "암호를 만들지 못했어요. 다시 해주세요",
   "@linkCodeIssueFailedFallback": { "description": "연결 암호 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내" },
 
-  "linkCodeExpired": "암호가 만료됐어요",
-  "@linkCodeExpired": { "description": "연결 암호 화면의 타이머 자리에 뜨는 만료 안내" },
 
   "linkCodeSuccessTitle": "휴대폰 연결에 성공했어요!",
   "@linkCodeSuccessTitle": { "description": "이룸이 휴대폰이 연결됐을 때 팝업 제목" },
@@ -748,8 +746,6 @@
   "inviteCodeShareFailFallback": "코드를 직접 알려주세요",
   "@inviteCodeShareFailFallback": {"description": "초대 링크 공유 실패 시 서버가 문구를 못 줄 때의 기본 안내"},
 
-  "inviteCodeExpired": "초대 코드가 만료됐어요",
-  "@inviteCodeExpired": {"description": "초대 코드 화면의 남은 시간 자리에 보이는 만료 안내"},
 
   "inviteCodeTitle": "초대 코드",
   "@inviteCodeTitle": {"description": "초대 코드 만들기 화면의 제목"},
@@ -760,7 +756,7 @@
   "inviteCodeHeaderTitle": "함께할 보호자에게\n코드를 알려주세요",
   "@inviteCodeHeaderTitle": {"description": "초대 코드 화면의 머리 제목"},
 
-  "inviteCodeAsk": "받은 분이 {name}{batchim, select, yes{을} other{를}} 함께 돌봐요",
+  "inviteCodeAsk": "코드를 받은 분이 {name}{batchim, select, yes{을} other{를}} 함께 돌봐요",
   "@inviteCodeAsk": {"description": "초대 코드 화면 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다", "placeholders": {"name": {"type": "String"}, "batchim": {"type": "String"}}},
 
   "inviteCodeNoProfileMessage": "함께 돌볼 이룸이가 없어요",
@@ -775,11 +771,7 @@
   "inviteCodeRetryChip": "초대 코드 다시 만들기",
   "@inviteCodeRetryChip": {"description": "초대 코드를 다시 만드는 칩"},
 
-  "inviteCodeRetryNote": "다시 만들면 이전 코드는 쓸 수 없어요",
-  "@inviteCodeRetryNote": {"description": "다시 만들기 아래 안내(앞 코드가 폐기됨)"},
 
-  "inviteCodeElumiPhoneNote": "이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요\n설정의 이룸이 휴대폰에서 연결해요",
-  "@inviteCodeElumiPhoneNote": {"description": "초대 코드는 보호자용이라는 안내"},
 
   "inviteEnterLinkInvalid": "초대 링크가 맞지 않아요. 보낸 분께 다시 받아주세요 (E-INV-LINK)",
   "@inviteEnterLinkInvalid": {"description": "링크로 열렸지만 코드를 못 쓰는 모양일 때의 안내. 에러 코드를 문구에 함께 둔다"},
@@ -1668,8 +1660,6 @@
   "@issuedCodeCopyFailed": {"description": "클립보드 복사 실패 토스트. 에러 코드를 문구에 함께 둔다"},
   "linkShareMessage": "이룸이가 쓸 휴대폰을 연결해요. 그 휴대폰에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 {code}",
   "@linkShareMessage": {"description": "연결 코드 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 연결 코드", "placeholders": {"minutes": {"type": "int"}, "url": {"type": "String"}, "code": {"type": "String"}}},
-  "linkCodePhoneNote": "이룸이 휴대폰에서 링크를 열거나\n코드를 직접 넣어요",
-  "@linkCodePhoneNote": {"description": "연결 코드 화면의 안내(초대 코드 화면의 inviteCodeElumiPhoneNote 와 같은 자리)"},
   "linkRejectedAlreadyLinked": "이미 연결된 휴대폰이에요",
   "@linkRejectedAlreadyLinked": {"description": "이미 연결된 이룸이 휴대폰에서 연결 링크를 열었을 때 토스트"},
   "linkRejectedOnGuardianPhone": "이룸이 휴대폰에서 열어주세요",

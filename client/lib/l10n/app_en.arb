@@ -174,7 +174,6 @@
   "linkCodeAskTitle": "Connect {name}'s\nphone?",
   "linkCodeEnterHint": "Enter the code below on {name}'s phone",
   "linkCodeIssueFailedFallback": "Couldn't make the code. Try again.",
-  "linkCodeExpired": "The code has expired",
   "linkCodeSuccessTitle": "The phone is connected!",
   "linkCodeStartButton": "Start",
   "linkCodeLater": "Maybe later",
@@ -226,7 +225,6 @@
   "guardiansRenameAction": "Rename",
   "inviteCodeShareFailTitle": "Couldn't send the link",
   "inviteCodeShareFailFallback": "Tell them the code yourself",
-  "inviteCodeExpired": "The invite code has expired",
   "inviteCodeTitle": "Invite code",
   "inviteCodeShareButton": "Send as a link",
   "inviteCodeHeaderTitle": "Share the code with\nthe guardian joining you",
@@ -235,8 +233,6 @@
   "inviteCodeNoProfileDescription": "Add Elumi first",
   "inviteCodeIssueFailedFallback": "Couldn't make the invite code",
   "inviteCodeRetryChip": "Make a new invite code",
-  "inviteCodeRetryNote": "The old code stops working when you make a new one",
-  "inviteCodeElumiPhoneNote": "Elumi's phone isn't added here\nConnect it from Elumi's phone in settings",
   "inviteEnterLinkInvalid": "This invite link isn't right. Ask them to send it again. (E-INV-LINK)",
   "inviteEnterFormInvalid": "That invite code isn't right (E-INV-FORM)",
   "inviteJoined": "You're now looking after {name} together",
@@ -536,7 +532,6 @@
   "issuedCodeCopied": "Code copied",
   "issuedCodeCopyFailed": "Couldn't copy (E-CODE-COPY)",
   "linkShareMessage": "Let's connect Elumi's phone. Tap the link below on that phone to open the elum app with the connection code filled in.\nThe connection code works for {minutes, plural, one{{minutes} minute} other{{minutes} minutes}}.\n\n{url}\n\nIf the link doesn't open, enter it in the app.\nConnection code {code}",
-  "linkCodePhoneNote": "Open the link on Elumi's phone\nor type the code in yourself",
   "linkRejectedAlreadyLinked": "This phone is already connected",
   "linkRejectedOnGuardianPhone": "Open this on Elumi's phone"
 }

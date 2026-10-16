@@ -1154,12 +1154,6 @@ abstract class AppLocalizations {
   /// **'암호를 만들지 못했어요. 다시 해주세요'**
   String get linkCodeIssueFailedFallback;
 
-  /// 연결 암호 화면의 타이머 자리에 뜨는 만료 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'암호가 만료됐어요'**
-  String get linkCodeExpired;
-
   /// 이룸이 휴대폰이 연결됐을 때 팝업 제목
   ///
   /// In ko, this message translates to:
@@ -1466,12 +1460,6 @@ abstract class AppLocalizations {
   /// **'코드를 직접 알려주세요'**
   String get inviteCodeShareFailFallback;
 
-  /// 초대 코드 화면의 남은 시간 자리에 보이는 만료 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'초대 코드가 만료됐어요'**
-  String get inviteCodeExpired;
-
   /// 초대 코드 만들기 화면의 제목
   ///
   /// In ko, this message translates to:
@@ -1493,7 +1481,7 @@ abstract class AppLocalizations {
   /// 초대 코드 화면 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'받은 분이 {name}{batchim, select, yes{을} other{를}} 함께 돌봐요'**
+  /// **'코드를 받은 분이 {name}{batchim, select, yes{을} other{를}} 함께 돌봐요'**
   String inviteCodeAsk(String name, String batchim);
 
   /// 이룸이가 없을 때의 안내 제목
@@ -1519,18 +1507,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'초대 코드 다시 만들기'**
   String get inviteCodeRetryChip;
-
-  /// 다시 만들기 아래 안내(앞 코드가 폐기됨)
-  ///
-  /// In ko, this message translates to:
-  /// **'다시 만들면 이전 코드는 쓸 수 없어요'**
-  String get inviteCodeRetryNote;
-
-  /// 초대 코드는 보호자용이라는 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요\n설정의 이룸이 휴대폰에서 연결해요'**
-  String get inviteCodeElumiPhoneNote;
 
   /// 링크로 열렸지만 코드를 못 쓰는 모양일 때의 안내. 에러 코드를 문구에 함께 둔다
   ///
@@ -3325,12 +3301,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이룸이가 쓸 휴대폰을 연결해요. 그 휴대폰에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 {code}'**
   String linkShareMessage(int minutes, String url, String code);
-
-  /// 연결 코드 화면의 안내(초대 코드 화면의 inviteCodeElumiPhoneNote 와 같은 자리)
-  ///
-  /// In ko, this message translates to:
-  /// **'이룸이 휴대폰에서 링크를 열거나\n코드를 직접 넣어요'**
-  String get linkCodePhoneNote;
 
   /// 이미 연결된 이룸이 휴대폰에서 연결 링크를 열었을 때 토스트
   ///

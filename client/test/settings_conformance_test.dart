@@ -22,6 +22,7 @@ import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
 import 'package:elum/features/profile/presentation/guardians_screen.dart';
+import 'package:elum/features/profile/presentation/invite_code_screen.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -164,8 +165,8 @@ void main() {
     );
   });
 
-  testWidgets('설정 — 이룸이 휴대폰 연결 (Figma 1027:4617)', (tester) async {
-    // 설정에서 들어온 화면이다 — `fromOnboarding: false`.
+  testWidgets('설정 — 이룸이 휴대폰 연결 (Figma 1532:6671)', (tester) async {
+    // 설정에서 들어온 화면이다: `fromOnboarding: false`.
     // 온보딩 시안(`732:5334`)과 머리·하단이 다르므로 둘을 같은 골든으로 묶으면
     // 한쪽이 어긋나도 드러나지 않는다.
     await _pump(
@@ -175,7 +176,31 @@ void main() {
     );
     await expectLater(
       find.byType(LinkCodeScreen),
-      matchesGoldenFile('figma/settings_link_1027-4617.png'),
+      matchesGoldenFile('figma/settings_link_1532-6671.png'),
+    );
+  });
+
+  // 시안 1579:8206 은 1532:6671 과 같은 모양이다 (제목·설명만 다르다).
+  //
+  // **알려진 차이**
+  // - 시안의 이룸이 이름은 `하늘이`, 앱은 회원 정보의 호칭을 쓴다. 시험은 `하늘이`로 맞춘다.
+  testWidgets('설정 — 다른 보호자 초대 (Figma 1579:8206)', (tester) async {
+    await _pump(
+      tester,
+      const InviteCodeScreen(),
+      extra: [
+        profileRepositoryProvider.overrideWithValue(
+          FakeProfileRepository()
+            ..issueResult = Attempt.ok(
+              IssuedLinkCode.fromNow(code: '5NJ280', expiresInSeconds: 599),
+            ),
+        ),
+        memberProvider.overrideWith((ref) async => memberWith([kProfileA])),
+      ],
+    );
+    await expectLater(
+      find.byType(InviteCodeScreen),
+      matchesGoldenFile('figma/settings_invite_1579-8206.png'),
     );
   });
 

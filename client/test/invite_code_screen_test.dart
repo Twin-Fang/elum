@@ -81,18 +81,35 @@ void main() {
 
 
 
-  testWidgets('다시 만들면 새로 발급하고 이전 코드는 쓸 수 없다고 알린다 (E9)', (tester) async {
+  testWidgets('코드 아래에 복사하기와 바뀌는 시간이 있고 다시 만들기 칩·안내 문구는 없다', (tester) async {
     await open(tester);
-    expect(find.textContaining('이전 코드'), findsOneWidget);
 
-    await tester.tap(find.text('코드 다시 만들기'));
-    await tester.pump();
+    expect(find.text('코드 복사하기'), findsOneWidget);
+    expect(find.text('뒤에 코드가 바껴요'), findsOneWidget);
+    expect(find.text('코드 다시 만들기'), findsNothing);
+    expect(find.textContaining('이전 코드'), findsNothing);
+  });
+
+  // 흐린 코드와 `만료됐어요`를 보이면 보호자가 직접 다시 만들어야 한다
+  testWidgets('시간이 다 되면 만료 문구 없이 새 코드로 바뀐다 (E9: 앞 코드는 서버가 폐기)', (tester) async {
+    repo.issueResult = Attempt.ok(
+      IssuedLinkCode.fromNow(code: 'A7K3M9', expiresInSeconds: 1),
+    );
+    await open(tester);
+    expect(repo.calls.where((c) => c.startsWith('issue')).length, 1);
+
+    repo.issueResult = Attempt.ok(
+      IssuedLinkCode.fromNow(code: 'B2C3D4', expiresInSeconds: 600),
+    );
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 1200)));
+    await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(repo.calls.where((c) => c.startsWith('issue')).length, 2);
+    expect(find.textContaining('만료'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('코드 다시 만들기'), findsNothing);
   });
-
-
 
   group('실패해도 화면이 산다', () {
     testWidgets('인터넷이 없으면 안내와 에러 코드와 다시 시도를 보여 준다 (E47)', (tester) async {
