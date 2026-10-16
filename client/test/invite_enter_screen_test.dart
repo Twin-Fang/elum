@@ -86,6 +86,8 @@ void main() {
 
       expect(repo.sentCodes, isEmpty);
       expect(startButtonAction(tester), isNotNull);
+      // 키보드가 시작하기를 가리지 않게 내려간다
+      expect(tester.widget<TextField>(find.byType(TextField)).focusNode!.hasFocus, isFalse);
     });
 
     testWidgets('시작하기를 누르면 보내고 합류한 이룸이의 보호자 홈으로 간다 (E6)', (tester) async {

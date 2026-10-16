@@ -214,6 +214,8 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     if (_filling || _sending || _locked) return;
     // 여섯 자가 차면 `시작하기` 가 켜진다. 보내는 것은 버튼이다 (연결 암호와 같다).
     setState(() {});
+    // 다 채우면 키보드를 내린다 - 시작하기가 키보드에 가려져 누를 곳을 찾지 못한다 (실기기).
+    if (_typed.length == LinkCode.length) _focusNode.unfocus();
   }
 
   /// 여섯 자가 찼고 보내거나 잠긴 중이 아닌가
