@@ -198,6 +198,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.creditNoticeBg,
     required this.creditNumberText,
     required this.creditMutedText,
+    required this.creditHistoryMutedText,
     required this.loginAppleLabel,
     required this.consentSelectedFill,
     required this.consentSelectedBorder,
@@ -746,6 +747,9 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 크레딧 카드의 보조 글자: 단위, 안내 아이콘, 다시 채워지는 날 (#9B97A4).
   final Color creditMutedText;
 
+  /// 크레딧 사용 내역의 날짜·부제·줄어든 값 (Figma `1589:8359` `#74757D`).
+  final Color creditHistoryMutedText;
+
   // --- 약관 동의 선택 상태 ---
   //
   // 값은 목표 칩 선택색과 같다. 그래도 토큰을 나누는 이유는 이 문서의 핵심 규칙
@@ -963,6 +967,7 @@ class AppColors extends ThemeExtension<AppColors> {
     creditNoticeBg: Color(0xFFFFF0E2),
     creditNumberText: Color(0xFFBAA0F9),
     creditMutedText: Color(0xFF9B97A4),
+    creditHistoryMutedText: Color(0xFF74757D),
     consentSelectedFill: Color(0xFFB5EAEC),
     consentSelectedBorder: Color(0xFF93DBCC),
     dlpBadgeText: Color(0xFF74757D),
@@ -1140,6 +1145,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? creditNoticeBg,
     Color? creditNumberText,
     Color? creditMutedText,
+    Color? creditHistoryMutedText,
     Color? loginKakaoBg,
     Color? loginKakaoLabel,
     Color? loginNaverBg,
@@ -1321,6 +1327,7 @@ class AppColors extends ThemeExtension<AppColors> {
       creditNoticeBg: creditNoticeBg ?? this.creditNoticeBg,
       creditNumberText: creditNumberText ?? this.creditNumberText,
       creditMutedText: creditMutedText ?? this.creditMutedText,
+      creditHistoryMutedText: creditHistoryMutedText ?? this.creditHistoryMutedText,
       loginKakaoBg: loginKakaoBg ?? this.loginKakaoBg,
       loginKakaoLabel: loginKakaoLabel ?? this.loginKakaoLabel,
       loginNaverBg: loginNaverBg ?? this.loginNaverBg,
@@ -1665,6 +1672,7 @@ class AppColors extends ThemeExtension<AppColors> {
       creditNoticeBg: Color.lerp(creditNoticeBg, other.creditNoticeBg, t)!,
       creditNumberText: Color.lerp(creditNumberText, other.creditNumberText, t)!,
       creditMutedText: Color.lerp(creditMutedText, other.creditMutedText, t)!,
+      creditHistoryMutedText: Color.lerp(creditHistoryMutedText, other.creditHistoryMutedText, t)!,
       loginKakaoBg: Color.lerp(loginKakaoBg, other.loginKakaoBg, t)!,
       loginKakaoLabel: Color.lerp(loginKakaoLabel, other.loginKakaoLabel, t)!,
       loginNaverBg: Color.lerp(loginNaverBg, other.loginNaverBg, t)!,

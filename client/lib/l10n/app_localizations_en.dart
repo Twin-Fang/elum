@@ -1908,4 +1908,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkRejectedOnGuardianPhone => 'Open this on Elumi\'s phone';
+
+  @override
+  String get creditHistoryTitle => 'Credit history';
+
+  @override
+  String get creditHistoryLink => 'View credit history';
+
+  @override
+  String creditHistoryDay(int month, int day) {
+    return '$month/$day';
+  }
+
+  @override
+  String creditHistoryDetail(String kind, String time) {
+    return '$kind・$time';
+  }
+
+  @override
+  String get creditHistoryKindRoutineText => 'Making the routine';
+
+  @override
+  String creditHistoryKindCardImages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count card pictures',
+      one: '$count card picture',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditHistoryKindCardImage => 'Making a card picture';
+
+  @override
+  String get creditHistoryKindImageRegenerate => 'Remaking a card picture';
+
+  @override
+  String get creditHistoryKindWeeklyGrant =>
+      'Your credits were refilled this week';
+
+  @override
+  String get creditHistoryKindAdReward => 'Received for watching an ad';
+
+  @override
+  String get creditHistoryKindAdminBonus => 'A bonus from the Elum team';
+
+  @override
+  String get creditHistoryKindOtherGrant => 'You received credits';
+
+  @override
+  String get creditHistoryKindExpired => 'Last week\'s credits expired';
+
+  @override
+  String get creditHistoryKindAdjusted => 'Credits were adjusted';
+
+  @override
+  String get creditHistoryKindUnknownSpend => 'You used credits';
+
+  @override
+  String get creditHistoryEmptyTitle => 'No credits used yet';
+
+  @override
+  String get creditHistoryEmptyBody =>
+      'Make a routine and it will show up here';
+
+  @override
+  String get creditHistoryLoadFailed => 'Couldn\'t load credit history';
+
+  @override
+  String get creditHistoryMoreFailed => 'Couldn\'t load more';
 }

@@ -4,6 +4,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/credit/data/credit_repository.dart';
 import 'package:elum/features/credit/domain/credit_summary.dart';
 import 'package:elum/features/guardian/presentation/widgets/ai_credit_card.dart';
+import 'package:elum/features/guardian/presentation/widgets/credit_history_link.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -117,5 +118,22 @@ void main() {
 
     expect(find.text('E-NET-OFFLINE'), findsOneWidget);
     expect(find.text('인터넷 연결을 확인해주세요'), findsOneWidget);
+  });
+
+  testWidgets('정상이면 사용 내역 보기 줄이 있고 누름 영역이 48 이상이다', (tester) async {
+    await pump(tester, () async => summary());
+
+    expect(find.text('크레딧 사용 내역 보기'), findsOneWidget);
+    final size = tester.getSize(find.byKey(CreditHistoryLink.linkKey));
+    expect(size.height, greaterThanOrEqualTo(48));
+  });
+
+  testWidgets('조회 실패에는 사용 내역 줄이 없다 — 잔액을 모르는데 내역으로 보내지 않는다', (tester) async {
+    await pump(tester, () async {
+      throw const AppFailure(fault: NetworkFault.offline);
+    });
+    await tester.pump();
+
+    expect(find.byKey(CreditHistoryLink.linkKey), findsNothing);
   });
 }

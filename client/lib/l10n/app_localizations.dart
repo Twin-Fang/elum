@@ -3343,6 +3343,120 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이룸이 휴대폰에서 열어주세요'**
   String get linkRejectedOnGuardianPhone;
+
+  /// 크레딧 사용 내역 화면의 제목 (Figma 1589:8359)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 사용 내역'**
+  String get creditHistoryTitle;
+
+  /// 설정 크레딧 카드 맨 아래 줄. 누르면 사용 내역 화면으로 간다 (Figma 1532:7501)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 사용 내역 보기'**
+  String get creditHistoryLink;
+
+  /// 사용 내역의 날짜 머리글. 예: 10월 1일
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}월 {day}일'**
+  String creditHistoryDay(int month, int day);
+
+  /// 사용 내역 줄의 부제: 종류와 시각. 예: 카드 그림 4장・오전 11:23
+  ///
+  /// In ko, this message translates to:
+  /// **'{kind}・{time}'**
+  String creditHistoryDetail(String kind, String time);
+
+  /// 사용 내역 종류: AI 일과 글 만들기 (사용)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 글 만들기'**
+  String get creditHistoryKindRoutineText;
+
+  /// 사용 내역 종류: 일과와 함께 만든 카드 그림 (사용)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림 {count}장'**
+  String creditHistoryKindCardImages(int count);
+
+  /// 사용 내역 종류: 카드 한 장의 그림 직접 만들기 (사용)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림 만들기'**
+  String get creditHistoryKindCardImage;
+
+  /// 사용 내역 종류: 그림 다시 만들기 (사용)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림 다시 만들기'**
+  String get creditHistoryKindImageRegenerate;
+
+  /// 사용 내역 종류: 주간 지급 (Figma 1589:8444)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 크레딧을 채워드렸어요'**
+  String get creditHistoryKindWeeklyGrant;
+
+  /// 사용 내역 종류: 보상형 광고 지급. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  ///
+  /// In ko, this message translates to:
+  /// **'광고를 보고 받았어요'**
+  String get creditHistoryKindAdReward;
+
+  /// 사용 내역 종류: 운영 보너스. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  ///
+  /// In ko, this message translates to:
+  /// **'운영에서 보너스를 드렸어요'**
+  String get creditHistoryKindAdminBonus;
+
+  /// 사용 내역 종류: 그 밖의 지급. 모르는 종류의 증가에도 쓴다
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 받았어요'**
+  String get creditHistoryKindOtherGrant;
+
+  /// 사용 내역 종류: 만료. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  ///
+  /// In ko, this message translates to:
+  /// **'지난주 크레딧이 사라졌어요'**
+  String get creditHistoryKindExpired;
+
+  /// 사용 내역 종류: 운영 조정. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧이 조정됐어요'**
+  String get creditHistoryKindAdjusted;
+
+  /// 사용 내역 종류: 앱이 모르는 종류의 감소
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 썼어요'**
+  String get creditHistoryKindUnknownSpend;
+
+  /// 사용 내역이 0건일 때. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 사용한 크레딧이 없어요'**
+  String get creditHistoryEmptyTitle;
+
+  /// 사용 내역이 0건일 때 다음 행동 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 만들면 여기에 기록돼요'**
+  String get creditHistoryEmptyBody;
+
+  /// 사용 내역 조회 실패. 다시 하기 버튼과 에러 코드와 함께
+  ///
+  /// In ko, this message translates to:
+  /// **'사용 내역을 불러오지 못했어요'**
+  String get creditHistoryLoadFailed;
+
+  /// 사용 내역 다음 쪽 조회 실패. 이미 불러온 내역은 그대로 둔다
+  ///
+  /// In ko, this message translates to:
+  /// **'더 불러오지 못했어요'**
+  String get creditHistoryMoreFailed;
 }
 
 class _AppLocalizationsDelegate

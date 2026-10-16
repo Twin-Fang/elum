@@ -31,6 +31,8 @@ class AiCreditCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(creditSummaryProvider);
 
+    // 사용 내역 줄이 있는 카드(정상 조회)는 줄의 누름 여백이 카드 아래 여백을 겸한다
+    final hasHistoryLink = async.value?.enabled ?? false;
     final Widget? card = switch (async) {
       AsyncData(value: final s) when !s.enabled => null,
       AsyncData(value: final s) => AiCreditSummaryView(summary: s),
@@ -44,20 +46,29 @@ class AiCreditCard extends ConsumerWidget {
 
     return Padding(
       padding: EdgeInsets.only(bottom: _gapBelow.h),
-      child: AiCreditFrame(child: card),
+      child: AiCreditFrame(
+        padBottom: hasHistoryLink ? AiCreditFrame.padBottomWithHistoryLink : null,
+        child: card,
+      ),
     );
   }
 }
 
 /// 흰 카드 면. 상태가 바뀌어도 테두리·여백이 같아야 자리가 출렁이지 않는다.
 class AiCreditFrame extends StatelessWidget {
-  const AiCreditFrame({super.key, required this.child});
+  const AiCreditFrame({super.key, required this.child, this.padBottom});
 
   final Widget child;
+
+  /// 아래 안쪽 여백을 바꿀 때만 넘긴다. 비우면 위와 같다.
+  final double? padBottom;
 
   static const _radius = 20.0;
   static const _padH = 20.0;
   static const _padV = 20.0;
+
+  /// 사용 내역 줄(누름 높이 48, 글자는 24)의 아래 12가 카드 아래 여백 20 안에 들어가므로 8 만 남긴다.
+  static const padBottomWithHistoryLink = 8.0;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +78,12 @@ class AiCreditFrame extends StatelessWidget {
         borderRadius: BorderRadius.circular(_radius.r),
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: _padH.w, vertical: _padV.h),
+        padding: EdgeInsets.fromLTRB(
+          _padH.w,
+          _padV.h,
+          _padH.w,
+          (padBottom ?? _padV).h,
+        ),
         child: child,
       ),
     );

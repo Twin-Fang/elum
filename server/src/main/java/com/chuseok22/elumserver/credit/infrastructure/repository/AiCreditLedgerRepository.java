@@ -3,9 +3,11 @@ package com.chuseok22.elumserver.credit.infrastructure.repository;
 import com.chuseok22.elumserver.credit.core.CreditLedgerType;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditLedger;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +24,14 @@ public interface AiCreditLedgerRepository extends JpaRepository<AiCreditLedger, 
   long sumDelta(
     @Param("accountId") String accountId, @Param("type") CreditLedgerType type,
     @Param("from") LocalDateTime from, @Param("to") LocalDateTime to
+  );
+
+
+  // --- 보호자 크레딧 내역 ---
+
+  /// 이 종류들의 줄을 최근 것부터 한 쪽. 총 개수를 세지 않는다(Slice) — 다음 쪽이 있는지만 안다.
+  Slice<AiCreditLedger> findByAccountIdAndTypeInOrderByCreatedAtDescIdDesc(
+    String accountId, Collection<CreditLedgerType> types, Pageable pageable
   );
 
   // --- 관리자 크레딧 화면 ---

@@ -23,7 +23,10 @@ import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
 import 'package:elum/features/profile/presentation/guardians_screen.dart';
 import 'package:elum/shared/models/routine.dart';
+import 'package:elum/features/credit/domain/credit_history.dart';
+import 'package:elum/features/credit/presentation/credit_history_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,7 +45,13 @@ import 'package:elum/features/guardian/application/routine_providers.dart';
 /// 값만 맞추고 렌더를 맞대지 않으면 통째로 어긋난 것을 놓친다 — 실제로 설정 제목을
 /// 네비게이션 제목(18/w600 Pretendard)이 아니라 페이지 제목(28/w800 Tmoney)으로
 /// 만들어 두고 "맞췄다"고 판단했다.
-Future<void> _pump(WidgetTester tester, Widget screen, {List<Object> extra = const []}) async {
+/// [hasKoreanLocale] 면 한국어 머티리얼 문구(`오전 11:23`)를 쓴다. 시각을 그리는 화면만 켠다.
+Future<void> _pump(
+  WidgetTester tester,
+  Widget screen, {
+  List<Object> extra = const [],
+  bool hasKoreanLocale = false,
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -55,6 +64,13 @@ Future<void> _pump(WidgetTester tester, Widget screen, {List<Object> extra = con
         builder: (context, _) => MaterialApp.router(
           theme: AppTheme.light,
           debugShowCheckedModeBanner: false,
+          locale: hasKoreanLocale ? const Locale('ko') : null,
+          localizationsDelegates: hasKoreanLocale
+              ? GlobalMaterialLocalizations.delegates
+              : null,
+          supportedLocales: hasKoreanLocale
+              ? const [Locale('ko')]
+              : const [Locale('en', 'US')],
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context).copyWith(padding: deviceInsets),
             child: child!,
@@ -104,6 +120,57 @@ void main() {
     await expectLater(
       find.byType(GuardianSettingsScreen),
       matchesGoldenFile('figma/settings_1532-7501.png'),
+    );
+  });
+
+  // 크레딧 사용 내역 시안 `1589:8359` (#658). 시안이 그린 줄 그대로 채운다.
+  //
+  // **알려진 차이**
+  // - 시안의 둘째·셋째 묶음은 자리 표시 글자(`타이틀`, `내용`)다. 앱은 실제 종류 문구가 들어간다.
+  // - 시안의 이룸이 이름·일과 제목은 가짜 데이터다.
+  testWidgets('크레딧 사용 내역 (Figma 1589:8359)', (tester) async {
+    CreditHistoryEntry entry(
+      String id,
+      CreditHistoryKind kind,
+      int delta,
+      DateTime at, {
+      String? title,
+      int? cardCount,
+    }) => CreditHistoryEntry(
+      id: id,
+      kind: kind,
+      delta: delta,
+      occurredAt: at,
+      routineTitle: title,
+      cardCount: cardCount,
+    );
+    final entries = [
+      entry('a', CreditHistoryKind.cardImages, -4, DateTime(2026, 10, 1, 11, 23),
+          title: '스스로 옷을 입어요', cardCount: 4),
+      entry('b', CreditHistoryKind.routineText, -1, DateTime(2026, 10, 1, 11, 22),
+          title: '스스로 옷을 입어요'),
+      entry('c', CreditHistoryKind.weeklyGrant, 100, DateTime(2026, 10, 1, 11, 22)),
+      entry('d', CreditHistoryKind.cardImages, -4, DateTime(2026, 9, 27, 23, 23),
+          title: '타이틀', cardCount: 4),
+      entry('e', CreditHistoryKind.routineText, -4, DateTime(2026, 9, 27, 11, 23),
+          title: '타이틀'),
+      entry('f', CreditHistoryKind.weeklyGrant, 100, DateTime(2026, 9, 25, 23, 23)),
+    ];
+    await _pump(
+      tester,
+      const CreditHistoryScreen(),
+      hasKoreanLocale: true,
+      extra: [
+        creditRepositoryProvider.overrideWithValue(
+          _HistoryRepository(
+            CreditHistoryPage(entries: entries, hasNext: false, page: 0),
+          ),
+        ),
+      ],
+    );
+    await expectLater(
+      find.byType(CreditHistoryScreen),
+      matchesGoldenFile('figma/credit_history_1589-8359.png'),
     );
   });
 
@@ -330,4 +397,15 @@ class _FakeLink extends DeviceLinkRepository {
   @override
   Future<Attempt<LinkStatus>> statusResult() async =>
       Attempt.ok(const LinkStatus(devices: []));
+}
+
+/// 사용 내역 대조용: 정해 둔 한 쪽만 돌려준다.
+class _HistoryRepository extends CreditRepository {
+  _HistoryRepository(this.page) : super(Dio());
+
+  final CreditHistoryPage page;
+
+  @override
+  Future<CreditHistoryPage> getHistory({required int page, int size = 30}) async =>
+      this.page;
 }

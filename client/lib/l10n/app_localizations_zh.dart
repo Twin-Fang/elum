@@ -1824,4 +1824,67 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get linkRejectedOnGuardianPhone => '이룸이 휴대폰에서 열어주세요';
+
+  @override
+  String get creditHistoryTitle => '크레딧 사용 내역';
+
+  @override
+  String get creditHistoryLink => '크레딧 사용 내역 보기';
+
+  @override
+  String creditHistoryDay(int month, int day) {
+    return '$month월 $day일';
+  }
+
+  @override
+  String creditHistoryDetail(String kind, String time) {
+    return '$kind・$time';
+  }
+
+  @override
+  String get creditHistoryKindRoutineText => '일과 글 만들기';
+
+  @override
+  String creditHistoryKindCardImages(int count) {
+    return '카드 그림 $count장';
+  }
+
+  @override
+  String get creditHistoryKindCardImage => '카드 그림 만들기';
+
+  @override
+  String get creditHistoryKindImageRegenerate => '카드 그림 다시 만들기';
+
+  @override
+  String get creditHistoryKindWeeklyGrant => '이번 주 크레딧을 채워드렸어요';
+
+  @override
+  String get creditHistoryKindAdReward => '광고를 보고 받았어요';
+
+  @override
+  String get creditHistoryKindAdminBonus => '운영에서 보너스를 드렸어요';
+
+  @override
+  String get creditHistoryKindOtherGrant => '크레딧을 받았어요';
+
+  @override
+  String get creditHistoryKindExpired => '지난주 크레딧이 사라졌어요';
+
+  @override
+  String get creditHistoryKindAdjusted => '크레딧이 조정됐어요';
+
+  @override
+  String get creditHistoryKindUnknownSpend => '크레딧을 썼어요';
+
+  @override
+  String get creditHistoryEmptyTitle => '아직 사용한 크레딧이 없어요';
+
+  @override
+  String get creditHistoryEmptyBody => '일과를 만들면 여기에 기록돼요';
+
+  @override
+  String get creditHistoryLoadFailed => '사용 내역을 불러오지 못했어요';
+
+  @override
+  String get creditHistoryMoreFailed => '더 불러오지 못했어요';
 }
