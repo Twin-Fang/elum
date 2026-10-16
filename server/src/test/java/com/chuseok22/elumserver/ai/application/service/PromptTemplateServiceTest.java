@@ -78,6 +78,7 @@ class PromptTemplateServiceTest {
     verify(promptTemplateHistoryRepository).save(captor.capture());
     assertThat(captor.getValue().getPromptKey()).isEqualTo(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
     assertThat(captor.getValue().getContent()).isEqualTo("이전 내용");
+    assertThat(captor.getValue().getLocale()).isEqualTo("ko");
   }
 
   @Test
