@@ -656,6 +656,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linkCodeLater => 'Maybe later';
 
   @override
+  String get linkCodeChangesAfter => 'until the code changes';
+
+  @override
   String get linkRetryChipLabel => 'Make a new code';
 
   @override
@@ -920,7 +923,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteEnterConsentFallback => 'Agree to the terms first';
 
   @override
-  String get inviteEnterJoinButton => 'Join';
+  String get inviteEnterStartButton => 'Start';
 
   @override
   String get inviteEnterManualLink => 'Enter a different code';
@@ -930,21 +933,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteEnterDescriptionFromLink =>
-      'This is the invite code from the link. If it\'s right, tap Join.';
+      'This is the invite code from the link. If it\'s right, tap Start.';
 
   @override
   String get inviteEnterDescriptionManual =>
-      'It\'s the six characters you got from a co-guardian';
+      'The code is on a co-guardian\'s phone,\nin Settings → Co-guardians';
 
   @override
-  String get inviteEnterWhereFrom => 'On a co-guardian\'s phone,';
-
-  @override
-  String get inviteEnterWherePath => 'go to Settings → Co-guardians';
-
-  @override
-  String get inviteEnterWhereHow =>
-      'Make an invite code and six characters appear';
+  String get inviteEnterDescriptionPath => 'Settings → Co-guardians';
 
   @override
   String get inviteEnterSemanticsFromLink => 'Invite code from the link';

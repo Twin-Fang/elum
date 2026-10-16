@@ -36,6 +36,8 @@ import '../../../core/router/routes.dart';
 /// | 제목 y | 131 | **147** |
 /// | 시작하기 | 있음 | **없음** |
 /// | 나중에 할게요 | 있음 | 없음 |
+/// | 링크로 보내기 | 있음(`시작하기` 위 보조 버튼) | 하단 버튼 |
+/// | 코드 아래 | 복사하기 > `09:59 뒤에 코드가 바껴요` | `09:59` > 다시 만들기 |
 ///
 /// 설정에서는 이미 앱 안이라 `시작하기`가 갈 곳이 없다 — 연결하면 팝업으로
 /// 알리고 뒤로가기로 돌아간다. 시안도 그렇게 그려져 있다.
@@ -53,10 +55,14 @@ import '../../../core/router/routes.dart';
 /// 연결되면 타이머와 다시 만들기가 사라진다 — **더 기다릴 이유가 없어서다.**
 /// `나중에 할게요`는 세 상태 모두에 남는다 (시안 `732:5850`).
 ///
+/// ## 온보딩 진입의 코드 갱신
+///
+/// 온보딩 시안은 `다시 만들기` 칩이 없고 `뒤에 코드가 바껴요`라고 말한다. 만료되면 **자동으로 새 코드**를 받아
+/// 타이머를 다시 돌린다. 새로 받지 못하면(실패) 다시 만들기 칩이 대신 나온다.
+///
 /// ## 설정 진입의 전하기 · 다시 들어오기
 ///
 /// 설정에서 들어온 화면에는 초대 코드 화면과 같은 하단 버튼(`링크로 보내기` · `코드 복사하기`)과 안내가 있다.
-/// 온보딩 시안(`732:5334`)은 하단이 `시작하기`·`나중에 할게요`로 가득 차 있어 건드리지 않는다.
 /// 나갔다 들어와도 서버에 아직 살아 있는 코드면 같은 코드를 보여 준다 ([IssuedCodeMemory]) —
 /// 새로 만드는 것은 `코드 다시 만들기`를 눌렀을 때와 기억한 코드를 못 쓸 때뿐이다.
 class LinkCodeScreen extends ConsumerStatefulWidget {
@@ -93,6 +99,9 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   static const _settingsBackTop = 67.0;
   static const _settingsTitleY = 147.0;
 
+  /// 온보딩 시안의 `링크로 보내기`(y=593~659)와 `시작하기`(y=675) 사이 (Figma 1532:6801).
+  static const _onboardingButtonGap = 16.0;
+
   @override
   void initState() {
     super.initState();
@@ -116,9 +125,10 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
   );
 
   /// [force] 가 true 면 기억한 코드를 쓰지 않고 새로 발급한다 (`코드 다시 만들기`).
-  Future<void> _issue({bool force = false}) async {
+  /// [isSilent] 가 true 면 스피너를 띄우지 않는다 (만료 자동 갱신 - 화면이 깜빡이지 않게).
+  Future<void> _issue({bool force = false, bool isSilent = false}) async {
     setState(() {
-      _loading = true;
+      _loading = !isSilent;
       _issueFailure = null;
     });
     final memory = ref.read(issuedCodeMemoryProvider);
@@ -175,8 +185,11 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
     // 남은 시간을 초까지 보여주므로 1초마다 다시 그린다. 만료되면 멈춘다.
     _ticker = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) return t.cancel();
-      if (_issued?.isExpired ?? true) t.cancel();
+      final isExpired = _issued?.isExpired ?? true;
+      if (isExpired) t.cancel();
       setState(() {});
+      // 온보딩은 만료되면 새 코드를 자동으로 받는다 (실패하면 다시 만들기 칩이 대신 나온다)
+      if (isExpired && widget.fromOnboarding && !_linked) _issue(force: true, isSilent: true);
     });
     // 3초는 서버에 부담이 크지 않으면서 사람이 기다린다고 느끼지 않는 간격이다.
     _poller = Timer.periodic(const Duration(seconds: 3), (t) async {
@@ -248,9 +261,24 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
                     shareFailCode: 'E-LINK-SHARE',
                   )
                 : null)
-          : ElumButton(
-              label: context.l10n.linkCodeStartButton,
-              onPressed: _linked ? _goHome : null,
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // 연결되면 코드는 이미 쓰였다 - 더 보낼 수 없다
+                IssuedCodeShareButton(
+                  issued: _linked || _loading || _issueFailure != null ? null : issued,
+                  shareMessage: (i) =>
+                      LinkCodeLink.shareMessage(i.code, validFor: i.remaining()),
+                  shareFailCode: 'E-LINK-SHARE',
+                  isSecondary: true,
+                ),
+                SizedBox(height: _onboardingButtonGap.h),
+                ElumButton(
+                  label: context.l10n.linkCodeStartButton,
+                  onPressed: _linked ? _goHome : null,
+                ),
+              ],
             ),
       // `나중에 할게요`는 CTA 아래에 붙는다 (시안 y=765).
       //
@@ -306,6 +334,13 @@ class _LinkCodeScreenState extends ConsumerState<LinkCodeScreen> {
               // 연결되면 타이머도 `다시 만들기`도 사라진다 — 더 기다릴 이유가 없다.
               showStatus: !_linked,
               onRetry: () => _issue(force: true),
+              // 온보딩 시안: 복사하기 > `09:59 뒤에 코드가 바껴요` (다시 만들기는 만료 뒤 실패했을 때만)
+              onCopy: widget.fromOnboarding
+                  ? () => copyIssuedCode(context, issued)
+                  : null,
+              timerSuffix: widget.fromOnboarding
+                  ? context.l10n.linkCodeChangesAfter
+                  : null,
               footer: fromSettings
                   ? [
                       SizedBox(height: IssuedCodePanel.timerToRetry.h),

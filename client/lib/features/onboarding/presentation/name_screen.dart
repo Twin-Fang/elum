@@ -88,9 +88,8 @@ class _NameScreenState extends ConsumerState<NameScreen> {
           // 진행 조건은 모델이 안다 — 화면마다 재구현하지 않는다
           onPressed: canSubmit ? _submit : null,
         ),
-        // 다른 보호자가 이미 만든 이룸이에 합류하는 길. **임시 시안이다** —
-        // 진입점을 어디에 둘지 시안이 정하지 않았다(역할 선택 vs 이 화면). CTA 아래 보조 동작 자리에
-        // 연결 암호의 `나중에 할게요`와 같은 모양으로 둔다. 합류하면 이룸이 등록은 건너뛴다.
+        // 다른 보호자가 이미 만든 이룸이에 합류하는 길 (Figma 1532:7112, y=765).
+        // 연결 암호의 `나중에 할게요`와 같은 모양이다. 합류하면 이룸이 등록은 건너뛴다.
         belowButton: Center(
           child: AppPressable(
             onTap: () => context.push(Routes.inviteEnter),

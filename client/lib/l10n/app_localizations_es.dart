@@ -632,6 +632,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get linkCodeLater => '나중에 할게요';
 
   @override
+  String get linkCodeChangesAfter => '뒤에 코드가 바껴요';
+
+  @override
   String get linkRetryChipLabel => '코드 다시 만들기';
 
   @override
@@ -880,29 +883,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get inviteEnterConsentFallback => '약관에 먼저 동의해주세요';
 
   @override
-  String get inviteEnterJoinButton => '함께하기';
+  String get inviteEnterStartButton => '시작하기';
 
   @override
   String get inviteEnterManualLink => '다른 코드 넣기';
 
   @override
-  String get inviteEnterTitle => '초대 코드를\n넣어주세요';
+  String get inviteEnterTitle => '초대 코드를\n입력해주세요';
 
   @override
   String get inviteEnterDescriptionFromLink =>
-      '링크로 받은 초대 코드예요. 맞으면 함께하기를 눌러주세요';
+      '링크로 받은 초대 코드예요. 맞으면 시작하기를 눌러주세요';
 
   @override
-  String get inviteEnterDescriptionManual => '함께하는 보호자에게 받은 여섯 글자예요';
+  String get inviteEnterDescriptionManual =>
+      '코드는 함께하는 보호자 휴대폰의\n설정 → 함께하는 사람에 있어요';
 
   @override
-  String get inviteEnterWhereFrom => '함께하는 보호자 휴대폰에서';
-
-  @override
-  String get inviteEnterWherePath => '설정 → 함께하는 사람';
-
-  @override
-  String get inviteEnterWhereHow => '초대 코드를 만들면 여섯 글자가 나와요';
+  String get inviteEnterDescriptionPath => '설정 → 함께하는 사람';
 
   @override
   String get inviteEnterSemanticsFromLink => '링크로 받은 초대 코드';

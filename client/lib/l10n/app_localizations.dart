@@ -1178,6 +1178,12 @@ abstract class AppLocalizations {
   /// **'나중에 할게요'**
   String get linkCodeLater;
 
+  /// 연결 암호 남은 시간(09:59) 오른쪽에 붙는 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'뒤에 코드가 바껴요'**
+  String get linkCodeChangesAfter;
+
   /// 연결 암호 화면의 다시 만들기 칩(시안 그대로)
   ///
   /// In ko, this message translates to:
@@ -1616,11 +1622,11 @@ abstract class AppLocalizations {
   /// **'약관에 먼저 동의해주세요'**
   String get inviteEnterConsentFallback;
 
-  /// 링크로 받은 코드로 합류하는 하단 버튼
+  /// 초대 코드 넣기 하단 버튼(여섯 칸을 채워야 켜짐, 링크로 받은 코드도 같은 버튼)
   ///
   /// In ko, this message translates to:
-  /// **'함께하기'**
-  String get inviteEnterJoinButton;
+  /// **'시작하기'**
+  String get inviteEnterStartButton;
 
   /// 링크로 받은 코드를 거두고 직접 입력으로 바꾸는 밑줄 글
   ///
@@ -1631,38 +1637,26 @@ abstract class AppLocalizations {
   /// 초대 코드 넣기 화면의 머리 제목
   ///
   /// In ko, this message translates to:
-  /// **'초대 코드를\n넣어주세요'**
+  /// **'초대 코드를\n입력해주세요'**
   String get inviteEnterTitle;
 
   /// 링크로 받은 코드가 채워졌을 때의 설명
   ///
   /// In ko, this message translates to:
-  /// **'링크로 받은 초대 코드예요. 맞으면 함께하기를 눌러주세요'**
+  /// **'링크로 받은 초대 코드예요. 맞으면 시작하기를 눌러주세요'**
   String get inviteEnterDescriptionFromLink;
 
-  /// 직접 입력할 때의 설명
+  /// 직접 입력할 때의 설명(코드를 받는 길)
   ///
   /// In ko, this message translates to:
-  /// **'함께하는 보호자에게 받은 여섯 글자예요'**
+  /// **'코드는 함께하는 보호자 휴대폰의\n설정 → 함께하는 사람에 있어요'**
   String get inviteEnterDescriptionManual;
 
-  /// 초대 코드를 어디서 받는지 알려 주는 안내 카드의 첫 줄
-  ///
-  /// In ko, this message translates to:
-  /// **'함께하는 보호자 휴대폰에서'**
-  String get inviteEnterWhereFrom;
-
-  /// 안내 카드의 길 안내(강조 줄)
+  /// 직접 입력 설명(inviteEnterDescriptionManual) 안에서 밑줄을 긋는 길 안내. 설명 문구에 그대로 들어 있어야 함
   ///
   /// In ko, this message translates to:
   /// **'설정 → 함께하는 사람'**
-  String get inviteEnterWherePath;
-
-  /// 안내 카드의 마지막 줄
-  ///
-  /// In ko, this message translates to:
-  /// **'초대 코드를 만들면 여섯 글자가 나와요'**
-  String get inviteEnterWhereHow;
+  String get inviteEnterDescriptionPath;
 
   /// 화면 낭독기가 읽는 여섯 칸의 이름(링크로 받았을 때)
   ///

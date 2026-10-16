@@ -62,7 +62,7 @@ void main() {
     );
   }
 
-  testWidgets('대기 — 암호·카운트다운·다시 만들기', (tester) async {
+  testWidgets('대기 — 암호·복사하기·카운트다운', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -90,7 +90,7 @@ void main() {
     );
   });
 
-  testWidgets('연결됨 — 타이머도 다시 만들기도 없다', (tester) async {
+  testWidgets('연결됨 — 타이머도 복사하기도 없다', (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
