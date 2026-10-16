@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://twin-fang.github.io/elum/</loc></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url><loc>https://twin-fang.github.io/elum/</loc><xhtml:link rel="alternate" hreflang="ko" href="https://twin-fang.github.io/elum/"/><xhtml:link rel="alternate" hreflang="en" href="https://twin-fang.github.io/elum/en/"/></url>
+  <url><loc>https://twin-fang.github.io/elum/en/</loc><xhtml:link rel="alternate" hreflang="ko" href="https://twin-fang.github.io/elum/"/><xhtml:link rel="alternate" hreflang="en" href="https://twin-fang.github.io/elum/en/"/></url>
   <url><loc>https://twin-fang.github.io/elum/privacy.html</loc></url>
   <url><loc>https://twin-fang.github.io/elum/delete.html</loc></url>
 </urlset>
