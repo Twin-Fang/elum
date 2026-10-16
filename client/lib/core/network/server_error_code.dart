@@ -189,6 +189,9 @@ enum ServerErrorCode {
   // 일과 생성 가능 언어. 서버 문구 파일이 빈 언어를 켜려 할 때 관리자 화면에서만 난다 — 앱 사용자는 거의 못 본다.
   contentLocaleNotReady('CONTENT_LOCALE_NOT_READY'),
 
+  // 프롬프트 행이 모자란 언어를 켜려 할 때 관리자 화면에서만 난다.
+  contentLocalePromptMissing('CONTENT_LOCALE_PROMPT_MISSING'),
+
   /// 앱이 모르는 코드. **서버가 새 코드를 먼저 배포하는 일은 반드시 생긴다.**
   /// 그때도 `errorMessage`는 맞으므로 문구는 그대로 보여줄 수 있다.
   unknown('');

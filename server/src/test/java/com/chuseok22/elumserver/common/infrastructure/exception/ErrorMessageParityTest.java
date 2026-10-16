@@ -44,11 +44,16 @@ class ErrorMessageParityTest {
   @Test
   @DisplayName("원본 이후 더한 코드는 golden 밖에서 따로 단언한다 — golden 을 다시 만들면 원본 증명이 흐려진다")
   void codesAddedAfterOriginal_areAssertedSeparately() {
-    assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size());
+    assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
       .isEqualTo("이 언어는 아직 켤 수 없어요. 서버 문구 파일이 비어 있어요.");
+    assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_PROMPT_MISSING.name());
+    assertThat(ErrorCode.CONTENT_LOCALE_PROMPT_MISSING.getStatus().name()).isEqualTo("BAD_REQUEST");
+    assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_PROMPT_MISSING, AppLocale.KO))
+      .isEqualTo("이 언어의 프롬프트가 아직 없어요. 프롬프트 화면에서 먼저 만들어 주세요.");
+    assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_PROMPT_MISSING, AppLocale.EN)).isNotBlank();
   }
 
   // 의견 보내기가 더한 코드.

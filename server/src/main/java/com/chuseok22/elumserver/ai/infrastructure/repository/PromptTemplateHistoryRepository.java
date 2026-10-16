@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PromptTemplateHistoryRepository extends JpaRepository<PromptTemplateHistory, String> {
 
-  // 이력은 append-only로 무한히 쌓이므로 화면에는 최근 50건까지만 보여준다.
-  List<PromptTemplateHistory> findTop50ByPromptKeyOrderByCreatedAtDesc(PromptKey promptKey);
+  // 이력은 append-only로 무한히 쌓이므로 화면에는 최근 50건까지만 보여준다. (키, 언어)마다 따로 본다.
+  List<PromptTemplateHistory> findTop50ByPromptKeyAndLocaleOrderByCreatedAtDesc(PromptKey promptKey, String locale);
 }

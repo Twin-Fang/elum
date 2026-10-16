@@ -11,16 +11,49 @@
       <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
       <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
+      <!-- 언어 선택: 프롬프트는 (키, 언어)마다 한 행. 모델이 없으면 ko -->
+      <div id="prompt-page" th:attr="data-locale=${selectedLocale ?: 'ko'}" class="space-y-3">
+        <div th:if="${locales != null}" class="tabs tabs-boxed">
+          <a th:each="entry : ${locales}"
+             th:href="@{/admin/prompts(locale=${entry.code})}"
+             class="tab"
+             th:classappend="${entry.code == (selectedLocale ?: 'ko')} ? 'tab-active' : ''">
+            <span th:text="${entry.label}">한국어 (ko)</span>
+            <span class="badge badge-xs ml-1"
+                  th:classappend="${entry.enabled} ? 'badge-success' : 'badge-ghost'"
+                  th:text="${entry.enabled} ? '켜짐' : '꺼짐'"></span>
+            <span class="badge badge-xs badge-warning ml-1" th:if="${entry.missingCount > 0}"
+                  th:text="'행 ' + ${entry.missingCount} + '개 없음'"></span>
+          </a>
+        </div>
+
+        <div th:if="${localeEnabled != null and !localeEnabled}" class="alert alert-info text-sm">
+          이 언어는 아직 켜지지 않았어요. 이 언어 휴대폰에서 만든 일과는 영어(없으면 한국어)로 처리돼요.
+          프롬프트 행이 모두 있고 시험을 마친 뒤 설정의 '일과 생성 가능 언어'에서 켜요.
+        </div>
+
+        <div th:if="${missingKeys != null and !#lists.isEmpty(missingKeys)}"
+             class="alert alert-warning text-sm flex-col items-start">
+          <span>이 언어에는 만들어야 하는 프롬프트가 <b th:text="${#lists.size(missingKeys)}">4</b>개 없어요.
+            행이 모두 있어야 이 언어를 켤 수 있어요.</span>
+          <!-- 제출 즉시 버튼 잠금 (중복 제출 방지) -->
+          <form th:action="@{/admin/prompts/locales/{locale}/seed(locale=${selectedLocale ?: 'ko'})}" method="post"
+                onsubmit="if (!confirm('이 언어의 없는 프롬프트 행을 기본값으로 만들까요? 이미 있는 행은 건드리지 않아요.')) { return false; } this.querySelector('button[type=submit]').disabled = true; return true;">
+            <button type="submit" class="btn btn-warning btn-sm">기본값으로 행 만들기</button>
+          </form>
+        </div>
+      </div>
+
       <div th:each="prompt : ${prompts}" class="card bg-base-100 shadow-md">
         <div class="card-body space-y-4">
           <h2 class="card-title" th:text="${prompt.promptKey.label}">프롬프트 제목</h2>
           <p class="text-sm text-base-content/60">
             키: <span th:text="${prompt.promptKey}"></span> ·
             마지막 수정: <span th:text="${prompt.updatedAt}"></span> ·
-            <a th:href="@{/admin/prompts/{key}/history(key=${prompt.promptKey})}" class="link link-primary">이력 보기</a>
+            <a th:href="@{/admin/prompts/{key}/history(key=${prompt.promptKey},locale=${selectedLocale ?: prompt.locale})}" class="link link-primary">이력 보기</a>
           </p>
 
-          <form th:action="@{/admin/prompts/{key}(key=${prompt.promptKey})}" method="post">
+          <form th:action="@{/admin/prompts/{key}(key=${prompt.promptKey},locale=${selectedLocale ?: prompt.locale})}" method="post">
             <textarea name="content" class="prompt-content textarea textarea-bordered w-full h-40"
                       th:text="${prompt.content}" th:attr="data-key=${prompt.promptKey}"></textarea>
             <div class="flex justify-end mt-2">
@@ -53,6 +86,10 @@
             </button>
           </div>
 
+          <p class="text-xs text-base-content/50">
+            '실제로 테스트하기'는 운영 AI를 한 번 호출해요(비용이 나가요). 언어마다 키당 한 번만 눌러 주세요.
+          </p>
+
           <pre class="result-area bg-base-200 rounded p-3 text-xs whitespace-pre-wrap"
                th:attr="data-key=${prompt.promptKey}"></pre>
         </div>
@@ -79,6 +116,12 @@
   function getCharacterFor(key) {
     const select = document.querySelector('.character-select[data-key="' + key + '"]');
     return select && select.value ? select.value : null;
+  }
+
+  // 보고 있는 언어: 시험·미리보기는 그 언어로 돈다
+  function currentLocale() {
+    const page = document.getElementById('prompt-page');
+    return page && page.dataset.locale ? page.dataset.locale : 'ko';
   }
 
   function getResultAreaFor(key) {
@@ -136,7 +179,8 @@
         const data = await callPromptApi(key, '/preview', {
           content: getContentFor(key),
           sampleInput: getSampleInputFor(key),
-          character: getCharacterFor(key)
+          character: getCharacterFor(key),
+          locale: currentLocale()
         });
         resultArea.textContent = data.composedPrompt;
       } catch (e) {
@@ -154,7 +198,8 @@
         const data = await callPromptApi(key, '/test', {
           content: getContentFor(key),
           sampleInput: getSampleInputFor(key),
-          character: getCharacterFor(key)
+          character: getCharacterFor(key),
+          locale: currentLocale()
         });
         if (data.imageDataUri) {
           resultArea.textContent = '';

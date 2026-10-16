@@ -2,9 +2,11 @@ package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
+import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.TextProvider;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
@@ -113,10 +115,11 @@ public class OpenAiTextClient implements TextGenerationClient {
 
   @Override
   public String pickPictogramJson(String stepTitle, String stepDescription) {
+    AppLocale locale = AiCallContext.currentContentLocale();
     return call(
-      GeminiTextClient.PICTOGRAM_PICK_SYSTEM_PROMPT,
+      GeminiTextClient.pictogramPickSystemPrompt(locale),
       geminiTextClient.buildPictogramPickUserContent(stepTitle, stepDescription),
-      GeminiTextClient.pictogramPickSchema(), "pictogram", AiCallType.OPENAI_TEXT_PICTOGRAM
+      GeminiTextClient.pictogramPickSchema(locale), "pictogram", AiCallType.OPENAI_TEXT_PICTOGRAM
     );
   }
 

@@ -7,5 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PromptTemplateRepository extends JpaRepository<PromptTemplate, String> {
 
-  Optional<PromptTemplate> findByPromptKey(PromptKey promptKey);
+  // (키, 언어) 한 행. locale 은 AppLocale.code()
+  Optional<PromptTemplate> findByPromptKeyAndLocale(PromptKey promptKey, String locale);
 }

@@ -198,6 +198,9 @@ public enum ErrorCode {
   // 켜 두면 다음 기동의 시작 검사가 서버를 세우지 않는다. 관리자 화면은 E-CFG-004 를 함께 보여준다.
   CONTENT_LOCALE_NOT_READY(HttpStatus.BAD_REQUEST),
 
+  // 프롬프트 행이 모자란 언어는 켤 수 없다. 관리자 화면은 E-CFG-005 를 함께 보여준다.
+  CONTENT_LOCALE_PROMPT_MISSING(HttpStatus.BAD_REQUEST),
+
   ;
 
 
