@@ -117,9 +117,14 @@ class DeviceSpeech implements SpeechService {
     _engineChosen = true;
     try {
       final engines = await _tts.getEngines;
-      if (engines is List && engines.contains(googleEngine)) {
-        await _tts.setEngine(googleEngine);
-      }
+      final isGoogleEngineInstalled =
+          engines is List && engines.contains(googleEngine);
+      if (isGoogleEngineInstalled) await _tts.setEngine(googleEngine);
+      // 실기기에서 어느 엔진으로 읽는지 확인용 (목록이 비면 매니페스트 TTS_SERVICE 누락)
+      AppLogger.speech(
+        'device engines=$engines → '
+        '${isGoogleEngineInstalled ? googleEngine : 'default'}',
+      );
     } catch (e) {
       AppLogger.error('tts', 'Google 음성 엔진 고르기 실패 → 기기 기본 엔진을 쓴다: $e');
     }
