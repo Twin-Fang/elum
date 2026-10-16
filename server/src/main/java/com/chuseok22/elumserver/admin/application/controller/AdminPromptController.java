@@ -12,6 +12,8 @@ import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import jakarta.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequiredArgsConstructor
 public class AdminPromptController {
+
+  private static final String BACK_TO_KO = "redirect:/admin/prompts?locale=ko";
 
   private final AdminPromptService adminPromptService;
   private final EnabledLocales enabledLocales;
@@ -60,7 +64,13 @@ public class AdminPromptController {
     BindingResult bindingResult,
     RedirectAttributes redirectAttributes
   ) {
-    AppLocale target = parseLocale(locale);
+    // 쓰기 경로: 모르는 코드는 ko 로 돌리지 않고 거절 (다른 언어 내용이 ko 행을 덮어쓰지 않도록)
+    Optional<AppLocale> parsed = parseLocaleStrict(locale);
+    if (parsed.isEmpty()) {
+      redirectAttributes.addFlashAttribute("errorMessage", unknownLocaleMessage(locale));
+      return BACK_TO_KO;
+    }
+    AppLocale target = parsed.get();
     String back = "redirect:/admin/prompts?locale=" + target.code();
     // 요청 DTO에 검증 어노테이션이 없어 bindingResult 는 공백을 잡지 못한다. 실제 검사는
     // 서비스가 하고, 여기서는 거절을 화면에 알린다.
@@ -84,7 +94,12 @@ public class AdminPromptController {
   // 그 언어의 없는 프롬프트 행을 기본값으로 생성 (있는 행은 건드리지 않음, ko 는 기동 때 생성되므로 제외)
   @PostMapping("/admin/prompts/locales/{locale}/seed")
   public String seed(@PathVariable String locale, RedirectAttributes redirectAttributes) {
-    AppLocale target = parseLocale(locale);
+    Optional<AppLocale> parsed = parseLocaleStrict(locale);
+    if (parsed.isEmpty()) {
+      redirectAttributes.addFlashAttribute("errorMessage", unknownLocaleMessage(locale));
+      return BACK_TO_KO;
+    }
+    AppLocale target = parsed.get();
     String back = "redirect:/admin/prompts?locale=" + target.code();
     if (target == AppLocale.KO) {
       redirectAttributes.addFlashAttribute("message", "ko 프롬프트는 서버가 켜질 때 만들어져요.");
@@ -111,7 +126,29 @@ public class AdminPromptController {
     return back;
   }
 
-  // 모르는 코드는 ko 로 (주소를 손으로 고쳐도 화면이 깨지지 않음)
+  // 앞뒤 공백·대소문자만 정규화, 모르는 코드는 비어 있음
+  private Optional<AppLocale> parseLocaleStrict(String code) {
+    if (code == null) {
+      return Optional.empty();
+    }
+    try {
+      return Optional.of(AppLocale.fromCode(code.trim().toLowerCase(Locale.ROOT)));
+    } catch (IllegalArgumentException e) {
+      return Optional.empty();
+    }
+  }
+
+  private String unknownLocaleMessage(String code) {
+    return "알 수 없는 언어 코드(" + sanitize(code) + ")라서 저장하지 않았어요. 언어 탭에서 다시 시도해 주세요.";
+  }
+
+  // 화면에 되돌려 보이는 값이라 길이 제한과 제어문자 제거
+  private String sanitize(String code) {
+    String cleaned = code == null ? "" : code.replaceAll("[\\p{Cntrl}<>\"']", "?");
+    return cleaned.length() > 20 ? cleaned.substring(0, 20) : cleaned;
+  }
+
+  // 조회·시험용: 모르는 코드는 ko 로 (주소를 손으로 고쳐도 화면이 깨지지 않음)
   private AppLocale parseLocale(String code) {
     if (code == null) {
       return AppLocale.KO;

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -142,5 +143,57 @@ class AdminPromptControllerLocaleTest {
     controller.seed("ja", redirect);
 
     assertThat((String) redirect.getFlashAttributes().get("errorMessage")).contains("실패 1개").contains("E-PRM-003");
+  }
+
+  @Test
+  @DisplayName("모르는 locale 로 저장하면 아무 행도 쓰지 않고 같은 탭으로 돌아와 오류를 알린다 (ko 행 보호)")
+  void update_unknownLocale_writesNothing() {
+    PromptUpdateRequest request = new PromptUpdateRequest("English content");
+    RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
+
+    String view = controller.update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "en-US", request,
+      new BeanPropertyBindingResult(request, "request"), redirect);
+
+    assertThat(view).isEqualTo("redirect:/admin/prompts?locale=ko");
+    verify(adminPromptService, never()).update(any(), any(AppLocale.class), any());
+    verify(adminPromptService, never()).update(any(), any(String.class));
+    assertThat((String) redirect.getFlashAttributes().get("errorMessage")).contains("en-US");
+  }
+
+  @Test
+  @DisplayName("대소문자만 다른 locale(EN)은 en 으로 정규화해 그 언어 행에 저장한다")
+  void update_uppercaseLocale_isNormalized() {
+    PromptUpdateRequest request = new PromptUpdateRequest("내용");
+    RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
+
+    String view = controller.update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, " EN ", request,
+      new BeanPropertyBindingResult(request, "request"), redirect);
+
+    assertThat(view).isEqualTo("redirect:/admin/prompts?locale=en");
+    verify(adminPromptService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.EN, "내용");
+  }
+
+  @Test
+  @DisplayName("모르는 locale 로 행 만들기를 누르면 시더를 부르지 않고 ko 안내도 띄우지 않는다")
+  void seed_unknownLocale_doesNotSeed() {
+    RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
+
+    String view = controller.seed("xx", redirect);
+
+    assertThat(view).isEqualTo("redirect:/admin/prompts?locale=ko");
+    verify(adminPromptService, never()).seedLocale(any());
+    assertThat((String) redirect.getFlashAttributes().get("errorMessage")).contains("xx");
+    assertThat(redirect.getFlashAttributes()).doesNotContainKey("message");
+  }
+
+  @Test
+  @DisplayName("대문자 locale(ES)로 행 만들기는 es 로 정규화해 만든다")
+  void seed_uppercaseLocale_isNormalized() {
+    when(adminPromptService.seedLocale(AppLocale.ES)).thenReturn(new PromptTemplateSeeder.SeedResult(4, 0, 0));
+
+    String view = controller.seed("ES", new RedirectAttributesModelMap());
+
+    assertThat(view).isEqualTo("redirect:/admin/prompts?locale=es");
+    verify(adminPromptService).seedLocale(AppLocale.ES);
   }
 }

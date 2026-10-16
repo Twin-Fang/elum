@@ -53,6 +53,7 @@ class ErrorMessageParityTest {
     assertThat(ErrorCode.CONTENT_LOCALE_PROMPT_MISSING.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_PROMPT_MISSING, AppLocale.KO))
       .isEqualTo("이 언어의 프롬프트가 아직 없어요. 프롬프트 화면에서 먼저 만들어 주세요.");
+    assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_PROMPT_MISSING, AppLocale.EN)).isNotBlank();
   }
 
   // 의견 보내기가 더한 코드.

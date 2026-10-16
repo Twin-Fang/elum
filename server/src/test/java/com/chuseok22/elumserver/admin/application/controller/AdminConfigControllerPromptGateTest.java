@@ -80,4 +80,15 @@ class AdminConfigControllerPromptGateTest {
 
     verifyNoInteractions(promptLocaleGate);
   }
+
+  @Test
+  @DisplayName("프롬프트 게이트(E-CFG-005)가 서버 문구 파일 검사(E-CFG-004)보다 먼저 거절한다")
+  void promptGate_runsBeforePhrasesCheck() {
+    doThrow(new CustomException(ErrorCode.CONTENT_LOCALE_PROMPT_MISSING)).when(promptLocaleGate).requireReady(any());
+
+    controller.update(ConfigKey.ENABLED_CONTENT_LOCALES, "ko,en,ja,zh,es", null, null, redirect);
+
+    assertThat((String) redirect.getFlashAttributes().get("errorMessage"))
+      .contains("E-CFG-005").doesNotContain("E-CFG-004");
+  }
 }
