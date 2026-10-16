@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/state/busy_state_mixin.dart';
-import '../../../core/text/keep_words.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
@@ -23,6 +22,7 @@ import 'widgets/guardian_person_row.dart';
 import 'widgets/people_action_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
+import '../../../core/widgets/kept_text.dart';
 import '../../member/application/member_providers.dart';
 import '../../../core/router/routes.dart';
 
@@ -234,12 +234,12 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
           children: [
             // 몇 명인지 모르면(목록 전) 제목 없이 설명만
             if (guardians != null)
-              Text(
+              KeptText(
                 context.l10n.guardiansPeopleHeader(guardians.length),
                 style: context.typo.peopleHeading.copyWith(color: context.colors.peopleTextPrimary),
               ),
             SizedBox(height: _headingToCaptionGap.h),
-            _KeptText(
+            KeptText(
               context.l10n.guardiansIntro,
               style: context.typo.peopleCaption.copyWith(color: context.colors.peopleTextSecondary),
             ),
@@ -283,7 +283,7 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
           SizedBox(height: _rowGap.h),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: _headerInset.w),
-            child: _KeptText(
+            child: KeptText(
               context.l10n.guardiansAloneHint,
               style: context.typo.peopleCaption.copyWith(color: context.colors.peopleTextSecondary),
             ),
@@ -334,21 +334,6 @@ class _GuardiansScreenState extends ConsumerState<GuardiansScreen>
       ),
     ];
   }
-}
-
-/// 어절 단위로 줄바꿈하는 글. 낭독기에는 표시가 섞이지 않은 원문을 읽게 한다.
-class _KeptText extends StatelessWidget {
-  const _KeptText(this.text, {required this.style});
-
-  final String text;
-  final TextStyle style;
-
-  @override
-  Widget build(BuildContext context) => Text(
-    keepWords(text, locale: context.appLocale),
-    semanticsLabel: text,
-    style: style,
-  );
 }
 
 class _Loading extends StatelessWidget {

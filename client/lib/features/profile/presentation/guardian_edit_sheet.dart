@@ -50,9 +50,10 @@ class _GuardianEditSheetState extends State<_GuardianEditSheet> {
   /// 서버가 막는 길이 (넘기면 400 이라 입력에서 미리 막음)
   static const _maxNameLength = 20;
 
-  /// 시안 위치: 손잡이 아래 제목까지 · 시트 바닥 여백 (기기 홈 인디케이터 21 제외)
+  /// 시안 위치: 시트 윗변에서 제목까지 · 저장 버튼 아래에서 화면 바닥까지
+  /// (시안 시트 높이 445 = 화면 852 - 407 이 안전영역을 포함하므로 기기 안전영역을 더하지 않음)
   static const _topPadding = 40.0;
-  static const _bottomPadding = 35.0;
+  static const _bottomPadding = 56.0;
   static const _sheetPadH = 16.0;
 
   /// 시트 윗변에서 손잡이 윗변까지 (시안 PNG 실측 12)
@@ -103,7 +104,7 @@ class _GuardianEditSheetState extends State<_GuardianEditSheet> {
             _sheetPadH.w,
             _topPadding.h,
             _sheetPadH.w,
-            _bottomPadding.h + MediaQuery.paddingOf(context).bottom,
+            _bottomPadding.h,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -170,8 +171,8 @@ class _NameField extends StatelessWidget {
   final String hintText;
   final int maxLength;
 
-  /// 글자 시작선 (칸 왼쪽 끝에서)
-  static const _padStart = 24.0;
+  /// 시안 글자 시작선은 칸 왼쪽에서 24. 입력 위젯이 4를 더 들여 쓰므로 그만큼 뺌
+  static const _padStart = 20.0;
 
   @override
   Widget build(BuildContext context) {

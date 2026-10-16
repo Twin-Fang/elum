@@ -1,5 +1,6 @@
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/kept_text.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
@@ -8,6 +9,7 @@ import 'package:elum/features/profile/presentation/invite_code_screen.dart';
 import 'package:elum/features/profile/presentation/guardian_edit_sheet.dart';
 import 'package:elum/features/profile/presentation/widgets/guardian_person_row.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -82,6 +84,27 @@ void main() {
     expect(find.text('나'), findsOneWidget);
   });
 
+  /// 마지막 줄에 남은 글 (끊지 말라는 표시 제외)
+  String lastLineOf(WidgetTester tester, String wholeText) {
+    // 끊지 말라는 표시가 섞인 글이라 원문(KeptText.text)으로 위젯을 찾는다
+    final keptText = find.byWidgetPredicate((w) => w is KeptText && w.text.contains(wholeText));
+    final paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(of: keptText, matching: find.byType(RichText)),
+    );
+    final text = paragraph.text.toPlainText();
+    // 맨 아래 줄 왼쪽 끝 글자부터 끝까지
+    final start = paragraph.getPositionForOffset(Offset(0, paragraph.size.height - 1)).offset;
+    return text.substring(start).replaceAll('\u2060', '').trim();
+  }
+
+  testWidgets('접근성 최대 글꼴(3.0)에서 머리 글과 초대 줄이 어절 중간에서 꺾이지 않는다', (tester) async {
+    await pump(tester, Routes.guardianPeople, const GuardiansScreen(), scale: 3.0);
+
+    // `2` 와 `명`, `초대하` 와 `기` 로 갈라지지 않고 띄어쓰기에서 꺾인다
+    expect(lastLineOf(tester, '함께 돌보는 사람'), endsWith('2명'));
+    expect(lastLineOf(tester, '다른 보호자 초대하기'), endsWith('초대하기'));
+  });
+
   testWidgets('이름 변경 시트는 글꼴 2.0 에서 넘침 없이 저장 버튼이 화면 안에 닿는다', (tester) async {
     await pump(tester, Routes.guardianPeople, const GuardiansScreen());
 
@@ -102,9 +125,9 @@ void main() {
     repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
     await pump(tester, Routes.guardianPeople, const GuardiansScreen());
 
-    await tester.ensureVisible(find.text('함께 돌보기 그만두기'));
+    await tester.ensureVisible(findKept('함께 돌보기 그만두기', exact: true));
     await tester.pump();
-    await tester.tap(find.text('함께 돌보기 그만두기'));
+    await tester.tap(findKept('함께 돌보기 그만두기', exact: true));
     await tester.pumpAndSettle();
 
     expect(findKept('되돌릴 수 없어요'), findsOneWidget);

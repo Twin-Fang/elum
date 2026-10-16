@@ -66,17 +66,17 @@ class GuardianPersonRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: context.typo.peopleRowName.copyWith(color: colors.peopleTextPrimary),
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  // 아주 큰 글자에서 칩 둘이 한 줄에 못 들어가면 칩끼리도 줄을 바꿈
+                  Wrap(
+                    spacing: _chipToChipGap.w,
+                    runSpacing: _chipToChipGap.h,
                     children: [
-                      if (guardian.me) ...[
+                      if (guardian.me)
                         _PersonChip(
                           label: context.l10n.guardiansMeBadge,
                           background: colors.peopleMeBadgeBg,
                           foreground: colors.peopleMeBadgeText,
                         ),
-                        SizedBox(width: _chipToChipGap.w),
-                      ],
                       _PersonChip(
                         label: guardian.kind.label,
                         background: isCaregiver

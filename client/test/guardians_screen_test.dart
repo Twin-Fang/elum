@@ -112,7 +112,7 @@ void main() {
       expect(find.textContaining('E-NET-OFFLINE'), findsOneWidget);
       expect(find.textContaining('다시 시도'), findsOneWidget);
       // 몇 명인지 모르면 "마지막 보호자"인지 말할 수 없다 — 누르게 두지 않는다
-      await tester.tap(find.text('함께 돌보기 그만두기'));
+      await tester.tap(findKept('함께 돌보기 그만두기', exact: true));
       await tester.pumpAndSettle();
       expect(find.text('함께 돌보기를 그만둘까요?'), findsNothing);
 
@@ -141,7 +141,7 @@ void main() {
     testWidgets('먼저 무엇이 사라지고 무엇이 남는지 말한다 — 확인 전에는 아무것도 보내지 않는다', (tester) async {
       await open(tester);
 
-      await tester.tap(find.text('함께 돌보기 그만두기'));
+      await tester.tap(findKept('함께 돌보기 그만두기', exact: true));
       await tester.pumpAndSettle();
 
       expect(find.text('함께 돌보기를 그만둘까요?'), findsOneWidget);
@@ -158,7 +158,7 @@ void main() {
       repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true, displayName: '엄마')]);
       await open(tester);
 
-      await tester.tap(find.text('함께 돌보기 그만두기'));
+      await tester.tap(findKept('함께 돌보기 그만두기', exact: true));
       await tester.pumpAndSettle();
 
       expect(findKept('함께하는 보호자가 없어요'), findsOneWidget);
@@ -174,7 +174,7 @@ void main() {
       repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
       await open(tester);
 
-      await tester.tap(find.text('함께 돌보기 그만두기'));
+      await tester.tap(findKept('함께 돌보기 그만두기', exact: true));
       await tester.pumpAndSettle();
       await tester.tap(find.text('그만두기'));
       await tester.pumpAndSettle();
@@ -188,7 +188,7 @@ void main() {
       repo.leaveFailure = serverFailure(500, ServerErrorCode.internalServerError, '잠시 후 다시 시도해주세요.');
       await open(tester);
 
-      await tester.tap(find.text('함께 돌보기 그만두기'));
+      await tester.tap(findKept('함께 돌보기 그만두기', exact: true));
       await tester.pumpAndSettle();
       await tester.tap(find.text('그만두기'));
       await tester.pumpAndSettle();

@@ -8,6 +8,7 @@ import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_spinner.dart';
+import '../../../../core/widgets/kept_text.dart';
 
 /// 흰 카드 한 장에 [PeopleActionRow] 를 쌓음 (초대 · 그만두기). 줄 사이 선 없음
 class PeopleActionCard extends StatelessWidget {
@@ -84,7 +85,8 @@ class PeopleActionRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  // 큰 글자에서 어절 중간(`초대하` / `기`)이 아니라 띄어쓰기에서 꺾이게 함
+                  KeptText(
                     label,
                     style: isDestructive
                         ? typo.peopleRowName.copyWith(color: colors.settingsDestructive)
@@ -92,7 +94,7 @@ class PeopleActionRow extends StatelessWidget {
                   ),
                   if (subtitle != null) ...[
                     SizedBox(height: _subtitleGap.h),
-                    Text(
+                    KeptText(
                       subtitle,
                       style: typo.peopleCaption.copyWith(color: colors.peopleTextSecondary),
                     ),
