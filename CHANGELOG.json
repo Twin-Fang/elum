@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-16T07:38:04Z",
-    "currentVersion": "2.33.1",
+    "lastUpdated": "2026-10-16T08:10:09Z",
+    "currentVersion": "2.33.2",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 243
+    "totalReleases": 244
   },
   "releases": [
+    {
+      "version": "2.33.2",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-16",
+      "pr_number": 686,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 설정 화면이 새로운 디자인으로 바뀌었어요\n  * 이번 주 AI 생성 크레딧 카드가 더 보기 쉬워졌어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "설정 화면이 새로운 디자인으로 바뀌었어요",
+            "이번 주 AI 생성 크레딧 카드가 더 보기 쉬워졌어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.33.1",
       "project_type": "flutter",
