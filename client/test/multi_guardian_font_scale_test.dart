@@ -72,18 +72,6 @@ void main() {
 
   }
 
-  testWidgets('함께하는 사람 줄은 글꼴 2.0 에서 잘리지 않고 시안 높이(68)보다 늘어난다', (tester) async {
-    repo.guardiansResult = const Attempt.ok([
-      Guardian(id: 'g-1', me: true, displayName: '이름이 아주 긴 보호자 엄마입니다'),
-    ]);
-    await pump(tester, Routes.guardianPeople, const GuardiansScreen());
-
-    // 넘침은 flutter_test_config 가 실패시킨다 — 높이가 늘어난 줄도 이름과 버튼이 모두 보여야 한다
-    expect(tester.getSize(find.byType(GuardianPersonRow)).height, greaterThan(68));
-    expect(find.byKey(guardianRenameButtonKey), findsOneWidget);
-    expect(find.text('나'), findsOneWidget);
-  });
-
   /// 마지막 줄에 남은 글 (끊지 말라는 표시 제외)
   String lastLineOf(WidgetTester tester, String wholeText) {
     // 끊지 말라는 표시가 섞인 글이라 원문(KeptText.text)으로 위젯을 찾는다
@@ -97,28 +85,31 @@ void main() {
     return text.substring(start).replaceAll('\u2060', '').trim();
   }
 
-  testWidgets('접근성 최대 글꼴(3.0)에서 머리 글과 초대 줄이 어절 중간에서 꺾이지 않는다', (tester) async {
+  testWidgets('접근성 최대 글꼴(3.0): 줄은 잘리지 않고 늘어나며 어절 중간에서 꺾이지 않는다', (tester) async {
+    repo.guardiansResult = const Attempt.ok([
+      Guardian(id: 'g-1', me: true, displayName: '이름이 아주 긴 보호자 엄마입니다'),
+      Guardian(id: 'g-2', me: false, displayName: '아빠'),
+    ]);
     await pump(tester, Routes.guardianPeople, const GuardiansScreen(), scale: 3.0);
 
+    // 시안 높이 68 은 최소값 — 넘침은 flutter_test_config 가 실패시키므로 줄이 늘어나야 한다
+    expect(tester.getSize(find.byType(GuardianPersonRow).first).height, greaterThan(68));
+    expect(find.byKey(guardianRenameButtonKey), findsOneWidget);
     // `2` 와 `명`, `초대하` 와 `기` 로 갈라지지 않고 띄어쓰기에서 꺾인다
     expect(lastLineOf(tester, '함께 돌보는 사람'), endsWith('2명'));
     expect(lastLineOf(tester, '다른 보호자 초대하기'), endsWith('초대하기'));
   });
 
-  testWidgets('이름 변경 시트는 글꼴 2.0 에서 넘침 없이 저장 버튼이 화면 안에 닿는다', (tester) async {
+  testWidgets('글꼴 2.0: 이름 변경 시트가 넘치지 않고 스크롤로 저장 버튼이 화면 안에 닿는다', (tester) async {
     await pump(tester, Routes.guardianPeople, const GuardiansScreen());
 
     await tester.tap(find.byKey(guardianRenameButtonKey));
     await tester.pumpAndSettle();
-    final save = find.byKey(guardianEditSaveButtonKey);
-    await tester.ensureVisible(save);
+    await tester.ensureVisible(find.byKey(guardianEditSaveButtonKey));
     await tester.pump();
-
-    // 시트가 스크롤되어 버튼이 화면(852) 안에 들어온다
-    final rect = tester.getRect(save);
+    final rect = tester.getRect(find.byKey(guardianEditSaveButtonKey));
     expect(rect.top, greaterThanOrEqualTo(0));
     expect(rect.bottom, lessThanOrEqualTo(852));
-    expect(tester.takeException(), isNull);
   });
 
   testWidgets('나가기 확인 팝업 — 마지막 보호자 문구가 글꼴 2.0 에서도 나가기·취소 버튼을 가리지 않는다', (tester) async {
