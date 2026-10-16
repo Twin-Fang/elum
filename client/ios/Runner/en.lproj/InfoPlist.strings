@@ -1,0 +1,4 @@
+/* 권한 안내 문구 (영어): Info.plist 기본 문구(한국어)를 기기 언어가 영어일 때 덮어씀 */
+"NSCameraUsageDescription" = "Elum uses the camera to take a photo to use as a card picture.";
+"NSPhotoLibraryUsageDescription" = "Elum uses your photo library to choose a photo to use as a card picture.";
+"NSUserTrackingUsageDescription" = "This is used to show ads that suit the guardian screen. Elumi's information is not used.";
