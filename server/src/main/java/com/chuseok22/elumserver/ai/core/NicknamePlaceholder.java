@@ -2,7 +2,6 @@ package com.chuseok22.elumserver.ai.core;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
@@ -185,15 +184,15 @@ public final class NicknamePlaceholder {
     }
   }
 
-  /// ko 외 언어: 입력 글에 적힌 실제 이름을 자리표시로 바꾼다. 한 글자 이름·자리표시 안에 들어가는 이름은
-  /// 건드리지 않는다(ko 와 같은 안전장치).
+  /// ko 외 언어: 입력 글에 적힌 실제 이름을 자리표시로 바꾼다. 한 글자 이름·자리표시와 같은 이름은
+  /// 건드리지 않는다(낱말 경계로 찾으므로 자리표시의 일부인 짧은 이름도 마스킹한다).
   private static String maskDirect(String text, String nickname, String placeholder) {
     if (text == null || isBlank(nickname)) {
       return text;
     }
     String name = nickname.trim();
-    boolean isInsidePlaceholder = placeholder.toLowerCase(Locale.ROOT).contains(name.toLowerCase(Locale.ROOT));
-    if (name.length() < 2 || isInsidePlaceholder || !text.contains(name)) {
+    boolean isPlaceholderItself = placeholder.equalsIgnoreCase(name);
+    if (name.length() < 2 || isPlaceholderItself || !text.contains(name)) {
       return text;
     }
     try {

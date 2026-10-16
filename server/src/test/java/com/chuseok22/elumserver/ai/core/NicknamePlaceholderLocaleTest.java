@@ -57,7 +57,12 @@ class NicknamePlaceholderLocaleTest {
       Arguments.of(AppLocale.ZH, "小明带上雨伞", "小明", "Elumi带上雨伞"),
       // 한 글자 이름, 자리표시 안에 들어가는 이름은 건드리지 않는다
       Arguments.of(AppLocale.EN, "A runs", "A", "A runs"),
-      Arguments.of(AppLocale.EN, "Elu runs", "Elu", "Elu runs"),
+      // 자리표시의 일부인 짧은 이름도 낱말 경계로 찾아 가린다
+      Arguments.of(AppLocale.EN, "Mi runs", "Mi", "Elumi runs"),
+      Arguments.of(AppLocale.EN, "Lu runs", "Lu", "Elumi runs"),
+      Arguments.of(AppLocale.EN, "Eli runs", "Eli", "Elumi runs"),
+      Arguments.of(AppLocale.EN, "Elu runs", "Elu", "Elumi runs"),
+      // 자리표시와 같은 이름은 그대로 둔다
       Arguments.of(AppLocale.EN, "Elumi runs", "Elumi", "Elumi runs")
     );
   }
