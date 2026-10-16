@@ -16,6 +16,7 @@ import 'package:go_router/go_router.dart';
 
 import 'helpers/device_viewport.dart';
 import 'helpers/kept_text_finder.dart';
+import 'helpers/line_breaks.dart';
 import 'helpers/profile_fixtures.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
@@ -272,6 +273,15 @@ void main() {
       // 입력 글자는 칸 왼쪽에서 24 (시안 글자 x 40 - 칸 x 16). 입력 위젯이 4를 더 들이므로 28 로 밀리기 쉽다
       final fieldLeft = tester.getTopLeft(find.byKey(guardianEditNameFieldKey)).dx;
       expect(tester.getTopLeft(find.byType(EditableText)).dx - fieldLeft, closeTo(24, 0.5));
+    });
+
+    testWidgets('큰 글자(2.0)에서도 시트 설명이 어절 중간에서 갈라지지 않는다', (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await open(tester, bottomInset: 34);
+      await openSheet(tester);
+
+      expectBreaksOnlyAtSpaces(tester, findKept('이룸이를 함께 돌보는 사람에게'));
     });
 
     testWidgets('저장하지 못하면 이유와 코드를 보인다', (tester) async {

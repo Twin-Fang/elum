@@ -7,6 +7,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../core/widgets/elum_button.dart';
+import '../../../core/widgets/kept_text.dart';
 import '../domain/guardian_member.dart';
 
 /// 시트 안 위젯을 찾는 키 (테스트 · 문구와 무관하게 찾기 위함)
@@ -119,7 +120,7 @@ class _GuardianEditSheetState extends State<_GuardianEditSheet> {
                       style: typo.sheetTitle.copyWith(color: colors.sheetTitleText, letterSpacing: 0),
                     ),
                     SizedBox(height: _titleToDescriptionGap.h),
-                    Text(
+                    KeptText(
                       context.l10n.guardiansEditDescription,
                       style: typo.peopleEditDescription.copyWith(color: colors.peopleTextPrimary),
                     ),
