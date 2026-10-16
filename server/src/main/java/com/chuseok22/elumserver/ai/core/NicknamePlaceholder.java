@@ -2,18 +2,22 @@ package com.chuseok22.elumserver.ai.core;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * 이룸이 이름을 AI 에 보내지 않기 위한 자리표시 처리.
  *
- * <p>AI 에는 이름 대신 {@link #PLACEHOLDER}({@code 이룸이})를 보내고, 응답에 나온 {@code 이룸이}를
- * 서버가 실제 이름으로 되돌린다({@link #restore}). 개인화(제목·질문에 이름이 들어감)는 그대로 둔 채
+ * <p>AI 에는 이름 대신 언어별 자리표시({@link #placeholderFor}: ko {@link #PLACEHOLDER} {@code 이룸이},
+ * 그 밖 {@link #GLOBAL_PLACEHOLDER} {@code Elumi})를 보내고, 응답에 나온 자리표시를 서버가 실제 이름으로
+ * 되돌린다({@link #restore}). 개인화(제목·질문에 이름이 들어감)는 그대로 둔 채
  * Google·OpenAI 로그에 이름이 남지 않게 하려는 것이다.
  *
- * <p>자리표시가 받침 없는 {@code 이}로 끝나 AI 는 늘 {@code 이룸이가·이룸이는}처럼 한 가지 조사로 쓴다.
+ * <p>ko: 자리표시가 받침 없는 {@code 이}로 끝나 AI 는 늘 {@code 이룸이가·이룸이는}처럼 한 가지 조사로 쓴다.
  * 되돌릴 때 실제 이름의 마지막 글자 받침에 맞춰 조사를 다시 고른다. 영문·숫자 등 받침을 알 수 없는
- * 끝 글자는 받침 없음으로 본다.
+ * 끝 글자는 받침 없음으로 본다. ko 외 언어: 조사가 없어 자리표시를 이름으로 그대로 바꾼다.
  *
  * <p>반대 방향({@link #mask})은 보호자가 입력한 글에 이름이 그대로 들어 있을 때 AI 로 나가기 전에
  * 자리표시로 바꾼다. 어느 쪽이든 던지지 않고, 이름이 비면 원문을 그대로 돌려준다.
@@ -68,11 +72,26 @@ public final class NicknamePlaceholder {
 
   /// AI 에 실을 닉네임. 이름이 있으면 자리표시, 없으면 null(없을 수 있다는 기존 계약을 지킨다).
   public static String forAi(String nickname) {
-    return isBlank(nickname) ? null : PLACEHOLDER;
+    return forAi(nickname, AppLocale.KO);
+  }
+
+  public static String forAi(String nickname, AppLocale locale) {
+    return isBlank(nickname) ? null : placeholderFor(locale);
   }
 
   /// AI 응답 문장의 {@code 이룸이}를 실제 이름으로 바꾼다. 이름이 비었거나 바꿀 게 없거나 실패하면 원문 그대로.
   public static String restore(String text, String nickname) {
+    return restore(text, nickname, AppLocale.KO);
+  }
+
+  /// ko 는 받침에 맞춰 조사를 다시 고르고, 그 밖의 언어는 조사가 없어 자리표시를 이름으로 그대로 바꾼다.
+  public static String restore(String text, String nickname, AppLocale locale) {
+    return locale == AppLocale.KO
+      ? restoreKorean(text, nickname)
+      : restoreDirect(text, nickname, placeholderFor(locale));
+  }
+
+  private static String restoreKorean(String text, String nickname) {
     if (text == null || isBlank(nickname) || !text.contains(PLACEHOLDER)) {
       return text;
     }
@@ -105,6 +124,16 @@ public final class NicknamePlaceholder {
   /// 입력 글에 적힌 실제 이름을 자리표시로 바꾼다(AI 로 나가기 전). 이름이 비었거나 한 글자이거나
   /// 자리표시 안에 들어가는 이름이면(자리표시를 깨뜨린다) 건드리지 않는다.
   public static String mask(String text, String nickname) {
+    return mask(text, nickname, AppLocale.KO);
+  }
+
+  public static String mask(String text, String nickname, AppLocale locale) {
+    return locale == AppLocale.KO
+      ? maskKorean(text, nickname)
+      : maskDirect(text, nickname, placeholderFor(locale));
+  }
+
+  private static String maskKorean(String text, String nickname) {
     if (text == null || isBlank(nickname)) {
       return text;
     }
@@ -139,6 +168,56 @@ public final class NicknamePlaceholder {
       log.warn("이룸이 이름 가리기 실패, 원문 그대로 둔다", e);
       return text;
     }
+  }
+
+  /// ko 외 언어: 조사가 없으므로 자리표시를 이름으로 그대로 바꾼다. ASCII 낱말 경계만 본다 —
+  /// 일본어·중국어는 자리표시 바로 뒤에 글자(は·的)가 붙어도 이름만 바꿔야 해서 \p{L} 경계를 쓰면 안 된다.
+  private static String restoreDirect(String text, String nickname, String placeholder) {
+    if (text == null || isBlank(nickname) || !text.contains(placeholder)) {
+      return text;
+    }
+    try {
+      return asciiWord(placeholder).matcher(text).replaceAll(Matcher.quoteReplacement(nickname.trim()));
+    } catch (RuntimeException e) {
+      // 치환만 포기한다 — AI 결과는 그대로 쓴다(자리표시가 보일 뿐 일과 생성은 이어진다).
+      log.warn("[nickname restore] failed, keeping original text", e);
+      return text;
+    }
+  }
+
+  /// ko 외 언어: 입력 글에 적힌 실제 이름을 자리표시로 바꾼다. 한 글자 이름·자리표시 안에 들어가는 이름은
+  /// 건드리지 않는다(ko 와 같은 안전장치).
+  private static String maskDirect(String text, String nickname, String placeholder) {
+    if (text == null || isBlank(nickname)) {
+      return text;
+    }
+    String name = nickname.trim();
+    boolean isInsidePlaceholder = placeholder.toLowerCase(Locale.ROOT).contains(name.toLowerCase(Locale.ROOT));
+    if (name.length() < 2 || isInsidePlaceholder || !text.contains(name)) {
+      return text;
+    }
+    try {
+      Pattern pattern = isSpaceDelimited(name)
+        ? Pattern.compile("(?<![\\p{L}\\p{N}])" + Pattern.quote(name) + "(?![\\p{L}\\p{N}])")
+        : Pattern.compile(Pattern.quote(name));
+      return pattern.matcher(text).replaceAll(Matcher.quoteReplacement(placeholder));
+    } catch (RuntimeException e) {
+      log.warn("[nickname mask] failed, keeping original text", e);
+      return text;
+    }
+  }
+
+  private static Pattern asciiWord(String token) {
+    return Pattern.compile("(?<![A-Za-z0-9])" + Pattern.quote(token) + "(?![A-Za-z0-9])");
+  }
+
+  /// 띄어쓰기로 낱말이 갈리는 문자(라틴 등)로만 된 이름인가. 한자·가나·한글 이름은 뒤에 조사·어미가
+  /// 바로 붙어 경계를 볼 수 없으므로 글자 그대로 찾는다.
+  private static boolean isSpaceDelimited(String name) {
+    return name.codePoints().noneMatch(codePoint -> switch (Character.UnicodeScript.of(codePoint)) {
+      case HAN, HIRAGANA, KATAKANA, HANGUL -> true;
+      default -> false;
+    });
   }
 
   /// 문장 끝이거나 한글이 아니거나, 이름 뒤에 올 만한 조사 글자면 true.

@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.ai.core.FluxSeed;
+import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -296,8 +297,8 @@ public class RoutineService {
     // 보호자가 카드에 이룸이 이름을 적었을 수 있다 — 글 AI·그림 AI 로 나가는 값만 자리표시로 바꾸고 저장값은 그대로 둔다.
     String nickname = routine.getProfile().getNickname();
     step.setPictogramId(pictogramPicker.pick(
-      caller.memberId(), NicknamePlaceholder.mask(step.getTitle(), nickname),
-      NicknamePlaceholder.mask(step.getDescription(), nickname)));
+      caller.memberId(), NicknamePlaceholder.mask(step.getTitle(), nickname, AiCallContext.currentContentLocale()),
+      NicknamePlaceholder.mask(step.getDescription(), nickname, AiCallContext.currentContentLocale())));
     // 맨 뒤에 붙인다. 뒤이어 renumberSteps가 1..N으로 정규화하므로
     // 기존 값이 비어 있거나 겹쳐 있어도 결과는 연속값이 된다.
     step.setStepOrder(steps.size() + 1);
@@ -342,7 +343,7 @@ public class RoutineService {
     // 커밋된 뒤에 그림을 만든다. 트랜잭션 안에서 돌리면 Gemini 호출(수 초) 동안
     // DB 커넥션을 붙잡고, 롤백되면 방금 쓴 이미지 파일이 고아로 남는다. 롤백되면 예약도 함께 사라진다.
     routineStepImageFiller.scheduleAfterCommit(
-      caller.memberId(), routineId, step.getId(), NicknamePlaceholder.mask(step.getDescription(), nickname),
+      caller.memberId(), routineId, step.getId(), NicknamePlaceholder.mask(step.getDescription(), nickname, AiCallContext.currentContentLocale()),
       routine.getProfile().getCharacter(),
       FluxSeed.routineKey(routine.getProfile().getId(), routine.getTitle()), creditJobId,
       routine.getProfile().getImageStyle());

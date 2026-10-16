@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.ChildProfileInput;
+import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
@@ -234,11 +235,11 @@ public class GeminiTextClient implements TextGenerationClient {
     String routineText, String nickname, Set<SupportGoal> supportGoals, List<String> answers
   ) {
     List<String> maskedAnswers = answers == null ? List.<String>of()
-      : answers.stream().map(answer -> NicknamePlaceholder.mask(answer, nickname)).toList();
+      : answers.stream().map(answer -> NicknamePlaceholder.mask(answer, nickname, AiCallContext.currentContentLocale())).toList();
     RoutineCreateAiInput input = new RoutineCreateAiInput(
       "CREATE_ROUTINE",
-      NicknamePlaceholder.mask(routineText, nickname),
-      new ChildProfileInput(NicknamePlaceholder.forAi(nickname), supportGoals == null ? Set.of() : supportGoals),
+      NicknamePlaceholder.mask(routineText, nickname, AiCallContext.currentContentLocale()),
+      new ChildProfileInput(NicknamePlaceholder.forAi(nickname, AiCallContext.currentContentLocale()), supportGoals == null ? Set.of() : supportGoals),
       maskedAnswers,
       pictogramCatalog.ids()
     );
@@ -259,8 +260,8 @@ public class GeminiTextClient implements TextGenerationClient {
 
   public String buildQuestionUserContent(String routineText, String nickname, Set<SupportGoal> supportGoals) {
     RoutineQuestionAiInput input = new RoutineQuestionAiInput(
-      "GENERATE_ROUTINE_QUESTIONS", NicknamePlaceholder.mask(routineText, nickname),
-      new ChildProfileInput(NicknamePlaceholder.forAi(nickname), supportGoals == null ? Set.of() : supportGoals)
+      "GENERATE_ROUTINE_QUESTIONS", NicknamePlaceholder.mask(routineText, nickname, AiCallContext.currentContentLocale()),
+      new ChildProfileInput(NicknamePlaceholder.forAi(nickname, AiCallContext.currentContentLocale()), supportGoals == null ? Set.of() : supportGoals)
     );
     return toJson(input);
   }

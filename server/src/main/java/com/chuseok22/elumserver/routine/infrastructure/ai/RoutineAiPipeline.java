@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
 import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
 import com.chuseok22.elumserver.ai.core.FluxSeed;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
+import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionDraft;
 import com.chuseok22.elumserver.ai.core.RoutineStepDraft;
@@ -72,7 +73,7 @@ public class RoutineAiPipeline {
     // 카드 추가가 저장된 제목으로 같은 seed 를 만들어 같은 캐릭터를 그리기 때문이다(seed 는 해시값이라 이름이 나가지 않는다).
     RoutineGenerationResult result = buildResult(
       draft, characterType, ImageStyle.orDefault(imageStyle), Map.of(),
-      FluxSeed.routineKey(profileId, NicknamePlaceholder.restore(draft.title(), nickname)));
+      FluxSeed.routineKey(profileId, NicknamePlaceholder.restore(draft.title(), nickname, AiCallContext.currentContentLocale())));
     return restoreNickname(result, nickname);
   }
 
@@ -82,12 +83,12 @@ public class RoutineAiPipeline {
     List<GeneratedStep> steps = result.steps().stream()
       .map(step -> new GeneratedStep(
         step.order(),
-        NicknamePlaceholder.restore(step.title(), nickname),
-        NicknamePlaceholder.restore(step.description(), nickname),
+        NicknamePlaceholder.restore(step.title(), nickname, AiCallContext.currentContentLocale()),
+        NicknamePlaceholder.restore(step.description(), nickname, AiCallContext.currentContentLocale()),
         step.imagePath(),
         step.pictogramId()))
       .toList();
-    return new RoutineGenerationResult(NicknamePlaceholder.restore(result.title(), nickname), steps, result.batchId());
+    return new RoutineGenerationResult(NicknamePlaceholder.restore(result.title(), nickname, AiCallContext.currentContentLocale()), steps, result.batchId());
   }
 
   private static final int MIN_OPTIONS = 3;
@@ -134,7 +135,7 @@ public class RoutineAiPipeline {
           RoutineQuestionDraft.QuestionItem::supportGoal,
           item -> new RoutineQuestionResult.QuestionResultItem(
             // AI 가 자리표시로 쓴 이름을 질문·선택지에서 되돌린다
-            NicknamePlaceholder.restore(item.question(), nickname), toOptionResults(item.options(), nickname)),
+            NicknamePlaceholder.restore(item.question(), nickname, AiCallContext.currentContentLocale()), toOptionResults(item.options(), nickname)),
           (first, second) -> first // 같은 supportGoal이 중복되면 먼저 나온 것만 채택한다.
         ));
     } catch (Exception e) {
@@ -162,7 +163,7 @@ public class RoutineAiPipeline {
     return options.stream()
       .filter(option -> option.label() != null && !option.label().isBlank())
       .map(option -> new RoutineQuestionResult.QuestionResultItem.OptionResult(
-        option.emoji() == null ? "" : option.emoji(), NicknamePlaceholder.restore(option.label(), nickname)
+        option.emoji() == null ? "" : option.emoji(), NicknamePlaceholder.restore(option.label(), nickname, AiCallContext.currentContentLocale())
       ))
       .toList();
   }
