@@ -151,7 +151,7 @@ void main() {
     );
   });
 
-  testWidgets('설정 — 약관 목록 (Figma 1027:4683)', (tester) async {
+  testWidgets('설정 — 약관 목록 (Figma 1274:9315)', (tester) async {
     await _pump(
       tester,
       const ConsentDocumentListScreen(),
@@ -161,7 +161,7 @@ void main() {
     );
     await expectLater(
       find.byType(ConsentDocumentListScreen),
-      matchesGoldenFile('figma/settings_terms_1027-4683.png'),
+      matchesGoldenFile('figma/settings_terms_1274-9315.png'),
     );
   });
 
