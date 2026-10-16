@@ -1,0 +1,67 @@
+{
+  "language": "ko",
+  "brand": "이룸 ELUM",
+  "tagline": "하루 일과를 행동 카드로 한 장씩",
+  "featureGraphic": {
+    "title": "하루 일과를\n행동 카드로 한 장씩",
+    "subtitle": "보호자가 만들고, 이룸이가 따라 해요",
+    "screen": "child_card",
+    "art": "hero"
+  },
+  "slides": [
+    {
+      "id": "01_card",
+      "screen": "child_card",
+      "eyebrow": "행동 카드",
+      "title": "하루 일과를\n행동 카드로 한 장씩",
+      "subtitle": "그림과 짧은 문장으로\n오늘 할 일을 차례대로 보여 줘요",
+      "theme": "peach",
+      "art": "scene_01"
+    },
+    {
+      "id": "02_input",
+      "screen": "input",
+      "eyebrow": "일과 만들기",
+      "title": "말하듯 한 줄 적으면\n카드가 만들어져요",
+      "subtitle": "“내일 비 오는 날 등교 준비”처럼 적으면\n작은 행동 단계로 나눠 줘요",
+      "theme": "butter",
+      "art": "scene_02"
+    },
+    {
+      "id": "03_review",
+      "screen": "card_review",
+      "eyebrow": "보호자 확인",
+      "title": "보호자가 확인한 카드만\n이룸이에게 보여요",
+      "subtitle": "그림과 문장을 고치고\n순서를 바꾸고 카드를 더할 수 있어요",
+      "theme": "mint",
+      "art": "scene_03"
+    },
+    {
+      "id": "04_elumi",
+      "screen": "child_home",
+      "eyebrow": "이룸이 화면",
+      "title": "이룸이 휴대폰에서\n오늘 할 일을 한눈에",
+      "subtitle": "휴대폰 두 대를 연결하면\n보호자가 만든 일과가 바로 나타나요",
+      "theme": "lavender",
+      "art": "scene_04"
+    },
+    {
+      "id": "05_reward",
+      "screen": "reward",
+      "eyebrow": "별과 보상",
+      "title": "다 하면 별,\n끝까지 하면 약속한 보상",
+      "subtitle": "루미·루루·포포가\n함께 기뻐해 줘요",
+      "theme": "sky",
+      "art": "scene_05"
+    },
+    {
+      "id": "06_together",
+      "screen": "guardian_home",
+      "eyebrow": "함께 챙기기",
+      "title": "가족·선생님과\n하루를 함께 챙겨요",
+      "subtitle": "초대해서 같은 일과를 함께 보고\n지난 일과는 한 번에 다시 써요",
+      "theme": "cream",
+      "art": "scene_06"
+    }
+  ]
+}

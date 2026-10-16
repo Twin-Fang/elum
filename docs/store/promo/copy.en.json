@@ -1,0 +1,67 @@
+{
+  "language": "en",
+  "brand": "ELUM",
+  "tagline": "Daily routines, one action card at a time",
+  "featureGraphic": {
+    "title": "Daily routines,\none card at a time",
+    "subtitle": "Guardians make them, Elumi follows along",
+    "screen": "child_card",
+    "art": "hero"
+  },
+  "slides": [
+    {
+      "id": "01_card",
+      "screen": "child_card",
+      "eyebrow": "Action cards",
+      "title": "Daily routines,\none card at a time",
+      "subtitle": "Pictures and short sentences\nshow today's steps in order",
+      "theme": "peach",
+      "art": "scene_01"
+    },
+    {
+      "id": "02_input",
+      "screen": "input",
+      "eyebrow": "Make a routine",
+      "title": "Write one line,\nget action cards",
+      "subtitle": "Type it the way you'd say it,\nand it's split into small, easy steps",
+      "theme": "butter",
+      "art": "scene_02"
+    },
+    {
+      "id": "03_review",
+      "screen": "card_review",
+      "eyebrow": "Guardian check",
+      "title": "Only cards you've checked\nreach Elumi",
+      "subtitle": "Edit pictures and words,\nreorder steps, or add a card",
+      "theme": "mint",
+      "art": "scene_03"
+    },
+    {
+      "id": "04_elumi",
+      "screen": "child_home",
+      "eyebrow": "Elumi's screen",
+      "title": "Today's steps at a glance\non Elumi's phone",
+      "subtitle": "Link two phones and new routines\nshow up right away",
+      "theme": "lavender",
+      "art": "scene_04"
+    },
+    {
+      "id": "05_reward",
+      "screen": "reward",
+      "eyebrow": "Stars & rewards",
+      "title": "A star for each step,\na reward at the end",
+      "subtitle": "Lumi, Ruru and Popo\ncheer along",
+      "theme": "sky",
+      "art": "scene_05"
+    },
+    {
+      "id": "06_together",
+      "screen": "guardian_home",
+      "eyebrow": "Better together",
+      "title": "Look after the day\nwith family and teachers",
+      "subtitle": "Invite others to share routines,\nand reuse past ones in one tap",
+      "theme": "cream",
+      "art": "scene_06"
+    }
+  ]
+}
