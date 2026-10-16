@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.ai.core;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
+import java.util.function.Supplier;
 
 /**
  * AI 호출 로그에 회원을 연결하기 위한 컨텍스트 홀더.
@@ -50,6 +51,23 @@ public final class AiCallContext {
   public static AppLocale currentContentLocale() {
     AppLocale locale = CONTENT_LOCALE.get();
     return locale == null ? AppLocale.KO : locale;
+  }
+
+  /// 일과 언어를 세우고 action 을 실행한 뒤 반드시 비운다(예외 포함). 헤더가 아닌 일과 언어로 AI 를 부를 때 쓴다.
+  public static <T> T callWithContentLocale(AppLocale locale, Supplier<T> action) {
+    setContentLocale(locale);
+    try {
+      return action.get();
+    } finally {
+      setContentLocale(null);
+    }
+  }
+
+  public static void runWithContentLocale(AppLocale locale, Runnable action) {
+    callWithContentLocale(locale, () -> {
+      action.run();
+      return null;
+    });
   }
 
   // 요청 스레드는 풀에서 재사용되므로 진입점의 finally에서 반드시 비워야

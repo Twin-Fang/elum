@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.service;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.application.service.CardImageGenerator;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.credit.application.service.CreditReservationService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
@@ -70,11 +71,16 @@ public class RoutineStepImageFiller {
       releaseCredit(creditJobId, "트랜잭션 밖 — 그림 예약을 걸 수 없음");
       return;
     }
+    // 커밋 콜백은 요청 스레드의 언어가 비워진 뒤에 돈다 - 예약 때 잡아 그림 스레드에 세운다
+    AppLocale contentLocale = AiCallContext.currentContentLocale();
     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
       @Override
       public void afterCommit() {
         try {
-          executor.execute(() -> fill(memberId, routineId, stepId, description, characterType, seedKey, creditJobId, imageStyle));
+          executor.execute(() -> {
+            AiCallContext.setContentLocale(contentLocale);
+            fill(memberId, routineId, stepId, description, characterType, seedKey, creditJobId, imageStyle);
+          });
         } catch (RuntimeException e) {
           // 실행기가 거절하면(종료 중) 그림은 없다. 예약만 돌려준다.
           log.warn("추가 카드 그림 작업을 시작하지 못했다: routineId={}, stepId={}", routineId, stepId, e);

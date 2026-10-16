@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.service;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
 import com.chuseok22.elumserver.credit.application.service.CreditReservation;
@@ -81,6 +82,8 @@ public class RoutineCreateService {
     // AI 호출 로그에 요청 회원을 연결한다. finally에서 반드시 비워 스레드 재사용 시
     // 다른 회원에게 새어 들어가지 않게 한다.
     AiCallContext.setMemberId(caller.memberId());
+    // 질문도 일과가 될 언어로 묻는다 (create 와 같은 값)
+    AiCallContext.setContentLocale(contentLocaleForRequest());
     try {
       // 입력 글을 가공하지 않고 넘긴다 — 로컬 마스킹은 쓰지 않는다.
       RoutineAiPipeline.RoutineQuestionResult result =
@@ -148,7 +151,10 @@ public class RoutineCreateService {
     // 입력 글과 답변은 가공하지 않고 넘긴다 — 로컬 마스킹은 실패 시 원문을 넘기는 fail-open 이라 보장이 못 되고 호출마다 수 초가 걸린다.
     List<String> answers = request.answers() == null ? List.of() : request.answers();
     RoutineAiPipeline.RoutineGenerationResult generation;
+    // 일과 언어: AI 호출과 routine.language 가 이 한 값을 쓴다 (AI 호출 전에 정함)
+    AppLocale contentLocale = contentLocaleForRequest();
     AiCallContext.setMemberId(caller.memberId());
+    AiCallContext.setContentLocale(contentLocale);
     // 호출 기록에 작업 id 를 달아 작업 하나의 실제 USD 를 대조한다. 그림 가상 스레드에도 전파된다.
     AiCallContext.setCreditJobId(creditJobId);
     try {
@@ -166,9 +172,7 @@ public class RoutineCreateService {
 
     // 이룸이·만든 사람·순서 번호는 저장기가 이룸이 행을 잠근 뒤 채운다 (E17).
     Routine routine = new Routine();
-    // 일과의 콘텐츠 언어 - 만든 요청의 화면 언어를 켜진 언어 목록에 비춰 정한다. 보호자가 고르지 않는다.
-    // 헤더가 없는 옛 앱은 KO 라 지금과 같다. 필터가 심은 값이라 요청 스레드에서만 읽는다.
-    routine.setLanguage(enabledLocales.resolveContentLocale(CurrentLocale.get()));
+    routine.setLanguage(contentLocale);
     routine.setRawInputText(request.rawInputText());
     // 가공하지 않으므로 원문과 같다. 컬럼을 없애는 것은 마이그레이션이 필요해 따로 한다.
     routine.setSanitizedInputText(request.rawInputText());
@@ -206,6 +210,12 @@ public class RoutineCreateService {
     }
     return response.withCredit(new RoutineResponse.CreditUsage(
       saved.routine().getSteps().size(), imageCount, settlement.charged(), settlement.balanceAfter()));
+  }
+
+  /// 이번 요청이 만드는 일과의 콘텐츠 언어: 요청의 화면 언어 > 켜진 언어 목록에 비춰 결정 (보호자가 고르지 않음)
+  /// 헤더가 없는 옛 앱은 KO. 필터가 심은 값이라 요청 스레드에서만 읽는다.
+  AppLocale contentLocaleForRequest() {
+    return enabledLocales.resolveContentLocale(CurrentLocale.get());
   }
 
   /// 앱이 보낸 멱등 키. 없으면(구버전 앱) 서버가 만든다.

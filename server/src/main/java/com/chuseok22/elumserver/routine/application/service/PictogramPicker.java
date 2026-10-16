@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.service;
 import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
@@ -71,8 +72,10 @@ public class PictogramPicker {
         log.warn("AI 하루 비용 상한 — 픽토그램 고르기를 건너뛰고 폴백을 쓴다");
         return catalog.fallbackId();
       }
+      // 호출 스레드의 일과 언어를 가상 스레드로 직접 넘긴다
+      AppLocale locale = AiCallContext.currentContentLocale();
       String json = CompletableFuture
-        .supplyAsync(() -> callModel(memberId, title, description), executor)
+        .supplyAsync(() -> callModel(memberId, title, description, locale), executor)
         .get(timeout.toMillis(), TimeUnit.MILLISECONDS);
       String resolved = catalog.resolve(readPictogramId(json));
       if (resolved != null && !resolved.equals(catalog.fallbackId())) {
@@ -92,9 +95,10 @@ public class PictogramPicker {
     }
   }
 
-  // 요청 스레드가 아닌 가상 스레드라 회원 맥락을 다시 세워야 호출 기록에 회원이 남는다.
-  private String callModel(String memberId, String title, String description) {
+  // 요청 스레드가 아닌 가상 스레드라 회원·언어 맥락을 다시 세워야 호출 기록에 회원이 남고 일과 언어로 돈다.
+  private String callModel(String memberId, String title, String description, AppLocale locale) {
     AiCallContext.setMemberId(memberId);
+    AiCallContext.setContentLocale(locale);
     try {
       return textClientRouter.current().pickPictogramJson(title, description);
     } finally {
