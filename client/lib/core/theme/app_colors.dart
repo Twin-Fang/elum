@@ -880,7 +880,7 @@ class AppColors extends ThemeExtension<AppColors> {
     checkPending: Color(0xFFC9D6D4),
     rewardBackdropTop: Color(0xFF0C0D1A),
     rewardBackdropBottom: Color(0xFF242634),
-    routineDoneBackdropBottom: Color(0xFF39514D),
+    routineDoneBackdropBottom: Color(0xFF574D2B),
     rewardStar: Color(0xFFD0FF00),
     rewardStarGlow: Color(0x4DD0FF00),
     rewardStarHalo: Color(0xFFFFDD00),

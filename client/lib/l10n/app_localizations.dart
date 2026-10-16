@@ -3224,10 +3224,16 @@ abstract class AppLocalizations {
   /// **'일과를 끝냈어요!'**
   String get routineDoneTitle;
 
+  /// 일과 완료 화면 제목 아래 두 줄 안내. name 은 이룸이 호칭이고 조사는 받침과 무관하게 `를`로 고정한다
+  ///
+  /// In ko, this message translates to:
+  /// **'할 일을 모두 해낸\n{name}를 위해 준비했어요'**
+  String routineDoneMessage(String name);
+
   /// 일과 완료 화면 하단 버튼(누르면 이룸이 홈으로)
   ///
   /// In ko, this message translates to:
-  /// **'오예!'**
+  /// **'해냈어요!'**
   String get routineDoneButton;
 
   /// 보호자 → 이룸이 화면 전환의 암호 안내
