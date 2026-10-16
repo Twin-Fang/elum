@@ -1824,7 +1824,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineDoneTitle => 'Routine done!';
 
   @override
-  String get routineDoneButton => 'Yay!';
+  String routineDoneMessage(String name) {
+    return 'Made for $name,\nwho finished everything';
+  }
+
+  @override
+  String get routineDoneButton => 'I did it!';
 
   @override
   String get modeSwitchToChild => 'Enter the passcode to switch to Elumi mode';

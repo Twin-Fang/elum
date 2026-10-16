@@ -1154,22 +1154,31 @@ void main() {
     );
   });
 
-  // 일과완료 화면 (#490). 시안(1274:9831)은 보상 칩 `젤리 4개 먹기`를 함께 그린다.
-  // 진입 연출(FadeIn)이 끝난 뒤 한 장으로 고정한다.
+  // 일과완료 화면 (#490). 시안(1274:9831)은 보상 칩 `젤리 4개 먹기`와 이룸이 이름 `하늘이`를 그린다.
+  // 움직임을 끄고 정지 모양(마지막 안착 모양)을 한 장으로 고정한다.
   testWidgets('일과완료 (Figma 1274:9831)', (tester) async {
     await tester.pumpWidget(
-      ScreenUtilInit(
-        designSize: const Size(393, 852),
-        useInheritedMediaQuery: true,
-        builder: (context, _) => MaterialApp(
-          theme: AppTheme.light,
-          debugShowCheckedModeBanner: false,
-          builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(padding: deviceInsets),
-            child: child!,
+      ProviderScope(
+        overrides: [
+          testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+          memberProvider.overrideWith(
+            (ref) async => Member(nickname: '하늘이', totalStars: 15),
           ),
-          home: const RoutineDoneScreen(
-            reward: (emoji: '', text: '젤리 4개 먹기'),
+        ],
+        child: ScreenUtilInit(
+          designSize: const Size(393, 852),
+          useInheritedMediaQuery: true,
+          builder: (context, _) => MaterialApp(
+            theme: AppTheme.light,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(padding: deviceInsets),
+              child: child!,
+            ),
+            home: const RoutineDoneScreen(
+              reward: (emoji: '', text: '젤리 4개 먹기'),
+              isMotionEnabled: false,
+            ),
           ),
         ),
       ),

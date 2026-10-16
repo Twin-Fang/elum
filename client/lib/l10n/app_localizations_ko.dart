@@ -1746,7 +1746,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineDoneTitle => '일과를 끝냈어요!';
 
   @override
-  String get routineDoneButton => '오예!';
+  String routineDoneMessage(String name) {
+    return '할 일을 모두 해낸\n$name를 위해 준비했어요';
+  }
+
+  @override
+  String get routineDoneButton => '해냈어요!';
 
   @override
   String get modeSwitchToChild => '암호를 입력하면 이룸이 화면으로 바뀌어요';
