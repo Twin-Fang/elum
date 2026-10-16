@@ -37,7 +37,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CardImageGenerator {
 
-  private static final Pattern HANGUL = Pattern.compile("[\\uAC00-\\uD7A3\\u3131-\\u318E]");
+  // 영어 한 줄에 섞이면 안 되는 글자: 한글, 가나, 한자 (악센트 라틴 é·ñ 는 허용)
+  private static final Pattern NON_ENGLISH_SCRIPT = Pattern.compile(
+    "[\\uAC00-\\uD7A3\\u3131-\\u318E\\u3040-\\u30FF\\u3400-\\u4DBF\\u4E00-\\u9FFF]");
   // 한 줄이어야 한다. 이보다 길면 지시를 어긴 응답이라 보고 번역으로 돌린다.
   private static final int MAX_SCENE_LENGTH = 400;
 
@@ -86,7 +88,7 @@ public class CardImageGenerator {
         return fallbackToOpenAi(request, e);
       }
       if (scene == null) {
-        log.warn("번역 결과를 FLUX 에 쓸 수 없다(비었거나 한국어·너무 김) — 이 카드는 OpenAI 로 그린다");
+        log.warn("번역 결과를 FLUX 에 쓸 수 없다(비었거나 영어가 아닌 글자·너무 김) — 이 카드는 OpenAI 로 그린다");
         return fallbackToOpenAi(request, new IllegalStateException("번역 결과를 쓸 수 없음"));
       }
     }
@@ -123,7 +125,7 @@ public class CardImageGenerator {
       return fallbackToOpenAi(request, e);
     }
     if (scene == null) {
-      log.warn("실사 번역 결과를 FLUX 에 쓸 수 없다(비었거나 한국어·너무 김) — 이 카드는 OpenAI 로 그린다");
+      log.warn("실사 번역 결과를 FLUX 에 쓸 수 없다(비었거나 영어가 아닌 글자·너무 김) — 이 카드는 OpenAI 로 그린다");
       return fallbackToOpenAi(request, new IllegalStateException("번역 결과를 쓸 수 없음"));
     }
 
@@ -135,13 +137,13 @@ public class CardImageGenerator {
     }
   }
 
-  /// FLUX 에 넣을 수 있는 한 줄인가. 한국어가 섞이면 schnell 이 사람을 그렸다.
+  /// FLUX 에 넣을 수 있는 한 줄인가. 한글·가나·한자가 섞이면 schnell 이 사람을 그렸다.
   private String usableScene(String raw) {
     if (raw == null) {
       return null;
     }
     String line = raw.replaceAll("\\s+", " ").trim();
-    if (line.isEmpty() || line.length() > MAX_SCENE_LENGTH || HANGUL.matcher(line).find()) {
+    if (line.isEmpty() || line.length() > MAX_SCENE_LENGTH || NON_ENGLISH_SCRIPT.matcher(line).find()) {
       return null;
     }
     return line;
