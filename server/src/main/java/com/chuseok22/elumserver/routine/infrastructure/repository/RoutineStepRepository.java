@@ -51,6 +51,19 @@ public interface RoutineStepRepository extends JpaRepository<RoutineStep, String
   int updateSpeechPath(@Param("stepId") String stepId, @Param("speechPath") String speechPath);
 
   /**
+   * 합성에 쓴 제목·설명이 지금도 같을 때만 열쇠 저장. 0 이면 그새 글이 바뀌었거나 단계가 지워짐
+   * 확인과 저장을 한 문장으로 묶어 그 사이에 끼어든 글 수정이 옛 음성을 붙이지 못하게 함
+   * 제목 null 은 빈 문자열로 비교 (JPQL null 파라미터 타입 모호성 회피)
+   */
+  @Transactional
+  @Modifying
+  @Query("update RoutineStep s set s.speechPath = :speechPath where s.id = :stepId "
+    + "and s.description = :description and coalesce(s.title, '') = :title")
+  int updateSpeechPathIfTextUnchanged(
+    @Param("stepId") String stepId, @Param("speechPath") String speechPath,
+    @Param("title") String titleOrEmpty, @Param("description") String description);
+
+  /**
    * 음성을 만들 문장 재료: 제목, 설명, 일과 언어 (지연 로딩 없이 한 번에)
    */
   @Query("select s.title as title, s.description as description, r.language as language "

@@ -27,6 +27,7 @@ class CardSpeechRepository {
     required CardImageDiskCache imageCache,
     required Future<Directory> Function() rootProvider,
     this.maxBytes = defaultMaxBytes,
+    this.downloadTimeout = defaultDownloadTimeout,
   })  : _dio = dio,
         _imageCache = imageCache,
         _rootProvider = rootProvider;
@@ -35,7 +36,7 @@ class CardSpeechRepository {
   static const defaultMaxBytes = 60 * 1024 * 1024;
 
   /// 받기 대기 상한. 넘기면 기기 음성으로 넘어감 (누르고 오래 기다리지 않게)
-  static const downloadTimeout = Duration(seconds: 8);
+  static const defaultDownloadTimeout = Duration(seconds: 8);
 
   static const _speechDirectoryName = 'speech';
   static const _speechExtension = '.wav';
@@ -48,6 +49,7 @@ class CardSpeechRepository {
   final CardImageDiskCache _imageCache;
   final Future<Directory> Function() _rootProvider;
   final int maxBytes;
+  final Duration downloadTimeout;
 
   /// 진행 중인 받기 by 단계·열쇠 (연타해도 받기는 1번)
   final Map<String, Future<File?>> _inFlight = {};
@@ -110,6 +112,11 @@ class CardSpeechRepository {
         case _SpeechDownloaded(:final speechKey, :final bytes):
           if (generation != _imageCache.generation) return null;
           final saved = await _save(source.stepId, speechKey, bytes);
+          // 저장하는 사이 로그아웃(캐시 삭제)이 있었으면 방금 쓴 파일도 지움 (다른 계정에 남지 않게)
+          if (saved != null && generation != _imageCache.generation) {
+            await _tryDelete(saved);
+            return null;
+          }
           if (saved != null) _knownKeyByStepId[source.stepId] = speechKey;
           return saved;
       }
@@ -140,6 +147,7 @@ class CardSpeechRepository {
   /// 받기. [knownKey] 가 있으면 If-None-Match 로 보내 같으면 304
   Future<_SpeechFetchResult> _download(StoredSpeechSource source, String? knownKey) async {
     try {
+      // receiveTimeout 은 무응답 시간이라 조금씩 오는 응답을 못 끊음 > 전체 시간으로 제한
       final response = await _dio.get<List<int>>(
         '/api/routines/${source.routineId}/steps/${source.stepId}/speech',
         options: Options(
@@ -149,7 +157,7 @@ class CardSpeechRepository {
           // 304 = 가진 것과 같음, 404 = 아직 없음 (정상 흐름이라 예외로 받지 않음)
           validateStatus: (status) => status == 200 || status == 304 || status == 404,
         ),
-      );
+      ).timeout(downloadTimeout);
       if (response.statusCode == 304) return const _SpeechNotModified();
       if (response.statusCode == 404) return const _SpeechMissing();
       final bytes = Uint8List.fromList(response.data ?? const []);

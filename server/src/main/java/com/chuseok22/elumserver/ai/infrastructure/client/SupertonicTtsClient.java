@@ -56,7 +56,7 @@ public class SupertonicTtsClient {
    * 문장 > WAV. 실패·빈 응답은 예외 (호출부가 기록하고 넘어감)
    */
   public byte[] synthesize(String text) {
-    String clippedText = text.length() > MAX_TEXT_LENGTH ? text.substring(0, MAX_TEXT_LENGTH) : text;
+    String clippedText = clip(text);
     byte[] wav = restClient.post()
       .uri(TTS_PATH)
       .header("X-API-Key", localLlmProperties.apiKey())
@@ -68,5 +68,19 @@ public class SupertonicTtsClient {
       throw new IllegalStateException("empty tts response");
     }
     return wav;
+  }
+
+  /**
+   * 500자 초과분 자르기. 이모지 등 두 칸 글자가 반으로 잘리면 JSON 이 깨져 같은 400 이 반복되므로 한 칸 물림
+   */
+  static String clip(String text) {
+    if (text.length() <= MAX_TEXT_LENGTH) {
+      return text;
+    }
+    int end = MAX_TEXT_LENGTH;
+    if (Character.isHighSurrogate(text.charAt(end - 1))) {
+      end--;
+    }
+    return text.substring(0, end);
   }
 }

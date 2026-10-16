@@ -16,13 +16,17 @@ void main() {
   late CardImageDiskCache imageCache;
   late CardSpeechRepository repository;
 
-  CardSpeechRepository build({int maxBytes = CardSpeechRepository.defaultMaxBytes}) {
+  CardSpeechRepository build({
+    int maxBytes = CardSpeechRepository.defaultMaxBytes,
+    Duration downloadTimeout = CardSpeechRepository.defaultDownloadTimeout,
+  }) {
     final dio = Dio(BaseOptions(baseUrl: 'https://test.local'))..httpClientAdapter = adapter;
     return CardSpeechRepository(
       dio: dio,
       imageCache: imageCache,
       rootProvider: () async => root,
       maxBytes: maxBytes,
+      downloadTimeout: downloadTimeout,
     );
   }
 
@@ -113,6 +117,23 @@ void main() {
     expect(oldFile!.existsSync(), isFalse);
   });
 
+  test('조금씩 느리게 오는 응답도 제한 시간이 지나면 끊고 null — 누르고 계속 기다리지 않게', () async {
+    repository = build(downloadTimeout: const Duration(milliseconds: 100));
+    adapter.delay = const Duration(seconds: 2);
+
+    expect(await repository.fileFor(source), isNull);
+  });
+
+  test('받는 사이 로그아웃(캐시 삭제)이 있으면 받은 음성을 남기지 않는다 — 다른 계정에 안 남게', () async {
+    adapter.onFetch = () => imageCache.clear();
+
+    expect(await repository.fileFor(source), isNull);
+    final leftovers = root.existsSync()
+        ? root.listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.wav'))
+        : const <File>[];
+    expect(leftovers, isEmpty);
+  });
+
   test('로그아웃으로 카드 캐시를 지우면 음성도 함께 지워진다', () async {
     final file = await repository.fileFor(source);
 
@@ -139,6 +160,8 @@ class _SpeechAdapter implements HttpClientAdapter {
     0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x41, 0x56, 0x45, 1, 2, 3, 4, //
   ]);
 
+  Duration delay = Duration.zero;
+  Future<void> Function()? onFetch;
   int calls = 0;
   int notModifiedCalls = 0;
   int status = 200;
@@ -152,6 +175,8 @@ class _SpeechAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     calls++;
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    await onFetch?.call();
     // 서버의 지금 열쇠 흉내 (경로 /api/routines/{r}/steps/{s}/speech)
     final stepId = options.path.split('/')[5];
     final key = keyByStepId[stepId] ?? '$stepId/cccc.wav';

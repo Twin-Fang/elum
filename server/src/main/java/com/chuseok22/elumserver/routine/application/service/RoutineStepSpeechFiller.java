@@ -27,28 +27,26 @@ public class RoutineStepSpeechFiller {
 
   public boolean fill(String stepId) {
     try {
-      // 단계 확인 (지워졌거나 한국어 아닌 일과면 건너뜀)
-      Optional<String> text = speechTextOf(stepId);
-      if (text.isEmpty()) {
+      // 단계 확인 (지워졌거나 한국어 아닌 일과, 빈 설명이면 건너뜀)
+      Optional<SpeechTextSource> source = routineStepRepository.findSpeechTextSource(stepId)
+        .filter(RoutineStepSpeechFiller::isSpeakable);
+      if (source.isEmpty()) {
         return true;
       }
-      String textHash = RoutineStepSpeechText.hashOf(text.get());
+      String title = source.get().getTitle();
+      String description = source.get().getDescription();
+      String text = RoutineStepSpeechText.of(title, description);
 
       // 합성 > 저장
       long startedAt = System.currentTimeMillis();
-      byte[] wav = supertonicTtsClient.synthesize(text.get());
-      String speechKey = routineStepSpeechStorage.save(stepId, textHash, wav);
+      byte[] wav = supertonicTtsClient.synthesize(text);
+      String speechKey = routineStepSpeechStorage.save(stepId, RoutineStepSpeechText.hashOf(text), wav);
 
-      // 합성 중 글이 바뀌었으면 버림 (새 글은 이미 다시 예약됨)
-      if (!isSameText(stepId, textHash)) {
+      // 열쇠 갱신: 합성에 쓴 글이 지금도 같을 때만 (0 = 그새 글 수정 또는 삭제 > 파일 버림, 새 글은 다시 예약됨)
+      if (routineStepRepository.updateSpeechPathIfTextUnchanged(
+        stepId, speechKey, title == null ? "" : title, description) == 0) {
         routineStepSpeechStorage.delete(speechKey);
-        log.info("[routine speech] discarded stale : stepId={}", stepId);
-        return true;
-      }
-      // 열쇠 갱신, 0 이면 그새 단계 삭제 > 파일 정리
-      if (routineStepRepository.updateSpeechPath(stepId, speechKey) == 0) {
-        routineStepSpeechStorage.delete(speechKey);
-        log.info("[routine speech] discarded deleted step : stepId={}", stepId);
+        log.info("[routine speech] discarded stale or deleted : stepId={}", stepId);
         return true;
       }
       log.info("[routine speech] saved : stepId={}, bytes={}, elapsedMs={}",
@@ -61,30 +59,9 @@ public class RoutineStepSpeechFiller {
     }
   }
 
-  /**
-   * 단계 > 읽을 문장. 단계 없음, 한국어 아님, 빈 설명이면 빈 값
-   */
-  private Optional<String> speechTextOf(String stepId) {
-    Optional<SpeechTextSource> source = routineStepRepository.findSpeechTextSource(stepId);
-    if (source.isEmpty() || !isKorean(source.get().getLanguage())) {
-      return Optional.empty();
-    }
-    String description = source.get().getDescription();
-    if (description == null || description.isBlank()) {
-      return Optional.empty();
-    }
-    return Optional.of(RoutineStepSpeechText.of(source.get().getTitle(), description));
-  }
-
-  private boolean isSameText(String stepId, String textHash) {
-    return speechTextOf(stepId)
-      .map(RoutineStepSpeechText::hashOf)
-      .filter(textHash::equals)
-      .isPresent();
-  }
-
-  /// Supertonic F1 은 한국어 목소리 (다른 언어는 기기 음성)
-  private static boolean isKorean(AppLocale language) {
-    return language == null || language == AppLocale.KO;
+  /// 한국어(또는 미지정) 일과이고 설명이 있는 단계만 (Supertonic F1 은 한국어 목소리)
+  private static boolean isSpeakable(SpeechTextSource source) {
+    boolean isKorean = source.getLanguage() == null || source.getLanguage() == AppLocale.KO;
+    return isKorean && source.getDescription() != null && !source.getDescription().isBlank();
   }
 }

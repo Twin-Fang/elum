@@ -45,15 +45,27 @@ class RoutineStepSpeechFillerTest {
   }
 
   @Test
-  @DisplayName("문장으로 합성해 저장하고 열쇠를 채운다")
+  @DisplayName("문장으로 합성해 저장하고, 합성에 쓴 글이 같을 때만 열쇠를 채운다")
   void fill_savesAndUpdatesKey() {
     when(repository.findSpeechTextSource("step-1")).thenReturn(source("옷을 입어요", "학교 갈 옷을 입어요", AppLocale.KO));
-    when(repository.updateSpeechPath("step-1", KEY)).thenReturn(1);
+    when(repository.updateSpeechPathIfTextUnchanged("step-1", KEY, "옷을 입어요", "학교 갈 옷을 입어요")).thenReturn(1);
 
     assertThat(filler.fill("step-1")).isTrue();
 
     verify(supertonicTtsClient).synthesize("옷을 입어요. 학교 갈 옷을 입어요");
     verify(storage).save("step-1", RoutineStepSpeechText.hashOf("옷을 입어요. 학교 갈 옷을 입어요"), WAV);
+    verify(storage, never()).delete(anyString());
+  }
+
+  @Test
+  @DisplayName("제목이 없는 카드는 빈 제목으로 비교한다 — null 제목도 열쇠가 채워지게")
+  void fill_nullTitle_comparesAsEmpty() {
+    when(repository.findSpeechTextSource("step-1")).thenReturn(source(null, "손을 씻어요", AppLocale.KO));
+    when(repository.updateSpeechPathIfTextUnchanged("step-1", KEY, "", "손을 씻어요")).thenReturn(1);
+
+    filler.fill("step-1");
+
+    verify(storage, never()).delete(anyString());
   }
 
   @Test
@@ -64,29 +76,16 @@ class RoutineStepSpeechFillerTest {
 
     assertThat(filler.fill("step-1")).isFalse();
 
-    verify(repository, never()).updateSpeechPath(anyString(), anyString());
+    verify(repository, never()).updateSpeechPathIfTextUnchanged(anyString(), anyString(), anyString(), anyString());
   }
 
   @Test
-  @DisplayName("합성하는 사이 글이 바뀌면 만든 파일을 버린다 — 옛 문장이 새 카드에 붙지 않게")
-  void fill_textChangedDuringSynthesis_discards() {
-    when(repository.findSpeechTextSource("step-1"))
-      .thenReturn(source("손", "손을 씻어요", AppLocale.KO))
-      .thenReturn(source("손", "비누로 손을 씻어요", AppLocale.KO));
-
-    filler.fill("step-1");
-
-    verify(storage).delete(KEY);
-    verify(repository, never()).updateSpeechPath(anyString(), anyString());
-  }
-
-  @Test
-  @DisplayName("합성하는 사이 카드가 지워지면 파일을 지운다")
-  void fill_stepDeletedDuringSynthesis_deletesFile() {
+  @DisplayName("합성하는 사이 글이 바뀌거나 카드가 지워져 갱신이 0건이면 만든 파일을 지운다 — 옛 문장이 새 카드에 붙지 않게")
+  void fill_textChangedOrDeletedDuringSynthesis_deletesFile() {
     when(repository.findSpeechTextSource("step-1")).thenReturn(source("손", "손을 씻어요", AppLocale.KO));
-    when(repository.updateSpeechPath("step-1", KEY)).thenReturn(0);
+    when(repository.updateSpeechPathIfTextUnchanged("step-1", KEY, "손", "손을 씻어요")).thenReturn(0);
 
-    filler.fill("step-1");
+    assertThat(filler.fill("step-1")).isTrue();
 
     verify(storage).delete(KEY);
   }

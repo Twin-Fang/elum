@@ -83,6 +83,23 @@ class RoutineStepSpeechQueueTest {
   }
 
   @Test
+  @DisplayName("처리 중에 다시 넣으면 끝난 뒤 한 번 더 처리한다 — 합성 중 고친 글의 새 음성을 만들게")
+  void enqueue_whileRunning_runsAgainAfterFinish() {
+    when(filler.fill("step-1")).thenAnswer(invocation -> {
+      // 첫 처리 중에 글 수정으로 같은 단계가 다시 들어옴
+      queue.enqueue("step-1");
+      return true;
+    }).thenReturn(true);
+
+    queue.enqueue("step-1");
+    executor.runAll();
+    executor.runAll();
+
+    verify(filler, times(2)).fill("step-1");
+    assertThat(queue.pendingCount()).isZero();
+  }
+
+  @Test
   @DisplayName("AI 서버 키가 없으면 아무것도 넣지 않는다")
   void disabled_withoutApiKey() {
     when(supertonicTtsClient.isAvailable()).thenReturn(false);

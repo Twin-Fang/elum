@@ -40,8 +40,14 @@ public class RoutineStepSpeechQueue {
 
   private final Clock clock;
 
-  /// 대기·처리 중인 stepId (같은 단계는 한 번만)
-  private final Set<String> pendingStepIds = ConcurrentHashMap.newKeySet();
+  /// 대기 중(아직 시작 안 함) stepId — 시작할 때 최신 글을 읽으므로 또 넣어도 한 번만
+  private final Set<String> queuedStepIds = ConcurrentHashMap.newKeySet();
+
+  /// 처리 중 stepId. 처리 중에 다시 넣으면 끝난 뒤 한 번 더 (합성 중 글 수정 > 새 글 음성)
+  private final Set<String> runningStepIds = ConcurrentHashMap.newKeySet();
+
+  /// 처리 중에 다시 요청된 stepId
+  private final Set<String> dirtyStepIds = ConcurrentHashMap.newKeySet();
 
   /// 최근 합성 실패 시각 by stepId (재시작 시 비움)
   private final Map<String, Instant> lastFailureAtByStepId = new ConcurrentHashMap<>();
@@ -128,28 +134,46 @@ public class RoutineStepSpeechQueue {
   }
 
   /**
-   * 대기열에 넣기. 이미 대기 중이면 무시
+   * 대기열에 넣기. 대기 중이면 무시, 처리 중이면 끝난 뒤 한 번 더
    */
-  public void enqueue(String stepId) {
-    if (stepId == null || !isEnabled() || !pendingStepIds.add(stepId)) {
+  public synchronized void enqueue(String stepId) {
+    if (stepId == null || !isEnabled() || queuedStepIds.contains(stepId)) {
       return;
     }
+    if (runningStepIds.contains(stepId)) {
+      dirtyStepIds.add(stepId);
+      return;
+    }
+    queuedStepIds.add(stepId);
     try {
-      executor.execute(() -> {
-        try {
-          if (routineStepSpeechFiller.fill(stepId)) {
-            lastFailureAtByStepId.remove(stepId);
-          } else {
-            lastFailureAtByStepId.put(stepId, clock.instant());
-          }
-        } finally {
-          // 처리 끝 (성공·실패 공통) > 다시 넣을 수 있음
-          pendingStepIds.remove(stepId);
-        }
-      });
+      executor.execute(() -> run(stepId));
     } catch (RejectedExecutionException e) {
-      pendingStepIds.remove(stepId);
+      queuedStepIds.remove(stepId);
       log.warn("[routine speech] rejected enqueue : stepId={}", stepId);
+    }
+  }
+
+  private void run(String stepId) {
+    synchronized (this) {
+      queuedStepIds.remove(stepId);
+      runningStepIds.add(stepId);
+    }
+    try {
+      if (routineStepSpeechFiller.fill(stepId)) {
+        lastFailureAtByStepId.remove(stepId);
+      } else {
+        lastFailureAtByStepId.put(stepId, clock.instant());
+      }
+    } finally {
+      // 처리 끝 (성공·실패 공통). 처리 중 다시 요청됐으면 한 번 더
+      boolean isRequestedAgain;
+      synchronized (this) {
+        runningStepIds.remove(stepId);
+        isRequestedAgain = dirtyStepIds.remove(stepId);
+      }
+      if (isRequestedAgain) {
+        enqueue(stepId);
+      }
     }
   }
 
@@ -163,7 +187,7 @@ public class RoutineStepSpeechQueue {
 
   /// 대기·처리 중인 건수 (주기 작업이 적체를 보고 건너뜀)
   public int pendingCount() {
-    return pendingStepIds.size();
+    return queuedStepIds.size() + runningStepIds.size();
   }
 
   @PreDestroy

@@ -303,7 +303,8 @@ class RoutineRepositoryImpl implements RoutineRepository {
       steps: [
         for (final step in routine.steps)
           if (step.id == stepId)
-            step.copyWith(title: title, description: description)
+            // 글이 바뀌면 옛 음성 열쇠도 버린다 (서버에 못 올렸어도 옛 문장이 읽히지 않게, #675)
+            step.copyWith(title: title, description: description, speechPath: null)
           else
             step,
       ],
