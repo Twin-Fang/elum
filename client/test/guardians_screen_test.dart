@@ -87,6 +87,20 @@ void main() {
   });
 
   group('목록', () {
+    testWidgets('이름을 정하지 않은 내 줄은 보호자로 보이고 구분 칩은 선생님이다', (tester) async {
+      repo.guardiansResult = const Attempt.ok([
+        Guardian(id: 'g-1', me: true),
+        Guardian(id: 'g-2', me: false, displayName: '2반', kind: GuardianKind.caregiver),
+      ]);
+      await open(tester);
+
+      // 내 줄: 이름 자리 + 구분 칩이 모두 보호자
+      expect(find.text('보호자'), findsNWidgets(2));
+      expect(find.text('이름 없음'), findsNothing);
+      expect(find.text('선생님'), findsOneWidget);
+      expect(find.text('센터 선생님'), findsNothing);
+    });
+
 
 
 
@@ -194,14 +208,14 @@ void main() {
 
   });
 
-  group('내 이름 고치기', () {
-    testWidgets('이름 바꾸기를 누르면 이름을 바꿔 저장한다 — 바뀐 항목만 보낸다', (tester) async {
+  group('내 이름 변경', () {
+    testWidgets('이름 변경을 누르면 이름을 바꿔 저장한다 — 바뀐 항목만 보낸다', (tester) async {
       await open(tester);
 
-      await tester.tap(find.text('이름 바꾸기'));
+      await tester.tap(find.text('이름 변경'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), '아빠');
-      await tester.tap(find.text('저장'));
+      await tester.tap(find.text('저장하기'));
       await tester.pumpAndSettle();
 
       expect(repo.calls, contains('update:p-a'));
@@ -212,14 +226,37 @@ void main() {
 
 
 
+    testWidgets('구분 칩만 바꾸면 구분만 보낸다', (tester) async {
+      await open(tester);
+
+      await tester.tap(find.text('이름 변경'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.descendant(of: find.byType(BottomSheet), matching: find.text('선생님')));
+      await tester.tap(find.text('저장하기'));
+      await tester.pumpAndSettle();
+
+      expect(repo.lastUpdate, {'kind': GuardianKind.caregiver, 'displayName': null});
+    });
+
+    testWidgets('이름도 구분도 그대로 저장하면 서버에 보내지 않는다', (tester) async {
+      await open(tester);
+
+      await tester.tap(find.text('이름 변경'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('저장하기'));
+      await tester.pumpAndSettle();
+
+      expect(repo.calls.where((c) => c.startsWith('update')), isEmpty);
+    });
+
     testWidgets('저장하지 못하면 이유와 코드를 보인다', (tester) async {
       repo.updateResult = Attempt.failed(serverFailure(400, ServerErrorCode.invalidInputValue, '입력값이 올바르지 않아요.'));
       await open(tester);
 
-      await tester.tap(find.text('이름 바꾸기'));
+      await tester.tap(find.text('이름 변경'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), '아빠');
-      await tester.tap(find.text('저장'));
+      await tester.tap(find.text('저장하기'));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('입력값이 올바르지 않아요.'), findsOneWidget);

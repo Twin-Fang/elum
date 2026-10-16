@@ -16,6 +16,7 @@ class ElumButton extends StatelessWidget {
     this.onPressed,
     this.backgroundColor,
     this.labelColor,
+    this.labelStyle,
     this.loading = false,
   });
 
@@ -30,6 +31,9 @@ class ElumButton extends StatelessWidget {
 
   /// 문구색 재정의. [backgroundColor]와 짝으로 쓴다.
   final Color? labelColor;
+
+  /// 문구 글자 재정의 (시트 안 버튼은 시안이 Pretendard 로 씀). null 이면 `button`.
+  final TextStyle? labelStyle;
 
   /// 서버 응답을 기다리는 중. 누를 수 없고 오른쪽에 스피너가 돈다.
   ///
@@ -57,7 +61,7 @@ class ElumButton extends StatelessWidget {
         alignment: Alignment.center,
         child: Text(
           label,
-          style: context.typo.button.copyWith(
+          style: (labelStyle ?? context.typo.button).copyWith(
             color: labelColor ??
                 (isEnabled
                     ? colors.buttonEnabledText

@@ -82,6 +82,14 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.creditCaption,
     required this.creditUnit,
     required this.creditReset,
+    required this.peopleHeading,
+    required this.peopleCaption,
+    required this.peopleSectionLabel,
+    required this.peopleRowName,
+    required this.peopleChipLabel,
+    required this.peopleRenameLabel,
+    required this.peopleEditDescription,
+    required this.peopleEditChipLabel,
     required this.navTitle,
     required this.contactSheetTitle,
     required this.contactSheetEmail,
@@ -389,6 +397,29 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 크레딧 `10월 19일(월) 0시에 다시 채워져요` (12/w500).
   final TextStyle creditReset;
+  /// 함께하는 사람 머리 제목 `함께 돌보는 사람 N명` (18/w600 Pretendard, 시안 1027:4617 · 1532:6877).
+  final TextStyle peopleHeading;
+
+  /// 머리 설명 · 그만두기 보조 글 (14/w400 Pretendard, 시안 1027:4617 · 1532:6877).
+  final TextStyle peopleCaption;
+
+  /// 카드 위 제목 `초대` (16/w600 Pretendard, 시안 1027:4617 · 1532:6877).
+  final TextStyle peopleSectionLabel;
+
+  /// 사람 이름 · 그만두기 줄 제목 (16/w500 Pretendard, 시안 1027:4617 · 1532:6877).
+  final TextStyle peopleRowName;
+
+  /// `나` 배지 · 구분 칩 글자 (12/w500 Pretendard, 시안 1027:4617 · 1532:6877).
+  final TextStyle peopleChipLabel;
+
+  /// `이름 변경` 버튼 글자 (14/w600 Pretendard, 시안 1027:4617 · 1532:6877).
+  final TextStyle peopleRenameLabel;
+
+  /// 이름 변경 시트 설명 (16/w400 Pretendard, 시안 1027:4617 · 1532:6877).
+  final TextStyle peopleEditDescription;
+
+  /// 이름 변경 시트 구분 칩 글자 (18/w500 Pretendard, 시안 1027:4617 · 1532:6877).
+  final TextStyle peopleEditChipLabel;
 
   /// 뒤로가기와 같은 줄에 서는 가운데 제목 (18/w600 Pretendard, Figma `1022:4467`).
   ///
@@ -890,6 +921,70 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w400,
       height: 1.4,
     ),
+    peopleHeading: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      // 테마 기본 자간(0.25)을 물려받지 않게 0 으로 고정
+      letterSpacing: 0,
+      height: 1.0,
+    ),
+    peopleCaption: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      // 테마 기본 자간(0.25)을 물려받지 않게 0 으로 고정
+      letterSpacing: 0,
+      height: 1.0,
+    ),
+    peopleSectionLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      // 테마 기본 자간(0.25)을 물려받지 않게 0 으로 고정
+      letterSpacing: 0,
+      height: 1.0,
+    ),
+    peopleRowName: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      // 테마 기본 자간(0.25)을 물려받지 않게 0 으로 고정
+      letterSpacing: 0,
+      height: 1.0,
+    ),
+    peopleChipLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      // 테마 기본 자간(0.25)을 물려받지 않게 0 으로 고정
+      letterSpacing: 0,
+      height: 1.0,
+    ),
+    peopleRenameLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      // 테마 기본 자간(0.25)을 물려받지 않게 0 으로 고정
+      letterSpacing: 0,
+      height: 1.0,
+    ),
+    peopleEditDescription: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      // 테마 기본 자간(0.25)을 물려받지 않게 0 으로 고정
+      letterSpacing: 0,
+      height: 1.2,
+    ),
+    peopleEditChipLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+      // 테마 기본 자간(0.25)을 물려받지 않게 0 으로 고정
+      letterSpacing: 0,
+      height: 1.0,
+    ),
     settingsTileLabel: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 16,
@@ -1031,6 +1126,14 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? creditCaption,
     TextStyle? creditUnit,
     TextStyle? creditReset,
+    TextStyle? peopleHeading,
+    TextStyle? peopleCaption,
+    TextStyle? peopleSectionLabel,
+    TextStyle? peopleRowName,
+    TextStyle? peopleChipLabel,
+    TextStyle? peopleRenameLabel,
+    TextStyle? peopleEditDescription,
+    TextStyle? peopleEditChipLabel,
     TextStyle? navTitle,
     TextStyle? contactSheetTitle,
     TextStyle? contactSheetEmail,
@@ -1117,6 +1220,14 @@ class AppTypography extends ThemeExtension<AppTypography> {
       creditCaption: creditCaption ?? this.creditCaption,
       creditUnit: creditUnit ?? this.creditUnit,
       creditReset: creditReset ?? this.creditReset,
+      peopleHeading: peopleHeading ?? this.peopleHeading,
+      peopleCaption: peopleCaption ?? this.peopleCaption,
+      peopleSectionLabel: peopleSectionLabel ?? this.peopleSectionLabel,
+      peopleRowName: peopleRowName ?? this.peopleRowName,
+      peopleChipLabel: peopleChipLabel ?? this.peopleChipLabel,
+      peopleRenameLabel: peopleRenameLabel ?? this.peopleRenameLabel,
+      peopleEditDescription: peopleEditDescription ?? this.peopleEditDescription,
+      peopleEditChipLabel: peopleEditChipLabel ?? this.peopleEditChipLabel,
       navTitle: navTitle ?? this.navTitle,
       contactSheetTitle: contactSheetTitle ?? this.contactSheetTitle,
       contactSheetEmail: contactSheetEmail ?? this.contactSheetEmail,
@@ -1230,6 +1341,14 @@ class AppTypography extends ThemeExtension<AppTypography> {
       creditCaption: TextStyle.lerp(creditCaption, other.creditCaption, t)!,
       creditUnit: TextStyle.lerp(creditUnit, other.creditUnit, t)!,
       creditReset: TextStyle.lerp(creditReset, other.creditReset, t)!,
+      peopleHeading: TextStyle.lerp(peopleHeading, other.peopleHeading, t)!,
+      peopleCaption: TextStyle.lerp(peopleCaption, other.peopleCaption, t)!,
+      peopleSectionLabel: TextStyle.lerp(peopleSectionLabel, other.peopleSectionLabel, t)!,
+      peopleRowName: TextStyle.lerp(peopleRowName, other.peopleRowName, t)!,
+      peopleChipLabel: TextStyle.lerp(peopleChipLabel, other.peopleChipLabel, t)!,
+      peopleRenameLabel: TextStyle.lerp(peopleRenameLabel, other.peopleRenameLabel, t)!,
+      peopleEditDescription: TextStyle.lerp(peopleEditDescription, other.peopleEditDescription, t)!,
+      peopleEditChipLabel: TextStyle.lerp(peopleEditChipLabel, other.peopleEditChipLabel, t)!,
       navTitle: TextStyle.lerp(navTitle, other.navTitle, t)!,
       contactSheetTitle:
           TextStyle.lerp(contactSheetTitle, other.contactSheetTitle, t)!,

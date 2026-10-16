@@ -768,13 +768,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardiansNoProfileDescription => 'Add Elumi first';
 
   @override
-  String guardiansCaption(String name, String batchim) {
-    return 'People looking after $name together';
-  }
-
-  @override
-  String get guardiansIntro =>
-      'Family or teachers who make routines together. Connect Elumi\'s phone from Elumi\'s phone in settings.';
+  String get guardiansIntro => 'Family or teachers who make routines together';
 
   @override
   String get guardiansLoadFailedFallback => 'Couldn\'t load co-guardians';
@@ -801,7 +795,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardiansLeaveHintWithOthers =>
-      'Only routines you made are removed. Other guardians\' routines stay.';
+      'Only routines you made are removed';
 
   @override
   String inviteCodeGuestJoinedTitle(String name) {
@@ -827,9 +821,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardiansRenameAction => 'Rename';
-
-  @override
-  String get guardiansNoName => 'No name';
 
   @override
   String get inviteCodeShareFailTitle => 'Couldn\'t send the link';

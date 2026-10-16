@@ -5,6 +5,7 @@ import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/domain/guardian_member.dart';
 import 'package:elum/features/profile/presentation/guardians_screen.dart';
 import 'package:elum/features/profile/presentation/invite_code_screen.dart';
+import 'package:elum/features/profile/presentation/widgets/guardian_person_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -67,6 +68,29 @@ void main() {
     });
 
   }
+
+  testWidgets('함께하는 사람 줄은 글꼴 2.0 에서 잘리지 않고 시안 높이(68)보다 늘어난다', (tester) async {
+    repo.guardiansResult = const Attempt.ok([
+      Guardian(id: 'g-1', me: true, displayName: '이름이 아주 긴 보호자 엄마입니다'),
+    ]);
+    await pump(tester, Routes.guardianPeople, const GuardiansScreen());
+
+    // 넘침은 flutter_test_config 가 실패시킨다 — 높이가 늘어난 줄도 이름과 버튼이 모두 보여야 한다
+    expect(tester.getSize(find.byType(GuardianPersonRow)).height, greaterThan(68));
+    expect(find.text('이름 변경'), findsOneWidget);
+    expect(find.text('나'), findsOneWidget);
+  });
+
+  testWidgets('이름 변경 시트는 글꼴 2.0 에서도 저장하기까지 닿는다', (tester) async {
+    await pump(tester, Routes.guardianPeople, const GuardiansScreen());
+
+    await tester.tap(find.text('이름 변경'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('저장하기'));
+    await tester.pump();
+
+    expect(find.text('저장하기'), findsOneWidget);
+  });
 
   testWidgets('나가기 확인 팝업 — 마지막 보호자 문구가 글꼴 2.0 에서도 나가기·취소 버튼을 가리지 않는다', (tester) async {
     repo.guardiansResult = const Attempt.ok([Guardian(id: 'g-1', me: true)]);
