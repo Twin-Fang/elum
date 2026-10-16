@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.chuseok22.elumserver.admin.application.service.PromptLocaleGate;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
@@ -29,13 +30,14 @@ class AdminConfigControllerLocaleTest {
   @Mock private SystemConfigService systemConfigService;
   @Mock private ImageClientRouter imageClientRouter;
   @Mock private TextClientRouter textClientRouter;
+  @Mock private PromptLocaleGate promptLocaleGate;
 
   private AdminConfigController controller;
   private final Principal admin = () -> "admin";
 
   @BeforeEach
   void setUp() {
-    controller = new AdminConfigController(systemConfigService, imageClientRouter, textClientRouter);
+    controller = new AdminConfigController(systemConfigService, imageClientRouter, textClientRouter, promptLocaleGate);
   }
 
   @Test

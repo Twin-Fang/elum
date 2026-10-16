@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminImageProviderView;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminTextProviderView;
+import com.chuseok22.elumserver.admin.application.service.PromptLocaleGate;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.core.TextProvider;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
@@ -37,6 +38,7 @@ public class AdminConfigController {
   private final SystemConfigService systemConfigService;
   private final ImageClientRouter imageClientRouter;
   private final TextClientRouter textClientRouter;
+  private final PromptLocaleGate promptLocaleGate;
 
   @GetMapping("/admin/settings")
   public String settings(Model model) {
@@ -113,6 +115,8 @@ public class AdminConfigController {
         " 저장 실패: 그 제공자의 API 키가 없습니다. 키를 먼저 저장하세요. (E-CFG-003)";
       case CONTENT_LOCALE_NOT_READY ->
         " 저장 실패: 그 언어의 서버 문구 파일(폴백 질문·추천)이 비어 있어 켤 수 없습니다. (E-CFG-004)";
+      case CONTENT_LOCALE_PROMPT_MISSING ->
+        " 저장 실패: 프롬프트 행이 모두 있는 언어만 켤 수 있어요. 프롬프트 화면에서 그 언어의 '기본값으로 행 만들기'를 누르고 시험한 뒤 다시 켜세요. (E-CFG-005)";
       default -> " 저장 실패: 값이 올바르지 않습니다. (E-CFG-001)";
     };
   }
@@ -129,12 +133,14 @@ public class AdminConfigController {
   }
 
   /**
-   * 서버 문구 파일(폴백 질문·추천)이 비어 있는 언어는 켤 수 없다.
+   * 프롬프트 행이 모자라거나 서버 문구 파일(폴백 질문·추천)이 비어 있는 언어는 켤 수 없다.
    * 켜 두면 다음 기동의 시작 검사(RoutinePhrasesStartupGuard)가 서버를 세우지 않으므로 화면에서 먼저 막는다.
    * 모르는 코드는 normalize 가 SYSTEM_CONFIG_INVALID_VALUE 로 거절한다.
    */
   private void rejectIncompleteLocales(String value) {
     Set<AppLocale> requested = EnabledLocales.parse(EnabledLocales.normalize(value));
+    // 프롬프트 행 먼저 (관리자 화면에서 고칠 수 있는 쪽), 서버 문구 파일은 배포로 고침
+    promptLocaleGate.requireReady(requested);
     if (!RoutinePhrases.standard().incompleteLocales(requested).isEmpty()) {
       throw new CustomException(ErrorCode.CONTENT_LOCALE_NOT_READY);
     }

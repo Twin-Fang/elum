@@ -1,8 +1,10 @@
 package com.chuseok22.elumserver.admin.application.service;
 
 import com.chuseok22.elumserver.admin.application.dto.response.PromptTestResponse;
+import com.chuseok22.elumserver.ai.application.service.PromptTemplateSeeder;
 import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
+import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
@@ -21,6 +23,7 @@ import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplate;
 import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplateHistory;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
@@ -41,6 +44,7 @@ public class AdminPromptService {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   private final PromptTemplateService promptTemplateService;
+  private final PromptTemplateSeeder promptTemplateSeeder;
   private final SensitiveInfoGuardService sensitiveInfoGuardService;
   private final GeminiTextClient geminiTextClient;
   private final TextClientRouter textClientRouter;
@@ -53,16 +57,42 @@ public class AdminPromptService {
     return promptTemplateService.getAll();
   }
 
+  public List<PromptTemplate> getAll(AppLocale locale) {
+    return promptTemplateService.getAll(locale);
+  }
+
   public PromptTemplate getTemplate(PromptKey key) {
     return promptTemplateService.getTemplate(key);
+  }
+
+  public PromptTemplate getTemplate(PromptKey key, AppLocale locale) {
+    return promptTemplateService.getTemplate(key, locale);
   }
 
   public List<PromptTemplateHistory> getHistory(PromptKey key) {
     return promptTemplateService.getHistory(key);
   }
 
+  public List<PromptTemplateHistory> getHistory(PromptKey key, AppLocale locale) {
+    return promptTemplateService.getHistory(key, locale);
+  }
+
   public void update(PromptKey key, String content) {
     promptTemplateService.update(key, content);
+  }
+
+  public void update(PromptKey key, AppLocale locale, String content) {
+    promptTemplateService.update(key, locale, content);
+  }
+
+  // 그 언어의 없는 프롬프트 행을 기본값으로 생성 (있는 행은 건드리지 않음)
+  public PromptTemplateSeeder.SeedResult seedLocale(AppLocale locale) {
+    return promptTemplateSeeder.seed(locale);
+  }
+
+  // 그 언어에 있어야 하는데 없는 행 (비어 있어야 그 언어를 켤 수 있음)
+  public List<PromptKey> missingKeys(AppLocale locale) {
+    return promptTemplateService.missingKeys(locale);
   }
 
   // 각 클라이언트의 실제 프롬프트 조립 메서드를 그대로 재사용한다 — preview와 실제 호출이
@@ -97,6 +127,13 @@ public class AdminPromptService {
       case REALISTIC_IMAGE_PROMPT_TRANSLATE -> "[System]\n" + content + "\n\n[User]\n"
         + geminiTextClient.buildTranslateUserContent(sampleInput);
     };
+  }
+
+  // 그 언어의 스키마 문구로 시험 (실제 AI 호출, 비용 발생)
+  public PromptTestResponse test(
+    PromptKey key, AppLocale locale, String content, String sampleInput, CharacterType characterType
+  ) {
+    return AiCallContext.callWithContentLocale(locale, () -> test(key, content, sampleInput, characterType));
   }
 
   public PromptTestResponse test(PromptKey key, String content, String sampleInput, CharacterType characterType) {
