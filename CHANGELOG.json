@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-16T07:22:38Z",
-    "currentVersion": "2.33.0",
+    "lastUpdated": "2026-10-16T07:38:04Z",
+    "currentVersion": "2.33.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 242
+    "totalReleases": 243
   },
   "releases": [
+    {
+      "version": "2.33.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-16",
+      "pr_number": 682,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 초대 코드를 입력할 때 키보드가 시작하기 버튼을 가리던 문제를 고쳤어요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "초대 코드를 입력할 때 키보드가 시작하기 버튼을 가리던 문제를 고쳤어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.33.0",
       "project_type": "flutter",
