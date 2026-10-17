@@ -315,6 +315,13 @@ void prefetchStoredSpeech(WidgetRef ref, String routineId, List<ActionCard> card
   unawaited(ref.read(cardSpeechRepositoryProvider).syncRoutine(routineId, cards));
 }
 
+/// 읽기에 실패했을 때 "소리 안내창"을 띄울지.
+///
+/// 서버 음성이 읽는 언어(한국어)만 실패를 알린다. 그 밖의 언어는 기기에 그 언어 음성이 없는
+/// 것이라 고장이 아니다 — 안내창 없이 글만 보여준다 (#672).
+bool shouldShowSpeechFailure(String language) =>
+    RemoteSpeech.supportedLanguages.contains(language);
+
 final speechServiceProvider = Provider<SpeechService>((ref) {
   final service = FallbackSpeech(speechEnginesFor(
     isAndroid: defaultTargetPlatform == TargetPlatform.android,

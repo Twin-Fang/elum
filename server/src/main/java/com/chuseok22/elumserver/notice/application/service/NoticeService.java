@@ -2,6 +2,8 @@ package com.chuseok22.elumserver.notice.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.notice.application.dto.request.NoticeInput;
 import com.chuseok22.elumserver.notice.application.dto.response.AppNoticeResponse;
 import com.chuseok22.elumserver.notice.application.dto.response.AppNoticesResponse;
@@ -97,13 +99,17 @@ public class NoticeService {
   }
 
   /**
-   * 앱에 줄 공지. 게시 중이고 이 플랫폼에 닿는 것을 순서대로 최대 5개.
+   * 앱에 줄 공지. 게시 중이고 이 플랫폼에 닿고 요청 언어와 같은 언어인 것을 순서대로 최대 5개.
+   *
+   * <p>그 언어 공지가 없으면 빈 목록이다 — 한국어 공지를 대신 보내지 않는다.
    *
    * <p>숨김은 기기에 있으므로 서버는 거르지 않는다 — 앱이 숨긴 것을 빼고 남은 것을 보여준다.
    */
   public AppNoticesResponse publishedFor(String platform) {
     NoticePlatform requested = NoticePlatform.parse(platform);
+    AppLocale requestedLocale = CurrentLocale.get();
     List<AppNoticeResponse> notices = liveInSlideOrder().stream()
+      .filter(notice -> notice.getLocale() == requestedLocale)
       .filter(notice -> notice.getPlatform().reaches(requested))
       .limit(MAX_SLIDES)
       .map(AppNoticeResponse::from)
@@ -249,7 +255,7 @@ public class NoticeService {
   /** 검증을 통과한, 다듬은 값. 이것만 엔티티에 들어간다. */
   private record Draft(
     String title, String body, String buttonLabel, String buttonUrl, NoticePlatform platform,
-    int priority, LocalDateTime startsAt, LocalDateTime endsAt, boolean enabled
+    AppLocale locale, int priority, LocalDateTime startsAt, LocalDateTime endsAt, boolean enabled
   ) {
 
     void applyTo(AppNotice notice) {
@@ -258,6 +264,7 @@ public class NoticeService {
       notice.setButtonLabel(buttonLabel);
       notice.setButtonUrl(buttonUrl);
       notice.setPlatform(platform);
+      notice.setLocale(locale);
       notice.setPriority(priority);
       notice.setStartsAt(startsAt);
       notice.setEndsAt(endsAt);
@@ -302,6 +309,7 @@ public class NoticeService {
     }
 
     NoticePlatform platform = NoticePlatform.parse(input.platform());
+    AppLocale locale = parseLocale(input.locale());
     int priority = parsePriority(input.priority());
     LocalDateTime startsAt = parseDateTime(input.startsAt());
     if (startsAt == null) {
@@ -313,7 +321,7 @@ public class NoticeService {
     }
 
     return new Draft(title, body, emptyToNull(buttonLabel), emptyToNull(buttonUrl), platform,
-      priority, startsAt, endsAt, input.enabled());
+      locale, priority, startsAt, endsAt, input.enabled());
   }
 
   /**
@@ -331,6 +339,19 @@ public class NoticeService {
       return host != null && !host.isBlank();
     } catch (URISyntaxException e) {
       return false;
+    }
+  }
+
+  /** 비었으면 ko, 코드는 소문자 정확 일치만. 모르는 값은 거부한다 — ko 로 바꾸면 영어 공지가 한국어 보호자에게 샌다. */
+  private AppLocale parseLocale(String raw) {
+    String value = trim(raw);
+    if (value.isEmpty()) {
+      return AppLocale.KO;
+    }
+    try {
+      return AppLocale.fromCode(value);
+    } catch (IllegalArgumentException e) {
+      throw new CustomException(ErrorCode.NOTICE_LOCALE_INVALID);
     }
   }
 

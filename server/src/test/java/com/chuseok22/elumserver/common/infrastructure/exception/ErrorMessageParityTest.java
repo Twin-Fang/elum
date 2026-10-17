@@ -44,7 +44,7 @@ class ErrorMessageParityTest {
   @Test
   @DisplayName("원본 이후 더한 코드는 golden 밖에서 따로 단언한다 — golden 을 다시 만들면 원본 증명이 흐려진다")
   void codesAddedAfterOriginal_areAssertedSeparately() {
-    assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size());
+    assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -54,6 +54,16 @@ class ErrorMessageParityTest {
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_PROMPT_MISSING, AppLocale.KO))
       .isEqualTo("이 언어의 프롬프트가 아직 없어요. 프롬프트 화면에서 먼저 만들어 주세요.");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_PROMPT_MISSING, AppLocale.EN)).isNotBlank();
+  }
+
+  @Test
+  @DisplayName("공지 언어 코드 거부는 golden 밖에서 상태와 문구를 단언한다")
+  void noticeLocaleInvalid_isAssertedSeparately() {
+    assertThat(GOLDEN).doesNotContainKey(ErrorCode.NOTICE_LOCALE_INVALID.name());
+    assertThat(ErrorCode.NOTICE_LOCALE_INVALID.getStatus().name()).isEqualTo("BAD_REQUEST");
+    assertThat(ErrorMessages.standard().of(ErrorCode.NOTICE_LOCALE_INVALID, AppLocale.KO))
+      .isEqualTo("공지 언어는 ko, en, ja, zh, es 중 하나예요.");
+    assertThat(ErrorMessages.standard().of(ErrorCode.NOTICE_LOCALE_INVALID, AppLocale.EN)).isNotBlank();
   }
 
   // 의견 보내기가 더한 코드.

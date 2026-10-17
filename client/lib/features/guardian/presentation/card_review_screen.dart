@@ -152,16 +152,18 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
 
     // 제목만 읽으면 무엇을 해야 하는지가 빠지고, 설명만 읽으면 화면의
     // 큰 제목과 어긋난다. 둘을 이어 붙인다.
+    final language = ref.read(routineFlowProvider).routine?.language ?? 'ko';
     final ok = await speech.speak(
       '${card.displayTitle}. ${card.description}',
-      language: ref.read(routineFlowProvider).routine?.language ?? 'ko',
+      language: language,
       stored: _storedSpeechOf(card),
     );
 
     if (!mounted) return;
     setState(() => _speakingId = null);
 
-    if (!ok) _showFailure();
+    // 음성이 없는 언어는 안내창 없이 글만 보여준다
+    if (!ok && shouldShowSpeechFailure(language)) _showFailure();
   }
 
   /// 소리를 낼 수 없을 때. 식별자는 보호자가 제보할 때 필요하다.

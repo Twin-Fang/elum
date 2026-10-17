@@ -175,6 +175,7 @@ enum ServerErrorCode {
   noticePeriodInvalid('NOTICE_PERIOD_INVALID'),
   noticePriorityInvalid('NOTICE_PRIORITY_INVALID'),
   noticePlatformInvalid('NOTICE_PLATFORM_INVALID'),
+  noticeLocaleInvalid('NOTICE_LOCALE_INVALID'),
   noticeImageInvalidType('NOTICE_IMAGE_INVALID_TYPE'),
   noticeImageTooLarge('NOTICE_IMAGE_TOO_LARGE'),
   noticeImageSaveFailed('NOTICE_IMAGE_SAVE_FAILED'),

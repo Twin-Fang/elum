@@ -36,11 +36,12 @@ final adNativeLoaderProvider = Provider<AdNativeLoader>(
 
 /// google_mobile_ads 구현.
 ///
-/// 광고주 이미지·문구는 SDK 템플릿(`small`)이 그린다. 앱 쪽 네이티브 팩토리를 따로
+/// 광고주 이미지·문구는 SDK 템플릿(`medium`)이 그린다. 앱 쪽 네이티브 팩토리를 따로
 /// 등록하지 않아도 되고, 광고 에셋을 앱이 임의로 가공하지 않는다(정책).
 class GoogleAdNativeLoader implements AdNativeLoader {
-  /// 템플릿 `small` 이 그려지는 높이. 이보다 작으면 잘린다.
-  static const _height = 100.0;
+  /// 템플릿 `medium` 이 그려지는 높이 (미디어 위, 문구 아래). 이보다 작으면 잘린다.
+  /// small 은 미디어가 120x120 미만이라 영상 광고 검증기 경고가 난다 (#571)
+  static const _height = 360.0;
 
   /// 광고가 이만큼 안 오면 포기한다 — 슬롯은 실패로 보고 항목을 만들지 않는다.
   static const _loadTimeout = Duration(seconds: 20);
@@ -63,7 +64,7 @@ class GoogleAdNativeLoader implements AdNativeLoader {
         // 요청에 넘기는 것은 비개인화 여부뿐이다. 이룸이·보호자 정보는 넘기지 않는다.
         request: AdRequest(nonPersonalizedAds: nonPersonalized),
         nativeTemplateStyle: NativeTemplateStyle(
-          templateType: TemplateType.small,
+          templateType: TemplateType.medium,
         ),
         listener: NativeAdListener(
           onAdLoaded: (a) {
