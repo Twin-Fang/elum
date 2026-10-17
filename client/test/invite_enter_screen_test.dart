@@ -1,7 +1,7 @@
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error_code.dart';
 import 'package:elum/core/storage/local_storage.dart';
-import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/elum_button.dart';import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/profile/data/profile_repository.dart';
 import 'package:elum/features/profile/presentation/invite_enter_screen.dart';
 import 'package:flutter/material.dart';
@@ -63,15 +63,38 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// 여섯 자를 채우고 `시작하기` 를 눌러 보낸다 (자동 제출은 없다)
+  Future<void> typeAndStart(WidgetTester tester, String code) async {
+    await type(tester, code);
+    await tester.tap(find.text('시작하기'));
+    await tester.pumpAndSettle();
+  }
+
+  VoidCallback? startButtonAction(WidgetTester tester) =>
+      tester.widget<ElumButton>(find.byType(ElumButton)).onPressed;
+
 
 
 
   group('정상', () {
-    testWidgets('여섯 자를 채우면 확인 버튼 없이 바로 보내고 합류한 이룸이의 보호자 홈으로 간다 (E6)', (tester) async {
+    testWidgets('여섯 자를 채워도 보내지 않고 시작하기가 켜진다 — 틀린 시도를 서버가 세기 때문', (tester) async {
+      await tester.pumpWidget(wrap());
+      await tester.pumpAndSettle();
+      expect(startButtonAction(tester), isNull);
+
+      await type(tester, 'A7K3M9');
+
+      expect(repo.sentCodes, isEmpty);
+      expect(startButtonAction(tester), isNotNull);
+      // 키보드가 시작하기를 가리지 않게 내려간다
+      expect(tester.widget<TextField>(find.byType(TextField)).focusNode!.hasFocus, isFalse);
+    });
+
+    testWidgets('시작하기를 누르면 보내고 합류한 이룸이의 보호자 홈으로 간다 (E6)', (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      await type(tester, 'A7K3M9');
+      await typeAndStart(tester, 'A7K3M9');
 
       expect(repo.sentCodes, ['A7K3M9']);
       expect(find.text('보호자 홈'), findsOneWidget);
@@ -92,7 +115,7 @@ void main() {
       repo.redeemResult = Attempt.failed(failure);
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
-      await type(tester, 'A7K3M9');
+      await typeAndStart(tester, 'A7K3M9');
     }
 
 

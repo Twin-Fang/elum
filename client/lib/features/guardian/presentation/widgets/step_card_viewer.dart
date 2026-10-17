@@ -101,6 +101,13 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
     super.dispose();
   }
 
+  /// 미리 만든 단계 음성 위치 (#675). 일과 id 가 없으면(저장 전) 기기 음성만
+  StoredSpeechSource? _storedSpeechOf(ActionCard card) {
+    final routineId = widget.routineId;
+    if (routineId.isEmpty) return null;
+    return (routineId: routineId, stepId: card.id, speechPath: card.speechPath);
+  }
+
   /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다 (카드확인과 같다).
   Future<void> _speak(ActionCard card) async {
     final speech = ref.read(speechServiceProvider);
@@ -115,6 +122,7 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
     final ok = await speech.speak(
       '${card.displayTitle}. ${card.description}',
       language: widget.language,
+      stored: _storedSpeechOf(card),
     );
     if (!mounted) return;
     setState(() => _speakingId = null);

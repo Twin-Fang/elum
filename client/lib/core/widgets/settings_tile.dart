@@ -1,6 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../assets/app_assets.dart';
 import '../theme/theme_context_ext.dart';
 import 'app_pressable.dart';
 import 'elum_spinner.dart';
@@ -19,6 +23,7 @@ class SettingsTile extends StatelessWidget {
     this.valueText,
     this.showChevronWithValue = false,
     this.loading = false,
+    this.isInCard = false,
   });
 
   final String label;
@@ -40,9 +45,22 @@ class SettingsTile extends StatelessWidget {
   /// 이 줄이 부른 작업(로그아웃 등)을 기다리는 중. 오른쪽에 스피너가 돌고 누를 수 없다.
   final bool loading;
 
+  /// 흰 묶음 카드 안의 줄이다 (Figma `1532:7501`: 높이 56, 안쪽 여백 왼쪽 20·오른쪽 16, 검정 글자, 얇은 화살표).
+  /// false 면 살색 배경 위 줄(`1022:4467`)이다. 다른 설정 목록이 새 시안을 받을 때까지 둘이 함께 있다.
+  final bool isInCard;
+
   /// 시안(`1022:4467`) 실측 — 줄 높이 60, 좌우 안쪽 여백 16.
   static const _height = 60.0;
   static const _padH = 16.0;
+
+  /// 묶음 카드 줄 (Figma `1532:7501`)
+  static const cardHeight = 56.0;
+  static const cardPadLeft = 20.0;
+  static const cardPadRight = 16.0;
+
+  /// 묶음 카드 줄의 화살표 (24×24 상자)와 값·화살표 사이
+  static const cardChevronSize = 24.0;
+  static const cardValueGap = 12.0;
 
   /// 글자가 커져 줄이 늘어났을 때 위아래가 붙지 않게 하는 여백. 기본 크기에서는 최소 높이 안에 들어간다.
   static const _padV = 8.0;
@@ -55,20 +73,41 @@ class SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final value = valueText;
-    final chevron = Icon(
-      Icons.chevron_right_rounded,
-      size: 20.w,
-      color: colors.settingsChevron,
-    );
+    final chevron = isInCard
+        // 시안과 같은 SVG: 원본이 아래를 보므로 반시계 90°를 돌려 `>` 로 쓴다
+        ? Transform.rotate(
+            angle: -math.pi / 2,
+            child: SvgPicture.asset(
+              AppAssets.iconAngleSmall,
+              width: cardChevronSize.w,
+              height: cardChevronSize.w,
+              colorFilter: ColorFilter.mode(
+                colors.settingsChevron,
+                BlendMode.srcIn,
+              ),
+            ),
+          )
+        : Icon(
+            Icons.chevron_right_rounded,
+            size: 20.w,
+            color: colors.settingsChevron,
+          );
+    final labelColor = destructive
+        ? colors.settingsDestructive
+        : (isInCard ? colors.settingsCardLabel : colors.textPrimary);
 
     // 시안 높이는 최소값이다. 글자가 커져 줄이 늘어나면 다음 줄을 밀어낸다.
     final row = ConstrainedBox(
       // 최소 높이를 Row 에 직접 걸어 기본 크기에서는 고정 높이와 같은 세로 가운데 배치가 된다.
-      constraints: BoxConstraints(minHeight: _height.h),
+      constraints: BoxConstraints(
+        minHeight: (isInCard ? cardHeight : _height).h,
+      ),
       // **구분선을 긋지 않는다.** 시안은 줄 사이가 배경 그대로다 — 렌더의
       // 경계 픽셀을 재 보면 배경색이 끊기지 않고 이어진다.
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: _padH.w),
+        padding: isInCard
+            ? EdgeInsets.only(left: cardPadLeft.w, right: cardPadRight.w)
+            : EdgeInsets.symmetric(horizontal: _padH.w),
         child: Row(
           children: [
             Expanded(
@@ -80,11 +119,9 @@ class SettingsTile extends StatelessWidget {
                   style: context.typo.settingsTileLabel.copyWith(
                     // 흐리게 하면 "못 누르는 항목"으로 읽힌다. 누를 수 있다는 것과
                     // 위험하다는 것을 동시에 전해야 한다.
-                    color: destructive
-                        ? colors.settingsDestructive
-                        : colors.textPrimary,
-                    // 시안은 회원탈퇴만 굵다.
-                    fontWeight: destructive ? FontWeight.w500 : null,
+                    color: labelColor,
+                    // 평면 시안은 회원탈퇴만 굵다. 묶음 카드 시안은 모두 같은 굵기다.
+                    fontWeight: destructive && !isInCard ? FontWeight.w500 : null,
                   ),
                 ),
               ),
@@ -94,17 +131,21 @@ class SettingsTile extends StatelessWidget {
             else ...[
               if (value != null)
                 // 값이 길어도 제목을 0 폭으로 밀어내지 않게 폭 상한을 둔다.
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 140.w),
-                child: Text(
-                  value,
-                  style: context.typo.settingsTileLabel.copyWith(
-                    color: colors.textPlaceholder,
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 140.w),
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.right,
+                    style: context.typo.settingsTileLabel.copyWith(
+                      color: isInCard
+                          ? colors.settingsCardValue
+                          : colors.textPlaceholder,
+                    ),
                   ),
                 ),
-              ),
-            if (value == null || showChevronWithValue) ...[
-              if (value != null) SizedBox(width: 4.w),
+              if (value == null || showChevronWithValue) ...[
+                if (value != null)
+                  SizedBox(width: (isInCard ? cardValueGap : 4).w),
                 chevron,
               ],
             ],

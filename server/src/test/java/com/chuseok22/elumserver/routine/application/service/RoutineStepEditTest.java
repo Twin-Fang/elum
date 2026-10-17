@@ -68,6 +68,11 @@ class RoutineStepEditTest {
   @Mock private CreditReservationService creditReservationService;
   @Mock private PictogramPicker pictogramPicker;
 
+  // 단계 음성 대기열 (#675) — 예약만 확인, 실제 합성 없음
+
+  @Mock private RoutineStepSpeechQueue routineStepSpeechQueue;
+
+
   @InjectMocks private RoutineService routineService;
 
   // ── 카드 추가 ────────────────────────────────────────────────────
@@ -324,6 +329,50 @@ class RoutineStepEditTest {
       .sorted(java.util.Comparator.comparingInt(RoutineStep::getStepOrder))
       .map(RoutineStep::getId)
       .toList();
+  }
+
+  // ── 단계 음성 (#675) ─────────────────────────────────────────────
+
+  @Test
+  @DisplayName("설명을 고치면 옛 음성을 버리고 다시 만들도록 예약한다 — 옛 문장이 읽히지 않게")
+  void updateStep_textChanged_resetsAndRequeuesSpeech() {
+    Routine routine = routine(RoutineStatus.CONFIRMED, 2, false);
+    RoutineStep step = routine.getSteps().getFirst();
+    step.setSpeechPath("step-1/old.wav");
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.updateStep(GUARDIAN, "routine-1", "step-1",
+      new RoutineStepUpdateRequest(null, "새 설명", null));
+
+    assertThat(step.getSpeechPath()).isNull();
+    verify(routineStepSpeechQueue).deleteSpeechAfterCommit("step-1/old.wav");
+    verify(routineStepSpeechQueue).enqueueAfterCommit("step-1");
+  }
+
+  @Test
+  @DisplayName("순서만 바꾸면 음성은 그대로 둔다 — AI 서버를 다시 부르지 않게")
+  void updateStep_orderOnly_keepsSpeech() {
+    Routine routine = routine(RoutineStatus.CONFIRMED, 2, false);
+    RoutineStep step = routine.getSteps().getFirst();
+    step.setSpeechPath("step-1/old.wav");
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.updateStep(GUARDIAN, "routine-1", "step-1",
+      new RoutineStepUpdateRequest(null, null, 2));
+
+    assertThat(step.getSpeechPath()).isEqualTo("step-1/old.wav");
+    verifyNoInteractions(routineStepSpeechQueue);
+  }
+
+  @Test
+  @DisplayName("카드를 지우면 커밋 뒤 그 카드의 음성 폴더를 지운다")
+  void deleteStep_deletesSpeechAfterCommit() {
+    Routine routine = routine(RoutineStatus.CONFIRMED, 2, false);
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(routine));
+
+    routineService.deleteStep(GUARDIAN, "routine-1", "step-2");
+
+    verify(routineStepSpeechQueue).deleteStepsAfterCommit(List.of("step-2"));
   }
 
   private Routine routine(RoutineStatus status, int stepCount, boolean allCompleted) {

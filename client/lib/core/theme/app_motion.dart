@@ -54,6 +54,17 @@ abstract final class AppMotion {
   /// 등장 연출과 겹치지 않도록 충분히 느리게 잡는다.
   static const float = Duration(milliseconds: 2400);
 
+  /// 일과 완료 화면 캐릭터가 아래에서 튀어 올라 자리 잡는 시간.
+  ///
+  /// [emphasis](500)를 넘긴다. 탄성 곡선은 마지막 20%가 잔진동이라 500에 맞추면
+  /// 첫 오버슛만 보이고 멎는다. 브랜드 핵심 순간(일과 전체 완료)에만 쓴다.
+  static const celebrationEntrance = Duration(milliseconds: 700);
+
+  /// 일과 완료 화면 대기 연출(숨쉬기·별 반짝임)의 한 바퀴.
+  ///
+  /// 모든 요소의 주기가 이 값의 약수라서 반복 이음매에서 튀지 않는다.
+  static const celebrationAmbientLoop = Duration(seconds: 12);
+
   // --- Curve ---
 
   /// 일반 상태 변화

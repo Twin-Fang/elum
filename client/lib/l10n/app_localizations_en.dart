@@ -644,9 +644,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t make the code. Try again.';
 
   @override
-  String get linkCodeExpired => 'The code has expired';
-
-  @override
   String get linkCodeSuccessTitle => 'The phone is connected!';
 
   @override
@@ -654,6 +651,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkCodeLater => 'Maybe later';
+
+  @override
+  String get linkCodeChangesAfter => 'until the code changes';
 
   @override
   String get linkRetryChipLabel => 'Make a new code';
@@ -765,13 +765,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardiansNoProfileDescription => 'Add Elumi first';
 
   @override
-  String guardiansCaption(String name, String batchim) {
-    return 'People looking after $name together';
-  }
-
-  @override
-  String get guardiansIntro =>
-      'Family or teachers who make routines together. Connect Elumi\'s phone from Elumi\'s phone in settings.';
+  String get guardiansIntro => 'Family or teachers who make routines together';
 
   @override
   String get guardiansLoadFailedFallback => 'Couldn\'t load co-guardians';
@@ -798,7 +792,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardiansLeaveHintWithOthers =>
-      'Only routines you made are removed. Other guardians\' routines stay.';
+      'Only routines you made are removed';
 
   @override
   String inviteCodeGuestJoinedTitle(String name) {
@@ -826,16 +820,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardiansRenameAction => 'Rename';
 
   @override
-  String get guardiansNoName => 'No name';
-
-  @override
   String get inviteCodeShareFailTitle => 'Couldn\'t send the link';
 
   @override
   String get inviteCodeShareFailFallback => 'Tell them the code yourself';
-
-  @override
-  String get inviteCodeExpired => 'The invite code has expired';
 
   @override
   String get inviteCodeTitle => 'Invite code';
@@ -864,14 +852,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteCodeRetryChip => 'Make a new invite code';
-
-  @override
-  String get inviteCodeRetryNote =>
-      'The old code stops working when you make a new one';
-
-  @override
-  String get inviteCodeElumiPhoneNote =>
-      'Elumi\'s phone isn\'t added here\nConnect it from Elumi\'s phone in settings';
 
   @override
   String get inviteEnterLinkInvalid =>
@@ -920,7 +900,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inviteEnterConsentFallback => 'Agree to the terms first';
 
   @override
-  String get inviteEnterJoinButton => 'Join';
+  String get inviteEnterStartButton => 'Start';
 
   @override
   String get inviteEnterManualLink => 'Enter a different code';
@@ -930,21 +910,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteEnterDescriptionFromLink =>
-      'This is the invite code from the link. If it\'s right, tap Join.';
+      'This is the invite code from the link. If it\'s right, tap Start.';
 
   @override
   String get inviteEnterDescriptionManual =>
-      'It\'s the six characters you got from a co-guardian';
+      'The code is on a co-guardian\'s phone,\nin Settings → Co-guardians';
 
   @override
-  String get inviteEnterWhereFrom => 'On a co-guardian\'s phone,';
-
-  @override
-  String get inviteEnterWherePath => 'go to Settings → Co-guardians';
-
-  @override
-  String get inviteEnterWhereHow =>
-      'Make an invite code and six characters appear';
+  String get inviteEnterDescriptionPath => 'Settings → Co-guardians';
 
   @override
   String get inviteEnterSemanticsFromLink => 'Invite code from the link';
@@ -1851,7 +1824,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routineDoneTitle => 'Routine done!';
 
   @override
-  String get routineDoneButton => 'Yay!';
+  String routineDoneMessage(String name) {
+    return 'Made for $name,\nwho finished everything';
+  }
+
+  @override
+  String get routineDoneButton => 'I did it!';
 
   @override
   String get modeSwitchToChild => 'Enter the passcode to switch to Elumi mode';
@@ -1913,12 +1891,79 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get linkCodePhoneNote =>
-      'Open the link on Elumi\'s phone\nor type the code in yourself';
-
-  @override
   String get linkRejectedAlreadyLinked => 'This phone is already connected';
 
   @override
   String get linkRejectedOnGuardianPhone => 'Open this on Elumi\'s phone';
+
+  @override
+  String get creditHistoryTitle => 'Credit history';
+
+  @override
+  String get creditHistoryLink => 'View credit history';
+
+  @override
+  String creditHistoryDay(int month, int day) {
+    return '$month/$day';
+  }
+
+  @override
+  String creditHistoryDetail(String kind, String time) {
+    return '$kind・$time';
+  }
+
+  @override
+  String get creditHistoryKindRoutineText => 'Making the routine';
+
+  @override
+  String creditHistoryKindCardImages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count card pictures',
+      one: '$count card picture',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditHistoryKindCardImage => 'Making a card picture';
+
+  @override
+  String get creditHistoryKindImageRegenerate => 'Remaking a card picture';
+
+  @override
+  String get creditHistoryKindWeeklyGrant =>
+      'Your credits were refilled this week';
+
+  @override
+  String get creditHistoryKindAdReward => 'Received for watching an ad';
+
+  @override
+  String get creditHistoryKindAdminBonus => 'A bonus from the Elum team';
+
+  @override
+  String get creditHistoryKindOtherGrant => 'You received credits';
+
+  @override
+  String get creditHistoryKindExpired => 'Last week\'s credits expired';
+
+  @override
+  String get creditHistoryKindAdjusted => 'Credits were adjusted';
+
+  @override
+  String get creditHistoryKindUnknownSpend => 'You used credits';
+
+  @override
+  String get creditHistoryEmptyTitle => 'No credits used yet';
+
+  @override
+  String get creditHistoryEmptyBody =>
+      'Make a routine and it will show up here';
+
+  @override
+  String get creditHistoryLoadFailed => 'Couldn\'t load credit history';
+
+  @override
+  String get creditHistoryMoreFailed => 'Couldn\'t load more';
 }

@@ -2,12 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/app_failure.dart';
-import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_error_view.dart';
 import '../../../core/widgets/elum_header.dart';
@@ -23,46 +21,34 @@ import '../application/profile_session.dart';
 import '../domain/invite_link.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../member/application/member_providers.dart';
-import '../../../core/theme/app_typography.dart';
 
-/// 초대 코드 만들기 — 연결된 보호자가 **함께 돌볼 보호자**를 부른다.
-///
-/// > ⚠️ **임시 시안이다.** 디자인 시안이 없어 연결 암호 만들기(`LinkCodeScreen`)의 설정 진입
-/// > 모양(제목 줄·코드 3-3·`MM:SS`·다시 만들기 칩)을 그대로 빌렸다. 시안이 나오면 바꾼다.
-///
-/// ## 연결 암호와 말을 섞지 않는다
+/// 초대 코드 만들기: 연결된 보호자가 **함께 돌볼 보호자**를 부른다 (Figma 1579:8206).
 ///
 /// 이룸이 **휴대폰**을 붙이는 것은 `연결 암호`, 다른 **보호자**를 붙이는 것은 `초대 코드`다.
-/// 2026-09-18 합의의 `코드` 예외는 그 온보딩 시안에만 적용되므로 여기서는 `초대 코드`로
-/// 구분한다 — 두 갈래가 같은 말이면 보호자가 어느 쪽을 만드는지 헷갈린다.
+/// 두 갈래가 같은 말이면 보호자가 어느 쪽을 만드는지 헷갈린다.
+/// 배치는 연결 암호 화면의 설정 진입(`1532:6671`)과 같다: 코드 > `코드 복사하기` > `09:59 뒤에 코드가 바껴요`,
+/// 하단에 `링크로 보내기` 하나.
 ///
 /// ## 상태
 ///
-/// | | 코드 | 타이머 | 다시 만들기 |
-/// | --- | --- | --- | --- |
-/// | 만드는 중 | — | — | — |
-/// | 대기 | 보임 | `09:59` | 있음 |
-/// | 만료 | 흐리게 | `만료됐어요` | 있음 |
-/// | 실패 | — | — | 서버가 다시 해도 같은 이유면 없음 |
+/// | | 코드 | 복사하기 · 타이머 |
+/// | --- | --- | --- |
+/// | 만드는 중 | — | — |
+/// | 대기 | 보임 | 있음 |
+/// | 새로 못 받음 | — | 서버가 다시 해도 같은 이유면 다시 시도 없음 |
 ///
-/// 이전에 만든 미사용 코드는 서버가 폐기한다 (E9) — 그래서 다시 만들면 앞 코드를 쓸 수 없다고
-/// 먼저 알린다 (되돌릴 수 없는 일은 먼저 말한다).
+/// 시간이 다 되면 `만료`라 말하지 않고, 새 코드를 조용히 받아 타이머를 다시 돌린다.
+/// 이전에 만든 미사용 코드는 서버가 폐기한다 (E9): 다시 만들면 앞 코드는 쓸 수 없다.
 ///
 /// ## 링크로 보내기
 ///
 /// 여섯 글자를 불러주는 대신 **링크 하나를 메신저로 보낸다.** 받은 사람이 누르면 앱이 열리고 초대 코드
-/// 넣기 화면에 코드가 채워진다 — 링크는 코드를 대신 전달하는 수단일 뿐이다. 공유 문구에는 남은 시간
-/// (10분)과 링크가 열리지 않을 때 직접 넣을 코드가 들어간다. **임시 시안** — 하단 버튼 자리는 다른
-/// 화면의 `다음` 버튼을 빌렸다.
-///
-/// 만료된 코드는 보내지 않는다 (버튼이 꺼진다). 다시 만들면 앞 코드가 폐기되므로 **보낼 때마다 지금 화면에
-/// 보이는 코드**로 링크를 만든다. 하단에는 `코드 복사하기`가 함께 있다 (연결 암호 화면과 같은 부품).
+/// 넣기 화면에 코드가 채워진다. 보낼 때마다 지금 화면에 보이는 코드로 링크를 만든다.
 ///
 /// ## 다시 들어와도 같은 코드
 ///
 /// 서버는 코드 원문을 모른다. 그래서 받은 코드와 만료를 앱이 메모리([IssuedCodeMemory])에 기억해 두었다가,
 /// 다시 들어오면 서버에 아직 살아 있는지만 묻고 그대로 보여 준다. 확인에 실패하거나 어긋나면 새로 발급한다.
-/// 새로 만드는 것은 `코드 다시 만들기`를 눌렀을 때뿐이다.
 class InviteCodeScreen extends ConsumerStatefulWidget {
   const InviteCodeScreen({super.key});
 
@@ -74,6 +60,9 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   IssuedLinkCode? _issued;
   AppFailure? _failure;
   bool _loading = true;
+
+  /// 시간이 다 된 코드를 새 코드로 바꾸는 중. 스피너 없이 옛 코드를 그대로 둔다.
+  bool _isRenewing = false;
 
   /// 연결된 이룸이가 없어 부를 곳이 없다 (E29). 서버 실패가 아니라 앱이 아는 상태다.
   bool _noProfile = false;
@@ -97,7 +86,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   /// 폴링 요청이 아직 돌고 있다. 응답이 3초보다 늦을 때 요청이 쌓이지 않게 한다.
   bool _polling = false;
 
-  /// 설정 진입 시안(`1027:4617`)과 같은 머리 — 뒤로가기 y=67, 제목 y=147.
+  /// 설정 묶음 시안의 머리: 뒤로가기 y=67, 제목 y=147.
   static const _settingsBackTop = 67.0;
   static const _settingsTitleY = 147.0;
 
@@ -118,9 +107,11 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
   String? _memoryKey;
 
   /// [force] 가 true 면 기억한 코드를 쓰지 않고 새로 발급한다 (`코드 다시 만들기`).
-  Future<void> _issue({bool force = false}) async {
+  /// [isSilent] 가 true 면 스피너를 띄우지 않는다 (시간이 다 된 코드의 자동 교체 - 화면이 깜빡이지 않게).
+  Future<void> _issue({bool force = false, bool isSilent = false}) async {
     setState(() {
-      _loading = true;
+      _loading = !isSilent;
+      _isRenewing = isSilent;
       _failure = null;
       _noProfile = false;
     });
@@ -135,6 +126,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
     if (active == null) {
       setState(() {
         _loading = false;
+        _isRenewing = false;
         _noProfile = true;
       });
       return;
@@ -161,6 +153,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       setState(() {
         _issued = reused;
         _loading = false;
+        _isRenewing = false;
       });
       _startTicker();
       _startPoller(active.id);
@@ -173,6 +166,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
     if (!attempt.isOk) {
       setState(() {
         _loading = false;
+        _isRenewing = false;
         _failure = attempt.failure;
       });
       return;
@@ -181,6 +175,7 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
     setState(() {
       _issued = attempt.value;
       _loading = false;
+      _isRenewing = false;
     });
     _startTicker();
     _startPoller(active.id);
@@ -244,13 +239,16 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
     if (mounted) context.popOrHome();
   }
 
-  /// 남은 시간을 초까지 보여 주므로 1초마다 다시 그린다. 만료되면 멈춘다.
+  /// 남은 시간을 초까지 보여 주므로 1초마다 다시 그린다. 시간이 다 되면 멈추고 새 코드로 바꾼다.
   void _startTicker() {
     _ticker?.cancel();
     _ticker = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) return t.cancel();
-      if (_issued?.isExpired ?? true) t.cancel();
+      final isExpired = _issued?.isExpired ?? true;
+      if (isExpired) t.cancel();
       setState(() {});
+      // 새 코드를 조용히 받는다 (실패하면 에러 화면과 다시 시도가 대신 나온다)
+      if (isExpired && !_celebrated) _issue(force: true, isSilent: true);
     });
   }
 
@@ -266,7 +264,6 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final issued = _issued;
     final failure = _failure;
     final name = _name ?? context.l10n.commonElumiName;
@@ -275,15 +272,12 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
       onBack: context.popOrHome,
       title: context.l10n.inviteCodeTitle,
       backTop: _settingsBackTop,
-      // 코드가 있을 때만 — 만들지 못했거나 이룸이가 없으면 보낼 것이 없다 (임시 시안)
-      bottomButton: issued != null && failure == null && !_loading && !_noProfile
-          ? IssuedCodeActions(
-              issued: issued,
-              shareMessage: (i) =>
-                  InviteLink.shareMessage(i.code, validFor: i.remaining()),
-              shareFailCode: 'E-INV-SHARE',
-            )
-          : null,
+      // 만들지 못했거나 이룸이가 없으면 보낼 코드가 없어 꺼진다
+      bottomButton: IssuedCodeShareButton(
+        issued: failure == null && !_loading && !_noProfile ? issued : null,
+        shareMessage: (i) => InviteLink.shareMessage(i.code, validFor: i.remaining()),
+        shareFailCode: 'E-INV-SHARE',
+      ),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -296,8 +290,9 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
             IssuedCodePanel(
               loading: _loading,
               issued: issued,
-              expiredLabel: context.l10n.inviteCodeExpired,
+              isRenewing: _isRenewing,
               onRetry: () => _issue(force: true),
+              onCopy: () => copyIssuedCode(context, issued),
               replacement: _noProfile
                   // 이룸이가 없으면 다시 해도 같다 — 버튼 없이 이유와 코드만 보여 준다.
                   ? ElumErrorView(
@@ -313,22 +308,6 @@ class _InviteCodeScreenState extends ConsumerState<InviteCodeScreen> {
                       onRetry: _retryable ? _issue : null,
                     )
                   : null,
-              footer: [
-                SizedBox(height: IssuedCodePanel.timerToRetry.h),
-                // 되돌릴 수 없는 일(앞 코드가 쓸 수 없게 된다)을 먼저 말한다. 한 줄이다.
-                Text(
-                  context.l10n.inviteCodeRetryNote,
-                  textAlign: TextAlign.center,
-                  style: context.typo.body.paragraph.copyWith(color: colors.textSecondary),
-                ),
-                SizedBox(height: IssuedCodePanel.timerToRetry.h),
-                // 초대 코드는 보호자용이다. 이룸이가 쓰는 휴대폰은 따로 붙인다.
-                Text(
-                  context.l10n.inviteCodeElumiPhoneNote,
-                  textAlign: TextAlign.center,
-                  style: context.typo.bodySmall.paragraph.copyWith(color: colors.textSecondary),
-                ),
-              ],
             ),
           ],
         ),

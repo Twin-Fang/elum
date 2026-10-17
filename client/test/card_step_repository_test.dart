@@ -104,6 +104,24 @@ void main() {
 
   });
 
+  group('updateStep 로컬 반영 (#675)', () {
+    test('서버에 못 올린 글 수정은 옛 음성 열쇠를 버린다 — 바꾼 글 옆에서 옛 문장이 읽히지 않게', () async {
+      const withSpeech = Routine(
+        id: 'r1',
+        title: '학교에 가요',
+        status: 'PENDING_REVIEW',
+        steps: [ActionCard(id: 'c1', stepOrder: 1, description: '사과', speechPath: 'c1/old.wav')],
+      );
+      final f = setUp({'PATCH /api/routines/r1/steps/c1': const FakeOffline()});
+
+      final result = await f.repo.updateStep(withSpeech, 'c1', title: '바나나', description: '바나나를 먹어요');
+
+      expect(result.failure, isNotNull);
+      expect(result.routine.steps.single.description, '바나나를 먹어요');
+      expect(result.routine.steps.single.speechPath, isNull);
+    });
+  });
+
   group('reorderSteps', () {
     test('PATCH /steps/order 로 카드 id 전체를 순서대로 보낸다', () async {
       final f = setUp({

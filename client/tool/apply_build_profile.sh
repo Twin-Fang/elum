@@ -114,6 +114,23 @@ strip_dev_keys() {
   mv "$tmp" "$ENV_FILE"
 }
 
+# ── 광고 ID 덧붙이기 ───────────────────────────────────────────────
+#
+# 운영 광고 단위는 `CLIENT_ENV_FILE`과 따로 시크릿 `CLIENT_ADMOB_ENV`에 둔다. 앱 전체 `.env`를 갈아끼우지 않고
+# 광고 줄만 바꿀 수 있어서다. 워크플로가 이 값을 환경변수 `CLIENT_ADMOB_ENV`로 넘기면 `.env`의 옛
+# `ELUM_ADMOB_` 줄을 지우고 이 값의 `ELUM_ADMOB_` 줄만 덧붙인다. 비어 있으면 아무것도 바꾸지 않는다.
+# 개발·테스트 빌드는 `AppConfig.useTestAds`가 구글 테스트 단위를 쓰므로 이 값이 들어가도 실광고는 나가지 않는다.
+merge_admob_env() {
+  [ -n "${CLIENT_ADMOB_ENV:-}" ] || return 0
+  local tmp added
+  tmp="$(mktemp)"
+  grep -Ev '^ELUM_ADMOB_' "$ENV_FILE" > "$tmp" || true
+  printf '%s\n' "$CLIENT_ADMOB_ENV" | grep -E '^ELUM_ADMOB_[A-Z_]+=.+' >> "$tmp" || true
+  mv "$tmp" "$ENV_FILE"
+  added="$(grep -cE '^ELUM_ADMOB_[A-Z_]+=.+' "$ENV_FILE" || true)"
+  echo "✅ 광고 ID ${added}개를 .env에 반영했습니다 (값은 찍지 않습니다)"
+}
+
 BUILD_FLAGS=""
 
 case "$MODE" in
@@ -141,6 +158,8 @@ case "$MODE" in
     exit 2
     ;;
 esac
+
+merge_admob_env
 
 # ── 결과 출력 — 두 층을 함께 보여준다 ──────────────────────────────
 echo "── 런타임 스위치 (.env) ──"

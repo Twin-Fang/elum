@@ -129,6 +129,13 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     ref.read(routineFlowProvider.notifier).removeStep(card.id);
   }
 
+  /// 미리 만든 단계 음성 위치 (#675). 일과 id 가 없으면(저장 전) 기기 음성만
+  StoredSpeechSource? _storedSpeechOf(ActionCard card) {
+    final routineId = ref.read(routineFlowProvider).routine?.id;
+    if (routineId == null || routineId.isEmpty) return null;
+    return (routineId: routineId, stepId: card.id, speechPath: card.speechPath);
+  }
+
   /// 카드를 읽어준다. 읽는 중에 다시 누르면 멈춘다.
   ///
   /// 아동이 여러 번 누를 때 소리가 겹치면 알아들을 수 없다.
@@ -148,6 +155,7 @@ class _CardReviewScreenState extends ConsumerState<CardReviewScreen>
     final ok = await speech.speak(
       '${card.displayTitle}. ${card.description}',
       language: ref.read(routineFlowProvider).routine?.language ?? 'ko',
+      stored: _storedSpeechOf(card),
     );
 
     if (!mounted) return;

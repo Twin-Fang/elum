@@ -64,6 +64,18 @@ final pastRoutinesProvider = FutureProvider<List<Routine>>((ref) {
   return ref.watch(routineRepositoryProvider).getPastRoutines();
 });
 
+/// 홈 광고(하단 배너 · 지난 일과 네이티브)를 보이는 최소 일과 수 (오늘 + 지난)
+const minimumRoutineCountForHomeAds = 5;
+
+/// 홈 광고를 보일지: 오늘·지난 목록을 모두 받았고 합이 [minimumRoutineCountForHomeAds] 이상일 때만 true.
+/// 불러오는 중·실패면 false — 일과가 적은 화면에 광고가 몰리거나 먼저 떴다 사라지지 않게 한다.
+final shouldShowHomeAdsProvider = Provider<bool>((ref) {
+  final today = ref.watch(todayRoutinesProvider).value;
+  final past = ref.watch(pastRoutinesProvider).value;
+  if (today == null || past == null) return false;
+  return today.length + past.length >= minimumRoutineCountForHomeAds;
+});
+
 /// 추천 일과. 보호자_홈 타일과 일과 만들기 화면의 칩이 함께 구독한다.
 ///
 /// 서버가 매 호출마다 셔플하므로 두 화면이 각자 부르면 목록이 달라진다.

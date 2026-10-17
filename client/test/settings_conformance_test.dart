@@ -18,8 +18,16 @@ import 'package:elum/features/guardian/presentation/guardian_settings_screen.dar
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
 import 'package:elum/features/link/presentation/link_code_screen.dart';
+import 'package:elum/features/member/application/member_providers.dart';
+import 'package:elum/features/profile/data/profile_repository.dart';
+import 'package:elum/features/profile/domain/guardian_member.dart';
+import 'package:elum/features/profile/presentation/guardians_screen.dart';
+import 'package:elum/features/profile/presentation/invite_code_screen.dart';
 import 'package:elum/shared/models/routine.dart';
+import 'package:elum/features/credit/domain/credit_history.dart';
+import 'package:elum/features/credit/presentation/credit_history_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,6 +36,7 @@ import 'package:go_router/go_router.dart';
 import 'helpers/credit_fixtures.dart';
 import 'helpers/device_viewport.dart';
 import 'helpers/precache_images.dart';
+import 'helpers/profile_fixtures.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
@@ -37,7 +46,13 @@ import 'package:elum/features/guardian/application/routine_providers.dart';
 /// 값만 맞추고 렌더를 맞대지 않으면 통째로 어긋난 것을 놓친다 — 실제로 설정 제목을
 /// 네비게이션 제목(18/w600 Pretendard)이 아니라 페이지 제목(28/w800 Tmoney)으로
 /// 만들어 두고 "맞췄다"고 판단했다.
-Future<void> _pump(WidgetTester tester, Widget screen, {List<Object> extra = const []}) async {
+/// [hasKoreanLocale] 면 한국어 머티리얼 문구(`오전 11:23`)를 쓴다. 시각을 그리는 화면만 켠다.
+Future<void> _pump(
+  WidgetTester tester,
+  Widget screen, {
+  List<Object> extra = const [],
+  bool hasKoreanLocale = false,
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -50,6 +65,13 @@ Future<void> _pump(WidgetTester tester, Widget screen, {List<Object> extra = con
         builder: (context, _) => MaterialApp.router(
           theme: AppTheme.light,
           debugShowCheckedModeBanner: false,
+          locale: hasKoreanLocale ? const Locale('ko') : null,
+          localizationsDelegates: hasKoreanLocale
+              ? GlobalMaterialLocalizations.delegates
+              : null,
+          supportedLocales: hasKoreanLocale
+              ? const [Locale('ko')]
+              : const [Locale('en', 'US')],
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context).copyWith(padding: deviceInsets),
             child: child!,
@@ -75,51 +97,81 @@ void main() {
   // 없으면 800×600 으로 찍혀 시안과 맞댈 수 없다.
   useFigmaViewport();
 
-  // **알려진 차이 — 문의하기 줄 (#312).** 시안에는 약관과 로그아웃 사이에
-  // `문의하기`가 있지만 App Store 심사 기간이라 일부러 뺐다. 골든은 뺀 상태로
-  // 다시 찍었다. 2026-09-27 에 시안에서도 빼기로 했다(사용자 확인) — 시안 export 가
-  // 갱신되면 이 차이는 사라진다.
+  // 설정 메인 시안 `1532:7501` (#683): 크레딧 카드 + 흰 묶음 카드 넷. 시안 자리 그대로다.
   //
-  // `비밀암호 변경하기` 줄(#437)은 시안 자리(임시저장과 약관 사이) 그대로다. 시안(1배 export)과 `figma_diff.py --rows` 로 맞대면 이렇게 나온다.
-  //
-  //   시안 y=349 줄(문의하기)부터 아래 줄이 한 칸(60)씩 올라간다
-  //   → 349·409 줄은 글자가 달라 붉게 뜨고, 469 줄(회원탈퇴)은 "시안에만 있다"
-  //
-  // 이 셋은 **의도된 차이라 그대로 둔다.** 그 위(제목 ~ 약관 줄)가 어긋나면
-  // 그건 진짜 결함이다. 문의하기를 되살리면 이 주석과 골든을 함께 바꾼다
-  // (`guardian_settings_test.dart` 의 "일부러 뺐다" 테스트도 같이 깨진다).
-  //
-  // **알려진 차이 — AI 크레딧 카드 (#407).** 시안(1022:4467)에 없는 카드가 제목과
-  // 첫 줄 사이에 들어와 아래 줄이 전부 카드 높이만큼 내려간다. 카드는 이슈 시안
-  // (정상 잔액 72 / 100)으로 찍는다 — 조회 실패·로딩 상태로 찍으면 기준이 흔들린다.
-  //
-  // **알려진 차이 — 앱 정보 줄 (#418).** 시안에 없는 `앱 정보` 줄이 약관과 로그아웃
-  // 사이에 들어와 아래 두 줄이 60씩 내려가고, 맨 아래 `버전` 글자는 없어졌다.
-  // 개발 쪽 임시안이라 시안이 나오면 이 주석과 골든을 함께 바꾼다.
-  //
-  // **알려진 차이 — 함께하는 사람 줄 (#362).** 시안에 없는 `함께하는 사람` 줄이 `이룸이 휴대폰
-  // 연결하기` 바로 아래 들어와 아래 줄이 전부 60씩 내려간다. 다중 보호자 시안이 나오면 이 주석과
-  // 골든을 함께 바꾼다. (`이룸이 바꾸기` 줄은 이룸이가 둘 이상일 때만 보여 이 렌더에는 없다.)
-  //
-  // **알려진 차이 — 카드 체크 진동 줄 (#515).** 시안에 없는 켜고 끄는 `카드 체크 진동` 줄이 `그림 방식`
-  // 바로 아래 들어와 약관부터 아래 줄이 60씩 내려간다. 켜고 끄는 줄 시안이 나오면 이 주석과 골든을 함께 바꾼다.
-  //
-  // **알려진 차이 — 의견 보내기 줄.** 시안에 없는 `의견 보내기` 줄이 약관 바로 아래 들어와 앱 정보부터
-  // 아래 줄이 60씩 내려간다. 의견 보내기 시안이 나오면 이 주석과 골든을 함께 바꾼다.
-  //
-  testWidgets('설정 (Figma 1022:4467)', (tester) async {
+  // **알려진 차이**
+  // - `문의하기` 줄은 일부러 뺐다 (#312, 시안에도 없다).
+  // - 앱 정보 오른쪽 값: 시안은 자리 표시 글자 `버전 정보`, 앱은 실제 버전이다. 시험 환경은 버전을 못 읽어 비어 있다.
+  // - `이룸이 바꾸기` 줄은 이룸이가 둘 이상일 때만 보이며 시안에 없다. 이 렌더에는 없다.
+  // - 크레딧 카드는 시안 값(남은 90 / 100, 10월 19일(월) 0시)으로 찍는다.
+  // - 시안 프레임은 852 에서 잘려 계정 묶음이 보이지 않는다 (스크롤 아래). 같은 크기로 찍으므로 같은 모양이다.
+  testWidgets('설정 (Figma 1532:7501)', (tester) async {
     await _pump(
       tester,
       const GuardianSettingsScreen(),
       extra: [
         creditSummaryProvider.overrideWith(
-          (ref) async => CreditSummary.fromJson(creditJson()),
+          (ref) async => CreditSummary.fromJson({
+            ...creditJson(available: 90),
+            'nextResetAt': '2026-10-19T00:00:00',
+          }),
         ),
       ],
     );
     await expectLater(
       find.byType(GuardianSettingsScreen),
-      matchesGoldenFile('figma/settings_1022-4467.png'),
+      matchesGoldenFile('figma/settings_1532-7501.png'),
+    );
+  });
+
+  // 크레딧 사용 내역 시안 `1589:8359` (#658). 시안이 그린 줄 그대로 채운다.
+  //
+  // **알려진 차이**
+  // - 시안의 둘째·셋째 묶음은 자리 표시 글자(`타이틀`, `내용`)다. 앱은 실제 종류 문구가 들어간다.
+  // - 시안의 이룸이 이름·일과 제목은 가짜 데이터다.
+  testWidgets('크레딧 사용 내역 (Figma 1589:8359)', (tester) async {
+    CreditHistoryEntry entry(
+      String id,
+      CreditHistoryKind kind,
+      int delta,
+      DateTime at, {
+      String? title,
+      int? cardCount,
+    }) => CreditHistoryEntry(
+      id: id,
+      kind: kind,
+      delta: delta,
+      occurredAt: at,
+      routineTitle: title,
+      cardCount: cardCount,
+    );
+    final entries = [
+      entry('a', CreditHistoryKind.cardImages, -4, DateTime(2026, 10, 1, 11, 23),
+          title: '스스로 옷을 입어요', cardCount: 4),
+      entry('b', CreditHistoryKind.routineText, -1, DateTime(2026, 10, 1, 11, 22),
+          title: '스스로 옷을 입어요'),
+      entry('c', CreditHistoryKind.weeklyGrant, 100, DateTime(2026, 10, 1, 11, 22)),
+      entry('d', CreditHistoryKind.cardImages, -4, DateTime(2026, 9, 27, 23, 23),
+          title: '타이틀', cardCount: 4),
+      entry('e', CreditHistoryKind.routineText, -4, DateTime(2026, 9, 27, 11, 23),
+          title: '타이틀'),
+      entry('f', CreditHistoryKind.weeklyGrant, 100, DateTime(2026, 9, 25, 23, 23)),
+    ];
+    await _pump(
+      tester,
+      const CreditHistoryScreen(),
+      hasKoreanLocale: true,
+      extra: [
+        creditRepositoryProvider.overrideWithValue(
+          _HistoryRepository(
+            CreditHistoryPage(entries: entries, hasNext: false, page: 0),
+          ),
+        ),
+      ],
+    );
+    await expectLater(
+      find.byType(CreditHistoryScreen),
+      matchesGoldenFile('figma/credit_history_1589-8359.png'),
     );
   });
 
@@ -166,7 +218,7 @@ void main() {
     );
   });
 
-  testWidgets('설정 — 약관 목록 (Figma 1027:4683)', (tester) async {
+  testWidgets('설정 — 약관 목록 (Figma 1274:9315)', (tester) async {
     await _pump(
       tester,
       const ConsentDocumentListScreen(),
@@ -176,12 +228,12 @@ void main() {
     );
     await expectLater(
       find.byType(ConsentDocumentListScreen),
-      matchesGoldenFile('figma/settings_terms_1027-4683.png'),
+      matchesGoldenFile('figma/settings_terms_1274-9315.png'),
     );
   });
 
-  testWidgets('설정 — 이룸이 휴대폰 연결 (Figma 1027:4617)', (tester) async {
-    // 설정에서 들어온 화면이다 — `fromOnboarding: false`.
+  testWidgets('설정 — 이룸이 휴대폰 연결 (Figma 1532:6671)', (tester) async {
+    // 설정에서 들어온 화면이다: `fromOnboarding: false`.
     // 온보딩 시안(`732:5334`)과 머리·하단이 다르므로 둘을 같은 골든으로 묶으면
     // 한쪽이 어긋나도 드러나지 않는다.
     await _pump(
@@ -191,7 +243,94 @@ void main() {
     );
     await expectLater(
       find.byType(LinkCodeScreen),
-      matchesGoldenFile('figma/settings_link_1027-4617.png'),
+      matchesGoldenFile('figma/settings_link_1532-6671.png'),
+    );
+  });
+
+  // 시안 1579:8206 은 1532:6671 과 같은 모양이다 (제목·설명만 다르다).
+  //
+  // **알려진 차이**
+  // - 시안의 이룸이 이름은 `하늘이`, 앱은 회원 정보의 호칭을 쓴다. 시험은 `하늘이`로 맞춘다.
+  testWidgets('설정 — 다른 보호자 초대 (Figma 1579:8206)', (tester) async {
+    await _pump(
+      tester,
+      const InviteCodeScreen(),
+      extra: [
+        profileRepositoryProvider.overrideWithValue(
+          FakeProfileRepository()
+            ..issueResult = Attempt.ok(
+              IssuedLinkCode.fromNow(code: '5NJ280', expiresInSeconds: 599),
+            ),
+        ),
+        memberProvider.overrideWith((ref) async => memberWith([kProfileA])),
+      ],
+    );
+    await expectLater(
+      find.byType(InviteCodeScreen),
+      matchesGoldenFile('figma/settings_invite_1579-8206.png'),
+    );
+  });
+
+  // 함께하는 사람 세 프레임 (Figma 1027:4617 · 1532:6877 · 1532:7013). 시안이 그린 세 사람 그대로 채운다.
+  //
+  // **알려진 차이 — 시트 프레임의 `이름없음`.** 시안 1532:6877·7013 은 스크림 뒤 내 줄 이름이
+  // `이름없음`(검정 30%)인데 목록 시안 1027:4617 은 `보호자`다. 목록 시안을 따르므로 시트 두 프레임의
+  // 그 글자만 붉게 남는다.
+  final people = [
+    const Guardian(id: 'g-1', me: true),
+    const Guardian(id: 'g-2', me: false, displayName: '다른보호자이름'),
+    const Guardian(
+      id: 'g-3',
+      me: false,
+      displayName: '다른보호자이름',
+      kind: GuardianKind.caregiver,
+    ),
+  ];
+
+  Future<void> pumpPeople(WidgetTester tester) async {
+    final repo = FakeProfileRepository()..guardiansResult = Attempt.ok(people);
+    await _pump(
+      tester,
+      const GuardiansScreen(),
+      extra: [
+        profileRepositoryProvider.overrideWithValue(repo),
+        memberProvider.overrideWith((ref) async => memberWith([kProfileA])),
+      ],
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('설정 — 함께하는 사람 (Figma 1027:4617)', (tester) async {
+    await pumpPeople(tester);
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/people_1027-4617.png'),
+    );
+  });
+
+  testWidgets('설정 — 함께하는 사람 이름 변경, 비어 있음 (Figma 1532:6877)', (tester) async {
+    await pumpPeople(tester);
+    await tester.tap(find.text('이름 변경'));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/people_sheet_1532-6877.png'),
+    );
+  });
+
+  testWidgets('설정 — 함께하는 사람 이름 변경, 선생님 (Figma 1532:7013)', (tester) async {
+    await pumpPeople(tester);
+    await tester.tap(find.text('이름 변경'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '2반 선생님');
+    // 시트 안 구분 칩 (뒷 화면의 목록 칩과 겹치지 않게 시트 안에서 찾는다)
+    await tester.tap(find.descendant(of: find.byType(BottomSheet), matching: find.text('선생님')));
+    // 시안은 입력칸이 포커스를 받지 않은 모습
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('figma/people_sheet_teacher_1532-7013.png'),
     );
   });
 
@@ -283,4 +422,15 @@ class _FakeLink extends DeviceLinkRepository {
   @override
   Future<Attempt<LinkStatus>> statusResult() async =>
       Attempt.ok(const LinkStatus(devices: []));
+}
+
+/// 사용 내역 대조용: 정해 둔 한 쪽만 돌려준다.
+class _HistoryRepository extends CreditRepository {
+  _HistoryRepository(this.page) : super(Dio());
+
+  final CreditHistoryPage page;
+
+  @override
+  Future<CreditHistoryPage> getHistory({required int page, int size = 30}) async =>
+      this.page;
 }

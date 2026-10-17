@@ -25,6 +25,8 @@ import com.chuseok22.logging.annotation.LogMonitoring;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -46,6 +48,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 public class RoutineController implements RoutineControllerDocs {
+
+  // 단계 음성 응답 형식 (#675)
+  private static final MediaType SPEECH_MEDIA_TYPE = MediaType.parseMediaType("audio/wav");
 
   private final RoutineService routineService;
   private final RoutineCreateService routineCreateService;
@@ -134,6 +139,30 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok()
       .contentType(MediaType.parseMediaType(content.contentType()))
       .body(content.bytes());
+  }
+
+  // 단계 음성 (#675). 아직 없으면 404 — 앱은 기기 음성으로 읽음
+  // ETag = 음성 열쇠. 앱이 가진 열쇠와 같으면 304 (다시 받지 않음), 다르면 새 음성
+  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @GetMapping("/{routineId}/steps/{stepId}/speech")
+  public ResponseEntity<byte[]> getStepSpeech(
+    Authentication authentication, @PathVariable String routineId, @PathVariable String stepId,
+    @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch
+  ) {
+    return routineQueryService.getStepSpeech(Caller.from(authentication), routineId, stepId)
+      .map(speech -> toSpeechResponse(speech, ifNoneMatch))
+      .orElseGet(() -> ResponseEntity.notFound().build());
+  }
+
+  private static ResponseEntity<byte[]> toSpeechResponse(RoutineQueryService.StepSpeech speech, String ifNoneMatch) {
+    String etag = "\"" + speech.speechKey() + "\"";
+    if (etag.equals(ifNoneMatch)) {
+      return ResponseEntity.status(HttpStatus.NOT_MODIFIED).eTag(etag).build();
+    }
+    return ResponseEntity.ok()
+      .contentType(SPEECH_MEDIA_TYPE)
+      .eTag(etag)
+      .body(speech.wav());
   }
 
   // 보상 텍스트는 보호자 자유 입력이라 민감정보가 섞일 수 있다 — 파라미터를 로그에 남기지 않는다.

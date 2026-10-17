@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/guarded_call.dart';
 import '../../../core/network/app_failure.dart';
+import '../domain/credit_history.dart';
 import '../domain/credit_summary.dart';
 import '../../../app/dio_provider.dart';
 
@@ -15,6 +16,9 @@ class CreditRepository {
   CreditRepository(this._dio);
 
   final Dio _dio;
+
+  /// 한 번에 받는 줄 수. 서버 기본값(30)과 같다.
+  static const historyPageSize = 30;
 
   Future<CreditSummary> getMine() async {
     try {
@@ -31,6 +35,28 @@ class CreditRepository {
       );
     } catch (e) {
       // 화면이 실패 유형을 알 수 있게 AppFailure 로 통일해 던진다
+      throw AppFailure.of(e);
+    }
+  }
+
+  /// 사용 내역 한 쪽 (최근 것부터). 실패는 [AppFailure] 로 던진다 — 빈 목록으로 바꾸지 않는다.
+  Future<CreditHistoryPage> getHistory({required int page, int size = historyPageSize}) async {
+    try {
+      return await logged(
+        'CreditRepository',
+        'getHistory',
+        () async {
+          final res = await _dio.get<Map<String, dynamic>>(
+            '/api/credits/ledger',
+            queryParameters: {'page': page, 'size': size},
+          );
+          final body = res.data;
+          if (body == null) throw const FormatException('빈 응답');
+          return CreditHistoryPage.fromJson(body);
+        },
+        describe: (p) => '${p.entries.length}건 ${p.hasNext ? '다음 있음' : '끝'}', // l10n-ignore: 로그 요약
+      );
+    } catch (e) {
       throw AppFailure.of(e);
     }
   }

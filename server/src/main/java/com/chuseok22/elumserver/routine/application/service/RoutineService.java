@@ -24,6 +24,7 @@ import com.chuseok22.elumserver.routine.infrastructure.ai.RoutineAiPipeline;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RewardPreset;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
+import com.chuseok22.elumserver.routine.core.RoutineStepSpeechText;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
@@ -71,6 +72,7 @@ public class RoutineService {
   private final RoutineStepRepository routineStepRepository;
   private final CreditReservationService creditReservationService;
   private final PictogramPicker pictogramPicker;
+  private final RoutineStepSpeechQueue routineStepSpeechQueue;
 
   @Transactional
   public RoutineResponse confirm(Caller caller, String routineId) {
@@ -136,7 +138,10 @@ public class RoutineService {
     }
     copy.setSteps(copiedSteps);
 
-    return RoutineResponse.from(routineRepository.save(copy));
+    Routine savedCopy = routineRepository.save(copy);
+    // 음성 열쇠는 단계 폴더에 묶여 복사하지 않고 새로 만듦 (#675)
+    routineStepSpeechQueue.enqueueAfterCommit(savedCopy.getSteps().stream().map(RoutineStep::getId).toList());
+    return RoutineResponse.from(savedCopy);
   }
 
   /// 이룸이가 **아직 시작하지 않은** 일과만 삭제한다.
@@ -152,7 +157,9 @@ public class RoutineService {
     if (!isDeletable(routine)) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
+    List<String> stepIds = routine.getSteps().stream().map(RoutineStep::getId).toList();
     routineRepository.delete(routine);
+    routineStepSpeechQueue.deleteStepsAfterCommit(stepIds);
   }
 
   private boolean isDeletable(Routine routine) {
@@ -176,6 +183,7 @@ public class RoutineService {
       .findFirst()
       .orElseThrow(() -> new CustomException(ErrorCode.ROUTINE_STEP_NOT_FOUND));
 
+    String speechTextBefore = RoutineStepSpeechText.of(targetStep.getTitle(), targetStep.getDescription());
     // 보낸 필드만 반영한다 — 넘어온 값을 그대로 덮어쓰면 순서만 보낼 때 제목·설명이 null로 지워진다.
     if (request.title() != null) {
       targetStep.setTitle(request.title());
@@ -185,6 +193,12 @@ public class RoutineService {
     }
     if (request.stepOrder() != null) {
       moveStep(steps, targetStep, request.stepOrder());
+    }
+    // 읽을 문장이 바뀌면 옛 음성 버리고 다시 만듦 (순서만 바꾸면 그대로)
+    if (!speechTextBefore.equals(RoutineStepSpeechText.of(targetStep.getTitle(), targetStep.getDescription()))) {
+      routineStepSpeechQueue.deleteSpeechAfterCommit(targetStep.getSpeechPath());
+      targetStep.setSpeechPath(null);
+      routineStepSpeechQueue.enqueueAfterCommit(targetStep.getId());
     }
 
     return RoutineResponse.from(routine);
@@ -252,6 +266,7 @@ public class RoutineService {
     }
 
     steps.remove(targetStep);
+    routineStepSpeechQueue.deleteStepsAfterCommit(List.of(targetStep.getId()));
     renumberSteps(steps);
     refreshCompletionStatus(routine);
 
@@ -315,6 +330,8 @@ public class RoutineService {
     // 지금 저장해 id 를 받는다. 목록에만 넣으면 커밋 때에야 id 가 매겨져, 그림 예약·정산에 넘길 카드 id 가
     // 비어 있어 그림 채우기가 "카드 없음"으로 끝난다.
     routineStepRepository.save(step);
+    // 단계 음성은 그림 여부와 무관하게 커밋 뒤 만듦 (#675)
+    routineStepSpeechQueue.enqueueAfterCommit(step.getId());
 
     // 직접 사진 방식: 그림 요청 여부와 무관하게 예약도 채우기 예약도 하지 않는다. 그림 몫 크레딧을
     // 잡지 않으니 청구도 없다. 그림을 원했는데 안 나온 까닭을 클라가 알 수 있게 사유를 싣는다.

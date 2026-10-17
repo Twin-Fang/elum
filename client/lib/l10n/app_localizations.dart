@@ -1154,12 +1154,6 @@ abstract class AppLocalizations {
   /// **'암호를 만들지 못했어요. 다시 해주세요'**
   String get linkCodeIssueFailedFallback;
 
-  /// 연결 암호 화면의 타이머 자리에 뜨는 만료 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'암호가 만료됐어요'**
-  String get linkCodeExpired;
-
   /// 이룸이 휴대폰이 연결됐을 때 팝업 제목
   ///
   /// In ko, this message translates to:
@@ -1177,6 +1171,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'나중에 할게요'**
   String get linkCodeLater;
+
+  /// 연결 암호 남은 시간(09:59) 오른쪽에 붙는 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'뒤에 코드가 바껴요'**
+  String get linkCodeChangesAfter;
 
   /// 연결 암호 화면의 다시 만들기 칩(시안 그대로)
   ///
@@ -1259,7 +1259,7 @@ abstract class AppLocalizations {
   /// 함께하는 사람의 구분 이름(센터·기관 선생님). 표시용이며 서버로 가는 값이 아니다
   ///
   /// In ko, this message translates to:
-  /// **'센터 선생님'**
+  /// **'선생님'**
   String get guardianKindCaregiver;
 
   /// 초대 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 초대 코드
@@ -1268,28 +1268,28 @@ abstract class AppLocalizations {
   /// **'이룸이를 함께 돌봐요. 아래 링크를 누르면 이룸 앱에 초대 코드가 채워져요.\n초대 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n초대 코드 {code}'**
   String inviteShareMessage(int minutes, String url, String code);
 
-  /// 내 이름·구분 고치기 시트의 제목
+  /// 내 이름·구분 변경 시트의 제목
   ///
   /// In ko, this message translates to:
-  /// **'내 이름 고치기'**
+  /// **'내 이름 변경하기'**
   String get guardiansEditTitle;
 
-  /// 내 이름 고치기 시트의 설명
+  /// 내 이름 변경 시트의 설명
   ///
   /// In ko, this message translates to:
-  /// **'이 이룸이를 함께 돌보는 사람에게 보이는 이름이에요. 실명이 아니어도 괜찮아요'**
+  /// **'이룸이를 함께 돌보는 사람에게 보이는 이름이에요.\n실명이 아니어도 괜찮아요'**
   String get guardiansEditDescription;
 
   /// 내 이름 입력칸의 예시 글
   ///
   /// In ko, this message translates to:
-  /// **'엄마, 아빠, 센터 선생님'**
+  /// **'엄마, 아빠, 선생님'**
   String get guardiansEditNameHint;
 
-  /// 내 이름 고치기 시트의 저장 버튼
+  /// 내 이름 변경 시트의 저장 버튼
   ///
   /// In ko, this message translates to:
-  /// **'저장'**
+  /// **'저장하기'**
   String get guardiansEditSave;
 
   /// 함께 돌보기 그만두기 확인 팝업 제목(되돌릴 수 없는 일)
@@ -1364,16 +1364,10 @@ abstract class AppLocalizations {
   /// **'이룸이를 먼저 등록해주세요'**
   String get guardiansNoProfileDescription;
 
-  /// 함께하는 사람 목록의 머리 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
+  /// 함께하는 사람 목록 머리 설명
   ///
   /// In ko, this message translates to:
-  /// **'{name}{batchim, select, yes{을} other{를}} 함께 돌보는 사람이에요'**
-  String guardiansCaption(String name, String batchim);
-
-  /// 함께하는 사람 화면의 보조 설명(보호자와 이룸이 휴대폰 연결을 구분)
-  ///
-  /// In ko, this message translates to:
-  /// **'일과를 같이 만드는 가족이나 선생님이에요. 이룸이가 쓰는 휴대폰은 설정의 이룸이 휴대폰에서 연결해요'**
+  /// **'일과를 같이 만드는 가족이나 선생님이에요'**
   String get guardiansIntro;
 
   /// 목록 조회 실패 시 서버가 문구를 못 줄 때의 기본 안내
@@ -1421,7 +1415,7 @@ abstract class AppLocalizations {
   /// 그만두기 줄 아래 설명(다른 보호자가 있을 때)
   ///
   /// In ko, this message translates to:
-  /// **'내가 만든 일과만 사라지고, 다른 보호자의 일과는 그대로예요'**
+  /// **'내가 만든 일과만 사라져요'**
   String get guardiansLeaveHintWithOthers;
 
   /// 내가 만든 초대 코드로 다른 보호자가 합류했을 때 팝업 제목. name 은 합류한 사람 이름(없으면 기본 호칭)
@@ -1448,17 +1442,11 @@ abstract class AppLocalizations {
   /// **'초대'**
   String get guardiansInviteHeader;
 
-  /// 내 줄 오른쪽 버튼. 누르면 내 이름·구분을 고치는 시트가 열린다
+  /// 내 줄 오른쪽 버튼. 누르면 내 이름·구분을 변경하는 시트가 열린다
   ///
   /// In ko, this message translates to:
-  /// **'이름 바꾸기'**
+  /// **'이름 변경'**
   String get guardiansRenameAction;
-
-  /// 이름을 정하지 않은 사람의 이름 자리
-  ///
-  /// In ko, this message translates to:
-  /// **'이름 없음'**
-  String get guardiansNoName;
 
   /// 초대 링크 공유 실패 팝업 제목
   ///
@@ -1471,12 +1459,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'코드를 직접 알려주세요'**
   String get inviteCodeShareFailFallback;
-
-  /// 초대 코드 화면의 남은 시간 자리에 보이는 만료 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'초대 코드가 만료됐어요'**
-  String get inviteCodeExpired;
 
   /// 초대 코드 만들기 화면의 제목
   ///
@@ -1499,7 +1481,7 @@ abstract class AppLocalizations {
   /// 초대 코드 화면 설명. name 은 이룸이 호칭. batchim 은 한국어 조사 선택용(yes/no)이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
-  /// **'받은 분이 {name}{batchim, select, yes{을} other{를}} 함께 돌봐요'**
+  /// **'코드를 받은 분이 {name}{batchim, select, yes{을} other{를}} 함께 돌봐요'**
   String inviteCodeAsk(String name, String batchim);
 
   /// 이룸이가 없을 때의 안내 제목
@@ -1525,18 +1507,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'초대 코드 다시 만들기'**
   String get inviteCodeRetryChip;
-
-  /// 다시 만들기 아래 안내(앞 코드가 폐기됨)
-  ///
-  /// In ko, this message translates to:
-  /// **'다시 만들면 이전 코드는 쓸 수 없어요'**
-  String get inviteCodeRetryNote;
-
-  /// 초대 코드는 보호자용이라는 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'이룸이가 쓰는 휴대폰은 여기서 붙이지 않아요\n설정의 이룸이 휴대폰에서 연결해요'**
-  String get inviteCodeElumiPhoneNote;
 
   /// 링크로 열렸지만 코드를 못 쓰는 모양일 때의 안내. 에러 코드를 문구에 함께 둔다
   ///
@@ -1616,11 +1586,11 @@ abstract class AppLocalizations {
   /// **'약관에 먼저 동의해주세요'**
   String get inviteEnterConsentFallback;
 
-  /// 링크로 받은 코드로 합류하는 하단 버튼
+  /// 초대 코드 넣기 하단 버튼(여섯 칸을 채워야 켜짐, 링크로 받은 코드도 같은 버튼)
   ///
   /// In ko, this message translates to:
-  /// **'함께하기'**
-  String get inviteEnterJoinButton;
+  /// **'시작하기'**
+  String get inviteEnterStartButton;
 
   /// 링크로 받은 코드를 거두고 직접 입력으로 바꾸는 밑줄 글
   ///
@@ -1631,38 +1601,26 @@ abstract class AppLocalizations {
   /// 초대 코드 넣기 화면의 머리 제목
   ///
   /// In ko, this message translates to:
-  /// **'초대 코드를\n넣어주세요'**
+  /// **'초대 코드를\n입력해주세요'**
   String get inviteEnterTitle;
 
   /// 링크로 받은 코드가 채워졌을 때의 설명
   ///
   /// In ko, this message translates to:
-  /// **'링크로 받은 초대 코드예요. 맞으면 함께하기를 눌러주세요'**
+  /// **'링크로 받은 초대 코드예요. 맞으면 시작하기를 눌러주세요'**
   String get inviteEnterDescriptionFromLink;
 
-  /// 직접 입력할 때의 설명
+  /// 직접 입력할 때의 설명(코드를 받는 길)
   ///
   /// In ko, this message translates to:
-  /// **'함께하는 보호자에게 받은 여섯 글자예요'**
+  /// **'코드는 함께하는 보호자 휴대폰의\n설정 → 함께하는 사람에 있어요'**
   String get inviteEnterDescriptionManual;
 
-  /// 초대 코드를 어디서 받는지 알려 주는 안내 카드의 첫 줄
-  ///
-  /// In ko, this message translates to:
-  /// **'함께하는 보호자 휴대폰에서'**
-  String get inviteEnterWhereFrom;
-
-  /// 안내 카드의 길 안내(강조 줄)
+  /// 직접 입력 설명(inviteEnterDescriptionManual) 안에서 밑줄을 긋는 길 안내. 설명 문구에 그대로 들어 있어야 함
   ///
   /// In ko, this message translates to:
   /// **'설정 → 함께하는 사람'**
-  String get inviteEnterWherePath;
-
-  /// 안내 카드의 마지막 줄
-  ///
-  /// In ko, this message translates to:
-  /// **'초대 코드를 만들면 여섯 글자가 나와요'**
-  String get inviteEnterWhereHow;
+  String get inviteEnterDescriptionPath;
 
   /// 화면 낭독기가 읽는 여섯 칸의 이름(링크로 받았을 때)
   ///
@@ -3242,10 +3200,16 @@ abstract class AppLocalizations {
   /// **'일과를 끝냈어요!'**
   String get routineDoneTitle;
 
+  /// 일과 완료 화면 제목 아래 두 줄 안내. name 은 이룸이 호칭이고 조사는 받침과 무관하게 `를`로 고정한다
+  ///
+  /// In ko, this message translates to:
+  /// **'할 일을 모두 해낸\n{name}를 위해 준비했어요'**
+  String routineDoneMessage(String name);
+
   /// 일과 완료 화면 하단 버튼(누르면 이룸이 홈으로)
   ///
   /// In ko, this message translates to:
-  /// **'오예!'**
+  /// **'해냈어요!'**
   String get routineDoneButton;
 
   /// 보호자 → 이룸이 화면 전환의 암호 안내
@@ -3344,12 +3308,6 @@ abstract class AppLocalizations {
   /// **'이룸이가 쓸 휴대폰을 연결해요. 그 휴대폰에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 {code}'**
   String linkShareMessage(int minutes, String url, String code);
 
-  /// 연결 코드 화면의 안내(초대 코드 화면의 inviteCodeElumiPhoneNote 와 같은 자리)
-  ///
-  /// In ko, this message translates to:
-  /// **'이룸이 휴대폰에서 링크를 열거나\n코드를 직접 넣어요'**
-  String get linkCodePhoneNote;
-
   /// 이미 연결된 이룸이 휴대폰에서 연결 링크를 열었을 때 토스트
   ///
   /// In ko, this message translates to:
@@ -3361,6 +3319,120 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이룸이 휴대폰에서 열어주세요'**
   String get linkRejectedOnGuardianPhone;
+
+  /// 크레딧 사용 내역 화면의 제목 (Figma 1589:8359)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 사용 내역'**
+  String get creditHistoryTitle;
+
+  /// 설정 크레딧 카드 맨 아래 줄. 누르면 사용 내역 화면으로 간다 (Figma 1532:7501)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 사용 내역 보기'**
+  String get creditHistoryLink;
+
+  /// 사용 내역의 날짜 머리글. 예: 10월 1일
+  ///
+  /// In ko, this message translates to:
+  /// **'{month}월 {day}일'**
+  String creditHistoryDay(int month, int day);
+
+  /// 사용 내역 줄의 부제: 종류와 시각. 예: 카드 그림 4장・오전 11:23
+  ///
+  /// In ko, this message translates to:
+  /// **'{kind}・{time}'**
+  String creditHistoryDetail(String kind, String time);
+
+  /// 사용 내역 종류: AI 일과 글 만들기 (사용)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 글 만들기'**
+  String get creditHistoryKindRoutineText;
+
+  /// 사용 내역 종류: 일과와 함께 만든 카드 그림 (사용)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림 {count}장'**
+  String creditHistoryKindCardImages(int count);
+
+  /// 사용 내역 종류: 카드 한 장의 그림 직접 만들기 (사용)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림 만들기'**
+  String get creditHistoryKindCardImage;
+
+  /// 사용 내역 종류: 그림 다시 만들기 (사용)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 그림 다시 만들기'**
+  String get creditHistoryKindImageRegenerate;
+
+  /// 사용 내역 종류: 주간 지급 (Figma 1589:8444)
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 크레딧을 채워드렸어요'**
+  String get creditHistoryKindWeeklyGrant;
+
+  /// 사용 내역 종류: 보상형 광고 지급. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  ///
+  /// In ko, this message translates to:
+  /// **'광고를 보고 받았어요'**
+  String get creditHistoryKindAdReward;
+
+  /// 사용 내역 종류: 운영 보너스. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  ///
+  /// In ko, this message translates to:
+  /// **'운영에서 보너스를 드렸어요'**
+  String get creditHistoryKindAdminBonus;
+
+  /// 사용 내역 종류: 그 밖의 지급. 모르는 종류의 증가에도 쓴다
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 받았어요'**
+  String get creditHistoryKindOtherGrant;
+
+  /// 사용 내역 종류: 만료. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  ///
+  /// In ko, this message translates to:
+  /// **'지난주 크레딧이 사라졌어요'**
+  String get creditHistoryKindExpired;
+
+  /// 사용 내역 종류: 운영 조정. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧이 조정됐어요'**
+  String get creditHistoryKindAdjusted;
+
+  /// 사용 내역 종류: 앱이 모르는 종류의 감소
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧을 썼어요'**
+  String get creditHistoryKindUnknownSpend;
+
+  /// 사용 내역이 0건일 때. 시안 없는 임시 문구(디자인 요청 #685 첫째 후보)
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 사용한 크레딧이 없어요'**
+  String get creditHistoryEmptyTitle;
+
+  /// 사용 내역이 0건일 때 다음 행동 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 만들면 여기에 기록돼요'**
+  String get creditHistoryEmptyBody;
+
+  /// 사용 내역 조회 실패. 다시 하기 버튼과 에러 코드와 함께
+  ///
+  /// In ko, this message translates to:
+  /// **'사용 내역을 불러오지 못했어요'**
+  String get creditHistoryLoadFailed;
+
+  /// 사용 내역 다음 쪽 조회 실패. 이미 불러온 내역은 그대로 둔다
+  ///
+  /// In ko, this message translates to:
+  /// **'더 불러오지 못했어요'**
+  String get creditHistoryMoreFailed;
 }
 
 class _AppLocalizationsDelegate

@@ -22,7 +22,7 @@ void main() {
       final device = _FakeSpeech(succeeds: true);
       final remote = _FakeSpeech(succeeds: true);
 
-      final ok = await FallbackSpeech(device: device, remote: remote)
+      final ok = await FallbackSpeech([device, remote])
           .speak('옷을 입어요');
 
       expect(ok, isTrue);
@@ -35,7 +35,7 @@ void main() {
       final device = _FakeSpeech(succeeds: false);
       final remote = _FakeSpeech(succeeds: true);
 
-      final ok = await FallbackSpeech(device: device, remote: remote)
+      final ok = await FallbackSpeech([device, remote])
           .speak('옷을 입어요');
 
       expect(ok, isTrue);
@@ -43,14 +43,60 @@ void main() {
     });
 
     test('둘 다 실패해도 예외를 던지지 않는다', () async {
-      final fallback = FallbackSpeech(
-        device: _FakeSpeech(succeeds: false),
-        remote: _FakeSpeech(succeeds: false),
-      );
+      final fallback = FallbackSpeech([_FakeSpeech(succeeds: false), _FakeSpeech(succeeds: false)]);
 
       expect(await fallback.speak('옷을 입어요'), isFalse);
     });
 
+  });
+
+  group('플랫폼별 순서 (#675)', () {
+    const stored = (routineId: 'r-1', stepId: 's-1', speechPath: 's-1/a.wav');
+
+    test('안드로이드는 저장 음성이 되면 기기 음성을 부르지 않는다 — 유령 목소리가 나지 않게', () async {
+      final storedSpeech = _FakeSpeech(succeeds: true);
+      final device = _FakeSpeech(succeeds: true);
+      final engines = speechEnginesFor(
+        isAndroid: true, createStored: () => storedSpeech, device: device, remote: _FakeSpeech(succeeds: true));
+
+      await FallbackSpeech(engines).speak('옷을 입어요', stored: stored);
+
+      expect(storedSpeech.storedSources, [stored]);
+      expect(device.spokenTexts, isEmpty);
+    });
+
+    test('안드로이드에서 저장 음성이 없으면 기기 음성으로 읽는다 — 소리가 끊기지 않게', () async {
+      final device = _FakeSpeech(succeeds: true);
+      final engines = speechEnginesFor(
+        isAndroid: true, createStored: () => _FakeSpeech(succeeds: false), device: device,
+        remote: _FakeSpeech(succeeds: true));
+
+      expect(await FallbackSpeech(engines).speak('옷을 입어요', stored: stored), isTrue);
+      expect(device.spokenTexts, ['옷을 입어요']);
+    });
+
+    test('아이폰은 저장 음성을 만들지도 부르지도 않는다 — 잘 되던 아이폰이 바뀌지 않게', () {
+      var isStoredCreated = false;
+      final engines = speechEnginesFor(
+        isAndroid: false,
+        createStored: () {
+          isStoredCreated = true;
+          return _FakeSpeech(succeeds: true);
+        },
+        device: _FakeSpeech(succeeds: true),
+        remote: _FakeSpeech(succeeds: true));
+
+      expect(engines, hasLength(2));
+      expect(isStoredCreated, isFalse);
+    });
+
+    test('정지하면 셋 다 멈춘다', () async {
+      final all = [_FakeSpeech(succeeds: true), _FakeSpeech(succeeds: true), _FakeSpeech(succeeds: true)];
+
+      await FallbackSpeech(all).stop();
+
+      expect(all.map((e) => e.stopCount), [1, 1, 1]);
+    });
   });
 
   group('기기 음성 엔진', () {
@@ -110,11 +156,13 @@ class _FakeSpeech implements SpeechService {
 
   final bool succeeds;
   final spokenTexts = <String>[];
+  final storedSources = <StoredSpeechSource?>[];
   var stopCount = 0;
 
   @override
-  Future<bool> speak(String text, {String language = 'ko'}) async {
+  Future<bool> speak(String text, {String language = 'ko', StoredSpeechSource? stored}) async {
     spokenTexts.add(text);
+    storedSources.add(stored);
     return succeeds;
   }
 

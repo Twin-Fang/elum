@@ -45,6 +45,11 @@ class RoutineCreationWriterTest {
   @Mock
   private CreditReservationService creditReservationService;
 
+  // 단계 음성 대기열 (#675) — 예약만 확인, 실제 합성 없음
+
+  @Mock private RoutineStepSpeechQueue routineStepSpeechQueue;
+
+
   @InjectMocks
   private RoutineCreationWriter writer;
 
