@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.common.infrastructure.properties.NoticeProperties;
 import com.chuseok22.elumserver.notice.application.dto.request.NoticeInput;
 import com.chuseok22.elumserver.notice.core.NoticePlatform;
@@ -82,25 +83,25 @@ class NoticeSaveTest {
   /** 통과하는 입력. 테스트마다 한 칸만 바꿔 그 칸의 검증을 본다. */
   private NoticeInput valid() {
     return new NoticeInput("베타 기간 안내", "하루 3개까지 만들 수 있어요", "", "",
-      "ALL", "0", "2026-09-23T09:00", "", true);
+      "ALL", "ko", "0", "2026-09-23T09:00", "", true);
   }
 
   private NoticeInput with(String title, String body) {
     NoticeInput base = valid();
     return new NoticeInput(title, body, base.buttonLabel(), base.buttonUrl(), base.platform(),
-      base.priority(), base.startsAt(), base.endsAt(), base.enabled());
+      base.locale(), base.priority(), base.startsAt(), base.endsAt(), base.enabled());
   }
 
   private NoticeInput withButton(String label, String url) {
     NoticeInput base = valid();
     return new NoticeInput(base.title(), base.body(), label, url, base.platform(),
-      base.priority(), base.startsAt(), base.endsAt(), base.enabled());
+      base.locale(), base.priority(), base.startsAt(), base.endsAt(), base.enabled());
   }
 
   private NoticeInput withPeriod(String startsAt, String endsAt) {
     NoticeInput base = valid();
     return new NoticeInput(base.title(), base.body(), base.buttonLabel(), base.buttonUrl(),
-      base.platform(), base.priority(), startsAt, endsAt, base.enabled());
+      base.platform(), base.locale(), base.priority(), startsAt, endsAt, base.enabled());
   }
 
   private void assertRejected(NoticeInput input, ErrorCode expected) {
@@ -115,7 +116,7 @@ class NoticeSaveTest {
   @DisplayName("통과한 입력은 다듬어서 저장한다 — 판은 1, 만든 사람과 고친 사람을 남긴다")
   void create_savesNormalized() {
     AppNotice saved = service.create(new NoticeInput("  **하루 3개**까지  ", "첫 줄\r\n둘째 줄\r\n  ",
-      " 자세히 보기 ", " https://twin-fang.github.io/elum/ ", "ios", " 3 ",
+      " 자세히 보기 ", " https://twin-fang.github.io/elum/ ", "ios", " en ", " 3 ",
       "2026-09-23T09:00", "2026-09-30T18:00", true), null, "kimchi");
 
     assertThat(saved.getTitle()).isEqualTo("**하루 3개**까지");
@@ -123,6 +124,7 @@ class NoticeSaveTest {
     assertThat(saved.getButtonLabel()).isEqualTo("자세히 보기");
     assertThat(saved.getButtonUrl()).isEqualTo("https://twin-fang.github.io/elum/");
     assertThat(saved.getPlatform()).isEqualTo(NoticePlatform.IOS);
+    assertThat(saved.getLocale()).isEqualTo(AppLocale.EN);
     assertThat(saved.getPriority()).isEqualTo(3);
     assertThat(saved.getStartsAt()).isEqualTo(LocalDateTime.of(2026, 9, 23, 9, 0));
     assertThat(saved.getEndsAt()).isEqualTo(LocalDateTime.of(2026, 9, 30, 18, 0));
@@ -236,7 +238,7 @@ class NoticeSaveTest {
   @DisplayName("우선순위가 숫자가 아니면 거부한다")
   void badPriority() {
     NoticeInput base = valid();
-    assertRejected(new NoticeInput(base.title(), base.body(), "", "", "ALL", "첫째",
+    assertRejected(new NoticeInput(base.title(), base.body(), "", "", "ALL", "ko", "첫째",
       base.startsAt(), "", true), ErrorCode.NOTICE_PRIORITY_INVALID);
   }
 
@@ -244,8 +246,26 @@ class NoticeSaveTest {
   @DisplayName("모르는 플랫폼은 거부한다")
   void badPlatform() {
     NoticeInput base = valid();
-    assertRejected(new NoticeInput(base.title(), base.body(), "", "", "PC", "0",
+    assertRejected(new NoticeInput(base.title(), base.body(), "", "", "PC", "ko", "0",
       base.startsAt(), "", true), ErrorCode.NOTICE_PLATFORM_INVALID);
+  }
+
+  @Test
+  @DisplayName("지원하지 않는 언어 코드는 거부한다 — ko 로 바꾸면 다른 언어 공지가 한국어 보호자에게 샌다")
+  void badLocale() {
+    NoticeInput base = valid();
+    assertRejected(new NoticeInput(base.title(), base.body(), "", "", "ALL", "fr", "0",
+      base.startsAt(), "", true), ErrorCode.NOTICE_LOCALE_INVALID);
+  }
+
+  @Test
+  @DisplayName("언어를 비워 저장하면 ko 다")
+  void blankLocale_isKorean() {
+    NoticeInput base = valid();
+    AppNotice saved = service.create(new NoticeInput(base.title(), base.body(), "", "", "ALL", " ", "0",
+      base.startsAt(), "", true), null, "admin");
+
+    assertThat(saved.getLocale()).isEqualTo(AppLocale.KO);
   }
 
   @Test

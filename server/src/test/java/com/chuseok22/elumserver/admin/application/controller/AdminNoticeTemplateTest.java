@@ -94,7 +94,7 @@ class AdminNoticeTemplateTest {
     Context context = new Context();
     Map<String, Object> variables = new HashMap<>();
     variables.put("form", notice == null
-      ? new NoticeEditForm("", "", "", "", "ALL", "0", "2026-09-23T12:00", "", false, false, false)
+      ? new NoticeEditForm("", "", "", "", "ALL", "ko", "0", "2026-09-23T12:00", "", false, false, false)
       : NoticeEditForm.of(notice));
     variables.put("notice", notice);
     variables.put("status", notice == null ? null : NoticeStatus.LIVE);

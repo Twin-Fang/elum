@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.NoticeProperties;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.notice.application.dto.response.AppNoticeResponse;
 import com.chuseok22.elumserver.notice.application.dto.response.AppNoticesResponse;
 import com.chuseok22.elumserver.notice.core.NoticePlatform;
@@ -81,6 +83,43 @@ class NoticePublishTest {
 
   private List<String> ids(AppNoticesResponse response) {
     return response.notices().stream().map(AppNoticeResponse::id).toList();
+  }
+
+  private AppNotice noticeIn(String id, AppLocale locale) {
+    AppNotice notice = notice(id, NoticePlatform.ALL, 0, NOW_KST.minusDays(1));
+    notice.setLocale(locale);
+    return notice;
+  }
+
+  @Test
+  @DisplayName("영어 요청에는 한국어 공지가 안 보인다")
+  void englishRequest_hidesKoreanNotice() {
+    noticeIn("ko-notice", AppLocale.KO);
+    noticeIn("en-notice", AppLocale.EN);
+
+    List<String> shown = CurrentLocale.callAs(AppLocale.EN, () -> ids(service.publishedFor("IOS")));
+
+    assertThat(shown).containsExactly("en-notice");
+  }
+
+  @Test
+  @DisplayName("요청 언어의 공지가 없으면 한국어로 대신 보내지 않고 빈 목록이다")
+  void noNoticeInRequestedLocale_isEmpty() {
+    noticeIn("ko-notice", AppLocale.KO);
+
+    List<String> shown = CurrentLocale.callAs(AppLocale.JA, () -> ids(service.publishedFor("IOS")));
+
+    assertThat(shown).isEmpty();
+  }
+
+  @Test
+  @DisplayName("언어 헤더가 없는 요청(ko)에는 기존 공지가 그대로 보인다")
+  void koreanRequest_keepsExistingNotices() {
+    // 언어를 지정하지 않은 기존 공지는 엔티티 기본값 ko
+    notice("legacy", NoticePlatform.ALL, 0, NOW_KST.minusDays(1));
+    noticeIn("en-notice", AppLocale.EN);
+
+    assertThat(ids(service.publishedFor("IOS"))).containsExactly("legacy");
   }
 
   @Test
