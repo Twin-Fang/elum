@@ -22,6 +22,7 @@ import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 import '../application/routine_flow_state.dart';
+import '../../../core/logger/app_logger.dart';
 
 /// Figma `보호자_새로운 일과 만들기_로딩`.
 ///
@@ -147,8 +148,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
 
     switch (widget.kind) {
       case RoutineLoadingKind.prepare:
-        // DLP는 화면 전환 없이 상태만 갱신한다. 전/후 비교는 카드 확인
-        // 화면에서 보여주므로 여기서 멈추지 않는다.
+        // DLP는 화면 전환 없이 상태만 갱신 (전/후 비교 화면 없음, 여기서 멈추지 않음)
         await notifier.runDlp();
         await notifier.askQuestion();
 
@@ -202,7 +202,7 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     // 이미 만들어 둔 결과가 있으면 재요청하지 않는다.
     // 연출은 그대로 두고 넘어가기만 한다 — 스텝을 건너뛰지 않는다.
     if (flow.routine != null) {
-      debugPrint('[cost] 로딩 화면 재생성 — 이미 만든 카드가 있어 요청하지 않는다');
+      AppLogger.info('[cost] loading screen rebuilt : cards already exist, request skipped');
       return;
     }
 

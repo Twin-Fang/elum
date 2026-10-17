@@ -99,7 +99,7 @@ Future<T?> showElumDialog<T>({
     // 배경 막을 읽어 줄 이름. 안 넘기면 기본값이 영어 `Dismiss` 로 읽힌다.
     barrierLabel: context.l10n.commonPopupClose,
     // 시안의 dim — 검정 50%.
-    barrierColor: Colors.black.withValues(alpha: 0.5),
+    barrierColor: context.colors.dialogScrim,
     // **화면 전체 가운데에 둔다.** 기본값(true)은 안전영역 안에서 가운데를
     // 잡아, 위 59·아래 21이 다른 만큼 팝업이 19 아래로 내려간다.
     // 시안(`732:5702`·`931:4879`)은 프레임 정중앙이다.

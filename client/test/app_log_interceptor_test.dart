@@ -75,6 +75,27 @@ void main() {
     expect(text, contains('"nickname":"하늘"'));
   });
 
+  // 깨지면: 보호자가 적은 일과 원문이 의견 첨부 기록으로 서버에 올라간다 (docs 원칙 5번)
+  test('일과 원문·답·보상 문구는 요청·응답 모두 가린다', () async {
+    final dio = build();
+    adapter.reply = _Reply(
+      200,
+      jsonEncode({'rawInputText': 'RAW-RES', 'sanitizedInputText': 'SAN-RES', 'id': 3}),
+    );
+
+    await dio.post<dynamic>('/api/routines', data: {
+      'rawInputText': 'RAW-REQ',
+      'answers': ['ANS-1'],
+      'rewardText': 'RWD',
+    });
+
+    final text = AppLogBuffer.asText();
+    for (final leaked in ['RAW-RES', 'SAN-RES', 'RAW-REQ', 'ANS-1', 'RWD']) {
+      expect(text, isNot(contains(leaked)), reason: leaked);
+    }
+    expect(text, contains('"id":3'));
+  });
+
 }
 
 class _Reply {

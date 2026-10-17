@@ -22,8 +22,8 @@ import 'credit_history_link.dart';
 /// 낭독기는 한 덩어리로 읽는다 — 숫자·막대·안내가 따로 잡히면 "72" 만 읽고 무엇의
 /// 72 인지 놓친다. 안내 버튼만 따로 잡힌다 — 눌러야 하는 것이라서.
 ///
-/// 단가는 카드에 적지 않고 제목 옆 안내 버튼 팝업으로 옮겼다. 카드 폭에서
-/// `1크레 / 딧` 처럼 낱말 가운데서 꺾였고, 매번 볼 정보도 아니다.
+/// 단가는 카드에 적지 않고 제목 옆 안내 버튼 팝업에 둔다. 카드 폭에서는
+/// `1크레 / 딧` 처럼 낱말 가운데서 꺾이고, 매번 볼 정보도 아니다.
 class AiCreditSummaryView extends StatelessWidget {
   const AiCreditSummaryView({super.key, required this.summary});
 

@@ -20,6 +20,7 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../../profile/application/profile_display_name.dart';
 import '../../../shared/models/character.dart';
 import '../../profile/application/profile_session.dart';
+import '../application/home_routines.dart';
 import '../application/home_coach_notifier.dart';
 import '../application/routine_notifier.dart';
 import 'widgets/create_routine_button.dart';

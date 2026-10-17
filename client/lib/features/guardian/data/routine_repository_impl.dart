@@ -84,8 +84,9 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
   @override
   Future<RoutineQuestion> generateQuestion(String rawInputText) async {
+    // 보호자 원문은 남기지 않고 글자 수만 (docs 원칙 5번)
     AppLogger.repositoryCall('RoutineRepository', 'generateQuestion', {
-      'rawInputText': rawInputText,
+      'rawInputLength': rawInputText.length,
     });
 
     try {
@@ -133,10 +134,11 @@ class RoutineRepositoryImpl implements RoutineRepository {
     String rewardPresetKey = '',
     String idempotencyKey = '',
   }) async {
+    // 원문·답은 글자 수·개수만 (docs 원칙 5번)
     AppLogger.repositoryCall('RoutineRepository', 'createRoutine', {
-      'rawInputText': rawInputText,
+      'rawInputLength': rawInputText.length,
       'goals': goals.map((g) => g.apiValue).toList(),
-      'answers': answers,
+      'answerCount': answers.length,
       // 보상 내용은 보호자가 적은 자유 문구라 로그에 남기지 않는다 (docs 원칙 5번).
       'hasReward': rewardText.trim().isNotEmpty,
     });
@@ -264,11 +266,12 @@ class RoutineRepositoryImpl implements RoutineRepository {
     required String title,
     required String description,
   }) async {
+    // 보호자가 고친 글은 글자 수만 (docs 원칙 5번)
     AppLogger.repositoryCall('RoutineRepository', 'updateStep', {
       'routineId': routine.id,
       'stepId': stepId,
-      'title': title,
-      'description': description,
+      'titleLength': title.length,
+      'descriptionLength': description.length,
     });
 
     // 서버로 보내려 했는데 왜 실패했는가 — **이유까지 들고 나간다.**

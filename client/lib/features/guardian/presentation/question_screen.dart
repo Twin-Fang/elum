@@ -21,6 +21,8 @@ import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
 import '../application/routine_flow_state.dart';
+import '../../../core/logger/app_logger.dart';
+import '../../../core/widgets/elum_spinner.dart';
 
 /// Figma `보호자_새로운 일과 만들기_추가질문`(262:4766 / 262:4854).
 ///
@@ -78,7 +80,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
       final alreadyStarted = state.step == RoutineFlowStep.generating ||
           state.routine != null;
       if (alreadyStarted) {
-        debugPrint('[cost] 질문 화면 리빌드 — 이미 생성이 시작돼 로딩 화면을 다시 열지 않는다');
+        AppLogger.info('[cost] question screen rebuilt : generation already started, loading screen not reopened');
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (context.mounted) {
@@ -469,13 +471,9 @@ class _Waiting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: context.colors.promptMuted,
-        ),
+      child: ElumSpinner(
+        size: 24,
+        color: context.colors.promptMuted,
       ),
     );
   }

@@ -295,9 +295,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             if (_showApple) ...[
               SizedBox(height: _buttonGap.h),
 
-              // ⚠️ 규격 위젯(`SignInWithAppleButton`)에서 직접 그리기로 바꿨다.
+              // ⚠️ 규격 위젯(`SignInWithAppleButton`) 대신 직접 그린다.
               // 시안이 세 버튼을 같은 규격(360×66 · r18 · 로고 x=64)으로 그렸고,
-              // 규격 위젯은 그 정렬을 맞출 수 없기 때문이다.
+              // 규격 위젯은 그 정렬을 맞출 수 없다.
               //
               // 애플이 요구하는 것을 전부 지킨다 — **검정 배경 · 흰 사과 심볼 ·
               // 최소 높이 · 승인 문구**. 문구는 `Apple로 로그인`·`Apple로 계속하기`·

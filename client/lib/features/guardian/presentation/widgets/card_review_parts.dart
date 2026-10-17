@@ -9,6 +9,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import '../../../../core/widgets/elum_state_body.dart';
+import '../../../../core/theme/card_layout.dart';
 
 /// 카드확인 화면의 부품 (시안 `1173:5541` 기본 / `1197:5798` 순서 변경).
 ///
@@ -69,7 +70,7 @@ class CardReviewRewardRow extends StatelessWidget {
     return AppPressable(
       onTap: onTap,
       child: Container(
-        width: 333.w,
+        width: CardLayout.cardWidth.w,
         padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
         decoration: BoxDecoration(
           color: colors.editChipBg,
@@ -127,7 +128,7 @@ class CardReviewReorderHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 333.w,
+      width: CardLayout.cardWidth.w,
       // 보상 줄(46)과 같은 높이라 아래 버튼이 움직이지 않는다
       height: 46.h,
       child: Align(

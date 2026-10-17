@@ -9,6 +9,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../guardian/presentation/widgets/action_card_view.dart';
+import '../../../../core/theme/card_layout.dart';
 
 /// 이룸이 일과 상세의 카드 넘기기 — 가운데 카드 한 장과 **가장자리에 걸친 옆 카드**.
 ///
@@ -34,7 +35,7 @@ class ChildCardPager extends StatelessWidget {
   });
 
   /// 시안 카드 폭 (`1197:6775` — 333 @ x=30).
-  static const cardWidth = 333.0;
+  static const cardWidth = CardLayout.cardWidth;
 
   /// 시안 카드 왼쪽 여백 — 화면 가장자리에서 카드까지.
   static const _sideMargin = 30.0;

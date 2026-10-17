@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
@@ -9,6 +8,7 @@ import '../../../shared/models/character.dart';
 import '../domain/image_style.dart';
 import '../domain/onboarding_profile.dart';
 import '../../../shared/models/support_goal.dart';
+import '../../../core/logger/app_logger.dart';
 
 final onboardingProvider =
     NotifierProvider<OnboardingNotifier, OnboardingProfile>(
@@ -79,8 +79,8 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
     state = state.copyWith(imageStyle: style);
     try {
       await ref.read(localStorageProvider).setImageStyle(style.apiValue);
-    } catch (e) {
-      debugPrint('[onboarding] 그림 방식 로컬 저장 실패, 서버 저장은 시도: $e');
+    } catch (e, stack) {
+      AppLogger.error('[onboarding] image style local save failed (server save still tried)', e, stack);
     }
     final failure = await ref
         .read(memberRepositoryProvider)
@@ -91,8 +91,8 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
     state = state.copyWith(imageStyle: previous);
     try {
       await ref.read(localStorageProvider).setImageStyle(previous.apiValue);
-    } catch (e) {
-      debugPrint('[onboarding] 그림 방식 로컬 복원 실패: $e');
+    } catch (e, stack) {
+      AppLogger.error('[onboarding] image style local restore failed', e, stack);
     }
     return failure;
   }
@@ -134,8 +134,8 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
       if (parsedGoals != null) {
         await storage.setGoals(parsedGoals.map((g) => g.apiValue).toList());
       }
-    } catch (e) {
-      debugPrint('[onboarding] 이룸이 값 로컬 저장 실패, 화면은 서버 값으로 간다: $e');
+    } catch (e, stack) {
+      AppLogger.error('[onboarding] profile local save failed (screen uses server value)', e, stack);
     }
   }
 
@@ -158,8 +158,8 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
     try {
       await storage.setNickname(childName);
       await storage.setOnboardingCompleted(true);
-    } catch (e) {
-      debugPrint('[onboarding] 복귀 저장 실패, 진행은 계속: $e');
+    } catch (e, stack) {
+      AppLogger.error('[onboarding] restore save failed (flow continues)', e, stack);
     }
   }
 
@@ -193,8 +193,8 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
       await storage.setImageStyle(input.imageStyle.apiValue);
       await storage.setPin(input.guardianPin);
       await storage.setOnboardingCompleted(true);
-    } catch (e) {
-      debugPrint('[onboarding] 로컬 저장 실패: $e');
+    } catch (e, stack) {
+      AppLogger.error('[onboarding] local save failed', e, stack);
       // 잠금 저장이 실패했는데 홈으로 가면 보호자 화면의 경계가 사라진다.
       return AppFailure.of(e);
     }

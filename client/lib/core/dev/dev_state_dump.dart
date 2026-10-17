@@ -61,7 +61,7 @@ abstract final class DevStateDump {
   // ── 항목별 수집 ──────────────────────────────────────────────
 
   static Map<String, String> _app() => {
-    '패키지': 'kr.twinfang.elum',
+    '패키지': AppConfig.androidPackageId,
     '빌드 모드': kReleaseMode
         ? 'release'
         : kProfileMode

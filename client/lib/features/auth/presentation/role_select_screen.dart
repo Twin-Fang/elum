@@ -13,6 +13,7 @@ import 'widgets/role_card.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../application/role_select_controller.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/logger/app_logger.dart';
 
 /// 역할 선택 (Figma `732:5176`·`732:5258`).
 ///
@@ -51,8 +52,8 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
     // 저장이 실패해도 화면을 멈추지 않는다. 다음에 다시 물으면 될 뿐이다.
     try {
       await ref.read(roleSelectControllerProvider).selectRole(role.storageValue);
-    } catch (e) {
-      debugPrint('역할 저장 실패: $e');
+    } catch (e, stack) {
+      AppLogger.error('[role select] role save failed', e, stack);
     }
     if (!mounted) return;
 

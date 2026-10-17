@@ -5,6 +5,7 @@ import '../../../core/logger/app_logger.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../domain/app_notice.dart';
 import 'notice_popup.dart';
+import '../../../core/theme/theme_context_ext.dart';
 
 /// 링크를 연다. 열었으면 true. 테스트는 브라우저 대신 가짜를 넣는다.
 typedef NoticeLinkOpener = Future<bool> Function(Uri url);
@@ -71,7 +72,7 @@ Future<NoticePopupResult> showNoticePopup(
     barrierDismissible: true,
     barrierLabel: context.l10n.noticeCloseBarrier,
     // 공통 팝업과 같은 dim — 검정 50%
-    barrierColor: Colors.black.withValues(alpha: 0.5),
+    barrierColor: context.colors.dialogScrim,
     // 공통 팝업처럼 화면 전체 가운데에 둔다. 안전영역은 카드가 스스로 피한다.
     useSafeArea: false,
     themes: InheritedTheme.capture(from: context, to: navigator.context),

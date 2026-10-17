@@ -3,7 +3,6 @@
 core/app_status/app_status_repository.dart -> app/dio_provider.dart
 features/ads/application/ad_gate.dart -> features/member/data/member_repository.dart
 features/child/data/step_progress_repository.dart -> features/auth/data/auth_repository.dart
-features/child/presentation/child_home_screen.dart -> features/guardian/presentation/widgets/today_routine_section.dart
 features/child/presentation/mode_switch_screen.dart -> features/onboarding/presentation/widgets/pin_keypad.dart
 features/child/presentation/widgets/child_card_pager.dart -> features/guardian/presentation/widgets/action_card_view.dart
 features/credit/application/ad_reward_flow.dart -> features/ads/data/rewarded_ad_loader.dart
