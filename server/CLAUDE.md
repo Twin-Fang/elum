@@ -1,16 +1,16 @@
 # CLAUDE.md
 
-이 파일은 `elum-server` 프로젝트에서 작업할 때 따라야 하는 규칙을 정의합니다. 상세 규칙은 `.claude/rules/*.md`를 참고하세요.
+이 파일은 `elum-server` 프로젝트에서 작업할 때 따라야 하는 규칙을 정의합니다.
 
 ## 프로젝트 개요
 
-24시간 해커톤용 이룸(ELUM) 서비스의 Spring Boot 백엔드. 보호자가 자연어로 입력한 일과를 AI가 아동 맞춤 행동 카드로 변환하는 서비스의 API 서버 + 관리자 페이지.
+운영 중인 이룸(ELUM) 서비스의 Spring Boot 백엔드. 보호자가 자연어로 입력한 일과를 AI가 아동 맞춤 행동 카드로 변환하는 서비스의 API 서버 + 관리자 페이지.
 
-이 저장소(`elum`)는 `client/`(Flutter 프론트엔드)와 `server/`(본 백엔드)가 함께 있는 모노레포이며, 우리는 백엔드 담당으로서 **`server/` 내부 파일만** 열람·수정한다. `client/`와 레포 루트 파일은 작업 범위 밖이다.
+이 저장소(`elum`)는 `client/`(Flutter 프론트엔드)와 `server/`(본 백엔드)가 함께 있는 모노레포이며, 우리는 백엔드 담당으로서 **`server/` 내부 파일만** 열람·수정한다. `client/`와 레포 루트 파일은 작업 범위 밖이다. 예외: 새 `ErrorCode`를 만들 때는 클라 `server_error_code.dart`도 같이 고친다(아래 "반드시 지킬 것").
 
 ## 핵심 원칙
 
-- 동작 우선. 코드 퀄리티보다 24시간 내 완성을 우선한다.
+- 운영 중인 서비스다. 동작을 지키면서 코드 품질도 함께 챙긴다.
 - DDD 스타일 패키지 구조(`{domain}/core`, `{domain}/application`, `{domain}/infrastructure`)를 따른다.
 
 ## 반드시 지킬 것
@@ -55,11 +55,7 @@ curl -s --max-time 20 "http://chuseok22.synology.me:8888/containers/elum-back-gr
 
 ## 상세 규칙
 
-- `.claude/rules/00-project-overview.md` — 프로젝트 목적/스택/명령어
-- `.claude/rules/10-architecture-and-boundaries.md` — 아키텍처/모듈 경계
-- `.claude/rules/20-team-conventions.md` — 네이밍/코드 스타일/책임 분리
 - [`../docs/testing-guidelines.md`](../docs/testing-guidelines.md) — 테스트 설계 가이드라인 (무엇을 단언하는가·층 고르기·퇴역 규칙)
   - 운영 중인 서비스라 API 계약(JSON 필드·상태 코드·에러 코드)·인증·트랜잭션·AI 실패 대체는 반드시 테스트로 고정한다
   - 가짜(mock)가 돌려준 값을 그대로 단언하거나 `verify` 만 있고 결과 단언이 없는 테스트는 쓰지 않는다
   - `@WebMvcTest` 는 `@MockitoBean` 조합이 다르면 Spring 컨텍스트를 새로 띄운다. 같은 조합을 쓰는 클래스는 묶는다
-- `.claude/rules/40-delivery-and-review.md` — 보고서/PR 규칙

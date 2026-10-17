@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.core.PromptKey;
+import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
@@ -134,8 +135,8 @@ public class FluxImageClient implements ImageGenerationClient {
     String apiKey = systemConfigService.getSecret(ConfigKey.FLUX_API_KEY);
 
     long startedAt = System.currentTimeMillis();
-    // 프롬프트는 카드 한 장의 영어 장면뿐이라 남긴다 — 그림이 틀렸을 때 무엇을 보냈는지 봐야 한다.
-    log.info("FLUX 이미지 생성 호출 시작: model={}, seed={}, prompt={}", model, seed, prompt);
+    // 프롬프트 원문 대신 글자 수만 기록
+    log.info("FLUX 이미지 생성 호출 시작: model={}, seed={}, promptLength={}", model, seed, LogTextLength.of(prompt));
     try {
       FluxImageResponse response = restClient.post()
         .uri("/" + model)

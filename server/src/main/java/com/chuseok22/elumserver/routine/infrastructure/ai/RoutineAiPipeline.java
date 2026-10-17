@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
@@ -139,7 +140,7 @@ public class RoutineAiPipeline {
           (first, second) -> first // 같은 supportGoal이 중복되면 먼저 나온 것만 채택한다.
         ));
     } catch (Exception e) {
-      log.warn("AI 추가 질문 생성 실패, 목표별 고정 매핑으로 대체: response={}", json, e);
+      log.warn("AI 추가 질문 생성 실패, 목표별 고정 매핑으로 대체: responseLength={}", LogTextLength.of(json), e);
       return Map.of();
     }
   }
@@ -194,23 +195,23 @@ public class RoutineAiPipeline {
       // title은 Routine.title이 NOT NULL이라, 스키마 위반으로 누락되면 DB 제약 위반(500)이
       // 아니라 여기서 먼저 502로 처리한다.
       if (draft.title() == null || draft.title().isBlank()) {
-        log.warn("AI가 title 없이 응답함: response={}", json);
+        log.warn("AI가 title 없이 응답함: responseLength={}", LogTextLength.of(json));
         throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
       }
       if (draft.steps() == null || draft.steps().isEmpty() || draft.steps().size() > MAX_STEPS) {
-        log.warn("AI가 반환한 단계 수가 허용 범위를 벗어남: count={}, response={}",
-          draft.steps() == null ? 0 : draft.steps().size(), json);
+        log.warn("AI가 반환한 단계 수가 허용 범위를 벗어남: count={}, responseLength={}",
+          draft.steps() == null ? 0 : draft.steps().size(), LogTextLength.of(json));
         throw new CustomException(ErrorCode.ROUTINE_STEP_LIMIT_EXCEEDED);
       }
       if (draft.steps().stream().anyMatch(step -> step.title() == null || step.title().isBlank())) {
-        log.warn("AI가 일부 단계에 title 없이 응답함: response={}", json);
+        log.warn("AI가 일부 단계에 title 없이 응답함: responseLength={}", LogTextLength.of(json));
         throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
       }
       return normalizeOrder(draft);
     } catch (CustomException e) {
       throw e;
     } catch (Exception e) {
-      log.warn("Gemini 텍스트 생성/응답 파싱 실패: response={}", json, e);
+      log.warn("Gemini 텍스트 생성/응답 파싱 실패: responseLength={}", LogTextLength.of(json), e);
       throw new CustomException(ErrorCode.ROUTINE_AI_GENERATION_FAILED);
     }
   }
@@ -324,12 +325,12 @@ public class RoutineAiPipeline {
     try {
       return cardImageGenerator.generate(request);
     } catch (Exception first) {
-      log.warn("이미지 생성 1차 실패, 1회 재시도: description={}", description, first);
+      log.warn("이미지 생성 1차 실패, 1회 재시도: descriptionLength={}", LogTextLength.of(description), first);
       try {
         return cardImageGenerator.generate(request);
       } catch (Exception retry) {
         // 재시도까지 실패 — 이 단계만 이미지 없이 진행한다. 일과 전체를 포기하지 않는다.
-        log.warn("이미지 생성 재시도까지 실패, 이미지 없이 진행: description={}", description, retry);
+        log.warn("이미지 생성 재시도까지 실패, 이미지 없이 진행: descriptionLength={}", LogTextLength.of(description), retry);
         return null;
       }
     }

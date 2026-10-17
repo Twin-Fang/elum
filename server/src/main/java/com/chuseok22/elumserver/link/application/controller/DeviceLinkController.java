@@ -35,7 +35,8 @@ public class DeviceLinkController implements DeviceLinkControllerDocs {
   private final RedeemRateLimiter rateLimiter;
 
   @Override
-  @LogMonitoring(logResult = true, logExecutionTime = true)
+  // 응답에 연결 암호 원문이 있어 결과 로그 끔
+  @LogMonitoring(logResult = false, logExecutionTime = true)
   @PostMapping
   public ResponseEntity<LinkCodeResponse> issue(
     Authentication authentication,
@@ -46,6 +47,7 @@ public class DeviceLinkController implements DeviceLinkControllerDocs {
   }
 
   @Override
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping
   public ResponseEntity<LinkStatusResponse> status(
     Authentication authentication,
@@ -87,6 +89,8 @@ public class DeviceLinkController implements DeviceLinkControllerDocs {
    * <p>암호는 로그에 남기지 않으므로 {@code logParameters}를 켜지 않는다.
    */
   @Override
+  // 요청에 암호, 응답에 토큰이 있어 파라미터·결과 로그 끔
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PostMapping("/redeem")
   public ResponseEntity<TokenResponse> redeem(
     @RequestBody @Valid RedeemLinkRequest request, HttpServletRequest http

@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.application.service;
 import com.chuseok22.elumserver.ai.application.service.PictogramCatalog;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
+import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -81,7 +82,7 @@ public class PictogramPicker {
       if (resolved != null && !resolved.equals(catalog.fallbackId())) {
         log.info("픽토그램 선택: pictogramId={}", resolved);
       } else {
-        log.info("픽토그램 폴백 적용: response={}", json);
+        log.info("픽토그램 폴백 적용: responseLength={}", LogTextLength.of(json));
       }
       return resolved;
     } catch (InterruptedException e) {
@@ -90,7 +91,7 @@ public class PictogramPicker {
       return catalog.fallbackId();
     } catch (Exception e) {
       // 타임아웃·호출 실패·파싱 실패·제공자 사용 불가 전부 같다 — 카드는 폴백 그림으로 만든다.
-      log.warn("픽토그램 고르기 실패 — 폴백을 쓴다: title={}", title, e);
+      log.warn("픽토그램 고르기 실패 — 폴백을 쓴다: titleLength={}", LogTextLength.of(title), e);
       return catalog.fallbackId();
     }
   }

@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
+import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -111,8 +112,8 @@ public class GeminiImageClient implements ImageGenerationClient {
     long startedAt = System.currentTimeMillis();
     // API 키는 로그에 남기지 않는다 — 원문을 찍으면 운영 로그와 관리자 로그 화면에 드러난다.
     log.info(
-      "Gemini 이미지 생성 호출 시작: model={}, characterType={}, prompt={}",
-      model, characterType, promptText
+      "Gemini 이미지 생성 호출 시작: model={}, characterType={}, promptLength={}",
+      model, characterType, LogTextLength.of(promptText)
     );
     try {
       GeminiGenerateContentResponse response = geminiRestClient.post()
@@ -136,8 +137,8 @@ public class GeminiImageClient implements ImageGenerationClient {
     } catch (Exception e) {
       long elapsedMs = System.currentTimeMillis() - startedAt;
       log.warn(
-        "Gemini 이미지 생성 호출 실패: model={}, elapsedMs={}, characterType={}, prompt={}",
-        model, elapsedMs, characterType, promptText, e
+        "Gemini 이미지 생성 호출 실패: model={}, elapsedMs={}, characterType={}, promptLength={}",
+        model, elapsedMs, characterType, LogTextLength.of(promptText), e
       );
       aiCallLogService.recordFailure(AiCallType.GEMINI_IMAGE, model, elapsedMs, e.getMessage());
       throw e;
@@ -176,7 +177,7 @@ public class GeminiImageClient implements ImageGenerationClient {
       .map(part -> part.inlineData() != null
         ? "image(mimeType=%s, size=%dB)".formatted(
             part.inlineData().mimeType(), part.inlineData().data().length())
-        : "text(%s)".formatted(part.text()))
+        : "text(length=%d)".formatted(LogTextLength.of(part.text())))
       .toList()
       .toString();
   }

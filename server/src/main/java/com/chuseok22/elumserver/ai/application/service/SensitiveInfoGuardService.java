@@ -9,6 +9,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.LocalLlmChatResponse;
 import com.chuseok22.elumserver.ai.infrastructure.client.LocalLlmClient;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.infrastructure.properties.LocalLlmProperties;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
@@ -27,7 +28,7 @@ public class SensitiveInfoGuardService {
 
   // Spring Boot 4.1은 Jackson 3(tools.jackson.databind) 기반이라 자동 구성되는 매핑 빈은
   // JsonMapper뿐이고 com.fasterxml.jackson.databind.ObjectMapper 빈은 존재하지 않는다.
-  // JwtAuthenticationEntryPoint와 동일하게 직접 생성해서 사용한다.
+  // FilterErrorResponseWriter와 동일하게 직접 생성해서 사용한다.
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   private final LocalLlmProperties localLlmProperties;
@@ -37,7 +38,7 @@ public class SensitiveInfoGuardService {
 
   public SensitiveInfoCheckResult check(String text) {
     if (!localLlmProperties.enabled()) {
-      log.info("로컬 LLM 민감정보 검증 비활성화 상태, 원문 그대로 통과: text={}", text);
+      log.info("로컬 LLM 민감정보 검증 비활성화 상태, 원문 그대로 통과: textLength={}", LogTextLength.of(text));
       return passThrough(text);
     }
 
@@ -46,14 +47,13 @@ public class SensitiveInfoGuardService {
       SensitiveInfoCheckContent content = callAndParse(systemPrompt, text);
       SensitiveInfoCheckResult result = toResult(text, content);
       log.info(
-        "로컬 LLM 민감정보 검증 완료: hasSensitiveInfo={}, categories={}, sanitizedText={}",
-        result.hasSensitiveInfo(), result.categories(), result.sanitizedText()
+        "로컬 LLM 민감정보 검증 완료: hasSensitiveInfo={}, categories={}, sanitizedTextLength={}",
+        result.hasSensitiveInfo(), result.categories(), LogTextLength.of(result.sanitizedText())
       );
       return result;
     } catch (Exception e) {
-      // 개발 중 원인 추적을 위해 검사 대상 원문과 전체 스택트레이스를 함께 로그로 남긴다
-      // (운영 로그는 개발자만 조회 가능하다는 전제 하에 원문 로깅을 허용하기로 결정됨).
-      log.warn("로컬 LLM 민감정보 검증 실패, fail-open으로 통과 처리함: text={}", text, e);
+      // 원문 대신 글자 수와 스택트레이스만 기록
+      log.warn("로컬 LLM 민감정보 검증 실패, fail-open으로 통과 처리함: textLength={}", LogTextLength.of(text), e);
       return passThrough(text);
     }
   }
@@ -66,7 +66,10 @@ public class SensitiveInfoGuardService {
       SensitiveInfoCheckContent content = callAndParse(systemPrompt, text);
       return toResult(text, content);
     } catch (Exception e) {
-      log.warn("[관리자 테스트] 로컬 LLM 민감정보 검증 실패: systemPrompt={}, text={}", systemPrompt, text, e);
+      log.warn(
+        "[관리자 테스트] 로컬 LLM 민감정보 검증 실패: systemPromptLength={}, textLength={}",
+        LogTextLength.of(systemPrompt), LogTextLength.of(text), e
+      );
       throw new CustomException(ErrorCode.PROMPT_TEST_LOCAL_LLM_FAILED);
     }
   }

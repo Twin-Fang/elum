@@ -23,6 +23,7 @@ import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplate;
 import com.chuseok22.elumserver.ai.infrastructure.entity.PromptTemplateHistory;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -186,7 +187,8 @@ public class AdminPromptService {
       String json = textClientRouter.current().generateRoutineJsonForTest(systemPrompt, sampleInput);
       return objectMapper.readValue(json, RoutineStepDraft.class);
     } catch (Exception e) {
-      log.warn("[관리자 테스트] 텍스트 생성 실패: systemPrompt={}, sampleInput={}", systemPrompt, sampleInput, e);
+      log.warn("[관리자 테스트] 텍스트 생성 실패: systemPromptLength={}, sampleInputLength={}",
+        LogTextLength.of(systemPrompt), LogTextLength.of(sampleInput), e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED);
     }
   }
@@ -196,7 +198,8 @@ public class AdminPromptService {
       String json = textClientRouter.current().generateQuestionJsonForTest(systemPrompt, sampleInput);
       return objectMapper.readValue(json, RoutineQuestionDraft.class);
     } catch (Exception e) {
-      log.warn("[관리자 테스트] 질문 생성 실패: systemPrompt={}, sampleInput={}", systemPrompt, sampleInput, e);
+      log.warn("[관리자 테스트] 질문 생성 실패: systemPromptLength={}, sampleInputLength={}",
+        LogTextLength.of(systemPrompt), LogTextLength.of(sampleInput), e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED);
     }
   }
@@ -205,7 +208,8 @@ public class AdminPromptService {
     try {
       return toDataUri(fluxImageClient.generateForTest(prefix, sampleScene, characterType));
     } catch (Exception e) {
-      log.warn("[관리자 테스트] FLUX 이미지 생성 실패: prefix={}, sampleInput={}", prefix, sampleScene, e);
+      log.warn("[관리자 테스트] FLUX 이미지 생성 실패: prefixLength={}, sampleInputLength={}",
+        LogTextLength.of(prefix), LogTextLength.of(sampleScene), e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_IMAGE_FAILED);
     }
   }
@@ -214,7 +218,7 @@ public class AdminPromptService {
     try {
       return geminiTextClient.translateImagePromptForTest(systemPrompt, sampleInput);
     } catch (Exception e) {
-      log.warn("[관리자 테스트] 그림 문장 번역 실패: sampleInput={}", sampleInput, e);
+      log.warn("[관리자 테스트] 그림 문장 번역 실패: sampleInputLength={}", LogTextLength.of(sampleInput), e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED);
     }
   }
@@ -248,7 +252,8 @@ public class AdminPromptService {
       String base64 = Base64.getEncoder().encodeToString(image.bytes());
       return "data:image/" + image.extension() + ";base64," + base64;
     } catch (Exception e) {
-      log.warn("[관리자 테스트] 이미지 생성 실패: prefix={}, sampleInput={}", prefix, sampleInput, e);
+      log.warn("[관리자 테스트] 이미지 생성 실패: prefixLength={}, sampleInputLength={}",
+        LogTextLength.of(prefix), LogTextLength.of(sampleInput), e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_IMAGE_FAILED);
     }
   }

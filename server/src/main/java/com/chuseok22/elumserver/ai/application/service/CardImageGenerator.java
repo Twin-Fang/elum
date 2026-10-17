@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
+import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import java.util.Optional;
@@ -83,8 +84,8 @@ public class CardImageGenerator {
       try {
         scene = usableScene(imagePromptTranslator.translateImagePrompt(request.description()));
       } catch (Exception e) {
-        log.warn("FLUX 용 영어 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: description={}",
-          request.description(), e);
+        log.warn("FLUX 용 영어 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: descriptionLength={}",
+          LogTextLength.of(request.description()), e);
         return fallbackToOpenAi(request, e);
       }
       if (scene == null) {
@@ -96,7 +97,7 @@ public class CardImageGenerator {
     try {
       return fluxImageClient.generate(scene, request.characterType(), FluxSeed.of(request.seedKey()));
     } catch (Exception e) {
-      log.warn("FLUX 그림 실패 — 이 카드는 OpenAI 로 그린다: scene={}", scene, e);
+      log.warn("FLUX 그림 실패 — 이 카드는 OpenAI 로 그린다: sceneLength={}", LogTextLength.of(scene), e);
       return fallbackToOpenAi(request, e);
     }
   }
@@ -121,7 +122,8 @@ public class CardImageGenerator {
     try {
       scene = usableScene(imagePromptTranslator.translateRealisticImagePrompt(request.description()));
     } catch (Exception e) {
-      log.warn("FLUX 용 실사 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: description={}", request.description(), e);
+      log.warn("FLUX 용 실사 장면 번역 실패 — 이 카드는 OpenAI 로 그린다: descriptionLength={}",
+        LogTextLength.of(request.description()), e);
       return fallbackToOpenAi(request, e);
     }
     if (scene == null) {
@@ -132,7 +134,7 @@ public class CardImageGenerator {
     try {
       return fluxImageClient.generateRealistic(scene, FluxSeed.of(request.seedKey()));
     } catch (Exception e) {
-      log.warn("FLUX 실사 그림 실패 — 이 카드는 OpenAI 로 그린다: scene={}", scene, e);
+      log.warn("FLUX 실사 그림 실패 — 이 카드는 OpenAI 로 그린다: sceneLength={}", LogTextLength.of(scene), e);
       return fallbackToOpenAi(request, e);
     }
   }

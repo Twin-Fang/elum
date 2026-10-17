@@ -7,11 +7,11 @@ import com.chuseok22.elumserver.ai.infrastructure.entity.AiCallLog;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * AI 호출 결과 기록 서비스. 기록 실패는 절대 본 호출을 실패시키지 않는다 —
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AiCallLogService {
 
   private static final int ERROR_MESSAGE_MAX_LENGTH = 500;
@@ -28,8 +27,19 @@ public class AiCallLogService {
 
   private final AiCallLogRepository aiCallLogRepository;
   private final SystemConfigService systemConfigService;
+  /// 기록 저장 전용 새 트랜잭션 (커밋 실패까지 try 안에서 잡힘)
+  private final TransactionTemplate requiresNewTransaction;
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public AiCallLogService(
+    AiCallLogRepository aiCallLogRepository, SystemConfigService systemConfigService,
+    PlatformTransactionManager transactionManager
+  ) {
+    this.aiCallLogRepository = aiCallLogRepository;
+    this.systemConfigService = systemConfigService;
+    this.requiresNewTransaction = new TransactionTemplate(transactionManager);
+    this.requiresNewTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+  }
+
   public void recordSuccess(
     AiCallType callType, String model, long latencyMs,
     GeminiGenerateContentResponse.UsageMetadata usage
@@ -37,7 +47,6 @@ public class AiCallLogService {
     save(callType, model, true, null, latencyMs, usage);
   }
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void recordFailure(AiCallType callType, String model, long latencyMs, String errorMessage) {
     save(callType, model, false, errorMessage, latencyMs, null);
   }
@@ -47,26 +56,34 @@ public class AiCallLogService {
     long latencyMs, GeminiGenerateContentResponse.UsageMetadata usage
   ) {
     try {
-      AiCallLog callLog = new AiCallLog();
-      callLog.setMemberId(AiCallContext.currentMemberId());
-      // 크레딧 작업에 딸린 호출이면 작업 id 를 단다 — 관리자가 작업 하나의 실제 USD 를 대조한다.
-      callLog.setCreditJobId(AiCallContext.currentCreditJobId());
-      callLog.setCallType(callType);
-      callLog.setModel(model);
-      callLog.setSuccess(success);
-      callLog.setErrorMessage(truncate(errorMessage));
-      callLog.setLatencyMs(latencyMs);
-      if (usage != null) {
-        callLog.setPromptTokens(usage.promptTokenCount());
-        // 생각 토큰까지 출력으로 센다 — 청구가 그렇게 된다.
-        callLog.setOutputTokens(usage.billableOutputTokens());
-        callLog.setTotalTokens(usage.totalTokenCount());
-      }
-      callLog.setEstimatedCostUsd(success ? estimateCostUsd(callType, usage) : 0.0);
-      aiCallLogRepository.save(callLog);
+      requiresNewTransaction.executeWithoutResult(status -> aiCallLogRepository.save(
+        toCallLog(callType, model, success, errorMessage, latencyMs, usage)));
     } catch (Exception e) {
-      log.warn("AI 호출 로그 저장 실패 (본 호출에는 영향 없음): callType={}, model={}", callType, model, e);
+      log.warn("[ai call log] save failed, main call unaffected : callType={}, model={}", callType, model, e);
     }
+  }
+
+  private AiCallLog toCallLog(
+    AiCallType callType, String model, boolean success, String errorMessage,
+    long latencyMs, GeminiGenerateContentResponse.UsageMetadata usage
+  ) {
+    AiCallLog callLog = new AiCallLog();
+    callLog.setMemberId(AiCallContext.currentMemberId());
+    // 크레딧 작업에 딸린 호출이면 작업 id 를 단다 — 관리자가 작업 하나의 실제 USD 를 대조한다.
+    callLog.setCreditJobId(AiCallContext.currentCreditJobId());
+    callLog.setCallType(callType);
+    callLog.setModel(model);
+    callLog.setSuccess(success);
+    callLog.setErrorMessage(truncate(errorMessage));
+    callLog.setLatencyMs(latencyMs);
+    if (usage != null) {
+      callLog.setPromptTokens(usage.promptTokenCount());
+      // 생각 토큰까지 출력으로 센다 — 청구가 그렇게 된다.
+      callLog.setOutputTokens(usage.billableOutputTokens());
+      callLog.setTotalTokens(usage.totalTokenCount());
+    }
+    callLog.setEstimatedCostUsd(success ? estimateCostUsd(callType, usage) : 0.0);
+    return callLog;
   }
 
   // 기록 시점의 시스템 설정 요금 단가로 비용을 추정한다.
