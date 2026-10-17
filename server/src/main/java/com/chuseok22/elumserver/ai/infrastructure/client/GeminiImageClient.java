@@ -176,7 +176,7 @@ public class GeminiImageClient implements ImageGenerationClient {
     return parts.stream()
       .map(part -> part.inlineData() != null
         ? "image(mimeType=%s, size=%dB)".formatted(
-            part.inlineData().mimeType(), part.inlineData().data().length())
+            part.inlineData().mimeType(), LogTextLength.of(part.inlineData().data()))
         : "text(length=%d)".formatted(LogTextLength.of(part.text())))
       .toList()
       .toString();

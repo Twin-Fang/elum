@@ -40,7 +40,8 @@ class ArchitectureRulesTest {
   /// 원문을 담는 변수·접근자 이름 (LogTextLength.of(...) 로 감싸면 허용)
   private static final Pattern RAW_TEXT_ARGUMENT = Pattern.compile(
     "\\b(userContent|userContentText|systemPrompt|sampleInput|sampleScene|rawInputText|sanitizedInputText"
-      + "|sanitizedText|prompt|promptText|json|text|content|description|title|scene)\\b");
+      + "|sanitizedText|prompt|promptText|json|text|content|description|title|scene"
+      + "|responseText|responseBody|answer|answers|reply|output|input|body)\\b");
   private static final String LOG_TEXT_LENGTH_CALL = "LogTextLength.of(";
   private static final Pattern NEW_OBJECT_MAPPER = Pattern.compile("new ObjectMapper\\(");
 
