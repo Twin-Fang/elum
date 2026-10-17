@@ -1,15 +1,43 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-17T10:15:59Z",
-    "currentVersion": "2.36.0",
+    "lastUpdated": "2026-10-17T15:09:20Z",
+    "currentVersion": "2.37.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 249
+    "totalReleases": 250
   },
   "releases": [
+    {
+      "version": "2.37.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-17",
+      "pr_number": 708,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 이룸이가 누르고 넘기고 체크할 때마다 진동이 종류별로 달라져요\n  * 일과를 끝내면 길게 터지는 진동으로 축하해 줘요\n\n* **개선**\n  * 영어 휴대폰에서 카메라·사진 권한 안내가 영어로 나와요\n  * 스페인어·일본어·중국어 휴대폰에서도 권한 안내를 영어로 볼 수 있어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "이룸이가 누르고 넘기고 체크할 때마다 진동이 종류별로 달라져요",
+            "일과를 끝내면 길게 터지는 진동으로 축하해 줘요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "영어 휴대폰에서 카메라·사진 권한 안내가 영어로 나와요",
+            "스페인어·일본어·중국어 휴대폰에서도 권한 안내를 영어로 볼 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.36.0",
       "project_type": "flutter",
