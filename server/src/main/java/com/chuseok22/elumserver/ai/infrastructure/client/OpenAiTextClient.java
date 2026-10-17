@@ -6,6 +6,7 @@ import com.chuseok22.elumserver.ai.core.AiCallContext;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.TextProvider;
+import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
@@ -155,8 +156,8 @@ public class OpenAiTextClient implements TextGenerationClient {
 
       String content = extractContent(response);
       long elapsedMs = System.currentTimeMillis() - startedAt;
-      log.info("OpenAI 텍스트 생성 호출 완료: model={}, elapsedMs={}, response={}",
-        model, elapsedMs, content);
+      log.info("OpenAI 텍스트 생성 호출 완료: model={}, elapsedMs={}, responseLength={}",
+        model, elapsedMs, LogTextLength.of(content));
       aiCallLogService.recordSuccess(callType, model, elapsedMs, toUsageMetadata(response));
       return content;
     } catch (Exception e) {

@@ -22,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @ExtendWith(MockitoExtension.class)
 class AiCallLogServiceTest {
@@ -31,6 +32,10 @@ class AiCallLogServiceTest {
 
   @Mock
   private SystemConfigService systemConfigService;
+
+  // 트랜잭션 경계는 AiCallLogServiceTransactionTest 에서 검증
+  @Mock
+  private PlatformTransactionManager transactionManager;
 
   @InjectMocks
   private AiCallLogService aiCallLogService;

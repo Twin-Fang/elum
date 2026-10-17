@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.common.infrastructure.security;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
+import com.chuseok22.elumserver.common.infrastructure.exception.FilterErrorResponseWriter;
 import com.chuseok22.elumserver.common.infrastructure.properties.AidlpProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,11 +18,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -43,7 +42,7 @@ public class AidlpDecryptionFilter extends OncePerRequestFilter {
   private final AidlpCryptoService cryptoService;
   private final NonceStore nonceStore;
   private final AidlpProperties properties;
-  // 이 프로젝트는 ObjectMapper 빈을 주입하지 않고 각자 직접 생성해 쓴다(JwtAuthenticationEntryPoint 등 관례).
+  // 이 프로젝트는 ObjectMapper 빈을 주입하지 않고 각자 직접 생성해 쓴다(FilterErrorResponseWriter 등 관례).
   // starter-webmvc 환경에서 필터 생성 시점에 ObjectMapper 빈이 없어 기동 실패했으므로 직접 생성으로 맞춘다.
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final ErrorMessages messages = ErrorMessages.standard();
@@ -157,15 +156,9 @@ public class AidlpDecryptionFilter extends OncePerRequestFilter {
     return s == null || s.isBlank();
   }
 
-  // 필터 예외는 GlobalExceptionHandler를 타지 않으므로 ErrorResponse와 동일한 JSON을 직접 쓴다.
+  // 필터 예외는 GlobalExceptionHandler를 타지 않으므로 공통 작성기로 ErrorResponse JSON을 쓴다.
   private void writeError(HttpServletResponse response, ErrorCode code) throws IOException {
-    response.setStatus(code.getStatus().value());
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response.setCharacterEncoding("UTF-8");
-    // ErrorResponse(errorCode, errorMessage) 구조를 그대로 흉내낸다 — 클라가 errorCode 이름으로 분기한다.
-    String body = objectMapper.writeValueAsString(
-      Map.of("errorCode", code.name(), "errorMessage", messages.of(code)));
-    response.getWriter().write(body);
+    FilterErrorResponseWriter.write(response, code, messages.of(code));
   }
 
   // 복호화한 평문 바이트를 요청 body로 다시 노출하는 wrapper. getInputStream을 여러 번 읽을 수 있게 한다.

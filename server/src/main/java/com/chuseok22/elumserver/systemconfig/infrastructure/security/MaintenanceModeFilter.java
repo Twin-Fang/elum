@@ -1,12 +1,11 @@
 package com.chuseok22.elumserver.systemconfig.infrastructure.security;
 
-import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.common.infrastructure.constant.SecurityPaths;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorMessages;
+import com.chuseok22.elumserver.common.infrastructure.exception.FilterErrorResponseWriter;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +14,6 @@ import java.io.IOException;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
@@ -45,7 +43,6 @@ public class MaintenanceModeFilter extends OncePerRequestFilter {
   );
 
   private final SystemConfigService systemConfigService;
-  private final ObjectMapper objectMapper = new ObjectMapper();
   private final ErrorMessages messages = ErrorMessages.standard();
 
   @Override
@@ -62,11 +59,7 @@ public class MaintenanceModeFilter extends OncePerRequestFilter {
       return;
     }
     log.info("[점검 모드] 요청을 막았습니다 — {} {}", request.getMethod(), request.getRequestURI());
-    ErrorCode code = ErrorCode.MAINTENANCE_MODE;
-    response.setStatus(code.getStatus().value());
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response.setCharacterEncoding("UTF-8");
-    response.getWriter().write(objectMapper.writeValueAsString(new ErrorResponse(code, message())));
+    FilterErrorResponseWriter.write(response, ErrorCode.MAINTENANCE_MODE, message());
   }
 
   /**

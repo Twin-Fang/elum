@@ -57,6 +57,20 @@ class MaintenanceModeFilterTest {
   }
 
   @Test
+  @DisplayName("점검 응답 계약: 503, application/json UTF-8, ErrorResponse 와 같은 JSON 바이트")
+  void maintenance_writesExactErrorResponseBytes() throws Exception {
+    maintenance(true);
+    MockHttpServletResponse response = run("POST", "/api/member/consents");
+
+    assertThat(response.getStatus()).isEqualTo(503);
+    assertThat(response.getContentType()).isEqualTo("application/json;charset=UTF-8");
+    assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
+    assertThat(response.getContentAsByteArray()).isEqualTo(
+      "{\"errorCode\":\"MAINTENANCE_MODE\",\"errorMessage\":\"오늘 밤 10시까지 점검해요\"}"
+        .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+  }
+
+  @Test
   @DisplayName("점검 중에는 조회도 막는다 — 앱이 503을 받아 점검 화면으로 간다")
   void maintenance_blocksReads() throws Exception {
     maintenance(true);

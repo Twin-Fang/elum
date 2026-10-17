@@ -12,6 +12,7 @@ import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
 import com.chuseok22.elumserver.ai.core.RoutineQuestionAiInput;
 import com.chuseok22.elumserver.ai.core.TextProvider;
+import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.infrastructure.properties.GeminiProperties;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
@@ -334,9 +335,10 @@ public class GeminiTextClient implements TextGenerationClient {
     // 모델명은 호출 시점마다 시스템 설정에서 읽는다 — 관리자가 바꾸면 재배포 없이 반영된다.
     String model = systemConfigService.getString(ConfigKey.GEMINI_TEXT_MODEL);
     long startedAt = System.currentTimeMillis();
+    // 원문 대신 글자 수만 기록 (지시문·보호자 입력 공통)
     log.info(
-      "Gemini 텍스트 생성 호출 시작: model={}, systemPrompt={}, userContent={}",
-      model, systemPrompt, foldPictogramCatalog(userContentText)
+      "Gemini 텍스트 생성 호출 시작: model={}, systemPromptLength={}, userContentLength={}",
+      model, LogTextLength.of(systemPrompt), LogTextLength.of(userContentText)
     );
     try {
       GeminiGenerateContentResponse response = geminiRestClient.post()
@@ -346,7 +348,10 @@ public class GeminiTextClient implements TextGenerationClient {
         .retrieve()
         .body(GeminiGenerateContentResponse.class);
       long elapsedMs = System.currentTimeMillis() - startedAt;
-      log.info("Gemini 텍스트 생성 호출 완료: model={}, elapsedMs={}, response={}", model, elapsedMs, response);
+      log.info(
+        "Gemini 텍스트 생성 호출 완료: model={}, elapsedMs={}, responseLength={}",
+        model, elapsedMs, responseTextLength(response)
+      );
       aiCallLogService.recordSuccess(
         callType, model, elapsedMs, response == null ? null : response.usageMetadata()
       );
@@ -354,12 +359,27 @@ public class GeminiTextClient implements TextGenerationClient {
     } catch (Exception e) {
       long elapsedMs = System.currentTimeMillis() - startedAt;
       log.warn(
-        "Gemini 텍스트 생성 호출 실패: model={}, elapsedMs={}, systemPrompt={}, userContent={}",
-        model, elapsedMs, systemPrompt, userContentText, e
+        "Gemini 텍스트 생성 호출 실패: model={}, elapsedMs={}, systemPromptLength={}, userContentLength={}",
+        model, elapsedMs, LogTextLength.of(systemPrompt), LogTextLength.of(userContentText), e
       );
       aiCallLogService.recordFailure(callType, model, elapsedMs, e.getMessage());
       throw e;
     }
+  }
+
+  /**
+   * 로그용 응답 길이: 모든 후보·파트의 text 글자 수 합 (응답 없음 > 0)
+   */
+  private int responseTextLength(GeminiGenerateContentResponse response) {
+    if (response == null || response.candidates() == null) {
+      return 0;
+    }
+    return response.candidates().stream()
+      .filter(candidate -> candidate != null && candidate.content() != null && candidate.content().parts() != null)
+      .flatMap(candidate -> candidate.content().parts().stream())
+      .filter(part -> part != null)
+      .mapToInt(part -> LogTextLength.of(part.text()))
+      .sum();
   }
 
   private String toJson(Object input) {
