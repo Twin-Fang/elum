@@ -83,7 +83,7 @@ class NoticeImageFlowTest {
   }
 
   private NoticeInput input(boolean enabled, String startsAt) {
-    return new NoticeInput("공지", "본문", "", "", "ALL", "0", startsAt, "", enabled);
+    return new NoticeInput("공지", "본문", "", "", "ALL", "ko", "0", startsAt, "", enabled);
   }
 
   private MockMultipartFile png(int size) {

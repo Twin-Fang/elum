@@ -128,7 +128,8 @@ class _StepCardViewerState extends ConsumerState<StepCardViewer> {
     if (!mounted) return;
     setState(() => _speakingId = null);
 
-    if (!ok) {
+    // 음성이 없는 언어는 안내창 없이 글만 보여준다
+    if (!ok && shouldShowSpeechFailure(widget.language)) {
       showFailure(
         context,
         null,

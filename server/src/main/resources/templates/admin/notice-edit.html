@@ -131,6 +131,17 @@
               </select>
             </label>
             <label class="form-control">
+              <div class="label"><span class="label-text">언어</span></div>
+              <select id="notice-locale" name="locale" class="select select-bordered">
+                <option value="ko" th:selected="${form.locale == 'ko'}">한국어 (ko)</option>
+                <option value="en" th:selected="${form.locale == 'en'}">English (en)</option>
+                <option value="ja" th:selected="${form.locale == 'ja'}">日本語 (ja)</option>
+                <option value="zh" th:selected="${form.locale == 'zh'}">中文 (zh)</option>
+                <option value="es" th:selected="${form.locale == 'es'}">Español (es)</option>
+              </select>
+              <div class="label"><span class="label-text-alt">휴대폰 언어가 같은 보호자에게만 나가요. 다른 언어는 따로 한 건 더 써요</span></div>
+            </label>
+            <label class="form-control">
               <div class="label"><span class="label-text">우선순위</span></div>
               <input id="notice-priority" type="number" name="priority" class="input input-bordered font-mono"
                      th:value="${form.priority}" step="1"/>

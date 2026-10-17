@@ -1,9 +1,12 @@
 package com.chuseok22.elumserver.notice.infrastructure.entity;
 
 import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
+import com.chuseok22.elumserver.common.locale.AppLocale;
+import com.chuseok22.elumserver.common.locale.AppLocaleConverter;
 import com.chuseok22.elumserver.notice.core.NoticePlatform;
 import com.chuseok22.elumserver.notice.core.NoticeStatus;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -51,6 +54,14 @@ public class AppNotice extends BaseEntity {
 
   @Column(length = BUTTON_URL_MAX_LENGTH)
   private String buttonUrl;
+
+  /**
+   * 이 공지를 보여줄 휴대폰 언어. 공지마다 언어 하나이고, 요청 언어와 같은 공지만 앱에 나간다.
+   * 기존 공지는 V38 이 ko 로 채웠다. columnDefinition 은 로컬(ddl-auto: update)에서 행이 있는 표에 NOT NULL 을 더할 때 필요하다.
+   */
+  @Convert(converter = AppLocaleConverter.class)
+  @Column(name = "locale", nullable = false, length = 8, columnDefinition = "varchar(8) not null default 'ko'")
+  private AppLocale locale = AppLocale.KO;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
