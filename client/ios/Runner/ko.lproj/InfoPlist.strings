@@ -1,0 +1,4 @@
+/* 권한 안내 문구 (한국어): 기기 언어가 한국어일 때 Info.plist 기본 문구(영어)를 덮어씀 */
+"NSCameraUsageDescription" = "카드 그림으로 쓸 사진을 찍으려고 카메라를 사용해요";
+"NSPhotoLibraryUsageDescription" = "카드 그림으로 쓸 사진을 고르려고 사진 보관함을 사용해요";
+"NSUserTrackingUsageDescription" = "보호자 화면에 알맞은 광고를 보여드리는 데 사용해요. 이룸이의 정보는 사용하지 않아요.";
