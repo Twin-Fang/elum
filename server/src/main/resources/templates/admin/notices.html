@@ -22,7 +22,7 @@
             <th>상태</th>
             <th>제목</th>
             <th>기간 (한국 시각)</th>
-            <th>대상 · 순서</th>
+            <th>언어 · 대상 · 순서</th>
             <th>마지막 수정</th>
             <th></th>
           </tr>
@@ -54,7 +54,8 @@
             </td>
             <!-- 칸을 줄이려고 플랫폼과 우선순위를 한 칸에 둔다. 넓은 화면에서도 오른쪽 버튼이 잘렸다. -->
             <td class="text-xs">
-              <div th:text="${n.platform.label}">전체</div>
+              <div><span class="badge badge-outline badge-xs font-mono" th:text="${n.locale.code()}">ko</span>
+                <span th:text="${n.platform.label}">전체</span></div>
               <div class="text-base-content/60" th:text="'우선순위 ' + ${n.priority}">우선순위 0</div>
             </td>
             <td class="text-xs">

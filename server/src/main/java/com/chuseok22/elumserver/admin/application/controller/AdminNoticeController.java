@@ -213,6 +213,7 @@ public class AdminNoticeController {
     slide.put("buttonLabel", notice.getButtonLabel());
     slide.put("buttonUrl", notice.getButtonUrl());
     slide.put("platform", notice.getPlatform().name());
+    slide.put("locale", notice.getLocale().code());
     slide.put("priority", notice.getPriority());
     slide.put("startsAt", notice.getStartsAt().format(ISO_MINUTE));
     return slide;
@@ -245,6 +246,7 @@ public class AdminNoticeController {
       case NOTICE_PERIOD_INVALID -> "시작 일시를 적고, 종료는 시작보다 늦게 적어 주세요. 종료를 비우면 끌 때까지 나가요. (E-NTC-009)";
       case NOTICE_PRIORITY_INVALID -> "우선순위는 숫자로 적어 주세요. 클수록 먼저 보여요. (E-NTC-010)";
       case NOTICE_PLATFORM_INVALID -> "플랫폼은 전체, iOS, Android 중에서 골라 주세요. (E-NTC-011)";
+      case NOTICE_LOCALE_INVALID -> "공지 언어는 ko, en, ja, zh, es 중에서 골라 주세요. (E-NTC-016)";
       case NOTICE_IMAGE_INVALID_TYPE -> "이미지는 png, jpg, webp 만 올릴 수 있어요. (E-NTC-012)";
       case NOTICE_IMAGE_TOO_LARGE -> "이미지는 2MB 까지예요. 크기를 줄여 주세요. (E-NTC-013)";
       case NOTICE_IMAGE_SAVE_FAILED -> "이미지를 저장하지 못했어요. 잠시 뒤 다시 해 주세요. (E-NTC-014)";

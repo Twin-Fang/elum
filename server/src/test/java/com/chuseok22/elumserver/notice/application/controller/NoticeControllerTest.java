@@ -37,6 +37,8 @@ class NoticeControllerTest {
     assertThat(response.getStatusCode().value()).isEqualTo(200);
     assertThat(response.getBody()).isEqualTo(body);
     assertThat(response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL)).isEqualTo("max-age=60");
+    // 언어별 응답이라 캐시가 언어를 섞지 않게
+    assertThat(response.getHeaders().getVary()).contains(HttpHeaders.ACCEPT_LANGUAGE);
   }
 
   @Test

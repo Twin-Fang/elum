@@ -7,6 +7,7 @@ import com.chuseok22.logging.annotation.LogMonitoring;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 보호자 홈 공지 팝업. 인증 없이 연다 — {@code SecurityConfig} 참고.
  *
- * <p>쓰기 경로가 없고 응답이 작다. 60초 캐시를 붙여 누가 마구 불러도 가볍게 한다(N22).
+ * <p>쓰기 경로가 없고 응답이 작다. 60초 캐시(언어별)를 붙여 누가 마구 불러도 가볍게 한다(N22).
  * 관리자가 끄거나 지운 공지는 길어도 60초 안에 빠진다.
  */
 @RestController
@@ -34,7 +35,8 @@ public class NoticeController implements NoticeControllerDocs {
   public ResponseEntity<AppNoticesResponse> notices(
     @RequestParam(value = "platform", required = false) String platform
   ) {
-    return ResponseEntity.ok().cacheControl(CACHE).body(noticeService.publishedFor(platform));
+    // 요청 언어별로 응답이 달라 캐시 키에 Accept-Language 를 넣는다
+    return ResponseEntity.ok().cacheControl(CACHE).varyBy(HttpHeaders.ACCEPT_LANGUAGE).body(noticeService.publishedFor(platform));
   }
 
   @Override

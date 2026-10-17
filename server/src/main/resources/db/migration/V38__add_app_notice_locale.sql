@@ -1,0 +1,11 @@
+-- 공지에 언어를 더한다 (이슈 #673).
+--
+-- 공지마다 언어 하나이고 앱은 요청 언어(Accept-Language)와 같은 공지만 받는다. 기존 공지는 전부 한국어라
+-- DEFAULT 'ko' 로 채운다. 내용은 바뀌지 않는다.
+--
+-- 더하는 것만 한다. 옛 서버 이미지로 되돌려도 locale 컬럼을 모른 채 읽고 쓰며, 새 행은 DEFAULT 'ko' 가 된다.
+-- 되돌리기 전에 en 등 ko 가 아닌 공지가 있으면 옛 서버가 한국어 보호자에게 그대로 보여주므로 먼저 끈다.
+--
+-- 공지는 관리자가 올리는 몇십 건이라 서비스가 전부 읽어 자바에서 거른다 — 인덱스를 두지 않는다.
+-- 로컬(ddl-auto: update)에서 이미 만들어졌을 수 있어 IF NOT EXISTS 로 양쪽 모두 안전하게 한다.
+ALTER TABLE app_notice ADD COLUMN IF NOT EXISTS locale VARCHAR(8) NOT NULL DEFAULT 'ko';
