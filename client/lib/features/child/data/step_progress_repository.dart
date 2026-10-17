@@ -60,7 +60,7 @@ class StepProgressRepository {
         AppLogger.info('[sync] rejected $status : $routineId');
         return SyncOutcome.rejected;
       }
-      AppLogger.info('[sync] unreachable, retry later : $routineId (${e.type.name})');
+      AppLogger.info('[sync] unreachable, retry later : $routineId (${e.type.name} ${e.message})');
       return SyncOutcome.unreachable;
     } catch (e, stack) {
       AppLogger.error('[sync] unexpected failure, retry later', e, stack, {'routineId': routineId});

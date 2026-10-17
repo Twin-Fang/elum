@@ -69,7 +69,7 @@ abstract final class AppConfig {
   /// ⚠️ 유출되면 안 되는 값이다. `.env.example`에는 빈 값으로 둔다.
   static String get ttsApiKey => _string('ELUM_TTS_API_KEY', '');
 
-  /// AI DLP 요청 암호화 마스터 시크릿. 서버 `elum.aidlp.secret`(application-prod.yml)와 같은 값.
+  /// AI DLP 요청 암호화 마스터 시크릿. 서버 `elum.aidlp.secret` 설정과 같은 값.
   /// 암호화 인터셉터가 꺼져 있어 지금은 읽는 곳 없음 (`dio_client.dart`).
   static String get aidlpSecret => _string('ELUM_AIDLP_SECRET', '');
 

@@ -29,7 +29,7 @@ void main() {
   };
 
   final debugPrintCall = RegExp(r'\bdebugPrint\(');
-  final rawSpinner = RegExp(r'\b(CircularProgressIndicator|CupertinoActivityIndicator)\(');
+  final rawSpinner = RegExp(r'\b(CircularProgressIndicator|CupertinoActivityIndicator)(?:\.\w+)?\(');
   // AppColors·context.colors 는 단어 경계로 걸러짐, transparent 는 토큰 대상 아님
   final rawColors = RegExp(r'\bColors\.(?!transparent\b)[a-zA-Z]');
 
@@ -78,5 +78,6 @@ void main() {
     expect(rawColors.hasMatch('color: Colors.transparent,'), isFalse);
     expect(rawColors.hasMatch('color: Colors.white,'), isTrue);
     expect(rawSpinner.hasMatch('const ElumSpinner(size: 24)'), isFalse);
+    expect(rawSpinner.hasMatch('CircularProgressIndicator.adaptive()'), isTrue);
   });
 }
