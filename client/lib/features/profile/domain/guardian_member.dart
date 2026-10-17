@@ -54,10 +54,6 @@ class Guardian {
   final GuardianKind kind;
   final DateTime? joinedAt;
 
-  /// 이 이룸이 안에서 불리는 이름을 정했는가. 안 정했으면 구분 이름이 대신 보이므로
-  /// 목록이 이름과 구분을 따로 보일 필요가 없다.
-  bool get hasName => displayName?.trim().isNotEmpty == true;
-
   /// 목록에 적을 이름.
   String get label {
     final name = displayName?.trim();

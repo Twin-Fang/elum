@@ -9,12 +9,13 @@ void main() {
   useFigmaViewport();
 
   group('IssuedCodePanel', () {
-    test('남은 시간 글자는 만료되면 만료 문구다', () {
-      final expired = IssuedLinkCode(
+    // 올림하면 실제보다 길게 말해 믿고 기다리다 코드가 바뀐다
+    test('남은 시간은 올림이 아니라 내림으로 MM:SS 를 말한다', () {
+      final issued = IssuedLinkCode(
         code: 'ABC123',
-        expiresAt: DateTime.now().subtract(const Duration(seconds: 1)),
+        expiresAt: DateTime.now().add(const Duration(minutes: 9, seconds: 59, milliseconds: 900)),
       );
-      expect(IssuedCodePanel.remainingLabel(expired, '만료'), '만료');
+      expect(IssuedCodePanel.remainingLabel(issued), '09:59');
     });
   });
 

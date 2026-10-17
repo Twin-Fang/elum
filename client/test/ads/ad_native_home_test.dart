@@ -38,6 +38,7 @@ void main() {
   ];
 
   late _CountingLoader loader;
+  late _CountingBanner banner;
 
   Future<void> pumpHome(
     WidgetTester tester, {
@@ -58,7 +59,7 @@ void main() {
           ),
           memberProvider.overrideWith((ref) async => null),
           adsEnabledProvider.overrideWithValue(adsEnabled),
-          adBannerLoaderProvider.overrideWithValue(_NoBanner()),
+          adBannerLoaderProvider.overrideWithValue(banner),
           adNativeLoaderProvider.overrideWithValue(loader),
         ],
         child: ScreenUtilInit(
@@ -73,7 +74,10 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  setUp(() => loader = _CountingLoader());
+  setUp(() {
+    loader = _CountingLoader();
+    banner = _CountingBanner();
+  });
 
   testWidgets('지난 일과가 3개 이상이면 두 번째와 세 번째 사이에 광고가 한 개 끼인다', (tester) async {
     await pumpHome(tester, pastList: past(5));
@@ -115,6 +119,30 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+
+  // 일과가 적은 홈에 광고가 둘이나 붙으면 광고 화면처럼 보인다 — 오늘·지난 합이 5개 이상일 때만 둔다.
+  testWidgets('오늘·지난 일과를 합쳐 4개면 하단 배너도 네이티브도 요청하지 않는다', (tester) async {
+    await pumpHome(
+      tester,
+      pastList: past(3),
+      todayList: [routine('t1', '오늘 1')],
+    );
+
+    expect(loader.calls, 0);
+    expect(banner.calls, 0);
+  });
+
+  testWidgets('오늘·지난 일과를 합쳐 5개면 하단 배너와 네이티브를 요청한다', (tester) async {
+    await pumpHome(
+      tester,
+      pastList: past(3),
+      todayList: [routine('t1', '오늘 1'), routine('t2', '오늘 2')],
+    );
+
+    expect(loader.calls, 1);
+    expect(banner.calls, 1);
+  });
+
 }
 
 class _CountingLoader implements AdNativeLoader {
@@ -135,9 +163,14 @@ class _CountingLoader implements AdNativeLoader {
   }
 }
 
-class _NoBanner implements AdBannerLoader {
+class _CountingBanner implements AdBannerLoader {
+  var calls = 0;
+
   @override
-  Future<LoadedBanner?> load(AdPlacement placement, int widthDp) async => null;
+  Future<LoadedBanner?> load(AdPlacement placement, int widthDp) async {
+    calls++;
+    return null;
+  }
 }
 
 class _StubRepo with FakeRewardApi implements RoutineRepository {

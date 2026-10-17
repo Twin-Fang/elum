@@ -208,6 +208,14 @@ color: destructive ? colors.textSecondary : colors.textPrimary,
 
 머리 문구는 `promptBody`(16/w500)에 `promptMuted`(40%)를 쓴다. 시안 문구가 이미 능동형이다.
 
+### 함께하는 사람 (`1027:4617` · `1532:6877` · `1532:7013`)
+
+`people*` 토큰이 이 화면과 이름 변경 시트의 색을 맡는다. 줄 카드 `peopleRowBg`(#EEE9E6), `나` 배지 `peopleMeBadge*`(#D7D3D1/흰 글),
+구분 칩 `peopleGuardianChip*`(#B5EAEC·#93DBCC·#388E7C)와 `peopleCaregiverChip*`(#FFDAC7·#F9C6AD·#AC6744),
+글자 `peopleTextPrimary`(#000)·`peopleTextSecondary`(#74757D), 꺾쇠 `peopleChevron`(#CACACA),
+시트 예시 글 `peopleEditPlaceholder`(검정 20%)·고르지 않은 칩 글 `peopleEditChipIdleText`(검정 30%).
+글자는 `people*` 타이포 토큰(Pretendard, 자간 0 고정).
+
 ### 캐릭터 / 일러스트 팔레트
 
 `#FFFADB` `#FFDFBD` `#FFDAC7` `#F4A753` `#EB9B73` `#F3F2E1` `#CED8FF` `#C8DD94` `#B5EAEC` `#CDC8C3`

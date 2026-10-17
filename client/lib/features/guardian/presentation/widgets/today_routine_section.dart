@@ -495,6 +495,8 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
   Widget build(BuildContext context) {
     final async = ref.watch(pastRoutinesProvider);
     final routines = async.value ?? const <Routine>[];
+    // 일과가 적으면 네이티브 광고를 끼우지 않는다 (하단 배너와 같은 기준)
+    final shouldShowAds = ref.watch(shouldShowHomeAdsProvider);
 
     if (routines.isEmpty) {
       if (async.hasError) {
@@ -538,7 +540,7 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
           ),
           // 지난 일과 네이티브 광고 한 개. 로드에 실패하면 항목 자체가
           // 없어 빈 자리가 남지 않는다. 오늘 일과에는 끼우지 않는다.
-          if (index == _nativeAdAfterIndex(routines.length))
+          if (shouldShowAds && index == _nativeAdAfterIndex(routines.length))
             AdNativeSlot(
               placement: AdPlacement.nativeHomePast,
               padding: EdgeInsets.only(

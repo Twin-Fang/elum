@@ -1,3 +1,4 @@
+import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error_code.dart';
 import 'package:elum/core/storage/local_storage.dart';
@@ -20,7 +21,7 @@ import 'package:elum/core/router/routes.dart';
 /// 링크로 받은 초대 코드가 채워진 입력 화면 (#365).
 ///
 /// **링크는 코드를 대신 전달하는 수단일 뿐이다.** 코드 흐름·합류 규칙은 그대로다 —
-/// 채워진 코드로 **자동 합류하지 않고**, 사람이 `함께하기` 를 눌러야 서버에 보낸다. 실패는 직접 친 코드와
+/// 채워진 코드로 **자동 합류하지 않고**, 사람이 `시작하기` 를 눌러야 서버에 보낸다. 실패는 직접 친 코드와
 /// 같은 갈래·같은 에러 코드로 안내한다.
 void main() {
   useFigmaViewport();
@@ -78,7 +79,7 @@ void main() {
 
       expect(repo.sentCodes, isEmpty);
       expect(find.text('보호자 홈'), findsNothing);
-      expect(find.text('함께하기'), findsOneWidget);
+      expect(find.text('시작하기'), findsOneWidget);
     });
 
 
@@ -99,7 +100,8 @@ void main() {
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
 
-      expect(find.text('함께하기'), findsNothing);
+      // 시작하기는 늘 있되, 채워진 코드가 없어 눌러도 보내지 않는다
+      expect(tester.widget<ElumButton>(find.byType(ElumButton)).onPressed, isNull);
       expect(input(tester).text, isEmpty);
     });
   });
@@ -109,7 +111,7 @@ void main() {
     Future<void> failWith(WidgetTester tester, AppFailure failure) async {
       repo.redeemResult = Attempt.failed(failure);
       await open(tester);
-      await tester.tap(find.text('함께하기'));
+      await tester.tap(find.text('시작하기'));
       await tester.pumpAndSettle();
     }
 
@@ -121,20 +123,21 @@ void main() {
 
       expect(find.textContaining('여러 번 잘못 입력했어요'), findsOneWidget);
       expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
-      expect(find.text('함께하기'), findsNothing);
+      // 잠기면 시작하기도 꺼진다
+      expect(tester.widget<ElumButton>(find.byType(ElumButton)).onPressed, isNull);
       expect(repo.sentCodes.length, 1);
     });
 
-    testWidgets('인터넷이 없으면: E-NET-OFFLINE 을 보이고 코드를 남겨 함께하기로 다시 보낸다', (tester) async {
+    testWidgets('인터넷이 없으면: E-NET-OFFLINE 을 보이고 코드를 남겨 시작하기로 다시 보낸다', (tester) async {
       await failWith(tester, const AppFailure(fault: NetworkFault.offline));
 
       expect(find.textContaining('E-NET-OFFLINE'), findsOneWidget);
       // 다시 칠 필요가 없다 — 같은 버튼이 다시 시도다
-      expect(find.text('함께하기'), findsOneWidget);
+      expect(find.text('시작하기'), findsOneWidget);
       expect(find.text('다시 시도'), findsNothing);
 
       repo.redeemResult = null;
-      await tester.tap(find.text('함께하기'));
+      await tester.tap(find.text('시작하기'));
       await tester.pumpAndSettle();
 
       expect(repo.sentCodes, ['A7K3M9', 'A7K3M9']);

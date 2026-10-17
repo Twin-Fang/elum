@@ -23,7 +23,6 @@ import '../domain/invite_problem.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_toast.dart';
 import '../../../core/router/routes.dart';
-import '../../../core/theme/app_typography.dart';
 
 /// 입력 아래에 보이는 안내의 종류. 문구가 아니라 종류를 들고 있다가 그릴 때 푼다 — 실패 순간에
 /// 문구로 굳히면 언어가 바뀐 뒤에도 옛 언어로 남는다.
@@ -85,9 +84,10 @@ class _InviteError {
 
 /// 초대 코드 넣기 — 함께하는 보호자에게 받은 코드로 **그 이룸이에 합류**한다.
 ///
-/// > ⚠️ **임시 시안이다.** 디자인 시안이 없어 연결 암호 넣기(`LinkEnterScreen`)의 여섯 칸·
-/// > 시스템 키보드·자동 제출·흔들림 모양을 그대로 빌렸다. 진입점도 시안이 정하지 않았다
-/// > 지금은 온보딩 이름 화면의 링크와 설정의 `함께하는 사람`에서 온다.
+/// 시안(`1532:7114`)은 연결 암호 넣기(`LinkEnterScreen`)와 같은 모양이다: 설명 2줄, 여섯 칸, `시작하기`.
+/// 진입점은 온보딩 이름 화면의 링크(`204:991`)와 설정의 `함께하는 사람`이다.
+///
+/// 여섯 칸을 채워도 **자동 제출하지 않는다.** `시작하기`를 눌러야 보낸다: 틀린 시도는 서버가 세어 한도를 넘으면 잠긴다.
 ///
 /// ## 새로 가입한 보호자 (E6)
 ///
@@ -102,7 +102,7 @@ class _InviteError {
 /// | 없는·쓴 코드 / 만료 | 비운다 | 새 코드를 받으라고 말한다 |
 /// | 이미 함께함 (자기 코드 포함) | 비운다 | 코드는 쓰이지 않았다 |
 /// | 시도 한도 | **잠근다** | 더 쳐도 시도만 늘고 막힌다 |
-/// | 인터넷 없음 | **남긴다** | `다시 시도` — 다시 칠 필요가 없다 |
+/// | 인터넷 없음 | **남긴다** | `시작하기` 를 다시 누르면 된다 |
 /// | 약관 미동의 | — | 팝업 → 동의 화면 |
 ///
 /// 문구는 서버가 준 것을 그대로 쓰고 **에러 코드를 함께 보인다** (제보를 받았을 때 추적).
@@ -113,8 +113,8 @@ class _InviteError {
 /// 보호자가 공유한 링크를 누르면 [InviteInbox](우편함)에 코드가 맡겨지고, 이 화면이 열리면서 꺼내 **칸에
 /// 채운다.** 링크는 코드를 대신 전달하는 수단일 뿐이라 코드 흐름·합류 규칙은 그대로다.
 ///
-/// - **자동으로 합류하지 않는다.** 여섯 자가 채워졌어도 서버에 보내지 않고 `함께하기` 를 기다린다 —
-///   직접 칠 때는 여섯 자째가 곧 확인이지만, 링크는 누른 순간 합류하면 의도하지 않은 이룸이에 붙을 수 있다.
+/// - **자동으로 합류하지 않는다.** 여섯 자가 채워졌어도 서버에 보내지 않고 `시작하기` 를 기다린다 —
+///   링크는 누른 순간 합류하면 의도하지 않은 이룸이에 붙을 수 있다.
 /// - 실패하면 확인 상태를 거두고 **직접 친 코드와 같은 갈래**로 안내한다 (입력을 비우고 새 코드를 받으라고 한다).
 ///   인터넷이 없을 때만 코드를 남겨 같은 버튼으로 다시 보낸다.
 /// - 링크는 맞는데 코드를 못 쓰는 모양이면 빈 입력으로 열고 `E-INV-LINK` 로 안내한다.
@@ -133,7 +133,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
   /// 링크로 받은 코드를 맡겨 두는 곳.
   late final InviteInbox _inbox = ref.read(inviteInboxProvider);
 
-  /// 링크로 받은 코드가 채워져 **확인을 기다린다.** 이때는 자동 제출도 키보드도 없다.
+  /// 링크로 받은 코드가 채워져 **확인을 기다린다.** 이때는 키보드가 없고 칸을 눌러도 고쳐지지 않는다.
   bool _fromLink = false;
 
   /// 동의 화면으로 떠나는 중. 맡겨 둔 링크 코드를 이 화면이 다시 꺼내지 않게 한다.
@@ -141,6 +141,9 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
 
   /// 프로그램이 칸을 채우는 중. 사용자가 친 것으로 보고 자동 제출하지 않게 한다.
   bool _filling = false;
+
+  /// 머리(뒤로가기 아래 ~ 여섯 칸 위) 영역 높이. 뒤로가기 하단 119 + 220 = 여섯 칸 상단 339 (Figma 1532:7114).
+  static const _headerRegionHeight = 220.0;
 
   _InviteError? _error;
 
@@ -152,9 +155,6 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
 
   /// 시도 한도(429)에 걸렸다. 더 입력해도 서버가 막고 시도만 늘어난다.
   bool _locked = false;
-
-  /// 인터넷이 없어 못 보냈다. 입력을 남기고 다시 시도 버튼을 보인다.
-  bool _offline = false;
 
   String get _typed => LinkCode.normalize(_controller.text);
 
@@ -199,7 +199,6 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     _filling = true;
     _controller.text = code ?? '';
     _filling = false;
-    _offline = false;
     if (code != null) {
       _fromLink = true;
       _error = null;
@@ -213,12 +212,14 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
 
   void _onChanged() {
     if (_filling || _sending || _locked) return;
+    // 여섯 자가 차면 `시작하기` 가 켜진다. 보내는 것은 버튼이다 (연결 암호와 같다).
     setState(() {});
-    // 링크로 받은 코드는 확인 버튼을 기다린다 — 직접 고치려면 `다른 코드 넣기` 를 먼저 누른다.
-    if (_fromLink) return;
-    // 여섯 자를 채우면 바로 보낸다 — 확인 버튼을 따로 누르게 하지 않는다 (연결 암호와 같다).
-    if (_typed.length == LinkCode.length) _submit();
+    // 다 채우면 키보드를 내린다 - 시작하기가 키보드에 가려져 누를 곳을 찾지 못한다 (실기기).
+    if (_typed.length == LinkCode.length) _focusNode.unfocus();
   }
+
+  /// 여섯 자가 찼고 보내거나 잠긴 중이 아닌가
+  bool get _canSubmit => _typed.length == LinkCode.length && !_sending && !_locked;
 
   Future<void> _submit() async {
     if (_sending || _locked) return;
@@ -229,10 +230,7 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
       return;
     }
 
-    setState(() {
-      _sending = true;
-      _offline = false;
-    });
+    setState(() => _sending = true);
     _focusNode.unfocus();
     final attempt = await ref
         .read(inviteEnterControllerProvider)
@@ -257,7 +255,6 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     setState(() {
       _fromLink = false;
       _error = null;
-      _offline = false;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _openKeyboard();
@@ -292,9 +289,8 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
       case InviteProblem.invalidInput:
         _fail(_InviteError(_InviteFault.invalidInput, failure));
       case InviteProblem.offline:
-        // 입력을 남긴다 — 인터넷이 돌아오면 다시 칠 필요 없이 `다시 시도`만 누르면 된다.
+        // 입력을 남긴다 — 인터넷이 돌아오면 다시 칠 필요 없이 `시작하기`만 다시 누르면 된다.
         setState(() {
-          _offline = true;
           _error = _InviteError(_InviteFault.offline, failure);
         });
       case InviteProblem.consentRequired:
@@ -357,11 +353,12 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
     return ElumScaffold(
       onBack: context.popOrHome,
       isBackEnabled: !_sending,
-      // 링크로 받은 코드는 사람이 눌러야 보낸다. **임시 시안** — 하단 버튼·보조 링크는 다른 입력
-      // 화면(이름 입력 `다음` · `초대 코드가 있어요`)의 배치를 그대로 빌렸다.
-      bottomButton: _fromLink
-          ? ElumButton(label: context.l10n.inviteEnterJoinButton, onPressed: _sending ? null : _submit)
-          : null,
+      // 여섯 칸을 다 채워야 켜진다. 보내는 중에는 다시 누를 수 없다 (첫 요청이 합류시키면 두 번째는 409).
+      bottomButton: ElumButton(
+        label: context.l10n.inviteEnterStartButton,
+        onPressed: _canSubmit ? _submit : null,
+      ),
+      // 링크로 받은 코드를 거두고 직접 입력으로 바꾸는 길
       belowButton: _fromLink
           ? Center(
               child: AppPressable(
@@ -383,64 +380,26 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ElumHeader(
-              title: context.l10n.inviteEnterTitle,
-              // 안내 문구는 어절 단위로 줄바꿈한다. 에러 코드가 붙는 오류 문구는 코드를 그대로 두려고 제외한다.
-              description:
-                  _error?.message(context.l10n) ??
-                  keepWords(
-                    _fromLink
-                        ? context.l10n.inviteEnterDescriptionFromLink
-                        : context.l10n.inviteEnterDescriptionManual,
-                    locale: context.appLocale,
-                  ),
-            ),
-            SizedBox(height: space.lg),
-            // 어디서 받는지 적어 준다. 받는 사람은 처음 보는 화면이다. 링크로 받았다면 이미 안다.
-            if (!_fromLink)
-              Container(
-                padding: EdgeInsets.all(space.lg),
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: BorderRadius.circular(space.cardRadius.r),
-                  border: Border.all(color: colors.border),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      keepWords(
-                        context.l10n.inviteEnterWhereFrom,
-                        locale: context.appLocale,
-                      ),
-                      style: context.typo.body.paragraph.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                    SizedBox(height: space.sm),
-                    Text(
-                      keepWords(
-                        context.l10n.inviteEnterWherePath,
-                        locale: context.appLocale,
-                      ),
-                      style: context.typo.subtitle.copyWith(
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                    SizedBox(height: space.sm),
-                    Text(
-                      keepWords(
-                        context.l10n.inviteEnterWhereHow,
-                        locale: context.appLocale,
-                      ),
-                      style: context.typo.body.paragraph.copyWith(
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
+            // 머리 영역 높이를 못 박아 여섯 칸이 시안 자리(y=339)에 온다 (연결 암호 넣기와 같다)
+            SizedBox(
+              height: _headerRegionHeight.h,
+              child: ElumHeader(
+                title: context.l10n.inviteEnterTitle,
+                // 오류 문구는 에러 코드를 그대로 두려고 어절 줄바꿈을 거치지 않는다
+                description:
+                    _error?.message(context.l10n) ??
+                    (_fromLink
+                        ? keepWords(
+                            context.l10n.inviteEnterDescriptionFromLink,
+                            locale: context.appLocale,
+                          )
+                        : context.l10n.inviteEnterDescriptionManual),
+                // 코드를 찾는 길(`설정 → 함께하는 사람`)에 밑줄 (Figma 1532:7114)
+                underlinedInDescription: _error == null && !_fromLink
+                    ? context.l10n.inviteEnterDescriptionPath
+                    : null,
               ),
-            if (!_fromLink) SizedBox(height: space.xl),
+            ),
             CodeEntryField(
               controller: _controller,
               focusNode: _focusNode,
@@ -453,32 +412,13 @@ class _InviteEnterScreenState extends ConsumerState<InviteEnterScreen> {
               failCount: _failCount,
               hasError: _error != null,
               sending: _sending,
-              // 연결 암호 넣기와 같은 칸 모양 — 기존 칸은 글자가 칸에 비해 작았다.
               figma: true,
               enabled: !_locked && !_fromLink,
+              // 키보드 완료도 시작하기와 같다 - 여섯 글자일 때만
+              onSubmitted: () {
+                if (_canSubmit) _submit();
+              },
             ),
-            // 링크로 받은 코드는 `함께하기` 가 다시 시도다 — 같은 일을 하는 버튼을 둘 두지 않는다
-            if (_offline && !_sending && !_fromLink) ...[
-              SizedBox(height: space.lg),
-              Center(
-                child: AppPressable(
-                  onTap: _submit,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: space.md.w,
-                      vertical: space.sm.h,
-                    ),
-                    child: Text(
-                      context.l10n.commonRetry,
-                      style: context.typo.linkLater.copyWith(
-                        color: colors.linkLaterLabel,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),

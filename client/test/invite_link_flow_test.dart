@@ -95,7 +95,7 @@ void main() {
     router.go(Routes.onboardingName);
     await settle(tester);
 
-    expect(find.text('함께하기'), findsOneWidget);
+    expect(find.text('시작하기'), findsOneWidget);
     for (final ch in 'A7K3M9'.split('')) {
       expect(find.text(ch), findsOneWidget);
     }
@@ -113,14 +113,14 @@ void main() {
     await pumpApp(tester);
 
     expect(inbox.hasPending, isTrue);
-    expect(find.text('함께하기'), findsNothing);
+    expect(find.text('시작하기'), findsNothing);
 
     // 로그인을 마쳤다
     session = true;
     router.go(Routes.onboardingName);
     await settle(tester);
 
-    expect(find.text('함께하기'), findsOneWidget);
+    expect(find.text('시작하기'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

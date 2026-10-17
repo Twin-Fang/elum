@@ -5,8 +5,7 @@
 ## 릴리스 노트
 
 * **개선**
-  * 영어 휴대폰에서도 일과를 만들 수 있도록 준비했어요
-  * 영어 일과를 한국어 목소리로 읽던 문제를 막았어요
+  * 일과가 적을 때는 홈 화면에 광고가 보이지 않아요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 

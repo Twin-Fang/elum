@@ -123,6 +123,8 @@ jobs:
       # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
       - name: 빌드 프로파일 적용 (release)
         id: build_profile
+        env:
+          CLIENT_ADMOB_ENV: ${{ secrets.CLIENT_ADMOB_ENV }}
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" release .env
 
       - name: Set up Flutter
@@ -283,6 +285,8 @@ jobs:
       # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
       - name: 빌드 프로파일 적용 (release)
         id: build_profile
+        env:
+          CLIENT_ADMOB_ENV: ${{ secrets.CLIENT_ADMOB_ENV }}
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" release .env
       # Release Keystore 설정
       - name: Setup Release Keystore

@@ -252,7 +252,9 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
               ),
             ),
             // 하단 배너. 로드 전·실패 시 높이 0이라 스크롤 영역이 원래 크기 그대로다.
-            const AdBannerSlot(placement: AdPlacement.bannerHome),
+            // 일과가 적으면 자리도 두지 않는다 (shouldShowHomeAdsProvider)
+            if (ref.watch(shouldShowHomeAdsProvider))
+              const AdBannerSlot(placement: AdPlacement.bannerHome),
           ],
         ),
       ),

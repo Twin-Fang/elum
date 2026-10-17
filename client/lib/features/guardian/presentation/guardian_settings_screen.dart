@@ -13,6 +13,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/haptics/child_haptics.dart';
+import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_switch_tile.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../auth/application/auth_session_controller.dart';
@@ -45,6 +46,9 @@ class _GuardianSettingsScreenState
   /// 진행 중인 동작을 타일에 구분해 보여주는 key.
   static const _logoutKey = 'logout';
   static const _withdrawKey = 'withdraw';
+
+  /// 뒤로가기 상자 하단(107) > 스크롤 고정 영역 끝(115)
+  static const _fixedAreaExtraHeight = 8.0;
 
   Future<void> _logout() async {
     // 시안(`팝업` 1045:5194 `로그아웃/회원탈퇴`)은 **가운데 팝업**이다.
@@ -161,81 +165,108 @@ class _GuardianSettingsScreenState
       // 동작으로 이어질 수 있다. 시안에서 간격이 정해지기 전까지 뺀다.
       // 크레딧 카드가 들어와 글꼴을 키우면 한 화면을 넘는다 — 스크롤로 끝까지
       // 볼 수 있게 한다.
-      child: SingleChildScrollView(child: _list(space)),
+      // 시안의 스크롤 고정 영역은 높이 115 (`스크롤 fix` 1532:7502). 뒤로가기 상자 하단(107)에서 8 더 내려와서
+      // 스크롤하는 줄이 제목 줄 아래로 비치지 않는다.
+      child: Padding(
+        padding: EdgeInsets.only(top: _fixedAreaExtraHeight.h),
+        child: SingleChildScrollView(child: _list(space)),
+      ),
     );
   }
 
+  /// 설정 메인 시안(`1532:7501`): 크레딧 카드 + 흰 묶음 카드 넷, 묶음 사이 16.
+  /// 줄 순서는 시안의 보이는 위치(y)를 따른다 — 연결 / 앱 사용 / 약관 및 정보 / 계정.
   Widget _list(AppSpacing space) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 시안 첫 줄은 y=147 이다. 뒤로가기 상자 하단(119)에서 28 떨어져 있다.
-        SizedBox(height: 40.h),
-        // 이번 주 AI 생성. 제목 아래·첫 줄 위 — 꺼져 있으면 자리도 없다.
+        // 첫 카드는 y=131 이다. 스크롤 영역이 y=115 에서 시작하므로 16 떨어져 있다.
+        SizedBox(height: 16.h),
+        // 이번 주 AI 생성. 제목 아래·첫 묶음 위 — 꺼져 있으면 자리도 없다.
         const AiCreditCard(),
-        _LinkTile(busy: busy),
-        // 다중 보호자. 시안(`1022:4467`)에 없는 줄이라 **임시 시안**이다 — 이룸이 휴대폰
-        // 연결 바로 아래에 둔다. 둘 다 "누구와 누구를 잇는가"를 다루는 줄이다.
-        _ProfileSwitchTile(busy: busy),
-        SettingsTile(
-          label: context.l10n.guardianSettingsPeople,
-          onTap: busy ? null : () => context.push(Routes.guardianPeople),
+        SettingsGroup(
+          hasDividers: false,
+          children: [
+            _LinkTile(busy: busy),
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsPeople,
+              onTap: busy ? null : () => context.push(Routes.guardianPeople),
+            ),
+            // 시안에 없는 줄이다: 이룸이가 둘 이상일 때만 보이며, 기능을 잃지 않게 임시로 연결 묶음 끝에 둔다.
+            _ProfileSwitchTile(busy: busy),
+          ],
         ),
-        // 계정을 정리하는 항목(로그아웃·탈퇴) 위에 둔다. 읽을거리와 되돌릴 수 없는
-        // 동작이 섞이면 실수로 누르기 쉽다.
-        SettingsTile(
-          label: context.l10n.guardianSettingsDrafts,
-          onTap: busy ? null : () => context.push(Routes.guardianDrafts),
+        _groupGap,
+        SettingsGroup(
+          hasDividers: false,
+          children: [
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsDrafts,
+              onTap: busy ? null : () => context.push(Routes.guardianDrafts),
+            ),
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsPinChange,
+              onTap: busy ? null : () => context.push(Routes.guardianPinChange),
+            ),
+            _ImageStyleTile(busy: busy),
+            const _HapticTile(),
+          ],
         ),
-        // 시안(`1022:4467`) 자리 그대로 — 임시저장과 약관 사이.
-        SettingsTile(
-          label: context.l10n.guardianSettingsPinChange,
-          onTap: busy ? null : () => context.push(Routes.guardianPinChange),
+        _groupGap,
+        SettingsGroup(
+          hasDividers: false,
+          children: [
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsTerms,
+              onTap: busy
+                  ? null
+                  : () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ConsentDocumentListScreen(),
+                      ),
+                    ),
+            ),
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsFeedback,
+              onTap: busy ? null : () => context.push(Routes.guardianFeedback),
+            ),
+            // 앱 버전은 목록의 한 줄로 둔다: 제보를 받았을 때 어느 빌드인지 알아야 재현할 수 있다.
+            const AppInfoTile(isInCard: true),
+          ],
         ),
-        // 카드 그림을 어떤 방식으로 만들지. 시안(`1022:4467`)에 없는 줄이라
-        // **임시 시안**이다 — 시안 줄 순서(연결·임시저장·비밀암호·약관)를 깨지 않게
-        // 비밀암호와 약관 사이에 둔다. 오른쪽에 지금 값과 화살표를 함께 보여준다.
-        _ImageStyleTile(busy: busy),
-        // 이룸이가 카드를 체크할 때 진동으로 알려줄지. 시안에 없는 줄이라 **임시 시안**이다.
-        // 이룸이 휴대폰 설정에도 같은 줄이 있고, 한 휴대폰에 값 하나를 함께 본다.
-        const _HapticTile(),
-        SettingsTile(
-          label: context.l10n.guardianSettingsTerms,
-          onTap: busy
-              ? null
-              : () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const ConsentDocumentListScreen(),
-                  ),
-                ),
-        ),
-        // 임시 시안(이슈 #604 디자인 요청 중) — 약관과 앱 버전 사이에 둔다.
-        SettingsTile(
-          label: context.l10n.guardianSettingsFeedback,
-          onTap: busy ? null : () => context.push(Routes.guardianFeedback),
-        ),
-        // 앱 버전은 목록의 한 줄로 둔다 — 떨어져 있으면 "앱 정보"로 찾기 어렵다.
-        // 제보를 받았을 때 어느 빌드인지 알아야 재현할 수 있다.
-        const AppInfoTile(),
-        // `문의하기`는 일부러 뺐다. 시안(`1022:4467`)에는 약관과 로그아웃 사이에 있지만
-        // 애플이 요구하는 것은 스토어 페이지의 지원 주소이고 앱 안 문의하기는 필수가 아니다.
-        // 시안 대조에서 '빠졌다'고 되살리지 않는다. 주소(`AppConfig.supportEmail`)와
-        // 글자 토큰(`contactSheetTitle`·`contactSheetEmail`)은 남겨 두었다.
-        SettingsTile(
-          label: context.l10n.guardianSettingsLogout,
-          loading: isBusy(_logoutKey),
-          onTap: busy ? null : _logout,
-        ),
-        SettingsTile(
-          label: context.l10n.guardianSettingsWithdraw,
-          loading: isBusy(_withdrawKey),
-          onTap: busy ? null : _deleteAccount,
-          destructive: true,
+        _groupGap,
+        // `문의하기`는 일부러 뺐다: 애플이 요구하는 것은 스토어 페이지의 지원 주소이고 앱 안 문의하기는 필수가 아니다.
+        // 시안 대조에서 '빠졌다'고 되살리지 않는다 (`AppConfig.supportEmail` 은 남겨 두었다).
+        SettingsGroup(
+          hasDividers: false,
+          children: [
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsLogout,
+              loading: isBusy(_logoutKey),
+              onTap: busy ? null : _logout,
+            ),
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsWithdraw,
+              loading: isBusy(_withdrawKey),
+              onTap: busy ? null : _deleteAccount,
+              destructive: true,
+            ),
+          ],
         ),
         SizedBox(height: space.lg),
       ],
     );
   }
+
+  /// 묶음 사이 (Figma `1579:8112` gap 16)
+  Widget get _groupGap => SizedBox(height: 16.h);
 }
 
 /// `이룸이 휴대폰` 줄 (명세 §8-4).
@@ -258,6 +289,7 @@ class _LinkTile extends ConsumerWidget {
         );
 
     return SettingsTile(
+      isInCard: true,
       label: connected
           ? context.l10n.guardianSettingsLinkConnected
           : context.l10n.guardianSettingsLinkConnect,
@@ -295,6 +327,7 @@ class _ProfileSwitchTile extends ConsumerWidget {
     if (count < 2) return const SizedBox.shrink();
     final active = ref.watch(activeProfileProvider);
     return SettingsTile(
+      isInCard: true,
       label: context.l10n.guardianSettingsProfileSwitch,
       // 지금 보는 이룸이 이름을 값으로 보여 준다
       valueText: active?.displayName,
@@ -314,6 +347,7 @@ class _ImageStyleTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final style = ref.watch(onboardingProvider.select((p) => p.imageStyle));
     return SettingsTile(
+      isInCard: true,
       label: context.l10n.guardianSettingsImageStyle,
       valueText: style.label,
       showChevronWithValue: true,
@@ -329,6 +363,7 @@ class _HapticTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SettingsSwitchTile(
+      isInCard: true,
       label: context.l10n.guardianSettingsHaptic,
       value: ref.watch(childHapticOnProvider),
       onChanged: (on) => ref.read(childHapticOnProvider.notifier).set(on),

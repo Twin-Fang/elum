@@ -169,6 +169,8 @@ jobs:
       # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
       - name: 빌드 프로파일 적용 (release)
         id: build_profile
+        env:
+          CLIENT_ADMOB_ENV: ${{ secrets.CLIENT_ADMOB_ENV }}
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" release ${{ env.ENV_FILE_PATH }}
 
       - name: Create Secrets.xcconfig file
@@ -361,6 +363,8 @@ jobs:
       # 그게 조용히 배포로 새어 나간다. 실제로 ELUM_ENABLE_NETWORK_LOG가 그랬다.
       - name: 빌드 프로파일 적용 (release)
         id: build_profile
+        env:
+          CLIENT_ADMOB_ENV: ${{ secrets.CLIENT_ADMOB_ENV }}
         run: bash "${{ github.workspace }}/client/tool/apply_build_profile.sh" release ${{ env.ENV_FILE_PATH }}
       # ⚠️ projectops 템플릿 업데이트 시 이 스텝이 사라지지 않도록 주의한다 (#156 참고).
       # iOS는 URL 스킴·네이버 SDK 설정을 Info.plist에서 읽는데 그 값이 빌드 타임에
