@@ -11,6 +11,14 @@ import 'package:flutter_tts/flutter_tts.dart';
 /// 글을 못 읽는 아동에게는 음성이 유일한 정보 경로다. 기기 음성이 없는
 /// 환경에서도 소리가 나야 하므로 **폴백이 실제로 도는지** 고정한다.
 void main() {
+  // 영어 음성이 없는 휴대폰에서 소리 안내창(E-TTS)이 뜨면 정상 동작이 고장처럼 보인다 (#672)
+  test('서버 음성이 읽는 언어만 실패 안내창을 띄운다', () {
+    expect(shouldShowSpeechFailure('ko'), isTrue);
+    for (final language in ['en', 'ja', 'zh', 'es']) {
+      expect(shouldShowSpeechFailure(language), isFalse, reason: language);
+    }
+  });
+
   // AudioPlayer가 생성 시 플랫폼 채널을 건드린다
   TestWidgetsFlutterBinding.ensureInitialized();
 

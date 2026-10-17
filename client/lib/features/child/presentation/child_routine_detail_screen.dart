@@ -144,7 +144,8 @@ class _ChildRoutineDetailScreenState
     if (!mounted) return;
     setState(() => _speakingId = null);
 
-    if (!ok) _showFailure();
+    // 음성이 없는 언어는 안내창 없이 글만 보여준다
+    if (!ok && shouldShowSpeechFailure(_routine.language)) _showFailure();
   }
 
   /// 소리를 낼 수 없을 때. 식별자는 보호자가 제보할 때 필요하다.
