@@ -5,7 +5,7 @@
 ## 릴리스 노트
 
 * **개선**
-  * 이용약관과 개인정보처리방침의 광고 안내를 자세히 정리했어요
+  * 일과가 적을 때는 홈 화면에 광고가 보이지 않아요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
