@@ -107,14 +107,14 @@ curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines
 | 라우팅 | **go_router** | 온보딩 단계별 딥링크·뒤로가기 제어가 명확 |
 | 모델 | **Freezed** | 불변 모델 + `copyWith` |
 | HTTP | **dio** | 인터셉터로 실패 시 fallback 체인 처리 |
-| 로컬 저장 | **shared_preferences** | 온보딩 결과(호칭·목표·캐릭터·PIN) 저장 |
-| TTS | **flutter_tts** (예정) | 아동 모드 음성 안내 |
+| 로컬 저장 | **shared_preferences** | 온보딩 결과(호칭·목표·캐릭터) 저장 |
+| 보안 저장 | **flutter_secure_storage** | 보호자 PIN(`core/storage/guardian_lock_store.dart`)·로그인 토큰(`core/storage/token_store.dart`) |
+| TTS | **flutter_tts** | 아동 모드 음성 안내 |
 
-> **제외한 패키지**: `riverpod_generator`, `json_serializable`(analyzer 충돌),
-> `flutter_secure_storage`(build hook이 build_runner를 깨뜨림).
+> **제외한 패키지**: `riverpod_generator`, `json_serializable`(analyzer 충돌).
 > 이유와 대응은 [트러블슈팅](./docs/troubleshooting.md#build_runner-aot-컴파일-실패) 참조.
 >
-> ⚠️ PIN이 현재 **평문 저장**된다. 발표 전 재검토 대상.
+> PIN은 평문이 아니라 salt + verifier(PBKDF2-HMAC-SHA256)로 secure storage에 저장한다 (`guardian_lock_store.dart`).
 
 > 해커톤 24시간 기준. 새 패키지를 추가할 땐 **데모 성립 조건**([../docs/07-mvp-scope.md](../docs/07-mvp-scope.md))에 필요한지 먼저 따진다.
 
@@ -184,16 +184,11 @@ curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines
 | PATCH | `.../steps/{stepId}/complete` \| `/cancel` | 아동 수행 체크 (단건, 순서 검사 있음) |
 | PUT | `/api/routines/{id}/progress` | **완료 집합 통째 반영** (오프라인 퍼스트 동기화, 멱등, 순서 검사 없음 — 이슈 #140) |
 
-**`RoutineResponse`의 DLP 관련 필드 — 발표 핵심**
-
-- `rawInputText` — 마스킹 **전** 원문
-- `sanitizedInputText` — 마스킹 **후** (실제 LLM에 전달된 값)
-
-이 두 필드로 "전송 전/후 비교" 화면을 만든다. 서버가 이미 검증용으로 노출해주고 있으므로
-클라이언트에서 마스킹을 흉내내지 않는다.
+**`RoutineResponse`의 `rawInputText`·`sanitizedInputText`** — AI DLP는 쓰지 않는다(루트 CLAUDE.md 서비스 원칙 2, #377).
+전/후 비교 화면을 만들지 않고, 화면에서 "가린다"고 말하지 않는다.
 
 > ⚠️ `rawInputText`는 **원문이므로 로그에 남기지 않는다.** 서버도 `@LogMonitoring(logResult=false)`로
-> 막아뒀다. 클라이언트 로깅 인터셉터도 body를 찍지 않는다.
+> 막아뒀다. 클라이언트 로깅 인터셉터는 원문 필드(`rawInputText`·`sanitizedInputText`·`answers`·`rewardText`)를 `****`로 가린다.
 
 > 서버 enum이나 필드명이 바뀌면 **클라이언트 도메인 모델을 먼저 맞추고** 테스트를 돌린다.
 > `test/onboarding_profile_test.dart`에 서버 계약 검증 테스트가 있다.
@@ -654,6 +649,6 @@ flutter run
 
 ## 미확정 사항
 
-- 서버 base URL (로컬 LLM 연결 정보 확정 전까지 mock repository 사용)
+- 서버 base URL은 확정 — `AppConfig.apiBaseUrl` (`.env`의 `ELUM_API_BASE_URL`, 기본값 `https://api.elum.chuseok22.com`)
 - 아동 모드 → 보호자 모드 전환 시 PIN 검증 로직 (온보딩에서 PIN 저장까지만 구현)
 - 캐릭터 에셋(여우/고양이 외 추가분) 확보 여부

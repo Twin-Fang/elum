@@ -20,6 +20,7 @@ import 'widgets/card_review_reorder_list.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/theme/card_layout.dart';
 
 /// Figma `보호자_카드확인`(1173:5541 기본 · 1197:5798 순서 변경).
 ///
@@ -40,7 +41,7 @@ class CardReviewScreen extends ConsumerStatefulWidget {
   /// 카드 폭과 카드 사이 (시안 `262:5124` 카드 333 @ x=30 · 옆 카드 x=373).
   ///
   /// 한 장 폭을 카드+사이로 잘라야 가운데 카드가 x=30 에 서고 옆 카드가 20 보인다.
-  static const _cardWidth = 333.0;
+  static const _cardWidth = CardLayout.cardWidth;
   static const _cardGap = 10.0;
 
   /// 옆 카드가 걸쳐 보이는 정도. 1.0이면 한 장만 꽉 찬다.

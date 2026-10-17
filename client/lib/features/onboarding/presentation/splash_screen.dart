@@ -14,6 +14,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../auth/application/auth_session_controller.dart';
 import '../application/splash_controller.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/logger/app_logger.dart';
 
 /// Figma `스플래시` (1022:4415) — 서비스 진입 화면.
 ///
@@ -91,9 +92,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         return;
       }
       router.go(route);
-    } catch (e) {
+    } catch (e, stack) {
       // 라우터가 없는 환경(테스트 등)에서는 화면을 그대로 둔다
-      debugPrint('시작 화면 이동 실패: $e');
+      AppLogger.error('[splash] start navigation failed', e, stack);
     }
   }
 

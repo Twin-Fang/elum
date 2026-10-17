@@ -9,6 +9,7 @@ import '../data/progress_store.dart';
 import '../data/step_progress_repository.dart';
 import '../domain/routine_progress_record.dart';
 import '../../guardian/application/routine_providers.dart';
+import '../../../core/logger/app_logger.dart';
 
 /// 아이 모드에서 보는 일과 진행 상태 (오프라인 퍼스트).
 ///
@@ -171,7 +172,7 @@ class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
         _refreshLists();
       case SyncOutcome.rejected:
         // 서버가 이 상태를 거부했다(승인 전·삭제 등). 기기 기록을 버리고 서버 값으로 돌아간다.
-        debugPrint('[sync] 서버 거부 — 로컬 기록 폐기: $routineId');
+        AppLogger.info('[sync] rejected : local progress discarded $routineId');
         final progress = Map<String, RoutineProgressRecord>.from(state.progress)
           ..remove(routineId);
         state = state.copyWith(progress: progress);
@@ -181,7 +182,7 @@ class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
       case SyncOutcome.gone:
         // 일과가 사라졌다 (E11). 기록을 버리고 사라졌다고 표시한다 — 화면이 홈으로 돌아가
         // 목록을 다시 받는다. 오류로 알리지 않는다: 이룸이가 잘못한 것이 아니다.
-        debugPrint('[sync] 일과가 사라짐 — 로컬 기록 폐기: $routineId');
+        AppLogger.info('[sync] routine gone : local progress discarded $routineId');
         final progress = Map<String, RoutineProgressRecord>.from(state.progress)
           ..remove(routineId);
         state = state.copyWith(
@@ -193,7 +194,7 @@ class ChildRoutineNotifier extends Notifier<ChildRoutineState> {
         _refreshLists();
       case SyncOutcome.unreachable:
         // 그대로 둔다. 다음 트리거(복귀·온라인 전환·조작)에서 다시 보낸다.
-        debugPrint('[sync] 서버에 닿지 못함 — 대기열 유지: $routineId');
+        AppLogger.info('[sync] unreachable : queue kept $routineId');
     }
   }
 

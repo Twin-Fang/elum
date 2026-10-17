@@ -11,6 +11,7 @@ import '../../../core/widgets/elum_dialog.dart';
 import '../application/ad_reward_flow.dart';
 import '../data/credit_repository.dart';
 import '../domain/credit_summary.dart';
+import '../../../core/widgets/elum_spinner.dart';
 
 /// 홈 `새로운 일과 만들기`가 막혔을 때의 안내 + 광고 보고 더 만들기.
 ///
@@ -82,7 +83,7 @@ Future<void> _watchAd(
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.5),
+      barrierColor: context.colors.dialogScrim,
       useSafeArea: false,
       builder: (_) => PopScope(canPop: false, child: _WaitDialog(stage: stage)),
     ),
@@ -138,13 +139,10 @@ class _WaitDialog extends StatelessWidget {
           builder: (context, value, _) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                width: 32.w,
-                height: 32.w,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: colors.brandOrange,
-                ),
+              ElumSpinner(
+                size: 32.w,
+                strokeWidth: 3,
+                color: colors.brandOrange,
               ),
               SizedBox(height: 20.h),
               Text(

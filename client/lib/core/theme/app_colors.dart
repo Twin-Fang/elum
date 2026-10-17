@@ -153,6 +153,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.topBarActionText,
     required this.sheetFieldLabelText,
     required this.sheetScrim,
+    required this.dialogScrim,
     required this.rewardLineLead,
     required this.editChipPressedBg,
     required this.loginKakaoBg,
@@ -595,6 +596,9 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 카드 수정·추가 시트 뒤 어두운 막 (rgba(0,0,0,0.5), 시안 1197:5923 Scrim).
   final Color sheetScrim;
 
+  /// 팝업 뒤 어두운 막 (검정 50%): 공통 팝업·크레딧 대기·공지 팝업.
+  final Color dialogScrim;
+
   /// 카드확인 보상 줄의 `완료 시` 부분 (#74757D, 시안 1173:5544). 뒤의 보상 이름은 textPrimary 라 회색/검정으로 갈린다.
   final Color rewardLineLead;
 
@@ -921,6 +925,7 @@ class AppColors extends ThemeExtension<AppColors> {
     topBarActionText: Color(0xFF74757D),
     sheetFieldLabelText: Color(0xFF74757D),
     sheetScrim: Color(0x80000000),
+    dialogScrim: Color.from(alpha: 0.5, red: 0, green: 0, blue: 0),
     rewardLineLead: Color(0xFF74757D),
     editChipPressedBg: Color(0xFFD7D3D1),
     loginKakaoBg: Color(0xFFFEE500),
@@ -1112,6 +1117,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? topBarActionText,
     Color? sheetFieldLabelText,
     Color? sheetScrim,
+    Color? dialogScrim,
     Color? rewardLineLead,
     Color? editChipPressedBg,
     Color? loginLastUsedBg,
@@ -1294,6 +1300,7 @@ class AppColors extends ThemeExtension<AppColors> {
       topBarActionText: topBarActionText ?? this.topBarActionText,
       sheetFieldLabelText: sheetFieldLabelText ?? this.sheetFieldLabelText,
       sheetScrim: sheetScrim ?? this.sheetScrim,
+      dialogScrim: dialogScrim ?? this.dialogScrim,
       rewardLineLead: rewardLineLead ?? this.rewardLineLead,
       editChipPressedBg: editChipPressedBg ?? this.editChipPressedBg,
       loginLastUsedBg: loginLastUsedBg ?? this.loginLastUsedBg,
@@ -1637,6 +1644,7 @@ class AppColors extends ThemeExtension<AppColors> {
       topBarActionText: Color.lerp(topBarActionText, other.topBarActionText, t)!,
       sheetFieldLabelText: Color.lerp(sheetFieldLabelText, other.sheetFieldLabelText, t)!,
       sheetScrim: Color.lerp(sheetScrim, other.sheetScrim, t)!,
+      dialogScrim: Color.lerp(dialogScrim, other.dialogScrim, t)!,
       rewardLineLead: Color.lerp(rewardLineLead, other.rewardLineLead, t)!,
       editChipPressedBg: Color.lerp(editChipPressedBg, other.editChipPressedBg, t)!,
       loginLastUsedBg: Color.lerp(loginLastUsedBg, other.loginLastUsedBg, t)!,

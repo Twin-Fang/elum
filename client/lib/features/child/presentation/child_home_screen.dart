@@ -19,7 +19,7 @@ import '../../../core/l10n/content_locale.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../shared/models/routine.dart';
 import '../../guardian/application/routine_notifier.dart';
-import '../../guardian/presentation/widgets/today_routine_section.dart'
+import '../../guardian/application/home_routines.dart'
     show routineProgress;
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../profile/application/profile_display_name.dart';
@@ -120,9 +120,8 @@ class ChildHomeScreen extends ConsumerWidget {
                         child: Text(
                           // Figma 문구 (1197:6810 · 356:5197).
                           //
-                          // 조사를 '가'로 박아 두었더니 받침 있는 이름에서 **민준가**가
-                          // 나왔다. 이름은 보호자가 직접 적으므로 받침을 보고 고른다.
-                          // 시안이 `할 일들이에요. 힘내봐요!`로 바뀌었다 — 해요체다.
+                          // 조사는 이름 받침을 보고 고른다 (보호자가 직접 적은 이름, 예: 민준이가).
+                          // 시안 문구는 해요체 (`할 일들이에요. 힘내봐요!`).
                           context.l10n.childHomeGreeting(
                             childName,
                             batchimOf(childName),

@@ -193,6 +193,7 @@ color: destructive ? colors.textSecondary : colors.textPrimary,
 | `editChipLabel` | `#74757D` | 도구 버튼 라벨. **옛 값은 검정이었다** — 옛 칩이 없어졌다 |
 | `rewardLineLead` | `#74757D` | 보상 줄의 `완료 시` (뒤 보상 이름은 `textPrimary`) |
 | `sheetScrim` | `#000000` 50% | 수정·추가 시트 뒤 막 |
+| `dialogScrim` | `#000000` 50% | 공통 팝업·크레딧 대기·공지 팝업 뒤 막 |
 | `sheetFieldLabelText` | `#74757D` | 시트의 `제목`·`설명` 라벨 |
 | `topBarActionText` | `#74757D` | 상단 `임시저장` |
 

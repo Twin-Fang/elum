@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/dio_client.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../../app/dio_provider.dart';
+import '../../../core/logger/app_logger.dart';
 
 /// 서버가 완료 집합을 받아들였는가.
 ///
@@ -51,19 +51,19 @@ class StepProgressRepository {
       final status = e.response?.statusCode;
       // 404 는 일과가 없어졌다는 뜻이다 — 다른 거부와 다르게 다룬다 (E11).
       if (status == 404) {
-        debugPrint('[sync] 일과가 사라짐(404): $routineId');
+        AppLogger.info('[sync] routine gone 404 : $routineId');
         return SyncOutcome.gone;
       }
       // 4xx 중 서버가 "이 상태는 안 된다"고 답한 것만 거부로 본다.
       // 401은 인터셉터가 토큰을 재발급하므로 여기까지 오면 일시 장애로 취급한다.
       if (status != null && const {400, 403, 409}.contains(status)) {
-        debugPrint('[sync] 서버가 진행 상태를 거부함 ($status): $routineId');
+        AppLogger.info('[sync] rejected $status : $routineId');
         return SyncOutcome.rejected;
       }
-      debugPrint('[sync] 서버에 닿지 못함, 다음에 재시도: $routineId ($e)');
+      AppLogger.info('[sync] unreachable, retry later : $routineId (${e.type.name} ${e.message})');
       return SyncOutcome.unreachable;
-    } catch (e) {
-      debugPrint('[sync] 예상 못 한 실패, 다음에 재시도: $routineId ($e)');
+    } catch (e, stack) {
+      AppLogger.error('[sync] unexpected failure, retry later', e, stack, {'routineId': routineId});
       return SyncOutcome.unreachable;
     }
   }

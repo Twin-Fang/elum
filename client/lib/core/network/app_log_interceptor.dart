@@ -31,6 +31,11 @@ class AppLogInterceptor extends Interceptor {
     'authorization',
     'secret',
     'code',
+    // 보호자 원문 (docs 원칙 5번): 일과 입력·서버 응답 사본·질문 답·보상 문구
+    'rawinputtext',
+    'sanitizedinputtext',
+    'answers',
+    'rewardtext',
   };
 
   /// 기록에 남길 요청 헤더. 이 밖의 헤더(Authorization 포함)는 적지 않는다.

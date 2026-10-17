@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_config.dart';
@@ -30,7 +29,8 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   RoutineFlowState build() => const RoutineFlowState();
 
   void setRawInput(String value) {
-    AppLogger.notifierCall('RoutineFlowNotifier', 'setRawInput', {'input': value});
+    // 입력마다 불려 원문 대신 글자 수만 (docs 원칙 5번)
+    AppLogger.notifierCall('RoutineFlowNotifier', 'setRawInput', {'inputLength': value.length});
     state = state.copyWith(rawInput: value);
   }
 
@@ -227,14 +227,14 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     final running = _generating;
     if (running != null) {
       _blockedCalls++;
-      debugPrint(
-        '[cost] 카드 생성 중복 호출 차단 (누적 $_blockedCalls회) — '
-        '이미 ${state.routine != null ? "생성 완료" : "생성 중"}. 서버 요청 안 보냄',
+      AppLogger.info(
+        '[cost] duplicate card generation blocked (total $_blockedCalls) : '
+        '${state.routine != null ? 'already generated' : 'in progress'}, no server request',
       );
       return running;
     }
 
-    debugPrint('[cost] 카드 생성 시작 → POST /api/routines (AI 호출, 과금 대상)');
+    AppLogger.info('[cost] card generation started : POST /api/routines (AI call, billed)');
     return _generating = _createRoutine();
   }
 
@@ -326,7 +326,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
       // keepAlive 라 한 번 받은 것을 계속 준다.
       ref.refreshRoutines();
     } catch (e) {
-      // 로컬 폴백을 제거했으므로 실패를 삼키지 않고 에러 상태로 드러낸다.
+      // 실패를 삼키지 않고 에러 상태로 드러낸다 (로컬 폴백 없음).
       // 화면은 무한 로딩 대신 에러 코드 + 재시도 버튼을 보여준다(docs 예외처리 규칙).
       AppLogger.error('RoutineFlowNotifier', e);
       _generating = null;
@@ -540,8 +540,8 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   }) async {
     AppLogger.notifierCall('RoutineFlowNotifier', 'updateStep', {
       'stepId': stepId,
-      'title': title,
-      'description': description,
+      'titleLength': title.length,
+      'descriptionLength': description.length,
     });
 
     final routine = state.routine;

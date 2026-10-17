@@ -139,7 +139,7 @@ class _ActionCardViewState extends State<ActionCardView> {
     final target = CardPalette.at(widget.index);
     final space = context.space;
     final childLayout = widget.layout == ActionCardLayout.childDetail;
-    // 이룸이 상세 시안(`1197:6775`)이 카드확인과 같은 카드로 바뀌었다.
+    // 이룸이 상세 시안(`1197:6775`)은 카드확인과 같은 카드다.
     // 여백·그림칸·간격이 같고 **그림자만 이룸이 상세에 있다.**
     final inset = _reviewInset.w;
     final illustrationAspect = ActionCardView.reviewIllustrationAspect;
@@ -394,7 +394,6 @@ class _ActionCardViewState extends State<ActionCardView> {
 /// 자리를 비우면 카드 비율이 무너진다.
 /// 스피커 아이콘. 읽는 중에는 주황 원 위로 파동이 퍼져 "지금 소리가 난다"가 한눈에 보인다.
 ///
-/// 예전에는 아이콘을 흐리게만 해 소리가 나는 중인지 꺼진 것인지 구분되지 않았다.
 /// 동작 줄이기를 켰다면 파동은 빼고 색 원만 남긴다.
 class _SpeakerGlyph extends StatefulWidget {
   const _SpeakerGlyph({required this.size, required this.speaking});

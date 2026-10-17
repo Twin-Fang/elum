@@ -10,6 +10,7 @@ import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../child/data/speech_service.dart';
 import 'action_card_view.dart';
+import '../../../../core/theme/card_layout.dart';
 
 /// 일과 시트에서 카드를 눌러 **크게 보는** 화면 (Figma `보호자_홈_오늘일과_행동단계`
 /// 1274:8864).
@@ -70,7 +71,7 @@ class StepCardViewer extends ConsumerStatefulWidget {
 
   /// 시안 실측 — 카드 333×410 @ (x30, y231) · 옆 카드 x=373 · `닫기` 40×40 @ (x328, y183).
   /// 카드확인 화면과 같은 값이다.
-  static const cardWidth = 333.0;
+  static const cardWidth = CardLayout.cardWidth;
   static const cardHeight = 410.0;
   static const cardGap = 10.0;
   static const cardTop = 231.0;

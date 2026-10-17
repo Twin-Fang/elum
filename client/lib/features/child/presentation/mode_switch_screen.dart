@@ -16,6 +16,7 @@ import '../../onboarding/presentation/widgets/pin_keypad.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../application/mode_switch_controller.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/logger/app_logger.dart';
 
 /// Figma `보호자_아이화면_전환`(309:2837).
 ///
@@ -67,8 +68,8 @@ class _ModeSwitchScreenState extends ConsumerState<ModeSwitchScreen> {
   Future<({bool ok, bool hasPin})> _readPin() async {
     try {
       return (ok: true, hasPin: await ref.read(modeSwitchControllerProvider).hasPin());
-    } catch (e) {
-      debugPrint('[mode-switch] 암호 읽기 실패: $e');
+    } catch (e, stack) {
+      AppLogger.error('[mode switch] pin read failed', e, stack);
       if (!mounted) return (ok: false, hasPin: false);
       await showFailure(
         context,

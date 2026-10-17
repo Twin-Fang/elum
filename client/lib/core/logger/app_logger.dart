@@ -18,6 +18,7 @@ abstract final class AppLogger {
   static const _tagLifecycle = '[생명주기]';
   static const _tagData = '[데이터]';
   static const _tagSpeech = '[음성]';
+  static const _tagInfo = '[안내]';
 
   /// 타임스탐프 포함 로그 출력 (HH:mm:ss.SSS 형식)
   /// [toBuffer] 가 false 면 콘솔에만 찍는다(의견 첨부 기록의 소음 제거용).
@@ -64,6 +65,9 @@ abstract final class AppLogger {
 
   /// 카드 읽어주기 엔진 선택·전환.
   static void speech(String message) => _log(_tagSpeech, message);
+
+  /// 처리된 흐름 한 줄 (중복 호출 차단·동기화 결과 등, 예외 아님).
+  static void info(String message) => _log(_tagInfo, message);
 
   /// 데이터를 보기 좋게 포맷팅
   static String _formatData(Map<String, dynamic> data) {

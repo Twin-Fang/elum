@@ -15,6 +15,7 @@ import 'card_image.dart';
 import 'card_photo_permission_screen.dart';
 import 'card_photo_source_sheet.dart';
 import 'default_card_art.dart';
+import '../../../../core/widgets/elum_spinner.dart';
 
 /// 카드 수정 시트 안의 그림 칸 — 그림 위 `사진 바꾸기` 칩과 그 뒤의 모든 상태.
 ///
@@ -356,13 +357,10 @@ class _UploadingOverlay extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: 36.w,
-              height: 36.w,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                color: colors.textPrimary,
-              ),
+            ElumSpinner(
+              size: 36.w,
+              strokeWidth: 3,
+              color: colors.textPrimary,
             ),
             SizedBox(height: 12.h),
             Text(

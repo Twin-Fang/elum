@@ -100,8 +100,8 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
       if (previous == null || next <= previous) return;
       final storage = _storage;
       if (storage != null) {
-        storage.clearSelectedProfileId().catchError((Object e) {
-          debugPrint('[profile] 세션 종료 뒤 선택 정리 실패: $e');
+        storage.clearSelectedProfileId().catchError((Object e, StackTrace stack) {
+          AppLogger.error('[profile] selected profile clear after session end failed', e, stack);
         });
       }
       state = const ProfileSession();
@@ -197,8 +197,8 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
     // 가리키도록 명시해 둔다.
     try {
       await _storage?.setSelectedProfileId(profile.id);
-    } catch (e) {
-      debugPrint('[profile] 새 이룸이 선택 저장 실패, 서버에는 만들었다: $e');
+    } catch (e, stack) {
+      AppLogger.error('[profile] new profile selection save failed (created on server)', e, stack);
     }
     if (ref.mounted) state = ProfileSession(selectedId: profile.id);
     // memberProvider 는 여기서 무효화하지 않는다 — 다시 받은 빈 이룸이로 [_reconcile] 이 돌면
@@ -231,8 +231,8 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
       await storage?.setOnboardingCompleted(true);
       await storage?.setSelectedRole(AppRole.guardian.storageValue);
       await storage?.setSelectedProfileId(join.profile.id);
-    } catch (e) {
-      debugPrint('[profile] 합류 저장 실패, 서버에는 합류했다: $e');
+    } catch (e, stack) {
+      AppLogger.error('[profile] join save failed (joined on server)', e, stack);
     }
     state = ProfileSession(selectedId: join.profile.id);
     await ref.read(onboardingProvider.notifier).applyServerProfile(join.profile);
@@ -283,8 +283,8 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
   void lost(String profileId) {
     if (state.selectedId != profileId) return;
     state = const ProfileSession();
-    _storage?.clearSelectedProfileId().catchError((Object e) {
-      debugPrint('[profile] 잃은 이룸이 선택 정리 실패: $e');
+    _storage?.clearSelectedProfileId().catchError((Object e, StackTrace stack) {
+      AppLogger.error('[profile] lost profile selection clear failed', e, stack);
     });
     _refreshScoped();
   }
@@ -304,8 +304,8 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
     if (storage != null) {
       try {
         await storage.clearChildProfile();
-      } catch (e) {
-        debugPrint('[profile] 이룸이 없음 정리 실패: $e');
+      } catch (e, stack) {
+        AppLogger.error('[profile] no-profile cleanup failed', e, stack);
       }
     }
     state = const ProfileSession(noProfile: true);
@@ -323,8 +323,8 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
     });
     try {
       await _storage?.clearCachedTodayRoutines();
-    } catch (e) {
-      debugPrint('[profile] 오늘 일과 캐시 정리 실패: $e');
+    } catch (e, stack) {
+      AppLogger.error('[profile] today routine cache clear failed', e, stack);
     }
     ref.read(routineFlowProvider.notifier).reset();
     // 이룸이 화면의 체크 기록·서버 반영 대기열(childRoutineProvider)은 비우지 않는다 — 아직 서버에
