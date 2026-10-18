@@ -20,6 +20,7 @@ import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigSer
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +47,8 @@ public class GeminiTextClient implements TextGenerationClient {
   private final AiCallLogService aiCallLogService;
   private final PictogramCatalog pictogramCatalog;
 
-  // Spring Boot 4.1은 Jackson 3 기반이라 Jackson 2 ObjectMapper 빈이 자동 구성되지 않으므로
-  // RoutineAiPipeline과 동일하게 직접 생성해서 쓴다.
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  // 공통 JSON 매퍼 (DefaultJsonMapper)
+  private final ObjectMapper objectMapper = DefaultJsonMapper.SHARED;
 
   @Override
   public TextProvider provider() {

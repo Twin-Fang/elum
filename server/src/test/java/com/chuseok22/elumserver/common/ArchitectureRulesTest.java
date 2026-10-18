@@ -32,7 +32,8 @@ class ArchitectureRulesTest {
   private static final Pattern DOMAIN_IMPORT = Pattern.compile(
     "^import " + Pattern.quote(BASE) + "([a-z]+)\\.([\\w.]+);", Pattern.MULTILINE);
   private static final String CROSS_DOMAIN_REPOSITORY_ALLOWLIST = "/architecture/cross-domain-repository-allowlist.txt";
-  private static final String NEW_OBJECT_MAPPER_ALLOWLIST = "/architecture/new-object-mapper-allowlist.txt";
+  /// new ObjectMapper( 를 만들어도 되는 유일한 곳 (나머지는 DefaultJsonMapper.SHARED 를 쓴다)
+  private static final String OBJECT_MAPPER_FACTORY_FILE = "common/infrastructure/json/DefaultJsonMapper.java";
 
   /// 원문 로그 검사 대상 도메인 4개: 보호자 입력·AI 지시문·AI 응답·이름·프로필을 다루는 곳
   private static final List<String> RAW_TEXT_LOG_DOMAINS = List.of("ai", "routine", "admin", "member");
@@ -125,23 +126,17 @@ class ArchitectureRulesTest {
   }
 
   @Test
-  @DisplayName("new ObjectMapper( 직접 생성 위치는 동결 목록보다 늘지 않는다")
-  void newObjectMapperUseDoesNotGrow() throws IOException {
+  @DisplayName("new ObjectMapper( 는 DefaultJsonMapper 에서만 쓴다")
+  void newObjectMapperOnlyInDefaultJsonMapper() throws IOException {
     Set<String> actual = new TreeSet<>();
     for (Path file : javaFiles(SOURCE_ROOT)) {
       if (NEW_OBJECT_MAPPER.matcher(Files.readString(file)).find()) {
         actual.add(SOURCE_ROOT.relativize(file).toString());
       }
     }
-    Set<String> allowed = allowlist(NEW_OBJECT_MAPPER_ALLOWLIST);
+    actual.remove(OBJECT_MAPPER_FACTORY_FILE);
 
-    Set<String> added = new TreeSet<>(actual);
-    added.removeAll(allowed);
-    assertThat(added).as("ObjectMapper 를 새로 만들지 말고 이미 있는 매퍼를 쓴다").isEmpty();
-
-    Set<String> stale = new TreeSet<>(allowed);
-    stale.removeAll(actual);
-    assertThat(stale).as("더는 없는 사용이다. 동결 목록에서 이 줄을 지운다").isEmpty();
+    assertThat(actual).as("ObjectMapper 를 새로 만들지 말고 DefaultJsonMapper.SHARED 를 쓴다").isEmpty();
   }
 
   /**

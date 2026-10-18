@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import org.springframework.stereotype.Component;
 
 // 실제 이미지 생성 호출(GeminiImageClient)과 관리자 미리보기(AdminPromptService)가 항상
@@ -13,9 +14,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class GeminiRoutineImagePromptBuilder {
 
-  // Spring Boot 4.1은 Jackson 3 기반이라 Jackson 2 ObjectMapper 빈이 자동 구성되지 않으므로
-  // GeminiTextClient와 동일하게 직접 생성해서 쓴다.
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  // 공통 JSON 매퍼 (DefaultJsonMapper)
+  private final ObjectMapper objectMapper = DefaultJsonMapper.SHARED;
 
   /**
    * @param referenceImageProvided 참조 이미지를 함께 보내는가. <b>사실대로 적는다</b> —

@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.adreward.application.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -39,8 +40,8 @@ public class GoogleSsvKeyProvider implements SsvKeyProvider {
   /// 캐시가 없거나 만료돼 받으러 갔다가 실패한 뒤 다시 시도하기까지의 간격. 그 사이 요청은 네트워크를 타지 않는다.
   private static final Duration FAILURE_RETRY_INTERVAL = Duration.ofSeconds(30);
 
-  /// JSON 파싱 전용. 빈으로 등록하지 않는다(JwkKeyResolver 와 같은 이유 — 앱에 ObjectMapper 빈이 없다).
-  private static final ObjectMapper MAPPER = new ObjectMapper();
+  // 공통 JSON 매퍼 (DefaultJsonMapper)
+  private static final ObjectMapper MAPPER = DefaultJsonMapper.SHARED;
 
   private final Supplier<String> fetcher;
   private final Clock clock;

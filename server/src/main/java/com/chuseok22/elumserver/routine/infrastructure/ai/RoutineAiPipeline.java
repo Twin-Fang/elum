@@ -21,6 +21,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.ImageStyle;
 import com.chuseok22.elumserver.member.infrastructure.entity.SupportGoal;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,9 +44,8 @@ public class RoutineAiPipeline {
 
   private static final int MAX_STEPS = 10;
 
-  // Spring Boot 4.1은 Jackson 3 기반이라 Jackson 2 ObjectMapper 빈이 자동 구성되지 않으므로
-  // SensitiveInfoGuardService와 동일하게 직접 생성해서 쓴다.
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  // 공통 JSON 매퍼 (DefaultJsonMapper)
+  private final ObjectMapper objectMapper = DefaultJsonMapper.SHARED;
 
   private final TextClientRouter textClientRouter;
   private final ImageClientRouter imageClientRouter;

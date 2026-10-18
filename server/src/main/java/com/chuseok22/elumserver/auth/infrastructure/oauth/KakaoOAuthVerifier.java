@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.infrastructure.properties.OAuthProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -30,10 +31,8 @@ public class KakaoOAuthVerifier implements OAuthVerifier {
   private static final String TOKEN_INFO_URL = "https://kapi.kakao.com/v1/user/access_token_info";
   private static final String USER_ME_URL = "https://kapi.kakao.com/v2/user/me";
 
-  /// JSON 파싱 전용. **빈으로 등록하지 않는다** — 이 앱에는 ObjectMapper 빈이 없고,
-  /// 새로 등록하면 Spring MVC의 JSON 처리 설정까지 바뀐다. ObjectMapper는 thread-safe라
-  /// 정적 인스턴스로 공유해도 안전하다.
-  private static final ObjectMapper MAPPER = new ObjectMapper();
+  // 공통 JSON 매퍼 (DefaultJsonMapper)
+  private static final ObjectMapper MAPPER = DefaultJsonMapper.SHARED;
 
   private final RestClient oauthRestClient;
   private final OAuthProperties oAuthProperties;

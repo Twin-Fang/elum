@@ -10,6 +10,7 @@ import com.chuseok22.elumserver.notice.infrastructure.entity.AppNotice;
 import com.chuseok22.elumserver.notice.infrastructure.storage.NoticeImageStorage.ImageContent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -47,7 +48,7 @@ public class AdminNoticeController {
   private static final String LIST = "redirect:/admin/notices";
   private static final String EDIT_VIEW = "admin/notice-edit";
   private static final DateTimeFormatter ISO_MINUTE = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-  private static final ObjectMapper JSON = new ObjectMapper();
+  private static final ObjectMapper JSON = DefaultJsonMapper.SHARED;
 
   private final NoticeService noticeService;
 
