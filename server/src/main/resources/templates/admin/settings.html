@@ -5,38 +5,64 @@
 <body>
 
 <main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
-    <div>
-      <h1 class="text-2xl font-bold">시스템 설정</h1>
-      <p class="text-base-content/60">AI 모델과 생성 파라미터를 재배포 없이 변경합니다. 변경 후 최대 30초 안에 모든 서버에 반영됩니다.</p>
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <div>
+        <h1 class="text-2xl font-bold">시스템 설정</h1>
+        <p class="text-base-content/60">재배포 없이 바꾸는 값이에요. 바꾸면 최대 30초 안에 모든 서버에 반영돼요.</p>
+      </div>
+      <a th:href="@{/admin/settings/history}" class="btn btn-outline btn-sm">변경 이력 전체 보기</a>
     </div>
 
-    <div th:if="${message}" class="alert alert-success" th:text="${message}">저장되었습니다.</div>
+    <div th:if="${message}" class="alert alert-success" th:text="${message}">저장했어요.</div>
     <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}">오류</div>
 
-    <!-- 설정이 서른 개가 넘어 평면 목록에서는 찾기가 고통스럽다 (이슈 #248).
-         검색과 그룹 탭은 서버를 거치지 않고 화면에서 거른다 — 왕복할 이유가 없다. -->
-    <div class="sticky top-12 z-10 space-y-2 bg-base-100 py-2 lg:top-14">
-      <div class="flex flex-wrap items-center gap-2">
-        <input type="search" data-settings-search placeholder="설정 이름·설명으로 찾기"
-               class="input input-bordered input-sm w-full sm:w-72"/>
-        <label class="label cursor-pointer gap-2">
-          <input type="checkbox" data-changed-only class="checkbox checkbox-sm"/>
-          <span class="label-text">바꾼 것만</span>
-        </label>
-        <span class="ml-auto text-sm text-base-content/50" data-settings-count></span>
+    <!-- 지금 적용 중 요약 + Free/Pro 비교 (저장하면 이 구역만 서버가 다시 그린 것으로 갈아 끼움) -->
+    <section th:replace="~{admin/fragments/settings-parts :: summary(${overview})}"></section>
+
+    <!-- 전체 설정 표: 검색·칩·정렬은 값이 한 화면에 다 있어 서버를 거치지 않고 화면에서 처리 -->
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body space-y-3">
+        <h2 class="card-title text-lg">전체 설정</h2>
+        <div class="flex flex-wrap items-center gap-2">
+          <input type="search" data-settings-search placeholder="이름·키·값·설명·그룹·변경자로 찾기"
+                 class="input input-bordered input-sm w-full sm:w-80"/>
+          <span class="ml-auto text-sm text-base-content/50" data-settings-count></span>
+        </div>
+        <div class="flex flex-wrap gap-1" data-chip-bar>
+          <button type="button" data-chip="all" class="btn btn-xs btn-primary">전체</button>
+          <button type="button" data-chip="different" class="btn btn-xs btn-ghost">기본값과 다름</button>
+          <button type="button" data-chip="today" class="btn btn-xs btn-ghost">오늘 변경</button>
+          <button type="button" th:each="group : ${groupLabelByName}" th:attr="data-chip='group:' + ${group.key}"
+                  th:text="${group.value}" class="btn btn-xs btn-ghost">그룹</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="table table-sm" data-settings-table>
+            <thead>
+            <tr>
+              <th><button type="button" data-sort-by="name" class="link link-hover">설정 <span data-sort-mark></span></button></th>
+              <th><button type="button" data-sort-by="current" class="link link-hover">현재 값 <span data-sort-mark></span></button></th>
+              <th><button type="button" data-sort-by="default" class="link link-hover">기본값 <span data-sort-mark></span></button></th>
+              <th><button type="button" data-sort-by="changed" class="link link-hover">마지막 변경 <span data-sort-mark>▼</span></button></th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- th:replace 가 th:each 보다 먼저 실행돼 한 태그에 두면 한 번만 그려짐 -->
+            <th:block th:each="row : ${rows}">
+              <tr th:replace="~{admin/fragments/settings-parts :: row(${row})}"></tr>
+            </th:block>
+            <tr data-empty-row class="hidden">
+              <td colspan="4" class="py-8 text-center text-base-content/50">조건에 맞는 설정이 없어요</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <!-- 변경 사유(선택, #407). 저장·복원·전환 때 함께 보내 아래 변경 이력에 남는다. -->
-      <input type="text" data-settings-reason maxlength="500" placeholder="변경 사유 (선택) — 이력에 남아요"
-             class="input input-bordered input-sm w-full sm:w-96"/>
-      <div class="flex flex-wrap gap-1">
-        <button type="button" data-group-tab="" class="btn btn-xs btn-primary">전체</button>
-        <button type="button" th:each="entry : ${groups}" th:data-group-tab="${entry.key.name()}"
-                th:text="${entry.key.label}" class="btn btn-xs btn-ghost">그룹</button>
-      </div>
-      <!-- 저장 결과를 여기 띄운다. 페이지를 다시 그리지 않으므로 스크롤이 그대로다. -->
-      <div data-settings-toast class="alert hidden py-2 text-sm"></div>
     </div>
 
+    <!-- 이미지·텍스트 제공자 전환: 단가·키 유무를 보고 한 번에 바꾸는 별도 흐름 -->
+    <details class="collapse collapse-arrow bg-base-100 shadow-md">
+      <summary class="collapse-title text-lg font-semibold">AI 제공자 전환 (이미지·텍스트)</summary>
+      <div class="collapse-content space-y-6">
     <!-- 이미지 제공자 상태 — 단가·키 유무·캐릭터 일관성을 한눈에 본다 (이슈 #246). -->
     <div class="card bg-base-100 shadow-md">
       <div class="card-body space-y-3">
@@ -121,110 +147,39 @@
       </div>
     </div>
 
-    <div th:each="entry : ${groups}" class="card bg-base-100 shadow-md"
-         th:data-group-card="${entry.key.name()}">
-      <div class="card-body space-y-4">
-        <h2 class="card-title text-lg" th:text="${entry.key.label}">그룹</h2>
-        <div th:each="config : ${entry.value}" class="border-t border-base-200 pt-4 first:border-t-0 first:pt-0"
-             data-config-row
-             th:data-changed="${config.changed()}"
-             th:data-search="${#strings.toLowerCase(config.label() + ' ' + config.key() + ' ' + config.description())}">
-          <div class="flex items-start justify-between gap-4 flex-wrap">
-            <div class="min-w-64">
-              <div class="font-medium">
-                <span th:text="${config.label()}">설정명</span>
-                <span th:if="${config.changed() and config.valueType().name() != 'SECRET'}"
-                      class="badge badge-warning badge-sm ml-1">변경됨</span>
-                <span th:if="${config.changed() and config.valueType().name() == 'SECRET'}"
-                      class="badge badge-success badge-sm ml-1">저장됨</span>
-              </div>
-              <div class="text-sm text-base-content/60" th:text="${config.description()}">설명</div>
-              <div class="text-xs text-base-content/40 mt-1"
-                   th:unless="${config.valueType().name() == 'SECRET'}">
-                기본값: <span th:text="${config.defaultValue() != '' ? config.defaultValue() : '(없음)'}">기본값</span>
-              </div>
-              <div class="text-xs text-base-content/40 mt-1"
-                   th:if="${config.valueType().name() == 'SECRET'}">
-                암호화해 저장합니다. 저장한 값은 다시 볼 수 없습니다
-              </div>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-              <form th:action="@{/admin/settings/{key}(key=${config.key()})}" method="post"
-                    data-async-save class="flex flex-wrap items-center gap-2">
-                <!-- 값 타입에 맞는 위젯을 고른다. 비밀값은 절대 화면에 그대로 내보내지 않는다. -->
-                <th:block th:switch="${config.valueType().name()}">
-                  <select th:case="'SELECT'" name="value" class="select select-bordered select-sm w-full sm:w-40">
-                    <option th:each="allowed : ${config.allowedValues()}" th:value="${allowed}" th:text="${allowed}"
-                            th:selected="${allowed == config.value()}">값</option>
-                  </select>
-                  <select th:case="'BOOLEAN'" name="value" class="select select-bordered select-sm w-full sm:w-40">
-                    <option value="true" th:selected="${config.value() == 'true'}">켜짐</option>
-                    <option value="false" th:selected="${config.value() != 'true'}">꺼짐</option>
-                  </select>
-                  <!-- 비어 있으면 "그대로 두기"다. 지우려면 옆의 기본값 버튼을 쓴다. -->
-                  <input th:case="'SECRET'" type="password" name="value" value="" autocomplete="off"
-                         th:placeholder="${config.changed()} ? '저장됨 — 바꾸려면 새 값 입력' : '아직 없음 — 값을 입력하세요'"
-                         class="input input-bordered input-sm w-full sm:w-64"/>
-                  <!-- 숫자는 숫자 칸으로. 범위가 있는 키는 브라우저가 먼저 막는다(서버도 다시 막는다). -->
-                  <input th:case="'INTEGER'" type="number" name="value" step="1"
-                         th:value="${config.value()}" th:attr="min=${config.minValue()},max=${config.maxValue()}"
-                         class="input input-bordered input-sm w-full sm:w-64"/>
-                  <input th:case="*" type="text" name="value"
-                         th:value="${config.value()}" class="input input-bordered input-sm w-full sm:w-64"/>
-                </th:block>
-                <button type="submit" class="btn btn-primary btn-sm">저장</button>
-              </form>
-              <!-- 비밀값은 "기본값으로 복원"이 곧 "지우기"라 버튼 글과 확인 문구가 다르다. -->
-              <form th:if="${config.valueType().name() == 'SECRET'}"
-                    th:action="@{/admin/settings/{key}/reset(key=${config.key()})}" method="post"
-                    onsubmit="return confirm('저장된 값을 지울까요? 이 키를 쓰는 기능이 꺼집니다.');">
-                <button type="submit" class="btn btn-ghost btn-sm">지우기</button>
-              </form>
-              <form th:unless="${config.valueType().name() == 'SECRET'}"
-                    th:action="@{/admin/settings/{key}/reset(key=${config.key()})}" method="post"
-                    onsubmit="return confirm('기본값으로 복원할까요?');">
-                <button type="submit" class="btn btn-ghost btn-sm">기본값</button>
-              </form>
-            </div>
-          </div>
-        </div>
       </div>
-    </div>
-    <!-- 설정 변경 이력 (#407) — 누가 언제 무엇을 무엇으로 바꿨는지. 비밀값은 값 대신 •••• 로만 남는다. -->
-    <div class="card bg-base-100 shadow-md">
-      <div class="card-body space-y-3">
-        <h2 class="card-title text-lg">최근 변경 이력</h2>
-        <p class="text-sm text-base-content/60">최근 20건입니다. 크레딧 정책을 켜고 끈 기록도 여기에 남습니다.</p>
-        <p th:if="${#lists.isEmpty(history)}" class="text-sm text-base-content/50">아직 바꾼 기록이 없습니다.</p>
-        <div th:unless="${#lists.isEmpty(history)}" class="overflow-x-auto">
-          <table class="table table-sm">
-            <thead>
-            <tr>
-              <th>시각</th>
-              <th>설정</th>
-              <th>이전 → 새 값</th>
-              <th>변경자</th>
-              <th>사유</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="h : ${history}">
-              <td class="whitespace-nowrap" th:text="${h.createdAt != null ? #temporals.format(h.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">시각</td>
-              <td class="font-mono text-xs" th:text="${h.configKey}">KEY</td>
-              <td class="break-all">
-                <span th:text="${h.oldValue != null and h.oldValue != '' ? h.oldValue : '(없음)'}">이전</span>
-                →
-                <span class="font-medium" th:text="${h.newValue != null and h.newValue != '' ? h.newValue : '(없음)'}">새 값</span>
-              </td>
-              <td th:text="${h.changedBy}">admin</td>
-              <td class="text-base-content/70" th:text="${h.reason != null ? h.reason : '-'}">사유</td>
-            </tr>
-            </tbody>
-          </table>
+    </details>
+
+    <!-- 수정 패널: 행을 누르면 열림. 위젯·이력은 스크립트가 채움 -->
+    <div data-settings-backdrop class="fixed inset-0 z-30 hidden bg-black/30"></div>
+    <aside data-settings-panel aria-hidden="true"
+           class="fixed inset-y-0 right-0 z-40 hidden w-full max-w-md overflow-y-auto bg-base-100 p-4 shadow-xl">
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <h2 class="text-lg font-bold" data-panel-label></h2>
+          <div class="font-mono text-xs text-base-content/50" data-panel-key></div>
         </div>
+        <button type="button" data-panel-close class="btn btn-ghost btn-sm" aria-label="닫기">닫기</button>
       </div>
-    </div>
+      <p class="mt-2 text-sm text-base-content/70" data-panel-description></p>
+      <form data-panel-form class="mt-4 space-y-3">
+        <div data-panel-widget class="space-y-2"></div>
+        <input type="text" name="reason" maxlength="500" placeholder="변경 사유 (선택) — 이력에 남아요"
+               class="input input-bordered input-sm w-full"/>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="submit" class="btn btn-primary btn-sm">저장</button>
+          <button type="button" data-panel-reset class="btn btn-ghost btn-sm">기본값으로 복원</button>
+          <span class="text-xs text-base-content/50" data-panel-default></span>
+        </div>
+      </form>
+      <h3 class="mt-6 font-semibold">이 설정의 변경 이력</h3>
+      <div class="mt-2 space-y-2 text-sm" data-panel-history></div>
+    </aside>
+    <!-- 저장 결과: 방금 고친 행 근처에 띄움 (스크롤을 움직이지 않음) -->
+    <div data-settings-toast role="status" class="alert fixed z-50 hidden max-w-sm py-2 text-sm shadow-lg"></div>
+
   <script th:src="@{/admin/js/settings.js}"></script>
+  <script th:src="@{/admin/js/settings-panel.js}"></script>
   </main>
 </body>
 </html>
