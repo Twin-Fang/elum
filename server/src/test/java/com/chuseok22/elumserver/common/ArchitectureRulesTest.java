@@ -44,6 +44,8 @@ class ArchitectureRulesTest {
       + "|responseText|responseBody|answer|answers|reply|output|input|body)\\b");
   private static final String LOG_TEXT_LENGTH_CALL = "LogTextLength.of(";
   private static final Pattern NEW_OBJECT_MAPPER = Pattern.compile("new ObjectMapper\\(");
+  /// @LogMonitoring 사용 (괄호 없는 형태 포함: 기본값은 인자·결과 로그가 둘 다 켜짐)
+  private static final Pattern LOG_MONITORING_USE = Pattern.compile("^\\s*@LogMonitoring(?:\\(([^)]*)\\))?\\s*$", Pattern.MULTILINE);
 
   /// common 안에서 도메인을 알아도 되는 곳과 그 이유. 앱 전체를 조립하는 설정만 둔다.
   private static final Map<String, String> COMMON_ALLOWED = Map.of(
@@ -100,6 +102,26 @@ class ArchitectureRulesTest {
       }
     }
     assertThat(violations).as("원문 대신 LogTextLength.of(...) 로 글자 수만 남긴다").isEmpty();
+  }
+
+  @Test
+  @DisplayName("ai·routine·admin 컨트롤러의 @LogMonitoring 은 요청·응답 본문 로그를 켜지 않는다")
+  void controllersDoNotLogRequestAndResponseBodies() throws IOException {
+    List<String> violations = new ArrayList<>();
+    for (String domain : RAW_TEXT_LOG_DOMAINS) {
+      for (Path file : javaFiles(SOURCE_ROOT.resolve(domain))) {
+        Matcher m = LOG_MONITORING_USE.matcher(Files.readString(file));
+        while (m.find()) {
+          String options = m.group(1) == null ? "" : m.group(1).replaceAll("\\s+", "");
+          if (!options.contains("logParameters=false") || !options.contains("logResult=false")) {
+            violations.add(SOURCE_ROOT.relativize(file) + " -> @LogMonitoring(" + options + ")");
+          }
+        }
+      }
+    }
+    assertThat(violations)
+      .as("logParameters = false, logResult = false 로 둔다 (본문에 보호자 원문이 들어 있다)")
+      .isEmpty();
   }
 
   @Test
