@@ -1,17 +1,11 @@
 package com.chuseok22.elumserver.common.infrastructure.config;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.chuseok22.elumserver.ai.application.controller.LocalLlmTestController;
-import com.chuseok22.elumserver.ai.application.service.SensitiveInfoGuardService;
-import com.chuseok22.elumserver.ai.core.SensitiveInfoCheckResult;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtAuthenticationEntryPoint;
 import com.chuseok22.elumserver.common.infrastructure.jwt.JwtProvider;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkAccessValidator;
@@ -22,7 +16,8 @@ import com.chuseok22.elumserver.common.infrastructure.security.NonceStore;
 import com.chuseok22.elumserver.member.application.controller.MemberController;
 import com.chuseok22.elumserver.member.application.service.MemberService;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,33 +27,49 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * API 보안 체인이 해커톤 시험용 경로 {@code /api/internal/**} 를 막는지 본다 (이슈 #382).
+ * API 보안 체인이 내부 경로 {@code /api/internal/**} 를 막는지 본다 (이슈 #382).
  *
  * <p>체인 마지막 규칙이 {@code anyRequest().hasAuthority(GUARDIAN)} 이라, 따로 막지 않으면
- * 가입만 하면 누구나 로컬 LLM 을 돌리고 원문을 로그에 남길 수 있었다(운영 실측 200).
+ * 따로 막지 않으면 가입만 한 누구나 내부 경로를 부를 수 있다(과거 운영 실측 200).
  * 대조군으로 같은 {@code anyRequest} 규칙을 타는 보호자 API 가 여전히 열려 있는지도 본다 —
  * 체인을 통째로 막아 버려도 첫 테스트는 통과하기 때문이다.
  *
  * <p>JWT 를 실제로 만들지 않고 {@code user()} 로 인증을 심는다. 보려는 것은 토큰 해석이 아니라
  * 인가 규칙이고, JwtAuthenticationFilter 는 헤더가 없으면 심어 둔 인증을 건드리지 않는다.
  */
-@WebMvcTest(controllers = {LocalLlmTestController.class, MemberController.class})
-@Import({SecurityConfig.class, JwtAuthenticationEntryPoint.class})
+@WebMvcTest(controllers = {SecurityConfigInternalPathTest.InternalProbeController.class, MemberController.class})
+@Import({SecurityConfig.class, JwtAuthenticationEntryPoint.class, SecurityConfigInternalPathTest.InternalProbeController.class})
 class SecurityConfigInternalPathTest {
 
-  private static final String SENSITIVE_CHECK = "/api/internal/sensitive-check";
+  static final String SENSITIVE_CHECK = "/api/internal/sensitive-check";
   private static final String BODY = "{\"text\":\"hello\"}";
 
   @Autowired
   private MockMvc mockMvc;
 
-  // 컨트롤러가 부르는 서비스 — 막혔다면 한 번도 불리지 않아야 한다
-  @MockitoBean
-  private SensitiveInfoGuardService sensitiveInfoGuardService;
+  // /api/internal/** 규칙만 보려는 시험용 컨트롤러 — 막혔다면 한 번도 불리지 않아야 한다
+  private static final AtomicInteger INTERNAL_PROBE_CALL_COUNT = new AtomicInteger();
+
+  @RestController
+  static class InternalProbeController {
+    @PostMapping(SENSITIVE_CHECK)
+    String probe() {
+      INTERNAL_PROBE_CALL_COUNT.incrementAndGet();
+      return "ok";
+    }
+  }
+
+  @BeforeEach
+  void resetInternalProbeCallCount() {
+    INTERNAL_PROBE_CALL_COUNT.set(0);
+  }
+
   @MockitoBean
   private MemberService memberService;
 
@@ -89,12 +100,8 @@ class SecurityConfigInternalPathTest {
   private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
   @Test
-  @DisplayName("보호자 토큰으로 민감정보 검사 API 를 부르면 403 이고 로컬 LLM 은 돌지 않는다")
+  @DisplayName("보호자 토큰으로 내부 경로를 부르면 403 이고 컨트롤러는 실행되지 않는다")
   void guardian_isForbidden_onInternalPath() throws Exception {
-    // 막히지 않았을 때 200 이 나오도록 정상 응답을 준비해 둔다 — 그래야 실패가 권한 때문임이 드러난다
-    when(sensitiveInfoGuardService.check(any()))
-      .thenReturn(new SensitiveInfoCheckResult(true, false, List.of(), "hello"));
-
     mockMvc.perform(post(SENSITIVE_CHECK)
         .with(user("guardian-1").authorities(
           new SimpleGrantedAuthority("ROLE_MEMBER"),
@@ -103,7 +110,7 @@ class SecurityConfigInternalPathTest {
         .content(BODY))
       .andExpect(status().isForbidden());
 
-    verify(sensitiveInfoGuardService, never()).check(any());
+    assertThat(INTERNAL_PROBE_CALL_COUNT.get()).isZero();
   }
 
   @Test
@@ -114,7 +121,7 @@ class SecurityConfigInternalPathTest {
         .content(BODY))
       .andExpect(status().isUnauthorized());
 
-    verify(sensitiveInfoGuardService, never()).check(any());
+    assertThat(INTERNAL_PROBE_CALL_COUNT.get()).isZero();
   }
 
   @Test

@@ -39,7 +39,7 @@ public class ProfileGuardianController implements ProfileGuardianControllerDocs 
 
   /** 코드 원문은 응답에만 나가고 로그에 남기지 않는다 — {@code logResult} 를 켜지 않는다. */
   @Override
-  @LogMonitoring(logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PostMapping("/api/profiles/{profileId}/invites")
   public ResponseEntity<ProfileInviteResponse> issueInvite(
     Authentication authentication, @PathVariable String profileId
@@ -48,7 +48,7 @@ public class ProfileGuardianController implements ProfileGuardianControllerDocs 
   }
 
   @Override
-  @LogMonitoring(logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/api/profiles/{profileId}/invites/pending")
   public ResponseEntity<ProfileInvitePendingResponse> pendingInvite(
     Authentication authentication, @PathVariable String profileId
@@ -58,7 +58,7 @@ public class ProfileGuardianController implements ProfileGuardianControllerDocs 
 
   /** 입력한 코드는 자격증명이다 — {@code logParameters} 를 켜지 않는다. */
   @Override
-  @LogMonitoring(logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PostMapping("/api/profile-invites/redeem")
   public ResponseEntity<ProfileJoinResponse> redeemInvite(
     Authentication authentication, @RequestBody @Valid RedeemProfileInviteRequest request
@@ -68,7 +68,7 @@ public class ProfileGuardianController implements ProfileGuardianControllerDocs 
   }
 
   @Override
-  @LogMonitoring(logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/api/profiles/{profileId}/guardians")
   public ResponseEntity<GuardianListResponse> listGuardians(
     Authentication authentication, @PathVariable String profileId
@@ -77,7 +77,7 @@ public class ProfileGuardianController implements ProfileGuardianControllerDocs 
   }
 
   @Override
-  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/api/profiles/{profileId}/guardians/me")
   public ResponseEntity<GuardianResponse> updateMyGuardian(
     Authentication authentication, @PathVariable String profileId, @RequestBody @Valid GuardianUpdateRequest request
@@ -86,7 +86,7 @@ public class ProfileGuardianController implements ProfileGuardianControllerDocs 
   }
 
   @Override
-  @LogMonitoring(logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @DeleteMapping("/api/profiles/{profileId}/guardians/me")
   public ResponseEntity<Void> leave(Authentication authentication, @PathVariable String profileId) {
     profileGuardianService.leave(Caller.from(authentication), profileId);

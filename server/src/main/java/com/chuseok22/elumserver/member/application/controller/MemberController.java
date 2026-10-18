@@ -30,7 +30,7 @@ public class MemberController implements MemberControllerDocs {
 
   private final MemberService memberService;
 
-  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/me")
   public ResponseEntity<MemberResponse> getMyInfo(
     Authentication authentication,
@@ -39,13 +39,13 @@ public class MemberController implements MemberControllerDocs {
     return ResponseEntity.ok(memberService.getMyInfo(Caller.from(authentication, profileId)));
   }
 
-  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/consents")
   public ResponseEntity<MemberConsentResponse> getConsents(Authentication authentication) {
     return ResponseEntity.ok(memberService.getConsents(authentication.getName()));
   }
 
-  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PostMapping("/consents")
   public ResponseEntity<MemberConsentResponse> agreeConsents(
     Authentication authentication, @RequestBody @Valid MemberConsentRequest request
@@ -53,13 +53,13 @@ public class MemberController implements MemberControllerDocs {
     return ResponseEntity.ok(memberService.agreeConsents(authentication.getName(), request));
   }
 
-  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PostMapping("/profile")
   public ResponseEntity<MemberResponse> createProfile(Authentication authentication) {
     return ResponseEntity.ok(memberService.createProfile(Caller.from(authentication)));
   }
 
-  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/nickname")
   public ResponseEntity<MemberResponse> updateNickname(
     Authentication authentication,
@@ -70,7 +70,7 @@ public class MemberController implements MemberControllerDocs {
     return ResponseEntity.ok(response);
   }
 
-  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/support-goals")
   public ResponseEntity<MemberResponse> updateSupportGoals(
     Authentication authentication,
@@ -81,7 +81,7 @@ public class MemberController implements MemberControllerDocs {
     return ResponseEntity.ok(response);
   }
 
-  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/character")
   public ResponseEntity<MemberResponse> updateCharacter(
     Authentication authentication,
@@ -92,7 +92,7 @@ public class MemberController implements MemberControllerDocs {
     return ResponseEntity.ok(response);
   }
 
-  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/image-style")
   public ResponseEntity<MemberResponse> updateImageStyle(
     Authentication authentication,
@@ -103,7 +103,7 @@ public class MemberController implements MemberControllerDocs {
     return ResponseEntity.ok(response);
   }
 
-  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @DeleteMapping("/me")
   public ResponseEntity<Void> withdraw(Authentication authentication) {
     memberService.withdraw(authentication.getName());

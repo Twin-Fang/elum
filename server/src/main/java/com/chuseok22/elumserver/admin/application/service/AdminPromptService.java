@@ -186,6 +186,9 @@ public class AdminPromptService {
     try {
       String json = textClientRouter.current().generateRoutineJsonForTest(systemPrompt, sampleInput);
       return objectMapper.readValue(json, RoutineStepDraft.class);
+    } catch (CustomException e) {
+      // 제공자 사용 불가 등 업무 예외는 코드를 그대로 전달
+      throw e;
     } catch (Exception e) {
       log.warn("[관리자 테스트] 텍스트 생성 실패: systemPromptLength={}, sampleInputLength={}",
         LogTextLength.of(systemPrompt), LogTextLength.of(sampleInput), e);
@@ -197,6 +200,9 @@ public class AdminPromptService {
     try {
       String json = textClientRouter.current().generateQuestionJsonForTest(systemPrompt, sampleInput);
       return objectMapper.readValue(json, RoutineQuestionDraft.class);
+    } catch (CustomException e) {
+      // 제공자 사용 불가 등 업무 예외는 코드를 그대로 전달
+      throw e;
     } catch (Exception e) {
       log.warn("[관리자 테스트] 질문 생성 실패: systemPromptLength={}, sampleInputLength={}",
         LogTextLength.of(systemPrompt), LogTextLength.of(sampleInput), e);
@@ -207,6 +213,9 @@ public class AdminPromptService {
   private String testFluxImage(String prefix, String sampleScene, CharacterType characterType) {
     try {
       return toDataUri(fluxImageClient.generateForTest(prefix, sampleScene, characterType));
+    } catch (CustomException e) {
+      // 제공자 사용 불가 등 업무 예외는 코드를 그대로 전달
+      throw e;
     } catch (Exception e) {
       log.warn("[관리자 테스트] FLUX 이미지 생성 실패: prefixLength={}, sampleInputLength={}",
         LogTextLength.of(prefix), LogTextLength.of(sampleScene), e);
@@ -217,6 +226,9 @@ public class AdminPromptService {
   private String testTranslate(String systemPrompt, String sampleInput) {
     try {
       return geminiTextClient.translateImagePromptForTest(systemPrompt, sampleInput);
+    } catch (CustomException e) {
+      // 제공자 사용 불가 등 업무 예외는 코드를 그대로 전달
+      throw e;
     } catch (Exception e) {
       log.warn("[관리자 테스트] 그림 문장 번역 실패: sampleInputLength={}", LogTextLength.of(sampleInput), e);
       throw new CustomException(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED);
@@ -251,6 +263,9 @@ public class AdminPromptService {
         promptTestImageClient().generateImageForTest(prefix, language, sampleInput, characterType);
       String base64 = Base64.getEncoder().encodeToString(image.bytes());
       return "data:image/" + image.extension() + ";base64," + base64;
+    } catch (CustomException e) {
+      // 제공자 사용 불가 등 업무 예외는 코드를 그대로 전달
+      throw e;
     } catch (Exception e) {
       log.warn("[관리자 테스트] 이미지 생성 실패: prefixLength={}, sampleInputLength={}",
         LogTextLength.of(prefix), LogTextLength.of(sampleInput), e);
