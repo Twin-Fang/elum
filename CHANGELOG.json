@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-18T07:21:01Z",
-    "currentVersion": "2.39.0",
+    "lastUpdated": "2026-10-18T08:18:21Z",
+    "currentVersion": "2.39.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 252
+    "totalReleases": 253
   },
   "releases": [
+    {
+      "version": "2.39.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-18",
+      "pr_number": 733,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 시작 화면에서 다음 화면으로 넘어가지 못하면 오류 코드와 다시 시도 버튼이 보여요\n  * 서버 기록에 이름과 프로필 내용이 남지 않아요\n\n* **개선**\n  * 관리자 크레딧 화면의 오류 안내가 오류 코드와 함께 보여요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "시작 화면에서 다음 화면으로 넘어가지 못하면 오류 코드와 다시 시도 버튼이 보여요",
+            "서버 기록에 이름과 프로필 내용이 남지 않아요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "관리자 크레딧 화면의 오류 안내가 오류 코드와 함께 보여요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.39.0",
       "project_type": "flutter",
