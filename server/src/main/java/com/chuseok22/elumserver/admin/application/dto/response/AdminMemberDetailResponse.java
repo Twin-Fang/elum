@@ -30,6 +30,8 @@ public record AdminMemberDetailResponse(
   List<AdminMemberRoutineSummary> routines,
   List<AiCallLog> recentAiCalls,
   AdminSubscriptionSummary subscription,
+  /// 요금제 부여·회수 이력 (최신순)
+  List<AdminSubscriptionHistoryLine> planHistory,
   LocalDateTime withdrawnAt,
   LocalDateTime retentionExpiresAt
 ) {
@@ -38,7 +40,7 @@ public record AdminMemberDetailResponse(
   public static AdminMemberDetailResponse of(
     Member member, Profile profile, List<Routine> routines, MemberAiUsage aiUsage,
     List<AiCallLog> recentAiCalls, AdminSubscriptionSummary subscription,
-    LocalDateTime retentionExpiresAt
+    List<AdminSubscriptionHistoryLine> planHistory, LocalDateTime retentionExpiresAt
   ) {
     List<AdminMemberRoutineSummary> routineSummaries = routines.stream()
       .map(AdminMemberRoutineSummary::from)
@@ -61,9 +63,15 @@ public record AdminMemberDetailResponse(
       routineSummaries,
       recentAiCalls,
       subscription,
+      planHistory,
       member.getWithdrawnAt(),
       retentionExpiresAt
     );
+  }
+
+  /// 가장 최근 요금제 변경. 이력이 없으면 null (화면의 "마지막 변경" 표시용)
+  public AdminSubscriptionHistoryLine lastPlanChange() {
+    return planHistory.isEmpty() ? null : planHistory.get(0);
   }
 
   // 루틴 상태별 개수 — 템플릿에서 바로 쓰는 헬퍼.

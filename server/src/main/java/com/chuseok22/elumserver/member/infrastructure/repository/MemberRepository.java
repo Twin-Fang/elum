@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.member.infrastructure.repository;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -27,57 +28,46 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
   Optional<Member> findByUsername(String username);
 
-  Page<Member> findByStatus(MemberStatus status, Pageable pageable);
-
-  // 이룸이 호칭은 Member가 아니라 Profile에 있고, 둘은 관계 표로 잇는다.
-  // 한 보호자에 이룸이가 여럿이어도 결과가 중복되지 않도록 join 대신 exists를 쓴다.
-  //
-  // 별명이 null인 프로필은 like가 null(불일치)로 평가돼 자연스럽게 제외된다.
+  /**
+   * 관리자 회원 목록: 상태 · 검색어(아이디 또는 이룸이 호칭) · 지금 유효한 요금제로 거른다.
+   *
+   * <p>요금제는 {@code Subscription.effectivePlan} 과 같은 기준(ACTIVE · 만료 전 PRO)이다. 구독을 그 조건으로
+   * left join 하므로 s 가 있으면 지금 PRO, 없으면 FREE(구독 행이 없는 회원 포함)이고 정렬 "s.plan" 도 같은 기준이 된다
+   * (회원당 구독은 최대 1행). 검색어는 호출부가
+   * {@code AdminListQuery.likePattern()} 으로 이스케이프해 넘긴다.
+   * 한 보호자에 이룸이가 여럿이어도 중복되지 않도록 이룸이 호칭은 join 대신 exists 를 쓴다.
+   *
+   * @param hasKeyword  false 면 pattern 을 보지 않는다 (null 파라미터 타입 추론 문제를 피하려고 따로 받음)
+   * @param planFilter  ALL, PRO, FREE
+   */
   @Query("""
     select m from Member m
-    where lower(m.username) like lower(concat('%', :keyword, '%'))
-       or exists (
-         select 1 from ProfileGuardian g
-         where g.member = m
-           and lower(g.profile.nickname) like lower(concat('%', :keyword, '%'))
-       )
+    left join Subscription s on s.member = m
+      and s.plan = com.chuseok22.elumserver.license.core.PlanType.PRO
+      and s.status = com.chuseok22.elumserver.license.core.SubscriptionStatus.ACTIVE
+      and (s.expiresAt is null or s.expiresAt >= :now)
+    where m.status in :statuses
+      and (:hasKeyword = false
+        or lower(m.username) like lower(:pattern) escape '\\'
+        or exists (
+          select 1 from ProfileGuardian g
+          where g.member = m
+            and lower(g.profile.nickname) like lower(:pattern) escape '\\'
+        ))
+      and (:planFilter = 'ALL'
+        or (:planFilter = 'PRO' and s.id is not null)
+        or (:planFilter = 'FREE' and s.id is null))
     """)
-  Page<Member> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
-
-  @Query("""
-    select m from Member m
-    where (lower(m.username) like lower(concat('%', :keyword, '%'))
-       or exists (
-         select 1 from ProfileGuardian g
-         where g.member = m
-           and lower(g.profile.nickname) like lower(concat('%', :keyword, '%'))
-       ))
-      and m.status = :status
-    """)
-  Page<Member> searchByKeywordAndStatus(
-    @Param("keyword") String keyword, @Param("status") MemberStatus status, Pageable pageable
+  Page<Member> searchForAdmin(
+    @Param("hasKeyword") boolean hasKeyword, @Param("pattern") String pattern,
+    @Param("statuses") Collection<MemberStatus> statuses, @Param("planFilter") String planFilter,
+    @Param("now") LocalDateTime now, Pageable pageable
   );
 
   long countByStatus(MemberStatus status);
 
   // --- 탈퇴 계정 ---
   // 탈퇴해도 행이 남으므로, 탈퇴 전처럼 "회원"을 세고 보여주려면 WITHDRAWN 을 빼야 한다.
-
-  Page<Member> findByStatusNot(MemberStatus status, Pageable pageable);
-
-  @Query("""
-    select m from Member m
-    where (lower(m.username) like lower(concat('%', :keyword, '%'))
-       or exists (
-         select 1 from ProfileGuardian g
-         where g.member = m
-           and lower(g.profile.nickname) like lower(concat('%', :keyword, '%'))
-       ))
-      and m.status <> :status
-    """)
-  Page<Member> searchByKeywordAndStatusNot(
-    @Param("keyword") String keyword, @Param("status") MemberStatus status, Pageable pageable
-  );
 
   long countByStatusNot(MemberStatus status);
 

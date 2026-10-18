@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.admin.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -12,13 +13,19 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
 import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
 import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.license.application.service.SubscriptionHistoryService;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
+import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
+import com.chuseok22.elumserver.license.infrastructure.entity.SubscriptionHistory;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -30,17 +37,22 @@ import com.chuseok22.elumserver.member.infrastructure.repository.ProfileReposito
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository.MemberRoutineCount;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 class AdminMemberServiceTest {
@@ -67,6 +79,9 @@ class AdminMemberServiceTest {
   private SubscriptionService subscriptionService;
 
   @Mock
+  private SubscriptionHistoryService subscriptionHistoryService;
+
+  @Mock
   private WithdrawnMemberService withdrawnMemberService;
 
   @InjectMocks
@@ -78,6 +93,34 @@ class AdminMemberServiceTest {
     member.setUsername(username);
     member.setStatus(MemberStatus.ACTIVE);
     return member;
+  }
+
+  private AdminListQuery query(String q, Map<String, String> filters, String sort, String page) {
+    return AdminListQuery.of(q, filters, sort, page, AdminMemberList.DEFINITION);
+  }
+
+  private AdminListQuery defaultQuery() {
+    return query(null, Map.of(), null, null);
+  }
+
+  /// searchForAdmin 에 실제로 넘어간 인자를 잡는다
+  private record SearchCall(boolean hasKeyword, String pattern, Collection<MemberStatus> statuses,
+                            String planFilter, Pageable pageable) {
+  }
+
+  private SearchCall stubSearchAndCapture(Page<Member> result, Runnable search) {
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
+      .thenReturn(result);
+    search.run();
+    ArgumentCaptor<Boolean> hasKeyword = ArgumentCaptor.forClass(Boolean.class);
+    ArgumentCaptor<String> pattern = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<Collection<MemberStatus>> statuses = ArgumentCaptor.forClass(Collection.class);
+    ArgumentCaptor<String> planFilter = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
+    verify(memberRepository).searchForAdmin(hasKeyword.capture(), pattern.capture(), statuses.capture(),
+      planFilter.capture(), any(), pageable.capture());
+    return new SearchCall(hasKeyword.getValue(), pattern.getValue(), statuses.getValue(),
+      planFilter.getValue(), pageable.getValue());
   }
 
   private MemberRoutineCount routineCount(String memberId, long count) {
@@ -122,14 +165,14 @@ class AdminMemberServiceTest {
   @DisplayName("search는 회원별 루틴수와 AI 사용량을 집계 쿼리로 붙여 반환한다")
   void search_attachesAggregates() {
     Member member = member("m1", "parent1");
-    when(memberRepository.findByStatusNot(eq(MemberStatus.WITHDRAWN), any(Pageable.class)))
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(member)));
     when(routineRepository.countByMemberIds(List.of("m1")))
       .thenReturn(List.of(routineCount("m1", 3)));
     when(aiCallLogRepository.aggregateUsageByMemberIds(List.of("m1")))
       .thenReturn(List.of(aiUsage("m1", 12, 34567, 0.12)));
 
-    Page<AdminMemberResponse> result = adminMemberService.search(null, null, 0);
+    Page<AdminMemberResponse> result = adminMemberService.search(defaultQuery());
 
     AdminMemberResponse response = result.getContent().get(0);
     assertThat(response.routineCount()).isEqualTo(3);
@@ -139,26 +182,113 @@ class AdminMemberServiceTest {
   }
 
   @Test
-  @DisplayName("S6 검색어만 있으면 탈퇴 계정을 뺀 keyword 검색 쿼리를 사용한다")
-  void search_withKeyword_usesKeywordQuery() {
-    when(memberRepository.searchByKeywordAndStatusNot(eq("하늘"), eq(MemberStatus.WITHDRAWN), any(Pageable.class)))
-      .thenReturn(new PageImpl<>(List.of()));
+  @DisplayName("S6 검색어가 있으면 이스케이프한 LIKE 패턴으로 찾고 탈퇴 계정은 뺀다")
+  void search_withKeyword_usesEscapedPatternAndExcludesWithdrawn() {
+    SearchCall call = stubSearchAndCapture(new PageImpl<>(List.of()),
+      () -> adminMemberService.search(query("  하_늘%  ", Map.of(), null, null)));
 
-    adminMemberService.search("  하늘  ", null, 0);
-
-    verify(memberRepository).searchByKeywordAndStatusNot(eq("하늘"), eq(MemberStatus.WITHDRAWN), any(Pageable.class));
-    verify(memberRepository, never()).searchByKeyword(any(), any(Pageable.class));
+    assertThat(call.hasKeyword()).isTrue();
+    assertThat(call.pattern()).isEqualTo("%하\\_늘\\%%");
+    assertThat(call.statuses()).containsExactlyInAnyOrder(MemberStatus.ACTIVE, MemberStatus.SUSPENDED);
   }
 
   @Test
-  @DisplayName("상태 필터만 있으면 findByStatus를 사용한다")
-  void search_withStatusOnly_usesStatusQuery() {
-    when(memberRepository.findByStatus(eq(MemberStatus.SUSPENDED), any(Pageable.class)))
-      .thenReturn(new PageImpl<>(List.of()));
+  @DisplayName("검색어가 없으면 키워드 조건을 건너뛰라고 알린다")
+  void search_withoutKeyword_skipsKeywordCondition() {
+    SearchCall call = stubSearchAndCapture(new PageImpl<>(List.of()),
+      () -> adminMemberService.search(defaultQuery()));
 
-    adminMemberService.search("", MemberStatus.SUSPENDED, 0);
+    assertThat(call.hasKeyword()).isFalse();
+  }
 
-    verify(memberRepository).findByStatus(eq(MemberStatus.SUSPENDED), any(Pageable.class));
+  @Test
+  @DisplayName("상태 필터가 있으면 그 상태만 조회한다")
+  void search_withStatusFilter_queriesThatStatusOnly() {
+    SearchCall call = stubSearchAndCapture(new PageImpl<>(List.of()),
+      () -> adminMemberService.search(query(null, Map.of("status", "SUSPENDED"), null, null)));
+
+    assertThat(call.statuses()).containsExactly(MemberStatus.SUSPENDED);
+  }
+
+  @Test
+  @DisplayName("요금제 필터 PRO 는 그대로 넘기고, 허용 밖 값은 필터 없음(ALL)으로 보정한다")
+  void search_planFilter_allowedValuePassedAndUnknownFallsBackToAll() {
+    SearchCall pro = stubSearchAndCapture(new PageImpl<>(List.of()),
+      () -> adminMemberService.search(query(null, Map.of("plan", "PRO"), null, null)));
+    assertThat(pro.planFilter()).isEqualTo("PRO");
+
+    Mockito.clearInvocations(memberRepository);
+    SearchCall unknown = stubSearchAndCapture(new PageImpl<>(List.of()),
+      () -> adminMemberService.search(query(null, Map.of("plan", "GOLD' or 1=1"), null, null)));
+    assertThat(unknown.planFilter()).isEqualTo("ALL");
+  }
+
+  @Test
+  @DisplayName("정렬은 허용 열만 받는다 — 요금제 정렬은 구독 열로, 허용 밖은 가입일 최신순으로 돌아간다")
+  void search_sort_allowedKeysOnlyElseDefault() {
+    SearchCall byPlan = stubSearchAndCapture(new PageImpl<>(List.of()),
+      () -> adminMemberService.search(query(null, Map.of(), "plan,asc", null)));
+    Sort.Order planOrder = byPlan.pageable().getSort().getOrderFor("s.plan");
+    assertThat(planOrder).isNotNull();
+    assertThat(planOrder.isAscending()).isTrue();
+
+    Mockito.clearInvocations(memberRepository);
+    SearchCall injected = stubSearchAndCapture(new PageImpl<>(List.of()),
+      () -> adminMemberService.search(query(null, Map.of(), "passwordHash,asc", null)));
+    Sort.Order defaultOrder = injected.pageable().getSort().getOrderFor("createdAt");
+    assertThat(defaultOrder).isNotNull();
+    assertThat(defaultOrder.isDescending()).isTrue();
+    assertThat(injected.pageable().getSort().getOrderFor("passwordHash")).isNull();
+  }
+
+  @Test
+  @DisplayName("범위 밖 페이지는 마지막 페이지로 맞춰 다시 조회한다")
+  void search_pageBeyondLast_requeriesLastPage() {
+    Page<Member> empty = new PageImpl<>(List.of(), org.springframework.data.domain.PageRequest.of(8, 20), 41);
+    Page<Member> last = new PageImpl<>(List.of(), org.springframework.data.domain.PageRequest.of(2, 20), 41);
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
+      .thenReturn(empty, last);
+
+    Page<AdminMemberResponse> result = adminMemberService.search(query(null, Map.of(), null, "9"));
+
+    assertThat(result.getNumber()).isEqualTo(2);
+    ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
+    verify(memberRepository, org.mockito.Mockito.times(2))
+      .searchForAdmin(anyBoolean(), any(), any(), any(), any(), pageable.capture());
+    assertThat(pageable.getAllValues().get(1).getPageNumber()).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("목록 행에 지금 유효한 요금제와 마지막 변경(시각·변경자)이 붙는다 — 구독·이력은 각각 한 번만 조회")
+  void search_attachesEffectivePlanAndLastChange() {
+    Member proMember = member("m1", "parent1");
+    Member freeMember = member("m2", "parent2");
+    Subscription pro = new Subscription();
+    pro.setMember(proMember);
+    pro.setPlan(PlanType.PRO);
+    pro.setExpiresAt(LocalDateTime.now().plusDays(10));
+    Subscription expiredPro = new Subscription();
+    expiredPro.setMember(freeMember);
+    expiredPro.setPlan(PlanType.PRO);
+    expiredPro.setExpiresAt(LocalDateTime.now().minusDays(1));
+    SubscriptionHistory change = new SubscriptionHistory();
+    change.setMemberId("m1");
+    change.setChangedAt(LocalDateTime.of(2026, 10, 18, 9, 0));
+    change.setChangedBy("admin1");
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
+      .thenReturn(new PageImpl<>(List.of(proMember, freeMember)));
+    when(subscriptionService.findAllByMemberIds(List.of("m1", "m2"))).thenReturn(Map.of("m1", pro, "m2", expiredPro));
+    when(subscriptionHistoryService.latestByMemberIds(List.of("m1", "m2"))).thenReturn(Map.of("m1", change));
+
+    List<AdminMemberResponse> rows = adminMemberService.search(defaultQuery()).getContent();
+
+    assertThat(rows.get(0).plan()).isEqualTo(PlanType.PRO);
+    assertThat(rows.get(0).planExpiresAt()).isEqualTo(pro.getExpiresAt());
+    assertThat(rows.get(0).planLastChangedAt()).isEqualTo(change.getChangedAt());
+    assertThat(rows.get(0).planLastChangedBy()).isEqualTo("admin1");
+    // 만료된 Pro 는 Free 로 보이고, 이력이 없으면 마지막 변경도 비어 있다
+    assertThat(rows.get(1).plan()).isEqualTo(PlanType.FREE);
+    assertThat(rows.get(1).planLastChangedAt()).isNull();
   }
 
   @Test
@@ -215,13 +345,11 @@ class AdminMemberServiceTest {
   @Test
   @DisplayName("S6 상태 필터가 없으면 탈퇴 계정을 뺀 목록을 본다")
   void search_default_excludesWithdrawn() {
-    when(memberRepository.findByStatusNot(eq(MemberStatus.WITHDRAWN), any(Pageable.class)))
-      .thenReturn(new PageImpl<>(List.of()));
-
-    adminMemberService.search(null, null, 0);
+    SearchCall call = stubSearchAndCapture(new PageImpl<>(List.of()),
+      () -> adminMemberService.search(defaultQuery()));
 
     // 탈퇴 계정이 섞이면 운영자가 "활성 회원"을 셀 때 헷갈리고, 지워 달라는 사람이 목록에 계속 보인다.
-    verify(memberRepository, never()).findAll(any(Pageable.class));
+    assertThat(call.statuses()).doesNotContain(MemberStatus.WITHDRAWN);
   }
 
   @Test
@@ -229,11 +357,12 @@ class AdminMemberServiceTest {
   void search_withdrawnFilter_showsRetentionExpiry() {
     LocalDateTime withdrawnAt = LocalDateTime.of(2026, 9, 23, 10, 0);
     Member member = withdrawnMember("m9", withdrawnAt);
-    when(memberRepository.findByStatus(eq(MemberStatus.WITHDRAWN), any(Pageable.class)))
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(member)));
     when(withdrawnMemberService.retentionExpiresAt(member)).thenReturn(withdrawnAt.plusDays(365));
 
-    Page<AdminMemberResponse> result = adminMemberService.search(null, MemberStatus.WITHDRAWN, 0);
+    Page<AdminMemberResponse> result = adminMemberService.search(
+      query(null, Map.of("status", "WITHDRAWN"), null, null));
 
     AdminMemberResponse row = result.getContent().get(0);
     assertThat(row.status()).isEqualTo(MemberStatus.WITHDRAWN);
@@ -306,16 +435,16 @@ class AdminMemberServiceTest {
       () -> adminMemberService.suspend("m9"),
       () -> adminMemberService.unsuspend("m9"),
       () -> adminMemberService.forceLogout("m9"),
-      () -> adminMemberService.grantPro("m9", 30, "시연"),
-      () -> adminMemberService.revokePro("m9"))) {
+      () -> adminMemberService.grantPro("m9", 30, "시연", "admin"),
+      () -> adminMemberService.revokePro("m9", "정리", "admin"))) {
       assertThatThrownBy(action::run)
         .isInstanceOf(CustomException.class)
         .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
           .isEqualTo(ErrorCode.MEMBER_WITHDRAWN));
     }
     assertThat(member.getStatus()).isEqualTo(MemberStatus.WITHDRAWN);
-    verify(subscriptionService, never()).grantPro(any(), any(), any());
-    verify(subscriptionService, never()).revokePro(any(), any());
+    verify(subscriptionService, never()).grantPro(any(), any(), any(), any());
+    verify(subscriptionService, never()).revokePro(any(), any(), any());
     verify(refreshTokenService, never()).revokeAll(any(), any());
   }
 
@@ -333,11 +462,11 @@ class AdminMemberServiceTest {
     ProfileGuardian g2 = new ProfileGuardian();
     g2.setMember(member);
     g2.setProfile(later);
-    when(memberRepository.findByStatusNot(eq(MemberStatus.WITHDRAWN), any(Pageable.class)))
+    when(memberRepository.searchForAdmin(anyBoolean(), any(), any(), any(), any(), any(Pageable.class)))
       .thenReturn(new PageImpl<>(List.of(member)));
     when(profileGuardianRepository.findAllWithProfileByMemberIdIn(List.of("m1"))).thenReturn(List.of(g1, g2));
 
-    AdminMemberResponse response = adminMemberService.search(null, null, 0).getContent().get(0);
+    AdminMemberResponse response = adminMemberService.search(defaultQuery()).getContent().get(0);
 
     assertThat(response.nickname()).isEqualTo("하늘");
   }

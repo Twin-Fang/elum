@@ -2,11 +2,19 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
+import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
+import com.chuseok22.elumserver.admin.application.list.AdminListDefinition;
+import com.chuseok22.elumserver.admin.application.list.AdminListRow;
+import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
+import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.DisplayName;
@@ -25,11 +33,20 @@ class AdminWithdrawnMemberViewTest {
 
   @Test
   @DisplayName("S6 회원 목록에 탈퇴 필터가 있고, 탈퇴 계정에는 보관 만료 예정일을 보인다")
-  void memberList_hasWithdrawnFilterAndExpiry() throws IOException {
-    String list = Files.readString(TEMPLATES.resolve("members.html"));
+  void memberList_hasWithdrawnFilterAndExpiry() {
+    AdminListDefinition.Filter statusFilter = AdminMemberList.DEFINITION.filters().stream()
+      .filter(filter -> filter.key().equals(AdminMemberList.FILTER_STATUS)).findFirst().orElseThrow();
+    assertThat(statusFilter.isAllowedValue("WITHDRAWN")).isTrue();
 
-    assertThat(list).contains("<option value=\"WITHDRAWN\"");
-    assertThat(list).contains("retentionExpiresAt()");
+    Member member = new Member();
+    member.setId("m9");
+    member.setUsername("kakao_m9");
+    member.setStatus(MemberStatus.WITHDRAWN);
+    AdminMemberResponse response = AdminMemberResponse.of(
+      member, null, 0, null, LocalDateTime.of(2027, 9, 23, 10, 0), null, null);
+    AdminListRow row = AdminMemberList.toRow(response, new AdminDateFormatter());
+
+    assertThat(row.cells().get("status")).contains("탈퇴").contains("만료 2027-09-23 10:00");
   }
 
   @Test

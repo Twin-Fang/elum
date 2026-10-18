@@ -3,14 +3,21 @@ package com.chuseok22.elumserver.license.application.service;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.license.core.SubscriptionHistoryAction;
 import com.chuseok22.elumserver.license.core.SubscriptionSource;
 import com.chuseok22.elumserver.license.core.SubscriptionStatus;
 import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
+import com.chuseok22.elumserver.license.infrastructure.entity.SubscriptionHistory;
+import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionHistoryRepository;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +35,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SubscriptionService {
 
+  /// 회수 사유를 비웠을 때 구독 메모와 이력에 남기는 문구
+  public static final String DEFAULT_REVOKE_REASON = "관리자 회수";
+  /// 변경자를 알 수 없을 때 이력에 남기는 값 (이력 자체는 빠뜨리지 않음)
+  public static final String UNKNOWN_ACTOR = "unknown";
+
   private final SubscriptionRepository subscriptionRepository;
+  private final SubscriptionHistoryRepository subscriptionHistoryRepository;
   private final MemberRepository memberRepository;
 
   /**
@@ -67,18 +80,23 @@ public class SubscriptionService {
   }
 
   /**
-   * 관리자가 Pro를 켠다.
+   * 관리자가 Pro를 켠다: 사유 검증 > 구독 갱신 > 이력 기록 (같은 트랜잭션)
    *
-   * @param expiresAt null이면 무기한
-   * @param memo      왜 켰는지. 나중에 "이 계정은 왜 Pro지"에 답하려면 있어야 하므로 필수다
+   * @param days   null 이거나 0 이하면 무기한
+   * @param reason 왜 켰는지. 나중에 "이 계정은 왜 Pro지"에 답하려면 있어야 하므로 필수다
+   * @param actor  변경한 관리자 로그인 이름
    */
   @Transactional
-  public Subscription grantPro(String memberId, LocalDateTime expiresAt, String memo) {
-    if (memo == null || memo.isBlank()) {
+  public Subscription grantPro(String memberId, Integer days, String reason, String actor) {
+    if (reason == null || reason.isBlank()) {
       throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
     }
     Member member = memberRepository.findById(memberId)
       .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+    LocalDateTime now = LocalDateTime.now();
+    boolean isLimitedPeriod = days != null && days > 0;
+    LocalDateTime expiresAt = isLimitedPeriod ? now.plusDays(days) : null;
 
     Subscription subscription = subscriptionRepository.findByMemberId(memberId)
       .orElseGet(() -> {
@@ -86,32 +104,82 @@ public class SubscriptionService {
         created.setMember(member);
         return created;
       });
+    PlanType beforePlan = subscription.effectivePlan(now);
+    LocalDateTime beforeExpiresAt = subscription.getExpiresAt();
+
     subscription.setPlan(PlanType.PRO);
     subscription.setStatus(SubscriptionStatus.ACTIVE);
     subscription.setSource(SubscriptionSource.MANUAL);
-    subscription.setStartedAt(LocalDateTime.now());
+    subscription.setStartedAt(now);
     subscription.setExpiresAt(expiresAt);
-    subscription.setMemo(memo.trim());
+    subscription.setMemo(reason.trim());
     Subscription saved = subscriptionRepository.save(subscription);
-    log.info("관리자가 Pro를 발급했습니다: memberId={}, expiresAt={}, memo={}",
-      memberId, expiresAt, memo);
+
+    recordHistory(memberId, SubscriptionHistoryAction.GRANT, beforePlan, PlanType.PRO,
+      isLimitedPeriod ? days : null, beforeExpiresAt, expiresAt, reason.trim(), actor, now);
+    log.info("관리자가 Pro를 발급했습니다: memberId={}, expiresAt={}, reason={}, actor={}",
+      memberId, expiresAt, reason, actor);
     return saved;
   }
 
   /**
-   * Pro를 거둔다. 행을 지우지 않고 Free로 되돌린다 — 지우면 언제 무엇을 했는지가 사라진다.
+   * Pro를 거둔다: 구독을 Free로 되돌림 > 이력 기록 (같은 트랜잭션)
+   * 행을 지우지 않는다 — 지우면 언제 무엇을 했는지가 사라진다. 구독 행이 없으면 바뀔 상태가 없어 이력도 없다
    */
   @Transactional
-  public void revokePro(String memberId, String memo) {
+  public void revokePro(String memberId, String reason, String actor) {
     subscriptionRepository.findByMemberId(memberId).ifPresent(subscription -> {
+      LocalDateTime now = LocalDateTime.now();
+      PlanType beforePlan = subscription.effectivePlan(now);
+      LocalDateTime beforeExpiresAt = subscription.getExpiresAt();
+      String reasonOrDefault = reason == null || reason.isBlank() ? DEFAULT_REVOKE_REASON : reason.trim();
+
       subscription.setPlan(PlanType.FREE);
       subscription.setStatus(SubscriptionStatus.ACTIVE);
       subscription.setSource(SubscriptionSource.MANUAL);
       subscription.setExpiresAt(null);
       subscription.setExternalRef(null);
-      subscription.setMemo(memo == null || memo.isBlank() ? "관리자 회수" : memo.trim());
+      subscription.setMemo(reasonOrDefault);
       subscriptionRepository.save(subscription);
-      log.info("관리자가 Pro를 회수했습니다: memberId={}", memberId);
+
+      recordHistory(memberId, SubscriptionHistoryAction.REVOKE, beforePlan, PlanType.FREE,
+        null, beforeExpiresAt, null, reasonOrDefault, actor, now);
+      log.info("관리자가 Pro를 회수했습니다: memberId={}, actor={}", memberId, actor);
     });
+  }
+
+  /// 탈퇴 계정을 완전히 지울 때 요금제 이력도 함께 지운다
+  @Transactional
+  public void deleteHistoryOf(String memberId) {
+    subscriptionHistoryRepository.deleteByMemberId(memberId);
+  }
+
+  /// 목록 페이지에 실린 회원들의 구독을 한 번에 (회원 id > 구독)
+  @Transactional(readOnly = true)
+  public Map<String, Subscription> findAllByMemberIds(Collection<String> memberIds) {
+    if (memberIds.isEmpty()) {
+      return Map.of();
+    }
+    return subscriptionRepository.findByMemberIdIn(memberIds).stream()
+      .collect(Collectors.toMap(subscription -> subscription.getMember().getId(), Function.identity(), (first, later) -> first));
+  }
+
+  private void recordHistory(
+    String memberId, SubscriptionHistoryAction action, PlanType beforePlan, PlanType afterPlan,
+    Integer durationDays, LocalDateTime beforeExpiresAt, LocalDateTime afterExpiresAt,
+    String reason, String actor, LocalDateTime changedAt
+  ) {
+    SubscriptionHistory history = new SubscriptionHistory();
+    history.setMemberId(memberId);
+    history.setAction(action);
+    history.setBeforePlan(beforePlan);
+    history.setAfterPlan(afterPlan);
+    history.setDurationDays(durationDays);
+    history.setBeforeExpiresAt(beforeExpiresAt);
+    history.setAfterExpiresAt(afterExpiresAt);
+    history.setReason(reason);
+    history.setChangedBy(actor == null || actor.isBlank() ? UNKNOWN_ACTOR : actor.trim());
+    history.setChangedAt(changedAt);
+    subscriptionHistoryRepository.save(history);
   }
 }

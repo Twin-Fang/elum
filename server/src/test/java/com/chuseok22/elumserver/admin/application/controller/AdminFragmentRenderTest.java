@@ -2,6 +2,10 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionHistoryLine;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionSummary;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Column;
@@ -9,6 +13,13 @@ import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Filte
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Option;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminListRow;
+import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
+import com.chuseok22.elumserver.license.core.PlanType;
+import com.chuseok22.elumserver.license.core.SubscriptionHistoryAction;
+import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
+import com.chuseok22.elumserver.license.infrastructure.entity.SubscriptionHistory;
+import com.chuseok22.elumserver.member.infrastructure.entity.Member;
+import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -123,9 +134,87 @@ class AdminFragmentRenderTest {
 
     java.util.Map<String, Object> memberModel = new java.util.HashMap<>();
     memberModel.put("members", pageOf(100, 1));
-    memberModel.put("keyword", "");
-    memberModel.put("selectedStatus", null);
+    AdminListQuery memberQuery = AdminListQuery.of(null, Map.of(), null, null, AdminMemberList.DEFINITION);
+    memberModel.put("definition", AdminMemberList.DEFINITION);
+    memberModel.put("query", memberQuery);
+    memberModel.put("rows", List.of());
+    memberModel.put("pagerBaseUrl", "/admin/members" + memberQuery.toQueryString(memberQuery.sort(), 1));
     String members = engine.process("admin/members", contextWith(memberModel));
     assertThat(members).contains("data-admin-pager").contains("2 / 5").contains("page=1").contains("page=3");
+  }
+
+  private static AdminMemberResponse memberRow(PlanType plan, LocalDateTime changedAt, String changedBy) {
+    Member member = new Member();
+    member.setId("m1");
+    member.setUsername("parent1");
+    member.setStatus(MemberStatus.ACTIVE);
+    Subscription subscription = new Subscription();
+    subscription.setPlan(plan);
+    subscription.setExpiresAt(plan == PlanType.PRO ? LocalDateTime.of(2026, 12, 1, 0, 0) : null);
+    SubscriptionHistory change = null;
+    if (changedAt != null) {
+      change = new SubscriptionHistory();
+      change.setChangedAt(changedAt);
+      change.setChangedBy(changedBy);
+    }
+    return AdminMemberResponse.of(member, null, 2, null, null, subscription, change);
+  }
+
+  @Test
+  @DisplayName("회원 목록: 요금제 열·필터 칩·정렬 링크·마지막 변경이 그려지고 이력 없는 회원은 안내가 나온다")
+  void memberList_showsPlanColumnFilterAndLastChanged() {
+    AdminListQuery query = AdminListQuery.of(null, Map.of("plan", "PRO"), "plan,desc", null, AdminMemberList.DEFINITION);
+    AdminDateFormatter dateFormatter = new AdminDateFormatter();
+    java.util.Map<String, Object> model = new java.util.HashMap<>();
+    model.put("members", pageOf(2, 0));
+    model.put("definition", AdminMemberList.DEFINITION);
+    model.put("query", query);
+    model.put("rows", List.of(
+      AdminMemberList.toRow(memberRow(PlanType.PRO, LocalDateTime.of(2026, 10, 18, 9, 5), "admin1"), dateFormatter),
+      AdminMemberList.toRow(memberRow(PlanType.FREE, null, null), dateFormatter)));
+    model.put("pagerBaseUrl", "/admin/members");
+
+    String html = engine.process("admin/members", contextWith(model));
+
+    assertThat(html).contains("요금제").contains("프로 (~2026-12-01 00:00)").contains("2026-10-18 09:05 · admin1");
+    assertThat(html).contains("변경 이력 없음");
+    // 요금제 필터 칩: 선택된 PRO 는 활성이고 전체 칩은 필터를 해제한다
+    assertThat(html).contains("aria-label=\"요금제\"").contains("plan=PRO");
+    // 요금제 열 헤더는 정렬 링크 (현재 내림차순이라 다음은 오름차순)
+    assertThat(html).contains("요금제 ▼").contains("sort=plan,asc");
+  }
+
+  @Test
+  @DisplayName("회원 상세: 부여 폼은 사유(reason)를 받고 Pro 일 때만 회수 폼이 나오며 이력 표에 전후 요금제·변경자·사유가 보인다")
+  void memberDetail_showsGrantRevokeFormsAndHistory() {
+    Member member = new Member();
+    member.setId("m1");
+    member.setUsername("parent1");
+    member.setStatus(MemberStatus.ACTIVE);
+    Subscription proSubscription = new Subscription();
+    proSubscription.setPlan(PlanType.PRO);
+    List<AdminSubscriptionHistoryLine> history = List.of(
+      new AdminSubscriptionHistoryLine(LocalDateTime.of(2026, 10, 18, 9, 5), "admin1", SubscriptionHistoryAction.GRANT,
+        PlanType.FREE, PlanType.PRO, 30, LocalDateTime.of(2026, 11, 17, 9, 5), "베타 <테스터>"),
+      new AdminSubscriptionHistoryLine(LocalDateTime.of(2026, 10, 19, 9, 5), "admin2", SubscriptionHistoryAction.REVOKE,
+        PlanType.PRO, PlanType.FREE, null, null, "기간 오입력"));
+
+    String html = engine.process("admin/member-detail", contextWith(Map.of("member",
+      AdminMemberDetailResponse.of(member, null, List.of(), null, List.of(),
+        AdminSubscriptionSummary.from(proSubscription), history, null))));
+
+    assertThat(html).contains("data-grant-pro-form").contains("name=\"reason\"").doesNotContain("name=\"memo\"");
+    assertThat(html).contains("data-revoke-pro-form");
+    assertThat(html).contains("data-plan-history").contains("무료 → 프로").contains("프로 → 무료")
+      .contains("30일 (~2026-11-17 09:05)").contains("admin2").contains("기간 오입력");
+    assertThat(html).as("사유는 이스케이프된다").contains("베타 &lt;테스터&gt;").doesNotContain("<테스터>");
+    // 마지막 변경은 이력의 가장 앞(최신) 한 줄
+    assertThat(html).contains("마지막 변경").contains("data-last-changed").contains("· admin1");
+
+    String freeHtml = engine.process("admin/member-detail", contextWith(Map.of("member",
+      AdminMemberDetailResponse.of(member, null, List.of(), null, List.of(),
+        AdminSubscriptionSummary.none(), List.of(), null))));
+    assertThat(freeHtml).doesNotContain("data-revoke-pro-form").contains("아직 요금제를 바꾼 기록이 없어요")
+      .contains("변경 이력 없음");
   }
 }

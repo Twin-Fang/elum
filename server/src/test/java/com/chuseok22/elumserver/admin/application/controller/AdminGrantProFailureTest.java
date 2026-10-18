@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.chuseok22.elumserver.admin.application.exception.AdminViewExceptionHandler;
+import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
 import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -39,7 +40,7 @@ class AdminGrantProFailureTest {
   @BeforeEach
   void setUp() {
     adminMemberService = mock(AdminMemberService.class);
-    mockMvc = MockMvcBuilders.standaloneSetup(new AdminMemberController(adminMemberService))
+    mockMvc = MockMvcBuilders.standaloneSetup(new AdminMemberController(adminMemberService, new AdminDateFormatter()))
       .setControllerAdvice(new AdminViewExceptionHandler())
       .build();
   }
@@ -48,9 +49,9 @@ class AdminGrantProFailureTest {
   @DisplayName("D1 탈퇴 계정에 Pro 발급 — 사유 안내가 아니라 다른 탈퇴 계정 조작과 같은 409 안내를 내고 로그에 남긴다")
   void grantPro_withdrawnMember_showsWithdrawnNotMemoHint(CapturedOutput output) throws Exception {
     doThrow(new CustomException(ErrorCode.MEMBER_WITHDRAWN))
-      .when(adminMemberService).grantPro(anyString(), any(), anyString());
+      .when(adminMemberService).grantPro(anyString(), any(), anyString(), any());
 
-    mockMvc.perform(post("/admin/members/m1/grant-pro").param("days", "1").param("memo", "QA 발급"))
+    mockMvc.perform(post("/admin/members/m1/grant-pro").param("days", "1").param("reason", "QA 발급"))
       .andExpect(status().isConflict())
       .andExpect(model().attribute("error", ErrorCode.MEMBER_WITHDRAWN.getMessage()))
       .andExpect(flash().attributeCount(0));
@@ -62,11 +63,11 @@ class AdminGrantProFailureTest {
   @DisplayName("D1 탈퇴 계정 안내는 정지와 같은 모양이다 — 같은 원인에 두 가지 안내를 내지 않는다")
   void grantPro_withdrawnMember_sameAsSuspend() throws Exception {
     doThrow(new CustomException(ErrorCode.MEMBER_WITHDRAWN))
-      .when(adminMemberService).grantPro(anyString(), any(), anyString());
+      .when(adminMemberService).grantPro(anyString(), any(), anyString(), any());
     doThrow(new CustomException(ErrorCode.MEMBER_WITHDRAWN))
       .when(adminMemberService).suspend(anyString());
 
-    Object grantError = mockMvc.perform(post("/admin/members/m1/grant-pro").param("memo", "QA 발급"))
+    Object grantError = mockMvc.perform(post("/admin/members/m1/grant-pro").param("reason", "QA 발급"))
       .andReturn().getModelAndView().getModel().get("error");
     Object suspendError = mockMvc.perform(post("/admin/members/m1/suspend"))
       .andReturn().getModelAndView().getModel().get("error");
@@ -78,9 +79,9 @@ class AdminGrantProFailureTest {
   @DisplayName("사유가 비었을 때만 사유 입력 안내를 낸다 — 상세 화면에 머물러 다시 넣을 수 있다")
   void grantPro_blankMemo_stillShowsMemoHint() throws Exception {
     doThrow(new CustomException(ErrorCode.INVALID_INPUT_VALUE))
-      .when(adminMemberService).grantPro(anyString(), any(), anyString());
+      .when(adminMemberService).grantPro(anyString(), any(), anyString(), any());
 
-    mockMvc.perform(post("/admin/members/m1/grant-pro").param("memo", " "))
+    mockMvc.perform(post("/admin/members/m1/grant-pro").param("reason", " "))
       .andExpect(status().is3xxRedirection())
       .andExpect(flash().attribute("errorMessage", "Pro 발급 실패: 사유를 입력해주세요. (E-ADM-001)"));
   }
