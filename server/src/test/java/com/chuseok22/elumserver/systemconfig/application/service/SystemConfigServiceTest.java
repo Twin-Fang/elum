@@ -121,6 +121,16 @@ class SystemConfigServiceTest {
   }
 
   @Test
+  @DisplayName("신규가입 이벤트 가입 시각은 읽을 수 없는 날짜를 거부한다")
+  void update_signupEventDateWithUnreadableValue_throws() {
+    assertThatThrownBy(() -> systemConfigService.update(ConfigKey.SIGNUP_PRO_EVENT_START_AT, "내일"))
+      .isInstanceOf(CustomException.class)
+      .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+        .isEqualTo(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE));
+    verify(systemConfigRepository, never()).save(any());
+  }
+
+  @Test
   @DisplayName("DECIMAL 타입은 숫자가 아닌 입력을 거부한다")
   void update_decimalTypeWithNonNumber_throws() {
     assertThatThrownBy(() -> systemConfigService.update(ConfigKey.GEMINI_TEXT_TEMPERATURE, "높게"))

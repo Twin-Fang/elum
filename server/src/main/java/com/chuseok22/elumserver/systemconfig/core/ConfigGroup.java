@@ -18,6 +18,8 @@ public enum ConfigGroup {
   MEMBER("회원"),
   PLAN_FREE("Free 플랜 한도"),
   PLAN_PRO("Pro 플랜 한도"),
+  // 구독 행이 없는 새 회원에게 기간 한정으로 Pro 를 주는 이벤트.
+  SIGNUP_PRO_EVENT("신규가입 PRO 이벤트"),
   AI_BUDGET("AI 비용 상한"),
   APP_CONTROL("앱 점검·버전"),
   // 앱이 서버에서 받아 쓰는 시간값. 서버가 주므로 바꿔도 앱을 다시 빌드하지 않는다.

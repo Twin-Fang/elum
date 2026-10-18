@@ -228,6 +228,30 @@ public enum ConfigKey {
     ConfigValueType.INTEGER, List.of(), "-1"
   ),
 
+  // --- 신규가입 PRO 이벤트 ---
+  //
+  // 조회 시점에 계산한다(DB 쓰기 없음) — 끄면 즉시 원래 요금제로 돌아간다. 구독 행이 있는 회원은 영향 없다.
+  // 기본 꺼짐이라 배포만으로는 동작이 바뀌지 않는다. 시작·종료가 비어 있으면 이벤트는 꺼진 것으로 본다.
+  SIGNUP_PRO_EVENT_ENABLED(
+    ConfigGroup.SIGNUP_PRO_EVENT, "이벤트 켜기",
+    "켜면 아래 가입 기간에 가입한 구독 없는 회원이 가입 후 유지 일수 동안 Pro 로 취급된다",
+    ConfigValueType.BOOLEAN, List.of(), "false"
+  ),
+  SIGNUP_PRO_EVENT_START_AT(
+    ConfigGroup.SIGNUP_PRO_EVENT, "가입 시작 시각",
+    "이 시각 이후 가입한 회원부터 적용. 형식 2026-10-19T00:00 (또는 2026-10-19 00:00, 날짜만도 가능). 비어 있으면 이벤트 꺼짐",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  SIGNUP_PRO_EVENT_END_AT(
+    ConfigGroup.SIGNUP_PRO_EVENT, "가입 종료 시각",
+    "이 시각 이전 가입한 회원까지 적용. 형식 2026-10-26T00:00 (또는 2026-10-26 00:00, 날짜만도 가능). 비어 있으면 이벤트 꺼짐",
+    ConfigValueType.STRING, List.of(), ""
+  ),
+  SIGNUP_PRO_EVENT_GRANT_DAYS(
+    ConfigGroup.SIGNUP_PRO_EVENT, "Pro 유지 일수",
+    "가입 시점부터 Pro 로 취급하는 일수",
+    ConfigValueType.INTEGER, List.of(), "30", 1, 3650
+  ),
   PRO_AI_IMAGE_GENERATION(
     ConfigGroup.PLAN_PRO, "AI 맞춤 삽화",
     "Pro에서 AI가 그린 맞춤 삽화를 쓸 수 있는지",
