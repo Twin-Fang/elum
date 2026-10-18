@@ -34,4 +34,15 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Stri
   List<String> findMemberIdsWithEffectivePlan(
     @Param("plan") PlanType plan, @Param("status") SubscriptionStatus status, @Param("now") LocalDateTime now
   );
+
+  /// 지금 이 플랜으로 동작하는 회원 수 (effectivePlan 과 같은 조건, 탈퇴 회원 제외)
+  @Query("""
+    select count(s) from Subscription s
+    where s.plan = :plan and s.status = :status
+      and (s.expiresAt is null or s.expiresAt >= :now)
+      and s.member.status <> com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus.WITHDRAWN
+    """)
+  long countEffectiveMembersByPlan(
+    @Param("plan") PlanType plan, @Param("status") SubscriptionStatus status, @Param("now") LocalDateTime now
+  );
 }

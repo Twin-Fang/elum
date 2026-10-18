@@ -147,6 +147,11 @@ public class AdminMemberService {
     return memberRepository.countByStatusNot(MemberStatus.WITHDRAWN);
   }
 
+  // 지금 유효한 Pro 회원수 (Subscription.effectivePlan 과 같은 기준, 탈퇴 회원 제외) — 대시보드 요금제 분포
+  public long countEffectivePro() {
+    return subscriptionService.countEffectivePro(LocalDateTime.now());
+  }
+
   public long countSuspended() {
     return memberRepository.countByStatus(MemberStatus.SUSPENDED);
   }

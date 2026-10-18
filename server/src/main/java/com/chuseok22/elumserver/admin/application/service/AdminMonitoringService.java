@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.admin.application.service;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminDashboardSummary.TodayAiStats;
 import com.chuseok22.elumserver.admin.application.list.AdminListPaging;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminMonitoringList;
@@ -30,6 +31,12 @@ public class AdminMonitoringService {
 
   public AiCallStats getTodayStats() {
     return aiCallLogRepository.statsSince(LocalDate.now().atStartOfDay());
+  }
+
+  /// 대시보드용: 조회 투영을 값 복사본으로 (캐시에 오래 들고 있어도 안전)
+  public TodayAiStats getTodayStatsSummary() {
+    AiCallStats stats = getTodayStats();
+    return new TodayAiStats(stats.getTotalCount(), stats.getSuccessCount(), stats.getTotalTokens(), stats.getTotalCostUsd());
   }
 
   public AiCallStats getTotalStats() {

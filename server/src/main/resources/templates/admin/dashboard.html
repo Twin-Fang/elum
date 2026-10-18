@@ -9,40 +9,95 @@
       <h1 class="text-2xl font-bold">대시보드</h1>
       <p class="text-base-content/60">안녕하세요, <span sec:authentication="name">관리자</span>님</p>
     </div>
+    <!-- 숫자 카드: 큰 숫자와 부가 수치가 각각 해당 목록으로 가는 링크 -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="stat bg-base-200 rounded-box shadow">
         <div class="stat-title">전체 회원수</div>
-        <div class="stat-value text-primary" th:text="${memberCount}">0</div>
+        <a th:href="@{/admin/members}" class="stat-value text-primary link-hover" th:text="${summary.memberCount()}">0</a>
         <div class="stat-desc">
-          최근 7일 활성 <span th:text="${activeMemberCount}">0</span> ·
-          정지 <span th:text="${suspendedMemberCount}">0</span>
+          <a th:href="@{/admin/members(sort='lastActivityAt,desc')}" class="link link-hover">
+            최근 7일 활성 <span th:text="${summary.activeMemberCount()}">0</span></a> ·
+          <a th:href="@{/admin/members(status='SUSPENDED')}" class="link link-hover">
+            정지 <span th:text="${summary.suspendedMemberCount()}">0</span></a>
         </div>
       </div>
       <div class="stat bg-base-200 rounded-box shadow">
         <div class="stat-title">전체 루틴수</div>
-        <div class="stat-value text-primary" th:text="${routineStats.total()}">0</div>
+        <a th:href="@{/admin/routines}" class="stat-value text-primary link-hover" th:text="${summary.routineStats().total()}">0</a>
         <div class="stat-desc">
-          검토대기 <span th:text="${routineStats.pendingReview()}">0</span> ·
-          확정 <span th:text="${routineStats.confirmed()}">0</span> ·
-          완료 <span th:text="${routineStats.completed()}">0</span>
+          <a th:href="@{/admin/routines(status='PENDING_REVIEW')}" class="link link-hover">
+            검토대기 <span th:text="${summary.routineStats().pendingReview()}">0</span></a> ·
+          <a th:href="@{/admin/routines(status='CONFIRMED')}" class="link link-hover">
+            확정 <span th:text="${summary.routineStats().confirmed()}">0</span></a> ·
+          <a th:href="@{/admin/routines(status='COMPLETED')}" class="link link-hover">
+            완료 <span th:text="${summary.routineStats().completed()}">0</span></a>
         </div>
       </div>
       <div class="stat bg-base-200 rounded-box shadow">
         <div class="stat-title">오늘 AI 호출</div>
-        <div class="stat-value text-primary" th:text="${todayAiStats.totalCount}">0</div>
+        <a th:href="@{/admin/monitoring}" class="stat-value text-primary link-hover" th:text="${summary.todayAiStats().totalCount()}">0</a>
         <div class="stat-desc">
-          성공 <span th:text="${todayAiStats.successCount}">0</span> ·
-          토큰 <span th:text="${#numbers.formatInteger(todayAiStats.totalTokens, 1, 'COMMA')}">0</span>
+          성공 <span th:text="${summary.todayAiStats().successCount()}">0</span> ·
+          토큰 <span th:text="${#numbers.formatInteger(summary.todayAiStats().totalTokens(), 1, 'COMMA')}">0</span>
         </div>
       </div>
       <div class="stat bg-base-200 rounded-box shadow">
         <div class="stat-title">오늘 AI 추정 비용</div>
-        <div class="stat-value text-primary" th:text="'$' + ${#numbers.formatDecimal(todayAiStats.totalCostUsd, 1, 4)}">$0</div>
+        <a th:href="@{/admin/monitoring}" class="stat-value text-primary link-hover"
+           th:text="'$' + ${#numbers.formatDecimal(summary.todayAiStats().totalCostUsd(), 1, 4)}">$0</a>
         <div class="stat-desc">
           <a th:href="@{/admin/monitoring}" class="link link-hover">AI 모니터링 상세 보기</a>
         </div>
       </div>
     </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- 요금제 분포: 지금 유효한 Pro 기준 (만료된 Pro 는 Free) -->
+      <div class="card bg-base-200 shadow" data-plan-distribution>
+        <div class="card-body p-4 gap-3">
+          <h2 class="font-semibold">요금제 분포</h2>
+          <div class="flex h-3 w-full overflow-hidden rounded-full bg-base-300">
+            <div class="bg-primary" th:style="'width:' + ${summary.proPercent()} + '%'"></div>
+          </div>
+          <div class="flex flex-wrap gap-3 text-sm">
+            <a th:href="@{/admin/members(plan='PRO')}" class="link link-hover">
+              <span class="badge badge-primary badge-sm"></span>
+              Pro <b th:text="${summary.proMemberCount()}">0</b>명
+              (<span th:text="${summary.proPercent()}">0</span>%)</a>
+            <a th:href="@{/admin/members(plan='FREE')}" class="link link-hover">
+              <span class="badge badge-ghost badge-sm"></span>
+              Free <b th:text="${summary.freeMemberCount()}">0</b>명
+              (<span th:text="${summary.freePercent()}">0</span>%)</a>
+          </div>
+          <p class="text-xs text-base-content/60">탈퇴 회원 제외, 기간이 끝난 Pro 는 Free 로 센다</p>
+        </div>
+      </div>
+
+      <!-- 지금 적용 중 설정: 설정 화면과 같은 요약 -->
+      <div class="card bg-base-200 shadow" data-config-summary>
+        <div class="card-body p-4 gap-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="font-semibold">지금 적용 중인 설정</h2>
+            <a th:href="@{/admin/settings}" class="link link-hover text-sm ml-auto">설정 화면 열기</a>
+          </div>
+          <a th:href="@{/admin/settings}" class="btn btn-sm w-fit"
+             th:classappend="${summary.configOverview().differsFromDefaultCount() > 0} ? 'btn-warning' : 'btn-ghost'"
+             th:text="'기본값과 다른 설정 ' + ${summary.configOverview().differsFromDefaultCount()} + '개'">기본값과 다른 설정 0개</a>
+          <ul class="space-y-1 text-sm">
+            <li th:each="highlight : ${summary.configOverview().highlights()}"
+                class="flex items-center justify-between gap-3">
+              <a th:href="@{/admin/settings}" class="link link-hover text-base-content/70"
+                 th:text="${highlight.label()}">항목</a>
+              <span class="badge" th:classappend="${highlight.isOn()} ? 'badge-success' : 'badge-ghost'"
+                    th:text="${highlight.valueText()}">값</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="text-xs text-base-content/50">
+      집계 <span th:text="${@adminDate.format(summary.aggregatedAt())}">시각</span> 기준, 60초마다 새로 집계해요
+    </p>
     <!-- 서버 오류. 메모리 집계라 서버가 다시 뜨면 0부터 센다 — 전체 기록은 서버 로그 화면의 elum-error.log. -->
     <div class="card bg-base-200 shadow">
       <div class="card-body p-4 gap-2">
@@ -55,7 +110,7 @@
         <p class="text-xs text-base-content/60"
            th:text="'집계 시작 ' + ${recentErrors.since()}">집계 시작</p>
         <p th:if="${recentErrors.recent().isEmpty()}" class="text-sm text-base-content/60">최근 오류가 없어요</p>
-        <ul th:unless="${recentErrors.recent().isEmpty()}" class="space-y-1 text-xs font-mono">
+        <ul th:unless="${recentErrors.recent().isEmpty()}" class="space-y-1 overflow-x-auto text-xs font-mono">
           <li th:each="error : ${recentErrors.recent()}">
             <span class="text-base-content/60"
                   th:text="${error.time()}">시각</span>

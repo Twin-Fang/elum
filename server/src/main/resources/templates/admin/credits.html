@@ -53,42 +53,42 @@
     <div class="stat bg-base-200 rounded-box shadow p-4">
       <div class="stat-title text-sm">지급받은 회원</div>
       <div class="stat-value text-primary text-2xl" th:text="${overview.activeAccounts()}">0</div>
-      <div class="stat-desc">그 주 주간 지급이 있는 계정</div>
+      <div class="stat-desc whitespace-normal">그 주 주간 지급이 있는 계정</div>
     </div>
     <div class="stat bg-base-200 rounded-box shadow p-4">
       <div class="stat-title text-sm">지급</div>
       <div class="stat-value text-primary text-2xl" th:text="${#numbers.formatInteger(overview.granted(), 1, 'COMMA')}">0</div>
-      <div class="stat-desc">보너스 <span th:text="${overview.bonusGranted()}">0</span> 별도</div>
+      <div class="stat-desc whitespace-normal">보너스 <span th:text="${overview.bonusGranted()}">0</span> 별도</div>
     </div>
     <div class="stat bg-base-200 rounded-box shadow p-4">
       <div class="stat-title text-sm">사용</div>
       <div class="stat-value text-primary text-2xl" th:text="${#numbers.formatInteger(overview.used(), 1, 'COMMA')}">0</div>
-      <div class="stat-desc">실제 차감 합</div>
+      <div class="stat-desc whitespace-normal">실제 차감 합</div>
     </div>
     <div class="stat bg-base-200 rounded-box shadow p-4">
       <div class="stat-title text-sm">남음</div>
       <div class="stat-value text-primary text-2xl" th:text="${#numbers.formatInteger(overview.remaining(), 1, 'COMMA')}">0</div>
-      <div class="stat-desc" th:text="${overview.current()} ? '지금 사용 가능량 합' : '주간 지급이 주 말에 남긴 양'">지금 사용 가능량 합</div>
+      <div class="stat-desc whitespace-normal" th:text="${overview.current()} ? '지금 사용 가능량 합' : '주간 지급이 주 말에 남긴 양'">지금 사용 가능량 합</div>
     </div>
     <div class="stat bg-base-200 rounded-box shadow p-4">
       <div class="stat-title text-sm">예약 중</div>
       <div class="stat-value text-2xl" th:text="${overview.reserved()}">0</div>
-      <div class="stat-desc" th:text="${overview.current()} ? '진행 중 작업이 잡아 둔 양' : '지난 주는 보지 않음'">진행 중</div>
+      <div class="stat-desc whitespace-normal" th:text="${overview.current()} ? '진행 중 작업이 잡아 둔 양' : '지난 주는 보지 않음'">진행 중</div>
     </div>
     <div class="stat bg-base-200 rounded-box shadow p-4">
       <div class="stat-title text-sm">초과</div>
       <div class="stat-value text-2xl" th:text="${overview.overageJobs()} + '건'">0건</div>
-      <div class="stat-desc"><span th:text="${overview.overageCredits()}">0</span> 크레딧 — 잔액이 모자라 차감 못 한 몫</div>
+      <div class="stat-desc whitespace-normal"><span th:text="${overview.overageCredits()}">0</span> 크레딧 — 잔액이 모자라 차감 못 한 몫</div>
     </div>
     <div class="stat bg-base-200 rounded-box shadow p-4">
       <div class="stat-title text-sm">반환·만료 작업</div>
       <div class="stat-value text-2xl" th:text="${overview.releasedJobs()}">0</div>
-      <div class="stat-desc">실패로 돌려준 예약</div>
+      <div class="stat-desc whitespace-normal">실패로 돌려준 예약</div>
     </div>
     <div class="stat bg-base-200 rounded-box shadow p-4">
       <div class="stat-title text-sm">소진 회원</div>
       <div class="stat-value text-2xl" th:text="${overview.exhaustedAccounts()}">0</div>
-      <div class="stat-desc">
+      <div class="stat-desc whitespace-normal">
         <a class="link link-hover" th:href="@{/admin/credits/members(week=${overview.period().key()}, exhausted=true)}">남음 0 인 계정 보기</a>
       </div>
     </div>

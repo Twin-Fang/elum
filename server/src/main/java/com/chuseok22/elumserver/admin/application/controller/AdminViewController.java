@@ -1,9 +1,7 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
+import com.chuseok22.elumserver.admin.application.service.AdminDashboardService;
 import com.chuseok22.elumserver.admin.application.service.AdminLogOverviewService;
-import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
-import com.chuseok22.elumserver.admin.application.service.AdminMonitoringService;
-import com.chuseok22.elumserver.admin.application.service.AdminRoutineService;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -14,9 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 public class AdminViewController {
 
-  private final AdminMemberService adminMemberService;
-  private final AdminRoutineService adminRoutineService;
-  private final AdminMonitoringService adminMonitoringService;
+  private final AdminDashboardService adminDashboardService;
   private final AdminLogOverviewService adminLogOverviewService;
 
   @GetMapping("/admin/login")
@@ -26,11 +22,8 @@ public class AdminViewController {
 
   @GetMapping("/admin/dashboard")
   public String dashboard(Model model) {
-    model.addAttribute("memberCount", adminMemberService.count());
-    model.addAttribute("routineStats", adminRoutineService.getStatusCounts());
-    model.addAttribute("todayAiStats", adminMonitoringService.getTodayStats());
-    model.addAttribute("activeMemberCount", adminMemberService.countActiveWithinDays(7));
-    model.addAttribute("suspendedMemberCount", adminMemberService.countSuspended());
+    // 집계는 60초 캐시, 서버 오류 건수는 메모리 집계라 매번
+    model.addAttribute("summary", adminDashboardService.summary());
     model.addAttribute("recentErrors", adminLogOverviewService.dashboardErrors(Instant.now()));
     return "admin/dashboard";
   }
