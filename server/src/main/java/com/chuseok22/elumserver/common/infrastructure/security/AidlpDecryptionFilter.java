@@ -6,6 +6,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.FilterErrorRespo
 import com.chuseok22.elumserver.common.infrastructure.properties.AidlpProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletException;
@@ -42,9 +43,8 @@ public class AidlpDecryptionFilter extends OncePerRequestFilter {
   private final AidlpCryptoService cryptoService;
   private final NonceStore nonceStore;
   private final AidlpProperties properties;
-  // 이 프로젝트는 ObjectMapper 빈을 주입하지 않고 각자 직접 생성해 쓴다(FilterErrorResponseWriter 등 관례).
-  // starter-webmvc 환경에서 필터 생성 시점에 ObjectMapper 빈이 없어 기동 실패했으므로 직접 생성으로 맞춘다.
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  // 공통 JSON 매퍼 (DefaultJsonMapper)
+  private final ObjectMapper objectMapper = DefaultJsonMapper.SHARED;
   private final ErrorMessages messages = ErrorMessages.standard();
 
   @Override

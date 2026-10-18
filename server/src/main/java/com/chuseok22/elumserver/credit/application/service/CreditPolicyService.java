@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPolicy;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditPolicyRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -34,7 +35,7 @@ public class CreditPolicyService {
   private static final long CACHE_TTL_MILLIS = 30_000;
   private static final Set<String> GRANT_APPLY_VALUES =
     Set.of(AiCreditPolicy.GRANT_APPLY_NEXT_PERIOD, AiCreditPolicy.GRANT_APPLY_IMMEDIATE);
-  private static final ObjectMapper JSON = new ObjectMapper();
+  private static final ObjectMapper JSON = DefaultJsonMapper.SHARED;
 
   private final AiCreditPolicyRepository policyRepository;
   private final Clock clock;

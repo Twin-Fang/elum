@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.common.infrastructure.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.springframework.http.MediaType;
@@ -11,8 +12,8 @@ import org.springframework.http.MediaType;
  */
 public final class FilterErrorResponseWriter {
 
-  // Jackson 2 매퍼 빈이 없어 직접 생성 (스레드 안전, 재사용)
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  // 공통 JSON 매퍼 (DefaultJsonMapper)
+  private static final ObjectMapper OBJECT_MAPPER = DefaultJsonMapper.SHARED;
   private static final String CHARACTER_ENCODING = "UTF-8";
 
   private FilterErrorResponseWriter() {

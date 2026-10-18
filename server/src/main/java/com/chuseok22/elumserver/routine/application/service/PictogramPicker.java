@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -36,7 +37,7 @@ public class PictogramPicker {
 
   static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(5);
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper = DefaultJsonMapper.SHARED;
   private final PictogramCatalog catalog;
   private final TextClientRouter textClientRouter;
   private final AiDailyBudgetGuard aiDailyBudgetGuard;

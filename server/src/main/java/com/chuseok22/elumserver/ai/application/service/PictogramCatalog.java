@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.ai.application.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashSet;
@@ -139,7 +140,7 @@ public class PictogramCatalog {
   }
 
   private static Loaded parse(InputStream in) throws IOException {
-    JsonNode root = new ObjectMapper().readTree(in);
+    JsonNode root = DefaultJsonMapper.SHARED.readTree(in);
     JsonNode symbols = root.path("symbols");
     if (!symbols.isArray()) {
       throw new IOException("symbols 배열이 없음");

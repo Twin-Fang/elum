@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.credit.core.CreditAction;
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,7 +41,7 @@ public class AiCreditPolicy extends BaseEntity {
   private static final int FALLBACK_COST = 1;
   private static final int REASON_MAX_LENGTH = 500;
   private static final int DEFAULT_TTL_MINUTES = 15;
-  private static final ObjectMapper JSON = new ObjectMapper();
+  private static final ObjectMapper JSON = DefaultJsonMapper.SHARED;
   private static final TypeReference<Map<String, Integer>> INT_MAP = new TypeReference<>() {
   };
 

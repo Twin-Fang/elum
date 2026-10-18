@@ -15,6 +15,7 @@ import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigSer
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +27,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SensitiveInfoGuardService {
 
-  // Spring Boot 4.1은 Jackson 3(tools.jackson.databind) 기반이라 자동 구성되는 매핑 빈은
-  // JsonMapper뿐이고 com.fasterxml.jackson.databind.ObjectMapper 빈은 존재하지 않는다.
-  // FilterErrorResponseWriter와 동일하게 직접 생성해서 사용한다.
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  // 공통 JSON 매퍼 (DefaultJsonMapper)
+  private final ObjectMapper objectMapper = DefaultJsonMapper.SHARED;
 
   private final LocalLlmProperties localLlmProperties;
   private final LocalLlmClient localLlmClient;

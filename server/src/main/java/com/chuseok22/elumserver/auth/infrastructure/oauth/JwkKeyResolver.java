@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.chuseok22.elumserver.common.infrastructure.json.DefaultJsonMapper;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.PublicKey;
@@ -33,10 +34,8 @@ public class JwkKeyResolver {
 
   private static final Duration CACHE_TTL = Duration.ofHours(1);
 
-  /// JSON 파싱 전용. **빈으로 등록하지 않는다** — 이 앱에는 ObjectMapper 빈이 없고,
-  /// 새로 등록하면 Spring MVC의 JSON 처리 설정까지 바뀐다. ObjectMapper는 thread-safe라
-  /// 정적 인스턴스로 공유해도 안전하다.
-  private static final ObjectMapper MAPPER = new ObjectMapper();
+  // 공통 JSON 매퍼 (DefaultJsonMapper)
+  private static final ObjectMapper MAPPER = DefaultJsonMapper.SHARED;
 
   private final RestClient oauthRestClient;
 
