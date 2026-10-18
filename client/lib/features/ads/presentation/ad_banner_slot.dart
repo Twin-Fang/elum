@@ -9,10 +9,11 @@ import '../data/ad_banner_loader.dart';
 import '../application/ad_gate.dart';
 import '../../../core/config/ad_ids.dart';
 
-/// 화면 하단에 놓는 배너 자리.
+/// 화면 하단에 놓는 한 줄(44dp) 네이티브 광고 띠 자리.
 ///
-/// **로드 전·실패 시 높이 0이다.** 빈 자리를 남기지 않는다 — 배너가 없으면 화면은
+/// **로드 전·실패 시 높이 0이다.** 빈 자리를 남기지 않는다 — 광고가 없으면 화면은
 /// 본래 크기 그대로다. 로드에 성공하면 그 높이만큼 본문이 줄어든다(겹치지 않는다).
+/// 띠 색은 앱 색 토큰에서 만들어 로드 때 네이티브에 넘기고, 색이 바뀌면 다시 로드한다.
 ///
 /// 실패하면 30초·60초 뒤 각 한 번만 다시 시도하고 그만둔다.
 class AdBannerSlot extends ConsumerStatefulWidget {
@@ -36,31 +37,72 @@ class AdBannerSlot extends ConsumerStatefulWidget {
 }
 
 class _AdBannerSlotState extends ConsumerState<AdBannerSlot> {
+  // 테마 전환 애니메이션 중간 색마다 다시 요청하지 않게 기다리는 시간
+  static const _colorSettleDelay = Duration(milliseconds: 500);
   static const _retryDelays = [Duration(seconds: 30), Duration(seconds: 60)];
 
   LoadedBanner? _banner;
   Timer? _retry;
+  Timer? _colorReloadTimer;
   var _attempt = 0;
   var _disposed = false;
   var _loading = false;
-  var _width = 0;
+  AdStripColors? _requestedColors;
+  var _isLoadStarted = false;
 
   @override
   void dispose() {
     _disposed = true;
     _retry?.cancel();
+    _colorReloadTimer?.cancel();
     _banner?.dispose();
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 앱 색 토큰 > 띠 색 (앱 콘텐츠와 면·글자색으로 갈라 광고임을 알아보게 한다)
+    final colors = context.colors;
+    final stripColors = AdStripColors(
+      background: colors.surface.toARGB32(),
+      headline: colors.textPrimary.toARGB32(),
+      callToAction: colors.buttonEnabled.toARGB32(),
+      badgeBackground: colors.border.toARGB32(),
+      badgeText: colors.textSecondary.toARGB32(),
+    );
+    if (stripColors == _requestedColors) return;
+    final isFirstRequest = _requestedColors == null;
+    _requestedColors = stripColors;
+    if (isFirstRequest) return;
+
+    // 색 전환 (라이트·다크): 테마 전환 애니메이션이 끝나 색이 멈춘 뒤 한 번만 다시 로드
+    _colorReloadTimer?.cancel();
+    _colorReloadTimer = Timer(_colorSettleDelay, _reloadWithLatestColors);
+  }
+
+  void _reloadWithLatestColors() {
+    if (_disposed) return;
+    // 이전 띠 해제 > 재시도 횟수 초기화 > 새 색으로 다시 로드
+    _retry?.cancel();
+    _attempt = 0;
+    final previous = _banner;
+    if (previous != null) {
+      setState(() => _banner = null);
+      WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
+    }
+    _load();
+  }
+
   Future<void> _load() async {
-    if (_loading || _banner != null || _disposed) return;
+    final colors = _requestedColors;
+    if (_loading || _banner != null || _disposed || colors == null) return;
     _loading = true;
     LoadedBanner? result;
     try {
       result = await ref
           .read(adBannerLoaderProvider)
-          .load(widget.placement, _width);
+          .load(widget.placement, colors);
     } catch (_) {
       // 로더가 예외를 던져도 화면은 살아 있어야 한다. 실패로 취급한다.
       result = null;
@@ -84,36 +126,29 @@ class _AdBannerSlotState extends ConsumerState<AdBannerSlot> {
   Widget build(BuildContext context) {
     if (!ref.watch(adsEnabledProvider)) return const SizedBox.shrink();
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth.isFinite
-            ? constraints.maxWidth.floor()
-            : MediaQuery.sizeOf(context).width.floor();
-        if (width > 0 && width != _width) {
-          _width = width;
-          // 빌드 도중 상태를 바꾸지 않게 첫 프레임 뒤로 미룬다.
-          WidgetsBinding.instance.addPostFrameCallback((_) => _load());
-        }
-        final banner = _banner;
-        if (banner == null) return const SizedBox.shrink();
-        // 배너를 화면 폭 전체의 얇은 층에 담는다: 면 색 + 윗선으로 본문과 구분
-        final colors = context.colors;
-        return Padding(
-          padding: widget.padding,
-          child: DecoratedBox(
-            key: AdBannerSlot.stripKey,
-            decoration: BoxDecoration(
-              color: colors.surface,
-              border: Border(top: BorderSide(color: colors.border)),
-            ),
-            child: SizedBox(
-              height: banner.height,
-              width: double.infinity,
-              child: Center(child: banner.widget),
-            ),
-          ),
-        );
-      },
+    // 광고가 허용된 뒤 첫 빌드에서 한 번만 요청 (빌드 도중 상태를 바꾸지 않게 프레임 뒤로)
+    if (!_isLoadStarted) {
+      _isLoadStarted = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+    }
+    final banner = _banner;
+    if (banner == null) return const SizedBox.shrink();
+    // 띠를 화면 폭 전체의 얇은 층에 담는다: 면 색 + 윗선으로 본문과 구분
+    final colors = context.colors;
+    return Padding(
+      padding: widget.padding,
+      child: DecoratedBox(
+        key: AdBannerSlot.stripKey,
+        decoration: BoxDecoration(
+          color: colors.surface,
+          border: Border(top: BorderSide(color: colors.border)),
+        ),
+        child: SizedBox(
+          height: banner.height,
+          width: double.infinity,
+          child: banner.widget,
+        ),
+      ),
     );
   }
 }

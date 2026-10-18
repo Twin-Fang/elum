@@ -3,6 +3,7 @@ package kr.twinfang.elum
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugins.googlemobileads.GoogleMobileAdsPlugin
 import android.util.AtomicFile
 import java.io.File
 import java.util.UUID
@@ -11,6 +12,12 @@ import java.util.UUID
 class MainActivity : FlutterFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        // 하단 한 줄 광고 띠 팩토리 (#743). Dart NativeAd 의 factoryId 가 이 이름을 찾는다
+        GoogleMobileAdsPlugin.registerNativeAdFactory(
+            flutterEngine,
+            StripNativeAdFactory.FACTORY_ID,
+            StripNativeAdFactory(this),
+        )
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "elum/installation")
             .setMethodCallHandler { call, result ->
                 if (call.method != "getInstallationId") { result.notImplemented() }
@@ -33,5 +40,10 @@ class MainActivity : FlutterFragmentActivity() {
                     result.error("E-INSTALL", "Installation marker unavailable", null)
                 }
             }
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, StripNativeAdFactory.FACTORY_ID)
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 }

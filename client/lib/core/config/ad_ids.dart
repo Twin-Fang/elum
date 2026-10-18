@@ -9,6 +9,9 @@ enum AdPlacement {
   bannerDrafts('BANNER_DRAFTS'),
   bannerSettings('BANNER_SETTINGS'),
   nativeHomePast('NATIVE_HOME_PAST'),
+
+  /// 화면 맨 아래 한 줄 네이티브 띠. 하단 띠를 쓰는 모든 화면이 단위 하나를 함께 쓴다.
+  nativeStrip('NATIVE_STRIP'),
   rewardedCredit('REWARDED_CREDIT');
 
   const AdPlacement(this.envSuffix);
@@ -34,6 +37,10 @@ abstract final class AdIds {
     AdPlacement.bannerHomeMiddle: _banner,
     AdPlacement.bannerDrafts: _banner,
     AdPlacement.bannerSettings: _banner,
+    AdPlacement.nativeStrip: (
+      android: 'ca-app-pub-3940256099942544/2247696110',
+      ios: 'ca-app-pub-3940256099942544/3986624511',
+    ),
     AdPlacement.nativeHomePast: (
       android: 'ca-app-pub-3940256099942544/2247696110',
       ios: 'ca-app-pub-3940256099942544/3986624511',
@@ -41,6 +48,15 @@ abstract final class AdIds {
     AdPlacement.rewardedCredit: (
       android: 'ca-app-pub-3940256099942544/5224354917',
       ios: 'ca-app-pub-3940256099942544/1712485313',
+    ),
+  };
+
+  /// 운영 광고 단위 (AdMob 콘솔 `native_strip_bottom`). `.env` 값이 있으면 그쪽이 우선한다.
+  /// 비어 있으면 릴리스에서 광고를 요청하지 않는다.
+  static const _releaseDefaults = <AdPlacement, ({String android, String ios})>{
+    AdPlacement.nativeStrip: (
+      android: 'ca-app-pub-2025665624324395/4054407957',
+      ios: 'ca-app-pub-2025665624324395/5242621687',
     ),
   };
 
@@ -58,6 +74,10 @@ abstract final class AdIds {
     final key =
         'ELUM_ADMOB_${isIos ? 'IOS' : 'ANDROID'}_${placement.envSuffix}';
     final value = readEnv(key).trim();
-    return value.isEmpty ? null : value;
+    if (value.isNotEmpty) return value;
+    final fallback = _releaseDefaults[placement];
+    if (fallback == null) return null;
+    final fallbackId = isIos ? fallback.ios : fallback.android;
+    return fallbackId.isEmpty ? null : fallbackId;
   }
 }

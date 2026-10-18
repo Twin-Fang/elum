@@ -119,7 +119,6 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-
   // 일과가 적은 홈에 광고가 둘이나 붙으면 광고 화면처럼 보인다 — 오늘·지난 합이 5개 이상일 때만 둔다.
   testWidgets('오늘·지난 일과를 합쳐 4개면 하단 배너도 네이티브도 요청하지 않는다', (tester) async {
     await pumpHome(
@@ -142,7 +141,6 @@ void main() {
     expect(loader.calls, 1);
     expect(banner.calls, 1);
   });
-
 }
 
 class _CountingLoader implements AdNativeLoader {
@@ -167,7 +165,10 @@ class _CountingBanner implements AdBannerLoader {
   var calls = 0;
 
   @override
-  Future<LoadedBanner?> load(AdPlacement placement, int widthDp) async {
+  Future<LoadedBanner?> load(
+    AdPlacement placement,
+    AdStripColors colors,
+  ) async {
     calls++;
     return null;
   }
