@@ -15,7 +15,7 @@
         <div class="card-body space-y-2">
           <h2 class="card-title text-base">현재 적용본</h2>
           <p class="text-sm text-base-content/60">
-            마지막 수정: <span th:text="${prompt.updatedAt}"></span>
+            마지막 수정: <span th:text="${@adminDate.format(prompt.updatedAt)}"></span>
           </p>
           <pre class="bg-base-200 rounded p-3 text-xs whitespace-pre-wrap" th:text="${prompt.content}"></pre>
         </div>
@@ -34,8 +34,9 @@
         <div th:each="history : ${histories}" class="collapse collapse-arrow bg-base-100 border border-base-300">
           <input type="checkbox"/>
           <div class="collapse-title text-sm font-medium">
-            <span th:text="${history.createdAt}"></span>
+            <span th:text="${@adminDate.format(history.createdAt)}"></span>
             <span class="text-base-content/50">에 교체된 버전</span>
+            <span class="text-base-content/50">· 수정자 <span th:text="${history.changedBy != null and !history.changedBy.isBlank() ? history.changedBy : '-'}">-</span></span>
           </div>
           <div class="collapse-content space-y-3">
             <pre class="bg-base-200 rounded p-3 text-xs whitespace-pre-wrap" th:text="${history.content}"></pre>

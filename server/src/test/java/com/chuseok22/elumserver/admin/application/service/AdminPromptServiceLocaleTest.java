@@ -44,14 +44,14 @@ class AdminPromptServiceLocaleTest {
     adminPromptService.getAll(AppLocale.JA);
     adminPromptService.getTemplate(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.JA);
     adminPromptService.getHistory(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.JA);
-    adminPromptService.update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.JA, "내용");
+    adminPromptService.update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.JA, "내용", "kimchi");
     adminPromptService.seedLocale(AppLocale.JA);
     adminPromptService.missingKeys(AppLocale.JA);
 
     verify(promptTemplateService).getAll(AppLocale.JA);
     verify(promptTemplateService).getTemplate(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.JA);
     verify(promptTemplateService).getHistory(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.JA);
-    verify(promptTemplateService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.JA, "내용");
+    verify(promptTemplateService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.JA, "내용", "kimchi");
     verify(promptTemplateSeeder).seed(AppLocale.JA);
     verify(promptTemplateService).missingKeys(AppLocale.JA);
   }

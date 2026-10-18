@@ -39,7 +39,7 @@ class AdminPromptControllerBlankLocaleTest {
     mockMvc.perform(post(UPDATE_URL).param("locale", "").param("content", "English"))
       .andExpect(redirectedUrl("/admin/prompts?locale=ko"));
 
-    verify(adminPromptService, never()).update(any(), any(AppLocale.class), any());
+    verify(adminPromptService, never()).update(any(), any(AppLocale.class), any(), any());
   }
 
   @Test
@@ -48,7 +48,7 @@ class AdminPromptControllerBlankLocaleTest {
     mockMvc.perform(post(UPDATE_URL).param("locale", "  ").param("content", "English"))
       .andExpect(redirectedUrl("/admin/prompts?locale=ko"));
 
-    verify(adminPromptService, never()).update(any(), any(AppLocale.class), any());
+    verify(adminPromptService, never()).update(any(), any(AppLocale.class), any(), any());
   }
 
   @Test
@@ -57,7 +57,7 @@ class AdminPromptControllerBlankLocaleTest {
     mockMvc.perform(post(UPDATE_URL).param("content", "내용"))
       .andExpect(redirectedUrl("/admin/prompts?locale=ko"));
 
-    verify(adminPromptService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.KO, "내용");
+    verify(adminPromptService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.KO, "내용", null);
   }
 
   @Test

@@ -11,7 +11,9 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +60,17 @@ public class PromptTemplateService {
     return promptTemplateHistoryRepository.findTop50ByPromptKeyAndLocaleOrderByCreatedAtDesc(key, locale.code());
   }
 
+  // 현재 적용본을 마지막으로 저장한 관리자 (키별, 이력이 없거나 수정자가 없으면 빠짐)
+  public Map<PromptKey, String> getLatestChangerByKey(AppLocale locale) {
+    Map<PromptKey, String> changerByKey = new EnumMap<>(PromptKey.class);
+    for (PromptTemplateHistory history : promptTemplateHistoryRepository.findLatestPerPromptKey(locale.code())) {
+      if (history.getChangedBy() != null) {
+        changerByKey.put(history.getPromptKey(), history.getChangedBy());
+      }
+    }
+    return changerByKey;
+  }
+
   public List<PromptTemplate> getAll() {
     return getAll(AppLocale.KO);
   }
@@ -89,6 +102,12 @@ public class PromptTemplateService {
   // 없는 행은 만들지 않는다(행 만들기는 시더의 일)
   @Transactional
   public void update(PromptKey key, AppLocale locale, String content) {
+    update(key, locale, content, null);
+  }
+
+  // changedBy: 저장한 관리자 이름, 이력에 함께 남긴다 (알 수 없으면 null)
+  @Transactional
+  public void update(PromptKey key, AppLocale locale, String content, String changedBy) {
     // 공백만 있는 프롬프트는 받지 않는다. 받아 주면 그 프롬프트를 쓰는 AI 호출이 지시 없이
     // 나가는데, 민감정보 검사 프롬프트라면 무엇을 가려야 하는지도 모른 채 돈다. 요청 DTO에는 검증 어노테이션을
     // 달지 않는 규칙이라 여기서 막는다.
@@ -106,6 +125,7 @@ public class PromptTemplateService {
     history.setPromptKey(key);
     history.setLocale(locale.code());
     history.setContent(template.getContent());
+    history.setChangedBy(changedBy);
     promptTemplateHistoryRepository.save(history);
     template.setContent(normalizedContent);
   }

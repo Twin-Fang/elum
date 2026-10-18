@@ -54,9 +54,9 @@
         </td>
         <td class="font-mono whitespace-nowrap" th:text="${doc.version}">버전</td>
         <td class="whitespace-nowrap text-xs"
-            th:text="${#temporals.format(doc.publishedAt, 'yyyy-MM-dd HH:mm')}">적용일</td>
+            th:text="${@adminDate.format(doc.publishedAt)}">적용일</td>
         <td class="whitespace-nowrap text-xs"
-            th:text="${doc.updatedAt != null ? #temporals.format(doc.updatedAt, 'yyyy-MM-dd HH:mm') : '-'}">수정</td>
+            th:text="${@adminDate.format(doc.updatedAt)}">수정</td>
         <td class="whitespace-nowrap">
           <a th:href="@{/admin/consents/{key}(key=${doc.consentKey})}" class="btn btn-primary btn-xs">고치기</a>
           <a th:href="@{/admin/consents/{key}/history(key=${doc.consentKey})}" class="btn btn-ghost btn-xs">이력</a>

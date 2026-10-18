@@ -21,21 +21,10 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 /** 프롬프트 화면의 언어 탭·안내·행 만들기 (스펙 4.5). 서버를 띄우지 않고 템플릿만 그린다. */
 class AdminPromptsLocaleTemplateTest {
 
+  private final AdminTemplateRenderSupport renderer = new AdminTemplateRenderSupport();
+
   private String render(String template, Context context) {
-    ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
-    resolver.setPrefix("templates/");
-    resolver.setSuffix(".html");
-    resolver.setTemplateMode(TemplateMode.HTML);
-    resolver.setCharacterEncoding("UTF-8");
-    SpringTemplateEngine engine = new SpringTemplateEngine();
-    engine.setTemplateResolver(resolver);
-    engine.setLinkBuilder(new StandardLinkBuilder() {
-      @Override
-      protected String computeContextPath(IExpressionContext context, String base, Map<String, Object> parameters) {
-        return "";
-      }
-    });
-    return engine.process(template, context);
+    return renderer.render(template, context);
   }
 
   private PromptTemplate row(PromptKey key, String locale) {

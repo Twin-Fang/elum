@@ -10,6 +10,7 @@ import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -41,6 +42,7 @@ public class AdminPromptController {
   public String list(@RequestParam(value = "locale", defaultValue = "ko") String locale, Model model) {
     AppLocale selected = parseLocale(locale);
     model.addAttribute("prompts", adminPromptService.getAll(selected));
+    model.addAttribute("latestChangerByKey", adminPromptService.getLatestChangerByKey(selected));
     addLocaleModel(model, selected);
     return "admin/prompts";
   }
@@ -62,6 +64,7 @@ public class AdminPromptController {
     @RequestParam(value = "locale", required = false) String locale,
     @Valid @ModelAttribute PromptUpdateRequest request,
     BindingResult bindingResult,
+    Principal principal,
     RedirectAttributes redirectAttributes
   ) {
     // 쓰기 경로: 파라미터가 아예 없을 때만 ko, 빈 값·모르는 코드는 거절 (다른 언어 내용이 ko 행을 덮어쓰지 않도록)
@@ -79,7 +82,7 @@ public class AdminPromptController {
       return back;
     }
     try {
-      adminPromptService.update(key, target, request.content());
+      adminPromptService.update(key, target, request.content(), principal == null ? null : principal.getName());
     } catch (CustomException e) {
       String reason = e.getErrorCode() == ErrorCode.PROMPT_TEMPLATE_NOT_FOUND
         ? "이 언어에는 아직 없는 프롬프트예요. 위의 '기본값으로 행 만들기'를 먼저 눌러 주세요. (E-PRM-002)"

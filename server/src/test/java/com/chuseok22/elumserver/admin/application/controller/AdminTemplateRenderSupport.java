@@ -42,6 +42,11 @@ final class AdminTemplateRenderSupport {
   String render(String template, Map<String, Object> variables) {
     Context context = new Context();
     context.setVariables(variables);
+    return render(template, context);
+  }
+
+  /// 이미 변수를 담은 Context 로 그린다 (${@adminDate} 빈 제공)
+  String render(String template, Context context) {
     context.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME,
       new ThymeleafEvaluationContext(applicationContext, null));
     return engine.process(template, context);

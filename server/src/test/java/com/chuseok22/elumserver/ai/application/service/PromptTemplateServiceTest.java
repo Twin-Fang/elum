@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +15,7 @@ import com.chuseok22.elumserver.ai.infrastructure.repository.PromptTemplateHisto
 import com.chuseok22.elumserver.ai.infrastructure.repository.PromptTemplateRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.common.locale.AppLocale;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -79,6 +81,38 @@ class PromptTemplateServiceTest {
     assertThat(captor.getValue().getPromptKey()).isEqualTo(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
     assertThat(captor.getValue().getContent()).isEqualTo("이전 내용");
     assertThat(captor.getValue().getLocale()).isEqualTo("ko");
+  }
+
+  @Test
+  @DisplayName("update는 저장한 관리자 이름을 이력에 남기고, 이름을 모르면 비워 둔다")
+  void update_recordsChangedBy() {
+    PromptTemplate template = new PromptTemplate();
+    template.setPromptKey(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK);
+    template.setContent("이전 내용");
+    when(promptTemplateRepository.findByPromptKeyAndLocale(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, "ko"))
+      .thenReturn(Optional.of(template));
+
+    promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, AppLocale.KO, "둘째 내용", "kimchi");
+    promptTemplateService.update(PromptKey.LOCAL_LLM_SENSITIVE_INFO_CHECK, AppLocale.KO, "셋째 내용");
+
+    ArgumentCaptor<PromptTemplateHistory> captor = ArgumentCaptor.forClass(PromptTemplateHistory.class);
+    verify(promptTemplateHistoryRepository, times(2)).save(captor.capture());
+    assertThat(captor.getAllValues().get(0).getChangedBy()).isEqualTo("kimchi");
+    assertThat(captor.getAllValues().get(1).getChangedBy()).isNull();
+  }
+
+  @Test
+  @DisplayName("키별 최근 수정자를 모으고, 수정자가 비어 있는 이력(기존 행)은 빼 화면에서 '-' 가 되게 한다")
+  void getLatestChangerByKey_skipsRowsWithoutChanger() {
+    PromptTemplateHistory withChanger = new PromptTemplateHistory();
+    withChanger.setPromptKey(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
+    withChanger.setChangedBy("kimchi");
+    PromptTemplateHistory legacy = new PromptTemplateHistory();
+    legacy.setPromptKey(PromptKey.GEMINI_ROUTINE_IMAGE_PREFIX);
+    when(promptTemplateHistoryRepository.findLatestPerPromptKey("ko")).thenReturn(List.of(withChanger, legacy));
+
+    assertThat(promptTemplateService.getLatestChangerByKey(AppLocale.KO))
+      .containsOnly(java.util.Map.entry(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "kimchi"));
   }
 
   @Test

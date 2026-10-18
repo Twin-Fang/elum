@@ -5,20 +5,13 @@ import com.chuseok22.elumserver.ai.infrastructure.entity.AiCallLog;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface AiCallLogRepository extends JpaRepository<AiCallLog, String> {
-
-  Page<AiCallLog> findByCallType(AiCallType callType, Pageable pageable);
-
-  Page<AiCallLog> findBySuccess(boolean success, Pageable pageable);
-
-  Page<AiCallLog> findByCallTypeAndSuccess(AiCallType callType, boolean success, Pageable pageable);
+public interface AiCallLogRepository extends JpaRepository<AiCallLog, String>, JpaSpecificationExecutor<AiCallLog> {
 
   List<AiCallLog> findTop20ByMemberIdOrderByCreatedAtDesc(String memberId);
 

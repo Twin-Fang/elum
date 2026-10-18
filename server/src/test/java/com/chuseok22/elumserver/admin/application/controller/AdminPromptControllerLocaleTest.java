@@ -84,10 +84,10 @@ class AdminPromptControllerLocaleTest {
     RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
 
     String view = controller.update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "ja", request,
-      new BeanPropertyBindingResult(request, "request"), redirect);
+      new BeanPropertyBindingResult(request, "request"), () -> "kimchi", redirect);
 
     assertThat(view).isEqualTo("redirect:/admin/prompts?locale=ja");
-    verify(adminPromptService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.JA, "내용");
+    verify(adminPromptService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.JA, "내용", "kimchi");
     assertThat(redirect.getFlashAttributes()).containsKey("message");
   }
 
@@ -96,11 +96,11 @@ class AdminPromptControllerLocaleTest {
   void update_missingRow_explainsHowToCreate() {
     PromptUpdateRequest request = new PromptUpdateRequest("내용");
     doThrow(new CustomException(ErrorCode.PROMPT_TEMPLATE_NOT_FOUND))
-      .when(adminPromptService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.ZH, "내용");
+      .when(adminPromptService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.ZH, "내용", "kimchi");
     RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
 
     String view = controller.update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "zh", request,
-      new BeanPropertyBindingResult(request, "request"), redirect);
+      new BeanPropertyBindingResult(request, "request"), () -> "kimchi", redirect);
 
     assertThat(view).isEqualTo("redirect:/admin/prompts?locale=zh");
     assertThat((String) redirect.getFlashAttributes().get("errorMessage"))
@@ -112,11 +112,11 @@ class AdminPromptControllerLocaleTest {
   void update_blank_keepsTheExistingMessage() {
     PromptUpdateRequest request = new PromptUpdateRequest("   ");
     doThrow(new CustomException(ErrorCode.PROMPT_TEMPLATE_BLANK))
-      .when(adminPromptService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.KO, "   ");
+      .when(adminPromptService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.KO, "   ", "kimchi");
     RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
 
     controller.update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "ko", request,
-      new BeanPropertyBindingResult(request, "request"), redirect);
+      new BeanPropertyBindingResult(request, "request"), () -> "kimchi", redirect);
 
     assertThat((String) redirect.getFlashAttributes().get("errorMessage"))
       .endsWith("프롬프트를 저장하지 않았습니다. 내용을 입력해주세요. (E-PRM-001)");
@@ -152,10 +152,10 @@ class AdminPromptControllerLocaleTest {
     RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
 
     String view = controller.update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "en-US", request,
-      new BeanPropertyBindingResult(request, "request"), redirect);
+      new BeanPropertyBindingResult(request, "request"), () -> "kimchi", redirect);
 
     assertThat(view).isEqualTo("redirect:/admin/prompts?locale=ko");
-    verify(adminPromptService, never()).update(any(), any(AppLocale.class), any());
+    verify(adminPromptService, never()).update(any(), any(AppLocale.class), any(), any());
     verify(adminPromptService, never()).update(any(), any(String.class));
     assertThat((String) redirect.getFlashAttributes().get("errorMessage")).contains("en-US");
   }
@@ -167,10 +167,10 @@ class AdminPromptControllerLocaleTest {
     RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
 
     String view = controller.update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, " EN ", request,
-      new BeanPropertyBindingResult(request, "request"), redirect);
+      new BeanPropertyBindingResult(request, "request"), () -> "kimchi", redirect);
 
     assertThat(view).isEqualTo("redirect:/admin/prompts?locale=en");
-    verify(adminPromptService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.EN, "내용");
+    verify(adminPromptService).update(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, AppLocale.EN, "내용", "kimchi");
   }
 
   @Test
