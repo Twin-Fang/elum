@@ -34,8 +34,8 @@ class ArchitectureRulesTest {
   private static final String CROSS_DOMAIN_REPOSITORY_ALLOWLIST = "/architecture/cross-domain-repository-allowlist.txt";
   private static final String NEW_OBJECT_MAPPER_ALLOWLIST = "/architecture/new-object-mapper-allowlist.txt";
 
-  /// 원문 로그 검사 대상 도메인 3개: 보호자 입력·AI 지시문·AI 응답을 다루는 곳
-  private static final List<String> RAW_TEXT_LOG_DOMAINS = List.of("ai", "routine", "admin");
+  /// 원문 로그 검사 대상 도메인 4개: 보호자 입력·AI 지시문·AI 응답·이름·프로필을 다루는 곳
+  private static final List<String> RAW_TEXT_LOG_DOMAINS = List.of("ai", "routine", "admin", "member");
   private static final Pattern LOG_CALL_START = Pattern.compile("\\blog\\.(info|warn|debug|error|trace)\\(");
   /// 원문을 담는 변수·접근자 이름 (LogTextLength.of(...) 로 감싸면 허용)
   private static final Pattern RAW_TEXT_ARGUMENT = Pattern.compile(
@@ -87,7 +87,7 @@ class ArchitectureRulesTest {
   }
 
   @Test
-  @DisplayName("ai·routine·admin 로그는 보호자 입력·지시문·AI 응답 원문을 남기지 않는다")
+  @DisplayName("ai·routine·admin·member 로그는 보호자 입력·지시문·AI 응답 원문을 남기지 않는다")
   void rawTextIsNotLogged() throws IOException {
     List<String> violations = new ArrayList<>();
     for (String domain : RAW_TEXT_LOG_DOMAINS) {
@@ -105,7 +105,7 @@ class ArchitectureRulesTest {
   }
 
   @Test
-  @DisplayName("ai·routine·admin 컨트롤러의 @LogMonitoring 은 요청·응답 본문 로그를 켜지 않는다")
+  @DisplayName("ai·routine·admin·member 컨트롤러의 @LogMonitoring 은 요청·응답 본문 로그를 켜지 않는다")
   void controllersDoNotLogRequestAndResponseBodies() throws IOException {
     List<String> violations = new ArrayList<>();
     for (String domain : RAW_TEXT_LOG_DOMAINS) {

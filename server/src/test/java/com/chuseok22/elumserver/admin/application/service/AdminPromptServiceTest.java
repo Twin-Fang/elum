@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.admin.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -18,6 +19,9 @@ import com.chuseok22.elumserver.ai.infrastructure.client.GeminiRoutineImagePromp
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageGenerationClient;
 import com.chuseok22.elumserver.ai.infrastructure.client.ImageClientRouter;
 import com.chuseok22.elumserver.ai.infrastructure.client.GeminiTextClient;
+import com.chuseok22.elumserver.ai.infrastructure.client.TextClientRouter;
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,6 +59,9 @@ class AdminPromptServiceTest {
 
   @Mock
   private FluxPromptBuilder fluxPromptBuilder;
+
+  @Mock
+  private TextClientRouter textClientRouter;
 
   @InjectMocks
   private AdminPromptService adminPromptService;
@@ -212,5 +219,39 @@ class AdminPromptServiceTest {
       org.assertj.core.api.Assertions.assertThatCode(
         () -> adminPromptService.preview(key, "content", "sample", null)).as(key.name()).doesNotThrowAnyException();
     }
+  }
+
+  @Test
+  @DisplayName("텍스트 제공자를 쓸 수 없으면 TEXT_PROVIDER_UNAVAILABLE 코드가 그대로 나간다")
+  void test_textProviderUnavailable_keepsErrorCode() {
+    when(textClientRouter.current()).thenThrow(new CustomException(ErrorCode.TEXT_PROVIDER_UNAVAILABLE));
+
+    assertThatThrownBy(() -> adminPromptService.test(
+      PromptKey.GEMINI_ROUTINE_CREATE_PREFIX, "Rules.", "우산", null))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TEXT_PROVIDER_UNAVAILABLE));
+  }
+
+  @Test
+  @DisplayName("이미지 제공자를 쓸 수 없으면 IMAGE_PROVIDER_UNAVAILABLE 코드가 그대로 나간다")
+  void test_imageProviderUnavailable_keepsErrorCode() {
+    when(imageClientRouter.current()).thenThrow(new CustomException(ErrorCode.IMAGE_PROVIDER_UNAVAILABLE));
+
+    assertThatThrownBy(() -> adminPromptService.test(
+      PromptKey.REALISTIC_ROUTINE_IMAGE_PREFIX, "Rules.", "우산", null))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.IMAGE_PROVIDER_UNAVAILABLE));
+  }
+
+  @Test
+  @DisplayName("그 밖의 예외는 PROMPT_TEST_*_FAILED 로 바뀐다")
+  void test_unexpectedException_becomesPromptTestFailed() {
+    when(geminiTextClient.translateImagePromptForTest("Rewrite.", "우산"))
+      .thenThrow(new IllegalStateException("boom"));
+
+    assertThatThrownBy(() -> adminPromptService.test(
+      PromptKey.FLUX_IMAGE_PROMPT_TRANSLATE, "Rewrite.", "우산", null))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.PROMPT_TEST_GEMINI_TEXT_FAILED));
   }
 }
