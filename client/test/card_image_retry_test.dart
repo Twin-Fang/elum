@@ -31,12 +31,21 @@ void main() {
     return (container, adapter);
   }
 
+  /// 재시도가 없음을 보일 때: 일어나지 않을 일이라 일정 시간만 기다린다
   Future<void> settle() => Future<void>.delayed(const Duration(milliseconds: 200));
+
+  /// 재시도가 일어날 때: 바쁜 CI 에서도 타이머가 늦지 않도록 조건이 될 때까지 기다린다
+  Future<void> waitUntil(bool Function() isDone) async {
+    final deadline = DateTime.now().add(const Duration(seconds: 5));
+    while (!isDone() && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+  }
 
   test('502 가 두 번 나도 서버가 돌아오면 그림을 받는다', () async {
     final (container, adapter) = setup([502, 502, 200]);
 
-    await settle();
+    await waitUntil(() => container.read(cardImageProvider(key)).value != null);
 
     expect(adapter.calls, 3, reason: '실패 둘 + 성공 하나');
     final bytes = container.read(cardImageProvider(key)).value;
