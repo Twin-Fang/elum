@@ -44,7 +44,8 @@ class ErrorMessageParityTest {
   @Test
   @DisplayName("원본 이후 더한 코드는 golden 밖에서 따로 단언한다 — golden 을 다시 만들면 원본 증명이 흐려진다")
   void codesAddedAfterOriginal_areAssertedSeparately() {
-    assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size());
+    assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
+      + ADDED_ADMIN_CREDIT_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -65,6 +66,31 @@ class ErrorMessageParityTest {
       .isEqualTo("공지 언어는 ko, en, ja, zh, es 중 하나예요.");
     assertThat(ErrorMessages.standard().of(ErrorCode.NOTICE_LOCALE_INVALID, AppLocale.EN)).isNotBlank();
   }
+
+  // 관리자 크레딧 화면이 더한 코드. 문구·detail 은 AdminCreditServiceTest 가 코드 단위로 본다.
+  private static final java.util.List<ErrorCode> ADDED_ADMIN_CREDIT_CODES = java.util.List.of(
+    ErrorCode.ADMIN_CREDIT_ACCOUNT_ALREADY_FROZEN,
+    ErrorCode.ADMIN_CREDIT_ACCOUNT_NOT_FROZEN,
+    ErrorCode.ADMIN_CREDIT_ADJUST_TYPE_REQUIRED,
+    ErrorCode.ADMIN_CREDIT_ADJUST_TYPE_UNKNOWN,
+    ErrorCode.ADMIN_CREDIT_AMOUNT_NOT_NUMBER,
+    ErrorCode.ADMIN_CREDIT_AMOUNT_REQUIRED,
+    ErrorCode.ADMIN_CREDIT_AMOUNT_TOO_LARGE,
+    ErrorCode.ADMIN_CREDIT_AMOUNT_TOO_SMALL,
+    ErrorCode.ADMIN_CREDIT_DEDUCT_EXCEEDS_AVAILABLE,
+    ErrorCode.ADMIN_CREDIT_EXPIRY_DATE_INVALID,
+    ErrorCode.ADMIN_CREDIT_EXPIRY_DATE_REQUIRED,
+    ErrorCode.ADMIN_CREDIT_EXPIRY_NOT_FUTURE,
+    ErrorCode.ADMIN_CREDIT_JOB_NOT_FOUND,
+    ErrorCode.ADMIN_CREDIT_JOB_NOT_RELEASABLE,
+    ErrorCode.ADMIN_CREDIT_POLICY_APPLY_INVALID,
+    ErrorCode.ADMIN_CREDIT_POLICY_TTL_TOO_SHORT,
+    ErrorCode.ADMIN_CREDIT_POLICY_VALUE_NEGATIVE,
+    ErrorCode.ADMIN_CREDIT_POLICY_VALUE_NOT_NUMBER,
+    ErrorCode.ADMIN_CREDIT_POLICY_VALUE_REQUIRED,
+    ErrorCode.ADMIN_CREDIT_REASON_REQUIRED,
+    ErrorCode.ADMIN_CREDIT_REASON_TOO_LONG
+  );
 
   // 의견 보내기가 더한 코드.
   private static final java.util.List<ErrorCode> ADDED_FEEDBACK_CODES = java.util.List.of(

@@ -64,7 +64,7 @@ class AdminCreditControllerTest {
         .param("type", "GRANT").param("amount", "삼십").param("reason", "보상"))
       .andExpect(status().is3xxRedirection())
       .andExpect(redirectedUrl("/admin/credits/members/m1"))
-      .andExpect(flash().attribute("errorMessage", "조정하지 못했어요: 수량은 숫자로 적어주세요. (E-CRD-001)"));
+      .andExpect(flash().attribute("errorMessage", "조정하지 못했어요: 수량은 숫자로 적어주세요. (ADMIN_CREDIT_AMOUNT_NOT_NUMBER)"));
 
     verify(creditService, never()).adjust(anyString(), any(), anyInt(), any(), any(), any());
   }
@@ -73,12 +73,12 @@ class AdminCreditControllerTest {
   @DisplayName("조정 — 서비스 검사(차감 상한 등)에 걸리면 그 문구로 폼 오류")
   void adjust_serviceRejects_flashError() throws Exception {
     when(creditService.adjust(eq("m1"), eq(CreditAdjustType.DEDUCT), eq(50), isNull(), any(), eq("회수")))
-      .thenThrow(new IllegalArgumentException("남은 크레딧(10)보다 많이 뺄 수 없어요."));
+      .thenThrow(new CustomException(ErrorCode.ADMIN_CREDIT_DEDUCT_EXCEEDS_AVAILABLE, "남은 크레딧 10"));
 
     mockMvc.perform(post("/admin/credits/members/m1/adjust")
         .param("type", "DEDUCT").param("amount", "50").param("reason", "회수"))
       .andExpect(flash().attribute("errorMessage",
-        "조정하지 못했어요: 남은 크레딧(10)보다 많이 뺄 수 없어요. (E-CRD-001)"));
+        "조정하지 못했어요: 남은 크레딧보다 많이 뺄 수 없어요. [남은 크레딧 10] (ADMIN_CREDIT_DEDUCT_EXCEEDS_AVAILABLE)"));
   }
 
   @Test
@@ -99,7 +99,7 @@ class AdminCreditControllerTest {
         .param("type", "GRANT").param("amount", "30").param("reason", " "))
       .andExpect(status().isOk())
       .andExpect(view().name("admin/credits-member-detail"))
-      .andExpect(model().attribute("errorMessage", "조정할 수 없어요: 사유를 적어주세요. (E-CRD-001)"))
+      .andExpect(model().attribute("errorMessage", "조정할 수 없어요: 사유를 적어주세요. (ADMIN_CREDIT_REASON_REQUIRED)"))
       .andExpect(model().attributeDoesNotExist("preview"));
 
     verify(creditService, never()).previewAdjust(anyString(), any(), anyInt(), any());
@@ -133,11 +133,11 @@ class AdminCreditControllerTest {
   @DisplayName("수동 반환 — 돌아갈 곳은 크레딧 화면 안으로만, 실패는 폼 오류")
   void release_backIsSanitized() throws Exception {
     when(creditService.manualRelease(eq("j1"), any(), eq("")))
-      .thenThrow(new IllegalArgumentException("사유를 적어주세요."));
+      .thenThrow(new CustomException(ErrorCode.ADMIN_CREDIT_REASON_REQUIRED));
 
     mockMvc.perform(post("/admin/credits/jobs/j1/release").param("reason", "").param("back", "https://evil.example"))
       .andExpect(redirectedUrl("/admin/credits/jobs"))
-      .andExpect(flash().attribute("errorMessage", "반환하지 못했어요: 사유를 적어주세요. (E-CRD-002)"));
+      .andExpect(flash().attribute("errorMessage", "반환하지 못했어요: 사유를 적어주세요. (ADMIN_CREDIT_REASON_REQUIRED)"));
     mockMvc.perform(post("/admin/credits/jobs/j1/release").param("reason", "멈춤")
         .param("back", "/admin/credits/members/m1"))
       .andExpect(redirectedUrl("/admin/credits/members/m1"));
@@ -152,7 +152,7 @@ class AdminCreditControllerTest {
         .param("grantApply", "NEXT_PERIOD").param("reason", "조정"))
       .andExpect(redirectedUrl("/admin/credits/policy"))
       .andExpect(flash().attribute("errorMessage",
-        "발행하지 못했어요: Free 주간 지급량은(는) 숫자로 적어주세요. (E-CRD-003)"));
+        "발행하지 못했어요: 숫자로 적어주세요. [Free 주간 지급량] (ADMIN_CREDIT_POLICY_VALUE_NOT_NUMBER)"));
 
     verify(creditService, never()).publishPolicy(any(), any());
   }

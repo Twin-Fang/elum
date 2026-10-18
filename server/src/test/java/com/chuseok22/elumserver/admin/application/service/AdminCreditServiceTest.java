@@ -11,6 +11,8 @@ import com.chuseok22.elumserver.admin.application.dto.request.CreditAdjustType;
 import com.chuseok22.elumserver.admin.application.dto.response.CreditAdjustPreview;
 import com.chuseok22.elumserver.admin.application.dto.response.CreditPolicyPreview;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.credit.application.service.CreditAccountService;
 import com.chuseok22.elumserver.credit.application.service.CreditPolicyService;
 import com.chuseok22.elumserver.credit.application.service.CreditTestStore;
@@ -119,8 +121,16 @@ class AdminCreditServiceTest {
     return accountService.balance(account, NOW).available();
   }
 
-  private static void assertFormError(Runnable call, String messagePart) {
-    assertThatThrownBy(call::run).isInstanceOf(IllegalArgumentException.class).hasMessageContaining(messagePart);
+  private static void assertFormError(Runnable call, ErrorCode expected) {
+    assertThatThrownBy(call::run).isInstanceOf(CustomException.class)
+      .extracting(e -> ((CustomException) e).getErrorCode()).isEqualTo(expected);
+  }
+
+  /// 코드와 함께 화면에 덧붙는 값(detail)까지 확인
+  private static void assertFormError(Runnable call, ErrorCode expected, String detailPart) {
+    assertFormError(call, expected);
+    assertThatThrownBy(call::run).extracting(e -> ((CustomException) e).getDetail()).asString()
+      .contains(detailPart);
   }
 
   // --- 조정 ---
@@ -184,8 +194,9 @@ class AdminCreditServiceTest {
     store.weekly(ACCOUNT_ID, NOW, 100, 12);
     store.reservedJob(ACCOUNT_ID, "k1", CreditJobKind.ROUTINE_CREATE, 2, NOW.minusMinutes(1));
 
-    assertFormError(() -> service.previewAdjust(MEMBER_ID, CreditAdjustType.DEDUCT, 11, null), "10");
-    assertFormError(() -> service.adjust(MEMBER_ID, CreditAdjustType.DEDUCT, 11, null, ADMIN, "회수"), "10");
+    assertFormError(() -> service.previewAdjust(MEMBER_ID, CreditAdjustType.DEDUCT, 11, null), ErrorCode.ADMIN_CREDIT_DEDUCT_EXCEEDS_AVAILABLE, "10");
+    assertFormError(() -> service.adjust(MEMBER_ID, CreditAdjustType.DEDUCT, 11, null, ADMIN, "회수"),
+      ErrorCode.ADMIN_CREDIT_DEDUCT_EXCEEDS_AVAILABLE, "10");
     assertThat(store.ledger).isEmpty();
     assertThat(available()).isEqualTo(10);
   }
@@ -195,7 +206,7 @@ class AdminCreditServiceTest {
   void adjust_requiresReason() {
     store.weekly(ACCOUNT_ID, NOW, 100, 12);
 
-    assertFormError(() -> service.adjust(MEMBER_ID, CreditAdjustType.GRANT, 5, null, ADMIN, "  "), "사유");
+    assertFormError(() -> service.adjust(MEMBER_ID, CreditAdjustType.GRANT, 5, null, ADMIN, "  "), ErrorCode.ADMIN_CREDIT_REASON_REQUIRED);
     assertThat(store.ledger).isEmpty();
     assertThat(store.grants).hasSize(1);
   }
@@ -203,9 +214,12 @@ class AdminCreditServiceTest {
   @Test
   @DisplayName("수량 0·음수, 지난 만료 시각은 폼 오류다")
   void adjust_rejectsBadAmountsAndPastExpiry() {
-    assertFormError(() -> service.previewAdjust(MEMBER_ID, CreditAdjustType.GRANT, 0, null), "1 이상");
-    assertFormError(() -> service.previewAdjust(MEMBER_ID, CreditAdjustType.DEDUCT, -3, null), "1 이상");
-    assertFormError(() -> service.previewAdjust(MEMBER_ID, CreditAdjustType.GRANT, 3, NOW.minusHours(1)), "만료");
+    assertFormError(() -> service.previewAdjust(MEMBER_ID, CreditAdjustType.GRANT, 0, null), ErrorCode.ADMIN_CREDIT_AMOUNT_TOO_SMALL);
+    assertFormError(() -> service.previewAdjust(MEMBER_ID, CreditAdjustType.DEDUCT, -3, null), ErrorCode.ADMIN_CREDIT_AMOUNT_TOO_SMALL);
+    assertFormError(() -> service.previewAdjust(MEMBER_ID, CreditAdjustType.GRANT, 10_001, null),
+      ErrorCode.ADMIN_CREDIT_AMOUNT_TOO_LARGE, "10000");
+    assertFormError(() -> service.previewAdjust(MEMBER_ID, null, 1, null), ErrorCode.ADMIN_CREDIT_ADJUST_TYPE_REQUIRED);
+    assertFormError(() -> service.previewAdjust(MEMBER_ID, CreditAdjustType.GRANT, 3, NOW.minusHours(1)), ErrorCode.ADMIN_CREDIT_EXPIRY_NOT_FUTURE);
   }
 
   @Test
@@ -219,10 +233,12 @@ class AdminCreditServiceTest {
     assertThat(applied.summary()).isEqualTo("남음 12 → 12 · 동결, 즉시 적용");
     assertThat(store.ledgerOf(CreditLedgerType.ADJUST)).singleElement()
       .satisfies(line -> assertThat(line.getDelta()).isZero());
-    assertFormError(() -> service.adjust(MEMBER_ID, CreditAdjustType.FREEZE, 0, null, ADMIN, "또"), "이미 동결");
+    assertFormError(() -> service.adjust(MEMBER_ID, CreditAdjustType.FREEZE, 0, null, ADMIN, "또"), ErrorCode.ADMIN_CREDIT_ACCOUNT_ALREADY_FROZEN);
 
     service.adjust(MEMBER_ID, CreditAdjustType.UNFREEZE, 0, null, ADMIN, "확인 완료");
     assertThat(account.getStatus()).isEqualTo(CreditAccountStatus.ACTIVE);
+    assertFormError(() -> service.adjust(MEMBER_ID, CreditAdjustType.UNFREEZE, 0, null, ADMIN, "또"),
+      ErrorCode.ADMIN_CREDIT_ACCOUNT_NOT_FROZEN);
   }
 
   @Test
@@ -232,8 +248,8 @@ class AdminCreditServiceTest {
     assertThat(service.resolveExpiry(null, null)).isEqualTo(LocalDateTime.of(2026, 9, 28, 0, 0));
     assertThat(service.resolveExpiry("DATE", "2026-10-01")).isEqualTo(LocalDateTime.of(2026, 10, 2, 0, 0));
     assertThat(service.resolveExpiry("NONE", null)).isNull();
-    assertFormError(() -> service.resolveExpiry("DATE", ""), "날짜");
-    assertFormError(() -> service.resolveExpiry("DATE", "어제"), "날짜");
+    assertFormError(() -> service.resolveExpiry("DATE", ""), ErrorCode.ADMIN_CREDIT_EXPIRY_DATE_REQUIRED);
+    assertFormError(() -> service.resolveExpiry("DATE", "어제"), ErrorCode.ADMIN_CREDIT_EXPIRY_DATE_INVALID, "어제");
   }
 
   // --- 수동 반환 ---
@@ -263,10 +279,10 @@ class AdminCreditServiceTest {
   void manualRelease_rejects() {
     AiCreditJob job = store.reservedJob(ACCOUNT_ID, "k1", CreditJobKind.ROUTINE_CREATE, 1, NOW.minusHours(2));
 
-    assertFormError(() -> service.manualRelease(job.getId(), ADMIN, ""), "사유");
+    assertFormError(() -> service.manualRelease(job.getId(), ADMIN, ""), ErrorCode.ADMIN_CREDIT_REASON_REQUIRED);
     job.setStatus(CreditJobStatus.SETTLED);
-    assertFormError(() -> service.manualRelease(job.getId(), ADMIN, "반환"), "진행 중인 예약만");
-    assertFormError(() -> service.manualRelease("nope", ADMIN, "반환"), "작업");
+    assertFormError(() -> service.manualRelease(job.getId(), ADMIN, "반환"), ErrorCode.ADMIN_CREDIT_JOB_NOT_RELEASABLE, "SETTLED");
+    assertFormError(() -> service.manualRelease("nope", ADMIN, "반환"), ErrorCode.ADMIN_CREDIT_JOB_NOT_FOUND, "nope");
     assertThat(store.ledger).isEmpty();
   }
 
@@ -279,9 +295,9 @@ class AdminCreditServiceTest {
     PolicyDraft base = draft(100, 100, AiCreditPolicy.GRANT_APPLY_NEXT_PERIOD);
     PolicyDraft longPolicy = new PolicyDraft(true, base.weeklyGrant(), base.actionCosts(), 15, base.grantApply(), tooLong);
 
-    assertFormError(() -> service.manualRelease(job.getId(), ADMIN, tooLong), "200");
-    assertFormError(() -> service.adjust(MEMBER_ID, CreditAdjustType.GRANT, 5, null, ADMIN, tooLong), "200");
-    assertFormError(() -> service.publishPolicy(longPolicy, ADMIN), "200");
+    assertFormError(() -> service.manualRelease(job.getId(), ADMIN, tooLong), ErrorCode.ADMIN_CREDIT_REASON_TOO_LONG, "200");
+    assertFormError(() -> service.adjust(MEMBER_ID, CreditAdjustType.GRANT, 5, null, ADMIN, tooLong), ErrorCode.ADMIN_CREDIT_REASON_TOO_LONG, "200");
+    assertFormError(() -> service.publishPolicy(longPolicy, ADMIN), ErrorCode.ADMIN_CREDIT_REASON_TOO_LONG, "200");
     assertThat(job.getStatus()).isEqualTo(CreditJobStatus.RESERVED);
     assertThat(store.ledger).isEmpty();
   }

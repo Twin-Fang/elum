@@ -193,6 +193,29 @@ enum ServerErrorCode {
   // 프롬프트 행이 모자란 언어를 켜려 할 때 관리자 화면에서만 난다.
   contentLocalePromptMissing('CONTENT_LOCALE_PROMPT_MISSING'),
 
+  // 관리자 크레딧 화면 입력 검증. 관리자 화면에서만 난다 — 앱 사용자는 보지 못한다.
+  adminCreditReasonRequired('ADMIN_CREDIT_REASON_REQUIRED'),
+  adminCreditReasonTooLong('ADMIN_CREDIT_REASON_TOO_LONG'),
+  adminCreditAdjustTypeRequired('ADMIN_CREDIT_ADJUST_TYPE_REQUIRED'),
+  adminCreditAdjustTypeUnknown('ADMIN_CREDIT_ADJUST_TYPE_UNKNOWN'),
+  adminCreditAmountRequired('ADMIN_CREDIT_AMOUNT_REQUIRED'),
+  adminCreditAmountNotNumber('ADMIN_CREDIT_AMOUNT_NOT_NUMBER'),
+  adminCreditAmountTooSmall('ADMIN_CREDIT_AMOUNT_TOO_SMALL'),
+  adminCreditAmountTooLarge('ADMIN_CREDIT_AMOUNT_TOO_LARGE'),
+  adminCreditExpiryDateRequired('ADMIN_CREDIT_EXPIRY_DATE_REQUIRED'),
+  adminCreditExpiryDateInvalid('ADMIN_CREDIT_EXPIRY_DATE_INVALID'),
+  adminCreditExpiryNotFuture('ADMIN_CREDIT_EXPIRY_NOT_FUTURE'),
+  adminCreditDeductExceedsAvailable('ADMIN_CREDIT_DEDUCT_EXCEEDS_AVAILABLE'),
+  adminCreditAccountAlreadyFrozen('ADMIN_CREDIT_ACCOUNT_ALREADY_FROZEN'),
+  adminCreditAccountNotFrozen('ADMIN_CREDIT_ACCOUNT_NOT_FROZEN'),
+  adminCreditJobNotFound('ADMIN_CREDIT_JOB_NOT_FOUND'),
+  adminCreditJobNotReleasable('ADMIN_CREDIT_JOB_NOT_RELEASABLE'),
+  adminCreditPolicyValueRequired('ADMIN_CREDIT_POLICY_VALUE_REQUIRED'),
+  adminCreditPolicyValueNotNumber('ADMIN_CREDIT_POLICY_VALUE_NOT_NUMBER'),
+  adminCreditPolicyTtlTooShort('ADMIN_CREDIT_POLICY_TTL_TOO_SHORT'),
+  adminCreditPolicyApplyInvalid('ADMIN_CREDIT_POLICY_APPLY_INVALID'),
+  adminCreditPolicyValueNegative('ADMIN_CREDIT_POLICY_VALUE_NEGATIVE'),
+
   /// 앱이 모르는 코드. **서버가 새 코드를 먼저 배포하는 일은 반드시 생긴다.**
   /// 그때도 `errorMessage`는 맞으므로 문구는 그대로 보여줄 수 있다.
   unknown('');
