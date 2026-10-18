@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/config/ad_ids.dart';
-import '../../../ads/presentation/ad_native_slot.dart';
+import '../../../ads/presentation/ad_banner_slot.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import 'routine_detail_sheet.dart';
@@ -33,7 +33,7 @@ const _adTrailingGap = 24.0;
 /// 3개 이상이면 두 번째 다음, 2개면 첫 번째 다음이라 광고는 언제나 일과 **사이**에 든다
 /// (오클릭 방지 의도). 1개만 사이가 없어 끝에 붙는다. 0개면 넣지 않는다 —
 /// 빈 상태 아래에 두면 하단 배너와 함께 내용 없는 화면에 광고 둘이 붙어 AdMob 정책 위험이 있다.
-int _nativeAdAfterIndex(int count) => count >= 3 ? 1 : 0;
+int _inlineAdAfterIndex(int count) => count >= 3 ? 1 : 0;
 
 /// 보호자 홈 `지난 일과` (Figma 931:3896 — 지난일과_1).
 ///
@@ -96,7 +96,7 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
   Widget build(BuildContext context) {
     final async = ref.watch(pastRoutinesProvider);
     final routines = async.value ?? const <Routine>[];
-    // 일과가 적으면 네이티브 광고를 끼우지 않는다 (하단 배너와 같은 기준)
+    // 일과가 적으면 사이 광고를 끼우지 않는다 (하단 배너와 같은 기준)
     final shouldShowAds = ref.watch(shouldShowHomeAdsProvider);
 
     if (routines.isEmpty) {
@@ -139,11 +139,12 @@ class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
               );
             },
           ),
-          // 지난 일과 네이티브 광고 한 개. 로드에 실패하면 항목 자체가
+          // 지난 일과 배너 광고 한 개. 로드에 실패하면 항목 자체가
           // 없어 빈 자리가 남지 않는다. 오늘 일과에는 끼우지 않는다.
-          if (shouldShowAds && index == _nativeAdAfterIndex(routines.length))
-            AdNativeSlot(
-              placement: AdPlacement.nativeHomePast,
+          if (shouldShowAds && index == _inlineAdAfterIndex(routines.length))
+            AdBannerSlot(
+              placement: AdPlacement.bannerHomeMiddle,
+              style: AdBannerStyle.inlineCard,
               padding: EdgeInsets.only(
                 top: (routineTileGap + _adExtraGap).h,
                 // 마지막 줄 다음이면 아래가 하단 배너다 — 더 띄운다.

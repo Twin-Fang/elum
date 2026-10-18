@@ -112,7 +112,6 @@ void main() {
       expect(find.text(adButton), findsOneWidget);
       expect(find.text('닫기'), findsOneWidget);
     });
-
   });
 
   group('시청 → 지급', () {
@@ -154,7 +153,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('새로운 일과 만들기'), findsOneWidget);
     });
-
   });
 
   group('실패 — 코드를 보이고 홈으로 돌아온다', () {
@@ -208,7 +206,7 @@ class _GatedRepo extends FakeAdRewardRepo {
 
 class _NoBanner implements AdBannerLoader {
   @override
-  Future<LoadedBanner?> load(AdPlacement placement, int widthDp) async => null;
+  Future<LoadedBanner?> load(AdPlacement placement) async => null;
 }
 
 /// 서버가 가진 잔액을 흉내 낸다. 읽은 횟수를 센다.
@@ -221,9 +219,7 @@ class _Credit extends CreditRepository {
   @override
   Future<CreditSummary> getMine() async {
     calls++;
-    return CreditSummary.fromJson(
-      creditJson(available: available),
-    );
+    return CreditSummary.fromJson(creditJson(available: available));
   }
 }
 

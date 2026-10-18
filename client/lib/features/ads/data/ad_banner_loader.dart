@@ -27,7 +27,7 @@ class LoadedBanner {
 /// 배너를 불러온다. 테스트는 이것을 가짜로 바꿔 SDK를 띄우지 않는다.
 abstract interface class AdBannerLoader {
   /// 실패·미지원이면 null. **예외를 던지지 않는다.**
-  Future<LoadedBanner?> load(AdPlacement placement, int widthDp);
+  Future<LoadedBanner?> load(AdPlacement placement);
 }
 
 final adBannerLoaderProvider = Provider<AdBannerLoader>(
@@ -36,13 +36,14 @@ final adBannerLoaderProvider = Provider<AdBannerLoader>(
 
 /// google_mobile_ads 구현.
 ///
+/// 크기는 표준 배너(320x50) 하나로 고정한다. 적응형 앵커 배너는 기기 폭에 따라 높이가 커지고
+/// 상품 썸네일 캐러셀 같은 큰 소재가 올라와 화면이 번잡해진다.
+///
 /// SDK는 **처음 배너를 요청할 때** 초기화한다. 이룸이 전용 휴대폰은 보호자 화면을
 /// 열지 않으므로 SDK가 시작되지도 않는다.
 class GoogleAdBannerLoader implements AdBannerLoader {
   @override
-  Future<LoadedBanner?> load(AdPlacement placement, int widthDp) async {
-    // 폭 0에서 적응형 배너를 요청하면 예외가 난다(첫 프레임).
-    if (widthDp <= 0) return null;
+  Future<LoadedBanner?> load(AdPlacement placement) async {
     try {
       final unitId = AppConfig.adUnitId(placement, isIos: Platform.isIOS);
       // 릴리스인데 .env가 비었다 — 광고를 띄우지 않는다.
@@ -50,11 +51,7 @@ class GoogleAdBannerLoader implements AdBannerLoader {
 
       await AdSdk.ensureInitialized();
       final nonPersonalized = await AdConsent.useNonPersonalized();
-      final size =
-          await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
-            widthDp,
-          );
-      if (size == null) return null;
+      const size = AdSize.banner;
 
       final done = Completer<BannerAd?>();
       final ad = BannerAd(

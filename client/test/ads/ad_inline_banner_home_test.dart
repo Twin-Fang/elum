@@ -1,7 +1,7 @@
 import 'package:elum/features/ads/data/ad_banner_loader.dart';
 import 'package:elum/features/ads/application/ad_gate.dart';
+import 'package:elum/features/ads/presentation/ad_banner_slot.dart';
 import 'package:elum/core/config/ad_ids.dart';
-import 'package:elum/features/ads/data/ad_native_loader.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
@@ -19,7 +19,7 @@ import '../helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
 
-/// 홈 '지난 일과' 목록 사이의 네이티브 광고 (#465).
+/// 홈 '지난 일과' 목록 사이의 배너 광고 (#741: 네이티브 medium 360dp 를 얇은 배너로 교체).
 ///
 /// 실패하면 항목 자체가 없고, 지난 일과가 없으면 넣지 않으며, 오늘 일과에는 끼지 않는다.
 void main() {
@@ -37,7 +37,6 @@ void main() {
     for (var i = 1; i <= n; i++) routine('p$i', '지난 $i'),
   ];
 
-  late _CountingLoader loader;
   late _CountingBanner banner;
 
   Future<void> pumpHome(
@@ -60,7 +59,6 @@ void main() {
           memberProvider.overrideWith((ref) async => null),
           adsEnabledProvider.overrideWithValue(adsEnabled),
           adBannerLoaderProvider.overrideWithValue(banner),
-          adNativeLoaderProvider.overrideWithValue(loader),
         ],
         child: ScreenUtilInit(
           designSize: const Size(393, 852),
@@ -75,7 +73,6 @@ void main() {
   }
 
   setUp(() {
-    loader = _CountingLoader();
     banner = _CountingBanner();
   });
 
@@ -83,10 +80,17 @@ void main() {
     await pumpHome(tester, pastList: past(5));
 
     expect(find.text('광고'), findsOneWidget);
-    expect(loader.calls, 1, reason: '광고는 한 개만 요청한다');
+    expect(
+      banner.callsOf(AdPlacement.bannerHomeMiddle),
+      1,
+      reason: '사이 광고는 한 개만 요청한다',
+    );
 
     final second = tester.getTopLeft(find.text('지난 2')).dy;
-    final ad = tester.getTopLeft(find.byKey(const Key('광고 틀'))).dy;
+    final adFrame = find.byKey(AdBannerSlot.frameKey);
+    final ad = tester.getTopLeft(adFrame).dy;
+    // 얇은 배너 한 칸: 라벨 포함 배너의 세 배 이내
+    expect(tester.getSize(adFrame).height, lessThanOrEqualTo(150));
     final third = tester.getTopLeft(find.text('지난 3')).dy;
     expect(ad, greaterThan(second));
     expect(ad, lessThan(third));
@@ -96,7 +100,7 @@ void main() {
     await pumpHome(tester, pastList: const [], pastFails: true);
 
     expect(find.text('광고'), findsNothing);
-    expect(loader.calls, 0);
+    expect(banner.calls, 0);
   });
 
   // 광고가 없을 때 목록이 광고 자리를 아예 안 둔 때와 같아야 한다 — 빈 자리 금지.
@@ -106,10 +110,10 @@ void main() {
       for (var i = 1; i <= 5; i++) tester.getTopLeft(find.text('지난 $i')).dy,
     ];
 
-    loader = _CountingLoader(fail: true);
+    banner = _CountingBanner(fail: true);
     await pumpHome(tester, pastList: past(5));
 
-    expect(loader.calls, 1);
+    expect(banner.callsOf(AdPlacement.bannerHomeMiddle), 1);
     expect(find.text('광고'), findsNothing);
     expect([
       for (var i = 1; i <= 5; i++) tester.getTopLeft(find.text('지난 $i')).dy,
@@ -119,57 +123,49 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-
   // 일과가 적은 홈에 광고가 둘이나 붙으면 광고 화면처럼 보인다 — 오늘·지난 합이 5개 이상일 때만 둔다.
-  testWidgets('오늘·지난 일과를 합쳐 4개면 하단 배너도 네이티브도 요청하지 않는다', (tester) async {
+  testWidgets('오늘·지난 일과를 합쳐 4개면 하단 배너도 사이 배너도 요청하지 않는다', (tester) async {
     await pumpHome(
       tester,
       pastList: past(3),
       todayList: [routine('t1', '오늘 1')],
     );
 
-    expect(loader.calls, 0);
     expect(banner.calls, 0);
   });
 
-  testWidgets('오늘·지난 일과를 합쳐 5개면 하단 배너와 네이티브를 요청한다', (tester) async {
+  testWidgets('오늘·지난 일과를 합쳐 5개면 하단 배너와 사이 배너를 요청한다', (tester) async {
     await pumpHome(
       tester,
       pastList: past(3),
       todayList: [routine('t1', '오늘 1'), routine('t2', '오늘 2')],
     );
 
-    expect(loader.calls, 1);
-    expect(banner.calls, 1);
+    expect(banner.callsOf(AdPlacement.bannerHome), 1);
+    expect(banner.callsOf(AdPlacement.bannerHomeMiddle), 1);
   });
-
-}
-
-class _CountingLoader implements AdNativeLoader {
-  _CountingLoader({this.fail = false});
-
-  final bool fail;
-  var calls = 0;
-
-  @override
-  Future<LoadedNative?> load(AdPlacement placement, int widthDp) async {
-    calls++;
-    if (fail) return null;
-    return LoadedNative(
-      height: 100,
-      widget: const SizedBox(height: 100),
-      dispose: () {},
-    );
-  }
 }
 
 class _CountingBanner implements AdBannerLoader {
-  var calls = 0;
+  _CountingBanner({this.fail = false});
+
+  final bool fail;
+  final placements = <AdPlacement>[];
+
+  int get calls => placements.length;
+
+  int callsOf(AdPlacement placement) =>
+      placements.where((p) => p == placement).length;
 
   @override
-  Future<LoadedBanner?> load(AdPlacement placement, int widthDp) async {
-    calls++;
-    return null;
+  Future<LoadedBanner?> load(AdPlacement placement) async {
+    placements.add(placement);
+    if (fail) return null;
+    return LoadedBanner(
+      height: 50,
+      widget: const SizedBox(width: 320, height: 50),
+      dispose: () {},
+    );
   }
 }
 

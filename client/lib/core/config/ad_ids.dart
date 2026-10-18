@@ -4,11 +4,10 @@
 enum AdPlacement {
   bannerHome('BANNER_HOME'),
 
-  /// 보호자 홈 목록 한가운데(오늘 일과와 지난 일과 사이). 하단 배너와 별개로 노출을 늘린다.
+  /// 보호자 홈 지난 일과 목록 사이 한 칸. 하단 배너와 별개로 노출을 늘린다.
   bannerHomeMiddle('BANNER_HOME_MIDDLE'),
   bannerDrafts('BANNER_DRAFTS'),
   bannerSettings('BANNER_SETTINGS'),
-  nativeHomePast('NATIVE_HOME_PAST'),
   rewardedCredit('REWARDED_CREDIT');
 
   const AdPlacement(this.envSuffix);
@@ -34,10 +33,6 @@ abstract final class AdIds {
     AdPlacement.bannerHomeMiddle: _banner,
     AdPlacement.bannerDrafts: _banner,
     AdPlacement.bannerSettings: _banner,
-    AdPlacement.nativeHomePast: (
-      android: 'ca-app-pub-3940256099942544/2247696110',
-      ios: 'ca-app-pub-3940256099942544/3986624511',
-    ),
     AdPlacement.rewardedCredit: (
       android: 'ca-app-pub-3940256099942544/5224354917',
       ios: 'ca-app-pub-3940256099942544/1712485313',
