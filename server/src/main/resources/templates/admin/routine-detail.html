@@ -14,7 +14,11 @@
       <div class="card-body space-y-2 text-sm">
         <div class="flex items-center gap-2">
           <span class="text-base-content/60">보호자</span>
-          <span th:text="${routine.memberNickname() ?: routine.memberUsername()}">보호자</span>
+          <a th:if="${routine.memberUsername() != null}" th:href="@{/admin/members/{id}(id=${routine.memberId()})}"
+             class="link link-hover" th:text="${routine.memberUsername()}" data-member-link>보호자</a>
+          <span th:if="${routine.memberUsername() == null}" th:text="${routine.memberNickname() ?: '-'}">보호자</span>
+          <span th:if="${routine.memberUsername() != null and routine.memberNickname() != null}"
+                class="text-base-content/60" th:text="'(이룸이 ' + ${routine.memberNickname()} + ')'">(이룸이)</span>
           <span th:if="${routine.status().name() == 'PENDING_REVIEW'}" class="badge badge-warning">검토 대기</span>
           <span th:if="${routine.status().name() == 'CONFIRMED'}" class="badge badge-info">확정</span>
           <span th:if="${routine.status().name() == 'COMPLETED'}" class="badge badge-success">완료</span>

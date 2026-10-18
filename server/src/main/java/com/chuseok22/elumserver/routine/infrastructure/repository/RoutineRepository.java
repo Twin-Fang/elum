@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.routine.infrastructure.repository;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,17 +19,31 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
   boolean existsByProfileId(String profileId);
 
   /**
-   * 관리자 목록 검색. 제목과 이룸이 호칭으로 찾는다.
+   * 관리자 목록 검색: 상태 필터, 제목·이룸이 호칭 검색, 이룸이를 함께 조회(일과마다 따로 묻지 않음)
+   * 검색어는 호출부가 {@code AdminListQuery.likePattern()} 으로 이스케이프해 넘김 (ESCAPE '\\')
    *
    * <p><b>원문({@code rawInputText})은 찾지 않는다.</b> 보호자가 적은 말 그대로라
    * 관리자가 그것으로 검색할 수 있으면 원문을 들여다보는 통로가 된다 (서비스 원칙 5번).
+   *
+   * @param hasKeyword false 면 pattern 을 보지 않음 (null 파라미터 타입 추론 문제를 피하려고 따로 받음)
+   * @param statuses   보여줄 상태 (필터 없으면 전체)
    */
-  @Query("""
-    select r from Routine r
-    where lower(r.title) like lower(concat('%', :keyword, '%'))
-       or lower(r.profile.nickname) like lower(concat('%', :keyword, '%'))
+  @Query(value = """
+    select r from Routine r join fetch r.profile p
+    where r.status in :statuses
+      and (:hasKeyword = false
+        or lower(r.title) like lower(:pattern) escape '\\'
+        or lower(p.nickname) like lower(:pattern) escape '\\')
+    """, countQuery = """
+    select count(r) from Routine r join r.profile p
+    where r.status in :statuses
+      and (:hasKeyword = false
+        or lower(r.title) like lower(:pattern) escape '\\'
+        or lower(p.nickname) like lower(:pattern) escape '\\')
     """)
-  Page<Routine> searchForAdmin(@Param("keyword") String keyword, Pageable pageable);
+  Page<Routine> searchForAdmin(
+    @Param("hasKeyword") boolean hasKeyword, @Param("pattern") String pattern,
+    @Param("statuses") Collection<RoutineStatus> statuses, Pageable pageable);
 
   // 회원 목록 화면용 회원별 루틴 개수 집계 — N+1을 피하기 위해 in + group by 한 번에.
   @org.springframework.data.jpa.repository.Query("""
