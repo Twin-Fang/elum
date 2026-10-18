@@ -3,14 +3,20 @@ package com.chuseok22.elumserver.admin.application.service;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionSummary;
+import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionHistoryLine;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
 import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
 import com.chuseok22.elumserver.auth.infrastructure.entity.RevokeReason;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
+import com.chuseok22.elumserver.license.application.service.SubscriptionHistoryService;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
+import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
+import com.chuseok22.elumserver.license.infrastructure.entity.SubscriptionHistory;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -23,6 +29,7 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository.MemberRoutineCount;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -42,6 +49,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AdminMemberService {
 
+  /// 회원 상세에 보여줄 요금제 이력 최대 건수
+  private static final int PLAN_HISTORY_LIMIT = 50;
+  /// 요금제 필터 없음 (MemberRepository.searchForAdmin 의 planFilter 값)
+  private static final String PLAN_FILTER_ALL = "ALL";
+
   private final MemberRepository memberRepository;
 
   private final ProfileRepository profileRepository;
@@ -50,13 +62,18 @@ public class AdminMemberService {
   private final AiCallLogRepository aiCallLogRepository;
   private final RefreshTokenService refreshTokenService;
   private final SubscriptionService subscriptionService;
+  private final SubscriptionHistoryService subscriptionHistoryService;
   private final WithdrawnMemberService withdrawnMemberService;
 
-  // 검색어·상태 필터 조합에 따라 파생/JPQL 쿼리를 선택하고, 페이지에 실린 회원들의
-  // 루틴수·AI 사용량을 group by 집계 2번으로 붙인다(회원 수만큼 쿼리 금지).
-  public Page<AdminMemberResponse> search(String keyword, MemberStatus status, int page) {
-    Pageable pageable = PageRequest.of(Math.max(page, 0), AdminListDefaults.PAGE_SIZE, Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Member> members = findMembers(normalize(keyword), status, pageable);
+  /**
+   * 회원 목록: 조건 쿼리 1회 > 페이지 회원의 집계 보강(루틴수, AI 사용량, 이룸이, 구독, 마지막 변경 각 1회)
+   * 회원 수만큼 쿼리하지 않음. 범위 밖 페이지는 마지막 페이지로 맞춰 다시 조회
+   */
+  public Page<AdminMemberResponse> search(AdminListQuery query) {
+    Page<Member> members = findMembers(query);
+    if (members.getTotalPages() > 0 && query.page() > members.getTotalPages()) {
+      members = findMembers(query.withTotalPages(members.getTotalPages()));
+    }
 
     List<String> memberIds = members.getContent().stream().map(Member::getId).toList();
     Map<String, Long> routineCounts = memberIds.isEmpty() ? Map.of()
@@ -70,13 +87,17 @@ public class AdminMemberService {
     Map<String, Profile> profiles = memberIds.isEmpty() ? Map.of()
       : profileGuardianRepository.findAllWithProfileByMemberIdIn(memberIds).stream()
         .collect(Collectors.toMap(g -> g.getMember().getId(), ProfileGuardian::getProfile, (first, later) -> first));
+    Map<String, Subscription> subscriptions = subscriptionService.findAllByMemberIds(memberIds);
+    Map<String, SubscriptionHistory> lastPlanChanges = subscriptionHistoryService.latestByMemberIds(memberIds);
 
     return members.map(member -> AdminMemberResponse.of(
       member,
       profiles.get(member.getId()),
       routineCounts.getOrDefault(member.getId(), 0L),
       aiUsages.get(member.getId()),
-      withdrawnMemberService.retentionExpiresAt(member)
+      withdrawnMemberService.retentionExpiresAt(member),
+      subscriptions.get(member.getId()),
+      lastPlanChanges.get(member.getId())
     ));
   }
 
@@ -93,6 +114,9 @@ public class AdminMemberService {
       subscriptionService.find(memberId)
         .map(AdminSubscriptionSummary::from)
         .orElseGet(AdminSubscriptionSummary::none),
+      subscriptionHistoryService.recent(memberId, PLAN_HISTORY_LIMIT).stream()
+        .map(AdminSubscriptionHistoryLine::from)
+        .toList(),
       withdrawnMemberService.retentionExpiresAt(member)
     );
   }
@@ -100,22 +124,22 @@ public class AdminMemberService {
   /**
    * Pro를 켠다. 결제가 아직 없으므로 지금은 이 경로가 유일하게 Pro를 만드는 방법이다.
    *
-   * @param days null이면 무기한
+   * @param days  null 이면 무기한
+   * @param actor 변경한 관리자 로그인 이름 (요금제 이력에 남음)
    */
   // 이 클래스는 기본이 읽기 전용이다. 붙이지 않으면 읽기 전용 트랜잭션에 참여해
   // 저장이 flush되지 않고 조용히 사라진다 — 로그도 화면도 성공으로 보이는데 아무 일도
   // 일어나지 않는다. 실제로 그렇게 배포됐다.
   @Transactional
-  public void grantPro(String memberId, Integer days, String memo) {
+  public void grantPro(String memberId, Integer days, String reason, String actor) {
     requireNotWithdrawn(memberId);
-    LocalDateTime expiresAt = (days == null || days <= 0) ? null : LocalDateTime.now().plusDays(days);
-    subscriptionService.grantPro(memberId, expiresAt, memo);
+    subscriptionService.grantPro(memberId, days, reason, actor);
   }
 
   @Transactional
-  public void revokePro(String memberId) {
+  public void revokePro(String memberId, String reason, String actor) {
     requireNotWithdrawn(memberId);
-    subscriptionService.revokePro(memberId, "관리자 회수");
+    subscriptionService.revokePro(memberId, reason, actor);
   }
 
   // 탈퇴해도 행이 남는다. 탈퇴 회원은 세지 않으므로 뺀다.
@@ -177,21 +201,29 @@ public class AdminMemberService {
   }
 
   // 상태 필터가 없으면 탈퇴 계정을 뺀다. 탈퇴 계정은 "탈퇴" 필터로만 본다.
-  private Page<Member> findMembers(String keyword, MemberStatus status, Pageable pageable) {
-    if (keyword.isEmpty() && status == null) {
-      return memberRepository.findByStatusNot(MemberStatus.WITHDRAWN, pageable);
-    }
-    if (keyword.isEmpty()) {
-      return memberRepository.findByStatus(status, pageable);
-    }
-    if (status == null) {
-      return memberRepository.searchByKeywordAndStatusNot(keyword, MemberStatus.WITHDRAWN, pageable);
-    }
-    return memberRepository.searchByKeywordAndStatus(keyword, status, pageable);
+  private Page<Member> findMembers(AdminListQuery query) {
+    String statusFilter = query.filters().get(AdminMemberList.FILTER_STATUS);
+    List<MemberStatus> statuses = statusFilter == null
+      ? Arrays.stream(MemberStatus.values()).filter(status -> status != MemberStatus.WITHDRAWN).toList()
+      : List.of(MemberStatus.valueOf(statusFilter));
+    String planFilter = query.filters().getOrDefault(AdminMemberList.FILTER_PLAN, PLAN_FILTER_ALL);
+    Pageable pageable = PageRequest.of(query.pageIndex(), AdminListDefaults.PAGE_SIZE, sortOf(query));
+    return memberRepository.searchForAdmin(
+      query.q() != null, query.likePattern(), statuses, planFilter, LocalDateTime.now(), pageable);
   }
 
-  private String normalize(String keyword) {
-    return keyword == null ? "" : keyword.trim();
+  // 정렬 열 키 > 엔티티 속성 (허용 열만 들어오므로 그 밖은 기본 정렬). 동률은 id 로 고정해 페이지가 겹치지 않게 한다
+  private Sort sortOf(AdminListQuery query) {
+    Sort.Direction direction = query.isAscending() ? Sort.Direction.ASC : Sort.Direction.DESC;
+    Sort.Order mainOrder = switch (query.sortKey()) {
+      case AdminMemberList.SORT_USERNAME -> new Sort.Order(direction, "username");
+      // s 는 지금 유효한 Pro 구독뿐이라 Free 는 null 이다: 오름차순은 Free 먼저, 내림차순은 Pro 먼저
+      case AdminMemberList.SORT_PLAN -> new Sort.Order(direction, "s.plan").with(
+        query.isAscending() ? Sort.NullHandling.NULLS_FIRST : Sort.NullHandling.NULLS_LAST);
+      case AdminMemberList.SORT_LAST_ACTIVITY -> new Sort.Order(direction, "lastActivityAt");
+      default -> new Sort.Order(direction, "createdAt");
+    };
+    return Sort.by(mainOrder, new Sort.Order(Sort.Direction.ASC, "id"));
   }
 
   /**

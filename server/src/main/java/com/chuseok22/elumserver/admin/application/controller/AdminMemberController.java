@@ -1,11 +1,17 @@
 package com.chuseok22.elumserver.admin.application.controller;
 
+import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
+import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
 import com.chuseok22.elumserver.admin.application.service.AdminMemberService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
-import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,17 +25,31 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminMemberController {
 
   private final AdminMemberService adminMemberService;
+  private final AdminDateFormatter adminDateFormatter;
 
+  /// 회원 목록: 검색어(q), 필터(plan, status), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping("/admin/members")
   public String list(
-    @RequestParam(name = "keyword", required = false) String keyword,
-    @RequestParam(name = "status", required = false) MemberStatus status,
-    @RequestParam(name = "page", defaultValue = "1") int page,
+    @RequestParam(name = "q", required = false) String q,
+    @RequestParam(name = "plan", required = false) String plan,
+    @RequestParam(name = "status", required = false) String status,
+    @RequestParam(name = "sort", required = false) String sort,
+    @RequestParam(name = "page", required = false) String page,
     Model model
   ) {
-    model.addAttribute("members", adminMemberService.search(keyword, status, page - 1));
-    model.addAttribute("keyword", keyword == null ? "" : keyword);
-    model.addAttribute("selectedStatus", status);
+    Map<String, String> rawFilters = new HashMap<>();
+    rawFilters.put(AdminMemberList.FILTER_PLAN, plan);
+    rawFilters.put(AdminMemberList.FILTER_STATUS, status);
+    AdminListQuery query = AdminListQuery.of(q, rawFilters, sort, page, AdminMemberList.DEFINITION);
+
+    Page<AdminMemberResponse> members = adminMemberService.search(query);
+    model.addAttribute("members", members);
+    model.addAttribute("rows", members.getContent().stream()
+      .map(member -> AdminMemberList.toRow(member, adminDateFormatter)).toList());
+    model.addAttribute("definition", AdminMemberList.DEFINITION);
+    model.addAttribute("query", query);
+    // 페이저 링크가 검색·필터·정렬을 유지하도록 (page 는 페이저가 붙임)
+    model.addAttribute("pagerBaseUrl", "/admin/members" + query.toQueryString(query.sort(), 1));
     return "admin/members";
   }
 
@@ -57,13 +77,14 @@ public class AdminMemberController {
    * Pro 발급. 사유를 반드시 받는다 — 나중에 "이 계정은 왜 Pro지"에 답해야 한다.
    *
    * <p>기간을 비우면 무기한이다. 심사 전이라 인앱결제를 붙일 수 없어, 지금은 이 화면이
-   * Pro를 켜는 유일한 방법이다.
+   * Pro를 켜는 유일한 방법이다. 변경자는 로그인한 관리자 이름이 요금제 이력에 남는다.
    */
   @PostMapping("/admin/members/{id}/grant-pro")
   public String grantPro(
     @PathVariable String id,
     @RequestParam(name = "days", required = false) Integer days,
-    @RequestParam(name = "memo") String memo,
+    @RequestParam(name = "reason") String reason,
+    Principal principal,
     RedirectAttributes redirectAttributes
   ) {
     // 사유가 비었을 때만 상세 화면에 머물러 다시 넣게 한다. 입력 실수라 오류 화면으로 보내면 번거롭다.
@@ -71,7 +92,7 @@ public class AdminMemberController {
     // 사이 탈퇴한 계정에도 그 안내가 떠 원인이 가려지고 로그에도 남지 않는다.
     // 올려 보내면 AdminViewExceptionHandler 가 정지·강제 로그아웃과 같은 409 안내를 내고 로그에 남긴다.
     try {
-      adminMemberService.grantPro(id, days, memo);
+      adminMemberService.grantPro(id, days, reason, actorOf(principal));
     } catch (CustomException e) {
       if (e.getErrorCode() != ErrorCode.INVALID_INPUT_VALUE) {
         throw e;
@@ -85,9 +106,15 @@ public class AdminMemberController {
     return "redirect:/admin/members/" + id;
   }
 
+  /// Pro 회수. 사유를 비우면 기본 문구("관리자 회수")로 이력에 남는다
   @PostMapping("/admin/members/{id}/revoke-pro")
-  public String revokePro(@PathVariable String id, RedirectAttributes redirectAttributes) {
-    adminMemberService.revokePro(id);
+  public String revokePro(
+    @PathVariable String id,
+    @RequestParam(name = "reason", required = false) String reason,
+    Principal principal,
+    RedirectAttributes redirectAttributes
+  ) {
+    adminMemberService.revokePro(id, reason, actorOf(principal));
     redirectAttributes.addFlashAttribute("message", "Pro를 회수했습니다. 이 계정은 Free로 돌아갑니다.");
     return "redirect:/admin/members/" + id;
   }
@@ -110,5 +137,10 @@ public class AdminMemberController {
     adminMemberService.forceLogout(id);
     redirectAttributes.addFlashAttribute("message", "강제 로그아웃했습니다. 기존 토큰이 모두 무효화됩니다.");
     return "redirect:/admin/members/" + id;
+  }
+
+  // 세션 로그인 이름. 없으면 null 로 넘겨 서비스가 unknown 으로 남긴다
+  private String actorOf(Principal principal) {
+    return principal == null ? null : principal.getName();
   }
 }

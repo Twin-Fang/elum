@@ -102,9 +102,15 @@
           <div class="col-span-3" th:text="${member.subscription().memo() ?: '-'}">-</div>
         </div>
 
-        <div class="border-t border-base-200 pt-4">
+        <!-- 마지막 변경 (이력의 가장 최근 한 줄) -->
+        <div class="text-sm">
+          <span class="text-base-content/60 mr-2">마지막 변경</span>
+          <span th:replace="~{admin/fragments/admin-list :: lastChanged(${member.lastPlanChange()?.changedAt()}, ${member.lastPlanChange()?.changedBy()})}"></span>
+        </div>
+
+        <div class="border-t border-base-200 pt-4 space-y-3">
           <form th:action="@{/admin/members/{id}/grant-pro(id=${member.id()})}" method="post"
-                class="flex flex-wrap items-end gap-2">
+                class="flex flex-wrap items-end gap-2" data-grant-pro-form>
             <label class="form-control">
               <span class="label-text text-xs">기간(일) — 비우면 무기한</span>
               <input type="number" name="days" min="1" placeholder="30"
@@ -113,7 +119,7 @@
             <label class="form-control flex-1 min-w-64">
               <!-- 사유를 필수로 받는다. 나중에 "이 계정은 왜 Pro지"에 답해야 한다. -->
               <span class="label-text text-xs">사유 (필수)</span>
-              <input type="text" name="memo" required maxlength="500"
+              <input type="text" name="reason" required maxlength="500"
                      placeholder="예: 베타 테스터, 시연용 계정"
                      class="input input-bordered input-sm w-full"/>
             </label>
@@ -122,10 +128,49 @@
 
           <form th:if="${member.subscription().plan().name() == 'PRO'}"
                 th:action="@{/admin/members/{id}/revoke-pro(id=${member.id()})}" method="post"
-                class="mt-2"
+                class="flex flex-wrap items-end gap-2" data-revoke-pro-form
                 onsubmit="return confirm('Pro를 회수할까요? 이 계정은 Free로 돌아갑니다.');">
+            <label class="form-control flex-1 min-w-64">
+              <span class="label-text text-xs">회수 사유 (비우면 &quot;관리자 회수&quot;)</span>
+              <input type="text" name="reason" maxlength="500" placeholder="예: 기간 오입력"
+                     class="input input-bordered input-sm w-full"/>
+            </label>
             <button type="submit" class="btn btn-ghost btn-sm">Pro 회수</button>
           </form>
+        </div>
+
+        <!-- 요금제 이력: 부여·회수마다 한 줄씩 쌓인다 (최신순) -->
+        <div class="overflow-x-auto" data-plan-history>
+          <table class="table table-sm">
+            <thead>
+            <tr>
+              <th>시각</th>
+              <th>변경자</th>
+              <th>구분</th>
+              <th>요금제</th>
+              <th>기간</th>
+              <th>사유</th>
+            </tr>
+            </thead>
+            <tbody>
+            <th:block th:if="${member.planHistory().isEmpty()}">
+              <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(6, '아직 요금제를 바꾼 기록이 없어요')}"></tr>
+            </th:block>
+            <tr th:each="line : ${member.planHistory()}">
+              <td class="whitespace-nowrap" th:text="${@adminDate.format(line.changedAt())}">2026-10-18 09:00</td>
+              <td th:text="${line.changedBy()}">admin</td>
+              <td th:text="${line.action().label}">부여</td>
+              <td class="whitespace-nowrap" th:text="${line.beforePlan().label} + ' → ' + ${line.afterPlan().label}">무료 → 프로</td>
+              <td class="whitespace-nowrap">
+                <span th:if="${line.durationDays() != null}"
+                      th:text="${line.durationDays()} + '일 (~' + ${@adminDate.format(line.afterExpiresAt())} + ')'">30일</span>
+                <span th:if="${line.durationDays() == null and line.action().name() == 'GRANT'}">무기한</span>
+                <span th:if="${line.action().name() == 'REVOKE'}">-</span>
+              </td>
+              <td th:text="${line.reason()}">사유</td>
+            </tr>
+            </tbody>
+          </table>
         </div>
 
         <p class="text-xs text-base-content/50">

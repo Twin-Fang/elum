@@ -239,6 +239,8 @@ class WithdrawnMemberServiceTest {
     leaveFirst.verify(guardianshipService).leaveAll("m1");
     leaveFirst.verify(memberRepository).delete(member);
     verify(subscriptionRepository).deleteByMemberId("m1");
+    // 요금제 변경 이력도 완전 삭제 때 함께 지운다
+    verify(subscriptionService).deleteHistoryOf("m1");
     verify(adRewardSessionRepository).deleteAllByMemberId("m1");
     verify(feedbackService).deleteAllOf("m1");
     verify(refreshTokenRepository).deleteAllByMemberId("m1");

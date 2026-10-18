@@ -132,6 +132,8 @@ public class WithdrawnMemberService {
     // 계정 행 삭제가 외래키에 걸려 이번 삭제만 실패하고, 다음 부팅의 채우기 뒤 스케줄러가 다시 지운다.
     guardianshipService.leaveAll(memberId);
     subscriptionRepository.deleteByMemberId(memberId);
+    // 요금제 변경 이력은 탈퇴 직후에는 남기고 완전 삭제 때 함께 지운다
+    subscriptionService.deleteHistoryOf(memberId);
     adRewardSessionRepository.deleteAllByMemberId(memberId);
     feedbackService.deleteAllOf(memberId);
     refreshTokenRepository.deleteAllByMemberId(memberId);
