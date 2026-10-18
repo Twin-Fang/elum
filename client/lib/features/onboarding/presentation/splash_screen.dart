@@ -11,6 +11,7 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/app_destination.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/elum_error_view.dart';
 import '../../auth/application/auth_session_controller.dart';
 import '../application/splash_controller.dart';
 import '../../../core/router/routes.dart';
@@ -34,6 +35,9 @@ bool shouldSkipSplash({
   bool isElumiDevice = false,
 }) => hasSession && (onboardingCompleted || isElumiDevice);
 
+/// 시작 화면에서 다음 화면으로 못 넘어갔을 때 보이는 식별자
+const splashNavigationFailureCode = 'E-SPLASH-NAV';
+
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -46,6 +50,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   static const _autoAdvanceAfter = Duration(milliseconds: 1700);
 
   Timer? _advance;
+
+  /// 라우터 이동에 실패했는가: 켜지면 로고 대신 에러 코드와 재시도를 보임
+  bool _hasNavigationFailed = false;
+
+  /// 실패한 이동의 재시도 (같은 목적지를 다시 계산해 이동)
+  void _retryNavigation() {
+    setState(() => _hasNavigationFailed = false);
+    _goTo(_destination());
+  }
 
   @override
   void initState() {
@@ -93,8 +106,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       }
       router.go(route);
     } catch (e, stack) {
-      // 라우터가 없는 환경(테스트 등)에서는 화면을 그대로 둔다
+      // 이동 실패 (예외도 기록) > 에러 코드와 재시도 노출
       AppLogger.error('[splash] start navigation failed', e, stack);
+      if (mounted) setState(() => _hasNavigationFailed = true);
     }
   }
 
@@ -105,7 +119,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => const Scaffold(body: _SplashCanvas());
+  Widget build(BuildContext context) {
+    if (_hasNavigationFailed) {
+      return Scaffold(
+        backgroundColor: context.colors.splashPlain,
+        body: ElumErrorView(
+          message: context.l10n.commonScreenNotFound,
+          errorCode: splashNavigationFailureCode,
+          onRetry: _retryNavigation,
+        ),
+      );
+    }
+    return const Scaffold(body: _SplashCanvas());
+  }
 }
 
 /// Figma `스플래시`(1022:4415) — **단색 배경 위에 로고 하나뿐이다.**

@@ -172,9 +172,10 @@ abstract final class AppConfig {
 
   // --- 데모 연출 ---
 
-  /// AI DLP 처리 최소 노출 시간. 서버가 준다 ([ClientTuning]).
-  /// 응답이 빨라도 보안 처리를 체감시키기 위해 유지한다.
-  static Duration get dlpMinDelay => _tuning.dlpMinDelay;
+  /// 추가 질문 준비 로딩의 최소 노출 시간 (서버가 준다, [ClientTuning]).
+  /// 응답이 빨라도 체크리스트 연출이 한 번에 스쳐 지나가지 않게 한다.
+  /// 서버 계약상 키 이름은 `dlpMinDelayMs` 그대로다.
+  static Duration get prepareMinimumWait => _tuning.dlpMinDelay;
 
   /// 로딩 화면이 결과를 기다리는 최대 시간. 서버가 준다 ([ClientTuning]).
   ///

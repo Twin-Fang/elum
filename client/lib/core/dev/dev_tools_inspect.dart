@@ -225,7 +225,7 @@ class _StatusView extends ConsumerWidget {
         _Row('API', AppConfig.apiBaseUrl),
         _Row('네트워크 로그', '${AppConfig.enableNetworkLog}'),
         _Row('온보딩 건너뛰기', '${AppConfig.skipOnboarding}'),
-        _Row('DLP 최소 지연', '${AppConfig.dlpMinDelay.inMilliseconds}ms'),
+        _Row('준비 로딩 최소 대기', '${AppConfig.prepareMinimumWait.inMilliseconds}ms'),
       ],
     );
   }

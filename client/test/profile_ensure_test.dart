@@ -127,6 +127,18 @@ void main() {
       expect(repo.creates, 0);
     });
 
+    test('생성은 성공했는데 이룸이 목록이 비어 있으면 예외 없이 실패를 돌려준다', () async {
+      repo.createResult = Attempt.ok(const Member(profiles: [], profilesKnown: true));
+      final c = build();
+      await settle(c);
+      final before = c.read(profileSessionProvider);
+
+      final result = await c.read(profileSessionProvider.notifier).ensureProfile();
+
+      expect(result.isOk, isFalse);
+      expect(c.read(profileSessionProvider), before);
+    });
+
     test('실패하면 실패를 돌려주고 상태를 건드리지 않는다', () async {
       repo.createResult = Attempt.failed(
         serverFailure(500, ServerErrorCode.unknown),

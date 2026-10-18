@@ -98,7 +98,7 @@ abstract final class DevStateDump {
     '연결 타임아웃': '${AppConfig.connectTimeout.inMilliseconds}ms',
     '수신 타임아웃': '${AppConfig.receiveTimeout.inMilliseconds}ms',
     'TTS 주소': AppConfig.ttsBaseUrl,
-    'DLP 최소 연출': '${AppConfig.dlpMinDelay.inMilliseconds}ms',
+    '준비 로딩 최소 대기': '${AppConfig.prepareMinimumWait.inMilliseconds}ms',
     '약관 대기': '${AppConfig.consentFetchTimeout.inMilliseconds}ms',
     '카드 최대 대기': '${AppConfig.loadingMaxWait.inMilliseconds}ms',
     '개발자 도구': '${AppConfig.showDevTools}',
