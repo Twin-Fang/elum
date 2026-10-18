@@ -148,8 +148,8 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
 
     switch (widget.kind) {
       case RoutineLoadingKind.prepare:
-        // DLP는 화면 전환 없이 상태만 갱신 (전/후 비교 화면 없음, 여기서 멈추지 않음)
-        await notifier.runDlp();
+        // 응답이 빨라도 체크리스트 연출을 최소 시간 보여준다
+        await Future<void>.delayed(AppConfig.prepareMinimumWait);
         await notifier.askQuestion();
 
       case RoutineLoadingKind.generate:

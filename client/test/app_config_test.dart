@@ -19,7 +19,7 @@ void main() {
 
     test('숫자가 아닌 값이 와도 죽지 않고 기본값을 쓴다', () {
       dotenv.loadFromString(envString: 'ELUM_DLP_MIN_DELAY_MS=빠르게');
-      expect(AppConfig.dlpMinDelay, const Duration(milliseconds: 1500));
+      expect(AppConfig.prepareMinimumWait, const Duration(milliseconds: 1500));
     });
 
   });

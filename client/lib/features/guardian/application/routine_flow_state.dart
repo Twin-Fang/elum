@@ -5,8 +5,6 @@ import '../../../shared/models/routine.dart';
 /// 일과 생성 플로우의 단계.
 enum RoutineFlowStep {
   input,      // 자연어 입력
-  masking,    // DLP 처리 중 (연출)
-  maskResult, // 전/후 비교
   question,   // AI 추가 질문
   reward,     // 보상 정하기 (건너뛸 수 있다)
   generating, // 카드 생성 중
@@ -19,8 +17,6 @@ class RoutineFlowState {
   const RoutineFlowState({
     this.step = RoutineFlowStep.input,
     this.rawInput = '',
-    this.maskedInput = '',
-    this.detectedTypes = const [],
     this.question,
     this.questionInput = '',
     this.answers = const [],
@@ -37,10 +33,6 @@ class RoutineFlowState {
 
   final RoutineFlowStep step;
   final String rawInput;
-  final String maskedInput;
-
-  /// 탐지된 민감정보 **유형**만. 원문은 담지 않는다.
-  final List<String> detectedTypes;
   final RoutineQuestion? question;
 
   /// [question] 을 받아 올 때 보낸 입력. [answers] 는 이 입력에 딸린다.
@@ -101,8 +93,6 @@ class RoutineFlowState {
   RoutineFlowState copyWith({
     RoutineFlowStep? step,
     String? rawInput,
-    String? maskedInput,
-    List<String>? detectedTypes,
     RoutineQuestion? question,
     String? questionInput,
     List<String>? answers,
@@ -119,8 +109,6 @@ class RoutineFlowState {
     return RoutineFlowState(
       step: step ?? this.step,
       rawInput: rawInput ?? this.rawInput,
-      maskedInput: maskedInput ?? this.maskedInput,
-      detectedTypes: detectedTypes ?? this.detectedTypes,
       question: question ?? this.question,
       questionInput: questionInput ?? this.questionInput,
       answers: answers ?? this.answers,

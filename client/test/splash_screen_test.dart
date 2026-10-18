@@ -107,6 +107,35 @@ void main() {
 
   });
 
+  group('시작 화면 이동 실패', () {
+    useReduceMotion();
+
+    testWidgets('라우터가 없어 이동하지 못하면 에러 코드와 재시도를 보인다', (tester) async {
+      // 무한 대기 대신 제보할 코드와 다시 시도를 준다.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            testStorageOverride(onboardingCompleted: true),
+            tokenStoreProvider.overrideWithValue(
+              InMemoryTokenStore(accessToken: 'a', refreshToken: 'r'),
+            ),
+          ],
+          child: ScreenUtilInit(
+            designSize: const Size(393, 852),
+            builder: (context, child) => MaterialApp(
+              theme: AppTheme.light,
+              home: const SplashScreen(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining(splashNavigationFailureCode), findsWidgets);
+      expect(find.textContaining('다시 시도'), findsOneWidget);
+    });
+  });
+
   // idle 부유 모션 시험은 **로그인 화면으로 옮겼다** (이슈 #338).
   // 새싹 줄기와 구슬이 그쪽에만 있다 — `login_screen_test.dart` 참고.
 }

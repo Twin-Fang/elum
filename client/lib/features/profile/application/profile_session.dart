@@ -191,7 +191,14 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
       if (MemberRepository.isRouteMissing(failure)) return const Attempt.ok(false);
       return Attempt.failed(failure);
     }
-    final profile = result.value!.profiles.first;
+    // 생성 응답에 이룸이가 없다 — 저장을 이어 가지 않고 다시 시도하게 한다
+    final createdProfiles = result.value?.profiles ?? const <ProfileSummary>[];
+    if (createdProfiles.isEmpty) {
+      final emptyResponse = StateError('createProfile returned no profile');
+      AppLogger.error('[profile] createProfile ok but profiles empty', emptyResponse, StackTrace.current);
+      return Attempt.failed(AppFailure.of(emptyResponse));
+    }
+    final profile = createdProfiles.first;
 
     // 새 이룸이를 고른다. 저장 API 가 헤더 없이도 이 이룸이에 닿지만, 이후 요청이 같은 이룸이를
     // 가리키도록 명시해 둔다.

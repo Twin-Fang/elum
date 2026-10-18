@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/idempotency_key.dart';
@@ -11,7 +10,6 @@ import '../../../shared/models/routine.dart';
 import '../../credit/data/credit_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../data/routine_repository.dart';
-import '../domain/local_dlp.dart';
 import 'routine_flow_state.dart';
 import 'routine_providers.dart';
 
@@ -20,7 +18,7 @@ final routineFlowProvider =
   RoutineFlowNotifier.new,
 );
 
-/// 일과 입력 → DLP → 질문 → 카드 생성 → 승인 흐름을 관리한다.
+/// 일과 입력 → 질문 → 카드 생성 → 승인 흐름을 관리한다.
 ///
 /// 어떤 단계도 예외를 던지지 않는다. repository가 실패를 흡수하므로
 /// 화면은 항상 다음 단계로 진행할 수 있다.
@@ -32,31 +30,6 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     // 입력마다 불려 원문 대신 글자 수만 (docs 원칙 5번)
     AppLogger.notifierCall('RoutineFlowNotifier', 'setRawInput', {'inputLength': value.length});
     state = state.copyWith(rawInput: value);
-  }
-
-  /// DLP 처리. 응답이 빨라도 최소 노출 시간을 지킨다 —
-  /// 보안 처리를 체감시키기 위한 연출이다 (docs/07-mvp-scope.md 데모 안전 수칙).
-  Future<void> runDlp() async {
-    AppLogger.notifierCall('RoutineFlowNotifier', 'runDlp');
-    AppLogger.notifierStateChange('RoutineFlowNotifier', state.step.name, 'masking');
-    state = state.copyWith(step: RoutineFlowStep.masking);
-
-    final started = DateTime.now();
-    final masked = LocalDlp.mask(state.rawInput);
-    final types = LocalDlp.detectedTypes(state.rawInput);
-
-    final elapsed = DateTime.now().difference(started);
-    final remaining = AppConfig.dlpMinDelay - elapsed;
-    if (remaining > Duration.zero) await Future<void>.delayed(remaining);
-
-    AppLogger.notifierStateChange('RoutineFlowNotifier', 'masking', 'maskResult', {
-      'detectedTypes': types.join(', '),
-    });
-    state = state.copyWith(
-      step: RoutineFlowStep.maskResult,
-      maskedInput: masked,
-      detectedTypes: types,
-    );
   }
 
   /// AI 추가 질문을 받아온다.
@@ -101,8 +74,6 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
     state = RoutineFlowState(
       step: RoutineFlowStep.question,
       rawInput: state.rawInput,
-      maskedInput: state.maskedInput,
-      detectedTypes: state.detectedTypes,
       question: question,
       questionInput: state.rawInput,
       rewardText: state.rewardText,
@@ -117,7 +88,7 @@ class RoutineFlowNotifier extends Notifier<RoutineFlowState> {
   /// 질문 받기가 실패한 뒤 다시 한다. 카드를 만들지 않는다 —
   /// 준비 로딩의 `다시 하기`가 카드 생성 재시도로 이어지면 질문을 건너뛴다.
   Future<void> retryQuestion() {
-    state = state.copyWith(step: RoutineFlowStep.maskResult);
+    state = state.copyWith(step: RoutineFlowStep.input);
     return askQuestion();
   }
 

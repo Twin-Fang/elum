@@ -32,7 +32,7 @@ lib/
 │   │   ├── domain/                 # 모델 (Freezed)
 │   │   ├── application/            # provider / notifier
 │   │   └── presentation/           # 화면 + 화면 전용 위젯
-│   ├── guardian/                   # 보호자 모드 (일과 입력·DLP·카드 검토·승인)
+│   ├── guardian/                   # 보호자 모드 (일과 입력·카드 검토·승인)
 │   └── child/                      # 아동 모드 (카드 수행·TTS·별 보상)
 │
 └── shared/
@@ -115,37 +115,9 @@ final routes = [
 
 ## 서버 연동
 
-서버가 아직 없으므로 **repository 인터페이스를 먼저 정의하고 mock으로 구현**한다.
-
-```dart
-abstract interface class CardRepository {
-  Future<List<ActionCard>> generateCards(RoutineRequest req);
-}
-
-// 서버 준비 전 — 데모 시나리오 고정 응답
-class MockCardRepository implements CardRepository { ... }
-
-// 서버 준비 후 — provider만 갈아끼운다
-class RemoteCardRepository implements CardRepository { ... }
-```
-
-```dart
-@riverpod
-CardRepository cardRepository(Ref ref) => MockCardRepository();  // ← 한 줄 교체
-```
-
-### fallback 체인 (필수)
-
-루트 docs 원칙 6번: **데모는 어떤 실패 상황에서도 끝까지 진행되어야 한다.**
-
-```
-1차: 서버 API 호출
-2차: 서버 실패 → 클라이언트 내장 기본 카드 세트
-3차: 파싱 실패 → 하드코딩된 데모 카드 5장
-```
-
-어느 단계에서 실패했든 **사용자에게는 동일한 화면**이 보여야 한다.
-에러 다이얼로그를 띄우지 않는다 — 발표 중 치명적이다.
+일과·카드는 `features/guardian/data/routine_repository.dart` 의 `RoutineRepository`(구현 `routine_repository_impl.dart`)가
+서버 API 를 부른다. 서버가 실패하면 가짜 카드로 메우지 않는다 — notifier 가 `RoutineFlowStep.error` 로 전환하고
+화면이 에러 코드와 재시도를 보인다.
 
 ## 로컬 저장
 
@@ -199,5 +171,4 @@ dart run build_runner watch   # 개발 중 권장
 
 - 서버 base URL · 인증 방식 (MVP는 로그인 제외)
 - `ActionCard` 모델 필드 확정 (→ [../../docs/06-api-spec.md](../../docs/06-api-spec.md))
-- DLP 전/후 비교 화면의 데이터 형식
 - 아동 모드 TTS 음성 종류·속도

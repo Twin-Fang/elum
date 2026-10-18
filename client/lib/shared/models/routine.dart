@@ -122,11 +122,6 @@ abstract class Routine with _$Routine {
     return at.year == now.year && at.month == now.month && at.day == now.day;
   }
 
-  /// DLP가 실제로 무언가를 바꿨는가.
-  /// 둘이 같으면 탐지된 민감정보가 없다는 뜻이다.
-  bool get hasMaskedContent =>
-      sanitizedInputText.isNotEmpty && rawInputText != sanitizedInputText;
-
   /// 홈·아이 목록에 보여줄 제목.
   /// AI가 title을 못 만들어도 화면이 비지 않게 대체어를 준다 (docs 원칙 6번).
   String get displayTitle =>
