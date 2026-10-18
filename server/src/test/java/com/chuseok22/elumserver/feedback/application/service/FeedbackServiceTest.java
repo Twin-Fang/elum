@@ -11,11 +11,14 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.feedback.application.dto.request.FeedbackRequest;
+import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import com.chuseok22.elumserver.feedback.infrastructure.repository.FeedbackRepository;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 class FeedbackServiceTest {
@@ -162,5 +168,105 @@ class FeedbackServiceTest {
     service.delete("f1");
 
     verify(repository).delete(feedback);
+  }
+
+  private Feedback storedFeedback(String id) {
+    Feedback feedback = new Feedback();
+    feedback.setId(id);
+    when(repository.findById(id)).thenReturn(Optional.of(feedback));
+    return feedback;
+  }
+
+  @Test
+  @DisplayName("새 의견은 처리 상태가 NEW 이고 변경 기록이 없다 (기존 행도 V40 이 NEW 로 채운다)")
+  void newFeedback_startsAsNew() {
+    Feedback feedback = new Feedback();
+
+    assertThat(feedback.getStatus()).isEqualTo(FeedbackStatus.NEW);
+    assertThat(feedback.getStatusChangedAt()).isNull();
+    assertThat(feedback.getStatusChangedBy()).isNull();
+  }
+
+  @Test
+  @DisplayName("처리 상태를 바꾸면 상태와 변경자·변경 시각이 남는다")
+  void changeStatus_recordsActorAndTime() {
+    Feedback feedback = storedFeedback("f1");
+
+    service.changeStatus("f1", FeedbackStatus.IN_PROGRESS, "kimchi");
+
+    assertThat(feedback.getStatus()).isEqualTo(FeedbackStatus.IN_PROGRESS);
+    assertThat(feedback.getStatusChangedBy()).isEqualTo("kimchi");
+    assertThat(feedback.getStatusChangedAt()).isEqualTo(NOW);
+  }
+
+  @Test
+  @DisplayName("NEW > IN_PROGRESS > DONE > NEW 어느 방향이든 바꿀 수 있다 (끝난 의견 다시 열기 포함)")
+  void changeStatus_anyTransition() {
+    Feedback feedback = storedFeedback("f1");
+
+    for (FeedbackStatus next : List.of(FeedbackStatus.IN_PROGRESS, FeedbackStatus.DONE, FeedbackStatus.NEW,
+      FeedbackStatus.DONE)) {
+      service.changeStatus("f1", next, "kimchi");
+      assertThat(feedback.getStatus()).isEqualTo(next);
+    }
+  }
+
+  @Test
+  @DisplayName("같은 상태로 바꾸면 마지막 변경 기록을 건드리지 않는다")
+  void changeStatus_sameStatus_keepsLastChange() {
+    Feedback feedback = storedFeedback("f1");
+    feedback.setStatus(FeedbackStatus.DONE);
+    feedback.setStatusChangedBy("first");
+    feedback.setStatusChangedAt(NOW.minusDays(1));
+
+    service.changeStatus("f1", FeedbackStatus.DONE, "second");
+
+    assertThat(feedback.getStatusChangedBy()).isEqualTo("first");
+    assertThat(feedback.getStatusChangedAt()).isEqualTo(NOW.minusDays(1));
+  }
+
+  @Test
+  @DisplayName("없는 의견의 상태를 바꾸면 FEEDBACK_NOT_FOUND")
+  void changeStatus_notFound() {
+    when(repository.findById("nope")).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> service.changeStatus("nope", FeedbackStatus.DONE, "kimchi"))
+      .isInstanceOfSatisfying(CustomException.class,
+        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.FEEDBACK_NOT_FOUND));
+  }
+
+  @Test
+  @DisplayName("상태 필터가 없으면 모든 상태를, 있으면 그 상태만 조회하고 검색어 없으면 빈 패턴을 넘긴다")
+  void search_translatesFilter() {
+    when(repository.searchForAdmin(org.mockito.ArgumentMatchers.anyBoolean(), any(), any(), any(Pageable.class)))
+      .thenReturn(new PageImpl<>(List.of()));
+    ArgumentCaptor<Collection<FeedbackStatus>> statuses = ArgumentCaptor.forClass(Collection.class);
+    ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
+    ArgumentCaptor<String> pattern = ArgumentCaptor.forClass(String.class);
+
+    service.search(null, null, Sort.by("createdAt"), 2);
+    verify(repository).searchForAdmin(eq(false), pattern.capture(), statuses.capture(), pageable.capture());
+    assertThat(statuses.getValue()).containsExactlyInAnyOrder(FeedbackStatus.values());
+    assertThat(pattern.getValue()).isEmpty();
+    assertThat(pageable.getValue().getPageNumber()).isEqualTo(2);
+    assertThat(pageable.getValue().getPageSize()).isEqualTo(FeedbackService.ADMIN_PAGE_SIZE);
+
+    org.mockito.Mockito.clearInvocations(repository);
+    service.search("%느림\\%", FeedbackStatus.DONE, Sort.by("createdAt"), -3);
+    verify(repository).searchForAdmin(eq(true), pattern.capture(), statuses.capture(), pageable.capture());
+    assertThat(statuses.getValue()).containsExactly(FeedbackStatus.DONE);
+    assertThat(pattern.getValue()).isEqualTo("%느림\\%");
+    // 음수 페이지는 0으로 보정
+    assertThat(pageable.getValue().getPageNumber()).isZero();
+  }
+
+  @Test
+  @DisplayName("상태 이름 해석: 알 수 없거나 비면 빈 값")
+  void statusFromName() {
+    assertThat(FeedbackStatus.fromName("DONE")).contains(FeedbackStatus.DONE);
+    assertThat(FeedbackStatus.fromName(" IN_PROGRESS ")).contains(FeedbackStatus.IN_PROGRESS);
+    assertThat(FeedbackStatus.fromName("done")).isEmpty();
+    assertThat(FeedbackStatus.fromName(null)).isEmpty();
+    assertThat(FeedbackStatus.fromName("")).isEmpty();
   }
 }

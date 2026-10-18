@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.chuseok22.elumserver.admin.application.dto.request.NoticeEditForm;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminNoticeRow;
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.admin.application.list.AdminNoticeList;
 import com.chuseok22.elumserver.notice.core.NoticePlatform;
 import com.chuseok22.elumserver.notice.core.NoticeStatus;
 import com.chuseok22.elumserver.notice.infrastructure.entity.AppNotice;
@@ -18,17 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.context.IExpressionContext;
-import org.thymeleaf.linkbuilder.StandardLinkBuilder;
-import org.thymeleaf.spring6.SpringTemplateEngine;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 /**
  * 공지 관리 화면이 실제로 그려지는지와 태그 여닫기가 맞는지 (이슈 #370).
@@ -44,25 +42,7 @@ class AdminNoticeTemplateTest {
     "div", "form", "label", "table", "thead", "tbody", "tr", "ul", "li", "section", "aside", "main",
     "select", "button", "a", "span", "p", "template", "script", "style", "dialog", "details", "summary");
 
-  private SpringTemplateEngine engine;
-
-  @BeforeEach
-  void setUp() {
-    ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
-    resolver.setPrefix("templates/");
-    resolver.setSuffix(".html");
-    resolver.setTemplateMode(TemplateMode.HTML);
-    resolver.setCharacterEncoding("UTF-8");
-    engine = new SpringTemplateEngine();
-    engine.setTemplateResolver(resolver);
-    // 웹 요청 없이 그리므로 @{/...} 링크에 붙일 컨텍스트 경로가 없다. 빈 값으로 둔다.
-    engine.setLinkBuilder(new StandardLinkBuilder() {
-      @Override
-      protected String computeContextPath(IExpressionContext context, String base, Map<String, Object> parameters) {
-        return "";
-      }
-    });
-  }
+  private final AdminTemplateRenderSupport renderer = new AdminTemplateRenderSupport();
 
   private AppNotice notice(String id, String title, NoticePlatform platform) {
     AppNotice notice = new AppNotice();
@@ -78,20 +58,29 @@ class AdminNoticeTemplateTest {
     notice.setCreatedBy("kimchi");
     notice.setUpdatedBy("kimchi");
     notice.setImageKey(id + "/abc.png");
+    // 감사 컬럼은 setter 가 없어 JPA 가 채운다. 화면 확인용으로 직접 넣는다.
+    ReflectionTestUtils.setField(notice, "updatedAt", LocalDateTime.of(2026, 9, 22, 18, 5));
     return notice;
   }
 
   private String renderList(List<AdminNoticeRow> rows) {
-    Context context = new Context();
-    context.setVariable("rows", rows);
-    context.setVariable("hideDays", 7);
-    context.setVariable("previewJson", "{\"hideDays\":7,\"notices\":[]}");
-    context.setVariable("message", "공지를 저장했어요.");
-    return engine.process("admin/notices", context);
+    return renderList(rows, AdminListQuery.of(null, Map.of(), null, null, AdminNoticeList.DEFINITION));
+  }
+
+  private String renderList(List<AdminNoticeRow> rows, AdminListQuery query) {
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("notices", new PageImpl<>(rows, PageRequest.of(0, 20), rows.size()));
+    variables.put("rows", rows);
+    variables.put("definition", AdminNoticeList.DEFINITION);
+    variables.put("query", query);
+    variables.put("pagerBaseUrl", "/admin/notices" + query.toQueryString(query.sort(), 1));
+    variables.put("hideDays", 7);
+    variables.put("previewJson", "{\"hideDays\":7,\"notices\":[]}");
+    variables.put("message", "공지를 저장했어요.");
+    return renderer.render("admin/notices", variables);
   }
 
   private String renderEdit(AppNotice notice, String errorMessage) {
-    Context context = new Context();
     Map<String, Object> variables = new HashMap<>();
     variables.put("form", notice == null
       ? new NoticeEditForm("", "", "", "", "ALL", "ko", "0", "2026-09-23T12:00", "", false, false, false)
@@ -101,8 +90,7 @@ class AdminNoticeTemplateTest {
     variables.put("hideDays", 7);
     variables.put("previewJson", "{\"hideDays\":7,\"notices\":[]}");
     variables.put("errorMessage", errorMessage);
-    context.setVariables(variables);
-    return engine.process("admin/notice-edit", context);
+    return renderer.render("admin/notice-edit", variables);
   }
 
   @Test
@@ -123,6 +111,43 @@ class AdminNoticeTemplateTest {
     assertThat(html).containsPattern("data-live=\"true\"[^>]*action=\"/admin/notices/n1/delete\""
       + "|action=\"/admin/notices/n1/delete\"[^>]*data-live=\"true\"");
     assertThat(html).contains("/admin/js/notice-preview.js");
+  }
+
+  @Test
+  @DisplayName("목록은 마지막 수정을 공통 표기(시각 + 수정자)로 보이고, 정렬 헤더·검색·총 건수를 둔다")
+  void list_commonLastChangedAndSortHeaders() {
+    AppNotice notice = notice("n1", "안내", NoticePlatform.ALL);
+    ReflectionTestUtils.setField(notice, "updatedAt", LocalDateTime.of(2026, 10, 9, 8, 30));
+    notice.setUpdatedBy("kimchi");
+    AdminListQuery query = AdminListQuery.of("안내", Map.of(), "title,asc", null, AdminNoticeList.DEFINITION);
+
+    String html = renderList(List.of(new AdminNoticeRow(notice, NoticeStatus.LIVE, true)), query);
+
+    assertThat(html).contains("data-last-changed").contains("2026-10-09 08:30").contains("· kimchi");
+    assertThat(html).contains("data-admin-filter-bar").contains("value=\"안내\"").contains("제목 ▲")
+      .contains("마지막 수정").contains("총 <span>1</span>건");
+    // 켜기·끄기·지우기 등 행 동작은 그대로
+    assertThat(html).contains("/admin/notices/n1/enabled").contains("/admin/notices/n1/delete");
+  }
+
+  @Test
+  @DisplayName("한 쪽을 넘으면 검색 조건을 유지한 페이저를 보인다")
+  void list_pagerKeepsConditions() {
+    AdminListQuery query = AdminListQuery.of("안내", Map.of(), "title,asc", null, AdminNoticeList.DEFINITION);
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("notices", new PageImpl<>(List.<AdminNoticeRow>of(), PageRequest.of(0, 20), 45));
+    variables.put("rows", List.<AdminNoticeRow>of());
+    variables.put("definition", AdminNoticeList.DEFINITION);
+    variables.put("query", query);
+    variables.put("pagerBaseUrl", "/admin/notices" + query.toQueryString(query.sort(), 1));
+    variables.put("hideDays", 7);
+    variables.put("previewJson", "{\"hideDays\":7,\"notices\":[]}");
+
+    String html = renderer.render("admin/notices", variables);
+
+    assertThat(html).contains("data-admin-pager")
+      .contains("href=\"/admin/notices?q=%EC%95%88%EB%82%B4&amp;sort=title,asc&amp;page=2\"");
+    assertThat(html).contains("검색 조건에 맞는 공지가 없어요");
   }
 
   @Test

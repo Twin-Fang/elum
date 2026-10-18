@@ -2,6 +2,9 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.dto.request.NoticeEditForm;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminNoticeRow;
+import com.chuseok22.elumserver.admin.application.list.AdminListPaging;
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.admin.application.list.AdminNoticeList;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.notice.application.service.NoticeService;
 import com.chuseok22.elumserver.notice.core.NoticeEmphasis;
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -52,14 +56,30 @@ public class AdminNoticeController {
 
   private final NoticeService noticeService;
 
+  /// 공지 목록: 검색어(q), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping("/admin/notices")
-  public String list(Model model) {
+  public String list(
+    @RequestParam(name = "q", required = false) String q,
+    @RequestParam(name = "sort", required = false) String sort,
+    @RequestParam(name = "page", required = false) String page,
+    Model model
+  ) {
+    AdminListQuery query = AdminListQuery.of(q, Map.of(), sort, page, AdminNoticeList.DEFINITION);
+    Page<AppNotice> notices = AdminListPaging.fetchWithPageCorrection(query,
+      condition -> noticeService.search(condition.likePattern(), AdminNoticeList.pageableOf(condition)));
+
+    // 상태는 서버 시계로 한 번 판단해 넘긴다 (행마다 같은 시각 기준)
     LocalDateTime now = noticeService.now();
-    List<AdminNoticeRow> rows = noticeService.getAll().stream()
-      .map(notice -> new AdminNoticeRow(notice, noticeService.statusOf(notice),
+    List<AdminNoticeRow> rows = notices.getContent().stream()
+      .map(notice -> new AdminNoticeRow(notice, notice.statusAt(now),
         NoticeStatus.of(true, notice.getStartsAt(), notice.getEndsAt(), now).isLive()))
       .toList();
+    model.addAttribute("notices", notices);
     model.addAttribute("rows", rows);
+    model.addAttribute("definition", AdminNoticeList.DEFINITION);
+    model.addAttribute("query", query);
+    // 페이저 링크가 검색·정렬을 유지하도록 (page 는 페이저가 붙임)
+    model.addAttribute("pagerBaseUrl", "/admin/notices" + query.toQueryString(query.sort(), 1));
     addPreview(model, null);
     return "admin/notices";
   }

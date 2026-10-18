@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.admin.application.dto.request.NoticeEditForm;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminNoticeRow;
+import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.notice.application.dto.request.NoticeInput;
@@ -23,6 +24,11 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.ui.ExtendedModelMap;
@@ -68,6 +74,58 @@ class AdminNoticeControllerTest {
     notice.setStartsAt(LocalDateTime.of(2026, 9, 23, 9, 0));
     notice.setEnabled(true);
     return notice;
+  }
+
+  private void stubSearch(Page<AppNotice> page) {
+    when(noticeService.search(any(), any(Pageable.class))).thenReturn(page);
+  }
+
+  @Test
+  @DisplayName("목록은 검색·정렬·페이지를 서비스 조건으로 옮기고 행마다 서버 시계로 판단한 상태를 담는다")
+  void list_translatesConditions() {
+    AppNotice live = stored("n1");
+    stubSearch(new PageImpl<>(List.of(live), PageRequest.of(1, 20), 25));
+
+    String view = controller.list("100%", "title,asc", "2", model);
+
+    ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
+    verify(noticeService).search(eq("%100\\%%"), pageable.capture());
+    assertThat(view).isEqualTo("admin/notices");
+    assertThat(pageable.getValue().getPageNumber()).isEqualTo(1);
+    assertThat(pageable.getValue().getPageSize()).isEqualTo(AdminListDefaults.PAGE_SIZE);
+    assertThat(pageable.getValue().getSort().toString()).startsWith("title: ASC");
+    @SuppressWarnings("unchecked")
+    List<AdminNoticeRow> rows = (List<AdminNoticeRow>) model.get("rows");
+    assertThat(rows).hasSize(1);
+    assertThat(rows.get(0).status()).isEqualTo(NoticeStatus.LIVE);
+    assertThat(model.get("pagerBaseUrl")).isEqualTo("/admin/notices?q=100%25&sort=title,asc");
+  }
+
+  @Test
+  @DisplayName("허용 밖 정렬·깨진 페이지는 기본(최근 수정순, 1페이지)으로 조회한다. 미리보기 자료는 그대로 담는다")
+  void list_invalidConditionsFallBack() {
+    stubSearch(new PageImpl<>(List.of()));
+
+    controller.list(null, "body,asc", "abc", model);
+
+    ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
+    verify(noticeService).search(eq(null), pageable.capture());
+    assertThat(pageable.getValue().getPageNumber()).isZero();
+    assertThat(pageable.getValue().getSort().toString()).startsWith("updatedAt: DESC");
+    assertThat(model.get("previewJson")).isNotNull();
+  }
+
+  @Test
+  @DisplayName("범위 밖 페이지는 마지막 페이지로 맞춰 다시 조회한다")
+  void list_pageBeyondLast_refetchesLastPage() {
+    when(noticeService.search(any(), any(Pageable.class))).thenAnswer(call -> {
+      Pageable requested = call.getArgument(1);
+      return new PageImpl<AppNotice>(requested.getPageNumber() == 2 ? List.of(stored("n1")) : List.of(), requested, 41);
+    });
+
+    controller.list(null, null, "9", model);
+
+    assertThat(((Page<?>) model.get("notices")).getNumber()).isEqualTo(2);
   }
 
   @Test
@@ -197,10 +255,9 @@ class AdminNoticeControllerTest {
     AppNotice ended = stored("n3");
     ended.setEnabled(false);
     ended.setEndsAt(LocalDateTime.of(2026, 9, 23, 11, 0));
-    when(noticeService.getAll()).thenReturn(List.of(now, tomorrow, ended));
-    when(noticeService.statusOf(any())).thenReturn(NoticeStatus.DISABLED);
+    stubSearch(new PageImpl<>(List.of(now, tomorrow, ended)));
 
-    controller.list(model);
+    controller.list(null, null, null, model);
 
     @SuppressWarnings("unchecked")
     List<AdminNoticeRow> rows = (List<AdminNoticeRow>) model.get("rows");

@@ -3,11 +3,13 @@ package com.chuseok22.elumserver.feedback.application.service;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.feedback.application.dto.request.FeedbackRequest;
+import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import com.chuseok22.elumserver.feedback.infrastructure.repository.FeedbackRepository;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +28,7 @@ public class FeedbackService {
   static final int MAX_VERSION_LENGTH = 32;
   static final int MAX_OS_LENGTH = 64;
   static final int DAILY_LIMIT = 20;
+  // 관리자 목록 한 쪽 건수: admin 이 이 패키지를 부르므로 AdminListDefaults.PAGE_SIZE 를 못 읽는다. 같은 값인지는 시험이 지킨다
   public static final int ADMIN_PAGE_SIZE = 20;
 
   private final FeedbackRepository feedbackRepository;
@@ -73,11 +76,36 @@ public class FeedbackService {
     return feedbackRepository.save(feedback).getId();
   }
 
-  /// 관리자 목록. 최신순.
+  /**
+   * 관리자 목록: 상태 필터(null 이면 전체), 검색(이스케이프된 LIKE 패턴, null 이면 전체), 정렬, 페이지(0부터)
+   * 의견은 연관 엔티티가 없어 목록 쿼리 1회
+   */
   @Transactional(readOnly = true)
-  public Page<Feedback> list(int page) {
-    return feedbackRepository.findAll(
-      PageRequest.of(Math.max(page, 0), ADMIN_PAGE_SIZE, Sort.by(Sort.Direction.DESC, "createdAt")));
+  public Page<Feedback> search(String likePattern, FeedbackStatus statusFilter, Sort sort, int pageIndex) {
+    List<FeedbackStatus> statuses = statusFilter == null ? List.of(FeedbackStatus.values()) : List.of(statusFilter);
+    boolean hasKeyword = likePattern != null;
+    // 검색어가 없을 때도 파라미터 타입이 흔들리지 않게 빈 문자열을 넘긴다 (hasKeyword 가 false 면 쓰이지 않음)
+    return feedbackRepository.searchForAdmin(hasKeyword, hasKeyword ? likePattern : "", statuses,
+      PageRequest.of(Math.max(pageIndex, 0), ADMIN_PAGE_SIZE, sort));
+  }
+
+  /**
+   * 처리 상태 변경: 의견 조회 > 상태·변경자·변경 시각 기록
+   * 같은 상태로 바꾸면 기록을 남기지 않음 (마지막 변경 표시가 흔들리지 않게)
+   */
+  @Transactional
+  public Feedback changeStatus(String id, FeedbackStatus status, String actor) {
+    if (status == null) {
+      throw new IllegalArgumentException("status must not be null");
+    }
+    Feedback feedback = get(id);
+    if (feedback.getStatus() == status) {
+      return feedback;
+    }
+    feedback.setStatus(status);
+    feedback.setStatusChangedAt(LocalDateTime.now(clock));
+    feedback.setStatusChangedBy(actor);
+    return feedback;
   }
 
   @Transactional(readOnly = true)

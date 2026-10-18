@@ -1,13 +1,17 @@
 package com.chuseok22.elumserver.feedback.infrastructure.entity;
 
 import com.chuseok22.elumserver.common.infrastructure.entity.BaseEntity;
+import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.Getter;
@@ -46,6 +50,18 @@ public class Feedback extends BaseEntity {
 
   @Column(length = 64)
   private String os;
+
+  // 처리 상태. 기존 의견은 V40 이 NEW 로 채웠다. columnDefinition 은 로컬(ddl-auto: update)에서 행이 있는 표에 NOT NULL 을 더할 때 필요하다.
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 20, columnDefinition = "varchar(20) not null default 'NEW'")
+  private FeedbackStatus status = FeedbackStatus.NEW;
+
+  // 처리 상태를 마지막으로 바꾼 시각과 관리자. 한 번도 안 바꿨으면 null.
+  @Column(name = "status_changed_at")
+  private LocalDateTime statusChangedAt;
+
+  @Column(name = "status_changed_by")
+  private String statusChangedBy;
 
   // 앱이 기록 맨 앞에 두는 구역 표지. 앱의 AppLogBuffer 와 같은 글자여야 한다.
   private static final String ERROR_SECTION = "== 최근 오류 ==";

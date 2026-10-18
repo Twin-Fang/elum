@@ -21,6 +21,23 @@
     </div>
   </div>
 
+  <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}"></div>
+  <div th:if="${errorMessage}" class="alert alert-error" role="alert" th:text="${errorMessage}"></div>
+
+  <!-- 처리 상태: 바꾼 관리자와 시각이 남는다. -->
+  <div class="card bg-base-100 shadow-md border border-base-300">
+    <div class="card-body">
+      <h2 class="card-title text-lg">처리 상태</h2>
+      <div class="flex flex-wrap items-center gap-3">
+      <span class="badge"
+            th:classappend="${feedback.status.name() == 'NEW'} ? 'badge-warning' : (${feedback.status.name() == 'DONE'} ? 'badge-success' : 'badge-info')"
+            th:text="${feedback.status.label}" data-feedback-status>새 의견</span>
+      <span th:replace="~{admin/fragments/admin-list :: lastChangedOr(${feedback.statusChangedAt}, ${feedback.statusChangedBy}, '변경 이력 없음')}"></span>
+      <form th:replace="~{admin/fragments/feedback-status-form :: statusForm(${feedback}, ${statuses}, null, 'detail')}"></form>
+      </div>
+    </div>
+  </div>
+
   <!-- 보낸 사람과 환경. 의견·기록은 사용자 입력이라 아래 모든 출력은 th:text 로 이스케이프한다. -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
     <div class="stat rounded-box bg-base-200 shadow">

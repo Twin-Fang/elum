@@ -7,6 +7,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberRespon
 import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionHistoryLine;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionSummary;
 import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
+import com.chuseok22.elumserver.admin.application.list.AdminFeedbackList;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Column;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Filter;
@@ -148,8 +149,15 @@ class AdminFragmentRenderTest {
       .contains("href=\"/admin/routines?q=%EC%95%84%EC%B9%A8&amp;status=CONFIRMED&amp;sort=updatedAt,desc&amp;page=1\"")
       .contains("page=3");
 
-    String feedbacks = engine.process("admin/feedback", contextWith(Map.of("feedbacks", pageOf(100, 0))));
-    assertThat(feedbacks).contains("data-admin-pager").contains("href=\"/admin/feedback?page=2\"");
+    AdminListQuery feedbackQuery = AdminListQuery.of(null, Map.of(), null, null, AdminFeedbackList.DEFINITION);
+    java.util.Map<String, Object> feedbackModel = new java.util.HashMap<>();
+    feedbackModel.put("feedbacks", pageOf(100, 0));
+    feedbackModel.put("definition", AdminFeedbackList.DEFINITION);
+    feedbackModel.put("query", feedbackQuery);
+    feedbackModel.put("statuses", com.chuseok22.elumserver.feedback.core.FeedbackStatus.values());
+    feedbackModel.put("pagerBaseUrl", "/admin/feedback" + feedbackQuery.toQueryString(feedbackQuery.sort(), 1));
+    String feedbacks = engine.process("admin/feedback", contextWith(feedbackModel));
+    assertThat(feedbacks).contains("data-admin-pager").contains("href=\"/admin/feedback?sort=createdAt,desc&amp;page=2\"");
 
     java.util.Map<String, Object> memberModel = new java.util.HashMap<>();
     memberModel.put("members", pageOf(100, 1));
