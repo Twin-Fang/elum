@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:math' as math;
-import 'dart:ui';
+import 'routine_input_field.dart';
+import 'routine_suggestion_chips.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
-import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import 'widgets/routine_flow_scaffold.dart';
@@ -20,7 +19,6 @@ import '../domain/routine_suggestion.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/routine_flow_backdrop.dart';
 import '../../../core/router/pop_or_home.dart';
-import '../application/routine_providers.dart';
 import '../../../core/router/routes.dart';
 
 /// Figma `보호자_새로운 일과 만들기`(238:1643) — 자연어로 일과를 받는다.
@@ -132,7 +130,7 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
                         SizedBox(height: _RoutineInputLayout.topToSparkles),
                         const _Headline(),
                         SizedBox(height: _RoutineInputLayout.bodyToInput),
-                        _InputField(
+                        RoutineInputField(
                           controller: _controller,
                           canSubmit: canSubmit,
                           onChanged: ref
@@ -141,7 +139,7 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
                           onSubmit: _next,
                         ),
                         SizedBox(height: _RoutineInputLayout.inputToChips),
-                        _SuggestionChips(onTap: _fill),
+                        RoutineSuggestionChips(onTap: _fill),
                       ],
                     ),
                   ),
@@ -272,251 +270,6 @@ class _Headline extends StatelessWidget {
           style: context.typo.promptBody.copyWith(color: colors.promptMuted),
         ),
       ],
-    );
-  }
-}
-
-/// 반투명 유리 입력창 (Figma 362×52, r20).
-///
-/// 배경이 움직이므로 `backdropFilter` 너머 색이 저절로 흐른다.
-/// 유리 효과 자체를 애니메이션하지 않는다.
-class _InputField extends StatefulWidget {
-  const _InputField({
-    required this.controller,
-    required this.canSubmit,
-    required this.onChanged,
-    required this.onSubmit,
-  });
-
-  final TextEditingController controller;
-  final bool canSubmit;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onSubmit;
-
-  @override
-  State<_InputField> createState() => _InputFieldState();
-}
-
-class _InputFieldState extends State<_InputField> {
-  /// **누르면 안내 문구를 지운다** (시안 `238:1643` → `262:3074`).
-  ///
-  /// 커서가 들어온 순간부터는 쓰는 중이라 안내가 자리만 차지한다.
-  /// 비우면 다시 나타나므로 무엇을 쓰는 칸인지 잊을 일은 없다.
-  final _focusNode = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode.addListener(() => setState(() {}));
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final space = context.space;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: space.buttonMarginH),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(space.cardRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            constraints: BoxConstraints(minHeight: 52.h),
-            // 위아래도 18이다 (시안 `238:1723`). `space.sm`(12)을 쓰고 있어
-            // 글자가 7 위에 붙어 있었다.
-            // 글자 쪽은 18, 보내기 단추 쪽은 9다 — 시안 원이 오른쪽에서
-            // 9 안쪽에 선다 (`262:4106`). 양쪽 18로 두면 단추가 9 안으로 들어간다.
-            padding: EdgeInsets.fromLTRB(18.w, 18.h, 9.w, 18.h),
-            decoration: BoxDecoration(
-              color: colors.glassSurface,
-              borderRadius: BorderRadius.circular(space.cardRadius),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.glassShadow,
-                  blurRadius: 5.w,
-                  offset: Offset(0, 2.h),
-                ),
-              ],
-            ),
-            child: Row(
-              // **아래 맞춤이다.** 시안(`262:4106`)은 글자가 위에서부터 쌓이고
-              // 보내기 단추가 아래에 붙는다. 가운데로 두면 두 줄일 때 단추가
-              // 11 올라간다. 한 줄일 때는 둘 다 같은 높이라 차이가 없다.
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: widget.controller,
-                    focusNode: _focusNode,
-                    onChanged: widget.onChanged,
-                    maxLines: 4,
-                    minLines: 1,
-                    style: context.typo.promptBody.copyWith(
-                      color: colors.textPrimary,
-                    ),
-                    decoration: InputDecoration.collapsed(
-                      // 시안(238:1723) 문구 그대로. `적어주세요`로 바꿔 두었던 것을 되돌린다.
-                      hintText: _focusNode.hasFocus
-                          ? ''
-                          : context.l10n.routineInputHint,
-                      // 플레이스홀더는 입력 텍스트(promptBody, w500)보다 가늘다 (Figma style_7YRXS7)
-                      hintStyle: context.typo.promptPlaceholder.copyWith(
-                        color: colors.promptMuted,
-                      ),
-                    ),
-                  ),
-                ),
-                // 입력이 있을 때만 나타난다 (Figma 262:4106)
-                if (widget.canSubmit) ...[
-                  SizedBox(width: space.xs),
-                  _SendButton(onTap: widget.onSubmit),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 입력창 안 전송 버튼 (Figma 32×32 원)
-class _SendButton extends StatelessWidget {
-  const _SendButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppPressable(
-      key: RoutineInputScreen.sendButtonKey,
-      onTap: onTap,
-      scaleDown: AppPressable.scaleIcon,
-      // 입력창 안 화살표뿐이라 무엇을 하는 버튼인지 이름으로 알린다
-      semanticLabel: context.l10n.routineInputSend,
-      child: Container(
-        // 원형 버튼이라 가로세로 모두 .w
-        width: 32.w,
-        height: 32.w,
-        // **흰 원에 짙은 꺾쇠다** (Figma `262:4106`). 검은 원에 흰 위쪽 화살표로
-        // 그리고 있었는데 색이 반대였고 모양도 달랐다.
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          shape: BoxShape.circle,
-        ),
-        // 아래를 보는 원본을 반시계 90° 돌려 `>`로 만든다 — 약관 줄과 같은 에셋.
-        child: Center(
-          child: Transform.rotate(
-            angle: -math.pi / 2,
-            child: SvgPicture.asset(
-              AppAssets.iconAngleSmall,
-              width: 24.w,
-              height: 24.w,
-              colorFilter: ColorFilter.mode(
-                context.colors.textPrimary,
-                BlendMode.srcIn,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 추천 문구 칩 — Figma 2·2·1 배치.
-///
-/// `Wrap`으로 두면 글자 길이에 따라 줄이 밀린다. Figma 구조를 그대로 만든다.
-///
-/// 목록은 서버에서 오고 **개수가 고정이 아니다.** 2개씩 채우고 남는 하나는
-/// 마지막 줄에 혼자 둔다(Figma 5개 = 2·2·1). 홀수·짝수 모두 대응된다.
-class _SuggestionChips extends ConsumerWidget {
-  const _SuggestionChips({required this.onTap});
-
-  final ValueChanged<RoutineSuggestion> onTap;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final items = ref
-        .watch(routineSuggestionsProvider)
-        .maybeWhen(
-          data: (list) => list,
-          // 로딩·실패 중에는 칩을 감춘다. 입력창은 그대로 쓸 수 있으므로
-          // 흐름이 막히지 않는다.
-          orElse: () => const <RoutineSuggestion>[],
-        );
-
-    if (items.isEmpty) return const SizedBox.shrink();
-
-    // 본문과 같은 좌우 여백 24. 글꼴 2.0 에서 두 칩이 한 줄을 다 차지해
-    // 화면 끝에 붙었다. 글꼴 1.0 에서는 칩이 좁아 가운데 그대로라 시안 자리와 같다.
-    //
-    // 두 칩씩 묶는 것은 그대로 두되 **둘이 한 줄에 안 들어가면 한 줄에 하나씩** 둔다
-    // (Wrap). 한 줄에 억지로 둘을 두면 칩이 좁아져 `병원 방 / 문 준비`처럼 낱말
-    // 가운데서 꺾였다. 들어가면 Row 때와 같은 자리다.
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: context.space.screenH.w),
-      child: Column(
-        children: [
-          for (var row = 0; row < items.length; row += 2) ...[
-            if (row > 0) SizedBox(height: context.space.xs),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 6.w,
-              runSpacing: context.space.xs,
-              children: [
-                for (final s in items.skip(row).take(2))
-                  _Chip(suggestion: s, onTap: onTap),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({required this.suggestion, required this.onTap});
-
-  final RoutineSuggestion suggestion;
-  final ValueChanged<RoutineSuggestion> onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-
-    return AppPressable(
-      onTap: () => onTap(suggestion),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(space.cardRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: AnimatedContainer(
-            duration: AppMotion.fast,
-            curve: AppMotion.standard,
-            // Figma padding 10×16
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: context.colors.glassChip,
-              borderRadius: BorderRadius.circular(space.cardRadius),
-            ),
-            child: Text(
-              suggestion.label,
-              style: context.typo.chipLabel.copyWith(
-                color: context.colors.chipLabel,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

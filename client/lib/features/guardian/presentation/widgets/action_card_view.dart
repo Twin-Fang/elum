@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../domain/card_palette.dart';
+import 'action_card_illustration.dart';
+import 'action_card_number_badge.dart';
+import 'action_card_speaker_glyph.dart';
 import 'card_image.dart';
 import 'default_card_art.dart';
 
@@ -156,7 +157,10 @@ class _ActionCardViewState extends State<ActionCardView> {
       // SVG가 25×25인데 Figma 배치는 24×24다. 크기만 지정하면
       // 비율이 눌려 아이콘이 찌그러진다 — contain으로 비율을 지킨다.
       // 정사각형 아이콘이라 가로세로 모두 .w로 맞춘다
-      child: _SpeakerGlyph(size: _volumeIconSize.w, speaking: widget.isSpeaking),
+      child: ActionCardSpeakerGlyph(
+        size: _volumeIconSize.w,
+        speaking: widget.isSpeaking,
+      ),
     );
 
     // 순서를 바꾸면 카드가 새 자리 색을 입는다. 그대로 두면 카드 한 장이 통째로 한
@@ -165,41 +169,41 @@ class _ActionCardViewState extends State<ActionCardView> {
     return ContentLocale(
       language: widget.language,
       child: Consumer(
-      // 그림이 없다는 사실을 그림 자리와 제목 줄이 **같이** 알아야 한다.
-      builder: (context, ref, _) {
-        final imageState = watchCardImageState(
-          ref,
-          routineId: widget.routineId,
-          stepId: widget.card.id,
-          imagePath: widget.card.imagePath,
-        );
-        return TweenAnimationBuilder<Color?>(
-          tween: ColorTween(end: target.fill),
-          duration: AppMotion.normal,
-          builder: (context, fillColor, _) => TweenAnimationBuilder<Color?>(
-            tween: ColorTween(end: target.border),
+        // 그림이 없다는 사실을 그림 자리와 제목 줄이 **같이** 알아야 한다.
+        builder: (context, ref, _) {
+          final imageState = watchCardImageState(
+            ref,
+            routineId: widget.routineId,
+            stepId: widget.card.id,
+            imagePath: widget.card.imagePath,
+          );
+          return TweenAnimationBuilder<Color?>(
+            tween: ColorTween(end: target.fill),
             duration: AppMotion.normal,
-            builder: (context, borderColor, _) {
-              final palette = CardPalette(
-                fill: fillColor ?? target.fill,
-                border: borderColor ?? target.border,
-              );
-              return _buildCard(
-                context,
-                palette: palette,
-                space: space,
-                childLayout: childLayout,
-                inset: inset,
-                illustrationAspect: illustrationAspect,
-                illustrationToTitle: illustrationToTitle,
-                titleToBody: titleToBody,
-                speaker: speaker,
-                imageState: imageState,
-              );
-            },
-          ),
-        );
-      },
+            builder: (context, fillColor, _) => TweenAnimationBuilder<Color?>(
+              tween: ColorTween(end: target.border),
+              duration: AppMotion.normal,
+              builder: (context, borderColor, _) {
+                final palette = CardPalette(
+                  fill: fillColor ?? target.fill,
+                  border: borderColor ?? target.border,
+                );
+                return _buildCard(
+                  context,
+                  palette: palette,
+                  space: space,
+                  childLayout: childLayout,
+                  inset: inset,
+                  illustrationAspect: illustrationAspect,
+                  illustrationToTitle: illustrationToTitle,
+                  titleToBody: titleToBody,
+                  speaker: speaker,
+                  imageState: imageState,
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
@@ -221,7 +225,8 @@ class _ActionCardViewState extends State<ActionCardView> {
     // 같은 글이 두 번 나온다. 받는 중에는 그림이 올 수 있어 줄에 그대로 둔다.
     // 픽토그램이 그림 자리를 채우면 제목은 줄에 그대로 둔다 — 그림이 뜻을 전하고
     // 글자는 줄에서 읽는다.
-    final titleInArt = childLayout &&
+    final titleInArt =
+        childLayout &&
         imageState == CardImageState.none &&
         !showsPictogram(imageState, widget.card.pictogramId);
     return Container(
@@ -268,7 +273,7 @@ class _ActionCardViewState extends State<ActionCardView> {
                     // 크기와 텍스트 시작 높이가 달라진다.
                     AspectRatio(
                       aspectRatio: illustrationAspect,
-                      child: _Illustration(
+                      child: ActionCardIllustration(
                         routineId: widget.routineId,
                         stepId: widget.card.id,
                         imagePath: widget.card.imagePath,
@@ -281,7 +286,9 @@ class _ActionCardViewState extends State<ActionCardView> {
                                 title: widget.card.displayTitle,
                                 color: palette.border,
                               )
-                            : DefaultCardPhotoSlot(onAddPhoto: widget.onAddPhoto),
+                            : DefaultCardPhotoSlot(
+                                onAddPhoto: widget.onAddPhoto,
+                              ),
                       ),
                     ),
                     SizedBox(height: illustrationToTitle),
@@ -295,7 +302,7 @@ class _ActionCardViewState extends State<ActionCardView> {
                         // Row 높이(둘 중 큰 쪽) 기준으로 세로 중앙 정렬된다
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          _NumberBadge(
+                          ActionCardNumberBadge(
                             order: widget.index + 1,
                             color: palette.border,
                           ),
@@ -313,16 +320,19 @@ class _ActionCardViewState extends State<ActionCardView> {
                                 children: [...previous, ?current],
                               ),
                               child: titleInArt
-                                  ? const SizedBox(key: ValueKey('title-in-art'))
+                                  ? const SizedBox(
+                                      key: ValueKey('title-in-art'),
+                                    )
                                   : Text(
                                       key: const ValueKey('title-in-row'),
                                       // 제목을 …로 자르지 않는다. 아동이 무엇을 해야 하는지
                                       // 알려주는 문장이라 잘리면 의미가 사라진다.
                                       widget.card.displayTitle,
                                       // 제목은 25/w800(style_GKEQ8F) — 순서 배지(cardHeadline 30)와 크기가 다르다
-                                      style: context.typo.actionCardTitle.copyWith(
-                                        color: context.colors.textPrimary,
-                                      ),
+                                      style: context.typo.actionCardTitle
+                                          .copyWith(
+                                            color: context.colors.textPrimary,
+                                          ),
                                     ),
                             ),
                           ),
@@ -340,7 +350,7 @@ class _ActionCardViewState extends State<ActionCardView> {
                         // 그린다. 카드 왼끝에 붙이면 설명이 제목보다 왼쪽에서 시작해
                         // 줄이 안 맞는다.
                         SizedBox(
-                          width: _NumberBadge.size.w,
+                          width: ActionCardNumberBadge.size.w,
                           child: Center(child: speaker),
                         ),
                         SizedBox(width: space.xs),
@@ -382,241 +392,6 @@ class _ActionCardViewState extends State<ActionCardView> {
                 ),
               ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// 카드 이미지 자리.
-///
-/// 서버가 만든 그림을 보여주고, 없으면 [emptyBuilder]의 기본 카드로 채운다.
-/// 자리를 비우면 카드 비율이 무너진다.
-/// 스피커 아이콘. 읽는 중에는 주황 원 위로 파동이 퍼져 "지금 소리가 난다"가 한눈에 보인다.
-///
-/// 동작 줄이기를 켰다면 파동은 빼고 색 원만 남긴다.
-class _SpeakerGlyph extends StatefulWidget {
-  const _SpeakerGlyph({required this.size, required this.speaking});
-
-  final double size;
-  final bool speaking;
-
-  @override
-  State<_SpeakerGlyph> createState() => _SpeakerGlyphState();
-}
-
-class _SpeakerGlyphState extends State<_SpeakerGlyph>
-    with SingleTickerProviderStateMixin {
-  // late final 로 두면 한 번도 안 쓴 채 dispose 될 때 그 자리에서 만들어져 틱커 오류가 난다
-  late final AnimationController _pulse;
-
-  @override
-  void didUpdateWidget(_SpeakerGlyph old) {
-    super.didUpdateWidget(old);
-    if (widget.speaking == old.speaking) return;
-    if (widget.speaking && !MediaQuery.disableAnimationsOf(context)) {
-      _pulse.repeat();
-    } else {
-      _pulse.stop();
-      _pulse.value = 0;
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _pulse = AnimationController(vsync: this, duration: AppMotion.float ~/ 2);
-    // 처음 그릴 때 이미 읽는 중일 수 있다(화면이 다시 만들어진 경우)
-    if (widget.speaking) _pulse.repeat();
-  }
-
-  @override
-  void dispose() {
-    _pulse.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final size = widget.size;
-    final orange = context.colors.brandOrange;
-    final reduce = MediaQuery.disableAnimationsOf(context);
-
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          if (widget.speaking && !reduce)
-            AnimatedBuilder(
-              animation: _pulse,
-              builder: (context, _) => Container(
-                width: size * (1 + _pulse.value * 0.9),
-                height: size * (1 + _pulse.value * 0.9),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: orange.withValues(alpha: 0.28 * (1 - _pulse.value)),
-                ),
-              ),
-            ),
-          // 읽는 중에는 주황 원과 그림자를 깔아 눌린 채 켜져 있음을 보여 준다
-          AnimatedContainer(
-            duration: AppMotion.fast,
-            width: size * 1.35,
-            height: size * 1.35,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: widget.speaking ? orange.withValues(alpha: 0.18) : Colors.transparent,
-              boxShadow: widget.speaking
-                  ? [
-                      BoxShadow(
-                        color: orange.withValues(alpha: 0.35),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : const [],
-            ),
-          ),
-          SizedBox(
-            width: size,
-            height: size,
-            child: SvgPicture.asset(AppAssets.iconVolume, fit: BoxFit.contain),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Illustration extends StatelessWidget {
-  const _Illustration({
-    required this.routineId,
-    required this.stepId,
-    this.imagePath,
-    this.pictogramId,
-    this.pictogramLabel = '',
-    required this.emptyBuilder,
-    this.onDelete,
-  });
-
-  final String routineId;
-  final String stepId;
-  final String? imagePath;
-  final String? pictogramId;
-  final String pictogramLabel;
-  final WidgetBuilder emptyBuilder;
-  final VoidCallback? onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: context.colors.surface,
-              borderRadius: BorderRadius.circular(space.xs),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(space.xs),
-              child: CardImage(
-                routineId: routineId,
-                stepId: stepId,
-                imagePath: imagePath,
-                pictogramId: pictogramId,
-                pictogramLabel: pictogramLabel,
-                emptyBuilder: emptyBuilder,
-              ),
-            ),
-          ),
-        ),
-        // 지우기 원(30)은 그림칸 위·오른쪽에서 6 안쪽이다 (시안 `262:5124` 그림칸
-        // 40,213 · 원 317,219). 누름 영역(44)이 원보다 7씩 넓어 그만큼 뺀다.
-        if (onDelete != null)
-          Positioned(
-            top: _DeleteButton.designInset.w - _DeleteButton.touchPad.w,
-            right: _DeleteButton.designInset.w - _DeleteButton.touchPad.w,
-            child: _DeleteButton(onTap: onDelete!),
-          ),
-      ],
-    );
-  }
-}
-
-/// 카드 삭제 버튼 (Figma 262:5124 이미지 우상단 — 흐린 원 + X, 393:4010).
-class _DeleteButton extends StatelessWidget {
-  const _DeleteButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  /// Figma 실측 30×30. 그대로 두면 보호자 최소 터치 타겟(44)에 못 미쳐
-  /// 투명 여백으로 넓힌다.
-  static const _visualSize = 30.0;
-  static const _touchSize = 44.0;
-
-  /// 원이 그림칸 모서리에서 떨어진 거리 (시안 `262:5124`).
-  static const designInset = 6.0;
-
-  /// 누름 영역이 원보다 한쪽에 더 넓은 만큼.
-  static const touchPad = (_touchSize - _visualSize) / 2;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppPressable(
-      onTap: onTap,
-      scaleDown: AppPressable.scaleIcon,
-      semanticLabel: context.l10n.cardDeleteLabel,
-      // 정사각형 버튼 — 가로세로 모두 .w
-      child: SizedBox(
-        width: _touchSize.w,
-        height: _touchSize.w,
-        child: Center(
-          child: SvgPicture.asset(
-            AppAssets.iconCardDelete,
-            width: _visualSize.w,
-            height: _visualSize.w,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 순서 배지 (40×40, r12)
-class _NumberBadge extends StatelessWidget {
-  const _NumberBadge({required this.order, required this.color});
-
-  /// 배지 한 변. 아래 줄의 스피커 칸도 이 폭을 쓴다.
-  static const size = 40.0;
-
-  final int order;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    // 정사각형 배지라 가로세로 모두 .w
-    return Container(
-      width: size.w,
-      height: size.w,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12.w),
-      ),
-      // Text만 Container.alignment로 두면 실제 렌더링 시 글자가 오른쪽으로
-      // 치우쳐 보인다(폰트 line box가 advance width보다 넓게 잡힘) — 이슈 재현
-      // 스크린샷에서 좌우 여백이 약 3배 차이 났다. textAlign.center로 텍스트
-      // 캔버스 자체를 중앙 정렬해 이를 바로잡는다.
-      child: Text(
-        '$order',
-        textAlign: TextAlign.center,
-        style: context.typo.cardHeadline.copyWith(
-          color: context.colors.surface,
         ),
       ),
     );

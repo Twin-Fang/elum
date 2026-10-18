@@ -1,5 +1,7 @@
 {
   "@@locale": "zh",
   "installationRetryMessage": "无法检查登录信息。请重试。",
-  "installationRetryButton": "重试"
+  "installationRetryButton": "重试",
+  "issuedCodeCopyFailedTitle": "复制失败了",
+  "issuedCodeCopyFailedFallback": "请直接告知屏幕上显示的代码"
 }

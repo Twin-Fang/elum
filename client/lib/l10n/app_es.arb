@@ -1,5 +1,7 @@
 {
   "@@locale": "es",
   "installationRetryMessage": "No se pudo comprobar el inicio de sesión. Inténtalo de nuevo.",
-  "installationRetryButton": "Reintentar"
+  "installationRetryButton": "Reintentar",
+  "issuedCodeCopyFailedTitle": "No se pudo copiar",
+  "issuedCodeCopyFailedFallback": "Indica tú mismo el código que aparece en la pantalla"
 }

@@ -3,39 +3,17 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
-import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
-import 'action_card_view.dart';
-
-/// 끌던 카드가 들어갈 자리 — 손가락이 가리키는 **사이**를 센다.
-///
-/// [contentX] 는 스크롤 내용 안의 가로 좌표(줌아웃 전 크기 기준)다. 끌고 있는 카드를 뺀
-/// 나머지 [count]장이 [leading] 에서 시작해 [extent] 간격으로 서 있고, 지금 [gap] 번째
-/// 앞에 카드 한 장 폭의 틈이 벌어져 있다고 본다. 중심이 [contentX] 보다 왼쪽에 있는
-/// 카드 수가 곧 들어갈 자리(0~count)다.
-///
-/// **눈에 보이는 배치(벌어진 틈 포함)로 잰다.** 그래야 손가락이 틈 안에 있는 동안은 자리가
-/// 바뀌지 않는다 — 이웃의 중심을 지나야 틈이 옮겨 가므로 깜빡이지 않는다.
-int reorderInsertionIndex({
-  required double contentX,
-  required int count,
-  required double leading,
-  required double extent,
-  required int gap,
-}) {
-  var k = 0;
-  for (var j = 0; j < count; j++) {
-    final center = leading + j * extent + (j >= gap ? extent : 0) + extent / 2;
-    if (center < contentX) k = j + 1;
-  }
-  return k;
-}
+import 'card_review_drag_overlay.dart';
+import 'card_review_gap_spacer.dart';
+import 'card_review_reorder_card.dart';
+import 'card_review_slot.dart';
+import 'card_snap_physics.dart';
+import 'reorder_insertion_index.dart';
 
 /// 순서 변경 모드의 카드 줄 — 길게 눌러 손가락을 따라 옮긴다 (시안 1197:5798).
 ///
@@ -418,10 +396,7 @@ class _CardReviewReorderListState extends State<CardReviewReorderList>
         ? others[gap].id
         : null;
     final trailingGap = gap != null && gap >= others.length;
-    ActionCard? dragged;
-    for (final c in cards) {
-      if (c.id == _dragId) dragged = c;
-    }
+    final dragged = cards.where((c) => c.id == _dragId).lastOrNull;
 
     return NotificationListener<ScrollEndNotification>(
       onNotification: (_) {
@@ -442,7 +417,7 @@ class _CardReviewReorderListState extends State<CardReviewReorderList>
               // 끄는 동안은 손가락으로 스크롤하지 않는다(두 번째 손가락 대비)
               physics: _dragId != null
                   ? const NeverScrollableScrollPhysics()
-                  : _CardSnapPhysics(itemExtent: _ext),
+                  : CardSnapPhysics(itemExtent: _ext),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -454,26 +429,20 @@ class _CardReviewReorderListState extends State<CardReviewReorderList>
                       scale,
                       gapBefore: cards[i].id == gapBeforeId,
                     ),
-                  _spacer('trailing', trailingGap ? 1 : 0, scale),
+                  CardReviewGapSpacer(
+                    key: const ValueKey('spacer_trailing'),
+                    isOpen: trailingGap,
+                    fullWidth: _ext * scale,
+                    slotDuration: _slotDuration,
+                  ),
                   SizedBox(width: _pad * scale),
                 ],
               ),
             ),
           ),
-          if (dragged != null) _overlay(context, dragged),
+          if (dragged != null) _overlay(dragged),
         ],
       ),
-    );
-  }
-
-  /// 자리가 벌어지고 닫히는 폭 — 카드 한 장 폭의 [factor] 배.
-  Widget _spacer(String name, double factor, double scale) {
-    return TweenAnimationBuilder<double>(
-      key: ValueKey('spacer_$name'),
-      tween: Tween(end: factor),
-      duration: _slotDuration,
-      curve: Curves.easeOutCubic,
-      builder: (context, f, _) => SizedBox(width: _ext * scale * f),
     );
   }
 
@@ -483,172 +452,48 @@ class _CardReviewReorderListState extends State<CardReviewReorderList>
     double scale, {
     required bool gapBefore,
   }) {
-    // 끌려간 카드의 자리는 닫힌다. 안착하는 동안은 다시 열려 카드가 들어올 자리가 된다.
-    final open = (card.id == _dragId && !_landing) ? 0.0 : 1.0;
-    final canMove = widget.cards.length > 1;
-
-    Widget child = GestureDetector(
-      onLongPressStart: (d) => _onGrab(card, index, d),
-      onLongPressMoveUpdate: _onMove,
-      onLongPressEnd: (_) => _onDrop(),
-      onLongPressCancel: _onCancel,
-      child: card.id == _dragId
-          // 들린 카드는 위에 떠 있다. 자리에는 아무것도 그리지 않는다.
-          ? const SizedBox.shrink()
-          : SizedBox(
-              width: _ext * scale,
-              height: _viewH * scale,
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: SizedBox(
-                  width: _ext,
-                  height: _viewH,
-                  child: _cardBody(card, index),
-                ),
-              ),
-            ),
-    );
-
-    if (canMove) {
-      final l10n = context.l10n;
-      child = Semantics(
-        customSemanticsActions: {
-          if (index > 0)
-            CustomSemanticsAction(label: l10n.cardMoveForward): () =>
-                _nudge(index, -1),
-          if (index < widget.cards.length - 1)
-            CustomSemanticsAction(label: l10n.cardMoveBackward): () =>
-                _nudge(index, 1),
-        },
-        child: child,
-      );
-    }
-
-    return TweenAnimationBuilder<double>(
+    return CardReviewSlot(
       key: ValueKey('slot_${card.id}'),
-      tween: Tween(end: open + (gapBefore ? 1 : 0)),
-      duration: _slotDuration,
-      curve: Curves.easeOutCubic,
-      builder: (context, f, content) => SizedBox(
-        width: _ext * scale * f,
-        // 카드는 자리의 오른쪽 끝에 붙는다 — 벌어진 틈이 카드 **앞**에 생긴다
-        child: Align(alignment: Alignment.centerRight, child: content),
-      ),
-      child: child,
-    );
-  }
-
-  Widget _cardBody(ActionCard card, int index) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: (widget.cardGap / 2).w),
-      child: ActionCardView(
-        key: ValueKey(card.id),
+      card: card,
+      index: index,
+      cardCount: widget.cards.length,
+      extent: _ext,
+      scale: scale,
+      height: _viewH,
+      isDragged: card.id == _dragId,
+      isLanding: _landing,
+      hasGapBefore: gapBefore,
+      slotDuration: _slotDuration,
+      cardBody: CardReviewReorderCard(
         card: card,
         // 색·번호는 안착한 뒤에 새 자리로 바뀐다
         index: _shown[card.id] ?? index,
         routineId: widget.routineId,
         language: widget.language,
-        // 모드 안에서는 소리를 읽지 않는다 — 카드가 움직이는 중이다
-        onSpeak: () {},
-        isSpeaking: false,
-        onDelete: null,
+        cardGap: widget.cardGap,
       ),
+      onGrab: (details) => _onGrab(card, index, details),
+      onMove: _onMove,
+      onDrop: _onDrop,
+      onCancel: _onCancel,
+      onNudge: (delta) => _nudge(index, delta),
     );
   }
 
-  /// 손가락을 따라다니는 카드. 이웃보다 조금 크게 그리고 그림자를 깐다.
-  Widget _overlay(BuildContext context, ActionCard card) {
-    final top = _overlayTopLeft;
-    final strength = _landing ? 1 - _easedLand : _easedZoom;
-    final radius = context.space.cardRadius;
+  Widget _overlay(ActionCard card) {
     final index = widget.cards.indexWhere((c) => c.id == card.id);
 
-    return Positioned(
-      left: top.dx,
-      top: top.dy,
+    return CardReviewDragOverlay(
+      card: card,
+      index: _shown[card.id] ?? index,
+      routineId: widget.routineId,
+      language: widget.language,
+      cardGap: widget.cardGap,
+      topLeft: _overlayTopLeft,
       width: _ext,
       height: _viewH,
-      child: IgnorePointer(
-        child: Transform.scale(
-          scale: _overlayScale,
-          alignment: Alignment.topLeft,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: (widget.cardGap / 2).w),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(radius),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.24 * strength),
-                    blurRadius: 24 * strength,
-                    offset: Offset(0, 10 * strength),
-                  ),
-                ],
-              ),
-              child: ActionCardView(
-                key: ValueKey(card.id),
-                card: card,
-                index: _shown[card.id] ?? index,
-                routineId: widget.routineId,
-                language: widget.language,
-                onSpeak: () {},
-                isSpeaking: false,
-                onDelete: null,
-              ),
-            ),
-          ),
-        ),
-      ),
+      scale: _overlayScale,
+      strength: _landing ? 1 - _easedLand : _easedZoom,
     );
   }
-}
-
-/// 스크롤을 놓으면 가장 가까운 카드가 정면(정중앙)에 붙는 물리.
-///
-/// 기본 화면의 페이지 뷰와 같은 동작이다. 속도가 있으면 그 방향 다음 카드로 넘어간다.
-class _CardSnapPhysics extends ScrollPhysics {
-  const _CardSnapPhysics({required this.itemExtent, super.parent});
-
-  final double itemExtent;
-
-  @override
-  _CardSnapPhysics applyTo(ScrollPhysics? ancestor) =>
-      _CardSnapPhysics(itemExtent: itemExtent, parent: buildParent(ancestor));
-
-  double _targetPixels(ScrollMetrics position, double velocity) {
-    var page = position.pixels / itemExtent;
-    if (velocity < -toleranceFor(position).velocity) {
-      page -= 0.5;
-    } else if (velocity > toleranceFor(position).velocity) {
-      page += 0.5;
-    }
-    return page.roundToDouble() * itemExtent;
-  }
-
-  @override
-  Simulation? createBallisticSimulation(
-    ScrollMetrics position,
-    double velocity,
-  ) {
-    // 양 끝 밖으로 나가 있으면 기본 물리가 되돌린다
-    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
-        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
-      return super.createBallisticSimulation(position, velocity);
-    }
-    final target = _targetPixels(
-      position,
-      velocity,
-    ).clamp(position.minScrollExtent, position.maxScrollExtent);
-    if (target == position.pixels) return null;
-    return ScrollSpringSimulation(
-      spring,
-      position.pixels,
-      target,
-      velocity,
-      tolerance: toleranceFor(position),
-    );
-  }
-
-  @override
-  bool get allowImplicitScrolling => false;
 }

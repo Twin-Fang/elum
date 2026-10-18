@@ -3296,11 +3296,17 @@ abstract class AppLocalizations {
   /// **'코드를 복사했어요'**
   String get issuedCodeCopied;
 
-  /// 클립보드 복사 실패 토스트. 에러 코드를 문구에 함께 둔다
+  /// 코드·연결 암호 클립보드 복사 실패 팝업 제목(에러 코드 E-CODE-COPY 는 팝업이 붙인다)
   ///
   /// In ko, this message translates to:
-  /// **'복사하지 못했어요 (E-CODE-COPY)'**
-  String get issuedCodeCopyFailed;
+  /// **'복사하지 못했어요'**
+  String get issuedCodeCopyFailedTitle;
+
+  /// 코드·연결 암호 복사 실패 팝업의 할 일 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'화면에 보이는 암호를 직접 알려주세요'**
+  String get issuedCodeCopyFailedFallback;
 
   /// 연결 코드 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 연결 코드
   ///

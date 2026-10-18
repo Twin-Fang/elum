@@ -1,17 +1,16 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/storage/local_storage.dart';
-import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
 import '../../../shared/models/support_goal.dart';
 import '../../credit/domain/credit_summary.dart';
 import '../domain/routine_suggestion.dart';
 import 'routine_repository.dart';
+import 'routine_step_api.dart';
+import 'today_routine_cache.dart';
 
 class RoutineRepositoryImpl implements RoutineRepository {
   RoutineRepositoryImpl({Dio? dio, LocalStorage? storage})
@@ -22,6 +21,9 @@ class RoutineRepositoryImpl implements RoutineRepository {
 
   /// 오늘 일과 캐시용. null이면 캐시 없이 동작한다(기존 테스트 호환).
   final LocalStorage? _storage;
+
+  late final _stepApi = RoutineStepApi(_dio);
+  late final _todayCache = TodayRoutineCache(_storage);
 
   @override
   Future<List<Routine>> getMyRoutines() async {
@@ -222,42 +224,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
     Routine routine, {
     required String title,
     required String description,
-  }) async {
-    // 제목·설명은 보호자가 쓴 글이라 로그에 남기지 않는다 (docs 원칙 5번)
-    AppLogger.repositoryCall('RoutineRepository', 'addStep', {
-      'routineId': routine.id,
-    });
-
-    // 서버에 없는 로컬 일과 — 데모가 끝까지 가도록 로컬에 넣는다
-    if (routine.id.isEmpty) {
-      final added = ActionCard(
-        id: 'local_${DateTime.now().microsecondsSinceEpoch}',
-        title: title,
-        description: description,
-        stepOrder: routine.steps.length + 1,
-      );
-      return (
-        routine: routine.copyWith(steps: [...routine.steps, added]),
-        failure: null,
-      );
-    }
-
-    try {
-      final res = await _dio.post<Map<String, dynamic>>(
-        '/api/routines/${routine.id}/steps',
-        data: {'title': title, 'description': description},
-      );
-      final body = res.data;
-      if (body == null) {
-        return (routine: routine, failure: const AppFailure(fault: NetworkFault.app));
-      }
-      AppLogger.repositorySuccess('RoutineRepository', 'addStep', '카드 추가 완료');
-      return (routine: Routine.fromJson(body), failure: null);
-    } catch (e) {
-      AppLogger.repositoryError('RoutineRepository', 'addStep', e);
-      return (routine: routine, failure: AppFailure.of(e));
-    }
-  }
+  }) => _stepApi.addStep(routine, title: title, description: description);
 
   @override
   Future<({Routine routine, AppFailure? failure})> updateStep(
@@ -265,60 +232,20 @@ class RoutineRepositoryImpl implements RoutineRepository {
     String stepId, {
     required String title,
     required String description,
-  }) async {
-    // 보호자가 고친 글은 글자 수만 (docs 원칙 5번)
-    AppLogger.repositoryCall('RoutineRepository', 'updateStep', {
-      'routineId': routine.id,
-      'stepId': stepId,
-      'titleLength': title.length,
-      'descriptionLength': description.length,
-    });
+  }) => _stepApi.updateStep(
+    routine,
+    stepId,
+    title: title,
+    description: description,
+  );
 
-    // 서버로 보내려 했는데 왜 실패했는가 — **이유까지 들고 나간다.**
-    // `false` 로 납작하게 만들면 서버가 알려준 문구가 여기서 사라진다.
-    AppFailure? failure;
+  @override
+  Future<AppFailure?> reorderSteps(String routineId, List<String> stepIds) =>
+      _stepApi.reorderSteps(routineId, stepIds);
 
-    if (routine.id.isNotEmpty) {
-      try {
-        final res = await _dio.patch<Map<String, dynamic>>(
-          '/api/routines/${routine.id}/steps/$stepId',
-          // 보낸 필드만 바뀐다 — 제목도 함께 보내야 서버에 남는다
-          data: {'title': title, 'description': description},
-        );
-        final body = res.data;
-        if (body != null) {
-          final updated = Routine.fromJson(body);
-          AppLogger.repositorySuccess(
-            'RoutineRepository',
-            'updateStep',
-            '카드 내용 수정 완료',
-          );
-          return (routine: updated, failure: null);
-        }
-        failure = const AppFailure(fault: NetworkFault.app);
-      } catch (e) {
-        AppLogger.repositoryError('RoutineRepository', 'updateStep', e);
-        failure = AppFailure.of(e);
-      }
-    }
-
-    final updated = routine.copyWith(
-      steps: [
-        for (final step in routine.steps)
-          if (step.id == stepId)
-            // 글이 바뀌면 옛 음성 열쇠도 버린다 (서버에 못 올렸어도 옛 문장이 읽히지 않게, #675)
-            step.copyWith(title: title, description: description, speechPath: null)
-          else
-            step,
-      ],
-    );
-    AppLogger.repositorySuccess(
-      'RoutineRepository',
-      'updateStep (로컬)',
-      '로컬에서 카드 내용 수정됨',
-    );
-    return (routine: updated, failure: failure);
-  }
+  @override
+  Future<AppFailure?> deleteStep(String routineId, String stepId) =>
+      _stepApi.deleteStep(routineId, stepId);
 
   @override
   Future<List<Routine>> getTodayRoutines() async {
@@ -339,9 +266,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
         );
         // 성공한 응답을 캐시해 둔다 — 다음에 오프라인이면 이걸 보여준다.
         // toJson 이 보호자 원문을 빼고 직렬화한다.
-        await _storage?.setCachedTodayRoutinesJson(
-          jsonEncode(routines.map((r) => r.toJson()).toList()),
-        );
+        await _todayCache.save(routines);
         return routines;
       }
     } catch (e) {
@@ -349,14 +274,14 @@ class RoutineRepositoryImpl implements RoutineRepository {
     }
 
     // 오프라인이거나 서버가 죽었다 — 마지막 성공 응답이 있으면 그걸 쓴다.
-    final cached = _readCachedToday();
+    final cached = _todayCache.read();
     if (cached != null) {
       AppLogger.repositorySuccess(
         'RoutineRepository',
         'getTodayRoutines (캐시)',
         '${cached.length}개 오프라인 캐시 사용',
       );
-      return _onlyToday(cached);
+      return _todayCache.onlyToday(cached);
     }
 
     // 캐시도 없으면 전체 조회로 폴백. 전체에는 어제 것·승인 전 것이 섞여 있어 오늘 것만
@@ -366,7 +291,7 @@ class RoutineRepositoryImpl implements RoutineRepository {
       'getTodayRoutines (폴백)',
       '전체 일과 조회로 대체',
     );
-    return _onlyToday(await getMyRoutines());
+    return _todayCache.onlyToday(await getMyRoutines());
   }
 
   // --- 보상(강화물) · 일과 정리 ---
@@ -535,55 +460,6 @@ class RoutineRepositoryImpl implements RoutineRepository {
   }
 
   @override
-  Future<AppFailure?> reorderSteps(String routineId, List<String> stepIds) async {
-    AppLogger.repositoryCall('RoutineRepository', 'reorderSteps', {
-      'routineId': routineId,
-      'count': stepIds.length,
-    });
-
-    if (routineId.isEmpty || stepIds.isEmpty) return null;
-
-    try {
-      await _dio.patch<void>(
-        '/api/routines/$routineId/steps/order',
-        data: {'stepIds': stepIds},
-      );
-      AppLogger.repositorySuccess(
-        'RoutineRepository',
-        'reorderSteps',
-        '단계 순서 저장됨',
-      );
-      return null;
-    } catch (e) {
-      // 일과 순서와 같다 — 실패를 삼키지 않고 부르는 쪽이 화면을 되돌린다.
-      AppLogger.repositoryError('RoutineRepository', 'reorderSteps', e);
-      return AppFailure.of(e);
-    }
-  }
-
-  @override
-  Future<AppFailure?> deleteStep(String routineId, String stepId) async {
-    AppLogger.repositoryCall('RoutineRepository', 'deleteStep', {
-      'routineId': routineId,
-      'stepId': stepId,
-    });
-
-    if (routineId.isEmpty || stepId.isEmpty) {
-      return const AppFailure(fault: NetworkFault.app);
-    }
-
-    try {
-      // 응답으로 일과 전체가 오지만 쓰지 않는다 — 로컬 카드 상태를 그대로 둔다.
-      await _dio.delete<void>('/api/routines/$routineId/steps/$stepId');
-      AppLogger.repositorySuccess('RoutineRepository', 'deleteStep', '카드 빠짐');
-      return null;
-    } catch (e) {
-      AppLogger.repositoryError('RoutineRepository', 'deleteStep', e);
-      return AppFailure.of(e);
-    }
-  }
-
-  @override
   Future<AppFailure?> delete(String routineId) async {
     AppLogger.repositoryCall('RoutineRepository', 'delete', {
       'routineId': routineId,
@@ -602,54 +478,4 @@ class RoutineRepositoryImpl implements RoutineRepository {
       return AppFailure.of(e);
     }
   }
-
-  /// 캐시가 깨져 있으면 null — 폴백으로 넘긴다. 캐시 한 건 때문에 화면이 죽으면 안 된다.
-  ///
-  /// 이전 빌드가 저장한 캐시에는 보호자 원문 키가 남아 있을 수 있다.
-  /// 읽을 때 그 키를 지워 다시 쓰므로, 오프라인으로만 열어도 원문이 오래 남지 않는다.
-  /// 서버 `/today` 와 같은 규칙으로 거른다 — 어제 받아 둔 캐시나 전체 목록 폴백이
-  /// 오늘 일과로 나가지 않게 한다.
-  List<Routine> _onlyToday(List<Routine> routines) {
-    final now = DateTime.now();
-    return routines.where((r) => r.isTodayOn(now)).toList();
-  }
-
-  List<Routine>? _readCachedToday() {
-    final json = _storage?.cachedTodayRoutinesJson;
-    if (json == null) return null;
-    try {
-      final decoded = jsonDecode(json);
-      if (decoded is! List) return null;
-      final maps = decoded.whereType<Map<String, dynamic>>().toList();
-      final routines = maps.map(Routine.fromJson).toList();
-      if (maps.any(
-        (m) => m.containsKey('rawInputText') || m.containsKey('sanitizedInputText'),
-      )) {
-        _rewriteCachedWithoutRaw(routines);
-      }
-      return routines;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// 원문 키가 빠진 형태로 캐시를 덮어쓴다. 쓰기 실패는 읽기 결과에 영향 주지 않는다.
-  void _rewriteCachedWithoutRaw(List<Routine> routines) {
-    try {
-      _storage
-          ?.setCachedTodayRoutinesJson(
-            jsonEncode(routines.map((r) => r.toJson()).toList()),
-          )
-          .catchError((Object e) {
-            AppLogger.repositoryError('RoutineRepository', 'cacheMigrate', e);
-          });
-    } catch (e) {
-      AppLogger.repositoryError('RoutineRepository', 'cacheMigrate', e);
-    }
-  }
-
-  // --- 로컬 대체 구현 ---
-
-  /// 서버 없이도 데모가 성립하도록 로컬에서 일과를 구성한다.
-  /// DLP 마스킹도 여기서 흉내낸다 — 발표에서 전/후 비교를 보여줘야 하기 때문이다.
 }
