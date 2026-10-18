@@ -67,8 +67,13 @@
 </div>
 
 <!-- 마지막 변경: 시각(공통 포맷) + 변경자. 시각이 없으면 이력이 없는 것 -->
-<span th:fragment="lastChanged(at, by)" class="text-xs text-base-content/60" data-last-changed>
-  <span th:if="${at == null}">변경 이력 없음</span>
+<th:block th:fragment="lastChanged(at, by)">
+  <span th:replace="~{admin/fragments/admin-list :: lastChangedOr(${at}, ${by}, '변경 이력 없음')}"></span>
+</th:block>
+
+<!-- 마지막 변경 (이력 없음 문구를 화면이 정함: 설정 화면은 '기본 설정 (변경 이력 없음)') -->
+<span th:fragment="lastChangedOr(at, by, emptyText)" class="text-xs text-base-content/60" data-last-changed>
+  <span th:if="${at == null}" th:text="${emptyText}">변경 이력 없음</span>
   <span th:if="${at != null}">
     <span th:text="${@adminDate.format(at)}">2026-10-18 09:00</span>
     <span th:if="${by != null and !by.isBlank()}" th:text="'· ' + ${by}">· 관리자</span>

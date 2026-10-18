@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{admin/fragments/admin-layout :: page('설정 변경 이력', 'settings', ~{:: content})}">
+<body>
+
+<main th:fragment="content" class="flex-1 p-4 lg:p-8 space-y-6">
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <div>
+        <h1 class="text-2xl font-bold">설정 변경 이력</h1>
+        <p class="text-base-content/60">누가 언제 무엇을 바꿨는지 모두 남아 있어요. 비밀값은 값 대신 ••••로만 남아요.</p>
+      </div>
+      <a th:href="@{/admin/settings}" class="btn btn-outline btn-sm">시스템 설정으로</a>
+    </div>
+
+    <!-- 검색 + 키·변경자·기간 필터: 조건이 바뀌면 1페이지부터 -->
+    <form method="get" th:action="@{/admin/settings/history}" class="flex flex-wrap items-end gap-2" data-admin-filter-bar>
+      <input type="hidden" name="sort" th:value="${query.sort}"/>
+      <label class="form-control">
+        <span class="label-text text-xs">검색</span>
+        <input type="text" name="q" th:value="${query.q}" maxlength="100" placeholder="키·값·변경자·사유"
+               class="input input-bordered input-sm w-full sm:w-56"/>
+      </label>
+      <label class="form-control">
+        <span class="label-text text-xs">설정 키</span>
+        <input type="text" name="key" th:value="${query.filters.get('key')}" list="config-key-names" maxlength="100"
+               class="input input-bordered input-sm w-full sm:w-56"/>
+        <datalist id="config-key-names">
+          <option th:each="name : ${configKeyNames}" th:value="${name}"></option>
+        </datalist>
+      </label>
+      <label class="form-control">
+        <span class="label-text text-xs">변경자</span>
+        <input type="text" name="changedBy" th:value="${query.filters.get('changedBy')}" maxlength="100"
+               class="input input-bordered input-sm w-full sm:w-36"/>
+      </label>
+      <label class="form-control">
+        <span class="label-text text-xs">시작일</span>
+        <input type="date" name="from" th:value="${query.filters.get('from')}" class="input input-bordered input-sm"/>
+      </label>
+      <label class="form-control">
+        <span class="label-text text-xs">종료일</span>
+        <input type="date" name="to" th:value="${query.filters.get('to')}" class="input input-bordered input-sm"/>
+      </label>
+      <button type="submit" class="btn btn-primary btn-sm">찾기</button>
+      <a th:href="@{/admin/settings/history}" class="btn btn-ghost btn-sm">초기화</a>
+      <span class="ml-auto text-sm text-base-content/60">총 <span th:text="${page.totalElements}">0</span>건</span>
+    </form>
+
+    <div th:replace="~{admin/fragments/admin-list :: table(${definition}, ${query}, ${rows})}"></div>
+    <nav th:replace="~{admin/fragments/admin-list :: pager(${page}, ${baseUrl})}"></nav>
+</main>
+</body>
+</html>

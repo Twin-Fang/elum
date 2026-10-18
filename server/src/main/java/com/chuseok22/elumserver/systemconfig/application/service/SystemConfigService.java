@@ -215,12 +215,6 @@ public class SystemConfigService {
     update(key, defaultValueFor(key), actor, reason);
   }
 
-  /// 설정 화면 아래 최근 변경 이력(최신 20건).
-  @Transactional(readOnly = true)
-  public List<SystemConfigHistory> recentHistory() {
-    return systemConfigHistoryRepository.findTop20ByOrderByCreatedAtDesc();
-  }
-
   private SystemConfig findOrNew(ConfigKey key) {
     return systemConfigRepository.findByConfigKey(key)
       .orElseGet(() -> {
@@ -286,6 +280,10 @@ public class SystemConfigService {
       }
       return secret;
     }
+    // 날짜시간은 비울 수 있다 (비어 있으면 그 기능이 꺼진 것 — 신규가입 PRO 이벤트 기간 등)
+    if (key.getValueType() == ConfigValueType.DATETIME && (rawValue == null || rawValue.isBlank())) {
+      return "";
+    }
     if (rawValue == null || rawValue.isBlank() || rawValue.length() > MAX_VALUE_LENGTH) {
       throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
     }
@@ -295,7 +293,7 @@ public class SystemConfigService {
         // 모르는 코드는 저장하지 않는다. ko 는 늘 켜 두므로 앞에 붙여 정규화한다.
         return EnabledLocales.normalize(value);
       }
-      if (key == ConfigKey.SIGNUP_PRO_EVENT_START_AT || key == ConfigKey.SIGNUP_PRO_EVENT_END_AT) {
+      if (key.getValueType() == ConfigValueType.DATETIME) {
         // 읽을 수 없는 날짜는 저장하지 않는다 (이벤트가 조용히 꺼지는 것을 막음)
         ConfigDateTime.parse(value);
         return value;

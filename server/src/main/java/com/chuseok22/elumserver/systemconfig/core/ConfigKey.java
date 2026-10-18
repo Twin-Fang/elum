@@ -240,12 +240,12 @@ public enum ConfigKey {
   SIGNUP_PRO_EVENT_START_AT(
     ConfigGroup.SIGNUP_PRO_EVENT, "가입 시작 시각",
     "이 시각 이후 가입한 회원부터 적용. 형식 2026-10-19T00:00 (또는 2026-10-19 00:00, 날짜만도 가능). 비어 있으면 이벤트 꺼짐",
-    ConfigValueType.STRING, List.of(), ""
+    ConfigValueType.DATETIME, List.of(), ""
   ),
   SIGNUP_PRO_EVENT_END_AT(
     ConfigGroup.SIGNUP_PRO_EVENT, "가입 종료 시각",
     "이 시각 이전 가입한 회원까지 적용. 형식 2026-10-26T00:00 (또는 2026-10-26 00:00, 날짜만도 가능). 비어 있으면 이벤트 꺼짐",
-    ConfigValueType.STRING, List.of(), ""
+    ConfigValueType.DATETIME, List.of(), ""
   ),
   SIGNUP_PRO_EVENT_GRANT_DAYS(
     ConfigGroup.SIGNUP_PRO_EVENT, "Pro 유지 일수",

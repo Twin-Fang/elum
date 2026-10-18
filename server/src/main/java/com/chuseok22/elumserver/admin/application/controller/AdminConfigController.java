@@ -2,6 +2,8 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminImageProviderView;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminTextProviderView;
+import com.chuseok22.elumserver.admin.application.dto.response.SettingRow;
+import com.chuseok22.elumserver.admin.application.service.SystemConfigOverviewService;
 import com.chuseok22.elumserver.admin.application.service.PromptLocaleGate;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.core.TextProvider;
@@ -13,10 +15,10 @@ import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.systemconfig.application.service.EnabledLocales;
 import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
-import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigView;
 import com.chuseok22.elumserver.systemconfig.core.ConfigGroup;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,20 +41,24 @@ public class AdminConfigController {
   private final ImageClientRouter imageClientRouter;
   private final TextClientRouter textClientRouter;
   private final PromptLocaleGate promptLocaleGate;
+  private final SystemConfigOverviewService overviewService;
 
   @GetMapping("/admin/settings")
   public String settings(Model model) {
-    // ConfigGroup 선언 순서대로 그룹 카드를 고정 표시한다.
-    Map<ConfigGroup, List<SystemConfigView>> grouped = new LinkedHashMap<>();
-    List<SystemConfigView> views = systemConfigService.getAllViews();
-    for (ConfigGroup group : ConfigGroup.values()) {
-      grouped.put(group, views.stream().filter(view -> view.group() == group).toList());
-    }
-    model.addAttribute("groups", grouped);
+    // 표 행(최근 변경순) + 상단 요약 + Free/Pro 비교
+    List<SettingRow> rows = overviewService.buildRows();
+    model.addAttribute("rows", rows);
+    LocalDateTime now = LocalDateTime.now();
+    model.addAttribute("overview", overviewService.buildOverview(rows, now));
+    // "오늘 변경" 칩 기준일
+    model.addAttribute("today", now.toLocalDate());
+    // 필터 칩: 그룹 이름 > 표시 이름 (선언 순서)
+    Map<String, String> groupLabelByName = new LinkedHashMap<>();
+    rows.stream().sorted(java.util.Comparator.comparing(row -> ConfigGroup.valueOf(row.groupName()).ordinal()))
+      .forEach(row -> groupLabelByName.putIfAbsent(row.groupName(), row.groupLabel()));
+    model.addAttribute("groupLabelByName", groupLabelByName);
     model.addAttribute("imageProviders", imageProviderViews());
     model.addAttribute("textProviders", textProviderViews());
-    // 누가 언제 무엇을 바꿨는지 — 크레딧을 끄고 켠 기록도 여기 보인다.
-    model.addAttribute("history", systemConfigService.recentHistory());
     return "admin/settings";
   }
 

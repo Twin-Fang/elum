@@ -1,15 +1,20 @@
 /*
- * 시스템 설정 화면 — 찾기와 저장 (이슈 #248).
+ * 시스템 설정 표 — 검색, 필터 칩, 열 정렬 (화면 안에서만 처리).
  *
- * 설정이 서른 개가 넘는다. 점검 모드·강제 업데이트 키가 더 붙을 예정이라
- * 평면 목록으로는 원하는 것을 찾을 수 없다. 거르는 일은 **서버를 거치지 않는다** —
- * 값이 이미 화면에 다 있어서 왕복할 이유가 없다.
- *
- * 저장도 페이지를 다시 그리지 않는다. 화면이 길어 리로드하면 스크롤이 맨 위로 튀고,
- * 고치던 자리를 다시 찾아 내려가야 한다.
+ * 설정은 한 화면에 다 실려 있어 서버를 거칠 이유가 없다.
+ * 저장 뒤 행이 바뀌면 settings-panel.js 가 window.elumSettingsTable.refresh() 로 다시 거른다.
  */
 (function () {
   'use strict';
+
+  var SORT_MARK = { asc: '▲', desc: '▼' };
+  // 정렬 열 키 > 행의 data 속성 (행 조각 settings-parts :: row 와 짝)
+  var SORT_ATTRIBUTE = {
+    name: 'data-sort-name',
+    current: 'data-sort-current',
+    default: 'data-sort-default',
+    changed: 'data-sort-changed',
+  };
 
   function ready(fn) {
     if (document.readyState !== 'loading') fn();
@@ -17,107 +22,102 @@
   }
 
   ready(function () {
+    var table = document.querySelector('[data-settings-table]');
     var search = document.querySelector('[data-settings-search]');
-    if (!search) return; // 설정 화면이 아니다
+    if (!table || !search) return; // 설정 화면이 아니다
 
-    var changedOnly = document.querySelector('[data-changed-only]');
+    var tbody = table.querySelector('tbody');
+    var emptyRow = tbody.querySelector('[data-empty-row]');
     var counter = document.querySelector('[data-settings-count]');
-    var toast = document.querySelector('[data-settings-toast]');
-    var group = '';
+    var chip = 'all';
+    // 처음엔 서버가 준 순서(최근 변경순)
+    var sort = { key: 'changed', direction: 'desc' };
+
+    function rowsOf() {
+      return Array.prototype.slice.call(tbody.querySelectorAll('[data-config-row]'));
+    }
+
+    function matchesChip(row) {
+      if (chip === 'all') return true;
+      if (chip === 'different') return row.getAttribute('data-different') === 'true';
+      if (chip === 'today') return row.getAttribute('data-today') === 'true';
+      return chip.indexOf('group:') === 0 && row.getAttribute('data-group') === chip.substring('group:'.length);
+    }
 
     function applyFilter() {
-      var q = (search.value || '').trim().toLowerCase();
-      var onlyChanged = changedOnly && changedOnly.checked;
+      var keyword = (search.value || '').trim().toLowerCase();
       var shown = 0;
-
-      document.querySelectorAll('[data-group-card]').forEach(function (card) {
-        var visibleRows = 0;
-        card.querySelectorAll('[data-config-row]').forEach(function (row) {
-          var hit = !q || (row.getAttribute('data-search') || '').indexOf(q) >= 0;
-          if (onlyChanged && row.getAttribute('data-changed') !== 'true') hit = false;
-          if (group && card.getAttribute('data-group-card') !== group) hit = false;
-          row.classList.toggle('hidden', !hit);
-          if (hit) visibleRows++;
-        });
-        // 안에 보이는 것이 하나도 없으면 그룹 카드째 숨긴다 — 빈 카드만 남으면 더 헷갈린다
-        card.classList.toggle('hidden', visibleRows === 0);
-        shown += visibleRows;
+      rowsOf().forEach(function (row) {
+        var isMatch = (!keyword || (row.getAttribute('data-search') || '').indexOf(keyword) >= 0) && matchesChip(row);
+        row.classList.toggle('hidden', !isMatch);
+        if (isMatch) shown++;
       });
-
+      if (emptyRow) emptyRow.classList.toggle('hidden', shown > 0);
       if (counter) counter.textContent = shown + '개 보이는 중';
     }
 
-    search.addEventListener('input', applyFilter);
-    if (changedOnly) changedOnly.addEventListener('change', applyFilter);
-
-    document.querySelectorAll('[data-group-tab]').forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        group = tab.getAttribute('data-group-tab') || '';
-        document.querySelectorAll('[data-group-tab]').forEach(function (t) {
-          var on = t === tab;
-          t.classList.toggle('btn-primary', on);
-          t.classList.toggle('btn-ghost', !on);
-        });
-        applyFilter();
-      });
-    });
-
-    applyFilter();
-
-    // --- 리로드 없는 저장 ---
-    function showToast(ok, message) {
-      if (!toast) return;
-      toast.textContent = message;
-      toast.classList.remove('hidden', 'alert-success', 'alert-error');
-      toast.classList.add(ok ? 'alert-success' : 'alert-error');
+    function compareRows(a, b) {
+      var attribute = SORT_ATTRIBUTE[sort.key];
+      var left = a.getAttribute(attribute) || '';
+      var right = b.getAttribute(attribute) || '';
+      // 마지막 변경이 없는 행은 어느 방향이든 맨 뒤
+      if (sort.key === 'changed' && (!left || !right)) {
+        if (!left && !right) return 0;
+        return !left ? 1 : -1;
+      }
+      var order = left < right ? -1 : left > right ? 1 : 0;
+      return sort.direction === 'asc' ? order : -order;
     }
 
-    // 변경 사유(선택, #407) — 위 입력칸의 값을 설정 폼마다 실어 보낸다. 비동기 저장보다 먼저 붙여야
-    // FormData 에 함께 담긴다. 비동기가 아닌 폼(복원·제공자 전환)도 같은 방식으로 싣는다.
-    var reasonInput = document.querySelector('[data-settings-reason]');
-    document.querySelectorAll('form[action*="/admin/settings/"]').forEach(function (form) {
-      form.addEventListener('submit', function () {
-        if (!reasonInput) return;
-        var hidden = form.querySelector('input[name=reason]');
-        if (!hidden) {
-          hidden = document.createElement('input');
-          hidden.type = 'hidden';
-          hidden.name = 'reason';
-          form.appendChild(hidden);
-        }
-        hidden.value = reasonInput.value || '';
+    function applySort() {
+      rowsOf().sort(compareRows).forEach(function (row) {
+        tbody.insertBefore(row, emptyRow); // 안내 줄은 항상 맨 아래
+      });
+      table.querySelectorAll('[data-sort-by]').forEach(function (button) {
+        var mark = button.querySelector('[data-sort-mark]');
+        if (mark) mark.textContent = button.getAttribute('data-sort-by') === sort.key ? SORT_MARK[sort.direction] : '';
+      });
+    }
+
+    function refresh() {
+      applySort();
+      applyFilter();
+    }
+
+    function selectChip(value) {
+      chip = value;
+      document.querySelectorAll('[data-chip]').forEach(function (button) {
+        var isOn = button.getAttribute('data-chip') === value;
+        button.classList.toggle('btn-primary', isOn);
+        button.classList.toggle('btn-ghost', !isOn);
+      });
+      applyFilter();
+    }
+
+    search.addEventListener('input', applyFilter);
+    document.querySelectorAll('[data-chip]').forEach(function (button) {
+      button.addEventListener('click', function () { selectChip(button.getAttribute('data-chip')); });
+    });
+    // 요약의 "기본값과 다른 설정 N개 보기" 는 요약이 다시 그려져도 동작해야 해서 문서에서 받는다
+    document.addEventListener('click', function (event) {
+      var shortcut = event.target.closest('[data-chip-shortcut]');
+      if (!shortcut) return;
+      selectChip(shortcut.getAttribute('data-chip-shortcut'));
+      // 표가 카드보다 넓어 표를 맞추면 화면이 가로로 밀림 > 카드 기준
+      (table.closest('.card') || table).scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    });
+    table.querySelectorAll('[data-sort-by]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var key = button.getAttribute('data-sort-by');
+        // 같은 열이면 방향 뒤집기, 다른 열이면 이름·값은 오름차순, 변경 시각은 최신부터
+        sort = sort.key === key
+          ? { key: key, direction: sort.direction === 'asc' ? 'desc' : 'asc' }
+          : { key: key, direction: key === 'changed' ? 'desc' : 'asc' };
+        refresh();
       });
     });
 
-    document.querySelectorAll('form[data-async-save]').forEach(function (form) {
-      form.addEventListener('submit', function (event) {
-        event.preventDefault();
-        var button = form.querySelector('button[type=submit]');
-        if (button) button.disabled = true; // 두 번 눌러 두 번 보내는 것을 막는다
-
-        fetch(form.action, {
-          method: 'POST',
-          headers: { 'X-Requested-With': 'fetch' },
-          body: new FormData(form),
-        })
-          .then(function (res) { return res.json(); })
-          .then(function (data) {
-            showToast(data.ok, data.message);
-            // 성공하면 "변경됨" 배지가 붙어야 하는데, 배지는 서버가 그린다.
-            // 값만 바뀐 것을 표시해 두고 다음 새로고침에 정식으로 반영한다.
-            if (data.ok) {
-              var row = form.closest('[data-config-row]');
-              if (row) row.setAttribute('data-changed', 'true');
-            }
-          })
-          .catch(function () {
-            // 네트워크가 끊겼거나 서버가 죽었다. 무엇이 문제인지 말해 준다.
-            showToast(false, '저장하지 못했어요. 연결을 확인해주세요 (E-CFG-NET)');
-          })
-          .then(function () {
-            if (button) button.disabled = false;
-          });
-      });
-    });
+    window.elumSettingsTable = { refresh: refresh };
+    refresh();
   });
 })();
