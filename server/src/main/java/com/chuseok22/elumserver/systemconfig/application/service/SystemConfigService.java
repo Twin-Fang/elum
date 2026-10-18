@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfig;
 import com.chuseok22.elumserver.systemconfig.infrastructure.entity.SystemConfigHistory;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigHistoryRepository;
 import com.chuseok22.elumserver.systemconfig.infrastructure.repository.SystemConfigRepository;
+import java.time.format.DateTimeParseException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -294,6 +295,11 @@ public class SystemConfigService {
         // 모르는 코드는 저장하지 않는다. ko 는 늘 켜 두므로 앞에 붙여 정규화한다.
         return EnabledLocales.normalize(value);
       }
+      if (key == ConfigKey.SIGNUP_PRO_EVENT_START_AT || key == ConfigKey.SIGNUP_PRO_EVENT_END_AT) {
+        // 읽을 수 없는 날짜는 저장하지 않는다 (이벤트가 조용히 꺼지는 것을 막음)
+        ConfigDateTime.parse(value);
+        return value;
+      }
       if (key.getValueType() == ConfigValueType.INTEGER) {
         int number = Integer.parseInt(value);
         // 시간값에 0 이나 음수가 들어가면 앱의 요청이 끝없이 기다리게 된다. 범위가 있는 키만 본다.
@@ -312,7 +318,7 @@ public class SystemConfigService {
         // 막힌 사용자를 엉뚱한 곳으로 보내지 않도록 공식 스토어 주소만 받는다
         throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
       }
-    } catch (NumberFormatException e) {
+    } catch (NumberFormatException | DateTimeParseException e) {
       throw new CustomException(ErrorCode.SYSTEM_CONFIG_INVALID_VALUE);
     }
     return value;
