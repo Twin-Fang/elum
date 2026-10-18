@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.admin.application.service;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditJobRow;
+import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
 import com.chuseok22.elumserver.ai.infrastructure.entity.AiCallLog;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.CreditJobCost;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
@@ -92,7 +93,7 @@ public class AdminCreditJobQueryService {
 
   public Page<AdminCreditJobRow> jobs(JobFilter filter, int page) {
     LocalDateTime now = LocalDateTime.now(clock);
-    Pageable pageable = PageRequest.of(Math.max(page, 0), AdminCreditQueryService.PAGE_SIZE, Sort.by(Sort.Direction.DESC, "startedAt"));
+    Pageable pageable = PageRequest.of(Math.max(page, 0), AdminListDefaults.PAGE_SIZE, Sort.by(Sort.Direction.DESC, "startedAt"));
     Page<AiCreditJob> jobs = jobRepository.findAll(specOf(filter), pageable);
     return jobRows(jobs, policyService.current(), now);
   }

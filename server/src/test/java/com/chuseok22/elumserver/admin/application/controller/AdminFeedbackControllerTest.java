@@ -29,7 +29,7 @@ class AdminFeedbackControllerTest {
     when(feedbackService.list(0)).thenReturn(new PageImpl<Feedback>(List.of()));
     ExtendedModelMap model = new ExtendedModelMap();
 
-    String view = controller.list(0, model);
+    String view = controller.list(1, model); // URL 페이지는 1부터, 서비스는 0부터
 
     assertThat(view).isEqualTo("admin/feedback");
     assertThat(model.get("feedbacks")).isNotNull();

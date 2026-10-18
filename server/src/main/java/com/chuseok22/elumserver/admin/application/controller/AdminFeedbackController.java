@@ -18,8 +18,8 @@ public class AdminFeedbackController {
   private final FeedbackService feedbackService;
 
   @GetMapping("/admin/feedback")
-  public String list(@RequestParam(name = "page", defaultValue = "0") int page, Model model) {
-    model.addAttribute("feedbacks", feedbackService.list(page));
+  public String list(@RequestParam(name = "page", defaultValue = "1") int page, Model model) {
+    model.addAttribute("feedbacks", feedbackService.list(page - 1));
     return "admin/feedback";
   }
 

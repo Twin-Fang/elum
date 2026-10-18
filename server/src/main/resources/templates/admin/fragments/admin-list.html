@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  관리자 목록 공통 조각 (페이저, 필터 바, 표, 마지막 변경).
+  쿼리 규칙은 AdminListDefinition / AdminListQuery 와 짝이다.
+  페이지 번호는 URL 에서 1부터 시작한다.
+-->
+<body>
+
+<!-- 페이저: page 는 Spring Page, baseUrl 은 검색 조건이 담긴 링크 (예: @{/admin/routines(keyword=${keyword})}) -->
+<nav th:fragment="pager(page, baseUrl)" th:if="${page.totalPages > 1}"
+     class="flex items-center justify-center gap-2" data-admin-pager>
+  <a th:if="${page.hasPrevious()}" class="btn btn-sm"
+     th:href="@{${baseUrl}(page=${page.number})}">이전</a>
+  <span class="text-sm" th:text="${page.number + 1} + ' / ' + ${page.totalPages}">1 / 1</span>
+  <a th:if="${page.hasNext()}" class="btn btn-sm"
+     th:href="@{${baseUrl}(page=${page.number + 2})}">다음</a>
+</nav>
+
+<!-- 필터 바: 검색어 + 필터 칩. 칩은 링크라 JS 없이 동작하고, 조건이 바뀌면 1페이지부터 다시 본다 -->
+<div th:fragment="filterBar(definition, query)" class="flex flex-wrap items-center gap-2" data-admin-filter-bar>
+  <form method="get" action="" class="flex items-center gap-2">
+    <input type="text" name="q" th:value="${query.q}" maxlength="100" placeholder="검색"
+           class="input input-bordered input-sm w-full sm:w-64"/>
+    <input type="hidden" name="sort" th:value="${query.sort}"/>
+    <input th:each="activeFilter : ${query.filters}" type="hidden"
+           th:name="${activeFilter.key}" th:value="${activeFilter.value}"/>
+    <button type="submit" class="btn btn-outline btn-sm">검색</button>
+  </form>
+  <div th:each="filter : ${definition.filters}" th:unless="${filter.options.isEmpty()}"
+       class="join" role="group" th:attr="aria-label=${filter.label}">
+    <a th:href="${query.withFilter(filter.key, null).toQueryString(query.sort, 1)}"
+       th:classappend="${query.filters.get(filter.key) == null} ? 'btn-primary'"
+       class="btn btn-sm join-item">전체</a>
+    <a th:each="option : ${filter.options}"
+       th:href="${query.withFilter(filter.key, option.value).toQueryString(query.sort, 1)}"
+       th:classappend="${option.value == query.filters.get(filter.key)} ? 'btn-primary'"
+       class="btn btn-sm join-item" th:text="${option.label}">옵션</a>
+  </div>
+</div>
+
+<!-- 표: 열은 정의 순서, 정렬 가능한 열은 헤더 링크. rows 는 AdminListRow 목록 -->
+<div th:fragment="table(definition, query, rows)" class="overflow-x-auto">
+  <table class="table">
+    <thead>
+    <tr>
+      <th th:each="column : ${definition.columns}">
+        <a th:if="${column.isSortable()}" th:href="${query.toQueryString(query.nextSortFor(column.key), 1)}"
+           class="link link-hover" th:text="${column.label} + (${query.sortKey() == column.key} ? (${query.isAscending()} ? ' ▲' : ' ▼') : '')">열</a>
+        <span th:unless="${column.isSortable()}" th:text="${column.label}">열</span>
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="row : ${rows}" class="hover">
+      <td th:each="column, columnStat : ${definition.columns}">
+        <a th:if="${columnStat.first and row.linkUrl != null}" th:href="${row.linkUrl}" class="link link-hover"
+           th:text="${row.cells.get(column.key)}">값</a>
+        <span th:unless="${columnStat.first and row.linkUrl != null}" th:text="${row.cells.get(column.key)}">값</span>
+      </td>
+    </tr>
+    <th:block th:if="${rows.isEmpty()}">
+      <tr th:replace="~{admin/fragments/admin-ui :: emptyRow(${definition.columns.size()}, '조건에 맞는 항목이 없어요')}"></tr>
+    </th:block>
+    </tbody>
+  </table>
+</div>
+
+<!-- 마지막 변경: 시각(공통 포맷) + 변경자. 시각이 없으면 이력이 없는 것 -->
+<span th:fragment="lastChanged(at, by)" class="text-xs text-base-content/60" data-last-changed>
+  <span th:if="${at == null}">변경 이력 없음</span>
+  <span th:if="${at != null}">
+    <span th:text="${@adminDate.format(at)}">2026-10-18 09:00</span>
+    <span th:if="${by != null and !by.isBlank()}" th:text="'· ' + ${by}">· 관리자</span>
+  </span>
+</span>
+
+</body>
+</html>

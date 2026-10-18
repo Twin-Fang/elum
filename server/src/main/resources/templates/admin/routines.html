@@ -58,13 +58,7 @@
       </table>
     </div>
 
-    <div class="flex items-center justify-center gap-2" th:if="${routines.totalPages > 1}">
-      <a th:if="${routines.hasPrevious()}" class="btn btn-sm"
-         th:href="@{/admin/routines(page=${routines.number - 1}, keyword=${keyword})}">이전</a>
-      <span class="text-sm" th:text="${routines.number + 1} + ' / ' + ${routines.totalPages}">1 / 1</span>
-      <a th:if="${routines.hasNext()}" class="btn btn-sm"
-         th:href="@{/admin/routines(page=${routines.number + 1}, keyword=${keyword})}">다음</a>
-    </div>
+    <div th:replace="~{admin/fragments/admin-list :: pager(${routines}, @{/admin/routines(keyword=${keyword})})}"></div>
   </main>
 </body>
 </html>

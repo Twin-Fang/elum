@@ -24,10 +24,10 @@ public class AdminMemberController {
   public String list(
     @RequestParam(name = "keyword", required = false) String keyword,
     @RequestParam(name = "status", required = false) MemberStatus status,
-    @RequestParam(name = "page", defaultValue = "0") int page,
+    @RequestParam(name = "page", defaultValue = "1") int page,
     Model model
   ) {
-    model.addAttribute("members", adminMemberService.search(keyword, status, page));
+    model.addAttribute("members", adminMemberService.search(keyword, status, page - 1));
     model.addAttribute("keyword", keyword == null ? "" : keyword);
     model.addAttribute("selectedStatus", status);
     return "admin/members";

@@ -82,13 +82,7 @@
       </table>
     </div>
 
-    <div class="flex items-center gap-2" th:if="${members.totalPages > 1}">
-      <a th:if="${members.hasPrevious()}" class="btn btn-sm"
-         th:href="@{/admin/members(page=${members.number - 1}, keyword=${keyword}, status=${selectedStatus != null ? selectedStatus.name() : ''})}">이전</a>
-      <span class="text-sm" th:text="${members.number + 1} + ' / ' + ${members.totalPages}">1 / 1</span>
-      <a th:if="${members.hasNext()}" class="btn btn-sm"
-         th:href="@{/admin/members(page=${members.number + 1}, keyword=${keyword}, status=${selectedStatus != null ? selectedStatus.name() : ''})}">다음</a>
-    </div>
+    <div th:replace="~{admin/fragments/admin-list :: pager(${members}, @{/admin/members(keyword=${keyword}, status=${selectedStatus != null ? selectedStatus.name() : null})})}"></div>
   </main>
 </body>
 </html>
