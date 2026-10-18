@@ -73,14 +73,46 @@ void main() {
       expect(device.spokenTexts, isEmpty);
     });
 
-    test('안드로이드에서 저장 음성이 없으면 기기 음성으로 읽는다 — 소리가 끊기지 않게', () async {
+    test('안드로이드 순서는 저장 음성, 서버 실시간 음성, 기기 음성이다 (#761)', () {
+      final storedSpeech = _FakeSpeech(succeeds: true);
+      final device = _FakeSpeech(succeeds: true);
+      final remote = _FakeSpeech(succeeds: true);
+
+      final engines = speechEnginesFor(
+        isAndroid: true, createStored: () => storedSpeech, device: device, remote: remote);
+
+      expect(engines, [storedSpeech, remote, device]);
+    });
+
+    test('안드로이드에서 저장 음성이 없으면 서버 음성으로 읽고 기기 음성은 부르지 않는다 — 귀신 목소리가 나지 않게', () async {
+      final device = _FakeSpeech(succeeds: true);
+      final remote = _FakeSpeech(succeeds: true);
+      final engines = speechEnginesFor(
+        isAndroid: true, createStored: () => _FakeSpeech(succeeds: false), device: device, remote: remote);
+
+      expect(await FallbackSpeech(engines).speak('옷을 입어요', stored: stored), isTrue);
+      expect(remote.spokenTexts, ['옷을 입어요']);
+      expect(device.spokenTexts, isEmpty);
+    });
+
+    test('안드로이드에서 저장 음성과 서버 음성이 모두 실패할 때만 기기 음성으로 읽는다 — 소리가 끊기지 않게', () async {
       final device = _FakeSpeech(succeeds: true);
       final engines = speechEnginesFor(
         isAndroid: true, createStored: () => _FakeSpeech(succeeds: false), device: device,
-        remote: _FakeSpeech(succeeds: true));
+        remote: _FakeSpeech(succeeds: false));
 
       expect(await FallbackSpeech(engines).speak('옷을 입어요', stored: stored), isTrue);
       expect(device.spokenTexts, ['옷을 입어요']);
+    });
+
+    test('아이폰 순서는 기기 음성, 서버 음성 그대로다 — 잘 되던 아이폰이 바뀌지 않게', () {
+      final device = _FakeSpeech(succeeds: true);
+      final remote = _FakeSpeech(succeeds: true);
+
+      final engines = speechEnginesFor(
+        isAndroid: false, createStored: () => _FakeSpeech(succeeds: true), device: device, remote: remote);
+
+      expect(engines, [device, remote]);
     });
 
     test('아이폰은 저장 음성을 만들지도 부르지도 않는다 — 잘 되던 아이폰이 바뀌지 않게', () {

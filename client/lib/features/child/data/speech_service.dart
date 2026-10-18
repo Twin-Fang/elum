@@ -264,7 +264,7 @@ class StoredSpeech implements SpeechService {
   void dispose() => _player.dispose();
 }
 
-/// 순서대로 시도: 앞이 실패하면 다음 (안드로이드 저장 > 기기 > 실시간, 아이폰 기기 > 실시간)
+/// 순서대로 시도: 앞이 실패하면 다음 (안드로이드 저장 > 실시간 > 기기, 아이폰 기기 > 실시간)
 ///
 /// 어느 쪽이 울리는지 확신할 수 없어 **정지할 때 전부 멈춘다** — 하나만 멈추면 소리가 남는다.
 class FallbackSpeech implements SpeechService {
@@ -298,7 +298,8 @@ class FallbackSpeech implements SpeechService {
 
 /// 플랫폼별 재생 순서
 ///
-/// 안드로이드: 기기 목소리가 기종마다 쉬고 흔들려(#675) 미리 만든 음성 먼저.
+/// 안드로이드: 기기 목소리가 기종마다 쉬고 흔들려(#675) 미리 만든 음성 먼저, 없으면 서버 실시간 음성.
+/// 기기 엔진은 최후 수단 (#761: 저장 음성이 없을 때 기기 엔진이 이상한 소리를 냄).
 /// 아이폰: 기기 목소리가 좋아 그대로 (저장 음성은 만들지도 않음).
 @visibleForTesting
 List<SpeechService> speechEnginesFor({
@@ -307,7 +308,7 @@ List<SpeechService> speechEnginesFor({
   required SpeechService device,
   required SpeechService remote,
 }) =>
-    isAndroid ? [createStored(), device, remote] : [device, remote];
+    isAndroid ? [createStored(), remote, device] : [device, remote];
 
 /// 일과 화면 진입 시 저장 음성 정리·미리 받기 (#675). 저장 음성을 쓰는 안드로이드만, 던지지 않음
 void prefetchStoredSpeech(WidgetRef ref, String routineId, List<ActionCard> cards) {
