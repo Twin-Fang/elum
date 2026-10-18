@@ -105,6 +105,20 @@ void main() {
     handle.dispose();
   });
 
+  // 기기에 영어 음성이 없어 읽기에 실패해도 고장 안내창을 띄우지 않는다 (#672)
+  testWidgets('카드 상세 — 영어 일과는 소리를 못 내도 실패 팝업이 없다', (tester) async {
+    final handle = tester.ensureSemantics();
+    await pump(
+      tester,
+      ChildRoutineDetailScreen(routine: routine.copyWith(language: 'en')),
+      speech: _FailingSpeech(),
+    );
+    await tester.tap(find.bySemanticsLabel('소리로 듣기').first);
+    await tester.pumpAndSettle();
+    expect(find.text('E-TTS'), findsNothing);
+    handle.dispose();
+  });
+
   group('화면 전환', () {
     testWidgets('암호를 읽지 못하면 실패 팝업 문구와 에러 코드', (tester) async {
       await pump(
