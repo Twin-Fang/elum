@@ -77,7 +77,7 @@ public class RoutineController implements RoutineControllerDocs {
 
   // rawInputText에 민감정보 원문이 포함될 수 있으므로 logParameters를 false로 둔다.
   // AI 가 실패해도 200을 반환한다(RoutineCreateService.generateQuestion 참고). 크레딧 부족만 403 이다.
-  @LogMonitoring(logParameters = false, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PostMapping("/questions")
   public ResponseEntity<RoutineQuestionResponse> generateQuestion(
     Authentication authentication,
@@ -90,7 +90,7 @@ public class RoutineController implements RoutineControllerDocs {
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
-  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/{routineId}")
   public ResponseEntity<RoutineResponse> getRoutine(
     Authentication authentication, @PathVariable String routineId
@@ -99,7 +99,7 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getRoutine(caller, routineId)));
   }
 
-  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping
   public ResponseEntity<List<RoutineResponse>> getMyRoutines(
     Authentication authentication,
@@ -110,7 +110,7 @@ public class RoutineController implements RoutineControllerDocs {
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
-  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/today")
   public ResponseEntity<List<RoutineResponse>> getTodayRoutines(
     Authentication authentication,
@@ -120,7 +120,7 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getTodayRoutines(caller)));
   }
 
-  @LogMonitoring(logParameters = true, logResult = true, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/suggestions")
   public ResponseEntity<List<RoutineSuggestionResponse>> getSuggestions(
     @RequestParam(defaultValue = "4") int count
@@ -129,7 +129,7 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(responses);
   }
 
-  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/{routineId}/steps/{stepId}/image")
   public ResponseEntity<byte[]> getStepImage(
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
@@ -143,7 +143,7 @@ public class RoutineController implements RoutineControllerDocs {
 
   // 단계 음성 (#675). 아직 없으면 404 — 앱은 기기 음성으로 읽음
   // ETag = 음성 열쇠. 앱이 가진 열쇠와 같으면 304 (다시 받지 않음), 다르면 새 음성
-  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/{routineId}/steps/{stepId}/speech")
   public ResponseEntity<byte[]> getStepSpeech(
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId,
@@ -210,7 +210,7 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(response);
   }
 
-  @LogMonitoring
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/past")
   public ResponseEntity<List<RoutineResponse>> getPastRoutines(
     Authentication authentication,
@@ -220,7 +220,7 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getPastRoutines(caller)));
   }
 
-  @LogMonitoring
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/drafts")
   public ResponseEntity<List<RoutineResponse>> getDraftRoutines(
     Authentication authentication,
@@ -231,7 +231,7 @@ public class RoutineController implements RoutineControllerDocs {
   }
 
   // AI를 호출하지 않는다. 같은 카드로 오늘 일과를 하나 더 만드는 것뿐이다.
-  @LogMonitoring
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PostMapping("/{routineId}/duplicate")
   public ResponseEntity<RoutineResponse> duplicate(
     Authentication authentication, @PathVariable String routineId
@@ -241,7 +241,7 @@ public class RoutineController implements RoutineControllerDocs {
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
   }
 
-  @LogMonitoring
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @DeleteMapping("/{routineId}")
   public ResponseEntity<Void> delete(
     Authentication authentication, @PathVariable String routineId
@@ -251,7 +251,7 @@ public class RoutineController implements RoutineControllerDocs {
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
-  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/{routineId}/confirm")
   public ResponseEntity<RoutineResponse> confirm(
     Authentication authentication, @PathVariable String routineId
@@ -262,7 +262,7 @@ public class RoutineController implements RoutineControllerDocs {
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
-  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/{routineId}/steps/{stepId}/complete")
   public ResponseEntity<RoutineResponse> completeStep(
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
@@ -272,7 +272,7 @@ public class RoutineController implements RoutineControllerDocs {
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
-  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PatchMapping("/{routineId}/steps/{stepId}/cancel")
   public ResponseEntity<RoutineResponse> cancelStep(
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
@@ -283,7 +283,7 @@ public class RoutineController implements RoutineControllerDocs {
 
   // 오프라인 퍼스트 동기화 — 완료 집합을 통째로 받아 멱등 반영한다.
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
-  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @PutMapping("/{routineId}/progress")
   public ResponseEntity<RoutineResponse> syncProgress(
     Authentication authentication,
@@ -342,7 +342,7 @@ public class RoutineController implements RoutineControllerDocs {
   }
 
   // RoutineResponse에 rawInputText(마스킹 전 원문)가 포함되므로 logResult를 false로 둔다.
-  @LogMonitoring(logParameters = true, logResult = false, logExecutionTime = true)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @DeleteMapping("/{routineId}/steps/{stepId}")
   public ResponseEntity<RoutineResponse> deleteStep(
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
