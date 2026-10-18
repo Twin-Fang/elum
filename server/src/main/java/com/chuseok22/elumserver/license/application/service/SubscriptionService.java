@@ -154,6 +154,12 @@ public class SubscriptionService {
     subscriptionHistoryRepository.deleteByMemberId(memberId);
   }
 
+  /// 지금 유효한 Pro 회원수 (ACTIVE · 만료 전 PRO, 탈퇴 회원 제외)
+  @Transactional(readOnly = true)
+  public long countEffectivePro(LocalDateTime now) {
+    return subscriptionRepository.countEffectiveMembersByPlan(PlanType.PRO, SubscriptionStatus.ACTIVE, now);
+  }
+
   /// 목록 페이지에 실린 회원들의 구독을 한 번에 (회원 id > 구독)
   @Transactional(readOnly = true)
   public Map<String, Subscription> findAllByMemberIds(Collection<String> memberIds) {

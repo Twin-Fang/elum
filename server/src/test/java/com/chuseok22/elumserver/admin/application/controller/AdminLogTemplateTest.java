@@ -2,9 +2,7 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineStatusCounts;
 import com.chuseok22.elumserver.admin.application.dto.response.DashboardErrorsView;
-import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.AiCallStats;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +23,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 class AdminLogTemplateTest {
 
   private SpringTemplateEngine engine;
+  private final AdminTemplateRenderSupport renderer = new AdminTemplateRenderSupport();
 
   @BeforeEach
   void setUp() {
@@ -55,9 +54,9 @@ class AdminLogTemplateTest {
   @Test
   @DisplayName("대시보드 오류 카드 — 오류가 있을 때와 없을 때 둘 다 그린다")
   void rendersDashboardErrorCard() {
-    String withErrors = engine.process("admin/dashboard", dashboard(new DashboardErrorsView(3, "10/08 09:12",
+    String withErrors = renderer.render("admin/dashboard", dashboard(new DashboardErrorsView(3, "10/08 09:12",
       List.of(new DashboardErrorsView.Item("10/08 10:01:02", "c.c.e.RoutineService", "일과 생성 실패")))));
-    String empty = engine.process("admin/dashboard", dashboard(new DashboardErrorsView(0, "10/08 09:12", List.of())));
+    String empty = renderer.render("admin/dashboard", dashboard(new DashboardErrorsView(0, "10/08 09:12", List.of())));
 
     assertThat(withErrors).contains("3건", "일과 생성 실패", "집계 시작 10/08 09:12", "badge-error");
     assertThat(empty).contains("0건", "최근 오류가 없어요");
@@ -65,17 +64,7 @@ class AdminLogTemplateTest {
 
   private Context dashboard(DashboardErrorsView errors) {
     Map<String, Object> variables = new HashMap<>();
-    variables.put("memberCount", 10L);
-    variables.put("routineStats", new AdminRoutineStatusCounts(5, 1, 2, 2));
-    variables.put("todayAiStats", new AiCallStats() {
-      public long getTotalCount() { return 4; }
-      public long getSuccessCount() { return 4; }
-      public double getAvgLatencyMs() { return 100; }
-      public long getTotalTokens() { return 1234; }
-      public double getTotalCostUsd() { return 0.12; }
-    });
-    variables.put("activeMemberCount", 3L);
-    variables.put("suspendedMemberCount", 0L);
+    variables.put("summary", AdminDashboardTemplateTest.summary());
     variables.put("recentErrors", errors);
     Context context = new Context();
     context.setVariables(variables);

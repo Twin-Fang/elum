@@ -144,4 +144,23 @@ class AdminMemberListQueryIT {
     assertThat(row.plan()).isEqualTo(PlanType.FREE);
     assertThat(row.planLastChangedBy()).isEqualTo("admin3");
   }
+
+  @Test
+  @DisplayName("대시보드 Pro 수는 유효 Pro 만 센다 — 만료된 Pro 와 탈퇴 회원의 Pro 는 뺀다 (#760)")
+  void countEffectivePro_countsOnlyEffectiveNonWithdrawn() {
+    long before = adminMemberService.countEffectivePro();
+    Member pro = newMember("cpro");
+    Member expired = newMember("cexpired");
+    Member withdrawn = newMember("cwithdrawn");
+    subscriptionService.grantPro(pro.getId(), 30, "시연", "admin1");
+    subscriptionService.grantPro(expired.getId(), 30, "시연", "admin1");
+    subscriptionService.grantPro(withdrawn.getId(), null, "시연", "admin1");
+    Subscription expiredSubscription = subscriptionRepository.findByMemberId(expired.getId()).orElseThrow();
+    expiredSubscription.setExpiresAt(LocalDateTime.now().minusDays(1));
+    subscriptionRepository.save(expiredSubscription);
+    withdrawn.setStatus(MemberStatus.WITHDRAWN);
+    memberRepository.save(withdrawn);
+
+    assertThat(adminMemberService.countEffectivePro() - before).isEqualTo(1);
+  }
 }

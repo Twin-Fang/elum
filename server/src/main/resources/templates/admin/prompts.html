@@ -13,7 +13,7 @@
 
       <!-- 언어 선택: 프롬프트는 (키, 언어)마다 한 행. 모델이 없으면 ko -->
       <div id="prompt-page" th:attr="data-locale=${selectedLocale ?: 'ko'}" class="space-y-3">
-        <div th:if="${locales != null}" class="tabs tabs-boxed">
+        <div th:if="${locales != null}" class="tabs tabs-boxed overflow-x-auto flex-nowrap">
           <a th:each="entry : ${locales}"
              th:href="@{/admin/prompts(locale=${entry.code})}"
              class="tab"

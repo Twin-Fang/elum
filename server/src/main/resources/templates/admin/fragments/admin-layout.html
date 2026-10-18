@@ -101,19 +101,35 @@
     <img th:src="@{/admin/vendor/logo_elum.svg}" alt="이룸" style="height:2.25rem;width:auto;align-self:flex-start"/>
     <span class="text-xs font-medium" style="opacity:.6">관리자</span>
   </a>
+  <!-- 메뉴 그룹 3개: 운영(회원, 루틴, 크레딧, 의견) / 콘텐츠(공지, 약관, 프롬프트) / 시스템(설정, 모니터링, 서버 로그) -->
   <ul class="menu w-full flex-1">
     <li><a th:href="@{/admin/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'">대시보드</a></li>
-    <li><a th:href="@{/admin/members}" th:classappend="${active == 'members'} ? 'active'">회원 관리</a></li>
-    <li><a th:href="@{/admin/routines}" th:classappend="${active == 'routines'} ? 'active'">루틴 관리</a></li>
-    <li><a th:href="@{/admin/prompts}" th:classappend="${active == 'prompts'} ? 'active'">프롬프트 관리</a></li>
-    <li><a th:href="@{/admin/monitoring}" th:classappend="${active == 'monitoring'} ? 'active'">AI 모니터링</a></li>
-    <li><a th:href="@{/admin/credits}" th:classappend="${active == 'credits'} ? 'active'">AI 크레딧</a></li>
-    <li><a th:href="@{/admin/logs}" th:classappend="${active == 'logs'} ? 'active'">서버 로그
-      <span data-log-error-badge class="badge badge-error badge-sm hidden" title="최근 24시간 오류"></span></a></li>
-    <li><a th:href="@{/admin/consents}" th:classappend="${active == 'consents'} ? 'active'">약관 관리</a></li>
-    <li><a th:href="@{/admin/notices}" th:classappend="${active == 'notices'} ? 'active'">공지 관리</a></li>
-    <li><a th:href="@{/admin/feedback}" th:classappend="${active == 'feedback'} ? 'active'">의견 관리</a></li>
-    <li><a th:href="@{/admin/settings}" th:classappend="${active == 'settings'} ? 'active'">시스템 설정</a></li>
+    <li data-menu-group="operations">
+      <h2 class="menu-title">운영</h2>
+      <ul>
+        <li><a th:href="@{/admin/members}" th:classappend="${active == 'members'} ? 'active'">회원 관리</a></li>
+        <li><a th:href="@{/admin/routines}" th:classappend="${active == 'routines'} ? 'active'">루틴 관리</a></li>
+        <li><a th:href="@{/admin/credits}" th:classappend="${active == 'credits'} ? 'active'">AI 크레딧</a></li>
+        <li><a th:href="@{/admin/feedback}" th:classappend="${active == 'feedback'} ? 'active'">의견 관리</a></li>
+      </ul>
+    </li>
+    <li data-menu-group="contents">
+      <h2 class="menu-title">콘텐츠</h2>
+      <ul>
+        <li><a th:href="@{/admin/notices}" th:classappend="${active == 'notices'} ? 'active'">공지 관리</a></li>
+        <li><a th:href="@{/admin/consents}" th:classappend="${active == 'consents'} ? 'active'">약관 관리</a></li>
+        <li><a th:href="@{/admin/prompts}" th:classappend="${active == 'prompts'} ? 'active'">프롬프트 관리</a></li>
+      </ul>
+    </li>
+    <li data-menu-group="system">
+      <h2 class="menu-title">시스템</h2>
+      <ul>
+        <li><a th:href="@{/admin/settings}" th:classappend="${active == 'settings'} ? 'active'">시스템 설정</a></li>
+        <li><a th:href="@{/admin/monitoring}" th:classappend="${active == 'monitoring'} ? 'active'">AI 모니터링</a></li>
+        <li><a th:href="@{/admin/logs}" th:classappend="${active == 'logs'} ? 'active'">서버 로그
+          <span data-log-error-badge class="badge badge-error badge-sm hidden" title="최근 24시간 오류"></span></a></li>
+      </ul>
+    </li>
   </ul>
   <form th:action="@{/admin/logout}" method="post" class="px-2">
     <button type="submit" class="btn btn-ghost btn-sm w-full justify-start">로그아웃</button>
