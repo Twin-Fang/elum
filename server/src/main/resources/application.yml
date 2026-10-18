@@ -36,6 +36,11 @@ chuseok22:
     date-format: "yyyy-MM-dd"
   logging:
     enabled: true
+    # 요청·응답 헤더(Bearer 토큰)와 본문(보호자 원문)은 로그에 남기지 않음, 요청 식별자·URL·실행시간 로그는 유지
+    log-request-headers: false
+    log-request-body: false
+    log-response-headers: false
+    log-response-body: false
 
 server:
   forward-headers-strategy: framework
