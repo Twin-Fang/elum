@@ -105,6 +105,7 @@ class ArchitectureRulesTest {
     assertThat(violations).as("원문 대신 LogTextLength.of(...) 로 글자 수만 남긴다").isEmpty();
   }
 
+  // 라이브러리 전역 HTTP 헤더·본문 로그 플래그는 HttpLoggingPropertiesBindingTest 가 고정
   @Test
   @DisplayName("ai·routine·admin·member 컨트롤러의 @LogMonitoring 은 요청·응답 본문 로그를 켜지 않는다")
   void controllersDoNotLogRequestAndResponseBodies() throws IOException {
