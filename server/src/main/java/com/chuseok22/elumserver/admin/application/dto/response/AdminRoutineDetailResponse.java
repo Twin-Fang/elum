@@ -8,6 +8,8 @@ import java.util.List;
 public record AdminRoutineDetailResponse(
   String id,
   String title,
+  /** 일과를 만든 보호자의 회원 id (회원 상세 링크용) */
+  String memberId,
   String memberNickname,
   String memberUsername,
   RoutineStatus status,
@@ -28,6 +30,7 @@ public record AdminRoutineDetailResponse(
     return new AdminRoutineDetailResponse(
       routine.getId(),
       routine.getTitle(),
+      routine.getCreatedBy(),
       routine.getProfile().getNickname(),
       creatorUsername,
       routine.getStatus(),

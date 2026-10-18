@@ -7,13 +7,16 @@ import java.time.LocalDateTime;
 public record AdminRoutineResponse(
   String id,
   String title,
+  /** 일과를 만든 보호자의 회원 id (회원 상세 링크용) */
+  String memberId,
   String memberNickname,
   String memberUsername,
   RoutineStatus status,
   LocalDateTime scheduledAt,
   LocalDateTime completedAt,
   /** 일과의 콘텐츠 언어 코드. 운영자가 어느 언어로 만들어진 일과인지 본다. */
-  String language
+  String language,
+  LocalDateTime updatedAt
 ) {
 
   /** 보호자 칸은 일과를 만든 사람의 계정 이름이다 (옛 대표 보호자 컬럼은 V32 에서 지웠다). */
@@ -21,13 +24,15 @@ public record AdminRoutineResponse(
     return new AdminRoutineResponse(
       routine.getId(),
       routine.getTitle(),
+      routine.getCreatedBy(),
       routine.getProfile().getNickname(),
       creatorUsername,
       routine.getStatus(),
       routine.getScheduledAt(),
       routine.getCompletedAt(),
       // 마이그레이션 전 행은 null 일 수 있어 ko 로 떨어뜨린다
-      routine.languageCode()
+      routine.languageCode(),
+      routine.getUpdatedAt()
     );
   }
 }

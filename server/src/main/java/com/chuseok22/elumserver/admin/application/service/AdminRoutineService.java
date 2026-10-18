@@ -5,6 +5,8 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineRespo
 import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineStatusCounts;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineStepImage;
 import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.admin.application.list.AdminRoutineList;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
@@ -35,21 +37,40 @@ public class AdminRoutineService {
   private final MemberRepository memberRepository;
 
   /**
-   * 일과 목록. <b>전건을 그리지 않는다</b>.
-   *
-   * <p>{@code findAll()} 로 전부 가져와 그리면 운영에서 일과가 쌓일수록 그 수만큼 줄을 그리다 화면이 멈춘다.
-   * 회원 목록·AI 모니터링처럼 페이지를 나눈다.
+   * 일과 목록: 조건 쿼리 1회(이룸이 함께 조회) > 보호자 계정명 1회
+   * 범위 밖 페이지는 마지막 페이지로 맞춰 다시 조회. 일과마다 쿼리하지 않음
    */
-  public Page<AdminRoutineResponse> search(String keyword, int page) {
-    Pageable pageable = PageRequest.of(Math.max(page, 0), AdminListDefaults.PAGE_SIZE,
-      Sort.by(Sort.Direction.DESC, "createdAt"));
-    String normalized = keyword == null || keyword.isBlank() ? null : keyword.trim();
-    Page<Routine> routines = normalized == null
-      ? routineRepository.findAll(pageable)
-      : routineRepository.searchForAdmin(normalized, pageable);
-    // 만든 사람 이름은 한 쪽(20건)을 한 번에 묻는다 — 일과마다 묻지 않는다.
+  public Page<AdminRoutineResponse> search(AdminListQuery query) {
+    Page<Routine> routines = findRoutines(query);
+    if (routines.getTotalPages() > 0 && query.page() > routines.getTotalPages()) {
+      routines = findRoutines(query.withTotalPages(routines.getTotalPages()));
+    }
     Map<String, String> usernames = usernamesOf(routines.getContent());
     return routines.map(routine -> AdminRoutineResponse.from(routine, usernames.get(routine.getCreatedBy())));
+  }
+
+  private Page<Routine> findRoutines(AdminListQuery query) {
+    String statusFilter = query.filters().get(AdminRoutineList.FILTER_STATUS);
+    List<RoutineStatus> statuses = statusFilter == null
+      ? List.of(RoutineStatus.values())
+      : List.of(RoutineStatus.valueOf(statusFilter));
+    Pageable pageable = PageRequest.of(query.pageIndex(), AdminListDefaults.PAGE_SIZE, sortOf(query));
+    return routineRepository.searchForAdmin(query.q() != null, query.likePattern(), statuses, pageable);
+  }
+
+  // 정렬 열 키 > 엔티티 속성 (허용 열만 들어오므로 그 밖은 기본 정렬). 동률은 id 로 고정해 페이지가 겹치지 않게 한다
+  private Sort sortOf(AdminListQuery query) {
+    Sort.Direction direction = query.isAscending() ? Sort.Direction.ASC : Sort.Direction.DESC;
+    Sort.Order mainOrder = switch (query.sortKey()) {
+      case AdminRoutineList.SORT_TITLE -> new Sort.Order(direction, "title");
+      case AdminRoutineList.SORT_STATUS -> new Sort.Order(direction, "status");
+      case AdminRoutineList.SORT_SCHEDULED_AT -> new Sort.Order(direction, "scheduledAt");
+      // 미완료(null)는 방향과 상관없이 뒤로
+      case AdminRoutineList.SORT_COMPLETED_AT ->
+        new Sort.Order(direction, "completedAt").with(Sort.NullHandling.NULLS_LAST);
+      default -> new Sort.Order(direction, "updatedAt").with(Sort.NullHandling.NULLS_LAST);
+    };
+    return Sort.by(mainOrder, new Sort.Order(Sort.Direction.ASC, "id"));
   }
 
   public AdminRoutineDetailResponse getDetail(String routineId) {

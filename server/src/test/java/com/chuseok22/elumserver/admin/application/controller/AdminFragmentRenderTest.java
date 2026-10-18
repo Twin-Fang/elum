@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.admin.application.list.AdminListDefinition.Optio
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminListRow;
 import com.chuseok22.elumserver.admin.application.list.AdminMemberList;
+import com.chuseok22.elumserver.admin.application.list.AdminRoutineList;
 import com.chuseok22.elumserver.license.core.PlanType;
 import com.chuseok22.elumserver.license.core.SubscriptionHistoryAction;
 import com.chuseok22.elumserver.license.infrastructure.entity.Subscription;
@@ -111,6 +112,17 @@ class AdminFragmentRenderTest {
   }
 
   @Test
+  @DisplayName("표는 첫 칸 외에 cellLinks 로 지정한 칸도 링크로 그린다")
+  void table_rendersCellLinks() {
+    AdminListQuery query = AdminListQuery.of(null, null, null, null, DEFINITION);
+    String html = engine.process("test/admin-list-smoke", contextWith(Map.of(
+      "definition", DEFINITION, "query", query, "page", pageOf(1, 0),
+      "rows", List.of(new AdminListRow("/admin/x/1", Map.of("name", "하늘", "memo", "메모"), Map.of("memo", "/admin/members/m1"))))));
+
+    assertThat(html).contains("href=\"/admin/x/1\"").contains("href=\"/admin/members/m1\"");
+  }
+
+  @Test
   @DisplayName("결과가 없으면 표는 빈 상태 줄을, 한 페이지뿐이면 페이저는 아무것도 그리지 않는다")
   void emptyRows_andSinglePage() {
     AdminListQuery query = AdminListQuery.of(null, null, null, null, DEFINITION);
@@ -123,10 +135,17 @@ class AdminFragmentRenderTest {
   @Test
   @DisplayName("회원·일과·의견 목록은 공통 페이저를 쓰고 검색 조건을 링크에 유지한다")
   void existingScreens_usePagerFragment() {
-    String routines = engine.process("admin/routines", contextWith(Map.of(
-      "routines", pageOf(100, 1), "keyword", "아침")));
+    AdminListQuery routineQuery = AdminListQuery.of("아침", Map.of("status", "CONFIRMED"), null, null,
+      AdminRoutineList.DEFINITION);
+    java.util.Map<String, Object> routineModel = new java.util.HashMap<>();
+    routineModel.put("routines", pageOf(100, 1));
+    routineModel.put("definition", AdminRoutineList.DEFINITION);
+    routineModel.put("query", routineQuery);
+    routineModel.put("rows", List.of());
+    routineModel.put("pagerBaseUrl", "/admin/routines" + routineQuery.toQueryString(routineQuery.sort(), 1));
+    String routines = engine.process("admin/routines", contextWith(routineModel));
     assertThat(routines).contains("data-admin-pager").contains("2 / 5")
-      .contains("href=\"/admin/routines?keyword=%EC%95%84%EC%B9%A8&amp;page=1\"")
+      .contains("href=\"/admin/routines?q=%EC%95%84%EC%B9%A8&amp;status=CONFIRMED&amp;sort=updatedAt,desc&amp;page=1\"")
       .contains("page=3");
 
     String feedbacks = engine.process("admin/feedback", contextWith(Map.of("feedbacks", pageOf(100, 0))));

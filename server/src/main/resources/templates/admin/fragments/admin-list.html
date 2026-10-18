@@ -39,7 +39,7 @@
   </div>
 </div>
 
-<!-- 표: 열은 정의 순서, 정렬 가능한 열은 헤더 링크. rows 는 AdminListRow 목록 -->
+<!-- 표: 열은 정의 순서, 정렬 가능한 열은 헤더 링크, 첫 칸과 cellLinks 지정 칸은 링크. rows 는 AdminListRow 목록 -->
 <div th:fragment="table(definition, query, rows)" class="overflow-x-auto">
   <table class="table">
     <thead>
@@ -54,9 +54,11 @@
     <tbody>
     <tr th:each="row : ${rows}" class="hover">
       <td th:each="column, columnStat : ${definition.columns}">
-        <a th:if="${columnStat.first and row.linkUrl != null}" th:href="${row.linkUrl}" class="link link-hover"
-           th:text="${row.cells.get(column.key)}">값</a>
-        <span th:unless="${columnStat.first and row.linkUrl != null}" th:text="${row.cells.get(column.key)}">값</span>
+        <th:block th:with="cellLink=${columnStat.first and row.linkUrl != null ? row.linkUrl : row.cellLinks.get(column.key)}">
+          <a th:if="${cellLink != null}" th:href="${cellLink}" class="link link-hover"
+             th:text="${row.cells.get(column.key)}">값</a>
+          <span th:unless="${cellLink != null}" th:text="${row.cells.get(column.key)}">값</span>
+        </th:block>
       </td>
     </tr>
     <th:block th:if="${rows.isEmpty()}">

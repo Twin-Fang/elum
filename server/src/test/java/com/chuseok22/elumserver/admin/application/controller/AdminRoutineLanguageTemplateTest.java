@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineResponse;
+import com.chuseok22.elumserver.admin.application.format.AdminDateFormatter;
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.admin.application.list.AdminRoutineList;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
@@ -85,36 +88,29 @@ class AdminRoutineLanguageTemplateTest {
   @Test
   @DisplayName("목록은 언어 열을 보이고 일과마다 자기 언어를 보인다")
   void list_showsEachRoutinesLanguage() {
-    Context context = new Context();
-    context.setVariable("routines", new PageImpl<>(List.of(
+    Context context = listContext(List.of(
       AdminRoutineResponse.from(routine("r1", "영어 일과", AppLocale.EN), "kimchi"),
-      AdminRoutineResponse.from(routine("r2", "일본어 일과", AppLocale.JA), "kimchi")),
-      PageRequest.of(0, 20), 2));
-    context.setVariable("keyword", null);
+      AdminRoutineResponse.from(routine("r2", "일본어 일과", AppLocale.JA), "kimchi")));
 
     String html = engine.process("admin/routines", context);
 
-    assertThat(html).contains("<th>언어</th>")
-      .containsPattern(String.format(BADGE, "en"))
-      .containsPattern(String.format(BADGE, "ja"))
-      .doesNotContainPattern(String.format(BADGE, "ko"));
+    assertThat(html).contains("언어").contains("<span>en</span>").contains("<span>ja</span>")
+      .doesNotContain("<span>ko</span>");
     // 행 순서대로 자기 언어가 붙는다
-    assertThat(html.indexOf("영어 일과")).isLessThan(html.indexOf(">en</span>"));
-    assertThat(html.indexOf(">en</span>")).isLessThan(html.indexOf("일본어 일과"));
-    assertThat(html.indexOf("일본어 일과")).isLessThan(html.indexOf(">ja</span>"));
+    assertThat(html.indexOf("영어 일과")).isLessThan(html.indexOf("<span>en</span>"));
+    assertThat(html.indexOf("<span>en</span>")).isLessThan(html.indexOf("일본어 일과"));
+    assertThat(html.indexOf("일본어 일과")).isLessThan(html.indexOf("<span>ja</span>"));
   }
 
   @Test
-  @DisplayName("목록이 비면 빈 줄이 열 수(6)를 덮고 열 머리도 6개다")
+  @DisplayName("목록이 비면 빈 줄이 열 수(8)를 덮고 열 머리도 8개다")
   void list_empty_colspanCoversColumns() {
-    Context context = new Context();
-    context.setVariable("routines", new PageImpl<AdminRoutineResponse>(List.of(), PageRequest.of(0, 20), 0));
-    context.setVariable("keyword", null);
+    Context context = listContext(List.of());
 
     String html = engine.process("admin/routines", context);
 
-    assertThat(html).contains("colspan=\"6\"");
-    assertThat(html.split("<th>", -1).length - 1).isEqualTo(6);
+    assertThat(html).contains("colspan=\"8\"");
+    assertThat(html.split("<th>", -1).length - 1).isEqualTo(8);
   }
 
   @Test
@@ -126,6 +122,27 @@ class AdminRoutineLanguageTemplateTest {
     assertThat(zh).contains("콘텐츠 언어").containsPattern(String.format(BADGE, "zh"))
       .doesNotContainPattern(String.format(BADGE, "es"));
     assertThat(es).containsPattern(String.format(BADGE, "es")).doesNotContainPattern(String.format(BADGE, "zh"));
+  }
+
+  @Test
+  @DisplayName("상세는 보호자 계정명을 회원 상세 링크로 보이고, 계정을 못 찾으면 링크 없이 보인다")
+  void detail_linksToMember() {
+    String linked = engine.process("admin/routine-detail", detailContext(AppLocale.KO));
+    assertThat(linked).contains("href=\"/admin/members/member-1\"").contains("kimchi");
+
+    Context orphan = new Context();
+    orphan.setVariable("routine", AdminRoutineDetailResponse.from(routine("r1", "t", AppLocale.KO), null));
+    assertThat(engine.process("admin/routine-detail", orphan)).doesNotContain("data-member-link");
+  }
+
+  private Context listContext(List<AdminRoutineResponse> routines) {
+    Context context = new Context();
+    context.setVariable("routines", new PageImpl<>(routines, PageRequest.of(0, 20), routines.size()));
+    context.setVariable("rows", routines.stream().map(routine -> AdminRoutineList.toRow(routine, new AdminDateFormatter())).toList());
+    context.setVariable("definition", AdminRoutineList.DEFINITION);
+    context.setVariable("query", AdminListQuery.of(null, null, null, null, AdminRoutineList.DEFINITION));
+    context.setVariable("pagerBaseUrl", "/admin/routines");
+    return context;
   }
 
   private Context detailContext(AppLocale language) {
