@@ -4,22 +4,18 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditJobRow
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditMemberDetail;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditOverview;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditWeekRow;
-import com.chuseok22.elumserver.ai.infrastructure.entity.AiCallLog;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
-import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.CreditJobCost;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.credit.application.service.CreditAccountService;
 import com.chuseok22.elumserver.credit.application.service.CreditPolicyService;
 import com.chuseok22.elumserver.credit.core.CreditAccountStatus;
 import com.chuseok22.elumserver.credit.core.CreditGrantSource;
-import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
 import com.chuseok22.elumserver.credit.core.CreditLedgerType;
 import com.chuseok22.elumserver.credit.core.CreditPeriod;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditAccount;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditGrant;
-import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditJob;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditLedger;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPolicy;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditAccountRepository;
@@ -38,8 +34,6 @@ import com.chuseok22.elumserver.member.infrastructure.entity.ProfileGuardian;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.routine.application.service.AiDailyBudgetGuard;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Subquery;
 import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -70,7 +64,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 관리자 크레딧 화면의 읽기 — 개요·회원별 표·회원 상세·작업 탐색.
+ * 관리자 크레딧 화면의 읽기 — 개요·회원별 표·회원 상세. 작업 탐색은 AdminCreditJobQueryService.
  *
  * <p>회원 수만큼 쿼리를 내지 않는다. 한 주의 계정별 값은 group by 몇 번으로 받아 메모리에서 합친다
  * ({@link #weekRows}). 정렬이 계산값(사용·초과·남음)이라 페이지 자르기도 메모리에서 한다 — 계정 수가 수천을
@@ -99,6 +93,7 @@ public class AdminCreditQueryService {
   private final ProfileGuardianRepository profileGuardianRepository;
   private final EntitlementService entitlementService;
   private final AiDailyBudgetGuard dailyBudgetGuard;
+  private final AdminCreditJobQueryService jobQueryService;
   private final Clock clock;
 
   // 생성자가 둘이라 스프링이 쓸 것을 명시한다. 빠뜨리면 서버가 뜨지 않는다.
@@ -109,11 +104,12 @@ public class AdminCreditQueryService {
     AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
     AiCallLogRepository aiCallLogRepository, SubscriptionRepository subscriptionRepository,
     MemberRepository memberRepository, ProfileGuardianRepository profileGuardianRepository,
-    EntitlementService entitlementService, AiDailyBudgetGuard dailyBudgetGuard
+    EntitlementService entitlementService, AiDailyBudgetGuard dailyBudgetGuard,
+    AdminCreditJobQueryService jobQueryService
   ) {
     this(policyService, accountService, accountRepository, grantRepository, jobRepository, ledgerRepository,
       aiCallLogRepository, subscriptionRepository, memberRepository, profileGuardianRepository,
-      entitlementService, dailyBudgetGuard, Clock.systemDefaultZone());
+      entitlementService, dailyBudgetGuard, jobQueryService, Clock.systemDefaultZone());
   }
 
   AdminCreditQueryService(
@@ -122,7 +118,8 @@ public class AdminCreditQueryService {
     AiCreditJobRepository jobRepository, AiCreditLedgerRepository ledgerRepository,
     AiCallLogRepository aiCallLogRepository, SubscriptionRepository subscriptionRepository,
     MemberRepository memberRepository, ProfileGuardianRepository profileGuardianRepository,
-    EntitlementService entitlementService, AiDailyBudgetGuard dailyBudgetGuard, Clock clock
+    EntitlementService entitlementService, AiDailyBudgetGuard dailyBudgetGuard,
+    AdminCreditJobQueryService jobQueryService, Clock clock
   ) {
     this.policyService = policyService;
     this.accountService = accountService;
@@ -136,6 +133,7 @@ public class AdminCreditQueryService {
     this.profileGuardianRepository = profileGuardianRepository;
     this.entitlementService = entitlementService;
     this.dailyBudgetGuard = dailyBudgetGuard;
+    this.jobQueryService = jobQueryService;
     this.clock = clock;
   }
 
@@ -210,7 +208,7 @@ public class AdminCreditQueryService {
     // 원가는 크레딧 작업에 연결된 호출만 센다 — 분모(사용 크레딧)와 같은 작업 집합이어야 나눈 값이 뜻을 가진다.
     double linkedUsd = kinds.stream().mapToDouble(AdminCreditOverview.KindCost::usd).sum();
 
-    long stuck = jobRepository.countByStatusAndStartedAtBefore(CreditJobStatus.RESERVED, stuckThreshold(policy, now));
+    long stuck = jobRepository.countByStatusAndStartedAtBefore(CreditJobStatus.RESERVED, AdminCreditJobQueryService.stuckThreshold(policy, now));
     long mismatch = jobRepository.countSettledWithoutCallLog(CreditJobStatus.SETTLED, period.start(), period.end());
 
     CreditPeriod prev = CreditPeriod.of(period.start().minusWeeks(1));
@@ -405,105 +403,11 @@ public class AdminCreditQueryService {
     Page<AiCreditLedger> ledger = ledgerType == null
       ? ledgerRepository.findByAccountIdOrderByCreatedAtDesc(account.getId(), lines)
       : ledgerRepository.findByAccountIdAndTypeOrderByCreatedAtDesc(account.getId(), ledgerType, lines);
-    Page<AdminCreditJobRow> jobRows = jobRows(
+    Page<AdminCreditJobRow> jobRows = jobQueryService.jobRows(
       jobRepository.findByAccountIdOrderByStartedAtDesc(account.getId(), jobs), policy, now);
     return new AdminCreditMemberDetail(memberId, member.getUsername(), nickname, plan, account,
       accountService.balance(account, now), accountService.spendableGrants(account.getId(), now),
       jobRows, ledger, ledgerType, policy);
-  }
-
-  // --- 작업 탐색 ---
-
-  /**
-   * 작업 탐색 필터.
-   *
-   * @param from 시작일(포함), to 끝날(포함) — started_at 기준
-   * @param query request_key 일부 또는 작업 id 그대로
-   */
-  public record JobFilter(
-    CreditJobStatus status, CreditJobKind kind, LocalDate from, LocalDate to,
-    boolean overageOnly, boolean mismatchOnly, String query
-  ) {
-
-  }
-
-  public Page<AdminCreditJobRow> jobs(JobFilter filter, int page) {
-    LocalDateTime now = LocalDateTime.now(clock);
-    Pageable pageable = PageRequest.of(Math.max(page, 0), PAGE_SIZE, Sort.by(Sort.Direction.DESC, "startedAt"));
-    Page<AiCreditJob> jobs = jobRepository.findAll(specOf(filter), pageable);
-    return jobRows(jobs, policyService.current(), now);
-  }
-
-  /// 필터를 조건으로 바꾼다. 조건마다 JPQL 을 따로 두지 않으려고 Criteria 로 붙인다.
-  static Specification<AiCreditJob> specOf(JobFilter filter) {
-    return (root, query, cb) -> {
-      List<Predicate> predicates = new ArrayList<>();
-      if (filter.status() != null) {
-        predicates.add(cb.equal(root.get("status"), filter.status()));
-      }
-      if (filter.kind() != null) {
-        predicates.add(cb.equal(root.get("kind"), filter.kind()));
-      }
-      if (filter.from() != null) {
-        predicates.add(cb.greaterThanOrEqualTo(root.get("startedAt"), filter.from().atStartOfDay()));
-      }
-      if (filter.to() != null) {
-        predicates.add(cb.lessThan(root.get("startedAt"), filter.to().plusDays(1).atStartOfDay()));
-      }
-      if (filter.overageOnly()) {
-        predicates.add(cb.greaterThan(root.get("overage"), 0));
-      }
-      if (filter.mismatchOnly()) {
-        // 청구가 있었는데 연결된 호출 기록이 없는 정산 작업 — 개요 경고와 같은 조건.
-        Subquery<String> calls = query.subquery(String.class);
-        var log = calls.from(AiCallLog.class);
-        calls.select(log.get("id")).where(cb.equal(log.get("creditJobId"), root.get("id")));
-        predicates.add(cb.equal(root.get("status"), CreditJobStatus.SETTLED));
-        predicates.add(cb.greaterThan(cb.sum(root.get("charged"), root.get("overage")), 0));
-        predicates.add(cb.not(cb.exists(calls)));
-      }
-      String q = filter.query() == null ? "" : filter.query().trim();
-      if (!q.isEmpty()) {
-        predicates.add(cb.or(
-          cb.equal(root.get("id"), q),
-          cb.like(cb.lower(root.get("requestKey")), "%" + q.toLowerCase() + "%")));
-      }
-      return cb.and(predicates.toArray(Predicate[]::new));
-    };
-  }
-
-  /// 작업 한 페이지에 연결 호출 대조·회원 아이디를 붙인다(쿼리 셋 — 줄마다 묻지 않는다).
-  private Page<AdminCreditJobRow> jobRows(Page<AiCreditJob> jobs, AiCreditPolicy policy, LocalDateTime now) {
-    List<String> jobIds = jobs.getContent().stream().map(AiCreditJob::getId).toList();
-    Map<String, CreditJobCost> costs = jobIds.isEmpty() ? Map.of()
-      : aiCallLogRepository.sumCostByCreditJobIds(jobIds).stream()
-        .collect(Collectors.toMap(CreditJobCost::getCreditJobId, Function.identity(), (a, b) -> a));
-    Set<String> accountIds = jobs.getContent().stream().map(AiCreditJob::getAccountId).collect(Collectors.toSet());
-    Map<String, String> memberByAccount = new HashMap<>();
-    if (!accountIds.isEmpty()) {
-      for (AiCreditAccount account : accountRepository.findAllById(accountIds)) {
-        if (account.getMemberId() != null) {
-          memberByAccount.put(account.getId(), account.getMemberId());
-        }
-      }
-    }
-    Map<String, String> usernames = memberByAccount.isEmpty() ? Map.of()
-      : memberRepository.findAllById(new HashSet<>(memberByAccount.values())).stream()
-        .collect(Collectors.toMap(Member::getId, Member::getUsername, (a, b) -> a));
-    LocalDateTime threshold = stuckThreshold(policy, now);
-    return jobs.map(job -> {
-      CreditJobCost cost = costs.get(job.getId());
-      String memberId = memberByAccount.get(job.getAccountId());
-      boolean stuck = job.getStatus() == CreditJobStatus.RESERVED
-        && job.getStartedAt() != null && job.getStartedAt().isBefore(threshold);
-      return new AdminCreditJobRow(job, memberId, memberId == null ? null : usernames.get(memberId),
-        cost == null ? 0 : cost.getCallCount(), cost == null ? 0 : cost.getTotalCostUsd(), stuck);
-    });
-  }
-
-  /// 멈춘 예약 기준 — 지금 정책의 예약 유지 시간보다 오래 RESERVED 인 작업.
-  static LocalDateTime stuckThreshold(AiCreditPolicy policy, LocalDateTime now) {
-    return now.minusMinutes(policy.getReservationTtlMinutes());
   }
 
   /// 비용 상한 도달 여부. 집계 실패는 가드가 false 로 돌려준다 — 경고 하나 때문에 개요가 깨지지 않게 여기서도 감싼다.

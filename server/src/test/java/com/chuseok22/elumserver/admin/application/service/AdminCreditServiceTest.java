@@ -87,6 +87,7 @@ class AdminCreditServiceTest {
   private final CreditTestStore store = new CreditTestStore();
   private CreditAccountService accountService;
   private AdminCreditService service;
+  private AdminCreditPolicyService policyAdminService;
   private AiCreditAccount account;
   private AiCreditPolicy policy;
 
@@ -112,7 +113,9 @@ class AdminCreditServiceTest {
     lenient().when(subscriptionRepository.findMemberIdsWithEffectivePlan(any(), any(), any())).thenReturn(List.of());
 
     service = new AdminCreditService(policyService, accountService, accountRepository, grantRepository,
-      jobRepository, ledgerRepository, aiCallLogRepository, subscriptionRepository, memberRepository,
+      jobRepository, ledgerRepository, memberRepository, CLOCK);
+    policyAdminService = new AdminCreditPolicyService(policyService, accountService, accountRepository,
+      grantRepository, jobRepository, ledgerRepository, aiCallLogRepository, subscriptionRepository,
       systemConfigService, CLOCK);
     account = store.account(ACCOUNT_ID, MEMBER_ID);
   }
@@ -297,7 +300,7 @@ class AdminCreditServiceTest {
 
     assertFormError(() -> service.manualRelease(job.getId(), ADMIN, tooLong), ErrorCode.ADMIN_CREDIT_REASON_TOO_LONG, "200");
     assertFormError(() -> service.adjust(MEMBER_ID, CreditAdjustType.GRANT, 5, null, ADMIN, tooLong), ErrorCode.ADMIN_CREDIT_REASON_TOO_LONG, "200");
-    assertFormError(() -> service.publishPolicy(longPolicy, ADMIN), ErrorCode.ADMIN_CREDIT_REASON_TOO_LONG, "200");
+    assertFormError(() -> policyAdminService.publishPolicy(longPolicy, ADMIN), ErrorCode.ADMIN_CREDIT_REASON_TOO_LONG, "200");
     assertThat(job.getStatus()).isEqualTo(CreditJobStatus.RESERVED);
     assertThat(store.ledger).isEmpty();
   }
@@ -342,7 +345,7 @@ class AdminCreditServiceTest {
   void publish_nextPeriodLeavesCurrentWeek() {
     AiCreditGrant weekly = store.weekly(ACCOUNT_ID, NOW, 100, 40);
 
-    service.publishPolicy(draft(150, 150, AiCreditPolicy.GRANT_APPLY_NEXT_PERIOD), ADMIN);
+    policyAdminService.publishPolicy(draft(150, 150, AiCreditPolicy.GRANT_APPLY_NEXT_PERIOD), ADMIN);
 
     assertThat(weekly.getAmount()).isEqualTo(100);
     assertThat(weekly.getRemaining()).isEqualTo(40);
@@ -354,8 +357,8 @@ class AdminCreditServiceTest {
   void publish_immediateAddsDifference() {
     AiCreditGrant weekly = store.weekly(ACCOUNT_ID, NOW, 100, 40);
 
-    AdminCreditService.PublishResult result =
-      service.publishPolicy(draft(150, 150, AiCreditPolicy.GRANT_APPLY_IMMEDIATE), ADMIN);
+    AdminCreditPolicyService.PublishResult result =
+      policyAdminService.publishPolicy(draft(150, 150, AiCreditPolicy.GRANT_APPLY_IMMEDIATE), ADMIN);
 
     assertThat(result.adjustedAccounts()).isEqualTo(1);
     assertThat(result.policy().getVersion()).isEqualTo(2);
@@ -376,7 +379,7 @@ class AdminCreditServiceTest {
     AiCreditGrant pro = store.weekly("acc2", NOW, 100, 100);
     when(subscriptionRepository.findMemberIdsWithEffectivePlan(any(), any(), any())).thenReturn(List.of("pro-member"));
 
-    service.publishPolicy(draft(20, 120, AiCreditPolicy.GRANT_APPLY_IMMEDIATE), ADMIN);
+    policyAdminService.publishPolicy(draft(20, 120, AiCreditPolicy.GRANT_APPLY_IMMEDIATE), ADMIN);
 
     assertThat(free.getAmount()).isEqualTo(20);
     assertThat(free.getRemaining()).isZero();
@@ -395,7 +398,7 @@ class AdminCreditServiceTest {
     when(jobRepository.sumOverageByAccount(any(), any())).thenReturn(List.of());
     when(aiCallLogRepository.sumCostBetween(any(), any())).thenReturn(3.0);
 
-    CreditPolicyPreview preview = service.previewPolicy(draft(150, 150, AiCreditPolicy.GRANT_APPLY_IMMEDIATE));
+    CreditPolicyPreview preview = policyAdminService.previewPolicy(draft(150, 150, AiCreditPolicy.GRANT_APPLY_IMMEDIATE));
 
     assertThat(preview.usdPerCredit()).isNull();
     assertThat(preview.estimatedWeeklyUsdAfter()).isNull();
@@ -417,7 +420,7 @@ class AdminCreditServiceTest {
     PolicyDraft off = draft(100, 100, AiCreditPolicy.GRANT_APPLY_NEXT_PERIOD);
     off = new PolicyDraft(false, off.weeklyGrant(), off.actionCosts(), 15, off.grantApply(), off.reason());
 
-    CreditPolicyPreview preview = service.previewPolicy(off);
+    CreditPolicyPreview preview = policyAdminService.previewPolicy(off);
 
     assertThat(preview.disabling()).isTrue();
     assertThat(preview.freeRoutinePerDay()).isEqualTo(2);

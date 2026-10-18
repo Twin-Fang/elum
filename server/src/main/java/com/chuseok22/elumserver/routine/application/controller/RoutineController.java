@@ -19,6 +19,7 @@ import com.chuseok22.elumserver.routine.application.service.RoutineCreateService
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
+import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.logging.annotation.LogMonitoring;
@@ -53,6 +54,7 @@ public class RoutineController implements RoutineControllerDocs {
   private static final MediaType SPEECH_MEDIA_TYPE = MediaType.parseMediaType("audio/wav");
 
   private final RoutineService routineService;
+  private final RoutineStepEditService routineStepEditService;
   private final RoutineCreateService routineCreateService;
   private final RoutineQueryService routineQueryService;
   private final RoutineProgressService routineProgressService;
@@ -306,7 +308,7 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestBody @Valid RoutineStepCreateRequest request
   ) {
     Caller caller = Caller.from(authentication);
-    RoutineResponse response = routineService.addStep(caller, routineId, request);
+    RoutineResponse response = routineStepEditService.addStep(caller, routineId, request);
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
   }
 
@@ -322,7 +324,7 @@ public class RoutineController implements RoutineControllerDocs {
     @RequestBody @Valid RoutineStepUpdateRequest request
   ) {
     Caller caller = Caller.from(authentication);
-    RoutineResponse response = routineService.updateStep(caller, routineId, stepId, request);
+    RoutineResponse response = routineStepEditService.updateStep(caller, routineId, stepId, request);
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
   }
 
@@ -348,7 +350,7 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId
   ) {
     Caller caller = Caller.from(authentication);
-    RoutineResponse response = routineService.deleteStep(caller, routineId, stepId);
+    RoutineResponse response = routineStepEditService.deleteStep(caller, routineId, stepId);
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, response));
   }
 }

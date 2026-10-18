@@ -22,7 +22,9 @@ import com.chuseok22.elumserver.admin.application.dto.request.CreditAdjustType;
 import com.chuseok22.elumserver.admin.application.dto.response.CreditAdjustPreview;
 import com.chuseok22.elumserver.admin.application.exception.AdminViewExceptionHandler;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService;
-import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService.JobFilter;
+import com.chuseok22.elumserver.admin.application.service.AdminCreditJobQueryService.JobFilter;
+import com.chuseok22.elumserver.admin.application.service.AdminCreditJobQueryService;
+import com.chuseok22.elumserver.admin.application.service.AdminCreditPolicyService;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditService;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -43,16 +45,20 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class AdminCreditControllerTest {
 
   private AdminCreditQueryService queryService;
+  private AdminCreditJobQueryService jobQueryService;
   private AdminCreditService creditService;
+  private AdminCreditPolicyService policyService;
   private MockMvc mockMvc;
 
   @BeforeEach
   void setUp() {
     queryService = mock(AdminCreditQueryService.class);
+    jobQueryService = mock(AdminCreditJobQueryService.class);
     creditService = mock(AdminCreditService.class);
-    when(creditService.currentPolicy()).thenReturn(AiCreditPolicy.disabledDefault());
-    when(queryService.jobs(any(), anyInt())).thenReturn(Page.empty());
-    mockMvc = MockMvcBuilders.standaloneSetup(new AdminCreditController(queryService, creditService))
+    policyService = mock(AdminCreditPolicyService.class);
+    when(policyService.currentPolicy()).thenReturn(AiCreditPolicy.disabledDefault());
+    when(jobQueryService.jobs(any(), anyInt())).thenReturn(Page.empty());
+    mockMvc = MockMvcBuilders.standaloneSetup(new AdminCreditController(queryService, jobQueryService, creditService, policyService))
       .setControllerAdvice(new AdminViewExceptionHandler())
       .build();
   }
@@ -123,7 +129,7 @@ class AdminCreditControllerTest {
       .andExpect(status().isOk());
 
     ArgumentCaptor<JobFilter> filter = ArgumentCaptor.forClass(JobFilter.class);
-    verify(queryService).jobs(filter.capture(), eq(0));
+    verify(jobQueryService).jobs(filter.capture(), eq(0));
     assertThat(filter.getValue().status()).isNull();
     assertThat(filter.getValue().from()).isNull();
     assertThat(filter.getValue().kind()).isNotNull();
@@ -154,6 +160,6 @@ class AdminCreditControllerTest {
       .andExpect(flash().attribute("errorMessage",
         "발행하지 못했어요: 숫자로 적어주세요. [Free 주간 지급량] (ADMIN_CREDIT_POLICY_VALUE_NOT_NUMBER)"));
 
-    verify(creditService, never()).publishPolicy(any(), any());
+    verify(policyService, never()).publishPolicy(any(), any());
   }
 }

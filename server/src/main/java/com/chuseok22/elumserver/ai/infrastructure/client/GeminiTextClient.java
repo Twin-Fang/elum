@@ -6,7 +6,6 @@ import com.chuseok22.elumserver.ai.application.service.PromptTemplateService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.core.ChildProfileInput;
 import com.chuseok22.elumserver.ai.core.AiCallContext;
-import com.chuseok22.elumserver.ai.core.ContentLanguageSpec;
 import com.chuseok22.elumserver.ai.core.NicknamePlaceholder;
 import com.chuseok22.elumserver.ai.core.PromptKey;
 import com.chuseok22.elumserver.ai.core.RoutineCreateAiInput;
@@ -93,8 +92,9 @@ public class GeminiTextClient implements TextGenerationClient {
   public String pickPictogramJson(String stepTitle, String stepDescription) {
     AppLocale locale = AiCallContext.currentContentLocale();
     return firstText(callGenerateContent(
-      pictogramPickSystemPrompt(locale), buildPictogramPickUserContent(stepTitle, stepDescription),
-      pictogramPickSchema(locale), AiCallType.GEMINI_TEXT_PICTOGRAM));
+      GeminiPictogramPickSpec.pictogramPickSystemPrompt(locale),
+      buildPictogramPickUserContent(stepTitle, stepDescription),
+      GeminiPictogramPickSpec.pictogramPickSchema(locale), AiCallType.GEMINI_TEXT_PICTOGRAM));
   }
 
   // OpenAiTextClient 가 같은 조립을 재사용한다 — 제공자를 바꿔도 지시가 달라지면 두 제공자를 비교할 수 없다.
@@ -106,63 +106,6 @@ public class GeminiTextClient implements TextGenerationClient {
     input.put("pictogramCatalog", pictogramCatalog.ids());
     return toJson(input);
   }
-
-  static final String PICTOGRAM_PICK_SYSTEM_PROMPT =
-    "당신은 발달장애인용 행동 카드에 붙일 픽토그램을 고르는 도우미입니다. "
-      + "입력의 stepTitle·stepDescription 이 나타내는 행동이나 사물을 가장 잘 나타내는 픽토그램 id 를 "
-      + "pictogramCatalog 안에서 하나만 고르세요. "
-      + "알맞은 것이 없거나 확신이 없으면 null 을 주세요. 억지로 고르지 마세요(비슷하지만 뜻이 다른 것은 금지).";
-
-  /// ko 가 아닌 일과용: 같은 규칙을 영어로 쓰고 입력은 어떤 언어든 뜻으로 맞추게 한다
-  static final String PICTOGRAM_PICK_SYSTEM_PROMPT_GLOBAL =
-    "You choose a pictogram for an action card for people with developmental disabilities. "
-      + "From pictogramCatalog, pick exactly one pictogram id that best shows the action or object that "
-      + "stepTitle and stepDescription describe. They may be written in any language; match by meaning. "
-      + "If nothing fits or you are not sure, return null. Do not force a pick "
-      + "(never choose something similar but with a different meaning).";
-
-  static String pictogramPickSystemPrompt(AppLocale locale) {
-    return locale == AppLocale.KO ? PICTOGRAM_PICK_SYSTEM_PROMPT : PICTOGRAM_PICK_SYSTEM_PROMPT_GLOBAL;
-  }
-
-  /// 카드 그림 id 의 설명. 지시는 여기(코드)에 둔다 — 프롬프트는 운영 DB 값이라 배포로 안 바뀐다.
-  static final String PICTOGRAM_ID_DESCRIPTION =
-    "pictogramCatalog 안에서 이 단계의 행동이나 사물을 가장 잘 나타내는 id 하나. "
-      + "알맞은 것이 없거나 확신이 없으면 null. 억지로 고르지 마세요(비슷하지만 뜻이 다른 것 금지)";
-
-  static final String PICTOGRAM_ID_DESCRIPTION_GLOBAL =
-    "One id from pictogramCatalog that best shows this step's action or object. "
-      + "null if nothing fits or you are not sure. Do not force a pick (similar but different meaning is forbidden)";
-
-  static String pictogramIdDescription(AppLocale locale) {
-    return locale == AppLocale.KO ? PICTOGRAM_ID_DESCRIPTION : PICTOGRAM_ID_DESCRIPTION_GLOBAL;
-  }
-
-  // nullable string — enum 으로 만들지 않는다(값이 811개라 스키마가 비대해진다). 검증은 응답을 받은 뒤 서버가 한다.
-  private static Map<String, Object> pictogramIdSchema(String description) {
-    return Map.of("type", "string", "nullable", true, "description", description);
-  }
-
-  static Map<String, Object> pictogramPickSchema() {
-    return PICTOGRAM_PICK_SCHEMA;
-  }
-
-  static Map<String, Object> pictogramPickSchema(AppLocale locale) {
-    return locale == AppLocale.KO ? PICTOGRAM_PICK_SCHEMA : PICTOGRAM_PICK_SCHEMA_GLOBAL;
-  }
-
-  private static Map<String, Object> pictogramPickSchemaOf(String idDescription) {
-    return Map.of(
-      "type", "object",
-      "properties", Map.of("pictogramId", pictogramIdSchema(idDescription)),
-      "required", List.of("pictogramId")
-    );
-  }
-
-  private static final Map<String, Object> PICTOGRAM_PICK_SCHEMA = pictogramPickSchemaOf(PICTOGRAM_ID_DESCRIPTION);
-
-  private static final Map<String, Object> PICTOGRAM_PICK_SCHEMA_GLOBAL =
-    pictogramPickSchemaOf(PICTOGRAM_ID_DESCRIPTION_GLOBAL);
 
   /**
    * 응답에서 JSON 본문 한 덩어리를 꺼낸다.
@@ -223,7 +166,7 @@ public class GeminiTextClient implements TextGenerationClient {
     }
     String userContent = buildTranslateUserContent(stepDescription);
     String json = firstText(callGenerateContent(
-      systemPrompt, userContent, IMAGE_PROMPT_SCHEMA, AiCallType.GEMINI_TEXT_IMAGE_PROMPT));
+      systemPrompt, userContent, GeminiRoutineSchemas.IMAGE_PROMPT_SCHEMA, AiCallType.GEMINI_TEXT_IMAGE_PROMPT));
     try {
       String line = objectMapper.readTree(json).path("imagePromptEn").asText("");
       line = line.replaceAll("\\s+", " ").trim();
@@ -241,24 +184,6 @@ public class GeminiTextClient implements TextGenerationClient {
     return toJson(Map.of("task", "TRANSLATE_CARD_SCENE", "stepDescription",
       stepDescription == null ? "" : stepDescription));
   }
-
-  private static final Map<String, Object> IMAGE_PROMPT_SCHEMA = Map.of(
-    "type", "object",
-    "properties", Map.of("imagePromptEn", Map.of("type", "string")),
-    "required", List.of("imagePromptEn")
-  );
-
-  /// 카드 설명(description) 스키마 설명. 지시문(운영 DB)과 별개로 스키마는 코드라 배포로 바로 바뀐다.
-  /// 길이 기준이 예시에 끌려가므로 예시도 짧게 둔다. ko 사양의 문장이고 다른 언어는 ContentLanguageSpec 이 준다.
-  static final String STEP_DESCRIPTION_HINT = ContentLanguageSpec.KO_STEP_DESCRIPTION_HINT;
-
-  /// 카드마다 받는 영어 장면 한 줄의 설명. 지시문(운영 DB)이 아니라 스키마에 둔다 — 스키마는 코드라
-  /// 배포로 바로 바뀌고, FLUX 를 고르지 않으면 통째로 빠져 토큰도 들지 않는다.
-  private static final String IMAGE_PROMPT_EN_DESCRIPTION =
-    "One English sentence (under 30 words) describing this step's picture for an illustrator. "
-      + "Start with 'The character'. Show the one action and name the concrete objects and their state "
-      + "(e.g. 'The character pulls the bottom drawer of a small wooden dresser half open.'). "
-      + "Never mention text, letters, signs, cards, or disabilities.";
 
   // 실제 호출과 관리자 preview가 같은 조립 결과를 쓰도록 조립 로직만 따로 뗀 메서드.
   // Gemini를 호출하지 않으므로 AdminPromptService.preview()에서도 그대로 재사용한다.
@@ -382,6 +307,23 @@ public class GeminiTextClient implements TextGenerationClient {
       .sum();
   }
 
+  public Map<String, Object> responseSchema() {
+    return responseSchema(false);
+  }
+
+  /// @param includeImagePromptEn 카드마다 FLUX 용 영어 장면(imagePromptEn)을 필수로 받는다
+  public Map<String, Object> responseSchema(boolean includeImagePromptEn) {
+    return GeminiRoutineSchemas.responseSchema(includeImagePromptEn, !pictogramCatalog.isEmpty());
+  }
+
+  public Map<String, Object> questionResponseSchemaFor(Set<SupportGoal> supportGoals) {
+    return GeminiRoutineSchemas.questionResponseSchemaFor(supportGoals);
+  }
+
+  public Map<String, Object> questionResponseSchemaForTest() {
+    return GeminiRoutineSchemas.questionResponseSchemaForTest();
+  }
+
   private String toJson(Object input) {
     try {
       return objectMapper.writeValueAsString(input);
@@ -417,110 +359,6 @@ public class GeminiTextClient implements TextGenerationClient {
       log.warn("생각 토큰 상한 설정을 읽지 못해 보내지 않는다: value={}", raw);
       return Optional.empty();
     }
-  }
-
-  public Map<String, Object> responseSchema() {
-    return responseSchema(false);
-  }
-
-  /// @param includeImagePromptEn 카드마다 FLUX 용 영어 장면(imagePromptEn)을 필수로 받는다
-  public Map<String, Object> responseSchema(boolean includeImagePromptEn) {
-    // 설명 문구는 일과 언어의 사양에서 읽는다 (ko 는 사양이 기존 문장 그대로)
-    ContentLanguageSpec spec = ContentLanguageSpec.of(AiCallContext.currentContentLocale());
-    return Map.of(
-      "type", "object",
-      "properties", Map.of(
-        "title", Map.of(
-          "type", "string",
-          "description", spec.routineTitleHint()
-        ),
-        "steps", Map.of(
-          "type", "array",
-          "maxItems", 10,
-          "items", stepSchema(spec, includeImagePromptEn)
-        )
-      ),
-      "required", List.of("title", "steps")
-    );
-  }
-
-  private Map<String, Object> stepSchema(ContentLanguageSpec spec, boolean includeImagePromptEn) {
-    Map<String, Object> properties = new LinkedHashMap<>(Map.of(
-              "order", Map.of("type", "integer"),
-              "title", Map.of(
-                "type", "string",
-                "minLength", 1,
-                "description", spec.stepTitleHint()
-              ),
-              "description", Map.of(
-                "type", "string",
-                "description", spec.stepDescriptionHint()
-              )
-    ));
-    List<String> required = new java.util.ArrayList<>(List.of("order", "title", "description"));
-    // 선택 필드다 — Gemini 는 required 에 넣지 않아 모델이 빠뜨려도 카드 생성이 실패하지 않는다.
-    // 카탈로그를 못 읽은 서버는 요청·스키마 어디에도 싣지 않는다.
-    if (!pictogramCatalog.isEmpty()) {
-      properties.put("pictogramId", pictogramIdSchema(pictogramIdDescription(spec.locale())));
-    }
-    if (includeImagePromptEn) {
-      properties.put("imagePromptEn", Map.of("type", "string", "description", IMAGE_PROMPT_EN_DESCRIPTION));
-      required.add("imagePromptEn");
-    }
-    return Map.of("type", "object", "properties", properties, "required", required);
-  }
-
-  // 선택된 도움 목표 중 질문 생성 대상(PREPARE_ITEMS/PREPARE_NEW)의 개수만큼 questions
-  // 배열 크기를 정확히 강제한다 — 목표 2개를 선택했는데 Gemini가 질문 1개만 반환하는
-  // 것을 스키마 단계에서부터 막기 위함.
-  public Map<String, Object> questionResponseSchemaFor(Set<SupportGoal> supportGoals) {
-    int relevantGoalCount = (int) (supportGoals == null ? 0 : supportGoals.stream()
-      .filter(goal -> goal == SupportGoal.PREPARE_ITEMS || goal == SupportGoal.PREPARE_NEW)
-      .count());
-    return Map.of(
-      "type", "object",
-      "properties", Map.of(
-        "questions", Map.of(
-          "type", "array", "minItems", relevantGoalCount, "maxItems", relevantGoalCount,
-          "items", questionItemSchema()
-        )
-      ),
-      "required", List.of("questions")
-    );
-  }
-
-  // 관리자 테스트 전용: 목표 개수를 알 수 없는 임의의 프롬프트 테스트이므로 questions
-  // 배열 크기를 제한하지 않는다.
-  public Map<String, Object> questionResponseSchemaForTest() {
-    return Map.of(
-      "type", "object",
-      "properties", Map.of("questions", Map.of("type", "array", "items", questionItemSchema())),
-      "required", List.of("questions")
-    );
-  }
-
-  private Map<String, Object> questionItemSchema() {
-    return Map.of(
-      "type", "object",
-      "properties", Map.of(
-        "supportGoal", Map.of("type", "string", "enum", List.of("PREPARE_ITEMS", "PREPARE_NEW")),
-        "question", Map.of("type", "string"),
-        "options", Map.of(
-          "type", "array",
-          "minItems", 3,
-          "maxItems", 5,
-          "items", Map.of(
-            "type", "object",
-            "properties", Map.of(
-              "emoji", Map.of("type", "string"),
-              "label", Map.of("type", "string")
-            ),
-            "required", List.of("emoji", "label")
-          )
-        )
-      ),
-      "required", List.of("supportGoal", "question", "options")
-    );
   }
 
   /// 로그에서 픽토그램 카탈로그(811개 id, 약 10KB)를 접는다 — 한 줄이 너무 길어져 로그를 읽기 어렵고 값도 고정이라 남길 이유가 없다.

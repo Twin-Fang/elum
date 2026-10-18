@@ -87,6 +87,7 @@ class AdminCreditQueryServiceTest {
 
   private final CreditTestStore store = new CreditTestStore();
   private AdminCreditQueryService service;
+  private AdminCreditJobQueryService jobService;
   private AiCreditPolicy policy;
 
   @BeforeEach
@@ -100,9 +101,11 @@ class AdminCreditQueryServiceTest {
     policy.setEnabled(true);
     policy.setReservationTtlMinutes(15);
     lenient().when(policyService.current()).thenReturn(policy);
+    jobService = new AdminCreditJobQueryService(policyService, accountRepository, jobRepository,
+      aiCallLogRepository, memberRepository, CLOCK);
     service = new AdminCreditQueryService(policyService, accountService, accountRepository, grantRepository,
       jobRepository, ledgerRepository, aiCallLogRepository, subscriptionRepository, memberRepository,
-      profileGuardianRepository, entitlementService, dailyBudgetGuard, CLOCK);
+      profileGuardianRepository, entitlementService, dailyBudgetGuard, jobService, CLOCK);
 
     lenient().when(accountRepository.findAll()).thenAnswer(inv -> store.accounts);
     lenient().when(ledgerRepository.sumDeltaOfPeriodGrantsByAccount(any(), anyString())).thenReturn(List.of());
@@ -246,8 +249,8 @@ class AdminCreditQueryServiceTest {
     when(accountRepository.findAllById(any())).thenReturn(store.accounts);
     when(aiCallLogRepository.sumCostByCreditJobIds(any())).thenReturn(List.of(cost(linked.getId(), 4, 0.02)));
 
-    Page<AdminCreditJobRow> rows = service.jobs(
-      new AdminCreditQueryService.JobFilter(null, null, null, null, false, false, null), 0);
+    Page<AdminCreditJobRow> rows = jobService.jobs(
+      new AdminCreditJobQueryService.JobFilter(null, null, null, null, false, false, null), 0);
 
     assertThat(rows.getContent()).extracting(AdminCreditJobRow::mismatch).containsExactly(true, false, false, false);
     assertThat(rows.getContent()).extracting(AdminCreditJobRow::stuck).containsExactly(false, false, true, false);
@@ -277,7 +280,7 @@ class AdminCreditQueryServiceTest {
   @Test
   @DisplayName("작업 탐색 조건은 필터를 모두 켜도 엔티티 모델로 해석된다(서버를 띄우지 않고)")
   void jobSpec_resolvesAgainstModel() {
-    AdminCreditQueryService.JobFilter all = new AdminCreditQueryService.JobFilter(
+    AdminCreditJobQueryService.JobFilter all = new AdminCreditJobQueryService.JobFilter(
       CreditJobStatus.SETTLED, CreditJobKind.ROUTINE_CREATE, LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30),
       true, true, "abc");
     try (OfflineHibernate hibernate = OfflineHibernate.open();
@@ -285,7 +288,7 @@ class AdminCreditQueryServiceTest {
       CriteriaBuilder cb = em.getCriteriaBuilder();
       CriteriaQuery<AiCreditJob> query = cb.createQuery(AiCreditJob.class);
       Root<AiCreditJob> root = query.from(AiCreditJob.class);
-      query.select(root).where(AdminCreditQueryService.specOf(all).toPredicate(root, query, cb));
+      query.select(root).where(AdminCreditJobQueryService.specOf(all).toPredicate(root, query, cb));
 
       assertThatCode(() -> em.createQuery(query)).doesNotThrowAnyException();
     }

@@ -16,7 +16,7 @@ class GeminiTextClientStepHintTest {
   @Test
   @DisplayName("카드 설명 힌트는 짧은 한 문장을 요청하고 옛 긴 예시를 쓰지 않는다")
   void stepDescriptionHint_asksForShortSentence() {
-    assertThat(GeminiTextClient.STEP_DESCRIPTION_HINT)
+    assertThat(GeminiRoutineSchemas.STEP_DESCRIPTION_HINT)
       .contains("12자 안팎")
       .doesNotContain("조금 더 자세")
       .doesNotContain("학교에 입고 갈 옷을 차례대로 입어요");

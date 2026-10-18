@@ -5,11 +5,13 @@ import com.chuseok22.elumserver.admin.application.dto.request.CreditAdjustType;
 import com.chuseok22.elumserver.admin.application.dto.request.CreditPolicyForm;
 import com.chuseok22.elumserver.admin.application.dto.response.CreditAdjustPreview;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService;
-import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService.JobFilter;
+import com.chuseok22.elumserver.admin.application.service.AdminCreditJobQueryService.JobFilter;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService.MemberFilter;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService.MemberSort;
+import com.chuseok22.elumserver.admin.application.service.AdminCreditJobQueryService;
+import com.chuseok22.elumserver.admin.application.service.AdminCreditPolicyService;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditService;
-import com.chuseok22.elumserver.admin.application.service.AdminCreditService.PublishResult;
+import com.chuseok22.elumserver.admin.application.service.AdminCreditPolicyService.PublishResult;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.credit.application.service.PolicyDraft;
 import com.chuseok22.elumserver.credit.core.CreditJobKind;
@@ -46,7 +48,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class AdminCreditController {
 
   private final AdminCreditQueryService queryService;
+  private final AdminCreditJobQueryService jobQueryService;
   private final AdminCreditService creditService;
+  private final AdminCreditPolicyService policyService;
 
   // --- 개요 ---
 
@@ -166,7 +170,7 @@ public class AdminCreditController {
     model.addAttribute("form", form);
     try {
       PolicyDraft draft = form.toDraft();
-      model.addAttribute("preview", creditService.previewPolicy(draft));
+      model.addAttribute("preview", policyService.previewPolicy(draft));
     } catch (CustomException e) {
       model.addAttribute("errorMessage", failureText("미리볼 수 없어요", e));
     }
@@ -178,7 +182,7 @@ public class AdminCreditController {
     @ModelAttribute CreditPolicyForm form, Principal principal, RedirectAttributes redirectAttributes
   ) {
     try {
-      PublishResult result = creditService.publishPolicy(form.toDraft(), actorOf(principal));
+      PublishResult result = policyService.publishPolicy(form.toDraft(), actorOf(principal));
       String applied = AiCreditPolicy.GRANT_APPLY_IMMEDIATE.equals(result.policy().getGrantApply())
         ? " 이번 주 지급을 " + result.adjustedAccounts() + "개 계정에 바로 맞췄어요. 이번 주에 처음 받는 회원도 새 지급량이에요."
         : " 새 지급량은 다음 주부터 적용돼요. 이번 주는 이번 주에 처음 받는 회원도 이전 지급량이에요.";
@@ -206,7 +210,7 @@ public class AdminCreditController {
   ) {
     JobFilter filter = new JobFilter(enumOf(CreditJobStatus.class, status), enumOf(CreditJobKind.class, kind),
       dateOf(from), dateOf(to), overage, mismatch, q);
-    model.addAttribute("rows", queryService.jobs(filter, page));
+    model.addAttribute("rows", jobQueryService.jobs(filter, page));
     model.addAttribute("filter", filter);
     model.addAttribute("statuses", CreditJobStatus.values());
     model.addAttribute("kinds", CreditJobKind.values());
@@ -230,11 +234,11 @@ public class AdminCreditController {
   }
 
   private void fillPolicy(Model model) {
-    AiCreditPolicy current = creditService.currentPolicy();
+    AiCreditPolicy current = policyService.currentPolicy();
     model.addAttribute("current", current);
     // 지급량·단가는 JSON 이라 화면에서 꺼내기 번거롭다. 폼과 같은 모양으로 풀어 둔다.
     model.addAttribute("currentValues", CreditPolicyForm.of(current));
-    model.addAttribute("history", creditService.policyHistory());
+    model.addAttribute("history", policyService.policyHistory());
   }
 
   /// 틀린 값은 필터를 끈 것으로 본다(400 대신).
