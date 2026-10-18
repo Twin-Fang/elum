@@ -42,4 +42,8 @@ public class PromptTemplateHistory extends BaseEntity {
 
   @Column(nullable = false, columnDefinition = "TEXT")
   private String content;
+
+  // 이 이력을 만든 저장(현재 적용본으로 교체)을 한 관리자 이름, 기존 행은 null
+  @Column(name = "changed_by")
+  private String changedBy;
 }

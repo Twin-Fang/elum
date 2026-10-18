@@ -28,26 +28,13 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 class AdminPromptsCsrfScriptTest {
 
   private String render() {
-    ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
-    resolver.setPrefix("templates/");
-    resolver.setSuffix(".html");
-    resolver.setTemplateMode(TemplateMode.HTML);
-    resolver.setCharacterEncoding("UTF-8");
-    SpringTemplateEngine engine = new SpringTemplateEngine();
-    engine.setTemplateResolver(resolver);
-    engine.setLinkBuilder(new StandardLinkBuilder() {
-      @Override
-      protected String computeContextPath(IExpressionContext context, String base, Map<String, Object> parameters) {
-        return "";
-      }
-    });
     PromptTemplate prompt = new PromptTemplate();
     prompt.setPromptKey(PromptKey.GEMINI_ROUTINE_CREATE_PREFIX);
     prompt.setContent("지시문");
     Context context = new Context();
     context.setVariable("prompts", List.of(prompt));
     // _csrf 를 넣지 않는다 — 골격이 meta 를 내보내지 않는 상황
-    return engine.process("admin/prompts", context);
+    return new AdminTemplateRenderSupport().render("admin/prompts", context);
   }
 
   /** 화면 스크립트 본문 (프롬프트 버튼 처리기가 든 것). */

@@ -82,8 +82,12 @@ public class AdminPromptService {
     promptTemplateService.update(key, content);
   }
 
-  public void update(PromptKey key, AppLocale locale, String content) {
-    promptTemplateService.update(key, locale, content);
+  public void update(PromptKey key, AppLocale locale, String content, String changedBy) {
+    promptTemplateService.update(key, locale, content, changedBy);
+  }
+
+  public Map<PromptKey, String> getLatestChangerByKey(AppLocale locale) {
+    return promptTemplateService.getLatestChangerByKey(locale);
   }
 
   // 그 언어의 없는 프롬프트 행을 기본값으로 생성 (있는 행은 건드리지 않음)

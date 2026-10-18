@@ -48,7 +48,7 @@
             <span th:if="${h.required}" class="badge badge-sm">필수</span>
             <span th:unless="${h.required}" class="badge badge-ghost badge-sm">선택</span>
             <span class="ml-auto text-xs text-base-content/60 whitespace-nowrap"
-                  th:text="${#temporals.format(h.createdAt, 'yyyy-MM-dd HH:mm')}">시각</span>
+                  th:text="${@adminDate.format(h.createdAt)}">시각</span>
           </div>
           <div class="mt-1 text-xs text-base-content/70">
             <span th:text="${h.changedBy}">누가</span> ·

@@ -49,25 +49,47 @@
       </div>
     </div>
 
-    <form method="get" th:action="@{/admin/monitoring}" class="flex items-center gap-2">
-      <select name="callType" class="select select-bordered select-sm">
-        <option value="" th:selected="${selectedCallType == null}">전체 유형</option>
-        <option th:each="type : ${callTypes}" th:value="${type.name()}" th:text="${type.label}"
-                th:selected="${selectedCallType == type}">유형</option>
-      </select>
-      <select name="success" class="select select-bordered select-sm">
-        <option value="" th:selected="${selectedSuccess == null}">전체 결과</option>
-        <option value="true" th:selected="${selectedSuccess == true}">성공</option>
-        <option value="false" th:selected="${selectedSuccess == false}">실패</option>
-      </select>
+    <!-- 기간 기본은 최근 7일. 값이 틀리면 서버가 보정해서 다시 채운다 -->
+    <form method="get" th:action="@{/admin/monitoring}" class="flex flex-wrap items-end gap-2" data-admin-filter-bar>
+      <label class="form-control">
+        <span class="label-text text-xs">시작일</span>
+        <input type="date" name="from" th:value="${query.filters.get('from')}" class="input input-bordered input-sm"/>
+      </label>
+      <label class="form-control">
+        <span class="label-text text-xs">종료일</span>
+        <input type="date" name="to" th:value="${query.filters.get('to')}" class="input input-bordered input-sm"/>
+      </label>
+      <label class="form-control">
+        <span class="label-text text-xs">호출 유형</span>
+        <select name="callType" class="select select-bordered select-sm">
+          <option value="" th:selected="${query.filters.get('callType') == null}">전체 유형</option>
+          <option th:each="type : ${callTypes}" th:value="${type.name()}"
+                  th:text="${type.label}" th:selected="${type.name() == query.filters.get('callType')}">유형</option>
+        </select>
+      </label>
+      <label class="form-control">
+        <span class="label-text text-xs">결과</span>
+        <select name="success" class="select select-bordered select-sm">
+          <option value="" th:selected="${query.filters.get('success') == null}">전체 결과</option>
+          <option value="true" th:selected="${query.filters.get('success') == 'true'}">성공</option>
+          <option value="false" th:selected="${query.filters.get('success') == 'false'}">실패</option>
+        </select>
+      </label>
+      <label class="form-control">
+        <span class="label-text text-xs">회원 ID</span>
+        <input type="text" name="memberId" th:value="${query.filters.get('memberId')}" maxlength="100"
+               placeholder="회원 ID 전체" class="input input-bordered input-sm w-full sm:w-72"/>
+      </label>
+      <input type="hidden" name="sort" th:value="${query.sort}"/>
       <button type="submit" class="btn btn-primary btn-sm">필터</button>
+      <a th:href="@{/admin/monitoring}" class="btn btn-ghost btn-sm">기간 초기화</a>
     </form>
 
     <div class="overflow-x-auto">
       <table class="table table-sm">
         <thead>
         <tr>
-          <th>시각</th>
+          <th:block th:replace="~{admin/fragments/admin-list :: sortHeaders(${definition}, ${query})}"></th:block>
           <th>유형</th>
           <th>모델</th>
           <th>회원</th>
@@ -106,13 +128,7 @@
       </table>
     </div>
 
-    <div class="flex items-center gap-2" th:if="${calls.totalPages > 1}">
-      <a th:if="${calls.hasPrevious()}" class="btn btn-sm"
-         th:href="@{/admin/monitoring(page=${calls.number - 1}, callType=${selectedCallType != null ? selectedCallType.name() : ''}, success=${selectedSuccess})}">이전</a>
-      <span class="text-sm" th:text="${calls.number + 1} + ' / ' + ${calls.totalPages}">1 / 1</span>
-      <a th:if="${calls.hasNext()}" class="btn btn-sm"
-         th:href="@{/admin/monitoring(page=${calls.number + 1}, callType=${selectedCallType != null ? selectedCallType.name() : ''}, success=${selectedSuccess})}">다음</a>
-    </div>
+    <div th:replace="~{admin/fragments/admin-list :: pager(${calls}, @{${pagerBaseUrl}})}"></div>
   </main>
 </body>
 </html>
