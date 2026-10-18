@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditJobRow
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditMemberDetail;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditOverview;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditWeekRow;
+import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
@@ -78,7 +79,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AdminCreditQueryService {
 
-  static final int PAGE_SIZE = 20;
   private static final Pattern WEEK_KEY = Pattern.compile("(\\d{4})-W(\\d{2})");
 
   private final CreditPolicyService policyService;
@@ -260,7 +260,7 @@ public class AdminCreditQueryService {
       .sorted(comparator(sort))
       .toList();
 
-    int size = PAGE_SIZE;
+    int size = AdminListDefaults.PAGE_SIZE;
     int safePage = Math.max(page, 0);
     int from = Math.min(safePage * size, rows.size());
     int to = Math.min(from + size, rows.size());
@@ -396,10 +396,10 @@ public class AdminCreditQueryService {
 
     if (account == null) {
       return new AdminCreditMemberDetail(memberId, member.getUsername(), nickname, plan, null, null, List.of(),
-        Page.empty(PageRequest.of(0, PAGE_SIZE)), Page.empty(PageRequest.of(0, PAGE_SIZE)), ledgerType, policy);
+        Page.empty(PageRequest.of(0, AdminListDefaults.PAGE_SIZE)), Page.empty(PageRequest.of(0, AdminListDefaults.PAGE_SIZE)), ledgerType, policy);
     }
-    Pageable jobs = PageRequest.of(Math.max(jobPage, 0), PAGE_SIZE);
-    Pageable lines = PageRequest.of(Math.max(ledgerPage, 0), PAGE_SIZE);
+    Pageable jobs = PageRequest.of(Math.max(jobPage, 0), AdminListDefaults.PAGE_SIZE);
+    Pageable lines = PageRequest.of(Math.max(ledgerPage, 0), AdminListDefaults.PAGE_SIZE);
     Page<AiCreditLedger> ledger = ledgerType == null
       ? ledgerRepository.findByAccountIdOrderByCreatedAtDesc(account.getId(), lines)
       : ledgerRepository.findByAccountIdAndTypeOrderByCreatedAtDesc(account.getId(), ledgerType, lines);

@@ -4,6 +4,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineDetai
 import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineStatusCounts;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminRoutineStepImage;
+import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
@@ -33,9 +34,6 @@ public class AdminRoutineService {
   private final RoutineImageStorage routineImageStorage;
   private final MemberRepository memberRepository;
 
-  /** 한 쪽에 보여줄 개수. 회원 목록과 같은 리듬으로 둔다. */
-  private static final int PAGE_SIZE = 20;
-
   /**
    * 일과 목록. <b>전건을 그리지 않는다</b>.
    *
@@ -43,7 +41,7 @@ public class AdminRoutineService {
    * 회원 목록·AI 모니터링처럼 페이지를 나눈다.
    */
   public Page<AdminRoutineResponse> search(String keyword, int page) {
-    Pageable pageable = PageRequest.of(Math.max(page, 0), PAGE_SIZE,
+    Pageable pageable = PageRequest.of(Math.max(page, 0), AdminListDefaults.PAGE_SIZE,
       Sort.by(Sort.Direction.DESC, "createdAt"));
     String normalized = keyword == null || keyword.isBlank() ? null : keyword.trim();
     Page<Routine> routines = normalized == null

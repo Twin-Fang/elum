@@ -233,6 +233,21 @@ class ArchitectureRulesTest {
     }
   }
 
+  @Test
+  @DisplayName("admin 은 목록 페이지 크기를 자체 선언하지 않고 AdminListDefaults 를 쓴다")
+  void adminDoesNotDeclareOwnPageSize() throws IOException {
+    Pattern ownPageSize = Pattern.compile("\\bstatic\\s+final\\s+int\\s+\\w*PAGE_SIZE\\s*=");
+    String defaultsFile = "admin/application/list/AdminListDefaults.java";
+    List<String> violations = new ArrayList<>();
+    for (Path file : javaFiles(SOURCE_ROOT.resolve("admin"))) {
+      String relative = SOURCE_ROOT.relativize(file).toString();
+      if (!relative.equals(defaultsFile) && ownPageSize.matcher(Files.readString(file)).find()) {
+        violations.add(relative);
+      }
+    }
+    assertThat(violations).as("페이지 크기 원본은 AdminListDefaults.PAGE_SIZE 하나다").isEmpty();
+  }
+
   private static List<Path> javaFiles(Path root) throws IOException {
     try (Stream<Path> walk = Files.walk(root)) {
       List<Path> files = walk.filter(p -> p.toString().endsWith(".java")).sorted().toList();

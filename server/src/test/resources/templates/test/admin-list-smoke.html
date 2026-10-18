@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- AdminFragmentRenderTest 전용: 공통 목록 조각을 한 화면에 모두 호출 -->
+<div th:replace="~{admin/fragments/admin-list :: filterBar(${definition}, ${query})}"></div>
+<div th:replace="~{admin/fragments/admin-list :: table(${definition}, ${query}, ${rows})}"></div>
+<div th:replace="~{admin/fragments/admin-list :: pager(${page}, @{/admin/test(q=${query.q})})}"></div>
+<p id="changed" th:replace="~{admin/fragments/admin-list :: lastChanged(${changedAt}, ${changedBy})}"></p>
+<p id="neverChanged" th:replace="~{admin/fragments/admin-list :: lastChanged(${null}, ${null})}"></p>
+</body>
+</html>

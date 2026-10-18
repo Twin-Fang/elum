@@ -20,10 +20,10 @@ public class AdminRoutineController {
   @GetMapping("/admin/routines")
   public String list(
     @RequestParam(name = "keyword", required = false) String keyword,
-    @RequestParam(name = "page", defaultValue = "0") int page,
+    @RequestParam(name = "page", defaultValue = "1") int page,
     Model model
   ) {
-    model.addAttribute("routines", adminRoutineService.search(keyword, page));
+    model.addAttribute("routines", adminRoutineService.search(keyword, page - 1));
     model.addAttribute("keyword", keyword);
     return "admin/routines";
   }

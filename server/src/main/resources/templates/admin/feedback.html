@@ -47,13 +47,7 @@
     </table>
   </div>
 
-  <div class="flex items-center gap-2" th:if="${feedbacks.totalPages > 1}">
-    <a th:if="${feedbacks.hasPrevious()}" class="btn btn-sm"
-       th:href="@{/admin/feedback(page=${feedbacks.number - 1})}">이전</a>
-    <span class="text-sm" th:text="${feedbacks.number + 1} + ' / ' + ${feedbacks.totalPages}">1 / 1</span>
-    <a th:if="${feedbacks.hasNext()}" class="btn btn-sm"
-       th:href="@{/admin/feedback(page=${feedbacks.number + 1})}">다음</a>
-  </div>
+  <div th:replace="~{admin/fragments/admin-list :: pager(${feedbacks}, @{/admin/feedback})}"></div>
 </main>
 </body>
 </html>

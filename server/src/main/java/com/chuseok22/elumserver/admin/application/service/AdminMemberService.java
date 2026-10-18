@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.admin.application.service;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberDetailResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminMemberResponse;
 import com.chuseok22.elumserver.admin.application.dto.response.AdminSubscriptionSummary;
+import com.chuseok22.elumserver.admin.application.list.AdminListDefaults;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository;
 import com.chuseok22.elumserver.ai.infrastructure.repository.AiCallLogRepository.MemberAiUsage;
 import com.chuseok22.elumserver.auth.application.service.RefreshTokenService;
@@ -41,8 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AdminMemberService {
 
-  private static final int PAGE_SIZE = 20;
-
   private final MemberRepository memberRepository;
 
   private final ProfileRepository profileRepository;
@@ -56,7 +55,7 @@ public class AdminMemberService {
   // 검색어·상태 필터 조합에 따라 파생/JPQL 쿼리를 선택하고, 페이지에 실린 회원들의
   // 루틴수·AI 사용량을 group by 집계 2번으로 붙인다(회원 수만큼 쿼리 금지).
   public Page<AdminMemberResponse> search(String keyword, MemberStatus status, int page) {
-    Pageable pageable = PageRequest.of(Math.max(page, 0), PAGE_SIZE, Sort.by(Sort.Direction.DESC, "createdAt"));
+    Pageable pageable = PageRequest.of(Math.max(page, 0), AdminListDefaults.PAGE_SIZE, Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<Member> members = findMembers(normalize(keyword), status, pageable);
 
     List<String> memberIds = members.getContent().stream().map(Member::getId).toList();
