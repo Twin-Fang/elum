@@ -1,12 +1,14 @@
 package com.chuseok22.elumserver.routine.application.service;
 
 import com.chuseok22.elumserver.ai.infrastructure.client.SupertonicTtsClient;
+import com.chuseok22.elumserver.common.infrastructure.logging.LogTextLength;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.routine.core.RoutineStepSpeechText;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository.SpeechTextSource;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineStepSpeechStorage;
 import java.util.Optional;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,36 +29,64 @@ public class RoutineStepSpeechFiller {
 
   public boolean fill(String stepId) {
     try {
-      // 단계 확인 (지워졌거나 한국어 아닌 일과, 빈 설명이면 건너뜀)
-      Optional<SpeechTextSource> source = routineStepRepository.findSpeechTextSource(stepId)
-        .filter(RoutineStepSpeechFiller::isSpeakable);
-      if (source.isEmpty()) {
-        return true;
-      }
-      String title = source.get().getTitle();
-      String description = source.get().getDescription();
-      String text = RoutineStepSpeechText.of(title, description);
-
-      // 합성 > 저장
-      long startedAt = System.currentTimeMillis();
-      byte[] wav = supertonicTtsClient.synthesize(text);
-      String speechKey = routineStepSpeechStorage.save(stepId, RoutineStepSpeechText.hashOf(text), wav);
-
-      // 열쇠 갱신: 합성에 쓴 글이 지금도 같을 때만 (0 = 그새 글 수정 또는 삭제 > 파일 버림, 새 글은 다시 예약됨)
-      if (routineStepRepository.updateSpeechPathIfTextUnchanged(
-        stepId, speechKey, title == null ? "" : title, description) == 0) {
-        routineStepSpeechStorage.delete(speechKey);
-        log.info("[routine speech] discarded stale or deleted : stepId={}", stepId);
-        return true;
-      }
-      log.info("[routine speech] saved : stepId={}, bytes={}, elapsedMs={}",
-        stepId, wav.length, System.currentTimeMillis() - startedAt);
+      fillWith(stepId, supertonicTtsClient::synthesize);
       return true;
     } catch (Exception e) {
-      log.warn("[routine speech] failed : stepId={}, cause={}: {}",
-        stepId, e.getClass().getSimpleName(), e.getMessage());
+      logFailure(stepId, e);
       return false;
     }
+  }
+
+  /**
+   * 요청 중 즉석 채우기 (#765): 같은 규칙에 합성 읽기 제한만 6초
+   * 반환: 저장된 음성, 건너뜀·폐기·실패면 빈 값 (던지지 않음)
+   */
+  public Optional<FilledSpeech> fillOnDemand(String stepId) {
+    try {
+      return fillWith(stepId, supertonicTtsClient::synthesizeWithinOnDemandLimit);
+    } catch (Exception e) {
+      logFailure(stepId, e);
+      return Optional.empty();
+    }
+  }
+
+  /// 단계 확인 > 합성 > 저장 > 문장 재확인 > 열쇠 갱신. 건너뜀·폐기는 빈 값, 합성·저장 실패는 예외
+  private Optional<FilledSpeech> fillWith(String stepId, Function<String, byte[]> synthesizer) {
+    // 단계 확인 (지워졌거나 한국어 아닌 일과, 빈 설명이면 건너뜀)
+    Optional<SpeechTextSource> source = routineStepRepository.findSpeechTextSource(stepId)
+      .filter(RoutineStepSpeechFiller::isSpeakable);
+    if (source.isEmpty()) {
+      return Optional.empty();
+    }
+    String title = source.get().getTitle();
+    String description = source.get().getDescription();
+    String text = RoutineStepSpeechText.of(title, description);
+
+    // 합성 > 저장
+    long startedAt = System.currentTimeMillis();
+    byte[] wav = synthesizer.apply(text);
+    String speechKey = routineStepSpeechStorage.save(stepId, RoutineStepSpeechText.hashOf(text), wav);
+
+    // 열쇠 갱신: 합성에 쓴 글이 지금도 같을 때만 (0 = 그새 글 수정 또는 삭제 > 파일 버림, 새 글은 다시 예약됨)
+    if (routineStepRepository.updateSpeechPathIfTextUnchanged(
+      stepId, speechKey, title == null ? "" : title, description) == 0) {
+      routineStepSpeechStorage.delete(speechKey);
+      log.info("[routine speech] discarded stale or deleted : stepId={}", stepId);
+      return Optional.empty();
+    }
+    log.info("[routine speech] saved : stepId={}, textLength={}, bytes={}, elapsedMs={}",
+      stepId, LogTextLength.of(text), wav.length, System.currentTimeMillis() - startedAt);
+    return Optional.of(new FilledSpeech(speechKey, wav));
+  }
+
+  private static void logFailure(String stepId, Exception e) {
+    log.warn("[routine speech] failed : stepId={}, cause={}: {}",
+      stepId, e.getClass().getSimpleName(), e.getMessage());
+  }
+
+  /// 방금 저장한 음성: 열쇠(앱 캐시 이름·ETag), WAV
+  public record FilledSpeech(String speechKey, byte[] wav) {
+
   }
 
   /// 한국어(또는 미지정) 일과이고 설명이 있는 단계만 (Supertonic F1 은 한국어 목소리)

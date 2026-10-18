@@ -110,6 +110,45 @@ class RoutineStepSpeechFillerTest {
     verify(supertonicTtsClient, never()).synthesize(anyString());
   }
 
+  @Test
+  @DisplayName("즉석 채우기는 6초 제한 합성을 쓰고, 저장한 열쇠와 WAV 를 돌려준다")
+  void fillOnDemand_usesLimitedSynthesisAndReturnsSpeech() {
+    when(repository.findSpeechTextSource("step-1")).thenReturn(source("손", "손을 씻어요", AppLocale.KO));
+    when(supertonicTtsClient.synthesizeWithinOnDemandLimit(anyString())).thenReturn(WAV);
+    when(repository.updateSpeechPathIfTextUnchanged("step-1", KEY, "손", "손을 씻어요")).thenReturn(1);
+
+    Optional<RoutineStepSpeechFiller.FilledSpeech> filled = filler.fillOnDemand("step-1");
+
+    assertThat(filled).isPresent();
+    assertThat(filled.get().speechKey()).isEqualTo(KEY);
+    assertThat(filled.get().wav()).isEqualTo(WAV);
+    verify(supertonicTtsClient, never()).synthesize(anyString());
+  }
+
+  @Test
+  @DisplayName("즉석 채우기 중 글이 바뀌면 열쇠를 갱신하지 않고 파일을 지우며 빈 값을 돌려준다")
+  void fillOnDemand_textChanged_discardsAndReturnsEmpty() {
+    when(repository.findSpeechTextSource("step-1")).thenReturn(source("손", "손을 씻어요", AppLocale.KO));
+    when(supertonicTtsClient.synthesizeWithinOnDemandLimit(anyString())).thenReturn(WAV);
+    when(repository.updateSpeechPathIfTextUnchanged("step-1", KEY, "손", "손을 씻어요")).thenReturn(0);
+
+    assertThat(filler.fillOnDemand("step-1")).isEmpty();
+
+    verify(storage).delete(KEY);
+  }
+
+  @Test
+  @DisplayName("즉석 채우기는 합성이 실패하거나 한국어가 아니면 던지지 않고 빈 값을 돌려준다")
+  void fillOnDemand_failureOrNonKorean_returnsEmpty() {
+    when(repository.findSpeechTextSource("step-1")).thenReturn(source("손", "손을 씻어요", AppLocale.KO));
+    when(supertonicTtsClient.synthesizeWithinOnDemandLimit(anyString())).thenThrow(new IllegalStateException("timeout"));
+    assertThat(filler.fillOnDemand("step-1")).isEmpty();
+
+    when(repository.findSpeechTextSource("step-2")).thenReturn(source("Wash", "Wash hands", AppLocale.EN));
+    assertThat(filler.fillOnDemand("step-2")).isEmpty();
+    verify(supertonicTtsClient, never()).synthesizeWithinOnDemandLimit("Wash. Wash hands");
+  }
+
   private static Optional<SpeechTextSource> source(String title, String description, AppLocale language) {
     return Optional.of(new SpeechTextSource() {
       @Override

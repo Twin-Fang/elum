@@ -29,16 +29,24 @@ public class SupertonicTtsClient {
   private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(3);
   // 실측 한 건 2.3~3.5초. 대기열이 하나씩 보내므로 넉넉히
   private static final Duration READ_TIMEOUT = Duration.ofSeconds(30);
+  // 요청 중 즉석 합성용 (앱 받기 대기 상한 8초 안에 끝나야 함 > 넘기면 404 로 넘김)
+  public static final Duration ON_DEMAND_READ_TIMEOUT = Duration.ofSeconds(6);
 
   private final RestClient restClient;
+  private final RestClient onDemandRestClient;
   private final LocalLlmProperties localLlmProperties;
 
   public SupertonicTtsClient(LocalLlmProperties localLlmProperties) {
     this.localLlmProperties = localLlmProperties;
+    this.restClient = buildRestClient(READ_TIMEOUT);
+    this.onDemandRestClient = buildRestClient(ON_DEMAND_READ_TIMEOUT);
+  }
+
+  private RestClient buildRestClient(Duration readTimeout) {
     JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(
       HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build());
-    requestFactory.setReadTimeout(READ_TIMEOUT);
-    this.restClient = RestClient.builder()
+    requestFactory.setReadTimeout(readTimeout);
+    return RestClient.builder()
       .baseUrl(localLlmProperties.baseUrl())
       .requestFactory(requestFactory)
       .build();
@@ -56,8 +64,19 @@ public class SupertonicTtsClient {
    * 문장 > WAV. 실패·빈 응답은 예외 (호출부가 기록하고 넘어감)
    */
   public byte[] synthesize(String text) {
+    return post(restClient, text);
+  }
+
+  /**
+   * 문장 > WAV, 읽기 제한 6초 (요청 중 즉석 합성용)
+   */
+  public byte[] synthesizeWithinOnDemandLimit(String text) {
+    return post(onDemandRestClient, text);
+  }
+
+  private byte[] post(RestClient client, String text) {
     String clippedText = clip(text);
-    byte[] wav = restClient.post()
+    byte[] wav = client.post()
       .uri(TTS_PATH)
       .header("X-API-Key", localLlmProperties.apiKey())
       .contentType(MediaType.APPLICATION_JSON)

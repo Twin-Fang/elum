@@ -11,6 +11,7 @@ import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepResp
 import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
+import com.chuseok22.elumserver.routine.application.service.RoutineStepSpeechProvider;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
@@ -36,7 +37,7 @@ class RoutineControllerStepImageTest {
 
   private final RoutineStepPhotoService photoService = mock(RoutineStepPhotoService.class);
   private final RoutineController controller = new RoutineController(mock(RoutineService.class), mock(RoutineStepEditService.class), mock(RoutineCreateService.class),
-    mock(RoutineQueryService.class), mock(RoutineProgressService.class), photoService,
+    mock(RoutineQueryService.class), mock(RoutineStepSpeechProvider.class), mock(RoutineProgressService.class), photoService,
     new RoutineAuthorResolver(mock(ProfileGuardianRepository.class)));
 
   @Test
