@@ -9,12 +9,10 @@ admin AdminCreditQueryService -> credit.AiCreditLedgerRepository
 admin AdminCreditQueryService -> license.SubscriptionRepository
 admin AdminCreditQueryService -> member.MemberRepository
 admin AdminCreditQueryService -> member.ProfileGuardianRepository
-admin AdminCreditService -> ai.AiCallLogRepository
 admin AdminCreditService -> credit.AiCreditAccountRepository
 admin AdminCreditService -> credit.AiCreditGrantRepository
 admin AdminCreditService -> credit.AiCreditJobRepository
 admin AdminCreditService -> credit.AiCreditLedgerRepository
-admin AdminCreditService -> license.SubscriptionRepository
 admin AdminCreditService -> member.MemberRepository
 admin AdminMemberDetailResponse -> ai.AiCallLogRepository
 admin AdminMemberResponse -> ai.AiCallLogRepository
@@ -56,3 +54,14 @@ routine RoutineCreationWriter -> member.ProfileRepository
 routine RoutineProgressService -> member.ProfileRepository
 routine RoutineQuotaGuard -> ai.AiCallLogRepository
 routine RoutineService -> member.ProfileRepository
+admin AdminCreditJobQueryService -> ai.AiCallLogRepository
+admin AdminCreditJobQueryService -> credit.AiCreditAccountRepository
+admin AdminCreditJobQueryService -> credit.AiCreditJobRepository
+admin AdminCreditJobQueryService -> member.MemberRepository
+admin AdminCreditPolicyService -> ai.AiCallLogRepository
+admin AdminCreditPolicyService -> credit.AiCreditAccountRepository
+admin AdminCreditPolicyService -> credit.AiCreditGrantRepository
+admin AdminCreditPolicyService -> credit.AiCreditJobRepository
+admin AdminCreditPolicyService -> credit.AiCreditLedgerRepository
+admin AdminCreditPolicyService -> license.SubscriptionRepository
+routine RoutineStepEditService -> member.ProfileRepository

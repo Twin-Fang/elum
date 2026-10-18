@@ -130,6 +130,9 @@ class RoutineServiceTest {
   private RoutineService routineService;
 
   @InjectMocks
+  private RoutineStepEditService routineStepEditService;
+
+  @InjectMocks
 
   private RoutineCreateService routineCreateService;
 
@@ -1089,7 +1092,7 @@ class RoutineServiceTest {
   }
 
   /// 권한 표 검사를 서비스 경계와 상관없이 한 표로 돌리려고 묶는다.
-  record Services(RoutineService edit, RoutineCreateService create, RoutineQueryService query,
+  record Services(RoutineService edit, RoutineStepEditService stepEdit, RoutineCreateService create, RoutineQueryService query,
     RoutineProgressService progress) {
   }
 
@@ -1114,7 +1117,7 @@ class RoutineServiceTest {
   void profileScopedCalls_askTheirPermission(String name, ProfileAction expected, Consumer<Services> call) {
     when(profileAccessGuard.profileFor(any(), any())).thenThrow(new CustomException(ErrorCode.PROFILE_ACCESS_DENIED));
 
-    assertThatThrownBy(() -> call.accept(new Services(routineService, routineCreateService, routineQueryService, routineProgressService)))
+    assertThatThrownBy(() -> call.accept(new Services(routineService, routineStepEditService, routineCreateService, routineQueryService, routineProgressService)))
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PROFILE_ACCESS_DENIED);
     verify(profileAccessGuard).profileFor(GUARDIAN, expected);
@@ -1129,10 +1132,10 @@ class RoutineServiceTest {
         (Consumer<Services>) s -> s.edit().updateReward(GUARDIAN, "routine-1", new RewardUpdateRequest("젤리", null))),
       Arguments.of("delete", RoutineAction.EDIT, (Consumer<Services>) s -> s.edit().delete(GUARDIAN, "routine-1")),
       Arguments.of("updateStep", RoutineAction.EDIT,
-        (Consumer<Services>) s -> s.edit().updateStep(GUARDIAN, "routine-1", "step-1", new RoutineStepUpdateRequest("제목", null, null))),
-      Arguments.of("deleteStep", RoutineAction.EDIT, (Consumer<Services>) s -> s.edit().deleteStep(GUARDIAN, "routine-1", "step-1")),
+        (Consumer<Services>) s -> s.stepEdit().updateStep(GUARDIAN, "routine-1", "step-1", new RoutineStepUpdateRequest("제목", null, null))),
+      Arguments.of("deleteStep", RoutineAction.EDIT, (Consumer<Services>) s -> s.stepEdit().deleteStep(GUARDIAN, "routine-1", "step-1")),
       Arguments.of("addStep", RoutineAction.EDIT,
-        (Consumer<Services>) s -> s.edit().addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("제목", "설명", null))),
+        (Consumer<Services>) s -> s.stepEdit().addStep(GUARDIAN, "routine-1", new RoutineStepCreateRequest("제목", "설명", null))),
       Arguments.of("reorderSteps", RoutineAction.EDIT,
         (Consumer<Services>) s -> s.edit().reorderSteps(GUARDIAN, "routine-1", List.of("step-2", "step-1"))),
       Arguments.of("completeStep", RoutineAction.PROGRESS, (Consumer<Services>) s -> s.progress().completeStep(GUARDIAN, "routine-1", "step-1")),
@@ -1155,7 +1158,7 @@ class RoutineServiceTest {
     doThrow(new CustomException(ErrorCode.ROUTINE_NOT_CREATOR))
       .when(profileAccessGuard).checkRoutine(any(), any(), any(), any());
 
-    assertThatThrownBy(() -> call.accept(new Services(routineService, routineCreateService, routineQueryService, routineProgressService)))
+    assertThatThrownBy(() -> call.accept(new Services(routineService, routineStepEditService, routineCreateService, routineQueryService, routineProgressService)))
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_NOT_CREATOR);
     verify(profileAccessGuard).checkRoutine(GUARDIAN, "profile-1", "member-1", expected);

@@ -118,9 +118,9 @@ public class OpenAiTextClient implements TextGenerationClient {
   public String pickPictogramJson(String stepTitle, String stepDescription) {
     AppLocale locale = AiCallContext.currentContentLocale();
     return call(
-      GeminiTextClient.pictogramPickSystemPrompt(locale),
+      GeminiPictogramPickSpec.pictogramPickSystemPrompt(locale),
       geminiTextClient.buildPictogramPickUserContent(stepTitle, stepDescription),
-      GeminiTextClient.pictogramPickSchema(locale), "pictogram", AiCallType.OPENAI_TEXT_PICTOGRAM
+      GeminiPictogramPickSpec.pictogramPickSchema(locale), "pictogram", AiCallType.OPENAI_TEXT_PICTOGRAM
     );
   }
 

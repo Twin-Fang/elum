@@ -16,6 +16,7 @@ import com.chuseok22.elumserver.routine.application.service.RoutineCreateService
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
+import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +33,7 @@ class RoutineControllerAuthorTest {
   private final RoutineProgressService progressService = mock(RoutineProgressService.class);
   private final ProfileGuardianRepository guardians = mock(ProfileGuardianRepository.class);
   private final RoutineController controller = new RoutineController(
-    service, createService, queryService, progressService, mock(RoutineStepPhotoService.class), new RoutineAuthorResolver(guardians));
+    service, mock(RoutineStepEditService.class), createService, queryService, progressService, mock(RoutineStepPhotoService.class), new RoutineAuthorResolver(guardians));
 
   private final Authentication guardian = new TestingAuthenticationToken("member-1", null);
 

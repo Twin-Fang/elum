@@ -76,15 +76,15 @@ class GeminiTextClientLocaleTest {
       .andExpect(jsonPath("$.generationConfig.responseSchema.properties.title.description")
         .value(ContentLanguageSpec.KO_ROUTINE_TITLE_HINT))
       .andExpect(jsonPath(STEP_PROPS + ".title.description").value(ContentLanguageSpec.KO_STEP_TITLE_HINT))
-      .andExpect(jsonPath(STEP_PROPS + ".description.description").value(GeminiTextClient.STEP_DESCRIPTION_HINT))
-      .andExpect(jsonPath(STEP_PROPS + ".pictogramId.description").value(GeminiTextClient.PICTOGRAM_ID_DESCRIPTION))
+      .andExpect(jsonPath(STEP_PROPS + ".description.description").value(GeminiRoutineSchemas.STEP_DESCRIPTION_HINT))
+      .andExpect(jsonPath(STEP_PROPS + ".pictogramId.description").value(GeminiPictogramPickSpec.PICTOGRAM_ID_DESCRIPTION))
       .andExpect(jsonPath("$.contents[0].parts[0].text", Matchers.containsString("\"nickname\":\"이룸이\"")))
       .andRespond(withSuccess(OK, MediaType.APPLICATION_JSON));
 
     client.generateRoutineJson("비 오는 날 학교 가기", "하늘이", Set.of(), List.of(), false);
 
     server.verify();
-    assertThat(GeminiTextClient.STEP_DESCRIPTION_HINT).isEqualTo(ContentLanguageSpec.KO_STEP_DESCRIPTION_HINT);
+    assertThat(GeminiRoutineSchemas.STEP_DESCRIPTION_HINT).isEqualTo(ContentLanguageSpec.KO_STEP_DESCRIPTION_HINT);
   }
 
   @Test
@@ -97,7 +97,7 @@ class GeminiTextClientLocaleTest {
       .andExpect(jsonPath(STEP_PROPS + ".title.description", Matchers.containsString("Spanish")))
       .andExpect(jsonPath(STEP_PROPS + ".description.description", Matchers.containsString("Spanish")))
       .andExpect(jsonPath(STEP_PROPS + ".pictogramId.description")
-        .value(GeminiTextClient.PICTOGRAM_ID_DESCRIPTION_GLOBAL))
+        .value(GeminiPictogramPickSpec.PICTOGRAM_ID_DESCRIPTION_GLOBAL))
       .andExpect(content().string(Matchers.not(Matchers.matchesPattern(NO_HANGUL))))
       .andRespond(withSuccess(OK, MediaType.APPLICATION_JSON));
 
@@ -128,9 +128,9 @@ class GeminiTextClientLocaleTest {
   @DisplayName("ko 픽토그램 고르기는 지금 문장 그대로다")
   void pictogram_ko_unchanged() {
     server.expect(method(HttpMethod.POST))
-      .andExpect(jsonPath("$.systemInstruction.parts[0].text").value(GeminiTextClient.PICTOGRAM_PICK_SYSTEM_PROMPT))
+      .andExpect(jsonPath("$.systemInstruction.parts[0].text").value(GeminiPictogramPickSpec.PICTOGRAM_PICK_SYSTEM_PROMPT))
       .andExpect(jsonPath("$.generationConfig.responseSchema.properties.pictogramId.description")
-        .value(GeminiTextClient.PICTOGRAM_ID_DESCRIPTION))
+        .value(GeminiPictogramPickSpec.PICTOGRAM_ID_DESCRIPTION))
       .andRespond(withSuccess(OK, MediaType.APPLICATION_JSON));
 
     client.pickPictogramJson("양치해요", "이를 닦아요");
@@ -143,9 +143,9 @@ class GeminiTextClientLocaleTest {
   void pictogram_es_usesLanguageNeutralInstruction() {
     AiCallContext.setContentLocale(AppLocale.ES);
     server.expect(method(HttpMethod.POST))
-      .andExpect(jsonPath("$.systemInstruction.parts[0].text").value(GeminiTextClient.PICTOGRAM_PICK_SYSTEM_PROMPT_GLOBAL))
+      .andExpect(jsonPath("$.systemInstruction.parts[0].text").value(GeminiPictogramPickSpec.PICTOGRAM_PICK_SYSTEM_PROMPT_GLOBAL))
       .andExpect(jsonPath("$.generationConfig.responseSchema.properties.pictogramId.description")
-        .value(GeminiTextClient.PICTOGRAM_ID_DESCRIPTION_GLOBAL))
+        .value(GeminiPictogramPickSpec.PICTOGRAM_ID_DESCRIPTION_GLOBAL))
       .andExpect(content().string(Matchers.not(Matchers.matchesPattern(NO_HANGUL))))
       .andRespond(withSuccess(OK, MediaType.APPLICATION_JSON));
 
@@ -157,13 +157,13 @@ class GeminiTextClientLocaleTest {
   @Test
   @DisplayName("OpenAI 클라이언트가 같은 지시를 쓰도록 언어별 값을 한 곳에서 고른다")
   void pictogramHelpersAreShared() {
-    assertThat(GeminiTextClient.pictogramPickSystemPrompt(AppLocale.KO))
-      .isEqualTo(GeminiTextClient.PICTOGRAM_PICK_SYSTEM_PROMPT);
+    assertThat(GeminiPictogramPickSpec.pictogramPickSystemPrompt(AppLocale.KO))
+      .isEqualTo(GeminiPictogramPickSpec.PICTOGRAM_PICK_SYSTEM_PROMPT);
     for (AppLocale locale : List.of(AppLocale.EN, AppLocale.JA, AppLocale.ZH, AppLocale.ES)) {
-      assertThat(GeminiTextClient.pictogramPickSystemPrompt(locale))
-        .isEqualTo(GeminiTextClient.PICTOGRAM_PICK_SYSTEM_PROMPT_GLOBAL);
+      assertThat(GeminiPictogramPickSpec.pictogramPickSystemPrompt(locale))
+        .isEqualTo(GeminiPictogramPickSpec.PICTOGRAM_PICK_SYSTEM_PROMPT_GLOBAL);
     }
-    assertThat(GeminiTextClient.pictogramPickSchema(AppLocale.KO)).isEqualTo(GeminiTextClient.pictogramPickSchema());
-    assertThat(GeminiTextClient.pictogramPickSchema(AppLocale.JA)).isNotEqualTo(GeminiTextClient.pictogramPickSchema());
+    assertThat(GeminiPictogramPickSpec.pictogramPickSchema(AppLocale.KO)).isEqualTo(GeminiPictogramPickSpec.pictogramPickSchema());
+    assertThat(GeminiPictogramPickSpec.pictogramPickSchema(AppLocale.JA)).isNotEqualTo(GeminiPictogramPickSpec.pictogramPickSchema());
   }
 }

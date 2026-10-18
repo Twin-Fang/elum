@@ -12,6 +12,7 @@ import com.chuseok22.elumserver.routine.application.service.RoutineCreateService
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
+import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
@@ -34,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 class RoutineControllerStepImageTest {
 
   private final RoutineStepPhotoService photoService = mock(RoutineStepPhotoService.class);
-  private final RoutineController controller = new RoutineController(mock(RoutineService.class), mock(RoutineCreateService.class),
+  private final RoutineController controller = new RoutineController(mock(RoutineService.class), mock(RoutineStepEditService.class), mock(RoutineCreateService.class),
     mock(RoutineQueryService.class), mock(RoutineProgressService.class), photoService,
     new RoutineAuthorResolver(mock(ProfileGuardianRepository.class)));
 

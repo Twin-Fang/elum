@@ -54,7 +54,7 @@ class RoutineServiceContentLocaleTest {
   @Mock private RoutineStepSpeechQueue routineStepSpeechQueue;
 
 
-  @InjectMocks private RoutineService routineService;
+  @InjectMocks private RoutineStepEditService routineService;
 
   @AfterEach
   void tearDown() {

@@ -11,7 +11,7 @@ import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditOvervi
 import com.chuseok22.elumserver.admin.application.dto.response.AdminCreditWeekRow;
 import com.chuseok22.elumserver.admin.application.dto.response.CreditAdjustPreview;
 import com.chuseok22.elumserver.admin.application.dto.response.CreditPolicyPreview;
-import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService.JobFilter;
+import com.chuseok22.elumserver.admin.application.service.AdminCreditJobQueryService.JobFilter;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService.MemberFilter;
 import com.chuseok22.elumserver.credit.application.service.CreditBalance;
 import com.chuseok22.elumserver.credit.core.CreditAccountStatus;

@@ -73,7 +73,7 @@ class RoutineStepEditTest {
   @Mock private RoutineStepSpeechQueue routineStepSpeechQueue;
 
 
-  @InjectMocks private RoutineService routineService;
+  @InjectMocks private RoutineStepEditService routineService;
 
   // ── 카드 추가 ────────────────────────────────────────────────────
 
