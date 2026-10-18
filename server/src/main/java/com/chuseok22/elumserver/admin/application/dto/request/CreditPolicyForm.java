@@ -1,5 +1,7 @@
 package com.chuseok22.elumserver.admin.application.dto.request;
 
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.credit.application.service.PolicyDraft;
 import com.chuseok22.elumserver.credit.core.CreditAction;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPolicy;
@@ -48,7 +50,7 @@ public record CreditPolicyForm(
   /**
    * 발행할 정책으로 바꾼다. 음수·사유·적용 시점 검사는 {@code CreditPolicyService.publish} 가 한 번 더 한다.
    *
-   * @throws IllegalArgumentException 빈 칸·숫자가 아닌 값 (폼 오류 문구)
+   * @throws CustomException 빈 칸·숫자가 아닌 값·사유·TTL·음수 (ADMIN_CREDIT_POLICY_* · ADMIN_CREDIT_REASON_REQUIRED)
    */
   public PolicyDraft toDraft() {
     Map<PlanType, Integer> grants = new EnumMap<>(PlanType.class);
@@ -63,26 +65,26 @@ public record CreditPolicyForm(
       ? AiCreditPolicy.GRANT_APPLY_NEXT_PERIOD : grantApply.trim();
     String cleanReason = reason == null ? null : reason.trim();
     if (cleanReason == null || cleanReason.isEmpty()) {
-      throw new IllegalArgumentException("정책을 바꾸는 사유를 적어주세요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_REASON_REQUIRED);
     }
     if (ttl < 1) {
-      throw new IllegalArgumentException("예약 유지 시간은 1분 이상이어야 해요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_POLICY_TTL_TOO_SHORT);
     }
     boolean negative = grants.values().stream().anyMatch(v -> v < 0) || costs.values().stream().anyMatch(v -> v < 0);
     if (negative) {
-      throw new IllegalArgumentException("지급량과 단가는 0 이상이어야 해요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_POLICY_VALUE_NEGATIVE);
     }
     return new PolicyDraft(isEnabled(), grants, costs, ttl, apply, cleanReason);
   }
 
   private static int number(String raw, String label) {
     if (raw == null || raw.isBlank()) {
-      throw new IllegalArgumentException(label + "을(를) 적어주세요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_POLICY_VALUE_REQUIRED, label);
     }
     try {
       return Integer.parseInt(raw.trim());
     } catch (NumberFormatException e) {
-      throw new IllegalArgumentException(label + "은(는) 숫자로 적어주세요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_POLICY_VALUE_NOT_NUMBER, label);
     }
   }
 }

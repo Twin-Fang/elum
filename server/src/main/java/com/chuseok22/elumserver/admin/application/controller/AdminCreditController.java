@@ -10,6 +10,7 @@ import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryServic
 import com.chuseok22.elumserver.admin.application.service.AdminCreditQueryService.MemberSort;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditService;
 import com.chuseok22.elumserver.admin.application.service.AdminCreditService.PublishResult;
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.credit.application.service.PolicyDraft;
 import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
@@ -105,8 +106,8 @@ public class AdminCreditController {
         ? creditService.resolveExpiry(form.expiryModeOrDefault(), form.expiryDate()) : null;
       CreditAdjustPreview preview = creditService.previewAdjust(memberId, type, form.parsedAmount(), expiresAt);
       model.addAttribute("preview", preview);
-    } catch (IllegalArgumentException e) {
-      model.addAttribute("errorMessage", "조정할 수 없어요: " + e.getMessage() + " (E-CRD-001)");
+    } catch (CustomException e) {
+      model.addAttribute("errorMessage", failureText("조정할 수 없어요", e));
     }
     return "admin/credits-member-detail";
   }
@@ -124,8 +125,8 @@ public class AdminCreditController {
         memberId, type, form.parsedAmount(), expiresAt, actorOf(principal), form.reason());
       redirectAttributes.addFlashAttribute("message",
         type.getLabel() + " 반영했어요. " + applied.summary().replace(", 즉시 적용", ""));
-    } catch (IllegalArgumentException e) {
-      redirectAttributes.addFlashAttribute("errorMessage", "조정하지 못했어요: " + e.getMessage() + " (E-CRD-001)");
+    } catch (CustomException e) {
+      redirectAttributes.addFlashAttribute("errorMessage", failureText("조정하지 못했어요", e));
     }
     return "redirect:/admin/credits/members/" + memberId;
   }
@@ -144,8 +145,8 @@ public class AdminCreditController {
     try {
       creditService.manualRelease(jobId, actorOf(principal), reason);
       redirectAttributes.addFlashAttribute("message", "예약을 반환했어요. 잔액이 바로 돌아가요.");
-    } catch (IllegalArgumentException e) {
-      redirectAttributes.addFlashAttribute("errorMessage", "반환하지 못했어요: " + e.getMessage() + " (E-CRD-002)");
+    } catch (CustomException e) {
+      redirectAttributes.addFlashAttribute("errorMessage", failureText("반환하지 못했어요", e));
     }
     return "redirect:" + safeBack(back);
   }
@@ -166,8 +167,8 @@ public class AdminCreditController {
     try {
       PolicyDraft draft = form.toDraft();
       model.addAttribute("preview", creditService.previewPolicy(draft));
-    } catch (IllegalArgumentException e) {
-      model.addAttribute("errorMessage", "미리볼 수 없어요: " + e.getMessage() + " (E-CRD-003)");
+    } catch (CustomException e) {
+      model.addAttribute("errorMessage", failureText("미리볼 수 없어요", e));
     }
     return "admin/credits-policy";
   }
@@ -183,8 +184,8 @@ public class AdminCreditController {
         : " 새 지급량은 다음 주부터 적용돼요. 이번 주는 이번 주에 처음 받는 회원도 이전 지급량이에요.";
       redirectAttributes.addFlashAttribute("message",
         "정책 v" + result.policy().getVersion() + " 발행했어요." + applied);
-    } catch (IllegalArgumentException e) {
-      redirectAttributes.addFlashAttribute("errorMessage", "발행하지 못했어요: " + e.getMessage() + " (E-CRD-003)");
+    } catch (CustomException e) {
+      redirectAttributes.addFlashAttribute("errorMessage", failureText("발행하지 못했어요", e));
     }
     return "redirect:/admin/credits/policy";
   }
@@ -214,6 +215,12 @@ public class AdminCreditController {
   }
 
   // --- 공통 ---
+
+  /// 화면 경고 문구: "{동작}: {문구} [{값}] ({ErrorCode 이름})" — 이름은 제보 추적용
+  private static String failureText(String action, CustomException e) {
+    String detail = e.getDetail() == null || e.getDetail().isBlank() ? "" : " [" + e.getDetail() + "]";
+    return action + ": " + e.getMessage() + detail + " (" + e.getErrorCode().name() + ")";
+  }
 
   private void fillMemberDetail(Model model, String memberId, int jobPage, String ledgerType, int ledgerPage) {
     model.addAttribute("detail",

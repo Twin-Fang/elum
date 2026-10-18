@@ -104,7 +104,7 @@ public class CreditPolicyService {
    * <p>시작 시각은 발행 시각이다. NEXT_PERIOD/IMMEDIATE 는 "이번 주에 이미 준 지급에도 반영하는가"이고,
    * 그 조정은 관리자 서비스가 한다.
    *
-   * @throws IllegalArgumentException 사유가 비었거나 숫자가 음수·TTL 이 1분 미만일 때 (관리자 폼 오류로 보인다)
+   * @throws CustomException 사유·TTL·적용 시점·음수 검사에 걸릴 때 (ADMIN_CREDIT_* , 관리자 폼 오류로 보인다)
    */
   @Transactional
   public AiCreditPolicy publish(PolicyDraft draft, String actor) {
@@ -139,21 +139,21 @@ public class CreditPolicyService {
 
   private static void validate(PolicyDraft draft) {
     if (draft.reason() == null || draft.reason().isBlank()) {
-      throw new IllegalArgumentException("정책을 바꾸는 사유를 적어주세요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_REASON_REQUIRED);
     }
     if (draft.reason().trim().length() > ADMIN_REASON_MAX_LENGTH) {
-      throw new IllegalArgumentException("사유는 " + ADMIN_REASON_MAX_LENGTH + "자까지 적을 수 있어요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_REASON_TOO_LONG, ADMIN_REASON_MAX_LENGTH + "자까지");
     }
     if (draft.reservationTtlMinutes() < 1) {
-      throw new IllegalArgumentException("예약 유지 시간은 1분 이상이어야 해요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_POLICY_TTL_TOO_SHORT);
     }
     if (!GRANT_APPLY_VALUES.contains(draft.grantApply())) {
-      throw new IllegalArgumentException("적용 시점은 NEXT_PERIOD 나 IMMEDIATE 여야 해요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_POLICY_APPLY_INVALID);
     }
     boolean negative = nullSafe(draft.weeklyGrant()).values().stream().anyMatch(v -> v == null || v < 0)
       || nullSafe(draft.actionCosts()).values().stream().anyMatch(v -> v == null || v < 0);
     if (negative) {
-      throw new IllegalArgumentException("지급량과 단가는 0 이상이어야 해요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_POLICY_VALUE_NEGATIVE);
     }
   }
 

@@ -7,6 +7,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
+import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.credit.core.CreditAction;
 import com.chuseok22.elumserver.credit.core.CreditPeriod;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPolicy;
@@ -198,7 +200,8 @@ class CreditPolicyServiceTest {
   @DisplayName("사유 없는 발행은 거절한다")
   void publish_requiresReason() {
     assertThatThrownBy(() -> service.publish(draft("  "), "admin"))
-      .isInstanceOf(IllegalArgumentException.class);
+      .isInstanceOf(CustomException.class)
+      .extracting(e -> ((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ADMIN_CREDIT_REASON_REQUIRED);
   }
 
   @Test
@@ -210,9 +213,12 @@ class CreditPolicyServiceTest {
       AiCreditPolicy.GRANT_APPLY_NEXT_PERIOD, "사유");
     PolicyDraft badApply = new PolicyDraft(true, Map.of(PlanType.FREE, 1), Map.of(), 15, "LATER", "사유");
 
-    assertThatThrownBy(() -> service.publish(negative, "admin")).isInstanceOf(IllegalArgumentException.class);
-    assertThatThrownBy(() -> service.publish(zeroTtl, "admin")).isInstanceOf(IllegalArgumentException.class);
-    assertThatThrownBy(() -> service.publish(badApply, "admin")).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> service.publish(negative, "admin")).isInstanceOf(CustomException.class)
+      .extracting(e -> ((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ADMIN_CREDIT_POLICY_VALUE_NEGATIVE);
+    assertThatThrownBy(() -> service.publish(zeroTtl, "admin")).isInstanceOf(CustomException.class)
+      .extracting(e -> ((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ADMIN_CREDIT_POLICY_TTL_TOO_SHORT);
+    assertThatThrownBy(() -> service.publish(badApply, "admin")).isInstanceOf(CustomException.class)
+      .extracting(e -> ((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ADMIN_CREDIT_POLICY_APPLY_INVALID);
   }
 
   // --- 주간 지급에 쓰는 정책 (NEXT_PERIOD 가 이번 주로 새지 않는다) ---
@@ -280,8 +286,8 @@ class CreditPolicyServiceTest {
   @DisplayName("사유가 200자를 넘으면 폼 오류로 거절한다 — 500 으로 떨어지지 않는다")
   void publish_rejectsTooLongReason() {
     assertThatThrownBy(() -> service.publish(draft("가".repeat(201)), "admin"))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessageContaining("200");
+      .isInstanceOf(CustomException.class)
+      .extracting(e -> ((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ADMIN_CREDIT_REASON_TOO_LONG);
     assertThat(rows).isEmpty();
   }
 

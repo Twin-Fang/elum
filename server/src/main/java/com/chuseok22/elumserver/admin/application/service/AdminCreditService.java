@@ -53,7 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>모든 쓰기는 계정 행을 잠근 안에서 하고 원장에 관리자 아이디(actor)와 사유를 남긴다. 미리보기와 반영은 같은
  * 잔액 계산({@link CreditAccountService#balance})을 거쳐 "미리보기에서 본 숫자 = 반영 뒤 숫자"가 된다.
  *
- * <p>폼 입력이 틀리면 {@link IllegalArgumentException}(화면에 그대로 보일 문구)을 던진다. 컨트롤러가 폼 오류로
+ * <p>폼 입력이 틀리면 {@link CustomException}(ADMIN_CREDIT_* 코드)을 던진다. 컨트롤러가 폼 오류로
  * 바꾼다 — 500 으로 떨어지지 않게.
  */
 @Slf4j
@@ -115,7 +115,7 @@ public class AdminCreditService {
   /**
    * 조정 결과를 미리 계산한다. 아무것도 쓰지 않는다(계정이 없으면 잔액 0 으로 본다).
    *
-   * @throws IllegalArgumentException 수량·만료·차감 상한·동결 상태가 맞지 않을 때
+   * @throws CustomException 수량·만료·차감 상한·동결 상태가 맞지 않을 때 (ADMIN_CREDIT_*)
    */
   @Transactional(readOnly = true)
   public CreditAdjustPreview previewAdjust(String memberId, CreditAdjustType type, int amount, LocalDateTime expiresAt) {
@@ -132,7 +132,7 @@ public class AdminCreditService {
    * 반영 결과가 그 값을 따른다(돌려주는 값이 실제로 반영된 숫자다).
    *
    * @return 반영된 결과
-   * @throws IllegalArgumentException 사유가 비었거나 미리보기와 같은 검사에 걸릴 때
+   * @throws CustomException 사유가 비었거나 미리보기와 같은 검사에 걸릴 때 (ADMIN_CREDIT_*)
    */
   @Transactional
   public CreditAdjustPreview adjust(
@@ -201,7 +201,7 @@ public class AdminCreditService {
   /**
    * 폼의 만료 선택을 시각으로 바꾼다. 이번 주 말 = 다음 월요일 0시, 날짜 = 그 날 끝(다음 날 0시), 무기한 = null.
    *
-   * @throws IllegalArgumentException 날짜를 고르고 비웠거나 형식이 틀릴 때
+   * @throws CustomException 날짜를 고르고 비웠거나 형식이 틀릴 때 (ADMIN_CREDIT_EXPIRY_DATE_*)
    */
   public LocalDateTime resolveExpiry(String mode, String date) {
     String chosen = (mode == null || mode.isBlank()) ? CreditAdjustForm.EXPIRY_WEEK_END : mode.trim();
@@ -209,12 +209,12 @@ public class AdminCreditService {
       case CreditAdjustForm.EXPIRY_NONE -> null;
       case CreditAdjustForm.EXPIRY_DATE -> {
         if (date == null || date.isBlank()) {
-          throw new IllegalArgumentException("만료 날짜를 골라주세요.");
+          throw new CustomException(ErrorCode.ADMIN_CREDIT_EXPIRY_DATE_REQUIRED);
         }
         try {
           yield LocalDate.parse(date.trim()).plusDays(1).atStartOfDay();
         } catch (DateTimeParseException e) {
-          throw new IllegalArgumentException("만료 날짜 형식이 올바르지 않아요: " + date);
+          throw new CustomException(ErrorCode.ADMIN_CREDIT_EXPIRY_DATE_INVALID, date);
         }
       }
       default -> CreditPeriod.of(LocalDateTime.now(clock)).end();
@@ -229,11 +229,12 @@ public class AdminCreditService {
    */
   public static String requireReason(String reason) {
     if (reason == null || reason.isBlank()) {
-      throw new IllegalArgumentException("사유를 적어주세요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_REASON_REQUIRED);
     }
     String trimmed = reason.trim();
     if (trimmed.length() > CreditPolicyService.ADMIN_REASON_MAX_LENGTH) {
-      throw new IllegalArgumentException("사유는 " + CreditPolicyService.ADMIN_REASON_MAX_LENGTH + "자까지 적을 수 있어요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_REASON_TOO_LONG,
+        CreditPolicyService.ADMIN_REASON_MAX_LENGTH + "자까지");
     }
     return trimmed;
   }
@@ -242,39 +243,39 @@ public class AdminCreditService {
     CreditAdjustType type, int amount, LocalDateTime expiresAt, int available, boolean frozen, LocalDateTime now
   ) {
     if (type == null) {
-      throw new IllegalArgumentException("조정 종류를 골라주세요.");
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_ADJUST_TYPE_REQUIRED);
     }
     if (type.hasAmount()) {
       if (amount < 1) {
-        throw new IllegalArgumentException("수량은 1 이상이어야 해요.");
+        throw new CustomException(ErrorCode.ADMIN_CREDIT_AMOUNT_TOO_SMALL);
       }
       if (amount > MAX_ADJUST_AMOUNT) {
-        throw new IllegalArgumentException("한 번에 " + MAX_ADJUST_AMOUNT + " 까지 조정할 수 있어요.");
+        throw new CustomException(ErrorCode.ADMIN_CREDIT_AMOUNT_TOO_LARGE, "최대 " + MAX_ADJUST_AMOUNT);
       }
     }
     return switch (type) {
       case GRANT -> {
         if (expiresAt != null && !expiresAt.isAfter(now)) {
-          throw new IllegalArgumentException("만료 시각은 지금 이후여야 해요.");
+          throw new CustomException(ErrorCode.ADMIN_CREDIT_EXPIRY_NOT_FUTURE);
         }
         yield new CreditAdjustPreview(type, amount, available, available + amount, expiresAt, frozen, frozen);
       }
       case DEDUCT -> {
         // 예약 중인 몫은 뺄 수 없다 — 빼면 정산 때 차감할 묶음이 모자라 초과로 샌다.
         if (amount > available) {
-          throw new IllegalArgumentException("남은 크레딧(" + available + ")보다 많이 뺄 수 없어요.");
+          throw new CustomException(ErrorCode.ADMIN_CREDIT_DEDUCT_EXCEEDS_AVAILABLE, "남은 크레딧 " + available);
         }
         yield new CreditAdjustPreview(type, amount, available, available - amount, null, frozen, frozen);
       }
       case FREEZE -> {
         if (frozen) {
-          throw new IllegalArgumentException("이미 동결된 계정이에요.");
+          throw new CustomException(ErrorCode.ADMIN_CREDIT_ACCOUNT_ALREADY_FROZEN);
         }
         yield new CreditAdjustPreview(type, 0, available, available, null, false, true);
       }
       case UNFREEZE -> {
         if (!frozen) {
-          throw new IllegalArgumentException("동결된 계정이 아니에요.");
+          throw new CustomException(ErrorCode.ADMIN_CREDIT_ACCOUNT_NOT_FROZEN);
         }
         yield new CreditAdjustPreview(type, 0, available, available, null, true, false);
       }
@@ -290,19 +291,19 @@ public class AdminCreditService {
    * 관리자 반환은 실패가 화면에 보여야 하고 누가 풀었는지 남아야 한다.
    *
    * @return 작업의 회원 id (화면을 돌아갈 곳). 떼어진 계정이면 null
-   * @throws IllegalArgumentException 사유가 없거나 작업이 없거나 이미 끝났을 때
+   * @throws CustomException 사유가 없거나 작업이 없거나 이미 끝났을 때 (ADMIN_CREDIT_*)
    */
   @Transactional
   public String manualRelease(String jobId, String actor, String reason) {
     String cleanReason = requireReason(reason);
     // 계정을 잠근 뒤에 작업을 읽는다 — 먼저 읽으면 그 사이 정산된 것을 못 본다.
     String accountId = jobRepository.findAccountIdById(jobId)
-      .orElseThrow(() -> new IllegalArgumentException("작업을 찾을 수 없어요: " + jobId));
+      .orElseThrow(() -> new CustomException(ErrorCode.ADMIN_CREDIT_JOB_NOT_FOUND, jobId));
     AiCreditAccount account = accountService.lockAccountById(accountId);
     AiCreditJob job = jobRepository.findById(jobId)
-      .orElseThrow(() -> new IllegalArgumentException("작업을 찾을 수 없어요: " + jobId));
+      .orElseThrow(() -> new CustomException(ErrorCode.ADMIN_CREDIT_JOB_NOT_FOUND, jobId));
     if (job.getStatus() != CreditJobStatus.RESERVED) {
-      throw new IllegalArgumentException("진행 중인 예약만 반환할 수 있어요. 지금 상태: " + job.getStatus().name());
+      throw new CustomException(ErrorCode.ADMIN_CREDIT_JOB_NOT_RELEASABLE, "지금 상태 " + job.getStatus().name());
     }
     LocalDateTime now = LocalDateTime.now(clock);
     int balanceAfter = accountService.balance(account, now).available() + job.getReserved();
@@ -333,7 +334,7 @@ public class AdminCreditService {
    * <p>늘리면 차이만큼 더하고, 줄이면 남은 양까지만 뺀다(0 아래로 내려가지 않는다). 계정마다 잠근 뒤 묶음을
    * 읽어 그 사이 정산과 엇갈리지 않게 한다. 한 트랜잭션이라 도중에 실패하면 발행까지 함께 되돌린다.
    *
-   * @throws IllegalArgumentException 사유·숫자·적용 시점이 틀릴 때 (정책 서비스 검사)
+   * @throws CustomException 사유·숫자·적용 시점이 틀릴 때 (정책 서비스 검사)
    */
   @Transactional
   public PublishResult publishPolicy(PolicyDraft draft, String actor) {
