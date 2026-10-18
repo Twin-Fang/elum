@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRe
 import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
+import com.chuseok22.elumserver.routine.application.service.RoutineStepSpeechProvider;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
@@ -63,7 +64,7 @@ class ProfileHeaderWiringTest {
   @Test
   @DisplayName("E27 일과 목록은 헤더의 이룸이를 서비스로 넘긴다")
   void e27_routineList_passesProfileHeader() {
-    new RoutineController(routineService, mock(RoutineStepEditService.class), routineCreateService, routineQueryService, routineProgressService, mock(RoutineStepPhotoService.class), new RoutineAuthorResolver(mock(ProfileGuardianRepository.class))).getTodayRoutines(guardian, "p9");
+    new RoutineController(routineService, mock(RoutineStepEditService.class), routineCreateService, routineQueryService, mock(RoutineStepSpeechProvider.class), routineProgressService, mock(RoutineStepPhotoService.class), new RoutineAuthorResolver(mock(ProfileGuardianRepository.class))).getTodayRoutines(guardian, "p9");
 
     verify(routineQueryService).getTodayRoutines(Caller.guardian("m1", "p9"));
   }
@@ -71,7 +72,7 @@ class ProfileHeaderWiringTest {
   @Test
   @DisplayName("E36 헤더가 없으면 기본 이룸이 — 지금 앱")
   void e36_routineList_withoutHeader_meansDefault() {
-    new RoutineController(routineService, mock(RoutineStepEditService.class), routineCreateService, routineQueryService, routineProgressService, mock(RoutineStepPhotoService.class), new RoutineAuthorResolver(mock(ProfileGuardianRepository.class))).getTodayRoutines(guardian, null);
+    new RoutineController(routineService, mock(RoutineStepEditService.class), routineCreateService, routineQueryService, mock(RoutineStepSpeechProvider.class), routineProgressService, mock(RoutineStepPhotoService.class), new RoutineAuthorResolver(mock(ProfileGuardianRepository.class))).getTodayRoutines(guardian, null);
 
     verify(routineQueryService).getTodayRoutines(Caller.guardian("m1"));
   }
@@ -79,7 +80,7 @@ class ProfileHeaderWiringTest {
   @Test
   @DisplayName("일과 순서도 헤더의 이룸이로 간다")
   void reorder_passesProfileHeader() {
-    new RoutineController(routineService, mock(RoutineStepEditService.class), routineCreateService, routineQueryService, routineProgressService, mock(RoutineStepPhotoService.class), new RoutineAuthorResolver(mock(ProfileGuardianRepository.class))).reorder(guardian, "p9", new RoutineReorderRequest(List.of("r1")));
+    new RoutineController(routineService, mock(RoutineStepEditService.class), routineCreateService, routineQueryService, mock(RoutineStepSpeechProvider.class), routineProgressService, mock(RoutineStepPhotoService.class), new RoutineAuthorResolver(mock(ProfileGuardianRepository.class))).reorder(guardian, "p9", new RoutineReorderRequest(List.of("r1")));
 
     verify(routineService).reorder(Caller.guardian("m1", "p9"), List.of("r1"));
   }

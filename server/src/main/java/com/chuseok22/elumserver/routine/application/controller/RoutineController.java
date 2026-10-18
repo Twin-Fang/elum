@@ -20,6 +20,7 @@ import com.chuseok22.elumserver.routine.application.service.RoutineProgressServi
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepEditService;
+import com.chuseok22.elumserver.routine.application.service.RoutineStepSpeechProvider;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepPhotoService;
 import com.chuseok22.elumserver.routine.infrastructure.storage.RoutineImageStorage;
 import com.chuseok22.logging.annotation.LogMonitoring;
@@ -57,6 +58,7 @@ public class RoutineController implements RoutineControllerDocs {
   private final RoutineStepEditService routineStepEditService;
   private final RoutineCreateService routineCreateService;
   private final RoutineQueryService routineQueryService;
+  private final RoutineStepSpeechProvider routineStepSpeechProvider;
   private final RoutineProgressService routineProgressService;
   private final RoutineStepPhotoService routineStepPhotoService;
   // 원문 가리기와 만든 사람 정보를 모든 일과 응답에 같은 방식으로 입힌다.
@@ -143,7 +145,7 @@ public class RoutineController implements RoutineControllerDocs {
       .body(content.bytes());
   }
 
-  // 단계 음성 (#675). 아직 없으면 404 — 앱은 기기 음성으로 읽음
+  // 단계 음성 (#675). 저장본이 없으면 요청 중 한 번 합성 (#765), 못 만들면 404 — 앱은 기기 음성으로 읽음
   // ETag = 음성 열쇠. 앱이 가진 열쇠와 같으면 304 (다시 받지 않음), 다르면 새 음성
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/{routineId}/steps/{stepId}/speech")
@@ -151,7 +153,7 @@ public class RoutineController implements RoutineControllerDocs {
     Authentication authentication, @PathVariable String routineId, @PathVariable String stepId,
     @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch
   ) {
-    return routineQueryService.getStepSpeech(Caller.from(authentication), routineId, stepId)
+    return routineStepSpeechProvider.getStepSpeech(Caller.from(authentication), routineId, stepId)
       .map(speech -> toSpeechResponse(speech, ifNoneMatch))
       .orElseGet(() -> ResponseEntity.notFound().build());
   }
