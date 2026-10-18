@@ -3,8 +3,6 @@ import 'package:dio/dio.dart';
 
 import '../config/app_config.dart';
 import 'app_log_interceptor.dart';
-// 비활성 상태지만 되살릴 때 바로 쓰도록 남겨둔다
-// ignore: unused_import
 
 /// Dio 인스턴스 생성. 설정값은 전부 [AppConfig]에서 온다 — 하드코딩하지 않는다.
 abstract final class DioClient {

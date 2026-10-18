@@ -211,6 +211,12 @@ void main() {
       expect(parsed.canAsk, isTrue);
     });
 
+    test('질문 문구가 없으면 물어볼 수 없다', () {
+      final parsed = RoutineQuestion.fromJson({'required': true});
+
+      expect(parsed.canAsk, isFalse);
+    });
+
     test('emoji/label 대신 문자열이 오면 깨지지 않고 빈 옵션으로 처리한다', () {
       // 과거 버그 재발 방지: options가 객체가 아니라 문자열 배열로 오면
       // whereType<Map>이 걸러내 빈 리스트가 되어야 한다 — Map.toString()이

@@ -57,7 +57,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   /// 실패한 이동의 재시도 (같은 목적지를 다시 계산해 이동)
   void _retryNavigation() {
     setState(() => _hasNavigationFailed = false);
-    _goTo(_destination());
+    try {
+      _goTo(_destination());
+    } catch (e, stack) {
+      // 목적지 계산 실패도 에러 화면으로 되돌림
+      AppLogger.error('[splash] retry destination failed', e, stack);
+      if (mounted) setState(() => _hasNavigationFailed = true);
+    }
   }
 
   @override
