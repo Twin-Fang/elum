@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  의견 처리 상태 변경 폼 (목록 행, 상세 공용).
+  returnTo 가 'detail' 이면 상세로, 아니면 검색·필터·정렬·페이지를 유지한 목록으로 돌아간다.
+-->
+<body>
+
+<form th:fragment="statusForm(feedback, statuses, query, returnTo)"
+      th:action="@{/admin/feedback/{id}/status(id=${feedback.id})}" method="post"
+      class="flex items-center gap-1" data-feedback-status-form>
+  <input type="hidden" name="returnTo" th:value="${returnTo}"/>
+  <th:block th:if="${query != null}">
+    <input type="hidden" name="returnQ" th:value="${query.q}"/>
+    <input type="hidden" name="returnStatus" th:value="${query.filters.get('status')}"/>
+    <input type="hidden" name="returnSort" th:value="${query.sort}"/>
+    <input type="hidden" name="returnPage" th:value="${query.page}"/>
+  </th:block>
+  <select name="status" class="select select-bordered select-xs" aria-label="처리 상태">
+    <option th:each="candidate : ${statuses}" th:value="${candidate.name()}" th:text="${candidate.label}"
+            th:selected="${candidate == feedback.status}">새 의견</option>
+  </select>
+  <button type="submit" class="btn btn-outline btn-xs">변경</button>
+</form>
+
+</body>
+</html>

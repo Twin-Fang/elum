@@ -2,27 +2,25 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.chuseok22.elumserver.admin.application.list.AdminFeedbackList;
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.feedback.core.FeedbackStatus;
 import com.chuseok22.elumserver.feedback.infrastructure.entity.Feedback;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.context.IExpressionContext;
-import org.thymeleaf.linkbuilder.StandardLinkBuilder;
-import org.thymeleaf.spring6.SpringTemplateEngine;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 /**
  * 의견 관리 목록·상세가 실제로 그려지는지, 사용자 입력이 이스케이프되는지, 태그 여닫기가 맞는지 본다.
@@ -31,27 +29,9 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 class AdminFeedbackTemplateTest {
 
   private static final List<String> TAGS = List.of(
-    "div", "form", "table", "thead", "tbody", "tr", "section", "main", "button", "a", "span", "p", "pre");
+    "div", "form", "table", "thead", "tbody", "tr", "section", "main", "button", "a", "span", "p", "pre", "select");
 
-  private SpringTemplateEngine engine;
-
-  @BeforeEach
-  void setUp() {
-    ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
-    resolver.setPrefix("templates/");
-    resolver.setSuffix(".html");
-    resolver.setTemplateMode(TemplateMode.HTML);
-    resolver.setCharacterEncoding("UTF-8");
-    engine = new SpringTemplateEngine();
-    engine.setTemplateResolver(resolver);
-    // 웹 요청 없이 그리므로 컨텍스트 경로가 없다.
-    engine.setLinkBuilder(new StandardLinkBuilder() {
-      @Override
-      protected String computeContextPath(IExpressionContext context, String base, Map<String, Object> parameters) {
-        return "";
-      }
-    });
-  }
+  private final AdminTemplateRenderSupport renderer = new AdminTemplateRenderSupport();
 
   private Feedback feedback(String id, String message, String appLog) {
     Feedback feedback = new Feedback();
@@ -67,15 +47,21 @@ class AdminFeedbackTemplateTest {
   }
 
   private String renderDetail(Feedback feedback) {
-    Context context = new Context();
-    context.setVariable("feedback", feedback);
-    return engine.process("admin/feedback-detail", context);
+    return renderer.render("admin/feedback-detail", Map.of("feedback", feedback, "statuses", FeedbackStatus.values()));
   }
 
   private String renderList(List<Feedback> rows) {
-    Context context = new Context();
-    context.setVariable("feedbacks", new PageImpl<>(rows));
-    return engine.process("admin/feedback", context);
+    return renderList(rows, AdminListQuery.of(null, Map.of(), null, null, AdminFeedbackList.DEFINITION));
+  }
+
+  private String renderList(List<Feedback> rows, AdminListQuery query) {
+    Map<String, Object> model = new HashMap<>();
+    model.put("feedbacks", new PageImpl<>(rows, PageRequest.of(0, 20), rows.size()));
+    model.put("definition", AdminFeedbackList.DEFINITION);
+    model.put("query", query);
+    model.put("statuses", FeedbackStatus.values());
+    model.put("pagerBaseUrl", "/admin/feedback" + query.toQueryString(query.sort(), 1));
+    return renderer.render("admin/feedback", model);
   }
 
   @Test
@@ -128,6 +114,63 @@ class AdminFeedbackTemplateTest {
     assertThat(html).contains("의견 관리").contains("첫 의견").contains("둘째 의견")
       .contains("/admin/feedback/f1").contains("/admin/feedback/f2");
     assertThat(renderList(List.of())).contains("아직 받은 의견이 없어요");
+  }
+
+  @Test
+  @DisplayName("목록은 처리 상태 배지·마지막 변경(변경자)·상태 변경 폼을 보이고, 안 바꾼 의견은 변경 이력 없음이다")
+  void list_showsStatusAndChangeForm() {
+    Feedback changed = feedback("f1", "첫 의견", "기록");
+    changed.setStatus(FeedbackStatus.IN_PROGRESS);
+    changed.setStatusChangedBy("kimchi");
+    changed.setStatusChangedAt(LocalDateTime.of(2026, 10, 9, 8, 30));
+    Feedback untouched = feedback("f2", "둘째 의견", null);
+
+    String html = renderList(List.of(changed, untouched));
+
+    assertThat(html).contains("확인 중").contains("새 의견").contains("2026-10-09 08:30").contains("· kimchi")
+      .contains("변경 이력 없음");
+    assertThat(html).contains("action=\"/admin/feedback/f1/status\"").contains("action=\"/admin/feedback/f2/status\"")
+      .contains("name=\"returnTo\" value=\"list\"");
+    // 현재 상태가 선택돼 있고 세 상태가 모두 고를 수 있다
+    assertThat(html).containsPattern("<option value=\"IN_PROGRESS\"[^>]*selected");
+    assertThat(html).contains("value=\"NEW\"").contains("value=\"DONE\"").contains("처리 완료");
+  }
+
+  @Test
+  @DisplayName("목록에 검색·필터 칩·정렬 헤더가 있고 상태 변경 폼이 현재 조건을 되돌아올 값으로 싣는다")
+  void list_keepsConditionsInStatusForm() {
+    AdminListQuery query = AdminListQuery.of("느림", Map.of("status", "NEW"), "status,asc", "2",
+      AdminFeedbackList.DEFINITION);
+
+    String html = renderList(List.of(feedback("f1", "느림 의견", null)), query);
+
+    assertThat(html).contains("data-admin-filter-bar").contains("value=\"느림\"").contains("처리 상태")
+      .contains("처리 상태 ▲");
+    assertThat(html).contains("name=\"returnQ\" value=\"느림\"").contains("name=\"returnStatus\" value=\"NEW\"")
+      .contains("name=\"returnSort\" value=\"status,asc\"").contains("name=\"returnPage\" value=\"2\"");
+  }
+
+  @Test
+  @DisplayName("조건이 있는데 결과가 없으면 조건 안내, 조건 없이 없으면 받은 의견 없음 안내")
+  void list_emptyMessages() {
+    AdminListQuery query = AdminListQuery.of("없는말", Map.of(), null, null, AdminFeedbackList.DEFINITION);
+
+    assertThat(renderList(List.of(), query)).contains("조건에 맞는 의견이 없어요");
+  }
+
+  @Test
+  @DisplayName("상세는 처리 상태와 마지막 변경, 상태 변경 폼(상세로 돌아옴)을 보인다")
+  void detail_showsStatus() {
+    Feedback done = feedback("f1", "의견", null);
+    done.setStatus(FeedbackStatus.DONE);
+    done.setStatusChangedBy("kimchi");
+    done.setStatusChangedAt(LocalDateTime.of(2026, 10, 9, 8, 30));
+
+    String html = renderDetail(done);
+
+    assertThat(html).contains("처리 상태").contains("처리 완료").contains("2026-10-09 08:30").contains("· kimchi")
+      .contains("action=\"/admin/feedback/f1/status\"").contains("name=\"returnTo\" value=\"detail\"")
+      .doesNotContain("name=\"returnQ\"");
   }
 
   @Test

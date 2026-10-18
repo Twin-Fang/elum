@@ -26,6 +26,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -152,13 +154,14 @@ public class NoticeService {
 
   // ── 관리자 ──────────────────────────────────────────
 
-  /** 목록 순서 — 게시 중, 예약, 꺼짐, 끝남 순. 같은 상태 안에서는 앱 슬라이드 순서다. */
-  public List<AppNotice> getAll() {
-    LocalDateTime now = now();
-    return appNoticeRepository.findAll().stream()
-      .sorted(Comparator.<AppNotice>comparingInt(notice -> listRank(notice.statusAt(now)))
-        .thenComparing(SLIDE_ORDER))
-      .toList();
+  /**
+   * 관리자 목록: 제목·본문 검색(이스케이프된 LIKE 패턴, null 이면 전체) + 정렬·페이지는 호출부 Pageable
+   * 게시 판단은 목록 쿼리가 아니라 statusOf 가 한다 (앱 API 와 같은 판단)
+   */
+  public Page<AppNotice> search(String likePattern, Pageable pageable) {
+    boolean hasKeyword = likePattern != null;
+    // 검색어가 없을 때도 파라미터 타입이 흔들리지 않게 빈 문자열을 넘긴다 (hasKeyword 가 false 면 쓰이지 않음)
+    return appNoticeRepository.searchForAdmin(hasKeyword, hasKeyword ? likePattern : "", pageable);
   }
 
   public NoticeStatus statusOf(AppNotice notice) {
@@ -451,15 +454,6 @@ public class NoticeService {
   }
 
   // ── 도움 ────────────────────────────────────────────
-
-  private static int listRank(NoticeStatus status) {
-    return switch (status) {
-      case LIVE -> 0;
-      case SCHEDULED -> 1;
-      case DISABLED -> 2;
-      case ENDED -> 3;
-    };
-  }
 
   private static String trim(String value) {
     return value == null ? "" : value.strip();

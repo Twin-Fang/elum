@@ -2,17 +2,16 @@ package com.chuseok22.elumserver.admin.application.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
+import com.chuseok22.elumserver.admin.application.list.AdminNoticeList;
+import com.chuseok22.elumserver.notice.infrastructure.entity.AppNotice;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.web.csrf.DefaultCsrfToken;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.context.IExpressionContext;
-import org.thymeleaf.linkbuilder.StandardLinkBuilder;
-import org.thymeleaf.spring6.SpringTemplateEngine;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 /**
  * 관리자 공통 골격이 CSRF meta 를 내보내는지 본다 (이슈 #399).
@@ -24,27 +23,19 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 class AdminLayoutCsrfMetaTest {
 
   private String render(Object csrf) {
-    ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
-    resolver.setPrefix("templates/");
-    resolver.setSuffix(".html");
-    resolver.setTemplateMode(TemplateMode.HTML);
-    resolver.setCharacterEncoding("UTF-8");
-    SpringTemplateEngine engine = new SpringTemplateEngine();
-    engine.setTemplateResolver(resolver);
-    engine.setLinkBuilder(new StandardLinkBuilder() {
-      @Override
-      protected String computeContextPath(IExpressionContext context, String base, Map<String, Object> parameters) {
-        return "";
-      }
-    });
-    Context context = new Context();
-    context.setVariable("rows", List.of());
-    context.setVariable("hideDays", 7);
-    context.setVariable("previewJson", "{\"hideDays\":7,\"notices\":[]}");
+    AdminListQuery query = AdminListQuery.of(null, Map.of(), null, null, AdminNoticeList.DEFINITION);
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("notices", new PageImpl<AppNotice>(List.of()));
+    variables.put("rows", List.of());
+    variables.put("definition", AdminNoticeList.DEFINITION);
+    variables.put("query", query);
+    variables.put("pagerBaseUrl", "/admin/notices");
+    variables.put("hideDays", 7);
+    variables.put("previewJson", "{\"hideDays\":7,\"notices\":[]}");
     if (csrf != null) {
-      context.setVariable("_csrf", csrf);
+      variables.put("_csrf", csrf);
     }
-    return engine.process("admin/notices", context);
+    return new AdminTemplateRenderSupport().render("admin/notices", variables);
   }
 
   @Test
