@@ -7,56 +7,10 @@ import '../l10n/l10n_context.dart';
 import '../assets/app_assets.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
+import 'coach_mark_close_button.dart';
+import 'coach_mark_footer.dart';
 import 'coach_mark_parts.dart';
-
-/// 말풍선 글을 어느 쪽에 맞출지.
-enum CoachMarkAlign { center, end }
-
-/// 코치마크 한 단계 — 무엇을 가리키고 뭐라고 말하는가.
-class CoachMarkStep {
-  const CoachMarkStep({
-    required this.target,
-    required this.message,
-    this.align = CoachMarkAlign.center,
-    this.holePadding = EdgeInsets.zero,
-    this.holeRadius = 0,
-    this.feather = 0,
-    this.bleedLeft = false,
-    this.pointerAt = 0.5,
-    this.pointerGap = 0,
-    this.partsOf,
-    this.partRadius = 0,
-  });
-
-  /// 가리킬 위젯. 화면에 그려져 있어야 잴 수 있다.
-  final GlobalKey target;
-
-  /// 말풍선 글. `*강조*` 로 감싼 부분은 강조색으로 나온다.
-  final String message;
-
-  final CoachMarkAlign align;
-
-  /// 대상보다 구멍을 얼마나 키울지.
-  final EdgeInsets holePadding;
-  final double holeRadius;
-
-  /// 가장자리를 풀어 줄 정도 — 대상이 빛나면(글로우) 준다.
-  final double feather;
-
-  /// 구멍을 화면 왼쪽 끝까지 넓힌다. 밀려 나간 카드가 화면 가장자리에서 잘려 보이는 자리다
-  /// (시안 1291:10401).
-  final bool bleedLeft;
-
-  /// 화살표가 대상 가로의 어디를 가리키는가(0~1). 밀어서 열린 줄은 버튼 쪽을 가리킨다.
-  final double pointerAt;
-
-  /// 구멍 가장자리에서 화살표가 시작하기까지 띄울 거리 (시안 1291:10730 은 배지에서 3 떨어진다).
-  final double pointerGap;
-
-  /// 대상 안에서 실제로 밝을 모양들. 대상 상자를 받아 돌려준다. 없으면 상자 전체가 밝다.
-  final List<Rect> Function(Rect target)? partsOf;
-  final double partRadius;
-}
+import 'coach_mark_step.dart';
 
 /// 화면을 어둡게 덮고 대상 하나만 밝게 뚫어 한 번에 하나씩 가리키는 안내 (Figma 코치마크 1291:10801).
 ///
@@ -144,10 +98,6 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
 
   /// 아래 점과 안내 문구가 차지하는 자리. 말풍선이 여기를 침범하지 않게 한다.
   static const _bottomReserve = 176.0;
-
-  /// 점과 문구를 화면 바닥에서 띄우는 거리(안전영역 제외). 하단 배너 광고(약 60~100) 위에 놓는다 —
-  /// 광고와 겹치면 글자가 광고 위에 얹혀 지저분하다.
-  static const _footerBottom = 112.0;
 
   bool get _reduceMotion => MediaQuery.disableAnimationsOf(context);
 
@@ -415,8 +365,13 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                                 )
                               : null,
                         ),
-                        _buildFooter(context, last: last),
-                        _buildCloseButton(context),
+                        CoachMarkFooter(
+                          stepCount: widget.steps.length,
+                          index: widget.index,
+                          isLast: last,
+                          isMotionReduced: reduce,
+                        ),
+                        CoachMarkCloseButton(onClose: _close),
                       ],
                     ),
                   ),
@@ -463,9 +418,7 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
     return CustomMultiChildLayout(
       delegate: CoachBubbleLayout(
         anchorX: anchorX,
-        edgeY: below
-            ? hole.rect.bottom + gapY
-            : hole.rect.top - gapY,
+        edgeY: below ? hole.rect.bottom + gapY : hole.rect.top - gapY,
         below: below,
         alignEnd: alignEnd,
         arrowSize: arrow,
@@ -506,81 +459,6 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
           ),
         ),
       ],
-    );
-  }
-
-  /// 아래쪽 진행 점과 안내 문구.
-  Widget _buildFooter(BuildContext context, {required bool last}) {
-    final media = MediaQuery.of(context);
-    final colors = context.colors;
-    final typo = context.typo;
-
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: media.padding.bottom + _footerBottom.h,
-      child: ExcludeSemantics(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CoachDots(count: widget.steps.length, index: widget.index),
-            SizedBox(height: 12.h),
-            // 문구가 바뀔 때 툭 바뀌지 않고 겹쳐 사라지고 나타난다.
-            AnimatedSwitcher(
-              duration: _reduceMotion ? Duration.zero : AppMotion.fast,
-              child: Text(
-                last
-                    ? context.l10n.coachTapToClose
-                    : context.l10n.coachTapToNext,
-                key: ValueKey(last),
-                style: typo.body.copyWith(
-                  color: colors.coachText.withValues(alpha: 0.7),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 닫기 ✕ (시안 1291:10802 — 안전영역 아래 8, 왼쪽 18).
-  ///
-  /// 시안은 마지막 단계에만 그렸다. 첫 단계에서 이미 보고 싶지 않은 사람이 두 번 더 눌러야
-  /// 닫히는 것은 불친절해 모든 단계에 둔다. 터치 영역은 48로 넓힌다.
-  Widget _buildCloseButton(BuildContext context) {
-    final media = MediaQuery.of(context);
-    const hit = 48.0;
-    const icon = 40.0;
-
-    return Positioned(
-      left: 18.w - (hit - icon) / 2,
-      top: media.padding.top + 8.h - (hit - icon) / 2,
-      child: Semantics(
-        button: true,
-        label: context.l10n.coachCloseHint,
-        onTap: _close,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            HapticFeedback.selectionClick();
-            _close();
-          },
-          child: SizedBox(
-            width: hit,
-            height: hit,
-            child: Center(
-              child: ExcludeSemantics(
-                child: SvgPicture.asset(
-                  AppAssets.coachClose,
-                  width: icon,
-                  height: icon,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

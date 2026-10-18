@@ -1796,7 +1796,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get issuedCodeCopied => '코드를 복사했어요';
 
   @override
-  String get issuedCodeCopyFailed => '복사하지 못했어요 (E-CODE-COPY)';
+  String get issuedCodeCopyFailedTitle => '复制失败了';
+
+  @override
+  String get issuedCodeCopyFailedFallback => '请直接告知屏幕上显示的代码';
 
   @override
   String linkShareMessage(int minutes, String url, String code) {

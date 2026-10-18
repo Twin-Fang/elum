@@ -1,5 +1,7 @@
 {
   "@@locale": "ja",
   "installationRetryMessage": "ログイン情報を確認できませんでした。もう一度お試しください。",
-  "installationRetryButton": "再試行"
+  "installationRetryButton": "再試行",
+  "issuedCodeCopyFailedTitle": "コピーできませんでした",
+  "issuedCodeCopyFailedFallback": "画面に表示されているコードを直接お伝えください"
 }

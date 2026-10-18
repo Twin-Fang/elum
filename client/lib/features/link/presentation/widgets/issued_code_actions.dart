@@ -18,9 +18,16 @@ Future<void> copyIssuedCode(BuildContext context, IssuedLinkCode? issued) async 
   try {
     await Clipboard.setData(ClipboardData(text: issued.code));
     showElumToastOn(messenger, l10n.issuedCodeCopied);
-  } catch (_) {
-    // 복사가 막혀도 코드는 화면에 그대로 있다 - 알리기만 한다.
-    showElumToastOn(messenger, l10n.issuedCodeCopyFailed);
+  } catch (error) {
+    // 복사가 막혀도 코드는 화면에 그대로 있다 - 팝업으로 알리고 에러 코드를 붙인다.
+    if (!context.mounted) return;
+    await showFailure(
+      context,
+      error,
+      title: l10n.issuedCodeCopyFailedTitle,
+      fallback: l10n.issuedCodeCopyFailedFallback,
+      fallbackCode: 'E-CODE-COPY',
+    );
   }
 }
 

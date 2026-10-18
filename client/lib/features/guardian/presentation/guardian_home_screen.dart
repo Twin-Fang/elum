@@ -26,6 +26,7 @@ import '../application/routine_notifier.dart';
 import 'widgets/create_routine_button.dart';
 import 'widgets/home_coach_mark.dart';
 import 'widgets/routine_summary_tile.dart';
+import 'widgets/past_routine_section.dart';
 import 'widgets/today_routine_section.dart';
 import '../../member/application/member_providers.dart';
 import '../application/routine_providers.dart';

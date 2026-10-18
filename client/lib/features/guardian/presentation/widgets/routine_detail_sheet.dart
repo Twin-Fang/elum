@@ -1,19 +1,17 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/l10n/content_locale.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/show_failure.dart';
-import '../../../../core/assets/app_assets.dart';
-import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
 import '../../../../shared/models/routine.dart';
+import 'routine_detail_header.dart';
+import 'routine_detail_reward_row.dart';
+import 'routine_detail_step_badge.dart';
+import 'routine_detail_step_card.dart';
 import 'step_card_viewer.dart';
 import '../../application/guardian_home_controller.dart';
 
@@ -171,7 +169,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
           Column(
             children: [
               // --- 고정: 핸들바 + 제목 (덤프의 `스크롤 시 fix 영역`) ---
-              _Header(
+              RoutineDetailHeader(
                 title: widget.routine.title,
                 language: widget.routine.language,
                 // 남이 만든 일과면 누가 만들었는지 먼저 말한다 — 왜 고칠 수 없는지의 답이다.
@@ -208,7 +206,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                   right: 4.w,
                                   bottom: 8.h,
                                 ),
-                                child: _StepBadge(index: index),
+                                child: RoutineDetailStepBadge(index: index),
                               ),
                             ),
                           ),
@@ -241,7 +239,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                                   key: _StepItemKey(step.id, this),
                                   child: Padding(
                                     padding: EdgeInsets.only(bottom: 8.h),
-                                    child: _StepCard(
+                                    child: RoutineDetailStepCard(
                                       step: step,
                                       index: index,
                                       language: widget.routine.language,
@@ -276,7 +274,7 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                         buttonBottom + buttonHeight + space.md,
                       ),
                       sliver: SliverToBoxAdapter(
-                        child: _RewardRow(routine: widget.routine),
+                        child: RoutineDetailRewardRow(routine: widget.routine),
                       ),
                     ),
                   ],
@@ -367,472 +365,4 @@ class _StepItemKey extends GlobalObjectKey {
 
   @override
   int get hashCode => Object.hash(id, sheet);
-}
-
-/// 스크롤해도 남는 머리 부분.
-class _Header extends StatelessWidget {
-  const _Header({required this.title, required this.language, this.caption});
-
-  final String title;
-
-  /// 제목(일과 글)의 언어. 아래 caption 은 화면 문구라 따르지 않는다.
-  final String language;
-
-  /// 제목 아래 한 줄 (`엄마가 만든 일과예요`). 없으면 자리도 없다 — 내 일과의 시트는 그대로다.
-  final String? caption;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Container(
-      // 배경이 없으면 스크롤되는 목록이 제목 뒤로 비친다 (덤프의 `스크롤 시 fix 영역`에도
-      // background 사각형이 따로 있다).
-      color: colors.background,
-      // 시안(980:5146) 헤더는 68 높이다 — 손잡이 16 · 제목 40~60 · 아래 8.
-      // 아래를 16 으로 두면 헤더가 76 이 되어 목록 전체가 8 씩 밀린다.
-      //
-      // 위는 **12**다. 16 으로 두어 손잡이가 시안보다 4 내려가 있었다.
-      // 아래 제목까지의 간격에서 그 4 를 되돌려 주므로 목록은 제자리다.
-      padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 8.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Center(child: ElumSheetHandle()),
-          // 위 여백에서 줄인 4 를 여기서 되돌린다 — 손잡이만 올라가고 제목·목록은 시안 자리에 그대로 있다
-          SizedBox(height: 24.h),
-          ContentLocale(
-            language: language,
-            child: Text(
-              title,
-              style: context.typo.sheetTitle.copyWith(
-                color: colors.sheetTitleText,
-              ),
-            ),
-          ),
-          if (caption != null) ...[
-            SizedBox(height: 4.h),
-            Text(
-              caption!,
-              style: context.typo.body.copyWith(color: colors.textSecondary),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// 단계 번호 뱃지. **순서를 바꿔도 움직이지 않는다**.
-///
-/// 번호는 카드의 이름표가 아니라 몇 번째 자리인가를 뜻한다. 그래서 카드
-/// 목록과 떼어 왼쪽 칸에 세워 두고, 끌기에도 들어올림에도 끼지 않는다. 카드를
-/// 옮기면 왼쪽 줄은 1·2·3·4 그대로 서 있고 오른쪽 내용만 자리를 바꾼다.
-class _StepBadge extends StatelessWidget {
-  const _StepBadge({required this.index});
-
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    // 네 색을 차례로 쓰고 다섯 번째부터 다시 처음으로 (카드는 최대 10장이다).
-    final palette = [
-      colors.stepBadge1,
-      colors.stepBadge2,
-      colors.stepBadge3,
-      colors.stepBadge4,
-    ];
-
-    return Container(
-      width: 40.w,
-      height: 68.h,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: palette[index % palette.length],
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Text(
-        '${index + 1}',
-        style: context.typo.stepBadgeNumber.copyWith(color: colors.surface),
-      ),
-    );
-  }
-}
-
-/// 단계 카드 — 제목·설명 + 완료 표시 + 순서 손잡이. 순서 바꾸기는 이 카드만 옮긴다.
-///
-/// **손잡이는 길게 눌러야 잡힌다**. 닿는 즉시 끌리게 두면 목록을 스크롤하려던
-/// 손가락이 손잡이를 스치는 것만으로 순서가 바뀐다. 고칠 생각이 없었는데 일과가
-/// 바뀌고 서버로 전송까지 된다.
-///
-/// 누르고 있는 동안 줄이 **점점 떠오른다.** 움직여야 그림자가 나타나면
-/// 누르는 내내 아무 일도 없다가 갑자기 뜨는 것처럼 보인다. 다 떠오른 순간이 곧
-/// 잡힌 순간이므로 진동으로 함께 알리고, 도중에 손을 떼면 제자리로 내려앉는다.
-class _StepCard extends StatefulWidget {
-  const _StepCard({
-    required this.step,
-    required this.index,
-    this.language = 'ko',
-    this.dragging = false,
-    this.reorderable = true,
-    this.onOpen,
-  });
-
-  final ActionCard step;
-  final int index;
-
-  /// 카드 제목·설명의 언어(일과 언어).
-  final String language;
-
-  /// 글 자리를 눌렀을 때 — 카드를 크게 연다. 손잡이와 체크는 따로 받는다.
-  final VoidCallback? onOpen;
-
-  /// 지금 끌려가는 중인가. 끌기가 시작되면 이 카드는 시트 위의 사본으로 다시
-  /// 그려지므로, 들린 상태로 시작하지 않으면 그림자가 한 번 깜빡인다.
-  final bool dragging;
-
-  /// 순서 바꾸는 손잡이를 그릴지. 지난 일과는 그리지 않는다 (시안 980:4777).
-  final bool reorderable;
-
-  @override
-  State<_StepCard> createState() => _StepCardState();
-}
-
-class _StepCardState extends State<_StepCard>
-    with SingleTickerProviderStateMixin {
-  /// 누르고 있는 정도(0~1).
-  ///
-  /// 길이를 [kLongPressTimeout]에 맞춘다. 이 값이 실제로 잡히는 시점과 어긋나면
-  /// 다 떠오른 뒤에도 안 잡히거나, 덜 떠오른 채로 잡혀 버린다.
-  late final AnimationController _lift = AnimationController(
-    vsync: this,
-    duration: kLongPressTimeout,
-    reverseDuration: AppMotion.fast,
-    value: widget.dragging ? 1 : 0,
-  )..addStatusListener(_onLiftStatus);
-
-  /// 진동을 한 번만 울리기 위한 표시.
-  bool _announced = false;
-
-  /// 다 들렸을 때 커지는 비율. 그림자가 주된 신호이고 크기는 거들 뿐이라 작게 준다.
-  static const _liftScale = 0.03;
-
-  void _onLiftStatus(AnimationStatus status) {
-    if (status == AnimationStatus.completed && !_announced) {
-      _announced = true;
-      HapticFeedback.mediumImpact();
-    } else if (status == AnimationStatus.dismissed) {
-      _announced = false;
-    }
-  }
-
-  @override
-  void didUpdateWidget(_StepCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.dragging == oldWidget.dragging) return;
-    if (widget.dragging) {
-      _lift.value = 1;
-    } else {
-      // 놓는 순간 되돌린다 — 손을 뗀 것과 같은 모습으로 내려앉는다.
-      _lift.reverse();
-    }
-  }
-
-  @override
-  void dispose() {
-    _lift.dispose();
-    super.dispose();
-  }
-
-  /// 들린 높이에 맞춘 그림자. 눌리지 않았으면 아예 그리지 않는다.
-  List<BoxShadow> _shadow(double t) {
-    if (t == 0) return const [];
-    return [
-      BoxShadow(
-        // 카드가 옅은 회색이라 알파가 낮으면 배경에 묻힌다
-        color: Colors.black.withValues(alpha: 0.26 * t),
-        blurRadius: 22 * t,
-        offset: Offset(0, 8 * t),
-      ),
-    ];
-  }
-
-  /// 잡힌 카드의 테두리. 눌리지 않았으면 그리지 않는다.
-  ///
-  /// 손가락이 18px 손잡이를 가려도 카드 가장자리는 보인다. 그림자·크기와 달리
-  /// 색은 "지금 이 카드를 쥐고 있다"를 한눈에 알린다.
-  /// 배경 테두리로 그리면 안쪽 여백이 밀려 글이 움직이므로 위에 덧그린다.
-  BoxDecoration? _outline(double t, Color color) {
-    if (t == 0) return null;
-    return BoxDecoration(
-      borderRadius: BorderRadius.circular(20.r),
-      border: Border.all(color: color.withValues(alpha: t), width: 2.w),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typo = context.typo;
-
-    return AnimatedBuilder(
-      animation: _lift,
-      builder: (context, _) {
-        final t = _lift.value;
-        final shadow = _shadow(t);
-
-        // 번호 뱃지는 여기 없다 — 왼쪽 칸에 따로 서 있어 들리지 않는다.
-        return Transform.scale(
-          scale: 1 + _liftScale * t,
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 68.h,
-                  padding: EdgeInsets.symmetric(horizontal: 18.w),
-                  decoration: BoxDecoration(
-                    color: colors.editChipBg,
-                    borderRadius: BorderRadius.circular(20.r),
-                    boxShadow: shadow,
-                  ),
-                  foregroundDecoration: _outline(t, colors.brandOrange),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          // 글자 사이 빈 곳도 눌리게 한다. 손잡이는 이 바깥이라 끌기와 겹치지 않는다.
-                          behavior: HitTestBehavior.opaque,
-                          onTap: widget.onOpen,
-                          child: Semantics(
-                            button: widget.onOpen != null,
-                            hint: context.l10n.routineDetailOpenHint,
-                            child: ContentLocale(
-                              language: widget.language,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    widget.step.displayTitle,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    // 시안(963:4236)은 순검정이다. 앱 본문색(#242634)이
-                                    // 아니다 — 시트 제목과 같은 토큰을 쓴다.
-                                    style: typo.sheetStepTitle.copyWith(
-                                      color: colors.sheetTitleText,
-                                    ),
-                                  ),
-                                  if (widget.step.description.isNotEmpty) ...[
-                                    // 시안 제목 y15(16 높이) · 설명 y39 → 사이 8
-                                    SizedBox(height: 8.h),
-                                    Text(
-                                      widget.step.description,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      // 시안의 `sub_color`(#74757D). 일과 타일 설명과 같은
-                                      // 값이라 토큰을 함께 쓴다 — 디자이너가 한 변수로
-                                      // 두었으므로 한쪽만 바뀌어서는 안 된다.
-                                      // `textSecondary`(#898B98)는 다른 자리의 색이다.
-                                      style: typo.sheetStepBody.copyWith(
-                                        color: colors.routineTileLabel,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      // 시안(963:4239)은 글 오른쪽 끝(227)과 체크(231) 사이가 4다.
-                      SizedBox(width: 4.w),
-                      // 이룸이가 해낸 결과를 보여줄 뿐 여기서 체크하지 않는다.
-                      // 보호자가 대신 체크하면 "이룸이가 해냈다"는 기록이 아니게 된다.
-                      _CompletionMark(completed: widget.step.completed),
-                      // 손잡이가 없으면 그 자리의 여백도 없다 (시안 980:4777)
-                      if (widget.reorderable) ...[
-                        // 시안 체크 끝(271) → 손잡이(281) 사이 10
-                        SizedBox(width: 10.w),
-                        // 누르는 동안의 들어올림은 여기서 시작한다. 끌기 자체는
-                        // Delayed 쪽이 맡으므로 둘의 임계가 같아야 한다.
-                        Listener(
-                          // 아이콘 글리프에만 의존하면 빈틈이 생긴다. 손잡이는
-                          // 18px이라 그러잖아도 좁으므로 영역 전체로 받는다.
-                          behavior: HitTestBehavior.opaque,
-                          onPointerDown: (_) => _lift.forward(),
-                          onPointerUp: (_) => _lift.reverse(),
-                          onPointerCancel: (_) => _lift.reverse(),
-                          child: ReorderableDelayedDragStartListener(
-                            index: widget.index,
-                            child: Stack(
-                              children: [
-                                // **`Icons.drag_handle`이 아니다.** 그건 줄이 둘인데
-                                // 시안(`963:4240` 순서변경)은 셋이고 색도 `#CACACA`로
-                                // 더 진하다. 눌리지 않았을 때는 에셋 색 그대로다.
-                                SvgPicture.asset(
-                                  AppAssets.sheetReorderHandle,
-                                  width: 18.w,
-                                  height: 18.w,
-                                ),
-                                // 잡히는 만큼 브랜드색이 위에 짙어진다. 에셋 색을
-                                // 코드에 옮겨 적지 않으려고 값을 섞지 않고 겹친다.
-                                if (t > 0)
-                                  Opacity(
-                                    opacity: t,
-                                    child: SvgPicture.asset(
-                                      AppAssets.sheetReorderHandle,
-                                      width: 18.w,
-                                      height: 18.w,
-                                      colorFilter: ColorFilter.mode(
-                                        colors.brandOrange,
-                                        BlendMode.srcIn,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _CompletionMark extends StatelessWidget {
-  const _CompletionMark({required this.completed});
-
-  final bool completed;
-
-  /// 시안(956:4084 `채크_라운드`) — 원 40 · 안의 체크 21.82×16.26.
-  /// 원본 컴포넌트가 20 기준 10.91×8.13 이라 그 비율 그대로다.
-  static const _size = 40.0;
-  static const _markW = 21.82;
-  static const _markH = 16.26;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    // 시안(`채크_라운드` 726:4881)은 두 상태를 이렇게 나눈다.
-    // 미완료도 투명이 아니라 배경색으로 칠하고 테두리를 따로 둔다 — 투명하게 두면
-    // 카드 위에서 동그라미가 사라져 "누를 곳"으로 읽히지 않는다.
-    return Container(
-      width: _size.w,
-      height: _size.w,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: completed ? colors.checkDone : colors.background,
-        border: completed
-            ? null
-            : Border.all(color: colors.checkIdleBorder, width: 2.w),
-      ),
-      // **글리프가 아니라 에셋이다.** `Icons.check` 는 정사각형이라 시안의
-      // 가로로 긴 체크와 모양이 다르다 (client/CLAUDE.md §2).
-      child: SvgPicture.asset(
-        AppAssets.iconCheckMark,
-        width: _markW.w,
-        height: _markH.w,
-        colorFilter: ColorFilter.mode(
-          completed ? colors.surface : colors.checkIdleBorder,
-          BlendMode.srcIn,
-        ),
-      ),
-    );
-  }
-}
-
-/// 보상 줄. **정하지 않았어도 그린다**.
-///
-/// 없다고 줄째 숨기면 보상을 넣을 수 있다는 것조차 보이지 않는다.
-/// 시안(980:5174)은 빈 칸 대신 **없다고 말하고**
-/// 별을 흐리게 해 채울 수 있는 자리임을 보여준다. 줄째 없애면 보상을 넣을 수
-/// 있다는 것조차 보이지 않는다.
-///
-/// **뱃지 + 카드로 둔다**. 시안(956:4084)이 검은 뱃지에 별을 넣어
-/// 단계와 같은 짜임으로 그렸다. 뱃지 색과 별이 이미 "이건 단계가
-/// 아니다"를 말해 주므로 `다 하면`이라는 말은 뺀다.
-class _RewardRow extends StatelessWidget {
-  const _RewardRow({required this.routine});
-
-  final Routine routine;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typo = context.typo;
-    // 보상을 아직 정하지 않았어도 줄은 그린다. 줄째 없애면 보상을 넣을 수
-    // 있다는 것조차 보이지 않는다. 시안(980:5174)은 **글자로** 알린다 —
-    // 빈 칸이 아니라 "없어요"라고 말해 준다.
-    final hasReward = routine.hasReward;
-
-    final rewardText = Text(
-      hasReward ? routine.rewardText.trim() : context.l10n.routineDetailNoReward,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: typo.sheetStepTitle.copyWith(
-        color: hasReward ? colors.textPrimary : colors.rewardEmptyLabel,
-      ),
-    );
-
-    // **위 여백을 주지 않는다.** 단계 줄마다 아래 8 이 붙어 있어 여기서 또 주면
-    // 마지막 단계와 보상 사이만 16 이 된다 (시안은 8).
-    return Padding(
-      padding: EdgeInsets.zero,
-      child: Row(
-        children: [
-          // 단계 번호 자리에 검은 뱃지를 둔다. 폭이 같아 줄이 나란히 서고,
-          // 색과 별로 "이건 단계가 아니라 보상"이 읽힌다 (Figma 963:4423).
-          Container(
-            width: 40.w,
-            height: 68.h,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [colors.rewardBadgeTop, colors.rewardBadgeBottom],
-              ),
-              borderRadius: BorderRadius.circular(16.r),
-            ),
-            // 정하지 않았으면 별을 흐리게 — 채울 수 있는 자리임을 보여준다.
-            // **별은 흐리게 하지 않는다.** 시안(`980:5174`)의 별은 보상이 없을
-            // 때도 선명하다 — 흐리게 한 건 시안을 잘못 읽은 것이었다.
-            // 비었다는 것은 **글자가** 말해 준다.
-            child: SvgPicture.asset(
-              AppAssets.rewardBadgeStar,
-              width: 25.w,
-              height: 24.w,
-            ),
-          ),
-          SizedBox(width: 4.w),
-          Expanded(
-            child: Container(
-              height: 68.h,
-              alignment: Alignment.centerLeft,
-              padding: EdgeInsets.symmetric(horizontal: 18.w),
-              decoration: BoxDecoration(
-                color: colors.editChipBg,
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              // 보상 글은 일과 언어, 비었다는 안내는 화면 문구라 따로 둔다
-              child: hasReward
-                  ? ContentLocale(language: routine.language, child: rewardText)
-                  : rewardText,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

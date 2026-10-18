@@ -1797,7 +1797,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get issuedCodeCopied => '코드를 복사했어요';
 
   @override
-  String get issuedCodeCopyFailed => '복사하지 못했어요 (E-CODE-COPY)';
+  String get issuedCodeCopyFailedTitle => 'No se pudo copiar';
+
+  @override
+  String get issuedCodeCopyFailedFallback =>
+      'Indica tú mismo el código que aparece en la pantalla';
 
   @override
   String linkShareMessage(int minutes, String url, String code) {

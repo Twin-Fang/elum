@@ -18,7 +18,7 @@ features/guardian/presentation/image_style_settings_screen.dart -> features/onbo
 features/guardian/presentation/pin_change_screen.dart -> features/onboarding/presentation/widgets/pin_keypad.dart
 features/guardian/presentation/widgets/ai_credit_card.dart -> features/credit/data/credit_repository.dart
 features/guardian/presentation/widgets/step_card_viewer.dart -> features/child/data/speech_service.dart
-features/guardian/presentation/widgets/today_routine_section.dart -> features/ads/presentation/ad_native_slot.dart
+features/guardian/presentation/widgets/past_routine_section.dart -> features/ads/presentation/ad_native_slot.dart
 features/link/data/device_link_repository.dart -> features/auth/data/auth_repository.dart
 features/link/presentation/elumi_settings_screen.dart -> features/auth/presentation/consent_document_list_screen.dart
 features/onboarding/application/onboarding_notifier.dart -> features/member/data/member_repository.dart

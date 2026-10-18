@@ -9,22 +9,22 @@ void main() {
   const frozenDebugPrints = <String, String>{};
 
   const frozenSpinners = <String, String>{
-    'features/guardian/presentation/routine_loading_screen.dart | child: CircularProgressIndicator(':
+    'features/guardian/presentation/routine_loading_stage_row.dart | child: CircularProgressIndicator(':
         'ElumSpinner 에 backgroundColor 없음 (투명 트랙 지정이 기본값과 같은지 미확인)',
   };
 
   const frozenColors = <String, String>{
     'features/guardian/presentation/widgets/pictogram_art.dart | color: Colors.white,':
         '시안 그림칸 흰 배경, 토큰 미정',
-    'features/guardian/presentation/widgets/card_review_reorder_list.dart | color: Colors.black.withValues(alpha: 0.24 * strength),':
+    'features/guardian/presentation/widgets/card_review_reorder_card.dart | color: Colors.black.withValues(alpha: 0.24 * strength),':
         '끌기 정도(strength)에 따라 알파가 변하는 그림자',
     'features/guardian/presentation/widgets/step_card_viewer.dart | barrierColor: Colors.black.withValues(alpha: 0.7),':
         '시안 Scrim 검정 70% (dialogScrim 50% 와 다른 값), 토큰 미정',
     'features/guardian/presentation/widgets/step_card_viewer.dart | Colors.white,':
         '어두운 막 위 닫기 아이콘 흰색, 토큰 미정',
-    'features/child/presentation/child_home_screen.dart | color: Colors.black.withValues(alpha: 0.7),':
+    'features/child/presentation/child_routine_tile.dart | color: Colors.black.withValues(alpha: 0.7),':
         '보상 글 검정 70%, 토큰 미정',
-    'features/guardian/presentation/widgets/routine_detail_sheet.dart | color: Colors.black.withValues(alpha: 0.26 * t),':
+    'features/guardian/presentation/widgets/routine_detail_step_card.dart | color: Colors.black.withValues(alpha: 0.26 * t),':
         '시트 펼침 정도(t)에 따라 알파가 변하는 그림자',
   };
 

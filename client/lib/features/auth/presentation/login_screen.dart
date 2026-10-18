@@ -1,16 +1,16 @@
 import 'dart:io' show Platform;
+import 'login_version_corner.dart';
+import 'login_last_used_slot.dart';
+import 'login_provider_button.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/app_status/app_status_repository.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../core/widgets/login_scene.dart';
@@ -228,7 +228,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: LoginScene(
         layout: _isIos ? LoginSceneLayout.ios : LoginSceneLayout.android,
         // 버전은 버튼 묶음과 따로 얹는다 — 버튼 배치를 건드리지 않는다.
-        overlay: Stack(children: [_buttons(context), const _VersionCorner()]),
+        overlay: Stack(
+          children: [_buttons(context), const LoginVersionCorner()],
+        ),
       ),
     );
   }
@@ -255,9 +257,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _LastUsedSlot(
+            LoginLastUsedSlot(
               show: _lastProvider == OAuthProvider.kakao,
-              child: _ProviderButton(
+              child: LoginProviderButton(
                 label: _pending == OAuthProvider.kakao
                     ? context.l10n.loginConnecting
                     : context.l10n.loginKakaoButton,
@@ -269,9 +271,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             SizedBox(height: _buttonGap.h),
 
-            _LastUsedSlot(
+            LoginLastUsedSlot(
               show: _lastProvider == OAuthProvider.naver,
-              child: _ProviderButton(
+              child: LoginProviderButton(
                 label: _pending == OAuthProvider.naver
                     ? context.l10n.loginConnecting
                     : context.l10n.loginNaverButton,
@@ -302,9 +304,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               // 애플이 요구하는 것을 전부 지킨다 — **검정 배경 · 흰 사과 심볼 ·
               // 최소 높이 · 승인 문구**. 문구는 `Apple로 로그인`·`Apple로 계속하기`·
               // `Apple로 가입` 셋만 허용되므로 **임의로 바꾸지 않는다**.
-              _LastUsedSlot(
+              LoginLastUsedSlot(
                 show: _lastProvider == OAuthProvider.apple,
-                child: _ProviderButton(
+                child: LoginProviderButton(
                   label: _pending == OAuthProvider.apple
                       ? context.l10n.loginConnecting
                       : context.l10n.loginAppleButton,
@@ -315,217 +317,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
             ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// 우측 상단 구석의 앱 버전 (`v1.44.0`). **개발 쪽 임시안이다**.
-///
-/// 로그인하지 못한 사용자는 설정 화면에 갈 수 없어, 제보할 때 어느 빌드인지
-/// 확인할 방법이 여기뿐이다. 사용자가 의식할 필요는 없어 **거의 안 보일 만큼
-/// 작고 옅게** 둔다.
-///
-/// 자리를 우측 상단으로 고른 이유 — 두 배치 모두 문구가 y=104 아래에서 시작해
-/// 상단이 비어 있다. 아래쪽은 병아리 그림·버튼·`최근 로그인` 알약이 차 있어
-/// 작은 글자가 묻히고, 버튼 묶음 여백(85)을 건드리면 누르는 자리가 흔들린다.
-///
-/// 버전을 못 읽으면 아무것도 그리지 않는다. 사용자가 할 수 있는 일이 없다.
-class _VersionCorner extends ConsumerWidget {
-  const _VersionCorner();
-
-  /// 상태바 아래로 4, 오른쪽에서 16 — 제공자 버튼 좌우 여백과 맞춘다.
-  static const _top = 4.0;
-  static const _right = 16.0;
-
-  /// 글자 크기는 `appVersionTag`(10) 토큰에 있다. 알고 찾아야 보이는 정도로 옅게 둔다.
-  static const _opacity = 0.6;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final version = ref
-        .watch(appVersionProvider)
-        .maybeWhen(data: (value) => value, orElse: () => '');
-    if (version.isEmpty) return const SizedBox.shrink();
-
-    return Positioned(
-      // 노치·다이내믹 아일랜드 아래로 내린다. 상태바 안에 두면 시계와 겹친다.
-      top: MediaQuery.paddingOf(context).top + _top.h,
-      right: _right.w,
-      child: Text(
-        'v$version',
-        style: context.typo.appVersionTag.copyWith(
-          color: context.colors.textPlaceholder.withValues(alpha: _opacity),
-        ),
-      ),
-    );
-  }
-}
-
-/// "지난번에 이걸로" 안내.
-///
-/// 로그인 수단이 여럿이면 무엇을 썼는지 잊는다. 다른 것으로 들어오면 별개 계정이
-/// 생겨 아이 정보가 사라진 것처럼 보인다. 그것을 막는 장치다.
-/// `지난번에 이걸로 로그인했어요` — 마지막으로 쓴 제공자 위에 붙는다.
-///
-/// **글자 뒤에 옅은 알약을 깐다.** 이 문구는 병아리 그림 위에 얹히는데 회색
-/// 글자라 그냥 두면 묻힌다. 안드로이드에서는 얼굴을 그리므로 부리와
-/// 정확히 겹쳐 `이걸로` 가 읽히지 않는다 — 부리 y614~638, 문구 y623~633.
-/// iOS 도 노란 몸통 위라 대비가 좋지 않아 **양쪽 다** 깐다.
-///
-/// 반투명이라 뒤 그림이 비쳐 덧댄 것처럼 보이지 않는다.
-/// 제공자 버튼 위에 `최근 로그인` 알약을 얹는 자리.
-///
-/// Figma `로그인_iOS`(238:1808) 실측 — 알약 **91×28 · r20**, 버튼 **우측에서 16**,
-/// 버튼 상단에서 **위로 10** 겹친다. 배경은 `#FFFADC` 투명도 50%이라 아래 버튼
-/// 색이 비쳐, 세 제공자에서 각각 다른 색으로 보인다.
-///
-/// **줄을 따로 차지하지 않는다.** 이전 구현은 버튼 위에 한 줄을 깔아, 최근 로그인이
-/// 있을 때만 버튼 묶음이 통째로 밀렸다 — 누르려던 자리가 움직인다. 버튼 간격이
-/// 12라 위로 10 겹쳐도 레이아웃은 그대로다.
-///
-/// [show]가 거짓이면 버튼만 그대로 내보낸다 — `Stack`을 세우지 않는다.
-class _LastUsedSlot extends StatelessWidget {
-  const _LastUsedSlot({required this.show, required this.child});
-
-  final bool show;
-  final Widget child;
-
-  /// 시안 실측 — 알약 91×28 · r20.
-  static const _pillWidth = 91.0;
-  static const _pillHeight = 28.0;
-  static const _pillRadius = 20.0;
-
-  /// 글자가 알약 가장자리에 붙지 않게 하는 좌우 여백. 글꼴 1.0 에서는 최소 폭 안에 묻힌다.
-  static const _pillPadding = 8.0;
-
-  /// 버튼 우측에서 16 · 버튼 위로 10.
-  static const _right = 16.0;
-  static const _top = 10.0;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!show) return child;
-
-    return Stack(
-      // 알약이 버튼 위로 삐져나온다. 자르면 시안과 달라진다.
-      clipBehavior: Clip.none,
-      children: [
-        child,
-        Positioned(
-          right: _right.w,
-          top: -_top.h,
-          child: Container(
-            // 시안 91×28 은 **최소 크기**다. 글꼴이 커져 글자가 들어가지 않으면
-            // 알약이 자란다 — 고정이면 글자가 줄바꿈돼 잘렸다.
-            constraints: BoxConstraints(
-              minWidth: _pillWidth.w,
-              minHeight: _pillHeight.h,
-            ),
-            padding: EdgeInsets.symmetric(horizontal: _pillPadding.w),
-            decoration: BoxDecoration(
-              color: context.colors.loginLastUsedBg,
-              borderRadius: BorderRadius.circular(_pillRadius.r),
-            ),
-            // 글자 크기만큼만 차지하고 알약 안 가운데에 둔다.
-            child: Center(
-              widthFactor: 1,
-              heightFactor: 1,
-              child: Text(
-                context.l10n.loginLastUsed,
-                maxLines: 1,
-                softWrap: false,
-                style: context.typo.lastLoginBadge.copyWith(
-                  color: context.colors.textPrimary,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// 제공자 버튼 (360×66 · r18). Figma `로그인`(238:1808) 실측.
-///
-/// **로고는 왼쪽 64에 고정하고 문구는 버튼 가운데에 둔다.** 로고를 문구 바로
-/// 앞에 붙이면 제공자마다 문구 길이가 달라 로고가 들쭉날쭉해진다. 세 개가
-/// 한 줄로 서야 목록으로 읽힌다.
-class _ProviderButton extends StatelessWidget {
-  const _ProviderButton({
-    required this.label,
-    required this.iconAsset,
-    required this.backgroundColor,
-    required this.labelColor,
-    required this.onTap,
-  });
-
-  final String label;
-
-  /// 제공자 로고. 색이 SVG 안에 박혀 있어 여기서 덧칠하지 않는다.
-  final String iconAsset;
-
-  final Color backgroundColor;
-  final Color labelColor;
-  final VoidCallback? onTap;
-
-  /// 로고 22×22, 왼쪽에서 64 (시안 실측). 세로는 버튼 가운데다.
-  static const _iconSize = 22.0;
-  static const _iconLeft = 64.0;
-
-  /// 로고와 문구 사이 최소 간격.
-  static const _labelGap = 8.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-
-    return AppPressable(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: space.buttonH.h,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(space.buttonRadius.r),
-          boxShadow: [
-            BoxShadow(
-              color: context.colors.loginButtonShadow,
-              offset: Offset(4.w, 4.h),
-              blurRadius: 6.r,
-            ),
-          ],
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // 문구는 로고 오른쪽부터 좌우 대칭 여백 안에 둔다. 글꼴 1.0 에서는 문구가 이 폭보다
-            // 좁아 버튼 가운데 그대로다. 커지면 로고 쪽으로 자라 붙거나 낱말이 중간에서 끊기는
-            // 대신 **한 줄로 폭에 맞춰 줄인다** — 버튼 높이(66)는 시안 그대로 둔다.
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: (_iconLeft + _iconSize + _labelGap).w,
-              ),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: context.typo.loginProvider.copyWith(color: labelColor),
-                ),
-              ),
-            ),
-            Positioned(
-              left: _iconLeft.w,
-              child: SvgPicture.asset(
-                iconAsset,
-                width: _iconSize.w,
-                height: _iconSize.w,
-              ),
-            ),
           ],
         ),
       ),

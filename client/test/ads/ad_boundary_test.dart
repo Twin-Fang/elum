@@ -25,7 +25,7 @@ void main() {
       // 홈 크레딧 소진 안내(#464)가 부르는 보상형 흐름. 아래 테스트가 호출처를 홈 하나로 잠근다.
       'lib/features/credit/application/ad_reward_flow.dart',
       // 홈 '지난 일과' 목록 사이 네이티브 광고(#465). 아래 테스트가 지난 일과 구역 안으로 잠근다.
-      'lib/features/guardian/presentation/widgets/today_routine_section.dart',
+      'lib/features/guardian/presentation/widgets/past_routine_section.dart',
     };
     final users = dartFiles('lib')
         .where((f) => !f.path.startsWith('lib/features/ads/'))
@@ -106,7 +106,7 @@ void main() {
     });
   });
 
-  // 한 파일에 오늘·지난 일과 구역이 함께 있어, 파일 단위로는 오늘 일과에 끼었는지 못 가린다.
+  // 지난 일과 구역 파일 하나에만 슬롯이 있고, 그 파일 안에서도 구역 클래스 앞에는 없어야 한다.
   test('네이티브 광고는 지난 일과 구역에서만 쓴다', () {
     final users = dartFiles('lib')
         .where((f) => !f.path.startsWith('lib/features/ads/'))
@@ -114,7 +114,7 @@ void main() {
         .map((f) => f.path)
         .toSet();
     expect(users, {
-      'lib/features/guardian/presentation/widgets/today_routine_section.dart',
+      'lib/features/guardian/presentation/widgets/past_routine_section.dart',
     });
 
     final src = File(users.single).readAsStringSync();

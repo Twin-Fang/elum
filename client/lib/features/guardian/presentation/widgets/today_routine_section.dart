@@ -5,12 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/config/ad_ids.dart';
-import '../../../ads/presentation/ad_native_slot.dart';
 import '../../../../core/network/server_error_code.dart';
 import '../../../../core/widgets/show_failure.dart';
-import '../../../../core/theme/app_motion.dart';
-import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_error_view.dart';
 import 'routine_detail_sheet.dart';
 import '../../../../core/widgets/elum_dialog.dart';
@@ -18,37 +14,20 @@ import '../../../child/application/child_routine_notifier.dart';
 import '../../application/home_coach_notifier.dart';
 import '../../application/routine_notifier.dart';
 import '../../../../shared/models/routine.dart';
+import 'empty_routines.dart';
+import 'grey_tile_shell.dart';
+import 'routine_loading_tile.dart';
+import 'routine_tile_gap.dart';
 import 'routine_summary_tile.dart';
 import 'routine_swipe_actions.dart';
 import '../../../../core/state/busy_state_mixin.dart';
 import '../../../../core/widgets/elum_spinner.dart';
-import '../../../../core/widgets/elum_toast.dart';
 import '../../application/guardian_home_controller.dart';
 import '../../application/routine_providers.dart';
 import '../../application/home_routines.dart';
 import '../../../../core/router/routes.dart';
 
 // (참고) 제목 fallback은 Routine.displayTitle이 처리한다.
-
-/// 카드 사이 간격 (Figma 931:4013 — gap 8)
-const _tileGap = 8.0;
-
-/// 지난 일과 사이 광고가 일과 카드와 떨어지는 만큼 더한 간격(오클릭 방지).
-/// 광고가 없으면 이 간격도 없다.
-const _adExtraGap = 8.0;
-
-/// 광고가 목록 끝에 붙을 때(지난 일과 1개) 아래로 더 띄우는 간격.
-///
-/// 끝에 붙으면 바로 아래가 하단 고정 배너라 광고 둘이 가깝게 보인다. 오클릭을 줄이려고
-/// 사이 광고(아래 8)보다 넓게 띄운다.
-const _adTrailingGap = 24.0;
-
-/// 광고를 끼울 일과 순번(이 일과 다음). 지난 일과가 1개 이상일 때만 부른다.
-///
-/// 3개 이상이면 두 번째 다음, 2개면 첫 번째 다음이라 광고는 언제나 일과 **사이**에 든다
-/// (오클릭 방지 의도). 1개만 사이가 없어 끝에 붙는다. 0개면 넣지 않는다 —
-/// 빈 상태 아래에 두면 하단 배너와 함께 내용 없는 화면에 광고 둘이 붙어 AdMob 정책 위험이 있다.
-int _nativeAdAfterIndex(int count) => count >= 3 ? 1 : 0;
 
 /// 보호자 홈 `오늘 일과` (Figma 931:3896 / 931:4179 / 931:4879).
 ///
@@ -267,8 +246,8 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
       // 일과가 사라진 줄 안다.
       if (async.hasError) {
         // 로딩·빈 상태와 같은 회색 칸 안에 둔다 — 지난 일과 실패와 같은 자리.
-        return _GreyTileShell(
-          height: _errorShellHeight,
+        return GreyTileShell(
+          height: greyTileErrorShellHeight,
           child: ElumErrorView.failure(
             async.error,
             fallback: context.l10n.todayRoutineLoadFailedFallback,
@@ -278,7 +257,9 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
           ),
         );
       }
-      return async.isLoading ? const _LoadingTile() : const EmptyRoutines();
+      return async.isLoading
+          ? const RoutineLoadingTile()
+          : const EmptyRoutines();
     }
 
     final progress = ref.watch(childRoutineProvider);
@@ -328,7 +309,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
         return Padding(
           key: ValueKey(routine.id),
           padding: EdgeInsets.only(
-            bottom: index == routines.length - 1 ? 0 : _tileGap.h,
+            bottom: index == routines.length - 1 ? 0 : routineTileGap.h,
           ),
           child: ReorderableDelayedDragStartListener(
             // 코치마크가 가리키는 줄에만 키를 단다. 목록 항목의 키(위 Padding)와는 따로다.
@@ -379,238 +360,6 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
           ),
         );
       },
-    );
-  }
-}
-
-/// 보호자 홈 `지난 일과` (Figma 931:3896 — 지난일과_1).
-///
-/// 오늘 목록과 달리 **밀리지도 않고 순서도 바꾸지 않는다.** 지나간 것을
-/// 고칠 일이 없고, 순서는 날짜가 정한다.
-///
-/// 다 끝낸 일과에만 `일과 다시하기`가 붙는다 — 그대로 한 번 더 시킬 값어치가
-/// 있다는 뜻이고, 하다 만 것을 복제하면 같은 일과가 둘이 되어 헷갈린다.
-class PastRoutineSection extends ConsumerStatefulWidget {
-  const PastRoutineSection({super.key});
-
-  @override
-  ConsumerState<PastRoutineSection> createState() => _PastRoutineSectionState();
-}
-
-class _PastRoutineSectionState extends ConsumerState<PastRoutineSection> {
-  /// 다시 만드는 중인 일과. 두 번 눌러 둘이 생기는 것을 막는다.
-  String? _rerunning;
-
-  /// 지난 일과 시트를 띄우고, `일과 다시하기`를 누르면 오늘로 복제한다.
-  ///
-  /// 복제는 타일의 다시하기와 **같은 길을 쓴다** — 두 자리에서 각각 만들면
-  /// 한쪽만 고쳐져 어긋난다.
-  Future<void> _openPastSheet(Routine routine) async {
-    final action = await RoutineDetailSheet.show(
-      context,
-      routine,
-      isPast: true,
-    );
-    if (action != RoutineSheetAction.rerun || !mounted) return;
-    await _rerun(routine);
-  }
-
-  Future<void> _rerun(Routine routine) async {
-    final l10n = context.l10n;
-    if (_rerunning != null) return;
-    setState(() => _rerunning = routine.id);
-
-    final copy = await ref
-        .read(guardianHomeControllerProvider)
-        .duplicate(routine.id);
-    if (!mounted) return;
-    setState(() => _rerunning = null);
-
-    if (!copy.isOk) {
-      showFailure(
-        context,
-        copy.failure,
-        title: l10n.todayRoutineRerunFailedTitle,
-        fallback: l10n.todayRoutineRerunFailedFallback,
-        fallbackCode: 'E-DUP',
-      );
-      return;
-    }
-    ref.refreshRoutines();
-    showElumToast(context, l10n.todayRoutineCopied(copy.value!.displayTitle));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final async = ref.watch(pastRoutinesProvider);
-    final routines = async.value ?? const <Routine>[];
-    // 일과가 적으면 네이티브 광고를 끼우지 않는다 (하단 배너와 같은 기준)
-    final shouldShowAds = ref.watch(shouldShowHomeAdsProvider);
-
-    if (routines.isEmpty) {
-      if (async.hasError) {
-        return _GreyTileShell(
-          // 세 줄(문구·안내·다시 시도)이 들어간다.
-          height: _errorShellHeight,
-          child: ElumErrorView.failure(
-            async.error,
-            fallback: context.l10n.todayRoutinePastLoadFailedFallback,
-            fallbackCode: 'E-PAST',
-            onRetry: () => ref.invalidate(pastRoutinesProvider),
-            compact: true,
-          ),
-        );
-      }
-      return async.isLoading
-          ? const _LoadingTile()
-          : const _GreyTileShell(child: _EmptyPastLabel());
-    }
-
-    return Column(
-      children: [
-        for (final (index, routine) in routines.indexed) ...[
-          if (index > 0) SizedBox(height: _tileGap.h),
-          Builder(
-            builder: (context) {
-              // **날짜와 다시하기를 붙이지 않는다.** 시안(931:3896)에서 둘 다
-              // 빠졌다 — 지난 일과도 오늘 일과와 같은 68 짜리 줄이다.
-              // 다시하기는 줄을 눌러 여는 시트 안에 있다.
-              return RoutineSummaryTile(
-                routine: routine,
-                // 지난 일과는 서버가 셈해 둔 값이 기준이다. 기기 기록은 오늘 것만 있다.
-                progress: routine.progressPercent / 100,
-                // 시안(980:4777)에는 지난 일과를 눌러 여는 시트가 있는데 화면이
-                // 없었다. 로 목록 자체가 안 보이던 동안 아무도 열어 보지
-                // 못해 빠진 것이 드러나지 않았다.
-                onTap: () => _openPastSheet(routine),
-                highlighted: _rerunning == routine.id,
-              );
-            },
-          ),
-          // 지난 일과 네이티브 광고 한 개. 로드에 실패하면 항목 자체가
-          // 없어 빈 자리가 남지 않는다. 오늘 일과에는 끼우지 않는다.
-          if (shouldShowAds && index == _nativeAdAfterIndex(routines.length))
-            AdNativeSlot(
-              placement: AdPlacement.nativeHomePast,
-              padding: EdgeInsets.only(
-                top: (_tileGap + _adExtraGap).h,
-                // 마지막 줄 다음이면 아래가 하단 배너다 — 더 띄운다.
-                bottom:
-                    (index == routines.length - 1
-                            ? _adTrailingGap
-                            : _adExtraGap)
-                        .h,
-              ),
-            ),
-        ],
-      ],
-    );
-  }
-}
-
-/// Figma 빈 상태 (217:2655 — 361×68, #EEE9E6) — `아직 만든 일과가 없어요`
-///
-/// 개편 시안에서 **캐릭터 배지가 빠졌다.** 일과 카드와 같은 상자에 같은 자리에서
-/// 글이 시작해야 "여기가 일과가 들어올 자리"로 읽힌다 — 그림이 붙으면 다른
-/// 종류의 알림처럼 보인다.
-class EmptyRoutines extends StatelessWidget {
-  const EmptyRoutines({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typo = context.typo;
-
-    return _GreyTileShell(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.todayRoutineEmptyTitle,
-            style: typo.routineEmptyTitle.copyWith(
-              color: colors.routineTileLabel,
-            ),
-          ),
-          SizedBox(height: _emptyLineGap.h),
-          Text(
-            context.l10n.todayRoutineEmptyHint,
-            style: typo.routineTileMeta.copyWith(
-              color: colors.routineEmptyHint,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 빈 상태 두 줄 사이 (일과 카드의 제목↔보상 간격과 같다)
-const _emptyLineGap = 8.0;
-
-/// 지난 일과가 0건일 때. 오늘 빈 상태와 달리 **권하지 않는다** —
-/// 지난 일과는 시간이 지나면 저절로 쌓이는 것이라 할 일이 없다.
-class _EmptyPastLabel extends StatelessWidget {
-  const _EmptyPastLabel();
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        context.l10n.todayRoutinePastEmpty,
-        style: context.typo.routineEmptyPast.copyWith(
-          color: context.colors.routineTileLabel,
-        ),
-      ),
-    );
-  }
-}
-
-/// 목록 조회 중. 빈 상태와 구분되는 자리 표시.
-class _LoadingTile extends StatelessWidget {
-  const _LoadingTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return _GreyTileShell(
-      child: Center(
-        child: ElumSpinner(size: 20.w, strokeWidth: 2.w),
-      ),
-    );
-  }
-}
-
-/// 빈 상태·로딩의 회색 껍데기 (Figma 931:3906 — 361×68, r20, #EEE9E6).
-/// 실패를 담을 때의 회색 칸 높이. 한 줄(68)로는 세 줄이 안 들어간다.
-const double _errorShellHeight = 96;
-
-class _GreyTileShell extends StatelessWidget {
-  const _GreyTileShell({required this.child, this.height});
-
-  final Widget child;
-
-  /// 기본은 일과 한 줄과 같은 68.
-  ///
-  /// **실패를 담을 때는 늘린다.** 실패는 무엇이 안 됐는지·무엇을 하면 되는지·
-  /// 추적 코드까지 세 줄이라 한 줄 높이에 들어가지 않는다 — 실기기에서
-  /// 11px 넘쳤다. 늘어나는 것은 실패했을 때뿐이라 평소 리듬은 그대로다.
-  final double? height;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-
-    return AnimatedContainer(
-      duration: AppMotion.fast,
-      curve: AppMotion.standard,
-      height: (height ?? 68).h,
-      padding: EdgeInsets.symmetric(horizontal: RoutineSummaryTile.padLeft.w),
-      decoration: BoxDecoration(
-        color: context.colors.routineTileBg,
-        borderRadius: BorderRadius.circular(space.cardRadius),
-      ),
-      child: child,
     );
   }
 }
