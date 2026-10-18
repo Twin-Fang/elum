@@ -4,11 +4,10 @@
 enum AdPlacement {
   bannerHome('BANNER_HOME'),
 
-  /// 보호자 홈 목록 한가운데(오늘 일과와 지난 일과 사이). 하단 배너와 별개로 노출을 늘린다.
+  /// 보호자 홈 지난 일과 목록 사이 한 칸. 하단 배너와 별개로 노출을 늘린다.
   bannerHomeMiddle('BANNER_HOME_MIDDLE'),
   bannerDrafts('BANNER_DRAFTS'),
   bannerSettings('BANNER_SETTINGS'),
-  nativeHomePast('NATIVE_HOME_PAST'),
 
   /// 화면 맨 아래 한 줄 네이티브 띠. 하단 띠를 쓰는 모든 화면이 단위 하나를 함께 쓴다.
   nativeStrip('NATIVE_STRIP'),
@@ -38,10 +37,6 @@ abstract final class AdIds {
     AdPlacement.bannerDrafts: _banner,
     AdPlacement.bannerSettings: _banner,
     AdPlacement.nativeStrip: (
-      android: 'ca-app-pub-3940256099942544/2247696110',
-      ios: 'ca-app-pub-3940256099942544/3986624511',
-    ),
-    AdPlacement.nativeHomePast: (
       android: 'ca-app-pub-3940256099942544/2247696110',
       ios: 'ca-app-pub-3940256099942544/3986624511',
     ),

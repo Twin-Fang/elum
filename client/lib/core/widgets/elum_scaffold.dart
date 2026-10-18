@@ -58,7 +58,7 @@ class ElumScaffold extends StatelessWidget {
   /// 화면 맨 아래 광고 자리. 없으면 자리도 없다.
   ///
   /// [bottomButton]·[belowButton]과 함께 못 쓰게 assert로 막는다 — 광고가 하단 고정
-  /// 버튼을 가리면 심사 4.0에서 반려된다. 값이 `AdBannerSlot`이면 로드 전·실패 시
+  /// 버튼을 가리면 심사 4.0에서 반려된다. 값이 `AdBottomStripSlot`이면 로드 전·실패 시
   /// 높이 0이라 자리를 차지하지 않는다.
   final Widget? bottomBanner;
 
@@ -195,35 +195,35 @@ class ElumScaffold extends StatelessWidget {
                         ),
                       ),
                     Padding(
-                    padding: EdgeInsets.only(left: _backBoxLeft.w),
-                    // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
-                    // 상자 자체가 40×40이라 누름 영역과 자리가 한 값으로 맞는다
-                    // — 따로 덮을 필요가 없다.
-                    //
-                    // 앱 거의 모든 화면의 뒤로가기라 이름이 비면 전부 함께 빈다.
-                    // 이름은 제스처 바깥에 두어야 누르는 노드에 붙는다.
-                    child: Semantics(
-                      container: true,
-                      button: true,
-                      enabled: isBackEnabled,
+                      padding: EdgeInsets.only(left: _backBoxLeft.w),
+                      // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
+                      // 상자 자체가 40×40이라 누름 영역과 자리가 한 값으로 맞는다
+                      // — 따로 덮을 필요가 없다.
+                      //
+                      // 앱 거의 모든 화면의 뒤로가기라 이름이 비면 전부 함께 빈다.
+                      // 이름은 제스처 바깥에 두어야 누르는 노드에 붙는다.
+                      child: Semantics(
+                        container: true,
+                        button: true,
+                        enabled: isBackEnabled,
                         label: context.l10n.commonBack,
-                      child: GestureDetector(
-                        onTap: isBackEnabled ? onBack : null,
-                        behavior: HitTestBehavior.opaque,
-                        child: SizedBox(
-                          width: _backBoxSize.w,
-                          height: _backBoxSize.w,
-                          child: Center(
-                            child: SvgPicture.asset(
-                              AppAssets.iconBack,
-                              width: _backIconSize.w,
-                              height: _backIconSize.w,
-                              excludeFromSemantics: true,
+                        child: GestureDetector(
+                          onTap: isBackEnabled ? onBack : null,
+                          behavior: HitTestBehavior.opaque,
+                          child: SizedBox(
+                            width: _backBoxSize.w,
+                            height: _backBoxSize.w,
+                            child: Center(
+                              child: SvgPicture.asset(
+                                AppAssets.iconBack,
+                                width: _backIconSize.w,
+                                height: _backIconSize.w,
+                                excludeFromSemantics: true,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
                     ),
                   ],
                 ),

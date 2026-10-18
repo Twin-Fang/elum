@@ -64,7 +64,7 @@ final pastRoutinesProvider = FutureProvider<List<Routine>>((ref) {
   return ref.watch(routineRepositoryProvider).getPastRoutines();
 });
 
-/// 홈 광고(하단 배너 · 지난 일과 네이티브)를 보이는 최소 일과 수 (오늘 + 지난)
+/// 홈 광고(하단 배너 · 지난 일과 사이 배너)를 보이는 최소 일과 수 (오늘 + 지난)
 const minimumRoutineCountForHomeAds = 5;
 
 /// 홈 광고를 보일지: 오늘·지난 목록을 모두 받았고 합이 [minimumRoutineCountForHomeAds] 이상일 때만 true.

@@ -9,7 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 /// 모르는 사용자가 잘못 누른다. 실수로 import가 늘면 이 테스트가 실패한다.
 void main() {
   // 상대 경로(../../ads/...)든 패키지 경로든 광고 모듈 import 를 잡는다
-  final adsImport = RegExp(r"import '[^']*\bads/(data|application|presentation)/");
+  final adsImport = RegExp(
+    r"import '[^']*\bads/(data|application|presentation)/",
+  );
 
   Iterable<File> dartFiles(String dir) => Directory(dir)
       .listSync(recursive: true)
@@ -24,7 +26,7 @@ void main() {
       'lib/features/guardian/presentation/draft_routines_screen.dart',
       // 홈 크레딧 소진 안내(#464)가 부르는 보상형 흐름. 아래 테스트가 호출처를 홈 하나로 잠근다.
       'lib/features/credit/application/ad_reward_flow.dart',
-      // 홈 '지난 일과' 목록 사이 네이티브 광고(#465). 아래 테스트가 지난 일과 구역 안으로 잠근다.
+      // 홈 '지난 일과' 목록 사이 배너 광고(#465, #741). 아래 테스트가 지난 일과 구역 안으로 잠근다.
       'lib/features/guardian/presentation/widgets/past_routine_section.dart',
     };
     final users = dartFiles('lib')
@@ -59,11 +61,11 @@ void main() {
   });
 
   test('광고 요청에 사용자 정보를 넘기지 않는다', () {
-    // 배너·네이티브·보상형 모두 — 요청을 만드는 모든 로더가 같은 모양이어야 한다.
+    // 배너·보상형 모두 — 요청을 만드는 모든 로더가 같은 모양이어야 한다.
     for (final name in [
       'ad_banner_loader.dart',
+      'ad_strip_loader.dart',
       'rewarded_ad_loader.dart',
-      'ad_native_loader.dart',
     ]) {
       final src = File('lib/features/ads/data/$name').readAsStringSync();
       expect(src, isNot(contains('keywords')), reason: name);
@@ -106,11 +108,11 @@ void main() {
     });
   });
 
-  // 지난 일과 구역 파일 하나에만 슬롯이 있고, 그 파일 안에서도 구역 클래스 앞에는 없어야 한다.
-  test('네이티브 광고는 지난 일과 구역에서만 쓴다', () {
+  // 사이 배너는 지난 일과 구역 파일 하나에만 있고, 그 파일 안에서도 구역 클래스 앞에는 없어야 한다.
+  test('목록 사이 배너는 지난 일과 구역에서만 쓴다', () {
     final users = dartFiles('lib')
         .where((f) => !f.path.startsWith('lib/features/ads/'))
-        .where((f) => f.readAsStringSync().contains('AdNativeSlot'))
+        .where((f) => f.readAsStringSync().contains('AdBannerStyle.inlineCard'))
         .map((f) => f.path)
         .toSet();
     expect(users, {
@@ -121,7 +123,23 @@ void main() {
     final pastStart = src.indexOf('class PastRoutineSection');
     expect(pastStart, greaterThan(0));
     // 지난 일과 구역 앞(오늘 일과·공용 위젯)에는 슬롯이 없다.
-    expect(src.substring(0, pastStart), isNot(contains('AdNativeSlot(')));
-    expect(src.substring(pastStart), contains('AdNativeSlot('));
+    expect(src.substring(0, pastStart), isNot(contains('AdBannerSlot(')));
+    expect(src.substring(pastStart), contains('AdBannerSlot('));
+  });
+
+  // 목록 사이 배너는 표준 크기로 고정하고, 네이티브 소재는 하단 띠 로더 한 곳에서만 쓴다 (#741, #743)
+  test('목록 배너는 표준 크기(320x50)로 고정하고 네이티브는 하단 띠 로더에서만 쓴다', () {
+    final loader = File(
+      'lib/features/ads/data/ad_banner_loader.dart',
+    ).readAsStringSync();
+    expect(loader, contains('AdSize.banner'));
+    expect(loader, isNot(contains('Adaptive')));
+    expect(
+      dartFiles('lib')
+          .where((f) => f.readAsStringSync().contains('NativeAd'))
+          .map((f) => f.path)
+          .toSet(),
+      {'lib/features/ads/data/ad_strip_loader.dart'},
+    );
   });
 }

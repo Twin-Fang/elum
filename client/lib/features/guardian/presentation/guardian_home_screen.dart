@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../ads/presentation/ad_banner_slot.dart';
+import '../../ads/presentation/ad_bottom_strip_slot.dart';
 import '../../../core/config/ad_ids.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
@@ -256,7 +256,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
             // 하단 배너. 로드 전·실패 시 높이 0이라 스크롤 영역이 원래 크기 그대로다.
             // 일과가 적으면 자리도 두지 않는다 (shouldShowHomeAdsProvider)
             if (ref.watch(shouldShowHomeAdsProvider))
-              const AdBannerSlot(placement: AdPlacement.bannerHome),
+              const AdBottomStripSlot(placement: AdPlacement.bannerHome),
           ],
         ),
       ),

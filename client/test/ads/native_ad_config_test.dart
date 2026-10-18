@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:elum/features/ads/data/ad_banner_loader.dart';
+import 'package:elum/features/ads/data/ad_strip_loader.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 앱 ID가 비면 SDK가 시작하다 앱이 죽는다. 네이티브 설정이 빠지면 바로 알린다.
@@ -26,7 +26,7 @@ void main() {
   // 팩토리 ID가 어긋나면 NativeAd 로드가 실패해 띠가 조용히 안 뜬다
   test('하단 띠 팩토리 ID가 Dart·Android·iOS에서 같다', () {
     const factoryId = 'elumStrip';
-    expect(GoogleAdBannerLoader.factoryId, factoryId);
+    expect(GoogleAdStripLoader.factoryId, factoryId);
     expect(
       File(
         'android/app/src/main/kotlin/kr/twinfang/elum/StripNativeAdFactory.kt',
@@ -50,7 +50,7 @@ void main() {
   });
 
   test('팩토리에 넘기는 색 옵션 키가 Kotlin·Swift와 같다', () {
-    final options = GoogleAdBannerLoader.customOptionsOf(
+    final options = GoogleAdStripLoader.customOptionsOf(
       const AdStripColors(
         background: 1,
         headline: 2,
@@ -69,6 +69,6 @@ void main() {
       expect(kotlin, contains('"$key"'), reason: 'Kotlin $key');
       expect(swift, contains('"$key"'), reason: 'Swift $key');
     }
-    expect(options[GoogleAdBannerLoader.badgeLabelKey], 'AD');
+    expect(options[GoogleAdStripLoader.badgeLabelKey], 'AD');
   });
 }

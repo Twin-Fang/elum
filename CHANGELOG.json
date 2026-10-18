@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-18T08:18:21Z",
-    "currentVersion": "2.39.1",
+    "lastUpdated": "2026-10-18T13:04:36Z",
+    "currentVersion": "2.39.2",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 253
+    "totalReleases": 254
   },
   "releases": [
+    {
+      "version": "2.39.2",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-18",
+      "pr_number": 745,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 보호자 화면 광고가 얇은 한 줄 배너로 바뀌어 화면이 덜 가려져요\n\n* **버그 수정**\n  * 연결 암호 복사에 실패하면 안내 팝업이 나와요\n  * 보호자가 적은 내용이 기록에 남지 않도록 보호를 강화했어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "보호자 화면 광고가 얇은 한 줄 배너로 바뀌어 화면이 덜 가려져요"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "연결 암호 복사에 실패하면 안내 팝업이 나와요",
+            "보호자가 적은 내용이 기록에 남지 않도록 보호를 강화했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.39.1",
       "project_type": "flutter",

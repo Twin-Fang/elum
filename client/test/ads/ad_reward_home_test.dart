@@ -206,10 +206,7 @@ class _GatedRepo extends FakeAdRewardRepo {
 
 class _NoBanner implements AdBannerLoader {
   @override
-  Future<LoadedBanner?> load(
-    AdPlacement placement,
-    AdStripColors colors,
-  ) async => null;
+  Future<LoadedBanner?> load(AdPlacement placement) async => null;
 }
 
 /// 서버가 가진 잔액을 흉내 낸다. 읽은 횟수를 센다.

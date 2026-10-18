@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../ads/presentation/ad_banner_slot.dart';
+import '../../ads/presentation/ad_bottom_strip_slot.dart';
 import '../../../core/config/ad_ids.dart';
 import '../../../core/l10n/content_locale.dart';
 import '../../../core/l10n/l10n_context.dart';
@@ -76,7 +76,7 @@ class _DraftRoutinesScreenState extends ConsumerState<DraftRoutinesScreen>
       backTop: 67,
       horizontalPadding: 16,
       // 하단 배너. 로드 전·실패 시 높이 0이라 자리를 남기지 않는다.
-      bottomBanner: const AdBannerSlot(placement: AdPlacement.bannerDrafts),
+      bottomBanner: const AdBottomStripSlot(placement: AdPlacement.bannerDrafts),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
