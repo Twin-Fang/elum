@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/theme_context_ext.dart';
+
 import '../data/ad_banner_loader.dart';
 import '../application/ad_gate.dart';
 import '../../../core/config/ad_ids.dart';
@@ -25,6 +27,9 @@ class AdBannerSlot extends ConsumerStatefulWidget {
   /// **광고가 뜬 뒤에만** 배너 둘레에 두는 여백. 광고가 없으면 이 여백도 없다 — 목록 중간에 넣을 때 광고가
   /// 없다고 빈 줄이 남지 않게 한다. 눌러도 되는 다른 요소와 떨어뜨리는 데도 쓴다(오클릭 방지).
   final EdgeInsets padding;
+
+  /// 테스트가 층을 찾는 키.
+  static const stripKey = Key('광고 배너 층');
 
   @override
   ConsumerState<AdBannerSlot> createState() => _AdBannerSlotState();
@@ -91,12 +96,21 @@ class _AdBannerSlotState extends ConsumerState<AdBannerSlot> {
         }
         final banner = _banner;
         if (banner == null) return const SizedBox.shrink();
+        // 배너를 화면 폭 전체의 얇은 층에 담는다: 면 색 + 윗선으로 본문과 구분
+        final colors = context.colors;
         return Padding(
           padding: widget.padding,
-          child: SizedBox(
-            height: banner.height,
-            width: double.infinity,
-            child: Center(child: banner.widget),
+          child: DecoratedBox(
+            key: AdBannerSlot.stripKey,
+            decoration: BoxDecoration(
+              color: colors.surface,
+              border: Border(top: BorderSide(color: colors.border)),
+            ),
+            child: SizedBox(
+              height: banner.height,
+              width: double.infinity,
+              child: Center(child: banner.widget),
+            ),
           ),
         );
       },
