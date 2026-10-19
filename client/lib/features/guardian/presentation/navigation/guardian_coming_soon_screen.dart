@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import 'guardian_tab.dart';
+import 'guardian_tab_icon.dart';
 
 /// 아직 내용이 없는 칸 (지금은 이야기 #786): 칸 제목 + 준비 중 안내
 ///
@@ -53,8 +54,8 @@ class GuardianComingSoonScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        tab.icon,
+                      GuardianTabIcon(
+                        tab: tab,
                         size: _iconSize.w,
                         color: colors.navIconUnselected,
                       ),

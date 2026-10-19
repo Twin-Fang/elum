@@ -72,7 +72,7 @@ void main() {
   testWidgets('이룸이 1명 — 프로필 카드와 이룸이 한 줄, 설정 목록은 없다', (tester) async {
     await pump(tester, const Member(profiles: [lulu]));
 
-    expect(find.text('내정보'), findsOneWidget);
+    expect(find.text('내 정보'), findsOneWidget);
     expect(find.text('보호자'), findsOneWidget);
     expect(find.text('이룸이 1명과 함께해요'), findsOneWidget);
     expect(find.text('하늘이'), findsOneWidget);

@@ -3959,7 +3959,7 @@ abstract class AppLocalizations {
   /// 보호자 하단 바·옆 메뉴 칸 이름: 만들어 둔 일과·묶음 관리
   ///
   /// In ko, this message translates to:
-  /// **'일과관리'**
+  /// **'일과 관리'**
   String get guardianTabManage;
 
   /// 보호자 하단 바·옆 메뉴 칸 이름: 보호자끼리 나누는 이야기
@@ -3971,7 +3971,7 @@ abstract class AppLocalizations {
   /// 보호자 하단 바·옆 메뉴 칸 이름이자 그 칸(프로필) 화면 제목
   ///
   /// In ko, this message translates to:
-  /// **'내정보'**
+  /// **'내 정보'**
   String get guardianTabMe;
 
   /// 내정보 프로필 카드의 이름 자리. 서버에 보호자 이름이 없어 고정 문구
@@ -4145,7 +4145,7 @@ abstract class AppLocalizations {
   /// 지우기 확인 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'일과관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요'**
+  /// **'일과 관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요'**
   String get routineLibraryRemoveConfirmMessage;
 
   /// 지우기 성공 알림
@@ -4445,7 +4445,7 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'안에 있던 일과는 일과관리에 그대로 남아요'**
+  /// **'안에 있던 일과는 일과 관리에 그대로 남아요'**
   String get routineGroupUngroupConfirmMessage;
 
   /// 이룸이 홈 묶음 상자 (#808)
@@ -4463,7 +4463,7 @@ abstract class AppLocalizations {
   /// 일과관리 메뉴 찾기 (#834)
   ///
   /// In ko, this message translates to:
-  /// **'일과를 *길게 누르면* 메뉴가 열려요\\n이름 바꾸기·복사·지우기를 할 수 있어요'**
+  /// **'일과를 *길게 누르면* 메뉴가 열려요\n이름 바꾸기·복사·지우기를 할 수 있어요'**
   String get libraryCoachMenu;
 
   /// 일과관리 메뉴 찾기 (#834)
