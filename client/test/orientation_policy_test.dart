@@ -74,4 +74,37 @@ void main() {
     );
     expect((call.arguments as List).length, 4);
   });
+
+  testWidgets('화면 크기를 아직 모르면(0x0) 방향을 잠그지 않는다', (tester) async {
+    // 안드로이드는 첫 프레임 전 뷰 크기가 0 일 수 있다. 이때 폰으로 오판해 세로를 잠그면
+    // 태블릿이 레터박스 세로 창으로 뜬다.
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = Size.zero;
+    tester.view.display.size = Size.zero;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.display.reset);
+
+    final calls = <MethodCall>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        calls.add(call);
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+
+    await OrientationPolicy.apply(view: tester.view);
+
+    expect(
+      calls.where((c) => c.method == 'SystemChrome.setPreferredOrientations'),
+      isEmpty,
+    );
+  });
 }
