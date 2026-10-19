@@ -307,6 +307,23 @@ y=279   콘텐츠 시작 (입력 필드 등)  ← 설명 하단 +52
 y=675   하단 CTA 버튼 (360×66)
 ```
 
+## 레이아웃 (AppLayout · 태블릿)
+
+화면 크기는 **기기 종류가 아니라 앱 창 폭**으로 가른다. 아이패드 분할 보기·안드로이드 분할 화면에서도 맞다.
+숫자는 `core/layout/app_layout.dart` 의 `AppLayout`(`context.layout`) 한 곳에만 둔다. 화면에서 `600`·`840` 을 직접 비교하지 않는다 (`test/tablet_layout_rule_test.dart` 가 막는다).
+
+| 등급 | 창 폭 | 쓰임 |
+|---|---|---|
+| compact | < 600 | 폰. 배율은 지금과 같다 |
+| medium | 600 ~ 839 | 작은 태블릿, 세로 태블릿 |
+| expanded | ≥ 840 | 큰 태블릿, 가로 |
+
+- **배율은 창 하나에 하나.** medium·expanded 는 `s = clamp(min(창폭/393, 창높이/852), 0.8, 1.3)` 로 `.w` 와 `.h` 가 같이 커진다 (`AdaptiveScreenScale`). 폭만 커져 찌그러지지 않는다. 폰은 건드리지 않는다.
+- **레이아웃 종류**(`ScreenLayoutKind`)는 라우트에서 정한다. 선언이 없으면 `phoneColumn` (폰 비율 열을 가운데). 폼·설정은 `contentColumn`, 화면이 직접 구성하면 `adaptive`.
+- 시트·토스트는 폭 상한 `sheetMaxWidth`(560 x s) 로 가운데. 확인 팝업 카드는 폭이 이미 고정이다.
+- 등급을 알려면 `context.sizeClass`, 방향은 `context.isLandscape`, 더 자세히는 `context.layoutMetrics`.
+- 사용자에게 열리는 네이티브 스위치(아이패드 family, Android 세로 고정 해제)는 `tool/apply_tablet_native.sh` 로 로컬에서만 켜 검증한다. 설계: `docs/superpowers/specs/2026-10-19-tablet-support-design.md`.
+
 ## 컴포넌트
 
 ### 하단 CTA 버튼 (`일반 버튼`)
