@@ -126,14 +126,14 @@ curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines
   이슈 번호·과거 경위("예전엔…")는 주석에 쓰지 않는다 — 커밋과 이슈에 있다. 지금 로직에 필요한 것만 남긴다.
 - **계층 import 방향을 지킨다.** `core/`·`shared/`는 `features/`·`app/`을 import하지 않는다(화면을 엮는 `core/router`·`core/dev`만 예외).
   기능은 다른 기능의 `data/`·`presentation/`을 직접 import하지 않고 `application/`·`domain/`을 거친다.
-  여러 기능을 엮는 provider(예: `dioProvider`)는 `lib/app/`에 둔다. `test/tool/check_layer_imports_test.dart`가 막고,
+  여러 기능을 엮는 provider(예: `dioProvider`)는 `lib/app/`에 둔다. `tool/check_layer_imports.dart`(Flutter CI 규칙 검사)가 막고,
   이미 있는 예외는 `tool/layer_imports_allowed.txt`에 동결돼 있다 — 줄을 지울 수는 있어도 더하지 않는다.
 - **디자인 토큰 하드코딩 금지.** 색·폰트·간격은 반드시 `core/theme/`의 `AppColors` / `AppTypography` / `AppSpacing`을 통해 쓴다.
   ```dart
   // ❌ Color(0xFF443E39), fontSize: 28
   // ✅ AppColors.textPrimary, AppTypography.title
   ```
-- **창 크기·방향은 `context.sizeClass` / `context.isLandscape` / `context.layout` 으로만 읽는다.** 화면에서 `600`·`840` 같은 breakpoint 를 직접 비교하거나 `1.sw`·`ScreenUtil()` 을 부르지 않는다. 시트·팝업은 `showElumSheet`·`showElumDialog` 로만 띄운다 (`test/tablet_layout_rule_test.dart`). 태블릿 설계는 `docs/superpowers/specs/2026-10-19-tablet-support-design.md`.
+- **창 크기·방향은 `context.sizeClass` / `context.isLandscape` / `context.layout` 으로만 읽는다.** 화면에서 `600`·`840` 같은 breakpoint 를 직접 비교하거나 `1.sw`·`ScreenUtil()` 을 부르지 않는다. 시트·팝업은 `showElumSheet`·`showElumDialog` 로만 띄운다. 태블릿 설계는 `docs/superpowers/specs/2026-10-19-tablet-support-design.md`.
 - **화면 위젯은 `ConsumerWidget` 우선.** `StatefulWidget`은 애니메이션 컨트롤러가 필요할 때만.
 - **`build()` 안에서 비즈니스 로직 금지.** provider 또는 notifier로 뺀다.
 - 한 파일 300줄을 넘기면 위젯을 분리한다.
@@ -192,7 +192,7 @@ curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines
 > 막아뒀다. 클라이언트 로깅 인터셉터는 원문 필드(`rawInputText`·`sanitizedInputText`·`answers`·`rewardText`)를 `****`로 가린다.
 
 > 서버 enum이나 필드명이 바뀌면 **클라이언트 도메인 모델을 먼저 맞추고** 테스트를 돌린다.
-> `test/onboarding_profile_test.dart`에 서버 계약 검증 테스트가 있다.
+> 서버 `CrossStackContractTest` 가 앱 enum 값과 서버 enum 을 대조한다.
 
 ### 브랜치 전략 (필수)
 
@@ -504,7 +504,7 @@ context.typo.cardTitle.copyWith(color: ...)
 | --- | --- |
 | 1 | `server/`의 Controller·Entity·DTO를 **직접 읽는다** |
 | 2 | 클라이언트 도메인 모델(enum `apiValue`, 모델 필드명) 수정 |
-| 3 | `flutter test` — 서버 계약 검증 테스트가 잡아준다 |
+| 3 | 서버 `CrossStackContractTest` — 앱·서버 값 대조 (`cd server && ./gradlew test --tests '*CrossStackContractTest*'`) |
 
 > **문서가 아니라 서버 코드가 기준이다.**
 > → [enum 불일치 사고](./docs/troubleshooting.md#supportgoal-enum-값이-서버와-전부-달랐음)
@@ -515,87 +515,35 @@ context.typo.cardTitle.copyWith(color: ...)
 | --- | --- |
 | 1 | `Routes`에 경로 상수 추가 (문자열 직접 쓰지 않음) |
 | 2 | `createRouter()`에 `GoRoute` 등록 |
-| 3 | **위젯 테스트를 먼저 쓴다** (§6 참조) |
+| 3 | 시뮬레이터에서 화면을 직접 띄워 확인한다 (§6 참조) |
 | 4 | `features/<기능>/presentation/`에 화면 작성 |
 | 5 | 화면 전용 위젯은 그 아래 `widgets/`에 |
 
 **화면 이동 규칙**
 
-- 뒤로가기·돌아가기는 `context.popOrHome()`. 인자 없는 `context.pop()` 은 `test/no_raw_pop_test.dart` 가 막는다
+- 뒤로가기·돌아가기는 `context.popOrHome()`. 인자 없는 `context.pop()` 은 쓰지 않는다
   (`go` 로 열린 화면에서 pop 은 예외를 던져 버튼이 먹통이 된다).
 - "지금 상태의 홈"은 `core/router/app_destination.dart` 한 곳에서 정한다. 시작 화면·뒤로가기가 함께 쓴다.
 - 로그아웃·탈퇴의 로컬 정리는 `wipeLocalAccount`, 세션 만료는 `handleSessionExpired`.
-- 가드·뒤로가기·로그아웃 도착지 테스트는 `test/helpers/real_router.dart` 로 **실제 `createRouter`** 를 띄운다.
-  가드 없는 가짜 `GoRouter` 로는 가드와의 충돌이 보이지 않는다.
-- 경로를 추가하면 `router_invariants_test`(상태 24가지 × 모든 경로)가 자동으로 검사한다. 실패하면 규칙을 고친다.
-- 계정 상태가 바뀌는 길을 더하면 `exit_paths_matrix_test` 에 행을 더한다.
+- 경로나 계정 상태가 바뀌는 길(로그인·로그아웃·탈퇴·재가입)을 더하면 시뮬레이터에서 그 길을 끝까지 밟아 본다.
 
 **공통 위젯 승격 기준**: 두 번째 화면이 같은 위젯을 필요로 할 때 `core/widgets/`로 옮긴다.
 화면 하나만 보고 미리 공통화하면 파라미터가 계속 붙어 결국 아무도 못 고치는 위젯이 된다.
 
-### 6. 테스트 — 구현 전에 쓴다 (TDD)
+### 6. 검증 — 앱 테스트는 두지 않는다 (2026-10-20, #848)
 
-**AI가 Flutter 코드를 쓸 때 가장 자주 내는 실수는 테스트로 잡힌다.**
-지금까지 낸 버그 중 계약 불일치·조사 누락·예약어 충돌은 전부 테스트가 있었으면 즉시 드러났다.
+앱 테스트(`client/test`)는 실행 비용에 비해 얻는 것이 적어 지웠다. 앱 쪽 검증은 아래 셋으로 한다.
 
-> **테스트를 쓰기 전에 [테스트 설계 가이드라인](../docs/testing-guidelines.md)을 먼저 읽는다.**
-> 무엇을 단언하고 무엇을 단언하지 않는지, 층 고르기, 퇴역 규칙, 실행 예산이 거기 있다.
-> 요약 — 테스트마다 "깨지면 어떤 사용자 문제인가"를 한 줄로 쓸 수 있어야 한다.
-> 화면 문구를 통째로 베끼는 단언, 가짜가 돌려준 값을 다시 확인하는 단언은 쓰지 않는다.
-> 새 파일은 컴파일에만 2.8초가 드니 기존 파일에 케이스를 더한다.
+| 무엇을 | 어떻게 | 어디서 |
+| --- | --- | --- |
+| 정적 분석 | `flutter analyze --no-fatal-infos` | 로컬 · Flutter CI |
+| 계층 import 방향 | `dart run tool/check_layer_imports.dart` (동결 목록 `tool/layer_imports_allowed.txt`) | 로컬 · Flutter CI |
+| 화면 문구 하드코딩 | `dart run tool/check_hangul_literals.dart lib` (0줄이어야 한다) | 로컬 · Flutter CI |
+| 서버 계약 (에러 코드·공유 enum·연결 암호·의견 기록 표지) | 서버 `CrossStackContractTest` 가 앱 소스를 읽어 대조 | `cd server && ./gradlew test --tests '*CrossStackContractTest*'` |
+| 실제 동작 | 시뮬레이터·실기기에서 직접 띄워 확인 (`/pro-launch`) | 로컬 |
 
-#### 3단계 테스트
-
-| 층 | 대상 | 도구 | 언제 |
-| --- | --- | --- | --- |
-| **단위** | 도메인 모델, repository, DLP 로직 | `flutter test` | 로직이 있으면 항상 |
-| **위젯** | 화면 구성·CTA 활성 조건·네비게이션 | `testWidgets` | 화면을 만들 때 |
-| **골든** | 렌더링 결과 이미지 회귀 | `matchesGoldenFile` | 화면이 승인된 뒤 |
-
-#### 순서
-
-```
-1. 테스트를 먼저 쓴다 (실패하는 것을 확인)
-2. 구현한다
-3. 통과시킨다
-4. (화면이면) 사용자가 눈으로 승인 → 골든 이미지 생성
-```
-
-#### 반드시 테스트로 고정할 것
-
-- **서버 계약** — enum `apiValue`, 모델 필드명. 어긋나면 조용히 실패한다
-- **fallback** — "어떤 실패에도 카드가 나온다"는 데모 성립 조건이다
-- **원문 비저장** — 탐지 결과에 원문이 섞이지 않는지 (docs 원칙 5번)
-- **에셋 사용** — 도형을 코드로 그리지 않았는지
-  (예: `test/splash_screen_test.dart`의 "병아리 몸통을 SVG로 렌더링한다")
-
-#### 위젯 테스트 작성법
-
-저장소는 인터페이스이므로 `InMemoryStorage`로 바꿔 끼운다.
-`SharedPreferences`는 플랫폼 채널을 타서 위젯 테스트에서 쓸 수 없다.
-
-```dart
-ProviderScope(
-  overrides: [testStorageOverride(onboardingCompleted: false)],
-  child: ScreenUtilInit(designSize: const Size(393, 852), builder: ...),
-)
-```
-
-`ScreenUtilInit`으로 감싸지 않으면 `.w`/`.h`가 터진다. 헬퍼는 `test/helpers/`에 둔다.
-
-#### 골든 테스트 주의
-
-**골든은 "Figma와 같은가"를 판단해주지 못한다.** 첫 이미지가 틀리면 틀린 것을 고정한다.
-그래서 **첫 승인은 반드시 사람이 눈으로** 한다. 이후에는 회귀 방지용으로 동작한다.
-
-```bash
-flutter test --update-goldens   # 의도한 변경일 때만
-```
-
-- 골든 파일에는 `@Tags(['golden'])` 를 붙인다. OS 마다 픽셀이 달라 CI 와 평소 실행에서는 빠진다.
-- **같은 상태를 두 번 찍지 않는다.** 시안 대조용 렌더(`*_conformance_test`)가 있는 화면은
-  그것이 골든을 겸한다. 따로 `*_golden_test` 를 두지 않는다.
-- 평소에는 `flutter test --exclude-tags golden`, 화면을 바꿨거나 배포 전에는 `flutter test` 로 전체를 돈다.
+- 서버 enum·에러 코드를 바꾸면 앱 값을 맞춘 뒤 `CrossStackContractTest` 를 돌린다.
+- 화면을 바꿨으면 라이트·다크, 폰·태블릿에서 직접 띄워 본다. 분석 통과만으로 완료라고 하지 않는다.
 
 ### 7. 코드 생성이 필요할 때
 

@@ -82,7 +82,9 @@ class NotificationSettingsController extends AsyncNotifier<NotificationSettings>
     try {
       // 화면 값 <-> 서버 확정값이 같아질 때까지 (마지막 요청만 반영)
       while (state.value != _confirmed) {
-        final desired = state.value!;
+        // 저장 중 다시 받기(reload)로 값이 비면 멈춤 — 새로 받은 값이 화면에 들어온다
+        final desired = state.value;
+        if (desired == null) return null;
         final saved = await _repository.saveSettings(desired);
         _confirmed = saved;
         if (!ref.mounted) return null;
