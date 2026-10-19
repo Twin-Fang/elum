@@ -1017,6 +1017,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notificationEmpty => '아직 받은 알림이 없어요';
 
   @override
+  String get notificationNoticeEmpty => '아직 올라온 공지가 없어요';
+
+  @override
+  String get notificationNoticeFailed => '공지를 불러오지 못했어요';
+
+  @override
   String get notificationListFailed => '알림을 불러오지 못했어요';
 
   @override

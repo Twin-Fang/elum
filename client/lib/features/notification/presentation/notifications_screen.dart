@@ -27,6 +27,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   int _selectedTabIndex = _notificationTabIndex;
 
+  /// 공지 탭을 한 번이라도 열었나 (처음 열 때 만들고, 이후 오가도 유지해 본 공지 기록을 한 번만 보냄)
+  bool _isNoticeTabOpened = false;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -54,12 +57,19 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               ),
             ],
             selectedIndex: _selectedTabIndex,
-            onSelected: (index) => setState(() => _selectedTabIndex = index),
+            onSelected: (index) => setState(() {
+              _selectedTabIndex = index;
+              if (index == _noticeTabIndex) _isNoticeTabOpened = true;
+            }),
           ),
           Expanded(
-            child: _selectedTabIndex == _noticeTabIndex
-                ? const NoticeHistoryTab()
-                : const NotificationListTab(),
+            child: IndexedStack(
+              index: _selectedTabIndex,
+              children: [
+                const NotificationListTab(),
+                if (_isNoticeTabOpened) const NoticeHistoryTab() else const SizedBox.shrink(),
+              ],
+            ),
           ),
         ],
       ),

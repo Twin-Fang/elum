@@ -1067,6 +1067,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationEmpty => 'No notifications yet';
 
   @override
+  String get notificationNoticeEmpty => 'No notices yet';
+
+  @override
+  String get notificationNoticeFailed => 'Couldn\'t load notices';
+
+  @override
   String get notificationListFailed => 'Couldn\'t load notifications';
 
   @override

@@ -294,6 +294,8 @@
   "notificationDayEarlier": "Earlier",
   "notificationMarkAllRead": "Mark all read",
   "notificationEmpty": "No notifications yet",
+  "notificationNoticeEmpty": "No notices yet",
+  "notificationNoticeFailed": "Couldn't load notices",
   "notificationListFailed": "Couldn't load notifications",
   "notificationProfileUnavailable": "This ELUM user is no longer available",
   "notificationRoutineCompletedOne": "Finished ''{title}''",

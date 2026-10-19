@@ -958,6 +958,12 @@
   "notificationEmpty": "아직 받은 알림이 없어요",
   "@notificationEmpty": {"description": "알림이 하나도 없을 때의 문구"},
 
+  "notificationNoticeEmpty": "아직 올라온 공지가 없어요",
+  "@notificationNoticeEmpty": {"description": "알림 화면 공지사항 탭에 공지가 하나도 없을 때의 문구"},
+
+  "notificationNoticeFailed": "공지를 불러오지 못했어요",
+  "@notificationNoticeFailed": {"description": "공지사항 탭 목록을 받지 못했을 때의 문구"},
+
   "notificationListFailed": "알림을 불러오지 못했어요",
   "@notificationListFailed": {"description": "알림 목록을 받지 못했을 때의 문구"},
 

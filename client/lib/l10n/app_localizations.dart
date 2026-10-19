@@ -1880,6 +1880,18 @@ abstract class AppLocalizations {
   /// **'아직 받은 알림이 없어요'**
   String get notificationEmpty;
 
+  /// 알림 화면 공지사항 탭에 공지가 하나도 없을 때의 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 올라온 공지가 없어요'**
+  String get notificationNoticeEmpty;
+
+  /// 공지사항 탭 목록을 받지 못했을 때의 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'공지를 불러오지 못했어요'**
+  String get notificationNoticeFailed;
+
   /// 알림 목록을 받지 못했을 때의 문구
   ///
   /// In ko, this message translates to:
