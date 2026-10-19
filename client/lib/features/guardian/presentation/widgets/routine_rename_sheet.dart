@@ -13,20 +13,35 @@ const routineTitleMaxLength = 30;
 /// 이름 바꾸기 시트: 지금 이름이 채워진 입력칸 + 저장. 저장하면 새 이름(앞뒤 공백 제거)을 돌려준다
 ///
 /// 비었거나 그대로면 저장을 막는다 — 서버에 보내 봐야 거절되거나 바뀌는 것이 없다.
+/// 묶음 이름도 같은 시트를 쓴다 (#807): [maxLength] · [hintText] 만 다르다.
 Future<String?> showRoutineRenameSheet(
   BuildContext context, {
   required String currentTitle,
+  int maxLength = routineTitleMaxLength,
+  String? hintText,
 }) {
   return showElumSheet<String>(
     context: context,
-    builder: (_) => _RoutineRenameSheet(currentTitle: currentTitle),
+    builder: (_) => _RoutineRenameSheet(
+      currentTitle: currentTitle,
+      maxLength: maxLength,
+      hintText: hintText,
+    ),
   );
 }
 
 class _RoutineRenameSheet extends StatefulWidget {
-  const _RoutineRenameSheet({required this.currentTitle});
+  const _RoutineRenameSheet({
+    required this.currentTitle,
+    required this.maxLength,
+    required this.hintText,
+  });
 
   final String currentTitle;
+  final int maxLength;
+
+  /// 비우면 일과 이름 안내 글
+  final String? hintText;
 
   @override
   State<_RoutineRenameSheet> createState() => _RoutineRenameSheetState();
@@ -89,8 +104,9 @@ class _RoutineRenameSheetState extends State<_RoutineRenameSheet> {
               SizedBox(height: space.md.h),
               ElumTextField(
                 controller: _controller,
-                hintText: context.l10n.routineLibraryRenameHint,
-                maxLength: routineTitleMaxLength,
+                hintText:
+                    widget.hintText ?? context.l10n.routineLibraryRenameHint,
+                maxLength: widget.maxLength,
                 isAutofocused: true,
                 onChanged: (_) => setState(() {}),
                 onSubmitted: (_) => _save(),

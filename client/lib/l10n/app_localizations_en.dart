@@ -2415,4 +2415,118 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exampleRoutinesFailed => 'Couldn\'t add the example routines';
+
+  @override
+  String get routineGroupMenuAddToGroup => 'Add to a bundle';
+
+  @override
+  String get routineGroupMenuReorder => 'Change order';
+
+  @override
+  String get routineGroupMenuUngroup => 'Ungroup';
+
+  @override
+  String routineGroupTileLabel(String name, int count) {
+    return '$name bundle, $count routines';
+  }
+
+  @override
+  String get routineGroupDefaultName => 'New bundle';
+
+  @override
+  String get routineGroupNameHint => 'Bundle name (e.g. Morning)';
+
+  @override
+  String get routineGroupNewTitle => 'New bundle';
+
+  @override
+  String routineGroupAddTitle(String name) {
+    return 'Add to $name';
+  }
+
+  @override
+  String get routineGroupPickHintNew =>
+      'Tap routines in the order to show them (2 or more)';
+
+  @override
+  String get routineGroupPickHint => 'Tap routines in order';
+
+  @override
+  String get routineGroupPickEmpty => 'No routines to add';
+
+  @override
+  String routineGroupPickConfirmNew(int count) {
+    return 'Bundle $count';
+  }
+
+  @override
+  String routineGroupPickConfirmAdd(int count) {
+    return 'Add $count';
+  }
+
+  @override
+  String get routineGroupCreateMenuTitle => 'What do you want to make?';
+
+  @override
+  String get routineGroupCreateRoutine => 'New routine';
+
+  @override
+  String get routineGroupCreateGroup => 'New bundle';
+
+  @override
+  String get routineGroupChooseTitle => 'Which bundle?';
+
+  @override
+  String routineGroupSheetCount(int count) {
+    return '$count routines · shown in this order';
+  }
+
+  @override
+  String get routineGroupSheetAdd => 'Add routines';
+
+  @override
+  String routineGroupSheetRemove(String title) {
+    return 'Remove $title from bundle';
+  }
+
+  @override
+  String get routineGroupSheetDragHint => 'Drag the handle to reorder';
+
+  @override
+  String get routineGroupCreated => 'Bundle created';
+
+  @override
+  String get routineGroupAdded => 'Added to bundle';
+
+  @override
+  String get routineGroupRemovedOne => 'Removed from bundle';
+
+  @override
+  String get routineGroupUngrouped => 'Bundle ungrouped';
+
+  @override
+  String get routineGroupUngroupedLastOne =>
+      'Only one routine left, so the bundle was ungrouped';
+
+  @override
+  String get routineGroupReordered => 'Order changed';
+
+  @override
+  String routineGroupSent(String name) {
+    return 'Sent the $name bundle for today';
+  }
+
+  @override
+  String get routineGroupAllSentAlready =>
+      'Everything in this bundle was already sent today';
+
+  @override
+  String get routineGroupActionFailedTitle => 'Couldn\'t change the bundle';
+
+  @override
+  String get routineGroupUngroupConfirmTitle => 'Ungroup this bundle?';
+
+  @override
+  String get routineGroupUngroupConfirmMessage =>
+      'The routines stay in Routines';
 }

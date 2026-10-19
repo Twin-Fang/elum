@@ -86,6 +86,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.navIconSelected,
     required this.navIconUnselected,
     required this.navSelectedFill,
+    required this.folderFill,
     required this.homeCardShadow,
     required this.homeCardIconBg,
     required this.glassSurface,
@@ -372,6 +373,9 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 옆 메뉴 고른 칸 바탕(연한 보라) (#798)
   final Color navSelectedFill;
+
+  /// 일과관리 묶음(폴더) 칸 바탕 — 진한 남색 10% (#807)
+  final Color folderFill;
 
   /// 같은 카드의 그림자 (Figma 0px 4px 10px rgba(35,13,96,0.1))
   final Color homeCardShadow;
@@ -924,6 +928,7 @@ class AppColors extends ThemeExtension<AppColors> {
     navIconSelected: Color(0xFF242634),
     navIconUnselected: Color(0xFFA6A8B4),
     navSelectedFill: Color(0xFFEEF1FD),
+    folderFill: Color(0x1A242634),
     homeCardShadow: Color(0x1A230D60), // rgba(35,13,96,0.1)
     homeCardIconBg: Color(0x6682DCDF), // rgba(130,220,223,0.4)
     glassSurface: Color(0x99FFFFFF), // rgba(255,255,255,0.6)
@@ -1134,6 +1139,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? navIconSelected,
     Color? navIconUnselected,
     Color? navSelectedFill,
+    Color? folderFill,
     Color? homeCardShadow,
     Color? homeCardIconBg,
     Color? glassSurface,
@@ -1333,6 +1339,7 @@ class AppColors extends ThemeExtension<AppColors> {
       navIconSelected: navIconSelected ?? this.navIconSelected,
       navIconUnselected: navIconUnselected ?? this.navIconUnselected,
       navSelectedFill: navSelectedFill ?? this.navSelectedFill,
+      folderFill: folderFill ?? this.folderFill,
       homeCardShadow: homeCardShadow ?? this.homeCardShadow,
       homeCardIconBg: homeCardIconBg ?? this.homeCardIconBg,
       glassSurface: glassSurface ?? this.glassSurface,
@@ -1586,6 +1593,7 @@ class AppColors extends ThemeExtension<AppColors> {
       navIconSelected: Color.lerp(navIconSelected, other.navIconSelected, t)!,
       navIconUnselected: Color.lerp(navIconUnselected, other.navIconUnselected, t)!,
       navSelectedFill: Color.lerp(navSelectedFill, other.navSelectedFill, t)!,
+      folderFill: Color.lerp(folderFill, other.folderFill, t)!,
       homeCardShadow: Color.lerp(homeCardShadow, other.homeCardShadow, t)!,
       homeCardIconBg: Color.lerp(homeCardIconBg, other.homeCardIconBg, t)!,
       glassSurface: Color.lerp(glassSurface, other.glassSurface, t)!,

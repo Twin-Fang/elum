@@ -15,10 +15,13 @@ import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/routine.dart';
 import '../../credit/application/credit_start_gate.dart';
+import '../application/library_entries.dart';
 import '../application/routine_library_controller.dart';
 import '../application/routine_notifier.dart';
 import '../application/routine_providers.dart';
 import 'guardian_home_screen.dart';
+import 'library_group_actions.dart';
+import 'widgets/library_entry_grid.dart';
 import 'widgets/library_parts.dart';
 import 'widgets/library_quick_menu.dart';
 import 'widgets/routine_detail_sheet.dart';
@@ -26,8 +29,8 @@ import 'widgets/routine_rename_sheet.dart';
 
 /// 하단 바 일과관리 칸: 만들어 둔 원본 일과를 바탕화면 아이콘처럼 모아 둔다 (#805, 설계 #797)
 ///
-/// 누르면 상세 시트(오늘 보내기 · 카드 고치기), 길게 누르면 빠른 메뉴(보내기 · 이름 · 복사 · 지우기).
-/// 가운데 아래 `+ 일과 만들기`. 묶음(폴더)은 #807 에서 이 격자 위에 얹는다.
+/// 누르면 상세 시트(오늘 보내기 · 카드 고치기), 길게 누르면 빠른 메뉴(보내기 · 이름 · 묶음에 넣기 · 복사 · 지우기).
+/// 묶음(폴더, #807)은 격자 앞에 오고, 낱개를 끌어 다른 일과·묶음 위에 놓으면 묶인다. 묶음 동작은 [LibraryGroupActions].
 class RoutineManageScreen extends ConsumerStatefulWidget {
   const RoutineManageScreen({super.key});
 
@@ -37,14 +40,17 @@ class RoutineManageScreen extends ConsumerStatefulWidget {
 }
 
 class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
-    with BusyStateMixin<RoutineManageScreen> {
+    with
+        BusyStateMixin<RoutineManageScreen>,
+        LibraryGroupActions<RoutineManageScreen> {
   /// `+ 일과 만들기` 버튼 높이 · 버튼 둘레 여백 (목록 끝이 버튼에 가리지 않게 그만큼 비운다)
   static const _createButtonHeight = 54.0;
   static const _createButtonMargin = 16.0;
 
   // --- 동작 ---
 
-  Future<void> _openDetail(Routine routine) async {
+  @override
+  Future<void> openRoutineDetail(Routine routine) async {
     final action = await RoutineDetailSheet.show(
       context,
       routine,
@@ -69,6 +75,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         await _send(routine);
       case LibraryMenuAction.rename:
         await _rename(routine);
+      case LibraryMenuAction.addToGroup:
+        await chooseGroupFor(routine);
       case LibraryMenuAction.copy:
         await _copy(routine);
       case LibraryMenuAction.remove:
@@ -202,8 +210,9 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     context.push(Routes.routineReview);
   }
 
-  /// `+ 일과 만들기`: 크레딧 확인 > 일과 만들기 흐름 (홈 버튼과 같은 길)
-  Future<void> _startCreate() async {
+  /// 새 일과: 크레딧 확인 > 일과 만들기 흐름 (홈 버튼과 같은 길)
+  @override
+  Future<void> startCreateRoutine() async {
     final check = await runBusy(
       () async => (blocked: await creditBlocksRoutineStart(ref)),
     );
@@ -217,17 +226,23 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   Widget build(BuildContext context) {
     final colors = context.colors;
     final space = context.space;
-    final async = ref.watch(routineLibraryProvider);
+    final async = ref.watch(libraryEntriesProvider);
     final sentIds = ref.watch(sentTodaySourceIdsProvider);
     final bottomSpace = (_createButtonHeight + _createButtonMargin * 2).h;
 
     final Widget body = switch (async) {
-      AsyncValue(:final value?) when value.isNotEmpty => LibraryGrid(
-        routines: value,
+      AsyncValue(:final value?) when value.isNotEmpty => LibraryEntryGrid(
+        entries: value,
         sentIds: sentIds,
         bottomSpace: bottomSpace,
-        onTap: busy ? null : _openDetail,
-        onLongPress: busy ? null : _openMenu,
+        onRoutineTap: busy ? null : openRoutineDetail,
+        onRoutineMenu: busy ? null : _openMenu,
+        onGroupTap: busy ? null : openGroup,
+        onGroupMenu: busy ? null : openGroupMenu,
+        onDropOnRoutine: busy ? null : groupByDrop,
+        onDropOnGroup: busy
+            ? null
+            : (dragged, target) => addToGroup(target.group, [dragged.id]),
       ),
       AsyncValue(:final value?) when value.isEmpty => LibraryEmptyState(
         bottomSpace: bottomSpace,
@@ -236,7 +251,9 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         error,
         fallback: context.l10n.routineLibraryLoadFailedFallback,
         fallbackCode: 'E-LIB',
-        onRetry: () => ref.invalidate(routineLibraryProvider),
+        onRetry: () => ref
+          ..invalidate(routineLibraryProvider)
+          ..invalidate(routineGroupsProvider),
       ),
       _ => const Center(child: ElumSpinner()),
     };
@@ -248,7 +265,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       floatingActionButton: CreateRoutineFab(
         height: _createButtonHeight.h,
         isBusy: busy,
-        onTap: _startCreate,
+        onTap: onCreatePressed,
       ),
       body: SafeArea(
         child: Column(

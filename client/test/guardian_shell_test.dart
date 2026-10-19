@@ -59,6 +59,7 @@ void main() {
         overrides: [
           // 일과관리 칸이 서버 없이 빈 목록을 받게
           routineLibraryProvider.overrideWith((ref) async => const <Routine>[]),
+          routineGroupsProvider.overrideWith((ref) async => const []),
           testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
           routineRepositoryProvider.overrideWithValue(StubRoutineRepository()),
           todayRoutinesProvider.overrideWith((ref) async => routines),

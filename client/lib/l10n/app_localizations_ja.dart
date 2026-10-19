@@ -2311,4 +2311,114 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get exampleRoutinesFailed => '例の日課を入れられませんでした';
+
+  @override
+  String get routineGroupMenuAddToGroup => '묶음에 넣기';
+
+  @override
+  String get routineGroupMenuReorder => '순서 바꾸기';
+
+  @override
+  String get routineGroupMenuUngroup => '묶음 풀기';
+
+  @override
+  String routineGroupTileLabel(String name, int count) {
+    return '$name 묶음, 일과 $count개';
+  }
+
+  @override
+  String get routineGroupDefaultName => '새 묶음';
+
+  @override
+  String get routineGroupNameHint => '묶음 이름 (예: 아침 준비)';
+
+  @override
+  String get routineGroupNewTitle => '새 묶음 만들기';
+
+  @override
+  String routineGroupAddTitle(String name) {
+    return '$name에 넣기';
+  }
+
+  @override
+  String get routineGroupPickHintNew => '넣을 일과를 보여 줄 순서대로 눌러 주세요 (2개 이상)';
+
+  @override
+  String get routineGroupPickHint => '넣을 일과를 순서대로 눌러 주세요';
+
+  @override
+  String get routineGroupPickEmpty => '넣을 수 있는 일과가 없어요';
+
+  @override
+  String routineGroupPickConfirmNew(int count) {
+    return '$count개로 묶기';
+  }
+
+  @override
+  String routineGroupPickConfirmAdd(int count) {
+    return '$count개 넣기';
+  }
+
+  @override
+  String get routineGroupCreateMenuTitle => '무엇을 만들까요?';
+
+  @override
+  String get routineGroupCreateRoutine => '새 일과 만들기';
+
+  @override
+  String get routineGroupCreateGroup => '새 묶음 만들기';
+
+  @override
+  String get routineGroupChooseTitle => '어느 묶음에 넣을까요?';
+
+  @override
+  String routineGroupSheetCount(int count) {
+    return '일과 $count개 · 이 순서대로 보여요';
+  }
+
+  @override
+  String get routineGroupSheetAdd => '일과 넣기';
+
+  @override
+  String routineGroupSheetRemove(String title) {
+    return '$title 묶음에서 빼기';
+  }
+
+  @override
+  String get routineGroupSheetDragHint => '손잡이를 끌어 순서를 바꿔요';
+
+  @override
+  String get routineGroupCreated => '묶음을 만들었어요';
+
+  @override
+  String get routineGroupAdded => '묶음에 넣었어요';
+
+  @override
+  String get routineGroupRemovedOne => '묶음에서 뺐어요';
+
+  @override
+  String get routineGroupUngrouped => '묶음을 풀었어요';
+
+  @override
+  String get routineGroupUngroupedLastOne => '일과가 하나만 남아 묶음을 풀었어요';
+
+  @override
+  String get routineGroupReordered => '순서를 바꿨어요';
+
+  @override
+  String routineGroupSent(String name) {
+    return '$name 묶음을 오늘 일과로 보냈어요';
+  }
+
+  @override
+  String get routineGroupAllSentAlready => '묶음 안 일과를 오늘 모두 보냈어요';
+
+  @override
+  String get routineGroupActionFailedTitle => '묶음을 바꾸지 못했어요';
+
+  @override
+  String get routineGroupUngroupConfirmTitle => '묶음을 풀까요?';
+
+  @override
+  String get routineGroupUngroupConfirmMessage => '안에 있던 일과는 일과관리에 그대로 남아요';
 }

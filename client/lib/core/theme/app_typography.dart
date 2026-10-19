@@ -61,6 +61,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.sheetStepTitle,
     required this.sheetStepBody,
     required this.sheetActionLabel,
+    required this.floatingActionLabel,
     required this.editChipLabel,
     required this.topBarAction,
     required this.sheetFieldText,
@@ -322,6 +323,10 @@ class AppTypography extends ThemeExtension<AppTypography> {
   /// `cardBody`(15)와 다르다.
   final TextStyle sheetStepBody;
   final TextStyle sheetActionLabel;
+
+  /// 화면 위에 떠 있는 알약 버튼 글자 (일과관리 `+ 일과 만들기`, 16/800).
+  /// 바닥 꽉 찬 버튼(`button` 22)보다 작게 — 격자 이름·제목보다 튀지 않게 (#807)
+  final TextStyle floatingActionLabel;
 
   // --- 카드확인·이룸이 상세 (Figma 262:5124 / 309:3548) ---
 
@@ -805,6 +810,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w800,
       height: 1,
     ),
+    floatingActionLabel: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 16,
+      fontWeight: FontWeight.w800,
+      height: 1,
+    ),
     editChipLabel: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 14,
@@ -1135,6 +1146,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? sheetStepTitle,
     TextStyle? sheetStepBody,
     TextStyle? sheetActionLabel,
+    TextStyle? floatingActionLabel,
     TextStyle? editChipLabel,
     TextStyle? topBarAction,
     TextStyle? sheetFieldText,
@@ -1232,6 +1244,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       sheetStepTitle: sheetStepTitle ?? this.sheetStepTitle,
       sheetStepBody: sheetStepBody ?? this.sheetStepBody,
       sheetActionLabel: sheetActionLabel ?? this.sheetActionLabel,
+      floatingActionLabel: floatingActionLabel ?? this.floatingActionLabel,
       editChipLabel: editChipLabel ?? this.editChipLabel,
       topBarAction: topBarAction ?? this.topBarAction,
       sheetFieldText: sheetFieldText ?? this.sheetFieldText,
@@ -1350,6 +1363,11 @@ class AppTypography extends ThemeExtension<AppTypography> {
       sheetActionLabel: TextStyle.lerp(
         sheetActionLabel,
         other.sheetActionLabel,
+        t,
+      )!,
+      floatingActionLabel: TextStyle.lerp(
+        floatingActionLabel,
+        other.floatingActionLabel,
         t,
       )!,
       editChipLabel: TextStyle.lerp(editChipLabel, other.editChipLabel, t)!,
