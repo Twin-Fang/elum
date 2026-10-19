@@ -39,7 +39,6 @@ void main() {
           Routes.guardianSettings,
           Routes.guardianPeople,
           Routes.guardianDrafts,
-          Routes.guardianCreditHistory,
           Routes.guardianProfileSwitch,
         ])
           GoRoute(path: path, builder: (_, _) => Scaffold(body: Text(path))),
@@ -115,7 +114,6 @@ void main() {
     final targets = {
       '함께하는 사람': Routes.guardianPeople,
       '임시저장': Routes.guardianDrafts,
-      '크레딧 사용 내역': Routes.guardianCreditHistory,
     };
     for (final entry in targets.entries) {
       await tester.tap(find.text(entry.key));

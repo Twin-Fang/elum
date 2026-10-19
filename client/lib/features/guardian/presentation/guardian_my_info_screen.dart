@@ -16,7 +16,7 @@ import '../../profile/application/profile_session.dart';
 import '../../profile/domain/profile_summary.dart';
 import 'widgets/ai_credit_card.dart';
 
-/// 하단 바 내정보 칸의 첫 화면: 보호자 프로필 > 이룸이 > AI 크레딧 > 바로가기 (#817)
+/// 하단 바 내정보 칸의 첫 화면: 보호자 프로필 > 이룸이 > AI 크레딧(사용 내역 링크 포함) > 바로가기 (#817)
 ///
 /// 설정은 오른쪽 위 아이콘으로만 들어간다. 이룸이가 여러 명이어도(교육 라이선스) 같은 구조로 늘어난다.
 /// 회원 정보를 못 받으면 이룸이 영역만 빠지고 나머지는 그대로 뜬다 (화면이 회원 정보에 막히지 않게).
@@ -110,12 +110,6 @@ class GuardianMyInfoScreen extends ConsumerWidget {
                           isInCard: true,
                           label: context.l10n.guardianSettingsDrafts,
                           onTap: () => context.push(Routes.guardianDrafts),
-                        ),
-                        SettingsTile(
-                          isInCard: true,
-                          label: context.l10n.creditHistoryTitle,
-                          onTap: () =>
-                              context.push(Routes.guardianCreditHistory),
                         ),
                       ],
                     ),
