@@ -53,6 +53,14 @@ public class ProfileGuardianService {
     return names;
   }
 
+  /** 이 이룸이를 돌보는 보호자들의 member id, 먼저 합류한 차례 (알림 받는 사람 계산용) */
+  @Transactional(readOnly = true)
+  public List<String> guardianMemberIdsOf(String profileId) {
+    return profileGuardianRepository.findAllByProfileIdOrderByJoinedAtAsc(profileId).stream()
+      .map(guardian -> guardian.getMember().getId())
+      .toList();
+  }
+
   /** 함께하는 사람 목록, 먼저 합류한 차례. */
   @Transactional(readOnly = true)
   public GuardianListResponse list(Caller caller, String profileId) {
