@@ -197,6 +197,25 @@ void main() {
     expect(groupApi.replaced, isEmpty);
   });
 
+  test('칸을 다른 칸 앞·뒤로 옮기면 묶음과 일과가 한 줄로 섞인 전체 순서가 나온다', () {
+    final entries = composeLibraryEntries(
+      [routine('a', '가'), routine('b', '나'), routine('c', '다')],
+      const [
+        RoutineGroup(id: 'g', name: '묶음', routineIds: ['a', 'b']),
+      ],
+    );
+    // 묶음(g) 다음에 낱개 c — 이 순서에서 c 를 묶음 앞으로
+    final order = reorderCells(
+      entries,
+      movedId: 'c',
+      targetId: 'g',
+      isBefore: true,
+    );
+
+    expect(order.map((cell) => cell.id), ['c', 'g']);
+    expect(order.map((cell) => cell.type.wire), ['ROUTINE', 'GROUP']);
+  });
+
   test('다른 기기에서 지워 2개 미만이 보이는 묶음은 낱개로 펼친다', () {
     final entries = composeLibraryEntries(
       [routine('a', '아침 준비하기'), routine('c', '학교 가는 날')],
@@ -282,6 +301,10 @@ class _FakeLibraryApi implements RoutineLibraryApi {
 
   @override
   Future<AppFailure?> removeFromLibrary(String routineId) async => null;
+
+  @override
+  Future<AppFailure?> saveOrder(List<({String type, String id})> cells) async =>
+      null;
 }
 
 /// 서버 없이 묶음 호출을 받는 가짜. 만들기·구성 바꾸기·풀기를 기록한다

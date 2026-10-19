@@ -251,6 +251,34 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     context.push(Routes.routineReview);
   }
 
+  /// 칸 사이에 놓아 자리 옮기기: 새 전체 순서를 만들어 서버에 저장한다 (#837, #844)
+  Future<void> _moveCell(
+    List<LibraryEntry> entries,
+    LibraryEntry dragged,
+    LibraryEntry target, {
+    required bool isBefore,
+  }) async {
+    final cells = reorderCells(
+      entries,
+      movedId: dragged.id,
+      targetId: target.id,
+      isBefore: isBefore,
+    );
+    final failure = await runBusy(
+      () => ref.read(routineLibraryControllerProvider).saveOrder([
+        for (final cell in cells) (type: cell.type.wire, id: cell.id),
+      ]),
+    );
+    if (failure == null || !mounted) return;
+    await showFailure(
+      context,
+      failure,
+      title: context.l10n.routineGroupActionFailedTitle,
+      fallback: context.l10n.routineLibraryActionFailedFallback,
+      fallbackCode: 'E-LIB-ORDER',
+    );
+  }
+
   /// 새 일과: 크레딧 확인 > 일과 만들기 흐름 (홈 버튼과 같은 길)
   @override
   Future<void> startCreateRoutine() async {
@@ -282,6 +310,10 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         onGroupMenu: busy ? null : openGroupMenu,
         isArranging: _isArranging,
         onArrangeStart: () => setState(() => _isArranging = true),
+        onMoveCell: busy
+            ? null
+            : (dragged, target, {required isBefore}) =>
+                  _moveCell(value, dragged, target, isBefore: isBefore),
         onRemoveRoutine: busy ? null : _remove,
         onRemoveGroup: busy ? null : (entry) => confirmUngroup(entry.group),
         onDropOnRoutine: busy ? null : groupByDrop,
