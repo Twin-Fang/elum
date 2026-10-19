@@ -48,7 +48,7 @@ void main() {
     return ProviderScope(
       overrides: [
         profileRepositoryProvider.overrideWithValue(repo),
-        inviteSharerProvider.overrideWithValue((text) async {
+        inviteSharerProvider.overrideWithValue((text, origin) async {
           if (shareError != null) throw shareError!;
           shared.add(text);
         }),

@@ -15,6 +15,7 @@ import '../l10n/app_locales.dart';
 import '../router/routes.dart';
 import '../storage/local_storage.dart';
 import 'dev_locale_override.dart';
+import '../layout/share_origin.dart';
 import 'dev_log_buffer.dart';
 import 'dev_log_file.dart';
 import 'dev_state_dump.dart';
