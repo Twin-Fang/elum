@@ -1,15 +1,40 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T06:53:52Z",
-    "currentVersion": "2.43.0",
+    "lastUpdated": "2026-10-19T07:20:05Z",
+    "currentVersion": "2.44.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 259
+    "totalReleases": 260
   },
   "releases": [
+    {
+      "version": "2.44.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 793,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 태블릿 이룸이 홈에 캐릭터가 언덕에 선 그림을 더했어요\n  * 태블릿 카드 화면 위에 순서와 보상 목표가 보여요\n  * 태블릿에서 카드를 크게, 체크 버튼은 카드 안에 뒀어요\n  * 태블릿 축하 화면 밤하늘에 별이 가득 반짝여요\n  * 태블릿 보호자 홈에서 일과 상세가 옆에서 열려요\n  * 태블릿 일과 만들기 배경이 가운데에서 퍼져요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "태블릿 이룸이 홈에 캐릭터가 언덕에 선 그림을 더했어요",
+            "태블릿 카드 화면 위에 순서와 보상 목표가 보여요",
+            "태블릿에서 카드를 크게, 체크 버튼은 카드 안에 뒀어요",
+            "태블릿 축하 화면 밤하늘에 별이 가득 반짝여요",
+            "태블릿 보호자 홈에서 일과 상세가 옆에서 열려요",
+            "태블릿 일과 만들기 배경이 가운데에서 퍼져요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.43.0",
       "project_type": "flutter",
