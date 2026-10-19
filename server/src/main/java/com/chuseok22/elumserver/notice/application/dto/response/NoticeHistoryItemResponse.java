@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Schema(description = "공지 탭의 공지 한 건")
 public record NoticeHistoryItemResponse(
 
-  @Schema(description = "공지 ID. 다음 페이지 cursor 로 쓴다")
+  @Schema(description = "공지 ID")
   String id,
 
   @Schema(description = "제목. `**…**` 는 강조 표기", example = "베타 기간에는 **하루 3개**까지 만들 수 있어요")

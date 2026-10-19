@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.notice.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.common.locale.AppLocale;
@@ -8,11 +9,11 @@ import com.chuseok22.elumserver.notice.application.dto.response.NoticeHistoryIte
 import com.chuseok22.elumserver.notice.core.NoticePlatform;
 import com.chuseok22.elumserver.notice.infrastructure.entity.AppNotice;
 import com.chuseok22.elumserver.notice.infrastructure.repository.AppNoticeRepository;
-import com.chuseok22.elumserver.notification.infrastructure.entity.NoticeSeen;
-import com.chuseok22.elumserver.notification.infrastructure.repository.NoticeSeenRepository;
+import com.chuseok22.elumserver.notification.application.service.NoticeSeenService;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +41,7 @@ class NoticeHistoryServiceTest {
   @Mock
   private AppNoticeRepository appNoticeRepository;
   @Mock
-  private NoticeSeenRepository noticeSeenRepository;
+  private NoticeSeenService noticeSeenService;
 
   private final List<AppNotice> stored = new ArrayList<>();
   private NoticeHistoryService service;
@@ -48,8 +49,8 @@ class NoticeHistoryServiceTest {
   @BeforeEach
   void setUp() {
     when(appNoticeRepository.findAll()).thenReturn(stored);
-    when(noticeSeenRepository.findById(MEMBER_ID)).thenReturn(Optional.empty());
-    service = new NoticeHistoryService(appNoticeRepository, noticeSeenRepository, Clock.fixed(NOW, java.time.ZoneOffset.UTC));
+    when(noticeSeenService.findSeenAt(MEMBER_ID)).thenReturn(Optional.empty());
+    service = new NoticeHistoryService(appNoticeRepository, noticeSeenService, Clock.fixed(NOW, ZoneOffset.UTC));
   }
 
   @Test
@@ -69,6 +70,15 @@ class NoticeHistoryServiceTest {
     stored.add(notice("old", NOW_KST.minusDays(91)));
 
     assertThat(service.history("IOS", null, null).items()).isEmpty();
+  }
+
+  @Test
+  @DisplayName("정확히 90일 전에 올라온 공지는 나온다")
+  void includesExactly90DaysBoundary() {
+    stored.add(notice("edge", NOW_KST.minusDays(90)));
+
+    assertThat(service.history("IOS", null, null).items()).extracting(NoticeHistoryItemResponse::id)
+      .containsExactly("edge");
   }
 
   @Test
@@ -97,24 +107,18 @@ class NoticeHistoryServiceTest {
     AppNotice republished = notice("re", NOW_KST.minusDays(20));
     republished.setRevisedAt(NOW_KST.minusDays(1));
     stored.add(republished);
-    NoticeSeen seen = new NoticeSeen();
-    seen.setMemberId(MEMBER_ID);
-    seen.setSeenAt(NOW_KST.minusDays(5));
-    when(noticeSeenRepository.findById(MEMBER_ID)).thenReturn(Optional.of(seen));
+    when(noticeSeenService.findSeenAt(MEMBER_ID)).thenReturn(Optional.of(NOW_KST.minusDays(5)));
 
-    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS")).isTrue();
+    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS", AppLocale.KO)).isTrue();
   }
 
   @Test
   @DisplayName("읽은 뒤 바뀐 공지가 없으면 안 읽음이 아니다")
   void seenAfterAll_isNotUnseen() {
     stored.add(notice("a", NOW_KST.minusDays(20)));
-    NoticeSeen seen = new NoticeSeen();
-    seen.setMemberId(MEMBER_ID);
-    seen.setSeenAt(NOW_KST.minusDays(5));
-    when(noticeSeenRepository.findById(MEMBER_ID)).thenReturn(Optional.of(seen));
+    when(noticeSeenService.findSeenAt(MEMBER_ID)).thenReturn(Optional.of(NOW_KST.minusDays(5)));
 
-    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS")).isFalse();
+    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS", AppLocale.KO)).isFalse();
   }
 
   @Test
@@ -122,7 +126,7 @@ class NoticeHistoryServiceTest {
   void noSeenRow_anyNotice_isUnseen() {
     stored.add(notice("a", NOW_KST.minusDays(60)));
 
-    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS")).isTrue();
+    assertThat(service.hasUnseenNotice(MEMBER_ID, "IOS", AppLocale.KO)).isTrue();
   }
 
   @Test
@@ -136,9 +140,61 @@ class NoticeHistoryServiceTest {
     var second = service.history("IOS", first.nextCursor(), 2);
 
     assertThat(first.items()).extracting(NoticeHistoryItemResponse::id).containsExactly("a", "b");
-    assertThat(first.nextCursor()).isEqualTo("b");
+    assertThat(first.nextCursor()).isEqualTo(NOW_KST.minusDays(2) + "|b");
     assertThat(second.items()).extracting(NoticeHistoryItemResponse::id).containsExactly("c");
     assertThat(second.nextCursor()).isNull();
+  }
+
+  @Test
+  @DisplayName("cursor 공지가 사라져도 그 위치 뒤에서 이어 준다")
+  void cursor_continuesEvenWhenCursorNoticeIsGone() {
+    stored.add(notice("a", NOW_KST.minusDays(1)));
+    stored.add(notice("c", NOW_KST.minusDays(3)));
+    String cursorOfMissingNotice = NOW_KST.minusDays(2) + "|b";
+
+    assertThat(service.history("IOS", cursorOfMissingNotice, 20).items())
+      .extracting(NoticeHistoryItemResponse::id).containsExactly("c");
+  }
+
+  @Test
+  @DisplayName("시각이 같으면 id 큰 순이고 cursor 도 id 로 이어진다")
+  void cursor_tieBreaksById() {
+    stored.add(notice("a", NOW_KST.minusDays(1)));
+    stored.add(notice("b", NOW_KST.minusDays(1)));
+
+    var first = service.history("IOS", null, 1);
+    var second = service.history("IOS", first.nextCursor(), 1);
+
+    assertThat(first.items()).extracting(NoticeHistoryItemResponse::id).containsExactly("b");
+    assertThat(second.items()).extracting(NoticeHistoryItemResponse::id).containsExactly("a");
+  }
+
+  @Test
+  @DisplayName("형식이 틀린 cursor 는 없는 것으로 본다")
+  void invalidCursor_isTreatedAsNoCursor() {
+    stored.add(notice("a", NOW_KST.minusDays(1)));
+
+    assertThat(service.history("IOS", "garbage", 20).items()).hasSize(1);
+    assertThat(service.history("IOS", "not-a-time|a", 20).items()).hasSize(1);
+  }
+
+  @Test
+  @DisplayName("size 는 최소 1, 최대 50 으로 맞춘다")
+  void size_isClamped() {
+    for (int index = 0; index < 60; index++) {
+      stored.add(notice(String.format("n%02d", index), NOW_KST.minusHours(index + 1)));
+    }
+
+    assertThat(service.history("IOS", null, 0).items()).hasSize(1);
+    assertThat(service.history("IOS", null, 100).items()).hasSize(50);
+  }
+
+  @Test
+  @DisplayName("읽음 기록은 지금 시각으로 저장한다")
+  void markSeen_recordsNow() {
+    service.markSeen(MEMBER_ID);
+
+    verify(noticeSeenService).markSeen(MEMBER_ID, NOW_KST);
   }
 
   private AppNotice notice(String id, LocalDateTime startsAt) {
