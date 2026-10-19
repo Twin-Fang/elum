@@ -2418,4 +2418,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get routineGroupUngroupConfirmMessage => '안에 있던 일과는 일과관리에 그대로 남아요';
+
+  @override
+  String childHomeGroupProgress(int done, int total) {
+    return '$done / $total';
+  }
+
+  @override
+  String get childHomeGroupAllDone => '다 했어요!';
 }

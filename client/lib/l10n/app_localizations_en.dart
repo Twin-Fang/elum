@@ -2525,4 +2525,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get routineGroupUngroupConfirmMessage =>
       'The routines stay in Routines';
+
+  @override
+  String childHomeGroupProgress(int done, int total) {
+    return '$done / $total';
+  }
+
+  @override
+  String get childHomeGroupAllDone => 'All done!';
 }

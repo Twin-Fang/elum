@@ -4417,6 +4417,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'안에 있던 일과는 일과관리에 그대로 남아요'**
   String get routineGroupUngroupConfirmMessage;
+
+  /// 이룸이 홈 묶음 상자 (#808)
+  ///
+  /// In ko, this message translates to:
+  /// **'{done} / {total}'**
+  String childHomeGroupProgress(int done, int total);
+
+  /// 이룸이 홈 묶음 상자 (#808)
+  ///
+  /// In ko, this message translates to:
+  /// **'다 했어요!'**
+  String get childHomeGroupAllDone;
 }
 
 class _AppLocalizationsDelegate

@@ -2060,5 +2060,9 @@
   "routineGroupUngroupConfirmTitle": "묶음을 풀까요?",
   "@routineGroupUngroupConfirmTitle": {"description": "일과 묶음 (#807)"},
   "routineGroupUngroupConfirmMessage": "안에 있던 일과는 일과관리에 그대로 남아요",
-  "@routineGroupUngroupConfirmMessage": {"description": "일과 묶음 (#807)"}
+  "@routineGroupUngroupConfirmMessage": {"description": "일과 묶음 (#807)"},
+  "childHomeGroupProgress": "{done} / {total}",
+  "@childHomeGroupProgress": {"description": "이룸이 홈 묶음 상자 (#808)", "placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "childHomeGroupAllDone": "다 했어요!",
+  "@childHomeGroupAllDone": {"description": "이룸이 홈 묶음 상자 (#808)"}
 }
