@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T11:21:56Z",
-    "currentVersion": "2.48.2",
+    "lastUpdated": "2026-10-19T11:45:54Z",
+    "currentVersion": "2.48.3",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 268
+    "totalReleases": 269
   },
   "releases": [
+    {
+      "version": "2.48.3",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 814,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 새 버전이 필요할 때 보이는 안내를 카드 모양으로 바꿨어요\n  * 점검 중일 때 보이는 안내를 더 알아보기 쉽게 바꿨어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "새 버전이 필요할 때 보이는 안내를 카드 모양으로 바꿨어요",
+            "점검 중일 때 보이는 안내를 더 알아보기 쉽게 바꿨어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.48.2",
       "project_type": "flutter",
