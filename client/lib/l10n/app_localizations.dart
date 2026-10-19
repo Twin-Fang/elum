@@ -4490,6 +4490,12 @@ abstract class AppLocalizations {
   /// **'이 일과만 오늘 보내기'**
   String get routineLibrarySendOnlyThis;
 
+  /// 묶음 열기 일과 줄의 보조 글 (#846)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 {count}장'**
+  String routineGroupRowCardCount(int count);
+
   /// 일과관리 코치마크 1단계. *로 감싼 부분이 강조된다 (#832)
   ///
   /// In ko, this message translates to:

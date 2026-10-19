@@ -49,6 +49,23 @@ class RoutineLibraryApi {
         return _routineOf(res.data);
       });
 
+  /// 칸 자리 저장: 격자의 모든 칸(낱개 일과·묶음)을 보여 줄 순서대로 보낸다 (#844)
+  Future<AppFailure?> saveOrder(List<({String type, String id})> cells) async {
+    final result = await guarded<void>(
+      _repo,
+      'saveOrder',
+      () => _dio.put<void>(
+        '/api/routines/library/order',
+        data: {
+          'cells': [
+            for (final cell in cells) {'type': cell.type, 'id': cell.id},
+          ],
+        },
+      ),
+    );
+    return result.failure;
+  }
+
   /// 일과관리에서 지우기. 수행 기록은 서버가 남긴다.
   Future<AppFailure?> removeFromLibrary(String routineId) async {
     final result = await guarded<void>(

@@ -6,9 +6,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_pressable.dart';
 import '../../../../shared/models/routine.dart';
 import '../../application/library_entries.dart';
+import 'arrange_remove_badge.dart';
 import 'library_group_tile.dart';
 import 'library_routine_tile.dart';
 
@@ -33,6 +33,7 @@ class LibraryEntryGrid extends StatefulWidget {
     required this.onGroupMenu,
     required this.onDropOnRoutine,
     required this.onDropOnGroup,
+    required this.onMoveCell,
     required this.onArrangeStart,
     required this.onRemoveRoutine,
     required this.onRemoveGroup,
@@ -57,6 +58,14 @@ class LibraryEntryGrid extends StatefulWidget {
   /// (끌어 온 일과, 놓은 자리의 일과)
   final void Function(Routine dragged, Routine target)? onDropOnRoutine;
   final void Function(Routine dragged, LibraryGroupEntry target)? onDropOnGroup;
+
+  /// 칸 가장자리에 놓았다: [dragged] 를 [target] 앞([isBefore])이나 뒤로 옮긴다 (#837)
+  final void Function(
+    LibraryEntry dragged,
+    LibraryEntry target, {
+    required bool isBefore,
+  })?
+  onMoveCell;
 
   /// 길게 누른 채 움직이기 시작했다 — 정리 상태로 들어간다
   final VoidCallback? onArrangeStart;
@@ -91,6 +100,12 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
 
   /// 이번 길게 누르기에서 이미 정리 상태로 넘겼는가 (한 번만 알린다)
   bool _hasStartedArranging = false;
+
+  /// 끌어 온 칸이 지금 어느 칸의 어느 자리 위에 있는가 (놓을 자리 표시)
+  ({String id, _DropZone zone})? _hover;
+
+  /// 칸 가장자리로 보는 폭 비율 (앞·뒤 각 25%, 가운데는 묶기)
+  static const _edgeFraction = 0.25;
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +160,71 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
     };
   }
 
-  /// 묶음 칸: 끌어 온 일과를 받는다
+
+  /// 끌어 온 칸이 [tileContext] 칸의 어느 자리 위에 놓였는가 (앞·가운데·뒤)
+  _DropZone _zoneOf(
+    BuildContext tileContext,
+    DragTargetDetails<LibraryEntry> d,
+  ) {
+    final rect = _rectOf(tileContext);
+    if (rect == null || rect.width <= 0) return _DropZone.center;
+    // 끄는 그림 한가운데를 손가락 자리로 본다
+    final x = d.offset.dx + LibraryRoutineTile.iconSize.w / 2;
+    final fraction = (x - rect.left) / rect.width;
+    if (fraction < _edgeFraction) return _DropZone.before;
+    if (fraction > 1 - _edgeFraction) return _DropZone.after;
+    return _DropZone.center;
+  }
+
+  void _setHover(String id, _DropZone? zone) {
+    final next = zone == null ? null : (id: id, zone: zone);
+    if (_hover == next) return;
+    setState(() => _hover = next);
+  }
+
+  /// 놓았다: 낱개를 가운데에 놓으면 묶기, 그 밖(가장자리 · 묶음을 끌어 온 경우)은 자리 이동
+  void _handleDrop(LibraryEntry target, LibraryEntry dragged, _DropZone zone) {
+    _setHover(target.id, null);
+    if (zone == _DropZone.center && dragged is LibraryRoutineEntry) {
+      switch (target) {
+        case LibraryRoutineEntry():
+          widget.onDropOnRoutine?.call(dragged.routine, target.routine);
+        case LibraryGroupEntry():
+          widget.onDropOnGroup?.call(dragged.routine, target);
+      }
+      return;
+    }
+    widget.onMoveCell?.call(dragged, target, isBefore: zone != _DropZone.after);
+  }
+
+  /// 놓을 자리 막대: 앞이면 칸 왼쪽, 뒤면 오른쪽에 세로로
+  Widget _withDropBar(String id, Widget tile) {
+    final hover = _hover;
+    final zone = hover != null && hover.id == id ? hover.zone : null;
+    if (zone == null || zone == _DropZone.center) return tile;
+    final colors = context.colors;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        tile,
+        Positioned(
+          left: zone == _DropZone.before ? -5.w : null,
+          right: zone == _DropZone.after ? -5.w : null,
+          top: 4.h,
+          child: Container(
+            width: 3.w,
+            height: LibraryRoutineTile.iconSize.w,
+            decoration: BoxDecoration(
+              color: colors.textSecondary,
+              borderRadius: BorderRadius.circular(2.r),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 묶음 칸: 끌어 온 칸을 받는다 (낱개 가운데 = 넣기, 가장자리 = 자리 이동)
   Widget _buildGroup(LibraryGroupEntry entry, int index) {
     final isSentToday = entry.routines.every(
       (routine) => widget.sentIds.contains(routine.id),
@@ -163,37 +242,58 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
     );
     return Builder(
       key: ValueKey('group-${entry.group.id}'),
-      builder: (tileContext) => DragTarget<Routine>(
-        onWillAcceptWithDetails: (_) => widget.onDropOnGroup != null,
+      builder: (tileContext) => DragTarget<LibraryEntry>(
+        onWillAcceptWithDetails: (details) => details.data.id != entry.id,
+        onMove: (details) => _setHover(entry.id, _zoneOf(tileContext, details)),
+        onLeave: (_) => _setHover(entry.id, null),
         onAcceptWithDetails: (details) =>
-            widget.onDropOnGroup?.call(details.data, entry),
-        builder: (context, candidates, _) => _ArrangeShell(
-          isArranging: widget.isArranging,
-          isAlternatePhase: index.isOdd,
-          onRemove: () => widget.onRemoveGroup?.call(entry),
-          child: groupTile(
-            isDropTarget: candidates.isNotEmpty,
-            onTap: widget.isArranging
-                ? null
-                : () => widget.onGroupTap?.call(entry),
-            onLongPress: widget.isArranging
-                ? null
-                : () {
-                    final rect = _rectOf(tileContext);
-                    if (rect == null) return;
-                    widget.onGroupMenu?.call(entry, (
-                      rect: rect,
-                      tile: groupTile(),
-                    ));
-                  },
-          ),
-        ),
+            _handleDrop(entry, details.data, _zoneOf(tileContext, details)),
+        builder: (context, candidates, _) {
+          final isCenter =
+              _hover?.id == entry.id && _hover?.zone == _DropZone.center;
+          final tile = _ArrangeShell(
+            isArranging: widget.isArranging,
+            isAlternatePhase: index.isOdd,
+            isRemovable: true,
+            onRemove: () => widget.onRemoveGroup?.call(entry),
+            child: groupTile(
+              isDropTarget: candidates.isNotEmpty && isCenter,
+              onTap: widget.isArranging
+                  ? null
+                  : () => widget.onGroupTap?.call(entry),
+              onLongPress: widget.isArranging
+                  ? null
+                  : () {
+                      final rect = _rectOf(tileContext);
+                      if (rect == null) return;
+                      widget.onGroupMenu?.call(entry, (
+                        rect: rect,
+                        tile: groupTile(),
+                      ));
+                    },
+            ),
+          );
+          // 정리 상태에서는 묶음도 끌어 자리를 옮길 수 있다
+          final draggable = widget.isArranging && widget.onMoveCell != null
+              ? Draggable<LibraryEntry>(
+                  data: entry,
+                  feedback: const _GroupDragFeedback(),
+                  childWhenDragging: Opacity(
+                    opacity: _draggingOpacity,
+                    child: tile,
+                  ),
+                  child: tile,
+                )
+              : tile;
+          return _withDropBar(entry.id, draggable);
+        },
       ),
     );
   }
 
-  /// 낱개 칸: 끌 수 있고, 다른 일과를 받으면 새 묶음
+  /// 낱개 칸: 끌 수 있고, 다른 칸을 받으면 (가운데 = 새 묶음, 가장자리 = 자리 이동)
   Widget _buildRoutine(Routine routine, int index) {
+    final entry = LibraryRoutineEntry(routine);
     final isSentToday = widget.sentIds.contains(routine.id);
     final isDragEnabled = widget.onRoutineMenu != null;
     LibraryRoutineTile routineTile({VoidCallback? onTap}) => LibraryRoutineTile(
@@ -203,14 +303,18 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
     );
     return Builder(
       key: ValueKey(routine.id),
-      builder: (tileContext) => DragTarget<Routine>(
-        onWillAcceptWithDetails: (details) =>
-            widget.onDropOnRoutine != null && details.data.id != routine.id,
+      builder: (tileContext) => DragTarget<LibraryEntry>(
+        onWillAcceptWithDetails: (details) => details.data.id != routine.id,
+        onMove: (details) =>
+            _setHover(routine.id, _zoneOf(tileContext, details)),
+        onLeave: (_) => _setHover(routine.id, null),
         onAcceptWithDetails: (details) =>
-            widget.onDropOnRoutine?.call(details.data, routine),
+            _handleDrop(entry, details.data, _zoneOf(tileContext, details)),
         builder: (context, candidates, _) {
+          final isCenter =
+              _hover?.id == routine.id && _hover?.zone == _DropZone.center;
           final tile = AnimatedScale(
-            scale: candidates.isNotEmpty ? _dropTargetScale : 1,
+            scale: candidates.isNotEmpty && isCenter ? _dropTargetScale : 1,
             duration: AppMotion.fast,
             child: routineTile(
               onTap: widget.isArranging
@@ -221,16 +325,21 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
           final dragged = !isDragEnabled
               ? tile
               : _buildDraggable(
+                  entry: entry,
                   routine: routine,
                   tile: tile,
                   tileContext: tileContext,
                   menuTile: routineTile(),
                 );
-          return _ArrangeShell(
-            isArranging: widget.isArranging,
-            isAlternatePhase: index.isOdd,
-            onRemove: () => widget.onRemoveRoutine?.call(routine),
-            child: dragged,
+          return _withDropBar(
+            routine.id,
+            _ArrangeShell(
+              isArranging: widget.isArranging,
+              isAlternatePhase: index.isOdd,
+              isRemovable: routine.isEditableByMe,
+              onRemove: () => widget.onRemoveRoutine?.call(routine),
+              child: dragged,
+            ),
           );
         },
       ),
@@ -239,6 +348,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
 
   /// 정리 상태면 바로 끌리고, 아니면 길게 눌러야 끌린다
   Widget _buildDraggable({
+    required LibraryEntry entry,
     required Routine routine,
     required Widget tile,
     required BuildContext tileContext,
@@ -247,15 +357,15 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
     final feedback = _DragFeedback(routine: routine);
     final childWhenDragging = Opacity(opacity: _draggingOpacity, child: tile);
     if (widget.isArranging) {
-      return Draggable<Routine>(
-        data: routine,
+      return Draggable<LibraryEntry>(
+        data: entry,
         feedback: feedback,
         childWhenDragging: childWhenDragging,
         child: tile,
       );
     }
-    return LongPressDraggable<Routine>(
-      data: routine,
+    return LongPressDraggable<LibraryEntry>(
+      data: entry,
       onDragStarted: () {
         _pointerOrigin = null;
         _hasStartedArranging = false;
@@ -296,11 +406,38 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
   }
 }
 
+/// 놓은 자리: 칸 앞 · 가운데(묶기) · 뒤
+enum _DropZone { before, center, after }
+
+/// 묶음 칸을 끌 때 따라다니는 그림 (폴더 모양)
+class _GroupDragFeedback extends StatelessWidget {
+  const _GroupDragFeedback();
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(LibraryRoutineTile.iconRadius.w);
+    return Container(
+      width: LibraryRoutineTile.iconSize.w,
+      height: LibraryRoutineTile.iconSize.w,
+      decoration: BoxDecoration(
+        color: context.colors.folderFill,
+        borderRadius: radius,
+      ),
+      child: Icon(
+        Icons.folder_rounded,
+        size: 28.w,
+        color: context.colors.textSecondary,
+      ),
+    );
+  }
+}
+
 /// 정리 상태 껍데기: 흔들리고 왼쪽 위에 ⊖ 를 단다. 정리 상태가 아니면 그대로 지나간다
 class _ArrangeShell extends StatefulWidget {
   const _ArrangeShell({
     required this.isArranging,
     required this.isAlternatePhase,
+    required this.isRemovable,
     required this.onRemove,
     required this.child,
   });
@@ -309,6 +446,9 @@ class _ArrangeShell extends StatefulWidget {
 
   /// 이웃 칸과 어긋나게 흔든다 (시안: 짝수 칸은 반 박자 늦게)
   final bool isAlternatePhase;
+
+  /// ⊖ 를 달 수 있는가 — 남이 만든 일과는 지울 수 없어 달지 않는다 (메뉴가 지우기를 숨기는 것과 같다)
+  final bool isRemovable;
   final VoidCallback onRemove;
   final Widget child;
 
@@ -321,9 +461,6 @@ class _ArrangeShellState extends State<_ArrangeShell>
   /// 흔들림 한 번(왕복의 절반) 시간 · 최대 기울기(도)
   static const _jiggleHalfPeriod = Duration(milliseconds: 260);
   static const _maxTiltDegrees = 2.4;
-
-  /// ⊖ 한 변 · 칸 위쪽 왼쪽으로 튀어나오는 정도
-  static const _badgeSize = 22.0;
 
   late final AnimationController _controller;
 
@@ -362,7 +499,6 @@ class _ArrangeShellState extends State<_ArrangeShell>
   @override
   Widget build(BuildContext context) {
     if (!widget.isArranging) return widget.child;
-    final colors = context.colors;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -375,28 +511,15 @@ class _ArrangeShellState extends State<_ArrangeShell>
           ),
           child: widget.child,
         ),
-        Positioned(
-          top: -4.h,
-          left: 2.w,
-          child: AppPressable(
-            onTap: widget.onRemove,
-            scaleDown: AppPressable.scaleIcon,
-            semanticLabel: context.l10n.libraryArrangeRemove,
-            child: Container(
-              width: _badgeSize.w,
-              height: _badgeSize.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colors.textSecondary,
-              ),
-              child: Icon(
-                Icons.remove_rounded,
-                size: 16.w,
-                color: colors.surface,
-              ),
+        if (widget.isRemovable)
+          Positioned(
+            top: -4.h,
+            left: 2.w,
+            child: ArrangeRemoveBadge(
+              onTap: widget.onRemove,
+              semanticLabel: context.l10n.libraryArrangeRemove,
             ),
           ),
-        ),
       ],
     );
   }

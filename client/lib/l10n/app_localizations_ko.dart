@@ -2460,6 +2460,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get routineLibrarySendOnlyThis => '이 일과만 오늘 보내기';
 
   @override
+  String routineGroupRowCardCount(int count) {
+    return '카드 $count장';
+  }
+
+  @override
   String get routineManageCoachTapMessage =>
       '일과를 *누르면* 카드를 볼 수 있어요\n카드 고치기와 *오늘 보내기*를 할 수 있어요';
 

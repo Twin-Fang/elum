@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.routine.application.controller;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorResponse;
 import com.chuseok22.elumserver.member.application.service.Caller;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineLibraryOrderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineTitleUpdateRequest;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +27,7 @@ public interface RoutineLibraryDocs {
   @Operation(
     summary = "일과관리 목록 조회",
     description = """
-      보호자 `일과관리` 탭에 보일 **원본 일과**를 최신순(`createdAt` 내림차순)으로 돌려줍니다.
+      보호자 `일과관리` 탭에 보일 **원본 일과**를 칸 순서(`libraryOrder` 오름차순, 없으면 맨 뒤) 다음 최신순으로 돌려줍니다.
 
       - 보낸 상태(`CONFIRMED`·`COMPLETED`)만 담습니다. 임시저장(`PENDING_REVIEW`)은 빠집니다.
       - `보내기`로 만든 일과(`sourceRoutineId` 가 있는 일과)는 빠집니다. 같은 일과가 날마다 쌓이지 않게 합니다.
@@ -38,6 +39,25 @@ public interface RoutineLibraryDocs {
   ResponseEntity<List<RoutineResponse>> getLibraryRoutines(
     Authentication authentication,
     @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId
+  );
+
+  @Operation(
+    summary = "일과관리 칸 순서 저장",
+    description = """
+      낱개 일과와 묶음을 **한 줄**로 세운 차례를 저장합니다 (보호자만). 받은 차례가 0부터의 자리가 되어
+      낱개는 `libraryOrder`, 묶음은 `displayOrder` 에 같은 번호 공간으로 저장됩니다.
+
+      - 요청은 `{"cells":[{"type":"ROUTINE","id":"..."},{"type":"GROUP","id":"..."}]}` 입니다.
+      - 빠뜨린 칸은 받은 칸 뒤에 기존 순서(묶음 먼저)대로 붙습니다. 아무것도 지우지 않습니다.
+      - 없는 ID·남의 이룸이 칸·묶음 안 일과·지운 일과는 400(`ROUTINE_GROUP_INVALID_MEMBER`).
+      - 종류·ID가 비었거나 같은 칸이 두 번이면 400(`INVALID_INPUT_VALUE`).
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  ResponseEntity<Void> reorderLibrary(
+    Authentication authentication,
+    @Parameter(in = ParameterIn.HEADER, name = Caller.PROFILE_HEADER, description = Caller.PROFILE_HEADER_DESCRIPTION) String profileId,
+    RoutineLibraryOrderRequest request
   );
 
   @Operation(
