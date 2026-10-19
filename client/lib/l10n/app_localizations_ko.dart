@@ -2465,7 +2465,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get routineManageCoachLongPressMessage =>
-      '*길게 누르면* 메뉴가 열려요\n오늘 보내기 · 이름 바꾸기 · 복사하기 · 지우기';
+      '*길게 누르면* 칸 옆에 메뉴가 열려요\n오늘 보내기 · 이름 바꾸기 · 묶음에 넣기 · 복사하기 · 지우기';
 
   @override
   String get routineManageCoachSentMessage =>

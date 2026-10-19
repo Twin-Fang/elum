@@ -350,10 +350,6 @@ void main() {
         (context) => tapDemo(context, firstTile),
         '오늘 보내기',
       ),
-      '길게 누르기 시범은 빠른 메뉴의 항목을 보여 준다': (
-        (context) => longPressDemo(context, firstTile),
-        '복사하기',
-      ),
       '보낸 뒤 시범은 실제 토스트 문구를 보여 준다': (
         (context) => sentBadgeDemo(context, firstTile, routineTitle: '양치하기'),
         '양치하기',
@@ -383,6 +379,20 @@ void main() {
       for (var i = 0; i < 6; i++) {
         await tester.pump(const Duration(seconds: 1));
       }
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('길게 누르기 시범은 메뉴를 그리지 않고 손가락만 보여 준다(문구를 가리지 않는다)', (
+      tester,
+    ) async {
+      await pumpDemo(
+        tester,
+        Builder(builder: (c) => longPressDemo(c, firstTile)),
+      );
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
+      expect(find.text('복사하기'), findsNothing);
       expect(tester.takeException(), isNull);
     });
 

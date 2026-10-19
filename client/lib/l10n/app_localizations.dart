@@ -4499,7 +4499,7 @@ abstract class AppLocalizations {
   /// 일과관리 코치마크 2단계 (#832)
   ///
   /// In ko, this message translates to:
-  /// **'*길게 누르면* 메뉴가 열려요\n오늘 보내기 · 이름 바꾸기 · 복사하기 · 지우기'**
+  /// **'*길게 누르면* 칸 옆에 메뉴가 열려요\n오늘 보내기 · 이름 바꾸기 · 묶음에 넣기 · 복사하기 · 지우기'**
   String get routineManageCoachLongPressMessage;
 
   /// 일과관리 코치마크 3단계. 보내도 원본은 일과관리에 남는다 (#832)

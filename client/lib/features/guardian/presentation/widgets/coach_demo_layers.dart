@@ -38,21 +38,17 @@ Widget tapDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
   ),
 );
 
-/// 길게 누르기: 칸 꾹 > 링이 퍼짐 > 빠른 메뉴 시트가 올라옴
+/// 길게 누르기: 칸 꾹 + 링이 퍼짐 (실제 메뉴는 칸 옆에 뜨는데 말풍선 글자를 가려서 그리지 않는다)
 Widget longPressDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
-  endScene: 0.8,
+  endScene: 0.5,
   builder: (context, t) => Stack(
     children: [
-      CoachDemoPreviewSheet(
-        slide: coachDemoPhase(t, 0.5, 0.65),
-        child: const CoachDemoMenuRows(),
-      ),
       CoachDemoFinger(
         center: target.center,
-        press: coachDemoPhase(t, 0.1, 0.2) * (1 - coachDemoPhase(t, 0.5, 0.55)),
-        appear: coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.55, 0.65)),
+        press: coachDemoPhase(t, 0.1, 0.2) * (1 - coachDemoPhase(t, 0.6, 0.7)),
+        appear: coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.65, 0.75)),
       ),
-      CoachDemoRing(center: target.center, spread: coachDemoPhase(t, 0.2, 0.5)),
+      CoachDemoRing(center: target.center, spread: coachDemoPhase(t, 0.2, 0.6)),
     ],
   ),
 );

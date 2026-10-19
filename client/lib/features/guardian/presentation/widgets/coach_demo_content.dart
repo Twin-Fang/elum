@@ -50,64 +50,6 @@ class CoachDemoSheetButtons extends StatelessWidget {
   }
 }
 
-/// 빠른 메뉴 네 줄 (실제 메뉴와 같은 문구, 지우기는 붉게)
-class CoachDemoMenuRows extends StatelessWidget {
-  const CoachDemoMenuRows({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CoachDemoMenuRow(Icons.send_rounded, l10n.routineLibrarySendToday),
-        CoachDemoMenuRow(Icons.edit_rounded, l10n.routineLibraryMenuRename),
-        CoachDemoMenuRow(
-          Icons.content_copy_rounded,
-          l10n.routineLibraryMenuCopy,
-        ),
-        CoachDemoMenuRow(
-          Icons.delete_outline_rounded,
-          l10n.routineLibraryMenuRemove,
-          isDanger: true,
-        ),
-      ],
-    );
-  }
-}
-
-class CoachDemoMenuRow extends StatelessWidget {
-  const CoachDemoMenuRow(
-    this.icon,
-    this.label, {
-    super.key,
-    this.isDanger = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool isDanger;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final color = isDanger ? colors.danger : colors.textPrimary;
-    // 큰 글자에서 줄이 잘리지 않게 높이는 최소값만 둔다
-    return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: 48.h),
-      child: Row(
-        children: [
-          Icon(icon, size: 22.w, color: color),
-          SizedBox(width: context.space.sm.w),
-          Flexible(
-            child: Text(label, style: context.typo.body.copyWith(color: color)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class CoachDemoToast extends StatelessWidget {
   const CoachDemoToast({super.key, required this.text});
 
