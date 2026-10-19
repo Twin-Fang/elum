@@ -62,6 +62,16 @@ void main() {
       expect(r.foreignCreatorLabel, '엄마가 만든 일과예요');
     });
 
+    test('온보딩 예시 일과는 만든 사람 표시가 없다 — 이름을 모르는 남의 일과는 그대로 (#823)', () {
+      final example = Routine.fromJson(
+        {...routineJson('r1', '아침 준비', createdByMe: false), 'isExample': true},
+      );
+      final unknownForeign = Routine.fromJson(routineJson('r2', '남의 일과', createdByMe: false));
+
+      expect(example.foreignCreatorLabel, isNull);
+      expect(unknownForeign.foreignCreatorLabel, '다른 보호자가 만든 일과예요');
+    });
+
   });
 
   group('보호자 홈', () {

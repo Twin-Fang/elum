@@ -111,8 +111,9 @@ abstract class Routine with _$Routine {
   bool get isEditableByMe => createdByMe != false;
 
   /// 남이 만든 일과에 붙이는 `엄마가 만든 일과예요`. 내가 만들었거나 모르면 null.
+  /// 온보딩 예시 일과는 보호자가 고른 것이라 만든 사람 표시를 하지 않는다 (#823).
   String? get foreignCreatorLabel {
-    if (createdByMe != false) return null;
+    if (createdByMe != false || isExample) return null;
     final name = creatorName?.trim();
     if (name == null || name.isEmpty) return appL10n.routineForeignCreatorUnknown;
     // 조사 글자는 문구가 정한다 — 코드는 받침 판정값만 넘긴다

@@ -2324,9 +2324,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get exampleCategoryOutsideHint => 'バスに乗る、買い物';
 
   @override
-  String get routineTileExampleBadge => '例';
-
-  @override
   String get exampleRoutinesFailed => '例の日課を入れられませんでした';
 
   @override
