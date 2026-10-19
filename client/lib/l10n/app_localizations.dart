@@ -401,13 +401,13 @@ abstract class AppLocalizations {
   /// 점검 중 화면 제목
   ///
   /// In ko, this message translates to:
-  /// **'잠시 쉬고 있어요'**
+  /// **'지금 점검 중이에요'**
   String get appStatusMaintenanceTitle;
 
   /// 점검 중 화면의 기본 설명(서버가 문구를 주면 그것이 이긴다)
   ///
   /// In ko, this message translates to:
-  /// **'조금 뒤에 다시 열어주세요'**
+  /// **'점검이 끝나면 다시 쓸 수 있어요.\n조금 뒤에 확인해주세요'**
   String get appStatusMaintenanceBody;
 
   /// 점검 화면의 버튼
@@ -416,17 +416,11 @@ abstract class AppLocalizations {
   /// **'다시 확인하기'**
   String get appStatusRecheck;
 
-  /// 강제 업데이트 화면 제목
+  /// 강제 업데이트 카드의 문구 (두 줄)
   ///
   /// In ko, this message translates to:
-  /// **'새 이룸이 나왔어요'**
+  /// **'지금 업데이트하고\n새로워진 이룸을 이용해보세요!'**
   String get appStatusUpdateTitle;
-
-  /// 강제 업데이트 화면 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'앱을 새로 받아야 이어서 쓸 수 있어요.\n스토어에서 이룸을 업데이트해주세요'**
-  String get appStatusUpdateBody;
 
   /// 스토어 주소가 없을 때의 버튼
   ///
@@ -811,18 +805,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'선택한 친구가 카드 속 주인공이 되어 도와줘요'**
   String get onboardingCharacterDescription;
-
-  /// 도움 목표 화면 제목. name 은 이룸이 호칭
-  ///
-  /// In ko, this message translates to:
-  /// **'{name}의 어떤 순간을\n도와주고 싶으신가요?'**
-  String onboardingGoalsTitle(String name);
-
-  /// 도움 목표 화면 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'여러 개를 선택할 수 있어요'**
-  String get onboardingGoalsDescription;
 
   /// 카드 그림 방식 화면 제목
   ///
@@ -2672,12 +2654,6 @@ abstract class AppLocalizations {
   /// **'갤러리에서 고르기'**
   String get cardPhotoSourceGallery;
 
-  /// 사진 고르기 시트 아래 개인정보 주의 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'얼굴이나 개인정보가 나오지 않게 찍어 주세요'**
-  String get cardPhotoSourcePrivacy;
-
   /// 사진 올리기가 실패했는데 자리가 없어 팝업으로 알릴 때 제목. message 는 실패 사유(서버 문구가 우선)
   ///
   /// In ko, this message translates to:
@@ -4171,6 +4147,306 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{title}을(를) 오늘 일과로 보냈어요'**
   String routineLibrarySent(String title);
+
+  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭, batchim 은 받침 유무(yes/no)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}{batchim, select, yes{과} other{와}} 어떤 일과부터\n해 볼까요?'**
+  String onboardingExampleTitle(String name, String batchim);
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'고른 분류의 예시 일과를 넣어 둘게요.\n여러 개 골라도 돼요.'**
+  String get onboardingExampleDescription;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'건너뛰기'**
+  String get onboardingExampleSkip;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'아침·저녁 준비'**
+  String get exampleCategoryMorningEvening;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'씻기, 옷 입기, 잠자리'**
+  String get exampleCategoryMorningEveningHint;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'학교·공부'**
+  String get exampleCategorySchoolStudy;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'등교 준비, 숙제'**
+  String get exampleCategorySchoolStudyHint;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'집안일·스스로 하기'**
+  String get exampleCategoryHouseSelf;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'정리, 식탁 차리기'**
+  String get exampleCategoryHouseSelfHint;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'밖에서 해 보기'**
+  String get exampleCategoryOutside;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'버스 타기, 물건 사기'**
+  String get exampleCategoryOutsideHint;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'예시'**
+  String get routineTileExampleBadge;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'예시 일과를 넣지 못했어요'**
+  String get exampleRoutinesFailed;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음에 넣기'**
+  String get routineGroupMenuAddToGroup;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'순서 바꾸기'**
+  String get routineGroupMenuReorder;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음 풀기'**
+  String get routineGroupMenuUngroup;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 묶음, 일과 {count}개'**
+  String routineGroupTileLabel(String name, int count);
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 묶음'**
+  String get routineGroupDefaultName;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음 이름 (예: 아침 준비)'**
+  String get routineGroupNameHint;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 묶음 만들기'**
+  String get routineGroupNewTitle;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}에 넣기'**
+  String routineGroupAddTitle(String name);
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'넣을 일과를 보여 줄 순서대로 눌러 주세요 (2개 이상)'**
+  String get routineGroupPickHintNew;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'넣을 일과를 순서대로 눌러 주세요'**
+  String get routineGroupPickHint;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'넣을 수 있는 일과가 없어요'**
+  String get routineGroupPickEmpty;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개로 묶기'**
+  String routineGroupPickConfirmNew(int count);
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개 넣기'**
+  String routineGroupPickConfirmAdd(int count);
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'무엇을 만들까요?'**
+  String get routineGroupCreateMenuTitle;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 일과 만들기'**
+  String get routineGroupCreateRoutine;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 묶음 만들기'**
+  String get routineGroupCreateGroup;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'어느 묶음에 넣을까요?'**
+  String get routineGroupChooseTitle;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 {count}개 · 이 순서대로 보여요'**
+  String routineGroupSheetCount(int count);
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 넣기'**
+  String get routineGroupSheetAdd;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'{title} 묶음에서 빼기'**
+  String routineGroupSheetRemove(String title);
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'손잡이를 끌어 순서를 바꿔요'**
+  String get routineGroupSheetDragHint;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음을 만들었어요'**
+  String get routineGroupCreated;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음에 넣었어요'**
+  String get routineGroupAdded;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음에서 뺐어요'**
+  String get routineGroupRemovedOne;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음을 풀었어요'**
+  String get routineGroupUngrouped;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과가 하나만 남아 묶음을 풀었어요'**
+  String get routineGroupUngroupedLastOne;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'순서를 바꿨어요'**
+  String get routineGroupReordered;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} 묶음을 오늘 일과로 보냈어요'**
+  String routineGroupSent(String name);
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음 안 일과를 오늘 모두 보냈어요'**
+  String get routineGroupAllSentAlready;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음을 바꾸지 못했어요'**
+  String get routineGroupActionFailedTitle;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음을 풀까요?'**
+  String get routineGroupUngroupConfirmTitle;
+
+  /// 일과 묶음 (#807)
+  ///
+  /// In ko, this message translates to:
+  /// **'안에 있던 일과는 일과관리에 그대로 남아요'**
+  String get routineGroupUngroupConfirmMessage;
+
+  /// 이룸이 홈 묶음 상자 (#808)
+  ///
+  /// In ko, this message translates to:
+  /// **'{done} / {total}'**
+  String childHomeGroupProgress(int done, int total);
+
+  /// 이룸이 홈 묶음 상자 (#808)
+  ///
+  /// In ko, this message translates to:
+  /// **'다 했어요!'**
+  String get childHomeGroupAllDone;
+
+  /// 일과관리 메뉴 찾기 (#834)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 *길게 누르면* 메뉴가 열려요\n이름 바꾸기·복사·지우기를 할 수 있어요'**
+  String get libraryCoachMenu;
+
+  /// 일과관리 메뉴 찾기 (#834)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 묶음도 여기서 만들 수 있어요'**
+  String get libraryCoachCreate;
+
+  /// 일과관리 메뉴 찾기 (#834)
+  ///
+  /// In ko, this message translates to:
+  /// **'더 보기'**
+  String get routineDetailMore;
 }
 
 class _AppLocalizationsDelegate

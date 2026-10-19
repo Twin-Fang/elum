@@ -3,5 +3,18 @@
   "installationRetryMessage": "ログイン情報を確認できませんでした。もう一度お試しください。",
   "installationRetryButton": "再試行",
   "issuedCodeCopyFailedTitle": "コピーできませんでした",
-  "issuedCodeCopyFailedFallback": "画面に表示されているコードを直接お伝えください"
+  "issuedCodeCopyFailedFallback": "画面に表示されているコードを直接お伝えください",
+  "onboardingExampleTitle": "{name}と、どの日課から\n始めましょうか?",
+  "onboardingExampleDescription": "選んだ分類の例の日課を入れておきます。\n複数選んでもかまいません。",
+  "onboardingExampleSkip": "スキップ",
+  "exampleCategoryMorningEvening": "朝・夜のしたく",
+  "exampleCategoryMorningEveningHint": "洗面、着替え、寝る準備",
+  "exampleCategorySchoolStudy": "学校・勉強",
+  "exampleCategorySchoolStudyHint": "登校のしたく、宿題",
+  "exampleCategoryHouseSelf": "家事・自分でする",
+  "exampleCategoryHouseSelfHint": "片づけ、食卓の準備",
+  "exampleCategoryOutside": "外でやってみる",
+  "exampleCategoryOutsideHint": "バスに乗る、買い物",
+  "routineTileExampleBadge": "例",
+  "exampleRoutinesFailed": "例の日課を入れられませんでした"
 }

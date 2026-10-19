@@ -11,10 +11,12 @@ class InMemoryStorage implements LocalStorage {
     // 기본은 "이미 봤다" — 홈을 띄우는 기존 테스트마다 코치마크가 화면을 덮으면 안 된다.
     // 코치마크를 검증하는 테스트만 false 를 준다. 실제 앱의 첫 실행 기본값은 false 다.
     bool homeCoachSeen = true,
+    bool libraryCoachSeen = true,
     bool childHapticOn = true,
   }) : _childHapticOn = childHapticOn,
        _completed = onboardingCompleted,
        _homeCoachSeen = homeCoachSeen,
+       _libraryCoachSeen = libraryCoachSeen,
        _pin = pin,
        _nickname = nickname,
        _character = character,
@@ -31,9 +33,13 @@ class InMemoryStorage implements LocalStorage {
   bool _elumi;
   bool _elumiLinkLost = false;
   bool _homeCoachSeen;
+  bool _libraryCoachSeen;
 
   String? _nickname;
   List<String> _goals = const [];
+  List<String> _pendingExampleCategories = const [];
+  int _exampleSeedAttempts = 0;
+  String? _pendingExampleProfileId;
   String? _character;
   String? _imageStyle;
   String? _pin;
@@ -64,6 +70,26 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   Future<void> setGoals(List<String> v) async => _goals = v;
+
+  @override
+  List<String> get pendingExampleCategories => _pendingExampleCategories;
+
+  @override
+  Future<void> setPendingExampleCategories(List<String> v) async =>
+      _pendingExampleCategories = v;
+
+  @override
+  String? get pendingExampleProfileId => _pendingExampleProfileId;
+
+  @override
+  Future<void> setPendingExampleProfileId(String? v) async =>
+      _pendingExampleProfileId = v;
+
+  @override
+  int get exampleSeedAttempts => _exampleSeedAttempts;
+
+  @override
+  Future<void> setExampleSeedAttempts(int v) async => _exampleSeedAttempts = v;
 
   @override
   String? get character => _character;
@@ -222,12 +248,21 @@ class InMemoryStorage implements LocalStorage {
   bool get isHomeCoachSeen => _homeCoachSeen;
 
   @override
+  bool get isLibraryCoachSeen => _libraryCoachSeen;
+
+  @override
+  Future<void> setLibraryCoachSeen(bool v) async => _libraryCoachSeen = v;
+
+  @override
   Future<void> setHomeCoachSeen(bool v) async => _homeCoachSeen = v;
 
   @override
   Future<void> clearChildProfile() async {
     _nickname = null;
     _goals = const [];
+    _pendingExampleCategories = const [];
+    _exampleSeedAttempts = 0;
+    _pendingExampleProfileId = null;
     _character = null;
     _imageStyle = null;
     _completed = false;
@@ -241,6 +276,9 @@ class InMemoryStorage implements LocalStorage {
     _accountMemberId = null;
     _nickname = null;
     _goals = const [];
+    _pendingExampleCategories = const [];
+    _exampleSeedAttempts = 0;
+    _pendingExampleProfileId = null;
     _character = null;
     _imageStyle = null;
     _pin = null;

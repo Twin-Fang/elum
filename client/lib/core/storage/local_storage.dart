@@ -26,6 +26,19 @@ abstract interface class LocalStorage {
   List<String> get goals;
   Future<void> setGoals(List<String> v);
 
+  /// 아직 서버에 만들지 못한 온보딩 예시 분류 (`RoutineExampleCategory.apiValue`, #803).
+  /// 비어 있으면 만들 것 없음. 홈 진입 시 생성 요청 후 비운다.
+  List<String> get pendingExampleCategories;
+  Future<void> setPendingExampleCategories(List<String> v);
+
+  /// 예시를 넣을 이룸이 id — 온보딩을 마친 순간 선택된 이룸이. 선택이 바뀌면 보내지 않는다
+  String? get pendingExampleProfileId;
+  Future<void> setPendingExampleProfileId(String? v);
+
+  /// 예시 생성 실패 횟수. 2번째 실패면 대기 분류를 비운다 (무한 재시도 방지)
+  int get exampleSeedAttempts;
+  Future<void> setExampleSeedAttempts(int v);
+
   String? get character;
   Future<void> setCharacter(String v);
 
@@ -161,6 +174,10 @@ abstract interface class LocalStorage {
   /// 로그아웃했다 들어왔다고 안내를 처음부터 다시 보여 주면 귀찮기만 하다.
   bool get isHomeCoachSeen;
   Future<void> setHomeCoachSeen(bool v);
+
+  /// 일과관리 코치마크를 이 휴대폰에서 이미 봤는가 (#834)
+  bool get isLibraryCoachSeen;
+  Future<void> setLibraryCoachSeen(bool v);
 
   /// 이룸이 화면의 카드 진동을 켜 두었는가. **기본은 켜짐**이라 저장된 적이 없으면 true.
   ///

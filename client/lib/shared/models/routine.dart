@@ -86,6 +86,20 @@ abstract class Routine with _$Routine {
 
     /// 보내기로 만들어진 일과가 어느 원본에서 왔는지. 원본이면 null. 서버 `sourceRoutineId`.
     String? sourceRoutineId,
+
+    // --- 일과 묶음 (#806) ---
+
+    /// 일과관리 원본이 들어 있는 묶음 id · 묶음 안 순서(0부터). 묶음 밖이면 null
+    String? groupId,
+    int? groupOrder,
+
+    /// 묶음째 보내 만든 오늘 일과의 묶음 id · 보낼 때의 묶음 이름 · 묶음 안 순서. 낱개로 보냈으면 null
+    String? sentGroupId,
+    String? sentGroupName,
+    int? sentGroupOrder,
+
+    /// 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803) — 홈 타일에 `예시` 표시.
+    @Default(false) bool isExample,
   }) = _Routine;
 
   const Routine._();
@@ -188,6 +202,11 @@ abstract class Routine with _$Routine {
     // 오프라인으로 이룸이 화면을 열어도 카드 글·음성이 일과 언어를 따르게 남긴다
     'language': language,
     if (sourceRoutineId != null) 'sourceRoutineId': sourceRoutineId,
+    // 오프라인으로 이룸이 홈을 열어도 묶음 상자가 그대로 보이게 남긴다
+    if (sentGroupId != null) 'sentGroupId': sentGroupId,
+    if (sentGroupName != null) 'sentGroupName': sentGroupName,
+    if (sentGroupOrder != null) 'sentGroupOrder': sentGroupOrder,
+    'isExample': isExample,
   };
 
   factory Routine.fromJson(Map<String, dynamic> json) {
@@ -221,12 +240,29 @@ abstract class Routine with _$Routine {
           : null,
       creatorName: json['creatorName']?.toString(),
       language: normalizeContentLanguage(json['language']),
-      sourceRoutineId: switch (json['sourceRoutineId']?.toString()) {
-        final String id when id.isNotEmpty => id,
-        _ => null,
-      },
+      sourceRoutineId: _optionalId(json['sourceRoutineId']),
+      groupId: _optionalId(json['groupId']),
+      groupOrder: _optionalInt(json['groupOrder']),
+      sentGroupId: _optionalId(json['sentGroupId']),
+      sentGroupName: _optionalId(json['sentGroupName']),
+      sentGroupOrder: _optionalInt(json['sentGroupOrder']),
+      // bool 이 아니면 예시 아님 — 옛 응답·캐시에 배지가 붙지 않게
+      isExample: json['isExample'] == true,
     );
   }
+
+  /// 비었거나 없는 글자는 null (빈 문자열을 값으로 보지 않는다)
+  static String? _optionalId(Object? value) => switch (value?.toString()) {
+    final String text when text.isNotEmpty => text,
+    _ => null,
+  };
+
+  /// 없으면 null, 숫자가 int·String 어느 쪽으로 와도 읽는다
+  static int? _optionalInt(Object? value) => switch (value) {
+    final int number => number,
+    final String text => int.tryParse(text),
+    _ => null,
+  };
 
   /// 숫자가 int·String 어느 쪽으로 와도 죽지 않게 읽는다.
   static int _asInt(Object? value) => switch (value) {

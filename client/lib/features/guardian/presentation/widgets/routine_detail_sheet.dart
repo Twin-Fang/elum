@@ -42,6 +42,9 @@ enum RoutineSheetAction {
 
   /// 일과관리 원본 — 오늘 이룸이에게 보낸다 (#805).
   send,
+
+  /// 일과관리 원본 — `⋯` 로 빠른 메뉴를 연다 (#834).
+  more,
 }
 
 class RoutineDetailSheet extends ConsumerStatefulWidget {
@@ -98,7 +101,11 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
 }
 
 class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
-  late List<ActionCard> _steps = List.of(widget.routine.steps);
+  // 일과관리 원본은 보관본이라 예전에 한 체크를 보이지 않는다 — 오늘 보내면 새로 시작한다
+  late List<ActionCard> _steps = [
+    for (final step in widget.routine.steps)
+      widget.isLibrary ? step.copyWith(completed: false) : step,
+  ];
 
   /// 시트 높이. 시안(956:4084) 기준 614/852 ≈ 0.72다.
   ///
@@ -191,6 +198,10 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                 caption: widget.isPast
                     ? null
                     : widget.routine.foreignCreatorLabel,
+                // 일과관리에서 연 시트만 — 길게 누르기를 모르는 사람이 메뉴를 찾는 길 (#834)
+                onMoreTap: widget.isLibrary
+                    ? () => Navigator.of(context).pop(RoutineSheetAction.more)
+                    : null,
               ),
 
               // --- 스크롤: 단계 + 보상 ---

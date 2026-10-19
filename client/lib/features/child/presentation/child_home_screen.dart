@@ -1,5 +1,6 @@
 import 'child_home_landscape_body.dart';
 import 'child_home_top_bar.dart';
+import 'child_routine_group_box.dart';
 import 'child_routine_tile.dart';
 import 'child_no_routine.dart';
 
@@ -23,6 +24,7 @@ import '../../onboarding/application/onboarding_notifier.dart';
 import '../../profile/application/profile_display_name.dart';
 import '../../profile/application/profile_session.dart';
 import '../../../shared/models/character.dart';
+import '../application/child_home_entries.dart';
 import '../application/child_routine_notifier.dart';
 import '../application/routine_auto_refresh.dart';
 import '../../../core/storage/local_storage.dart';
@@ -185,7 +187,7 @@ class ChildHomeScreen extends ConsumerWidget {
   }
 }
 
-/// 일과 타일 목록 (Figma 361×68, 간격 16).
+/// 일과 타일 목록 (Figma 361×68, 간격 16). 묶음으로 보낸 일과는 상자 하나로 묶어 보인다 (#808)
 class _RoutineList extends ConsumerWidget {
   const _RoutineList({required this.routines});
 
@@ -195,15 +197,23 @@ class _RoutineList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final space = context.space;
     final progress = ref.watch(childRoutineProvider);
+    double progressOf(Routine routine) => routineProgress(routine, progress);
+    final entries = composeChildHomeEntries(routines);
 
     return Column(
       children: [
-        for (final (index, routine) in routines.indexed) ...[
+        for (final (index, entry) in entries.indexed) ...[
           if (index > 0) SizedBox(height: space.md),
-          ChildRoutineTile(
-            routine: routine,
-            progress: routineProgress(routine, progress),
-          ),
+          switch (entry) {
+            ChildRoutineEntry(:final routine) => ChildRoutineTile(
+              routine: routine,
+              progress: progressOf(routine),
+            ),
+            ChildGroupEntry() => ChildRoutineGroupBox(
+              entry: entry,
+              progressOf: progressOf,
+            ),
+          },
         ],
       ],
     );

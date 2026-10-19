@@ -1,15 +1,271 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T10:33:36Z",
-    "currentVersion": "2.47.0",
+    "lastUpdated": "2026-10-19T14:32:40Z",
+    "currentVersion": "2.53.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 265
+    "totalReleases": 276
   },
   "releases": [
+    {
+      "version": "2.53.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 833,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **새로운 기능**\n  * 이룸이 홈에서 묶음으로 보낸 일과가 흰 상자 하나로 묶여 보여요. 상자 머리에 묶음 이름과 진행(예: 0 / 2)이 보이고, 안의 일과는 보낸 순서대로 나와요.\n  * 묶음을 모두 끝내면 머리가 \"다 했어요!\"로 바뀌어요.\n  * 낱개로 보낸 일과는 지금처럼 한 줄로 보여요.",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "이룸이 홈에서 묶음으로 보낸 일과가 흰 상자 하나로 묶여 보여요. 상자 머리에 묶음 이름과 진행(예: 0 / 2)이 보이고, 안의 일과는 보낸 순서대로 나와요.",
+            "묶음을 모두 끝내면 머리가 \"다 했어요!\"로 바뀌어요.",
+            "낱개로 보낸 일과는 지금처럼 한 줄로 보여요."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.52.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 830,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 태블릿 보호자 화면 왼쪽 위 카드에 루미 아이콘이 나와요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "태블릿 보호자 화면 왼쪽 위 카드에 루미 아이콘이 나와요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.51.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 829,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 카드 사진을 고르는 화면의 안내 문구를 정리했어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드 사진을 고르는 화면의 안내 문구를 정리했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.50.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 824,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **새로운 기능**\n  * 관리자 설정의 Pro 요금제 그룹에 \"광고 항상 노출 회원\" 항목을 더했어요. 회원 ID를 쉼표로 적으면 그 계정은 Pro여도 광고가 보여요. 비워 두면 지금과 똑같이 동작해요.",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "관리자 설정의 Pro 요금제 그룹에 \"광고 항상 노출 회원\" 항목을 더했어요. 회원 ID를 쉼표로 적으면 그 계정은 Pro여도 광고가 보여요. 비워 두면 지금과 똑같이 동작해요."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.49.2",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 819,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **버그 수정**\n  * 일과관리의 묶음 칸 미리보기가 하얀 칸으로만 보이던 문제를 고쳤어요. 이제 안에 든 일과 그림이 2×2로 보여요.\n  * 새 묶음을 만들 때 키보드가 올라오면 시트가 화면 위쪽 상태바를 덮던 문제를 고쳤어요.",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "일과관리의 묶음 칸 미리보기가 하얀 칸으로만 보이던 문제를 고쳤어요. 이제 안에 든 일과 그림이 2×2로 보여요.",
+            "새 묶음을 만들 때 키보드가 올라오면 시트가 화면 위쪽 상태바를 덮던 문제를 고쳤어요."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.49.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 818,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 카드를 만들지 못했을 때 화면이 더 보기 쉬워졌어요\n  * 다시 하기 버튼이 아래에 고정되고, 홈으로 나가는 길이 항상 있어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드를 만들지 못했을 때 화면이 더 보기 쉬워졌어요",
+            "다시 하기 버튼이 아래에 고정되고, 홈으로 나가는 길이 항상 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.49.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 815,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **새로운 기능**\n  * 일과관리에서 일과를 묶음(폴더)으로 모을 수 있어요. 묶음은 안 일과 그림이 2×2로 보이고, 누르면 순서 바꾸기·빼기·일과 넣기·오늘 보내기를 할 수 있어요.\n  * 일과를 길게 누른 채 다른 일과나 묶음 위에 놓으면 묶여요. 그냥 떼면 기존처럼 메뉴가 열려요.\n  * + 일과 만들기에서 새 일과와 새 묶음 중 고를 수 있고, 일과 메뉴에 묶음에 넣기가 생겼어요.\n  * 묶음째 오늘 보낼 수 있고, 이미 보낸 일과는 건너뛰어요.\n\n* **개선**\n  * + 일과 만들기 글자 크기를 줄여 다른 글자와 어울리게 했어요.\n\n* **기타**\n  * 서버에 일과 묶음 저장·복사·풀기·묶음째 보내기 API를 더했어요.",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "일과관리에서 일과를 묶음(폴더)으로 모을 수 있어요. 묶음은 안 일과 그림이 2×2로 보이고, 누르면 순서 바꾸기·빼기·일과 넣기·오늘 보내기를 할 수 있어요.",
+            "일과를 길게 누른 채 다른 일과나 묶음 위에 놓으면 묶여요. 그냥 떼면 기존처럼 메뉴가 열려요.",
+            "+ 일과 만들기에서 새 일과와 새 묶음 중 고를 수 있고, 일과 메뉴에 묶음에 넣기가 생겼어요.",
+            "묶음째 오늘 보낼 수 있고, 이미 보낸 일과는 건너뛰어요."
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "+ 일과 만들기 글자 크기를 줄여 다른 글자와 어울리게 했어요."
+          ]
+        },
+        "기타": {
+          "title": "기타",
+          "items": [
+            "서버에 일과 묶음 저장·복사·풀기·묶음째 보내기 API를 더했어요."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.48.3",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 814,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 새 버전이 필요할 때 보이는 안내를 카드 모양으로 바꿨어요\n  * 점검 중일 때 보이는 안내를 더 알아보기 쉽게 바꿨어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "새 버전이 필요할 때 보이는 안내를 카드 모양으로 바꿨어요",
+            "점검 중일 때 보이는 안내를 더 알아보기 쉽게 바꿨어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.48.2",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 812,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 휴대폰에서 일과 이름을 바꿀 때 아래 메뉴가 키보드 위로 떠오르고 입력창이 잘리던 문제를 고쳤어요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "휴대폰에서 일과 이름을 바꿀 때 아래 메뉴가 키보드 위로 떠오르고 입력창이 잘리던 문제를 고쳤어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.48.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 811,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 태블릿 왼쪽 메뉴를 화면 읽기 기능으로 찾지 못하던 문제를 고쳤어요\n  * 알림 메시지가 메뉴와 일과 만들기 버튼을 가리던 문제를 고쳤어요\n\n* **개선**\n  * 일과 이름을 바꿀 때 입력칸이 바로 열려요\n  * 일과관리에서 그림을 불러오는 동안에도 칸이 보여요\n  * 태블릿 가로 화면에서 일과관리가 화면을 넓게 써요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "태블릿 왼쪽 메뉴를 화면 읽기 기능으로 찾지 못하던 문제를 고쳤어요",
+            "알림 메시지가 메뉴와 일과 만들기 버튼을 가리던 문제를 고쳤어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "일과 이름을 바꿀 때 입력칸이 바로 열려요",
+            "일과관리에서 그림을 불러오는 동안에도 칸이 보여요",
+            "태블릿 가로 화면에서 일과관리가 화면을 넓게 써요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.48.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 810,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 처음 시작할 때 일과 분류를 고르면 예시 일과를 넣어 드려요\n  * 예시 일과에 '예시' 표시가 붙어요\n* **개선**\n  * 처음 시작 화면의 질문을 더 쉽게 바꿨어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "처음 시작할 때 일과 분류를 고르면 예시 일과를 넣어 드려요",
+            "예시 일과에 '예시' 표시가 붙어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "처음 시작 화면의 질문을 더 쉽게 바꿨어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.47.0",
       "project_type": "flutter",

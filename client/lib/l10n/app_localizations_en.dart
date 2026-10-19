@@ -212,21 +212,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Find elum in the store and update it';
 
   @override
-  String get appStatusMaintenanceTitle => 'Taking a short break';
+  String get appStatusMaintenanceTitle => 'Under maintenance right now';
 
   @override
   String get appStatusMaintenanceBody =>
-      'Please open the app again in a little while';
+      'You can use elum again once it is done.\nPlease check back in a little while';
 
   @override
   String get appStatusRecheck => 'Check again';
 
   @override
-  String get appStatusUpdateTitle => 'A new elum is here';
-
-  @override
-  String get appStatusUpdateBody =>
-      'Get the new version to keep using the app.\nUpdate elum in the store';
+  String get appStatusUpdateTitle => 'Update now and enjoy\nthe new elum!';
 
   @override
   String get appStatusUpdated => 'I updated it';
@@ -449,14 +445,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboardingCharacterDescription =>
       'The friend you pick is the star of the cards and helps along the way';
-
-  @override
-  String onboardingGoalsTitle(String name) {
-    return 'Which moments of $name\'s day\ndo you want to help with?';
-  }
-
-  @override
-  String get onboardingGoalsDescription => 'You can pick more than one';
 
   @override
   String get onboardingImageStyleTitle =>
@@ -1495,10 +1483,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardPhotoSourceGallery => 'Choose from gallery';
 
   @override
-  String get cardPhotoSourcePrivacy =>
-      'Don\'t show faces or personal information in the photo';
-
-  @override
   String cardPhotoUploadFailedDialog(String message) {
     return 'Couldn\'t upload the photo.\n$message';
   }
@@ -2384,4 +2368,179 @@ class AppLocalizationsEn extends AppLocalizations {
   String routineLibrarySent(String title) {
     return 'Sent $title for today';
   }
+
+  @override
+  String onboardingExampleTitle(String name, String batchim) {
+    return 'Which routines would you like\nto start with $name?';
+  }
+
+  @override
+  String get onboardingExampleDescription =>
+      'We\'ll add example routines for the ones you pick.\nYou can pick more than one.';
+
+  @override
+  String get onboardingExampleSkip => 'Skip';
+
+  @override
+  String get exampleCategoryMorningEvening => 'Morning & evening';
+
+  @override
+  String get exampleCategoryMorningEveningHint => 'Washing, dressing, bedtime';
+
+  @override
+  String get exampleCategorySchoolStudy => 'School & study';
+
+  @override
+  String get exampleCategorySchoolStudyHint =>
+      'Getting ready for school, homework';
+
+  @override
+  String get exampleCategoryHouseSelf => 'Chores & doing it myself';
+
+  @override
+  String get exampleCategoryHouseSelfHint => 'Tidying up, setting the table';
+
+  @override
+  String get exampleCategoryOutside => 'Out and about';
+
+  @override
+  String get exampleCategoryOutsideHint => 'Taking the bus, shopping';
+
+  @override
+  String get routineTileExampleBadge => 'Example';
+
+  @override
+  String get exampleRoutinesFailed => 'Couldn\'t add the example routines';
+
+  @override
+  String get routineGroupMenuAddToGroup => 'Add to a bundle';
+
+  @override
+  String get routineGroupMenuReorder => 'Change order';
+
+  @override
+  String get routineGroupMenuUngroup => 'Ungroup';
+
+  @override
+  String routineGroupTileLabel(String name, int count) {
+    return '$name bundle, $count routines';
+  }
+
+  @override
+  String get routineGroupDefaultName => 'New bundle';
+
+  @override
+  String get routineGroupNameHint => 'Bundle name (e.g. Morning)';
+
+  @override
+  String get routineGroupNewTitle => 'New bundle';
+
+  @override
+  String routineGroupAddTitle(String name) {
+    return 'Add to $name';
+  }
+
+  @override
+  String get routineGroupPickHintNew =>
+      'Tap routines in the order to show them (2 or more)';
+
+  @override
+  String get routineGroupPickHint => 'Tap routines in order';
+
+  @override
+  String get routineGroupPickEmpty => 'No routines to add';
+
+  @override
+  String routineGroupPickConfirmNew(int count) {
+    return 'Bundle $count';
+  }
+
+  @override
+  String routineGroupPickConfirmAdd(int count) {
+    return 'Add $count';
+  }
+
+  @override
+  String get routineGroupCreateMenuTitle => 'What do you want to make?';
+
+  @override
+  String get routineGroupCreateRoutine => 'New routine';
+
+  @override
+  String get routineGroupCreateGroup => 'New bundle';
+
+  @override
+  String get routineGroupChooseTitle => 'Which bundle?';
+
+  @override
+  String routineGroupSheetCount(int count) {
+    return '$count routines · shown in this order';
+  }
+
+  @override
+  String get routineGroupSheetAdd => 'Add routines';
+
+  @override
+  String routineGroupSheetRemove(String title) {
+    return 'Remove $title from bundle';
+  }
+
+  @override
+  String get routineGroupSheetDragHint => 'Drag the handle to reorder';
+
+  @override
+  String get routineGroupCreated => 'Bundle created';
+
+  @override
+  String get routineGroupAdded => 'Added to bundle';
+
+  @override
+  String get routineGroupRemovedOne => 'Removed from bundle';
+
+  @override
+  String get routineGroupUngrouped => 'Bundle ungrouped';
+
+  @override
+  String get routineGroupUngroupedLastOne =>
+      'Only one routine left, so the bundle was ungrouped';
+
+  @override
+  String get routineGroupReordered => 'Order changed';
+
+  @override
+  String routineGroupSent(String name) {
+    return 'Sent the $name bundle for today';
+  }
+
+  @override
+  String get routineGroupAllSentAlready =>
+      'Everything in this bundle was already sent today';
+
+  @override
+  String get routineGroupActionFailedTitle => 'Couldn\'t change the bundle';
+
+  @override
+  String get routineGroupUngroupConfirmTitle => 'Ungroup this bundle?';
+
+  @override
+  String get routineGroupUngroupConfirmMessage =>
+      'The routines stay in Routines';
+
+  @override
+  String childHomeGroupProgress(int done, int total) {
+    return '$done / $total';
+  }
+
+  @override
+  String get childHomeGroupAllDone => 'All done!';
+
+  @override
+  String get libraryCoachMenu =>
+      '*Long-press* a routine to open its menu\nRename, copy or delete from there';
+
+  @override
+  String get libraryCoachCreate => 'You can also make a new bundle here';
+
+  @override
+  String get routineDetailMore => 'More';
 }

@@ -39,6 +39,7 @@ public class RoutineService {
   private final RoutineRepository routineRepository;
   private final ProfileAccessGuard profileAccessGuard;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
+  private final RoutineGroupMembership routineGroupMembership;
 
   @Transactional
   public RoutineResponse confirm(Caller caller, String routineId) {
@@ -91,6 +92,8 @@ public class RoutineService {
     if (!isDeletable(routine)) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
+    // 묶음 구성원이면 묶음에서 빼고 2개 미만이면 묶음 풀기 (#806)
+    routineGroupMembership.leaveGroup(routine);
     RoutineRules.deleteWithSpeech(routineRepository, routineStepSpeechQueue, routine);
   }
 

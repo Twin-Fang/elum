@@ -11,11 +11,9 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/character_badge.dart';
 import '../../../../core/widgets/elum_spinner.dart';
-import '../../../../shared/models/routine.dart';
 import '../../application/guardian_child_identity.dart';
-import 'library_routine_tile.dart';
 
-// 일과관리 칸 화면 조각: 머리, 격자, 빈 상태, `+ 일과 만들기` 버튼 (#805)
+// 일과관리 칸 화면 조각: 머리, 빈 상태, `+ 일과 만들기` 버튼 (#805). 격자는 library_entry_grid.dart
 
 /// 제목 + (폰만) 오른쪽 위 이룸이 화면 배지. 태블릿은 옆 메뉴에 입구가 있다
 class LibraryManageHeader extends ConsumerWidget {
@@ -52,73 +50,6 @@ class LibraryManageHeader extends ConsumerWidget {
             ),
         ],
       ),
-    );
-  }
-}
-
-/// 원본 격자. 창 폭으로 열 수를 정한다 (폰 4열, 넓으면 늘어남)
-class LibraryGrid extends StatelessWidget {
-  const LibraryGrid({
-    required this.routines,
-    required this.sentIds,
-    required this.bottomSpace,
-    required this.onTap,
-    required this.onLongPress,
-  });
-
-  final List<Routine> routines;
-  final Set<String> sentIds;
-  final double bottomSpace;
-
-  /// 다른 동작이 도는 중이면 null — 같은 요청이 두 번 가지 않게
-  final ValueChanged<Routine>? onTap;
-  final ValueChanged<Routine>? onLongPress;
-
-  /// 칸 한 개가 차지하는 최소 폭(393 기준). 이 폭으로 열 수를 정한다 (폰 4열)
-  static const _tileMinWidth = 84.0;
-  static const _minColumns = 4;
-  static const _maxColumns = 8;
-
-  @override
-  Widget build(BuildContext context) {
-    final space = context.space;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns =
-            (constraints.maxWidth / _tileMinWidth.w)
-                .floor()
-                .clamp(
-                  _minColumns,
-                  _maxColumns,
-                );
-        return GridView.builder(
-          padding: EdgeInsets.fromLTRB(
-            space.md.w,
-            space.xs.h,
-            space.md.w,
-            bottomSpace,
-          ),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            mainAxisSpacing: space.md.h,
-            crossAxisSpacing: space.xs.w,
-            // 그림 칸 + 이름 두 줄이 들어가는 높이
-            mainAxisExtent:
-                LibraryRoutineTile.iconSize.w + space.xs.h + space.xl.h * 1.4,
-          ),
-          itemCount: routines.length,
-          itemBuilder: (context, index) {
-            final routine = routines[index];
-            return LibraryRoutineTile(
-              key: ValueKey(routine.id),
-              routine: routine,
-              isSentToday: sentIds.contains(routine.id),
-              onTap: () => onTap?.call(routine),
-              onLongPress: () => onLongPress?.call(routine),
-            );
-          },
-        );
-      },
     );
   }
 }
@@ -185,7 +116,7 @@ class CreateRoutineFab extends StatelessWidget {
   final VoidCallback onTap;
 
   /// 더하기 아이콘 한 변
-  static const _iconSize = 24.0;
+  static const _iconSize = 20.0;
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +148,9 @@ class CreateRoutineFab extends StatelessWidget {
             SizedBox(width: space.xs.w),
             Text(
               context.l10n.routineLibraryCreate,
-              style: context.typo.button.copyWith(color: colors.surface),
+              style: context.typo.floatingActionLabel.copyWith(
+                color: colors.surface,
+              ),
             ),
           ],
         ),

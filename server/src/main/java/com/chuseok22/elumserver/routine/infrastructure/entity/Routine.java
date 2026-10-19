@@ -30,7 +30,11 @@ import lombok.Setter;
 @Getter
 @Setter
 // 보내기 이력 조회 (오늘 이미 보냈는가 · 원본을 가리키는 일과가 있는가) — V42 와 같은 이름
-@Table(indexes = @Index(name = "idx_routine_source_routine_id", columnList = "source_routine_id"))
+// 묶음 구성원 조회 (#806) — V44 와 같은 이름
+@Table(indexes = {
+  @Index(name = "idx_routine_source_routine_id", columnList = "source_routine_id"),
+  @Index(name = "idx_routine_group_id", columnList = "group_id")
+})
 public class Routine extends BaseEntity {
 
   @Id
@@ -105,6 +109,13 @@ public class Routine extends BaseEntity {
   private Integer displayOrder = 0;
 
   /**
+   * 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803). 홈에 `예시` 표시, 보유 한도 집계 제외.
+   * 고쳐도 예시 표시는 그대로 둔다.
+   */
+  @Column(name = "is_example", nullable = false, columnDefinition = "boolean not null default false")
+  private Boolean isExample = false;
+
+  /**
    * 일과의 콘텐츠 언어. 일과가 만들어질 때 정해진 언어를 저장한다.
    *
    * <p>일과를 만든 요청의 화면 언어를 켜진 언어 목록(ENABLED_CONTENT_LOCALES)에 비춰 정한다. 보호자가 고르지 않고
@@ -150,6 +161,26 @@ public class Routine extends BaseEntity {
    */
   @Column(name = "library_hidden", nullable = false, columnDefinition = "boolean not null default false")
   private boolean libraryHidden = false;
+
+  /// 이 원본이 속한 일과관리 묶음 ID (#806). 묶음 밖이면 null. 외래키 없는 문자열 (sourceRoutineId 와 같은 방식)
+  @Column(name = "group_id")
+  private String groupId;
+
+  /// 묶음 안 차례 (0부터). 이룸이가 보는 순서. 묶음 밖이면 null
+  @Column(name = "group_order")
+  private Integer groupOrder;
+
+  /// 묶음째 보내기로 만든 오늘 일과면 그 묶음 ID (#806). 보낸 때 스냅샷 — 묶음을 풀어도 그대로
+  @Column(name = "sent_group_id")
+  private String sentGroupId;
+
+  /// 보낸 때의 묶음 이름 스냅샷. 이룸이 홈 묶음 상자 이름
+  @Column(name = "sent_group_name", length = 40)
+  private String sentGroupName;
+
+  /// 보낸 때 묶음 안 차례 (0부터)
+  @Column(name = "sent_group_order")
+  private Integer sentGroupOrder;
 
   private LocalDateTime completedAt;
 

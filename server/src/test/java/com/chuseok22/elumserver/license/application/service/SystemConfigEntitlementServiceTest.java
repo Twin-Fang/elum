@@ -275,4 +275,49 @@ class SystemConfigEntitlementServiceTest {
     assertThat(snapshot.adsRemoved()).isFalse();
     assertThat(snapshot.routineCreatePerWeek()).isEqualTo(3);
   }
+
+  // --- 광고 항상 노출 회원 ---
+
+  private void givenProWithAdsRemoved(String alwaysShownMemberIds) {
+    when(subscriptionRepository.findByMemberId(MEMBER_ID))
+      .thenReturn(Optional.of(subscription(PlanType.PRO, SubscriptionStatus.ACTIVE, null)));
+    lenient().when(systemConfigService.getBoolean(any())).thenReturn(false);
+    lenient().when(systemConfigService.getInt(any())).thenReturn(-1);
+    lenient().when(systemConfigService.getBoolean(ConfigKey.PRO_ADS_REMOVED)).thenReturn(true);
+    lenient().when(systemConfigService.getString(ConfigKey.ADS_ALWAYS_SHOWN_MEMBER_IDS)).thenReturn(alwaysShownMemberIds);
+  }
+
+  @Test
+  @DisplayName("목록에 있는 회원은 Pro여도 광고가 제거되지 않는다")
+  void adsAlwaysShown_listedProMember_adsNotRemoved() {
+    givenProWithAdsRemoved("other, m1");
+
+    assertThat(entitlementService.snapshot(MEMBER_ID).adsRemoved()).isFalse();
+    assertThat(entitlementService.isAllowed(MEMBER_ID, Entitlement.ADS_REMOVED)).isFalse();
+  }
+
+  @Test
+  @DisplayName("목록에 없는 Pro 회원은 광고 제거가 유지된다")
+  void adsAlwaysShown_unlistedProMember_adsRemoved() {
+    givenProWithAdsRemoved("other1,other2");
+
+    assertThat(entitlementService.snapshot(MEMBER_ID).adsRemoved()).isTrue();
+    assertThat(entitlementService.isAllowed(MEMBER_ID, Entitlement.ADS_REMOVED)).isTrue();
+  }
+
+  @Test
+  @DisplayName("공백과 빈 항목이 섞인 목록도 읽는다")
+  void adsAlwaysShown_listWithSpacesAndEmptyEntries() {
+    givenProWithAdsRemoved(" , other ,  m1  ,, ");
+
+    assertThat(entitlementService.snapshot(MEMBER_ID).adsRemoved()).isFalse();
+  }
+
+  @Test
+  @DisplayName("목록이 비었거나 공백뿐이면 동작이 바뀌지 않는다")
+  void adsAlwaysShown_blankList_unchanged() {
+    givenProWithAdsRemoved("  ");
+
+    assertThat(entitlementService.snapshot(MEMBER_ID).adsRemoved()).isTrue();
+  }
 }

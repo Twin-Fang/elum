@@ -21,6 +21,7 @@ testStorageOverride({
   String? character,
   bool elumiDevice = false,
   bool homeCoachSeen = true,
+  bool libraryCoachSeen = true,
 }) {
   return localStorageProvider.overrideWithValue(
     InMemoryStorage(
@@ -30,6 +31,7 @@ testStorageOverride({
       character: character,
       elumiDevice: elumiDevice,
       homeCoachSeen: homeCoachSeen,
+      libraryCoachSeen: libraryCoachSeen,
     ),
   );
 }

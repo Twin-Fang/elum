@@ -7,6 +7,7 @@ import '../../profile/domain/profile_summary.dart';
 import '../../../shared/models/character.dart';
 import '../domain/image_style.dart';
 import '../domain/onboarding_profile.dart';
+import '../../../shared/models/routine_example_category.dart';
 import '../../../shared/models/support_goal.dart';
 import '../../../core/logger/app_logger.dart';
 
@@ -47,15 +48,14 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
     state = state.copyWith(childNickname: value);
   }
 
-  /// 목표는 다중 선택이다
-  void toggleGoal(SupportGoal goal) {
-    final next = Set<SupportGoal>.from(state.supportGoals);
-    next.contains(goal) ? next.remove(goal) : next.add(goal);
-    state = state.copyWith(supportGoals: next);
+  /// 예시 분류는 다중 선택이다 (#803)
+  void setExampleCategories(Set<RoutineExampleCategory> categories) {
+    state = state.copyWith(exampleCategories: categories);
   }
 
-  void setGoals(Set<SupportGoal> goals) {
-    state = state.copyWith(supportGoals: goals);
+  /// 건너뛰기 — 예시를 만들지 않는다
+  void clearExampleCategories() {
+    state = state.copyWith(exampleCategories: const {});
   }
 
   /// 캐릭터는 단일 선택이다
@@ -173,6 +173,8 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
   /// 대신 **서버 저장이 온전했는지를 돌려준다** — 부르는 쪽이 알려야
   /// 보호자가 "설정이 저장된 줄 알았는데 재설치하니 사라졌다"를 겪지 않는다.
   ///
+  /// 예시 일과 분류는 서버에 보내지 않고 로컬에만 보관한다 (홈 진입 때 ExampleRoutineSeeder 가 만든다).
+  ///
   /// null 이면 셋 다 저장됐다. 하나라도 실패하면 **처음 실패한 이유**를 돌려준다 —
   /// 서버가 왜 거절했는지(잘못된 값·정지된 계정 등)를 화면이 그대로 띄운다.
   Future<AppFailure?> complete() async {
@@ -192,6 +194,13 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
       // 건너뛴 경우에도 기본값(만화)이 명시로 남는다
       await storage.setImageStyle(input.imageStyle.apiValue);
       await storage.setPin(input.guardianPin);
+      // 예시 일과는 홈 진입 때 만든다 (ExampleRoutineSeeder). 건너뛰었으면 빈 목록
+      await storage.setPendingExampleCategories(
+        input.exampleCategories.map((c) => c.apiValue).toList(),
+      );
+      // ensureProfile 이 먼저 고른 이룸이 — 나중에 선택이 바뀌면 그 이룸이에 넣지 않는다
+      await storage.setPendingExampleProfileId(storage.selectedProfileId);
+      await storage.setExampleSeedAttempts(0);
       await storage.setOnboardingCompleted(true);
     } catch (e, stack) {
       AppLogger.error('[onboarding] local save failed', e, stack);

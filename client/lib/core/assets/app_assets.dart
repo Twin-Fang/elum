@@ -1,6 +1,5 @@
 import '../../shared/models/reward_character.dart';
 import '../../shared/models/character.dart';
-import '../../shared/models/support_goal.dart';
 
 /// 에셋 경로 상수.
 ///
@@ -50,21 +49,6 @@ abstract final class AppAssets {
   /// 로그아웃·회원탈퇴·모든 실패가 같은 아이콘을 쓴다. 이룸이 화면도 같다 —
   /// 시안에 노란 경고가 없다.
   static const dialogAlert = 'assets/icon/dialog/alert_round.svg';
-
-  /// 목표 칩 아이콘 (40×40).
-  ///
-  /// **고른 뒤에는 배경 원 색이 바뀐다** — 미선택 `#EEE9E6`, 선택 `#93DBCC`
-  /// (Figma `204:1002` ↔ `204:1147`). 원이 그림 안에 들어 있어 코드로 덧칠할 수
-  /// 없으므로 두 벌을 따로 들여온다. 한 벌만 쓰면 고른 칩만 원이 허옇게 남는다.
-  static String goalIcon(SupportGoal goal, {bool selected = false}) {
-    final suffix = selected ? '_selected' : '';
-    return switch (goal) {
-      SupportGoal.stepByStep => '$_images/goal_icon_step_by_step$suffix.svg',
-      SupportGoal.prepareItems => '$_images/goal_icon_prepare_items$suffix.svg',
-      SupportGoal.prepareNew => '$_images/goal_icon_prepare_new$suffix.svg',
-      SupportGoal.independent => '$_images/goal_icon_independent$suffix.svg',
-    };
-  }
 
   /// 역할 선택 카드 그림 (40×40) — ⚠️ **임시로 목표 아이콘을 빌려 쓴다.**
   ///
@@ -187,6 +171,15 @@ abstract final class AppAssets {
   /// 버려 납작한 점만 남았고, 몸통 방사형 그라데이션 셋에도 `gradientTransform`
   /// 행렬이 걸려 빛 자리가 어긋났다. 병아리 몸통·구슬과 같은 부류다.
   static const lumiThinking = '$_images/lumi_thinking.png';
+
+  /// 일과 카드 생성 실패 화면의 루미 (빈 카드를 들고 고개를 기울임, 투명 배경).
+  static const cardCreationFailedLumi = '$_images/card_creation_failed_lumi.png';
+
+  /// 강제 업데이트 안내 카드의 루미 + 다운로드 화살표 (1536×1024, 투명 배경).
+  static const updateLumi = '$_images/update_lumi.png';
+
+  /// 점검 안내 카드의 루미 + 톱니바퀴·렌치 (1536×1024, 투명 배경).
+  static const maintenanceLumi = '$_images/maintenance_lumi.png';
 
   /// 보호자 프로필 자리 루미 얼굴 아이콘 (투명 배경 정사각형 PNG)
   static const guardianProfileLumi = '$_images/guardian_profile_lumi.png';

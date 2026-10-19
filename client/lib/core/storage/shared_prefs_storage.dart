@@ -31,6 +31,10 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kNickname = 'childNickname';
   static const _kLastProvider = 'lastLoginProvider';
   static const _kGoals = 'supportGoals';
+  // 온보딩 예시 분류 대기값·실패 횟수 (#803)
+  static const _kPendingExampleCategories = 'pendingExampleCategories';
+  static const _kExampleSeedAttempts = 'exampleSeedAttempts';
+  static const _kPendingExampleProfileId = 'pendingExampleProfileId';
   static const _kCharacter = 'cardCharacter';
   static const _kImageStyle = 'imageStyle';
   static const _kCompleted = 'onboardingCompleted';
@@ -48,6 +52,7 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedTuning = 'cache.clientTuning';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
   static const _kHomeCoachSeen = 'coach.homeSeen';
+  static const _kLibraryCoachSeen = 'coach.librarySeen';
   static const _kChildHapticOn = 'haptic.childOn';
   static const _kChildPraiseSoundOn = 'sound.childPraiseOn';
   // 일과 알림: {routineId: {hour, minute, isDaily, title}} JSON
@@ -100,6 +105,43 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setGoals(List<String> v) {
     AppLogger.storageWrite(_kGoals, v);
     return _prefs.setStringList(_kGoals, v);
+  }
+
+  @override
+  List<String> get pendingExampleCategories {
+    final categories =
+        _prefs.getStringList(_kPendingExampleCategories) ?? const [];
+    AppLogger.storageRead(_kPendingExampleCategories, categories);
+    return categories;
+  }
+
+  @override
+  Future<void> setPendingExampleCategories(List<String> v) {
+    AppLogger.storageWrite(_kPendingExampleCategories, v);
+    return _prefs.setStringList(_kPendingExampleCategories, v);
+  }
+
+  @override
+  String? get pendingExampleProfileId =>
+      _prefs.getString(_kPendingExampleProfileId);
+
+  @override
+  Future<void> setPendingExampleProfileId(String? v) async {
+    AppLogger.storageWrite(_kPendingExampleProfileId, v ?? '');
+    if (v == null) {
+      await _prefs.remove(_kPendingExampleProfileId);
+    } else {
+      await _prefs.setString(_kPendingExampleProfileId, v);
+    }
+  }
+
+  @override
+  int get exampleSeedAttempts => _prefs.getInt(_kExampleSeedAttempts) ?? 0;
+
+  @override
+  Future<void> setExampleSeedAttempts(int v) {
+    AppLogger.storageWrite(_kExampleSeedAttempts, '$v');
+    return _prefs.setInt(_kExampleSeedAttempts, v);
   }
 
   @override
@@ -270,6 +312,15 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  bool get isLibraryCoachSeen => _prefs.getBool(_kLibraryCoachSeen) ?? false;
+
+  @override
+  Future<void> setLibraryCoachSeen(bool v) async {
+    AppLogger.storageWrite(_kLibraryCoachSeen, '$v');
+    await _prefs.setBool(_kLibraryCoachSeen, v);
+  }
+
+  @override
   bool get isChildHapticOn => _prefs.getBool(_kChildHapticOn) ?? true;
 
   @override
@@ -340,6 +391,10 @@ class SharedPrefsStorage implements LocalStorage {
     for (final key in [
       _kNickname,
       _kGoals,
+      // 지운 이룸이의 예시를 다음 이룸이에 만들지 않게
+      _kPendingExampleCategories,
+      _kExampleSeedAttempts,
+      _kPendingExampleProfileId,
       _kCharacter,
       _kImageStyle,
       _kCompleted,

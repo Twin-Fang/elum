@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/widgets/elum_toast.dart';
 import '../../../core/layout/adaptive_page_frame.dart';
 import '../../../core/layout/layout_context_ext.dart';
 import '../../../core/layout/window_size_class.dart';
@@ -18,6 +19,7 @@ import '../../credit/presentation/credit_blocked_dialog.dart';
 import '../../child/application/routine_auto_refresh.dart';
 import '../../profile/application/profile_session.dart';
 import '../application/guardian_child_identity.dart';
+import '../application/example_routine_seeder.dart';
 import '../application/home_routines.dart';
 import '../application/home_coach_notifier.dart';
 import '../application/routine_notifier.dart';
@@ -84,6 +86,26 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
   /// 다음 팝업이 올라오는 찰나에 홈이 잠깐 맨 앞이 된다 — 그때 시작하면 다음 팝업이
   /// 코치마크 위에 겹친다 (실기기에서 확인).
   static const _coachSettleFor = Duration(milliseconds: 1200);
+
+  @override
+  void initState() {
+    super.initState();
+    // 온보딩에서 고른 예시 일과를 만든다 (#803). 대기 분류가 없으면 아무것도 하지 않는다
+    WidgetsBinding.instance.addPostFrameCallback((_) => _seedExampleRoutines());
+  }
+
+  /// 예시 생성 실패는 홈을 막지 않고 안내만 한다 (에러 코드 포함)
+  Future<void> _seedExampleRoutines() async {
+    final outcome = await ref.read(exampleRoutineSeederProvider).seedPending();
+    if (!mounted || !outcome.shouldNotifyGuardian) return;
+    showElumToast(
+      context,
+      '${context.l10n.exampleRoutinesFailed} ($_exampleSeedErrorCode)',
+    );
+  }
+
+  /// 예시 일과 생성 실패 안내에 붙는 코드
+  static const _exampleSeedErrorCode = 'E-EXAMPLE';
 
   @override
   void dispose() {

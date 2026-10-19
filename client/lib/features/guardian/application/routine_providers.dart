@@ -4,8 +4,11 @@ import '../../../app/dio_provider.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../shared/models/routine.dart';
 import '../../../core/network/app_failure.dart';
+import '../data/routine_group_api.dart';
 import '../data/routine_library_api.dart';
+import '../domain/routine_group.dart';
 import '../data/routine_repository.dart';
+import '../data/routine_example_repository.dart';
 import '../data/routine_repository_impl.dart';
 import '../domain/routine_suggestion.dart';
 
@@ -103,6 +106,7 @@ extension RoutineListRefresh on WidgetRef {
     invalidate(pastRoutinesProvider);
     invalidate(myRoutinesProvider);
     invalidate(routineLibraryProvider);
+    invalidate(routineGroupsProvider);
   }
 }
 
@@ -113,6 +117,7 @@ extension RoutineListRefreshContainer on ProviderContainer {
     invalidate(pastRoutinesProvider);
     invalidate(myRoutinesProvider);
     invalidate(routineLibraryProvider);
+    invalidate(routineGroupsProvider);
   }
 }
 
@@ -123,6 +128,7 @@ extension RoutineListRefreshRef on Ref {
     invalidate(pastRoutinesProvider);
     invalidate(myRoutinesProvider);
     invalidate(routineLibraryProvider);
+    invalidate(routineGroupsProvider);
   }
 }
 
@@ -137,4 +143,21 @@ final routineLibraryProvider = FutureProvider<List<Routine>>((ref) async {
   final failure = result.failure;
   if (failure != null) throw failure;
   return result.value ?? const <Routine>[];
+});
+
+/// 온보딩 예시 일과 저장소 (#803). 인증 인터셉터가 붙은 [dioProvider]를 쓴다.
+final routineExampleRepositoryProvider = Provider<RoutineExampleRepository>(
+  (ref) => RoutineExampleRepository(ref.watch(dioProvider)),
+);
+
+final routineGroupApiProvider = Provider<RoutineGroupApi>(
+  (ref) => RoutineGroupApi(ref.watch(dioProvider)),
+);
+
+/// 일과 묶음 목록 (#807). 실패하면 [AppFailure] 를 던진다 — 묶음이 없는 것처럼 보이면 일과가 흩어진 줄 안다
+final routineGroupsProvider = FutureProvider<List<RoutineGroup>>((ref) async {
+  final groupsAttempt = await ref.watch(routineGroupApiProvider).fetchGroups();
+  final failure = groupsAttempt.failure;
+  if (failure != null) throw failure;
+  return groupsAttempt.value ?? const <RoutineGroup>[];
 });

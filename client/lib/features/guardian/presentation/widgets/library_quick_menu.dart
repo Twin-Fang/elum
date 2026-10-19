@@ -7,61 +7,134 @@ import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../shared/models/routine.dart';
 
-/// 일과관리 칸을 길게 눌렀을 때 고르는 동작 4개
-enum LibraryMenuAction { send, rename, copy, remove }
+/// 일과관리 낱개 원본을 길게 눌렀을 때 고르는 동작
+enum LibraryMenuAction { send, rename, addToGroup, copy, remove }
 
-/// 빠른 메뉴 시트: 제목 + 동작 줄. 남이 만든 일과는 보내기·복사하기만 (#805)
+/// 일과관리 묶음(폴더)을 길게 눌렀을 때 고르는 동작 (#807)
+enum GroupMenuAction { send, rename, reorder, copy, ungroup }
+
+/// 빠른 메뉴 한 줄: 돌려줄 값 · 아이콘 · 글자 · 붉게(되돌리기 어려운 동작)
+typedef QuickMenuRow<T> = ({
+  T value,
+  IconData icon,
+  String label,
+  bool isDanger,
+});
+
+/// 낱개 원본 메뉴. 남이 만든 일과는 보내기·묶음에 넣기·복사하기만 (#805)
 ///
 /// 이름 바꾸기·지우기는 만든 사람만 할 수 있어 서버도 막지만, 누를 수 없는 줄은 처음부터 보이지 않는다.
 Future<LibraryMenuAction?> showLibraryQuickMenu(
   BuildContext context,
   Routine routine,
 ) {
-  return showElumSheet<LibraryMenuAction>(
-    context: context,
-    builder: (_) => _LibraryQuickMenu(routine: routine),
+  final l10n = context.l10n;
+  final isMine = routine.isEditableByMe;
+  return showQuickMenuSheet(
+    context,
+    title: routine.displayTitle,
+    rows: [
+      (
+        value: LibraryMenuAction.send,
+        icon: Icons.send_rounded,
+        label: l10n.routineLibrarySendToday,
+        isDanger: false,
+      ),
+      if (isMine)
+        (
+          value: LibraryMenuAction.rename,
+          icon: Icons.edit_rounded,
+          label: l10n.routineLibraryMenuRename,
+          isDanger: false,
+        ),
+      (
+        value: LibraryMenuAction.addToGroup,
+        icon: Icons.create_new_folder_outlined,
+        label: l10n.routineGroupMenuAddToGroup,
+        isDanger: false,
+      ),
+      (
+        value: LibraryMenuAction.copy,
+        icon: Icons.content_copy_rounded,
+        label: l10n.routineLibraryMenuCopy,
+        isDanger: false,
+      ),
+      if (isMine)
+        (
+          value: LibraryMenuAction.remove,
+          icon: Icons.delete_outline_rounded,
+          label: l10n.routineLibraryMenuRemove,
+          isDanger: true,
+        ),
+    ],
   );
 }
 
-class _LibraryQuickMenu extends StatelessWidget {
-  const _LibraryQuickMenu({required this.routine});
+/// 묶음 메뉴: 보내기 · 이름 바꾸기 · 순서 바꾸기 · 복사하기 · 묶음 풀기 (풀어도 일과는 남는다)
+Future<GroupMenuAction?> showGroupQuickMenu(
+  BuildContext context, {
+  required String groupName,
+}) {
+  final l10n = context.l10n;
+  return showQuickMenuSheet(
+    context,
+    title: groupName,
+    rows: [
+      (
+        value: GroupMenuAction.send,
+        icon: Icons.send_rounded,
+        label: l10n.routineLibrarySendToday,
+        isDanger: false,
+      ),
+      (
+        value: GroupMenuAction.rename,
+        icon: Icons.edit_rounded,
+        label: l10n.routineLibraryMenuRename,
+        isDanger: false,
+      ),
+      (
+        value: GroupMenuAction.reorder,
+        icon: Icons.swap_vert_rounded,
+        label: l10n.routineGroupMenuReorder,
+        isDanger: false,
+      ),
+      (
+        value: GroupMenuAction.copy,
+        icon: Icons.content_copy_rounded,
+        label: l10n.routineLibraryMenuCopy,
+        isDanger: false,
+      ),
+      (
+        value: GroupMenuAction.ungroup,
+        icon: Icons.folder_off_outlined,
+        label: l10n.routineGroupMenuUngroup,
+        isDanger: false,
+      ),
+    ],
+  );
+}
 
-  final Routine routine;
+/// 빠른 메뉴 시트: 무엇에 대한 메뉴인지(제목) + 동작 줄. 고른 줄의 값을 돌려준다
+Future<T?> showQuickMenuSheet<T>(
+  BuildContext context, {
+  required String title,
+  required List<QuickMenuRow<T>> rows,
+}) {
+  return showElumSheet<T>(
+    context: context,
+    builder: (_) => _QuickMenuSheet<T>(title: title, rows: rows),
+  );
+}
+
+class _QuickMenuSheet<T> extends StatelessWidget {
+  const _QuickMenuSheet({required this.title, required this.rows});
+
+  final String title;
+  final List<QuickMenuRow<T>> rows;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final space = context.space;
-    final isMine = routine.isEditableByMe;
-    final rows = <(LibraryMenuAction, IconData, String, bool)>[
-      (
-        LibraryMenuAction.send,
-        Icons.send_rounded,
-        l10n.routineLibrarySendToday,
-        false,
-      ),
-      if (isMine)
-        (
-          LibraryMenuAction.rename,
-          Icons.edit_rounded,
-          l10n.routineLibraryMenuRename,
-          false,
-        ),
-      (
-        LibraryMenuAction.copy,
-        Icons.content_copy_rounded,
-        l10n.routineLibraryMenuCopy,
-        false,
-      ),
-      if (isMine)
-        (
-          LibraryMenuAction.remove,
-          Icons.delete_outline_rounded,
-          l10n.routineLibraryMenuRemove,
-          true,
-        ),
-    ];
-
     return ElumSheetSurface(
       child: Padding(
         padding: EdgeInsets.fromLTRB(
@@ -74,11 +147,10 @@ class _LibraryQuickMenu extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 무엇에 대한 메뉴인지
             Padding(
               padding: EdgeInsets.symmetric(horizontal: space.xs.w),
               child: Text(
-                routine.displayTitle,
+                title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.typo.sectionTitle.copyWith(
@@ -87,12 +159,12 @@ class _LibraryQuickMenu extends StatelessWidget {
               ),
             ),
             SizedBox(height: space.sm.h),
-            for (final (action, icon, label, isDanger) in rows)
+            for (final row in rows)
               _MenuRow(
-                icon: icon,
-                label: label,
-                isDanger: isDanger,
-                onTap: () => Navigator.of(context).pop(action),
+                icon: row.icon,
+                label: row.label,
+                isDanger: row.isDanger,
+                onTap: () => Navigator.of(context).pop(row.value),
               ),
           ],
         ),
@@ -101,7 +173,7 @@ class _LibraryQuickMenu extends StatelessWidget {
   }
 }
 
-/// 메뉴 한 줄 (아이콘 + 글자, 지우기는 붉게)
+/// 메뉴 한 줄 (아이콘 + 글자, 되돌리기 어려운 동작은 붉게)
 class _MenuRow extends StatelessWidget {
   const _MenuRow({
     required this.icon,

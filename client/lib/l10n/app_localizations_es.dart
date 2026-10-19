@@ -199,20 +199,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get appStatusStoreOpenFailedFallback => '스토어에서 이룸을 찾아 업데이트해주세요';
 
   @override
-  String get appStatusMaintenanceTitle => '잠시 쉬고 있어요';
+  String get appStatusMaintenanceTitle => '지금 점검 중이에요';
 
   @override
-  String get appStatusMaintenanceBody => '조금 뒤에 다시 열어주세요';
+  String get appStatusMaintenanceBody => '점검이 끝나면 다시 쓸 수 있어요.\n조금 뒤에 확인해주세요';
 
   @override
   String get appStatusRecheck => '다시 확인하기';
 
   @override
-  String get appStatusUpdateTitle => '새 이룸이 나왔어요';
-
-  @override
-  String get appStatusUpdateBody =>
-      '앱을 새로 받아야 이어서 쓸 수 있어요.\n스토어에서 이룸을 업데이트해주세요';
+  String get appStatusUpdateTitle => '지금 업데이트하고\n새로워진 이룸을 이용해보세요!';
 
   @override
   String get appStatusUpdated => '업데이트했어요';
@@ -430,14 +426,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboardingCharacterDescription => '선택한 친구가 카드 속 주인공이 되어 도와줘요';
-
-  @override
-  String onboardingGoalsTitle(String name) {
-    return '$name의 어떤 순간을\n도와주고 싶으신가요?';
-  }
-
-  @override
-  String get onboardingGoalsDescription => '여러 개를 선택할 수 있어요';
 
   @override
   String get onboardingImageStyleTitle => '카드 그림은 어떤 방식으로\n만들까요?';
@@ -1431,9 +1419,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cardPhotoSourceGallery => '갤러리에서 고르기';
 
   @override
-  String get cardPhotoSourcePrivacy => '얼굴이나 개인정보가 나오지 않게 찍어 주세요';
-
-  @override
   String cardPhotoUploadFailedDialog(String message) {
     return '사진을 올리지 못했어요.\n$message';
   }
@@ -2283,4 +2268,176 @@ class AppLocalizationsEs extends AppLocalizations {
   String routineLibrarySent(String title) {
     return '$title을(를) 오늘 일과로 보냈어요';
   }
+
+  @override
+  String onboardingExampleTitle(String name, String batchim) {
+    return '¿Con qué rutinas quieres\nempezar con $name?';
+  }
+
+  @override
+  String get onboardingExampleDescription =>
+      'Añadiremos rutinas de ejemplo de lo que elijas.\nPuedes elegir más de una.';
+
+  @override
+  String get onboardingExampleSkip => 'Omitir';
+
+  @override
+  String get exampleCategoryMorningEvening => 'Mañana y noche';
+
+  @override
+  String get exampleCategoryMorningEveningHint =>
+      'Asearse, vestirse, ir a dormir';
+
+  @override
+  String get exampleCategorySchoolStudy => 'Escuela y estudio';
+
+  @override
+  String get exampleCategorySchoolStudyHint =>
+      'Prepararse para la escuela, deberes';
+
+  @override
+  String get exampleCategoryHouseSelf => 'Tareas y hacerlo solo';
+
+  @override
+  String get exampleCategoryHouseSelfHint => 'Ordenar, poner la mesa';
+
+  @override
+  String get exampleCategoryOutside => 'Salir y probar';
+
+  @override
+  String get exampleCategoryOutsideHint => 'Tomar el autobús, hacer compras';
+
+  @override
+  String get routineTileExampleBadge => 'Ejemplo';
+
+  @override
+  String get exampleRoutinesFailed =>
+      'No se pudieron añadir las rutinas de ejemplo';
+
+  @override
+  String get routineGroupMenuAddToGroup => '묶음에 넣기';
+
+  @override
+  String get routineGroupMenuReorder => '순서 바꾸기';
+
+  @override
+  String get routineGroupMenuUngroup => '묶음 풀기';
+
+  @override
+  String routineGroupTileLabel(String name, int count) {
+    return '$name 묶음, 일과 $count개';
+  }
+
+  @override
+  String get routineGroupDefaultName => '새 묶음';
+
+  @override
+  String get routineGroupNameHint => '묶음 이름 (예: 아침 준비)';
+
+  @override
+  String get routineGroupNewTitle => '새 묶음 만들기';
+
+  @override
+  String routineGroupAddTitle(String name) {
+    return '$name에 넣기';
+  }
+
+  @override
+  String get routineGroupPickHintNew => '넣을 일과를 보여 줄 순서대로 눌러 주세요 (2개 이상)';
+
+  @override
+  String get routineGroupPickHint => '넣을 일과를 순서대로 눌러 주세요';
+
+  @override
+  String get routineGroupPickEmpty => '넣을 수 있는 일과가 없어요';
+
+  @override
+  String routineGroupPickConfirmNew(int count) {
+    return '$count개로 묶기';
+  }
+
+  @override
+  String routineGroupPickConfirmAdd(int count) {
+    return '$count개 넣기';
+  }
+
+  @override
+  String get routineGroupCreateMenuTitle => '무엇을 만들까요?';
+
+  @override
+  String get routineGroupCreateRoutine => '새 일과 만들기';
+
+  @override
+  String get routineGroupCreateGroup => '새 묶음 만들기';
+
+  @override
+  String get routineGroupChooseTitle => '어느 묶음에 넣을까요?';
+
+  @override
+  String routineGroupSheetCount(int count) {
+    return '일과 $count개 · 이 순서대로 보여요';
+  }
+
+  @override
+  String get routineGroupSheetAdd => '일과 넣기';
+
+  @override
+  String routineGroupSheetRemove(String title) {
+    return '$title 묶음에서 빼기';
+  }
+
+  @override
+  String get routineGroupSheetDragHint => '손잡이를 끌어 순서를 바꿔요';
+
+  @override
+  String get routineGroupCreated => '묶음을 만들었어요';
+
+  @override
+  String get routineGroupAdded => '묶음에 넣었어요';
+
+  @override
+  String get routineGroupRemovedOne => '묶음에서 뺐어요';
+
+  @override
+  String get routineGroupUngrouped => '묶음을 풀었어요';
+
+  @override
+  String get routineGroupUngroupedLastOne => '일과가 하나만 남아 묶음을 풀었어요';
+
+  @override
+  String get routineGroupReordered => '순서를 바꿨어요';
+
+  @override
+  String routineGroupSent(String name) {
+    return '$name 묶음을 오늘 일과로 보냈어요';
+  }
+
+  @override
+  String get routineGroupAllSentAlready => '묶음 안 일과를 오늘 모두 보냈어요';
+
+  @override
+  String get routineGroupActionFailedTitle => '묶음을 바꾸지 못했어요';
+
+  @override
+  String get routineGroupUngroupConfirmTitle => '묶음을 풀까요?';
+
+  @override
+  String get routineGroupUngroupConfirmMessage => '안에 있던 일과는 일과관리에 그대로 남아요';
+
+  @override
+  String childHomeGroupProgress(int done, int total) {
+    return '$done / $total';
+  }
+
+  @override
+  String get childHomeGroupAllDone => '다 했어요!';
+
+  @override
+  String get libraryCoachMenu => '일과를 *길게 누르면* 메뉴가 열려요\n이름 바꾸기·복사·지우기를 할 수 있어요';
+
+  @override
+  String get libraryCoachCreate => '새 묶음도 여기서 만들 수 있어요';
+
+  @override
+  String get routineDetailMore => '더 보기';
 }

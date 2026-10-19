@@ -81,6 +81,8 @@ class RoutineServiceTest {
 
   @Mock
   private RoutineRepository routineRepository;
+  @Mock
+  private RoutineGroupMembership routineGroupMembership;
 
   @Mock
   private RoutineImageStorage routineImageStorage;

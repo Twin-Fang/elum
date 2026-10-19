@@ -3,5 +3,18 @@
   "installationRetryMessage": "无法检查登录信息。请重试。",
   "installationRetryButton": "重试",
   "issuedCodeCopyFailedTitle": "复制失败了",
-  "issuedCodeCopyFailedFallback": "请直接告知屏幕上显示的代码"
+  "issuedCodeCopyFailedFallback": "请直接告知屏幕上显示的代码",
+  "onboardingExampleTitle": "想和{name}\n先从哪些日常开始?",
+  "onboardingExampleDescription": "我们会为所选分类加入示例日常。\n可以选择多个。",
+  "onboardingExampleSkip": "跳过",
+  "exampleCategoryMorningEvening": "早晚准备",
+  "exampleCategoryMorningEveningHint": "洗漱、穿衣、睡前",
+  "exampleCategorySchoolStudy": "上学·学习",
+  "exampleCategorySchoolStudyHint": "上学准备、作业",
+  "exampleCategoryHouseSelf": "家务·自己动手",
+  "exampleCategoryHouseSelfHint": "整理、摆餐桌",
+  "exampleCategoryOutside": "外出试试",
+  "exampleCategoryOutsideHint": "坐公交、买东西",
+  "routineTileExampleBadge": "示例",
+  "exampleRoutinesFailed": "未能加入示例日常"
 }

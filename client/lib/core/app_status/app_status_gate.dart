@@ -1,18 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../assets/app_assets.dart';
 import '../l10n/l10n_context.dart';
 import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
 import '../config/app_config.dart';
 import '../logger/app_logger.dart';
-import '../theme/theme_context_ext.dart';
 import '../widgets/show_failure.dart';
 import 'app_status_recheck.dart';
 import 'app_status_repository.dart';
 import 'store_launcher.dart';
+import 'app_notice_card.dart';
 
 /// 앱이 시작할 때 서버 상태를 확인하고, 필요하면 화면을 대신 그린다.
 ///
@@ -91,14 +91,18 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
         if (status.maintenance) {
           return AdaptivePageFrame(
             kind: ScreenLayoutKind.phoneColumn,
-            child: _FullNotice(
-              emoji: '🛠️',
-              title: context.l10n.appStatusMaintenanceTitle,
-              body: status.maintenanceMessage.isEmpty
-                  ? context.l10n.appStatusMaintenanceBody
-                  : status.maintenanceMessage,
-              actionLabel: context.l10n.appStatusRecheck,
-              onAction: (_) => ref.invalidate(appStatusProvider),
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: Theme.of(context),
+              home: AppNoticeCard(
+                imageAsset: AppAssets.maintenanceLumi,
+                title: context.l10n.appStatusMaintenanceTitle,
+                body: status.maintenanceMessage.isEmpty
+                    ? context.l10n.appStatusMaintenanceBody
+                    : status.maintenanceMessage,
+                actionLabel: context.l10n.appStatusRecheck,
+                onAction: (_) => ref.invalidate(appStatusProvider),
+              ),
             ),
           );
         }
@@ -111,18 +115,21 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
           );
           return AdaptivePageFrame(
             kind: ScreenLayoutKind.phoneColumn,
-            child: _FullNotice(
-              emoji: '✨',
-              title: context.l10n.appStatusUpdateTitle,
-              body: context.l10n.appStatusUpdateBody,
-              // 누를 것은 하나만 둔다. 스토어에서 돌아오면 앱이 앞으로 올라오며
-              // 알아서 다시 묻기 때문에 `업데이트했어요` 가 따로 필요 없다.
-              actionLabel: storeUrl == null
-                  ? context.l10n.appStatusUpdated
-                  : context.l10n.appStatusGoUpdate,
-              onAction: storeUrl == null
-                  ? (_) => ref.invalidate(appStatusProvider)
-                  : (noticeContext) => _openStore(noticeContext, storeUrl),
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: Theme.of(context),
+              home: AppNoticeCard(
+                imageAsset: AppAssets.updateLumi,
+                title: context.l10n.appStatusUpdateTitle,
+                // 누를 것은 하나만 둔다. 스토어에서 돌아오면 앱이 앞으로 올라오며
+                // 알아서 다시 묻기 때문에 `업데이트했어요` 가 따로 필요 없다.
+                actionLabel: storeUrl == null
+                    ? context.l10n.appStatusUpdated
+                    : context.l10n.appStatusGoUpdate,
+                onAction: storeUrl == null
+                    ? (_) => ref.invalidate(appStatusProvider)
+                    : (noticeContext) => _openStore(noticeContext, storeUrl),
+              ),
             ),
           );
         }
@@ -130,86 +137,6 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
       },
       // 처음 기다리는 중·실패 — 어느 쪽이든 앱을 막지 않는다
       orElse: () => widget.child,
-    );
-  }
-}
-
-/// 화면 전체를 대신하는 안내.
-///
-/// 이룸이도 보는 화면이라 저장소 규칙을 따른다 — 빨강·경고 아이콘을 쓰지 않고,
-/// 누를 것은 하나만 두며, 터치 영역을 64 이상으로 잡는다.
-class _FullNotice extends StatelessWidget {
-  const _FullNotice({
-    required this.emoji,
-    required this.title,
-    required this.body,
-    required this.actionLabel,
-    required this.onAction,
-  });
-
-  final String emoji;
-  final String title;
-  final String body;
-  final String actionLabel;
-
-  /// 안내 화면 안쪽 context 를 받는다 — 팝업을 이 화면의 Navigator 위에 띄워야 한다.
-  final void Function(BuildContext context) onAction;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typo = context.typo;
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: Theme.of(context),
-      home: Scaffold(
-        backgroundColor: colors.background,
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32.w),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(emoji, style: TextStyle(fontSize: 64.sp)),
-                SizedBox(height: 24.h),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: typo.promptTitle.copyWith(color: colors.textPrimary),
-                ),
-                SizedBox(height: 12.h),
-                Text(
-                  body,
-                  textAlign: TextAlign.center,
-                  style: typo.promptBody.copyWith(color: colors.textSecondary),
-                ),
-                SizedBox(height: 40.h),
-                SizedBox(
-                  width: double.infinity,
-                  height: 66.h, // 이룸이 화면 최소 터치 규칙
-                  // 이 MaterialApp 안쪽 context 가 있어야 실패 팝업을 띄울 수 있다
-                  child: Builder(
-                    builder: (innerContext) => FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: colors.textPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.r),
-                        ),
-                      ),
-                      onPressed: () => onAction(innerContext),
-                      child: Text(
-                        actionLabel,
-                        style: typo.button.copyWith(color: colors.surface),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

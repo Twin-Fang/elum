@@ -122,7 +122,7 @@ public class RoutineQuotaGuard {
   private void guardOwnedCount(String memberId, PlanType plan) {
     long owned;
     try {
-      owned = routineRepository.countByCreatedBy(memberId);
+      owned = routineRepository.countByCreatedByAndIsExampleFalse(memberId);
     } catch (Exception e) {
       log.warn("보유 일과 집계 실패 — 한도를 보지 않고 통과시킨다: memberId={}", memberId, e);
       return;

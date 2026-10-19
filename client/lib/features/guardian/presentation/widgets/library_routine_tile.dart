@@ -17,7 +17,7 @@ class LibraryRoutineTile extends StatelessWidget {
     required this.routine,
     required this.isSentToday,
     required this.onTap,
-    required this.onLongPress,
+    this.onLongPress,
   });
 
   final Routine routine;
@@ -25,12 +25,14 @@ class LibraryRoutineTile extends StatelessWidget {
   /// 오늘 이룸이에게 이미 보냈는가 (오른쪽 아래 ✓)
   final bool isSentToday;
   final VoidCallback onTap;
-  final VoidCallback onLongPress;
+
+  /// null 이면 길게 누르기를 바깥(끌기)에 맡긴다 (#807)
+  final VoidCallback? onLongPress;
 
   /// 그림 칸 한 변 · 모서리 · ✓ 배지 한 변
   static const iconSize = 64.0;
-  static const _iconRadius = 18.0;
-  static const _badgeSize = 22.0;
+  static const iconRadius = 18.0;
+  static const badgeSize = 22.0;
 
   @override
   Widget build(BuildContext context) {
@@ -57,17 +59,17 @@ class LibraryRoutineTile extends StatelessWidget {
               children: [
                 // 정사각형 — 가로세로 모두 .w
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(_iconRadius.w),
+                  borderRadius: BorderRadius.circular(iconRadius.w),
                   child: SizedBox.square(
                     dimension: iconSize.w,
-                    child: _Thumbnail(routine: routine),
+                    child: LibraryRoutineThumbnail(routine: routine),
                   ),
                 ),
                 if (isSentToday)
                   Positioned(
                     right: -space.xs.w / 2,
                     bottom: -space.xs.w / 2,
-                    child: _SentBadge(size: _badgeSize.w),
+                    child: LibrarySentBadge(size: badgeSize.w),
                   ),
               ],
             ),
@@ -89,9 +91,9 @@ class LibraryRoutineTile extends StatelessWidget {
   }
 }
 
-/// 첫 카드 그림. 카드가 없거나 그림이 없으면 제목 첫 글자
-class _Thumbnail extends StatelessWidget {
-  const _Thumbnail({required this.routine});
+/// 일과 첫 카드 그림. 카드가 없거나 그림이 없으면 제목 첫 글자 (격자 칸 · 폴더 미리보기 · 묶음 목록 공통)
+class LibraryRoutineThumbnail extends StatelessWidget {
+  const LibraryRoutineThumbnail({super.key, required this.routine});
 
   final Routine routine;
 
@@ -101,13 +103,17 @@ class _Thumbnail extends StatelessWidget {
     final placeholder = _LetterThumbnail(title: routine.displayTitle);
     if (steps.isEmpty) return placeholder;
     final first = steps.first;
-    return CardImage(
-      routineId: routine.id,
-      stepId: first.id,
-      imagePath: first.imagePath,
-      pictogramId: first.pictogramId,
-      pictogramLabel: first.title,
-      emptyBuilder: (_) => placeholder,
+    // 그림을 받는 동안에도 칸 모양이 보이게 흰 바탕을 깔아 둔다 (비어 보이면 빠진 칸 같다)
+    return ColoredBox(
+      color: context.colors.surface,
+      child: CardImage(
+        routineId: routine.id,
+        stepId: first.id,
+        imagePath: first.imagePath,
+        pictogramId: first.pictogramId,
+        pictogramLabel: first.title,
+        emptyBuilder: (_) => placeholder,
+      ),
     );
   }
 }
@@ -136,8 +142,8 @@ class _LetterThumbnail extends StatelessWidget {
 }
 
 /// 오늘 보냄 ✓ (민트 원 + 흰 체크, 바탕색 테두리로 그림과 떨어뜨린다)
-class _SentBadge extends StatelessWidget {
-  const _SentBadge({required this.size});
+class LibrarySentBadge extends StatelessWidget {
+  const LibrarySentBadge({super.key, required this.size});
 
   final double size;
 

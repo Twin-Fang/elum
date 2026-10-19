@@ -29,9 +29,6 @@ class CardPhotoSourceSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typo = context.typo;
-
     // 손잡이가 내용과 함께 스크롤되므로 시트 면의 겹침 손잡이는 끄고 직접 놓는다
     return ElumSheetSurface(
       showHandle: false,
@@ -61,16 +58,7 @@ class CardPhotoSourceSheet extends StatelessWidget {
                 label: context.l10n.commonClose,
                 onTap: () => Navigator.of(context).pop(),
               ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 24.h),
-                child: Text(
-                  context.l10n.cardPhotoSourcePrivacy,
-                  style: typo.bodySmall.copyWith(
-                    color: colors.textSecondary,
-                    height: 1.3,
-                  ),
-                ),
-              ),
+              SizedBox(height: 24.h),
             ],
           ),
         ),
