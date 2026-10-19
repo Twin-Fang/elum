@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T12:26:40Z",
-    "currentVersion": "2.49.1",
+    "lastUpdated": "2026-10-19T12:31:04Z",
+    "currentVersion": "2.49.2",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 271
+    "totalReleases": 272
   },
   "releases": [
+    {
+      "version": "2.49.2",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 819,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **버그 수정**\n  * 일과관리의 묶음 칸 미리보기가 하얀 칸으로만 보이던 문제를 고쳤어요. 이제 안에 든 일과 그림이 2×2로 보여요.\n  * 새 묶음을 만들 때 키보드가 올라오면 시트가 화면 위쪽 상태바를 덮던 문제를 고쳤어요.",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "일과관리의 묶음 칸 미리보기가 하얀 칸으로만 보이던 문제를 고쳤어요. 이제 안에 든 일과 그림이 2×2로 보여요.",
+            "새 묶음을 만들 때 키보드가 올라오면 시트가 화면 위쪽 상태바를 덮던 문제를 고쳤어요."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.49.1",
       "project_type": "flutter",

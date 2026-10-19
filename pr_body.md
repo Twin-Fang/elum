@@ -1,12 +1,6 @@
-<!-- This is an auto-generated comment: release notes by coderabbit.ai -->
-
 ## Summary by CodeRabbit
 
-## 릴리스 노트
-
-* **개선**
-  * 카드를 만들지 못했을 때 화면이 더 보기 쉬워졌어요
-  * 다시 하기 버튼이 아래에 고정되고, 홈으로 나가는 길이 항상 있어요
-
-<!-- end of auto-generated comment: release notes by coderabbit.ai -->
+* **버그 수정**
+  * 일과관리의 묶음 칸 미리보기가 하얀 칸으로만 보이던 문제를 고쳤어요. 이제 안에 든 일과 그림이 2×2로 보여요.
+  * 새 묶음을 만들 때 키보드가 올라오면 시트가 화면 위쪽 상태바를 덮던 문제를 고쳤어요.
 
