@@ -69,14 +69,16 @@ public class RoutineGroupService {
   }
 
   /**
-   * 묶음 만들기: 이룸이(헤더, 보호자만) > 이름 검증 > 구성원 검증 > 저장(맨 뒤 순서) > 구성원 넣기(다른 묶음에서 옮김)
+   * 묶음 만들기: 이룸이(헤더, 보호자만) > 이름 검증 > 구성원 검증 > 저장(칸 자리 = 구성원 중 가장 앞 칸, 없으면 맨 뒤) > 구성원 넣기(다른 묶음에서 옮김)
    */
   @Transactional
   public RoutineGroupResponse create(Caller caller, String name, List<String> routineIds) {
     Profile profile = profileAccessGuard.profileFor(caller, ProfileAction.MANAGE);
     String trimmedName = validateName(name);
     List<Routine> members = loadMembers(profile.getId(), routineIds);
-    RoutineGroup group = routineGroupRepository.save(newGroup(profile, caller.memberId(), trimmedName));
+    int displayOrder = members.stream().map(Routine::getLibraryOrder).filter(Objects::nonNull)
+      .min(Integer::compare).orElseGet(() -> nextLibraryOrder(profile.getId()));
+    RoutineGroup group = routineGroupRepository.save(newGroup(profile, caller.memberId(), trimmedName, displayOrder));
     routineGroupMembership.assign(group.getId(), members);
     return RoutineGroupResponse.of(group, idsOf(members));
   }
@@ -123,7 +125,8 @@ public class RoutineGroupService {
     List<Routine> members = requireMembers(groupId);
     String copyName = RoutineLibraryService.toCopyName(group.getName(), members.get(0).getLanguage(),
       GROUP_NAME_MAX_LENGTH);
-    RoutineGroup copiedGroup = routineGroupRepository.save(newGroup(group.getProfile(), caller.memberId(), copyName));
+    RoutineGroup copiedGroup = routineGroupRepository.save(newGroup(group.getProfile(), caller.memberId(), copyName,
+      nextLibraryOrder(group.getProfile().getId())));
     List<Routine> copies = members.stream()
       .map(member -> routineLibraryService.newLibraryCopyOf(member, caller.memberId(), false))
       .toList();
@@ -222,13 +225,18 @@ public class RoutineGroupService {
       && (routine.getStatus() == RoutineStatus.CONFIRMED || routine.getStatus() == RoutineStatus.COMPLETED);
   }
 
-  /// 새 묶음 (저장 전, 이 이룸이 묶음 맨 뒤 순서)
-  private RoutineGroup newGroup(Profile profile, String createdBy, String name) {
+  /// 새 칸 자리: 묶음 칸·낱개 칸을 통틀어 맨 뒤 (#844)
+  private int nextLibraryOrder(String profileId) {
+    return Math.max(routineGroupRepository.maxDisplayOrder(profileId), routineRepository.maxLibraryOrder(profileId)) + 1;
+  }
+
+  /// 새 묶음 (저장 전, 칸 자리 지정)
+  private RoutineGroup newGroup(Profile profile, String createdBy, String name, int displayOrder) {
     RoutineGroup group = new RoutineGroup();
     group.setProfile(profile);
     group.setCreatedBy(createdBy);
     group.setName(name);
-    group.setDisplayOrder(routineGroupRepository.maxDisplayOrder(profile.getId()) + 1);
+    group.setDisplayOrder(displayOrder);
     return group;
   }
 
