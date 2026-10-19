@@ -990,6 +990,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianHomeGoChildScreen => '이룸이 화면으로 가기';
 
   @override
+  String get notificationBellLabel => '알림';
+
+  @override
+  String get notificationBellUnreadLabel => '읽지 않은 알림이 있어요';
+
+  @override
   String get guardianHomeSettings => '설정';
 
   @override

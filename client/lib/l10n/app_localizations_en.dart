@@ -1040,6 +1040,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianHomeGoChildScreen => 'Go to Elumi mode';
 
   @override
+  String get notificationBellLabel => 'Notifications';
+
+  @override
+  String get notificationBellUnreadLabel => 'You have unread notifications';
+
+  @override
   String get guardianHomeSettings => 'Settings';
 
   @override

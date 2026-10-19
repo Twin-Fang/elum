@@ -10,6 +10,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/character_badge.dart';
 import '../../../shared/models/character.dart';
+import '../../notification/presentation/widgets/notification_bell_button.dart';
 
 /// 로고 + 캐릭터 배지 + 인사말 (Figma y=70~223).
 ///
@@ -63,17 +64,24 @@ class GuardianHomeHeader extends StatelessWidget {
             width: _logoW.w,
             height: _logoH.h,
           ),
-          // 이룸이 화면으로 넘어가는 입구. 보호자→이룸이 방향은 암호 없이 바로 간다.
-          // (이룸이→보호자 방향만 PIN으로 막는다)
-          AppPressable(
-            onTap: () => context.go(Routes.child),
-            scaleDown: AppPressable.scaleIcon,
-            // 그림뿐이라 이름을 주지 않으면 화면 낭독기로는 이 길을 찾을 수 없다.
-            semanticLabel: context.l10n.guardianHomeGoChildScreen,
-            child: KeyedSubtree(
-              key: modeKey,
-              child: CharacterBadge(character: character),
-            ),
+          // 종 아이콘은 배지 왼쪽. 코치마크 키는 배지에만 건다.
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const NotificationBellButton(),
+              // 이룸이 화면으로 넘어가는 입구. 보호자→이룸이 방향은 암호 없이 바로 간다.
+              // (이룸이→보호자 방향만 PIN으로 막는다)
+              AppPressable(
+                onTap: () => context.go(Routes.child),
+                scaleDown: AppPressable.scaleIcon,
+                // 그림뿐이라 이름을 주지 않으면 화면 낭독기로는 이 길을 찾을 수 없다.
+                semanticLabel: context.l10n.guardianHomeGoChildScreen,
+                child: KeyedSubtree(
+                  key: modeKey,
+                  child: CharacterBadge(character: character),
+                ),
+              ),
+            ],
           ),
         ],
       ),

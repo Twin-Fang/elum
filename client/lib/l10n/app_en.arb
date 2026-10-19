@@ -285,6 +285,8 @@
   "guardianHomeTodayRoutine": "Today's routine",
   "guardianHomePastRoutine": "Past routines",
   "guardianHomeGoChildScreen": "Go to Elumi mode",
+  "notificationBellLabel": "Notifications",
+  "notificationBellUnreadLabel": "You have unread notifications",
   "guardianHomeSettings": "Settings",
   "guardianHomeGreeting": "Hello,\n{name} 👋🏻",
   "guardianHomeSubtitle": "What routine should we prepare today?",

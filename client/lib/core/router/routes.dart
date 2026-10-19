@@ -37,6 +37,12 @@ abstract final class Routes {
   /// 보호자 설정. 내정보 칸 위에 열리는 화면이고 계정 정리(로그아웃·회원탈퇴)가 여기 있다.
   static const guardianSettings = '/guardian/settings';
 
+  /// 알림·공지사항 화면. 홈 종 아이콘이 연다.
+  static const guardianNotifications = '/guardian/notifications';
+
+  /// 알림 설정. 알림 화면 오른쪽 위에서 들어간다.
+  static const guardianNotificationSettings = '/guardian/settings/notifications';
+
   /// 임시저장 — 만들다 만 일과.
   static const guardianDrafts = '/guardian/settings/drafts';
 

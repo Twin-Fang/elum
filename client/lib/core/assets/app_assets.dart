@@ -195,6 +195,12 @@ abstract final class AppAssets {
   /// 보호자 프로필 자리 루미 얼굴 아이콘 (투명 배경 정사각형 PNG)
   static const guardianProfileLumi = '$_images/guardian_profile_lumi.png';
 
+  /// 홈 머리 줄의 종 아이콘 (96×96, 투명 배경). 빨간 점은 코드로 그린다.
+  static const notificationBell = '$_images/notification_bell.png';
+
+  /// 알림 목록이 비었을 때의 루미 (400×400, 투명 배경)
+  static const notificationsEmptyLumi = '$_images/notifications_empty_lumi.png';
+
   /// 이야기 칸 준비 중 안내의 루미 (빈 말풍선을 안음, 1254×1254 투명 배경)
   static const storiesComingSoonLumi = '$_images/stories_coming_soon_lumi.png';
 

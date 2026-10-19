@@ -930,6 +930,12 @@
   "@guardianHomePastRoutine": { "description": "보호자 홈의 지난 일과 구역 제목" },
 
   "guardianHomeGoChildScreen": "이룸이 화면으로 가기",
+
+  "notificationBellLabel": "알림",
+  "@notificationBellLabel": { "description": "보호자 홈 종 아이콘 버튼의 낭독 이름" },
+
+  "notificationBellUnreadLabel": "읽지 않은 알림이 있어요",
+  "@notificationBellUnreadLabel": { "description": "종 아이콘에 빨간 점이 있을 때 낭독 이름에 덧붙이는 말" },
   "@guardianHomeGoChildScreen": { "description": "보호자 홈에서 이룸이 화면으로 넘어가는 배지 버튼의 낭독 이름" },
 
   "guardianHomeSettings": "설정",

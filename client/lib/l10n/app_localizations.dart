@@ -1826,6 +1826,18 @@ abstract class AppLocalizations {
   /// **'이룸이 화면으로 가기'**
   String get guardianHomeGoChildScreen;
 
+  /// 보호자 홈 종 아이콘 버튼의 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'알림'**
+  String get notificationBellLabel;
+
+  /// 종 아이콘에 빨간 점이 있을 때 낭독 이름에 덧붙이는 말
+  ///
+  /// In ko, this message translates to:
+  /// **'읽지 않은 알림이 있어요'**
+  String get notificationBellUnreadLabel;
+
   /// 보호자 홈의 설정 아이콘 버튼 낭독 이름
   ///
   /// In ko, this message translates to:
