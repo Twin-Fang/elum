@@ -1,3 +1,4 @@
+import 'child_home_landscape_body.dart';
 import 'child_home_top_bar.dart';
 import 'child_routine_tile.dart';
 import 'child_no_routine.dart';
@@ -6,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/layout/adaptive_page_frame.dart';
+import '../../../core/layout/layout_context_ext.dart';
+import '../../../core/layout/screen_layout_kind.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/l10n/batchim.dart';
@@ -68,69 +72,94 @@ class ChildHomeScreen extends ConsumerWidget {
         ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
     final isElumiDevice = ref.watch(localStorageProvider).isElumiDevice;
 
-    // 보호자가 새 일과를 저장해도 앱을 껐다 켜야 보였다 — 떠 있는 동안 주기 갱신
-    return RoutineAutoRefresh(
-      child: Scaffold(
-        backgroundColor: context.colors.background,
-        body: SafeArea(
-          child: routines.isEmpty
-              ? Column(
-                  children: [
-                    const ChildHomeTopBar(),
-                    Expanded(
-                      child: ChildNoRoutine(
-                        childName: childName,
-                        character: character,
-                        isElumiDevice: isElumiDevice,
-                        // 조회가 실패했으면 제보 추적용 코드를 함께 보여준다.
-                        // 아동 화면이라 빨강·경고 아이콘은 쓰지 않는다.
-                        // 코드는 실제로 무엇이 터졌는지를 쓴다 — 연결이 끊긴 것과
-                        // 서버가 막은 것이 같은 코드로 보이면 제보를 못 가린다.
-                        errorCode: routinesAsync.hasError
-                            ? AppFailure.of(
-                                routinesAsync.error,
-                              ).badgeOr('E-CHLIST')
-                            : null,
-                      ),
-                    ),
-                  ],
-                )
-              : SingleChildScrollView(
-                  padding: EdgeInsets.only(bottom: space.xl),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    final greetingText = Text(
+      // Figma 문구 (1197:6810 · 356:5197).
+      //
+      // 조사는 이름 받침을 보고 고른다 (보호자가 직접 적은 이름, 예: 민준이가).
+      // 시안 문구는 해요체 (`할 일들이에요. 힘내봐요!`).
+      context.l10n.childHomeGreeting(childName, batchimOf(childName)),
+      // 이 화면 인사말은 22다. 빈 상태 제목(24)과 다르다.
+      style: context.typo.childGreeting.copyWith(
+        color: context.colors.textPrimary,
+      ),
+    );
+
+    // 가로 태블릿은 왼쪽 인사말·오른쪽 목록 두 칸. 낮은 창(분할 보기)은 한 열 스크롤로 접는다
+    final metrics = context.layoutMetrics;
+    final hasTwoPanes =
+        metrics.isScaleOverridden &&
+        metrics.isLandscape &&
+        !metrics.isShortHeight;
+
+    // 태블릿에서 두 칸이 아니면 가운데 열(폭 상한)에 담는다. 폰은 그대로 지나간다
+    return AdaptivePageFrame(
+      kind: hasTwoPanes
+          ? ScreenLayoutKind.adaptive
+          : ScreenLayoutKind.contentColumn,
+      // 보호자가 새 일과를 저장해도 앱을 껐다 켜야 보였다 — 떠 있는 동안 주기 갱신
+      child: RoutineAutoRefresh(
+        child: Scaffold(
+          backgroundColor: context.colors.background,
+          body: SafeArea(
+            child: routines.isEmpty
+                ? Column(
                     children: [
                       const ChildHomeTopBar(),
-                      // 시안(1197:6810)은 인사말이 y150 에서 시작한다. 상단 줄 아래(122)에서 28.
-                      SizedBox(height: 28.h),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: space.screenH,
+                      Expanded(
+                        child: ChildNoRoutine(
+                          childName: childName,
+                          character: character,
+                          isElumiDevice: isElumiDevice,
+                          // 조회가 실패했으면 제보 추적용 코드를 함께 보여준다.
+                          // 아동 화면이라 빨강·경고 아이콘은 쓰지 않는다.
+                          // 코드는 실제로 무엇이 터졌는지를 쓴다 — 연결이 끊긴 것과
+                          // 서버가 막은 것이 같은 코드로 보이면 제보를 못 가린다.
+                          errorCode: routinesAsync.hasError
+                              ? AppFailure.of(
+                                  routinesAsync.error,
+                                ).badgeOr('E-CHLIST')
+                              : null,
                         ),
-                        child: Text(
-                          // Figma 문구 (1197:6810 · 356:5197).
-                          //
-                          // 조사는 이름 받침을 보고 고른다 (보호자가 직접 적은 이름, 예: 민준이가).
-                          // 시안 문구는 해요체 (`할 일들이에요. 힘내봐요!`).
-                          context.l10n.childHomeGreeting(
-                            childName,
-                            batchimOf(childName),
-                          ),
-                          // 이 화면 인사말은 22다. 빈 상태 제목(24)과 다르다.
-                          style: context.typo.childGreeting.copyWith(
-                            color: context.colors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      // 인사말 아래(202) → 첫 타일(242)
-                      SizedBox(height: 40.h),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: space.md),
-                        child: _RoutineList(routines: routines),
                       ),
                     ],
+                  )
+                : hasTwoPanes
+                ? Column(
+                    children: [
+                      const ChildHomeTopBar(),
+                      Expanded(
+                        child: ChildHomeLandscapeBody(
+                          greeting: greetingText,
+                          character: character,
+                          routineList: _RoutineList(routines: routines),
+                        ),
+                      ),
+                    ],
+                  )
+                : SingleChildScrollView(
+                    padding: EdgeInsets.only(bottom: space.xl),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const ChildHomeTopBar(),
+                        // 시안(1197:6810)은 인사말이 y150 에서 시작한다. 상단 줄 아래(122)에서 28.
+                        SizedBox(height: 28.h),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: space.screenH,
+                          ),
+                          child: greetingText,
+                        ),
+                        // 인사말 아래(202) → 첫 타일(242)
+                        SizedBox(height: 40.h),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: space.md),
+                          child: _RoutineList(routines: routines),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+          ),
         ),
       ),
     );

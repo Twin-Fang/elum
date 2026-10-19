@@ -1,6 +1,11 @@
 import 'package:elum/core/layout/adaptive_page_frame.dart';
 import 'package:elum/core/layout/screen_layout_kind.dart';
+import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
+import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
+import 'package:elum/features/child/presentation/reward_screen.dart';
+import 'package:elum/features/child/presentation/routine_done_screen.dart';
+import 'package:elum/features/child/presentation/widgets/child_night_sky_backdrop.dart';
 import 'package:elum/features/child/presentation/child_stars_screen.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
 import 'package:elum/features/guardian/data/routine_repository.dart';
@@ -16,6 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/adaptive_test_app.dart';
+import 'helpers/fake_dio.dart';
 import 'helpers/fake_reward_api.dart';
 import 'helpers/test_storage.dart';
 
@@ -56,8 +62,15 @@ void main() {
     ],
   );
 
-  Widget screenApp(Widget screen, double textScale) => ProviderScope(
+  Widget screenApp(
+    Widget screen,
+    double textScale, {
+    ScreenLayoutKind kind = ScreenLayoutKind.phoneColumn,
+    Widget? backdrop,
+  }) => ProviderScope(
     overrides: [
+      offlineDioOverride(),
+      speechServiceProvider.overrideWithValue(_SilentSpeech()),
       testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
       routineRepositoryProvider.overrideWithValue(_StubRepo()),
       myRoutinesProvider.overrideWith(
@@ -78,18 +91,26 @@ void main() {
     ],
     child: adaptiveTestApp(
       textScale: textScale,
-      // 라우터가 하는 일과 같이 기본 폰 비율 열로 감싼다
-      home: AdaptivePageFrame(kind: ScreenLayoutKind.phoneColumn, child: screen),
+      // 라우터가 하는 일과 같이 화면이 선언한 종류로 감싼다
+      home: AdaptivePageFrame(kind: kind, backdrop: backdrop, child: screen),
     ),
   );
 
-  void runOnAllWindows(String name, Widget Function() build) {
+  void runOnAllWindows(
+    String name,
+    Widget Function() build, {
+    ScreenLayoutKind kind = ScreenLayoutKind.phoneColumn,
+    Widget? backdrop,
+    List<double> scales = textScales,
+  }) {
     for (final window in windows.entries) {
-      for (final textScale in textScales) {
+      for (final textScale in scales) {
         testWidgets('$name · ${window.key} · 글자 x$textScale', (tester) async {
           setTestWindowSize(tester, window.value);
 
-          await tester.pumpWidget(screenApp(build(), textScale));
+          await tester.pumpWidget(
+            screenApp(build(), textScale, kind: kind, backdrop: backdrop),
+          );
           // 오로라·별처럼 끝나지 않는 움직임이 있어 settle 을 기다리지 않는다
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 400));
@@ -101,9 +122,38 @@ void main() {
   }
 
   runOnAllWindows('보호자 홈', () => const GuardianHomeScreen());
-  runOnAllWindows('이룸이 홈', () => const ChildHomeScreen());
-  runOnAllWindows('별 모으기', () => const ChildStarsScreen());
+  runOnAllWindows(
+    '별 모으기',
+    () => const ChildStarsScreen(),
+    backdrop: const ChildNightSkyBackdrop(),
+  );
   runOnAllWindows('일과 만들기 입력', () => const RoutineInputScreen());
+
+  // 이룸이 화면 (태블릿 주 사용자)
+  runOnAllWindows(
+    '이룸이 홈',
+    () => const ChildHomeScreen(),
+    kind: ScreenLayoutKind.adaptive,
+  );
+  runOnAllWindows(
+    '이룸이 카드 상세',
+    () => ChildRoutineDetailScreen(routine: _detailRoutine),
+    kind: ScreenLayoutKind.adaptive,
+  );
+  runOnAllWindows(
+    '일과 완료',
+    () => const RoutineDoneScreen(reward: (emoji: '🍪', text: '젤리 먹기')),
+    backdrop: const ChildNightSkyBackdrop(sky: ChildNightSky.routineDone),
+    // 시안 좌표로 고정한 화면이라 폰(393x852)에서도 글자 2배는 넘친다 (기존 한계, 태블릿 문제가 아님)
+    scales: const [1.0],
+  );
+  runOnAllWindows(
+    '카드 보상',
+    () => const RewardScreen(reward: (emoji: '🍪', text: '젤리 먹기')),
+    backdrop: const ChildNightSkyBackdrop(),
+    // 일과 완료와 같은 이유: 시안 좌표 고정 화면의 글자 2배 한계
+    scales: const [1.0],
+  );
 }
 
 /// 서버를 타지 않는 저장소. 이 테스트는 레이아웃만 본다.
@@ -122,4 +172,47 @@ class _StubRepo with FakeRewardApi implements RoutineRepository {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// 카드 상세 매트릭스용 일과 (id 를 local 로 둔다: 서버 동기화를 타지 않는다)
+const _detailRoutine = Routine(
+  id: 'local',
+  title: '아침에 학교 갈 준비',
+  status: 'CONFIRMED',
+  rewardText: '젤리 먹기',
+  steps: [
+    ActionCard(
+      id: 'c1',
+      stepOrder: 1,
+      title: '세수해요',
+      description: '물로 얼굴을 씻어요',
+    ),
+    ActionCard(
+      id: 'c2',
+      stepOrder: 2,
+      title: '옷을 입어요',
+      description: '옷을 차례대로 입어요',
+    ),
+    ActionCard(
+      id: 'c3',
+      stepOrder: 3,
+      title: '신발을 신어요',
+      description: '현관에서 신발을 신어요',
+    ),
+  ],
+);
+
+class _SilentSpeech implements SpeechService {
+  @override
+  Future<bool> speak(
+    String text, {
+    String language = 'ko',
+    StoredSpeechSource? stored,
+  }) async => true;
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  void dispose() {}
 }

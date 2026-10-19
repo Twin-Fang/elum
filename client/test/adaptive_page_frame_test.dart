@@ -167,6 +167,44 @@ void main() {
     });
   });
 
+  group('backdrop', () {
+    const backdropKey = ValueKey('frame.backdrop');
+
+    testWidgets('열 바깥까지 창 전체를 덮는다 (밤하늘 같은 전폭 배경)', (tester) async {
+      setTestWindowSize(tester, const Size(1194, 834));
+      await tester.pumpWidget(
+        adaptiveTestApp(
+          home: const AdaptivePageFrame(
+            kind: ScreenLayoutKind.phoneColumn,
+            backdrop: SizedBox.expand(key: backdropKey),
+            child: _FormPage(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.getSize(find.byKey(backdropKey)), const Size(1194, 834));
+      // 화면은 여전히 폰 비율 열 안에 있다
+      expect(tester.getSize(find.byKey(_probeKey)).width, closeTo(393 * 834 / 852, 0.5));
+    });
+
+    testWidgets('폰에서는 배경을 따로 깔지 않는다 (화면이 자기 배경을 가진다)', (tester) async {
+      setTestWindowSize(tester, const Size(393, 852));
+      await tester.pumpWidget(
+        adaptiveTestApp(
+          home: const AdaptivePageFrame(
+            kind: ScreenLayoutKind.phoneColumn,
+            backdrop: SizedBox.expand(key: backdropKey),
+            child: _FormPage(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(backdropKey), findsNothing);
+    });
+  });
+
   group('adaptive', () {
     testWidgets('화면이 직접 구성하므로 자식을 그대로 둔다', (tester) async {
       setTestWindowSize(tester, const Size(1194, 834));

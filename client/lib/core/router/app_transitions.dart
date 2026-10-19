@@ -18,13 +18,18 @@ CustomTransitionPage<void> slidePage(
   GoRouterState state,
   Widget child, {
   ScreenLayoutKind layoutKind = ScreenLayoutKind.phoneColumn,
+  Widget? backdrop,
 }) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
     // 이름이 있어야 화면 이동 기록과 개발자 도구가 어느 화면인지 경로로 남긴다.
     name: state.uri.path,
     // 태블릿에서는 선언한 종류대로 담는다 (폰은 그대로)
-    child: AdaptivePageFrame(kind: layoutKind, child: child),
+    child: AdaptivePageFrame(
+      kind: layoutKind,
+      backdrop: backdrop,
+      child: child,
+    ),
     transitionDuration: kPageTransitionDuration,
     reverseTransitionDuration: kPageTransitionDuration,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -48,13 +53,18 @@ CustomTransitionPage<void> fadePage(
   GoRouterState state,
   Widget child, {
   ScreenLayoutKind layoutKind = ScreenLayoutKind.phoneColumn,
+  Widget? backdrop,
 }) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
     // 이름이 있어야 화면 이동 기록과 개발자 도구가 어느 화면인지 경로로 남긴다.
     name: state.uri.path,
     // 태블릿에서는 선언한 종류대로 담는다 (폰은 그대로)
-    child: AdaptivePageFrame(kind: layoutKind, child: child),
+    child: AdaptivePageFrame(
+      kind: layoutKind,
+      backdrop: backdrop,
+      child: child,
+    ),
     transitionDuration: kPageTransitionDuration,
     reverseTransitionDuration: kPageTransitionDuration,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {

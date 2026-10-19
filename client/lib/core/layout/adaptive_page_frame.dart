@@ -16,10 +16,16 @@ class AdaptivePageFrame extends StatefulWidget {
     required this.kind,
     required this.child,
     this.isBackgroundPainted = true,
+    this.backdrop,
   });
 
   final ScreenLayoutKind kind;
   final Widget child;
+
+  /// 열 바깥까지 창 전체에 깔 배경(밤하늘 같은 그라데이션). 없으면 배경색 한 장
+  ///
+  /// 화면이 자기 배경을 그대로 가지므로 열 안과 위아래로 이어지는 배경이어야 한다. 폰에서는 쓰지 않는다
+  final Widget? backdrop;
 
   /// 열 바깥을 배경색으로 칠할지. 흐름 배경(오로라)이 이미 깔린 화면은 false
   final bool isBackgroundPainted;
@@ -54,6 +60,16 @@ class _AdaptivePageFrameState extends State<AdaptivePageFrame> {
       ),
       ScreenLayoutKind.adaptive => child,
     };
+
+    final backdrop = widget.backdrop;
+    if (backdrop != null) {
+      return Stack(
+        children: [
+          Positioned.fill(child: backdrop),
+          Positioned.fill(child: column),
+        ],
+      );
+    }
 
     if (!widget.isBackgroundPainted) return column;
     // AppTheme 이 scaffoldBackgroundColor 를 colors.background 로 둔다 (테마 확장 없이도 동작)

@@ -151,7 +151,7 @@ void main() {
     expect(context.layoutMetrics, same(metrics));
   });
 
-  testWidgets('스코프 없이도 context.layoutMetrics 는 MediaQuery 로 계산한다', (
+  testWidgets('스코프가 없으면 창이 커도 compact 로 본다 (루트 없는 위젯 테스트 보호)', (
     tester,
   ) async {
     tester.view.devicePixelRatio = 1.0;
@@ -170,6 +170,6 @@ void main() {
       ),
     );
 
-    expect(sizeClass, WindowSizeClass.expanded);
+    expect(sizeClass, WindowSizeClass.compact);
   });
 }

@@ -13,11 +13,13 @@ extension LayoutContextExt on BuildContext {
   AppLayout get layout =>
       Theme.of(this).extension<AppLayout>() ?? AppLayout.standard;
 
-  /// 지금 창의 등급·방향·배율. 루트 스코프가 없으면 MediaQuery 로 계산
+  /// 지금 창의 등급·방향·배율. 루트 스코프가 없으면 폰(compact)으로 본다
+  ///
+  /// 앱은 항상 루트([AdaptiveScreenScale])가 스코프를 준다. 없는 곳은 위젯 테스트뿐이고, 테스트 기본 창(800x600)이
+  /// 태블릿으로 판정돼 기존 폰 화면 테스트가 흔들리지 않게 폰으로 둔다.
   LayoutMetrics get layoutMetrics {
-    final scoped = AdaptiveScope.maybeOf(this);
-    if (scoped != null) return scoped;
-    return LayoutMetrics.fromWindowSize(MediaQuery.sizeOf(this), layout: layout);
+    return AdaptiveScope.maybeOf(this) ??
+        LayoutMetrics.fromWindowSize(Size.zero, layout: layout);
   }
 
   WindowSizeClass get sizeClass => layoutMetrics.sizeClass;
