@@ -34,6 +34,8 @@ abstract final class AppAssets {
   static const loginKakao = '$_loginIcons/kakao.svg';
   static const loginNaver = '$_loginIcons/naver.svg';
   static const loginApple = '$_loginIcons/apple.svg';
+  // 구글 G 로고 (공식 4색). 로그인 버튼엔 없고 내 정보 가입 방법 배지에만 씀 (#849)
+  static const loginGoogle = '$_loginIcons/google.svg';
 
   /// 공통 팝업의 성공 아이콘 (40×40 원 + 흰 체크). Figma `채크_라운드`(726:4882).
   /// 원과 체크가 한 파일에 있어 크기만 바꿔 쓰면 된다.

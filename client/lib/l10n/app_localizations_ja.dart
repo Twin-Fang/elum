@@ -2184,12 +2184,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get guardianMyInfoProfileName => '보호자';
 
   @override
-  String guardianMyInfoLinkedCount(int count) {
-    return '이룸이 $count명과 함께해요';
-  }
+  String get guardianMyInfoEmailPrivate => '이메일 비공개';
 
   @override
-  String get guardianMyInfoNoLinked => '연결된 이룸이가 아직 없어요';
+  String guardianMyInfoJoinedOn(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat(
+      'y.MM.dd',
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString 가입';
+  }
 
   @override
   String get guardianMyInfoChildrenHeader => '이룸이';

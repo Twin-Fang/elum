@@ -36,6 +36,10 @@ public class Member extends BaseEntity {
   @Column(nullable = false)
   private String password;
 
+  // 보호자 닉네임 (가입 시 자동 생성, 유니크). 기존 회원은 기동 시 MemberNicknameBackfill 이 채움
+  @Column(unique = true, length = 50)
+  private String nickname;
+
   // 계정 상태. SUSPENDED면 로그인·API 사용이 모두 차단된다(MemberAccessGuard).
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, columnDefinition = "varchar(255) not null default 'ACTIVE'")

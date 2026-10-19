@@ -2283,18 +2283,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianMyInfoProfileName => 'Guardian';
 
   @override
-  String guardianMyInfoLinkedCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Together with $count Elumis',
-      one: 'Together with 1 Elumi',
-    );
-    return '$_temp0';
-  }
+  String get guardianMyInfoEmailPrivate => 'Email private';
 
   @override
-  String get guardianMyInfoNoLinked => 'No Elumi connected yet';
+  String guardianMyInfoJoinedOn(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat(
+      'y.MM.dd',
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Joined $dateString';
+  }
 
   @override
   String get guardianMyInfoChildrenHeader => 'Elumi';

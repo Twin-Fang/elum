@@ -11,6 +11,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkRole;
 import com.chuseok22.elumserver.member.application.service.GuardianshipService;
+import com.chuseok22.elumserver.member.application.service.MemberNicknameService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -31,6 +32,7 @@ public class AuthService {
   private final MemberRepository memberRepository;
 
   private final GuardianshipService guardianshipService;
+  private final MemberNicknameService memberNicknameService;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager memberAuthenticationManager;
   private final JwtProvider jwtProvider;
@@ -48,6 +50,7 @@ public class AuthService {
     Member member = new Member();
     member.setUsername(request.username());
     member.setPassword(passwordEncoder.encode(request.password()));
+    memberNicknameService.assignIfAbsent(member);
     memberRepository.save(member);
 
     // 계정과 함께 당사자 프로필을 관계와 함께 만든다. 온보딩에서 이름·캐릭터를 채운다.
