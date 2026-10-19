@@ -59,6 +59,14 @@ class AppLogBuffer {
     }
   }
 
+  /// 오류 보관에서 [keyword] 가 들어 있는 가장 최근 오류. 없으면 null.
+  static String? lastErrorContaining(String keyword) {
+    for (final error in _errors.reversed) {
+      if (error.contains(keyword)) return error;
+    }
+    return null;
+  }
+
   /// 전송용 텍스트. `머리말 → 오류 → 기록` 순이며 전체가 [maxBytes] 를 넘지 않는다.
   ///
   /// 넘치면 일반 기록을 앞(오래된 쪽)부터 자른다. 오류 구역은 우선 보존하되
