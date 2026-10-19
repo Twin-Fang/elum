@@ -1,11 +1,7 @@
-<!-- This is an auto-generated comment: release notes by coderabbit.ai -->
-
 ## Summary by CodeRabbit
 
-## 릴리스 노트
-
-* **개선**
-  * 태블릿 보호자 화면 왼쪽 위 카드에 루미 아이콘이 나와요
-
-<!-- end of auto-generated comment: release notes by coderabbit.ai -->
+* **새로운 기능**
+  * 이룸이 홈에서 묶음으로 보낸 일과가 흰 상자 하나로 묶여 보여요. 상자 머리에 묶음 이름과 진행(예: 0 / 2)이 보이고, 안의 일과는 보낸 순서대로 나와요.
+  * 묶음을 모두 끝내면 머리가 "다 했어요!"로 바뀌어요.
+  * 낱개로 보낸 일과는 지금처럼 한 줄로 보여요.
 
