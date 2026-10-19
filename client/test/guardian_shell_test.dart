@@ -83,26 +83,41 @@ void main() {
   String topOf(GoRouter router) =>
       router.routerDelegate.currentConfiguration.last.matchedLocation;
 
+  // 하단 바 칸 이름 글자색 (고른 칸만 진하다)
+  Color? bottomNavLabelColorOf(WidgetTester tester, String label) => tester
+      .widget<Text>(
+        find.descendant(
+          of: find.byType(GuardianBottomNav),
+          matching: find.text(label),
+        ),
+      )
+      .style
+      ?.color;
+
+  const selectedColor = Color(0xFF242634);
+
   group('폰', () {
     testWidgets('하단 바에 칸 넷이 있고 홈이 고른 칸이다', (tester) async {
       await pumpShell(tester, size: phone);
 
       expect(find.byType(GuardianBottomNav), findsOneWidget);
       expect(find.byType(GuardianSideNav), findsNothing);
-      for (final label in ['홈', '일과관리', '이야기', '내정보']) {
+      for (final label in ['홈', '일과 관리', '이야기', '내 정보']) {
         expect(find.bySemanticsLabel(label), findsOneWidget, reason: label);
       }
-      expect(find.byIcon(Icons.home_rounded), findsOneWidget);
+      expect(bottomNavLabelColorOf(tester, '홈'), selectedColor);
+      expect(bottomNavLabelColorOf(tester, '일과 관리'), isNot(selectedColor));
     });
 
-    testWidgets('칸을 누르면 그 칸으로 가고 고른 칸 아이콘이 꽉 찬다', (tester) async {
+    testWidgets('칸을 누르면 그 칸으로 가고 그 칸 이름이 진해진다', (tester) async {
       final router = await pumpShell(tester, size: phone);
 
-      await tester.tap(find.bySemanticsLabel('일과관리'));
+      await tester.tap(find.bySemanticsLabel('일과 관리'));
       await tester.pumpAndSettle();
       expect(topOf(router), Routes.guardianManage);
       expect(find.text('아직 만든 일과가 없어요'), findsOneWidget);
-      expect(find.byIcon(Icons.folder_rounded), findsOneWidget);
+      expect(bottomNavLabelColorOf(tester, '일과 관리'), selectedColor);
+      expect(bottomNavLabelColorOf(tester, '홈'), isNot(selectedColor));
 
       await tester.tap(find.bySemanticsLabel('이야기'));
       await tester.pumpAndSettle();
@@ -113,14 +128,27 @@ void main() {
       expect(topOf(router), Routes.guardian);
     });
 
-    testWidgets('내정보 칸은 설정 첫 화면이라 뒤로가기가 없다', (tester) async {
+    testWidgets('내정보 칸은 프로필 화면이고, 설정 아이콘을 누르면 하단 바를 덮고 설정이 열린다', (tester) async {
       final router = await pumpShell(tester, size: phone);
 
-      await tester.tap(find.bySemanticsLabel('내정보'));
+      await tester.tap(find.bySemanticsLabel('내 정보'));
+      await tester.pumpAndSettle();
+
+      expect(topOf(router), Routes.guardianMyInfo);
+      expect(find.byType(GuardianBottomNav), findsOneWidget);
+      expect(find.text('로그아웃'), findsNothing, reason: '설정 목록이 칸 첫 화면에 뜨면 안 된다');
+
+      await tester.tap(find.bySemanticsLabel('설정'));
       await tester.pumpAndSettle();
 
       expect(topOf(router), Routes.guardianSettings);
-      expect(find.bySemanticsLabel('뒤로 가기'), findsNothing);
+      expect(find.byType(GuardianBottomNav), findsNothing);
+      expect(find.bySemanticsLabel('뒤로 가기'), findsOneWidget);
+
+      // 뒤로가면 내정보 칸으로 돌아온다
+      await tester.tap(find.bySemanticsLabel('뒤로 가기'));
+      await tester.pumpAndSettle();
+      expect(topOf(router), Routes.guardianMyInfo);
       expect(find.byType(GuardianBottomNav), findsOneWidget);
     });
 
@@ -128,14 +156,14 @@ void main() {
       final router = await pumpShell(tester, size: phone, routineCount: 5);
       expect(find.byType(AdBottomStripSlot), findsOneWidget);
 
-      await tester.tap(find.bySemanticsLabel('내정보'));
+      await tester.tap(find.bySemanticsLabel('내 정보'));
       await tester.pumpAndSettle();
       expect(
         find.byType(AdBottomStripSlot),
         findsNothing,
         reason: '설정은 회원탈퇴 줄과 가까워 광고를 두지 않는다',
       );
-      expect(topOf(router), Routes.guardianSettings);
+      expect(topOf(router), Routes.guardianMyInfo);
     });
 
     testWidgets('일과가 4개 이하면 광고 띠 자리가 없다', (tester) async {
@@ -150,12 +178,12 @@ void main() {
 
       expect(find.byType(GuardianSideNav), findsOneWidget);
       expect(find.byType(GuardianBottomNav), findsNothing);
-      for (final label in ['홈', '일과관리', '이야기', '내정보']) {
+      for (final label in ['홈', '일과 관리', '이야기', '내 정보']) {
         expect(find.text(label), findsWidgets, reason: label);
       }
       expect(find.text('이룸이 화면'), findsOneWidget);
       // 화면 낭독기로도 칸과 이룸이 화면 입구를 찾을 수 있다
-      for (final label in ['홈', '일과관리', '이야기', '내정보']) {
+      for (final label in ['홈', '일과 관리', '이야기', '내 정보']) {
         expect(find.bySemanticsLabel(label), findsOneWidget, reason: label);
       }
       expect(find.bySemanticsLabel('이룸이 화면으로 가기'), findsOneWidget);
@@ -167,7 +195,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(GuardianSideNav),
-          matching: find.text('일과관리'),
+          matching: find.text('일과 관리'),
         ),
       );
       await tester.pumpAndSettle();

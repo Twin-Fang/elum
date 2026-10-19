@@ -31,7 +31,10 @@ abstract final class Routes {
   /// 이야기 칸. 보호자 커뮤니티(#786)가 들어올 자리
   static const guardianTalk = '/guardian/talk';
 
-  /// 내정보 칸 = 보호자 설정. 계정 정리(로그아웃·회원탈퇴)가 여기 있다.
+  /// 내정보 칸 = 보호자 프로필 (#817). 오른쪽 위 설정 아이콘으로 [guardianSettings] 에 들어간다.
+  static const guardianMyInfo = '/guardian/me';
+
+  /// 보호자 설정. 내정보 칸 위에 열리는 화면이고 계정 정리(로그아웃·회원탈퇴)가 여기 있다.
   static const guardianSettings = '/guardian/settings';
 
   /// 임시저장 — 만들다 만 일과.
