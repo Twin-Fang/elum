@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/content_locale.dart';
+import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 
@@ -12,6 +14,7 @@ class RoutineDetailHeader extends StatelessWidget {
     required this.title,
     required this.language,
     this.caption,
+    this.onMoreTap,
   });
 
   final String title;
@@ -21,6 +24,9 @@ class RoutineDetailHeader extends StatelessWidget {
 
   /// 제목 아래 한 줄 (`엄마가 만든 일과예요`). 없으면 자리도 없다 — 내 일과의 시트는 그대로다.
   final String? caption;
+
+  /// 있으면 제목 오른쪽에 `⋯` 버튼을 둔다 (#834)
+  final VoidCallback? onMoreTap;
 
   @override
   Widget build(BuildContext context) {
@@ -42,14 +48,34 @@ class RoutineDetailHeader extends StatelessWidget {
           const Center(child: ElumSheetHandle()),
           // 위 여백에서 줄인 4 를 여기서 되돌린다 — 손잡이만 올라가고 제목·목록은 시안 자리에 그대로 있다
           SizedBox(height: 24.h),
-          ContentLocale(
-            language: language,
-            child: Text(
-              title,
-              style: context.typo.sheetTitle.copyWith(
-                color: colors.sheetTitleText,
+          Row(
+            children: [
+              Expanded(
+                child: ContentLocale(
+                  language: language,
+                  child: Text(
+                    title,
+                    style: context.typo.sheetTitle.copyWith(
+                      color: colors.sheetTitleText,
+                    ),
+                  ),
+                ),
               ),
-            ),
+              if (onMoreTap != null)
+                AppPressable(
+                  onTap: onMoreTap,
+                  scaleDown: AppPressable.scaleIcon,
+                  semanticLabel: context.l10n.routineDetailMore,
+                  child: Padding(
+                    padding: EdgeInsets.all(8.w),
+                    child: Icon(
+                      Icons.more_horiz_rounded,
+                      size: 24.w,
+                      color: colors.sheetTitleText,
+                    ),
+                  ),
+                ),
+            ],
           ),
           if (caption != null) ...[
             SizedBox(height: 4.h),
