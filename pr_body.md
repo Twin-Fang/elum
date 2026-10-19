@@ -4,8 +4,8 @@
 
 ## 릴리스 노트
 
-* **버그 수정**
-  * 개인정보 처리 동의 문서에서 불필요한 안내 문구를 정리했습니다.
+* **개선**
+  * 일과 상세 화면에서 알림 설정 항목을 잠시 정리했어요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
