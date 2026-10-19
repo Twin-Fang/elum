@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>일과관리 전체 프로토타입</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#E6E1DD;font-family:-apple-system,"Apple SD Gothic Neo",sans-serif;color:#242634;display:flex;gap:36px;justify-content:center;align-items:flex-start;padding:28px 16px;flex-wrap:wrap}
+  .side{width:330px}
+  .side h1{font-size:22px;margin:0 0 8px}
+  .side p{font-size:13px;line-height:1.6;color:#555866;margin:0 0 14px}
+  .st{background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:10px;font-size:13px;line-height:1.55}
+  .st h4{margin:0 0 4px;font-size:14px}
+  .todo{font-size:13px;line-height:1.9;padding-left:18px;margin:6px 0 12px;color:#3c3e4b}
+  .reset{border:0;background:#242634;color:#fff;border-radius:10px;padding:10px 16px;font-size:13px;cursor:pointer}
+  .plabel{text-align:center;font-size:13px;font-weight:700;color:#555866;margin-bottom:10px}
+
+  .phone{width:360px;height:740px;border-radius:46px;background:#F6F1EE;border:10px solid #1d1f2a;position:relative;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.22);user-select:none;-webkit-user-select:none}
+  .page{position:absolute;inset:0;padding:44px 16px 80px;overflow-y:auto}
+  .hd{display:flex;justify-content:space-between;align-items:center}
+  .hd b{font-size:24px}
+  .link{color:#5b6bb5;font-weight:700;font-size:15px;cursor:pointer;padding:6px 2px}
+  .hint{font-size:12px;color:#898B98;margin:8px 2px 18px;min-height:16px}
+
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px 6px}
+  .tile{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;touch-action:none;cursor:pointer}
+  .icon{width:62px;height:62px;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 2px 8px rgba(36,38,52,.08);position:relative;transition:transform .15s,background .15s}
+  .icon.folder{background:rgba(36,38,52,.10);display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:7px;font-size:13px}
+  .icon.folder span{background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center}
+  .icon.add{background:transparent;border:2px dashed #b4b7c4;box-shadow:none;color:#898B98;font-size:28px;font-weight:300}
+  .lbl{font-size:11.5px;text-align:center;max-width:78px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sent{position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:10px;background:#4DC3A3;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #F6F1EE}
+  .del{position:absolute;top:-7px;left:2px;width:22px;height:22px;border-radius:11px;background:#7d808e;color:#fff;font-size:17px;line-height:20px;text-align:center;z-index:2;cursor:pointer}
+  .editing .icon:not(.add){animation:jig .26s infinite alternate ease-in-out}
+  .editing .tile:nth-child(2n) .icon{animation-delay:-.13s}
+  @keyframes jig{from{transform:rotate(-2.4deg)}to{transform:rotate(2.4deg)}}
+  .tile.dragging{opacity:.2}
+  .tile.over .icon{transform:scale(1.2)!important;background:rgba(156,173,241,.4);animation:none}
+  .tile.gap::before{content:"";position:absolute;left:-5px;top:4px;width:3px;height:58px;border-radius:2px;background:#9CADF1}
+  .ghost{position:fixed;z-index:999;pointer-events:none;transform:translate(-50%,-50%) scale(1.12);filter:drop-shadow(0 12px 18px rgba(0,0,0,.25))}
+
+  .nav{position:absolute;left:0;right:0;bottom:0;height:76px;background:rgba(255,255,255,.95);border-top:1px solid #EFEFEF;display:flex;justify-content:space-around;align-items:center;padding-bottom:12px;z-index:5}
+  .tab{display:flex;flex-direction:column;align-items:center;font-size:10.5px;color:#a0a2ad;gap:3px;flex:1;cursor:pointer}
+  .tab i{font-style:normal;font-size:21px;filter:grayscale(1);opacity:.5}
+  .tab.on{color:#242634;font-weight:700}.tab.on i{filter:none;opacity:1}
+
+  .kidbtn{display:flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #A9B5EE;border-radius:20px;padding:6px 12px 6px 8px;font-size:13px;font-weight:700;cursor:pointer}
+  .kidbtn span{width:24px;height:24px;border-radius:12px;background:#DCE1FB;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .fab{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);height:54px;padding:0 24px;border-radius:27px;background:#242634;color:#fff;font-size:16px;font-weight:700;gap:6px;white-space:nowrap;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(36,38,52,.35);cursor:pointer;z-index:6;transition:all .2s}
+  .fab.done{background:#5b6bb5}
+  .fab b{font-size:24px;font-weight:400;line-height:1}
+  .layer{position:absolute;inset:0;z-index:20;display:none}
+  .layer.show{display:block}
+  .dim{position:absolute;inset:0;background:rgba(20,22,30,.38)}
+  .frost{position:absolute;inset:0;background:rgba(246,241,238,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:26px 26px 0 0;padding:10px 18px 30px;animation:up .25s ease-out;max-height:88%;overflow-y:auto}
+  @keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+  .handle{width:38px;height:5px;border-radius:3px;background:#CACACA;margin:0 auto 16px}
+  .sheet h3{margin:0 0 14px;font-size:19px}
+  .act{display:flex;gap:12px;align-items:center;background:#F6F1EE;border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer}
+  .act .ai{width:44px;height:44px;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+  .act b{display:block;font-size:15px}.act small{font-size:12px;color:#898B98}
+  .btn{display:block;width:100%;border:0;border-radius:15px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px}
+  .btn.dark{background:#242634;color:#fff}.btn.light{background:#EFEDEA;color:#242634}
+  .btn:disabled{background:#818393;color:rgba(255,255,255,.5)}
+
+  .ctxicon{position:absolute;z-index:2;transform:scale(1.12);transition:transform .2s}
+  .menu{position:absolute;z-index:2;width:230px;background:rgba(255,255,255,.97);border-radius:16px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.2);animation:pop .18s ease-out}
+  @keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+  .mi{display:flex;justify-content:space-between;align-items:center;padding:13px 15px;font-size:14.5px;border-bottom:1px solid #eee;cursor:pointer}
+  .mi:last-child{border:0}.mi.red{color:#E5484D}
+  .mi:hover{background:#f5f5f7}
+
+  .fwrap{position:absolute;left:16px;right:16px;top:70px;bottom:30px;display:flex;flex-direction:column;animation:pop .2s ease-out}
+  .ftop{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .fx{font-size:20px;color:#898B98;cursor:pointer;padding:4px 8px}
+  .fname{border:0;background:transparent;font-size:26px;font-weight:800;text-align:center;color:#242634;width:100%;outline:none;font-family:inherit;border-radius:10px;padding:2px}
+  .fname:focus{background:rgba(255,255,255,.75)}
+  .fmeta{font-size:12px;color:#898B98;text-align:center;margin:2px 0 14px}
+  .fpanel{background:rgba(255,255,255,.78);border-radius:26px;padding:12px;overflow-y:auto;flex:1}
+  .frow{display:flex;align-items:center;gap:10px;background:#fff;border-radius:15px;padding:9px 10px;margin-bottom:8px;position:relative;cursor:pointer;touch-action:none}
+  .frow.lift{box-shadow:0 10px 24px rgba(0,0,0,.18);z-index:5}
+  .num{width:24px;height:24px;border-radius:12px;background:#242634;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+  .ric{width:40px;height:40px;border-radius:12px;background:#F3EFEC;font-size:21px;display:flex;align-items:center;justify-content:center;flex:none}
+  .rn{flex:1;font-size:14.5px;font-weight:600}.rn small{display:block;font-weight:400;color:#898B98;font-size:11.5px;margin-top:1px}
+  .rh{color:#b4b7c4;font-size:18px;padding:4px;cursor:grab}
+  .rminus{width:24px;height:24px;border-radius:12px;background:#7d808e;color:#fff;font-size:17px;line-height:22px;text-align:center;cursor:pointer;flex:none}
+  .chev{color:#b4b7c4;font-size:18px}
+  .addrow{border:1.6px dashed #c2c5d1;border-radius:15px;padding:11px;text-align:center;font-size:13px;color:#898B98;cursor:pointer}
+
+  .dtop{display:flex;gap:14px;align-items:center;margin-bottom:6px}
+  .dic{width:64px;height:64px;border-radius:18px;background:#F6F1EE;font-size:32px;display:flex;align-items:center;justify-content:center}
+  .dtop b{font-size:20px}.dtop small{display:block;color:#898B98;font-size:12px;margin-top:3px}
+  .cards{display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px}
+  .cd{min-width:92px;height:112px;border-radius:14px;background:#F6F1EE;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:11px;color:#6b6d7a}
+  .cd b{font-size:24px}
+
+  .page2{position:absolute;inset:0;background:#F6F1EE;z-index:25;padding:44px 16px 100px;overflow-y:auto;display:none;animation:slide .25s ease-out}
+  .page2.show{display:block}
+  @keyframes slide{from{transform:translateX(40px);opacity:.5}to{transform:none;opacity:1}}
+  .back{font-size:26px;font-weight:800;cursor:pointer;display:inline-block;padding:0 8px 0 0}
+  .ptitle{font-size:22px;font-weight:800;margin:6px 0 12px}
+  .namebox{background:#fff;border-radius:15px;padding:10px 14px;margin-bottom:16px}
+  .namebox small{display:block;font-size:11px;color:#898B98;margin-bottom:2px}
+  .namebox input{border:0;outline:none;font-size:17px;font-weight:700;width:100%;font-family:inherit;color:#242634}
+  .pk{display:flex;align-items:center;gap:10px;background:#fff;border-radius:15px;padding:10px 12px;margin-bottom:8px;font-size:14.5px;cursor:pointer}
+  .ck{margin-left:auto;width:26px;height:26px;border-radius:13px;border:2px solid #d0d2db;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex:none}
+  .pk.on .ck{background:#242634;border-color:#242634}
+  .pcta{position:absolute;left:16px;right:16px;bottom:22px}
+
+  .dlg{position:absolute;left:34px;right:34px;top:34%;background:#fff;border-radius:22px;padding:22px 18px 16px;text-align:center;animation:pop .18s ease-out}
+  .dlg b{font-size:17px;display:block;margin-bottom:6px}
+  .dlg p{font-size:13px;color:#6b6d7a;margin:0 0 14px;line-height:1.5}
+  .dlg input{width:100%;border:1.5px solid #e3e1de;border-radius:12px;padding:11px;font-size:15px;font-family:inherit;outline:none;margin-bottom:12px}
+  .dbtns{display:flex;gap:8px}.dbtns .btn{margin:0;padding:13px}
+  .btn.red{background:#E5484D;color:#fff}
+
+  .toast{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);background:#242634;color:#fff;font-size:12.5px;padding:10px 15px;border-radius:12px;z-index:60;opacity:0;transition:opacity .2s;white-space:nowrap;pointer-events:none}
+  .toast.show{opacity:1}
+
+  /* 이룸이 미리보기 */
+  .kid .page{padding:26px 16px 30px}
+  .ktop{display:flex;justify-content:space-between;align-items:center}
+  .logo{font-weight:900;font-size:24px;letter-spacing:1px;background:linear-gradient(90deg,#F5C518,#E5484D,#2BB3E8,#3CCB5A);-webkit-background-clip:text;color:transparent}
+  .kchar{width:48px;height:48px;border-radius:13px;background:#DCE1FB;border:2px solid #A9B5EE;display:flex;align-items:center;justify-content:center;font-size:25px}
+  .kttl{font-size:22px;font-weight:800;line-height:1.35;margin:20px 4px}
+  .kt{background:#EEEAE7;border-radius:17px;min-height:62px;padding:0 14px 0 20px;display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:16px;cursor:pointer}
+  .kt span:first-child{flex:1}
+  .kt.done{background:#DDF3EC}
+  .ring{width:36px;height:36px;border-radius:18px;border:3px solid #C9DCD6;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#4DC3A3}
+  .kt.done .ring{background:#4DC3A3;border-color:#4DC3A3;color:#fff;font-size:15px}
+  .kbox{background:#fff;border-radius:22px;padding:12px 12px 2px;margin-bottom:14px}
+  .kbh{font-size:16px;font-weight:800;margin:2px 6px 12px;display:flex;justify-content:space-between}
+  .kbh span{font-size:13px;color:#4DC3A3}
+  .kbox .kt{margin-bottom:10px}
+  .kempty{text-align:center;color:#898B98;font-size:14px;margin-top:120px;line-height:1.7}
+</style>
+</head>
+<body>
+  <div class="side">
+    <h1>일과관리 전체 동작</h1>
+    <p>가운데 화면은 실제로 눌러 볼 수 있어요. 오른쪽은 보낸 결과가 이룸이 홈에 어떻게 보이는지예요 (B안: 묶음을 상자로 감싸 펼쳐 보여 주기).</p>
+    <div class="st"><h4>기본</h4>누르면 열기 · 길게 누르면 메뉴(보내기·이름·묶음에 넣기·<b>복사하기</b>·지우기) · 메뉴가 뜬 채로 끌면 정리 상태로 · 가운데 아래 <b>+ 일과 만들기</b></div>
+    <div class="st"><h4>정리 상태 (흔들림) — 따로 "편집" 버튼 없음</h4>끌어서 일과 위 = 새 묶음 · 묶음 위 = 넣기 · 사이 = 자리 이동 · ⊖ = 지우기 / 묶음 풀기 · 가운데 버튼이 "완료"로 바뀜</div>
+    <div class="st"><h4>일과 하나는 한 곳에만</h4>묶음에 넣으면 그 일과는 묶음 안으로 <b>옮겨져요</b>. 같은 일과를 다른 묶음에도 쓰려면 <b>복사하기</b>.</div>
+    <div class="st"><h4>묶음 열림</h4>번호 = 이룸이에게 보이는 순서 · 이름 바로 고치기 · 순서 편집 · + 일과 넣기 · 보내기</div>
+    <b style="font-size:13px">해 볼 것</b>
+    <ol class="todo">
+      <li>"등교 준비" 누르고 → 보내기</li>
+      <li>"빨래 개기" 길게 누르기 → 메뉴</li>
+      <li>길게 누른 채로 끌어서 "장보기" 위에 놓기</li>
+      <li>+ 일과 만들기 → 새 묶음 → 일과 고르기</li>
+      <li>길게 눌러 끌기 시작 → ⊖ 로 묶음 풀기 → 완료</li>
+      <li>"양치하기"가 든 묶음을 길게 눌러 복사하기</li>
+      <li>오른쪽 이룸이 화면에서 줄 눌러 완료</li>
+    </ol>
+    <button class="reset" onclick="resetAll()">처음 상태로</button>
+  </div>
+
+  <div>
+    <div class="plabel">보호자 · 일과관리 칸</div>
+    <div class="phone" id="phone">
+      <div class="page" id="main">
+        <div class="hd"><b>일과관리</b><span class="kidbtn" onclick="toast('이룸이 화면으로 넘어가요 (어느 칸에서든 같은 자리)')"><span>🐱</span>이룸이 화면</span></div>
+        <div class="hint" id="hint"></div>
+        <div class="grid" id="grid"></div>
+      </div>
+
+      <!-- 길게 누르기 메뉴 -->
+      <div class="layer" id="ctx"><div class="frost" onclick="closeLayer('ctx')"></div><div id="ctxbody"></div></div>
+      <!-- 묶음 열림 -->
+      <div class="layer" id="fold"><div class="frost" onclick="closeFolder()"></div>
+        <div class="fwrap">
+          <div class="ftop"><span class="fx" onclick="closeFolder()">✕</span><span class="link" id="fedit" onclick="toggleFolderEdit()">순서 편집</span></div>
+          <input class="fname" id="fname" maxlength="12">
+          <div class="fmeta" id="fmeta"></div>
+          <div class="fpanel"><div id="flist"></div><div class="addrow" onclick="openPicker('add')">+ 일과 넣기</div></div>
+          <button class="btn dark" id="fsend">오늘 하늘이에게 보내기</button>
+        </div>
+      </div>
+      <!-- 시트 (일과 상세 · 만들기 · 묶음 고르기) -->
+      <div class="layer" id="sheetL"><div class="dim" onclick="closeLayer('sheetL')"></div><div class="sheet" id="sheet"></div></div>
+      <!-- 고르기 화면 -->
+      <div class="page2" id="picker"></div>
+      <!-- 팝업 -->
+      <div class="layer" id="dlgL" style="z-index:40"><div class="dim"></div><div class="dlg" id="dlg"></div></div>
+
+      <div class="fab" id="fab" onclick="fabTap()"><b>+</b>일과 만들기</div>
+      <div class="nav">
+        <div class="tab" onclick="toast('홈 칸은 지금 홈 화면 그대로예요')"><i>🏠</i>홈</div>
+        <div class="tab on"><i>🗂️</i>일과관리</div>
+        <div class="tab" onclick="toast('이야기 칸은 나중에 열어요')"><i>💬</i>이야기</div>
+        <div class="tab" onclick="toast('내정보 칸 (프로필·설정)')"><i>👤</i>내정보</div>
+      </div>
+      <div class="toast" id="toast"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="plabel">이룸이 홈 미리보기</div>
+    <div class="phone kid"><div class="page" id="kid"></div><div class="toast" id="kidcheer" style="bottom:40px;font-size:15px;padding:13px 20px"></div></div>
+  </div>
+
+<script>
+const R=(id,e,n,c)=>({id,type:'routine',emoji:e,name:n,cards:c});
+function initial(){return [
+  {id:'f1',type:'folder',name:'등교 준비',children:[R('r1','🍚','밥 먹기',4),R('r2','🧼','세수하기',3),R('r3','🪥','양치하기',5),R('r4','👕','옷 입기',4)]},
+  R('r5','🌧️','비 오는 날 학교 가기',5),R('r6','🧺','빨래 개기',4),R('r7','🛒','장보기',6),R('r8','🚿','샤워하기',5),
+  R('r9','🌙','잠옷 입기',3),R('r10','🧴','손 씻기',3),R('r11','🎒','가방 정리',4),R('r12','🍎','간식 먹기',3)];}
+let items,edit,drag,press,openId,folderEdit,sentIds,sent,seq=100,pickMode,picked,pickSeed;
+const $=id=>document.getElementById(id);
+function resetAll(){items=initial();edit=false;drag=null;press=null;openId=null;folderEdit=false;sentIds=new Set();sent=[];
+  ['ctx','fold','sheetL','dlgL'].forEach(closeLayer);$('picker').classList.remove('show');render();renderKid();}
+function find(id){return items.find(i=>i.id===id);}
+function findRoutine(id){for(const i of items){if(i.id===id)return i;if(i.type==='folder'){const c=i.children.find(x=>x.id===id);if(c)return c;}}}
+function parentOf(id){return items.find(i=>i.type==='folder'&&i.children.some(c=>c.id===id));}
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2000);}
+function closeLayer(id){$(id).classList.remove('show');}
+function showLayer(id){$(id).classList.add('show');}
+
+// ── 격자
+function iconHtml(it){
+  const badge=sentIds.has(it.id)?'<span class="sent">✓</span>':'';
+  if(it.type==='folder') return `<div class="icon folder">${it.children.slice(0,4).map(c=>`<span>${c.emoji}</span>`).join('')}${badge}</div>`;
+  return `<div class="icon">${it.emoji}${badge}</div>`;
+}
+function render(){
+  $('grid').innerHTML=items.map(it=>`<div class="tile${drag&&drag.id===it.id?' dragging':''}" data-id="${it.id}">${edit?`<span class="del" data-del="${it.id}">−</span>`:''}${iconHtml(it)}<div class="lbl">${it.name}</div></div>`).join('');
+  $('main').classList.toggle('editing',edit);
+  $('fab').classList.toggle('done',edit);$('fab').innerHTML=edit?'완료':'<b>+</b>일과 만들기';
+  $('hint').textContent=edit?'끌어서 겹치면 묶음 · 사이에 놓으면 자리 이동 · 다 했으면 아래 완료':'누르면 열기 · 길게 누르면 메뉴';
+  if(openId) renderFolder();
+}
+function toggleEdit(){edit=!edit;render();}
+function fabTap(){if(edit){edit=false;render();}else openCreate();}
+
+$('grid').addEventListener('pointerdown',e=>{
+  const del=e.target.closest('.del');
+  if(del){e.stopPropagation();askRemove(del.dataset.del);return;}
+  const t=e.target.closest('.tile');if(!t)return;
+  press={id:t.dataset.id,x:e.clientX,y:e.clientY,moved:false,longFired:false};
+  if(!edit&&press.id!=='__add') press.timer=setTimeout(()=>{press.longFired=true;openCtx(press.id);},450);
+});
+document.addEventListener('pointermove',e=>{
+  if(drag){moveDrag(e.clientX,e.clientY);return;}
+  if(press&&!press.moved&&Math.hypot(e.clientX-press.x,e.clientY-press.y)>10){
+    press.moved=true;clearTimeout(press.timer);
+    if(press.id!=='__add'&&(edit||press.longFired)){closeLayer('ctx');edit=true;startDrag(press.id,e.clientX,e.clientY);}
+  }
+});
+document.addEventListener('pointerup',()=>{
+  if(drag){endDrag();press=null;return;}
+  if(press){clearTimeout(press.timer);if(!press.moved&&!press.longFired)tapTile(press.id);press=null;}
+});
+function tapTile(id){
+  if(id==='__add'){openCreate();return;}
+  const it=find(id);if(!it)return;
+  if(it.type==='folder')openFolder(id);
+  else if(edit)toast('편집 중에는 끌어서 옮겨요');
+  else openDetail(id);
+}
+function startDrag(id,x,y){
+  const it=find(id);if(!it)return;
+  const g=document.createElement('div');g.className='ghost';g.innerHTML=iconHtml(it);document.body.appendChild(g);
+  drag={id,ghost:g,target:null};render();moveDrag(x,y);
+}
+function moveDrag(x,y){
+  drag.ghost.style.left=x+'px';drag.ghost.style.top=y+'px';
+  document.querySelectorAll('.tile.over,.tile.gap').forEach(n=>n.classList.remove('over','gap'));
+  drag.target=null;
+  const el=document.elementFromPoint(x,y);const t=el&&el.closest('#grid .tile');
+  if(!t||t.dataset.id===drag.id)return;
+  const r=t.querySelector('.icon').getBoundingClientRect();
+  const isCenter=x>r.left+10&&x<r.right-10&&t.dataset.id!=='__add';
+  const d=find(drag.id);
+  if(isCenter&&d.type==='routine'){t.classList.add('over');drag.target={id:t.dataset.id,mode:'merge'};}
+  else{t.classList.add('gap');drag.target={id:t.dataset.id,mode:'move'};}
+}
+function endDrag(){
+  const d=find(drag.id),tg=drag.target;drag.ghost.remove();drag=null;
+  if(tg){
+    if(tg.mode==='move'){
+      items=items.filter(i=>i!==d);
+      if(tg.id==='__add')items.push(d);else items.splice(items.indexOf(find(tg.id)),0,d);
+    }else{
+      const t=find(tg.id);
+      if(t.type==='folder'){t.children.push(d);items=items.filter(i=>i!==d);toast(`"${d.name}"을(를) ${t.name}에 넣었어요`);}
+      else{
+        const f={id:'f'+(seq++),type:'folder',name:'새 묶음',children:[t,d]};
+        items[items.indexOf(t)]=f;items=items.filter(i=>i!==d);render();openFolder(f.id,true);return;
+      }
+    }
+  }
+  render();
+}
+
+// ── 길게 누르기 메뉴
+function openCtx(id){
+  const it=find(id);const tile=document.querySelector(`#grid .tile[data-id="${id}"]`);
+  const pr=$('phone').getBoundingClientRect(),r=tile.querySelector('.icon').getBoundingClientRect();
+  const left=r.left-pr.left-10,top=r.top-pr.top-10;
+  const rows=it.type==='folder'
+    ?[['오늘 하늘이에게 보내기','📤',`sendItem('${id}')`],['이름 바꾸기','✏️',`askRename('${id}')`],['순서 바꾸기','↕️',`openFolder('${id}');toggleFolderEdit(true)`],['복사하기','📄',`copyItem('${id}')`],['묶음 풀기','📂',`askRemove('${id}')`,'red']]
+    :[['오늘 하늘이에게 보내기','📤',`sendItem('${id}')`],['이름 바꾸기','✏️',`askRename('${id}')`],['묶음에 넣기','🗂️',`openChooser('${id}')`],['복사하기','📄',`copyItem('${id}')`],['지우기','🗑️',`askRemove('${id}')`,'red']];
+  const menuTop=top+90+rows.length*46>660?top-rows.length*46-8:top+84;
+  const menuLeft=Math.min(Math.max(8,left),340-238);
+  $('ctxbody').innerHTML=`<div class="ctxicon" style="left:${left+10}px;top:${top+10}px">${iconHtml(it)}</div>
+    <div class="menu" style="left:${menuLeft}px;top:${menuTop}px">${rows.map(([t,ic,fn,c])=>`<div class="mi ${c||''}" onclick="closeLayer('ctx');${fn}">${t}<span>${ic}</span></div>`).join('')}</div>`;
+  showLayer('ctx');
+}
+
+// ── 복사 (같은 일과를 두 묶음에 쓰고 싶을 때)
+function cloneR(r){return {...r,id:'r'+(seq++)};}
+function copyItem(id){
+  const it=find(id);
+  const c=it.type==='folder'?{id:'f'+(seq++),type:'folder',name:it.name+' 복사',children:it.children.map(cloneR)}:{...cloneR(it),name:it.name+' 복사'};
+  items.splice(items.indexOf(it)+1,0,c);render();toast(`"${c.name}"을(를) 만들었어요`);
+}
+// ── 묶음 열림
+function openFolder(id,naming){
+  openId=id;folderEdit=false;renderFolder();showLayer('fold');
+  if(naming){setTimeout(()=>{$('fname').focus();$('fname').select();},60);toast('새 묶음이 생겼어요. 이름을 정해 주세요');}
+}
+function closeFolder(){openId=null;closeLayer('fold');render();}
+function toggleFolderEdit(v){folderEdit=v===undefined?!folderEdit:v;renderFolder();}
+function renderFolder(){
+  const f=find(openId);if(!f){closeLayer('fold');openId=null;return;}
+  $('fname').value=document.activeElement===$('fname')?$('fname').value:f.name;
+  $('fmeta').textContent=`일과 ${f.children.length}개 · 이 순서대로 하늘이에게 보여요`;
+  $('fedit').textContent=folderEdit?'완료':'순서 편집';
+  $('flist').innerHTML=f.children.map((c,i)=>`<div class="frow" data-i="${i}" data-rid="${c.id}"><span class="num">${i+1}</span><span class="ric">${c.emoji}</span><span class="rn">${c.name}<small>카드 ${c.cards}장</small></span>${folderEdit?`<span class="rminus" data-out="${c.id}">−</span><span class="rh" data-h="${i}">≡</span>`:'<span class="chev">›</span>'}</div>`).join('');
+  $('fsend').onclick=()=>sendItem(f.id);
+}
+$('fname').addEventListener('input',e=>{const f=find(openId);if(f){f.name=e.target.value.trim()||'새 묶음';$('grid').querySelectorAll('.lbl');render();}});
+let fdrag=null;
+$('flist').addEventListener('pointerdown',e=>{
+  const out=e.target.closest('[data-out]');if(out){takeOut(out.dataset.out);return;}
+  const h=e.target.closest('[data-h]');
+  if(h){const row=h.closest('.frow');fdrag={i:+h.dataset.h,y:e.clientY,row,hgt:row.offsetHeight+8};row.classList.add('lift');h.setPointerCapture(e.pointerId);e.stopPropagation();return;}
+  const row=e.target.closest('.frow');if(row&&!folderEdit)openDetail(row.dataset.rid);
+});
+$('flist').addEventListener('pointermove',e=>{
+  if(!fdrag)return;const f=find(openId);const dy=e.clientY-fdrag.y;fdrag.row.style.transform=`translateY(${dy}px)`;
+  const to=Math.max(0,Math.min(f.children.length-1,fdrag.i+Math.round(dy/fdrag.hgt)));
+  if(to!==fdrag.i){const [m]=f.children.splice(fdrag.i,1);f.children.splice(to,0,m);fdrag.y+=(to-fdrag.i)*fdrag.hgt;fdrag.i=to;renderFolder();
+    fdrag.row=$('flist').children[to];fdrag.row.classList.add('lift');fdrag.row.style.transform=`translateY(${e.clientY-fdrag.y}px)`;}
+});
+$('flist').addEventListener('pointerup',()=>{if(fdrag){fdrag=null;renderFolder();render();}});
+function takeOut(rid){
+  const f=find(openId),c=f.children.find(x=>x.id===rid);
+  f.children=f.children.filter(x=>x!==c);items.splice(items.indexOf(f)+1,0,c);
+  if(f.children.length<=1){items.splice(items.indexOf(f),1,...f.children);closeFolder();toast('일과가 하나만 남아 묶음을 풀었어요');}
+  else toast(`"${c.name}"을(를) 묶음에서 뺐어요 (지워지지 않아요)`);
+  render();
+}
+
+// ── 일과 상세 시트
+function openDetail(rid){
+  const r=findRoutine(rid),p=parentOf(rid);
+  const where=p?`${p.name} 묶음 · ${p.children.indexOf(r)+1}번째`:'묶지 않은 일과';
+  $('sheet').innerHTML=`<div class="handle"></div>
+    <div class="dtop"><span class="dic">${r.emoji}</span><span><b>${r.name}</b><small>${where} · 카드 ${r.cards}장</small></span></div>
+    <div class="cards">${Array.from({length:r.cards},(_,i)=>`<div class="cd"><b>${r.emoji}</b>${i+1}단계</div>`).join('')}</div>
+    <button class="btn dark" onclick="sendItem('${p?p.id:rid}',${p?`'${rid}'`:'null'})">${p?'이 일과만 오늘 보내기':'오늘 하늘이에게 보내기'}</button>
+    <button class="btn light" onclick="toast('지금의 카드 고치기 화면으로 가요')">카드 고치기</button>`;
+  showLayer('sheetL');
+}
+
+// ── 만들기
+function openCreate(){
+  $('sheet').innerHTML=`<div class="handle"></div><h3>무엇을 만들까요?</h3>
+    <div class="act" onclick="closeLayer('sheetL');toast('지금의 일과 만들기 화면으로 가요')"><span class="ai">✏️</span><span><b>새 일과 만들기</b><small>글로 쓰면 카드가 만들어져요</small></span></div>
+    <div class="act" onclick="closeLayer('sheetL');openPicker('new')"><span class="ai">🗂️</span><span><b>새 묶음 만들기</b><small>만들어 둔 일과를 골라 순서대로 묶어요</small></span></div>`;
+  showLayer('sheetL');
+}
+function openChooser(rid){
+  const fs=items.filter(i=>i.type==='folder');
+  $('sheet').innerHTML=`<div class="handle"></div><h3>어느 묶음에 넣을까요?</h3>
+    ${fs.map(f=>`<div class="act" onclick="putInto('${rid}','${f.id}')"><span class="ai">🗂️</span><span><b>${f.name}</b><small>일과 ${f.children.length}개 · 맨 뒤에 붙어요</small></span></div>`).join('')}
+    <div class="act" onclick="closeLayer('sheetL');openPicker('new','${rid}')"><span class="ai">＋</span><span><b>새 묶음 만들기</b><small>이 일과로 시작해요</small></span></div>`;
+  showLayer('sheetL');
+}
+function putInto(rid,fid){const r=find(rid),f=find(fid);items=items.filter(i=>i!==r);f.children.push(r);closeLayer('sheetL');render();toast(`"${r.name}"을(를) ${f.name}에 넣었어요`);}
+
+// ── 고르기 화면 (새 묶음 · 묶음에 넣기)
+function openPicker(mode,seed){
+  pickMode=mode;picked=seed?[seed]:[];pickSeed=seed;renderPicker();$('picker').classList.add('show');
+}
+function renderPicker(){
+  const loose=items.filter(i=>i.type==='routine');
+  const f=pickMode==='add'?find(openId):null;
+  const ok=pickMode==='new'?picked.length>=2:picked.length>=1;
+  $('picker').innerHTML=`<span class="back" onclick="$('picker').classList.remove('show')">‹</span>
+    <div class="ptitle">${pickMode==='new'?'새 묶음 만들기':f.name+'에 일과 넣기'}</div>
+    ${pickMode==='new'?`<div class="namebox"><small>묶음 이름</small><input id="pname" value="${$('pname')?$('pname').value:'새 묶음'}" maxlength="12"></div>`:''}
+    <div style="font-size:12px;color:#898B98;margin:0 2px 10px">누른 순서대로 번호가 붙어요${pickMode==='new'?' · 2개 이상 골라요':''}</div>
+    ${loose.map(r=>{const n=picked.indexOf(r.id);return `<div class="pk ${n>=0?'on':''}" onclick="togglePick('${r.id}')"><span class="ric">${r.emoji}</span>${r.name}<span class="ck">${n>=0?n+1:''}</span></div>`}).join('')}
+    <div class="pcta"><button class="btn dark" ${ok?'':'disabled'} onclick="confirmPick()">${pickMode==='new'?`${picked.length}개로 묶기`:`${picked.length}개 넣기`}</button></div>`;
+}
+function togglePick(id){const n=picked.indexOf(id);if(n>=0)picked.splice(n,1);else picked.push(id);renderPicker();}
+function confirmPick(){
+  const rs=picked.map(find);
+  if(pickMode==='new'){
+    const name=($('pname').value||'').trim()||'새 묶음';
+    const at=items.indexOf(rs[0]);
+    const f={id:'f'+(seq++),type:'folder',name,children:rs};
+    items=items.filter(i=>!rs.includes(i));items.splice(Math.min(at,items.length),0,f);
+    toast(`"${name}" 묶음을 만들었어요`);
+  }else{
+    const f=find(openId);items=items.filter(i=>!rs.includes(i));f.children.push(...rs);toast(`${rs.length}개를 넣었어요`);
+  }
+  $('picker').classList.remove('show');render();
+}
+
+// ── 팝업 (이름 · 지우기 · 풀기)
+function askRename(id){
+  const it=find(id);
+  $('dlg').innerHTML=`<b>이름 바꾸기</b><input id="rn" value="${it.name}" maxlength="12"><div class="dbtns"><button class="btn light" onclick="closeLayer('dlgL')">취소</button><button class="btn dark" onclick="doRename('${id}')">저장</button></div>`;
+  showLayer('dlgL');setTimeout(()=>{$('rn').focus();$('rn').select();},50);
+}
+function doRename(id){const v=$('rn').value.trim();if(v)find(id).name=v;closeLayer('dlgL');render();toast('이름을 바꿨어요');}
+function askRemove(id){
+  const it=find(id);
+  const isF=it.type==='folder';
+  $('dlg').innerHTML=isF
+    ?`<b>"${it.name}" 묶음을 풀까요?</b><p>안의 일과 ${it.children.length}개는 그대로 남아요</p><div class="dbtns"><button class="btn light" onclick="closeLayer('dlgL')">취소</button><button class="btn dark" onclick="doRemove('${id}')">풀기</button></div>`
+    :`<b>"${it.name}"을(를) 지울까요?</b><p>지운 일과는 되돌릴 수 없어요</p><div class="dbtns"><button class="btn light" onclick="closeLayer('dlgL')">취소</button><button class="btn red" onclick="doRemove('${id}')">지우기</button></div>`;
+  showLayer('dlgL');
+}
+function doRemove(id){
+  const it=find(id),at=items.indexOf(it);
+  if(it.type==='folder'){items.splice(at,1,...it.children);toast('묶음을 풀었어요');}
+  else{items.splice(at,1);toast('일과를 지웠어요');}
+  closeLayer('dlgL');render();
+}
+
+// ── 보내기 → 이룸이 홈
+function sendItem(id,onlyRid){
+  closeLayer('sheetL');
+  if(onlyRid){const r=findRoutine(onlyRid);sent.push({kind:'routine',name:r.name,routines:[{name:r.name,done:false}]});toast(`"${r.name}"만 하늘이에게 보냈어요`);renderKid();return;}
+  const it=find(id);
+  if(sentIds.has(id)){toast('오늘 이미 보냈어요');return;}
+  sentIds.add(id);
+  if(it.type==='folder'){sent.push({kind:'folder',name:it.name,routines:it.children.map(c=>({name:c.name,done:false}))});closeFolder();toast(`${it.name} 일과 ${it.children.length}개를 하늘이에게 보냈어요`);}
+  else{sent.push({kind:'routine',name:it.name,routines:[{name:it.name,done:false}]});toast(`"${it.name}"을(를) 하늘이에게 보냈어요`);}
+  render();renderKid();
+}
+function kidTile(s,j,k){return `<div class="kt ${s.routines[k].done?'done':''}" onclick="kidToggle(${j},${k})"><span>${s.routines[k].name}</span><span class="ring">${s.routines[k].done?'✓':'0%'}</span><span style="font-weight:900">›</span></div>`;}
+function renderKid(){
+  const body=sent.length===0?'<div class="kempty">아직 보낸 일과가 없어요<br>왼쪽에서 "보내기"를 눌러 보세요</div>'
+    :sent.map((s,j)=>s.kind==='folder'
+      ?`<div class="kbox"><div class="kbh">🗂️ ${s.name}<span>${s.routines.filter(r=>r.done).length} / ${s.routines.length}</span></div>${s.routines.map((_,k)=>kidTile(s,j,k)).join('')}</div>`
+      :kidTile(s,j,0)).join('');
+  $('kid').innerHTML=`<div class="ktop"><span class="logo">ELUM</span><span style="display:flex;gap:8px;align-items:center"><span style="font-size:32px">⭐</span><span class="kchar">🐱</span></span></div>
+    <div class="kttl">오늘 이룸이가<br>할 일이에요</div>${body}`;
+}
+function kidToggle(j,k){const r=sent[j].routines[k];r.done=!r.done;renderKid();
+  if(sent[j].kind==='folder'&&sent[j].routines.every(x=>x.done)){const b=document.getElementById('kidcheer');b.textContent=`🎉 ${sent[j].name} 다 해냈어요!`;b.classList.add('show');clearTimeout(b.t);b.t=setTimeout(()=>b.classList.remove('show'),2200);}}
+resetAll();
+</script>
+</body>
+</html>
