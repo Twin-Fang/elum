@@ -1483,10 +1483,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardPhotoSourceGallery => 'Choose from gallery';
 
   @override
-  String get cardPhotoSourcePrivacy =>
-      'Don\'t show faces or personal information in the photo';
-
-  @override
   String cardPhotoUploadFailedDialog(String message) {
     return 'Couldn\'t upload the photo.\n$message';
   }

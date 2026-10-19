@@ -2654,12 +2654,6 @@ abstract class AppLocalizations {
   /// **'갤러리에서 고르기'**
   String get cardPhotoSourceGallery;
 
-  /// 사진 고르기 시트 아래 개인정보 주의 안내
-  ///
-  /// In ko, this message translates to:
-  /// **'얼굴이나 개인정보가 나오지 않게 찍어 주세요'**
-  String get cardPhotoSourcePrivacy;
-
   /// 사진 올리기가 실패했는데 자리가 없어 팝업으로 알릴 때 제목. message 는 실패 사유(서버 문구가 우선)
   ///
   /// In ko, this message translates to:

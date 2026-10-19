@@ -1419,9 +1419,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cardPhotoSourceGallery => '갤러리에서 고르기';
 
   @override
-  String get cardPhotoSourcePrivacy => '얼굴이나 개인정보가 나오지 않게 찍어 주세요';
-
-  @override
   String cardPhotoUploadFailedDialog(String message) {
     return '사진을 올리지 못했어요.\n$message';
   }
