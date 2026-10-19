@@ -31,6 +31,9 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kNickname = 'childNickname';
   static const _kLastProvider = 'lastLoginProvider';
   static const _kGoals = 'supportGoals';
+  // 온보딩 예시 분류 대기값·실패 횟수 (#803)
+  static const _kPendingExampleCategories = 'pendingExampleCategories';
+  static const _kExampleSeedAttempts = 'exampleSeedAttempts';
   static const _kCharacter = 'cardCharacter';
   static const _kImageStyle = 'imageStyle';
   static const _kCompleted = 'onboardingCompleted';
@@ -100,6 +103,29 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setGoals(List<String> v) {
     AppLogger.storageWrite(_kGoals, v);
     return _prefs.setStringList(_kGoals, v);
+  }
+
+  @override
+  List<String> get pendingExampleCategories {
+    final categories =
+        _prefs.getStringList(_kPendingExampleCategories) ?? const [];
+    AppLogger.storageRead(_kPendingExampleCategories, categories);
+    return categories;
+  }
+
+  @override
+  Future<void> setPendingExampleCategories(List<String> v) {
+    AppLogger.storageWrite(_kPendingExampleCategories, v);
+    return _prefs.setStringList(_kPendingExampleCategories, v);
+  }
+
+  @override
+  int get exampleSeedAttempts => _prefs.getInt(_kExampleSeedAttempts) ?? 0;
+
+  @override
+  Future<void> setExampleSeedAttempts(int v) {
+    AppLogger.storageWrite(_kExampleSeedAttempts, '$v');
+    return _prefs.setInt(_kExampleSeedAttempts, v);
   }
 
   @override
@@ -340,6 +366,9 @@ class SharedPrefsStorage implements LocalStorage {
     for (final key in [
       _kNickname,
       _kGoals,
+      // 지운 이룸이의 예시를 다음 이룸이에 만들지 않게
+      _kPendingExampleCategories,
+      _kExampleSeedAttempts,
       _kCharacter,
       _kImageStyle,
       _kCompleted,

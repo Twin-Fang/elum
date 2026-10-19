@@ -117,8 +117,6 @@
   "goalIndependent": "Build the experience of finishing on their own",
   "onboardingCharacterTitle": "Choose a friend to\nspend {name}'s day with",
   "onboardingCharacterDescription": "The friend you pick is the star of the cards and helps along the way",
-  "onboardingGoalsTitle": "Which moments of {name}'s day\ndo you want to help with?",
-  "onboardingGoalsDescription": "You can pick more than one",
   "onboardingImageStyleTitle": "How should the card\npictures be made?",
   "onboardingImageStyleDescription": "You can change this later in settings",
   "onboardingNameTitle": "What should we\ncall Elumi?",
@@ -676,5 +674,18 @@
   "routineLibraryRemoveFailedTitle": "Couldn't delete",
   "routineLibrarySentBadge": "Sent today",
   "routineLibraryTileHint": "Long press to open the menu",
-  "routineLibrarySent": "Sent {title} for today"
+  "routineLibrarySent": "Sent {title} for today",
+  "onboardingExampleTitle": "Which routines would you like\nto start with {name}?",
+  "onboardingExampleDescription": "We'll add example routines for the ones you pick.\nYou can pick more than one.",
+  "onboardingExampleSkip": "Skip",
+  "exampleCategoryMorningEvening": "Morning & evening",
+  "exampleCategoryMorningEveningHint": "Washing, dressing, bedtime",
+  "exampleCategorySchoolStudy": "School & study",
+  "exampleCategorySchoolStudyHint": "Getting ready for school, homework",
+  "exampleCategoryHouseSelf": "Chores & doing it myself",
+  "exampleCategoryHouseSelfHint": "Tidying up, setting the table",
+  "exampleCategoryOutside": "Out and about",
+  "exampleCategoryOutsideHint": "Taking the bus, shopping",
+  "routineTileExampleBadge": "Example",
+  "exampleRoutinesFailed": "Couldn't add the example routines"
 }

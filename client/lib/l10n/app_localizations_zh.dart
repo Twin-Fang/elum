@@ -432,14 +432,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingCharacterDescription => '선택한 친구가 카드 속 주인공이 되어 도와줘요';
 
   @override
-  String onboardingGoalsTitle(String name) {
-    return '$name의 어떤 순간을\n도와주고 싶으신가요?';
-  }
-
-  @override
-  String get onboardingGoalsDescription => '여러 개를 선택할 수 있어요';
-
-  @override
   String get onboardingImageStyleTitle => '카드 그림은 어떤 방식으로\n만들까요?';
 
   @override
@@ -2281,4 +2273,45 @@ class AppLocalizationsZh extends AppLocalizations {
   String routineLibrarySent(String title) {
     return '$title을(를) 오늘 일과로 보냈어요';
   }
+
+  @override
+  String onboardingExampleTitle(String name, String batchim) {
+    return '想和$name\n先从哪些日常开始?';
+  }
+
+  @override
+  String get onboardingExampleDescription => '我们会为所选分类加入示例日常。\n可以选择多个。';
+
+  @override
+  String get onboardingExampleSkip => '跳过';
+
+  @override
+  String get exampleCategoryMorningEvening => '早晚准备';
+
+  @override
+  String get exampleCategoryMorningEveningHint => '洗漱、穿衣、睡前';
+
+  @override
+  String get exampleCategorySchoolStudy => '上学·学习';
+
+  @override
+  String get exampleCategorySchoolStudyHint => '上学准备、作业';
+
+  @override
+  String get exampleCategoryHouseSelf => '家务·自己动手';
+
+  @override
+  String get exampleCategoryHouseSelfHint => '整理、摆餐桌';
+
+  @override
+  String get exampleCategoryOutside => '外出试试';
+
+  @override
+  String get exampleCategoryOutsideHint => '坐公交、买东西';
+
+  @override
+  String get routineTileExampleBadge => '示例';
+
+  @override
+  String get exampleRoutinesFailed => '未能加入示例日常';
 }

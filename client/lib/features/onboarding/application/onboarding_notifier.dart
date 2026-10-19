@@ -7,6 +7,7 @@ import '../../profile/domain/profile_summary.dart';
 import '../../../shared/models/character.dart';
 import '../domain/image_style.dart';
 import '../domain/onboarding_profile.dart';
+import '../../../shared/models/routine_example_category.dart';
 import '../../../shared/models/support_goal.dart';
 import '../../../core/logger/app_logger.dart';
 
@@ -47,15 +48,14 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
     state = state.copyWith(childNickname: value);
   }
 
-  /// 목표는 다중 선택이다
-  void toggleGoal(SupportGoal goal) {
-    final next = Set<SupportGoal>.from(state.supportGoals);
-    next.contains(goal) ? next.remove(goal) : next.add(goal);
-    state = state.copyWith(supportGoals: next);
+  /// 예시 분류는 다중 선택이다 (#803)
+  void setExampleCategories(Set<RoutineExampleCategory> categories) {
+    state = state.copyWith(exampleCategories: categories);
   }
 
-  void setGoals(Set<SupportGoal> goals) {
-    state = state.copyWith(supportGoals: goals);
+  /// 건너뛰기 — 예시를 만들지 않는다
+  void clearExampleCategories() {
+    state = state.copyWith(exampleCategories: const {});
   }
 
   /// 캐릭터는 단일 선택이다
@@ -192,6 +192,11 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
       // 건너뛴 경우에도 기본값(만화)이 명시로 남는다
       await storage.setImageStyle(input.imageStyle.apiValue);
       await storage.setPin(input.guardianPin);
+      // 예시 일과는 홈 진입 때 만든다 (ExampleRoutineSeeder). 건너뛰었으면 빈 목록
+      await storage.setPendingExampleCategories(
+        input.exampleCategories.map((c) => c.apiValue).toList(),
+      );
+      await storage.setExampleSeedAttempts(0);
       await storage.setOnboardingCompleted(true);
     } catch (e, stack) {
       AppLogger.error('[onboarding] local save failed', e, stack);

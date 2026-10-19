@@ -26,6 +26,15 @@ abstract interface class LocalStorage {
   List<String> get goals;
   Future<void> setGoals(List<String> v);
 
+  /// 아직 서버에 만들지 못한 온보딩 예시 분류 (`RoutineExampleCategory.apiValue`, #803).
+  /// 비어 있으면 만들 것 없음. 홈 진입 시 생성 요청 후 비운다.
+  List<String> get pendingExampleCategories;
+  Future<void> setPendingExampleCategories(List<String> v);
+
+  /// 예시 생성 실패 횟수. 2번째 실패면 대기 분류를 비운다 (무한 재시도 방지)
+  int get exampleSeedAttempts;
+  Future<void> setExampleSeedAttempts(int v);
+
   String? get character;
   Future<void> setCharacter(String v);
 

@@ -5,7 +5,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/role_select_screen.dart';
 import '../../features/onboarding/presentation/card_completion_screen.dart';
 import '../../features/onboarding/presentation/character_screen.dart';
-import '../../features/onboarding/presentation/goals_screen.dart';
+import '../../features/onboarding/presentation/example_category_screen.dart';
 import '../../features/onboarding/presentation/image_style_screen.dart';
 import '../../features/onboarding/presentation/name_screen.dart';
 import '../../features/onboarding/presentation/pin_screen.dart';
@@ -62,8 +62,8 @@ List<RouteBase> entryRoutes() => [
     pageBuilder: (context, state) => slidePage(state, const NameScreen()),
   ),
   GoRoute(
-    path: Routes.onboardingGoals,
-    pageBuilder: (context, state) => slidePage(state, const GoalsScreen()),
+    path: Routes.onboardingExampleCategories,
+    pageBuilder: (context, state) => slidePage(state, const ExampleCategoryScreen()),
   ),
   GoRoute(
     path: Routes.onboardingCharacter,

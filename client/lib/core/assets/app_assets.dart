@@ -1,6 +1,5 @@
 import '../../shared/models/reward_character.dart';
 import '../../shared/models/character.dart';
-import '../../shared/models/support_goal.dart';
 
 /// 에셋 경로 상수.
 ///
@@ -50,21 +49,6 @@ abstract final class AppAssets {
   /// 로그아웃·회원탈퇴·모든 실패가 같은 아이콘을 쓴다. 이룸이 화면도 같다 —
   /// 시안에 노란 경고가 없다.
   static const dialogAlert = 'assets/icon/dialog/alert_round.svg';
-
-  /// 목표 칩 아이콘 (40×40).
-  ///
-  /// **고른 뒤에는 배경 원 색이 바뀐다** — 미선택 `#EEE9E6`, 선택 `#93DBCC`
-  /// (Figma `204:1002` ↔ `204:1147`). 원이 그림 안에 들어 있어 코드로 덧칠할 수
-  /// 없으므로 두 벌을 따로 들여온다. 한 벌만 쓰면 고른 칩만 원이 허옇게 남는다.
-  static String goalIcon(SupportGoal goal, {bool selected = false}) {
-    final suffix = selected ? '_selected' : '';
-    return switch (goal) {
-      SupportGoal.stepByStep => '$_images/goal_icon_step_by_step$suffix.svg',
-      SupportGoal.prepareItems => '$_images/goal_icon_prepare_items$suffix.svg',
-      SupportGoal.prepareNew => '$_images/goal_icon_prepare_new$suffix.svg',
-      SupportGoal.independent => '$_images/goal_icon_independent$suffix.svg',
-    };
-  }
 
   /// 역할 선택 카드 그림 (40×40) — ⚠️ **임시로 목표 아이콘을 빌려 쓴다.**
   ///

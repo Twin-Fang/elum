@@ -6,6 +6,7 @@ import '../../../shared/models/routine.dart';
 import '../../../core/network/app_failure.dart';
 import '../data/routine_library_api.dart';
 import '../data/routine_repository.dart';
+import '../data/routine_example_repository.dart';
 import '../data/routine_repository_impl.dart';
 import '../domain/routine_suggestion.dart';
 
@@ -138,3 +139,8 @@ final routineLibraryProvider = FutureProvider<List<Routine>>((ref) async {
   if (failure != null) throw failure;
   return result.value ?? const <Routine>[];
 });
+
+/// 온보딩 예시 일과 저장소 (#803). 인증 인터셉터가 붙은 [dioProvider]를 쓴다.
+final routineExampleRepositoryProvider = Provider<RoutineExampleRepository>(
+  (ref) => RoutineExampleRepository(ref.watch(dioProvider)),
+);
