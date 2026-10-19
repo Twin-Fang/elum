@@ -50,6 +50,14 @@ abstract final class AppAssets {
   /// 시안에 노란 경고가 없다.
   static const dialogAlert = 'assets/icon/dialog/alert_round.svg';
 
+  /// 보호자 하단 바 아이콘 4개 (Flaticon bold rounded, 시안 `네비게이션바` 1666:7082, #835).
+  /// 한 가지 색(#242634)으로 받아 두고 고른 칸 · 아닌 칸 색은 코드에서 입힌다
+  static const _navIcons = 'assets/icon/nav';
+  static const navHome = '$_navIcons/nav_home.svg';
+  static const navFolder = '$_navIcons/nav_folder.svg';
+  static const navComment = '$_navIcons/nav_comment.svg';
+  static const navUser = '$_navIcons/nav_user.svg';
+
   /// 역할 선택 카드 그림 (40×40) — ⚠️ **임시로 목표 아이콘을 빌려 쓴다.**
   ///
   /// 전용 그림 2종이 아직 없다. 도형을 코드로

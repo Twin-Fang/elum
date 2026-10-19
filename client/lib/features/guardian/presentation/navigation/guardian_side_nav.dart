@@ -11,7 +11,9 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/character_badge.dart';
 import '../../application/guardian_child_identity.dart';
+import 'guardian_bottom_nav.dart';
 import 'guardian_tab.dart';
+import 'guardian_tab_icon.dart';
 
 /// 태블릿 보호자 옆 메뉴: 로고 · 이룸이 카드 · 칸 4개 · 맨 아래 이룸이 화면 (#798 시안 T3)
 ///
@@ -46,7 +48,12 @@ class GuardianSideNav extends ConsumerWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.navBackground,
-        border: Border(right: BorderSide(color: colors.navDivider)),
+        border: Border(
+          right: BorderSide(
+            color: colors.navDivider,
+            width: GuardianBottomNav.dividerWidth,
+          ),
+        ),
       ),
       child: SizedBox(
         width: width.w + padding.left,
@@ -106,7 +113,7 @@ class _ChildCard extends StatelessWidget {
     final space = context.space;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.background,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(GuardianSideNav._itemRadius.w),
       ),
       child: Padding(
@@ -169,7 +176,7 @@ class _SideNavItem extends StatelessWidget {
     final space = context.space;
     final color = isSelected
         ? colors.navIconSelected
-        : colors.navIconUnselected;
+        : colors.navItemUnselected;
     return Semantics(
       selected: isSelected,
       button: true,
@@ -188,8 +195,8 @@ class _SideNavItem extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  isSelected ? tab.selectedIcon : tab.icon,
+                GuardianTabIcon(
+                  tab: tab,
                   size: GuardianSideNav._itemIconSize.w,
                   color: color,
                 ),
