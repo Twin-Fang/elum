@@ -65,7 +65,9 @@ class NotificationSettingsController extends AsyncNotifier<NotificationSettings>
 
   Future<void> reload() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(build);
+    final result = await AsyncValue.guard(build);
+    if (!ref.mounted) return;
+    state = result;
   }
 
   /// 화면 먼저 바꾸고 저장. 실패하면 서버 확정값으로 되돌리고 그 오류를 반환 (성공·중복 호출은 null)
@@ -83,6 +85,7 @@ class NotificationSettingsController extends AsyncNotifier<NotificationSettings>
         final desired = state.value!;
         final saved = await _repository.saveSettings(desired);
         _confirmed = saved;
+        if (!ref.mounted) return null;
         // 서버가 다른 값을 돌려줘도 같은 값을 다시 보내며 맴돌지 않게 맞춤
         if (state.value == desired) state = AsyncData(saved);
       }
@@ -90,7 +93,7 @@ class NotificationSettingsController extends AsyncNotifier<NotificationSettings>
     } catch (e, st) {
       AppLogger.error('notification', e, st, {'step': 'saveSettings'});
       final confirmed = _confirmed;
-      if (confirmed != null) state = AsyncData(confirmed);
+      if (ref.mounted && confirmed != null) state = AsyncData(confirmed);
       return e;
     } finally {
       _isSaving = false;

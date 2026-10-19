@@ -13,6 +13,7 @@ class NotificationListState {
     required this.items,
     this.nextCursor,
     this.isLoadingMore = false,
+    this.hasLoadMoreFailed = false,
   });
 
   final List<AppNotification> items;
@@ -21,17 +22,22 @@ class NotificationListState {
   final String? nextCursor;
   final bool isLoadingMore;
 
+  /// 다음 쪽 받기가 실패함 (새로고침 전까지 스크롤로 다시 요청하지 않음)
+  final bool hasLoadMoreFailed;
+
   bool get hasUnread => items.any((notification) => !notification.isRead);
 
   NotificationListState copyWith({
     List<AppNotification>? items,
     String? nextCursor,
     bool? isLoadingMore,
+    bool? hasLoadMoreFailed,
   }) =>
       NotificationListState(
         items: items ?? this.items,
         nextCursor: nextCursor ?? this.nextCursor,
         isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+        hasLoadMoreFailed: hasLoadMoreFailed ?? this.hasLoadMoreFailed,
       );
 }
 
@@ -54,7 +60,7 @@ class NotificationListController extends AsyncNotifier<NotificationListState> {
   /// 다음 쪽 이어 붙이기 (받는 중이거나 마지막 쪽이면 무시, id 중복 제거)
   Future<void> loadMore() async {
     final current = state.value;
-    if (current == null || current.isLoadingMore) return;
+    if (current == null || current.isLoadingMore || current.hasLoadMoreFailed) return;
     final cursor = current.nextCursor;
     if (cursor == null) return;
 
@@ -62,11 +68,13 @@ class NotificationListController extends AsyncNotifier<NotificationListState> {
     try {
       final page = await _repository.fetchPage(cursor: cursor);
       if (!ref.mounted) return;
-      final knownIds = {for (final item in current.items) item.id};
+      // 기다리는 동안 바뀐 읽음 상태를 잃지 않도록 지금 상태에 이어 붙임
+      final latest = state.value ?? current;
+      final knownIds = {for (final item in latest.items) item.id};
       state = AsyncData(
         NotificationListState(
           items: [
-            ...current.items,
+            ...latest.items,
             for (final item in page.items)
               if (!knownIds.contains(item.id)) item,
           ],
@@ -76,14 +84,21 @@ class NotificationListController extends AsyncNotifier<NotificationListState> {
     } catch (e, st) {
       AppLogger.error('notification', e, st, {'step': 'loadMore'});
       if (!ref.mounted) return;
-      // 실패해도 이미 받은 줄은 그대로 두고 다음 스크롤에서 다시 시도
-      state = AsyncData(current.copyWith(isLoadingMore: false));
+      // 실패해도 이미 받은 줄은 그대로 두고 새로고침 전까지 자동 요청 중단
+      state = AsyncData(
+        (state.value ?? current).copyWith(
+          isLoadingMore: false,
+          hasLoadMoreFailed: true,
+        ),
+      );
     }
   }
 
   /// 처음부터 다시 받기 (실패 시 에러 상태)
   Future<void> refresh() async {
-    state = await AsyncValue.guard(build);
+    final result = await AsyncValue.guard(build);
+    if (!ref.mounted) return;
+    state = result;
   }
 
   /// 한 줄 읽음: 화면 먼저 > 서버 요청 (실패해도 되돌리지 않음) > 종 아이콘 점 갱신
@@ -119,12 +134,13 @@ class NotificationListController extends AsyncNotifier<NotificationListState> {
 
   // 읽음 요청 공통 (성공·실패 공통으로 안 읽음 요약 갱신)
   Future<void> _syncToServer(String step, Future<void> Function() request) async {
+    // 화면을 떠나 이 컨트롤러가 정리돼도 요약(전역)은 갱신해야 해서 미리 잡아 둠
+    final summary = ref.read(unreadSummaryProvider.notifier);
     try {
       await request();
     } catch (e, st) {
       AppLogger.error('notification', e, st, {'step': step});
     }
-    if (!ref.mounted) return;
-    await ref.read(unreadSummaryProvider.notifier).refresh();
+    await summary.refresh();
   }
 }

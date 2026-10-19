@@ -1973,13 +1973,13 @@ abstract class AppLocalizations {
   /// 알림 줄: 이룸이가 일과 하나를 끝냄. title 은 일과 제목
   ///
   /// In ko, this message translates to:
-  /// **'\'\'{title}\'\' 일과를 끝냈어요'**
+  /// **'\'{title}\' 일과를 끝냈어요'**
   String notificationRoutineCompletedOne(String title);
 
   /// 알림 줄: 이룸이가 하루에 일과 여러 개를 끝냄(묶음). count 는 개수
   ///
   /// In ko, this message translates to:
-  /// **'오늘 일과 {count}개를 끝냈어요'**
+  /// **'일과 {count}개를 끝냈어요'**
   String notificationRoutineCompletedMany(int count);
 
   /// 알림 줄: 일과를 끝냄(제목을 모를 때)
@@ -1991,7 +1991,7 @@ abstract class AppLocalizations {
   /// 알림 줄: 다른 보호자가 일과를 보냄. title 은 일과 제목
   ///
   /// In ko, this message translates to:
-  /// **'함께하는 보호자가 \'\'{title}\'\' 일과를 보냈어요'**
+  /// **'함께하는 보호자가 \'{title}\' 일과를 보냈어요'**
   String notificationRoutineSent(String title);
 
   /// 알림 줄: 다른 보호자가 일과를 보냄(제목을 모를 때)

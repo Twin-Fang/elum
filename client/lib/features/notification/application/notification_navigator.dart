@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n_context.dart';
-import '../../../core/logger/app_logger.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../member/application/member_providers.dart';
@@ -43,7 +42,20 @@ class NotificationNavigator {
     if (profileId == null) return true;
     if (_ref.read(profileSessionProvider).selectedId == profileId) return true;
 
-    final profile = await _findAccessibleProfile(profileId);
+    final ProfileSummary? profile;
+    try {
+      profile = await _findAccessibleProfile(profileId);
+    } catch (e) {
+      // 목록을 못 받은 것과 접근 못 하는 것을 구분
+      if (!context.mounted) return false;
+      await showFailure(
+        context,
+        e,
+        fallback: context.l10n.notificationListFailed,
+        fallbackCode: 'E-NOTIF-PROFILE-LOAD',
+      );
+      return false;
+    }
     if (profile == null) {
       if (!context.mounted) return false;
       await showFailure(
@@ -54,20 +66,25 @@ class NotificationNavigator {
       );
       return false;
     }
-    await _ref.read(profileSessionProvider.notifier).select(profile);
+    try {
+      await _ref.read(profileSessionProvider.notifier).select(profile);
+    } catch (e) {
+      if (!context.mounted) return false;
+      await showFailure(
+        context,
+        e,
+        fallback: context.l10n.notificationListFailed,
+        fallbackCode: 'E-NOTIF-PROFILE-SELECT',
+      );
+      return false;
+    }
     return true;
   }
 
-  // 회원 정보의 이룸이 목록에서 찾기 (아직 못 받았으면 한 번 기다림)
+  // 회원 정보의 이룸이 목록에서 찾기 (아직 못 받았으면 한 번 기다림, 받기 실패는 던짐)
   Future<ProfileSummary?> _findAccessibleProfile(String profileId) async {
     var profiles = _ref.read(memberProvider).value?.profiles;
-    if (profiles == null) {
-      try {
-        profiles = (await _ref.read(memberProvider.future))?.profiles;
-      } catch (e, st) {
-        AppLogger.error('notification', e, st, {'step': 'loadMember'});
-      }
-    }
+    profiles ??= (await _ref.read(memberProvider.future))?.profiles;
     return profiles?.where((profile) => profile.id == profileId).firstOrNull;
   }
 

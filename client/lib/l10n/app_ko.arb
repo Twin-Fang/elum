@@ -1003,16 +1003,16 @@
   "notificationProfileUnavailable": "이 이룸이의 알림은 더 볼 수 없어요",
   "@notificationProfileUnavailable": {"description": "알림이 가리키는 이룸이가 내 목록에 없을 때의 안내"},
 
-  "notificationRoutineCompletedOne": "''{title}'' 일과를 끝냈어요",
+  "notificationRoutineCompletedOne": "'{title}' 일과를 끝냈어요",
   "@notificationRoutineCompletedOne": {"description": "알림 줄: 이룸이가 일과 하나를 끝냄. title 은 일과 제목", "placeholders": {"title": {"type": "String"}}},
 
-  "notificationRoutineCompletedMany": "오늘 일과 {count}개를 끝냈어요",
+  "notificationRoutineCompletedMany": "일과 {count}개를 끝냈어요",
   "@notificationRoutineCompletedMany": {"description": "알림 줄: 이룸이가 하루에 일과 여러 개를 끝냄(묶음). count 는 개수", "placeholders": {"count": {"type": "int"}}},
 
   "notificationRoutineCompletedNoTitle": "일과를 끝냈어요",
   "@notificationRoutineCompletedNoTitle": {"description": "알림 줄: 일과를 끝냄(제목을 모를 때)"},
 
-  "notificationRoutineSent": "함께하는 보호자가 ''{title}'' 일과를 보냈어요",
+  "notificationRoutineSent": "함께하는 보호자가 '{title}' 일과를 보냈어요",
   "@notificationRoutineSent": {"description": "알림 줄: 다른 보호자가 일과를 보냄. title 은 일과 제목", "placeholders": {"title": {"type": "String"}}},
 
   "notificationRoutineSentNoTitle": "함께하는 보호자가 새 일과를 보냈어요",

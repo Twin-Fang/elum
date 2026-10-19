@@ -1063,12 +1063,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String notificationRoutineCompletedOne(String title) {
-    return '\'\'$title\'\' 일과를 끝냈어요';
+    return '\'$title\' 일과를 끝냈어요';
   }
 
   @override
   String notificationRoutineCompletedMany(int count) {
-    return '오늘 일과 $count개를 끝냈어요';
+    return '일과 $count개를 끝냈어요';
   }
 
   @override
@@ -1076,7 +1076,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String notificationRoutineSent(String title) {
-    return '함께하는 보호자가 \'\'$title\'\' 일과를 보냈어요';
+    return '함께하는 보호자가 \'$title\' 일과를 보냈어요';
   }
 
   @override

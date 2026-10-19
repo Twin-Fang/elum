@@ -1119,12 +1119,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String notificationRoutineCompletedOne(String title) {
-    return 'Finished \'\'$title\'\'';
+    return 'Finished \'$title\'';
   }
 
   @override
   String notificationRoutineCompletedMany(int count) {
-    return 'Finished $count routines today';
+    return 'Finished $count routines';
   }
 
   @override
@@ -1132,7 +1132,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String notificationRoutineSent(String title) {
-    return 'A co-guardian sent \'\'$title\'\'';
+    return 'A co-guardian sent \'$title\'';
   }
 
   @override

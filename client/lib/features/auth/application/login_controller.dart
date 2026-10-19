@@ -4,6 +4,7 @@ import '../../../core/storage/local_storage.dart';
 import '../../child/application/child_routine_notifier.dart';
 import '../../member/application/member_providers.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
+import '../../notification/application/unread_summary_provider.dart';
 import '../../profile/application/profile_session.dart';
 import '../data/auth_repository.dart';
 import '../data/oauth_sdk.dart';
@@ -28,6 +29,8 @@ class LoginController {
   Future<void> resetPreviousAccount() async {
     _ref.invalidate(memberProvider);
     _ref.invalidate(profileSessionProvider);
+    // 안 읽음 요약(종 아이콘 점)도 이전 계정 값이다
+    _ref.invalidate(unreadSummaryProvider);
     // 이룸이 설정도 이전 계정 값이라 함께 비운다
     _ref.invalidate(onboardingProvider);
     // 일과 목록도 이전 계정 것이다
