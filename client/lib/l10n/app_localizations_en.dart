@@ -123,7 +123,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adRewardSlow =>
-      'Checking your credits is taking a while.\nCheck settings in a moment';
+      'Checking your credits is taking a while.\nCheck My info in a moment';
 
   @override
   String get adRewardDailyLimit =>
@@ -905,10 +905,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteEnterDescriptionManual =>
-      'The code is on a co-guardian\'s device,\nin Settings → Co-guardians';
+      'The code is on a co-guardian\'s device,\nin My info → Co-guardians';
 
   @override
-  String get inviteEnterDescriptionPath => 'Settings → Co-guardians';
+  String get inviteEnterDescriptionPath => 'My info → Co-guardians';
 
   @override
   String get inviteEnterSemanticsFromLink => 'Invite code from the link';
@@ -1603,14 +1603,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineLeaveDraftWhenReadyMessage =>
-      'Once the cards are ready, it stays in drafts\nYou can continue from settings';
+      'Once the cards are ready, it stays in drafts\nYou can continue from My info';
 
   @override
   String get routineLeaveDraftTitle => 'Leave it as a draft?';
 
   @override
   String get routineLeaveDraftMessage =>
-      'You can continue from\nDrafts in settings';
+      'You can continue from\nDrafts in My info';
 
   @override
   String get routineLeaveEditTitle => 'Leave without saving?';

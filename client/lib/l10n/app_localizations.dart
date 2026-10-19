@@ -245,7 +245,7 @@ abstract class AppLocalizations {
   /// 시청은 끝났는데 지급 확인이 오지 않을 때의 안내
   ///
   /// In ko, this message translates to:
-  /// **'크레딧 확인이 늦어지고 있어요.\n잠시 후 설정에서 확인해주세요'**
+  /// **'크레딧 확인이 늦어지고 있어요.\n잠시 후 내정보에서 확인해주세요'**
   String get adRewardSlow;
 
   /// 하루 한도를 다 받았을 때의 안내
@@ -1601,13 +1601,13 @@ abstract class AppLocalizations {
   /// 직접 입력할 때의 설명(코드를 받는 길)
   ///
   /// In ko, this message translates to:
-  /// **'코드는 함께하는 보호자 기기의\n설정 → 함께하는 사람에 있어요'**
+  /// **'코드는 함께하는 보호자 기기의\n내정보 → 함께하는 사람에 있어요'**
   String get inviteEnterDescriptionManual;
 
   /// 직접 입력 설명(inviteEnterDescriptionManual) 안에서 밑줄을 긋는 길 안내. 설명 문구에 그대로 들어 있어야 함
   ///
   /// In ko, this message translates to:
-  /// **'설정 → 함께하는 사람'**
+  /// **'내정보 → 함께하는 사람'**
   String get inviteEnterDescriptionPath;
 
   /// 화면 낭독기가 읽는 여섯 칸의 이름(링크로 받았을 때)
@@ -2843,7 +2843,7 @@ abstract class AppLocalizations {
   /// 카드를 만드는 중에 나가는 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요'**
+  /// **'카드가 다 만들어지면 임시저장에 남아요\n내정보에서 이어서 만들 수 있어요'**
   String get routineLeaveDraftWhenReadyMessage;
 
   /// 카드 검토 화면에서 나가는 팝업 제목
@@ -2855,7 +2855,7 @@ abstract class AppLocalizations {
   /// 카드 검토 화면에서 나가는 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'설정의 임시저장에서\n이어서 만들 수 있어요'**
+  /// **'내정보의 임시저장에서\n이어서 만들 수 있어요'**
   String get routineLeaveDraftMessage;
 
   /// 저장한 일과를 고치다 나가는 팝업 제목
