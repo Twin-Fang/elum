@@ -40,6 +40,7 @@ public class FcmPushSender implements PushSender {
       MessagingErrorCode errorCode = exception.getMessagingErrorCode();
       // 토큰이 무효: UNREGISTERED(앱 삭제·만료), INVALID_ARGUMENT(형식 오류)
       if (errorCode == MessagingErrorCode.UNREGISTERED || errorCode == MessagingErrorCode.INVALID_ARGUMENT) {
+        log.info("[notification push] invalid token removed : {}", errorCode);
         return PushResult.INVALID_TOKEN;
       }
       log.warn("[notification push] failed : {}", errorCode);

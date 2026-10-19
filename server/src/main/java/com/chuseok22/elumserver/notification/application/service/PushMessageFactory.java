@@ -72,6 +72,7 @@ public class PushMessageFactory {
   private String text(AppLocale locale, String key) {
     String text = bundle(locale).getProperty(key);
     if (text == null && locale != AppLocale.EN) {
+      log.warn("[notification push] missing copy key : {}", key);
       text = bundle(AppLocale.EN).getProperty(key);
     }
     return text == null ? key : text;

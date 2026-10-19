@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.notification.application.service;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -91,7 +92,7 @@ class PushDispatcherTest {
 
     dispatcher.dispatch(List.of(recorded), NotificationType.ROUTINE_COMPLETED);
 
-    verify(pushSender, org.mockito.Mockito.times(2)).send(any(PushMessage.class));
+    verify(pushSender, times(2)).send(any(PushMessage.class));
   }
 
   @Test
@@ -104,7 +105,7 @@ class PushDispatcherTest {
 
     verify(pushDeviceRepository).deleteByToken("t1");
     verify(pushDeviceRepository, never()).deleteByToken("t2");
-    verify(pushSender, org.mockito.Mockito.times(2)).send(any());
+    verify(pushSender, times(2)).send(any());
   }
 
   @Test

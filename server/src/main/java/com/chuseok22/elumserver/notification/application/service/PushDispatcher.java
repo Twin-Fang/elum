@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 푸시 발송: 푸시 대상만 추림 > 설정 확인(전체 끔, 종류별) > 받는 사람 기기 전부에 순차 발송 > 무효 토큰 기기 삭제
@@ -40,7 +39,7 @@ public class PushDispatcher {
     this.pushSender = pushSender;
   }
 
-  @Transactional
+  // 트랜잭션 없음: FCM 호출 동안 DB 연결을 잡지 않고, 삭제만 저장소의 짧은 트랜잭션으로 확정
   public void dispatch(List<RecordedNotification> recorded, NotificationType type) {
     for (RecordedNotification notification : recorded) {
       if (!notification.shouldPush()) {
@@ -56,11 +55,16 @@ public class PushDispatcher {
   }
 
   private void dispatchOne(RecordedNotification recorded, NotificationType type) {
-    if (!isPushEnabled(recorded.recipientMemberId(), type)) {
-      return;
-    }
     Optional<Notification> notification = notificationRepository.findById(recorded.notificationId());
     if (notification.isEmpty()) {
+      return;
+    }
+    // 종류의 원본은 알림 행 (인자와 다르면 행 기준으로 처리)
+    NotificationType rowType = notification.get().getType();
+    if (rowType != type) {
+      log.warn("[notification push] type mismatch : argument={} row={}", type, rowType);
+    }
+    if (!isPushEnabled(recorded.recipientMemberId(), rowType)) {
       return;
     }
     List<PushDevice> devices = pushDeviceRepository.findAllByMemberIdIn(List.of(recorded.recipientMemberId()));

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
 import com.chuseok22.elumserver.notification.application.service.NotificationRecorder;
 import com.chuseok22.elumserver.notification.application.service.PushDispatcher;
+import com.chuseok22.elumserver.notification.application.service.RecordedNotification;
 import com.chuseok22.elumserver.notification.core.NotificationDraft;
 import com.chuseok22.elumserver.notification.core.NotificationType;
 import com.chuseok22.elumserver.notification.core.event.CoGuardianJoinedEvent;
@@ -116,6 +118,29 @@ class NotificationEventListenerTest {
     when(profileGuardianService.guardianMemberIdsOf("profile-1")).thenReturn(List.of("member-1"));
     when(notificationRecorder.record(any(NotificationDraft.class), anyCollection()))
       .thenThrow(new IllegalStateException("db down"));
+
+    assertThatCode(() -> listener.onRoutineCompleted(
+      new RoutineCompletedEvent("routine-1", "profile-1", LocalDate.of(2026, 10, 19), null)))
+      .doesNotThrowAnyException();
+  }
+
+  @Test
+  @DisplayName("기록이 끝나면 기록 결과와 종류로 푸시 발송을 부른다")
+  void recorded_thenDispatchCalled() {
+    List<RecordedNotification> recorded = List.of(new RecordedNotification("n1", "member-2", 1, true));
+    when(profileGuardianService.guardianMemberIdsOf("profile-1")).thenReturn(List.of("member-2"));
+    when(notificationRecorder.record(any(NotificationDraft.class), anyCollection())).thenReturn(recorded);
+
+    listener.onRoutineCompleted(new RoutineCompletedEvent("routine-1", "profile-1", LocalDate.of(2026, 10, 19), null));
+
+    verify(pushDispatcher).dispatch(recorded, NotificationType.ROUTINE_COMPLETED);
+  }
+
+  @Test
+  @DisplayName("푸시 발송이 예외를 던져도 리스너 밖으로 번지지 않는다")
+  void dispatchThrows_notPropagated() {
+    when(profileGuardianService.guardianMemberIdsOf("profile-1")).thenReturn(List.of("member-2"));
+    doThrow(new IllegalStateException("fcm down")).when(pushDispatcher).dispatch(any(), any());
 
     assertThatCode(() -> listener.onRoutineCompleted(
       new RoutineCompletedEvent("routine-1", "profile-1", LocalDate.of(2026, 10, 19), null)))

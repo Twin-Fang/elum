@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface PushDeviceRepository extends JpaRepository<PushDevice, String> {
 
@@ -12,7 +13,8 @@ public interface PushDeviceRepository extends JpaRepository<PushDevice, String> 
 
   List<PushDevice> findAllByMemberIdIn(Collection<String> memberIds);
 
-  /// 푸시 서버가 무효 토큰이라고 답한 기기 정리
+  /// 푸시 서버가 무효 토큰이라고 답한 기기 정리 (발송 흐름과 분리된 짧은 트랜잭션)
+  @Transactional
   void deleteByToken(String token);
 
   /// 탈퇴·완전 삭제: 회원의 기기 전부
