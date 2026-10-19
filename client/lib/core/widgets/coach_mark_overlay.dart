@@ -328,6 +328,24 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                     ),
                   ),
                 ),
+                // 시범 층: 구멍이 대상에 자리 잡은 뒤에만 (옮겨 가는 동안은 어긋나 보인다)
+                if (_to != null &&
+                    _measuredIndex == widget.index &&
+                    step.demoBuilder != null)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: AnimatedBuilder(
+                        animation: _move,
+                        builder: (context, _) => Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            if (_move.isCompleted)
+                              step.demoBuilder!(context, _to!.rect),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 if (_to != null)
                   FadeTransition(
                     opacity: _contentFade,

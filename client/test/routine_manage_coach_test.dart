@@ -1,11 +1,20 @@
 import 'package:elum/core/storage/in_memory_storage.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/guardian/application/routine_manage_coach_notifier.dart';
+import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/coach_mark_overlay.dart';
+import 'package:elum/core/widgets/coach_mark_step.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'helpers/device_viewport.dart';
 
 /// 일과관리 코치마크: 언제 뜨고, 무엇을 보여주고, 닫으면 다시 안 뜨는가 (이슈 #832)
 void main() {
+  useFigmaViewport();
+
   ProviderContainer containerWith(InMemoryStorage storage) {
     final container = ProviderContainer(
       overrides: [localStorageProvider.overrideWithValue(storage)],
@@ -210,6 +219,56 @@ void main() {
           .read(routineManageCoachProvider.notifier)
           .replay(routineCount: 1, groupCount: 0);
       expect(container.read(routineManageCoachProvider).active, isTrue);
+    });
+  });
+
+  group('시범 층 (demoBuilder)', () {
+    testWidgets('단계에 시범 층이 있으면 구멍 자리(대상 상자)에 맞춰 그려진다', (tester) async {
+      final targetKey = GlobalKey();
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(393, 852),
+          builder: (context, _) => MaterialApp(
+            theme: AppTheme.light,
+            home: Scaffold(
+              body: Stack(
+                children: [
+                  Positioned(
+                    left: 100,
+                    top: 200,
+                    child: SizedBox(key: targetKey, width: 80, height: 80),
+                  ),
+                  CoachMarkOverlay(
+                    steps: [
+                      CoachMarkStep(
+                        target: targetKey,
+                        message: '안내',
+                        demoBuilder: (context, targetRect) => Positioned.fromRect(
+                          rect: targetRect,
+                          child: const SizedBox(key: Key('demo')),
+                        ),
+                      ),
+                    ],
+                    index: 0,
+                    visible: true,
+                    onNext: () {},
+                    onClose: () {},
+                    onDismissed: () {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      // 막이 내려앉고 구멍이 대상으로 좁혀 들어오는 연출이 끝날 때까지 흘린다
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump(const Duration(milliseconds: 700));
+
+      expect(find.byKey(const Key('demo')), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(const Key('demo'))), const Offset(100, 200));
+      expect(tester.getSize(find.byKey(const Key('demo'))), const Size(80, 80));
     });
   });
 }
