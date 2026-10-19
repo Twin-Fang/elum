@@ -8,6 +8,7 @@ import com.chuseok22.elumserver.systemconfig.application.service.ConfigDateTime;
 import com.chuseok22.elumserver.systemconfig.application.service.SystemConfigService;
 import com.chuseok22.elumserver.systemconfig.core.ConfigKey;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -79,6 +80,10 @@ public class SystemConfigEntitlementService implements EntitlementService {
 
   @Override
   public boolean isAllowed(String memberId, Entitlement flag) {
+    // 광고 항상 노출 회원은 플랜과 무관하게 광고 제거 불가
+    if (flag == Entitlement.ADS_REMOVED && isAdsAlwaysShownMember(memberId)) {
+      return false;
+    }
     return isAllowed(planOf(memberId), flag);
   }
 
@@ -123,12 +128,26 @@ public class SystemConfigEntitlementService implements EntitlementService {
     return new EntitlementSnapshot(
       plan,
       systemConfigService.getBoolean(Entitlement.AI_IMAGE_GENERATION.configKeyFor(plan)),
-      systemConfigService.getBoolean(Entitlement.ADS_REMOVED.configKeyFor(plan)),
+      !isAdsAlwaysShownMember(memberId) && systemConfigService.getBoolean(Entitlement.ADS_REMOVED.configKeyFor(plan)),
       systemConfigService.getInt(Entitlement.ROUTINE_CREATE_PER_DAY.configKeyFor(plan)),
       systemConfigService.getInt(Entitlement.ROUTINE_CREATE_PER_WEEK.configKeyFor(plan)),
       systemConfigService.getInt(Entitlement.ROUTINE_MAX_COUNT.configKeyFor(plan)),
       systemConfigService.getInt(Entitlement.PROFILE_MAX_COUNT.configKeyFor(plan)),
       systemConfigService.getInt(Entitlement.HISTORY_RETENTION_DAYS.configKeyFor(plan))
     );
+  }
+
+  // 광고 항상 노출 목록(쉼표 구분, 공백·빈 항목 무시)에 회원이 있는지
+  private boolean isAdsAlwaysShownMember(String memberId) {
+    if (memberId == null || memberId.isBlank()) {
+      return false;
+    }
+    String memberIdsText = systemConfigService.getString(ConfigKey.ADS_ALWAYS_SHOWN_MEMBER_IDS);
+    if (memberIdsText == null || memberIdsText.isBlank()) {
+      return false;
+    }
+    return Arrays.stream(memberIdsText.split(","))
+      .map(String::trim)
+      .anyMatch(memberId.trim()::equals);
   }
 }

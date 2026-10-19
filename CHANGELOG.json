@@ -1,15 +1,55 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T12:31:04Z",
-    "currentVersion": "2.49.2",
+    "lastUpdated": "2026-10-19T13:11:45Z",
+    "currentVersion": "2.51.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 272
+    "totalReleases": 274
   },
   "releases": [
+    {
+      "version": "2.51.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 829,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 카드 사진을 고르는 화면의 안내 문구를 정리했어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드 사진을 고르는 화면의 안내 문구를 정리했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.50.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 824,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **새로운 기능**\n  * 관리자 설정의 Pro 요금제 그룹에 \"광고 항상 노출 회원\" 항목을 더했어요. 회원 ID를 쉼표로 적으면 그 계정은 Pro여도 광고가 보여요. 비워 두면 지금과 똑같이 동작해요.",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "관리자 설정의 Pro 요금제 그룹에 \"광고 항상 노출 회원\" 항목을 더했어요. 회원 ID를 쉼표로 적으면 그 계정은 Pro여도 광고가 보여요. 비워 두면 지금과 똑같이 동작해요."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.49.2",
       "project_type": "flutter",
