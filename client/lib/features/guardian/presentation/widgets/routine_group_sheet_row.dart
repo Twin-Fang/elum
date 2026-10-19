@@ -15,6 +15,7 @@ class RoutineGroupSheetRow extends StatelessWidget {
     required this.index,
     required this.routine,
     required this.isEnabled,
+    required this.isEditing,
     required this.onTap,
     required this.onRemove,
   });
@@ -25,6 +26,9 @@ class RoutineGroupSheetRow extends StatelessWidget {
 
   /// 저장 중이면 누르기·빼기를 막는다
   final bool isEnabled;
+
+  /// 순서 편집 중인가 — 이때만 ⊖ 와 끌기 손잡이가 보인다 (시안)
+  final bool isEditing;
   final VoidCallback onTap;
   final VoidCallback onRemove;
 
@@ -46,20 +50,22 @@ class RoutineGroupSheetRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // 빼기
-            AppPressable(
-              onTap: isEnabled ? onRemove : null,
-              scaleDown: AppPressable.scaleIcon,
-              semanticLabel: context.l10n.routineGroupSheetRemove(
-                routine.displayTitle,
+            // 빼기 (순서 편집 중에만)
+            if (isEditing) ...[
+              AppPressable(
+                onTap: isEnabled ? onRemove : null,
+                scaleDown: AppPressable.scaleIcon,
+                semanticLabel: context.l10n.routineGroupSheetRemove(
+                  routine.displayTitle,
+                ),
+                child: Icon(
+                  Icons.remove_circle_rounded,
+                  size: _iconSize.w,
+                  color: colors.danger,
+                ),
               ),
-              child: Icon(
-                Icons.remove_circle_rounded,
-                size: _iconSize.w,
-                color: colors.danger,
-              ),
-            ),
-            SizedBox(width: space.xs.w),
+              SizedBox(width: space.xs.w),
+            ],
             // 순서 번호
             Text(
               '${index + 1}',
@@ -101,19 +107,26 @@ class RoutineGroupSheetRow extends StatelessWidget {
                 ),
               ),
             ),
-            // 끌기 손잡이 (누르자마자 끌린다)
-            ReorderableDragStartListener(
-              index: index,
-              enabled: isEnabled,
-              child: Padding(
-                padding: EdgeInsets.all(space.xs.w),
-                child: Icon(
-                  Icons.drag_handle_rounded,
-                  size: _iconSize.w,
-                  color: colors.navIconUnselected,
+            // 보통은 `›`, 순서 편집 중에는 끌기 손잡이 (누르자마자 끌린다)
+            if (!isEditing)
+              Icon(
+                Icons.chevron_right_rounded,
+                size: _iconSize.w,
+                color: colors.navIconUnselected,
+              )
+            else
+              ReorderableDragStartListener(
+                index: index,
+                enabled: isEnabled,
+                child: Padding(
+                  padding: EdgeInsets.all(space.xs.w),
+                  child: Icon(
+                    Icons.drag_handle_rounded,
+                    size: _iconSize.w,
+                    color: colors.navIconUnselected,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

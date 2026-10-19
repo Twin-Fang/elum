@@ -165,13 +165,16 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.text('양치하기')));
     await tester.pump();
     await gesture.up();
-    await tester.pumpAndSettle();
+    // 정리 상태는 계속 흔들려 settle 이 끝나지 않는다 — 시간만 흘린다
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(groupApi.created, [
       ['b', 'a'],
     ]);
     // 끌어 놓았으면 메뉴는 열리지 않는다
     expect(find.text('오늘 보내기'), findsNothing);
+    // 길게 누른 채 움직였으니 정리 상태: 가운데 버튼이 `완료`로 바뀐다
+    expect(find.text('완료'), findsOneWidget);
   });
 
   test('묶음에서 빼서 하나만 남으면 구성을 바꾸지 않고 묶음을 푼다', () async {

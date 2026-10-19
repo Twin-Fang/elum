@@ -6,6 +6,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../shared/models/routine.dart';
+import 'anchored_quick_menu.dart';
 
 /// 일과관리 낱개 원본을 길게 눌렀을 때 고르는 동작
 enum LibraryMenuAction { send, rename, addToGroup, copy, remove }
@@ -13,72 +14,84 @@ enum LibraryMenuAction { send, rename, addToGroup, copy, remove }
 /// 일과관리 묶음(폴더)을 길게 눌렀을 때 고르는 동작 (#807)
 enum GroupMenuAction { send, rename, reorder, copy, ungroup }
 
-/// 빠른 메뉴 한 줄: 돌려줄 값 · 아이콘 · 글자 · 붉게(되돌리기 어려운 동작)
-typedef QuickMenuRow<T> = ({
-  T value,
-  IconData icon,
-  String label,
-  bool isDanger,
-});
-
 /// 낱개 원본 메뉴. 남이 만든 일과는 보내기·묶음에 넣기·복사하기만 (#805)
 ///
 /// 이름 바꾸기·지우기는 만든 사람만 할 수 있어 서버도 막지만, 누를 수 없는 줄은 처음부터 보이지 않는다.
 Future<LibraryMenuAction?> showLibraryQuickMenu(
   BuildContext context,
+  Routine routine, {
+  required Rect anchor,
+  required Widget highlight,
+}) => showAnchoredQuickMenu(
+  context,
+  anchor: anchor,
+  highlight: highlight,
+  rows: _libraryMenuRows(context, routine),
+);
+
+/// 같은 메뉴를 아래 시트로: 상세 시트의 ⋯ 처럼 눌린 칸이 없을 때 (#834)
+Future<LibraryMenuAction?> showLibraryQuickMenuSheet(
+  BuildContext context,
+  Routine routine,
+) => showQuickMenuSheet(
+  context,
+  title: routine.displayTitle,
+  rows: _libraryMenuRows(context, routine),
+);
+
+List<QuickMenuRow<LibraryMenuAction>> _libraryMenuRows(
+  BuildContext context,
   Routine routine,
 ) {
   final l10n = context.l10n;
   final isMine = routine.isEditableByMe;
-  return showQuickMenuSheet(
-    context,
-    title: routine.displayTitle,
-    rows: [
+  return [
+    (
+      value: LibraryMenuAction.send,
+      icon: Icons.send_rounded,
+      label: l10n.routineLibrarySendToday,
+      isDanger: false,
+    ),
+    if (isMine)
       (
-        value: LibraryMenuAction.send,
-        icon: Icons.send_rounded,
-        label: l10n.routineLibrarySendToday,
+        value: LibraryMenuAction.rename,
+        icon: Icons.edit_rounded,
+        label: l10n.routineLibraryMenuRename,
         isDanger: false,
       ),
-      if (isMine)
-        (
-          value: LibraryMenuAction.rename,
-          icon: Icons.edit_rounded,
-          label: l10n.routineLibraryMenuRename,
-          isDanger: false,
-        ),
+    (
+      value: LibraryMenuAction.addToGroup,
+      icon: Icons.create_new_folder_outlined,
+      label: l10n.routineGroupMenuAddToGroup,
+      isDanger: false,
+    ),
+    (
+      value: LibraryMenuAction.copy,
+      icon: Icons.content_copy_rounded,
+      label: l10n.routineLibraryMenuCopy,
+      isDanger: false,
+    ),
+    if (isMine)
       (
-        value: LibraryMenuAction.addToGroup,
-        icon: Icons.create_new_folder_outlined,
-        label: l10n.routineGroupMenuAddToGroup,
-        isDanger: false,
+        value: LibraryMenuAction.remove,
+        icon: Icons.delete_outline_rounded,
+        label: l10n.routineLibraryMenuRemove,
+        isDanger: true,
       ),
-      (
-        value: LibraryMenuAction.copy,
-        icon: Icons.content_copy_rounded,
-        label: l10n.routineLibraryMenuCopy,
-        isDanger: false,
-      ),
-      if (isMine)
-        (
-          value: LibraryMenuAction.remove,
-          icon: Icons.delete_outline_rounded,
-          label: l10n.routineLibraryMenuRemove,
-          isDanger: true,
-        ),
-    ],
-  );
+  ];
 }
 
 /// 묶음 메뉴: 보내기 · 이름 바꾸기 · 순서 바꾸기 · 복사하기 · 묶음 풀기 (풀어도 일과는 남는다)
 Future<GroupMenuAction?> showGroupQuickMenu(
   BuildContext context, {
-  required String groupName,
+  required Rect anchor,
+  required Widget highlight,
 }) {
   final l10n = context.l10n;
-  return showQuickMenuSheet(
+  return showAnchoredQuickMenu(
     context,
-    title: groupName,
+    anchor: anchor,
+    highlight: highlight,
     rows: [
       (
         value: GroupMenuAction.send,

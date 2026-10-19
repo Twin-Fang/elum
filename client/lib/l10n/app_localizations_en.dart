@@ -2566,4 +2566,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineDetailMore => 'More';
+
+  @override
+  String get libraryArrangeDone => 'Done';
+
+  @override
+  String get libraryArrangeRemove => 'Remove or ungroup';
+
+  @override
+  String get routineGroupEditOrder => 'Edit order';
+
+  @override
+  String get routineLibrarySendOnlyThis => 'Send only this one today';
 }

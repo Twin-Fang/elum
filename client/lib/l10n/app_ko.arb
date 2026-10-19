@@ -2089,5 +2089,13 @@
   "libraryCoachCreate": "새 묶음도 여기서 만들 수 있어요",
   "@libraryCoachCreate": {"description": "일과관리 메뉴 찾기 (#834)"},
   "routineDetailMore": "더 보기",
-  "@routineDetailMore": {"description": "일과관리 메뉴 찾기 (#834)"}
+  "@routineDetailMore": {"description": "일과관리 메뉴 찾기 (#834)"},
+  "libraryArrangeDone": "완료",
+  "@libraryArrangeDone": {"description": "일과관리 정리 상태 (#837)"},
+  "libraryArrangeRemove": "지우기 또는 묶음 풀기",
+  "@libraryArrangeRemove": {"description": "일과관리 정리 상태 (#837)"},
+  "routineGroupEditOrder": "순서 편집",
+  "@routineGroupEditOrder": {"description": "일과관리 묶음 열기 (#837)"},
+  "routineLibrarySendOnlyThis": "이 일과만 오늘 보내기",
+  "@routineLibrarySendOnlyThis": {"description": "일과관리 묶음 열기 (#837)"}
 }

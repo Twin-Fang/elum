@@ -4477,6 +4477,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'더 보기'**
   String get routineDetailMore;
+
+  /// 일과관리 정리 상태 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get libraryArrangeDone;
+
+  /// 일과관리 정리 상태 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'지우기 또는 묶음 풀기'**
+  String get libraryArrangeRemove;
+
+  /// 일과관리 묶음 열기 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'순서 편집'**
+  String get routineGroupEditOrder;
+
+  /// 일과관리 묶음 열기 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'이 일과만 오늘 보내기'**
+  String get routineLibrarySendOnlyThis;
 }
 
 class _AppLocalizationsDelegate

@@ -728,5 +728,9 @@
   "childHomeGroupAllDone": "All done!",
   "libraryCoachMenu": "*Long-press* a routine to open its menu\nRename, copy or delete from there",
   "libraryCoachCreate": "You can also make a new bundle here",
-  "routineDetailMore": "More"
+  "routineDetailMore": "More",
+  "libraryArrangeDone": "Done",
+  "libraryArrangeRemove": "Remove or ungroup",
+  "routineGroupEditOrder": "Edit order",
+  "routineLibrarySendOnlyThis": "Send only this one today"
 }

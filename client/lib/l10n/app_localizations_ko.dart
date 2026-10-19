@@ -2453,4 +2453,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get routineDetailMore => '더 보기';
+
+  @override
+  String get libraryArrangeDone => '완료';
+
+  @override
+  String get libraryArrangeRemove => '지우기 또는 묶음 풀기';
+
+  @override
+  String get routineGroupEditOrder => '순서 편집';
+
+  @override
+  String get routineLibrarySendOnlyThis => '이 일과만 오늘 보내기';
 }
