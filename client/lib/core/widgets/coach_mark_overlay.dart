@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../l10n/l10n_context.dart';
+import '../layout/layout_context_ext.dart';
 import '../assets/app_assets.dart';
 import '../theme/app_motion.dart';
 import '../theme/theme_context_ext.dart';
@@ -321,6 +322,8 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                         ),
                         hole: _hole,
                         gaps: _gaps(),
+                        // 태블릿 열 안이면 창 가장자리까지 어둡게 (폰은 0)
+                        sideBleed: context.frameSideOverhang,
                       ),
                     ),
                   ),
