@@ -33,8 +33,8 @@ void main() {
           builder: (context, state) => const NameScreen(),
         ),
         GoRoute(
-          path: Routes.onboardingGoals,
-          builder: (context, state) => const Scaffold(body: Text('목표 화면')),
+          path: Routes.onboardingExampleCategories,
+          builder: (context, state) => const Scaffold(body: Text('예시 분류 화면')),
         ),
         GoRoute(
           path: Routes.guardian,
@@ -75,7 +75,7 @@ void main() {
       expect(isNextButtonEnabled(tester), isFalse);
     });
 
-    testWidgets('입력 후 다음을 누르면 목표 화면으로 간다', (tester) async {
+    testWidgets('입력 후 다음을 누르면 예시 분류 화면으로 간다', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -85,7 +85,7 @@ void main() {
       await tester.tap(find.text('다음'));
       await tester.pumpAndSettle();
 
-      expect(find.text('목표 화면'), findsOneWidget);
+      expect(find.text('예시 분류 화면'), findsOneWidget);
     });
 
 

@@ -25,7 +25,7 @@ import 'package:elum/features/link/presentation/link_code_screen.dart';
 import 'package:elum/features/onboarding/presentation/splash_screen.dart';
 import 'package:elum/features/onboarding/presentation/card_completion_screen.dart';
 import 'package:elum/features/onboarding/presentation/name_screen.dart';
-import 'package:elum/features/onboarding/presentation/goals_screen.dart';
+import 'package:elum/features/onboarding/presentation/example_category_screen.dart';
 import 'package:elum/features/onboarding/presentation/character_screen.dart';
 import 'package:elum/features/onboarding/presentation/widgets/character_card.dart';
 import 'package:elum/shared/models/character.dart';
@@ -1205,15 +1205,15 @@ void main() {
   });
 
 
-  // 목표 (#297). 온보딩 셋째 화면이다.
-  testWidgets('목표 (Figma 204:1002)', (tester) async {
-    await pumpOnboarding(tester, Routes.onboardingGoals, () => const GoalsScreen());
+  // 예시 분류 (#803). 온보딩 셋째 화면 — 옛 목표(204:1002) 자리, 시안 없음
+  testWidgets('예시 분류', (tester) async {
+    await pumpOnboarding(tester, Routes.onboardingExampleCategories, () => const ExampleCategoryScreen());
     await precacheAllImages(tester);
     await tester.pump(const Duration(milliseconds: 400));
 
     await expectLater(
-      find.byType(GoalsScreen),
-      matchesGoldenFile('figma/goals_204-1002.png'),
+      find.byType(ExampleCategoryScreen),
+      matchesGoldenFile('figma/example_category.png'),
     );
   });
 
@@ -1417,21 +1417,19 @@ void main() {
   // 선택색·테두리 굵기·CTA 활성색이라, 전만 올려 두면 그 넷을 아무도 안 본다.
   // 실제로 목표 칩에 여우색이 들어간 적이 있다 (이슈 #11).
 
-  testWidgets('목표 — 고른 뒤 (Figma 204:1147)', (tester) async {
-    await pumpOnboarding(tester, Routes.onboardingGoals, () => const GoalsScreen());
+  testWidgets('예시 분류 — 고른 뒤 (#803)', (tester) async {
+    await pumpOnboarding(tester, Routes.onboardingExampleCategories, () => const ExampleCategoryScreen());
     await precacheAllImages(tester);
 
-    // 시안은 위 둘이 켜져 있다
-    await tester.tap(find.text('해야 할 일을 순서대로 이해해요'));
+    await tester.tap(find.text('아침·저녁 준비'));
     // 칩이 색을 바꾸는 동안에는 다음 탭이 먹지 않는다 — 끝까지 기다린다
-    // (이 화면은 끝나지 않는 움직임이 없어 settle 을 써도 된다)
     await tester.pumpAndSettle();
-    await tester.tap(find.text('필요한 준비물을 스스로 챙겨요'));
+    await tester.tap(find.text('학교·공부'));
     await tester.pumpAndSettle();
 
     await expectLater(
-      find.byType(GoalsScreen),
-      matchesGoldenFile('figma/goal_selected_204-1147.png'),
+      find.byType(ExampleCategoryScreen),
+      matchesGoldenFile('figma/example_category_selected.png'),
     );
   });
 

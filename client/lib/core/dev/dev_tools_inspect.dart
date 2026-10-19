@@ -251,7 +251,7 @@ class _NavigateView extends StatelessWidget {
     // 매번 로그아웃해야 한다. 상태가 둘(미동의·전체동의)이라 확인할 일이 잦다.
     ('약관 동의', Routes.consent),
     ('온보딩 · 이름', Routes.onboardingName),
-    ('온보딩 · 목표', Routes.onboardingGoals),
+    ('온보딩 · 예시 분류', Routes.onboardingExampleCategories),
     ('온보딩 · 캐릭터', Routes.onboardingCharacter),
     ('온보딩 · 그림 방식', Routes.onboardingImageStyle),
     ('온보딩 · PIN', Routes.onboardingPin),

@@ -59,7 +59,8 @@ List<RouteBase> guardianRoutes() => [
             pageBuilder: (context, state) => fadePage(
               state,
               const RoutineManageScreen(),
-              layoutKind: ScreenLayoutKind.contentColumn,
+              // 아이콘 격자라 넓은 창에서는 열을 늘려 폭을 다 쓴다 (가운데 열에 가두면 오른쪽이 빈다)
+              layoutKind: ScreenLayoutKind.adaptive,
             ),
           ),
         ],

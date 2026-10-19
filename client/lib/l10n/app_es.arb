@@ -3,5 +3,18 @@
   "installationRetryMessage": "No se pudo comprobar el inicio de sesión. Inténtalo de nuevo.",
   "installationRetryButton": "Reintentar",
   "issuedCodeCopyFailedTitle": "No se pudo copiar",
-  "issuedCodeCopyFailedFallback": "Indica tú mismo el código que aparece en la pantalla"
+  "issuedCodeCopyFailedFallback": "Indica tú mismo el código que aparece en la pantalla",
+  "onboardingExampleTitle": "¿Con qué rutinas quieres\nempezar con {name}?",
+  "onboardingExampleDescription": "Añadiremos rutinas de ejemplo de lo que elijas.\nPuedes elegir más de una.",
+  "onboardingExampleSkip": "Omitir",
+  "exampleCategoryMorningEvening": "Mañana y noche",
+  "exampleCategoryMorningEveningHint": "Asearse, vestirse, ir a dormir",
+  "exampleCategorySchoolStudy": "Escuela y estudio",
+  "exampleCategorySchoolStudyHint": "Prepararse para la escuela, deberes",
+  "exampleCategoryHouseSelf": "Tareas y hacerlo solo",
+  "exampleCategoryHouseSelfHint": "Ordenar, poner la mesa",
+  "exampleCategoryOutside": "Salir y probar",
+  "exampleCategoryOutsideHint": "Tomar el autobús, hacer compras",
+  "routineTileExampleBadge": "Ejemplo",
+  "exampleRoutinesFailed": "No se pudieron añadir las rutinas de ejemplo"
 }

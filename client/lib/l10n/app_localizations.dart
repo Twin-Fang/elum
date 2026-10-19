@@ -806,18 +806,6 @@ abstract class AppLocalizations {
   /// **'선택한 친구가 카드 속 주인공이 되어 도와줘요'**
   String get onboardingCharacterDescription;
 
-  /// 도움 목표 화면 제목. name 은 이룸이 호칭
-  ///
-  /// In ko, this message translates to:
-  /// **'{name}의 어떤 순간을\n도와주고 싶으신가요?'**
-  String onboardingGoalsTitle(String name);
-
-  /// 도움 목표 화면 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'여러 개를 선택할 수 있어요'**
-  String get onboardingGoalsDescription;
-
   /// 카드 그림 방식 화면 제목
   ///
   /// In ko, this message translates to:
@@ -4165,6 +4153,84 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{title}을(를) 오늘 일과로 보냈어요'**
   String routineLibrarySent(String title);
+
+  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭, batchim 은 받침 유무(yes/no)
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}{batchim, select, yes{과} other{와}} 어떤 일과부터\n해 볼까요?'**
+  String onboardingExampleTitle(String name, String batchim);
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'고른 분류의 예시 일과를 넣어 둘게요.\n여러 개 골라도 돼요.'**
+  String get onboardingExampleDescription;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'건너뛰기'**
+  String get onboardingExampleSkip;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'아침·저녁 준비'**
+  String get exampleCategoryMorningEvening;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'씻기, 옷 입기, 잠자리'**
+  String get exampleCategoryMorningEveningHint;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'학교·공부'**
+  String get exampleCategorySchoolStudy;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'등교 준비, 숙제'**
+  String get exampleCategorySchoolStudyHint;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'집안일·스스로 하기'**
+  String get exampleCategoryHouseSelf;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'정리, 식탁 차리기'**
+  String get exampleCategoryHouseSelfHint;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'밖에서 해 보기'**
+  String get exampleCategoryOutside;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'버스 타기, 물건 사기'**
+  String get exampleCategoryOutsideHint;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'예시'**
+  String get routineTileExampleBadge;
+
+  /// 온보딩 예시 일과 (#803)
+  ///
+  /// In ko, this message translates to:
+  /// **'예시 일과를 넣지 못했어요'**
+  String get exampleRoutinesFailed;
 }
 
 class _AppLocalizationsDelegate

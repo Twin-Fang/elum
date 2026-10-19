@@ -3,13 +3,15 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../core/l10n/current_l10n.dart';
 import '../../../shared/models/character.dart';
 import 'image_style.dart';
+import '../../../shared/models/routine_example_category.dart';
 import '../../../shared/models/support_goal.dart';
 
 part 'onboarding_profile.freezed.dart';
 
 /// 온보딩이 수집하는 정보의 전부.
 ///
-/// 호칭 / 도움 목표 / 카드 캐릭터 / 그림 방식 / PIN — 이 5개뿐이다.
+/// 호칭 / 예시 일과 분류 / 카드 캐릭터 / 그림 방식 / PIN — 이 5개뿐이다.
+/// 도움 목표는 더 묻지 않는다 (#803). 기존 값은 서버·로컬에 그대로 남는다.
 /// 필드를 추가할 땐 "진단명 없는 개인화" 원칙을 깨는지 먼저 검토한다.
 ///
 /// 그림 방식은 **서비스 원칙 1(진단명·장애 유형 수집 금지)을 어기지 않는다.**
@@ -22,6 +24,10 @@ abstract class OnboardingProfile with _$OnboardingProfile {
     /// 아이 호칭. 실명이 아니어도 된다고 온보딩에서 안내한다.
     @Default('') String childNickname,
     @Default(<SupportGoal>{}) Set<SupportGoal> supportGoals,
+
+    /// 예시 일과를 넣을 분류 (#803). 건너뛰면 비어 있다 — 비어도 온보딩은 진행된다.
+    @Default(<RoutineExampleCategory>{})
+    Set<RoutineExampleCategory> exampleCategories,
     CardCharacter? cardCharacter,
 
     /// 카드 그림 방식. 새 이룸이는 기본 그림으로 시작한다.
@@ -45,14 +51,13 @@ abstract class OnboardingProfile with _$OnboardingProfile {
   // 각 단계의 진행 조건을 모델이 스스로 안다.
   // 화면마다 조건을 재구현하면 하나만 틀려도 CTA가 잘못 열린다.
   bool get canProceedFromName => childNickname.trim().isNotEmpty;
-  bool get canProceedFromGoals => supportGoals.isNotEmpty;
+  bool get canProceedFromExampleCategories => exampleCategories.isNotEmpty;
   bool get canProceedFromCharacter => cardCharacter != null;
   bool get isPinComplete => guardianPin.length == pinLength;
 
   /// 온보딩 전체 완료 여부 — 라우터 redirect 판단에 쓴다
   bool get isComplete =>
       canProceedFromName &&
-      canProceedFromGoals &&
       canProceedFromCharacter &&
       isPinComplete;
 }

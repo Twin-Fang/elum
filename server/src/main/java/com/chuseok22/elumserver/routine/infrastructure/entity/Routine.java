@@ -105,6 +105,13 @@ public class Routine extends BaseEntity {
   private Integer displayOrder = 0;
 
   /**
+   * 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803). 홈에 `예시` 표시, 보유 한도 집계 제외.
+   * 고쳐도 예시 표시는 그대로 둔다.
+   */
+  @Column(name = "is_example", nullable = false, columnDefinition = "boolean not null default false")
+  private Boolean isExample = false;
+
+  /**
    * 일과의 콘텐츠 언어. 일과가 만들어질 때 정해진 언어를 저장한다.
    *
    * <p>일과를 만든 요청의 화면 언어를 켜진 언어 목록(ENABLED_CONTENT_LOCALES)에 비춰 정한다. 보호자가 고르지 않고

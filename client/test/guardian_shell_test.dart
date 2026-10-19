@@ -153,6 +153,11 @@ void main() {
         expect(find.text(label), findsWidgets, reason: label);
       }
       expect(find.text('이룸이 화면'), findsOneWidget);
+      // 화면 낭독기로도 칸과 이룸이 화면 입구를 찾을 수 있다
+      for (final label in ['홈', '일과관리', '이야기', '내정보']) {
+        expect(find.bySemanticsLabel(label), findsOneWidget, reason: label);
+      }
+      expect(find.bySemanticsLabel('이룸이 화면으로 가기'), findsOneWidget);
     });
 
     testWidgets('옆 메뉴 칸을 누르면 그 칸으로 간다', (tester) async {

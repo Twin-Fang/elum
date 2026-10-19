@@ -51,6 +51,9 @@ class GuardianShell extends StatelessWidget {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: colors.background,
+      // 키보드가 올라와도 틀을 줄이지 않는다 — 줄이면 하단 바가 키보드 위로 떠오른다.
+      // 입력이 있는 칸 화면은 자기 Scaffold 가 키보드를 피한다
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
           // 아래 안전영역은 이 틀이 맡는다 — 칸 화면이 또 비우면 바 위에 빈 띠가 생긴다
@@ -58,7 +61,7 @@ class GuardianShell extends StatelessWidget {
             child: MediaQuery.removePadding(
               context: context,
               removeBottom: true,
-              child: navigationShell,
+              child: _ContentSemanticsScope(child: navigationShell),
             ),
           ),
           GuardianBottomNav(
@@ -81,6 +84,9 @@ class GuardianShell extends StatelessWidget {
     final media = MediaQuery.of(context);
     return Scaffold(
       backgroundColor: colors.background,
+      // 키보드가 올라와도 틀을 줄이지 않는다 — 줄이면 하단 바가 키보드 위로 떠오른다.
+      // 입력이 있는 칸 화면은 자기 Scaffold 가 키보드를 피한다
+      resizeToAvoidBottomInset: false,
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -101,7 +107,7 @@ class GuardianShell extends StatelessWidget {
                           bottom: 0,
                         ),
                       ),
-                      child: navigationShell,
+                      child: _ContentSemanticsScope(child: navigationShell),
                     ),
                   ),
                 ),
@@ -150,4 +156,22 @@ class _AdStripGateState extends ConsumerState<_AdStripGate> {
     final isVisible = widget.tab.isAdStripAllowed && _isEnoughRoutines;
     return isVisible ? widget.adStrip : const SizedBox.shrink();
   }
+}
+
+/// 칸 화면을 따로 낭독 묶음 · 알림 자리로 가둔다
+///
+/// 칸 화면의 내비게이터(라우트 막)가 같은 묶음에서 먼저 그려진 것의 낭독 정보를 지운다.
+/// 옆 메뉴는 본문보다 먼저 그려지므로 가두지 않으면 화면 낭독기에서 옆 메뉴가 통째로 사라진다.
+class _ContentSemanticsScope extends StatelessWidget {
+  const _ContentSemanticsScope({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    container: true,
+    explicitChildNodes: true,
+    // 칸 화면의 알림(토스트)도 본문 안에서 뜨게 — 창 가운데에 뜨면 태블릿 옆 메뉴를 덮는다
+    child: ScaffoldMessenger(child: child),
+  );
 }

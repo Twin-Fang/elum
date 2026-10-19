@@ -13,7 +13,7 @@ abstract final class Routes {
   static const roleSelect = '/role';
 
   static const onboardingName = '/onboarding/name';
-  static const onboardingGoals = '/onboarding/goals';
+  static const onboardingExampleCategories = '/onboarding/example-categories';
   static const onboardingCharacter = '/onboarding/character';
 
   /// 카드 그림 방식. 캐릭터 다음, 비밀암호 앞. 건너뛸 수 있다.

@@ -86,6 +86,9 @@ abstract class Routine with _$Routine {
 
     /// 보내기로 만들어진 일과가 어느 원본에서 왔는지. 원본이면 null. 서버 `sourceRoutineId`.
     String? sourceRoutineId,
+
+    /// 온보딩에서 고른 분류로 넣은 예시 일과인가 (#803) — 홈 타일에 `예시` 표시.
+    @Default(false) bool isExample,
   }) = _Routine;
 
   const Routine._();
@@ -188,6 +191,7 @@ abstract class Routine with _$Routine {
     // 오프라인으로 이룸이 화면을 열어도 카드 글·음성이 일과 언어를 따르게 남긴다
     'language': language,
     if (sourceRoutineId != null) 'sourceRoutineId': sourceRoutineId,
+    'isExample': isExample,
   };
 
   factory Routine.fromJson(Map<String, dynamic> json) {
@@ -225,6 +229,8 @@ abstract class Routine with _$Routine {
         final String id when id.isNotEmpty => id,
         _ => null,
       },
+      // bool 이 아니면 예시 아님 — 옛 응답·캐시에 배지가 붙지 않게
+      isExample: json['isExample'] == true,
     );
   }
 

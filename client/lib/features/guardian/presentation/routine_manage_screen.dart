@@ -38,9 +38,9 @@ class RoutineManageScreen extends ConsumerStatefulWidget {
 
 class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     with BusyStateMixin<RoutineManageScreen> {
-  /// `+ 일과 만들기` 버튼 높이 · 아래 여백 (목록 끝이 버튼에 가리지 않게 같은 만큼 비운다)
+  /// `+ 일과 만들기` 버튼 높이 · 버튼 둘레 여백 (목록 끝이 버튼에 가리지 않게 그만큼 비운다)
   static const _createButtonHeight = 54.0;
-  static const _createButtonBottom = 16.0;
+  static const _createButtonMargin = 16.0;
 
   // --- 동작 ---
 
@@ -159,6 +159,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       icon: ElumDialogIcon.alert,
       title: l10n.routineLibraryRemoveConfirmTitle,
       message: l10n.routineLibraryRemoveConfirmMessage,
+      // "남아요"가 "남아 / 요"로 끊기지 않게 낱말 단위로 줄바꿈
+      keepWordsInMessage: true,
       actions: [
         ElumDialogAction(
           label: l10n.commonCancel,
@@ -217,7 +219,7 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     final space = context.space;
     final async = ref.watch(routineLibraryProvider);
     final sentIds = ref.watch(sentTodaySourceIdsProvider);
-    final bottomSpace = (_createButtonHeight + _createButtonBottom * 2).h;
+    final bottomSpace = (_createButtonHeight + _createButtonMargin * 2).h;
 
     final Widget body = switch (async) {
       AsyncValue(:final value?) when value.isNotEmpty => LibraryGrid(
@@ -241,30 +243,20 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
 
     return Scaffold(
       backgroundColor: colors.background,
+      // 떠 있는 버튼으로 두어야 알림(토스트)이 버튼을 가리지 않고 그 위에 뜬다
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: CreateRoutineFab(
+        height: _createButtonHeight.h,
+        isBusy: busy,
+        onTap: _startCreate,
+      ),
       body: SafeArea(
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const LibraryManageHeader(),
-                SizedBox(height: space.md.h),
-                Expanded(child: body),
-              ],
-            ),
-            // 가운데 아래 떠 있는 `+ 일과 만들기`
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: _createButtonBottom.h,
-              child: Center(
-                child: CreateRoutineFab(
-                  height: _createButtonHeight.h,
-                  isBusy: busy,
-                  onTap: _startCreate,
-                ),
-              ),
-            ),
+            const LibraryManageHeader(),
+            SizedBox(height: space.md.h),
+            Expanded(child: body),
           ],
         ),
       ),

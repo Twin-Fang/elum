@@ -47,7 +47,7 @@ class _NameScreenState extends ConsumerState<NameScreen> {
   /// 로그인은 온보딩 앞에서 끝나므로 여기서는 **입력만 받는다.** 서버 저장은 온보딩을
   /// 마칠 때 [OnboardingNotifier.complete]가 한 번에 처리한다.
   void _submit() {
-    context.push(Routes.onboardingGoals);
+    context.push(Routes.onboardingExampleCategories);
   }
 
   /// 돌아갈 화면이 있으면 pop. 없으면 고른 역할을 지우고 역할 선택으로 간다.

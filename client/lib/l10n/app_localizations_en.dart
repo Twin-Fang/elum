@@ -447,14 +447,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The friend you pick is the star of the cards and helps along the way';
 
   @override
-  String onboardingGoalsTitle(String name) {
-    return 'Which moments of $name\'s day\ndo you want to help with?';
-  }
-
-  @override
-  String get onboardingGoalsDescription => 'You can pick more than one';
-
-  @override
   String get onboardingImageStyleTitle =>
       'How should the card\npictures be made?';
 
@@ -2380,4 +2372,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String routineLibrarySent(String title) {
     return 'Sent $title for today';
   }
+
+  @override
+  String onboardingExampleTitle(String name, String batchim) {
+    return 'Which routines would you like\nto start with $name?';
+  }
+
+  @override
+  String get onboardingExampleDescription =>
+      'We\'ll add example routines for the ones you pick.\nYou can pick more than one.';
+
+  @override
+  String get onboardingExampleSkip => 'Skip';
+
+  @override
+  String get exampleCategoryMorningEvening => 'Morning & evening';
+
+  @override
+  String get exampleCategoryMorningEveningHint => 'Washing, dressing, bedtime';
+
+  @override
+  String get exampleCategorySchoolStudy => 'School & study';
+
+  @override
+  String get exampleCategorySchoolStudyHint =>
+      'Getting ready for school, homework';
+
+  @override
+  String get exampleCategoryHouseSelf => 'Chores & doing it myself';
+
+  @override
+  String get exampleCategoryHouseSelfHint => 'Tidying up, setting the table';
+
+  @override
+  String get exampleCategoryOutside => 'Out and about';
+
+  @override
+  String get exampleCategoryOutsideHint => 'Taking the bus, shopping';
+
+  @override
+  String get routineTileExampleBadge => 'Example';
+
+  @override
+  String get exampleRoutinesFailed => 'Couldn\'t add the example routines';
 }

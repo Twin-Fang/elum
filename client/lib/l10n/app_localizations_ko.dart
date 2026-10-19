@@ -428,14 +428,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingCharacterDescription => '선택한 친구가 카드 속 주인공이 되어 도와줘요';
 
   @override
-  String onboardingGoalsTitle(String name) {
-    return '$name의 어떤 순간을\n도와주고 싶으신가요?';
-  }
-
-  @override
-  String get onboardingGoalsDescription => '여러 개를 선택할 수 있어요';
-
-  @override
   String get onboardingImageStyleTitle => '카드 그림은 어떤 방식으로\n만들까요?';
 
   @override
@@ -2277,4 +2269,47 @@ class AppLocalizationsKo extends AppLocalizations {
   String routineLibrarySent(String title) {
     return '$title을(를) 오늘 일과로 보냈어요';
   }
+
+  @override
+  String onboardingExampleTitle(String name, String batchim) {
+    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '과', 'other': '와'});
+    return '$name$_temp0 어떤 일과부터\n해 볼까요?';
+  }
+
+  @override
+  String get onboardingExampleDescription =>
+      '고른 분류의 예시 일과를 넣어 둘게요.\n여러 개 골라도 돼요.';
+
+  @override
+  String get onboardingExampleSkip => '건너뛰기';
+
+  @override
+  String get exampleCategoryMorningEvening => '아침·저녁 준비';
+
+  @override
+  String get exampleCategoryMorningEveningHint => '씻기, 옷 입기, 잠자리';
+
+  @override
+  String get exampleCategorySchoolStudy => '학교·공부';
+
+  @override
+  String get exampleCategorySchoolStudyHint => '등교 준비, 숙제';
+
+  @override
+  String get exampleCategoryHouseSelf => '집안일·스스로 하기';
+
+  @override
+  String get exampleCategoryHouseSelfHint => '정리, 식탁 차리기';
+
+  @override
+  String get exampleCategoryOutside => '밖에서 해 보기';
+
+  @override
+  String get exampleCategoryOutsideHint => '버스 타기, 물건 사기';
+
+  @override
+  String get routineTileExampleBadge => '예시';
+
+  @override
+  String get exampleRoutinesFailed => '예시 일과를 넣지 못했어요';
 }

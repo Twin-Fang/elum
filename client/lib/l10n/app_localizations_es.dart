@@ -428,14 +428,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardingCharacterDescription => '선택한 친구가 카드 속 주인공이 되어 도와줘요';
 
   @override
-  String onboardingGoalsTitle(String name) {
-    return '$name의 어떤 순간을\n도와주고 싶으신가요?';
-  }
-
-  @override
-  String get onboardingGoalsDescription => '여러 개를 선택할 수 있어요';
-
-  @override
   String get onboardingImageStyleTitle => '카드 그림은 어떤 방식으로\n만들까요?';
 
   @override
@@ -2279,4 +2271,49 @@ class AppLocalizationsEs extends AppLocalizations {
   String routineLibrarySent(String title) {
     return '$title을(를) 오늘 일과로 보냈어요';
   }
+
+  @override
+  String onboardingExampleTitle(String name, String batchim) {
+    return '¿Con qué rutinas quieres\nempezar con $name?';
+  }
+
+  @override
+  String get onboardingExampleDescription =>
+      'Añadiremos rutinas de ejemplo de lo que elijas.\nPuedes elegir más de una.';
+
+  @override
+  String get onboardingExampleSkip => 'Omitir';
+
+  @override
+  String get exampleCategoryMorningEvening => 'Mañana y noche';
+
+  @override
+  String get exampleCategoryMorningEveningHint =>
+      'Asearse, vestirse, ir a dormir';
+
+  @override
+  String get exampleCategorySchoolStudy => 'Escuela y estudio';
+
+  @override
+  String get exampleCategorySchoolStudyHint =>
+      'Prepararse para la escuela, deberes';
+
+  @override
+  String get exampleCategoryHouseSelf => 'Tareas y hacerlo solo';
+
+  @override
+  String get exampleCategoryHouseSelfHint => 'Ordenar, poner la mesa';
+
+  @override
+  String get exampleCategoryOutside => 'Salir y probar';
+
+  @override
+  String get exampleCategoryOutsideHint => 'Tomar el autobús, hacer compras';
+
+  @override
+  String get routineTileExampleBadge => 'Ejemplo';
+
+  @override
+  String get exampleRoutinesFailed =>
+      'No se pudieron añadir las rutinas de ejemplo';
 }

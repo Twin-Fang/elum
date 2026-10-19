@@ -25,6 +25,7 @@ class ElumTextField extends StatelessWidget {
     this.onSubmitted,
     this.explicitTextAlign,
     this.maxLength,
+    this.isAutofocused = false,
   });
 
   final String hintText;
@@ -41,6 +42,9 @@ class ElumTextField extends StatelessWidget {
   /// 서버가 길이를 막는 입력(보호자 표시 이름 20자)에 쓴다 — 넘기면 400 이라 미리 막는다.
   final int? maxLength;
 
+  /// 화면이 열리자마자 입력칸에 커서를 둘지 (바로 고쳐 쓰는 시트 — 이름 바꾸기 등)
+  final bool isAutofocused;
+
   TextAlign get resolvedTextAlign => explicitTextAlign ?? TextAlign.start;
 
   @override
@@ -51,6 +55,7 @@ class ElumTextField extends StatelessWidget {
     return SizedBox(
       height: space.fieldH.h,
       child: TextField(
+        autofocus: isAutofocused,
         controller: controller,
         onChanged: onChanged,
         onSubmitted: onSubmitted,

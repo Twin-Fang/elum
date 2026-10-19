@@ -67,6 +67,8 @@ class RoutineSummaryTile extends StatelessWidget {
   static const _padBottom = 12.0;
   static const _titleToMeta = 8.0;
   static const _metaToDate = 21.0;
+  // 제목 ↔ 예시 배지
+  static const _titleToBadge = 6.0;
 
   /// 링 위 14 · 링과 다시하기 사이 7
   static const _ringTop = 14.0;
@@ -128,7 +130,7 @@ class RoutineSummaryTile extends StatelessWidget {
     final dateLabel = routine.scheduledDateLabel;
     final showsDate = showDate && dateLabel.isNotEmpty;
 
-    final title = ContentLocale(
+    final titleText = ContentLocale(
       language: routine.language,
       child: Text(
         routine.displayTitle,
@@ -137,6 +139,16 @@ class RoutineSummaryTile extends StatelessWidget {
         style: typo.routineTileTitle.copyWith(color: colors.chipLabel),
       ),
     );
+    // 온보딩 예시 일과면 제목 옆 `예시` (#803)
+    final title = routine.isExample
+        ? Row(
+            children: [
+              Flexible(child: titleText),
+              SizedBox(width: _titleToBadge.w),
+              const _ExampleBadge(),
+            ],
+          )
+        : titleText;
 
     // 보상도 날짜도 없으면 제목 하나뿐이다. 위에서 16 띄우면 아래로 처져 보인다.
     if (!routine.hasReward && !showsDate) {
@@ -188,6 +200,33 @@ class RoutineSummaryTile extends StatelessWidget {
           _RerunButton(onTap: onRerun!),
         ],
       ],
+    );
+  }
+}
+
+/// 온보딩 예시 일과 표시 (#803). 제목이 길어도 줄지 않는다.
+class _ExampleBadge extends StatelessWidget {
+  const _ExampleBadge();
+
+  static const _padH = 6.0;
+  static const _padV = 2.0;
+  static const _radius = 6.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: _padH.w, vertical: _padV.h),
+      decoration: BoxDecoration(
+        color: colors.exampleBadgeBg,
+        borderRadius: BorderRadius.circular(_radius.r),
+      ),
+      child: Text(
+        context.l10n.routineTileExampleBadge,
+        style: context.typo.routineTileMeta.copyWith(
+          color: colors.exampleBadgeText,
+        ),
+      ),
     );
   }
 }
