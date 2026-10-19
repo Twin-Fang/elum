@@ -16,6 +16,9 @@ import 'step_card_viewer.dart';
 import '../../application/guardian_home_controller.dart';
 import 'routine_reminder_row.dart';
 
+// 알림 줄 노출 여부: 알림 설계 확정 전까지 false (코드는 유지)
+const _isReminderRowVisible = false;
+
 /// 오늘 일과를 눌렀을 때 올라오는 시트 (Figma 956:4084).
 ///
 /// **보는 것과 고치는 것을 나눈다.** 일과를 누르면 곧바로 편집 화면으로
@@ -280,8 +283,8 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                         child: Column(
                           children: [
                             RoutineDetailRewardRow(routine: widget.routine),
-                            // 일과 알림 (#777): 오늘 일과만. 지난 일과는 `다시하기` 뒤 새 일과에 건다
-                            if (!widget.isPast) ...[
+                            // 일과 알림 (#777): 설계 확정 전까지 숨김. 오늘 일과만, 지난 일과는 `다시하기` 뒤 새 일과에 건다
+                            if (_isReminderRowVisible && !widget.isPast) ...[
                               SizedBox(height: 8.h),
                               RoutineReminderRow(routine: widget.routine),
                             ],
