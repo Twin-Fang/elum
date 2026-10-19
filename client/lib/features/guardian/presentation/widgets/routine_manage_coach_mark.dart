@@ -218,7 +218,7 @@ class _RoutineManageCoachMarkState
       },
     );
     final state = ref.watch(routineManageCoachProvider);
-    if (state.active) {
+    if (state.isActive) {
       _retained = state.steps;
       _retainedIndex = state.index;
     }
@@ -228,8 +228,8 @@ class _RoutineManageCoachMarkState
     final notifier = ref.read(routineManageCoachProvider.notifier);
     return CoachMarkOverlay(
       steps: [for (final step in steps) _stepFor(step, context)],
-      index: state.active ? state.index : _retainedIndex,
-      visible: state.active,
+      index: state.isActive ? state.index : _retainedIndex,
+      visible: state.isActive,
       onNext: notifier.next,
       onClose: notifier.finish,
       onDismissed: () {

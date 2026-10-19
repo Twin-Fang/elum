@@ -8,17 +8,17 @@ class InMemoryStorage implements LocalStorage {
     String? nickname,
     String? character,
     bool elumiDevice = false,
-    // 기본은 "이미 봤다" — 홈을 띄우는 기존 테스트마다 코치마크가 화면을 덮으면 안 된다.
+    // 기본은 "이미 봤다" — 홈·일과관리를 띄우는 기존 테스트마다 코치마크가 화면을 덮으면 안 된다.
     // 코치마크를 검증하는 테스트만 false 를 준다. 실제 앱의 첫 실행 기본값은 false 다.
     bool homeCoachSeen = true,
-    bool manageCoachSeen = true,
-    bool groupCoachSeen = true,
+    bool isManageCoachSeen = true,
+    bool isGroupCoachSeen = true,
     bool childHapticOn = true,
   }) : _childHapticOn = childHapticOn,
        _completed = onboardingCompleted,
        _homeCoachSeen = homeCoachSeen,
-       _manageCoachSeen = manageCoachSeen,
-       _groupCoachSeen = groupCoachSeen,
+       _isManageCoachSeen = isManageCoachSeen,
+       _isGroupCoachSeen = isGroupCoachSeen,
        _pin = pin,
        _nickname = nickname,
        _character = character,
@@ -35,8 +35,8 @@ class InMemoryStorage implements LocalStorage {
   bool _elumi;
   bool _elumiLinkLost = false;
   bool _homeCoachSeen;
-  bool _manageCoachSeen;
-  bool _groupCoachSeen;
+  bool _isManageCoachSeen;
+  bool _isGroupCoachSeen;
 
   String? _nickname;
   List<String> _goals = const [];
@@ -254,16 +254,18 @@ class InMemoryStorage implements LocalStorage {
   Future<void> setHomeCoachSeen(bool v) async => _homeCoachSeen = v;
 
   @override
-  bool get isManageCoachSeen => _manageCoachSeen;
+  bool get isManageCoachSeen => _isManageCoachSeen;
 
   @override
-  Future<void> setManageCoachSeen(bool v) async => _manageCoachSeen = v;
+  Future<void> setManageCoachSeen(bool isSeen) async =>
+      _isManageCoachSeen = isSeen;
 
   @override
-  bool get isGroupCoachSeen => _groupCoachSeen;
+  bool get isGroupCoachSeen => _isGroupCoachSeen;
 
   @override
-  Future<void> setGroupCoachSeen(bool v) async => _groupCoachSeen = v;
+  Future<void> setGroupCoachSeen(bool isSeen) async =>
+      _isGroupCoachSeen = isSeen;
 
   @override
   Future<void> clearChildProfile() async {

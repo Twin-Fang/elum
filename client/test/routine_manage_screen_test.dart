@@ -187,8 +187,8 @@ void main() {
     InMemoryStorage unseenStorage() => InMemoryStorage(
       onboardingCompleted: true,
       nickname: '하늘이',
-      manageCoachSeen: false,
-      groupCoachSeen: false,
+      isManageCoachSeen: false,
+      isGroupCoachSeen: false,
     );
 
     // 안내가 뜨기까지: 목록 도착 > 맨 앞에서 가만히 1.2초 > 막이 내려앉는 연출

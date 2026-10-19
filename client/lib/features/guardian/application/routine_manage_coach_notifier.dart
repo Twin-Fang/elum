@@ -46,9 +46,9 @@ class RoutineManageCoachState {
   /// 다시 보기를 요청받았고 아직 켜지 않았는가 (일과관리 화면이 아직 없을 때도 요청은 남는다)
   final bool isReplayRequested;
 
-  bool get active => steps.isNotEmpty;
+  bool get isActive => steps.isNotEmpty;
 
-  RoutineManageCoachStep? get current => active ? steps[index] : null;
+  RoutineManageCoachStep? get current => isActive ? steps[index] : null;
 }
 
 final routineManageCoachProvider =
@@ -61,7 +61,7 @@ final routineManageCoachProvider =
 /// **한 번 본 것은 기기에 남긴다.** 끝까지 봐도, 건너뛰어도, 닫아도 같다.
 class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
   /// 이번 실행에서 이미 띄웠는가. 저장에 실패해도 같은 실행에서 두 번 뜨지 않는다.
-  bool _shownThisRun = false;
+  bool _hasShownThisRun = false;
 
   @override
   RoutineManageCoachState build() => const RoutineManageCoachState();
@@ -76,23 +76,22 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
     }
   }
 
-  /// 조건이 맞으면 코치마크를 켠다. 켰으면 true.
-  ///
-  /// 조건 2개: 가리킬 일과 칸 있음, 아직 안 본 단계 있음.
-  /// - 기본 3단계: 일과 1개 이상
-  /// - 묶음 2단계: 일과 2개 이상 + 묶음 0개 (끌어다 놓을 대상이 있어야 한다)
+  /// 가리킬 낱개 일과 칸이 있고 안 본 단계가 있으면 켠다 (켰으면 true)
+  /// 묶음 단계: 일과 2개 이상 + 묶음 0개일 때만 (끌어다 놓을 대상이 있어야 한다)
   bool maybeStart({
     required int routineCount,
     required int groupCount,
     required bool hasFirstRoutineTile,
   }) {
-    if (state.active || _shownThisRun || !hasFirstRoutineTile) return false;
+    if (state.isActive || _hasShownThisRun || !hasFirstRoutineTile) {
+      return false;
+    }
     final steps = _unseenStepsFor(
       routineCount: routineCount,
       groupCount: groupCount,
     );
     if (steps.isEmpty) return false;
-    _shownThisRun = true;
+    _hasShownThisRun = true;
     _turnOn(steps);
     return true;
   }
@@ -108,7 +107,7 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
 
   /// 다시 보기: 봤어도 켠다. 봤음 기록은 바꾸지 않는다 (이미 true).
   void replay({required int routineCount, required int groupCount}) {
-    if (state.active || routineCount < 1) return;
+    if (state.isActive || routineCount < 1) return;
     _turnOn([
       ..._basicSteps,
       if (_canGroup(routineCount: routineCount, groupCount: groupCount))
@@ -141,7 +140,7 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
 
   /// 다음 단계로. 마지막이면 끝낸다.
   void next() {
-    if (!state.active) return;
+    if (!state.isActive) return;
     if (state.index + 1 >= state.steps.length) {
       finish();
       return;
@@ -151,7 +150,7 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
 
   /// 끝낸다 — 마지막까지 봤든 중간에 닫았든 보여 준 단계 묶음을 "본 것"으로 남긴다.
   Future<void> finish() async {
-    if (!state.active) return;
+    if (!state.isActive) return;
     final shownSteps = state.steps;
     state = const RoutineManageCoachState();
     final storage = ref.read(localStorageProvider);
@@ -165,7 +164,7 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
     );
   }
 
-  /// 못 남겨도 이번 실행에서는 [_shownThisRun] 이 다시 뜨는 것을 막는다.
+  /// 못 남겨도 이번 실행에서는 [_hasShownThisRun] 이 다시 뜨는 것을 막는다.
   Future<void> _remember({
     required bool isShown,
     required Future<void> Function(bool) write,

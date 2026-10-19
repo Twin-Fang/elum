@@ -25,7 +25,7 @@ void main() {
   }
 
   InMemoryStorage unseenStorage() =>
-      InMemoryStorage(manageCoachSeen: false, groupCoachSeen: false);
+      InMemoryStorage(isManageCoachSeen: false, isGroupCoachSeen: false);
 
   group('시작 조건', () {
     test('일과가 0개면 뜨지 않는다 — 가리킬 칸이 없다', () {
@@ -38,7 +38,7 @@ void main() {
             hasFirstRoutineTile: false,
           );
       expect(isStarted, isFalse);
-      expect(container.read(routineManageCoachProvider).active, isFalse);
+      expect(container.read(routineManageCoachProvider).isActive, isFalse);
     });
 
     test('일과 1개면 기본 3단계만 뜬다', () {
@@ -104,7 +104,7 @@ void main() {
 
     test('기본 3단계를 이미 봤으면 묶음 단계만 뜬다', () {
       final container = containerWith(
-        InMemoryStorage(manageCoachSeen: true, groupCoachSeen: false),
+        InMemoryStorage(isManageCoachSeen: true, isGroupCoachSeen: false),
       );
       container
           .read(routineManageCoachProvider.notifier)
@@ -183,7 +183,7 @@ void main() {
       );
       notifier.next();
       await Future<void>.delayed(Duration.zero);
-      expect(container.read(routineManageCoachProvider).active, isFalse);
+      expect(container.read(routineManageCoachProvider).isActive, isFalse);
       expect(storage.isManageCoachSeen, isTrue);
       expect(storage.isGroupCoachSeen, isFalse, reason: '묶음 단계는 안 보여 줬다');
     });
@@ -211,7 +211,7 @@ void main() {
         hasFirstRoutineTile: true,
       );
       await notifier.finish();
-      expect(container.read(routineManageCoachProvider).active, isFalse);
+      expect(container.read(routineManageCoachProvider).isActive, isFalse);
     });
 
     test('다시 보기 요청은 표시만 해 두고, replay 로 켜면 요청이 지워진다', () {
@@ -227,7 +227,7 @@ void main() {
         container.read(routineManageCoachProvider).isReplayRequested,
         isFalse,
       );
-      expect(container.read(routineManageCoachProvider).active, isTrue);
+      expect(container.read(routineManageCoachProvider).isActive, isTrue);
     });
 
     test('다시 보기(replay)는 봤어도 켜진다', () {
@@ -235,7 +235,7 @@ void main() {
       container
           .read(routineManageCoachProvider.notifier)
           .replay(routineCount: 1, groupCount: 0);
-      expect(container.read(routineManageCoachProvider).active, isTrue);
+      expect(container.read(routineManageCoachProvider).isActive, isTrue);
     });
   });
 
@@ -260,10 +260,11 @@ void main() {
                       CoachMarkStep(
                         target: targetKey,
                         message: '안내',
-                        demoBuilder: (context, targetRect) => Positioned.fromRect(
-                          rect: targetRect,
-                          child: const SizedBox(key: Key('demo')),
-                        ),
+                        demoBuilder: (context, targetRect) =>
+                            Positioned.fromRect(
+                              rect: targetRect,
+                              child: const SizedBox(key: Key('demo')),
+                            ),
                       ),
                     ],
                     index: 0,
@@ -284,7 +285,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 700));
 
       expect(find.byKey(const Key('demo')), findsOneWidget);
-      expect(tester.getTopLeft(find.byKey(const Key('demo'))), const Offset(100, 200));
+      expect(
+        tester.getTopLeft(find.byKey(const Key('demo'))),
+        const Offset(100, 200),
+      );
       expect(tester.getSize(find.byKey(const Key('demo'))), const Size(80, 80));
     });
   });
@@ -378,8 +382,10 @@ class _UnreadableStorage extends InMemoryStorage {
 }
 
 class _UnwritableStorage extends InMemoryStorage {
-  _UnwritableStorage() : super(manageCoachSeen: false, groupCoachSeen: false);
+  _UnwritableStorage()
+    : super(isManageCoachSeen: false, isGroupCoachSeen: false);
 
   @override
-  Future<void> setManageCoachSeen(bool v) async => throw StateError('쓰기 실패');
+  Future<void> setManageCoachSeen(bool isSeen) async =>
+      throw StateError('쓰기 실패');
 }

@@ -9,20 +9,27 @@ class SharedPrefsStorage implements LocalStorage {
   SharedPrefsStorage(this._prefs, {GuardianLockStore? lock}) : _lock = lock;
 
   GuardianLockStore? _lock;
-  GuardianLockStore get _guardianLock => _lock ?? (throw StateError('E-PIN: installation not configured'));
+  GuardianLockStore get _guardianLock =>
+      _lock ?? (throw StateError('E-PIN: installation not configured'));
 
   /// 설치 판정 뒤에만 평문 레거시 값을 이전한다. 재설치 잔존 암호는 폐기한다.
-  Future<void> configureLock(String installationId, {required bool reset}) async {
+  Future<void> configureLock(
+    String installationId, {
+    required bool reset,
+  }) async {
     _lock = GuardianLockStore(installationId: installationId);
     if (reset) {
       await _guardianLock.clear();
     } else {
       final legacy = _prefs.getString(_kPin);
-      if (legacy != null && legacy.isNotEmpty && !await _guardianLock.hasPin()) {
+      if (legacy != null &&
+          legacy.isNotEmpty &&
+          !await _guardianLock.hasPin()) {
         await _guardianLock.setPin(legacy);
       }
     }
-    if (!await _prefs.remove(_kPin)) throw StateError('E-PIN: legacy cleanup failed');
+    if (!await _prefs.remove(_kPin))
+      throw StateError('E-PIN: legacy cleanup failed');
   }
 
   final SharedPreferences _prefs;
@@ -60,14 +67,18 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kRoutineReminders = 'reminder.routines';
 
   static Future<SharedPrefsStorage> create({GuardianLockStore? lock}) async {
-    return SharedPrefsStorage(await SharedPreferences.getInstance(), lock: lock);
+    return SharedPrefsStorage(
+      await SharedPreferences.getInstance(),
+      lock: lock,
+    );
   }
 
   @override
   String? get accountMemberId => _prefs.getString(_kAccountMemberId);
 
   @override
-  Future<void> setAccountMemberId(String id) => _prefs.setString(_kAccountMemberId, id);
+  Future<void> setAccountMemberId(String id) =>
+      _prefs.setString(_kAccountMemberId, id);
 
   @override
   String? get nickname {
@@ -316,18 +327,18 @@ class SharedPrefsStorage implements LocalStorage {
   bool get isManageCoachSeen => _prefs.getBool(_kManageCoachSeen) ?? false;
 
   @override
-  Future<void> setManageCoachSeen(bool v) async {
-    AppLogger.storageWrite(_kManageCoachSeen, '$v');
-    await _prefs.setBool(_kManageCoachSeen, v);
+  Future<void> setManageCoachSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kManageCoachSeen, '$isSeen');
+    await _prefs.setBool(_kManageCoachSeen, isSeen);
   }
 
   @override
   bool get isGroupCoachSeen => _prefs.getBool(_kGroupCoachSeen) ?? false;
 
   @override
-  Future<void> setGroupCoachSeen(bool v) async {
-    AppLogger.storageWrite(_kGroupCoachSeen, '$v');
-    await _prefs.setBool(_kGroupCoachSeen, v);
+  Future<void> setGroupCoachSeen(bool isSeen) async {
+    AppLogger.storageWrite(_kGroupCoachSeen, '$isSeen');
+    await _prefs.setBool(_kGroupCoachSeen, isSeen);
   }
 
   @override
@@ -428,7 +439,8 @@ class SharedPrefsStorage implements LocalStorage {
     // 토큰도 함께 지운다 — 이것이 곧 로그아웃이다. 온보딩 값만 지우고 토큰이
     // 남으면 이전 계정의 일과가 새 이름과 섞여 보인다.
     await _guardianLock.clear();
-    if (!await _prefs.remove(_kPin)) throw StateError('E-PIN: legacy cleanup failed');
+    if (!await _prefs.remove(_kPin))
+      throw StateError('E-PIN: legacy cleanup failed');
     await clearChildProfile();
     // 역할도 지운다 — 이룸이 휴대폰에서의 로그아웃은 곧 연결 끊기다 (§8-5).
     // 잘못 고른 사람이 로그아웃으로 빠져나올 수 있어야 한다.

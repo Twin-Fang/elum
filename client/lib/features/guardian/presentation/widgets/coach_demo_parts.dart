@@ -70,8 +70,8 @@ double coachDemoPhase(double t, double begin, double end) =>
 
 /// [begin, end] 구간에서 0 > 1 > 0 으로 오가는 값 (눌렀다 뗌)
 double coachDemoPulse(double t, double begin, double end) {
-  final p = coachDemoPhase(t, begin, end);
-  return p < 0.5 ? p * 2 : (1 - p) * 2;
+  final progress = coachDemoPhase(t, begin, end);
+  return progress < 0.5 ? progress * 2 : (1 - progress) * 2;
 }
 
 // --- 조각 ---
