@@ -1838,6 +1838,108 @@ abstract class AppLocalizations {
   /// **'읽지 않은 알림이 있어요'**
   String get notificationBellUnreadLabel;
 
+  /// 알림 화면 제목과 첫 번째 탭 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'알림'**
+  String get notificationTabNotifications;
+
+  /// 알림 화면 두 번째 탭 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'공지사항'**
+  String get notificationTabNotices;
+
+  /// 알림 목록 날짜 묶음 머리글: 오늘
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘'**
+  String get notificationDayToday;
+
+  /// 알림 목록 날짜 묶음 머리글: 어제
+  ///
+  /// In ko, this message translates to:
+  /// **'어제'**
+  String get notificationDayYesterday;
+
+  /// 알림 목록 날짜 묶음 머리글: 어제보다 오래된 것
+  ///
+  /// In ko, this message translates to:
+  /// **'이전'**
+  String get notificationDayEarlier;
+
+  /// 알림 목록의 전체 읽음 처리 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'모두 읽음'**
+  String get notificationMarkAllRead;
+
+  /// 알림이 하나도 없을 때의 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 받은 알림이 없어요'**
+  String get notificationEmpty;
+
+  /// 알림 목록을 받지 못했을 때의 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 불러오지 못했어요'**
+  String get notificationListFailed;
+
+  /// 알림이 가리키는 이룸이가 내 목록에 없을 때의 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'이 이룸이의 알림은 더 볼 수 없어요'**
+  String get notificationProfileUnavailable;
+
+  /// 알림 줄: 이룸이가 일과 하나를 끝냄. title 은 일과 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'\'\'{title}\'\' 일과를 끝냈어요'**
+  String notificationRoutineCompletedOne(String title);
+
+  /// 알림 줄: 이룸이가 하루에 일과 여러 개를 끝냄(묶음). count 는 개수
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 일과 {count}개를 끝냈어요'**
+  String notificationRoutineCompletedMany(int count);
+
+  /// 알림 줄: 일과를 끝냄(제목을 모를 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 끝냈어요'**
+  String get notificationRoutineCompletedNoTitle;
+
+  /// 알림 줄: 다른 보호자가 일과를 보냄. title 은 일과 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 보호자가 \'\'{title}\'\' 일과를 보냈어요'**
+  String notificationRoutineSent(String title);
+
+  /// 알림 줄: 다른 보호자가 일과를 보냄(제목을 모를 때)
+  ///
+  /// In ko, this message translates to:
+  /// **'함께하는 보호자가 새 일과를 보냈어요'**
+  String get notificationRoutineSentNoTitle;
+
+  /// 알림 줄: 새 보호자가 합류함
+  ///
+  /// In ko, this message translates to:
+  /// **'새 보호자가 함께하기 시작했어요'**
+  String get notificationCoGuardianJoined;
+
+  /// 알림 줄: 주간 크레딧이 다시 채워짐
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 크레딧이 채워졌어요'**
+  String get notificationCreditRefilled;
+
+  /// 알림 줄: 보낸 의견이 처리됨
+  ///
+  /// In ko, this message translates to:
+  /// **'보내 주신 의견을 확인하고 처리했어요'**
+  String get notificationFeedbackResolved;
+
   /// 보호자 홈의 설정 아이콘 버튼 낭독 이름
   ///
   /// In ko, this message translates to:

@@ -1046,6 +1046,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationBellUnreadLabel => 'You have unread notifications';
 
   @override
+  String get notificationTabNotifications => 'Notifications';
+
+  @override
+  String get notificationTabNotices => 'Notices';
+
+  @override
+  String get notificationDayToday => 'Today';
+
+  @override
+  String get notificationDayYesterday => 'Yesterday';
+
+  @override
+  String get notificationDayEarlier => 'Earlier';
+
+  @override
+  String get notificationMarkAllRead => 'Mark all read';
+
+  @override
+  String get notificationEmpty => 'No notifications yet';
+
+  @override
+  String get notificationListFailed => 'Couldn\'t load notifications';
+
+  @override
+  String get notificationProfileUnavailable =>
+      'This ELUM user is no longer available';
+
+  @override
+  String notificationRoutineCompletedOne(String title) {
+    return 'Finished \'\'$title\'\'';
+  }
+
+  @override
+  String notificationRoutineCompletedMany(int count) {
+    return 'Finished $count routines today';
+  }
+
+  @override
+  String get notificationRoutineCompletedNoTitle => 'Finished a routine';
+
+  @override
+  String notificationRoutineSent(String title) {
+    return 'A co-guardian sent \'\'$title\'\'';
+  }
+
+  @override
+  String get notificationRoutineSentNoTitle =>
+      'A co-guardian sent a new routine';
+
+  @override
+  String get notificationCoGuardianJoined => 'A new guardian joined';
+
+  @override
+  String get notificationCreditRefilled => 'This week\'s credits are refilled';
+
+  @override
+  String get notificationFeedbackResolved => 'We reviewed your feedback';
+
+  @override
   String get guardianHomeSettings => 'Settings';
 
   @override

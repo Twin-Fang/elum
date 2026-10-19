@@ -996,6 +996,63 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notificationBellUnreadLabel => '읽지 않은 알림이 있어요';
 
   @override
+  String get notificationTabNotifications => '알림';
+
+  @override
+  String get notificationTabNotices => '공지사항';
+
+  @override
+  String get notificationDayToday => '오늘';
+
+  @override
+  String get notificationDayYesterday => '어제';
+
+  @override
+  String get notificationDayEarlier => '이전';
+
+  @override
+  String get notificationMarkAllRead => '모두 읽음';
+
+  @override
+  String get notificationEmpty => '아직 받은 알림이 없어요';
+
+  @override
+  String get notificationListFailed => '알림을 불러오지 못했어요';
+
+  @override
+  String get notificationProfileUnavailable => '이 이룸이의 알림은 더 볼 수 없어요';
+
+  @override
+  String notificationRoutineCompletedOne(String title) {
+    return '\'\'$title\'\' 일과를 끝냈어요';
+  }
+
+  @override
+  String notificationRoutineCompletedMany(int count) {
+    return '오늘 일과 $count개를 끝냈어요';
+  }
+
+  @override
+  String get notificationRoutineCompletedNoTitle => '일과를 끝냈어요';
+
+  @override
+  String notificationRoutineSent(String title) {
+    return '함께하는 보호자가 \'\'$title\'\' 일과를 보냈어요';
+  }
+
+  @override
+  String get notificationRoutineSentNoTitle => '함께하는 보호자가 새 일과를 보냈어요';
+
+  @override
+  String get notificationCoGuardianJoined => '새 보호자가 함께하기 시작했어요';
+
+  @override
+  String get notificationCreditRefilled => '이번 주 크레딧이 채워졌어요';
+
+  @override
+  String get notificationFeedbackResolved => '보내 주신 의견을 확인하고 처리했어요';
+
+  @override
   String get guardianHomeSettings => '설정';
 
   @override

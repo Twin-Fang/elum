@@ -936,6 +936,57 @@
 
   "notificationBellUnreadLabel": "읽지 않은 알림이 있어요",
   "@notificationBellUnreadLabel": { "description": "종 아이콘에 빨간 점이 있을 때 낭독 이름에 덧붙이는 말" },
+
+  "notificationTabNotifications": "알림",
+  "@notificationTabNotifications": {"description": "알림 화면 제목과 첫 번째 탭 이름"},
+
+  "notificationTabNotices": "공지사항",
+  "@notificationTabNotices": {"description": "알림 화면 두 번째 탭 이름"},
+
+  "notificationDayToday": "오늘",
+  "@notificationDayToday": {"description": "알림 목록 날짜 묶음 머리글: 오늘"},
+
+  "notificationDayYesterday": "어제",
+  "@notificationDayYesterday": {"description": "알림 목록 날짜 묶음 머리글: 어제"},
+
+  "notificationDayEarlier": "이전",
+  "@notificationDayEarlier": {"description": "알림 목록 날짜 묶음 머리글: 어제보다 오래된 것"},
+
+  "notificationMarkAllRead": "모두 읽음",
+  "@notificationMarkAllRead": {"description": "알림 목록의 전체 읽음 처리 버튼"},
+
+  "notificationEmpty": "아직 받은 알림이 없어요",
+  "@notificationEmpty": {"description": "알림이 하나도 없을 때의 문구"},
+
+  "notificationListFailed": "알림을 불러오지 못했어요",
+  "@notificationListFailed": {"description": "알림 목록을 받지 못했을 때의 문구"},
+
+  "notificationProfileUnavailable": "이 이룸이의 알림은 더 볼 수 없어요",
+  "@notificationProfileUnavailable": {"description": "알림이 가리키는 이룸이가 내 목록에 없을 때의 안내"},
+
+  "notificationRoutineCompletedOne": "''{title}'' 일과를 끝냈어요",
+  "@notificationRoutineCompletedOne": {"description": "알림 줄: 이룸이가 일과 하나를 끝냄. title 은 일과 제목", "placeholders": {"title": {"type": "String"}}},
+
+  "notificationRoutineCompletedMany": "오늘 일과 {count}개를 끝냈어요",
+  "@notificationRoutineCompletedMany": {"description": "알림 줄: 이룸이가 하루에 일과 여러 개를 끝냄(묶음). count 는 개수", "placeholders": {"count": {"type": "int"}}},
+
+  "notificationRoutineCompletedNoTitle": "일과를 끝냈어요",
+  "@notificationRoutineCompletedNoTitle": {"description": "알림 줄: 일과를 끝냄(제목을 모를 때)"},
+
+  "notificationRoutineSent": "함께하는 보호자가 ''{title}'' 일과를 보냈어요",
+  "@notificationRoutineSent": {"description": "알림 줄: 다른 보호자가 일과를 보냄. title 은 일과 제목", "placeholders": {"title": {"type": "String"}}},
+
+  "notificationRoutineSentNoTitle": "함께하는 보호자가 새 일과를 보냈어요",
+  "@notificationRoutineSentNoTitle": {"description": "알림 줄: 다른 보호자가 일과를 보냄(제목을 모를 때)"},
+
+  "notificationCoGuardianJoined": "새 보호자가 함께하기 시작했어요",
+  "@notificationCoGuardianJoined": {"description": "알림 줄: 새 보호자가 합류함"},
+
+  "notificationCreditRefilled": "이번 주 크레딧이 채워졌어요",
+  "@notificationCreditRefilled": {"description": "알림 줄: 주간 크레딧이 다시 채워짐"},
+
+  "notificationFeedbackResolved": "보내 주신 의견을 확인하고 처리했어요",
+  "@notificationFeedbackResolved": {"description": "알림 줄: 보낸 의견이 처리됨"},
   "@guardianHomeGoChildScreen": { "description": "보호자 홈에서 이룸이 화면으로 넘어가는 배지 버튼의 낭독 이름" },
 
   "guardianHomeSettings": "설정",
