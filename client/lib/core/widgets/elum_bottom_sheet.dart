@@ -25,6 +25,9 @@ Future<T?> showElumSheet<T>({
   }
   return showModalBottomSheet<T>(
     context: context,
+    // 보호자 칸 화면 안에서 열어도 하단 바를 덮는 맨 위 화면에 띄운다 — 칸 영역에 띄우면
+    // 키보드가 올라올 때 칸 영역째 줄어 시트가 넘친다 (팝업·옆 패널과 같은 자리)
+    useRootNavigator: true,
     // 키보드 때문에 시트가 화면 위까지 자랄 수 있다
     isScrollControlled: true,
     // 큰 화면에서는 전폭으로 펴지 않고 폭 상한으로 가운데에 둔다 (폰은 창 폭이 더 작아 그대로)

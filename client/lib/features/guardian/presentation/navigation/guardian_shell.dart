@@ -51,6 +51,9 @@ class GuardianShell extends StatelessWidget {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: colors.background,
+      // 키보드가 올라와도 틀을 줄이지 않는다 — 줄이면 하단 바가 키보드 위로 떠오른다.
+      // 입력이 있는 칸 화면은 자기 Scaffold 가 키보드를 피한다
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
           // 아래 안전영역은 이 틀이 맡는다 — 칸 화면이 또 비우면 바 위에 빈 띠가 생긴다
@@ -81,6 +84,9 @@ class GuardianShell extends StatelessWidget {
     final media = MediaQuery.of(context);
     return Scaffold(
       backgroundColor: colors.background,
+      // 키보드가 올라와도 틀을 줄이지 않는다 — 줄이면 하단 바가 키보드 위로 떠오른다.
+      // 입력이 있는 칸 화면은 자기 Scaffold 가 키보드를 피한다
+      resizeToAvoidBottomInset: false,
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
