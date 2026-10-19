@@ -100,6 +100,23 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setChildHapticOn(bool v) async => _childHapticOn = v;
 
+  bool _childPraiseSoundOn = true;
+
+  @override
+  bool get isChildPraiseSoundOn => _childPraiseSoundOn;
+
+  @override
+  Future<void> setChildPraiseSoundOn(bool v) async => _childPraiseSoundOn = v;
+
+  String? _routineRemindersJson;
+
+  @override
+  String? get routineRemindersJson => _routineRemindersJson;
+
+  @override
+  Future<void> setRoutineRemindersJson(String json) async =>
+      _routineRemindersJson = json;
+
   @override
   bool get isElumiDevice => _elumi;
 

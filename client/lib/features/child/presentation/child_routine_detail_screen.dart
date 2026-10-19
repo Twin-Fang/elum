@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +20,7 @@ import 'widgets/reward_banner.dart';
 import 'widgets/child_card_pager.dart';
 import '../application/child_routine_notifier.dart';
 import '../../../core/haptics/child_haptics.dart';
+import '../../../core/sound/child_praise_sound.dart';
 import '../data/speech_service.dart';
 import 'child_home_screen.dart' show childRoutinesProvider;
 import '../../../core/router/pop_or_home.dart';
@@ -232,6 +235,9 @@ class _ChildRoutineDetailScreenState
       becameChecked ? ChildHapticKind.check : ChildHapticKind.uncheck,
     );
 
+    // 칭찬 소리 (#777): 체크 순간만, 마지막 카드면 일과 완료 칭찬. 카드 읽기와 겹치지 않게 먼저 끊는다
+    if (becameChecked) _playPraise();
+
     if (!shouldReward || _rewardFlowActive) return;
     _rewardFlowActive = true;
     try {
@@ -270,6 +276,22 @@ class _ChildRoutineDetailScreenState
     } finally {
       _rewardFlowActive = false;
     }
+  }
+
+  /// 칭찬 소리 재생: 읽기 중단 > 완료 여부로 종류 선택 > 재생 (기다리지 않음)
+  void _playPraise() {
+    if (_speakingId != null) {
+      unawaited(ref.read(speechServiceProvider).stop());
+      setState(() => _speakingId = null);
+    }
+    unawaited(
+      ref
+          .read(childPraiseSoundProvider)
+          .play(
+            _isRoutineDone ? ChildPraiseKind.complete : ChildPraiseKind.check,
+            language: _routine.language,
+          ),
+    );
   }
 
   /// 모든 카드가 체크됐는지. 기기 기록이 서버 값보다 우선한다.

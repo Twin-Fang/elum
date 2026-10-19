@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'routine_input_field.dart';
 import 'routine_suggestion_chips.dart';
+import 'routine_template_sheet.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,13 +68,22 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
     unawaited(context.push(Routes.routineReward));
   });
 
-  void _fill(RoutineSuggestion suggestion) {
-    final text = suggestion.inputText;
+  void _fill(RoutineSuggestion suggestion) => _setInput(suggestion.inputText);
+
+  void _setInput(String text) {
     _controller
       ..text = text
       // 커서를 끝으로 보내야 이어서 고칠 수 있다
       ..selection = TextSelection.collapsed(offset: text.length);
     ref.read(routineFlowProvider.notifier).setRawInput(text);
+  }
+
+  /// 예시 일과 시트 > 고른 문장을 입력칸에 채운다
+  Future<void> _openTemplates() async {
+    dismissKeyboard();
+    final template = await RoutineTemplateSheet.show(context);
+    if (template == null || !mounted) return;
+    _setInput(template.promptOf(context.l10n));
   }
 
   @override
@@ -140,6 +150,9 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
                         ),
                         SizedBox(height: _RoutineInputLayout.inputToChips),
                         RoutineSuggestionChips(onTap: _fill),
+                        SizedBox(height: space.md),
+                        // 카테고리별 예시 일과 (#777)
+                        _TemplateButton(onPressed: _openTemplates),
                       ],
                     ),
                   ),
@@ -149,6 +162,48 @@ class _RoutineInputScreenState extends ConsumerState<RoutineInputScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 예시 일과 시트를 여는 글자 버튼
+class _TemplateButton extends StatelessWidget {
+  const _TemplateButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  static const buttonKey = Key('routineInputTemplates');
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return AppPressable(
+      key: buttonKey,
+      onTap: onPressed,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: context.space.md,
+          vertical: context.space.sm,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.auto_awesome_mosaic_rounded,
+              size: 20.w,
+              color: colors.textPrimary,
+            ),
+            SizedBox(width: 6.w),
+            Text(
+              context.l10n.routineTemplateOpen,
+              style: context.typo.chipLabel.copyWith(
+                color: colors.textPrimary,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

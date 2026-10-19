@@ -13,6 +13,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/haptics/child_haptics.dart';
+import '../../../core/sound/child_praise_sound.dart';
 import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_switch_tile.dart';
 import '../../../core/widgets/settings_tile.dart';
@@ -213,6 +214,7 @@ class _GuardianSettingsScreenState
             ),
             _ImageStyleTile(busy: busy),
             const _HapticTile(),
+            const _PraiseSoundTile(),
           ],
         ),
         _groupGap,
@@ -352,6 +354,21 @@ class _ImageStyleTile extends ConsumerWidget {
       valueText: style.label,
       showChevronWithValue: true,
       onTap: busy ? null : () => context.push(Routes.guardianImageStyle),
+    );
+  }
+}
+
+/// 이룸이 칭찬 소리 켜기/끄기 줄 (#777).
+class _PraiseSoundTile extends ConsumerWidget {
+  const _PraiseSoundTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SettingsSwitchTile(
+      isInCard: true,
+      label: context.l10n.guardianSettingsPraiseSound,
+      value: ref.watch(childPraiseSoundOnProvider),
+      onChanged: (on) => ref.read(childPraiseSoundOnProvider.notifier).set(on),
     );
   }
 }

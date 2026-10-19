@@ -49,6 +49,9 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
   static const _kHomeCoachSeen = 'coach.homeSeen';
   static const _kChildHapticOn = 'haptic.childOn';
+  static const _kChildPraiseSoundOn = 'sound.childPraiseOn';
+  // 일과 알림: {routineId: {hour, minute, isDaily, title}} JSON
+  static const _kRoutineReminders = 'reminder.routines';
 
   static Future<SharedPrefsStorage> create({GuardianLockStore? lock}) async {
     return SharedPrefsStorage(await SharedPreferences.getInstance(), lock: lock);
@@ -273,6 +276,24 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setChildHapticOn(bool v) async {
     AppLogger.storageWrite(_kChildHapticOn, '$v');
     await _prefs.setBool(_kChildHapticOn, v);
+  }
+
+  @override
+  bool get isChildPraiseSoundOn => _prefs.getBool(_kChildPraiseSoundOn) ?? true;
+
+  @override
+  Future<void> setChildPraiseSoundOn(bool v) async {
+    AppLogger.storageWrite(_kChildPraiseSoundOn, '$v');
+    await _prefs.setBool(_kChildPraiseSoundOn, v);
+  }
+
+  @override
+  String? get routineRemindersJson => _prefs.getString(_kRoutineReminders);
+
+  @override
+  Future<void> setRoutineRemindersJson(String json) async {
+    AppLogger.storageWrite(_kRoutineReminders, 'len=${json.length}');
+    await _prefs.setString(_kRoutineReminders, json);
   }
 
   @override
