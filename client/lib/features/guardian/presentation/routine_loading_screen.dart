@@ -12,14 +12,15 @@ import '../../../core/l10n/l10n_context.dart';
 import '../../../core/layout/layout_context_ext.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
-import '../../../core/widgets/elum_error_view.dart';
-import '../../../core/widgets/elum_state_body.dart';
+import '../../../core/widgets/app_pressable.dart';
+import '../../../core/widgets/elum_button.dart';
 import '../../credit/domain/credit_summary.dart';
 import '../application/routine_notifier.dart';
 import '../domain/routine_stage.dart';
 import 'widgets/aurora_background.dart';
 import 'lumi_peek.dart';
 import 'routine_loading_stage_row.dart';
+import 'widgets/routine_failure_body.dart';
 import 'widgets/routine_flow_scaffold.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
@@ -264,41 +265,59 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
     final flow = ref.watch(routineFlowProvider);
     if (flow.step == RoutineFlowStep.error) {
       final blocked = isCreditBlockingCode(flow.errorCode);
+      // 서버 문구가 있으면 그대로 띄운다 — 앱이 다시 쓰면 서버에서 고쳐도 이전 문구가 나온다.
+      // 서버에 닿지도 못했으면 인터넷을 확인하라고 한다.
+      final description = switch (flow.errorMessage?.trim()) {
+        final message? when message.isNotEmpty => message,
+        _ => flow.errorHint ?? context.l10n.commonRetryLater,
+      };
       return RoutineFlowScaffold(
         aurora: RoutineLoadingScreen.auroraOf(widget.kind),
         onBack: _handleBack,
         // 만들지 못했으니 서버에 남은 것이 없다 (T5). 뒤로는 흐름 안 한 칸이라 묻지 않는다.
         leave: RoutineLeave.discard,
-        // 공통 실패 화면을 본문 가운데에 둔다 — 다른 실패 화면과 같은 모양·자리.
-        child: ElumStateBody(
-          child: ElumErrorView(
-            // 준비 로딩은 질문을 받다 실패한 것이다 — 카드는 아직 시작도 안 했다.
-            // 크레딧 때문에 막힌 것은 AI 가 실패한 것이 아니다 — "만들지 못했어요"라고
-            // 하면 다시 하면 될 줄 안다. 이유는 아래 서버 문구가 말한다.
-            message: blocked
-                ? context.l10n.routineLoadingBlockedTitle
-                : switch (widget.kind) {
-                    RoutineLoadingKind.prepare =>
-                      context.l10n.routineLoadingPrepareFailed,
-                    RoutineLoadingKind.generate =>
-                      context.l10n.routineLoadingGenerateFailed,
-                  },
-            // 서버 문구가 있으면 그대로 띄운다 — 앱이 다시 쓰면 서버에서 고쳐도 이전 문구가 나온다.
-            // 서버에 닿지도 못했으면 인터넷을 확인하라고 한다.
-            description: switch (flow.errorMessage?.trim()) {
-              final message? when message.isNotEmpty => message,
-              _ => flow.errorHint,
-            },
-            errorCode: flow.errorCode,
-            // 크레딧 부족·진행 중·동결은 다시 해도 같다 — 다시 하기 대신 홈으로.
-            // 떠나기 전에 묻지 않는다. 만든 것이 없어 잃을 것도 없다.
-            onRetry: blocked
-                ? () => context.go(Routes.guardian)
-                : () => _retry(),
-            actionLabel: blocked
-                ? context.l10n.routineLoadingHome
-                : context.l10n.routineLoadingRetry,
-          ),
+        // 버튼은 다른 흐름 화면처럼 시안 자리(y=675)에 고정한다.
+        // 크레딧 부족·진행 중·동결은 다시 해도 같다 — 홈으로가 주 버튼이다.
+        pinCtaToFigmaY: true,
+        bottomButton: ElumButton(
+          label: blocked
+              ? context.l10n.routineLoadingHome
+              : context.l10n.routineLoadingRetry,
+          onPressed: blocked ? () => context.go(Routes.guardian) : _retry,
+        ),
+        // 다시 해도 같은 실패가 반복될 때 빠져나갈 길. 같은 무게의 버튼으로 두지 않는다.
+        belowButton: blocked
+            ? null
+            : Center(
+                child: AppPressable(
+                  onTap: () => context.go(Routes.guardian),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: context.space.md),
+                    child: Text(
+                      context.l10n.routineLoadingHome,
+                      style: context.typo.linkLater.copyWith(
+                        color: colors.linkLaterLabel,
+                        decoration: TextDecoration.underline,
+                        decorationColor: colors.linkLaterLabel,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+        child: RoutineFailureBody(
+          // 준비 로딩은 질문을 받다 실패한 것이다 — 카드는 아직 시작도 안 했다.
+          // 크레딧 때문에 막힌 것은 AI 가 실패한 것이 아니다 — "만들지 못했어요"라고
+          // 하면 다시 하면 될 줄 안다. 이유는 서버 문구가 말한다.
+          message: blocked
+              ? context.l10n.routineLoadingBlockedTitle
+              : switch (widget.kind) {
+                  RoutineLoadingKind.prepare =>
+                    context.l10n.routineLoadingPrepareFailed,
+                  RoutineLoadingKind.generate =>
+                    context.l10n.routineLoadingGenerateFailed,
+                },
+          description: description,
+          errorCode: flow.errorCode,
         ),
       );
     }

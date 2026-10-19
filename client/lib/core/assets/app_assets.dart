@@ -172,6 +172,9 @@ abstract final class AppAssets {
   /// 행렬이 걸려 빛 자리가 어긋났다. 병아리 몸통·구슬과 같은 부류다.
   static const lumiThinking = '$_images/lumi_thinking.png';
 
+  /// 일과 카드 생성 실패 화면의 루미 (빈 카드를 들고 고개를 기울임, 투명 배경).
+  static const cardCreationFailedLumi = '$_images/card_creation_failed_lumi.png';
+
   /// 강제 업데이트 안내 카드의 루미 + 다운로드 화살표 (1536×1024, 투명 배경).
   static const updateLumi = '$_images/update_lumi.png';
 
