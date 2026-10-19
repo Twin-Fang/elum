@@ -8,8 +8,6 @@ import 'package:elum/features/child/presentation/routine_done_screen.dart';
 import 'package:elum/features/child/presentation/widgets/child_night_sky_backdrop.dart';
 import 'package:elum/features/child/presentation/child_stars_screen.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
-import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/features/member/application/member_providers.dart';
@@ -22,7 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/adaptive_test_app.dart';
 import 'helpers/fake_dio.dart';
-import 'helpers/fake_reward_api.dart';
+import 'helpers/stub_routine_repository.dart';
 import 'helpers/test_storage.dart';
 
 /// 태블릿·분할 창 크기 × 글자 배율에서 화면이 깨지지 않는다.
@@ -72,7 +70,7 @@ void main() {
       offlineDioOverride(),
       speechServiceProvider.overrideWithValue(_SilentSpeech()),
       testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
-      routineRepositoryProvider.overrideWithValue(_StubRepo()),
+      routineRepositoryProvider.overrideWithValue(StubRoutineRepository()),
       myRoutinesProvider.overrideWith(
         (ref) async => [
           routine('r1', '스스로 옷을 입어요', percent: 50),
@@ -121,7 +119,11 @@ void main() {
     }
   }
 
-  runOnAllWindows('보호자 홈', () => const GuardianHomeScreen());
+  runOnAllWindows(
+    '보호자 홈',
+    () => const GuardianHomeScreen(),
+    kind: ScreenLayoutKind.adaptive,
+  );
   runOnAllWindows(
     '별 모으기',
     () => const ChildStarsScreen(),
@@ -154,24 +156,6 @@ void main() {
     // 일과 완료와 같은 이유: 시안 좌표 고정 화면의 글자 2배 한계
     scales: const [1.0],
   );
-}
-
-/// 서버를 타지 않는 저장소. 이 테스트는 레이아웃만 본다.
-class _StubRepo with FakeRewardApi implements RoutineRepository {
-  @override
-  Future<List<Routine>> getMyRoutines() async => const [];
-
-  @override
-  Future<List<Routine>> getTodayRoutines() async => const [];
-
-  @override
-  Future<List<Routine>> getPastRoutines() async => const [];
-
-  @override
-  Future<List<RoutineSuggestion>> getSuggestions() async => const [];
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// 카드 상세 매트릭스용 일과 (id 를 local 로 둔다: 서버 동기화를 타지 않는다)

@@ -10,6 +10,9 @@ import '../../ads/presentation/ad_bottom_strip_slot.dart';
 import '../../../core/config/ad_ids.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/layout/adaptive_page_frame.dart';
+import '../../../core/layout/layout_context_ext.dart';
+import '../../../core/layout/screen_layout_kind.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/character_badge.dart';
@@ -23,6 +26,7 @@ import '../../profile/application/profile_session.dart';
 import '../application/home_routines.dart';
 import '../application/home_coach_notifier.dart';
 import '../application/routine_notifier.dart';
+import 'guardian_home_landscape_body.dart';
 import 'widgets/create_routine_button.dart';
 import 'widgets/home_coach_mark.dart';
 import 'widgets/routine_summary_tile.dart';
@@ -196,62 +200,80 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
 
     final coachActive = ref.watch(homeCoachProvider.select((s) => s.active));
 
+    final header = _Header(
+      childName: childName,
+      character: character,
+      modeKey: _modeKey,
+    );
+    // 코치마크가 가리키는 자리 — 키만 달고 모양은 건드리지 않는다.
+    final createButton = Padding(
+      padding: EdgeInsets.symmetric(horizontal: _listInset.w),
+      child: KeyedSubtree(key: _createKey, child: const _StartRoutineButton()),
+    );
+    final sections = Padding(
+      padding: EdgeInsets.symmetric(horizontal: _listInset.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          RoutineSectionTitle(
+            iconAsset: AppAssets.iconTodayRoutine,
+            label: context.l10n.guardianHomeTodayRoutine,
+          ),
+          SizedBox(height: _titleToList.h),
+          TodayRoutineSection(coachKey: _swipeKey),
+          SizedBox(height: _betweenSections.h),
+          RoutineSectionTitle(
+            iconAsset: AppAssets.iconTimePast,
+            label: context.l10n.guardianHomePastRoutine,
+          ),
+          SizedBox(height: _titleToList.h),
+          const PastRoutineSection(),
+        ],
+      ),
+    );
+
+    // 코치마크가 떠 있는 동안은 뒤 목록이 움직이지 않게 잠근다 — 구멍은 한 번만 재서
+    // 스크롤되면 대상과 어긋난다.
+    final listPhysics = coachActive
+        ? const NeverScrollableScrollPhysics()
+        : null;
+
+    // 가로 태블릿은 왼쪽 머리말·만들기, 오른쪽 목록 두 칸. 낮은 창(분할 보기)은 한 열로 접는다
+    final metrics = context.layoutMetrics;
+    final hasTwoPanes =
+        metrics.isScaleOverridden &&
+        metrics.isLandscape &&
+        !metrics.isShortHeight;
+
     final scaffold = Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                controller: _scroll,
-                // 코치마크가 떠 있는 동안은 뒤 목록이 움직이지 않게 잠근다 — 구멍은 한 번만 재서
-                // 스크롤되면 대상과 어긋난다.
-                physics: coachActive
-                    ? const NeverScrollableScrollPhysics()
-                    : null,
-                padding: EdgeInsets.only(bottom: space.xl),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _Header(
-                      childName: childName,
-                      character: character,
-                      modeKey: _modeKey,
-                    ),
-                    SizedBox(height: _toCreateButton.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: _listInset.w),
-                      // 코치마크가 가리키는 자리 — 키만 달고 모양은 건드리지 않는다.
-                      child: KeyedSubtree(
-                        key: _createKey,
-                        child: const _StartRoutineButton(),
-                      ),
-                    ),
-                    SizedBox(height: _toSections.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: _listInset.w),
+              child: hasTwoPanes
+                  ? GuardianHomeLandscapeBody(
+                      header: header,
+                      createButton: createButton,
+                      sections: sections,
+                      listController: _scroll,
+                      listPhysics: listPhysics,
+                    )
+                  : SingleChildScrollView(
+                      controller: _scroll,
+                      physics: listPhysics,
+                      padding: EdgeInsets.only(bottom: space.xl),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          RoutineSectionTitle(
-                            iconAsset: AppAssets.iconTodayRoutine,
-                            label: context.l10n.guardianHomeTodayRoutine,
-                          ),
-                          SizedBox(height: _titleToList.h),
-                          TodayRoutineSection(coachKey: _swipeKey),
-                          SizedBox(height: _betweenSections.h),
-                          RoutineSectionTitle(
-                            iconAsset: AppAssets.iconTimePast,
-                            label: context.l10n.guardianHomePastRoutine,
-                          ),
-                          SizedBox(height: _titleToList.h),
-                          const PastRoutineSection(),
+                          header,
+                          SizedBox(height: _toCreateButton.h),
+                          createButton,
+                          SizedBox(height: _toSections.h),
+                          sections,
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
             ),
             // 하단 배너. 로드 전·실패 시 높이 0이라 스크롤 영역이 원래 크기 그대로다.
             // 일과가 적으면 자리도 두지 않는다 (shouldShowHomeAdsProvider)
@@ -265,23 +287,29 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
     // 이룸이가 다른 휴대폰에서 단계를 끝내도 알려 줄 길이 없다(푸시·소켓 없음).
     // 받아 둔 목록을 계속 쥐고 있어 마지막 단계를 끝낸 일과가 직전 퍼센트에 머물렀다 —
     // 완료 체크가 나오지 않아 "100% 가 안 뜬다"로 보였다. 이룸이 홈과 같은 주기로 다시 받는다.
-    return RoutineAutoRefresh(
-      child: Stack(
-        children: [
-          scaffold,
-          // 처음 들어왔을 때만 뜨는 안내. 평소에는 높이 0이라 아무것도 그리지 않는다.
-          // Scaffold 밖이라 글 스타일을 주는 Material 이 없어 투명 Material 로 감싼다.
-          Positioned.fill(
-            child: Material(
-              type: MaterialType.transparency,
-              child: HomeCoachMark(
-                createKey: _createKey,
-                swipeKey: _swipeKey,
-                modeKey: _modeKey,
+    return AdaptivePageFrame(
+      // 태블릿에서 두 칸이 아니면 가운데 열에 담는다 (폰은 그대로 지나간다)
+      kind: hasTwoPanes
+          ? ScreenLayoutKind.adaptive
+          : ScreenLayoutKind.contentColumn,
+      child: RoutineAutoRefresh(
+        child: Stack(
+          children: [
+            scaffold,
+            // 처음 들어왔을 때만 뜨는 안내. 평소에는 높이 0이라 아무것도 그리지 않는다.
+            // Scaffold 밖이라 글 스타일을 주는 Material 이 없어 투명 Material 로 감싼다.
+            Positioned.fill(
+              child: Material(
+                type: MaterialType.transparency,
+                child: HomeCoachMark(
+                  createKey: _createKey,
+                  swipeKey: _swipeKey,
+                  modeKey: _modeKey,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
