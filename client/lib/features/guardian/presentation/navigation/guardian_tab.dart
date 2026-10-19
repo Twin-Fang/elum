@@ -12,7 +12,7 @@ enum GuardianTab {
   home(path: Routes.guardian, iconAsset: AppAssets.navHome),
   manage(path: Routes.guardianManage, iconAsset: AppAssets.navFolder),
   talk(path: Routes.guardianTalk, iconAsset: AppAssets.navComment),
-  me(path: Routes.guardianSettings, iconAsset: AppAssets.navUser);
+  me(path: Routes.guardianMyInfo, iconAsset: AppAssets.navUser);
 
   const GuardianTab({required this.path, required this.iconAsset});
 
@@ -32,6 +32,6 @@ enum GuardianTab {
 
   /// 아래 광고 띠를 둘 칸인가
   ///
-  /// 내정보(설정)는 맨 아래 `회원탈퇴` 줄과 가까워 광고를 잘못 누르면 되돌릴 수 없는 동작으로 이어질 수 있다
+  /// 내정보는 설정으로 이어지는 칸이라 광고를 잘못 누르면 계정 정리(`회원탈퇴`) 근처에서 오탭이 날 수 있어 뺀다
   bool get isAdStripAllowed => this != GuardianTab.me;
 }

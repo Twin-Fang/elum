@@ -128,14 +128,27 @@ void main() {
       expect(topOf(router), Routes.guardian);
     });
 
-    testWidgets('내정보 칸은 설정 첫 화면이라 뒤로가기가 없다', (tester) async {
+    testWidgets('내정보 칸은 프로필 화면이고, 설정 아이콘을 누르면 하단 바를 덮고 설정이 열린다', (tester) async {
       final router = await pumpShell(tester, size: phone);
 
       await tester.tap(find.bySemanticsLabel('내 정보'));
       await tester.pumpAndSettle();
 
+      expect(topOf(router), Routes.guardianMyInfo);
+      expect(find.byType(GuardianBottomNav), findsOneWidget);
+      expect(find.text('로그아웃'), findsNothing, reason: '설정 목록이 칸 첫 화면에 뜨면 안 된다');
+
+      await tester.tap(find.bySemanticsLabel('설정'));
+      await tester.pumpAndSettle();
+
       expect(topOf(router), Routes.guardianSettings);
-      expect(find.bySemanticsLabel('뒤로 가기'), findsNothing);
+      expect(find.byType(GuardianBottomNav), findsNothing);
+      expect(find.bySemanticsLabel('뒤로 가기'), findsOneWidget);
+
+      // 뒤로가면 내정보 칸으로 돌아온다
+      await tester.tap(find.bySemanticsLabel('뒤로 가기'));
+      await tester.pumpAndSettle();
+      expect(topOf(router), Routes.guardianMyInfo);
       expect(find.byType(GuardianBottomNav), findsOneWidget);
     });
 
@@ -150,7 +163,7 @@ void main() {
         findsNothing,
         reason: '설정은 회원탈퇴 줄과 가까워 광고를 두지 않는다',
       );
-      expect(topOf(router), Routes.guardianSettings);
+      expect(topOf(router), Routes.guardianMyInfo);
     });
 
     testWidgets('일과가 4개 이하면 광고 띠 자리가 없다', (tester) async {
