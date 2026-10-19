@@ -42,6 +42,9 @@ enum RoutineSheetAction {
 
   /// 일과관리 원본 — 오늘 이룸이에게 보낸다 (#805).
   send,
+
+  /// 일과관리 원본 — `⋯` 로 빠른 메뉴를 연다 (#834).
+  more,
 }
 
 class RoutineDetailSheet extends ConsumerStatefulWidget {
@@ -195,6 +198,10 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                 caption: widget.isPast
                     ? null
                     : widget.routine.foreignCreatorLabel,
+                // 일과관리에서 연 시트만 — 길게 누르기를 모르는 사람이 메뉴를 찾는 길 (#834)
+                onMoreTap: widget.isLibrary
+                    ? () => Navigator.of(context).pop(RoutineSheetAction.more)
+                    : null,
               ),
 
               // --- 스크롤: 단계 + 보상 ---

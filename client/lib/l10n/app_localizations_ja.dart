@@ -2426,4 +2426,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get childHomeGroupAllDone => '다 했어요!';
+
+  @override
+  String get libraryCoachMenu =>
+      '일과를 *길게 누르면* 메뉴가 열려요\\n이름 바꾸기·복사·지우기를 할 수 있어요';
+
+  @override
+  String get libraryCoachCreate => '새 묶음도 여기서 만들 수 있어요';
+
+  @override
+  String get routineDetailMore => '더 보기';
 }
