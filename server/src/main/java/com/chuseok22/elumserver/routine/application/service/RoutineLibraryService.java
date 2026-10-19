@@ -54,11 +54,15 @@ public class RoutineLibraryService {
       throw new CustomException(ErrorCode.ROUTINE_ALREADY_SENT_TODAY);
     }
     Routine sentRoutine = saveCopy(newTodayCopyOf(original, caller.memberId()));
-    // 새로 만든 오늘 일과가 알림 대상 (요청자 제외는 보호자 기기일 때만)
+    publishRoutineSent(caller, sentRoutine);
+    return RoutineResponse.from(sentRoutine);
+  }
+
+  /// 일과 보냄 알림 이벤트: 새로 만든 오늘 일과가 대상 (요청자 제외는 보호자 기기일 때만). 묶음째 보내기도 씀
+  void publishRoutineSent(Caller caller, Routine sentRoutine) {
     String actorMemberId = caller.isElumi() ? null : caller.memberId();
     eventPublisher.publishEvent(new RoutineSentEvent(sentRoutine.getId(), sentRoutine.getProfile().getId(),
       actorMemberId));
-    return RoutineResponse.from(sentRoutine);
   }
 
   /**

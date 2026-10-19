@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.member.application.service.ProfileGuardianServic
 import com.chuseok22.elumserver.notification.application.service.NotificationRecorder;
 import com.chuseok22.elumserver.notification.application.service.RecordedNotification;
 import com.chuseok22.elumserver.notification.core.NotificationDraft;
+import com.chuseok22.elumserver.notification.core.NotificationType;
 import com.chuseok22.elumserver.notification.core.event.CoGuardianJoinedEvent;
 import com.chuseok22.elumserver.notification.core.event.FeedbackResolvedEvent;
 import com.chuseok22.elumserver.notification.core.event.RoutineCompletedEvent;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -51,55 +53,50 @@ public class NotificationEventListener {
   @Async(AsyncConfig.NOTIFICATION_EXECUTOR)
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void onRoutineCompleted(RoutineCompletedEvent event) {
-    try {
+    recordSafely(NotificationType.ROUTINE_COMPLETED.name(), () -> {
       NotificationDraft draft = NotificationDraft.routineCompleted(event.profileId(), event.routineId(),
         event.routineDate(), now());
       // 받는 사람: 이룸이의 보호자 전원 - 요청한 보호자 (이룸이 기기가 완료했으면 연결해 준 보호자도 포함)
-      List<RecordedNotification> recorded = notificationRecorder.record(draft,
-        guardiansExcept(event.profileId(), event.actorMemberId()));
-      log.info("[notification record] done type=ROUTINE_COMPLETED count={}", recorded.size());
-    } catch (RuntimeException exception) {
-      logFailure("ROUTINE_COMPLETED", exception);
-    }
+      return notificationRecorder.record(draft, guardiansExcept(event.profileId(), event.actorMemberId()));
+    });
   }
 
   @Async(AsyncConfig.NOTIFICATION_EXECUTOR)
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void onRoutineSent(RoutineSentEvent event) {
-    try {
+    recordSafely(NotificationType.ROUTINE_SENT_BY_CO_GUARDIAN.name(), () -> {
       NotificationDraft draft = NotificationDraft.routineSent(event.profileId(), event.routineId(), now());
-      List<RecordedNotification> recorded = notificationRecorder.record(draft,
-        guardiansExcept(event.profileId(), event.actorMemberId()));
-      log.info("[notification record] done type=ROUTINE_SENT_BY_CO_GUARDIAN count={}", recorded.size());
-    } catch (RuntimeException exception) {
-      logFailure("ROUTINE_SENT_BY_CO_GUARDIAN", exception);
-    }
+      return notificationRecorder.record(draft, guardiansExcept(event.profileId(), event.actorMemberId()));
+    });
   }
 
   @Async(AsyncConfig.NOTIFICATION_EXECUTOR)
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void onCoGuardianJoined(CoGuardianJoinedEvent event) {
-    try {
+    recordSafely(NotificationType.CO_GUARDIAN_JOINED.name(), () -> {
       NotificationDraft draft = NotificationDraft.coGuardianJoined(event.profileId(), event.joinedMemberId(), now());
       // 받는 사람: 기존 보호자 전원 (합류한 본인 제외)
-      List<RecordedNotification> recorded = notificationRecorder.record(draft,
-        guardiansExcept(event.profileId(), event.joinedMemberId()));
-      log.info("[notification record] done type=CO_GUARDIAN_JOINED count={}", recorded.size());
-    } catch (RuntimeException exception) {
-      logFailure("CO_GUARDIAN_JOINED", exception);
-    }
+      return notificationRecorder.record(draft, guardiansExcept(event.profileId(), event.joinedMemberId()));
+    });
   }
 
   @Async(AsyncConfig.NOTIFICATION_EXECUTOR)
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
   public void onFeedbackResolved(FeedbackResolvedEvent event) {
-    try {
+    recordSafely(NotificationType.FEEDBACK_RESOLVED.name(), () -> {
       NotificationDraft draft = NotificationDraft.feedbackResolved(event.feedbackId(), now());
       // 받는 사람: 의견을 보낸 사람 한 명
-      List<RecordedNotification> recorded = notificationRecorder.record(draft, List.of(event.memberId()));
-      log.info("[notification record] done type=FEEDBACK_RESOLVED count={}", recorded.size());
+      return notificationRecorder.record(draft, List.of(event.memberId()));
+    });
+  }
+
+  /// 기록 실행 > 완료 로그 (예외는 로그만 남기고 삼킴: 본래 요청과 무관하게 끝남)
+  private void recordSafely(String typeName, Supplier<List<RecordedNotification>> recording) {
+    try {
+      List<RecordedNotification> recorded = recording.get();
+      log.info("[notification record] done type={} count={}", typeName, recorded.size());
     } catch (RuntimeException exception) {
-      logFailure("FEEDBACK_RESOLVED", exception);
+      log.warn("[notification record] failed type={} : {}", typeName, exception.getClass().getSimpleName());
     }
   }
 
@@ -111,9 +108,5 @@ public class NotificationEventListener {
 
   private LocalDateTime now() {
     return LocalDateTime.now(clock);
-  }
-
-  private void logFailure(String type, RuntimeException exception) {
-    log.warn("[notification record] failed type={} : {}", type, exception.getClass().getSimpleName());
   }
 }

@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +19,7 @@ import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
+import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineGroupResponse;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
@@ -39,6 +41,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 /// 일과관리 묶음(#806): 구성원 규칙(원본만 · 한 묶음 · 2개 이상) · 풀기 · 복사 · 묶음째 보내기 · 권한
 /// 저장소는 메모리 목록으로 흉내 내 묶음 구성 변화를 결과로 확인한다
@@ -55,6 +58,8 @@ class RoutineGroupServiceTest {
   private ProfileAccessGuard profileAccessGuard;
   @Mock
   private RoutineStepSpeechQueue routineStepSpeechQueue;
+  @Mock
+  private ApplicationEventPublisher eventPublisher;
 
   private final List<Routine> storedRoutines = new ArrayList<>();
   private final AtomicInteger idSequence = new AtomicInteger();
@@ -67,7 +72,7 @@ class RoutineGroupServiceTest {
   void setUp() {
     RoutineGroupMembership membership = new RoutineGroupMembership(routineRepository, routineGroupRepository);
     routineLibraryService = new RoutineLibraryService(routineRepository, profileAccessGuard, routineStepSpeechQueue,
-      membership, org.mockito.Mockito.mock(org.springframework.context.ApplicationEventPublisher.class));
+      membership, eventPublisher);
     routineGroupService = new RoutineGroupService(routineGroupRepository, routineRepository, profileAccessGuard,
       routineLibraryService, membership);
 
@@ -224,6 +229,21 @@ class RoutineGroupServiceTest {
     when(routineRepository.existsBySourceRoutineIdAndScheduledAtBetween(anyString(), any(), any())).thenReturn(true);
     assertThatThrownBy(() -> routineGroupService.send(GUARDIAN, "group-1"))
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_ALREADY_SENT_TODAY);
+  }
+
+  @Test
+  @DisplayName("묶음째 보내기는 일과를 여러 개 만들어도 일과 보냄 이벤트를 첫 일과 id 로 한 번만 낸다")
+  void groupSend_publishesOneRoutineSent() {
+    Routine first = original("routine-a");
+    Routine second = original("routine-b");
+    when(routineGroupRepository.findById("group-1")).thenReturn(Optional.of(group("group-1", "아침 묶음")));
+    putInGroup("group-1", first, second);
+    when(routineRepository.existsBySourceRoutineIdAndScheduledAtBetween(anyString(), any(), any())).thenReturn(false);
+
+    List<RoutineResponse> sent = routineGroupService.send(GUARDIAN, "group-1");
+
+    verify(eventPublisher, times(1)).publishEvent(any(Object.class));
+    verify(eventPublisher).publishEvent(new RoutineSentEvent(sent.get(0).id(), "profile-1", "member-1"));
   }
 
   @Test

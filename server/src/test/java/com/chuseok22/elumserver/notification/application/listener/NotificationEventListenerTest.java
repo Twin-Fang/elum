@@ -1,9 +1,12 @@
 package com.chuseok22.elumserver.notification.application.listener;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
@@ -11,7 +14,9 @@ import com.chuseok22.elumserver.notification.application.service.NotificationRec
 import com.chuseok22.elumserver.notification.core.NotificationDraft;
 import com.chuseok22.elumserver.notification.core.NotificationType;
 import com.chuseok22.elumserver.notification.core.event.CoGuardianJoinedEvent;
+import com.chuseok22.elumserver.notification.core.event.FeedbackResolvedEvent;
 import com.chuseok22.elumserver.notification.core.event.RoutineCompletedEvent;
+import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -54,10 +59,10 @@ class NotificationEventListenerTest {
     listener.onRoutineCompleted(new RoutineCompletedEvent("routine-1", "profile-1", routineDate, null));
 
     ArgumentCaptor<Collection<String>> recipients = ArgumentCaptor.forClass(Collection.class);
-    verify(notificationRecorder, org.mockito.Mockito.times(2)).record(any(NotificationDraft.class),
+    verify(notificationRecorder, times(2)).record(any(NotificationDraft.class),
       recipients.capture());
-    org.assertj.core.api.Assertions.assertThat(recipients.getAllValues().get(0)).containsExactly("member-2");
-    org.assertj.core.api.Assertions.assertThat(recipients.getAllValues().get(1))
+    assertThat(recipients.getAllValues().get(0)).containsExactly("member-2");
+    assertThat(recipients.getAllValues().get(1))
       .containsExactly("member-1", "member-2");
   }
 
@@ -71,8 +76,35 @@ class NotificationEventListenerTest {
     ArgumentCaptor<NotificationDraft> draft = ArgumentCaptor.forClass(NotificationDraft.class);
     ArgumentCaptor<Collection<String>> recipients = ArgumentCaptor.forClass(Collection.class);
     verify(notificationRecorder).record(draft.capture(), recipients.capture());
-    org.assertj.core.api.Assertions.assertThat(draft.getValue().type()).isEqualTo(NotificationType.CO_GUARDIAN_JOINED);
-    org.assertj.core.api.Assertions.assertThat(recipients.getValue()).containsExactly("member-1");
+    assertThat(draft.getValue().type()).isEqualTo(NotificationType.CO_GUARDIAN_JOINED);
+    assertThat(recipients.getValue()).containsExactly("member-1");
+  }
+
+  @Test
+  @DisplayName("일과 보냄 알림은 보낸 보호자를 뺀 나머지 보호자에게 간다")
+  void routineSent_excludesActor() {
+    when(profileGuardianService.guardianMemberIdsOf("profile-1")).thenReturn(List.of("member-1", "member-2"));
+
+    listener.onRoutineSent(new RoutineSentEvent("routine-1", "profile-1", "member-1"));
+
+    ArgumentCaptor<NotificationDraft> draft = ArgumentCaptor.forClass(NotificationDraft.class);
+    ArgumentCaptor<Collection<String>> recipients = ArgumentCaptor.forClass(Collection.class);
+    verify(notificationRecorder).record(draft.capture(), recipients.capture());
+    assertThat(draft.getValue().type()).isEqualTo(NotificationType.ROUTINE_SENT_BY_CO_GUARDIAN);
+    assertThat(recipients.getValue()).containsExactly("member-2");
+  }
+
+  @Test
+  @DisplayName("의견 처리 알림은 보호자 조회 없이 의견을 보낸 한 명에게만 간다")
+  void feedbackResolved_recordsForFeedbackOwnerOnly() {
+    listener.onFeedbackResolved(new FeedbackResolvedEvent("feedback-1", "member-9"));
+
+    ArgumentCaptor<NotificationDraft> draft = ArgumentCaptor.forClass(NotificationDraft.class);
+    ArgumentCaptor<Collection<String>> recipients = ArgumentCaptor.forClass(Collection.class);
+    verify(notificationRecorder).record(draft.capture(), recipients.capture());
+    assertThat(draft.getValue().type()).isEqualTo(NotificationType.FEEDBACK_RESOLVED);
+    assertThat(recipients.getValue()).containsExactly("member-9");
+    verifyNoInteractions(profileGuardianService);
   }
 
   @Test
