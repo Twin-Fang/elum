@@ -113,7 +113,12 @@ class _ChildCard extends StatelessWidget {
         padding: EdgeInsets.all(space.xs.w),
         child: Row(
           children: [
-            _SmallBadge(identity: identity, size: GuardianSideNav._badgeSize),
+            // 보호자 화면 카드: 이룸이 캐릭터가 아니라 루미
+            Image.asset(
+              AppAssets.guardianProfileLumi,
+              width: GuardianSideNav._badgeSize.w,
+              height: GuardianSideNav._badgeSize.w,
+            ),
             SizedBox(width: space.xs.w),
             Expanded(
               child: Column(

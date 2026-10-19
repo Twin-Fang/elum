@@ -4423,6 +4423,36 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'안에 있던 일과는 일과관리에 그대로 남아요'**
   String get routineGroupUngroupConfirmMessage;
+
+  /// 이룸이 홈 묶음 상자 (#808)
+  ///
+  /// In ko, this message translates to:
+  /// **'{done} / {total}'**
+  String childHomeGroupProgress(int done, int total);
+
+  /// 이룸이 홈 묶음 상자 (#808)
+  ///
+  /// In ko, this message translates to:
+  /// **'다 했어요!'**
+  String get childHomeGroupAllDone;
+
+  /// 일과관리 메뉴 찾기 (#834)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 *길게 누르면* 메뉴가 열려요\\n이름 바꾸기·복사·지우기를 할 수 있어요'**
+  String get libraryCoachMenu;
+
+  /// 일과관리 메뉴 찾기 (#834)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 묶음도 여기서 만들 수 있어요'**
+  String get libraryCoachCreate;
+
+  /// 일과관리 메뉴 찾기 (#834)
+  ///
+  /// In ko, this message translates to:
+  /// **'더 보기'**
+  String get routineDetailMore;
 }
 
 class _AppLocalizationsDelegate

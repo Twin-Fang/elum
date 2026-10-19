@@ -11,10 +11,12 @@ class InMemoryStorage implements LocalStorage {
     // 기본은 "이미 봤다" — 홈을 띄우는 기존 테스트마다 코치마크가 화면을 덮으면 안 된다.
     // 코치마크를 검증하는 테스트만 false 를 준다. 실제 앱의 첫 실행 기본값은 false 다.
     bool homeCoachSeen = true,
+    bool libraryCoachSeen = true,
     bool childHapticOn = true,
   }) : _childHapticOn = childHapticOn,
        _completed = onboardingCompleted,
        _homeCoachSeen = homeCoachSeen,
+       _libraryCoachSeen = libraryCoachSeen,
        _pin = pin,
        _nickname = nickname,
        _character = character,
@@ -31,6 +33,7 @@ class InMemoryStorage implements LocalStorage {
   bool _elumi;
   bool _elumiLinkLost = false;
   bool _homeCoachSeen;
+  bool _libraryCoachSeen;
 
   String? _nickname;
   List<String> _goals = const [];
@@ -243,6 +246,12 @@ class InMemoryStorage implements LocalStorage {
 
   @override
   bool get isHomeCoachSeen => _homeCoachSeen;
+
+  @override
+  bool get isLibraryCoachSeen => _libraryCoachSeen;
+
+  @override
+  Future<void> setLibraryCoachSeen(bool v) async => _libraryCoachSeen = v;
 
   @override
   Future<void> setHomeCoachSeen(bool v) async => _homeCoachSeen = v;
