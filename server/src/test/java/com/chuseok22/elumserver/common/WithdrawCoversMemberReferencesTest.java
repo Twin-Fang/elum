@@ -46,6 +46,9 @@ class WithdrawCoversMemberReferencesTest {
   /// 탈퇴는 의견 삭제를 의견 서비스에 맡긴다. 저장소 삭제 호출은 거기 있다.
   private static final Path FEEDBACK_SERVICE = SOURCE_ROOT.resolve(
     "com/chuseok22/elumserver/feedback/application/service/FeedbackService.java");
+  /// 탈퇴는 알림 기록·푸시 기기·알림 설정·공지 확인 삭제를 알림 정리 서비스에 맡긴다. 저장소 삭제 호출은 거기 있다 (#827).
+  private static final Path NOTIFICATION_CLEANUP_SERVICE = SOURCE_ROOT.resolve(
+    "com/chuseok22/elumserver/notification/application/service/NotificationCleanupService.java");
 
   /// 탈퇴해도 보관 기간 동안 남기는 표와 그 이유. 여기에 없는 표는 탈퇴할 때 지운다 (최소 보관).
   private static final Map<String, String> RETAINED_ON_WITHDRAW = Map.of(
@@ -112,7 +115,8 @@ class WithdrawCoversMemberReferencesTest {
   void purgeCleansEveryMemberReference() throws IOException {
     String purge = methodBody(WITHDRAWN_MEMBER_SERVICE, "public void purge(");
     assertThat(purge).as("완전 삭제도 나가기 규칙으로 이룸이를 정리한다").contains("guardianshipService.leaveAll(");
-    purge = purge + guardianshipSource() + Files.readString(FEEDBACK_SERVICE).replaceAll("//[^\n]*", "");
+    assertThat(purge).as("완전 삭제도 알림 데이터를 지운다").contains("notificationCleanupService.deleteAllOf(");
+    purge = purge + guardianshipSource() + serviceSource(FEEDBACK_SERVICE) + serviceSource(NOTIFICATION_CLEANUP_SERVICE);
     List<String> uncovered = new ArrayList<>();
 
     for (String entity : entitiesReferencingMember()) {
@@ -157,12 +161,18 @@ class WithdrawCoversMemberReferencesTest {
     String withdraw = methodBody(MEMBER_SERVICE, "public void withdraw(");
     assertThat(withdraw).as("탈퇴는 나가기 규칙으로 이룸이를 정리한다").contains("guardianshipService.leaveAll(");
     assertThat(withdraw).as("탈퇴는 의견을 지운다").contains("feedbackService.deleteAllOf(");
-    return withdraw + guardianshipSource() + Files.readString(FEEDBACK_SERVICE).replaceAll("//[^\n]*", "");
+    assertThat(withdraw).as("탈퇴는 알림 데이터를 지운다").contains("notificationCleanupService.deleteAllOf(");
+    return withdraw + guardianshipSource() + serviceSource(FEEDBACK_SERVICE) + serviceSource(NOTIFICATION_CLEANUP_SERVICE);
   }
 
   /// 나가기 서비스 전체(주석 뺀). 나가기·마지막 보호자 정리가 private 도우미에 나뉘어 있어 파일로 본다.
   private static String guardianshipSource() throws IOException {
     return Files.readString(GUARDIANSHIP_SERVICE).replaceAll("//[^\n]*", "");
+  }
+
+  /// 위임받은 서비스 전체(주석 뺀)
+  private static String serviceSource(Path file) throws IOException {
+    return Files.readString(file).replaceAll("//[^\n]*", "");
   }
 
   /// Profile → profileRepository, AiCallLog → aiCallLogRepository

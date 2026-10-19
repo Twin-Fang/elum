@@ -78,6 +78,9 @@ public class AppNotice extends BaseEntity {
   @Column(nullable = false)
   private int revision = 1;
 
+  /** revision 을 마지막으로 올린 시각. 올린 적 없으면 null. 공지 안 읽음 판정에 쓴다. */
+  private LocalDateTime revisedAt;
+
   /** 한국 시각. 서버 시계로 판단한다. */
   @Column(nullable = false)
   private LocalDateTime startsAt;
