@@ -64,7 +64,7 @@ public class NotificationQueryService {
 
   /**
    * 안 읽음 요약: 알림 개수 + 안 읽은 공지 여부
-   * platform 이 틀려도 요약은 실패하지 않고 공지만 없음으로 본다
+   * platform 이 비면 ALL, 모르는 값이면 요약은 실패하지 않고 공지만 없음으로 본다
    */
   public UnreadSummaryResponse unreadSummary(String memberId, String platform) {
     long unreadCount = notificationRepository.countByRecipientMemberIdAndReadAtIsNull(memberId);
@@ -74,18 +74,15 @@ public class NotificationQueryService {
   private boolean hasUnseenNoticeSafely(String memberId, String platform) {
     // 트랜잭션 프록시를 넘기 전에 검증 (예외가 공유 트랜잭션을 rollback-only 로 만들지 않게)
     if (!isValidNoticePlatform(platform)) {
-      log.warn("[notification summary] notice skipped : platform is missing or invalid");
+      log.warn("[notification summary] notice skipped : platform is invalid");
       return false;
     }
-    // 언어는 요청 스레드에서 정한다
-    return noticeHistoryService.hasUnseenNotice(memberId, platform, CurrentLocale.get());
+    // 언어는 요청 스레드에서 정한다. 비어 있으면 ALL (공지 목록과 같은 규칙)
+    return noticeHistoryService.hasUnseenNotice(memberId, NoticePlatform.parse(platform).name(), CurrentLocale.get());
   }
 
-  /** 비었거나 모르는 값이면 false. 프록시가 아닌 정적 메서드를 직접 부른다 */
+  /** 비었으면 ALL 로 보고 true, 모르는 값이면 false. 프록시가 아닌 정적 메서드를 직접 부른다 */
   private static boolean isValidNoticePlatform(String platform) {
-    if (platform == null || platform.isBlank()) {
-      return false;
-    }
     try {
       NoticePlatform.parse(platform);
       return true;

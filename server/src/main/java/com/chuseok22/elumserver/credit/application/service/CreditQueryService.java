@@ -136,7 +136,7 @@ public class CreditQueryService {
     }
   }
 
-  /// 주기 안에 사용·초과로 잔액이 0 이하가 된 계정의 회원 id (지급·만료 줄 제외, 탈퇴 계정 제외)
+  /// 주기 안에 사용·초과로 잔액이 0 이하가 된 계정의 회원 id (지급·만료 줄 제외, memberId 가 없는(완전 삭제된) 계정 제외)
   public List<String> memberIdsDepletedIn(CreditPeriod period) {
     return ledgerRepository.findMemberIdsWithBalanceDepletedIn(DEPLETING_LEDGER_TYPES, period.start(), period.end())
       .stream().filter(Objects::nonNull).toList();

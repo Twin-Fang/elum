@@ -161,18 +161,25 @@ class NotificationQueryServiceTest {
   }
 
   @Test
-  @DisplayName("platform 이 틀리거나 없으면 공지 조회를 부르지 않고 공지만 false 이다")
+  @DisplayName("platform 이 모르는 값이면 공지 조회를 부르지 않고 공지만 false 이다")
   void invalidPlatform_noticeFalse_doesNotCallNoticeService() {
     when(notificationRepository.countByRecipientMemberIdAndReadAtIsNull(MEMBER_ID)).thenReturn(3L);
 
     UnreadSummaryResponse invalid = notificationQueryService.unreadSummary(MEMBER_ID, "WINDOWS");
-    UnreadSummaryResponse missing = notificationQueryService.unreadSummary(MEMBER_ID, null);
 
     assertThat(invalid.hasUnreadNotice()).isFalse();
-    assertThat(missing.hasUnreadNotice()).isFalse();
     assertThat(invalid.hasUnreadNotification()).isTrue();
     assertThat(invalid.unreadNotificationCount()).isEqualTo(3L);
     verify(noticeHistoryService, never()).hasUnseenNotice(anyString(), any(), any());
+  }
+
+  @Test
+  @DisplayName("platform 이 비었거나 null 이면 ALL 로 공지를 조회한다")
+  void blankPlatform_resolvesToAll() {
+    when(noticeHistoryService.hasUnseenNotice(eq(MEMBER_ID), eq("ALL"), any(AppLocale.class))).thenReturn(true);
+
+    assertThat(notificationQueryService.unreadSummary(MEMBER_ID, null).hasUnreadNotice()).isTrue();
+    assertThat(notificationQueryService.unreadSummary(MEMBER_ID, " ").hasUnreadNotice()).isTrue();
   }
 
   @Test

@@ -14,8 +14,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface NotificationRepository extends JpaRepository<Notification, String> {
 
-  Optional<Notification> findByRecipientMemberIdAndGroupKey(String recipientMemberId, String groupKey);
-
   /// 묶음 갱신용 행 잠금 조회: 같은 묶음의 동시 갱신에서 횟수·일과 id 가 유실되지 않게 직렬화
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("select n from Notification n where n.recipientMemberId = :recipientMemberId and n.groupKey = :groupKey")
