@@ -4759,6 +4759,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'보호자 알림'**
   String get pushChannelGuardianUpdates;
+
+  /// 가입한 소셜 제공자 배지의 화면 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'카카오'**
+  String get signInProviderKakao;
+
+  /// 가입한 소셜 제공자 배지의 화면 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'네이버'**
+  String get signInProviderNaver;
+
+  /// 가입한 소셜 제공자 배지의 화면 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'구글'**
+  String get signInProviderGoogle;
+
+  /// 가입한 소셜 제공자 배지의 화면 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'애플'**
+  String get signInProviderApple;
 }
 
 class _AppLocalizationsDelegate

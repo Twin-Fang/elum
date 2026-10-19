@@ -2216,5 +2216,13 @@
   "pushPermissionDenied": "알림 설정에서 언제든 켤 수 있어요",
   "@pushPermissionDenied": {"description": "시스템 권한 창에서 거부했을 때 안내 팝업 문구"},
   "pushChannelGuardianUpdates": "보호자 알림",
-  "@pushChannelGuardianUpdates": {"description": "안드로이드 알림 채널 이름 — 이룸이 일과 완료·공동 보호자·크레딧 소식 푸시 (#828)"}
+  "@pushChannelGuardianUpdates": {"description": "안드로이드 알림 채널 이름 — 이룸이 일과 완료·공동 보호자·크레딧 소식 푸시 (#828)"},
+  "signInProviderKakao": "카카오",
+  "@signInProviderKakao": { "description": "가입한 소셜 제공자 배지의 화면 낭독 이름" },
+  "signInProviderNaver": "네이버",
+  "@signInProviderNaver": { "description": "가입한 소셜 제공자 배지의 화면 낭독 이름" },
+  "signInProviderGoogle": "구글",
+  "@signInProviderGoogle": { "description": "가입한 소셜 제공자 배지의 화면 낭독 이름" },
+  "signInProviderApple": "애플",
+  "@signInProviderApple": { "description": "가입한 소셜 제공자 배지의 화면 낭독 이름" }
 }

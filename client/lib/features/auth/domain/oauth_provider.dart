@@ -6,11 +6,4 @@ enum OAuthProvider {
   apple;
 
   String get path => name;
-
-  String get label => switch (this) {
-        OAuthProvider.kakao => '카카오',
-        OAuthProvider.naver => '네이버',
-        OAuthProvider.google => '구글',
-        OAuthProvider.apple => '애플',
-      };
 }

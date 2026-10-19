@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
+import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../auth/domain/oauth_provider.dart';
 
@@ -29,16 +30,17 @@ class SignInProviderBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final (asset, background) = switch (provider) {
-      OAuthProvider.kakao => (AppAssets.loginKakao, colors.loginKakaoBg),
-      OAuthProvider.naver => (AppAssets.loginNaver, colors.loginNaverBg),
-      OAuthProvider.apple => (AppAssets.loginApple, colors.loginAppleBg),
+    final l10n = context.l10n;
+    final (asset, background, name) = switch (provider) {
+      OAuthProvider.kakao => (AppAssets.loginKakao, colors.loginKakaoBg, l10n.signInProviderKakao),
+      OAuthProvider.naver => (AppAssets.loginNaver, colors.loginNaverBg, l10n.signInProviderNaver),
+      OAuthProvider.apple => (AppAssets.loginApple, colors.loginAppleBg, l10n.signInProviderApple),
       // 구글은 흰 바탕 G — 흰 카드 위에서 묻히지 않게 화면 바탕색 원
-      OAuthProvider.google => (AppAssets.loginGoogle, colors.background),
+      OAuthProvider.google => (AppAssets.loginGoogle, colors.background, l10n.signInProviderGoogle),
     };
 
     return Semantics(
-      label: provider.label,
+      label: name,
       child: SizedBox(
         width: size.w,
         height: size.w,

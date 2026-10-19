@@ -768,5 +768,9 @@
   "pushPermissionAllow": "Turn on",
   "pushPermissionLater": "Not now",
   "pushPermissionDenied": "You can turn this on anytime in notification settings",
-  "pushChannelGuardianUpdates": "Guardian updates"
+  "pushChannelGuardianUpdates": "Guardian updates",
+  "signInProviderKakao": "Kakao",
+  "signInProviderNaver": "Naver",
+  "signInProviderGoogle": "Google",
+  "signInProviderApple": "Apple"
 }

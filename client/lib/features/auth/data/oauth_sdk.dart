@@ -65,7 +65,7 @@ class OAuthSdk {
         OAuthProvider.apple => await _apple(),
       };
     } catch (e, st) {
-      AppLogger.error('소셜 로그인 ${provider.label}', e, st);
+      AppLogger.error('[oauth] sign in failed : ${provider.name}', e, st);
       return OAuthSdkFailure('SDK-${provider.name.toUpperCase()}');
     }
   }

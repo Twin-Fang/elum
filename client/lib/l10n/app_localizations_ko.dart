@@ -2612,4 +2612,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get pushChannelGuardianUpdates => '보호자 알림';
+
+  @override
+  String get signInProviderKakao => '카카오';
+
+  @override
+  String get signInProviderNaver => '네이버';
+
+  @override
+  String get signInProviderGoogle => '구글';
+
+  @override
+  String get signInProviderApple => '애플';
 }

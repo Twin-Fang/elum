@@ -2729,4 +2729,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pushChannelGuardianUpdates => 'Guardian updates';
+
+  @override
+  String get signInProviderKakao => 'Kakao';
+
+  @override
+  String get signInProviderNaver => 'Naver';
+
+  @override
+  String get signInProviderGoogle => 'Google';
+
+  @override
+  String get signInProviderApple => 'Apple';
 }

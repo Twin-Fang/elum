@@ -15,5 +15,9 @@
   "exampleCategoryHouseSelfHint": "片づけ、食卓の準備",
   "exampleCategoryOutside": "外でやってみる",
   "exampleCategoryOutsideHint": "バスに乗る、買い物",
-  "exampleRoutinesFailed": "例の日課を入れられませんでした"
+  "exampleRoutinesFailed": "例の日課を入れられませんでした",
+  "signInProviderKakao": "Kakao",
+  "signInProviderNaver": "NAVER",
+  "signInProviderGoogle": "Google",
+  "signInProviderApple": "Apple"
 }
