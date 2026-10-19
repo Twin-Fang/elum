@@ -2014,8 +2014,6 @@
   "@exampleCategoryOutside": { "description": "온보딩 예시 일과 (#803)" },
   "exampleCategoryOutsideHint": "버스 타기, 물건 사기",
   "@exampleCategoryOutsideHint": { "description": "온보딩 예시 일과 (#803)" },
-  "routineTileExampleBadge": "예시",
-  "@routineTileExampleBadge": { "description": "온보딩 예시 일과 (#803)" },
   "exampleRoutinesFailed": "예시 일과를 넣지 못했어요",
   "@exampleRoutinesFailed": { "description": "온보딩 예시 일과 (#803)" },
   "routineGroupMenuAddToGroup": "묶음에 넣기",
