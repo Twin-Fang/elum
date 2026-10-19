@@ -21,7 +21,7 @@
 - 새 ErrorCode는 `messages_ko.properties` 문구 + 클라 `server_error_code.dart` 같은 이름 (서버 CLAUDE.md).
 - 모든 엔드포인트 `@LogMonitoring` + `*ControllerDocs`. request DTO에 `jakarta.validation` 금지.
 - `notification` 패키지를 `GlobalExceptionHandler` `basePackages`에 추가.
-- 마이그레이션 V43, 추가만, `IF NOT EXISTS`, NOT NULL엔 DEFAULT.
+- 마이그레이션 V46 (develop 에 V43~V45 가 먼저 있어 번호를 밀었다), 추가만, `IF NOT EXISTS`, NOT NULL엔 DEFAULT.
 - 시간대 `Asia/Seoul` (`NoticeService.ZONE` 재사용 금지 — `notification`에 `NotificationClock` 없이 `Clock` 주입, 기본 `Clock.system(ZoneId.of("Asia/Seoul"))`).
 
 ## Review Focus
@@ -36,7 +36,7 @@
 ### Task 1: 저장 구조 (마이그레이션 · 엔티티 · 저장소 · 탈퇴 정리)
 
 **Files:**
-- Create: `server/src/main/resources/db/migration/V43__create_notification_tables.sql`
+- Create: `server/src/main/resources/db/migration/V46__create_notification_tables.sql`
 - Create: `M/notification/core/NotificationType.java`
 - Create: `M/notification/infrastructure/entity/{Notification,PushDevice,NotificationSetting,NoticeSeen}.java`
 - Create: `M/notification/infrastructure/repository/{Notification,PushDevice,NotificationSetting,NoticeSeen}Repository.java`
@@ -57,12 +57,12 @@
   - `PushDeviceRepository`: `Optional<PushDevice> findByToken(String)`, `List<PushDevice> findAllByMemberIdIn(Collection<String>)`, `void deleteByToken(String)`, `int deleteAllByMemberId(String)`.
   - `NotificationCleanupService.deleteAllOf(String memberId)`, `deleteAllOfProfile(String profileId)`.
 
-- [ ] **Step 1:** V43 작성: 표 4개(`notification`, `push_device`, `notification_setting`, `notice_seen`) + `app_notice.revised_at timestamp NULL` + 인덱스 `notification(member_id, last_occurred_at desc)`.
+- [ ] **Step 1:** V46 작성: 표 4개(`notification`, `push_device`, `notification_setting`, `notice_seen`) + `app_notice.revised_at timestamp NULL` + 인덱스 `notification(member_id, last_occurred_at desc)`.
 - [ ] **Step 2:** 엔티티·저장소·`NotificationType`·`PushPlatform` 작성, `GlobalExceptionHandler` basePackages에 `com.chuseok22.elumserver.notification` 추가.
 - [ ] **Step 3: 실패하는 테스트** `NotificationCleanupServiceTest.deleteAllOf_removesNotificationsDevicesSettingsAndSeen` — 네 저장소의 `deleteAllByMemberId`/`deleteById`가 각각 1회 호출되는지 Mockito로 검증.
 - [ ] **Step 4:** `NotificationCleanupService` 구현, `withdraw`·`purge`에서 `notificationCleanupService.deleteAllOf(memberId)`, `removeProfile`에서 `deleteAllOfProfile(profileId)` 호출. 서비스를 거치므로 `WithdrawCoversMemberReferencesTest` 화이트리스트에 feedback 사례처럼 4개 엔티티를 등록.
 - [ ] **Step 5:** `cd server && ./gradlew test --tests '*NotificationCleanupServiceTest' --tests '*WithdrawCoversMemberReferencesTest' --tests '*ArchitectureRulesTest' --tests '*MigrationRollbackContractTest' --tests '*ExceptionHandlerCoverageTest'` → PASS
-- [ ] **Step 6:** `/pro-commit` (V43, notification 패키지, 탈퇴 정리 3곳, 화이트리스트)
+- [ ] **Step 6:** `/pro-commit` (V46, notification 패키지, 탈퇴 정리 3곳, 화이트리스트)
 
 ### Task 2: NotificationRecorder (묶음 · 받는 사람)
 

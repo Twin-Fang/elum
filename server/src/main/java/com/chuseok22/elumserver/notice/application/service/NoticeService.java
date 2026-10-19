@@ -222,7 +222,7 @@ public class NoticeService {
     draft.applyTo(notice);
     if (bumpRevision) {
       notice.setRevision(notice.getRevision() + 1);
-      // 공지 안 읽음 판정 기준 (V43)
+      // 공지 안 읽음 판정 기준 (V46)
       notice.setRevisedAt(now());
     }
     notice.setUpdatedBy(actor(adminId));
