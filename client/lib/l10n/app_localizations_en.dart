@@ -2281,6 +2281,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianTabMe => 'My info';
 
   @override
+  String get guardianMyInfoProfileName => 'Guardian';
+
+  @override
+  String guardianMyInfoLinkedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Together with $count Elumis',
+      one: 'Together with 1 Elumi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get guardianMyInfoNoLinked => 'No Elumi connected yet';
+
+  @override
+  String get guardianMyInfoChildrenHeader => 'Elumi';
+
+  @override
+  String get guardianMyInfoActiveBadge => 'Viewing';
+
+  @override
   String get guardianSideNavCaption => 'Guardian mode';
 
   @override

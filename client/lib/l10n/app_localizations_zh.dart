@@ -2181,6 +2181,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianTabMe => '내정보';
 
   @override
+  String get guardianMyInfoProfileName => '보호자';
+
+  @override
+  String guardianMyInfoLinkedCount(int count) {
+    return '이룸이 $count명과 함께해요';
+  }
+
+  @override
+  String get guardianMyInfoNoLinked => '연결된 이룸이가 아직 없어요';
+
+  @override
+  String get guardianMyInfoChildrenHeader => '이룸이';
+
+  @override
+  String get guardianMyInfoActiveBadge => '보는 중';
+
+  @override
   String get guardianSideNavCaption => '보호자 화면';
 
   @override

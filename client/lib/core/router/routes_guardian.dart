@@ -5,6 +5,7 @@ import '../../features/credit/presentation/credit_history_screen.dart';
 import '../../features/feedback/presentation/feedback_screen.dart';
 import '../../features/guardian/presentation/draft_routines_screen.dart';
 import '../../features/guardian/presentation/guardian_home_screen.dart';
+import '../../features/guardian/presentation/guardian_my_info_screen.dart';
 import '../../features/guardian/presentation/guardian_settings_screen.dart';
 import '../../features/guardian/presentation/image_style_settings_screen.dart';
 import '../../features/guardian/presentation/navigation/guardian_coming_soon_screen.dart';
@@ -80,13 +81,22 @@ List<RouteBase> guardianRoutes() => [
       StatefulShellBranch(
         routes: [
           GoRoute(
-            path: Routes.guardianSettings,
-            pageBuilder: (context, state) =>
-                fadePage(state, const GuardianSettingsScreen(isTabRoot: true)),
+            path: Routes.guardianMyInfo,
+            pageBuilder: (context, state) => fadePage(
+              state,
+              const GuardianMyInfoScreen(),
+              layoutKind: ScreenLayoutKind.contentColumn,
+            ),
           ),
         ],
       ),
     ],
+  ),
+  // 설정은 내정보 칸 위에 열린다 (하단 바를 덮고 뒤로가기가 있다)
+  GoRoute(
+    path: Routes.guardianSettings,
+    pageBuilder: (context, state) =>
+        slidePage(state, const GuardianSettingsScreen()),
   ),
   GoRoute(
     path: Routes.linkCode,

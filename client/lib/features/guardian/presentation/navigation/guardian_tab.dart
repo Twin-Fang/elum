@@ -24,7 +24,7 @@ enum GuardianTab {
     selectedIcon: Icons.chat_bubble_rounded,
   ),
   me(
-    path: Routes.guardianSettings,
+    path: Routes.guardianMyInfo,
     icon: Icons.person_outline_rounded,
     selectedIcon: Icons.person_rounded,
   );
@@ -52,6 +52,6 @@ enum GuardianTab {
 
   /// 아래 광고 띠를 둘 칸인가
   ///
-  /// 내정보(설정)는 맨 아래 `회원탈퇴` 줄과 가까워 광고를 잘못 누르면 되돌릴 수 없는 동작으로 이어질 수 있다
+  /// 내정보는 설정으로 이어지는 칸이라 광고를 잘못 누르면 계정 정리(`회원탈퇴`) 근처에서 오탭이 날 수 있어 뺀다
   bool get isAdStripAllowed => this != GuardianTab.me;
 }

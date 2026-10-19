@@ -3974,11 +3974,41 @@ abstract class AppLocalizations {
   /// **'이야기'**
   String get guardianTabTalk;
 
-  /// 보호자 하단 바·옆 메뉴 칸 이름이자 그 칸(설정) 화면 제목
+  /// 보호자 하단 바·옆 메뉴 칸 이름이자 그 칸(프로필) 화면 제목
   ///
   /// In ko, this message translates to:
   /// **'내정보'**
   String get guardianTabMe;
+
+  /// 내정보 프로필 카드의 이름 자리. 서버에 보호자 이름이 없어 고정 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자'**
+  String get guardianMyInfoProfileName;
+
+  /// 내정보 프로필 카드 안내: 연결된 이룸이 수
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 {count}명과 함께해요'**
+  String guardianMyInfoLinkedCount(int count);
+
+  /// 내정보 프로필 카드 안내: 연결된 이룸이가 0명
+  ///
+  /// In ko, this message translates to:
+  /// **'연결된 이룸이가 아직 없어요'**
+  String get guardianMyInfoNoLinked;
+
+  /// 내정보 이룸이 목록 묶음 머리 글
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이'**
+  String get guardianMyInfoChildrenHeader;
+
+  /// 내정보 이룸이 목록: 이룸이가 여럿일 때 지금 보고 있는 이룸이 표시
+  ///
+  /// In ko, this message translates to:
+  /// **'보는 중'**
+  String get guardianMyInfoActiveBadge;
 
   /// 태블릿 옆 메뉴 이룸이 카드에서 이름 아래 작은 글
   ///

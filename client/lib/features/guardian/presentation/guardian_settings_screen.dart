@@ -34,10 +34,7 @@ import '../../../core/router/routes.dart';
 ///
 /// 아이 화면에는 진입점을 두지 않는다 — 아이가 계정을 정리할 이유가 없다.
 class GuardianSettingsScreen extends ConsumerStatefulWidget {
-  const GuardianSettingsScreen({super.key, this.isTabRoot = false});
-
-  /// 하단 바 내정보 칸의 첫 화면인가. 맞으면 뒤로가기 없이 칸 이름을 제목으로 쓴다
-  final bool isTabRoot;
+  const GuardianSettingsScreen({super.key});
 
   @override
   ConsumerState<GuardianSettingsScreen> createState() =>
@@ -158,12 +155,9 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     return ElumScaffold(
       onBack: context.popOrHome,
       isBackEnabled: !busy,
-      isBackButtonVisible: !widget.isTabRoot,
       // 시안(`1022:4467`)은 제목이 뒤로가기와 **같은 줄**에 선다. 본문에 두면
       // 뒤로가기 아래로 내려간다.
-      title: widget.isTabRoot
-          ? context.l10n.guardianTabMe
-          : context.l10n.guardianSettingsTitle,
+      title: context.l10n.guardianSettingsTitle,
       // 줄이 x=16 에서 시작한다. 뼈대 기본 여백(24)이면 8 만큼 안쪽으로 밀린다.
       backTop: 67,
       horizontalPadding: 16,
