@@ -181,6 +181,9 @@ abstract final class AppAssets {
   /// 점검 안내 카드의 루미 + 톱니바퀴·렌치 (1536×1024, 투명 배경).
   static const maintenanceLumi = '$_images/maintenance_lumi.png';
 
+  /// 보호자 프로필 자리 루미 얼굴 아이콘 (투명 배경 정사각형 PNG)
+  static const guardianProfileLumi = '$_images/guardian_profile_lumi.png';
+
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
   static const imageStyleRealistic = '$_images/image_style_realistic.png';
 

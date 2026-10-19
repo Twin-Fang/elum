@@ -24,6 +24,7 @@ class LibraryEntryGrid extends StatefulWidget {
     required this.onGroupMenu,
     required this.onDropOnRoutine,
     required this.onDropOnGroup,
+    this.firstTileKey,
   });
 
   final List<LibraryEntry> entries;
@@ -39,6 +40,9 @@ class LibraryEntryGrid extends StatefulWidget {
   /// (끌어 온 일과, 놓은 자리의 일과)
   final void Function(Routine dragged, Routine target)? onDropOnRoutine;
   final void Function(Routine dragged, LibraryGroupEntry target)? onDropOnGroup;
+
+  /// 코치마크가 가리킬 첫 칸에 붙일 키 (#834)
+  final GlobalKey? firstTileKey;
 
   @override
   State<LibraryEntryGrid> createState() => _LibraryEntryGridState();
@@ -85,9 +89,14 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
                 LibraryRoutineTile.iconSize.w + space.xs.h + space.xl.h * 1.4,
           ),
           itemCount: widget.entries.length,
-          itemBuilder: (context, index) => switch (widget.entries[index]) {
-            final LibraryGroupEntry entry => _buildGroup(entry),
-            final LibraryRoutineEntry entry => _buildRoutine(entry.routine),
+          itemBuilder: (context, index) {
+            final tile = switch (widget.entries[index]) {
+              final LibraryGroupEntry entry => _buildGroup(entry),
+              final LibraryRoutineEntry entry => _buildRoutine(entry.routine),
+            };
+            final coachKey = widget.firstTileKey;
+            if (index != 0 || coachKey == null) return tile;
+            return KeyedSubtree(key: coachKey, child: tile);
           },
         );
       },

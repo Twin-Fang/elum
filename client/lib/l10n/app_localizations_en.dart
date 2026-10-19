@@ -2548,4 +2548,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get routineGroupUngroupConfirmMessage =>
       'The routines stay in Routines';
+
+  @override
+  String childHomeGroupProgress(int done, int total) {
+    return '$done / $total';
+  }
+
+  @override
+  String get childHomeGroupAllDone => 'All done!';
+
+  @override
+  String get libraryCoachMenu =>
+      '*Long-press* a routine to open its menu\\nRename, copy or delete from there';
+
+  @override
+  String get libraryCoachCreate => 'You can also make a new bundle here';
+
+  @override
+  String get routineDetailMore => 'More';
 }
