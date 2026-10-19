@@ -2536,7 +2536,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryCoachMenu =>
-      '*Long-press* a routine to open its menu\\nRename, copy or delete from there';
+      '*Long-press* a routine to open its menu\nRename, copy or delete from there';
 
   @override
   String get libraryCoachCreate => 'You can also make a new bundle here';

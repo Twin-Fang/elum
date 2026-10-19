@@ -4433,7 +4433,7 @@ abstract class AppLocalizations {
   /// 일과관리 메뉴 찾기 (#834)
   ///
   /// In ko, this message translates to:
-  /// **'일과를 *길게 누르면* 메뉴가 열려요\\n이름 바꾸기·복사·지우기를 할 수 있어요'**
+  /// **'일과를 *길게 누르면* 메뉴가 열려요\n이름 바꾸기·복사·지우기를 할 수 있어요'**
   String get libraryCoachMenu;
 
   /// 일과관리 메뉴 찾기 (#834)

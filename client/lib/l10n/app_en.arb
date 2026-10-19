@@ -720,7 +720,7 @@
   "routineGroupUngroupConfirmMessage": "The routines stay in Routines",
   "childHomeGroupProgress": "{done} / {total}",
   "childHomeGroupAllDone": "All done!",
-  "libraryCoachMenu": "*Long-press* a routine to open its menu\\nRename, copy or delete from there",
+  "libraryCoachMenu": "*Long-press* a routine to open its menu\nRename, copy or delete from there",
   "libraryCoachCreate": "You can also make a new bundle here",
   "routineDetailMore": "More"
 }

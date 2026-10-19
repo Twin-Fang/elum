@@ -2065,7 +2065,7 @@
   "@childHomeGroupProgress": {"description": "이룸이 홈 묶음 상자 (#808)", "placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
   "childHomeGroupAllDone": "다 했어요!",
   "@childHomeGroupAllDone": {"description": "이룸이 홈 묶음 상자 (#808)"},
-  "libraryCoachMenu": "일과를 *길게 누르면* 메뉴가 열려요\\n이름 바꾸기·복사·지우기를 할 수 있어요",
+  "libraryCoachMenu": "일과를 *길게 누르면* 메뉴가 열려요\n이름 바꾸기·복사·지우기를 할 수 있어요",
   "@libraryCoachMenu": {"description": "일과관리 메뉴 찾기 (#834)"},
   "libraryCoachCreate": "새 묶음도 여기서 만들 수 있어요",
   "@libraryCoachCreate": {"description": "일과관리 메뉴 찾기 (#834)"},
