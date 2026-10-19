@@ -34,10 +34,17 @@ const _groupSteps = [
 
 /// 코치마크 진행 상태. [steps]가 비어 있으면 꺼진 상태다.
 class RoutineManageCoachState {
-  const RoutineManageCoachState({this.steps = const [], this.index = 0});
+  const RoutineManageCoachState({
+    this.steps = const [],
+    this.index = 0,
+    this.isReplayRequested = false,
+  });
 
   final List<RoutineManageCoachStep> steps;
   final int index;
+
+  /// 다시 보기를 요청받았고 아직 켜지 않았는가 (일과관리 화면이 아직 없을 때도 요청은 남는다)
+  final bool isReplayRequested;
 
   bool get active => steps.isNotEmpty;
 
@@ -90,6 +97,15 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
     return true;
   }
 
+  /// 다시 보기 요청: 일과관리 화면이 목록을 받은 뒤 [replay] 로 켠다. 내정보 줄이 부른다
+  void requestReplay() {
+    state = RoutineManageCoachState(
+      steps: state.steps,
+      index: state.index,
+      isReplayRequested: true,
+    );
+  }
+
   /// 다시 보기: 봤어도 켠다. 봤음 기록은 바꾸지 않는다 (이미 true).
   void replay({required int routineCount, required int groupCount}) {
     if (state.active || routineCount < 1) return;
@@ -130,10 +146,7 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
       finish();
       return;
     }
-    state = RoutineManageCoachState(
-      steps: state.steps,
-      index: state.index + 1,
-    );
+    state = RoutineManageCoachState(steps: state.steps, index: state.index + 1);
   }
 
   /// 끝낸다 — 마지막까지 봤든 중간에 닫았든 보여 준 단계 묶음을 "본 것"으로 남긴다.

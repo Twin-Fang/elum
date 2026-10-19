@@ -214,6 +214,22 @@ void main() {
       expect(container.read(routineManageCoachProvider).active, isFalse);
     });
 
+    test('다시 보기 요청은 표시만 해 두고, replay 로 켜면 요청이 지워진다', () {
+      final container = containerWith(InMemoryStorage());
+      final notifier = container.read(routineManageCoachProvider.notifier);
+      notifier.requestReplay();
+      expect(
+        container.read(routineManageCoachProvider).isReplayRequested,
+        isTrue,
+      );
+      notifier.replay(routineCount: 1, groupCount: 0);
+      expect(
+        container.read(routineManageCoachProvider).isReplayRequested,
+        isFalse,
+      );
+      expect(container.read(routineManageCoachProvider).active, isTrue);
+    });
+
     test('다시 보기(replay)는 봤어도 켜진다', () {
       final container = containerWith(InMemoryStorage());
       container

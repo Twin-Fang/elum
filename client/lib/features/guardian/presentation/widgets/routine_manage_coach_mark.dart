@@ -40,6 +40,9 @@ class _RoutineManageCoachMarkState
     extends ConsumerState<RoutineManageCoachMark> {
   /// 맨 앞에서 이만큼 가만히 있어야 켠다 (홈 코치마크와 같다)
   static const _settleFor = Duration(milliseconds: 1200);
+
+  /// 다시 보기는 사용자가 방금 눌러서 온 것이라 오래 기다리게 하지 않는다
+  static const _replaySettleFor = Duration(milliseconds: 300);
   static const _retryEvery = Duration(milliseconds: 500);
   static const _maxRetries = 60;
 
@@ -99,7 +102,8 @@ class _RoutineManageCoachMarkState
       return;
     }
     if (_settle?.isActive ?? false) return;
-    _settle = Timer(_settleFor, _startNow);
+    final isReplay = ref.read(routineManageCoachProvider).isReplayRequested;
+    _settle = Timer(isReplay ? _replaySettleFor : _settleFor, _startNow);
   }
 
   void _retryLater() {
@@ -119,15 +123,18 @@ class _RoutineManageCoachMarkState
     // 기다리는 사이 목록이 바뀌었을 수 있어 지금 값으로 다시 센다
     final entries = widget.entries;
     if (entries == null) return;
-    ref
-        .read(routineManageCoachProvider.notifier)
-        .maybeStart(
-          routineCount: _routineCountOf(entries),
-          groupCount: entries.whereType<LibraryGroupEntry>().length,
-          hasFirstRoutineTile: entries.any(
-            (entry) => entry is LibraryRoutineEntry,
-          ),
-        );
+    final notifier = ref.read(routineManageCoachProvider.notifier);
+    final routineCount = _routineCountOf(entries);
+    final groupCount = entries.whereType<LibraryGroupEntry>().length;
+    if (ref.read(routineManageCoachProvider).isReplayRequested) {
+      notifier.replay(routineCount: routineCount, groupCount: groupCount);
+      return;
+    }
+    notifier.maybeStart(
+      routineCount: routineCount,
+      groupCount: groupCount,
+      hasFirstRoutineTile: entries.any((entry) => entry is LibraryRoutineEntry),
+    );
   }
 
   /// 묶음 안 일과까지 센 일과 수
@@ -203,6 +210,13 @@ class _RoutineManageCoachMarkState
 
   @override
   Widget build(BuildContext context) {
+    // 내정보에서 다시 보기를 눌러 이미 떠 있는 이 화면으로 돌아온 경우
+    ref.listen(
+      routineManageCoachProvider.select((state) => state.isReplayRequested),
+      (_, isRequested) {
+        if (isRequested) _maybeStart();
+      },
+    );
     final state = ref.watch(routineManageCoachProvider);
     if (state.active) {
       _retained = state.steps;

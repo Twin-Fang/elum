@@ -7,6 +7,7 @@ import 'package:elum/features/auth/data/auth_repository.dart';
 import 'package:elum/features/auth/data/consent_document_repository.dart';
 import 'package:elum/features/auth/data/oauth_sdk.dart';
 import 'package:elum/features/auth/domain/consent_bundle.dart';
+import 'package:elum/features/guardian/application/routine_manage_coach_notifier.dart';
 import 'package:elum/features/guardian/presentation/guardian_settings_screen.dart';
 import 'package:elum/features/link/data/device_link_repository.dart';
 import 'package:elum/features/link/domain/link_status.dart';
@@ -41,6 +42,10 @@ void main() {
         GoRoute(
           path: Routes.guardianSettings,
           builder: (context, state) => const GuardianSettingsScreen(),
+        ),
+        GoRoute(
+          path: Routes.guardianManage,
+          builder: (context, state) => const Scaffold(body: Text('일과관리 화면')),
         ),
         GoRoute(
           path: Routes.login,
@@ -133,6 +138,21 @@ void main() {
 
 
 
+
+  testWidgets('일과관리 사용법 다시 보기 줄을 누르면 일과관리로 가서 안내를 다시 요청한다 (#832)', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(find.text('일과관리 사용법 다시 보기'), 200);
+    await tester.tap(find.text('일과관리 사용법 다시 보기'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('일과관리 화면'), findsOneWidget);
+    final container = ProviderScope.containerOf(
+      tester.element(find.text('일과관리 화면')),
+    );
+    expect(container.read(routineManageCoachProvider).isReplayRequested, isTrue);
+  });
 
   testWidgets('로그아웃은 확인을 거친다 — 탭만으로는 나가지지 않는다', (tester) async {
     await tester.pumpWidget(wrap());

@@ -5,6 +5,7 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/coach_mark_overlay.dart';
 import 'package:elum/features/guardian/application/library_entries.dart';
 import 'package:elum/features/guardian/application/routine_group_controller.dart';
+import 'package:elum/features/guardian/application/routine_manage_coach_notifier.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
 import 'package:elum/features/guardian/data/routine_group_api.dart';
 import 'package:elum/features/guardian/data/routine_library_api.dart';
@@ -305,6 +306,20 @@ void main() {
       await waitForCoach(tester);
       expect(overlay, findsOneWidget);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('다시 보기를 요청하면 이미 봤어도 안내가 뜬다', (tester) async {
+      await pump(tester);
+      await waitForCoach(tester);
+      expect(overlay, findsNothing);
+
+      ProviderScope.containerOf(tester.element(find.byType(RoutineManageScreen)))
+          .read(routineManageCoachProvider.notifier)
+          .requestReplay();
+      await tester.pump();
+      await waitForCoach(tester);
+
+      expect(overlay, findsOneWidget);
     });
 
     testWidgets('뒤로가기로 닫아도 본 것으로 남는다', (tester) async {
