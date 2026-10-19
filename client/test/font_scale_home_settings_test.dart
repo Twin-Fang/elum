@@ -175,7 +175,7 @@ void main() {
 
       // 이룸이 휴대폰 줄이 바로 아래 줄과 겹치지 않는다
       final link = tester.getRect(find.text('이룸이 기기').first);
-      final next = tester.getRect(find.text('함께하는 사람').first);
+      final next = tester.getRect(find.text('비밀암호 변경하기').first);
       expect(link.bottom, lessThanOrEqualTo(next.top));
     });
   }

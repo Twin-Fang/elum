@@ -117,7 +117,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get adRewardNotWatched => '광고를 끝까지 봐야 크레딧을 받을 수 있어요.\n처음부터 다시 해주세요';
 
   @override
-  String get adRewardSlow => '크레딧 확인이 늦어지고 있어요.\n잠시 후 설정에서 확인해주세요';
+  String get adRewardSlow => '크레딧 확인이 늦어지고 있어요.\n잠시 후 내정보에서 확인해주세요';
 
   @override
   String get adRewardDailyLimit => '오늘은 광고로 받을 수 있는 크레딧을 모두 받았어요.\n내일 다시 해주세요';
@@ -864,10 +864,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get inviteEnterDescriptionManual =>
-      '코드는 함께하는 보호자 기기의\n설정 → 함께하는 사람에 있어요';
+      '코드는 함께하는 보호자 기기의\n내정보 → 함께하는 사람에 있어요';
 
   @override
-  String get inviteEnterDescriptionPath => '설정 → 함께하는 사람';
+  String get inviteEnterDescriptionPath => '내정보 → 함께하는 사람';
 
   @override
   String get inviteEnterSemanticsFromLink => '링크로 받은 초대 코드';
@@ -1533,13 +1533,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get routineLeaveDraftWhenReadyMessage =>
-      '카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요';
+      '카드가 다 만들어지면 임시저장에 남아요\n내정보에서 이어서 만들 수 있어요';
 
   @override
   String get routineLeaveDraftTitle => '임시저장에 두고 나갈까요?';
 
   @override
-  String get routineLeaveDraftMessage => '설정의 임시저장에서\n이어서 만들 수 있어요';
+  String get routineLeaveDraftMessage => '내정보의 임시저장에서\n이어서 만들 수 있어요';
 
   @override
   String get routineLeaveEditTitle => '저장하지 않고 나갈까요?';
@@ -2174,13 +2174,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String get guardianTabHome => '홈';
 
   @override
-  String get guardianTabManage => '일과관리';
+  String get guardianTabManage => '일과 관리';
 
   @override
   String get guardianTabTalk => '이야기';
 
   @override
-  String get guardianTabMe => '내정보';
+  String get guardianTabMe => '내 정보';
+
+  @override
+  String get guardianMyInfoProfileName => '보호자';
+
+  @override
+  String guardianMyInfoLinkedCount(int count) {
+    return '이룸이 $count명과 함께해요';
+  }
+
+  @override
+  String get guardianMyInfoNoLinked => '연결된 이룸이가 아직 없어요';
+
+  @override
+  String get guardianMyInfoChildrenHeader => '이룸이';
+
+  @override
+  String get guardianMyInfoActiveBadge => '보는 중';
 
   @override
   String get guardianSideNavCaption => '보호자 화면';
@@ -2253,7 +2270,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get routineLibraryRemoveConfirmMessage =>
-      '일과관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요';
+      '일과 관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요';
 
   @override
   String get routineLibraryRemoved => '일과를 지웠어요';
@@ -2425,7 +2442,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get routineGroupUngroupConfirmTitle => '묶음을 풀까요?';
 
   @override
-  String get routineGroupUngroupConfirmMessage => '안에 있던 일과는 일과관리에 그대로 남아요';
+  String get routineGroupUngroupConfirmMessage => '안에 있던 일과는 일과 관리에 그대로 남아요';
 
   @override
   String childHomeGroupProgress(int done, int total) {
@@ -2436,8 +2453,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get childHomeGroupAllDone => '다 했어요!';
 
   @override
-  String get libraryCoachMenu =>
-      '일과를 *길게 누르면* 메뉴가 열려요\\n이름 바꾸기·복사·지우기를 할 수 있어요';
+  String get libraryCoachMenu => '일과를 *길게 누르면* 메뉴가 열려요\n이름 바꾸기·복사·지우기를 할 수 있어요';
 
   @override
   String get libraryCoachCreate => '새 묶음도 여기서 만들 수 있어요';

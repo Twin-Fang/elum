@@ -120,7 +120,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('임시저장에 두고 나갈까요?'), findsOneWidget);
-      expect(find.text('설정의 임시저장에서\n이어서 만들 수 있어요'), findsOneWidget);
+      expect(find.text('내정보의 임시저장에서\n이어서 만들 수 있어요'), findsOneWidget);
       await tester.tap(find.text('나가기'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));

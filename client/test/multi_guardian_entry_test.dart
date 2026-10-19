@@ -72,7 +72,7 @@ void main() {
 
   group('설정', () {
 
-    testWidgets('회원 정보를 못 받으면 이룸이 바꾸기만 숨기고 설정은 그대로 뜬다', (tester) async {
+    testWidgets('설정에는 이룸이 목록, 임시저장, 함께하는 사람이 없다 (내정보 칸에 있다)', (tester) async {
       final router = GoRouter(
         initialLocation: Routes.guardianSettings,
         routes: [GoRoute(path: Routes.guardianSettings, builder: (_, _) => const GuardianSettingsScreen())],
@@ -95,7 +95,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('이룸이 바꾸기'), findsNothing);
-      expect(find.text('함께하는 사람'), findsOneWidget);
+      expect(find.text('함께하는 사람'), findsNothing);
+      expect(find.text('임시저장'), findsNothing);
+      expect(find.text('이번 주 AI 생성'), findsNothing);
       expect(find.text('로그아웃'), findsOneWidget);
     });
   });

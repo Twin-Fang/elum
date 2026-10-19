@@ -245,7 +245,7 @@ abstract class AppLocalizations {
   /// 시청은 끝났는데 지급 확인이 오지 않을 때의 안내
   ///
   /// In ko, this message translates to:
-  /// **'크레딧 확인이 늦어지고 있어요.\n잠시 후 설정에서 확인해주세요'**
+  /// **'크레딧 확인이 늦어지고 있어요.\n잠시 후 내정보에서 확인해주세요'**
   String get adRewardSlow;
 
   /// 하루 한도를 다 받았을 때의 안내
@@ -1601,13 +1601,13 @@ abstract class AppLocalizations {
   /// 직접 입력할 때의 설명(코드를 받는 길)
   ///
   /// In ko, this message translates to:
-  /// **'코드는 함께하는 보호자 기기의\n설정 → 함께하는 사람에 있어요'**
+  /// **'코드는 함께하는 보호자 기기의\n내정보 → 함께하는 사람에 있어요'**
   String get inviteEnterDescriptionManual;
 
   /// 직접 입력 설명(inviteEnterDescriptionManual) 안에서 밑줄을 긋는 길 안내. 설명 문구에 그대로 들어 있어야 함
   ///
   /// In ko, this message translates to:
-  /// **'설정 → 함께하는 사람'**
+  /// **'내정보 → 함께하는 사람'**
   String get inviteEnterDescriptionPath;
 
   /// 화면 낭독기가 읽는 여섯 칸의 이름(링크로 받았을 때)
@@ -2843,7 +2843,7 @@ abstract class AppLocalizations {
   /// 카드를 만드는 중에 나가는 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요'**
+  /// **'카드가 다 만들어지면 임시저장에 남아요\n내정보에서 이어서 만들 수 있어요'**
   String get routineLeaveDraftWhenReadyMessage;
 
   /// 카드 검토 화면에서 나가는 팝업 제목
@@ -2855,7 +2855,7 @@ abstract class AppLocalizations {
   /// 카드 검토 화면에서 나가는 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'설정의 임시저장에서\n이어서 만들 수 있어요'**
+  /// **'내정보의 임시저장에서\n이어서 만들 수 있어요'**
   String get routineLeaveDraftMessage;
 
   /// 저장한 일과를 고치다 나가는 팝업 제목
@@ -3965,7 +3965,7 @@ abstract class AppLocalizations {
   /// 보호자 하단 바·옆 메뉴 칸 이름: 만들어 둔 일과·묶음 관리
   ///
   /// In ko, this message translates to:
-  /// **'일과관리'**
+  /// **'일과 관리'**
   String get guardianTabManage;
 
   /// 보호자 하단 바·옆 메뉴 칸 이름: 보호자끼리 나누는 이야기
@@ -3974,11 +3974,41 @@ abstract class AppLocalizations {
   /// **'이야기'**
   String get guardianTabTalk;
 
-  /// 보호자 하단 바·옆 메뉴 칸 이름이자 그 칸(설정) 화면 제목
+  /// 보호자 하단 바·옆 메뉴 칸 이름이자 그 칸(프로필) 화면 제목
   ///
   /// In ko, this message translates to:
-  /// **'내정보'**
+  /// **'내 정보'**
   String get guardianTabMe;
+
+  /// 내정보 프로필 카드의 이름 자리. 서버에 보호자 이름이 없어 고정 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자'**
+  String get guardianMyInfoProfileName;
+
+  /// 내정보 프로필 카드 안내: 연결된 이룸이 수
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 {count}명과 함께해요'**
+  String guardianMyInfoLinkedCount(int count);
+
+  /// 내정보 프로필 카드 안내: 연결된 이룸이가 0명
+  ///
+  /// In ko, this message translates to:
+  /// **'연결된 이룸이가 아직 없어요'**
+  String get guardianMyInfoNoLinked;
+
+  /// 내정보 이룸이 목록 묶음 머리 글
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이'**
+  String get guardianMyInfoChildrenHeader;
+
+  /// 내정보 이룸이 목록: 이룸이가 여럿일 때 지금 보고 있는 이룸이 표시
+  ///
+  /// In ko, this message translates to:
+  /// **'보는 중'**
+  String get guardianMyInfoActiveBadge;
 
   /// 태블릿 옆 메뉴 이룸이 카드에서 이름 아래 작은 글
   ///
@@ -4121,7 +4151,7 @@ abstract class AppLocalizations {
   /// 지우기 확인 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'일과관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요'**
+  /// **'일과 관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요'**
   String get routineLibraryRemoveConfirmMessage;
 
   /// 지우기 성공 알림
@@ -4421,7 +4451,7 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'안에 있던 일과는 일과관리에 그대로 남아요'**
+  /// **'안에 있던 일과는 일과 관리에 그대로 남아요'**
   String get routineGroupUngroupConfirmMessage;
 
   /// 이룸이 홈 묶음 상자 (#808)
@@ -4439,7 +4469,7 @@ abstract class AppLocalizations {
   /// 일과관리 메뉴 찾기 (#834)
   ///
   /// In ko, this message translates to:
-  /// **'일과를 *길게 누르면* 메뉴가 열려요\\n이름 바꾸기·복사·지우기를 할 수 있어요'**
+  /// **'일과를 *길게 누르면* 메뉴가 열려요\n이름 바꾸기·복사·지우기를 할 수 있어요'**
   String get libraryCoachMenu;
 
   /// 일과관리 메뉴 찾기 (#834)
