@@ -1,15 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T09:22:15Z",
-    "currentVersion": "2.45.2",
+    "lastUpdated": "2026-10-19T09:55:08Z",
+    "currentVersion": "2.46.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 263
+    "totalReleases": 264
   },
   "releases": [
+    {
+      "version": "2.46.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 802,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 보호자 화면 아래에 홈·일과관리·이야기·내정보 메뉴가 생겼어요\n  * 태블릿에서는 왼쪽에 항상 보이는 메뉴로 이동해요\n  * 태블릿 메뉴에서 이룸이 화면으로 바로 갈 수 있어요\n\n* **개선**\n  * 설정은 내정보 메뉴에서 열 수 있어요\n  * 광고가 하단 메뉴 아래 한 줄로 보여요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "보호자 화면 아래에 홈·일과관리·이야기·내정보 메뉴가 생겼어요",
+            "태블릿에서는 왼쪽에 항상 보이는 메뉴로 이동해요",
+            "태블릿 메뉴에서 이룸이 화면으로 바로 갈 수 있어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "설정은 내정보 메뉴에서 열 수 있어요",
+            "광고가 하단 메뉴 아래 한 줄로 보여요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.45.2",
       "project_type": "flutter",
