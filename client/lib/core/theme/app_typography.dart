@@ -63,6 +63,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     required this.sheetActionLabel,
     required this.floatingActionLabel,
     required this.editChipLabel,
+    required this.bottomNavLabel,
     required this.topBarAction,
     required this.sheetFieldText,
     required this.sheetFieldLabel,
@@ -332,6 +333,9 @@ class AppTypography extends ThemeExtension<AppTypography> {
 
   /// 카드확인 도구 버튼 3개의 라벨 (14/w500 Pretendard, 시안 1173:5575).
   final TextStyle editChipLabel;
+
+  /// 폰 보호자 하단 바 칸 이름 (14/w500 Pretendard · 줄 1.0, 시안 1666:7082, #835).
+  final TextStyle bottomNavLabel;
 
   /// 상단바 오른쪽 `임시저장` (16/w600, 시안 1173:5591).
   final TextStyle topBarAction;
@@ -822,6 +826,12 @@ class AppTypography extends ThemeExtension<AppTypography> {
       fontWeight: FontWeight.w500,
       height: 1.0,
     ),
+    bottomNavLabel: TextStyle(
+      fontFamily: promptFontFamily,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      height: 1.0,
+    ),
     topBarAction: TextStyle(
       fontFamily: promptFontFamily,
       fontSize: 16,
@@ -1148,6 +1158,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
     TextStyle? sheetActionLabel,
     TextStyle? floatingActionLabel,
     TextStyle? editChipLabel,
+    TextStyle? bottomNavLabel,
     TextStyle? topBarAction,
     TextStyle? sheetFieldText,
     TextStyle? sheetFieldLabel,
@@ -1246,6 +1257,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
       sheetActionLabel: sheetActionLabel ?? this.sheetActionLabel,
       floatingActionLabel: floatingActionLabel ?? this.floatingActionLabel,
       editChipLabel: editChipLabel ?? this.editChipLabel,
+      bottomNavLabel: bottomNavLabel ?? this.bottomNavLabel,
       topBarAction: topBarAction ?? this.topBarAction,
       sheetFieldText: sheetFieldText ?? this.sheetFieldText,
       sheetFieldLabel: sheetFieldLabel ?? this.sheetFieldLabel,
@@ -1371,6 +1383,7 @@ class AppTypography extends ThemeExtension<AppTypography> {
         t,
       )!,
       editChipLabel: TextStyle.lerp(editChipLabel, other.editChipLabel, t)!,
+      bottomNavLabel: TextStyle.lerp(bottomNavLabel, other.bottomNavLabel, t)!,
       topBarAction: TextStyle.lerp(topBarAction, other.topBarAction, t)!,
       sheetFieldText: TextStyle.lerp(sheetFieldText, other.sheetFieldText, t)!,
       sheetFieldLabel: TextStyle.lerp(sheetFieldLabel, other.sheetFieldLabel, t)!,
