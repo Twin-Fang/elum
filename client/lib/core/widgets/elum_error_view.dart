@@ -149,9 +149,9 @@ class ElumErrorView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            AppAssets.lumiThinking,
-            width: 100.w,
-            height: 100.w,
+            AppAssets.temporaryErrorLumi,
+            width: 160.w,
+            height: 160.w,
             fit: BoxFit.contain,
           ),
           SizedBox(height: space.lg),

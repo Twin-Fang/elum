@@ -183,6 +183,9 @@ abstract final class AppAssets {
   /// 일과 카드 생성 실패 화면의 루미 (빈 카드를 들고 고개를 기울임, 투명 배경).
   static const cardCreationFailedLumi = '$_images/card_creation_failed_lumi.png';
 
+  /// 일시적인 오류 안내 화면의 루미 (민트색 돋보기로 살펴봄, 1254×1254, 투명 배경).
+  static const temporaryErrorLumi = '$_images/temporary_error_lumi.png';
+
   /// 강제 업데이트 안내 카드의 루미 + 다운로드 화살표 (1536×1024, 투명 배경).
   static const updateLumi = '$_images/update_lumi.png';
 
