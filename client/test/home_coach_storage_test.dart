@@ -43,6 +43,31 @@ void main() {
     });
   });
 
+  group('SharedPrefsStorage 일과관리 코치마크 (#832)', () {
+    late LocalStorage storage;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      storage = await SharedPrefsStorage.create(lock: GuardianLockStore(installationId: 'test-install'));
+    });
+
+    test('기본 단계와 묶음 단계는 따로 기록된다', () async {
+      expect(storage.isManageCoachSeen, isFalse);
+      expect(storage.isGroupCoachSeen, isFalse);
+      await storage.setManageCoachSeen(true);
+      expect(storage.isManageCoachSeen, isTrue);
+      expect(storage.isGroupCoachSeen, isFalse);
+    });
+
+    test('로그아웃(clearAll)해도 남는다', () async {
+      await storage.setManageCoachSeen(true);
+      await storage.setGroupCoachSeen(true);
+      await storage.clearAll();
+      expect(storage.isManageCoachSeen, isTrue);
+      expect(storage.isGroupCoachSeen, isTrue);
+    });
+  });
+
   group('InMemoryStorage', () {
     test('기본은 본 것으로 둔다 — 다른 화면 테스트를 가리지 않으려고', () {
       expect(InMemoryStorage().isHomeCoachSeen, isTrue);

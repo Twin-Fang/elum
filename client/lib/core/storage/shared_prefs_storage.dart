@@ -52,6 +52,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedTuning = 'cache.clientTuning';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
   static const _kHomeCoachSeen = 'coach.homeSeen';
+  static const _kManageCoachSeen = 'coach.manageSeen';
+  static const _kGroupCoachSeen = 'coach.groupSeen';
   static const _kChildHapticOn = 'haptic.childOn';
   static const _kChildPraiseSoundOn = 'sound.childPraiseOn';
   // 일과 알림: {routineId: {hour, minute, isDaily, title}} JSON
@@ -308,6 +310,24 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setHomeCoachSeen(bool v) async {
     AppLogger.storageWrite(_kHomeCoachSeen, '$v');
     await _prefs.setBool(_kHomeCoachSeen, v);
+  }
+
+  @override
+  bool get isManageCoachSeen => _prefs.getBool(_kManageCoachSeen) ?? false;
+
+  @override
+  Future<void> setManageCoachSeen(bool v) async {
+    AppLogger.storageWrite(_kManageCoachSeen, '$v');
+    await _prefs.setBool(_kManageCoachSeen, v);
+  }
+
+  @override
+  bool get isGroupCoachSeen => _prefs.getBool(_kGroupCoachSeen) ?? false;
+
+  @override
+  Future<void> setGroupCoachSeen(bool v) async {
+    AppLogger.storageWrite(_kGroupCoachSeen, '$v');
+    await _prefs.setBool(_kGroupCoachSeen, v);
   }
 
   @override

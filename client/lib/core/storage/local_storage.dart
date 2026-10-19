@@ -175,6 +175,14 @@ abstract interface class LocalStorage {
   bool get isHomeCoachSeen;
   Future<void> setHomeCoachSeen(bool v);
 
+  /// 일과관리 코치마크(누르기·길게 누르기·보낸 뒤 ✓)를 봤는가. 계정이 아니라 기기에 속한다
+  bool get isManageCoachSeen;
+  Future<void> setManageCoachSeen(bool v);
+
+  /// 일과관리 묶음 코치마크(끌어서 묶기)를 봤는가
+  bool get isGroupCoachSeen;
+  Future<void> setGroupCoachSeen(bool v);
+
   /// 이룸이 화면의 카드 진동을 켜 두었는가. **기본은 켜짐**이라 저장된 적이 없으면 true.
   ///
   /// 코치마크와 같은 이유로 **계정이 아니라 휴대폰에 속한다.** [clearAll] 이 지우지 않는다 —

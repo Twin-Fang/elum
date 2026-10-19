@@ -1,0 +1,167 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/logger/app_logger.dart';
+import '../../../core/storage/local_storage.dart';
+
+/// 일과관리 코치마크가 가리키는 순서 (기본 3단계 + 묶음 2단계)
+enum RoutineManageCoachStep {
+  /// 일과 칸 누르기 > 상세 시트
+  tapRoutine,
+
+  /// 일과 칸 길게 누르기 > 빠른 메뉴
+  longPressRoutine,
+
+  /// 오늘 보낸 칸의 ✓ 배지
+  sentBadge,
+
+  /// 일과를 끌어 다른 일과 위에 놓아 묶기
+  dragToGroup,
+
+  /// `+ 일과 만들기` > 새 묶음 만들기
+  createGroup,
+}
+
+/// 기본 단계 묶음 / 묶음 단계 묶음 — "봤음"도 이 단위로 따로 남긴다
+const _basicSteps = [
+  RoutineManageCoachStep.tapRoutine,
+  RoutineManageCoachStep.longPressRoutine,
+  RoutineManageCoachStep.sentBadge,
+];
+const _groupSteps = [
+  RoutineManageCoachStep.dragToGroup,
+  RoutineManageCoachStep.createGroup,
+];
+
+/// 코치마크 진행 상태. [steps]가 비어 있으면 꺼진 상태다.
+class RoutineManageCoachState {
+  const RoutineManageCoachState({this.steps = const [], this.index = 0});
+
+  final List<RoutineManageCoachStep> steps;
+  final int index;
+
+  bool get active => steps.isNotEmpty;
+
+  RoutineManageCoachStep? get current => active ? steps[index] : null;
+}
+
+final routineManageCoachProvider =
+    NotifierProvider<RoutineManageCoachNotifier, RoutineManageCoachState>(
+      RoutineManageCoachNotifier.new,
+    );
+
+/// 일과관리 코치마크의 시작 조건과 진행을 맡는다. 규칙은 홈 코치마크와 같다.
+///
+/// **한 번 본 것은 기기에 남긴다.** 끝까지 봐도, 건너뛰어도, 닫아도 같다.
+class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
+  /// 이번 실행에서 이미 띄웠는가. 저장에 실패해도 같은 실행에서 두 번 뜨지 않는다.
+  bool _shownThisRun = false;
+
+  @override
+  RoutineManageCoachState build() => const RoutineManageCoachState();
+
+  /// 읽지 못하면 **봤다고 친다.** 못 읽는 저장소에서 매번 뜨는 안내는 닫을 방법 없는 반복이다.
+  bool _isSeen(bool Function(LocalStorage storage) read) {
+    try {
+      return read(ref.read(localStorageProvider));
+    } catch (e) {
+      AppLogger.error('RoutineManageCoach.read', e);
+      return true;
+    }
+  }
+
+  /// 조건이 맞으면 코치마크를 켠다. 켰으면 true.
+  ///
+  /// 조건 2개: 가리킬 일과 칸 있음, 아직 안 본 단계 있음.
+  /// - 기본 3단계: 일과 1개 이상
+  /// - 묶음 2단계: 일과 2개 이상 + 묶음 0개 (끌어다 놓을 대상이 있어야 한다)
+  bool maybeStart({
+    required int routineCount,
+    required int groupCount,
+    required bool hasFirstRoutineTile,
+  }) {
+    if (state.active || _shownThisRun || !hasFirstRoutineTile) return false;
+    final steps = _unseenStepsFor(
+      routineCount: routineCount,
+      groupCount: groupCount,
+    );
+    if (steps.isEmpty) return false;
+    _shownThisRun = true;
+    _turnOn(steps);
+    return true;
+  }
+
+  /// 다시 보기: 봤어도 켠다. 봤음 기록은 바꾸지 않는다 (이미 true).
+  void replay({required int routineCount, required int groupCount}) {
+    if (state.active || routineCount < 1) return;
+    _turnOn([
+      ..._basicSteps,
+      if (_canGroup(routineCount: routineCount, groupCount: groupCount))
+        ..._groupSteps,
+    ]);
+  }
+
+  List<RoutineManageCoachStep> _unseenStepsFor({
+    required int routineCount,
+    required int groupCount,
+  }) {
+    if (routineCount < 1) return const [];
+    return [
+      if (!_isSeen((storage) => storage.isManageCoachSeen)) ..._basicSteps,
+      if (_canGroup(routineCount: routineCount, groupCount: groupCount) &&
+          !_isSeen((storage) => storage.isGroupCoachSeen))
+        ..._groupSteps,
+    ];
+  }
+
+  bool _canGroup({required int routineCount, required int groupCount}) =>
+      routineCount >= 2 && groupCount == 0;
+
+  void _turnOn(List<RoutineManageCoachStep> steps) {
+    state = RoutineManageCoachState(steps: steps);
+    AppLogger.notifierCall('RoutineManageCoachNotifier', 'start', {
+      'steps': steps.length,
+    });
+  }
+
+  /// 다음 단계로. 마지막이면 끝낸다.
+  void next() {
+    if (!state.active) return;
+    if (state.index + 1 >= state.steps.length) {
+      finish();
+      return;
+    }
+    state = RoutineManageCoachState(
+      steps: state.steps,
+      index: state.index + 1,
+    );
+  }
+
+  /// 끝낸다 — 마지막까지 봤든 중간에 닫았든 보여 준 단계 묶음을 "본 것"으로 남긴다.
+  Future<void> finish() async {
+    if (!state.active) return;
+    final shownSteps = state.steps;
+    state = const RoutineManageCoachState();
+    final storage = ref.read(localStorageProvider);
+    await _remember(
+      isShown: shownSteps.any(_basicSteps.contains),
+      write: storage.setManageCoachSeen,
+    );
+    await _remember(
+      isShown: shownSteps.any(_groupSteps.contains),
+      write: storage.setGroupCoachSeen,
+    );
+  }
+
+  /// 못 남겨도 이번 실행에서는 [_shownThisRun] 이 다시 뜨는 것을 막는다.
+  Future<void> _remember({
+    required bool isShown,
+    required Future<void> Function(bool) write,
+  }) async {
+    if (!isShown) return;
+    try {
+      await write(true);
+    } catch (e) {
+      AppLogger.error('RoutineManageCoach.write', e);
+    }
+  }
+}
