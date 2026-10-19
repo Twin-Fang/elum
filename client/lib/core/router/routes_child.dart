@@ -8,6 +8,8 @@ import '../../features/child/presentation/reward_screen.dart';
 import '../../features/child/presentation/routine_done_screen.dart';
 import '../../features/link/presentation/elumi_settings_screen.dart';
 import '../../shared/models/routine.dart';
+import '../layout/adaptive_page_frame.dart';
+import '../layout/screen_layout_kind.dart';
 import 'app_transitions.dart';
 import 'routes.dart';
 
@@ -17,15 +19,22 @@ List<RouteBase> childRoutes() => [
   // --- 아동 모드 ---
   GoRoute(
     path: Routes.child,
-    builder: (context, state) => const ChildHomeScreen(),
+    builder: (context, state) => const AdaptivePageFrame(
+      kind: ScreenLayoutKind.phoneColumn,
+      child: ChildHomeScreen(),
+    ),
   ),
   GoRoute(
     path: Routes.childRoutineDetail,
     builder: (context, state) {
       // extra 없이 들어오면(딥링크 등) 보여줄 일과가 없다 — 홈으로 돌린다.
       final routine = state.extra;
-      if (routine is! Routine) return const ChildHomeScreen();
-      return ChildRoutineDetailScreen(routine: routine);
+      return AdaptivePageFrame(
+        kind: ScreenLayoutKind.phoneColumn,
+        child: routine is! Routine
+            ? const ChildHomeScreen()
+            : ChildRoutineDetailScreen(routine: routine),
+      );
     },
   ),
   // 어두운 밤하늘 배경이라 옆에서 밀려드는 슬라이드가 부자연스럽다.
@@ -67,8 +76,11 @@ List<RouteBase> childRoutes() => [
   ),
   GoRoute(
     path: Routes.modeSwitch,
-    builder: (context, state) => ModeSwitchScreen(
-      target: ModeSwitchTarget.fromName(state.uri.queryParameters['to']),
+    builder: (context, state) => AdaptivePageFrame(
+      kind: ScreenLayoutKind.phoneColumn,
+      child: ModeSwitchScreen(
+        target: ModeSwitchTarget.fromName(state.uri.queryParameters['to']),
+      ),
     ),
   ),
 ];

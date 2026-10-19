@@ -14,6 +14,8 @@ import '../../features/notice/presentation/guardian_notice_launcher.dart';
 import '../../features/profile/presentation/guardians_screen.dart';
 import '../../features/profile/presentation/invite_code_screen.dart';
 import '../../features/profile/presentation/profile_switch_screen.dart';
+import '../layout/adaptive_page_frame.dart';
+import '../layout/screen_layout_kind.dart';
 import 'app_transitions.dart';
 import 'routes.dart';
 
@@ -54,7 +56,10 @@ List<RouteBase> guardianRoutes() => [
   ),
   GoRoute(
     path: Routes.guardianDrafts,
-    builder: (context, state) => const DraftRoutinesScreen(),
+    builder: (context, state) => const AdaptivePageFrame(
+      kind: ScreenLayoutKind.phoneColumn,
+      child: DraftRoutinesScreen(),
+    ),
   ),
   GoRoute(
     path: Routes.guardianImageStyle,

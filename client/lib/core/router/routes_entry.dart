@@ -11,6 +11,8 @@ import '../../features/onboarding/presentation/name_screen.dart';
 import '../../features/onboarding/presentation/pin_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
 import '../../features/profile/presentation/invite_enter_screen.dart';
+import '../layout/adaptive_page_frame.dart';
+import '../layout/screen_layout_kind.dart';
 import 'app_transitions.dart';
 import 'routes.dart';
 
@@ -18,7 +20,10 @@ import 'routes.dart';
 List<RouteBase> entryRoutes() => [
   GoRoute(
     path: Routes.splash,
-    builder: (context, state) => const SplashScreen(),
+    builder: (context, state) => const AdaptivePageFrame(
+      kind: ScreenLayoutKind.phoneColumn,
+      child: SplashScreen(),
+    ),
   ),
 
   // --- 로그인 ---
@@ -77,6 +82,9 @@ List<RouteBase> entryRoutes() => [
   ),
   GoRoute(
     path: Routes.cardCompletion,
-    builder: (context, state) => const CardCompletionScreen(),
+    builder: (context, state) => const AdaptivePageFrame(
+      kind: ScreenLayoutKind.phoneColumn,
+      child: CardCompletionScreen(),
+    ),
   ),
 ];

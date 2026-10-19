@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../l10n/l10n_context.dart';
+import '../layout/adaptive_page_frame.dart';
+import '../layout/screen_layout_kind.dart';
 import '../config/app_config.dart';
 import '../logger/app_logger.dart';
 import '../theme/theme_context_ext.dart';
@@ -87,14 +89,17 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
       data: (result) {
         final status = result.status;
         if (status.maintenance) {
-          return _FullNotice(
-            emoji: '🛠️',
-            title: context.l10n.appStatusMaintenanceTitle,
-            body: status.maintenanceMessage.isEmpty
-                ? context.l10n.appStatusMaintenanceBody
-                : status.maintenanceMessage,
-            actionLabel: context.l10n.appStatusRecheck,
-            onAction: (_) => ref.invalidate(appStatusProvider),
+          return AdaptivePageFrame(
+            kind: ScreenLayoutKind.phoneColumn,
+            child: _FullNotice(
+              emoji: '🛠️',
+              title: context.l10n.appStatusMaintenanceTitle,
+              body: status.maintenanceMessage.isEmpty
+                  ? context.l10n.appStatusMaintenanceBody
+                  : status.maintenanceMessage,
+              actionLabel: context.l10n.appStatusRecheck,
+              onAction: (_) => ref.invalidate(appStatusProvider),
+            ),
           );
         }
         if (status.requiresUpdate(result.version)) {
@@ -104,18 +109,21 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
             defaultTargetPlatform,
             serverUrl: status.storeUrl,
           );
-          return _FullNotice(
-            emoji: '✨',
-            title: context.l10n.appStatusUpdateTitle,
-            body: context.l10n.appStatusUpdateBody,
-            // 누를 것은 하나만 둔다. 스토어에서 돌아오면 앱이 앞으로 올라오며
-            // 알아서 다시 묻기 때문에 `업데이트했어요` 가 따로 필요 없다.
-            actionLabel: storeUrl == null
-                ? context.l10n.appStatusUpdated
-                : context.l10n.appStatusGoUpdate,
-            onAction: storeUrl == null
-                ? (_) => ref.invalidate(appStatusProvider)
-                : (noticeContext) => _openStore(noticeContext, storeUrl),
+          return AdaptivePageFrame(
+            kind: ScreenLayoutKind.phoneColumn,
+            child: _FullNotice(
+              emoji: '✨',
+              title: context.l10n.appStatusUpdateTitle,
+              body: context.l10n.appStatusUpdateBody,
+              // 누를 것은 하나만 둔다. 스토어에서 돌아오면 앱이 앞으로 올라오며
+              // 알아서 다시 묻기 때문에 `업데이트했어요` 가 따로 필요 없다.
+              actionLabel: storeUrl == null
+                  ? context.l10n.appStatusUpdated
+                  : context.l10n.appStatusGoUpdate,
+              onAction: storeUrl == null
+                  ? (_) => ref.invalidate(appStatusProvider)
+                  : (noticeContext) => _openStore(noticeContext, storeUrl),
+            ),
           );
         }
         return widget.child;
