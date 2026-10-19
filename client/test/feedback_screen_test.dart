@@ -93,7 +93,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), '불편해요');
     await tester.pump();
-    await tester.tap(find.text('앱 상태 기록과 휴대폰 정보 보내기'));
+    await tester.tap(find.text('앱 상태 기록과 기기 정보 보내기'));
     await tester.pump();
     await tester.tap(find.text('보내기'));
     await tester.pumpAndSettle();
@@ -108,9 +108,9 @@ void main() {
     expect(find.text('불편해요'), findsOneWidget);
     expect(find.byType(FeedbackScreen), findsOneWidget);
     expect(
-      tester.getSemantics(find.text('앱 상태 기록과 휴대폰 정보 보내기')),
+      tester.getSemantics(find.text('앱 상태 기록과 기기 정보 보내기')),
       matchesSemantics(
-        label: '앱 상태 기록과 휴대폰 정보 보내기',
+        label: '앱 상태 기록과 기기 정보 보내기',
         hasCheckedState: true,
         isChecked: false,
         hasEnabledState: true,
@@ -128,7 +128,7 @@ void main() {
     });
 
     await tester.enterText(find.byType(TextField), '불편해요');
-    await tester.tap(find.text('앱 상태 기록과 휴대폰 정보 보내기'));
+    await tester.tap(find.text('앱 상태 기록과 기기 정보 보내기'));
     await tester.pump();
     await tester.tap(find.text('보내기'));
     await tester.pumpAndSettle();

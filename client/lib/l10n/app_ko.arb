@@ -1171,7 +1171,7 @@
   "feedbackHint": "불편했던 점을 편하게 적어 주세요",
   "@feedbackHint": { "description": "의견 입력창 안내 문구" },
 
-  "feedbackIncludeLog": "앱 상태 기록과 휴대폰 정보 보내기",
+  "feedbackIncludeLog": "앱 상태 기록과 기기 정보 보내기",
   "@feedbackIncludeLog": { "description": "의견과 함께 최근 앱 상태 기록을 보낼지 고르는 체크 문구" },
 
   "feedbackSend": "보내기",

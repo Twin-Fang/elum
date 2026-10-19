@@ -366,7 +366,7 @@
   "guardianSettingsFeedback": "Send feedback",
   "feedbackTitle": "Send feedback",
   "feedbackHint": "Tell us what was hard to use",
-  "feedbackIncludeLog": "Send app status log and phone info",
+  "feedbackIncludeLog": "Send app status log and device info",
   "feedbackSend": "Send",
   "feedbackSent": "Feedback sent",
   "feedbackFailedTitle": "Couldn't send your feedback",

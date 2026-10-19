@@ -1239,7 +1239,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get feedbackHint => '불편했던 점을 편하게 적어 주세요';
 
   @override
-  String get feedbackIncludeLog => '앱 상태 기록과 휴대폰 정보 보내기';
+  String get feedbackIncludeLog => '앱 상태 기록과 기기 정보 보내기';
 
   @override
   String get feedbackSend => '보내기';

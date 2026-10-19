@@ -1296,7 +1296,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedbackHint => 'Tell us what was hard to use';
 
   @override
-  String get feedbackIncludeLog => 'Send app status log and phone info';
+  String get feedbackIncludeLog => 'Send app status log and device info';
 
   @override
   String get feedbackSend => 'Send';
