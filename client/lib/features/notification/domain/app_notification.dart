@@ -46,7 +46,8 @@ class AppNotification {
   /// 모르는 종류거나 필수값이 깨졌으면 null (그 줄만 버린다)
   static AppNotification? fromJson(Map<String, dynamic> json) {
     final id = json['id'];
-    final type = NotificationType.fromServer(json['type'] as String?);
+    final rawType = json['type'];
+    final type = rawType is String ? NotificationType.fromServer(rawType) : null;
     final occurredAtRaw = json['occurredAt'];
     if (id is! String || id.isEmpty || type == null) return null;
     if (occurredAtRaw is! String) return null;
@@ -83,8 +84,8 @@ class NotificationPage {
     final items = <AppNotification>[];
     if (raw is List) {
       for (final entry in raw) {
-        if (entry is! Map<String, dynamic>) continue;
-        final notification = AppNotification.fromJson(entry);
+        if (entry is! Map) continue;
+        final notification = AppNotification.fromJson(Map<String, dynamic>.from(entry));
         if (notification != null) items.add(notification);
       }
     }

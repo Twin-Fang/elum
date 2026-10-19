@@ -1,28 +1,13 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/guarded_call.dart';
 import '../../../core/network/profile_header_interceptor.dart';
+import '../../../shared/models/notice_platform.dart';
 import '../domain/app_notice.dart';
 import '../../../app/dio_provider.dart';
-
-/// 공지를 받을 플랫폼. 값은 서버 `NoticePlatform` enum 과 같다.
-enum NoticePlatform {
-  ios('IOS'),
-  android('ANDROID');
-
-  const NoticePlatform(this.wire);
-
-  final String wire;
-
-  /// `dart:io` 의 Platform 대신 [defaultTargetPlatform] 으로 가린다 —
-  /// 테스트에서 바꿔 볼 수 있어야 스토어별 공지가 섞이지 않는지 확인할 수 있다.
-  static NoticePlatform get current =>
-      defaultTargetPlatform == TargetPlatform.iOS ? ios : android;
-}
 
 /// 관리자가 올린 공지를 받는다 (명세 3-1).
 ///

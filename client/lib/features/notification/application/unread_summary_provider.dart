@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
-import '../../notice/data/notice_repository.dart';
+import '../../../shared/models/notice_platform.dart';
 import '../data/notification_repository.dart';
 import '../domain/unread_summary.dart';
 

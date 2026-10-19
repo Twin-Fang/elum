@@ -5,7 +5,7 @@ import '../../../app/dio_provider.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/guarded_call.dart';
 import '../../../core/network/profile_header_interceptor.dart';
-import '../../notice/data/notice_repository.dart';
+import '../../../shared/models/notice_platform.dart';
 import '../domain/app_notification.dart';
 import '../domain/notification_settings.dart';
 import '../domain/unread_summary.dart';
