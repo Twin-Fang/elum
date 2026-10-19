@@ -11,6 +11,7 @@ import '../../features/guardian/presentation/navigation/guardian_coming_soon_scr
 import '../../features/guardian/presentation/navigation/guardian_shell.dart';
 import '../../features/guardian/presentation/navigation/guardian_tab.dart';
 import '../../features/guardian/presentation/pin_change_screen.dart';
+import '../../features/guardian/presentation/routine_manage_screen.dart';
 import '../../features/link/presentation/link_code_screen.dart';
 import '../../features/link/presentation/link_enter_screen.dart';
 import '../../features/link/presentation/link_status_screen.dart';
@@ -57,7 +58,7 @@ List<RouteBase> guardianRoutes() => [
             path: Routes.guardianManage,
             pageBuilder: (context, state) => fadePage(
               state,
-              const GuardianComingSoonScreen(tab: GuardianTab.manage),
+              const RoutineManageScreen(),
               layoutKind: ScreenLayoutKind.contentColumn,
             ),
           ),

@@ -39,6 +39,9 @@ enum RoutineSheetAction {
 
   /// 지난 일과 — 오늘 날짜로 복제한다.
   rerun,
+
+  /// 일과관리 원본 — 오늘 이룸이에게 보낸다 (#805).
+  send,
 }
 
 class RoutineDetailSheet extends ConsumerStatefulWidget {
@@ -47,9 +50,13 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
     required this.routine,
     this.isPast = false,
     this.isFinished = false,
+    this.isLibrary = false,
   });
 
   final Routine routine;
+
+  /// 일과관리 칸에서 연 원본인가 (#805). 아래 버튼이 `카드 고치기` · `오늘 보내기` 둘이 된다.
+  final bool isLibrary;
 
   /// 지난 일과인가 (시안 `980:4777`).
   ///
@@ -71,6 +78,7 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
     Routine routine, {
     bool isPast = false,
     bool isFinished = false,
+    bool isLibrary = false,
   }) {
     return showElumSheet<RoutineSheetAction>(
       context: context,
@@ -80,6 +88,7 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
         routine: routine,
         isPast: isPast,
         isFinished: isFinished,
+        isLibrary: isLibrary,
       ),
     );
   }
@@ -300,7 +309,10 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
 
           // --- 떠 있는: 편집하기 · 다시하기 (목록이 길어져도 밀려나지 않는다) ---
           // 남이 만든 일과는 버튼이 없다 — 편집하기를 눌러도 서버가 403 으로 막는다.
-          if (widget.isPast || widget.routine.isEditableByMe) ...[
+          // 일과관리 원본은 남이 만든 것이어도 보낼 수 있어 버튼을 둔다
+          if (widget.isLibrary ||
+              widget.isPast ||
+              widget.routine.isEditableByMe) ...[
             // 버튼 뒤 배경 (시안 1274:8309): 시트 바닥 138, 투명 > 시트 배경색.
             // 버튼 뒤로 지나가는 목록 글자가 버튼과 겹쳐 읽히지 않게 흐린다. 터치는 목록으로 통과
             Positioned(
@@ -328,35 +340,37 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
               right: 16.w,
               bottom: buttonBottom,
               height: buttonHeight,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: colors.textPrimary,
-                  disabledBackgroundColor: colors.buttonDisabled,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.r),
-                  ),
-                ),
-                // 다 끝낸 오늘 일과는 눌리지 않는다. 지난 일과의 `다시하기`는 그대로 둔다.
-                onPressed: _finishedToday
-                    ? null
-                    : () => Navigator.of(context).pop(
-                        widget.isPast
-                            ? RoutineSheetAction.rerun
-                            : RoutineSheetAction.edit,
+              child: widget.isLibrary
+                  ? _LibraryActions(isEditable: widget.routine.isEditableByMe)
+                  : FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: colors.textPrimary,
+                        disabledBackgroundColor: colors.buttonDisabled,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.r),
+                        ),
                       ),
-                child: Text(
-                  widget.isPast
-                      ? context.l10n.routineDetailRerun
-                      : _finishedToday
-                      ? context.l10n.routineDetailFinishedToday
-                      : context.l10n.routineDetailEdit,
-                  style: typo.sheetActionLabel.copyWith(
-                    color: _finishedToday
-                        ? colors.buttonDisabledText
-                        : colors.surface,
-                  ),
-                ),
-              ),
+                      // 다 끝낸 오늘 일과는 눌리지 않는다. 지난 일과의 `다시하기`는 그대로 둔다.
+                      onPressed: _finishedToday
+                          ? null
+                          : () => Navigator.of(context).pop(
+                              widget.isPast
+                                  ? RoutineSheetAction.rerun
+                                  : RoutineSheetAction.edit,
+                            ),
+                      child: Text(
+                        widget.isPast
+                            ? context.l10n.routineDetailRerun
+                            : _finishedToday
+                            ? context.l10n.routineDetailFinishedToday
+                            : context.l10n.routineDetailEdit,
+                        style: typo.sheetActionLabel.copyWith(
+                          color: _finishedToday
+                              ? colors.buttonDisabledText
+                              : colors.surface,
+                        ),
+                      ),
+                    ),
             ),
           ],
         ],
@@ -380,4 +394,57 @@ class _StepItemKey extends GlobalObjectKey {
 
   @override
   int get hashCode => Object.hash(id, sheet);
+}
+
+/// 일과관리 원본의 아래 버튼 두 개: `카드 고치기`(보조) · `오늘 보내기`(주)
+///
+/// 남이 만든 원본은 고치지 못하므로 보내기 하나만 둔다 — 보내기는 누구나 할 수 있다.
+class _LibraryActions extends StatelessWidget {
+  const _LibraryActions({required this.isEditable});
+
+  final bool isEditable;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typo = context.typo;
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(18.r),
+    );
+    final sendButton = FilledButton(
+      style: FilledButton.styleFrom(
+        backgroundColor: colors.textPrimary,
+        shape: shape,
+      ),
+      onPressed: () => Navigator.of(context).pop(RoutineSheetAction.send),
+      child: Text(
+        context.l10n.routineLibrarySendToday,
+        style: typo.sheetActionLabel.copyWith(color: colors.surface),
+      ),
+    );
+    if (!isEditable) return SizedBox.expand(child: sendButton);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          flex: 2,
+          child: FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: colors.buttonNeutral,
+              shape: shape,
+            ),
+            onPressed: () => Navigator.of(context).pop(RoutineSheetAction.edit),
+            child: Text(
+              context.l10n.routineLibraryEditCards,
+              style: typo.sheetActionLabel.copyWith(
+                color: colors.buttonNeutralText,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: context.space.xs.w),
+        Expanded(flex: 3, child: sendButton),
+      ],
+    );
+  }
 }

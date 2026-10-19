@@ -2199,15 +2199,86 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianSideNavChildScreen => '이룸이 화면';
 
   @override
-  String get guardianManageComingSoonTitle => '일과관리를 준비하고 있어요';
-
-  @override
-  String get guardianManageComingSoonBody =>
-      '자주 쓰는 일과를 묶어 두고\n한 번에 보낼 수 있게 만들고 있어요';
-
-  @override
   String get guardianTalkComingSoonTitle => '이야기를 준비하고 있어요';
 
   @override
   String get guardianTalkComingSoonBody => '다른 보호자와 꿀팁을 나누는 곳이\n곧 열려요';
+
+  @override
+  String get routineLibraryEmptyTitle => '아직 만든 일과가 없어요';
+
+  @override
+  String get routineLibraryEmptyBody => '아래 + 일과 만들기로 첫 일과를 만들어 보세요';
+
+  @override
+  String get routineLibraryLoadFailedFallback => '일과를 불러오지 못했어요';
+
+  @override
+  String get routineLibraryCreate => '일과 만들기';
+
+  @override
+  String get routineLibrarySendToday => '오늘 보내기';
+
+  @override
+  String get routineLibraryEditCards => '카드 고치기';
+
+  @override
+  String get routineLibraryAlreadySent => '오늘 이미 보낸 일과예요';
+
+  @override
+  String get routineLibrarySendFailedTitle => '보내지 못했어요';
+
+  @override
+  String get routineLibraryActionFailedFallback => '잠시 뒤 다시 해 주세요';
+
+  @override
+  String get routineLibraryCopied => '복사본을 만들었어요';
+
+  @override
+  String get routineLibraryCopyFailedTitle => '복사하지 못했어요';
+
+  @override
+  String get routineLibraryMenuRename => '이름 바꾸기';
+
+  @override
+  String get routineLibraryMenuCopy => '복사하기';
+
+  @override
+  String get routineLibraryMenuRemove => '지우기';
+
+  @override
+  String get routineLibraryRenameHint => '일과 이름';
+
+  @override
+  String get routineLibraryRenameSave => '저장하기';
+
+  @override
+  String get routineLibraryRenamed => '이름을 바꿨어요';
+
+  @override
+  String get routineLibraryRenameFailedTitle => '이름을 바꾸지 못했어요';
+
+  @override
+  String get routineLibraryRemoveConfirmTitle => '이 일과를 지울까요?';
+
+  @override
+  String get routineLibraryRemoveConfirmMessage =>
+      '일과관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요';
+
+  @override
+  String get routineLibraryRemoved => '일과를 지웠어요';
+
+  @override
+  String get routineLibraryRemoveFailedTitle => '지우지 못했어요';
+
+  @override
+  String get routineLibrarySentBadge => '오늘 보냈어요';
+
+  @override
+  String get routineLibraryTileHint => '길게 누르면 메뉴가 열려요';
+
+  @override
+  String routineLibrarySent(String title) {
+    return '$title을(를) 오늘 일과로 보냈어요';
+  }
 }

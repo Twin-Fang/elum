@@ -57,6 +57,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // 일과관리 칸이 서버 없이 빈 목록을 받게
+          routineLibraryProvider.overrideWith((ref) async => const <Routine>[]),
           testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
           routineRepositoryProvider.overrideWithValue(StubRoutineRepository()),
           todayRoutinesProvider.overrideWith((ref) async => routines),
@@ -98,7 +100,7 @@ void main() {
       await tester.tap(find.bySemanticsLabel('일과관리'));
       await tester.pumpAndSettle();
       expect(topOf(router), Routes.guardianManage);
-      expect(find.text('일과관리를 준비하고 있어요'), findsOneWidget);
+      expect(find.text('아직 만든 일과가 없어요'), findsOneWidget);
       expect(find.byIcon(Icons.folder_rounded), findsOneWidget);
 
       await tester.tap(find.bySemanticsLabel('이야기'));

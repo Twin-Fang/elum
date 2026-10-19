@@ -5,7 +5,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import 'guardian_tab.dart';
 
-/// 아직 내용이 없는 칸 (일과관리 #797 · 이야기 #786): 칸 제목 + 준비 중 안내
+/// 아직 내용이 없는 칸 (지금은 이야기 #786): 칸 제목 + 준비 중 안내
 ///
 /// 칸 자리를 먼저 열어 두고, 기능이 들어오면 이 화면을 그 칸의 화면으로 바꾼다.
 class GuardianComingSoonScreen extends StatelessWidget {
@@ -21,16 +21,14 @@ class GuardianComingSoonScreen extends StatelessWidget {
     final colors = context.colors;
     final space = context.space;
     final (title, body) = switch (tab) {
-      GuardianTab.manage => (
-        context.l10n.guardianManageComingSoonTitle,
-        context.l10n.guardianManageComingSoonBody,
-      ),
       GuardianTab.talk => (
         context.l10n.guardianTalkComingSoonTitle,
         context.l10n.guardianTalkComingSoonBody,
       ),
       // 홈·내정보는 이미 화면이 있다 — 라우터가 이 화면을 쓰지 않는다
-      GuardianTab.home || GuardianTab.me => (tab.labelOf(context), ''),
+      GuardianTab.home ||
+      GuardianTab.manage ||
+      GuardianTab.me => (tab.labelOf(context), ''),
     };
 
     return Scaffold(

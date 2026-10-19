@@ -83,6 +83,9 @@ abstract class Routine with _$Routine {
     /// 일과를 만든 보호자 휴대폰의 화면 언어다. 이룸이 휴대폰은 카드 글과 음성을 화면 언어가 아니라
     /// **이 값**으로 보여준다. 서버 응답·캐시에 없으면 — 모두 한국어 일과였으므로 `ko`.
     @Default('ko') String language,
+
+    /// 보내기로 만들어진 일과가 어느 원본에서 왔는지. 원본이면 null. 서버 `sourceRoutineId`.
+    String? sourceRoutineId,
   }) = _Routine;
 
   const Routine._();
@@ -184,6 +187,7 @@ abstract class Routine with _$Routine {
     if (creatorName != null) 'creatorName': creatorName,
     // 오프라인으로 이룸이 화면을 열어도 카드 글·음성이 일과 언어를 따르게 남긴다
     'language': language,
+    if (sourceRoutineId != null) 'sourceRoutineId': sourceRoutineId,
   };
 
   factory Routine.fromJson(Map<String, dynamic> json) {
@@ -217,6 +221,10 @@ abstract class Routine with _$Routine {
           : null,
       creatorName: json['creatorName']?.toString(),
       language: normalizeContentLanguage(json['language']),
+      sourceRoutineId: switch (json['sourceRoutineId']?.toString()) {
+        final String id when id.isNotEmpty => id,
+        _ => null,
+      },
     );
   }
 

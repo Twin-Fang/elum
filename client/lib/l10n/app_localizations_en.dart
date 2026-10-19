@@ -2299,16 +2299,89 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianSideNavChildScreen => 'Elumi mode';
 
   @override
-  String get guardianManageComingSoonTitle => 'Routine manager is coming';
-
-  @override
-  String get guardianManageComingSoonBody =>
-      'Soon you can group routines you use often\nand send them all at once';
-
-  @override
   String get guardianTalkComingSoonTitle => 'Community is coming';
 
   @override
   String get guardianTalkComingSoonBody =>
       'A place to share tips with other guardians\nopens soon';
+
+  @override
+  String get routineLibraryEmptyTitle => 'No routines yet';
+
+  @override
+  String get routineLibraryEmptyBody =>
+      'Tap + New routine below to make your first one';
+
+  @override
+  String get routineLibraryLoadFailedFallback => 'Couldn\'t load your routines';
+
+  @override
+  String get routineLibraryCreate => 'New routine';
+
+  @override
+  String get routineLibrarySendToday => 'Send today';
+
+  @override
+  String get routineLibraryEditCards => 'Edit cards';
+
+  @override
+  String get routineLibraryAlreadySent => 'Already sent today';
+
+  @override
+  String get routineLibrarySendFailedTitle => 'Couldn\'t send';
+
+  @override
+  String get routineLibraryActionFailedFallback =>
+      'Please try again in a moment';
+
+  @override
+  String get routineLibraryCopied => 'Copy created';
+
+  @override
+  String get routineLibraryCopyFailedTitle => 'Couldn\'t copy';
+
+  @override
+  String get routineLibraryMenuRename => 'Rename';
+
+  @override
+  String get routineLibraryMenuCopy => 'Copy';
+
+  @override
+  String get routineLibraryMenuRemove => 'Delete';
+
+  @override
+  String get routineLibraryRenameHint => 'Routine name';
+
+  @override
+  String get routineLibraryRenameSave => 'Save';
+
+  @override
+  String get routineLibraryRenamed => 'Renamed';
+
+  @override
+  String get routineLibraryRenameFailedTitle => 'Couldn\'t rename';
+
+  @override
+  String get routineLibraryRemoveConfirmTitle => 'Delete this routine?';
+
+  @override
+  String get routineLibraryRemoveConfirmMessage =>
+      'It leaves your routine list. What your Elumi already did stays recorded';
+
+  @override
+  String get routineLibraryRemoved => 'Routine deleted';
+
+  @override
+  String get routineLibraryRemoveFailedTitle => 'Couldn\'t delete';
+
+  @override
+  String get routineLibrarySentBadge => 'Sent today';
+
+  @override
+  String get routineLibraryTileHint => 'Long press to open the menu';
+
+  @override
+  String routineLibrarySent(String title) {
+    return 'Sent $title for today';
+  }
 }

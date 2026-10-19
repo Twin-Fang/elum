@@ -13,6 +13,7 @@ import '../../../core/layout/window_size_class.dart';
 import '../../../core/layout/screen_layout_kind.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../credit/application/credit_start_gate.dart';
+import '../../credit/domain/credit_summary.dart';
 import '../../credit/presentation/credit_blocked_dialog.dart';
 import '../../child/application/routine_auto_refresh.dart';
 import '../../profile/application/profile_session.dart';
@@ -346,15 +347,25 @@ class _StartRoutineButtonState extends ConsumerState<_StartRoutineButton>
       () async => (blocked: await creditBlocksRoutineStart(ref)),
     );
     if (check == null || !mounted) return;
-    final blocked = check.blocked;
-    if (blocked != null) {
-      // 안내 + (서버가 켜 둔 경우에만) 광고 보고 더 만들기. 들어가지 않고 홈에 남는다.
-      await showCreditBlockedDialog(context, ref, blocked);
-      return;
-    }
-    ref.read(routineFlowProvider.notifier).reset();
-    // push 가 끝나기를 기다리지 않는다 — 흐름이 `go` 로 홈에 돌아오면 그 Future 가
-    // 끝나지 않을 수 있고, 그러면 버튼이 영영 눌리지 않는다.
-    context.push(Routes.routineInput);
+    await continueRoutineStart(context, ref, check.blocked);
   }
+}
+
+/// 크레딧 확인을 마친 뒤 일과 만들기로 들어간다 (홈 · 일과관리 `+ 일과 만들기` 공통)
+///
+/// 막혔으면 안내만 띄우고 제자리에 남는다. 아니면 흐름 초기화 > 입력 화면.
+Future<void> continueRoutineStart(
+  BuildContext context,
+  WidgetRef ref,
+  CreditSummary? blocked,
+) async {
+  if (blocked != null) {
+    // 안내 + (서버가 켜 둔 경우에만) 광고 보고 더 만들기. 들어가지 않고 제자리에 남는다.
+    await showCreditBlockedDialog(context, ref, blocked);
+    return;
+  }
+  ref.read(routineFlowProvider.notifier).reset();
+  // push 가 끝나기를 기다리지 않는다 — 흐름이 `go` 로 홈에 돌아오면 그 Future 가
+  // 끝나지 않을 수 있고, 그러면 버튼이 영영 눌리지 않는다.
+  context.push(Routes.routineInput);
 }

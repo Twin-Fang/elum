@@ -31,6 +31,8 @@ enum ServerErrorCode {
   routineNotFound('ROUTINE_NOT_FOUND'),
   routineAccessDenied('ROUTINE_ACCESS_DENIED'),
   routineInvalidStatus('ROUTINE_INVALID_STATUS'),
+  // 일과관리 원본을 같은 날 두 번 보냈다 (#804)
+  routineAlreadySentToday('ROUTINE_ALREADY_SENT_TODAY'),
   routineStepNotFound('ROUTINE_STEP_NOT_FOUND'),
   routineStepAlreadyCompleted('ROUTINE_STEP_ALREADY_COMPLETED'),
   routineStepOrderViolation('ROUTINE_STEP_ORDER_VIOLATION'),

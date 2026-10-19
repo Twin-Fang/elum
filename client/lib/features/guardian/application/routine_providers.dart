@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/dio_provider.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../shared/models/routine.dart';
+import '../../../core/network/app_failure.dart';
+import '../data/routine_library_api.dart';
 import '../data/routine_repository.dart';
 import '../data/routine_repository_impl.dart';
 import '../domain/routine_suggestion.dart';
@@ -88,18 +90,19 @@ final routineSuggestionsProvider = FutureProvider<List<RoutineSuggestion>>((
 
 /// 일과 목록을 **세 개 다** 다시 받는다.
 ///
-/// 목록이 셋으로 나뉘어 산다 — 오늘([todayRoutinesProvider]) · 지난
+/// 목록이 넷으로 나뉘어 산다 — 일과관리 원본([routineLibraryProvider]) · 오늘([todayRoutinesProvider]) · 지난
 /// ([pastRoutinesProvider]) · 전체([myRoutinesProvider], 임시저장이 여기서
 /// 걸러 쓴다). 하나를 바꾸면 나머지도 달라질 수 있다. 일과를 지우면 오늘에서도
 /// 빠지고 전체에서도 빠진다.
 ///
 /// **한쪽만 무효화하면 화면마다 다른 것을 보게 된다.**
-/// 부르는 쪽이 매번 셋을 기억하지 않도록 한 곳에 묶는다.
+/// 부르는 쪽이 매번 넷을 기억하지 않도록 한 곳에 묶는다.
 extension RoutineListRefresh on WidgetRef {
   void refreshRoutines() {
     invalidate(todayRoutinesProvider);
     invalidate(pastRoutinesProvider);
     invalidate(myRoutinesProvider);
+    invalidate(routineLibraryProvider);
   }
 }
 
@@ -109,6 +112,7 @@ extension RoutineListRefreshContainer on ProviderContainer {
     invalidate(todayRoutinesProvider);
     invalidate(pastRoutinesProvider);
     invalidate(myRoutinesProvider);
+    invalidate(routineLibraryProvider);
   }
 }
 
@@ -118,5 +122,19 @@ extension RoutineListRefreshRef on Ref {
     invalidate(todayRoutinesProvider);
     invalidate(pastRoutinesProvider);
     invalidate(myRoutinesProvider);
+    invalidate(routineLibraryProvider);
   }
 }
+
+final routineLibraryApiProvider = Provider<RoutineLibraryApi>(
+  (ref) => RoutineLibraryApi(ref.watch(dioProvider)),
+);
+
+/// 일과관리 원본 목록 (#805). 실패하면 [AppFailure] 를 던져 화면이 다시 시도 안내를 그린다
+/// (빈 목록으로 삼키면 "만든 일과가 사라졌다"로 보인다).
+final routineLibraryProvider = FutureProvider<List<Routine>>((ref) async {
+  final result = await ref.watch(routineLibraryApiProvider).fetchLibrary();
+  final failure = result.failure;
+  if (failure != null) throw failure;
+  return result.value ?? const <Routine>[];
+});

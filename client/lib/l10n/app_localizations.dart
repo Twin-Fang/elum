@@ -4010,18 +4010,6 @@ abstract class AppLocalizations {
   /// **'이룸이 화면'**
   String get guardianSideNavChildScreen;
 
-  /// 일과관리 칸 준비 중 안내 제목
-  ///
-  /// In ko, this message translates to:
-  /// **'일과관리를 준비하고 있어요'**
-  String get guardianManageComingSoonTitle;
-
-  /// 일과관리 칸 준비 중 안내 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'자주 쓰는 일과를 묶어 두고\n한 번에 보낼 수 있게 만들고 있어요'**
-  String get guardianManageComingSoonBody;
-
   /// 이야기 칸 준비 중 안내 제목
   ///
   /// In ko, this message translates to:
@@ -4033,6 +4021,156 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'다른 보호자와 꿀팁을 나누는 곳이\n곧 열려요'**
   String get guardianTalkComingSoonBody;
+
+  /// 일과관리 칸 빈 상태 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 만든 일과가 없어요'**
+  String get routineLibraryEmptyTitle;
+
+  /// 일과관리 칸 빈 상태 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'아래 + 일과 만들기로 첫 일과를 만들어 보세요'**
+  String get routineLibraryEmptyBody;
+
+  /// 일과관리 목록을 못 받았을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 불러오지 못했어요'**
+  String get routineLibraryLoadFailedFallback;
+
+  /// 일과관리 칸 가운데 아래 떠 있는 버튼 글자 (앞에 + 아이콘)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 만들기'**
+  String get routineLibraryCreate;
+
+  /// 일과관리 상세 시트·빠른 메뉴의 오늘 이룸이에게 보내기
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 보내기'**
+  String get routineLibrarySendToday;
+
+  /// 일과관리 상세 시트의 보조 버튼 (검토 화면으로)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 고치기'**
+  String get routineLibraryEditCards;
+
+  /// 같은 날 두 번 보내려 할 때 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 이미 보낸 일과예요'**
+  String get routineLibraryAlreadySent;
+
+  /// 보내기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'보내지 못했어요'**
+  String get routineLibrarySendFailedTitle;
+
+  /// 일과관리 동작 실패 팝업 기본 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 뒤 다시 해 주세요'**
+  String get routineLibraryActionFailedFallback;
+
+  /// 복사하기 성공 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'복사본을 만들었어요'**
+  String get routineLibraryCopied;
+
+  /// 복사하기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'복사하지 못했어요'**
+  String get routineLibraryCopyFailedTitle;
+
+  /// 빠른 메뉴 줄 · 이름 바꾸기 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이름 바꾸기'**
+  String get routineLibraryMenuRename;
+
+  /// 빠른 메뉴 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'복사하기'**
+  String get routineLibraryMenuCopy;
+
+  /// 빠른 메뉴 줄 · 지우기 확인 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'지우기'**
+  String get routineLibraryMenuRemove;
+
+  /// 이름 바꾸기 입력칸 안내 글
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 이름'**
+  String get routineLibraryRenameHint;
+
+  /// 이름 바꾸기 저장 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'저장하기'**
+  String get routineLibraryRenameSave;
+
+  /// 이름 바꾸기 성공 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'이름을 바꿨어요'**
+  String get routineLibraryRenamed;
+
+  /// 이름 바꾸기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이름을 바꾸지 못했어요'**
+  String get routineLibraryRenameFailedTitle;
+
+  /// 지우기 확인 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이 일과를 지울까요?'**
+  String get routineLibraryRemoveConfirmTitle;
+
+  /// 지우기 확인 팝업 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요'**
+  String get routineLibraryRemoveConfirmMessage;
+
+  /// 지우기 성공 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 지웠어요'**
+  String get routineLibraryRemoved;
+
+  /// 지우기 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'지우지 못했어요'**
+  String get routineLibraryRemoveFailedTitle;
+
+  /// 격자 칸 ✓ 표시의 화면 낭독 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 보냈어요'**
+  String get routineLibrarySentBadge;
+
+  /// 격자 칸 화면 낭독 힌트
+  ///
+  /// In ko, this message translates to:
+  /// **'길게 누르면 메뉴가 열려요'**
+  String get routineLibraryTileHint;
+
+  /// 보내기 성공 알림. title 은 일과 제목(조사는 받침을 모르므로 을(를))
+  ///
+  /// In ko, this message translates to:
+  /// **'{title}을(를) 오늘 일과로 보냈어요'**
+  String routineLibrarySent(String title);
 }
 
 class _AppLocalizationsDelegate
