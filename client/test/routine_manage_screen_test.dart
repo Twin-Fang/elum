@@ -1,5 +1,8 @@
 import 'package:elum/core/network/app_failure.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
+import 'package:elum/core/widgets/coach_mark_overlay.dart';
 import 'package:elum/features/guardian/application/library_entries.dart';
 import 'package:elum/features/guardian/application/routine_group_controller.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
@@ -43,13 +46,18 @@ void main() {
     Attempt<List<Routine>>? library,
     List<Routine> today = const [],
     List<RoutineGroup> groups = const [],
+    InMemoryStorage? storage,
+    bool isOnTopOfAnotherRoute = false,
   }) async {
     api = _FakeLibraryApi(library ?? Attempt.ok([routine('a', '아침 준비하기')]));
     groupApi = _FakeGroupApi(groups);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
+          if (storage != null)
+            localStorageProvider.overrideWithValue(storage)
+          else
+            testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
           routineRepositoryProvider.overrideWithValue(StubRoutineRepository()),
           routineLibraryApiProvider.overrideWithValue(api),
           routineGroupApiProvider.overrideWithValue(groupApi),
@@ -60,7 +68,10 @@ void main() {
           designSize: const Size(393, 852),
           builder: (context, _) => MaterialApp(
             theme: AppTheme.light,
-            home: const RoutineManageScreen(),
+            // 뒤로가기 시험: 아래에 다른 화면이 깔려 있어야 pop 이 화면을 닫으려 든다
+            home: isOnTopOfAnotherRoute
+                ? const _PushesManageScreen()
+                : const RoutineManageScreen(),
           ),
         ),
       ),
@@ -171,6 +182,176 @@ void main() {
     expect(find.text('오늘 보내기'), findsNothing);
   });
 
+  group('처음 사용 안내 코치마크 (#832)', () {
+    InMemoryStorage unseenStorage() => InMemoryStorage(
+      onboardingCompleted: true,
+      nickname: '하늘이',
+      manageCoachSeen: false,
+      groupCoachSeen: false,
+    );
+
+    // 안내가 뜨기까지: 목록 도착 > 맨 앞에서 가만히 1.2초 > 막이 내려앉는 연출
+    Future<void> waitForCoach(WidgetTester tester) async {
+      await tester.pump(const Duration(milliseconds: 1300));
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump(const Duration(milliseconds: 700));
+    }
+
+    Future<void> tapThrough(WidgetTester tester) async {
+      await tester.tapAt(const Offset(200, 600));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump(const Duration(milliseconds: 700));
+    }
+
+    Finder message(String part) =>
+        find.textContaining(part, findRichText: true);
+    final overlay = find.byType(CoachMarkOverlay);
+
+    testWidgets('일과 1개: 누르기 > 길게 누르기 > 보낸 뒤 순서로 뜨고, 끝내면 다시 안 뜬다', (tester) async {
+      final storage = unseenStorage();
+      await pump(tester, storage: storage);
+      await waitForCoach(tester);
+
+      expect(overlay, findsOneWidget);
+      expect(message('카드를 볼 수 있어요'), findsOneWidget);
+      await tapThrough(tester);
+      expect(message('메뉴가 열려요'), findsOneWidget);
+      await tapThrough(tester);
+      expect(message('붙어요'), findsOneWidget);
+      await tapThrough(tester);
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(overlay, findsNothing);
+      expect(storage.isManageCoachSeen, isTrue);
+      // 일과가 1개면 끌어다 놓을 대상이 없어 묶음 단계는 보여 주지 않았다
+      expect(storage.isGroupCoachSeen, isFalse);
+    });
+
+    testWidgets('안내가 도는 동안 서버에는 아무것도 보내지 않는다', (tester) async {
+      await pump(tester, storage: unseenStorage());
+      await waitForCoach(tester);
+      await tapThrough(tester);
+      await tapThrough(tester);
+      await tapThrough(tester);
+      expect(api.sentIds, isEmpty);
+    });
+
+    testWidgets('이미 봤으면 뜨지 않는다', (tester) async {
+      await pump(tester);
+      await waitForCoach(tester);
+      expect(overlay, findsNothing);
+    });
+
+    testWidgets('목록을 못 받았거나 0건이면 뜨지 않는다', (tester) async {
+      await pump(
+        tester,
+        library: const Attempt.failed(AppFailure(fault: NetworkFault.offline)),
+        storage: unseenStorage(),
+      );
+      await waitForCoach(tester);
+      expect(overlay, findsNothing);
+
+      await pump(tester, library: const Attempt.ok([]), storage: unseenStorage());
+      await waitForCoach(tester);
+      expect(overlay, findsNothing);
+    });
+
+    testWidgets('일과 2개 + 묶음 없음이면 기본 3단계 뒤에 묶음 단계가 이어진다', (tester) async {
+      final storage = unseenStorage();
+      await pump(
+        tester,
+        library: Attempt.ok([routine('a', '아침 준비하기'), routine('b', '양치하기')]),
+        storage: storage,
+      );
+      await waitForCoach(tester);
+      await tapThrough(tester);
+      await tapThrough(tester);
+      await tapThrough(tester);
+      expect(message('꾹 눌러'), findsOneWidget);
+      await tapThrough(tester);
+      expect(message('묶을 수 있어요'), findsOneWidget);
+      await tapThrough(tester);
+      await tester.pump(const Duration(seconds: 1));
+      expect(storage.isGroupCoachSeen, isTrue);
+    });
+
+    testWidgets('일과가 전부 묶음 안에 있으면(낱개 칸 없음) 뜨지 않는다', (tester) async {
+      await pump(
+        tester,
+        library: Attempt.ok([routine('a', '아침 준비하기'), routine('b', '양치하기')]),
+        groups: const [
+          RoutineGroup(id: 'g1', name: '아침', routineIds: ['b', 'a']),
+        ],
+        storage: unseenStorage(),
+      );
+      await waitForCoach(tester);
+      expect(overlay, findsNothing);
+    });
+
+    testWidgets('첫 항목이 묶음이어도 낱개 일과 칸이 있으면 뜬다', (tester) async {
+      await pump(
+        tester,
+        library: Attempt.ok([
+          routine('a', '아침 준비하기'),
+          routine('b', '양치하기'),
+          routine('c', '학교 가는 날'),
+        ]),
+        groups: const [
+          RoutineGroup(id: 'g1', name: '아침', routineIds: ['b', 'a']),
+        ],
+        storage: unseenStorage(),
+      );
+      await waitForCoach(tester);
+      expect(overlay, findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('뒤로가기로 닫아도 본 것으로 남는다', (tester) async {
+      final storage = unseenStorage();
+      await pump(tester, storage: storage, isOnTopOfAnotherRoute: true);
+      await waitForCoach(tester);
+      expect(overlay, findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      // 사라지는 연출은 상태가 바뀐 다음 프레임부터 돈다
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump(const Duration(milliseconds: 700));
+
+      expect(overlay, findsNothing);
+      expect(storage.isManageCoachSeen, isTrue);
+    });
+
+    testWidgets('도는 중에 목록이 비어 가리킬 칸이 사라져도 예외 없이 끝난다', (tester) async {
+      await pump(tester, storage: unseenStorage());
+      await waitForCoach(tester);
+      expect(overlay, findsOneWidget);
+
+      api.library = const Attempt.ok([]);
+      ProviderScope.containerOf(
+        tester.element(find.byType(RoutineManageScreen)),
+      ).invalidate(routineLibraryProvider);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('태블릿 폭 · 큰 글자에서도 예외 없이 뜬다', (tester) async {
+      tester.view
+        ..physicalSize = const Size(1024, 768)
+        ..devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.reset);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+      await pump(tester, storage: unseenStorage());
+      await waitForCoach(tester);
+      expect(overlay, findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   test('묶음에서 빼서 하나만 남으면 구성을 바꾸지 않고 묶음을 푼다', () async {
     final groupApi = _FakeGroupApi(const []);
     final container = ProviderContainer(
@@ -219,10 +400,33 @@ void main() {
 }
 
 /// 서버 없이 일과관리 호출을 받는 가짜. 보낸 원본 id 를 기록한다
+/// 일과관리 화면을 다른 화면 위에 올려 둔다 (뒤로가기가 화면을 닫으려 드는 상황)
+class _PushesManageScreen extends StatefulWidget {
+  const _PushesManageScreen();
+
+  @override
+  State<_PushesManageScreen> createState() => _PushesManageScreenState();
+}
+
+class _PushesManageScreenState extends State<_PushesManageScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const RoutineManageScreen()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const Scaffold();
+}
+
 class _FakeLibraryApi implements RoutineLibraryApi {
   _FakeLibraryApi(this.library);
 
-  final Attempt<List<Routine>> library;
+  Attempt<List<Routine>> library;
   final sentIds = <String>[];
 
   @override

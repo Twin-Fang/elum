@@ -24,6 +24,7 @@ import 'library_group_actions.dart';
 import 'widgets/library_entry_grid.dart';
 import 'widgets/library_parts.dart';
 import 'widgets/library_quick_menu.dart';
+import 'widgets/routine_manage_coach_mark.dart';
 import 'widgets/routine_detail_sheet.dart';
 import 'widgets/routine_rename_sheet.dart';
 
@@ -46,6 +47,11 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   /// `+ 일과 만들기` 버튼 높이 · 버튼 둘레 여백 (목록 끝이 버튼에 가리지 않게 그만큼 비운다)
   static const _createButtonHeight = 54.0;
   static const _createButtonMargin = 16.0;
+
+  /// 첫 사용 안내가 가리킬 칸: 낱개 일과 첫째 · 둘째, `+ 일과 만들기`
+  final _firstRoutineTileKey = GlobalKey();
+  final _secondRoutineTileKey = GlobalKey();
+  final _createButtonKey = GlobalKey();
 
   // --- 동작 ---
 
@@ -235,6 +241,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         entries: value,
         sentIds: sentIds,
         bottomSpace: bottomSpace,
+        firstRoutineTileKey: _firstRoutineTileKey,
+        secondRoutineTileKey: _secondRoutineTileKey,
         onRoutineTap: busy ? null : openRoutineDetail,
         onRoutineMenu: busy ? null : _openMenu,
         onGroupTap: busy ? null : openGroup,
@@ -258,14 +266,17 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       _ => const Center(child: ElumSpinner()),
     };
 
-    return Scaffold(
+    final scaffold = Scaffold(
       backgroundColor: colors.background,
       // 떠 있는 버튼으로 두어야 알림(토스트)이 버튼을 가리지 않고 그 위에 뜬다
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: CreateRoutineFab(
-        height: _createButtonHeight.h,
-        isBusy: busy,
-        onTap: onCreatePressed,
+      floatingActionButton: KeyedSubtree(
+        key: _createButtonKey,
+        child: CreateRoutineFab(
+          height: _createButtonHeight.h,
+          isBusy: busy,
+          onTap: onCreatePressed,
+        ),
       ),
       body: SafeArea(
         child: Column(
@@ -277,6 +288,25 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
           ],
         ),
       ),
+    );
+
+    return Stack(
+      children: [
+        scaffold,
+        // 처음 들어왔을 때만 뜨는 안내. 평소에는 아무것도 그리지 않는다.
+        // Scaffold 밖이라 글 스타일을 주는 Material 이 없어 투명 Material 로 감싼다.
+        Positioned.fill(
+          child: Material(
+            type: MaterialType.transparency,
+            child: RoutineManageCoachMark(
+              entries: async.value,
+              firstRoutineTileKey: _firstRoutineTileKey,
+              secondRoutineTileKey: _secondRoutineTileKey,
+              createButtonKey: _createButtonKey,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -24,6 +24,8 @@ class LibraryEntryGrid extends StatefulWidget {
     required this.onGroupMenu,
     required this.onDropOnRoutine,
     required this.onDropOnGroup,
+    this.firstRoutineTileKey,
+    this.secondRoutineTileKey,
   });
 
   final List<LibraryEntry> entries;
@@ -39,6 +41,10 @@ class LibraryEntryGrid extends StatefulWidget {
   /// (끌어 온 일과, 놓은 자리의 일과)
   final void Function(Routine dragged, Routine target)? onDropOnRoutine;
   final void Function(Routine dragged, LibraryGroupEntry target)? onDropOnGroup;
+
+  /// 코치마크가 가리킬 낱개 일과 칸의 첫째 · 둘째 (묶음 칸은 세지 않는다)
+  final GlobalKey? firstRoutineTileKey;
+  final GlobalKey? secondRoutineTileKey;
 
   @override
   State<LibraryEntryGrid> createState() => _LibraryEntryGridState();
@@ -69,6 +75,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
           _minColumns,
           _maxColumns,
         );
+        final coachKeys = _coachKeysByRoutineId();
         return GridView.builder(
           padding: EdgeInsets.fromLTRB(
             space.md.w,
@@ -87,11 +94,29 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
           itemCount: widget.entries.length,
           itemBuilder: (context, index) => switch (widget.entries[index]) {
             final LibraryGroupEntry entry => _buildGroup(entry),
-            final LibraryRoutineEntry entry => _buildRoutine(entry.routine),
+            final LibraryRoutineEntry entry => KeyedSubtree(
+              key: coachKeys[entry.routine.id],
+              child: _buildRoutine(entry.routine),
+            ),
           },
         );
       },
     );
+  }
+
+  /// 낱개 일과 칸 중 첫째 · 둘째에 코치마크 키를 붙인다 (일과 id > 키)
+  Map<String, GlobalKey> _coachKeysByRoutineId() {
+    final looseRoutines = widget.entries
+        .whereType<LibraryRoutineEntry>()
+        .map((entry) => entry.routine.id)
+        .take(2)
+        .toList();
+    return {
+      if (looseRoutines.isNotEmpty && widget.firstRoutineTileKey != null)
+        looseRoutines[0]: widget.firstRoutineTileKey!,
+      if (looseRoutines.length > 1 && widget.secondRoutineTileKey != null)
+        looseRoutines[1]: widget.secondRoutineTileKey!,
+    };
   }
 
   /// 묶음 칸: 끌어 온 일과를 받는다

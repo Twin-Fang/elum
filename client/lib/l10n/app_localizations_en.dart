@@ -2525,4 +2525,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get routineGroupUngroupConfirmMessage =>
       'The routines stay in Routines';
+
+  @override
+  String get routineManageCoachTapMessage =>
+      '일과를 *누르면* 카드를 볼 수 있어요\n카드 고치기와 *오늘 보내기*를 할 수 있어요';
+
+  @override
+  String get routineManageCoachLongPressMessage =>
+      '*길게 누르면* 메뉴가 열려요\n오늘 보내기 · 이름 바꾸기 · 복사하기 · 지우기';
+
+  @override
+  String get routineManageCoachSentMessage =>
+      '오늘 보낸 일과에는 *✓*가 붙어요\n홈의 오늘 일과에 들어가고, 여기 일과는 그대로 남아요';
+
+  @override
+  String get routineManageCoachDragMessage =>
+      '일과를 *꾹 눌러* 다른 일과 위에 놓으면 묶음이 돼요\n묶음을 보내면 안 일과가 순서대로 한꺼번에 가요';
+
+  @override
+  String get routineManageCoachCreateGroupMessage =>
+      '끌기가 어려우면 *+ 일과 만들기*에서도\n묶을 수 있어요';
 }
