@@ -4753,6 +4753,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'알림 설정에서 언제든 켤 수 있어요'**
   String get pushPermissionDenied;
+
+  /// 안드로이드 알림 채널 이름 — 이룸이 일과 완료·공동 보호자·크레딧 소식 푸시 (#828)
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 알림'**
+  String get pushChannelGuardianUpdates;
 }
 
 class _AppLocalizationsDelegate

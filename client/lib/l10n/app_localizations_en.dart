@@ -2726,4 +2726,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pushPermissionDenied =>
       'You can turn this on anytime in notification settings';
+
+  @override
+  String get pushChannelGuardianUpdates => 'Guardian updates';
 }

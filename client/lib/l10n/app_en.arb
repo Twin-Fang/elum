@@ -767,5 +767,6 @@
   "pushPermissionSheetBody": "You'll also get updates from other guardians and credit reminders",
   "pushPermissionAllow": "Turn on",
   "pushPermissionLater": "Not now",
-  "pushPermissionDenied": "You can turn this on anytime in notification settings"
+  "pushPermissionDenied": "You can turn this on anytime in notification settings",
+  "pushChannelGuardianUpdates": "Guardian updates"
 }

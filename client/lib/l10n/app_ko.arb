@@ -2214,5 +2214,7 @@
   "pushPermissionLater": "나중에",
   "@pushPermissionLater": {"description": "알림 권한 안내 시트의 보류 버튼"},
   "pushPermissionDenied": "알림 설정에서 언제든 켤 수 있어요",
-  "@pushPermissionDenied": {"description": "시스템 권한 창에서 거부했을 때 안내 팝업 문구"}
+  "@pushPermissionDenied": {"description": "시스템 권한 창에서 거부했을 때 안내 팝업 문구"},
+  "pushChannelGuardianUpdates": "보호자 알림",
+  "@pushChannelGuardianUpdates": {"description": "안드로이드 알림 채널 이름 — 이룸이 일과 완료·공동 보호자·크레딧 소식 푸시 (#828)"}
 }

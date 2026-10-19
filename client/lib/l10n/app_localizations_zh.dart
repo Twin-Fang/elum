@@ -2608,4 +2608,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pushPermissionDenied => '알림 설정에서 언제든 켤 수 있어요';
+
+  @override
+  String get pushChannelGuardianUpdates => '보호자 알림';
 }
