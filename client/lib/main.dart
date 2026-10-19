@@ -8,6 +8,7 @@ import 'core/dev/dev_log_buffer.dart';
 import 'core/dev/dev_log_file.dart';
 import 'core/logger/app_diagnostics.dart';
 import 'core/logger/app_logger.dart';
+import 'core/push/firebase_bootstrap.dart';
 import 'core/state/provider_retry.dart';
 import 'core/storage/local_storage.dart';
 import 'core/storage/token_store.dart';
@@ -34,6 +35,9 @@ Future<void> main() async {
 
   // 환경변수를 먼저 읽는다 — 저장소·네트워크가 설정값에 의존한다.
   await AppConfig.load();
+
+  // 푸시(FCM) 준비. 실패해도 앱은 계속 시작한다.
+  await initializeFirebase();
 
   // 실기기·릴리스 빌드에는 콘솔이 없다. 앱 안에서 로그를 보려면 미리 가로채야
   // 하므로 초기화 직후에 건다.

@@ -371,6 +371,18 @@ jobs:
       # 필요하다. Info.plist에 직접 적으면 시크릿이 저장소에 커밋되므로,
       # .env를 읽어 gitignore된 xcconfig로 만든다. 이 스텝이 빠지면 값이 빈 채로
       # 빌드돼 카카오·네이버·구글 로그인이 조용히 실패한다.
+      # Firebase iOS 설정 파일 (푸시 #828). 커밋되지 않으므로 Secret 에서 만든다.
+      - name: Create GoogleService-Info.plist
+        env:
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+        run: |
+          if [ -z "$GOOGLE_SERVICE_INFO_PLIST" ]; then
+            echo "::error::GOOGLE_SERVICE_INFO_PLIST secret 이 비었다"
+            exit 1
+          fi
+          printf '%s' "$GOOGLE_SERVICE_INFO_PLIST" > ios/Runner/GoogleService-Info.plist
+          echo "✅ ios/Runner/GoogleService-Info.plist 생성"
+
       - name: Generate iOS social login secrets
         run: |
           bash tool/gen_ios_secrets.sh
