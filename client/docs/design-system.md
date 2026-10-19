@@ -322,7 +322,7 @@ y=675   하단 CTA 버튼 (360×66)
 - **레이아웃 종류**(`ScreenLayoutKind`)는 라우트에서 정한다. 선언이 없으면 `phoneColumn` (폰 비율 열을 가운데). 폼·설정은 `contentColumn`, 화면이 직접 구성하면 `adaptive`.
 - 시트·토스트는 폭 상한 `sheetMaxWidth`(560 x s) 로 가운데. 확인 팝업 카드는 폭이 이미 고정이다.
 - 등급을 알려면 `context.sizeClass`, 방향은 `context.isLandscape`, 더 자세히는 `context.layoutMetrics`.
-- 사용자에게 열리는 네이티브 스위치(아이패드 family, Android 세로 고정 해제)는 `tool/apply_tablet_native.sh` 로 로컬에서만 켜 검증한다. 설계: `docs/superpowers/specs/2026-10-19-tablet-support-design.md`.
+- 네이티브 설정(2026-10-19 적용): iOS `TARGETED_DEVICE_FAMILY = "1,2"`와 `UISupportedInterfaceOrientations~ipad` 4방향(분할 보기 지원, `UIRequiresFullScreen` 없음), Android `screenOrientation="unspecified"`. 폰은 앱 시작 때 `OrientationPolicy`가 세로로 묶는다. 설계: `docs/superpowers/specs/2026-10-19-tablet-support-design.md`.
 
 ## 컴포넌트
 
