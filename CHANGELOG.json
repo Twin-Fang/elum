@@ -1,15 +1,47 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T07:20:05Z",
-    "currentVersion": "2.44.0",
+    "lastUpdated": "2026-10-19T09:00:47Z",
+    "currentVersion": "2.45.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 260
+    "totalReleases": 261
   },
   "releases": [
+    {
+      "version": "2.45.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 796,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 카드 소리 버튼을 누르면 가볍게 진동해요\n\n* **버그 수정**\n  * 태블릿 첫 안내 화면이 양옆까지 어두워지게 고쳤어요\n\n* **개선**\n  * 안드로이드에서 카드 읽어주기 목소리가 더 안정적이에요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "카드 소리 버튼을 누르면 가볍게 진동해요"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "태블릿 첫 안내 화면이 양옆까지 어두워지게 고쳤어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "안드로이드에서 카드 읽어주기 목소리가 더 안정적이에요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.44.0",
       "project_type": "flutter",
