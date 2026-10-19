@@ -34,6 +34,9 @@ import lombok.Setter;
 )
 public class Notification extends BaseEntity {
 
+  // subjectIds 의 id 구분자 (기록하는 쪽과 읽는 쪽이 함께 씀)
+  public static final String SUBJECT_ID_DELIMITER = ",";
+
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;

@@ -1,10 +1,10 @@
 package com.chuseok22.elumserver.notification.application.service;
 
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
-import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
 import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
 import com.chuseok22.elumserver.notice.application.service.NoticeHistoryService;
+import com.chuseok22.elumserver.notice.core.NoticePlatform;
 import com.chuseok22.elumserver.notification.application.dto.response.NotificationItemResponse;
 import com.chuseok22.elumserver.notification.application.dto.response.NotificationPageResponse;
 import com.chuseok22.elumserver.notification.application.dto.response.UnreadSummaryResponse;
@@ -14,6 +14,7 @@ import com.chuseok22.elumserver.notification.infrastructure.repository.Notificat
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,6 @@ public class NotificationQueryService {
 
   /** cursor 구분자: "{lastOccurredAt ISO-8601}|{id}" */
   private static final String CURSOR_DELIMITER = "|";
-  private static final String SUBJECT_ID_DELIMITER = ",";
 
   private final NotificationRepository notificationRepository;
   private final ProfileGuardianService profileGuardianService;
@@ -72,14 +72,24 @@ public class NotificationQueryService {
   }
 
   private boolean hasUnseenNoticeSafely(String memberId, String platform) {
+    // 트랜잭션 프록시를 넘기 전에 검증 (예외가 공유 트랜잭션을 rollback-only 로 만들지 않게)
+    if (!isValidNoticePlatform(platform)) {
+      log.warn("[notification summary] notice skipped : platform is missing or invalid");
+      return false;
+    }
+    // 언어는 요청 스레드에서 정한다
+    return noticeHistoryService.hasUnseenNotice(memberId, platform, CurrentLocale.get());
+  }
+
+  /** 비었거나 모르는 값이면 false. 프록시가 아닌 정적 메서드를 직접 부른다 */
+  private static boolean isValidNoticePlatform(String platform) {
+    if (platform == null || platform.isBlank()) {
+      return false;
+    }
     try {
-      // 언어는 요청 스레드에서 정한다
-      return noticeHistoryService.hasUnseenNotice(memberId, platform, CurrentLocale.get());
+      NoticePlatform.parse(platform);
+      return true;
     } catch (CustomException e) {
-      if (e.getErrorCode() != ErrorCode.NOTICE_PLATFORM_INVALID) {
-        throw e;
-      }
-      log.warn("[notification summary] notice skipped : platform is invalid");
       return false;
     }
   }
@@ -131,9 +141,12 @@ public class NotificationQueryService {
       || row.getSubjectIds().isBlank()) {
       return null;
     }
-    String[] subjectIds = row.getSubjectIds().split(SUBJECT_ID_DELIMITER);
-    String lastSubjectId = subjectIds[subjectIds.length - 1].strip();
-    return lastSubjectId.isEmpty() ? null : lastSubjectId;
+    // 빈 조각은 버리고 마지막 id (예: "," 만 있으면 없음)
+    return Arrays.stream(row.getSubjectIds().split(Notification.SUBJECT_ID_DELIMITER))
+      .map(String::strip)
+      .filter(subjectId -> !subjectId.isEmpty())
+      .reduce((first, second) -> second)
+      .orElse(null);
   }
 
   private record CursorPosition(LocalDateTime lastOccurredAt, String id) {

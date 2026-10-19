@@ -37,7 +37,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-/// 알림 API 의 문 앞: 토큰이 없으면 401, 이룸이 권한이면 403, 보호자만 통과한다. 
+/// 알림 API 의 문 앞: 토큰이 없으면 401, 이룸이 권한이면 403, 보호자만 통과한다.
 @WebMvcTest(controllers = {PushDeviceController.class, NotificationSettingController.class, NotificationController.class})
 @Import({SecurityConfig.class, JwtAuthenticationEntryPoint.class})
 class NotificationSecurityTest {

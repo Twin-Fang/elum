@@ -27,7 +27,7 @@ public interface NotificationControllerDocs {
 
       - cursor: 앞 쪽 응답의 nextCursor 를 그대로 보냅니다. 형식은 `{마지막 발생 시각}|{id}` 이고 `|` 가 들어 있으니 URL 인코딩해서 보냅니다. 비었거나 형식이 틀리면 첫 쪽입니다.
       - size: 기본 20, 최대 50. nextCursor 가 null 이면 마지막 쪽입니다.
-      - profileName 은 지금도 접근할 수 있는 이룸이일 때만, routineTitle 은 지워지지 않은 일과일 때만 채워집니다(아니면 null).
+      - profileName 은 지금도 접근할 수 있는 이룸이일 때만, routineTitle 은 지워지지 않았고 지금도 내가 돌보는 이룸이의 일과일 때만 채워집니다(아니면 null).
       """
   )
   @SecurityRequirement(name = "bearerAuth")
@@ -47,7 +47,7 @@ public interface NotificationControllerDocs {
 
       - hasUnreadNotification·unreadNotificationCount: 내 안 읽은 알림.
       - hasUnreadNotice: 공지 탭을 마지막으로 본 뒤 올라온 공지가 있는가. platform(IOS, ANDROID)을 보냅니다.
-        platform 이 없거나 틀려도 요약은 실패하지 않고 hasUnreadNotice 만 false 입니다.
+        platform 이 없거나 틀리면 공지는 확인하지 않고 hasUnreadNotice 만 false 입니다(요약은 실패하지 않음).
       """
   )
   @SecurityRequirement(name = "bearerAuth")

@@ -1,7 +1,6 @@
 package com.chuseok22.elumserver.notification.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,8 +9,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
-import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.AppLocale;
 import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
 import com.chuseok22.elumserver.notice.application.service.NoticeHistoryService;
@@ -164,27 +161,35 @@ class NotificationQueryServiceTest {
   }
 
   @Test
-  @DisplayName("platform 이 틀려도 요약은 실패하지 않고 공지만 false 이다")
-  void invalidPlatform_noticeFalse_doesNotThrow() {
+  @DisplayName("platform 이 틀리거나 없으면 공지 조회를 부르지 않고 공지만 false 이다")
+  void invalidPlatform_noticeFalse_doesNotCallNoticeService() {
     when(notificationRepository.countByRecipientMemberIdAndReadAtIsNull(MEMBER_ID)).thenReturn(3L);
-    when(noticeHistoryService.hasUnseenNotice(eq(MEMBER_ID), eq("WINDOWS"), any(AppLocale.class)))
-      .thenThrow(new CustomException(ErrorCode.NOTICE_PLATFORM_INVALID));
 
-    UnreadSummaryResponse summary = notificationQueryService.unreadSummary(MEMBER_ID, "WINDOWS");
+    UnreadSummaryResponse invalid = notificationQueryService.unreadSummary(MEMBER_ID, "WINDOWS");
+    UnreadSummaryResponse missing = notificationQueryService.unreadSummary(MEMBER_ID, null);
 
-    assertThat(summary.hasUnreadNotice()).isFalse();
-    assertThat(summary.hasUnreadNotification()).isTrue();
-    assertThat(summary.unreadNotificationCount()).isEqualTo(3L);
+    assertThat(invalid.hasUnreadNotice()).isFalse();
+    assertThat(missing.hasUnreadNotice()).isFalse();
+    assertThat(invalid.hasUnreadNotification()).isTrue();
+    assertThat(invalid.unreadNotificationCount()).isEqualTo(3L);
+    verify(noticeHistoryService, never()).hasUnseenNotice(anyString(), any(), any());
   }
 
   @Test
-  @DisplayName("공지 판단 외의 예외는 숨기지 않는다")
-  void otherNoticeError_isNotSwallowed() {
-    when(noticeHistoryService.hasUnseenNotice(anyString(), any(), any(AppLocale.class)))
-      .thenThrow(new CustomException(ErrorCode.INVALID_INPUT_VALUE));
+  @DisplayName("platform 이 맞으면 공지 조회 결과를 그대로 쓴다")
+  void validPlatform_usesNoticeResult() {
+    when(noticeHistoryService.hasUnseenNotice(eq(MEMBER_ID), eq("IOS"), any(AppLocale.class))).thenReturn(true);
 
-    assertThatThrownBy(() -> notificationQueryService.unreadSummary(MEMBER_ID, "IOS"))
-      .isInstanceOf(CustomException.class);
+    assertThat(notificationQueryService.unreadSummary(MEMBER_ID, "IOS").hasUnreadNotice()).isTrue();
+  }
+
+  @Test
+  @DisplayName("subjectIds 가 쉼표뿐이어도 목록이 죽지 않고 제목은 null 이다")
+  void subjectIdsOnlyDelimiter_titleNull() {
+    when(notificationRepository.findByRecipientMemberIdOrderByLastOccurredAtDescIdDesc(eq(MEMBER_ID), any(Pageable.class)))
+      .thenReturn(List.of(routineCompleted("n1", "p1", ",", NEWER)));
+
+    assertThat(notificationQueryService.page(MEMBER_ID, null, 20).items().get(0).routineTitle()).isNull();
   }
 
   private static Notification routineCompleted(String id, String profileId, String subjectIds, LocalDateTime occurredAt) {

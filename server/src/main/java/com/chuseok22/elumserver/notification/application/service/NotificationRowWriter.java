@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 class NotificationRowWriter {
 
   // 일과 id 목록 구분자
-  private static final String SUBJECT_ID_DELIMITER = ",";
 
   private final NotificationRepository notificationRepository;
 
@@ -62,7 +61,7 @@ class NotificationRowWriter {
     // 다른 일과 완료: 횟수 +1, 일과 id 추가, 다시 안 읽음 상태로
     String mergedSubjectIds = row.getSubjectIds() == null || row.getSubjectIds().isBlank()
       ? draft.subjectId()
-      : row.getSubjectIds() + SUBJECT_ID_DELIMITER + draft.subjectId();
+      : row.getSubjectIds() + Notification.SUBJECT_ID_DELIMITER + draft.subjectId();
     row.setSubjectIds(mergedSubjectIds);
     row.setCount(row.getCount() + 1);
     row.setLastOccurredAt(draft.occurredAt());
@@ -72,6 +71,6 @@ class NotificationRowWriter {
   }
 
   private boolean hasSubject(String subjectIds, String subjectId) {
-    return subjectIds != null && Arrays.asList(subjectIds.split(SUBJECT_ID_DELIMITER)).contains(subjectId);
+    return subjectIds != null && Arrays.asList(subjectIds.split(Notification.SUBJECT_ID_DELIMITER)).contains(subjectId);
   }
 }
