@@ -6,6 +6,7 @@ import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequ
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
+import com.chuseok22.elumserver.member.application.dto.request.OnboardingCompleteRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import com.chuseok22.elumserver.member.application.service.Caller;
@@ -110,6 +111,41 @@ public interface MemberControllerDocs {
     )
   })
   ResponseEntity<MemberResponse> createProfile(Authentication authentication);
+
+  @Operation(
+    summary = "온보딩 완료 (한 번에 저장)",
+    description = """
+      온보딩에서 받은 이룸이 정보와 예시 일과 분류를 **한 트랜잭션으로** 저장합니다.
+
+      **처리 순서**
+      1. 연결된 이룸이가 없으면 새로 만듭니다 (`POST /api/member/profile` 과 같음, 멱등).
+      2. 그 이룸이(가장 먼저 연결된 이룸이)에 호칭, 도움 목표, 캐릭터, 그림 방식을 저장합니다.
+      3. `exampleCategories` 가 있으면 예시 일과를 만듭니다. 모르는 분류 코드는 빼고, 이미 만든 이룸이면 건너뜁니다.
+      4. 저장된 내 정보를 `/api/member/me` 와 같은 모양으로 돌려줍니다.
+
+      **`X-Profile-Id` 헤더를 보지 않습니다.** 탈퇴 후 재가입처럼 앱에 지워진 이룸이 id 가 남아 있어도 403 이나 일부만 저장되는 일이 없습니다.
+      하나라도 실패하면 전부 되돌립니다. 이룸이 휴대폰 토큰은 403(`DEVICE_LINK_FORBIDDEN_FOR_ELUMI`), 호칭이 비면 400 입니다.
+      """
+  )
+  @SecurityRequirement(name = "bearerAuth")
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "저장 완료",
+      content = @Content(schema = @Schema(implementation = MemberResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "400",
+      description = "호칭 없음",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "이룸이 휴대폰 토큰",
+      content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    )
+  })
+  ResponseEntity<MemberResponse> completeOnboarding(Authentication authentication, OnboardingCompleteRequest request);
 
   @Operation(
     summary = "아이 호칭 설정",
