@@ -67,7 +67,7 @@ class RoutineGroupServiceTest {
   void setUp() {
     RoutineGroupMembership membership = new RoutineGroupMembership(routineRepository, routineGroupRepository);
     routineLibraryService = new RoutineLibraryService(routineRepository, profileAccessGuard, routineStepSpeechQueue,
-      membership);
+      membership, org.mockito.Mockito.mock(org.springframework.context.ApplicationEventPublisher.class));
     routineGroupService = new RoutineGroupService(routineGroupRepository, routineRepository, profileAccessGuard,
       routineLibraryService, membership);
 

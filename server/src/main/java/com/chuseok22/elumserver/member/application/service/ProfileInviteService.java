@@ -19,10 +19,12 @@ import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepositor
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileGuardianRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileInviteRepository;
 import com.chuseok22.elumserver.member.infrastructure.repository.ProfileRepository;
+import com.chuseok22.elumserver.notification.core.event.CoGuardianJoinedEvent;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +55,7 @@ public class ProfileInviteService {
   private final ProfileAccessGuard profileAccessGuard;
   private final GuardianshipService guardianshipService;
   private final ProfileInviteRateLimiter rateLimiter;
+  private final ApplicationEventPublisher eventPublisher;
 
   /**
    * 초대 코드를 새로 낸다.
@@ -225,6 +228,9 @@ public class ProfileInviteService {
 
     // 가입 때 생긴 빈 이룸이를 지운다 (명세 4-4, E6).
     List<String> removed = guardianshipService.removeEmptyOwnProfiles(memberId, profileId);
+
+    // 합류 저장이 끝난 성공 경로에서만 발행 (실패 경로는 위에서 예외로 빠짐)
+    eventPublisher.publishEvent(new CoGuardianJoinedEvent(profileId, memberId));
 
     log.info("초대 코드로 합류: memberId={}, profileId={}, issuedBy={}, 지운 빈 이룸이={}",
       memberId, profileId, invite.getIssuedBy(), removed.size());

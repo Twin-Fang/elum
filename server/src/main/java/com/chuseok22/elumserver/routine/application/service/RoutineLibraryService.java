@@ -11,11 +11,13 @@ import com.chuseok22.elumserver.routine.infrastructure.constant.RoutinePhrases;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,7 @@ public class RoutineLibraryService {
   private final ProfileAccessGuard profileAccessGuard;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
   private final RoutineGroupMembership routineGroupMembership;
+  private final ApplicationEventPublisher eventPublisher;
 
   /**
    * 보내기: 권한(복제와 같음) > 원본·보낸 상태 확인 > 오늘 이미 보냈는지 > 카드 복사 (오늘 09:00, 원본 ID 기록)
@@ -50,7 +53,12 @@ public class RoutineLibraryService {
       log.info("[routine library] send rejected 409 : already sent today, routineId={}", routineId);
       throw new CustomException(ErrorCode.ROUTINE_ALREADY_SENT_TODAY);
     }
-    return RoutineResponse.from(saveCopy(newTodayCopyOf(original, caller.memberId())));
+    Routine sentRoutine = saveCopy(newTodayCopyOf(original, caller.memberId()));
+    // 새로 만든 오늘 일과가 알림 대상 (요청자 제외는 보호자 기기일 때만)
+    String actorMemberId = caller.isElumi() ? null : caller.memberId();
+    eventPublisher.publishEvent(new RoutineSentEvent(sentRoutine.getId(), sentRoutine.getProfile().getId(),
+      actorMemberId));
+    return RoutineResponse.from(sentRoutine);
   }
 
   /**
