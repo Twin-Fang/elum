@@ -33,10 +33,8 @@ class ChildHomeLandscapeBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final margin = context.layout.pageMarginFor(context.sizeClass).w;
-    final characterAsset = switch (character) {
-      CardCharacter.cat => AppAssets.rewardRuru,
-      CardCharacter.fox => AppAssets.rewardPopo,
-    };
+    // 밝은 배경에서도 또렷한 테두리 배지 (고양이 파랑, 여우 주황). 보상 화면의 흰색 그림은 어두운 배경용
+    final characterAsset = AppAssets.characterBadgeFramed(character);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -47,7 +47,11 @@ Future<void> main() async {
     refreshToken: 'preview-refresh',
   );
   final dio = Dio(BaseOptions(baseUrl: 'https://preview.local'))
-    ..httpClientAdapter = FakeAdapter(const {});
+    // 진행률 저장은 성공으로 둔다 (404 면 "일과가 사라졌다"로 보고 홈으로 돌아간다)
+    ..httpClientAdapter = FakeAdapter({
+      for (final routine in _demoRoutines)
+        'PUT /api/routines/${routine.id}/progress': const <String, Object?>{},
+    });
 
   runApp(
     ProviderScope(
