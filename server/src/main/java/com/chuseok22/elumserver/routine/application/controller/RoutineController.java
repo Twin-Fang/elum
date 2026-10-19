@@ -5,6 +5,7 @@ import com.chuseok22.elumserver.routine.application.dto.request.RewardUpdateRequ
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressSyncRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineQuestionRequest;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineLibraryOrderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepCreateRequest;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineStepReorderRequest;
@@ -17,6 +18,7 @@ import com.chuseok22.elumserver.routine.application.dto.response.RoutineSuggesti
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineStepResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
 import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
+import com.chuseok22.elumserver.routine.application.service.RoutineLibraryOrderService;
 import com.chuseok22.elumserver.routine.application.service.RoutineLibraryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
@@ -64,6 +66,7 @@ public class RoutineController implements RoutineControllerDocs {
   private final RoutineProgressService routineProgressService;
   private final RoutineStepPhotoService routineStepPhotoService;
   private final RoutineLibraryService routineLibraryService;
+  private final RoutineLibraryOrderService routineLibraryOrderService;
   // 원문 가리기와 만든 사람 정보를 모든 일과 응답에 같은 방식으로 입힌다.
   private final RoutineAuthorResolver routineAuthorResolver;
 
@@ -257,6 +260,18 @@ public class RoutineController implements RoutineControllerDocs {
   ) {
     Caller caller = Caller.from(authentication, profileId);
     return ResponseEntity.ok(routineAuthorResolver.forCaller(caller, routineQueryService.getLibraryRoutines(caller)));
+  }
+
+  // 일과관리 칸 순서 저장: 낱개 일과 + 묶음을 한 줄로 (#844)
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PutMapping("/library/order")
+  public ResponseEntity<Void> reorderLibrary(
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
+    @RequestBody RoutineLibraryOrderRequest request
+  ) {
+    routineLibraryOrderService.reorder(Caller.from(authentication, profileId), request == null ? null : request.cells());
+    return ResponseEntity.noContent().build();
   }
 
   // 원본 카드로 오늘 일과를 만든다. AI 호출 없음, 원본 하나당 하루 한 번 (#804)
