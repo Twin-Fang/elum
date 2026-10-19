@@ -24,8 +24,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../test/helpers/fake_dio.dart';
 
-/// 어느 화면으로 시작할지: child(이룸이 휴대폰) | guardian(보호자)
-const _previewRole = String.fromEnvironment('PREVIEW_ROLE', defaultValue: 'child');
+/// 어느 화면으로 시작할지: child(이룸이 기기) | guardian(보호자 홈) | login(로그인 전) | onboarding(로그인 뒤 가입 절차)
+const _previewRole = String.fromEnvironment(
+  'PREVIEW_ROLE',
+  defaultValue: 'child',
+);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,19 +36,23 @@ Future<void> main() async {
   await AppConfig.load();
 
   final isChild = _previewRole == 'child';
+  final isSignedIn = _previewRole != 'login';
+  final isOnboarded = _previewRole == 'child' || _previewRole == 'guardian';
   final storage = InMemoryStorage(
-    onboardingCompleted: true,
-    nickname: '하늘이',
-    character: 'cat',
-    pin: '1234',
+    onboardingCompleted: isOnboarded,
+    nickname: isOnboarded ? '하늘이' : null,
+    character: isOnboarded ? 'cat' : null,
+    pin: isOnboarded ? '1234' : null,
     elumiDevice: isChild,
   );
-  if (!isChild) await storage.setSelectedRole('guardian');
+  if (_previewRole == 'guardian') await storage.setSelectedRole('guardian');
 
-  final tokens = InMemoryTokenStore(
-    accessToken: 'preview-access',
-    refreshToken: 'preview-refresh',
-  );
+  final tokens = isSignedIn
+      ? InMemoryTokenStore(
+          accessToken: 'preview-access',
+          refreshToken: 'preview-refresh',
+        )
+      : InMemoryTokenStore();
   final dio = Dio(BaseOptions(baseUrl: 'https://preview.local'))
     // 진행률 저장은 성공으로 둔다 (404 면 "일과가 사라졌다"로 보고 홈으로 돌아간다)
     ..httpClientAdapter = FakeAdapter({
@@ -71,14 +78,19 @@ Future<void> main() async {
   );
 }
 
-ActionCard _card(String id, int order, String title, String description, String pictogramId) =>
-    ActionCard(
-      id: id,
-      stepOrder: order,
-      title: title,
-      description: description,
-      pictogramId: pictogramId,
-    );
+ActionCard _card(
+  String id,
+  int order,
+  String title,
+  String description,
+  String pictogramId,
+) => ActionCard(
+  id: id,
+  stepOrder: order,
+  title: title,
+  description: description,
+  pictogramId: pictogramId,
+);
 
 final _demoRoutines = <Routine>[
   Routine(

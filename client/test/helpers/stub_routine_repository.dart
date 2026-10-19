@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:elum/features/guardian/data/routine_repository.dart';
 import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/shared/models/routine.dart';
+import 'package:elum/shared/models/support_goal.dart';
 
 import 'fake_reward_api.dart';
 
@@ -20,4 +23,17 @@ class StubRoutineRepository with FakeRewardApi implements RoutineRepository {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// 일과 생성 요청이 끝나지 않는 저장소: 로딩 연출이 계속 도는 상태를 만든다
+class PendingRoutineRepository extends StubRoutineRepository {
+  @override
+  Future<Routine> createRoutine({
+    required String rawInputText,
+    required Set<SupportGoal> goals,
+    List<String>? answers,
+    String? rewardText,
+    String? rewardPresetKey,
+    String? idempotencyKey,
+  }) => Completer<Routine>().future;
 }

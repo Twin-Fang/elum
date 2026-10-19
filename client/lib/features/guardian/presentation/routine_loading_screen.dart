@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/layout/layout_context_ext.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_error_view.dart';
@@ -325,16 +326,20 @@ class _RoutineLoadingScreenState extends ConsumerState<RoutineLoadingScreen> {
       // 되돌릴 수 없다는 이유로 숨겼다가 시안과 어긋났다.
       // 오래 기다리는 화면이라 빠져나갈 길이 없으면 갇힌 느낌을 준다.
       onBack: _handleBack,
+      // 태블릿에서 루미가 창 가장자리까지 나가도록 자르지 않는다 (폰은 화면이 곧 가장자리)
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
           // 루미는 두 화면 모두 y=398에 있고 **좌우만 반대**다.
           // 준비(262:4569)는 왼쪽 밖으로 31, 생성(262:4703)은 오른쪽 밖으로 37
           // 걸친다. **덤프 좌표(y=383)가 아니라** 시안 export에 겹쳐 맞춘 값이다 —
           // 그룹 상자에 그려지지 않는 여백이 붙어 있다.
+          //
+          // 태블릿은 폰 비율 열 양옆만큼 넓혀 창 가장자리에서 엿보게 한다.
           Positioned(
             top: (398 - topBarH).h,
-            left: 0,
-            right: 0,
+            left: -context.frameSideOverhang,
+            right: -context.frameSideOverhang,
             child: LumiPeek(side: widget.kind.lumiSide),
           ),
 

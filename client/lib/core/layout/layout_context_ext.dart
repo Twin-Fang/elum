@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'adaptive_scope.dart';
@@ -25,4 +27,16 @@ extension LayoutContextExt on BuildContext {
   WindowSizeClass get sizeClass => layoutMetrics.sizeClass;
 
   bool get isLandscape => layoutMetrics.isLandscape;
+
+  /// 폰 비율 열 양옆에 남는 폭(dp). 화면 가장자리에 걸치는 연출이 **창 가장자리**까지 가게 할 때 쓴다
+  ///
+  /// 열 밖에서는 0 (폰, 전폭 화면). 열 안에서는 `MediaQuery` 크기가 열 폭이라 창 폭과의 차이의 절반이다.
+  double get frameSideOverhang {
+    final metrics = layoutMetrics;
+    if (!metrics.isScaleOverridden) return 0;
+    return math.max(
+      0,
+      (metrics.windowSize.width - MediaQuery.sizeOf(this).width) / 2,
+    );
+  }
 }

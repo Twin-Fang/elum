@@ -105,8 +105,7 @@ class LoginSceneLayout {
   /// 이 기기가 따르는 배치.
   ///
   /// **애플 버튼 유무와 같은 기준으로 갈린다** — 시안이 그렇게 나뉘어 나왔다.
-  static LoginSceneLayout get ofThisPlatform =>
-      Platform.isIOS ? ios : android;
+  static LoginSceneLayout get ofThisPlatform => Platform.isIOS ? ios : android;
 }
 
 /// 병아리 얼굴 자리 (눈 둘 + 부리). 좌표는 Figma `1022:4333` 실측.
@@ -251,16 +250,8 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
     final layout = widget.layout;
     final face = layout.face;
 
-    return Container(
-      // 배경: 흰색 → 크림 (Figma linear-gradient 180deg, 40% 지점). 두 시안이 같다.
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [colors.splashTop, colors.splashBottom],
-          stops: const [0, 0.4],
-        ),
-      ),
+    // 배경: 흰색 → 크림 (Figma linear-gradient 180deg, 40% 지점). 두 시안이 같다.
+    return LoginSceneBackdrop(
       child: Stack(
         children: [
           // 병아리 몸통 — 둥근 path와 방사형 그라데이션이 파일 안에 있다.
@@ -399,6 +390,45 @@ class _LoginSceneState extends State<LoginScene> with TickerProviderStateMixin {
           if (widget.overlay != null) Positioned.fill(child: widget.overlay!),
         ],
       ),
+    );
+  }
+}
+
+/// 로그인 장면의 배경 그라데이션 (위 흰색 > 40% 지점부터 크림)
+///
+/// 장면 안과 태블릿 전폭 배경이 **같은 위젯**이라 폰 비율 열 바깥과 이음매 없이 이어진다.
+class LoginSceneBackdrop extends StatelessWidget {
+  const LoginSceneBackdrop({super.key, this.child});
+
+  /// 배경 위에 얹을 장면. 없으면 배경만 꽉 채운다
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [colors.splashTop, colors.splashBottom],
+          stops: const [0, 0.4],
+        ),
+      ),
+      child: child ?? const SizedBox.expand(),
+    );
+  }
+}
+
+/// 시작 화면의 단색 배경. 태블릿에서 폰 비율 열 바깥을 같은 색으로 채운다
+class SplashPlainBackdrop extends StatelessWidget {
+  const SplashPlainBackdrop({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: context.colors.splashPlain,
+      child: const SizedBox.expand(),
     );
   }
 }
