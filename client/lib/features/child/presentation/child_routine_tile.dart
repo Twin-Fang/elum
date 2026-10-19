@@ -42,7 +42,8 @@ class ChildRoutineTile extends StatelessWidget {
       scaleDown: AppPressable.scaleCard,
       child: Container(
         // 보상이 있으면 한 줄이 늘어 타일이 높아진다. 시안은 92.
-        height: (routine.hasReward ? 92 : 68).h,
+        // 최소 높이만 정한다 — 큰 글자 설정에서 내용이 더 높아지면 넘치지 않고 늘어난다.
+        constraints: BoxConstraints(minHeight: (routine.hasReward ? 92 : 68).h),
         // Figma 실측 — 제목 좌 24, 화살표 우 16
         padding: EdgeInsets.only(left: 24.w, right: 16.w),
         decoration: BoxDecoration(
