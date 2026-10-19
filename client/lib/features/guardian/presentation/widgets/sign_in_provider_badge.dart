@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/assets/app_assets.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../auth/data/oauth_sdk.dart';
+import '../../../auth/domain/oauth_provider.dart';
 
 /// 가입한 소셜 제공자 배지: 브랜드 색 원 + 로고 (#849)
 ///

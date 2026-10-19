@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../../auth/data/oauth_sdk.dart';
+import '../../auth/domain/oauth_provider.dart';
 
 /// 보호자 계정 표시 정보 — 서버 `MemberResponse.account` + `createdAt` (#849)
 ///

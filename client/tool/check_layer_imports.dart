@@ -1,4 +1,4 @@
-// 계층 import 규칙 검사기. `dart run tool/check_layer_imports.dart` 로 돌리고, CI 는 test/tool 의 시험으로 건다.
+// 계층 import 규칙 검사기. `dart run tool/check_layer_imports.dart` 로 돌리고, CI 는 Flutter CI 의 규칙 검사 단계가 돌린다.
 //
 // 규칙
 // - core·shared 는 features·app 을 모른다. 바닥 계층이 위를 알면 순환이 생기고 따로 시험할 수 없다.

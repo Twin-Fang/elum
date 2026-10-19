@@ -294,6 +294,14 @@ jobs:
           flutter analyze --no-fatal-infos
           echo "✅ 코드 분석 완료"
 
+      # 규칙 검사 (계층 import 방향, 화면 문구 하드코딩) — 앱 테스트를 지운 뒤 남은 강제 장치
+      - name: Run rule checks
+        id: rules
+        run: |
+          dart run tool/check_layer_imports.dart
+          dart run tool/check_hangul_literals.dart lib
+          echo "✅ 규칙 검사 완료"
+
       # 분석 결과 기록
       - name: 분석 결과 기록
         id: result
@@ -309,7 +317,8 @@ jobs:
             const duration = minutes > 0 ? `${minutes}분 ${seconds}초` : `${seconds}초`;
 
             const analyzeOk = '${{ steps.analyze.outcome }}' === 'success';
-            const status = analyzeOk ? 'success' : 'failure';
+            const rulesOk = '${{ steps.rules.outcome }}' === 'success';
+            const status = analyzeOk && rulesOk ? 'success' : 'failure';
 
             core.setOutput('status', status);
             core.setOutput('duration', duration);

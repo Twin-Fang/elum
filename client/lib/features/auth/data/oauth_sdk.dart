@@ -7,23 +7,9 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/logger/app_logger.dart';
+import '../domain/oauth_provider.dart';
 
-/// 서버가 받는 제공자 이름. 경로 변수 `/api/auth/oauth/{provider}`에 그대로 들어간다.
-enum OAuthProvider {
-  kakao,
-  naver,
-  google,
-  apple;
-
-  String get path => name;
-
-  String get label => switch (this) {
-        OAuthProvider.kakao => '카카오',
-        OAuthProvider.naver => '네이버',
-        OAuthProvider.google => '구글',
-        OAuthProvider.apple => '애플',
-      };
-}
+export '../domain/oauth_provider.dart';
 
 /// 제공자 SDK 호출 결과.
 ///
