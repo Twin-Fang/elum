@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +21,7 @@ import 'features/auth/data/auth_repository.dart';
 import 'features/child/application/sync_triggers.dart';
 import 'features/link/application/link_code_intake.dart';
 import 'features/link/application/link_reset.dart';
+import 'features/notification/application/push_token_registrar.dart';
 import 'features/profile/application/invite_inbox.dart';
 import 'features/profile/application/invite_link_intake.dart';
 import 'features/profile/presentation/invite_link_host.dart';
@@ -138,6 +141,11 @@ class _ElumAppState extends ConsumerState<ElumApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || ref.read(localStorageProvider).isElumiDevice) return;
       AdConsent.requestOnLaunch();
+    });
+    // 로그인한 보호자 기기면 푸시 토큰을 서버에 맞춤 (첫 프레임을 막지 않음, 조건·실패는 안에서 처리)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(ref.read(pushTokenRegistrarProvider).syncRegistration());
     });
   }
 
