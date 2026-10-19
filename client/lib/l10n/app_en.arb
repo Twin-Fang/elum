@@ -680,7 +680,7 @@
   "routineLibrarySentBadge": "Sent today",
   "routineLibraryTileHint": "Long press to open the menu",
   "routineLibrarySent": "Sent {title} for today",
-  "onboardingExampleTitle": "Which routines would you like\nto start with {name}?",
+  "onboardingExampleTitle": "What would you like\nto help {name} with?",
   "onboardingExampleDescription": "We'll add example routines for the ones you pick.\nYou can pick more than one.",
   "onboardingExampleSkip": "Skip",
   "exampleCategoryMorningEvening": "Morning & evening",

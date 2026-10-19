@@ -2396,8 +2396,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String onboardingExampleTitle(String name, String batchim) {
-    return 'Which routines would you like\nto start with $name?';
+  String onboardingExampleTitle(String name) {
+    return 'What would you like\nto help $name with?';
   }
 
   @override

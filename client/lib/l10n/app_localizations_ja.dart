@@ -2288,8 +2288,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String onboardingExampleTitle(String name, String batchim) {
-    return '$nameと、どの日課から\n始めましょうか?';
+  String onboardingExampleTitle(String name) {
+    return '$nameの、どんなことを\n手伝いたいですか?';
   }
 
   @override

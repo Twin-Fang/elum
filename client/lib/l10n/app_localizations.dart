@@ -4184,11 +4184,11 @@ abstract class AppLocalizations {
   /// **'{title}을(를) 오늘 일과로 보냈어요'**
   String routineLibrarySent(String title);
 
-  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭, batchim 은 받침 유무(yes/no)
+  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭
   ///
   /// In ko, this message translates to:
-  /// **'{name}{batchim, select, yes{과} other{와}} 어떤 일과부터\n해 볼까요?'**
-  String onboardingExampleTitle(String name, String batchim);
+  /// **'{name}의 어떤 일을\n돕고 싶으세요?'**
+  String onboardingExampleTitle(String name);
 
   /// 온보딩 예시 일과 (#803)
   ///

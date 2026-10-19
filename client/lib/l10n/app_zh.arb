@@ -4,7 +4,7 @@
   "installationRetryButton": "重试",
   "issuedCodeCopyFailedTitle": "复制失败了",
   "issuedCodeCopyFailedFallback": "请直接告知屏幕上显示的代码",
-  "onboardingExampleTitle": "想和{name}\n先从哪些日常开始?",
+  "onboardingExampleTitle": "想在哪些方面\n帮助{name}?",
   "onboardingExampleDescription": "我们会为所选分类加入示例日常。\n可以选择多个。",
   "onboardingExampleSkip": "跳过",
   "exampleCategoryMorningEvening": "早晚准备",
