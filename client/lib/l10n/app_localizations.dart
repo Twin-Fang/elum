@@ -4172,23 +4172,23 @@ abstract class AppLocalizations {
   /// **'내 정보'**
   String get guardianTabMe;
 
-  /// 내정보 프로필 카드의 이름 자리. 서버에 보호자 이름이 없어 고정 문구
+  /// 내정보 프로필 카드: 닉네임 위 역할 이름. 닉네임이 없으면 이 문구가 이름 자리에 감
   ///
   /// In ko, this message translates to:
   /// **'보호자'**
   String get guardianMyInfoProfileName;
 
-  /// 내정보 프로필 카드 안내: 연결된 이룸이 수
+  /// 내정보 프로필 카드: 이메일이 없거나 애플 숨김 주소인 계정 (#849)
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 {count}명과 함께해요'**
-  String guardianMyInfoLinkedCount(int count);
+  /// **'이메일 비공개'**
+  String get guardianMyInfoEmailPrivate;
 
-  /// 내정보 프로필 카드 안내: 연결된 이룸이가 0명
+  /// 내정보 프로필 카드: 가입일 (예: 2026.10.19 가입)
   ///
   /// In ko, this message translates to:
-  /// **'연결된 이룸이가 아직 없어요'**
-  String get guardianMyInfoNoLinked;
+  /// **'{date} 가입'**
+  String guardianMyInfoJoinedOn(DateTime date);
 
   /// 내정보 이룸이 목록 묶음 머리 글
   ///

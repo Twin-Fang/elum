@@ -1,15 +1,57 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T15:41:31Z",
-    "currentVersion": "2.56.0",
+    "lastUpdated": "2026-10-19T15:59:26Z",
+    "currentVersion": "2.57.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 279
+    "totalReleases": 281
   },
   "releases": [
+    {
+      "version": "2.57.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 858,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 보호자마다 닉네임이 자동으로 생겨요\n  * 내 정보에서 가입한 계정과 가입일을 볼 수 있어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "보호자마다 닉네임이 자동으로 생겨요",
+            "내 정보에서 가입한 계정과 가입일을 볼 수 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "2.56.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 857,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 다시 가입할 때 이름이 저장되지 않던 문제 해결\n  * 온보딩에서 고른 예시 일과가 바로 생기도록 고쳤어요",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "다시 가입할 때 이름이 저장되지 않던 문제 해결",
+            "온보딩에서 고른 예시 일과가 바로 생기도록 고쳤어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.56.0",
       "project_type": "flutter",

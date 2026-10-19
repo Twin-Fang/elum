@@ -107,7 +107,7 @@ class ProfileHeaderWiringTest {
   @Test
   @DisplayName("내 정보도 헤더의 이룸이로 간다")
   void memberMe_passesProfileHeader() {
-    new MemberController(memberService).getMyInfo(guardian, "p9");
+    new MemberController(memberService, null).getMyInfo(guardian, "p9");
 
     verify(memberService).getMyInfo(Caller.guardian("m1", "p9"));
   }

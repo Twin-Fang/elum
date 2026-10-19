@@ -2014,16 +2014,16 @@
   "@guardianTabMe": { "description": "보호자 하단 바·옆 메뉴 칸 이름이자 그 칸(프로필) 화면 제목" },
 
   "guardianMyInfoProfileName": "보호자",
-  "@guardianMyInfoProfileName": { "description": "내정보 프로필 카드의 이름 자리. 서버에 보호자 이름이 없어 고정 문구" },
+  "@guardianMyInfoProfileName": { "description": "내정보 프로필 카드: 닉네임 위 역할 이름. 닉네임이 없으면 이 문구가 이름 자리에 감" },
 
-  "guardianMyInfoLinkedCount": "이룸이 {count}명과 함께해요",
-  "@guardianMyInfoLinkedCount": {
-    "description": "내정보 프로필 카드 안내: 연결된 이룸이 수",
-    "placeholders": { "count": { "type": "int" } }
+  "guardianMyInfoEmailPrivate": "이메일 비공개",
+  "@guardianMyInfoEmailPrivate": { "description": "내정보 프로필 카드: 이메일이 없거나 애플 숨김 주소인 계정 (#849)" },
+
+  "guardianMyInfoJoinedOn": "{date} 가입",
+  "@guardianMyInfoJoinedOn": {
+    "description": "내정보 프로필 카드: 가입일 (예: 2026.10.19 가입)",
+    "placeholders": { "date": { "type": "DateTime", "format": "y.MM.dd", "isCustomDateFormat": "true" } }
   },
-
-  "guardianMyInfoNoLinked": "연결된 이룸이가 아직 없어요",
-  "@guardianMyInfoNoLinked": { "description": "내정보 프로필 카드 안내: 연결된 이룸이가 0명" },
 
   "guardianMyInfoChildrenHeader": "이룸이",
   "@guardianMyInfoChildrenHeader": { "description": "내정보 이룸이 목록 묶음 머리 글" },

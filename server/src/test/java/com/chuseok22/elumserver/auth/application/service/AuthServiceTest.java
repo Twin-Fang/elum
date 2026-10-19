@@ -17,6 +17,7 @@ import com.chuseok22.elumserver.common.infrastructure.properties.JwtProperties;
 import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.common.infrastructure.jwt.LinkRole;
 import com.chuseok22.elumserver.member.application.service.GuardianshipService;
+import com.chuseok22.elumserver.member.application.service.MemberNicknameService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
@@ -63,6 +64,9 @@ class AuthServiceTest {
   @Mock
   private SubscriptionService subscriptionService;
 
+  @Mock
+  private MemberNicknameService memberNicknameService;
+
   @InjectMocks
   private AuthService authService;
 
@@ -71,7 +75,7 @@ class AuthServiceTest {
     "elum-test-secret-key-elum-test-secret-key-0123456789", 86_400_000L, 15_552_000_000L, "elum-test"));
 
   private AuthService serviceWithRealJwt() {
-    return new AuthService(memberRepository, null, passwordEncoder, memberAuthenticationManager,
+    return new AuthService(memberRepository, null, memberNicknameService, passwordEncoder, memberAuthenticationManager,
       realJwt, jwtProperties, refreshTokenService, null, withdrawnMemberService);
   }
 

@@ -173,7 +173,8 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
   /// 대신 **서버 저장이 온전했는지를 돌려준다** — 부르는 쪽이 알려야
   /// 보호자가 "설정이 저장된 줄 알았는데 재설치하니 사라졌다"를 겪지 않는다.
   ///
-  /// 예시 일과 분류는 서버에 보내지 않고 로컬에만 보관한다 (홈 진입 때 ExampleRoutineSeeder 가 만든다).
+  /// 서버 저장은 온보딩 완료 API 한 번 — 이룸이 확보·정보·예시 일과가 함께 저장되거나 함께 실패한다.
+  /// 고른 이룸이 헤더를 싣지 않아, 지워진 이룸이 id 가 남은 재가입에서도 내 이룸이에 저장된다.
   ///
   /// null 이면 셋 다 저장됐다. 하나라도 실패하면 **처음 실패한 이유**를 돌려준다 —
   /// 서버가 왜 거절했는지(잘못된 값·정지된 계정 등)를 화면이 그대로 띄운다.
@@ -194,12 +195,9 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
       // 건너뛴 경우에도 기본값(만화)이 명시로 남는다
       await storage.setImageStyle(input.imageStyle.apiValue);
       await storage.setPin(input.guardianPin);
-      // 예시 일과는 홈 진입 때 만든다 (ExampleRoutineSeeder). 건너뛰었으면 빈 목록
-      await storage.setPendingExampleCategories(
-        input.exampleCategories.map((c) => c.apiValue).toList(),
-      );
-      // ensureProfile 이 먼저 고른 이룸이 — 나중에 선택이 바뀌면 그 이룸이에 넣지 않는다
-      await storage.setPendingExampleProfileId(storage.selectedProfileId);
+      // 예시 일과는 서버가 온보딩 저장과 함께 만든다 — 홈에서 따로 만들 대기값은 비운다
+      await storage.setPendingExampleCategories(const []);
+      await storage.setPendingExampleProfileId(null);
       await storage.setExampleSeedAttempts(0);
       await storage.setOnboardingCompleted(true);
     } catch (e, stack) {
@@ -208,11 +206,30 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
       return AppFailure.of(e);
     }
 
-    // 서버 연동 — nickname·goals·character·imageStyle을 계정에 남긴다. 하나가
-    // 실패해도 나머지는 시도한다 — 일부라도 남는 편이 낫다. (`??=` 로 이으면 앞이 실패할 때
-    // 뒤 호출이 통째로 건너뛰어진다.)
+    // 서버 한 번 저장 (이룸이 확보·정보·예시 일과) > 저장된 이룸이를 고른 이룸이로
     final member = ref.read(memberRepositoryProvider);
     final character = input.cardCharacter;
+    final saved = await member.completeOnboarding(
+      nickname: input.childNickname,
+      supportGoals: input.supportGoals.map((g) => g.apiValue).toList(),
+      character: character?.apiValue,
+      imageStyle: input.imageStyle.apiValue,
+      exampleCategories: input.exampleCategories.map((c) => c.apiValue).toList(),
+    );
+    final savedMember = saved.value;
+    final savedFailure = saved.failure;
+    if (savedFailure == null && savedMember != null) {
+      await _selectSavedProfile(storage, savedMember.profiles.first.id);
+      if (ref.mounted && state != input) state = input;
+      return null;
+    }
+    // 이 경로를 모르는 옛 서버만 낱개 저장으로 (예시 일과 없음)
+    if (savedFailure == null || !MemberRepository.isRouteMissing(savedFailure)) {
+      return savedFailure ?? const AppFailure(fault: NetworkFault.app);
+    }
+
+    // 옛 서버 낱개 저장 — 하나가 실패해도 나머지는 시도한다. (`??=` 로 이으면 앞이 실패할 때
+    // 뒤 호출이 통째로 건너뛰어진다.)
     final failures = <AppFailure?>[
       await member.updateNickname(input.childNickname),
       await member.updateSupportGoals(
@@ -225,5 +242,14 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
     if (ref.mounted && state != input) state = input;
     // 처음 실패한 이유를 돌려준다
     return failures.whereType<AppFailure>().firstOrNull;
+  }
+
+  /// 서버가 저장한 이룸이를 고른 이룸이로 (이후 요청이 같은 이룸이를 가리키게)
+  Future<void> _selectSavedProfile(LocalStorage storage, String profileId) async {
+    try {
+      await storage.setSelectedProfileId(profileId);
+    } catch (e, stack) {
+      AppLogger.error('[onboarding] saved profile selection failed (saved on server)', e, stack);
+    }
   }
 }

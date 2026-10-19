@@ -28,6 +28,7 @@ import com.chuseok22.elumserver.license.application.service.SubscriptionService;
 import com.chuseok22.elumserver.license.infrastructure.repository.SubscriptionRepository;
 import com.chuseok22.elumserver.link.infrastructure.repository.DeviceLinkRepository;
 import com.chuseok22.elumserver.member.application.service.GuardianshipService;
+import com.chuseok22.elumserver.member.application.service.MemberNicknameService;
 import com.chuseok22.elumserver.member.application.service.WithdrawnMemberService;
 import com.chuseok22.elumserver.member.infrastructure.entity.CharacterType;
 import com.chuseok22.elumserver.member.infrastructure.entity.Member;
@@ -145,7 +146,7 @@ class OAuthLoginServiceTest {
     oAuthLoginService = new OAuthLoginService(
       List.of(kakao, naver), authIdentityRepository, memberRepository, guardianshipService,
       subscriptionService, passwordEncoder, jwtProvider, jwtProperties, refreshTokenService,
-      withdrawnMemberService, creditAccountService);
+      withdrawnMemberService, creditAccountService, new MemberNicknameService(memberRepository));
   }
 
   private Member existingMember(MemberStatus status) {
