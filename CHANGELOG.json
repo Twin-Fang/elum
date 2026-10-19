@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-18T16:09:11Z",
-    "currentVersion": "2.40.1",
+    "lastUpdated": "2026-10-19T05:16:36Z",
+    "currentVersion": "2.41.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 256
+    "totalReleases": 257
   },
   "releases": [
+    {
+      "version": "2.41.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 775,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 의견 보내기에서 휴대폰 정보도 함께 보낼 수 있어요\n  * 문제가 생겼을 때 원인을 더 빨리 확인할 수 있어요\n\n* **문서**\n  * 개인정보처리방침에 의견 보내기로 받는 휴대폰 정보를 안내했어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "의견 보내기에서 휴대폰 정보도 함께 보낼 수 있어요",
+            "문제가 생겼을 때 원인을 더 빨리 확인할 수 있어요"
+          ]
+        },
+        "문서": {
+          "title": "문서",
+          "items": [
+            "개인정보처리방침에 의견 보내기로 받는 휴대폰 정보를 안내했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.40.1",
       "project_type": "flutter",

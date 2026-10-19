@@ -18,6 +18,7 @@ class MainActivity : FlutterFragmentActivity() {
             StripNativeAdFactory.FACTORY_ID,
             StripNativeAdFactory(this),
         )
+        AppDiagnosticsChannel.register(flutterEngine, this)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "elum/installation")
             .setMethodCallHandler { call, result ->
                 if (call.method != "getInstallationId") { result.notImplemented() }

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_log_connectivity.dart';
+import 'app_log_diagnostics.dart';
 import 'app_log_lifecycle_observer.dart';
 import 'app_logger.dart';
 
@@ -16,6 +17,7 @@ abstract final class AppDiagnostics {
   static void install() {
     if (_installed) return;
     _installed = true;
+    AppLogDiagnostics.startedAt = DateTime.now();
 
     // 기존 핸들러를 보존하며 체인한다 — 기록만 더하고 동작은 바꾸지 않는다.
     final previousFlutter = FlutterError.onError;

@@ -4,11 +4,15 @@ import 'dart:ui';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../storage/local_storage.dart';
+import 'app_log_diagnostics.dart';
 
 /// 첨부 기록 맨 위에 붙일 환경 정보. 읽지 못한 값은 '-' 로 두고 예외를 던지지 않는다.
 ///
 /// [storage] 는 호출 시점에 읽는다 — 저장소를 올리지 않은 곳(일부 테스트)은 예외가 나도 '-' 다.
-Future<String> buildAppLogHeader({LocalStorage Function()? storage}) async {
+Future<String> buildAppLogHeader({
+  LocalStorage Function()? storage,
+  AppLogDiagnostics? diagnostics,
+}) async {
   String safe(String Function() read) {
     try {
       final v = read();
@@ -25,7 +29,12 @@ Future<String> buildAppLogHeader({LocalStorage Function()? storage}) async {
   } catch (_) {}
 
   final dispatcher = PlatformDispatcher.instance;
-  return [
+  // 진단 구역은 값마다 실패를 삼키므로 예외가 나와도 기본 머리글은 그대로 보낸다
+  var diagnosticsSection = '';
+  try {
+    diagnosticsSection = await (diagnostics ?? AppLogDiagnostics()).buildSection();
+  } catch (_) {}
+  final base = [
     '앱: $app',
     'OS: ${safe(() => '${Platform.operatingSystem} ${Platform.operatingSystemVersion}')}',
     '언어: ${safe(() => dispatcher.locale.toLanguageTag())}',
@@ -34,6 +43,7 @@ Future<String> buildAppLogHeader({LocalStorage Function()? storage}) async {
     '온보딩 완료: ${safe(() => storage!().isOnboardingCompleted ? '예' : '아니오')}',
     '화면 크기: ${safe(() => _screenSize(dispatcher))}',
   ].join('\n');
+  return diagnosticsSection.isEmpty ? base : '$base\n$diagnosticsSection';
 }
 
 String _roleLabel(String? role) => switch (role) {

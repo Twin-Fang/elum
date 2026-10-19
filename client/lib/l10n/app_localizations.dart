@@ -2309,7 +2309,7 @@ abstract class AppLocalizations {
   /// 의견과 함께 최근 앱 상태 기록을 보낼지 고르는 체크 문구
   ///
   /// In ko, this message translates to:
-  /// **'앱 상태 기록 보내기'**
+  /// **'앱 상태 기록과 휴대폰 정보 보내기'**
   String get feedbackIncludeLog;
 
   /// 의견 보내기 버튼
