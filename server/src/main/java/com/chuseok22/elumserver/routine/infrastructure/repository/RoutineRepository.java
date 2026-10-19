@@ -63,10 +63,14 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
     long getRoutineCount();
   }
 
-  /// 이 보호자가 만든 일과 수. 보유 개수 한도에 쓴다 (다중 보호자 E42).
+  /// 이 보호자가 만든 일과 수 (온보딩 예시 제외). 보유 개수 한도에 쓴다 (다중 보호자 E42).
   ///
   /// 이룸이 밑 일과를 세면 함께 돌보는 사람이 만든 일과까지 내 한도를 먹는다. 요금제는 만드는 사람 기준이다.
-  long countByCreatedBy(String createdBy);
+  /// 예시는 고르기만 한 일과라 세지 않는다 — 예시 때문에 첫 일과 만들기가 막히면 안 된다 (#803)
+  long countByCreatedByAndIsExampleFalse(String createdBy);
+
+  /// 이 이룸이에 온보딩 예시 일과가 이미 있는가 — 예시를 두 벌 만들지 않는 기준 (#803)
+  boolean existsByProfileIdAndIsExampleTrue(String profileId);
 
   /**
    * 홈 목록용 조회. 보이는 순서 → 예정 시각 차례로 줄 세운다.

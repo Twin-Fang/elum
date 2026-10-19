@@ -84,7 +84,10 @@ public record RoutineResponse(
 
   @Schema(description = "일과관리 '보내기'로 만든 오늘 일과면 그 원본 일과 ID (#804). 원본(직접 만든 일과·복사하기)이면 null",
     nullable = true)
-  String sourceRoutineId
+  String sourceRoutineId,
+
+  @Schema(description = "온보딩에서 고른 분류로 넣은 예시 일과인가 (#803). 홈에 '예시' 표시", example = "false")
+  boolean isExample
 ) {
 
   /**
@@ -107,14 +110,14 @@ public record RoutineResponse(
   public RoutineResponse withCredit(CreditUsage usage) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      usage, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId);
+      usage, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample);
   }
 
   /// 그림을 건너뛴 까닭을 붙인 응답.
   public RoutineResponse withImageSkippedReason(String reason) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, reason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId);
+      credit, reason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample);
   }
 
   /// 보호자가 쓴 말(원문·마스킹본·재생성 피드백)을 뺀 응답. 이룸이 휴대폰은 화면에 쓰지 않는 값이라
@@ -122,7 +125,7 @@ public record RoutineResponse(
   public RoutineResponse withoutSourceText() {
     return new RoutineResponse(id, title, null, null, scheduledAt, status, null,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId);
+      credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId, isExample);
   }
 
   /// 보호자 원문을 가려야 하는 호출자인가.
@@ -162,13 +165,13 @@ public record RoutineResponse(
   public RoutineResponse withCreatorName(String name) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, imageSkippedReason, createdBy, createdByMe, name, profileId, language, sourceRoutineId);
+      credit, imageSkippedReason, createdBy, createdByMe, name, profileId, language, sourceRoutineId, isExample);
   }
 
   private RoutineResponse withCreatedByMe(Boolean mine) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, imageSkippedReason, createdBy, mine, creatorName, profileId, language, sourceRoutineId);
+      credit, imageSkippedReason, createdBy, mine, creatorName, profileId, language, sourceRoutineId, isExample);
   }
 
   public static RoutineResponse from(Routine routine) {
@@ -204,7 +207,9 @@ public record RoutineResponse(
       routine.getProfile() == null ? null : routine.getProfile().getId(),
       // 마이그레이션 전 코드로 만든 행은 null 일 수 있어 ko 로 떨어뜨린다
       routine.languageCode(),
-      routine.getSourceRoutineId()
+      routine.getSourceRoutineId(),
+      // 컬럼 추가 전 행은 null — 예시 아님
+      Boolean.TRUE.equals(routine.getIsExample())
     );
   }
 }
