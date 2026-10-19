@@ -58,7 +58,7 @@ class GuardianShell extends StatelessWidget {
             child: MediaQuery.removePadding(
               context: context,
               removeBottom: true,
-              child: navigationShell,
+              child: _ContentSemanticsScope(child: navigationShell),
             ),
           ),
           GuardianBottomNav(
@@ -101,7 +101,7 @@ class GuardianShell extends StatelessWidget {
                           bottom: 0,
                         ),
                       ),
-                      child: navigationShell,
+                      child: _ContentSemanticsScope(child: navigationShell),
                     ),
                   ),
                 ),
@@ -150,4 +150,22 @@ class _AdStripGateState extends ConsumerState<_AdStripGate> {
     final isVisible = widget.tab.isAdStripAllowed && _isEnoughRoutines;
     return isVisible ? widget.adStrip : const SizedBox.shrink();
   }
+}
+
+/// 칸 화면을 따로 낭독 묶음 · 알림 자리로 가둔다
+///
+/// 칸 화면의 내비게이터(라우트 막)가 같은 묶음에서 먼저 그려진 것의 낭독 정보를 지운다.
+/// 옆 메뉴는 본문보다 먼저 그려지므로 가두지 않으면 화면 낭독기에서 옆 메뉴가 통째로 사라진다.
+class _ContentSemanticsScope extends StatelessWidget {
+  const _ContentSemanticsScope({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    container: true,
+    explicitChildNodes: true,
+    // 칸 화면의 알림(토스트)도 본문 안에서 뜨게 — 창 가운데에 뜨면 태블릿 옆 메뉴를 덮는다
+    child: ScaffoldMessenger(child: child),
+  );
 }

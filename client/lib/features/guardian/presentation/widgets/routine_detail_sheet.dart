@@ -98,7 +98,11 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
 }
 
 class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
-  late List<ActionCard> _steps = List.of(widget.routine.steps);
+  // 일과관리 원본은 보관본이라 예전에 한 체크를 보이지 않는다 — 오늘 보내면 새로 시작한다
+  late List<ActionCard> _steps = [
+    for (final step in widget.routine.steps)
+      widget.isLibrary ? step.copyWith(completed: false) : step,
+  ];
 
   /// 시트 높이. 시안(956:4084) 기준 614/852 ≈ 0.72다.
   ///

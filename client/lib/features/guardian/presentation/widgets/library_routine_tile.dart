@@ -101,13 +101,17 @@ class _Thumbnail extends StatelessWidget {
     final placeholder = _LetterThumbnail(title: routine.displayTitle);
     if (steps.isEmpty) return placeholder;
     final first = steps.first;
-    return CardImage(
-      routineId: routine.id,
-      stepId: first.id,
-      imagePath: first.imagePath,
-      pictogramId: first.pictogramId,
-      pictogramLabel: first.title,
-      emptyBuilder: (_) => placeholder,
+    // 그림을 받는 동안에도 칸 모양이 보이게 흰 바탕을 깔아 둔다 (비어 보이면 빠진 칸 같다)
+    return ColoredBox(
+      color: context.colors.surface,
+      child: CardImage(
+        routineId: routine.id,
+        stepId: first.id,
+        imagePath: first.imagePath,
+        pictogramId: first.pictogramId,
+        pictogramLabel: first.title,
+        emptyBuilder: (_) => placeholder,
+      ),
     );
   }
 }
