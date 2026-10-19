@@ -6,9 +6,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
-import '../../../../core/widgets/app_pressable.dart';
 import '../../../../shared/models/routine.dart';
 import '../../application/library_entries.dart';
+import 'arrange_remove_badge.dart';
 import 'library_group_tile.dart';
 import 'library_routine_tile.dart';
 
@@ -448,9 +448,6 @@ class _ArrangeShellState extends State<_ArrangeShell>
   static const _jiggleHalfPeriod = Duration(milliseconds: 260);
   static const _maxTiltDegrees = 2.4;
 
-  /// ⊖ 한 변 · 칸 위쪽 왼쪽으로 튀어나오는 정도
-  static const _badgeSize = 22.0;
-
   late final AnimationController _controller;
 
   @override
@@ -488,7 +485,6 @@ class _ArrangeShellState extends State<_ArrangeShell>
   @override
   Widget build(BuildContext context) {
     if (!widget.isArranging) return widget.child;
-    final colors = context.colors;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -505,23 +501,9 @@ class _ArrangeShellState extends State<_ArrangeShell>
           Positioned(
             top: -4.h,
             left: 2.w,
-            child: AppPressable(
+            child: ArrangeRemoveBadge(
               onTap: widget.onRemove,
-              scaleDown: AppPressable.scaleIcon,
               semanticLabel: context.l10n.libraryArrangeRemove,
-              child: Container(
-                width: _badgeSize.w,
-                height: _badgeSize.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colors.textSecondary,
-                ),
-                child: Icon(
-                  Icons.remove_rounded,
-                  size: 16.w,
-                  color: colors.surface,
-                ),
-              ),
             ),
           ),
       ],

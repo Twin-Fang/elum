@@ -4501,6 +4501,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이 일과만 오늘 보내기'**
   String get routineLibrarySendOnlyThis;
+
+  /// 묶음 열기 일과 줄의 보조 글 (#846)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 {count}장'**
+  String routineGroupRowCardCount(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -2578,4 +2578,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineLibrarySendOnlyThis => 'Send only this one today';
+
+  @override
+  String routineGroupRowCardCount(int count) {
+    return '카드 $count장';
+  }
 }
