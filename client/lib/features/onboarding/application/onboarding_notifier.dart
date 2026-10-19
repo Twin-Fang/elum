@@ -173,6 +173,8 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
   /// 대신 **서버 저장이 온전했는지를 돌려준다** — 부르는 쪽이 알려야
   /// 보호자가 "설정이 저장된 줄 알았는데 재설치하니 사라졌다"를 겪지 않는다.
   ///
+  /// 예시 일과 분류는 서버에 보내지 않고 로컬에만 보관한다 (홈 진입 때 ExampleRoutineSeeder 가 만든다).
+  ///
   /// null 이면 셋 다 저장됐다. 하나라도 실패하면 **처음 실패한 이유**를 돌려준다 —
   /// 서버가 왜 거절했는지(잘못된 값·정지된 계정 등)를 화면이 그대로 띄운다.
   Future<AppFailure?> complete() async {

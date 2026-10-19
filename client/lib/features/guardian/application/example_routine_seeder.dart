@@ -43,7 +43,7 @@ class ExampleRoutineSeeder {
     final pending = storage.pendingExampleCategories;
     if (pending.isEmpty || _isRunning) return ExampleSeedOutcome.nothingPending;
 
-    // 온보딩을 마친 이룸이가 아니면 버림 (다른 이룸이로 바꿨거나 합류함)
+    // 대상 이룸이 확인 (온보딩 때 선택한 이룸이일 때만 보냄)
     if (storage.pendingExampleProfileId != storage.selectedProfileId) {
       AppLogger.error(
         '[routine example] dropped : selected profile changed',
