@@ -24,6 +24,7 @@ public class NotificationRecorder {
   public List<RecordedNotification> record(NotificationDraft draft, Collection<String> recipientMemberIds) {
     List<RecordedNotification> recorded = new ArrayList<>();
     if (draft == null || recipientMemberIds == null) {
+      log.warn("[notification record] skipped : empty draft or recipients");
       return recorded;
     }
     for (String recipientMemberId : recipientMemberIds) {

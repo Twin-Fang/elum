@@ -28,7 +28,7 @@ class NotificationRowWriter {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public RecordedNotification write(NotificationDraft draft, String recipientMemberId) {
     Optional<Notification> existing =
-      notificationRepository.findByRecipientMemberIdAndGroupKey(recipientMemberId, draft.groupKey());
+      notificationRepository.findForUpdateByRecipientMemberIdAndGroupKey(recipientMemberId, draft.groupKey());
     if (existing.isEmpty()) {
       return insert(draft, recipientMemberId);
     }
