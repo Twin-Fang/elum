@@ -565,7 +565,7 @@ void main() {
 
   // 이룸이가 직접 쓰는 화면이라 올려 둔다. 값으로 대조했을 때는 열두 값이
   // 모두 맞았지만(#297), 픽셀로 맞대본 적은 없었다.
-  testWidgets('이룸이 홈 — 이룸이 휴대폰 (Figma 1197:6810)', (tester) async {
+  testWidgets('이룸이 홈 — 이룸이 기기 (Figma 1197:6810)', (tester) async {
     await tester.pumpWidget(
       wrapChild(
         // 시안이 그린 내용 그대로. 다르면 차이 그림이 통째로 붉어진다.

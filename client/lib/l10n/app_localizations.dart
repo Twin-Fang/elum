@@ -146,7 +146,7 @@ abstract class AppLocalizations {
   /// **'{year}년 {month}월 {day}일'**
   String dateYearMonthDay(int year, int month, int day);
 
-  /// 이룸이 휴대폰이 연결된 날. 예: 9월 18일부터
+  /// 이룸이 기기가 연결된 날. 예: 9월 18일부터
   ///
   /// In ko, this message translates to:
   /// **'{month}월 {day}일부터'**
@@ -521,7 +521,7 @@ abstract class AppLocalizations {
   /// 역할 선택 화면 제목. 줄바꿈 위치까지 문구의 일부
   ///
   /// In ko, this message translates to:
-  /// **'이 휴대폰은 누가\n사용하나요?'**
+  /// **'이 기기는 누가\n사용하나요?'**
   String get roleSelectTitle;
 
   /// 역할 선택 화면 부제
@@ -938,7 +938,7 @@ abstract class AppLocalizations {
   /// **'설정 화면에서 다시 확인해주세요'**
   String get pinSaveFailedFallback;
 
-  /// 이룸이 휴대폰 설정 페이지 제목
+  /// 이룸이 기기 설정 페이지 제목
   ///
   /// In ko, this message translates to:
   /// **'설정'**
@@ -977,7 +977,7 @@ abstract class AppLocalizations {
   /// 로그아웃 확인 팝업 본문
   ///
   /// In ko, this message translates to:
-  /// **'이 휴대폰의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요'**
+  /// **'이 기기의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요'**
   String get elumiSettingsLogoutMessage;
 
   /// 로그아웃 실패 팝업 제목
@@ -995,13 +995,13 @@ abstract class AppLocalizations {
   /// 회원탈퇴 확인 팝업 본문
   ///
   /// In ko, this message translates to:
-  /// **'이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요'**
+  /// **'이 기기의 연결만 끊어져요\n일과와 별은 보호자 기기에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요'**
   String get elumiSettingsWithdrawMessage;
 
-  /// 이룸이 전용 휴대폰에서 초대 링크를 열었을 때의 토스트
+  /// 이룸이 전용 기기에서 초대 링크를 열었을 때의 토스트
   ///
   /// In ko, this message translates to:
-  /// **'이 휴대폰에서는 초대를 받을 수 없어요\n보호자 휴대폰에서 열어주세요'**
+  /// **'이 기기에서는 초대를 받을 수 없어요\n보호자 기기에서 열어주세요'**
   String get inviteRejectedOnElumiDevice;
 
   /// 회원탈퇴 실패 팝업 제목
@@ -1016,10 +1016,10 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 시도해주세요'**
   String get elumiSettingsExitFailedFallback;
 
-  /// 보호자 설정의 이룸이 휴대폰 연결 상태 화면 제목
+  /// 보호자 설정의 이룸이 기기 연결 상태 화면 제목
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 휴대폰'**
+  /// **'이룸이 기기'**
   String get linkStatusTitle;
 
   /// 연결 끊기 확인 팝업 제목
@@ -1031,7 +1031,7 @@ abstract class AppLocalizations {
   /// 연결 끊기 확인 팝업 본문
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 휴대폰에서 일과를 볼 수 없어요\n다시 연결하려면 새 암호를 만들면 돼요'**
+  /// **'이룸이 기기에서 일과를 볼 수 없어요\n다시 연결하려면 새 암호를 만들면 돼요'**
   String get linkStatusRevokeConfirmMessage;
 
   /// 연결 끊기 확인 팝업의 위험 버튼
@@ -1070,19 +1070,19 @@ abstract class AppLocalizations {
   /// **'연결 상태를 불러오지 못했어요'**
   String get linkStatusLoadFailedFallback;
 
-  /// 연결된 휴대폰이 여러 대일 때 붙이는 번호 제목
+  /// 연결된 기기가 여러 대일 때 붙이는 번호 제목
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 휴대폰 {number}'**
+  /// **'이룸이 기기 {number}'**
   String linkDeviceNumbered(int number);
 
-  /// 연결된 휴대폰의 상태 글자
+  /// 연결된 기기의 상태 글자
   ///
   /// In ko, this message translates to:
   /// **'연결됨'**
   String get linkStatusConnected;
 
-  /// 연결된 휴대폰 카드의 연결 끊기 버튼
+  /// 연결된 기기 카드의 연결 끊기 버튼
   ///
   /// In ko, this message translates to:
   /// **'연결 끊기'**
@@ -1091,22 +1091,22 @@ abstract class AppLocalizations {
   /// 연결 끊기 버튼 아래 안내
   ///
   /// In ko, this message translates to:
-  /// **'끊으면 이룸이 휴대폰에서\n일과를 볼 수 없어요'**
+  /// **'끊으면 이룸이 기기에서\n일과를 볼 수 없어요'**
   String get linkStatusRevokeHint;
 
-  /// 연결된 휴대폰이 하나도 없을 때
+  /// 연결된 기기가 하나도 없을 때
   ///
   /// In ko, this message translates to:
-  /// **'연결된 휴대폰이 없어요'**
+  /// **'연결된 기기가 없어요'**
   String get linkStatusEmpty;
 
-  /// 연결된 휴대폰을 누가 연결했는지. name 은 연결 암호를 만든 보호자가 이 이룸이 안에서 불리는 이름(없으면 '보호자'). batchim 은 한국어 조사 선택용이라 다른 언어는 쓰지 않는다
+  /// 연결된 기기를 누가 연결했는지. name 은 연결 암호를 만든 보호자가 이 이룸이 안에서 불리는 이름(없으면 '보호자'). batchim 은 한국어 조사 선택용이라 다른 언어는 쓰지 않는다
   ///
   /// In ko, this message translates to:
   /// **'{name}{batchim, select, yes{이} other{가}} 연결'**
   String linkStatusConnectedBy(String name, String batchim);
 
-  /// 내가 만든 연결 암호로 붙은 휴대폰
+  /// 내가 만든 연결 암호로 붙은 기기
   ///
   /// In ko, this message translates to:
   /// **'내가 연결'**
@@ -1118,34 +1118,34 @@ abstract class AppLocalizations {
   /// **'{by} · {since}'**
   String linkStatusConnectedByAndSince(String by, String since);
 
-  /// 연결된 휴대폰이 있어도 목록 아래에서 연결 암호 만들기로 가는 버튼
+  /// 연결된 기기가 있어도 목록 아래에서 연결 암호 만들기로 가는 버튼
   ///
   /// In ko, this message translates to:
-  /// **'+ 다른 휴대폰 연결하기'**
+  /// **'+ 다른 기기 연결하기'**
   String get linkStatusAddAction;
 
   /// 연결 없음 상태에서 연결 암호 만들기로 가는 버튼
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 휴대폰 연결하기'**
+  /// **'이룸이 기기 연결하기'**
   String get linkStatusConnectAction;
 
   /// 설정에서 연 연결 암호 화면의 제목
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 휴대폰 연결'**
+  /// **'이룸이 기기 연결'**
   String get linkCodeSettingsTitle;
 
-  /// 보호자 휴대폰의 연결 암호 화면 제목. name 은 이룸이 호칭
+  /// 보호자 기기의 연결 암호 화면 제목. name 은 이룸이 호칭
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 휴대폰을\n연결할까요?'**
+  /// **'{name}의 기기를\n연결할까요?'**
   String linkCodeAskTitle(String name);
 
   /// 연결 암호 화면의 설명. name 은 이룸이 호칭
   ///
   /// In ko, this message translates to:
-  /// **'{name}의 휴대폰에서 아래 코드를 입력하세요'**
+  /// **'{name}의 기기에서 아래 코드를 입력하세요'**
   String linkCodeEnterHint(String name);
 
   /// 연결 암호 발급 실패 시 서버가 문구를 못 줄 때의 기본 안내
@@ -1154,10 +1154,10 @@ abstract class AppLocalizations {
   /// **'암호를 만들지 못했어요. 다시 해주세요'**
   String get linkCodeIssueFailedFallback;
 
-  /// 이룸이 휴대폰이 연결됐을 때 팝업 제목
+  /// 이룸이 기기가 연결됐을 때 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'휴대폰 연결에 성공했어요!'**
+  /// **'기기 연결에 성공했어요!'**
   String get linkCodeSuccessTitle;
 
   /// 온보딩에서 연 연결 암호 화면의 시작 버튼
@@ -1184,22 +1184,22 @@ abstract class AppLocalizations {
   /// **'코드 다시 만들기'**
   String get linkRetryChipLabel;
 
-  /// 이룸이 휴대폰의 코드 입력 화면 제목
+  /// 이룸이 기기의 코드 입력 화면 제목
   ///
   /// In ko, this message translates to:
   /// **'보호자에게서 받은 코드를\n입력해주세요'**
   String get linkEnterTitle;
 
-  /// 이룸이 휴대폰의 코드 입력 안내. linkEnterGuidePath 를 문장 안에 그대로 포함해야 밑줄이 그려진다
+  /// 이룸이 기기의 코드 입력 안내. linkEnterGuidePath 를 문장 안에 그대로 포함해야 밑줄이 그려진다
   ///
   /// In ko, this message translates to:
-  /// **'코드는 보호자 휴대폰의\n설정 → 이룸이 휴대폰 연결하기에 있어요'**
+  /// **'코드는 보호자 기기의\n설정 → 이룸이 기기 연결하기에 있어요'**
   String get linkEnterGuide;
 
   /// linkEnterGuide 안에서 밑줄을 그을 부분. 안내문에 똑같이 들어 있어야 한다
   ///
   /// In ko, this message translates to:
-  /// **'설정 → 이룸이 휴대폰 연결하기'**
+  /// **'설정 → 이룸이 기기 연결하기'**
   String get linkEnterGuidePath;
 
   /// 연결이 밖에서 끊겨 코드 입력 화면으로 돌아왔을 때 설명(다음 행동 포함)
@@ -1307,7 +1307,7 @@ abstract class AppLocalizations {
   /// 다른 보호자가 남아 있을 때의 확인 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'내가 연결한 이룸이 휴대폰이 있다면 연결이 끊어져요\n남은 보호자가 새 연결 암호를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요'**
+  /// **'내가 연결한 이룸이 기기가 있다면 연결이 끊어져요\n남은 보호자가 새 연결 암호를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요'**
   String get guardiansLeaveConfirmMessageOthers;
 
   /// 함께 돌보기 그만두기 확인 팝업의 위험 버튼
@@ -1550,10 +1550,10 @@ abstract class AppLocalizations {
   /// **'이미 함께하고 있는 이룸이예요'**
   String get inviteEnterAlreadyGuardian;
 
-  /// 이룸이 휴대폰에서 합류하려 할 때 서버가 문구를 못 줄 때의 기본 안내
+  /// 이룸이 기기에서 합류하려 할 때 서버가 문구를 못 줄 때의 기본 안내
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 휴대폰에서는 할 수 없어요'**
+  /// **'이룸이 기기에서는 할 수 없어요'**
   String get inviteEnterForbiddenForElumi;
 
   /// 서버가 코드 모양을 거절했을 때 서버가 문구를 못 줄 때의 기본 안내
@@ -1613,7 +1613,7 @@ abstract class AppLocalizations {
   /// 직접 입력할 때의 설명(코드를 받는 길)
   ///
   /// In ko, this message translates to:
-  /// **'코드는 함께하는 보호자 휴대폰의\n설정 → 함께하는 사람에 있어요'**
+  /// **'코드는 함께하는 보호자 기기의\n설정 → 함께하는 사람에 있어요'**
   String get inviteEnterDescriptionManual;
 
   /// 직접 입력 설명(inviteEnterDescriptionManual) 안에서 밑줄을 긋는 길 안내. 설명 문구에 그대로 들어 있어야 함
@@ -2153,7 +2153,7 @@ abstract class AppLocalizations {
   /// 카드 소리 재생 실패 팝업 안내
   ///
   /// In ko, this message translates to:
-  /// **'휴대폰 소리를 켜고 다시 눌러주세요'**
+  /// **'기기 소리를 켜고 다시 눌러주세요'**
   String get cardReviewSoundFailedFallback;
 
   /// 일과 저장 실패 팝업 제목
@@ -2348,19 +2348,19 @@ abstract class AppLocalizations {
   /// **'회원탈퇴'**
   String get guardianSettingsWithdraw;
 
-  /// 설정 줄 — 이룸이 휴대폰이 이미 연결됐을 때
+  /// 설정 줄 — 이룸이 기기가 이미 연결됐을 때
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 휴대폰'**
+  /// **'이룸이 기기'**
   String get guardianSettingsLinkConnected;
 
-  /// 설정 줄 — 이룸이 휴대폰을 아직 연결하지 않았을 때
+  /// 설정 줄 — 이룸이 기기를 아직 연결하지 않았을 때
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 휴대폰 연결하기'**
+  /// **'이룸이 기기 연결하기'**
   String get guardianSettingsLinkConnect;
 
-  /// 설정 줄 — 이룸이 휴대폰 연결 상태 값
+  /// 설정 줄 — 이룸이 기기 연결 상태 값
   ///
   /// In ko, this message translates to:
   /// **'연결됨'**
@@ -2537,7 +2537,7 @@ abstract class AppLocalizations {
   /// 카드 크게 보기에서 소리 재생이 실패했을 때 서버 문구가 없을 때의 안내
   ///
   /// In ko, this message translates to:
-  /// **'휴대폰 소리를 켜고 다시 눌러주세요'**
+  /// **'기기 소리를 켜고 다시 눌러주세요'**
   String get cardViewerSoundFailedFallback;
 
   /// 카드 크게 보기의 닫기 버튼 낭독 이름
@@ -2606,7 +2606,7 @@ abstract class AppLocalizations {
   /// **'갤러리에서 고르기'**
   String get cardPhotoPermissionGallery;
 
-  /// 사진 권한 안내 화면의 휴대폰 설정 열기 버튼
+  /// 사진 권한 안내 화면의 기기 설정 열기 버튼
   ///
   /// In ko, this message translates to:
   /// **'설정 열기'**
@@ -2627,25 +2627,25 @@ abstract class AppLocalizations {
   /// 카메라 권한이 막혔을 때 사진 권한 안내 설명
   ///
   /// In ko, this message translates to:
-  /// **'휴대폰 설정에서 카메라를 켜면 사진을 찍을 수 있어요'**
+  /// **'기기 설정에서 카메라를 켜면 사진을 찍을 수 있어요'**
   String get cardPhotoPermissionCameraBody;
 
   /// 사진 접근 권한이 막혔을 때 사진 권한 안내 설명
   ///
   /// In ko, this message translates to:
-  /// **'휴대폰 설정에서 사진 접근을 켜면 고를 수 있어요'**
+  /// **'기기 설정에서 사진 접근을 켜면 고를 수 있어요'**
   String get cardPhotoPermissionGalleryBody;
 
-  /// 사진 권한 안내에서 휴대폰 설정을 못 열었을 때 제목
+  /// 사진 권한 안내에서 기기 설정을 못 열었을 때 제목
   ///
   /// In ko, this message translates to:
   /// **'설정을 열지 못했어요'**
   String get cardPhotoSettingsFailedTitle;
 
-  /// 사진 권한 안내에서 휴대폰 설정을 못 열었을 때 안내
+  /// 사진 권한 안내에서 기기 설정을 못 열었을 때 안내
   ///
   /// In ko, this message translates to:
-  /// **'휴대폰 설정에서 직접 켜 주세요'**
+  /// **'기기 설정에서 직접 켜 주세요'**
   String get cardPhotoSettingsFailedFallback;
 
   /// 사진 고르기 시트의 사진 찍기 줄
@@ -3074,10 +3074,10 @@ abstract class AppLocalizations {
   /// **'보호자 화면에서 일과를 만들 수 있어요'**
   String get childHomeEmptyHint;
 
-  /// 일과가 없을 때의 안내(이룸이 전용 휴대폰)
+  /// 일과가 없을 때의 안내(이룸이 전용 기기)
   ///
   /// In ko, this message translates to:
-  /// **'보호자 휴대폰에서 일과를 만들 수 있어요'**
+  /// **'보호자 기기에서 일과를 만들 수 있어요'**
   String get childHomeEmptyHintDevice;
 
   /// 이룸이 홈 오른쪽 위 캐릭터 배지를 낭독기가 읽는 이름(보호자 화면으로 이동)
@@ -3125,7 +3125,7 @@ abstract class AppLocalizations {
   /// 카드 읽어 주기(음성)가 실패했을 때 팝업 본문
   ///
   /// In ko, this message translates to:
-  /// **'휴대폰 소리를 켜고 다시 눌러주세요'**
+  /// **'기기 소리를 켜고 다시 눌러주세요'**
   String get childDetailSoundFailedFallback;
 
   /// 카드 상세의 체크 버튼을 낭독기가 읽는 이름
@@ -3254,16 +3254,16 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 해주세요'**
   String get modeSwitchReadFailedFallback;
 
-  /// 암호가 없는 이룸이 휴대폰에서 보호자 화면을 열려 할 때 제목(줄바꿈 위치 유지)
+  /// 암호가 없는 이룸이 기기에서 보호자 화면을 열려 할 때 제목(줄바꿈 위치 유지)
   ///
   /// In ko, this message translates to:
-  /// **'보호자 휴대폰에서\n열어 주세요'**
+  /// **'보호자 기기에서\n열어 주세요'**
   String get modeSwitchBlockedTitle;
 
-  /// 암호가 없는 이룸이 휴대폰에서 보호자 화면을 열려 할 때 설명
+  /// 암호가 없는 이룸이 기기에서 보호자 화면을 열려 할 때 설명
   ///
   /// In ko, this message translates to:
-  /// **'이 휴대폰에서는 보호자 화면을 열 수 없어요'**
+  /// **'이 기기에서는 보호자 화면을 열 수 없어요'**
   String get modeSwitchBlockedDescription;
 
   /// 보호자 화면을 열 수 없다는 안내의 하단 버튼
@@ -3275,7 +3275,7 @@ abstract class AppLocalizations {
   /// No description provided for @installationRetryMessage.
   ///
   /// In ko, this message translates to:
-  /// **'휴대폰의 로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.'**
+  /// **'기기의 로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.'**
   String get installationRetryMessage;
 
   /// No description provided for @installationRetryButton.
@@ -3311,19 +3311,19 @@ abstract class AppLocalizations {
   /// 연결 코드 링크를 메신저로 보낼 때의 글. 보내는 사람의 앱 언어로 만들어진다. url 은 링크(번역하지 않는다), code 는 3-3 으로 끊은 연결 코드
   ///
   /// In ko, this message translates to:
-  /// **'이룸이가 쓸 휴대폰을 연결해요. 그 휴대폰에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 {code}'**
+  /// **'이룸이가 쓸 기기를 연결해요. 그 기기에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 {minutes, plural, other{{minutes}분}} 동안만 쓸 수 있어요.\n\n{url}\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 {code}'**
   String linkShareMessage(int minutes, String url, String code);
 
-  /// 이미 연결된 이룸이 휴대폰에서 연결 링크를 열었을 때 토스트
+  /// 이미 연결된 이룸이 기기에서 연결 링크를 열었을 때 토스트
   ///
   /// In ko, this message translates to:
-  /// **'이미 연결된 휴대폰이에요'**
+  /// **'이미 연결된 기기예요'**
   String get linkRejectedAlreadyLinked;
 
-  /// 보호자 휴대폰에서 이룸이 휴대폰 연결 링크를 열었을 때 토스트
+  /// 보호자 기기에서 이룸이 기기 연결 링크를 열었을 때 토스트
   ///
   /// In ko, this message translates to:
-  /// **'이룸이 휴대폰에서 열어주세요'**
+  /// **'이룸이 기기에서 열어주세요'**
   String get linkRejectedOnGuardianPhone;
 
   /// 크레딧 사용 내역 화면의 제목 (Figma 1589:8359)

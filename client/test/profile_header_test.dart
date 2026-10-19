@@ -42,7 +42,7 @@ void main() {
     expect(adapter.sentHeaders['GET /api/routines/today']!['X-Profile-Id'], 'p-2');
   });
 
-  test('실은 이룸이가 403 PROFILE_ACCESS_DENIED 면 잃었다고 알린다 (다른 휴대폰에서 나갔다)', () async {
+  test('실은 이룸이가 403 PROFILE_ACCESS_DENIED 면 잃었다고 알린다 (다른 기기에서 나갔다)', () async {
     selected = 'p-2';
     final dio = build({
       'GET /api/routines/today': const FakeHttpError(

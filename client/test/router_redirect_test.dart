@@ -48,7 +48,7 @@ void main() {
 
   });
 
-  group('세션이 없으면 이룸이 휴대폰도 로그인으로 되돌린다', () {
+  group('세션이 없으면 이룸이 기기도 로그인으로 되돌린다', () {
     String? go(String target, {required bool isElumi}) => resolveRedirect(
           target,
           hasSession: false,
@@ -57,7 +57,7 @@ void main() {
           isElumiDevice: isElumi,
         );
 
-    test('이룸이 휴대폰 — 로그인으로', () {
+    test('이룸이 기기 — 로그인으로', () {
       expect(go(Routes.child, isElumi: true), Routes.login);
     });
 
@@ -67,7 +67,7 @@ void main() {
     });
   });
 
-  group('휴대폰 잠금을 만들기 전에는 보호자 화면을 열지 않는다', () {
+  group('기기 잠금을 만들기 전에는 보호자 화면을 열지 않는다', () {
     String? go(String path, {bool elumi = false, bool pending = true}) =>
         resolveRedirect(
           path,

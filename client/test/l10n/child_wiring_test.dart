@@ -100,7 +100,7 @@ void main() {
     );
     await tester.tap(find.bySemanticsLabel('소리로 듣기').first);
     await tester.pumpAndSettle();
-    expect(find.text('소리를 재생하지 못했어요.\n휴대폰 소리를 켜고 다시 눌러주세요'), findsOneWidget);
+    expect(find.text('소리를 재생하지 못했어요.\n기기 소리를 켜고 다시 눌러주세요'), findsOneWidget);
     expect(find.text('E-TTS'), findsOneWidget);
     handle.dispose();
   });
@@ -130,14 +130,14 @@ void main() {
       expect(find.text('E-PIN-READ'), findsOneWidget);
     });
 
-    testWidgets('암호 없는 이룸이 휴대폰은 보호자 화면이 막힌다', (tester) async {
+    testWidgets('암호 없는 이룸이 기기는 보호자 화면이 막힌다', (tester) async {
       await pump(
         tester,
         const ModeSwitchScreen(target: ModeSwitchTarget.guardian),
         elumiDevice: true,
       );
-      expect(find.text('보호자 휴대폰에서\n열어 주세요'), findsOneWidget);
-      expect(find.text('이 휴대폰에서는 보호자 화면을 열 수 없어요'), findsOneWidget);
+      expect(find.text('보호자 기기에서\n열어 주세요'), findsOneWidget);
+      expect(find.text('이 기기에서는 보호자 화면을 열 수 없어요'), findsOneWidget);
       expect(find.text('돌아가기'), findsOneWidget);
     });
   });

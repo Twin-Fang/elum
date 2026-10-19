@@ -263,7 +263,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get roleElumiDescription => '일과를 실천해요';
 
   @override
-  String get roleSelectTitle => '이 휴대폰은 누가\n사용하나요?';
+  String get roleSelectTitle => '이 기기는 누가\n사용하나요?';
 
   @override
   String get roleSelectDescription => '보호자모드와 이룸이모드가 나눠져 있어요';
@@ -516,7 +516,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get elumiSettingsLogoutMessage =>
-      '이 휴대폰의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요';
+      '이 기기의 연결이 끊어져요\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요';
 
   @override
   String get elumiSettingsLogoutFailTitle => '로그아웃하지 못했어요';
@@ -526,11 +526,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get elumiSettingsWithdrawMessage =>
-      '이 휴대폰의 연결만 끊어져요\n일과와 별은 보호자 휴대폰에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요';
+      '이 기기의 연결만 끊어져요\n일과와 별은 보호자 기기에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요';
 
   @override
   String get inviteRejectedOnElumiDevice =>
-      '이 휴대폰에서는 초대를 받을 수 없어요\n보호자 휴대폰에서 열어주세요';
+      '이 기기에서는 초대를 받을 수 없어요\n보호자 기기에서 열어주세요';
 
   @override
   String get elumiSettingsWithdrawFailTitle => '탈퇴하지 못했어요';
@@ -539,14 +539,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get elumiSettingsExitFailedFallback => '잠시 후 다시 시도해주세요';
 
   @override
-  String get linkStatusTitle => '이룸이 휴대폰';
+  String get linkStatusTitle => '이룸이 기기';
 
   @override
   String get linkStatusRevokeConfirmTitle => '연결을 끊을까요?';
 
   @override
   String get linkStatusRevokeConfirmMessage =>
-      '이룸이 휴대폰에서 일과를 볼 수 없어요\n다시 연결하려면 새 암호를 만들면 돼요';
+      '이룸이 기기에서 일과를 볼 수 없어요\n다시 연결하려면 새 암호를 만들면 돼요';
 
   @override
   String get linkStatusRevokeConfirmAction => '연결 끊기';
@@ -568,7 +568,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String linkDeviceNumbered(int number) {
-    return '이룸이 휴대폰 $number';
+    return '이룸이 기기 $number';
   }
 
   @override
@@ -578,10 +578,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get linkStatusRevokeButton => '연결 끊기';
 
   @override
-  String get linkStatusRevokeHint => '끊으면 이룸이 휴대폰에서\n일과를 볼 수 없어요';
+  String get linkStatusRevokeHint => '끊으면 이룸이 기기에서\n일과를 볼 수 없어요';
 
   @override
-  String get linkStatusEmpty => '연결된 휴대폰이 없어요';
+  String get linkStatusEmpty => '연결된 기기가 없어요';
 
   @override
   String linkStatusConnectedBy(String name, String batchim) {
@@ -598,29 +598,29 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get linkStatusAddAction => '+ 다른 휴대폰 연결하기';
+  String get linkStatusAddAction => '+ 다른 기기 연결하기';
 
   @override
-  String get linkStatusConnectAction => '이룸이 휴대폰 연결하기';
+  String get linkStatusConnectAction => '이룸이 기기 연결하기';
 
   @override
-  String get linkCodeSettingsTitle => '이룸이 휴대폰 연결';
+  String get linkCodeSettingsTitle => '이룸이 기기 연결';
 
   @override
   String linkCodeAskTitle(String name) {
-    return '$name의 휴대폰을\n연결할까요?';
+    return '$name의 기기를\n연결할까요?';
   }
 
   @override
   String linkCodeEnterHint(String name) {
-    return '$name의 휴대폰에서 아래 코드를 입력하세요';
+    return '$name의 기기에서 아래 코드를 입력하세요';
   }
 
   @override
   String get linkCodeIssueFailedFallback => '암호를 만들지 못했어요. 다시 해주세요';
 
   @override
-  String get linkCodeSuccessTitle => '휴대폰 연결에 성공했어요!';
+  String get linkCodeSuccessTitle => '기기 연결에 성공했어요!';
 
   @override
   String get linkCodeStartButton => '시작하기';
@@ -638,10 +638,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get linkEnterTitle => '보호자에게서 받은 코드를\n입력해주세요';
 
   @override
-  String get linkEnterGuide => '코드는 보호자 휴대폰의\n설정 → 이룸이 휴대폰 연결하기에 있어요';
+  String get linkEnterGuide => '코드는 보호자 기기의\n설정 → 이룸이 기기 연결하기에 있어요';
 
   @override
-  String get linkEnterGuidePath => '설정 → 이룸이 휴대폰 연결하기';
+  String get linkEnterGuidePath => '설정 → 이룸이 기기 연결하기';
 
   @override
   String get linkEnterLinkLost => '연결이 끊어졌어요\n보호자에게 새 연결 암호를 받아 입력해주세요';
@@ -705,7 +705,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get guardiansLeaveConfirmMessageOthers =>
-      '내가 연결한 이룸이 휴대폰이 있다면 연결이 끊어져요\n남은 보호자가 새 연결 암호를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요';
+      '내가 연결한 이룸이 기기가 있다면 연결이 끊어져요\n남은 보호자가 새 연결 암호를 만들어야 다시 쓸 수 있어요\n내가 만든 일과는 사라져요\n이룸이와 다른 보호자의 일과·별은 그대로예요';
 
   @override
   String get guardiansLeaveConfirmAction => '그만두기';
@@ -841,7 +841,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get inviteEnterAlreadyGuardian => '이미 함께하고 있는 이룸이예요';
 
   @override
-  String get inviteEnterForbiddenForElumi => '이룸이 휴대폰에서는 할 수 없어요';
+  String get inviteEnterForbiddenForElumi => '이룸이 기기에서는 할 수 없어요';
 
   @override
   String get inviteEnterInvalidInput => '초대 코드가 맞지 않아요';
@@ -873,7 +873,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get inviteEnterDescriptionManual =>
-      '코드는 함께하는 보호자 휴대폰의\n설정 → 함께하는 사람에 있어요';
+      '코드는 함께하는 보호자 기기의\n설정 → 함께하는 사람에 있어요';
 
   @override
   String get inviteEnterDescriptionPath => '설정 → 함께하는 사람';
@@ -1160,7 +1160,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cardReviewSoundFailedTitle => '소리를 재생하지 못했어요';
 
   @override
-  String get cardReviewSoundFailedFallback => '휴대폰 소리를 켜고 다시 눌러주세요';
+  String get cardReviewSoundFailedFallback => '기기 소리를 켜고 다시 눌러주세요';
 
   @override
   String get cardReviewSaveFailedTitle => '일과를 저장하지 못했어요';
@@ -1260,10 +1260,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get guardianSettingsWithdraw => '회원탈퇴';
 
   @override
-  String get guardianSettingsLinkConnected => '이룸이 휴대폰';
+  String get guardianSettingsLinkConnected => '이룸이 기기';
 
   @override
-  String get guardianSettingsLinkConnect => '이룸이 휴대폰 연결하기';
+  String get guardianSettingsLinkConnect => '이룸이 기기 연결하기';
 
   @override
   String get guardianSettingsLinkStatus => '연결됨';
@@ -1362,7 +1362,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cardViewerSoundFailedTitle => '소리를 재생하지 못했어요';
 
   @override
-  String get cardViewerSoundFailedFallback => '휴대폰 소리를 켜고 다시 눌러주세요';
+  String get cardViewerSoundFailedFallback => '기기 소리를 켜고 다시 눌러주세요';
 
   @override
   String get cardViewerClose => '카드 닫기';
@@ -1407,16 +1407,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cardPhotoPermissionGalleryTitle => '사진을 볼 수 없어요';
 
   @override
-  String get cardPhotoPermissionCameraBody => '휴대폰 설정에서 카메라를 켜면 사진을 찍을 수 있어요';
+  String get cardPhotoPermissionCameraBody => '기기 설정에서 카메라를 켜면 사진을 찍을 수 있어요';
 
   @override
-  String get cardPhotoPermissionGalleryBody => '휴대폰 설정에서 사진 접근을 켜면 고를 수 있어요';
+  String get cardPhotoPermissionGalleryBody => '기기 설정에서 사진 접근을 켜면 고를 수 있어요';
 
   @override
   String get cardPhotoSettingsFailedTitle => '설정을 열지 못했어요';
 
   @override
-  String get cardPhotoSettingsFailedFallback => '휴대폰 설정에서 직접 켜 주세요';
+  String get cardPhotoSettingsFailedFallback => '기기 설정에서 직접 켜 주세요';
 
   @override
   String get cardPhotoSourceTake => '사진 찍기';
@@ -1660,7 +1660,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get childHomeEmptyHint => '보호자 화면에서 일과를 만들 수 있어요';
 
   @override
-  String get childHomeEmptyHintDevice => '보호자 휴대폰에서 일과를 만들 수 있어요';
+  String get childHomeEmptyHintDevice => '보호자 기기에서 일과를 만들 수 있어요';
 
   @override
   String get childHomeToGuardianLabel => '보호자 화면으로 가기';
@@ -1700,7 +1700,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get childDetailSoundFailedTitle => '소리를 재생하지 못했어요';
 
   @override
-  String get childDetailSoundFailedFallback => '휴대폰 소리를 켜고 다시 눌러주세요';
+  String get childDetailSoundFailedFallback => '기기 소리를 켜고 다시 눌러주세요';
 
   @override
   String get childDetailCheckLabel => '다 했어요';
@@ -1775,10 +1775,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get modeSwitchReadFailedFallback => '잠시 후 다시 해주세요';
 
   @override
-  String get modeSwitchBlockedTitle => '보호자 휴대폰에서\n열어 주세요';
+  String get modeSwitchBlockedTitle => '보호자 기기에서\n열어 주세요';
 
   @override
-  String get modeSwitchBlockedDescription => '이 휴대폰에서는 보호자 화면을 열 수 없어요';
+  String get modeSwitchBlockedDescription => '이 기기에서는 보호자 화면을 열 수 없어요';
 
   @override
   String get modeSwitchBlockedBack => '돌아가기';
@@ -1808,14 +1808,14 @@ class AppLocalizationsJa extends AppLocalizations {
       locale: localeName,
       other: '$minutes분',
     );
-    return '이룸이가 쓸 휴대폰을 연결해요. 그 휴대폰에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 $_temp0 동안만 쓸 수 있어요.\n\n$url\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 $code';
+    return '이룸이가 쓸 기기를 연결해요. 그 기기에서 아래 링크를 누르면 이룸 앱에 연결 코드가 채워져요.\n연결 코드는 $_temp0 동안만 쓸 수 있어요.\n\n$url\n\n링크가 열리지 않으면 앱에서 직접 넣어주세요.\n연결 코드 $code';
   }
 
   @override
-  String get linkRejectedAlreadyLinked => '이미 연결된 휴대폰이에요';
+  String get linkRejectedAlreadyLinked => '이미 연결된 기기예요';
 
   @override
-  String get linkRejectedOnGuardianPhone => '이룸이 휴대폰에서 열어주세요';
+  String get linkRejectedOnGuardianPhone => '이룸이 기기에서 열어주세요';
 
   @override
   String get creditHistoryTitle => '크레딧 사용 내역';

@@ -41,7 +41,7 @@ void main() {
     expect(await controller().takeOnce(), isNull);
   });
 
-  test('N10 이룸이 휴대폰이면 서버에 묻지도 않는다', () async {
+  test('N10 이룸이 기기가면 서버에 묻지도 않는다', () async {
     await storage.setElumiDevice(true);
     repo.feed = NoticeFeed(hideDays: 7, notices: [notice('a')]);
 

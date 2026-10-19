@@ -128,7 +128,7 @@ void main() {
       await settle(tester);
 
       expect(find.text('카메라를 쓸 수 없어요'), findsOneWidget);
-      expect(find.text('휴대폰 설정에서 카메라를 켜면 사진을 찍을 수 있어요'), findsOneWidget);
+      expect(find.text('기기 설정에서 카메라를 켜면 사진을 찍을 수 있어요'), findsOneWidget);
       expect(find.text('갤러리에서 고르기'), findsOneWidget);
       expect(find.text('설정 열기'), findsOneWidget);
     });
@@ -263,7 +263,7 @@ void main() {
       expect(find.text('다시 하기'), findsOneWidget);
     });
 
-    testWidgets('사진 앱을 여는 데 실패하면 E-PHOTO-PICK (갤러리 앱이 없는 휴대폰 등)', (tester) async {
+    testWidgets('사진 앱을 여는 데 실패하면 E-PHOTO-PICK (갤러리 앱이 없는 기기 등)', (tester) async {
       picker = FakePhotoPicker([const PhotoPickFailed(PhotoFailure.pick)]);
       await tester.pumpWidget(host({}));
       await openPickSheet(tester);

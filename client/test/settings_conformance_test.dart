@@ -232,7 +232,7 @@ void main() {
     );
   });
 
-  testWidgets('설정 — 이룸이 휴대폰 연결 (Figma 1532:6671)', (tester) async {
+  testWidgets('설정 — 이룸이 기기 연결 (Figma 1532:6671)', (tester) async {
     // 설정에서 들어온 화면이다: `fromOnboarding: false`.
     // 온보딩 시안(`732:5334`)과 머리·하단이 다르므로 둘을 같은 골든으로 묶으면
     // 한쪽이 어긋나도 드러나지 않는다.

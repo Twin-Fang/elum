@@ -41,7 +41,7 @@ void main() {
     dotenv.loadFromString(envString: '', isOptional: true);
   });
 
-  test('휴대폰 언어가 요청 헤더로 나간다', () async {
+  test('기기 언어가 요청 헤더로 나간다', () async {
     binding.platformDispatcher.localesTestValue = const [Locale('en', 'US')];
     expect(await sentLanguage(build()), 'en');
     binding.platformDispatcher.localesTestValue = const [Locale('ko', 'KR')];
@@ -63,7 +63,7 @@ void main() {
     expect(await sentLanguage(c), 'ja');
   });
 
-  test('휴대폰 지역이 없으면 지역 헤더 없이 나가고 요청은 성공한다', () async {
+  test('기기 지역이 없으면 지역 헤더 없이 나가고 요청은 성공한다', () async {
     binding.platformDispatcher.localesTestValue = const [Locale('ja')];
     final c = build();
     final res = await c.read(dioProvider).get<dynamic>('/api/ping');

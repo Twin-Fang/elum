@@ -66,7 +66,7 @@ void main() {
           'DELETE /api/device-links/l1': const FakeHttpError(
             404,
             errorCode: 'DEVICE_LINK_NOT_CONNECTED',
-            errorMessage: '연결된 이룸이 휴대폰이 없습니다.',
+            errorMessage: '연결된 이룸이 기기가 없습니다.',
           ),
         });
 
@@ -119,7 +119,7 @@ void main() {
     });
   });
 
-  group('이 휴대폰이 스스로 끊는다 — disconnectThisPhone', () {
+  group('이 기기가 스스로 끊는다 — disconnectThisPhone', () {
     test('끊기면 로컬을 비운다 — 토큰·이룸이 정보·일과 캐시·체크 기록', () async {
       final t = build({
         'DELETE /api/device-links/current': const <String, Object?>{},
@@ -135,7 +135,7 @@ void main() {
       expect(storage.getRoutineProgressJson('r1'), isNull);
     });
 
-    test('이룸이 휴대폰 표식과 역할까지 지운다 — 남으면 연결 화면에 갇힌다 (#542)', () async {
+    test('이룸이 기기 표식과 역할까지 지운다 — 남으면 연결 화면에 갇힌다 (#542)', () async {
       await storage.setSelectedRole('elumi');
       final t = build({
         'DELETE /api/device-links/current': const <String, Object?>{},
@@ -278,7 +278,7 @@ void main() {
       expect(result.failure, isNotNull);
     });
 
-    test('연결된 휴대폰 목록을 읽는다', () async {
+    test('연결된 기기 목록을 읽는다', () async {
       final t = build({
         'GET /api/device-links': const {
           'devices': [

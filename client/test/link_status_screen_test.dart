@@ -143,7 +143,7 @@ void main() {
       expect(adapter.calls.where((c) => c.startsWith('DELETE')), isEmpty);
     });
 
-    testWidgets('확인하면 그 연결을 끊고, 남은 휴대폰이 없으면 설정으로 돌아가 알린다', (tester) async {
+    testWidgets('확인하면 그 연결을 끊고, 남은 기기가 없으면 설정으로 돌아가 알린다', (tester) async {
       routes['DELETE /api/device-links/l1'] = const <String, Object?>{};
       await open(tester);
       await tapDisconnect(tester);

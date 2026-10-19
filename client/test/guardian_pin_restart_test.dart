@@ -19,7 +19,7 @@ void main() {
         sdk: OAuthSdk(),
       );
 
-  test('세션이 있고 잠금이 없는 보호자 휴대폰은 암호 만들기가 다시 선다', () {
+  test('세션이 있고 잠금이 없는 보호자 기기는 암호 만들기가 다시 선다', () {
     final r = repo(InMemoryStorage(onboardingCompleted: true))
       ..restoreGuardianPinRequirement(lockMissing: true);
     expect(r.guardianPinSetupPending, isTrue);
@@ -33,7 +33,7 @@ void main() {
     expect(r.guardianPinSetupPending, isFalse);
   });
 
-  test('이룸이 휴대폰·세션 없음·온보딩 전은 대상이 아니다', () {
+  test('이룸이 기기·세션 없음·온보딩 전은 대상이 아니다', () {
     expect(
       (repo(InMemoryStorage(onboardingCompleted: true, elumiDevice: true))
             ..restoreGuardianPinRequirement(lockMissing: true))
