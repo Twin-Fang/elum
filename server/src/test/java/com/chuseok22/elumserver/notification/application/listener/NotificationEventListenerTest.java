@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
 import com.chuseok22.elumserver.notification.application.service.NotificationRecorder;
+import com.chuseok22.elumserver.notification.application.service.PushDispatcher;
 import com.chuseok22.elumserver.notification.core.NotificationDraft;
 import com.chuseok22.elumserver.notification.core.NotificationType;
 import com.chuseok22.elumserver.notification.core.event.CoGuardianJoinedEvent;
@@ -40,13 +41,15 @@ class NotificationEventListenerTest {
   private NotificationRecorder notificationRecorder;
   @Mock
   private ProfileGuardianService profileGuardianService;
+  @Mock
+  private PushDispatcher pushDispatcher;
 
   private NotificationEventListener listener;
 
   @BeforeEach
   void setUp() {
     Clock fixedClock = Clock.fixed(LocalDate.of(2026, 10, 19).atTime(10, 0).atZone(ZONE).toInstant(), ZONE);
-    listener = new NotificationEventListener(notificationRecorder, profileGuardianService, fixedClock);
+    listener = new NotificationEventListener(notificationRecorder, profileGuardianService, pushDispatcher, fixedClock);
   }
 
   @Test
