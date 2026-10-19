@@ -2308,9 +2308,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get exampleCategoryOutsideHint => '버스 타기, 물건 사기';
 
   @override
-  String get routineTileExampleBadge => '예시';
-
-  @override
   String get exampleRoutinesFailed => '예시 일과를 넣지 못했어요';
 
   @override

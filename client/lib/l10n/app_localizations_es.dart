@@ -2311,9 +2311,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get exampleCategoryOutsideHint => 'Tomar el autobús, hacer compras';
 
   @override
-  String get routineTileExampleBadge => 'Ejemplo';
-
-  @override
   String get exampleRoutinesFailed =>
       'No se pudieron añadir las rutinas de ejemplo';
 

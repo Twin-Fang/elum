@@ -4223,12 +4223,6 @@ abstract class AppLocalizations {
   /// 온보딩 예시 일과 (#803)
   ///
   /// In ko, this message translates to:
-  /// **'예시'**
-  String get routineTileExampleBadge;
-
-  /// 온보딩 예시 일과 (#803)
-  ///
-  /// In ko, this message translates to:
   /// **'예시 일과를 넣지 못했어요'**
   String get exampleRoutinesFailed;
 

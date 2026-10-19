@@ -2306,9 +2306,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get exampleCategoryOutsideHint => '坐公交、买东西';
 
   @override
-  String get routineTileExampleBadge => '示例';
-
-  @override
   String get exampleRoutinesFailed => '未能加入示例日常';
 
   @override
