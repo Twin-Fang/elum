@@ -4,7 +4,7 @@
   "installationRetryButton": "Reintentar",
   "issuedCodeCopyFailedTitle": "No se pudo copiar",
   "issuedCodeCopyFailedFallback": "Indica tú mismo el código que aparece en la pantalla",
-  "onboardingExampleTitle": "¿Con qué rutinas quieres\nempezar con {name}?",
+  "onboardingExampleTitle": "¿En qué te gustaría\nayudar a {name}?",
   "onboardingExampleDescription": "Añadiremos rutinas de ejemplo de lo que elijas.\nPuedes elegir más de una.",
   "onboardingExampleSkip": "Omitir",
   "exampleCategoryMorningEvening": "Mañana y noche",

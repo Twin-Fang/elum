@@ -2288,9 +2288,8 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String onboardingExampleTitle(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '과', 'other': '와'});
-    return '$name$_temp0 어떤 일과부터\n해 볼까요?';
+  String onboardingExampleTitle(String name) {
+    return '$name의 어떤 일을\n돕고 싶으세요?';
   }
 
   @override

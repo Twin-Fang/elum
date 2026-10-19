@@ -2288,8 +2288,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String onboardingExampleTitle(String name, String batchim) {
-    return '想和$name\n先从哪些日常开始?';
+  String onboardingExampleTitle(String name) {
+    return '想在哪些方面\n帮助$name?';
   }
 
   @override
