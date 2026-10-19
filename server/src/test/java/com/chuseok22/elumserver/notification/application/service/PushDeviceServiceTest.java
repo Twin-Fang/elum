@@ -95,4 +95,16 @@ class PushDeviceServiceTest {
 
     verify(pushDeviceRepository, never()).delete(any());
   }
+
+  @Test
+  @DisplayName("내 토큰은 해제하면 지운다")
+  void unregister_ownToken_deletes() {
+    PushDevice existing = new PushDevice();
+    existing.setMemberId("m1");
+    when(pushDeviceRepository.findByToken("token-1")).thenReturn(Optional.of(existing));
+
+    pushDeviceService.unregister("m1", "token-1");
+
+    verify(pushDeviceRepository).delete(existing);
+  }
 }
