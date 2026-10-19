@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/assets/app_assets.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import 'guardian_tab.dart';
@@ -16,6 +17,9 @@ class GuardianComingSoonScreen extends StatelessWidget {
 
   /// 안내 아이콘 한 변
   static const _iconSize = 56.0;
+
+  /// 루미 일러스트 한 변 (정사각형, 여백 포함)
+  static const _illustrationSize = 220.0;
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +58,20 @@ class GuardianComingSoonScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      GuardianTabIcon(
-                        tab: tab,
-                        size: _iconSize.w,
-                        color: colors.navIconUnselected,
-                      ),
+                      if (tab == GuardianTab.talk)
+                        Image.asset(
+                          AppAssets.storiesComingSoonLumi,
+                          width: _illustrationSize.w,
+                          height: _illustrationSize.w,
+                          // 장식 그림 (제목이 뜻을 전한다)
+                          excludeFromSemantics: true,
+                        )
+                      else
+                        GuardianTabIcon(
+                          tab: tab,
+                          size: _iconSize.w,
+                          color: colors.navIconUnselected,
+                        ),
                       SizedBox(height: space.md.h),
                       Text(
                         title,
