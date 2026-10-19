@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T12:59:16Z",
-    "currentVersion": "2.50.0",
+    "lastUpdated": "2026-10-19T13:11:45Z",
+    "currentVersion": "2.51.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 273
+    "totalReleases": 274
   },
   "releases": [
+    {
+      "version": "2.51.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 829,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 카드 사진을 고르는 화면의 안내 문구를 정리했어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드 사진을 고르는 화면의 안내 문구를 정리했어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.50.0",
       "project_type": "flutter",

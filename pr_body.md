@@ -1,5 +1,11 @@
+<!-- This is an auto-generated comment: release notes by coderabbit.ai -->
+
 ## Summary by CodeRabbit
 
-* **새로운 기능**
-  * 관리자 설정의 Pro 요금제 그룹에 "광고 항상 노출 회원" 항목을 더했어요. 회원 ID를 쉼표로 적으면 그 계정은 Pro여도 광고가 보여요. 비워 두면 지금과 똑같이 동작해요.
+## 릴리스 노트
+
+* **개선**
+  * 카드 사진을 고르는 화면의 안내 문구를 정리했어요
+
+<!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
