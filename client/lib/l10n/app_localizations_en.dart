@@ -1858,8 +1858,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modeSwitchBlockedBack => 'Go back';
 
   @override
+  String get installationRetryTitle => 'Something went wrong';
+
+  @override
   String get installationRetryMessage =>
-      'Could not check sign-in information on this device. Please try again.';
+      'We couldn\'t check this device. Want to try again?';
 
   @override
   String get installationRetryButton => 'Try again';
