@@ -17,6 +17,7 @@ import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/action_card.dart';
 import '../../../shared/models/routine.dart';
 import 'widgets/reward_banner.dart';
+import 'widgets/child_card_page_controller.dart';
 import 'widgets/child_card_pager.dart';
 import '../application/child_routine_notifier.dart';
 import '../../../core/haptics/child_haptics.dart';
@@ -69,13 +70,9 @@ class ChildRoutineDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ChildRoutineDetailScreenState
-    extends ConsumerState<ChildRoutineDetailScreen> {
-  /// 카드 넘기기 컨트롤러. 폰은 옆 카드가 걸치게 한 장 폭(카드 + 간격)만큼 자르고,
-  /// 태블릿은 한 장이 자리를 꽉 채운다. 창 등급이 바뀌면(분할 보기) 보던 카드에서 다시 만든다
-  PageController? _pageController;
-  bool? _isFullCardPager;
-
-  PageController get _controller => _pageController!;
+    extends ConsumerState<ChildRoutineDetailScreen>
+    with ChildCardPageControllerMixin {
+  PageController get _controller => cardPageController;
 
   /// 태블릿 카드 안 체크 버튼 배율 (88 > 약 119)
   static const _tabletCheckScale = 1.35;
@@ -98,28 +95,8 @@ class _ChildRoutineDetailScreenState
   /// 미리 잡아두고 정리할 때 쓴다.
   SpeechService? _speech;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncPageController();
-  }
-
-  /// 창 등급에 맞는 컨트롤러 준비 (처음 + 폰 <-> 태블릿 전환 시)
-  void _syncPageController() {
-    final isFullCardPager = context.layoutMetrics.isScaleOverridden;
-    if (_isFullCardPager == isFullCardPager) return;
-    final previous = _pageController;
-    final initialPage = previous == null ? 0 : _currentIndex;
-    _pageController = PageController(
-      viewportFraction: isFullCardPager ? 1.0 : ChildCardPager.viewportFraction,
-      initialPage: initialPage,
-    );
-    _isFullCardPager = isFullCardPager;
-    // 옛 컨트롤러는 새 PageView 가 붙은 뒤에 정리 (build 전에 버리면 붙어 있던 위젯이 깨진다)
-    if (previous != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
-    }
-  }
+  /// 현재 보고 있는 카드. 체크 버튼이 이 카드를 대상으로 한다.
+  int get _currentIndex => currentCardIndex;
 
   @override
   void initState() {
@@ -139,7 +116,6 @@ class _ChildRoutineDetailScreenState
     // 화면을 벗어나도 소리가 남으면 다음 화면까지 따라온다
     _speech?.stop();
     _confetti.dispose();
-    _pageController?.dispose();
     super.dispose();
   }
 
@@ -188,15 +164,6 @@ class _ChildRoutineDetailScreenState
       fallback: context.l10n.childDetailSoundFailedFallback,
       fallbackCode: 'E-TTS',
     );
-  }
-
-  /// 현재 보고 있는 카드. 체크 버튼이 이 카드를 대상으로 한다.
-  int get _currentIndex {
-    final controller = _pageController;
-    if (controller == null || !controller.hasClients) {
-      return controller?.initialPage ?? 0;
-    }
-    return (controller.page ?? controller.initialPage.toDouble()).round();
   }
 
   /// 지금 보여줄 일과. 홈이 넘겨준 스냅샷([widget.routine])이 아니라 목록
