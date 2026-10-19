@@ -102,6 +102,11 @@ public class AppNotice extends BaseEntity {
     return NoticeStatus.of(enabled, startsAt, endsAt, now);
   }
 
+  /** 공지 탭에 올라온 시각: 시작 시각 <-> 다시 보이게 한 시각 중 늦은 쪽 */
+  public LocalDateTime visibleSince() {
+    return revisedAt != null && revisedAt.isAfter(startsAt) ? revisedAt : startsAt;
+  }
+
   public boolean hasButton() {
     return buttonLabel != null && buttonUrl != null;
   }
