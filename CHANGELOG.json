@@ -1,15 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T12:04:57Z",
-    "currentVersion": "2.49.0",
+    "lastUpdated": "2026-10-19T12:26:40Z",
+    "currentVersion": "2.49.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 270
+    "totalReleases": 271
   },
   "releases": [
+    {
+      "version": "2.49.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 818,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 카드를 만들지 못했을 때 화면이 더 보기 쉬워졌어요\n  * 다시 하기 버튼이 아래에 고정되고, 홈으로 나가는 길이 항상 있어요",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "카드를 만들지 못했을 때 화면이 더 보기 쉬워졌어요",
+            "다시 하기 버튼이 아래에 고정되고, 홈으로 나가는 길이 항상 있어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.49.0",
       "project_type": "flutter",
