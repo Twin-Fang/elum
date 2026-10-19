@@ -74,6 +74,18 @@ public interface AiCreditLedgerRepository extends JpaRepository<AiCreditLedger, 
     """)
   List<AccountLastAt> lastAtByAccount(@Param("type") CreditLedgerType type);
 
+  /// 기간 [from, to) 안에 이 종류 줄의 잔액이 0 이하가 된 계정의 회원 id. memberId 가 없는(완전 삭제된) 계정은 뺀다.
+  @Query("""
+    select distinct a.memberId from AiCreditAccount a, AiCreditLedger l
+    where l.accountId = a.id and a.memberId is not null
+      and l.type in :types and l.balanceAfter <= 0
+      and l.createdAt >= :from and l.createdAt < :to
+    """)
+  List<String> findMemberIdsWithBalanceDepletedIn(
+    @Param("types") Collection<CreditLedgerType> types, @Param("from") LocalDateTime from,
+    @Param("to") LocalDateTime to
+  );
+
   /// 계정별 합계 한 줄.
   interface AccountTotal {
 

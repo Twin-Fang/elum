@@ -23,6 +23,7 @@ import com.chuseok22.elumserver.member.infrastructure.entity.Member;
 import com.chuseok22.elumserver.member.infrastructure.entity.MemberStatus;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
 import com.chuseok22.elumserver.member.infrastructure.repository.MemberRepository;
+import com.chuseok22.elumserver.notification.application.service.NotificationCleanupService;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -49,6 +50,7 @@ public class MemberService {
   private final SubscriptionRepository subscriptionRepository;
   private final AdRewardSessionRepository adRewardSessionRepository;
   private final FeedbackService feedbackService;
+  private final NotificationCleanupService notificationCleanupService;
   private final EntitlementService entitlementService;
 
   /**
@@ -213,6 +215,8 @@ public class MemberService {
     adRewardSessionRepository.deleteAllByMemberId(memberId);
     // 의견 글과 앱 상태 기록. 개인 정보가 섞여 있을 수 있어 남기지 않는다.
     feedbackService.deleteAllOf(memberId);
+    // 알림 기록·푸시 기기·알림 설정·공지 확인. 푸시 토큰이 남으면 탈퇴한 사람에게 푸시가 간다.
+    notificationCleanupService.deleteAllOf(memberId);
 
     // ── 남긴다 (보관 기간 동안) ──
     // 소셜 신원: 같은 소셜 계정이 다시 오면 이 행으로 이전 계정을 찾는다. 이메일은 비운다 —

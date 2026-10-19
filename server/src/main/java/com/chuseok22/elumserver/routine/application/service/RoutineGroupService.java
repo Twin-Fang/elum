@@ -144,6 +144,7 @@ public class RoutineGroupService {
     RoutineGroup group = groupFor(caller, groupId);
     List<Routine> members = requireMembers(groupId);
     List<RoutineResponse> sentRoutines = new ArrayList<>();
+    Routine firstSentRoutine = null;
     for (int order = 0; order < members.size(); order++) {
       Routine member = members.get(order);
       if (routineLibraryService.isAlreadySentToday(member)) {
@@ -154,12 +155,18 @@ public class RoutineGroupService {
       todayCopy.setSentGroupName(group.getName());
       // 묶음 안 자리 그대로 (건너뛴 일과 자리는 비움)
       todayCopy.setSentGroupOrder(order);
-      sentRoutines.add(RoutineResponse.from(routineLibraryService.saveCopy(todayCopy)));
+      Routine savedTodayCopy = routineLibraryService.saveCopy(todayCopy);
+      if (firstSentRoutine == null) {
+        firstSentRoutine = savedTodayCopy;
+      }
+      sentRoutines.add(RoutineResponse.from(savedTodayCopy));
     }
     if (sentRoutines.isEmpty()) {
       log.info("[routine group] send rejected 409 : all routines already sent today, groupId={}", groupId);
       throw new CustomException(ErrorCode.ROUTINE_ALREADY_SENT_TODAY);
     }
+    // 묶음 1회 보내기는 알림 1건 (첫 번째로 만든 일과 기준)
+    routineLibraryService.publishRoutineSent(caller, firstSentRoutine);
     return sentRoutines;
   }
 

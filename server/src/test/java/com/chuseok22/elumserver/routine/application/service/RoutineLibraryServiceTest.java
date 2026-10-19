@@ -18,6 +18,7 @@ import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.ProfileAction;
 import com.chuseok22.elumserver.member.application.service.ProfileAccessGuard.RoutineAction;
 import com.chuseok22.elumserver.member.infrastructure.entity.Profile;
+import com.chuseok22.elumserver.notification.core.event.RoutineSentEvent;
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
@@ -37,6 +38,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 /// 일과관리(#804): 보내기 하루 한 번 · 복사본은 홈에 안 뜸 · 지우기는 기록을 남김 · 제목 수정
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +50,8 @@ class RoutineLibraryServiceTest {
   private RoutineRepository routineRepository;
   @Mock
   private RoutineGroupMembership routineGroupMembership;
+  @Mock
+  private ApplicationEventPublisher eventPublisher;
   @Mock
   private ProfileAccessGuard profileAccessGuard;
   @Mock
@@ -89,6 +93,34 @@ class RoutineLibraryServiceTest {
       .isInstanceOf(CustomException.class)
       .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ROUTINE_ALREADY_SENT_TODAY);
     verify(routineRepository).save(any());
+  }
+
+  @Test
+  @DisplayName("보내기는 새로 만든 오늘 일과로 일과 보냄 이벤트를 낸다")
+  void librarySend_publishesRoutineSent() {
+    Routine original = originalRoutine("routine-1", LocalDate.now().minusDays(3).atTime(9, 0));
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(original));
+    when(routineRepository.save(any(Routine.class))).thenAnswer(invocation -> {
+      Routine savedCopy = invocation.getArgument(0);
+      savedCopy.setId("sent-1");
+      return savedCopy;
+    });
+
+    routineLibraryService.send(GUARDIAN, "routine-1");
+
+    verify(eventPublisher).publishEvent(new RoutineSentEvent("sent-1", "profile-1", "member-1"));
+  }
+
+  @Test
+  @DisplayName("복사하기는 홈에 안 뜨는 보관함 사본이라 이벤트를 내지 않는다")
+  void libraryCopy_publishesNothing() {
+    Routine original = originalRoutine("routine-1", LocalDate.now().minusDays(3).atTime(9, 0));
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(original));
+    when(routineRepository.save(any(Routine.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    routineLibraryService.copy(GUARDIAN, "routine-1");
+
+    verify(eventPublisher, never()).publishEvent(any(Object.class));
   }
 
   @Test

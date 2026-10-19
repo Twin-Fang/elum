@@ -69,6 +69,9 @@ dependencies {
     // Chuseok22 API Change Log
     implementation 'com.chuseok22:ApiChangeLog:1.0.1'
 
+    // Firebase Admin (FCM)
+    implementation 'com.google.firebase:firebase-admin:9.4.3'
+
     // Chuseok22 Method Logging
     implementation 'com.chuseok22:logging:0.0.9'
 

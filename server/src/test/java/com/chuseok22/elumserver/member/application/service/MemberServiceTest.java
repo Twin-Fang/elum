@@ -70,6 +70,9 @@ class MemberServiceTest {
   private FeedbackService feedbackService;
 
   @Mock
+  private com.chuseok22.elumserver.notification.application.service.NotificationCleanupService notificationCleanupService;
+
+  @Mock
   private AiCallLogRepository aiCallLogRepository;
 
   @Mock

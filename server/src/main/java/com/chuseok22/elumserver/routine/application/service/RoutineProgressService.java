@@ -11,12 +11,14 @@ import com.chuseok22.elumserver.routine.infrastructure.entity.Routine;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStatus;
 import com.chuseok22.elumserver.routine.infrastructure.entity.RoutineStep;
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineRepository;
+import com.chuseok22.elumserver.notification.core.event.RoutineCompletedEvent;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,7 @@ public class RoutineProgressService {
   private final RoutineRepository routineRepository;
   private final ProfileRepository profileRepository;
   private final ProfileAccessGuard profileAccessGuard;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Transactional
   public RoutineResponse completeStep(Caller caller, String routineId, String stepId) {
@@ -64,6 +67,8 @@ public class RoutineProgressService {
     if (allCompleted) {
       routine.setStatus(RoutineStatus.COMPLETED);
       routine.setCompletedAt(now);
+      // 위에서 CONFIRMED 만 통과시키므로 여기는 항상 새 완료
+      publishRoutineCompleted(caller, routine);
     }
 
     return RoutineResponse.from(routine);
@@ -150,6 +155,8 @@ public class RoutineProgressService {
       if (routine.getStatus() != RoutineStatus.COMPLETED) {
         routine.setStatus(RoutineStatus.COMPLETED);
         routine.setCompletedAt(now);
+        // 이미 완료였던 일과의 재전송은 발행하지 않음
+        publishRoutineCompleted(caller, routine);
       }
     } else {
       routine.setStatus(RoutineStatus.CONFIRMED);
@@ -157,6 +164,13 @@ public class RoutineProgressService {
     }
 
     return RoutineResponse.from(routine);
+  }
+
+  /// 일과 완료 알림 이벤트 (요청자 제외는 보호자 기기일 때만: 이룸이 기기의 memberId 는 연결해 준 보호자)
+  private void publishRoutineCompleted(Caller caller, Routine routine) {
+    String actorMemberId = caller.isElumi() ? null : caller.memberId();
+    eventPublisher.publishEvent(new RoutineCompletedEvent(routine.getId(), routine.getProfile().getId(),
+      routine.getScheduledAt().toLocalDate(), actorMemberId));
   }
 
   private Routine getRoutineFor(Caller caller, String routineId, RoutineAction action) {

@@ -15,6 +15,8 @@ import com.chuseok22.elumserver.credit.core.CreditAccountStatus;
 import com.chuseok22.elumserver.credit.core.CreditGrantSource;
 import com.chuseok22.elumserver.credit.core.CreditJobKind;
 import com.chuseok22.elumserver.credit.core.CreditJobStatus;
+import com.chuseok22.elumserver.credit.core.CreditLedgerType;
+import com.chuseok22.elumserver.credit.core.CreditPeriod;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditAccount;
 import com.chuseok22.elumserver.credit.infrastructure.entity.AiCreditPolicy;
 import com.chuseok22.elumserver.credit.infrastructure.repository.AiCreditAccountRepository;
@@ -71,7 +73,7 @@ class CreditQueryServiceTest {
     CreditReservationService reservationService = new CreditReservationService(
       policyService, accountService, entitlementService, jobRepository, ledgerRepository, tx, CLOCK);
     service = new CreditQueryService(policyService, accountService, reservationService, entitlementService,
-      jobRepository, tx, CLOCK);
+      jobRepository, ledgerRepository, tx, CLOCK);
 
     policy = AiCreditPolicy.disabledDefault();
     policy.setVersion(1);
@@ -233,5 +235,20 @@ class CreditQueryServiceTest {
     policy.setEnabled(false);
     store.grants.get(0).setRemaining(0);
     assertThatCode(() -> service.requireCanStartRoutine(MEMBER_ID)).doesNotThrowAnyException();
+  }
+
+  @Test
+  @DisplayName("memberIdsDepletedIn_callsRepositoryWithPeriodBounds_andFiltersNulls")
+  void memberIdsDepletedIn_callsRepositoryWithPeriodBounds_andFiltersNulls() {
+    CreditPeriod period = CreditPeriod.of(NOW);
+    when(ledgerRepository.findMemberIdsWithBalanceDepletedIn(
+      org.mockito.ArgumentMatchers.anyCollection(), org.mockito.ArgumentMatchers.eq(period.start()),
+      org.mockito.ArgumentMatchers.eq(period.end())))
+      .thenReturn(java.util.Arrays.asList("m1", null, "m2"));
+
+    assertThat(service.memberIdsDepletedIn(period)).containsExactly("m1", "m2");
+    org.mockito.Mockito.verify(ledgerRepository).findMemberIdsWithBalanceDepletedIn(
+      java.util.List.of(CreditLedgerType.CONSUME, CreditLedgerType.OVERAGE),
+      period.start(), period.end());
   }
 }

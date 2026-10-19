@@ -42,4 +42,18 @@ public interface ProfileGuardianRepository extends JpaRepository<ProfileGuardian
   /** 관리자 회원 목록 —회원마다 따로 묻지 않도록 이룸이까지 한 번에, 합류 순서대로 가져온다. */
   @Query("select g from ProfileGuardian g join fetch g.profile where g.member.id in :memberIds order by g.joinedAt asc")
   List<ProfileGuardian> findAllWithProfileByMemberIdIn(@Param("memberIds") Collection<String> memberIds);
+
+  /** 이룸이 id 와 이름만 읽는 투영 */
+  interface ProfileName {
+
+    String getProfileId();
+
+    String getNickname();
+  }
+
+  /** 이 보호자가 연결된 이룸이 중 주어진 id 들의 현재 이름 (연결되지 않은 이룸이는 나오지 않는다) */
+  @Query("select g.profile.id as profileId, g.profile.nickname as nickname "
+    + "from ProfileGuardian g where g.member.id = :memberId and g.profile.id in :profileIds")
+  List<ProfileName> findProfileNamesByMemberIdAndProfileIdIn(
+    @Param("memberId") String memberId, @Param("profileIds") Collection<String> profileIds);
 }

@@ -69,6 +69,9 @@ class GuardianshipServiceTest {
   @Mock
   private ProfileInviteRepository profileInviteRepository;
 
+  @Mock
+  private com.chuseok22.elumserver.notification.application.service.NotificationCleanupService notificationCleanupService;
+
   @InjectMocks
   private GuardianshipService guardianshipService;
 

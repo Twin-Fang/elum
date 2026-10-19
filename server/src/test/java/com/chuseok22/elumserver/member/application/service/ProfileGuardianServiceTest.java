@@ -82,6 +82,12 @@ class ProfileGuardianServiceTest {
   // ── 목록 ──
 
   @Test
+  @DisplayName("guardianMemberIdsOf 는 합류한 차례대로 member id 를 돌려준다")
+  void guardianMemberIdsOf_returnsJoinedOrder() {
+    assertThat(service.guardianMemberIdsOf("p1")).containsExactly("A", "B");
+  }
+
+  @Test
   @DisplayName("연결된 보호자는 함께하는 사람을 합류 순서대로 보고 나는 me=true 다")
   void list_allowedForGuardian() {
     GuardianListResponse res = service.list(Caller.guardian("A"), "p1");
