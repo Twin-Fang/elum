@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T09:00:47Z",
-    "currentVersion": "2.45.0",
+    "lastUpdated": "2026-10-19T09:15:49Z",
+    "currentVersion": "2.45.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 261
+    "totalReleases": 262
   },
   "releases": [
+    {
+      "version": "2.45.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 800,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 개인정보 처리 동의 문서에서 불필요한 안내 문구를 정리했습니다.",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "개인정보 처리 동의 문서에서 불필요한 안내 문구를 정리했습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.45.0",
       "project_type": "flutter",
