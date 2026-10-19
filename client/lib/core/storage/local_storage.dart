@@ -168,6 +168,12 @@ abstract interface class LocalStorage {
   String? getNoticeHiddenJson(String noticeId);
   Future<void> setNoticeHiddenJson(String noticeId, String json);
 
+  /// 알림 권한 안내 시트를 이 휴대폰에서 이미 보여 줬는가 (첫 일과를 보낸 뒤 한 번만).
+  ///
+  /// 시스템 권한이 휴대폰 단위라 [clearAll] 이 지우지 않는다.
+  bool get hasAskedPushPermission;
+  Future<void> setHasAskedPushPermission(bool v);
+
   /// 보호자 홈 코치마크를 이 휴대폰에서 이미 봤는가.
   ///
   /// 공지 숨김과 같은 이유로 **계정이 아니라 휴대폰에 속한다.** [clearAll] 이 지우지 않는다 —

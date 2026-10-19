@@ -4723,6 +4723,36 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'일과관리 사용법 다시 보기'**
   String get guardianSettingsRoutineManageGuide;
+
+  /// 첫 일과를 보낸 뒤 뜨는 알림 권한 안내 시트 제목 (#828)
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 일과를 끝내면 알려 드릴까요?'**
+  String get pushPermissionSheetTitle;
+
+  /// 알림 권한 안내 시트 설명 — 받게 되는 알림 종류
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 보호자의 소식과 크레딧 안내도 함께 알려 드려요'**
+  String get pushPermissionSheetBody;
+
+  /// 알림 권한 안내 시트의 허용 버튼 (누르면 시스템 권한 창)
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 받기'**
+  String get pushPermissionAllow;
+
+  /// 알림 권한 안내 시트의 보류 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에'**
+  String get pushPermissionLater;
+
+  /// 시스템 권한 창에서 거부했을 때 안내 팝업 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 설정에서 언제든 켤 수 있어요'**
+  String get pushPermissionDenied;
 }
 
 class _AppLocalizationsDelegate

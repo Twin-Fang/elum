@@ -762,5 +762,10 @@
   "libraryArrangeDone": "Done",
   "libraryArrangeRemove": "Remove or ungroup",
   "routineGroupEditOrder": "Edit order",
-  "routineLibrarySendOnlyThis": "Send only this one today"
+  "routineLibrarySendOnlyThis": "Send only this one today",
+  "pushPermissionSheetTitle": "Want a heads-up when your ELUM user finishes a routine?",
+  "pushPermissionSheetBody": "You'll also get updates from other guardians and credit reminders",
+  "pushPermissionAllow": "Turn on",
+  "pushPermissionLater": "Not now",
+  "pushPermissionDenied": "You can turn this on anytime in notification settings"
 }

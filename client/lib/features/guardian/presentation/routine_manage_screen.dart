@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../../core/router/routes.dart';
+import '../../notification/application/push_permission_prompt.dart';
 import '../../../core/state/busy_state_mixin.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/elum_dialog.dart';
@@ -132,6 +135,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     final failure = result.failure;
     if (failure == null) {
       showElumToast(context, l10n.routineLibrarySent(routine.displayTitle));
+      // 일과를 보낸 보호자에게 알림 권한 안내 (한 번만, 기다리지 않음)
+      unawaited(ref.read(pushPermissionPromptProvider).maybeAsk(context));
       return;
     }
     // 다른 기기에서 먼저 보냈다 — 실패 팝업이 아니라 안내로 충분하다

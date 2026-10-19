@@ -2708,4 +2708,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
+
+  @override
+  String get pushPermissionSheetTitle =>
+      'Want a heads-up when your ELUM user finishes a routine?';
+
+  @override
+  String get pushPermissionSheetBody =>
+      'You\'ll also get updates from other guardians and credit reminders';
+
+  @override
+  String get pushPermissionAllow => 'Turn on';
+
+  @override
+  String get pushPermissionLater => 'Not now';
+
+  @override
+  String get pushPermissionDenied =>
+      'You can turn this on anytime in notification settings';
 }

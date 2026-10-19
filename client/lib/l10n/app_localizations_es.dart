@@ -2599,4 +2599,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
+
+  @override
+  String get pushPermissionSheetTitle => '이룸이가 일과를 끝내면 알려 드릴까요?';
+
+  @override
+  String get pushPermissionSheetBody => '다른 보호자의 소식과 크레딧 안내도 함께 알려 드려요';
+
+  @override
+  String get pushPermissionAllow => '알림 받기';
+
+  @override
+  String get pushPermissionLater => '나중에';
+
+  @override
+  String get pushPermissionDenied => '알림 설정에서 언제든 켤 수 있어요';
 }

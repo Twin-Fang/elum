@@ -6,6 +6,7 @@ import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/logger/app_logger.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_button.dart';
+import '../../application/push_permission_prompt.dart';
 import '../../data/notification_permission_gate.dart';
 
 /// 기기 알림이 꺼져 있을 때만 보이는 안내 줄 + 기기 설정 열기 버튼
@@ -56,6 +57,22 @@ class _DeviceNotificationPermissionBannerState
     }
   }
 
+  /// 버튼: 아직 한 번도 안 물은 기기면 시스템 권한 창, 이미 거부했으면 기기 설정
+  Future<void> _requestOrOpenDeviceSettings() async {
+    try {
+      final isRequested = await ref
+          .read(pushPermissionPromptProvider)
+          .requestIfNeverAsked();
+      if (isRequested) {
+        await _checkPermission();
+        return;
+      }
+    } catch (e, st) {
+      AppLogger.error('notification', e, st, {'step': 'requestPermission'});
+    }
+    await _openDeviceSettings();
+  }
+
   Future<void> _openDeviceSettings() async {
     try {
       await ref.read(notificationPermissionGateProvider).openDeviceSettings();
@@ -86,7 +103,7 @@ class _DeviceNotificationPermissionBannerState
           SizedBox(height: _textToButtonGap.h),
           ElumButton(
             label: l10n.notificationOpenDeviceSettings,
-            onPressed: _openDeviceSettings,
+            onPressed: _requestOrOpenDeviceSettings,
           ),
         ],
       ),
