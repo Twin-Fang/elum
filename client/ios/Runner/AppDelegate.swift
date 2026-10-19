@@ -2,6 +2,7 @@ import Flutter
 import google_mobile_ads
 import NidThirdPartyLogin
 import UIKit
+import UserNotifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -10,6 +11,8 @@ import UIKit
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
+    // 일과 알림 (#777): 앱이 떠 있을 때도 알림 배너가 보이게 알림 센터 대리자를 잡는다
+    UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
     // 하단 한 줄 광고 띠 팩토리 (#743). Dart NativeAd 의 factoryId 가 이 이름을 찾는다
     FLTGoogleMobileAdsPlugin.registerNativeAdFactory(
       self,

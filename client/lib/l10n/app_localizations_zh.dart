@@ -503,6 +503,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get elumiSettingsHapticLabel => '카드 체크 진동';
 
   @override
+  String get elumiSettingsPraiseSoundLabel => '카드 체크 칭찬 소리';
+
+  @override
   String get elumiSettingsTermsLabel => '약관 및 개인정보처리방침';
 
   @override
@@ -1278,6 +1281,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianSettingsHaptic => '카드 체크 진동';
 
   @override
+  String get guardianSettingsPraiseSound => '카드 체크 칭찬 소리';
+
+  @override
   String get questionMakeCards => '카드 만들기';
 
   @override
@@ -1879,4 +1885,298 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get creditHistoryMoreFailed => '더 불러오지 못했어요';
+
+  @override
+  String get reminderRowLabel => '일과 알림';
+
+  @override
+  String get reminderRowOff => '알림 없음';
+
+  @override
+  String reminderRowDaily(String time) {
+    return '매일 $time에 알려요';
+  }
+
+  @override
+  String reminderRowOnce(String time) {
+    return '$time에 한 번 알려요';
+  }
+
+  @override
+  String get reminderSheetTitle => '언제 알려 드릴까요?';
+
+  @override
+  String get reminderSheetBody => '정한 시각에 이 기기로 알림이 와요';
+
+  @override
+  String get reminderRepeatDaily => '매일 같은 시각에 알리기';
+
+  @override
+  String get reminderTurnOn => '알림 켜기';
+
+  @override
+  String get reminderUpdate => '알림 시각 바꾸기';
+
+  @override
+  String get reminderTurnOff => '알림 끄기';
+
+  @override
+  String get reminderSavedToast => '알림을 맞췄어요';
+
+  @override
+  String get reminderClearedToast => '알림을 껐어요';
+
+  @override
+  String get reminderPermissionDeniedTitle => '알림이 꺼져 있어요';
+
+  @override
+  String get reminderPermissionDeniedBody =>
+      '기기 설정에서 이룸 알림을 허용하면 일과 시간을 알려 드려요';
+
+  @override
+  String get reminderFailedTitle => '알림을 맞추지 못했어요';
+
+  @override
+  String get reminderFailedBody => '잠시 후 다시 해 주세요';
+
+  @override
+  String get reminderChannelName => '일과 알림';
+
+  @override
+  String get reminderNotificationTitle => '이룸';
+
+  @override
+  String reminderNotificationBody(String routineTitle) {
+    return '$routineTitle 할 시간이에요';
+  }
+
+  @override
+  String get routineTemplateOpen => '예시 일과 둘러보기';
+
+  @override
+  String get routineTemplateSheetTitle => '예시 일과';
+
+  @override
+  String get routineTemplateSheetBody => '고르면 입력칸에 채워 드려요. 이룸이에게 맞게 고쳐서 보내세요';
+
+  @override
+  String get routineTemplateBeginnerBadge => '처음이라면 추천';
+
+  @override
+  String get routineTemplateCategorySelfCare => '몸 돌보기';
+
+  @override
+  String get routineTemplateCategorySelfCareHint => '씻기·옷 입기·밥 먹기처럼 매일 하는 일';
+
+  @override
+  String get routineTemplateCategoryDailyFlow => '하루 흐름';
+
+  @override
+  String get routineTemplateCategoryDailyFlowHint => '아침부터 잠들 때까지 큰 순서';
+
+  @override
+  String get routineTemplateCategoryHousehold => '집안일';
+
+  @override
+  String get routineTemplateCategoryHouseholdHint => '내 물건과 자리를 스스로 정리하기';
+
+  @override
+  String get routineTemplateCategoryCommunity => '밖에서 해 보기';
+
+  @override
+  String get routineTemplateCategoryCommunityHint => '버스 타기·물건 사기처럼 혼자 해 보는 연습';
+
+  @override
+  String get routineTemplateCategoryLearning => '공부';
+
+  @override
+  String get routineTemplateCategoryLearningHint => '공부를 시작하고 끝까지 하는 순서';
+
+  @override
+  String get routineTemplateCategoryFeelings => '마음과 관계';
+
+  @override
+  String get routineTemplateCategoryFeelingsHint => '감정 표현·인사·차례 기다리기';
+
+  @override
+  String get routineTemplateBrushTeethText => '양치하기';
+
+  @override
+  String get routineTemplateBrushTeethPrompt =>
+      '이룸이가 혼자 양치를 해 보게 하고 싶어. 칫솔과 치약 꺼내기, 양치컵에 물 받기, 이 닦기, 헹구기, 정리하기까지 순서대로 알려 줘';
+
+  @override
+  String get routineTemplateWashFaceText => '세수하기';
+
+  @override
+  String get routineTemplateWashFacePrompt =>
+      '이룸이가 아침에 혼자 세수를 해 보게 하고 싶어. 물 틀기, 얼굴 적시기, 비누 거품 내기, 헹구기, 수건으로 닦기, 로션 바르기까지 알려 줘';
+
+  @override
+  String get routineTemplateGetDressedText => '혼자 옷 입기';
+
+  @override
+  String get routineTemplateGetDressedPrompt =>
+      '이룸이가 혼자 옷을 입어 보게 하고 싶어. 러닝셔츠, 티셔츠, 바지, 양말 순서로 하나씩 입는 걸 알려 줘';
+
+  @override
+  String get routineTemplateEatMealText => '밥 먹기';
+
+  @override
+  String get routineTemplateEatMealPrompt =>
+      '이룸이가 식사 시간에 스스로 해 보게 하고 싶어. 물 마시기, 자기 수저와 그릇 가져가기, 앉아서 먹기, 다 먹은 그릇 갖다 놓기까지 알려 줘';
+
+  @override
+  String get routineTemplateBathTimeText => '목욕하기';
+
+  @override
+  String get routineTemplateBathTimePrompt =>
+      '이룸이가 목욕을 순서대로 해 보게 하고 싶어. 옷 벗기, 몸에 물 적시기, 머리 감기, 몸 씻기, 헹구기, 수건으로 닦고 옷 입기까지 알려 줘';
+
+  @override
+  String get routineTemplateMorningRoutineText => '아침 등교 준비';
+
+  @override
+  String get routineTemplateMorningRoutinePrompt =>
+      '이룸이가 아침에 일어나서 학교 갈 때까지 할 일을 순서대로 하게 하고 싶어. 일어나기, 화장실 가기, 밥 먹기, 세수와 양치, 옷 입기, 가방 메고 신발 신기까지 알려 줘';
+
+  @override
+  String get routineTemplateAfterSchoolText => '학교 다녀와서';
+
+  @override
+  String get routineTemplateAfterSchoolPrompt =>
+      '이룸이가 학교에서 돌아오면 스스로 할 일을 하게 하고 싶어. 신발 정리하기, 손 씻기, 가방 제자리에 두기, 간식 먹기, 쉬는 시간 갖기까지 알려 줘';
+
+  @override
+  String get routineTemplateBedtimeText => '자기 전 준비';
+
+  @override
+  String get routineTemplateBedtimePrompt =>
+      '이룸이가 잠들기 전에 할 일을 순서대로 하게 하고 싶어. 양치하기, 잠옷 입기, 내일 가방 챙기기, 불 끄고 눕기까지 알려 줘';
+
+  @override
+  String get routineTemplateGoingOutText => '외출 준비';
+
+  @override
+  String get routineTemplateGoingOutPrompt =>
+      '이룸이가 밖에 나가기 전에 스스로 준비하게 하고 싶어. 화장실 다녀오기, 겉옷 입기, 물통과 휴대폰 챙기기, 신발 신기, 문 앞에서 기다리기까지 알려 줘';
+
+  @override
+  String get routineTemplateTidyRoomText => '방 정리하기';
+
+  @override
+  String get routineTemplateTidyRoomPrompt =>
+      '이룸이가 놀고 난 뒤 방을 스스로 정리하게 하고 싶어. 장난감 모으기, 상자에 넣기, 책 꽂기, 옷 걸기까지 알려 줘';
+
+  @override
+  String get routineTemplateClearDishesText => '먹은 그릇 정리하기';
+
+  @override
+  String get routineTemplateClearDishesPrompt =>
+      '이룸이가 밥을 다 먹고 그릇을 스스로 치우게 하고 싶어. 남은 음식 모으기, 그릇 들고 가기, 싱크대에 넣기, 식탁 닦기까지 알려 줘';
+
+  @override
+  String get routineTemplateFoldLaundryText => '빨래 개기';
+
+  @override
+  String get routineTemplateFoldLaundryPrompt =>
+      '이룸이가 마른 빨래를 개서 정리해 보게 하고 싶어. 빨래 가져오기, 양말 짝 맞추기, 수건 접기, 옷 개기, 서랍에 넣기까지 알려 줘';
+
+  @override
+  String get routineTemplateTakeOutTrashText => '쓰레기 버리기';
+
+  @override
+  String get routineTemplateTakeOutTrashPrompt =>
+      '이룸이가 쓰레기를 나눠서 버리는 걸 해 보게 하고 싶어. 쓰레기 모으기, 종이와 플라스틱 나누기, 봉투 묶기, 정해진 곳에 버리기까지 알려 줘';
+
+  @override
+  String get routineTemplateRideBusText => '버스 타기';
+
+  @override
+  String get routineTemplateRideBusPrompt =>
+      '이룸이가 혼자 버스를 타 보는 연습을 하고 싶어. 정류장에서 번호 확인하기, 줄 서기, 교통카드 찍기, 자리에 앉기, 내릴 곳에서 벨 누르기까지 알려 줘';
+
+  @override
+  String get routineTemplateBuyItemText => '편의점에서 물건 사기';
+
+  @override
+  String get routineTemplateBuyItemPrompt =>
+      '이룸이가 편의점에서 혼자 물건을 사 보게 하고 싶어. 살 물건 찾기, 계산대에 줄 서기, 물건 올려놓기, 카드나 돈 내기, 영수증 받고 인사하기까지 알려 줘';
+
+  @override
+  String get routineTemplateUseElevatorText => '엘리베이터로 층 찾아가기';
+
+  @override
+  String get routineTemplateUseElevatorPrompt =>
+      '이룸이가 엘리베이터를 타고 정한 층에 혼자 가 보게 하고 싶어. 버튼 누르기, 문 열리면 타기, 숫자 버튼 누르기, 층 숫자 보기, 내리기까지 알려 줘';
+
+  @override
+  String get routineTemplateHospitalVisitText => '병원 다녀오기';
+
+  @override
+  String get routineTemplateHospitalVisitPrompt =>
+      '이룸이가 병원에 가서 순서대로 진료를 받게 하고 싶어. 접수하기, 대기실에서 기다리기, 이름 부르면 들어가기, 진료 받기, 약 받고 인사하기까지 알려 줘';
+
+  @override
+  String get routineTemplateStartHomeworkText => '숙제 시작하기';
+
+  @override
+  String get routineTemplateStartHomeworkPrompt =>
+      '이룸이가 숙제를 스스로 시작해서 끝내 보게 하고 싶어. 책상에 앉기, 공책과 연필 꺼내기, 숙제 하기, 다 하면 보여 주기, 가방에 넣기까지 알려 줘';
+
+  @override
+  String get routineTemplateWriteNameText => '이름 쓰기 연습';
+
+  @override
+  String get routineTemplateWriteNamePrompt =>
+      '이룸이가 연필을 바르게 잡고 자기 이름을 써 보게 하고 싶어. 연필 잡기, 종이 놓기, 이름 따라 쓰기, 혼자 써 보기, 정리하기까지 알려 줘';
+
+  @override
+  String get routineTemplateCountObjectsText => '수 세기 놀이';
+
+  @override
+  String get routineTemplateCountObjectsPrompt =>
+      '이룸이가 물건을 하나씩 짚으며 수를 세는 연습을 하고 싶어. 물건 늘어놓기, 하나씩 손가락으로 짚기, 소리 내어 세기, 다 센 수 말하기까지 알려 줘';
+
+  @override
+  String get routineTemplateReadBookText => '책 읽는 시간';
+
+  @override
+  String get routineTemplateReadBookPrompt =>
+      '이룸이가 책 읽는 시간을 스스로 가져 보게 하고 싶어. 책 고르기, 자리에 앉기, 한 쪽씩 넘기며 보기, 다 읽으면 책꽂이에 꽂기까지 알려 줘';
+
+  @override
+  String get routineTemplateEmotionCardText => '화가 날 때 감정 카드 꺼내기';
+
+  @override
+  String get routineTemplateEmotionCardPrompt =>
+      '이룸이가 친구 때문에 화가 날 때 소리 지르거나 밀지 않고 감정 카드를 꺼내 보여 주게 하고 싶어. 멈추기, 주머니에서 감정 카드 꺼내기, 지금 기분 카드 고르기, 선생님께 보여 주기까지 알려 줘';
+
+  @override
+  String get routineTemplatePlayNicelyText => '친구와 사이좋게 놀기';
+
+  @override
+  String get routineTemplatePlayNicelyPrompt =>
+      '이룸이가 친구와 사이좋게 노는 연습을 하고 싶어. 같이 놀자고 말하기, 장난감 나눠 쓰기, 차례 지키기, 끝나면 고마워 말하기까지 알려 줘';
+
+  @override
+  String get routineTemplateGreetingText => '인사하기';
+
+  @override
+  String get routineTemplateGreetingPrompt =>
+      '이룸이가 사람을 만나면 먼저 인사하게 하고 싶어. 상대 얼굴 보기, 손 흔들기, 안녕하세요 말하기, 웃어 주기까지 알려 줘';
+
+  @override
+  String get routineTemplateWaitTurnText => '차례 기다리기';
+
+  @override
+  String get routineTemplateWaitTurnPrompt =>
+      '이룸이가 줄을 서서 자기 차례를 기다리는 연습을 하고 싶어. 줄 끝에 서기, 앞사람 뒤에서 기다리기, 내 차례 확인하기, 차례가 오면 하기까지 알려 줘';
+
+  @override
+  String get routineTemplateAskHelpText => '도와 달라고 말하기';
+
+  @override
+  String get routineTemplateAskHelpPrompt =>
+      '이룸이가 혼자 하기 어려울 때 도움을 요청하게 하고 싶어. 멈추기, 가까운 어른 찾기, 도와주세요 말하기, 도움 받고 고맙습니다 말하기까지 알려 줘';
 }

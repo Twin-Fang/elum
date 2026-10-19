@@ -950,6 +950,12 @@ abstract class AppLocalizations {
   /// **'카드 체크 진동'**
   String get elumiSettingsHapticLabel;
 
+  /// 이룸이 설정의 칭찬 소리 스위치 줄 — 카드를 체크하면 효과음과 '잘했어요!' 음성이 나온다 (#777)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 체크 칭찬 소리'**
+  String get elumiSettingsPraiseSoundLabel;
+
   /// 이룸이 설정의 약관 줄
   ///
   /// In ko, this message translates to:
@@ -2384,6 +2390,12 @@ abstract class AppLocalizations {
   /// **'카드 체크 진동'**
   String get guardianSettingsHaptic;
 
+  /// 설정 줄 — 이룸이가 카드를 체크할 때 효과음과 칭찬 음성 켜기/끄기 (#777)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 체크 칭찬 소리'**
+  String get guardianSettingsPraiseSound;
+
   /// 추가 질문 화면 하단 버튼
   ///
   /// In ko, this message translates to:
@@ -3439,6 +3451,528 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'더 불러오지 못했어요'**
   String get creditHistoryMoreFailed;
+
+  /// 일과 상세 시트의 알림 줄 읽어주기 이름 (#777)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 알림'**
+  String get reminderRowLabel;
+
+  /// 일과 상세 시트 알림 줄 — 알림을 정하지 않았을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 없음'**
+  String get reminderRowOff;
+
+  /// 일과 상세 시트 알림 줄 — 매일 반복. time 은 기기 형식 시각 (예: 오전 8:00)
+  ///
+  /// In ko, this message translates to:
+  /// **'매일 {time}에 알려요'**
+  String reminderRowDaily(String time);
+
+  /// 일과 상세 시트 알림 줄 — 한 번만
+  ///
+  /// In ko, this message translates to:
+  /// **'{time}에 한 번 알려요'**
+  String reminderRowOnce(String time);
+
+  /// 일과 알림 설정 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'언제 알려 드릴까요?'**
+  String get reminderSheetTitle;
+
+  /// 일과 알림 설정 시트 설명 — 알림은 설정한 기기에서만 울린다
+  ///
+  /// In ko, this message translates to:
+  /// **'정한 시각에 이 기기로 알림이 와요'**
+  String get reminderSheetBody;
+
+  /// 일과 알림 설정 시트 — 매일 반복 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'매일 같은 시각에 알리기'**
+  String get reminderRepeatDaily;
+
+  /// 일과 알림 설정 시트 — 처음 켤 때 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 켜기'**
+  String get reminderTurnOn;
+
+  /// 일과 알림 설정 시트 — 이미 켜져 있을 때 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 시각 바꾸기'**
+  String get reminderUpdate;
+
+  /// 일과 알림 설정 시트 — 끄기 글자 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 끄기'**
+  String get reminderTurnOff;
+
+  /// 일과 알림 저장 후 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 맞췄어요'**
+  String get reminderSavedToast;
+
+  /// 일과 알림 끈 뒤 토스트
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 껐어요'**
+  String get reminderClearedToast;
+
+  /// 알림 권한 거부 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'알림이 꺼져 있어요'**
+  String get reminderPermissionDeniedTitle;
+
+  /// 알림 권한 거부 팝업 본문 — 우회 경로 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 설정에서 이룸 알림을 허용하면 일과 시간을 알려 드려요'**
+  String get reminderPermissionDeniedBody;
+
+  /// 일과 알림 예약 실패 팝업 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 맞추지 못했어요'**
+  String get reminderFailedTitle;
+
+  /// 일과 알림 예약 실패 팝업 본문
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 해 주세요'**
+  String get reminderFailedBody;
+
+  /// 안드로이드 알림 설정에 보이는 알림 종류 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'일과 알림'**
+  String get reminderChannelName;
+
+  /// 일과 알림 제목 — 앱 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸'**
+  String get reminderNotificationTitle;
+
+  /// 일과 알림 본문. routineTitle 은 일과 제목 (예: 양치하기)
+  ///
+  /// In ko, this message translates to:
+  /// **'{routineTitle} 할 시간이에요'**
+  String reminderNotificationBody(String routineTitle);
+
+  /// 일과 만들기 화면 — 카테고리별 예시 일과 시트를 여는 버튼 (#777)
+  ///
+  /// In ko, this message translates to:
+  /// **'예시 일과 둘러보기'**
+  String get routineTemplateOpen;
+
+  /// 예시 일과 시트 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'예시 일과'**
+  String get routineTemplateSheetTitle;
+
+  /// 예시 일과 시트 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'고르면 입력칸에 채워 드려요. 이룸이에게 맞게 고쳐서 보내세요'**
+  String get routineTemplateSheetBody;
+
+  /// 예시 일과 중 처음 써 보는 보호자에게 권하는 항목 표시
+  ///
+  /// In ko, this message translates to:
+  /// **'처음이라면 추천'**
+  String get routineTemplateBeginnerBadge;
+
+  /// 예시 일과 카테고리 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'몸 돌보기'**
+  String get routineTemplateCategorySelfCare;
+
+  /// 예시 일과 카테고리 한 줄 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'씻기·옷 입기·밥 먹기처럼 매일 하는 일'**
+  String get routineTemplateCategorySelfCareHint;
+
+  /// 예시 일과 카테고리 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'하루 흐름'**
+  String get routineTemplateCategoryDailyFlow;
+
+  /// 예시 일과 카테고리 한 줄 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'아침부터 잠들 때까지 큰 순서'**
+  String get routineTemplateCategoryDailyFlowHint;
+
+  /// 예시 일과 카테고리 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'집안일'**
+  String get routineTemplateCategoryHousehold;
+
+  /// 예시 일과 카테고리 한 줄 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'내 물건과 자리를 스스로 정리하기'**
+  String get routineTemplateCategoryHouseholdHint;
+
+  /// 예시 일과 카테고리 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'밖에서 해 보기'**
+  String get routineTemplateCategoryCommunity;
+
+  /// 예시 일과 카테고리 한 줄 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'버스 타기·물건 사기처럼 혼자 해 보는 연습'**
+  String get routineTemplateCategoryCommunityHint;
+
+  /// 예시 일과 카테고리 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'공부'**
+  String get routineTemplateCategoryLearning;
+
+  /// 예시 일과 카테고리 한 줄 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'공부를 시작하고 끝까지 하는 순서'**
+  String get routineTemplateCategoryLearningHint;
+
+  /// 예시 일과 카테고리 이름
+  ///
+  /// In ko, this message translates to:
+  /// **'마음과 관계'**
+  String get routineTemplateCategoryFeelings;
+
+  /// 예시 일과 카테고리 한 줄 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'감정 표현·인사·차례 기다리기'**
+  String get routineTemplateCategoryFeelingsHint;
+
+  /// 예시 일과 이름 (selfCare)
+  ///
+  /// In ko, this message translates to:
+  /// **'양치하기'**
+  String get routineTemplateBrushTeethText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 혼자 양치를 해 보게 하고 싶어. 칫솔과 치약 꺼내기, 양치컵에 물 받기, 이 닦기, 헹구기, 정리하기까지 순서대로 알려 줘'**
+  String get routineTemplateBrushTeethPrompt;
+
+  /// 예시 일과 이름 (selfCare)
+  ///
+  /// In ko, this message translates to:
+  /// **'세수하기'**
+  String get routineTemplateWashFaceText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 아침에 혼자 세수를 해 보게 하고 싶어. 물 틀기, 얼굴 적시기, 비누 거품 내기, 헹구기, 수건으로 닦기, 로션 바르기까지 알려 줘'**
+  String get routineTemplateWashFacePrompt;
+
+  /// 예시 일과 이름 (selfCare)
+  ///
+  /// In ko, this message translates to:
+  /// **'혼자 옷 입기'**
+  String get routineTemplateGetDressedText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 혼자 옷을 입어 보게 하고 싶어. 러닝셔츠, 티셔츠, 바지, 양말 순서로 하나씩 입는 걸 알려 줘'**
+  String get routineTemplateGetDressedPrompt;
+
+  /// 예시 일과 이름 (selfCare)
+  ///
+  /// In ko, this message translates to:
+  /// **'밥 먹기'**
+  String get routineTemplateEatMealText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 식사 시간에 스스로 해 보게 하고 싶어. 물 마시기, 자기 수저와 그릇 가져가기, 앉아서 먹기, 다 먹은 그릇 갖다 놓기까지 알려 줘'**
+  String get routineTemplateEatMealPrompt;
+
+  /// 예시 일과 이름 (selfCare)
+  ///
+  /// In ko, this message translates to:
+  /// **'목욕하기'**
+  String get routineTemplateBathTimeText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 목욕을 순서대로 해 보게 하고 싶어. 옷 벗기, 몸에 물 적시기, 머리 감기, 몸 씻기, 헹구기, 수건으로 닦고 옷 입기까지 알려 줘'**
+  String get routineTemplateBathTimePrompt;
+
+  /// 예시 일과 이름 (dailyFlow)
+  ///
+  /// In ko, this message translates to:
+  /// **'아침 등교 준비'**
+  String get routineTemplateMorningRoutineText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 아침에 일어나서 학교 갈 때까지 할 일을 순서대로 하게 하고 싶어. 일어나기, 화장실 가기, 밥 먹기, 세수와 양치, 옷 입기, 가방 메고 신발 신기까지 알려 줘'**
+  String get routineTemplateMorningRoutinePrompt;
+
+  /// 예시 일과 이름 (dailyFlow)
+  ///
+  /// In ko, this message translates to:
+  /// **'학교 다녀와서'**
+  String get routineTemplateAfterSchoolText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 학교에서 돌아오면 스스로 할 일을 하게 하고 싶어. 신발 정리하기, 손 씻기, 가방 제자리에 두기, 간식 먹기, 쉬는 시간 갖기까지 알려 줘'**
+  String get routineTemplateAfterSchoolPrompt;
+
+  /// 예시 일과 이름 (dailyFlow)
+  ///
+  /// In ko, this message translates to:
+  /// **'자기 전 준비'**
+  String get routineTemplateBedtimeText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 잠들기 전에 할 일을 순서대로 하게 하고 싶어. 양치하기, 잠옷 입기, 내일 가방 챙기기, 불 끄고 눕기까지 알려 줘'**
+  String get routineTemplateBedtimePrompt;
+
+  /// 예시 일과 이름 (dailyFlow)
+  ///
+  /// In ko, this message translates to:
+  /// **'외출 준비'**
+  String get routineTemplateGoingOutText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 밖에 나가기 전에 스스로 준비하게 하고 싶어. 화장실 다녀오기, 겉옷 입기, 물통과 휴대폰 챙기기, 신발 신기, 문 앞에서 기다리기까지 알려 줘'**
+  String get routineTemplateGoingOutPrompt;
+
+  /// 예시 일과 이름 (household)
+  ///
+  /// In ko, this message translates to:
+  /// **'방 정리하기'**
+  String get routineTemplateTidyRoomText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 놀고 난 뒤 방을 스스로 정리하게 하고 싶어. 장난감 모으기, 상자에 넣기, 책 꽂기, 옷 걸기까지 알려 줘'**
+  String get routineTemplateTidyRoomPrompt;
+
+  /// 예시 일과 이름 (household)
+  ///
+  /// In ko, this message translates to:
+  /// **'먹은 그릇 정리하기'**
+  String get routineTemplateClearDishesText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 밥을 다 먹고 그릇을 스스로 치우게 하고 싶어. 남은 음식 모으기, 그릇 들고 가기, 싱크대에 넣기, 식탁 닦기까지 알려 줘'**
+  String get routineTemplateClearDishesPrompt;
+
+  /// 예시 일과 이름 (household)
+  ///
+  /// In ko, this message translates to:
+  /// **'빨래 개기'**
+  String get routineTemplateFoldLaundryText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 마른 빨래를 개서 정리해 보게 하고 싶어. 빨래 가져오기, 양말 짝 맞추기, 수건 접기, 옷 개기, 서랍에 넣기까지 알려 줘'**
+  String get routineTemplateFoldLaundryPrompt;
+
+  /// 예시 일과 이름 (household)
+  ///
+  /// In ko, this message translates to:
+  /// **'쓰레기 버리기'**
+  String get routineTemplateTakeOutTrashText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 쓰레기를 나눠서 버리는 걸 해 보게 하고 싶어. 쓰레기 모으기, 종이와 플라스틱 나누기, 봉투 묶기, 정해진 곳에 버리기까지 알려 줘'**
+  String get routineTemplateTakeOutTrashPrompt;
+
+  /// 예시 일과 이름 (community)
+  ///
+  /// In ko, this message translates to:
+  /// **'버스 타기'**
+  String get routineTemplateRideBusText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 혼자 버스를 타 보는 연습을 하고 싶어. 정류장에서 번호 확인하기, 줄 서기, 교통카드 찍기, 자리에 앉기, 내릴 곳에서 벨 누르기까지 알려 줘'**
+  String get routineTemplateRideBusPrompt;
+
+  /// 예시 일과 이름 (community)
+  ///
+  /// In ko, this message translates to:
+  /// **'편의점에서 물건 사기'**
+  String get routineTemplateBuyItemText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 편의점에서 혼자 물건을 사 보게 하고 싶어. 살 물건 찾기, 계산대에 줄 서기, 물건 올려놓기, 카드나 돈 내기, 영수증 받고 인사하기까지 알려 줘'**
+  String get routineTemplateBuyItemPrompt;
+
+  /// 예시 일과 이름 (community)
+  ///
+  /// In ko, this message translates to:
+  /// **'엘리베이터로 층 찾아가기'**
+  String get routineTemplateUseElevatorText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 엘리베이터를 타고 정한 층에 혼자 가 보게 하고 싶어. 버튼 누르기, 문 열리면 타기, 숫자 버튼 누르기, 층 숫자 보기, 내리기까지 알려 줘'**
+  String get routineTemplateUseElevatorPrompt;
+
+  /// 예시 일과 이름 (community)
+  ///
+  /// In ko, this message translates to:
+  /// **'병원 다녀오기'**
+  String get routineTemplateHospitalVisitText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 병원에 가서 순서대로 진료를 받게 하고 싶어. 접수하기, 대기실에서 기다리기, 이름 부르면 들어가기, 진료 받기, 약 받고 인사하기까지 알려 줘'**
+  String get routineTemplateHospitalVisitPrompt;
+
+  /// 예시 일과 이름 (learning)
+  ///
+  /// In ko, this message translates to:
+  /// **'숙제 시작하기'**
+  String get routineTemplateStartHomeworkText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 숙제를 스스로 시작해서 끝내 보게 하고 싶어. 책상에 앉기, 공책과 연필 꺼내기, 숙제 하기, 다 하면 보여 주기, 가방에 넣기까지 알려 줘'**
+  String get routineTemplateStartHomeworkPrompt;
+
+  /// 예시 일과 이름 (learning)
+  ///
+  /// In ko, this message translates to:
+  /// **'이름 쓰기 연습'**
+  String get routineTemplateWriteNameText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 연필을 바르게 잡고 자기 이름을 써 보게 하고 싶어. 연필 잡기, 종이 놓기, 이름 따라 쓰기, 혼자 써 보기, 정리하기까지 알려 줘'**
+  String get routineTemplateWriteNamePrompt;
+
+  /// 예시 일과 이름 (learning)
+  ///
+  /// In ko, this message translates to:
+  /// **'수 세기 놀이'**
+  String get routineTemplateCountObjectsText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 물건을 하나씩 짚으며 수를 세는 연습을 하고 싶어. 물건 늘어놓기, 하나씩 손가락으로 짚기, 소리 내어 세기, 다 센 수 말하기까지 알려 줘'**
+  String get routineTemplateCountObjectsPrompt;
+
+  /// 예시 일과 이름 (learning)
+  ///
+  /// In ko, this message translates to:
+  /// **'책 읽는 시간'**
+  String get routineTemplateReadBookText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 책 읽는 시간을 스스로 가져 보게 하고 싶어. 책 고르기, 자리에 앉기, 한 쪽씩 넘기며 보기, 다 읽으면 책꽂이에 꽂기까지 알려 줘'**
+  String get routineTemplateReadBookPrompt;
+
+  /// 예시 일과 이름 (feelings)
+  ///
+  /// In ko, this message translates to:
+  /// **'화가 날 때 감정 카드 꺼내기'**
+  String get routineTemplateEmotionCardText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 친구 때문에 화가 날 때 소리 지르거나 밀지 않고 감정 카드를 꺼내 보여 주게 하고 싶어. 멈추기, 주머니에서 감정 카드 꺼내기, 지금 기분 카드 고르기, 선생님께 보여 주기까지 알려 줘'**
+  String get routineTemplateEmotionCardPrompt;
+
+  /// 예시 일과 이름 (feelings)
+  ///
+  /// In ko, this message translates to:
+  /// **'친구와 사이좋게 놀기'**
+  String get routineTemplatePlayNicelyText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 친구와 사이좋게 노는 연습을 하고 싶어. 같이 놀자고 말하기, 장난감 나눠 쓰기, 차례 지키기, 끝나면 고마워 말하기까지 알려 줘'**
+  String get routineTemplatePlayNicelyPrompt;
+
+  /// 예시 일과 이름 (feelings)
+  ///
+  /// In ko, this message translates to:
+  /// **'인사하기'**
+  String get routineTemplateGreetingText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 사람을 만나면 먼저 인사하게 하고 싶어. 상대 얼굴 보기, 손 흔들기, 안녕하세요 말하기, 웃어 주기까지 알려 줘'**
+  String get routineTemplateGreetingPrompt;
+
+  /// 예시 일과 이름 (feelings)
+  ///
+  /// In ko, this message translates to:
+  /// **'차례 기다리기'**
+  String get routineTemplateWaitTurnText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 줄을 서서 자기 차례를 기다리는 연습을 하고 싶어. 줄 끝에 서기, 앞사람 뒤에서 기다리기, 내 차례 확인하기, 차례가 오면 하기까지 알려 줘'**
+  String get routineTemplateWaitTurnPrompt;
+
+  /// 예시 일과 이름 (feelings)
+  ///
+  /// In ko, this message translates to:
+  /// **'도와 달라고 말하기'**
+  String get routineTemplateAskHelpText;
+
+  /// 예시 일과를 고르면 입력칸에 채울 문장 — AI 가 이 문장으로 카드를 쪼갠다
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 혼자 하기 어려울 때 도움을 요청하게 하고 싶어. 멈추기, 가까운 어른 찾기, 도와주세요 말하기, 도움 받고 고맙습니다 말하기까지 알려 줘'**
+  String get routineTemplateAskHelpPrompt;
 }
 
 class _AppLocalizationsDelegate
