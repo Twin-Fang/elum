@@ -50,6 +50,14 @@ abstract final class AppAssets {
   /// 시안에 노란 경고가 없다.
   static const dialogAlert = 'assets/icon/dialog/alert_round.svg';
 
+  /// 보호자 하단 바 아이콘 4개 (Flaticon bold rounded, 시안 `네비게이션바` 1666:7082, #835).
+  /// 한 가지 색(#242634)으로 받아 두고 고른 칸 · 아닌 칸 색은 코드에서 입힌다
+  static const _navIcons = 'assets/icon/nav';
+  static const navHome = '$_navIcons/nav_home.svg';
+  static const navFolder = '$_navIcons/nav_folder.svg';
+  static const navComment = '$_navIcons/nav_comment.svg';
+  static const navUser = '$_navIcons/nav_user.svg';
+
   /// 역할 선택 카드 그림 (40×40) — ⚠️ **임시로 목표 아이콘을 빌려 쓴다.**
   ///
   /// 전용 그림 2종이 아직 없다. 도형을 코드로
@@ -175,6 +183,9 @@ abstract final class AppAssets {
   /// 일과 카드 생성 실패 화면의 루미 (빈 카드를 들고 고개를 기울임, 투명 배경).
   static const cardCreationFailedLumi = '$_images/card_creation_failed_lumi.png';
 
+  /// 일시적인 오류 안내 화면의 루미 (민트색 돋보기로 살펴봄, 1254×1254, 투명 배경).
+  static const temporaryErrorLumi = '$_images/temporary_error_lumi.png';
+
   /// 강제 업데이트 안내 카드의 루미 + 다운로드 화살표 (1536×1024, 투명 배경).
   static const updateLumi = '$_images/update_lumi.png';
 
@@ -183,6 +194,9 @@ abstract final class AppAssets {
 
   /// 보호자 프로필 자리 루미 얼굴 아이콘 (투명 배경 정사각형 PNG)
   static const guardianProfileLumi = '$_images/guardian_profile_lumi.png';
+
+  /// 이야기 칸 준비 중 안내의 루미 (빈 말풍선을 안음, 1254×1254 투명 배경)
+  static const storiesComingSoonLumi = '$_images/stories_coming_soon_lumi.png';
 
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
   static const imageStyleRealistic = '$_images/image_style_realistic.png';

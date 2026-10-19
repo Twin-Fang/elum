@@ -93,6 +93,9 @@ abstract class Routine with _$Routine {
     String? groupId,
     int? groupOrder,
 
+    /// 일과관리 격자 안 자리 (묶음과 같은 순서열, 0부터). 정한 적 없으면 null (#844)
+    int? libraryOrder,
+
     /// 묶음째 보내 만든 오늘 일과의 묶음 id · 보낼 때의 묶음 이름 · 묶음 안 순서. 낱개로 보냈으면 null
     String? sentGroupId,
     String? sentGroupName,
@@ -111,8 +114,9 @@ abstract class Routine with _$Routine {
   bool get isEditableByMe => createdByMe != false;
 
   /// 남이 만든 일과에 붙이는 `엄마가 만든 일과예요`. 내가 만들었거나 모르면 null.
+  /// 온보딩 예시 일과는 보호자가 고른 것이라 만든 사람 표시를 하지 않는다 (#823).
   String? get foreignCreatorLabel {
-    if (createdByMe != false) return null;
+    if (createdByMe != false || isExample) return null;
     final name = creatorName?.trim();
     if (name == null || name.isEmpty) return appL10n.routineForeignCreatorUnknown;
     // 조사 글자는 문구가 정한다 — 코드는 받침 판정값만 넘긴다
@@ -243,6 +247,7 @@ abstract class Routine with _$Routine {
       sourceRoutineId: _optionalId(json['sourceRoutineId']),
       groupId: _optionalId(json['groupId']),
       groupOrder: _optionalInt(json['groupOrder']),
+      libraryOrder: _optionalInt(json['libraryOrder']),
       sentGroupId: _optionalId(json['sentGroupId']),
       sentGroupName: _optionalId(json['sentGroupName']),
       sentGroupOrder: _optionalInt(json['sentGroupOrder']),

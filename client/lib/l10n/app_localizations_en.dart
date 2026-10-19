@@ -123,7 +123,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adRewardSlow =>
-      'Checking your credits is taking a while.\nCheck settings in a moment';
+      'Checking your credits is taking a while.\nCheck My info in a moment';
 
   @override
   String get adRewardDailyLimit =>
@@ -905,10 +905,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteEnterDescriptionManual =>
-      'The code is on a co-guardian\'s device,\nin Settings → Co-guardians';
+      'The code is on a co-guardian\'s device,\nin My info → Co-guardians';
 
   @override
-  String get inviteEnterDescriptionPath => 'Settings → Co-guardians';
+  String get inviteEnterDescriptionPath => 'My info → Co-guardians';
 
   @override
   String get inviteEnterSemanticsFromLink => 'Invite code from the link';
@@ -1603,14 +1603,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineLeaveDraftWhenReadyMessage =>
-      'Once the cards are ready, it stays in drafts\nYou can continue from settings';
+      'Once the cards are ready, it stays in drafts\nYou can continue from My info';
 
   @override
   String get routineLeaveDraftTitle => 'Leave it as a draft?';
 
   @override
   String get routineLeaveDraftMessage =>
-      'You can continue from\nDrafts in settings';
+      'You can continue from\nDrafts in My info';
 
   @override
   String get routineLeaveEditTitle => 'Leave without saving?';
@@ -1854,8 +1854,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modeSwitchBlockedBack => 'Go back';
 
   @override
+  String get installationRetryTitle => 'Something went wrong';
+
+  @override
   String get installationRetryMessage =>
-      'Could not check sign-in information on this device. Please try again.';
+      'We couldn\'t check this device. Want to try again?';
 
   @override
   String get installationRetryButton => 'Try again';
@@ -2277,6 +2280,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianTabMe => 'My info';
 
   @override
+  String get guardianMyInfoProfileName => 'Guardian';
+
+  @override
+  String guardianMyInfoLinkedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Together with $count Elumis',
+      one: 'Together with 1 Elumi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get guardianMyInfoNoLinked => 'No Elumi connected yet';
+
+  @override
+  String get guardianMyInfoChildrenHeader => 'Elumi';
+
+  @override
+  String get guardianMyInfoActiveBadge => 'Viewing';
+
+  @override
   String get guardianSideNavCaption => 'Guardian mode';
 
   @override
@@ -2370,8 +2396,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String onboardingExampleTitle(String name, String batchim) {
-    return 'Which routines would you like\nto start with $name?';
+  String onboardingExampleTitle(String name) {
+    return 'What would you like\nto help $name with?';
   }
 
   @override
@@ -2405,9 +2431,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exampleCategoryOutsideHint => 'Taking the bus, shopping';
-
-  @override
-  String get routineTileExampleBadge => 'Example';
 
   @override
   String get exampleRoutinesFailed => 'Couldn\'t add the example routines';
@@ -2535,12 +2558,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get childHomeGroupAllDone => 'All done!';
 
   @override
-  String get libraryCoachMenu =>
-      '*Long-press* a routine to open its menu\\nRename, copy or delete from there';
-
-  @override
-  String get libraryCoachCreate => 'You can also make a new bundle here';
-
-  @override
   String get routineDetailMore => 'More';
+
+  @override
+  String get libraryArrangeDone => 'Done';
+
+  @override
+  String get libraryArrangeRemove => 'Remove or ungroup';
+
+  @override
+  String get routineGroupEditOrder => 'Edit order';
+
+  @override
+  String get routineLibrarySendOnlyThis => 'Send only this one today';
+
+  @override
+  String routineGroupRowCardCount(int count) {
+    return '카드 $count장';
+  }
+
+  @override
+  String get routineManageCoachTapMessage =>
+      '일과를 *누르면* 카드를 볼 수 있어요\n카드 고치기와 *오늘 보내기*를 할 수 있어요';
+
+  @override
+  String get routineManageCoachLongPressMessage =>
+      '*길게 누르면* 칸 옆에 메뉴가 열려요\n오늘 보내기 · 이름 바꾸기 · 묶음에 넣기 · 복사하기 · 지우기';
+
+  @override
+  String get routineManageCoachSentMessage =>
+      '오늘 보낸 일과에는 *✓*가 붙어요\n홈의 오늘 일과에 들어가고, 여기 일과는 그대로 남아요';
+
+  @override
+  String get routineManageCoachDragMessage =>
+      '일과를 *꾹 눌러* 다른 일과 위에 놓으면 묶음이 돼요\n묶음을 보내면 안 일과가 순서대로 한꺼번에 가요';
+
+  @override
+  String get routineManageCoachCreateGroupMessage =>
+      '끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요';
+
+  @override
+  String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';
 }

@@ -15,17 +15,16 @@ import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/routine.dart';
 import '../../credit/application/credit_start_gate.dart';
-import '../application/library_coach_notifier.dart';
 import '../application/library_entries.dart';
 import '../application/routine_library_controller.dart';
 import '../application/routine_notifier.dart';
 import '../application/routine_providers.dart';
 import 'guardian_home_screen.dart';
 import 'library_group_actions.dart';
-import 'widgets/library_coach_mark.dart';
 import 'widgets/library_entry_grid.dart';
 import 'widgets/library_parts.dart';
 import 'widgets/library_quick_menu.dart';
+import 'widgets/routine_manage_coach_mark.dart';
 import 'widgets/routine_detail_sheet.dart';
 import 'widgets/routine_rename_sheet.dart';
 
@@ -49,25 +48,26 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   static const _createButtonHeight = 54.0;
   static const _createButtonMargin = 16.0;
 
-  /// 코치마크가 가리킬 첫 일과 칸 · `+ 일과 만들기` 버튼 (#834)
-  final _firstTileKey = GlobalKey();
-  final _createKey = GlobalKey();
+  /// 정리 상태: 칸이 흔들리고 ⊖ 가 붙고 바로 끌 수 있다 (#837)
+  bool _isArranging = false;
 
-  /// 이 칸이 맨 위에 보이는 지금일 때만 코치마크를 켠다. 숨은 칸(다른 탭)이나 다른 화면 위에서는 켜지 않는다
-  void _maybeStartCoach() {
-    if (!mounted || !TickerMode.of(context)) return;
-    if (ModalRoute.of(context)?.isCurrent == false) return;
-    ref.read(libraryCoachProvider.notifier).maybeStart(hasTileTarget: true);
-  }
+  /// 첫 사용 안내가 가리킬 칸: 낱개 일과 첫째 · 둘째, `+ 일과 만들기`
+  final _firstRoutineTileKey = GlobalKey();
+  final _secondRoutineTileKey = GlobalKey();
+  final _createButtonKey = GlobalKey();
 
   // --- 동작 ---
 
   @override
-  Future<void> openRoutineDetail(Routine routine) async {
+  Future<void> openRoutineDetail(
+    Routine routine, {
+    bool isInGroup = false,
+  }) async {
     final action = await RoutineDetailSheet.show(
       context,
       routine,
       isLibrary: true,
+      isInGroup: isInGroup,
     );
     if (!mounted) return;
     switch (action) {
@@ -76,14 +76,33 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       case RoutineSheetAction.edit:
         _editCards(routine);
       case RoutineSheetAction.more:
-        await _openMenu(routine);
+        await _openMenuSheet(routine);
       case RoutineSheetAction.rerun || null:
         return;
     }
   }
 
-  Future<void> _openMenu(Routine routine) async {
-    final action = await showLibraryQuickMenu(context, routine);
+  /// 길게 누른 칸 옆 메뉴
+  Future<void> _openMenu(Routine routine, LibraryMenuAnchor anchor) async {
+    final action = await showLibraryQuickMenu(
+      context,
+      routine,
+      anchor: anchor.rect,
+      highlight: anchor.tile,
+    );
+    await _runMenuAction(routine, action);
+  }
+
+  /// 상세 시트 ⋯ 로 연 같은 메뉴 (눌린 칸이 없어 아래 시트)
+  Future<void> _openMenuSheet(Routine routine) async => _runMenuAction(
+    routine,
+    await showLibraryQuickMenuSheet(context, routine),
+  );
+
+  Future<void> _runMenuAction(
+    Routine routine,
+    LibraryMenuAction? action,
+  ) async {
     if (!mounted || action == null) return;
     switch (action) {
       case LibraryMenuAction.send:
@@ -225,6 +244,34 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     context.push(Routes.routineReview);
   }
 
+  /// 칸 사이에 놓아 자리 옮기기: 새 전체 순서를 만들어 서버에 저장한다 (#837, #844)
+  Future<void> _moveCell(
+    List<LibraryEntry> entries,
+    LibraryEntry dragged,
+    LibraryEntry target, {
+    required bool isBefore,
+  }) async {
+    final cells = reorderCells(
+      entries,
+      movedId: dragged.id,
+      targetId: target.id,
+      isBefore: isBefore,
+    );
+    final failure = await runBusy(
+      () => ref.read(routineLibraryControllerProvider).saveOrder([
+        for (final cell in cells) (type: cell.type.wire, id: cell.id),
+      ]),
+    );
+    if (failure == null || !mounted) return;
+    await showFailure(
+      context,
+      failure,
+      title: context.l10n.routineGroupActionFailedTitle,
+      fallback: context.l10n.routineLibraryActionFailedFallback,
+      fallbackCode: 'E-LIB-ORDER',
+    );
+  }
+
   /// 새 일과: 크레딧 확인 > 일과 만들기 흐름 (홈 버튼과 같은 길)
   @override
   Future<void> startCreateRoutine() async {
@@ -250,15 +297,24 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         entries: value,
         sentIds: sentIds,
         bottomSpace: bottomSpace,
+        firstRoutineTileKey: _firstRoutineTileKey,
+        secondRoutineTileKey: _secondRoutineTileKey,
         onRoutineTap: busy ? null : openRoutineDetail,
         onRoutineMenu: busy ? null : _openMenu,
         onGroupTap: busy ? null : openGroup,
         onGroupMenu: busy ? null : openGroupMenu,
+        isArranging: _isArranging,
+        onArrangeStart: () => setState(() => _isArranging = true),
+        onMoveCell: busy
+            ? null
+            : (dragged, target, {required isBefore}) =>
+                  _moveCell(value, dragged, target, isBefore: isBefore),
+        onRemoveRoutine: busy ? null : _remove,
+        onRemoveGroup: busy ? null : (entry) => confirmUngroup(entry.group),
         onDropOnRoutine: busy ? null : groupByDrop,
         onDropOnGroup: busy
             ? null
             : (dragged, target) => addToGroup(target.group, [dragged.id]),
-        firstTileKey: _firstTileKey,
       ),
       AsyncValue(:final value?) when value.isEmpty => LibraryEmptyState(
         bottomSpace: bottomSpace,
@@ -274,21 +330,20 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       _ => const Center(child: ElumSpinner()),
     };
 
-    // 일과 칸이 그려진 뒤(가리킬 곳이 있을 때) 처음 한 번 안내를 켠다
-    if (async.value?.isNotEmpty ?? false) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartCoach());
-    }
-
     final scaffold = Scaffold(
       backgroundColor: colors.background,
       // 떠 있는 버튼으로 두어야 알림(토스트)이 버튼을 가리지 않고 그 위에 뜬다
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: KeyedSubtree(
-        key: _createKey,
+        key: _createButtonKey,
         child: CreateRoutineFab(
           height: _createButtonHeight.h,
           isBusy: busy,
-          onTap: onCreatePressed,
+          isArranging: _isArranging,
+          // 정리 상태에서는 가운데 버튼이 `완료`
+          onTap: _isArranging
+              ? () => setState(() => _isArranging = false)
+              : onCreatePressed,
         ),
       ),
       body: SafeArea(
@@ -306,13 +361,16 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     return Stack(
       children: [
         scaffold,
-        // 처음 들어왔을 때만 뜨는 안내. 평소에는 아무것도 그리지 않는다
+        // 처음 들어왔을 때만 뜨는 안내. 평소에는 아무것도 그리지 않는다.
+        // Scaffold 밖이라 글 스타일을 주는 Material 이 없어 투명 Material 로 감싼다.
         Positioned.fill(
           child: Material(
             type: MaterialType.transparency,
-            child: LibraryCoachMark(
-              tileKey: _firstTileKey,
-              createKey: _createKey,
+            child: RoutineManageCoachMark(
+              entries: async.value,
+              firstRoutineTileKey: _firstRoutineTileKey,
+              secondRoutineTileKey: _secondRoutineTileKey,
+              createButtonKey: _createButtonKey,
             ),
           ),
         ),

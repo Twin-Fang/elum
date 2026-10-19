@@ -245,7 +245,7 @@ abstract class AppLocalizations {
   /// 시청은 끝났는데 지급 확인이 오지 않을 때의 안내
   ///
   /// In ko, this message translates to:
-  /// **'크레딧 확인이 늦어지고 있어요.\n잠시 후 설정에서 확인해주세요'**
+  /// **'크레딧 확인이 늦어지고 있어요.\n잠시 후 내정보에서 확인해주세요'**
   String get adRewardSlow;
 
   /// 하루 한도를 다 받았을 때의 안내
@@ -1601,13 +1601,13 @@ abstract class AppLocalizations {
   /// 직접 입력할 때의 설명(코드를 받는 길)
   ///
   /// In ko, this message translates to:
-  /// **'코드는 함께하는 보호자 기기의\n설정 → 함께하는 사람에 있어요'**
+  /// **'코드는 함께하는 보호자 기기의\n내정보 → 함께하는 사람에 있어요'**
   String get inviteEnterDescriptionManual;
 
   /// 직접 입력 설명(inviteEnterDescriptionManual) 안에서 밑줄을 긋는 길 안내. 설명 문구에 그대로 들어 있어야 함
   ///
   /// In ko, this message translates to:
-  /// **'설정 → 함께하는 사람'**
+  /// **'내정보 → 함께하는 사람'**
   String get inviteEnterDescriptionPath;
 
   /// 화면 낭독기가 읽는 여섯 칸의 이름(링크로 받았을 때)
@@ -2843,7 +2843,7 @@ abstract class AppLocalizations {
   /// 카드를 만드는 중에 나가는 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요'**
+  /// **'카드가 다 만들어지면 임시저장에 남아요\n내정보에서 이어서 만들 수 있어요'**
   String get routineLeaveDraftWhenReadyMessage;
 
   /// 카드 검토 화면에서 나가는 팝업 제목
@@ -2855,7 +2855,7 @@ abstract class AppLocalizations {
   /// 카드 검토 화면에서 나가는 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'설정의 임시저장에서\n이어서 만들 수 있어요'**
+  /// **'내정보의 임시저장에서\n이어서 만들 수 있어요'**
   String get routineLeaveDraftMessage;
 
   /// 저장한 일과를 고치다 나가는 팝업 제목
@@ -3260,10 +3260,16 @@ abstract class AppLocalizations {
   /// **'돌아가기'**
   String get modeSwitchBlockedBack;
 
-  /// No description provided for @installationRetryMessage.
+  /// 기기 설치 표식을 읽지 못했을 때 오류 화면 제목 (E-INSTALL)
   ///
   /// In ko, this message translates to:
-  /// **'기기의 로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.'**
+  /// **'잠깐 문제가 생겼어요'**
+  String get installationRetryTitle;
+
+  /// 기기 설치 표식을 읽지 못했을 때 오류 화면 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 정보를 확인하지 못했어요. 다시 해볼까요?'**
   String get installationRetryMessage;
 
   /// No description provided for @installationRetryButton.
@@ -3959,7 +3965,7 @@ abstract class AppLocalizations {
   /// 보호자 하단 바·옆 메뉴 칸 이름: 만들어 둔 일과·묶음 관리
   ///
   /// In ko, this message translates to:
-  /// **'일과관리'**
+  /// **'일과 관리'**
   String get guardianTabManage;
 
   /// 보호자 하단 바·옆 메뉴 칸 이름: 보호자끼리 나누는 이야기
@@ -3968,11 +3974,41 @@ abstract class AppLocalizations {
   /// **'이야기'**
   String get guardianTabTalk;
 
-  /// 보호자 하단 바·옆 메뉴 칸 이름이자 그 칸(설정) 화면 제목
+  /// 보호자 하단 바·옆 메뉴 칸 이름이자 그 칸(프로필) 화면 제목
   ///
   /// In ko, this message translates to:
-  /// **'내정보'**
+  /// **'내 정보'**
   String get guardianTabMe;
+
+  /// 내정보 프로필 카드의 이름 자리. 서버에 보호자 이름이 없어 고정 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자'**
+  String get guardianMyInfoProfileName;
+
+  /// 내정보 프로필 카드 안내: 연결된 이룸이 수
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 {count}명과 함께해요'**
+  String guardianMyInfoLinkedCount(int count);
+
+  /// 내정보 프로필 카드 안내: 연결된 이룸이가 0명
+  ///
+  /// In ko, this message translates to:
+  /// **'연결된 이룸이가 아직 없어요'**
+  String get guardianMyInfoNoLinked;
+
+  /// 내정보 이룸이 목록 묶음 머리 글
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이'**
+  String get guardianMyInfoChildrenHeader;
+
+  /// 내정보 이룸이 목록: 이룸이가 여럿일 때 지금 보고 있는 이룸이 표시
+  ///
+  /// In ko, this message translates to:
+  /// **'보는 중'**
+  String get guardianMyInfoActiveBadge;
 
   /// 태블릿 옆 메뉴 이룸이 카드에서 이름 아래 작은 글
   ///
@@ -4115,7 +4151,7 @@ abstract class AppLocalizations {
   /// 지우기 확인 팝업 설명
   ///
   /// In ko, this message translates to:
-  /// **'일과관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요'**
+  /// **'일과 관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요'**
   String get routineLibraryRemoveConfirmMessage;
 
   /// 지우기 성공 알림
@@ -4148,11 +4184,11 @@ abstract class AppLocalizations {
   /// **'{title}을(를) 오늘 일과로 보냈어요'**
   String routineLibrarySent(String title);
 
-  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭, batchim 은 받침 유무(yes/no)
+  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭
   ///
   /// In ko, this message translates to:
-  /// **'{name}{batchim, select, yes{과} other{와}} 어떤 일과부터\n해 볼까요?'**
-  String onboardingExampleTitle(String name, String batchim);
+  /// **'{name}의 어떤 일을\n돕고 싶으세요?'**
+  String onboardingExampleTitle(String name);
 
   /// 온보딩 예시 일과 (#803)
   ///
@@ -4213,12 +4249,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'버스 타기, 물건 사기'**
   String get exampleCategoryOutsideHint;
-
-  /// 온보딩 예시 일과 (#803)
-  ///
-  /// In ko, this message translates to:
-  /// **'예시'**
-  String get routineTileExampleBadge;
 
   /// 온보딩 예시 일과 (#803)
   ///
@@ -4415,7 +4445,7 @@ abstract class AppLocalizations {
   /// 일과 묶음 (#807)
   ///
   /// In ko, this message translates to:
-  /// **'안에 있던 일과는 일과관리에 그대로 남아요'**
+  /// **'안에 있던 일과는 일과 관리에 그대로 남아요'**
   String get routineGroupUngroupConfirmMessage;
 
   /// 이룸이 홈 묶음 상자 (#808)
@@ -4433,20 +4463,74 @@ abstract class AppLocalizations {
   /// 일과관리 메뉴 찾기 (#834)
   ///
   /// In ko, this message translates to:
-  /// **'일과를 *길게 누르면* 메뉴가 열려요\\n이름 바꾸기·복사·지우기를 할 수 있어요'**
-  String get libraryCoachMenu;
-
-  /// 일과관리 메뉴 찾기 (#834)
-  ///
-  /// In ko, this message translates to:
-  /// **'새 묶음도 여기서 만들 수 있어요'**
-  String get libraryCoachCreate;
-
-  /// 일과관리 메뉴 찾기 (#834)
-  ///
-  /// In ko, this message translates to:
   /// **'더 보기'**
   String get routineDetailMore;
+
+  /// 일과관리 정리 상태 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get libraryArrangeDone;
+
+  /// 일과관리 정리 상태 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'지우기 또는 묶음 풀기'**
+  String get libraryArrangeRemove;
+
+  /// 일과관리 묶음 열기 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'순서 편집'**
+  String get routineGroupEditOrder;
+
+  /// 일과관리 묶음 열기 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'이 일과만 오늘 보내기'**
+  String get routineLibrarySendOnlyThis;
+
+  /// 묶음 열기 일과 줄의 보조 글 (#846)
+  ///
+  /// In ko, this message translates to:
+  /// **'카드 {count}장'**
+  String routineGroupRowCardCount(int count);
+
+  /// 일과관리 코치마크 1단계. *로 감싼 부분이 강조된다 (#832)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 *누르면* 카드를 볼 수 있어요\n카드 고치기와 *오늘 보내기*를 할 수 있어요'**
+  String get routineManageCoachTapMessage;
+
+  /// 일과관리 코치마크 2단계 (#832)
+  ///
+  /// In ko, this message translates to:
+  /// **'*길게 누르면* 칸 옆에 메뉴가 열려요\n오늘 보내기 · 이름 바꾸기 · 묶음에 넣기 · 복사하기 · 지우기'**
+  String get routineManageCoachLongPressMessage;
+
+  /// 일과관리 코치마크 3단계. 보내도 원본은 일과관리에 남는다 (#832)
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 보낸 일과에는 *✓*가 붙어요\n홈의 오늘 일과에 들어가고, 여기 일과는 그대로 남아요'**
+  String get routineManageCoachSentMessage;
+
+  /// 일과관리 묶음 코치마크 1단계 (#832)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과를 *꾹 눌러* 다른 일과 위에 놓으면 묶음이 돼요\n묶음을 보내면 안 일과가 순서대로 한꺼번에 가요'**
+  String get routineManageCoachDragMessage;
+
+  /// 일과관리 묶음 코치마크 2단계 (#832)
+  ///
+  /// In ko, this message translates to:
+  /// **'끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요'**
+  String get routineManageCoachCreateGroupMessage;
+
+  /// 설정 줄 — 일과관리 첫 사용 안내(코치마크)를 다시 본다 (#832)
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리 사용법 다시 보기'**
+  String get guardianSettingsRoutineManageGuide;
 }
 
 class _AppLocalizationsDelegate

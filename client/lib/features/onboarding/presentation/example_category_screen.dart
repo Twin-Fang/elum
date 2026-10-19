@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../../core/router/routes.dart';
@@ -64,7 +63,7 @@ class ExampleCategoryScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElumHeader(
-              title: context.l10n.onboardingExampleTitle(name, batchimOf(name)),
+              title: context.l10n.onboardingExampleTitle(name),
               description: context.l10n.onboardingExampleDescription,
               hasBackButton: true,
             ),

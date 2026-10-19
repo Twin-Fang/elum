@@ -109,11 +109,15 @@ class CreateRoutineFab extends StatelessWidget {
     required this.height,
     required this.isBusy,
     required this.onTap,
+    this.isArranging = false,
   });
 
   final double height;
   final bool isBusy;
   final VoidCallback onTap;
+
+  /// 정리 상태면 `+ 일과 만들기` 대신 `완료`가 된다 (#837)
+  final bool isArranging;
 
   /// 더하기 아이콘 한 변
   static const _iconSize = 20.0;
@@ -143,11 +147,13 @@ class CreateRoutineFab extends StatelessWidget {
           children: [
             if (isBusy)
               ElumSpinner(size: _iconSize.w, color: colors.surface)
-            else
+            else if (!isArranging)
               Icon(Icons.add_rounded, size: _iconSize.w, color: colors.surface),
-            SizedBox(width: space.xs.w),
+            if (!isArranging) SizedBox(width: space.xs.w),
             Text(
-              context.l10n.routineLibraryCreate,
+              isArranging
+                  ? context.l10n.libraryArrangeDone
+                  : context.l10n.routineLibraryCreate,
               style: context.typo.floatingActionLabel.copyWith(
                 color: colors.surface,
               ),

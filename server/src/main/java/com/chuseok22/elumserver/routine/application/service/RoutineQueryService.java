@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -142,13 +143,15 @@ public class RoutineQueryService {
       .toList();
   }
 
-  /// 일과관리 목록: 보낸 상태(CONFIRMED·COMPLETED)의 원본만, 최신순 (#804)
+  /// 일과관리 목록: 보낸 상태(CONFIRMED·COMPLETED)의 원본만, 칸 순서(libraryOrder, 없으면 맨 뒤) > 최신순 (#804, #844)
   /// 보내기로 만든 일과·일과관리에서 지운 원본·임시저장은 빠진다
   public List<RoutineResponse> getLibraryRoutines(Caller caller) {
     return routineRepository
       .findLibraryOriginals(profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId(),
         List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED))
       .stream()
+      // 안정 정렬 — 같은 번호·번호 없음은 쿼리의 최신순 유지
+      .sorted(Comparator.comparing(Routine::getLibraryOrder, Comparator.nullsLast(Comparator.naturalOrder())))
       .map(RoutineResponse::from)
       .toList();
   }

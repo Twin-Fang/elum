@@ -21,11 +21,9 @@ import '../../auth/application/auth_session_controller.dart';
 import '../../auth/presentation/consent_document_list_screen.dart';
 import '../../link/data/device_link_repository.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
-import '../../profile/application/profile_session.dart';
-import 'widgets/ai_credit_card.dart';
 import '../../../core/router/pop_or_home.dart';
-import '../../member/application/member_providers.dart';
 import '../../../core/router/routes.dart';
+import '../application/routine_manage_coach_notifier.dart';
 
 /// 보호자 설정 화면.
 ///
@@ -34,10 +32,7 @@ import '../../../core/router/routes.dart';
 ///
 /// 아이 화면에는 진입점을 두지 않는다 — 아이가 계정을 정리할 이유가 없다.
 class GuardianSettingsScreen extends ConsumerStatefulWidget {
-  const GuardianSettingsScreen({super.key, this.isTabRoot = false});
-
-  /// 하단 바 내정보 칸의 첫 화면인가. 맞으면 뒤로가기 없이 칸 이름을 제목으로 쓴다
-  final bool isTabRoot;
+  const GuardianSettingsScreen({super.key});
 
   @override
   ConsumerState<GuardianSettingsScreen> createState() =>
@@ -52,6 +47,12 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
 
   /// 뒤로가기 상자 하단(107) > 스크롤 고정 영역 끝(115)
   static const _fixedAreaExtraHeight = 8.0;
+
+  /// 일과관리 칸으로 가서 첫 사용 안내를 다시 띄운다 (요청만 남기면 그 화면이 목록을 받은 뒤 켠다)
+  void _replayRoutineManageGuide() {
+    ref.read(routineManageCoachProvider.notifier).requestReplay();
+    context.go(Routes.guardianManage);
+  }
 
   Future<void> _logout() async {
     // 시안(`팝업` 1045:5194 `로그아웃/회원탈퇴`)은 **가운데 팝업**이다.
@@ -158,12 +159,9 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
     return ElumScaffold(
       onBack: context.popOrHome,
       isBackEnabled: !busy,
-      isBackButtonVisible: !widget.isTabRoot,
       // 시안(`1022:4467`)은 제목이 뒤로가기와 **같은 줄**에 선다. 본문에 두면
       // 뒤로가기 아래로 내려간다.
-      title: widget.isTabRoot
-          ? context.l10n.guardianTabMe
-          : context.l10n.guardianSettingsTitle,
+      title: context.l10n.guardianSettingsTitle,
       // 줄이 x=16 에서 시작한다. 뼈대 기본 여백(24)이면 8 만큼 안쪽으로 밀린다.
       backTop: 67,
       horizontalPadding: 16,
@@ -188,30 +186,16 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
       children: [
         // 첫 카드는 y=131 이다. 스크롤 영역이 y=115 에서 시작하므로 16 떨어져 있다.
         SizedBox(height: 16.h),
-        // 이번 주 AI 생성. 제목 아래·첫 묶음 위 — 꺼져 있으면 자리도 없다.
-        const AiCreditCard(),
+        // 연결: 이룸이 기기. 이룸이 목록과 바꾸기는 내정보 칸에 있다
         SettingsGroup(
           hasDividers: false,
-          children: [
-            _LinkTile(busy: busy),
-            SettingsTile(
-              isInCard: true,
-              label: context.l10n.guardianSettingsPeople,
-              onTap: busy ? null : () => context.push(Routes.guardianPeople),
-            ),
-            // 시안에 없는 줄이다: 이룸이가 둘 이상일 때만 보이며, 기능을 잃지 않게 임시로 연결 묶음 끝에 둔다.
-            _ProfileSwitchTile(busy: busy),
-          ],
+          children: [_LinkTile(busy: busy)],
         ),
         _groupGap,
+        // 앱 설정: 암호, 그림 방식, 이룸이 화면 진동과 소리
         SettingsGroup(
           hasDividers: false,
           children: [
-            SettingsTile(
-              isInCard: true,
-              label: context.l10n.guardianSettingsDrafts,
-              onTap: busy ? null : () => context.push(Routes.guardianDrafts),
-            ),
             SettingsTile(
               isInCard: true,
               label: context.l10n.guardianSettingsPinChange,
@@ -223,6 +207,7 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           ],
         ),
         _groupGap,
+        // 약관 및 정보
         SettingsGroup(
           hasDividers: false,
           children: [
@@ -236,6 +221,11 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
                         builder: (_) => const ConsentDocumentListScreen(),
                       ),
                     ),
+            ),
+            SettingsTile(
+              isInCard: true,
+              label: context.l10n.guardianSettingsRoutineManageGuide,
+              onTap: busy ? null : _replayRoutineManageGuide,
             ),
             SettingsTile(
               isInCard: true,
@@ -313,33 +303,6 @@ class _LinkTile extends ConsumerWidget {
               // 돌아오면 그사이 연결·끊기가 있었을 수 있다 — 줄을 다시 맞춘다
               ref.invalidate(linkStatusProvider);
             },
-    );
-  }
-}
-
-/// `이룸이 바꾸기` 줄 — **연결된 이룸이가 둘 이상일 때만** 보인다.
-///
-/// 이룸이가 하나뿐인 보호자 대부분에게는 고를 것이 없는 줄이다. 회원 정보를 못 받았을 때도
-/// 숨긴다 — 이룸이가 몇 명인지 모르면 있는 줄도 없는 줄도 믿을 수 없다.
-class _ProfileSwitchTile extends ConsumerWidget {
-  const _ProfileSwitchTile({required this.busy});
-
-  final bool busy;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final count = ref.watch(
-      memberProvider.select((m) => m.value?.profiles.length ?? 0),
-    );
-    if (count < 2) return const SizedBox.shrink();
-    final active = ref.watch(activeProfileProvider);
-    return SettingsTile(
-      isInCard: true,
-      label: context.l10n.guardianSettingsProfileSwitch,
-      // 지금 보는 이룸이 이름을 값으로 보여 준다
-      valueText: active?.displayName,
-      showChevronWithValue: true,
-      onTap: busy ? null : () => context.push(Routes.guardianProfileSwitch),
     );
   }
 }

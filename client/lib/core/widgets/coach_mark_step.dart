@@ -17,6 +17,7 @@ class CoachMarkStep {
     this.pointerGap = 0,
     this.partsOf,
     this.partRadius = 0,
+    this.demoBuilder,
   });
 
   /// 가리킬 위젯. 화면에 그려져 있어야 잴 수 있다.
@@ -47,4 +48,8 @@ class CoachMarkStep {
   /// 대상 안에서 실제로 밝을 모양들. 대상 상자를 받아 돌려준다. 없으면 상자 전체가 밝다.
   final List<Rect> Function(Rect target)? partsOf;
   final double partRadius;
+
+  /// 구멍 위에 얹는 시범 층 (손가락·시트 미리보기 등). 구멍이 자리를 잡은 뒤에 그려지고
+  /// 터치는 막지 않는다. 대상 상자를 받아 **`Positioned` 를 돌려준다.** 없으면 그리지 않는다.
+  final Widget Function(BuildContext context, Rect targetRect)? demoBuilder;
 }

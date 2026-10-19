@@ -86,6 +86,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.navIconSelected,
     required this.navIconUnselected,
     required this.navSelectedFill,
+    required this.navItemUnselected,
     required this.folderFill,
     required this.homeCardShadow,
     required this.homeCardIconBg,
@@ -194,8 +195,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.settingsGroupDivider,
     required this.peopleMeBadgeBg,
     required this.peopleMeBadgeText,
-    required this.exampleBadgeBg,
-    required this.exampleBadgeText,
     required this.peopleGuardianChipBg,
     required this.peopleGuardianChipText,
     required this.peopleCaregiverChipBg,
@@ -359,10 +358,10 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 캐릭터 선택 테두리가 바뀌어도 홈 카드는 따라가면 안 된다.
   final Color homeCardTitle;
 
-  /// 보호자 하단 바·옆 메뉴 바탕 (#798)
+  /// 보호자 하단 바·옆 메뉴 바탕 (시안 1666:7082, #835)
   final Color navBackground;
 
-  /// 하단 바 위 선·옆 메뉴 오른쪽 선 (#798)
+  /// 하단 바 위 선·옆 메뉴 오른쪽 선 2px (시안 1666:7082, #835)
   final Color navDivider;
 
   /// 고른 칸 아이콘·글자 (#798)
@@ -373,6 +372,9 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// 옆 메뉴 고른 칸 바탕(연한 보라) (#798)
   final Color navSelectedFill;
+
+  /// 하단 바 · 옆 메뉴 고르지 않은 칸 아이콘·글자 (#242634 20%, 시안 1666:7082, #835). 고른 칸은 navIconSelected
+  final Color navItemUnselected;
 
   /// 일과관리 묶음(폴더) 칸 바탕 — 진한 남색 10% (#807)
   final Color folderFill;
@@ -753,8 +755,6 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color peopleMeBadgeText;
 
   /// 홈 일과 타일의 `예시` 배지 — 온보딩 예시 일과 (#803).
-  final Color exampleBadgeBg;
-  final Color exampleBadgeText;
 
   /// 구분 칩 `보호자`.
   final Color peopleGuardianChipBg;
@@ -923,11 +923,12 @@ class AppColors extends ThemeExtension<AppColors> {
     homeCardGradientStart: Color(0xFFF9F4FF),
     homeCardGradientEnd: Color(0xFFE9EEFF),
     homeCardTitle: Color(0xFF9CADF1),
-    navBackground: Color(0xFFFFFFFF),
-    navDivider: Color(0xFFECEAE7),
+    navBackground: Color(0xFFF7F2EF),
+    navDivider: Color(0xFFEEE9E6),
     navIconSelected: Color(0xFF242634),
     navIconUnselected: Color(0xFFA6A8B4),
     navSelectedFill: Color(0xFFEEF1FD),
+    navItemUnselected: Color(0x33242634),
     folderFill: Color(0x1A242634),
     homeCardShadow: Color(0x1A230D60), // rgba(35,13,96,0.1)
     homeCardIconBg: Color(0x6682DCDF), // rgba(130,220,223,0.4)
@@ -1038,8 +1039,6 @@ class AppColors extends ThemeExtension<AppColors> {
     peopleMeBadgeBg: Color(0xFFD7D3D1),
     peopleMeBadgeText: Color(0xFFFFFFFF),
     // 녹색 계열 연한 배지 — 상태(완료·진행)와 겹치지 않는 보조 표시
-    exampleBadgeBg: Color(0xFFE8F5E9),
-    exampleBadgeText: Color(0xFF2E7D32),
     peopleGuardianChipBg: Color(0xFFB5EAEC),
     peopleGuardianChipText: Color(0xFF388E7C),
     peopleCaregiverChipBg: Color(0xFFFFDAC7),
@@ -1139,6 +1138,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? navIconSelected,
     Color? navIconUnselected,
     Color? navSelectedFill,
+    Color? navItemUnselected,
     Color? folderFill,
     Color? homeCardShadow,
     Color? homeCardIconBg,
@@ -1235,8 +1235,6 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? settingsGroupDivider,
     Color? peopleMeBadgeBg,
     Color? peopleMeBadgeText,
-    Color? exampleBadgeBg,
-    Color? exampleBadgeText,
     Color? peopleGuardianChipBg,
     Color? peopleGuardianChipText,
     Color? peopleCaregiverChipBg,
@@ -1339,6 +1337,7 @@ class AppColors extends ThemeExtension<AppColors> {
       navIconSelected: navIconSelected ?? this.navIconSelected,
       navIconUnselected: navIconUnselected ?? this.navIconUnselected,
       navSelectedFill: navSelectedFill ?? this.navSelectedFill,
+      navItemUnselected: navItemUnselected ?? this.navItemUnselected,
       folderFill: folderFill ?? this.folderFill,
       homeCardShadow: homeCardShadow ?? this.homeCardShadow,
       homeCardIconBg: homeCardIconBg ?? this.homeCardIconBg,
@@ -1436,8 +1435,6 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsGroupDivider: settingsGroupDivider ?? this.settingsGroupDivider,
       peopleMeBadgeBg: peopleMeBadgeBg ?? this.peopleMeBadgeBg,
       peopleMeBadgeText: peopleMeBadgeText ?? this.peopleMeBadgeText,
-      exampleBadgeBg: exampleBadgeBg ?? this.exampleBadgeBg,
-      exampleBadgeText: exampleBadgeText ?? this.exampleBadgeText,
       peopleGuardianChipBg: peopleGuardianChipBg ?? this.peopleGuardianChipBg,
       peopleGuardianChipText: peopleGuardianChipText ?? this.peopleGuardianChipText,
       peopleCaregiverChipBg: peopleCaregiverChipBg ?? this.peopleCaregiverChipBg,
@@ -1593,6 +1590,7 @@ class AppColors extends ThemeExtension<AppColors> {
       navIconSelected: Color.lerp(navIconSelected, other.navIconSelected, t)!,
       navIconUnselected: Color.lerp(navIconUnselected, other.navIconUnselected, t)!,
       navSelectedFill: Color.lerp(navSelectedFill, other.navSelectedFill, t)!,
+      navItemUnselected: Color.lerp(navItemUnselected, other.navItemUnselected, t)!,
       folderFill: Color.lerp(folderFill, other.folderFill, t)!,
       homeCardShadow: Color.lerp(homeCardShadow, other.homeCardShadow, t)!,
       homeCardIconBg: Color.lerp(homeCardIconBg, other.homeCardIconBg, t)!,
@@ -1799,8 +1797,6 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsGroupDivider: Color.lerp(settingsGroupDivider, other.settingsGroupDivider, t)!,
       peopleMeBadgeBg: Color.lerp(peopleMeBadgeBg, other.peopleMeBadgeBg, t)!,
       peopleMeBadgeText: Color.lerp(peopleMeBadgeText, other.peopleMeBadgeText, t)!,
-      exampleBadgeBg: Color.lerp(exampleBadgeBg, other.exampleBadgeBg, t)!,
-      exampleBadgeText: Color.lerp(exampleBadgeText, other.exampleBadgeText, t)!,
       peopleGuardianChipBg: Color.lerp(peopleGuardianChipBg, other.peopleGuardianChipBg, t)!,
       peopleGuardianChipText: Color.lerp(peopleGuardianChipText, other.peopleGuardianChipText, t)!,
       peopleCaregiverChipBg: Color.lerp(peopleCaregiverChipBg, other.peopleCaregiverChipBg, t)!,

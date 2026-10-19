@@ -328,6 +328,27 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                     ),
                   ),
                 ),
+                // 시범 층: 구멍이 대상에 자리 잡은 뒤에만 (옮겨 가는 동안은 어긋나 보인다)
+                if (_to != null &&
+                    _measuredIndex == widget.index &&
+                    step.demoBuilder != null)
+                  Positioned.fill(
+                    // 시범의 가짜 버튼·토스트를 낭독기가 읽지 않게 한다 (설명은 말풍선이 맡는다)
+                    child: ExcludeSemantics(
+                      child: IgnorePointer(
+                        child: AnimatedBuilder(
+                          animation: _move,
+                          builder: (context, _) => Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              if (_move.isCompleted)
+                                step.demoBuilder!(context, _to!.rect),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 if (_to != null)
                   FadeTransition(
                     opacity: _contentFade,
@@ -373,6 +394,8 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                           index: widget.index,
                           isLast: last,
                           isMotionReduced: reduce,
+                          // 대상이 아래 문구 자리에 닿으면 말풍선이 거기를 쓴다 — 문구를 위로 옮긴다
+                          isAtTop: _isTargetInFooterZone(context),
                         ),
                         CoachMarkCloseButton(onClose: _close),
                       ],
@@ -384,6 +407,15 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
         ),
       ),
     );
+  }
+
+  /// 가리키는 대상이 아래 점·문구 자리(바닥 [_bottomReserve])에 걸치는가
+  bool _isTargetInFooterZone(BuildContext context) {
+    final hole = _to;
+    if (hole == null) return false;
+    final media = MediaQuery.of(context);
+    return hole.rect.bottom >
+        media.size.height - media.padding.bottom - _bottomReserve.h;
   }
 
   /// 화살표 + 글. 아래에 자리가 모자라면 위에 놓고 화살표를 뒤집는다.
