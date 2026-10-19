@@ -1023,6 +1023,39 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notificationNoticeFailed => '공지를 불러오지 못했어요';
 
   @override
+  String get notificationSettingsTitle => '알림 설정';
+
+  @override
+  String get notificationSettingAll => '모든 알림 받기';
+
+  @override
+  String get notificationSettingRoutineCompleted => '이룸이가 일과를 끝냈을 때';
+
+  @override
+  String get notificationSettingRoutineSent => '다른 보호자가 일과를 보냈을 때';
+
+  @override
+  String get notificationSettingCoGuardianJoined => '새 보호자가 함께할 때';
+
+  @override
+  String get notificationSettingCreditRefilled => '이번 주 크레딧이 채워졌을 때';
+
+  @override
+  String get notificationSettingFeedbackResolved => '의견을 처리했을 때';
+
+  @override
+  String get notificationPermissionOff => '기기 알림이 꺼져 있어 알림을 받을 수 없어요';
+
+  @override
+  String get notificationOpenDeviceSettings => '기기 설정 열기';
+
+  @override
+  String get notificationSettingSaveFailed => '설정을 저장하지 못했어요';
+
+  @override
+  String get notificationSettingLoadFailed => '설정을 불러오지 못했어요';
+
+  @override
   String get notificationListFailed => '알림을 불러오지 못했어요';
 
   @override

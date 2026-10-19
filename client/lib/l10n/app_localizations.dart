@@ -1892,6 +1892,72 @@ abstract class AppLocalizations {
   /// **'공지를 불러오지 못했어요'**
   String get notificationNoticeFailed;
 
+  /// 알림 설정 화면 제목과 보호자 설정의 진입 줄
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 설정'**
+  String get notificationSettingsTitle;
+
+  /// 알림 설정: 전체 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 알림 받기'**
+  String get notificationSettingAll;
+
+  /// 알림 설정: 일과 완료 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이가 일과를 끝냈을 때'**
+  String get notificationSettingRoutineCompleted;
+
+  /// 알림 설정: 일과 전송 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 보호자가 일과를 보냈을 때'**
+  String get notificationSettingRoutineSent;
+
+  /// 알림 설정: 보호자 합류 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'새 보호자가 함께할 때'**
+  String get notificationSettingCoGuardianJoined;
+
+  /// 알림 설정: 크레딧 충전 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주 크레딧이 채워졌을 때'**
+  String get notificationSettingCreditRefilled;
+
+  /// 알림 설정: 의견 처리 푸시 스위치
+  ///
+  /// In ko, this message translates to:
+  /// **'의견을 처리했을 때'**
+  String get notificationSettingFeedbackResolved;
+
+  /// 알림 설정 맨 위 안내: 기기 알림 권한이 꺼짐
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 알림이 꺼져 있어 알림을 받을 수 없어요'**
+  String get notificationPermissionOff;
+
+  /// 기기 알림 권한 안내 줄의 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 설정 열기'**
+  String get notificationOpenDeviceSettings;
+
+  /// 알림 설정 저장 실패 팝업 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'설정을 저장하지 못했어요'**
+  String get notificationSettingSaveFailed;
+
+  /// 알림 설정 불러오기 실패 문구
+  ///
+  /// In ko, this message translates to:
+  /// **'설정을 불러오지 못했어요'**
+  String get notificationSettingLoadFailed;
+
   /// 알림 목록을 받지 못했을 때의 문구
   ///
   /// In ko, this message translates to:

@@ -198,6 +198,13 @@ class _GuardianSettingsScreenState extends ConsumerState<GuardianSettingsScreen>
           children: [
             SettingsTile(
               isInCard: true,
+              label: context.l10n.notificationSettingsTitle,
+              onTap: busy
+                  ? null
+                  : () => context.push(Routes.guardianNotificationSettings),
+            ),
+            SettingsTile(
+              isInCard: true,
               label: context.l10n.guardianSettingsPinChange,
               onTap: busy ? null : () => context.push(Routes.guardianPinChange),
             ),

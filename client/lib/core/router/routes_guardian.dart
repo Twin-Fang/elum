@@ -17,6 +17,7 @@ import '../../features/link/presentation/link_code_screen.dart';
 import '../../features/link/presentation/link_enter_screen.dart';
 import '../../features/link/presentation/link_status_screen.dart';
 import '../../features/notice/presentation/guardian_notice_launcher.dart';
+import '../../features/notification/presentation/notification_settings_screen.dart';
 import '../../features/notification/presentation/notifications_screen.dart';
 import '../../features/profile/presentation/guardians_screen.dart';
 import '../../features/profile/presentation/invite_code_screen.dart';
@@ -133,6 +134,11 @@ List<RouteBase> guardianRoutes() => [
     path: Routes.guardianNotifications,
     pageBuilder: (context, state) =>
         slidePage(state, const NotificationsScreen()),
+  ),
+  GoRoute(
+    path: Routes.guardianNotificationSettings,
+    pageBuilder: (context, state) =>
+        slidePage(state, const NotificationSettingsScreen()),
   ),
   GoRoute(
     path: Routes.guardianCreditHistory,

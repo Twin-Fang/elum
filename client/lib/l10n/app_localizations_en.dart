@@ -1073,6 +1073,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationNoticeFailed => 'Couldn\'t load notices';
 
   @override
+  String get notificationSettingsTitle => 'Notification settings';
+
+  @override
+  String get notificationSettingAll => 'All notifications';
+
+  @override
+  String get notificationSettingRoutineCompleted =>
+      'When an ELUM user finishes a routine';
+
+  @override
+  String get notificationSettingRoutineSent =>
+      'When a co-guardian sends a routine';
+
+  @override
+  String get notificationSettingCoGuardianJoined => 'When a new guardian joins';
+
+  @override
+  String get notificationSettingCreditRefilled =>
+      'When this week\'s credits are refilled';
+
+  @override
+  String get notificationSettingFeedbackResolved =>
+      'When your feedback is resolved';
+
+  @override
+  String get notificationPermissionOff =>
+      'Device notifications are off, so you won\'t receive alerts';
+
+  @override
+  String get notificationOpenDeviceSettings => 'Open device settings';
+
+  @override
+  String get notificationSettingSaveFailed => 'Couldn\'t save your settings';
+
+  @override
+  String get notificationSettingLoadFailed => 'Couldn\'t load your settings';
+
+  @override
   String get notificationListFailed => 'Couldn\'t load notifications';
 
   @override

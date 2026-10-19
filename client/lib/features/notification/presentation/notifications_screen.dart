@@ -7,6 +7,7 @@ import '../../../core/router/pop_or_home.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/widgets/elum_segmented_tabs.dart';
 import '../application/unread_summary_provider.dart';
+import 'widgets/notification_settings_gear_button.dart';
 import 'widgets/notice_history_tab.dart';
 import 'widgets/notification_list_tab.dart';
 
@@ -25,6 +26,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   /// 뒤로가기 줄 아래 탭까지 간격
   static const _titleToTabsGap = 8.0;
 
+  /// 제목 줄(뒤로가기 상자와 같은 높이) 오른쪽 끝 여백
+  static const _gearRight = 16.0;
+  static const _titleRowTop = 67.0;
+
   int _selectedTabIndex = _notificationTabIndex;
 
   /// 공지 탭을 한 번이라도 열었나 (처음 열 때 만들고, 이후 오가도 유지해 본 공지 기록을 한 번만 보냄)
@@ -35,7 +40,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final l10n = context.l10n;
     final summary = ref.watch(unreadSummaryProvider).value;
 
-    return ElumScaffold(
+    // 톱니는 스캐폴드 제목 줄 위에 겹쳐 놓음 (제목 줄 y = 뒤로가기 backTop)
+    final safeTop = MediaQuery.paddingOf(context).top;
+    final gearTop = _titleRowTop.h < safeTop ? 0.0 : _titleRowTop.h - safeTop;
+
+    final scaffold = ElumScaffold(
       onBack: context.popOrHome,
       title: l10n.notificationTabNotifications,
       backTop: 67,
@@ -73,6 +82,18 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           ),
         ],
       ),
+    );
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        scaffold,
+        Positioned(
+          top: safeTop + gearTop,
+          right: _gearRight.w,
+          child: const NotificationSettingsGearButton(),
+        ),
+      ],
     );
   }
 }

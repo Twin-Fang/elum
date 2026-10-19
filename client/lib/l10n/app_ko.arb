@@ -964,6 +964,39 @@
   "notificationNoticeFailed": "공지를 불러오지 못했어요",
   "@notificationNoticeFailed": {"description": "공지사항 탭 목록을 받지 못했을 때의 문구"},
 
+  "notificationSettingsTitle": "알림 설정",
+  "@notificationSettingsTitle": {"description": "알림 설정 화면 제목과 보호자 설정의 진입 줄"},
+
+  "notificationSettingAll": "모든 알림 받기",
+  "@notificationSettingAll": {"description": "알림 설정: 전체 푸시 스위치"},
+
+  "notificationSettingRoutineCompleted": "이룸이가 일과를 끝냈을 때",
+  "@notificationSettingRoutineCompleted": {"description": "알림 설정: 일과 완료 푸시 스위치"},
+
+  "notificationSettingRoutineSent": "다른 보호자가 일과를 보냈을 때",
+  "@notificationSettingRoutineSent": {"description": "알림 설정: 일과 전송 푸시 스위치"},
+
+  "notificationSettingCoGuardianJoined": "새 보호자가 함께할 때",
+  "@notificationSettingCoGuardianJoined": {"description": "알림 설정: 보호자 합류 푸시 스위치"},
+
+  "notificationSettingCreditRefilled": "이번 주 크레딧이 채워졌을 때",
+  "@notificationSettingCreditRefilled": {"description": "알림 설정: 크레딧 충전 푸시 스위치"},
+
+  "notificationSettingFeedbackResolved": "의견을 처리했을 때",
+  "@notificationSettingFeedbackResolved": {"description": "알림 설정: 의견 처리 푸시 스위치"},
+
+  "notificationPermissionOff": "기기 알림이 꺼져 있어 알림을 받을 수 없어요",
+  "@notificationPermissionOff": {"description": "알림 설정 맨 위 안내: 기기 알림 권한이 꺼짐"},
+
+  "notificationOpenDeviceSettings": "기기 설정 열기",
+  "@notificationOpenDeviceSettings": {"description": "기기 알림 권한 안내 줄의 버튼"},
+
+  "notificationSettingSaveFailed": "설정을 저장하지 못했어요",
+  "@notificationSettingSaveFailed": {"description": "알림 설정 저장 실패 팝업 문구"},
+
+  "notificationSettingLoadFailed": "설정을 불러오지 못했어요",
+  "@notificationSettingLoadFailed": {"description": "알림 설정 불러오기 실패 문구"},
+
   "notificationListFailed": "알림을 불러오지 못했어요",
   "@notificationListFailed": {"description": "알림 목록을 받지 못했을 때의 문구"},
 
