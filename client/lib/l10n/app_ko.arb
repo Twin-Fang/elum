@@ -1345,9 +1345,6 @@
   "cardPhotoSourceGallery": "갤러리에서 고르기",
   "@cardPhotoSourceGallery": {"description": "사진 고르기 시트의 갤러리 줄"},
 
-  "cardPhotoSourcePrivacy": "얼굴이나 개인정보가 나오지 않게 찍어 주세요",
-  "@cardPhotoSourcePrivacy": {"description": "사진 고르기 시트 아래 개인정보 주의 안내"},
-
   "cardPhotoUploadFailedDialog": "사진을 올리지 못했어요.\n{message}",
   "@cardPhotoUploadFailedDialog": {"description": "사진 올리기가 실패했는데 자리가 없어 팝업으로 알릴 때 제목. message 는 실패 사유(서버 문구가 우선)", "placeholders": {"message": {"type": "String"}}},
 

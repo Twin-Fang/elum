@@ -422,7 +422,6 @@
   "cardPhotoSettingsFailedFallback": "Turn it on in your device's settings",
   "cardPhotoSourceTake": "Take a photo",
   "cardPhotoSourceGallery": "Choose from gallery",
-  "cardPhotoSourcePrivacy": "Don't show faces or personal information in the photo",
   "cardPhotoUploadFailedDialog": "Couldn't upload the photo.\n{message}",
   "cardPhotoChange": "Change photo",
   "cardPhotoUploading": "Uploading the photo",
