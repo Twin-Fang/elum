@@ -37,9 +37,9 @@ public class CreditQueryService {
   /// 일과 하나의 최대 카드 수. RoutineAiPipeline.MAX_STEPS · RoutineService.STEP_MAX_COUNT 와 같은 값이다.
   public static final int MAX_CARDS_PER_ROUTINE = 10;
 
-  /// 잔액을 줄이는 줄 종류 3개: 사용, 예약, 초과 (GRANT·EXPIRE 등은 제외)
+  /// 잔액을 줄이는 확정 줄 2개: 사용, 초과 (RESERVE 는 해제로 잔액이 되살아날 수 있어 제외, GRANT·EXPIRE 도 제외)
   private static final List<CreditLedgerType> DEPLETING_LEDGER_TYPES =
-    List.of(CreditLedgerType.CONSUME, CreditLedgerType.RESERVE, CreditLedgerType.OVERAGE);
+    List.of(CreditLedgerType.CONSUME, CreditLedgerType.OVERAGE);
 
   private final CreditPolicyService policyService;
   private final CreditAccountService accountService;
@@ -136,7 +136,7 @@ public class CreditQueryService {
     }
   }
 
-  /// 주기 안에 사용·예약·초과로 잔액이 0 이하가 된 계정의 회원 id (지급·만료 줄 제외, 탈퇴 계정 제외)
+  /// 주기 안에 사용·초과로 잔액이 0 이하가 된 계정의 회원 id (지급·만료 줄 제외, 탈퇴 계정 제외)
   public List<String> memberIdsDepletedIn(CreditPeriod period) {
     return ledgerRepository.findMemberIdsWithBalanceDepletedIn(DEPLETING_LEDGER_TYPES, period.start(), period.end())
       .stream().filter(Objects::nonNull).toList();

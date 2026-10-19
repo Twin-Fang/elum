@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notification.infrastructure.scheduler;
 
+import com.chuseok22.elumserver.notification.core.NotificationTime;
 import com.chuseok22.elumserver.credit.application.service.CreditQueryService;
 import com.chuseok22.elumserver.credit.core.CreditPeriod;
 import com.chuseok22.elumserver.notification.application.service.NotificationRecorder;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreditRefillNotificationScheduler {
 
-  private static final ZoneId NOTIFICATION_ZONE = ZoneId.of("Asia/Seoul");
+  private static final ZoneId NOTIFICATION_ZONE = NotificationTime.ZONE_ID;
   // 한 번에 기록할 보호자 수 (목록 전체를 한꺼번에 쥐지 않음)
   private static final int RECIPIENT_CHUNK_SIZE = 200;
 
@@ -32,23 +33,26 @@ public class CreditRefillNotificationScheduler {
   private final NotificationRecorder notificationRecorder;
   private final PushDispatcher pushDispatcher;
   private final Clock clock;
+  private final int recipientChunkSize;
 
   @Autowired
   public CreditRefillNotificationScheduler(CreditQueryService creditQueryService,
     NotificationRecorder notificationRecorder, PushDispatcher pushDispatcher) {
-    this(creditQueryService, notificationRecorder, pushDispatcher, Clock.system(NOTIFICATION_ZONE));
+    this(creditQueryService, notificationRecorder, pushDispatcher, Clock.system(NOTIFICATION_ZONE),
+      RECIPIENT_CHUNK_SIZE);
   }
 
   CreditRefillNotificationScheduler(CreditQueryService creditQueryService, NotificationRecorder notificationRecorder,
-    PushDispatcher pushDispatcher, Clock clock) {
+    PushDispatcher pushDispatcher, Clock clock, int recipientChunkSize) {
     this.creditQueryService = creditQueryService;
     this.notificationRecorder = notificationRecorder;
     this.pushDispatcher = pushDispatcher;
     this.clock = clock;
+    this.recipientChunkSize = recipientChunkSize;
   }
 
   // 월요일 오전 9시(한국 시각): 새 주기 지급이 이미 시작된 뒤
-  @Scheduled(cron = "${elum.notification.credit-refill-cron:0 0 9 * * MON}", zone = "Asia/Seoul")
+  @Scheduled(cron = "${elum.notification.credit-refill-cron:0 0 9 * * MON}", zone = NotificationTime.ZONE_ID_NAME)
   public void run() {
     try {
       notifyDepletedMembers();
@@ -56,6 +60,7 @@ public class CreditRefillNotificationScheduler {
       // 스케줄러 밖으로 던지지 않음
       log.warn("[notification record] failed type={} : {}", NotificationType.CREDIT_REFILLED,
         exception.getClass().getSimpleName());
+      log.debug("[notification record] failure detail", exception);
     }
   }
 
@@ -69,11 +74,17 @@ public class CreditRefillNotificationScheduler {
       return;
     }
     NotificationDraft draft = NotificationDraft.creditRefilled(thisPeriodKey, now);
-    // 묶음 단위 기록 + 발송
-    for (int from = 0; from < memberIds.size(); from += RECIPIENT_CHUNK_SIZE) {
-      List<String> chunk = memberIds.subList(from, Math.min(from + RECIPIENT_CHUNK_SIZE, memberIds.size()));
-      List<RecordedNotification> recorded = notificationRecorder.record(draft, chunk);
-      pushDispatcher.dispatch(recorded, NotificationType.CREDIT_REFILLED);
+    // 묶음 단위 기록 + 발송 (묶음마다 독립: 한 묶음 실패가 다음 묶음을 막지 않음)
+    for (int from = 0; from < memberIds.size(); from += recipientChunkSize) {
+      List<String> chunk = memberIds.subList(from, Math.min(from + recipientChunkSize, memberIds.size()));
+      try {
+        List<RecordedNotification> recorded = notificationRecorder.record(draft, chunk);
+        pushDispatcher.dispatch(recorded, NotificationType.CREDIT_REFILLED);
+      } catch (RuntimeException exception) {
+        log.warn("[notification record] failed type={} chunkOffset={} : {}", NotificationType.CREDIT_REFILLED, from,
+          exception.getClass().getSimpleName());
+        log.debug("[notification record] failure detail", exception);
+      }
     }
   }
 }

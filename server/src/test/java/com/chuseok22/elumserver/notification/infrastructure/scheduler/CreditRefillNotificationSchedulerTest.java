@@ -48,7 +48,7 @@ class CreditRefillNotificationSchedulerTest {
 
   @BeforeEach
   void setUp() {
-    scheduler = new CreditRefillNotificationScheduler(creditQueryService, notificationRecorder, pushDispatcher, CLOCK);
+    scheduler = new CreditRefillNotificationScheduler(creditQueryService, notificationRecorder, pushDispatcher, CLOCK, 200);
   }
 
   @Test
@@ -114,5 +114,21 @@ class CreditRefillNotificationSchedulerTest {
     scheduler.run();
 
     verify(notificationRecorder, org.mockito.Mockito.times(3)).record(any(NotificationDraft.class), anyCollection());
+  }
+
+  @Test
+  @DisplayName("chunkFails_nextChunksStillProcessed")
+  void chunkFails_nextChunksStillProcessed() {
+    scheduler = new CreditRefillNotificationScheduler(creditQueryService, notificationRecorder, pushDispatcher, CLOCK, 2);
+    when(creditQueryService.memberIdsDepletedIn(any(CreditPeriod.class)))
+      .thenReturn(List.of("m1", "m2", "m3", "m4", "m5"));
+    when(notificationRecorder.record(any(NotificationDraft.class), eq(List.of("m1", "m2")))).thenReturn(List.of());
+    when(notificationRecorder.record(any(NotificationDraft.class), eq(List.of("m3", "m4"))))
+      .thenThrow(new IllegalStateException("boom"));
+    when(notificationRecorder.record(any(NotificationDraft.class), eq(List.of("m5")))).thenReturn(List.of());
+
+    scheduler.run();
+
+    verify(notificationRecorder).record(any(NotificationDraft.class), eq(List.of("m5")));
   }
 }

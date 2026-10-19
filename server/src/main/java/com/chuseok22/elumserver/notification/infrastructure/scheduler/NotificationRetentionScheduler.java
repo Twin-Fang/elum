@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notification.infrastructure.scheduler;
 
+import com.chuseok22.elumserver.notification.core.NotificationTime;
 import com.chuseok22.elumserver.notification.infrastructure.repository.NotificationRepository;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class NotificationRetentionScheduler {
 
-  private static final ZoneId NOTIFICATION_ZONE = ZoneId.of("Asia/Seoul");
+  private static final ZoneId NOTIFICATION_ZONE = NotificationTime.ZONE_ID;
   // 알림 보관 기간 (90일)
   private static final int RETENTION_DAYS = 90;
 
@@ -35,7 +36,7 @@ public class NotificationRetentionScheduler {
   }
 
   // 새벽 5시(한국 시각)
-  @Scheduled(cron = "${elum.notification.retention-cron:0 0 5 * * *}", zone = "Asia/Seoul")
+  @Scheduled(cron = "${elum.notification.retention-cron:0 0 5 * * *}", zone = NotificationTime.ZONE_ID_NAME)
   @Transactional
   public void run() {
     int deletedCount = notificationRepository.deleteAllByLastOccurredAtBefore(

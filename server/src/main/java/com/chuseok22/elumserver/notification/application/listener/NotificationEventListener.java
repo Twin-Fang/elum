@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notification.application.listener;
 
+import com.chuseok22.elumserver.notification.core.NotificationTime;
 import com.chuseok22.elumserver.common.infrastructure.config.AsyncConfig;
 import com.chuseok22.elumserver.member.application.service.ProfileGuardianService;
 import com.chuseok22.elumserver.notification.application.service.NotificationRecorder;
@@ -32,7 +33,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 public class NotificationEventListener {
 
-  private static final ZoneId NOTIFICATION_ZONE = ZoneId.of("Asia/Seoul");
+  private static final ZoneId NOTIFICATION_ZONE = NotificationTime.ZONE_ID;
 
   private final NotificationRecorder notificationRecorder;
   private final ProfileGuardianService profileGuardianService;

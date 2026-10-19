@@ -46,6 +46,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
   /// 이룸이 프로필을 지울 때 그 프로필의 알림 전부
   int deleteAllByProfileId(String profileId);
 
-  /// 보관 기간이 지난 알림 정리
-  int deleteAllByLastOccurredAtBefore(LocalDateTime threshold);
+  /// 보관 기간이 지난 알림 정리 (일괄 삭제, 트랜잭션 안에서 호출)
+  @Modifying(flushAutomatically = true, clearAutomatically = true)
+  @Query("delete from Notification n where n.lastOccurredAt < :threshold")
+  int deleteAllByLastOccurredAtBefore(@Param("threshold") LocalDateTime threshold);
 }

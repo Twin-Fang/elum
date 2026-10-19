@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notification.application.service;
 
+import com.chuseok22.elumserver.notification.core.NotificationTime;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.notification.infrastructure.entity.Notification;
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class NotificationReadService {
 
-  private static final ZoneId NOTIFICATION_ZONE = ZoneId.of("Asia/Seoul");
+  private static final ZoneId NOTIFICATION_ZONE = NotificationTime.ZONE_ID;
 
   private final NotificationRepository notificationRepository;
   private final Clock clock;

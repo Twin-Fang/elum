@@ -248,7 +248,7 @@ class CreditQueryServiceTest {
 
     assertThat(service.memberIdsDepletedIn(period)).containsExactly("m1", "m2");
     org.mockito.Mockito.verify(ledgerRepository).findMemberIdsWithBalanceDepletedIn(
-      java.util.List.of(CreditLedgerType.CONSUME, CreditLedgerType.RESERVE, CreditLedgerType.OVERAGE),
+      java.util.List.of(CreditLedgerType.CONSUME, CreditLedgerType.OVERAGE),
       period.start(), period.end());
   }
 }

@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.notification.application.service;
 
+import com.chuseok22.elumserver.notification.core.NotificationTime;
 import com.chuseok22.elumserver.common.infrastructure.exception.CustomException;
 import com.chuseok22.elumserver.common.infrastructure.exception.ErrorCode;
 import com.chuseok22.elumserver.common.locale.CurrentLocale;
@@ -19,7 +20,7 @@ public class PushDeviceService {
 
   // 유니크 인덱스(btree)가 약 2.7KB 를 넘으면 실패하므로 컬럼 길이(4096)보다 낮게 막는다
   static final int TOKEN_MAX_LENGTH = 2048;
-  private static final ZoneId NOTIFICATION_ZONE = ZoneId.of("Asia/Seoul");
+  private static final ZoneId NOTIFICATION_ZONE = NotificationTime.ZONE_ID;
 
   private final PushDeviceRepository pushDeviceRepository;
   private final Clock clock;
