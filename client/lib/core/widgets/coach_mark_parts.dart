@@ -96,17 +96,26 @@ class CoachScrimPainter extends CustomPainter {
     required this.color,
     required this.hole,
     this.gaps = const [],
+    this.sideBleed = 0,
   });
 
   final Color color;
   final CoachHole? hole;
+
+  /// 막을 좌우로 자기 크기보다 더 칠할 폭 (태블릿 가운데 열 바깥 여백까지 덮기, #794). 폰은 0
+  final double sideBleed;
 
   /// 구멍 안에서 다시 어둡게 덮을 틈과 그 진하기(0~1). 단계가 바뀔 때 앞 틈은 옅어지고 뒤 틈은 짙어진다.
   final List<({Path path, double alpha})> gaps;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final bounds = Offset.zero & size;
+    final bounds = Rect.fromLTRB(
+      -sideBleed,
+      0,
+      size.width + sideBleed,
+      size.height,
+    );
     // 지우기(clear)는 별도 레이어 안에서만 막을 지운다. 레이어 없이 지우면
     // 막 뒤의 화면 전체가 같이 지워진다.
     canvas.saveLayer(bounds, Paint());
@@ -135,6 +144,7 @@ class CoachScrimPainter extends CustomPainter {
   bool shouldRepaint(CoachScrimPainter old) =>
       old.color != color ||
       old.hole != hole ||
+      old.sideBleed != sideBleed ||
       gaps.isNotEmpty ||
       old.gaps.isNotEmpty;
 }
