@@ -2097,5 +2097,7 @@
   "routineGroupEditOrder": "순서 편집",
   "@routineGroupEditOrder": {"description": "일과관리 묶음 열기 (#837)"},
   "routineLibrarySendOnlyThis": "이 일과만 오늘 보내기",
-  "@routineLibrarySendOnlyThis": {"description": "일과관리 묶음 열기 (#837)"}
+  "@routineLibrarySendOnlyThis": {"description": "일과관리 묶음 열기 (#837)"},
+  "routineGroupRowCardCount": "카드 {count}장",
+  "@routineGroupRowCardCount": {"description": "묶음 열기 일과 줄의 보조 글 (#846)", "placeholders": {"count": {"type": "int"}}}
 }

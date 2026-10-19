@@ -10,6 +10,9 @@ import 'package:elum/features/guardian/domain/routine_group.dart';
 import 'package:elum/core/storage/in_memory_storage.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/guardian/presentation/routine_manage_screen.dart';
+import 'package:elum/features/guardian/presentation/widgets/arrange_remove_badge.dart';
+import 'package:elum/features/guardian/presentation/widgets/routine_detail_step_badge.dart';
+import 'package:elum/features/guardian/presentation/widgets/routine_group_sheet_row.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
@@ -175,6 +178,77 @@ void main() {
     expect(find.text('오늘 보내기'), findsNothing);
     // 길게 누른 채 움직였으니 정리 상태: 가운데 버튼이 `완료`로 바뀐다
     expect(find.text('완료'), findsOneWidget);
+  });
+
+  group('묶음 열기 순서 편집 (#846): 행동카드 순서 변경과 같은 모양·동작', () {
+    Future<void> openGroup(WidgetTester tester) async {
+      await pump(
+        tester,
+        library: Attempt.ok([routine('a', '아침 준비하기'), routine('b', '양치하기')]),
+        groups: const [
+          RoutineGroup(id: 'g1', name: '아침', routineIds: ['a', 'b']),
+        ],
+      );
+      await tester.tap(find.text('아침'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('번호는 줄 밖 왼쪽 칸에 따로 서 있어 줄과 함께 끌리지 않는다', (tester) async {
+      await openGroup(tester);
+
+      expect(find.byType(RoutineDetailStepBadge), findsNWidgets(2));
+      // 줄 안에는 번호 글자가 없다
+      expect(
+        find.descendant(
+          of: find.byType(RoutineGroupSheetRow),
+          matching: find.text('1'),
+        ),
+        findsNothing,
+      );
+      expect(find.text('카드 1장'), findsNWidgets(2));
+    });
+
+    testWidgets('순서 편집을 누르면 줄마다 회색 − 배지가 뜨고, 빨간 머티리얼 ⊖ 는 없다', (tester) async {
+      await openGroup(tester);
+      expect(find.byType(ArrangeRemoveBadge), findsNothing);
+
+      await tester.tap(find.text('순서 편집'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ArrangeRemoveBadge), findsNWidgets(2));
+      expect(find.byIcon(Icons.remove_circle_rounded), findsNothing);
+      expect(find.byIcon(Icons.drag_handle_rounded), findsNothing);
+    });
+
+    testWidgets('손잡이는 닿자마자 끌리지 않고 길게 눌러야 잡힌다', (tester) async {
+      await openGroup(tester);
+      await tester.tap(find.text('순서 편집'));
+      await tester.pumpAndSettle();
+      final handle = find
+          .descendant(
+            of: find.byType(RoutineGroupSheetRow).first,
+            matching: find.byType(ReorderableDelayedDragStartListener),
+          )
+          .first;
+
+      // 바로 끌면 순서가 바뀌지 않는다 (옆으로 끌어 시트 끌어내리기와 섞이지 않게 한다)
+      final quick = await tester.startGesture(tester.getCenter(handle));
+      await quick.moveBy(const Offset(-60, 0));
+      await quick.up();
+      await tester.pumpAndSettle();
+      expect(groupApi.replaced, isEmpty);
+
+      // 길게 누른 뒤 끌면 바뀐다
+      final held = await tester.startGesture(tester.getCenter(handle));
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 100));
+      await held.moveBy(const Offset(0, 140));
+      await tester.pump();
+      await held.up();
+      await tester.pumpAndSettle();
+      expect(groupApi.replaced, [
+        ['b', 'a'],
+      ]);
+    });
   });
 
   test('묶음에서 빼서 하나만 남으면 구성을 바꾸지 않고 묶음을 푼다', () async {
