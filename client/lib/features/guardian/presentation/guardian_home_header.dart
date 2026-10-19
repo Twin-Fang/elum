@@ -10,7 +10,7 @@ import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/character_badge.dart';
 import '../../../shared/models/character.dart';
-import '../../notification/presentation/widgets/notification_bell_button.dart';
+import 'widgets/notification_bell_button.dart';
 
 /// 로고 + 캐릭터 배지 + 인사말 (Figma y=70~223).
 ///

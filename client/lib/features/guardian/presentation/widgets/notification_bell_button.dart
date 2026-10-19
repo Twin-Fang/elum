@@ -9,7 +9,7 @@ import '../../../../core/router/routes.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/periodic_refresh.dart';
-import '../../application/unread_summary_provider.dart';
+import '../../../notification/application/unread_summary_provider.dart';
 
 /// 홈 머리 줄의 종 아이콘: 안 읽은 알림·공지가 있으면 빨간 점, 탭하면 알림 화면
 ///

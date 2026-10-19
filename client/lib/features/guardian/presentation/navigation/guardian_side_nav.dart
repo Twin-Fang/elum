@@ -11,7 +11,7 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/character_badge.dart';
 import '../../application/guardian_child_identity.dart';
-import '../../../notification/presentation/widgets/notification_bell_button.dart';
+import '../widgets/notification_bell_button.dart';
 import 'guardian_bottom_nav.dart';
 import 'guardian_tab.dart';
 import 'guardian_tab_icon.dart';
