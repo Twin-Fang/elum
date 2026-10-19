@@ -169,6 +169,14 @@ abstract interface class LocalStorage {
   bool get isChildHapticOn;
   Future<void> setChildHapticOn(bool v);
 
+  /// 이룸이가 카드를 체크할 때 칭찬 소리를 낼지. 진동과 같은 이유로 휴대폰에 속하고 기본은 켜짐 (#777)
+  bool get isChildPraiseSoundOn;
+  Future<void> setChildPraiseSoundOn(bool v);
+
+  /// 일과 알림 설정 JSON (#777). 예약은 이 휴대폰에만 걸리므로 휴대폰에 속한다. 없으면 null
+  String? get routineRemindersJson;
+  Future<void> setRoutineRemindersJson(String json);
+
   /// 저장된 온보딩 결과를 전부 지운다. **개발·테스트 전용.**
   ///
   /// 일부만 지우면 어중간한 상태가 남아 더 헷갈리므로 5개 값을 모두 비운다.

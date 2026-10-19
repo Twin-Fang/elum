@@ -75,6 +75,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
+  flutter_local_notifications: ^22.3.2
+  timezone: ^0.11.2
+  flutter_timezone: ^5.1.1
 
 # path_provider_foundation 2.5+가 끌고 오는 objective_c의 build hook이
 # build_runner AOT 컴파일을 깨뜨린다 (troubleshooting.md "build_runner AOT 컴파일 실패").
@@ -162,6 +165,8 @@ flutter:
     # Mulberry Symbols 픽토그램 811개 + 라이선스 원문(CC BY-SA 4.0) + 카탈로그 (#469).
     # 파일명에 쉼표·밑줄이 있어 목록 등록이 아니라 폴더째 올린다. SVG 는 고치지 않는다.
     - assets/pictograms/
+    # 이룸이 칭찬 소리 (#777)
+    - assets/sounds/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

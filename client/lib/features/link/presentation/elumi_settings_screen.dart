@@ -9,6 +9,7 @@ import '../../../core/widgets/app_info_tile.dart';
 import '../../../core/widgets/elum_dialog.dart';
 import '../../../core/widgets/elum_scaffold.dart';
 import '../../../core/haptics/child_haptics.dart';
+import '../../../core/sound/child_praise_sound.dart';
 import '../../../core/widgets/settings_switch_tile.dart';
 import '../../../core/widgets/settings_tile.dart';
 import '../../../core/widgets/show_failure.dart';
@@ -159,6 +160,13 @@ class _ElumiSettingsScreenState extends ConsumerState<ElumiSettingsScreen>
               value: ref.watch(childHapticOnProvider),
               onChanged: (on) =>
                   ref.read(childHapticOnProvider.notifier).set(on),
+            ),
+            // 카드를 체크할 때 칭찬 소리 (#777). 보호자 설정과 같은 값
+            SettingsSwitchTile(
+              label: context.l10n.elumiSettingsPraiseSoundLabel,
+              value: ref.watch(childPraiseSoundOnProvider),
+              onChanged: (on) =>
+                  ref.read(childPraiseSoundOnProvider.notifier).set(on),
             ),
             SettingsTile(
               label: context.l10n.elumiSettingsTermsLabel,

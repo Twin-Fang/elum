@@ -11,6 +11,15 @@ import '../../shared/models/support_goal.dart';
 abstract final class AppAssets {
   static const _images = 'assets/images';
 
+  /// 이룸이 칭찬 소리 (#777). 원본 생성: `tool/mix_praise_sounds.py`
+  /// 효과음(반짝) + 서버 음성(Supertonic F1, 한국어) 한 파일, AAC 64kbps
+  static const _sounds = 'assets/sounds';
+  static const soundChimeCheck = '$_sounds/chime_check.m4a';
+  static const soundPraiseCheck1 = '$_sounds/praise_check_1.m4a'; // 잘했어요!
+  static const soundPraiseCheck2 = '$_sounds/praise_check_2.m4a'; // 멋져요!
+  static const soundPraiseCheck3 = '$_sounds/praise_check_3.m4a'; // 최고예요!
+  static const soundPraiseDone = '$_sounds/praise_done.m4a'; // 다 해냈어요! 정말 멋져요!
+
   /// 카드 그림 자리의 무료 픽토그램 — Mulberry Symbols v3.6.1 (CC BY-SA 4.0).
   ///
   /// [id] 는 서버가 내려주는 `pictogramId` (SVG 파일명 stem, 예 `get_dressed_,_to`).

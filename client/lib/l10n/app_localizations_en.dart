@@ -525,6 +525,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get elumiSettingsHapticLabel => 'Vibrate on card check';
 
   @override
+  String get elumiSettingsPraiseSoundLabel => 'Praise sound on card check';
+
+  @override
   String get elumiSettingsTermsLabel => 'Terms and Privacy Policy';
 
   @override
@@ -1336,6 +1339,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianSettingsHaptic => 'Vibrate on card check';
 
   @override
+  String get guardianSettingsPraiseSound => 'Praise sound on card check';
+
+  @override
   String get questionMakeCards => 'Make cards';
 
   @override
@@ -1970,4 +1976,307 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get creditHistoryMoreFailed => 'Couldn\'t load more';
+
+  @override
+  String get reminderRowLabel => 'Routine reminder';
+
+  @override
+  String get reminderRowOff => 'No reminder';
+
+  @override
+  String reminderRowDaily(String time) {
+    return 'Every day at $time';
+  }
+
+  @override
+  String reminderRowOnce(String time) {
+    return 'Once at $time';
+  }
+
+  @override
+  String get reminderSheetTitle => 'When should we remind you?';
+
+  @override
+  String get reminderSheetBody =>
+      'This phone will get a notification at the time you pick';
+
+  @override
+  String get reminderRepeatDaily => 'Remind at the same time every day';
+
+  @override
+  String get reminderTurnOn => 'Turn on reminder';
+
+  @override
+  String get reminderUpdate => 'Change reminder time';
+
+  @override
+  String get reminderTurnOff => 'Turn off reminder';
+
+  @override
+  String get reminderSavedToast => 'Reminder set';
+
+  @override
+  String get reminderClearedToast => 'Reminder turned off';
+
+  @override
+  String get reminderPermissionDeniedTitle => 'Notifications are off';
+
+  @override
+  String get reminderPermissionDeniedBody =>
+      'Allow ELUM notifications in your phone settings to get routine reminders';
+
+  @override
+  String get reminderFailedTitle => 'Couldn\'t set the reminder';
+
+  @override
+  String get reminderFailedBody => 'Please try again in a moment';
+
+  @override
+  String get reminderChannelName => 'Routine reminders';
+
+  @override
+  String get reminderNotificationTitle => 'ELUM';
+
+  @override
+  String reminderNotificationBody(String routineTitle) {
+    return 'Time for $routineTitle';
+  }
+
+  @override
+  String get routineTemplateOpen => 'Browse example routines';
+
+  @override
+  String get routineTemplateSheetTitle => 'Example routines';
+
+  @override
+  String get routineTemplateSheetBody =>
+      'Pick one and we\'ll fill in the text. Adjust it for your Elumi before sending';
+
+  @override
+  String get routineTemplateBeginnerBadge => 'Good for first-timers';
+
+  @override
+  String get routineTemplateCategorySelfCare => 'Self-care';
+
+  @override
+  String get routineTemplateCategorySelfCareHint =>
+      'Everyday tasks like washing, dressing and eating';
+
+  @override
+  String get routineTemplateCategoryDailyFlow => 'Daily flow';
+
+  @override
+  String get routineTemplateCategoryDailyFlowHint =>
+      'The big steps from morning to bedtime';
+
+  @override
+  String get routineTemplateCategoryHousehold => 'Chores';
+
+  @override
+  String get routineTemplateCategoryHouseholdHint =>
+      'Tidying up your own things and space';
+
+  @override
+  String get routineTemplateCategoryCommunity => 'Out and about';
+
+  @override
+  String get routineTemplateCategoryCommunityHint =>
+      'Practice doing things alone, like riding the bus or shopping';
+
+  @override
+  String get routineTemplateCategoryLearning => 'Study';
+
+  @override
+  String get routineTemplateCategoryLearningHint =>
+      'Starting and finishing study time in order';
+
+  @override
+  String get routineTemplateCategoryFeelings => 'Feelings and friends';
+
+  @override
+  String get routineTemplateCategoryFeelingsHint =>
+      'Showing feelings, greeting and waiting your turn';
+
+  @override
+  String get routineTemplateBrushTeethText => 'Brushing teeth';
+
+  @override
+  String get routineTemplateBrushTeethPrompt =>
+      'I want my Elumi to brush their teeth alone. Walk through taking out the toothbrush and toothpaste, filling the cup with water, brushing, rinsing and putting things away';
+
+  @override
+  String get routineTemplateWashFaceText => 'Washing face';
+
+  @override
+  String get routineTemplateWashFacePrompt =>
+      'I want my Elumi to wash their face alone in the morning. Walk through turning on the water, wetting the face, making soap bubbles, rinsing, drying with a towel and putting on lotion';
+
+  @override
+  String get routineTemplateGetDressedText => 'Getting dressed alone';
+
+  @override
+  String get routineTemplateGetDressedPrompt =>
+      'I want my Elumi to get dressed alone. Walk through putting on an undershirt, a T-shirt, pants and socks one at a time';
+
+  @override
+  String get routineTemplateEatMealText => 'Mealtime';
+
+  @override
+  String get routineTemplateEatMealPrompt =>
+      'I want my Elumi to handle mealtime on their own. Walk through drinking water, bringing their own spoon and bowl, sitting down to eat and taking the dishes back';
+
+  @override
+  String get routineTemplateBathTimeText => 'Bath time';
+
+  @override
+  String get routineTemplateBathTimePrompt =>
+      'I want my Elumi to take a bath step by step. Walk through taking off clothes, wetting the body, washing hair, washing the body, rinsing, drying with a towel and getting dressed';
+
+  @override
+  String get routineTemplateMorningRoutineText => 'Getting ready for school';
+
+  @override
+  String get routineTemplateMorningRoutinePrompt =>
+      'I want my Elumi to do everything from waking up to leaving for school in order. Walk through getting up, using the bathroom, eating, washing and brushing, getting dressed, and putting on the backpack and shoes';
+
+  @override
+  String get routineTemplateAfterSchoolText => 'After school';
+
+  @override
+  String get routineTemplateAfterSchoolPrompt =>
+      'I want my Elumi to do things on their own after coming home from school. Walk through putting away shoes, washing hands, putting the bag in its place, having a snack and taking a break';
+
+  @override
+  String get routineTemplateBedtimeText => 'Getting ready for bed';
+
+  @override
+  String get routineTemplateBedtimePrompt =>
+      'I want my Elumi to do the bedtime steps in order. Walk through brushing teeth, putting on pajamas, packing tomorrow\'s bag, and turning off the light to lie down';
+
+  @override
+  String get routineTemplateGoingOutText => 'Getting ready to go out';
+
+  @override
+  String get routineTemplateGoingOutPrompt =>
+      'I want my Elumi to get ready to go out on their own. Walk through using the bathroom, putting on a jacket, taking a water bottle and phone, putting on shoes and waiting by the door';
+
+  @override
+  String get routineTemplateTidyRoomText => 'Tidying the room';
+
+  @override
+  String get routineTemplateTidyRoomPrompt =>
+      'I want my Elumi to tidy their room after playing. Walk through gathering toys, putting them in the box, shelving books and hanging clothes';
+
+  @override
+  String get routineTemplateClearDishesText => 'Clearing dishes';
+
+  @override
+  String get routineTemplateClearDishesPrompt =>
+      'I want my Elumi to clear their dishes after eating. Walk through gathering leftovers, carrying the dishes, putting them in the sink and wiping the table';
+
+  @override
+  String get routineTemplateFoldLaundryText => 'Folding laundry';
+
+  @override
+  String get routineTemplateFoldLaundryPrompt =>
+      'I want my Elumi to fold and put away dry laundry. Walk through bringing the laundry, matching socks, folding towels, folding clothes and putting them in the drawer';
+
+  @override
+  String get routineTemplateTakeOutTrashText => 'Taking out the trash';
+
+  @override
+  String get routineTemplateTakeOutTrashPrompt =>
+      'I want my Elumi to sort and take out the trash. Walk through gathering trash, separating paper and plastic, tying the bag and taking it to the right place';
+
+  @override
+  String get routineTemplateRideBusText => 'Riding the bus';
+
+  @override
+  String get routineTemplateRideBusPrompt =>
+      'I want my Elumi to practice riding the bus alone. Walk through checking the bus number at the stop, lining up, tapping the transit card, sitting down and pressing the bell at their stop';
+
+  @override
+  String get routineTemplateBuyItemText => 'Buying something at a store';
+
+  @override
+  String get routineTemplateBuyItemPrompt =>
+      'I want my Elumi to buy something at a convenience store alone. Walk through finding the item, lining up at the counter, putting the item down, paying by card or cash, and taking the receipt and saying thanks';
+
+  @override
+  String get routineTemplateUseElevatorText => 'Taking the elevator to a floor';
+
+  @override
+  String get routineTemplateUseElevatorPrompt =>
+      'I want my Elumi to take the elevator to a set floor alone. Walk through pressing the button, getting on when the door opens, pressing the floor number, watching the floor display and getting off';
+
+  @override
+  String get routineTemplateHospitalVisitText => 'Going to the doctor';
+
+  @override
+  String get routineTemplateHospitalVisitPrompt =>
+      'I want my Elumi to go through a doctor visit in order. Walk through checking in, waiting in the waiting room, going in when called, seeing the doctor, and getting medicine and saying goodbye';
+
+  @override
+  String get routineTemplateStartHomeworkText => 'Starting homework';
+
+  @override
+  String get routineTemplateStartHomeworkPrompt =>
+      'I want my Elumi to start and finish homework on their own. Walk through sitting at the desk, taking out the notebook and pencil, doing the homework, showing it when done and putting it in the bag';
+
+  @override
+  String get routineTemplateWriteNameText => 'Practicing writing a name';
+
+  @override
+  String get routineTemplateWriteNamePrompt =>
+      'I want my Elumi to hold a pencil properly and write their name. Walk through holding the pencil, placing the paper, tracing the name, writing it alone and cleaning up';
+
+  @override
+  String get routineTemplateCountObjectsText => 'Counting game';
+
+  @override
+  String get routineTemplateCountObjectsPrompt =>
+      'I want my Elumi to practice counting objects one by one. Walk through laying out the objects, pointing to each with a finger, counting out loud and saying the total';
+
+  @override
+  String get routineTemplateReadBookText => 'Reading time';
+
+  @override
+  String get routineTemplateReadBookPrompt =>
+      'I want my Elumi to have reading time on their own. Walk through choosing a book, sitting down, turning the pages one by one and putting the book back on the shelf';
+
+  @override
+  String get routineTemplateEmotionCardText =>
+      'Showing a feelings card when upset';
+
+  @override
+  String get routineTemplateEmotionCardPrompt =>
+      'When my Elumi gets angry at a friend, I want them to show a feelings card instead of yelling or pushing. Walk through stopping, taking the feelings card out of the pocket, choosing the card for how they feel and showing it to the teacher';
+
+  @override
+  String get routineTemplatePlayNicelyText => 'Playing nicely with friends';
+
+  @override
+  String get routineTemplatePlayNicelyPrompt =>
+      'I want my Elumi to practice playing nicely with friends. Walk through asking to play together, sharing toys, taking turns and saying thank you at the end';
+
+  @override
+  String get routineTemplateGreetingText => 'Saying hello';
+
+  @override
+  String get routineTemplateGreetingPrompt =>
+      'I want my Elumi to greet people first. Walk through looking at the person\'s face, waving, saying hello and smiling';
+
+  @override
+  String get routineTemplateWaitTurnText => 'Waiting your turn';
+
+  @override
+  String get routineTemplateWaitTurnPrompt =>
+      'I want my Elumi to practice waiting in line for their turn. Walk through standing at the end of the line, waiting behind the person in front, checking when it\'s their turn and going when it comes';
+
+  @override
+  String get routineTemplateAskHelpText => 'Asking for help';
+
+  @override
+  String get routineTemplateAskHelpPrompt =>
+      'I want my Elumi to ask for help when something is hard. Walk through stopping, finding a nearby adult, saying \'please help me\', and saying thank you after getting help';
 }

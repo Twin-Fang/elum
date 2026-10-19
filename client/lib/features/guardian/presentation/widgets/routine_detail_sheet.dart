@@ -14,6 +14,7 @@ import 'routine_detail_step_badge.dart';
 import 'routine_detail_step_card.dart';
 import 'step_card_viewer.dart';
 import '../../application/guardian_home_controller.dart';
+import 'routine_reminder_row.dart';
 
 /// 오늘 일과를 눌렀을 때 올라오는 시트 (Figma 956:4084).
 ///
@@ -274,7 +275,16 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
                         buttonBottom + buttonHeight + space.md,
                       ),
                       sliver: SliverToBoxAdapter(
-                        child: RoutineDetailRewardRow(routine: widget.routine),
+                        child: Column(
+                          children: [
+                            RoutineDetailRewardRow(routine: widget.routine),
+                            // 일과 알림 (#777): 오늘 일과만. 지난 일과는 `다시하기` 뒤 새 일과에 건다
+                            if (!widget.isPast) ...[
+                              SizedBox(height: 8.h),
+                              RoutineReminderRow(routine: widget.routine),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
                   ],

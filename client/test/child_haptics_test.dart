@@ -2,6 +2,7 @@ import 'package:elum/core/haptics/child_haptics.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
+import 'package:elum/core/widgets/settings_switch_tile.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
 import 'package:elum/features/child/presentation/reward_screen.dart';
@@ -318,11 +319,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
+      // 진동 줄의 스위치 (칭찬 소리 스위치가 옆에 함께 있다 #777)
+      Switch hapticSwitch() => tester.widget<Switch>(
+        find.descendant(
+          of: find.byWidgetPredicate(
+            (widget) =>
+                widget is SettingsSwitchTile && widget.label == '카드 체크 진동',
+          ),
+          matching: find.byType(Switch),
+        ),
+      );
+      expect(hapticSwitch().value, isTrue);
 
       await tester.tap(find.text('카드 체크 진동'));
       await tester.pumpAndSettle();
-      expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+      expect(hapticSwitch().value, isFalse);
       expect(storage.isChildHapticOn, isFalse);
       expect(driver.played, isEmpty, reason: '끌 때는 울리지 않는다');
 
