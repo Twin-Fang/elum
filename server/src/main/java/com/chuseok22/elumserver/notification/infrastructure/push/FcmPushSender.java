@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.notification.infrastructure.push;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
@@ -54,7 +55,8 @@ public class FcmPushSender implements PushSender {
     }
   }
 
-  private Message toFcmMessage(PushMessage pushMessage) {
+  // 발송 없이 메시지만 조립 (테스트에서 직접 호출)
+  Message toFcmMessage(PushMessage pushMessage) {
     // 길이 제한(APNs 64바이트)을 모든 플랫폼에 같은 키로 맞춤
     String collapseKey = toStableShortKey(pushMessage.collapseKey());
     return Message.builder()
@@ -67,6 +69,8 @@ public class FcmPushSender implements PushSender {
         .build())
       .setApnsConfig(ApnsConfig.builder()
         .putHeader(APNS_COLLAPSE_ID_HEADER, collapseKey)
+        // SDK 가 aps 를 필수로 요구: 보이는 알림은 Notification 페이로드에서 채워짐
+        .setAps(Aps.builder().setSound("default").build())
         .build())
       .build();
   }
