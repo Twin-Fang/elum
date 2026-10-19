@@ -1775,7 +1775,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get modeSwitchBlockedBack => '돌아가기';
 
   @override
-  String get installationRetryMessage => '기기의 로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.';
+  String get installationRetryTitle => '잠깐 문제가 생겼어요';
+
+  @override
+  String get installationRetryMessage => '기기 정보를 확인하지 못했어요. 다시 해볼까요?';
 
   @override
   String get installationRetryButton => '다시 시도';

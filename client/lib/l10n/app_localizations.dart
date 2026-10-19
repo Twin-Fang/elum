@@ -3260,10 +3260,16 @@ abstract class AppLocalizations {
   /// **'돌아가기'**
   String get modeSwitchBlockedBack;
 
-  /// No description provided for @installationRetryMessage.
+  /// 기기 설치 표식을 읽지 못했을 때 오류 화면 제목 (E-INSTALL)
   ///
   /// In ko, this message translates to:
-  /// **'기기의 로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.'**
+  /// **'잠깐 문제가 생겼어요'**
+  String get installationRetryTitle;
+
+  /// 기기 설치 표식을 읽지 못했을 때 오류 화면 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 정보를 확인하지 못했어요. 다시 해볼까요?'**
   String get installationRetryMessage;
 
   /// No description provided for @installationRetryButton.
