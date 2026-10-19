@@ -21,7 +21,6 @@ class AppLayout extends ThemeExtension<AppLayout> {
     required this.masterPaneWidth,
     required this.paneGutter,
     required this.sheetMaxWidth,
-    required this.dialogMaxWidth,
   });
 
   /// medium 시작 폭 (dp)
@@ -53,9 +52,8 @@ class AppLayout extends ThemeExtension<AppLayout> {
   final double masterPaneWidth;
   final double paneGutter;
 
-  /// 바텀시트·다이얼로그 폭 상한
+  /// 바텀시트·토스트 폭 상한 (확인 팝업 카드는 폭이 이미 고정이라 상한이 없다)
   final double sheetMaxWidth;
-  final double dialogMaxWidth;
 
   static const standard = AppLayout(
     mediumMinWidth: 600,
@@ -70,7 +68,6 @@ class AppLayout extends ThemeExtension<AppLayout> {
     masterPaneWidth: 360,
     paneGutter: 24,
     sheetMaxWidth: 560,
-    dialogMaxWidth: 420,
   );
 
   /// 등급별 좌우 여백 (dp)
@@ -96,7 +93,6 @@ class AppLayout extends ThemeExtension<AppLayout> {
     double? masterPaneWidth,
     double? paneGutter,
     double? sheetMaxWidth,
-    double? dialogMaxWidth,
   }) {
     return AppLayout(
       mediumMinWidth: mediumMinWidth ?? this.mediumMinWidth,
@@ -112,7 +108,6 @@ class AppLayout extends ThemeExtension<AppLayout> {
       masterPaneWidth: masterPaneWidth ?? this.masterPaneWidth,
       paneGutter: paneGutter ?? this.paneGutter,
       sheetMaxWidth: sheetMaxWidth ?? this.sheetMaxWidth,
-      dialogMaxWidth: dialogMaxWidth ?? this.dialogMaxWidth,
     );
   }
 
