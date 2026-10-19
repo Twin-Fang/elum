@@ -156,6 +156,16 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.dialogScrim,
     required this.rewardLineLead,
     required this.editChipPressedBg,
+    required this.tabletSceneSkyTop,
+    required this.tabletSceneSkyBottom,
+    required this.tabletSceneHillBack,
+    required this.tabletSceneHillFront,
+    required this.tabletSceneCloud,
+    required this.tabletSceneSparkle,
+    required this.nightSkyTwinkle,
+    required this.stepStripGoalFill,
+    required this.stepStripGoalBorder,
+    required this.tabletSceneGroundShadow,
     required this.loginKakaoBg,
     required this.loginKakaoLabel,
     required this.loginNaverBg,
@@ -605,6 +615,36 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 카드확인 도구 버튼이 눌린 상태의 배경 (#D7D3D1, 시안 1197:5798 순서 변경 모드의 `카드 순서 변경`). 다른 화면의 #D7D3D1 과 값만 같다.
   final Color editChipPressedBg;
 
+  /// 태블릿 장면 그림 하늘 위 (#DDE6FF, 시안 없음 · #789 개발 제안)
+  final Color tabletSceneSkyTop;
+
+  /// 태블릿 장면 그림 하늘 아래 (#FFF4E6)
+  final Color tabletSceneSkyBottom;
+
+  /// 태블릿 장면 그림 뒤 언덕 (#D3EEDD)
+  final Color tabletSceneHillBack;
+
+  /// 태블릿 장면 그림 앞 언덕 (#B7E2C9)
+  final Color tabletSceneHillFront;
+
+  /// 태블릿 장면 그림 구름 (흰색 85%)
+  final Color tabletSceneCloud;
+
+  /// 태블릿 장면 그림 반짝이 별 (#FFD45C)
+  final Color tabletSceneSparkle;
+
+  /// 태블릿 밤하늘 별 밭의 작은 별 (흰색 90%)
+  final Color nightSkyTwinkle;
+
+  /// 태블릿 카드 순서 줄 끝 보상 칸 바탕 (#FFF3D6)
+  final Color stepStripGoalFill;
+
+  /// 태블릿 카드 순서 줄 끝 보상 칸 테두리 (#FFCF70)
+  final Color stepStripGoalBorder;
+
+  /// 태블릿 장면 그림 캐릭터 발밑 그림자 (#2E5A43 12%)
+  final Color tabletSceneGroundShadow;
+
   // --- 소셜 로그인 버튼 ---
   //
   // 각 제공자가 정한 **브랜드 고정값**이다. 디자이너가 바꾸는 값이 아니며,
@@ -928,6 +968,16 @@ class AppColors extends ThemeExtension<AppColors> {
     dialogScrim: Color.from(alpha: 0.5, red: 0, green: 0, blue: 0),
     rewardLineLead: Color(0xFF74757D),
     editChipPressedBg: Color(0xFFD7D3D1),
+    tabletSceneSkyTop: Color(0xFFDDE6FF),
+    tabletSceneSkyBottom: Color(0xFFFFF4E6),
+    tabletSceneHillBack: Color(0xFFD3EEDD),
+    tabletSceneHillFront: Color(0xFFB7E2C9),
+    tabletSceneCloud: Color(0xD9FFFFFF),
+    tabletSceneSparkle: Color(0xFFFFD45C),
+    nightSkyTwinkle: Color(0xE6FFFFFF),
+    stepStripGoalFill: Color(0xFFFFF3D6),
+    stepStripGoalBorder: Color(0xFFFFCF70),
+    tabletSceneGroundShadow: Color(0x1F2E5A43),
     loginKakaoBg: Color(0xFFFEE500),
     loginKakaoLabel: Color(0xFF191600),
     loginNaverBg: Color(0xFF03C75A),
@@ -1120,6 +1170,16 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? dialogScrim,
     Color? rewardLineLead,
     Color? editChipPressedBg,
+    Color? tabletSceneSkyTop,
+    Color? tabletSceneSkyBottom,
+    Color? tabletSceneHillBack,
+    Color? tabletSceneHillFront,
+    Color? tabletSceneCloud,
+    Color? tabletSceneSparkle,
+    Color? nightSkyTwinkle,
+    Color? stepStripGoalFill,
+    Color? stepStripGoalBorder,
+    Color? tabletSceneGroundShadow,
     Color? loginLastUsedBg,
     Color? settingsDestructive,
     Color? settingsChevron,
@@ -1303,6 +1363,16 @@ class AppColors extends ThemeExtension<AppColors> {
       dialogScrim: dialogScrim ?? this.dialogScrim,
       rewardLineLead: rewardLineLead ?? this.rewardLineLead,
       editChipPressedBg: editChipPressedBg ?? this.editChipPressedBg,
+      tabletSceneSkyTop: tabletSceneSkyTop ?? this.tabletSceneSkyTop,
+      tabletSceneSkyBottom: tabletSceneSkyBottom ?? this.tabletSceneSkyBottom,
+      tabletSceneHillBack: tabletSceneHillBack ?? this.tabletSceneHillBack,
+      tabletSceneHillFront: tabletSceneHillFront ?? this.tabletSceneHillFront,
+      tabletSceneCloud: tabletSceneCloud ?? this.tabletSceneCloud,
+      tabletSceneSparkle: tabletSceneSparkle ?? this.tabletSceneSparkle,
+      nightSkyTwinkle: nightSkyTwinkle ?? this.nightSkyTwinkle,
+      stepStripGoalFill: stepStripGoalFill ?? this.stepStripGoalFill,
+      stepStripGoalBorder: stepStripGoalBorder ?? this.stepStripGoalBorder,
+      tabletSceneGroundShadow: tabletSceneGroundShadow ?? this.tabletSceneGroundShadow,
       loginLastUsedBg: loginLastUsedBg ?? this.loginLastUsedBg,
       settingsDestructive: settingsDestructive ?? this.settingsDestructive,
       settingsChevron: settingsChevron ?? this.settingsChevron,
@@ -1647,6 +1717,16 @@ class AppColors extends ThemeExtension<AppColors> {
       dialogScrim: Color.lerp(dialogScrim, other.dialogScrim, t)!,
       rewardLineLead: Color.lerp(rewardLineLead, other.rewardLineLead, t)!,
       editChipPressedBg: Color.lerp(editChipPressedBg, other.editChipPressedBg, t)!,
+      tabletSceneSkyTop: Color.lerp(tabletSceneSkyTop, other.tabletSceneSkyTop, t)!,
+      tabletSceneSkyBottom: Color.lerp(tabletSceneSkyBottom, other.tabletSceneSkyBottom, t)!,
+      tabletSceneHillBack: Color.lerp(tabletSceneHillBack, other.tabletSceneHillBack, t)!,
+      tabletSceneHillFront: Color.lerp(tabletSceneHillFront, other.tabletSceneHillFront, t)!,
+      tabletSceneCloud: Color.lerp(tabletSceneCloud, other.tabletSceneCloud, t)!,
+      tabletSceneSparkle: Color.lerp(tabletSceneSparkle, other.tabletSceneSparkle, t)!,
+      nightSkyTwinkle: Color.lerp(nightSkyTwinkle, other.nightSkyTwinkle, t)!,
+      stepStripGoalFill: Color.lerp(stepStripGoalFill, other.stepStripGoalFill, t)!,
+      stepStripGoalBorder: Color.lerp(stepStripGoalBorder, other.stepStripGoalBorder, t)!,
+      tabletSceneGroundShadow: Color.lerp(tabletSceneGroundShadow, other.tabletSceneGroundShadow, t)!,
       loginLastUsedBg: Color.lerp(loginLastUsedBg, other.loginLastUsedBg, t)!,
       settingsDestructive:
           Color.lerp(settingsDestructive, other.settingsDestructive, t)!,

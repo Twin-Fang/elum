@@ -57,7 +57,7 @@ List<RouteBase> childRoutes() => [
         fadePage(
           state,
           const ChildStarsScreen(),
-          backdrop: const ChildNightSkyBackdrop(),
+          backdrop: const ChildNightSkyBackdrop(hasStarField: true),
         ),
   ),
   GoRoute(
@@ -66,7 +66,7 @@ List<RouteBase> childRoutes() => [
     // 별 연출만 돈다 — 그 자체가 보상 없이 끝낸 모습이라 맞다.
     pageBuilder: (context, state) => fadePage(
       state,
-      backdrop: const ChildNightSkyBackdrop(),
+      backdrop: const ChildNightSkyBackdrop(hasStarField: true),
       RewardScreen(
         reward: state.extra is ({String emoji, String text})
             ? state.extra! as ({String emoji, String text})
@@ -79,7 +79,10 @@ List<RouteBase> childRoutes() => [
     // 보상은 `extra`로 온다. 없으면(개발자 도구로 직접 들어온 경우 포함) 칩 없이 그린다.
     pageBuilder: (context, state) => fadePage(
       state,
-      backdrop: const ChildNightSkyBackdrop(sky: ChildNightSky.routineDone),
+      backdrop: const ChildNightSkyBackdrop(
+        sky: ChildNightSky.routineDone,
+        hasStarField: true,
+      ),
       RoutineDoneScreen(
         reward: state.extra is ({String emoji, String text})
             ? state.extra! as ({String emoji, String text})

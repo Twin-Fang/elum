@@ -67,10 +67,15 @@ class ChildRoutineDetailScreen extends ConsumerStatefulWidget {
 
 class _ChildRoutineDetailScreenState
     extends ConsumerState<ChildRoutineDetailScreen> {
-  /// 옆 카드가 가장자리에 걸치도록 한 장 폭(카드 + 간격)만큼 자른다.
-  final _controller = PageController(
-    viewportFraction: ChildCardPager.viewportFraction,
-  );
+  /// 카드 넘기기 컨트롤러. 폰은 옆 카드가 걸치게 한 장 폭(카드 + 간격)만큼 자르고,
+  /// 태블릿은 한 장이 자리를 꽉 채운다. 창 등급이 바뀌면(분할 보기) 보던 카드에서 다시 만든다
+  PageController? _pageController;
+  bool? _isFullCardPager;
+
+  PageController get _controller => _pageController!;
+
+  /// 태블릿 카드 안 체크 버튼 배율 (88 > 약 119)
+  static const _tabletCheckScale = 1.35;
 
   /// 체크 순간 색종이가 터진다. `play()`가 이 duration만큼 색종이를 뿜는다.
   /// 아동 화면 최소 전환 시간(300ms) 이상으로 둔다.
@@ -91,6 +96,29 @@ class _ChildRoutineDetailScreenState
   SpeechService? _speech;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncPageController();
+  }
+
+  /// 창 등급에 맞는 컨트롤러 준비 (처음 + 폰 <-> 태블릿 전환 시)
+  void _syncPageController() {
+    final isFullCardPager = context.layoutMetrics.isScaleOverridden;
+    if (_isFullCardPager == isFullCardPager) return;
+    final previous = _pageController;
+    final initialPage = previous == null ? 0 : _currentIndex;
+    _pageController = PageController(
+      viewportFraction: isFullCardPager ? 1.0 : ChildCardPager.viewportFraction,
+      initialPage: initialPage,
+    );
+    _isFullCardPager = isFullCardPager;
+    // 옛 컨트롤러는 새 PageView 가 붙은 뒤에 정리 (build 전에 버리면 붙어 있던 위젯이 깨진다)
+    if (previous != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     // 첫 프레임 뒤에 잡는다. initState에서 읽어도 되지만 일관되게 둔다.
@@ -108,7 +136,7 @@ class _ChildRoutineDetailScreenState
     // 화면을 벗어나도 소리가 남으면 다음 화면까지 따라온다
     _speech?.stop();
     _confetti.dispose();
-    _controller.dispose();
+    _pageController?.dispose();
     super.dispose();
   }
 
@@ -160,8 +188,13 @@ class _ChildRoutineDetailScreenState
   }
 
   /// 현재 보고 있는 카드. 체크 버튼이 이 카드를 대상으로 한다.
-  int get _currentIndex =>
-      _controller.hasClients ? (_controller.page ?? 0).round() : 0;
+  int get _currentIndex {
+    final controller = _pageController;
+    if (controller == null || !controller.hasClients) {
+      return controller?.initialPage ?? 0;
+    }
+    return (controller.page ?? controller.initialPage.toDouble()).round();
+  }
 
   /// 지금 보여줄 일과. 홈이 넘겨준 스냅샷([widget.routine])이 아니라 목록
   /// provider에서 같은 id를 찾아 쓴다 — 서버 동기화 뒤 목록이 갱신되면 카드의
@@ -318,6 +351,26 @@ class _ChildRoutineDetailScreenState
     );
   }
 
+  /// 지금 카드의 체크 버튼 (폰: 카드 아래 / 태블릿: 카드 안, [sizeScale] 만큼 크게)
+  Widget _buildCheckButton(
+    List<ActionCard> cards,
+    bool Function(String routineId, ActionCard card) isChecked,
+    String routineId, {
+    double sizeScale = 1.0,
+  }) {
+    return Builder(
+      builder: (context) {
+        final current = cards[_currentIndex.clamp(0, cards.length - 1)];
+        return ChildRoutineCheckButton(
+          isChecked: isChecked(routineId, current),
+          confettiController: _confetti,
+          onTap: () => _toggle(current),
+          sizeScale: sizeScale,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // 보던 일과가 사라졌다 — 그 일과를 만든 보호자가 이룸이에서 나갔다 (다중 보호자 · E11).
@@ -368,37 +421,41 @@ class _ChildRoutineDetailScreenState
       isChecked: (card) => progress.isChecked(routine.id, card),
     );
 
-    final checkButton = Builder(
-      builder: (context) {
-        final current = cards[_currentIndex.clamp(0, cards.length - 1)];
-        return ChildRoutineCheckButton(
-          isChecked: progress.isChecked(routine.id, current),
-          confettiController: _confetti,
-          onTap: () => _toggle(current),
-        );
-      },
+    final checkButton = _buildCheckButton(
+      cards,
+      progress.isChecked,
+      routine.id,
     );
 
     // 🔴 하는 동안 보상이 계속 보인다 (수행 중 보상 노출이 핵심 기능).
     // 완료 후에만 뜨는 별 연출과 다른 기능이다 — 끝까지 가는 힘이 여기서 나온다.
     final rewardBanner = RewardBanner.maybe(routine);
 
-    // 태블릿은 카드를 크게 다시 배치한다 (폰은 아래 시안 배치 그대로)
+    // 태블릿: 순서 줄 + 꽉 찬 카드 한 장, 체크 버튼은 카드 안 (#789). 폰은 아래 시안 배치 그대로
     if (context.layoutMetrics.isScaleOverridden) {
-      return Scaffold(
-        backgroundColor: context.colors.background,
-        body: SafeArea(
-          child: ChildRoutineDetailTabletBody(
-            topBar: topBar,
-            rewardBanner: rewardBanner,
-            // 폰 시안 크기 상자 — 태블릿 본문이 통째로 키운다
-            pager: SizedBox(
-              width: 393.w,
-              height: ChildRoutineDetailScreen._cardBoxHeight.h,
-              child: pager,
-            ),
-            checkButton: checkButton,
-            isLandscape: context.isLandscape,
+      final currentIndex = cards.isEmpty
+          ? 0
+          : _currentIndex.clamp(0, cards.length - 1);
+      return ChildRoutineDetailTabletBody(
+        topBar: topBar,
+        routine: routine,
+        currentIndex: currentIndex,
+        isChecked: (card) => progress.isChecked(routine.id, card),
+        onStepTap: _goToPage,
+        pager: ChildTabletCardPager(
+          controller: _controller,
+          cards: cards,
+          routineId: routine.id,
+          language: routine.language,
+          currentIndex: currentIndex,
+          speakingId: _speakingId,
+          onSpeak: _speak,
+          onPageChanged: pager.onPageChanged,
+          checkButton: _buildCheckButton(
+            cards,
+            progress.isChecked,
+            routine.id,
+            sizeScale: _tabletCheckScale,
           ),
         ),
       );

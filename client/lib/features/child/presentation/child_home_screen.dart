@@ -7,11 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/assets/app_assets.dart';
 import '../../../core/layout/adaptive_page_frame.dart';
 import '../../../core/layout/layout_context_ext.dart';
 import '../../../core/layout/screen_layout_kind.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import '../../../core/widgets/tablet_hero_scene.dart';
 import '../../../core/l10n/batchim.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../shared/models/routine.dart';
@@ -55,6 +57,9 @@ final childRoutinesProvider = Provider<List<Routine>>((ref) {
 /// 카드 페이저는 [ChildRoutineDetailScreen]으로 내려갔다.
 class ChildHomeScreen extends ConsumerWidget {
   const ChildHomeScreen({super.key});
+
+  /// 세로 태블릿 장면 띠 높이 (393 기준)
+  static const _portraitSceneHeight = 220.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -150,6 +155,20 @@ class ChildHomeScreen extends ConsumerWidget {
                           ),
                           child: greetingText,
                         ),
+                        // 세로 태블릿: 인사말 아래 장면 띠 (폰은 없음)
+                        if (metrics.isScaleOverridden) ...[
+                          SizedBox(height: space.lg),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: space.md),
+                            child: SizedBox(
+                              height: _portraitSceneHeight.h,
+                              child: TabletHeroScene(
+                                characterAsset: AppAssets.character(character),
+                                characterHeightRatio: 0.62,
+                              ),
+                            ),
+                          ),
+                        ],
                         // 인사말 아래(202) → 첫 타일(242)
                         SizedBox(height: 40.h),
                         Padding(

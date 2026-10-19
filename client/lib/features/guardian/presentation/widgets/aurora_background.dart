@@ -160,8 +160,13 @@ class AuroraPalette {
       listEquals(other.colors, colors);
 
   @override
-  int get hashCode =>
-      Object.hash(strength, eclipseEndAlpha, top, planetEnd, Object.hashAll(colors));
+  int get hashCode => Object.hash(
+    strength,
+    eclipseEndAlpha,
+    top,
+    planetEnd,
+    Object.hashAll(colors),
+  );
 }
 
 class _AuroraPaletteTween extends Tween<AuroraPalette> {
@@ -195,6 +200,15 @@ class AuroraBackground extends StatefulWidget {
   /// 두 원 묶음 — 그룹 윗변이 입력 자리(204)에서 얼마나 내려왔는지 잰다.
   @visibleForTesting
   static const groupKey = ValueKey('auroraGroup');
+
+  /// 태블릿에서만 더하는 양옆 작은 원
+  @visibleForTesting
+  static const leftSatelliteKey = ValueKey('auroraLeftSatellite');
+  @visibleForTesting
+  static const rightSatelliteKey = ValueKey('auroraRightSatellite');
+
+  /// 두 원 묶음 기준 폭 (시안 프레임 393)
+  static const _groupWidth = 393.0;
 
   /// 각 원의 왕복 주기.
   ///
@@ -281,12 +295,38 @@ class _AuroraBackgroundState extends State<AuroraBackground>
           final colors = palette.visibleColors;
           // 입력·보상(204)과 로딩·추가질문(244)은 두 원 자리가 40 다르다.
           // 색과 같은 곡선으로 옮겨 가 두 원이 툭 떨어지지 않는다.
+          // 태블릿: 393 폭 묶음을 창 가운데로 (폰은 창 폭 = 393.w 라 0)
+          final centeringOffset = math.max(
+            0.0,
+            (MediaQuery.sizeOf(context).width -
+                    AuroraBackground._groupWidth.w) /
+                2,
+          );
+          final hasSatellites = centeringOffset > 0;
           return Transform.translate(
             key: AuroraBackground.groupKey,
-            offset: Offset(0, (palette.top - AuroraPalette.inputTop).h),
+            offset: Offset(
+              centeringOffset,
+              (palette.top - AuroraPalette.inputTop).h,
+            ),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
+                // 태블릿 넓은 화면: 같은 색 작은 원 둘이 양옆으로 살짝 퍼진다
+                if (hasSatellites) ...[
+                  _blob(
+                    controller: _controllers[1],
+                    key: AuroraBackground.leftSatelliteKey,
+                    spec: _Blob.leftSatellite,
+                    colors: [colors[2], palette.planetEnd],
+                  ),
+                  _blob(
+                    controller: _controllers[0],
+                    key: AuroraBackground.rightSatelliteKey,
+                    spec: _Blob.rightSatellite,
+                    colors: [colors[0], colors[1]],
+                  ),
+                ],
                 _blob(
                   controller: _controllers[0],
                   key: AuroraBackground.eclipseKey,
@@ -368,7 +408,13 @@ enum _Blob {
   eclipse(left: 11.2, top: 225.3, diameter: 356.7, blur: 200),
 
   /// `Planet` (238:1730) — 261 원, (120.4, 204), 블러 100.
-  planet(left: 120.4, top: 204, diameter: 261, blur: 100);
+  planet(left: 120.4, top: 204, diameter: 261, blur: 100),
+
+  /// 태블릿 왼쪽 작은 원 (시안 없음 · #789 개발 제안)
+  leftSatellite(left: -170, top: 330, diameter: 230, blur: 140),
+
+  /// 태블릿 오른쪽 작은 원 (시안 없음 · #789 개발 제안)
+  rightSatellite(left: 340, top: 120, diameter: 210, blur: 140);
 
   const _Blob({
     required this.left,

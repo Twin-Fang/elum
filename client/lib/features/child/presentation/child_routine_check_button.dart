@@ -21,7 +21,11 @@ class ChildRoutineCheckButton extends StatelessWidget {
     required this.isChecked,
     required this.confettiController,
     required this.onTap,
+    this.sizeScale = 1.0,
   });
+
+  /// 기본 크기(88) 대비 배율. 태블릿 카드 안에서 키운다 (폰은 1)
+  final double sizeScale;
 
   final bool isChecked;
   final ConfettiController confettiController;
@@ -30,10 +34,12 @@ class ChildRoutineCheckButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final size = ChildRoutineDetailScreen.checkButtonSize.w.clamp(
-      ChildRoutineDetailScreen.minTouchTarget,
-      double.infinity,
-    );
+    final size =
+        ChildRoutineDetailScreen.checkButtonSize.w.clamp(
+          ChildRoutineDetailScreen.minTouchTarget,
+          double.infinity,
+        ) *
+        sizeScale;
 
     // 색종이가 버튼 중심에서 사방으로 뿜어져 나오도록 겹쳐 놓는다.
     // ConfettiWidget은 자식(버튼)이 놓인 지점을 방출 원점으로 삼는다.
@@ -81,7 +87,10 @@ class ChildRoutineCheckButton extends StatelessWidget {
                 // (Figma 309:3682)
                 border: isChecked
                     ? null
-                    : Border.all(color: colors.checkPending, width: 8.w),
+                    : Border.all(
+                        color: colors.checkPending,
+                        width: 8.w * sizeScale,
+                      ),
                 // 채워진 뒤에만 그림자가 붙는다 (시안 `309:3682` — 0 2 5 · 5%).
                 // 카드가 쓰는 것과 같은 그림자다.
                 boxShadow: isChecked
@@ -100,8 +109,8 @@ class ChildRoutineCheckButton extends StatelessWidget {
               child: Center(
                 child: SvgPicture.asset(
                   AppAssets.childCheckMark,
-                  width: 48.w,
-                  height: 35.76.w,
+                  width: 48.w * sizeScale,
+                  height: 35.76.w * sizeScale,
                   colorFilter: ColorFilter.mode(
                     isChecked ? colors.surface : colors.checkPending,
                     BlendMode.srcIn,

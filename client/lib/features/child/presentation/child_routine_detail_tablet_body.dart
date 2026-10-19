@@ -1,70 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// 이룸이 카드 상세 태블릿 본문: 카드를 가능한 만큼 크게, 체크 버튼은 손이 닿는 자리에
+import '../../../core/layout/layout_context_ext.dart';
+import '../../../core/theme/theme_context_ext.dart';
+import '../../../shared/models/action_card.dart';
+import '../../../shared/models/routine.dart';
+import 'widgets/child_step_strip.dart';
+
+/// 이룸이 카드 상세 태블릿 화면: 위 줄 > 순서 줄(단계·보상 목표) > 카드 한 장(꽉 채움, 체크 버튼은 카드 안) (#789)
 ///
-/// 카드 자리는 폰 시안 상자(393x410)를 통째로 [FittedBox] 로 키운다. 카드·옆 카드 걸침·글자가 같은 비율로 커져
-/// 폰의 모양과 넘기는 느낌이 그대로다. 태블릿은 양손으로 잡으므로
-/// - 가로: 체크 버튼을 오른쪽 가장자리 칸(엄지 자리)에 두고, 카드는 왼쪽 같은 폭을 비워 가운데에 맞춘다
-/// - 세로: 카드 아래 가운데
+/// 폰 배치(보상 칩 > 카드 > 아래 체크 버튼)는 상세 화면이 따로 그린다.
 class ChildRoutineDetailTabletBody extends StatelessWidget {
   const ChildRoutineDetailTabletBody({
     super.key,
     required this.topBar,
-    required this.rewardBanner,
+    required this.routine,
+    required this.currentIndex,
+    required this.isChecked,
+    required this.onStepTap,
     required this.pager,
-    required this.checkButton,
-    required this.isLandscape,
   });
 
   final Widget topBar;
 
-  /// 보상 칩. 보상이 없으면 빈 위젯
-  final Widget rewardBanner;
+  /// 순서 줄의 단계·보상을 읽는 일과
+  final Routine routine;
+  final int currentIndex;
+  final bool Function(ActionCard card) isChecked;
+  final ValueChanged<int> onStepTap;
 
-  /// 폰 시안 크기(393x410) 카드 넘기기 상자
+  /// 태블릿 카드 넘기기
   final Widget pager;
 
-  final Widget checkButton;
-  final bool isLandscape;
+  /// 위 줄 > 순서 줄 > 카드 간격 (393 기준)
+  static const _topBarToStrip = 12.0;
+  static const _stripToCard = 20.0;
 
-  /// 가로에서 체크 버튼 칸 폭 (393 기준, `.w`). 왼쪽에도 같은 폭을 비워 카드를 가운데에 둔다
-  static const _railWidth = 200.0;
+  /// 카드 넘기기가 양옆에 이미 두는 간격의 절반 (393 기준)
+  static const _pagerHalfGap = 12.0;
 
   @override
   Widget build(BuildContext context) {
-    // Expanded 가 주는 꽉 찬 제약 안에서 contain 으로 키운다 (느슨한 제약이면 키우지 않는다)
-    final cardArea = FittedBox(fit: BoxFit.contain, child: pager);
+    final margin = context.layout.pageMarginFor(context.sizeClass).w;
 
-    return Column(
-      children: [
-        SizedBox(height: 8.h),
-        topBar,
-        SizedBox(height: 16.h),
-        Center(child: rewardBanner),
-        SizedBox(height: 16.h),
-        Expanded(
-          child: isLandscape
-              ? Row(
-                  children: [
-                    SizedBox(width: _railWidth.w),
-                    Expanded(child: cardArea),
-                    SizedBox(
-                      width: _railWidth.w,
-                      child: Center(child: checkButton),
-                    ),
-                  ],
-                )
-              : Column(
-                  children: [
-                    Expanded(child: cardArea),
-                    SizedBox(height: 24.h),
-                    checkButton,
-                  ],
+    return Scaffold(
+      backgroundColor: context.colors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(height: 8.h),
+            topBar,
+            // 낮은 창(분할 보기 등)은 카드 자리를 위해 순서 줄을 접는다
+            if (!context.layoutMetrics.isShortHeight) ...[
+              SizedBox(height: _topBarToStrip.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: margin),
+                child: ChildStepStrip(
+                  cards: routine.steps,
+                  currentIndex: currentIndex,
+                  isChecked: isChecked,
+                  onStepTap: onStepTap,
+                  rewardEmoji: routine.hasReward ? routine.rewardEmoji : '',
+                  rewardText: routine.hasReward ? routine.rewardText : '',
+                  language: routine.language,
                 ),
+              ),
+            ],
+            SizedBox(height: _stripToCard.h),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: margin - _pagerHalfGap.w,
+                ),
+                child: pager,
+              ),
+            ),
+            SizedBox(height: margin / 2),
+          ],
         ),
-        SizedBox(height: isLandscape ? 24.h : 40.h),
-      ],
+      ),
     );
   }
 }
