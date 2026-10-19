@@ -16,6 +16,9 @@ import 'action_card_speaker_glyph.dart';
 import 'card_image.dart';
 import 'default_card_art.dart';
 
+// 태블릿 큰 카드도 같은 행동 카드 묶음이라 함께 내보낸다
+export 'action_card_tablet_view.dart';
+
 /// 행동 카드 한 장.
 ///
 /// Figma `카드확인`(262:5124)과 `아이_홈`(309:3548)이 같은 카드를 쓴다.

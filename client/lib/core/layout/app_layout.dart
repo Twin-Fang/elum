@@ -21,6 +21,7 @@ class AppLayout extends ThemeExtension<AppLayout> {
     required this.masterPaneWidth,
     required this.paneGutter,
     required this.sheetMaxWidth,
+    required this.sidePanelWidth,
   });
 
   /// medium 시작 폭 (dp)
@@ -55,6 +56,9 @@ class AppLayout extends ThemeExtension<AppLayout> {
   /// 바텀시트·토스트 폭 상한 (확인 팝업 카드는 폭이 이미 고정이라 상한이 없다)
   final double sheetMaxWidth;
 
+  /// 가로 태블릿에서 오른쪽에서 나오는 옆 패널 폭 (시트를 대신한다, #789)
+  final double sidePanelWidth;
+
   static const standard = AppLayout(
     mediumMinWidth: 600,
     expandedMinWidth: 840,
@@ -68,6 +72,7 @@ class AppLayout extends ThemeExtension<AppLayout> {
     masterPaneWidth: 360,
     paneGutter: 24,
     sheetMaxWidth: 560,
+    sidePanelWidth: 440,
   );
 
   /// 등급별 좌우 여백 (dp)
@@ -93,6 +98,7 @@ class AppLayout extends ThemeExtension<AppLayout> {
     double? masterPaneWidth,
     double? paneGutter,
     double? sheetMaxWidth,
+    double? sidePanelWidth,
   }) {
     return AppLayout(
       mediumMinWidth: mediumMinWidth ?? this.mediumMinWidth,
@@ -108,6 +114,7 @@ class AppLayout extends ThemeExtension<AppLayout> {
       masterPaneWidth: masterPaneWidth ?? this.masterPaneWidth,
       paneGutter: paneGutter ?? this.paneGutter,
       sheetMaxWidth: sheetMaxWidth ?? this.sheetMaxWidth,
+      sidePanelWidth: sidePanelWidth ?? this.sidePanelWidth,
     );
   }
 

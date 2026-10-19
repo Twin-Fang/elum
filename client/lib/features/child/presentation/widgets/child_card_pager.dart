@@ -246,3 +246,73 @@ class _SideCheck extends StatelessWidget {
     );
   }
 }
+
+/// 태블릿 카드 넘기기: 한 장이 자리를 꽉 채운다 (옆 카드 걸침 없음 — 위 순서 줄이 "더 있다"를 알린다)
+///
+/// 체크 버튼은 가운데 카드 안에만 넣는다. 넘기는 중인 옆 카드에는 없다.
+class ChildTabletCardPager extends StatelessWidget {
+  const ChildTabletCardPager({
+    super.key,
+    required this.controller,
+    required this.cards,
+    required this.routineId,
+    required this.language,
+    required this.currentIndex,
+    required this.speakingId,
+    required this.onSpeak,
+    required this.onPageChanged,
+    required this.checkButton,
+  });
+
+  final PageController controller;
+  final List<ActionCard> cards;
+  final String routineId;
+  final String language;
+  final int currentIndex;
+  final String? speakingId;
+  final ValueChanged<ActionCard> onSpeak;
+  final ValueChanged<int> onPageChanged;
+
+  /// 가운데 카드 안에 들어갈 체크 버튼
+  final Widget checkButton;
+
+  /// 카드 사이 간격 (넘길 때 두 장이 붙어 보이지 않게, 393 기준)
+  static const _cardGap = 24.0;
+
+  @override
+  Widget build(BuildContext context) {
+    // 넘기면 위치가 바뀐다 — liveRegion 이라 낭독기가 바뀐 값을 읽는다 (폰 페이저와 같다)
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      liveRegion: true,
+      label: context.l10n.childCardPagerLabel(cards.length, currentIndex + 1),
+      child: PageView.builder(
+        controller: controller,
+        itemCount: cards.length,
+        onPageChanged: onPageChanged,
+        itemBuilder: (context, index) {
+          final card = cards[index];
+          final isCurrent = index == currentIndex;
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: (_cardGap / 2).w),
+            // 옆 카드는 낭독기에 섞이지 않게 뺀다
+            child: ExcludeSemantics(
+              excluding: !isCurrent,
+              child: ActionCardTabletView(
+                key: ValueKey(card.id),
+                card: card,
+                index: index,
+                routineId: routineId,
+                language: language,
+                isSpeaking: speakingId == card.id,
+                onSpeak: () => onSpeak(card),
+                action: isCurrent ? checkButton : null,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

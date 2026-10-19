@@ -1,5 +1,6 @@
 import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/features/child/presentation/child_routine_detail_screen.dart';
+import 'package:elum/features/child/presentation/widgets/child_step_strip.dart';
 import 'package:elum/shared/models/action_card.dart';
 import 'package:elum/shared/models/routine.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +11,8 @@ import 'helpers/adaptive_test_app.dart';
 import 'helpers/fake_dio.dart';
 import 'helpers/test_storage.dart';
 
-/// 이룸이 카드 상세: 태블릿에서 카드를 크게, 체크 버튼은 손이 닿는 자리에 둔다.
-/// 깨지면: 이룸이가 쓰는 태블릿에서 카드가 폰 크기 그대로 작게 떠 있거나 체크 버튼이 화면 밖에 있다.
+/// 이룸이 카드 상세: 태블릿에서 카드를 크게, 체크 버튼은 카드 안에, 위에 순서 줄 (#789).
+/// 깨지면: 이룸이가 쓰는 태블릿에서 카드가 작게 떠 있거나, 체크 버튼이 카드와 떨어져 무엇을 체크하는지 모른다.
 void main() {
   const cards = [
     ActionCard(id: 'c1', title: '세수해요', description: '물로 얼굴을 씻어요', stepOrder: 1),
@@ -56,31 +57,52 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('가로 태블릿 1194x834: 카드가 크고 체크 버튼은 카드 오른쪽', (tester) async {
+  testWidgets('가로 태블릿 1194x834: 카드가 크고 체크 버튼은 카드 안 오른쪽 아래', (tester) async {
     await pumpDetail(tester, const Size(1194, 834));
 
     final card = tester.getRect(currentCard);
     final button = tester.getRect(checkButton);
     const window = Rect.fromLTWH(0, 0, 1194, 834);
 
-    expect(card.width, greaterThan(480), reason: '폰(333)보다 훨씬 크다');
-    expect(card.height, greaterThan(500));
+    expect(card.width, greaterThan(800), reason: '한 장이 자리를 꽉 채운다');
+    expect(card.height, greaterThan(450));
     expect(window.contains(card.topLeft) && window.contains(card.bottomRight), isTrue);
-    expect(button.left, greaterThan(card.right - 1), reason: '체크 버튼은 카드 오른쪽');
-    expect(window.contains(button.bottomRight), isTrue);
+    expect(card.contains(button.center), isTrue, reason: '체크 버튼은 카드 안');
+    expect(button.center.dx, greaterThan(card.center.dx), reason: '오른쪽 글 영역');
     expect(button.width, greaterThanOrEqualTo(64), reason: '이룸이 터치 영역 64 이상');
+    // 옆 카드는 화면 안에 걸치지 않는다 (잘린 카드로 보이지 않게)
+    final nextCard = find.byKey(const ValueKey('c2'));
+    if (nextCard.evaluate().isNotEmpty) {
+      expect(tester.getRect(nextCard).left, greaterThanOrEqualTo(1194 - 1));
+    }
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('세로 태블릿 820x1180: 카드가 크고 체크 버튼은 카드 아래', (tester) async {
+  testWidgets('세로 태블릿 820x1180: 카드가 크고 체크 버튼은 카드 안', (tester) async {
     await pumpDetail(tester, const Size(820, 1180));
 
     final card = tester.getRect(currentCard);
     final button = tester.getRect(checkButton);
 
-    expect(card.width, greaterThan(420));
-    expect(button.top, greaterThan(card.bottom - 1), reason: '체크 버튼은 카드 아래');
+    expect(card.width, greaterThan(600));
+    expect(card.contains(button.center), isTrue, reason: '체크 버튼은 카드 안');
     expect(button.bottom, lessThanOrEqualTo(1180));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('순서 줄: 단계 칸을 누르면 그 카드로 가고, 끝에 보상 목표가 보인다', (tester) async {
+    await pumpDetail(tester, const Size(1194, 834));
+
+    expect(find.byKey(ChildStepStrip.goalKey), findsOneWidget);
+    expect(find.text('젤리 먹기'), findsOneWidget);
+
+    await tester.tap(find.byKey(ChildStepStrip.stepKey(2)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    final third = tester.getRect(find.byKey(const ValueKey('c3')));
+    expect(third.left, greaterThanOrEqualTo(0));
+    expect(third.right, lessThanOrEqualTo(1194));
     expect(tester.takeException(), isNull);
   });
 

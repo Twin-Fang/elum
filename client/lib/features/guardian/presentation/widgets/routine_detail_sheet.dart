@@ -71,6 +71,8 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
   }) {
     return showElumSheet<RoutineSheetAction>(
       context: context,
+      // 가로 태블릿은 목록을 보면서 상세를 보도록 오른쪽 옆 패널 (#789)
+      isSidePanelOnWideTablet: true,
       builder: (_) => RoutineDetailSheet(
         routine: routine,
         isPast: isPast,

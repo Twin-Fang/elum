@@ -30,6 +30,10 @@ class AdaptivePageFrame extends StatefulWidget {
   /// 열 바깥을 배경색으로 칠할지. 흐름 배경(오로라)이 이미 깔린 화면은 false
   final bool isBackgroundPainted;
 
+  /// 전폭 [backdrop] 위의 열 안인가. true 면 화면은 같은 배경을 다시 칠하지 않아도 된다 (폰은 늘 false)
+  static bool hasFramedBackdrop(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<_FramedBackdropScope>() != null;
+
   @override
   State<AdaptivePageFrame> createState() => _AdaptivePageFrameState();
 }
@@ -66,7 +70,8 @@ class _AdaptivePageFrameState extends State<AdaptivePageFrame> {
       return Stack(
         children: [
           Positioned.fill(child: backdrop),
-          Positioned.fill(child: column),
+          // 화면이 같은 배경을 또 칠하지 않게 알린다 (전폭 배경의 별 밭이 열 안까지 이어진다)
+          Positioned.fill(child: _FramedBackdropScope(child: column)),
         ],
       );
     }
@@ -134,7 +139,11 @@ class _AdaptivePageFrameState extends State<AdaptivePageFrame> {
         width: columnSize.width,
         height: columnSize.height,
         child: MediaQuery(
-          data: _columnMediaQuery(media, columnSize, isViewInsetConsumed: false),
+          data: _columnMediaQuery(
+            media,
+            columnSize,
+            isViewInsetConsumed: false,
+          ),
           child: child,
         ),
       ),
@@ -156,4 +165,11 @@ class _AdaptivePageFrameState extends State<AdaptivePageFrame> {
           : media.viewInsets,
     );
   }
+}
+
+class _FramedBackdropScope extends InheritedWidget {
+  const _FramedBackdropScope({required super.child});
+
+  @override
+  bool updateShouldNotify(_FramedBackdropScope oldWidget) => false;
 }
