@@ -54,12 +54,16 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
     this.isPast = false,
     this.isFinished = false,
     this.isLibrary = false,
+    this.isInGroup = false,
   });
 
   final Routine routine;
 
   /// 일과관리 칸에서 연 원본인가 (#805). 아래 버튼이 `카드 고치기` · `오늘 보내기` 둘이 된다.
   final bool isLibrary;
+
+  /// 묶음 안에서 연 일과인가 — 보내기 버튼이 `이 일과만 오늘 보내기`가 된다 (#837)
+  final bool isInGroup;
 
   /// 지난 일과인가 (시안 `980:4777`).
   ///
@@ -82,6 +86,7 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
     bool isPast = false,
     bool isFinished = false,
     bool isLibrary = false,
+    bool isInGroup = false,
   }) {
     return showElumSheet<RoutineSheetAction>(
       context: context,
@@ -92,6 +97,7 @@ class RoutineDetailSheet extends ConsumerStatefulWidget {
         isPast: isPast,
         isFinished: isFinished,
         isLibrary: isLibrary,
+        isInGroup: isInGroup,
       ),
     );
   }
@@ -352,7 +358,10 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
               bottom: buttonBottom,
               height: buttonHeight,
               child: widget.isLibrary
-                  ? _LibraryActions(isEditable: widget.routine.isEditableByMe)
+                  ? _LibraryActions(
+                      isEditable: widget.routine.isEditableByMe,
+                      isInGroup: widget.isInGroup,
+                    )
                   : FilledButton(
                       style: FilledButton.styleFrom(
                         backgroundColor: colors.textPrimary,
@@ -411,9 +420,10 @@ class _StepItemKey extends GlobalObjectKey {
 ///
 /// 남이 만든 원본은 고치지 못하므로 보내기 하나만 둔다 — 보내기는 누구나 할 수 있다.
 class _LibraryActions extends StatelessWidget {
-  const _LibraryActions({required this.isEditable});
+  const _LibraryActions({required this.isEditable, required this.isInGroup});
 
   final bool isEditable;
+  final bool isInGroup;
 
   @override
   Widget build(BuildContext context) {
@@ -429,7 +439,9 @@ class _LibraryActions extends StatelessWidget {
       ),
       onPressed: () => Navigator.of(context).pop(RoutineSheetAction.send),
       child: Text(
-        context.l10n.routineLibrarySendToday,
+        isInGroup
+            ? context.l10n.routineLibrarySendOnlyThis
+            : context.l10n.routineLibrarySendToday,
         style: typo.sheetActionLabel.copyWith(color: colors.surface),
       ),
     );

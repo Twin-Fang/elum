@@ -180,7 +180,11 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
       // 아래 성공 처리에 적었다.
       member = await repo.getMyInfo();
     }
-    if (member == null || !member.profilesKnown || member.profiles.isNotEmpty) {
+    if (member == null || !member.profilesKnown) {
+      return const Attempt.ok(false);
+    }
+    if (member.profiles.isNotEmpty) {
+      await _selectFirstIfUnselected(member.profiles);
       return const Attempt.ok(false);
     }
 
@@ -211,6 +215,23 @@ class ProfileSessionNotifier extends Notifier<ProfileSession> {
     // memberProvider 는 여기서 무효화하지 않는다 — 다시 받은 빈 이룸이로 [_reconcile] 이 돌면
     // 방금 입력한 이름·캐릭터를 비워 버린다. 저장을 마친 뒤 부르는 쪽이 새로 받는다.
     return const Attempt.ok(true);
+  }
+
+  /// 이미 있는 이룸이(소셜 가입 때 서버가 만든 빈 이룸이)를 고르지 않은 채면 첫 이룸이를 고른다.
+  ///
+  /// 헤더 없는 저장은 서버가 첫 이룸이에 넣으므로 같은 이룸이를 고른다. 비워 두면 온보딩이
+  /// 빈 값을 예시 일과 대상으로 남기고, 홈이 첫 이룸이를 고르는 순간 예시가 버려진다.
+  Future<void> _selectFirstIfUnselected(List<ProfileSummary> profiles) async {
+    final storage = _storage;
+    final current = storage?.selectedProfileId;
+    if (profiles.any((p) => p.id == current)) return;
+    final first = profiles.first;
+    try {
+      await storage?.setSelectedProfileId(first.id);
+    } catch (e, stack) {
+      AppLogger.error('[profile] existing profile selection save failed', e, stack);
+    }
+    if (ref.mounted) state = ProfileSession(selectedId: first.id);
   }
 
   /// 이룸이를 바꾼다. 같은 이룸이면 아무것도 하지 않는다.

@@ -48,6 +48,9 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   static const _createButtonHeight = 54.0;
   static const _createButtonMargin = 16.0;
 
+  /// 정리 상태: 칸이 흔들리고 ⊖ 가 붙고 바로 끌 수 있다 (#837)
+  bool _isArranging = false;
+
   /// 첫 사용 안내가 가리킬 칸: 낱개 일과 첫째 · 둘째, `+ 일과 만들기`
   final _firstRoutineTileKey = GlobalKey();
   final _secondRoutineTileKey = GlobalKey();
@@ -56,11 +59,15 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   // --- 동작 ---
 
   @override
-  Future<void> openRoutineDetail(Routine routine) async {
+  Future<void> openRoutineDetail(
+    Routine routine, {
+    bool isInGroup = false,
+  }) async {
     final action = await RoutineDetailSheet.show(
       context,
       routine,
       isLibrary: true,
+      isInGroup: isInGroup,
     );
     if (!mounted) return;
     switch (action) {
@@ -69,14 +76,33 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       case RoutineSheetAction.edit:
         _editCards(routine);
       case RoutineSheetAction.more:
-        await _openMenu(routine);
+        await _openMenuSheet(routine);
       case RoutineSheetAction.rerun || null:
         return;
     }
   }
 
-  Future<void> _openMenu(Routine routine) async {
-    final action = await showLibraryQuickMenu(context, routine);
+  /// 길게 누른 칸 옆 메뉴
+  Future<void> _openMenu(Routine routine, LibraryMenuAnchor anchor) async {
+    final action = await showLibraryQuickMenu(
+      context,
+      routine,
+      anchor: anchor.rect,
+      highlight: anchor.tile,
+    );
+    await _runMenuAction(routine, action);
+  }
+
+  /// 상세 시트 ⋯ 로 연 같은 메뉴 (눌린 칸이 없어 아래 시트)
+  Future<void> _openMenuSheet(Routine routine) async => _runMenuAction(
+    routine,
+    await showLibraryQuickMenuSheet(context, routine),
+  );
+
+  Future<void> _runMenuAction(
+    Routine routine,
+    LibraryMenuAction? action,
+  ) async {
     if (!mounted || action == null) return;
     switch (action) {
       case LibraryMenuAction.send:
@@ -249,6 +275,10 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         onRoutineMenu: busy ? null : _openMenu,
         onGroupTap: busy ? null : openGroup,
         onGroupMenu: busy ? null : openGroupMenu,
+        isArranging: _isArranging,
+        onArrangeStart: () => setState(() => _isArranging = true),
+        onRemoveRoutine: busy ? null : _remove,
+        onRemoveGroup: busy ? null : (entry) => confirmUngroup(entry.group),
         onDropOnRoutine: busy ? null : groupByDrop,
         onDropOnGroup: busy
             ? null
@@ -277,7 +307,11 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         child: CreateRoutineFab(
           height: _createButtonHeight.h,
           isBusy: busy,
-          onTap: onCreatePressed,
+          isArranging: _isArranging,
+          // 정리 상태에서는 가운데 버튼이 `완료`
+          onTap: _isArranging
+              ? () => setState(() => _isArranging = false)
+              : onCreatePressed,
         ),
       ),
       body: SafeArea(

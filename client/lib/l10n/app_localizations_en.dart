@@ -1854,8 +1854,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modeSwitchBlockedBack => 'Go back';
 
   @override
+  String get installationRetryTitle => 'Something went wrong';
+
+  @override
   String get installationRetryMessage =>
-      'Could not check sign-in information on this device. Please try again.';
+      'We couldn\'t check this device. Want to try again?';
 
   @override
   String get installationRetryButton => 'Try again';
@@ -2393,8 +2396,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String onboardingExampleTitle(String name, String batchim) {
-    return 'Which routines would you like\nto start with $name?';
+  String onboardingExampleTitle(String name) {
+    return 'What would you like\nto help $name with?';
   }
 
   @override
@@ -2428,9 +2431,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exampleCategoryOutsideHint => 'Taking the bus, shopping';
-
-  @override
-  String get routineTileExampleBadge => 'Example';
 
   @override
   String get exampleRoutinesFailed => 'Couldn\'t add the example routines';
@@ -2559,6 +2559,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineDetailMore => 'More';
+
+  @override
+  String get libraryArrangeDone => 'Done';
+
+  @override
+  String get libraryArrangeRemove => 'Remove or ungroup';
+
+  @override
+  String get routineGroupEditOrder => 'Edit order';
+
+  @override
+  String get routineLibrarySendOnlyThis => 'Send only this one today';
 
   @override
   String get routineManageCoachTapMessage =>

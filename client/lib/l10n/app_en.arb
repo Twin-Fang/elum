@@ -523,7 +523,8 @@
   "modeSwitchBlockedTitle": "Open this on\na guardian's device",
   "modeSwitchBlockedDescription": "Guardian mode can't be opened on this device",
   "modeSwitchBlockedBack": "Go back",
-  "installationRetryMessage": "Could not check sign-in information on this device. Please try again.",
+  "installationRetryTitle": "Something went wrong",
+  "installationRetryMessage": "We couldn't check this device. Want to try again?",
   "installationRetryButton": "Try again",
   "issuedCodeCopyButton": "Copy code",
   "issuedCodeCopied": "Code copied",
@@ -679,7 +680,7 @@
   "routineLibrarySentBadge": "Sent today",
   "routineLibraryTileHint": "Long press to open the menu",
   "routineLibrarySent": "Sent {title} for today",
-  "onboardingExampleTitle": "Which routines would you like\nto start with {name}?",
+  "onboardingExampleTitle": "What would you like\nto help {name} with?",
   "onboardingExampleDescription": "We'll add example routines for the ones you pick.\nYou can pick more than one.",
   "onboardingExampleSkip": "Skip",
   "exampleCategoryMorningEvening": "Morning & evening",
@@ -690,7 +691,6 @@
   "exampleCategoryHouseSelfHint": "Tidying up, setting the table",
   "exampleCategoryOutside": "Out and about",
   "exampleCategoryOutsideHint": "Taking the bus, shopping",
-  "routineTileExampleBadge": "Example",
   "exampleRoutinesFailed": "Couldn't add the example routines",
   "routineGroupMenuAddToGroup": "Add to a bundle",
   "routineGroupMenuReorder": "Change order",
@@ -726,5 +726,9 @@
   "routineGroupUngroupConfirmMessage": "The routines stay in Routines",
   "childHomeGroupProgress": "{done} / {total}",
   "childHomeGroupAllDone": "All done!",
-  "routineDetailMore": "More"
+  "routineDetailMore": "More",
+  "libraryArrangeDone": "Done",
+  "libraryArrangeRemove": "Remove or ungroup",
+  "routineGroupEditOrder": "Edit order",
+  "routineLibrarySendOnlyThis": "Send only this one today"
 }

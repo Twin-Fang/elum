@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:elum/core/storage/installation_store.dart';
 import 'package:elum/core/storage/token_store.dart';
+import 'package:elum/core/widgets/elum_button.dart';
 import 'package:elum/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -96,18 +98,35 @@ void main() {
       throwsA(isA<InstallationException>()),
     );
   });
-  testWidgets('설치 오류 화면은 코드와 재시도를 제공', (tester) async {
+  testWidgets('설치 오류 화면은 캐릭터·코드·재시도를 제공하고 진행 중에는 막는다', (tester) async {
     var retries = 0;
+    final retryGate = Completer<void>();
     await tester.pumpWidget(
       InstallationRetryApp(
         onRetry: () async {
           retries++;
+          await retryGate.future;
         },
       ),
     );
+    // 이룸이 캐릭터 + 오류 코드 + 안내 문구
+    expect(find.byType(Image), findsOneWidget);
     expect(find.text('E-INSTALL'), findsOneWidget);
-    await tester.tap(find.byType(FilledButton));
+    expect(find.byType(ElumButton), findsOneWidget);
+
+    await tester.tap(find.byType(ElumButton));
     await tester.pump();
     expect(retries, 1);
+
+    // 진행 중 두 번째 탭은 무시
+    await tester.tap(find.byType(ElumButton));
+    await tester.pump();
+    expect(retries, 1);
+
+    retryGate.complete();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElumButton));
+    await tester.pump();
+    expect(retries, 2);
   });
 }

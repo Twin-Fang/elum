@@ -3260,10 +3260,16 @@ abstract class AppLocalizations {
   /// **'돌아가기'**
   String get modeSwitchBlockedBack;
 
-  /// No description provided for @installationRetryMessage.
+  /// 기기 설치 표식을 읽지 못했을 때 오류 화면 제목 (E-INSTALL)
   ///
   /// In ko, this message translates to:
-  /// **'기기의 로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.'**
+  /// **'잠깐 문제가 생겼어요'**
+  String get installationRetryTitle;
+
+  /// 기기 설치 표식을 읽지 못했을 때 오류 화면 안내
+  ///
+  /// In ko, this message translates to:
+  /// **'기기 정보를 확인하지 못했어요. 다시 해볼까요?'**
   String get installationRetryMessage;
 
   /// No description provided for @installationRetryButton.
@@ -4178,11 +4184,11 @@ abstract class AppLocalizations {
   /// **'{title}을(를) 오늘 일과로 보냈어요'**
   String routineLibrarySent(String title);
 
-  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭, batchim 은 받침 유무(yes/no)
+  /// 온보딩 예시 분류 화면 제목 (#803). name 은 이룸이 호칭
   ///
   /// In ko, this message translates to:
-  /// **'{name}{batchim, select, yes{과} other{와}} 어떤 일과부터\n해 볼까요?'**
-  String onboardingExampleTitle(String name, String batchim);
+  /// **'{name}의 어떤 일을\n돕고 싶으세요?'**
+  String onboardingExampleTitle(String name);
 
   /// 온보딩 예시 일과 (#803)
   ///
@@ -4243,12 +4249,6 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'버스 타기, 물건 사기'**
   String get exampleCategoryOutsideHint;
-
-  /// 온보딩 예시 일과 (#803)
-  ///
-  /// In ko, this message translates to:
-  /// **'예시'**
-  String get routineTileExampleBadge;
 
   /// 온보딩 예시 일과 (#803)
   ///
@@ -4465,6 +4465,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'더 보기'**
   String get routineDetailMore;
+
+  /// 일과관리 정리 상태 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get libraryArrangeDone;
+
+  /// 일과관리 정리 상태 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'지우기 또는 묶음 풀기'**
+  String get libraryArrangeRemove;
+
+  /// 일과관리 묶음 열기 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'순서 편집'**
+  String get routineGroupEditOrder;
+
+  /// 일과관리 묶음 열기 (#837)
+  ///
+  /// In ko, this message translates to:
+  /// **'이 일과만 오늘 보내기'**
+  String get routineLibrarySendOnlyThis;
 
   /// 일과관리 코치마크 1단계. *로 감싼 부분이 강조된다 (#832)
   ///

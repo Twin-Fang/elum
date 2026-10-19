@@ -4,7 +4,7 @@
   "installationRetryButton": "再試行",
   "issuedCodeCopyFailedTitle": "コピーできませんでした",
   "issuedCodeCopyFailedFallback": "画面に表示されているコードを直接お伝えください",
-  "onboardingExampleTitle": "{name}と、どの日課から\n始めましょうか?",
+  "onboardingExampleTitle": "{name}の、どんなことを\n手伝いたいですか?",
   "onboardingExampleDescription": "選んだ分類の例の日課を入れておきます。\n複数選んでもかまいません。",
   "onboardingExampleSkip": "スキップ",
   "exampleCategoryMorningEvening": "朝・夜のしたく",
@@ -15,6 +15,5 @@
   "exampleCategoryHouseSelfHint": "片づけ、食卓の準備",
   "exampleCategoryOutside": "外でやってみる",
   "exampleCategoryOutsideHint": "バスに乗る、買い物",
-  "routineTileExampleBadge": "例",
   "exampleRoutinesFailed": "例の日課を入れられませんでした"
 }

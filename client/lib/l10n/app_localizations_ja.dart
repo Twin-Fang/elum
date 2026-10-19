@@ -1775,6 +1775,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get modeSwitchBlockedBack => '돌아가기';
 
   @override
+  String get installationRetryTitle => '잠깐 문제가 생겼어요';
+
+  @override
   String get installationRetryMessage => 'ログイン情報を確認できませんでした。もう一度お試しください。';
 
   @override
@@ -2285,8 +2288,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String onboardingExampleTitle(String name, String batchim) {
-    return '$nameと、どの日課から\n始めましょうか?';
+  String onboardingExampleTitle(String name) {
+    return '$nameの、どんなことを\n手伝いたいですか?';
   }
 
   @override
@@ -2319,9 +2322,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get exampleCategoryOutsideHint => 'バスに乗る、買い物';
-
-  @override
-  String get routineTileExampleBadge => '例';
 
   @override
   String get exampleRoutinesFailed => '例の日課を入れられませんでした';
@@ -2446,6 +2446,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get routineDetailMore => '더 보기';
+
+  @override
+  String get libraryArrangeDone => '완료';
+
+  @override
+  String get libraryArrangeRemove => '지우기 또는 묶음 풀기';
+
+  @override
+  String get routineGroupEditOrder => '순서 편집';
+
+  @override
+  String get routineLibrarySendOnlyThis => '이 일과만 오늘 보내기';
 
   @override
   String get routineManageCoachTapMessage =>

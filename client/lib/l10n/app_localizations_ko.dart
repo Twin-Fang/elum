@@ -1775,7 +1775,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get modeSwitchBlockedBack => '돌아가기';
 
   @override
-  String get installationRetryMessage => '기기의 로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.';
+  String get installationRetryTitle => '잠깐 문제가 생겼어요';
+
+  @override
+  String get installationRetryMessage => '기기 정보를 확인하지 못했어요. 다시 해볼까요?';
 
   @override
   String get installationRetryButton => '다시 시도';
@@ -2285,9 +2288,8 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String onboardingExampleTitle(String name, String batchim) {
-    String _temp0 = intl.Intl.selectLogic(batchim, {'yes': '과', 'other': '와'});
-    return '$name$_temp0 어떤 일과부터\n해 볼까요?';
+  String onboardingExampleTitle(String name) {
+    return '$name의 어떤 일을\n돕고 싶으세요?';
   }
 
   @override
@@ -2320,9 +2322,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get exampleCategoryOutsideHint => '버스 타기, 물건 사기';
-
-  @override
-  String get routineTileExampleBadge => '예시';
 
   @override
   String get exampleRoutinesFailed => '예시 일과를 넣지 못했어요';
@@ -2447,6 +2446,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get routineDetailMore => '더 보기';
+
+  @override
+  String get libraryArrangeDone => '완료';
+
+  @override
+  String get libraryArrangeRemove => '지우기 또는 묶음 풀기';
+
+  @override
+  String get routineGroupEditOrder => '순서 편집';
+
+  @override
+  String get routineLibrarySendOnlyThis => '이 일과만 오늘 보내기';
 
   @override
   String get routineManageCoachTapMessage =>

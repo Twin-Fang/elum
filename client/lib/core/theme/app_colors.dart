@@ -195,8 +195,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.settingsGroupDivider,
     required this.peopleMeBadgeBg,
     required this.peopleMeBadgeText,
-    required this.exampleBadgeBg,
-    required this.exampleBadgeText,
     required this.peopleGuardianChipBg,
     required this.peopleGuardianChipText,
     required this.peopleCaregiverChipBg,
@@ -757,8 +755,6 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color peopleMeBadgeText;
 
   /// 홈 일과 타일의 `예시` 배지 — 온보딩 예시 일과 (#803).
-  final Color exampleBadgeBg;
-  final Color exampleBadgeText;
 
   /// 구분 칩 `보호자`.
   final Color peopleGuardianChipBg;
@@ -1043,8 +1039,6 @@ class AppColors extends ThemeExtension<AppColors> {
     peopleMeBadgeBg: Color(0xFFD7D3D1),
     peopleMeBadgeText: Color(0xFFFFFFFF),
     // 녹색 계열 연한 배지 — 상태(완료·진행)와 겹치지 않는 보조 표시
-    exampleBadgeBg: Color(0xFFE8F5E9),
-    exampleBadgeText: Color(0xFF2E7D32),
     peopleGuardianChipBg: Color(0xFFB5EAEC),
     peopleGuardianChipText: Color(0xFF388E7C),
     peopleCaregiverChipBg: Color(0xFFFFDAC7),
@@ -1241,8 +1235,6 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? settingsGroupDivider,
     Color? peopleMeBadgeBg,
     Color? peopleMeBadgeText,
-    Color? exampleBadgeBg,
-    Color? exampleBadgeText,
     Color? peopleGuardianChipBg,
     Color? peopleGuardianChipText,
     Color? peopleCaregiverChipBg,
@@ -1443,8 +1435,6 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsGroupDivider: settingsGroupDivider ?? this.settingsGroupDivider,
       peopleMeBadgeBg: peopleMeBadgeBg ?? this.peopleMeBadgeBg,
       peopleMeBadgeText: peopleMeBadgeText ?? this.peopleMeBadgeText,
-      exampleBadgeBg: exampleBadgeBg ?? this.exampleBadgeBg,
-      exampleBadgeText: exampleBadgeText ?? this.exampleBadgeText,
       peopleGuardianChipBg: peopleGuardianChipBg ?? this.peopleGuardianChipBg,
       peopleGuardianChipText: peopleGuardianChipText ?? this.peopleGuardianChipText,
       peopleCaregiverChipBg: peopleCaregiverChipBg ?? this.peopleCaregiverChipBg,
@@ -1807,8 +1797,6 @@ class AppColors extends ThemeExtension<AppColors> {
       settingsGroupDivider: Color.lerp(settingsGroupDivider, other.settingsGroupDivider, t)!,
       peopleMeBadgeBg: Color.lerp(peopleMeBadgeBg, other.peopleMeBadgeBg, t)!,
       peopleMeBadgeText: Color.lerp(peopleMeBadgeText, other.peopleMeBadgeText, t)!,
-      exampleBadgeBg: Color.lerp(exampleBadgeBg, other.exampleBadgeBg, t)!,
-      exampleBadgeText: Color.lerp(exampleBadgeText, other.exampleBadgeText, t)!,
       peopleGuardianChipBg: Color.lerp(peopleGuardianChipBg, other.peopleGuardianChipBg, t)!,
       peopleGuardianChipText: Color.lerp(peopleGuardianChipText, other.peopleGuardianChipText, t)!,
       peopleCaregiverChipBg: Color.lerp(peopleCaregiverChipBg, other.peopleCaregiverChipBg, t)!,

@@ -12,7 +12,10 @@ import 'core/state/provider_retry.dart';
 import 'core/storage/local_storage.dart';
 import 'core/storage/token_store.dart';
 import 'core/storage/installation_store.dart';
-import 'l10n/app_localizations.dart';
+import 'core/l10n/l10n_context.dart';
+import 'core/layout/adaptive_screen_scale.dart';
+import 'core/theme/app_theme.dart';
+import 'core/widgets/elum_error_view.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/oauth_sdk.dart';
 import 'core/layout/orientation_policy.dart';
@@ -115,7 +118,8 @@ Future<void> main() async {
   );
 }
 
-/// 설치 표식 확인 전에는 인증과 잠금 화면을 만들지 않는다.
+/// 설치 표식 확인 실패 화면: 인증·잠금 화면 대신 오류 안내와 다시 시도만 보여준다
+/// ProviderScope·라우터 이전 단계라 테마·화면 배율·번역만 직접 감싼다
 class InstallationRetryApp extends StatefulWidget {
   const InstallationRetryApp({required this.onRetry, super.key});
   final Future<void> Function() onRetry;
@@ -124,36 +128,42 @@ class InstallationRetryApp extends StatefulWidget {
 }
 
 class _InstallationRetryAppState extends State<InstallationRetryApp> {
-  bool _retrying = false;
+  // 설치 표식 오류 식별자 (제보 추적용)
+  static const String _errorCode = 'E-INSTALL';
+
+  bool _isRetrying = false;
+
+  Future<void> _onRetryPressed() async {
+    if (_isRetrying) return; // 진행 중 중복 호출 차단
+    setState(() => _isRetrying = true);
+    try {
+      await widget.onRetry();
+    } finally {
+      if (mounted) setState(() => _isRetrying = false);
+    }
+  }
+
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: Builder(
-      builder: (context) => Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(AppLocalizations.of(context).installationRetryMessage),
-                const Text('E-INSTALL'),
-                FilledButton(
-                  onPressed: _retrying
-                      ? null
-                      : () async {
-                          setState(() => _retrying = true);
-                          try {
-                            await widget.onRetry();
-                          } finally {
-                            if (mounted) setState(() => _retrying = false);
-                          }
-                        },
-                  child: Text(
-                    AppLocalizations.of(context).installationRetryButton,
-                  ),
-                ),
-              ],
+  Widget build(BuildContext context) => AdaptiveScreenScale(
+    baseDesignSize: const Size(393, 852),
+    minTextAdapt: true,
+    builder: (context, child) => MaterialApp(
+      theme: AppTheme.light,
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Builder(
+        builder: (context) => Scaffold(
+          body: SafeArea(
+            child: Center(
+              child: ElumErrorView(
+                message: context.l10n.installationRetryTitle,
+                description: context.l10n.installationRetryMessage,
+                actionLabel: context.l10n.installationRetryButton,
+                errorCode: _errorCode,
+                onRetry: _onRetryPressed,
+                isRetrying: _isRetrying,
+              ),
             ),
           ),
         ),

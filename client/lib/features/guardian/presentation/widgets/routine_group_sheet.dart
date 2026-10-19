@@ -11,16 +11,11 @@ import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/routine.dart';
 import '../../application/library_entries.dart';
 import '../../application/routine_group_controller.dart';
+import '../../domain/routine_group.dart';
 import 'routine_group_sheet_row.dart';
 
 /// 묶음 시트가 닫히며 화면에 맡기는 동작 (토스트·다음 시트는 화면이 띄운다)
-enum GroupSheetAction {
-  send,
-  rename,
-  addRoutines,
-  openRoutine,
-  ungroupedLastOne,
-}
+enum GroupSheetAction { send, addRoutines, openRoutine, ungroupedLastOne }
 
 typedef GroupSheetResult = ({GroupSheetAction action, Routine? routine});
 
@@ -30,17 +25,25 @@ typedef GroupSheetResult = ({GroupSheetAction action, Routine? routine});
 Future<GroupSheetResult?> showRoutineGroupSheet(
   BuildContext context, {
   required String groupId,
+  bool startsEditing = false,
 }) {
   return showElumSheet<GroupSheetResult>(
     context: context,
-    builder: (_) => _RoutineGroupSheet(groupId: groupId),
+    builder: (_) =>
+        _RoutineGroupSheet(groupId: groupId, startsEditing: startsEditing),
   );
 }
 
 class _RoutineGroupSheet extends ConsumerStatefulWidget {
-  const _RoutineGroupSheet({required this.groupId});
+  const _RoutineGroupSheet({
+    required this.groupId,
+    required this.startsEditing,
+  });
 
   final String groupId;
+
+  /// 순서 편집 상태로 연다 (메뉴 `순서 바꾸기`)
+  final bool startsEditing;
 
   @override
   ConsumerState<_RoutineGroupSheet> createState() => _RoutineGroupSheetState();
@@ -50,6 +53,53 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
   /// 서버 반영 전 먼저 보여 주는 순서 (끌어 놓자마자 제자리에 있게). null 이면 서버 순서
   List<Routine>? _pendingOrder;
   bool _isSaving = false;
+
+  /// 순서 편집 중인가 (⊖ · 손잡이가 보인다)
+  late bool _isEditing = widget.startsEditing;
+
+  /// 이름 칸: 그 자리에서 바로 고친다. 끝내면(완료 키·칸 밖) 저장
+  final _nameController = TextEditingController();
+  final _nameFocus = FocusNode();
+  String _savedName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _nameFocus.addListener(() {
+      if (!_nameFocus.hasFocus) _saveName();
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _nameFocus.dispose();
+    super.dispose();
+  }
+
+  /// 이름 저장: 비었거나 그대로면 서버에 보내지 않고 되돌린다
+  Future<void> _saveName() async {
+    final entry = _currentEntry();
+    if (entry == null) return;
+    final name = _nameController.text.trim();
+    if (name.isEmpty || name == entry.group.name) {
+      _nameController.text = entry.group.name;
+      return;
+    }
+    final renamed = await ref
+        .read(routineGroupControllerProvider)
+        .rename(entry.group, name);
+    if (!mounted || renamed.isOk) return;
+    _nameController.text = entry.group.name;
+    await _showFailure(renamed.failure, 'E-GRP-RENAME');
+  }
+
+  LibraryGroupEntry? _currentEntry() => ref
+      .read(libraryEntriesProvider)
+      .value
+      ?.whereType<LibraryGroupEntry>()
+      .where((candidate) => candidate.group.id == widget.groupId)
+      .firstOrNull;
 
   /// 시트 높이 (화면 대비)
   static const _heightRatio = 0.85;
@@ -134,40 +184,68 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
     final colors = context.colors;
     final space = context.space;
     final routines = _pendingOrder ?? entry.routines;
+    // 서버 이름이 바뀌었고 지금 입력 중이 아니면 칸을 따라 맞춘다
+    if (!_nameFocus.hasFocus && _savedName != entry.group.name) {
+      _savedName = entry.group.name;
+      _nameController.text = entry.group.name;
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 이름 (누르면 이름 바꾸기)
-        AppPressable(
-          onTap: _isSaving ? null : () => _close(GroupSheetAction.rename),
-          scaleDown: AppPressable.scaleCard,
-          semanticLabel:
-              '${entry.group.name}, ${l10n.routineLibraryMenuRename}',
-          child: Row(
-            children: [
-              Flexible(
+        // 이름 (그 자리에서 바로 고침) + 순서 편집 / 완료
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _nameController,
+                focusNode: _nameFocus,
+                maxLength: RoutineGroup.nameMaxLength,
+                maxLines: 1,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _nameFocus.unfocus(),
+                style: context.typo.sectionTitle.copyWith(
+                  color: colors.textPrimary,
+                ),
+                decoration: InputDecoration(
+                  isDense: true,
+                  counterText: '',
+                  border: InputBorder.none,
+                  hintText: l10n.routineGroupNameHint,
+                  suffixIcon: Icon(
+                    Icons.edit_rounded,
+                    size: space.md.w,
+                    color: colors.textSecondary,
+                  ),
+                  suffixIconConstraints: BoxConstraints(minWidth: space.xl.w),
+                ),
+              ),
+            ),
+            AppPressable(
+              onTap: _isSaving
+                  ? null
+                  : () => setState(() => _isEditing = !_isEditing),
+              scaleDown: AppPressable.scaleIcon,
+              child: Padding(
+                padding: EdgeInsets.all(space.xs.w),
                 child: Text(
-                  entry.group.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.typo.sectionTitle.copyWith(
-                    color: colors.textPrimary,
+                  _isEditing
+                      ? l10n.libraryArrangeDone
+                      : l10n.routineGroupEditOrder,
+                  style: context.typo.tileLabel.copyWith(
+                    color: colors.textSecondary,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
-              SizedBox(width: space.xs.w),
-              Icon(
-                Icons.edit_rounded,
-                size: space.md.w,
-                color: colors.textSecondary,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
         SizedBox(height: space.xs.h / 2),
         Text(
-          '${l10n.routineGroupSheetCount(routines.length)} · '
-          '${l10n.routineGroupSheetDragHint}',
+          _isEditing
+              ? '${l10n.routineGroupSheetCount(routines.length)} · '
+                    '${l10n.routineGroupSheetDragHint}'
+              : l10n.routineGroupSheetCount(routines.length),
           style: context.typo.caption.copyWith(color: colors.textSecondary),
         ),
         SizedBox(height: space.sm.h),
@@ -186,6 +264,7 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
                 index: index,
                 routine: routine,
                 isEnabled: !_isSaving,
+                isEditing: _isEditing,
                 onTap: () => _close(GroupSheetAction.openRoutine, routine),
                 onRemove: () => _remove(entry, routine),
               );
