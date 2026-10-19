@@ -5,7 +5,7 @@
 ## 릴리스 노트
 
 * **개선**
-  * 카드 사진을 고르는 화면의 안내 문구를 정리했어요
+  * 태블릿 보호자 화면 왼쪽 위 카드에 루미 아이콘이 나와요
 
 <!-- end of auto-generated comment: release notes by coderabbit.ai -->
 
