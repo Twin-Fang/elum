@@ -1,15 +1,43 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T09:55:08Z",
-    "currentVersion": "2.46.0",
+    "lastUpdated": "2026-10-19T10:33:36Z",
+    "currentVersion": "2.47.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 264
+    "totalReleases": 265
   },
   "releases": [
+    {
+      "version": "2.47.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 809,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 일과관리 메뉴에서 만든 일과를 한눈에 모아 볼 수 있어요\n  * 일과를 눌러 오늘 이룸이에게 바로 보낼 수 있어요\n  * 일과를 길게 눌러 이름 바꾸기·복사하기·지우기를 할 수 있어요\n\n* **개선**\n  * 오늘 이미 보낸 일과에 표시가 붙어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "일과관리 메뉴에서 만든 일과를 한눈에 모아 볼 수 있어요",
+            "일과를 눌러 오늘 이룸이에게 바로 보낼 수 있어요",
+            "일과를 길게 눌러 이름 바꾸기·복사하기·지우기를 할 수 있어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "오늘 이미 보낸 일과에 표시가 붙어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.46.0",
       "project_type": "flutter",
