@@ -30,10 +30,10 @@ public class NoticeHistoryService {
   static final int DEFAULT_PAGE_SIZE = 20;
   static final int MAX_PAGE_SIZE = 50;
 
-  /** 올라온 시각 최신순, 같으면 id 큰 순 (cursor 가 id 라 순서를 고정) */
   /** cursor 구분자: "{visibleSince ISO-8601}|{id}" */
   private static final String CURSOR_DELIMITER = "|";
 
+  /** 올라온 시각 최신순, 같으면 id 큰 순 (cursor 가 visibleSince|id 라 순서를 고정) */
   private static final Comparator<AppNotice> HISTORY_ORDER = Comparator
     .comparing(AppNotice::visibleSince, Comparator.reverseOrder())
     .thenComparing(AppNotice::getId, Comparator.reverseOrder());

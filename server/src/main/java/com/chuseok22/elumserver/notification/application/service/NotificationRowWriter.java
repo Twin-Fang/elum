@@ -19,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 class NotificationRowWriter {
 
-  // 일과 id 목록 구분자
-
   private final NotificationRepository notificationRepository;
 
   /** 받는 사람별 독립 커밋 (한 명 실패가 다른 사람에 번지지 않게). 중복 키 위반은 예외로 올려 호출부가 재시도 */
