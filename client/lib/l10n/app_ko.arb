@@ -186,11 +186,8 @@
   "appStatusRecheck": "다시 확인하기",
   "@appStatusRecheck": { "description": "점검 화면의 버튼" },
 
-  "appStatusUpdateTitle": "새 이룸이 나왔어요",
-  "@appStatusUpdateTitle": { "description": "강제 업데이트 화면 제목" },
-
-  "appStatusUpdateBody": "앱을 새로 받아야 이어서 쓸 수 있어요.\n스토어에서 이룸을 업데이트해주세요",
-  "@appStatusUpdateBody": { "description": "강제 업데이트 화면 설명" },
+  "appStatusUpdateTitle": "지금 업데이트하고\n새로워진 이룸을 이용해보세요!",
+  "@appStatusUpdateTitle": { "description": "강제 업데이트 카드의 문구 (두 줄)" },
 
   "appStatusUpdated": "업데이트했어요",
   "@appStatusUpdated": { "description": "스토어 주소가 없을 때의 버튼" },

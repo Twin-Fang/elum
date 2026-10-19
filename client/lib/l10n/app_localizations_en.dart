@@ -222,11 +222,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appStatusRecheck => 'Check again';
 
   @override
-  String get appStatusUpdateTitle => 'A new elum is here';
-
-  @override
-  String get appStatusUpdateBody =>
-      'Get the new version to keep using the app.\nUpdate elum in the store';
+  String get appStatusUpdateTitle => 'Update now and enjoy\nthe new elum!';
 
   @override
   String get appStatusUpdated => 'I updated it';

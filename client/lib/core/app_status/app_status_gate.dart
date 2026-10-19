@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../assets/app_assets.dart';
 import '../l10n/l10n_context.dart';
 import '../layout/adaptive_page_frame.dart';
 import '../layout/screen_layout_kind.dart';
@@ -13,6 +14,7 @@ import '../widgets/show_failure.dart';
 import 'app_status_recheck.dart';
 import 'app_status_repository.dart';
 import 'store_launcher.dart';
+import 'app_notice_card.dart';
 
 /// 앱이 시작할 때 서버 상태를 확인하고, 필요하면 화면을 대신 그린다.
 ///
@@ -111,18 +113,21 @@ class _AppStatusGateState extends ConsumerState<AppStatusGate>
           );
           return AdaptivePageFrame(
             kind: ScreenLayoutKind.phoneColumn,
-            child: _FullNotice(
-              emoji: '✨',
-              title: context.l10n.appStatusUpdateTitle,
-              body: context.l10n.appStatusUpdateBody,
-              // 누를 것은 하나만 둔다. 스토어에서 돌아오면 앱이 앞으로 올라오며
-              // 알아서 다시 묻기 때문에 `업데이트했어요` 가 따로 필요 없다.
-              actionLabel: storeUrl == null
-                  ? context.l10n.appStatusUpdated
-                  : context.l10n.appStatusGoUpdate,
-              onAction: storeUrl == null
-                  ? (_) => ref.invalidate(appStatusProvider)
-                  : (noticeContext) => _openStore(noticeContext, storeUrl),
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: Theme.of(context),
+              home: AppNoticeCard(
+                imageAsset: AppAssets.updateLumi,
+                title: context.l10n.appStatusUpdateTitle,
+                // 누를 것은 하나만 둔다. 스토어에서 돌아오면 앱이 앞으로 올라오며
+                // 알아서 다시 묻기 때문에 `업데이트했어요` 가 따로 필요 없다.
+                actionLabel: storeUrl == null
+                    ? context.l10n.appStatusUpdated
+                    : context.l10n.appStatusGoUpdate,
+                onAction: storeUrl == null
+                    ? (_) => ref.invalidate(appStatusProvider)
+                    : (noticeContext) => _openStore(noticeContext, storeUrl),
+              ),
             ),
           );
         }

@@ -3,6 +3,7 @@ import 'package:elum/core/app_status/app_status.dart';
 import 'package:elum/core/app_status/app_status_gate.dart';
 import 'package:elum/core/app_status/app_status_repository.dart';
 import 'package:elum/core/app_status/store_launcher.dart';
+import 'package:elum/core/app_status/app_notice_card.dart';
 import 'package:elum/core/config/app_config.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -80,6 +81,28 @@ void main() {
   });
 
   group('강제 업데이트 화면', () {
+
+    // 태블릿에서 카드가 화면 폭만큼 늘어나면 안내가 어색해진다
+    testWidgets('카드는 넓은 화면에서도 최대 너비를 넘지 않는다', (tester) async {
+      tester.view.physicalSize = const Size(1600, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(wrap(launcher: (_) async => true));
+      await tester.pumpAndSettle();
+
+      final cardWidth = tester.getSize(find.byType(AppNoticeCard).first).width;
+      final cardBox = find.descendant(
+        of: find.byType(AppNoticeCard),
+        matching: find.byType(DecoratedBox),
+      );
+      expect(
+        tester.getSize(cardBox.first).width,
+        lessThanOrEqualTo(AppNoticeCard.maxCardWidth),
+        reason: 'screen width $cardWidth',
+      );
+      expect(find.text('업데이트하러 가기'), findsOneWidget);
+    }, variant: android);
 
     testWidgets('스토어를 열지 못하면 에러 코드와 함께 알린다', (tester) async {
       await tester.pumpWidget(wrap(launcher: (_) async => false));

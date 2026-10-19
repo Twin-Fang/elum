@@ -416,17 +416,11 @@ abstract class AppLocalizations {
   /// **'다시 확인하기'**
   String get appStatusRecheck;
 
-  /// 강제 업데이트 화면 제목
+  /// 강제 업데이트 카드의 문구 (두 줄)
   ///
   /// In ko, this message translates to:
-  /// **'새 이룸이 나왔어요'**
+  /// **'지금 업데이트하고\n새로워진 이룸을 이용해보세요!'**
   String get appStatusUpdateTitle;
-
-  /// 강제 업데이트 화면 설명
-  ///
-  /// In ko, this message translates to:
-  /// **'앱을 새로 받아야 이어서 쓸 수 있어요.\n스토어에서 이룸을 업데이트해주세요'**
-  String get appStatusUpdateBody;
 
   /// 스토어 주소가 없을 때의 버튼
   ///

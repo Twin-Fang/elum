@@ -208,11 +208,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appStatusRecheck => '다시 확인하기';
 
   @override
-  String get appStatusUpdateTitle => '새 이룸이 나왔어요';
-
-  @override
-  String get appStatusUpdateBody =>
-      '앱을 새로 받아야 이어서 쓸 수 있어요.\n스토어에서 이룸을 업데이트해주세요';
+  String get appStatusUpdateTitle => '지금 업데이트하고\n새로워진 이룸을 이용해보세요!';
 
   @override
   String get appStatusUpdated => '업데이트했어요';
