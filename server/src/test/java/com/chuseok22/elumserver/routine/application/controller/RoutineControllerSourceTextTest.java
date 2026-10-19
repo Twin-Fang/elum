@@ -13,6 +13,7 @@ import com.chuseok22.elumserver.routine.application.dto.request.RoutineProgressS
 import com.chuseok22.elumserver.routine.application.dto.response.RoutineResponse;
 import com.chuseok22.elumserver.routine.application.service.RoutineAuthorResolver;
 import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
+import com.chuseok22.elumserver.routine.application.service.RoutineLibraryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineProgressService;
 import com.chuseok22.elumserver.routine.application.service.RoutineQueryService;
 import com.chuseok22.elumserver.routine.application.service.RoutineStepSpeechProvider;
@@ -41,7 +42,7 @@ class RoutineControllerSourceTextTest {
   private final RoutineCreateService createService = mock(RoutineCreateService.class);
   private final RoutineQueryService queryService = mock(RoutineQueryService.class);
   private final RoutineProgressService progressService = mock(RoutineProgressService.class);
-  private final RoutineController controller = new RoutineController(service, mock(RoutineStepEditService.class), createService, queryService, mock(RoutineStepSpeechProvider.class), progressService, mock(RoutineStepPhotoService.class),
+  private final RoutineController controller = new RoutineController(service, mock(RoutineStepEditService.class), createService, queryService, mock(RoutineStepSpeechProvider.class), progressService, mock(RoutineStepPhotoService.class), mock(RoutineLibraryService.class),
     new RoutineAuthorResolver(mock(ProfileGuardianRepository.class)));
 
   private final Authentication elumi = elumiAuth();
@@ -60,7 +61,7 @@ class RoutineControllerSourceTextTest {
   /// createdBy 가 만든 보호자인 일과. guardian 토큰의 memberId 는 member-1 이다.
   private static RoutineResponse routineBy(String createdBy) {
     return new RoutineResponse("r1", "제목", RAW, MASKED, null, "CONFIRMED", FEEDBACK, null,
-      0, 0, 0, null, null, List.of(), null, null, createdBy, null, null, null, "ko");
+      0, 0, 0, null, null, List.of(), null, null, createdBy, null, null, null, "ko", null);
   }
 
   private static void assertStripped(RoutineResponse r) {

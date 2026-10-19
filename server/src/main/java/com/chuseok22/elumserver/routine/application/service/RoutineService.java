@@ -19,7 +19,6 @@ import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineReposit
 import com.chuseok22.elumserver.routine.infrastructure.repository.RoutineStepRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -73,42 +72,10 @@ public class RoutineService {
   @Transactional
   public RoutineResponse duplicate(Caller caller, String routineId) {
     Routine origin = getRoutineFor(caller, routineId, RoutineAction.COPY);
-
-    Routine copy = new Routine();
-    copy.setProfile(origin.getProfile());
-    // 복제본은 복제한 사람의 일과다. 원본을 누가 만들었든 원본은 그대로 남는다.
-    copy.setCreatedBy(caller.memberId());
-    copy.setRawInputText(origin.getTitle());
-    copy.setSanitizedInputText(origin.getTitle());
-    copy.setTitle(origin.getTitle());
-    // 카드 글이 원본 그대로이므로 언어도 원본을 따른다 (복제한 사람의 화면 언어가 아니다)
-    copy.setLanguage(origin.getLanguage());
-    copy.setScheduledAt(LocalDate.now().atTime(9, 0));
-    // 이미 검토를 거친 카드라 다시 승인받지 않는다. 바로 오늘 할 일이 된다.
-    copy.setStatus(RoutineStatus.CONFIRMED);
-    copy.setRewardText(origin.getRewardText());
-    copy.setRewardPresetKey(origin.getRewardPresetKey());
-
-    List<RoutineStep> copiedSteps = new ArrayList<>();
-    for (RoutineStep step : origin.getSteps()) {
-      RoutineStep copied = new RoutineStep();
-      copied.setRoutine(copy);
-      copied.setStepOrder(step.getStepOrder());
-      copied.setTitle(step.getTitle());
-      copied.setDescription(step.getDescription());
-      // 이미지는 새로 만들지 않고 그대로 쓴다 — 재생성은 비용이고 같은 행동이면 같은 그림이면 된다.
-      copied.setImagePath(step.getImagePath());
-      // 픽토그램도 그대로 — 같은 행동이면 같은 그림이고, 복제에서 AI 를 다시 부르지 않는다.
-      copied.setPictogramId(step.getPictogramId());
-      copied.setCompleted(false);
-      copiedSteps.add(copied);
-    }
-    copy.setSteps(copiedSteps);
-
-    Routine savedCopy = routineRepository.save(copy);
-    // 음성 열쇠는 단계 폴더에 묶여 복사하지 않고 새로 만듦 (#675)
-    routineStepSpeechQueue.enqueueAfterCommit(savedCopy.getSteps().stream().map(RoutineStep::getId).toList());
-    return RoutineResponse.from(savedCopy);
+    Routine copy = RoutineRules.copyCardsOf(origin, caller.memberId());
+    // 다시하기도 보낸 일과다: 맨 처음 원본을 가리켜 일과관리에 복제본이 원본처럼 쌓이지 않게 (#804)
+    copy.setSourceRoutineId(origin.getSourceRoutineId() != null ? origin.getSourceRoutineId() : origin.getId());
+    return RoutineResponse.from(RoutineRules.saveWithSpeech(routineRepository, routineStepSpeechQueue, copy));
   }
 
   /// 이룸이가 **아직 시작하지 않은** 일과만 삭제한다.
@@ -124,9 +91,22 @@ public class RoutineService {
     if (!isDeletable(routine)) {
       throw new CustomException(ErrorCode.ROUTINE_INVALID_STATUS);
     }
-    List<String> stepIds = routine.getSteps().stream().map(RoutineStep::getId).toList();
-    routineRepository.delete(routine);
-    routineStepSpeechQueue.deleteStepsAfterCommit(stepIds);
+    RoutineRules.deleteWithSpeech(routineRepository, routineStepSpeechQueue, routine);
+  }
+
+  /**
+   * 일과 제목 고치기: 권한(만든 사람) > 검증(공백 · 30자) > 이 일과 제목만 교체 (#804)
+   * 이 원본으로 보낸 일과의 제목은 그대로 둔다
+   */
+  @Transactional
+  public RoutineResponse rename(Caller caller, String routineId, String title) {
+    Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
+    String trimmedTitle = title == null ? "" : title.trim();
+    if (trimmedTitle.isEmpty() || trimmedTitle.length() > RoutineRules.ROUTINE_TITLE_MAX_LENGTH) {
+      throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+    }
+    routine.setTitle(trimmedTitle);
+    return RoutineResponse.from(routine);
   }
 
   private boolean isDeletable(Routine routine) {

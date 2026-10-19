@@ -10,6 +10,7 @@ public interface RoutineControllerDocs extends
   RoutineCreationDocs,
   RoutineQueryDocs,
   RoutineManagementDocs,
+  RoutineLibraryDocs,
   RoutineProgressDocs,
   RoutineStepEditDocs {
 }

@@ -73,12 +73,15 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
    *
    * <p>순서를 한 번도 바꾸지 않았으면 전부 같은 값이라 예정 시각 순이 된다 — 지금
    * 동작과 같다.
+   *
+   * <p>일과관리 복사본(libraryOnly)은 빠진다 — 홈에는 보낸 일과만 뜬다 (#804).
    */
   @Query("""
     select r from Routine r
     where r.profile.id = :profileId
       and r.status in :statuses
       and r.scheduledAt between :from and :to
+      and r.libraryOnly = false
     order by r.displayOrder asc, r.scheduledAt asc
     """)
   List<Routine> findTodayOrdered(
@@ -120,4 +123,24 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   /// 이 보호자가 만든 일과 전부. 탈퇴 마지막에 관계 밖에 남은 것을 치운다.
   List<Routine> findAllByCreatedBy(String createdBy);
+
+  /// 일과관리 목록: 원본(보낸 일과 아님) · 지우지 않음 · 보낸 상태만, 최신순 (#804)
+  @Query("""
+    select r from Routine r
+    where r.profile.id = :profileId
+      and r.status in :statuses
+      and r.sourceRoutineId is null
+      and r.libraryHidden = false
+    order by r.createdAt desc
+    """)
+  List<Routine> findLibraryOriginals(
+    @Param("profileId") String profileId,
+    @Param("statuses") List<RoutineStatus> statuses
+  );
+
+  /// 이 원본으로 보낸 일과가 기간 안에 있는가. 하루 한 번 보내기 확인 (#804)
+  boolean existsBySourceRoutineIdAndScheduledAtBetween(String sourceRoutineId, LocalDateTime from, LocalDateTime to);
+
+  /// 이 원본으로 보낸 일과가 하나라도 있는가. 있으면 원본을 지우지 않고 숨긴다 (#804)
+  boolean existsBySourceRoutineId(String sourceRoutineId);
 }

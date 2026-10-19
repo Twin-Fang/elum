@@ -36,6 +36,8 @@ public final class RoutinePhrases {
   private static final List<SupportGoal> FALLBACK_GOALS = List.of(SupportGoal.PREPARE_ITEMS, SupportGoal.PREPARE_NEW);
   /** RoutineAiPipeline 이 질문을 인정하는 최소 선택지 수와 같은 기준. ko 파일이 이보다 적으면 미완성이다. */
   private static final int MIN_FALLBACK_OPTIONS = 3;
+  /** 일과관리 복사본 제목 뒤에 붙는 말의 키 (#804) */
+  private static final String COPY_TITLE_SUFFIX_KEY = "copy.titleSuffix";
   private static final RoutinePhrases DEFAULT = new RoutinePhrases(RoutinePhrases::loadFromClasspath);
   private static volatile RoutinePhrases standard = DEFAULT;
 
@@ -143,6 +145,11 @@ public final class RoutinePhrases {
         phrases.getOrDefault(optionKey(name, i, "emoji"), ""), phrases.get(optionKey(name, i, "label"))));
     }
     return new FallbackQuestion(phrases.get("fallback." + name + ".question"), List.copyOf(options));
+  }
+
+  /** 일과관리 "복사하기" 제목 뒤에 붙는 말 (#804). 일과 언어의 한 벌을 따른다 */
+  public String copyTitleSuffix(AppLocale requested) {
+    return file(resolve(requested)).get(COPY_TITLE_SUFFIX_KEY);
   }
 
   /** 요청 → en → ko 중 한 벌이 완성된 첫 언어. KO 요청은 ko 만 본다. 아무것도 없으면 ko. */

@@ -59,4 +59,18 @@ class RoutineRepositoryDerivedQueryTest {
     // 늦게 도착한 AI 그림이 보호자가 올린 사진을 덮지 않게 하는 조건이다
     assertThat(update.value()).contains("s.imagePath is null");
   }
+
+  @Test
+  @DisplayName("일과관리(#804): 오늘 목록은 복사본을 빼고, 일과관리 목록은 원본·지우지 않은 것만 묻는다")
+  void routineLibraryQueries() throws NoSuchMethodException {
+    Query today = RoutineRepository.class.getMethod("findTodayOrdered",
+      String.class, List.class, java.time.LocalDateTime.class, java.time.LocalDateTime.class).getAnnotation(Query.class);
+    // 빠지면 복사하기로 만든 일과가 보호자·이룸이 오늘 목록에 뜬다
+    assertThat(today.value()).contains("r.libraryOnly = false");
+
+    Query library = RoutineRepository.class.getMethod("findLibraryOriginals", String.class, List.class)
+      .getAnnotation(Query.class);
+    // 빠지면 보낸 일과가 날마다 일과관리에 쌓이고, 지운 원본이 다시 보인다
+    assertThat(library.value()).contains("r.sourceRoutineId is null", "r.libraryHidden = false", "order by r.createdAt desc");
+  }
 }

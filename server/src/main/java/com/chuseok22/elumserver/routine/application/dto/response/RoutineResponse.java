@@ -80,7 +80,11 @@ public record RoutineResponse(
   String profileId,
 
   @Schema(description = "일과를 만들 때 정한 콘텐츠 언어 코드(ko·en·ja·zh·es). 기존 일과는 ko", example = "ko")
-  String language
+  String language,
+
+  @Schema(description = "일과관리 '보내기'로 만든 오늘 일과면 그 원본 일과 ID (#804). 원본(직접 만든 일과·복사하기)이면 null",
+    nullable = true)
+  String sourceRoutineId
 ) {
 
   /**
@@ -103,14 +107,14 @@ public record RoutineResponse(
   public RoutineResponse withCredit(CreditUsage usage) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      usage, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language);
+      usage, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId);
   }
 
   /// 그림을 건너뛴 까닭을 붙인 응답.
   public RoutineResponse withImageSkippedReason(String reason) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, reason, createdBy, createdByMe, creatorName, profileId, language);
+      credit, reason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId);
   }
 
   /// 보호자가 쓴 말(원문·마스킹본·재생성 피드백)을 뺀 응답. 이룸이 휴대폰은 화면에 쓰지 않는 값이라
@@ -118,7 +122,7 @@ public record RoutineResponse(
   public RoutineResponse withoutSourceText() {
     return new RoutineResponse(id, title, null, null, scheduledAt, status, null,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language);
+      credit, imageSkippedReason, createdBy, createdByMe, creatorName, profileId, language, sourceRoutineId);
   }
 
   /// 보호자 원문을 가려야 하는 호출자인가.
@@ -158,13 +162,13 @@ public record RoutineResponse(
   public RoutineResponse withCreatorName(String name) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, imageSkippedReason, createdBy, createdByMe, name, profileId, language);
+      credit, imageSkippedReason, createdBy, createdByMe, name, profileId, language, sourceRoutineId);
   }
 
   private RoutineResponse withCreatedByMe(Boolean mine) {
     return new RoutineResponse(id, title, rawInputText, sanitizedInputText, scheduledAt, status, revisionFeedback,
       completedAt, completedStepCount, totalStepCount, progressPercent, rewardText, rewardPresetKey, steps,
-      credit, imageSkippedReason, createdBy, mine, creatorName, profileId, language);
+      credit, imageSkippedReason, createdBy, mine, creatorName, profileId, language, sourceRoutineId);
   }
 
   public static RoutineResponse from(Routine routine) {
@@ -199,7 +203,8 @@ public record RoutineResponse(
       // 프록시의 getId 는 이룸이를 읽지 않는다
       routine.getProfile() == null ? null : routine.getProfile().getId(),
       // 마이그레이션 전 코드로 만든 행은 null 일 수 있어 ko 로 떨어뜨린다
-      routine.languageCode()
+      routine.languageCode(),
+      routine.getSourceRoutineId()
     );
   }
 }

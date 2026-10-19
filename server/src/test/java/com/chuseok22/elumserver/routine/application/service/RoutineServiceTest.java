@@ -1194,6 +1194,24 @@ class RoutineServiceTest {
   }
 
   @Test
+  @DisplayName("다시하기 복제본은 맨 처음 원본을 가리켜 일과관리에 원본처럼 쌓이지 않는다 (#804)")
+  void duplicate_pointsAtFirstOriginal() {
+    Routine origin = confirmedRoutine(profileWithStars(0), 1);
+    origin.setId("routine-1");
+    when(routineRepository.findById("routine-1")).thenReturn(Optional.of(origin));
+    ArgumentCaptor<Routine> saved = ArgumentCaptor.forClass(Routine.class);
+    when(routineRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+
+    routineService.duplicate(GUARDIAN, "routine-1");
+    assertThat(saved.getValue().getSourceRoutineId()).isEqualTo("routine-1");
+
+    // 복제본을 다시 복제해도 처음 원본을 가리킨다
+    origin.setSourceRoutineId("first-original");
+    routineService.duplicate(GUARDIAN, "routine-1");
+    assertThat(saved.getValue().getSourceRoutineId()).isEqualTo("first-original");
+  }
+
+  @Test
   @DisplayName("복제한 카드는 원본의 pictogramId 를 그대로 가진다 — 복제에서 AI 를 다시 부르지 않는다 (#247)")
   void duplicate_copiesPictogramId() {
     Routine origin = confirmedRoutine(profileWithStars(0), 2);

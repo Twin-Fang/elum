@@ -14,10 +14,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+// 보내기 이력 조회 (오늘 이미 보냈는가 · 원본을 가리키는 일과가 있는가) — V42 와 같은 이름
+@Table(indexes = @Index(name = "idx_routine_source_routine_id", columnList = "source_routine_id"))
 public class Routine extends BaseEntity {
 
   @Id
@@ -120,6 +124,32 @@ public class Routine extends BaseEntity {
   public String languageCode() {
     return language == null ? AppLocale.KO.code() : language.code();
   }
+
+  /**
+   * 일과관리에서 "보내기"로 만든 오늘 일과면 그 원본 일과 ID (#804). 원본이면 null.
+   *
+   * <p>일과관리 목록은 원본(null)만 보여준다. 보낸 일과까지 올리면 같은 일과가 날마다 쌓인다.
+   * V42 이전 일과는 모두 원본으로 본다.
+   */
+  @Column(name = "source_routine_id")
+  private String sourceRoutineId;
+
+  /**
+   * 일과관리 "복사하기"로 만든 일과인가 (#804). 일과관리에만 있고 보호자·이룸이 홈에는 뜨지 않는다.
+   *
+   * <p>복사본은 고쳐서 나중에 보내려는 원본이다. 오늘 일과로 뜨면 이룸이가 같은 일과를 두 번 본다.
+   * columnDefinition 은 displayOrder 와 같은 이유(로컬 ddl-auto: update 의 NOT NULL 추가)로 둔다.
+   */
+  @Column(name = "library_only", nullable = false, columnDefinition = "boolean not null default false")
+  private boolean libraryOnly = false;
+
+  /**
+   * 보호자가 일과관리에서 지운 원본인가 (#804). 목록에서만 빠진다.
+   *
+   * <p>완료 기록과 이 원본으로 보낸 일과가 남아 있어 행은 지우지 않는다(수행률 추이의 원본).
+   */
+  @Column(name = "library_hidden", nullable = false, columnDefinition = "boolean not null default false")
+  private boolean libraryHidden = false;
 
   private LocalDateTime completedAt;
 

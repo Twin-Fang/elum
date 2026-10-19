@@ -45,7 +45,7 @@ class ErrorMessageParityTest {
   @DisplayName("원본 이후 더한 코드는 golden 밖에서 따로 단언한다 — golden 을 다시 만들면 원본 증명이 흐려진다")
   void codesAddedAfterOriginal_areAssertedSeparately() {
     assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
-      + ADDED_ADMIN_CREDIT_CODES.size());
+      + ADDED_ADMIN_CREDIT_CODES.size() + 1);
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -65,6 +65,16 @@ class ErrorMessageParityTest {
     assertThat(ErrorMessages.standard().of(ErrorCode.NOTICE_LOCALE_INVALID, AppLocale.KO))
       .isEqualTo("공지 언어는 ko, en, ja, zh, es 중 하나예요.");
     assertThat(ErrorMessages.standard().of(ErrorCode.NOTICE_LOCALE_INVALID, AppLocale.EN)).isNotBlank();
+  }
+
+  @Test
+  @DisplayName("일과관리 보내기 중복(#804)은 golden 밖에서 상태와 문구를 단언한다")
+  void routineAlreadySentToday_isAssertedSeparately() {
+    assertThat(GOLDEN).doesNotContainKey(ErrorCode.ROUTINE_ALREADY_SENT_TODAY.name());
+    assertThat(ErrorCode.ROUTINE_ALREADY_SENT_TODAY.getStatus().name()).isEqualTo("CONFLICT");
+    assertThat(ErrorMessages.standard().of(ErrorCode.ROUTINE_ALREADY_SENT_TODAY, AppLocale.KO))
+      .isEqualTo("오늘 이미 보낸 일과예요.");
+    assertThat(ErrorMessages.standard().of(ErrorCode.ROUTINE_ALREADY_SENT_TODAY, AppLocale.EN)).isNotBlank();
   }
 
   // 관리자 크레딧 화면이 더한 코드. 문구·detail 은 AdminCreditServiceTest 가 코드 단위로 본다.

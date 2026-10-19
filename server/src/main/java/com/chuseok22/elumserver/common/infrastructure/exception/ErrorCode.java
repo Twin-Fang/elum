@@ -104,6 +104,8 @@ public enum ErrorCode {
   ROUTINE_NOT_CREATOR(HttpStatus.FORBIDDEN),
   // 두 사람(두 기기)이 동시에 순서를 바꿔 보낸 목록이 옛 목록이 됐다 (E24).
   ROUTINE_ORDER_CONFLICT(HttpStatus.CONFLICT),
+  // 일과관리 보내기는 원본 하나당 하루 한 번이다 (#804). 같은 일과가 오늘 목록에 둘 뜨지 않게.
+  ROUTINE_ALREADY_SENT_TODAY(HttpStatus.CONFLICT),
 
   // 초대 코드. 연결 암호(DEVICE_LINK_*)와 같은 체계다 — 없는 코드와 이미 쓴 코드는
   // 같은 문구로 돌려줘 어떤 코드가 존재했는지가 새어 나가지 않게 한다.

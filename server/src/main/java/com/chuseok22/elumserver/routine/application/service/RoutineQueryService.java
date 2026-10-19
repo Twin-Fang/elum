@@ -97,6 +97,8 @@ public class RoutineQueryService {
         List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED),
         LocalDate.now().atStartOfDay())
       .stream()
+      // 일과관리 복사본은 보낸 적이 없어 지난 일과가 아니다 (#804). 개수 자르기 전에 거른다
+      .filter(routine -> !routine.isLibraryOnly())
       .limit(PAST_ROUTINE_LIMIT)
       .map(RoutineResponse::from)
       .toList();
@@ -124,6 +126,19 @@ public class RoutineQueryService {
       // 이룸이 토큰은 승인 전 일과를 받지 않는다 — 보호자 승인 후에만 이룸이에게 노출한다.
       // 임시저장·설정이 쓰는 보호자 호출은 전체를 그대로 받는다.
       .filter(r -> !caller.isElumi() || r.getStatus() != RoutineStatus.PENDING_REVIEW)
+      // 일과관리 복사본은 홈에 뜨지 않는다 — 목록은 일과관리 API 가 따로 준다 (#804)
+      .filter(r -> !r.isLibraryOnly())
+      .map(RoutineResponse::from)
+      .toList();
+  }
+
+  /// 일과관리 목록: 보낸 상태(CONFIRMED·COMPLETED)의 원본만, 최신순 (#804)
+  /// 보내기로 만든 일과·일과관리에서 지운 원본·임시저장은 빠진다
+  public List<RoutineResponse> getLibraryRoutines(Caller caller) {
+    return routineRepository
+      .findLibraryOriginals(profileAccessGuard.profileFor(caller, ProfileAction.VIEW).getId(),
+        List.of(RoutineStatus.CONFIRMED, RoutineStatus.COMPLETED))
+      .stream()
       .map(RoutineResponse::from)
       .toList();
   }
