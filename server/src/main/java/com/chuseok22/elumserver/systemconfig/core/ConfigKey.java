@@ -262,6 +262,11 @@ public enum ConfigKey {
     "Pro에서 광고를 숨길지",
     ConfigValueType.BOOLEAN, List.of(), "true"
   ),
+  ADS_ALWAYS_SHOWN_MEMBER_IDS(
+    ConfigGroup.PLAN_PRO, "광고 항상 노출 회원",
+    "여기 적은 회원은 Pro여도 광고를 숨기지 않는다 (광고 시험용). 회원 ID를 쉼표로 구분, 비어 있으면 없음",
+    ConfigValueType.STRING, List.of(), ""
+  ),
   PRO_ROUTINE_CREATE_PER_DAY(
     ConfigGroup.PLAN_PRO, "하루 일과 생성 횟수",
     "Pro가 하루(한국 시각 0시 시작)에 만들 수 있는 일과 수. 주당 횟수와 함께 걸면 먼저 닿는 쪽이 막는다. -1이면 무제한",
