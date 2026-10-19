@@ -46,6 +46,10 @@ public class FcmPushSender implements PushSender {
         log.info("[notification push] invalid token reported : {}", errorCode);
         return PushResult.INVALID_TOKEN;
       }
+      if (errorCode == null && exception.getHttpResponse() != null) {
+        log.warn("[notification push] failed : http {}", exception.getHttpResponse().getStatusCode());
+        return PushResult.FAILED;
+      }
       log.warn("[notification push] failed : {}", errorCode);
       return PushResult.FAILED;
     } catch (RuntimeException exception) {

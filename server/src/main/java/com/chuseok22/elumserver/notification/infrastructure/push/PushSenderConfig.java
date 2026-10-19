@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.notification.infrastructure.push;
 
 import com.chuseok22.elumserver.common.infrastructure.properties.FirebaseProperties;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -37,6 +38,8 @@ public class PushSenderConfig {
       }
       FirebaseOptions options = FirebaseOptions.builder()
         .setCredentials(GoogleCredentials.fromStream(keyStream))
+        // 기본 전송기는 FCM 의 gzip 응답을 두 번 풀어 오류 코드를 못 읽음 (java.net 전송기는 정상)
+        .setHttpTransport(new NetHttpTransport())
         .build();
       // 같은 이름 앱이 이미 있으면 재사용 (컨텍스트 재시작·테스트)
       FirebaseApp firebaseApp = FirebaseApp.getApps().isEmpty()
