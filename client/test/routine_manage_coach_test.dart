@@ -230,6 +230,30 @@ void main() {
       expect(container.read(routineManageCoachProvider).isActive, isTrue);
     });
 
+    test('다시 보기는 일과가 없거나 낱개 칸이 없으면 켜지 않고 요청을 지운다', () {
+      final container = containerWith(InMemoryStorage());
+      final notifier = container.read(routineManageCoachProvider.notifier);
+      notifier.requestReplay();
+      notifier.replay(routineCount: 0, groupCount: 0);
+      expect(container.read(routineManageCoachProvider).isActive, isFalse);
+      expect(
+        container.read(routineManageCoachProvider).isReplayRequested,
+        isFalse,
+      );
+
+      notifier.requestReplay();
+      notifier.replay(
+        routineCount: 2,
+        groupCount: 1,
+        hasFirstRoutineTile: false,
+      );
+      expect(container.read(routineManageCoachProvider).isActive, isFalse);
+      expect(
+        container.read(routineManageCoachProvider).isReplayRequested,
+        isFalse,
+      );
+    });
+
     test('다시 보기(replay)는 봤어도 켜진다', () {
       final container = containerWith(InMemoryStorage());
       container
@@ -334,10 +358,6 @@ void main() {
         (context) => sentBadgeDemo(context, firstTile, routineTitle: '양치하기'),
         '양치하기',
       ),
-      '버튼으로 묶기 시범은 만들기 시트를 보여 준다': (
-        (context) => createGroupDemo(context, createButton),
-        '새 묶음 만들기',
-      ),
     };
 
     demosWithKeyText.forEach((name, spec) {
@@ -363,6 +383,18 @@ void main() {
       for (var i = 0; i < 6; i++) {
         await tester.pump(const Duration(seconds: 1));
       }
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('버튼으로 묶기 시범은 시트를 올리지 않고 탭만 보여 준다(문구를 가리지 않는다)', (tester) async {
+      await pumpDemo(
+        tester,
+        Builder(builder: (c) => createGroupDemo(c, createButton)),
+      );
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
+      expect(find.text('새 묶음 만들기'), findsNothing);
       expect(tester.takeException(), isNull);
     });
 

@@ -4463,7 +4463,7 @@ abstract class AppLocalizations {
   /// 일과관리 묶음 코치마크 2단계 (#832)
   ///
   /// In ko, this message translates to:
-  /// **'끌기가 어려우면 *+ 일과 만들기*에서도\n묶을 수 있어요'**
+  /// **'끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요'**
   String get routineManageCoachCreateGroupMessage;
 
   /// 설정 줄 — 일과관리 첫 사용 안내(코치마크)를 다시 본다 (#832)

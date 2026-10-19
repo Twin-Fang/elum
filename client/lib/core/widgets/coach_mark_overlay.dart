@@ -333,15 +333,18 @@ class _CoachMarkOverlayState extends State<CoachMarkOverlay>
                     _measuredIndex == widget.index &&
                     step.demoBuilder != null)
                   Positioned.fill(
-                    child: IgnorePointer(
-                      child: AnimatedBuilder(
-                        animation: _move,
-                        builder: (context, _) => Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            if (_move.isCompleted)
-                              step.demoBuilder!(context, _to!.rect),
-                          ],
+                    // 시범의 가짜 버튼·토스트를 낭독기가 읽지 않게 한다 (설명은 말풍선이 맡는다)
+                    child: ExcludeSemantics(
+                      child: IgnorePointer(
+                        child: AnimatedBuilder(
+                          animation: _move,
+                          builder: (context, _) => Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              if (_move.isCompleted)
+                                step.demoBuilder!(context, _to!.rect),
+                            ],
+                          ),
                         ),
                       ),
                     ),

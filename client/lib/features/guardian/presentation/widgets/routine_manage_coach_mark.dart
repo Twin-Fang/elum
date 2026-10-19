@@ -48,11 +48,11 @@ class _RoutineManageCoachMarkState
 
   Timer? _settle;
   Timer? _retry;
-  int _retries = 0;
+  int _retryCount = 0;
   bool _isWaitingRoute = false;
 
   /// 사라지는 연출이 끝날 때까지 직전 단계 목록을 들고 있는다
-  List<RoutineManageCoachStep>? _retained;
+  List<RoutineManageCoachStep>? _retainedSteps;
   int _retainedIndex = 0;
 
   @override
@@ -121,7 +121,7 @@ class _RoutineManageCoachMarkState
 
   void _retryLater() {
     if (_retry?.isActive ?? false) return;
-    if (_retries++ >= _maxRetries) return;
+    if (_retryCount++ >= _maxRetries) return;
     _retry = Timer(_retryEvery, _maybeStart);
   }
 
@@ -136,11 +136,22 @@ class _RoutineManageCoachMarkState
     // 기다리는 사이 목록이 바뀌었을 수 있어 지금 값으로 다시 센다
     final entries = widget.entries;
     if (entries == null) return;
+    // 가리킬 첫 칸이 화면 안에 없으면 켜지 않는다 (단계가 전부 건너뛰어져 본 것으로만 남는다)
+    if (!_isFullyVisible(widget.firstRoutineTileKey)) {
+      _retryLater();
+      return;
+    }
     final notifier = ref.read(routineManageCoachProvider.notifier);
     final routineCount = _routineCountOf(entries);
     final groupCount = entries.whereType<LibraryGroupEntry>().length;
     if (ref.read(routineManageCoachProvider).isReplayRequested) {
-      notifier.replay(routineCount: routineCount, groupCount: groupCount);
+      notifier.replay(
+        routineCount: routineCount,
+        groupCount: groupCount,
+        hasFirstRoutineTile: entries.any(
+          (entry) => entry is LibraryRoutineEntry,
+        ),
+      );
       return;
     }
     notifier.maybeStart(
@@ -148,6 +159,20 @@ class _RoutineManageCoachMarkState
       groupCount: groupCount,
       hasFirstRoutineTile: entries.any((entry) => entry is LibraryRoutineEntry),
     );
+  }
+
+  /// 대상이 이 위젯(화면 전체) 안에 온전히 들어와 있는가
+  bool _isFullyVisible(GlobalKey key) {
+    final overlayBox = context.findRenderObject();
+    final targetBox = key.currentContext?.findRenderObject();
+    if (overlayBox is! RenderBox || !overlayBox.hasSize) return false;
+    if (targetBox is! RenderBox || !targetBox.attached || !targetBox.hasSize) {
+      return false;
+    }
+    final origin = targetBox.localToGlobal(Offset.zero, ancestor: overlayBox);
+    final screen = (Offset.zero & overlayBox.size).inflate(1);
+    return screen.contains(origin) &&
+        screen.contains(origin + targetBox.size.bottomRight(Offset.zero));
   }
 
   /// 묶음 안 일과까지 센 일과 수
@@ -232,10 +257,10 @@ class _RoutineManageCoachMarkState
     );
     final state = ref.watch(routineManageCoachProvider);
     if (state.isActive) {
-      _retained = state.steps;
+      _retainedSteps = state.steps;
       _retainedIndex = state.index;
     }
-    final steps = _retained;
+    final steps = _retainedSteps;
     if (steps == null) return const SizedBox.shrink();
 
     final notifier = ref.read(routineManageCoachProvider.notifier);
@@ -246,7 +271,7 @@ class _RoutineManageCoachMarkState
       onNext: notifier.next,
       onClose: notifier.finish,
       onDismissed: () {
-        if (mounted) setState(() => _retained = null);
+        if (mounted) setState(() => _retainedSteps = null);
       },
     );
   }

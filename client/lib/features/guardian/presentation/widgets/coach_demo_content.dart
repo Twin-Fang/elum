@@ -92,40 +92,18 @@ class CoachDemoMenuRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final color = isDanger ? colors.danger : colors.textPrimary;
-    return SizedBox(
-      height: 48.h,
+    // 큰 글자에서 줄이 잘리지 않게 높이는 최소값만 둔다
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: 48.h),
       child: Row(
         children: [
           Icon(icon, size: 22.w, color: color),
           SizedBox(width: context.space.sm.w),
-          Text(label, style: context.typo.body.copyWith(color: color)),
+          Flexible(
+            child: Text(label, style: context.typo.body.copyWith(color: color)),
+          ),
         ],
       ),
-    );
-  }
-}
-
-/// + 일과 만들기 시트 (새 일과 / 새 묶음, 묶음 쪽을 짚어 준다)
-class CoachDemoCreateChoices extends StatelessWidget {
-  const CoachDemoCreateChoices({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.routineGroupCreateMenuTitle,
-          style: context.typo.sectionTitle.copyWith(
-            color: context.colors.textPrimary,
-          ),
-        ),
-        SizedBox(height: context.space.sm.h),
-        CoachDemoMenuRow(Icons.add_rounded, l10n.routineGroupCreateRoutine),
-        CoachDemoMenuRow(Icons.folder_rounded, l10n.routineGroupCreateGroup),
-      ],
     );
   }
 }
@@ -166,7 +144,12 @@ class CoachDemoGhostTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(16.r),
-        boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(
+            color: context.colors.textPrimary.withValues(alpha: 0.2),
+            blurRadius: 10,
+          ),
+        ],
       ),
     ),
   );

@@ -106,8 +106,17 @@ class RoutineManageCoachNotifier extends Notifier<RoutineManageCoachState> {
   }
 
   /// 다시 보기: 봤어도 켠다. 봤음 기록은 바꾸지 않는다 (이미 true).
-  void replay({required int routineCount, required int groupCount}) {
-    if (state.isActive || routineCount < 1) return;
+  /// 가리킬 칸이 없으면 켜지 않고 요청만 지운다 (나중에 뜬금없이 뜨지 않게)
+  void replay({
+    required int routineCount,
+    required int groupCount,
+    bool hasFirstRoutineTile = true,
+  }) {
+    if (state.isActive) return;
+    if (routineCount < 1 || !hasFirstRoutineTile) {
+      state = const RoutineManageCoachState();
+      return;
+    }
     _turnOn([
       ..._basicSteps,
       if (_canGroup(routineCount: routineCount, groupCount: groupCount))

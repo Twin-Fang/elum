@@ -8,7 +8,7 @@ import '../../../../core/widgets/elum_bottom_sheet.dart';
 /// 코치마크 시범 연출의 조각들 (손가락·링·시트 미리보기·메뉴 줄·토스트·묶음 모양)과 시간 계산
 
 /// 한 주기를 도는 시범. 동작 줄이기면 [endScene] 지점의 멈춘 장면만 그린다.
-Widget coachDemoLoop({
+Widget buildCoachDemoLoop({
   required double endScene,
   required Widget Function(BuildContext context, double t) builder,
 }) => Positioned.fill(
@@ -108,8 +108,11 @@ class CoachDemoFinger extends StatelessWidget {
             decoration: BoxDecoration(
               color: context.colors.surface.withValues(alpha: 0.95),
               shape: BoxShape.circle,
-              boxShadow: const [
-                BoxShadow(color: Color(0x59000000), blurRadius: 8),
+              boxShadow: [
+                BoxShadow(
+                  color: context.colors.textPrimary.withValues(alpha: 0.35),
+                  blurRadius: 8,
+                ),
               ],
             ),
           ),

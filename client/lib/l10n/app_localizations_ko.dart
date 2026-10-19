@@ -2449,7 +2449,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get routineManageCoachCreateGroupMessage =>
-      '끌기가 어려우면 *+ 일과 만들기*에서도\n묶을 수 있어요';
+      '끌기가 어려우면 *+ 일과 만들기*에서\n*새 묶음 만들기*로도 묶을 수 있어요';
 
   @override
   String get guardianSettingsRoutineManageGuide => '일과관리 사용법 다시 보기';

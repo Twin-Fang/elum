@@ -13,8 +13,11 @@ import 'library_routine_tile.dart';
 /// 모두 `CoachMarkStep.demoBuilder` 에 꽂을 수 있게 [Positioned] 를 돌려준다.
 /// 한 주기는 [AppMotion.coachDemoLoop]. 동작 줄이기면 멈춘 마지막 장면만 그린다.
 
+/// 보낸 뒤 토스트: 화면 바닥에서 띄우는 거리 (진행 점·안내 문구 위)
+const _toastBottomInset = 190.0;
+
 /// 누르기: 칸 탭 > 상세 시트(카드 고치기 | 오늘 보내기)가 올라옴
-Widget tapDemo(BuildContext context, Rect target) => coachDemoLoop(
+Widget tapDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
   endScene: 0.7,
   builder: (context, t) => Stack(
     children: [
@@ -36,7 +39,7 @@ Widget tapDemo(BuildContext context, Rect target) => coachDemoLoop(
 );
 
 /// 길게 누르기: 칸 꾹 > 링이 퍼짐 > 빠른 메뉴 시트가 올라옴
-Widget longPressDemo(BuildContext context, Rect target) => coachDemoLoop(
+Widget longPressDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
   endScene: 0.8,
   builder: (context, t) => Stack(
     children: [
@@ -59,24 +62,30 @@ Widget sentBadgeDemo(
   BuildContext context,
   Rect target, {
   required String routineTitle,
-}) => coachDemoLoop(
+}) => buildCoachDemoLoop(
   endScene: 0.85,
   builder: (context, t) {
-    final badgeSize = 20.w;
+    // 실제 칸: 그림 칸이 가운데 위에 있고, ✓ 는 그 오른쪽 아래 모서리에서 xs/2 만큼 삐져나온다
+    final iconSize = LibraryRoutineTile.iconSize.w;
+    final badgeSize = LibraryRoutineTile.badgeSize.w;
+    final overhang = context.space.xs.w / 2;
+    final iconRight = target.center.dx + iconSize / 2;
+    final iconBottom = target.top + iconSize;
     return Stack(
       children: [
         Positioned(
-          left: target.right - badgeSize * 0.8,
-          top: target.top + target.width * 0.78,
+          left: iconRight + overhang - badgeSize,
+          top: iconBottom + overhang - badgeSize,
           child: Transform.scale(
             scale: Curves.elasticOut.transform(coachDemoPhase(t, 0.15, 0.4)),
             child: LibrarySentBadge(size: badgeSize),
           ),
         ),
+        // 실제 알림처럼 화면 아래쪽에 뜬다 (위쪽은 말풍선 자리)
         Positioned(
           left: 0,
           right: 0,
-          top: target.bottom + 12.h,
+          bottom: _toastBottomInset.h,
           child: Opacity(
             opacity:
                 coachDemoPhase(t, 0.35, 0.5) * (1 - coachDemoPhase(t, 0.9, 1)),
@@ -97,7 +106,7 @@ Widget dragToGroupDemo(
   BuildContext context,
   Rect first,
   Rect second,
-) => coachDemoLoop(
+) => buildCoachDemoLoop(
   endScene: 0.8,
   builder: (context, t) {
     final move = Curves.easeInOut.transform(coachDemoPhase(t, 0.25, 0.6));
@@ -142,23 +151,19 @@ Widget dragToGroupDemo(
   },
 );
 
-/// 버튼으로 묶기: + 일과 만들기 탭 > "무엇을 만들까요?" 시트에서 새 묶음 만들기
-Widget createGroupDemo(BuildContext context, Rect target) => coachDemoLoop(
-  endScene: 0.7,
+/// 버튼으로 묶기: + 일과 만들기 탭 (시트는 올리지 않는다: 말풍선과 안내 문구를 가린다)
+Widget createGroupDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
+  endScene: 0.5,
   builder: (context, t) => Stack(
     children: [
-      CoachDemoPreviewSheet(
-        slide: coachDemoPhase(t, 0.3, 0.45),
-        child: const CoachDemoCreateChoices(),
-      ),
       CoachDemoFinger(
         center: target.center,
         press: coachDemoPulse(t, 0.1, 0.25),
-        appear: coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.35, 0.45)),
+        appear: coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.6, 0.7)),
       ),
       CoachDemoRing(
         center: target.center,
-        spread: coachDemoPhase(t, 0.17, 0.35),
+        spread: coachDemoPhase(t, 0.17, 0.5),
       ),
     ],
   ),

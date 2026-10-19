@@ -8,7 +8,7 @@ class InMemoryStorage implements LocalStorage {
     String? nickname,
     String? character,
     bool elumiDevice = false,
-    // 기본은 "이미 봤다" — 홈·일과관리를 띄우는 기존 테스트마다 코치마크가 화면을 덮으면 안 된다.
+    // 기본은 "이미 봤다" — 홈을 띄우는 기존 테스트마다 코치마크가 화면을 덮으면 안 된다.
     // 코치마크를 검증하는 테스트만 false 를 준다. 실제 앱의 첫 실행 기본값은 false 다.
     bool homeCoachSeen = true,
     bool isManageCoachSeen = true,
