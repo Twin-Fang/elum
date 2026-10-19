@@ -717,5 +717,8 @@
   "routineGroupAllSentAlready": "Everything in this bundle was already sent today",
   "routineGroupActionFailedTitle": "Couldn't change the bundle",
   "routineGroupUngroupConfirmTitle": "Ungroup this bundle?",
-  "routineGroupUngroupConfirmMessage": "The routines stay in Routines"
+  "routineGroupUngroupConfirmMessage": "The routines stay in Routines",
+  "childHomeGroupProgress": "{done} / {total}",
+  "childHomeGroupAllDone": "All done!",
+  "routineDetailMore": "More"
 }

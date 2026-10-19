@@ -2527,6 +2527,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'The routines stay in Routines';
 
   @override
+  String childHomeGroupProgress(int done, int total) {
+    return '$done / $total';
+  }
+
+  @override
+  String get childHomeGroupAllDone => 'All done!';
+
+  @override
+  String get routineDetailMore => 'More';
+
+  @override
   String get routineManageCoachTapMessage =>
       '일과를 *누르면* 카드를 볼 수 있어요\n카드 고치기와 *오늘 보내기*를 할 수 있어요';
 

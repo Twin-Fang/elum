@@ -68,6 +68,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         await _send(routine);
       case RoutineSheetAction.edit:
         _editCards(routine);
+      case RoutineSheetAction.more:
+        await _openMenu(routine);
       case RoutineSheetAction.rerun || null:
         return;
     }

@@ -61,6 +61,13 @@ class _RoutineManageCoachMarkState
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStart());
   }
 
+  /// 탭 화면은 안 보이는 동안에도 살아 있다. 이 칸이 보이게 되는 순간(TickerMode 변화) 다시 따진다
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStart());
+  }
+
   @override
   void didUpdateWidget(covariant RoutineManageCoachMark old) {
     super.didUpdateWidget(old);
@@ -76,9 +83,15 @@ class _RoutineManageCoachMarkState
 
   /// 코치마크를 띄워도 되는 때인지 보고, 맞으면 켠다.
   ///
-  /// 조건 3개: 목록을 받아 옴, 이 화면이 맨 앞이고 전환이 끝남, 그 상태로 [_settleFor] 유지.
+  /// 조건 4개: 목록을 받아 옴, 이 칸이 보이는 탭, 화면이 맨 앞이고 전환이 끝남, 그 상태로 [_settleFor] 유지.
   void _maybeStart() {
     if (!mounted || widget.entries == null) return;
+    // 다른 탭이 보이는 중이면 대상을 못 재서 단계가 전부 건너뛰어지고 본 것으로 남는다
+    if (!TickerMode.of(context)) {
+      _settle?.cancel();
+      _settle = null;
+      return;
+    }
 
     final route = ModalRoute.of(context);
     if (route != null && !route.isCurrent) {
@@ -114,7 +127,7 @@ class _RoutineManageCoachMarkState
 
   void _startNow() {
     _settle = null;
-    if (!mounted) return;
+    if (!mounted || !TickerMode.of(context)) return;
     final route = ModalRoute.of(context);
     if (route != null && !route.isCurrent) {
       _retryLater();

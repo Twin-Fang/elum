@@ -1,11 +1,9 @@
-<!-- This is an auto-generated comment: release notes by coderabbit.ai -->
-
 ## Summary by CodeRabbit
 
-## 릴리스 노트
+* **새로운 기능**
+  * 일과관리의 일과 상세 시트 머리에 ⋯ 버튼을 더했어요. 누르면 길게 눌렀을 때와 같은 메뉴(오늘 보내기·묶음에 넣기·복사하기 등)가 열려요.
+  * 일과관리에 처음 들어오면 사용법을 알려 주는 안내를 한 번만 보여 줘요. 일과를 길게 누르면 메뉴가 열리고, + 일과 만들기에서 새 묶음을 만들 수 있다는 내용이에요.
 
-* **개선**
-  * 태블릿 보호자 화면 왼쪽 위 카드에 루미 아이콘이 나와요
-
-<!-- end of auto-generated comment: release notes by coderabbit.ai -->
+* **버그 수정**
+  * 화면 아래쪽 버튼을 가리키는 안내에서 말풍선과 안내 문구가 겹치던 것을 고쳤어요.
 

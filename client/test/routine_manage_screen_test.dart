@@ -10,6 +10,8 @@ import 'package:elum/features/guardian/application/routine_providers.dart';
 import 'package:elum/features/guardian/data/routine_group_api.dart';
 import 'package:elum/features/guardian/data/routine_library_api.dart';
 import 'package:elum/features/guardian/domain/routine_group.dart';
+import 'package:elum/core/storage/in_memory_storage.dart';
+import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/features/guardian/presentation/routine_manage_screen.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/shared/models/action_card.dart';
@@ -396,6 +398,18 @@ void main() {
     );
     expect(entries.whereType<LibraryGroupEntry>(), isEmpty);
     expect(entries.whereType<LibraryRoutineEntry>().length, 2);
+  });
+
+  testWidgets('상세 시트의 ⋯ 를 누르면 길게 누르기와 같은 메뉴가 열린다', (tester) async {
+    await pump(tester);
+
+    await tester.tap(find.text('아침 준비하기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('더 보기'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('복사하기'), findsOneWidget);
+    expect(find.text('묶음에 넣기'), findsOneWidget);
   });
 
   test('서버 sourceRoutineId 를 읽고, 비어 있으면 원본(null)으로 본다', () {

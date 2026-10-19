@@ -2169,13 +2169,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get guardianTabHome => '홈';
 
   @override
-  String get guardianTabManage => '일과관리';
+  String get guardianTabManage => '일과 관리';
 
   @override
   String get guardianTabTalk => '이야기';
 
   @override
-  String get guardianTabMe => '내정보';
+  String get guardianTabMe => '내 정보';
 
   @override
   String get guardianSideNavCaption => '보호자 화면';
@@ -2248,7 +2248,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get routineLibraryRemoveConfirmMessage =>
-      '일과관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요';
+      '일과 관리에서 빠져요. 이룸이가 한 기록은 그대로 남아요';
 
   @override
   String get routineLibraryRemoved => '일과를 지웠어요';
@@ -2417,7 +2417,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get routineGroupUngroupConfirmTitle => '묶음을 풀까요?';
 
   @override
-  String get routineGroupUngroupConfirmMessage => '안에 있던 일과는 일과관리에 그대로 남아요';
+  String get routineGroupUngroupConfirmMessage => '안에 있던 일과는 일과 관리에 그대로 남아요';
+
+  @override
+  String childHomeGroupProgress(int done, int total) {
+    return '$done / $total';
+  }
+
+  @override
+  String get childHomeGroupAllDone => '다 했어요!';
+
+  @override
+  String get routineDetailMore => '더 보기';
 
   @override
   String get routineManageCoachTapMessage =>
