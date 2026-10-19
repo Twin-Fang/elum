@@ -89,7 +89,7 @@ void main() {
   // 이룸이 카드 진동 스위치 (#515) — 이룸이 설정과 같은 값 하나를 본다.
 
   // 이룸이 휴대폰 줄 (#363 · 명세 §8-4) — 연결 전에는 할 일(`연결하기`), 연결된 뒤에는 상태(`연결됨 ›`).
-  group('이룸이 휴대폰 줄', () {
+  group('이룸이 기기 줄', () {
 
 
 
@@ -99,7 +99,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('이룸이 휴대폰 연결하기'), findsOneWidget);
+      expect(find.text('이룸이 기기 연결하기'), findsOneWidget);
       expect(find.text('로그아웃'), findsOneWidget);
     });
 

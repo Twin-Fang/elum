@@ -7,10 +7,10 @@ import 'package:timezone/timezone.dart' as tz;
 import '../../../core/logger/app_logger.dart';
 import '../domain/routine_reminder.dart';
 
-/// 알림 글 (휴대폰 언어로 부르는 쪽이 채운다)
+/// 알림 글 (기기 언어로 부르는 쪽이 채운다)
 typedef ReminderTexts = ({String channelName, String title, String body});
 
-/// 휴대폰 알림 예약 창구 (#777). 테스트에서 가짜로 바꿔 끼운다
+/// 기기 알림 예약 창구 (#777). 테스트에서 가짜로 바꿔 끼운다
 abstract interface class ReminderScheduler {
   /// 알림 권한 요청. 이미 허용이면 묻지 않고 true
   Future<bool> requestPermission();

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 /// 일과 알림 1건 (#777): 어떤 일과를 몇 시에, 매일인지
 ///
-/// 이 휴대폰에만 예약된다 — 서버에 저장하지 않는다.
+/// 이 기기에만 예약된다 — 서버에 저장하지 않는다.
 @immutable
 class RoutineReminder {
   const RoutineReminder({

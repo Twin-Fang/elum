@@ -17,7 +17,7 @@ final reminderSchedulerProvider = Provider<ReminderScheduler>(
 
 /// 일과별 알림 상태 (#777): 저장소 읽기 > 켜기(권한 > 예약 > 저장) / 끄기(취소 > 저장)
 ///
-/// 상태는 `일과 id > 알림`. 예약은 이 휴대폰에만 걸린다.
+/// 상태는 `일과 id > 알림`. 예약은 이 기기에만 걸린다.
 class RoutineReminderController extends Notifier<Map<String, RoutineReminder>> {
   @override
   Map<String, RoutineReminder> build() {

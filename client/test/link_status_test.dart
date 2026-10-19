@@ -8,7 +8,7 @@ void main() {
   group('남은 시간 표시', _remainingLabelRules);
 
   group('연결 상태', () {
-    test('연결된 휴대폰을 여러 대 담는다', () {
+    test('연결된 기기를 여러 대 담는다', () {
       final s = LinkStatus.fromJson({
         'devices': [
           {'linkId': 'l1', 'linkedAt': '2026-09-18T10:00:00'},

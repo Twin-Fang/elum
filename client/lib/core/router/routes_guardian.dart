@@ -14,12 +14,13 @@ import '../../features/notice/presentation/guardian_notice_launcher.dart';
 import '../../features/profile/presentation/guardians_screen.dart';
 import '../../features/profile/presentation/invite_code_screen.dart';
 import '../../features/profile/presentation/profile_switch_screen.dart';
+import '../layout/adaptive_page_frame.dart';
+import '../layout/screen_layout_kind.dart';
 import 'app_transitions.dart';
 import 'routes.dart';
 
 /// 보호자 화면과 설정·연결·사람 관리.
 List<RouteBase> guardianRoutes() => [
-
   // --- 보호자 모드 ---
   // 온보딩 완료 → 홈은 맥락 전환이라 fade (motion.md "시작 화면 → 홈" 준용).
   // 다른 경로에서 홈으로 올 때도 fade가 걸리는데, 즉시 교체보다 나으므로 허용.
@@ -27,9 +28,11 @@ List<RouteBase> guardianRoutes() => [
     path: Routes.guardian,
     // 공지 팝업은 **이 자리에서만** 뜬다. 이룸이 화면·일과 만들기에는
     // 감싸지 않는다 — 이룸이 화면은 한 화면에 행동 하나다.
+    // 홈이 태블릿 구성(가운데 열·가로 두 칸)을 직접 정한다
     pageBuilder: (context, state) => fadePage(
       state,
       const GuardianNoticeLauncher(child: GuardianHomeScreen()),
+      layoutKind: ScreenLayoutKind.adaptive,
     ),
   ),
   GoRoute(
@@ -44,8 +47,7 @@ List<RouteBase> guardianRoutes() => [
   ),
   GoRoute(
     path: Routes.linkEnter,
-    pageBuilder: (context, state) =>
-        slidePage(state, const LinkEnterScreen()),
+    pageBuilder: (context, state) => slidePage(state, const LinkEnterScreen()),
   ),
   GoRoute(
     path: Routes.guardianSettings,
@@ -54,7 +56,10 @@ List<RouteBase> guardianRoutes() => [
   ),
   GoRoute(
     path: Routes.guardianDrafts,
-    builder: (context, state) => const DraftRoutinesScreen(),
+    builder: (context, state) => const AdaptivePageFrame(
+      kind: ScreenLayoutKind.phoneColumn,
+      child: DraftRoutinesScreen(),
+    ),
   ),
   GoRoute(
     path: Routes.guardianImageStyle,
@@ -63,8 +68,7 @@ List<RouteBase> guardianRoutes() => [
   ),
   GoRoute(
     path: Routes.guardianFeedback,
-    pageBuilder: (context, state) =>
-        slidePage(state, const FeedbackScreen()),
+    pageBuilder: (context, state) => slidePage(state, const FeedbackScreen()),
   ),
   GoRoute(
     path: Routes.guardianCreditHistory,
@@ -74,13 +78,11 @@ List<RouteBase> guardianRoutes() => [
   // 다중 보호자 — 시안이 없는 임시 화면들이다.
   GoRoute(
     path: Routes.guardianPeople,
-    pageBuilder: (context, state) =>
-        slidePage(state, const GuardiansScreen()),
+    pageBuilder: (context, state) => slidePage(state, const GuardiansScreen()),
   ),
   GoRoute(
     path: Routes.guardianInvite,
-    pageBuilder: (context, state) =>
-        slidePage(state, const InviteCodeScreen()),
+    pageBuilder: (context, state) => slidePage(state, const InviteCodeScreen()),
   ),
   GoRoute(
     path: Routes.guardianProfileSwitch,
@@ -89,18 +91,14 @@ List<RouteBase> guardianRoutes() => [
   ),
   GoRoute(
     path: Routes.guardianLinkStatus,
-    pageBuilder: (context, state) =>
-        slidePage(state, const LinkStatusScreen()),
+    pageBuilder: (context, state) => slidePage(state, const LinkStatusScreen()),
   ),
   GoRoute(
     path: Routes.guardianPinChange,
     pageBuilder: (context, state) => slidePage(
       state,
       // 암호가 없는 휴대폰이 보호자 화면에 들어올 때 거치는 길이다
-      PinChangeScreen(
-        createOnly:
-            state.uri.queryParameters['from'] == 'login',
-      ),
+      PinChangeScreen(createOnly: state.uri.queryParameters['from'] == 'login'),
     ),
   ),
 ];

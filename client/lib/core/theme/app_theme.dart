@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../layout/app_layout.dart';
 import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
@@ -46,7 +47,7 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 4,
       ),
-      extensions: const [colors, typo, AppSpacing.standard],
+      extensions: const [colors, typo, AppSpacing.standard, AppLayout.standard],
     );
   }
 }

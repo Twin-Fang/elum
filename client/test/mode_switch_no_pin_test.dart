@@ -90,7 +90,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  group('보호자 휴대폰 — 암호가 없다', () {
+  group('보호자 기기 — 암호가 없다', () {
     testWidgets('암호 없이 보호자 홈을 열거나 임의 생성하지 않고 로그인한다', (tester) async {
       await open(tester);
       expect(find.text('로그인'), findsOneWidget);

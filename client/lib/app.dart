@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import 'features/ads/data/ad_consent.dart';
@@ -11,6 +10,7 @@ import 'core/dev/dev_locale_override.dart';
 import 'core/dev/dev_tools_overlay.dart';
 import 'core/l10n/app_l10n.dart';
 import 'core/l10n/current_l10n.dart';
+import 'core/layout/adaptive_screen_scale.dart';
 import 'core/network/session_expiry.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -202,10 +202,11 @@ class _ElumAppState extends ConsumerState<ElumApp> {
       ),
     );
 
-    return ScreenUtilInit(
+    return AdaptiveScreenScale(
       // Figma 프레임 크기(iPhone 16). 이 기준으로 .w/.h/.sp가 계산되므로
       // 화면 코드에서 Figma 좌표를 그대로 쓸 수 있다.
-      designSize: const Size(393, 852),
+      // 태블릿(창 폭 600dp 이상)은 창에 맞춰 배율이 정해진다.
+      baseDesignSize: const Size(393, 852),
       minTextAdapt: true,
       builder: (context, child) => MaterialApp.router(
         onGenerateTitle: l10n.onGenerateTitle,

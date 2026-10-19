@@ -58,8 +58,8 @@ void main() {
     return name;
   }
 
-  testWidgets('휴대폰이 한국어면 ko', (t) async => expect(await pumpPhone(t, const [Locale('ko', 'KR')]), 'ko'));
-  testWidgets('개발자 도구가 강제한 언어는 휴대폰 언어를 이긴다', (t) async {
+  testWidgets('기기가 한국어면 ko', (t) async => expect(await pumpPhone(t, const [Locale('ko', 'KR')]), 'ko'));
+  testWidgets('개발자 도구가 강제한 언어는 기기 언어를 이긴다', (t) async {
     expect(await pumpPhone(t, const [Locale('ko', 'KR')], forced: const Locale('ja')), 'ja');
   });
   testWidgets('개발자 도구가 꺼진 빌드에서는 강제 언어를 무시한다', (t) async {

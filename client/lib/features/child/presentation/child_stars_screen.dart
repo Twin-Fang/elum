@@ -7,6 +7,7 @@ import '../../../core/haptics/child_haptics.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import 'widgets/child_night_sky_backdrop.dart';
 import '../../../core/widgets/app_pressable.dart';
 import '../../../core/router/pop_or_home.dart';
 import '../../member/application/member_providers.dart';
@@ -57,16 +58,9 @@ class ChildStarsScreen extends ConsumerWidget {
     final stars = ref.watch(memberProvider).value?.totalStars ?? 0;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          // Figma linear-gradient(180deg, #0C0D1A → #242634).
-          // 보상 화면과 같은 밤하늘 세계관이라 토큰을 공유한다.
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [colors.rewardBackdropTop, colors.rewardBackdropBottom],
-          ),
-        ),
+      // Figma linear-gradient(180deg, #0C0D1A → #242634).
+      // 보상 화면과 같은 밤하늘 세계관이라 같은 배경 위젯을 쓴다.
+      body: ChildNightSkyBackdrop(
         child: Stack(
           children: [
             // 주변 작은 별 — 투명도까지 구워진 에셋이라 Opacity를 씌우지 않는다.

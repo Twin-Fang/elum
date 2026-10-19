@@ -51,6 +51,8 @@ class _DumpViewState extends State<_DumpView> {
   }
 
   Future<void> _export() async {
+    // 아이패드 공유 팝오버 기준 (await 전에 잡는다)
+    final origin = shareOriginOf(context);
     setState(() => _busy = true);
     try {
       final dir = await getTemporaryDirectory();
@@ -58,7 +60,11 @@ class _DumpViewState extends State<_DumpView> {
       await file.writeAsString(await _full());
       // 공유 시트를 띄운다. 사용자가 취소해도 예외가 아니라 그냥 닫힌다.
       await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path)], text: 'elum 디버그 덤프'),
+        ShareParams(
+          files: [XFile(file.path)],
+          text: 'elum 디버그 덤프',
+          sharePositionOrigin: origin,
+        ),
       );
       _say('내보냈습니다: ${file.path.split('/').last}');
     } catch (e) {
@@ -147,9 +153,9 @@ class _LogViewer extends StatelessWidget {
                     ClipboardData(text: DevLogBuffer.asText()),
                   );
                   if (!context.mounted) return;
-                  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-                    const SnackBar(content: Text('로그를 복사했어요')),
-                  );
+                  ScaffoldMessenger.maybeOf(
+                    context,
+                  )?.showSnackBar(const SnackBar(content: Text('로그를 복사했어요')));
                 },
                 icon: const Icon(Icons.copy, size: 18),
                 label: const Text('복사'),
@@ -183,7 +189,10 @@ class _LogViewer extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 4),
                   child: SelectableText(
                     lines[i],
-                    style: const TextStyle(fontSize: 11, fontFamily: 'monospace'),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontFamily: 'monospace',
+                    ),
                   ),
                 ),
               );
@@ -215,10 +224,8 @@ class _StatusView extends ConsumerWidget {
         // 존재 여부만 조회해 암호 검증값이 개발 화면에도 노출되지 않게 한다
         FutureBuilder<bool>(
           future: storage.hasPin(),
-          builder: (context, snap) => _Row(
-            'PIN',
-            (snap.data ?? false) ? '설정됨' : '(없음)',
-          ),
+          builder: (context, snap) =>
+              _Row('PIN', (snap.data ?? false) ? '설정됨' : '(없음)'),
         ),
         const SizedBox(height: 16),
         const Text('설정값', style: TextStyle(fontWeight: FontWeight.bold)),

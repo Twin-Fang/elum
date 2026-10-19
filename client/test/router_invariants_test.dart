@@ -54,7 +54,7 @@ void main() {
   for (final s in states) {
     final label =
         '세션 ${s.hasSession ? '있음' : '없음'} · '
-        '${s.isElumiDevice ? '이룸이 휴대폰' : '보호자 휴대폰'} · '
+        '${s.isElumiDevice ? '이룸이 기기' : '보호자 기기'} · '
         '역할 ${s.role?.name ?? '없음'} · '
         '온보딩 ${s.onboardingCompleted ? '완료' : '미완료'} · '
         '${s.resumeOnElumiScreen ? '이룸이 화면에서 꺼짐' : '보호자 화면에서 꺼짐'}';

@@ -39,6 +39,12 @@ lib/
     └── models/                     # feature 간 공유 모델 (ActionCard 등)
 ```
 
+### `core/layout/` — 창 크기와 태블릿
+
+창 폭 등급(`WindowSizeClass`), 크기 배율(`LayoutMetrics`), 레이아웃 토큰(`AppLayout`), 라우트 프레임(`AdaptivePageFrame`),
+방향 정책(`OrientationPolicy`)이 여기 있다. 앱 루트가 `AdaptiveScreenScale` 로 `ScreenUtil` 배율을 창 크기에 맞춘다.
+`slidePage`·`fadePage` 가 선언한 `ScreenLayoutKind` 대로 화면을 담으므로, **새 라우트도 별도 작업 없이 태블릿에서 깨지지 않는다.**
+
 ### 왜 feature-first인가
 
 보호자 모드와 아동 모드는 **UI 규칙이 완전히 다르다** (터치 타겟, 애니메이션 속도, 텍스트 크기).

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
+import '../../../../core/layout/share_origin.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/elum_button.dart';
 import '../../../../core/widgets/elum_toast.dart';
@@ -11,7 +12,10 @@ import '../../../profile/application/invite_sharer.dart';
 import '../../domain/link_status.dart';
 
 /// 발급된 코드를 클립보드에 복사: 만료됐거나 코드가 없으면 하지 않음
-Future<void> copyIssuedCode(BuildContext context, IssuedLinkCode? issued) async {
+Future<void> copyIssuedCode(
+  BuildContext context,
+  IssuedLinkCode? issued,
+) async {
   if (issued == null || issued.isExpired) return;
   final messenger = ScaffoldMessenger.maybeOf(context);
   final l10n = context.l10n;
@@ -63,8 +67,10 @@ class IssuedCodeShareButton extends ConsumerWidget {
   Future<void> _share(BuildContext context, WidgetRef ref) async {
     final i = issued;
     if (i == null || i.isExpired) return;
+    // 아이패드 공유 팝오버가 이 버튼 옆에 뜨도록 누른 자리를 잡아 둔다 (await 전에)
+    final origin = shareOriginOf(context);
     try {
-      await ref.read(inviteSharerProvider)(shareMessage(i));
+      await ref.read(inviteSharerProvider)(shareMessage(i), origin);
     } catch (e) {
       if (!context.mounted) return;
       await showFailure(

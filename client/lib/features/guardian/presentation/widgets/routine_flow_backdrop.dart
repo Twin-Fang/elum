@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/layout/adaptive_page_frame.dart';
+import '../../../../core/layout/screen_layout_kind.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import 'aurora_background.dart';
 
@@ -40,7 +42,16 @@ class RoutineFlowBackdrop extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(child: AuroraBackground(tone: tone)),
-          Positioned.fill(child: _BackdropScope(child: child)),
+          // 태블릿에서는 화면(글자·버튼)만 폰 비율 열에 담고 배경은 전폭으로 둔다.
+          Positioned.fill(
+            child: _BackdropScope(
+              child: AdaptivePageFrame(
+                kind: ScreenLayoutKind.phoneColumn,
+                isBackgroundPainted: false,
+                child: child,
+              ),
+            ),
+          ),
         ],
       ),
     );

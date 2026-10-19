@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../../features/guardian/domain/routine_stage.dart';
+import '../layout/screen_layout_kind.dart';
 import '../../features/guardian/presentation/card_review_screen.dart';
 import '../../features/guardian/presentation/question_screen.dart';
 import '../../features/guardian/presentation/reward_setup_screen.dart';
@@ -22,12 +23,14 @@ List<RouteBase> routineFlowRoutes() => [
   // **iOS 뒤로 밀기가 흐름을 통째로 닫지 않게** 전환 페이지로 둔다 — 플랫폼
   // 기본 페이지면 안쪽 화면의 나가기 확인을 건너뛴다.
   ShellRoute(
+    // 배경(오로라)은 전폭이어야 해서 바깥은 프레임 없이 두고, 열은 배경 안쪽에서 만든다.
     pageBuilder: (context, state, child) => slidePage(
       state,
       RoutineFlowBackdrop(
         tone: routineFlowToneOf(state.uri.path),
         child: child,
       ),
+      layoutKind: ScreenLayoutKind.adaptive,
     ),
     routes: [
       GoRoute(

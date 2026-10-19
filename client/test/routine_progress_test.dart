@@ -17,7 +17,7 @@ void main() {
   // 이 휴대폰에는 카드 1, 2를 체크한 기록만 있다
   final localOnly12 = RoutineProgressRecord(completed: {'c1', 'c2'});
 
-  test('다 보낸 일과는 다른 휴대폰이 끝낸 카드까지 서버 값으로 센다', () {
+  test('다 보낸 일과는 다른 기기가 끝낸 카드까지 서버 값으로 센다', () {
     final routine = routineOf('r1', [
       card('c1', completed: true),
       card('c2', completed: true),

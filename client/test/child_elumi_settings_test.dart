@@ -137,7 +137,7 @@ void main() {
 
   });
 
-  group('로그아웃 · 회원탈퇴 — 이 휴대폰의 연결만 끊는다', () {
+  group('로그아웃 · 회원탈퇴 — 이 기기의 연결만 끊는다', () {
 
     testWidgets('로그아웃 확인: 서버가 끊긴 뒤 로컬을 전부 비우고 로그인 화면으로 간다 (#542)', (tester) async {
       await pump(tester);
@@ -166,15 +166,15 @@ void main() {
       );
     });
 
-    testWidgets('회원탈퇴: 일과와 별이 보호자 휴대폰에 남는다고 말하고, 같은 연결 끊기를 한다', (tester) async {
+    testWidgets('회원탈퇴: 일과와 별이 보호자 기기에 남는다고 말하고, 같은 연결 끊기를 한다', (tester) async {
       await pump(tester);
       await openSettings(tester);
 
       await tester.tap(find.text('회원탈퇴'));
       await tester.pumpAndSettle();
       expect(find.text('회원탈퇴 하실건가요?'), findsOneWidget);
-      expect(find.textContaining('일과와 별은 보호자 휴대폰에'), findsOneWidget);
-      expect(find.textContaining('이 휴대폰의 연결만 끊어져요'), findsOneWidget);
+      expect(find.textContaining('일과와 별은 보호자 기기에'), findsOneWidget);
+      expect(find.textContaining('이 기기의 연결만 끊어져요'), findsOneWidget);
       // 로그아웃 확인창처럼 다시 쓰는 방법을 알려 준다
       expect(find.textContaining('연결 암호를 받아야 해요'), findsOneWidget);
 
@@ -208,7 +208,7 @@ void main() {
         const FakeHttpError(
           403,
           errorCode: 'DEVICE_LINK_ONLY_FOR_ELUMI',
-          errorMessage: '이룸이 휴대폰에서만 할 수 있어요.',
+          errorMessage: '이룸이 기기에서만 할 수 있어요.',
         ),
         'DEVICE_LINK_ONLY_FOR_ELUMI',
       ),

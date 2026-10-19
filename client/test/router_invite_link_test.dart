@@ -100,7 +100,7 @@ void main() {
       });
     }
 
-    testWidgets('이룸이 휴대폰에서는 우편함에 맡기지 않고 무시한다', (tester) async {
+    testWidgets('이룸이 기기에서는 우편함에 맡기지 않고 무시한다', (tester) async {
       tester.binding.platformDispatcher.defaultRouteNameTestValue = 'elum://invite?code=A7K3M9';
       addTearDown(tester.binding.platformDispatcher.clearDefaultRouteNameTestValue);
       build(elumi: true);

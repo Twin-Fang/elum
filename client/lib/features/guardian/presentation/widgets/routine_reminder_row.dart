@@ -12,7 +12,7 @@ import 'routine_reminder_sheet.dart';
 
 /// 일과 상세 시트의 알림 줄 (#777): 꺼짐 / `매일 오전 8:00` · 누르면 알림 설정 시트
 ///
-/// 보상 줄과 같은 짜임 (뱃지 40 + 카드). 이 휴대폰에만 울린다.
+/// 보상 줄과 같은 짜임 (뱃지 40 + 카드). 이 기기에만 울린다.
 class RoutineReminderRow extends ConsumerWidget {
   const RoutineReminderRow({super.key, required this.routine});
 
@@ -92,7 +92,7 @@ class RoutineReminderRow extends ConsumerWidget {
   }
 }
 
-/// 알림 > `매일 오전 8:00` / `한 번 오전 8:00` (시각은 휴대폰 언어 형식)
+/// 알림 > `매일 오전 8:00` / `한 번 오전 8:00` (시각은 기기 언어 형식)
 String reminderScheduleLabel(BuildContext context, RoutineReminder reminder) {
   final time = MaterialLocalizations.of(
     context,

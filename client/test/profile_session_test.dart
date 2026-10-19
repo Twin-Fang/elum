@@ -131,11 +131,11 @@ void main() {
   group('이룸이를 바꾼다', () {
   });
 
-  group('고른 이룸이를 잃었다 (다른 휴대폰에서 나갔다)', () {
+  group('고른 이룸이를 잃었다 (다른 기기에서 나갔다)', () {
   });
 
   group('나갔다', () {
-    test('마지막 이룸이에서 나가면 이룸이 없음이다 — 이룸이 값은 비우되 휴대폰의 비밀암호는 남긴다 (E29·E45)', () async {
+    test('마지막 이룸이에서 나가면 이룸이 없음이다 — 이룸이 값은 비우되 기기의 비밀암호는 남긴다 (E29·E45)', () async {
       member = const Member(nickname: '하늘이', profiles: [a]);
       final c = build();
       await settle(c);

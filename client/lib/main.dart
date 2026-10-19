@@ -15,12 +15,16 @@ import 'core/storage/installation_store.dart';
 import 'l10n/app_localizations.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/data/oauth_sdk.dart';
+import 'core/layout/orientation_policy.dart';
 import 'core/storage/shared_prefs_storage.dart';
 
 Future<void> main() async {
   AppLogger.appStarted();
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 폰은 세로만, 태블릿은 네 방향 (네이티브가 풀려 있어도 폰이 가로로 돌지 않게)
+  await OrientationPolicy.apply();
 
   // 처리하지 못한 오류·생명주기·연결 상태 기록. 가능한 한 일찍 건다.
   AppDiagnostics.install();

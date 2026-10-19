@@ -114,7 +114,7 @@ void main() {
       expect(InMemoryStorage().isChildHapticOn, isTrue);
     });
 
-    test('clearAll 이 지우지 않는다 — 계정이 아니라 휴대폰에 속한다', () async {
+    test('clearAll 이 지우지 않는다 — 계정이 아니라 기기에 속한다', () async {
       final storage = InMemoryStorage();
       await storage.setChildHapticOn(false);
       await storage.clearAll();

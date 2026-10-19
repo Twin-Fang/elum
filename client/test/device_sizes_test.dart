@@ -2,8 +2,6 @@ import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/features/child/presentation/child_home_screen.dart';
 import 'package:elum/features/child/presentation/child_stars_screen.dart';
 import 'package:elum/features/member/data/member_repository.dart';
-import 'package:elum/features/guardian/data/routine_repository.dart';
-import 'package:elum/features/guardian/domain/routine_suggestion.dart';
 import 'package:elum/features/guardian/presentation/guardian_home_screen.dart';
 import 'package:elum/features/guardian/presentation/routine_input_screen.dart';
 import 'package:elum/shared/models/action_card.dart';
@@ -13,7 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'helpers/fake_reward_api.dart';
+import 'helpers/stub_routine_repository.dart';
 import 'helpers/test_storage.dart';
 import 'package:elum/features/member/application/member_providers.dart';
 import 'package:elum/features/guardian/application/routine_providers.dart';
@@ -59,7 +57,7 @@ void main() {
   Widget wrap(Widget home, Size size) => ProviderScope(
     overrides: [
       testStorageOverride(onboardingCompleted: true, nickname: '하늘이'),
-      routineRepositoryProvider.overrideWithValue(_StubRepo()),
+      routineRepositoryProvider.overrideWithValue(StubRoutineRepository()),
       myRoutinesProvider.overrideWith(
         (ref) async => [
           routine('r1', '스스로 옷을 입어요', percent: 50),
@@ -116,22 +114,4 @@ void main() {
   runOnAllDevices('이룸이 홈', () => const ChildHomeScreen());
   runOnAllDevices('별 모으기', () => const ChildStarsScreen());
   runOnAllDevices('일과 만들기 입력', () => const RoutineInputScreen());
-}
-
-/// 서버를 타지 않는 저장소. 이 테스트는 레이아웃만 본다.
-class _StubRepo with FakeRewardApi implements RoutineRepository {
-  @override
-  Future<List<Routine>> getMyRoutines() async => const [];
-
-  @override
-  Future<List<Routine>> getTodayRoutines() async => const [];
-
-  @override
-  Future<List<Routine>> getPastRoutines() async => const [];
-
-  @override
-  Future<List<RoutineSuggestion>> getSuggestions() async => const [];
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

@@ -48,7 +48,7 @@ void main() {
     return ProviderScope(
       overrides: [
         profileRepositoryProvider.overrideWithValue(repo),
-        inviteSharerProvider.overrideWithValue((text) async {
+        inviteSharerProvider.overrideWithValue((text, origin) async {
           if (shareError != null) throw shareError!;
           shared.add(text);
         }),
@@ -146,7 +146,7 @@ void main() {
       expect(find.text('PROFILE_INVITE_TOO_MANY_ATTEMPTS'), findsOneWidget);
     });
 
-    testWidgets('이룸이 휴대폰·연결 안 된 이룸이(403)는 다시 시도 버튼 없이 이유만 보여 준다', (tester) async {
+    testWidgets('이룸이 기기·연결 안 된 이룸이(403)는 다시 시도 버튼 없이 이유만 보여 준다', (tester) async {
       repo.issueResult = const Attempt.failed(
         AppFailure(
           fault: NetworkFault.none,
