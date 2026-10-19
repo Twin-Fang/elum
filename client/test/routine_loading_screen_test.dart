@@ -137,7 +137,7 @@ void main() {
       // 나가도 생성 요청은 서버에서 끝까지 가서 임시저장으로 남는다 — 경고가 아니다.
       expect(find.text('임시저장에 두고 나갈까요?'), findsOneWidget);
       expect(
-        find.text('카드가 다 만들어지면 임시저장에 남아요\n설정에서 이어서 만들 수 있어요'),
+        find.text('카드가 다 만들어지면 임시저장에 남아요\n내정보에서 이어서 만들 수 있어요'),
         findsOneWidget,
       );
       await tester.tap(find.text('계속 만들기'));
