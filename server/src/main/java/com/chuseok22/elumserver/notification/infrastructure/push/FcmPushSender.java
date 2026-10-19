@@ -11,7 +11,9 @@ import com.google.firebase.messaging.Notification;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.HexFormat;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -47,6 +49,7 @@ public class FcmPushSender implements PushSender {
       return PushResult.FAILED;
     } catch (RuntimeException exception) {
       log.warn("[notification push] failed : {}", exception.getClass().getSimpleName());
+      log.debug("[notification push] failure detail", exception);
       return PushResult.FAILED;
     }
   }
@@ -57,7 +60,7 @@ public class FcmPushSender implements PushSender {
     return Message.builder()
       .setToken(pushMessage.token())
       .setNotification(Notification.builder().setTitle(pushMessage.title()).setBody(pushMessage.body()).build())
-      .putAllData(pushMessage.data())
+      .putAllData(nonBlankEntries(pushMessage.data()))
       .setAndroidConfig(AndroidConfig.builder()
         .setCollapseKey(collapseKey)
         .setNotification(AndroidNotification.builder().setTag(collapseKey).build())
@@ -66,6 +69,17 @@ public class FcmPushSender implements PushSender {
         .putHeader(APNS_COLLAPSE_ID_HEADER, collapseKey)
         .build())
       .build();
+  }
+
+  // FCM data 는 null 값을 거부하므로 null·빈 값 항목은 뺌
+  static Map<String, String> nonBlankEntries(Map<String, String> data) {
+    Map<String, String> filtered = new HashMap<>();
+    data.forEach((key, value) -> {
+      if (key != null && value != null && !value.isBlank()) {
+        filtered.put(key, value);
+      }
+    });
+    return filtered;
   }
 
   // 64바이트 이하는 그대로, 넘으면 SHA-256 hex(64자)

@@ -54,18 +54,20 @@ public class PushMessageFactory {
     };
   }
 
-  // data: 앱이 눌렀을 때 화면을 정하는 id 만 (없는 값은 빈 문자열)
+  // data: 앱이 눌렀을 때 화면을 정하는 id 만 (없는 값은 키째 뺌: FCM 이 null 값을 거부)
   private Map<String, String> buildData(Notification notification, NotificationType type) {
     Map<String, String> data = new HashMap<>();
     data.put("type", type.name());
-    data.put("notificationId", notification.getId());
-    data.put("profileId", orEmpty(notification.getProfileId()));
-    data.put("targetId", orEmpty(notification.getTargetId()));
+    putIfPresent(data, "notificationId", notification.getId());
+    putIfPresent(data, "profileId", notification.getProfileId());
+    putIfPresent(data, "targetId", notification.getTargetId());
     return data;
   }
 
-  private String orEmpty(String value) {
-    return value == null ? "" : value;
+  private void putIfPresent(Map<String, String> data, String key, String value) {
+    if (value != null && !value.isBlank()) {
+      data.put(key, value);
+    }
   }
 
   // 언어 > en 순서로 키를 찾음

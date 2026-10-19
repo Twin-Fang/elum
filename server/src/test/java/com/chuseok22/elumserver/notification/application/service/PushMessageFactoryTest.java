@@ -50,6 +50,18 @@ class PushMessageFactoryTest {
     assertThat(message.body()).isEqualTo("A new guardian joined");
   }
 
+  @Test
+  @DisplayName("id 가 없는 알림은 data 에서 해당 키를 뺀다 (FCM 이 null 값을 거부)")
+  void data_omitsNullIds() {
+    Notification notification = notification(NotificationType.CO_GUARDIAN_JOINED, "CO_GUARDIAN_JOINED:p1:m2");
+    notification.setProfileId(null);
+    notification.setTargetId(null);
+
+    PushMessage message = factory.create(notification, new RecordedNotification("n1", "m1", 1, true), device(AppLocale.EN));
+
+    assertThat(message.data()).containsOnlyKeys("type", "notificationId");
+  }
+
   private Notification notification(NotificationType type, String groupKey) {
     Notification notification = new Notification();
     notification.setId("n1");
