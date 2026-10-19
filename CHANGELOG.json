@@ -1,15 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-19T10:33:36Z",
-    "currentVersion": "2.47.0",
+    "lastUpdated": "2026-10-19T10:51:42Z",
+    "currentVersion": "2.48.0",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 265
+    "totalReleases": 266
   },
   "releases": [
+    {
+      "version": "2.48.0",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-19",
+      "pr_number": 810,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새 기능**\n  * 처음 시작할 때 일과 분류를 고르면 예시 일과를 넣어 드려요\n  * 예시 일과에 '예시' 표시가 붙어요\n* **개선**\n  * 처음 시작 화면의 질문을 더 쉽게 바꿨어요",
+      "parsed_changes": {
+        "새_기능": {
+          "title": "새 기능",
+          "items": [
+            "처음 시작할 때 일과 분류를 고르면 예시 일과를 넣어 드려요",
+            "예시 일과에 '예시' 표시가 붙어요"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "처음 시작 화면의 질문을 더 쉽게 바꿨어요"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.47.0",
       "project_type": "flutter",
