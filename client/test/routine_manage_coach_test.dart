@@ -4,6 +4,7 @@ import 'package:elum/features/guardian/application/routine_manage_coach_notifier
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/coach_mark_overlay.dart';
 import 'package:elum/core/widgets/coach_mark_step.dart';
+import 'package:elum/features/guardian/presentation/widgets/coach_demo_layers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -269,6 +270,88 @@ void main() {
       expect(find.byKey(const Key('demo')), findsOneWidget);
       expect(tester.getTopLeft(find.byKey(const Key('demo'))), const Offset(100, 200));
       expect(tester.getSize(find.byKey(const Key('demo'))), const Size(80, 80));
+    });
+  });
+
+  group('시범 연출', () {
+    const firstTile = Rect.fromLTWH(20, 150, 84, 90);
+    const secondTile = Rect.fromLTWH(108, 150, 84, 90);
+    const createButton = Rect.fromLTWH(120, 700, 150, 54);
+
+    Future<void> pumpDemo(
+      WidgetTester tester,
+      Widget demo, {
+      bool isMotionReduced = false,
+    }) async {
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(393, 852),
+          builder: (context, _) => MaterialApp(
+            theme: AppTheme.light,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(disableAnimations: isMotionReduced),
+              child: child!,
+            ),
+            home: Scaffold(body: Stack(children: [demo])),
+          ),
+        ),
+      );
+    }
+
+    // 시범이 가리키는 문구는 실제 시트·메뉴의 문구와 같아야 한다 — 따로 적으면 어긋난다
+    final demosWithKeyText = <String, (Widget Function(BuildContext), String)>{
+      '누르기 시범은 상세 시트의 두 버튼을 보여 준다': (
+        (context) => tapDemo(context, firstTile),
+        '오늘 보내기',
+      ),
+      '길게 누르기 시범은 빠른 메뉴의 항목을 보여 준다': (
+        (context) => longPressDemo(context, firstTile),
+        '복사하기',
+      ),
+      '보낸 뒤 시범은 실제 토스트 문구를 보여 준다': (
+        (context) => sentBadgeDemo(context, firstTile, routineTitle: '양치하기'),
+        '양치하기',
+      ),
+      '버튼으로 묶기 시범은 만들기 시트를 보여 준다': (
+        (context) => createGroupDemo(context, createButton),
+        '새 묶음 만들기',
+      ),
+    };
+
+    demosWithKeyText.forEach((name, spec) {
+      testWidgets('동작 줄이기: $name — 멈춘 마지막 장면만 그린다', (tester) async {
+        await pumpDemo(
+          tester,
+          Builder(builder: spec.$1),
+          isMotionReduced: true,
+        );
+        // 돌아가는 애니메이션이 없어 pumpAndSettle 이 끝난다
+        await tester.pumpAndSettle();
+        expect(find.textContaining(spec.$2, findRichText: true), findsWidgets);
+      });
+    });
+
+    testWidgets('끌어서 묶기 시범은 두 칸 사이를 오가고 예외 없이 반복된다', (tester) async {
+      await pumpDemo(
+        tester,
+        Builder(
+          builder: (context) => dragToGroupDemo(context, firstTile, secondTile),
+        ),
+      );
+      for (var i = 0; i < 6; i++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('일반 모드: 누르기 시범이 1주기 넘게 돌아도 예외가 없다', (tester) async {
+      await pumpDemo(tester, Builder(builder: (c) => tapDemo(c, firstTile)));
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
+      expect(tester.takeException(), isNull);
     });
   });
 }
