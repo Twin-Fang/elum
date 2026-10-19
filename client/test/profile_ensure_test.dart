@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:elum/core/network/app_failure.dart';
 import 'package:elum/core/network/server_error_code.dart';
@@ -152,6 +154,49 @@ void main() {
       expect(result.isOk, isFalse);
       expect(c.read(profileSessionProvider), before);
       expect(storage.selectedProfileId, isNull);
+    });
+
+    // 동의 화면을 거친 소셜 가입: 서버가 빈 이룸이를 만들어 두었고, 앱은 고른 이룸이를 비운 채
+    // 회원 정보도 아직 받지 않았다. 고르지 않으면 온보딩이 빈 값을 예시 대상으로 남기고,
+    // 홈이 첫 이룸이를 고르는 순간 예시 일과가 버려진다.
+    test('이미 있는 이룸이를 고르지 않은 채면 첫 이룸이를 고른다 — 예시 일과가 버려지지 않게', () async {
+      final neverLoaded = Completer<Member?>();
+      repo.me = memberWith([kProfileA, kProfileB]);
+      final c = ProviderContainer(
+        overrides: [
+          localStorageProvider.overrideWithValue(storage),
+          memberRepositoryProvider.overrideWithValue(repo),
+          memberProvider.overrideWith((ref) => neverLoaded.future),
+        ],
+      );
+      addTearDown(c.dispose);
+      c.listen(profileSessionProvider, (_, _) {});
+
+      final result = await c.read(profileSessionProvider.notifier).ensureProfile();
+
+      expect(result.value, isFalse);
+      expect(repo.creates, 0);
+      expect(storage.selectedProfileId, kProfileA.id);
+      expect(c.read(profileSessionProvider).selectedId, kProfileA.id);
+    });
+
+    test('이미 고른 이룸이가 목록에 있으면 바꾸지 않는다', () async {
+      final neverLoaded = Completer<Member?>();
+      repo.me = memberWith([kProfileA, kProfileB]);
+      await storage.setSelectedProfileId(kProfileB.id);
+      final c = ProviderContainer(
+        overrides: [
+          localStorageProvider.overrideWithValue(storage),
+          memberRepositoryProvider.overrideWithValue(repo),
+          memberProvider.overrideWith((ref) => neverLoaded.future),
+        ],
+      );
+      addTearDown(c.dispose);
+      c.listen(profileSessionProvider, (_, _) {});
+
+      await c.read(profileSessionProvider.notifier).ensureProfile();
+
+      expect(storage.selectedProfileId, kProfileB.id);
     });
 
     test('두 번 눌러도 요청은 하나다', () async {
