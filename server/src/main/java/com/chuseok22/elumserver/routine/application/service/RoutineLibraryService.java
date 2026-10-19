@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 일과관리(원본 보관함) 쓰기: 보내기, 복사하기, 지우기 (#804)
+ * 일과관리(원본 보관함) 쓰기: 보내기, 복사하기, 지우기 (#804). 묶음째 보내기·복사도 여기 카드 복사를 씀 (#806)
  * 원본 = sourceRoutineId 가 null 인 일과. 보내기는 원본의 카드를 복사해 오늘 일과를 만든다 (AI 호출 없음)
  */
 @Slf4j
@@ -37,6 +37,7 @@ public class RoutineLibraryService {
   private final RoutineRepository routineRepository;
   private final ProfileAccessGuard profileAccessGuard;
   private final RoutineStepSpeechQueue routineStepSpeechQueue;
+  private final RoutineGroupMembership routineGroupMembership;
 
   /**
    * 보내기: 권한(복제와 같음) > 원본·보낸 상태 확인 > 오늘 이미 보냈는지 > 카드 복사 (오늘 09:00, 원본 ID 기록)
@@ -49,10 +50,7 @@ public class RoutineLibraryService {
       log.info("[routine library] send rejected 409 : already sent today, routineId={}", routineId);
       throw new CustomException(ErrorCode.ROUTINE_ALREADY_SENT_TODAY);
     }
-    Routine copy = RoutineRules.copyCardsOf(original, caller.memberId());
-    copy.setSourceRoutineId(original.getId());
-    copy.setLibraryOnly(false);
-    return RoutineResponse.from(RoutineRules.saveWithSpeech(routineRepository, routineStepSpeechQueue, copy));
+    return RoutineResponse.from(saveCopy(newTodayCopyOf(original, caller.memberId())));
   }
 
   /**
@@ -63,21 +61,17 @@ public class RoutineLibraryService {
   public RoutineResponse copy(Caller caller, String routineId) {
     Routine original = getRoutineFor(caller, routineId, RoutineAction.COPY);
     validateLibraryOriginal(original);
-    Routine copy = RoutineRules.copyCardsOf(original, caller.memberId());
-    copy.setTitle(toCopyTitle(original));
-    copy.setSourceRoutineId(null);
-    copy.setLibraryOnly(true);
-    copy.setScheduledAt(LocalDateTime.now());
-    return RoutineResponse.from(RoutineRules.saveWithSpeech(routineRepository, routineStepSpeechQueue, copy));
+    return RoutineResponse.from(saveCopy(newLibraryCopyOf(original, caller.memberId(), true)));
   }
 
   /**
-   * 일과관리에서 지우기: 권한(만든 사람) > 흔적 없는 복사본이면 삭제, 아니면 목록에서만 숨김
+   * 일과관리에서 지우기: 권한(만든 사람) > 묶음에서 빼기(2개 미만이면 묶음 풀기) > 흔적 없는 복사본이면 삭제, 아니면 목록에서만 숨김
    * 흔적 = 완료한 단계 · 이 원본으로 보낸 일과. 남아 있으면 수행 기록이라 행을 지우지 않는다
    */
   @Transactional
   public void removeFromLibrary(Caller caller, String routineId) {
     Routine routine = getRoutineFor(caller, routineId, RoutineAction.EDIT);
+    routineGroupMembership.leaveGroup(routine);
     if (isDeletableLibraryCopy(routine)) {
       RoutineRules.deleteWithSpeech(routineRepository, routineStepSpeechQueue, routine);
       return;
@@ -94,8 +88,36 @@ public class RoutineLibraryService {
     }
   }
 
+  /// 원본 카드 > 오늘 일과 (저장 전, 원본 ID 기록). 낱개·묶음째 보내기가 함께 씀
+  Routine newTodayCopyOf(Routine original, String createdBy) {
+    Routine copy = RoutineRules.copyCardsOf(original, createdBy);
+    copy.setSourceRoutineId(original.getId());
+    copy.setLibraryOnly(false);
+    return copy;
+  }
+
+  /**
+   * 원본 카드 > 일과관리에만 있는 새 원본 (저장 전). 낱개 복사는 "제목 복사", 묶음 복사는 제목 그대로
+   * 묶음 복사는 묶음 이름에 "복사"가 붙어 일과마다 붙이면 중복이다
+   */
+  Routine newLibraryCopyOf(Routine original, String createdBy, boolean shouldAddCopySuffix) {
+    Routine copy = RoutineRules.copyCardsOf(original, createdBy);
+    if (shouldAddCopySuffix) {
+      copy.setTitle(toCopyName(original.getTitle(), original.getLanguage(), COPY_TITLE_MAX_LENGTH));
+    }
+    copy.setSourceRoutineId(null);
+    copy.setLibraryOnly(true);
+    copy.setScheduledAt(LocalDateTime.now());
+    return copy;
+  }
+
+  /// 복사본 저장 > 커밋 뒤 단계 음성 예약
+  Routine saveCopy(Routine copy) {
+    return RoutineRules.saveWithSpeech(routineRepository, routineStepSpeechQueue, copy);
+  }
+
   /// 오늘 이미 보냈는가: 원본 자체가 오늘 홈 일과이거나(복사본 제외), 이 원본으로 보낸 일과가 오늘 있음
-  private boolean isAlreadySentToday(Routine original) {
+  boolean isAlreadySentToday(Routine original) {
     LocalDate today = LocalDate.now();
     LocalDateTime startOfDay = today.atStartOfDay();
     LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
@@ -113,17 +135,16 @@ public class RoutineLibraryService {
       && !routineRepository.existsBySourceRoutineId(routine.getId());
   }
 
-  /// 원본 제목 > "원본 제목 복사" (일과 언어, 100자 제한 — 넘으면 원본 제목 쪽을 자름)
-  private String toCopyTitle(Routine original) {
-    String suffix = RoutinePhrases.standard()
-      .copyTitleSuffix(original.getLanguage() == null ? AppLocale.KO : original.getLanguage());
-    String title = original.getTitle();
+  /// 이름 > "이름 복사" (언어별 문구, maxLength 제한 — 넘으면 원래 이름 쪽을 자름). 일과 제목·묶음 이름이 함께 씀
+  static String toCopyName(String name, AppLocale language, int maxLength) {
+    String suffix = RoutinePhrases.standard().copyTitleSuffix(language == null ? AppLocale.KO : language);
     if (suffix == null || suffix.isBlank()) {
-      return title.length() > COPY_TITLE_MAX_LENGTH ? title.substring(0, COPY_TITLE_MAX_LENGTH) : title;
+      return name.length() > maxLength ? name.substring(0, maxLength) : name;
     }
     String tail = COPY_TITLE_SEPARATOR + suffix;
-    int titleRoom = COPY_TITLE_MAX_LENGTH - tail.length();
-    return (title.length() > titleRoom ? title.substring(0, titleRoom) : title) + tail;
+    int nameRoom = Math.max(0, maxLength - tail.length());
+    // 자른 자리가 공백이면 "아침 " + " 복사" 처럼 공백이 겹쳐 끝 공백을 지움
+    return (name.length() > nameRoom ? name.substring(0, nameRoom).stripTrailing() : name) + tail;
   }
 
   private Routine getRoutineFor(Caller caller, String routineId, RoutineAction action) {

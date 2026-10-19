@@ -147,4 +147,10 @@ public interface RoutineRepository extends JpaRepository<Routine, String> {
 
   /// 이 원본으로 보낸 일과가 하나라도 있는가. 있으면 원본을 지우지 않고 숨긴다 (#804)
   boolean existsBySourceRoutineId(String sourceRoutineId);
+
+  /// 묶음 하나의 구성원, 묶음 안 차례대로 (#806)
+  List<Routine> findAllByGroupIdOrderByGroupOrderAsc(String groupId);
+
+  /// 여러 묶음의 구성원을 한 번에 (묶음 목록, 묶음마다 따로 묻지 않음) (#806)
+  List<Routine> findAllByGroupIdInOrderByGroupOrderAsc(Collection<String> groupIds);
 }

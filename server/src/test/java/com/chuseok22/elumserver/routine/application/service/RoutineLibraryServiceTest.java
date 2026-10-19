@@ -47,6 +47,8 @@ class RoutineLibraryServiceTest {
   @Mock
   private RoutineRepository routineRepository;
   @Mock
+  private RoutineGroupMembership routineGroupMembership;
+  @Mock
   private ProfileAccessGuard profileAccessGuard;
   @Mock
   private RoutineStepSpeechQueue routineStepSpeechQueue;

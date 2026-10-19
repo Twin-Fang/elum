@@ -106,6 +106,12 @@ public enum ErrorCode {
   ROUTINE_ORDER_CONFLICT(HttpStatus.CONFLICT),
   // 일과관리 보내기는 원본 하나당 하루 한 번이다 (#804). 같은 일과가 오늘 목록에 둘 뜨지 않게.
   ROUTINE_ALREADY_SENT_TODAY(HttpStatus.CONFLICT),
+  // 일과관리 묶음 (#806). 없는 묶음과 남의 이룸이 묶음은 같은 404 — 있는지 없는지를 흘리지 않는다.
+  ROUTINE_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND),
+  // 묶음에는 일과관리 원본만 (보내기로 만든 일과 · 지운 원본 · 임시저장 · 다른 이룸이 일과 제외)
+  ROUTINE_GROUP_INVALID_MEMBER(HttpStatus.BAD_REQUEST),
+  // 묶음은 일과 2개 이상. 하나만 남기려면 묶음을 푼다
+  ROUTINE_GROUP_TOO_SMALL(HttpStatus.BAD_REQUEST),
 
   // 초대 코드. 연결 암호(DEVICE_LINK_*)와 같은 체계다 — 없는 코드와 이미 쓴 코드는
   // 같은 문구로 돌려줘 어떤 코드가 존재했는지가 새어 나가지 않게 한다.

@@ -45,7 +45,7 @@ class ErrorMessageParityTest {
   @DisplayName("원본 이후 더한 코드는 golden 밖에서 따로 단언한다 — golden 을 다시 만들면 원본 증명이 흐려진다")
   void codesAddedAfterOriginal_areAssertedSeparately() {
     assertThat(ErrorCode.values()).hasSize(GOLDEN.size() + 2 + 1 + ADDED_LOG_CODES.size() + ADDED_FEEDBACK_CODES.size()
-      + ADDED_ADMIN_CREDIT_CODES.size() + 1);
+      + ADDED_ADMIN_CREDIT_CODES.size() + 1 + ADDED_ROUTINE_GROUP_CODES.size());
     assertThat(GOLDEN).doesNotContainKey(ErrorCode.CONTENT_LOCALE_NOT_READY.name());
     assertThat(ErrorCode.CONTENT_LOCALE_NOT_READY.getStatus().name()).isEqualTo("BAD_REQUEST");
     assertThat(ErrorMessages.standard().of(ErrorCode.CONTENT_LOCALE_NOT_READY, AppLocale.KO))
@@ -75,6 +75,23 @@ class ErrorMessageParityTest {
     assertThat(ErrorMessages.standard().of(ErrorCode.ROUTINE_ALREADY_SENT_TODAY, AppLocale.KO))
       .isEqualTo("오늘 이미 보낸 일과예요.");
     assertThat(ErrorMessages.standard().of(ErrorCode.ROUTINE_ALREADY_SENT_TODAY, AppLocale.EN)).isNotBlank();
+  }
+
+  // 일과관리 묶음(#806)이 더한 코드
+  private static final java.util.List<ErrorCode> ADDED_ROUTINE_GROUP_CODES = java.util.List.of(
+    ErrorCode.ROUTINE_GROUP_NOT_FOUND, ErrorCode.ROUTINE_GROUP_INVALID_MEMBER, ErrorCode.ROUTINE_GROUP_TOO_SMALL);
+
+  @Test
+  @DisplayName("일과관리 묶음 코드(#806)는 golden 밖에서 상태와 문구를 단언한다")
+  void routineGroupCodes_areAssertedSeparately() {
+    assertThat(ErrorCode.ROUTINE_GROUP_NOT_FOUND.getStatus().name()).isEqualTo("NOT_FOUND");
+    assertThat(ErrorCode.ROUTINE_GROUP_INVALID_MEMBER.getStatus().name()).isEqualTo("BAD_REQUEST");
+    assertThat(ErrorCode.ROUTINE_GROUP_TOO_SMALL.getStatus().name()).isEqualTo("BAD_REQUEST");
+    for (ErrorCode code : ADDED_ROUTINE_GROUP_CODES) {
+      assertThat(GOLDEN).doesNotContainKey(code.name());
+      assertThat(ErrorMessages.standard().of(code, AppLocale.KO)).isNotBlank().doesNotContain("아이");
+      assertThat(ErrorMessages.standard().of(code, AppLocale.EN)).isNotBlank();
+    }
   }
 
   // 관리자 크레딧 화면이 더한 코드. 문구·detail 은 AdminCreditServiceTest 가 코드 단위로 본다.

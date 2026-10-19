@@ -10,6 +10,9 @@ import com.chuseok22.elumserver.member.application.controller.MemberController;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.MemberService;
 import com.chuseok22.elumserver.routine.application.controller.RoutineController;
+import com.chuseok22.elumserver.routine.application.controller.RoutineGroupController;
+import com.chuseok22.elumserver.routine.application.dto.request.RoutineGroupCreateRequest;
+import com.chuseok22.elumserver.routine.application.service.RoutineGroupService;
 import com.chuseok22.elumserver.routine.application.dto.request.RoutineReorderRequest;
 import com.chuseok22.elumserver.routine.application.service.RoutineCreateService;
 import com.chuseok22.elumserver.routine.application.service.RoutineLibraryService;
@@ -76,6 +79,20 @@ class ProfileHeaderWiringTest {
     new RoutineController(routineService, mock(RoutineStepEditService.class), routineCreateService, routineQueryService, mock(RoutineStepSpeechProvider.class), routineProgressService, mock(RoutineStepPhotoService.class), mock(RoutineLibraryService.class), new RoutineAuthorResolver(mock(ProfileGuardianRepository.class))).getTodayRoutines(guardian, null);
 
     verify(routineQueryService).getTodayRoutines(Caller.guardian("m1"));
+  }
+
+  @Test
+  @DisplayName("일과관리 묶음 목록·만들기도 헤더의 이룸이로 간다 (#806)")
+  void routineGroups_passProfileHeader() {
+    RoutineGroupService routineGroupService = mock(RoutineGroupService.class);
+    RoutineGroupController controller = new RoutineGroupController(routineGroupService,
+      new RoutineAuthorResolver(mock(ProfileGuardianRepository.class)));
+
+    controller.getGroups(guardian, "p9");
+    controller.create(guardian, "p9", new RoutineGroupCreateRequest("아침", List.of("r1", "r2")));
+
+    verify(routineGroupService).getGroups(Caller.guardian("m1", "p9"));
+    verify(routineGroupService).create(Caller.guardian("m1", "p9"), "아침", List.of("r1", "r2"));
   }
 
   @Test
