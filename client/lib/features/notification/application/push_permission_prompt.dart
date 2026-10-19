@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/storage/local_storage.dart';
+import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/push_permission_sheet.dart';
-import '../../../core/widgets/show_failure.dart';
 import '../data/push_messaging_client.dart';
 import '../domain/push_permission_status.dart';
 import 'push_token_registrar.dart';
@@ -56,12 +56,9 @@ class PushPermissionPrompt {
       if (isAllowed != true) return; // 나중에·닫기: 플래그만
       final isGranted = await _requestAndRegister();
       if (isGranted == false && context.mounted) {
-        await showFailure(
-          context,
-          null,
-          fallback: context.l10n.pushPermissionDenied,
-          fallbackCode: 'E-PUSH-PERM',
-        );
+        // 본인이 거부한 것이라 오류 팝업이 아니라 안내 토스트
+        AppLogger.info('[push] permission denied by user');
+        showElumToast(context, context.l10n.pushPermissionDenied);
       }
     } catch (e, st) {
       AppLogger.error('push', e, st, {'step': 'maybeAsk'});

@@ -44,8 +44,8 @@ class PushMessageRouter {
   // 같은 알림이 두 경로(초기 메시지·누름 스트림)로 들어와도 한 번만 여는 시간
   static const _duplicateOpenWindow = Duration(seconds: 5);
 
-  // 알림 id 가 없는 푸시의 배너 id 범위 시작 (알림 id 해시와 겹치지 않게 큰 값부터)
-  static const _fallbackBannerIdStart = 0x40000000;
+  // 배너 id 는 음수 (일과 알림 id 는 0 이상 31비트라 겹치지 않음). 알림 id 없는 푸시는 이 값부터 감소
+  static const _fallbackBannerIdStart = -0x40000001;
 
   bool _isStarted = false;
   ReadyNavigatorContext? _readyContext;
@@ -191,8 +191,8 @@ class PushMessageRouter {
   // 같은 알림은 같은 id 로 (재수신 시 배너가 겹쳐 쌓이지 않음)
   int _bannerIdOf(PushMessage message) {
     final notificationId = message.notificationId;
-    if (notificationId != null) return notificationId.hashCode & 0x3fffffff;
-    return _nextFallbackBannerId++;
+    if (notificationId != null) return -(notificationId.hashCode & 0x3fffffff) - 1;
+    return _nextFallbackBannerId--;
   }
 
   // ----- 누름 > 이동 -----

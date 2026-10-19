@@ -40,6 +40,8 @@ class PushTokenRegistrar {
   /// 조건이 맞으면 현재 토큰 등록 + 갱신 구독 (로그인 직후, 앱 시작, 권한 허용 직후에 부름)
   Future<void> syncRegistration() async {
     _isSuspended = false;
+    // 명시적 동기화는 서버 PUT 을 항상 다시 함 (세션 만료로 다른 계정이 들어온 경우 토큰 주인을 바로잡음)
+    _registeredToken = null;
     try {
       _subscribeToTokenRefresh();
     } catch (e, st) {
