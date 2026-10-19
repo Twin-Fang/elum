@@ -157,6 +157,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
         builder: (context, candidates, _) => _ArrangeShell(
           isArranging: widget.isArranging,
           isAlternatePhase: index.isOdd,
+          isRemovable: true,
           onRemove: () => widget.onRemoveGroup?.call(entry),
           child: groupTile(
             isDropTarget: candidates.isNotEmpty,
@@ -216,6 +217,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
           return _ArrangeShell(
             isArranging: widget.isArranging,
             isAlternatePhase: index.isOdd,
+            isRemovable: routine.isEditableByMe,
             onRemove: () => widget.onRemoveRoutine?.call(routine),
             child: dragged,
           );
@@ -288,6 +290,7 @@ class _ArrangeShell extends StatefulWidget {
   const _ArrangeShell({
     required this.isArranging,
     required this.isAlternatePhase,
+    required this.isRemovable,
     required this.onRemove,
     required this.child,
   });
@@ -296,6 +299,9 @@ class _ArrangeShell extends StatefulWidget {
 
   /// 이웃 칸과 어긋나게 흔든다 (시안: 짝수 칸은 반 박자 늦게)
   final bool isAlternatePhase;
+
+  /// ⊖ 를 달 수 있는가 — 남이 만든 일과는 지울 수 없어 달지 않는다 (메뉴가 지우기를 숨기는 것과 같다)
+  final bool isRemovable;
   final VoidCallback onRemove;
   final Widget child;
 
@@ -362,28 +368,29 @@ class _ArrangeShellState extends State<_ArrangeShell>
           ),
           child: widget.child,
         ),
-        Positioned(
-          top: -4.h,
-          left: 2.w,
-          child: AppPressable(
-            onTap: widget.onRemove,
-            scaleDown: AppPressable.scaleIcon,
-            semanticLabel: context.l10n.libraryArrangeRemove,
-            child: Container(
-              width: _badgeSize.w,
-              height: _badgeSize.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colors.textSecondary,
-              ),
-              child: Icon(
-                Icons.remove_rounded,
-                size: 16.w,
-                color: colors.surface,
+        if (widget.isRemovable)
+          Positioned(
+            top: -4.h,
+            left: 2.w,
+            child: AppPressable(
+              onTap: widget.onRemove,
+              scaleDown: AppPressable.scaleIcon,
+              semanticLabel: context.l10n.libraryArrangeRemove,
+              child: Container(
+                width: _badgeSize.w,
+                height: _badgeSize.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colors.textSecondary,
+                ),
+                child: Icon(
+                  Icons.remove_rounded,
+                  size: 16.w,
+                  color: colors.surface,
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }
