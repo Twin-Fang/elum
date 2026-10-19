@@ -15,17 +15,16 @@ import '../../../core/widgets/elum_toast.dart';
 import '../../../core/widgets/show_failure.dart';
 import '../../../shared/models/routine.dart';
 import '../../credit/application/credit_start_gate.dart';
-import '../application/library_coach_notifier.dart';
 import '../application/library_entries.dart';
 import '../application/routine_library_controller.dart';
 import '../application/routine_notifier.dart';
 import '../application/routine_providers.dart';
 import 'guardian_home_screen.dart';
 import 'library_group_actions.dart';
-import 'widgets/library_coach_mark.dart';
 import 'widgets/library_entry_grid.dart';
 import 'widgets/library_parts.dart';
 import 'widgets/library_quick_menu.dart';
+import 'widgets/routine_manage_coach_mark.dart';
 import 'widgets/routine_detail_sheet.dart';
 import 'widgets/routine_rename_sheet.dart';
 
@@ -52,16 +51,10 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
   /// 정리 상태: 칸이 흔들리고 ⊖ 가 붙고 바로 끌 수 있다 (#837)
   bool _isArranging = false;
 
-  /// 코치마크가 가리킬 첫 일과 칸 · `+ 일과 만들기` 버튼 (#834)
-  final _firstTileKey = GlobalKey();
-  final _createKey = GlobalKey();
-
-  /// 이 칸이 맨 위에 보이는 지금일 때만 코치마크를 켠다. 숨은 칸(다른 탭)이나 다른 화면 위에서는 켜지 않는다
-  void _maybeStartCoach() {
-    if (!mounted || !TickerMode.of(context)) return;
-    if (ModalRoute.of(context)?.isCurrent == false) return;
-    ref.read(libraryCoachProvider.notifier).maybeStart(hasTileTarget: true);
-  }
+  /// 첫 사용 안내가 가리킬 칸: 낱개 일과 첫째 · 둘째, `+ 일과 만들기`
+  final _firstRoutineTileKey = GlobalKey();
+  final _secondRoutineTileKey = GlobalKey();
+  final _createButtonKey = GlobalKey();
 
   // --- 동작 ---
 
@@ -304,6 +297,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         entries: value,
         sentIds: sentIds,
         bottomSpace: bottomSpace,
+        firstRoutineTileKey: _firstRoutineTileKey,
+        secondRoutineTileKey: _secondRoutineTileKey,
         onRoutineTap: busy ? null : openRoutineDetail,
         onRoutineMenu: busy ? null : _openMenu,
         onGroupTap: busy ? null : openGroup,
@@ -320,7 +315,6 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
         onDropOnGroup: busy
             ? null
             : (dragged, target) => addToGroup(target.group, [dragged.id]),
-        firstTileKey: _firstTileKey,
       ),
       AsyncValue(:final value?) when value.isEmpty => LibraryEmptyState(
         bottomSpace: bottomSpace,
@@ -336,17 +330,12 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       _ => const Center(child: ElumSpinner()),
     };
 
-    // 일과 칸이 그려진 뒤(가리킬 곳이 있을 때) 처음 한 번 안내를 켠다
-    if (async.value?.isNotEmpty ?? false) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartCoach());
-    }
-
     final scaffold = Scaffold(
       backgroundColor: colors.background,
       // 떠 있는 버튼으로 두어야 알림(토스트)이 버튼을 가리지 않고 그 위에 뜬다
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: KeyedSubtree(
-        key: _createKey,
+        key: _createButtonKey,
         child: CreateRoutineFab(
           height: _createButtonHeight.h,
           isBusy: busy,
@@ -372,13 +361,16 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     return Stack(
       children: [
         scaffold,
-        // 처음 들어왔을 때만 뜨는 안내. 평소에는 아무것도 그리지 않는다
+        // 처음 들어왔을 때만 뜨는 안내. 평소에는 아무것도 그리지 않는다.
+        // Scaffold 밖이라 글 스타일을 주는 Material 이 없어 투명 Material 로 감싼다.
         Positioned.fill(
           child: Material(
             type: MaterialType.transparency,
-            child: LibraryCoachMark(
-              tileKey: _firstTileKey,
-              createKey: _createKey,
+            child: RoutineManageCoachMark(
+              entries: async.value,
+              firstRoutineTileKey: _firstRoutineTileKey,
+              secondRoutineTileKey: _secondRoutineTileKey,
+              createButtonKey: _createButtonKey,
             ),
           ),
         ),

@@ -37,7 +37,8 @@ class LibraryEntryGrid extends StatefulWidget {
     required this.onArrangeStart,
     required this.onRemoveRoutine,
     required this.onRemoveGroup,
-    this.firstTileKey,
+    this.firstRoutineTileKey,
+    this.secondRoutineTileKey,
   });
 
   final List<LibraryEntry> entries;
@@ -73,8 +74,9 @@ class LibraryEntryGrid extends StatefulWidget {
   final ValueChanged<Routine>? onRemoveRoutine;
   final ValueChanged<LibraryGroupEntry>? onRemoveGroup;
 
-  /// 코치마크가 가리킬 첫 칸에 붙일 키 (#834)
-  final GlobalKey? firstTileKey;
+  /// 코치마크가 가리킬 낱개 일과 칸의 첫째 · 둘째 (묶음 칸은 세지 않는다)
+  final GlobalKey? firstRoutineTileKey;
+  final GlobalKey? secondRoutineTileKey;
 
   @override
   State<LibraryEntryGrid> createState() => _LibraryEntryGridState();
@@ -114,6 +116,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
           _minColumns,
           _maxColumns,
         );
+        final coachKeys = _coachKeysByRoutineId();
         return GridView.builder(
           padding: EdgeInsets.fromLTRB(
             space.md.w,
@@ -130,22 +133,33 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid> {
                 LibraryRoutineTile.iconSize.w + space.xs.h + space.xl.h * 1.4,
           ),
           itemCount: widget.entries.length,
-          itemBuilder: (context, index) {
-            final tile = switch (widget.entries[index]) {
-              final LibraryGroupEntry entry => _buildGroup(entry, index),
-              final LibraryRoutineEntry entry => _buildRoutine(
-                entry.routine,
-                index,
-              ),
-            };
-            final coachKey = widget.firstTileKey;
-            if (index != 0 || coachKey == null) return tile;
-            return KeyedSubtree(key: coachKey, child: tile);
+          itemBuilder: (context, index) => switch (widget.entries[index]) {
+            final LibraryGroupEntry entry => _buildGroup(entry, index),
+            final LibraryRoutineEntry entry => KeyedSubtree(
+              key: coachKeys[entry.routine.id],
+              child: _buildRoutine(entry.routine, index),
+            ),
           },
         );
       },
     );
   }
+
+  /// 낱개 일과 칸 중 첫째 · 둘째에 코치마크 키를 붙인다 (일과 id > 키)
+  Map<String, GlobalKey> _coachKeysByRoutineId() {
+    final looseRoutines = widget.entries
+        .whereType<LibraryRoutineEntry>()
+        .map((entry) => entry.routine.id)
+        .take(2)
+        .toList();
+    return {
+      if (looseRoutines.isNotEmpty && widget.firstRoutineTileKey != null)
+        looseRoutines[0]: widget.firstRoutineTileKey!,
+      if (looseRoutines.length > 1 && widget.secondRoutineTileKey != null)
+        looseRoutines[1]: widget.secondRoutineTileKey!,
+    };
+  }
+
 
   /// 끌어 온 칸이 [tileContext] 칸의 어느 자리 위에 놓였는가 (앞·가운데·뒤)
   _DropZone _zoneOf(
