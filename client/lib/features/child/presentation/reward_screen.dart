@@ -7,6 +7,7 @@ import '../../../core/haptics/child_haptics.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import 'widgets/child_night_sky_backdrop.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../onboarding/application/onboarding_notifier.dart';
 import '../../../shared/models/reward_character.dart';
@@ -62,15 +63,8 @@ class _RewardScreenState extends ConsumerState<RewardScreen> {
         );
 
     return Scaffold(
-      body: DecoratedBox(
-        // Figma linear-gradient(180deg, #0C0D1A → #242634)
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [colors.rewardBackdropTop, colors.rewardBackdropBottom],
-          ),
-        ),
+      // Figma linear-gradient(180deg, #0C0D1A → #242634)
+      body: ChildNightSkyBackdrop(
         child: SafeArea(
           child: Column(
             children: [

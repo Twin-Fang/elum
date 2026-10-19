@@ -7,6 +7,7 @@ import '../../../core/haptics/child_haptics.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
+import 'widgets/child_night_sky_backdrop.dart';
 import '../../../core/widgets/elum_button.dart';
 import '../../../core/router/routes.dart';
 import '../../member/application/member_providers.dart';
@@ -58,19 +59,9 @@ class RoutineDoneScreen extends ConsumerWidget {
         );
 
     return Scaffold(
-      body: DecoratedBox(
-        // Figma linear-gradient(180deg, #0C0D1A 7% → #574D2B 100%)
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: const [0.07, 1],
-            colors: [
-              colors.rewardBackdropTop,
-              colors.routineDoneBackdropBottom,
-            ],
-          ),
-        ),
+      // Figma linear-gradient(180deg, #0C0D1A 7% → #574D2B 100%)
+      body: ChildNightSkyBackdrop(
+        sky: ChildNightSky.routineDone,
         child: SafeArea(
           child: Stack(
             clipBehavior: Clip.none,

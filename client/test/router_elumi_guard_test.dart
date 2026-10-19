@@ -24,7 +24,7 @@ void main() {
       ) ??
       path;
 
-  group('이룸이 휴대폰 + 세션 있음 → 보호자 경로는 이룸이 홈으로', () {
+  group('이룸이 기기 + 세션 있음 → 보호자 경로는 이룸이 홈으로', () {
     for (final path in [
       Routes.guardian,
       Routes.guardianSettings,
@@ -48,7 +48,7 @@ void main() {
     });
   });
 
-  group('이룸이 휴대폰이 갈 수 있는 곳은 그대로다', () {
+  group('이룸이 기기가 갈 수 있는 곳은 그대로다', () {
     for (final path in [
       Routes.child,
       Routes.childRoutineDetail,
@@ -62,11 +62,11 @@ void main() {
 
   });
 
-  group('이룸이 휴대폰 + 세션 없음 → 로그인이다', () {
+  group('이룸이 기기 + 세션 없음 → 로그인이다', () {
   });
 
-  group('보호자 휴대폰은 달라지지 않는다', () {
-    test('세션이 없으면 로그인으로 보낸다 (이룸이 휴대폰 규칙과 섞이지 않는다)', () {
+  group('보호자 기기는 달라지지 않는다', () {
+    test('세션이 없으면 로그인으로 보낸다 (이룸이 기기 규칙과 섞이지 않는다)', () {
       expect(
         go(Routes.guardian, elumi: false, hasSession: false),
         Routes.login,

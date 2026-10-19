@@ -277,7 +277,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roleElumiDescription => 'Do the routines';
 
   @override
-  String get roleSelectTitle => 'Who will use\nthis phone?';
+  String get roleSelectTitle => 'Who will use\nthis device?';
 
   @override
   String get roleSelectDescription => 'There are Guardian mode and Elumi mode';
@@ -538,7 +538,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get elumiSettingsLogoutMessage =>
-      'This phone will be disconnected\nTo use it again, get a\nlink code from a guardian';
+      'This device will be disconnected\nTo use it again, get a\nlink code from a guardian';
 
   @override
   String get elumiSettingsLogoutFailTitle => 'Couldn\'t log out';
@@ -548,11 +548,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get elumiSettingsWithdrawMessage =>
-      'Only this phone is disconnected\nRoutines and stars stay on the guardian\'s phone\nTo use it again, get a\nlink code from a guardian';
+      'Only this device is disconnected\nRoutines and stars stay on the guardian\'s device\nTo use it again, get a\nlink code from a guardian';
 
   @override
   String get inviteRejectedOnElumiDevice =>
-      'This phone can\'t accept invites\nOpen it on a guardian\'s phone';
+      'This device can\'t accept invites\nOpen it on a guardian\'s device';
 
   @override
   String get elumiSettingsWithdrawFailTitle => 'Couldn\'t delete the account';
@@ -561,14 +561,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get elumiSettingsExitFailedFallback => 'Try again in a moment';
 
   @override
-  String get linkStatusTitle => 'Elumi\'s phone';
+  String get linkStatusTitle => 'Elumi\'s device';
 
   @override
-  String get linkStatusRevokeConfirmTitle => 'Disconnect this phone?';
+  String get linkStatusRevokeConfirmTitle => 'Disconnect this device?';
 
   @override
   String get linkStatusRevokeConfirmMessage =>
-      'Elumi won\'t be able to see routines on that phone\nTo connect again, make a new link code';
+      'Elumi won\'t be able to see routines on that device\nTo connect again, make a new link code';
 
   @override
   String get linkStatusRevokeConfirmAction => 'Disconnect';
@@ -591,7 +591,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String linkDeviceNumbered(int number) {
-    return 'Elumi\'s phone $number';
+    return 'Elumi\'s device $number';
   }
 
   @override
@@ -602,10 +602,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkStatusRevokeHint =>
-      'If you disconnect, Elumi can\'t see\nroutines on that phone';
+      'If you disconnect, Elumi can\'t see\nroutines on that device';
 
   @override
-  String get linkStatusEmpty => 'No phone is connected';
+  String get linkStatusEmpty => 'No device is connected';
 
   @override
   String linkStatusConnectedBy(String name, String batchim) {
@@ -621,22 +621,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get linkStatusAddAction => '+ Connect another phone';
+  String get linkStatusAddAction => '+ Connect another device';
 
   @override
-  String get linkStatusConnectAction => 'Connect Elumi\'s phone';
+  String get linkStatusConnectAction => 'Connect Elumi\'s device';
 
   @override
-  String get linkCodeSettingsTitle => 'Connect Elumi\'s phone';
+  String get linkCodeSettingsTitle => 'Connect Elumi\'s device';
 
   @override
   String linkCodeAskTitle(String name) {
-    return 'Connect $name\'s\nphone?';
+    return 'Connect $name\'s\ndevice?';
   }
 
   @override
   String linkCodeEnterHint(String name) {
-    return 'Enter the code below on $name\'s phone';
+    return 'Enter the code below on $name\'s device';
   }
 
   @override
@@ -644,7 +644,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t make the code. Try again.';
 
   @override
-  String get linkCodeSuccessTitle => 'The phone is connected!';
+  String get linkCodeSuccessTitle => 'The device is connected!';
 
   @override
   String get linkCodeStartButton => 'Start';
@@ -663,10 +663,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkEnterGuide =>
-      'You can find the code on the guardian\'s phone in\nSettings → Connect Elumi\'s phone';
+      'You can find the code on the guardian\'s device in\nSettings → Connect Elumi\'s device';
 
   @override
-  String get linkEnterGuidePath => 'Settings → Connect Elumi\'s phone';
+  String get linkEnterGuidePath => 'Settings → Connect Elumi\'s device';
 
   @override
   String get linkEnterLinkLost =>
@@ -732,7 +732,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardiansLeaveConfirmMessageOthers =>
-      'If you connected Elumi\'s phone, it will be disconnected\nA remaining guardian needs to make a new link code to use it again\nRoutines you made will be gone\nElumi\'s and other guardians\' routines and stars stay';
+      'If you connected Elumi\'s device, it will be disconnected\nA remaining guardian needs to make a new link code to use it again\nRoutines you made will be gone\nElumi\'s and other guardians\' routines and stars stay';
 
   @override
   String get guardiansLeaveConfirmAction => 'Stop';
@@ -882,7 +882,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteEnterForbiddenForElumi =>
-      'You can\'t do this on Elumi\'s phone';
+      'You can\'t do this on Elumi\'s device';
 
   @override
   String get inviteEnterInvalidInput => 'That invite code isn\'t right';
@@ -914,7 +914,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inviteEnterDescriptionManual =>
-      'The code is on a co-guardian\'s phone,\nin Settings → Co-guardians';
+      'The code is on a co-guardian\'s device,\nin Settings → Co-guardians';
 
   @override
   String get inviteEnterDescriptionPath => 'Settings → Co-guardians';
@@ -1216,7 +1216,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardReviewSoundFailedFallback =>
-      'Turn on your phone\'s sound and tap again';
+      'Turn on your device\'s sound and tap again';
 
   @override
   String get cardReviewSaveFailedTitle => 'Couldn\'t save the routine';
@@ -1296,7 +1296,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedbackHint => 'Tell us what was hard to use';
 
   @override
-  String get feedbackIncludeLog => 'Send app status log and phone info';
+  String get feedbackIncludeLog => 'Send app status log and device info';
 
   @override
   String get feedbackSend => 'Send';
@@ -1318,10 +1318,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guardianSettingsWithdraw => 'Delete account';
 
   @override
-  String get guardianSettingsLinkConnected => 'Elumi\'s phone';
+  String get guardianSettingsLinkConnected => 'Elumi\'s device';
 
   @override
-  String get guardianSettingsLinkConnect => 'Connect Elumi\'s phone';
+  String get guardianSettingsLinkConnect => 'Connect Elumi\'s device';
 
   @override
   String get guardianSettingsLinkStatus => 'Connected';
@@ -1423,7 +1423,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardViewerSoundFailedFallback =>
-      'Turn on your phone\'s sound and tap again';
+      'Turn on your device\'s sound and tap again';
 
   @override
   String get cardViewerClose => 'Close card';
@@ -1469,18 +1469,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardPhotoPermissionCameraBody =>
-      'Turn on the camera in your phone\'s settings to take photos';
+      'Turn on the camera in your device\'s settings to take photos';
 
   @override
   String get cardPhotoPermissionGalleryBody =>
-      'Turn on photo access in your phone\'s settings to choose photos';
+      'Turn on photo access in your device\'s settings to choose photos';
 
   @override
   String get cardPhotoSettingsFailedTitle => 'Couldn\'t open settings';
 
   @override
   String get cardPhotoSettingsFailedFallback =>
-      'Turn it on in your phone\'s settings';
+      'Turn it on in your device\'s settings';
 
   @override
   String get cardPhotoSourceTake => 'Take a photo';
@@ -1736,7 +1736,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get childHomeEmptyHintDevice =>
-      'Make a routine on a guardian\'s phone';
+      'Make a routine on a guardian\'s device';
 
   @override
   String get childHomeToGuardianLabel => 'Go to Guardian mode';
@@ -1779,7 +1779,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get childDetailSoundFailedFallback =>
-      'Turn on your phone\'s sound and tap again';
+      'Turn on your device\'s sound and tap again';
 
   @override
   String get childDetailCheckLabel => 'I did it';
@@ -1854,18 +1854,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modeSwitchReadFailedFallback => 'Try again in a moment';
 
   @override
-  String get modeSwitchBlockedTitle => 'Open this on\na guardian\'s phone';
+  String get modeSwitchBlockedTitle => 'Open this on\na guardian\'s device';
 
   @override
   String get modeSwitchBlockedDescription =>
-      'Guardian mode can\'t be opened on this phone';
+      'Guardian mode can\'t be opened on this device';
 
   @override
   String get modeSwitchBlockedBack => 'Go back';
 
   @override
   String get installationRetryMessage =>
-      'Could not check sign-in information on this phone. Please try again.';
+      'Could not check sign-in information on this device. Please try again.';
 
   @override
   String get installationRetryButton => 'Try again';
@@ -1891,14 +1891,14 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$minutes minutes',
       one: '$minutes minute',
     );
-    return 'Let\'s connect Elumi\'s phone. Tap the link below on that phone to open the elum app with the connection code filled in.\nThe connection code works for $_temp0.\n\n$url\n\nIf the link doesn\'t open, enter it in the app.\nConnection code $code';
+    return 'Let\'s connect Elumi\'s device. Tap the link below on that device to open the elum app with the connection code filled in.\nThe connection code works for $_temp0.\n\n$url\n\nIf the link doesn\'t open, enter it in the app.\nConnection code $code';
   }
 
   @override
-  String get linkRejectedAlreadyLinked => 'This phone is already connected';
+  String get linkRejectedAlreadyLinked => 'This device is already connected';
 
   @override
-  String get linkRejectedOnGuardianPhone => 'Open this on Elumi\'s phone';
+  String get linkRejectedOnGuardianPhone => 'Open this on Elumi\'s device';
 
   @override
   String get creditHistoryTitle => 'Credit history';

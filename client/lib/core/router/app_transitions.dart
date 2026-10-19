@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../layout/adaptive_page_frame.dart';
+import '../layout/screen_layout_kind.dart';
 import '../theme/app_motion.dart';
 
 /// go_router 페이지 전환 헬퍼 — motion.md "전환 없는 즉시 교체 금지" 구현.
@@ -12,12 +14,22 @@ import '../theme/app_motion.dart';
 const kPageTransitionDuration = AppMotion.slow;
 
 /// 수평 슬라이드 + fade. 온보딩 단계 진행처럼 "다음으로 나아가는" 전환.
-CustomTransitionPage<void> slidePage(GoRouterState state, Widget child) {
+CustomTransitionPage<void> slidePage(
+  GoRouterState state,
+  Widget child, {
+  ScreenLayoutKind layoutKind = ScreenLayoutKind.phoneColumn,
+  Widget? backdrop,
+}) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
     // 이름이 있어야 화면 이동 기록과 개발자 도구가 어느 화면인지 경로로 남긴다.
     name: state.uri.path,
-    child: child,
+    // 태블릿에서는 선언한 종류대로 담는다 (폰은 그대로)
+    child: AdaptivePageFrame(
+      kind: layoutKind,
+      backdrop: backdrop,
+      child: child,
+    ),
     transitionDuration: kPageTransitionDuration,
     reverseTransitionDuration: kPageTransitionDuration,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -37,12 +49,22 @@ CustomTransitionPage<void> slidePage(GoRouterState state, Widget child) {
 }
 
 /// fade 전환. 온보딩 완료 → 보호자 홈처럼 맥락이 바뀌는 진입.
-CustomTransitionPage<void> fadePage(GoRouterState state, Widget child) {
+CustomTransitionPage<void> fadePage(
+  GoRouterState state,
+  Widget child, {
+  ScreenLayoutKind layoutKind = ScreenLayoutKind.phoneColumn,
+  Widget? backdrop,
+}) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
     // 이름이 있어야 화면 이동 기록과 개발자 도구가 어느 화면인지 경로로 남긴다.
     name: state.uri.path,
-    child: child,
+    // 태블릿에서는 선언한 종류대로 담는다 (폰은 그대로)
+    child: AdaptivePageFrame(
+      kind: layoutKind,
+      backdrop: backdrop,
+      child: child,
+    ),
     transitionDuration: kPageTransitionDuration,
     reverseTransitionDuration: kPageTransitionDuration,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {

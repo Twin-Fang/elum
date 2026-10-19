@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'child_routine_detail_tablet_body.dart';
 import 'child_routine_detail_top_bar.dart';
 import 'child_routine_check_button.dart';
 
 import '../../../core/l10n/l10n_context.dart';
+import '../../../core/layout/layout_context_ext.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../../core/widgets/show_failure.dart';
@@ -332,27 +334,87 @@ class _ChildRoutineDetailScreenState
     _followCard(cards);
     final progress = ref.watch(childRoutineProvider);
 
+    final topBar = ChildRoutineDetailTopBar(
+      onBack: context.popOrHome,
+      title: routine.displayTitle,
+      language: routine.language,
+    );
+
+    // 카드 넘기기 상자. 가운데 카드는 시안 자리(333 @ x=30) 그대로, 옆 카드는 가장자리에
+    // 20 걸친다 (시안 이탈 — 시안도 옆 카드를 x373에 둔다). 카드는 이 자리 높이를 채운다.
+    final pager = ChildCardPager(
+      controller: _controller,
+      cards: cards,
+      routineId: routine.id,
+      language: routine.language,
+      currentIndex: cards.isEmpty
+          ? 0
+          : _currentIndex.clamp(0, cards.length - 1),
+      speakingId: _speakingId,
+      onSpeak: _speak,
+      // 카드를 넘기면 체크 버튼 대상도 바뀐다
+      onPageChanged: (index) {
+        // 넘길 때마다 가볍게 — 옆 카드를 눌러 넘어갈 때도 같다
+        playChildHaptic(context, ChildHapticKind.select);
+        setState(() {
+          // 이룸이가 직접 넘긴 것이므로 새 카드를 기준으로 삼는다
+          if (index >= 0 && index < cards.length) {
+            _anchorId = cards[index].id;
+          }
+        });
+      },
+      onSideTap: _goToPage,
+      // 옆에 걸친 카드에도 한 것을 표시한다
+      isChecked: (card) => progress.isChecked(routine.id, card),
+    );
+
+    final checkButton = Builder(
+      builder: (context) {
+        final current = cards[_currentIndex.clamp(0, cards.length - 1)];
+        return ChildRoutineCheckButton(
+          isChecked: progress.isChecked(routine.id, current),
+          confettiController: _confetti,
+          onTap: () => _toggle(current),
+        );
+      },
+    );
+
+    // 🔴 하는 동안 보상이 계속 보인다 (수행 중 보상 노출이 핵심 기능).
+    // 완료 후에만 뜨는 별 연출과 다른 기능이다 — 끝까지 가는 힘이 여기서 나온다.
+    final rewardBanner = RewardBanner.maybe(routine);
+
+    // 태블릿은 카드를 크게 다시 배치한다 (폰은 아래 시안 배치 그대로)
+    if (context.layoutMetrics.isScaleOverridden) {
+      return Scaffold(
+        backgroundColor: context.colors.background,
+        body: SafeArea(
+          child: ChildRoutineDetailTabletBody(
+            topBar: topBar,
+            rewardBanner: rewardBanner,
+            // 폰 시안 크기 상자 — 태블릿 본문이 통째로 키운다
+            pager: SizedBox(
+              width: 393.w,
+              height: ChildRoutineDetailScreen._cardBoxHeight.h,
+              child: pager,
+            ),
+            checkButton: checkButton,
+            isLandscape: context.isLandscape,
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: context.colors.background,
       body: SafeArea(
         child: Column(
           children: [
             SizedBox(height: ChildRoutineDetailScreen._backTop.h),
-            ChildRoutineDetailTopBar(
-              onBack: context.popOrHome,
-              title: routine.displayTitle,
-              language: routine.language,
-            ),
+            topBar,
             SizedBox(height: ChildRoutineDetailScreen._topBarToReward.h),
-            // 🔴 하는 동안 보상이 계속 보인다 (수행 중 보상 노출이 핵심 기능).
-            // 완료 후에만 뜨는 별 연출과 다른 기능이다 — 끝까지 가는 힘이 여기서 나온다.
-            //
             // **보상이 없어도 칩 자리는 비워 둔다.** 시안은 칩·카드·버튼이 모두 고정
             // 자리라, 자리를 걷으면 일과마다 카드가 오르내려 보인다.
-            SizedBox(
-              height: RewardBanner.height.h,
-              child: RewardBanner.maybe(routine),
-            ),
+            SizedBox(height: RewardBanner.height.h, child: rewardBanner),
             SizedBox(height: ChildRoutineDetailScreen._rewardToCard.h),
             // **카드 자리를 시안 높이로 못 박는다.**
             //
@@ -365,48 +427,12 @@ class _ChildRoutineDetailScreenState
             Flexible(
               child: SizedBox(
                 height: ChildRoutineDetailScreen._cardBoxHeight.h,
-                // 가운데 카드는 시안 자리(333 @ x=30) 그대로, 옆 카드는 가장자리에
-                // 20 걸친다 (시안 이탈 — 시안도 옆 카드를 x373에 둔다).
-                // 카드는 이 자리 높이를 채운다.
-                child: ChildCardPager(
-                  controller: _controller,
-                  cards: cards,
-                  routineId: routine.id,
-                  language: routine.language,
-                  currentIndex: cards.isEmpty
-                      ? 0
-                      : _currentIndex.clamp(0, cards.length - 1),
-                  speakingId: _speakingId,
-                  onSpeak: _speak,
-                  // 카드를 넘기면 체크 버튼 대상도 바뀐다
-                  onPageChanged: (index) {
-                    // 넘길 때마다 가볍게 — 옆 카드를 눌러 넘어갈 때도 같다
-                    playChildHaptic(context, ChildHapticKind.select);
-                    setState(() {
-                      // 이룸이가 직접 넘긴 것이므로 새 카드를 기준으로 삼는다
-                      if (index >= 0 && index < cards.length) {
-                        _anchorId = cards[index].id;
-                      }
-                    });
-                  },
-                  onSideTap: _goToPage,
-                  // 옆에 걸친 카드에도 한 것을 표시한다
-                  isChecked: (card) => progress.isChecked(routine.id, card),
-                ),
+                child: pager,
               ),
             ),
             // 시안 카드 아래(641) → 체크 버튼(675) 사이 34
             SizedBox(height: ChildRoutineDetailScreen._cardToCheck.h),
-            Builder(
-              builder: (context) {
-                final current = cards[_currentIndex.clamp(0, cards.length - 1)];
-                return ChildRoutineCheckButton(
-                  isChecked: progress.isChecked(routine.id, current),
-                  confettiController: _confetti,
-                  onTap: () => _toggle(current),
-                );
-              },
-            ),
+            checkButton,
           ],
         ),
       ),

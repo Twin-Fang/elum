@@ -36,7 +36,7 @@ import 'package:elum/core/router/route_redirect.dart';
 void main() {
   useFigmaViewport();
 
-  group('라우터 가드 — 이룸이 휴대폰에서는 이 기능이 보이지도 열리지도 않는다', () {
+  group('라우터 가드 — 이룸이 기기에서는 이 기능이 보이지도 열리지도 않는다', () {
     String? guard(String path, {bool elumi = false, bool onboarded = true}) =>
         resolveRedirect(
           path,
@@ -46,7 +46,7 @@ void main() {
           isElumiDevice: elumi,
         );
 
-    test('이룸이 휴대폰은 함께하는 사람·초대·이룸이 바꾸기·초대 코드 넣기를 열 수 없다', () {
+    test('이룸이 기기는 함께하는 사람·초대·이룸이 바꾸기·초대 코드 넣기를 열 수 없다', () {
       for (final path in [
         Routes.guardianPeople,
         Routes.guardianInvite,

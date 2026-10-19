@@ -11,6 +11,9 @@ import '../../features/onboarding/presentation/name_screen.dart';
 import '../../features/onboarding/presentation/pin_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
 import '../../features/profile/presentation/invite_enter_screen.dart';
+import '../layout/adaptive_page_frame.dart';
+import '../layout/screen_layout_kind.dart';
+import '../widgets/login_scene.dart';
 import 'app_transitions.dart';
 import 'routes.dart';
 
@@ -18,7 +21,11 @@ import 'routes.dart';
 List<RouteBase> entryRoutes() => [
   GoRoute(
     path: Routes.splash,
-    builder: (context, state) => const SplashScreen(),
+    builder: (context, state) => const AdaptivePageFrame(
+      kind: ScreenLayoutKind.phoneColumn,
+      backdrop: SplashPlainBackdrop(),
+      child: SplashScreen(),
+    ),
   ),
 
   // --- 로그인 ---
@@ -31,18 +38,21 @@ List<RouteBase> entryRoutes() => [
   // 읽힌다 — `시작하기`를 없애 두 화면을 하나로 만든 의도와 맞는다.
   GoRoute(
     path: Routes.login,
-    pageBuilder: (context, state) => fadePage(state, const LoginScreen()),
+    pageBuilder: (context, state) => fadePage(
+      state,
+      const LoginScreen(),
+      // 태블릿에서 폰 비율 열 바깥도 같은 배경으로 채운다
+      backdrop: const LoginSceneBackdrop(),
+    ),
   ),
 
   GoRoute(
     path: Routes.consent,
-    pageBuilder: (context, state) =>
-        slidePage(state, const ConsentScreen()),
+    pageBuilder: (context, state) => slidePage(state, const ConsentScreen()),
   ),
   GoRoute(
     path: Routes.roleSelect,
-    pageBuilder: (context, state) =>
-        slidePage(state, const RoleSelectScreen()),
+    pageBuilder: (context, state) => slidePage(state, const RoleSelectScreen()),
   ),
 
   // --- 온보딩 ---
@@ -57,8 +67,7 @@ List<RouteBase> entryRoutes() => [
   ),
   GoRoute(
     path: Routes.onboardingCharacter,
-    pageBuilder: (context, state) =>
-        slidePage(state, const CharacterScreen()),
+    pageBuilder: (context, state) => slidePage(state, const CharacterScreen()),
   ),
   // 초대 코드 넣기 — 새로 가입한 보호자가 이룸이 등록 대신 들어온다.
   GoRoute(
@@ -68,8 +77,7 @@ List<RouteBase> entryRoutes() => [
   ),
   GoRoute(
     path: Routes.onboardingImageStyle,
-    pageBuilder: (context, state) =>
-        slidePage(state, const ImageStyleScreen()),
+    pageBuilder: (context, state) => slidePage(state, const ImageStyleScreen()),
   ),
   GoRoute(
     path: Routes.onboardingPin,
@@ -77,6 +85,9 @@ List<RouteBase> entryRoutes() => [
   ),
   GoRoute(
     path: Routes.cardCompletion,
-    builder: (context, state) => const CardCompletionScreen(),
+    builder: (context, state) => const AdaptivePageFrame(
+      kind: ScreenLayoutKind.phoneColumn,
+      child: CardCompletionScreen(),
+    ),
   ),
 ];

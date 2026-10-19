@@ -133,6 +133,7 @@ curl -N "http://chuseok22.synology.me:8888/containers/elum-back-green/logs?lines
   // ❌ Color(0xFF443E39), fontSize: 28
   // ✅ AppColors.textPrimary, AppTypography.title
   ```
+- **창 크기·방향은 `context.sizeClass` / `context.isLandscape` / `context.layout` 으로만 읽는다.** 화면에서 `600`·`840` 같은 breakpoint 를 직접 비교하거나 `1.sw`·`ScreenUtil()` 을 부르지 않는다. 시트·팝업은 `showElumSheet`·`showElumDialog` 로만 띄운다 (`test/tablet_layout_rule_test.dart`). 태블릿 설계는 `docs/superpowers/specs/2026-10-19-tablet-support-design.md`.
 - **화면 위젯은 `ConsumerWidget` 우선.** `StatefulWidget`은 애니메이션 컨트롤러가 필요할 때만.
 - **`build()` 안에서 비즈니스 로직 금지.** provider 또는 notifier로 뺀다.
 - 한 파일 300줄을 넘기면 위젯을 분리한다.

@@ -61,7 +61,8 @@ class _HomeCoachMarkState extends ConsumerState<HomeCoachMark> {
         );
       case HomeCoachStep.swipeRoutine:
         // 열린 줄에서 삭제·수정 두 버튼의 가운데를 가리킨다 (시안 화살표 x=305).
-        final rowWidth = 1.sw - 32.w;
+        // 태블릿에서는 폰 비율 열 안이라 창이 아니라 이 화면의 폭을 쓴다
+        final rowWidth = MediaQuery.sizeOf(context).width - 32.w;
         final actions =
             (RoutineSwipeActions.deleteWidth +
                     RoutineSwipeActions.actionGap +

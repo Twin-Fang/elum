@@ -23,7 +23,7 @@ void main() {
     return c;
   }
 
-  test('연결된 이룸이 휴대폰은 이룸이 홈이다', () {
+  test('연결된 이룸이 기기는 이룸이 홈이다', () {
     final c = containerWith(
       storage: InMemoryStorage(elumiDevice: true, onboardingCompleted: true),
       tokens: InMemoryTokenStore(accessToken: 'a', refreshToken: 'r'),

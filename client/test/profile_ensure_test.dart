@@ -60,12 +60,12 @@ void main() {
       expect(result.isOk, isFalse);
     });
 
-    test('403(이룸이 휴대폰)은 실패이고 경로 없음이 아니다', () async {
+    test('403(이룸이 기기)은 실패이고 경로 없음이 아니다', () async {
       final repo = repoWith({
         'POST /api/member/profile': const FakeHttpError(
           403,
           errorCode: 'DEVICE_LINK_FORBIDDEN_FOR_ELUMI',
-          errorMessage: '이룸이 휴대폰은 할 수 없어요',
+          errorMessage: '이룸이 기기는 할 수 없어요',
         ),
       });
 

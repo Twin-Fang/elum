@@ -186,7 +186,7 @@ void main() {
       await tester.pump();
 
       // 성공 팝업이 먼저 뜬다
-      expect(find.text('휴대폰 연결에 성공했어요!'), findsOneWidget);
+      expect(find.text('기기 연결에 성공했어요!'), findsOneWidget);
       await tester.tap(find.text('확인'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
@@ -200,7 +200,7 @@ void main() {
 
   // #363 — 이미 연결된 상태에서 이 화면을 열면 예전 연결을 방금 성공한 것처럼 알렸다.
   // 화면이 3초마다 상태를 물어 `hasDevice` 만 보았기 때문이다. 이 화면이 열린 뒤 **새로 붙은** 휴대폰만 알린다.
-  group('이미 연결된 휴대폰이 있을 때 (#363)', () {
+  group('이미 연결된 기기가 있을 때 (#363)', () {
     testWidgets('예전 연결을 방금 성공한 것처럼 알리지 않는다', (tester) async {
       repo.deviceIds.add('l-old');
       await tester.pumpWidget(wrap());
@@ -211,7 +211,7 @@ void main() {
       await tester.pump(const Duration(seconds: 3));
       await tester.pump();
 
-      expect(find.text('휴대폰 연결에 성공했어요!'), findsNothing);
+      expect(find.text('기기 연결에 성공했어요!'), findsNothing);
       // 암호는 그대로 보이고 기다린다 — 타이머도 살아 있다
       expect(find.textContaining(RegExp(r'^\d{2}:\d{2}$')), findsOneWidget);
     });

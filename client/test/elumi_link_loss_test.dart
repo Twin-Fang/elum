@@ -37,7 +37,7 @@ void main() {
     repo = DeviceLinkRepository(dio: Dio(), tokens: tokens, storage: storage);
   });
 
-  group('세션이 끝났을 때 이룸이 휴대폰이 하는 일', () {
+  group('세션이 끝났을 때 이룸이 기기가 하는 일', () {
     Future<({GoRouter router, ProviderContainer container})> pumpApp(
       WidgetTester tester,
     ) async {

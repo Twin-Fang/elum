@@ -39,7 +39,7 @@ void main() {
       expect(r.value!.remaining().inSeconds, inInclusiveRange(598, 600));
     });
 
-    test('서버 실패는 코드와 문구를 그대로 담는다 (이룸이 휴대폰·연결 안 됨·시도 한도)', () async {
+    test('서버 실패는 코드와 문구를 그대로 담는다 (이룸이 기기·연결 안 됨·시도 한도)', () async {
       for (final (status, code) in [
         (403, 'DEVICE_LINK_FORBIDDEN_FOR_ELUMI'),
         (403, 'PROFILE_ACCESS_DENIED'),

@@ -98,7 +98,7 @@ void main() {
 
 
 
-    test('이룸이 휴대폰에서 열린 링크는 우편함에도 두지 않고 무시한다', () {
+    test('이룸이 기기에서 열린 링크는 우편함에도 두지 않고 무시한다', () {
       elumi = true;
       var notified = 0;
       inbox.addListener(() => notified++);
@@ -113,7 +113,7 @@ void main() {
     });
 
 
-    test('맡겨 둔 뒤 이룸이 휴대폰이 되었다면 버린다 — 이어 줄 이유가 없다', () {
+    test('맡겨 둔 뒤 이룸이 기기가 되었다면 버린다 — 이어 줄 이유가 없다', () {
       session = false;
       final intake = build();
       intake.accept(link('A7K3M9'));

@@ -50,9 +50,9 @@ void main() {
   });
 
   // 이룸이 휴대폰의 연결이 밖에서 끊겼다는 표식 (#363). 연결 화면이 `연결이 끊어졌어요`를 말하는 근거다.
-  group('이룸이 휴대폰 연결 끊김 표식', () {
+  group('이룸이 기기 연결 끊김 표식', () {
     test(
-      '아이 정보만 지우는 정리(clearChildProfile)는 표식도 이룸이 휴대폰 표식도 건드리지 않는다',
+      '아이 정보만 지우는 정리(clearChildProfile)는 표식도 이룸이 기기 표식도 건드리지 않는다',
       () async {
         final storage = InMemoryStorage(elumiDevice: true);
         await storage.setElumiLinkLost(true);
@@ -64,7 +64,7 @@ void main() {
         expect(
           storage.isElumiDevice,
           isTrue,
-          reason: '이 휴대폰은 여전히 이룸이 휴대폰이라 연결 화면으로 간다',
+          reason: '이 기기는 여전히 이룸이 기기가라 연결 화면으로 간다',
         );
         expect(storage.isElumiLinkLost, isTrue);
       },

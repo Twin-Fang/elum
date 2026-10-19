@@ -25,7 +25,7 @@ void main() {
 
   tearDown(AdConsent.resetForTest);
 
-  test('이미 답한 휴대폰에서는 다시 묻지 않는다', () async {
+  test('이미 답한 기기에서는 다시 묻지 않는다', () async {
     current = TrackingStatus.denied;
     await AdConsent.requestOnLaunch();
     expect(requests, 0);
