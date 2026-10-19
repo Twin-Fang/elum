@@ -5,10 +5,12 @@ import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequ
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberSupportGoalsUpdateRequest;
+import com.chuseok22.elumserver.member.application.dto.request.OnboardingCompleteRequest;
 import com.chuseok22.elumserver.member.application.dto.response.MemberConsentResponse;
 import com.chuseok22.elumserver.member.application.dto.response.MemberResponse;
 import com.chuseok22.elumserver.member.application.service.Caller;
 import com.chuseok22.elumserver.member.application.service.MemberService;
+import com.chuseok22.elumserver.member.application.service.OnboardingService;
 import com.chuseok22.logging.annotation.LogMonitoring;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController implements MemberControllerDocs {
 
   private final MemberService memberService;
+  private final OnboardingService onboardingService;
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
   @GetMapping("/me")
@@ -57,6 +60,15 @@ public class MemberController implements MemberControllerDocs {
   @PostMapping("/profile")
   public ResponseEntity<MemberResponse> createProfile(Authentication authentication) {
     return ResponseEntity.ok(memberService.createProfile(Caller.from(authentication)));
+  }
+
+  // X-Profile-Id 를 받지 않는다 — 앱에 남은 옛 선택값과 무관하게 내 이룸이에 저장
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PostMapping("/onboarding")
+  public ResponseEntity<MemberResponse> completeOnboarding(
+    Authentication authentication, @RequestBody OnboardingCompleteRequest request
+  ) {
+    return ResponseEntity.ok(onboardingService.complete(Caller.from(authentication), request));
   }
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/guarded_call.dart';
+import '../../../core/network/profile_header_interceptor.dart';
 import '../../../core/network/server_error_code.dart';
 import '../../onboarding/domain/image_style.dart';
 import '../../profile/domain/profile_summary.dart';
@@ -161,6 +162,38 @@ class MemberRepository {
       final member = body == null ? null : Member.fromJson(body);
       if (member == null || member.profiles.isEmpty) {
         // 목록이 없으면 어느 이룸이가 생겼는지 몰라 실패로 본다
+        throw const AppFailure(fault: NetworkFault.app);
+      }
+      return member;
+    });
+  }
+
+  /// 온보딩 완료 한 번 저장: 이룸이 확보 > 호칭·목표·캐릭터·그림 방식 > 예시 일과 (서버 한 트랜잭션)
+  ///
+  /// 고른 이룸이 헤더를 싣지 않는다. 탈퇴 후 재가입처럼 지워진 이룸이 id 가 남아 있어도 내 이룸이에 저장된다.
+  Future<Attempt<Member>> completeOnboarding({
+    required String nickname,
+    required List<String> supportGoals,
+    required String? character,
+    required String imageStyle,
+    required List<String> exampleCategories,
+  }) {
+    return guarded(_repo, 'completeOnboarding', () async {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/api/member/onboarding',
+        data: {
+          'nickname': nickname,
+          'supportGoals': supportGoals,
+          'character': ?character,
+          'imageStyle': imageStyle,
+          'exampleCategories': exampleCategories,
+        },
+        options: Options(extra: {ProfileHeaderInterceptor.skipKey: true}),
+      );
+      final body = res.data;
+      final member = body == null ? null : Member.fromJson(body);
+      if (member == null || member.profiles.isEmpty) {
+        // 어느 이룸이에 저장됐는지 몰라 실패로 본다
         throw const AppFailure(fault: NetworkFault.app);
       }
       return member;

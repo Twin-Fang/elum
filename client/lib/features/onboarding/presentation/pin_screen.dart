@@ -193,9 +193,10 @@ class _PinScreenState extends ConsumerState<PinScreen>
 
     ref.read(onboardingProvider.notifier).setPin(_current);
     final failure = await ref.read(onboardingProvider.notifier).complete();
-    if (failure == null && ensured.value == true) {
-      // 방금 만든 이룸이의 이름·캐릭터까지 저장됐다 — 비어 있던 회원 정보를 새로 받는다.
+    if (failure == null) {
+      // 서버가 저장한 이룸이로 다시 맞춘다 (메모리의 옛 선택값·회원 정보 버림).
       // 저장이 실패했으면 받지 않는다: 서버의 빈 값이 로컬 입력을 덮는다.
+      ref.invalidate(profileSessionProvider);
       ref.invalidate(memberProvider);
     }
     return (createFailure: null, saveFailure: failure);

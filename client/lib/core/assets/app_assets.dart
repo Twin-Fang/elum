@@ -200,6 +200,9 @@ abstract final class AppAssets {
   /// 이야기 칸 준비 중 안내의 루미 (빈 말풍선을 안음, 1254×1254 투명 배경)
   static const storiesComingSoonLumi = '$_images/stories_coming_soon_lumi.png';
 
+  /// 일과관리 빈 상태의 루미 (민트색 폴더를 듦, 1254×1254 투명 배경)
+  static const routinesEmptyLumi = '$_images/routines_empty_lumi.png';
+
   /// 그림 방식 선택의 `실사` 예시 (레고 블록 사진, 70×70). Figma `1274:10043`.
   static const imageStyleRealistic = '$_images/image_style_realistic.png';
 
