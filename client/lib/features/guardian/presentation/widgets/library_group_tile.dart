@@ -32,6 +32,9 @@ class LibraryGroupTile extends StatelessWidget {
   /// 미리보기 칸 수 (2×2)
   static const _previewCount = 4;
 
+  /// 미리보기 그림을 먼저 그리는 크기 (논리 픽셀). 이 크기로 그려 칸에 맞춰 줄인다
+  static const _previewRenderSize = 100.0;
+
   /// 끌어 온 일과가 위에 있을 때 키우는 비율
   static const _dropScale = 1.12;
 
@@ -87,7 +90,16 @@ class LibraryGroupTile extends StatelessWidget {
                         for (final routine in previews)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(gap * 2),
-                            child: LibraryRoutineThumbnail(routine: routine),
+                            // 큰 칸에 그린 뒤 줄인다 — 그림 둘레 여백이 px 고정이라 작은 칸에 바로 그리면 빈 칸이 된다
+                            child: FittedBox(
+                              fit: BoxFit.cover,
+                              child: SizedBox.square(
+                                dimension: _previewRenderSize,
+                                child: LibraryRoutineThumbnail(
+                                  routine: routine,
+                                ),
+                              ),
+                            ),
                           ),
                       ],
                     ),

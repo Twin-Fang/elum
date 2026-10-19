@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -92,7 +94,14 @@ class _RoutineGroupPickerState extends State<_RoutineGroupPicker> {
     return Padding(
       padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
       child: ElumSheetSurface(
-        height: media.size.height * _heightRatio,
+        // 키보드가 올라오면 남은 공간 안으로 줄여 상태바 밑으로 올라가지 않게
+        height: math.min(
+          media.size.height * _heightRatio,
+          media.size.height -
+              media.viewInsets.bottom -
+              media.padding.top -
+              space.md.h,
+        ),
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             space.md.w,
