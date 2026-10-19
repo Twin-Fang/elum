@@ -212,11 +212,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Find elum in the store and update it';
 
   @override
-  String get appStatusMaintenanceTitle => 'Taking a short break';
+  String get appStatusMaintenanceTitle => 'Under maintenance right now';
 
   @override
   String get appStatusMaintenanceBody =>
-      'Please open the app again in a little while';
+      'You can use elum again once it is done.\nPlease check back in a little while';
 
   @override
   String get appStatusRecheck => 'Check again';

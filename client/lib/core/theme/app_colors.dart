@@ -159,7 +159,6 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.sheetFieldLabelText,
     required this.sheetScrim,
     required this.dialogScrim,
-    required this.updateNoticeButton,
     required this.rewardLineLead,
     required this.editChipPressedBg,
     required this.tabletSceneSkyTop,
@@ -632,9 +631,6 @@ class AppColors extends ThemeExtension<AppColors> {
   /// 팝업 뒤 어두운 막 (검정 50%): 공통 팝업·크레딧 대기·공지 팝업.
   final Color dialogScrim;
 
-  /// 강제 업데이트 안내 카드의 버튼 (초록, 글자는 흰색).
-  final Color updateNoticeButton;
-
   /// 카드확인 보상 줄의 `완료 시` 부분 (#74757D, 시안 1173:5544). 뒤의 보상 이름은 textPrimary 라 회색/검정으로 갈린다.
   final Color rewardLineLead;
 
@@ -1001,7 +997,6 @@ class AppColors extends ThemeExtension<AppColors> {
     sheetFieldLabelText: Color(0xFF74757D),
     sheetScrim: Color(0x80000000),
     dialogScrim: Color.from(alpha: 0.5, red: 0, green: 0, blue: 0),
-    updateNoticeButton: Color(0xFF2E9E5B),
     rewardLineLead: Color(0xFF74757D),
     editChipPressedBg: Color(0xFFD7D3D1),
     tabletSceneSkyTop: Color(0xFFDDE6FF),
@@ -1212,7 +1207,6 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? sheetFieldLabelText,
     Color? sheetScrim,
     Color? dialogScrim,
-    Color? updateNoticeButton,
     Color? rewardLineLead,
     Color? editChipPressedBg,
     Color? tabletSceneSkyTop,
@@ -1413,7 +1407,6 @@ class AppColors extends ThemeExtension<AppColors> {
       sheetFieldLabelText: sheetFieldLabelText ?? this.sheetFieldLabelText,
       sheetScrim: sheetScrim ?? this.sheetScrim,
       dialogScrim: dialogScrim ?? this.dialogScrim,
-      updateNoticeButton: updateNoticeButton ?? this.updateNoticeButton,
       rewardLineLead: rewardLineLead ?? this.rewardLineLead,
       editChipPressedBg: editChipPressedBg ?? this.editChipPressedBg,
       tabletSceneSkyTop: tabletSceneSkyTop ?? this.tabletSceneSkyTop,
@@ -1775,7 +1768,6 @@ class AppColors extends ThemeExtension<AppColors> {
       sheetFieldLabelText: Color.lerp(sheetFieldLabelText, other.sheetFieldLabelText, t)!,
       sheetScrim: Color.lerp(sheetScrim, other.sheetScrim, t)!,
       dialogScrim: Color.lerp(dialogScrim, other.dialogScrim, t)!,
-      updateNoticeButton: Color.lerp(updateNoticeButton, other.updateNoticeButton, t)!,
       rewardLineLead: Color.lerp(rewardLineLead, other.rewardLineLead, t)!,
       editChipPressedBg: Color.lerp(editChipPressedBg, other.editChipPressedBg, t)!,
       tabletSceneSkyTop: Color.lerp(tabletSceneSkyTop, other.tabletSceneSkyTop, t)!,

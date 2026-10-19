@@ -82,14 +82,14 @@ void main() {
       final repo = _QueueRepository([status(maintenance: true)], then: gate.future);
       await tester.pumpWidget(wrap(repo));
       await tester.pumpAndSettle();
-      expect(find.text('잠시 쉬고 있어요'), findsOneWidget);
+      expect(find.text('지금 점검 중이에요'), findsOneWidget);
 
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pump();
 
       // 응답을 기다리는 중 — 뒤에 있던 홈이 잠깐이라도 그려지면 요청이 나가 503을 또 받는다
       expect(find.text('홈'), findsNothing);
-      expect(find.text('잠시 쉬고 있어요'), findsOneWidget);
+      expect(find.text('지금 점검 중이에요'), findsOneWidget);
 
       gate.complete(status(maintenance: false));
       await tester.pumpAndSettle();

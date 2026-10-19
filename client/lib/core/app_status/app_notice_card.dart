@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/theme_context_ext.dart';
+import '../widgets/elum_button.dart';
 
 /// 앱 전체를 막는 안내(강제 업데이트, 점검): 어두운 막 위의 흰색 카드 (이미지, 문구, 설명, 버튼 하나)
-/// 이룸이도 보는 화면이라 빨강·경고 아이콘 없이 누를 것은 버튼 하나만 둔다.
+/// 이룸이도 보는 화면이라 빨강·경고 아이콘 없이 누를 것은 버튼 하나만 둔다
 class AppNoticeCard extends StatelessWidget {
   const AppNoticeCard({
     super.key,
@@ -78,26 +79,11 @@ class AppNoticeCard extends StatelessWidget {
                           ),
                         ],
                         SizedBox(height: 28.h),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 66.h, // 이룸이 화면 최소 터치 규칙
-                          // 이 MaterialApp 안쪽 context 가 있어야 실패 팝업을 띄울 수 있다
-                          child: Builder(
-                            builder: (innerContext) => FilledButton(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: colors.updateNoticeButton,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18.r),
-                                ),
-                              ),
-                              onPressed: () => onAction(innerContext),
-                              child: Text(
-                                actionLabel,
-                                style: typo.button.copyWith(
-                                  color: colors.surface,
-                                ),
-                              ),
-                            ),
+                        // 이 MaterialApp 안쪽 context 가 있어야 실패 팝업을 띄울 수 있다
+                        Builder(
+                          builder: (innerContext) => ElumButton(
+                            label: actionLabel,
+                            onPressed: () => onAction(innerContext),
                           ),
                         ),
                       ],

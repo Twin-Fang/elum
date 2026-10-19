@@ -177,10 +177,10 @@
   "appStatusStoreOpenFailedFallback": "스토어에서 이룸을 찾아 업데이트해주세요",
   "@appStatusStoreOpenFailedFallback": { "description": "스토어 열기 실패 시 직접 하는 방법 안내" },
 
-  "appStatusMaintenanceTitle": "잠시 쉬고 있어요",
+  "appStatusMaintenanceTitle": "지금 점검 중이에요",
   "@appStatusMaintenanceTitle": { "description": "점검 중 화면 제목" },
 
-  "appStatusMaintenanceBody": "조금 뒤에 다시 열어주세요",
+  "appStatusMaintenanceBody": "점검이 끝나면 다시 쓸 수 있어요.\n조금 뒤에 확인해주세요",
   "@appStatusMaintenanceBody": { "description": "점검 중 화면의 기본 설명(서버가 문구를 주면 그것이 이긴다)" },
 
   "appStatusRecheck": "다시 확인하기",

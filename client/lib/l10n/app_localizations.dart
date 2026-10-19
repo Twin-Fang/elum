@@ -401,13 +401,13 @@ abstract class AppLocalizations {
   /// 점검 중 화면 제목
   ///
   /// In ko, this message translates to:
-  /// **'잠시 쉬고 있어요'**
+  /// **'지금 점검 중이에요'**
   String get appStatusMaintenanceTitle;
 
   /// 점검 중 화면의 기본 설명(서버가 문구를 주면 그것이 이긴다)
   ///
   /// In ko, this message translates to:
-  /// **'조금 뒤에 다시 열어주세요'**
+  /// **'점검이 끝나면 다시 쓸 수 있어요.\n조금 뒤에 확인해주세요'**
   String get appStatusMaintenanceBody;
 
   /// 점검 화면의 버튼

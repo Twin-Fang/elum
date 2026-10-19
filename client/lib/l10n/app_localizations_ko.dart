@@ -199,10 +199,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get appStatusStoreOpenFailedFallback => '스토어에서 이룸을 찾아 업데이트해주세요';
 
   @override
-  String get appStatusMaintenanceTitle => '잠시 쉬고 있어요';
+  String get appStatusMaintenanceTitle => '지금 점검 중이에요';
 
   @override
-  String get appStatusMaintenanceBody => '조금 뒤에 다시 열어주세요';
+  String get appStatusMaintenanceBody => '점검이 끝나면 다시 쓸 수 있어요.\n조금 뒤에 확인해주세요';
 
   @override
   String get appStatusRecheck => '다시 확인하기';
