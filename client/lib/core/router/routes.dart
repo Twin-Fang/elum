@@ -21,9 +21,17 @@ abstract final class Routes {
   static const onboardingPin = '/onboarding/pin';
   static const cardCompletion = '/onboarding/card-completion';
 
+  /// 보호자 하단 바(폰)·옆 메뉴(태블릿) 4칸: 홈 · 일과관리 · 이야기 · 내정보 (#798)
+  /// 칸 순서와 아이콘은 `GuardianTab` 한 곳이 정한다.
   static const guardian = '/guardian';
 
-  /// 보호자 설정. 계정 정리(로그아웃·회원탈퇴)가 여기 있다.
+  /// 일과관리 칸. 일과 묶음(#797)이 들어올 자리
+  static const guardianManage = '/guardian/manage';
+
+  /// 이야기 칸. 보호자 커뮤니티(#786)가 들어올 자리
+  static const guardianTalk = '/guardian/talk';
+
+  /// 내정보 칸 = 보호자 설정. 계정 정리(로그아웃·회원탈퇴)가 여기 있다.
   static const guardianSettings = '/guardian/settings';
 
   /// 임시저장 — 만들다 만 일과.

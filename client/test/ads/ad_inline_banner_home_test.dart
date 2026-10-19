@@ -137,15 +137,16 @@ void main() {
     expect(banner.calls, 0);
   });
 
-  testWidgets('오늘·지난 일과를 합쳐 5개면 하단 배너와 사이 배너를 요청한다', (tester) async {
+  // 하단 띠는 홈이 아니라 보호자 틀(GuardianShell)이 하단 바 아래에 둔다 (#798) — guardian_shell_test 가 본다.
+  testWidgets('오늘·지난 일과를 합쳐 5개면 사이 배너를 요청하고 홈은 하단 띠를 두지 않는다', (tester) async {
     await pumpHome(
       tester,
       pastList: past(3),
       todayList: [routine('t1', '오늘 1'), routine('t2', '오늘 2')],
     );
 
-    expect(banner.callsOf(AdPlacement.bannerHome), 1);
     expect(banner.callsOf(AdPlacement.bannerHomeMiddle), 1);
+    expect(banner.callsOf(AdPlacement.bannerHome), 0);
   });
 }
 

@@ -36,6 +36,7 @@ class ElumScaffold extends StatelessWidget {
     this.bottomBanner,
     this.onBack,
     this.isBackEnabled = true,
+    this.isBackButtonVisible = true,
     this.title,
     this.backTop,
     this.horizontalPadding,
@@ -69,6 +70,11 @@ class ElumScaffold extends StatelessWidget {
   ///
   /// [onBack] 을 null 로 넘기면 제목줄이 통째로 빠져 본문이 위로 튄다.
   final bool isBackEnabled;
+
+  /// 뒤로가기 화살표를 그릴지. false 면 제목 줄은 그대로 두고 화살표만 뺀다
+  ///
+  /// 보호자 하단 바 칸의 첫 화면(내정보)처럼 돌아갈 곳이 없는 화면. 줄을 지우면 제목 위치가 시안과 어긋난다.
+  final bool isBackButtonVisible;
 
   /// 뒤로가기와 **같은 줄**에 놓이는 가운데 제목 (설정·약관·임시저장).
   ///
@@ -194,37 +200,38 @@ class ElumScaffold extends StatelessWidget {
                           ),
                         ),
                       ),
-                    Padding(
-                      padding: EdgeInsets.only(left: _backBoxLeft.w),
-                      // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
-                      // 상자 자체가 40×40이라 누름 영역과 자리가 한 값으로 맞는다
-                      // — 따로 덮을 필요가 없다.
-                      //
-                      // 앱 거의 모든 화면의 뒤로가기라 이름이 비면 전부 함께 빈다.
-                      // 이름은 제스처 바깥에 두어야 누르는 노드에 붙는다.
-                      child: Semantics(
-                        container: true,
-                        button: true,
-                        enabled: isBackEnabled,
-                        label: context.l10n.commonBack,
-                        child: GestureDetector(
-                          onTap: isBackEnabled ? onBack : null,
-                          behavior: HitTestBehavior.opaque,
-                          child: SizedBox(
-                            width: _backBoxSize.w,
-                            height: _backBoxSize.w,
-                            child: Center(
-                              child: SvgPicture.asset(
-                                AppAssets.iconBack,
-                                width: _backIconSize.w,
-                                height: _backIconSize.w,
-                                excludeFromSemantics: true,
+                    if (isBackButtonVisible)
+                      Padding(
+                        padding: EdgeInsets.only(left: _backBoxLeft.w),
+                        // Figma fi-br-angle-left(24×24). Material 아이콘은 형태가 다르다.
+                        // 상자 자체가 40×40이라 누름 영역과 자리가 한 값으로 맞는다
+                        // — 따로 덮을 필요가 없다.
+                        //
+                        // 앱 거의 모든 화면의 뒤로가기라 이름이 비면 전부 함께 빈다.
+                        // 이름은 제스처 바깥에 두어야 누르는 노드에 붙는다.
+                        child: Semantics(
+                          container: true,
+                          button: true,
+                          enabled: isBackEnabled,
+                          label: context.l10n.commonBack,
+                          child: GestureDetector(
+                            onTap: isBackEnabled ? onBack : null,
+                            behavior: HitTestBehavior.opaque,
+                            child: SizedBox(
+                              width: _backBoxSize.w,
+                              height: _backBoxSize.w,
+                              child: Center(
+                                child: SvgPicture.asset(
+                                  AppAssets.iconBack,
+                                  width: _backIconSize.w,
+                                  height: _backIconSize.w,
+                                  excludeFromSemantics: true,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ],

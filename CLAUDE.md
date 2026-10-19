@@ -39,6 +39,20 @@ elum/
 **9단계는 생략하지 않는다.** 작업이 끝났는데 이슈에 아무 기록이 없으면 무엇을 왜 그렇게
 구현했는지가 커밋 메시지에만 남는다.
 
+### worktree 를 만들면 로컬 전용 파일부터 채운다 ⚠️
+
+`.env`·서명 키·광고 앱 ID 같은 파일은 커밋되지 않아 **새 worktree 에는 없다.** 빠진 채 빌드하면
+iOS 앱이 시작 직후 꺼지고(`GADInvalidInitializationException`, `ios/Flutter/Secrets.xcconfig` 없음),
+Android 릴리스 서명이 실패한다. 증상만 보면 코드 버그로 오해하기 쉽다.
+
+```bash
+# worktree 를 만든 직후, 그 안에서 한 번
+scripts/copy-worktree-local-files.sh          # 메인 작업 폴더에서 빠진 파일만 복사 (덮어쓰지 않음)
+scripts/copy-worktree-local-files.sh --check  # 복사 없이 빠진 것만 확인
+```
+
+새 로컬 전용 파일이 생기면 스크립트의 `LOCAL_FILES` 에 한 줄 더한다. 실제 값은 메인 작업 폴더에만 있고, 값 자체를 이슈·대화·커밋에 붙이지 않는다.
+
 ### 작업이 끝나면 이슈를 닫는다 (10단계)
 
 정리 댓글(보고서)과 검증 기록을 남기고 **라벨을 `작업완료`로 바꾼 뒤 이슈를 닫는다.**

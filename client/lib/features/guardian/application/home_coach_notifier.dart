@@ -61,14 +61,15 @@ class HomeCoachNotifier extends Notifier<HomeCoachState> {
   ///
   /// [hasSwipeTarget] — 밀어 볼 수 있는 일과가 있는가. 없으면 2단계를 건너뛴다.
   /// 가리킬 카드가 없는데 "일과를 밀어 보라"고 하면 빈 화면을 가리키게 된다.
-  bool maybeStart({required bool hasSwipeTarget}) {
+  /// [hasModeTarget] — 홈 안에 이룸이 화면 배지가 있는가. 태블릿은 옆 메뉴에 있어 3단계를 건너뛴다.
+  bool maybeStart({required bool hasSwipeTarget, bool hasModeTarget = true}) {
     if (state.active || _shownThisRun || _alreadySeen()) return false;
     _shownThisRun = true;
     state = HomeCoachState(
       steps: [
         HomeCoachStep.createRoutine,
         if (hasSwipeTarget) HomeCoachStep.swipeRoutine,
-        HomeCoachStep.switchMode,
+        if (hasModeTarget) HomeCoachStep.switchMode,
       ],
     );
     AppLogger.notifierCall('HomeCoachNotifier', 'start', {

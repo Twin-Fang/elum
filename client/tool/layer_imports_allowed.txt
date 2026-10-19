@@ -9,7 +9,6 @@ features/credit/application/ad_reward_flow.dart -> features/ads/data/rewarded_ad
 features/guardian/application/routine_notifier.dart -> features/credit/data/credit_repository.dart
 features/guardian/presentation/card_review_screen.dart -> features/child/data/speech_service.dart
 features/guardian/presentation/draft_routines_screen.dart -> features/ads/presentation/ad_bottom_strip_slot.dart
-features/guardian/presentation/guardian_home_screen.dart -> features/ads/presentation/ad_bottom_strip_slot.dart
 features/guardian/presentation/guardian_home_screen.dart -> features/credit/presentation/credit_blocked_dialog.dart
 features/guardian/presentation/guardian_settings_screen.dart -> features/auth/presentation/consent_document_list_screen.dart
 features/guardian/presentation/guardian_settings_screen.dart -> features/link/data/device_link_repository.dart

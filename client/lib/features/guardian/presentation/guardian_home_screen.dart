@@ -5,21 +5,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../ads/presentation/ad_bottom_strip_slot.dart';
-import '../../../core/config/ad_ids.dart';
 import '../../../core/assets/app_assets.dart';
 import '../../../core/l10n/l10n_context.dart';
 import '../../../core/layout/adaptive_page_frame.dart';
 import '../../../core/layout/layout_context_ext.dart';
+import '../../../core/layout/window_size_class.dart';
 import '../../../core/layout/screen_layout_kind.dart';
 import '../../../core/theme/theme_context_ext.dart';
 import '../../credit/application/credit_start_gate.dart';
 import '../../credit/presentation/credit_blocked_dialog.dart';
 import '../../child/application/routine_auto_refresh.dart';
-import '../../onboarding/application/onboarding_notifier.dart';
-import '../../profile/application/profile_display_name.dart';
-import '../../../shared/models/character.dart';
 import '../../profile/application/profile_session.dart';
+import '../application/guardian_child_identity.dart';
 import '../application/home_routines.dart';
 import '../application/home_coach_notifier.dart';
 import '../application/routine_notifier.dart';
@@ -30,7 +27,6 @@ import 'widgets/home_coach_mark.dart';
 import 'widgets/routine_summary_tile.dart';
 import 'widgets/past_routine_section.dart';
 import 'widgets/today_routine_section.dart';
-import '../../member/application/member_providers.dart';
 import '../application/routine_providers.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/state/busy_state_mixin.dart';
@@ -145,9 +141,13 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
     final hasSwipeTarget = ref
         .read(homeRoutinesProvider)
         .any((r) => r.isEditableByMe);
+    // 태블릿은 이룸이 화면 입구가 홈 밖(옆 메뉴, 글자 있음)이라 그 단계를 건너뛴다
     final started = ref
         .read(homeCoachProvider.notifier)
-        .maybeStart(hasSwipeTarget: hasSwipeTarget);
+        .maybeStart(
+          hasSwipeTarget: hasSwipeTarget,
+          hasModeTarget: context.sizeClass == WindowSizeClass.compact,
+        );
     // 대기 중 스크롤했거나 관성이 도는 중이면 버튼이 밀려 구멍이 어긋난다. 켜질 때만 맨 위로
     // 되돌린다 — 이미 본 사람의 스크롤까지 끌어올리면 안 된다. jumpTo 는 진행 중인 관성도 끊는다.
     // 구멍은 다음 프레임 이후에 재므로 이 이동이 먼저 반영된다.
@@ -175,17 +175,10 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
       if (none) context.go(Routes.onboardingName);
     });
 
-    // 함께하기로 선택한 이룸이 이름을 이룸이 홈과 동일하게 표시한다.
-    final childName = resolveProfileDisplayName(
-      ref.watch(memberProvider).value,
-      ref.watch(profileSessionProvider.select((session) => session.selectedId)),
-      ref.watch(onboardingProvider).displayName,
-    );
-
-    // 온보딩에서 고른 캐릭터(고양이/여우) — 홈 전역의 마스코트를 이 값으로 맞춘다.
-    // 선택 전(구버전 데이터 등) 폴백은 이룸이 홈과 동일하게 고양이로 둔다.
-    final character =
-        ref.watch(onboardingProvider).cardCharacter ?? CardCharacter.cat;
+    // 함께하기로 선택한 이룸이 이름·캐릭터 (태블릿 옆 메뉴와 같은 값)
+    final identity = ref.watch(guardianChildIdentityProvider);
+    // 폰만 머리 줄(로고·이룸이 화면 배지)을 그린다. 태블릿은 옆 메뉴에 있다 (#798)
+    final isPhone = context.sizeClass == WindowSizeClass.compact;
 
     // 코치마크: 오늘 일과를 받아 온 뒤에, 밀어 볼 수 있는 줄이 있는지 함께 알려 준다.
     // 받아 오지 못했으면(실패·로딩) 켜지 않는다 — 가리킬 대상이 있는지 모른다.
@@ -198,11 +191,21 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
 
     final coachActive = ref.watch(homeCoachProvider.select((s) => s.active));
 
-    final header = GuardianHomeHeader(
-      childName: childName,
-      character: character,
+    final headerContent = GuardianHomeHeader(
+      childName: identity.name,
+      character: identity.character,
       modeKey: _modeKey,
+      part: isPhone
+          ? GuardianHomeHeaderPart.all
+          : GuardianHomeHeaderPart.greeting,
     );
+    // 태블릿 세로는 인사말이 맨 위라 상태 표시줄에 붙지 않게 숨 쉴 자리를 둔다 (폰은 머리 줄이 있다)
+    final header = isPhone
+        ? headerContent
+        : Padding(
+            padding: EdgeInsets.only(top: space.lg.h),
+            child: headerContent,
+          );
     // 코치마크가 가리키는 자리 — 키만 달고 모양은 건드리지 않는다.
     final createButton = Padding(
       padding: EdgeInsets.symmetric(horizontal: _listInset.w),
@@ -251,15 +254,9 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
             Expanded(
               child: hasTwoPanes
                   ? GuardianHomeLandscapeBody(
-                      topRow: GuardianHomeHeader(
-                        childName: childName,
-                        character: character,
-                        modeKey: _modeKey,
-                        part: GuardianHomeHeaderPart.topRow,
-                      ),
                       greeting: GuardianHomeHeader(
-                        childName: childName,
-                        character: character,
+                        childName: identity.name,
+                        character: identity.character,
                         modeKey: _modeKey,
                         part: GuardianHomeHeaderPart.greeting,
                       ),
@@ -284,10 +281,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
                       ),
                     ),
             ),
-            // 하단 배너. 로드 전·실패 시 높이 0이라 스크롤 영역이 원래 크기 그대로다.
-            // 일과가 적으면 자리도 두지 않는다 (shouldShowHomeAdsProvider)
-            if (ref.watch(shouldShowHomeAdsProvider))
-              const AdBottomStripSlot(placement: AdPlacement.bannerHome),
+            // 광고 띠는 보호자 틀(GuardianShell)이 하단 바 아래에 둔다 (#798)
           ],
         ),
       ),

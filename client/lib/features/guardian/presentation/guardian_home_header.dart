@@ -11,10 +11,9 @@ import '../../../core/widgets/app_pressable.dart';
 import '../../../core/widgets/character_badge.dart';
 import '../../../shared/models/character.dart';
 
-/// 로고 + 캐릭터 배지 + 설정 + 인사말 (Figma y=70~223).
+/// 로고 + 캐릭터 배지 + 인사말 (Figma y=70~223).
 ///
-/// 셋이 y=98을 가운데로 나란히 선다. 크기가 제각각(30 · 56 · 24)이라
-/// 위를 맞추면 어긋나 보인다.
+/// 설정은 하단 바 내정보 칸으로 옮겼다 (#798). 태블릿은 로고·이룸이 화면 입구가 옆 메뉴에 있어 인사말만 그린다.
 class GuardianHomeHeader extends StatelessWidget {
   const GuardianHomeHeader({
     super.key,
@@ -24,7 +23,7 @@ class GuardianHomeHeader extends StatelessWidget {
     this.part = GuardianHomeHeaderPart.all,
   });
 
-  /// 그릴 부분. 가로 태블릿은 머리 줄(전폭)과 인사말(왼쪽 칸)을 따로 놓는다 (#789)
+  /// 그릴 부분. 폰은 머리 줄 + 인사말, 태블릿은 인사말만
   final GuardianHomeHeaderPart part;
 
   final String childName;
@@ -37,10 +36,8 @@ class GuardianHomeHeader extends StatelessWidget {
   static const _top = 11.0;
   static const _logoW = 80.0;
   static const _logoH = 30.0;
-  static const _settings = 24.0;
 
-  /// 배지 ↔ 설정 16 · 머리 줄 ↔ 인사말 11 · 인사말 ↔ 부제 12
-  static const _badgeToSettings = 16.0;
+  /// 머리 줄 ↔ 인사말 11 · 인사말 ↔ 부제 12
   static const _rowToGreeting = 11.0;
   static const _greetingToSubtitle = 12.0;
 
@@ -66,38 +63,17 @@ class GuardianHomeHeader extends StatelessWidget {
             width: _logoW.w,
             height: _logoH.h,
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // 이룸이 화면으로 넘어가는 입구. 보호자→이룸이 방향은 암호 없이 바로 간다.
-              // (이룸이→보호자 방향만 PIN으로 막는다)
-              AppPressable(
-                onTap: () => context.go(Routes.child),
-                scaleDown: AppPressable.scaleIcon,
-                // 이룸이 화면으로 가는 유일한 입구다. 그림뿐이라 이름을 주지
-                // 않으면 화면 낭독기로는 이 길을 찾을 수 없다.
-                semanticLabel: context.l10n.guardianHomeGoChildScreen,
-                child: KeyedSubtree(
-                  key: modeKey,
-                  child: CharacterBadge(character: character),
-                ),
-              ),
-              SizedBox(width: _badgeToSettings.w),
-              // 설정 진입점. 개편 시안에서 배지 오른쪽으로 옮겨졌다.
-              AppPressable(
-                // push로 연다. go는 스택을 교체해 설정 화면의 뒤로가기가
-                // 돌아갈 곳을 잃는다 — 화살표도 기기 뒤로가기도 먹통이 된다.
-                onTap: () => context.push(Routes.guardianSettings),
-                scaleDown: AppPressable.scaleIcon,
-                semanticLabel: context.l10n.guardianHomeSettings,
-                child: SvgPicture.asset(
-                  AppAssets.iconSettings,
-                  // 정사각형 아이콘 — 가로세로 모두 .w
-                  width: _settings.w,
-                  height: _settings.w,
-                ),
-              ),
-            ],
+          // 이룸이 화면으로 넘어가는 입구. 보호자→이룸이 방향은 암호 없이 바로 간다.
+          // (이룸이→보호자 방향만 PIN으로 막는다)
+          AppPressable(
+            onTap: () => context.go(Routes.child),
+            scaleDown: AppPressable.scaleIcon,
+            // 그림뿐이라 이름을 주지 않으면 화면 낭독기로는 이 길을 찾을 수 없다.
+            semanticLabel: context.l10n.guardianHomeGoChildScreen,
+            child: KeyedSubtree(
+              key: modeKey,
+              child: CharacterBadge(character: character),
+            ),
           ),
         ],
       ),
@@ -117,10 +93,8 @@ class GuardianHomeHeader extends StatelessWidget {
         style: context.typo.body.copyWith(color: colors.routineTileLabel),
       ),
     ];
-    // 폰·세로는 한 덩어리 (시안 그대로)
     final children = switch (part) {
       GuardianHomeHeaderPart.all => [...topRowChildren, ...greetingChildren],
-      GuardianHomeHeaderPart.topRow => topRowChildren,
       // 머리 줄 없이 쓰면 인사말 위 간격(11)도 뺀다
       GuardianHomeHeaderPart.greeting => greetingChildren.skip(1).toList(),
     };
@@ -137,12 +111,9 @@ class GuardianHomeHeader extends StatelessWidget {
 
 /// 머리말 중 그릴 부분
 enum GuardianHomeHeaderPart {
-  /// 머리 줄 + 인사말 (폰·세로 태블릿)
+  /// 로고 · 이룸이 화면 배지 줄 + 인사말 (폰)
   all,
 
-  /// 로고 · 이룸이 화면 가기 · 설정 줄만
-  topRow,
-
-  /// 인사말 · 부제만
+  /// 인사말 · 부제만 (태블릿 — 로고·입구는 옆 메뉴)
   greeting,
 }

@@ -119,6 +119,22 @@ final routes = [
 
 > 아동 모드에서는 **시스템 뒤로가기를 막는다** (`PopScope`). 아동이 실수로 이탈하면 안 된다.
 
+### 보호자 화면 칸 4개 (#798)
+
+보호자 화면은 `StatefulShellRoute.indexedStack` 하나에 칸 4개를 가지(branch)로 둔다. 칸마다 스크롤·쌓인 화면이 남는다.
+
+| 칸 | 경로 | 화면 |
+| --- | --- | --- |
+| 홈 | `/guardian` | `GuardianHomeScreen` |
+| 일과관리 | `/guardian/manage` | 준비 중 (#797에서 일과 묶음) |
+| 이야기 | `/guardian/talk` | 준비 중 (#786) |
+| 내정보 | `/guardian/settings` | `GuardianSettingsScreen(isTabRoot: true)` — 뒤로가기 없음 |
+
+- **칸 순서·경로·아이콘·이름의 원본은 `GuardianTab` 하나**(`features/guardian/presentation/navigation/guardian_tab.dart`)다. 칸을 더하면 `GuardianTab` 값 하나, `routes_guardian.dart` 가지 하나, ARB 이름 하나를 늘린다.
+- **이동 막대는 창 폭으로 고른다.** `GuardianShell` 이 compact 는 하단 바(아이콘만), medium·expanded 는 왼쪽 옆 메뉴를 그린다. 숫자 비교 없이 `context.sizeClass` 만 쓴다.
+- **바를 덮는 화면은 가지 밖(루트)에 둔다.** 설정 하위 화면·일과 만들기 흐름은 `GoRoute` 를 가지 바깥에 두고 `push` 한다. 가지 안에 두면 바가 그대로 남는다.
+- **광고 띠는 틀(`GuardianShell`)이 바 아래에 둔다.** 내정보 칸은 `GuardianTab.isAdStripAllowed` 가 뺀다. 광고 모듈은 라우터가 틀에 넣어 준다(기능 간 import 규칙).
+
 ## 서버 연동
 
 일과·카드는 `features/guardian/data/routine_repository.dart` 의 `RoutineRepository`(구현 `routine_repository_impl.dart`)가

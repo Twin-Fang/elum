@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// 광고 코드를 import할 수 있는 화면은 홈·임시저장뿐이다(보상형 흐름은 홈이 부른다).
+/// 광고 코드를 import할 수 있는 화면은 보호자 틀(하단 띠)·홈·임시저장뿐이다(보상형 흐름은 홈이 부른다).
 /// 설정은 `회원탈퇴` 줄과 가까워 뺐다.
 ///
 /// 이룸이 화면·일과 만들기 흐름·보상 연출·온보딩에 광고가 생기면 되돌릴 방법을
@@ -22,7 +22,8 @@ void main() {
     const allowed = {
       // 앱 시작 때 ATT 팝업을 묻는다(#519). 광고를 그리지 않고 AdConsent.requestOnLaunch 만 부른다.
       'lib/app.dart',
-      'lib/features/guardian/presentation/guardian_home_screen.dart',
+      // 보호자 틀 맨 아래 광고 띠(#798). 내정보(설정) 칸은 GuardianTab.isAdStripAllowed 가 뺀다.
+      'lib/core/router/routes_guardian.dart',
       'lib/features/guardian/presentation/draft_routines_screen.dart',
       // 홈 크레딧 소진 안내(#464)가 부르는 보상형 흐름. 아래 테스트가 호출처를 홈 하나로 잠근다.
       'lib/features/credit/application/ad_reward_flow.dart',

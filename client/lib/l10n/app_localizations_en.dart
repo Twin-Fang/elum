@@ -2279,4 +2279,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get routineTemplateAskHelpPrompt =>
       'I want my Elumi to ask for help when something is hard. Walk through stopping, finding a nearby adult, saying \'please help me\', and saying thank you after getting help';
+
+  @override
+  String get guardianTabHome => 'Home';
+
+  @override
+  String get guardianTabManage => 'Routines';
+
+  @override
+  String get guardianTabTalk => 'Community';
+
+  @override
+  String get guardianTabMe => 'My info';
+
+  @override
+  String get guardianSideNavCaption => 'Guardian mode';
+
+  @override
+  String get guardianSideNavChildScreen => 'Elumi mode';
+
+  @override
+  String get guardianManageComingSoonTitle => 'Routine manager is coming';
+
+  @override
+  String get guardianManageComingSoonBody =>
+      'Soon you can group routines you use often\nand send them all at once';
+
+  @override
+  String get guardianTalkComingSoonTitle => 'Community is coming';
+
+  @override
+  String get guardianTalkComingSoonBody =>
+      'A place to share tips with other guardians\nopens soon';
 }

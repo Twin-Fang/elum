@@ -2179,4 +2179,35 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get routineTemplateAskHelpPrompt =>
       '이룸이가 혼자 하기 어려울 때 도움을 요청하게 하고 싶어. 멈추기, 가까운 어른 찾기, 도와주세요 말하기, 도움 받고 고맙습니다 말하기까지 알려 줘';
+
+  @override
+  String get guardianTabHome => '홈';
+
+  @override
+  String get guardianTabManage => '일과관리';
+
+  @override
+  String get guardianTabTalk => '이야기';
+
+  @override
+  String get guardianTabMe => '내정보';
+
+  @override
+  String get guardianSideNavCaption => '보호자 화면';
+
+  @override
+  String get guardianSideNavChildScreen => '이룸이 화면';
+
+  @override
+  String get guardianManageComingSoonTitle => '일과관리를 준비하고 있어요';
+
+  @override
+  String get guardianManageComingSoonBody =>
+      '자주 쓰는 일과를 묶어 두고\n한 번에 보낼 수 있게 만들고 있어요';
+
+  @override
+  String get guardianTalkComingSoonTitle => '이야기를 준비하고 있어요';
+
+  @override
+  String get guardianTalkComingSoonBody => '다른 보호자와 꿀팁을 나누는 곳이\n곧 열려요';
 }

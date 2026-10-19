@@ -643,5 +643,15 @@
   "routineTemplateWaitTurnText": "Waiting your turn",
   "routineTemplateWaitTurnPrompt": "I want my Elumi to practice waiting in line for their turn. Walk through standing at the end of the line, waiting behind the person in front, checking when it's their turn and going when it comes",
   "routineTemplateAskHelpText": "Asking for help",
-  "routineTemplateAskHelpPrompt": "I want my Elumi to ask for help when something is hard. Walk through stopping, finding a nearby adult, saying 'please help me', and saying thank you after getting help"
+  "routineTemplateAskHelpPrompt": "I want my Elumi to ask for help when something is hard. Walk through stopping, finding a nearby adult, saying 'please help me', and saying thank you after getting help",
+  "guardianTabHome": "Home",
+  "guardianTabManage": "Routines",
+  "guardianTabTalk": "Community",
+  "guardianTabMe": "My info",
+  "guardianSideNavCaption": "Guardian mode",
+  "guardianSideNavChildScreen": "Elumi mode",
+  "guardianManageComingSoonTitle": "Routine manager is coming",
+  "guardianManageComingSoonBody": "Soon you can group routines you use often\nand send them all at once",
+  "guardianTalkComingSoonTitle": "Community is coming",
+  "guardianTalkComingSoonBody": "A place to share tips with other guardians\nopens soon"
 }

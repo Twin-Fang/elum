@@ -135,11 +135,12 @@ void main() {
   });
 
   group('돌아갈 화면 없이 열린 화면의 뒤로가기 → 지금 상태의 홈', () {
+    // 보호자 설정은 하단 바 내정보 칸의 첫 화면이라 뒤로가기가 없다 (#798) — 그 아래 화면으로 본다
     for (final (who, settings, home, given) in [
-      ('보호자', Routes.guardianSettings, Routes.guardian, givenGuardian),
+      ('보호자', Routes.guardianFeedback, Routes.guardian, givenGuardian),
       ('이룸이', Routes.childSettings, Routes.child, givenLinkedElumi),
     ]) {
-      testWidgets('$who 설정 → $home', (tester) async {
+      testWidgets('$who $settings → $home', (tester) async {
         await given();
         final app = await pumpRealRouter(
           tester,

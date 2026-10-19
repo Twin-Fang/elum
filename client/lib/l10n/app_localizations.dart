@@ -3973,6 +3973,66 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이룸이가 혼자 하기 어려울 때 도움을 요청하게 하고 싶어. 멈추기, 가까운 어른 찾기, 도와주세요 말하기, 도움 받고 고맙습니다 말하기까지 알려 줘'**
   String get routineTemplateAskHelpPrompt;
+
+  /// 보호자 하단 바·옆 메뉴 칸 이름: 홈
+  ///
+  /// In ko, this message translates to:
+  /// **'홈'**
+  String get guardianTabHome;
+
+  /// 보호자 하단 바·옆 메뉴 칸 이름: 만들어 둔 일과·묶음 관리
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리'**
+  String get guardianTabManage;
+
+  /// 보호자 하단 바·옆 메뉴 칸 이름: 보호자끼리 나누는 이야기
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기'**
+  String get guardianTabTalk;
+
+  /// 보호자 하단 바·옆 메뉴 칸 이름이자 그 칸(설정) 화면 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'내정보'**
+  String get guardianTabMe;
+
+  /// 태블릿 옆 메뉴 이룸이 카드에서 이름 아래 작은 글
+  ///
+  /// In ko, this message translates to:
+  /// **'보호자 화면'**
+  String get guardianSideNavCaption;
+
+  /// 태블릿 옆 메뉴 맨 아래 이룸이 화면으로 가는 버튼 글자
+  ///
+  /// In ko, this message translates to:
+  /// **'이룸이 화면'**
+  String get guardianSideNavChildScreen;
+
+  /// 일과관리 칸 준비 중 안내 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'일과관리를 준비하고 있어요'**
+  String get guardianManageComingSoonTitle;
+
+  /// 일과관리 칸 준비 중 안내 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'자주 쓰는 일과를 묶어 두고\n한 번에 보낼 수 있게 만들고 있어요'**
+  String get guardianManageComingSoonBody;
+
+  /// 이야기 칸 준비 중 안내 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'이야기를 준비하고 있어요'**
+  String get guardianTalkComingSoonTitle;
+
+  /// 이야기 칸 준비 중 안내 설명
+  ///
+  /// In ko, this message translates to:
+  /// **'다른 보호자와 꿀팁을 나누는 곳이\n곧 열려요'**
+  String get guardianTalkComingSoonBody;
 }
 
 class _AppLocalizationsDelegate

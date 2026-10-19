@@ -81,6 +81,11 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.homeCardGradientStart,
     required this.homeCardGradientEnd,
     required this.homeCardTitle,
+    required this.navBackground,
+    required this.navDivider,
+    required this.navIconSelected,
+    required this.navIconUnselected,
+    required this.navSelectedFill,
     required this.homeCardShadow,
     required this.homeCardIconBg,
     required this.glassSurface,
@@ -350,6 +355,21 @@ class AppColors extends ThemeExtension<AppColors> {
   /// catSelectedBorder와 값이 같지만(#9CADF1) 쓰임이 달라 분리한다 —
   /// 캐릭터 선택 테두리가 바뀌어도 홈 카드는 따라가면 안 된다.
   final Color homeCardTitle;
+
+  /// 보호자 하단 바·옆 메뉴 바탕 (#798)
+  final Color navBackground;
+
+  /// 하단 바 위 선·옆 메뉴 오른쪽 선 (#798)
+  final Color navDivider;
+
+  /// 고른 칸 아이콘·글자 (#798)
+  final Color navIconSelected;
+
+  /// 고르지 않은 칸 아이콘·글자 (#798)
+  final Color navIconUnselected;
+
+  /// 옆 메뉴 고른 칸 바탕(연한 보라) (#798)
+  final Color navSelectedFill;
 
   /// 같은 카드의 그림자 (Figma 0px 4px 10px rgba(35,13,96,0.1))
   final Color homeCardShadow;
@@ -893,6 +913,11 @@ class AppColors extends ThemeExtension<AppColors> {
     homeCardGradientStart: Color(0xFFF9F4FF),
     homeCardGradientEnd: Color(0xFFE9EEFF),
     homeCardTitle: Color(0xFF9CADF1),
+    navBackground: Color(0xFFFFFFFF),
+    navDivider: Color(0xFFECEAE7),
+    navIconSelected: Color(0xFF242634),
+    navIconUnselected: Color(0xFFA6A8B4),
+    navSelectedFill: Color(0xFFEEF1FD),
     homeCardShadow: Color(0x1A230D60), // rgba(35,13,96,0.1)
     homeCardIconBg: Color(0x6682DCDF), // rgba(130,220,223,0.4)
     glassSurface: Color(0x99FFFFFF), // rgba(255,255,255,0.6)
@@ -1095,6 +1120,11 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? homeCardGradientStart,
     Color? homeCardGradientEnd,
     Color? homeCardTitle,
+    Color? navBackground,
+    Color? navDivider,
+    Color? navIconSelected,
+    Color? navIconUnselected,
+    Color? navSelectedFill,
     Color? homeCardShadow,
     Color? homeCardIconBg,
     Color? glassSurface,
@@ -1287,6 +1317,11 @@ class AppColors extends ThemeExtension<AppColors> {
           homeCardGradientStart ?? this.homeCardGradientStart,
       homeCardGradientEnd: homeCardGradientEnd ?? this.homeCardGradientEnd,
       homeCardTitle: homeCardTitle ?? this.homeCardTitle,
+      navBackground: navBackground ?? this.navBackground,
+      navDivider: navDivider ?? this.navDivider,
+      navIconSelected: navIconSelected ?? this.navIconSelected,
+      navIconUnselected: navIconUnselected ?? this.navIconUnselected,
+      navSelectedFill: navSelectedFill ?? this.navSelectedFill,
       homeCardShadow: homeCardShadow ?? this.homeCardShadow,
       homeCardIconBg: homeCardIconBg ?? this.homeCardIconBg,
       glassSurface: glassSurface ?? this.glassSurface,
@@ -1533,6 +1568,11 @@ class AppColors extends ThemeExtension<AppColors> {
         t,
       )!,
       homeCardTitle: Color.lerp(homeCardTitle, other.homeCardTitle, t)!,
+      navBackground: Color.lerp(navBackground, other.navBackground, t)!,
+      navDivider: Color.lerp(navDivider, other.navDivider, t)!,
+      navIconSelected: Color.lerp(navIconSelected, other.navIconSelected, t)!,
+      navIconUnselected: Color.lerp(navIconUnselected, other.navIconUnselected, t)!,
+      navSelectedFill: Color.lerp(navSelectedFill, other.navSelectedFill, t)!,
       homeCardShadow: Color.lerp(homeCardShadow, other.homeCardShadow, t)!,
       homeCardIconBg: Color.lerp(homeCardIconBg, other.homeCardIconBg, t)!,
       glassSurface: Color.lerp(glassSurface, other.glassSurface, t)!,
