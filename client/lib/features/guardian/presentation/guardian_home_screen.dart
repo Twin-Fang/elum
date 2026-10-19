@@ -97,7 +97,7 @@ class _GuardianHomeScreenState extends ConsumerState<GuardianHomeScreen> {
   /// 예시 생성 실패는 홈을 막지 않고 안내만 한다 (에러 코드 포함)
   Future<void> _seedExampleRoutines() async {
     final outcome = await ref.read(exampleRoutineSeederProvider).seedPending();
-    if (!mounted || !outcome.isFailure) return;
+    if (!mounted || !outcome.shouldNotifyGuardian) return;
     showElumToast(
       context,
       '${context.l10n.exampleRoutinesFailed} ($_exampleSeedErrorCode)',

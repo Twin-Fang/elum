@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/logger/app_logger.dart';
+import '../../../core/network/app_failure.dart';
 import '../../../core/storage/local_storage.dart';
 import 'routine_providers.dart';
 
@@ -11,15 +12,15 @@ enum ExampleSeedOutcome {
   failedWillRetry,
   failedGaveUp;
 
-  /// 보호자에게 실패를 알릴 결과인가
-  bool get isFailure => this == failedWillRetry || this == failedGaveUp;
+  /// 보호자에게 알릴 결과인가 — 다시 시도할 실패는 조용히 넘긴다 (다음에 성공할 수 있다)
+  bool get shouldNotifyGuardian => this == failedGaveUp;
 }
 
 final exampleRoutineSeederProvider = Provider<ExampleRoutineSeeder>(
   ExampleRoutineSeeder.new,
 );
 
-/// 온보딩 예시 일과 생성 (#803): 대기 분류 확인 > 서버 요청 > 성공·포기 시 대기값 비움 > 오늘 목록 갱신
+/// 온보딩 예시 일과 생성 (#803): 대상 이룸이 확인 > 서버 요청 > 성공·포기 시 대기값 비움 > 일과 목록 갱신
 ///
 /// 온보딩이 고른 분류를 저장소에 남기고, 보호자 홈이 들어올 때마다 이것을 부른다.
 /// 실패해도 홈은 그대로 — 결과만 돌려주고 안내는 화면이 한다.
@@ -28,7 +29,7 @@ class ExampleRoutineSeeder {
 
   final Ref _ref;
 
-  /// 실패 허용 횟수 — 첫 실패는 다음 홈 진입 때 다시, 두 번째면 포기
+  /// 서버 실패 허용 횟수 — 첫 실패는 다음 홈 진입 때 다시, 두 번째면 포기 (오프라인은 세지 않음)
   static const maxAttempts = 2;
 
   /// 400 — 앱·서버 분류 코드 불일치. 다시 해도 같다
@@ -42,6 +43,16 @@ class ExampleRoutineSeeder {
     final pending = storage.pendingExampleCategories;
     if (pending.isEmpty || _isRunning) return ExampleSeedOutcome.nothingPending;
 
+    // 온보딩을 마친 이룸이가 아니면 버림 (다른 이룸이로 바꿨거나 합류함)
+    if (storage.pendingExampleProfileId != storage.selectedProfileId) {
+      AppLogger.error(
+        '[routine example] dropped : selected profile changed',
+        StateError('profile changed'),
+      );
+      await _clearPending(storage);
+      return ExampleSeedOutcome.nothingPending;
+    }
+
     _isRunning = true;
     try {
       final attempt = await _ref
@@ -49,12 +60,15 @@ class ExampleRoutineSeeder {
           .createExamples(pending);
       final failure = attempt.failure;
 
-      // 성공 (이미 만들어 빈 목록이어도 성공)
+      // 성공 (이미 만들어 빈 목록이어도 성공) — 홈·일과관리 목록 모두 새로 받음
       if (failure == null) {
         await _clearPending(storage);
-        _ref.invalidate(todayRoutinesProvider);
+        _ref.refreshRoutines();
         return ExampleSeedOutcome.created;
       }
+
+      // 서버에 닿지 못함 > 횟수에 넣지 않고 다음 진입 때 다시
+      if (_isUnreached(failure)) return ExampleSeedOutcome.failedWillRetry;
 
       // 재시도해도 같은 실패 (400) 또는 허용 횟수 초과 > 포기
       final attempts = storage.exampleSeedAttempts + 1;
@@ -74,8 +88,17 @@ class ExampleRoutineSeeder {
     }
   }
 
+  /// 오프라인·타임아웃·취소 — 서버 판단을 듣지 못한 실패
+  bool _isUnreached(AppFailure failure) => switch (failure.fault) {
+    NetworkFault.offline ||
+    NetworkFault.timeout ||
+    NetworkFault.cancelled => true,
+    _ => false,
+  };
+
   Future<void> _clearPending(LocalStorage storage) async {
     await storage.setPendingExampleCategories(const []);
+    await storage.setPendingExampleProfileId(null);
     await storage.setExampleSeedAttempts(0);
   }
 }

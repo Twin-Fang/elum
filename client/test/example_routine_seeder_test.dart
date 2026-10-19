@@ -31,6 +31,13 @@ const _offline = Attempt<List<Routine>>.failed(
   AppFailure(fault: NetworkFault.offline),
 );
 
+const _serverError = Attempt<List<Routine>>.failed(
+  AppFailure(
+    fault: NetworkFault.none,
+    server: ServerError(code: ServerErrorCode.unknown, statusCode: 500),
+  ),
+);
+
 void main() {
   late InMemoryStorage storage;
   late int todayFetchCount;
@@ -53,7 +60,9 @@ void main() {
 
   setUp(() async {
     storage = InMemoryStorage();
+    await storage.setSelectedProfileId('p1');
     await storage.setPendingExampleCategories(['MORNING_EVENING', 'OUTSIDE']);
+    await storage.setPendingExampleProfileId('p1');
   });
 
   test('대기 분류가 없으면 요청하지 않는다 — 건너뛴 보호자에게 예시가 생기지 않게', () async {
@@ -99,8 +108,21 @@ void main() {
     expect(storage.pendingExampleCategories, isEmpty);
   });
 
-  test('네트워크 실패 한 번은 대기값을 남겨 다음 홈 진입 때 다시 시도한다', () async {
-    final repository = _FakeExampleRepository([_offline]);
+  test('오프라인은 횟수에 세지 않고 남긴다 — 오프라인으로 두 번 열어도 예시가 사라지지 않게', () async {
+    final repository = _FakeExampleRepository([_offline, _offline]);
+    final container = containerWith(repository);
+    final seeder = container.read(exampleRoutineSeederProvider);
+
+    await seeder.seedPending();
+    final outcome = await seeder.seedPending();
+
+    expect(outcome, ExampleSeedOutcome.failedWillRetry);
+    expect(storage.pendingExampleCategories, ['MORNING_EVENING', 'OUTSIDE']);
+    expect(storage.exampleSeedAttempts, 0);
+  });
+
+  test('서버 실패 한 번은 남겨 다음 홈 진입 때 다시 시도한다', () async {
+    final repository = _FakeExampleRepository([_serverError]);
     final container = containerWith(repository);
 
     final outcome = await container
@@ -108,12 +130,25 @@ void main() {
         .seedPending();
 
     expect(outcome, ExampleSeedOutcome.failedWillRetry);
-    expect(storage.pendingExampleCategories, ['MORNING_EVENING', 'OUTSIDE']);
     expect(storage.exampleSeedAttempts, 1);
   });
 
-  test('두 번째 실패면 포기하고 비운다 — 홈을 열 때마다 실패 안내가 뜨지 않게', () async {
-    final repository = _FakeExampleRepository([_offline, _offline]);
+  test('선택된 이룸이가 바뀌었으면 보내지 않고 버린다 — 합류한 남의 이룸이에게 예시가 들어가지 않게', () async {
+    await storage.setSelectedProfileId('p2');
+    final repository = _FakeExampleRepository([]);
+    final container = containerWith(repository);
+
+    final outcome = await container
+        .read(exampleRoutineSeederProvider)
+        .seedPending();
+
+    expect(outcome, ExampleSeedOutcome.nothingPending);
+    expect(repository.calls, isEmpty);
+    expect(storage.pendingExampleCategories, isEmpty);
+  });
+
+  test('서버 실패 두 번째면 포기하고 비운다 — 홈을 열 때마다 실패 안내가 뜨지 않게', () async {
+    final repository = _FakeExampleRepository([_serverError, _serverError]);
     final container = containerWith(repository);
     final seeder = container.read(exampleRoutineSeederProvider);
 
@@ -124,7 +159,6 @@ void main() {
     expect(storage.pendingExampleCategories, isEmpty);
     expect(storage.exampleSeedAttempts, 0);
   });
-
   test('400 이면 재시도 없이 비운다 — 앱·서버 분류 코드가 어긋나 다시 해도 같다', () async {
     final repository = _FakeExampleRepository([
       const Attempt.failed(

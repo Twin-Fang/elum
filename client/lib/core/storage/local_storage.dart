@@ -31,6 +31,10 @@ abstract interface class LocalStorage {
   List<String> get pendingExampleCategories;
   Future<void> setPendingExampleCategories(List<String> v);
 
+  /// 예시를 넣을 이룸이 id — 온보딩을 마친 순간 선택된 이룸이. 선택이 바뀌면 보내지 않는다
+  String? get pendingExampleProfileId;
+  Future<void> setPendingExampleProfileId(String? v);
+
   /// 예시 생성 실패 횟수. 2번째 실패면 대기 분류를 비운다 (무한 재시도 방지)
   int get exampleSeedAttempts;
   Future<void> setExampleSeedAttempts(int v);

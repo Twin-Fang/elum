@@ -34,6 +34,7 @@ class SharedPrefsStorage implements LocalStorage {
   // 온보딩 예시 분류 대기값·실패 횟수 (#803)
   static const _kPendingExampleCategories = 'pendingExampleCategories';
   static const _kExampleSeedAttempts = 'exampleSeedAttempts';
+  static const _kPendingExampleProfileId = 'pendingExampleProfileId';
   static const _kCharacter = 'cardCharacter';
   static const _kImageStyle = 'imageStyle';
   static const _kCompleted = 'onboardingCompleted';
@@ -117,6 +118,20 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setPendingExampleCategories(List<String> v) {
     AppLogger.storageWrite(_kPendingExampleCategories, v);
     return _prefs.setStringList(_kPendingExampleCategories, v);
+  }
+
+  @override
+  String? get pendingExampleProfileId =>
+      _prefs.getString(_kPendingExampleProfileId);
+
+  @override
+  Future<void> setPendingExampleProfileId(String? v) async {
+    AppLogger.storageWrite(_kPendingExampleProfileId, v ?? '');
+    if (v == null) {
+      await _prefs.remove(_kPendingExampleProfileId);
+    } else {
+      await _prefs.setString(_kPendingExampleProfileId, v);
+    }
   }
 
   @override
@@ -369,6 +384,7 @@ class SharedPrefsStorage implements LocalStorage {
       // 지운 이룸이의 예시를 다음 이룸이에 만들지 않게
       _kPendingExampleCategories,
       _kExampleSeedAttempts,
+      _kPendingExampleProfileId,
       _kCharacter,
       _kImageStyle,
       _kCompleted,

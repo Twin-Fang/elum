@@ -100,6 +100,8 @@ void main() {
 
       final storage = container.read(localStorageProvider);
       expect(storage.pendingExampleCategories, ['HOUSE_SELF']);
+      // 저장 시점에 선택된 이룸이에만 만든다
+      expect(storage.pendingExampleProfileId, storage.selectedProfileId);
       expect(storage.exampleSeedAttempts, 0);
     });
 

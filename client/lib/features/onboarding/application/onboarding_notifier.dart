@@ -196,6 +196,8 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
       await storage.setPendingExampleCategories(
         input.exampleCategories.map((c) => c.apiValue).toList(),
       );
+      // ensureProfile 이 먼저 고른 이룸이 — 나중에 선택이 바뀌면 그 이룸이에 넣지 않는다
+      await storage.setPendingExampleProfileId(storage.selectedProfileId);
       await storage.setExampleSeedAttempts(0);
       await storage.setOnboardingCompleted(true);
     } catch (e, stack) {

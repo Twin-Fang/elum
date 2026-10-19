@@ -36,6 +36,7 @@ class InMemoryStorage implements LocalStorage {
   List<String> _goals = const [];
   List<String> _pendingExampleCategories = const [];
   int _exampleSeedAttempts = 0;
+  String? _pendingExampleProfileId;
   String? _character;
   String? _imageStyle;
   String? _pin;
@@ -73,6 +74,13 @@ class InMemoryStorage implements LocalStorage {
   @override
   Future<void> setPendingExampleCategories(List<String> v) async =>
       _pendingExampleCategories = v;
+
+  @override
+  String? get pendingExampleProfileId => _pendingExampleProfileId;
+
+  @override
+  Future<void> setPendingExampleProfileId(String? v) async =>
+      _pendingExampleProfileId = v;
 
   @override
   int get exampleSeedAttempts => _exampleSeedAttempts;
@@ -245,6 +253,7 @@ class InMemoryStorage implements LocalStorage {
     _goals = const [];
     _pendingExampleCategories = const [];
     _exampleSeedAttempts = 0;
+    _pendingExampleProfileId = null;
     _character = null;
     _imageStyle = null;
     _completed = false;
@@ -260,6 +269,7 @@ class InMemoryStorage implements LocalStorage {
     _goals = const [];
     _pendingExampleCategories = const [];
     _exampleSeedAttempts = 0;
+    _pendingExampleProfileId = null;
     _character = null;
     _imageStyle = null;
     _pin = null;
