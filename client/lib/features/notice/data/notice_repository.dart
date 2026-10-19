@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/logger/app_logger.dart';
 import '../../../core/network/app_failure.dart';
 import '../../../core/network/guarded_call.dart';
+import '../../../core/network/profile_header_interceptor.dart';
 import '../domain/app_notice.dart';
 import '../../../app/dio_provider.dart';
 
@@ -54,6 +55,48 @@ class NoticeRepository {
         'code': AppFailure.of(e).badgeOr(failureCode),
       });
       return NoticeFeed.empty;
+    }
+  }
+
+  /// 한 번에 받는 공지 수 (서버 기본값과 같음)
+  static const historyPageSize = 20;
+
+  /// 공지 탭 목록 한 쪽 (최근 90일, 게시 끝난 공지 포함). 부가 기능 [fetch] 와 달리 실패를 던짐
+  Future<NoticeHistoryPage> fetchHistory(
+    NoticePlatform platform, {
+    String? cursor,
+  }) async {
+    try {
+      return await logged('NoticeRepository', 'fetchHistory', () async {
+        final res = await _dio.get<Map<String, dynamic>>(
+          '/api/notices/history',
+          queryParameters: {
+            'platform': platform.wire,
+            'size': historyPageSize,
+            'cursor': ?cursor,
+          },
+          options: Options(extra: {ProfileHeaderInterceptor.skipKey: true}),
+        );
+        final body = res.data;
+        if (body == null) throw const FormatException('empty response');
+        return NoticeHistoryPage.fromJson(body, baseUrl: _dio.options.baseUrl);
+      });
+    } catch (e) {
+      throw AppFailure.of(e);
+    }
+  }
+
+  /// 공지 탭을 열었다고 서버에 기록 (안 읽은 공지 표시 지움)
+  Future<void> markSeen() async {
+    try {
+      await logged('NoticeRepository', 'markSeen', () async {
+        await _dio.post<void>(
+          '/api/notices/seen',
+          options: Options(extra: {ProfileHeaderInterceptor.skipKey: true}),
+        );
+      });
+    } catch (e) {
+      throw AppFailure.of(e);
     }
   }
 }
