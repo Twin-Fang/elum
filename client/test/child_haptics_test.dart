@@ -1,4 +1,5 @@
 import 'package:elum/core/haptics/child_haptics.dart';
+import 'package:elum/features/child/data/speech_service.dart';
 import 'package:elum/core/storage/local_storage.dart';
 import 'package:elum/core/theme/app_theme.dart';
 import 'package:elum/core/widgets/elum_button.dart';
@@ -168,6 +169,7 @@ void main() {
         overrides: [
           localStorageProvider.overrideWithValue(storage),
           hapticDriverProvider.overrideWithValue(driver),
+          speechServiceProvider.overrideWithValue(_SilentSpeech()),
           myRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
           todayRoutinesProvider.overrideWith((ref) async => const <Routine>[]),
           memberProvider.overrideWith((ref) async => null),
@@ -263,6 +265,15 @@ void main() {
       ]);
     });
 
+    testWidgets('스피커를 누르면 누름 진동이 울린다', (tester) async {
+      await pumpDetail(tester);
+
+      await tester.tap(find.bySemanticsLabel('소리로 듣기').first);
+      await settle(tester);
+
+      expect(driver.played, [ChildHapticKind.tap]);
+    });
+
     testWidgets('스위치를 끄면 체크해도 울리지 않고 화면은 그대로 진행된다', (tester) async {
       storage = InMemoryStorage(
         onboardingCompleted: true,
@@ -345,4 +356,20 @@ void main() {
       ], reason: '켤 때 느낌을 한 번 알려준다');
     });
   });
+}
+
+/// 소리 없이 바로 끝나는 음성 (진동만 보는 시험용)
+class _SilentSpeech implements SpeechService {
+  @override
+  Future<bool> speak(
+    String text, {
+    String language = 'ko',
+    StoredSpeechSource? stored,
+  }) async => true;
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  void dispose() {}
 }
