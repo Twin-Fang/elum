@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
+import '../../../../core/widgets/coach_mark_overlay.dart';
 import 'coach_demo_content.dart';
 import 'coach_demo_parts.dart';
 import 'library_routine_tile.dart';
@@ -12,9 +13,6 @@ import 'library_routine_tile.dart';
 ///
 /// 모두 `CoachMarkStep.demoBuilder` 에 꽂을 수 있게 [Positioned] 를 돌려준다.
 /// 한 주기는 [AppMotion.coachDemoLoop]. 동작 줄이기면 멈춘 마지막 장면만 그린다.
-
-/// 보낸 뒤 토스트: 화면 바닥에서 띄우는 거리 (진행 점·안내 문구 위)
-const _toastBottomInset = 190.0;
 
 /// 누르기: 칸 탭 > 상세 시트(카드 고치기 | 오늘 보내기)가 올라옴
 Widget tapDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
@@ -38,19 +36,64 @@ Widget tapDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
   ),
 );
 
-/// 길게 누르기: 칸 꾹 + 링이 퍼짐 (실제 메뉴는 칸 옆에 뜨는데 말풍선 글자를 가려서 그리지 않는다)
+/// 길게 눌렀다 떼기: 꾹 누르면 링이 퍼지고, 손을 떼면 칸 옆에 메뉴가 뜬다 (끌지 않으면 메뉴)
+///
+/// 메뉴는 실제처럼 그림 칸 오른쪽 위에 붙인다. 화면 오른쪽 끝을 넘으면 칸 왼쪽으로 돌린다.
 Widget longPressDemo(BuildContext context, Rect target) => buildCoachDemoLoop(
-  endScene: 0.5,
-  builder: (context, t) => Stack(
-    children: [
-      CoachDemoFinger(
-        center: target.center,
-        press: coachDemoPhase(t, 0.1, 0.2) * (1 - coachDemoPhase(t, 0.6, 0.7)),
-        appear: coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.65, 0.75)),
-      ),
-      CoachDemoRing(center: target.center, spread: coachDemoPhase(t, 0.2, 0.6)),
-    ],
-  ),
+  endScene: 0.85,
+  builder: (context, t) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final menuWidth = CoachDemoAnchoredMenu.width.w;
+    final gap = context.space.xs.w;
+    final iconRight = target.center.dx + LibraryRoutineTile.iconSize.w / 2;
+    final isRoomOnRight = iconRight + gap + menuWidth <= screenWidth - gap;
+    final menuLeft = isRoomOnRight
+        ? iconRight + gap
+        : target.center.dx -
+              LibraryRoutineTile.iconSize.w / 2 -
+              gap -
+              menuWidth;
+    // 칸 위 끝에 맞추되, 아래 점·안내 문구 자리는 넘지 않게 올린다
+    final media = MediaQuery.of(context);
+    final menuHeight =
+        CoachDemoAnchoredMenu.rowHeight.h * CoachDemoAnchoredMenu.rowCount;
+    final menuBottomLimit =
+        media.size.height -
+        media.padding.bottom -
+        CoachMarkOverlay.bottomReserve.h;
+    final menuTop = target.top.clamp(
+      media.padding.top,
+      (menuBottomLimit - menuHeight).clamp(media.padding.top, double.infinity),
+    );
+    final appear = coachDemoPhase(t, 0.5, 0.6);
+    return Stack(
+      children: [
+        CoachDemoFinger(
+          center: target.center,
+          press:
+              coachDemoPhase(t, 0.1, 0.2) * (1 - coachDemoPhase(t, 0.45, 0.5)),
+          appear:
+              coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.5, 0.58)),
+        ),
+        CoachDemoRing(
+          center: target.center,
+          spread: coachDemoPhase(t, 0.2, 0.45),
+        ),
+        Positioned(
+          left: menuLeft,
+          top: menuTop,
+          child: Opacity(
+            opacity: appear,
+            child: Transform.scale(
+              scale: 0.92 + 0.08 * appear,
+              alignment: isRoomOnRight ? Alignment.topLeft : Alignment.topRight,
+              child: const CoachDemoAnchoredMenu(),
+            ),
+          ),
+        ),
+      ],
+    );
+  },
 );
 
 /// 보낸 뒤: ✓ 배지가 칸에 톡 붙고 실제 토스트 문구가 뜸
@@ -81,7 +124,11 @@ Widget sentBadgeDemo(
         Positioned(
           left: 0,
           right: 0,
-          bottom: _toastBottomInset.h,
+          // 아래 점·안내 문구 바로 위 (말풍선은 칸 아래에 온다)
+          bottom:
+              MediaQuery.paddingOf(context).bottom +
+              CoachMarkOverlay.bottomReserve.h +
+              context.space.sm.h,
           child: Opacity(
             opacity:
                 coachDemoPhase(t, 0.35, 0.5) * (1 - coachDemoPhase(t, 0.9, 1)),
@@ -97,47 +144,82 @@ Widget sentBadgeDemo(
   },
 );
 
-/// 끌어서 묶기: 첫 칸을 들어 올려 둘째 칸 위로 > 놓으면 묶음 칸이 생김
+/// 끌어서 묶기: 첫 칸 그림을 들어 올려 둘째 칸 위로 > 놓으면 그 자리에 묶음 칸이 생김
+///
+/// [ghost] 는 끌려가는 그림 칸 내용, [groupItems] 는 놓은 뒤 묶음 칸 안 그림 (안내 무대는 예시 일과 그림). 없으면 빈 칸.
 Widget dragToGroupDemo(
   BuildContext context,
   Rect first,
-  Rect second,
-) => buildCoachDemoLoop(
+  Rect second, {
+  Widget? ghost,
+  List<Widget> groupItems = const [],
+}) => buildCoachDemoLoop(
   endScene: 0.8,
   builder: (context, t) {
     final move = Curves.easeInOut.transform(coachDemoPhase(t, 0.25, 0.6));
     final lift = coachDemoPhase(t, 0.15, 0.25);
     final drop = coachDemoPhase(t, 0.6, 0.7);
-    final ghost = Rect.lerp(first, second, move)!;
+    // 칸 전체가 아니라 실제 칸의 그림 자리(가운데 위)만 움직인다
+    final iconSize = LibraryRoutineTile.iconSize.w;
+    Rect iconOf(Rect cell) => Rect.fromLTWH(
+      cell.center.dx - iconSize / 2,
+      cell.top,
+      iconSize,
+      iconSize,
+    );
+    final from = iconOf(first);
+    final to = iconOf(second);
+    final moving = Rect.lerp(from, to, move)!;
     final colors = context.colors;
+    final radius = BorderRadius.circular(LibraryRoutineTile.iconRadius.w);
     return Stack(
       children: [
-        // 받는 칸: 위에 올라오면 살짝 커짐
+        // 받는 칸: 위에 올라오면 테두리가 뜨며 살짝 커짐
         Positioned.fromRect(
-          rect: second,
+          rect: to,
           child: Transform.scale(
             scale: 1 + 0.1 * coachDemoPhase(t, 0.5, 0.6) * (1 - drop),
-            child: CoachDemoGhostTile(color: colors.surface, opacity: 1 - drop),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: radius,
+                border: Border.all(
+                  color: colors.surface.withValues(
+                    alpha: coachDemoPhase(t, 0.45, 0.55) * (1 - drop),
+                  ),
+                  width: 2.w,
+                ),
+              ),
+            ),
           ),
         ),
-        // 끌려가는 칸
+        // 끌려가는 그림 칸
         Positioned.fromRect(
-          rect: ghost,
+          rect: moving,
           child: Transform.scale(
-            scale: 1 + 0.15 * lift - 0.4 * drop,
-            child: CoachDemoGhostTile(color: colors.surface, opacity: 1 - drop),
+            scale: 1 + 0.12 * lift - 0.4 * drop,
+            child: Opacity(
+              opacity: 1 - drop,
+              child: CoachDemoGhostTile(
+                color: colors.surface,
+                opacity: 1,
+                child: ghost,
+              ),
+            ),
           ),
         ),
         // 놓은 자리에 묶음 칸: 2×2 미리보기
         Positioned.fromRect(
-          rect: second,
+          rect: to,
           child: Transform.scale(
             scale: Curves.easeOutBack.transform(drop),
-            child: Opacity(opacity: drop, child: const CoachDemoGroupPreview()),
+            child: Opacity(
+              opacity: drop,
+              child: CoachDemoGroupPreview(items: groupItems),
+            ),
           ),
         ),
         CoachDemoFinger(
-          center: ghost.center,
+          center: moving.center,
           press: lift * (1 - drop),
           appear:
               coachDemoPhase(t, 0, 0.1) * (1 - coachDemoPhase(t, 0.65, 0.75)),
