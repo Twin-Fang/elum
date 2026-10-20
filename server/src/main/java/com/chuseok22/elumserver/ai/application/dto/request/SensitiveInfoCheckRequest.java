@@ -15,7 +15,7 @@ public record SensitiveInfoCheckRequest(
   @Schema(description = "검증할 원문 텍스트", example = "홍길동 010-1234-5678로 연락주세요",
     requiredMode = Schema.RequiredMode.REQUIRED)
   @NotBlank(message = "검사할 내용을 입력해주세요.")
-  @Size(max = 1000, message = "검사할 내용은 1000자를 넘을 수 없습니다.")
+  @Size(max = 1000, message = "검사할 내용은 1000자를 넘을 수 없어요.")
   String text
 ) {
 

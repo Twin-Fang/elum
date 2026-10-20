@@ -13,17 +13,17 @@ import jakarta.validation.constraints.Size;
 @Schema(description = "일과 카드 수정 요청 — 보낸 필드만 바뀐다")
 public record RoutineStepUpdateRequest(
 
-  @Size(max = 100, message = "카드 제목은 100자를 넘을 수 없습니다.")
+  @Size(max = 100, message = "카드 제목은 100자를 넘을 수 없어요.")
   @Schema(description = "바꿀 카드 제목. 안 보내면 그대로 둔다", example = "옷을 입어요")
   String title,
 
-  @Size(max = 300, message = "카드 설명은 300자를 넘을 수 없습니다.")
+  @Size(max = 300, message = "카드 설명은 300자를 넘을 수 없어요.")
   @Schema(description = "바꿀 카드 설명. 안 보내면 그대로 둔다", example = "현관 우산꽂이에서 파란색 우산을 챙겨요.")
   String description,
 
   // 화면은 화살표로 한 칸씩 옮긴다. 목표 자리를 그대로 보내면
   // 서버가 그 자리에 끼워 넣고 나머지를 1..N으로 다시 채운다.
-  @Min(value = 1, message = "카드 순서는 1부터 시작합니다.")
+  @Min(value = 1, message = "카드 순서는 1부터 시작해요.")
   @Schema(description = "옮길 자리(1부터). 안 보내면 순서를 그대로 둔다", example = "2")
   Integer stepOrder
 ) {
