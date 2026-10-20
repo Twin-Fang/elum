@@ -119,12 +119,17 @@ final class GeminiRoutineSchemas {
     );
   }
 
+  // 되묻기 질문 스키마 설명: 코드라 배포하면 바로 적용 (지시문은 운영 DB)
+  private static final String QUESTION_HINT = "질문 한 문장, 20자 안팎, 이름 없이";
+  private static final String OPTION_LABEL_HINT = "10자 이내의 짧은 말 (문장 금지)";
+  private static final String OPTION_EMOJI_HINT = "그 선택지를 나타내는 이모지 하나";
+
   private static Map<String, Object> questionItemSchema() {
     return Map.of(
       "type", "object",
       "properties", Map.of(
         "supportGoal", Map.of("type", "string", "enum", List.of("PREPARE_ITEMS", "PREPARE_NEW")),
-        "question", Map.of("type", "string"),
+        "question", Map.of("type", "string", "description", QUESTION_HINT),
         "options", Map.of(
           "type", "array",
           "minItems", 3,
@@ -132,8 +137,8 @@ final class GeminiRoutineSchemas {
           "items", Map.of(
             "type", "object",
             "properties", Map.of(
-              "emoji", Map.of("type", "string"),
-              "label", Map.of("type", "string")
+              "emoji", Map.of("type", "string", "description", OPTION_EMOJI_HINT),
+              "label", Map.of("type", "string", "description", OPTION_LABEL_HINT)
             ),
             "required", List.of("emoji", "label")
           )

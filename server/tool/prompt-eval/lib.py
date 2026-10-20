@@ -136,17 +136,21 @@ def routine_response_schema(extra_step_properties: dict = None, description_hint
     }
 
 
-def question_response_schema(goal_count: int) -> dict:
+def question_response_schema(goal_count: int, hints: dict = None) -> dict:
+    hints = hints or {}
     option = {
         "type": "object",
-        "properties": {"emoji": {"type": "string"}, "label": {"type": "string"}},
+        "properties": {
+            "emoji": {"type": "string", **({"description": hints["option_emoji_hint"]} if "option_emoji_hint" in hints else {})},
+            "label": {"type": "string", **({"description": hints["option_label_hint"]} if "option_label_hint" in hints else {})},
+        },
         "required": ["emoji", "label"],
     }
     item = {
         "type": "object",
         "properties": {
             "supportGoal": {"type": "string", "enum": ["PREPARE_ITEMS", "PREPARE_NEW"]},
-            "question": {"type": "string"},
+            "question": {"type": "string", **({"description": hints["question_hint"]} if "question_hint" in hints else {})},
             "options": {"type": "array", "minItems": 3, "maxItems": 5, "items": option},
         },
         "required": ["supportGoal", "question", "options"],
