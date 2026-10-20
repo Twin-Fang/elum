@@ -27,12 +27,14 @@ public class AdminMemberController {
   private final AdminMemberService adminMemberService;
   private final AdminDateFormatter adminDateFormatter;
 
-  /// 회원 목록: 검색어(q), 필터(plan, status), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
+  /// 회원 목록: 검색어(q), 필터(plan, status, joinedFrom, joinedTo), 정렬(sort), 페이지(page, 1부터). 허용 밖 값은 보정된다
   @GetMapping("/admin/members")
   public String list(
     @RequestParam(name = "q", required = false) String q,
     @RequestParam(name = "plan", required = false) String plan,
     @RequestParam(name = "status", required = false) String status,
+    @RequestParam(name = "joinedFrom", required = false) String joinedFrom,
+    @RequestParam(name = "joinedTo", required = false) String joinedTo,
     @RequestParam(name = "sort", required = false) String sort,
     @RequestParam(name = "page", required = false) String page,
     Model model
@@ -40,6 +42,8 @@ public class AdminMemberController {
     Map<String, String> rawFilters = new HashMap<>();
     rawFilters.put(AdminMemberList.FILTER_PLAN, plan);
     rawFilters.put(AdminMemberList.FILTER_STATUS, status);
+    rawFilters.put(AdminMemberList.FILTER_JOINED_FROM, joinedFrom);
+    rawFilters.put(AdminMemberList.FILTER_JOINED_TO, joinedTo);
     AdminListQuery query = AdminListQuery.of(q, rawFilters, sort, page, AdminMemberList.DEFINITION);
 
     Page<AdminMemberResponse> members = adminMemberService.search(query);

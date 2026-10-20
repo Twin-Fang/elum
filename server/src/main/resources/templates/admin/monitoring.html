@@ -49,6 +49,85 @@
       </div>
     </div>
 
+    <!-- 지금 AI 상태: 대시보드와 같은 판정 -->
+    <div class="card bg-base-200 shadow">
+      <div class="card-body p-4 gap-3">
+        <h2 class="font-semibold">AI 상태</h2>
+        <div th:replace="~{admin/fragments/admin-ai-health :: providerCards(${aiHealth})}"></div>
+      </div>
+    </div>
+
+    <!-- 사용량 추이: 용도별로 쌓은 막대 (실패율은 용도별 선) -->
+    <div class="card bg-base-200 shadow" data-trend-chart data-endpoint="/admin/stats/api/ai-usage" data-days="30"
+         data-type="stacked" data-metric="count">
+      <div class="card-body p-4 gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="font-semibold">사용량 추이</h2>
+          <div class="ml-auto"><div th:replace="~{admin/fragments/admin-chart :: unitToggle('일별 (30일)', '월별 (12달)')}"></div></div>
+          <select data-trend-metric class="select select-bordered select-xs" aria-label="지표">
+            <option value="count" selected>호출 수</option>
+            <option value="cost">비용 (원)</option>
+            <option value="failure">실패율 (%)</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" data-month-summary>
+          <div class="rounded-box bg-base-100 p-3">
+            <div class="text-xs text-base-content/60">이번 달 호출</div>
+            <div class="text-xl font-bold" th:text="${#numbers.formatInteger(monthSummary.callCount(), 1, 'COMMA')}">0</div>
+          </div>
+          <div class="rounded-box bg-base-100 p-3">
+            <div class="text-xs text-base-content/60">이번 달 비용</div>
+            <div class="text-xl font-bold" th:text="'$' + ${#numbers.formatDecimal(monthSummary.costUsd(), 1, 2)}">$0</div>
+            <div class="text-xs text-base-content/60" th:if="${monthSummary.costKrw() > 0}"
+                 th:text="'약 ' + ${#numbers.formatInteger(monthSummary.costKrw(), 1, 'COMMA')} + '원'">약 0원</div>
+          </div>
+          <div class="rounded-box bg-base-100 p-3">
+            <div class="text-xs text-base-content/60">일과 1개 평균 비용</div>
+            <div class="text-xl font-bold"
+                 th:text="${monthSummary.averageCostKrwPerRoutine() == null ? '-' : '약 ' + #numbers.formatInteger(monthSummary.averageCostKrwPerRoutine(), 1, 'COMMA') + '원'}">-</div>
+            <div class="text-xs text-base-content/60">이번 달 비용 ÷ 성공한 일과 생성</div>
+          </div>
+          <div class="rounded-box bg-base-100 p-3">
+            <div class="text-xs text-base-content/60">이번 달 실패율</div>
+            <div class="text-xl font-bold" th:text="${#numbers.formatDecimal(monthSummary.failurePercent(), 1, 1)} + '%'">0%</div>
+          </div>
+        </div>
+        <th:block th:replace="~{admin/fragments/admin-chart :: trendBody('h-72')}"></th:block>
+        <p class="text-xs text-base-content/60">원화는 시스템 설정의 환율로 바꾼 추정값이에요</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- 제공자별 비용: 몇 개뿐이라 그래프 대신 막대 줄 -->
+      <div class="card bg-base-200 shadow">
+        <div class="card-body p-4 gap-2" data-provider-costs>
+          <h2 class="font-semibold">제공자별 비용 (이번 달)</h2>
+          <p th:if="${monthSummary.providerCosts().isEmpty()}" class="text-sm text-base-content/60">이번 달 비용 기록이 없어요</p>
+          <div th:each="providerCost : ${monthSummary.providerCosts()}" class="space-y-1">
+            <div class="flex justify-between text-sm">
+              <span th:text="${providerCost.laneLabel()}">제공자</span>
+              <span>
+                <b th:text="'$' + ${#numbers.formatDecimal(providerCost.costUsd(), 1, 2)}">$0</b>
+                <span class="text-base-content/60"
+                      th:text="'(' + ${monthSummary.costPercentOf(providerCost)} + '%)'">(0%)</span>
+              </span>
+            </div>
+            <div class="h-2 w-full rounded-full bg-base-300 overflow-hidden">
+              <div class="h-2 rounded-full bg-primary"
+                   th:style="'width:' + ${monthSummary.costPercentOf(providerCost)} + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card bg-base-200 shadow">
+        <div class="card-body p-4 gap-2">
+          <h2 class="font-semibold">최근 24시간 실패 원인</h2>
+          <div th:replace="~{admin/fragments/admin-ai-health :: failureTable(${aiHealth})}"></div>
+          <a th:href="@{/admin/monitoring(success='false')}" class="link link-hover text-sm">실패한 호출만 보기</a>
+        </div>
+      </div>
+    </div>
+
     <!-- 기간 기본은 최근 7일. 값이 틀리면 서버가 보정해서 다시 채운다 -->
     <form method="get" th:action="@{/admin/monitoring}" class="flex flex-wrap items-end gap-2" data-admin-filter-bar>
       <label class="form-control">
@@ -129,6 +208,7 @@
     </div>
 
     <div th:replace="~{admin/fragments/admin-list :: pager(${calls}, @{${pagerBaseUrl}})}"></div>
+    <th:block th:replace="~{admin/fragments/admin-chart :: scripts}"></th:block>
   </main>
 </body>
 </html>

@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.service;
 
+import com.chuseok22.elumserver.member.infrastructure.repository.MemberDailyVisitRepository;
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
 import com.chuseok22.elumserver.adreward.infrastructure.repository.AdRewardSessionRepository;
 import com.chuseok22.elumserver.feedback.application.service.FeedbackService;
@@ -83,6 +84,9 @@ class MemberServiceTest {
 
   @Mock
   private EntitlementService entitlementService;
+
+  @Mock
+  private MemberDailyVisitRepository memberDailyVisitRepository;
 
   @InjectMocks
   private MemberService memberService;

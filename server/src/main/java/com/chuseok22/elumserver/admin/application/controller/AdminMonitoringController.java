@@ -3,9 +3,12 @@ package com.chuseok22.elumserver.admin.application.controller;
 import com.chuseok22.elumserver.admin.application.list.AdminListQuery;
 import com.chuseok22.elumserver.admin.application.list.AdminMonitoringList;
 import com.chuseok22.elumserver.admin.application.service.AdminMonitoringService;
+import com.chuseok22.elumserver.admin.application.service.AdminStatsService;
+import com.chuseok22.elumserver.ai.application.service.AiCallStatsService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
 import com.chuseok22.elumserver.ai.infrastructure.entity.AiCallLog;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AdminMonitoringController {
 
   private final AdminMonitoringService adminMonitoringService;
+  private final AdminStatsService adminStatsService;
+  private final AiCallStatsService aiCallStatsService;
 
   /// 모니터링: 필터(callType, success, memberId, from, to), 정렬(sort), 페이지(page, 1부터). 허용 밖 값·기간은 보정된다
   @GetMapping("/admin/monitoring")
@@ -45,6 +50,10 @@ public class AdminMonitoringController {
     Page<AiCallLog> calls = adminMonitoringService.search(query);
     model.addAttribute("todayStats", adminMonitoringService.getTodayStats());
     model.addAttribute("totalStats", adminMonitoringService.getTotalStats());
+    // 이번 달 요약·제공자 상태 (사용량 추이 그래프는 화면 스크립트가 따로 불러옴)
+    LocalDateTime now = LocalDateTime.now();
+    model.addAttribute("monthSummary", adminStatsService.loadAiMonthSummary(now));
+    model.addAttribute("aiHealth", aiCallStatsService.loadHealthSnapshot(now));
     model.addAttribute("calls", calls);
     model.addAttribute("callTypes", AiCallType.values());
     model.addAttribute("definition", AdminMonitoringList.DEFINITION);
