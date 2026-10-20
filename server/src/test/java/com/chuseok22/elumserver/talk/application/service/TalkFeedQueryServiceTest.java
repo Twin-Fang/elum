@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -156,7 +157,7 @@ class TalkFeedQueryServiceTest {
     service.feed(GUARDIAN, null, null, 0, AppLocale.KO);
 
     ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
-    verify(talkPostRepository, org.mockito.Mockito.times(3))
+    verify(talkPostRepository, times(3))
       .findFeedPage(any(), any(), anyCollection(), any(), anyString(), pageable.capture());
     assertThat(pageable.getAllValues()).extracting(Pageable::getPageSize).containsExactly(51, 21, 2);
   }
@@ -177,6 +178,70 @@ class TalkFeedQueryServiceTest {
 
     assertThat(exactlyFull.items()).hasSize(3);
     assertThat(exactlyFull.nextCursor()).isNull();
+  }
+
+  @Test
+  @DisplayName("첫 읽기가 모두 차단 글이면 이어 읽고, 이어 읽을 때 cursor 는 직전에 읽은 마지막 글이다")
+  void feed_continuesScanWhenWholeBatchIsBlocked() {
+    blockAuthor("author-blocked");
+    List<TalkPost> blockedBatch = List.of(
+      post("b1", "author-blocked", NOW.minusHours(1)), post("b2", "author-blocked", NOW.minusHours(2)),
+      post("b3", "author-blocked", NOW.minusHours(3)));
+    List<TalkPost> visibleBatch = List.of(
+      post("v1", "author-ok", NOW.minusHours(4)), post("v2", "author-ok", NOW.minusHours(5)),
+      post("v3", "author-ok", NOW.minusHours(6)));
+    when(talkPostRepository.findFeedPage(any(), any(), anyCollection(), any(), anyString(), any()))
+      .thenReturn(blockedBatch, visibleBatch);
+
+    TalkFeedPageResponse page = service.feed(GUARDIAN, null, null, 2, AppLocale.KO);
+
+    assertThat(page.items()).extracting(TalkPostSummaryResponse::id).containsExactly("v1", "v2");
+    assertThat(page.nextCursor()).isEqualTo(TalkCursor.encode(NOW.minusHours(5), "v2"));
+    ArgumentCaptor<LocalDateTime> cursorCreatedAt = ArgumentCaptor.forClass(LocalDateTime.class);
+    ArgumentCaptor<String> cursorId = ArgumentCaptor.forClass(String.class);
+    verify(talkPostRepository, times(2))
+      .findFeedPage(any(), any(), anyCollection(), cursorCreatedAt.capture(), cursorId.capture(), any());
+    assertThat(cursorCreatedAt.getAllValues())
+      .containsExactly(TalkFeedQueryService.NO_CURSOR_CREATED_AT, NOW.minusHours(3));
+    assertThat(cursorId.getAllValues()).containsExactly("", "b3");
+  }
+
+  @Test
+  @DisplayName("다섯 번 읽어도 전부 차단 글이면 빈 쪽과 마지막으로 읽은 위치의 nextCursor 를 준다")
+  void feed_allRoundsBlocked_returnsEmptyPageWithCursorAtLastScanned() {
+    blockAuthor("author-blocked");
+    List<List<TalkPost>> batches = new ArrayList<>();
+    for (int round = 0; round < 5; round++) {
+      batches.add(List.of(
+        post("r" + round + "a", "author-blocked", NOW.minusHours(round * 10 + 1)),
+        post("r" + round + "b", "author-blocked", NOW.minusHours(round * 10 + 2)),
+        post("r" + round + "c", "author-blocked", NOW.minusHours(round * 10 + 3))));
+    }
+    when(talkPostRepository.findFeedPage(any(), any(), anyCollection(), any(), anyString(), any()))
+      .thenReturn(batches.get(0), batches.get(1), batches.get(2), batches.get(3), batches.get(4));
+
+    TalkFeedPageResponse page = service.feed(GUARDIAN, null, null, 2, AppLocale.KO);
+
+    assertThat(page.items()).isEmpty();
+    assertThat(page.nextCursor()).isEqualTo(TalkCursor.encode(NOW.minusHours(43), "r4c"));
+    verify(talkPostRepository, times(5)).findFeedPage(any(), any(), anyCollection(), any(), anyString(), any());
+  }
+
+  @Test
+  @DisplayName("이어 읽다 짧은 묶음이 오면 끝난 것이라 nextCursor 가 없다")
+  void feed_shortBatchAfterBlockedRound_hasNoNextCursor() {
+    blockAuthor("author-blocked");
+    List<TalkPost> blockedBatch = List.of(
+      post("b1", "author-blocked", NOW.minusHours(1)), post("b2", "author-blocked", NOW.minusHours(2)),
+      post("b3", "author-blocked", NOW.minusHours(3)));
+    when(talkPostRepository.findFeedPage(any(), any(), anyCollection(), any(), anyString(), any()))
+      .thenReturn(blockedBatch, List.of(post("v1", "author-ok", NOW.minusHours(4))));
+
+    TalkFeedPageResponse page = service.feed(GUARDIAN, null, null, 2, AppLocale.KO);
+
+    assertThat(page.items()).extracting(TalkPostSummaryResponse::id).containsExactly("v1");
+    assertThat(page.nextCursor()).isNull();
+    verify(talkPostRepository, times(2)).findFeedPage(any(), any(), anyCollection(), any(), anyString(), any());
   }
 
   @Test
@@ -349,6 +414,13 @@ class TalkFeedQueryServiceTest {
           e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.TALK_IMAGE_NOT_FOUND));
     }
     verifyNoImageRead();
+  }
+
+  private void blockAuthor(String blockedMemberId) {
+    TalkBlock block = new TalkBlock();
+    block.setBlockerMemberId("viewer-1");
+    block.setBlockedMemberId(blockedMemberId);
+    when(talkBlockRepository.findByBlockerMemberId("viewer-1")).thenReturn(List.of(block));
   }
 
   private void verifyNoImageRead() {

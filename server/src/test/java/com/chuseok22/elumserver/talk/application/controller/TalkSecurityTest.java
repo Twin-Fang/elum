@@ -115,7 +115,7 @@ class TalkSecurityTest {
   }
 
   @Test
-  @DisplayName("이룸이 권한으로는 인기·상세·그림·내 글 매핑·올리기도 403 이다")
+  @DisplayName("이룸이 권한으로는 인기·상세·그림·내 글 매핑·미리보기·올리기도 403 이다")
   void otherEndpoints_asElumi_are403() throws Exception {
     var elumi = user("e1").authorities(MEMBER, ELUMI);
 
@@ -124,6 +124,8 @@ class TalkSecurityTest {
     mockMvc.perform(get("/api/talk/posts/p1").with(elumi)).andExpect(status().isForbidden());
     mockMvc.perform(get("/api/talk/posts/p1/steps/0/image").with(elumi)).andExpect(status().isForbidden());
     mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/talk/posts")
+      .with(elumi).contentType("application/json").content("{}")).andExpect(status().isForbidden());
+    mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/talk/posts/preview")
       .with(elumi).contentType("application/json").content("{}")).andExpect(status().isForbidden());
   }
 

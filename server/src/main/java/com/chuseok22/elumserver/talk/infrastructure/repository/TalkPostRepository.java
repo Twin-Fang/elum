@@ -35,11 +35,11 @@ public interface TalkPostRepository extends JpaRepository<TalkPost, String> {
     Pageable pageable);
 
   /**
-   * 인기 글 id: since 이후 가져간 고유 보호자 수 내림차순 (같으면 최신순), 가져간 기록 없는 글은 빠짐
+   * 인기 글 id: since 이후 가져간 고유 보호자 수 내림차순 (같으면 최신순, 시각도 같으면 id 큰 순), 가져간 기록 없는 글은 빠짐
    */
   @Query("select p.id from TalkPost p, TalkImport i where i.postId = p.id and p.status = :status "
     + "and p.language = :language and p.category in :categories and i.createdAt >= :since "
-    + "group by p.id, p.createdAt order by count(distinct i.memberId) desc, p.createdAt desc")
+    + "group by p.id, p.createdAt order by count(distinct i.memberId) desc, p.createdAt desc, p.id desc")
   List<String> findPopularPostIds(
     @Param("status") TalkPostStatus status, @Param("language") AppLocale language,
     @Param("categories") Collection<TalkCategory> categories, @Param("since") LocalDateTime since,
