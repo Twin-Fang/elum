@@ -2,6 +2,7 @@ package com.chuseok22.elumserver.ai.infrastructure.client;
 
 import com.chuseok22.elumserver.ai.application.service.AiCallLogService;
 import com.chuseok22.elumserver.ai.core.AiCallType;
+import com.chuseok22.elumserver.ai.core.CardScene;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
@@ -72,7 +73,12 @@ public class OpenAiImageClient implements ImageGenerationClient {
   // 비교가 성립하지 않는다. 언어(KO/EN)도 조립기가 한 곳에서 고른다.
   @Override
   public GeneratedImage generateImage(String stepDescription, CharacterType characterType) {
-    return call(promptComposer.compose(stepDescription, characterType, false), characterType);
+    return generateCardImage(CardScene.descriptionOnly(stepDescription), characterType);
+  }
+
+  @Override
+  public GeneratedImage generateCardImage(CardScene scene, CharacterType characterType) {
+    return call(promptComposer.compose(scene, characterType, false), characterType);
   }
 
   /// 실사: Gemini 와 같은 실사 지시문을 쓴다 — 제공자를 바꿨다고 그림의 결이 달라지면 안 된다.

@@ -1,6 +1,7 @@
 package com.chuseok22.elumserver.ai.application.service;
 
 import com.chuseok22.elumserver.ai.core.FluxSeed;
+import com.chuseok22.elumserver.ai.core.CardScene;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
 import com.chuseok22.elumserver.ai.infrastructure.client.FluxImageClient;
@@ -53,13 +54,23 @@ public class CardImageGenerator {
    * @param imagePromptEn 글 AI 가 같은 호출에서 준 영어 장면. 없으면 null
    * @param seedKey       {@link FluxSeed#routineKey} — 한 일과의 카드들이 같은 캐릭터로 나오게
    * @param imageStyle    이룸이의 그림 방식. null 이면 만화 — 기존 동작
+   * @param routineTitle  일과 제목 (그림 AI 에게 어떤 일과인지 알리는 참고용). 직접 추가한 카드는 null
+   * @param stepTitle     카드 제목. 직접 추가한 카드는 null
    */
   public record CardImageRequest(
-    String description, String imagePromptEn, CharacterType characterType, String seedKey, ImageStyle imageStyle
+    String description, String imagePromptEn, CharacterType characterType, String seedKey, ImageStyle imageStyle,
+    String routineTitle, String stepTitle
   ) {
 
     public CardImageRequest {
       imageStyle = ImageStyle.orDefault(imageStyle);
+    }
+
+    /// 설명만 있는 카드 (보호자가 직접 추가한 카드, 제목·영어 장면 없음)
+    public CardImageRequest(
+      String description, String imagePromptEn, CharacterType characterType, String seedKey, ImageStyle imageStyle
+    ) {
+      this(description, imagePromptEn, characterType, seedKey, imageStyle, null, null);
     }
   }
 
@@ -72,7 +83,7 @@ public class CardImageGenerator {
       return generateRealistic(request);
     }
     if (imageClientRouter.selected() != ImageProvider.FLUX) {
-      return imageClientRouter.current().generateImage(request.description(), request.characterType());
+      return imageClientRouter.current().generateCardImage(toCardScene(request), request.characterType());
     }
     if (!fluxImageClient.available()) {
       log.warn("FLUX 를 골랐지만 키가 없다 — 이 카드는 OpenAI 로 그린다");
@@ -167,6 +178,12 @@ public class CardImageGenerator {
     if (request.imageStyle() == ImageStyle.REALISTIC) {
       return openAi.get().generateRealisticImage(request.description());
     }
-    return openAi.get().generateImage(request.description(), request.characterType());
+    return openAi.get().generateCardImage(toCardScene(request), request.characterType());
+  }
+
+  /// 글 AI 의 영어 장면은 한 줄·영어일 때만 싣는다 (그림 지시문 JSON 의 sceneDetail)
+  private CardScene toCardScene(CardImageRequest request) {
+    return new CardScene(
+      request.routineTitle(), request.stepTitle(), request.description(), usableScene(request.imagePromptEn()));
   }
 }

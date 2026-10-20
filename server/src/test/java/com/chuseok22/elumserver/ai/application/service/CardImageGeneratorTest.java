@@ -3,6 +3,7 @@ package com.chuseok22.elumserver.ai.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -56,7 +57,7 @@ class CardImageGeneratorTest {
     lenient().when(fluxImageClient.available()).thenReturn(true);
     lenient().when(imageClientRouter.of(ImageProvider.OPENAI)).thenReturn(Optional.of(openAiClient));
     lenient().when(openAiClient.available()).thenReturn(true);
-    lenient().when(openAiClient.generateImage(anyString(), any())).thenReturn(OPENAI_IMAGE);
+    lenient().when(openAiClient.generateCardImage(any(), any())).thenReturn(OPENAI_IMAGE);
   }
 
   private CardImageGenerator.CardImageRequest request(String imagePromptEn) {
@@ -72,7 +73,7 @@ class CardImageGeneratorTest {
     GeneratedImage image = generator.generate(request("The character picks up a red umbrella."));
 
     assertThat(image).isSameAs(OPENAI_IMAGE);
-    verify(openAiClient).generateImage("우산을 챙겨요", CharacterType.LULU);
+    verify(openAiClient).generateCardImage(argThat(scene -> "우산을 챙겨요".equals(scene.stepDescription())), eq(CharacterType.LULU));
     verifyNoInteractions(fluxImageClient, translator);
   }
 
@@ -87,7 +88,7 @@ class CardImageGeneratorTest {
     verify(fluxImageClient).generate(
       "The character picks up a red umbrella.", CharacterType.LULU, FluxSeed.of(SEED_KEY));
     verifyNoInteractions(translator);
-    verify(openAiClient, never()).generateImage(anyString(), any());
+    verify(openAiClient, never()).generateCardImage(any(), any());
   }
 
   @Test
@@ -118,7 +119,7 @@ class CardImageGeneratorTest {
     when(translator.translateImagePrompt(anyString())).thenThrow(new IllegalStateException("번역 실패"));
 
     assertThat(generator.generate(request(null))).isSameAs(OPENAI_IMAGE);
-    verify(openAiClient).generateImage("우산을 챙겨요", CharacterType.LULU);
+    verify(openAiClient).generateCardImage(argThat(scene -> "우산을 챙겨요".equals(scene.stepDescription())), eq(CharacterType.LULU));
     verify(fluxImageClient, never()).generate(any(), any(), any());
   }
 
@@ -130,7 +131,7 @@ class CardImageGeneratorTest {
         "Payment Required", null, null, null));
 
     assertThat(generator.generate(request("The character picks up an umbrella."))).isSameAs(OPENAI_IMAGE);
-    verify(openAiClient).generateImage("우산을 챙겨요", CharacterType.LULU);
+    verify(openAiClient).generateCardImage(argThat(scene -> "우산을 챙겨요".equals(scene.stepDescription())), eq(CharacterType.LULU));
   }
 
   @Test
@@ -177,7 +178,7 @@ class CardImageGeneratorTest {
 
     assertThat(generator.generate(realistic("The character picks up an umbrella."))).isSameAs(OPENAI_IMAGE);
 
-    verify(openAiClient, never()).generateImage(anyString(), any());
+    verify(openAiClient, never()).generateCardImage(any(), any());
     verifyNoInteractions(fluxImageClient, translator);
   }
 
@@ -203,7 +204,7 @@ class CardImageGeneratorTest {
 
     assertThat(generator.generate(realistic(null))).isSameAs(OPENAI_IMAGE);
 
-    verify(openAiClient, never()).generateImage(anyString(), any());
+    verify(openAiClient, never()).generateCardImage(any(), any());
     verify(fluxImageClient, never()).generateRealistic(any(), any());
   }
 
@@ -215,7 +216,7 @@ class CardImageGeneratorTest {
     when(openAiClient.generateRealisticImage("우산을 챙겨요")).thenReturn(OPENAI_IMAGE);
 
     assertThat(generator.generate(realistic(null))).isSameAs(OPENAI_IMAGE);
-    verify(openAiClient, never()).generateImage(anyString(), any());
+    verify(openAiClient, never()).generateCardImage(any(), any());
   }
 
   @Test

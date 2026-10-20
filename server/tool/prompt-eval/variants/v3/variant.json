@@ -1,0 +1,10 @@
+{
+ "image_scene_mode": "scene_field",
+ "description_hint": "소리 내어 읽어줄 아주 짧은 한 문장. 공백 포함 12자 안팎, 행동 하나만. '~고', '~해서', '~한 뒤', 쉼표로 행동을 잇지 않는다 (나쁜 예: '이불을 덮고 누워요', 좋은 예: '침대에 누워요'). title을 되풀이하지 않고 쉬운 말로 (예: '학교 갈 옷을 입어요')",
+ "extra_step_properties": {
+  "imagePromptEn": {
+   "type": "string",
+   "description": "One English sentence (under 25 words) telling the illustrator what to draw. Start with 'The character'. Show one visible pose and the 1-2 objects held or used, placed where they are (e.g. 'The character stands at a sink and rubs a bar of soap between both hands.'). Always include one prop that identifies the activity (stethoscope for a check-up, pill and cup for medicine, wallet and coins for paying). Turn invisible actions (rest, wait, meet, arrive) into a visible pose (sits on a bench with hands on knees). Draw only the character: never other people or animals (grandmother, friend, doctor are shown by objects only). No background places, weather, traffic. Never use words that cause text in the picture: exit, sign, label, menu, clock, title, card, ticket, number."
+  }
+ }
+}

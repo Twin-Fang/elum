@@ -31,10 +31,15 @@ final class GeminiRoutineSchemas {
   /// 카드마다 받는 영어 장면 한 줄의 설명. 지시문(운영 DB)이 아니라 스키마에 둔다 — 스키마는 코드라
   /// 배포로 바로 바뀌고, FLUX 를 고르지 않으면 통째로 빠져 토큰도 들지 않는다.
   private static final String IMAGE_PROMPT_EN_DESCRIPTION =
-    "One English sentence (under 30 words) describing this step's picture for an illustrator. "
-      + "Start with 'The character'. Show the one action and name the concrete objects and their state "
-      + "(e.g. 'The character pulls the bottom drawer of a small wooden dresser half open.'). "
-      + "Never mention text, letters, signs, cards, or disabilities.";
+    "One English sentence (under 25 words) telling the illustrator what to draw. Start with 'The character'. "
+      + "Show one visible pose and the 1-2 objects held or used, placed where they are "
+      + "(e.g. 'The character stands at a sink and rubs a bar of soap between both hands.'). "
+      + "Always include one prop that identifies the activity (stethoscope for a check-up, pill and cup for medicine, "
+      + "wallet and coins for paying). "
+      + "Turn invisible actions (rest, wait, meet, arrive) into a visible pose (sits on a bench with hands on knees). "
+      + "Draw only the character: never other people or animals (grandmother, friend, doctor are shown by objects only). "
+      + "No background places, weather, traffic. "
+      + "Never use words that cause text in the picture: exit, sign, label, menu, clock, title, card, ticket, number.";
 
   /// @param includeImagePromptEn 카드마다 FLUX 용 영어 장면(imagePromptEn)을 필수로 받는다
   static Map<String, Object> responseSchema(boolean includeImagePromptEn, boolean hasPictogramCatalog) {

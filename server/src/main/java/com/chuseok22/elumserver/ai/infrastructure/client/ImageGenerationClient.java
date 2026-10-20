@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.ai.infrastructure.client;
 
+import com.chuseok22.elumserver.ai.core.CardScene;
 import com.chuseok22.elumserver.ai.core.GeneratedImage;
 import com.chuseok22.elumserver.ai.core.ImagePromptLanguage;
 import com.chuseok22.elumserver.ai.core.ImageProvider;
@@ -33,6 +34,13 @@ public interface ImageGenerationClient {
   boolean supportsCharacterReference();
 
   GeneratedImage generateImage(String stepDescription, CharacterType characterType);
+
+  /**
+   * 제목·영어 장면까지 싣는 그림. 장면을 못 쓰는 제공자(FLUX 는 영어 장면을 따로 받음)는 설명만 쓴다.
+   */
+  default GeneratedImage generateCardImage(CardScene scene, CharacterType characterType) {
+    return generateImage(scene.stepDescription(), characterType);
+  }
 
   /**
    * 실사 방식 — 캐릭터 없이 물건·장소를 사진처럼 그린다. 참조 이미지도 캐릭터 묘사도 쓰지 않는다.
