@@ -19,9 +19,8 @@ typedef QuickMenuRow<T> = ({
 ///
 /// 배경을 흐리게 하고, 누른 칸을 살짝 키워 그 자리에 두고, 아래(모자라면 위)에 작은 메뉴를 띄운다.
 /// 고른 줄의 값을 돌려주고, 바깥을 누르면 null.
-///
-/// 페이드 없이 바로 뜬다 — 길게 누르는 동안 격자가 같은 모양([AnchoredQuickMenuView])을 먼저 그려 두고,
-/// 손을 떼면 그 자리를 이 메뉴가 이어받는다. 누르는 동안 화면(route)을 띄우면 Navigator 가 손가락을 취소해 끌기가 끊긴다.
+/// 페이드 없이 뜸: 누르는 동안 격자가 그린 미리보기([AnchoredQuickMenuView]) 자리를 이어받는다
+/// (누르는 중에 route 를 띄우면 Navigator 가 손가락을 취소해 끌기가 끊김)
 Future<T?> showAnchoredQuickMenu<T>(
   BuildContext context, {
   required Rect anchor,

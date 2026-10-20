@@ -13,6 +13,68 @@ extension _LibraryGridCells on _LibraryEntryGridState {
   /// 칸 이름 두 줄 높이를 잴 때 쓰는 글 (줄바꿈으로 정확히 두 줄, 줄 높이는 글자와 무관)
   static const _twoLineSample = 'A\nA';
 
+  /// 화면 좌표 > 격자 내용(스크롤 안) 좌표
+  Offset _toContent(Offset global) {
+    final box = _contentKey.currentContext?.findRenderObject();
+    return box is RenderBox ? box.globalToLocal(global) : global;
+  }
+
+  /// 격자 내용 좌표 상자 > 화면 좌표 상자 (메뉴 자리)
+  Rect? _globalRectOf(Rect contentRect) {
+    final box = _contentKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return box.localToGlobal(contentRect.topLeft) & contentRect.size;
+  }
+
+  /// 끄는 동안 들린 칸 상자 (손가락 - 집은 지점), 안착 중이면 내려앉는 자리
+  Rect _overlayRect() {
+    final landing = _landing;
+    if (landing != null) {
+      return Rect.lerp(landing.from, landing.to, _easedLand)!;
+    }
+    final geometry = _geometry!;
+    final topLeft = _toContent(_fingerGlobal) - _grab;
+    return topLeft & Size(geometry.tileWidth, geometry.tileHeight);
+  }
+
+  /// 들린 칸 크기: 끄는 동안 집은 만큼 키우고, 안착 중이면 내려앉는 크기
+  double _overlayScale() {
+    final landing = _landing;
+    if (landing != null) {
+      return lerpDouble(landing.fromScale, landing.toScale, _easedLand)!;
+    }
+    return 1 + _LibraryEntryGridState._liftScale * _easedLift;
+  }
+
+  /// 칸 옆 메뉴 열기 (진짜 메뉴 — 손가락을 뗀 뒤에만 띄운다)
+  void _openMenu(LibraryEntry entry, Rect contentRect) {
+    final rect = _globalRectOf(contentRect);
+    if (rect == null) return;
+    switch (entry) {
+      case LibraryRoutineEntry(:final routine):
+        widget.onRoutineMenu?.call(routine, (
+          rect: rect,
+          tile: _routineTile(routine),
+        ));
+      case final LibraryGroupEntry group:
+        widget.onGroupMenu?.call(group, (rect: rect, tile: _groupTile(group)));
+    }
+  }
+
+  /// 칸 옆 메뉴 미리보기를 띄운다 (누를 수 없는 같은 모양)
+  void _showMenuPreview(LibraryEntry entry, Rect contentRect) {
+    final rect = _globalRectOf(contentRect);
+    if (rect == null) return;
+    _menuPreviewTarget = (entry: entry, rect: rect);
+    _menuPreview.show();
+  }
+
+  void _hideMenuPreview() {
+    if (!mounted || _menuPreviewTarget == null) return;
+    _menuPreviewTarget = null;
+    _menuPreview.hide();
+  }
+
   /// 보이는 칸: 서버 목록 > 놓은 순서 덧씌우기 > 숨긴 칸 빼기
   List<LibraryEntry> get _shownEntries {
     final override = _orderOverride;

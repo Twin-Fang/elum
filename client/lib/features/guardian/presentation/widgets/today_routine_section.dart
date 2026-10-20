@@ -279,7 +279,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
       builder: (context, follow) => _buildReorderList(
         routines: routines,
         progress: progress,
-        demoOpen: demoOpen,
+        isDemoSwipeOpen: demoOpen,
         coachId: coachId,
         follow: follow,
       ),
@@ -290,7 +290,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
   Widget _buildReorderList({
     required List<Routine> routines,
     required ChildRoutineState progress,
-    required bool demoOpen,
+    required bool isDemoSwipeOpen,
     required String? coachId,
     required ReorderFingerFollowState follow,
   }) {
@@ -353,7 +353,8 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
                   !_isFinished(routine) &&
                   !isBusy(routine.id),
               isOpen:
-                  _openId == routine.id || (demoOpen && routine.id == coachId),
+                  _openId == routine.id ||
+                  (isDemoSwipeOpen && routine.id == coachId),
               onOpenChanged: (open) =>
                   setState(() => _openId = open ? routine.id : null),
               onDelete: () => _delete(routine),
@@ -364,7 +365,7 @@ class _TodayRoutineSectionState extends ConsumerState<TodayRoutineSection>
                 highlighted:
                     _openId == routine.id ||
                     _draggingId == routine.id ||
-                    (demoOpen && routine.id == coachId),
+                    (isDemoSwipeOpen && routine.id == coachId),
                 // **손잡이를 그리지 않는다.** 시안(931:3896)에서 빠졌다 — 홈에서는
                 // 줄을 밀어 편집·삭제하고, 순서는 줄을 눌러 여는 시트에서 바꾼다.
                 // 손잡이가 있으면 링이 그만큼 왼쪽으로 밀려 시안과 어긋난다.

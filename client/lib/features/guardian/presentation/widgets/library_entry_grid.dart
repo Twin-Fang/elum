@@ -24,13 +24,8 @@ part 'library_entry_grid_cells.dart';
 /// 길게 누른 칸의 화면 자리와 그 칸 모양 (칸 옆 메뉴가 쓴다)
 typedef LibraryMenuAnchor = ({Rect rect, Widget tile});
 
-/// 일과관리 격자 (#807, #837): 묶음 칸 + 낱개 칸. 창 폭으로 열 수를 정한다 (폰 4열, 넓으면 늘어남)
-///
-/// 칸 길게 누르기(갤럭시 홈 화면과 같다): 누르는 순간 칸 옆 메뉴가 뜨고, 그대로 떼면 메뉴가 남는다.
-/// 누른 채 움직이면 메뉴가 사라지고 정리 상태로 들어가 끌기.
-/// 끄는 칸은 손가락에 붙어 다니고, 칸 사이로 가면 이웃 칸이 비켜 빈자리가 생긴다.
-/// 낱개를 다른 칸 그림 위에 겹쳐 놓으면 묶기(새 묶음 · 묶음에 넣기), 빈자리에 놓으면 자리 옮기기.
-/// 정리 상태([isArranging]): 칸이 흔들리고 칸마다 ⊖ (지우기 · 묶음 풀기), 누르자마자 끌 수 있다.
+/// 일과관리 격자: 묶음 · 낱개 칸, 길게 누르면 메뉴, 누른 채 움직이면 끌기 (갤럭시 홈 화면과 같음)
+/// 끄는 칸은 손가락에 붙고 이웃이 비켜 빈자리 > 놓으면 그 자리로 · 그림 위에 겹쳐 놓으면 묶기
 class LibraryEntryGrid extends StatefulWidget {
   const LibraryEntryGrid({
     super.key,
@@ -176,21 +171,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
     super.dispose();
   }
 
-  /// 화면 좌표 > 격자 내용(스크롤 안) 좌표
-  Offset _toContent(Offset global) {
-    final box = _contentKey.currentContext?.findRenderObject();
-    return box is RenderBox ? box.globalToLocal(global) : global;
-  }
-
-  Rect? _globalRectOf(Rect contentRect) {
-    final box = _contentKey.currentContext?.findRenderObject();
-    if (box is! RenderBox || !box.hasSize) return null;
-    return box.localToGlobal(contentRect.topLeft) & contentRect.size;
-  }
-
-  // ---------------------------------------------------------------------------
   // 집기 · 끌기 · 놓기
-  // ---------------------------------------------------------------------------
 
   /// 집기: 칸을 든다. 길게 누른 것이면 칸 옆 메뉴 미리보기부터 (움직여야 메뉴가 사라지고 이웃이 비킨다)
   Drag? _startDrag(
@@ -352,34 +333,6 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
     });
   }
 
-  void _openMenu(LibraryEntry entry, Rect contentRect) {
-    final rect = _globalRectOf(contentRect);
-    if (rect == null) return;
-    switch (entry) {
-      case LibraryRoutineEntry(:final routine):
-        widget.onRoutineMenu?.call(routine, (
-          rect: rect,
-          tile: _routineTile(routine),
-        ));
-      case final LibraryGroupEntry group:
-        widget.onGroupMenu?.call(group, (rect: rect, tile: _groupTile(group)));
-    }
-  }
-
-  /// 칸 옆 메뉴 미리보기를 띄운다 (누를 수 없는 같은 모양)
-  void _showMenuPreview(LibraryEntry entry, Rect contentRect) {
-    final rect = _globalRectOf(contentRect);
-    if (rect == null) return;
-    _menuPreviewTarget = (entry: entry, rect: rect);
-    _menuPreview.show();
-  }
-
-  void _hideMenuPreview() {
-    if (!mounted || _menuPreviewTarget == null) return;
-    _menuPreviewTarget = null;
-    _menuPreview.hide();
-  }
-
   /// 들린 칸을 [to] 자리로 내려놓는다 (크기 · 투명도도 함께)
   void _beginLanding(Rect to, {double toScale = 1, double toOpacity = 1}) {
     _edgeTicker.stop();
@@ -457,29 +410,6 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
     _scroll.jumpTo(next);
     _updateHover();
     setState(() {});
-  }
-
-  // ---------------------------------------------------------------------------
-  // 그리기
-  // ---------------------------------------------------------------------------
-
-  /// 끄는 동안 들린 칸 상자 (손가락 - 집은 지점), 안착 중이면 내려앉는 자리
-  Rect _overlayRect() {
-    final landing = _landing;
-    if (landing != null) {
-      return Rect.lerp(landing.from, landing.to, _easedLand)!;
-    }
-    final geometry = _geometry!;
-    final topLeft = _toContent(_fingerGlobal) - _grab;
-    return topLeft & Size(geometry.tileWidth, geometry.tileHeight);
-  }
-
-  double _overlayScale() {
-    final landing = _landing;
-    if (landing != null) {
-      return lerpDouble(landing.fromScale, landing.toScale, _easedLand)!;
-    }
-    return 1 + _liftScale * _easedLift;
   }
 
   @override

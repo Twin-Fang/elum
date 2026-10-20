@@ -257,16 +257,16 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       targetId: target.id,
       isBefore: isBefore,
     );
-    // 성공도 null 이라 기록으로 감싸 다른 동작 중이라 건너뛴 경우(result == null)와 가른다
-    final result = await runBusy(
+    // 성공도 null 이라 기록으로 감싸 다른 동작 중이라 건너뛴 경우(saveAttempt == null)와 가른다
+    final saveAttempt = await runBusy(
       () async => (
         failure: await ref.read(routineLibraryControllerProvider).saveOrder([
           for (final cell in cells) (type: cell.type.wire, id: cell.id),
         ]),
       ),
     );
-    if (result == null) return false;
-    final failure = result.failure;
+    if (saveAttempt == null) return false;
+    final failure = saveAttempt.failure;
     if (failure == null) return true;
     if (!mounted) return false;
     // 팝업을 기다리지 않는다 — 격자가 먼저 제자리로 돌아가야 무엇이 안 됐는지 보인다

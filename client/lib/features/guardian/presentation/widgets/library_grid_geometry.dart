@@ -78,11 +78,8 @@ class LibraryGridGeometry {
     return distance < iconSize * mergeRadiusFraction;
   }
 
-  /// 끄는 동안 다음 상태: 빈자리를 옮기거나, 칸 위에 겹쳐 묶을 칸을 고른다
-  ///
-  /// 나머지 칸 [otherCount] 개가 [gap] 자리를 비우고 서 있다고 본다.
-  /// 빈자리 위면 그대로, 칸 그림 위면(묶을 수 있을 때) 묶기, 그 밖이면 빈자리를 그 칸 자리로.
-  /// 빈자리를 옮기면 손가락이 곧 빈자리 위에 있게 되어 자리가 깜빡이지 않는다.
+  /// 끄는 동안 다음 상태: 빈자리 위 > 그대로, 칸 그림 위 > 묶기, 그 밖 > 빈자리를 그 칸 자리로
+  /// (빈자리를 옮기면 손가락이 곧 빈자리 위라 깜빡이지 않음)
   LibraryGridHover resolveHover({
     required Offset draggedIconCenter,
     required int otherCount,

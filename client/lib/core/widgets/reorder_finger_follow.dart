@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_motion.dart';
 
-/// 세로 순서 바꾸기 목록의 들린 줄을 가로로도 손가락에 붙인다 (기본 목록은 위아래로만 따라온다)
-///
-/// 목록을 [builder] 로 감싸고, 목록의 `proxyDecorator` 에서 [ReorderFingerFollowState.decorate],
-/// `onReorderStart` · `onReorderEnd` 에서 [ReorderFingerFollowState.start] · [ReorderFingerFollowState.end] 를 부른다.
-/// 놓으면 가로 어긋남이 목록의 안착 움직임과 함께 0으로 돌아간다.
+/// 세로 순서 바꾸기 목록의 들린 줄을 가로로도 손가락에 붙임 (기본 목록은 위아래로만 따라옴)
+/// 쓰는 법: proxyDecorator > decorate, onReorderStart > start, onReorderEnd > end (놓으면 가로 어긋남 0으로)
 class ReorderFingerFollow extends StatefulWidget {
   const ReorderFingerFollow({super.key, required this.builder});
 

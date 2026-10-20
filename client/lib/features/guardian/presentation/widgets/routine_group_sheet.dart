@@ -135,7 +135,7 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
     await _showFailure(reordered.failure, 'E-GRP-ORDER');
   }
 
-  /// 빼기: 하나만 남으면 묶음이 풀려 시트를 닫는다
+  /// 빼기: 확인 > 묶음에서 빼기, 하나만 남으면 묶음이 풀려 시트를 닫는다
   Future<void> _remove(LibraryGroupEntry entry, Routine routine) async {
     if (!await _confirmRemove(routine) || !mounted) return;
     setState(() => _isSaving = true);
