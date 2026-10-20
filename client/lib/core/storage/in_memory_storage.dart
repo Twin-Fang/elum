@@ -248,6 +248,14 @@ class InMemoryStorage implements LocalStorage {
       _noticeHidden[noticeId] = json;
 
   bool _hasAskedPushPermission = false;
+  String? _updateSuggestionShownRecord;
+
+  @override
+  String? get updateSuggestionShownRecord => _updateSuggestionShownRecord;
+
+  @override
+  Future<void> setUpdateSuggestionShownRecord(String record) async =>
+      _updateSuggestionShownRecord = record;
 
   @override
   bool get hasAskedPushPermission => _hasAskedPushPermission;

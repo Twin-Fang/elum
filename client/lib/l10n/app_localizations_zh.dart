@@ -2652,4 +2652,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get routineManageCoachSampleBag => '가방 챙기기';
+
+  @override
+  String get updateSuggestionTitle => '有新版本了';
+
+  @override
+  String get updateSuggestionBody => '更新后即可使用最新的修复和功能';
+
+  @override
+  String get updateSuggestionLater => '以后再说';
 }

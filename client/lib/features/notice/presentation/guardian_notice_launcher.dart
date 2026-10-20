@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_status/update_suggestion.dart';
 import '../../../core/logger/app_logger.dart';
 import '../application/notice_log.dart';
 import '../application/notice_popup_controller.dart';
@@ -36,6 +37,9 @@ class _GuardianNoticeLauncherState
   }
 
   Future<void> _maybeShow() async {
+    if (!mounted) return;
+    // 업데이트 권유가 먼저 (하루 한 번), 닫히면 공지가 이어서 뜸
+    await showUpdateSuggestionIfNeeded(context, ref);
     if (!mounted) return;
     final controller = ref.read(noticePopupControllerProvider);
     try {

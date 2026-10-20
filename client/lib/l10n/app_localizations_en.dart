@@ -2770,4 +2770,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routineManageCoachSampleBag => '가방 챙기기';
+
+  @override
+  String get updateSuggestionTitle => 'A new version is here';
+
+  @override
+  String get updateSuggestionBody =>
+      'Update to get the latest fixes and features';
+
+  @override
+  String get updateSuggestionLater => 'Later';
 }

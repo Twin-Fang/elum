@@ -4837,6 +4837,24 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'가방 챙기기'**
   String get routineManageCoachSampleBag;
+
+  /// 보호자 홈에서 하루 한 번 뜨는 업데이트 권유 팝업 제목 (#660)
+  ///
+  /// In ko, this message translates to:
+  /// **'새 버전이 나왔어요'**
+  String get updateSuggestionTitle;
+
+  /// 업데이트 권유 팝업 본문
+  ///
+  /// In ko, this message translates to:
+  /// **'업데이트하면 고친 점과 새 기능을 바로 쓸 수 있어요'**
+  String get updateSuggestionBody;
+
+  /// 업데이트 권유 팝업의 닫기 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에'**
+  String get updateSuggestionLater;
 }
 
 class _AppLocalizationsDelegate

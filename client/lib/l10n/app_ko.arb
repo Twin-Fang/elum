@@ -2245,5 +2245,12 @@
   "routineManageCoachSampleBrush": "양치하기",
   "@routineManageCoachSampleBrush": {"description": "일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)"},
   "routineManageCoachSampleBag": "가방 챙기기",
-  "@routineManageCoachSampleBag": {"description": "일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)"}
+  "@routineManageCoachSampleBag": {"description": "일과관리 코치마크 안내 화면의 예시 일과 이름 (#861)"},
+
+  "updateSuggestionTitle": "새 버전이 나왔어요",
+  "@updateSuggestionTitle": {"description": "보호자 홈에서 하루 한 번 뜨는 업데이트 권유 팝업 제목 (#660)"},
+  "updateSuggestionBody": "업데이트하면 고친 점과 새 기능을 바로 쓸 수 있어요",
+  "@updateSuggestionBody": {"description": "업데이트 권유 팝업 본문"},
+  "updateSuggestionLater": "나중에",
+  "@updateSuggestionLater": {"description": "업데이트 권유 팝업의 닫기 버튼"}
 }

@@ -2653,4 +2653,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get routineManageCoachSampleBag => '가방 챙기기';
+
+  @override
+  String get updateSuggestionTitle => '새 버전이 나왔어요';
+
+  @override
+  String get updateSuggestionBody => '업데이트하면 고친 점과 새 기능을 바로 쓸 수 있어요';
+
+  @override
+  String get updateSuggestionLater => '나중에';
 }

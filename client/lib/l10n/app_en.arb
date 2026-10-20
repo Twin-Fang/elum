@@ -772,5 +772,9 @@
   "signInProviderKakao": "Kakao",
   "signInProviderNaver": "Naver",
   "signInProviderGoogle": "Google",
-  "signInProviderApple": "Apple"
+  "signInProviderApple": "Apple",
+
+  "updateSuggestionTitle": "A new version is here",
+  "updateSuggestionBody": "Update to get the latest fixes and features",
+  "updateSuggestionLater": "Later"
 }

@@ -2653,4 +2653,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get routineManageCoachSampleBag => '가방 챙기기';
+
+  @override
+  String get updateSuggestionTitle => '新しいバージョンがあります';
+
+  @override
+  String get updateSuggestionBody => 'アップデートすると最新の修正と機能を使えます';
+
+  @override
+  String get updateSuggestionLater => 'あとで';
 }

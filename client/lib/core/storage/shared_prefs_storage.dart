@@ -52,6 +52,8 @@ class SharedPrefsStorage implements LocalStorage {
   static const _kCachedTuning = 'cache.clientTuning';
   static const _kNoticeHiddenPrefix = 'notice.hidden.';
   static const _kHasAskedPushPermission = 'push.hasAskedPermission';
+  // 업데이트 권유 마지막 표시: 최신 버전|yyyy-MM-dd
+  static const _kUpdateSuggestionShown = 'updateSuggestionShown';
   static const _kHomeCoachSeen = 'coach.homeSeen';
   static const _kManageCoachSeen = 'coach.manageSeen';
   static const _kGroupCoachSeen = 'coach.groupSeen';
@@ -312,6 +314,16 @@ class SharedPrefsStorage implements LocalStorage {
   Future<void> setHasAskedPushPermission(bool v) async {
     AppLogger.storageWrite(_kHasAskedPushPermission, '$v');
     await _prefs.setBool(_kHasAskedPushPermission, v);
+  }
+
+  @override
+  String? get updateSuggestionShownRecord =>
+      _prefs.getString(_kUpdateSuggestionShown);
+
+  @override
+  Future<void> setUpdateSuggestionShownRecord(String record) async {
+    AppLogger.storageWrite(_kUpdateSuggestionShown, record);
+    await _prefs.setString(_kUpdateSuggestionShown, record);
   }
 
   @override
