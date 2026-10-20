@@ -1,15 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-10-20T09:16:59Z",
-    "currentVersion": "2.60.0",
+    "lastUpdated": "2026-10-20T09:44:33Z",
+    "currentVersion": "2.60.1",
     "projectType": "flutter",
     "projectTypes": [
       "flutter",
       "spring"
     ],
-    "totalReleases": 285
+    "totalReleases": 286
   },
   "releases": [
+    {
+      "version": "2.60.1",
+      "project_type": "flutter",
+      "project_types": [
+        "flutter",
+        "spring"
+      ],
+      "date": "2026-10-20",
+      "pr_number": 891,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **버그 수정**\n  * iOS 심사 대기 중인 버전이 있어도 새 빌드를 같은 버전으로 다시 제출할 수 있게 했어요 (앱 화면 변화 없음)",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "iOS 심사 대기 중인 버전이 있어도 새 빌드를 같은 버전으로 다시 제출할 수 있게 했어요 (앱 화면 변화 없음)"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "2.60.0",
       "project_type": "flutter",
