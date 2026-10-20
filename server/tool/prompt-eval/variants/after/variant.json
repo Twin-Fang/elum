@@ -6,5 +6,9 @@
    "type": "string",
    "description": "One English sentence (under 25 words) telling the illustrator what to draw. Start with 'The character'. Show one visible pose and the 1-2 objects held or used, placed where they are (e.g. 'The character stands at a sink and rubs a bar of soap between both hands.'). Always include one prop that identifies the activity (stethoscope for a check-up, pill and cup for medicine, wallet and coins for paying). Turn invisible actions (rest, wait, meet, arrive) into a visible pose (sits on a bench with hands on knees). Draw only the character: never other people or animals (grandmother, friend, doctor are shown by objects only). No background places, weather, traffic. Never use words that cause text in the picture: exit, sign, label, menu, clock, title, card, ticket, number."
   }
- }
+ },
+ "question_hint": "질문 한 문장, 20자 안팎, 이름 없이",
+ "option_label_hint": "10자 이내의 짧은 말 (문장 금지)",
+ "option_emoji_hint": "그 선택지를 나타내는 이모지 하나",
+ "image_layout": true
 }

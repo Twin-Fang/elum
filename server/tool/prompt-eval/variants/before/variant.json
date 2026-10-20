@@ -1,0 +1,5 @@
+{
+ "defaults_ref": "origin/develop",
+ "image_scene_mode": "description",
+ "image_layout": false
+}

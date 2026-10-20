@@ -14,8 +14,12 @@ FORBIDDEN_LABELS = ["직접 입력", "기타", "그 외", "없음", "해당 없�
 
 
 def load_prompt(variant: str) -> str:
-    path = lib.TOOL_DIR / "variants" / variant / "question.txt"
-    return path.read_text(encoding="utf-8") if path.exists() else lib.baseline_prompt("GEMINI_ROUTINE_QUESTION_PREFIX")
+    folder = lib.TOOL_DIR / "variants" / variant
+    path = folder / "question.txt"
+    if path.exists():
+        return path.read_text(encoding="utf-8")
+    ref = json.loads((folder / "variant.json").read_text(encoding="utf-8")).get("defaults_ref") if (folder / "variant.json").exists() else None
+    return lib.baseline_prompt("GEMINI_ROUTINE_QUESTION_PREFIX", ref)
 
 
 def measure(goals: list, result: dict) -> list:
@@ -47,7 +51,11 @@ def main():
     cases = json.loads((lib.TOOL_DIR / "cases.json").read_text(encoding="utf-8"))
     if args.cases:
         cases = [case for case in cases if case["id"] in set(args.cases.split(","))]
+    prod = lib.load_prod_config()
+    print(lib.describe_prod_config(prod))
     prompt, settings = load_prompt(args.variant), lib.load_gemini_settings()
+    settings["text-model"] = prod["text"]["model"]
+    settings["thinking-budget"] = prod["text"]["thinking_budget"]
     config_path = lib.TOOL_DIR / "variants" / args.variant / "variant.json"
     hints = json.loads(config_path.read_text(encoding="utf-8")) if config_path.exists() else {}
     out_dir = lib.TOOL_DIR / "results" / args.variant / "question"

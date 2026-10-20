@@ -34,7 +34,7 @@ def load_variant(name: str) -> dict:
     create_file = folder / "create.txt"
     config["create_prompt"] = (
         create_file.read_text(encoding="utf-8") if create_file.exists()
-        else lib.baseline_prompt("GEMINI_ROUTINE_CREATE_PREFIX")
+        else lib.baseline_prompt("GEMINI_ROUTINE_CREATE_PREFIX", config.get("defaults_ref"))
     )
     preprocess_file = folder / "preprocess.txt"
     config["preprocess_prompt"] = preprocess_file.read_text(encoding="utf-8") if preprocess_file.exists() else None
@@ -131,8 +131,14 @@ def main():
     if args.category:
         cases = [case for case in cases if case["category"] == args.category]
 
+    prod = lib.load_prod_config()
+    print(lib.describe_prod_config(prod))
+    if prod["text"]["provider"] != "GEMINI":
+        raise SystemExit("텍스트 제공자 OPENAI 경로는 아직 하네스에 없음: 운영이 OPENAI 이면 먼저 구현한다")
     config = load_variant(args.variant)
     settings = lib.load_gemini_settings()
+    settings["text-model"] = prod["text"]["model"]       # 운영 모델 (application-dev.yml 값 대신)
+    settings["thinking-budget"] = prod["text"]["thinking_budget"]
     out_dir = RESULT_ROOT / args.variant / "text"
     out_dir.mkdir(parents=True, exist_ok=True)
 

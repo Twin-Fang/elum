@@ -1,0 +1,6 @@
+{
+  "_설명": "운영 서버 설정과 같은 조건으로 평가한다. verified 가 false 인 항목은 코드 기본값 추정이며 결과에 '미확인'으로 표시된다. 운영 관리자 화면 값으로 채워 verified 를 true 로 바꾼다.",
+  "text": {"provider": "GEMINI", "model": "gemini-flash-latest", "temperature": 0, "thinking_budget": "UNSET", "verified": false},
+  "image": {"provider": "OPENAI", "openai_model": "gpt-image-1-mini", "openai_quality": "low", "prompt_language": "KO", "verified": false},
+  "prompts": {"dir": null, "verified": false}
+}

@@ -75,9 +75,38 @@ def extract_java_text_block(java_file: Path, prompt_key: str) -> str:
     return stripped.replace("\\\n", "").replace('\\"', '"')
 
 
-def baseline_prompt(prompt_key: str) -> str:
-    """현재 코드 기본값 프롬프트 (운영 DB 값과 다를 수 있음)"""
-    return extract_java_text_block(JAVA_ROOT / "ai/core/PromptDefaults.java", prompt_key)
+def _java_source(relative_path: str, ref: str = None) -> str:
+    """자바 소스 본문. ref 가 있으면 그 git ref(예: origin/develop)의 옛 버전"""
+    if not ref:
+        return (JAVA_ROOT / relative_path).read_text(encoding="utf-8")
+    import subprocess
+    repo_path = "server/src/main/java/com/chuseok22/elumserver/" + relative_path
+    return subprocess.run(["git", "show", f"{ref}:{repo_path}"], capture_output=True, text=True, check=True,
+                          cwd=SERVER_DIR).stdout
+
+
+def _dedent_text_block(raw: str) -> str:
+    lines = raw.split("\n")
+    indents = [len(line) - len(line.lstrip()) for line in lines if line.strip()]
+    margin = min(indents) if indents else 0
+    stripped = "\n".join(line[margin:] if line.strip() else "" for line in lines)
+    return stripped.replace("\\\n", "").replace('\\"', '"')
+
+
+def baseline_prompt(prompt_key: str, ref: str = None) -> str:
+    """PromptDefaults 기본값 (운영 DB 값과 다를 수 있음). ref 로 옛 버전도 읽는다."""
+    source = _java_source("ai/core/PromptDefaults.java", ref)
+    match = re.search(r'Map\.entry\(PromptKey\.' + re.escape(prompt_key) + r',\s*"""\n(.*?)"""\)', source, re.DOTALL)
+    if not match:
+        raise RuntimeError(f"{prompt_key} 텍스트 블록을 찾지 못함")
+    return _dedent_text_block(match.group(1))
+
+
+def layout_rules(language: str) -> str:
+    """ImageCardLayoutRules.KO/EN (코드가 그림 요청마다 붙이는 화면 규격)"""
+    source = _java_source("ai/core/ImageCardLayoutRules.java")
+    match = re.search(r'public static final String ' + language + r' = """\n(.*?)""";', source, re.DOTALL)
+    return _dedent_text_block(match.group(1))
 
 
 def pictogram_ids() -> list:
@@ -192,6 +221,9 @@ def call_text_model(system_prompt: str, user_content: str, schema: dict, setting
             "responseMimeType": "application/json", "responseSchema": schema, "temperature": 0,
         },
     }
+    budget = str(settings.get("thinking-budget", "UNSET")).strip()
+    if budget.isdigit():
+        body["generationConfig"]["thinkingConfig"] = {"thinkingBudget": int(budget)}
     url = f"{settings['base-url']}/v1beta/models/{settings['text-model']}:generateContent"
     started = time.time()
     response = _post_json(url, settings["api-key"], body)
@@ -226,14 +258,89 @@ def call_image_model(prompt_text: str, character: str, settings: dict, aspect_ra
     raise RuntimeError("응답에 이미지 데이터가 없음")
 
 
-def image_prompt(prefix: str, scene: dict, character: str, reference_provided: bool = True) -> str:
-    """GeminiRoutineImagePromptBuilder.build(KO) 와 같은 조립: 지시문 + 빈 줄 + '장면 정보:' + JSON"""
+CHARACTER_APPEARANCE_EN = {
+    "LULU": "a round ivory baby kitten, chubby body as big as its head, very short legs, "
+            "triangle ears with light pink insides, tiny round black dot eyes, small pink triangle nose, "
+            "mouth of two short curves, long thin tail stretched to the side",
+    "POPO": "a round orange baby fox, very short legs, pointed triangle ears with cream insides, "
+            "cream belly, chest and tail tip, tiny round black dot eyes, small black dot nose, short curved mouth",
+}
+
+
+def image_prompt(prefix: str, scene: dict, character: str, reference_provided: bool = True, language: str = "KO") -> str:
+    """GeminiRoutineImagePromptBuilder.build 와 같은 조립: 지시문 + 빈 줄 + 장면 머리말 + JSON (언어별 머리말·생김새)"""
+    is_english = language == "EN"
     payload = {
         "task": "CREATE_ROUTINE_CARD_IMAGE",
         "scene": scene,
         "character": {
-            "type": character, "appearance": CHARACTER_APPEARANCE_KO[character],
+            "type": character,
+            "appearance": (CHARACTER_APPEARANCE_EN if is_english else CHARACTER_APPEARANCE_KO)[character],
             "referenceImageProvided": reference_provided,
         },
     }
-    return prefix + "\n\n장면 정보:\n" + json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    label = "Scene info" if is_english else "장면 정보"
+    return prefix + "\n\n" + label + ":\n" + json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+
+
+def load_prod_config() -> dict:
+    """prod-config.json: 운영 서버와 같은 조건 (제공자, 모델, 그림 지시문 언어, 프롬프트 폴더)"""
+    return json.loads((TOOL_DIR / "prod-config.json").read_text(encoding="utf-8"))
+
+
+def describe_prod_config(config: dict) -> str:
+    """실행 첫 줄에 찍는 운영 조건 요약: 확인된 값과 미확인(코드 기본값 추정)을 구분한다"""
+    def mark(section: str) -> str:
+        return "확인됨" if config[section].get("verified") else "미확인(코드 기본값 추정)"
+    return (
+        f"[운영 조건] 텍스트 {config['text']['provider']}/{config['text']['model']} ({mark('text')}) | "
+        f"그림 {config['image']['provider']}/{config['image']['openai_model']}/{config['image']['openai_quality']}"
+        f"/지시문 {config['image']['prompt_language']} ({mark('image')}) | "
+        f"프롬프트 {'운영 값 ' + str(config['prompts']['dir']) if config['prompts']['dir'] else '코드 기본값'} ({mark('prompts')})"
+    )
+
+
+# 그림 1장 비용 추정 (서버 ConfigKey 기본 단가). 실제 청구액은 각 콘솔에서 확인
+COST_PER_IMAGE_USD = {"OPENAI": 0.005, "GEMINI": 0.039}
+
+
+def load_openai_key() -> str:
+    """OPENAI_API_KEY 환경변수 > server/tool/prompt-eval/.env.local (gitignore). 값은 출력하지 않는다."""
+    import os
+    key = os.environ.get("OPENAI_API_KEY", "")
+    local_file = TOOL_DIR / ".env.local"
+    if not key and local_file.exists():
+        for line in local_file.read_text(encoding="utf-8").splitlines():
+            if line.startswith("OPENAI_API_KEY="):
+                key = line.split("=", 1)[1].strip().strip("\"'")
+    if not key:
+        raise RuntimeError("OPENAI_API_KEY 없음: 환경변수 또는 server/tool/prompt-eval/.env.local 에 넣는다")
+    return key
+
+
+def call_openai_image(prompt_text: str, config: dict) -> tuple:
+    """OpenAI 이미지 호출 > (PNG 바이트, 경과 초). 서버 OpenAiImageClient 와 같은 요청, 참조 이미지 없음."""
+    body = {
+        "model": config["image"]["openai_model"], "prompt": prompt_text, "quality": config["image"]["openai_quality"],
+        "size": "1536x1024", "background": "opaque", "n": 1,
+    }
+    data = json.dumps(body, ensure_ascii=False).encode("utf-8")
+    key, last_error = load_openai_key(), None
+    for attempt in range(1, MAX_RETRY_COUNT + 1):
+        request = urllib.request.Request(
+            "https://api.openai.com/v1/images/generations", data=data, method="POST",
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
+        )
+        started = time.time()
+        try:
+            with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            return base64.b64decode(payload["data"][0]["b64_json"]), time.time() - started
+        except urllib.error.HTTPError as error:
+            last_error = f"HTTP {error.code}: {error.read().decode('utf-8', 'replace')[:300]}"
+            if error.code not in (429, 500, 502, 503, 504):
+                break
+        except Exception as error:
+            last_error = repr(error)
+        time.sleep(RETRY_WAIT_SECONDS * attempt * 2)
+    raise RuntimeError(last_error)
