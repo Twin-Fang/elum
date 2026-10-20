@@ -172,6 +172,34 @@ extension _LibraryGridCells on _LibraryEntryGridState {
     );
   }
 
+  /// 길게 누르는 동안의 칸 옆 메뉴: 손을 떼면 같은 자리에 뜨는 진짜 메뉴와 같은 모양 (누를 수 없음)
+  Widget _buildMenuPreview(BuildContext context) {
+    final target = _menuPreviewTarget;
+    if (target == null) return const SizedBox.shrink();
+    final Widget view = switch (target.entry) {
+      LibraryRoutineEntry(:final routine) =>
+        AnchoredQuickMenuView<LibraryMenuAction>(
+          anchor: target.rect,
+          highlight: _routineTile(routine),
+          rows: libraryMenuRows(context, routine),
+        ),
+      final LibraryGroupEntry group => AnchoredQuickMenuView<GroupMenuAction>(
+        anchor: target.rect,
+        highlight: _groupTile(group),
+        rows: groupMenuRows(context),
+      ),
+    };
+    return IgnorePointer(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: AppMotion.fast,
+        builder: (context, opacity, child) =>
+            Opacity(opacity: opacity, child: child),
+        child: view,
+      ),
+    );
+  }
+
   /// 칸 하나: 정리 껍데기(흔들림 · ⊖) > 끌기 제스처 > 칸 모양
   Widget _buildCell(
     LibraryEntry entry,

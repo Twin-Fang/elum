@@ -11,10 +11,12 @@ import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/routine.dart';
 import '../../application/library_entries.dart';
+import 'anchored_quick_menu.dart';
 import 'library_arrange_shell.dart';
 import 'library_grid_geometry.dart';
 import 'library_grid_lifted_tile.dart';
 import 'library_group_tile.dart';
+import 'library_quick_menu.dart';
 import 'library_routine_tile.dart';
 
 part 'library_entry_grid_cells.dart';
@@ -24,7 +26,8 @@ typedef LibraryMenuAnchor = ({Rect rect, Widget tile});
 
 /// 일과관리 격자 (#807, #837): 묶음 칸 + 낱개 칸. 창 폭으로 열 수를 정한다 (폰 4열, 넓으면 늘어남)
 ///
-/// 칸 길게 누르기: 그냥 떼면 칸 옆 메뉴, 누른 채 움직이면 정리 상태로 들어가 끌기.
+/// 칸 길게 누르기(갤럭시 홈 화면과 같다): 누르는 순간 칸 옆 메뉴가 뜨고, 그대로 떼면 메뉴가 남는다.
+/// 누른 채 움직이면 메뉴가 사라지고 정리 상태로 들어가 끌기.
 /// 끄는 칸은 손가락에 붙어 다니고, 칸 사이로 가면 이웃 칸이 비켜 빈자리가 생긴다.
 /// 낱개를 다른 칸 그림 위에 겹쳐 놓으면 묶기(새 묶음 · 묶음에 넣기), 빈자리에 놓으면 자리 옮기기.
 /// 정리 상태([isArranging]): 칸이 흔들리고 칸마다 ⊖ (지우기 · 묶음 풀기), 누르자마자 끌 수 있다.
@@ -93,7 +96,7 @@ class LibraryEntryGrid extends StatefulWidget {
 
 class _LibraryEntryGridState extends State<LibraryEntryGrid>
     with TickerProviderStateMixin {
-  /// 이만큼 안 움직이고 떼면 끌기가 아니라 메뉴 열기로 본다 (논리 픽셀)
+  /// 길게 누른 뒤 이만큼 움직이면 메뉴를 거두고 끌기로 넘어간다 (논리 픽셀)
   static const _menuSlopPixels = 12.0;
 
   /// 집은 칸을 키우는 비율 · 묶음에 빨려 들어갈 때 줄이는 비율
@@ -114,6 +117,10 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
   );
   late final Ticker _edgeTicker = createTicker(_onEdgeTick);
   Duration _lastEdgeTick = Duration.zero;
+
+  /// 길게 누르는 동안의 메뉴 미리보기 (화면을 띄우지 않는다 — 띄우면 Navigator 가 손가락을 취소해 끌기가 끊긴다)
+  final _menuPreview = OverlayPortalController();
+  ({LibraryEntry entry, Rect rect})? _menuPreviewTarget;
 
   LibraryGridGeometry? _geometry;
 
@@ -185,7 +192,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
   // 집기 · 끌기 · 놓기
   // ---------------------------------------------------------------------------
 
-  /// 집기: 칸을 들어 손가락 밑에 붙인다. 빈자리는 아직 제자리 (움직여야 이웃이 비킨다)
+  /// 집기: 칸을 든다. 길게 누른 것이면 칸 옆 메뉴 미리보기부터 (움직여야 메뉴가 사라지고 이웃이 비킨다)
   Drag? _startDrag(
     LibraryEntry entry,
     Offset globalPosition, {
@@ -212,6 +219,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
     _lift.forward(from: 0);
     _lastEdgeTick = Duration.zero;
     _edgeTicker.start();
+    if (isLongPress) _showMenuPreview(entry, geometry.slotRect(index));
     return _GridDrag(
       onUpdate: _onDragUpdate,
       onEnd: (_) => _onDrop(),
@@ -225,6 +233,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
     if (!_hasMoved &&
         (_fingerGlobal - _startGlobal).distance >= _menuSlopPixels) {
       _hasMoved = true;
+      _hideMenuPreview();
       if (_isLongPressDrag) widget.onArrangeStart?.call();
     }
     _updateHover();
@@ -272,10 +281,12 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
     final shown = _shownEntries;
     final dragged = shown.where((entry) => entry.id == dragId).firstOrNull;
     if (dragged == null) return _resetDrag();
-    // 안 움직이고 뗐다 — 칸 옆 메뉴 (메뉴가 칸 모양을 그리므로 들린 칸은 바로 내린다)
+    // 안 움직이고 뗐다 — 미리보기 자리를 진짜 메뉴가 이어받는다 (한 프레임 겹친 뒤 미리보기를 거둔다)
     if (!_hasMoved) {
       _resetDrag();
-      return _openMenu(dragged, geometry.slotRect(_dragFrom));
+      _openMenu(dragged, geometry.slotRect(_dragFrom));
+      WidgetsBinding.instance.addPostFrameCallback((_) => _hideMenuPreview());
+      return;
     }
     final others = _othersOf(shown);
     final mergeIndex = hover.mergeOtherIndex;
@@ -299,6 +310,7 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
   void _onCancel() {
     final geometry = _geometry;
     if (_dragId == null || _landing != null || geometry == null) return;
+    _hideMenuPreview();
     setState(() => _hover = LibraryGridHover(gap: _dragFrom));
     _beginLanding(geometry.slotRect(_dragFrom));
   }
@@ -352,6 +364,20 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
       case final LibraryGroupEntry group:
         widget.onGroupMenu?.call(group, (rect: rect, tile: _groupTile(group)));
     }
+  }
+
+  /// 칸 옆 메뉴 미리보기를 띄운다 (누를 수 없는 같은 모양)
+  void _showMenuPreview(LibraryEntry entry, Rect contentRect) {
+    final rect = _globalRectOf(contentRect);
+    if (rect == null) return;
+    _menuPreviewTarget = (entry: entry, rect: rect);
+    _menuPreview.show();
+  }
+
+  void _hideMenuPreview() {
+    if (!mounted || _menuPreviewTarget == null) return;
+    _menuPreviewTarget = null;
+    _menuPreview.hide();
   }
 
   /// 들린 칸을 [to] 자리로 내려놓는다 (크기 · 투명도도 함께)
@@ -458,15 +484,21 @@ class _LibraryEntryGridState extends State<LibraryEntryGrid>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final geometry = _geometryFor(context, constraints.maxWidth);
-        _geometry = geometry;
-        return AnimatedBuilder(
-          animation: Listenable.merge([_lift, _land]),
-          builder: (context, _) => _buildGrid(geometry, constraints),
-        );
-      },
+    // 메뉴 미리보기는 화면 전체 흐림이라 맨 위 오버레이에 그린다 (칸 자리는 화면 좌표)
+    return OverlayPortal(
+      controller: _menuPreview,
+      overlayLocation: OverlayChildLocation.rootOverlay,
+      overlayChildBuilder: _buildMenuPreview,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final geometry = _geometryFor(context, constraints.maxWidth);
+          _geometry = geometry;
+          return AnimatedBuilder(
+            animation: Listenable.merge([_lift, _land]),
+            builder: (context, _) => _buildGrid(geometry, constraints),
+          );
+        },
+      ),
     );
   }
 }
