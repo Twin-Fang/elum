@@ -485,7 +485,7 @@
   "elumiSettingsLogoutFailTitle": "로그아웃하지 못했어요",
   "@elumiSettingsLogoutFailTitle": { "description": "로그아웃 실패 팝업 제목" },
 
-  "elumiSettingsWithdrawTitle": "회원탈퇴 하실건가요?",
+  "elumiSettingsWithdrawTitle": "회원탈퇴할까요?",
   "@elumiSettingsWithdrawTitle": { "description": "회원탈퇴 확인 팝업 제목" },
 
   "elumiSettingsWithdrawMessage": "이 기기의 연결만 끊어져요\n일과와 별은 보호자 기기에 남고\n다시 쓰려면 보호자에게\n연결 암호를 받아야 해요",
@@ -1148,7 +1148,7 @@
   "draftRoutinesDeleteLabel": "임시저장 삭제",
   "@draftRoutinesDeleteLabel": { "description": "줄을 밀면 나오는 삭제 버튼의 낭독 이름" },
 
-  "draftRoutinesDeleteConfirmTitle": "임시저장을 삭제하실건가요?",
+  "draftRoutinesDeleteConfirmTitle": "임시저장을 삭제할까요?",
   "@draftRoutinesDeleteConfirmTitle": { "description": "임시저장 삭제 확인 팝업 제목" },
 
   "draftRoutinesDeleteAction": "삭제",
@@ -1175,7 +1175,7 @@
   "draftRoutinesEmptyBody": "일과를 만들다 그만두면 여기에 남아요",
   "@draftRoutinesEmptyBody": { "description": "임시저장이 0건일 때 설명" },
 
-  "cardReviewDeleteConfirmTitle": "카드를 삭제하실건가요?",
+  "cardReviewDeleteConfirmTitle": "카드를 삭제할까요?",
   "@cardReviewDeleteConfirmTitle": { "description": "카드 삭제 확인 팝업 제목" },
 
   "cardReviewDeleteAction": "삭제",
@@ -1235,7 +1235,7 @@
   "guardianSettingsLogoutConfirmTitle": "로그아웃할까요?",
   "@guardianSettingsLogoutConfirmTitle": { "description": "로그아웃 확인 팝업 제목" },
 
-  "guardianSettingsWithdrawConfirmTitle": "회원탈퇴 하실건가요?",
+  "guardianSettingsWithdrawConfirmTitle": "회원탈퇴할까요?",
   "@guardianSettingsWithdrawConfirmTitle": { "description": "회원탈퇴 확인 팝업 제목" },
 
   "guardianSettingsWithdrawConfirmMessage": "만든 일과와 모은 별이 모두 사라져요\n다시 로그인해도 되돌릴 수 없어요",
@@ -1593,7 +1593,7 @@
   "todayRoutineReorderFailedFallback": "잠시 후 다시 시도해주세요",
   "@todayRoutineReorderFailedFallback": {"description": "보호자 홈에서 일과 순서 저장이 실패했을 때 서버 문구가 없을 때의 안내"},
 
-  "todayRoutineDeleteConfirmTitle": "일과를 삭제하실건가요?",
+  "todayRoutineDeleteConfirmTitle": "일과를 삭제할까요?",
   "@todayRoutineDeleteConfirmTitle": {"description": "보호자 홈에서 일과를 지우기 전 확인 팝업 제목"},
   "todayRoutineStartedTitle": "이룸이가 시작한 일과예요",
   "@todayRoutineStartedTitle": {"description": "이룸이가 한 단계라도 한 일과를 지우려 할 때 안내 팝업 제목"},

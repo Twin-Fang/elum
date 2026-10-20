@@ -513,7 +513,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get elumiSettingsLogoutFailTitle => '로그아웃하지 못했어요';
 
   @override
-  String get elumiSettingsWithdrawTitle => '회원탈퇴 하실건가요?';
+  String get elumiSettingsWithdrawTitle => '회원탈퇴할까요?';
 
   @override
   String get elumiSettingsWithdrawMessage =>
@@ -1217,7 +1217,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get draftRoutinesDeleteLabel => '임시저장 삭제';
 
   @override
-  String get draftRoutinesDeleteConfirmTitle => '임시저장을 삭제하실건가요?';
+  String get draftRoutinesDeleteConfirmTitle => '임시저장을 삭제할까요?';
 
   @override
   String get draftRoutinesDeleteAction => '삭제';
@@ -1244,7 +1244,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get draftRoutinesEmptyBody => '일과를 만들다 그만두면 여기에 남아요';
 
   @override
-  String get cardReviewDeleteConfirmTitle => '카드를 삭제하실건가요?';
+  String get cardReviewDeleteConfirmTitle => '카드를 삭제할까요?';
 
   @override
   String get cardReviewDeleteAction => '삭제';
@@ -1304,7 +1304,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get guardianSettingsLogoutConfirmTitle => '로그아웃할까요?';
 
   @override
-  String get guardianSettingsWithdrawConfirmTitle => '회원탈퇴 하실건가요?';
+  String get guardianSettingsWithdrawConfirmTitle => '회원탈퇴할까요?';
 
   @override
   String get guardianSettingsWithdrawConfirmMessage =>
@@ -1695,7 +1695,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get todayRoutineReorderFailedFallback => '잠시 후 다시 시도해주세요';
 
   @override
-  String get todayRoutineDeleteConfirmTitle => '일과를 삭제하실건가요?';
+  String get todayRoutineDeleteConfirmTitle => '일과를 삭제할까요?';
 
   @override
   String get todayRoutineStartedTitle => '이룸이가 시작한 일과예요';

@@ -977,7 +977,7 @@ abstract class AppLocalizations {
   /// 회원탈퇴 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'회원탈퇴 하실건가요?'**
+  /// **'회원탈퇴할까요?'**
   String get elumiSettingsWithdrawTitle;
 
   /// 회원탈퇴 확인 팝업 본문
@@ -2261,7 +2261,7 @@ abstract class AppLocalizations {
   /// 임시저장 삭제 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'임시저장을 삭제하실건가요?'**
+  /// **'임시저장을 삭제할까요?'**
   String get draftRoutinesDeleteConfirmTitle;
 
   /// 임시저장 삭제 확인 팝업의 삭제 버튼
@@ -2315,7 +2315,7 @@ abstract class AppLocalizations {
   /// 카드 삭제 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'카드를 삭제하실건가요?'**
+  /// **'카드를 삭제할까요?'**
   String get cardReviewDeleteConfirmTitle;
 
   /// 카드 삭제 확인 팝업의 삭제 버튼
@@ -2435,7 +2435,7 @@ abstract class AppLocalizations {
   /// 회원탈퇴 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'회원탈퇴 하실건가요?'**
+  /// **'회원탈퇴할까요?'**
   String get guardianSettingsWithdrawConfirmTitle;
 
   /// 회원탈퇴 확인 팝업의 되돌릴 수 없다는 고지
@@ -3155,7 +3155,7 @@ abstract class AppLocalizations {
   /// 보호자 홈에서 일과를 지우기 전 확인 팝업 제목
   ///
   /// In ko, this message translates to:
-  /// **'일과를 삭제하실건가요?'**
+  /// **'일과를 삭제할까요?'**
   String get todayRoutineDeleteConfirmTitle;
 
   /// 이룸이가 한 단계라도 한 일과를 지우려 할 때 안내 팝업 제목
