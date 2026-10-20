@@ -198,6 +198,9 @@ abstract final class AppAssets {
   /// 강제 업데이트 안내 카드의 루미 + 다운로드 화살표 (1536×1024, 투명 배경).
   static const updateLumi = '$_images/update_lumi.png';
 
+  /// 업데이트 권유 안내의 루미 (윙크하며 손 흔듦, 768×768, 투명 배경).
+  static const updateSuggestionLumi = '$_images/update_suggestion_lumi.png';
+
   /// 점검 안내 카드의 루미 + 톱니바퀴·렌치 (1536×1024, 투명 배경).
   static const maintenanceLumi = '$_images/maintenance_lumi.png';
 
