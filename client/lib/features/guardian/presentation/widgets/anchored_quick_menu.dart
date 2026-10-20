@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
-import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 
@@ -20,6 +19,8 @@ typedef QuickMenuRow<T> = ({
 ///
 /// 배경을 흐리게 하고, 누른 칸을 살짝 키워 그 자리에 두고, 아래(모자라면 위)에 작은 메뉴를 띄운다.
 /// 고른 줄의 값을 돌려주고, 바깥을 누르면 null.
+/// 페이드 없이 뜸: 누르는 동안 격자가 그린 미리보기([AnchoredQuickMenuView]) 자리를 이어받는다
+/// (누르는 중에 route 를 띄우면 Navigator 가 손가락을 취소해 끌기가 끊김)
 Future<T?> showAnchoredQuickMenu<T>(
   BuildContext context, {
   required Rect anchor,
@@ -32,24 +33,33 @@ Future<T?> showAnchoredQuickMenu<T>(
     barrierDismissible: true,
     barrierLabel: context.l10n.commonClose,
     barrierColor: Colors.transparent,
-    transitionDuration: AppMotion.fast,
-    pageBuilder: (_, _, _) =>
-        _AnchoredQuickMenu<T>(anchor: anchor, highlight: highlight, rows: rows),
-    transitionBuilder: (_, animation, _, child) =>
-        FadeTransition(opacity: animation, child: child),
+    transitionDuration: Duration.zero,
+    pageBuilder: (context, _, _) => AnchoredQuickMenuView<T>(
+      anchor: anchor,
+      highlight: highlight,
+      rows: rows,
+      onSelected: (value) => Navigator.of(context).pop(value),
+      onDismissed: () => Navigator.of(context).pop(),
+    ),
   );
 }
 
-class _AnchoredQuickMenu<T> extends StatelessWidget {
-  const _AnchoredQuickMenu({
+/// 칸 옆 메뉴 모양 (흐린 배경 · 키운 칸 · 메뉴). [onSelected] 가 null 이면 누를 수 없는 미리보기
+class AnchoredQuickMenuView<T> extends StatelessWidget {
+  const AnchoredQuickMenuView({
+    super.key,
     required this.anchor,
     required this.highlight,
     required this.rows,
+    this.onSelected,
+    this.onDismissed,
   });
 
   final Rect anchor;
   final Widget highlight;
   final List<QuickMenuRow<T>> rows;
+  final ValueChanged<T>? onSelected;
+  final VoidCallback? onDismissed;
 
   /// 메뉴 폭 · 줄 높이 · 칸과의 간격 · 화면 가장자리 여백
   static const _menuWidth = 230.0;
@@ -79,13 +89,14 @@ class _AnchoredQuickMenu<T> extends StatelessWidget {
       media.size.width - menuWidth - _edge.w,
     );
 
+    final onSelected = this.onSelected;
     return Stack(
       children: [
         // 흐린 배경 (누르면 닫힘)
         Positioned.fill(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => Navigator.of(context).pop(),
+            onTap: onDismissed,
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
               child: ColoredBox(
@@ -121,7 +132,9 @@ class _AnchoredQuickMenu<T> extends StatelessWidget {
                   _AnchoredMenuRow(
                     row: row,
                     height: _rowHeight.h,
-                    onTap: () => Navigator.of(context).pop(row.value),
+                    onTap: onSelected == null
+                        ? null
+                        : () => onSelected(row.value),
                   ),
               ],
             ),
@@ -142,7 +155,9 @@ class _AnchoredMenuRow<T> extends StatelessWidget {
 
   final QuickMenuRow<T> row;
   final double height;
-  final VoidCallback onTap;
+
+  /// null 이면 미리보기라 누를 수 없다
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

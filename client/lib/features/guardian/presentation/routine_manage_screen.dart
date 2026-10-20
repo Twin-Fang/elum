@@ -244,8 +244,8 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
     context.push(Routes.routineReview);
   }
 
-  /// 칸 사이에 놓아 자리 옮기기: 새 전체 순서를 만들어 서버에 저장한다 (#837, #844)
-  Future<void> _moveCell(
+  /// 칸 사이에 놓아 자리 옮기기: 새 전체 순서를 만들어 서버에 저장한다 (#837, #844). 저장했으면 true
+  Future<bool> _moveCell(
     List<LibraryEntry> entries,
     LibraryEntry dragged,
     LibraryEntry target, {
@@ -257,19 +257,29 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       targetId: target.id,
       isBefore: isBefore,
     );
-    final failure = await runBusy(
-      () => ref.read(routineLibraryControllerProvider).saveOrder([
-        for (final cell in cells) (type: cell.type.wire, id: cell.id),
-      ]),
+    // 성공도 null 이라 기록으로 감싸 다른 동작 중이라 건너뛴 경우(saveAttempt == null)와 가른다
+    final saveAttempt = await runBusy(
+      () async => (
+        failure: await ref.read(routineLibraryControllerProvider).saveOrder([
+          for (final cell in cells) (type: cell.type.wire, id: cell.id),
+        ]),
+      ),
     );
-    if (failure == null || !mounted) return;
-    await showFailure(
-      context,
-      failure,
-      title: context.l10n.routineGroupActionFailedTitle,
-      fallback: context.l10n.routineLibraryActionFailedFallback,
-      fallbackCode: 'E-LIB-ORDER',
+    if (saveAttempt == null) return false;
+    final failure = saveAttempt.failure;
+    if (failure == null) return true;
+    if (!mounted) return false;
+    // 팝업을 기다리지 않는다 — 격자가 먼저 제자리로 돌아가야 무엇이 안 됐는지 보인다
+    unawaited(
+      showFailure(
+        context,
+        failure,
+        title: context.l10n.routineGroupActionFailedTitle,
+        fallback: context.l10n.routineLibraryActionFailedFallback,
+        fallbackCode: 'E-LIB-ORDER',
+      ),
     );
+    return false;
   }
 
   /// 새 일과: 크레딧 확인 > 일과 만들기 흐름 (홈 버튼과 같은 길)

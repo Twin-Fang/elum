@@ -20,6 +20,9 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
   boolean existsByNickname(String nickname);
 
+  // 보호자 닉네임 변경: 대소문자 무시, 본인 제외
+  boolean existsByNicknameIgnoreCaseAndIdNot(String nickname, String id);
+
   /** 닉네임이 없는 계정 (V46 이전 가입자). 기동 시 일괄 채움용 */
   List<Member> findAllByNicknameIsNull();
 

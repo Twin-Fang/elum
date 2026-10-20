@@ -19,6 +19,9 @@
 # ============================================================
 default_platform(:ios)
 
+# 심사 제출 취소 후 App Store Connect 반영 대기 (초)
+CANCEL_SETTLE_SECONDS = 20
+
 platform :ios do
   desc "TestFlight 업로드 (+ DEPLOY_MODE=store_submit이면 App Store 심사 자동 제출)"
   lane :deploy do
@@ -103,6 +106,9 @@ platform :ios do
 
       UI.message("📂 metadata_path=#{metadata_path}")
 
+      # 심사 자동 제출이면 먼저 심사 대기 중인 옛 제출을 내린다 (대기 중이면 빌드를 못 바꿔 deliver 실패)
+      cancel_waiting_review_submissions(app_id: app_id) if submit_to_appstore
+
       deliver(
         api_key: api_key,
         app_identifier: app_id,
@@ -135,6 +141,25 @@ platform :ios do
       end
     else
       puts "⏭️  store_only(testflight_only) 모드 — App Store 단계 건너뜀 (TestFlight 업로드만 완료)"
+    end
+  end
+
+  desc "심사 대기(WAITING_FOR_REVIEW) 중인 제출 취소: 새 빌드로 같은 버전을 다시 제출하기 위함 (#859)"
+  private_lane :cancel_waiting_review_submissions do |options|
+    app = Spaceship::ConnectAPI::App.find(options[:app_id])
+    UI.user_error!("App Store Connect 에서 앱을 찾지 못했습니다: #{options[:app_id]}") if app.nil?
+
+    # 심사 대기 상태만 대상 (심사 중·승인·반려는 건드리지 않음)
+    waiting_submissions = app.get_review_submissions(filter: { state: "WAITING_FOR_REVIEW" })
+    if waiting_submissions.empty?
+      UI.message("⏭️  심사 대기 중인 제출 없음 — 취소 건너뜀")
+    else
+      waiting_submissions.each do |submission|
+        UI.important("🗑️  심사 대기 제출 취소: #{submission.id}")
+        submission.cancel_submission
+      end
+      # 취소가 반영될 때까지 잠시 대기 (바로 deliver 하면 아직 대기 상태로 보일 수 있음)
+      sleep(CANCEL_SETTLE_SECONDS)
     end
   end
 end

@@ -43,7 +43,7 @@ public interface RoutineManagementDocs {
       content = @Content(
         schema = @Schema(implementation = ErrorResponse.class),
         examples = @ExampleObject(
-          value = "{\"errorCode\":\"ROUTINE_INVALID_STATUS\",\"errorMessage\":\"현재 상태에서는 처리할 수 없습니다.\"}"
+          value = "{\"errorCode\":\"ROUTINE_INVALID_STATUS\",\"errorMessage\":\"지금 상태에서는 처리할 수 없어요.\"}"
         )
       )
     )

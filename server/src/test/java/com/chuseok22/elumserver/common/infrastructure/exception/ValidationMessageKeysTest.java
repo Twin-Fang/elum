@@ -102,6 +102,6 @@ class ValidationMessageKeysTest {
   @DisplayName("본문을 읽을 수 없을 때의 문구 키가 ko 리소스에 있다")
   void unreadableBodyKey_exists() {
     assertThat(ErrorMessages.standard().of("detail.requestBodyUnreadable", AppLocale.KO, "<<없음>>"))
-      .isEqualTo("요청 본문을 읽을 수 없습니다.");
+      .isEqualTo("요청 본문을 읽을 수 없어요.");
   }
 }

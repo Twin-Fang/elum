@@ -235,7 +235,7 @@ class _CardPhotoBlockState extends ConsumerState<CardPhotoBlock> {
                             routineId: widget.routineId,
                             stepId: widget.stepId,
                             imagePath: step?.imagePath,
-                            // 사진·AI 그림이 없으면 무료 픽토그램이 자리를 채운다. 사진 바꾸기 칩은 그대로다.
+                            // 사진·AI 그림이 없으면 번들 그림(예시 이미지 > 픽토그램)이 자리를 채운다. 사진 바꾸기 칩은 그대로다.
                             pictogramId: step?.pictogramId,
                             exampleImageId: step?.exampleImageId,
                             pictogramLabel: step?.displayTitle ?? '',

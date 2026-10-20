@@ -1,5 +1,6 @@
 package com.chuseok22.elumserver.member.application.controller;
 
+import com.chuseok22.elumserver.member.application.dto.request.GuardianNicknameUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberCharacterUpdateRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberConsentRequest;
 import com.chuseok22.elumserver.member.application.dto.request.MemberImageStyleUpdateRequest;
@@ -80,6 +81,17 @@ public class MemberController implements MemberControllerDocs {
   ) {
     MemberResponse response = memberService.updateNickname(Caller.from(authentication, profileId), request);
     return ResponseEntity.ok(response);
+  }
+
+  // 보호자 본인 닉네임 (위 /nickname 은 이룸이 호칭). 헤더는 응답의 이룸이 칸을 고르는 데만 씀
+  @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)
+  @PatchMapping("/account/nickname")
+  public ResponseEntity<MemberResponse> updateGuardianNickname(
+    Authentication authentication,
+    @RequestHeader(value = Caller.PROFILE_HEADER, required = false) String profileId,
+    @RequestBody GuardianNicknameUpdateRequest request
+  ) {
+    return ResponseEntity.ok(memberService.updateGuardianNickname(Caller.from(authentication, profileId), request));
   }
 
   @LogMonitoring(logParameters = false, logResult = false, logExecutionTime = true)

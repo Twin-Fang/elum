@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/l10n/l10n_context.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
+import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../shared/models/action_card.dart';
@@ -212,113 +213,122 @@ class _RoutineDetailSheetState extends ConsumerState<RoutineDetailSheet> {
 
               // --- 스크롤: 단계 + 보상 ---
               Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    SliverPadding(
-                      // 시안(956:4084) 헤더가 68 에서 끝나고 첫 단계가 76 에서 시작한다.
-                      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
-                      // **번호 칸과 카드 칸을 나란히 따로 둔다**.
-                      //
-                      // 한 줄로 묶으면 오래 누를 때 번호까지 들리고
-                      // 끄는 동안 번호가 카드를 따라 미끄러진다. 번호는 몇 번째 자리인가를
-                      // 뜻하므로 제자리에 두고 **카드만** 순서 바꾸기에 올린다. 시안도
-                      // 번호(`1번`~`4번`, x=16)와 카드 묶음(`행동단계`, x=60)을 따로 그렸다.
-                      //
-                      // 한 스크롤 안에 두어야 같이 스크롤되고, 끌면서 가장자리에 닿았을 때의
-                      // 자동 스크롤도 이 목록 하나로 돈다.
-                      sliver: SliverCrossAxisGroup(
-                        slivers: [
-                          SliverConstrainedCrossAxis(
-                            // 뱃지 40 + 카드와의 틈 4
-                            maxExtent: 44.w,
-                            sliver: SliverList.builder(
-                              itemCount: _steps.length,
-                              itemBuilder: (context, index) => Padding(
-                                padding: EdgeInsets.only(
-                                  right: 4.w,
-                                  bottom: 8.h,
+                // 들린 카드를 가로로도 손가락에 붙인다
+                child: ReorderFingerFollow(
+                  builder: (context, follow) => CustomScrollView(
+                    slivers: [
+                      SliverPadding(
+                        // 시안(956:4084) 헤더가 68 에서 끝나고 첫 단계가 76 에서 시작한다.
+                        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                        // **번호 칸과 카드 칸을 나란히 따로 둔다**.
+                        //
+                        // 한 줄로 묶으면 오래 누를 때 번호까지 들리고
+                        // 끄는 동안 번호가 카드를 따라 미끄러진다. 번호는 몇 번째 자리인가를
+                        // 뜻하므로 제자리에 두고 **카드만** 순서 바꾸기에 올린다. 시안도
+                        // 번호(`1번`~`4번`, x=16)와 카드 묶음(`행동단계`, x=60)을 따로 그렸다.
+                        //
+                        // 한 스크롤 안에 두어야 같이 스크롤되고, 끌면서 가장자리에 닿았을 때의
+                        // 자동 스크롤도 이 목록 하나로 돈다.
+                        sliver: SliverCrossAxisGroup(
+                          slivers: [
+                            SliverConstrainedCrossAxis(
+                              // 뱃지 40 + 카드와의 틈 4
+                              maxExtent: 44.w,
+                              sliver: SliverList.builder(
+                                itemCount: _steps.length,
+                                itemBuilder: (context, index) => Padding(
+                                  padding: EdgeInsets.only(
+                                    right: 4.w,
+                                    bottom: 8.h,
+                                  ),
+                                  child: RoutineDetailStepBadge(index: index),
                                 ),
-                                child: RoutineDetailStepBadge(index: index),
                               ),
                             ),
-                          ),
-                          SliverReorderableList(
-                            // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
-                            // 들어올림은 카드가 직접 그리므로 여기서는 자리만 잡아 준다.
-                            proxyDecorator: (child, index, animation) =>
-                                Material(
-                                  color: Colors.transparent,
-                                  child: child,
-                                ),
-                            itemCount: _steps.length,
-                            // 지난 일과는 자리를 바꿔도 의미가 없으므로 받기만 하고 버린다.
-                            // 남이 만든 일과도 카드 순서는 만든 사람의 몫이라 같다.
-                            onReorder: _canEdit ? _reorder : (_, _) {},
-                            onReorderStart: (index) =>
-                                setState(() => _draggingIndex = index),
-                            onReorderEnd: (_) =>
-                                setState(() => _draggingIndex = null),
-                            itemBuilder: (context, index) {
-                              final step = _steps[index];
-                              // **전역 키로 한 번 더 감싼다.** 끌기가 시작되면 목록은 이
-                              // 카드를 빼고 시트 위의 사본으로 다시 그린다. 전역 키가 없으면
-                              // 그때 카드 상태가 버려져, 손을 떼는 순간 이미 사라진 들어올림
-                              // 애니메이션을 되돌리려다 오류가 난다. `ReorderableListView`는
-                              // 이 일을 안에서 해 주지만 `SliverReorderableList`는 하지 않는다.
-                              return KeyedSubtree(
-                                key: ValueKey(step.id),
-                                child: KeyedSubtree(
-                                  key: _StepItemKey(step.id, this),
-                                  child: Padding(
-                                    padding: EdgeInsets.only(bottom: 8.h),
-                                    child: RoutineDetailStepCard(
-                                      step: step,
-                                      index: index,
-                                      language: widget.routine.language,
-                                      dragging: _draggingIndex == index,
-                                      // 손잡이를 아예 그리지 않는다 (시안 980:4777)
-                                      reorderable: _canEdit,
-                                      // 카드를 눌러 크게 본다 (시안 1274:8864)
-                                      onOpen: () => StepCardViewer.show(
-                                        context,
-                                        cards: _steps,
-                                        initialIndex: index,
-                                        routineId: widget.routine.id,
+                            SliverReorderableList(
+                              // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
+                              // 들어올림은 카드가 직접 그리므로 여기서는 자리만 잡아 준다.
+                              proxyDecorator: (child, index, animation) =>
+                                  follow.decorate(
+                                    Material(
+                                      color: Colors.transparent,
+                                      child: child,
+                                    ),
+                                  ),
+                              itemCount: _steps.length,
+                              // 지난 일과는 자리를 바꿔도 의미가 없으므로 받기만 하고 버린다.
+                              // 남이 만든 일과도 카드 순서는 만든 사람의 몫이라 같다.
+                              onReorder: _canEdit ? _reorder : (_, _) {},
+                              onReorderStart: (index) {
+                                follow.start();
+                                setState(() => _draggingIndex = index);
+                              },
+                              onReorderEnd: (_) {
+                                follow.end();
+                                setState(() => _draggingIndex = null);
+                              },
+                              itemBuilder: (context, index) {
+                                final step = _steps[index];
+                                // **전역 키로 한 번 더 감싼다.** 끌기가 시작되면 목록은 이
+                                // 카드를 빼고 시트 위의 사본으로 다시 그린다. 전역 키가 없으면
+                                // 그때 카드 상태가 버려져, 손을 떼는 순간 이미 사라진 들어올림
+                                // 애니메이션을 되돌리려다 오류가 난다. `ReorderableListView`는
+                                // 이 일을 안에서 해 주지만 `SliverReorderableList`는 하지 않는다.
+                                return KeyedSubtree(
+                                  key: ValueKey(step.id),
+                                  child: KeyedSubtree(
+                                    key: _StepItemKey(step.id, this),
+                                    child: Padding(
+                                      padding: EdgeInsets.only(bottom: 8.h),
+                                      child: RoutineDetailStepCard(
+                                        step: step,
+                                        index: index,
                                         language: widget.routine.language,
+                                        dragging: _draggingIndex == index,
+                                        // 손잡이를 아예 그리지 않는다 (시안 980:4777)
+                                        reorderable: _canEdit,
+                                        // 카드를 눌러 크게 본다 (시안 1274:8864)
+                                        onOpen: () => StepCardViewer.show(
+                                          context,
+                                          cards: _steps,
+                                          initialIndex: index,
+                                          routineId: widget.routine.id,
+                                          language: widget.routine.language,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    SliverPadding(
-                      // 아래 여백은 떠 있는 버튼 높이만큼 더 준다. 단계가 많아 끝까지
-                      // 스크롤했을 때 마지막 보상 줄이 버튼에 가리면 안 된다.
-                      // 단계가 네 개 이하면 스크롤이 생기지 않아 시안 자리 그대로다.
-                      padding: EdgeInsets.fromLTRB(
-                        16.w,
-                        0,
-                        16.w,
-                        buttonBottom + buttonHeight + space.md,
-                      ),
-                      sliver: SliverToBoxAdapter(
-                        child: Column(
-                          children: [
-                            RoutineDetailRewardRow(routine: widget.routine),
-                            // 일과 알림 (#777): 설계 확정 전까지 숨김. 오늘 일과만, 지난 일과는 `다시하기` 뒤 새 일과에 건다
-                            if (_isReminderRowVisible && !widget.isPast) ...[
-                              SizedBox(height: 8.h),
-                              RoutineReminderRow(routine: widget.routine),
-                            ],
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                      SliverPadding(
+                        // 아래 여백은 떠 있는 버튼 높이만큼 더 준다. 단계가 많아 끝까지
+                        // 스크롤했을 때 마지막 보상 줄이 버튼에 가리면 안 된다.
+                        // 단계가 네 개 이하면 스크롤이 생기지 않아 시안 자리 그대로다.
+                        padding: EdgeInsets.fromLTRB(
+                          16.w,
+                          0,
+                          16.w,
+                          buttonBottom + buttonHeight + space.md,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: Column(
+                            children: [
+                              RoutineDetailRewardRow(routine: widget.routine),
+                              // 일과 알림 (#777): 설계 확정 전까지 숨김. 오늘 일과만, 지난 일과는 `다시하기` 뒤 새 일과에 건다
+                              if (_isReminderRowVisible && !widget.isPast) ...[
+                                SizedBox(height: 8.h),
+                                RoutineReminderRow(routine: widget.routine),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

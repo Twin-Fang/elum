@@ -26,7 +26,7 @@ Future<LibraryMenuAction?> showLibraryQuickMenu(
   context,
   anchor: anchor,
   highlight: highlight,
-  rows: _libraryMenuRows(context, routine),
+  rows: libraryMenuRows(context, routine),
 );
 
 /// 같은 메뉴를 아래 시트로: 상세 시트의 ⋯ 처럼 눌린 칸이 없을 때 (#834)
@@ -36,10 +36,11 @@ Future<LibraryMenuAction?> showLibraryQuickMenuSheet(
 ) => showQuickMenuSheet(
   context,
   title: routine.displayTitle,
-  rows: _libraryMenuRows(context, routine),
+  rows: libraryMenuRows(context, routine),
 );
 
-List<QuickMenuRow<LibraryMenuAction>> _libraryMenuRows(
+/// 낱개 원본 메뉴 줄 (격자가 길게 누르는 동안 그리는 미리보기도 이 줄을 쓴다)
+List<QuickMenuRow<LibraryMenuAction>> libraryMenuRows(
   BuildContext context,
   Routine routine,
 ) {
@@ -86,45 +87,48 @@ Future<GroupMenuAction?> showGroupQuickMenu(
   BuildContext context, {
   required Rect anchor,
   required Widget highlight,
-}) {
+}) => showAnchoredQuickMenu(
+  context,
+  anchor: anchor,
+  highlight: highlight,
+  rows: groupMenuRows(context),
+);
+
+/// 묶음 메뉴 줄 (격자 미리보기도 이 줄을 쓴다)
+List<QuickMenuRow<GroupMenuAction>> groupMenuRows(BuildContext context) {
   final l10n = context.l10n;
-  return showAnchoredQuickMenu(
-    context,
-    anchor: anchor,
-    highlight: highlight,
-    rows: [
-      (
-        value: GroupMenuAction.send,
-        icon: Icons.send_rounded,
-        label: l10n.routineLibrarySendToday,
-        isDanger: false,
-      ),
-      (
-        value: GroupMenuAction.rename,
-        icon: Icons.edit_rounded,
-        label: l10n.routineLibraryMenuRename,
-        isDanger: false,
-      ),
-      (
-        value: GroupMenuAction.reorder,
-        icon: Icons.swap_vert_rounded,
-        label: l10n.routineGroupMenuReorder,
-        isDanger: false,
-      ),
-      (
-        value: GroupMenuAction.copy,
-        icon: Icons.content_copy_rounded,
-        label: l10n.routineLibraryMenuCopy,
-        isDanger: false,
-      ),
-      (
-        value: GroupMenuAction.ungroup,
-        icon: Icons.folder_off_outlined,
-        label: l10n.routineGroupMenuUngroup,
-        isDanger: false,
-      ),
-    ],
-  );
+  return [
+    (
+      value: GroupMenuAction.send,
+      icon: Icons.send_rounded,
+      label: l10n.routineLibrarySendToday,
+      isDanger: false,
+    ),
+    (
+      value: GroupMenuAction.rename,
+      icon: Icons.edit_rounded,
+      label: l10n.routineLibraryMenuRename,
+      isDanger: false,
+    ),
+    (
+      value: GroupMenuAction.reorder,
+      icon: Icons.swap_vert_rounded,
+      label: l10n.routineGroupMenuReorder,
+      isDanger: false,
+    ),
+    (
+      value: GroupMenuAction.copy,
+      icon: Icons.content_copy_rounded,
+      label: l10n.routineLibraryMenuCopy,
+      isDanger: false,
+    ),
+    (
+      value: GroupMenuAction.ungroup,
+      icon: Icons.folder_off_outlined,
+      label: l10n.routineGroupMenuUngroup,
+      isDanger: false,
+    ),
+  ];
 }
 
 /// 빠른 메뉴 시트: 무엇에 대한 메뉴인지(제목) + 동작 줄. 고른 줄의 값을 돌려준다

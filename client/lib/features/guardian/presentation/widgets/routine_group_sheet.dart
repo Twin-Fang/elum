@@ -7,6 +7,8 @@ import '../../../../core/theme/theme_context_ext.dart';
 import '../../../../core/widgets/app_pressable.dart';
 import '../../../../core/widgets/elum_bottom_sheet.dart';
 import '../../../../core/widgets/elum_button.dart';
+import '../../../../core/widgets/elum_dialog.dart';
+import '../../../../core/widgets/reorder_finger_follow.dart';
 import '../../../../core/widgets/show_failure.dart';
 import '../../../../shared/models/routine.dart';
 import '../../application/library_entries.dart';
@@ -133,8 +135,9 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
     await _showFailure(reordered.failure, 'E-GRP-ORDER');
   }
 
-  /// 빼기: 하나만 남으면 묶음이 풀려 시트를 닫는다
+  /// 빼기: 확인 > 묶음에서 빼기, 하나만 남으면 묶음이 풀려 시트를 닫는다
   Future<void> _remove(LibraryGroupEntry entry, Routine routine) async {
+    if (!await _confirmRemove(routine) || !mounted) return;
     setState(() => _isSaving = true);
     final removal = await ref
         .read(routineGroupControllerProvider)
@@ -148,6 +151,31 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
     if (removal.outcome == RemoveOutcome.ungrouped) {
       _close(GroupSheetAction.ungroupedLastOne);
     }
+  }
+
+  /// ⊖ 확인: 지우기가 아니라 묶음에서 빼기 (일과는 일과 관리에 남는다). 빼기를 골랐으면 true
+  Future<bool> _confirmRemove(Routine routine) async {
+    final l10n = context.l10n;
+    final isConfirmed = await showElumDialog<bool>(
+      context: context,
+      icon: ElumDialogIcon.alert,
+      title: l10n.routineGroupRemoveConfirmTitle(routine.displayTitle),
+      message: l10n.routineGroupRemoveConfirmMessage,
+      keepWordsInMessage: true,
+      actions: [
+        ElumDialogAction(
+          label: l10n.commonCancel,
+          value: false,
+          tone: ElumDialogTone.neutral,
+        ),
+        ElumDialogAction(
+          label: l10n.routineGroupRemoveConfirmAction,
+          value: true,
+          tone: ElumDialogTone.primary,
+        ),
+      ],
+    );
+    return isConfirmed == true;
   }
 
   Future<void> _showFailure(Object? failure, String code) => showFailure(
@@ -264,61 +292,73 @@ class _RoutineGroupSheetState extends ConsumerState<_RoutineGroupSheet> {
         // 한 줄로 묶으면 끄는 동안 번호가 카드를 따라 미끄러진다. 번호는 몇 번째 자리인가를 뜻하므로
         // 제자리에 두고 카드만 순서 바꾸기에 올린다. 한 스크롤 안이라 가장자리 자동 스크롤도 하나로 돈다
         Expanded(
-          child: CustomScrollView(
-            slivers: [
-              SliverCrossAxisGroup(
-                slivers: [
-                  SliverConstrainedCrossAxis(
-                    // 번호 칸 40 + 카드와의 틈 4
-                    maxExtent: 44.w,
-                    sliver: SliverList.builder(
-                      itemCount: routines.length,
-                      itemBuilder: (context, index) => Padding(
-                        padding: EdgeInsets.only(right: 4.w, bottom: 8.h),
-                        child: RoutineDetailStepBadge(index: index),
+          // 들린 줄을 가로로도 손가락에 붙인다
+          child: ReorderFingerFollow(
+            builder: (context, follow) => CustomScrollView(
+              slivers: [
+                SliverCrossAxisGroup(
+                  slivers: [
+                    SliverConstrainedCrossAxis(
+                      // 번호 칸 40 + 카드와의 틈 4
+                      maxExtent: 44.w,
+                      sliver: SliverList.builder(
+                        itemCount: routines.length,
+                        itemBuilder: (context, index) => Padding(
+                          padding: EdgeInsets.only(right: 4.w, bottom: 8.h),
+                          child: RoutineDetailStepBadge(index: index),
+                        ),
                       ),
                     ),
-                  ),
-                  SliverReorderableList(
-                    // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
-                    // 들어올림은 줄이 직접 그리므로 여기서는 자리만 잡아 준다
-                    proxyDecorator: (child, index, animation) =>
-                        Material(color: Colors.transparent, child: child),
-                    itemCount: routines.length,
-                    onReorder: _isSaving
-                        ? (_, _) {}
-                        : (from, to) => _reorder(entry, from, to),
-                    onReorderStart: (index) =>
-                        setState(() => _draggingIndex = index),
-                    onReorderEnd: (_) => setState(() => _draggingIndex = null),
-                    itemBuilder: (context, index) {
-                      final routine = routines[index];
-                      // 전역 키로 한 번 더 감싼다: 끌기가 시작되면 목록이 이 줄을 빼고 사본으로
-                      // 다시 그려, 키가 없으면 줄 상태가 버려져 놓을 때 들림 연출 되돌리기가 터진다
-                      return KeyedSubtree(
-                        key: ValueKey(routine.id),
-                        child: KeyedSubtree(
-                          key: _RowItemKey(routine.id, this),
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: 8.h),
-                            child: RoutineGroupSheetRow(
-                              index: index,
-                              routine: routine,
-                              isEnabled: !_isSaving,
-                              isEditing: _isEditing,
-                              isDragging: _draggingIndex == index,
-                              onTap: () =>
-                                  _close(GroupSheetAction.openRoutine, routine),
-                              onRemove: () => _remove(entry, routine),
+                    SliverReorderableList(
+                      // 기본 프록시는 시트 밖 화면 위로 떠올라 엉뚱한 자리에 그려진다.
+                      // 들어올림은 줄이 직접 그리므로 여기서는 자리만 잡아 준다
+                      proxyDecorator: (child, index, animation) =>
+                          follow.decorate(
+                            Material(color: Colors.transparent, child: child),
+                          ),
+                      itemCount: routines.length,
+                      onReorder: _isSaving
+                          ? (_, _) {}
+                          : (from, to) => _reorder(entry, from, to),
+                      onReorderStart: (index) {
+                        follow.start();
+                        setState(() => _draggingIndex = index);
+                      },
+                      onReorderEnd: (_) {
+                        follow.end();
+                        setState(() => _draggingIndex = null);
+                      },
+                      itemBuilder: (context, index) {
+                        final routine = routines[index];
+                        // 전역 키로 한 번 더 감싼다: 끌기가 시작되면 목록이 이 줄을 빼고 사본으로
+                        // 다시 그려, 키가 없으면 줄 상태가 버려져 놓을 때 들림 연출 되돌리기가 터진다
+                        return KeyedSubtree(
+                          key: ValueKey(routine.id),
+                          child: KeyedSubtree(
+                            key: _RowItemKey(routine.id, this),
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 8.h),
+                              child: RoutineGroupSheetRow(
+                                index: index,
+                                routine: routine,
+                                isEnabled: !_isSaving,
+                                isEditing: _isEditing,
+                                isDragging: _draggingIndex == index,
+                                onTap: () => _close(
+                                  GroupSheetAction.openRoutine,
+                                  routine,
+                                ),
+                                onRemove: () => _remove(entry, routine),
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
         SizedBox(height: space.sm.h),
