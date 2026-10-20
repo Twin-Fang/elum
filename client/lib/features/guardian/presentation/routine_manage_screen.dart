@@ -313,29 +313,6 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
 
   // --- 화면 ---
 
-  /// 목록 받기가 끝났는데도 스크롤 대상 일과가 없거나 목록이 실패하면 대기 중인 요청을 비운다
-  /// (격자는 대상을 찾았을 때만 비우므로, 끝내 못 찾는 요청이 남지 않게)
-  void _clearScrollTargetIfUnreachable(
-    String? targetRoutineId,
-    AsyncValue<List<LibraryEntry>> entries,
-  ) {
-    if (targetRoutineId == null) return;
-    final isStillLoading =
-        ref.watch(routineLibraryProvider).isLoading ||
-        ref.watch(routineGroupsProvider).isLoading;
-    if (isStillLoading) return;
-    final isTargetPresent =
-        entries.value?.any(
-          (entry) => doesLibraryEntryHoldRoutine(entry, targetRoutineId),
-        ) ??
-        false;
-    if (isTargetPresent) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(libraryScrollTargetRoutineIdProvider.notifier).clear();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -349,7 +326,6 @@ class _RoutineManageScreenState extends ConsumerState<RoutineManageScreen>
       libraryScrollTargetRoutineIdProvider,
     );
     final bottomSpace = CreateRoutineFab.scrollBottomSpace.h;
-    _clearScrollTargetIfUnreachable(scrollTargetRoutineId, async);
 
     final Widget body = switch (async) {
       AsyncValue(:final value?) when value.isNotEmpty => LibraryEntryGrid(
