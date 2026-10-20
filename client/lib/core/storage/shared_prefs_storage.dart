@@ -342,6 +342,14 @@ class SharedPrefsStorage implements LocalStorage {
   }
 
   @override
+  Future<void> resetCoachMarks() async {
+    for (final key in [_kHomeCoachSeen, _kManageCoachSeen, _kGroupCoachSeen]) {
+      AppLogger.storageWrite(key, 'reset');
+      await _prefs.remove(key);
+    }
+  }
+
+  @override
   bool get isChildHapticOn => _prefs.getBool(_kChildHapticOn) ?? true;
 
   @override

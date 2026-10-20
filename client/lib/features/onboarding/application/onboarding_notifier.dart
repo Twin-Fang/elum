@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/app_failure.dart';
 import '../../../core/storage/local_storage.dart';
+import '../../guardian/application/home_coach_notifier.dart';
 import '../../member/data/member_repository.dart';
 import '../../profile/domain/profile_summary.dart';
 import '../../../shared/models/character.dart';
@@ -204,6 +205,14 @@ class OnboardingNotifier extends Notifier<OnboardingProfile> {
       AppLogger.error('[onboarding] local save failed', e, stack);
       // 잠금 저장이 실패했는데 홈으로 가면 보호자 화면의 경계가 사라진다.
       return AppFailure.of(e);
+    }
+
+    // 새로 시작한 보호자에게 코치마크 다시 보이기 (이 기기에서 전에 본 표시 지움)
+    try {
+      await storage.resetCoachMarks();
+      ref.invalidate(homeCoachProvider);
+    } catch (e, stack) {
+      AppLogger.error('[onboarding] coach mark reset failed (flow continues)', e, stack);
     }
 
     // 서버 한 번 저장 (이룸이 확보·정보·예시 일과) > 저장된 이룸이를 고른 이룸이로
